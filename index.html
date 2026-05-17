@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Anchit Tandon — Senior Product Manager</title>
-<meta name="description" content="Senior Product Manager at Times Internet. Building consumer tech, subscriptions, and growth funnels with multi-crore revenue impact." />
-<meta property="og:title" content="Anchit Tandon — Senior Product Manager" />
-<meta property="og:description" content="Building consumer products that move the numbers that actually matter." />
+<title>Talk with Anchit</title>
+<meta name="description" content="Chat with Anchit Tandon — Senior Product Manager at Times Internet. Explore his work, side projects, and how to reach him." />
+<meta property="og:title" content="Talk with Anchit" />
+<meta property="og:description" content="An interactive portfolio. Ask me anything." />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,6 +17,7 @@
     --bg: #0e0f0e;
     --bg-elev: #15161a;
     --bg-elev-2: #1c1d22;
+    --bg-sidebar: #0a0a0b;
     --ink: #ece5d6;
     --ink-dim: #9a948a;
     --ink-mute: #5a564e;
@@ -26,12 +27,13 @@
     --accent-deep: #a8884a;
     --accent-soft: rgba(201, 169, 110, 0.12);
     --grain-opacity: 0.04;
-    --shadow: 0 24px 48px rgba(0,0,0,0.6), 0 0 0 1px var(--rule-bright);
+    --shadow: 0 24px 48px rgba(0,0,0,0.6);
   }
   :root[data-theme="light"] {
     --bg: #f4eee3;
     --bg-elev: #ece5d6;
     --bg-elev-2: #e3dccb;
+    --bg-sidebar: #ebe3d2;
     --ink: #161614;
     --ink-dim: #5a564e;
     --ink-mute: #9a948a;
@@ -41,704 +43,1215 @@
     --accent-deep: #876a32;
     --accent-soft: rgba(168, 136, 74, 0.1);
     --grain-opacity: 0.025;
-    --shadow: 0 24px 48px rgba(120, 100, 60, 0.18), 0 0 0 1px var(--rule-bright);
+    --shadow: 0 24px 48px rgba(120, 100, 60, 0.18);
   }
   :root {
     --serif: 'Fraunces', 'Times New Roman', serif;
     --mono: 'JetBrains Mono', ui-monospace, monospace;
     --sans: 'Inter', -apple-system, sans-serif;
+    --sidebar-w: 240px;
+    --sidebar-w-collapsed: 64px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+  html, body { height: 100%; overflow: hidden; }
   body {
     background: var(--bg); color: var(--ink);
     font-family: var(--sans); font-weight: 300; line-height: 1.6;
     -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
     transition: background 0.4s ease, color 0.4s ease;
   }
   body::before {
     content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 1;
     opacity: var(--grain-opacity);
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    transition: opacity 0.4s ease;
   }
   ::selection { background: var(--accent); color: var(--bg); }
   a { color: inherit; text-decoration: none; }
-  .container { max-width: 1240px; margin: 0 auto; padding: 0 32px; }
 
-  /* NAV */
-  nav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
-    backdrop-filter: blur(20px) saturate(140%); -webkit-backdrop-filter: blur(20px) saturate(140%);
-    background: color-mix(in srgb, var(--bg) 75%, transparent);
-    border-bottom: 1px solid var(--rule);
+  /* ============== APP LAYOUT ============== */
+  .app {
+    display: grid;
+    grid-template-columns: var(--sidebar-w) 1fr;
+    height: 100vh;
+    position: relative;
+    z-index: 2;
+    transition: grid-template-columns 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .app.collapsed { grid-template-columns: var(--sidebar-w-collapsed) 1fr; }
+
+  /* ============== SIDEBAR ============== */
+  aside.sidebar {
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     transition: background 0.4s ease, border-color 0.4s ease;
   }
-  nav .container { display: flex; align-items: center; justify-content: space-between; padding-top: 18px; padding-bottom: 18px; }
-  .logo { font-family: var(--serif); font-weight: 400; font-size: 18px; letter-spacing: -0.015em; font-feature-settings: 'ss01' on; }
-  .logo em { font-style: italic; color: var(--accent); font-weight: 500; font-feature-settings: 'ss01' on, 'swsh' on; }
-  .nav-right { display: flex; align-items: center; gap: 28px; }
-  .nav-links { display: flex; gap: 28px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-dim); }
-  .nav-links a { transition: color 0.2s ease; position: relative; }
-  .nav-links a::after { content: ''; position: absolute; left: 0; bottom: -4px; width: 0; height: 1px; background: var(--accent); transition: width 0.3s ease; }
-  .nav-links a:hover { color: var(--ink); }
-  .nav-links a:hover::after { width: 100%; }
-  .theme-toggle { background: transparent; border: 1px solid var(--rule-bright); color: var(--ink-dim); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.3s ease; padding: 0; }
-  .theme-toggle:hover { color: var(--accent); border-color: var(--accent); transform: rotate(15deg); }
-  .theme-toggle svg { width: 16px; height: 16px; }
+  .sidebar-top {
+    padding: 20px 16px;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 68px;
+  }
+  .sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+  }
+  .brand-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--bg);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 15px;
+    font-style: italic;
+    flex-shrink: 0;
+  }
+  .brand-label {
+    font-family: var(--serif);
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    opacity: 1;
+    transition: opacity 0.2s ease;
+  }
+  .brand-label em { font-style: italic; color: var(--accent); }
+  .collapsed .brand-label { opacity: 0; pointer-events: none; }
+
+  .sidebar-toggle {
+    background: transparent;
+    border: 1px solid var(--rule-bright);
+    color: var(--ink-dim);
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+  .sidebar-toggle:hover { color: var(--accent); border-color: var(--accent); }
+  .sidebar-toggle svg { width: 14px; height: 14px; transition: transform 0.3s ease; }
+  .collapsed .sidebar-toggle svg { transform: rotate(180deg); }
+
+  .sidebar-nav {
+    flex: 1;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow-y: auto;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--ink-dim);
+    transition: all 0.2s ease;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 400;
+    width: 100%;
+    background: transparent;
+    border: none;
+    text-align: left;
+    position: relative;
+  }
+  .nav-item:hover { background: var(--bg-elev); color: var(--ink); }
+  .nav-item.active { background: var(--accent-soft); color: var(--accent); }
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 50%; transform: translateY(-50%);
+    width: 3px; height: 18px;
+    background: var(--accent);
+    border-radius: 0 2px 2px 0;
+  }
+  .nav-icon {
+    width: 20px; height: 20px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .nav-icon svg { width: 18px; height: 18px; stroke-width: 1.6; }
+  .nav-label {
+    opacity: 1;
+    transition: opacity 0.2s ease;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .collapsed .nav-label { opacity: 0; pointer-events: none; }
+  .collapsed .nav-item { justify-content: center; padding: 10px; }
+  .collapsed .nav-item.active::before { display: none; }
+  .collapsed .nav-item.active { box-shadow: inset 0 0 0 1px var(--accent); }
+
+  /* Tooltip when collapsed */
+  .collapsed .nav-item:hover::after {
+    content: attr(data-label);
+    position: absolute;
+    left: calc(100% + 12px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--bg-elev-2);
+    color: var(--ink);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    box-shadow: var(--shadow);
+    z-index: 100;
+    font-family: var(--mono);
+    letter-spacing: 0.05em;
+  }
+
+  .sidebar-section-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    padding: 16px 12px 8px;
+    opacity: 1;
+    transition: opacity 0.2s ease;
+  }
+  .collapsed .sidebar-section-label { opacity: 0; height: 12px; padding: 6px 0 0; }
+
+  .sidebar-bottom {
+    padding: 12px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .contact-pill {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--bg-elev);
+    border: 1px solid var(--rule-bright);
+    border-radius: 10px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+  .contact-pill:hover { border-color: var(--accent); }
+  .contact-pill .status-dot {
+    width: 8px; height: 8px;
+    background: #4ade80;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 8px #4ade80;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(0.85); } }
+  .contact-pill-text {
+    overflow: hidden;
+    opacity: 1;
+    transition: opacity 0.2s ease;
+  }
+  .contact-pill-text .label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 2px;
+  }
+  .contact-pill-text .value {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .collapsed .contact-pill-text { opacity: 0; width: 0; pointer-events: none; }
+  .collapsed .contact-pill { justify-content: center; padding: 12px; }
+
+  .theme-toggle {
+    background: transparent;
+    border: 1px solid var(--rule-bright);
+    color: var(--ink-dim);
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s ease;
+    font-family: var(--sans);
+    font-size: 13px;
+    width: 100%;
+  }
+  .theme-toggle:hover { color: var(--accent); border-color: var(--accent); }
+  .theme-toggle svg { width: 16px; height: 16px; flex-shrink: 0; }
   .theme-toggle .moon { display: block; }
   .theme-toggle .sun { display: none; }
   [data-theme="light"] .theme-toggle .moon { display: none; }
   [data-theme="light"] .theme-toggle .sun { display: block; }
-  @media (max-width: 720px) { .nav-links { gap: 18px; font-size: 10px; } .nav-right { gap: 18px; } }
-  @media (max-width: 520px) { .nav-links a:not(:last-child):not(:first-child) { display: none; } }
+  .theme-label { opacity: 1; transition: opacity 0.2s ease; white-space: nowrap; }
+  .collapsed .theme-label { opacity: 0; pointer-events: none; }
+  .collapsed .theme-toggle { justify-content: center; padding: 10px; }
 
-  /* HERO */
-  .hero { min-height: 100vh; display: flex; align-items: center; padding: 140px 0 80px; position: relative; }
-  .hero-grid { display: grid; grid-template-columns: 1fr; gap: 40px; width: 100%; }
-  .hero-meta { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-dim); display: flex; align-items: center; gap: 16px; }
-  .hero-meta .dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: pulse 2.4s ease-in-out infinite; box-shadow: 0 0 12px var(--accent); }
-  @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.55; transform: scale(0.85); } }
-  .hero h1 { font-family: var(--serif); font-weight: 300; font-size: clamp(48px, 9vw, 132px); line-height: 0.95; letter-spacing: -0.035em; color: var(--ink); font-feature-settings: 'ss01' on; }
-  .hero h1 em { font-style: italic; color: var(--accent); font-weight: 400; font-feature-settings: 'ss01' on, 'swsh' on; }
-  .hero-sub { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; margin-top: 24px; align-items: end; }
-  @media (max-width: 720px) { .hero-sub { grid-template-columns: 1fr; gap: 32px; } }
-  .hero-tagline { font-family: var(--serif); font-size: clamp(18px, 2.2vw, 24px); line-height: 1.4; color: var(--ink-dim); font-weight: 300; max-width: 540px; font-style: italic; }
-  .hero-tagline strong { color: var(--ink); font-weight: 400; font-style: normal; font-family: var(--sans); }
-  .hero-cta { display: flex; flex-direction: column; gap: 14px; font-family: var(--mono); font-size: 12px; }
-  .hero-cta .row { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--rule); color: var(--ink-dim); transition: all 0.25s ease; }
-  .hero-cta .row:hover { color: var(--ink); border-bottom-color: var(--accent); padding-left: 8px; }
-  .hero-cta .row span:first-child { text-transform: uppercase; letter-spacing: 0.1em; font-size: 10px; color: var(--ink-mute); }
-  .hero-cta .arrow { display: inline-block; margin-left: 6px; transition: transform 0.25s ease; }
-  .hero-cta .row:hover .arrow { transform: translateX(4px); }
+  /* ============== MAIN AREA ============== */
+  main.view {
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+  }
+  main.view::-webkit-scrollbar { width: 6px; }
+  main.view::-webkit-scrollbar-thumb { background: var(--rule-bright); border-radius: 3px; }
+  main.view::-webkit-scrollbar-thumb:hover { background: var(--ink-mute); }
 
-  /* SECTIONS */
-  section { padding: 100px 0; border-top: 1px solid var(--rule); position: relative; z-index: 2; }
-  .section-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
-  .section-label::before { content: ''; width: 24px; height: 1px; background: var(--accent); }
-  .section-title { font-family: var(--serif); font-weight: 300; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.025em; margin-bottom: 80px; max-width: 900px; font-feature-settings: 'ss01' on; }
-  .section-title em { font-style: italic; color: var(--accent); font-weight: 400; font-feature-settings: 'ss01' on, 'swsh' on; }
+  .panel { display: none; min-height: 100%; }
+  .panel.active { display: flex; flex-direction: column; }
 
-  /* NUMBERS */
-  .numbers { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+  /* ============== CHAT PANEL ============== */
+  .chat-panel {
+    height: 100%;
+    flex-direction: column;
+  }
+  .chat-header {
+    padding: 28px 40px 20px;
+    border-bottom: 1px solid var(--rule);
+    background: color-mix(in srgb, var(--bg) 90%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .chat-eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .chat-eyebrow .live-dot {
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--accent);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  .chat-title {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: clamp(28px, 4.5vw, 48px);
+    line-height: 1;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    font-feature-settings: 'ss01' on;
+  }
+  .chat-title em {
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 400;
+    font-feature-settings: 'ss01' on, 'swsh' on;
+  }
+  .chat-subtitle {
+    font-family: var(--serif);
+    font-size: 16px;
+    color: var(--ink-dim);
+    margin-top: 8px;
+    font-style: italic;
+  }
+
+  .chat-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 32px 40px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 880px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .chat-body::-webkit-scrollbar { width: 6px; }
+  .chat-body::-webkit-scrollbar-thumb { background: var(--rule-bright); border-radius: 3px; }
+
+  .msg { display: flex; gap: 12px; max-width: 100%; }
+  .msg.user { justify-content: flex-end; }
+  .msg-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--bg);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 14px;
+    font-style: italic;
+    flex-shrink: 0;
+  }
+  .msg.user .msg-avatar { display: none; }
+  .msg-bubble {
+    padding: 14px 18px;
+    border-radius: 16px;
+    font-size: 15px;
+    line-height: 1.6;
+    max-width: 75%;
+    word-wrap: break-word;
+  }
+  .msg.bot .msg-bubble {
+    background: var(--bg-elev);
+    color: var(--ink);
+    border-bottom-left-radius: 4px;
+  }
+  .msg.user .msg-bubble {
+    background: var(--accent);
+    color: var(--bg);
+    border-bottom-right-radius: 4px;
+    font-weight: 400;
+  }
+  .msg-bubble a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+  }
+  .msg.user .msg-bubble a { color: var(--bg); }
+  .msg-bubble strong { font-weight: 500; }
+
+  .msg.typing .msg-bubble {
+    display: inline-flex;
+    gap: 4px;
+    padding: 16px 18px;
+    align-items: center;
+  }
+  .msg.typing .msg-bubble span {
+    width: 6px; height: 6px;
+    background: var(--ink-dim);
+    border-radius: 50%;
+    animation: typing 1.4s ease-in-out infinite;
+  }
+  .msg.typing .msg-bubble span:nth-child(2) { animation-delay: 0.2s; }
+  .msg.typing .msg-bubble span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typing { 0%, 60%, 100% { opacity: 0.3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-3px); } }
+
+  .chip-row {
+    padding: 8px 40px 16px;
+    max-width: 880px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chip {
+    font-family: var(--sans);
+    font-size: 13px;
+    padding: 8px 14px;
+    background: transparent;
+    color: var(--ink-dim);
+    border: 1px solid var(--rule-bright);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .chip:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+
+  .chat-input-bar {
+    padding: 20px 40px 28px;
+    border-top: 1px solid var(--rule);
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .chat-input-inner {
+    max-width: 880px;
+    margin: 0 auto;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background: var(--bg-elev);
+    border: 1px solid var(--rule-bright);
+    border-radius: 14px;
+    padding: 6px 8px 6px 18px;
+    transition: border-color 0.2s ease;
+  }
+  .chat-input-inner:focus-within { border-color: var(--accent); }
+  .chat-input {
+    flex: 1;
+    background: transparent;
+    color: var(--ink);
+    border: none;
+    outline: none;
+    font-family: var(--sans);
+    font-size: 15px;
+    padding: 12px 0;
+  }
+  .chat-input::placeholder { color: var(--ink-mute); }
+  .chat-send {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .chat-send:hover { background: var(--accent-deep); transform: translateX(2px); }
+  .chat-send svg { width: 16px; height: 16px; }
+  .input-hint {
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--ink-mute);
+    margin-top: 10px;
+    text-transform: uppercase;
+  }
+
+  /* ============== CONTENT PANELS (Work, Projects, About, etc) ============== */
+  .panel-header {
+    padding: 32px 40px 24px;
+    border-bottom: 1px solid var(--rule);
+    position: sticky;
+    top: 0;
+    background: color-mix(in srgb, var(--bg) 90%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 10;
+  }
+  .panel-eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .panel-eyebrow::before {
+    content: '';
+    width: 20px;
+    height: 1px;
+    background: var(--accent);
+  }
+  .panel-title {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: clamp(28px, 4.5vw, 48px);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    font-feature-settings: 'ss01' on;
+    max-width: 900px;
+  }
+  .panel-title em {
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 400;
+    font-feature-settings: 'ss01' on, 'swsh' on;
+  }
+  .panel-body {
+    padding: 40px;
+    max-width: 1100px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  /* Numbers strip */
+  .numbers { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); margin-bottom: 60px; }
   @media (max-width: 820px) { .numbers { grid-template-columns: repeat(2, 1fr); } }
-  .stat { padding: 40px 24px; border-right: 1px solid var(--rule); transition: background 0.3s ease; }
+  .stat { padding: 32px 20px; border-right: 1px solid var(--rule); transition: background 0.3s ease; }
   .stat:last-child { border-right: none; }
   @media (max-width: 820px) { .stat:nth-child(2n) { border-right: none; } .stat:nth-child(-n+2) { border-bottom: 1px solid var(--rule); } }
   .stat:hover { background: var(--accent-soft); }
-  .stat-num { font-family: var(--serif); font-weight: 300; font-size: clamp(48px, 6vw, 80px); line-height: 1; letter-spacing: -0.04em; color: var(--ink); font-feature-settings: 'ss01' on, 'lnum' on; }
+  .stat-num { font-family: var(--serif); font-weight: 300; font-size: clamp(36px, 4vw, 56px); line-height: 1; letter-spacing: -0.04em; color: var(--ink); }
   .stat-num em { font-style: italic; color: var(--accent); font-weight: 400; }
-  .stat-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-dim); margin-top: 16px; max-width: 200px; line-height: 1.5; }
+  .stat-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-dim); margin-top: 12px; line-height: 1.5; }
 
-  /* WORK */
-  .work-item { display: grid; grid-template-columns: 80px 1fr 200px; gap: 40px; padding: 36px 0; border-bottom: 1px solid var(--rule); align-items: start; transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1); }
-  @media (max-width: 720px) { .work-item { grid-template-columns: 60px 1fr; gap: 20px; } .work-meta { grid-column: 2; } }
-  .work-item:hover { padding-left: 24px; background: linear-gradient(90deg, var(--accent-soft) 0%, transparent 100%); }
-  .work-num { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; color: var(--ink-mute); padding-top: 8px; }
-  .work-content h3 { font-family: var(--serif); font-weight: 400; font-size: clamp(22px, 2.8vw, 32px); line-height: 1.2; letter-spacing: -0.015em; margin-bottom: 12px; font-feature-settings: 'ss01' on; }
-  .work-content h3 em { font-style: italic; color: var(--accent); font-feature-settings: 'ss01' on, 'swsh' on; }
-  .work-content p { color: var(--ink-dim); max-width: 580px; font-size: 15px; line-height: 1.6; }
-  .work-content .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
-  .tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-dim); padding: 4px 10px; border: 1px solid var(--rule-bright); border-radius: 999px; }
-  .work-meta { text-align: right; font-family: var(--mono); font-size: 11px; letter-spacing: 0.05em; color: var(--ink-dim); padding-top: 8px; }
-  @media (max-width: 720px) { .work-meta { text-align: left; margin-top: 12px; } }
-  .work-meta .year { color: var(--accent); margin-bottom: 4px; }
-  .work-meta .impact { font-size: 10px; color: var(--ink-mute); text-transform: uppercase; letter-spacing: 0.08em; }
+  /* Work list */
+  .work-item { display: grid; grid-template-columns: 60px 1fr 180px; gap: 32px; padding: 28px 0; border-bottom: 1px solid var(--rule); align-items: start; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  @media (max-width: 720px) { .work-item { grid-template-columns: 50px 1fr; gap: 16px; } .work-meta { grid-column: 2; } }
+  .work-item:hover { padding-left: 16px; background: linear-gradient(90deg, var(--accent-soft) 0%, transparent 100%); }
+  .work-num { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; color: var(--ink-mute); padding-top: 6px; }
+  .work-content h3 { font-family: var(--serif); font-weight: 400; font-size: clamp(20px, 2.4vw, 26px); line-height: 1.2; letter-spacing: -0.015em; margin-bottom: 10px; }
+  .work-content h3 em { font-style: italic; color: var(--accent); }
+  .work-content p { color: var(--ink-dim); max-width: 560px; font-size: 14px; line-height: 1.6; }
+  .work-content .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+  .tag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-dim); padding: 3px 9px; border: 1px solid var(--rule-bright); border-radius: 999px; }
+  .work-meta { text-align: right; font-family: var(--mono); font-size: 11px; letter-spacing: 0.05em; color: var(--ink-dim); padding-top: 6px; }
+  @media (max-width: 720px) { .work-meta { text-align: left; margin-top: 8px; } }
+  .work-meta .year { color: var(--accent); margin-bottom: 4px; font-size: 10px; }
+  .work-meta .impact { font-size: 9px; color: var(--ink-mute); text-transform: uppercase; letter-spacing: 0.08em; }
 
-  /* SIDE PROJECTS GRID */
-  .projects-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  /* Project cards */
+  .projects-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; }
   @media (max-width: 820px) { .projects-grid { grid-template-columns: 1fr; } }
-  .project-card { background: var(--bg); padding: 36px 32px; display: flex; flex-direction: column; min-height: 320px; transition: background 0.3s ease; position: relative; }
+  .project-card { background: var(--bg); padding: 28px; display: flex; flex-direction: column; min-height: 280px; transition: background 0.3s ease; }
   .project-card:hover { background: var(--bg-elev); }
-  .project-tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
+  .project-tag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; }
   .project-tag .status { color: var(--ink-mute); }
-  .project-card h3 { font-family: var(--serif); font-weight: 400; font-size: 28px; line-height: 1.15; letter-spacing: -0.015em; color: var(--ink); margin-bottom: 12px; font-feature-settings: 'ss01' on; }
-  .project-card h3 em { font-style: italic; color: var(--accent); font-feature-settings: 'ss01' on, 'swsh' on; }
-  .project-card p { color: var(--ink-dim); font-size: 14px; line-height: 1.6; flex: 1; max-width: 480px; }
-  .project-stack { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 20px; }
-  .project-stack .tag { font-size: 9px; padding: 3px 8px; }
-  .project-actions { display: flex; gap: 12px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--rule); }
-  .btn { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 16px; border: 1px solid var(--rule-bright); border-radius: 999px; transition: all 0.25s ease; display: inline-flex; align-items: center; gap: 6px; color: var(--ink); }
+  .project-card h3 { font-family: var(--serif); font-weight: 400; font-size: 24px; line-height: 1.15; letter-spacing: -0.015em; color: var(--ink); margin-bottom: 10px; }
+  .project-card h3 em { font-style: italic; color: var(--accent); }
+  .project-card p { color: var(--ink-dim); font-size: 13.5px; line-height: 1.6; flex: 1; }
+  .project-stack { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 16px; }
+  .project-stack .tag { font-size: 8.5px; padding: 3px 7px; }
+  .project-actions { display: flex; gap: 10px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--rule); }
+  .btn { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 14px; border: 1px solid var(--rule-bright); border-radius: 999px; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 4px; color: var(--ink); cursor: pointer; }
   .btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
   .btn.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
-  .btn.primary:hover { background: var(--accent-deep); border-color: var(--accent-deep); color: var(--bg); transform: translateY(-1px); }
+  .btn.primary:hover { background: var(--accent-deep); color: var(--bg); }
 
-  /* ABOUT */
-  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
-  @media (max-width: 820px) { .about-grid { grid-template-columns: 1fr; gap: 40px; } }
-  .about-prose { font-family: var(--serif); font-size: clamp(20px, 2.4vw, 28px); line-height: 1.45; color: var(--ink); font-weight: 300; letter-spacing: -0.01em; font-feature-settings: 'ss01' on; }
-  .about-prose p { margin-bottom: 24px; }
+  /* About */
+  .about-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 60px; align-items: start; }
+  @media (max-width: 820px) { .about-grid { grid-template-columns: 1fr; gap: 32px; } }
+  .about-prose { font-family: var(--serif); font-size: 20px; line-height: 1.5; color: var(--ink); font-weight: 300; }
+  .about-prose p { margin-bottom: 20px; }
   .about-prose em { font-style: italic; color: var(--accent); }
-  .about-meta { display: flex; flex-direction: column; gap: 32px; }
-  .meta-block h4 { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 12px; }
+  .meta-block { margin-bottom: 28px; }
+  .meta-block h4 { font-family: var(--mono); font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 10px; }
   .meta-block ul { list-style: none; }
-  .meta-block li { padding: 10px 0; border-bottom: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; color: var(--ink); gap: 16px; }
-  .meta-block li span:last-child { font-family: var(--mono); font-size: 11px; color: var(--ink-dim); text-align: right; flex-shrink: 0; }
+  .meta-block li { padding: 9px 0; border-bottom: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: baseline; font-size: 13.5px; color: var(--ink); gap: 12px; }
+  .meta-block li span:last-child { font-family: var(--mono); font-size: 10.5px; color: var(--ink-dim); text-align: right; flex-shrink: 0; }
 
-  /* TIMELINE */
-  .timeline-item { display: grid; grid-template-columns: 180px 1fr; gap: 40px; padding: 28px 0; border-bottom: 1px solid var(--rule); }
-  @media (max-width: 720px) { .timeline-item { grid-template-columns: 1fr; gap: 8px; } }
-  .timeline-time { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--ink-mute); padding-top: 4px; }
-  .timeline-content h4 { font-family: var(--serif); font-weight: 400; font-size: 20px; color: var(--ink); margin-bottom: 4px; }
-  .timeline-content .org { font-family: var(--mono); font-size: 12px; color: var(--accent); letter-spacing: 0.05em; margin-bottom: 8px; }
-  .timeline-content p { color: var(--ink-dim); font-size: 14px; max-width: 640px; }
+  /* Timeline */
+  .timeline-item { display: grid; grid-template-columns: 160px 1fr; gap: 32px; padding: 22px 0; border-bottom: 1px solid var(--rule); }
+  @media (max-width: 720px) { .timeline-item { grid-template-columns: 1fr; gap: 6px; } }
+  .timeline-time { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.08em; color: var(--ink-mute); padding-top: 4px; }
+  .timeline-content h4 { font-family: var(--serif); font-weight: 400; font-size: 18px; color: var(--ink); margin-bottom: 4px; }
+  .timeline-content .org { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 0.05em; margin-bottom: 8px; }
+  .timeline-content p { color: var(--ink-dim); font-size: 13.5px; max-width: 620px; }
 
-  /* CONTACT */
-  .contact { text-align: center; padding: 140px 0; }
-  .contact-prompt { font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 32px; }
-  .contact h2 { font-family: var(--serif); font-weight: 300; font-size: clamp(48px, 8vw, 108px); line-height: 0.95; letter-spacing: -0.035em; margin-bottom: 48px; font-feature-settings: 'ss01' on; }
-  .contact h2 em { font-style: italic; color: var(--accent); font-weight: 400; font-feature-settings: 'ss01' on, 'swsh' on; }
-  .contact-email { font-family: var(--serif); font-size: clamp(22px, 3vw, 32px); color: var(--ink); border-bottom: 1px solid var(--accent); padding-bottom: 6px; display: inline-block; transition: all 0.3s ease; }
-  .contact-email:hover { color: var(--accent); transform: translateY(-2px); }
-  .socials { margin-top: 64px; display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-dim); }
-  .socials a { transition: color 0.2s; position: relative; }
-  .socials a::after { content: '↗'; margin-left: 4px; color: var(--ink-mute); transition: all 0.2s; }
-  .socials a:hover { color: var(--accent); }
-  .socials a:hover::after { color: var(--accent); transform: translate(2px, -2px); }
+  /* Contact panel */
+  .contact-card { background: var(--bg-elev); border: 1px solid var(--rule-bright); border-radius: 16px; padding: 36px; margin-bottom: 16px; transition: all 0.25s ease; display: flex; align-items: center; gap: 20px; }
+  .contact-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .contact-icon { width: 44px; height: 44px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .contact-icon svg { width: 20px; height: 20px; stroke-width: 1.6; }
+  .contact-card-text .label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 4px; }
+  .contact-card-text .value { font-family: var(--serif); font-size: 22px; color: var(--ink); letter-spacing: -0.01em; }
+  .contact-card-text .value em { font-style: italic; color: var(--accent); }
 
-  /* FOOTER */
-  footer { padding: 32px 0; border-top: 1px solid var(--rule); font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-mute); position: relative; z-index: 2; }
-  footer .container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-
-  /* ANIMATIONS */
-  .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.8s ease, transform 0.8s ease; }
-  .reveal.in { opacity: 1; transform: translateY(0); }
-
-  /* =================================================== */
-  /*  CHATBOT — Ask Anchit                                */
-  /* =================================================== */
-  .chat-launcher {
-    position: fixed; bottom: 24px; right: 24px; z-index: 200;
-    display: inline-flex; align-items: center; gap: 10px;
-    padding: 12px 18px 12px 14px;
-    background: var(--accent); color: var(--bg);
-    border: none; border-radius: 999px;
-    font-family: var(--mono); font-size: 12px; font-weight: 500;
-    letter-spacing: 0.06em; text-transform: uppercase;
-    cursor: pointer;
-    box-shadow: 0 12px 32px rgba(0,0,0,0.4), 0 0 0 1px var(--accent-deep);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .chat-launcher:hover { transform: translateY(-2px); box-shadow: 0 18px 40px rgba(0,0,0,0.5), 0 0 0 1px var(--accent-deep); }
-  .chat-launcher .chat-dot { width: 8px; height: 8px; background: var(--bg); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
-  .chat-launcher.hidden { opacity: 0; pointer-events: none; transform: scale(0.9) translateY(20px); }
-
-  .chat-panel {
-    position: fixed; bottom: 24px; right: 24px; z-index: 200;
-    width: 380px; max-width: calc(100vw - 32px);
-    height: 560px; max-height: calc(100vh - 48px);
-    background: var(--bg); border-radius: 16px;
-    box-shadow: var(--shadow);
-    display: flex; flex-direction: column;
-    transform: scale(0.95) translateY(20px); opacity: 0; pointer-events: none;
-    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden;
-  }
-  .chat-panel.open { transform: scale(1) translateY(0); opacity: 1; pointer-events: auto; }
-
-  .chat-header { padding: 18px 20px; border-bottom: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: center; }
-  .chat-header-left { display: flex; align-items: center; gap: 12px; }
-  .chat-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: var(--bg); display: inline-flex; align-items: center; justify-content: center; font-family: var(--serif); font-weight: 500; font-size: 16px; font-style: italic; }
-  .chat-header-title { font-family: var(--serif); font-weight: 400; font-size: 15px; color: var(--ink); }
-  .chat-header-status { font-family: var(--mono); font-size: 10px; color: var(--ink-mute); letter-spacing: 0.08em; text-transform: uppercase; }
-  .chat-header-status .live-dot { display: inline-block; width: 6px; height: 6px; background: #4ade80; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
-  .chat-close { background: transparent; border: none; color: var(--ink-dim); cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center; transition: color 0.2s; }
-  .chat-close:hover { color: var(--ink); }
-  .chat-close svg { width: 18px; height: 18px; }
-
-  .chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
-  .chat-messages::-webkit-scrollbar { width: 4px; }
-  .chat-messages::-webkit-scrollbar-thumb { background: var(--rule-bright); border-radius: 2px; }
-
-  .chat-msg { max-width: 85%; padding: 12px 14px; border-radius: 14px; font-size: 14px; line-height: 1.5; word-wrap: break-word; }
-  .chat-msg.bot { background: var(--bg-elev); color: var(--ink); border-bottom-left-radius: 4px; align-self: flex-start; }
-  .chat-msg.user { background: var(--accent); color: var(--bg); border-bottom-right-radius: 4px; align-self: flex-end; }
-  .chat-msg a { color: var(--accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
-  .chat-msg.user a { color: var(--bg); }
-  .chat-msg.typing { display: inline-flex; gap: 4px; align-items: center; padding: 14px 16px; }
-  .chat-msg.typing span { width: 6px; height: 6px; background: var(--ink-dim); border-radius: 50%; animation: typing 1.4s ease-in-out infinite; }
-  .chat-msg.typing span:nth-child(2) { animation-delay: 0.2s; }
-  .chat-msg.typing span:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes typing { 0%, 60%, 100% { opacity: 0.3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-3px); } }
-
-  .chat-chips { padding: 0 20px 12px; display: flex; flex-wrap: wrap; gap: 6px; }
-  .chat-chip { font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; padding: 6px 12px; background: transparent; color: var(--ink-dim); border: 1px solid var(--rule-bright); border-radius: 999px; cursor: pointer; transition: all 0.2s ease; }
-  .chat-chip:hover { color: var(--accent); border-color: var(--accent); }
-
-  .chat-input-row { padding: 14px 16px; border-top: 1px solid var(--rule); display: flex; gap: 8px; align-items: center; }
-  .chat-input { flex: 1; background: var(--bg-elev); color: var(--ink); border: 1px solid var(--rule); border-radius: 999px; padding: 10px 16px; font-family: var(--sans); font-size: 14px; outline: none; transition: border-color 0.2s; }
-  .chat-input:focus { border-color: var(--accent); }
-  .chat-send { background: var(--accent); color: var(--bg); border: none; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
-  .chat-send:hover { background: var(--accent-deep); }
-  .chat-send svg { width: 16px; height: 16px; }
-  .chat-footer-note { padding: 0 16px 12px; font-family: var(--mono); font-size: 9px; color: var(--ink-mute); text-align: center; letter-spacing: 0.05em; text-transform: uppercase; }
-
-  @media (max-width: 480px) {
-    .chat-panel { width: calc(100vw - 16px); right: 8px; bottom: 8px; height: calc(100vh - 16px); max-height: 100vh; }
-    .chat-launcher { bottom: 16px; right: 16px; }
+  /* ============== MOBILE ============== */
+  .mobile-menu-btn { display: none; }
+  @media (max-width: 820px) {
+    .app { grid-template-columns: 1fr; }
+    .app aside.sidebar {
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      width: var(--sidebar-w);
+      z-index: 200;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+    .app.mobile-open aside.sidebar { transform: translateX(0); box-shadow: var(--shadow); }
+    .app.collapsed { grid-template-columns: 1fr; }
+    .mobile-menu-btn {
+      display: inline-flex;
+      position: fixed;
+      top: 14px; left: 14px;
+      z-index: 150;
+      background: var(--bg-elev);
+      border: 1px solid var(--rule-bright);
+      color: var(--ink);
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+    }
+    .mobile-menu-btn svg { width: 18px; height: 18px; }
+    .chat-header, .panel-header { padding-left: 64px; }
+    .chat-body, .chat-input-bar, .chip-row, .panel-body { padding-left: 20px; padding-right: 20px; }
+    .mobile-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 199; }
+    .app.mobile-open .mobile-backdrop { display: block; }
   }
 </style>
 </head>
 <body>
 
-<nav>
-  <div class="container">
-    <a href="#" class="logo">Anchit <em>Tandon</em></a>
-    <div class="nav-right">
-      <div class="nav-links">
-        <a href="#work">Work</a>
-        <a href="#projects">Projects</a>
-        <a href="#about">About</a>
-        <a href="#contact">Contact</a>
+<div class="app" id="app">
+
+  <!-- ============== SIDEBAR ============== -->
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="sidebar-brand">
+        <div class="brand-avatar">A</div>
+        <div class="brand-label">Anchit <em>Tandon</em></div>
       </div>
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="sidebar-nav">
+      <div class="sidebar-section-label">Explore</div>
+
+      <button class="nav-item active" data-view="chat" data-label="Talk with Anchit">
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        </span>
+        <span class="nav-label">Talk with Anchit</span>
+      </button>
+
+      <button class="nav-item" data-view="work" data-label="Selected work">
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+          </svg>
+        </span>
+        <span class="nav-label">Selected work</span>
+      </button>
+
+      <button class="nav-item" data-view="projects" data-label="Side projects">
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"/>
+            <polyline points="8 6 2 12 8 18"/>
+          </svg>
+        </span>
+        <span class="nav-label">Side projects</span>
+      </button>
+
+      <button class="nav-item" data-view="about" data-label="About">
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </span>
+        <span class="nav-label">About</span>
+      </button>
+
+      <button class="nav-item" data-view="experience" data-label="Experience">
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </span>
+        <span class="nav-label">Experience</span>
+      </button>
+
+      <button class="nav-item" data-view="contact" data-label="Contact">
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </span>
+        <span class="nav-label">Contact</span>
+      </button>
+    </div>
+
+    <div class="sidebar-bottom">
+      <a href="mailto:anchit.tandon@gmail.com" class="contact-pill">
+        <span class="status-dot"></span>
+        <div class="contact-pill-text">
+          <div class="label">Always reachable</div>
+          <div class="value">anchit.tandon@gmail.com</div>
+        </div>
+      </a>
       <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
         <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <span class="theme-label">Switch theme</span>
       </button>
     </div>
-  </div>
-</nav>
+  </aside>
 
-<section class="hero">
-  <div class="container">
-    <div class="hero-grid">
-      <div class="hero-meta"><span class="dot"></span><span>Currently — Senior PM at Times Internet</span></div>
-      <h1>Building consumer<br />products that move<br />the <em>numbers</em> that<br />actually matter.</h1>
-      <div class="hero-sub">
-        <p class="hero-tagline">I'm <strong>Anchit Tandon</strong> — Senior Product Manager at Times Internet. Five-plus years shipping consumer tech across content, subscriptions, events, and assisted buying — with multi-crore revenue impact to show for it.</p>
-        <div class="hero-cta">
-          <a href="#work" class="row"><span>01</span><span>Selected work <span class="arrow">→</span></span></a>
-          <a href="#projects" class="row"><span>02</span><span>Side projects <span class="arrow">→</span></span></a>
-          <a href="https://linkedin.com/in/anchit-tandon" target="_blank" rel="noopener" class="row"><span>03</span><span>Résumé on LinkedIn <span class="arrow">↗</span></span></a>
+  <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="mobile-backdrop" id="mobileBackdrop"></div>
+
+  <!-- ============== MAIN VIEW ============== -->
+  <main class="view">
+
+    <!-- ===== CHAT PANEL ===== -->
+    <div class="panel chat-panel active" id="panel-chat">
+      <div class="chat-header">
+        <div class="chat-eyebrow"><span class="live-dot"></span><span>Live · Senior PM at Times Internet</span></div>
+        <h1 class="chat-title">Talk with <em>Anchit</em></h1>
+        <p class="chat-subtitle">Ask me anything — about the work, the side projects, or what I'm building next.</p>
+      </div>
+
+      <div class="chat-body" id="chatBody"></div>
+
+      <div class="chip-row" id="chipRow"></div>
+
+      <div class="chat-input-bar">
+        <div class="chat-input-inner">
+          <input type="text" class="chat-input" id="chatInput" placeholder="Ask me anything..." autocomplete="off" />
+          <button class="chat-send" id="chatSend" aria-label="Send">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+        <div class="input-hint">Press / anywhere to focus · Esc to clear</div>
+      </div>
+    </div>
+
+    <!-- ===== WORK PANEL ===== -->
+    <div class="panel" id="panel-work">
+      <div class="panel-header">
+        <div class="panel-eyebrow">Selected work · Times Internet</div>
+        <h1 class="panel-title">Work, <em>and</em> what it moved.</h1>
+      </div>
+      <div class="panel-body">
+        <div class="numbers">
+          <div class="stat"><div class="stat-num"><em>5×</em></div><div class="stat-label">Revenue growth, assisted conversions ₹15L → ₹80L</div></div>
+          <div class="stat"><div class="stat-num">₹3<em>Cr</em>+</div><div class="stat-label">Incremental annual revenue from ET Markets revamp</div></div>
+          <div class="stat"><div class="stat-num">400<em>%</em></div><div class="stat-label">ROI within six months on ET Prime funnel</div></div>
+          <div class="stat"><div class="stat-num">25<em>%</em></div><div class="stat-label">DAU lift on ET Markets iOS & Android</div></div>
+        </div>
+
+        <div class="work-item">
+          <div class="work-num">01</div>
+          <div class="work-content">
+            <h3>Times Internet <em>Half Marathon</em></h3>
+            <p>I'm owning this zero-to-one consumer IP end-to-end — discovery, registration funnels, acquisition channels, and on-ground runner insights for Times Internet's first marquee running event.</p>
+            <div class="tags"><span class="tag">0→1</span><span class="tag">Consumer Event</span><span class="tag">Funnel Design</span></div>
+          </div>
+          <div class="work-meta"><div class="year">Mar 2026 →</div><div class="impact">Live</div></div>
+        </div>
+
+        <div class="work-item">
+          <div class="work-num">02</div>
+          <div class="work-content">
+            <h3>Assisted Sales for <em>ET Prime</em></h3>
+            <p>I scaled a struggling consumer conversion channel into one of Economic Times' most profitable growth engines. Funnel redesign, continuous experimentation, and an AI-powered telesuite for pitch quality at scale.</p>
+            <div class="tags"><span class="tag">Growth</span><span class="tag">Subscriptions</span><span class="tag">AI Workflows</span></div>
+          </div>
+          <div class="work-meta"><div class="year">2024 — 2025</div><div class="impact">5× MRR · Team Award '25</div></div>
+        </div>
+
+        <div class="work-item">
+          <div class="work-num">03</div>
+          <div class="work-content">
+            <h3>ET Markets, <em>rebuilt</em></h3>
+            <p>I led the end-to-end revamp of one of India's highest-traffic consumer financial surfaces — across Web, mWeb, Android, and iOS. New discovery and decision-support features, sharper onboarding, measurable wins on every surface.</p>
+            <div class="tags"><span class="tag">Consumer Tech</span><span class="tag">Multi-platform</span><span class="tag">Experimentation</span></div>
+          </div>
+          <div class="work-meta"><div class="year">2023 — 2024</div><div class="impact">+27% engagement · ₹3Cr ARR</div></div>
+        </div>
+
+        <div class="work-item">
+          <div class="work-num">04</div>
+          <div class="work-content">
+            <h3>Times Health<em>+</em> Subscriptions</h3>
+            <p>I launched paid wellness subscriptions from scratch — freemium-to-paid journeys, pricing experiments, and retention-led monetization for a category most Indian publishers haven't cracked yet.</p>
+            <div class="tags"><span class="tag">Subscriptions</span><span class="tag">Monetization</span><span class="tag">Retention</span></div>
+          </div>
+          <div class="work-meta"><div class="year">2024 — Present</div><div class="impact">New revenue line</div></div>
+        </div>
+
+        <div class="work-item">
+          <div class="work-num">05</div>
+          <div class="work-content">
+            <h3>Assisted Buying for <em>Economic Times</em></h3>
+            <p>I introduced assisted-buying surfaces for high-intent ET users, taking qualified leads from around 30 to 150+ per day — turning passive content traffic into a structured conversion channel.</p>
+            <div class="tags"><span class="tag">Lead Gen</span><span class="tag">Funnel</span><span class="tag">Conversion</span></div>
+          </div>
+          <div class="work-meta"><div class="year">2024</div><div class="impact">5× qualified leads</div></div>
         </div>
       </div>
     </div>
-  </div>
-</section>
 
-<section style="padding: 0; border-top: none;">
-  <div class="numbers">
-    <div class="stat"><div class="stat-num"><em>5×</em></div><div class="stat-label">Revenue growth on assisted conversions — ₹15L → ₹80L monthly</div></div>
-    <div class="stat"><div class="stat-num">₹3<em>Cr</em>+</div><div class="stat-label">Incremental annual revenue unlocked via ET Markets revamp</div></div>
-    <div class="stat"><div class="stat-num">400<em>%</em></div><div class="stat-label">ROI within six months on the ET Prime conversion funnel</div></div>
-    <div class="stat"><div class="stat-num">25<em>%</em></div><div class="stat-label">DAU lift on the ET Markets iOS &amp; Android revamp</div></div>
-  </div>
-</section>
+    <!-- ===== PROJECTS PANEL ===== -->
+    <div class="panel" id="panel-projects">
+      <div class="panel-header">
+        <div class="panel-eyebrow">Side projects · Built end-to-end</div>
+        <h1 class="panel-title">Builds I ship <em>on the side</em>.</h1>
+      </div>
+      <div class="panel-body">
+        <div class="projects-grid">
 
-<section id="work">
-  <div class="container">
-    <div class="section-label">Selected work — Times Internet</div>
-    <h2 class="section-title">Selected work, <em>and</em> what it moved.</h2>
-    <div class="work-list">
-      <div class="work-item">
-        <div class="work-num">01</div>
-        <div class="work-content">
-          <h3>Times Internet <em>Half Marathon</em></h3>
-          <p>Owning a zero-to-one consumer IP end-to-end — discovery, registration funnels, acquisition channels, and on-ground runner insights for Times Internet's first marquee running event.</p>
-          <div class="tags"><span class="tag">0→1</span><span class="tag">Consumer Event</span><span class="tag">Funnel Design</span></div>
-        </div>
-        <div class="work-meta"><div class="year">Mar 2026 →</div><div class="impact">Live</div></div>
-      </div>
-      <div class="work-item">
-        <div class="work-num">02</div>
-        <div class="work-content">
-          <h3>Assisted Sales for <em>ET Prime</em></h3>
-          <p>Scaled a struggling consumer conversion channel into one of Economic Times' most profitable growth engines. Funnel redesign, continuous experimentation, and an AI-powered telesuite for pitch quality at scale.</p>
-          <div class="tags"><span class="tag">Growth</span><span class="tag">Subscriptions</span><span class="tag">AI Workflows</span></div>
-        </div>
-        <div class="work-meta"><div class="year">2024 — 2025</div><div class="impact">5× MRR · Team Award '25</div></div>
-      </div>
-      <div class="work-item">
-        <div class="work-num">03</div>
-        <div class="work-content">
-          <h3>ET Markets, <em>rebuilt</em></h3>
-          <p>Led the end-to-end revamp of one of India's highest-traffic consumer financial surfaces — across Web, mWeb, Android, and iOS. New discovery and decision-support features, sharper onboarding, measurable wins on every surface.</p>
-          <div class="tags"><span class="tag">Consumer Tech</span><span class="tag">Multi-platform</span><span class="tag">Experimentation</span></div>
-        </div>
-        <div class="work-meta"><div class="year">2023 — 2024</div><div class="impact">+27% engagement · ₹3Cr ARR</div></div>
-      </div>
-      <div class="work-item">
-        <div class="work-num">04</div>
-        <div class="work-content">
-          <h3>Times Health<em>+</em> Subscriptions</h3>
-          <p>Launched paid wellness subscriptions from scratch — freemium-to-paid journeys, pricing experiments, and retention-led monetization for a category most Indian publishers haven't cracked yet.</p>
-          <div class="tags"><span class="tag">Subscriptions</span><span class="tag">Monetization</span><span class="tag">Retention</span></div>
-        </div>
-        <div class="work-meta"><div class="year">2024 — Present</div><div class="impact">New revenue line</div></div>
-      </div>
-      <div class="work-item">
-        <div class="work-num">05</div>
-        <div class="work-content">
-          <h3>Assisted Buying for <em>Economic Times</em></h3>
-          <p>Introduced assisted-buying surfaces for high-intent ET users, taking qualified leads from around 30 to 150+ per day — turning passive content traffic into a structured conversion channel.</p>
-          <div class="tags"><span class="tag">Lead Gen</span><span class="tag">Funnel</span><span class="tag">Conversion</span></div>
-        </div>
-        <div class="work-meta"><div class="year">2024</div><div class="impact">5× qualified leads</div></div>
-      </div>
-    </div>
-  </div>
-</section>
+          <div class="project-card">
+            <div class="project-tag"><span>AI Voice · Consumer</span><span class="status">● Live</span></div>
+            <h3>Hey <em>Yaara</em></h3>
+            <p>An AI voice companion for the elderly. Talk, listen, and never feel alone — a warm, conversational interface designed for users who find apps intimidating. Built as a PWA for accessibility on any device.</p>
+            <div class="project-stack"><span class="tag">AI Voice</span><span class="tag">PWA</span><span class="tag">Accessibility</span></div>
+            <div class="project-actions">
+              <a href="https://hey-yaara.vercel.app/" target="_blank" rel="noopener" class="btn primary">Live ↗</a>
+              <a href="https://github.com/anchittandon-create/hey-yaara" target="_blank" rel="noopener" class="btn">Code ↗</a>
+            </div>
+          </div>
 
-<!-- ============ SIDE PROJECTS ============ -->
-<section id="projects">
-  <div class="container">
-    <div class="section-label">Side projects</div>
-    <h2 class="section-title">Builds I ship <em>on the side</em> — mostly AI, mostly consumer.</h2>
+          <div class="project-card">
+            <div class="project-tag"><span>Generative AI · Music</span><span class="status">● Live</span></div>
+            <h3>Music<em>GenAI</em></h3>
+            <p>An AI-powered music generation app — prompt to track, with vocal synthesis and lyric verification. A full Vite/React/TypeScript stack with Supabase for storage and a Python microservice handling the vocal pipeline.</p>
+            <div class="project-stack"><span class="tag">React</span><span class="tag">TypeScript</span><span class="tag">Supabase</span><span class="tag">Python</span></div>
+            <div class="project-actions">
+              <a href="https://music-gen-ai-blue.vercel.app/" target="_blank" rel="noopener" class="btn primary">Live ↗</a>
+              <a href="https://github.com/anchittandon-create/MusicGenAI" target="_blank" rel="noopener" class="btn">Code ↗</a>
+            </div>
+          </div>
 
-    <div class="projects-grid">
+          <div class="project-card">
+            <div class="project-tag"><span>AI Workflow · Sales</span><span class="status">● Live</span></div>
+            <h3>AI <em>TeleSuite</em></h3>
+            <p>An AI-powered sales and support suite — the consumer prototype of the same telesuite philosophy I shipped at ET. Real-time transcription, pitch scoring, and conversion suggestions packaged for solo operators and small teams.</p>
+            <div class="project-stack"><span class="tag">LLM</span><span class="tag">Transcription</span><span class="tag">Sales Ops</span></div>
+            <div class="project-actions">
+              <a href="https://ai-tele-suite.vercel.app/" target="_blank" rel="noopener" class="btn primary">Live ↗</a>
+              <a href="https://github.com/anchittandon-create/AI-TeleSuite" target="_blank" rel="noopener" class="btn">Code ↗</a>
+            </div>
+          </div>
 
-      <div class="project-card">
-        <div class="project-tag"><span>AI Voice · Consumer</span><span class="status">● Live</span></div>
-        <h3>Hey <em>Yaara</em></h3>
-        <p>An AI voice companion for the elderly. Talk, listen, and never feel alone — a warm, conversational interface designed for users who find apps intimidating. Built as a PWA for accessibility on any device.</p>
-        <div class="project-stack">
-          <span class="tag">AI Voice</span>
-          <span class="tag">PWA</span>
-          <span class="tag">Accessibility</span>
-        </div>
-        <div class="project-actions">
-          <a href="https://hey-yaara.vercel.app/" target="_blank" rel="noopener" class="btn primary">Live ↗</a>
-          <a href="https://github.com/anchittandon-create/hey-yaara" target="_blank" rel="noopener" class="btn">Code ↗</a>
-        </div>
-      </div>
+          <div class="project-card">
+            <div class="project-tag"><span>AI Wellness · Personalised</span><span class="status">● Live</span></div>
+            <h3>TH+ <em>LifeEngine</em></h3>
+            <p>A personalised health booster — AI-powered wellness planning that turns generic advice into a daily plan tied to your goals. Built as a private, login-gated tool exploring what a Times Health+ "engine" could look like.</p>
+            <div class="project-stack"><span class="tag">AI Planning</span><span class="tag">Wellness</span><span class="tag">Subscriptions</span></div>
+            <div class="project-actions">
+              <a href="https://th-life-engine.vercel.app/" target="_blank" rel="noopener" class="btn primary">Live ↗</a>
+              <a href="https://github.com/anchittandon-create/TH-LifeEngine" target="_blank" rel="noopener" class="btn">Code ↗</a>
+            </div>
+          </div>
 
-      <div class="project-card">
-        <div class="project-tag"><span>Generative AI · Music</span><span class="status">● Live</span></div>
-        <h3>Music<em>GenAI</em></h3>
-        <p>An AI-powered music generation app — prompt to track, with vocal synthesis and lyric verification. A full Vite/React/TypeScript stack with Supabase for storage and a Python microservice handling the vocal pipeline.</p>
-        <div class="project-stack">
-          <span class="tag">React</span>
-          <span class="tag">TypeScript</span>
-          <span class="tag">Supabase</span>
-          <span class="tag">Python</span>
-        </div>
-        <div class="project-actions">
-          <a href="https://music-gen-ai-blue.vercel.app/" target="_blank" rel="noopener" class="btn primary">Live ↗</a>
-          <a href="https://github.com/anchittandon-create/MusicGenAI" target="_blank" rel="noopener" class="btn">Code ↗</a>
-        </div>
-      </div>
-
-      <div class="project-card">
-        <div class="project-tag"><span>AI Workflow · Sales</span><span class="status">● Live</span></div>
-        <h3>AI <em>TeleSuite</em></h3>
-        <p>An AI-powered sales and support suite — the consumer prototype of the same telesuite philosophy I shipped at ET. Real-time transcription, pitch scoring, and conversion suggestions packaged for solo operators and small teams.</p>
-        <div class="project-stack">
-          <span class="tag">LLM</span>
-          <span class="tag">Transcription</span>
-          <span class="tag">Sales Ops</span>
-        </div>
-        <div class="project-actions">
-          <a href="https://ai-tele-suite.vercel.app/" target="_blank" rel="noopener" class="btn primary">Live ↗</a>
-          <a href="https://github.com/anchittandon-create/AI-TeleSuite" target="_blank" rel="noopener" class="btn">Code ↗</a>
-        </div>
-      </div>
-
-      <div class="project-card">
-        <div class="project-tag"><span>AI Wellness · Personalised</span><span class="status">● Live</span></div>
-        <h3>TH+ <em>LifeEngine</em></h3>
-        <p>A personalised health booster — AI-powered wellness planning that turns generic advice into a daily plan tied to your goals. Built as a private, login-gated tool exploring what a Times Health+ "engine" could look like.</p>
-        <div class="project-stack">
-          <span class="tag">AI Planning</span>
-          <span class="tag">Wellness</span>
-          <span class="tag">Subscriptions</span>
-        </div>
-        <div class="project-actions">
-          <a href="https://th-life-engine.vercel.app/" target="_blank" rel="noopener" class="btn primary">Live ↗</a>
-          <a href="https://github.com/anchittandon-create/TH-LifeEngine" target="_blank" rel="noopener" class="btn">Code ↗</a>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<section id="about">
-  <div class="container">
-    <div class="section-label">About</div>
-    <h2 class="section-title">An engineer who learned to <em>love the funnel.</em></h2>
-    <div class="about-grid">
-      <div class="about-prose">
-        <p>I started as a backend engineer building consumer apps — live sports commentary, e-commerce — the kinds of systems where you watch your code touch a million people in a weekend.</p>
-        <p>Then I moved to product, and what I really fell for was <em>the funnel</em> — the way it tells you the unfiltered truth about your decisions.</p>
-        <p>These days I split my time between shipping at Times Internet — ET Markets, ET Prime, Times Health+, and a marquee consumer event — and <em>building</em> on the side. Most of my side projects are AI-first consumer experiments I prototype end-to-end.</p>
-      </div>
-      <div class="about-meta">
-        <div class="meta-block">
-          <h4>Currently</h4>
-          <ul>
-            <li><span>Senior PM, Times Internet</span><span>Apr '25 →</span></li>
-            <li><span>Building TI Half Marathon</span><span>Mar '26</span></li>
-            <li><span>Based in Delhi</span><span>IST</span></li>
-          </ul>
-        </div>
-        <div class="meta-block">
-          <h4>Sharp edges</h4>
-          <ul>
-            <li><span>Growth funnels &amp; conversion</span><span>★★★★★</span></li>
-            <li><span>0→1 product development</span><span>★★★★★</span></li>
-            <li><span>Subscriptions &amp; monetization</span><span>★★★★★</span></li>
-            <li><span>Experimentation &amp; A/B testing</span><span>★★★★★</span></li>
-            <li><span>AI workflows &amp; LLM tooling</span><span>★★★★☆</span></li>
-          </ul>
-        </div>
-        <div class="meta-block">
-          <h4>Stack</h4>
-          <ul>
-            <li><span>Figma, JIRA</span><span>Design / Plan</span></li>
-            <li><span>Google Analytics, Firebase</span><span>Measure</span></li>
-            <li><span>React, TypeScript, Supabase</span><span>Build</span></li>
-            <li><span>GCP, ChatGPT, LLM tools</span><span>Ship</span></li>
-          </ul>
         </div>
       </div>
     </div>
-  </div>
-</section>
 
-<section id="experience">
-  <div class="container">
-    <div class="section-label">The long version</div>
-    <h2 class="section-title">Five-plus years, three titles, <em>one company</em> — and counting.</h2>
-    <div class="timeline">
-      <div class="timeline-item"><div class="timeline-time">Apr 2025 → Now</div><div class="timeline-content"><h4>Senior Product Manager</h4><div class="org">Times Internet</div><p>Owning Times Internet Half Marathon end-to-end. Scaling Assisted Sales and AI-enabled growth tooling across Economic Times properties.</p></div></div>
-      <div class="timeline-item"><div class="timeline-time">Oct 2023 — Mar 2025</div><div class="timeline-content"><h4>Product Manager</h4><div class="org">Times Internet</div><p>Led the ET Markets revamp across web and apps. Launched Times Health+ subscriptions. Scaled Assisted Sales from ₹15L to ₹80L MRR.</p></div></div>
-      <div class="timeline-item"><div class="timeline-time">Jun 2022 — Oct 2023</div><div class="timeline-content"><h4>Associate Product Manager</h4><div class="org">Times Internet</div><p>Made the jump from engineering to product. Shipped discovery, screeners, and portfolios for ET Markets — and learned the funnel the hard way.</p></div></div>
-      <div class="timeline-item"><div class="timeline-time">Mar 2022 — Jun 2022</div><div class="timeline-content"><h4>Software Engineer</h4><div class="org">Citymall</div><p>Data pipelines and backend systems for a fast-moving consumer commerce platform.</p></div></div>
-      <div class="timeline-item"><div class="timeline-time">Apr 2020 — Mar 2022</div><div class="timeline-content"><h4>Software Engineer</h4><div class="org">Tuple Technologies</div><p>Built and scaled backend services for consumer-facing apps. Acted as Product Owner for an early-stage live sports commentary product — the training ground for everything that came next.</p></div></div>
-      <div class="timeline-item"><div class="timeline-time">2016 — 2020</div><div class="timeline-content"><h4>B.Tech, Computer Science &amp; Engineering</h4><div class="org">Vellore Institute of Technology</div><p>Where the engineering brain got built.</p></div></div>
-    </div>
-  </div>
-</section>
-
-<section id="contact" class="contact">
-  <div class="container">
-    <div class="contact-prompt">Get in touch</div>
-    <h2>Building something <em>worth</em><br />measuring?</h2>
-    <a href="mailto:anchit.tandon@gmail.com" class="contact-email">anchit.tandon@gmail.com</a>
-    <div class="socials">
-      <a href="https://linkedin.com/in/anchit-tandon" target="_blank" rel="noopener">LinkedIn</a>
-      <a href="https://github.com/anchittandon-create" target="_blank" rel="noopener">GitHub</a>
-      <a href="tel:+919873945238">+91 98739 45238</a>
-      <a href="https://github.com/anchittandon-create/Anchit-s-Work-Portfolio" target="_blank" rel="noopener">This site's code</a>
-    </div>
-  </div>
-</section>
-
-<footer>
-  <div class="container">
-    <div>© 2026 Anchit Tandon — Delhi, IN</div>
-    <div>Built late at night, between deploys.</div>
-  </div>
-</footer>
-
-<!-- ============ CHATBOT WIDGET ============ -->
-<button class="chat-launcher" id="chatLauncher" aria-label="Ask Anchit AI">
-  <span class="chat-dot"></span>
-  <span>Ask Anchit AI</span>
-</button>
-
-<div class="chat-panel" id="chatPanel" role="dialog" aria-labelledby="chatTitle">
-  <div class="chat-header">
-    <div class="chat-header-left">
-      <div class="chat-avatar">A</div>
-      <div>
-        <div class="chat-header-title" id="chatTitle">Anchit's AI</div>
-        <div class="chat-header-status"><span class="live-dot"></span>Trained on his work</div>
+    <!-- ===== ABOUT PANEL ===== -->
+    <div class="panel" id="panel-about">
+      <div class="panel-header">
+        <div class="panel-eyebrow">About</div>
+        <h1 class="panel-title">An engineer who learned to <em>love the funnel.</em></h1>
+      </div>
+      <div class="panel-body">
+        <div class="about-grid">
+          <div class="about-prose">
+            <p>I started as a backend engineer building consumer apps — live sports commentary, e-commerce — the kinds of systems where you watch your code touch a million people in a weekend.</p>
+            <p>Then I moved to product, and what I really fell for was <em>the funnel</em> — the way it tells you the unfiltered truth about your decisions.</p>
+            <p>These days I split my time between shipping at Times Internet — ET Markets, ET Prime, Times Health+, and a marquee consumer event — and <em>building</em> on the side. Most of my side projects are AI-first consumer experiments I prototype end-to-end.</p>
+          </div>
+          <div>
+            <div class="meta-block">
+              <h4>Currently</h4>
+              <ul>
+                <li><span>Senior PM, Times Internet</span><span>Apr '25 →</span></li>
+                <li><span>Building TI Half Marathon</span><span>Mar '26</span></li>
+                <li><span>Based in Delhi</span><span>IST</span></li>
+              </ul>
+            </div>
+            <div class="meta-block">
+              <h4>Sharp edges</h4>
+              <ul>
+                <li><span>Growth funnels &amp; conversion</span><span>★★★★★</span></li>
+                <li><span>0→1 product development</span><span>★★★★★</span></li>
+                <li><span>Subscriptions &amp; monetization</span><span>★★★★★</span></li>
+                <li><span>Experimentation</span><span>★★★★★</span></li>
+                <li><span>AI workflows &amp; LLMs</span><span>★★★★☆</span></li>
+              </ul>
+            </div>
+            <div class="meta-block">
+              <h4>Stack</h4>
+              <ul>
+                <li><span>Figma, JIRA</span><span>Design / Plan</span></li>
+                <li><span>GA, Firebase</span><span>Measure</span></li>
+                <li><span>React, TS, Supabase</span><span>Build</span></li>
+                <li><span>GCP, LLM tools</span><span>Ship</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    <button class="chat-close" id="chatClose" aria-label="Close chat">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
-  </div>
 
-  <div class="chat-messages" id="chatMessages"></div>
-  <div class="chat-chips" id="chatChips"></div>
+    <!-- ===== EXPERIENCE PANEL ===== -->
+    <div class="panel" id="panel-experience">
+      <div class="panel-header">
+        <div class="panel-eyebrow">The long version</div>
+        <h1 class="panel-title">Five-plus years, three titles, <em>one company</em> — and counting.</h1>
+      </div>
+      <div class="panel-body">
+        <div class="timeline-item"><div class="timeline-time">Apr 2025 → Now</div><div class="timeline-content"><h4>Senior Product Manager</h4><div class="org">Times Internet</div><p>Owning Times Internet Half Marathon end-to-end. Scaling Assisted Sales and AI-enabled growth tooling across Economic Times properties.</p></div></div>
+        <div class="timeline-item"><div class="timeline-time">Oct 2023 — Mar 2025</div><div class="timeline-content"><h4>Product Manager</h4><div class="org">Times Internet</div><p>Led the ET Markets revamp across web and apps. Launched Times Health+ subscriptions. Scaled Assisted Sales from ₹15L to ₹80L MRR.</p></div></div>
+        <div class="timeline-item"><div class="timeline-time">Jun 2022 — Oct 2023</div><div class="timeline-content"><h4>Associate Product Manager</h4><div class="org">Times Internet</div><p>Made the jump from engineering to product. Shipped discovery, screeners, and portfolios for ET Markets — and learned the funnel the hard way.</p></div></div>
+        <div class="timeline-item"><div class="timeline-time">Mar 2022 — Jun 2022</div><div class="timeline-content"><h4>Software Engineer</h4><div class="org">Citymall</div><p>Data pipelines and backend systems for a fast-moving consumer commerce platform.</p></div></div>
+        <div class="timeline-item"><div class="timeline-time">Apr 2020 — Mar 2022</div><div class="timeline-content"><h4>Software Engineer</h4><div class="org">Tuple Technologies</div><p>Built and scaled backend services for consumer-facing apps. Acted as Product Owner for an early-stage live sports commentary product — the training ground for everything that came next.</p></div></div>
+        <div class="timeline-item"><div class="timeline-time">2016 — 2020</div><div class="timeline-content"><h4>B.Tech, Computer Science &amp; Engineering</h4><div class="org">Vellore Institute of Technology</div><p>Where the engineering brain got built.</p></div></div>
+      </div>
+    </div>
 
-  <div class="chat-input-row">
-    <input type="text" class="chat-input" id="chatInput" placeholder="Ask anything about Anchit..." autocomplete="off" />
-    <button class="chat-send" id="chatSend" aria-label="Send">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-    </button>
-  </div>
-  <div class="chat-footer-note">Powered by knowledge base · Press / to focus</div>
+    <!-- ===== CONTACT PANEL ===== -->
+    <div class="panel" id="panel-contact">
+      <div class="panel-header">
+        <div class="panel-eyebrow">Get in touch</div>
+        <h1 class="panel-title">Let's build something <em>worth measuring.</em></h1>
+      </div>
+      <div class="panel-body">
+        <a href="mailto:anchit.tandon@gmail.com" class="contact-card">
+          <span class="contact-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </span>
+          <div class="contact-card-text">
+            <div class="label">Email</div>
+            <div class="value">anchit<em>.</em>tandon<em>@</em>gmail.com</div>
+          </div>
+        </a>
+
+        <a href="https://linkedin.com/in/anchit-tandon" target="_blank" rel="noopener" class="contact-card">
+          <span class="contact-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+          </span>
+          <div class="contact-card-text">
+            <div class="label">LinkedIn · Full résumé</div>
+            <div class="value">linkedin.com/in/<em>anchit-tandon</em></div>
+          </div>
+        </a>
+
+        <a href="https://github.com/anchittandon-create" target="_blank" rel="noopener" class="contact-card">
+          <span class="contact-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          </span>
+          <div class="contact-card-text">
+            <div class="label">GitHub · Code</div>
+            <div class="value">github.com/<em>anchittandon-create</em></div>
+          </div>
+        </a>
+
+        <a href="tel:+919873945238" class="contact-card">
+          <span class="contact-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </span>
+          <div class="contact-card-text">
+            <div class="label">Phone · Delhi, IST</div>
+            <div class="value">+91 <em>98739</em> 45238</div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+  </main>
 </div>
 
 <script>
-  /* ========== THEME ========== */
+  /* =================================================== */
+  /*  STATE                                              */
+  /* =================================================== */
+  const app = document.getElementById('app');
   const root = document.documentElement;
-  const toggleBtn = document.getElementById('themeToggle');
-  const saved = localStorage.getItem('anchit-theme');
-  if (saved) root.setAttribute('data-theme', saved);
-  toggleBtn.addEventListener('click', () => {
+
+  /* ============== THEME ============== */
+  const savedTheme = localStorage.getItem('anchit-theme');
+  if (savedTheme) root.setAttribute('data-theme', savedTheme);
+  document.getElementById('themeToggle').addEventListener('click', () => {
     const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     root.setAttribute('data-theme', next);
     localStorage.setItem('anchit-theme', next);
   });
 
-  /* ========== REVEAL ON SCROLL ========== */
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); observer.unobserve(e.target); } });
-  }, { threshold: 0.12 });
-  document.querySelectorAll('section').forEach(s => { s.classList.add('reveal'); observer.observe(s); });
-
-  /* ========== ACTIVE NAV ========== */
-  const sections = document.querySelectorAll('section[id]');
-  const navLinks = document.querySelectorAll('.nav-links a');
-  window.addEventListener('scroll', () => {
-    let current = '';
-    sections.forEach(s => { const top = s.offsetTop - 100; if (window.scrollY >= top) current = s.id; });
-    navLinks.forEach(l => { l.style.color = l.getAttribute('href') === '#' + current ? 'var(--ink)' : ''; });
+  /* ============== SIDEBAR COLLAPSE ============== */
+  const savedCollapsed = localStorage.getItem('anchit-sidebar') === 'collapsed';
+  if (savedCollapsed) app.classList.add('collapsed');
+  document.getElementById('sidebarToggle').addEventListener('click', () => {
+    app.classList.toggle('collapsed');
+    localStorage.setItem('anchit-sidebar', app.classList.contains('collapsed') ? 'collapsed' : 'expanded');
   });
 
-  /* ============================================================ */
-  /*  CHATBOT  —  Knowledge-base bot                                */
-  /*  To upgrade to a real LLM: replace getBotResponse() with a    */
-  /*  fetch() to /api/chat (see deploy guide).                     */
-  /* ============================================================ */
+  /* ============== MOBILE MENU ============== */
+  document.getElementById('mobileMenuBtn').addEventListener('click', () => app.classList.add('mobile-open'));
+  document.getElementById('mobileBackdrop').addEventListener('click', () => app.classList.remove('mobile-open'));
 
+  /* ============== VIEW SWITCHING ============== */
+  const navItems = document.querySelectorAll('.nav-item');
+  const panels = document.querySelectorAll('.panel');
+  const mainView = document.querySelector('main.view');
+
+  function switchView(viewName) {
+    navItems.forEach(n => n.classList.toggle('active', n.dataset.view === viewName));
+    panels.forEach(p => p.classList.toggle('active', p.id === 'panel-' + viewName));
+    mainView.scrollTop = 0;
+    app.classList.remove('mobile-open');
+    history.replaceState(null, '', '#' + viewName);
+  }
+  navItems.forEach(n => n.addEventListener('click', () => switchView(n.dataset.view)));
+
+  // Open via hash on load
+  const hash = window.location.hash.replace('#', '');
+  if (['chat', 'work', 'projects', 'about', 'experience', 'contact'].includes(hash)) {
+    switchView(hash);
+  }
+
+  /* =================================================== */
+  /*  CHATBOT — speaks AS Anchit (first person)         */
+  /* =================================================== */
   const KB = [
     {
-      keywords: ['who', 'about', 'tell', 'yourself', 'background', 'bio'],
-      response: "I'm Anchit — Senior PM at Times Internet. I've spent 5+ years shipping consumer tech across content, subscriptions, events, and assisted buying. Started as a backend engineer (Tuple Tech, then Citymall) before moving to product. Want me to go deeper on the work, the side projects, or the engineering background?"
+      keywords: ['who', 'about', 'tell me about you', 'yourself', 'background', 'bio', 'introduce'],
+      response: "I'm a Senior Product Manager at Times Internet — five-plus years building consumer tech across content, subscriptions, events, and assisted buying. I started as a backend engineer (Tuple Technologies, then Citymall) before moving to product in 2022. Where do you want to go next — my <a data-nav='work'>work</a>, my <a data-nav='projects'>side projects</a>, or something specific?"
     },
     {
-      keywords: ['role', 'title', 'work', 'job', 'current', 'doing', 'now'],
-      response: "I'm a Senior PM at Times Internet (since Apr 2025). Right now I'm building the Times Internet Half Marathon — a zero-to-one consumer IP launching March 2026 — and scaling the Assisted Sales engine + AI telesuite across ET properties."
+      keywords: ['role', 'title', 'current', 'doing now', 'what do you do', 'job'],
+      response: "Right now I'm Senior PM at Times Internet (since April 2025). My main thing is building the Times Internet Half Marathon — a zero-to-one consumer IP launching March 2026. I'm also scaling our Assisted Sales engine and the AI telesuite across Economic Times properties."
     },
     {
       keywords: ['et markets', 'markets', 'revamp', 'finance', 'stocks'],
-      response: "Led the end-to-end revamp of ET Markets across Web, mWeb, Android and iOS — one of India's highest-traffic consumer financial surfaces. Drove +27% engagement, +25% DAU, +15% session duration, and unlocked ₹3 Cr+ in incremental annual revenue."
+      response: "I led the end-to-end revamp of ET Markets across Web, mWeb, Android, and iOS — one of India's highest-traffic consumer financial surfaces. Drove +27% engagement, +25% DAU, +15% session duration, and unlocked ₹3 Cr+ in incremental annual revenue. <a data-nav='work'>See the full work →</a>"
     },
     {
-      keywords: ['prime', 'assisted', 'sales', 'subscription', 'conversion', 'funnel', 'roi'],
-      response: "Scaled the Assisted Sales channel for ET Prime from ₹15L to ₹80L MRR (5×) and delivered 400%+ ROI in six months. Won a Team Award in Oct 2025 for the Jul–Sep '25 performance. The AI telesuite — transcription + pitch scoring + conversion assist — made the consistency possible."
+      keywords: ['prime', 'assisted sales', 'sales', 'subscription', 'conversion', 'funnel', 'roi', 'growth'],
+      response: "My biggest growth story: I scaled Assisted Sales for ET Prime from ₹15L to ₹80L MRR (5×) and delivered 400%+ ROI in six months. Won a Team Award in October 2025 for the Jul–Sep '25 performance. The AI telesuite I built — transcription + pitch scoring + conversion assist — made that consistency possible at scale."
     },
     {
-      keywords: ['marathon', 'event', 'running', 'half', '0 to 1', 'zero to one', 'zero-to-one'],
-      response: "Times Internet Half Marathon (Mar 2026) is my current zero-to-one — discovery, registration funnels, acquisition channels, and on-ground runner insights. First marquee running event from TI, so everything from the brand surface to the funnel architecture is being built from scratch."
+      keywords: ['marathon', 'event', 'running', 'half', '0 to 1', 'zero to one', 'zero-to-one', 'building now', 'next'],
+      response: "I'm building the Times Internet Half Marathon (March 2026) — our first marquee running event. Owning the whole thing: discovery, registration funnels, acquisition channels, on-ground runner insights, brand surface. Everything from scratch. It's my favourite kind of problem — building software and physical experience at once."
     },
     {
       keywords: ['health', 'wellness', 'plus'],
-      response: "Launched Times Health+ paid wellness subscriptions from scratch — freemium-to-paid journeys, pricing experiments, retention-led monetization. A category most Indian publishers haven't cracked yet."
-    },
-    {
-      keywords: ['ai', 'llm', 'telesuite', 'tool', 'chatgpt'],
-      response: "I work with AI a lot — both as a PM and a builder. At ET I built an AI telesuite (transcription, pitch quality scoring, conversion assist). On the side I've shipped MusicGenAI, Hey Yaara (AI voice companion for elders), AI TeleSuite (consumer prototype), and TH+ LifeEngine (AI wellness planner). Ask me about any of them."
+      response: "I launched Times Health+ paid wellness subscriptions from scratch — freemium-to-paid journeys, pricing experiments, retention-led monetization. It's a category most Indian publishers haven't cracked yet, which is exactly why it's interesting."
     },
     {
       keywords: ['side', 'project', 'projects', 'github', 'build', 'vercel', 'personal'],
-      response: "Four side projects, all live: <a href='https://hey-yaara.vercel.app/' target='_blank'>Hey Yaara</a> (AI voice companion for elderly), <a href='https://music-gen-ai-blue.vercel.app/' target='_blank'>MusicGenAI</a> (AI music generation), <a href='https://ai-tele-suite.vercel.app/' target='_blank'>AI TeleSuite</a> (AI sales suite), and <a href='https://th-life-engine.vercel.app/' target='_blank'>TH+ LifeEngine</a> (AI wellness planning). Scroll down to the Projects section or check <a href='https://github.com/anchittandon-create' target='_blank'>my GitHub</a>."
+      response: "I've shipped four side projects, all live. Each one is something I built end-to-end on weekends and evenings — most are AI-first consumer experiments. <a data-nav='projects'>Open the Projects view →</a> Or ask me about a specific one — Hey Yaara, MusicGenAI, AI TeleSuite, or TH+ LifeEngine."
     },
     {
-      keywords: ['hey yaara', 'yaara', 'elderly', 'voice'],
-      response: "Hey Yaara is an AI voice companion built for the elderly — warm conversation, simple interface, designed for users who find apps intimidating. PWA so it works on any device. <a href='https://hey-yaara.vercel.app/' target='_blank'>Try it →</a>"
+      keywords: ['hey yaara', 'yaara', 'elderly', 'voice', 'companion'],
+      response: "Hey Yaara is an AI voice companion I built for the elderly — warm, conversational, designed for people who find apps intimidating. PWA so it works anywhere. <a href='https://hey-yaara.vercel.app/' target='_blank'>Try it →</a> or <a href='https://github.com/anchittandon-create/hey-yaara' target='_blank'>see the code</a>."
     },
     {
       keywords: ['music', 'musicgen', 'song', 'audio'],
-      response: "MusicGenAI is an AI-powered music generation app — prompt to track, with vocal synthesis and lyric verification. React/TypeScript/Vite + Supabase + a Python microservice for vocals. <a href='https://music-gen-ai-blue.vercel.app/' target='_blank'>Try it →</a>"
+      response: "MusicGenAI is an AI music generation app I built — prompt to full track with vocal synthesis and lyric verification. Vite/React/TypeScript + Supabase + a Python microservice handling vocals. <a href='https://music-gen-ai-blue.vercel.app/' target='_blank'>Try it →</a> or <a href='https://github.com/anchittandon-create/MusicGenAI' target='_blank'>see the code</a>."
     },
     {
-      keywords: ['skill', 'skills', 'good at', 'specialty', 'specialties', 'expertise'],
-      response: "Sharpest edges: growth funnels and conversion, 0→1 product development, subscriptions and monetization, experimentation and A/B testing, and AI workflows. I think in funnels and ship in experiments."
+      keywords: ['telesuite', 'ai tele'],
+      response: "AI TeleSuite is the consumer prototype of the same telesuite I shipped at ET — real-time transcription, pitch scoring, and conversion assist, packaged for solo operators and small teams. <a href='https://ai-tele-suite.vercel.app/' target='_blank'>Try it →</a>"
     },
     {
-      keywords: ['engineer', 'engineering', 'tech', 'code', 'backend', 'coding', 'developer'],
-      response: "B.Tech CSE from VIT Vellore (2016–2020). Started as a software engineer — Tuple Technologies (2020–22) and Citymall (2022) — building backend services for consumer apps including a live sports commentary product where I was also Product Owner. Moved to product full-time at Times Internet in 2022. Still code on the side — the side projects are all me end-to-end."
+      keywords: ['lifeengine', 'life engine', 'th+'],
+      response: "TH+ LifeEngine is my experiment in what an AI wellness engine could look like — turning generic advice into a daily plan tied to your goals. Login-gated, deliberately private. <a href='https://th-life-engine.vercel.app/' target='_blank'>See it →</a>"
     },
     {
-      keywords: ['contact', 'email', 'reach', 'hire', 'talk', 'connect'],
-      response: "Easiest is <a href='mailto:anchit.tandon@gmail.com'>anchit.tandon@gmail.com</a>, or DM me on <a href='https://linkedin.com/in/anchit-tandon' target='_blank'>LinkedIn</a>. Phone is +91 98739 45238 if it's urgent."
+      keywords: ['skill', 'skills', 'good at', 'specialty', 'specialties', 'expertise', 'strength'],
+      response: "My sharpest edges: growth funnels and conversion, 0→1 product development, subscriptions and monetization, experimentation and A/B testing, and AI workflows. I think in funnels and ship in experiments."
+    },
+    {
+      keywords: ['engineer', 'engineering', 'tech', 'code', 'backend', 'coding', 'developer', 'engineering background'],
+      response: "B.Tech CSE from VIT Vellore (2016–2020). I started as a software engineer at Tuple Technologies (2020–22) and Citymall (2022) — backend services for consumer apps, including a live sports commentary product where I was also Product Owner. I moved to product full-time at Times Internet in 2022. I still code on weekends — the side projects are all me, end-to-end."
+    },
+    {
+      keywords: ['contact', 'email', 'reach', 'hire', 'talk', 'connect', 'in touch'],
+      response: "Easiest is <a data-nav='contact'>my contact panel</a>, or just email me at <a href='mailto:anchit.tandon@gmail.com'>anchit.tandon@gmail.com</a>. LinkedIn DM works too. Phone if it's urgent: +91 98739 45238."
     },
     {
       keywords: ['linkedin', 'resume', 'cv', 'résumé'],
-      response: "Full résumé and work history on <a href='https://linkedin.com/in/anchit-tandon' target='_blank'>LinkedIn ↗</a>. Code on <a href='https://github.com/anchittandon-create' target='_blank'>GitHub ↗</a>."
+      response: "Full résumé and work history on <a href='https://linkedin.com/in/anchit-tandon' target='_blank'>LinkedIn ↗</a>. Code on <a href='https://github.com/anchittandon-create' target='_blank'>GitHub ↗</a>. Want to see my work right here? <a data-nav='work'>Open the Work view →</a>"
     },
     {
       keywords: ['location', 'where', 'based', 'delhi', 'india', 'remote'],
-      response: "Based in Delhi, India (IST). Open to remote/hybrid for the right role."
+      response: "I'm based in Delhi, India (IST). Open to remote or hybrid for the right role."
+    },
+    {
+      keywords: ['ai', 'llm', 'tool', 'chatgpt'],
+      response: "AI shows up in pretty much everything I do now. At Times Internet I built the AI telesuite (transcription, pitch scoring, conversion assist). On the side: <a href='https://hey-yaara.vercel.app/' target='_blank'>Hey Yaara</a> (voice companion for elderly), <a href='https://music-gen-ai-blue.vercel.app/' target='_blank'>MusicGenAI</a> (generative music), <a href='https://ai-tele-suite.vercel.app/' target='_blank'>AI TeleSuite</a>, and <a href='https://th-life-engine.vercel.app/' target='_blank'>TH+ LifeEngine</a>. <a data-nav='projects'>Open the Projects view →</a>"
     },
     {
       keywords: ['hi', 'hello', 'hey', 'sup', 'yo', 'namaste'],
-      response: "Hey 👋 I'm a bot trained on Anchit's work and background. Ask me about ET Markets, Assisted Sales, the side projects (MusicGenAI, Hey Yaara, etc), his engineering background, or how to reach him."
+      response: "Hey! What do you want to know — my <a data-nav='work'>work</a>, my <a data-nav='projects'>side projects</a>, or something else?"
     },
     {
       keywords: ['thanks', 'thank you', 'thx', 'cool', 'nice', 'great'],
       response: "Anytime. Anything else you want to dig into?"
+    },
+    {
+      keywords: ['why', 'product', 'pm', 'move to product', 'switch'],
+      response: "I moved from engineering to product because I fell for <em>the funnel</em> — the unfiltered way it tells you the truth about your decisions. Shipping a feature is satisfying; watching conversion change because of it is addictive."
     }
   ];
 
   const CHIPS = [
-    "What does Anchit do?",
-    "Show me his side projects",
-    "Biggest growth story?",
-    "How do I reach him?"
+    "What do you do?",
+    "Show me your work",
+    "What are you building now?",
+    "Tell me about your side projects",
+    "How do I reach you?"
   ];
 
-  const messagesEl = document.getElementById('chatMessages');
-  const chipsEl = document.getElementById('chatChips');
-  const inputEl = document.getElementById('chatInput');
-  const sendBtn = document.getElementById('chatSend');
-  const launcherEl = document.getElementById('chatLauncher');
-  const panelEl = document.getElementById('chatPanel');
-  const closeBtn = document.getElementById('chatClose');
-  let conversationStarted = false;
+  const chatBody = document.getElementById('chatBody');
+  const chipRow = document.getElementById('chipRow');
+  const chatInput = document.getElementById('chatInput');
+  const chatSend = document.getElementById('chatSend');
 
-  function openChat() {
-    panelEl.classList.add('open');
-    launcherEl.classList.add('hidden');
-    if (!conversationStarted) {
-      conversationStarted = true;
-      addBotMessage("Hi 👋 I'm Anchit's AI — trained on his work and background. Ask me anything, or pick a quick prompt below.");
-      renderChips();
-    }
-    setTimeout(() => inputEl.focus(), 350);
+  function scrollToBottom() {
+    requestAnimationFrame(() => { chatBody.scrollTop = chatBody.scrollHeight; });
   }
-  function closeChat() {
-    panelEl.classList.remove('open');
-    launcherEl.classList.remove('hidden');
+  function addBot(html) {
+    const wrap = document.createElement('div');
+    wrap.className = 'msg bot';
+    wrap.innerHTML = `<div class="msg-avatar">A</div><div class="msg-bubble">${html}</div>`;
+    chatBody.appendChild(wrap);
+    // Wire in-message nav links
+    wrap.querySelectorAll('a[data-nav]').forEach(a => {
+      a.style.cursor = 'pointer';
+      a.addEventListener('click', (e) => { e.preventDefault(); switchView(a.dataset.nav); });
+    });
+    scrollToBottom();
   }
-  launcherEl.addEventListener('click', openChat);
-  closeBtn.addEventListener('click', closeChat);
-
-  function addBotMessage(html) {
-    const div = document.createElement('div');
-    div.className = 'chat-msg bot';
-    div.innerHTML = html;
-    messagesEl.appendChild(div);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  }
-  function addUserMessage(text) {
-    const div = document.createElement('div');
-    div.className = 'chat-msg user';
-    div.textContent = text;
-    messagesEl.appendChild(div);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
+  function addUser(text) {
+    const wrap = document.createElement('div');
+    wrap.className = 'msg user';
+    wrap.innerHTML = `<div class="msg-bubble"></div>`;
+    wrap.querySelector('.msg-bubble').textContent = text;
+    chatBody.appendChild(wrap);
+    scrollToBottom();
   }
   function showTyping() {
-    const div = document.createElement('div');
-    div.className = 'chat-msg bot typing';
-    div.id = 'typingIndicator';
-    div.innerHTML = '<span></span><span></span><span></span>';
-    messagesEl.appendChild(div);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
+    const wrap = document.createElement('div');
+    wrap.className = 'msg bot typing';
+    wrap.id = 'typingIndicator';
+    wrap.innerHTML = `<div class="msg-avatar">A</div><div class="msg-bubble"><span></span><span></span><span></span></div>`;
+    chatBody.appendChild(wrap);
+    scrollToBottom();
   }
   function hideTyping() {
     const t = document.getElementById('typingIndicator');
     if (t) t.remove();
   }
   function renderChips() {
-    chipsEl.innerHTML = '';
+    chipRow.innerHTML = '';
     CHIPS.forEach(label => {
       const b = document.createElement('button');
-      b.className = 'chat-chip';
+      b.className = 'chip';
       b.textContent = label;
-      b.addEventListener('click', () => { chipsEl.innerHTML = ''; handleUserMessage(label); });
-      chipsEl.appendChild(b);
+      b.addEventListener('click', () => { chipRow.innerHTML = ''; handleMessage(label); });
+      chipRow.appendChild(b);
     });
   }
 
-  function getBotResponse(text) {
+  function getResponse(text) {
     const q = text.toLowerCase();
     let best = null, bestScore = 0;
     for (const entry of KB) {
@@ -749,37 +1262,46 @@
       if (score > bestScore) { bestScore = score; best = entry; }
     }
     if (best) return best.response;
-    return "I don't have that one in my notes yet — but you can ask Anchit directly at <a href='mailto:anchit.tandon@gmail.com'>anchit.tandon@gmail.com</a>. Or try asking about his work at Times Internet, his side projects, or his engineering background.";
+    return "I don't have a great answer to that one — yet. Try asking about my work at Times Internet, my side projects (Hey Yaara, MusicGenAI, etc), my engineering background, or how to reach me. Or just email me directly at <a href='mailto:anchit.tandon@gmail.com'>anchit.tandon@gmail.com</a>.";
   }
 
-  function handleUserMessage(text) {
+  function handleMessage(text) {
     if (!text.trim()) return;
-    addUserMessage(text);
+    addUser(text);
     showTyping();
     setTimeout(() => {
       hideTyping();
-      addBotMessage(getBotResponse(text));
-    }, 600 + Math.random() * 500);
+      addBot(getResponse(text));
+    }, 550 + Math.random() * 450);
   }
 
-  sendBtn.addEventListener('click', () => {
-    const v = inputEl.value;
-    inputEl.value = '';
-    chipsEl.innerHTML = '';
-    handleUserMessage(v);
+  chatSend.addEventListener('click', () => {
+    const v = chatInput.value;
+    chatInput.value = '';
+    chipRow.innerHTML = '';
+    handleMessage(v);
   });
-  inputEl.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') { sendBtn.click(); }
+  chatInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') chatSend.click();
   });
 
-  // Keyboard shortcut: '/' to open and focus chat
+  // First message from Anchit
+  setTimeout(() => {
+    addBot("Hi 👋 I'm <strong>Anchit</strong>. Welcome to my work. Ask me anything — about what I'm building at Times Internet, the side projects I ship on weekends, or what I'm trying to figure out next. Or pick a quick prompt below.");
+    renderChips();
+  }, 300);
+
+  // Keyboard: '/' to focus chat
   document.addEventListener('keydown', (e) => {
     if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
       e.preventDefault();
-      if (!panelEl.classList.contains('open')) openChat();
-      else inputEl.focus();
+      switchView('chat');
+      setTimeout(() => chatInput.focus(), 100);
     }
-    if (e.key === 'Escape' && panelEl.classList.contains('open')) closeChat();
+    if (e.key === 'Escape') {
+      chatInput.value = '';
+      chatInput.blur();
+    }
   });
 </script>
 
