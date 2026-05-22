@@ -85,9 +85,14 @@
   .sidebar-section-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-mute); padding: 16px 12px 8px; opacity: 1; transition: opacity 0.2s ease; }
   .collapsed .sidebar-section-label { opacity: 0; height: 12px; padding: 6px 0 0; }
 
-  /* Nested project items */
-  .nav-sub-item { padding-left: 36px !important; font-size: 13px; color: var(--ink-mute); }
-  .collapsed .nav-sub-item { display: none; }
+  /* Nested project items — contextual, shown only when projects section is active */
+  .nav-sub-item { display: none; padding-left: 36px !important; font-size: 13px; color: var(--ink-mute); }
+  .sidebar-nav.projects-expanded .nav-sub-item { display: flex; }
+  .collapsed .nav-sub-item { display: none !important; }
+
+  /* Section divider */
+  .sidebar-divider { height: 1px; background: var(--rule); margin: 8px 12px; flex-shrink: 0; }
+  .collapsed .sidebar-divider { margin: 8px 6px; }
 
   .sidebar-bottom { padding: 12px; border-top: 1px solid var(--rule); display: flex; flex-direction: column; gap: 6px; }
   .contact-pill { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-elev); border: 1px solid var(--rule-bright); border-radius: 10px; transition: all 0.2s ease; cursor: pointer; }
@@ -312,7 +317,6 @@
     </div>
 
     <div class="sidebar-nav">
-      <div class="sidebar-section-label">Explore</div>
 
       <button class="nav-item active" data-view="chat" data-label="Talk with Anchit">
         <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
@@ -341,6 +345,8 @@
       <button class="nav-item nav-sub-item" data-view="project-lifeengine" data-label="TH+ LifeEngine">
         <span class="nav-label">· TH+ LifeEngine</span>
       </button>
+
+      <div class="sidebar-divider"></div>
 
       <button class="nav-item" data-view="about" data-label="About">
         <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
@@ -845,6 +851,7 @@
     mainView.scrollTop = 0;
     app.classList.remove('mobile-open');
     history.replaceState(null, '', '#' + viewName);
+    document.querySelector('.sidebar-nav').classList.toggle('projects-expanded', viewName === 'projects' || viewName.startsWith('project-'));
   }
   navItems.forEach(n => n.addEventListener('click', () => switchView(n.dataset.view)));
   document.querySelectorAll('.back-link').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
@@ -964,10 +971,10 @@
 
   // Default chips shown at start
   const DEFAULT_CHIPS = [
-    "What do you do?",
     "Show me your biggest win",
-    "Tell me about your side projects",
     "What are you building now?",
+    "Tell me about your side projects",
+    "Why did you move to product?",
     "How do I reach you?"
   ];
 
@@ -1066,7 +1073,7 @@
 
   // First message + initial chips
   setTimeout(() => {
-    addBot("Hi 👋 I'm <strong>Anchit</strong>. Welcome to my work. Ask me anything — about what I'm building at Times Internet, the side projects I ship on weekends, or what I'm trying to figure out next. Or tap a suggestion below.");
+    addBot("I'm <strong>Anchit Tandon</strong> — Senior PM at Times Internet. I scaled Assisted Sales 5× (₹15L → ₹80L MRR), led the ET Markets revamp (₹3Cr ARR), and I'm currently building the Times Internet Half Marathon from scratch. Ask me anything, or browse the <a data-nav='work'>work</a>, <a data-nav='projects'>side projects</a>, or <a data-nav='about'>about me</a>.");
     renderChips(DEFAULT_CHIPS);
   }, 300);
 
