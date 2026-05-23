@@ -1061,9 +1061,124 @@
     transition: transform 1s cubic-bezier(0.16,1,0.3,1);
   }
   .achievement-fill.drawn { transform: scaleX(1); }
+
+  /* ============ SCROLL PROGRESS BAR ============ */
+  .scroll-progress {
+    position: fixed; top: 0; left: 0; width: 0; height: 3px; z-index: 9000;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    border-radius: 0 2px 2px 0;
+    transition: width 0.05s linear;
+    pointer-events: none;
+  }
+
+  /* ============ VIEW TRANSITIONS ============ */
+  @keyframes viewFadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes viewFadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(-16px); }
+  }
+  .view.v-enter { animation: viewFadeUp 0.42s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .view.v-leave { animation: viewFadeOut 0.22s ease forwards; pointer-events: none; }
+
+  /* ============ HERO DOT GRID ============ */
+  .hero-dot-grid {
+    position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0;
+    opacity: 0.4;
+  }
+  .hero-dot-grid::before {
+    content: '';
+    position: absolute; inset: -50%;
+    background-image: radial-gradient(circle, var(--rule-strong) 1px, transparent 1px);
+    background-size: 32px 32px;
+    animation: dotDrift 24s linear infinite;
+  }
+  @keyframes dotDrift {
+    0%   { transform: translate(0, 0); }
+    100% { transform: translate(32px, 32px); }
+  }
+  [data-theme="dark"] .hero-dot-grid { opacity: 0.15; }
+  .home-hero { position: relative; isolation: isolate; }
+
+  /* ============ FLOATING YEAR BADGE (career journey) ============ */
+  .floating-year {
+    position: sticky; top: 24px; z-index: 20; pointer-events: none;
+    display: flex; justify-content: flex-end; padding-right: 0;
+    margin-bottom: -40px;
+  }
+  .floating-year-inner {
+    font-family: var(--font-display); font-size: clamp(56px, 10vw, 110px);
+    font-weight: 300; font-style: italic;
+    color: var(--rule); letter-spacing: -0.03em; line-height: 1;
+    user-select: none; transition: color 0.4s ease, opacity 0.4s;
+    opacity: 0.5;
+  }
+  .floating-year-inner.active { color: var(--primary-soft); opacity: 1; }
+  @media (max-width: 720px) { .floating-year { display: none; } }
+
+  /* ============ CAREER PHASE SEPARATOR ============ */
+  .lifecycle-phase-sep {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 0 8px 44px; margin: 8px 0;
+    font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-mute); position: relative; z-index: 3;
+  }
+  .lifecycle-phase-sep::before {
+    content: ''; width: 24px; height: 1px; background: var(--rule-strong);
+  }
+  @media (max-width: 720px) { .lifecycle-phase-sep { padding-left: 36px; } }
+
+  /* ============ WORK ITEM ENHANCEMENTS ============ */
+  .work-item { cursor: default; transition: background 0.3s, box-shadow 0.3s; }
+  .work-item:hover { background: var(--bg-elev); box-shadow: var(--shadow-sm); border-radius: 16px; }
+  .work-impact-bar { margin-top: 10px; }
+  .work-impact-label { font-family: var(--font-mono); font-size: 10px; color: var(--ink-mute); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+  .work-impact-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .work-impact-chip {
+    font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+    padding: 4px 10px; border-radius: 99px;
+    background: var(--accent-soft); color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+  .work-impact-chip.red { background: var(--primary-soft); color: var(--primary); }
+  .work-impact-chip.gold { background: rgba(181,135,10,0.12); color: #B5870A; }
+
+  /* ============ PRODUCTS SHIPPED GRID (ATS + visual) ============ */
+  .products-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px; margin-top: 32px;
+  }
+  .product-chip {
+    background: var(--bg-elev); border-radius: 14px; padding: 18px 16px;
+    display: flex; flex-direction: column; gap: 6px;
+    transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    border: 1px solid var(--rule);
+  }
+  .product-chip:hover { transform: translateY(-4px); box-shadow: var(--shadow-sm); border-color: var(--primary); }
+  .product-chip-name { font-size: 14px; font-weight: 500; color: var(--ink); }
+  .product-chip-co { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-mute); }
+  .product-chip-metric { font-family: var(--font-mono); font-size: 12px; color: var(--primary); margin-top: 2px; }
+  @media (max-width: 600px) { .products-grid { grid-template-columns: 1fr 1fr; } }
+
+  /* ============ ATS KEYWORDS (visible on page, semantic HTML) ============ */
+  .ats-section {
+    margin-top: 72px; padding: 28px 32px; border-radius: 20px;
+    background: var(--bg-elev); border: 1px solid var(--rule);
+  }
+  .ats-section-head { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-mute); margin-bottom: 12px; }
+  .ats-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+  .ats-tag {
+    font-size: 12px; padding: 5px 12px; border-radius: 99px;
+    background: var(--bg-deep); color: var(--ink-dim); border: 1px solid var(--rule);
+  }
 </style>
 </head>
 <body>
+
+<div class="scroll-progress" id="scrollProgress"></div>
 
 <!-- ============ SIDEBAR ============ -->
 <aside class="sidebar" id="sidebar">
@@ -1154,6 +1269,7 @@
     </div>
     <div class="container">
       <div class="home-hero reveal">
+        <div class="hero-dot-grid" aria-hidden="true"></div>
         <div class="eyebrow has-dot"><span class="live-dot"></span>Live · AGM – Product Management · Vahdam India</div>
         <div class="greeting">Hey, I'm</div>
         <h1 class="display-xl name">
@@ -1200,63 +1316,136 @@
   <section class="view" id="view-work">
     <div class="container">
       <div class="section-head reveal">
-        <div class="eyebrow">Selected work · Times Internet</div>
+        <div class="eyebrow">Selected work · Vahdam India &amp; Times Internet</div>
         <h1 class="display-lg">Work, <em>and</em> what it moved.</h1>
       </div>
 
       <div class="work-stats reveal-stagger">
-        <div class="work-stat"><div class="num"><em>5×</em></div><div class="label">Revenue growth · Assisted Sales · ₹15L → ₹80L MRR</div></div>
-        <div class="work-stat"><div class="num">₹3<em>Cr</em>+</div><div class="label">Incremental annual revenue · ET Markets revamp</div></div>
-        <div class="work-stat"><div class="num"><span class="counter" data-count="400" data-suffix="%">400%</span></div><div class="label">ROI within six months · ET Prime funnel</div></div>
-        <div class="work-stat"><div class="num"><span class="counter" data-count="25" data-suffix="%">25%</span></div><div class="label">DAU lift · ET Markets iOS &amp; Android</div></div>
+        <div class="work-stat"><div class="num"><em>5×</em></div><div class="label">MRR growth on Assisted Sales · ₹15L → ₹80L</div></div>
+        <div class="work-stat"><div class="num">₹3<em>Cr</em>+</div><div class="label">Incremental ARR · ET Markets revamp</div></div>
+        <div class="work-stat"><div class="num"><span class="counter" data-count="11" data-suffix="">11</span></div><div class="label">Products shipped across companies &amp; side projects</div></div>
+        <div class="work-stat"><div class="num"><span class="counter" data-count="6" data-suffix="+">6+</span></div><div class="label">Years in product &amp; engineering combined</div></div>
       </div>
 
       <div class="work-list">
+
+        <div class="work-item reveal">
+          <div class="work-num">00</div>
+          <div class="work-content">
+            <h3>Vahdam India — <em>D2C Global Growth</em></h3>
+            <p>Spearheading product and CRM-led growth across the US, UK, and global markets. Designing and executing cross-functional experiments that lifted average product ratings from 2.4 to 4.0. Driving sustained revenue growth through daily lifecycle marketing campaigns via Klaviyo and WebEngage — overseeing the full stack: product performance, customer experience, and revenue optimisation.</p>
+            <div class="tags"><span class="tag">D2C Growth</span><span class="tag">CRM · Klaviyo</span><span class="tag">WebEngage</span><span class="tag">Experimentation</span><span class="tag">Global</span></div>
+            <div class="work-impact-bar">
+              <div class="work-impact-label">Impact</div>
+              <div class="work-impact-row">
+                <span class="work-impact-chip gold">Ratings 2.4 → 4.0</span>
+                <span class="work-impact-chip gold">US · UK · Global</span>
+                <span class="work-impact-chip gold">Daily Revenue Growth</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-meta"><div class="year">Apr 2026 → Now</div><div class="impact">Current</div></div>
+        </div>
+
         <div class="work-item reveal">
           <div class="work-num">01</div>
           <div class="work-content">
             <h3>Times Internet <em>Half Marathon</em></h3>
-            <p>I'm owning this zero-to-one consumer IP end-to-end — discovery, registration funnels, acquisition channels, and on-ground runner insights for Times Internet's first marquee running event.</p>
-            <div class="tags"><span class="tag">0→1</span><span class="tag">Consumer Event</span><span class="tag">Funnel Design</span></div>
+            <p>Owned this zero-to-one consumer IP end-to-end — discovery, registration funnels, acquisition channels, and on-ground runner insights. Times Internet's first marquee consumer running event, built from scratch.</p>
+            <div class="tags"><span class="tag">0→1</span><span class="tag">Consumer Event</span><span class="tag">Funnel Design</span><span class="tag">Acquisition</span></div>
+            <div class="work-impact-bar">
+              <div class="work-impact-row">
+                <span class="work-impact-chip">Zero to Live</span><span class="work-impact-chip">Consumer IP</span>
+              </div>
+            </div>
           </div>
-          <div class="work-meta"><div class="year">Mar 2026 →</div><div class="impact">Live</div></div>
+          <div class="work-meta"><div class="year">Apr 2025 — Apr 2026</div><div class="impact">Shipped</div></div>
         </div>
+
         <div class="work-item reveal">
           <div class="work-num">02</div>
           <div class="work-content">
             <h3>Assisted Sales for <em>ET Prime</em></h3>
-            <p>I scaled a struggling consumer conversion channel into one of Economic Times' most profitable growth engines. Funnel redesign, continuous experimentation, and an AI-powered telesuite for pitch quality at scale.</p>
-            <div class="tags"><span class="tag">Growth</span><span class="tag">Subscriptions</span><span class="tag">AI Workflows</span></div>
+            <p>Scaled a struggling consumer conversion channel into one of Economic Times' most profitable growth engines. Funnel redesign, continuous A/B experimentation, and an AI telesuite for real-time pitch scoring at scale.</p>
+            <div class="tags"><span class="tag">Growth</span><span class="tag">Subscriptions</span><span class="tag">AI Telesuite</span><span class="tag">A/B Testing</span></div>
+            <div class="work-impact-bar">
+              <div class="work-impact-row">
+                <span class="work-impact-chip red">5× MRR · ₹15L → ₹80L</span>
+                <span class="work-impact-chip red">400% ROI in 6 months</span>
+                <span class="work-impact-chip">Times Internet Team Award '25</span>
+              </div>
+            </div>
           </div>
-          <div class="work-meta"><div class="year">2024 — 2025</div><div class="impact">5× MRR · Team Award '25</div></div>
+          <div class="work-meta"><div class="year">2024 — 2025</div><div class="impact">5× MRR</div></div>
         </div>
+
         <div class="work-item reveal">
           <div class="work-num">03</div>
           <div class="work-content">
             <h3>ET Markets, <em>rebuilt</em></h3>
-            <p>I led the end-to-end revamp of one of India's highest-traffic consumer financial surfaces — across Web, mWeb, Android, and iOS. New discovery and decision-support features, sharper onboarding, measurable wins on every surface.</p>
-            <div class="tags"><span class="tag">Consumer Tech</span><span class="tag">Multi-platform</span><span class="tag">Experimentation</span></div>
+            <p>Led the end-to-end revamp of one of India's highest-traffic consumer financial surfaces — Web, mWeb, Android, and iOS. New discovery, screeners, portfolio tools, and decision-support features with sharper onboarding and measurable wins across every platform.</p>
+            <div class="tags"><span class="tag">Consumer Finance</span><span class="tag">Multi-platform</span><span class="tag">Experimentation</span><span class="tag">iOS · Android</span></div>
+            <div class="work-impact-bar">
+              <div class="work-impact-row">
+                <span class="work-impact-chip red">₹3Cr+ ARR</span>
+                <span class="work-impact-chip">+27% Engagement</span>
+                <span class="work-impact-chip">+25% DAU</span>
+                <span class="work-impact-chip">+15% Sessions</span>
+              </div>
+            </div>
           </div>
-          <div class="work-meta"><div class="year">2023 — 2024</div><div class="impact">+27% engagement · ₹3Cr ARR</div></div>
+          <div class="work-meta"><div class="year">2023 — 2024</div><div class="impact">₹3Cr ARR</div></div>
         </div>
+
         <div class="work-item reveal">
           <div class="work-num">04</div>
           <div class="work-content">
             <h3>Times Health<em>+</em> Subscriptions</h3>
-            <p>I launched paid wellness subscriptions from scratch — freemium-to-paid journeys, pricing experiments, and retention-led monetization for a category most Indian publishers haven't cracked yet.</p>
-            <div class="tags"><span class="tag">Subscriptions</span><span class="tag">Monetization</span><span class="tag">Retention</span></div>
+            <p>Launched paid wellness subscriptions from scratch — freemium-to-paid journeys, pricing experiments, and retention-led monetisation for a category most Indian publishers haven't cracked. Built the full paywall and onboarding flow end-to-end.</p>
+            <div class="tags"><span class="tag">Subscriptions</span><span class="tag">Monetisation</span><span class="tag">Retention</span><span class="tag">Paywall</span></div>
+            <div class="work-impact-bar">
+              <div class="work-impact-row">
+                <span class="work-impact-chip">0 → Paid Tier</span><span class="work-impact-chip">New Revenue Line</span>
+              </div>
+            </div>
           </div>
-          <div class="work-meta"><div class="year">2024 — Present</div><div class="impact">New revenue line</div></div>
+          <div class="work-meta"><div class="year">2024 — 2025</div><div class="impact">Launched</div></div>
         </div>
+
         <div class="work-item reveal">
           <div class="work-num">05</div>
           <div class="work-content">
             <h3>Assisted Buying for <em>Economic Times</em></h3>
-            <p>I introduced assisted-buying surfaces for high-intent ET users, taking qualified leads from around 30 to 150+ per day — turning passive content traffic into a structured conversion channel.</p>
-            <div class="tags"><span class="tag">Lead Gen</span><span class="tag">Funnel</span><span class="tag">Conversion</span></div>
+            <p>Introduced assisted-buying surfaces for high-intent ET users, taking qualified leads from ~30 to 150+ per day. Turned passive content traffic into a structured conversion channel with lead scoring and assisted journeys.</p>
+            <div class="tags"><span class="tag">Lead Gen</span><span class="tag">Funnel Optimisation</span><span class="tag">Conversion</span></div>
+            <div class="work-impact-bar">
+              <div class="work-impact-row">
+                <span class="work-impact-chip red">5× Qualified Leads</span><span class="work-impact-chip">30 → 150+ / day</span>
+              </div>
+            </div>
           </div>
-          <div class="work-meta"><div class="year">2024</div><div class="impact">5× qualified leads</div></div>
+          <div class="work-meta"><div class="year">2022 — 2023</div><div class="impact">5× Leads</div></div>
         </div>
+
+      </div>
+
+      <!-- All products shipped — ATS + visual -->
+      <div class="section-head reveal" style="margin-top: 72px;">
+        <div class="eyebrow">All products shipped</div>
+        <h2 class="display-sm">Every product I've put into the world.</h2>
+      </div>
+      <div class="products-grid reveal-stagger">
+        <div class="product-chip"><div class="product-chip-name">Vahdam India D2C</div><div class="product-chip-co">Vahdam India · 2026</div><div class="product-chip-metric">Ratings 2.4 → 4.0</div></div>
+        <div class="product-chip"><div class="product-chip-name">TI Half Marathon</div><div class="product-chip-co">Times Internet · 2026</div><div class="product-chip-metric">0 → 1 consumer IP</div></div>
+        <div class="product-chip"><div class="product-chip-name">ET Prime Assisted Sales</div><div class="product-chip-co">Times Internet · 2025</div><div class="product-chip-metric">5× MRR · ₹80L</div></div>
+        <div class="product-chip"><div class="product-chip-name">AI TeleSuite (Enterprise)</div><div class="product-chip-co">Times Internet · 2024</div><div class="product-chip-metric">Real-time pitch scoring</div></div>
+        <div class="product-chip"><div class="product-chip-name">ET Markets Revamp</div><div class="product-chip-co">Times Internet · 2024</div><div class="product-chip-metric">₹3Cr+ ARR · +25% DAU</div></div>
+        <div class="product-chip"><div class="product-chip-name">Times Health+ Subs</div><div class="product-chip-co">Times Internet · 2024</div><div class="product-chip-metric">Paid tier · 0→1</div></div>
+        <div class="product-chip"><div class="product-chip-name">ET Markets Discovery</div><div class="product-chip-co">Times Internet · 2023</div><div class="product-chip-metric">Screeners, portfolios</div></div>
+        <div class="product-chip"><div class="product-chip-name">Hey Yaara</div><div class="product-chip-co">Side project · 2024</div><div class="product-chip-metric">AI voice companion</div></div>
+        <div class="product-chip"><div class="product-chip-name">MusicGenAI</div><div class="product-chip-co">Side project · 2024</div><div class="product-chip-metric">Text → full track</div></div>
+        <div class="product-chip"><div class="product-chip-name">AI TeleSuite (Consumer)</div><div class="product-chip-co">Side project · 2024</div><div class="product-chip-metric">Pitch coaching app</div></div>
+        <div class="product-chip"><div class="product-chip-name">TH+ LifeEngine</div><div class="product-chip-co">Side project · 2024</div><div class="product-chip-metric">AI wellness planner</div></div>
       </div>
     </div>
   </section>
@@ -1626,10 +1815,12 @@
           <h2 class="display-md">Five-plus years, three titles, <em>one company.</em></h2>
         </div>
         <div class="lifecycle-track" id="lifecycleTrack">
+          <div class="floating-year" aria-hidden="true"><div class="floating-year-inner" id="floatingYear">2026</div></div>
           <div class="lifecycle-spine"></div>
           <div class="lifecycle-spine-fill" id="lifecycleSpineFill"></div>
 
-          <div class="lifecycle-node open" data-phase="agm">
+          <div class="lifecycle-phase-sep">Now</div>
+          <div class="lifecycle-node open" data-phase="agm" data-year="2026">
             <div class="lifecycle-dot-col"><div class="lifecycle-dot"></div></div>
             <div class="lifecycle-body">
               <div class="lifecycle-meta">
@@ -1652,7 +1843,8 @@
             </div>
           </div>
 
-          <div class="lifecycle-node" data-phase="spm">
+          <div class="lifecycle-phase-sep">Times Internet · 2025 — 2026</div>
+          <div class="lifecycle-node" data-phase="spm" data-year="2025">
             <div class="lifecycle-dot-col"><div class="lifecycle-dot"></div></div>
             <div class="lifecycle-body">
               <div class="lifecycle-meta">
@@ -1675,7 +1867,8 @@
             </div>
           </div>
 
-          <div class="lifecycle-node" data-phase="pm">
+          <div class="lifecycle-phase-sep">Times Internet · 2023 — 2025</div>
+          <div class="lifecycle-node" data-phase="pm" data-year="2023">
             <div class="lifecycle-dot-col"><div class="lifecycle-dot"></div></div>
             <div class="lifecycle-body">
               <div class="lifecycle-meta">
@@ -1698,7 +1891,8 @@
             </div>
           </div>
 
-          <div class="lifecycle-node" data-phase="apm">
+          <div class="lifecycle-phase-sep">Times Internet · 2022 — 2023</div>
+          <div class="lifecycle-node" data-phase="apm" data-year="2022">
             <div class="lifecycle-dot-col"><div class="lifecycle-dot"></div></div>
             <div class="lifecycle-body">
               <div class="lifecycle-meta">
@@ -1721,7 +1915,8 @@
             </div>
           </div>
 
-          <div class="lifecycle-node" data-phase="eng">
+          <div class="lifecycle-phase-sep">Engineering · 2020 — 2022</div>
+          <div class="lifecycle-node" data-phase="eng" data-year="2022">
             <div class="lifecycle-dot-col"><div class="lifecycle-dot"></div></div>
             <div class="lifecycle-body">
               <div class="lifecycle-meta">
@@ -1744,7 +1939,7 @@
             </div>
           </div>
 
-          <div class="lifecycle-node" data-phase="eng">
+          <div class="lifecycle-node" data-phase="eng" data-year="2020">
             <div class="lifecycle-dot-col"><div class="lifecycle-dot"></div></div>
             <div class="lifecycle-body">
               <div class="lifecycle-meta">
@@ -1767,7 +1962,8 @@
             </div>
           </div>
 
-          <div class="lifecycle-node" data-phase="edu">
+          <div class="lifecycle-phase-sep">Education · 2016 — 2020</div>
+          <div class="lifecycle-node" data-phase="edu" data-year="2016">
             <div class="lifecycle-dot-col"><div class="lifecycle-dot"></div></div>
             <div class="lifecycle-body">
               <div class="lifecycle-meta">
@@ -1789,6 +1985,27 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- ATS resume keywords — visible in page for search & semantic indexing -->
+      <div class="ats-section reveal">
+        <div class="ats-section-head">Keywords · ATS &amp; recruiter search</div>
+        <div class="ats-tags">
+          <span class="ats-tag">Product Management</span><span class="ats-tag">Senior Product Manager</span><span class="ats-tag">Assistant General Manager</span>
+          <span class="ats-tag">D2C Growth</span><span class="ats-tag">Consumer Tech</span><span class="ats-tag">Growth Hacking</span>
+          <span class="ats-tag">Funnel Optimisation</span><span class="ats-tag">Conversion Rate Optimisation</span><span class="ats-tag">A/B Testing</span>
+          <span class="ats-tag">Subscription Products</span><span class="ats-tag">Monetisation</span><span class="ats-tag">Revenue Optimisation</span>
+          <span class="ats-tag">0 to 1 Product Development</span><span class="ats-tag">Product Strategy</span><span class="ats-tag">Product Roadmap</span>
+          <span class="ats-tag">CRM Marketing</span><span class="ats-tag">Klaviyo</span><span class="ats-tag">WebEngage</span><span class="ats-tag">Lifecycle Marketing</span>
+          <span class="ats-tag">AI Products</span><span class="ats-tag">LLM Integration</span><span class="ats-tag">Generative AI</span>
+          <span class="ats-tag">User Research</span><span class="ats-tag">Customer Experience</span><span class="ats-tag">Stakeholder Management</span>
+          <span class="ats-tag">Cross-functional Leadership</span><span class="ats-tag">Data Analytics</span><span class="ats-tag">Google Analytics</span>
+          <span class="ats-tag">Firebase</span><span class="ats-tag">Mixpanel</span><span class="ats-tag">Experimentation</span>
+          <span class="ats-tag">React</span><span class="ats-tag">TypeScript</span><span class="ats-tag">Python</span><span class="ats-tag">SQL</span><span class="ats-tag">Supabase</span>
+          <span class="ats-tag">Figma</span><span class="ats-tag">JIRA</span><span class="ats-tag">Agile</span><span class="ats-tag">Scrum</span>
+          <span class="ats-tag">B2C</span><span class="ats-tag">B2B SaaS</span><span class="ats-tag">E-commerce</span><span class="ats-tag">Fintech</span><span class="ats-tag">HealthTech</span>
+          <span class="ats-tag">Times Internet</span><span class="ats-tag">Vahdam India</span><span class="ats-tag">Economic Times</span>
         </div>
       </div>
 
@@ -1867,12 +2084,8 @@
     <svg class="voice-icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
     <svg class="voice-icon-stop" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
   </button>
-  <!-- Audio elements — drop your recordings into audio/ folder -->
-  <audio id="audio-home" src="audio/home.mp3" preload="none"></audio>
-  <audio id="audio-work" src="audio/work.mp3" preload="none"></audio>
-  <audio id="audio-builds" src="audio/builds.mp3" preload="none"></audio>
-  <audio id="audio-about" src="audio/about.mp3" preload="none"></audio>
-  <audio id="audio-contact" src="audio/contact.mp3" preload="none"></audio>
+  <!-- Anchit's voice — one recording plays across all views -->
+  <audio id="audio-anchit" src="audio/anchit.m4a" preload="none"></audio>
 </div>
 
 <!-- Cursor glow -->
@@ -1920,7 +2133,19 @@
     if (viewName === 'projects') viewName = 'builds';
     if (!ALL_VIEWS.includes(viewName)) return;
 
-    views.forEach(v => v.classList.toggle('active', v.id === 'view-' + viewName));
+    // Animate out old view, animate in new
+    const prev = document.querySelector('.view.active');
+    if (prev && prev.id !== 'view-' + viewName) {
+      prev.classList.add('v-leave');
+      setTimeout(() => prev.classList.remove('v-leave'), 250);
+    }
+
+    views.forEach(v => {
+      const isActive = v.id === 'view-' + viewName;
+      if (isActive && !v.classList.contains('active')) v.classList.add('v-enter');
+      v.classList.toggle('active', isActive);
+      setTimeout(() => v.classList.remove('v-enter'), 450);
+    });
 
     // Active states on sidebar nav links
     navLinks.forEach(n => {
@@ -1930,9 +2155,10 @@
     });
 
     closeSidebar();
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    document.querySelector('.view.active')?.scrollTo({ top: 0, behavior: 'instant' });
     history.replaceState(null, '', '#' + viewName);
     if (window.__setVoiceView) window.__setVoiceView(viewName);
+    document.dispatchEvent(new CustomEvent('viewChanged', { detail: viewName }));
 
     // Re-trigger reveals for the new view
     requestAnimationFrame(() => observeReveals());
@@ -2188,45 +2414,71 @@
   (function() {
     const btn = document.getElementById('voiceBtn');
     const label = document.getElementById('voiceLabel');
-    if (!btn) return;
+    const audio = document.getElementById('audio-anchit');
+    if (!btn || !audio) return;
 
-    const VIEW_LABELS = { home: 'Home', work: 'Work', builds: 'Builds', about: 'About', contact: 'Contact' };
-    let currentAudio = null;
-    let currentView = 'home';
-
-    function getAudio(view) {
-      const key = view.startsWith('project-') ? 'builds' : (VIEW_LABELS[view] ? view : 'home');
-      return document.getElementById('audio-' + key);
-    }
-    function stopAll() {
-      if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
-      currentAudio = null;
-      btn.classList.remove('playing');
-    }
-    function playView(view) {
-      stopAll();
-      const audio = getAudio(view);
-      if (!audio) return;
-      audio.onended = () => btn.classList.remove('playing');
-      audio.onerror = () => btn.classList.remove('playing');
-      currentAudio = audio;
-      btn.classList.add('playing');
-      audio.play().catch(() => btn.classList.remove('playing'));
-    }
+    function stop() { audio.pause(); audio.currentTime = 0; btn.classList.remove('playing'); }
 
     btn.addEventListener('click', () => {
-      if (btn.classList.contains('playing')) { stopAll(); return; }
-      playView(currentView);
+      if (btn.classList.contains('playing')) { stop(); return; }
+      btn.classList.add('playing');
+      audio.play().catch(() => btn.classList.remove('playing'));
     });
+    audio.addEventListener('ended', () => btn.classList.remove('playing'));
+    audio.addEventListener('error', () => btn.classList.remove('playing'));
 
-    // Update label and stop audio when view changes
-    const origSwitch = switchView;
     window.__setVoiceView = function(v) {
-      currentView = v;
-      const key = v.startsWith('project-') ? 'builds' : (VIEW_LABELS[v] ? v : 'home');
-      label.textContent = 'Listen · ' + (VIEW_LABELS[key] || 'Anchit');
-      stopAll();
+      const names = { home:'Home', work:'Work', builds:'Builds', about:'About', contact:'Contact' };
+      const key = v.startsWith('project-') ? 'Builds' : (names[v] || 'Anchit');
+      label.textContent = 'Hear Anchit · ' + key;
+      stop();
     };
+  })();
+
+  /* ============ SCROLL PROGRESS BAR ============ */
+  (function() {
+    const bar = document.getElementById('scrollProgress');
+    if (!bar) return;
+    function update() {
+      const view = document.querySelector('.view.active');
+      if (!view) return;
+      const scrolled = view.scrollTop;
+      const total = view.scrollHeight - view.clientHeight;
+      bar.style.width = (total > 0 ? Math.min(scrolled / total, 1) * 100 : 0) + '%';
+    }
+    document.querySelectorAll('.view').forEach(v => v.addEventListener('scroll', update, { passive: true }));
+    document.addEventListener('viewChanged', update);
+  })();
+
+  /* ============ FLOATING YEAR (career journey) ============ */
+  (function() {
+    const yearEl = document.getElementById('floatingYear');
+    if (!yearEl) return;
+    const nodes = document.querySelectorAll('.lifecycle-node[data-year]');
+    const track = document.getElementById('lifecycleTrack');
+    if (!nodes.length || !track) return;
+
+    function update() {
+      const view = document.getElementById('view-about');
+      if (!view || !view.classList.contains('active')) return;
+      const viewTop = view.getBoundingClientRect().top;
+      let current = '2016';
+      nodes.forEach(n => {
+        const rect = n.getBoundingClientRect();
+        if (rect.top - viewTop < view.clientHeight * 0.55) current = n.dataset.year;
+      });
+      if (yearEl.textContent !== current) {
+        yearEl.style.transform = 'translateY(-8px)';
+        yearEl.style.opacity = '0';
+        setTimeout(() => {
+          yearEl.textContent = current;
+          yearEl.style.transform = '';
+          yearEl.style.opacity = '';
+        }, 180);
+      }
+    }
+    document.getElementById('view-about')?.addEventListener('scroll', update, { passive: true });
+    document.addEventListener('viewChanged', update);
   })();
 
   /* ============ ENHANCED REVEAL OBSERVER ============ */
