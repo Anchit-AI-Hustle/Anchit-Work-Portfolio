@@ -880,16 +880,41 @@
     display: flex; align-items: stretch; gap: 3px; height: 48px; border-radius: 10px; overflow: hidden;
   }
   .career-phase-seg {
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 8px; flex: var(--flex); cursor: default;
+    display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 4px;
+    border-radius: 8px; flex: var(--flex); cursor: pointer;
     position: relative; overflow: hidden; min-width: 40px;
-    transition: flex 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+    transition: flex 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s, box-shadow 0.2s;
   }
-  .career-phase-seg:hover { flex: calc(var(--flex) * 1.4); }
+  .career-phase-seg:hover { flex: calc(var(--flex) * 1.45); box-shadow: 0 4px 20px rgba(0,0,0,0.35); }
   .career-phase-seg-label {
-    font-family: var(--font-mono); font-size: 9px; font-weight: 500; letter-spacing: 0.08em;
-    text-transform: uppercase; color: rgba(255,255,255,0.8); white-space: nowrap;
+    font-family: var(--font-mono); font-size: 9px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: #fff; white-space: nowrap;
     overflow: hidden; text-overflow: ellipsis; padding: 0 8px;
+  }
+  .career-phase-seg-hint {
+    font-family: var(--font-mono); font-size: 8px; color: rgba(255,255,255,0.65);
+    letter-spacing: 0.06em; opacity: 0; transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+  .career-phase-seg:hover .career-phase-seg-hint { opacity: 1; }
+  .career-arc-years {
+    color: var(--ink-dim);
+  }
+
+  /* Active/selected arc segment */
+  .career-phase-seg.arc-active {
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.6), 0 6px 24px rgba(0,0,0,0.4);
+    flex: calc(var(--flex) * 1.5);
+  }
+
+  /* Flash highlight when node is jumped to */
+  @keyframes nodeFlash {
+    0%   { box-shadow: 0 0 0 0 var(--primary-soft), inset 0 0 0 0 var(--primary-soft); }
+    40%  { box-shadow: 0 0 0 8px rgba(255,77,31,0.2), inset 0 0 32px rgba(255,77,31,0.06); }
+    100% { box-shadow: none; }
+  }
+  .lifecycle-node.flash-highlight .lifecycle-body {
+    animation: nodeFlash 1.2s ease forwards;
   }
   .phase-edu { background: #4A6FA5; }
   .phase-eng { background: #6B4A9E; }
@@ -899,7 +924,7 @@
   .phase-agm { background: #B5870A; box-shadow: 0 0 20px rgba(181,135,10,0.4); }
   .career-arc-years {
     display: flex; justify-content: space-between; margin-top: 10px;
-    font-family: var(--font-mono); font-size: 10px; color: var(--ink-mute);
+    font-family: var(--font-mono); font-size: 10px;
   }
 
   /* ============ LIFECYCLE TIMELINE ============ */
@@ -918,8 +943,10 @@
   }
   .lifecycle-node {
     display: grid; grid-template-columns: 44px 1fr; cursor: pointer;
-    position: relative; z-index: 2;
+    position: relative; z-index: 2; border-radius: 16px;
+    transition: background 0.25s;
   }
+  .lifecycle-node:hover { background: var(--bg-elev); }
   .lifecycle-dot-col {
     display: flex; flex-direction: column; align-items: center; padding-top: 20px;
   }
@@ -941,16 +968,29 @@
   .lifecycle-node.open .lifecycle-dot { box-shadow: 0 0 0 6px rgba(255,77,31,0.15), 0 0 0 3px var(--bg); }
   .lifecycle-node[data-phase="agm"].open .lifecycle-dot { box-shadow: 0 0 0 6px rgba(181,135,10,0.2), 0 0 0 3px var(--bg); }
   .lifecycle-body {
-    padding: 14px 0 28px 20px; border-bottom: 1px solid var(--rule);
+    padding: 14px 12px 24px 20px; border-bottom: 1px solid var(--rule);
+    border-left: 3px solid transparent;
+    transition: border-color 0.3s;
+    border-radius: 0 14px 14px 0;
   }
+  .lifecycle-node.open .lifecycle-body {
+    border-left-color: var(--primary);
+    background: var(--bg-elev);
+    border-radius: 0 14px 14px 0;
+  }
+  .lifecycle-node[data-phase="agm"].open .lifecycle-body { border-left-color: #B5870A; }
+  .lifecycle-node[data-phase="edu"].open .lifecycle-body { border-left-color: #4A6FA5; }
+  .lifecycle-node[data-phase="eng"].open .lifecycle-body { border-left-color: #6B4A9E; }
+  .lifecycle-node[data-phase="apm"].open .lifecycle-body { border-left-color: var(--accent); }
   .lifecycle-node:last-child .lifecycle-body { border-bottom: none; }
   .lifecycle-meta {
     display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+    padding: 2px 0;
   }
   .lifecycle-left { flex: 1; min-width: 0; }
   .lifecycle-phase-label {
-    font-family: var(--font-mono); font-size: 10px; font-weight: 500;
-    letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+    letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 6px;
   }
   .lifecycle-node[data-phase="edu"] .lifecycle-phase-label { color: #4A6FA5; }
   .lifecycle-node[data-phase="eng"] .lifecycle-phase-label { color: #6B4A9E; }
@@ -975,18 +1015,46 @@
     white-space: nowrap;
   }
   .lifecycle-chevron {
-    color: var(--ink-mute); transition: transform 0.3s ease, color 0.2s;
-    flex-shrink: 0;
+    width: 20px; height: 20px; flex-shrink: 0;
+    color: var(--ink-dim);
+    background: var(--bg-deep); border-radius: 50%; padding: 2px;
+    transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), color 0.2s, background 0.2s;
+    box-shadow: 0 0 0 1px var(--rule-strong);
   }
-  .lifecycle-node.open .lifecycle-chevron { transform: rotate(90deg); color: var(--primary); }
+  .lifecycle-node.open .lifecycle-chevron {
+    transform: rotate(90deg);
+    color: #fff;
+    background: var(--primary);
+    box-shadow: 0 0 0 1px var(--primary);
+  }
+  .lifecycle-node[data-phase="agm"].open .lifecycle-chevron { background: #B5870A; box-shadow: 0 0 0 1px #B5870A; }
+  .lifecycle-node[data-phase="edu"].open .lifecycle-chevron { background: #4A6FA5; box-shadow: 0 0 0 1px #4A6FA5; }
+  .lifecycle-node[data-phase="eng"].open .lifecycle-chevron { background: #6B4A9E; box-shadow: 0 0 0 1px #6B4A9E; }
+  .lifecycle-node[data-phase="apm"].open .lifecycle-chevron { background: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+
+  /* Expand hint shows on hover for collapsed nodes */
+  .lifecycle-right::before {
+    content: 'expand';
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--ink-dim);
+    opacity: 0; transition: opacity 0.2s;
+  }
+  .lifecycle-node:not(.open):hover .lifecycle-right::before { opacity: 1; }
+  .lifecycle-node.open .lifecycle-right::before { content: 'collapse'; opacity: 0.6; }
+
   .lifecycle-detail {
     overflow: hidden; max-height: 0; opacity: 0;
-    transition: max-height 0.45s ease, opacity 0.35s ease, margin-top 0.35s;
+    transition: max-height 0.5s cubic-bezier(0.16,1,0.3,1), opacity 0.35s ease, margin-top 0.35s;
     margin-top: 0;
   }
-  .lifecycle-node.open .lifecycle-detail { max-height: 400px; opacity: 1; margin-top: 16px; }
+  .lifecycle-node.open .lifecycle-detail { max-height: 600px; opacity: 1; margin-top: 18px; }
+  /* Highlight detail text section */
+  .lifecycle-detail {
+    padding-left: 2px;
+    border-radius: 8px;
+  }
   .lifecycle-detail p {
-    font-size: 15.5px; color: var(--ink-dim); line-height: 1.65; max-width: 640px;
+    font-size: 15.5px; color: var(--ink); line-height: 1.65; max-width: 640px;
     margin-bottom: 14px;
   }
   .lifecycle-detail-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
@@ -1088,21 +1156,8 @@
   [data-theme="dark"] .hero-dot-grid { opacity: 0.15; }
   .home-hero { position: relative; isolation: isolate; }
 
-  /* ============ FLOATING YEAR BADGE (career journey) ============ */
-  .floating-year {
-    position: sticky; top: 24px; z-index: 20; pointer-events: none;
-    display: flex; justify-content: flex-end; padding-right: 0;
-    margin-bottom: -40px;
-  }
-  .floating-year-inner {
-    font-family: var(--font-display); font-size: clamp(56px, 10vw, 110px);
-    font-weight: 300; font-style: italic;
-    color: var(--ink); letter-spacing: -0.03em; line-height: 1;
-    user-select: none; transition: color 0.4s ease, opacity 0.4s;
-    opacity: 0.07;
-  }
-  .floating-year-inner.active { color: var(--primary); opacity: 0.13; }
-  @media (max-width: 720px) { .floating-year { display: none; } }
+  /* ============ FLOATING YEAR — removed (was overlaying content) ============ */
+  .floating-year { display: none; }
 
   /* ============ CAREER PHASE SEPARATOR ============ */
   .lifecycle-phase-sep {
@@ -1740,23 +1795,29 @@
       <div class="career-arc reveal-scale">
         <div class="career-arc-label">Career Lifecycle · 2016 → Present</div>
         <div class="career-arc-track">
-          <div class="career-phase-seg phase-edu" style="--flex:4" title="B.Tech CSE · VIT · 2016–2020">
+          <div class="career-phase-seg phase-edu" style="--flex:4" data-target-phase="edu" title="B.Tech CSE · VIT · 2016–2020">
             <span class="career-phase-seg-label">Education</span>
+            <span class="career-phase-seg-hint">↓ see detail</span>
           </div>
-          <div class="career-phase-seg phase-eng" style="--flex:2.5" title="Software Engineer · 2020–2022">
+          <div class="career-phase-seg phase-eng" style="--flex:2.5" data-target-phase="eng" title="Software Engineer · 2020–2022">
             <span class="career-phase-seg-label">Engineering</span>
+            <span class="career-phase-seg-hint">↓ see detail</span>
           </div>
-          <div class="career-phase-seg phase-apm" style="--flex:1.5" title="Associate PM · Times Internet · 2022–2023">
+          <div class="career-phase-seg phase-apm" style="--flex:1.5" data-target-phase="apm" title="Associate PM · Times Internet · 2022–2023">
             <span class="career-phase-seg-label">APM</span>
+            <span class="career-phase-seg-hint">↓ see detail</span>
           </div>
-          <div class="career-phase-seg phase-pm" style="--flex:1.5" title="Product Manager · Times Internet · 2023–2025">
+          <div class="career-phase-seg phase-pm" style="--flex:1.5" data-target-phase="pm" title="Product Manager · Times Internet · 2023–2025">
             <span class="career-phase-seg-label">PM</span>
+            <span class="career-phase-seg-hint">↓ see detail</span>
           </div>
-          <div class="career-phase-seg phase-spm" style="--flex:0.8" title="Senior PM · Times Internet · Apr 2025 – Apr 2026">
+          <div class="career-phase-seg phase-spm" style="--flex:0.8" data-target-phase="spm" title="Senior PM · Times Internet · Apr 2025 – Apr 2026">
             <span class="career-phase-seg-label">Senior PM</span>
+            <span class="career-phase-seg-hint">↓ see detail</span>
           </div>
-          <div class="career-phase-seg phase-agm" style="--flex:0.5" title="AGM – Product Management · Vahdam India · Apr 2026→">
+          <div class="career-phase-seg phase-agm" style="--flex:0.5" data-target-phase="agm" title="AGM – Product Management · Vahdam India · Apr 2026→">
             <span class="career-phase-seg-label">AGM</span>
+            <span class="career-phase-seg-hint">↓ see detail</span>
           </div>
         </div>
         <div class="career-arc-years">
@@ -2373,13 +2434,83 @@
 
   /* ============ LIFECYCLE TIMELINE ============ */
   (function() {
+    function openNode(node, { scroll = true, flash = true } = {}) {
+      // close all others
+      document.querySelectorAll('.lifecycle-node.open').forEach(n => {
+        if (n !== node) n.classList.remove('open');
+      });
+      node.classList.add('open');
+
+      if (flash) {
+        node.classList.remove('flash-highlight');
+        void node.offsetWidth; // reflow to restart animation
+        node.classList.add('flash-highlight');
+        setTimeout(() => node.classList.remove('flash-highlight'), 1400);
+      }
+
+      if (scroll) {
+        // scroll the About view panel to this node
+        const view = document.getElementById('view-about');
+        if (view) {
+          const nodeTop = node.offsetTop - 80;
+          view.scrollTo({ top: nodeTop, behavior: 'smooth' });
+        }
+      }
+    }
+
+    // Expand/collapse on direct timeline node click
     document.querySelectorAll('.lifecycle-node').forEach(node => {
       node.addEventListener('click', () => {
-        const wasOpen = node.classList.contains('open');
-        document.querySelectorAll('.lifecycle-node.open').forEach(n => n.classList.remove('open'));
-        if (!wasOpen) node.classList.add('open');
+        if (node.classList.contains('open')) {
+          node.classList.remove('open');
+        } else {
+          openNode(node, { scroll: false, flash: false });
+        }
       });
     });
+
+    // Arc segment click → expand + scroll to matching lifecycle node
+    document.querySelectorAll('.career-phase-seg[data-target-phase]').forEach(seg => {
+      seg.addEventListener('click', () => {
+        const phase = seg.dataset.targetPhase;
+
+        // Update active arc segment
+        document.querySelectorAll('.career-phase-seg').forEach(s => s.classList.remove('arc-active'));
+        seg.classList.add('arc-active');
+
+        // Find the FIRST lifecycle node with this phase
+        const target = document.querySelector('.lifecycle-node[data-phase="' + phase + '"]');
+        if (!target) return;
+
+        // If not on About view, switch first then scroll
+        if (!document.getElementById('view-about')?.classList.contains('active')) {
+          switchView('about');
+          setTimeout(() => openNode(target), 500);
+        } else {
+          openNode(target);
+        }
+      });
+    });
+
+    // Sync arc active state as user scrolls through lifecycle nodes
+    const view = document.getElementById('view-about');
+    if (view) {
+      view.addEventListener('scroll', () => {
+        const nodes = document.querySelectorAll('.lifecycle-node[data-phase]');
+        let closest = null, minDist = Infinity;
+        nodes.forEach(n => {
+          const dist = Math.abs(n.getBoundingClientRect().top - window.innerHeight * 0.4);
+          if (dist < minDist) { minDist = dist; closest = n; }
+        });
+        if (closest) {
+          const phase = closest.dataset.phase;
+          document.querySelectorAll('.career-phase-seg').forEach(s => {
+            s.classList.toggle('arc-active', s.dataset.targetPhase === phase);
+          });
+        }
+      }, { passive: true });
+    }
+
     const track = document.getElementById('lifecycleTrack');
     const fill = document.getElementById('lifecycleSpineFill');
     if (track && fill) {
@@ -2448,36 +2579,7 @@
     document.addEventListener('viewChanged', update);
   })();
 
-  /* ============ FLOATING YEAR (career journey) ============ */
-  (function() {
-    const yearEl = document.getElementById('floatingYear');
-    if (!yearEl) return;
-    const nodes = document.querySelectorAll('.lifecycle-node[data-year]');
-    const track = document.getElementById('lifecycleTrack');
-    if (!nodes.length || !track) return;
-
-    function update() {
-      const view = document.getElementById('view-about');
-      if (!view || !view.classList.contains('active')) return;
-      const viewTop = view.getBoundingClientRect().top;
-      let current = '2016';
-      nodes.forEach(n => {
-        const rect = n.getBoundingClientRect();
-        if (rect.top - viewTop < view.clientHeight * 0.55) current = n.dataset.year;
-      });
-      if (yearEl.textContent !== current) {
-        yearEl.style.transform = 'translateY(-8px)';
-        yearEl.style.opacity = '0';
-        setTimeout(() => {
-          yearEl.textContent = current;
-          yearEl.style.transform = '';
-          yearEl.style.opacity = '';
-        }, 180);
-      }
-    }
-    document.getElementById('view-about')?.addEventListener('scroll', update, { passive: true });
-    document.addEventListener('viewChanged', update);
-  })();
+  /* floating year removed — phase separators already show the date context */
 
   /* ============ ENHANCED REVEAL OBSERVER ============ */
   function observeReveals() {
