@@ -792,7 +792,271 @@
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
     .reveal, .reveal-stagger > * { opacity: 1; transform: none; }
+    .reveal-left, .reveal-right, .reveal-scale { opacity: 1; transform: none; }
   }
+
+  /* ============ CURSOR GLOW ============ */
+  .cursor-glow {
+    position: fixed; pointer-events: none; z-index: 9999;
+    width: 380px; height: 380px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,77,31,0.06) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    transition: opacity 0.5s;
+    will-change: left, top;
+  }
+
+  /* ============ ENHANCED REVEALS ============ */
+  .reveal-left { opacity: 0; transform: translateX(-28px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.16,1,0.3,1); }
+  .reveal-left.in { opacity: 1; transform: translateX(0); }
+  .reveal-right { opacity: 0; transform: translateX(28px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.16,1,0.3,1); }
+  .reveal-right.in { opacity: 1; transform: translateX(0); }
+  .reveal-scale { opacity: 0; transform: scale(0.94); transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16,1,0.3,1); }
+  .reveal-scale.in { opacity: 1; transform: scale(1); }
+
+  /* ============ ANIMATED COUNTERS ============ */
+  .counter { font-variant-numeric: tabular-nums; }
+
+  /* ============ TYPING CURSOR ============ */
+  .typing-cursor {
+    display: inline-block; width: 3px; height: 0.82em;
+    background: var(--primary); margin-left: 3px; vertical-align: text-bottom;
+    animation: blink 1s ease-in-out infinite;
+  }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+  /* ============ 3D TILT ============ */
+  .tilt-card { transform-style: preserve-3d; }
+  .tilt-card::after {
+    content: ''; position: absolute; inset: 0; border-radius: inherit;
+    background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,0.12) 0%, transparent 60%);
+    opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 0;
+  }
+  .tilt-card:hover::after { opacity: 1; }
+
+  /* ============ VOICE PLAYER ============ */
+  .voice-player {
+    position: fixed; bottom: calc(32px + var(--safe-bottom)); right: 32px;
+    z-index: 150; display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+  }
+  .voice-label {
+    background: var(--ink); color: var(--bg);
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 6px 12px; border-radius: 8px; white-space: nowrap;
+    opacity: 0; transform: translateY(4px) translateX(4px);
+    transition: all 0.2s ease; pointer-events: none;
+  }
+  .voice-player:hover .voice-label { opacity: 1; transform: translateY(0) translateX(0); }
+  .voice-btn {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--primary); color: #FFF;
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 20px rgba(255,77,31,0.4);
+    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    border: none; cursor: pointer; position: relative;
+  }
+  .voice-btn:hover { transform: scale(1.1); box-shadow: 0 8px 32px rgba(255,77,31,0.5); }
+  .voice-btn.playing { background: var(--accent); box-shadow: 0 4px 20px rgba(0,181,132,0.4); }
+  .voice-btn svg { width: 22px; height: 22px; transition: all 0.2s; }
+  .voice-icon-play { display: block; }
+  .voice-icon-stop { display: none; }
+  .voice-btn.playing .voice-icon-play { display: none; }
+  .voice-btn.playing .voice-icon-stop { display: block; }
+  .voice-rings {
+    position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  }
+  .voice-ring {
+    position: absolute; inset: -4px; border-radius: 50%;
+    border: 2px solid var(--primary); opacity: 0;
+  }
+  .voice-btn.playing .voice-ring { animation: voiceRing 1.8s ease-out infinite; }
+  .voice-btn.playing .voice-ring:nth-child(2) { animation-delay: 0.6s; }
+  .voice-btn.playing .voice-ring:nth-child(3) { animation-delay: 1.2s; }
+  .voice-btn.playing .voice-ring { border-color: var(--accent); }
+  @keyframes voiceRing {
+    0% { opacity: 0.7; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.9); }
+  }
+  @media (max-width: 820px) {
+    .voice-player { bottom: calc(24px + var(--safe-bottom)); right: 18px; }
+  }
+
+  /* ============ CAREER ARC SCRUBBER ============ */
+  .career-arc {
+    background: var(--bg-elev); border-radius: 20px; padding: 28px 32px;
+    margin-bottom: 64px; overflow: hidden; position: relative;
+  }
+  .career-arc-label {
+    font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 16px;
+  }
+  .career-arc-track {
+    display: flex; align-items: stretch; gap: 3px; height: 48px; border-radius: 10px; overflow: hidden;
+  }
+  .career-phase-seg {
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px; flex: var(--flex); cursor: default;
+    position: relative; overflow: hidden; min-width: 40px;
+    transition: flex 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+  }
+  .career-phase-seg:hover { flex: calc(var(--flex) * 1.4); }
+  .career-phase-seg-label {
+    font-family: var(--font-mono); font-size: 9px; font-weight: 500; letter-spacing: 0.08em;
+    text-transform: uppercase; color: rgba(255,255,255,0.8); white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis; padding: 0 8px;
+  }
+  .phase-edu { background: #4A6FA5; }
+  .phase-eng { background: #6B4A9E; }
+  .phase-apm { background: var(--accent); }
+  .phase-pm { background: var(--primary); }
+  .phase-spm { background: var(--primary-deep); box-shadow: 0 0 20px rgba(255,77,31,0.4); }
+  .career-arc-years {
+    display: flex; justify-content: space-between; margin-top: 10px;
+    font-family: var(--font-mono); font-size: 10px; color: var(--ink-mute);
+  }
+
+  /* ============ LIFECYCLE TIMELINE ============ */
+  .lifecycle { margin-top: 80px; padding-top: 64px; border-top: 1px solid var(--rule); }
+  .lifecycle-track {
+    position: relative; display: flex; flex-direction: column; margin-top: 48px;
+  }
+  .lifecycle-spine {
+    position: absolute; left: 21px; top: 0; bottom: 0; width: 2px;
+    background: var(--rule); z-index: 0;
+  }
+  .lifecycle-spine-fill {
+    position: absolute; left: 21px; top: 0; width: 2px; height: 0;
+    background: linear-gradient(to bottom, var(--primary), var(--accent));
+    z-index: 1; transition: height 1.4s cubic-bezier(0.16,1,0.3,1);
+  }
+  .lifecycle-node {
+    display: grid; grid-template-columns: 44px 1fr; cursor: pointer;
+    position: relative; z-index: 2;
+  }
+  .lifecycle-dot-col {
+    display: flex; flex-direction: column; align-items: center; padding-top: 20px;
+  }
+  .lifecycle-dot {
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--rule-strong); border: 3px solid var(--bg);
+    box-shadow: 0 0 0 3px var(--bg);
+    transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative; z-index: 2; flex-shrink: 0;
+  }
+  .lifecycle-node:hover .lifecycle-dot,
+  .lifecycle-node.open .lifecycle-dot { transform: scale(1.35); }
+  .lifecycle-node[data-phase="edu"] .lifecycle-dot { background: #4A6FA5; }
+  .lifecycle-node[data-phase="eng"] .lifecycle-dot { background: #6B4A9E; }
+  .lifecycle-node[data-phase="apm"] .lifecycle-dot { background: var(--accent); }
+  .lifecycle-node[data-phase="pm"] .lifecycle-dot { background: var(--primary); }
+  .lifecycle-node[data-phase="spm"] .lifecycle-dot { background: var(--primary-deep); box-shadow: 0 0 0 3px var(--bg), 0 0 16px rgba(255,77,31,0.4); }
+  .lifecycle-node.open .lifecycle-dot { box-shadow: 0 0 0 6px rgba(255,77,31,0.15), 0 0 0 3px var(--bg); }
+  .lifecycle-body {
+    padding: 14px 0 28px 20px; border-bottom: 1px solid var(--rule);
+  }
+  .lifecycle-node:last-child .lifecycle-body { border-bottom: none; }
+  .lifecycle-meta {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+  }
+  .lifecycle-left { flex: 1; min-width: 0; }
+  .lifecycle-phase-label {
+    font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px;
+  }
+  .lifecycle-node[data-phase="edu"] .lifecycle-phase-label { color: #4A6FA5; }
+  .lifecycle-node[data-phase="eng"] .lifecycle-phase-label { color: #6B4A9E; }
+  .lifecycle-node[data-phase="apm"] .lifecycle-phase-label { color: var(--accent); }
+  .lifecycle-node[data-phase="pm"] .lifecycle-phase-label { color: var(--primary); }
+  .lifecycle-node[data-phase="spm"] .lifecycle-phase-label { color: var(--primary); }
+  .lifecycle-title {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: clamp(17px, 2vw, 22px); color: var(--ink); line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+  .lifecycle-title em { font-style: italic; color: var(--primary); }
+  .lifecycle-org {
+    font-family: var(--font-mono); font-size: 12px; color: var(--ink-mute); margin-top: 4px;
+  }
+  .lifecycle-right {
+    display: flex; align-items: center; gap: 12px; flex-shrink: 0; padding-top: 2px;
+  }
+  .lifecycle-date {
+    font-family: var(--font-mono); font-size: 11px; color: var(--ink-mute); text-align: right;
+    white-space: nowrap;
+  }
+  .lifecycle-chevron {
+    color: var(--ink-mute); transition: transform 0.3s ease, color 0.2s;
+    flex-shrink: 0;
+  }
+  .lifecycle-node.open .lifecycle-chevron { transform: rotate(90deg); color: var(--primary); }
+  .lifecycle-detail {
+    overflow: hidden; max-height: 0; opacity: 0;
+    transition: max-height 0.45s ease, opacity 0.35s ease, margin-top 0.35s;
+    margin-top: 0;
+  }
+  .lifecycle-node.open .lifecycle-detail { max-height: 400px; opacity: 1; margin-top: 16px; }
+  .lifecycle-detail p {
+    font-size: 15.5px; color: var(--ink-dim); line-height: 1.65; max-width: 640px;
+    margin-bottom: 14px;
+  }
+  .lifecycle-detail-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+
+  @media (max-width: 720px) {
+    .lifecycle-node { grid-template-columns: 36px 1fr; }
+    .lifecycle-spine, .lifecycle-spine-fill { left: 16px; }
+    .lifecycle-right { display: none; }
+    .lifecycle-body { padding-left: 12px; }
+  }
+
+  /* ============ SKILLS GRID (ATS keywords in HTML) ============ */
+  .skills-section { margin-top: 72px; padding-top: 56px; border-top: 1px solid var(--rule); }
+  .skills-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;
+    margin-top: 32px;
+  }
+  .skill-pill {
+    background: var(--bg-elev); border-radius: 14px; padding: 16px 14px;
+    text-align: center; cursor: default;
+    transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative; overflow: hidden;
+  }
+  .skill-pill:hover { transform: translateY(-5px) scale(1.03); background: var(--primary-soft); }
+  .skill-pill:hover .skill-name { color: var(--primary); }
+  .skill-pill:hover .skill-dot.lit { background: var(--primary); }
+  .skill-name {
+    font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+    letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-dim);
+    transition: color 0.2s; line-height: 1.5;
+  }
+  .skill-bar { display: flex; gap: 3px; justify-content: center; margin-top: 10px; }
+  .skill-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--rule-strong);
+    transition: background 0.2s;
+  }
+  .skill-dot.lit { background: var(--primary); }
+  @media (max-width: 720px) { .skills-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); } }
+
+  /* ============ WORK IMPACT BADGES ============ */
+  .impact-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    background: var(--accent-soft); color: var(--accent);
+    padding: 5px 12px; border-radius: 999px; margin-top: 8px;
+  }
+  .impact-pill::before { content: '↑'; }
+
+  /* ============ PROGRESS / ACHIEVEMENT BARS ============ */
+  .achievement-bar {
+    height: 4px; background: var(--rule); border-radius: 2px;
+    overflow: hidden; margin-top: 8px;
+  }
+  .achievement-fill {
+    height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent));
+    border-radius: 2px; transform: scaleX(0); transform-origin: left;
+    transition: transform 1s cubic-bezier(0.16,1,0.3,1);
+  }
+  .achievement-fill.drawn { transform: scaleX(1); }
 </style>
 </head>
 <body>
@@ -895,10 +1159,10 @@
         <p class="hero-tagline">An <span class="hero-strike">engineer</span> who learned to <em>love the funnel</em>. Five years of product, four side projects live, one company growing through the ranks.</p>
 
         <div class="hero-stats reveal-stagger">
-          <div class="hero-stat"><div class="num"><em>5+</em></div><div class="label">Years in product</div></div>
-          <div class="hero-stat"><div class="num"><em>5×</em></div><div class="label">MRR growth, Assisted Sales</div></div>
-          <div class="hero-stat"><div class="num">₹3<em>Cr</em>+</div><div class="label">ARR, ET Markets revamp</div></div>
-          <div class="hero-stat"><div class="num"><em>4</em></div><div class="label">Side projects live</div></div>
+          <div class="hero-stat"><div class="num"><em class="counter" data-count="5" data-suffix="+">5+</em></div><div class="label">Years in product management</div></div>
+          <div class="hero-stat"><div class="num"><em>5×</em></div><div class="label">MRR growth · Assisted Sales (₹15L → ₹80L)</div></div>
+          <div class="hero-stat"><div class="num">₹3<em>Cr</em>+</div><div class="label">Incremental ARR unlocked · ET Markets revamp</div></div>
+          <div class="hero-stat"><div class="num"><em class="counter" data-count="4">4</em></div><div class="label">Side projects shipped &amp; live</div></div>
         </div>
 
         <a class="hero-current-block reveal" href="#work" data-view="work">
@@ -937,10 +1201,10 @@
       </div>
 
       <div class="work-stats reveal-stagger">
-        <div class="work-stat"><div class="num"><em>5×</em></div><div class="label">Revenue growth, assisted conversions ₹15L → ₹80L</div></div>
-        <div class="work-stat"><div class="num">₹3<em>Cr</em>+</div><div class="label">Incremental annual revenue, ET Markets revamp</div></div>
-        <div class="work-stat"><div class="num">400<em>%</em></div><div class="label">ROI within six months on ET Prime funnel</div></div>
-        <div class="work-stat"><div class="num">25<em>%</em></div><div class="label">DAU lift on ET Markets iOS &amp; Android</div></div>
+        <div class="work-stat"><div class="num"><em>5×</em></div><div class="label">Revenue growth · Assisted Sales · ₹15L → ₹80L MRR</div></div>
+        <div class="work-stat"><div class="num">₹3<em>Cr</em>+</div><div class="label">Incremental annual revenue · ET Markets revamp</div></div>
+        <div class="work-stat"><div class="num"><span class="counter" data-count="400" data-suffix="%">400%</span></div><div class="label">ROI within six months · ET Prime funnel</div></div>
+        <div class="work-stat"><div class="num"><span class="counter" data-count="25" data-suffix="%">25%</span></div><div class="label">DAU lift · ET Markets iOS &amp; Android</div></div>
       </div>
 
       <div class="work-list">
@@ -1002,28 +1266,28 @@
       </div>
 
       <div class="builds-grid reveal-stagger">
-        <a class="build-card" href="#project-yaara" data-view="project-yaara">
+        <a class="build-card tilt-card" href="#project-yaara" data-view="project-yaara">
           <div class="build-tag"><span>AI Voice · Consumer</span><span class="status">Live</span></div>
           <h3>Hey <em>Yaara</em></h3>
           <p>An AI voice companion for the elderly. Talk, listen, and never feel alone — built for a generation that finds apps intimidating.</p>
           <div class="build-stack"><span class="tag">AI Voice</span><span class="tag">PWA</span><span class="tag">Accessibility</span></div>
           <span class="build-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></span>
         </a>
-        <a class="build-card" href="#project-music" data-view="project-music">
+        <a class="build-card tilt-card" href="#project-music" data-view="project-music">
           <div class="build-tag"><span>Generative AI · Music</span><span class="status">Live</span></div>
           <h3>Music<em>GenAI</em></h3>
           <p>An AI music generation app — prompt to full track with vocal synthesis and lyric verification, end-to-end on a custom stack.</p>
           <div class="build-stack"><span class="tag">React</span><span class="tag">TypeScript</span><span class="tag">Supabase</span><span class="tag">Python</span></div>
           <span class="build-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></span>
         </a>
-        <a class="build-card" href="#project-telesuite" data-view="project-telesuite">
+        <a class="build-card tilt-card" href="#project-telesuite" data-view="project-telesuite">
           <div class="build-tag"><span>AI Workflow · Sales</span><span class="status">Live</span></div>
           <h3>AI <em>TeleSuite</em></h3>
           <p>The consumer prototype of the same telesuite I shipped at ET. Real-time transcription, pitch scoring, and conversion assist — for solo operators.</p>
           <div class="build-stack"><span class="tag">LLM</span><span class="tag">Transcription</span><span class="tag">Sales Ops</span></div>
           <span class="build-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></span>
         </a>
-        <a class="build-card" href="#project-lifeengine" data-view="project-lifeengine">
+        <a class="build-card tilt-card" href="#project-lifeengine" data-view="project-lifeengine">
           <div class="build-tag"><span>AI Wellness · Personalised</span><span class="status">Live</span></div>
           <h3>TH+ <em>LifeEngine</em></h3>
           <p>A personalised health booster — AI-powered wellness planning that turns generic advice into a daily plan tied to your goals.</p>
@@ -1285,58 +1549,246 @@
   <section class="view" id="view-about">
     <div class="container">
       <div class="section-head reveal">
-        <div class="eyebrow">About</div>
+        <div class="eyebrow">About · Senior Product Manager</div>
         <h1 class="display-lg">An engineer who learned to <em>love the funnel.</em></h1>
       </div>
 
+      <!-- Career Arc scrubber — visual lifecycle bar -->
+      <div class="career-arc reveal-scale">
+        <div class="career-arc-label">Career Lifecycle · 2016 → Present</div>
+        <div class="career-arc-track">
+          <div class="career-phase-seg phase-edu" style="--flex:4" title="B.Tech CSE · VIT · 2016–2020">
+            <span class="career-phase-seg-label">Education</span>
+          </div>
+          <div class="career-phase-seg phase-eng" style="--flex:2.5" title="Software Engineer · 2020–2022">
+            <span class="career-phase-seg-label">Engineering</span>
+          </div>
+          <div class="career-phase-seg phase-apm" style="--flex:1.5" title="Associate PM · Times Internet · 2022–2023">
+            <span class="career-phase-seg-label">APM</span>
+          </div>
+          <div class="career-phase-seg phase-pm" style="--flex:1.5" title="Product Manager · Times Internet · 2023–2025">
+            <span class="career-phase-seg-label">PM</span>
+          </div>
+          <div class="career-phase-seg phase-spm" style="--flex:0.8" title="Senior PM · Times Internet · Apr 2025→">
+            <span class="career-phase-seg-label">Senior PM</span>
+          </div>
+        </div>
+        <div class="career-arc-years">
+          <span>2016</span><span>2018</span><span>2020</span><span>2022</span><span>2024</span><span>Now</span>
+        </div>
+      </div>
+
       <div class="about-grid">
-        <div class="about-prose reveal">
+        <div class="about-prose reveal-left">
           <p>I started as a backend engineer building consumer apps — live sports commentary, e-commerce — the kinds of systems where you watch your code touch a million people in a weekend.</p>
           <p>Then I moved to product, and what I really fell for was <em>the funnel</em> — the way it tells you the unfiltered truth about your decisions.</p>
-          <p>These days I split my time between shipping at Times Internet — ET Markets, ET Prime, Times Health+, and a marquee consumer event — and <em>building</em> on the side. Most of my side projects are AI-first consumer experiments I prototype end-to-end.</p>
+          <p>These days I split my time between shipping at Times Internet — ET Markets, ET Prime, Times Health+, and the Half Marathon — and <em>building on the side</em>. All four of my side projects are AI-first consumer experiments I prototype end-to-end.</p>
         </div>
-        <div class="reveal">
+        <div class="reveal-right">
           <div class="meta-block">
             <h4>Currently</h4>
             <ul>
-              <li><span>Senior PM, Times Internet</span><span>Apr '25 →</span></li>
+              <li><span>Senior Product Manager</span><span>Times Internet</span></li>
               <li><span>Building TI Half Marathon</span><span>Mar '26</span></li>
-              <li><span>Based in Delhi</span><span>IST</span></li>
+              <li><span>Delhi, India</span><span>IST · Open to remote</span></li>
             </ul>
           </div>
           <div class="meta-block">
-            <h4>Sharp edges</h4>
+            <h4>Education</h4>
             <ul>
-              <li><span>Growth funnels &amp; conversion</span><span>★★★★★</span></li>
-              <li><span>0→1 product development</span><span>★★★★★</span></li>
-              <li><span>Subscriptions &amp; monetization</span><span>★★★★★</span></li>
-              <li><span>Experimentation</span><span>★★★★★</span></li>
-              <li><span>AI workflows &amp; LLMs</span><span>★★★★☆</span></li>
+              <li><span>B.Tech · Computer Science &amp; Engineering</span><span>VIT · 2020</span></li>
             </ul>
           </div>
           <div class="meta-block">
-            <h4>Stack</h4>
+            <h4>Core PM skills</h4>
             <ul>
-              <li><span>Figma, JIRA</span><span>Design / Plan</span></li>
-              <li><span>GA, Firebase</span><span>Measure</span></li>
-              <li><span>React, TS, Supabase</span><span>Build</span></li>
-              <li><span>GCP, LLM tools</span><span>Ship</span></li>
+              <li><span>Growth funnels &amp; conversion optimisation</span><span>Expert</span></li>
+              <li><span>0→1 product development</span><span>Expert</span></li>
+              <li><span>Subscriptions &amp; monetisation</span><span>Expert</span></li>
+              <li><span>A/B testing &amp; experimentation</span><span>Expert</span></li>
+              <li><span>AI workflows &amp; LLM integration</span><span>Advanced</span></li>
             </ul>
           </div>
         </div>
       </div>
 
-      <div class="about-timeline">
+      <!-- Interactive Lifecycle Timeline -->
+      <div class="lifecycle">
         <div class="section-head reveal">
-          <div class="eyebrow">The long version</div>
-          <h2 class="display-md">Five-plus years, three titles, <em>one company</em> — and counting.</h2>
+          <div class="eyebrow">Career lifecycle · Click any role to expand</div>
+          <h2 class="display-md">Five-plus years, three titles, <em>one company.</em></h2>
         </div>
-        <div class="timeline-item reveal"><div class="timeline-time">Apr 2025 → Now</div><div class="timeline-content"><h4>Senior Product Manager</h4><div class="org">Times Internet</div><p>Owning Times Internet Half Marathon end-to-end. Scaling Assisted Sales and AI-enabled growth tooling across Economic Times properties.</p></div></div>
-        <div class="timeline-item reveal"><div class="timeline-time">Oct 2023 — Mar 2025</div><div class="timeline-content"><h4>Product Manager</h4><div class="org">Times Internet</div><p>Led the ET Markets revamp across web and apps. Launched Times Health+ subscriptions. Scaled Assisted Sales from ₹15L to ₹80L MRR.</p></div></div>
-        <div class="timeline-item reveal"><div class="timeline-time">Jun 2022 — Oct 2023</div><div class="timeline-content"><h4>Associate Product Manager</h4><div class="org">Times Internet</div><p>Made the jump from engineering to product. Shipped discovery, screeners, and portfolios for ET Markets — and learned the funnel the hard way.</p></div></div>
-        <div class="timeline-item reveal"><div class="timeline-time">Mar 2022 — Jun 2022</div><div class="timeline-content"><h4>Software Engineer</h4><div class="org">Citymall</div><p>Data pipelines and backend systems for a fast-moving consumer commerce platform.</p></div></div>
-        <div class="timeline-item reveal"><div class="timeline-time">Apr 2020 — Mar 2022</div><div class="timeline-content"><h4>Software Engineer</h4><div class="org">Tuple Technologies</div><p>Built and scaled backend services for consumer-facing apps. Acted as Product Owner for an early-stage live sports commentary product — the training ground for everything that came next.</p></div></div>
-        <div class="timeline-item reveal"><div class="timeline-time">2016 — 2020</div><div class="timeline-content"><h4>B.Tech, Computer Science &amp; Engineering</h4><div class="org">Vellore Institute of Technology</div><p>Where the engineering brain got built.</p></div></div>
+        <div class="lifecycle-track" id="lifecycleTrack">
+          <div class="lifecycle-spine"></div>
+          <div class="lifecycle-spine-fill" id="lifecycleSpineFill"></div>
+
+          <div class="lifecycle-node open" data-phase="spm">
+            <div class="lifecycle-dot-col"><div class="lifecycle-dot"></div></div>
+            <div class="lifecycle-body">
+              <div class="lifecycle-meta">
+                <div class="lifecycle-left">
+                  <div class="lifecycle-phase-label">Senior Product Manager · Times Internet</div>
+                  <div class="lifecycle-title">Times Internet Half Marathon <em>&amp; Growth</em></div>
+                  <div class="lifecycle-org">Times Internet · Delhi</div>
+                </div>
+                <div class="lifecycle-right">
+                  <div class="lifecycle-date">Apr 2025 → Now</div>
+                  <svg class="lifecycle-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+              </div>
+              <div class="lifecycle-detail">
+                <p>Owning the Times Internet Half Marathon end-to-end — our first marquee consumer running event. Discovery, registration funnels, acquisition channels, on-ground runner insights, brand surface. Zero to one, from scratch. Simultaneously scaling Assisted Sales and the AI telesuite across Economic Times properties.</p>
+                <div class="lifecycle-detail-tags">
+                  <span class="tag">0→1 Event</span><span class="tag">Consumer IP</span><span class="tag">Growth</span><span class="tag">AI Workflows</span><span class="tag">Funnel Design</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lifecycle-node" data-phase="pm">
+            <div class="lifecycle-dot-col"><div class="lifecycle-dot"></div></div>
+            <div class="lifecycle-body">
+              <div class="lifecycle-meta">
+                <div class="lifecycle-left">
+                  <div class="lifecycle-phase-label">Product Manager · Times Internet</div>
+                  <div class="lifecycle-title">ET Markets, ET Prime &amp; <em>Times Health+</em></div>
+                  <div class="lifecycle-org">Times Internet · Delhi</div>
+                </div>
+                <div class="lifecycle-right">
+                  <div class="lifecycle-date">Oct 2023 — Mar 2025</div>
+                  <svg class="lifecycle-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+              </div>
+              <div class="lifecycle-detail">
+                <p>Led the end-to-end revamp of ET Markets — web, mWeb, Android, iOS. Drove +27% engagement, +25% DAU, +15% sessions, and ₹3Cr+ in incremental ARR. Scaled Assisted Sales for ET Prime from ₹15L to ₹80L MRR (5×), 400%+ ROI in six months. Launched Times Health+ paid subscriptions from zero — freemium-to-paid journeys, pricing experiments, retention-led monetisation. Won the Times Internet Team Award (Oct 2025).</p>
+                <div class="lifecycle-detail-tags">
+                  <span class="tag">ET Markets</span><span class="tag">ET Prime</span><span class="tag">Times Health+</span><span class="tag">Subscriptions</span><span class="tag">5× MRR</span><span class="tag">₹3Cr ARR</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lifecycle-node" data-phase="apm">
+            <div class="lifecycle-dot-col"><div class="lifecycle-dot"></div></div>
+            <div class="lifecycle-body">
+              <div class="lifecycle-meta">
+                <div class="lifecycle-left">
+                  <div class="lifecycle-phase-label">Associate Product Manager · Times Internet</div>
+                  <div class="lifecycle-title">ET Markets — <em>the beginning</em></div>
+                  <div class="lifecycle-org">Times Internet · Delhi</div>
+                </div>
+                <div class="lifecycle-right">
+                  <div class="lifecycle-date">Jun 2022 — Oct 2023</div>
+                  <svg class="lifecycle-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+              </div>
+              <div class="lifecycle-detail">
+                <p>Made the jump from engineering to product. Shipped discovery, screeners, and portfolio features for ET Markets — one of India's highest-traffic consumer financial surfaces. Learned the funnel the hard way: shipping, measuring, iterating. The engineering background meant I could spec precisely and move fast without losing engineers.</p>
+                <div class="lifecycle-detail-tags">
+                  <span class="tag">Career Pivot</span><span class="tag">ET Markets</span><span class="tag">Discovery</span><span class="tag">Consumer Finance</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lifecycle-node" data-phase="eng">
+            <div class="lifecycle-dot-col"><div class="lifecycle-dot"></div></div>
+            <div class="lifecycle-body">
+              <div class="lifecycle-meta">
+                <div class="lifecycle-left">
+                  <div class="lifecycle-phase-label">Software Engineer · Citymall</div>
+                  <div class="lifecycle-title">Backend systems, <em>consumer commerce</em></div>
+                  <div class="lifecycle-org">Citymall · Delhi</div>
+                </div>
+                <div class="lifecycle-right">
+                  <div class="lifecycle-date">Mar 2022 — Jun 2022</div>
+                  <svg class="lifecycle-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+              </div>
+              <div class="lifecycle-detail">
+                <p>Data pipelines and backend systems for a fast-moving consumer commerce platform. Short stint — moved to product at Times Internet shortly after.</p>
+                <div class="lifecycle-detail-tags">
+                  <span class="tag">Backend</span><span class="tag">Data Pipelines</span><span class="tag">E-commerce</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lifecycle-node" data-phase="eng">
+            <div class="lifecycle-dot-col"><div class="lifecycle-dot"></div></div>
+            <div class="lifecycle-body">
+              <div class="lifecycle-meta">
+                <div class="lifecycle-left">
+                  <div class="lifecycle-phase-label">Software Engineer · Tuple Technologies</div>
+                  <div class="lifecycle-title">Backend engineer, <em>also product owner</em></div>
+                  <div class="lifecycle-org">Tuple Technologies</div>
+                </div>
+                <div class="lifecycle-right">
+                  <div class="lifecycle-date">Apr 2020 — Mar 2022</div>
+                  <svg class="lifecycle-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+              </div>
+              <div class="lifecycle-detail">
+                <p>Built and scaled backend services for consumer-facing apps. Also acted as Product Owner for an early-stage live sports commentary product — the training ground for everything that came next. That experience of sitting at the intersection of engineering and product decisions is what eventually pulled me into PM.</p>
+                <div class="lifecycle-detail-tags">
+                  <span class="tag">Backend Engineering</span><span class="tag">Product Owner</span><span class="tag">Live Sports</span><span class="tag">Consumer Apps</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lifecycle-node" data-phase="edu">
+            <div class="lifecycle-dot-col"><div class="lifecycle-dot"></div></div>
+            <div class="lifecycle-body">
+              <div class="lifecycle-meta">
+                <div class="lifecycle-left">
+                  <div class="lifecycle-phase-label">Education</div>
+                  <div class="lifecycle-title">B.Tech · Computer Science <em>&amp; Engineering</em></div>
+                  <div class="lifecycle-org">Vellore Institute of Technology · VIT</div>
+                </div>
+                <div class="lifecycle-right">
+                  <div class="lifecycle-date">2016 — 2020</div>
+                  <svg class="lifecycle-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+              </div>
+              <div class="lifecycle-detail">
+                <p>Where the engineering brain got built. Computer Science &amp; Engineering. The foundation that makes me dangerous as a PM — I can read code, spec precisely, and spot what's actually hard vs. what looks hard.</p>
+                <div class="lifecycle-detail-tags">
+                  <span class="tag">Computer Science</span><span class="tag">Engineering</span><span class="tag">VIT Vellore</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Skills grid — ATS keyword rich -->
+      <div class="skills-section reveal">
+        <div class="eyebrow">Skills &amp; tools</div>
+        <h2 class="display-sm" style="margin-top: 16px; margin-bottom: 4px;">The full toolkit.</h2>
+        <p style="color: var(--ink-dim); font-size: 15px; max-width: 560px; margin-bottom: 0;">Hover any skill to see how deep it goes.</p>
+        <div class="skills-grid">
+          <div class="skill-pill"><div class="skill-name">Product Strategy</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span></div></div>
+          <div class="skill-pill"><div class="skill-name">Growth &amp; Funnels</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span></div></div>
+          <div class="skill-pill"><div class="skill-name">Subscriptions</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span></div></div>
+          <div class="skill-pill"><div class="skill-name">A/B Testing</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span></div></div>
+          <div class="skill-pill"><div class="skill-name">0→1 Development</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span></div></div>
+          <div class="skill-pill"><div class="skill-name">AI / LLM Products</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot"></span></div></div>
+          <div class="skill-pill"><div class="skill-name">Monetisation</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span></div></div>
+          <div class="skill-pill"><div class="skill-name">Roadmapping</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot"></span></div></div>
+          <div class="skill-pill"><div class="skill-name">User Research</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot"></span></div></div>
+          <div class="skill-pill"><div class="skill-name">Data Analytics</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot"></span></div></div>
+          <div class="skill-pill"><div class="skill-name">Stakeholder Mgmt</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span></div></div>
+          <div class="skill-pill"><div class="skill-name">Consumer Tech</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span></div></div>
+          <div class="skill-pill"><div class="skill-name">Figma</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot"></span></div></div>
+          <div class="skill-pill"><div class="skill-name">JIRA</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span></div></div>
+          <div class="skill-pill"><div class="skill-name">Google Analytics</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot"></span></div></div>
+          <div class="skill-pill"><div class="skill-name">Firebase</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot"></span></div></div>
+          <div class="skill-pill"><div class="skill-name">React / TypeScript</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot"></span></div></div>
+          <div class="skill-pill"><div class="skill-name">Python</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot"></span><span class="skill-dot"></span></div></div>
+          <div class="skill-pill"><div class="skill-name">SQL</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot"></span></div></div>
+          <div class="skill-pill"><div class="skill-name">GCP / Cloud</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot"></span><span class="skill-dot"></span></div></div>
+        </div>
       </div>
     </div>
   </section>
@@ -1372,6 +1824,29 @@
   </section>
 
 </main>
+
+<!-- ============ VOICE PLAYER ============ -->
+<div class="voice-player" id="voicePlayer">
+  <div class="voice-label" id="voiceLabel">Listen to Anchit</div>
+  <button class="voice-btn" id="voiceBtn" aria-label="Listen to Anchit narrate this section">
+    <div class="voice-rings">
+      <div class="voice-ring"></div>
+      <div class="voice-ring"></div>
+      <div class="voice-ring"></div>
+    </div>
+    <svg class="voice-icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+    <svg class="voice-icon-stop" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+  </button>
+  <!-- Audio elements — drop your recordings into audio/ folder -->
+  <audio id="audio-home" src="audio/home.mp3" preload="none"></audio>
+  <audio id="audio-work" src="audio/work.mp3" preload="none"></audio>
+  <audio id="audio-builds" src="audio/builds.mp3" preload="none"></audio>
+  <audio id="audio-about" src="audio/about.mp3" preload="none"></audio>
+  <audio id="audio-contact" src="audio/contact.mp3" preload="none"></audio>
+</div>
+
+<!-- Cursor glow -->
+<div class="cursor-glow" id="cursorGlow"></div>
 
 <footer>
   <div>© Anchit Tandon · 2026 · Delhi, IST</div>
@@ -1427,6 +1902,7 @@
     closeSidebar();
     window.scrollTo({ top: 0, behavior: 'instant' });
     history.replaceState(null, '', '#' + viewName);
+    if (window.__setVoiceView) window.__setVoiceView(viewName);
 
     // Re-trigger reveals for the new view
     requestAnimationFrame(() => observeReveals());
@@ -1443,23 +1919,8 @@
   const hash = window.location.hash.replace('#', '');
   if (hash) switchView(hash);
 
-  /* ============ REVEAL ON SCROLL ============ */
+  /* ============ REVEAL ON SCROLL — defined below ============ */
   let revealObserver;
-  function observeReveals() {
-    if (revealObserver) revealObserver.disconnect();
-    revealObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('in');
-          revealObserver.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-    document.querySelectorAll('.view.active .reveal, .view.active .reveal-stagger').forEach(el => {
-      if (!el.classList.contains('in')) revealObserver.observe(el);
-    });
-  }
-  observeReveals();
 
   /* ============ CHAT ============ */
   const KB = [
@@ -1619,6 +2080,143 @@
     }
     if (e.key === 'Escape') { chatInput.value = ''; chatInput.blur(); closeSidebar(); }
   });
+
+  /* ============ CURSOR GLOW ============ */
+  (function() {
+    const glow = document.getElementById('cursorGlow');
+    if (window.matchMedia('(hover: none)').matches) { glow.style.display = 'none'; return; }
+    let mx = 0, my = 0, gx = 0, gy = 0;
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+    function tick() {
+      gx += (mx - gx) * 0.07; gy += (my - gy) * 0.07;
+      glow.style.left = gx + 'px'; glow.style.top = gy + 'px';
+      requestAnimationFrame(tick);
+    }
+    tick();
+  })();
+
+  /* ============ ANIMATED COUNTERS ============ */
+  (function() {
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (!e.isIntersecting || e.target.dataset.counted) return;
+        e.target.dataset.counted = '1';
+        const target = +e.target.dataset.count;
+        const suffix = e.target.dataset.suffix || '';
+        const prefix = e.target.dataset.prefix || '';
+        const dur = 1800, start = performance.now();
+        function step(now) {
+          const t = Math.min((now - start) / dur, 1);
+          const ease = 1 - Math.pow(1 - t, 3);
+          e.target.textContent = prefix + Math.floor(ease * target) + suffix;
+          if (t < 1) requestAnimationFrame(step);
+          else e.target.textContent = prefix + target + suffix;
+        }
+        requestAnimationFrame(step);
+        obs.unobserve(e.target);
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('[data-count]').forEach(el => obs.observe(el));
+  })();
+
+  /* ============ 3D TILT CARDS ============ */
+  document.querySelectorAll('.tilt-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = `perspective(700px) rotateY(${x * 9}deg) rotateX(${-y * 9}deg) translateY(-6px)`;
+      card.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+      card.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+    });
+    card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+  });
+
+  /* ============ LIFECYCLE TIMELINE ============ */
+  (function() {
+    document.querySelectorAll('.lifecycle-node').forEach(node => {
+      node.addEventListener('click', () => {
+        const wasOpen = node.classList.contains('open');
+        document.querySelectorAll('.lifecycle-node.open').forEach(n => n.classList.remove('open'));
+        if (!wasOpen) node.classList.add('open');
+      });
+    });
+    const track = document.getElementById('lifecycleTrack');
+    const fill = document.getElementById('lifecycleSpineFill');
+    if (track && fill) {
+      const obs = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting) {
+          fill.style.height = track.offsetHeight + 'px';
+          obs.disconnect();
+        }
+      }, { threshold: 0.15 });
+      obs.observe(track);
+    }
+  })();
+
+  /* ============ VOICE PLAYER ============ */
+  (function() {
+    const btn = document.getElementById('voiceBtn');
+    const label = document.getElementById('voiceLabel');
+    if (!btn) return;
+
+    const VIEW_LABELS = { home: 'Home', work: 'Work', builds: 'Builds', about: 'About', contact: 'Contact' };
+    let currentAudio = null;
+    let currentView = 'home';
+
+    function getAudio(view) {
+      const key = view.startsWith('project-') ? 'builds' : (VIEW_LABELS[view] ? view : 'home');
+      return document.getElementById('audio-' + key);
+    }
+    function stopAll() {
+      if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
+      currentAudio = null;
+      btn.classList.remove('playing');
+    }
+    function playView(view) {
+      stopAll();
+      const audio = getAudio(view);
+      if (!audio) return;
+      audio.onended = () => btn.classList.remove('playing');
+      audio.onerror = () => btn.classList.remove('playing');
+      currentAudio = audio;
+      btn.classList.add('playing');
+      audio.play().catch(() => btn.classList.remove('playing'));
+    }
+
+    btn.addEventListener('click', () => {
+      if (btn.classList.contains('playing')) { stopAll(); return; }
+      playView(currentView);
+    });
+
+    // Update label and stop audio when view changes
+    const origSwitch = switchView;
+    window.__setVoiceView = function(v) {
+      currentView = v;
+      const key = v.startsWith('project-') ? 'builds' : (VIEW_LABELS[v] ? v : 'home');
+      label.textContent = 'Listen · ' + (VIEW_LABELS[key] || 'Anchit');
+      stopAll();
+    };
+  })();
+
+  /* ============ ENHANCED REVEAL OBSERVER ============ */
+  function observeReveals() {
+    if (revealObserver) revealObserver.disconnect();
+    revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -32px 0px' });
+    const sel = '.view.active .reveal, .view.active .reveal-stagger, .view.active .reveal-left, .view.active .reveal-right, .view.active .reveal-scale';
+    document.querySelectorAll(sel).forEach(el => {
+      if (!el.classList.contains('in')) revealObserver.observe(el);
+    });
+  }
+
+  observeReveals();
 
   /* ============ SERVICE WORKER ============ */
   if ('serviceWorker' in navigator) {
