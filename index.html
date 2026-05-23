@@ -269,12 +269,15 @@
   /* ============ HOME / HERO ============ */
   .home-hero { padding-top: clamp(12px, 2.5vw, 32px); }
   .home-hero .eyebrow { margin-bottom: 16px; }
+  /* "Hey, I'm" sits inline — smaller, italic, same baseline as "Anchit" */
   .home-hero .greeting {
-    font-family: var(--font-display); font-style: italic; font-weight: 300;
-    font-size: clamp(18px, 2vw, 24px); color: var(--ink-dim); margin-bottom: 4px;
+    display: inline; font-family: var(--font-display); font-style: italic; font-weight: 300;
+    font-size: clamp(28px, 4vw, 52px); color: var(--ink-dim); margin-right: 0.18em;
+    vertical-align: baseline; line-height: inherit;
   }
-  .home-hero .name { margin-bottom: 20px; }
-  .home-hero .name .firstline { display: block; }
+  .home-hero .name { margin-bottom: 20px; line-height: 0.9; }
+  /* first line: "Hey, I'm Anchit" — greeting inline-block before firstline */
+  .home-hero .name .firstline { display: inline; }
   .home-hero .name .secondline {
     display: block; font-style: italic; color: var(--primary);
     font-variation-settings: "SOFT" 100, "WONK" 1;
@@ -645,9 +648,11 @@
   .project-section ul { list-style: none; }
   .project-section ul li {
     padding: 16px 0; border-bottom: 1px solid var(--rule);
-    display: grid; grid-template-columns: 24px 1fr; gap: 14px; align-items: start;
-    font-size: 16px; color: var(--ink); line-height: 1.55;
+    display: grid; grid-template-columns: 20px 1fr; gap: 12px; align-items: start;
+    font-size: 16px; color: var(--ink); line-height: 1.55; min-width: 0;
+    word-break: normal; overflow-wrap: break-word;
   }
+  .project-section ul li > * { min-width: 0; }
   .project-section ul li::before {
     content: '→'; color: var(--primary);
     font-family: var(--font-display); font-size: 20px; line-height: 1.3;
@@ -886,19 +891,16 @@
   }
   .career-phase-seg:hover { flex: calc(var(--flex) * 1.45); box-shadow: 0 4px 20px rgba(0,0,0,0.35); }
   .career-phase-seg-label {
-    font-family: var(--font-mono); font-size: 9px; font-weight: 600; letter-spacing: 0.08em;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.07em;
     text-transform: uppercase; color: #fff; white-space: nowrap;
-    overflow: hidden; text-overflow: ellipsis; padding: 0 8px;
+    overflow: hidden; text-overflow: ellipsis; padding: 0 10px;
   }
   .career-phase-seg-hint {
-    font-family: var(--font-mono); font-size: 8px; color: rgba(255,255,255,0.65);
-    letter-spacing: 0.06em; opacity: 0; transition: opacity 0.2s;
+    font-family: var(--font-mono); font-size: 10px; color: rgba(255,255,255,0.8);
+    letter-spacing: 0.05em; opacity: 0; transition: opacity 0.18s;
     white-space: nowrap;
   }
   .career-phase-seg:hover .career-phase-seg-hint { opacity: 1; }
-  .career-arc-years {
-    color: var(--ink-dim);
-  }
 
   /* Active/selected arc segment */
   .career-phase-seg.arc-active {
@@ -923,7 +925,7 @@
   .phase-agm { background: #B5870A; box-shadow: 0 0 20px rgba(181,135,10,0.4); }
   .career-arc-years {
     display: flex; justify-content: space-between; margin-top: 10px;
-    font-family: var(--font-mono); font-size: 10px;
+    font-family: var(--font-mono); font-size: 11px; color: var(--ink-dim);
   }
 
   /* ============ LIFECYCLE TIMELINE ============ */
@@ -997,6 +999,11 @@
   .lifecycle-node[data-phase="pm"] .lifecycle-phase-label { color: var(--primary); }
   .lifecycle-node[data-phase="spm"] .lifecycle-phase-label { color: var(--primary); }
   .lifecycle-node[data-phase="agm"] .lifecycle-phase-label { color: #B5870A; }
+  /* Light mode: darken low-contrast phase label colours */
+  [data-theme="light"] .lifecycle-node[data-phase="apm"] .lifecycle-phase-label { color: #007A58; }
+  [data-theme="light"] .lifecycle-node[data-phase="agm"] .lifecycle-phase-label { color: #7A5400; }
+  [data-theme="light"] .lifecycle-node[data-phase="pm"] .lifecycle-phase-label { color: #C03010; }
+  [data-theme="light"] .lifecycle-node[data-phase="spm"] .lifecycle-phase-label { color: #C03010; }
   .lifecycle-title {
     font-family: var(--font-display); font-weight: 400;
     font-size: clamp(17px, 2vw, 22px); color: var(--ink); line-height: 1.25;
@@ -1043,10 +1050,10 @@
 
   .lifecycle-detail {
     overflow: hidden; max-height: 0; opacity: 0;
-    transition: max-height 0.5s cubic-bezier(0.16,1,0.3,1), opacity 0.35s ease, margin-top 0.35s;
+    transition: max-height 0.32s cubic-bezier(0.16,1,0.3,1), opacity 0.22s ease, margin-top 0.22s;
     margin-top: 0;
   }
-  .lifecycle-node.open .lifecycle-detail { max-height: 600px; opacity: 1; margin-top: 18px; }
+  .lifecycle-node.open .lifecycle-detail { max-height: 600px; opacity: 1; margin-top: 14px; }
   /* Highlight detail text section */
   .lifecycle-detail {
     padding-left: 2px;
@@ -1315,9 +1322,8 @@
       <div class="home-hero reveal">
         <div class="hero-dot-grid" aria-hidden="true"></div>
         <div class="eyebrow has-dot"><span class="live-dot"></span>Live · AGM – Product Management · Vahdam India</div>
-        <div class="greeting">Hey, I'm</div>
         <h1 class="display-xl name">
-          <span class="firstline">Anchit</span>
+          <span class="greeting">Hey, I'm</span><span class="firstline">Anchit</span>
           <span class="secondline">Tandon.</span>
         </h1>
         <p class="hero-tagline">An <span class="hero-strike">engineer</span> who learned to <em>love the funnel.</em> Six years building and shipping — Times Internet, Vahdam India, four AI side projects live.</p>
@@ -1420,7 +1426,7 @@
               </div>
             </div>
           </div>
-          <div class="work-meta"><div class="year">2024 — 2025</div><div class="impact">5× MRR</div></div>
+          <div class="work-meta"><div class="year">2024 — Apr 2026</div><div class="impact">5× MRR</div></div>
         </div>
 
         <div class="work-item reveal">
@@ -1828,7 +1834,7 @@
         <div class="about-prose reveal-left">
           <p>I started as a backend engineer building consumer apps — live sports commentary, e-commerce — the kinds of systems where you watch your code touch a million people in a weekend.</p>
           <p>Then I moved to product, and what I really fell for was <em>the funnel</em> — the way it tells you the unfiltered truth about your decisions.</p>
-          <p>These days I'm at Vahdam India as AGM – Product Management, spearheading D2C growth across US, UK, and global markets. Before this, five-plus years at Times Internet across ET Markets, ET Prime, Times Health+, and the Half Marathon — and <em>building on the side</em>. All four side projects are AI-first consumer experiments I prototype end-to-end.</p>
+          <p>These days I'm at Vahdam India as AGM – Product Management, spearheading D2C growth across US, UK, and global markets. Before this, nearly four years at Times Internet — APM to SPM — across ET Markets, ET Prime, Times Health+, and the Half Marathon — and <em>building on the side</em>. All four side projects are AI-first consumer experiments I prototype end-to-end.</p>
         </div>
         <div class="reveal-right">
           <div class="meta-block">
@@ -1909,7 +1915,7 @@
                 </div>
               </div>
               <div class="lifecycle-detail">
-                <p>Owned the Times Internet Half Marathon end-to-end — zero to one consumer IP launch. Discovery, registration funnels, acquisition channels, on-ground runner insights, and brand surface. Simultaneously scaled Assisted Sales and the AI telesuite across Economic Times properties.</p>
+                <p>Owned the Times Internet Half Marathon end-to-end — zero to one consumer IP launch. Discovery, registration funnels, acquisition channels, on-ground runner insights, and brand surface. Simultaneously scaled Assisted Sales and the AI telesuite across Economic Times properties. Won the Times Internet Team Award (Oct 2025) for Jul–Sep '25 performance.</p>
                 <div class="lifecycle-detail-tags">
                   <span class="tag">0→1 Event</span><span class="tag">Consumer IP</span><span class="tag">Growth</span><span class="tag">AI Workflows</span><span class="tag">Funnel Design</span>
                 </div>
@@ -1933,7 +1939,7 @@
                 </div>
               </div>
               <div class="lifecycle-detail">
-                <p>Led the end-to-end revamp of ET Markets — web, mWeb, Android, iOS. Drove +27% engagement, +25% DAU, +15% sessions, and ₹3Cr+ in incremental ARR. Scaled Assisted Sales for ET Prime from ₹15L to ₹80L MRR (5×), 400%+ ROI in six months. Launched Times Health+ paid subscriptions from zero — freemium-to-paid journeys, pricing experiments, retention-led monetisation. Won the Times Internet Team Award (Oct 2025).</p>
+                <p>Led the end-to-end revamp of ET Markets — web, mWeb, Android, iOS. Drove +27% engagement, +25% DAU, +15% sessions, and ₹3Cr+ in incremental ARR. Scaled Assisted Sales for ET Prime from ₹15L to ₹80L MRR (5×), 400%+ ROI in six months. Launched Times Health+ paid subscriptions from zero — freemium-to-paid journeys, pricing experiments, retention-led monetisation.</p>
                 <div class="lifecycle-detail-tags">
                   <span class="tag">ET Markets</span><span class="tag">ET Prime</span><span class="tag">Times Health+</span><span class="tag">Subscriptions</span><span class="tag">5× MRR</span><span class="tag">₹3Cr ARR</span>
                 </div>
@@ -2124,7 +2130,7 @@
 
 <!-- ============ VOICE PLAYER ============ -->
 <!-- Ambient audio — auto-plays after first user interaction -->
-<audio id="audio-anchit" src="audio/anchit.m4a" preload="none"></audio>
+<audio id="audio-anchit" src="audio/anchit.m4a" preload="metadata"></audio>
 <div class="audio-ambient" id="audioAmbient" aria-hidden="true" title="Anchit's voice narration playing">
   <span class="audio-ambient-label">Playing</span>
   <div class="audio-ambient-bars">
@@ -2199,7 +2205,6 @@
     });
 
     closeSidebar();
-    document.querySelector('.view.active')?.scrollTo({ top: 0, behavior: 'instant' });
     window.scrollTo({ top: 0, behavior: 'instant' });
     history.replaceState(null, '', '#' + viewName);
     document.dispatchEvent(new CustomEvent('viewChanged', { detail: viewName }));
@@ -2434,8 +2439,13 @@
 
   /* ============ LIFECYCLE TIMELINE ============ */
   (function() {
+    function scrollToNode(node) {
+      const rect = node.getBoundingClientRect();
+      const top = rect.top + window.scrollY - 90;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+
     function openNode(node, { scroll = true, flash = true } = {}) {
-      // close all others
       document.querySelectorAll('.lifecycle-node.open').forEach(n => {
         if (n !== node) n.classList.remove('open');
       });
@@ -2443,28 +2453,21 @@
 
       if (flash) {
         node.classList.remove('flash-highlight');
-        void node.offsetWidth; // reflow to restart animation
+        void node.offsetWidth;
         node.classList.add('flash-highlight');
-        setTimeout(() => node.classList.remove('flash-highlight'), 1400);
+        setTimeout(() => node.classList.remove('flash-highlight'), 1200);
       }
 
-      if (scroll) {
-        // allow the open animation to start, then scroll
-        setTimeout(() => {
-          const rect = node.getBoundingClientRect();
-          const offset = rect.top + window.scrollY - 96;
-          window.scrollTo({ top: offset, behavior: 'smooth' });
-        }, 60);
-      }
+      if (scroll) scrollToNode(node);
     }
 
-    // Expand/collapse on direct timeline node click
+    // Expand/collapse on direct timeline node click — also scroll into view on open
     document.querySelectorAll('.lifecycle-node').forEach(node => {
       node.addEventListener('click', () => {
         if (node.classList.contains('open')) {
           node.classList.remove('open');
         } else {
-          openNode(node, { scroll: false, flash: false });
+          openNode(node, { scroll: true, flash: false });
         }
       });
     });
@@ -2474,18 +2477,16 @@
       seg.addEventListener('click', () => {
         const phase = seg.dataset.targetPhase;
 
-        // Update active arc segment
         document.querySelectorAll('.career-phase-seg').forEach(s => s.classList.remove('arc-active'));
         seg.classList.add('arc-active');
 
-        // Find the FIRST lifecycle node with this phase
         const target = document.querySelector('.lifecycle-node[data-phase="' + phase + '"]');
         if (!target) return;
 
-        // If not on About view, switch first then scroll
         if (!document.getElementById('view-about')?.classList.contains('active')) {
           switchView('about');
-          setTimeout(() => openNode(target), 500);
+          // 280ms matches the viewFadeUp animation (0.42s) — enough for DOM to be active
+          setTimeout(() => openNode(target), 280);
         } else {
           openNode(target);
         }
@@ -2537,23 +2538,24 @@
     audio.addEventListener('pause', hide);
     audio.addEventListener('error', hide);
 
-    function tryPlay() {
+    // CRITICAL: play() must be called synchronously inside the gesture handler.
+    // Any setTimeout() breaks the browser's user-activation window and blocks audio.
+    function onFirstGesture(e) {
       if (played) return;
+      // Only fire on real interactive elements, not passive scroll events
+      if (e.type === 'keydown' && e.key === 'Tab') return;
       played = true;
-      audio.play().then(show).catch(() => { played = false; });
+      document.removeEventListener('click',    onFirstGesture);
+      document.removeEventListener('keydown',  onFirstGesture);
+      document.removeEventListener('pointerup', onFirstGesture);
+      audio.play().then(show).catch(err => {
+        played = false; // allow retry on next gesture if blocked
+      });
     }
 
-    // After any user gesture, wait for current event to finish then play
-    function onFirstGesture() {
-      document.removeEventListener('click', onFirstGesture);
-      document.removeEventListener('keydown', onFirstGesture);
-      document.removeEventListener('touchend', onFirstGesture);
-      setTimeout(tryPlay, 400);
-    }
-
-    document.addEventListener('click',    onFirstGesture, { passive: true });
-    document.addEventListener('keydown',  onFirstGesture, { passive: true });
-    document.addEventListener('touchend', onFirstGesture, { passive: true });
+    document.addEventListener('click',     onFirstGesture, { passive: true });
+    document.addEventListener('keydown',   onFirstGesture, { passive: true });
+    document.addEventListener('pointerup', onFirstGesture, { passive: true });
   })();
 
   /* ============ SCROLL PROGRESS BAR ============ */
