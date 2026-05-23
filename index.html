@@ -2551,7 +2551,7 @@
 
     // Main robust view-specific playback function
     function playAudioForView(viewName) {
-      if (!isInteracted) return;
+      // if (!isInteracted) return;
 
       let key = viewName;
       if (key.startsWith('project-')) {
@@ -2598,7 +2598,6 @@
             }
           });
       }
-
       tryNextSource();
     }
 
@@ -2611,6 +2610,7 @@
       document.removeEventListener('click',     onFirstGesture);
       document.removeEventListener('keydown',   onFirstGesture);
       document.removeEventListener('pointerup', onFirstGesture);
+      document.removeEventListener('touchstart', onFirstGesture);
 
       const activeViewEl = document.querySelector('.view.active');
       const activeView = activeViewEl ? activeViewEl.id.replace('view-', '') : 'home';
