@@ -2558,16 +2558,17 @@
     let isInteracted = false;
 
     const NARRATIONS = {
-      home:    "Hey, I'm Anchit. Product leader, engineer by training, builder by instinct. Six-plus years in consumer tech — shipping growth at scale, experimenting with AI on the side. Dig in — the work, the builds, the funnel decisions.",
-      work:    "This is the work that moved numbers. ET Markets revamp — twenty-seven percent engagement lift. Assisted Sales — five-x MRR growth. Times Health Plus — subscriptions from zero. And the Half Marathon — built from scratch, zero to one.",
-      builds:  "Four side projects, all live. Hey Yaara, MusicGenAI, AI TeleSuite, and LifeEngine. Each one built end-to-end on weekends and evenings. Curiosity starts them, ambition keeps them alive, restlessness keeps me shipping.",
-      about:   "An engineer who learned to love the funnel. B.Tech CSE from VIT, backend at Tuple and Citymall, then product at Times Internet. Now AGM at Vahdam India — driving D2C growth across US, UK, and global markets.",
+      home:    "Hey, I'm Anchit. Product leader, engineer by training, builder by instinct. Six plus years in consumer tech — shipping growth at scale, experimenting with A.I. on the side. Dig in — the work, the builds, the funnel decisions.",
+      work:    "This is the work that moved numbers. E.T. Markets revamp — twenty seven percent engagement lift. Assisted Sales — five x monthly recurring revenue growth. Times Health Plus — subscriptions from zero. And the Half Marathon — built from scratch, zero to one.",
+      builds:  "Four side projects, all live. Hey Yaara, Music Gen A.I., A.I. Tele Suite, and Life Engine. Each one built end to end on weekends and evenings. Curiosity starts them, ambition keeps them alive, restlessness keeps me shipping.",
+      about:   "An engineer who learned to love the funnel. B. Tech Computer Science from V.I.T., backend at Tuple and City Mall, then product at Times Internet. Now A.G.M. at Vah-dahm India — driving direct to consumer growth across U.S., U.K., and global markets.",
       contact: "Let's build something worth measuring. Open to remote, hybrid, side collaborations, and honest conversations about funnels, subscriptions, and consumer product."
     };
 
+    const VIEW_LABELS = { home: 'Home', work: 'Work', builds: 'Builds', about: 'About', contact: 'Contact' };
+
     function show(viewName) {
-      const names = { home: 'Home', work: 'Work', builds: 'Builds', about: 'About', contact: 'Contact' };
-      const key = viewName.startsWith('project-') ? 'Builds' : (names[viewName] || 'Anchit');
+      const key = viewName.startsWith('project-') ? 'Builds' : (VIEW_LABELS[viewName] || 'Anchit');
       if (label) label.textContent = 'Hear Anchit \u00B7 ' + key;
       indicator.classList.add('active');
     }
@@ -2605,7 +2606,10 @@
     function trySpeak(viewName) {
       const voices = window.speechSynthesis.getVoices();
       if (voices.length === 0) {
-        window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.onvoiceschanged = null; speak(viewName); };
+        window.speechSynthesis.onvoiceschanged = () => {
+          window.speechSynthesis.onvoiceschanged = null;
+          speak(viewName);
+        };
       } else {
         speak(viewName);
       }
