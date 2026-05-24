@@ -2322,7 +2322,6 @@
   const navLinks = document.querySelectorAll('[data-view]');
 
   function switchView(viewName) {
-    if (viewName === 'chat') viewName = 'home';
     if (!ALL_VIEWS.includes(viewName)) return;
 
     // Animate out old view, animate in new
