@@ -986,52 +986,38 @@
     .af-active { width: 200px; }
   }
 
-  /* ============ FLOATING AUDIO NUDGE + PLAYER ============ */
-  .anp-nudge {
+  /* ============ STICKY CTAs ============ */
+  .sticky-ctas {
     position: fixed; bottom: calc(24px + var(--safe-bottom)); right: 24px;
-    z-index: 160; display: flex; align-items: center; gap: 8px;
-    background: var(--bg-elev); border: 1px solid var(--rule-strong);
-    border-radius: 99px; padding: 6px 8px 6px 6px;
+    z-index: 160; display: flex; flex-direction: column; gap: 8px;
+    align-items: flex-end;
+  }
+  .sticky-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 20px; border-radius: 99px; cursor: pointer;
+    font-family: var(--font-body); font-size: 13px; font-weight: 600;
+    border: none; transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
     box-shadow: var(--shadow-md);
   }
+  .sticky-cta svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .sticky-cta.talk {
+    background: var(--primary); color: #FFF;
+  }
+  .sticky-cta.talk:hover { background: var(--primary-deep); transform: translateY(-2px) scale(1.04); box-shadow: 0 8px 24px rgba(255,77,31,0.35); }
+  .sticky-cta.listen {
+    background: var(--bg-elev); color: var(--ink); border: 1px solid var(--rule-strong);
+  }
+  .sticky-cta.listen:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
+  .sticky-cta.listen.playing { border-color: var(--primary); color: var(--primary); }
+  .sticky-cta.listen.playing span::after { content: ' ...'; }
+  @media (max-width: 600px) {
+    .sticky-ctas { bottom: calc(16px + var(--safe-bottom)); right: 16px; }
+    .sticky-cta span { display: none; }
+    .sticky-cta { padding: 12px; border-radius: 50%; }
+  }
+
+  /* Hidden audio player state (for TTS JS internals) */
   .anp-nudge.dismissed { display: none; }
-  .anp-play-btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: var(--primary); color: #FFF; border: none; cursor: pointer;
-    border-radius: 99px; padding: 8px 14px 8px 10px;
-    font-family: var(--font-mono); font-size: 11px; font-weight: 500;
-    letter-spacing: 0.06em; text-transform: uppercase;
-  }
-  .anp-play-btn:hover { background: var(--primary-deep); }
-  .anp-play-btn svg { width: 14px; height: 14px; }
-  .anp-nudge.playing .anp-play-btn,
-  .anp-nudge.paused .anp-play-btn { display: none; }
-  .anp-player { display: none; align-items: center; gap: 8px; }
-  .anp-nudge.playing .anp-player,
-  .anp-nudge.paused .anp-player { display: flex; }
-  .anp-label {
-    font-family: var(--font-mono); font-size: 10px; font-weight: 500;
-    letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-dim);
-    white-space: nowrap;
-  }
-  .anp-progress { width: 80px; height: 3px; background: var(--rule); border-radius: 2px; overflow: hidden; }
-  .anp-fill { height: 100%; width: 0%; background: var(--primary); border-radius: 2px; }
-  .anp-time { font-family: var(--font-mono); font-size: 10px; color: var(--ink-dim); min-width: 28px; text-align: right; }
-  .anp-btn {
-    width: 28px; height: 28px; border-radius: 50%; border: none; cursor: pointer;
-    background: var(--bg-deep); color: var(--ink-dim);
-    display: inline-flex; align-items: center; justify-content: center;
-  }
-  .anp-btn:hover { background: var(--primary); color: #FFF; }
-  .anp-btn svg { width: 14px; height: 14px; }
-  .anp-dismiss {
-    width: 24px; height: 24px; border-radius: 50%; border: none; cursor: pointer;
-    background: transparent; color: var(--ink-mute); font-size: 16px; line-height: 1;
-    display: inline-flex; align-items: center; justify-content: center;
-  }
-  .anp-dismiss:hover { color: var(--primary); }
-  .anp-nudge.playing .anp-dismiss,
-  .anp-nudge.paused .anp-dismiss { display: none; }
 
   /* Chat TTS speaking state + caption */
   .msg.bot.speaking .msg-bubble { outline: 2px solid var(--primary); outline-offset: 1px; }
@@ -2256,12 +2242,20 @@
 
 </main>
 
-<!-- Floating audio nudge + mini player -->
-<div class="anp-nudge" id="audioNudge">
-  <button class="anp-play-btn" id="audioPlayBtn" aria-label="Listen to this page">
-    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-    <span>Listen</span>
+<!-- Sticky CTAs: Talk to me + Listen -->
+<div class="sticky-ctas" id="stickyCtas">
+  <a class="sticky-cta talk" href="#chat" data-view="chat">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span>Talk to me</span>
+  </a>
+  <button class="sticky-cta listen" id="audioPlayBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+    <span>Hear this page</span>
   </button>
+</div>
+
+<!-- Audio player state (hidden, used by TTS JS) -->
+<div class="anp-nudge dismissed" id="audioNudge" style="display:none;">
   <div class="anp-player">
     <span class="anp-label" id="anpLabel">Home</span>
     <div class="anp-progress" id="anpProgress"><div class="anp-fill" id="anpFill"></div></div>
@@ -2274,7 +2268,6 @@
       <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
     </button>
   </div>
-
 </div>
 
 <!-- Cursor glow -->
@@ -2784,13 +2777,15 @@
     let progressTimer = null, utterStart = 0, utterDuration = 0;
     let currentViewName = 'home';
 
+    const stickyListen = document.querySelector('.sticky-cta.listen');
     function showIndicator(viewName) {
+      stickyListen?.classList.add('playing');
       if (!indicator) return;
       const key = viewName?.startsWith('project-') ? 'Projects' : (VIEW_LABELS[viewName] || 'Anchit');
       indicator.querySelector('.audio-ambient-label').textContent = 'Playing · ' + key;
       indicator.classList.add('active');
     }
-    function hideIndicator() { indicator?.classList.remove('active', 'listening'); }
+    function hideIndicator() { indicator?.classList.remove('active', 'listening'); stickyListen?.classList.remove('playing'); }
 
     function setPlayerState(playing, viewName) {
       nudge?.classList.toggle('playing', playing);
