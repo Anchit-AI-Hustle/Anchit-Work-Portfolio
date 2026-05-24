@@ -109,18 +109,15 @@
     transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1);
   }
   .sidebar-logo {
-    display: flex; align-items: baseline; gap: 5px;
+    display: block; text-align: center;
     font-family: var(--font-display); font-weight: 600;
-    font-size: 15px; line-height: 1; letter-spacing: -0.02em;
-    color: #FBF5EC; white-space: nowrap;
-    margin: 0 auto 28px; flex-shrink: 0;
-    padding: 10px 16px; border-radius: 10px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.06);
-    transition: background 0.2s, border-color 0.2s;
+    font-size: 16px; line-height: 1.2; letter-spacing: -0.02em;
+    color: #FBF5EC;
+    margin: 0 10px 24px; flex-shrink: 0;
+    transition: color 0.2s;
   }
-  .sidebar-logo:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.12); }
-  .sidebar-logo span { color: var(--primary); font-style: italic; font-weight: 500; }
+  .sidebar-logo span { display: block; color: var(--primary); font-style: italic; font-weight: 500; }
+  .sidebar-logo:hover { color: var(--primary); }
   .sidebar-nav {
     flex: 1; display: flex; flex-direction: column; align-items: stretch;
     gap: 2px; width: 100%; overflow-y: auto; scrollbar-width: none;
@@ -1470,7 +1467,7 @@
 
 <!-- ============ SIDEBAR ============ -->
 <aside class="sidebar" id="sidebar">
-  <a class="sidebar-logo" href="#home" data-view="home" aria-label="Home">Anchit <span>Tandon.</span></a>
+  <a class="sidebar-logo" href="#home" data-view="home" aria-label="Home">Anchit<span>Tandon.</span></a>
 
   <nav class="sidebar-nav">
     <a class="sidebar-item active" href="#home" data-view="home" aria-label="Home">
