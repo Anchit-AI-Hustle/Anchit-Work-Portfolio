@@ -186,6 +186,7 @@
     width: 100%; height: 40px;
     background: var(--primary); color: #FFF;
     overflow: hidden; display: flex; align-items: center;
+    border-top: 1px solid var(--primary-deep);
     border-bottom: 1px solid var(--primary-deep);
   }
   .ticker-track {
@@ -268,18 +269,21 @@
   .lede em { font-style: italic; color: var(--primary); font-weight: 400; }
 
   /* ============ HOME / HERO ============ */
-  .home-hero { padding-top: clamp(20px, 3.5vw, 48px); }
+  .home-hero { padding-top: clamp(20px, 3.5vw, 48px); padding-bottom: clamp(32px, 4vw, 56px); }
   .home-hero .eyebrow { margin-bottom: 20px; }
-  /* "Hey, I'm" sits inline — smaller, italic, same baseline as "Anchit" */
+  /* Name headline — all on one line */
   .home-hero .greeting {
-    display: block; font-family: var(--font-display); font-style: italic; font-weight: 300;
-    font-size: clamp(20px, 2.8vw, 32px); color: var(--ink-dim); margin-bottom: 8px;
+    display: inline; font-family: var(--font-display); font-style: italic; font-weight: 300;
+    font-size: 0.44em; color: var(--ink-dim);
     letter-spacing: 0.01em;
   }
-  .home-hero .name { margin-bottom: 24px; line-height: 0.92; }
+  .home-hero .name {
+    font-size: clamp(36px, 5.5vw, 72px); line-height: 1.05;
+    margin-bottom: 24px; letter-spacing: -0.03em;
+  }
   .home-hero .name .firstline { display: inline; }
   .home-hero .name .secondline {
-    display: block; font-style: italic; color: var(--primary);
+    display: inline; font-style: italic; color: var(--primary);
     font-variation-settings: "SOFT" 100, "WONK" 1;
   }
   .hero-tagline {
@@ -319,7 +323,7 @@
   /* ============ HOME IDENTITY + CHAT GRID ============ */
   .home-identity-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 2fr 3fr;
     gap: 24px;
     align-items: start;
     margin-bottom: 24px;
@@ -417,56 +421,69 @@
   .chat-block {
     background: var(--bg-elev); border-radius: 28px;
     box-shadow: var(--shadow-md);
-    overflow: hidden;
+    border: 1px solid var(--rule);
+    overflow: hidden; display: flex; flex-direction: column;
   }
   .chat-head {
-    padding: 28px 32px 20px; border-bottom: 1px solid var(--rule);
-    display: flex; align-items: center; gap: 14px;
+    padding: 20px 24px 18px; border-bottom: 1px solid var(--rule);
+    display: flex; align-items: center; gap: 12px;
+    background: var(--bg-elev);
   }
   .chat-head-avatar {
-    width: 44px; height: 44px; border-radius: 50%;
-    background: var(--primary); color: #FFF;
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary) 0%, #FF6940 100%); color: #FFF;
     display: inline-flex; align-items: center; justify-content: center;
-    font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: 20px;
+    font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: 18px;
+    flex-shrink: 0; box-shadow: 0 2px 8px rgba(255,77,31,0.3);
   }
+  .chat-head-info { flex: 1; min-width: 0; }
   .chat-head-info .title {
-    font-family: var(--font-display); font-size: 20px; color: var(--ink); font-weight: 500;
+    font-family: var(--font-display); font-size: 17px; color: var(--ink); font-weight: 500;
+    letter-spacing: -0.01em;
   }
   .chat-head-info .sub {
-    font-family: var(--font-mono); font-size: 11px; color: var(--accent);
-    letter-spacing: 0.08em; text-transform: uppercase; display: flex; align-items: center; gap: 8px;
-    margin-top: 4px;
+    font-family: var(--font-mono); font-size: 10px; color: var(--accent);
+    letter-spacing: 0.07em; text-transform: uppercase; display: flex; align-items: center; gap: 6px;
+    margin-top: 3px;
   }
   .chat-head-info .sub::before {
-    content: ''; width: 6px; height: 6px; background: var(--accent); border-radius: 50%;
+    content: ''; width: 5px; height: 5px; background: var(--accent); border-radius: 50%;
     animation: live 2s ease-in-out infinite;
+  }
+  .chat-model-tag {
+    flex-shrink: 0;
+    font-family: var(--font-mono); font-size: 9px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    background: var(--primary-soft); color: var(--primary);
+    border: 1px solid rgba(255,77,31,0.2);
+    border-radius: 6px; padding: 4px 9px;
   }
 
   .chat-body {
-    padding: 24px 32px; max-height: 460px; overflow-y: auto;
-    display: flex; flex-direction: column; gap: 14px;
+    padding: 20px 24px; min-height: 320px; max-height: 480px; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 12px; flex: 1;
   }
-  .chat-body::-webkit-scrollbar { width: 6px; }
-  .chat-body::-webkit-scrollbar-thumb { background: var(--rule-strong); border-radius: 3px; }
+  .chat-body::-webkit-scrollbar { width: 4px; }
+  .chat-body::-webkit-scrollbar-thumb { background: var(--rule-strong); border-radius: 2px; }
 
-  .msg { display: flex; gap: 12px; max-width: 100%; animation: msgIn 0.35s ease-out; }
-  @keyframes msgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .msg { display: flex; gap: 10px; max-width: 100%; animation: msgIn 0.3s ease-out; }
+  @keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
   .msg.user { justify-content: flex-end; }
   .msg-avatar {
-    width: 32px; height: 32px; border-radius: 50%;
-    background: var(--primary); color: #FFF;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary) 0%, #FF6940 100%); color: #FFF;
     display: inline-flex; align-items: center; justify-content: center;
-    font-family: var(--font-display); font-weight: 500; font-size: 14px; font-style: italic;
-    flex-shrink: 0;
+    font-family: var(--font-display); font-weight: 500; font-size: 12px; font-style: italic;
+    flex-shrink: 0; margin-top: 2px; box-shadow: 0 1px 4px rgba(255,77,31,0.25);
   }
   .msg.user .msg-avatar { display: none; }
   .msg-bubble {
-    padding: 12px 18px; border-radius: 18px; font-size: 15px; line-height: 1.55;
-    max-width: 80%; word-wrap: break-word;
+    padding: 10px 16px; border-radius: 18px; font-size: 14.5px; line-height: 1.58;
+    max-width: 82%; word-wrap: break-word;
   }
   .msg.bot .msg-bubble {
     background: var(--bg-deep); color: var(--ink);
-    border-bottom-left-radius: 4px;
+    border-bottom-left-radius: 4px; border: 1px solid var(--rule);
   }
   .msg.user .msg-bubble {
     background: var(--primary); color: #FFF;
@@ -474,13 +491,13 @@
   }
   .msg-bubble a {
     color: var(--primary); font-weight: 500;
-    text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px;
+    text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px;
     cursor: pointer;
   }
-  .msg.user .msg-bubble a { color: #FFF; }
-  .msg.typing .msg-bubble { display: inline-flex; gap: 4px; padding: 14px 18px; align-items: center; }
+  .msg.user .msg-bubble a { color: rgba(255,255,255,0.9); }
+  .msg.typing .msg-bubble { display: inline-flex; gap: 4px; padding: 12px 16px; align-items: center; }
   .msg.typing .msg-bubble span {
-    width: 7px; height: 7px; background: var(--ink-mute); border-radius: 50%;
+    width: 6px; height: 6px; background: var(--ink-mute); border-radius: 50%;
     animation: typing 1.4s ease-in-out infinite;
   }
   .msg.typing .msg-bubble span:nth-child(2) { animation-delay: 0.2s; }
@@ -490,38 +507,45 @@
     30% { opacity: 1; transform: translateY(-4px); }
   }
 
+  /* Suggestion chips — full-width cards, Claude.ai style */
   .chips {
-    padding: 0 32px 20px; display: flex; flex-wrap: wrap; gap: 8px;
+    padding: 10px 16px 14px; display: flex; flex-direction: column; gap: 6px;
+    border-top: 1px solid var(--rule);
   }
   .chip {
-    font-family: var(--font-body); font-size: 13px; font-weight: 500;
-    padding: 9px 16px; border-radius: 999px;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    text-align: left; width: 100%;
+    font-family: var(--font-body); font-size: 13px; font-weight: 400;
+    padding: 9px 13px; border-radius: 10px;
     background: var(--bg-deep); color: var(--ink-dim);
-    transition: all 0.2s ease;
-    animation: chipIn 0.4s ease both;
+    border: 1px solid var(--rule);
+    transition: all 0.18s ease;
+    animation: chipIn 0.35s ease both;
   }
-  .chip:hover { background: var(--primary); color: #FFF; transform: translateY(-2px) scale(1.02); }
-  @keyframes chipIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .chip::after { content: '→'; flex-shrink: 0; color: var(--ink-mute); font-size: 13px; transition: all 0.18s; }
+  .chip:hover { background: var(--primary-soft); border-color: rgba(255,77,31,0.35); color: var(--primary); transform: translateX(2px); }
+  .chip:hover::after { color: var(--primary); }
+  @keyframes chipIn { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: translateX(0); } }
 
   .chat-input {
-    display: flex; gap: 10px; align-items: center;
-    padding: 14px 16px 14px 24px;
+    display: flex; gap: 8px; align-items: center;
+    padding: 12px 16px;
     background: var(--bg-deep); border-top: 1px solid var(--rule);
   }
   .chat-input input {
     flex: 1; background: transparent; color: var(--ink);
     border: none; outline: none;
-    font-family: var(--font-body); font-size: 15px; padding: 8px 0;
+    font-family: var(--font-body); font-size: 14px; padding: 6px 0;
   }
   .chat-input input::placeholder { color: var(--ink-mute); }
   .chat-send {
     background: var(--primary); color: #FFF;
-    width: 42px; height: 42px; border-radius: 50%;
+    width: 36px; height: 36px; border-radius: 50%;
     display: inline-flex; align-items: center; justify-content: center;
-    transition: all 0.2s;
+    transition: all 0.2s; flex-shrink: 0;
   }
-  .chat-send:hover { background: var(--primary-deep); transform: translateX(2px) scale(1.05); }
-  .chat-send svg { width: 16px; height: 16px; }
+  .chat-send:hover { background: var(--primary-deep); transform: translateX(1px) scale(1.05); }
+  .chat-send svg { width: 14px; height: 14px; }
 
   /* ============ SECTION HEADERS ============ */
   .section-head { margin-bottom: clamp(40px, 6vw, 80px); max-width: 980px; }
@@ -1518,6 +1542,18 @@
 
   <!-- HOME -->
   <section class="view active" id="view-home">
+    <div class="container">
+      <div class="home-hero reveal">
+        <div class="hero-dot-grid" aria-hidden="true"></div>
+        <div class="eyebrow has-dot"><span class="live-dot"></span>Live · AGM – Product Management · Vahdam India</div>
+        <h1 class="display-xl name">
+          <span class="greeting">Hey, I'm </span><span class="firstline">Anchit </span><span class="secondline">Tandon.</span>
+        </h1>
+        <p class="hero-tagline">AGM — Product Management at <em>Vahdam India.</em> Scaled Assisted Sales 5× to ₹80L MRR, revamped ET Markets to ₹3Cr+ ARR, shipped 11 products across companies and side projects.</p>
+      </div>
+    </div>
+
+    <!-- Ticker: section break between intro and identity+chat -->
     <div class="ticker" aria-hidden="true">
       <div class="ticker-track">
         <span>✦ Currently <strong>AGM – Product Management at Vahdam India</strong> · D2C growth across US, UK &amp; global</span>
@@ -1542,17 +1578,9 @@
         <span class="sparkle">/</span>
       </div>
     </div>
-    <div class="container">
-      <div class="home-hero reveal">
-        <div class="hero-dot-grid" aria-hidden="true"></div>
-        <div class="eyebrow has-dot"><span class="live-dot"></span>Live · AGM – Product Management · Vahdam India</div>
-        <h1 class="display-xl name">
-          <span class="greeting">Hey, I'm</span><span class="firstline">Anchit</span>
-          <span class="secondline">Tandon.</span>
-        </h1>
-        <p class="hero-tagline">AGM — Product Management at <em>Vahdam India.</em> Scaled Assisted Sales 5× to ₹80L MRR, revamped ET Markets to ₹3Cr+ ARR, shipped 11 products across companies and side projects.</p>
 
-        <div class="home-identity-row reveal">
+    <div class="container">
+      <div class="home-identity-row reveal" style="margin-top: 32px;">
           <!-- Identity card -->
           <div class="identity-card">
             <div class="identity-prose">
@@ -1604,9 +1632,10 @@
             <div class="chat-head">
               <div class="chat-head-avatar">A</div>
               <div class="chat-head-info">
-                <div class="title">Talk with Anchit</div>
-                <div class="sub">Online now · usually replies in seconds</div>
+                <div class="title">Ask Anchit anything</div>
+                <div class="sub">Always on · knows every detail on this page</div>
               </div>
+              <div class="chat-model-tag">AI</div>
             </div>
             <div class="chat-body" id="chatBody"></div>
             <div class="chips" id="chipRow"></div>
@@ -1620,12 +1649,11 @@
           </div>
         </div>
 
-        <a class="hero-current-block reveal" href="#work" data-view="work">
+      <a class="hero-current-block reveal" href="#work" data-view="work">
           <span class="dot"></span>
           <span class="text">AGM — Product Management at <em>Vahdam India</em> since Apr 2026. D2C growth, CRM experimentation, conversion optimisation across US, UK &amp; global markets.</span>
           <span class="arrow">See the work →</span>
         </a>
-      </div>
     </div>
   </section>
 
@@ -1641,7 +1669,7 @@
         <div class="work-stat"><div class="num"><em>5×</em></div><div class="label">MRR growth on Assisted Sales · ₹15L → ₹80L</div></div>
         <div class="work-stat"><div class="num">₹3<em>Cr</em>+</div><div class="label">Incremental ARR · ET Markets revamp</div></div>
         <div class="work-stat"><div class="num"><span class="counter" data-count="11" data-suffix="">11</span></div><div class="label">Products shipped across companies &amp; side projects</div></div>
-        <div class="work-stat"><div class="num"><span class="counter" data-count="6" data-suffix="+">6+</span></div><div class="label">Years in product &amp; engineering combined</div></div>
+        <div class="work-stat"><div class="num"><span class="counter" data-count="5" data-suffix="+">5+</span></div><div class="label">Years in B2C product &amp; engineering</div></div>
       </div>
 
       <div class="work-list">
@@ -2499,7 +2527,7 @@
       response: "Hey — glad you're here. I'm Anchit. Ask me anything: my <a data-nav='work'>work</a>, my <a data-nav='builds'>side builds</a>, how I think about product, or what I'm solving right now at Vahdam.",
       nextChips: ["What do you do?","Your biggest career win?","What are you building?","Why product over engineering?"] },
     { keywords: ['who','about','tell me about you','yourself','background','bio','introduce','what do you do','describe'],
-      response: "I'm Anchit Tandon — AGM, Product at Vahdam India, ex-Times Internet. Six-plus years in consumer tech: D2C growth, subscriptions, content, events. Started as a backend engineer, moved to product in 2022 because I got obsessed with <em>why</em> things were being built, not just how. I think in systems, ship in experiments, and build AI side projects on weekends because I can't sit still. <a data-nav='about'>Full story →</a>",
+      response: "I'm Anchit Tandon — AGM, Product at Vahdam India, ex-Times Internet. Five-plus years in B2C consumer tech: D2C growth, subscriptions, content, events. Started as a backend engineer, moved to product in 2022 because I got obsessed with <em>why</em> things were being built, not just how. I think in systems, ship in experiments, and build AI side projects on weekends because I can't sit still. <a data-nav='about'>Full story →</a>",
       nextChips: ["Your biggest career win?","Why switch to product?","Tell me about your side builds","Hardest problem right now?"] },
     { keywords: ['role','title','current','doing now','job','vahdam','work now','position'],
       response: "AGM – Product Management at Vahdam India since April 2026. Driving D2C growth across the US, UK, and global markets. The core challenge: balancing acquisition, retention, CRM experimentation, conversion optimisation, and profitability — simultaneously. The challenge isn't finding opportunities, it's prioritising the right ones. Before this, nearly four years at Times Internet — APM to Senior PM.",
@@ -2730,7 +2758,7 @@
 
   // Initial bot message
   setTimeout(() => {
-    addBot("That's the snapshot. Ask me for the real story — the <a data-nav='work'>work</a>, the <a data-nav='builds'>side builds</a>, my product philosophy, or what I'm figuring out next. I'm direct — ask me anything.");
+    addBot("Hi — I'm an AI built on everything Anchit knows about himself. Ask me about his <a data-nav='work'>work</a>, <a data-nav='builds'>side builds</a>, career path, or what he's solving right now. I'll give you the real story, not a resume summary.");
     renderChips(DEFAULT_CHIPS);
   }, 350);
 
@@ -2900,7 +2928,7 @@
 
     const NARRATIONS = {
       home:    "Hey, I'm Anchit Tandon. A.G.M., Product Management at Vah-dahm India. Scaled Assisted Sales five x to eighty lakh M.R.R., revamped E.T. Markets to three crore plus A.R.R., shipped eleven products across companies and side projects. Currently driving direct-to-consumer growth, C.R.M. experimentation, and conversion optimisation across U.S., U.K. and global markets.",
-      work:    "Work, and what it moved. Five x M.R.R. growth on Assisted Sales, from fifteen lakhs to eighty lakhs. Three crore plus incremental A.R.R. from the E.T. Markets revamp. Eleven products shipped across companies and side projects. Six plus years in product and engineering combined.",
+      work:    "Work, and what it moved. Five x M.R.R. growth on Assisted Sales, from fifteen lakhs to eighty lakhs. Three crore plus incremental A.R.R. from the E.T. Markets revamp. Eleven products shipped across companies and side projects. Five plus years in B2C product and engineering.",
       builds:  "Builds I ship on the side. Four A.I.-first consumer experiments, built end-to-end on weekends and evenings, all live. Hey Yaara — an A.I. voice companion for the elderly. Music Gen A.I. — prompt to full track with vocal synthesis. A.I. Tele Suite — real-time transcription and pitch scoring. T.H. Plus Life Engine — personalised A.I. wellness planning.",
       about:   "An engineer who learned to love the funnel. Career lifecycle, 2016 to present. B. Tech Computer Science at V.I.T., then software engineering at Tuple Technologies and City Mall, then product at Times Internet — A.P.M. to Senior P.M. Now A.G.M., Product Management at Vah-dahm India, driving direct-to-consumer growth across U.S., U.K. and global markets.",
       contact: "Let's build something worth measuring. Open to remote and hybrid roles, interesting side collaborations, and honest conversations about funnels, subscriptions, and the messy edges of consumer product."
