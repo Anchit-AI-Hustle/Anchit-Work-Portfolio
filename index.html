@@ -70,7 +70,7 @@
     --font-display: 'Fraunces', 'Times New Roman', serif;
     --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-    --sidebar-w: 80px;
+    --sidebar-w: 160px;
     --max-w: 1280px;
     --gutter: clamp(20px, 4vw, 64px);
     --safe-top: env(safe-area-inset-top);
@@ -104,36 +104,43 @@
     width: var(--sidebar-w); z-index: 200;
     background: #0D0B09;
     border-right: 1px solid rgba(255,255,255,0.07);
-    display: flex; flex-direction: column; align-items: center;
+    display: flex; flex-direction: column; align-items: stretch;
     padding: calc(20px + var(--safe-top)) 0 calc(20px + var(--safe-bottom));
     transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1);
   }
   .sidebar-logo {
-    width: 44px; height: 44px; border-radius: 50%;
+    width: 40px; height: 40px; border-radius: 50%;
     background: var(--primary); color: #FFF;
     display: inline-flex; align-items: center; justify-content: center;
-    padding: 9px;
-    margin-bottom: 24px; flex-shrink: 0;
+    padding: 8px;
+    margin: 0 10px 20px; flex-shrink: 0;
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   .sidebar-logo svg { width: 100%; height: 100%; }
   .sidebar-logo:hover { transform: rotate(-15deg) scale(1.08); }
   .sidebar-nav {
-    flex: 1; display: flex; flex-direction: column; align-items: center;
-    gap: 4px; width: 100%; overflow-y: auto; scrollbar-width: none;
+    flex: 1; display: flex; flex-direction: column; align-items: stretch;
+    gap: 2px; width: 100%; overflow-y: auto; scrollbar-width: none;
+    padding: 0 10px;
   }
   .sidebar-nav::-webkit-scrollbar { display: none; }
   .sidebar-item {
     position: relative;
-    width: 48px; height: 48px; border-radius: 50%;
-    display: inline-flex; align-items: center; justify-content: center;
-    color: rgba(251,245,236,0.32); background: transparent;
+    width: 100%; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 14px;
+    color: rgba(251,245,236,0.4); background: transparent;
     transition: all 0.2s ease; flex-shrink: 0;
     cursor: pointer; border: none; outline: none;
   }
   .sidebar-item:hover { background: rgba(255,255,255,0.09); color: rgba(251,245,236,0.85); }
-  .sidebar-item.active { background: rgba(255,255,255,0.16); color: #FBF5EC; }
-  .sidebar-item svg { width: 20px; height: 20px; }
+  .sidebar-item.active { background: rgba(255,255,255,0.14); color: #FBF5EC; }
+  .sidebar-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .sidebar-label {
+    font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+  }
   .sidebar-tip {
     position: absolute; left: calc(100% + 12px); top: 50%;
     transform: translateY(-50%) translateX(-4px);
@@ -142,15 +149,15 @@
     font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
     padding: 6px 12px; border-radius: 8px; white-space: nowrap;
     pointer-events: none; opacity: 0; z-index: 400;
-    transition: opacity 0.15s ease, transform 0.15s ease;
+    display: none;
   }
-  .sidebar-item:hover .sidebar-tip { opacity: 1; transform: translateY(-50%) translateX(0); }
   .sidebar-rule {
-    width: 28px; height: 1px; border: none;
-    background: rgba(255,255,255,0.1); margin: 8px 0; flex-shrink: 0;
+    width: auto; height: 1px; border: none;
+    background: rgba(255,255,255,0.1); margin: 8px 10px; flex-shrink: 0;
   }
   .sidebar-social {
-    display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0;
+    display: flex; flex-direction: column; align-items: stretch; gap: 2px; flex-shrink: 0;
+    padding: 0 10px;
   }
   .sidebar-item .icon-sun { display: none; }
   [data-theme="dark"] .sidebar-item .icon-sun { display: block; }
@@ -1425,31 +1432,31 @@
   <nav class="sidebar-nav">
     <a class="sidebar-item active" href="#home" data-view="home" aria-label="Home">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      <span class="sidebar-tip">Home</span>
+      <span class="sidebar-label">Home</span>
     </a>
     <a class="sidebar-item" href="#about" data-view="about" aria-label="About Me">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <span class="sidebar-tip">About Me</span>
+      <span class="sidebar-label">About Me</span>
     </a>
-    <a class="sidebar-item" href="#now" data-view="now" aria-label="Now">
+    <a class="sidebar-item" href="#now" data-view="now" aria-label="Current Role">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-      <span class="sidebar-tip">Now</span>
+      <span class="sidebar-label">Now</span>
     </a>
     <a class="sidebar-item" href="#experience" data-view="experience" aria-label="Experience">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-      <span class="sidebar-tip">Experience</span>
+      <span class="sidebar-label">Experience</span>
     </a>
-    <a class="sidebar-item" href="#projects" data-view="projects" aria-label="Projects">
+    <a class="sidebar-item" href="#projects" data-view="projects" aria-label="Side Projects">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-      <span class="sidebar-tip">Projects</span>
+      <span class="sidebar-label">Projects</span>
     </a>
     <a class="sidebar-item" href="#resume" data-view="resume" aria-label="Resume">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-      <span class="sidebar-tip">Resume</span>
+      <span class="sidebar-label">Resume</span>
     </a>
-    <a class="sidebar-item" href="#contact" data-view="contact" aria-label="Contact">
+    <a class="sidebar-item" href="#contact" data-view="contact" aria-label="Get in Touch">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-      <span class="sidebar-tip">Contact</span>
+      <span class="sidebar-label">Contact</span>
     </a>
   </nav>
 
@@ -1458,20 +1465,20 @@
   <div class="sidebar-social">
     <a href="https://linkedin.com/in/anchit-tandon" target="_blank" rel="noopener" class="sidebar-item" aria-label="LinkedIn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-      <span class="sidebar-tip">LinkedIn</span>
+      <span class="sidebar-label">LinkedIn</span>
     </a>
     <a href="https://github.com/anchittandon-create" target="_blank" rel="noopener" class="sidebar-item" aria-label="GitHub">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
-      <span class="sidebar-tip">GitHub</span>
+      <span class="sidebar-label">GitHub</span>
     </a>
     <a href="mailto:anchit.tandon@gmail.com" class="sidebar-item" aria-label="Email">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-      <span class="sidebar-tip">Email</span>
+      <span class="sidebar-label">Email</span>
     </a>
     <button class="sidebar-item" id="themeToggle" aria-label="Toggle theme">
       <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
-      <span class="sidebar-tip">Theme</span>
+      <span class="sidebar-label">Theme</span>
     </button>
   </div>
 </aside>
