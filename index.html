@@ -71,8 +71,8 @@
     --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, monospace;
     --sidebar-w: 160px;
-    --max-w: 1280px;
-    --gutter: clamp(20px, 4vw, 64px);
+    --max-w: 1600px;
+    --gutter: clamp(20px, 3vw, 48px);
     --safe-top: env(safe-area-inset-top);
     --safe-bottom: env(safe-area-inset-bottom);
   }
@@ -272,7 +272,7 @@
   .lede {
     font-family: var(--font-display); font-weight: 300;
     font-size: clamp(18px, 2.2vw, 26px); line-height: 1.45;
-    color: var(--ink-dim); max-width: 720px;
+    color: var(--ink-dim); max-width: 880px;
   }
   .lede em { font-style: italic; color: var(--primary); font-weight: 400; }
 
@@ -297,14 +297,14 @@
   .hero-persona {
     font-family: var(--font-display); font-weight: 300;
     font-size: clamp(22px, 2.8vw, 34px); line-height: 1.35;
-    color: var(--ink); max-width: 780px; margin-bottom: 16px;
+    color: var(--ink); max-width: 960px; margin-bottom: 16px;
     letter-spacing: -0.01em;
   }
   .hero-persona em { font-style: italic; color: var(--primary); font-weight: 400; }
   .hero-tagline {
     font-family: var(--font-display); font-weight: 300;
     font-size: clamp(16px, 1.8vw, 21px); line-height: 1.5;
-    color: var(--ink-dim); max-width: 780px; margin-bottom: 0;
+    color: var(--ink-dim); max-width: 960px; margin-bottom: 0;
   }
   .hero-tagline em { font-style: italic; color: var(--primary); font-weight: 400; }
   /* Hero stats — big, confident */
@@ -557,7 +557,7 @@
   .chat-send svg { width: 14px; height: 14px; }
 
   /* ============ SECTION HEADERS ============ */
-  .section-head { margin-bottom: clamp(40px, 6vw, 80px); max-width: 980px; }
+  .section-head { margin-bottom: clamp(40px, 6vw, 80px); max-width: 1200px; }
   .section-head .eyebrow { margin-bottom: 24px; }
 
   /* ============ WORK ============ */
@@ -867,13 +867,9 @@
   footer .footer-links { display: flex; gap: 24px; }
 
   /* ============ TV / LARGE SCREEN ============ */
-  @media (min-width: 1920px) {
-    :root { --max-w: 1600px; }
-    body { font-size: 19px; }
-  }
   @media (min-width: 2560px) {
     :root { --max-w: 1920px; }
-    body { font-size: 22px; }
+    body { font-size: 20px; }
   }
 
   /* ============ REVEAL — all visible immediately ============ */
