@@ -336,74 +336,68 @@
   }
 
   /* ============ HOME IDENTITY + CHAT GRID ============ */
-  .home-identity-row {
-    display: grid;
-    grid-template-columns: 2fr 3fr;
-    gap: 24px;
-    align-items: start;
-    margin-bottom: 24px;
+  /* ============ HOME CAREER TIMELINE ============ */
+  .home-timeline {
+    display: flex; flex-direction: column; gap: 4px;
+    position: relative; margin-bottom: 40px;
+    padding-left: 28px;
   }
-  @media (max-width: 860px) {
-    .home-identity-row { grid-template-columns: 1fr; }
+  .home-timeline::before {
+    content: ''; position: absolute; left: 8px; top: 12px; bottom: 12px;
+    width: 2px; background: var(--rule);
   }
-  .identity-card {
-    background: var(--bg-elev); border-radius: 28px;
-    border: 1px solid var(--rule);
-    padding: 28px 28px 24px;
-    display: flex; flex-direction: column; gap: 0;
+  .home-tl-item {
+    display: flex; align-items: center; gap: 16px;
+    padding: 14px 20px 14px 0; border-radius: 14px;
+    transition: background 0.2s, transform 0.2s;
+    position: relative; cursor: pointer;
   }
-  .identity-prose {
-    font-family: var(--font-display); font-weight: 300;
-    font-size: clamp(15px, 1.5vw, 17px); line-height: 1.65; color: var(--ink);
+  .home-tl-item:hover { background: var(--bg-elev); transform: translateX(4px); }
+  .home-tl-dot {
+    width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+    position: absolute; left: -24px; top: 50%; transform: translateY(-50%);
+    border: 3px solid var(--bg);
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
   }
-  .identity-prose p { margin: 0 0 14px; }
-  .identity-prose p:last-child { margin-bottom: 0; }
-  .identity-prose em { font-style: italic; color: var(--primary); }
-  .identity-divider {
-    height: 1px; background: var(--rule); margin: 22px 0;
+  .home-tl-item:hover .home-tl-dot { transform: translateY(-50%) scale(1.4); }
+  .home-tl-content { flex: 1; min-width: 0; }
+  .home-tl-year {
+    font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-mute);
+    margin-bottom: 2px;
   }
-  .identity-meta {
-    display: flex; flex-direction: column; gap: 12px; margin-bottom: 22px;
+  .home-tl-title {
+    font-family: var(--font-display); font-size: clamp(16px, 1.8vw, 20px);
+    font-weight: 400; color: var(--ink); line-height: 1.25; letter-spacing: -0.01em;
   }
-  .identity-row {
-    display: flex; align-items: baseline; gap: 14px;
+  .home-tl-title em { font-style: italic; color: var(--primary); font-weight: 500; }
+  .home-tl-desc {
+    font-size: 13px; color: var(--ink-dim); margin-top: 2px; line-height: 1.4;
   }
-  .identity-meta-key {
-    font-family: var(--font-mono); font-size: 10px; text-transform: uppercase;
-    letter-spacing: 0.1em; color: var(--ink-mute); min-width: 58px; flex-shrink: 0;
+  .home-tl-arrow {
+    font-family: var(--font-mono); font-size: 16px; color: var(--ink-mute);
+    flex-shrink: 0; opacity: 0; transition: opacity 0.2s, transform 0.2s;
   }
-  .identity-meta-val {
-    font-size: 13.5px; color: var(--ink); line-height: 1.45;
+  .home-tl-item:hover .home-tl-arrow { opacity: 1; transform: translateX(4px); }
+
+  /* ============ HOME DUAL CTAs ============ */
+  .home-ctas {
+    display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 48px;
   }
-  .identity-meta-val strong { font-weight: 600; }
-  .identity-skills {
-    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 22px;
+  .home-cta {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--font-body); font-size: 15px; font-weight: 600;
+    padding: 16px 28px; border-radius: 99px; cursor: pointer;
+    border: none; transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
   }
-  .skill-tag {
-    font-family: var(--font-mono); font-size: 10px; text-transform: uppercase;
-    letter-spacing: 0.05em; color: var(--ink-dim);
-    background: var(--bg-deep); border: 1px solid var(--rule);
-    border-radius: 99px; padding: 5px 11px;
+  .home-cta.primary {
+    background: var(--primary); color: #FFF;
   }
-  .identity-proof {
-    display: flex; gap: 0; border-top: 1px solid var(--rule); padding-top: 18px;
+  .home-cta.primary:hover { background: var(--primary-deep); transform: translateY(-2px) scale(1.03); box-shadow: 0 8px 24px rgba(255,77,31,0.3); }
+  .home-cta.secondary {
+    background: var(--bg-elev); color: var(--ink); border: 1px solid var(--rule-strong);
   }
-  .identity-proof-item {
-    flex: 1; display: flex; flex-direction: column; gap: 4px;
-    padding-right: 16px; border-right: 1px solid var(--rule);
-    margin-right: 16px;
-  }
-  .identity-proof-item:last-child { border-right: none; padding-right: 0; margin-right: 0; }
-  .identity-proof-num {
-    font-family: var(--font-display); font-weight: 400;
-    font-size: clamp(26px, 3vw, 36px); line-height: 1; letter-spacing: -0.03em;
-    color: var(--ink); font-variation-settings: "SOFT" 70, "WONK" 1;
-  }
-  .identity-proof-num em { font-style: italic; color: var(--primary); }
-  .identity-proof-label {
-    font-family: var(--font-mono); font-size: 9px; text-transform: uppercase;
-    letter-spacing: 0.1em; color: var(--ink-dim); line-height: 1.4;
-  }
+  .home-cta.secondary:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
 
   /* Currently strip */
   .hero-current-block {
@@ -2301,7 +2295,7 @@
 
 <script>
   /* ============ STATE ============ */
-  const ALL_VIEWS = ['home','about','now','experience','projects','resume','contact','project-yaara','project-music','project-telesuite','project-lifeengine'];
+  const ALL_VIEWS = ['home','chat','about','now','experience','projects','resume','contact','project-yaara','project-music','project-telesuite','project-lifeengine'];
   let audioModeEnabled = false; // true once user has clicked Play — gates TTS for chat
   const root = document.documentElement;
 
@@ -2781,15 +2775,16 @@
     const progress  = document.getElementById('anpProgress');
 
     const NARRATIONS = {
-      home:       "Hey, I'm Anchit Tandon. A.G.M., Product Management at Vah-dahm India. Scaled Assisted Sales five x to eighty lakh M.R.R., revamped E.T. Markets to three crore plus A.R.R., shipped eleven products across companies and side projects.",
-      about:      "Zero to one product builder with five plus years of B2C experience. I drive growth and conversion funnels through data-driven experimentation, and have scaled paid subscription products across fintech and content. B. Tech Computer Science from V.I.T. Vellore. Currently A.G.M. Product Management at Vah-dahm India, Delhi.",
+      home:       "Hey, I'm Anchit Tandon. An engineer who learned to love the funnel. Currently A.G.M., Product Management at Vah-dahm India, driving direct-to-consumer growth across U.S., U.K. and global. Previously at Times Internet — scaled Assisted Sales five x to eighty lakh M.R.R., revamped E.T. Markets to three crore plus A.R.R. Eleven products shipped across work and side projects.",
+      chat:       "Ask me anything — my work, my side projects, why I moved from engineering to product, or what I'm solving right now.",
+      about:      "I started in engineering — backend systems, consumer apps. Then I moved to product because I got obsessed with why things were being built. What I found was the funnel — the unfiltered truth about whether your decisions actually matter. Two hills I'll die on: execution beats ideas, and technology should remove friction, not create it.",
       now:        "Current role: A.G.M., Product Management at Vah-dahm India since April 2026. Spearheading direct-to-consumer growth across U.S., U.K. and global markets. Lifted product ratings from 2.4 to 4.0 through cross-functional experiments. Driving revenue growth through Klaviyo and WebEngage lifecycle campaigns.",
       experience: "Past experience at Times Internet — A.P.M. to Senior P.M. across four years. Five x M.R.R. growth on Assisted Sales, three crore plus A.R.R. from the E.T. Markets revamp, eleven products shipped. Earlier: backend engineering at Tuple Technologies and City Mall.",
       projects:   "Personal projects, built out of curiosity and love for technology. Four A.I.-first consumer experiments, all live. Hey Yaara — A.I. voice companion. Music Gen A.I. — prompt to full track. A.I. Tele Suite — transcription and pitch scoring. T.H. Plus Life Engine — personalised wellness planning.",
       resume:     "My resume. Download or view the full P.D.F.",
       contact:    "Let's build something worth measuring. Open to remote and hybrid roles, side collaborations, and honest conversations about funnels, subscriptions, and consumer product."
     };
-    const VIEW_LABELS = { home: 'Home', about: 'About Me', now: 'Now', experience: 'Experience', projects: 'Projects', resume: 'Resume', contact: 'Contact' };
+    const VIEW_LABELS = { home: 'Home', chat: 'Chat', about: 'About Me', now: 'Now', experience: 'Experience', projects: 'Projects', resume: 'Resume', contact: 'Contact' };
 
     let progressTimer = null, utterStart = 0, utterDuration = 0;
     let currentViewName = 'home';
@@ -2897,6 +2892,13 @@
     });
 
     dismissBtn?.addEventListener('click', () => { nudge?.classList.add('dismissed'); });
+
+    /* Hero "Hear this from me" button */
+    const heroListen = document.getElementById('heroListenBtn');
+    heroListen?.addEventListener('click', () => {
+      audioModeEnabled = true;
+      trySpeak('home');
+    });
 
     document.addEventListener('viewChanged', (e) => { if (audioModeEnabled) trySpeak(e.detail); });
 
