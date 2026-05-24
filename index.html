@@ -293,9 +293,16 @@
     display: inline; font-style: italic; color: var(--primary);
     font-variation-settings: "SOFT" 100, "WONK" 1;
   }
+  .hero-persona {
+    font-family: var(--font-display); font-weight: 300;
+    font-size: clamp(22px, 2.8vw, 34px); line-height: 1.35;
+    color: var(--ink); max-width: 780px; margin-bottom: 16px;
+    letter-spacing: -0.01em;
+  }
+  .hero-persona em { font-style: italic; color: var(--primary); font-weight: 400; }
   .hero-tagline {
     font-family: var(--font-display); font-weight: 300;
-    font-size: clamp(17px, 2vw, 24px); line-height: 1.5;
+    font-size: clamp(16px, 1.8vw, 21px); line-height: 1.5;
     color: var(--ink-dim); max-width: 780px; margin-bottom: 40px;
   }
   .hero-tagline em { font-style: italic; color: var(--primary); font-weight: 400; }
@@ -1503,6 +1510,7 @@
         <h1 class="display-xl name">
           <span class="greeting">Hey, I'm </span><span class="firstline">Anchit </span><span class="secondline">Tandon.</span>
         </h1>
+        <p class="hero-persona">Product leader. Engineer by training. Builder by instinct. <em>Relentlessly curious.</em></p>
         <p class="hero-tagline">AGM — Product Management at <em>Vahdam India.</em> Scaled Assisted Sales 5× to ₹80L MRR, revamped ET Markets to ₹3Cr+ ARR, shipped 11 products across companies and side projects.</p>
       </div>
     </div>
