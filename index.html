@@ -268,16 +268,15 @@
   .lede em { font-style: italic; color: var(--primary); font-weight: 400; }
 
   /* ============ HOME / HERO ============ */
-  .home-hero { padding-top: clamp(12px, 2.5vw, 32px); }
-  .home-hero .eyebrow { margin-bottom: 16px; }
+  .home-hero { padding-top: clamp(20px, 3.5vw, 48px); }
+  .home-hero .eyebrow { margin-bottom: 20px; }
   /* "Hey, I'm" sits inline — smaller, italic, same baseline as "Anchit" */
   .home-hero .greeting {
-    display: inline; font-family: var(--font-display); font-style: italic; font-weight: 300;
-    font-size: clamp(28px, 4vw, 52px); color: var(--ink-dim); margin-right: 0.18em;
-    vertical-align: baseline; line-height: inherit;
+    display: block; font-family: var(--font-display); font-style: italic; font-weight: 300;
+    font-size: clamp(20px, 2.8vw, 32px); color: var(--ink-dim); margin-bottom: 8px;
+    letter-spacing: 0.01em;
   }
-  .home-hero .name { margin-bottom: 20px; line-height: 0.9; }
-  /* first line: "Hey, I'm Anchit" — greeting inline-block before firstline */
+  .home-hero .name { margin-bottom: 24px; line-height: 0.92; }
   .home-hero .name .firstline { display: inline; }
   .home-hero .name .secondline {
     display: block; font-style: italic; color: var(--primary);
@@ -285,22 +284,11 @@
   }
   .hero-tagline {
     font-family: var(--font-display); font-weight: 300;
-    font-size: clamp(18px, 2.2vw, 28px); line-height: 1.4;
-    color: var(--ink); max-width: 780px; margin-bottom: 36px;
+    font-size: clamp(17px, 2vw, 24px); line-height: 1.5;
+    color: var(--ink-dim); max-width: 780px; margin-bottom: 40px;
   }
   .hero-tagline em { font-style: italic; color: var(--primary); font-weight: 400; }
-  /* engineer strike — readable text, unmissable line through it */
-  .hero-strike {
-    position: relative; display: inline-block;
-    color: var(--ink); opacity: 0.55;
-  }
-  .hero-strike::after {
-    content: ''; position: absolute; left: -2%; right: -2%; top: 54%;
-    height: 3px; background: var(--primary); transform: rotate(-1.5deg);
-    border-radius: 3px; opacity: 1;
-  }
-
-  /* Hero stats — big, confident, no thin borders */
+  /* Hero stats — big, confident */
   .hero-stats {
     display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
     margin-bottom: 40px;
@@ -308,10 +296,11 @@
   @media (max-width: 880px) { .hero-stats { grid-template-columns: repeat(2, 1fr); } }
   .hero-stat {
     background: var(--bg-elev); border-radius: 20px; padding: 28px 24px;
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+    border: 1px solid var(--rule);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s, border-color 0.3s;
     position: relative; overflow: hidden;
   }
-  .hero-stat:hover { transform: translateY(-6px) rotate(-1deg); box-shadow: var(--shadow-md); }
+  .hero-stat:hover { transform: translateY(-6px) rotate(-1deg); box-shadow: var(--shadow-md); border-color: var(--primary); }
   .hero-stat:nth-child(2):hover { transform: translateY(-6px) rotate(1deg); }
   .hero-stat:nth-child(4):hover { transform: translateY(-6px) rotate(1deg); }
   .hero-stat .num {
@@ -1327,18 +1316,18 @@
           <span class="greeting">Hey, I'm</span><span class="firstline">Anchit</span>
           <span class="secondline">Tandon.</span>
         </h1>
-        <p class="hero-tagline">An <span class="hero-strike">engineer</span> who learned to <em>love the funnel.</em> Six years building and shipping — Times Internet, Vahdam India, four AI side projects live.</p>
+        <p class="hero-tagline">AGM — Product Management at <em>Vahdam India.</em> Scaled Assisted Sales 5× to ₹80L MRR, revamped ET Markets to ₹3Cr+ ARR, shipped 11 products across companies and side projects.</p>
 
         <div class="hero-stats reveal-stagger">
-          <div class="hero-stat"><div class="num"><em class="counter" data-count="6" data-suffix="+">6+</em></div><div class="label">Years in product &amp; engineering</div></div>
-          <div class="hero-stat"><div class="num"><em>5×</em></div><div class="label">MRR growth · Assisted Sales (₹15L → ₹80L)</div></div>
-          <div class="hero-stat"><div class="num">₹3<em>Cr</em>+</div><div class="label">Incremental ARR unlocked · ET Markets revamp</div></div>
-          <div class="hero-stat"><div class="num"><em class="counter" data-count="4">4</em></div><div class="label">Side projects shipped &amp; live</div></div>
+          <div class="hero-stat"><div class="num"><em>5×</em></div><div class="label">MRR growth · ₹15L → ₹80L · ET Prime Assisted Sales</div></div>
+          <div class="hero-stat"><div class="num">₹3<em>Cr</em>+</div><div class="label">Incremental ARR · ET Markets revamp across 4 platforms</div></div>
+          <div class="hero-stat"><div class="num"><em class="counter" data-count="11">11</em></div><div class="label">Products shipped · work + side projects combined</div></div>
+          <div class="hero-stat"><div class="num">2.4→<em>4.0</em></div><div class="label">Product ratings lift · Vahdam India · cross-functional experiments</div></div>
         </div>
 
         <a class="hero-current-block reveal" href="#work" data-view="work">
           <span class="dot"></span>
-          <span class="text">Currently spearheading <em>D2C growth at Vahdam India</em> — product, CRM, experimentation across US, UK &amp; global.</span>
+          <span class="text">AGM — Product Management at <em>Vahdam India</em> since Apr 2026. D2C growth, CRM experimentation, conversion optimisation across US, UK &amp; global markets.</span>
           <span class="arrow">See the work →</span>
         </a>
 
@@ -2558,7 +2547,7 @@
     let isInteracted = false;
 
     const NARRATIONS = {
-      home:    "Hey, I'm Anchit Tandon. An engineer who learned to love the funnel. Six years building and shipping — Times Internet, Vah-dahm India, four A.I. side projects live. Currently spearheading direct-to-consumer growth at Vah-dahm India — product, C.R.M., experimentation across U.S., U.K. and global.",
+      home:    "Hey, I'm Anchit Tandon. A.G.M., Product Management at Vah-dahm India. Scaled Assisted Sales five x to eighty lakh M.R.R., revamped E.T. Markets to three crore plus A.R.R., shipped eleven products across companies and side projects. Currently driving direct-to-consumer growth, C.R.M. experimentation, and conversion optimisation across U.S., U.K. and global markets.",
       work:    "Work, and what it moved. Five x M.R.R. growth on Assisted Sales, from fifteen lakhs to eighty lakhs. Three crore plus incremental A.R.R. from the E.T. Markets revamp. Eleven products shipped across companies and side projects. Six plus years in product and engineering combined.",
       builds:  "Builds I ship on the side. Four A.I.-first consumer experiments, built end-to-end on weekends and evenings, all live. Hey Yaara — an A.I. voice companion for the elderly. Music Gen A.I. — prompt to full track with vocal synthesis. A.I. Tele Suite — real-time transcription and pitch scoring. T.H. Plus Life Engine — personalised A.I. wellness planning.",
       about:   "An engineer who learned to love the funnel. Career lifecycle, 2016 to present. B. Tech Computer Science at V.I.T., then software engineering at Tuple Technologies and City Mall, then product at Times Internet — A.P.M. to Senior P.M. Now A.G.M., Product Management at Vah-dahm India, driving direct-to-consumer growth across U.S., U.K. and global markets.",
