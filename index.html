@@ -932,6 +932,88 @@
   .audio-ambient.listening .audio-ambient-bars span { background: var(--accent); }
   .audio-ambient.listening .audio-ambient-label { color: var(--accent); }
 
+  /* ============ AUDIO NUDGE BAR ============ */
+  .audio-nudge {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255,77,31,0.06); border-bottom: 1px solid rgba(255,77,31,0.18);
+    padding: 0 clamp(20px,4vw,48px); overflow: hidden;
+  }
+  .audio-nudge.dismissed { display: none; }
+  .audio-nudge-idle { display: flex; align-items: center; gap: 16px; padding: 13px 0; }
+  .audio-nudge.playing .audio-nudge-idle,
+  .audio-nudge.paused  .audio-nudge-idle { display: none; }
+  .audio-nudge-icon {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--primary); color: #fff;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .audio-nudge-copy { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
+  .audio-nudge-headline {
+    font-family: var(--font-display); font-size: 15px; font-weight: 500;
+    color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .audio-nudge-sub {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--ink-dim); white-space: nowrap;
+  }
+  .audio-nudge-play-btn {
+    display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; background: var(--primary); color: #fff; border: none;
+    border-radius: 99px; padding: 10px 20px; cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .audio-nudge-play-btn:hover { background: var(--primary-deep); transform: scale(1.04); }
+  .audio-nudge-dismiss-btn {
+    background: none; border: none; cursor: pointer; color: var(--ink-mute);
+    font-size: 18px; padding: 4px 8px; line-height: 1; flex-shrink: 0; transition: color 0.2s;
+  }
+  .audio-nudge-dismiss-btn:hover { color: var(--ink); }
+  @media (max-width: 600px) { .audio-nudge-sub { display: none; } }
+
+  /* Nudge — player state */
+  .audio-nudge-player { display: none; align-items: center; gap: 12px; padding: 11px 0; }
+  .audio-nudge.playing .audio-nudge-player,
+  .audio-nudge.paused  .audio-nudge-player { display: flex; }
+  .anp-btn {
+    width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+    background: var(--primary); color: #fff; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .anp-btn:hover { background: var(--primary-deep); transform: scale(1.08); }
+  .anp-label {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--ink-dim); flex-shrink: 0; white-space: nowrap;
+  }
+  .audio-nudge.paused .anp-label { color: var(--ink-mute); }
+  .anp-progress {
+    flex: 1; height: 4px; background: var(--rule); border-radius: 2px; overflow: hidden;
+    cursor: pointer; min-width: 60px;
+  }
+  .anp-progress-fill { height: 100%; background: var(--primary); border-radius: 2px; width: 0%; transition: width 0.6s linear; }
+  .anp-time { font-family: var(--font-mono); font-size: 10px; color: var(--ink-mute); flex-shrink: 0; min-width: 30px; text-align: right; }
+  .anp-stop-btn {
+    background: none; border: 1px solid var(--rule-strong); color: var(--ink-mute);
+    font-size: 10px; font-family: var(--font-mono); letter-spacing: 0.04em; text-transform: uppercase;
+    border-radius: 99px; padding: 6px 12px; cursor: pointer; flex-shrink: 0;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .anp-stop-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+  /* Chat TTS speaking state + caption */
+  .msg.bot.speaking .msg-bubble { outline: 2px solid var(--primary); outline-offset: 1px; }
+  .chat-caption {
+    border-top: 1px solid transparent; background: var(--bg-deep);
+    font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.02em;
+    color: var(--ink-dim); line-height: 1.6;
+    max-height: 0; overflow: hidden; padding: 0 24px;
+    transition: max-height 0.3s ease, padding 0.25s ease, border-color 0.2s;
+  }
+  .chat-caption.active { max-height: 72px; padding: 10px 24px 12px; border-top-color: var(--rule); }
+  .chat-caption-word { transition: color 0.08s; }
+  .chat-caption-word.current { color: var(--primary); font-weight: 600; }
+
   /* ============ VOICE INTERRUPT CARD ============ */
   .voice-interrupt-card {
     position: fixed; bottom: calc(72px + var(--safe-bottom, 0px)); right: 20px;
@@ -1402,6 +1484,38 @@
 <!-- ============ MAIN ============ -->
 <main>
 
+  <!-- ============ AUDIO NUDGE BAR — visible on every view ============ -->
+  <div class="audio-nudge" id="audioNudge" role="region" aria-label="Voice narration by Anchit">
+    <!-- Idle: invite to play -->
+    <div class="audio-nudge-idle">
+      <div class="audio-nudge-icon" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="2" x2="12" y2="22"/><line x1="8" y1="6" x2="8" y2="18"/><line x1="4" y1="10" x2="4" y2="14"/><line x1="16" y1="6" x2="16" y2="18"/><line x1="20" y1="10" x2="20" y2="14"/></svg>
+      </div>
+      <div class="audio-nudge-copy">
+        <span class="audio-nudge-headline">Hear it from Anchit</span>
+        <span class="audio-nudge-sub">Let him tell his own journey · ~2 min</span>
+      </div>
+      <button class="audio-nudge-play-btn" id="audioPlayBtn" aria-label="Play Anchit's narration">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Play
+      </button>
+      <button class="audio-nudge-dismiss-btn" id="audioNudgeDismiss" aria-label="Dismiss narration bar">✕</button>
+    </div>
+    <!-- Player: mini-player while audio runs -->
+    <div class="audio-nudge-player">
+      <button class="anp-btn" id="anpPausePlay" aria-label="Pause">
+        <svg id="anpPauseIcon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        <svg id="anpPlayIcon"  width="11" height="11" viewBox="0 0 24 24" fill="currentColor" style="display:none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      </button>
+      <span class="anp-label" id="anpLabel">Anchit's story</span>
+      <div class="anp-progress" id="anpProgress" title="Click to seek">
+        <div class="anp-progress-fill" id="anpFill"></div>
+      </div>
+      <span class="anp-time" id="anpTime">0:00</span>
+      <button class="anp-stop-btn" id="anpStop" aria-label="Stop narration">■ Stop</button>
+    </div>
+  </div>
+
   <!-- HOME -->
   <section class="view active" id="view-home">
     <div class="ticker" aria-hidden="true">
@@ -1438,11 +1552,72 @@
         </h1>
         <p class="hero-tagline">AGM — Product Management at <em>Vahdam India.</em> Scaled Assisted Sales 5× to ₹80L MRR, revamped ET Markets to ₹3Cr+ ARR, shipped 11 products across companies and side projects.</p>
 
-        <div class="hero-stats reveal-stagger">
-          <div class="hero-stat"><div class="num"><em>5×</em></div><div class="label">MRR growth · ₹15L → ₹80L · ET Prime Assisted Sales</div></div>
-          <div class="hero-stat"><div class="num">₹3<em>Cr</em>+</div><div class="label">Incremental ARR · ET Markets revamp across 4 platforms</div></div>
-          <div class="hero-stat"><div class="num"><em class="counter" data-count="11">11</em></div><div class="label">Products shipped · work + side projects combined</div></div>
-          <div class="hero-stat"><div class="num">2.4→<em>4.0</em></div><div class="label">Product ratings lift · Vahdam India · cross-functional experiments</div></div>
+        <div class="home-identity-row reveal">
+          <!-- Identity card -->
+          <div class="identity-card">
+            <div class="identity-prose">
+              <p>I started as a backend engineer building consumer apps — the kinds of systems where you watch your code touch a million people in a weekend.</p>
+              <p>Then I moved to product, and what I fell for was <em>the funnel</em> — the unfiltered truth about whether your decisions actually matter.</p>
+              <p>These days I'm AGM – Product at Vahdam India, spearheading D2C growth across the US, UK, and global markets. Before this, nearly four years at Times Internet — APM to Senior PM. Still writing code every weekend; all four side projects are mine, end-to-end.</p>
+            </div>
+            <div class="identity-divider"></div>
+            <div class="identity-meta">
+              <div class="identity-row">
+                <span class="identity-meta-key">Now</span>
+                <span class="identity-meta-val"><strong>AGM – Product Management</strong> · Vahdam India · Delhi</span>
+              </div>
+              <div class="identity-row">
+                <span class="identity-meta-key">Open to</span>
+                <span class="identity-meta-val">Remote &amp; hybrid · D2C · Consumer tech · AI-native products</span>
+              </div>
+              <div class="identity-row">
+                <span class="identity-meta-key">Education</span>
+                <span class="identity-meta-val">B.Tech CSE · VIT Vellore · 2020</span>
+              </div>
+            </div>
+            <div class="identity-skills">
+              <span class="skill-tag">Growth funnels</span>
+              <span class="skill-tag">0→1 products</span>
+              <span class="skill-tag">Subscriptions</span>
+              <span class="skill-tag">A/B testing</span>
+              <span class="skill-tag">AI &amp; LLMs</span>
+              <span class="skill-tag">Backend eng.</span>
+            </div>
+            <div class="identity-proof">
+              <div class="identity-proof-item">
+                <div class="identity-proof-num"><em>5×</em></div>
+                <div class="identity-proof-label">MRR growth<br>Assisted Sales</div>
+              </div>
+              <div class="identity-proof-item">
+                <div class="identity-proof-num">₹3<em>Cr</em>+</div>
+                <div class="identity-proof-label">Incremental ARR<br>ET Markets</div>
+              </div>
+              <div class="identity-proof-item">
+                <div class="identity-proof-num"><em>11</em></div>
+                <div class="identity-proof-label">Products shipped<br>work + side builds</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chat -->
+          <div class="chat-block">
+            <div class="chat-head">
+              <div class="chat-head-avatar">A</div>
+              <div class="chat-head-info">
+                <div class="title">Talk with Anchit</div>
+                <div class="sub">Online now · usually replies in seconds</div>
+              </div>
+            </div>
+            <div class="chat-body" id="chatBody"></div>
+            <div class="chips" id="chipRow"></div>
+            <div class="chat-input">
+              <input type="text" id="chatInput" placeholder="Ask me anything…" autocomplete="off" />
+              <button class="chat-send" id="chatSend" aria-label="Send">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </button>
+            </div>
+            <div class="chat-caption" id="chatCaption" aria-live="polite" aria-label="Currently spoken text"></div>
+          </div>
         </div>
 
         <a class="hero-current-block reveal" href="#work" data-view="work">
@@ -2243,6 +2418,7 @@
 <script>
   /* ============ STATE ============ */
   const ALL_VIEWS = ['home','work','builds','about','contact','project-yaara','project-music','project-telesuite','project-lifeengine'];
+  let audioModeEnabled = false; // true once user has clicked Play — gates TTS for chat
   const root = document.documentElement;
 
   /* ============ THEME ============ */
@@ -2428,6 +2604,71 @@
       a.addEventListener('click', (e) => { e.preventDefault(); switchView(a.dataset.nav); });
     });
     scrollChat();
+    if (audioModeEnabled) {
+      const bubble = w.querySelector('.msg-bubble');
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      const plain = tmp.textContent.trim();
+      // Small delay so the bubble is scrolled into view first
+      setTimeout(() => speakBotResponse(bubble, plain), 200);
+    }
+  }
+
+  function speakBotResponse(bubbleEl, plainText) {
+    if (!window.speechSynthesis || !plainText || !bubbleEl) return;
+    window.speechSynthesis.cancel();
+
+    const caption = document.getElementById('chatCaption');
+    const words = plainText.trim().split(/\s+/);
+
+    if (caption) {
+      caption.innerHTML = words.map((w, i) => `<span class="chat-caption-word" data-i="${i}">${w}</span>`).join(' ');
+      caption.classList.add('active');
+    }
+    bubbleEl.closest('.msg')?.classList.add('speaking');
+
+    const utter = new SpeechSynthesisUtterance(plainText);
+    utter.lang = 'en-IN'; utter.rate = 0.92; utter.pitch = 1.0;
+
+    const pickVoice = () => {
+      const vv = window.speechSynthesis.getVoices();
+      return vv.find(v => v.lang === 'en-IN')
+          || vv.find(v => v.lang === 'en-GB' && v.localService)
+          || vv.find(v => v.lang.startsWith('en') && v.localService)
+          || vv.find(v => v.lang.startsWith('en'));
+    };
+    const voice = pickVoice();
+    if (!voice && window.speechSynthesis.getVoices().length === 0) {
+      // Voices not loaded yet — wait for them
+      window.speechSynthesis.onvoiceschanged = () => {
+        utter.voice = pickVoice();
+        window.speechSynthesis.onvoiceschanged = null;
+      };
+    } else if (voice) {
+      utter.voice = voice;
+    }
+
+    utter.onboundary = (e) => {
+      if (e.name !== 'word' || !caption) return;
+      let pos = 0;
+      for (let i = 0; i < words.length; i++) {
+        if (e.charIndex >= pos && e.charIndex < pos + words[i].length) {
+          caption.querySelectorAll('.current').forEach(el => el.classList.remove('current'));
+          caption.querySelector(`[data-i="${i}"]`)?.classList.add('current');
+          break;
+        }
+        pos += words[i].length + 1;
+      }
+    };
+
+    const cleanup = () => {
+      bubbleEl.closest('.msg')?.classList.remove('speaking');
+      if (caption) { caption.classList.remove('active'); caption.innerHTML = ''; }
+    };
+    utter.onend = cleanup;
+    utter.onerror = cleanup;
+
+    window.speechSynthesis.speak(utter);
   }
   function addUser(text) {
     const w = document.createElement('div');
@@ -2642,11 +2883,20 @@
 
   /* ============ AMBIENT VOICE — browser TTS narration per page ============ */
   (function() {
-    const indicator = document.getElementById('audioAmbient');
-    if (!indicator || !('speechSynthesis' in window)) return;
+    if (!('speechSynthesis' in window)) { document.getElementById('audioNudge')?.classList.add('dismissed'); return; }
 
-    const label = indicator.querySelector('.audio-ambient-label');
-    let isInteracted = false;
+    const indicator = document.getElementById('audioAmbient');
+    const nudge     = document.getElementById('audioNudge');
+    const playBtn   = document.getElementById('audioPlayBtn');
+    const dismissBtn= document.getElementById('audioNudgeDismiss');
+    const ppBtn     = document.getElementById('anpPausePlay');
+    const stopBtn   = document.getElementById('anpStop');
+    const fill      = document.getElementById('anpFill');
+    const timeEl    = document.getElementById('anpTime');
+    const labelEl   = document.getElementById('anpLabel');
+    const pauseIcon = document.getElementById('anpPauseIcon');
+    const playIcon  = document.getElementById('anpPlayIcon');
+    const progress  = document.getElementById('anpProgress');
 
     const NARRATIONS = {
       home:    "Hey, I'm Anchit Tandon. A.G.M., Product Management at Vah-dahm India. Scaled Assisted Sales five x to eighty lakh M.R.R., revamped E.T. Markets to three crore plus A.R.R., shipped eleven products across companies and side projects. Currently driving direct-to-consumer growth, C.R.M. experimentation, and conversion optimisation across U.S., U.K. and global markets.",
@@ -2655,77 +2905,168 @@
       about:   "An engineer who learned to love the funnel. Career lifecycle, 2016 to present. B. Tech Computer Science at V.I.T., then software engineering at Tuple Technologies and City Mall, then product at Times Internet — A.P.M. to Senior P.M. Now A.G.M., Product Management at Vah-dahm India, driving direct-to-consumer growth across U.S., U.K. and global markets.",
       contact: "Let's build something worth measuring. Open to remote and hybrid roles, interesting side collaborations, and honest conversations about funnels, subscriptions, and the messy edges of consumer product."
     };
-
     const VIEW_LABELS = { home: 'Home', work: 'Work', builds: 'Builds', about: 'About', contact: 'Contact' };
 
-    function show(viewName) {
-      const key = viewName.startsWith('project-') ? 'Builds' : (VIEW_LABELS[viewName] || 'Anchit');
-      if (label) label.textContent = 'Hear Anchit \u00B7 ' + key;
+    let progressTimer = null, utterStart = 0, utterDuration = 0;
+    let currentViewName = 'home';
+
+    function showIndicator(viewName) {
+      if (!indicator) return;
+      const key = viewName?.startsWith('project-') ? 'Builds' : (VIEW_LABELS[viewName] || 'Anchit');
+      indicator.querySelector('.audio-ambient-label').textContent = 'Playing · ' + key;
       indicator.classList.add('active');
     }
+    function hideIndicator() { indicator?.classList.remove('active', 'listening'); }
 
-    function hide() { indicator.classList.remove('active'); }
+    function setPlayerState(playing, viewName) {
+      nudge?.classList.toggle('playing', playing);
+      nudge?.classList.toggle('paused', !playing && audioModeEnabled);
+      if (pauseIcon) pauseIcon.style.display = playing ? '' : 'none';
+      if (playIcon)  playIcon.style.display  = playing ? 'none' : '';
+      const vLabel = viewName ? (VIEW_LABELS[viewName] || 'Anchit') : (VIEW_LABELS[currentViewName] || 'Anchit');
+      if (labelEl) labelEl.textContent = playing ? (vLabel + ' · playing') : (vLabel + ' · paused');
+    }
 
-    function speak(viewName) {
+    function startProgressBar(durationMs) {
+      if (!fill) return;
+      fill.style.transition = 'none'; fill.style.width = '0%';
+      fill.getBoundingClientRect();
+      fill.style.transition = 'width ' + durationMs + 'ms linear';
+      fill.style.width = '100%';
+      utterStart = Date.now(); utterDuration = durationMs;
+      clearInterval(progressTimer);
+      progressTimer = setInterval(() => {
+        const e = (Date.now() - utterStart) / 1000;
+        if (timeEl) timeEl.textContent = Math.floor(e / 60) + ':' + String(Math.floor(e % 60)).padStart(2, '0');
+      }, 500);
+    }
+    function stopProgressBar() {
+      clearInterval(progressTimer);
+      if (fill) { fill.style.transition = 'none'; fill.style.width = '0%'; }
+      if (timeEl) timeEl.textContent = '0:00';
+    }
+
+    function pickVoice() {
+      const vv = window.speechSynthesis.getVoices();
+      return vv.find(v => /Google UK English Male/i.test(v.name))
+          || vv.find(v => /Google/i.test(v.name) && v.lang.startsWith('en'))
+          || vv.find(v => v.lang.startsWith('en-') && /male/i.test(v.name))
+          || vv.find(v => v.lang.startsWith('en'));
+    }
+
+    function speakView(viewName) {
       window.speechSynthesis.cancel();
-
-      let key = viewName;
-      if (key.startsWith('project-')) key = 'builds';
-
+      let key = viewName; if (key?.startsWith('project-')) key = 'builds';
       const text = NARRATIONS[key];
-      if (!text) return;
+      if (!text) { hideIndicator(); setPlayerState(false, viewName); return; }
+      currentViewName = viewName;
 
       const utter = new SpeechSynthesisUtterance(text);
-      utter.rate = 0.96;
-      utter.pitch = 1.0;
-      utter.volume = 0.85;
+      utter.rate = 0.96; utter.pitch = 1.0; utter.volume = 0.85;
+      const voice = pickVoice(); if (voice) utter.voice = voice;
 
-      const voices = window.speechSynthesis.getVoices();
-      const pick = voices.find(v => /Google UK English Male/i.test(v.name))
-                || voices.find(v => /Google/i.test(v.name) && v.lang.startsWith('en'))
-                || voices.find(v => v.lang.startsWith('en-') && /male/i.test(v.name))
-                || voices.find(v => v.lang.startsWith('en'));
-      if (pick) utter.voice = pick;
-
-      utter.onstart = () => show(viewName);
-      utter.onend   = hide;
-      utter.onerror = hide;
-
+      const estimatedMs = (text.split(/\s+/).length / (0.96 * 2.3)) * 1000;
+      utter.onstart = () => { showIndicator(viewName); setPlayerState(true, viewName); startProgressBar(estimatedMs); };
+      utter.onend   = () => { hideIndicator(); setPlayerState(false, viewName); stopProgressBar(); };
+      utter.onerror = () => { hideIndicator(); setPlayerState(false, viewName); stopProgressBar(); };
       window.speechSynthesis.speak(utter);
     }
 
     function trySpeak(viewName) {
       const voices = window.speechSynthesis.getVoices();
       if (voices.length === 0) {
-        window.speechSynthesis.onvoiceschanged = () => {
-          window.speechSynthesis.onvoiceschanged = null;
-          speak(viewName);
-        };
-      } else {
-        speak(viewName);
-      }
+        window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.onvoiceschanged = null; speakView(viewName); };
+      } else { speakView(viewName); }
     }
 
-    function onFirstGesture(e) {
-      if (isInteracted) return;
-      if (e.type === 'keydown' && e.key === 'Tab') return;
-      isInteracted = true;
-
-      document.removeEventListener('click',     onFirstGesture);
-      document.removeEventListener('keydown',   onFirstGesture);
-      document.removeEventListener('pointerup', onFirstGesture);
-
+    playBtn?.addEventListener('click', () => {
+      audioModeEnabled = true;
       const activeEl = document.querySelector('.view.active');
-      const activeView = activeEl ? activeEl.id.replace('view-', '') : 'home';
-      trySpeak(activeView);
-    }
-    document.addEventListener('click',     onFirstGesture, { passive: true });
-    document.addEventListener('keydown',   onFirstGesture, { passive: true });
-    document.addEventListener('pointerup', onFirstGesture, { passive: true });
-
-    document.addEventListener('viewChanged', (e) => {
-      if (isInteracted) trySpeak(e.detail);
+      const vName = activeEl ? activeEl.id.replace('view-', '') : 'home';
+      trySpeak(vName);
     });
+
+    ppBtn?.addEventListener('click', () => {
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+        if (fill && utterDuration) {
+          const elapsed = Date.now() - utterStart;
+          fill.style.transition = 'width ' + (utterDuration - elapsed) + 'ms linear';
+          fill.style.width = '100%';
+        }
+        setPlayerState(true);
+      } else if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.pause();
+        if (fill && utterDuration) {
+          const pct = Math.min(((Date.now() - utterStart) / utterDuration) * 100, 99);
+          fill.style.transition = 'none'; fill.style.width = pct + '%';
+        }
+        clearInterval(progressTimer);
+        setPlayerState(false);
+      }
+    });
+
+    stopBtn?.addEventListener('click', () => {
+      window.speechSynthesis.cancel();
+      audioModeEnabled = false;
+      hideIndicator(); nudge?.classList.remove('playing','paused'); stopProgressBar();
+    });
+
+    dismissBtn?.addEventListener('click', () => { nudge?.classList.add('dismissed'); });
+
+    document.addEventListener('viewChanged', (e) => { if (audioModeEnabled) trySpeak(e.detail); });
+
+    /* ---- Voice interrupt via SpeechRecognition ---- */
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return;
+
+    const card = document.createElement('div');
+    card.className = 'voice-interrupt-card';
+    card.innerHTML = '<div class="vic-header"><span class="vic-label">&#9679; You asked</span><button class="vic-close" aria-label="Dismiss">&#x2715;</button></div><div class="vic-question"></div><div class="vic-response"></div><div class="vic-actions"><button class="vic-continue">Continue narration &#9654;</button><button class="vic-dismiss">Skip, thanks</button></div>';
+    document.body.appendChild(card);
+
+    function showCard(question, responseHtml) {
+      card.querySelector('.vic-question').textContent = '"' + question + '"';
+      card.querySelector('.vic-response').innerHTML = responseHtml;
+      card.querySelectorAll('[data-nav]').forEach(a => {
+        a.addEventListener('click', ev => { ev.preventDefault(); card.classList.remove('active'); switchView(a.dataset.nav); });
+      });
+      card.classList.add('active');
+    }
+    function dismissCard() { card.classList.remove('active'); }
+    card.querySelector('.vic-close').addEventListener('click', dismissCard);
+    card.querySelector('.vic-dismiss').addEventListener('click', dismissCard);
+    card.querySelector('.vic-continue').addEventListener('click', () => {
+      dismissCard();
+      if (audioModeEnabled) { window.speechSynthesis.resume(); setPlayerState(true); }
+    });
+
+    let rec = null, recognizing = false;
+    function startRec() {
+      if (recognizing) return;
+      try {
+        rec = new SR(); rec.continuous = false; rec.interimResults = false; rec.lang = 'en-IN';
+        rec.onresult = (e) => {
+          if (!e.results[0]?.isFinal) return;
+          const q = (e.results[0][0].transcript || '').trim();
+          if (!q || q.length < 3) return;
+          window.speechSynthesis.pause();
+          if (fill && utterDuration) { const pct = Math.min(((Date.now()-utterStart)/utterDuration)*100,99); fill.style.transition='none'; fill.style.width=pct+'%'; }
+          clearInterval(progressTimer); setPlayerState(false);
+          const match = findMatch(q);
+          const resp = match ? match.response : 'That\'s a thoughtful question — I\'d love to give it the space it deserves. <a data-nav="home">Ask me in the chat</a> and I\'ll walk you through it properly.';
+          showCard(q, resp);
+        };
+        rec.onend = () => { recognizing = false; if (audioModeEnabled && window.speechSynthesis.speaking) setTimeout(startRec, 300); };
+        rec.onerror = (ev) => { recognizing = false; if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') rec = null; };
+        rec.start(); recognizing = true;
+      } catch (err) { recognizing = false; }
+    }
+    function stopRec() { recognizing = false; if (rec) { try { rec.stop(); } catch (e) {} } }
+
+    playBtn?.addEventListener('click', () => { setTimeout(startRec, 1200); }, { capture: true });
+    document.addEventListener('viewChanged', () => { if (audioModeEnabled) setTimeout(startRec, 1200); });
+    stopBtn?.addEventListener('click', stopRec, { capture: true });
   })();
 
   /* ============ SCROLL PROGRESS BAR ============ */
