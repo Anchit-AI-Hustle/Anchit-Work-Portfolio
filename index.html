@@ -992,6 +992,7 @@
     z-index: 160; display: flex; flex-direction: column; gap: 8px;
     align-items: flex-end;
   }
+  .sticky-ctas.hide-talk .sticky-cta.talk { display: none; }
   .sticky-cta {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 12px 20px; border-radius: 99px; cursor: pointer;
@@ -1000,21 +1001,33 @@
     box-shadow: var(--shadow-md);
   }
   .sticky-cta svg { width: 18px; height: 18px; flex-shrink: 0; }
-  .sticky-cta.talk {
-    background: var(--primary); color: #FFF;
-  }
+  .sticky-cta.talk { background: var(--primary); color: #FFF; }
   .sticky-cta.talk:hover { background: var(--primary-deep); transform: translateY(-2px) scale(1.04); box-shadow: 0 8px 24px rgba(255,77,31,0.35); }
-  .sticky-cta.listen {
-    background: var(--bg-elev); color: var(--ink); border: 1px solid var(--rule-strong);
-  }
+  .sticky-cta.listen { background: var(--bg-elev); color: var(--ink); border: 1px solid var(--rule-strong); }
   .sticky-cta.listen:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
-  .sticky-cta.listen.playing { border-color: var(--primary); color: var(--primary); }
-  .sticky-cta.listen.playing span::after { content: ' ...'; }
+  .sticky-cta.listen.playing { border-color: var(--accent); color: var(--accent); }
+  .sticky-cta.listen .listen-pause,
+  .sticky-cta.listen .listen-stop { display: none; }
+  .sticky-cta.listen.playing .listen-play { display: none; }
+  .sticky-cta.listen.playing .listen-pause { display: inline-flex; align-items: center; gap: 6px; }
+  .sticky-cta.listen.playing .listen-stop { display: inline-flex; }
+  .sticky-cta.listen.paused { border-color: var(--primary); color: var(--primary); }
+  .sticky-cta.listen.paused .listen-play { display: none; }
+  .sticky-cta.listen.paused .listen-pause { display: none; }
+  .sticky-cta.listen.paused .listen-resume { display: inline-flex; align-items: center; gap: 6px; }
   @media (max-width: 600px) {
     .sticky-ctas { bottom: calc(16px + var(--safe-bottom)); right: 16px; }
-    .sticky-cta span { display: none; }
-    .sticky-cta { padding: 12px; border-radius: 50%; }
+    .sticky-cta { padding: 10px 16px; font-size: 12px; }
   }
+
+  /* ============ CHAT PAGE FULL HEIGHT ============ */
+  #view-chat { padding-top: 24px; padding-bottom: 0; }
+  #view-chat .container { height: calc(100vh - 24px); display: flex; flex-direction: column; }
+  #view-chat .section-head { margin-bottom: 16px; flex-shrink: 0; }
+  #view-chat .chat-block { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  #view-chat .chat-body { flex: 1; overflow-y: auto; min-height: 0; max-height: none; }
+  #view-chat .chips { flex-shrink: 0; }
+  #view-chat .chat-input { flex-shrink: 0; }
 
   /* Hidden audio player state (for TTS JS internals) */
   .anp-nudge.dismissed { display: none; }
@@ -2246,9 +2259,18 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     <span>Talk to me</span>
   </a>
-  <button class="sticky-cta listen" id="audioPlayBtn">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-    <span>Hear this page</span>
+  <button class="sticky-cta listen" id="stickyListenBtn">
+    <span class="listen-play">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      Hear this page
+    </span>
+    <span class="listen-pause">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+      Pause
+    </span>
+    <span class="listen-stop" id="stickyStopBtn" style="margin-left: 4px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+    </span>
   </button>
 </div>
 
@@ -2331,6 +2353,10 @@
       const isActive = target === viewName || (viewName.startsWith('project-') && target === 'projects');
       n.classList.toggle('active', isActive);
     });
+
+    // Hide "Talk to me" on chat page
+    const stickyCtas = document.getElementById('stickyCtas');
+    if (stickyCtas) stickyCtas.classList.toggle('hide-talk', viewName === 'chat');
 
     closeSidebar();
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -2775,15 +2801,20 @@
     let progressTimer = null, utterStart = 0, utterDuration = 0;
     let currentViewName = 'home';
 
-    const stickyListen = document.querySelector('.sticky-cta.listen');
     function showIndicator(viewName) {
-      stickyListen?.classList.add('playing');
+      const sb = document.getElementById('stickyListenBtn');
+      sb?.classList.add('playing');
+      sb?.classList.remove('paused');
       if (!indicator) return;
       const key = viewName?.startsWith('project-') ? 'Projects' : (VIEW_LABELS[viewName] || 'Anchit');
       indicator.querySelector('.audio-ambient-label').textContent = 'Playing · ' + key;
       indicator.classList.add('active');
     }
-    function hideIndicator() { indicator?.classList.remove('active', 'listening'); stickyListen?.classList.remove('playing'); }
+    function hideIndicator() {
+      indicator?.classList.remove('active', 'listening');
+      const sb = document.getElementById('stickyListenBtn');
+      sb?.classList.remove('playing', 'paused');
+    }
 
     function setPlayerState(playing, viewName) {
       nudge?.classList.toggle('playing', playing);
@@ -2880,6 +2911,38 @@
     });
 
     dismissBtn?.addEventListener('click', () => { nudge?.classList.add('dismissed'); });
+
+    /* Sticky listen button — play/pause/stop */
+    const stickyBtn = document.getElementById('stickyListenBtn');
+    const stickyStop = document.getElementById('stickyStopBtn');
+    stickyBtn?.addEventListener('click', (e) => {
+      if (e.target.closest('.listen-stop')) return; // handled below
+      if (stickyBtn.classList.contains('playing')) {
+        // Pause
+        window.speechSynthesis.pause();
+        stickyBtn.classList.remove('playing');
+        stickyBtn.classList.add('paused');
+        clearInterval(progressTimer);
+      } else if (stickyBtn.classList.contains('paused')) {
+        // Resume
+        window.speechSynthesis.resume();
+        stickyBtn.classList.remove('paused');
+        stickyBtn.classList.add('playing');
+      } else {
+        // Play
+        audioModeEnabled = true;
+        const activeEl = document.querySelector('.view.active');
+        const vName = activeEl ? activeEl.id.replace('view-', '') : 'home';
+        trySpeak(vName);
+      }
+    });
+    stickyStop?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      window.speechSynthesis.cancel();
+      audioModeEnabled = false;
+      stickyBtn?.classList.remove('playing', 'paused');
+      hideIndicator(); stopProgressBar();
+    });
 
     /* Hero "Hear this from me" button */
     const heroListen = document.getElementById('heroListenBtn');
