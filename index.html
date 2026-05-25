@@ -70,7 +70,7 @@
     --font-display: 'Fraunces', 'Times New Roman', serif;
     --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-    --sidebar-w: 160px;
+    --sidebar-w: 176px;
     --max-w: 1600px;
     --gutter: clamp(20px, 3vw, 48px);
     --safe-top: env(safe-area-inset-top);
@@ -1463,29 +1463,21 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       <span class="sidebar-label">Home</span>
     </a>
-    <a class="sidebar-item" href="#chat" data-view="chat" aria-label="Chat with Me">
+    <a class="sidebar-item" href="#chat" data-view="chat" aria-label="Chat with Anchit">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      <span class="sidebar-label">Chat</span>
+      <span class="sidebar-label">Chat with me</span>
     </a>
-    <a class="sidebar-item" href="#about" data-view="about" aria-label="About Me">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <span class="sidebar-label">About Me</span>
-    </a>
-    <a class="sidebar-item" href="#now" data-view="now" aria-label="Current Role">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-      <span class="sidebar-label">Now</span>
-    </a>
-    <a class="sidebar-item" href="#experience" data-view="experience" aria-label="Experience">
+    <a class="sidebar-item" href="#experience" data-view="experience" aria-label="Work Experience">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
       <span class="sidebar-label">Experience</span>
     </a>
     <a class="sidebar-item" href="#projects" data-view="projects" aria-label="Side Projects">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-      <span class="sidebar-label">Projects</span>
+      <span class="sidebar-label">Side Projects</span>
     </a>
-    <a class="sidebar-item" href="#resume" data-view="resume" aria-label="Resume">
+    <a class="sidebar-item" href="#resume" data-view="resume" aria-label="My Resume">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-      <span class="sidebar-label">Resume</span>
+      <span class="sidebar-label">My Resume</span>
     </a>
     <a class="sidebar-item" href="#contact" data-view="contact" aria-label="Get in Touch">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
@@ -1573,7 +1565,7 @@
         <div class="eyebrow">The journey · Click any phase to explore</div>
       </div>
       <div class="home-timeline">
-        <a class="home-tl-item" href="#now" data-view="now">
+        <a class="home-tl-item" href="#experience" data-view="experience">
           <div class="home-tl-dot" style="background: #B5870A; box-shadow: 0 0 12px rgba(181,135,10,0.4);"></div>
           <div class="home-tl-content">
             <div class="home-tl-year">2026 → Now</div>
@@ -1618,7 +1610,7 @@
           </div>
           <div class="home-tl-arrow">→</div>
         </a>
-        <a class="home-tl-item" href="#about" data-view="about">
+        <a class="home-tl-item" href="#experience" data-view="experience">
           <div class="home-tl-dot" style="background: #4A6FA5;"></div>
           <div class="home-tl-content">
             <div class="home-tl-year">2016 — 2020</div>
@@ -1683,57 +1675,47 @@
   </section>
 
   <!-- NOW — Current Role -->
-  <section class="view" id="view-now">
-    <div class="container">
-      <div class="section-head reveal">
-        <div class="eyebrow">Current role · Vahdam India · Apr 2026 → Present</div>
-        <h1 class="display-lg">Current Role — Vahdam India</h1>
-        <p class="lede" style="margin-top: 16px;">AGM, Product Management. D2C growth across US, UK &amp; global markets. <em>The role where every number is mine.</em></p>
-      </div>
-
-      <div class="work-stats reveal-stagger">
-        <div class="work-stat"><div class="num">2.4→<em>4.0</em></div><div class="label">Product ratings lift · cross-functional experiments</div></div>
-        <div class="work-stat"><div class="num"><em>3</em></div><div class="label">Markets · US, UK &amp; Global</div></div>
-        <div class="work-stat"><div class="num"><em>2</em></div><div class="label">CRM platforms · Klaviyo &amp; WebEngage</div></div>
-        <div class="work-stat"><div class="num"><em>↑</em></div><div class="label">Daily lifecycle revenue · sustained growth</div></div>
-      </div>
-
-      <div class="about-prose reveal" style="max-width: 820px; margin-bottom: 48px;">
-        <p>Spearheading D2C growth across the US, UK, and global markets as Assistant General Manager — Product Management. Overseeing product performance, customer experience, experimentation, and revenue optimisation initiatives.</p>
-        <p>Designing and executing cross-functional product and CRM experiments that elevated average product ratings from 2.4 to 4.0, while driving sustained growth in revenue from daily lifecycle marketing campaigns through Klaviyo and WebEngage.</p>
-      </div>
-
-      <div class="reveal" style="background: var(--bg-elev); border-radius: 20px; padding: 32px; margin-bottom: 32px;">
-        <h3 class="display-sm" style="margin-bottom: 16px;">What I'm solving <em>right now</em></h3>
-        <p style="color: var(--ink-dim); font-size: 16px; line-height: 1.6; max-width: 820px;">Creating sustainable D2C growth while improving customer experience. That means balancing acquisition, retention, CRM experimentation, conversion optimisation, reviews, merchandising, and profitability — simultaneously. The challenge isn't finding opportunities — it's prioritising the right ones.</p>
-        <div class="tags" style="margin-top: 16px;"><span class="tag">D2C Growth</span><span class="tag">CRM · Klaviyo</span><span class="tag">WebEngage</span><span class="tag">Experimentation</span><span class="tag">Global Markets</span><span class="tag">Revenue Optimisation</span></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- EXPERIENCE — Past Work -->
+  <!-- EXPERIENCE — Full work history -->
   <section class="view" id="view-experience">
     <div class="container">
       <div class="section-head reveal">
-        <div class="eyebrow">Experience · Times Internet · Tuple · Citymall</div>
+        <div class="eyebrow">Work experience · 2020 → Present</div>
         <h1 class="display-lg">Work Experience</h1>
-        <p class="lede" style="margin-top: 16px;">5+ years across product and engineering. APM → PM → Senior PM at Times Internet, backend engineer before that. <em>Ship fast, measure everything, compound the results.</em></p>
+        <p class="lede" style="margin-top: 16px;">5+ years across product and engineering. Vahdam India, Times Internet, Citymall, Tuple Technologies. <em>Ship fast, measure everything, compound the results.</em></p>
       </div>
 
       <div class="work-stats reveal-stagger">
-        <div class="work-stat"><div class="num"><em>5×</em></div><div class="label">MRR growth on Assisted Sales · ₹15L → ₹80L</div></div>
+        <div class="work-stat"><div class="num"><em>5×</em></div><div class="label">MRR growth · ET Prime Assisted Sales</div></div>
         <div class="work-stat"><div class="num">₹3<em>Cr</em>+</div><div class="label">Incremental ARR · ET Markets revamp</div></div>
-        <div class="work-stat"><div class="num"><span class="counter" data-count="11" data-suffix="">11</span></div><div class="label">Products shipped across companies &amp; side projects</div></div>
-        <div class="work-stat"><div class="num"><span class="counter" data-count="5" data-suffix="+">5+</span></div><div class="label">Years in B2C product &amp; engineering</div></div>
+        <div class="work-stat"><div class="num">2.4→<em>4.0</em></div><div class="label">Product ratings · Vahdam India</div></div>
+        <div class="work-stat"><div class="num"><span class="counter" data-count="11" data-suffix="">11</span></div><div class="label">Products shipped total</div></div>
+      </div>
+
+      <!-- Current: Vahdam India -->
+      <div class="section-head reveal" style="margin-bottom: 24px;">
+        <div class="eyebrow">Current · Vahdam India · Apr 2026 → Present</div>
+        <h2 class="display-sm">AGM — Product Management · <em>Vahdam India</em></h2>
+      </div>
+      <div class="work-list" style="margin-bottom: 64px;">
+        <div class="work-item reveal">
+          <div class="work-num">00</div>
+          <div class="work-content">
+            <h3>D2C <em>Global Growth</em></h3>
+            <p>Spearheading D2C growth across the US, UK, and global markets. Overseeing product performance, customer experience, experimentation, and revenue optimisation. Designing cross-functional product and CRM experiments that elevated average product ratings from 2.4 to 4.0, while driving sustained revenue growth through Klaviyo and WebEngage lifecycle campaigns.</p>
+            <div class="tags"><span class="tag">D2C Growth</span><span class="tag">CRM · Klaviyo</span><span class="tag">WebEngage</span><span class="tag">Experimentation</span><span class="tag">Global</span></div>
+            <div class="work-impact-bar"><div class="work-impact-row"><span class="work-impact-chip gold">Ratings 2.4 → 4.0</span><span class="work-impact-chip gold">US · UK · Global</span><span class="work-impact-chip gold">Daily Revenue Growth</span></div></div>
+          </div>
+          <div class="work-meta"><div class="year">Apr 2026 → Now</div><div class="impact">Current</div></div>
+        </div>
       </div>
 
       <!-- Times Internet -->
-      <div class="section-head reveal" style="margin-bottom: 32px;">
+      <div class="section-head reveal" style="margin-bottom: 24px;">
         <div class="eyebrow">Times Internet · Jun 2022 — Apr 2026</div>
-        <h2 class="display-sm">APM → PM → Senior PM. <em>Four years, one thread.</em></h2>
+        <h2 class="display-sm">APM → PM → Senior PM · <em>Times Internet</em></h2>
       </div>
 
-      <div class="work-list">
+      <div class="work-list" style="margin-bottom: 64px;">
         <div class="work-item reveal">
           <div class="work-num">01</div>
           <div class="work-content">
@@ -1768,7 +1750,7 @@
           <div class="work-num">04</div>
           <div class="work-content">
             <h3>Times Health<em>+</em> Subscriptions</h3>
-            <p>Launched paid wellness subscriptions from scratch — freemium-to-paid journeys, pricing experiments, and retention-led monetisation for a category most Indian publishers haven't cracked.</p>
+            <p>Launched paid wellness subscriptions from scratch — freemium-to-paid journeys, pricing experiments, and retention-led monetisation.</p>
             <div class="tags"><span class="tag">Subscriptions</span><span class="tag">Monetisation</span><span class="tag">Retention</span><span class="tag">Paywall</span></div>
             <div class="work-impact-bar"><div class="work-impact-row"><span class="work-impact-chip">0 → Paid Tier</span><span class="work-impact-chip">New Revenue Line</span></div></div>
           </div>
@@ -1786,12 +1768,12 @@
         </div>
       </div>
 
-      <!-- Earlier Experience -->
-      <div class="section-head reveal" style="margin-top: 72px; margin-bottom: 32px;">
-        <div class="eyebrow">Earlier experience · 2020 — 2022</div>
-        <h2 class="display-sm">Where the <em>engineering brain</em> got built.</h2>
+      <!-- Earlier -->
+      <div class="section-head reveal" style="margin-bottom: 24px;">
+        <div class="eyebrow">Earlier · 2020 — 2022</div>
+        <h2 class="display-sm">Software Engineer · <em>Where it started</em></h2>
       </div>
-      <div class="work-list">
+      <div class="work-list" style="margin-bottom: 64px;">
         <div class="work-item reveal">
           <div class="work-num">06</div>
           <div class="work-content">
@@ -1809,6 +1791,23 @@
             <div class="tags"><span class="tag">Backend</span><span class="tag">Product Owner</span><span class="tag">Live Sports</span><span class="tag">Consumer Apps</span></div>
           </div>
           <div class="work-meta"><div class="year">Apr 2020 — Mar 2022</div><div class="impact">Engineer + PO</div></div>
+        </div>
+      </div>
+
+      <!-- Education -->
+      <div class="section-head reveal" style="margin-bottom: 24px;">
+        <div class="eyebrow">Education · 2016 — 2020</div>
+        <h2 class="display-sm">B.Tech CSE · <em>VIT Vellore</em></h2>
+      </div>
+      <div class="work-list">
+        <div class="work-item reveal">
+          <div class="work-num">08</div>
+          <div class="work-content">
+            <h3>B.Tech · Computer Science &amp; <em>Engineering</em></h3>
+            <p>Vellore Institute of Technology, Vellore. The engineering foundation — systems thinking, data structures, algorithms — that makes everything else work.</p>
+            <div class="tags"><span class="tag">Computer Science</span><span class="tag">Engineering</span><span class="tag">VIT Vellore</span></div>
+          </div>
+          <div class="work-meta"><div class="year">2016 — 2020</div><div class="impact">B.Tech</div></div>
         </div>
       </div>
 
@@ -2122,102 +2121,6 @@
     </div>
   </section>
 
-  <!-- ABOUT -->
-  <section class="view" id="view-about">
-    <div class="container">
-      <div class="section-head reveal">
-        <div class="eyebrow">About me</div>
-        <h1 class="display-lg">About Me</h1>
-        <p class="lede" style="margin-top: 16px;">0→1 product builder, 5+ years in B2C, engineering foundation, AI on the side. <em>An engineer who learned to love the funnel.</em></p>
-      </div>
-
-      <div class="about-grid">
-        <div class="about-prose reveal-left">
-          <p>I started in engineering — backend systems, consumer apps, the kind of code that touches a million people in a weekend. Then I moved to product because I got obsessed with <em>why</em> things were being built, not just how.</p>
-          <p>What I found was the funnel — the unfiltered truth about whether your decisions actually matter. That obsession turned into a career: growth, subscriptions, monetisation, experimentation, 0→1 products.</p>
-          <p>Two hills I'll die on: <strong>execution beats ideas</strong>, and <strong>technology should remove friction, not create it.</strong></p>
-        </div>
-        <div class="reveal-right">
-          <div class="meta-block">
-            <h4>Quick facts</h4>
-            <ul>
-              <li><span>Location</span><span>Delhi, India · IST</span></li>
-              <li><span>Open to</span><span>Remote &amp; hybrid roles</span></li>
-              <li><span>Education</span><span>B.Tech CSE · VIT Vellore · 2020</span></li>
-              <li><span>Side projects</span><span>4 live · all AI-first</span></li>
-            </ul>
-          </div>
-          <div class="meta-block">
-            <h4>What I'm best at</h4>
-            <ul>
-              <li><span>Growth funnels &amp; conversion</span><span>Expert</span></li>
-              <li><span>0→1 product development</span><span>Expert</span></li>
-              <li><span>Subscriptions &amp; monetisation</span><span>Expert</span></li>
-              <li><span>A/B testing &amp; experimentation</span><span>Expert</span></li>
-              <li><span>AI workflows &amp; LLM integration</span><span>Advanced</span></li>
-            </ul>
-          </div>
-          <div class="meta-block">
-            <h4>Resume</h4>
-            <ul>
-              <li><a href="assets/resume.pdf" target="_blank" rel="noopener" style="display:flex; justify-content:space-between; width:100%; color:var(--primary); font-weight:500;"><span>Download PDF</span><span>↗</span></a></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <!-- ATS resume keywords — visible in page for search & semantic indexing -->
-      <div class="ats-section reveal" style="margin-top: 64px;">
-        <div class="ats-section-head">Keywords · ATS &amp; recruiter search</div>
-        <div class="ats-tags">
-          <span class="ats-tag">Product Management</span><span class="ats-tag">Senior Product Manager</span><span class="ats-tag">Assistant General Manager</span>
-          <span class="ats-tag">D2C Growth</span><span class="ats-tag">Consumer Tech</span><span class="ats-tag">Growth Hacking</span>
-          <span class="ats-tag">Funnel Optimisation</span><span class="ats-tag">Conversion Rate Optimisation</span><span class="ats-tag">A/B Testing</span>
-          <span class="ats-tag">Subscription Products</span><span class="ats-tag">Monetisation</span><span class="ats-tag">Revenue Optimisation</span>
-          <span class="ats-tag">0 to 1 Product Development</span><span class="ats-tag">Product Strategy</span><span class="ats-tag">Product Roadmap</span>
-          <span class="ats-tag">CRM Marketing</span><span class="ats-tag">Klaviyo</span><span class="ats-tag">WebEngage</span><span class="ats-tag">Lifecycle Marketing</span>
-          <span class="ats-tag">AI Products</span><span class="ats-tag">LLM Integration</span><span class="ats-tag">Generative AI</span>
-          <span class="ats-tag">User Research</span><span class="ats-tag">Customer Experience</span><span class="ats-tag">Stakeholder Management</span>
-          <span class="ats-tag">Cross-functional Leadership</span><span class="ats-tag">Data Analytics</span><span class="ats-tag">Google Analytics</span>
-          <span class="ats-tag">Firebase</span><span class="ats-tag">Mixpanel</span><span class="ats-tag">Experimentation</span>
-          <span class="ats-tag">React</span><span class="ats-tag">TypeScript</span><span class="ats-tag">Python</span><span class="ats-tag">SQL</span><span class="ats-tag">Supabase</span>
-          <span class="ats-tag">Figma</span><span class="ats-tag">JIRA</span><span class="ats-tag">Agile</span><span class="ats-tag">Scrum</span>
-          <span class="ats-tag">B2C</span><span class="ats-tag">B2B SaaS</span><span class="ats-tag">E-commerce</span><span class="ats-tag">Fintech</span><span class="ats-tag">HealthTech</span>
-          <span class="ats-tag">Times Internet</span><span class="ats-tag">Vahdam India</span><span class="ats-tag">Economic Times</span>
-        </div>
-      </div>
-
-      <!-- Skills grid — ATS keyword rich -->
-      <div class="skills-section reveal">
-        <div class="eyebrow">Skills &amp; tools</div>
-        <h2 class="display-sm" style="margin-top: 16px; margin-bottom: 4px;">The full toolkit.</h2>
-        <p style="color: var(--ink-dim); font-size: 15px; max-width: 560px; margin-bottom: 0;">Hover any skill to see how deep it goes.</p>
-        <div class="skills-grid">
-          <div class="skill-pill"><div class="skill-name">Product Strategy</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span></div></div>
-          <div class="skill-pill"><div class="skill-name">Growth &amp; Funnels</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span></div></div>
-          <div class="skill-pill"><div class="skill-name">Subscriptions</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span></div></div>
-          <div class="skill-pill"><div class="skill-name">A/B Testing</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span></div></div>
-          <div class="skill-pill"><div class="skill-name">0→1 Development</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span></div></div>
-          <div class="skill-pill"><div class="skill-name">AI / LLM Products</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot"></span></div></div>
-          <div class="skill-pill"><div class="skill-name">Monetisation</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span></div></div>
-          <div class="skill-pill"><div class="skill-name">Roadmapping</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot"></span></div></div>
-          <div class="skill-pill"><div class="skill-name">User Research</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot"></span></div></div>
-          <div class="skill-pill"><div class="skill-name">Data Analytics</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot"></span></div></div>
-          <div class="skill-pill"><div class="skill-name">Stakeholder Mgmt</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span></div></div>
-          <div class="skill-pill"><div class="skill-name">Consumer Tech</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span></div></div>
-          <div class="skill-pill"><div class="skill-name">Figma</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot"></span></div></div>
-          <div class="skill-pill"><div class="skill-name">JIRA</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span></div></div>
-          <div class="skill-pill"><div class="skill-name">Google Analytics</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot"></span></div></div>
-          <div class="skill-pill"><div class="skill-name">Firebase</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot"></span></div></div>
-          <div class="skill-pill"><div class="skill-name">React / TypeScript</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot"></span></div></div>
-          <div class="skill-pill"><div class="skill-name">Python</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot"></span><span class="skill-dot"></span></div></div>
-          <div class="skill-pill"><div class="skill-name">SQL</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot"></span></div></div>
-          <div class="skill-pill"><div class="skill-name">GCP / Cloud</div><div class="skill-bar"><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot lit"></span><span class="skill-dot"></span><span class="skill-dot"></span></div></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- RESUME -->
   <section class="view" id="view-resume">
     <div class="container">
@@ -2320,7 +2223,7 @@
 
 <script>
   /* ============ STATE ============ */
-  const ALL_VIEWS = ['home','chat','about','now','experience','projects','resume','contact','project-yaara','project-music','project-telesuite','project-lifeengine'];
+  const ALL_VIEWS = ['home','chat','experience','projects','resume','contact','project-yaara','project-music','project-telesuite','project-lifeengine'];
   let audioModeEnabled = false; // true once user has clicked Play — gates TTS for chat
   const root = document.documentElement;
 
@@ -2403,7 +2306,7 @@
       response: "Hey — glad you're here. I'm Anchit. Ask me anything: my <a data-nav='experience'>work</a>, my <a data-nav='projects'>side builds</a>, how I think about product, or what I'm solving right now at Vahdam.",
       nextChips: ["What do you do?","Your biggest career win?","What are you building?","Why product over engineering?"] },
     { keywords: ['who','about','tell me about you','yourself','background','bio','introduce','what do you do','describe'],
-      response: "I'm Anchit Tandon — AGM, Product at Vahdam India, ex-Times Internet. Five-plus years in B2C consumer tech: D2C growth, subscriptions, content, events. Started as a backend engineer, moved to product in 2022 because I got obsessed with <em>why</em> things were being built, not just how. I think in systems, ship in experiments, and build AI side projects on weekends because I can't sit still. <a data-nav='about'>Full story →</a>",
+      response: "I'm Anchit Tandon — AGM, Product at Vahdam India, ex-Times Internet. Five-plus years in B2C consumer tech: D2C growth, subscriptions, content, events. Started as a backend engineer, moved to product in 2022 because I got obsessed with <em>why</em> things were being built, not just how. I think in systems, ship in experiments, and build AI side projects on weekends because I can't sit still. <a data-nav='experience'>Full story →</a>",
       nextChips: ["Your biggest career win?","Why switch to product?","Tell me about your side builds","Hardest problem right now?"] },
     { keywords: ['role','title','current','doing now','job','vahdam','work now','position'],
       response: "AGM – Product Management at Vahdam India since April 2026. Driving D2C growth across the US, UK, and global markets. The core challenge: balancing acquisition, retention, CRM experimentation, conversion optimisation, and profitability — simultaneously. The challenge isn't finding opportunities, it's prioritising the right ones. Before this, nearly four years at Times Internet — APM to Senior PM.",
@@ -2478,7 +2381,7 @@
       response: "I don't just talk about ideas — I ship them. Four live AI products built end-to-end on weekends. 5× MRR growth at work. Ratings lifted from 2.4 to 4.0 through systematic experimentation. Engineering foundation means I understand what's feasible and what's fantasy. Product instinct means I know what's worth building. The intersection is rare.",
       nextChips: ["Your biggest win?","Tell me about your builds","Your philosophy?","How do I reach you?"] },
     { keywords: ['experience','career','journey','timeline','history','worked at','companies','times internet'],
-      response: "Quick timeline: VIT CSE (2016–20) → Tuple Technologies, backend (2020–22) → Citymall, backend (2022) → Times Internet, APM to Senior PM (2022–26) → Vahdam India, AGM Product (2026–now). The thread: started building systems, then products, then growth. Each step compounded the last. <a data-nav='about'>Full timeline →</a>",
+      response: "Quick timeline: VIT CSE (2016–20) → Tuple Technologies, backend (2020–22) → Citymall, backend (2022) → Times Internet, APM to Senior PM (2022–26) → Vahdam India, AGM Product (2026–now). The thread: started building systems, then products, then growth. Each step compounded the last. <a data-nav='experience'>Full timeline →</a>",
       nextChips: ["Why switch to product?","Tell me about Times Internet","Tell me about Vahdam","How do I reach you?"] },
     { keywords: ['voice','voice ai'],
       response: "Voice is a thread that runs through my work. Hey Yaara is voice-first — an AI companion for the elderly where the entire interface is conversation. At Times Internet, the AI telesuite processed voice in real-time for sales transcription and pitch scoring. I think voice removes the biggest friction of all: having to learn an interface. <a data-nav='project-yaara'>See Hey Yaara →</a>",
@@ -2745,7 +2648,7 @@
         const target = document.querySelector('.lifecycle-node[data-phase="' + phase + '"]');
         if (!target) return;
 
-        if (!document.getElementById('view-about')?.classList.contains('active')) {
+        if (!document.getElementById('view-experience')?.classList.contains('active')) {
           switchView('about');
           // 280ms matches the viewFadeUp animation (0.42s) — enough for DOM to be active
           setTimeout(() => openNode(target), 280);
@@ -2757,7 +2660,7 @@
 
     // Sync arc active state as user scrolls through lifecycle nodes
     window.addEventListener('scroll', () => {
-      if (!document.getElementById('view-about')?.classList.contains('active')) return;
+      if (!document.getElementById('view-experience')?.classList.contains('active')) return;
       const nodes = document.querySelectorAll('.lifecycle-node[data-phase]');
       let closest = null, minDist = Infinity;
       nodes.forEach(n => {
@@ -2805,14 +2708,12 @@
     const NARRATIONS = {
       home:       "Hey, I'm Anchit Tandon. An engineer who learned to love the funnel. Currently A.G.M., Product Management at Vah-dahm India, driving direct-to-consumer growth across U.S., U.K. and global. Previously at Times Internet — scaled Assisted Sales five x to eighty lakh M.R.R., revamped E.T. Markets to three crore plus A.R.R. Eleven products shipped across work and side projects.",
       chat:       "Ask me anything — my work, my side projects, why I moved from engineering to product, or what I'm solving right now.",
-      about:      "I started in engineering — backend systems, consumer apps. Then I moved to product because I got obsessed with why things were being built. What I found was the funnel — the unfiltered truth about whether your decisions actually matter. Two hills I'll die on: execution beats ideas, and technology should remove friction, not create it.",
-      now:        "Current role: A.G.M., Product Management at Vah-dahm India since April 2026. Spearheading direct-to-consumer growth across U.S., U.K. and global markets. Lifted product ratings from 2.4 to 4.0 through cross-functional experiments. Driving revenue growth through Klaviyo and WebEngage lifecycle campaigns.",
-      experience: "Past experience at Times Internet — A.P.M. to Senior P.M. across four years. Five x M.R.R. growth on Assisted Sales, three crore plus A.R.R. from the E.T. Markets revamp, eleven products shipped. Earlier: backend engineering at Tuple Technologies and City Mall.",
+      experience: "Work experience. Currently A.G.M. Product at Vah-dahm India — ratings 2.4 to 4.0, direct-to-consumer growth across three markets. Previously at Times Internet — A.P.M. to Senior P.M. Five x M.R.R. on Assisted Sales, three crore plus A.R.R. from the E.T. Markets revamp, eleven products shipped. Started as a backend engineer at Tuple Technologies and City Mall.",
       projects:   "Personal projects, built out of curiosity and love for technology. Four A.I.-first consumer experiments, all live. Hey Yaara — A.I. voice companion. Music Gen A.I. — prompt to full track. A.I. Tele Suite — transcription and pitch scoring. T.H. Plus Life Engine — personalised wellness planning.",
       resume:     "My resume. Download or view the full P.D.F.",
       contact:    "Let's build something worth measuring. Open to remote and hybrid roles, side collaborations, and honest conversations about funnels, subscriptions, and consumer product."
     };
-    const VIEW_LABELS = { home: 'Home', chat: 'Chat', about: 'About Me', now: 'Now', experience: 'Experience', projects: 'Projects', resume: 'Resume', contact: 'Contact' };
+    const VIEW_LABELS = { home: 'Home', chat: 'Chat with me', experience: 'Experience', projects: 'Side Projects', resume: 'My Resume', contact: 'Contact' };
 
     let progressTimer = null, utterStart = 0, utterDuration = 0;
     let currentViewName = 'home';
