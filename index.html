@@ -72,6 +72,7 @@
     --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, monospace;
     --sidebar-w: 176px;
+    --sidebar-w-collapsed: 60px;
     --max-w: 1600px;
     --gutter: clamp(20px, 3vw, 48px);
     --safe-top: env(safe-area-inset-top);
@@ -107,8 +108,32 @@
     border-right: 1px solid rgba(255,255,255,0.07);
     display: flex; flex-direction: column; align-items: stretch;
     padding: calc(20px + var(--safe-top)) 0 calc(20px + var(--safe-bottom));
-    transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1);
+    transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1), width 0.25s ease;
   }
+  /* Desktop collapsed mode: icon-only rail */
+  body.sidebar-collapsed { padding-left: var(--sidebar-w-collapsed); }
+  body.sidebar-collapsed .sidebar { width: var(--sidebar-w-collapsed); }
+  body.sidebar-collapsed .top-bar { left: var(--sidebar-w-collapsed); }
+  body.sidebar-collapsed .sidebar-label,
+  body.sidebar-collapsed .sidebar-logo span { display: none; }
+  body.sidebar-collapsed .sidebar-logo { font-size: 0; }
+  body.sidebar-collapsed .sidebar-logo::before { content: "A"; font-size: 18px; }
+  body.sidebar-collapsed .sidebar-item { justify-content: center; padding: 0; }
+  body.sidebar-collapsed .sidebar-item:hover .sidebar-tip { display: block; opacity: 1; transform: translateY(-50%) translateX(0); }
+
+  /* Desktop collapse button (bottom of sidebar) */
+  .sidebar-collapse-btn {
+    margin: 8px 10px 0; height: 32px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;
+    background: transparent; color: rgba(251,245,236,0.5);
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+  }
+  .sidebar-collapse-btn:hover { color: #FBF5EC; border-color: rgba(255,255,255,0.18); }
+  .sidebar-collapse-btn svg { width: 14px; height: 14px; transition: transform 0.25s; }
+  body.sidebar-collapsed .sidebar-collapse-btn .scb-label { display: none; }
+  body.sidebar-collapsed .sidebar-collapse-btn svg { transform: rotate(180deg); }
   .sidebar-logo {
     display: block; text-align: center;
     font-family: var(--font-display); font-weight: 600;
@@ -182,17 +207,21 @@
   .sidebar-backdrop.visible { opacity: 1; pointer-events: auto; }
 
   @media (max-width: 820px) {
-    body { padding-left: 0; }
-    .sidebar { transform: translateX(-100%); }
+    body, body.sidebar-collapsed { padding-left: 0; }
+    .sidebar { transform: translateX(-100%); width: var(--sidebar-w); }
+    body.sidebar-collapsed .sidebar { width: var(--sidebar-w); }
     .sidebar.open { transform: translateX(0); }
     .sidebar-toggle { display: inline-flex; }
+    .sidebar-collapse-btn { display: none; } /* Mobile uses hamburger pattern only */
     main { padding-top: calc(58px + var(--safe-top)); }
   }
 
   /* ============ TOP ACTION BAR ============ */
   .top-bar {
     position: fixed; top: 0; left: var(--sidebar-w); right: 0;
-    z-index: 150; height: 44px;
+    z-index: 150;
+    padding-top: var(--safe-top);
+    height: calc(44px + var(--safe-top));
     background: rgba(15,13,10,0.85); backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(255,255,255,0.06);
     display: flex; align-items: center;
@@ -227,12 +256,13 @@
   .top-bar-cta.listen.playing { border-color: var(--accent); color: var(--accent); }
 
   /* Push main content below top bar */
-  main { padding-top: 44px; }
+  main { padding-top: calc(44px + var(--safe-top)); }
   #view-home { padding-top: 0; }
 
   @media (max-width: 820px) {
     .top-bar { left: 0; }
-    .top-bar-inner { padding: 0 12px; gap: 8px; }
+    /* Make room for the hamburger (42px wide at left:14px) on the left side */
+    .top-bar-inner { padding: 0 12px 0 64px; gap: 8px; }
     /* Contact links collapse to icon-only chips, stay visible */
     .top-bar-links { gap: 10px; }
     .top-bar-link { padding: 6px; }
@@ -241,14 +271,23 @@
     /* CTAs shrink */
     .top-bar-cta { padding: 6px 10px; font-size: 11px; gap: 5px; }
     .top-bar-cta svg { width: 13px; height: 13px; }
-    main { padding-top: calc(44px + 58px + var(--safe-top)); }
+    /* Hamburger button sits inside the safe-area top of the bar */
+    .sidebar-toggle { top: calc(var(--safe-top) + 6px); width: 36px; height: 36px; }
+    main { padding-top: calc(44px + var(--safe-top)); }
   }
 
   @media (max-width: 480px) {
-    .top-bar-inner { padding: 0 8px; gap: 6px; }
-    .top-bar-links { gap: 6px; }
+    .top-bar-inner { padding: 0 8px 0 54px; gap: 6px; }
+    .top-bar-links { gap: 4px; }
+    .top-bar-link { padding: 5px; }
+    .top-bar-link .tb-icon { width: 14px; height: 14px; }
     .top-bar-cta .cta-label { display: none; }
     .top-bar-cta { padding: 6px 9px; }
+    /* Below 380px, hide email + resume icons to keep talk/hear visible */
+  }
+  @media (max-width: 380px) {
+    .top-bar-link[aria-label="Email"],
+    .top-bar-link[aria-label="Resume PDF"] { display: none; }
   }
 
   /* ============ TICKER ============ */
@@ -1558,6 +1597,10 @@
       <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
       <span class="sidebar-label">Theme</span>
     </button>
+    <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" aria-label="Collapse sidebar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      <span class="scb-label">Collapse</span>
+    </button>
   </div>
 </aside>
 
@@ -1958,21 +2001,21 @@
           <div class="build-stack"><span class="tag">AI Planning</span><span class="tag">Wellness</span><span class="tag">Subscriptions</span></div>
           <span class="build-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></span>
         </a>
-        <a class="build-card tilt-card" href="https://the-third-eye-anchit.vercel.app/" target="_blank" rel="noopener">
+        <a class="build-card tilt-card" href="#project-thirdeye" data-view="project-thirdeye">
           <div class="build-tag"><span>AI OS · Personal</span><span class="status">Live</span></div>
           <h3>The Third <em>Eye</em></h3>
           <p>A self-hosted, agent-orchestrated personal AI operating system — memory-backed, with AI chat, task management, and multi-phase automation. The closest thing to turning a long-term vision into reality.</p>
           <div class="build-stack"><span class="tag">Next.js</span><span class="tag">FastAPI</span><span class="tag">PostgreSQL</span><span class="tag">Gemini</span><span class="tag">Docker</span></div>
           <span class="build-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></span>
         </a>
-        <a class="build-card tilt-card" href="https://marketing-mailers-html-architect.vercel.app/" target="_blank" rel="noopener">
+        <a class="build-card tilt-card" href="#project-mailer" data-view="project-mailer">
           <div class="build-tag"><span>AI Tooling · Marketing</span><span class="status">Live</span></div>
           <h3>Mailer <em>Architect</em></h3>
           <p>A 6-provider LLM cascade that turns a campaign brief into a production-grade HTML email. OpenAI → Anthropic → Gemini → Grok → Groq → Cerebras, with automatic failover and seed-based anti-repetition.</p>
           <div class="build-stack"><span class="tag">Vercel Functions</span><span class="tag">Multi-LLM</span><span class="tag">HTML Email</span><span class="tag">Playwright</span></div>
           <span class="build-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></span>
         </a>
-        <a class="build-card tilt-card" href="https://vahdam-dtc-data-engine.vercel.app/" target="_blank" rel="noopener">
+        <a class="build-card tilt-card" href="#project-dtc" data-view="project-dtc">
           <div class="build-tag"><span>Data Engineering · D2C</span><span class="status">Live</span></div>
           <h3>DTC Data <em>Engine</em></h3>
           <p>A DuckDB analytics layer that fuses Shopify, Klaviyo, and WebEngage into one queryable warehouse — with a metric registry, navigable strategy dashboards, and growth-pillar attribution.</p>
@@ -2230,6 +2273,182 @@
     </div>
   </section>
 
+  <!-- PROJECT: THE THIRD EYE -->
+  <section class="view" id="view-project-thirdeye">
+    <div class="container">
+      <a class="back-link" href="#projects" data-view="projects">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        All side projects
+      </a>
+      <div class="project-hero reveal">
+        <div class="eyebrow">AI OS · Personal · Agent-orchestrated</div>
+        <h1 class="display-lg">The Third <em>Eye</em></h1>
+        <p class="quote">"A personal operating system, run by agents — Jarvis on the inside, calm UI on the outside."</p>
+        <div class="project-meta">
+          <div><span class="label">Role</span><span>Architect · Builder</span></div>
+          <div><span class="label">Status</span><span>Live · Self-hosted</span></div>
+          <div><span class="label">Stack</span><span>Next.js · FastAPI · Postgres+pgvector · Gemini</span></div>
+        </div>
+        <div class="project-cta">
+          <a href="https://the-third-eye-anchit.vercel.app/" target="_blank" rel="noopener" class="btn primary">Open live app ↗</a>
+          <a href="https://github.com/Anchit-s-AI-Hustle/The-Third-Eye" target="_blank" rel="noopener" class="btn">View source ↗</a>
+        </div>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">The pitch</div>
+        <h2>What it is</h2>
+        <p>The Third Eye is a personal AI operating system. One assistant, four personas — <em>JARVIS</em>, <em>FRIDAY</em>, <em>E.D.I.T.H.</em>, <em>ULTRON</em> — sharing the same toolset: tasks, notes, knowledge-base RAG, web search, weather, news, stock quotes, multi-agent parallel reasoning, translation, location-aware suggestions, calendar, reminders, voice control.</p>
+        <p>The agents disagree about tone; they agree about answers. You pick the personality, you get the same capabilities underneath.</p>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">Origin</div>
+        <h2>Why I built it</h2>
+        <p>Every productivity tool I tried at work — Notion, ChatGPT, custom GPTs — solved one slice but never the whole loop: capture → memory → recall → action → review. So I built the loop. It runs on my own infrastructure, learns my context, and never asks me to copy-paste between tabs.</p>
+        <p>The Iron Man personas weren't a gimmick — they were a forcing function. If JARVIS, FRIDAY, EDITH and ULTRON all had to share the same backend, I had to design the backend right.</p>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">Problem it solves</div>
+        <h2>What's broken without it</h2>
+        <ul>
+          <li><strong>Tool sprawl with no memory.</strong> ChatGPT forgets, Notion doesn't reason, calendar apps don't notice patterns. Third Eye stitches them.</li>
+          <li><strong>One-time consent.</strong> Mic, location, camera, notifications — granted once via a single dialog, never asked again unless reset.</li>
+          <li><strong>Voice that actually works.</strong> Wake word on agent name OR "hey/hi", Web Speech STT with interim text, TTS matched to the active agent's persona.</li>
+          <li><strong>Multi-agent reasoning.</strong> ULTRON mode kicks off N parallel sub-agents on distinct angles of a hard question and synthesises — for strategy / pros-cons / "should I do X".</li>
+        </ul>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">What I'd build next</div>
+        <h2>The roadmap in my head</h2>
+        <p>Vision (Gemini multimodal on live camera, EDITH-style), wake-word via Porcupine for true always-on, Gmail/Calendar OAuth so the agent can read mail and book meetings, threat/anomaly scanning over inbound info, predictive routine ("you usually do X now").</p>
+      </div>
+
+      <div class="iframe-wrap reveal">
+        <div class="iframe-bar"><div class="dots"><span></span><span></span><span></span></div>the-third-eye-anchit.vercel.app</div>
+        <iframe src="https://the-third-eye-anchit.vercel.app/" loading="lazy" title="The Third Eye live preview"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECT: MAILER ARCHITECT -->
+  <section class="view" id="view-project-mailer">
+    <div class="container">
+      <a class="back-link" href="#projects" data-view="projects">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        All side projects
+      </a>
+      <div class="project-hero reveal">
+        <div class="eyebrow">AI Tooling · Marketing · Multi-LLM cascade</div>
+        <h1 class="display-lg">Mailer <em>Architect</em></h1>
+        <p class="quote">"Brief in. Production-grade HTML email out. Six LLMs trading off when one runs out."</p>
+        <div class="project-meta">
+          <div><span class="label">Role</span><span>Architect · Builder</span></div>
+          <div><span class="label">Status</span><span>Live · Used at Vahdam</span></div>
+          <div><span class="label">Stack</span><span>Vercel Functions · OpenAI · Anthropic · Gemini · xAI · Groq · Cerebras</span></div>
+        </div>
+        <div class="project-cta">
+          <a href="https://marketing-mailers-html-architect.vercel.app/" target="_blank" rel="noopener" class="btn primary">Open live app ↗</a>
+          <a href="https://github.com/Anchit-s-AI-Hustle/marketing_mailers__html_architect" target="_blank" rel="noopener" class="btn">View source ↗</a>
+        </div>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">The pitch</div>
+        <h2>What it is</h2>
+        <p>Mailer Architect turns a one-line campaign brief into a fully designed HTML email — copy, product picks from the live Shopify catalog, hero image, layout, subject line. A six-tier LLM cascade handles failover: OpenAI → Anthropic → Gemini → xAI → Groq → Cerebras. When one provider exhausts quota, the next takes over inside the same request.</p>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">Origin</div>
+        <h2>Why I built it</h2>
+        <p>Marketing teams at Vahdam were shipping 4–6 campaigns a week per region. Each one cost hours of designer + copywriter time, and the cost of <em>not</em> sending was bigger than the cost of mediocre output. I wanted a tool that gives a competent first draft in under a minute and lets humans edit instead of starting from blank.</p>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">Problem it solves</div>
+        <h2>What's broken without it</h2>
+        <ul>
+          <li><strong>Catalog drift.</strong> Manual emails reference products that are sold out, mispriced, or wrong-region. Architect pulls live PDPs at generation time.</li>
+          <li><strong>LLM single-point-of-failure.</strong> OpenAI billing limit hits — your weekly campaign dies. The cascade routes around it without anyone noticing.</li>
+          <li><strong>Brand drift.</strong> Brand palette + typography are locked at the generator layer; copywriters can't accidentally introduce off-brand styling.</li>
+          <li><strong>11 layout archetypes.</strong> Hero-led, narrative, comparison, gift bundle, etc. — the AI picks the right one for the campaign type, not just one template.</li>
+        </ul>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">What I'd build next</div>
+        <h2>The roadmap in my head</h2>
+        <p>Live campaign performance dashboard, AI-generated monthly mailer calendar built from past performance, automated daily creation + send. (In flight.)</p>
+      </div>
+
+      <div class="iframe-wrap reveal">
+        <div class="iframe-bar"><div class="dots"><span></span><span></span><span></span></div>marketing-mailers-html-architect.vercel.app</div>
+        <iframe src="https://marketing-mailers-html-architect.vercel.app/" loading="lazy" title="Mailer Architect live preview"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECT: DTC DATA ENGINE -->
+  <section class="view" id="view-project-dtc">
+    <div class="container">
+      <a class="back-link" href="#projects" data-view="projects">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        All side projects
+      </a>
+      <div class="project-hero reveal">
+        <div class="eyebrow">Data Engineering · D2C analytics · Real-time</div>
+        <h1 class="display-lg">DTC Data <em>Engine</em></h1>
+        <p class="quote">"One queryable warehouse fusing Shopify, Klaviyo and WebEngage — with a live operator dashboard on top."</p>
+        <div class="project-meta">
+          <div><span class="label">Role</span><span>Architect · Builder</span></div>
+          <div><span class="label">Status</span><span>Live · Powering weekly reviews</span></div>
+          <div><span class="label">Stack</span><span>DuckDB · Supabase Postgres · Chart.js · Python</span></div>
+        </div>
+        <div class="project-cta">
+          <a href="https://vahdam-dtc-data-engine.vercel.app/" target="_blank" rel="noopener" class="btn primary">Open live app ↗</a>
+          <a href="https://github.com/Anchit-s-AI-Hustle/vahdam_dtc_data_engine" target="_blank" rel="noopener" class="btn">View source ↗</a>
+        </div>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">The pitch</div>
+        <h2>What it is</h2>
+        <p>DTC Data Engine fuses Shopify (via Matrixify exports), Shopify Analytics, Klaviyo email and WebEngage CDP into a single queryable warehouse. The local layer is DuckDB; the published layer is Supabase Postgres; the operator surface is a live dashboard that updates the second new data lands, powered by Supabase Realtime change feeds.</p>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">Origin</div>
+        <h2>Why I built it</h2>
+        <p>At Vahdam, every growth meeting started with the same friction: someone exporting CSVs, someone else reconciling Klaviyo numbers, no one agreeing on the AOV. I wanted one source of truth, with the metric registry baked in, so the weekly review could focus on decisions instead of data wrangling.</p>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">Problem it solves</div>
+        <h2>What's broken without it</h2>
+        <ul>
+          <li><strong>Tool-of-record fragmentation.</strong> Shopify says one revenue number, Klaviyo attributes a different slice, WebEngage tracks events that neither sees. The engine reconciles them.</li>
+          <li><strong>Tier 1/2/3 metric framework.</strong> Business health (Tier 1) → growth levers (Tier 2) → retention intel (Tier 3). The dashboard surfaces the right level for the right decision.</li>
+          <li><strong>Decision speed.</strong> Realtime change feeds mean a campaign launch shows up in the dashboard within seconds, not the next morning.</li>
+          <li><strong>Open analytics.</strong> Anyone with the link sees the same numbers — no spreadsheet of truth that only the data person can update.</li>
+        </ul>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">What I'd build next</div>
+        <h2>The roadmap in my head</h2>
+        <p>Anomaly detection on the daily-revenue feed, predictive cohort projections, a slash-command interface so I can ask "what's IN revenue last week" in the assistant and have the engine answer.</p>
+      </div>
+
+      <div class="iframe-wrap reveal">
+        <div class="iframe-bar"><div class="dots"><span></span><span></span><span></span></div>vahdam-dtc-data-engine.vercel.app</div>
+        <iframe src="https://vahdam-dtc-data-engine.vercel.app/reports/dashboard.html" loading="lazy" title="DTC Data Engine live preview"></iframe>
+      </div>
+    </div>
+  </section>
+
   <!-- RESUME -->
   <section class="view" id="view-resume">
     <div class="container">
@@ -2312,7 +2531,7 @@
 
 <script>
   /* ============ STATE ============ */
-  const ALL_VIEWS = ['home','chat','experience','projects','resume','contact','project-yaara','project-music','project-telesuite','project-lifeengine'];
+  const ALL_VIEWS = ['home','chat','experience','projects','resume','contact','project-yaara','project-music','project-telesuite','project-lifeengine','project-thirdeye','project-mailer','project-dtc'];
   let audioModeEnabled = false; // true once user has clicked Play — gates TTS for chat
   const root = document.documentElement;
 
@@ -2324,6 +2543,19 @@
     root.setAttribute('data-theme', next);
     localStorage.setItem('anchit-theme', next);
   });
+
+  /* ============ SIDEBAR COLLAPSE (desktop) ============ */
+  if (localStorage.getItem('anchit-sidebar-collapsed') === '1') {
+    document.body.classList.add('sidebar-collapsed');
+  }
+  const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
+  if (sidebarCollapseBtn) {
+    sidebarCollapseBtn.addEventListener('click', () => {
+      const collapsed = document.body.classList.toggle('sidebar-collapsed');
+      localStorage.setItem('anchit-sidebar-collapsed', collapsed ? '1' : '0');
+      sidebarCollapseBtn.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
+    });
+  }
 
   /* ============ SIDEBAR (MOBILE) ============ */
   const sidebar = document.getElementById('sidebar');
