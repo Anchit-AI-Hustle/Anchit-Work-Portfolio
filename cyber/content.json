@@ -1,0 +1,196 @@
+{
+  "hero": {
+    "name": "Anchit Tandon",
+    "tagline": "An engineer who learned to love the funnel.",
+    "bio": "Currently AGM — Product at Vahdam India , driving D2C growth across US, UK & global. Previously at Times Internet — scaled Assisted Sales 5× to ₹80L MRR, revamped ET Markets to ₹3Cr+ ARR. 12 products shipped across work and side projects."
+  },
+  "projects": {
+    "project-yaara": {
+      "title": "Hey Yaara",
+      "paras": [
+        "All side projects AI Voice · Consumer · PWA Hey Yaara \"An AI voice companion for elderly. Talk, listen, and never feel alone.\"",
+        "Hey Yaara is an AI voice companion built specifically for elderly users. It listens, it responds in a warm conversational tone, and it does not demand the user learn anything new. No app navigation, no menus, no notifications competing for attention. You open it, you speak, you're heard.",
+        "It runs as a Progressive Web App — installable on any phone or tablet, no app store, no download friction. The interface is deliberately spare: one button to start talking, one to stop. Everything else is voice.",
+        "India has roughly 140 million people over 60. A huge share of them live alone, or with family members who are out of the house most of the day. The loneliness problem is well documented; the technology gap is too. Most \"senior-friendly\" apps still assume you know how to navigate a smartphone.",
+        "I wanted to see what a tool would look like if it started from voice first , not screen first. Something my own family members could use without me having to teach them.",
+        "Multilingual support is the most obvious next move — Hindi-first, then regional. Voice cloning so a user's children can record a \"voice they recognise\". Family hand-off — moments where the AI says \"let me get your daughter on the line for this one\"."
+      ]
+    },
+    "project-music": {
+      "title": "Music GenAI",
+      "paras": [
+        "All side projects Generative AI · Music · Full-stack Music GenAI \"Type a prompt, get a song — with verified lyrics, generated vocals, and the whole pipeline in your hands.\"",
+        "MusicGenAI is an AI-powered music generation app. You give it a prompt — a mood, a genre, a theme — and it composes a full track with vocals, generated lyrics, and verified output. The whole pipeline runs end-to-end on a stack I built: React/TypeScript frontend on Vite, Supabase for storage and auth, and a Python microservice handling the vocal synthesis.",
+        "It's not a wrapper around someone else's model. It's a real composition tool with its own orchestration layer.",
+        "The first wave of AI music tools (Suno, Udio, others) showed what's possible, but they're all closed boxes — you get an output and you don't see the seams. I wanted to understand the pipeline by building one myself: prompt parsing, melody generation, lyric generation, lyric verification (a step most tools skip), vocal synthesis, and final mixing.",
+        "Beyond curiosity, this was a real PM exercise too — for any AI music product to be a sustainable business, you need control over the failure modes. You can't operate at scale if you don't know why a track came out wrong. Building the pipeline taught me where the failure modes actually live."
+      ]
+    },
+    "project-telesuite": {
+      "title": "AI TeleSuite",
+      "paras": [
+        "All side projects AI Workflow · Sales Ops AI TeleSuite \"The same telesuite playbook I shipped at ET — packaged for solo operators and small teams.\"",
+        "AI TeleSuite is a real-time AI sales co-pilot. It transcribes a sales call as it happens, scores the pitch against quality criteria, and surfaces conversion suggestions live to the operator. Think of it as a quiet voice in the seller's ear, trained on what good looks like.",
+        "This is the consumer-facing companion to a product I built at Times Internet — same philosophy, smaller surface area, designed for individual sellers and tiny teams rather than enterprise sales floors.",
+        "At ET, the original telesuite was for our high-volume assisted-sales channel — dozens of agents, structured scripts, mature ops layer. It worked beautifully and made the difference in scaling Assisted Sales from ₹15L to ₹80L MRR.",
+        "But the same problem exists everywhere outside enterprise sales floors: a freelancer running calls all day, a founder doing demos, a small startup with three SDRs. They have no coaching layer. Every call is solo, every mistake invisible, every win unrepeatable. AI TeleSuite is what happens when you take the enterprise version and strip it down to one user.",
+        "The next step is integrations — pull objection responses from your CRM, post-call summaries to your pipeline, and a coaching dashboard that surfaces patterns across a seller's last 50 calls. The vision is a quiet, persistent improvement engine that runs in the background while you sell."
+      ]
+    },
+    "project-lifeengine": {
+      "title": "TH+ LifeEngine",
+      "paras": [
+        "All side projects AI Wellness · Personalised planning TH+ LifeEngine \"Personalised health booster — AI that turns generic wellness advice into a daily plan tied to your goals.\"",
+        "TH+ LifeEngine is an AI-powered wellness planner. You tell it your goals — fitness, sleep, nutrition, stress, focus — and it builds a daily plan around them, adjusting as you log progress. It's behind a login because the version of wellness advice that actually works is personal, and personal data needs to live behind auth.",
+        "It's a private exploration of what a \"Times Health+ engine\" — a personalised companion sitting on top of the subscription product — could look like.",
+        "I shipped Times Health+ subscriptions at Times Internet — paid wellness content for Indian users. The product works, but it has the same problem every content product has: the content is one-size-fits-all, even when the user's goals aren't.",
+        "LifeEngine is my answer to that — a personalisation layer that takes the same wellness library and routes the right pieces to the right user on the right day. I built it as a side experiment to see whether the personalisation actually does the work I expected it to.",
+        "Building the engine end-to-end forced me to confront a question I'd been ducking at work: where does AI personalisation actually create value in a content subscription, and where does it just look like value? The answer turned out to be more nuanced than the PRD I'd have written before — and that's exactly why I keep building these on the side."
+      ]
+    },
+    "project-thirdeye": {
+      "title": "The Third Eye",
+      "paras": [
+        "All side projects AI OS · Personal · Agent-orchestrated The Third Eye \"A personal operating system, run by agents — Jarvis on the inside, calm UI on the outside.\"",
+        "The Third Eye is a personal AI operating system. One assistant, four personas — JARVIS , FRIDAY , E.D.I.T.H. , ULTRON — sharing the same toolset: tasks, notes, knowledge-base RAG, web search, weather, news, stock quotes, multi-agent parallel reasoning, translation, location-aware suggestions, calendar, reminders, voice control.",
+        "The agents disagree about tone; they agree about answers. You pick the personality, you get the same capabilities underneath.",
+        "Every productivity tool I tried at work — Notion, ChatGPT, custom GPTs — solved one slice but never the whole loop: capture → memory → recall → action → review. So I built the loop. It runs on my own infrastructure, learns my context, and never asks me to copy-paste between tabs.",
+        "The Iron Man personas weren't a gimmick — they were a forcing function. If JARVIS, FRIDAY, EDITH and ULTRON all had to share the same backend, I had to design the backend right.",
+        "Vision (Gemini multimodal on live camera, EDITH-style), wake-word via Porcupine for true always-on, Gmail/Calendar OAuth so the agent can read mail and book meetings, threat/anomaly scanning over inbound info, predictive routine (\"you usually do X now\")."
+      ]
+    },
+    "project-mailer": {
+      "title": "Mailer Architect",
+      "paras": [
+        "All side projects AI Tooling · Marketing · Multi-LLM cascade Mailer Architect \"Brief in. Production-grade HTML email out. Six LLMs trading off when one runs out.\"",
+        "Mailer Architect turns a one-line campaign brief into a fully designed HTML email — copy, product picks from the live Shopify catalog, hero image, layout, subject line. A six-tier LLM cascade handles failover: OpenAI → Anthropic → Gemini → xAI → Groq → Cerebras. When one provider exhausts quota, the next takes over inside the same request.",
+        "Marketing teams at Vahdam were shipping 4–6 campaigns a week per region. Each one cost hours of designer + copywriter time, and the cost of not sending was bigger than the cost of mediocre output. I wanted a tool that gives a competent first draft in under a minute and lets humans edit instead of starting from blank.",
+        "Live campaign performance dashboard, AI-generated monthly mailer calendar built from past performance, automated daily creation + send. (In flight.)"
+      ]
+    },
+    "project-dtc": {
+      "title": "DTC Data Engine",
+      "paras": [
+        "All side projects Data Engineering · D2C analytics · Real-time DTC Data Engine \"One queryable warehouse fusing Shopify, Klaviyo and WebEngage — with a live operator dashboard on top.\"",
+        "DTC Data Engine fuses Shopify (via Matrixify exports), Shopify Analytics, Klaviyo email and WebEngage CDP into a single queryable warehouse. The local layer is DuckDB; the published layer is Supabase Postgres; the operator surface is a live dashboard that updates the second new data lands, powered by Supabase Realtime change feeds.",
+        "At Vahdam, every growth meeting started with the same friction: someone exporting CSVs, someone else reconciling Klaviyo numbers, no one agreeing on the AOV. I wanted one source of truth, with the metric registry baked in, so the weekly review could focus on decisions instead of data wrangling.",
+        "Anomaly detection on the daily-revenue feed, predictive cohort projections, a slash-command interface so I can ask \"what's IN revenue last week\" in the assistant and have the engine answer."
+      ]
+    },
+    "project-lifecycle": {
+      "title": "VAHDAM Lifecycle OS",
+      "paras": [
+        "All side projects D2C Retention · Marketing Calendar · Mailer Creator · Installable PWA VAHDAM Lifecycle OS \"Stop guessing what to send next — one workflow from data to plan to mailers.\"",
+        "Three tools, one workflow, one Google sign-in. Stage 1 reads your campaign + customer + order data and builds an executive-grade retention dashboard — RFM segments, cohort retention, send-time heatmaps, cross-sell affinity, all currency-aware (USD ⇄ INR). Stage 2 turns that analysis into a 30-day marketing calendar, festival-aware across 11 markets, with cadence guards per segment. Stage 3 runs every row through the brand-locked Mailer Studio — strategy → variant → image cascade → HTML — and hands you four ready-to-ship variants per send. The whole thing installs from the address bar as a PWA.",
+        "At Vahdam, the retention workflow was three disconnected tools and a calendar nobody trusted. Analytics in one tab, a spreadsheet plan in another, the email builder in a third — every Monday started with someone reconciling, not deciding. I wanted one place where the data already knew what to send, the calendar respected segment fatigue and cultural moments, and the mailer itself was already drafted on-brand before the meeting started.",
+        "Auto-daily send queue with a one-click \"ship the plan\" mode, anomaly detection on the retention curve, predictive cohort forecasts, and a slash-command interface so the dashboard answers \"what's UK revenue last Tuesday\" in plain English. Plus deeper hand-off into the Studio — direct image-variant render in the calendar drawer, no extra step."
+      ]
+    }
+  },
+  "chips": [
+    {
+      "name": "Hey Yaara",
+      "meta": "AI Voice · Consumer",
+      "metric": "Voice companion for elderly"
+    },
+    {
+      "name": "MusicGenAI",
+      "meta": "Generative AI · Music",
+      "metric": "Prompt → full track with vocals"
+    },
+    {
+      "name": "AI TeleSuite",
+      "meta": "AI Workflow · Sales",
+      "metric": "Real-time pitch scoring"
+    },
+    {
+      "name": "TH+ LifeEngine",
+      "meta": "AI Wellness",
+      "metric": "Personalised daily plans"
+    },
+    {
+      "name": "The Third Eye",
+      "meta": "AI OS · Personal",
+      "metric": "Agent-orchestrated AI OS"
+    },
+    {
+      "name": "Mailer Architect",
+      "meta": "AI Tooling · Marketing",
+      "metric": "6-LLM cascade → HTML email"
+    },
+    {
+      "name": "DTC Data Engine",
+      "meta": "Data Eng · D2C",
+      "metric": "Shopify+Klaviyo+WE → DuckDB"
+    },
+    {
+      "name": "Lifecycle OS",
+      "meta": "D2C Retention · PWA",
+      "metric": "Dashboard → calendar → mailers"
+    },
+    {
+      "name": "Vahdam India D2C",
+      "meta": "Vahdam India · 2026",
+      "metric": "Ratings 2.4 → 4.0"
+    },
+    {
+      "name": "TI Half Marathon",
+      "meta": "Times Internet · 2026",
+      "metric": "0 → 1 consumer IP"
+    },
+    {
+      "name": "ET Prime Assisted Sales",
+      "meta": "Times Internet · 2025",
+      "metric": "5× MRR · ₹80L"
+    },
+    {
+      "name": "AI TeleSuite (Enterprise)",
+      "meta": "Times Internet · 2024",
+      "metric": "Real-time pitch scoring"
+    },
+    {
+      "name": "ET Markets Revamp",
+      "meta": "Times Internet · 2024",
+      "metric": "₹3Cr+ ARR · +25% DAU"
+    },
+    {
+      "name": "Times Health+ Subs",
+      "meta": "Times Internet · 2024",
+      "metric": "Paid tier · 0→1"
+    },
+    {
+      "name": "ET Markets Discovery",
+      "meta": "Times Internet · 2023",
+      "metric": "Screeners, portfolios"
+    },
+    {
+      "name": "AI TeleSuite (Consumer)",
+      "meta": "Side project · 2024",
+      "metric": "Pitch coaching app"
+    }
+  ],
+  "experience": [
+    {
+      "title": "D2C Global Growth",
+      "detail": "Spearheading D2C growth across the US, UK, and global markets. Overseeing product performance, customer experience, experimentation, and revenue optimisation. Designing cross-functional product and CRM experiments that elevated average product ratings from 2.4 to 4.0, while driving sustained revenue growth through Klaviyo and WebEngage lifecycle campaigns."
+    },
+    {
+      "title": "Times Internet Half Marathon",
+      "detail": "Building a 0→1 consumer product — owning discovery, registration, acquisition funnels, and on-ground runner insights for a first-time consumer IP. Scaled an assisted consumer conversion channel into one of Economic Times' most profitable growth engines. Funnel redesign, continuous A/B experimentation, and an AI-powered telesuite enabling call transcription, quality scoring, and pitch assistance."
+    },
+    {
+      "title": "Software Engineer — Citymall",
+      "detail": "Supported data pipelines and backend systems for consumer commerce platforms. Built and scaled backend services for consumer-facing applications. Also acted as Product Owner for an early-stage live sports commentary product — the training ground for everything that came next."
+    },
+    {
+      "title": "B.Tech · Computer Science & Engineering",
+      "detail": "Vellore Institute of Technology, Vellore. The engineering foundation — systems thinking, data structures, algorithms — that makes everything else work."
+    }
+  ],
+  "links": {
+    "github_personal": "https://github.com/anchittandon-create",
+    "github_org": "https://github.com/Anchit-s-AI-Hustle",
+    "email": "mailto:anchittandon@gmail.com",
+    "linkedin": "https://www.linkedin.com/in/anchit-tandon"
+  }
+}
