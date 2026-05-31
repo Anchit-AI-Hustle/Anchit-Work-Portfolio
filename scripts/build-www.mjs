@@ -20,6 +20,7 @@ const assets = [
   'icons',
   'assets',
   'audio',
+  'cyber',
 ];
 
 async function main() {
