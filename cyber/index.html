@@ -393,5 +393,13 @@ function boot(){
 }
 boot();
 </script>
+<!-- View switcher → back to Editorial -->
+<button id="viewToggle" title="Switch to the Editorial edition" aria-label="Switch design"
+  style="position:fixed;top:16px;right:16px;z-index:9998;display:inline-flex;align-items:center;gap:8px;background:rgba(14,14,17,.82);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:8px 14px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#e8e8ec;cursor:pointer;backdrop-filter:blur(8px);">
+  <span style="width:8px;height:8px;border-radius:50%;background:#ff2b2b;"></span>Editorial view
+</button>
+<script>
+  document.getElementById('viewToggle').onclick=function(){ try{localStorage.setItem('anchit-portfolio-view','simple');}catch(e){} location.href='/'; };
+</script>
 </body>
 </html>
