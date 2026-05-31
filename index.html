@@ -1597,10 +1597,14 @@
   <hr class="sidebar-rule" />
 
   <div class="sidebar-social">
-    <button class="sidebar-item" id="themeToggle" aria-label="Toggle theme">
+    <button class="sidebar-item" id="sidebarViewToggle" aria-label="Switch to Cyberpunk view" title="Switch design — Editorial ⇄ Cyberpunk">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M3 12a9 9 0 0 1 9-9m0 18a9 9 0 0 1-9-9"/><path d="M16 8l4-4M14 4h6v6"/></svg>
+      <span class="sidebar-label">Cyberpunk view</span>
+    </button>
+    <button class="sidebar-item" id="themeToggle" aria-label="Toggle light / dark">
       <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
-      <span class="sidebar-label">Theme</span>
+      <span class="sidebar-label">Light / Dark</span>
     </button>
     <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" aria-label="Collapse sidebar">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -3396,12 +3400,7 @@
 </script>
 
 <!-- ───────── Schedule-a-call modal (Google Meet invite) ───────── -->
-<!-- ============ VIEW SWITCHER (Simple ⇄ Cyberpunk) ============ -->
-<button id="viewToggle" title="Switch to the Cyberpunk edition" aria-label="Switch design"
-  style="position:fixed;top:calc(env(safe-area-inset-top,0px) + 64px);right:16px;z-index:9998;display:inline-flex;align-items:center;gap:8px;background:var(--bg-elev,#fff);border:1px solid var(--rule,#e5dcc7);border-radius:999px;padding:8px 14px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink,#161312);cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.12);">
-  <span style="width:8px;height:8px;border-radius:50%;background:var(--primary,#ff4d1f);"></span>
-  <span id="viewToggleLabel">Cyberpunk view</span>
-</button>
+<!-- ============ VIEW SWITCHER (Editorial ⇄ Cyberpunk) — lives in the LHS menu ============ -->
 <div id="viewChooser" role="dialog" aria-modal="true" style="position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(8,6,5,.82);backdrop-filter:blur(8px);">
   <div style="max-width:560px;width:100%;background:var(--bg-elev,#fff);border:1px solid var(--rule,#e5dcc7);border-radius:20px;padding:30px 26px;text-align:center;font-family:inherit;box-shadow:0 40px 100px rgba(0,0,0,.5);">
     <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--primary,#ff4d1f);margin-bottom:8px;">Welcome — pick your vibe</div>
@@ -3422,7 +3421,6 @@
 <script>
 (function(){
   var KEY='anchit-portfolio-view';
-  var label=document.getElementById('viewToggleLabel');
   function go(v){ try{localStorage.setItem(KEY,v);}catch(e){} if(v==='cyber'){ location.href='/cyber'; } }
   // first-visit chooser
   var chosen=null; try{chosen=localStorage.getItem(KEY);}catch(e){}
@@ -3431,7 +3429,8 @@
     document.getElementById('chooseSimple').onclick=function(){ try{localStorage.setItem(KEY,'simple');}catch(e){} ch.style.display='none'; };
     document.getElementById('chooseCyber').onclick=function(){ go('cyber'); };
   }
-  document.getElementById('viewToggle').onclick=function(){ go('cyber'); };
+  var sb=document.getElementById('sidebarViewToggle');
+  if(sb) sb.onclick=function(){ go('cyber'); };
 })();
 </script>
 
