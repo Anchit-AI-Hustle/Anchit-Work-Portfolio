@@ -194,7 +194,7 @@
     position: fixed; top: calc(14px + var(--safe-top)); left: 14px; z-index: 300;
     width: 42px; height: 42px; border-radius: 12px;
     background: var(--bg-elev); border: 1px solid var(--rule);
-    color: var(--ink); display: none; align-items: center; justify-content: center;
+    color: var(--ink); display: inline-flex; align-items: center; justify-content: center;
     box-shadow: var(--shadow-md); cursor: pointer; transition: all 0.2s;
   }
   .sidebar-toggle:hover { background: var(--bg-deep); }
@@ -2646,9 +2646,21 @@
   const sidebar = document.getElementById('sidebar');
   const sidebarBackdrop = document.getElementById('sidebarBackdrop');
   const sidebarToggle = document.getElementById('sidebarToggle');
-  function openSidebar() { sidebar.classList.add('open'); sidebarBackdrop.classList.add('visible'); }
-  function closeSidebar() { sidebar.classList.remove('open'); sidebarBackdrop.classList.remove('visible'); }
-  sidebarToggle.addEventListener('click', openSidebar);
+  function openSidebar() { sidebar.classList.add('open'); sidebarBackdrop.classList.add('visible'); if(sidebarToggle) sidebarToggle.setAttribute('aria-expanded','true'); }
+  function closeSidebar() { sidebar.classList.remove('open'); sidebarBackdrop.classList.remove('visible'); if(sidebarToggle) sidebarToggle.setAttribute('aria-expanded','false'); }
+  // The hamburger now TOGGLES based on current state (expand ⇄ collapse),
+  // on every viewport — fixes the bug where tapping ☰ while open did nothing.
+  function toggleSidebar() {
+    const onDesktop = window.matchMedia('(min-width: 861px)').matches;
+    if (onDesktop) {
+      const collapsed = document.body.classList.toggle('sidebar-collapsed');
+      try { localStorage.setItem('anchit-sidebar-collapsed', collapsed ? '1' : '0'); } catch {}
+      sidebarToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    } else {
+      if (sidebar.classList.contains('open')) closeSidebar(); else openSidebar();
+    }
+  }
+  if (sidebarToggle) sidebarToggle.addEventListener('click', toggleSidebar);
   sidebarBackdrop.addEventListener('click', closeSidebar);
 
   /* ============ VIEW SWITCHING ============ */
