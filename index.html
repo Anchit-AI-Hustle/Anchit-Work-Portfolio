@@ -662,6 +662,16 @@
   }
   .chat-send:hover { background: var(--primary-deep); transform: translateX(1px) scale(1.05); }
   .chat-send svg { width: 14px; height: 14px; }
+  .chat-mic {
+    background: var(--bg-deep); color: var(--ink-dim);
+    width: 36px; height: 36px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid var(--rule); cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+  }
+  .chat-mic:hover { color: var(--primary); border-color: var(--primary); }
+  .chat-mic svg { width: 15px; height: 15px; }
+  .chat-mic.listening { background: var(--primary); color: #fff; border-color: var(--primary); animation: micPulse 1.1s ease-in-out infinite; }
+  @keyframes micPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(255,77,31,.5); } 50% { box-shadow: 0 0 0 7px rgba(255,77,31,0); } }
 
   /* ============ SECTION HEADERS ============ */
   .section-head { margin-bottom: clamp(40px, 6vw, 80px); max-width: 1200px; }
@@ -1809,7 +1819,10 @@
         <div class="chat-body" id="chatBody"></div>
         <div class="chips" id="chipRow"></div>
         <div class="chat-input">
-          <input type="text" id="chatInput" placeholder="Ask me anything…" autocomplete="off" />
+          <input type="text" id="chatInput" placeholder="Ask me anything — or tap the mic to talk…" autocomplete="off" />
+          <button class="chat-mic" id="chatMic" aria-label="Speak" title="Speak your question">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
+          </button>
           <button class="chat-send" id="chatSend" aria-label="Send">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           </button>
@@ -2855,9 +2868,35 @@
     }
   }
 
+  // Shared audio element for the cloned-voice (ElevenLabs) path.
+  let cloneAudio = null;
+  // Tries Anchit's cloned voice via /api/tts first; on any failure (key not
+  // set / 401 / offline) falls back to the browser's built-in speech so the
+  // site always talks. Returns true if the clone path is handling playback.
+  async function speakViaClone(plainText, onStart, onEnd) {
+    try {
+      const r = await fetch('/api/tts', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: plainText }),
+      });
+      if (!r.ok) return false;                 // 503/401 → use browser voice
+      const ct = r.headers.get('content-type') || '';
+      if (!ct.includes('audio')) return false;
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob);
+      if (cloneAudio) { try { cloneAudio.pause(); } catch {} }
+      cloneAudio = new Audio(url);
+      cloneAudio.onplay = onStart || null;
+      cloneAudio.onended = () => { URL.revokeObjectURL(url); if (onEnd) onEnd(); };
+      cloneAudio.onerror = () => { URL.revokeObjectURL(url); if (onEnd) onEnd(); };
+      await cloneAudio.play();
+      return true;
+    } catch { return false; }
+  }
+
   function speakBotResponse(bubbleEl, plainText) {
-    if (!window.speechSynthesis || !plainText || !bubbleEl) return;
-    window.speechSynthesis.cancel();
+    if (!plainText || !bubbleEl) return;
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
 
     const caption = document.getElementById('chatCaption');
     const words = plainText.trim().split(/\s+/);
@@ -2866,7 +2905,17 @@
       caption.innerHTML = words.map((w, i) => `<span class="chat-caption-word" data-i="${i}">${w}</span>`).join(' ');
       caption.classList.add('active');
     }
-    bubbleEl.closest('.msg')?.classList.add('speaking');
+    const msgEl = bubbleEl.closest('.msg');
+    msgEl?.classList.add('speaking');
+    const cleanupClone = () => { msgEl?.classList.remove('speaking'); if (caption) { caption.classList.remove('active'); caption.innerHTML=''; } };
+
+    // Try the cloned voice first; if it can't (no key / blocked), fall through
+    // to the browser speech-synthesis path below.
+    speakViaClone(plainText, () => { if (caption) caption.classList.add('active'); }, cleanupClone)
+      .then((usedClone) => { if (usedClone) return; speakViaBrowser(); });
+
+    function speakViaBrowser() {
+    if (!window.speechSynthesis) { cleanupClone(); return; }
 
     const utter = new SpeechSynthesisUtterance(plainText);
     utter.lang = 'en-IN'; utter.rate = 0.92; utter.pitch = 1.0;
@@ -2910,6 +2959,7 @@
     utter.onerror = cleanup;
 
     window.speechSynthesis.speak(utter);
+    } /* end speakViaBrowser */
   }
   function addUser(text) {
     const w = document.createElement('div');
@@ -2962,12 +3012,54 @@
     }, 500 + Math.random() * 400);
   }
 
-  chatSend.addEventListener('click', () => {
+  // ---- Sent "swish" sound (WebAudio, no asset) ----
+  let _ac = null;
+  function playSwish() {
+    try {
+      _ac = _ac || new (window.AudioContext || window.webkitAudioContext)();
+      if (_ac.state === 'suspended') _ac.resume();
+      const t = _ac.currentTime;
+      const o = _ac.createOscillator(), g = _ac.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(540, t); o.frequency.exponentialRampToValueAtTime(1180, t + 0.12);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.16, t + 0.03); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+      o.connect(g).connect(_ac.destination); o.start(t); o.stop(t + 0.24);
+    } catch {}
+  }
+
+  function sendCurrent() {
     const v = chatInput.value;
     chatInput.value = '';
+    if (v.trim()) playSwish();
     handleMessage(v);
-  });
-  chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') chatSend.click(); });
+  }
+  chatSend.addEventListener('click', sendCurrent);
+  chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendCurrent(); });
+
+  // ---- In-chat mic: speak → transcribe into the input → auto-send ----
+  (function(){
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const micBtn = document.getElementById('chatMic');
+    if (!micBtn) return;
+    if (!SR) { micBtn.style.display = 'none'; return; }
+    let rec = null, on = false;
+    micBtn.addEventListener('click', () => {
+      if (on) { try { rec && rec.stop(); } catch {} return; }
+      try {
+        if (window.speechSynthesis) window.speechSynthesis.cancel();   // pause narration while user speaks
+        if (cloneAudio) { try { cloneAudio.pause(); } catch {} }
+        rec = new SR(); rec.lang = 'en-IN'; rec.interimResults = true; rec.continuous = false;
+        micBtn.classList.add('listening'); on = true;
+        rec.onresult = (e) => {
+          let txt = ''; for (let i=0;i<e.results.length;i++) txt += e.results[i][0].transcript;
+          chatInput.value = txt;
+          if (e.results[e.results.length-1].isFinal) { rec.stop(); }
+        };
+        rec.onend = () => { micBtn.classList.remove('listening'); on = false; if (chatInput.value.trim()) sendCurrent(); };
+        rec.onerror = () => { micBtn.classList.remove('listening'); on = false; };
+        rec.start();
+      } catch { micBtn.classList.remove('listening'); on = false; }
+    });
+  })();
 
   // Initial bot message
   setTimeout(() => {
