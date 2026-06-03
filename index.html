@@ -3605,6 +3605,13 @@
     var tm=document.getElementById('sf-time'); if(tm&&!tm.value)tm.value="15:00";
     modal.style.display='flex'; document.body.style.overflow='hidden';
   };
+  // Any element marked [data-schedule] (Meet Me button, contact card, footer link)
+  // opens the scheduler. This delegated handler is what was missing — the buttons
+  // existed but nothing called openScheduleModal().
+  document.addEventListener('click', function(e){
+    var t = e.target.closest('[data-schedule]');
+    if (t) { e.preventDefault(); window.openScheduleModal(); }
+  });
   function close(){ modal.style.display='none'; document.body.style.overflow=''; }
   document.getElementById('schedClose').onclick=close;
   modal.addEventListener('click',function(e){ if(e.target===modal) close(); });
