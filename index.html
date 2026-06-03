@@ -856,14 +856,14 @@
   .project-section p em { font-style: italic; color: var(--primary); }
   .project-section ul { list-style: none; }
   .project-section ul li {
-    padding: 16px 0; border-bottom: 1px solid var(--rule);
-    display: grid; grid-template-columns: 20px 1fr; gap: 12px; align-items: start;
-    font-size: 16px; color: var(--ink); line-height: 1.55; min-width: 0;
+    padding: 16px 0 16px 32px; border-bottom: 1px solid var(--rule);
+    position: relative;
+    font-size: 16px; color: var(--ink); line-height: 1.55;
     word-break: normal; overflow-wrap: break-word;
   }
-  .project-section ul li > * { min-width: 0; }
   .project-section ul li::before {
     content: '→'; color: var(--primary);
+    position: absolute; left: 0; top: 14px;
     font-family: var(--font-display); font-size: 20px; line-height: 1.3;
   }
   .project-section ul li strong { font-weight: 600; color: var(--ink); }
@@ -2753,40 +2753,40 @@
       response: "I'm Anchit Tandon — AGM, Product at Vahdam India, ex-Times Internet. Five-plus years in B2C consumer tech: D2C growth, subscriptions, content, events. Started as a backend engineer, moved to product in 2022 because I got obsessed with <em>why</em> things were being built, not just how. I think in systems, ship in experiments, and build AI side projects on weekends because I can't sit still. <a data-nav='experience'>Full story →</a>",
       nextChips: ["Your biggest career win?","Why switch to product?","Tell me about your side builds","Hardest problem right now?"] },
     { keywords: ['role','title','current','doing now','job','vahdam','work now','position'],
-      response: "AGM – Product Management at Vahdam India since April 2026. Driving D2C growth across the US, UK, and global markets. The core challenge: balancing acquisition, retention, CRM experimentation, conversion optimisation, and profitability — simultaneously. The challenge isn't finding opportunities, it's prioritising the right ones. Before this, nearly four years at Times Internet — APM to Senior PM.",
+      response: "Vahdam India is a premium, home-grown wellness brand that sources fresh Indian teas, spices, and superfoods directly from estates and exports them to a global audience (primarily US, UK, and Europe). As AGM of Product Management here since April 2026, I drive direct-to-consumer (D2C) growth across these global markets. My role focuses on optimizing the entire digital funnel — balancing acquisition, retention, CRM, and conversion rate optimization (CRO) to scale global revenue profitably. Before this, I spent nearly four years at Times Internet moving from APM to Senior PM.",
       nextChips: ["What's hardest at Vahdam?","Tell me about Times Internet","Show me your work","How do I reach you?"] },
     { keywords: ['hardest','challenge','hard','difficult','solving','problem','struggle'],
-      response: "Right now at Vahdam: creating sustainable D2C growth while improving customer experience. That means acquisition, retention, CRM, experimentation, conversion optimisation, reviews, merchandising, profitability — all at once. I lifted product ratings from 2.4 to 4.0 through cross-functional experiments. The real skill isn't finding opportunities — it's knowing which ones to say no to.",
+      response: "Right now at Vahdam India — a global D2C wellness and tea brand — my main challenge is driving sustainable growth across global markets. That involves coordinating customer acquisition, retention, and conversion rate optimization (CRO) simultaneously. For instance, I led cross-functional experiments that lifted our product rating from 2.4 to 4.0. The real skill is prioritizing the highest-impact funnel opportunities.",
       nextChips: ["Show me your growth wins","Your product philosophy?","Tell me about your builds","How do I reach you?"] },
     { keywords: ['et markets','markets','revamp','finance','stocks'],
-      response: "Led the end-to-end revamp of ET Markets across Web, mWeb, Android, and iOS — one of India's highest-traffic financial surfaces. The numbers: +27% engagement, +25% DAU, +15% session duration, ₹3Cr+ incremental ARR. The approach: break the problem into measurable surfaces, test relentlessly, ship what the data supports. <a data-nav='experience'>Full work view →</a>",
+      response: "ET Markets is the stock market and financial tracking arm of The Economic Times (India's leading business daily), serving as one of the country's highest-traffic financial platforms with real-time market data. I led the end-to-end product revamp of ET Markets across Web, mobile Web, Android, and iOS. By restructuring the information architecture and testing relentlessly, we achieved a +27% boost in user engagement, +25% in DAUs, and added ₹3Cr+ in incremental ARR. <a data-nav='experience'>Full work view →</a>",
       nextChips: ["Tell me about Assisted Sales","What about Times Health+?","Your engineering background?","Show me a side build"] },
     { keywords: ['prime','assisted sales','sales','subscription','conversion','roi','growth','biggest','win','proudest','proud'],
-      response: "My proudest growth story: Assisted Sales for ET Prime — ₹15L to ₹80L MRR in six months. 5× growth, 400%+ ROI. Won a Team Award for Jul–Sep 2025 performance. The AI telesuite I built — transcription, pitch scoring, conversion assist — made that consistency possible at scale. But honestly, what I'm proudest of isn't the numbers. It's going from writing backend code to leading growth and experimentation across global markets. That required learning an entirely different skill set.",
+      response: "ET Prime is the premium, member-only business subscription service of The Economic Times, offering high-quality, ad-free investigative journalism and business analysis. I led growth for ET Prime's Assisted Sales channel, scaling it 5× from ₹15L to ₹80L MRR in six months. To achieve this, I built an AI-powered telesuite featuring real-time call transcription, pitch scoring, and conversion assists, which boosted our team's sales conversion and delivered over 400% ROI. This work won me the Times Internet Team Award.",
       nextChips: ["What's the AI telesuite?","Your product philosophy?","What are you building now?","How do I reach you?"] },
     { keywords: ['marathon','event','running','half','0 to 1','zero to one','zero-to-one'],
-      response: "The Times Internet Half Marathon was pure zero-to-one: consumer IP that didn't exist before I built it. Discovery, registration funnels, acquisition, on-ground runner ops. That's my favourite kind of problem — building something from nothing, where you figure out every layer yourself. At Vahdam I'm doing similar zero-to-one thinking but in D2C growth across global markets.",
+      response: "The Times Internet Half Marathon is a major consumer sports IP and fitness event designed to bring running communities together. I built and launched this event from absolute zero-to-one, managing the discovery platforms, registration and ticket booking funnels, participant acquisition campaigns, and coordinating on-ground runner operations. At Vahdam I apply similar zero-to-one thinking but to D2C growth across global markets.",
       nextChips: ["Show me your other work","Tell me about side builds","Your approach to product?","How do I reach you?"] },
     { keywords: ['health','wellness','plus','health+'],
-      response: "Launched Times Health+ paid wellness subscriptions from scratch — freemium-to-paid journeys, pricing experiments, retention-led monetisation. A category most Indian publishers haven't cracked yet. The question: can you make people pay for wellness content in a market that expects it free? Short answer: yes, if you nail the value-to-friction ratio.",
+      response: "Times Health+ is a premium, paid wellness subscription program launched by Times Internet, offering curated health content, plans, and digital tools. I launched this product from scratch, designing the freemium-to-paid subscription journeys, running pricing experiments, and leading monetization. By tuning the value-to-friction ratio, we successfully cracked subscription revenue in a market historically accustomed to free content.",
       nextChips: ["Tell me about LifeEngine","What about ET Markets?","Tell me about Assisted Sales","How do I reach you?"] },
     { keywords: ['side','project','projects','build','builds','weekend','personal','ship','github','vercel'],
       response: "Four live side projects, all built end-to-end on weekends and evenings. Curiosity starts the project, ambition keeps it alive, restlessness prevents me from staying satisfied. <a data-nav='projects'>See them all →</a> Or ask about a specific one — Hey Yaara, MusicGenAI, AI TeleSuite, LifeEngine, or Jarvis.",
       nextChips: ["Tell me about Hey Yaara","Tell me about Jarvis","Tell me about MusicGenAI","Why build on weekends?"] },
     { keywords: ['hey yaara','yaara','elderly','companion'],
-      response: "Hey Yaara is an AI voice companion I built for elderly users. The premise: what if a tool started from voice first, not screen first? Something my own family members could use without me teaching them. One button to start talking, one to stop. Everything else is voice. PWA — no app store friction. <a data-nav='project-yaara'>Full deep dive →</a>",
+      response: "Hey Yaara is an AI-powered voice companion designed specifically for elderly users to combat loneliness and assist with daily queries through a simple voice-first interface. I designed and built this PWA from scratch to remove all screen-based friction — users simply tap one button to talk and one to stop. Everything from transcription to speech response is handled entirely by voice. <a data-nav='project-yaara'>Full deep dive →</a>",
       nextChips: ["Open Hey Yaara page","Tell me about MusicGenAI","Why build side projects?","Show me your day job"] },
     { keywords: ['music','musicgen','song'],
-      response: "MusicGenAI: type a prompt, get a full song — lyrics, vocals, production. Most AI music tools are black boxes. When the lyrics drift or the vocal sounds off, you can't debug it. MusicGenAI exposes every stage so you can fix them. React/TypeScript frontend, Python microservice for audio synthesis. <a data-nav='project-music'>Full deep dive →</a>",
+      response: "MusicGenAI is an AI-powered music generation web app that composes complete songs — including lyrics, vocals, and instruments — from simple text prompts. Unlike typical 'black box' music generators, MusicGenAI exposes every stage of the generation pipeline, allowing users to inspect and debug lyrics or vocal tracks when they drift. I built this end-to-end using a React/TypeScript frontend and a dedicated Python audio synthesis microservice. <a data-nav='project-music'>Full deep dive →</a>",
       nextChips: ["Open MusicGenAI page","Tell me about AI TeleSuite","Your tech stack?","Show me your day job"] },
     { keywords: ['telesuite','ai tele','tele suite'],
-      response: "AI TeleSuite is the same playbook I shipped at ET Prime — real-time transcription, pitch scoring, conversion suggestions — packaged for solo operators and small teams. Think of it as a quiet voice in the seller's ear, trained on what good looks like. <a data-nav='project-telesuite'>Full deep dive →</a>",
+      response: "AI TeleSuite is a real-time sales intelligence platform that helps solo operators and small sales teams close deals by providing live call transcription, automated pitch scoring, and real-time conversion recommendations. I packaged the same playbook and technology I built for ET Prime's enterprise growth into this lightweight, accessible product to act as a real-time assistant for independent sellers. <a data-nav='project-telesuite'>Full deep dive →</a>",
       nextChips: ["Open TeleSuite page","Tell me about ET Prime","Tell me about LifeEngine","How do I reach you?"] },
     { keywords: ['lifeengine','life engine','th+','th plus'],
-      response: "TH+ LifeEngine: personalised AI wellness planning. Generic health advice is noise — this turns it into a daily plan tied to your actual goals. Login-gated, deliberately private. Born from the same thinking that went into Times Health+, but taken further. <a data-nav='project-lifeengine'>Full deep dive →</a>",
+      response: "TH+ LifeEngine is a secure, personalized AI wellness platform that transforms generic health advice into structured, actionable daily routines tailored to an individual's specific health goals. I built this login-gated, privacy-first platform to take the subscription-led wellness models I developed at Times Health+ to the next level, offering deep personalization. <a data-nav='project-lifeengine'>Full deep dive →</a>",
       nextChips: ["Open LifeEngine page","Tell me about Times Health+","Tell me about other builds","How do I reach you?"] },
     { keywords: ['jarvis','ai os','operating system','vision','dream project','most attached'],
-      response: "Jarvis is the project I'm most emotionally attached to. It's an attempt to build the kind of AI operating system I've always wanted — proactive, connected, intelligent, genuinely useful. Not just a chatbot, but a system that understands context across everything. It's more than a side project; it's a long-term vision I'm slowly turning into reality. Still early, but it's the one I think about most.",
+      response: "Jarvis is a proactive, context-aware AI operating system designed to act as an intelligent agent across multiple devices and workflows, rather than a simple conversational chatbot. I initiated this project to build a truly integrated AI workspace that understands context across apps and files. It's a long-term vision that I'm building step-by-step, and it is the side build I'm most passionate about.",
       nextChips: ["Why build on weekends?","Tell me about Hey Yaara","Your AI stack?","Show me your day job"] },
     { keywords: ['why build','why weekend','why side','motivation','drive','restless'],
       response: "A mix of curiosity, ambition, and restlessness. Curiosity starts the project. Ambition keeps it alive. Restlessness prevents me from staying satisfied with the status quo. I enjoy building things that don't exist yet and testing ideas fast. The side projects aren't hobbies — they're how I stress-test ideas I can't run inside a company.",
@@ -2991,14 +2991,23 @@
     });
   }
   function findMatch(text) {
-    const q = text.toLowerCase();
+    const q = text.toLowerCase().trim();
     let best = null, bestScore = 0;
     for (const e of KB) {
       let s = 0;
-      for (const kw of e.keywords) { if (q.includes(kw)) s += kw.length + (kw.includes(' ') ? kw.length : 0); }
-      if (s > bestScore) { bestScore = s; best = e; }
+      for (const kw of e.keywords) {
+        const escaped = kw.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        const regex = new RegExp('\\b' + escaped + '\\b');
+        if (regex.test(q) || (kw.length >= 3 && q.includes(kw))) {
+          s += kw.length + (kw.includes(' ') ? kw.length : 0);
+        }
+      }
+      if (s > bestScore) {
+        bestScore = s;
+        best = e;
+      }
     }
-    return bestScore >= 3 ? best : null;
+    return bestScore > 0 ? best : null;
   }
   function handleMessage(text) {
     if (!text.trim()) return;
@@ -3429,13 +3438,19 @@
         rec.onresult = (e) => {
           if (!e.results[0]?.isFinal) return;
           const q = (e.results[0][0].transcript || '').trim();
-          if (!q || q.length < 3) return;
+          if (!q || q.length < 2) return;
           window.speechSynthesis.pause();
           if (fill && utterDuration) { const pct = Math.min(((Date.now()-utterStart)/utterDuration)*100,99); fill.style.transition='none'; fill.style.width=pct+'%'; }
           clearInterval(progressTimer); setPlayerState(false);
           const match = findMatch(q);
           const resp = match ? match.response : 'That\'s a thoughtful question — I\'d love to give it the space it deserves. <a data-nav="home">Ask me in the chat</a> and I\'ll walk you through it properly.';
-          showCard(q, resp);
+          
+          const isChat = document.getElementById('view-chat')?.classList.contains('active');
+          if (isChat) {
+            handleMessage(q);
+          } else {
+            showCard(q, resp);
+          }
         };
         rec.onend = () => { recognizing = false; if (audioModeEnabled && window.speechSynthesis.speaking) setTimeout(startRec, 300); };
         rec.onerror = (ev) => { recognizing = false; if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') rec = null; };
