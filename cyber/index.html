@@ -70,6 +70,35 @@
   .cyber-actions a:hover{color:#fff;border-color:var(--red);box-shadow:0 0 14px rgba(255,43,43,.35)}
   @media(max-width:680px){.cyber-actions{flex-direction:row;top:auto;bottom:14px;right:50%;transform:translateX(50%);
     background:rgba(5,5,6,.85);padding:6px;border-radius:12px}}
+  /* cyber chat terminal */
+  .cyber-chat{margin-top:36px;border:1px solid var(--line);border-radius:14px;background:rgba(10,10,12,.72);
+    backdrop-filter:blur(10px);overflow:hidden;max-width:760px}
+  .cc-head{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--red);padding:13px 16px;
+    border-bottom:1px solid var(--line);display:flex;align-items:center;gap:9px;text-transform:uppercase}
+  .cc-dot{width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 10px var(--red);animation:ccpulse 1.6s ease-in-out infinite}
+  @keyframes ccpulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .cc-body{padding:16px;min-height:200px;max-height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+  .cc-msg{font-size:14px;line-height:1.6;max-width:88%;padding:11px 14px;border-radius:12px;animation:ccin .3s ease}
+  @keyframes ccin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .cc-msg.bot{align-self:flex-start;background:rgba(255,43,43,.08);border:1px solid rgba(255,43,43,.22);color:var(--ink)}
+  .cc-msg.bot a{color:#00e0ff;text-decoration:underline;cursor:pointer}
+  .cc-msg.user{align-self:flex-end;background:rgba(255,255,255,.06);border:1px solid var(--line);color:#fff;font-family:var(--mono);font-size:13px}
+  .cc-typing{align-self:flex-start;display:flex;gap:5px;padding:12px 14px}
+  .cc-typing span{width:7px;height:7px;border-radius:50%;background:var(--red);animation:ccbounce 1s infinite}
+  .cc-typing span:nth-child(2){animation-delay:.15s}.cc-typing span:nth-child(3){animation-delay:.3s}
+  @keyframes ccbounce{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
+  .cc-input{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--line);align-items:center}
+  .cc-input input{flex:1;background:transparent;border:0;outline:0;color:var(--ink);font-family:var(--mono);font-size:14px}
+  .cc-input input::placeholder{color:var(--mute)}
+  .cc-input button{width:38px;height:38px;border-radius:9px;border:1px solid var(--line);background:transparent;color:var(--dim);
+    display:grid;place-items:center;cursor:pointer;transition:all .2s}
+  .cc-input button:hover{color:#fff;border-color:var(--red)}
+  .cc-input button svg{width:16px;height:16px}
+  #ccMic.listening{background:var(--red);color:#fff;border-color:var(--red);animation:ccpulse 1.1s infinite}
+  .cc-chips{display:flex;gap:8px;flex-wrap:wrap;padding:0 14px 14px}
+  .cc-chips button{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--dim);background:rgba(255,255,255,.04);
+    border:1px solid var(--line);border-radius:99px;padding:6px 12px;cursor:pointer;transition:all .2s}
+  .cc-chips button:hover{color:#fff;border-color:var(--red)}
   /* layout */
   main{position:relative;z-index:10}
   section{position:relative;padding:clamp(80px,14vh,160px) clamp(16px,5vw,80px);max-width:1280px;margin:0 auto}
@@ -167,6 +196,7 @@
     <a href="#work">Work</a>
     <a href="#builds" class="opt">Builds</a>
     <a href="#exp" class="opt">Path</a>
+    <a href="#chat">Chat</a>
     <a href="#contact">Contact</a>
     <a href="https://www.linkedin.com/in/anchit-tandon" target="_blank" rel="noopener" class="opt">LinkedIn</a>
     <a href="/assets/resume.pdf" target="_blank" rel="noopener" class="opt">Resume</a>
@@ -216,8 +246,24 @@
     <div class="exp" id="exp-list"></div>
   </section>
 
+  <section id="chat">
+    <div class="eyebrow">04 — Interactive Terminal</div>
+    <h2 class="sec-h reveal">Talk to<br>the system.</h2>
+    <p class="sec-sub reveal">Ask me anything about my work, builds, or how I think. Type or tap the mic.</p>
+    <div class="cyber-chat reveal">
+      <div class="cc-head"><span class="cc-dot"></span> ANCHIT_AGENT // ONLINE</div>
+      <div class="cc-body" id="ccBody"></div>
+      <div class="cc-input">
+        <input id="ccInput" type="text" placeholder="> query the system…" autocomplete="off">
+        <button id="ccMic" title="Speak" aria-label="Speak"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/></svg></button>
+        <button id="ccSend" title="Send" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+      </div>
+      <div class="cc-chips" id="ccChips"></div>
+    </div>
+  </section>
+
   <section id="contact">
-    <div class="eyebrow" style="justify-content:center">04 — Open Channel</div>
+    <div class="eyebrow" style="justify-content:center">05 — Open Channel</div>
     <h2 class="reveal"><span class="glitch" data-t="LET'S BUILD">LET'S BUILD</span></h2>
     <div class="cta" id="contact-links"></div>
   </section>
@@ -343,6 +389,49 @@ document.querySelectorAll(".proj-row").forEach(row=>{
     if(!open){ d.classList.add("open"); ScrollTrigger.refresh(); }
   });
 });
+
+// ---------- CYBER CHAT (same knowledge, cyber-styled terminal) ----------
+(function(){
+  const body=$("#ccBody"), input=$("#ccInput"), sendBtn=$("#ccSend"), micBtn=$("#ccMic"), chips=$("#ccChips");
+  if(!body) return;
+  const KB=[
+    {k:["what do you do","role","current","vahdam","job"],a:"I'm AGM — Product at <b>Vahdam India</b>, driving D2C growth across US, UK & global. Before that, at Times Internet I scaled Assisted Sales 5× to ₹80L MRR and rebuilt ET Markets to ₹3Cr+ ARR.",c:["Your biggest win?","Tell me about your builds","Why product over engineering?"]},
+    {k:["win","achievement","proud","impact"],a:"Scaling ET Prime's Assisted Sales 5× to ₹80L MRR in 8–10 months — by redesigning the funnel and building an AI telesuite for real-time pitch scoring. That blend of product + AI + growth is my signature.",c:["Tell me about the AI telesuite","Show me your side builds","How do I reach you?"]},
+    {k:["build","side project","project","made","ai"],a:"Eight live AI builds — VAHDAM Lifecycle OS, MusicGenAI, Task Tracker, The Third Eye, Hey Yaara, Mailer Architect, AI TeleSuite, TH+ LifeEngine. Scroll up to the Builds grid; each opens its live app.",c:["Tell me about Lifecycle OS","Why build on weekends?","How do I reach you?"]},
+    {k:["lifecycle","retention"],a:"VAHDAM Lifecycle OS reads campaign + customer + order data, builds a retention dashboard, plans a 30-day mailer calendar, and drafts every email — one workflow, dashboard to send.",c:["Show me other builds","Your tech stack?","How do I reach you?"]},
+    {k:["product over engineering","switch","why product"],a:"I started as an engineer but fell for the funnel — the place where code meets a real human decision. Product lets me own the whole arc: problem, build, growth, outcome.",c:["Your biggest win?","Tell me about your builds","How do I reach you?"]},
+    {k:["marathon","half marathon","event"],a:"I led the Times Internet Delhi Half Marathon end-to-end — tech, marketing and on-ground experience — launching it as a brand-new IP and revenue stream from zero.",c:["Your biggest win?","Show me your builds","How do I reach you?"]},
+    {k:["reach","contact","email","hire","connect","call","meet"],a:"Easiest: WhatsApp or call <a href='tel:+919873945238'>+91 98739 45238</a>, email <a href='mailto:anchit.tandon@gmail.com'>anchit.tandon@gmail.com</a>, or book a Meet via the MEET button on the right rail.",c:["Tell me about your work","Show me a build","Your resume"]},
+    {k:["stack","tech","tools"],a:"Whatever removes friction fastest — React, TypeScript, Python, Next.js, Supabase, Vercel, and the full LLM toolkit (OpenAI, Anthropic, Gemini, Groq).",c:["Show me your builds","Your biggest win?","How do I reach you?"]},
+  ];
+  const DEFAULT=["What do you do?","Your biggest win?","Show me your builds","How do I reach you?"];
+  function add(cls,html){const d=document.createElement("div");d.className="cc-msg "+cls;d.innerHTML=html;body.appendChild(d);
+    d.querySelectorAll("a[href^='#'],a[data-nav]").forEach(a=>{});body.scrollTop=body.scrollHeight;return d;}
+  function typing(){const d=document.createElement("div");d.className="cc-typing";d.id="ccTyping";d.innerHTML="<span></span><span></span><span></span>";body.appendChild(d);body.scrollTop=body.scrollHeight;}
+  function untyping(){const t=document.getElementById("ccTyping");if(t)t.remove();}
+  function setChips(arr){chips.innerHTML="";arr.forEach(t=>{const b=document.createElement("button");b.textContent=t;b.onclick=()=>handle(t);chips.appendChild(b);});}
+  function match(q){q=q.toLowerCase();let best=null,s=0;for(const e of KB){let sc=0;for(const kw of e.k)if(q.includes(kw))sc+=kw.length;if(sc>s){s=sc;best=e;}}return s>=3?best:null;}
+  function handle(text){if(!text.trim())return;add("user",text.replace(/[<>]/g,""));input.value="";typing();
+    setTimeout(()=>{untyping();const m=match(text);
+      if(m){add("bot",m.a);setChips(m.c||DEFAULT);}
+      else{add("bot","Good question — most of what I do sits at <b>product × growth × AI</b>, so the precise answer depends on your goal. Fastest way to a real answer: WhatsApp/call <a href='tel:+919873945238'>+91 98739 45238</a> or <a href='mailto:anchit.tandon@gmail.com'>email me</a>. Meanwhile — want my work, a build, or how I think?");setChips(["Walk me through your work","Show me a build","Your biggest win?","How do I reach you?"]);}
+    },420+Math.random()*350);}
+  sendBtn.onclick=()=>handle(input.value);
+  input.addEventListener("keydown",e=>{if(e.key==="Enter")handle(input.value);});
+  // mic
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){micBtn.style.display="none";} else {
+    let rec=null,on=false;
+    micBtn.onclick=()=>{if(on){try{rec&&rec.stop();}catch(e){}return;}
+      try{rec=new SR();rec.lang="en-IN";rec.interimResults=true;rec.continuous=false;micBtn.classList.add("listening");on=true;
+        rec.onresult=e=>{let t="";for(let i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;input.value=t;if(e.results[e.results.length-1].isFinal)rec.stop();};
+        rec.onend=()=>{micBtn.classList.remove("listening");on=false;if(input.value.trim())handle(input.value);};
+        rec.onerror=()=>{micBtn.classList.remove("listening");on=false;};rec.start();
+      }catch(e){micBtn.classList.remove("listening");on=false;}};
+  }
+  // greeting
+  setTimeout(()=>{add("bot","Hey — I'm Anchit's agent. Ask about my <b>work</b>, my <b>builds</b>, or how I think about product. I'm direct — let's get into it.");setChips(DEFAULT);},400);
+})();
 
 // ---------- Three.js background ----------
 let renderer,scene,camera,group,particles,raf;
