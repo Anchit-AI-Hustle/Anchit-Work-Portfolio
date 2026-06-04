@@ -2844,6 +2844,10 @@
       <svg id="anpPauseIcon" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
       <svg id="anpPlayIcon" viewBox="0 0 24 24" fill="currentColor" width="14" height="14" style="display:none;"><polygon points="5 3 19 12 5 21 5 3"/></svg>
     </button>
+    <button class="anp-btn" id="anpMute" aria-label="Mute / Unmute" title="Mute">
+      <svg id="anpVolIcon" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <svg id="anpMuteIcon" viewBox="0 0 24 24" fill="currentColor" width="14" height="14" style="display:none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="22" y1="9" x2="16" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="9" x2="22" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
     <button class="anp-btn" id="anpStop" aria-label="Stop">
       <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
     </button>
@@ -3506,6 +3510,24 @@
 
     let progressTimer = null, utterStart = 0, utterDuration = 0;
     let currentViewName = 'home';
+    let pageAudio = null;       // HTMLAudioElement when the cloned-voice path is active
+    let audioMuted = false;     // shared mute state across both playback paths
+
+    function stopPageAudio() {
+      if (pageAudio) { try { pageAudio.pause(); } catch {} try { pageAudio.removeAttribute('src'); pageAudio.load(); } catch {} pageAudio = null; }
+    }
+    function applyMute() {
+      if (pageAudio) pageAudio.muted = audioMuted;
+      // Browser TTS can't change volume mid-utterance — pause/resume as a graceful fallback.
+      if (!pageAudio && window.speechSynthesis.speaking) {
+        if (audioMuted) { window.speechSynthesis.pause(); clearInterval(progressTimer); }
+        else { window.speechSynthesis.resume(); }
+      }
+      const vol = document.getElementById('anpVolIcon'), mut = document.getElementById('anpMuteIcon');
+      if (vol) vol.style.display = audioMuted ? 'none' : '';
+      if (mut) mut.style.display = audioMuted ? '' : 'none';
+      document.getElementById('anpMute')?.classList.toggle('muted', audioMuted);
+    }
 
     function showIndicator(viewName) {
       const sb = document.getElementById('topBarListenBtn');
@@ -3558,22 +3580,55 @@
           || vv.find(v => v.lang.startsWith('en'));
     }
 
+    // Cloned-voice (Anchit) path for page narration. Returns true if it took over playback.
+    async function speakViaCloneEl(viewName, text) {
+      try {
+        const r = await fetch('/api/tts', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+        if (!r.ok) return false;                       // 503/401 → browser voice
+        const ct = r.headers.get('content-type') || '';
+        if (!ct.includes('audio')) return false;
+        const blob = await r.blob();
+        const url = URL.createObjectURL(blob);
+        stopPageAudio();
+        pageAudio = new Audio(url);
+        pageAudio.muted = audioMuted;
+        pageAudio.onplay = () => { showIndicator(viewName); setPlayerState(true, viewName); };
+        pageAudio.ontimeupdate = () => {
+          if (!pageAudio || !pageAudio.duration) return;
+          if (fill) { const pct = Math.min((pageAudio.currentTime / pageAudio.duration) * 100, 100); fill.style.transition = 'none'; fill.style.width = pct + '%'; }
+          if (timeEl) { const e = pageAudio.currentTime; timeEl.textContent = Math.floor(e/60)+':'+String(Math.floor(e%60)).padStart(2,'0'); }
+        };
+        const done = () => { try{URL.revokeObjectURL(url);}catch{} hideIndicator(); setPlayerState(false, viewName); stopProgressBar(); pageAudio = null; };
+        pageAudio.onended = done; pageAudio.onerror = done;
+        await pageAudio.play();
+        return true;
+      } catch { return false; }
+    }
+
     function speakView(viewName) {
       window.speechSynthesis.cancel();
+      stopPageAudio();
       let key = viewName; if (key?.startsWith('project-')) key = 'projects';
       const text = NARRATIONS[key];
       if (!text) { hideIndicator(); setPlayerState(false, viewName); return; }
       currentViewName = viewName;
 
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.rate = 0.96; utter.pitch = 1.0; utter.volume = 0.85;
-      const voice = pickVoice(); if (voice) utter.voice = voice;
+      // Anchit's cloned voice first; browser speech-synthesis as fallback.
+      speakViaCloneEl(viewName, text).then((usedClone) => {
+        if (usedClone) return;
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.rate = 0.96; utter.pitch = 1.0; utter.volume = audioMuted ? 0 : 0.85;
+        const voice = pickVoice(); if (voice) utter.voice = voice;
 
-      const estimatedMs = (text.split(/\s+/).length / (0.96 * 2.3)) * 1000;
-      utter.onstart = () => { showIndicator(viewName); setPlayerState(true, viewName); startProgressBar(estimatedMs); };
-      utter.onend   = () => { hideIndicator(); setPlayerState(false, viewName); stopProgressBar(); };
-      utter.onerror = () => { hideIndicator(); setPlayerState(false, viewName); stopProgressBar(); };
-      window.speechSynthesis.speak(utter);
+        const estimatedMs = (text.split(/\s+/).length / (0.96 * 2.3)) * 1000;
+        utter.onstart = () => { showIndicator(viewName); setPlayerState(true, viewName); startProgressBar(estimatedMs); };
+        utter.onend   = () => { hideIndicator(); setPlayerState(false, viewName); stopProgressBar(); };
+        utter.onerror = () => { hideIndicator(); setPlayerState(false, viewName); stopProgressBar(); };
+        window.speechSynthesis.speak(utter);
+      });
     }
 
     function trySpeak(viewName) {
@@ -3591,6 +3646,11 @@
     });
 
     ppBtn?.addEventListener('click', () => {
+      if (pageAudio) {                                  // cloned-voice path
+        if (pageAudio.paused) { pageAudio.play(); setPlayerState(true); }
+        else { pageAudio.pause(); setPlayerState(false); }
+        return;
+      }
       if (window.speechSynthesis.paused) {
         window.speechSynthesis.resume();
         if (fill && utterDuration) {
@@ -3610,7 +3670,12 @@
       }
     });
 
+    // Mute / unmute — governs both the cloned-voice element and browser TTS
+    const muteBtn = document.getElementById('anpMute');
+    muteBtn?.addEventListener('click', () => { audioMuted = !audioMuted; applyMute(); muteBtn.title = audioMuted ? 'Unmute' : 'Mute'; });
+
     stopBtn?.addEventListener('click', () => {
+      stopPageAudio();
       window.speechSynthesis.cancel();
       audioModeEnabled = false;
       hideIndicator(); nudge?.classList.remove('playing','paused'); stopProgressBar();
@@ -3625,13 +3690,13 @@
       if (e.target.closest('.listen-stop')) return; // handled below
       if (stickyBtn.classList.contains('playing')) {
         // Pause
-        window.speechSynthesis.pause();
+        if (pageAudio) { try { pageAudio.pause(); } catch {} } else { window.speechSynthesis.pause(); }
         stickyBtn.classList.remove('playing');
         stickyBtn.classList.add('paused');
         clearInterval(progressTimer);
       } else if (stickyBtn.classList.contains('paused')) {
         // Resume
-        window.speechSynthesis.resume();
+        if (pageAudio) { try { pageAudio.play(); } catch {} } else { window.speechSynthesis.resume(); }
         stickyBtn.classList.remove('paused');
         stickyBtn.classList.add('playing');
       } else {
@@ -3644,6 +3709,7 @@
     });
     stickyStop?.addEventListener('click', (e) => {
       e.stopPropagation();
+      stopPageAudio();
       window.speechSynthesis.cancel();
       audioModeEnabled = false;
       stickyBtn?.classList.remove('playing', 'paused');
@@ -3681,7 +3747,7 @@
     card.querySelector('.vic-dismiss').addEventListener('click', dismissCard);
     card.querySelector('.vic-continue').addEventListener('click', () => {
       dismissCard();
-      if (audioModeEnabled) { window.speechSynthesis.resume(); setPlayerState(true); }
+      if (audioModeEnabled) { if (pageAudio) { try { pageAudio.play(); } catch {} } else { window.speechSynthesis.resume(); } setPlayerState(true); }
     });
 
     let rec = null, recognizing = false;
@@ -3693,7 +3759,7 @@
           if (!e.results[0]?.isFinal) return;
           const q = (e.results[0][0].transcript || '').trim();
           if (!q || q.length < 2) return;
-          window.speechSynthesis.pause();
+          if (pageAudio) { try { pageAudio.pause(); } catch {} } else { window.speechSynthesis.pause(); }
           if (fill && utterDuration) { const pct = Math.min(((Date.now()-utterStart)/utterDuration)*100,99); fill.style.transition='none'; fill.style.width=pct+'%'; }
           clearInterval(progressTimer); setPlayerState(false);
           const match = findMatch(q);
