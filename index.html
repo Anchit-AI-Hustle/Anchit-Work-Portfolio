@@ -1692,6 +1692,22 @@
     font-size: 12px; padding: 5px 12px; border-radius: 99px;
     background: var(--bg-deep); color: var(--ink-dim); border: 1px solid var(--rule-strong);
   }
+
+  /* ============ NARRATION HIGHLIGHTING ============ */
+  .narrate-span {
+    transition: background-color 0.25s ease, color 0.25s ease;
+    border-radius: 4px;
+    padding: 0 2px;
+  }
+  .narrate-span.active-narrate {
+    background-color: rgba(181, 135, 10, 0.18); /* Soft champagne highlight */
+    color: var(--primary); /* Highlight using primary color */
+    box-shadow: 0 0 8px rgba(181, 135, 10, 0.12);
+  }
+  [data-theme="light"] .narrate-span.active-narrate {
+    background-color: rgba(181, 135, 10, 0.22);
+    color: #8f6000;
+  }
 </style>
 </head>
 <body>
@@ -1804,10 +1820,15 @@
         <div class="hero-dot-grid" aria-hidden="true"></div>
         <div class="eyebrow has-dot"><span class="live-dot"></span>Live · AGM – Product Management · Vahdam India</div>
         <h1 class="display-xl name">
-          <span class="greeting">Hey, I'm </span><span class="firstline">Anchit </span><span class="secondline">Tandon.</span>
+          <span class="greeting narrate-span" data-n-idx="0">Hey, I'm </span><span class="firstline narrate-span" data-n-idx="0">Anchit </span><span class="secondline"><span class="narrate-span" data-n-idx="0">Tandon.</span></span>
         </h1>
-        <p class="hero-persona">An <em>engineer</em> who learned to love the funnel.</p>
-        <p class="hero-tagline">Currently AGM — Product at <em>Vahdam India</em>, driving D2C growth across US, UK &amp; global. Previously at <em>Times Internet</em> — led the <em>Delhi Half Marathon</em> end-to-end, from tech and marketing to on-ground experience, launching it as a brand-new IP and revenue stream; scaled <em>Assisted Sales</em> 5× to ₹80L MRR in 8–10 months; and rebuilt <em>ET Markets &amp; ET</em> across iOS, Android and web to ₹3Cr+ ARR.</p>
+        <p class="hero-persona narrate-span" data-n-idx="1">An <em>engineer</em> who learned to love the funnel.</p>
+        <p class="hero-tagline">
+          <span class="narrate-span" data-n-idx="2">Currently AGM — Product at <em>Vahdam India</em>, driving D2C growth across US, UK &amp; global.</span>
+          <span class="narrate-span" data-n-idx="3">Previously at <em>Times Internet</em> — led the <em>Delhi Half Marathon</em> end-to-end, from tech and marketing to on-ground experience, launching it as a brand-new IP and revenue stream;</span>
+          <span class="narrate-span" data-n-idx="4">scaled <em>Assisted Sales</em> 5× to ₹80L MRR in 8–10 months;</span>
+          <span class="narrate-span" data-n-idx="5">and rebuilt <em>ET Markets &amp; ET</em> across iOS, Android and web to ₹3Cr+ ARR.</span>
+        </p>
       </div>
     </div>
 
@@ -1900,7 +1921,7 @@
       </div>
 
       <!-- Key highlights -->
-      <div class="section-head" style="margin-top: 48px; margin-bottom: 24px;">
+      <div class="section-head narrate-span" data-n-idx="6" style="margin-top: 48px; margin-bottom: 24px;">
         <div class="eyebrow">Highlights · The numbers that matter</div>
       </div>
       <div class="hero-stats reveal-stagger">
@@ -3666,7 +3687,125 @@
           || vv.find(v => v.lang.startsWith('en'));
     }
 
-    // Cloned-voice (Anchit) path for page narration. Returns true if it took over playback.
+    // Highlight transcript helper functions
+    let activeHighlightTimer = null;
+
+    function startHighlightingSync(viewName, audioEl, utterEl, durationMs) {
+      stopHighlighting();
+      if (viewName !== 'home') return;
+      const spans = document.querySelectorAll('#view-home .narrate-span');
+      if (spans.length === 0) return;
+
+      function highlightIndex(idx) {
+        spans.forEach(span => {
+          const sIdx = parseInt(span.getAttribute('data-n-idx'), 10);
+          if (sIdx === idx) {
+            span.classList.add('active-narrate');
+          } else {
+            span.classList.remove('active-narrate');
+          }
+        });
+      }
+
+      if (audioEl) {
+        // Timeline for the audio file (approximate phrase starts in seconds)
+        const timeline = [
+          { t: 0.0, idx: 0 },
+          { t: 1.8, idx: 1 },
+          { t: 4.3, idx: 2 },
+          { t: 9.5, idx: 3 },
+          { t: 19.0, idx: 4 },
+          { t: 22.8, idx: 5 },
+          { t: 27.2, idx: 6 }
+        ];
+
+        activeHighlightTimer = setInterval(() => {
+          if (!audioEl) return;
+          const curr = audioEl.currentTime;
+          let activeIdx = 0;
+          for (let i = 0; i < timeline.length; i++) {
+            if (curr >= timeline[i].t) {
+              activeIdx = timeline[i].idx;
+            }
+          }
+          highlightIndex(activeIdx);
+        }, 100);
+      } else if (utterEl) {
+        utterEl.onboundary = (event) => {
+          if (event.name === 'word') {
+            const charIdx = event.charIndex;
+            let activeIdx = 0;
+            if (charIdx >= 538) activeIdx = 6;
+            else if (charIdx >= 448) activeIdx = 5;
+            else if (charIdx >= 368) activeIdx = 4;
+            else if (charIdx >= 188) activeIdx = 3;
+            else if (charIdx >= 67) activeIdx = 2;
+            else if (charIdx >= 23) activeIdx = 1;
+            highlightIndex(activeIdx);
+          }
+        };
+      }
+    }
+
+    function stopHighlighting() {
+      clearInterval(activeHighlightTimer);
+      activeHighlightTimer = null;
+      document.querySelectorAll('#view-home .narrate-span').forEach(span => {
+        span.classList.remove('active-narrate');
+      });
+    }
+
+    // Play pre-recorded uploaded audio file (audio/anchit.m4a for home page)
+    function playUploadedAudio(viewName) {
+      return new Promise((resolve) => {
+        if (viewName !== 'home') { return resolve(false); }
+        const src = 'audio/anchit.m4a';
+        stopPageAudio();
+        pageAudio = new Audio(src);
+        pageAudio.muted = audioMuted;
+
+        pageAudio.onplay = () => {
+          showIndicator(viewName);
+          setPlayerState(true, viewName);
+          startHighlightingSync(viewName, pageAudio);
+        };
+
+        pageAudio.ontimeupdate = () => {
+          if (!pageAudio || !pageAudio.duration) return;
+          if (fill) {
+            const pct = Math.min((pageAudio.currentTime / pageAudio.duration) * 100, 100);
+            fill.style.transition = 'none';
+            fill.style.width = pct + '%';
+          }
+          if (timeEl) {
+            const e = pageAudio.currentTime;
+            timeEl.textContent = Math.floor(e/60) + ':' + String(Math.floor(e%60)).padStart(2, '0');
+          }
+        };
+
+        const done = () => {
+          hideIndicator();
+          setPlayerState(false, viewName);
+          stopProgressBar();
+          stopHighlighting();
+          pageAudio = null;
+          resolve(true);
+        };
+
+        pageAudio.onended = done;
+        pageAudio.onerror = () => {
+          pageAudio = null;
+          resolve(false);
+        };
+
+        pageAudio.play().catch(() => {
+          pageAudio = null;
+          resolve(false);
+        });
+      });
+    }
+
+    // Cloned-voice (ElevenLabs) path for other page narrations.
     async function speakViaCloneEl(viewName, text) {
       try {
         const r = await fetch('/api/tts', {
@@ -3697,23 +3836,35 @@
     function speakView(viewName) {
       window.speechSynthesis.cancel();
       stopPageAudio();
+      stopHighlighting();
       let key = viewName; if (key?.startsWith('project-')) key = 'projects';
       const text = NARRATIONS[key];
       if (!text) { hideIndicator(); setPlayerState(false, viewName); return; }
       currentViewName = viewName;
 
-      // Anchit's cloned voice first; browser speech-synthesis as fallback.
-      speakViaCloneEl(viewName, text).then((usedClone) => {
-        if (usedClone) return;
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.rate = 0.96; utter.pitch = 1.0; utter.volume = audioMuted ? 0 : 0.85;
-        const voice = pickVoice(); if (voice) utter.voice = voice;
+      playUploadedAudio(viewName).then((usedUploaded) => {
+        if (usedUploaded) return;
 
-        const estimatedMs = (text.split(/\s+/).length / (0.96 * 2.3)) * 1000;
-        utter.onstart = () => { showIndicator(viewName); setPlayerState(true, viewName); startProgressBar(estimatedMs); };
-        utter.onend   = () => { hideIndicator(); setPlayerState(false, viewName); stopProgressBar(); };
-        utter.onerror = () => { hideIndicator(); setPlayerState(false, viewName); stopProgressBar(); };
-        window.speechSynthesis.speak(utter);
+        speakViaCloneEl(viewName, text).then((usedClone) => {
+          if (usedClone) {
+            startHighlightingSync(viewName, pageAudio);
+            return;
+          }
+          const utter = new SpeechSynthesisUtterance(text);
+          utter.rate = 0.96; utter.pitch = 1.0; utter.volume = audioMuted ? 0 : 0.85;
+          const voice = pickVoice(); if (voice) utter.voice = voice;
+
+          const estimatedMs = (text.split(/\s+/).length / (0.96 * 2.3)) * 1000;
+          utter.onstart = () => {
+            showIndicator(viewName);
+            setPlayerState(true, viewName);
+            startProgressBar(estimatedMs);
+            startHighlightingSync(viewName, null, utter, estimatedMs);
+          };
+          utter.onend   = () => { hideIndicator(); setPlayerState(false, viewName); stopProgressBar(); stopHighlighting(); };
+          utter.onerror = () => { hideIndicator(); setPlayerState(false, viewName); stopProgressBar(); stopHighlighting(); };
+          window.speechSynthesis.speak(utter);
+        });
       });
     }
 
@@ -3732,7 +3883,7 @@
     });
 
     ppBtn?.addEventListener('click', () => {
-      if (pageAudio) {                                  // cloned-voice path
+      if (pageAudio) {                                  // cloned-voice or uploaded path
         if (pageAudio.paused) { pageAudio.play(); setPlayerState(true); }
         else { pageAudio.pause(); setPlayerState(false); }
         return;
@@ -3760,12 +3911,18 @@
     const muteBtn = document.getElementById('anpMute');
     muteBtn?.addEventListener('click', () => { audioMuted = !audioMuted; applyMute(); muteBtn.title = audioMuted ? 'Unmute' : 'Mute'; });
 
-    stopBtn?.addEventListener('click', () => {
+    function stopAllPlayback() {
       stopPageAudio();
       window.speechSynthesis.cancel();
+      stopHighlighting();
       audioModeEnabled = false;
-      hideIndicator(); nudge?.classList.remove('playing','paused'); stopProgressBar();
-    });
+      hideIndicator();
+      nudge?.classList.remove('playing', 'paused');
+      stickyBtn?.classList.remove('playing', 'paused');
+      stopProgressBar();
+    }
+
+    stopBtn?.addEventListener('click', stopAllPlayback);
 
     dismissBtn?.addEventListener('click', () => { nudge?.classList.add('dismissed'); });
 
@@ -3795,11 +3952,7 @@
     });
     stickyStop?.addEventListener('click', (e) => {
       e.stopPropagation();
-      stopPageAudio();
-      window.speechSynthesis.cancel();
-      audioModeEnabled = false;
-      stickyBtn?.classList.remove('playing', 'paused');
-      hideIndicator(); stopProgressBar();
+      stopAllPlayback();
     });
 
     /* Hero "Hear this from me" button */
