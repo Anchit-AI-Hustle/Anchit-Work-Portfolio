@@ -61,6 +61,15 @@
   nav .links a::after{content:"";position:absolute;left:0;bottom:-5px;width:0;height:1px;background:var(--red);transition:width .3s}
   nav .links a:hover::after{width:100%}
   @media(max-width:680px){nav .links a.opt{display:none}}
+  /* sticky reach-me rail */
+  .cyber-actions{position:fixed;top:50%;right:14px;transform:translateY(-50%);z-index:82;
+    display:flex;flex-direction:column;gap:8px}
+  .cyber-actions a{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--dim);
+    background:rgba(14,14,17,.72);border:1px solid var(--line);border-radius:8px;padding:8px 9px;
+    text-align:center;min-width:42px;transition:all .2s;backdrop-filter:blur(8px)}
+  .cyber-actions a:hover{color:#fff;border-color:var(--red);box-shadow:0 0 14px rgba(255,43,43,.35)}
+  @media(max-width:680px){.cyber-actions{flex-direction:row;top:auto;bottom:14px;right:50%;transform:translateX(50%);
+    background:rgba(5,5,6,.85);padding:6px;border-radius:12px}}
   /* layout */
   main{position:relative;z-index:10}
   section{position:relative;padding:clamp(80px,14vh,160px) clamp(16px,5vw,80px);max-width:1280px;margin:0 auto}
@@ -159,9 +168,19 @@
     <a href="#builds" class="opt">Builds</a>
     <a href="#exp" class="opt">Path</a>
     <a href="#contact">Contact</a>
-    <a href="/" onclick="try{localStorage.setItem('anchit-portfolio-view','simple');}catch(e){}" title="Classic edition">◳ Classic</a>
+    <a href="https://www.linkedin.com/in/anchit-tandon" target="_blank" rel="noopener" class="opt">LinkedIn</a>
+    <a href="/assets/resume.pdf" target="_blank" rel="noopener" class="opt">Resume</a>
+    <a href="/" onclick="try{localStorage.setItem('anchit-portfolio-view','simple');}catch(e){}" title="Editorial edition">◳ Editorial</a>
   </div>
 </nav>
+<!-- Sticky reach-me rail (WhatsApp / SMS / Call / E-Mail / Meet) — matches the editorial view -->
+<div class="cyber-actions" aria-label="Reach me">
+  <a href="https://wa.me/919873945238" target="_blank" rel="noopener" title="WhatsApp">WA</a>
+  <a href="sms:+919873945238" title="SMS">SMS</a>
+  <a href="tel:+919873945238" title="Call">CALL</a>
+  <a href="mailto:anchit.tandon@gmail.com" title="E-Mail">MAIL</a>
+  <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Intro%20call%20%E2%80%94%20Anchit%20Tandon&details=15-min%20Google%20Meet%20with%20Anchit%20Tandon.&add=anchit.tandon@gmail.com&conferenceData=true" target="_blank" rel="noopener" title="Book a Google Meet">MEET</a>
+</div>
 
 <main>
   <section id="hero">
