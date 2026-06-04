@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
+<script>
+  (function(){
+    var KEY='anchit-portfolio-view';
+    try {
+      var chosen = localStorage.getItem(KEY);
+      if (chosen === 'cyber' && !window.location.hash) {
+        window.location.replace('/cyber');
+      }
+    } catch(e){}
+  })();
+</script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Anchit Tandon — Product leader & AI builder turning funnels into growth</title>
@@ -1544,16 +1555,44 @@
     gap: 12px; margin-top: 32px;
   }
   .product-chip {
+    position: relative;
     background: var(--bg-elev); border-radius: 14px; padding: 18px 16px;
     display: flex; flex-direction: column; gap: 6px;
     transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
     border: 1px solid var(--rule);
+    text-decoration: none;
+    cursor: pointer;
   }
   .product-chip:hover { transform: translateY(-4px); box-shadow: var(--shadow-sm); border-color: var(--primary); }
-  .product-chip-name { font-size: 14px; font-weight: 500; color: var(--ink); }
+  .product-chip-name { font-size: 14px; font-weight: 500; color: var(--ink); padding-right: 20px; }
   .product-chip-co { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-dim); }
   .product-chip-metric { font-family: var(--font-mono); font-size: 12px; color: var(--primary); margin-top: 2px; }
   [data-theme="light"] .product-chip-metric { color: #C03010; }
+  .product-chip-link {
+    position: absolute; top: 12px; right: 12px;
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    background: transparent;
+    transition: all 0.22s ease;
+    z-index: 5;
+  }
+  .product-chip-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  [data-theme="light"] .product-chip-link:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+  .product-chip-arrow {
+    width: 14px; height: 14px; color: var(--ink-dim); opacity: 0.35;
+    transition: all 0.22s ease;
+  }
+  .product-chip:hover .product-chip-arrow {
+    color: var(--primary); opacity: 0.95;
+  }
+  .product-chip-link:hover .product-chip-arrow {
+    color: var(--primary); opacity: 1; transform: translate(1px, -1px);
+  }
   @media (max-width: 600px) { .products-grid { grid-template-columns: 1fr 1fr; } }
 
   /* ============ ATS KEYWORDS (visible on page, semantic HTML) ============ */
@@ -1790,14 +1829,94 @@
         <div class="eyebrow">Side projects · Built on weekends, all live</div>
       </div>
       <div class="products-grid reveal-stagger" style="margin-bottom: 48px;">
-        <a class="product-chip" href="#project-lifecycle" data-view="project-lifecycle" style="cursor:pointer;"><div class="product-chip-name">VAHDAM Lifecycle OS</div><div class="product-chip-co">D2C Retention · PWA</div><div class="product-chip-metric">Dashboard → calendar → mailers</div></a>
-        <a class="product-chip" href="#project-music" data-view="project-music" style="cursor:pointer;"><div class="product-chip-name">MusicGenAI</div><div class="product-chip-co">Generative AI · Music</div><div class="product-chip-metric">Prompt → full track with vocals</div></a>
-        <a class="product-chip" href="#project-tasktracker" data-view="project-tasktracker" style="cursor:pointer;"><div class="product-chip-name">Task Tracker</div><div class="product-chip-co">Personal Productivity · AI</div><div class="product-chip-metric">Email/meeting/voice → task board</div></a>
-        <a class="product-chip" href="#project-thirdeye" data-view="project-thirdeye" style="cursor:pointer;"><div class="product-chip-name">The Third Eye</div><div class="product-chip-co">Personal AI OS</div><div class="product-chip-metric">Agent-orchestrated AI OS</div></a>
-        <a class="product-chip" href="#project-yaara" data-view="project-yaara" style="cursor:pointer;"><div class="product-chip-name">Hey Yaara</div><div class="product-chip-co">AI Voice · Consumer</div><div class="product-chip-metric">Voice companion for elderly</div></a>
-        <a class="product-chip" href="#project-mailer" data-view="project-mailer" style="cursor:pointer;"><div class="product-chip-name">Mailer Architect</div><div class="product-chip-co">AI Tooling · Marketing</div><div class="product-chip-metric">Multi-LLM cascade → HTML email</div></a>
-        <a class="product-chip" href="#project-telesuite" data-view="project-telesuite" style="cursor:pointer;"><div class="product-chip-name">AI TeleSuite</div><div class="product-chip-co">AI Workflow · Sales</div><div class="product-chip-metric">Real-time pitch scoring</div></a>
-        <a class="product-chip" href="#project-lifeengine" data-view="project-lifeengine" style="cursor:pointer;"><div class="product-chip-name">TH+ LifeEngine</div><div class="product-chip-co">AI Wellness</div><div class="product-chip-metric">Personalised daily plans</div></a>
+        <a class="product-chip" href="#project-lifecycle" data-view="project-lifecycle" style="cursor:pointer;">
+          <div class="product-chip-name">VAHDAM Lifecycle OS</div>
+          <div class="product-chip-co">D2C Retention · PWA</div>
+          <div class="product-chip-metric">Dashboard &rarr; calendar &rarr; mailers</div>
+          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://vahdam-lifecycle-os.vercel.app/', '_blank');" title="Open live website">
+            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"></line>
+              <polyline points="7 7 17 7 17 17"></polyline>
+            </svg>
+          </span>
+        </a>
+        <a class="product-chip" href="#project-music" data-view="project-music" style="cursor:pointer;">
+          <div class="product-chip-name">MusicGenAI</div>
+          <div class="product-chip-co">Generative AI · Music</div>
+          <div class="product-chip-metric">Prompt &rarr; full track with vocals</div>
+          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://music-gen-ai-blue.vercel.app/', '_blank');" title="Open live website">
+            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"></line>
+              <polyline points="7 7 17 7 17 17"></polyline>
+            </svg>
+          </span>
+        </a>
+        <a class="product-chip" href="#project-tasktracker" data-view="project-tasktracker" style="cursor:pointer;">
+          <div class="product-chip-name">Task Tracker</div>
+          <div class="product-chip-co">Personal Productivity · AI</div>
+          <div class="product-chip-metric">Email/meeting/voice &rarr; task board</div>
+          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://personal-ai-assistant-anchit.vercel.app/', '_blank');" title="Open live website">
+            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"></line>
+              <polyline points="7 7 17 7 17 17"></polyline>
+            </svg>
+          </span>
+        </a>
+        <a class="product-chip" href="#project-thirdeye" data-view="project-thirdeye" style="cursor:pointer;">
+          <div class="product-chip-name">The Third Eye</div>
+          <div class="product-chip-co">Personal AI OS</div>
+          <div class="product-chip-metric">Agent-orchestrated AI OS</div>
+          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://the-third-eye-anchit.vercel.app/', '_blank');" title="Open live website">
+            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"></line>
+              <polyline points="7 7 17 7 17 17"></polyline>
+            </svg>
+          </span>
+        </a>
+        <a class="product-chip" href="#project-yaara" data-view="project-yaara" style="cursor:pointer;">
+          <div class="product-chip-name">Hey Yaara</div>
+          <div class="product-chip-co">AI Voice · Consumer</div>
+          <div class="product-chip-metric">Voice companion for elderly</div>
+          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://hey-yaara.vercel.app/', '_blank');" title="Open live website">
+            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"></line>
+              <polyline points="7 7 17 7 17 17"></polyline>
+            </svg>
+          </span>
+        </a>
+        <a class="product-chip" href="#project-mailer" data-view="project-mailer" style="cursor:pointer;">
+          <div class="product-chip-name">Mailer Architect</div>
+          <div class="product-chip-co">AI Tooling · Marketing</div>
+          <div class="product-chip-metric">Multi-LLM cascade &rarr; HTML email</div>
+          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://marketing-mailers-html-architect.vercel.app/', '_blank');" title="Open live website">
+            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"></line>
+              <polyline points="7 7 17 7 17 17"></polyline>
+            </svg>
+          </span>
+        </a>
+        <a class="product-chip" href="#project-telesuite" data-view="project-telesuite" style="cursor:pointer;">
+          <div class="product-chip-name">AI TeleSuite</div>
+          <div class="product-chip-co">AI Workflow · Sales</div>
+          <div class="product-chip-metric">Real-time pitch scoring</div>
+          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://ai-tele-suite.vercel.app/', '_blank');" title="Open live website">
+            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"></line>
+              <polyline points="7 7 17 7 17 17"></polyline>
+            </svg>
+          </span>
+        </a>
+        <a class="product-chip" href="#project-lifeengine" data-view="project-lifeengine" style="cursor:pointer;">
+          <div class="product-chip-name">TH+ LifeEngine</div>
+          <div class="product-chip-co">AI Wellness</div>
+          <div class="product-chip-metric">Personalised daily plans</div>
+          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://th-life-engine.vercel.app/', '_blank');" title="Open live website">
+            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"></line>
+              <polyline points="7 7 17 7 17 17"></polyline>
+            </svg>
+          </span>
+        </a>
       </div>
     </div>
   </section>
@@ -1855,13 +1974,18 @@
         <h2 class="display-sm">AGM — Product Management · <em>Vahdam India</em></h2>
       </div>
       <div class="work-list" style="margin-bottom: 64px;">
-        <div class="work-item reveal">
+        <div class="work-item reveal" id="exp-vahdam-d2c">
           <div class="work-num">00</div>
           <div class="work-content">
             <h3>D2C <em>Global Growth</em></h3>
             <p>Spearheading D2C growth across the US, UK, and global markets. Overseeing product performance, customer experience, experimentation, and revenue optimisation. Designing cross-functional product and CRM experiments that elevated average product ratings from 2.4 to 4.0, while driving sustained revenue growth through Klaviyo and WebEngage lifecycle campaigns.</p>
             <div class="tags"><span class="tag">D2C Growth</span><span class="tag">CRM · Klaviyo</span><span class="tag">WebEngage</span><span class="tag">Experimentation</span><span class="tag">Global</span></div>
             <div class="work-impact-bar"><div class="work-impact-row"><span class="work-impact-chip gold">Ratings 2.4 → 4.0</span><span class="work-impact-chip gold">US · UK · Global</span><span class="work-impact-chip gold">Daily Revenue Growth</span></div></div>
+            <div style="margin-top: 16px;">
+              <a href="https://www.vahdam.com/" target="_blank" rel="noopener" class="btn" style="padding: 8px 18px; font-size: 13px;">
+                Visit live website ↗
+              </a>
+            </div>
           </div>
           <div class="work-meta"><div class="year">Apr 2026 → Now</div><div class="impact">Current</div></div>
         </div>
@@ -1874,43 +1998,63 @@
       </div>
 
       <div class="work-list" style="margin-bottom: 64px;">
-        <div class="work-item reveal">
+        <div class="work-item reveal" id="exp-ti-marathon">
           <div class="work-num">01</div>
           <div class="work-content">
             <h3>Times Internet <em>Half Marathon</em></h3>
             <p>Building a 0→1 consumer product — owning discovery, registration, acquisition funnels, and on-ground runner insights for a first-time consumer IP.</p>
             <div class="tags"><span class="tag">0→1</span><span class="tag">Consumer Event</span><span class="tag">Funnel Design</span><span class="tag">Acquisition</span></div>
             <div class="work-impact-bar"><div class="work-impact-row"><span class="work-impact-chip">Zero to Live</span><span class="work-impact-chip">Consumer IP</span></div></div>
+            <div style="margin-top: 16px;">
+              <a href="https://www.timesinternet.in/" target="_blank" rel="noopener" class="btn" style="padding: 8px 18px; font-size: 13px;">
+                Visit live website ↗
+              </a>
+            </div>
           </div>
           <div class="work-meta"><div class="year">Apr 2025 — Apr 2026</div><div class="impact">Senior PM</div></div>
         </div>
-        <div class="work-item reveal">
+        <div class="work-item reveal" id="exp-ti-assisted">
           <div class="work-num">02</div>
           <div class="work-content">
             <h3>Assisted Sales for <em>ET Prime</em></h3>
             <p>Scaled an assisted consumer conversion channel into one of Economic Times' most profitable growth engines. Funnel redesign, continuous A/B experimentation, and an AI-powered telesuite enabling call transcription, quality scoring, and pitch assistance.</p>
             <div class="tags"><span class="tag">Growth</span><span class="tag">Subscriptions</span><span class="tag">AI Telesuite</span><span class="tag">A/B Testing</span></div>
             <div class="work-impact-bar"><div class="work-impact-row"><span class="work-impact-chip red">5× MRR · ₹15L → ₹80L</span><span class="work-impact-chip red">400%+ ROI in 6 months</span><span class="work-impact-chip">Team Award '25</span></div></div>
+            <div style="margin-top: 16px;">
+              <a href="https://economictimes.indiatimes.com/prime" target="_blank" rel="noopener" class="btn" style="padding: 8px 18px; font-size: 13px;">
+                Visit live website ↗
+              </a>
+            </div>
           </div>
           <div class="work-meta"><div class="year">2024 — Apr 2026</div><div class="impact">PM → SPM</div></div>
         </div>
-        <div class="work-item reveal">
+        <div class="work-item reveal" id="exp-ti-health">
           <div class="work-num">03</div>
           <div class="work-content">
             <h3>Times Health<em>+</em> Subscriptions</h3>
             <p>Launched paid wellness subscriptions from scratch — freemium-to-paid journeys, pricing experiments, and retention-led monetisation.</p>
             <div class="tags"><span class="tag">Subscriptions</span><span class="tag">Monetisation</span><span class="tag">Retention</span><span class="tag">Paywall</span></div>
             <div class="work-impact-bar"><div class="work-impact-row"><span class="work-impact-chip">0 → Paid Tier</span><span class="work-impact-chip">New Revenue Line</span></div></div>
+            <div style="margin-top: 16px;">
+              <a href="https://www.timesinternet.in/" target="_blank" rel="noopener" class="btn" style="padding: 8px 18px; font-size: 13px;">
+                Visit live website ↗
+              </a>
+            </div>
           </div>
           <div class="work-meta"><div class="year">2024 — 2025</div><div class="impact">PM</div></div>
         </div>
-        <div class="work-item reveal">
+        <div class="work-item reveal" id="exp-ti-etmarkets">
           <div class="work-num">04</div>
           <div class="work-content">
             <h3>ET Markets, <em>rebuilt</em></h3>
             <p>Led the revamp of ET Markets (Web &amp; mWeb), improving engagement by 27% and unlocking ₹3Cr+ incremental annual revenue. Revamped Android and iOS apps, increasing DAU by 25% and average session duration by 15%. Launched discovery and decision-support features improving screen views by 19%.</p>
             <div class="tags"><span class="tag">Consumer Finance</span><span class="tag">Multi-platform</span><span class="tag">Experimentation</span><span class="tag">iOS · Android</span></div>
             <div class="work-impact-bar"><div class="work-impact-row"><span class="work-impact-chip red">₹3Cr+ ARR</span><span class="work-impact-chip">+27% Engagement</span><span class="work-impact-chip">+25% DAU</span><span class="work-impact-chip">+15% Sessions</span></div></div>
+            <div style="margin-top: 16px;">
+              <a href="https://economictimes.indiatimes.com/markets" target="_blank" rel="noopener" class="btn" style="padding: 8px 18px; font-size: 13px;">
+                Visit live website ↗
+              </a>
+            </div>
           </div>
           <div class="work-meta"><div class="year">2022 — 2024</div><div class="impact">APM → PM</div></div>
         </div>
@@ -1975,17 +2119,127 @@
         <h2 class="display-sm">Every product I've put into the world.</h2>
       </div>
       <div class="products-grid reveal-stagger">
-        <div class="product-chip"><div class="product-chip-name">Vahdam India D2C</div><div class="product-chip-co">Vahdam India · 2026</div><div class="product-chip-metric">Ratings 2.4 → 4.0</div></div>
-        <div class="product-chip"><div class="product-chip-name">TI Half Marathon</div><div class="product-chip-co">Times Internet · 2026</div><div class="product-chip-metric">0 → 1 consumer IP</div></div>
-        <div class="product-chip"><div class="product-chip-name">ET Prime Assisted Sales</div><div class="product-chip-co">Times Internet · 2025</div><div class="product-chip-metric">5× MRR · ₹80L</div></div>
-        <div class="product-chip"><div class="product-chip-name">AI TeleSuite (Enterprise)</div><div class="product-chip-co">Times Internet · 2024</div><div class="product-chip-metric">Real-time pitch scoring</div></div>
-        <div class="product-chip"><div class="product-chip-name">ET Markets Revamp</div><div class="product-chip-co">Times Internet · 2024</div><div class="product-chip-metric">₹3Cr+ ARR · +25% DAU</div></div>
-        <div class="product-chip"><div class="product-chip-name">Times Health+ Subs</div><div class="product-chip-co">Times Internet · 2024</div><div class="product-chip-metric">Paid tier · 0→1</div></div>
-        <div class="product-chip"><div class="product-chip-name">ET Markets Discovery</div><div class="product-chip-co">Times Internet · 2023</div><div class="product-chip-metric">Screeners, portfolios</div></div>
-        <div class="product-chip"><div class="product-chip-name">Hey Yaara</div><div class="product-chip-co">Side project · 2024</div><div class="product-chip-metric">AI voice companion</div></div>
-        <div class="product-chip"><div class="product-chip-name">MusicGenAI</div><div class="product-chip-co">Side project · 2024</div><div class="product-chip-metric">Text → full track</div></div>
-        <div class="product-chip"><div class="product-chip-name">AI TeleSuite (Consumer)</div><div class="product-chip-co">Side project · 2024</div><div class="product-chip-metric">Pitch coaching app</div></div>
-        <div class="product-chip"><div class="product-chip-name">TH+ LifeEngine</div><div class="product-chip-co">Side project · 2024</div><div class="product-chip-metric">AI wellness planner</div></div>
+        <a class="product-chip" href="#experience/exp-vahdam-d2c" data-view="experience" data-anchor="exp-vahdam-d2c" style="cursor:pointer;">
+          <div class="product-chip-name">Vahdam India D2C</div>
+          <div class="product-chip-co">Vahdam India &middot; 2026</div>
+          <div class="product-chip-metric">Ratings 2.4 &rarr; 4.0</div>
+          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://www.vahdam.com/', '_blank');" title="Open live website">
+            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"></line>
+              <polyline points="7 7 17 7 17 17"></polyline>
+            </svg>
+          </span>
+        </a>
+        <a class="product-chip" href="#experience/exp-ti-marathon" data-view="experience" data-anchor="exp-ti-marathon" style="cursor:pointer;">
+          <div class="product-chip-name">TI Half Marathon</div>
+          <div class="product-chip-co">Times Internet &middot; 2026</div>
+          <div class="product-chip-metric">0 &rarr; 1 consumer IP</div>
+          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://www.timesinternet.in/', '_blank');" title="Open live website">
+            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"></line>
+              <polyline points="7 7 17 7 17 17"></polyline>
+            </svg>
+          </span>
+        </a>
+        <a class="product-chip" href="#experience/exp-ti-assisted" data-view="experience" data-anchor="exp-ti-assisted" style="cursor:pointer;">
+          <div class="product-chip-name">ET Prime Assisted Sales</div>
+          <div class="product-chip-co">Times Internet &middot; 2025</div>
+          <div class="product-chip-metric">5&times; MRR &middot; &nbsp;80L</div>
+          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://economictimes.indiatimes.com/prime', '_blank');" title="Open live website">
+            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"></line>
+              <polyline points="7 7 17 7 17 17"></polyline>
+            </svg>
+          </span>
+        </a>
+        <a class="product-chip" href="#experience/exp-ti-assisted" data-view="experience" data-anchor="exp-ti-assisted" style="cursor:pointer;">
+          <div class="product-chip-name">AI TeleSuite (Enterprise)</div>
+          <div class="product-chip-co">Times Internet &middot; 2024</div>
+          <div class="product-chip-metric">Real-time pitch scoring</div>
+          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://economictimes.indiatimes.com/prime', '_blank');" title="Open live website">
+            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"></line>
+              <polyline points="7 7 17 7 17 17"></polyline>
+            </svg>
+          </span>
+        </a>
+        <a class="product-chip" href="#experience/exp-ti-etmarkets" data-view="experience" data-anchor="exp-ti-etmarkets" style="cursor:pointer;">
+          <div class="product-chip-name">ET Markets Revamp</div>
+          <div class="product-chip-co">Times Internet &middot; 2024</div>
+          <div class="product-chip-metric">&#8377;3Cr+ ARR &middot; +25% DAU</div>
+          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://economictimes.indiatimes.com/markets', '_blank');" title="Open live website">
+            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"></line>
+              <polyline points="7 7 17 7 17 17"></polyline>
+            </svg>
+          </span>
+        </a>
+        <a class="product-chip" href="#experience/exp-ti-health" data-view="experience" data-anchor="exp-ti-health" style="cursor:pointer;">
+          <div class="product-chip-name">Times Health+ Subs</div>
+          <div class="product-chip-co">Times Internet &middot; 2024</div>
+          <div class="product-chip-metric">Paid tier &middot; 0&rarr;1</div>
+          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://www.timesinternet.in/', '_blank');" title="Open live website">
+            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"></line>
+              <polyline points="7 7 17 7 17 17"></polyline>
+            </svg>
+          </span>
+        </a>
+        <a class="product-chip" href="#experience/exp-ti-etmarkets" data-view="experience" data-anchor="exp-ti-etmarkets" style="cursor:pointer;">
+          <div class="product-chip-name">ET Markets Discovery</div>
+          <div class="product-chip-co">Times Internet &middot; 2023</div>
+          <div class="product-chip-metric">Screeners, portfolios</div>
+          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://economictimes.indiatimes.com/markets', '_blank');" title="Open live website">
+            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"></line>
+              <polyline points="7 7 17 7 17 17"></polyline>
+            </svg>
+          </span>
+        </a>
+        <a class="product-chip" href="#project-yaara" data-view="project-yaara" style="cursor:pointer;">
+          <div class="product-chip-name">Hey Yaara</div>
+          <div class="product-chip-co">Side project &middot; 2024</div>
+          <div class="product-chip-metric">AI voice companion</div>
+          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://hey-yaara.vercel.app/', '_blank');" title="Open live website">
+            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"></line>
+              <polyline points="7 7 17 7 17 17"></polyline>
+            </svg>
+          </span>
+        </a>
+        <a class="product-chip" href="#project-music" data-view="project-music" style="cursor:pointer;">
+          <div class="product-chip-name">MusicGenAI</div>
+          <div class="product-chip-co">Side project &middot; 2024</div>
+          <div class="product-chip-metric">Text &rarr; full track</div>
+          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://music-gen-ai-blue.vercel.app/', '_blank');" title="Open live website">
+            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"></line>
+              <polyline points="7 7 17 7 17 17"></polyline>
+            </svg>
+          </span>
+        </a>
+        <a class="product-chip" href="#project-telesuite" data-view="project-telesuite" style="cursor:pointer;">
+          <div class="product-chip-name">AI TeleSuite (Consumer)</div>
+          <div class="product-chip-co">Side project &middot; 2024</div>
+          <div class="product-chip-metric">Pitch coaching app</div>
+          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://ai-tele-suite.vercel.app/', '_blank');" title="Open live website">
+            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"></line>
+              <polyline points="7 7 17 7 17 17"></polyline>
+            </svg>
+          </span>
+        </a>
+        <a class="product-chip" href="#project-lifeengine" data-view="project-lifeengine" style="cursor:pointer;">
+          <div class="product-chip-name">TH+ LifeEngine</div>
+          <div class="product-chip-co">Side project &middot; 2024</div>
+          <div class="product-chip-metric">AI wellness planner</div>
+          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://th-life-engine.vercel.app/', '_blank');" title="Open live website">
+            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"></line>
+              <polyline points="7 7 17 7 17 17"></polyline>
+            </svg>
+          </span>
+        </a>
       </div>
     </div>
   </section>

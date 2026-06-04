@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>
+  (function(){
+    var KEY='anchit-portfolio-view';
+    try {
+      var chosen = localStorage.getItem(KEY);
+      if (chosen === 'simple') {
+        window.location.replace('/');
+      }
+    } catch(e){}
+  })();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#050506">
@@ -111,8 +122,11 @@
   /* stats */
   .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:10px}
   @media(max-width:680px){.stats{grid-template-columns:repeat(2,1fr)}}
-  .stat{background:var(--bg);padding:26px 20px}
-  .stat .v{font-size:clamp(28px,4vw,46px);font-weight:700;letter-spacing:-.02em}
+  .stat{background:var(--bg);padding:26px 20px;transition:background 0.25s,color 0.25s}
+  .stat:hover{background:var(--bg2)}
+  .stat .v{font-size:clamp(28px,4vw,46px);font-weight:700;letter-spacing:-.02em;transition:color 0.25s}
+  .stat:hover .v{color:var(--red)}
+  .stat:hover .stat-arrow{color:var(--red) !important;transform:translate(2px,-2px)}
   .stat .v b{color:var(--red)}
   .stat .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);margin-top:8px}
   /* contact */
@@ -145,7 +159,7 @@
     <a href="#builds" class="opt">Builds</a>
     <a href="#exp" class="opt">Path</a>
     <a href="#contact">Contact</a>
-    <a href="/" title="Classic edition">◳ Classic</a>
+    <a href="/" onclick="try{localStorage.setItem('anchit-portfolio-view','simple');}catch(e){}" title="Classic edition">◳ Classic</a>
   </div>
 </nav>
 
@@ -220,26 +234,30 @@ const DATA = {
     meta:["AGM PRODUCT // VAHDAM","12+ PRODUCTS SHIPPED","AI-FIRST BUILDER","BASED IN INDIA"] },
   work:[
     {name:"VAHDAM Lifecycle OS",meta:"D2C Retention · PWA · 2026",metric:"Dashboard → calendar → mailers",
+     hash:"project-lifecycle",url:"https://vahdam-lifecycle-os.vercel.app/",
      detail:["A single workflow that reads campaign + customer + order data, builds an executive retention dashboard, generates a 30-day mailer calendar, and writes every mailer through a brand-locked studio.","RFM segmentation, cohort retention, cross-sell affinity — computed client-side. 4-variant AI mailer generation with region-aware product links."]},
     {name:"Vahdam India D2C",meta:"Vahdam India · 2026",metric:"Ratings 2.4 → 4.0",
+     hash:"experience/exp-vahdam-d2c",url:"https://www.vahdam.com/",
      detail:["Owned D2C product + growth across US, UK and global storefronts.","Drove app store ratings from 2.4 to 4.0 through CRM experiments and product optimisation at scale."]},
     {name:"TI Half Marathon",meta:"Times Internet · 2026",metric:"0 → 1 consumer IP",
+     hash:"experience/exp-ti-marathon",url:"https://www.timesinternet.in/",
      detail:["Built a new consumer IP from zero — event registration, engagement, and content surfaces."]},
     {name:"ET Prime Assisted Sales",meta:"Times Internet · 2025",metric:"5× MRR · ₹80L",
+     hash:"experience/exp-ti-assisted",url:"https://economictimes.indiatimes.com/prime",
      detail:["Scaled Assisted Sales 5× to ₹80L MRR with real-time transcription and pitch scoring for the tele-sales floor."]},
     {name:"ET Markets, rebuilt",meta:"Times Internet · 2025",metric:"₹3Cr+ ARR",
+     hash:"experience/exp-ti-etmarkets",url:"https://economictimes.indiatimes.com/markets",
      detail:["Revamped ET Markets subscription surfaces, lifting it to ₹3Cr+ ARR."]},
   ],
   builds:[
-    {name:"The Third Eye",metric:"Agent-orchestrated AI OS"},
-    {name:"Mailer Architect",metric:"6-LLM cascade → HTML email"},
-    {name:"MusicGenAI",metric:"Prompt → full track + vocals"},
-    {name:"DTC Data Engine",metric:"Shopify+Klaviyo → DuckDB"},
-    {name:"Hey Yaara",metric:"AI voice companion, elderly"},
-    {name:"AI TeleSuite",metric:"Real-time pitch scoring"},
-    {name:"TH+ LifeEngine",metric:"Personalised daily plans"},
-    {name:"Personal AI OS",metric:"Email/meeting → task board"},
-    {name:"Lifecycle OS",metric:"D2C retention, end-to-end"},
+    {name:"VAHDAM Lifecycle OS",metric:"D2C Retention · PWA",hash:"project-lifecycle",url:"https://vahdam-lifecycle-os.vercel.app/"},
+    {name:"MusicGenAI",metric:"Generative AI · Music",hash:"project-music",url:"https://music-gen-ai-blue.vercel.app/"},
+    {name:"Task Tracker",metric:"Personal Productivity · AI",hash:"project-tasktracker",url:"https://personal-ai-assistant-anchit.vercel.app/"},
+    {name:"The Third Eye",metric:"Personal AI OS",hash:"project-thirdeye",url:"https://the-third-eye-anchit.vercel.app/"},
+    {name:"Hey Yaara",metric:"AI Voice · Consumer",hash:"project-yaara",url:"https://hey-yaara.vercel.app/"},
+    {name:"Mailer Architect",metric:"AI Tooling · Marketing",hash:"project-mailer",url:"https://marketing-mailers-html-architect.vercel.app/"},
+    {name:"AI TeleSuite",metric:"AI Workflow · Sales",hash:"project-telesuite",url:"https://ai-tele-suite.vercel.app/"},
+    {name:"TH+ LifeEngine",metric:"AI Wellness · Personalised",hash:"project-lifeengine",url:"https://th-life-engine.vercel.app/"}
   ],
   experience:[
     {title:"AGM — Product @ <b>Vahdam India</b>",detail:"D2C global growth across US, UK & global. CRM experiments, product optimisation at scale, app ratings 2.4 → 4.0."},
@@ -268,11 +286,29 @@ $("#proj-list").innerHTML = DATA.work.map((p,i)=>`
       <div><div class="pname">${p.name}</div><div class="pmeta">${p.meta}</div></div>
       <div class="pmetric">${p.metric} ↗</div>
     </div>
-    <div class="proj-detail"><div class="inner">${p.detail.map(d=>`<p>${d}</p>`).join("")}</div></div>
+    <div class="proj-detail">
+      <div class="inner">
+        ${p.detail.map(d=>`<p>${d}</p>`).join("")}
+        <div class="proj-actions" style="margin-top: 18px; display: flex; gap: 12px; flex-wrap: wrap;">
+          ${p.url ? `
+          <a href="${p.url}" target="_blank" rel="noopener" class="lnk" style="padding: 10px 18px; font-size: 11px; margin-top: 6px;">
+            <span>Open Live App ↗</span>
+          </a>` : ''}
+          ${p.hash ? `
+          <a href="/#${p.hash}" onclick="try{localStorage.setItem('anchit-portfolio-view','simple');}catch(e){}" class="lnk" style="padding: 10px 18px; font-size: 11px; margin-top: 6px;">
+            <span>Editorial Deep Dive →</span>
+          </a>` : ''}
+        </div>
+      </div>
+    </div>
   </div>`).join("");
 
 $("#build-stats").innerHTML = DATA.builds.map(b=>`
-  <div class="stat"><div class="v">${b.name}</div><div class="k">${b.metric}</div></div>`).join("");
+  <a class="stat" href="/#${b.hash}" onclick="try{localStorage.setItem('anchit-portfolio-view','simple');}catch(e){}" style="display:block; position:relative; text-decoration:none; cursor:pointer;">
+    <div class="v">${b.name}</div>
+    <div class="k">${b.metric}</div>
+    <div class="stat-arrow" style="position: absolute; top: 16px; right: 16px; font-family: var(--mono); font-size: 11px; color: var(--mute); transition: color .25s, transform .25s;">↗</div>
+  </a>`).join("");
 
 $("#exp-list").innerHTML = DATA.experience.map(e=>`
   <div class="exp-item reveal"><h3>${e.title}</h3><p>${e.detail}</p></div>`).join("");
