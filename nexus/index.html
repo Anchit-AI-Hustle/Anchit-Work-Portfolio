@@ -84,6 +84,9 @@
     .back-to-earth { position: fixed; bottom: 20px; left: 20px; font-family: var(--mono); font-size: 10px; color: var(--txt-mute); text-decoration: none; border-bottom: 1px solid var(--txt-mute); pointer-events: auto; }
     .back-to-earth:hover { color: var(--txt); border-color: var(--txt); }
     
+    .nexus-view-dropdown { position: fixed; top: 20px; right: 20px; z-index: 100; appearance: none; background: rgba(10,10,15,0.8); border: 1px solid var(--acc-dim); border-radius: 4px; padding: 6px 12px; font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--acc); cursor: pointer; outline: none; backdrop-filter: blur(4px); transition: border-color 0.2s, box-shadow 0.2s; }
+    .nexus-view-dropdown:hover { border-color: var(--acc); box-shadow: 0 0 10px var(--acc-dim); }
+    
   </style>
 </head>
 <body>
@@ -94,6 +97,12 @@
   </div>
 
   <canvas id="bg-canvas"></canvas>
+
+  <select class="nexus-view-dropdown hud-element" id="topBarViewSelect" aria-label="Switch Design View">
+    <option value="simple">✦ Editorial</option>
+    <option value="cyber">⌁ Cyberpunk</option>
+    <option value="nexus" selected>◎ God Mode</option>
+  </select>
 
   <div id="hud">
     <header>
@@ -331,6 +340,15 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
       }
     });
+
+    const ts = $("#topBarViewSelect");
+    if(ts) {
+      ts.addEventListener("change", (e) => {
+        try { localStorage.setItem("anchit-portfolio-view", e.target.value); } catch(err) {}
+        if(e.target.value === 'simple') window.location.replace("/");
+        else if(e.target.value === 'cyber') window.location.replace("/cyber");
+      });
+    }
   </script>
 </body>
 </html>

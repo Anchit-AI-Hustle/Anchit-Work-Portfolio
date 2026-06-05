@@ -267,6 +267,8 @@
   .top-bar-cta.listen { background: var(--bg-deep); color: var(--ink-dim); border: 1px solid var(--rule-strong); }
   .top-bar-cta.listen:hover { border-color: var(--primary); color: var(--primary); }
   .top-bar-cta.listen.playing { border-color: var(--accent); color: var(--accent); }
+  .view-dropdown { appearance: none; background: var(--bg-deep); border: 1px solid var(--rule); border-radius: 99px; padding: 4px 12px; font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--ink); cursor: pointer; outline: none; }
+  .view-dropdown:hover { background: var(--rule); }
 
   /* Push main content below top bar */
   main { padding-top: calc(44px + var(--safe-top)); }
@@ -1800,6 +1802,11 @@
       </a>
     </div>
     <div class="top-bar-actions">
+      <select class="view-dropdown" id="topBarViewSelect" aria-label="Switch Design View">
+        <option value="simple" selected>✦ Editorial</option>
+        <option value="cyber">⌁ Cyberpunk</option>
+        <option value="nexus">◎ God Mode</option>
+      </select>
       <button class="top-bar-cta act-meet" data-schedule aria-label="Meet Me" title="Meet Me — book a Google Meet">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <span class="cta-label">Meet Me</span>
@@ -4132,6 +4139,14 @@
   }
   var sb=document.getElementById('sidebarViewToggle');
   if(sb) sb.onclick=function(){ go('nexus'); };
+  
+  var ts=document.getElementById('topBarViewSelect');
+  if(ts) {
+    ts.addEventListener('change', function(e) {
+      if(e.target.value === 'cyber') go('cyber');
+      else if(e.target.value === 'nexus') go('nexus');
+    });
+  }
 })();
 </script>
 

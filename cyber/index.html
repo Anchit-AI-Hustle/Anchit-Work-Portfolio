@@ -69,7 +69,9 @@
     text-align:center;min-width:42px;transition:all .2s;backdrop-filter:blur(8px)}
   .cyber-actions a:hover{color:#fff;border-color:var(--red);box-shadow:0 0 14px rgba(255,43,43,.35)}
   @media(max-width:680px){.cyber-actions{flex-direction:row;top:auto;bottom:14px;right:50%;transform:translateX(50%);
-    background:rgba(5,5,6,.85);padding:6px;border-radius:12px}}
+    background:rgba(10,10,12,.8);padding:6px 12px;border-radius:12px;border:1px solid var(--line)}}
+  .cyber-view-dropdown { position: fixed; top: 20px; right: 20px; z-index: 100; appearance: none; background: rgba(10,10,15,0.8); border: 1px solid var(--line); border-radius: 4px; padding: 6px 12px; font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink); cursor: pointer; outline: none; backdrop-filter: blur(4px); transition: border-color 0.2s, box-shadow 0.2s; }
+  .cyber-view-dropdown:hover { border-color: var(--red); box-shadow: 0 0 10px rgba(255,43,43,0.2); }
   /* cyber chat terminal */
   .cyber-chat{margin-top:36px;border:1px solid var(--line);border-radius:14px;background:rgba(10,10,12,.72);
     backdrop-filter:blur(10px);overflow:hidden;max-width:760px}
@@ -422,6 +424,12 @@
     </button>
   </div>
 </aside>
+
+<select class="cyber-view-dropdown" id="topBarViewSelect" aria-label="Switch Design View">
+  <option value="simple">✦ Editorial</option>
+  <option value="cyber" selected>⌁ Cyberpunk</option>
+  <option value="nexus">◎ God Mode</option>
+</select>
 
 <!-- Mobile toggle button -->
 <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">
@@ -930,6 +938,15 @@ document.addEventListener("keydown", (e) => {
         localStorage.setItem("anchit-portfolio-view", "nexus");
       } catch(e) {}
       window.location.replace("/nexus");
+    });
+  }
+
+  const ts = $("#topBarViewSelect");
+  if(ts) {
+    ts.addEventListener("change", (e) => {
+      try { localStorage.setItem("anchit-portfolio-view", e.target.value); } catch(err) {}
+      if(e.target.value === 'simple') window.location.replace("/");
+      else if(e.target.value === 'nexus') window.location.replace("/nexus");
     });
   }
 })();
