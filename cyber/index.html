@@ -22,8 +22,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#050506; --bg2:#0a0a0c; --panel:rgba(14,14,17,.72); --line:rgba(255,255,255,.10);
-    --ink:#e8e8ec; --dim:#8b8b96; --mute:#54545f; --red:#ff2b2b; --red-dim:#b81f1f;
+    --bg:#050506; --bg2:#0a0a0c; --panel:rgba(14,14,17,.72); --line:rgba(255,255,255,.15);
+    --ink:#f8f8fa; --dim:#a1a1aa; --mute:#71717a; --red:#ff2b2b; --red-dim:#b81f1f;
     --mono:'JetBrains Mono',monospace; --sans:'Space Grotesk',system-ui,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -128,7 +128,7 @@
   @keyframes cue{0%,100%{transform:scaleY(.4);opacity:.4}50%{transform:scaleY(1);opacity:1}}
   /* section heading */
   .sec-h{font-size:clamp(30px,6vw,72px);font-weight:600;letter-spacing:-.02em;line-height:1;text-transform:uppercase;margin-bottom:14px}
-  .sec-sub{color:var(--dim);font-size:15px;max-width:560px;line-height:1.6;margin-bottom:54px}
+  .sec-sub{color:var(--dim);font-size:16px;max-width:560px;line-height:1.6;margin-bottom:54px}
   /* marquee */
   .marquee{border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden;white-space:nowrap;padding:18px 0;margin:0;background:var(--bg2)}
   .marquee .track{display:inline-block;font-family:var(--mono);font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);will-change:transform}
@@ -149,14 +149,14 @@
   .proj-detail{max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(.16,1,.3,1);border-bottom:1px solid var(--line);background:var(--bg2)}
   .proj-detail.open{max-height:640px}
   .proj-detail .inner{padding:clamp(20px,3vw,40px) clamp(16px,4vw,72px);display:grid;grid-template-columns:1fr;gap:14px;max-width:860px}
-  .proj-detail p{color:var(--dim);font-size:15px;line-height:1.7}
-  .proj-detail p:first-child{color:var(--ink);font-size:16px}
+  .proj-detail p{color:var(--dim);font-size:16px;line-height:1.7}
+  .proj-detail p:first-child{color:var(--ink);font-size:17px}
   /* experience */
   .exp{display:grid;gap:0;border-top:1px solid var(--line)}
   .exp-item{padding:clamp(20px,3vw,34px) 4px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr;gap:10px}
   .exp-item h3{font-size:clamp(20px,3vw,30px);font-weight:600;letter-spacing:-.01em}
   .exp-item h3 b{color:var(--red);font-weight:600}
-  .exp-item p{color:var(--dim);font-size:15px;line-height:1.65;max-width:760px}
+  .exp-item p{color:var(--dim);font-size:16px;line-height:1.65;max-width:760px}
   /* stats */
   .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:10px}
   @media(max-width:680px){.stats{grid-template-columns:repeat(2,1fr)}}
@@ -343,9 +343,9 @@
   .modal-body { display: grid; gap: 28px; }
   .modal-sec-title { font-family: var(--mono); font-size: 11px; color: var(--red); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.1em; }
   .modal-sec h4 { font-size: 20px; font-weight: 600; margin-bottom: 10px; }
-  .modal-sec p { color: var(--dim); font-size: 14.5px; line-height: 1.65; margin-bottom: 12px; }
+  .modal-sec p { color: var(--dim); font-size: 16px; line-height: 1.65; margin-bottom: 12px; }
   .modal-sec ul { list-style: none; padding-left: 20px; display: grid; gap: 10px; }
-  .modal-sec ul li { position: relative; font-size: 14.5px; color: var(--dim); line-height: 1.5; }
+  .modal-sec ul li { position: relative; font-size: 16px; color: var(--dim); line-height: 1.5; }
   .modal-sec ul li::before { content: "→"; color: var(--red); position: absolute; left: -20px; }
   .modal-sec ul li strong { color: var(--ink); font-weight: 600; }
   
@@ -379,23 +379,23 @@
   <nav class="sidebar-nav">
     <a class="sidebar-item active" href="#hero">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span class="sidebar-label">System Home</span>
-    </a>
-    <a class="sidebar-item" href="#work">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-      <span class="sidebar-label">Career Work</span>
-    </a>
-    <a class="sidebar-item" href="#builds">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-      <span class="sidebar-label">Side Builds</span>
-    </a>
-    <a class="sidebar-item" href="#exp">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <span class="sidebar-label">The Path</span>
+      <span class="sidebar-label">Home</span>
     </a>
     <a class="sidebar-item" href="#chat">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      <span class="sidebar-label">AI Chat</span>
+      <span class="sidebar-label">Chat with me</span>
+    </a>
+    <a class="sidebar-item" href="#work">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      <span class="sidebar-label">Experience</span>
+    </a>
+    <a class="sidebar-item" href="#builds">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      <span class="sidebar-label">Side Projects</span>
+    </a>
+    <a class="sidebar-item" href="#exp">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span class="sidebar-label">Timeline</span>
     </a>
     <a class="sidebar-item" href="#resume">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
@@ -411,6 +411,10 @@
     <button class="sidebar-item" id="sidebarViewToggle" aria-label="Switch to Editorial view" title="Switch design — Editorial ⇄ Cyberpunk">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M3 12a9 9 0 0 1 9-9m0 18a9 9 0 0 1-9-9"/><path d="M16 8l4-4M14 4h6v6"/></svg>
       <span class="sidebar-label">Editorial view</span>
+    </button>
+    <button class="sidebar-item" id="sidebarNexusToggle" aria-label="Switch to God Mode" title="God Mode — Neural Interface">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+      <span class="sidebar-label" style="color:#00ff88; font-weight:bold;">GOD MODE</span>
     </button>
     <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" aria-label="Collapse sidebar">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -917,6 +921,15 @@ document.addEventListener("keydown", (e) => {
         localStorage.setItem("anchit-portfolio-view", "simple");
       } catch(e) {}
       window.location.replace("/");
+    });
+  }
+  const nexusToggle = $("#sidebarNexusToggle");
+  if (nexusToggle) {
+    nexusToggle.addEventListener("click", () => {
+      try {
+        localStorage.setItem("anchit-portfolio-view", "nexus");
+      } catch(e) {}
+      window.location.replace("/nexus");
     });
   }
 })();

@@ -8,6 +8,8 @@
       var chosen = localStorage.getItem(KEY);
       if (chosen === 'cyber' && !window.location.hash) {
         window.location.replace('/cyber');
+      } else if (chosen === 'nexus' && !window.location.hash) {
+        window.location.replace('/nexus');
       }
     } catch(e){}
   })();
@@ -4098,16 +4100,20 @@
 <div id="viewChooser" role="dialog" aria-modal="true" style="position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(8,6,5,.82);backdrop-filter:blur(8px);">
   <div style="max-width:560px;width:100%;background:var(--bg-elev,#fff);border:1px solid var(--rule,#e5dcc7);border-radius:20px;padding:30px 26px;text-align:center;font-family:inherit;box-shadow:0 40px 100px rgba(0,0,0,.5);">
     <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--primary,#ff4d1f);margin-bottom:8px;">Welcome — pick your vibe</div>
-    <h2 style="font-size:24px;color:var(--ink,#161312);margin-bottom:6px;">Two ways to see my world</h2>
-    <p style="color:var(--ink-dim,#5a554e);font-size:14px;line-height:1.6;margin-bottom:22px;">Same story, two designs. You can switch anytime from the menu.</p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+    <h2 style="font-size:24px;color:var(--ink,#161312);margin-bottom:6px;">Three ways to see my world</h2>
+    <p style="color:var(--ink-dim,#5a554e);font-size:14px;line-height:1.6;margin-bottom:22px;">Same story, different designs. You can switch anytime from the menu.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
       <button id="chooseSimple" style="cursor:pointer;border:1px solid var(--rule,#e5dcc7);background:var(--bg,#fbf5ec);border-radius:14px;padding:22px 16px;font-family:inherit;text-align:left;">
-        <div style="font-size:16px;font-weight:600;color:var(--ink,#161312);margin-bottom:6px;">✦ Editorial</div>
-        <div style="font-size:12.5px;color:var(--ink-dim,#5a554e);line-height:1.5;">Warm, clean, calm. The classic read.</div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink,#161312);margin-bottom:6px;">✦ Editorial</div>
+        <div style="font-size:11.5px;color:var(--ink-dim,#5a554e);line-height:1.5;">Warm, clean, calm. Classic read.</div>
       </button>
       <button id="chooseCyber" style="cursor:pointer;border:1px solid #2a2a30;background:#0a0a0c;border-radius:14px;padding:22px 16px;font-family:inherit;text-align:left;">
-        <div style="font-size:16px;font-weight:600;color:#ff2b2b;margin-bottom:6px;">⌁ Cyberpunk</div>
-        <div style="font-size:12.5px;color:#8b8b96;line-height:1.5;">Dark, glitchy, 3D. The experimental cut.</div>
+        <div style="font-size:14px;font-weight:600;color:#ff2b2b;margin-bottom:6px;">⌁ Cyberpunk</div>
+        <div style="font-size:11.5px;color:#8b8b96;line-height:1.5;">Dark, glitchy, 3D. Experimental.</div>
+      </button>
+      <button id="chooseNexus" style="cursor:pointer;border:1px solid #00ff88;background:#030305;border-radius:14px;padding:22px 16px;font-family:inherit;text-align:left;box-shadow:0 0 15px rgba(0,255,136,0.2);">
+        <div style="font-size:14px;font-weight:600;color:#00ff88;margin-bottom:6px;">◎ GOD MODE</div>
+        <div style="font-size:11.5px;color:#707080;line-height:1.5;">Interactive AI avatar, 3D neural grid.</div>
       </button>
     </div>
   </div>
@@ -4122,9 +4128,10 @@
     var ch=document.getElementById('viewChooser'); ch.style.display='flex';
     document.getElementById('chooseSimple').onclick=function(){ try{localStorage.setItem(KEY,'simple');}catch(e){} ch.style.display='none'; };
     document.getElementById('chooseCyber').onclick=function(){ go('cyber'); };
+    document.getElementById('chooseNexus').onclick=function(){ go('nexus'); };
   }
   var sb=document.getElementById('sidebarViewToggle');
-  if(sb) sb.onclick=function(){ go('cyber'); };
+  if(sb) sb.onclick=function(){ go('nexus'); };
 })();
 </script>
 
