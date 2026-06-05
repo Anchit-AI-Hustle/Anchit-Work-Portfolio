@@ -25,9 +25,9 @@
 <meta name="apple-mobile-web-app-title" content="Anchit" />
 <meta name="mobile-web-app-capable" content="yes" />
 <link rel="manifest" href="manifest.json" />
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
-<link rel="icon" type="image/svg+xml" href="icons/favicon.svg" />
-<link rel="icon" type="image/png" href="/favicon.png" />
+<link rel="apple-touch-icon" href="assets/premium_logo.png" />
+<link rel="icon" type="image/svg+xml" href="assets/premium_logo.png" />
+<link rel="icon" type="image/png" href="assets/premium_logo.png" />
 
 <!-- Open Graph -->
 <meta property="og:title" content="Anchit Tandon — Product leader & AI builder turning funnels into growth" />
@@ -3681,7 +3681,10 @@
 
     function pickVoice() {
       const vv = window.speechSynthesis.getVoices();
-      return vv.find(v => /Google UK English Male/i.test(v.name))
+      // Prefer an Indian English voice if available (e.g., Google, Microsoft, etc.)
+      return vv.find(v => v.lang.startsWith('en-IN'))
+          || vv.find(v => /Indian/i.test(v.name) && v.lang.startsWith('en'))
+          || vv.find(v => /Google UK English Male/i.test(v.name))
           || vv.find(v => /Google/i.test(v.name) && v.lang.startsWith('en'))
           || vv.find(v => v.lang.startsWith('en-') && /male/i.test(v.name))
           || vv.find(v => v.lang.startsWith('en'));
