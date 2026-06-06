@@ -1,5 +1,6 @@
 import os
 import json
+import re
 
 # Read the extracted sections
 def read_file(name):
@@ -33,12 +34,25 @@ sections_data = {
     "contact": contact_html
 }
 
+# Fix script tag closure issue
+json_data_str = json.dumps(sections_data).replace('</script>', '<\\/script>')
+
+# Get fonts from backup
+backup_html = read_file('index.backup.html')
+fonts_match = re.search(r'(<link rel="preconnect" href="https://fonts.googleapis.com">.*?</style>)', backup_html, re.DOTALL)
+fonts_css = fonts_match.group(1) if fonts_match else ""
+
+# Get CSS from scratch files
+css1 = read_file('scratch-css.css')
+css2 = read_file('scratch-css-products.css')
+
 html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Anchit Tandon — Interactive OS</title>
+  {fonts_css}
   <style>
     :root {{
       --bg: #050505;
@@ -48,14 +62,14 @@ html_content = f"""<!DOCTYPE html>
       --accent: #FF5F15;
       --accent-hover: #FF7A00;
       --border: rgba(255,255,255,0.1);
-      --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      /* Use the font variables from the original CSS if available */
     }}
     
     * {{ box-sizing: border-box; margin: 0; padding: 0; }}
     body {{
       background: var(--bg);
       color: var(--txt);
-      font-family: var(--font-main);
+      font-family: var(--font-body), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       overflow-x: hidden;
       height: 100vh;
       display: flex;
@@ -176,6 +190,9 @@ html_content = f"""<!DOCTYPE html>
     h1, h2, h3 {{ color: var(--txt); margin-bottom: 10px; }}
     p {{ color: var(--txt-mute); margin-bottom: 20px; line-height: 1.6; }}
     .eyebrow {{ color: var(--accent); font-weight: 600; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; margin-bottom: 8px; }}
+
+    {css1}
+    {css2}
   </style>
 </head>
 <body>
@@ -218,7 +235,7 @@ html_content = f"""<!DOCTYPE html>
   </div>
 
   <script>
-    const sectionsData = {json.dumps(sections_data)};
+    const sectionsData = {json_data_str};
     const TTS_URL = 'http://localhost:8000/api/tts';
     
     let userName = localStorage.getItem('anchit-user-name') || '';
@@ -240,10 +257,11 @@ html_content = f"""<!DOCTYPE html>
     const fcMic = document.getElementById('fc-mic');
     
     // Init Speech Recognition
-    if ('webkitSpeechRecognition' in window) {{
-      recognition = new webkitSpeechRecognition();
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {{
+      recognition = new SpeechRecognition();
       recognition.continuous = false;
-      recognition.interimResults = true;
+      recognition.interimResults = false;
       recognition.lang = 'en-US';
     }}
 
@@ -293,6 +311,10 @@ html_content = f"""<!DOCTYPE html>
 
     // App Initialization
     window.onload = () => {{
+      // Hide any legacy UI that might conflict from appended sections
+      const globalNudge = document.getElementById('globalChatNudge');
+      if(globalNudge) globalNudge.style.display = 'none';
+
       if (chatHistory.length > 0 && userName) {{
         // Resume session
         obEl.classList.add('hidden');
@@ -329,7 +351,7 @@ html_content = f"""<!DOCTYPE html>
       fcBody.scrollTop = fcBody.scrollHeight;
     }}
     
-    function clearSession() {{
+    window.clearSession = function() {{
       chatHistory = [];
       localStorage.removeItem('anchit-chat-history');
       fcBody.innerHTML = '';
@@ -378,12 +400,16 @@ html_content = f"""<!DOCTYPE html>
       addBubble(`Load ${{key}}`, 'user', fcBody);
       if (sectionsData[key]) {{
         portContent.innerHTML = sectionsData[key];
+        // hide legacy widgets inside loaded content
+        const gn = portContent.querySelectorAll('#globalChatNudge, #floatingChatWidget');
+        gn.forEach(e => e.style.display = 'none');
+        
         speakText(`Loading ${{key}}.`, fcBody);
         
         // Random follow-up nudge
         setTimeout(() => {{
           speakText(`Let me know if you need help finding specific engineering details in this section.`, fcBody);
-        }}, 5000);
+        }}, 8000);
       }} else {{
         speakText(`I couldn't find that section.`, fcBody);
       }}
@@ -469,4 +495,4 @@ html_content = f"""<!DOCTYPE html>
 with open('index.html', 'w') as f:
     f.write(html_content)
 
-print("index.html successfully built.")
+print("index.html successfully rebuilt with correct JSON escaping and hidden legacy widgets.")
