@@ -2029,10 +2029,27 @@ body {
 </head>
 <body>
 
+  <script>
+    window.onerror = function(msg, url, line, col, error) {
+      const errDiv = document.createElement('div');
+      errDiv.style.cssText = "position:fixed;top:0;left:0;width:100%;background:red;color:white;z-index:9999999;padding:20px;font-size:16px;font-family:monospace;word-wrap:break-word;";
+      errDiv.innerHTML = "<strong>FATAL ERROR:</strong> " + msg + "<br>Line: " + line + "<br>Stack: " + (error ? error.stack : 'N/A');
+      document.body.appendChild(errDiv);
+    };
+    window.addEventListener('unhandledrejection', function(event) {
+      const errDiv = document.createElement('div');
+      errDiv.style.cssText = "position:fixed;top:0;left:0;width:100%;background:orange;color:black;z-index:9999999;padding:20px;font-size:16px;font-family:monospace;word-wrap:break-word;";
+      errDiv.innerHTML = "<strong>PROMISE REJECTION:</strong> " + event.reason;
+      document.body.appendChild(errDiv);
+    });
+  </script>
+
+
   <!-- ONBOARDING MODAL -->
   <div id="onboarding">
     <div class="chat-container-center">
-      <div id="onboarding-chat">
+      <div id="onboarding-chat" style="border: 2px solid green; min-height: 50px;">
+        <div class="bubble system" style="background: #222; border: 1px solid #444; align-self: flex-start; color: #fff;">[HARDCODED HTML] Testing visibility.</div>
         <!-- Bubbles injected here -->
       </div>
       <div class="input-row" id="onboarding-input-row">
@@ -2122,8 +2139,31 @@ body {
 </style>\n<script>\n(function(){\n  var HOST_EMAIL=\"anchit.tandon@gmail.com\", HOST_WA=\"919873945238\";\n  var modal=document.getElementById('schedModal'), form=document.getElementById('schedForm'), done=document.getElementById('sf-done'), err=document.getElementById('sf-err');\n  window.openScheduleModal=function(){\n    form.style.display=''; done.style.display='none'; err.style.display='none';\n    var d=document.getElementById('sf-date'); if(d){var t=new Date(Date.now()+864e5);d.value=t.toISOString().slice(0,10);d.min=new Date().toISOString().slice(0,10);}\n    var tm=document.getElementById('sf-time'); if(tm&&!tm.value)tm.value=\"15:00\";\n    modal.style.display='flex'; document.body.style.overflow='hidden';\n  };\n  // Any element marked [data-schedule] (Meet Me button, contact card, footer link)\n  // opens the scheduler. This delegated handler is what was missing \u2014 the buttons\n  // existed but nothing called openScheduleModal().\n  document.addEventListener('click', function(e){\n    var t = e.target.closest('[data-schedule]');\n    if (t) { e.preventDefault(); window.openScheduleModal(); }\n  });\n  function close(){ modal.style.display='none'; document.body.style.overflow=''; }\n  document.getElementById('schedClose').onclick=close;\n  modal.addEventListener('click',function(e){ if(e.target===modal) close(); });\n  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&modal.style.display==='flex') close(); });\n  document.getElementById('sf-again').onclick=function(){ form.style.display=''; done.style.display='none'; };\n  var EMAIL_RE=/^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/;\n  function cleanPhone(p){ return (p||'').replace(/[^\\d+]/g,''); }\n  function validPhone(p){ var d=cleanPhone(p).replace(/^\\+/,''); return d.length>=10 && d.length<=15; }\n  function pad(n){ return String(n).padStart(2,'0'); }\n  function gfmt(dt){ return dt.getUTCFullYear()+pad(dt.getUTCMonth()+1)+pad(dt.getUTCDate())+'T'+pad(dt.getUTCHours())+pad(dt.getUTCMinutes())+'00Z'; }\n  form.addEventListener('submit',function(e){\n    e.preventDefault();\n    var name=document.getElementById('sf-name').value.trim();\n    var role=(document.getElementById('sf-role')||{}).value ? document.getElementById('sf-role').value.trim() : '';\n    var company=(document.getElementById('sf-company')||{}).value ? document.getElementById('sf-company').value.trim() : '';\n    var email=document.getElementById('sf-email').value.trim();\n    var phone=document.getElementById('sf-phone').value.trim();\n    var date=document.getElementById('sf-date').value, time=document.getElementById('sf-time').value;\n    var probs=[];\n    if(name.length<2) probs.push(\"a valid name\");\n    if(!EMAIL_RE.test(email)) probs.push(\"a valid email\");\n    if(!validPhone(phone)) probs.push(\"a valid mobile (10\u201315 digits)\");\n    if(!date||!time) probs.push(\"a date and time\");\n    var start=new Date(date+'T'+time);\n    if(date&&time&&(isNaN(start)||start.getTime()<Date.now())) probs.push(\"a future time\");\n    if(probs.length){ err.style.display='block'; err.textContent=\"Please enter \"+probs.join(\", \")+\".\"; return; }\n    err.style.display='none';\n    var who = name + (role||company ? \" (\"+[role,company].filter(Boolean).join(\" at \")+\")\" : \"\");\n    var end=new Date(start.getTime()+15*60000);\n    var title=encodeURIComponent(\"Intro call \u2014 \"+name+\" \u00d7 Anchit Tandon\");\n    var details=encodeURIComponent(\"15-min Google Meet.\\nGuest: \"+who+\" \u2014 \"+email+\", \"+phone+\"\\nHost: Anchit Tandon (\"+HOST_EMAIL+\", +91 98739 45238)\\n\\nGoogle attaches a Meet link and emails both guests.\");\n    var gcal=\"https://calendar.google.com/calendar/render?action=TEMPLATE&text=\"+title+\"&dates=\"+gfmt(start)+\"/\"+gfmt(end)+\"&details=\"+details+\"&add=\"+encodeURIComponent(HOST_EMAIL+\",\"+email)+\"&conferenceData=true&ctz=\"+encodeURIComponent(Intl.DateTimeFormat().resolvedOptions().timeZone||'Asia/Kolkata');\n    document.getElementById('sf-gcal').href=gcal;\n    var dateStr=start.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});\n    var timeStr=start.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});\n    // WhatsApp message from the user's number, in the requested template.\n    var roleCo = (role||company) ? (\"I am a \"+(role||\"professional\")+(company?\" at \"+company:\"\")+\" and \") : \"\";\n    var waMsg=encodeURIComponent(\"Hi Anchit, this is \"+name+\". \"+roleCo+\"I would like to meet you on \"+dateStr+\" at \"+timeStr+\". Looking forward to the same.\");\n    document.getElementById('sf-wa').href=\"https://wa.me/\"+HOST_WA+\"?text=\"+waMsg;\n    form.style.display='none'; done.style.display='block';\n  });\n})();\n<\/script>\n\n\n<!-- GLOBAL VIEW SWITCHER -->\n<div id=\"globalViewSwitcher\" style=\"position: fixed; bottom: 24px; right: 24px; z-index: 999999; display: flex; gap: 6px; background: rgba(10,10,12,0.85); backdrop-filter: blur(12px); padding: 6px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 8px 32px rgba(0,0,0,0.4);\">\n  <button onclick=\"goView('simple')\" style=\"color:#FBF5EC; background:transparent; border:none; border-radius:100px; cursor:pointer; padding:8px 16px; font-family:'Space Grotesk', system-ui, sans-serif; font-size:13px; font-weight:600; transition:all 0.2s;\" onmouseover=\"this.style.background='rgba(255,255,255,0.1)'\" onmouseout=\"this.style.background='transparent'\">\u2726 Editorial</button>\n  <button onclick=\"goView('cyber')\" style=\"color:#ff2b2b; background:transparent; border:none; border-radius:100px; cursor:pointer; padding:8px 16px; font-family:'Space Grotesk', system-ui, sans-serif; font-size:13px; font-weight:600; transition:all 0.2s;\" onmouseover=\"this.style.background='rgba(255,43,43,0.1)'\" onmouseout=\"this.style.background='transparent'\">\u2301 Cyberpunk</button>\n  <button onclick=\"goView('nexus')\" style=\"color:#00ff88; background:transparent; border:none; border-radius:100px; cursor:pointer; padding:8px 16px; font-family:'Space Grotesk', system-ui, sans-serif; font-size:13px; font-weight:600; transition:all 0.2s;\" onmouseover=\"this.style.background='rgba(0,255,136,0.1)'\" onmouseout=\"this.style.background='transparent'\">\u25ce God Mode</button>\n</div>\n<script>\n  function goView(v) {\n    try { localStorage.setItem('anchit-portfolio-view', v); } catch(e){}\n    location.href = v === 'simple' ? '/' : '/' + v + '/';\n  }\n  // Highlight active view\n  window.addEventListener('DOMContentLoaded', () => {\n    let current = 'simple';\n    if(location.pathname.includes('cyber')) current = 'cyber';\n    if(location.pathname.includes('nexus')) current = 'nexus';\n    const btns = document.getElementById('globalViewSwitcher').querySelectorAll('button');\n    if(current === 'simple') btns[0].style.background = 'rgba(255,255,255,0.15)';\n    if(current === 'cyber') btns[1].style.background = 'rgba(255,43,43,0.15)';\n    if(current === 'nexus') btns[2].style.background = 'rgba(0,255,136,0.15)';\n  });\n<\/script>\n\n\n\n<!-- GLOBAL NUDGE WIDGET -->\n<div id=\"globalNudgeWidget\" style=\"position: fixed; bottom: 80px; right: 24px; z-index: 999999; display: flex; flex-direction: column; gap: 12px; align-items: flex-end;\">\n  <!-- Mute Toggle -->\n  <button id=\"globalMuteBtn\" onclick=\"toggleGlobalMute()\" style=\"display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: rgba(10,10,12,0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 8px 32px rgba(0,0,0,0.4); color: #fff; cursor: pointer; transition: all 0.2s;\" aria-label=\"Toggle Audio\">\n    <!-- Icon injected via JS -->\n  </button>\n  \n  <!-- Talk With Me Nudge -->\n  <button id=\"globalChatNudge\" onclick=\"triggerGlobalChatNudge()\" style=\"display: flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 100px; background: var(--primary, #00FF88); border: none; box-shadow: 0 8px 32px rgba(0, 255, 136, 0.4); color: #000; cursor: pointer; transition: all 0.2s; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 14px; font-weight: 700;\">\n    <svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"/></svg>\n    Talk With Me\n  </button>\n</div>\n\n<script>\n  function updateGlobalMuteIcon() {\n    const isMuted = localStorage.getItem('anchit-mute') === 'true';\n    const btn = document.getElementById('globalMuteBtn');\n    if (isMuted) {\n      btn.innerHTML = '<svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"1\" y1=\"1\" x2=\"23\" y2=\"23\"></line><path d=\"M9 9v6a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6\"></path><path d=\"M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23\"></path><line x1=\"12\" y1=\"19\" x2=\"12\" y2=\"23\"></line><line x1=\"8\" y1=\"23\" x2=\"16\" y2=\"23\"></line></svg>'; // Mic off\n    } else {\n      btn.innerHTML = '<svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z\"></path><path d=\"M19 10v2a7 7 0 0 1-14 0v-2\"></path><line x1=\"12\" y1=\"19\" x2=\"12\" y2=\"23\"></line><line x1=\"8\" y1=\"23\" x2=\"16\" y2=\"23\"></line></svg>'; // Mic on\n    }\n  }\n\n  function toggleGlobalMute() {\n    const isMuted = localStorage.getItem('anchit-mute') === 'true';\n    localStorage.setItem('anchit-mute', !isMuted);\n    updateGlobalMuteIcon();\n    if (!isMuted) { \n      // Muting now -> stop any ongoing speech\n      if (window.speechSynthesis) window.speechSynthesis.cancel();\n      if (window.audioMuted !== undefined) {\n         window.audioMuted = true;\n         if (typeof setPlayerState === 'function') setPlayerState(false);\n      }\n    } else {\n      // Unmuting\n      if (window.audioMuted !== undefined) {\n         window.audioMuted = false;\n      }\n    }\n  }\n\n  function triggerGlobalChatNudge() {\n    if (document.getElementById('cli')) { // Nexus\n      document.getElementById('cli').focus();\n    } else if (document.getElementById('ccInput')) { // Cyber\n      document.getElementById('chat').scrollIntoView({ behavior: 'smooth' });\n      setTimeout(() => document.getElementById('ccInput').focus(), 600);\n    } else if (document.getElementById('view-chat')) { // Simple\n      document.getElementById('view-chat').scrollIntoView({ behavior: 'smooth' });\n      setTimeout(() => {\n        const ci = document.getElementById('chat-input');\n        if(ci) ci.focus();\n      }, 600);\n    }\n  }\n\n  document.addEventListener('DOMContentLoaded', updateGlobalMuteIcon);\n<\/script>"};
     const TTS_URL = 'http://localhost:8000/api/tts';
     
-    let userName = localStorage.getItem('anchit-user-name') || '';
-    let chatHistory = JSON.parse(localStorage.getItem('anchit-chat-history') || '[]');
+    let userName = '';
+    let chatHistory = [];
+    
+    // Robust storage wrapper to handle file:// protocol restrictions or corrupted data
+    const Storage = {
+        get: (key) => {
+            try { return localStorage.getItem(key); } catch(e) { return null; }
+        },
+        set: (key, val) => {
+            try { localStorage.setItem(key, val); } catch(e) { }
+        },
+        remove: (key) => {
+            try { localStorage.removeItem(key); } catch(e) { }
+        }
+    };
+
+    userName = Storage.get('anchit-user-name') || '';
+    try {
+        const h = Storage.get('anchit-chat-history');
+        if (h && h !== 'undefined') {
+            chatHistory = JSON.parse(h);
+        }
+    } catch(e) {
+        console.warn('History parse failed');
+    }
     let isRecording = false;
     let recognition = null;
     let currentAudio = null;
@@ -2159,7 +2199,7 @@ body {
       // Save history if it's the floating chat
       if (container === fcBody) {
         chatHistory.push({ text, type });
-        localStorage.setItem('anchit-chat-history', JSON.stringify(chatHistory));
+        Storage.set('anchit-chat-history', JSON.stringify(chatHistory));
       }
     }
 
@@ -2194,7 +2234,7 @@ body {
     }
 
     // App Initialization
-    window.onload = () => {
+    (() => {
       // Hide any legacy UI that might conflict from appended sections
       const globalNudge = document.getElementById('globalChatNudge');
       if(globalNudge) globalNudge.style.display = 'none';
@@ -2220,9 +2260,11 @@ body {
         
       } else {
         // New session
+        console.log("Starting new session");
+        document.body.insertAdjacentHTML("beforeend", "<div style='position:fixed;top:50px;left:50px;background:yellow;color:black;z-index:999999;padding:10px;'>JS speakText executed!</div>");
         speakText("Hi, I am Anchit. Welcome to my interactive portfolio. What's your name?", obChat);
       }
-    };
+    })();
     
     function loadHistory() {
       fcBody.innerHTML = '';
@@ -2237,7 +2279,7 @@ body {
     
     window.clearSession = function() {
       chatHistory = [];
-      localStorage.removeItem('anchit-chat-history');
+      Storage.remove('anchit-chat-history');
       fcBody.innerHTML = '';
       speakText(`Clean slate. I have my Timeline, Hard Metrics, and Deep Projects available. What would you like to see?`, fcBody);
       showBriefChips();
@@ -2252,7 +2294,7 @@ body {
     
     function submitName(name) {
       userName = name;
-      localStorage.setItem('anchit-user-name', userName);
+      Storage.set('anchit-user-name', userName);
       addBubble(name, 'user', obChat);
       obInput.value = '';
       document.getElementById('onboarding-input-row').style.display = 'none';
