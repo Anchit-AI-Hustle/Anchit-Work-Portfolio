@@ -6,7 +6,7 @@ const CACHE = 'anchit-portfolio-20260607b';
 const SHELL = [
   '/',
   '/index.html',
-  '/cyber/',
+  '/',
   '/manifest.json',
   '/AnchitTandon-AppLogo.png',
   '/icons/favicon.svg'
