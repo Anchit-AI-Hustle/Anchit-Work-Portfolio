@@ -242,22 +242,38 @@
     });
     
     function handleQuery(q) {
-      // Simple routing logic based on keywords
       const lower = q.toLowerCase();
-      if (lower.includes('metric') || lower.includes('highlight') || lower.includes('roi')) {
-        loadSection('highlights');
-      } else if (lower.includes('project') || lower.includes('build')) {
-        loadSection('projects');
-      } else if (lower.includes('timeline') || lower.includes('journey')) {
-        loadSection('timeline');
-      } else if (lower.includes('deep') || lower.includes('experience')) {
-        loadSection('deep_exp');
-      } else if (lower.includes('resume')) {
-        loadSection('resume');
-      } else if (lower.includes('contact')) {
-        loadSection('contact');
+      
+      const intents = {
+        'highlights': ['metric', 'highlight', 'roi', 'growth', 'result', 'impact', 'number', 'revenue', 'arr', 'mrr'],
+        'projects': ['project', 'build', 'side', 'experiment', 'hobby', 'app', 'tool'],
+        'deep_exp': ['experience', 'work', 'job', 'history', 'times internet', 'vahdam', 'career', 'role'],
+        'timeline': ['timeline', 'journey', 'path', 'story'],
+        'intro': ['about', 'who are you', 'intro', 'bio'],
+        'contact': ['contact', 'email', 'message', 'reach', 'talk', 'chat with anchit']
+      };
+      
+      let matchedSection = null;
+      for (const [section, keywords] of Object.entries(intents)) {
+        if (keywords.some(kw => lower.includes(kw))) {
+          matchedSection = section;
+          break;
+        }
+      }
+      
+      if (matchedSection) {
+        let msg = '';
+        if (matchedSection === 'highlights') msg = "I've pulled up the key metrics and ROI from Anchit's major product launches.";
+        if (matchedSection === 'projects') msg = "Loading his AI and side builds. He engineers these end-to-end.";
+        if (matchedSection === 'deep_exp') msg = "Navigating to his professional product history across Vahdam and Times Internet.";
+        if (matchedSection === 'timeline') msg = "Here is the timeline of his journey from engineering to product management.";
+        if (matchedSection === 'intro') msg = "Here is a quick overview of who Anchit is.";
+        if (matchedSection === 'contact') msg = "Bringing up his contact details so you can reach out directly.";
+        
+        speakText(msg, fcBody);
+        setTimeout(() => loadSection(matchedSection), 100);
       } else {
-        speakText(`I'm a static AI construct right now, so I don't have an LLM attached to answer arbitrary questions, but I can navigate you! Try asking for my Resume or Projects.`, fcBody);
+        speakText(`I am the autonomous brain navigating this OS. Ask me to show you his metrics, side projects, work history, or contact details, and I will drive the UI for you.`, fcBody);
       }
     }
 

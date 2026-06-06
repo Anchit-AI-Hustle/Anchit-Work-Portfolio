@@ -1,17 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script>
-  (function(){
-    var KEY='anchit-portfolio-view';
-    try {
-      var chosen = localStorage.getItem(KEY);
-      if (chosen === 'simple') {
-        window.location.replace('/');
-      }
-    } catch(e){}
-  })();
-</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#050506">
@@ -70,8 +59,6 @@
   .cyber-actions a:hover{color:#fff;border-color:var(--red);box-shadow:0 0 14px rgba(255,43,43,.35)}
   @media(max-width:680px){.cyber-actions{flex-direction:row;top:auto;bottom:14px;right:50%;transform:translateX(50%);
     background:rgba(10,10,12,.8);padding:6px 12px;border-radius:12px;border:1px solid var(--line)}}
-  .cyber-view-dropdown { position: fixed; top: 20px; right: 20px; z-index: 100; appearance: none; background: rgba(10,10,15,0.8); border: 1px solid var(--line); border-radius: 4px; padding: 6px 12px; font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink); cursor: pointer; outline: none; backdrop-filter: blur(4px); transition: border-color 0.2s, box-shadow 0.2s; }
-  .cyber-view-dropdown:hover { border-color: var(--red); box-shadow: 0 0 10px rgba(255,43,43,0.2); }
   /* cyber chat terminal */
   .cyber-chat{margin-top:36px;border:1px solid var(--line);border-radius:14px;background:rgba(10,10,12,.72);
     backdrop-filter:blur(10px);overflow:hidden;max-width:760px}
@@ -197,10 +184,17 @@
     backdrop-filter: blur(12px);
   }
   .sidebar-logo {
-    font-size: 16px; font-weight: 700; color: #fff; text-transform: uppercase;
-    letter-spacing: 0.15em; margin-bottom: 36px; display: block;
+    font-size: 15px; font-weight: 700; color: #fff; text-transform: uppercase;
+    letter-spacing: 0.12em; margin-bottom: 36px; display: flex; align-items: center; gap: 10px;
+    min-width: 0;
   }
   .sidebar-logo span { color: var(--red); }
+  .sidebar-app-icon {
+    width: 30px; height: 30px; border-radius: 8px; flex: 0 0 30px;
+    border: 1px solid rgba(255, 43, 43, 0.36);
+    box-shadow: 0 0 18px rgba(255, 43, 43, 0.22);
+  }
+  .sidebar-logo-text { display: flex; flex-direction: column; line-height: 1.05; min-width: 0; }
   .sidebar-nav {
     display: flex; flex-direction: column; gap: 8px; flex: 1;
   }
@@ -237,15 +231,13 @@
     width: var(--sidebar-w-collapsed);
   }
   body.sidebar-collapsed .sidebar-logo span,
+  body.sidebar-collapsed .sidebar-logo-text,
   body.sidebar-collapsed .sidebar-label,
   body.sidebar-collapsed .scb-label {
     display: none !important;
   }
   body.sidebar-collapsed .sidebar-logo {
-    font-size: 0; text-align: center;
-  }
-  body.sidebar-collapsed .sidebar-logo::before {
-    content: "A_"; font-size: 18px; font-weight: 700; color: var(--red);
+    font-size: 0; justify-content: center;
   }
   body.sidebar-collapsed .sidebar-item {
     justify-content: center; padding: 10px 0;
@@ -566,10 +558,56 @@
       bottom: 60px !important;
       right: 16px !important;
     }
-    #globalViewSwitcher {
-      bottom: 16px !important;
-      right: 16px !important;
-    }
+  }
+  .onboarding-gate {
+    position: fixed; inset: 0; z-index: 5000;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px; background: rgba(5, 5, 6, 0.28);
+    backdrop-filter: blur(8px);
+    transition: opacity 0.35s ease, visibility 0.35s ease;
+  }
+  .onboarding-gate.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+  .onboarding-card {
+    width: min(520px, 92vw);
+    border: 1px solid rgba(255,43,43,.34);
+    border-radius: 18px;
+    background: rgba(10,10,12,.76);
+    box-shadow: 0 34px 90px rgba(0,0,0,.62), inset 0 0 28px rgba(255,43,43,.06);
+    padding: clamp(24px, 5vw, 38px);
+    display: flex; flex-direction: column; align-items: stretch; gap: 16px;
+  }
+  .onboarding-title {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .28em;
+    text-transform: uppercase; color: var(--red);
+  }
+  .onboarding-copy { color: var(--dim); font-size: 15px; line-height: 1.6; }
+  .onboarding-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .onboarding-actions button,
+  .onboarding-input-row button {
+    border: 1px solid rgba(255,43,43,.4); color: #fff;
+    background: rgba(255,43,43,.12); border-radius: 999px;
+    padding: 11px 17px; font-family: var(--mono); font-size: 11px;
+    letter-spacing: .11em; text-transform: uppercase; cursor: pointer;
+    transition: all .2s ease;
+  }
+  .onboarding-actions button.primary {
+    color: #050506; background: var(--red); box-shadow: 0 0 20px rgba(255,43,43,.34);
+  }
+  .onboarding-actions button:hover,
+  .onboarding-input-row button:hover { transform: translateY(-1px); border-color: var(--red); }
+  .onboarding-chat { display: flex; flex-direction: column; gap: 10px; max-height: 280px; overflow-y: auto; }
+  .onboarding-bubble {
+    max-width: 92%; padding: 11px 14px; border-radius: 13px;
+    font-size: 14px; line-height: 1.5; border: 1px solid var(--line);
+  }
+  .onboarding-bubble.system { align-self: flex-start; background: rgba(255,43,43,.08); color: var(--ink); }
+  .onboarding-bubble.user { align-self: flex-end; background: rgba(255,255,255,.08); color: #fff; font-family: var(--mono); font-size: 13px; }
+  .onboarding-input-row { display: none; gap: 8px; }
+  .onboarding-input-row input {
+    flex: 1; min-width: 0; background: rgba(5,5,6,.72);
+    border: 1px solid var(--line); border-radius: 999px;
+    color: var(--ink); padding: 12px 15px; font-family: var(--mono); font-size: 13px;
+    outline: none;
   }
 </style>
 
@@ -582,7 +620,10 @@
 
 <!-- ============ SIDEBAR ============ -->
 <aside class="sidebar" id="sidebar">
-  <a class="sidebar-logo" href="#hero">ANCHIT<span><b>_</b>TANDON</span></a>
+  <a class="sidebar-logo" href="#hero" aria-label="Anchit Tandon home">
+    <img class="sidebar-app-icon" src="../AnchitTandon-AppLogo.png" alt="" aria-hidden="true">
+    <span class="sidebar-logo-text">ANCHIT<span><b>_</b>TANDON</span></span>
+  </a>
   <nav class="sidebar-nav">
     <a class="sidebar-item active" href="#hero">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -615,14 +656,6 @@
   </nav>
   <hr class="sidebar-rule" />
   <div class="sidebar-social">
-    <button class="sidebar-item" id="sidebarViewToggle" aria-label="Switch to Editorial view" title="Switch design — Editorial ⇄ Cyberpunk">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M3 12a9 9 0 0 1 9-9m0 18a9 9 0 0 1-9-9"/><path d="M16 8l4-4M14 4h6v6"/></svg>
-      <span class="sidebar-label">Editorial view</span>
-    </button>
-    <button class="sidebar-item" id="sidebarNexusToggle" aria-label="Switch to God Mode" title="God Mode — Neural Interface">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-      <span class="sidebar-label" style="color:#00ff88; font-weight:bold;">GOD MODE</span>
-    </button>
     <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" aria-label="Collapse sidebar">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
       <span class="scb-label">Collapse</span>
@@ -630,11 +663,21 @@
   </div>
 </aside>
 
-<select class="cyber-view-dropdown" id="topBarViewSelect" aria-label="Switch Design View">
-  <option value="simple">✦ Editorial</option>
-  <option value="cyber" selected>⌁ Cyberpunk</option>
-  <option value="nexus">◎ God Mode</option>
-</select>
+<div class="onboarding-gate" id="onboardingGate" aria-modal="true" role="dialog" aria-labelledby="onboardingTitle">
+  <div class="onboarding-card">
+    <div class="onboarding-title" id="onboardingTitle">// Interactive Portfolio</div>
+    <p class="onboarding-copy" id="onboardingCopy">The full portfolio is already live behind this. Start a guided session or continue where you left off.</p>
+    <div class="onboarding-chat" id="onboardingChat" aria-live="polite"></div>
+    <div class="onboarding-input-row" id="onboardingInputRow">
+      <input id="onboardingName" type="text" autocomplete="name" placeholder="Type your name...">
+      <button id="onboardingNameSubmit" type="button">Enter</button>
+    </div>
+    <div class="onboarding-actions" id="onboardingActions">
+      <button class="primary" id="onboardingStart" type="button">Start Fresh</button>
+      <button id="onboardingContinue" type="button">Continue</button>
+    </div>
+  </div>
+</div>
 
 <!-- Mobile toggle button -->
 <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">
@@ -1795,6 +1838,92 @@
   let audioModeEnabled = false; // true once user has clicked Play — gates TTS for chat
   const root = document.documentElement;
 
+  /* ============ START / CONTINUE GATE ============ */
+  (function initOnboardingGate() {
+    const gate = document.getElementById('onboardingGate');
+    const copy = document.getElementById('onboardingCopy');
+    const chat = document.getElementById('onboardingChat');
+    const actions = document.getElementById('onboardingActions');
+    const startBtn = document.getElementById('onboardingStart');
+    const continueBtn = document.getElementById('onboardingContinue');
+    const inputRow = document.getElementById('onboardingInputRow');
+    const nameInput = document.getElementById('onboardingName');
+    const nameSubmit = document.getElementById('onboardingNameSubmit');
+    if (!gate || !startBtn || !continueBtn) return;
+
+    const sessionKey = 'anchit-cyber-session';
+    const nameKey = 'anchit-user-name';
+    const hasSession = (() => {
+      try { return localStorage.getItem(sessionKey) === '1' || !!localStorage.getItem(nameKey); }
+      catch { return false; }
+    })();
+
+    function addGateBubble(text, type) {
+      const bubble = document.createElement('div');
+      bubble.className = 'onboarding-bubble ' + type;
+      bubble.textContent = text;
+      chat.appendChild(bubble);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function closeGate({ focusChat = false } = {}) {
+      gate.classList.add('hidden');
+      try { localStorage.setItem(sessionKey, '1'); } catch {}
+      if (focusChat) {
+        const chatSection = document.getElementById('chat');
+        const ccInput = document.getElementById('ccInput');
+        chatSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setTimeout(() => ccInput?.focus(), 600);
+      }
+    }
+
+    function clearSession() {
+      try {
+        localStorage.removeItem(sessionKey);
+        localStorage.removeItem(nameKey);
+      } catch {}
+      chat.innerHTML = '';
+      copy.textContent = "Clean slate. I'll just ask your name, then the full portfolio stays available behind this.";
+      actions.style.display = 'none';
+      inputRow.style.display = 'flex';
+      addGateBubble("Hi, I'm Anchit. Welcome to my interactive portfolio. What's your name?", 'system');
+      nameInput?.focus();
+    }
+
+    function submitName() {
+      const name = (nameInput?.value || '').trim();
+      if (!name) return;
+      try {
+        localStorage.setItem(nameKey, name);
+        localStorage.setItem(sessionKey, '1');
+      } catch {}
+      addGateBubble(name, 'user');
+      inputRow.style.display = 'none';
+      setTimeout(() => {
+        addGateBubble("Nice to meet you, " + name + ". I can walk you through the timeline, metrics, builds, or resume.", 'system');
+      }, 180);
+      setTimeout(() => closeGate({ focusChat: true }), 950);
+    }
+
+    if (hasSession) {
+      let name = '';
+      try { name = localStorage.getItem(nameKey) || ''; } catch {}
+      copy.textContent = name
+        ? "Welcome back, " + name + ". Continue from here or start fresh."
+        : "Welcome back. Continue from here or start fresh.";
+    } else {
+      continueBtn.textContent = 'Explore';
+      copy.textContent = "The full portfolio is already live behind this. Start fresh or jump straight in.";
+    }
+
+    startBtn.addEventListener('click', clearSession);
+    continueBtn.addEventListener('click', () => closeGate({ focusChat: true }));
+    nameSubmit?.addEventListener('click', submitName);
+    nameInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') submitName();
+    });
+  })();
+
   /* ============ THEME ============ */
   const savedTheme = localStorage.getItem('anchit-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   root.setAttribute('data-theme', savedTheme);
@@ -2906,29 +3035,6 @@
   })();
 </script>
 
-<!-- ============ VIEW SWITCHER HAS BEEN MOVED TO TOP BAR ============ -->
-<script>
-(function(){
-  var KEY='anchit-portfolio-view';
-  function go(v){ try{localStorage.setItem(KEY,v);}catch(e){} if(v==='cyber'){ location.href='/cyber'; } }
-  // first-visit chooser
-  var chosen=null; try{chosen=localStorage.getItem(KEY);}catch(e){}
-  if(!chosen){
-    try{localStorage.setItem(KEY,'simple');}catch(e){}
-  }
-  var sb=document.getElementById('sidebarViewToggle');
-  if(sb) sb.onclick=function(){ go('nexus'); };
-  
-  var ts=document.getElementById('topBarViewSelect');
-  if(ts) {
-    ts.addEventListener('change', function(e) {
-      if(e.target.value === 'cyber') go('cyber');
-      else if(e.target.value === 'nexus') go('nexus');
-    });
-  }
-})();
-</script>
-
 <div id="schedModal" role="dialog" aria-modal="true" aria-labelledby="schedTitle" style="position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.62);backdrop-filter:blur(6px);">
   <div style="max-width:460px;width:100%;max-height:90vh;overflow-y:auto;background:var(--bg-elev,#fff);border:1px solid var(--rule,#e5dcc7);border-radius:18px;padding:24px 22px 26px;font-family:inherit;box-shadow:0 30px 80px rgba(0,0,0,.4);">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px;">
@@ -3033,31 +3139,6 @@
   });
 })();
 </script>
-
-
-<!-- GLOBAL VIEW SWITCHER -->
-<div id="globalViewSwitcher" style="position: fixed; bottom: 24px; right: 24px; z-index: 999999; display: flex; gap: 6px; background: rgba(10,10,12,0.85); backdrop-filter: blur(12px); padding: 6px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 8px 32px rgba(0,0,0,0.4);">
-  <button onclick="goView('simple')" style="color:#FBF5EC; background:transparent; border:none; border-radius:100px; cursor:pointer; padding:8px 16px; font-family:'Space Grotesk', system-ui, sans-serif; font-size:13px; font-weight:600; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">✦ Editorial</button>
-  <button onclick="goView('cyber')" style="color:#ff2b2b; background:transparent; border:none; border-radius:100px; cursor:pointer; padding:8px 16px; font-family:'Space Grotesk', system-ui, sans-serif; font-size:13px; font-weight:600; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,43,43,0.1)'" onmouseout="this.style.background='transparent'">⌁ Cyberpunk</button>
-  <button onclick="goView('nexus')" style="color:#00ff88; background:transparent; border:none; border-radius:100px; cursor:pointer; padding:8px 16px; font-family:'Space Grotesk', system-ui, sans-serif; font-size:13px; font-weight:600; transition:all 0.2s;" onmouseover="this.style.background='rgba(0,255,136,0.1)'" onmouseout="this.style.background='transparent'">◎ God Mode</button>
-</div>
-<script>
-  function goView(v) {
-    try { localStorage.setItem('anchit-portfolio-view', v); } catch(e){}
-    location.href = v === 'simple' ? '/' : '/' + v + '/';
-  }
-  // Highlight active view
-  window.addEventListener('DOMContentLoaded', () => {
-    let current = 'simple';
-    if(location.pathname.includes('cyber')) current = 'cyber';
-    if(location.pathname.includes('nexus')) current = 'nexus';
-    const btns = document.getElementById('globalViewSwitcher').querySelectorAll('button');
-    if(current === 'simple') btns[0].style.background = 'rgba(255,255,255,0.15)';
-    if(current === 'cyber') btns[1].style.background = 'rgba(255,43,43,0.15)';
-    if(current === 'nexus') btns[2].style.background = 'rgba(0,255,136,0.15)';
-  });
-</script>
-
 
 
 <!-- GLOBAL NUDGE WIDGET -->
@@ -3543,33 +3624,7 @@ document.addEventListener("keydown", (e) => {
     });
   }
 
-  const viewToggle = $("#sidebarViewToggle");
-  if (viewToggle) {
-    viewToggle.addEventListener("click", () => {
-      try {
-        localStorage.setItem("anchit-portfolio-view", "simple");
-      } catch(e) {}
-      window.location.replace("/");
-    });
-  }
-  const nexusToggle = $("#sidebarNexusToggle");
-  if (nexusToggle) {
-    nexusToggle.addEventListener("click", () => {
-      try {
-        localStorage.setItem("anchit-portfolio-view", "nexus");
-      } catch(e) {}
-      window.location.replace("/nexus");
-    });
-  }
-
-  const ts = $("#topBarViewSelect");
-  if(ts) {
-    ts.addEventListener("change", (e) => {
-      try { localStorage.setItem("anchit-portfolio-view", e.target.value); } catch(err) {}
-      if(e.target.value === 'simple') window.location.replace("/");
-      else if(e.target.value === 'nexus') window.location.replace("/nexus");
-    });
-  }
+  try { localStorage.setItem("anchit-portfolio-view", "cyber"); } catch(e) {}
 })();
 
 // ---------- CYBER CHAT (same knowledge, cyber-styled terminal) ----------
@@ -3762,14 +3817,6 @@ function boot(){
 }
 boot();
 </script>
-<!-- View switcher → back to Editorial -->
-<button id="viewToggle" title="Switch to the Editorial edition" aria-label="Switch design"
-  style="position:fixed;top:16px;right:16px;z-index:9998;display:inline-flex;align-items:center;gap:8px;background:rgba(14,14,17,.82);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:8px 14px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#e8e8ec;cursor:pointer;backdrop-filter:blur(8px);">
-  <span style="width:8px;height:8px;border-radius:50%;background:#ff2b2b;"></span>Editorial view
-</button>
-<script>
-  document.getElementById('viewToggle').onclick=function(){ try{localStorage.setItem('anchit-portfolio-view','simple');}catch(e){} location.href='/'; };
-</script>
 <!-- Project Details Modal Backdrop -->
 <div class="modal-backdrop" id="projectModal">
   <div class="project-modal">
@@ -3779,29 +3826,6 @@ boot();
     <div id="modalContentContainer"></div>
   </div>
 </div>
-
-<!-- GLOBAL VIEW SWITCHER -->
-<div id="globalViewSwitcher" style="position: fixed; bottom: 24px; right: 24px; z-index: 999999; display: flex; gap: 6px; background: rgba(10,10,12,0.85); backdrop-filter: blur(12px); padding: 6px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 8px 32px rgba(0,0,0,0.4);">
-  <button onclick="goView('simple')" style="color:#FBF5EC; background:transparent; border:none; border-radius:100px; cursor:pointer; padding:8px 16px; font-family:'Space Grotesk', system-ui, sans-serif; font-size:13px; font-weight:600; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">✦ Editorial</button>
-  <button onclick="goView('cyber')" style="color:#ff2b2b; background:transparent; border:none; border-radius:100px; cursor:pointer; padding:8px 16px; font-family:'Space Grotesk', system-ui, sans-serif; font-size:13px; font-weight:600; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,43,43,0.1)'" onmouseout="this.style.background='transparent'">⌁ Cyberpunk</button>
-  <button onclick="goView('nexus')" style="color:#00ff88; background:transparent; border:none; border-radius:100px; cursor:pointer; padding:8px 16px; font-family:'Space Grotesk', system-ui, sans-serif; font-size:13px; font-weight:600; transition:all 0.2s;" onmouseover="this.style.background='rgba(0,255,136,0.1)'" onmouseout="this.style.background='transparent'">◎ God Mode</button>
-</div>
-<script>
-  function goView(v) {
-    try { localStorage.setItem('anchit-portfolio-view', v); } catch(e){}
-    location.href = v === 'simple' ? '/' : '/' + v + '/';
-  }
-  // Highlight active view
-  window.addEventListener('DOMContentLoaded', () => {
-    let current = 'simple';
-    if(location.pathname.includes('cyber')) current = 'cyber';
-    if(location.pathname.includes('nexus')) current = 'nexus';
-    const btns = document.getElementById('globalViewSwitcher').querySelectorAll('button');
-    if(current === 'simple') btns[0].style.background = 'rgba(255,255,255,0.15)';
-    if(current === 'cyber') btns[1].style.background = 'rgba(255,43,43,0.15)';
-    if(current === 'nexus') btns[2].style.background = 'rgba(0,255,136,0.15)';
-  });
-</script>
 
 
 
