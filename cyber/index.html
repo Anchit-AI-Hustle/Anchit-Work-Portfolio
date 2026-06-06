@@ -2085,54 +2085,55 @@
 </style>
 
 </head>
-<body class="loading">
-<div id="loader"><div class="lt">// initialising</div><div class="bar"><i></i></div><div class="pct">0%</div></div>
+<body>
 
-<canvas id="bg-canvas"></canvas>
-<div class="noise"></div><div class="scanlines"></div><div class="vignette"></div>
+<canvas id="bg-canvas" style="position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:-2; pointer-events:none;"></canvas>
+<div class="noise" style="position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:-1; pointer-events:none; opacity:0.1; background-image:url('data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E');"></div>
+<div class="scanlines" style="position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:-1; pointer-events:none; background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1)); background-size: 100% 4px;"></div>
+
+
+
+<div class="scroll-progress" id="scrollProgress"></div>
 
 <!-- ============ SIDEBAR ============ -->
 <aside class="sidebar" id="sidebar">
-  <a class="sidebar-logo" href="#hero">ANCHIT<span><b>_</b>TANDON</span></a>
+  <a class="sidebar-logo" href="#home" data-view="home" aria-label="Home">Anchit<span>Tandon.</span></a>
+
   <nav class="sidebar-nav">
-    <a class="sidebar-item active" href="#hero">
+    <a class="sidebar-item active" href="#home" data-view="home" aria-label="Home">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       <span class="sidebar-label">Home</span>
     </a>
-    <a class="sidebar-item" href="#chat">
+    <a class="sidebar-item" href="#chat" data-view="chat" aria-label="Chat with Anchit">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       <span class="sidebar-label">Chat with me</span>
     </a>
-    <a class="sidebar-item" href="#work">
+    <a class="sidebar-item" href="#experience" data-view="experience" aria-label="Work Experience">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
       <span class="sidebar-label">Experience</span>
     </a>
-    <a class="sidebar-item" href="#builds">
+    <a class="sidebar-item" href="#projects" data-view="projects" aria-label="Side Projects">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
       <span class="sidebar-label">Side Projects</span>
     </a>
-    <a class="sidebar-item" href="#exp">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <span class="sidebar-label">Timeline</span>
-    </a>
-    <a class="sidebar-item" href="#resume">
+    <a class="sidebar-item" href="#resume" data-view="resume" aria-label="My Resume">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-      <span class="sidebar-label">Resume</span>
+      <span class="sidebar-label">My Resume</span>
     </a>
-    <a class="sidebar-item" href="#contact">
+    <a class="sidebar-item" href="#contact" data-view="contact" aria-label="Get in Touch">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
       <span class="sidebar-label">Contact</span>
     </a>
   </nav>
+
   <hr class="sidebar-rule" />
+
   <div class="sidebar-social">
-    <button class="sidebar-item" id="sidebarViewToggle" aria-label="Switch to Editorial view" title="Switch design — Editorial ⇄ Cyberpunk">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M3 12a9 9 0 0 1 9-9m0 18a9 9 0 0 1-9-9"/><path d="M16 8l4-4M14 4h6v6"/></svg>
-      <span class="sidebar-label">Editorial view</span>
-    </button>
-    <button class="sidebar-item" id="sidebarNexusToggle" aria-label="Switch to God Mode" title="God Mode — Neural Interface">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-      <span class="sidebar-label" style="color:#00ff88; font-weight:bold;">GOD MODE</span>
+
+    <button class="sidebar-item" id="themeToggle" aria-label="Toggle light / dark">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      <span class="sidebar-label">Light / Dark</span>
     </button>
     <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" aria-label="Collapse sidebar">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -2141,28 +2142,54 @@
   </div>
 </aside>
 
-<select class="cyber-view-dropdown" id="topBarViewSelect" aria-label="Switch Design View">
-  <option value="simple">✦ Editorial</option>
-  <option value="cyber" selected>⌁ Cyberpunk</option>
-  <option value="nexus">◎ God Mode</option>
-</select>
+<!-- Mobile sidebar backdrop -->
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
 <!-- Mobile toggle button -->
 <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
 </button>
 
-<!-- Mobile sidebar backdrop -->
-<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
-<!-- Sticky reach-me rail (WhatsApp / SMS / Call / E-Mail / Meet) — matches the editorial view -->
-<div class="cyber-actions" aria-label="Reach me">
-  <a href="https://wa.me/919873945238" target="_blank" rel="noopener" title="WhatsApp">WA</a>
-  <a href="sms:+919873945238" title="SMS">SMS</a>
-  <a href="tel:+919873945238" title="Call">CALL</a>
-  <a href="mailto:anchit.tandon@gmail.com" title="E-Mail">MAIL</a>
-  <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Intro%20call%20%E2%80%94%20Anchit%20Tandon&details=15-min%20Google%20Meet%20with%20Anchit%20Tandon.&add=anchit.tandon@gmail.com&conferenceData=true" target="_blank" rel="noopener" title="Book a Google Meet">MEET</a>
+<!-- ============ TOP ACTION BAR ============ -->
+<div class="top-bar" id="topBar">
+  <div class="top-bar-inner">
+    <div class="top-bar-links" aria-label="Reach me">
+      <a href="https://www.linkedin.com/in/anchit-tandon" target="_blank" rel="noopener" class="top-bar-link" aria-label="LinkedIn" title="LinkedIn">
+        <svg class="tb-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.95v5.66H9.36V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.38-1.85 3.61 0 4.28 2.38 4.28 5.47v6.27ZM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12ZM7.12 20.45H3.55V9h3.57v11.45ZM22.22 0H1.77C.79 0 0 .78 0 1.74v20.51C0 23.22.79 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.75V1.74C24 .78 23.2 0 22.22 0Z"/></svg>
+        <span class="tb-label">LinkedIn</span>
+      </a>
+      <a href="mailto:anchit.tandon@gmail.com" class="top-bar-link" aria-label="E-Mail" title="E-Mail">
+        <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span class="tb-label">E-Mail</span>
+      </a>
+      <a href="https://wa.me/919873945238" target="_blank" rel="noopener" class="top-bar-link" aria-label="WhatsApp" title="WhatsApp">
+        <svg class="tb-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.8.7.8-2.7-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2.1-.2 0-.3 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3-.8.8-1 1.9-.6 3.1a9.3 9.3 0 0 0 4.6 4.9c1.6.7 2.6.6 3.4.4.5-.1 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.1l-.4-.1z"/></svg>
+        <span class="tb-label">WhatsApp</span>
+      </a>
+      <a href="sms:+919873945238" class="top-bar-link" aria-label="SMS" title="SMS">
+        <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span class="tb-label">SMS</span>
+      </a>
+      <a href="assets/resume.pdf" target="_blank" rel="noopener" class="top-bar-link" aria-label="View Resume" title="View Resume">
+        <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span class="tb-label">View Resume</span>
+      </a>
+    </div>
+    <div class="top-bar-actions">
+      <!-- View switcher moved to global sticky widget -->
+      <button class="top-bar-cta act-meet" data-schedule aria-label="Meet Me" title="Meet Me — book a Google Meet">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span class="cta-label">Meet Me</span>
+      </button>
+      <button class="top-bar-cta listen" id="topBarListenBtn" aria-label="Hear this page" title="Hear this page">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        <span class="cta-label">Hear this page</span>
+      </button>
+    </div>
+  </div>
 </div>
 
+<!-- ============ MAIN ============ -->
 <main>
 
   <!-- HOME -->
@@ -2172,7 +2199,7 @@
         <div class="hero-dot-grid" aria-hidden="true"></div>
         <div class="eyebrow has-dot"><span class="live-dot"></span>Live · AGM – Product Management · Vahdam India</div>
         <div class="hero-profile-wrap" style="display:flex; align-items:center; gap:20px; margin-bottom:16px;">
-          <img src="assets/anchit-profile.png" alt="Anchit Tandon" class="profile-pic" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 2px solid var(--rule);">
+          <img src="assets/anchit-profile.jpg" alt="Anchit Tandon" class="profile-pic" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 2px solid var(--rule);">
           <h1 class="display-xl name" style="margin:0;">
             <span class="greeting narrate-span" data-n-idx="0">Hey, I'm </span><span class="firstline narrate-span" data-n-idx="0">Anchit </span><span class="secondline"><span class="narrate-span" data-n-idx="0">Tandon.</span></span>
           </h1>
@@ -3295,447 +3322,1288 @@
 
 </main>
 
+
+<!-- Audio player state (hidden, used by TTS JS) -->
+<div class="anp-nudge dismissed" id="audioNudge" style="display:none;">
+  <div class="anp-player">
+    <span class="anp-label" id="anpLabel">Home</span>
+    <div class="anp-progress" id="anpProgress"><div class="anp-fill" id="anpFill"></div></div>
+    <span class="anp-time" id="anpTime">0:00</span>
+    <button class="anp-btn" id="anpPausePlay" aria-label="Pause / Play">
+      <svg id="anpPauseIcon" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+      <svg id="anpPlayIcon" viewBox="0 0 24 24" fill="currentColor" width="14" height="14" style="display:none;"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    </button>
+    <button class="anp-btn" id="anpMute" aria-label="Mute / Unmute" title="Mute">
+      <svg id="anpVolIcon" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <svg id="anpMuteIcon" viewBox="0 0 24 24" fill="currentColor" width="14" height="14" style="display:none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="22" y1="9" x2="16" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="9" x2="22" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <button class="anp-btn" id="anpStop" aria-label="Stop">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- Cursor glow -->
+<div class="cursor-glow" id="cursorGlow"></div>
+
 <footer>
-  <span>© <b id="yr"></b> ANCHIT TANDON</span>
-  <span>BUILT WITH <b>THREE.JS</b> · <b>GSAP</b> · <b>LENIS</b></span>
-  <span>// CYBERPUNK_BUILD_v1</span>
+  <div>© Anchit Tandon · 2026 · Delhi, IST</div>
+  <div class="footer-links">
+    <a href="https://wa.me/919873945238" target="_blank" rel="noopener">WhatsApp</a>
+    <a href="sms:+919873945238">SMS</a>
+    <a href="tel:+919873945238">Call</a>
+    <a href="mailto:anchit.tandon@gmail.com">E-Mail</a>
+    <a href="#schedule" data-schedule>Meet</a>
+    <a href="https://www.linkedin.com/in/anchit-tandon" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="assets/resume.pdf" target="_blank" rel="noopener">View Resume</a>
+  </div>
 </footer>
 
-<script type="importmap">
-{ "imports": {
-  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
-}}
-</script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<script>
+  /* ============ STATE ============ */
+  const ALL_VIEWS = ['home','chat','experience','projects','resume','contact','project-lifecycle','project-music','project-tasktracker','project-thirdeye','project-yaara','project-mailer','project-telesuite','project-lifeengine'];
+  let audioModeEnabled = false; // true once user has clicked Play — gates TTS for chat
+  const root = document.documentElement;
 
-<script type="module">
-import * as THREE from "three";
-
-
-
-// ---------- populate DOM ----------
-$("#hero-lede").innerHTML = `<b>${DATA.hero.tagline}</b> ${DATA.hero.bio}`;
-$("#hero-meta").innerHTML = DATA.hero.meta.map(m=>`<span>${m}</span>`).join("");
-$("#yr").textContent = new Date().getFullYear();
-
-const marqueeContent = (() => {
-  const items = ["PRODUCT", "×", "ENGINEERING", "×", "GROWTH", "×", "AI", "×", "D2C", "×", "RETENTION", "×", "DESIGN"];
-  const one = "<span>" + items.map(i => i === "×" ? "<b>×</b>" : i).join("</span><span>") + "</span>";
-  return one + one + one;
-})();
-$("#mq").innerHTML = marqueeContent;
-$("#mq2").innerHTML = marqueeContent;
-$("#mq3").innerHTML = marqueeContent;
-
-$("#proj-list").innerHTML = DATA.work.map((p,i)=>`
-  <div class="proj-wrap">
-    <div class="proj-row" data-i="${i}">
-      <div class="num">0${i+1}</div>
-      <div><div class="pname">${p.name}</div><div class="pmeta">${p.meta}</div></div>
-      <div class="pmetric">${p.metric} ↗</div>
-    </div>
-    <div class="proj-detail">
-      <div class="inner">
-        ${p.detail.map(d=>`<p>${d}</p>`).join("")}
-        <div class="proj-actions" style="margin-top: 18px; display: flex; gap: 12px; flex-wrap: wrap;">
-          ${p.url ? `
-          <a href="${p.url}" target="_blank" rel="noopener" class="lnk" style="padding: 10px 18px; font-size: 11px; margin-top: 6px;">
-            <span>Open Live App ↗</span>
-          </a>` : ''}
-          ${p.hash ? `
-          <button onclick="openProjectModal('${p.hash}')" class="lnk" style="padding: 10px 18px; font-size: 11px; margin-top: 6px; background: transparent; border: 1px solid var(--line); color: var(--ink); cursor: pointer;">
-            <span>Deep Dive Detail →</span>
-          </button>` : ''}
-        </div>
-      </div>
-    </div>
-  </div>`).join("");
-
-$("#build-stats").innerHTML = DATA.builds.map(b=>`
-  <div class="stat" data-hash="${b.hash}" style="display:block; position:relative; text-decoration:none; cursor:pointer;">
-    <div class="v">${b.name}</div>
-    <div class="k">${b.metric}</div>
-    <div class="stat-arrow" style="position: absolute; top: 16px; right: 16px; font-family: var(--mono); font-size: 11px; color: var(--mute); transition: color .25s, transform .25s;">↗</div>
-  </div>`).join("");
-
-// Add click listeners to side builds cards to trigger modal
-document.querySelectorAll("#build-stats .stat").forEach(card => {
-  card.addEventListener("click", () => {
-    const hash = card.getAttribute("data-hash");
-    openProjectModal(hash);
+  /* ============ THEME ============ */
+  const savedTheme = localStorage.getItem('anchit-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  root.setAttribute('data-theme', savedTheme);
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem('anchit-theme', next);
   });
-});
 
-$("#exp-list").innerHTML = DATA.experience.map(e=>`
-  <div class="exp-item reveal"><h3>${e.title}</h3><p>${e.detail}</p></div>`).join("");
-
-$("#contact-links").innerHTML = Object.entries(DATA.links).map(([k,v])=>
-  `<a class="lnk" href="${v}" target="_blank" rel="noopener"><span>${k} ↗</span></a>`).join("");
-
-// project expand
-document.querySelectorAll(".proj-row").forEach(row=>{
-  row.addEventListener("click",()=>{
-    const d=row.nextElementSibling; const open=d.classList.contains("open");
-    document.querySelectorAll(".proj-detail.open").forEach(x=>x.classList.remove("open"));
-    if(!open){ d.classList.add("open"); ScrollTrigger.refresh(); }
-  });
-});
-
-// ---------- MODAL JS FUNCTIONS ----------
-window.openProjectModal = function openProjectModal(hash) {
-  // If it is an experience hash, mapping it to professional details is optional or we expand work row
-  if (hash.startsWith("experience/")) {
-    const expRow = document.querySelector(`.proj-row[data-i]`); // fallback
-    return;
+  /* ============ SIDEBAR COLLAPSE (desktop) ============ */
+  // Safari Intelligent Tracking Prevention can clear localStorage after long
+  // inactivity. Read both stores and write to both so a clean Safari reload
+  // doesn't lose the user's collapsed-sidebar preference.
+  function readSidebarCollapsed() {
+    try {
+      const ls = localStorage.getItem('anchit-sidebar-collapsed');
+      if (ls !== null) return ls === '1';
+    } catch {}
+    return (document.cookie.match(/(?:^|; )sb_collapsed=(\d)/)?.[1] === '1');
   }
-  const proj = PROJECT_DETAILS[hash];
-  if (!proj) return;
-  const container = $("#modalContentContainer");
-  container.innerHTML = `
-    <div class="modal-content">
-      <div class="modal-hero">
-        <div class="eyebrow">${proj.subtitle}</div>
-        <h2>${proj.name.replace(/([a-zA-Z]+)(OS|GenAI|Tracker|Eye|Architect|Suite|Engine)/, "$1 <em>$2</em>")}</h2>
-        <p class="quote">"${proj.quote}"</p>
-        <div class="modal-meta-grid">
-          <div class="modal-meta-item"><div class="lbl">Role</div><div class="val">${proj.role}</div></div>
-          <div class="modal-meta-item"><div class="lbl">Status</div><div class="val">${proj.status}</div></div>
-          <div class="modal-meta-item"><div class="lbl">Stack</div><div class="val">${proj.stack}</div></div>
-        </div>
-        <div style="margin-top: 20px;">
-          <a href="${proj.url}" target="_blank" rel="noopener" class="lnk" style="padding: 10px 20px; font-size: 11px;">
-            <span>Open Live App ↗</span>
-          </a>
-        </div>
-      </div>
-      <div class="modal-body">
-        <div class="modal-sec">
-          <div class="modal-sec-title">The Pitch</div>
-          <h4>What it is</h4>
-          <p>${proj.pitch}</p>
-        </div>
-        <div class="modal-sec">
-          <div class="modal-sec-title">Origin</div>
-          <h4>Why I built it</h4>
-          <p>${proj.whyBuilt}</p>
-        </div>
-        <div class="modal-sec">
-          <div class="modal-sec-title">Problem Solved</div>
-          <h4>What's broken without it</h4>
-          <ul>
-            ${proj.problems.map(p => `<li>${p}</li>`).join("")}
-          </ul>
-        </div>
-        <div class="modal-sec">
-          <div class="modal-sec-title">Roadmap</div>
-          <h4>What I'd build next</h4>
-          <p>${proj.roadmap}</p>
-        </div>
-      </div>
-      <div class="modal-iframe-wrap">
-        <div class="modal-iframe-bar">
-          <div class="dots"><span></span><span></span><span></span></div>
-          <span>${proj.url.replace(/^https?:\/\//, "")}</span>
-        </div>
-        <iframe src="${proj.url}" loading="lazy" title="${proj.name} live preview"></iframe>
-      </div>
-    </div>
-  `;
-  const modal = $("#projectModal");
-  modal.classList.add("open");
-  document.body.style.overflow = "hidden";
-};
-
-window.closeProjectModal = function closeProjectModal() {
-  const modal = $("#projectModal");
-  modal.classList.remove("open");
-  if (!$("#sidebar").classList.contains("open") && !document.body.classList.contains("loading")) {
-    document.body.style.overflow = "";
+  function writeSidebarCollapsed(collapsed) {
+    try { localStorage.setItem('anchit-sidebar-collapsed', collapsed ? '1' : '0'); } catch {}
+    // 1-year same-site cookie as fallback when localStorage is purged
+    document.cookie = `sb_collapsed=${collapsed ? 1 : 0}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
   }
-};
+  if (readSidebarCollapsed()) {
+    document.body.classList.add('sidebar-collapsed');
+  }
+  const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
+  if (sidebarCollapseBtn) {
+    sidebarCollapseBtn.addEventListener('click', () => {
+      const collapsed = document.body.classList.toggle('sidebar-collapsed');
+      writeSidebarCollapsed(collapsed);
+      sidebarCollapseBtn.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
+    });
+  }
 
-$("#modalCloseBtn").addEventListener("click", window.closeProjectModal);
-$("#projectModal").addEventListener("click", (e) => {
-  if (e.target === $("#projectModal")) window.closeProjectModal();
-});
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") window.closeProjectModal();
-});
-
-// ---------- SIDEBAR DRAWER + COLLAPSE ----------
-(function() {
-  try {
-    if (localStorage.getItem("anchit-portfolio-sidebar-collapsed") === "1") {
-      document.body.classList.add("sidebar-collapsed");
+  /* ============ SIDEBAR (MOBILE) ============ */
+  const sidebar = document.getElementById('sidebar');
+  const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  function openSidebar() { sidebar.classList.add('open'); sidebarBackdrop.classList.add('visible'); if(sidebarToggle) sidebarToggle.setAttribute('aria-expanded','true'); }
+  function closeSidebar() { sidebar.classList.remove('open'); sidebarBackdrop.classList.remove('visible'); if(sidebarToggle) sidebarToggle.setAttribute('aria-expanded','false'); }
+  // The hamburger now TOGGLES based on current state (expand ⇄ collapse),
+  // on every viewport — fixes the bug where tapping ☰ while open did nothing.
+  function toggleSidebar() {
+    const onDesktop = window.matchMedia('(min-width: 861px)').matches;
+    if (onDesktop) {
+      const collapsed = document.body.classList.toggle('sidebar-collapsed');
+      try { localStorage.setItem('anchit-sidebar-collapsed', collapsed ? '1' : '0'); } catch {}
+      sidebarToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    } else {
+      if (sidebar.classList.contains('open')) closeSidebar(); else openSidebar();
     }
-  } catch(e) {}
+  }
+  if (sidebarToggle) sidebarToggle.addEventListener('click', toggleSidebar);
+  sidebarBackdrop.addEventListener('click', closeSidebar);
 
-  const sidebar = $("#sidebar");
-  const toggleBtn = $("#sidebarToggle");
-  const backdrop = $("#sidebarBackdrop");
-  const collapseBtn = $("#sidebarCollapseBtn");
+  /* ============ VIEW SWITCHING ============ */
+  const views = document.querySelectorAll('.view');
+  const navLinks = document.querySelectorAll('[data-view]');
 
-  if (toggleBtn && sidebar && backdrop) {
-    toggleBtn.addEventListener("click", () => {
-      sidebar.classList.add("open");
-      backdrop.classList.add("visible");
-      document.body.style.overflow = "hidden";
+  function switchView(viewName, anchorId) {
+    if (viewName === 'schedule') { if (window.openScheduleModal) window.openScheduleModal(); return; }
+    if (!ALL_VIEWS.includes(viewName)) return;
+
+    // Animate out old view, animate in new
+    const prev = document.querySelector('.view.active');
+    if (prev && prev.id !== 'view-' + viewName) {
+      prev.classList.add('v-leave');
+      setTimeout(() => prev.classList.remove('v-leave'), 250);
+    }
+
+    views.forEach(v => {
+      const isActive = v.id === 'view-' + viewName;
+      if (isActive && !v.classList.contains('active')) v.classList.add('v-enter');
+      v.classList.toggle('active', isActive);
+      setTimeout(() => v.classList.remove('v-enter'), 450);
     });
-    backdrop.addEventListener("click", () => {
-      sidebar.classList.remove("open");
-      backdrop.classList.remove("visible");
-      document.body.style.overflow = "";
+
+    // Active states on sidebar nav links
+    navLinks.forEach(n => {
+      const target = n.dataset.view;
+      const isActive = target === viewName || (viewName.startsWith('project-') && target === 'projects');
+      n.classList.toggle('active', isActive);
     });
+
+    closeSidebar();
+    if (anchorId) {
+      // Defer scroll until the view is rendered + animated in
+      requestAnimationFrame(() => {
+        const el = document.getElementById(anchorId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }
+      });
+      history.replaceState(null, '', '#' + viewName + '/' + anchorId);
+    } else {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      history.replaceState(null, '', '#' + viewName);
+    }
+    document.dispatchEvent(new CustomEvent('viewChanged', { detail: viewName }));
+
+    // Re-trigger reveals for the new view
+    requestAnimationFrame(() => observeReveals());
   }
 
-  if (collapseBtn) {
-    collapseBtn.addEventListener("click", () => {
-      document.body.classList.toggle("sidebar-collapsed");
-      try {
-        const isCollapsed = document.body.classList.contains("sidebar-collapsed");
-        localStorage.setItem("anchit-portfolio-sidebar-collapsed", isCollapsed ? "1" : "0");
-      } catch(e) {}
-    });
-  }
-
-  const viewToggle = $("#sidebarViewToggle");
-  if (viewToggle) {
-    viewToggle.addEventListener("click", () => {
-      try {
-        localStorage.setItem("anchit-portfolio-view", "simple");
-      } catch(e) {}
-      window.location.replace("/");
-    });
-  }
-  const nexusToggle = $("#sidebarNexusToggle");
-  if (nexusToggle) {
-    nexusToggle.addEventListener("click", () => {
-      try {
-        localStorage.setItem("anchit-portfolio-view", "nexus");
-      } catch(e) {}
-      window.location.replace("/nexus");
-    });
-  }
-
-  const ts = $("#topBarViewSelect");
-  if(ts) {
-    ts.addEventListener("change", (e) => {
-      try { localStorage.setItem("anchit-portfolio-view", e.target.value); } catch(err) {}
-      if(e.target.value === 'simple') window.location.replace("/");
-      else if(e.target.value === 'nexus') window.location.replace("/nexus");
-    });
-  }
-})();
-
-// ---------- CYBER CHAT (same knowledge, cyber-styled terminal) ----------
-(function(){
-  const body=$("#ccBody"), input=$("#ccInput"), sendBtn=$("#ccSend"), micBtn=$("#ccMic"), chips=$("#ccChips");
-  if(!body) return;
-  const KB=[
-    {k:["what do you do","role","current","vahdam","job"],a:"I'm AGM — Product at <b>Vahdam India</b>, driving D2C growth across US, UK & global. Before that, at Times Internet I scaled Assisted Sales 5× to ₹80L MRR and rebuilt ET Markets to ₹3Cr+ ARR.",c:["Your biggest win?","Tell me about your builds","Why product over engineering?"]},
-    {k:["win","achievement","proud","impact"],a:"Scaling ET Prime's Assisted Sales 5× to ₹80L MRR in 8–10 months — by redesigning the funnel and building an AI telesuite for real-time pitch scoring. That blend of product + AI + growth is my signature.",c:["Tell me about the AI telesuite","Show me your side builds","How do I reach you?"]},
-    {k:["build","side project","project","made","ai"],a:"Eight live AI builds — VAHDAM Lifecycle OS, MusicGenAI, Task Tracker, The Third Eye, Hey Yaara, Mailer Architect, AI TeleSuite, TH+ LifeEngine. Scroll up to the Builds grid; each opens its live app.",c:["Tell me about Lifecycle OS","Why build on weekends?","How do I reach you?"]},
-    {k:["lifecycle","retention"],a:"VAHDAM Lifecycle OS reads campaign + customer + order data, builds a retention dashboard, plans a 30-day mailer calendar, and drafts every email — one workflow, dashboard to send.",c:["Show me other builds","Your tech stack?","How do I reach you?"]},
-    {k:["product over engineering","switch","why product"],a:"I started as an engineer but fell for the funnel — the place where code meets a real human decision. Product lets me own the whole arc: problem, build, growth, outcome.",c:["Your biggest win?","Tell me about your builds","How do I reach you?"]},
-    {k:["marathon","half marathon","event"],a:"I led the Times Internet Delhi Half Marathon end-to-end — tech, marketing and on-ground experience — launching it as a brand-new IP and revenue stream from zero.",c:["Your biggest win?","Show me your builds","How do I reach you?"]},
-    {k:["reach","contact","email","hire","connect","call","meet"],a:"Easiest: WhatsApp or call <a href='tel:+919873945238'>+91 98739 45238</a>, email <a href='mailto:anchit.tandon@gmail.com'>anchit.tandon@gmail.com</a>, or book a Meet via the MEET button on the right rail.",c:["Tell me about your work","Show me a build","Your resume"]},
-    {k:["stack","tech","tools"],a:"Whatever removes friction fastest — React, TypeScript, Python, Next.js, Supabase, Vercel, and the full LLM toolkit (OpenAI, Anthropic, Gemini, Groq).",c:["Show me your builds","Your biggest win?","How do I reach you?"]},
-  ];
-  const DEFAULT=["What do you do?","Your biggest win?","Show me your builds","How do I reach you?"];
-  function add(cls,html){const d=document.createElement("div");d.className="cc-msg "+cls;d.innerHTML=html;body.appendChild(d);
-    d.querySelectorAll("a[href^='#'],a[data-nav]").forEach(a=>{});body.scrollTop=body.scrollHeight;return d;}
-  function typing(){const d=document.createElement("div");d.className="cc-typing";d.id="ccTyping";d.innerHTML="<span></span><span></span><span></span>";body.appendChild(d);body.scrollTop=body.scrollHeight;}
-  function untyping(){const t=document.getElementById("ccTyping");if(t)t.remove();}
-  function setChips(arr){chips.innerHTML="";arr.forEach(t=>{const b=document.createElement("button");b.textContent=t;b.onclick=()=>handle(t);chips.appendChild(b);});}
-  function match(q){q=q.toLowerCase();let best=null,s=0;for(const e of KB){let sc=0;for(const kw of e.k)if(q.includes(kw))sc+=kw.length;if(sc>s){s=sc;best=e;}}return s>=3?best:null;}
-  function handle(text){if(!text.trim())return;add("user",text.replace(/[<>]/g,""));input.value="";typing();
-    setTimeout(()=>{untyping();const m=match(text);
-      if(m){add("bot",m.a);setChips(m.c||DEFAULT);}
-      else{add("bot","Good question — most of what I do sits at <b>product × growth × AI</b>, so the precise answer depends on your goal. Fastest way to a real answer: WhatsApp/call <a href='tel:+919873945238'>+91 98739 45238</a> or <a href='mailto:anchit.tandon@gmail.com'>email me</a>. Meanwhile — want my work, a build, or how I think?");setChips(["Walk me through your work","Show me a build","Your biggest win?","How do I reach you?"]);}
-    },420+Math.random()*350);}
-  sendBtn.onclick=()=>handle(input.value);
-  input.addEventListener("keydown",e=>{if(e.key==="Enter")handle(input.value);});
-  // mic
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){micBtn.style.display="none";} else {
-    let rec=null,on=false;
-    micBtn.onclick=()=>{if(on){try{rec&&rec.stop();}catch(e){}return;}
-      try{rec=new SR();rec.lang="en-IN";rec.interimResults=true;rec.continuous=false;micBtn.classList.add("listening");on=true;
-        rec.onresult=e=>{let t="";for(let i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;input.value=t;if(e.results[e.results.length-1].isFinal)rec.stop();};
-        rec.onend=()=>{micBtn.classList.remove("listening");on=false;if(input.value.trim())handle(input.value);};
-        rec.onerror=()=>{micBtn.classList.remove("listening");on=false;};rec.start();
-      }catch(e){micBtn.classList.remove("listening");on=false;}};
-  }
-  // greeting
-  setTimeout(()=>{add("bot","Hey — I'm Anchit's agent. Ask about my <b>work</b>, my <b>builds</b>, or how I think about product. I'm direct — let's get into it.");setChips(DEFAULT);},400);
-})();
-
-// ---------- Three.js background ----------
-let renderer,scene,camera,group,particles,raf;
-function initThree(){
-  const canvas=$("#bg-canvas");
-  renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:"high-performance"});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-  renderer.setSize(innerWidth,innerHeight);
-  scene=new THREE.Scene();
-  scene.fog=new THREE.FogExp2(0x050506,0.06);
-  camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,0.1,100);
-  camera.position.z=9;
-
-  group=new THREE.Group(); scene.add(group);
-  const mat=new THREE.MeshBasicMaterial({color:0xff2b2b,wireframe:true,transparent:true,opacity:.5});
-  const matW=new THREE.MeshBasicMaterial({color:0x2a2a30,wireframe:true,transparent:true,opacity:.45});
-  const geos=[new THREE.IcosahedronGeometry(1.4,1),new THREE.TorusGeometry(1.1,.4,8,20),
-    new THREE.OctahedronGeometry(1.3,0),new THREE.TorusKnotGeometry(.8,.28,48,8),
-    new THREE.DodecahedronGeometry(1.3,0),new THREE.BoxGeometry(1.6,1.6,1.6,2,2,2)];
-  geos.forEach((g,i)=>{
-    const m=new THREE.Mesh(g, i%3===0?mat:matW);
-    m.position.set((Math.random()-.5)*14,(Math.random()-.5)*9,(Math.random()-.5)*6-2);
-    m.rotation.set(Math.random()*6,Math.random()*6,0);
-    m.userData={sx:.0006+Math.random()*.0014,sy:.0005+Math.random()*.0012,fl:Math.random()*6};
-    group.add(m);
-  });
-  // particle field
-  const N=900,pos=new Float32Array(N*3);
-  for(let i=0;i<N*3;i++)pos[i]=(Math.random()-.5)*34;
-  const pg=new THREE.BufferGeometry(); pg.setAttribute("position",new THREE.BufferAttribute(pos,3));
-  particles=new THREE.Points(pg,new THREE.PointsMaterial({color:0x55555f,size:.03,transparent:true,opacity:.7}));
-  scene.add(particles);
-
-  addEventListener("resize",onResize);
-  let mx=0,my=0;
-  addEventListener("pointermove",e=>{mx=(e.clientX/innerWidth-.5);my=(e.clientY/innerHeight-.5);},{passive:true});
-  const clock=new THREE.Clock();
-  (function loop(){
-    raf=requestAnimationFrame(loop);
-    const t=clock.getElapsedTime();
-    group.children.forEach(m=>{m.rotation.x+=m.userData.sx;m.rotation.y+=m.userData.sy;
-      m.position.y+=Math.sin(t+m.userData.fl)*.0015;});
-    particles.rotation.y=t*.02;
-    camera.position.x+=(mx*1.6-camera.position.x)*.04;
-    camera.position.y+=(-my*1.2-camera.position.y)*.04;
-    camera.lookAt(0,0,0);
-    renderer.render(scene,camera);
-  })();
-}
-function onResize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();}
-
-// ---------- Lenis smooth scroll ----------
-function initLenis(){
-  if(reduce||typeof Lenis==="undefined")return null;
-  const lenis=new Lenis({duration:1.1,easing:t=>Math.min(1,1.001-Math.pow(2,-10*t)),smoothWheel:true});
-  function raf(t){lenis.raf(t);requestAnimationFrame(raf);} requestAnimationFrame(raf);
-  lenis.on("scroll",()=>ScrollTrigger.update());
-  
-  // Sidebar items navigation
-  document.querySelectorAll('.sidebar-item[href^="#"]').forEach(a=>{
-    a.addEventListener("click",e=>{
+  navLinks.forEach(n => {
+    n.addEventListener('click', (e) => {
       e.preventDefault();
-      const targetId = a.getAttribute("href");
-      const el = document.querySelector(targetId);
-      if(el) {
-        lenis.scrollTo(el,{offset:-10});
-        // Close mobile drawer
-        $("#sidebar").classList.remove("open");
-        $("#sidebarBackdrop").classList.remove("visible");
-        if (!document.body.classList.contains("loading")) {
-          document.body.style.overflow = "";
+      switchView(n.dataset.view, n.dataset.anchor);
+    });
+  });
+
+  // Hash on load — supports #view or #view/anchor
+  const hash = window.location.hash.replace('#', '');
+  if (hash) {
+    const [viewPart, anchorPart] = hash.split('/');
+    switchView(viewPart, anchorPart || undefined);
+  }
+
+  /* ============ REVEAL ON SCROLL — defined below ============ */
+  let revealObserver;
+
+  /* ============ CHAT ============ */
+  const KB = [
+    { keywords: ['hi','hello','hey','sup','yo','namaste','good morning','good evening','howdy'],
+      response: "Hey — glad you're here. I'm Anchit. Ask me anything: my <a data-nav='experience'>work</a>, my <a data-nav='projects'>side builds</a>, how I think about product, or what I'm solving right now at Vahdam.",
+      nextChips: ["What do you do?","Your biggest career win?","What are you building?","Why product over engineering?"] },
+    { keywords: ['who','about','tell me about you','yourself','background','bio','introduce','what do you do','describe'],
+      response: "I'm Anchit Tandon — AGM, Product at Vahdam India, ex-Times Internet. Five-plus years in B2C consumer tech: D2C growth, subscriptions, content, events. Started as a backend engineer, moved to product in 2022 because I got obsessed with <em>why</em> things were being built, not just how. I think in systems, ship in experiments, and build AI side projects on weekends because I can't sit still. <a data-nav='experience'>Full story →</a>",
+      nextChips: ["Your biggest career win?","Why switch to product?","Tell me about your side builds","Hardest problem right now?"] },
+    { keywords: ['role','title','current','doing now','job','vahdam','work now','position'],
+      response: "Vahdam India is a premium, home-grown wellness brand that sources fresh Indian teas, spices, and superfoods directly from estates and exports them to a global audience (primarily US, UK, and Europe). As AGM of Product Management here since April 2026, I drive direct-to-consumer (D2C) growth across these global markets. My role focuses on optimizing the entire digital funnel — balancing acquisition, retention, CRM, and conversion rate optimization (CRO) to scale global revenue profitably. Before this, I spent nearly four years at Times Internet moving from APM to Senior PM.",
+      nextChips: ["What's hardest at Vahdam?","Tell me about Times Internet","Show me your work","How do I reach you?"] },
+    { keywords: ['hardest','challenge','hard','difficult','solving','problem','struggle'],
+      response: "Right now at Vahdam India — a global D2C wellness and tea brand — my main challenge is driving sustainable growth across global markets. That involves coordinating customer acquisition, retention, and conversion rate optimization (CRO) simultaneously. For instance, I led cross-functional experiments that lifted our product rating from 2.4 to 4.0. The real skill is prioritizing the highest-impact funnel opportunities.",
+      nextChips: ["Show me your growth wins","Your product philosophy?","Tell me about your builds","How do I reach you?"] },
+    { keywords: ['et markets','markets','revamp','finance','stocks'],
+      response: "ET Markets is the stock market and financial tracking arm of The Economic Times (India's leading business daily), serving as one of the country's highest-traffic financial platforms with real-time market data. I led the end-to-end product revamp of ET Markets across Web, mobile Web, Android, and iOS. By restructuring the information architecture and testing relentlessly, we achieved a +27% boost in user engagement, +25% in DAUs, and added ₹3Cr+ in incremental ARR. <a data-nav='experience'>Full work view →</a>",
+      nextChips: ["Tell me about Assisted Sales","What about Times Health+?","Your engineering background?","Show me a side build"] },
+    { keywords: ['prime','assisted sales','sales','subscription','conversion','roi','growth','biggest','win','proudest','proud'],
+      response: "ET Prime is the premium, member-only business subscription service of The Economic Times, offering high-quality, ad-free investigative journalism and business analysis. I led growth for ET Prime's Assisted Sales channel, scaling it 5× from ₹15L to ₹80L MRR in six months. To achieve this, I built an AI-powered telesuite featuring real-time call transcription, pitch scoring, and conversion assists, which boosted our team's sales conversion and delivered over 400% ROI. This work won me the Times Internet Team Award.",
+      nextChips: ["What's the AI telesuite?","Your product philosophy?","What are you building now?","How do I reach you?"] },
+    { keywords: ['marathon','event','running','half','0 to 1','zero to one','zero-to-one'],
+      response: "The Times Internet Half Marathon is a major consumer sports IP and fitness event designed to bring running communities together. I built and launched this event from absolute zero-to-one, managing the discovery platforms, registration and ticket booking funnels, participant acquisition campaigns, and coordinating on-ground runner operations. At Vahdam I apply similar zero-to-one thinking but to D2C growth across global markets.",
+      nextChips: ["Show me your other work","Tell me about side builds","Your approach to product?","How do I reach you?"] },
+    { keywords: ['health','wellness','plus','health+'],
+      response: "Times Health+ is a premium, paid wellness subscription program launched by Times Internet, offering curated health content, plans, and digital tools. I launched this product from scratch, designing the freemium-to-paid subscription journeys, running pricing experiments, and leading monetization. By tuning the value-to-friction ratio, we successfully cracked subscription revenue in a market historically accustomed to free content.",
+      nextChips: ["Tell me about LifeEngine","What about ET Markets?","Tell me about Assisted Sales","How do I reach you?"] },
+    { keywords: ['side','project','projects','build','builds','weekend','personal','ship','github','vercel'],
+      response: "Four live side projects, all built end-to-end on weekends and evenings. Curiosity starts the project, ambition keeps it alive, restlessness prevents me from staying satisfied. <a data-nav='projects'>See them all →</a> Or ask about a specific one — Hey Yaara, MusicGenAI, AI TeleSuite, LifeEngine, or Jarvis.",
+      nextChips: ["Tell me about Hey Yaara","Tell me about Jarvis","Tell me about MusicGenAI","Why build on weekends?"] },
+    { keywords: ['hey yaara','yaara','elderly','companion'],
+      response: "Hey Yaara is an AI-powered voice companion designed specifically for elderly users to combat loneliness and assist with daily queries through a simple voice-first interface. I designed and built this PWA from scratch to remove all screen-based friction — users simply tap one button to talk and one to stop. Everything from transcription to speech response is handled entirely by voice. <a data-nav='project-yaara'>Full deep dive →</a>",
+      nextChips: ["Open Hey Yaara page","Tell me about MusicGenAI","Why build side projects?","Show me your day job"] },
+    { keywords: ['music','musicgen','song'],
+      response: "MusicGenAI is an AI-powered music generation web app that composes complete songs — including lyrics, vocals, and instruments — from simple text prompts. Unlike typical 'black box' music generators, MusicGenAI exposes every stage of the generation pipeline, allowing users to inspect and debug lyrics or vocal tracks when they drift. I built this end-to-end using a React/TypeScript frontend and a dedicated Python audio synthesis microservice. <a data-nav='project-music'>Full deep dive →</a>",
+      nextChips: ["Open MusicGenAI page","Tell me about AI TeleSuite","Your tech stack?","Show me your day job"] },
+    { keywords: ['telesuite','ai tele','tele suite'],
+      response: "AI TeleSuite is a real-time sales intelligence platform that helps solo operators and small sales teams close deals by providing live call transcription, automated pitch scoring, and real-time conversion recommendations. I packaged the same playbook and technology I built for ET Prime's enterprise growth into this lightweight, accessible product to act as a real-time assistant for independent sellers. <a data-nav='project-telesuite'>Full deep dive →</a>",
+      nextChips: ["Open TeleSuite page","Tell me about ET Prime","Tell me about LifeEngine","How do I reach you?"] },
+    { keywords: ['lifeengine','life engine','th+','th plus'],
+      response: "TH+ LifeEngine is a secure, personalized AI wellness platform that transforms generic health advice into structured, actionable daily routines tailored to an individual's specific health goals. I built this login-gated, privacy-first platform to take the subscription-led wellness models I developed at Times Health+ to the next level, offering deep personalization. <a data-nav='project-lifeengine'>Full deep dive →</a>",
+      nextChips: ["Open LifeEngine page","Tell me about Times Health+","Tell me about other builds","How do I reach you?"] },
+    { keywords: ['jarvis','ai os','operating system','vision','dream project','most attached'],
+      response: "Jarvis is a proactive, context-aware AI operating system designed to act as an intelligent agent across multiple devices and workflows, rather than a simple conversational chatbot. I initiated this project to build a truly integrated AI workspace that understands context across apps and files. It's a long-term vision that I'm building step-by-step, and it is the side build I'm most passionate about.",
+      nextChips: ["Why build on weekends?","Tell me about Hey Yaara","Your AI stack?","Show me your day job"] },
+    { keywords: ['why build','why weekend','why side','motivation','drive','restless'],
+      response: "A mix of curiosity, ambition, and restlessness. Curiosity starts the project. Ambition keeps it alive. Restlessness prevents me from staying satisfied with the status quo. I enjoy building things that don't exist yet and testing ideas fast. The side projects aren't hobbies — they're how I stress-test ideas I can't run inside a company.",
+      nextChips: ["Tell me about Jarvis","Show me your builds","Your product philosophy?","How do I reach you?"] },
+    { keywords: ['skill','skills','good at','specialty','specialties','expertise','strength','capable'],
+      response: "Sharpest edges: growth funnels and conversion, zero-to-one product development, subscriptions and monetisation, experimentation and A/B testing, AI workflows. I think in funnels and ship in experiments. The common thread: can this be automated, measured, or scaled?",
+      nextChips: ["Show me a 0→1 example","Show me a growth win","Tell me about your AI work","How do I reach you?"] },
+    { keywords: ['engineer','engineering','tech','code','backend','coding','developer','vit','computer science','engineering background'],
+      response: "B.Tech CSE from VIT Vellore (2016–2020). Started at Tuple Technologies — backend services, consumer apps, became Product Owner of a live sports commentary product. Then Citymall — backend and data pipelines. Moved to product full-time at Times Internet in 2022. I still code — every side project is me, end-to-end. The engineering foundation shapes how I think about product: systems, trade-offs, what's actually feasible.",
+      nextChips: ["Why switch to product?","Show me a side build","Your day job?","What's your tech stack?"] },
+    { keywords: ['why','pm','product manage','switch','move to product','transition','career change','funnel reason'],
+      response: "It was gradual. I enjoyed building, but became increasingly obsessed with <em>why</em> things were being built. Customer problems, business impact, prioritisation, growth opportunities — that's what pulled me. Product felt like the intersection of technology, business, and customer understanding. And then I fell for the funnel — the unfiltered way it tells you the truth about your decisions. Shipping a feature is satisfying; watching conversion change because of it is addictive.",
+      nextChips: ["Your biggest funnel win?","What are you building now?","Tell me about your builds","How do I reach you?"] },
+    { keywords: ['philosophy','approach','principle','how you think','framework','method','believe','opinion'],
+      response: "Two hills I'll die on: <strong>Execution beats ideas.</strong> Most products fail because teams don't ship fast enough, measure correctly, or stay focused long enough to compound results. And: <strong>Technology should remove friction, not create it.</strong> My default question for any problem: what's the actual problem we're trying to solve? Then: can this be automated, measured, or scaled? Everything else is noise.",
+      nextChips: ["Show me that in action","Your biggest win?","Tell me about your builds","How do I reach you?"] },
+    { keywords: ['ai','llm','chatgpt','tech stack','stack','technology','tools','audio'],
+      response: "AI shows up everywhere I work. At Vahdam — CRM experiments, product optimisation at scale. At Times Internet — built the AI telesuite (transcription, pitch scoring, conversion assist). Side builds: <a data-nav='projects'>Hey Yaara, MusicGenAI, AI TeleSuite, LifeEngine</a> — all AI-first. Stack varies by project: React, TypeScript, Python, Supabase, Vercel. I pick whatever removes friction fastest.",
+      nextChips: ["Tell me about MusicGenAI","Tell me about Jarvis","Tell me about Hey Yaara","Show me your work"] },
+    { keywords: ['contact','email','reach','hire','talk','connect','in touch'],
+      response: "Best bet: <a href='mailto:anchit.tandon@gmail.com'>anchit.tandon@gmail.com</a> — I check it daily. LinkedIn DMs work too. Phone if it's urgent: +91 98739 45238. Or just <a data-nav='contact'>open the contact panel →</a>",
+      nextChips: ["Open contact panel","Show me your work","Show me your builds","Are you open to remote?"] },
+    { keywords: ['linkedin','resume','cv','résumé','portfolio'],
+      response: "You're already on the best version of my portfolio — the full story lives right here. My <a data-nav='experience'>work history</a> walks through Vahdam and Times Internet, and <a data-nav='projects'>side projects</a> covers everything I've built on the side. For the formal version, my full profile is on LinkedIn (linkedin.com/in/anchit-tandon) and my résumé is one tap away under <a data-nav='resume'>My Resume</a>.",
+      nextChips: ["Open the Work view","Show me your builds","Tell me about your experience","How do I reach you?"] },
+    { keywords: ['location','where','based','delhi','india','remote','hybrid','relocate'],
+      response: "Delhi, India. IST timezone. Open to remote and hybrid for the right role. The right role means: interesting problems, measurable outcomes, and a team that ships.",
+      nextChips: ["How do I reach you?","Show me your work","What are you building now?","What role are you looking for?"] },
+    { keywords: ['looking for','seeking','ideal role','what role','hiring','open to','opportunities','available'],
+      response: "I'm looking for a role where I can combine engineering thinking, product judgement, growth orientation, and execution speed. Ideal fit: a founder, operator, or product leader who values people that move between strategy and execution. I want problems that compound — where shipping fast and measuring correctly creates outsized results.",
+      nextChips: ["Your biggest win?","Your product philosophy?","Open to remote?","How do I reach you?"] },
+    { keywords: ['personality','work style','working style','like working','describe yourself','who are you as','type of person','friends say'],
+      response: "Three words my friends would use: ambitious, curious, relentless. I'm direct and structured — I break complex problems into systems and first principles rather than discussing them at surface level. My default mode: what's the actual problem? Can it be automated, measured, or scaled? I don't do surface-level. I dig.",
+      nextChips: ["Your product philosophy?","Why build on weekends?","Show me your work","How do I reach you?"] },
+    { keywords: ['different','stand out','unique','why you','why hire','special','what sets'],
+      response: "I don't just talk about ideas — I ship them. Four live AI products built end-to-end on weekends. 5× MRR growth at work. Ratings lifted from 2.4 to 4.0 through systematic experimentation. Engineering foundation means I understand what's feasible and what's fantasy. Product instinct means I know what's worth building. The intersection is rare.",
+      nextChips: ["Your biggest win?","Tell me about your builds","Your philosophy?","How do I reach you?"] },
+    { keywords: ['experience','career','journey','timeline','history','worked at','companies','times internet'],
+      response: "Quick timeline: VIT CSE (2016–20) → Tuple Technologies, backend (2020–22) → Citymall, backend (2022) → Times Internet, APM to Senior PM (2022–26) → Vahdam India, AGM Product (2026–now). The thread: started building systems, then products, then growth. Each step compounded the last. <a data-nav='experience'>Full timeline →</a>",
+      nextChips: ["Why switch to product?","Tell me about Times Internet","Tell me about Vahdam","How do I reach you?"] },
+    { keywords: ['book','schedule','call','meet','meeting','calendar','appointment','connect','catch up','hop on','available','talk to you'],
+      response: "Let's actually talk — I keep 15-min intro slots for a quick Google Meet. <a data-nav='schedule'>Open the scheduler →</a> and you'll get a calendar invite with a Meet link (me + you, both emailed). Prefer async first? <a href='mailto:anchit.tandon@gmail.com'>anchit.tandon@gmail.com</a> · WhatsApp/call <a href='tel:+919873945238'>+91 98739 45238</a>.",
+      nextChips: ["Book a 15-min Meet","What should we discuss?","Show me your work","Your resume"] },
+    { keywords: ['voice','voice ai'],
+      response: "Voice is a thread that runs through my work. Hey Yaara is voice-first — an AI companion for the elderly where the entire interface is conversation. At Times Internet, the AI telesuite processed voice in real-time for sales transcription and pitch scoring. I think voice removes the biggest friction of all: having to learn an interface. <a data-nav='project-yaara'>See Hey Yaara →</a>",
+      nextChips: ["Tell me about Hey Yaara","What's the AI telesuite?","Tell me about MusicGenAI","Your AI stack?"] },
+    { keywords: ['thanks','thank you','thx','cool','nice','great','awesome','amazing','helpful','interesting'],
+      response: "Glad that landed. Anything else — the work, the builds, the thinking behind them?",
+      nextChips: ["Tell me about your builds","Show me your work","What are you building now?","How do I reach you?"] }
+  ];
+
+  const DEFAULT_CHIPS = ["Your biggest career win?","What are you building now?","Tell me about your side builds","Why product over engineering?","How do I reach you?"];
+
+  const chatBody = document.getElementById('chatBody');
+  const chipRow = document.getElementById('chipRow');
+  const chatInput = document.getElementById('chatInput');
+  const chatSend = document.getElementById('chatSend');
+
+  function scrollChat() {
+    requestAnimationFrame(() => { chatBody.scrollTop = chatBody.scrollHeight; });
+  }
+  function addBot(html) {
+    const w = document.createElement('div');
+    w.className = 'msg bot';
+    w.innerHTML = `<div class="msg-avatar">A</div><div class="msg-bubble">${html}</div>`;
+    chatBody.appendChild(w);
+    w.querySelectorAll('a[data-nav]').forEach(a => {
+      a.style.cursor = 'pointer';
+      a.addEventListener('click', (e) => { e.preventDefault(); switchView(a.dataset.nav); });
+    });
+    scrollChat();
+    if (audioModeEnabled) {
+      const bubble = w.querySelector('.msg-bubble');
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      const plain = tmp.textContent.trim();
+      // Small delay so the bubble is scrolled into view first
+      setTimeout(() => speakBotResponse(bubble, plain), 200);
+    }
+  }
+
+  // Shared audio element for the cloned-voice (ElevenLabs) path.
+  let cloneAudio = null;
+  // Tries Anchit's cloned voice via /api/tts first; on any failure (key not
+  // set / 401 / offline) falls back to the browser's built-in speech so the
+  // site always talks. Returns true if the clone path is handling playback.
+  async function speakViaClone(plainText, onStart, onEnd) {
+    try {
+      const r = await fetch('/api/tts', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: plainText }),
+      });
+      if (!r.ok) return false;                 // 503/401 → use browser voice
+      const ct = r.headers.get('content-type') || '';
+      if (!ct.includes('audio')) return false;
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob);
+      if (cloneAudio) { try { cloneAudio.pause(); } catch {} }
+      cloneAudio = new Audio(url);
+      cloneAudio.onplay = onStart || null;
+      cloneAudio.onended = () => { URL.revokeObjectURL(url); if (onEnd) onEnd(); };
+      cloneAudio.onerror = () => { URL.revokeObjectURL(url); if (onEnd) onEnd(); };
+      await cloneAudio.play();
+      return true;
+    } catch { return false; }
+  }
+
+  function speakBotResponse(bubbleEl, plainText) {
+    if (!plainText || !bubbleEl) return;
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+
+    const caption = document.getElementById('chatCaption');
+    const words = plainText.trim().split(/\s+/);
+
+    if (caption) {
+      caption.innerHTML = words.map((w, i) => `<span class="chat-caption-word" data-i="${i}">${w}</span>`).join(' ');
+      caption.classList.add('active');
+    }
+    const msgEl = bubbleEl.closest('.msg');
+    msgEl?.classList.add('speaking');
+    const cleanupClone = () => { msgEl?.classList.remove('speaking'); if (caption) { caption.classList.remove('active'); caption.innerHTML=''; } };
+
+    // Try the cloned voice first; if it can't (no key / blocked), fall through
+    // to the browser speech-synthesis path below.
+    speakViaClone(plainText, () => { if (caption) caption.classList.add('active'); }, cleanupClone)
+      .then((usedClone) => { if (usedClone) return; speakViaBrowser(); });
+
+    function speakViaBrowser() {
+    if (!window.speechSynthesis) { cleanupClone(); return; }
+
+    const utter = new SpeechSynthesisUtterance(plainText);
+    utter.lang = 'en-IN'; utter.rate = 0.92; utter.pitch = 1.0;
+
+    const pickVoice = () => {
+      const vv = window.speechSynthesis.getVoices();
+      return vv.find(v => v.lang === 'en-IN')
+          || vv.find(v => v.lang === 'en-GB' && v.localService)
+          || vv.find(v => v.lang.startsWith('en') && v.localService)
+          || vv.find(v => v.lang.startsWith('en'));
+    };
+    const voice = pickVoice();
+    if (!voice && window.speechSynthesis.getVoices().length === 0) {
+      // Voices not loaded yet — wait for them
+      window.speechSynthesis.onvoiceschanged = () => {
+        utter.voice = pickVoice();
+        window.speechSynthesis.onvoiceschanged = null;
+      };
+    } else if (voice) {
+      utter.voice = voice;
+    }
+
+    utter.onboundary = (e) => {
+      if (e.name !== 'word' || !caption) return;
+      let pos = 0;
+      for (let i = 0; i < words.length; i++) {
+        if (e.charIndex >= pos && e.charIndex < pos + words[i].length) {
+          caption.querySelectorAll('.current').forEach(el => el.classList.remove('current'));
+          caption.querySelector(`[data-i="${i}"]`)?.classList.add('current');
+          break;
+        }
+        pos += words[i].length + 1;
+      }
+    };
+
+    const cleanup = () => {
+      bubbleEl.closest('.msg')?.classList.remove('speaking');
+      if (caption) { caption.classList.remove('active'); caption.innerHTML = ''; }
+    };
+    utter.onend = cleanup;
+    utter.onerror = cleanup;
+
+    window.speechSynthesis.speak(utter);
+    } /* end speakViaBrowser */
+  }
+  function addUser(text) {
+    const w = document.createElement('div');
+    w.className = 'msg user';
+    w.innerHTML = `<div class="msg-bubble"></div>`;
+    w.querySelector('.msg-bubble').textContent = text;
+    chatBody.appendChild(w);
+    scrollChat();
+  }
+  function showTyping() {
+    const w = document.createElement('div');
+    w.className = 'msg bot typing'; w.id = 'typingIndicator';
+    w.innerHTML = `<div class="msg-avatar">A</div><div class="msg-bubble"><span></span><span></span><span></span></div>`;
+    chatBody.appendChild(w);
+    scrollChat();
+  }
+  function hideTyping() {
+    const t = document.getElementById('typingIndicator');
+    if (t) t.remove();
+  }
+  function renderChips(chips) {
+    chipRow.innerHTML = '';
+    chips.forEach(text => {
+      const b = document.createElement('button');
+      b.className = 'chip';
+      b.textContent = text;
+      b.addEventListener('click', () => handleMessage(text));
+      chipRow.appendChild(b);
+    });
+  }
+  function findMatch(text) {
+    const q = text.toLowerCase().trim();
+    let best = null, bestScore = 0;
+    for (const e of KB) {
+      let s = 0;
+      for (const kw of e.keywords) {
+        const escaped = kw.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        const regex = new RegExp('\\b' + escaped + '\\b');
+        if (regex.test(q) || (kw.length >= 3 && q.includes(kw))) {
+          s += kw.length + (kw.includes(' ') ? kw.length : 0);
         }
       }
+      if (s > bestScore) {
+        bestScore = s;
+        best = e;
+      }
+    }
+    return bestScore > 0 ? best : null;
+  }
+  function handleMessage(text) {
+    if (!text.trim()) return;
+    addUser(text);
+    showTyping();
+    setTimeout(() => {
+      hideTyping();
+      const m = findMatch(text);
+      if (m) { addBot(m.response); renderChips(m.nextChips || DEFAULT_CHIPS); }
+      else { addBot("Here's my honest quick take: most of what I work on lives at the crossroads of <b>product, growth and AI</b> — so the real answer usually depends on the specific funnel or goal. Rather than hand-wave, I'd give you a precise answer directly. The fastest way: <a data-nav='schedule'>book a 15-min Google Meet →</a>, or reach me at <a href='mailto:anchit.tandon@gmail.com'>anchit.tandon@gmail.com</a> / <a href='tel:+919873945238'>+91 98739 45238</a>. Meanwhile, want me to walk you through my work, a project, or how I think about product?"); renderChips(["Walk me through your work","Show me a project","Book a quick call","Why product over engineering?"]); }
+    }, 500 + Math.random() * 400);
+  }
+
+  // ---- Sent "swish" sound (WebAudio, no asset) ----
+  let _ac = null;
+  function playSwish() {
+    try {
+      _ac = _ac || new (window.AudioContext || window.webkitAudioContext)();
+      if (_ac.state === 'suspended') _ac.resume();
+      const t = _ac.currentTime;
+      const o = _ac.createOscillator(), g = _ac.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(540, t); o.frequency.exponentialRampToValueAtTime(1180, t + 0.12);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.16, t + 0.03); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+      o.connect(g).connect(_ac.destination); o.start(t); o.stop(t + 0.24);
+    } catch {}
+  }
+
+  function sendCurrent() {
+    const v = chatInput.value;
+    chatInput.value = '';
+    if (v.trim()) playSwish();
+    handleMessage(v);
+  }
+  chatSend.addEventListener('click', sendCurrent);
+  chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendCurrent(); });
+
+  // ---- In-chat mic: speak → transcribe into the input → auto-send ----
+  (function(){
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const micBtn = document.getElementById('chatMic');
+    if (!micBtn) return;
+    if (!SR) { micBtn.style.display = 'none'; return; }
+    let rec = null, on = false;
+    micBtn.addEventListener('click', () => {
+      if (on) { try { rec && rec.stop(); } catch {} return; }
+      try {
+        if (window.speechSynthesis) window.speechSynthesis.cancel();   // pause narration while user speaks
+        if (cloneAudio) { try { cloneAudio.pause(); } catch {} }
+        rec = new SR(); rec.lang = 'en-IN'; rec.interimResults = true; rec.continuous = false;
+        micBtn.classList.add('listening'); on = true;
+        rec.onresult = (e) => {
+          let txt = ''; for (let i=0;i<e.results.length;i++) txt += e.results[i][0].transcript;
+          chatInput.value = txt;
+          if (e.results[e.results.length-1].isFinal) { rec.stop(); }
+        };
+        rec.onend = () => { micBtn.classList.remove('listening'); on = false; if (chatInput.value.trim()) sendCurrent(); };
+        rec.onerror = () => { micBtn.classList.remove('listening'); on = false; };
+        rec.start();
+      } catch { micBtn.classList.remove('listening'); on = false; }
     });
-  });
-  return lenis;
-}
+  })();
 
-// ---------- GSAP reveals + glitch transitions ----------
-function initScroll(){
-  gsap.registerPlugin(ScrollTrigger);
-  // hero entrance
-  gsap.from("#hero h1 .glitch",{yPercent:60,opacity:0,duration:1,stagger:.12,ease:"power4.out",delay:.1});
-  gsap.from("#hero .lede,#hero .meta,#hero .kicker",{y:30,opacity:0,duration:.9,stagger:.08,ease:"power3.out",delay:.5});
-  // generic reveals
-  gsap.utils.toArray(".reveal").forEach(el=>{
-    gsap.to(el,{opacity:1,y:0,duration:.9,ease:"power3.out",
-      scrollTrigger:{trigger:el,start:"top 85%"}});
-  });
-  // project rows stagger in
-  gsap.utils.toArray(".proj-row").forEach((el,i)=>{
-    gsap.from(el,{x:-30,opacity:0,duration:.7,ease:"power3.out",
-      scrollTrigger:{trigger:el,start:"top 90%"}});
-  });
-  // section heading glitch burst on enter
-  gsap.utils.toArray(".sec-h").forEach(h=>{
-    ScrollTrigger.create({trigger:h,start:"top 80%",onEnter:()=>burstGlitch(h)});
-  });
-  
-  // marquee scroll-linked drift (alternate directions)
-  gsap.to("#mq",{xPercent:-33,ease:"none",scrollTrigger:{trigger:".marquee:nth-of-type(1)",scrub:1,start:"top bottom",end:"bottom top"}});
-  gsap.to("#mq2",{xPercent:33,ease:"none",scrollTrigger:{trigger:".marquee:nth-of-type(2)",scrub:1,start:"top bottom",end:"bottom top"}});
-  gsap.to("#mq3",{xPercent:-33,ease:"none",scrollTrigger:{trigger:".marquee:nth-of-type(3)",scrub:1,start:"top bottom",end:"bottom top"}});
+  // Initial bot message
+  setTimeout(() => {
+    addBot("Hey, I'm Anchit. Ask me anything — my <a data-nav='experience'>work</a>, my <a data-nav='projects'>side projects</a>, why I moved from engineering to product, or what I'm solving right now. I'm direct — let's get into it.");
+    renderChips(DEFAULT_CHIPS);
+  }, 350);
 
-  // Scroll-Spy (active sidebar item highlight)
-  const sections = document.querySelectorAll("main > section");
-  const navItems = document.querySelectorAll(".sidebar-nav .sidebar-item");
-  const observerOptions = {
-    root: null,
-    rootMargin: "-25% 0px -55% 0px",
-    threshold: 0
-  };
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const id = entry.target.getAttribute("id");
-        navItems.forEach(item => {
-          if (item.getAttribute("href") === `#${id}`) {
-            item.classList.add("active");
+  /* ============ KEYBOARD ============ */
+  document.addEventListener('keydown', (e) => {
+    if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+      e.preventDefault();
+      switchView('home');
+      setTimeout(() => chatInput.focus(), 100);
+    }
+    if (e.key === 'Escape') { chatInput.value = ''; chatInput.blur(); closeSidebar(); }
+  });
+
+  /* ============ CURSOR GLOW ============ */
+  (function() {
+    const glow = document.getElementById('cursorGlow');
+    if (window.matchMedia('(hover: none)').matches) { glow.style.display = 'none'; return; }
+    let mx = 0, my = 0, gx = 0, gy = 0;
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+    function tick() {
+      gx += (mx - gx) * 0.07; gy += (my - gy) * 0.07;
+      glow.style.left = gx + 'px'; glow.style.top = gy + 'px';
+      requestAnimationFrame(tick);
+    }
+    tick();
+  })();
+
+  /* ============ ANIMATED COUNTERS ============ */
+  (function() {
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (!e.isIntersecting || e.target.dataset.counted) return;
+        e.target.dataset.counted = '1';
+        const target = +e.target.dataset.count;
+        const suffix = e.target.dataset.suffix || '';
+        const prefix = e.target.dataset.prefix || '';
+        const dur = 1800, start = performance.now();
+        function step(now) {
+          const t = Math.min((now - start) / dur, 1);
+          const ease = 1 - Math.pow(1 - t, 3);
+          e.target.textContent = prefix + Math.floor(ease * target) + suffix;
+          if (t < 1) requestAnimationFrame(step);
+          else e.target.textContent = prefix + target + suffix;
+        }
+        requestAnimationFrame(step);
+        obs.unobserve(e.target);
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('[data-count]').forEach(el => obs.observe(el));
+  })();
+
+  /* ============ 3D TILT CARDS ============ */
+  document.querySelectorAll('.tilt-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = `perspective(700px) rotateY(${x * 9}deg) rotateX(${-y * 9}deg) translateY(-6px)`;
+      card.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+      card.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+    });
+    card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+  });
+
+  /* ============ LIFECYCLE TIMELINE ============ */
+  (function() {
+    function scrollToNode(node) {
+      const rect = node.getBoundingClientRect();
+      const top = rect.top + window.scrollY - 90;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+
+    function openNode(node, { scroll = true, flash = true } = {}) {
+      document.querySelectorAll('.lifecycle-node.open').forEach(n => {
+        if (n !== node) n.classList.remove('open');
+      });
+      node.classList.add('open');
+
+      if (flash) {
+        node.classList.remove('flash-highlight');
+        void node.offsetWidth;
+        node.classList.add('flash-highlight');
+        setTimeout(() => node.classList.remove('flash-highlight'), 1200);
+      }
+
+      if (scroll) scrollToNode(node);
+    }
+
+    // Expand/collapse on direct timeline node click — also scroll into view on open
+    document.querySelectorAll('.lifecycle-node').forEach(node => {
+      node.addEventListener('click', () => {
+        if (node.classList.contains('open')) {
+          node.classList.remove('open');
+        } else {
+          openNode(node, { scroll: true, flash: false });
+        }
+      });
+    });
+
+    // Arc segment click → expand + scroll to matching lifecycle node
+    document.querySelectorAll('.career-phase-seg[data-target-phase]').forEach(seg => {
+      seg.addEventListener('click', () => {
+        const phase = seg.dataset.targetPhase;
+
+        document.querySelectorAll('.career-phase-seg').forEach(s => s.classList.remove('arc-active'));
+        seg.classList.add('arc-active');
+
+        const target = document.querySelector('.lifecycle-node[data-phase="' + phase + '"]');
+        if (!target) return;
+
+        if (!document.getElementById('view-experience')?.classList.contains('active')) {
+          switchView('about');
+          // 280ms matches the viewFadeUp animation (0.42s) — enough for DOM to be active
+          setTimeout(() => openNode(target), 280);
+        } else {
+          openNode(target);
+        }
+      });
+    });
+
+    // Sync arc active state as user scrolls through lifecycle nodes
+    window.addEventListener('scroll', () => {
+      if (!document.getElementById('view-experience')?.classList.contains('active')) return;
+      const nodes = document.querySelectorAll('.lifecycle-node[data-phase]');
+      let closest = null, minDist = Infinity;
+      nodes.forEach(n => {
+        const dist = Math.abs(n.getBoundingClientRect().top - window.innerHeight * 0.35);
+        if (dist < minDist) { minDist = dist; closest = n; }
+      });
+      if (closest) {
+        const phase = closest.dataset.phase;
+        document.querySelectorAll('.career-phase-seg').forEach(s => {
+          s.classList.toggle('arc-active', s.dataset.targetPhase === phase);
+        });
+      }
+    }, { passive: true });
+
+    const track = document.getElementById('lifecycleTrack');
+    const fill = document.getElementById('lifecycleSpineFill');
+    if (track && fill) {
+      const obs = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting) {
+          fill.style.height = track.offsetHeight + 'px';
+          obs.disconnect();
+        }
+      }, { threshold: 0.15 });
+      obs.observe(track);
+    }
+  })();
+
+  /* ============ AMBIENT VOICE — browser TTS narration per page ============ */
+  (function() {
+    if (!('speechSynthesis' in window)) { document.getElementById('audioNudge')?.classList.add('dismissed'); return; }
+
+    const indicator = document.getElementById('audioAmbient');
+    const nudge     = document.getElementById('audioNudge');
+    const playBtn   = document.getElementById('audioPlayBtn');
+    const dismissBtn= document.getElementById('audioNudgeDismiss');
+    const ppBtn     = document.getElementById('anpPausePlay');
+    const stopBtn   = document.getElementById('anpStop');
+    const fill      = document.getElementById('anpFill');
+    const timeEl    = document.getElementById('anpTime');
+    const labelEl   = document.getElementById('anpLabel');
+    const pauseIcon = document.getElementById('anpPauseIcon');
+    const playIcon  = document.getElementById('anpPlayIcon');
+    const progress  = document.getElementById('anpProgress');
+
+    const NARRATIONS = {
+      home:       "Hey, I'm Anchit Tandon. An engineer who learned to love the funnel. Currently A.G.M., Product Management at Vah-dahm India, driving direct-to-consumer growth across U.S., U.K. and global. Previously at Times Internet — I led the Delhi Half Marathon end to end, from tech and marketing to the on-ground experience, launching it as a brand-new I.P. and revenue stream; scaled Assisted Sales five times to eighty lakh M.R.R. in eight to ten months; and rebuilt E.T. Markets and E.T. across iOS, Android and web to three crore plus A.R.R. Twelve products shipped across work and side projects.",
+      chat:       "Ask me anything — my work, my side projects, why I moved from engineering to product, or what I'm solving right now.",
+      experience: "Work experience. Currently A.G.M. Product at Vah-dahm India — ratings 2.4 to 4.0, direct-to-consumer growth across three markets. Previously at Times Internet — A.P.M. to Senior P.M. Five x M.R.R. on Assisted Sales, three crore plus A.R.R. from the E.T. Markets revamp, eleven products shipped. Started as a backend engineer at Tuple Technologies and City Mall.",
+      projects:   "Personal projects, built out of curiosity and love for technology. Four A.I.-first consumer experiments, all live. Hey Yaara — A.I. voice companion. Music Gen A.I. — prompt to full track. A.I. Tele Suite — transcription and pitch scoring. T.H. Plus Life Engine — personalised wellness planning.",
+      resume:     "My resume. Download or view the full P.D.F.",
+      contact:    "Let's build something worth measuring. Open to remote and hybrid roles, side collaborations, and honest conversations about funnels, subscriptions, and consumer product."
+    };
+    const VIEW_LABELS = { home: 'Home', chat: 'Chat with me', experience: 'Experience', projects: 'Side Projects', resume: 'My Resume', contact: 'Contact' };
+
+    let progressTimer = null, utterStart = 0, utterDuration = 0;
+    let currentViewName = 'home';
+    let pageAudio = null;       // HTMLAudioElement when the cloned-voice path is active
+    let audioMuted = false;     // shared mute state across both playback paths
+
+    function stopPageAudio() {
+      if (pageAudio) { try { pageAudio.pause(); } catch {} try { pageAudio.removeAttribute('src'); pageAudio.load(); } catch {} pageAudio = null; }
+    }
+    function applyMute() {
+      if (pageAudio) pageAudio.muted = audioMuted;
+      // Browser TTS can't change volume mid-utterance — pause/resume as a graceful fallback.
+      if (!pageAudio && window.speechSynthesis.speaking) {
+        if (audioMuted) { window.speechSynthesis.pause(); clearInterval(progressTimer); }
+        else { window.speechSynthesis.resume(); }
+      }
+      const vol = document.getElementById('anpVolIcon'), mut = document.getElementById('anpMuteIcon');
+      if (vol) vol.style.display = audioMuted ? 'none' : '';
+      if (mut) mut.style.display = audioMuted ? '' : 'none';
+      document.getElementById('anpMute')?.classList.toggle('muted', audioMuted);
+    }
+
+    function showIndicator(viewName) {
+      const sb = document.getElementById('topBarListenBtn');
+      sb?.classList.add('playing');
+      sb?.classList.remove('paused');
+      if (!indicator) return;
+      const key = viewName?.startsWith('project-') ? 'Projects' : (VIEW_LABELS[viewName] || 'Anchit');
+      indicator.querySelector('.audio-ambient-label').textContent = 'Playing · ' + key;
+      indicator.classList.add('active');
+    }
+    function hideIndicator() {
+      indicator?.classList.remove('active', 'listening');
+      const sb = document.getElementById('topBarListenBtn');
+      sb?.classList.remove('playing', 'paused');
+    }
+
+    function setPlayerState(playing, viewName) {
+      nudge?.classList.toggle('playing', playing);
+      nudge?.classList.toggle('paused', !playing && audioModeEnabled);
+      if (pauseIcon) pauseIcon.style.display = playing ? '' : 'none';
+      if (playIcon)  playIcon.style.display  = playing ? 'none' : '';
+      const vLabel = viewName ? (VIEW_LABELS[viewName] || 'Anchit') : (VIEW_LABELS[currentViewName] || 'Anchit');
+      if (labelEl) labelEl.textContent = playing ? (vLabel + ' · playing') : (vLabel + ' · paused');
+    }
+
+    function startProgressBar(durationMs) {
+      if (!fill) return;
+      fill.style.transition = 'none'; fill.style.width = '0%';
+      fill.getBoundingClientRect();
+      fill.style.transition = 'width ' + durationMs + 'ms linear';
+      fill.style.width = '100%';
+      utterStart = Date.now(); utterDuration = durationMs;
+      clearInterval(progressTimer);
+      progressTimer = setInterval(() => {
+        const e = (Date.now() - utterStart) / 1000;
+        if (timeEl) timeEl.textContent = Math.floor(e / 60) + ':' + String(Math.floor(e % 60)).padStart(2, '0');
+      }, 500);
+    }
+    function stopProgressBar() {
+      clearInterval(progressTimer);
+      if (fill) { fill.style.transition = 'none'; fill.style.width = '0%'; }
+      if (timeEl) timeEl.textContent = '0:00';
+    }
+
+    function pickVoice() {
+      const vv = window.speechSynthesis.getVoices();
+      // Prefer an Indian English voice if available (e.g., Google, Microsoft, etc.)
+      return vv.find(v => v.lang.startsWith('en-IN'))
+          || vv.find(v => /Indian/i.test(v.name) && v.lang.startsWith('en'))
+          || vv.find(v => /Google UK English Male/i.test(v.name))
+          || vv.find(v => /Google/i.test(v.name) && v.lang.startsWith('en'))
+          || vv.find(v => v.lang.startsWith('en-') && /male/i.test(v.name))
+          || vv.find(v => v.lang.startsWith('en'));
+    }
+
+    // Highlight transcript helper functions
+    let activeHighlightTimer = null;
+
+    function startHighlightingSync(viewName, audioEl, utterEl, durationMs) {
+      stopHighlighting();
+      if (viewName !== 'home') return;
+      const spans = document.querySelectorAll('#view-home .narrate-span');
+      if (spans.length === 0) return;
+
+      function highlightIndex(idx) {
+        spans.forEach(span => {
+          const sIdx = parseInt(span.getAttribute('data-n-idx'), 10);
+          if (sIdx === idx) {
+            span.classList.add('active-narrate');
           } else {
-            item.classList.remove("active");
+            span.classList.remove('active-narrate');
           }
         });
       }
+
+      if (audioEl) {
+        // Timeline for the audio file (approximate phrase starts in seconds)
+        const timeline = [
+          { t: 0.0, idx: 0 },
+          { t: 1.8, idx: 1 },
+          { t: 4.3, idx: 2 },
+          { t: 9.5, idx: 3 },
+          { t: 19.0, idx: 4 },
+          { t: 22.8, idx: 5 },
+          { t: 27.2, idx: 6 }
+        ];
+
+        activeHighlightTimer = setInterval(() => {
+          if (!audioEl) return;
+          const curr = audioEl.currentTime;
+          let activeIdx = 0;
+          for (let i = 0; i < timeline.length; i++) {
+            if (curr >= timeline[i].t) {
+              activeIdx = timeline[i].idx;
+            }
+          }
+          highlightIndex(activeIdx);
+        }, 100);
+      } else if (utterEl) {
+        utterEl.onboundary = (event) => {
+          if (event.name === 'word') {
+            const charIdx = event.charIndex;
+            let activeIdx = 0;
+            if (charIdx >= 538) activeIdx = 6;
+            else if (charIdx >= 448) activeIdx = 5;
+            else if (charIdx >= 368) activeIdx = 4;
+            else if (charIdx >= 188) activeIdx = 3;
+            else if (charIdx >= 67) activeIdx = 2;
+            else if (charIdx >= 23) activeIdx = 1;
+            highlightIndex(activeIdx);
+          }
+        };
+      }
+    }
+
+    function stopHighlighting() {
+      clearInterval(activeHighlightTimer);
+      activeHighlightTimer = null;
+      document.querySelectorAll('#view-home .narrate-span').forEach(span => {
+        span.classList.remove('active-narrate');
+      });
+    }
+
+    // Play pre-recorded uploaded audio file (audio/anchit.m4a for home page)
+    function playUploadedAudio(viewName) {
+      return new Promise((resolve) => {
+        if (viewName !== 'home') { return resolve(false); }
+        const src = 'audio/anchit.m4a';
+        stopPageAudio();
+        pageAudio = new Audio(src);
+        pageAudio.muted = audioMuted;
+
+        pageAudio.onplay = () => {
+          showIndicator(viewName);
+          setPlayerState(true, viewName);
+          startHighlightingSync(viewName, pageAudio);
+        };
+
+        pageAudio.ontimeupdate = () => {
+          if (!pageAudio || !pageAudio.duration) return;
+          if (fill) {
+            const pct = Math.min((pageAudio.currentTime / pageAudio.duration) * 100, 100);
+            fill.style.transition = 'none';
+            fill.style.width = pct + '%';
+          }
+          if (timeEl) {
+            const e = pageAudio.currentTime;
+            timeEl.textContent = Math.floor(e/60) + ':' + String(Math.floor(e%60)).padStart(2, '0');
+          }
+        };
+
+        const done = () => {
+          hideIndicator();
+          setPlayerState(false, viewName);
+          stopProgressBar();
+          stopHighlighting();
+          pageAudio = null;
+          resolve(true);
+        };
+
+        pageAudio.onended = done;
+        pageAudio.onerror = () => {
+          pageAudio = null;
+          resolve(false);
+        };
+
+        pageAudio.play().catch(() => {
+          pageAudio = null;
+          resolve(false);
+        });
+      });
+    }
+
+    // Cloned-voice (ElevenLabs) path for other page narrations.
+    async function speakViaCloneEl(viewName, text) {
+      try {
+        const r = await fetch('/api/tts', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+        if (!r.ok) return false;                       // 503/401 → browser voice
+        const ct = r.headers.get('content-type') || '';
+        if (!ct.includes('audio')) return false;
+        const blob = await r.blob();
+        const url = URL.createObjectURL(blob);
+        stopPageAudio();
+        pageAudio = new Audio(url);
+        pageAudio.muted = audioMuted;
+        pageAudio.onplay = () => { showIndicator(viewName); setPlayerState(true, viewName); };
+        pageAudio.ontimeupdate = () => {
+          if (!pageAudio || !pageAudio.duration) return;
+          if (fill) { const pct = Math.min((pageAudio.currentTime / pageAudio.duration) * 100, 100); fill.style.transition = 'none'; fill.style.width = pct + '%'; }
+          if (timeEl) { const e = pageAudio.currentTime; timeEl.textContent = Math.floor(e/60)+':'+String(Math.floor(e%60)).padStart(2,'0'); }
+        };
+        const done = () => { try{URL.revokeObjectURL(url);}catch{} hideIndicator(); setPlayerState(false, viewName); stopProgressBar(); pageAudio = null; };
+        pageAudio.onended = done; pageAudio.onerror = done;
+        await pageAudio.play();
+        return true;
+      } catch { return false; }
+    }
+
+    function speakView(viewName) {
+      window.speechSynthesis.cancel();
+      stopPageAudio();
+      stopHighlighting();
+      let key = viewName; if (key?.startsWith('project-')) key = 'projects';
+      const text = NARRATIONS[key];
+      if (!text) { hideIndicator(); setPlayerState(false, viewName); return; }
+      currentViewName = viewName;
+
+      playUploadedAudio(viewName).then((usedUploaded) => {
+        if (usedUploaded) return;
+
+        speakViaCloneEl(viewName, text).then((usedClone) => {
+          if (usedClone) {
+            startHighlightingSync(viewName, pageAudio);
+            return;
+          }
+          const utter = new SpeechSynthesisUtterance(text);
+          utter.rate = 0.96; utter.pitch = 1.0; utter.volume = audioMuted ? 0 : 0.85;
+          const voice = pickVoice(); if (voice) utter.voice = voice;
+
+          const estimatedMs = (text.split(/\s+/).length / (0.96 * 2.3)) * 1000;
+          utter.onstart = () => {
+            showIndicator(viewName);
+            setPlayerState(true, viewName);
+            startProgressBar(estimatedMs);
+            startHighlightingSync(viewName, null, utter, estimatedMs);
+          };
+          utter.onend   = () => { hideIndicator(); setPlayerState(false, viewName); stopProgressBar(); stopHighlighting(); };
+          utter.onerror = () => { hideIndicator(); setPlayerState(false, viewName); stopProgressBar(); stopHighlighting(); };
+          window.speechSynthesis.speak(utter);
+        });
+      });
+    }
+
+    function trySpeak(viewName) {
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length === 0) {
+        window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.onvoiceschanged = null; speakView(viewName); };
+      } else { speakView(viewName); }
+    }
+
+    playBtn?.addEventListener('click', () => {
+      audioModeEnabled = true;
+      const activeEl = document.querySelector('.view.active');
+      const vName = activeEl ? activeEl.id.replace('view-', '') : 'home';
+      trySpeak(vName);
     });
-  }, observerOptions);
-  sections.forEach(sec => observer.observe(sec));
-}
-function burstGlitch(el){
-  el.style.textShadow="3px 0 var(--red),-3px 0 #00e0ff";
-  setTimeout(()=>el.style.textShadow="",160);
-}
 
-// occasional hero glitch
-setInterval(()=>{const g=document.querySelector("#hero .l2");if(!g)return;g.classList.toggle("go");},2600);
+    ppBtn?.addEventListener('click', () => {
+      if (pageAudio) {                                  // cloned-voice or uploaded path
+        if (pageAudio.paused) { pageAudio.play(); setPlayerState(true); }
+        else { pageAudio.pause(); setPlayerState(false); }
+        return;
+      }
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+        if (fill && utterDuration) {
+          const elapsed = Date.now() - utterStart;
+          fill.style.transition = 'width ' + (utterDuration - elapsed) + 'ms linear';
+          fill.style.width = '100%';
+        }
+        setPlayerState(true);
+      } else if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.pause();
+        if (fill && utterDuration) {
+          const pct = Math.min(((Date.now() - utterStart) / utterDuration) * 100, 99);
+          fill.style.transition = 'none'; fill.style.width = pct + '%';
+        }
+        clearInterval(progressTimer);
+        setPlayerState(false);
+      }
+    });
 
-// ---------- boot + preloader ----------
-function boot(){
-  initThree(); const lenis=initLenis(); initScroll();
-  // preloader
-  const bar=$("#loader .bar i"),pct=$("#loader .pct");let p=0;
-  const tick=setInterval(()=>{p=Math.min(100,p+Math.random()*22);bar.style.width=p+"%";pct.textContent=Math.floor(p)+"%";
-    if(p>=100){clearInterval(tick);setTimeout(()=>{
-      gsap.to("#loader",{opacity:0,duration:.6,onComplete:()=>{$("#loader").style.display="none";document.body.classList.remove("loading");ScrollTrigger.refresh();}});
-    },180);}},120);
-}
-boot();
+    // Mute / unmute — governs both the cloned-voice element and browser TTS
+    const muteBtn = document.getElementById('anpMute');
+    muteBtn?.addEventListener('click', () => { audioMuted = !audioMuted; applyMute(); muteBtn.title = audioMuted ? 'Unmute' : 'Mute'; });
+
+    function stopAllPlayback() {
+      stopPageAudio();
+      window.speechSynthesis.cancel();
+      stopHighlighting();
+      audioModeEnabled = false;
+      hideIndicator();
+      nudge?.classList.remove('playing', 'paused');
+      stickyBtn?.classList.remove('playing', 'paused');
+      stopProgressBar();
+    }
+
+    stopBtn?.addEventListener('click', stopAllPlayback);
+
+    dismissBtn?.addEventListener('click', () => { nudge?.classList.add('dismissed'); });
+
+    /* Sticky listen button — play/pause/stop */
+    const stickyBtn = document.getElementById('topBarListenBtn');
+    const stickyStop = document.getElementById('topBarStopBtn');
+    stickyBtn?.addEventListener('click', (e) => {
+      if (e.target.closest('.listen-stop')) return; // handled below
+      if (stickyBtn.classList.contains('playing')) {
+        // Pause
+        if (pageAudio) { try { pageAudio.pause(); } catch {} } else { window.speechSynthesis.pause(); }
+        stickyBtn.classList.remove('playing');
+        stickyBtn.classList.add('paused');
+        clearInterval(progressTimer);
+      } else if (stickyBtn.classList.contains('paused')) {
+        // Resume
+        if (pageAudio) { try { pageAudio.play(); } catch {} } else { window.speechSynthesis.resume(); }
+        stickyBtn.classList.remove('paused');
+        stickyBtn.classList.add('playing');
+      } else {
+        // Play
+        audioModeEnabled = true;
+        const activeEl = document.querySelector('.view.active');
+        const vName = activeEl ? activeEl.id.replace('view-', '') : 'home';
+        trySpeak(vName);
+      }
+    });
+    stickyStop?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      stopAllPlayback();
+    });
+
+    /* Hero "Hear this from me" button */
+    const heroListen = document.getElementById('heroListenBtn');
+    heroListen?.addEventListener('click', () => {
+      audioModeEnabled = true;
+      trySpeak('home');
+    });
+
+    document.addEventListener('viewChanged', (e) => { if (audioModeEnabled) trySpeak(e.detail); });
+
+    /* ---- Voice interrupt via SpeechRecognition ---- */
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return;
+
+    const card = document.createElement('div');
+    card.className = 'voice-interrupt-card';
+    card.innerHTML = '<div class="vic-header"><span class="vic-label">&#9679; You asked</span><button class="vic-close" aria-label="Dismiss">&#x2715;</button></div><div class="vic-question"></div><div class="vic-response"></div><div class="vic-actions"><button class="vic-continue">Continue narration &#9654;</button><button class="vic-dismiss">Skip, thanks</button></div>';
+    document.body.appendChild(card);
+
+    function showCard(question, responseHtml) {
+      card.querySelector('.vic-question').textContent = '"' + question + '"';
+      card.querySelector('.vic-response').innerHTML = responseHtml;
+      card.querySelectorAll('[data-nav]').forEach(a => {
+        a.addEventListener('click', ev => { ev.preventDefault(); card.classList.remove('active'); switchView(a.dataset.nav); });
+      });
+      card.classList.add('active');
+    }
+    function dismissCard() { card.classList.remove('active'); }
+    card.querySelector('.vic-close').addEventListener('click', dismissCard);
+    card.querySelector('.vic-dismiss').addEventListener('click', dismissCard);
+    card.querySelector('.vic-continue').addEventListener('click', () => {
+      dismissCard();
+      if (audioModeEnabled) { if (pageAudio) { try { pageAudio.play(); } catch {} } else { window.speechSynthesis.resume(); } setPlayerState(true); }
+    });
+
+    let rec = null, recognizing = false;
+    function startRec() {
+      if (recognizing) return;
+      try {
+        rec = new SR(); rec.continuous = false; rec.interimResults = false; rec.lang = 'en-IN';
+        rec.onresult = (e) => {
+          if (!e.results[0]?.isFinal) return;
+          const q = (e.results[0][0].transcript || '').trim();
+          if (!q || q.length < 2) return;
+          if (pageAudio) { try { pageAudio.pause(); } catch {} } else { window.speechSynthesis.pause(); }
+          if (fill && utterDuration) { const pct = Math.min(((Date.now()-utterStart)/utterDuration)*100,99); fill.style.transition='none'; fill.style.width=pct+'%'; }
+          clearInterval(progressTimer); setPlayerState(false);
+          const match = findMatch(q);
+          const resp = match ? match.response : 'That\'s a thoughtful question — I\'d love to give it the space it deserves. <a data-nav="home">Ask me in the chat</a> and I\'ll walk you through it properly.';
+          
+          const isChat = document.getElementById('view-chat')?.classList.contains('active');
+          if (isChat) {
+            handleMessage(q);
+          } else {
+            showCard(q, resp);
+          }
+        };
+        rec.onend = () => { recognizing = false; if (audioModeEnabled && window.speechSynthesis.speaking) setTimeout(startRec, 300); };
+        rec.onerror = (ev) => { recognizing = false; if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') rec = null; };
+        rec.start(); recognizing = true;
+      } catch (err) { recognizing = false; }
+    }
+    function stopRec() { recognizing = false; if (rec) { try { rec.stop(); } catch (e) {} } }
+
+    playBtn?.addEventListener('click', () => { setTimeout(startRec, 1200); }, { capture: true });
+    document.addEventListener('viewChanged', () => { if (audioModeEnabled) setTimeout(startRec, 1200); });
+    stopBtn?.addEventListener('click', stopRec, { capture: true });
+  })();
+
+  /* ============ SCROLL PROGRESS BAR ============ */
+  (function() {
+    const bar = document.getElementById('scrollProgress');
+    if (!bar) return;
+    function update() {
+      const scrolled = window.scrollY;
+      const total = document.body.scrollHeight - window.innerHeight;
+      bar.style.width = (total > 0 ? Math.min(scrolled / total, 1) * 100 : 0) + '%';
+    }
+    window.addEventListener('scroll', update, { passive: true });
+    document.addEventListener('viewChanged', () => { bar.style.width = '0'; });
+  })();
+
+  /* floating year removed — phase separators already show the date context */
+
+  /* ============ ENHANCED REVEAL OBSERVER ============ */
+  function observeReveals() {
+    if (revealObserver) revealObserver.disconnect();
+    revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -32px 0px' });
+    const sel = '.view.active .reveal, .view.active .reveal-stagger, .view.active .reveal-left, .view.active .reveal-right, .view.active .reveal-scale';
+    document.querySelectorAll(sel).forEach(el => {
+      if (!el.classList.contains('in')) revealObserver.observe(el);
+    });
+  }
+
+  observeReveals();
+
+  /* ============ SERVICE WORKER ============ */
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
 </script>
-<!-- View switcher → back to Editorial -->
-<button id="viewToggle" title="Switch to the Editorial edition" aria-label="Switch design"
-  style="position:fixed;top:16px;right:16px;z-index:9998;display:inline-flex;align-items:center;gap:8px;background:rgba(14,14,17,.82);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:8px 14px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#e8e8ec;cursor:pointer;backdrop-filter:blur(8px);">
-  <span style="width:8px;height:8px;border-radius:50%;background:#ff2b2b;"></span>Editorial view
+
+<!-- ───────── Schedule-a-call modal (Google Meet invite) ───────── -->
+<!-- ============ FLOATING "TALK TO ME" CHAT FAB ============ -->
+<button id="chatFab" data-view="chat" aria-label="Chat with Anchit" title="Chat with Anchit"
+  style="position:fixed;right:20px;bottom:24px;z-index:9997;display:inline-flex;align-items:center;gap:10px;background:var(--primary,#ff4d1f);color:#fff;border:0;border-radius:999px;padding:14px 20px 14px 16px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 10px 30px rgba(255,77,31,.4);animation:chatFabPulse 2.6s ease-in-out infinite;">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  <span class="cf-label">Talk to me</span>
 </button>
+<style>
+  @keyframes chatFabPulse{0%,100%{box-shadow:0 10px 30px rgba(255,77,31,.4)}50%{box-shadow:0 10px 38px rgba(255,77,31,.62)}}
+  #chatFab:hover{filter:brightness(1.06);transform:translateY(-1px)}
+  @media(max-width:560px){#chatFab .cf-label{display:none}#chatFab{padding:14px;right:16px;bottom:18px}}
+  body.view-chat #chatFab{display:none}
+</style>
 <script>
-  document.getElementById('viewToggle').onclick=function(){ try{localStorage.setItem('anchit-portfolio-view','simple');}catch(e){} location.href='/'; };
+  (function(){
+    var f=document.getElementById('chatFab');
+    if(f)f.addEventListener('click',function(){
+      // Trigger the already-wired sidebar "Chat" item (querySelectorAll ran before this FAB existed).
+      var link=document.querySelector('.sidebar-item[data-view="chat"]')||document.querySelector('[data-view="chat"]:not(#chatFab)');
+      if(link){ link.click(); }
+      else { location.hash='#chat'; }
+    });
+    document.addEventListener('viewChanged',function(e){ document.body.classList.toggle('view-chat', e.detail==='chat'); });
+  })();
 </script>
-<!-- Project Details Modal Backdrop -->
-<div class="modal-backdrop" id="projectModal">
-  <div class="project-modal">
-    <button class="modal-close" id="modalCloseBtn" aria-label="Close modal">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px; height:16px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
-    <div id="modalContentContainer"></div>
+
+<!-- ============ VIEW SWITCHER HAS BEEN MOVED TO TOP BAR ============ -->
+<script>
+(function(){
+  var KEY='anchit-portfolio-view';
+  function go(v){ try{localStorage.setItem(KEY,v);}catch(e){} if(v==='cyber'){ location.href='/cyber'; } }
+  // first-visit chooser
+  var chosen=null; try{chosen=localStorage.getItem(KEY);}catch(e){}
+  if(!chosen){
+    try{localStorage.setItem(KEY,'simple');}catch(e){}
+  }
+  var sb=document.getElementById('sidebarViewToggle');
+  if(sb) sb.onclick=function(){ go('nexus'); };
+  
+  var ts=document.getElementById('topBarViewSelect');
+  if(ts) {
+    ts.addEventListener('change', function(e) {
+      if(e.target.value === 'cyber') go('cyber');
+      else if(e.target.value === 'nexus') go('nexus');
+    });
+  }
+})();
+</script>
+
+<div id="schedModal" role="dialog" aria-modal="true" aria-labelledby="schedTitle" style="position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.62);backdrop-filter:blur(6px);">
+  <div style="max-width:460px;width:100%;max-height:90vh;overflow-y:auto;background:var(--bg-elev,#fff);border:1px solid var(--rule,#e5dcc7);border-radius:18px;padding:24px 22px 26px;font-family:inherit;box-shadow:0 30px 80px rgba(0,0,0,.4);">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px;">
+      <div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--primary,#ff4d1f);">Let's talk</div>
+        <h2 id="schedTitle" style="font-size:22px;margin-top:6px;color:var(--ink,#161312);">Book a 15-min Google Meet</h2>
+      </div>
+      <button type="button" id="schedClose" aria-label="Close" style="background:none;border:0;color:var(--ink-mute,#a39e94);font-size:26px;line-height:1;cursor:pointer;">×</button>
+    </div>
+    <p style="color:var(--ink-dim,#5a554e);font-size:13.5px;line-height:1.6;margin-bottom:18px;">Pick a time and add your details. You'll get a Google Calendar invite with a Meet link — and so will I. I'll confirm on WhatsApp too.</p>
+    <form id="schedForm" novalidate>
+      <label class="sf-l">Your name</label>
+      <input id="sf-name" class="sf-i" type="text" autocomplete="name" placeholder="Jane Doe">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><label class="sf-l">Designation</label><input id="sf-role" class="sf-i" type="text" autocomplete="organization-title" placeholder="Product Manager"></div>
+        <div><label class="sf-l">Company</label><input id="sf-company" class="sf-i" type="text" autocomplete="organization" placeholder="Acme Inc."></div>
+      </div>
+      <label class="sf-l">Your email</label>
+      <input id="sf-email" class="sf-i" type="email" autocomplete="email" placeholder="jane@company.com">
+      <label class="sf-l">Your mobile (WhatsApp)</label>
+      <input id="sf-phone" class="sf-i" type="tel" autocomplete="tel" placeholder="+91 98765 43210">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><label class="sf-l">Date</label><input id="sf-date" class="sf-i" type="date" style="color-scheme:light;"></div>
+        <div><label class="sf-l">Time</label><input id="sf-time" class="sf-i" type="time" style="color-scheme:light;"></div>
+      </div>
+      <p style="font-size:11.5px;color:var(--ink-mute,#a39e94);margin:4px 0 0;line-height:1.5;">I'll confirm the slot is free and accept the invite — if it clashes, I'll suggest the nearest open time.</p>
+      <div id="sf-err" style="color:#d92d20;font-size:12.5px;margin-top:10px;display:none;"></div>
+      <button type="submit" style="width:100%;margin-top:18px;background:var(--primary,#ff4d1f);color:#fff;border:0;border-radius:11px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Create the invite →</button>
+    </form>
+    <div id="sf-done" style="display:none;">
+      <p style="color:var(--ink,#161312);font-size:14px;line-height:1.6;margin-bottom:16px;">Two quick steps to lock it in:</p>
+      <a id="sf-gcal" href="#" target="_blank" rel="noopener" class="sf-step">📅 <span><b>Add to Google Calendar</b> — invites you + me, with a Meet link</span></a>
+      <a id="sf-wa" href="#" target="_blank" rel="noopener" class="sf-step">💬 <span><b>Confirm on WhatsApp</b> — sends me the details</span></a>
+      <button type="button" id="sf-again" style="margin-top:14px;background:none;border:0;color:var(--ink-dim,#5a554e);font-size:12.5px;cursor:pointer;text-decoration:underline;">← Change details</button>
+    </div>
   </div>
 </div>
+<style>
+  #schedModal .sf-l{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-dim,#5a554e);margin:0 0 5px;font-weight:600;}
+  #schedModal .sf-i{width:100%;background:var(--bg,#fbf5ec);border:1px solid var(--rule,#e5dcc7);border-radius:10px;color:var(--ink,#161312);padding:11px 13px;font-size:14px;font-family:inherit;outline:none;margin-bottom:12px;}
+  #schedModal .sf-i:focus{border-color:var(--primary,#ff4d1f);}
+  #schedModal .sf-step{display:flex;align-items:center;gap:10px;background:var(--bg,#fbf5ec);border:1px solid var(--rule,#e5dcc7);border-radius:11px;padding:13px 15px;margin-bottom:10px;text-decoration:none;color:var(--ink,#161312);font-size:13.5px;}
+  #schedModal .sf-step:hover{border-color:var(--primary,#ff4d1f);}
+</style>
+<script>
+(function(){
+  var HOST_EMAIL="anchit.tandon@gmail.com", HOST_WA="919873945238";
+  var modal=document.getElementById('schedModal'), form=document.getElementById('schedForm'), done=document.getElementById('sf-done'), err=document.getElementById('sf-err');
+  window.openScheduleModal=function(){
+    form.style.display=''; done.style.display='none'; err.style.display='none';
+    var d=document.getElementById('sf-date'); if(d){var t=new Date(Date.now()+864e5);d.value=t.toISOString().slice(0,10);d.min=new Date().toISOString().slice(0,10);}
+    var tm=document.getElementById('sf-time'); if(tm&&!tm.value)tm.value="15:00";
+    modal.style.display='flex'; document.body.style.overflow='hidden';
+  };
+  // Any element marked [data-schedule] (Meet Me button, contact card, footer link)
+  // opens the scheduler. This delegated handler is what was missing — the buttons
+  // existed but nothing called openScheduleModal().
+  document.addEventListener('click', function(e){
+    var t = e.target.closest('[data-schedule]');
+    if (t) { e.preventDefault(); window.openScheduleModal(); }
+  });
+  function close(){ modal.style.display='none'; document.body.style.overflow=''; }
+  document.getElementById('schedClose').onclick=close;
+  modal.addEventListener('click',function(e){ if(e.target===modal) close(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&modal.style.display==='flex') close(); });
+  document.getElementById('sf-again').onclick=function(){ form.style.display=''; done.style.display='none'; };
+  var EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  function cleanPhone(p){ return (p||'').replace(/[^\d+]/g,''); }
+  function validPhone(p){ var d=cleanPhone(p).replace(/^\+/,''); return d.length>=10 && d.length<=15; }
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function gfmt(dt){ return dt.getUTCFullYear()+pad(dt.getUTCMonth()+1)+pad(dt.getUTCDate())+'T'+pad(dt.getUTCHours())+pad(dt.getUTCMinutes())+'00Z'; }
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var name=document.getElementById('sf-name').value.trim();
+    var role=(document.getElementById('sf-role')||{}).value ? document.getElementById('sf-role').value.trim() : '';
+    var company=(document.getElementById('sf-company')||{}).value ? document.getElementById('sf-company').value.trim() : '';
+    var email=document.getElementById('sf-email').value.trim();
+    var phone=document.getElementById('sf-phone').value.trim();
+    var date=document.getElementById('sf-date').value, time=document.getElementById('sf-time').value;
+    var probs=[];
+    if(name.length<2) probs.push("a valid name");
+    if(!EMAIL_RE.test(email)) probs.push("a valid email");
+    if(!validPhone(phone)) probs.push("a valid mobile (10–15 digits)");
+    if(!date||!time) probs.push("a date and time");
+    var start=new Date(date+'T'+time);
+    if(date&&time&&(isNaN(start)||start.getTime()<Date.now())) probs.push("a future time");
+    if(probs.length){ err.style.display='block'; err.textContent="Please enter "+probs.join(", ")+"."; return; }
+    err.style.display='none';
+    var who = name + (role||company ? " ("+[role,company].filter(Boolean).join(" at ")+")" : "");
+    var end=new Date(start.getTime()+15*60000);
+    var title=encodeURIComponent("Intro call — "+name+" × Anchit Tandon");
+    var details=encodeURIComponent("15-min Google Meet.\nGuest: "+who+" — "+email+", "+phone+"\nHost: Anchit Tandon ("+HOST_EMAIL+", +91 98739 45238)\n\nGoogle attaches a Meet link and emails both guests.");
+    var gcal="https://calendar.google.com/calendar/render?action=TEMPLATE&text="+title+"&dates="+gfmt(start)+"/"+gfmt(end)+"&details="+details+"&add="+encodeURIComponent(HOST_EMAIL+","+email)+"&conferenceData=true&ctz="+encodeURIComponent(Intl.DateTimeFormat().resolvedOptions().timeZone||'Asia/Kolkata');
+    document.getElementById('sf-gcal').href=gcal;
+    var dateStr=start.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+    var timeStr=start.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+    // WhatsApp message from the user's number, in the requested template.
+    var roleCo = (role||company) ? ("I am a "+(role||"professional")+(company?" at "+company:"")+" and ") : "";
+    var waMsg=encodeURIComponent("Hi Anchit, this is "+name+". "+roleCo+"I would like to meet you on "+dateStr+" at "+timeStr+". Looking forward to the same.");
+    document.getElementById('sf-wa').href="https://wa.me/"+HOST_WA+"?text="+waMsg;
+    form.style.display='none'; done.style.display='block';
+  });
+})();
+</script>
+
 
 <!-- GLOBAL VIEW SWITCHER -->
 <div id="globalViewSwitcher" style="position: fixed; bottom: 24px; right: 24px; z-index: 999999; display: flex; gap: 6px; background: rgba(10,10,12,0.85); backdrop-filter: blur(12px); padding: 6px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 8px 32px rgba(0,0,0,0.4);">
@@ -3758,6 +4626,54 @@ boot();
     if(current === 'cyber') btns[1].style.background = 'rgba(255,43,43,0.15)';
     if(current === 'nexus') btns[2].style.background = 'rgba(0,255,136,0.15)';
   });
+</script>
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<script>
+(function(){
+  const canvas=document.getElementById("bg-canvas");
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(window.innerWidth,window.innerHeight);
+  const scene=new THREE.Scene();
+  scene.fog=new THREE.FogExp2(0x050506,0.06);
+  const camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,0.1,100);
+  camera.position.z=9;
+  const group=new THREE.Group(); scene.add(group);
+  const geo=new THREE.BufferGeometry();
+  const pts=[]; const colors=[];
+  const c1=new THREE.Color(0xff2b2b); const c2=new THREE.Color(0x0a0a0c);
+  for(let i=0;i<600;i++){
+    pts.push((Math.random()-0.5)*30,(Math.random()-0.5)*30,(Math.random()-0.5)*30);
+    const c=Math.random()>0.5?c1:c2;
+    colors.push(c.r,c.g,c.b);
+  }
+  geo.setAttribute('position',new THREE.Float32BufferAttribute(pts,3));
+  geo.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
+  const mat=new THREE.PointsMaterial({size:0.1,vertexColors:true,transparent:true,opacity:0.8});
+  const points=new THREE.Points(geo,mat);
+  group.add(points);
+  for(let i=0;i<20;i++){
+    const lg=new THREE.BufferGeometry();
+    const lpts=[];
+    let x=(Math.random()-0.5)*20, y=(Math.random()-0.5)*20, z=(Math.random()-0.5)*20;
+    for(let j=0;j<5;j++){ lpts.push(x,y,z); x+=(Math.random()-0.5)*4; y+=(Math.random()-0.5)*4; z+=(Math.random()-0.5)*4; }
+    lg.setAttribute('position',new THREE.Float32BufferAttribute(lpts,3));
+    const lm=new THREE.LineBasicMaterial({color:0xff2b2b,transparent:true,opacity:0.3});
+    group.add(new THREE.Line(lg,lm));
+  }
+  let time=0;
+  function animate(){
+    requestAnimationFrame(animate);
+    time+=0.005; group.rotation.y=time*0.5; group.rotation.x=time*0.2;
+    group.children.forEach(c=>{ if(c.type==='Line'){ c.material.opacity=Math.random()>0.95?0.8:0.2; } });
+    renderer.render(scene,camera);
+  }
+  animate();
+  window.addEventListener('resize',()=>{ camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth,window.innerHeight); });
+})();
 </script>
 
 </body>
