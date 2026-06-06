@@ -266,6 +266,33 @@
   }
 </style>
 
+  
+<style>
+  @media (max-width: 600px) {
+    .home-timeline, .products-grid, .hero-stats {
+      padding: 16px !important;
+      margin-bottom: 24px !important;
+    }
+    .hero-stats {
+      grid-template-columns: 1fr !important;
+    }
+    .products-grid {
+      grid-template-columns: 1fr !important;
+    }
+    .home-tl-item {
+      padding-right: 0 !important;
+    }
+    #globalNudgeWidget {
+      bottom: 60px !important;
+      right: 16px !important;
+    }
+    #globalViewSwitcher {
+      bottom: 16px !important;
+      right: 16px !important;
+    }
+  }
+</style>
+
 </head>
 <body data-theme="nexus">
 
@@ -430,7 +457,7 @@
       utter.onend = () => { isSpeaking = false; $('#avatar-box').classList.remove('speaking'); };
       utter.onerror = () => { isSpeaking = false; $('#avatar-box').classList.remove('speaking'); };
       
-      synth.speak(utter);
+      if (localStorage.getItem('anchit-mute') !== 'true') synth.speak(utter);
     }
 
     // --- Content & Scripts ---
@@ -689,6 +716,70 @@
     if(current === 'cyber') btns[1].style.background = 'rgba(255,43,43,0.15)';
     if(current === 'nexus') btns[2].style.background = 'rgba(0,255,136,0.15)';
   });
+</script>
+
+
+
+<!-- GLOBAL NUDGE WIDGET -->
+<div id="globalNudgeWidget" style="position: fixed; bottom: 80px; right: 24px; z-index: 999999; display: flex; flex-direction: column; gap: 12px; align-items: flex-end;">
+  <!-- Mute Toggle -->
+  <button id="globalMuteBtn" onclick="toggleGlobalMute()" style="display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: rgba(10,10,12,0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 8px 32px rgba(0,0,0,0.4); color: #fff; cursor: pointer; transition: all 0.2s;" aria-label="Toggle Audio">
+    <!-- Icon injected via JS -->
+  </button>
+  
+  <!-- Talk With Me Nudge -->
+  <button id="globalChatNudge" onclick="triggerGlobalChatNudge()" style="display: flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 100px; background: var(--primary, #00FF88); border: none; box-shadow: 0 8px 32px rgba(0, 255, 136, 0.4); color: #000; cursor: pointer; transition: all 0.2s; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 14px; font-weight: 700;">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    Talk With Me
+  </button>
+</div>
+
+<script>
+  function updateGlobalMuteIcon() {
+    const isMuted = localStorage.getItem('anchit-mute') === 'true';
+    const btn = document.getElementById('globalMuteBtn');
+    if (isMuted) {
+      btn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M9 9v6a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>'; // Mic off
+    } else {
+      btn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>'; // Mic on
+    }
+  }
+
+  function toggleGlobalMute() {
+    const isMuted = localStorage.getItem('anchit-mute') === 'true';
+    localStorage.setItem('anchit-mute', !isMuted);
+    updateGlobalMuteIcon();
+    if (!isMuted) { 
+      // Muting now -> stop any ongoing speech
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      if (window.audioMuted !== undefined) {
+         window.audioMuted = true;
+         if (typeof setPlayerState === 'function') setPlayerState(false);
+      }
+    } else {
+      // Unmuting
+      if (window.audioMuted !== undefined) {
+         window.audioMuted = false;
+      }
+    }
+  }
+
+  function triggerGlobalChatNudge() {
+    if (document.getElementById('cli')) { // Nexus
+      document.getElementById('cli').focus();
+    } else if (document.getElementById('ccInput')) { // Cyber
+      document.getElementById('chat').scrollIntoView({ behavior: 'smooth' });
+      setTimeout(() => document.getElementById('ccInput').focus(), 600);
+    } else if (document.getElementById('view-chat')) { // Simple
+      document.getElementById('view-chat').scrollIntoView({ behavior: 'smooth' });
+      setTimeout(() => {
+        const ci = document.getElementById('chat-input');
+        if(ci) ci.focus();
+      }, 600);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', updateGlobalMuteIcon);
 </script>
 
 </body>
