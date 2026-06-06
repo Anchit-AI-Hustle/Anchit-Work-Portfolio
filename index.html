@@ -1,35 +1,21 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
-<script>
-  (function(){
-    var KEY='anchit-portfolio-view';
-    try {
-      var chosen = localStorage.getItem(KEY);
-      if (chosen === 'cyber' && !window.location.hash) {
-        window.location.replace('/cyber');
-      } else if (chosen === 'nexus' && !window.location.hash) {
-        window.location.replace('/nexus');
-      }
-    } catch(e){}
-  })();
-</script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Anchit Tandon — Product leader & AI builder turning funnels into growth</title>
 <meta name="description" content="Anchit Tandon — Assistant General Manager, Product Management at Vahdam India. D2C growth, CRM experimentation, and AI side builds." />
 
 <!-- PWA -->
-<meta name="theme-color" content="#FBF5EC" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#050301" media="(prefers-color-scheme: light)" />
 <meta name="theme-color" content="#0F0D0A" media="(prefers-color-scheme: dark)" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Anchit" />
 <meta name="mobile-web-app-capable" content="yes" />
 <link rel="manifest" href="manifest.json" />
-<link rel="apple-touch-icon" href="assets/premium_logo.png" />
-<link rel="icon" type="image/svg+xml" href="assets/premium_logo.png" />
-<link rel="icon" type="image/png" href="assets/premium_logo.png" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
 
 <!-- Open Graph -->
 <meta property="og:title" content="Anchit Tandon — Product leader & AI builder turning funnels into growth" />
@@ -1812,14 +1798,6 @@
     .home-tl-item {
       padding-right: 0 !important;
     }
-    #globalNudgeWidget {
-      bottom: 60px !important;
-      right: 16px !important;
-    }
-    #globalViewSwitcher {
-      bottom: 16px !important;
-      right: 16px !important;
-    }
   }
 </style>
 
@@ -1831,11 +1809,11 @@
   <div class="chat-container-center" style="align-items:center; justify-content:center; display:flex; flex-direction:column; background:rgba(20,20,20,0.85); border:1px solid rgba(255, 95, 21, 0.4); box-shadow:0 0 50px rgba(255, 95, 21, 0.15), inset 0 0 20px rgba(255, 95, 21, 0.05); border-radius:24px; padding:40px; width:90%; max-width:500px; text-align:center;">
     
     <div style="margin-bottom:24px;">
-      <img src="assets/logo-at.jpg" style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:2px solid var(--accent); box-shadow: 0 0 20px rgba(243, 179, 49, 0.5);">
+      <img src="AnchitTandon-AppLogo.png" alt="Anchit Tandon" style="width:88px; height:88px; border-radius:22px; object-fit:cover; border:1px solid rgba(255,183,54,.7); box-shadow: 0 0 28px rgba(255, 153, 31, 0.45);">
     </div>
     
-    <h2 style="font-family:var(--font-display); font-size:28px; font-weight:700; color:#FFF; margin-bottom:12px;">Welcome to my world</h2>
-    <p style="color:var(--ink-dim); font-size:16px; margin-bottom:32px; line-height:1.5;">This isn't a normal portfolio. My AI Agent is here to walk you through my builds, metrics, and funnel philosophy.</p>
+    <h2 style="font-family:var(--font-display); font-size:28px; font-weight:700; color:#FFF; margin-bottom:12px;">Anchit Tandon</h2>
+    <p style="color:var(--ink-dim); font-size:16px; margin-bottom:32px; line-height:1.5;">Product, growth, AI systems, and the work behind them. Tell me your name and I will guide you through it.</p>
 
     <button id="ob-start-btn" style="padding:16px 32px; background:var(--primary); color:#000; font-weight:bold; border-radius:30px; border:none; cursor:pointer; font-size:18px; box-shadow:0 0 20px rgba(255,95,21,0.5); transition:all 0.3s ease;">Meet Anchit Tandon</button>
     
@@ -1854,9 +1832,9 @@
 
 <!-- ============ SIDEBAR ============ -->
 <aside class="sidebar" id="sidebar">
-  <a class="sidebar-logo" href="#home" data-view="home" aria-label="Home" style="display:flex; flex-direction:column; align-items:center;">
-    <img src="assets/logo-at.jpg" alt="Anchit Tandon Logo" style="width: 48px; height: 48px; border-radius: 8px; margin-bottom: 8px; object-fit: cover; border: 1px solid var(--accent);">
-    <span>Anchit<span style="display:inline; color:var(--accent);">Tandon.</span></span>
+  <a class="sidebar-logo" href="#home" data-view="home" aria-label="Home" style="display:flex; align-items:center; gap:12px;">
+    <img src="AnchitTandon-AppLogo.png" alt="Anchit Tandon Logo" style="width: 50px; height: 50px; border-radius: 14px; object-fit: cover; border: 1px solid rgba(255,183,54,.7); box-shadow:0 0 22px rgba(255,133,24,.28);">
+    <span>Anchit Tandon</span>
   </a>
 
   <nav class="sidebar-nav">
@@ -1866,7 +1844,7 @@
     </a>
     <a class="sidebar-item" href="#chat" data-view="chat" aria-label="Chat with Anchit">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      <span class="sidebar-label">Chat with me</span>
+      <span class="sidebar-label">Chat</span>
     </a>
     <a class="sidebar-item" href="#experience" data-view="experience" aria-label="Work Experience">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
@@ -1941,9 +1919,17 @@
     </div>
     <div class="top-bar-actions">
       <!-- View switcher moved to global sticky widget -->
-      <button class="top-bar-cta act-meet" data-schedule aria-label="Meet Me" title="Meet Me — book a Google Meet">
+      <button class="top-bar-cta listen" id="universalNarrateBtn" type="button" aria-label="Hear me narrate" title="Hear Anchit narrate this page">
+        <svg class="listen-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        <span class="cta-label">Hear me narrate</span>
+      </button>
+      <button class="top-bar-cta act-chat" id="universalTalkBtn" type="button" aria-label="Talk with me" title="Open chat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span class="cta-label">Talk with me</span>
+      </button>
+      <button class="top-bar-cta act-meet" data-schedule aria-label="Book 30-min Google Meet" title="Book a 30-min Google Meet">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <span class="cta-label">Meet Me</span>
+        <span class="cta-label">30-min Meet</span>
       </button>
       
     </div>
@@ -2175,26 +2161,31 @@
   <section class="view" id="view-chat">
     <div class="container">
       <div style="margin-bottom: 16px;">
-        <div class="eyebrow" style="margin-bottom: 8px;">Chat with Anchit · Ask me anything</div>
+        <div class="eyebrow" style="margin-bottom: 8px;">Anchit Tandon · Ask me anything</div>
       </div>
       <div class="chat-block">
         <div class="chat-head">
-          <div class="chat-head-avatar"><img src="assets/logo-at.jpg" style="width:100%; height:100%; object-fit:cover; border-radius:50%;"></div>
+          <div class="chat-head-avatar"><img src="assets/anchit-profile.jpg" alt="Anchit Tandon" style="width:100%; height:100%; object-fit:cover; border-radius:50%;"></div>
           <div class="chat-head-info">
             <div class="title" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-              <span>Talk with Anchit (AI)</span>
-              <button id="chatNarrateBtn" style="background:var(--primary); color:#000; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">Hear me narrate</button>
+              <span>Talk with Anchit</span>
+              <button id="chatMinimizeBtn" class="chat-mini-btn" type="button" aria-label="Minimize chat" title="Minimize for this session">–</button>
             </div>
-            <div class="sub">My cloned voice and knowledge base. Ask me anything!</div>
+            <div class="sub">Ask about work, projects, metrics, or the fastest way to connect.</div>
           </div>
         </div>
         <div class="chat-body" id="chatBody"></div>
         <div class="chips" id="chipRow"></div>
+        <div class="dictation-transcript" id="dictationTranscript" aria-live="polite"></div>
         <div class="chat-input">
           <input type="text" id="chatInput" placeholder="Ask me anything — or tap the mic to talk…" autocomplete="off" />
-          <button class="chat-mic" id="chatMic" aria-label="Speak" title="Speak your question">
+          <button class="chat-mic" id="chatMic" aria-label="Dictate message" title="Dictate with live transcript">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
           </button>
+          <button class="chat-mic" id="chatAudioUploadBtn" aria-label="Send audio file" title="Send audio file directly" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </button>
+          <input type="file" id="chatAudioFile" accept="audio/*" hidden>
           <button class="chat-send" id="chatSend" aria-label="Send">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           </button>
@@ -3058,7 +3049,7 @@
       <div class="contact-grid reveal-stagger">
         <a href="#schedule" data-schedule class="contact-card" style="cursor:pointer;">
           <span class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
-          <div class="contact-card-text"><div class="label">Schedule · 15-min Google Meet</div><div class="value">Book a <em>call</em> with me</div></div>
+          <div class="contact-card-text"><div class="label">Google Meet · 30 min</div><div class="value">Book a <em>focused</em> call</div></div>
         </a>
         <a href="mailto:anchit.tandon@gmail.com" class="contact-card">
           <span class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
@@ -3066,19 +3057,23 @@
         </a>
         <a href="https://wa.me/919873945238" target="_blank" rel="noopener" class="contact-card">
           <span class="contact-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.8.7.8-2.7-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2.1-.2 0-.3 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3-.8.8-1 1.9-.6 3.1a9.3 9.3 0 0 0 4.6 4.9c1.6.7 2.6.6 3.4.4.5-.1 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.1l-.4-.1z"/></svg></span>
-          <div class="contact-card-text"><div class="label">WhatsApp · SMS · Call</div><div class="value">+91 <em>98739</em> 45238</div></div>
+          <div class="contact-card-text"><div class="label">WhatsApp</div><div class="value">+91 <em>98739</em> 45238</div></div>
         </a>
         <a href="https://linkedin.com/in/anchit-tandon" target="_blank" rel="noopener" class="contact-card">
           <span class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></span>
-          <div class="contact-card-text"><div class="label">LinkedIn · Full résumé</div><div class="value">linkedin.com/in/<em>anchit-tandon</em></div></div>
+          <div class="contact-card-text"><div class="label">LinkedIn</div><div class="value">linkedin.com/in/<em>anchit-tandon</em></div></div>
         </a>
-        <a href="https://wa.me/919873945238" target="_blank" rel="noopener" class="contact-card">
+        <a href="sms:+919873945238" class="contact-card">
           <span class="contact-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.8.7.8-2.7-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2.1-.2 0-.3 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3-.8.8-1 1.9-.6 3.1a9.3 9.3 0 0 0 4.6 4.9c1.6.7 2.6.6 3.4.4.5-.1 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.1l-.4-.1z"/></svg></span>
-          <div class="contact-card-text"><div class="label">WhatsApp · Quickest</div><div class="value">+91 <em>98739</em> 45238</div></div>
+          <div class="contact-card-text"><div class="label">SMS</div><div class="value">Send a <em>text</em></div></div>
         </a>
         <a href="tel:+919873945238" class="contact-card">
           <span class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
-          <div class="contact-card-text"><div class="label">Anchit Tandon · Delhi, IST</div><div class="value">+91 <em>98739</em> 45238</div></div>
+          <div class="contact-card-text"><div class="label">Phone call</div><div class="value">Call <em>directly</em></div></div>
+        </a>
+        <a href="assets/resume.pdf" target="_blank" rel="noopener" class="contact-card">
+          <span class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+          <div class="contact-card-text"><div class="label">Direct resume</div><div class="value">Open <em>PDF</em></div></div>
         </a>
       </div>
     </div>
@@ -3130,12 +3125,11 @@
   const root = document.documentElement;
 
   /* ============ THEME ============ */
-  const savedTheme = localStorage.getItem('anchit-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  const savedTheme = 'dark';
   root.setAttribute('data-theme', savedTheme);
   document.getElementById('themeToggle').addEventListener('click', () => {
-    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    root.setAttribute('data-theme', next);
-    localStorage.setItem('anchit-theme', next);
+    root.setAttribute('data-theme', 'dark');
+    localStorage.setItem('anchit-theme', 'dark');
   });
 
   /* ============ SIDEBAR COLLAPSE (desktop) ============ */
@@ -3339,8 +3333,8 @@
       response: "Quick timeline: VIT CSE (2016–20) → Tuple Technologies, backend (2020–22) → Citymall, backend (2022) → Times Internet, APM to Senior PM (2022–26) → Vahdam India, AGM Product (2026–now). The thread: started building systems, then products, then growth. Each step compounded the last. <a data-nav='experience'>Full timeline →</a>",
       nextChips: ["Why switch to product?","Tell me about Times Internet","Tell me about Vahdam","How do I reach you?"] },
     { keywords: ['book','schedule','call','meet','meeting','calendar','appointment','connect','catch up','hop on','available','talk to you'],
-      response: "Let's actually talk — I keep 15-min intro slots for a quick Google Meet. <a data-nav='schedule'>Open the scheduler →</a> and you'll get a calendar invite with a Meet link (me + you, both emailed). Prefer async first? <a href='mailto:anchit.tandon@gmail.com'>anchit.tandon@gmail.com</a> · WhatsApp/call <a href='tel:+919873945238'>+91 98739 45238</a>.",
-      nextChips: ["Book a 15-min Meet","What should we discuss?","Show me your work","Your resume"] },
+      response: "Let's actually talk — I keep 30-minute Google Meet slots for focused conversations. <a data-nav='schedule'>Open the scheduler →</a> and you'll get a calendar invite with a Meet link. Prefer async first? <a href='mailto:anchit.tandon@gmail.com'>anchit.tandon@gmail.com</a> · WhatsApp/call <a href='tel:+919873945238'>+91 98739 45238</a>.",
+      nextChips: ["Book a 30-min Meet","What should we discuss?","Show me your work","Your resume"] },
     { keywords: ['voice','voice ai'],
       response: "Voice is a thread that runs through my work. Hey Yaara is voice-first — an AI companion for the elderly where the entire interface is conversation. At Times Internet, the AI telesuite processed voice in real-time for sales transcription and pitch scoring. I think voice removes the biggest friction of all: having to learn an interface. <a data-nav='project-yaara'>See Hey Yaara →</a>",
       nextChips: ["Tell me about Hey Yaara","What's the AI telesuite?","Tell me about MusicGenAI","Your AI stack?"] },
@@ -3379,18 +3373,17 @@
     }
   }
 
-  // Shared audio element for the cloned-voice (ElevenLabs) path.
+  // Shared audio element for the cloned-voice path.
   let cloneAudio = null;
-  // Tries Anchit's cloned voice via /api/tts first; on any failure (key not
-  // set / 401 / offline) falls back to the browser's built-in speech so the
-  // site always talks. Returns true if the clone path is handling playback.
+  // Tries Anchit's cloned XTTS voice via /api/tts. If unavailable, narration
+  // stops visibly instead of falling back to the wrong browser voice.
   async function speakViaClone(plainText, onStart, onEnd) {
     try {
       const r = await fetch('/api/tts', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: plainText }),
       });
-      if (!r.ok) return false;                 // 503/401 → use browser voice
+      if (!r.ok) return false;
       const ct = r.headers.get('content-type') || '';
       if (!ct.includes('audio')) return false;
       const blob = await r.blob();
@@ -3420,10 +3413,17 @@
     msgEl?.classList.add('speaking');
     const cleanupClone = () => { msgEl?.classList.remove('speaking'); if (caption) { caption.classList.remove('active'); caption.innerHTML=''; } };
 
-    // Try the cloned voice first; if it can't (no key / blocked), fall through
-    // to the browser speech-synthesis path below.
+    // Use the cloned voice only. The browser voice sounded like the wrong person.
     speakViaClone(plainText, () => { if (caption) caption.classList.add('active'); }, cleanupClone)
-      .then((usedClone) => { if (usedClone) return; speakViaBrowser(); });
+      .then((usedClone) => {
+        if (usedClone) return;
+        cleanupClone();
+        if (caption) {
+          caption.textContent = 'Voice engine is warming up. Please try again in a moment.';
+          caption.classList.add('active');
+          setTimeout(() => caption.classList.remove('active'), 2600);
+        }
+      });
 
     function speakViaBrowser() {
     if (!window.speechSynthesis) { cleanupClone(); return; }
@@ -3528,7 +3528,7 @@
       hideTyping();
       const m = findMatch(text);
       if (m) { addBot(m.response); renderChips(m.nextChips || DEFAULT_CHIPS); }
-      else { addBot("Here's my honest quick take: most of what I work on lives at the crossroads of <b>product, growth and AI</b> — so the real answer usually depends on the specific funnel or goal. Rather than hand-wave, I'd give you a precise answer directly. The fastest way: <a data-nav='schedule'>book a 15-min Google Meet →</a>, or reach me at <a href='mailto:anchit.tandon@gmail.com'>anchit.tandon@gmail.com</a> / <a href='tel:+919873945238'>+91 98739 45238</a>. Meanwhile, want me to walk you through my work, a project, or how I think about product?"); renderChips(["Walk me through your work","Show me a project","Book a quick call","Why product over engineering?"]); }
+      else { addBot("Here's my honest quick take: most of what I work on lives at the crossroads of <b>product, growth and AI</b>, so the real answer depends on the funnel or goal. The fastest way: <a data-nav='schedule'>book a 30-minute Google Meet →</a>, or reach me at <a href='mailto:anchit.tandon@gmail.com'>anchit.tandon@gmail.com</a> / <a href='tel:+919873945238'>+91 98739 45238</a>. Want me to walk you through my work, a project, or how I think about product?"); renderChips(["Walk me through your work","Show me a project","Book a quick call","Why product over engineering?"]); }
     }, 500 + Math.random() * 400);
   }
 
@@ -3818,7 +3818,7 @@
     }
     function applyMute() {
       if (pageAudio) pageAudio.muted = audioMuted;
-      // Browser TTS can't change volume mid-utterance — pause/resume as a graceful fallback.
+      // Browser TTS pause/resume remains only for legacy paused states.
       if (!pageAudio && window.speechSynthesis.speaking) {
         if (audioMuted) { window.speechSynthesis.pause(); clearInterval(progressTimer); }
         else { window.speechSynthesis.resume(); }
@@ -3951,17 +3951,17 @@
       });
     }
 
-    // Play pre-recorded uploaded audio file (audio/anchit.m4a for home page)
+    // The voice sample is only a cloning reference on the server, never playback.
     function playUploadedAudio(viewName) { return Promise.resolve(false); }
 
-    // Cloned-voice (ElevenLabs) path for other page narrations.
+    // Cloned XTTS path for page narrations.
     async function speakViaCloneEl(viewName, text) {
       try {
         const r = await fetch('/api/tts', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text })
         });
-        if (!r.ok) return false;                       // 503/401 → browser voice
+        if (!r.ok) return false;
         const ct = r.headers.get('content-type') || '';
         if (!ct.includes('audio')) return false;
         const blob = await r.blob();
@@ -3999,20 +3999,14 @@
             startHighlightingSync(viewName, pageAudio);
             return;
           }
-          const utter = new SpeechSynthesisUtterance(text);
-          utter.rate = 0.96; utter.pitch = 1.0; utter.volume = audioMuted ? 0 : 0.85;
-          const voice = pickVoice(); if (voice) utter.voice = voice;
-
-          const estimatedMs = (text.split(/\s+/).length / (0.96 * 2.3)) * 1000;
-          utter.onstart = () => {
-            showIndicator(viewName);
-            setPlayerState(true, viewName);
-            startProgressBar(estimatedMs);
-            startHighlightingSync(viewName, null, utter, estimatedMs);
-          };
-          utter.onend   = () => { hideIndicator(); setPlayerState(false, viewName); stopProgressBar(); stopHighlighting(); };
-          utter.onerror = () => { hideIndicator(); setPlayerState(false, viewName); stopProgressBar(); stopHighlighting(); };
-          window.speechSynthesis.speak(utter);
+          hideIndicator();
+          setPlayerState(false, viewName);
+          const caption = document.getElementById('chatCaption');
+          if (caption) {
+            caption.textContent = 'Voice engine is warming up. Please try again in a moment.';
+            caption.classList.add('active');
+            setTimeout(() => caption.classList.remove('active'), 2600);
+          }
         });
       });
     }
@@ -4268,7 +4262,7 @@
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px;">
       <div>
         <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--primary,#ff4d1f);">Let's talk</div>
-        <h2 id="schedTitle" style="font-size:22px;margin-top:6px;color:var(--ink,#161312);">Book a 15-min Google Meet</h2>
+        <h2 id="schedTitle" style="font-size:22px;margin-top:6px;color:var(--ink,#161312);">Book a 30-min Google Meet</h2>
       </div>
       <button type="button" id="schedClose" aria-label="Close" style="background:none;border:0;color:var(--ink-mute,#a39e94);font-size:26px;line-height:1;cursor:pointer;">×</button>
     </div>
@@ -4352,9 +4346,9 @@
     if(probs.length){ err.style.display='block'; err.textContent="Please enter "+probs.join(", ")+"."; return; }
     err.style.display='none';
     var who = name + (role||company ? " ("+[role,company].filter(Boolean).join(" at ")+")" : "");
-    var end=new Date(start.getTime()+15*60000);
+    var end=new Date(start.getTime()+30*60000);
     var title=encodeURIComponent("Intro call — "+name+" × Anchit Tandon");
-    var details=encodeURIComponent("15-min Google Meet.\nGuest: "+who+" — "+email+", "+phone+"\nHost: Anchit Tandon ("+HOST_EMAIL+", +91 98739 45238)\n\nGoogle attaches a Meet link and emails both guests.");
+    var details=encodeURIComponent("30-min Google Meet.\nGuest: "+who+" — "+email+", "+phone+"\nHost: Anchit Tandon ("+HOST_EMAIL+", +91 98739 45238)\n\nGoogle attaches a Meet link and emails both guests.");
     var gcal="https://calendar.google.com/calendar/render?action=TEMPLATE&text="+title+"&dates="+gfmt(start)+"/"+gfmt(end)+"&details="+details+"&add="+encodeURIComponent(HOST_EMAIL+","+email)+"&conferenceData=true&ctz="+encodeURIComponent(Intl.DateTimeFormat().resolvedOptions().timeZone||'Asia/Kolkata');
     document.getElementById('sf-gcal').href=gcal;
     var dateStr=start.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
@@ -4368,93 +4362,257 @@
 })();
 </script>
 
-
-<!-- GLOBAL VIEW SWITCHER -->
-<div id="globalViewSwitcher" style="position: fixed; bottom: 24px; right: 24px; z-index: 999999; display: flex; gap: 6px; background: rgba(10,10,12,0.85); backdrop-filter: blur(12px); padding: 6px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 8px 32px rgba(0,0,0,0.4);">
-  <button onclick="goView('simple')" style="color:#FBF5EC; background:transparent; border:none; border-radius:100px; cursor:pointer; padding:8px 16px; font-family:'Space Grotesk', system-ui, sans-serif; font-size:13px; font-weight:600; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">✦ Editorial</button>
-  <button onclick="goView('cyber')" style="color:#ff2b2b; background:transparent; border:none; border-radius:100px; cursor:pointer; padding:8px 16px; font-family:'Space Grotesk', system-ui, sans-serif; font-size:13px; font-weight:600; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,43,43,0.1)'" onmouseout="this.style.background='transparent'">⌁ Cyberpunk</button>
-  <button onclick="goView('nexus')" style="color:#00ff88; background:transparent; border:none; border-radius:100px; cursor:pointer; padding:8px 16px; font-family:'Space Grotesk', system-ui, sans-serif; font-size:13px; font-weight:600; transition:all 0.2s;" onmouseover="this.style.background='rgba(0,255,136,0.1)'" onmouseout="this.style.background='transparent'">◎ God Mode</button>
-</div>
-<script>
-  function goView(v) {
-    try { localStorage.setItem('anchit-portfolio-view', v); } catch(e){}
-    location.href = v === 'simple' ? '/' : '/' + v + '/';
+<style id="at-final-polish">
+  :root[data-theme="dark"] {
+    --bg: #050301;
+    --bg-elev: #120d07;
+    --bg-deep: #020100;
+    --ink: #fff6df;
+    --ink-dim: #d9c6a3;
+    --ink-mute: #8d7a5d;
+    --rule: rgba(255, 165, 42, .18);
+    --rule-strong: rgba(255, 190, 73, .36);
+    --primary: #ff6a1a;
+    --primary-deep: #ff3d00;
+    --accent: #f5b531;
+    --accent-soft: rgba(245, 181, 49, .14);
   }
-  // Highlight active view
-  window.addEventListener('DOMContentLoaded', () => {
-    let current = 'simple';
-    if(location.pathname.includes('cyber')) current = 'cyber';
-    if(location.pathname.includes('nexus')) current = 'nexus';
-    const btns = document.getElementById('globalViewSwitcher').querySelectorAll('button');
-    if(current === 'simple') btns[0].style.background = 'rgba(255,255,255,0.15)';
-    if(current === 'cyber') btns[1].style.background = 'rgba(255,43,43,0.15)';
-    if(current === 'nexus') btns[2].style.background = 'rgba(0,255,136,0.15)';
+  body {
+    background:
+      radial-gradient(circle at 70% 10%, rgba(245,181,49,.18), transparent 30%),
+      radial-gradient(circle at 18% 85%, rgba(255,106,26,.16), transparent 34%),
+      linear-gradient(145deg, #020100 0%, #100804 55%, #030201 100%);
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      linear-gradient(rgba(255, 153, 31, .055) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 153, 31, .045) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(circle at 50% 35%, black, transparent 72%);
+    animation: gridDrift 16s linear infinite;
+  }
+  @keyframes gridDrift { to { transform: translate3d(44px, 44px, 0); } }
+  main, .sidebar, .top-bar, footer { position: relative; z-index: 1; }
+  .sidebar {
+    background: linear-gradient(180deg, rgba(8,5,2,.96), rgba(18,10,3,.92));
+    border-right: 1px solid rgba(255, 170, 40, .22);
+    box-shadow: inset -1px 0 rgba(255, 209, 93, .12), 12px 0 60px rgba(255, 106, 26, .07);
+  }
+  .sidebar-logo span {
+    color: #f7ddb0;
+    font-family: var(--font-mono);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .top-bar {
+    background: rgba(5, 3, 1, .78);
+    border-bottom: 1px solid rgba(255, 170, 40, .2);
+    backdrop-filter: blur(18px);
+  }
+  .home-hero, .feature-card, .work-card, .project-card, .contact-card, .chat-block {
+    background: linear-gradient(145deg, rgba(22, 13, 5, .86), rgba(5, 3, 1, .88));
+    border-color: rgba(255, 171, 46, .24);
+    box-shadow: 0 24px 80px rgba(0,0,0,.38), inset 0 0 40px rgba(255, 115, 23, .035);
+  }
+  .contact-card, .sidebar-item, .top-bar-link, .top-bar-cta {
+    transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, color .22s ease;
+  }
+  .contact-card:hover, .sidebar-item:hover, .top-bar-link:hover, .top-bar-cta:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 190, 73, .65);
+    box-shadow: 0 16px 46px rgba(255, 106, 26, .14);
+  }
+  #chatFab, #audioNudge, #audioAmbient, #chatNarrateBtn { display: none !important; }
+  .chat-mini-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 190, 73, .35);
+    background: rgba(255, 106, 26, .12);
+    color: var(--accent);
+    cursor: pointer;
+  }
+  .dictation-transcript {
+    display: none;
+    margin: 8px 14px 0;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(245,181,49,.26);
+    background: rgba(255,106,26,.08);
+    color: var(--ink-dim);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+  .dictation-transcript.active { display: block; }
+  .chat-block.minimized {
+    display: none !important;
+  }
+  .chat-return {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid rgba(255, 190, 73, .42);
+    border-radius: 999px;
+    background: linear-gradient(135deg, #ff7a1a, #f5b531);
+    color: #090400;
+    font-weight: 800;
+    padding: 13px 18px;
+    box-shadow: 0 0 38px rgba(255, 120, 24, .42);
+    cursor: pointer;
+  }
+  .chat-return.visible { display: inline-flex; }
+  @media (max-width: 720px) {
+    .top-bar-inner { gap: 8px; }
+    .top-bar-actions { flex-wrap: wrap; justify-content: flex-end; }
+    .top-bar-cta .cta-label, .top-bar-link .tb-label { display: none; }
+  }
+</style>
+<button class="chat-return" id="chatReturnBtn" type="button" aria-label="Reopen chat">
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  Talk with me
+</button>
+<script id="at-final-flow">
+(function(){
+  const chatBlock = document.querySelector('#view-chat .chat-block');
+  const chatInputEl = document.getElementById('chatInput');
+  const returnBtn = document.getElementById('chatReturnBtn');
+  const transcript = document.getElementById('dictationTranscript');
+  const audioFileInput = document.getElementById('chatAudioFile');
+  const uploadBtn = document.getElementById('chatAudioUploadBtn');
+  const micBtn = document.getElementById('chatMic');
+  const talkBtn = document.getElementById('universalTalkBtn');
+  const hearBtn = document.getElementById('universalNarrateBtn');
+  const miniBtn = document.getElementById('chatMinimizeBtn');
+  const logoImgs = document.querySelectorAll('img[src="assets/logo-at.jpg"]');
+  logoImgs.forEach(img => { img.src = 'AnchitTandon-AppLogo.png'; img.alt = 'Anchit Tandon'; });
+
+  function openSmallChat() {
+    sessionStorage.removeItem('anchit-chat-minimized');
+    chatBlock?.classList.remove('minimized');
+    returnBtn?.classList.remove('visible');
+    document.body.classList.remove('view-chat');
+    setTimeout(() => chatInputEl?.focus(), 120);
+  }
+  function openFullChat() {
+    sessionStorage.removeItem('anchit-chat-minimized');
+    chatBlock?.classList.remove('minimized');
+    returnBtn?.classList.remove('visible');
+    if (typeof switchView === 'function') switchView('chat');
+    document.body.classList.add('view-chat');
+    setTimeout(() => chatInputEl?.focus(), 160);
+  }
+  function minimizeChat() {
+    sessionStorage.setItem('anchit-chat-minimized', '1');
+    chatBlock?.classList.add('minimized');
+    returnBtn?.classList.add('visible');
+    document.body.classList.remove('view-chat');
+  }
+  if (sessionStorage.getItem('anchit-chat-minimized') === '1') {
+    chatBlock?.classList.add('minimized');
+    returnBtn?.classList.add('visible');
+  } else {
+    chatBlock?.classList.remove('minimized');
+  }
+  talkBtn?.addEventListener('click', openSmallChat);
+  returnBtn?.addEventListener('click', openSmallChat);
+  miniBtn?.addEventListener('click', minimizeChat);
+  document.querySelectorAll('.sidebar-item[data-view="chat"]').forEach(a => {
+    a.addEventListener('click', (e) => { e.preventDefault(); openFullChat(); });
   });
-</script>
 
+  hearBtn?.addEventListener('click', () => {
+    document.getElementById('heroListenBtn')?.click();
+    document.getElementById('audioPlayBtn')?.click();
+  });
 
-
-<!-- GLOBAL NUDGE WIDGET -->
-<div id="globalNudgeWidget" style="position: fixed; bottom: 80px; right: 24px; z-index: 999999; display: flex; flex-direction: column; gap: 12px; align-items: flex-end;">
-  <!-- Mute Toggle -->
-  <button id="globalMuteBtn" onclick="toggleGlobalMute()" style="display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: rgba(10,10,12,0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 8px 32px rgba(0,0,0,0.4); color: #fff; cursor: pointer; transition: all 0.2s;" aria-label="Toggle Audio">
-    <!-- Icon injected via JS -->
-  </button>
-  
-  <!-- Talk With Me Nudge -->
-  <button id="globalChatNudge" onclick="triggerGlobalChatNudge()" style="display: flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 100px; background: var(--primary, #00FF88); border: none; box-shadow: 0 8px 32px rgba(0, 255, 136, 0.4); color: #000; cursor: pointer; transition: all 0.2s; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 14px; font-weight: 700;">
-    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-    Talk With Me
-  </button>
-</div>
-
-<script>
-  function updateGlobalMuteIcon() {
-    const isMuted = localStorage.getItem('anchit-mute') === 'true';
-    const btn = document.getElementById('globalMuteBtn');
-    if (isMuted) {
-      btn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M9 9v6a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>'; // Mic off
-    } else {
-      btn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>'; // Mic on
-    }
-  }
-
-  function toggleGlobalMute() {
-    const isMuted = localStorage.getItem('anchit-mute') === 'true';
-    localStorage.setItem('anchit-mute', !isMuted);
-    updateGlobalMuteIcon();
-    if (!isMuted) { 
-      // Muting now -> stop any ongoing speech
-      if (window.speechSynthesis) window.speechSynthesis.cancel();
-      if (window.audioMuted !== undefined) {
-         window.audioMuted = true;
-         if (typeof setPlayerState === 'function') setPlayerState(false);
+  if (uploadBtn && audioFileInput) {
+    uploadBtn.addEventListener('click', () => audioFileInput.click());
+    audioFileInput.addEventListener('change', () => {
+      const file = audioFileInput.files && audioFileInput.files[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      const body = document.getElementById('chatBody');
+      if (body) {
+        const w = document.createElement('div');
+        w.className = 'msg user audio-msg';
+        w.innerHTML = '<div class="msg-bubble"><strong>Audio message</strong><br><audio controls src="'+url+'"></audio></div>';
+        body.appendChild(w);
+        body.scrollTop = body.scrollHeight;
       }
+      if (typeof addBot === 'function') addBot('Got your audio message. For a written answer, use the mic dictation button so I can read the transcript directly.');
+      audioFileInput.value = '';
+    });
+  }
+
+  if (micBtn) {
+    const freshMic = micBtn.cloneNode(true);
+    micBtn.replaceWith(freshMic);
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      freshMic.style.display = 'none';
     } else {
-      // Unmuting
-      if (window.audioMuted !== undefined) {
-         window.audioMuted = false;
-      }
+      let rec = null;
+      let listening = false;
+      freshMic.addEventListener('click', () => {
+        if (listening) { try { rec && rec.stop(); } catch {} return; }
+        rec = new SR();
+        rec.lang = 'en-IN';
+        rec.interimResults = true;
+        rec.continuous = false;
+        listening = true;
+        freshMic.classList.add('listening');
+        transcript.textContent = 'Listening...';
+        transcript.classList.add('active');
+        let finalText = '';
+        rec.onresult = (event) => {
+          let interim = '';
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const text = event.results[i][0].transcript;
+            if (event.results[i].isFinal) finalText += text;
+            else interim += text;
+          }
+          const visible = (finalText + ' ' + interim).trim();
+          chatInputEl.value = visible;
+          transcript.textContent = visible || 'Listening...';
+        };
+        rec.onerror = () => {
+          transcript.textContent = 'I could not hear that clearly. Please try again.';
+        };
+        rec.onend = () => {
+          listening = false;
+          freshMic.classList.remove('listening');
+          if (chatInputEl.value.trim()) {
+            transcript.textContent = 'Transcript ready. Press send to submit as a chat message.';
+          } else {
+            transcript.classList.remove('active');
+          }
+        };
+        try { rec.start(); } catch {
+          listening = false;
+          freshMic.classList.remove('listening');
+        }
+      });
     }
   }
 
-  function triggerGlobalChatNudge() {
-    if (document.getElementById('cli')) { // Nexus
-      document.getElementById('cli').focus();
-    } else if (document.getElementById('ccInput')) { // Cyber
-      document.getElementById('chat').scrollIntoView({ behavior: 'smooth' });
-      setTimeout(() => document.getElementById('ccInput').focus(), 600);
-    } else if (document.getElementById('view-chat')) { // Simple
-      document.getElementById('view-chat').scrollIntoView({ behavior: 'smooth' });
-      setTimeout(() => {
-        const ci = document.getElementById('chat-input');
-        if(ci) ci.focus();
-      }, 600);
+  document.title = 'Anchit Tandon';
+  document.querySelectorAll('*').forEach(el => {
+    if (el.childNodes.length === 1 && el.firstChild.nodeType === Node.TEXT_NODE) {
+      el.textContent = el.textContent
+        .replace(new RegExp('Interactive\\s+Portfolio', 'gi'), 'Anchit Tandon')
+        .replace(new RegExp('portfolio\\s+is\\s+interactive', 'gi'), 'experience is guided');
     }
-  }
-
-  document.addEventListener('DOMContentLoaded', updateGlobalMuteIcon);
+  });
+})();
 </script>
-
 </body>
 </html>
