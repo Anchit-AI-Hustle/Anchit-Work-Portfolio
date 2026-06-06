@@ -17,6 +17,7 @@ const assets = [
   'index.html',
   'manifest.json',
   'sw.js',
+  'AnchitTandon-AppLogo.png',
   'icons',
   'assets',
   'audio',
