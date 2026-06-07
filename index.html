@@ -1329,8 +1329,89 @@
     #view-chat .container { height: 100% !important; padding-top: calc(52px + var(--safe-top)) !important; }
   }
 
-  /* Hidden audio player state (for TTS JS internals) */
-  .anp-nudge.dismissed { display: none; }
+  /* ============ VOICE — AMBIENT INDICATOR ============ */
+  .audio-ambient {
+    position: fixed; bottom: calc(28px + var(--safe-bottom)); right: 28px;
+    z-index: 150; display: flex; align-items: center; gap: 8px;
+    pointer-events: none; opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .audio-ambient.active { opacity: 1; }
+  .audio-ambient-bars {
+    display: flex; align-items: flex-end; gap: 2px; height: 18px;
+  }
+  .audio-ambient-bars span {
+    display: block; width: 3px; border-radius: 2px;
+    background: var(--primary);
+    animation: waveBar 1.2s ease-in-out infinite;
+  }
+  .audio-ambient-bars span:nth-child(1) { height: 8px;  animation-delay: 0s; }
+  .audio-ambient-bars span:nth-child(2) { height: 14px; animation-delay: 0.2s; }
+  .audio-ambient-bars span:nth-child(3) { height: 18px; animation-delay: 0.1s; }
+  .audio-ambient-bars span:nth-child(4) { height: 10px; animation-delay: 0.3s; }
+  .audio-ambient-bars span:nth-child(5) { height: 6px;  animation-delay: 0.15s; }
+  @keyframes waveBar {
+    0%, 100% { transform: scaleY(0.5); opacity: 0.6; }
+    50%       { transform: scaleY(1);   opacity: 1; }
+  }
+  .audio-ambient-label {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-dim);
+  }
+  @media (max-width: 820px) {
+    .audio-ambient { bottom: calc(20px + var(--safe-bottom)); right: 16px; }
+  }
+
+  /* ============ FLOATING AUDIO NUDGE + PLAYER ============ */
+  .anp-nudge {
+    position: fixed; bottom: calc(24px + var(--safe-bottom)); right: 24px;
+    z-index: 160; display: flex; align-items: center; gap: 8px;
+    background: var(--bg-elev); border: 1px solid var(--rule-strong);
+    border-radius: 99px; padding: 6px 8px 6px 6px;
+    box-shadow: var(--shadow-md);
+  }
+  .anp-nudge.dismissed { display: none !important; }
+  .anp-play-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--primary); color: #FFF; border: none; cursor: pointer;
+    border-radius: 99px; padding: 8px 14px 8px 10px;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .anp-play-btn:hover { background: var(--primary-deep); }
+  .anp-play-btn svg { width: 14px; height: 14px; }
+  .anp-nudge.playing .anp-play-btn,
+  .anp-nudge.paused .anp-play-btn { display: none; }
+  .anp-player { display: none; align-items: center; gap: 8px; }
+  .anp-nudge.playing .anp-player,
+  .anp-nudge.paused .anp-player { display: flex; }
+  .anp-label {
+    font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+    letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-dim);
+    white-space: nowrap;
+  }
+  .anp-progress { width: 80px; height: 3px; background: var(--rule); border-radius: 2px; overflow: hidden; }
+  .anp-fill { height: 100%; width: 0%; background: var(--primary); border-radius: 2px; }
+  .anp-time { font-family: var(--font-mono); font-size: 10px; color: var(--ink-dim); min-width: 28px; text-align: right; }
+  .anp-btn {
+    width: 28px; height: 28px; border-radius: 50%; border: none; cursor: pointer;
+    background: var(--bg-deep); color: var(--ink-dim);
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .anp-btn:hover { background: var(--primary); color: #FFF; }
+  .anp-btn svg { width: 14px; height: 14px; }
+  .anp-dismiss {
+    width: 24px; height: 24px; border-radius: 50%; border: none; cursor: pointer;
+    background: transparent; color: var(--ink-mute); font-size: 16px; line-height: 1;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .anp-dismiss:hover { color: var(--primary); }
+  .anp-nudge.playing .anp-dismiss,
+  .anp-nudge.paused .anp-dismiss { display: none; }
+
+  #view-chat.chat-view-minimized {
+    display: none !important;
+  }
 
   /* Chat TTS speaking state + caption */
   /* speaking glow handled by the animated bubbleGlow rule above */
@@ -3186,8 +3267,20 @@
 </main>
 
 
-<!-- Audio player state (hidden, used by TTS JS) -->
-<div class="anp-nudge dismissed" id="audioNudge" style="display:none;">
+<!-- ============ VOICE PLAYER (TTS) ============ -->
+<div class="audio-ambient" id="audioAmbient" aria-hidden="true" title="Anchit's voice narration playing">
+  <span class="audio-ambient-label">Playing</span>
+  <div class="audio-ambient-bars">
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+</div>
+
+<!-- Floating audio nudge + mini player -->
+<div class="anp-nudge" id="audioNudge">
+  <button class="anp-play-btn" id="audioPlayBtn" aria-label="Listen to this page">
+    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    <span>Listen</span>
+  </button>
   <div class="anp-player">
     <span class="anp-label" id="anpLabel">Home</span>
     <div class="anp-progress" id="anpProgress"><div class="anp-fill" id="anpFill"></div></div>
@@ -3204,6 +3297,7 @@
       <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
     </button>
   </div>
+  <button class="anp-dismiss" id="audioNudgeDismiss" aria-label="Dismiss">&times;</button>
 </div>
 
 <!-- Cursor glow -->
@@ -3379,6 +3473,12 @@
     // Auto minimize/expand chat widget on tab switching
     if (viewName === 'chat') {
       if (typeof window.openFullChat === 'function') window.openFullChat();
+    } else if (viewName === 'home') {
+      if (sessionStorage.getItem('anchit-chat-minimized') !== '1') {
+        if (typeof window.showFloatingChat === 'function') window.showFloatingChat();
+      } else {
+        if (typeof window.minimizeChat === 'function') window.minimizeChat();
+      }
     } else {
       if (typeof window.minimizeChat === 'function') window.minimizeChat();
     }
@@ -3991,6 +4091,7 @@
   (function() {
     const indicator = document.getElementById('audioAmbient');
     const nudge     = document.getElementById('audioNudge');
+    const playBtn   = document.getElementById('audioPlayBtn');
     const dismissBtn= document.getElementById('audioNudgeDismiss');
     const ppBtn     = document.getElementById('anpPausePlay');
     const stopBtn   = document.getElementById('anpStop');
@@ -4266,6 +4367,13 @@
 
     stopBtn?.addEventListener('click', stopAllPlayback);
 
+    playBtn?.addEventListener('click', () => {
+      audioModeEnabled = true;
+      const activeEl = document.querySelector('.view.active');
+      const vName = activeEl ? activeEl.id.replace('view-', '') : 'home';
+      trySpeak(vName);
+    });
+
     dismissBtn?.addEventListener('click', () => { nudge?.classList.add('dismissed'); });
 
     document.addEventListener('viewChanged', (e) => { if (audioModeEnabled) trySpeak(e.detail); });
@@ -4533,7 +4641,7 @@
     border-color: rgba(255, 190, 73, .65);
     box-shadow: 0 16px 46px rgba(255, 106, 26, .14);
   }
-  #audioNudge, #audioAmbient { display: none !important; }
+
   .chat-mini-btn {
     width: 30px;
     height: 30px;
@@ -4708,9 +4816,19 @@
   const micBtn = document.getElementById('chatMic');
   const miniBtn = document.getElementById('chatMinimizeBtn');
   let chatAudioMuted = false;
+  const viewChatEl = document.getElementById('view-chat');
+  function showFloatingChat() {
+    chatBlock?.classList.remove('minimized');
+    viewChatEl?.classList.remove('chat-view-minimized');
+    returnBtn?.classList.remove('visible');
+    document.body.classList.remove('view-chat');
+  }
+  window.showFloatingChat = showFloatingChat;
+
   function openSmallChat() {
     sessionStorage.removeItem('anchit-chat-minimized');
     chatBlock?.classList.remove('minimized');
+    viewChatEl?.classList.remove('chat-view-minimized');
     returnBtn?.classList.remove('visible');
     document.body.classList.add('view-chat');
     if (typeof switchView === 'function') switchView('chat');
@@ -4719,6 +4837,7 @@
   function openFullChat() {
     sessionStorage.removeItem('anchit-chat-minimized');
     chatBlock?.classList.remove('minimized');
+    viewChatEl?.classList.remove('chat-view-minimized');
     returnBtn?.classList.remove('visible');
     if (typeof switchView === 'function') switchView('chat');
     document.body.classList.add('view-chat');
@@ -4727,6 +4846,7 @@
   function minimizeChat() {
     sessionStorage.setItem('anchit-chat-minimized', '1');
     chatBlock?.classList.add('minimized');
+    viewChatEl?.classList.add('chat-view-minimized');
     returnBtn?.classList.add('visible');
     document.body.classList.remove('view-chat');
   }
@@ -4734,9 +4854,11 @@
   window.minimizeChat = minimizeChat;
   if (sessionStorage.getItem('anchit-chat-minimized') === '1') {
     chatBlock?.classList.add('minimized');
+    viewChatEl?.classList.add('chat-view-minimized');
     returnBtn?.classList.add('visible');
   } else {
     chatBlock?.classList.remove('minimized');
+    viewChatEl?.classList.remove('chat-view-minimized');
   }
   function setChatAudioMuted(nextMuted) {
     chatAudioMuted = nextMuted;
