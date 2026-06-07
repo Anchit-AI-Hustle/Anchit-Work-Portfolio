@@ -262,10 +262,11 @@
     position: fixed; top: 0; left: var(--sidebar-w); right: 0;
     z-index: 150;
     padding-top: var(--safe-top);
-    height: calc(44px + var(--safe-top));
+    min-height: calc(44px + var(--safe-top));
     background: rgba(15,13,10,0.85); backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(255,255,255,0.06);
     display: flex; align-items: center;
+    overflow: hidden;
   }
   [data-theme="light"] .top-bar { background: rgba(251,245,236,0.88); border-bottom-color: var(--rule); }
   .top-bar-inner {
@@ -273,14 +274,21 @@
     padding: 0 var(--gutter);
     display: flex; align-items: center; justify-content: flex-start;
   }
-  .top-bar-links { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+  .top-bar-links { display: flex; gap: 20px; align-items: center; flex-wrap: nowrap; min-width: 0; }
   .top-bar-link {
     font-family: var(--font-mono); font-size: 11px; font-weight: 500;
     letter-spacing: 0.06em; text-transform: uppercase;
     color: var(--ink-dim); transition: color 0.2s;
     display: inline-flex; align-items: center; gap: 6px;
+    white-space: nowrap;
   }
-  .top-bar-link .tb-icon { width: 13px; height: 13px; display: none; }
+  .top-bar-link .tb-icon { width: 13px; height: 13px; display: none; flex: 0 0 auto; }
+  .top-bar-link[data-channel="whatsapp"] .tb-icon { color: #25D366; }
+  .top-bar-link[data-channel="call"] .tb-icon { color: #22C55E; }
+  .top-bar-link[data-channel="meet"] .tb-icon { color: #F59E0B; }
+  .top-bar-link[data-channel="sms"] .tb-icon { color: #38BDF8; }
+  .top-bar-link[data-channel="email"] .tb-icon { color: #EF4444; }
+  .top-bar-link[data-channel="resume"] .tb-icon { color: #A78BFA; }
   .top-bar-link:hover { color: var(--primary); }
   .view-dropdown { appearance: none; background: var(--bg-deep); border: 1px solid var(--rule); border-radius: 99px; padding: 4px 12px; font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--ink); cursor: pointer; outline: none; }
   .view-dropdown:hover { background: var(--rule); }
@@ -293,23 +301,38 @@
   @media (max-width: 820px) {
     .top-bar { left: 0; }
     /* Make room for the hamburger (42px wide at left:14px) on the left side */
-    .top-bar-inner { padding: 0 12px 0 64px; gap: 8px; }
-    /* Contact links collapse to icon-only chips, stay visible */
-    .top-bar-links { gap: 10px; }
-    .top-bar-link { padding: 6px; }
-    .top-bar-link .tb-label { display: none; }
+    .top-bar-inner { padding: 6px 10px 6px 58px; gap: 8px; max-width: none; overflow: hidden; }
+    .top-bar-links {
+      gap: 8px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      width: 100%;
+    }
+    .top-bar-links::-webkit-scrollbar { display: none; }
+    .top-bar-link {
+      padding: 7px 9px;
+      border: 1px solid rgba(255, 190, 73, .18);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .035);
+      font-size: 9px;
+      letter-spacing: .04em;
+      max-width: 118px;
+    }
+    .top-bar-link .tb-label { display: inline-block; overflow: hidden; text-overflow: ellipsis; }
     .top-bar-link .tb-icon { display: inline-block; }
     /* Hamburger button sits inside the safe-area top of the bar */
     .sidebar-toggle { top: calc(var(--safe-top) + 6px); width: 36px; height: 36px; }
-    main { padding-top: calc(44px + var(--safe-top)); }
-    main:has(#view-home.active) { padding-top: calc(44px + var(--safe-top)); }
+    main { padding-top: calc(58px + var(--safe-top)); }
+    main:has(#view-home.active) { padding-top: calc(58px + var(--safe-top)); }
   }
 
   @media (max-width: 480px) {
-    .top-bar-inner { padding: 0 8px 0 54px; gap: 6px; }
-    .top-bar-links { gap: 4px; }
-    .top-bar-link { padding: 5px; }
-    .top-bar-link .tb-icon { width: 14px; height: 14px; }
+    .top-bar-inner { padding: 6px 8px 6px 54px; gap: 6px; }
+    .top-bar-links { gap: 6px; }
+    .top-bar-link { padding: 7px 8px; max-width: 104px; }
+    .top-bar-link .tb-icon { width: 13px; height: 13px; }
   }
   
 
@@ -432,14 +455,14 @@
     color: var(--ink-dim); max-width: 960px; margin-bottom: 0;
   }
   .hero-tagline em { font-style: italic; color: var(--primary); font-weight: 400; }
-  /* Hero stats — big, confident */
+  /* Hero stats — compact, consistent */
   .hero-stats {
     display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
     margin-bottom: 40px;
   }
   @media (max-width: 880px) { .hero-stats { grid-template-columns: repeat(2, 1fr); } }
   .hero-stat {
-    background: var(--bg-elev); border-radius: 20px; padding: 28px 24px;
+    background: var(--bg-elev); border-radius: 14px; padding: 20px 18px;
     border: 1px solid var(--rule);
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s, border-color 0.3s;
     position: relative; overflow: hidden;
@@ -449,15 +472,15 @@
   .hero-stat:nth-child(4):hover { transform: translateY(-6px) rotate(1deg); }
   .hero-stat .num {
     font-family: var(--font-display); font-weight: 400;
-    font-size: clamp(40px, 5.5vw, 72px); line-height: 0.95;
-    letter-spacing: -0.04em; color: var(--ink);
+    font-size: clamp(26px, 3.4vw, 42px); line-height: 1;
+    letter-spacing: 0; color: var(--ink);
     font-variation-settings: "SOFT" 70, "WONK" 1;
   }
   .hero-stat .num em { font-style: italic; color: var(--primary); }
   .hero-stat .label {
     font-family: var(--font-mono); font-size: 10px; font-weight: 500;
     letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-dim);
-    margin-top: 16px; line-height: 1.5; max-width: 220px;
+    margin-top: 12px; line-height: 1.45; max-width: 220px;
   }
 
   /* ============ HOME IDENTITY + CHAT GRID ============ */
@@ -856,8 +879,8 @@
   @media (max-width: 820px) { .builds-grid { grid-template-columns: 1fr; gap: 16px; } }
 
   .build-card {
-    background: var(--bg-elev); border-radius: 24px;
-    padding: 36px 32px; min-height: 320px;
+    background: var(--bg-elev); border-radius: 18px;
+    padding: 26px 24px; min-height: 320px;
     display: flex; flex-direction: column; position: relative; overflow: hidden;
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
   }
@@ -866,7 +889,7 @@
 
   .build-card::before {
     content: ''; position: absolute; top: -40px; right: -40px;
-    width: 160px; height: 160px; border-radius: 50%;
+    width: 104px; height: 104px; border-radius: 50%;
     background: var(--primary-soft);
     transition: transform 0.5s, background 0.3s;
   }
@@ -886,15 +909,34 @@
 
   .build-card h3 {
     font-family: var(--font-display); font-weight: 400;
-    font-size: clamp(28px, 3.5vw, 40px); line-height: 1.05;
+    font-size: clamp(22px, 2.4vw, 30px); line-height: 1.08;
     letter-spacing: -0.025em; margin-bottom: 14px; color: var(--ink);
     position: relative; z-index: 1;
     font-variation-settings: "SOFT" 70;
   }
   .build-card h3 em { font-style: italic; color: var(--primary); font-weight: 500; }
   .build-card p {
-    color: var(--ink-dim); font-size: 15.5px; line-height: 1.6; flex: 1;
+    color: var(--ink-dim); font-size: 15px; line-height: 1.55; flex: 0 0 auto;
     position: relative; z-index: 1;
+  }
+  .build-details {
+    position: relative; z-index: 1;
+    margin: 16px 0 0; padding: 0; list-style: none;
+    display: grid; gap: 7px;
+    color: var(--ink-dim); font-size: 13px; line-height: 1.45;
+  }
+  .build-details li { display: flex; gap: 8px; }
+  .build-details li::before {
+    content: '';
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--primary);
+    flex: 0 0 6px; margin-top: .55em;
+  }
+  .build-actions {
+    position: relative; z-index: 1;
+    margin-top: auto;
+    padding-top: 20px;
+    display: flex; flex-wrap: wrap; gap: 10px;
   }
   .build-stack {
     display: flex; flex-wrap: wrap; gap: 6px; margin-top: 24px;
@@ -1248,10 +1290,10 @@
 
   /* ============ CHAT PAGE FULL HEIGHT ============ */
 
-  /* Universal Chat Overrides */
-  #view-chat {
-    display: flex !important;
-    opacity: 1 !important;
+	  /* Universal Chat Overrides */
+	  #view-chat {
+	    display: none !important;
+	    opacity: 1 !important;
     position: fixed;
     bottom: 24px;
     right: 24px;
@@ -1278,34 +1320,33 @@
   }
   
   /* When Chat is ACTIVE from LHS */
-  body.view-chat #view-chat,
-  #view-chat.active {
-    bottom: 0 !important;
-    right: 0 !important;
-    width: calc(100vw - var(--sidebar-w)) !important;
-    height: calc(100vh - 44px) !important;
-    max-height: none !important;
-    border-radius: 0 !important;
-    border: none !important;
-    box-shadow: none !important;
-    background: var(--bg) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+	  body.view-chat #view-chat,
+	  #view-chat.active {
+	    display: flex !important;
+	    bottom: calc(22px + var(--safe-bottom)) !important;
+    right: 22px !important;
+    width: min(760px, calc(100vw - var(--sidebar-w) - 48px)) !important;
+    height: min(760px, calc(100vh - 92px)) !important;
+    max-height: calc(100vh - 92px) !important;
+    border-radius: 18px !important;
   }
-  body.sidebar-collapsed.view-chat #view-chat,
-  body.sidebar-collapsed #view-chat.active {
-    width: calc(100vw - var(--sidebar-w-collapsed)) !important;
-  }
+	  body.sidebar-collapsed.view-chat #view-chat,
+	  body.sidebar-collapsed #view-chat.active {
+	    width: min(760px, calc(100vw - var(--sidebar-w-collapsed) - 48px)) !important;
+	  }
   @media (max-width: 820px) {
     body.view-chat #view-chat,
     #view-chat.active {
       left: 0 !important;
       right: auto !important;
+      bottom: 0 !important;
       width: 100vw !important;
-      height: calc(100vh - 44px) !important;
+      height: calc(100vh - 58px - var(--safe-top)) !important;
+      max-height: calc(100vh - 58px - var(--safe-top)) !important;
     }
-    #view-chat {
-      bottom: 80px !important;
+	    #view-chat {
+	      display: none !important;
+	      bottom: 80px !important;
       left: 12px !important;
       right: auto !important;
       width: calc(100vw - 32px) !important;
@@ -1973,25 +2014,33 @@
 <div class="top-bar" id="topBar">
   <div class="top-bar-inner">
     <div class="top-bar-links" aria-label="Reach me">
-      <a href="https://wa.me/919873945238" target="_blank" rel="noopener" class="top-bar-link" aria-label="WhatsApp" title="WhatsApp">
+      <a href="https://wa.me/919873945238" target="_blank" rel="noopener" class="top-bar-link" data-channel="whatsapp" aria-label="WhatsApp" title="WhatsApp">
         <svg class="tb-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.8.7.8-2.7-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2.1-.2 0-.3 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3-.8.8-1 1.9-.6 3.1a9.3 9.3 0 0 0 4.6 4.9c1.6.7 2.6.6 3.4.4.5-.1 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.1l-.4-.1z"/></svg>
         <span class="tb-label">WhatsApp</span>
       </a>
-      <a href="tel:+919873945238" class="top-bar-link" aria-label="Phone Call" title="Phone Call">
+      <a href="tel:+919873945238" class="top-bar-link" data-channel="call" aria-label="Phone Call" title="Phone Call">
         <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
         <span class="tb-label">Call</span>
       </a>
-      <a href="#schedule" data-schedule class="top-bar-link" aria-label="Set up a 30-min Google Meet" title="Set up a 30-min Google Meet">
+      <a href="#schedule" data-schedule class="top-bar-link" data-channel="meet" aria-label="Set up a 30-min Google Meet" title="Set up a 30-min Google Meet">
         <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <span class="tb-label">Set up a 30-Mins Google Meet</span>
       </a>
-      <a href="https://wa.me/919873945238" target="_blank" rel="noopener" class="top-bar-link" aria-label="WhatsApp" title="WhatsApp">
+      <a href="https://wa.me/919873945238" target="_blank" rel="noopener" class="top-bar-link" data-channel="whatsapp" aria-label="WhatsApp" title="WhatsApp">
         <svg class="tb-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.8.7.8-2.7-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2.1-.2 0-.3 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3-.8.8-1 1.9-.6 3.1a9.3 9.3 0 0 0 4.6 4.9c1.6.7 2.6.6 3.4.4.5-.1 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.1l-.4-.1z"/></svg>
         <span class="tb-label">WhatsApp</span>
       </a>
-      <a href="sms:+919873945238" class="top-bar-link" aria-label="SMS" title="SMS">
+      <a href="sms:+919873945238" class="top-bar-link" data-channel="sms" aria-label="SMS" title="SMS">
         <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         <span class="tb-label">SMS</span>
+      </a>
+      <a href="mailto:anchit.tandon@gmail.com" class="top-bar-link" data-channel="email" aria-label="Email" title="Email">
+        <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span class="tb-label">Email</span>
+      </a>
+      <a href="assets/resume.pdf" target="_blank" rel="noopener" class="top-bar-link" data-channel="resume" aria-label="View Resume" title="View Resume">
+        <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span class="tb-label">Resume</span>
       </a>
     </div>
   </div>
@@ -2010,9 +2059,7 @@
       caption.innerHTML = words.map(function(w, i){ return '<span class="chat-caption-word" data-i="' + i + '">' + w + '</span>'; }).join(' ');
       caption.classList.add('active');
     }
-    document.querySelectorAll('#view-home .narrate-span').forEach(function(span, idx) {
-      span.classList.toggle('active-narrate', idx < 3);
-    });
+    document.querySelectorAll('#view-home .active-narrate').forEach(function(el){ el.classList.remove('active-narrate'); });
     if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
     window.speechSynthesis.cancel();
     var utter = new SpeechSynthesisUtterance(text);
@@ -2323,14 +2370,12 @@
           <div class="chat-head-info">
             <div class="title" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
               <span>Talk with Anchit</span>
-              <button id="chatMinimizeBtn" class="chat-mini-btn" type="button" aria-label="Minimize chat" title="Minimize for this session">–</button>
             </div>
             <div class="sub">Ask about work, projects, metrics, or the fastest way to connect.</div>
           </div>
         </div>
         <div class="chat-body" id="chatBody"></div>
         <div class="chips" id="chipRow"></div>
-        <div class="dictation-transcript" id="dictationTranscript" aria-live="polite"></div>
         <div class="chat-input">
           <input type="text" id="chatInput" placeholder="Ask me anything — or tap the mic to talk…" autocomplete="off" />
           <button class="chat-mic" id="chatMic" aria-label="Dictate message" title="Dictate with live transcript">
@@ -2648,7 +2693,7 @@
       <div class="section-head reveal">
         <div class="eyebrow">Personal projects · All live · Built end-to-end</div>
         <h1 class="display-lg">Side Hustle</h1>
-        <p class="lede" style="margin-top: 16px;">Eight AI-first experiments, built end-to-end on weekends and evenings out of curiosity and love for technology. <em>Ideas that wouldn't wait for permission.</em></p>
+        <p class="lede" style="margin-top: 16px;">Nine AI-first experiments, built end-to-end on weekends and evenings out of curiosity and love for technology. <em>Ideas that wouldn't wait for permission.</em></p>
       </div>
 
       <div class="builds-grid reveal-stagger">
@@ -2658,6 +2703,10 @@
           <div class="build-tag"><span>D2C Retention · PWA</span><span class="status">Live</span></div>
           <h3>VAHDAM <em>Lifecycle OS</em></h3>
           <p>Reads campaign, customer &amp; order data, builds a retention dashboard, plans a 30-day mailer calendar, then drafts every email — one workflow, dashboard to send.</p>
+          <ul class="build-details">
+            <li>Built with Supabase data views, ApexCharts, Vercel Functions and a 7-LLM cascade.</li>
+            <li>Implemented dashboard → calendar → mailer generation as one guarded lifecycle workflow.</li>
+          </ul>
           <div class="build-actions">
             <a class="btn primary" href="#project-lifecycle" data-view="project-lifecycle">Case Study &rarr;</a>
             <a class="btn" href="https://vahdam-lifecycle-os.vercel.app/" target="_blank" rel="noopener">Live Demo ↗</a>
@@ -2669,6 +2718,10 @@
           <div class="build-tag"><span>Generative AI · Music</span><span class="status">Live</span></div>
           <h3>Music<em>GenAI</em></h3>
           <p>Type a prompt, get a full song — lyrics, vocals and production. A hobby build exploring how far text-to-music can go.</p>
+          <ul class="build-details">
+            <li>Built with Vite, React, TypeScript, Supabase storage/auth and a Python audio service.</li>
+            <li>Implemented prompt parsing, lyric validation, vocal synthesis handoff and generation history.</li>
+          </ul>
           <div class="build-actions">
             <a class="btn primary" href="#project-music" data-view="project-music">Case Study &rarr;</a>
             <a class="btn" href="https://music-gen-ai-blue.vercel.app/" target="_blank" rel="noopener">Live Demo ↗</a>
@@ -2677,64 +2730,103 @@
 
         <!-- Card 3 -->
         <div class="build-card tilt-card">
+          <div class="build-tag"><span>Portfolio OS · Voice UI</span><span class="status">Live</span></div>
+          <h3>Interactive <em>Portfolio</em></h3>
+          <p>This portfolio is also a hobby product: guided navigation, voice narration, chat, resume handling, mobile PWA branding and responsive OS-style UI.</p>
+          <ul class="build-details">
+            <li>Built as a fast static web app with vanilla JS, responsive CSS, PWA assets and local TTS hooks.</li>
+            <li>Implemented onboarding, chat knowledge base, word-level narration captions and device-scaled layouts.</li>
+          </ul>
+          <div class="build-actions">
+            <a class="btn primary" href="#home" data-view="home">Explore &rarr;</a>
+            <a class="btn" href="./" target="_blank" rel="noopener">Live Demo ↗</a>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="build-card tilt-card">
           <div class="build-tag"><span>Personal Productivity · AI</span><span class="status">Live</span></div>
           <h3>Task <em>Tracker</em></h3>
           <p>Turns emails, meetings &amp; voice notes into tasks on a live Jira-style board — add, drag, filter and assign, so nothing slips.</p>
+          <ul class="build-details">
+            <li>Built with a responsive web board, local task state and AI-assisted task extraction flows.</li>
+            <li>Implemented drag/drop columns, filters, priorities, assignment metadata and voice/email capture paths.</li>
+          </ul>
           <div class="build-actions">
             <a class="btn primary" href="#project-tasktracker" data-view="project-tasktracker">Case Study &rarr;</a>
             <a class="btn" href="https://personal-ai-assistant-anchit.vercel.app/" target="_blank" rel="noopener">Live Demo ↗</a>
           </div>
         </div>
 
-        <!-- Card 4 -->
+        <!-- Card 5 -->
         <div class="build-card tilt-card">
           <div class="build-tag"><span>Personal AI OS</span><span class="status">Live</span></div>
           <h3>The Third <em>Eye</em></h3>
           <p>An agent-orchestrated personal AI OS — memory-backed chat, tasks and multi-phase automation in one place.</p>
+          <ul class="build-details">
+            <li>Built with Next.js, FastAPI, Postgres/pgvector and Gemini-backed agent orchestration.</li>
+            <li>Implemented personas, RAG memory, tasks, tools, voice control and multi-agent reasoning modes.</li>
+          </ul>
           <div class="build-actions">
             <a class="btn primary" href="#project-thirdeye" data-view="project-thirdeye">Case Study &rarr;</a>
             <a class="btn" href="https://the-third-eye-anchit.vercel.app/" target="_blank" rel="noopener">Live Demo ↗</a>
           </div>
         </div>
 
-        <!-- Card 5 -->
+        <!-- Card 6 -->
         <div class="build-card tilt-card">
           <div class="build-tag"><span>AI Voice · Consumer</span><span class="status">Live</span></div>
           <h3>Hey <em>Yaara</em></h3>
           <p>A voice-first AI companion for the elderly — one button to talk, one to stop. Built for people who find apps intimidating.</p>
+          <ul class="build-details">
+            <li>Built as an installable PWA with voice-first interaction and LLM response handling.</li>
+            <li>Implemented a minimal one-button flow, speech input, spoken replies and elderly-friendly UI states.</li>
+          </ul>
           <div class="build-actions">
             <a class="btn primary" href="#project-yaara" data-view="project-yaara">Case Study &rarr;</a>
             <a class="btn" href="https://hey-yaara.vercel.app/" target="_blank" rel="noopener">Live Demo ↗</a>
           </div>
         </div>
 
-        <!-- Card 6 -->
+        <!-- Card 7 -->
         <div class="build-card tilt-card">
           <div class="build-tag"><span>AI Tooling · Marketing</span><span class="status">Live</span></div>
           <h3>Mailer <em>Architect</em></h3>
           <p>Turns a brief into a production-ready HTML email via a multi-LLM cascade with automatic failover.</p>
+          <ul class="build-details">
+            <li>Built with Vercel Functions and a provider cascade across OpenAI, Anthropic, Gemini, xAI, Groq and Cerebras.</li>
+            <li>Implemented catalog-aware product picks, brand-locked layouts, subject lines and HTML email output.</li>
+          </ul>
           <div class="build-actions">
             <a class="btn primary" href="#project-mailer" data-view="project-mailer">Case Study &rarr;</a>
             <a class="btn" href="https://marketing-mailers-html-architect.vercel.app/" target="_blank" rel="noopener">Live Demo ↗</a>
           </div>
         </div>
 
-        <!-- Card 7 -->
+        <!-- Card 8 -->
         <div class="build-card tilt-card">
           <div class="build-tag"><span>AI Workflow · Sales</span><span class="status">Live</span></div>
           <h3>AI <em>TeleSuite</em></h3>
           <p>Real-time transcription, pitch scoring and conversion assist — the consumer take on the telesuite I shipped at ET.</p>
+          <ul class="build-details">
+            <li>Built with real-time speech transcription, LLM scoring logic and a call-coaching UI.</li>
+            <li>Implemented pitch criteria, objection hints, conversion assists and post-call quality feedback.</li>
+          </ul>
           <div class="build-actions">
             <a class="btn primary" href="#project-telesuite" data-view="project-telesuite">Case Study &rarr;</a>
             <a class="btn" href="https://ai-tele-suite.vercel.app/" target="_blank" rel="noopener">Live Demo ↗</a>
           </div>
         </div>
 
-        <!-- Card 8 -->
+        <!-- Card 9 -->
         <div class="build-card tilt-card">
           <div class="build-tag"><span>AI Wellness · Personalised</span><span class="status">Live</span></div>
           <h3>TH+ <em>LifeEngine</em></h3>
           <p>AI wellness planning that turns generic health advice into a daily plan tied to your goals.</p>
+          <ul class="build-details">
+            <li>Built with auth-gated web flows and AI planning prompts for personal wellness goals.</li>
+            <li>Implemented daily routines, check-ins, goal context and personalised plan generation.</li>
+          </ul>
           <div class="build-actions">
             <a class="btn primary" href="#project-lifeengine" data-view="project-lifeengine">Case Study &rarr;</a>
             <a class="btn" href="https://th-life-engine.vercel.app/" target="_blank" rel="noopener">Live Demo ↗</a>
@@ -3263,6 +3355,14 @@
           <span class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
           <div class="contact-card-text"><div class="label">SMS</div><div class="value">Send a <em>text</em></div></div>
         </a>
+        <a href="mailto:anchit.tandon@gmail.com" class="contact-card">
+          <span class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
+          <div class="contact-card-text"><div class="label">Email</div><div class="value">anchit<em>.</em>tandon<em>@</em>gmail.com</div></div>
+        </a>
+        <a href="assets/resume.pdf" target="_blank" rel="noopener" class="contact-card">
+          <span class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+          <div class="contact-card-text"><div class="label">Resume</div><div class="value">Open the <em>PDF</em></div></div>
+        </a>
       </div>
     </div>
   </section>
@@ -3314,6 +3414,8 @@
     <a href="#schedule" data-schedule>Set up a 30-Mins Google Meet</a>
     <a href="https://wa.me/919873945238" target="_blank" rel="noopener">WhatsApp</a>
     <a href="sms:+919873945238">SMS</a>
+    <a href="mailto:anchit.tandon@gmail.com">Email</a>
+    <a href="assets/resume.pdf" target="_blank" rel="noopener">Resume</a>
   </div>
 </footer>
 
@@ -3335,9 +3437,7 @@
       caption.innerHTML = words.map((w, i) => `<span class="chat-caption-word" data-i="${i}">${w}</span>`).join(' ');
       caption.classList.add('active');
     }
-    document.querySelectorAll('#view-home .narrate-span').forEach((span, idx) => {
-      span.classList.toggle('active-narrate', viewName === 'home' && idx < 3);
-    });
+    document.querySelectorAll('#view-home .active-narrate').forEach(el => el.classList.remove('active-narrate'));
     const cleanup = () => {
       caption?.classList.remove('active');
       document.querySelectorAll('#view-home .active-narrate').forEach(el => el.classList.remove('active-narrate'));
@@ -3572,7 +3672,7 @@
       response: "AI shows up everywhere I work. At Vahdam, the most important example is VAHDAM Lifecycle OS. At Times Internet, I built the AI telesuite for transcription, pitch scoring and conversion assist. On the side, MusicGenAI is my passion project, this portfolio is a hobby build, and I keep experimenting with voice, agents, mailers, wellness and productivity workflows. Stack varies by project: React, TypeScript, Python, Supabase, Vercel. I pick whatever removes friction fastest.",
       nextChips: ["Tell me about MusicGenAI","Tell me about Jarvis","Tell me about Hey Yaara","Show me your work"] },
     { keywords: ['contact','email','reach','hire','talk','connect','in touch'],
-      response: "Best way to reach me: WhatsApp first, then call, then a focused 30-minute Google Meet. If you prefer async, WhatsApp or SMS both work at <a href='tel:+919873945238'>+91 98739 45238</a>. <a data-nav='contact'>Open the contact panel →</a>",
+      response: "Best way to reach me: WhatsApp first, then call, then a focused 30-minute Google Meet. If you prefer async, WhatsApp or SMS both work at <a href='tel:+919873945238'>+91 98739 45238</a>; email is <a href='mailto:anchit.tandon@gmail.com'>anchit.tandon@gmail.com</a>. My <a href='assets/resume.pdf' target='_blank' rel='noopener'>resume opens as a PDF</a>. <a data-nav='contact'>Open the contact panel →</a>",
       nextChips: ["Open contact panel","Book a 30-min Meet","Show me your work","Are you open to roles?"] },
     { keywords: ['linkedin','resume','cv','résumé','portfolio'],
       response: "You're already on the best version of my portfolio — the full story lives right here. My <a data-nav='experience'>work history</a> walks through Vahdam and Times Internet, and <a data-nav='projects'>side projects</a> covers everything I've built on the side. For the formal version, my full profile is on LinkedIn (linkedin.com/in/anchit-tandon) and my <a href='assets/resume.pdf' target='_blank' rel='noopener'>résumé opens as a PDF here</a>.",
@@ -3609,9 +3709,16 @@
   const chipRow = document.getElementById('chipRow');
   const chatInput = document.getElementById('chatInput');
   const chatSend = document.getElementById('chatSend');
+  let chatIntroShown = false;
 
   function scrollChat() {
     nextFrame(() => { chatBody.scrollTop = chatBody.scrollHeight; });
+  }
+  function seedChatIntro(html) {
+    if (chatIntroShown || !chatBody) return;
+    chatIntroShown = true;
+    addBot(html);
+    renderChips(DEFAULT_CHIPS);
   }
   function addBot(html) {
     const w = document.createElement('div');
@@ -3679,23 +3786,45 @@
     if (caption) {
       caption.innerHTML = words.map((w, i) => `<span class="chat-caption-word" data-i="${i}">${w}</span>`).join(' ');
       caption.classList.add('active');
-    }
-    const msgEl = bubbleEl.closest('.msg');
-    msgEl?.classList.add('speaking');
-    const cleanupClone = () => { msgEl?.classList.remove('speaking'); if (caption) { caption.classList.remove('active'); caption.innerHTML=''; } };
+	    }
+	    const msgEl = bubbleEl.closest('.msg');
+	    msgEl?.classList.add('speaking');
+	    let transcriptTimer = null;
+	    function markTranscriptWord(idx) {
+	      if (!caption || words.length === 0) return;
+	      const safeIdx = Math.max(0, Math.min(words.length - 1, idx));
+	      caption.querySelectorAll('.current').forEach(el => el.classList.remove('current'));
+	      caption.querySelector(`[data-i="${safeIdx}"]`)?.classList.add('current');
+	    }
+	    function startTranscriptTimer() {
+	      if (!caption || words.length === 0) return;
+	      const started = Date.now();
+	      const estimatedMs = Math.max(2200, words.length * 330);
+	      markTranscriptWord(0);
+	      transcriptTimer = setInterval(() => {
+	        const progress = Math.min(1, (Date.now() - started) / estimatedMs);
+	        markTranscriptWord(Math.floor(progress * words.length));
+	        if (progress >= 1) clearInterval(transcriptTimer);
+	      }, 120);
+	    }
+	    const finishTranscript = () => {
+	      clearInterval(transcriptTimer);
+	      transcriptTimer = null;
+	      msgEl?.classList.remove('speaking');
+	      if (caption) {
+	        markTranscriptWord(words.length - 1);
+	        caption.classList.add('active');
+	      }
+	    };
+	    startTranscriptTimer();
 
-    speakViaClone(plainText, () => { if (caption) caption.classList.add('active'); }, cleanupClone, { caption, words })
-      .then((usedClone) => {
-        if (usedClone) return;
-        if (!window.speechSynthesis) {
-          cleanupClone();
-          if (caption) {
-            caption.textContent = 'Voice is unavailable in this browser.';
-            caption.classList.add('active');
-            setTimeout(() => caption.classList.remove('active'), 2400);
-          }
-          return;
-        }
+	    speakViaClone(plainText, () => { if (caption) caption.classList.add('active'); }, finishTranscript, { caption, words })
+	      .then((usedClone) => {
+	        if (usedClone) return;
+	        if (!window.speechSynthesis) {
+	          finishTranscript();
+	          return;
+	        }
         const utter = new SpeechSynthesisUtterance(plainText);
         utter.rate = 0.96;
         utter.pitch = 0.95;
@@ -3706,17 +3835,16 @@
           || voices.find(v => /Google/i.test(v.name || '') && v.lang?.startsWith('en'))
           || voices.find(v => v.lang?.startsWith('en'));
         if (voice) utter.voice = voice;
-        utter.onboundary = (event) => {
-          if (!caption || (event.name !== 'word' && event.charIndex == null)) return;
-          const before = plainText.slice(0, event.charIndex || 0).trim();
-          const idx = before ? before.split(/\s+/).length : 0;
-          caption.querySelectorAll('.current').forEach(el => el.classList.remove('current'));
-          caption.querySelector(`[data-i="${idx}"]`)?.classList.add('current');
-        };
-        utter.onend = cleanupClone;
-        utter.onerror = cleanupClone;
-        window.speechSynthesis.speak(utter);
-      });
+	        utter.onboundary = (event) => {
+	          if (!caption || (event.name !== 'word' && event.charIndex == null)) return;
+	          const before = plainText.slice(0, event.charIndex || 0).trim();
+	          const idx = before ? before.split(/\s+/).length : 0;
+	          markTranscriptWord(idx);
+	        };
+	        utter.onend = finishTranscript;
+	        utter.onerror = finishTranscript;
+	        window.speechSynthesis.speak(utter);
+	      });
 
   }
   function addUser(text) {
@@ -3880,17 +4008,14 @@
       ob.style.pointerEvents = 'none';
       setTimeout(() => ob.style.visibility = 'hidden', 500);
     }
-    // Open Universal Chat
-    document.body.classList.add('view-chat');
-    // Scroll to #view-chat
-    const c = document.getElementById('view-chat');
-    if(c) c.scrollIntoView({behavior:'smooth'});
-    
-    // Greeting
+    audioModeEnabled = true;
+    chatIntroShown = true;
+    if (typeof switchView === 'function') switchView('chat');
+    if (typeof window.openFullChat === 'function') window.openFullChat();
     setTimeout(() => {
-      addBot(`Hey ${name}, I'm Anchit. Welcome. Ask me anything — my work, side projects, or what I'm solving right now.`);
+      addBot(`Hey ${name}, I'm Anchit. Welcome. Ask me anything — my work, side projects, what I'm solving at Vahdam, or the fastest way to connect.`);
       renderChips(DEFAULT_CHIPS);
-    }, 600);
+    }, 180);
   }
 
   if (obSubmit) { obSubmit.addEventListener('click', finishOnboarding); }
@@ -3923,11 +4048,14 @@
     });
   })();
 
-  // Initial bot message
-  setTimeout(() => {
-    addBot("Hey, I'm Anchit. Ask me anything — my <a data-nav='experience'>work</a>, my <a data-nav='projects'>side projects</a>, why I moved from engineering to product, or what I'm solving right now. I'm direct — let's get into it.");
-    renderChips(DEFAULT_CHIPS);
-  }, 350);
+  document.addEventListener('viewChanged', (e) => {
+    if (e.detail === 'chat') {
+      seedChatIntro("Hey, I'm Anchit. Ask me anything — my <a data-nav='experience'>work</a>, my <a data-nav='projects'>side projects</a>, why I moved from engineering to product, or what I'm solving right now. I'm direct — let's get into it.");
+    }
+  });
+  if (document.querySelector('#view-chat.active')) {
+    seedChatIntro("Hey, I'm Anchit. Ask me anything — my <a data-nav='experience'>work</a>, my <a data-nav='projects'>side projects</a>, why I moved from engineering to product, or what I'm solving right now. I'm direct — let's get into it.");
+  }
 
   /* ============ KEYBOARD ============ */
   document.addEventListener('keydown', (e) => {
@@ -4115,21 +4243,26 @@
     };
     const VIEW_LABELS = { home: 'Home', chat: 'Chat with me', experience: 'Experience', projects: 'Side Hustle', resume: 'My Resume', contact: 'Contact' };
 
-    let progressTimer = null, utterStart = 0, utterDuration = 0;
-    let currentViewName = 'home';
-    let pageAudio = null;       // HTMLAudioElement when the cloned-voice path is active
-    let audioMuted = false;     // shared mute state across both playback paths
+	    let progressTimer = null, utterStart = 0, utterDuration = 0;
+	    let currentViewName = 'home';
+	    let pageAudio = null;       // HTMLAudioElement when the cloned-voice path is active
+	    let audioMuted = false;     // shared mute state across both playback paths
+	    let browserVoiceActive = false;
+	    let browserVoicePaused = false;
 
     function stopPageAudio() {
       if (pageAudio) { try { pageAudio.pause(); } catch {} try { pageAudio.removeAttribute('src'); pageAudio.load(); } catch {} pageAudio = null; }
     }
-    function applyMute() {
-      if (pageAudio) pageAudio.muted = audioMuted;
-      const vol = document.getElementById('anpVolIcon'), mut = document.getElementById('anpMuteIcon');
-      if (vol) vol.style.display = audioMuted ? 'none' : '';
-      if (mut) mut.style.display = audioMuted ? '' : 'none';
-      document.getElementById('anpMute')?.classList.toggle('muted', audioMuted);
-    }
+	    function applyMute() {
+	      if (pageAudio) pageAudio.muted = audioMuted;
+	      const vol = document.getElementById('anpVolIcon'), mut = document.getElementById('anpMuteIcon');
+	      if (vol) vol.style.display = audioMuted ? 'none' : '';
+	      if (mut) mut.style.display = audioMuted ? '' : 'none';
+	      document.getElementById('anpMute')?.classList.toggle('muted', audioMuted);
+	      document.dispatchEvent(new CustomEvent('anchitAudioState', {
+	        detail: { muted: audioMuted, playing: isNarrationPlaying(), paused: isNarrationPaused(), view: currentViewName }
+	      }));
+	    }
 
     function showIndicator(viewName) {
       if (!indicator) return;
@@ -4141,14 +4274,27 @@
       indicator?.classList.remove('active', 'listening');
     }
 
-    function setPlayerState(playing, viewName) {
-      nudge?.classList.toggle('playing', playing);
-      nudge?.classList.toggle('paused', !playing && audioModeEnabled);
+	    function setPlayerState(playing, viewName) {
+	      nudge?.classList.toggle('playing', playing);
+	      nudge?.classList.toggle('paused', !playing && audioModeEnabled);
       if (pauseIcon) pauseIcon.style.display = playing ? '' : 'none';
       if (playIcon)  playIcon.style.display  = playing ? 'none' : '';
-      const vLabel = viewName ? (VIEW_LABELS[viewName] || 'Anchit') : (VIEW_LABELS[currentViewName] || 'Anchit');
-      if (labelEl) labelEl.textContent = playing ? (vLabel + ' · playing') : (vLabel + ' · paused');
-    }
+	      const vLabel = viewName ? (VIEW_LABELS[viewName] || 'Anchit') : (VIEW_LABELS[currentViewName] || 'Anchit');
+	      if (labelEl) labelEl.textContent = playing ? (vLabel + ' · playing') : (vLabel + ' · paused');
+	      document.dispatchEvent(new CustomEvent('anchitAudioState', {
+	        detail: { muted: audioMuted, playing, paused: !playing && audioModeEnabled, view: viewName || currentViewName }
+	      }));
+	    }
+
+	    function isNarrationPlaying() {
+	      if (pageAudio) return !pageAudio.paused && !pageAudio.ended;
+	      return !!(window.speechSynthesis && window.speechSynthesis.speaking && !window.speechSynthesis.paused);
+	    }
+
+	    function isNarrationPaused() {
+	      if (pageAudio) return pageAudio.paused && !pageAudio.ended && audioModeEnabled;
+	      return browserVoicePaused || !!(window.speechSynthesis && window.speechSynthesis.paused);
+	    }
 
     function startProgressBar(durationMs) {
       if (!fill) return;
@@ -4169,45 +4315,29 @@
       if (timeEl) timeEl.textContent = '0:00';
     }
 
-    // Highlight transcript helper functions
-    let activeHighlightTimer = null;
-
-    function startHighlightingSync(viewName, audioEl, utterEl, durationMs) {
-      stopHighlighting();
-      if (viewName !== 'home') return;
-      const spans = document.querySelectorAll('#view-home .narrate-span');
-      if (spans.length === 0) return;
-
-      function highlightIndex(idx) {
-        spans.forEach(span => {
-          const sIdx = parseInt(span.getAttribute('data-n-idx'), 10);
-          if (sIdx === idx) {
-            span.classList.add('active-narrate');
-          } else {
-            span.classList.remove('active-narrate');
-          }
-        });
-      }
-
-      const timeline = [
-        { t: 0.0, idx: 0 },
-        { t: 2.2, idx: 1 },
-        { t: 7.5, idx: 2 },
-        { t: 19.0, idx: 3 },
-        { t: 34.0, idx: 4 },
-        { t: 48.0, idx: 5 }
-      ];
-
-      const startedAt = Date.now();
-      activeHighlightTimer = setInterval(() => {
-        const curr = audioEl?.currentTime ?? (((Date.now() - startedAt) / Math.max(durationMs || 1, 1)) * 30);
-        let activeIdx = 0;
-        for (let i = 0; i < timeline.length; i++) {
-          if (curr >= timeline[i].t) activeIdx = timeline[i].idx;
-        }
-        highlightIndex(activeIdx);
-      }, 100);
+    function collectNarrationText(viewName) {
+      let key = viewName || 'home';
+      const view = document.getElementById('view-' + key);
+      if (!view || key === 'chat') return NARRATIONS[key] || '';
+      const parts = [];
+      const seen = new Set();
+      view.querySelectorAll('h1,h2,h3,p,li,.eyebrow,.hero-stat .num,.hero-stat .label,.product-chip-name,.product-chip-co,.product-chip-metric,.build-tag,.label,.value,.quote').forEach(el => {
+        if (el.closest('script,style,iframe,.chat-caption,.dictation-transcript,.chat-input')) return;
+        const text = (el.textContent || '').replace(/\s+/g, ' ').trim();
+        if (!text || text.length < 2 || seen.has(text)) return;
+        seen.add(text);
+        parts.push(text);
+      });
+      const fullText = parts.join('. ').replace(/\s+/g, ' ').trim();
+      return fullText || NARRATIONS[key] || NARRATIONS[key?.startsWith('project-') ? 'projects' : key] || '';
     }
+
+	    // Highlight transcript helper functions
+	    let activeHighlightTimer = null;
+
+	    function startHighlightingSync(viewName, audioEl, utterEl, durationMs) {
+	      stopHighlighting();
+	    }
 
     function stopHighlighting() {
       clearInterval(activeHighlightTimer);
@@ -4276,7 +4406,7 @@
         caption.classList.add('active');
       }
 
-      const utter = new SpeechSynthesisUtterance(text);
+	      const utter = new SpeechSynthesisUtterance(text);
       const voices = window.speechSynthesis.getVoices();
       utter.voice = voices.find(v => /india|indian|en-IN/i.test(v.name + ' ' + v.lang)) ||
                     voices.find(v => /Google|Microsoft|Samantha|Alex|Daniel/i.test(v.name)) ||
@@ -4286,9 +4416,11 @@
       utter.pitch = 0.92;
 
       const durationMs = Math.max(4200, Math.round(words.length * 360));
-      utter.onstart = () => {
-        showIndicator(viewName);
-        setPlayerState(true, viewName);
+	      utter.onstart = () => {
+	        browserVoiceActive = true;
+	        browserVoicePaused = false;
+	        showIndicator(viewName);
+	        setPlayerState(true, viewName);
         startProgressBar(durationMs);
         startHighlightingSync(viewName, null, utter, durationMs);
       };
@@ -4298,8 +4430,10 @@
         caption.querySelectorAll('.current').forEach(el => el.classList.remove('current'));
         caption.querySelector(`[data-i="${idx}"]`)?.classList.add('current');
       };
-      const done = () => {
-        hideIndicator();
+	      const done = () => {
+	        browserVoiceActive = false;
+	        browserVoicePaused = false;
+	        hideIndicator();
         setPlayerState(false, viewName);
         stopProgressBar();
         stopHighlighting();
@@ -4316,7 +4450,7 @@
       stopHighlighting();
       if (window.speechSynthesis) window.speechSynthesis.cancel();
       let key = viewName; if (key?.startsWith('project-')) key = 'projects';
-      const text = NARRATIONS[key];
+      const text = collectNarrationText(viewName) || NARRATIONS[key];
       if (!text) { hideIndicator(); setPlayerState(false, viewName); return; }
       currentViewName = viewName;
 
@@ -4338,34 +4472,105 @@
       });
     }
 
-    function trySpeak(viewName) { speakView(viewName); }
-    window.anchitNarrate = function(viewName) {
-      audioModeEnabled = true;
-      const activeEl = document.querySelector('.view.active');
-      trySpeak(viewName || (activeEl ? activeEl.id.replace('view-', '') : 'home'));
-    };
-    window.anchitStopNarration = stopAllPlayback;
+	    function trySpeak(viewName) { speakView(viewName); }
+	    window.anchitNarrate = function(viewName) {
+	      audioModeEnabled = true;
+	      const activeEl = document.querySelector('.view.active');
+	      trySpeak(viewName || (activeEl ? activeEl.id.replace('view-', '') : 'home'));
+	    };
+	    window.anchitStopNarration = stopAllPlayback;
 
-    ppBtn?.addEventListener('click', () => {
-      if (pageAudio) {                                  // cloned-voice or uploaded path
-        if (pageAudio.paused) { pageAudio.play(); setPlayerState(true); }
-        else { pageAudio.pause(); setPlayerState(false); }
-        return;
-      }
-    });
+	    function activeViewName() {
+	      const activeEl = document.querySelector('.view.active');
+	      return activeEl ? activeEl.id.replace('view-', '') : 'home';
+	    }
+
+	    function toggleNarrationPlayback() {
+	      audioModeEnabled = true;
+	      if (audioMuted) {
+	        audioMuted = false;
+	        applyMute();
+	      }
+	      if (pageAudio) {
+	        if (pageAudio.paused) {
+	          pageAudio.play();
+	          setPlayerState(true, currentViewName);
+	        } else {
+	          pageAudio.pause();
+	          setPlayerState(false, currentViewName);
+	        }
+	        return;
+	      }
+	      if (window.speechSynthesis && (browserVoiceActive || window.speechSynthesis.speaking || window.speechSynthesis.paused)) {
+	        if (window.speechSynthesis.paused || browserVoicePaused) {
+	          window.speechSynthesis.resume();
+	          browserVoicePaused = false;
+	          setPlayerState(true, currentViewName);
+	        } else {
+	          window.speechSynthesis.pause();
+	          browserVoicePaused = true;
+	          setPlayerState(false, currentViewName);
+	        }
+	        return;
+	      }
+	      trySpeak(activeViewName());
+	    }
+
+	    function setNarrationMuted(nextMuted) {
+	      audioMuted = !!nextMuted;
+	      applyMute();
+	      if (audioMuted) {
+	        if (pageAudio && !pageAudio.paused) pageAudio.pause();
+	        if (window.speechSynthesis?.speaking) {
+	          window.speechSynthesis.pause();
+	          browserVoicePaused = true;
+	        }
+	        setPlayerState(false, currentViewName);
+	      }
+	    }
+
+	    window.anchitAudioControls = {
+	      toggle: toggleNarrationPlayback,
+	      play: () => { if (!isNarrationPlaying()) toggleNarrationPlayback(); },
+	      pause: () => {
+	        if (pageAudio && !pageAudio.paused) { pageAudio.pause(); setPlayerState(false, currentViewName); return; }
+	        if (window.speechSynthesis?.speaking && !window.speechSynthesis.paused) {
+	          window.speechSynthesis.pause();
+	          browserVoicePaused = true;
+	          setPlayerState(false, currentViewName);
+	        }
+	      },
+	      mute: () => setNarrationMuted(true),
+	      unmute: () => setNarrationMuted(false),
+	      toggleMute: () => setNarrationMuted(!audioMuted),
+	      getState: () => ({ muted: audioMuted, playing: isNarrationPlaying(), paused: isNarrationPaused(), view: currentViewName })
+	    };
+
+	    ppBtn?.addEventListener('click', () => {
+	      window.anchitAudioControls.toggle();
+	    });
 
     // Mute / unmute — governs the cloned-voice audio element.
-    const muteBtn = document.getElementById('anpMute');
-    muteBtn?.addEventListener('click', () => { audioMuted = !audioMuted; applyMute(); muteBtn.title = audioMuted ? 'Unmute' : 'Mute'; });
+	    const muteBtn = document.getElementById('anpMute');
+	    muteBtn?.addEventListener('click', () => {
+	      window.anchitAudioControls.toggleMute();
+	      muteBtn.title = audioMuted ? 'Unmute' : 'Mute';
+	    });
 
     function stopAllPlayback() {
-      stopPageAudio();
-      stopHighlighting();
-      audioModeEnabled = false;
-      hideIndicator();
-      nudge?.classList.remove('playing', 'paused');
-      stopProgressBar();
-    }
+	      stopPageAudio();
+	      stopHighlighting();
+	      audioModeEnabled = false;
+	      browserVoiceActive = false;
+	      browserVoicePaused = false;
+	      if (window.speechSynthesis) window.speechSynthesis.cancel();
+	      hideIndicator();
+	      nudge?.classList.remove('playing', 'paused');
+	      stopProgressBar();
+	      document.dispatchEvent(new CustomEvent('anchitAudioState', {
+	        detail: { muted: audioMuted, playing: false, paused: false, view: currentViewName }
+	      }));
+	    }
 
     stopBtn?.addEventListener('click', stopAllPlayback);
 
@@ -4398,9 +4603,7 @@
         caption.innerHTML = words.map((w, i) => `<span class="chat-caption-word" data-i="${i}">${w}</span>`).join(' ');
         caption.classList.add('active');
       }
-      document.querySelectorAll('#view-home .narrate-span').forEach((span, idx) => {
-        span.classList.toggle('active-narrate', idx < 3);
-      });
+      document.querySelectorAll('#view-home .active-narrate').forEach(el => el.classList.remove('active-narrate'));
       if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) {
         setTimeout(() => {
           caption?.classList.remove('active');
@@ -4645,6 +4848,7 @@
   }
 
   .chat-mini-btn {
+    display: none !important;
     width: 30px;
     height: 30px;
     border-radius: 50%;
@@ -4664,7 +4868,7 @@
     font-size: 13px;
     line-height: 1.45;
   }
-  .dictation-transcript.active { display: block; }
+  .dictation-transcript.active { display: none; }
   .chat-block.minimized {
     display: none !important;
   }
@@ -4721,8 +4925,10 @@
     background: rgba(255, 255, 255, .08);
     border: 1px solid rgba(255, 255, 255, .1);
   }
-  .chat-return-icon:hover { border-color: rgba(255, 190, 73, .54); color: var(--accent); }
-  .chat-return-icon.muted { color: #ff7a1a; background: rgba(255, 122, 26, .12); }
+	  .chat-return-icon:hover { border-color: rgba(255, 190, 73, .54); color: var(--accent); }
+	  .chat-return-icon.playing { color: #25D366; background: rgba(37, 211, 102, .13); border-color: rgba(37, 211, 102, .35); }
+	  .chat-return-icon.paused { color: #F59E0B; background: rgba(245, 158, 11, .13); border-color: rgba(245, 158, 11, .35); }
+	  .chat-return-icon.muted { color: #ff7a1a; background: rgba(255, 122, 26, .12); border-color: rgba(255, 122, 26, .35); }
   body.view-chat footer,
   body:has(#view-chat.active) footer,
   body.view-chat .sticky-ctas,
@@ -4732,14 +4938,14 @@
   }
   body.view-chat,
   body:has(#view-chat.active) {
-    overflow: hidden;
+    overflow: auto;
   }
   body.view-chat #view-chat .chat-block,
   #view-chat.active .chat-block {
-    width: min(100%, 1180px) !important;
+    width: 100% !important;
     margin: 0 auto !important;
-    height: calc(100vh - 80px) !important;
-    max-height: none !important;
+    height: 100% !important;
+    max-height: 100% !important;
     border-radius: 18px !important;
   }
   body.view-chat #view-chat .messages,
@@ -4767,11 +4973,13 @@
   }
   @media (max-width: 720px) {
     .top-bar-inner { gap: 8px; }
-    .top-bar-link .tb-label { display: none; }
-    .sidebar {
-      left: 0 !important;
-      right: auto !important;
-    }
+	    .sidebar {
+	      left: 0 !important;
+	      right: auto !important;
+	    }
+	    .sidebar.open {
+	      transform: translateX(0) !important;
+	    }
     .sidebar-toggle {
       left: 12px !important;
       right: auto !important;
@@ -4796,10 +5004,14 @@
       <span class="chat-return-sub">Ask about work, builds, roles, or collaborations.</span>
     </span>
   </button>
-  <button class="chat-return-icon" id="chatReturnMic" type="button" aria-label="Talk to chat" title="Talk to chat">
-    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
-  </button>
-  <button class="chat-return-icon" id="chatReturnMute" type="button" aria-label="Mute chat audio" aria-pressed="false" title="Mute chat audio">
+	  <button class="chat-return-icon" id="chatReturnMic" type="button" aria-label="Talk to chat" title="Talk to chat">
+	    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+	  </button>
+	  <button class="chat-return-icon" id="chatReturnPlay" type="button" aria-label="Play narration" aria-pressed="false" title="Play narration">
+	    <svg class="icon-play" viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+	    <svg class="icon-pause" viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true" style="display:none;"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+	  </button>
+	  <button class="chat-return-icon" id="chatReturnMute" type="button" aria-label="Mute chat audio" aria-pressed="false" title="Mute chat audio">
     <svg class="icon-audio-on" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
     <svg class="icon-audio-off" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></svg>
   </button>
@@ -4809,14 +5021,14 @@
   const chatBlock = document.querySelector('#view-chat .chat-block');
   const chatInputEl = document.getElementById('chatInput');
   const returnBtn = document.getElementById('chatReturnBtn');
-  const returnMain = returnBtn?.querySelector('[data-chat-open]');
-  const returnMic = document.getElementById('chatReturnMic');
-  const returnMute = document.getElementById('chatReturnMute');
-  const transcript = document.getElementById('dictationTranscript');
+	  const returnMain = returnBtn?.querySelector('[data-chat-open]');
+	  const returnMic = document.getElementById('chatReturnMic');
+	  const returnPlay = document.getElementById('chatReturnPlay');
+	  const returnMute = document.getElementById('chatReturnMute');
+  const transcript = document.getElementById('chatCaption');
   const audioFileInput = document.getElementById('chatAudioFile');
   const uploadBtn = document.getElementById('chatAudioUploadBtn');
   const micBtn = document.getElementById('chatMic');
-  const miniBtn = document.getElementById('chatMinimizeBtn');
   let chatAudioMuted = false;
   const viewChatEl = document.getElementById('view-chat');
   function showFloatingChat() {
@@ -4854,25 +5066,68 @@
   }
   window.openFullChat = openFullChat;
   window.minimizeChat = minimizeChat;
-  if (sessionStorage.getItem('anchit-chat-minimized') === '1') {
-    chatBlock?.classList.add('minimized');
-    viewChatEl?.classList.add('chat-view-minimized');
-    returnBtn?.classList.add('visible');
-  } else {
-    chatBlock?.classList.remove('minimized');
-    viewChatEl?.classList.remove('chat-view-minimized');
-  }
-  function setChatAudioMuted(nextMuted) {
-    chatAudioMuted = nextMuted;
-    returnMute?.classList.toggle('muted', chatAudioMuted);
-    returnMute?.setAttribute('aria-pressed', chatAudioMuted ? 'true' : 'false');
-    returnMute?.setAttribute('aria-label', chatAudioMuted ? 'Unmute chat audio' : 'Mute chat audio');
-    returnMute?.setAttribute('title', chatAudioMuted ? 'Unmute chat audio' : 'Mute chat audio');
-    const audioOn = returnMute?.querySelector('.icon-audio-on');
-    const audioOff = returnMute?.querySelector('.icon-audio-off');
-    if (audioOn) audioOn.style.display = chatAudioMuted ? 'none' : '';
-    if (audioOff) audioOff.style.display = chatAudioMuted ? '' : 'none';
-    if (typeof audioModeEnabled !== 'undefined') audioModeEnabled = !chatAudioMuted;
+	  if (sessionStorage.getItem('anchit-chat-minimized') === '1') {
+	    chatBlock?.classList.add('minimized');
+	    viewChatEl?.classList.add('chat-view-minimized');
+	    returnBtn?.classList.add('visible');
+	  } else {
+	    chatBlock?.classList.remove('minimized');
+	    viewChatEl?.classList.remove('chat-view-minimized');
+	  }
+	  const initialActiveView = document.querySelector('.view.active')?.id;
+	  if (initialActiveView === 'view-chat') {
+	    openFullChat();
+	  } else if (initialActiveView && initialActiveView !== 'view-home') {
+	    minimizeChat();
+	  }
+	  function paintTileAudioState(state = {}) {
+	    const muted = !!state.muted;
+	    const playing = !!state.playing;
+	    const paused = !!state.paused && !playing;
+	    chatAudioMuted = muted;
+	    returnMute?.classList.toggle('muted', muted);
+	    returnMute?.setAttribute('aria-pressed', muted ? 'true' : 'false');
+	    returnMute?.setAttribute('aria-label', muted ? 'Unmute narration' : 'Mute narration');
+	    returnMute?.setAttribute('title', muted ? 'Unmute narration' : 'Mute narration');
+	    const audioOn = returnMute?.querySelector('.icon-audio-on');
+	    const audioOff = returnMute?.querySelector('.icon-audio-off');
+	    if (audioOn) audioOn.style.display = muted ? 'none' : '';
+	    if (audioOff) audioOff.style.display = muted ? '' : 'none';
+
+	    returnPlay?.classList.toggle('playing', playing);
+	    returnPlay?.classList.toggle('paused', paused);
+	    returnPlay?.setAttribute('aria-pressed', playing ? 'true' : 'false');
+	    returnPlay?.setAttribute('aria-label', playing ? 'Pause narration' : 'Play narration');
+	    returnPlay?.setAttribute('title', playing ? 'Pause narration' : 'Play narration');
+	    const playIcon = returnPlay?.querySelector('.icon-play');
+	    const pauseIcon = returnPlay?.querySelector('.icon-pause');
+	    if (playIcon) playIcon.style.display = playing ? 'none' : '';
+	    if (pauseIcon) pauseIcon.style.display = playing ? '' : 'none';
+	  }
+
+	  function readAudioState() {
+	    if (window.anchitAudioControls?.getState) return window.anchitAudioControls.getState();
+	    return {
+	      muted: chatAudioMuted,
+	      playing: !!(window.speechSynthesis && window.speechSynthesis.speaking && !window.speechSynthesis.paused),
+	      paused: !!(window.speechSynthesis && window.speechSynthesis.paused)
+	    };
+	  }
+
+	  function refreshTileAudioState() {
+	    paintTileAudioState(readAudioState());
+	  }
+
+	  function setChatAudioMuted(nextMuted) {
+	    if (window.anchitAudioControls) {
+	      if (nextMuted) window.anchitAudioControls.mute?.();
+	      else window.anchitAudioControls.unmute?.();
+	      refreshTileAudioState();
+	      return;
+	    }
+	    chatAudioMuted = nextMuted;
+	    paintTileAudioState({ muted: chatAudioMuted, playing: false, paused: false });
+	    if (typeof audioModeEnabled !== 'undefined') audioModeEnabled = !chatAudioMuted;
     document.querySelectorAll('audio, video').forEach(media => {
       media.muted = chatAudioMuted;
       if (chatAudioMuted && typeof media.pause === 'function') {
@@ -4887,17 +5142,27 @@
   }
 
   returnMain?.addEventListener('click', openFullChat);
-  returnMic?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (!chatAudioMuted && typeof audioModeEnabled !== 'undefined') audioModeEnabled = true;
-    openFullChat();
-    setTimeout(() => document.getElementById('chatMic')?.click(), 260);
-  });
-  returnMute?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    setChatAudioMuted(!chatAudioMuted);
-  });
-  miniBtn?.addEventListener('click', minimizeChat);
+	  returnMic?.addEventListener('click', (e) => {
+	    e.stopPropagation();
+	    if (!chatAudioMuted && typeof audioModeEnabled !== 'undefined') audioModeEnabled = true;
+	    openFullChat();
+	    setTimeout(() => document.getElementById('chatMic')?.click(), 260);
+	  });
+	  returnPlay?.addEventListener('click', (e) => {
+	    e.stopPropagation();
+	    if (window.anchitAudioControls?.toggle) {
+	      window.anchitAudioControls.toggle();
+	    } else if (typeof window.anchitNarrate === 'function') {
+	      window.anchitNarrate();
+	    }
+	    setTimeout(refreshTileAudioState, 120);
+	  });
+	  returnMute?.addEventListener('click', (e) => {
+	    e.stopPropagation();
+	    setChatAudioMuted(!chatAudioMuted);
+	  });
+	  document.addEventListener('anchitAudioState', (e) => paintTileAudioState(e.detail || {}));
+	  refreshTileAudioState();
   document.querySelectorAll('.sidebar-item[data-view="chat"]').forEach(a => {
     a.addEventListener('click', (e) => { e.preventDefault(); openFullChat(); });
   });
@@ -4941,8 +5206,10 @@
         rec.continuous = false;
         listening = true;
         freshMic.classList.add('listening');
-        transcript.textContent = 'Listening...';
-        transcript.classList.add('active');
+        if (transcript) {
+          transcript.textContent = 'Listening...';
+          transcript.classList.add('active');
+        }
         let finalText = '';
         rec.onresult = (event) => {
           let interim = '';
@@ -4953,18 +5220,18 @@
           }
           const visible = (finalText + ' ' + interim).trim();
           chatInputEl.value = visible;
-          transcript.textContent = visible || 'Listening...';
+          if (transcript) transcript.textContent = visible || 'Listening...';
         };
         rec.onerror = () => {
-          transcript.textContent = 'I could not hear that clearly. Please try again.';
+          if (transcript) transcript.textContent = 'I could not hear that clearly. Please try again.';
         };
         rec.onend = () => {
           listening = false;
           freshMic.classList.remove('listening');
           if (chatInputEl.value.trim()) {
-            transcript.textContent = 'Transcript ready. Press send to submit as a chat message.';
+            if (transcript) transcript.textContent = 'Transcript ready. Press send to submit as a chat message.';
           } else {
-            transcript.classList.remove('active');
+            transcript?.classList.remove('active');
           }
         };
         try { rec.start(); } catch {
