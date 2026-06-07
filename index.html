@@ -1269,6 +1269,13 @@
       width: calc(100vw - 32px) !important;
       height: min(560px, calc(100vh - 116px)) !important;
     }
+    body.view-chat #view-chat .chat-block,
+    #view-chat.active .chat-block {
+      width: 100% !important;
+      height: 100% !important;
+      border-radius: 0 !important;
+      margin: 0 !important;
+    }
   }
 
   #view-chat .container { height: 100% !important; display: flex; flex-direction: column; overflow: hidden; }
@@ -3373,7 +3380,10 @@
     const caption = transcriptState.caption || null;
     const words = transcriptState.words || [];
     try {
-      const r = await fetch('/api/tts', {
+      const urlPrefix = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+        ? 'http://127.0.0.1:8000'
+        : '';
+      const r = await fetch(urlPrefix + '/api/tts', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: plainText }),
       });
@@ -3955,7 +3965,10 @@
           caption.innerHTML = words.map((w, i) => `<span class="chat-caption-word" data-i="${i}">${w}</span>`).join(' ');
           caption.classList.add('active');
         }
-        const r = await fetch('/api/tts', {
+        const urlPrefix = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+          ? 'http://127.0.0.1:8000'
+          : '';
+        const r = await fetch(urlPrefix + '/api/tts', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text })
         });
@@ -4455,10 +4468,11 @@
   }
   body.view-chat #view-chat .chat-block,
   #view-chat.active .chat-block {
-    width: min(100%, 1180px);
-    margin: 0 auto;
-    max-height: 100%;
-    border-radius: 18px;
+    width: min(100%, 1180px) !important;
+    margin: 0 auto !important;
+    height: calc(100vh - 140px) !important;
+    max-height: none !important;
+    border-radius: 18px !important;
   }
   body.view-chat #view-chat .messages,
   body.view-chat #view-chat .chat-body,
