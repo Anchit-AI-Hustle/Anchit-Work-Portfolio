@@ -1230,9 +1230,9 @@
     position: fixed;
     bottom: 24px;
     right: 24px;
-    width: 360px;
-    height: 520px;
-    max-height: calc(100vh - 100px);
+    width: min(760px, calc(100vw - var(--sidebar-w) - 48px));
+    height: min(620px, calc(100vh - 96px));
+    max-height: calc(100vh - 96px);
     border-radius: 16px;
     z-index: 9999;
     background: rgba(10, 10, 10, 0.75) !important;
@@ -1253,7 +1253,8 @@
   }
   
   /* When Chat is ACTIVE from LHS */
-  body.view-chat #view-chat {
+  body.view-chat #view-chat,
+  #view-chat.active {
     bottom: 0;
     right: 0;
     width: calc(100vw - var(--sidebar-w));
@@ -1265,29 +1266,34 @@
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
-  body.sidebar-collapsed.view-chat #view-chat {
+  body.sidebar-collapsed.view-chat #view-chat,
+  body.sidebar-collapsed #view-chat.active {
     width: calc(100vw - var(--sidebar-w-collapsed));
   }
   @media (max-width: 820px) {
-    body.view-chat #view-chat {
+    body.view-chat #view-chat,
+    #view-chat.active {
+      left: 0;
+      right: auto;
       width: 100vw;
-      height: calc(100vh - 44px - 58px);
+      height: calc(100vh - 44px);
     }
     #view-chat {
       bottom: 80px;
-      right: 16px;
+      left: 12px;
+      right: auto;
       width: calc(100vw - 32px);
-      height: 450px;
+      height: min(560px, calc(100vh - 116px));
     }
   }
 
-  #view-chat .container { height: calc(100vh - 44px - 12px); display: flex; flex-direction: column; }
+  #view-chat .container { height: 100% !important; display: flex; flex-direction: column; overflow: hidden; }
   #view-chat .chat-block { flex: 1; display: flex; flex-direction: column; min-height: 0; }
   #view-chat .chat-body { flex: 1; overflow-y: auto; min-height: 0; max-height: none; }
   #view-chat .chips { flex-shrink: 0; }
   #view-chat .chat-input { flex-shrink: 0; }
   @media (max-width: 820px) {
-    #view-chat .container { height: calc(100vh - 44px - 58px - 12px - var(--safe-top)); }
+    #view-chat .container { height: 100% !important; padding-top: calc(52px + var(--safe-top)) !important; }
   }
 
   /* Hidden audio player state (for TTS JS internals) */
@@ -1809,7 +1815,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
       <span class="sidebar-label">Side Projects</span>
     </a>
-    <a class="sidebar-item" href="#resume" data-view="resume" aria-label="My Resume">
+    <a class="sidebar-item" href="assets/resume.pdf" target="_blank" rel="noopener" aria-label="Open resume PDF">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
       <span class="sidebar-label">My Resume</span>
     </a>
@@ -2983,9 +2989,12 @@
         <div class="iframe-bar">
           <div class="dots"><span></span><span></span><span></span></div>
           <span>Anchit_Tandon_Resume.pdf</span>
-          <a href="https://raw.githubusercontent.com/anchittandon-create/Anchit-Work-Portfolio/main/assets/resume.pdf" download style="margin-left:auto; color:var(--primary); font-weight:500; text-decoration:none;">Download ↓</a>
+          <a href="assets/resume.pdf" target="_blank" rel="noopener" style="margin-left:auto; color:var(--primary); font-weight:500; text-decoration:none;">Open PDF ↗</a>
         </div>
-        <iframe src="https://docs.google.com/gview?url=https://raw.githubusercontent.com/anchittandon-create/Anchit-Work-Portfolio/main/assets/resume.pdf&embedded=true" title="Anchit Tandon Resume" style="height:700px; width:100%; border:0;"></iframe>
+        <div style="padding:32px; text-align:center; color:var(--ink-dim);">
+          <p style="margin-bottom:18px;">Open the resume in a separate tab for the clean PDF view.</p>
+          <a class="btn" href="assets/resume.pdf" target="_blank" rel="noopener">Open Resume PDF ↗</a>
+        </div>
       </div>
     </div>
   </section>
@@ -3374,16 +3383,38 @@
     msgEl?.classList.add('speaking');
     const cleanupClone = () => { msgEl?.classList.remove('speaking'); if (caption) { caption.classList.remove('active'); caption.innerHTML=''; } };
 
-    // Use the cloned voice only. The browser voice sounded like the wrong person.
     speakViaClone(plainText, () => { if (caption) caption.classList.add('active'); }, cleanupClone, { caption, words })
       .then((usedClone) => {
         if (usedClone) return;
-        cleanupClone();
-        if (caption) {
-          caption.textContent = 'Voice engine is warming up. Please try again in a moment.';
-          caption.classList.add('active');
-          setTimeout(() => caption.classList.remove('active'), 2600);
+        if (!window.speechSynthesis) {
+          cleanupClone();
+          if (caption) {
+            caption.textContent = 'Voice is unavailable in this browser.';
+            caption.classList.add('active');
+            setTimeout(() => caption.classList.remove('active'), 2400);
+          }
+          return;
         }
+        const utter = new SpeechSynthesisUtterance(plainText);
+        utter.rate = 0.96;
+        utter.pitch = 0.95;
+        utter.volume = 0.9;
+        const voices = window.speechSynthesis.getVoices();
+        const voice = voices.find(v => v.lang?.startsWith('en-IN'))
+          || voices.find(v => /Indian/i.test(v.name || '') && v.lang?.startsWith('en'))
+          || voices.find(v => /Google/i.test(v.name || '') && v.lang?.startsWith('en'))
+          || voices.find(v => v.lang?.startsWith('en'));
+        if (voice) utter.voice = voice;
+        utter.onboundary = (event) => {
+          if (!caption || (event.name !== 'word' && event.charIndex == null)) return;
+          const before = plainText.slice(0, event.charIndex || 0).trim();
+          const idx = before ? before.split(/\s+/).length : 0;
+          caption.querySelectorAll('.current').forEach(el => el.classList.remove('current'));
+          caption.querySelector(`[data-i="${idx}"]`)?.classList.add('current');
+        };
+        utter.onend = cleanupClone;
+        utter.onerror = cleanupClone;
+        window.speechSynthesis.speak(utter);
       });
 
   }
@@ -3435,6 +3466,32 @@
     }
     return bestScore > 0 ? best : null;
   }
+  function frameAnswer(question, match) {
+    const q = question.trim();
+    if (!match) return null;
+    const topic = q.length > 72 ? q.slice(0, 69) + '...' : q;
+    return `<strong>On "${topic}"</strong><br>${match.response}`;
+  }
+  function contextualFallback(question) {
+    const q = question.toLowerCase();
+    const hints = [];
+    if (/\b(team|lead|stakeholder|cross[- ]?functional|manage|people)\b/.test(q)) {
+      hints.push("For team and stakeholder work, the strongest evidence here is the Delhi Half Marathon launch, ET Markets multi-platform revamp, and Vahdam D2C growth work — all required product, tech, marketing, and ops alignment.");
+    }
+    if (/\b(fail|mistake|learn|lesson|improve)\b/.test(q)) {
+      hints.push("The portfolio shows a clear learning pattern: start with engineering, move closer to customer/business decisions, then use experiments and metrics to correct course quickly.");
+    }
+    if (/\b(strategy|roadmap|prioriti|decide|tradeoff)\b/.test(q)) {
+      hints.push("Anchit's product style is metrics-led: identify the funnel constraint, ship a focused experiment, read the outcome, then compound the working loop.");
+    }
+    if (/\b(ai|automation|agent|llm)\b/.test(q)) {
+      hints.push("His AI work is not just novelty: AI TeleSuite, Hey Yaara, MusicGenAI, Mailer Architect, The Third Eye, and Lifecycle OS each map AI to a concrete workflow.");
+    }
+    if (hints.length) {
+      return `<strong>Answering your question directly:</strong><br>${hints.join(' ')} If you want the most precise version, ask for a specific project, role, metric, or decision and I’ll narrow it down.`;
+    }
+    return `I don’t want to bluff that answer. Based on the portfolio, I can answer accurately about Anchit's work history, Vahdam role, Times Internet wins, ET Prime Assisted Sales, ET Markets, AI side builds, engineering background, product philosophy, contact details, and resume. Ask that another way with one of those anchors and I’ll give you the specific answer.`;
+  }
   function handleMessage(text) {
     if (!text.trim()) return;
     addUser(text);
@@ -3442,8 +3499,8 @@
     setTimeout(() => {
       hideTyping();
       const m = findMatch(text);
-      if (m) { addBot(m.response); renderChips(m.nextChips || DEFAULT_CHIPS); }
-      else { addBot("Here's my honest quick take: most of what I work on lives at the crossroads of <b>product, growth and AI</b>, so the real answer depends on the funnel or goal. The fastest way: <a data-nav='schedule'>book a 30-minute Google Meet →</a>, or reach me at <a href='mailto:anchit.tandon@gmail.com'>anchit.tandon@gmail.com</a> / <a href='tel:+919873945238'>+91 98739 45238</a>. Want me to walk you through my work, a project, or how I think about product?"); renderChips(["Walk me through your work","Show me a project","Book a quick call","Why product over engineering?"]); }
+      if (m) { addBot(frameAnswer(text, m)); renderChips(m.nextChips || DEFAULT_CHIPS); }
+      else { addBot(contextualFallback(text)); renderChips(["Work history","Hard metrics","AI side builds","Product philosophy"]); }
     }, 500 + Math.random() * 400);
   }
 
@@ -4205,10 +4262,66 @@
     cursor: pointer;
   }
   .chat-return.visible { display: inline-flex; }
+  body.view-chat footer,
+  body:has(#view-chat.active) footer,
+  body.view-chat .sticky-ctas,
+  body:has(#view-chat.active) .sticky-ctas,
+  body.view-chat .chat-return {
+    display: none !important;
+  }
+  body.view-chat,
+  body:has(#view-chat.active) {
+    overflow: hidden;
+  }
+  body.view-chat #view-chat .chat-block,
+  #view-chat.active .chat-block {
+    width: min(100%, 1180px);
+    margin: 0 auto;
+    max-height: 100%;
+    border-radius: 18px;
+  }
+  body.view-chat #view-chat .messages,
+  body.view-chat #view-chat .chat-body,
+  #view-chat.active .messages,
+  #view-chat.active .chat-body {
+    min-height: 0;
+  }
+  body.view-chat #view-chat .chips,
+  #view-chat.active .chips {
+    max-height: 190px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  body.view-chat #view-chat .dictation-transcript.active,
+  #view-chat.active .dictation-transcript.active {
+    flex-shrink: 0;
+  }
+  body.view-chat #view-chat .chat-caption.active,
+  #view-chat.active .chat-caption.active {
+    flex-shrink: 0;
+    max-height: 92px;
+    overflow-y: auto;
+  }
   @media (max-width: 720px) {
     .top-bar-inner { gap: 8px; }
     .top-bar-actions { flex-wrap: wrap; justify-content: flex-end; }
     .top-bar-cta .cta-label, .top-bar-link .tb-label { display: none; }
+    .sidebar {
+      left: 0 !important;
+      right: auto !important;
+    }
+    .sidebar-toggle {
+      left: 12px !important;
+      right: auto !important;
+    }
+    .sidebar-backdrop {
+      left: 0 !important;
+      right: 0 !important;
+    }
+    .chat-return {
+      left: 16px;
+      right: auto;
+    }
   }
 </style>
 <button class="chat-return" id="chatReturnBtn" type="button" aria-label="Reopen chat">
@@ -4231,7 +4344,8 @@
     sessionStorage.removeItem('anchit-chat-minimized');
     chatBlock?.classList.remove('minimized');
     returnBtn?.classList.remove('visible');
-    document.body.classList.remove('view-chat');
+    document.body.classList.add('view-chat');
+    if (typeof switchView === 'function') switchView('chat');
     setTimeout(() => chatInputEl?.focus(), 120);
   }
   function openFullChat() {
@@ -4254,8 +4368,8 @@
   } else {
     chatBlock?.classList.remove('minimized');
   }
-  talkBtn?.addEventListener('click', openSmallChat);
-  returnBtn?.addEventListener('click', openSmallChat);
+  talkBtn?.addEventListener('click', openFullChat);
+  returnBtn?.addEventListener('click', openFullChat);
   miniBtn?.addEventListener('click', minimizeChat);
   document.querySelectorAll('.sidebar-item[data-view="chat"]').forEach(a => {
     a.addEventListener('click', (e) => { e.preventDefault(); openFullChat(); });
