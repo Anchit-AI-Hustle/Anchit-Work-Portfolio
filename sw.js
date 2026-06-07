@@ -2,7 +2,7 @@
  * Cache name is version-stamped so each deploy purges the previous cache
  * (the activate handler deletes every cache whose name !== CACHE). Bump
  * this string on every deploy that changes assets. */
-const CACHE = 'anchit-portfolio-20260607c';
+const CACHE = 'anchit-portfolio-20260607d';
 const SHELL = [
   '/',
   '/index.html',
@@ -13,6 +13,10 @@ const SHELL = [
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/icon-maskable-512.png',
+  '/icons/anchit-apple-touch-20260607.png',
+  '/icons/anchit-app-icon-192-20260607.png',
+  '/icons/anchit-app-icon-512-20260607.png',
+  '/icons/anchit-app-icon-maskable-512-20260607.png',
   '/icons/favicon.svg'
 ];
 

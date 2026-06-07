@@ -22,7 +22,6 @@ const assets = [
   'assets',
   'audio',
   'cyber',
-  'nexus',
 ];
 
 async function main() {

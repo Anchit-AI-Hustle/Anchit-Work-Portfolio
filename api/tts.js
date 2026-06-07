@@ -2,11 +2,9 @@
 // The model runs in the FastAPI service under tts-server/app.py. This Vercel
 // function proxies to it so the browser receives generated speech, not the
 // reference sample file.
-export const config = { runtime: 'nodejs' };
-
 const XTTS_URL = (process.env.XTTS_API_URL || process.env.LOCAL_XTTS_API_URL || 'http://127.0.0.1:8000/api/tts').replace(/\/$/, '');
 
-module.exports = async function handler(req, res) {
+async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -48,4 +46,7 @@ module.exports = async function handler(req, res) {
       message: String(error).slice(0, 240),
     });
   }
-};
+}
+
+module.exports = handler;
+module.exports.config = { runtime: 'nodejs' };

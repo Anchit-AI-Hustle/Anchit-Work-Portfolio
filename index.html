@@ -14,7 +14,7 @@
 <meta name="apple-mobile-web-app-title" content="Anchit" />
 <meta name="mobile-web-app-capable" content="yes" />
 <link rel="manifest" href="manifest.json" />
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<link rel="apple-touch-icon" href="icons/anchit-apple-touch-20260607.png" />
 <link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
 
 <!-- Open Graph -->
@@ -1306,54 +1306,6 @@
   .chat-caption-word { transition: color 0.08s; }
   .chat-caption-word.current { color: var(--primary); font-weight: 600; }
 
-  /* ============ VOICE INTERRUPT CARD ============ */
-  .voice-interrupt-card {
-    position: fixed; bottom: calc(72px + var(--safe-bottom, 0px)); right: 20px;
-    z-index: 160; width: 308px; max-width: calc(100vw - 40px);
-    background: var(--bg-elev); border: 1px solid var(--rule-strong);
-    border-radius: 20px; padding: 18px 20px;
-    box-shadow: var(--shadow-lg);
-    transform: translateY(16px) scale(0.97); opacity: 0; pointer-events: none;
-    transition: transform 0.38s cubic-bezier(0.16,1,0.3,1), opacity 0.22s ease;
-  }
-  .voice-interrupt-card.active { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }
-  .vic-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-  .vic-label {
-    font-family: var(--font-mono); font-size: 10px; text-transform: uppercase;
-    letter-spacing: 0.1em; color: var(--accent);
-  }
-  .vic-close {
-    background: none; border: none; cursor: pointer; color: var(--ink-mute);
-    font-size: 16px; padding: 0; line-height: 1; transition: color 0.2s;
-  }
-  .vic-close:hover { color: var(--ink); }
-  .vic-question {
-    font-family: var(--font-display); font-style: italic; font-size: 13.5px;
-    color: var(--ink-dim); margin-bottom: 10px; line-height: 1.45;
-  }
-  .vic-response {
-    font-size: 14px; line-height: 1.6; color: var(--ink); margin-bottom: 14px;
-  }
-  .vic-response a { color: var(--primary); text-decoration: none; }
-  .vic-response a:hover { text-decoration: underline; }
-  .vic-actions { display: flex; gap: 8px; }
-  .vic-continue {
-    font-family: var(--font-mono); font-size: 10px; font-weight: 500;
-    letter-spacing: 0.06em; text-transform: uppercase;
-    background: var(--primary); color: #fff; border: none;
-    border-radius: 99px; padding: 8px 16px; cursor: pointer;
-    transition: background 0.2s, transform 0.2s;
-  }
-  .vic-continue:hover { background: var(--primary-deep); transform: scale(1.03); }
-  .vic-dismiss {
-    font-family: var(--font-mono); font-size: 10px; font-weight: 500;
-    letter-spacing: 0.06em; text-transform: uppercase;
-    background: var(--bg-deep); color: var(--ink-dim); border: none;
-    border-radius: 99px; padding: 8px 14px; cursor: pointer;
-    transition: background 0.2s;
-  }
-  .vic-dismiss:hover { background: var(--rule); }
-
   /* ============ CAREER ARC SCRUBBER ============ */
   .career-arc {
     background: var(--bg-elev); border-radius: 20px; padding: 28px 32px;
@@ -1805,17 +1757,20 @@
 <body>
 
 <!-- ONBOARDING MODAL -->
-<div id="onboarding" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(5,5,5,0.4); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); z-index:10000; display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; transition:opacity 0.5s, visibility 0.5s;">
-  <div class="chat-container-center" style="align-items:center; justify-content:center; display:flex; flex-direction:column; background:rgba(20,20,20,0.85); border:1px solid rgba(255, 95, 21, 0.4); box-shadow:0 0 50px rgba(255, 95, 21, 0.15), inset 0 0 20px rgba(255, 95, 21, 0.05); border-radius:24px; padding:40px; width:90%; max-width:500px; text-align:center;">
+<div id="onboarding" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:linear-gradient(90deg, rgba(5,5,5,0.34), rgba(5,5,5,0.10) 46%, rgba(5,5,5,0.28)); z-index:10000; display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; transition:opacity 0.5s, visibility 0.5s;">
+  <div class="chat-container-center" style="align-items:center; justify-content:center; display:flex; flex-direction:column; background:rgba(20,20,20,0.72); border:1px solid rgba(255, 95, 21, 0.4); box-shadow:0 0 50px rgba(255, 95, 21, 0.15), inset 0 0 20px rgba(255, 95, 21, 0.05); border-radius:24px; padding:40px; width:90%; max-width:500px; text-align:center;">
     
     <div style="margin-bottom:24px;">
       <img src="AnchitTandon-AppLogo.png" alt="Anchit Tandon" style="width:88px; height:88px; border-radius:22px; object-fit:cover; border:1px solid rgba(255,183,54,.7); box-shadow: 0 0 28px rgba(255, 153, 31, 0.45);">
     </div>
     
     <h2 style="font-family:var(--font-display); font-size:28px; font-weight:700; color:#FFF; margin-bottom:12px;">Anchit Tandon</h2>
-    <p style="color:var(--ink-dim); font-size:16px; margin-bottom:32px; line-height:1.5;">Product, growth, AI systems, and the work behind them. Tell me your name and I will guide you through it.</p>
+    <p id="onboarding-copy" style="color:var(--ink-dim); font-size:16px; margin-bottom:32px; line-height:1.5;">Choose a guided walkthrough or continue exploring the portfolio.</p>
 
-    <button id="ob-start-btn" style="padding:16px 32px; background:var(--primary); color:#000; font-weight:bold; border-radius:30px; border:none; cursor:pointer; font-size:18px; box-shadow:0 0 20px rgba(255,95,21,0.5); transition:all 0.3s ease;">Meet Anchit Tandon</button>
+    <div id="onboarding-actions" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center;">
+      <button id="ob-start-btn" style="padding:14px 26px; background:var(--primary); color:#000; font-weight:bold; border-radius:30px; border:none; cursor:pointer; font-size:16px; box-shadow:0 0 20px rgba(255,95,21,0.5); transition:all 0.3s ease;">Start fresh</button>
+      <button id="ob-continue-btn" style="padding:14px 26px; background:rgba(255,255,255,.08); color:#fff; font-weight:bold; border-radius:30px; border:1px solid rgba(255,183,54,.35); cursor:pointer; font-size:16px; transition:all 0.3s ease;">Continue</button>
+    </div>
     
     <div class="input-row" id="onboarding-input-row" style="display:none; width:100%; max-width:400px; margin-top:24px;">
       <input type="text" id="ob-input" placeholder="What's your name?" autocomplete="off" style="flex:1; background:var(--bg-deep); border:1px solid var(--rule); padding:12px 16px; border-radius:24px; color:#FFF; font-size:16px; outline:none;">
@@ -1918,7 +1873,6 @@
       </a>
     </div>
     <div class="top-bar-actions">
-      <!-- View switcher moved to global sticky widget -->
       <button class="top-bar-cta listen" id="universalNarrateBtn" type="button" aria-label="Hear me narrate" title="Hear Anchit narrate this page">
         <svg class="listen-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
         <span class="cta-label">Hear me narrate</span>
@@ -3024,7 +2978,6 @@
         <div class="eyebrow">Resume · Download or view</div>
         <h1 class="display-lg">My Resume</h1>
         <p class="lede" style="margin-top: 16px;">The complete professional summary — roles, impact, skills, education. <em>The full story, on one page.</em></p>
-        <p style="margin-top:18px;"><a href="/cyber" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:9px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-dim);border:1px solid var(--rule);border-radius:999px;padding:9px 18px;text-decoration:none;transition:color .2s,border-color .2s;" onmouseover="this.style.color='#ff2b2b';this.style.borderColor='#ff2b2b'" onmouseout="this.style.color='';this.style.borderColor=''">◳ View the cyberpunk edition ↗</a></p>
       </div>
       <div class="iframe-wrap reveal">
         <div class="iframe-bar">
@@ -3377,7 +3330,9 @@
   let cloneAudio = null;
   // Tries Anchit's cloned XTTS voice via /api/tts. If unavailable, narration
   // stops visibly instead of falling back to the wrong browser voice.
-  async function speakViaClone(plainText, onStart, onEnd) {
+  async function speakViaClone(plainText, onStart, onEnd, transcriptState = {}) {
+    const caption = transcriptState.caption || null;
+    const words = transcriptState.words || [];
     try {
       const r = await fetch('/api/tts', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -3391,6 +3346,12 @@
       if (cloneAudio) { try { cloneAudio.pause(); } catch {} }
       cloneAudio = new Audio(url);
       cloneAudio.onplay = onStart || null;
+      cloneAudio.ontimeupdate = () => {
+        if (!caption || !cloneAudio?.duration || words.length === 0) return;
+        const idx = Math.min(words.length - 1, Math.floor((cloneAudio.currentTime / cloneAudio.duration) * words.length));
+        caption.querySelectorAll('.current').forEach(el => el.classList.remove('current'));
+        caption.querySelector(`[data-i="${idx}"]`)?.classList.add('current');
+      };
       cloneAudio.onended = () => { URL.revokeObjectURL(url); if (onEnd) onEnd(); };
       cloneAudio.onerror = () => { URL.revokeObjectURL(url); if (onEnd) onEnd(); };
       await cloneAudio.play();
@@ -3414,7 +3375,7 @@
     const cleanupClone = () => { msgEl?.classList.remove('speaking'); if (caption) { caption.classList.remove('active'); caption.innerHTML=''; } };
 
     // Use the cloned voice only. The browser voice sounded like the wrong person.
-    speakViaClone(plainText, () => { if (caption) caption.classList.add('active'); }, cleanupClone)
+    speakViaClone(plainText, () => { if (caption) caption.classList.add('active'); }, cleanupClone, { caption, words })
       .then((usedClone) => {
         if (usedClone) return;
         cleanupClone();
@@ -3425,52 +3386,6 @@
         }
       });
 
-    function speakViaBrowser() {
-    if (!window.speechSynthesis) { cleanupClone(); return; }
-
-    const utter = new SpeechSynthesisUtterance(plainText);
-    utter.lang = 'en-IN'; utter.rate = 0.92; utter.pitch = 1.0;
-
-    const pickVoice = () => {
-      const vv = window.speechSynthesis.getVoices();
-      return vv.find(v => v.lang === 'en-IN')
-          || vv.find(v => v.lang === 'en-GB' && v.localService)
-          || vv.find(v => v.lang.startsWith('en') && v.localService)
-          || vv.find(v => v.lang.startsWith('en'));
-    };
-    const voice = pickVoice();
-    if (!voice && window.speechSynthesis.getVoices().length === 0) {
-      // Voices not loaded yet — wait for them
-      window.speechSynthesis.onvoiceschanged = () => {
-        utter.voice = pickVoice();
-        window.speechSynthesis.onvoiceschanged = null;
-      };
-    } else if (voice) {
-      utter.voice = voice;
-    }
-
-    utter.onboundary = (e) => {
-      if (e.name !== 'word' || !caption) return;
-      let pos = 0;
-      for (let i = 0; i < words.length; i++) {
-        if (e.charIndex >= pos && e.charIndex < pos + words[i].length) {
-          caption.querySelectorAll('.current').forEach(el => el.classList.remove('current'));
-          caption.querySelector(`[data-i="${i}"]`)?.classList.add('current');
-          break;
-        }
-        pos += words[i].length + 1;
-      }
-    };
-
-    const cleanup = () => {
-      bubbleEl.closest('.msg')?.classList.remove('speaking');
-      if (caption) { caption.classList.remove('active'); caption.innerHTML = ''; }
-    };
-    utter.onend = cleanup;
-    utter.onerror = cleanup;
-
-    window.speechSynthesis.speak(utter);
-    } /* end speakViaBrowser */
   }
   function addUser(text) {
     const w = document.createElement('div');
@@ -3566,15 +3481,29 @@
   }, 800);
 
   const obStartBtn = document.getElementById('ob-start-btn');
+  const obContinueBtn = document.getElementById('ob-continue-btn');
+  const obActions = document.getElementById('onboarding-actions');
+  const obCopy = document.getElementById('onboarding-copy');
   const obInputRow = document.getElementById('onboarding-input-row');
   const obInput = document.getElementById('ob-input');
   const obSubmit = document.getElementById('ob-submit');
 
   if (obStartBtn) {
     obStartBtn.addEventListener('click', () => {
-      obStartBtn.style.display = 'none';
+      if (obActions) obActions.style.display = 'none';
+      if (obCopy) obCopy.textContent = 'Great. What should I call you while we explore?';
       obInputRow.style.display = 'flex';
       obInput.focus();
+    });
+  }
+
+  if (obContinueBtn) {
+    obContinueBtn.addEventListener('click', () => {
+      const ob = document.getElementById('onboarding');
+      if (ob) {
+        ob.style.opacity = '0';
+        setTimeout(() => ob.style.visibility = 'hidden', 500);
+      }
     });
   }
 
@@ -3781,13 +3710,10 @@
     }
   })();
 
-  /* ============ AMBIENT VOICE — browser TTS narration per page ============ */
+  /* ============ AMBIENT VOICE — XTTS narration per page ============ */
   (function() {
-    if (!('speechSynthesis' in window)) { document.getElementById('audioNudge')?.classList.add('dismissed'); return; }
-
     const indicator = document.getElementById('audioAmbient');
     const nudge     = document.getElementById('audioNudge');
-    const playBtn   = document.getElementById('audioPlayBtn');
     const dismissBtn= document.getElementById('audioNudgeDismiss');
     const ppBtn     = document.getElementById('anpPausePlay');
     const stopBtn   = document.getElementById('anpStop');
@@ -3818,11 +3744,6 @@
     }
     function applyMute() {
       if (pageAudio) pageAudio.muted = audioMuted;
-      // Browser TTS pause/resume remains only for legacy paused states.
-      if (!pageAudio && window.speechSynthesis.speaking) {
-        if (audioMuted) { window.speechSynthesis.pause(); clearInterval(progressTimer); }
-        else { window.speechSynthesis.resume(); }
-      }
       const vol = document.getElementById('anpVolIcon'), mut = document.getElementById('anpMuteIcon');
       if (vol) vol.style.display = audioMuted ? 'none' : '';
       if (mut) mut.style.display = audioMuted ? '' : 'none';
@@ -3830,9 +3751,6 @@
     }
 
     function showIndicator(viewName) {
-      const sb = document.getElementById('chatNarrateBtn');
-      sb?.classList.add('playing');
-      sb?.classList.remove('paused');
       if (!indicator) return;
       const key = viewName?.startsWith('project-') ? 'Projects' : (VIEW_LABELS[viewName] || 'Anchit');
       indicator.querySelector('.audio-ambient-label').textContent = 'Playing · ' + key;
@@ -3840,8 +3758,6 @@
     }
     function hideIndicator() {
       indicator?.classList.remove('active', 'listening');
-      const sb = document.getElementById('chatNarrateBtn');
-      sb?.classList.remove('playing', 'paused');
     }
 
     function setPlayerState(playing, viewName) {
@@ -3870,17 +3786,6 @@
       clearInterval(progressTimer);
       if (fill) { fill.style.transition = 'none'; fill.style.width = '0%'; }
       if (timeEl) timeEl.textContent = '0:00';
-    }
-
-    function pickVoice() {
-      const vv = window.speechSynthesis.getVoices();
-      // Prefer an Indian English voice if available (e.g., Google, Microsoft, etc.)
-      return vv.find(v => v.lang.startsWith('en-IN'))
-          || vv.find(v => /Indian/i.test(v.name) && v.lang.startsWith('en'))
-          || vv.find(v => /Google UK English Male/i.test(v.name))
-          || vv.find(v => /Google/i.test(v.name) && v.lang.startsWith('en'))
-          || vv.find(v => v.lang.startsWith('en-') && /male/i.test(v.name))
-          || vv.find(v => v.lang.startsWith('en'));
     }
 
     // Highlight transcript helper functions
@@ -3926,20 +3831,6 @@
           }
           highlightIndex(activeIdx);
         }, 100);
-      } else if (utterEl) {
-        utterEl.onboundary = (event) => {
-          if (event.name === 'word') {
-            const charIdx = event.charIndex;
-            let activeIdx = 0;
-            if (charIdx >= 538) activeIdx = 6;
-            else if (charIdx >= 448) activeIdx = 5;
-            else if (charIdx >= 368) activeIdx = 4;
-            else if (charIdx >= 188) activeIdx = 3;
-            else if (charIdx >= 67) activeIdx = 2;
-            else if (charIdx >= 23) activeIdx = 1;
-            highlightIndex(activeIdx);
-          }
-        };
       }
     }
 
@@ -3951,12 +3842,15 @@
       });
     }
 
-    // The voice sample is only a cloning reference on the server, never playback.
-    function playUploadedAudio(viewName) { return Promise.resolve(false); }
-
     // Cloned XTTS path for page narrations.
     async function speakViaCloneEl(viewName, text) {
       try {
+        const caption = document.getElementById('chatCaption');
+        const words = text.trim().split(/\s+/);
+        if (caption) {
+          caption.innerHTML = words.map((w, i) => `<span class="chat-caption-word" data-i="${i}">${w}</span>`).join(' ');
+          caption.classList.add('active');
+        }
         const r = await fetch('/api/tts', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text })
@@ -3974,8 +3868,20 @@
           if (!pageAudio || !pageAudio.duration) return;
           if (fill) { const pct = Math.min((pageAudio.currentTime / pageAudio.duration) * 100, 100); fill.style.transition = 'none'; fill.style.width = pct + '%'; }
           if (timeEl) { const e = pageAudio.currentTime; timeEl.textContent = Math.floor(e/60)+':'+String(Math.floor(e%60)).padStart(2,'0'); }
+          if (caption && words.length) {
+            const idx = Math.min(words.length - 1, Math.floor((pageAudio.currentTime / pageAudio.duration) * words.length));
+            caption.querySelectorAll('.current').forEach(el => el.classList.remove('current'));
+            caption.querySelector(`[data-i="${idx}"]`)?.classList.add('current');
+          }
         };
-        const done = () => { try{URL.revokeObjectURL(url);}catch{} hideIndicator(); setPlayerState(false, viewName); stopProgressBar(); pageAudio = null; };
+        const done = () => {
+          try{URL.revokeObjectURL(url);}catch{}
+          hideIndicator();
+          setPlayerState(false, viewName);
+          stopProgressBar();
+          if (caption) { caption.classList.remove('active'); caption.innerHTML = ''; }
+          pageAudio = null;
+        };
         pageAudio.onended = done; pageAudio.onerror = done;
         await pageAudio.play();
         return true;
@@ -3983,7 +3889,6 @@
     }
 
     function speakView(viewName) {
-      window.speechSynthesis.cancel();
       stopPageAudio();
       stopHighlighting();
       let key = viewName; if (key?.startsWith('project-')) key = 'projects';
@@ -3991,39 +3896,29 @@
       if (!text) { hideIndicator(); setPlayerState(false, viewName); return; }
       currentViewName = viewName;
 
-      playUploadedAudio(viewName).then((usedUploaded) => {
-        if (usedUploaded) return;
-
-        speakViaCloneEl(viewName, text).then((usedClone) => {
-          if (usedClone) {
-            startHighlightingSync(viewName, pageAudio);
-            return;
-          }
-          hideIndicator();
-          setPlayerState(false, viewName);
-          const caption = document.getElementById('chatCaption');
-          if (caption) {
-            caption.textContent = 'Voice engine is warming up. Please try again in a moment.';
-            caption.classList.add('active');
-            setTimeout(() => caption.classList.remove('active'), 2600);
-          }
-        });
+      speakViaCloneEl(viewName, text).then((usedClone) => {
+        if (usedClone) {
+          startHighlightingSync(viewName, pageAudio);
+          return;
+        }
+        hideIndicator();
+        setPlayerState(false, viewName);
+        const caption = document.getElementById('chatCaption');
+        if (caption) {
+          caption.textContent = 'Anchit voice is warming up. Please try again in a moment.';
+          caption.classList.add('active');
+          setTimeout(() => caption.classList.remove('active'), 2600);
+        }
       });
     }
 
-    function trySpeak(viewName) {
-      const voices = window.speechSynthesis.getVoices();
-      if (voices.length === 0) {
-        window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.onvoiceschanged = null; speakView(viewName); };
-      } else { speakView(viewName); }
-    }
-
-    playBtn?.addEventListener('click', () => {
+    function trySpeak(viewName) { speakView(viewName); }
+    window.anchitNarrate = function(viewName) {
       audioModeEnabled = true;
       const activeEl = document.querySelector('.view.active');
-      const vName = activeEl ? activeEl.id.replace('view-', '') : 'home';
-      trySpeak(vName);
-    });
+      trySpeak(viewName || (activeEl ? activeEl.id.replace('view-', '') : 'home'));
+    };
+    window.anchitStopNarration = stopAllPlayback;
 
     ppBtn?.addEventListener('click', () => {
       if (pageAudio) {                                  // cloned-voice or uploaded path
@@ -4031,37 +3926,18 @@
         else { pageAudio.pause(); setPlayerState(false); }
         return;
       }
-      if (window.speechSynthesis.paused) {
-        window.speechSynthesis.resume();
-        if (fill && utterDuration) {
-          const elapsed = Date.now() - utterStart;
-          fill.style.transition = 'width ' + (utterDuration - elapsed) + 'ms linear';
-          fill.style.width = '100%';
-        }
-        setPlayerState(true);
-      } else if (window.speechSynthesis.speaking) {
-        window.speechSynthesis.pause();
-        if (fill && utterDuration) {
-          const pct = Math.min(((Date.now() - utterStart) / utterDuration) * 100, 99);
-          fill.style.transition = 'none'; fill.style.width = pct + '%';
-        }
-        clearInterval(progressTimer);
-        setPlayerState(false);
-      }
     });
 
-    // Mute / unmute — governs both the cloned-voice element and browser TTS
+    // Mute / unmute — governs the cloned-voice audio element.
     const muteBtn = document.getElementById('anpMute');
     muteBtn?.addEventListener('click', () => { audioMuted = !audioMuted; applyMute(); muteBtn.title = audioMuted ? 'Unmute' : 'Mute'; });
 
     function stopAllPlayback() {
       stopPageAudio();
-      window.speechSynthesis.cancel();
       stopHighlighting();
       audioModeEnabled = false;
       hideIndicator();
       nudge?.classList.remove('playing', 'paused');
-      stickyBtn?.classList.remove('playing', 'paused');
       stopProgressBar();
     }
 
@@ -4069,101 +3945,8 @@
 
     dismissBtn?.addEventListener('click', () => { nudge?.classList.add('dismissed'); });
 
-    /* Sticky listen button — play/pause/stop */
-    const stickyBtn = document.getElementById('chatNarrateBtn');
-    const stickyStop = document.getElementById('topBarStopBtn');
-    stickyBtn?.addEventListener('click', (e) => {
-      if (e.target.closest('.listen-stop')) return; // handled below
-      if (stickyBtn.classList.contains('playing')) {
-        // Pause
-        if (pageAudio) { try { pageAudio.pause(); } catch {} } else { window.speechSynthesis.pause(); }
-        stickyBtn.classList.remove('playing');
-        stickyBtn.classList.add('paused');
-        clearInterval(progressTimer);
-      } else if (stickyBtn.classList.contains('paused')) {
-        // Resume
-        if (pageAudio) { try { pageAudio.play(); } catch {} } else { window.speechSynthesis.resume(); }
-        stickyBtn.classList.remove('paused');
-        stickyBtn.classList.add('playing');
-      } else {
-        // Play
-        audioModeEnabled = true;
-        const activeEl = document.querySelector('.view.active');
-        const vName = activeEl ? activeEl.id.replace('view-', '') : 'home';
-        trySpeak(vName);
-      }
-    });
-    stickyStop?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      stopAllPlayback();
-    });
-
-    /* Hero "Hear this from me" button */
-    const heroListen = document.getElementById('heroListenBtn');
-    heroListen?.addEventListener('click', () => {
-      audioModeEnabled = true;
-      trySpeak('home');
-    });
-
     document.addEventListener('viewChanged', (e) => { if (audioModeEnabled) trySpeak(e.detail); });
 
-    /* ---- Voice interrupt via SpeechRecognition ---- */
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) return;
-
-    const card = document.createElement('div');
-    card.className = 'voice-interrupt-card';
-    card.innerHTML = '<div class="vic-header"><span class="vic-label">&#9679; You asked</span><button class="vic-close" aria-label="Dismiss">&#x2715;</button></div><div class="vic-question"></div><div class="vic-response"></div><div class="vic-actions"><button class="vic-continue">Continue narration &#9654;</button><button class="vic-dismiss">Skip, thanks</button></div>';
-    document.body.appendChild(card);
-
-    function showCard(question, responseHtml) {
-      card.querySelector('.vic-question').textContent = '"' + question + '"';
-      card.querySelector('.vic-response').innerHTML = responseHtml;
-      card.querySelectorAll('[data-nav]').forEach(a => {
-        a.addEventListener('click', ev => { ev.preventDefault(); card.classList.remove('active'); switchView(a.dataset.nav); });
-      });
-      card.classList.add('active');
-    }
-    function dismissCard() { card.classList.remove('active'); }
-    card.querySelector('.vic-close').addEventListener('click', dismissCard);
-    card.querySelector('.vic-dismiss').addEventListener('click', dismissCard);
-    card.querySelector('.vic-continue').addEventListener('click', () => {
-      dismissCard();
-      if (audioModeEnabled) { if (pageAudio) { try { pageAudio.play(); } catch {} } else { window.speechSynthesis.resume(); } setPlayerState(true); }
-    });
-
-    let rec = null, recognizing = false;
-    function startRec() {
-      if (recognizing) return;
-      try {
-        rec = new SR(); rec.continuous = false; rec.interimResults = false; rec.lang = 'en-IN';
-        rec.onresult = (e) => {
-          if (!e.results[0]?.isFinal) return;
-          const q = (e.results[0][0].transcript || '').trim();
-          if (!q || q.length < 2) return;
-          if (pageAudio) { try { pageAudio.pause(); } catch {} } else { window.speechSynthesis.pause(); }
-          if (fill && utterDuration) { const pct = Math.min(((Date.now()-utterStart)/utterDuration)*100,99); fill.style.transition='none'; fill.style.width=pct+'%'; }
-          clearInterval(progressTimer); setPlayerState(false);
-          const match = findMatch(q);
-          const resp = match ? match.response : 'That\'s a thoughtful question — I\'d love to give it the space it deserves. <a data-nav="home">Ask me in the chat</a> and I\'ll walk you through it properly.';
-          
-          const isChat = document.getElementById('view-chat')?.classList.contains('active');
-          if (isChat) {
-            handleMessage(q);
-          } else {
-            showCard(q, resp);
-          }
-        };
-        rec.onend = () => { recognizing = false; if (audioModeEnabled && window.speechSynthesis.speaking) setTimeout(startRec, 300); };
-        rec.onerror = (ev) => { recognizing = false; if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') rec = null; };
-        rec.start(); recognizing = true;
-      } catch (err) { recognizing = false; }
-    }
-    function stopRec() { recognizing = false; if (rec) { try { rec.stop(); } catch (e) {} } }
-
-    playBtn?.addEventListener('click', () => { setTimeout(startRec, 1200); }, { capture: true });
-    document.addEventListener('viewChanged', () => { if (audioModeEnabled) setTimeout(startRec, 1200); });
-    stopBtn?.addEventListener('click', stopRec, { capture: true });
   })();
 
   /* ============ SCROLL PROGRESS BAR ============ */
@@ -4209,54 +3992,6 @@
 </script>
 
 <!-- ───────── Schedule-a-call modal (Google Meet invite) ───────── -->
-<!-- ============ FLOATING "TALK TO ME" CHAT FAB ============ -->
-<button id="chatFab" data-view="chat" aria-label="Chat with Anchit" title="Chat with Anchit"
-  style="position:fixed;right:20px;bottom:24px;z-index:9997;display:inline-flex;align-items:center;gap:10px;background:var(--primary,#ff4d1f);color:#fff;border:0;border-radius:999px;padding:14px 20px 14px 16px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 10px 30px rgba(255,77,31,.4);animation:chatFabPulse 2.6s ease-in-out infinite;">
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-  <span class="cf-label">Talk to me</span>
-</button>
-<style>
-  @keyframes chatFabPulse{0%,100%{box-shadow:0 10px 30px rgba(255,77,31,.4)}50%{box-shadow:0 10px 38px rgba(255,77,31,.62)}}
-  #chatFab:hover{filter:brightness(1.06);transform:translateY(-1px)}
-  @media(max-width:560px){#chatFab .cf-label{display:none}#chatFab{padding:14px;right:16px;bottom:18px}}
-  body.view-chat #chatFab{display:none}
-</style>
-<script>
-  (function(){
-    var f=document.getElementById('chatFab');
-    if(f)f.addEventListener('click',function(){
-      // Trigger the already-wired sidebar "Chat" item (querySelectorAll ran before this FAB existed).
-      var link=document.querySelector('.sidebar-item[data-view="chat"]')||document.querySelector('[data-view="chat"]:not(#chatFab)');
-      if(link){ link.click(); }
-      else { location.hash='#chat'; }
-    });
-    document.addEventListener('viewChanged',function(e){ document.body.classList.toggle('view-chat', e.detail==='chat'); });
-  })();
-</script>
-
-<!-- ============ VIEW SWITCHER HAS BEEN MOVED TO TOP BAR ============ -->
-<script>
-(function(){
-  var KEY='anchit-portfolio-view';
-  function go(v){ try{localStorage.setItem(KEY,v);}catch(e){} if(v==='cyber'){ location.href='/cyber'; } }
-  // first-visit chooser
-  var chosen=null; try{chosen=localStorage.getItem(KEY);}catch(e){}
-  if(!chosen){
-    try{localStorage.setItem(KEY,'simple');}catch(e){}
-  }
-  var sb=document.getElementById('sidebarViewToggle');
-  if(sb) sb.onclick=function(){ go('nexus'); };
-  
-  var ts=document.getElementById('topBarViewSelect');
-  if(ts) {
-    ts.addEventListener('change', function(e) {
-      if(e.target.value === 'cyber') go('cyber');
-      else if(e.target.value === 'nexus') go('nexus');
-    });
-  }
-})();
-</script>
-
 <div id="schedModal" role="dialog" aria-modal="true" aria-labelledby="schedTitle" style="position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.62);backdrop-filter:blur(6px);">
   <div style="max-width:460px;width:100%;max-height:90vh;overflow-y:auto;background:var(--bg-elev,#fff);border:1px solid var(--rule,#e5dcc7);border-radius:18px;padding:24px 22px 26px;font-family:inherit;box-shadow:0 30px 80px rgba(0,0,0,.4);">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px;">
@@ -4427,7 +4162,7 @@
     border-color: rgba(255, 190, 73, .65);
     box-shadow: 0 16px 46px rgba(255, 106, 26, .14);
   }
-  #chatFab, #audioNudge, #audioAmbient, #chatNarrateBtn { display: none !important; }
+  #audioNudge, #audioAmbient { display: none !important; }
   .chat-mini-btn {
     width: 30px;
     height: 30px;
@@ -4492,9 +4227,6 @@
   const talkBtn = document.getElementById('universalTalkBtn');
   const hearBtn = document.getElementById('universalNarrateBtn');
   const miniBtn = document.getElementById('chatMinimizeBtn');
-  const logoImgs = document.querySelectorAll('img[src="assets/logo-at.jpg"]');
-  logoImgs.forEach(img => { img.src = 'AnchitTandon-AppLogo.png'; img.alt = 'Anchit Tandon'; });
-
   function openSmallChat() {
     sessionStorage.removeItem('anchit-chat-minimized');
     chatBlock?.classList.remove('minimized');
@@ -4530,8 +4262,9 @@
   });
 
   hearBtn?.addEventListener('click', () => {
-    document.getElementById('heroListenBtn')?.click();
-    document.getElementById('audioPlayBtn')?.click();
+    if (typeof window.anchitNarrate === 'function') {
+      window.anchitNarrate();
+    }
   });
 
   if (uploadBtn && audioFileInput) {
