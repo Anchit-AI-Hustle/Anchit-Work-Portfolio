@@ -231,9 +231,9 @@
   .top-bar-inner {
     width: 100%; max-width: var(--max-w); margin: 0 auto;
     padding: 0 var(--gutter);
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex; align-items: center; justify-content: flex-start;
   }
-  .top-bar-links { display: flex; gap: 20px; align-items: center; }
+  .top-bar-links { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
   .top-bar-link {
     font-family: var(--font-mono); font-size: 11px; font-weight: 500;
     letter-spacing: 0.06em; text-transform: uppercase;
@@ -242,19 +242,6 @@
   }
   .top-bar-link .tb-icon { width: 13px; height: 13px; display: none; }
   .top-bar-link:hover { color: var(--primary); }
-  .top-bar-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
-  .top-bar-cta {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-family: var(--font-body); font-size: 12px; font-weight: 600;
-    padding: 6px 14px; border-radius: 99px; cursor: pointer;
-    border: none; transition: all 0.2s;
-  }
-  .top-bar-cta svg { width: 14px; height: 14px; }
-  .top-bar-cta.talk { background: var(--primary); color: #FFF; }
-  .top-bar-cta.talk:hover { background: var(--primary-deep); }
-  .top-bar-cta.listen { background: var(--bg-deep); color: var(--ink-dim); border: 1px solid var(--rule-strong); }
-  .top-bar-cta.listen:hover { border-color: var(--primary); color: var(--primary); }
-  .top-bar-cta.listen.playing { border-color: var(--accent); color: var(--accent); }
   .view-dropdown { appearance: none; background: var(--bg-deep); border: 1px solid var(--rule); border-radius: 99px; padding: 4px 12px; font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--ink); cursor: pointer; outline: none; }
   .view-dropdown:hover { background: var(--rule); }
 
@@ -272,9 +259,6 @@
     .top-bar-link { padding: 6px; }
     .top-bar-link .tb-label { display: none; }
     .top-bar-link .tb-icon { display: inline-block; }
-    /* CTAs shrink */
-    .top-bar-cta { padding: 6px 10px; font-size: 11px; gap: 5px; }
-    .top-bar-cta svg { width: 13px; height: 13px; }
     /* Hamburger button sits inside the safe-area top of the bar */
     .sidebar-toggle { top: calc(var(--safe-top) + 6px); width: 36px; height: 36px; }
     main { padding-top: calc(44px + var(--safe-top)); }
@@ -286,9 +270,6 @@
     .top-bar-links { gap: 4px; }
     .top-bar-link { padding: 5px; }
     .top-bar-link .tb-icon { width: 14px; height: 14px; }
-    .top-bar-cta .cta-label { display: none; }
-    .top-bar-cta { padding: 6px 9px; }
-    /* Below 380px, hide email + resume icons to keep talk/hear visible */
   }
   
 
@@ -320,14 +301,6 @@
   .view { display: none; padding: clamp(40px, 6vw, 96px) 0 clamp(80px, 10vw, 160px); }
   .view.active { display: block; animation: viewIn 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
   #view-home { padding-top: 0; }
-  @media (min-width: 821px) {
-    #view-home > .container {
-      padding-left: max(var(--gutter), calc(var(--sidebar-w) + 24px));
-    }
-    body.sidebar-collapsed:has(#view-home.active) #view-home > .container {
-      padding-left: max(var(--gutter), calc(var(--sidebar-w-collapsed) + 24px));
-    }
-  }
   @keyframes viewIn {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
@@ -1865,13 +1838,17 @@
 <div class="top-bar" id="topBar">
   <div class="top-bar-inner">
     <div class="top-bar-links" aria-label="Reach me">
-      <a href="https://www.linkedin.com/in/anchit-tandon" target="_blank" rel="noopener" class="top-bar-link" aria-label="LinkedIn" title="LinkedIn">
-        <svg class="tb-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.95v5.66H9.36V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.38-1.85 3.61 0 4.28 2.38 4.28 5.47v6.27ZM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12ZM7.12 20.45H3.55V9h3.57v11.45ZM22.22 0H1.77C.79 0 0 .78 0 1.74v20.51C0 23.22.79 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.75V1.74C24 .78 23.2 0 22.22 0Z"/></svg>
-        <span class="tb-label">LinkedIn</span>
+      <a href="https://wa.me/919873945238" target="_blank" rel="noopener" class="top-bar-link" aria-label="WhatsApp" title="WhatsApp">
+        <svg class="tb-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.8.7.8-2.7-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2.1-.2 0-.3 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3-.8.8-1 1.9-.6 3.1a9.3 9.3 0 0 0 4.6 4.9c1.6.7 2.6.6 3.4.4.5-.1 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.1l-.4-.1z"/></svg>
+        <span class="tb-label">WhatsApp</span>
       </a>
-      <a href="mailto:anchit.tandon@gmail.com" class="top-bar-link" aria-label="E-Mail" title="E-Mail">
-        <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        <span class="tb-label">E-Mail</span>
+      <a href="tel:+919873945238" class="top-bar-link" aria-label="Phone Call" title="Phone Call">
+        <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <span class="tb-label">Call</span>
+      </a>
+      <a href="#schedule" data-schedule class="top-bar-link" aria-label="Set up a 30-min Google Meet" title="Set up a 30-min Google Meet">
+        <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span class="tb-label">Set up a 30-Mins Google Meet</span>
       </a>
       <a href="https://wa.me/919873945238" target="_blank" rel="noopener" class="top-bar-link" aria-label="WhatsApp" title="WhatsApp">
         <svg class="tb-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.8.7.8-2.7-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2.1-.2 0-.3 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3-.8.8-1 1.9-.6 3.1a9.3 9.3 0 0 0 4.6 4.9c1.6.7 2.6.6 3.4.4.5-.1 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.1l-.4-.1z"/></svg>
@@ -1881,29 +1858,6 @@
         <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         <span class="tb-label">SMS</span>
       </a>
-      <a href="tel:+919873945238" class="top-bar-link" aria-label="Phone Call" title="Phone Call">
-        <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-        <span class="tb-label">Phone</span>
-      </a>
-      <a href="assets/resume.pdf" target="_blank" rel="noopener" class="top-bar-link" aria-label="View Resume" title="View Resume">
-        <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        <span class="tb-label">View Resume</span>
-      </a>
-    </div>
-    <div class="top-bar-actions">
-      <button class="top-bar-cta listen" id="universalNarrateBtn" type="button" aria-label="Hear me narrate" title="Hear Anchit narrate this page" onclick="if(window.anchitNarrate){window.anchitNarrate()}else if(window.anchitHardNarrate){window.anchitHardNarrate()}">
-        <svg class="listen-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-        <span class="cta-label">Hear me narrate</span>
-      </button>
-      <button class="top-bar-cta act-chat" id="universalTalkBtn" type="button" aria-label="Talk with me" title="Open chat">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        <span class="cta-label">Talk with me</span>
-      </button>
-      <button class="top-bar-cta act-meet" data-schedule aria-label="Book 30-min Google Meet" title="Book a 30-min Google Meet">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <span class="cta-label">30-min Meet</span>
-      </button>
-      
     </div>
   </div>
 </div>
@@ -1924,10 +1878,7 @@
     document.querySelectorAll('#view-home .narrate-span').forEach(function(span, idx) {
       span.classList.toggle('active-narrate', idx < 3);
     });
-    if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) {
-      setTimeout(cleanup, 3000);
-      return;
-    }
+    if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
     window.speechSynthesis.cancel();
     var utter = new SpeechSynthesisUtterance(text);
     utter.rate = 0.98;
@@ -3057,33 +3008,25 @@
       </div>
 
       <div class="contact-grid reveal-stagger">
-        <a href="#schedule" data-schedule class="contact-card" style="cursor:pointer;">
-          <span class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
-          <div class="contact-card-text"><div class="label">Google Meet · 30 min</div><div class="value">Book a <em>focused</em> call</div></div>
-        </a>
-        <a href="mailto:anchit.tandon@gmail.com" class="contact-card">
-          <span class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
-          <div class="contact-card-text"><div class="label">Email</div><div class="value">anchit<em>.</em>tandon<em>@</em>gmail.com</div></div>
-        </a>
         <a href="https://wa.me/919873945238" target="_blank" rel="noopener" class="contact-card">
           <span class="contact-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.8.7.8-2.7-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2.1-.2 0-.3 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3-.8.8-1 1.9-.6 3.1a9.3 9.3 0 0 0 4.6 4.9c1.6.7 2.6.6 3.4.4.5-.1 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.1l-.4-.1z"/></svg></span>
-          <div class="contact-card-text"><div class="label">WhatsApp</div><div class="value">+91 <em>98739</em> 45238</div></div>
-        </a>
-        <a href="https://linkedin.com/in/anchit-tandon" target="_blank" rel="noopener" class="contact-card">
-          <span class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></span>
-          <div class="contact-card-text"><div class="label">LinkedIn</div><div class="value">linkedin.com/in/<em>anchit-tandon</em></div></div>
-        </a>
-        <a href="sms:+919873945238" class="contact-card">
-          <span class="contact-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.8.7.8-2.7-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2.1-.2 0-.3 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3-.8.8-1 1.9-.6 3.1a9.3 9.3 0 0 0 4.6 4.9c1.6.7 2.6.6 3.4.4.5-.1 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.1l-.4-.1z"/></svg></span>
-          <div class="contact-card-text"><div class="label">SMS</div><div class="value">Send a <em>text</em></div></div>
+          <div class="contact-card-text"><div class="label">WhatsApp</div><div class="value">Message me on <em>WhatsApp</em></div></div>
         </a>
         <a href="tel:+919873945238" class="contact-card">
           <span class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
-          <div class="contact-card-text"><div class="label">Phone call</div><div class="value">Call <em>directly</em></div></div>
+          <div class="contact-card-text"><div class="label">Call</div><div class="value">Call <em>directly</em></div></div>
         </a>
-        <a href="assets/resume.pdf" target="_blank" rel="noopener" class="contact-card">
-          <span class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
-          <div class="contact-card-text"><div class="label">Direct resume</div><div class="value">Open <em>PDF</em></div></div>
+        <a href="#schedule" data-schedule class="contact-card" style="cursor:pointer;">
+          <span class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+          <div class="contact-card-text"><div class="label">Set up a 30-Mins Google Meet</div><div class="value">Book a <em>focused</em> conversation</div></div>
+        </a>
+        <a href="https://wa.me/919873945238" target="_blank" rel="noopener" class="contact-card">
+          <span class="contact-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.8.7.8-2.7-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2.1-.2 0-.3 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3-.8.8-1 1.9-.6 3.1a9.3 9.3 0 0 0 4.6 4.9c1.6.7 2.6.6 3.4.4.5-.1 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.1l-.4-.1z"/></svg></span>
+          <div class="contact-card-text"><div class="label">WhatsApp</div><div class="value">Send a <em>quick note</em></div></div>
+        </a>
+        <a href="sms:+919873945238" class="contact-card">
+          <span class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+          <div class="contact-card-text"><div class="label">SMS</div><div class="value">Send a <em>text</em></div></div>
         </a>
       </div>
     </div>
@@ -3119,12 +3062,10 @@
   <div>© Anchit Tandon · 2026 · Delhi, IST</div>
   <div class="footer-links">
     <a href="https://wa.me/919873945238" target="_blank" rel="noopener">WhatsApp</a>
-    <a href="sms:+919873945238">SMS</a>
     <a href="tel:+919873945238">Call</a>
-    <a href="mailto:anchit.tandon@gmail.com">E-Mail</a>
-    <a href="#schedule" data-schedule>Meet</a>
-    <a href="https://www.linkedin.com/in/anchit-tandon" target="_blank" rel="noopener">LinkedIn</a>
-    <a href="assets/resume.pdf" target="_blank" rel="noopener">View Resume</a>
+    <a href="#schedule" data-schedule>Set up a 30-Mins Google Meet</a>
+    <a href="https://wa.me/919873945238" target="_blank" rel="noopener">WhatsApp</a>
+    <a href="sms:+919873945238">SMS</a>
   </div>
 </footer>
 
@@ -3166,7 +3107,8 @@
       caption.querySelectorAll('.current').forEach(el => el.classList.remove('current'));
       caption.querySelector(`[data-i="${idx}"]`)?.classList.add('current');
     };
-    utter.onend = utter.onerror = cleanup;
+    utter.onend = cleanup;
+    utter.onerror = function() {};
     window.speechSynthesis.speak(utter);
   };
 
@@ -3237,6 +3179,10 @@
 
     // Animate out old view, animate in new
     const prev = document.querySelector('.view.active');
+    if (prev && prev.id === 'view-' + viewName && !anchorId) {
+      closeSidebar();
+      return;
+    }
     if (prev && prev.id !== 'view-' + viewName) {
       prev.classList.add('v-leave');
       setTimeout(() => prev.classList.remove('v-leave'), 250);
@@ -3244,9 +3190,10 @@
 
     views.forEach(v => {
       const isActive = v.id === 'view-' + viewName;
-      if (isActive && !v.classList.contains('active')) v.classList.add('v-enter');
+      const needsEnter = isActive && !v.classList.contains('active');
+      if (needsEnter) v.classList.add('v-enter');
       v.classList.toggle('active', isActive);
-      setTimeout(() => v.classList.remove('v-enter'), 450);
+      if (needsEnter) setTimeout(() => v.classList.remove('v-enter'), 450);
     });
 
     // Active states on sidebar nav links
@@ -3358,8 +3305,8 @@
       response: "AI shows up everywhere I work. At Vahdam, the most important example is VAHDAM Lifecycle OS. At Times Internet, I built the AI telesuite for transcription, pitch scoring and conversion assist. On the side, MusicGenAI is my passion project, this portfolio is a hobby build, and I keep experimenting with voice, agents, mailers, wellness and productivity workflows. Stack varies by project: React, TypeScript, Python, Supabase, Vercel. I pick whatever removes friction fastest.",
       nextChips: ["Tell me about MusicGenAI","Tell me about Jarvis","Tell me about Hey Yaara","Show me your work"] },
     { keywords: ['contact','email','reach','hire','talk','connect','in touch'],
-      response: "Best bet: <a href='mailto:anchit.tandon@gmail.com'>anchit.tandon@gmail.com</a> — I check it daily. LinkedIn DMs work too. Phone if it's urgent: +91 98739 45238. Or just <a data-nav='contact'>open the contact panel →</a>",
-      nextChips: ["Open contact panel","Show me your work","Show me your builds","Are you open to remote?"] },
+      response: "Best way to reach me: WhatsApp first, then call, then a focused 30-minute Google Meet. If you prefer async, WhatsApp or SMS both work at <a href='tel:+919873945238'>+91 98739 45238</a>. <a data-nav='contact'>Open the contact panel →</a>",
+      nextChips: ["Open contact panel","Book a 30-min Meet","Show me your work","Are you open to roles?"] },
     { keywords: ['linkedin','resume','cv','résumé','portfolio'],
       response: "You're already on the best version of my portfolio — the full story lives right here. My <a data-nav='experience'>work history</a> walks through Vahdam and Times Internet, and <a data-nav='projects'>side projects</a> covers everything I've built on the side. For the formal version, my full profile is on LinkedIn (linkedin.com/in/anchit-tandon) and my <a href='assets/resume.pdf' target='_blank' rel='noopener'>résumé opens as a PDF here</a>.",
       nextChips: ["Open the Work view","Show me your builds","Tell me about your experience","How do I reach you?"] },
@@ -3379,8 +3326,8 @@
       response: "Quick timeline: VIT CSE (2016–20) → Tuple Technologies, backend (2020–22) → Citymall, backend (2022) → Times Internet, APM to Senior PM (2022–26) → Vahdam India, AGM — Product Management, D2C Growth from 20 April 2026. The thread: started building systems, then products, then growth. Each step compounded the last. <a data-nav='experience'>Full timeline →</a>",
       nextChips: ["Why switch to product?","Tell me about Times Internet","Tell me about Vahdam","How do I reach you?"] },
     { keywords: ['book','schedule','call','meet','meeting','calendar','appointment','connect','catch up','hop on','available','talk to you'],
-      response: "Let's actually talk — I keep 30-minute Google Meet slots for focused conversations. <a data-nav='schedule'>Open the scheduler →</a> and you'll get a calendar invite with a Meet link. Prefer async first? <a href='mailto:anchit.tandon@gmail.com'>anchit.tandon@gmail.com</a> · WhatsApp/call <a href='tel:+919873945238'>+91 98739 45238</a>.",
-      nextChips: ["Book a 30-min Meet","What should we discuss?","Show me your work","Your resume"] },
+      response: "Let's set up a focused 30-minute Google Meet. <a data-nav='schedule'>Open the scheduler →</a>; it creates a calendar invite with a Meet link, then I confirm on WhatsApp. For faster back-and-forth, WhatsApp or call me at <a href='tel:+919873945238'>+91 98739 45238</a>.",
+      nextChips: ["Book a 30-min Meet","What should we discuss?","Show me your work","How do I reach you?"] },
     { keywords: ['voice','voice ai'],
       response: "Voice is a thread that runs through my work. Hey Yaara is voice-first — an AI companion for the elderly where the entire interface is conversation. At Times Internet, the AI telesuite processed voice in real-time for sales transcription and pitch scoring. I think voice removes the biggest friction of all: having to learn an interface. <a data-nav='project-yaara'>See Hey Yaara →</a>",
       nextChips: ["Tell me about Hey Yaara","What's the AI telesuite?","Tell me about MusicGenAI","Your AI stack?"] },
@@ -3553,8 +3500,13 @@
   function frameAnswer(question, match) {
     const q = question.trim();
     if (!match) return null;
-    const topic = q.length > 72 ? q.slice(0, 69) + '...' : q;
-    return `<strong>On "${topic}"</strong><br>${match.response}`;
+    const ql = q.toLowerCase();
+    let lead = "Here is the direct answer:";
+    if (/\b(contact|reach|call|whatsapp|sms|meet|schedule|book)\b/.test(ql)) lead = "Best route:";
+    else if (/\b(why|how)\b/.test(ql)) lead = "The honest answer:";
+    else if (/\b(who|about|background|bio|describe)\b/.test(ql)) lead = "Short version:";
+    else if (/\b(metric|number|win|impact|growth|result)\b/.test(ql)) lead = "Impact view:";
+    return `<strong>${lead}</strong><br>${match.response}`;
   }
   function contextualFallback(question) {
     const q = question.toLowerCase();
@@ -4241,16 +4193,16 @@
 </script>
 
 <!-- ───────── Schedule-a-call modal (Google Meet invite) ───────── -->
-<div id="schedModal" role="dialog" aria-modal="true" aria-labelledby="schedTitle" style="position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.62);backdrop-filter:blur(6px);">
-  <div style="max-width:460px;width:100%;max-height:90vh;overflow-y:auto;background:var(--bg-elev,#fff);border:1px solid var(--rule,#e5dcc7);border-radius:18px;padding:24px 22px 26px;font-family:inherit;box-shadow:0 30px 80px rgba(0,0,0,.4);">
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px;">
+<div id="schedModal" role="dialog" aria-modal="true" aria-labelledby="schedTitle" style="position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:10px;background:rgba(0,0,0,.62);backdrop-filter:blur(6px);">
+  <div style="max-width:460px;width:100%;max-height:calc(100vh - 20px);overflow-y:auto;background:var(--bg-elev,#fff);border:1px solid var(--rule,#e5dcc7);border-radius:18px;padding:16px 18px 18px;font-family:inherit;box-shadow:0 30px 80px rgba(0,0,0,.4);">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:2px;">
       <div>
         <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--primary,#ff4d1f);">Let's talk</div>
-        <h2 id="schedTitle" style="font-size:22px;margin-top:6px;color:var(--ink,#161312);">Book a 30-min Google Meet</h2>
+        <h2 id="schedTitle" style="font-size:21px;margin:3px 0 0;color:var(--ink,#161312);">Book a 30-min Google Meet</h2>
       </div>
       <button type="button" id="schedClose" aria-label="Close" style="background:none;border:0;color:var(--ink-mute,#a39e94);font-size:26px;line-height:1;cursor:pointer;">×</button>
     </div>
-    <p style="color:var(--ink-dim,#5a554e);font-size:13.5px;line-height:1.6;margin-bottom:18px;">Pick a time and add your details. You'll get a Google Calendar invite with a Meet link — and so will I. I'll confirm on WhatsApp too.</p>
+    <p style="color:var(--ink-dim,#5a554e);font-size:13px;line-height:1.45;margin:0 0 12px;">Pick a time and add your details. You will get a Google Calendar invite with a Meet link, and I will confirm on WhatsApp.</p>
     <form id="schedForm" novalidate>
       <label class="sf-l">Your name</label>
       <input id="sf-name" class="sf-i" type="text" autocomplete="name" placeholder="Jane Doe">
@@ -4266,23 +4218,23 @@
         <div><label class="sf-l">Date</label><input id="sf-date" class="sf-i" type="date" style="color-scheme:light;"></div>
         <div><label class="sf-l">Time</label><input id="sf-time" class="sf-i" type="time" style="color-scheme:light;"></div>
       </div>
-      <p style="font-size:11.5px;color:var(--ink-mute,#a39e94);margin:4px 0 0;line-height:1.5;">I'll confirm the slot is free and accept the invite — if it clashes, I'll suggest the nearest open time.</p>
-      <div id="sf-err" style="color:#d92d20;font-size:12.5px;margin-top:10px;display:none;"></div>
-      <button type="submit" style="width:100%;margin-top:18px;background:var(--primary,#ff4d1f);color:#fff;border:0;border-radius:11px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Create the invite →</button>
+      <p style="font-size:11.5px;color:var(--ink-mute,#a39e94);margin:2px 0 0;line-height:1.4;">If it clashes, I will suggest the nearest open slot.</p>
+      <div id="sf-err" style="color:#d92d20;font-size:12.5px;margin-top:8px;display:none;"></div>
+      <button type="submit" style="width:100%;margin-top:12px;background:var(--primary,#ff4d1f);color:#fff;border:0;border-radius:11px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Create the invite →</button>
     </form>
     <div id="sf-done" style="display:none;">
-      <p style="color:var(--ink,#161312);font-size:14px;line-height:1.6;margin-bottom:16px;">Two quick steps to lock it in:</p>
+      <p style="color:var(--ink,#161312);font-size:14px;line-height:1.45;margin:0 0 10px;">Two quick steps to lock it in:</p>
       <a id="sf-gcal" href="#" target="_blank" rel="noopener" class="sf-step">📅 <span><b>Add to Google Calendar</b> — invites you + me, with a Meet link</span></a>
       <a id="sf-wa" href="#" target="_blank" rel="noopener" class="sf-step">💬 <span><b>Confirm on WhatsApp</b> — sends me the details</span></a>
-      <button type="button" id="sf-again" style="margin-top:14px;background:none;border:0;color:var(--ink-dim,#5a554e);font-size:12.5px;cursor:pointer;text-decoration:underline;">← Change details</button>
+      <button type="button" id="sf-again" style="margin-top:8px;background:none;border:0;color:var(--ink-dim,#5a554e);font-size:12.5px;cursor:pointer;text-decoration:underline;">← Change details</button>
     </div>
   </div>
 </div>
 <style>
   #schedModal .sf-l{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-dim,#5a554e);margin:0 0 5px;font-weight:600;}
-  #schedModal .sf-i{width:100%;background:var(--bg,#fbf5ec);border:1px solid var(--rule,#e5dcc7);border-radius:10px;color:var(--ink,#161312);padding:11px 13px;font-size:14px;font-family:inherit;outline:none;margin-bottom:12px;}
+  #schedModal .sf-i{width:100%;background:var(--bg,#fbf5ec);border:1px solid var(--rule,#e5dcc7);border-radius:10px;color:var(--ink,#161312);padding:9px 11px;font-size:14px;font-family:inherit;outline:none;margin-bottom:8px;}
   #schedModal .sf-i:focus{border-color:var(--primary,#ff4d1f);}
-  #schedModal .sf-step{display:flex;align-items:center;gap:10px;background:var(--bg,#fbf5ec);border:1px solid var(--rule,#e5dcc7);border-radius:11px;padding:13px 15px;margin-bottom:10px;text-decoration:none;color:var(--ink,#161312);font-size:13.5px;}
+  #schedModal .sf-step{display:flex;align-items:center;gap:10px;background:var(--bg,#fbf5ec);border:1px solid var(--rule,#e5dcc7);border-radius:11px;padding:10px 12px;margin-bottom:8px;text-decoration:none;color:var(--ink,#161312);font-size:13.5px;}
   #schedModal .sf-step:hover{border-color:var(--primary,#ff4d1f);}
 </style>
 <script>
@@ -4403,10 +4355,10 @@
     border-color: rgba(255, 171, 46, .24);
     box-shadow: 0 24px 80px rgba(0,0,0,.38), inset 0 0 40px rgba(255, 115, 23, .035);
   }
-  .contact-card, .sidebar-item, .top-bar-link, .top-bar-cta {
+  .contact-card, .sidebar-item, .top-bar-link {
     transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, color .22s ease;
   }
-  .contact-card:hover, .sidebar-item:hover, .top-bar-link:hover, .top-bar-cta:hover {
+  .contact-card:hover, .sidebar-item:hover, .top-bar-link:hover {
     transform: translateY(-2px);
     border-color: rgba(255, 190, 73, .65);
     box-shadow: 0 16px 46px rgba(255, 106, 26, .14);
@@ -4443,17 +4395,51 @@
     z-index: 9999;
     display: none;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    width: min(360px, calc(100vw - 32px));
     border: 1px solid rgba(255, 190, 73, .42);
-    border-radius: 999px;
-    background: linear-gradient(135deg, #ff7a1a, #f5b531);
-    color: #090400;
-    font-weight: 800;
-    padding: 13px 18px;
-    box-shadow: 0 0 38px rgba(255, 120, 24, .42);
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(17, 12, 8, .96), rgba(56, 24, 7, .94));
+    color: #fff7e8;
+    padding: 10px;
+    box-shadow: 0 18px 54px rgba(0, 0, 0, .52), 0 0 38px rgba(255, 120, 24, .28);
+  }
+  .chat-return.visible { display: flex; }
+  .chat-return-main,
+  .chat-return-icon {
+    appearance: none;
+    border: 0;
+    font: inherit;
+    color: inherit;
     cursor: pointer;
   }
-  .chat-return.visible { display: inline-flex; }
+  .chat-return-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-align: left;
+    background: transparent;
+    padding: 4px 6px;
+  }
+  .chat-return-main svg { flex: 0 0 18px; color: var(--primary); }
+  .chat-return-copy { min-width: 0; display: grid; gap: 2px; }
+  .chat-return-title { font-weight: 800; font-size: 14px; line-height: 1.2; }
+  .chat-return-sub { color: rgba(255, 247, 232, .66); font-size: 11px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chat-return-icon {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .08);
+    border: 1px solid rgba(255, 255, 255, .1);
+  }
+  .chat-return-icon:hover { border-color: rgba(255, 190, 73, .54); color: var(--accent); }
+  .chat-return-icon.muted { color: #ff7a1a; background: rgba(255, 122, 26, .12); }
   body.view-chat footer,
   body:has(#view-chat.active) footer,
   body.view-chat .sticky-ctas,
@@ -4496,8 +4482,7 @@
   }
   @media (max-width: 720px) {
     .top-bar-inner { gap: 8px; }
-    .top-bar-actions { flex-wrap: wrap; justify-content: flex-end; }
-    .top-bar-cta .cta-label, .top-bar-link .tb-label { display: none; }
+    .top-bar-link .tb-label { display: none; }
     .sidebar {
       left: 0 !important;
       right: auto !important;
@@ -4513,25 +4498,41 @@
     .chat-return {
       left: 16px;
       right: auto;
+      bottom: 16px;
+      width: calc(100vw - 32px);
     }
   }
 </style>
-<button class="chat-return" id="chatReturnBtn" type="button" aria-label="Reopen chat">
-  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-  Talk with me
-</button>
+<div class="chat-return" id="chatReturnBtn" role="group" aria-label="Chat with Anchit">
+  <button class="chat-return-main" type="button" data-chat-open aria-label="Open chat">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span class="chat-return-copy">
+      <span class="chat-return-title">Chat with me</span>
+      <span class="chat-return-sub">Ask about work, builds, roles, or collaborations.</span>
+    </span>
+  </button>
+  <button class="chat-return-icon" id="chatReturnMic" type="button" aria-label="Talk to chat" title="Talk to chat">
+    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+  </button>
+  <button class="chat-return-icon" id="chatReturnMute" type="button" aria-label="Mute chat audio" aria-pressed="false" title="Mute chat audio">
+    <svg class="icon-audio-on" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+    <svg class="icon-audio-off" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></svg>
+  </button>
+</div>
 <script id="at-final-flow">
 (function(){
   const chatBlock = document.querySelector('#view-chat .chat-block');
   const chatInputEl = document.getElementById('chatInput');
   const returnBtn = document.getElementById('chatReturnBtn');
+  const returnMain = returnBtn?.querySelector('[data-chat-open]');
+  const returnMic = document.getElementById('chatReturnMic');
+  const returnMute = document.getElementById('chatReturnMute');
   const transcript = document.getElementById('dictationTranscript');
   const audioFileInput = document.getElementById('chatAudioFile');
   const uploadBtn = document.getElementById('chatAudioUploadBtn');
   const micBtn = document.getElementById('chatMic');
-  const talkBtn = document.getElementById('universalTalkBtn');
-  const hearBtn = document.getElementById('universalNarrateBtn');
   const miniBtn = document.getElementById('chatMinimizeBtn');
+  let chatAudioMuted = false;
   function openSmallChat() {
     sessionStorage.removeItem('anchit-chat-minimized');
     chatBlock?.classList.remove('minimized');
@@ -4560,8 +4561,41 @@
   } else {
     chatBlock?.classList.remove('minimized');
   }
-  talkBtn?.addEventListener('click', openFullChat);
-  returnBtn?.addEventListener('click', openFullChat);
+  function setChatAudioMuted(nextMuted) {
+    chatAudioMuted = nextMuted;
+    returnMute?.classList.toggle('muted', chatAudioMuted);
+    returnMute?.setAttribute('aria-pressed', chatAudioMuted ? 'true' : 'false');
+    returnMute?.setAttribute('aria-label', chatAudioMuted ? 'Unmute chat audio' : 'Mute chat audio');
+    returnMute?.setAttribute('title', chatAudioMuted ? 'Unmute chat audio' : 'Mute chat audio');
+    const audioOn = returnMute?.querySelector('.icon-audio-on');
+    const audioOff = returnMute?.querySelector('.icon-audio-off');
+    if (audioOn) audioOn.style.display = chatAudioMuted ? 'none' : '';
+    if (audioOff) audioOff.style.display = chatAudioMuted ? '' : 'none';
+    if (typeof audioModeEnabled !== 'undefined') audioModeEnabled = !chatAudioMuted;
+    document.querySelectorAll('audio, video').forEach(media => {
+      media.muted = chatAudioMuted;
+      if (chatAudioMuted && typeof media.pause === 'function') {
+        try { media.pause(); } catch {}
+      }
+    });
+    if (chatAudioMuted) {
+      try { window.speechSynthesis?.cancel(); } catch {}
+      if (typeof cloneAudio !== 'undefined' && cloneAudio) { try { cloneAudio.pause(); } catch {} }
+      document.getElementById('chatCaption')?.classList.remove('active');
+    }
+  }
+
+  returnMain?.addEventListener('click', openFullChat);
+  returnMic?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!chatAudioMuted && typeof audioModeEnabled !== 'undefined') audioModeEnabled = true;
+    openFullChat();
+    setTimeout(() => document.getElementById('chatMic')?.click(), 260);
+  });
+  returnMute?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setChatAudioMuted(!chatAudioMuted);
+  });
   miniBtn?.addEventListener('click', minimizeChat);
   document.querySelectorAll('.sidebar-item[data-view="chat"]').forEach(a => {
     a.addEventListener('click', (e) => { e.preventDefault(); openFullChat(); });
