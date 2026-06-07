@@ -7,7 +7,7 @@
     "dev": "npx --yes serve@latest -l ${PORT:-5173} .",
     "build": "node scripts/build-www.mjs",
     "preview": "npx --yes serve@latest -l 4173 .",
-    "tts:serve": "cd tts-server && uvicorn app:app --host 127.0.0.1 --port 8000",
+    "tts:serve": "cd tts-server && .venv/bin/uvicorn app:app --host 127.0.0.1 --port 8000",
     "cap:add:ios": "npm run build && npx cap add ios",
     "cap:add:android": "npm run build && npx cap add android",
     "cap:sync": "npm run build && npx cap sync",

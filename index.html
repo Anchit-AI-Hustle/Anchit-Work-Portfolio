@@ -288,7 +288,7 @@
   /* The home canvas owns its vertical rhythm; secondary views sit below the top bar. */
   main { padding-top: 0; }
   main:has(.view.active:not(#view-home)) { padding-top: calc(44px + var(--safe-top)); }
-  #view-home { padding-top: 0; min-height: 100svh; }
+  #view-home { padding-top: 0; }
 
   @media (max-width: 820px) {
     .top-bar { left: 0; }
@@ -402,7 +402,7 @@
   .lede em { font-style: italic; color: var(--primary); font-weight: 400; }
 
   /* ============ HOME / HERO ============ */
-  .home-hero { min-height: calc(100svh - 44px - var(--safe-top)); padding-top: clamp(28px, 4vw, 56px); padding-bottom: 0; margin-bottom: 0; display: flex; flex-direction: column; justify-content: flex-start; }
+  .home-hero { padding-top: clamp(28px, 4vw, 56px); padding-bottom: 0; margin-bottom: 0; display: flex; flex-direction: column; justify-content: flex-start; }
   .home-hero .eyebrow { margin-bottom: 20px; }
   /* Name headline — all on one line */
   .home-hero .greeting {
@@ -1256,7 +1256,7 @@
     bottom: 24px;
     right: 24px;
     width: min(760px, calc(100vw - var(--sidebar-w) - 48px));
-    height: min(620px, calc(100vh - 96px));
+    height: min(800px, calc(100vh - 96px));
     max-height: calc(100vh - 96px);
     border-radius: 16px;
     z-index: 9999;
@@ -1999,7 +1999,7 @@
 
 <script>
   window.anchitHardNarrate = function() {
-    var text = "Hey, I'm Anchit Tandon. Currently A.G.M., Product Management, D2C Growth at Vahdam India across U.S., U.K. and global, where I joined on twentieth April twenty twenty six. My biggest Vahdam highlight so far is Vahdam Lifecycle O.S., and we have also increased U.K. marketing revenue.";
+    var text = "Hey, I'm Anchit Tandon. An engineer who learned to love the funnel. Building products. Scaling growth. Creating leverage. Currently AGM – Product Management and D to C Growth at Vahdam India, driving growth across the US, UK and global markets while helping scale a leading consumer brand. Previously at Times Internet, I owned growth and monetisation across ET Prime and TOI Plus, scaling telesales into a meaningful revenue engine and building high-performing acquisition and retention funnels. I also led the end-to-end launch and execution of the inaugural Times Internet Delhi Half Marathon twenty twenty six at Dhyan Chand National Stadium — establishing a new I P, delivering a fifteen thousand plus participant experience, and creating a new revenue stream for the business. Today, I operate at the intersection of Product, Growth and Revenue — building systems, optimising funnels, running experiments, and creating scalable pathways to sustainable growth.";
     var caption = document.getElementById('chatCaption');
     var words = text.trim().split(/\s+/);
     function cleanup() {
@@ -2045,13 +2045,16 @@
             <span class="greeting narrate-span" data-n-idx="0">Hey, I'm </span><span class="firstline narrate-span" data-n-idx="0">Anchit </span><span class="secondline"><span class="narrate-span" data-n-idx="0">Tandon.</span></span>
           </h1>
         </div>
-        <p class="hero-persona narrate-span" data-n-idx="1" style="margin-top:12px;">An <em>engineer</em> who learned to love the funnel.</p>
-        <p class="hero-tagline">
-          <span class="narrate-span" data-n-idx="2">Currently AGM — Product Management, D2C Growth at <em>Vahdam India</em>, driving US, UK &amp; global growth since 20 April 2026.</span>
-          <span class="narrate-span" data-n-idx="3">Previously at <em>Times Internet</em> — led the <em>Delhi Half Marathon</em> end-to-end, from tech and marketing to on-ground experience, launching it as a brand-new IP and revenue stream;</span>
-          <span class="narrate-span" data-n-idx="4">scaled <em>Assisted Sales</em> 5× to ₹80L MRR in 8–10 months;</span>
-          <span class="narrate-span" data-n-idx="5">and rebuilt <em>ET Markets &amp; ET</em> across iOS, Android and web to ₹3Cr+ ARR.</span>
+        <p class="hero-persona narrate-span" data-n-idx="1" style="margin-top:12px; margin-bottom:16px;">
+          An <em>engineer</em> who learned to love the funnel.<br>
+          <span style="font-size: clamp(16px, 2vw, 22px); color: var(--ink-dim); font-weight: 300;">Building products. Scaling growth. Creating leverage.</span>
         </p>
+        <div class="hero-tagline" style="display: flex; flex-direction: column; gap: 16px;">
+          <p class="narrate-span" data-n-idx="2" style="margin:0;">Currently AGM – Product Management &amp; D2C Growth at <em>Vahdam India</em>, driving growth across the US, UK and global markets while helping scale a leading consumer brand.</p>
+          <p class="narrate-span" data-n-idx="3" style="margin:0;">Previously at <em>Times Internet</em>, I owned growth and monetisation across ET Prime and TOI Plus, scaling telesales into a meaningful revenue engine and building high-performing acquisition and retention funnels.</p>
+          <p class="narrate-span" data-n-idx="4" style="margin:0;">I also led the end-to-end launch and execution of the inaugural <em>Times Internet Delhi Half Marathon 2026</em> at Dhyan Chand National Stadium — establishing a new IP, delivering a 15,000+ participant experience, and creating a new revenue stream for the business.</p>
+          <p class="narrate-span" data-n-idx="5" style="margin:0;">Today, I operate at the intersection of Product, Growth and Revenue — building systems, optimising funnels, running experiments, and creating scalable pathways to sustainable growth.</p>
+        </div>
       </div>
     </div>
 
@@ -4103,7 +4106,7 @@
     const progress  = document.getElementById('anpProgress');
 
     const NARRATIONS = {
-      home:       "Hey, I'm Anchit Tandon. An engineer who learned to love the funnel. Currently A.G.M., Product Management, D2C Growth at Vah-dahm India across U.S., U.K. and global, where I joined on twentieth April twenty twenty six. My biggest Vahdam highlight so far is Vahdam Lifecycle O.S., and we have also increased U.K. marketing revenue. Previously at Times Internet, I led the Delhi Half Marathon end to end, scaled Assisted Sales five times to eighty lakh M.R.R., and rebuilt E.T. Markets to three crore plus A.R.R.",
+      home:       "Hey, I'm Anchit Tandon. An engineer who learned to love the funnel. Building products. Scaling growth. Creating leverage. Currently AGM – Product Management and D to C Growth at Vahdam India, driving growth across the US, UK and global markets while helping scale a leading consumer brand. Previously at Times Internet, I owned growth and monetisation across ET Prime and TOI Plus, scaling telesales into a meaningful revenue engine and building high-performing acquisition and retention funnels. I also led the end-to-end launch and execution of the inaugural Times Internet Delhi Half Marathon twenty twenty six at Dhyan Chand National Stadium — establishing a new I P, delivering a fifteen thousand plus participant experience, and creating a new revenue stream for the business. Today, I operate at the intersection of Product, Growth and Revenue — building systems, optimising funnels, running experiments, and creating scalable pathways to sustainable growth.",
       chat:       "Ask me anything — my work, my side projects, why I moved from engineering to product, or what I'm solving right now.",
       experience: "Work experience. Currently A.G.M., Product Management, D2C Growth at Vah-dahm India across U.S., U.K. and global. I joined on twentieth April twenty twenty six, and the headline so far is Vahdam Lifecycle O.S. plus increased U.K. marketing revenue. Previously at Times Internet — A.P.M. to Senior P.M. Five x M.R.R. on Assisted Sales, three crore plus A.R.R. from the E.T. Markets revamp. Started as a backend engineer at Tuple Technologies and City Mall.",
       projects:   "Personal projects, built out of curiosity, depth and experimentation. Vahdam Lifecycle O.S. is my most important work project right now. Music Gen A.I. is my passion project for music, and this portfolio is also a hobby build. Other live builds include Hey Yaara, The Third Eye, Mailer Architect, A.I. Tele Suite and T.H. Plus Life Engine.",
@@ -4188,12 +4191,11 @@
 
       const timeline = [
         { t: 0.0, idx: 0 },
-        { t: 1.8, idx: 1 },
-        { t: 4.3, idx: 2 },
-        { t: 9.5, idx: 3 },
-        { t: 19.0, idx: 4 },
-        { t: 22.8, idx: 5 },
-        { t: 27.2, idx: 6 }
+        { t: 2.2, idx: 1 },
+        { t: 7.5, idx: 2 },
+        { t: 19.0, idx: 3 },
+        { t: 34.0, idx: 4 },
+        { t: 48.0, idx: 5 }
       ];
 
       const startedAt = Date.now();
@@ -4388,7 +4390,7 @@
       const activeEl = document.querySelector('.view.active');
       const viewName = activeEl ? activeEl.id.replace('view-', '') : 'home';
       const fallbackText = viewName === 'home'
-        ? "Hey, I'm Anchit Tandon. Currently A.G.M., Product Management, D2C Growth at Vahdam India across U.S., U.K. and global, where I joined on twentieth April twenty twenty six. My biggest Vahdam highlight so far is Vahdam Lifecycle O.S., and we have also increased U.K. marketing revenue."
+        ? "Hey, I'm Anchit Tandon. An engineer who learned to love the funnel. Building products. Scaling growth. Creating leverage. Currently AGM – Product Management and D to C Growth at Vahdam India, driving growth across the US, UK and global markets while helping scale a leading consumer brand. Previously at Times Internet, I owned growth and monetisation across ET Prime and TOI Plus, scaling telesales into a meaningful revenue engine and building high-performing acquisition and retention funnels. I also led the end-to-end launch and execution of the inaugural Times Internet Delhi Half Marathon twenty twenty six at Dhyan Chand National Stadium — establishing a new I P, delivering a fifteen thousand plus participant experience, and creating a new revenue stream for the business. Today, I operate at the intersection of Product, Growth and Revenue — building systems, optimising funnels, running experiments, and creating scalable pathways to sustainable growth."
         : "Ask me anything about my work, side projects, product philosophy, or how to connect.";
       const caption = document.getElementById('chatCaption');
       const words = fallbackText.trim().split(/\s+/);
@@ -4736,7 +4738,7 @@
   #view-chat.active .chat-block {
     width: min(100%, 1180px) !important;
     margin: 0 auto !important;
-    height: calc(100vh - 140px) !important;
+    height: calc(100vh - 80px) !important;
     max-height: none !important;
     border-radius: 18px !important;
   }
