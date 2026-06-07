@@ -696,12 +696,77 @@
     box-shadow: 0 6px 18px rgba(255,77,31,0.32);
   }
   .msg-bubble:hover { transform: translateY(-1px); }
-  .msg-bubble a {
-    color: var(--primary); font-weight: 500;
-    text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px;
-    cursor: pointer;
-  }
-  .msg.user .msg-bubble a { color: rgba(255,255,255,0.95); text-decoration-color: rgba(255,255,255,0.6); }
+	  .msg-bubble a {
+	    color: var(--primary); font-weight: 500;
+	    text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px;
+	    cursor: pointer;
+	  }
+	  .msg.page-guide {
+	    max-width: 100%;
+	    animation: guideIn .42s cubic-bezier(.16,1,.3,1) both;
+	  }
+	  @keyframes guideIn {
+	    from { opacity: 0; transform: translateY(12px) scale(.98); filter: blur(4px); }
+	    to { opacity: 1; transform: none; filter: blur(0); }
+	  }
+	  .msg.page-guide .msg-bubble {
+	    max-width: 100%;
+	    width: 100%;
+	    border-radius: 18px;
+	    padding: 0;
+	    overflow: hidden;
+	    background:
+	      linear-gradient(145deg, rgba(255, 125, 28, .12), rgba(255, 255, 255, .035) 46%, rgba(255, 183, 54, .08)),
+	      rgba(8, 5, 2, .92);
+	    border: 1px solid rgba(255, 183, 54, .22);
+	    box-shadow: 0 18px 52px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.06);
+	  }
+	  .msg.page-guide .msg-bubble::after { display: none; }
+	  .guide-card { position: relative; padding: 16px; display: grid; gap: 14px; }
+	  .guide-card::before {
+	    content: ''; position: absolute; inset: 0 0 auto; height: 2px;
+	    background: linear-gradient(90deg, transparent, var(--primary), var(--accent), transparent);
+	    animation: guideScan 2.8s ease-in-out infinite;
+	  }
+	  @keyframes guideScan { 0%,100% { opacity: .35; transform: translateX(-18%); } 50% { opacity: 1; transform: translateX(18%); } }
+	  .guide-kicker {
+	    font-family: var(--font-mono); font-size: 9px; letter-spacing: .16em;
+	    text-transform: uppercase; color: var(--accent);
+	  }
+	  .guide-title {
+	    font-family: var(--font-display); font-size: clamp(18px, 2.2vw, 24px);
+	    line-height: 1.05; color: var(--ink); margin: -6px 0 0;
+	  }
+	  .guide-copy { color: var(--ink-dim); font-size: 13.5px; line-height: 1.5; margin: 0; }
+	  .coach-rail { display: grid; gap: 8px; }
+	  .coach-mark {
+	    display: grid; grid-template-columns: 24px 1fr; gap: 9px; align-items: start;
+	    padding: 9px 10px; border-radius: 12px;
+	    background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.07);
+	  }
+	  .coach-dot {
+	    width: 24px; height: 24px; border-radius: 9px;
+	    display: inline-flex; align-items: center; justify-content: center;
+	    background: rgba(255, 106, 26, .14); color: var(--primary);
+	    font-family: var(--font-mono); font-size: 10px; font-weight: 800;
+	    box-shadow: 0 0 22px rgba(255, 106, 26, .18);
+	  }
+	  .coach-text { color: var(--ink); font-size: 12.5px; line-height: 1.45; }
+	  .guide-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+	  .guide-action {
+	    appearance: none; border: 1px solid rgba(255, 183, 54, .24);
+	    background: rgba(255, 106, 26, .1); color: var(--ink);
+	    border-radius: 999px; padding: 8px 11px;
+	    font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .08em;
+	    text-transform: uppercase; cursor: pointer;
+	    transition: transform .18s ease, border-color .18s ease, background .18s ease;
+	  }
+	  .guide-action:hover {
+	    transform: translateY(-2px);
+	    border-color: rgba(255, 183, 54, .58);
+	    background: rgba(255, 106, 26, .18);
+	  }
+	  .msg.user .msg-bubble a { color: rgba(255,255,255,0.95); text-decoration-color: rgba(255,255,255,0.6); }
   /* speaking — animated glow ring while narrating */
   .msg.bot.speaking .msg-bubble { animation: bubbleGlow 1.5s ease-in-out infinite; }
   @keyframes bubbleGlow {
@@ -1320,8 +1385,9 @@
   }
   
   /* When Chat is ACTIVE from LHS */
-	  body.view-chat #view-chat,
-	  #view-chat.active {
+		  body.view-chat #view-chat,
+		  body.chat-guide-open #view-chat,
+		  #view-chat.active {
 	    display: flex !important;
 	    bottom: calc(22px + var(--safe-bottom)) !important;
     right: 22px !important;
@@ -1330,13 +1396,15 @@
     max-height: calc(100vh - 92px) !important;
     border-radius: 18px !important;
   }
-	  body.sidebar-collapsed.view-chat #view-chat,
-	  body.sidebar-collapsed #view-chat.active {
+		  body.sidebar-collapsed.view-chat #view-chat,
+		  body.sidebar-collapsed.chat-guide-open #view-chat,
+		  body.sidebar-collapsed #view-chat.active {
 	    width: min(760px, calc(100vw - var(--sidebar-w-collapsed) - 48px)) !important;
 	  }
   @media (max-width: 820px) {
-    body.view-chat #view-chat,
-    #view-chat.active {
+	    body.view-chat #view-chat,
+	    body.chat-guide-open #view-chat,
+	    #view-chat.active {
       left: 0 !important;
       right: auto !important;
       bottom: 0 !important;
@@ -1352,8 +1420,9 @@
       width: calc(100vw - 32px) !important;
       height: min(560px, calc(100vh - 116px)) !important;
     }
-    body.view-chat #view-chat .chat-block,
-    #view-chat.active .chat-block {
+	    body.view-chat #view-chat .chat-block,
+	    body.chat-guide-open #view-chat .chat-block,
+	    #view-chat.active .chat-block {
       width: 100% !important;
       height: 100% !important;
       border-radius: 0 !important;
@@ -3573,18 +3642,12 @@
       history.replaceState(null, '', '#' + viewName);
     }
 
-    // Auto minimize/expand chat widget on tab switching
-    if (viewName === 'chat') {
-      if (typeof window.openFullChat === 'function') window.openFullChat();
-    } else if (viewName === 'home') {
-      if (sessionStorage.getItem('anchit-chat-minimized') !== '1') {
-        if (typeof window.showFloatingChat === 'function') window.showFloatingChat();
-      } else {
-        if (typeof window.minimizeChat === 'function') window.minimizeChat();
-      }
-    } else {
-      if (typeof window.minimizeChat === 'function') window.minimizeChat();
-    }
+	    // Keep the chat open as the interactive coach layer for every page.
+	    if (viewName === 'chat') {
+	      if (typeof window.openFullChat === 'function') window.openFullChat();
+	    } else if (typeof window.openGuideChat === 'function') {
+	      window.openGuideChat();
+	    }
 
     document.dispatchEvent(new CustomEvent('viewChanged', { detail: viewName }));
 
@@ -3610,10 +3673,13 @@
   let revealObserver;
 
   /* ============ CHAT ============ */
-  const KB = [
-    { keywords: ['hi','hello','hey','sup','yo','namaste','good morning','good evening','howdy'],
-      response: "Hey — glad you're here. I'm Anchit. Ask me anything: my <a data-nav='experience'>work</a>, my <a data-nav='projects'>side builds</a>, how I think about product, roles or collaborations, or what I'm solving right now at Vahdam.",
-      nextChips: ["What do you do?","Your biggest career win?","What are you building?","Why product over engineering?"] },
+	  const KB = [
+	    { keywords: ['hi','hello','hey','sup','yo','namaste','good morning','good evening','howdy'],
+	      response: "Hey — glad you're here. I'm Anchit. Ask me anything: my <a data-nav='experience'>work</a>, my <a data-nav='projects'>side builds</a>, how I think about product, roles or collaborations, or what I'm solving right now at Vahdam.",
+	      nextChips: ["What do you do?","Your biggest career win?","What are you building?","Why product over engineering?"] },
+	    { keywords: ['tour','tutorial','walkthrough','guide','coach','what is here','what all is there','show me around'],
+	      response: "Here is the tour: Home gives the quick positioning and proof points; Work Experience explains Vahdam, Times Internet and my engineering-to-product arc; Side Hustle shows the products I build; Resume is the formal PDF path; Contact gives WhatsApp, call, Google Meet, WhatsApp, SMS, Email and Resume. I will update the guide card every time you open a page.",
+	      nextChips: ["Open Work Experience","Open Side Hustle","How do I reach you?","Narrate this page"] },
     { keywords: ['who','about','tell me about you','yourself','background','bio','introduce','what do you do','describe'],
       response: "I'm Anchit Tandon — AGM, Product Management, D2C Growth at Vahdam India across the US, UK and global markets. I started on 20 April 2026. Before this I was at Times Internet, moving from APM to Senior PM. I started as a backend engineer, moved to product because I wanted to understand the <em>why</em> behind what we build, and I keep going deep until I understand the real system underneath a problem. <a data-nav='experience'>Full story →</a>",
       nextChips: ["Your biggest career win?","Why switch to product?","Tell me about your side builds","Hardest problem right now?"] },
@@ -3703,32 +3769,212 @@
       nextChips: ["Tell me about your builds","Show me your work","What are you building now?","How do I reach you?"] }
   ];
 
-  const DEFAULT_CHIPS = ["Your biggest career win?","What are you building now?","Tell me about your side builds","Why product over engineering?","How do I reach you?"];
+	  const DEFAULT_CHIPS = ["Your biggest career win?","What are you building now?","Tell me about your side builds","Why product over engineering?","How do I reach you?"];
+	  const TOUR_CHIPS = ["Start the tour","Show me your work","Open side hustles","How do I reach you?"];
+	  const PAGE_GUIDES = {
+	    home: {
+	      kicker: 'Portfolio cockpit',
+	      title: 'Start here',
+	      copy: "I'm Anchit — AGM, Product Management and D2C Growth at Vahdam, with a builder's brain from engineering and a growth lens from Times Internet. Use this page for the quick signal: who I am, current role, proof points, and the fastest route into the rest of the portfolio.",
+	      coach: ['Hero gives the two-line positioning and current Vahdam context.', 'Stats and timeline show the measurable work behind the story.', 'Use the chat CTAs to jump to Work, Side Hustle, Contact, or narrate the page.'],
+	      actions: [
+	        ['View work', 'experience'],
+	        ['Side hustles', 'projects'],
+	        ['Contact', 'contact'],
+	        ['Narrate page', 'narrate']
+	      ],
+	      chips: TOUR_CHIPS
+	    },
+	    chat: {
+	      kicker: 'Ask me anything',
+	      title: 'Conversation mode',
+	      copy: 'This is the command center. Ask questions naturally and I will answer in first person using the portfolio facts, not just canned replies.',
+	      coach: ['Ask about Vahdam, Times Internet, metrics, side projects, role fit, or collaborations.', 'Tap chips for fast prompts, type your own question, or use the mic for dictation.', 'Use play/pause/mute on the bottom tile to control narration.'],
+	      actions: [
+	        ['Biggest win', 'query:Your biggest career win?'],
+	        ['Current work', 'query:What are you building now?'],
+	        ['Reach me', 'contact']
+	      ],
+	      chips: DEFAULT_CHIPS
+	    },
+	    experience: {
+	      kicker: 'Work history',
+	      title: 'Product, growth, engineering',
+	      copy: 'This page explains my career arc from backend engineering into product and growth, with Vahdam, Times Internet, Citymall and Tuple in one place.',
+	      coach: ['Top stat cards highlight scale: Assisted Sales, ET Markets, half marathon, and lifecycle work.', 'The timeline shows how I moved from systems engineering to revenue-owning product roles.', 'Ask the chat to explain any role, metric, decision, or transition.'],
+	      actions: [
+	        ['Vahdam role', 'query:What is your role at Vahdam?'],
+	        ['Biggest win', 'query:Your biggest career win?'],
+	        ['Side builds', 'projects'],
+	        ['Narrate page', 'narrate']
+	      ],
+	      chips: ['Explain Vahdam Lifecycle OS','Tell me about Times Internet','Why product over engineering?','Show hard metrics']
+	    },
+	    projects: {
+	      kicker: 'Side Hustle lab',
+	      title: 'What I build when curiosity wins',
+	      copy: 'This page ranks my most important builds, including VAHDAM Lifecycle OS, MusicGenAI, this portfolio, Task Tracker, The Third Eye, and more.',
+	      coach: ['Each card explains the problem, stack, and implementation detail.', 'Portfolio is now in the top five because it is an active hobby build and interactive product surface.', 'Use chat to open any project deep dive or compare stacks.'],
+	      actions: [
+	        ['MusicGenAI', 'project-music'],
+	        ['Lifecycle OS', 'project-lifecycle'],
+	        ['Portfolio build', 'query:Tell me about this portfolio build'],
+	        ['Narrate page', 'narrate']
+	      ],
+	      chips: ['Tell me about MusicGenAI','Tell me about VAHDAM Lifecycle OS','What did you use to build these?','Which project matters most?']
+	    },
+	    resume: {
+	      kicker: 'Resume',
+	      title: 'Formal profile',
+	      copy: 'This view gives the structured resume path: concise career summary, core roles, and the PDF that opens separately.',
+	      coach: ['Use the PDF for formal review or sharing.', 'Use Experience for richer context behind each line.', 'Ask chat to tailor the story for roles, collaborations, or interviews.'],
+	      actions: [
+	        ['Open PDF', 'resume-pdf'],
+	        ['Experience', 'experience'],
+	        ['Role fit', 'query:What roles are you looking for?']
+	      ],
+	      chips: ['Summarize your resume','What roles fit you?','Tell me about Vahdam','How do I reach you?']
+	    },
+	    contact: {
+	      kicker: 'Contact',
+	      title: 'Fastest way to connect',
+	      copy: 'Use this page for WhatsApp, call, Google Meet, WhatsApp again, SMS, Email, or Resume — in that exact order.',
+	      coach: ['WhatsApp is the fastest first touch.', 'The 30-minute Google Meet flow builds a calendar invite and WhatsApp confirmation.', 'Email and Resume are available for formal follow-up.'],
+	      actions: [
+	        ['WhatsApp', 'whatsapp'],
+	        ['30-min Meet', 'schedule'],
+	        ['Email', 'email'],
+	        ['Resume', 'resume-pdf']
+	      ],
+	      chips: ['How do I reach you?','Book a 30-min Meet','Are you open to roles?','Send me your resume']
+	    }
+	  };
+	  const PROJECT_GUIDES = {
+	    'project-yaara': ['Hey Yaara', 'Voice-first elderly companion', ['Voice-led interaction removes screen friction.', 'Built as a PWA with speech input, AI response, and spoken output.', 'Ask about accessibility, voice UX, or implementation.']],
+	    'project-music': ['MusicGenAI', 'AI music generation pipeline', ['Generates lyrics, vocals and instrument tracks from prompts.', 'Built with a React/TypeScript frontend and Python audio service.', 'Ask how the generation pipeline is debugged.']],
+	    'project-telesuite': ['AI TeleSuite', 'Sales intelligence assistant', ['Live transcription, pitch scoring and conversion recommendations.', 'Productized the ET Prime assisted-sales playbook.', 'Ask how it improved sales conversion.']],
+	    'project-lifeengine': ['TH+ LifeEngine', 'Personalized wellness engine', ['Turns generic health advice into daily routines.', 'Login-gated, privacy-conscious personalization flow.', 'Ask how Times Health+ influenced it.']],
+	    'project-thirdeye': ['The Third Eye', 'Agent-orchestrated AI OS', ['Explores agent workflows and multi-step task orchestration.', 'Built around AI operating-system style interactions.', 'Ask what the long-term AI OS vision is.']],
+	    'project-mailer': ['Mailer Architect', 'Marketing mailer generator', ['Creates multi-LLM HTML email cascades.', 'Focuses on production-ready mailer structure and speed.', 'Ask how lifecycle marketing connects to Vahdam.']],
+	    'project-tasktracker': ['Task Tracker', 'Personal productivity system', ['Converts meetings, emails and voice notes into tasks.', 'Built as a personal AI assistant workflow.', 'Ask how it differs from ordinary to-do tools.']],
+	    'project-lifecycle': ['VAHDAM Lifecycle OS', 'Most important current work project', ['Connects lifecycle planning, segmentation and mailer workflows.', 'Built for retention and D2C growth operating rhythm.', 'Ask why this is the headline Vahdam project.']]
+	  };
 
-  const chatBody = document.getElementById('chatBody');
+	  const chatBody = document.getElementById('chatBody');
   const chipRow = document.getElementById('chipRow');
   const chatInput = document.getElementById('chatInput');
   const chatSend = document.getElementById('chatSend');
   let chatIntroShown = false;
 
-  function scrollChat() {
-    nextFrame(() => { chatBody.scrollTop = chatBody.scrollHeight; });
-  }
-  function seedChatIntro(html) {
-    if (chatIntroShown || !chatBody) return;
-    chatIntroShown = true;
+	  function scrollChat() {
+	    nextFrame(() => { chatBody.scrollTop = chatBody.scrollHeight; });
+	  }
+	  function escapeHtml(str) {
+	    return String(str || '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+	  }
+	  function currentViewName() {
+	    return document.querySelector('.view.active')?.id.replace('view-', '') || 'home';
+	  }
+	  function guideForView(viewName) {
+	    if (PROJECT_GUIDES[viewName]) {
+	      const [title, copy, coach] = PROJECT_GUIDES[viewName];
+	      return {
+	        kicker: 'Project deep dive',
+	        title,
+	        copy,
+	        coach,
+	        actions: [
+	          ['All projects', 'projects'],
+	          ['Ask about stack', 'query:What did you use to build ' + title + '?'],
+	          ['Narrate page', 'narrate']
+	        ],
+	        chips: ['What did you use to build this?','How did you implement it?','Why did you build it?','Show all side hustles']
+	      };
+	    }
+	    return PAGE_GUIDES[viewName] || PAGE_GUIDES.home;
+	  }
+	  function buildGuideHtml(viewName, { initial = false } = {}) {
+	    const guide = guideForView(viewName);
+	    const intro = initial
+	      ? `<p class="guide-copy"><strong>I'm Anchit.</strong> I build product and growth systems across D2C, subscriptions, AI workflows, and side projects. Think of this portfolio as an interactive OS: I will guide you page by page, answer questions, and narrate the story when you press play.</p>`
+	      : '';
+	    const coach = guide.coach.map((text, index) => (
+	      `<div class="coach-mark"><span class="coach-dot">${index + 1}</span><span class="coach-text">${escapeHtml(text)}</span></div>`
+	    )).join('');
+	    const actions = guide.actions.map(([label, action]) => {
+	      const attr = action.startsWith('query:')
+	        ? `data-guide-query="${escapeHtml(action.slice(6))}"`
+	        : `data-guide-action="${escapeHtml(action)}"`;
+	      return `<button class="guide-action" type="button" ${attr}>${escapeHtml(label)}</button>`;
+	    }).join('');
+	    return `<div class="guide-card" data-guide-view="${escapeHtml(viewName)}">
+	      <div class="guide-kicker">${escapeHtml(guide.kicker)}</div>
+	      <div class="guide-title">${escapeHtml(guide.title)}</div>
+	      ${intro}
+	      <p class="guide-copy">${escapeHtml(guide.copy)}</p>
+	      <div class="coach-rail">${coach}</div>
+	      <div class="guide-actions">${actions}</div>
+	    </div>`;
+	  }
+	  function bindChatActions(rootEl) {
+	    rootEl.querySelectorAll('a[data-nav]').forEach(a => {
+	      a.style.cursor = 'pointer';
+	      a.addEventListener('click', (e) => { e.preventDefault(); switchView(a.dataset.nav); });
+	    });
+	    rootEl.querySelectorAll('[data-guide-action]').forEach(btn => {
+	      btn.addEventListener('click', () => {
+	        const action = btn.dataset.guideAction;
+	        if (action === 'narrate') {
+	          if (typeof window.anchitNarrate === 'function') window.anchitNarrate(currentViewName());
+	        } else if (action === 'schedule') {
+	          if (window.openScheduleModal) window.openScheduleModal();
+	        } else if (action === 'resume-pdf') {
+	          window.open('assets/resume.pdf', '_blank', 'noopener');
+	        } else if (action === 'whatsapp') {
+	          window.open('https://wa.me/919873945238', '_blank', 'noopener');
+	        } else if (action === 'email') {
+	          window.location.href = 'mailto:anchit.tandon@gmail.com';
+	        } else if (action) {
+	          switchView(action);
+	        }
+	      });
+	    });
+	    rootEl.querySelectorAll('[data-guide-query]').forEach(btn => {
+	      btn.addEventListener('click', () => handleMessage(btn.dataset.guideQuery || btn.textContent || ''));
+	    });
+	  }
+	  function renderPageGuide(viewName, opts = {}) {
+	    if (!chatBody) return;
+	    const safeView = viewName || currentViewName();
+	    let wrapper = chatBody.querySelector('.msg.page-guide');
+	    if (!wrapper) {
+	      wrapper = document.createElement('div');
+	      wrapper.className = 'msg bot page-guide';
+	      wrapper.innerHTML = '<div class="msg-avatar">A</div><div class="msg-bubble"></div>';
+	      chatBody.prepend(wrapper);
+	    }
+	    wrapper.querySelector('.msg-bubble').innerHTML = buildGuideHtml(safeView, opts);
+	    bindChatActions(wrapper);
+	    renderChips(guideForView(safeView).chips || DEFAULT_CHIPS);
+	    nextFrame(() => { chatBody.scrollTop = 0; });
+	    if (opts.speak && typeof speakBotResponse === 'function') {
+	      const bubble = wrapper.querySelector('.msg-bubble');
+	      speakBotResponse(bubble, bubble.textContent.replace(/\s+/g, ' ').trim());
+	    }
+	  }
+	  window.renderPageGuide = renderPageGuide;
+	  function seedChatIntro(html) {
+	    if (chatIntroShown || !chatBody) return;
+	    chatIntroShown = true;
     addBot(html);
     renderChips(DEFAULT_CHIPS);
   }
-  function addBot(html) {
-    const w = document.createElement('div');
-    w.className = 'msg bot';
-    w.innerHTML = `<div class="msg-avatar">A</div><div class="msg-bubble">${html}</div>`;
-    chatBody.appendChild(w);
-    w.querySelectorAll('a[data-nav]').forEach(a => {
-      a.style.cursor = 'pointer';
-      a.addEventListener('click', (e) => { e.preventDefault(); switchView(a.dataset.nav); });
-    });
+	  function addBot(html) {
+	    const w = document.createElement('div');
+	    w.className = 'msg bot';
+	    w.innerHTML = `<div class="msg-avatar">A</div><div class="msg-bubble">${html}</div>`;
+	    chatBody.appendChild(w);
+	    bindChatActions(w);
     scrollChat();
     if (audioModeEnabled) {
       const bubble = w.querySelector('.msg-bubble');
@@ -3740,21 +3986,24 @@
     }
   }
 
-  // Shared audio element for the cloned-voice path.
-  let cloneAudio = null;
-  // Tries Anchit's cloned XTTS voice via /api/tts. If unavailable, narration
-  // stops visibly instead of falling back to the wrong browser voice.
-  async function speakViaClone(plainText, onStart, onEnd, transcriptState = {}) {
+	  // Shared audio element for the cloned-voice path.
+	  let cloneAudio = null;
+	  function ttsEndpoint() {
+	    const localHosts = ['localhost', '127.0.0.1', '0.0.0.0'];
+	    return localHosts.includes(location.hostname)
+	      ? 'http://127.0.0.1:8000/api/tts'
+	      : '/api/tts';
+	  }
+	  // Tries Anchit's cloned XTTS voice via /api/tts. If unavailable, narration
+	  // stops visibly instead of falling back to the wrong browser voice.
+	  async function speakViaClone(plainText, onStart, onEnd, transcriptState = {}) {
     const caption = transcriptState.caption || null;
     const words = transcriptState.words || [];
     try {
-      const urlPrefix = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-        ? 'http://127.0.0.1:8000'
-        : '';
-      const r = await fetch(urlPrefix + '/api/tts', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: plainText }),
-      });
+	      const r = await fetch(ttsEndpoint(), {
+	        method: 'POST', headers: { 'Content-Type': 'application/json' },
+	        body: JSON.stringify({ text: plainText }),
+	      });
       if (!r.ok) return false;
       const ct = r.headers.get('content-type') || '';
       if (!ct.includes('audio')) return false;
@@ -3926,10 +4175,16 @@
     }
     return `I don’t want to bluff that answer. Based on the portfolio, I can answer accurately about my work history, Vahdam role, Times Internet wins, ET Prime Assisted Sales, ET Markets, AI side builds, engineering background, product philosophy, contact details, and resume. Ask that another way with one of those anchors and I’ll give you the specific answer.`;
   }
-  function handleMessage(text) {
-    if (!text.trim()) return;
-    addUser(text);
-    showTyping();
+	  function handleMessage(text) {
+	    if (!text.trim()) return;
+	    addUser(text);
+	    if (/\b(narrate|read|speak|voice|play audio|listen)\b/i.test(text)) {
+	      if (typeof window.anchitNarrate === 'function') window.anchitNarrate(currentViewName());
+	      addBot("Playing the current page narration now. Use the bottom tile to pause, resume, or mute me.");
+	      renderChips(guideForView(currentViewName()).chips || DEFAULT_CHIPS);
+	      return;
+	    }
+	    showTyping();
     setTimeout(() => {
       hideTyping();
       const m = findMatch(text);
@@ -3962,15 +4217,11 @@
   chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendCurrent(); });
 
   
-  // Onboarding Logic
-  setTimeout(() => {
-    const ob = document.getElementById('onboarding');
-    if (ob) {
-      ob.style.visibility = 'visible';
-      ob.style.pointerEvents = 'auto';
-      ob.style.opacity = '1';
-    }
-  }, 800);
+	  // Onboarding Logic
+	  setTimeout(() => {
+	    if (typeof window.openGuideChat === 'function') window.openGuideChat();
+	    renderPageGuide(currentViewName(), { initial: true });
+	  }, 800);
 
   const obStartBtn = document.getElementById('ob-start-btn');
   const obContinueBtn = document.getElementById('ob-continue-btn');
@@ -4008,15 +4259,14 @@
       ob.style.pointerEvents = 'none';
       setTimeout(() => ob.style.visibility = 'hidden', 500);
     }
-    audioModeEnabled = true;
-    chatIntroShown = true;
-    if (typeof switchView === 'function') switchView('chat');
-    if (typeof window.openFullChat === 'function') window.openFullChat();
-    setTimeout(() => {
-      addBot(`Hey ${name}, I'm Anchit. Welcome. Ask me anything — my work, side projects, what I'm solving at Vahdam, or the fastest way to connect.`);
-      renderChips(DEFAULT_CHIPS);
-    }, 180);
-  }
+	    audioModeEnabled = true;
+	    chatIntroShown = true;
+	    if (typeof window.openGuideChat === 'function') window.openGuideChat();
+	    setTimeout(() => {
+	      addBot(`Hey ${name}, I'm Anchit. Quick brief: I build product and growth systems across Vahdam, Times Internet, AI workflows, and side projects. I’ll guide you through each page, explain what matters, and you can ask me anything in first person.`);
+	      renderPageGuide(currentViewName(), { initial: true, speak: true });
+	    }, 180);
+	  }
 
   if (obSubmit) { obSubmit.addEventListener('click', finishOnboarding); }
   if (obInput) { obInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') finishOnboarding(); }); }
@@ -4048,14 +4298,12 @@
     });
   })();
 
-  document.addEventListener('viewChanged', (e) => {
-    if (e.detail === 'chat') {
-      seedChatIntro("Hey, I'm Anchit. Ask me anything — my <a data-nav='experience'>work</a>, my <a data-nav='projects'>side projects</a>, why I moved from engineering to product, or what I'm solving right now. I'm direct — let's get into it.");
-    }
-  });
-  if (document.querySelector('#view-chat.active')) {
-    seedChatIntro("Hey, I'm Anchit. Ask me anything — my <a data-nav='experience'>work</a>, my <a data-nav='projects'>side projects</a>, why I moved from engineering to product, or what I'm solving right now. I'm direct — let's get into it.");
-  }
+	  document.addEventListener('viewChanged', (e) => {
+	    renderPageGuide(e.detail);
+	  });
+	  if (document.querySelector('#view-chat.active')) {
+	    renderPageGuide('chat', { initial: true });
+	  }
 
   /* ============ KEYBOARD ============ */
   document.addEventListener('keydown', (e) => {
@@ -4356,10 +4604,10 @@
           caption.innerHTML = words.map((w, i) => `<span class="chat-caption-word" data-i="${i}">${w}</span>`).join(' ');
           caption.classList.add('active');
         }
-        const urlPrefix = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-          ? 'http://127.0.0.1:8000'
-          : '';
-        const r = await fetch(urlPrefix + '/api/tts', {
+	        const endpoint = typeof ttsEndpoint === 'function'
+	          ? ttsEndpoint()
+	          : (['localhost', '127.0.0.1', '0.0.0.0'].includes(location.hostname) ? 'http://127.0.0.1:8000/api/tts' : '/api/tts');
+	        const r = await fetch(endpoint, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text })
         });
@@ -4933,40 +5181,47 @@
   body:has(#view-chat.active) footer,
   body.view-chat .sticky-ctas,
   body:has(#view-chat.active) .sticky-ctas,
-  body.view-chat .chat-return {
+	  body.view-chat .chat-return,
+	  body.chat-guide-open .chat-return {
     display: none !important;
   }
   body.view-chat,
   body:has(#view-chat.active) {
     overflow: auto;
   }
-  body.view-chat #view-chat .chat-block,
-  #view-chat.active .chat-block {
+	  body.view-chat #view-chat .chat-block,
+	  body.chat-guide-open #view-chat .chat-block,
+	  #view-chat.active .chat-block {
     width: 100% !important;
     margin: 0 auto !important;
     height: 100% !important;
     max-height: 100% !important;
     border-radius: 18px !important;
   }
-  body.view-chat #view-chat .messages,
-  body.view-chat #view-chat .chat-body,
-  #view-chat.active .messages,
-  #view-chat.active .chat-body {
+	  body.view-chat #view-chat .messages,
+	  body.view-chat #view-chat .chat-body,
+	  body.chat-guide-open #view-chat .messages,
+	  body.chat-guide-open #view-chat .chat-body,
+	  #view-chat.active .messages,
+	  #view-chat.active .chat-body {
     min-height: 0;
     max-height: none !important;
   }
-  body.view-chat #view-chat .chips,
-  #view-chat.active .chips {
+	  body.view-chat #view-chat .chips,
+	  body.chat-guide-open #view-chat .chips,
+	  #view-chat.active .chips {
     max-height: 190px;
     overflow-y: auto;
     padding-right: 4px;
   }
-  body.view-chat #view-chat .dictation-transcript.active,
-  #view-chat.active .dictation-transcript.active {
+	  body.view-chat #view-chat .dictation-transcript.active,
+	  body.chat-guide-open #view-chat .dictation-transcript.active,
+	  #view-chat.active .dictation-transcript.active {
     flex-shrink: 0;
   }
-  body.view-chat #view-chat .chat-caption.active,
-  #view-chat.active .chat-caption.active {
+	  body.view-chat #view-chat .chat-caption.active,
+	  body.chat-guide-open #view-chat .chat-caption.active,
+	  #view-chat.active .chat-caption.active {
     flex-shrink: 0;
     max-height: 92px;
     overflow-y: auto;
@@ -5031,39 +5286,52 @@
   const micBtn = document.getElementById('chatMic');
   let chatAudioMuted = false;
   const viewChatEl = document.getElementById('view-chat');
-  function showFloatingChat() {
-    chatBlock?.classList.remove('minimized');
-    viewChatEl?.classList.remove('chat-view-minimized');
-    returnBtn?.classList.remove('visible');
-    document.body.classList.remove('view-chat');
-  }
-  window.showFloatingChat = showFloatingChat;
+	  function showFloatingChat() {
+	    chatBlock?.classList.remove('minimized');
+	    viewChatEl?.classList.remove('chat-view-minimized');
+	    returnBtn?.classList.remove('visible');
+	    document.body.classList.remove('view-chat');
+	    document.body.classList.add('chat-guide-open');
+	  }
+	  window.showFloatingChat = showFloatingChat;
+	  function openGuideChat() {
+	    sessionStorage.removeItem('anchit-chat-minimized');
+	    chatBlock?.classList.remove('minimized');
+	    viewChatEl?.classList.remove('chat-view-minimized');
+	    returnBtn?.classList.remove('visible');
+	    document.body.classList.remove('view-chat');
+	    document.body.classList.add('chat-guide-open');
+	  }
+	  window.openGuideChat = openGuideChat;
 
-  function openSmallChat() {
-    sessionStorage.removeItem('anchit-chat-minimized');
-    chatBlock?.classList.remove('minimized');
-    viewChatEl?.classList.remove('chat-view-minimized');
-    returnBtn?.classList.remove('visible');
-    document.body.classList.add('view-chat');
-    if (typeof switchView === 'function') switchView('chat');
+	  function openSmallChat() {
+	    sessionStorage.removeItem('anchit-chat-minimized');
+	    chatBlock?.classList.remove('minimized');
+	    viewChatEl?.classList.remove('chat-view-minimized');
+	    returnBtn?.classList.remove('visible');
+	    document.body.classList.remove('chat-guide-open');
+	    document.body.classList.add('view-chat');
+	    if (typeof switchView === 'function') switchView('chat');
     setTimeout(() => chatInputEl?.focus(), 120);
   }
   function openFullChat() {
     sessionStorage.removeItem('anchit-chat-minimized');
-    chatBlock?.classList.remove('minimized');
-    viewChatEl?.classList.remove('chat-view-minimized');
-    returnBtn?.classList.remove('visible');
-    if (typeof switchView === 'function') switchView('chat');
-    document.body.classList.add('view-chat');
+	    chatBlock?.classList.remove('minimized');
+	    viewChatEl?.classList.remove('chat-view-minimized');
+	    returnBtn?.classList.remove('visible');
+	    document.body.classList.remove('chat-guide-open');
+	    if (typeof switchView === 'function') switchView('chat');
+	    document.body.classList.add('view-chat');
     setTimeout(() => chatInputEl?.focus(), 160);
   }
   function minimizeChat() {
     sessionStorage.setItem('anchit-chat-minimized', '1');
     chatBlock?.classList.add('minimized');
-    viewChatEl?.classList.add('chat-view-minimized');
-    returnBtn?.classList.add('visible');
-    document.body.classList.remove('view-chat');
-  }
+	    viewChatEl?.classList.add('chat-view-minimized');
+	    returnBtn?.classList.add('visible');
+	    document.body.classList.remove('view-chat');
+	    document.body.classList.remove('chat-guide-open');
+	  }
   window.openFullChat = openFullChat;
   window.minimizeChat = minimizeChat;
 	  if (sessionStorage.getItem('anchit-chat-minimized') === '1') {
@@ -5074,12 +5342,12 @@
 	    chatBlock?.classList.remove('minimized');
 	    viewChatEl?.classList.remove('chat-view-minimized');
 	  }
-	  const initialActiveView = document.querySelector('.view.active')?.id;
-	  if (initialActiveView === 'view-chat') {
-	    openFullChat();
-	  } else if (initialActiveView && initialActiveView !== 'view-home') {
-	    minimizeChat();
-	  }
+		  const initialActiveView = document.querySelector('.view.active')?.id;
+		  if (initialActiveView === 'view-chat') {
+		    openFullChat();
+		  } else if (initialActiveView && initialActiveView !== 'view-home') {
+		    openGuideChat();
+		  }
 	  function paintTileAudioState(state = {}) {
 	    const muted = !!state.muted;
 	    const playing = !!state.playing;
