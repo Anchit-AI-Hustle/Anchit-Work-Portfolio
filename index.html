@@ -2067,10 +2067,6 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       <span class="sidebar-label">Home</span>
     </a>
-    <a class="sidebar-item" href="#chat" data-view="chat" aria-label="Chat with Anchit">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      <span class="sidebar-label">Chat</span>
-    </a>
     <a class="sidebar-item" href="#experience" data-view="experience" aria-label="Work Experience">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
       <span class="sidebar-label">Experience</span>
@@ -2188,6 +2184,26 @@
 </div>
 
 <script>
+  // Shared voice picker — prefers an Indian-accented English voice (en-IN /
+  // named Indian voices like Rishi, Veena, Heera), with Hindi as an option.
+  window.anchitPickVoice = function(preferHindi) {
+    if (!window.speechSynthesis) return null;
+    var vs = window.speechSynthesis.getVoices() || [];
+    var byLang = function(p){ return vs.find(function(v){ return (v.lang||'').toLowerCase().replace('_','-').indexOf(p) === 0; }); };
+    var byName = function(re){ return vs.find(function(v){ return re.test((v.name||'') + ' ' + (v.lang||'')); }); };
+    if (preferHindi) {
+      return byLang('hi-in') || byLang('hi') || byName(/hindi/i) || byLang('en-in') || byName(/india|indian/i) || byLang('en') || vs[0] || null;
+    }
+    return byLang('en-in')
+      || byName(/\b(Rishi|Veena|Lekha|Heera|Priya|Isha|Aditi|Kanya)\b/i)
+      || byName(/india|indian/i)
+      || byName(/Google.*English.*India/i)
+      || byName(/Google.*English/i)
+      || byLang('en') || vs[0] || null;
+  };
+  // Voices populate asynchronously on some browsers — warm them up.
+  if (window.speechSynthesis) { try { window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged = function(){ window.speechSynthesis.getVoices(); }; } catch (e) {} }
+
   window.anchitHardNarrate = function() {
     var text = "Hey, I'm Anchit Tandon. An engineer who learned to love the funnel. Building products. Scaling growth. Creating leverage. Currently AGM – Product Management and D to C Growth at Vahdam India, driving growth across the US, UK and global markets while helping scale a leading consumer brand. Previously at Times Internet, I owned growth and monetisation across ET Prime and TOI Plus, scaling telesales into a meaningful revenue engine and building high-performing acquisition and retention funnels. I also led the end-to-end launch and execution of the inaugural Times Internet Delhi Half Marathon twenty twenty six at Dhyan Chand National Stadium — establishing a new I P, delivering a fifteen thousand plus participant experience, and creating a new revenue stream for the business. Today, I operate at the intersection of Product, Growth and Revenue — building systems, optimising funnels, running experiments, and creating scalable pathways to sustainable growth.";
     var caption = document.getElementById('chatCaption');
@@ -2204,7 +2220,9 @@
     if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
     window.speechSynthesis.cancel();
     var utter = new SpeechSynthesisUtterance(text);
-    utter.rate = 0.98;
+    utter.rate = 0.95; utter.pitch = 1; utter.lang = 'en-IN';
+    var _v = window.anchitPickVoice && window.anchitPickVoice();
+    if (_v) utter.voice = _v;
     utter.onboundary = function(event) {
       if (!caption || event.charIndex == null) return;
       var idx = Math.max(0, text.slice(0, event.charIndex).trim().split(/\s+/).filter(Boolean).length - 1);
@@ -3588,7 +3606,9 @@
     }
     window.speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
-    utter.rate = 0.98;
+    utter.rate = 0.95; utter.pitch = 1; utter.lang = 'en-IN';
+    const _v = window.anchitPickVoice && window.anchitPickVoice();
+    if (_v) utter.voice = _v;
     utter.onboundary = (event) => {
       if (!caption || event.charIndex == null) return;
       const idx = Math.max(0, text.slice(0, event.charIndex).trim().split(/\s+/).filter(Boolean).length - 1);
@@ -3668,6 +3688,9 @@
 
   function switchView(viewName, anchorId) {
     if (viewName === 'schedule') { if (window.openScheduleModal) window.openScheduleModal(); return; }
+    // Chat is a floating overlay available on every page — open it maximised
+    // instead of navigating to a separate page.
+    if (viewName === 'chat') { if (window.openGuideChat) window.openGuideChat(); return; }
     if (!ALL_VIEWS.includes(viewName)) return;
 
     // Animate out old view, animate in new
@@ -3713,11 +3736,11 @@
       history.replaceState(null, '', '#' + viewName);
     }
 
-	    // Keep the chat open as the interactive coach layer for every page.
-	    if (viewName === 'chat') {
-	      if (typeof window.openFullChat === 'function') window.openFullChat();
-	    } else if (typeof window.openGuideChat === 'function') {
-	      window.openGuideChat();
+	    // The chat is a floating CTA, not a page. On navigation we collapse it back
+	    // to the CTA so the destination page is visible; its guide content is still
+	    // refreshed for the new page via the viewChanged event below.
+	    if (document.body.classList.contains('chat-guide-open') && typeof window.minimizeChat === 'function') {
+	      window.minimizeChat();
 	    }
 
     document.dispatchEvent(new CustomEvent('viewChanged', { detail: viewName }));
@@ -4146,14 +4169,12 @@
 	          return;
 	        }
         const utter = new SpeechSynthesisUtterance(plainText);
-        utter.rate = 0.96;
-        utter.pitch = 0.95;
-        utter.volume = 0.9;
-        const voices = window.speechSynthesis.getVoices();
-        const voice = voices.find(v => v.lang?.startsWith('en-IN'))
-          || voices.find(v => /Indian/i.test(v.name || '') && v.lang?.startsWith('en'))
-          || voices.find(v => /Google/i.test(v.name || '') && v.lang?.startsWith('en'))
-          || voices.find(v => v.lang?.startsWith('en'));
+        utter.rate = 0.95;
+        utter.pitch = 1;
+        utter.volume = 1;
+        utter.lang = 'en-IN';
+        const voice = (window.anchitPickVoice && window.anchitPickVoice())
+          || window.speechSynthesis.getVoices().find(v => v.lang?.startsWith('en'));
         if (voice) utter.voice = voice;
 	        utter.onboundary = (event) => {
 	          if (!caption || (event.name !== 'word' && event.charIndex == null)) return;
@@ -4288,10 +4309,10 @@
   chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendCurrent(); });
 
   
-	  // Onboarding Logic
+	  // Seed the chat's guide content, but leave it minimised as a floating CTA.
 	  setTimeout(() => {
-	    if (typeof window.openGuideChat === 'function') window.openGuideChat();
 	    renderPageGuide(currentViewName(), { initial: true });
+	    if (typeof window.minimizeChat === 'function') window.minimizeChat();
 	  }, 800);
 
   const obStartBtn = document.getElementById('ob-start-btn');
@@ -4724,13 +4745,10 @@
       }
 
 	      const utter = new SpeechSynthesisUtterance(text);
-      const voices = window.speechSynthesis.getVoices();
-      utter.voice = voices.find(v => /india|indian|en-IN/i.test(v.name + ' ' + v.lang)) ||
-                    voices.find(v => /Google|Microsoft|Samantha|Alex|Daniel/i.test(v.name)) ||
-                    voices.find(v => /^en/i.test(v.lang)) ||
-                    null;
-      utter.rate = 0.98;
-      utter.pitch = 0.92;
+      utter.lang = 'en-IN';
+      utter.voice = (window.anchitPickVoice && window.anchitPickVoice()) || null;
+      utter.rate = 0.95;
+      utter.pitch = 1;
 
       const durationMs = Math.max(4200, Math.round(words.length * 360));
 	      utter.onstart = () => {
@@ -4930,7 +4948,9 @@
       }
       window.speechSynthesis.cancel();
       const utter = new SpeechSynthesisUtterance(fallbackText);
-      utter.rate = 0.98;
+      utter.rate = 0.95; utter.pitch = 1; utter.lang = 'en-IN';
+      const _v = window.anchitPickVoice && window.anchitPickVoice();
+      if (_v) utter.voice = _v;
       utter.onboundary = (event) => {
         if (!caption || event.charIndex == null) return;
         const idx = Math.max(0, fallbackText.slice(0, event.charIndex).trim().split(/\s+/).filter(Boolean).length - 1);
@@ -5492,6 +5512,57 @@
     #view-chat .coach-text { font-size: 14.5px; }
     #view-chat .chat-caption.active { font-size: 17px; }
   }
+
+  /* Dedicated Chat page (sidebar → CHAT): fill the content canvas and centre the
+     conversation instead of a narrow box floating in the corner with dead space
+     around it. The compact docked window is kept only for the guide overlay that
+     rides along on the other pages (body.chat-guide-open). */
+  @media (min-width: 821px) {
+    body.view-chat #view-chat:not(.chat-view-minimized),
+    body.chat-guide-open #view-chat:not(.chat-view-minimized),
+    #view-chat.active:not(.chat-view-minimized) {
+      left: var(--sidebar-w) !important;
+      right: 0 !important;
+      top: calc(44px + var(--safe-top)) !important;
+      bottom: 0 !important;
+      width: auto !important;
+      height: auto !important;
+      max-width: none !important;
+      max-height: none !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      box-shadow: none !important;
+      padding: 20px 24px 24px !important;
+      display: flex !important;
+    }
+    body.sidebar-collapsed.view-chat #view-chat:not(.chat-view-minimized),
+    body.sidebar-collapsed.chat-guide-open #view-chat:not(.chat-view-minimized),
+    body.sidebar-collapsed #view-chat.active:not(.chat-view-minimized) {
+      left: var(--sidebar-w-collapsed) !important;
+    }
+    body.view-chat #view-chat .container,
+    body.chat-guide-open #view-chat .container,
+    #view-chat.active .container {
+      max-width: 1060px !important;
+      width: 100% !important;
+      margin: 0 auto !important;
+      padding: 0 !important;
+    }
+    body.view-chat #view-chat .chat-block,
+    body.chat-guide-open #view-chat .chat-block,
+    #view-chat.active .chat-block {
+      border: 1px solid var(--rule) !important;
+      border-radius: 20px !important;
+      box-shadow: 0 24px 80px rgba(0,0,0,.45), inset 0 0 40px rgba(255,115,23,.04) !important;
+    }
+    /* hold message line-length to a readable width inside the wider panel */
+    body.view-chat #view-chat .msg-bubble,
+    body.chat-guide-open #view-chat .msg-bubble,
+    #view-chat.active .msg-bubble { max-width: 78%; }
+  }
 </style>
 <div class="chat-return" id="chatReturnBtn" role="group" aria-label="Chat with Anchit">
   <button class="chat-return-main" type="button" data-chat-open aria-label="Open chat">
@@ -5577,20 +5648,12 @@
   window.openFullChat = openFullChat;
   window.minimizeChat = minimizeChat;
   document.getElementById('chatMinimizeBtn')?.addEventListener('click', () => minimizeChat());
-	  if (sessionStorage.getItem('anchit-chat-minimized') === '1') {
-	    chatBlock?.classList.add('minimized');
-	    viewChatEl?.classList.add('chat-view-minimized');
-	    returnBtn?.classList.add('visible');
-	  } else {
-	    chatBlock?.classList.remove('minimized');
-	    viewChatEl?.classList.remove('chat-view-minimized');
-	  }
-		  const initialActiveView = document.querySelector('.view.active')?.id;
-		  if (initialActiveView === 'view-chat') {
-		    openFullChat();
-		  } else if (initialActiveView && initialActiveView !== 'view-home') {
-		    openGuideChat();
-		  }
+	  // Chat is a floating CTA on every page — start minimised by default.
+	  chatBlock?.classList.add('minimized');
+	  viewChatEl?.classList.add('chat-view-minimized');
+	  returnBtn?.classList.add('visible');
+	  document.body.classList.remove('view-chat');
+	  document.body.classList.remove('chat-guide-open');
 	  function paintTileAudioState(state = {}) {
 	    const muted = !!state.muted;
 	    const playing = !!state.playing;
@@ -5652,11 +5715,11 @@
     }
   }
 
-  returnMain?.addEventListener('click', openFullChat);
+  returnMain?.addEventListener('click', openGuideChat);
 	  returnMic?.addEventListener('click', (e) => {
 	    e.stopPropagation();
 	    if (!chatAudioMuted && typeof audioModeEnabled !== 'undefined') audioModeEnabled = true;
-	    openFullChat();
+	    openGuideChat();
 	    setTimeout(() => document.getElementById('chatMic')?.click(), 260);
 	  });
 	  returnPlay?.addEventListener('click', (e) => {
