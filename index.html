@@ -81,14 +81,21 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   *::selection { background: var(--primary); color: var(--bg); }
 
-  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; overscroll-behavior-y: none; background: var(--bg); }
   body {
     background: var(--bg); color: var(--ink);
     font-family: var(--font-body); font-weight: 400; font-size: 17px; line-height: 1.55;
     -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
     transition: background 0.5s ease, color 0.5s ease;
     overflow-x: hidden;
+    overscroll-behavior-y: none;
     padding-left: var(--sidebar-w);
+  }
+  /* Fixed/sticky chrome can visually detach during iOS rubber-band overscroll —
+     promoting to their own composited layer keeps them pinned at the edges. */
+  .top-bar, .sticky-ctas, .chat-return {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
   body::before {
     content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 1;
@@ -623,6 +630,13 @@
   @keyframes orbSpin { to { transform: rotate(360deg); } }
   @keyframes orbHalo { 0% { box-shadow: 0 0 0 0 rgba(255,77,31,.5); } 70%,100% { box-shadow: 0 0 0 13px rgba(255,77,31,0); } }
   .chat-head-info { flex: 1; min-width: 0; }
+  .chat-minimize-btn {
+    flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--rule-strong);
+    background: var(--bg-elev); color: var(--ink-dim); cursor: pointer; transition: all 0.2s;
+  }
+  .chat-minimize-btn:hover { color: var(--primary); border-color: var(--primary); transform: translateY(-1px); }
+  .chat-minimize-btn svg { width: 16px; height: 16px; }
   .chat-head-info .title {
     font-family: var(--font-display); font-size: 17px; color: var(--ink); font-weight: 500;
     letter-spacing: -0.01em;
@@ -1197,7 +1211,7 @@
   }
   footer a { color: var(--ink-dim); transition: color 0.2s; }
   footer a:hover { color: var(--primary); }
-  footer .footer-links { display: flex; gap: 24px; }
+  footer .footer-links { display: flex; gap: 24px; flex-wrap: wrap; row-gap: 10px; }
 
   /* ============ TV / LARGE SCREEN ============ */
   @media (min-width: 2560px) {
@@ -1525,16 +1539,33 @@
 
   /* Chat TTS speaking state + caption */
   /* speaking glow handled by the animated bubbleGlow rule above */
+  /* Live narration transcript — rendered as a "speaking" bubble inside the chat body,
+     pinned to the bottom of the conversation (not a separate strip). */
   .chat-caption {
-    border-top: 1px solid transparent; background: var(--bg-deep);
-    font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.02em;
-    color: var(--ink-dim); line-height: 1.6;
-    max-height: 0; overflow: hidden; padding: 0 24px;
-    transition: max-height 0.3s ease, padding 0.25s ease, border-color 0.2s;
+    display: none;
+    position: sticky; bottom: 0; z-index: 2;
+    margin-top: 8px;
+    font-family: var(--font-body); font-size: 15px; letter-spacing: 0.01em;
+    color: var(--ink-dim); line-height: 1.62;
+    padding: 13px 16px 13px 42px;
+    border-radius: 16px; border-bottom-left-radius: 5px;
+    background:
+      linear-gradient(180deg, rgba(255,106,26,0.07), transparent 60%),
+      var(--bg-deep);
+    border: 1px solid rgba(255,106,26,0.32);
+    box-shadow: 0 6px 22px rgba(0,0,0,0.28);
   }
-  .chat-caption.active { max-height: 72px; padding: 10px 24px 12px; border-top-color: var(--rule); }
+  .chat-caption.active { display: block; }
+  /* little speaking indicator dot */
+  .chat-caption.active::before {
+    content: ''; position: absolute; left: 16px; top: 17px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: radial-gradient(circle, var(--primary), #FF6940);
+    box-shadow: 0 0 0 0 rgba(255,106,26,0.5);
+    animation: orbHalo 1.8s ease-out infinite;
+  }
   .chat-caption-word { transition: color 0.08s; }
-  .chat-caption-word.current { color: var(--primary); font-weight: 600; }
+  .chat-caption-word.current { color: var(--primary); font-weight: 700; }
 
   /* ============ CAREER ARC SCRUBBER ============ */
   .career-arc {
@@ -2052,11 +2083,56 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
       <span class="sidebar-label">My Resume</span>
     </a>
-    <a class="sidebar-item" href="#contact" data-view="contact" aria-label="Get in Touch">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-      <span class="sidebar-label">Contact</span>
-    </a>
+    <div class="sidebar-contact-group" id="sidebarContactGroup">
+      <button type="button" class="sidebar-item sidebar-group-toggle" id="sidebarContactToggle" aria-expanded="false" aria-controls="sidebarContactSub" aria-label="Contact channels">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span class="sidebar-label">Contact</span>
+        <svg class="sidebar-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <div class="sidebar-subnav" id="sidebarContactSub">
+        <a class="sidebar-subitem" href="#contact" data-view="contact" data-c="page">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/></svg>
+          <span>Contact page</span>
+        </a>
+        <button type="button" class="sidebar-subitem" data-wa-choice data-c="whatsapp">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm4.4 12c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2.1-.2 0-.3 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3-.8.8-1 1.9-.6 3.1a9.3 9.3 0 0 0 4.6 4.9c1.6.7 2.6.6 3.4.4.5-.1 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.1l-.4-.1z"/></svg>
+          <span>WhatsApp</span>
+        </button>
+        <a class="sidebar-subitem" href="tel:+919873945238" data-c="call">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <span>Phone call</span>
+        </a>
+        <a class="sidebar-subitem" href="#schedule" data-schedule data-c="meet">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>Google Meet</span>
+        </a>
+        <a class="sidebar-subitem" href="sms:+919873945238" data-c="sms">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>SMS</span>
+        </a>
+        <a class="sidebar-subitem" href="mailto:anchit.tandon@gmail.com" data-c="email">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <span>Email</span>
+        </a>
+        <a class="sidebar-subitem" href="assets/resume.pdf" target="_blank" rel="noopener" data-c="resume">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span>Resume</span>
+        </a>
+      </div>
+    </div>
   </nav>
+  <script>
+    (function(){
+      var group=document.getElementById('sidebarContactGroup');
+      var toggle=document.getElementById('sidebarContactToggle');
+      if(group&&toggle){
+        toggle.addEventListener('click', function(){
+          var open=group.classList.toggle('open');
+          toggle.setAttribute('aria-expanded', open ? 'true':'false');
+        });
+      }
+    })();
+  </script>
 
   <hr class="sidebar-rule" />
 
@@ -2083,21 +2159,17 @@
 <div class="top-bar" id="topBar">
   <div class="top-bar-inner">
     <div class="top-bar-links" aria-label="Reach me">
-      <a href="https://wa.me/919873945238" target="_blank" rel="noopener" class="top-bar-link" data-channel="whatsapp" aria-label="WhatsApp" title="WhatsApp">
+      <button type="button" data-wa-choice class="top-bar-link" data-channel="whatsapp" aria-label="WhatsApp — message or call" title="WhatsApp — message or call">
         <svg class="tb-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.8.7.8-2.7-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2.1-.2 0-.3 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3-.8.8-1 1.9-.6 3.1a9.3 9.3 0 0 0 4.6 4.9c1.6.7 2.6.6 3.4.4.5-.1 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.1l-.4-.1z"/></svg>
         <span class="tb-label">WhatsApp</span>
-      </a>
+      </button>
       <a href="tel:+919873945238" class="top-bar-link" data-channel="call" aria-label="Phone Call" title="Phone Call">
         <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
         <span class="tb-label">Call</span>
       </a>
       <a href="#schedule" data-schedule class="top-bar-link" data-channel="meet" aria-label="Set up a 30-min Google Meet" title="Set up a 30-min Google Meet">
         <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <span class="tb-label">Set up a 30-Mins Google Meet</span>
-      </a>
-      <a href="https://wa.me/919873945238" target="_blank" rel="noopener" class="top-bar-link" data-channel="whatsapp" aria-label="WhatsApp" title="WhatsApp">
-        <svg class="tb-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.8.7.8-2.7-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2.1-.2 0-.3 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3-.8.8-1 1.9-.6 3.1a9.3 9.3 0 0 0 4.6 4.9c1.6.7 2.6.6 3.4.4.5-.1 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.1l-.4-.1z"/></svg>
-        <span class="tb-label">WhatsApp</span>
+        <span class="tb-label">Google Meet</span>
       </a>
       <a href="sms:+919873945238" class="top-bar-link" data-channel="sms" aria-label="SMS" title="SMS">
         <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -2162,7 +2234,8 @@
           </h1>
         </div>
         <p class="hero-persona narrate-span" data-n-idx="1" style="margin-top:12px; margin-bottom:16px;">
-          An engineer who learned to love the funnel. Building products. Scaling growth. Creating leverage.
+          An <em>engineer</em> who learned to love the funnel.<br>
+          <span style="font-size: clamp(16px, 2vw, 22px); color: var(--ink-dim); font-weight: 300;">Building products. Scaling growth. Creating leverage.</span>
         </p>
         <div class="hero-tagline" style="display: flex; flex-direction: column; gap: 16px;">
           <p class="narrate-span" data-n-idx="2" style="margin:0;">Currently AGM – Product Management &amp; D2C Growth at <em>Vahdam India</em>, driving growth across the US, UK and global markets while helping scale a leading consumer brand.</p>
@@ -2441,8 +2514,13 @@
             </div>
             <div class="sub">Ask about work, projects, metrics, or the fastest way to connect.</div>
           </div>
+          <button class="chat-minimize-btn" id="chatMinimizeBtn" type="button" aria-label="Minimise chat" title="Minimise chat — keep it docked on this page">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
         </div>
-        <div class="chat-body" id="chatBody"></div>
+        <div class="chat-body" id="chatBody">
+          <div class="chat-caption" id="chatCaption" aria-live="polite" aria-label="Currently spoken text"></div>
+        </div>
         <div class="chips" id="chipRow"></div>
         <div class="chat-input">
           <input type="text" id="chatInput" placeholder="Ask me anything — or tap the mic to talk…" autocomplete="off" />
@@ -2457,7 +2535,6 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           </button>
         </div>
-        <div class="chat-caption" id="chatCaption" aria-live="polite" aria-label="Currently spoken text"></div>
       </div>
     </div>
   </section>
@@ -3403,9 +3480,9 @@
       </div>
 
       <div class="contact-grid reveal-stagger">
-        <a href="https://wa.me/919873945238" target="_blank" rel="noopener" class="contact-card">
+        <a href="https://wa.me/919873945238" target="_blank" rel="noopener" data-wa-choice class="contact-card">
           <span class="contact-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.8.7.8-2.7-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2.1-.2 0-.3 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3-.8.8-1 1.9-.6 3.1a9.3 9.3 0 0 0 4.6 4.9c1.6.7 2.6.6 3.4.4.5-.1 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.1l-.4-.1z"/></svg></span>
-          <div class="contact-card-text"><div class="label">WhatsApp</div><div class="value">Message me on <em>WhatsApp</em></div></div>
+          <div class="contact-card-text"><div class="label">WhatsApp</div><div class="value"><em>Message</em> or <em>call</em></div></div>
         </a>
         <a href="tel:+919873945238" class="contact-card">
           <span class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
@@ -3414,10 +3491,6 @@
         <a href="#schedule" data-schedule class="contact-card" style="cursor:pointer;">
           <span class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
           <div class="contact-card-text"><div class="label">Set up a 30-Mins Google Meet</div><div class="value">Book a <em>focused</em> conversation</div></div>
-        </a>
-        <a href="https://wa.me/919873945238" target="_blank" rel="noopener" class="contact-card">
-          <span class="contact-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.8.7.8-2.7-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2.1-.2 0-.3 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3-.8.8-1 1.9-.6 3.1a9.3 9.3 0 0 0 4.6 4.9c1.6.7 2.6.6 3.4.4.5-.1 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.1l-.4-.1z"/></svg></span>
-          <div class="contact-card-text"><div class="label">WhatsApp</div><div class="value">Send a <em>quick note</em></div></div>
         </a>
         <a href="sms:+919873945238" class="contact-card">
           <span class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
@@ -3480,7 +3553,6 @@
     <a href="https://wa.me/919873945238" target="_blank" rel="noopener">WhatsApp</a>
     <a href="tel:+919873945238">Call</a>
     <a href="#schedule" data-schedule>Set up a 30-Mins Google Meet</a>
-    <a href="https://wa.me/919873945238" target="_blank" rel="noopener">WhatsApp</a>
     <a href="sms:+919873945238">SMS</a>
     <a href="mailto:anchit.tandon@gmail.com">Email</a>
     <a href="assets/resume.pdf" target="_blank" rel="noopener">Resume</a>
@@ -3774,7 +3846,7 @@
 	    home: {
 	      kicker: 'Portfolio cockpit',
 	      title: 'Start here',
-	      copy: "I'm Anchit — AGM, Product Management and D2C Growth at Vahdam, with a builder's brain from engineering and a growth lens from Times Internet. Use this page for the quick signal: who I am, current role, proof points, and the fastest route into the rest of the portfolio.",
+	      copy: "Currently AGM — Product Management & D2C Growth at Vahdam, with a builder's brain from engineering and a growth lens from Times Internet. Use this page for the quick signal: current role, proof points, and the fastest route into the rest of the portfolio.",
 	      coach: ['Hero gives the two-line positioning and current Vahdam context.', 'Stats and timeline show the measurable work behind the story.', 'Use the chat CTAs to jump to Work, Side Hustle, Contact, or narrate the page.'],
 	      actions: [
 	        ['View work', 'experience'],
@@ -4028,13 +4100,13 @@
     if (!plainText || !bubbleEl) return;
     if (window.speechSynthesis) window.speechSynthesis.cancel();
 
-    const caption = document.getElementById('chatCaption');
+    // Chat replies are already shown as a message bubble — don't mirror the text
+    // into the separate transcript (that caused the words to appear twice). The
+    // bubble glows while it is being read; the in-chat transcript bubble is used
+    // only by full-page narration (Listen), where there is no reply bubble.
+    const caption = null;
     const words = plainText.trim().split(/\s+/);
 
-    if (caption) {
-      caption.innerHTML = words.map((w, i) => `<span class="chat-caption-word" data-i="${i}">${w}</span>`).join(' ');
-      caption.classList.add('active');
-	    }
 	    const msgEl = bubbleEl.closest('.msg');
 	    msgEl?.classList.add('speaking');
 	    let transcriptTimer = null;
@@ -4252,7 +4324,6 @@
 
   function finishOnboarding() {
     const ob = document.getElementById('onboarding');
-    const name = obInput.value.trim() || 'Guest';
     if (ob) {
       ob.style.opacity = '0';
       ob.style.pointerEvents = 'none';
@@ -4262,7 +4333,6 @@
 	    chatIntroShown = true;
 	    if (typeof window.openGuideChat === 'function') window.openGuideChat();
 	    setTimeout(() => {
-	      addBot(`Hey ${name}, I'm Anchit. Quick brief: I build product and growth systems across Vahdam, Times Internet, AI workflows, and side projects. I’ll guide you through each page, explain what matters, and you can ask me anything in first person.`);
 	      renderPageGuide(currentViewName(), { initial: true, speak: true });
 	    }, 180);
 	  }
@@ -4923,6 +4993,44 @@
 </script>
 
 <!-- ───────── Schedule-a-call modal (Google Meet invite) ───────── -->
+<!-- WhatsApp choice sheet: message or call -->
+<div class="wa-sheet" id="waSheet" role="dialog" aria-modal="true" aria-label="WhatsApp — message or call">
+  <div class="wa-sheet-card">
+    <h4>WhatsApp Anchit</h4>
+    <p>Choose how you'd like to reach me.</p>
+    <a class="wa-opt" href="https://wa.me/919873945238" target="_blank" rel="noopener">
+      <svg class="wa-opt-msg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm4.4 12c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2.1-.2 0-.3 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3-.8.8-1 1.9-.6 3.1a9.3 9.3 0 0 0 4.6 4.9c1.6.7 2.6.6 3.4.4.5-.1 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.1l-.4-.1z"/></svg>
+      <span><b>Send a message</b><span>Opens a WhatsApp chat with me</span></span>
+    </a>
+    <a class="wa-opt" href="https://wa.me/919873945238?call=1" target="_blank" rel="noopener" data-wa-call>
+      <svg class="wa-opt-call" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      <span><b>Call me</b><span>Open WhatsApp chat to call, or dial directly</span></span>
+    </a>
+    <button type="button" class="wa-sheet-close" id="waSheetClose">Cancel</button>
+  </div>
+</div>
+<script>
+  (function(){
+    var sheet=document.getElementById('waSheet');
+    if(!sheet) return;
+    function open(){ sheet.classList.add('open'); document.body.style.overflow='hidden'; }
+    function close(){ sheet.classList.remove('open'); document.body.style.overflow=''; }
+    document.addEventListener('click', function(e){
+      var t=e.target.closest('[data-wa-choice]');
+      if(t){ e.preventDefault(); open(); return; }
+      if(e.target===sheet) close();
+    });
+    document.getElementById('waSheetClose').addEventListener('click', close);
+    sheet.querySelectorAll('.wa-opt').forEach(function(a){ a.addEventListener('click', function(){ setTimeout(close, 60); }); });
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape' && sheet.classList.contains('open')) close(); });
+    // On mobile, "Call me" tries the native WhatsApp call deep link, else falls back to dialer.
+    var callOpt=sheet.querySelector('[data-wa-call]');
+    if(callOpt){ callOpt.addEventListener('click', function(e){
+      var isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if(!isMobile){ e.preventDefault(); window.open('https://wa.me/919873945238','_blank','noopener'); }
+    }); }
+  })();
+</script>
 <div id="schedModal" role="dialog" aria-modal="true" aria-labelledby="schedTitle" style="position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:10px;background:rgba(0,0,0,.62);backdrop-filter:blur(6px);">
   <div style="max-width:460px;width:100%;max-height:calc(100vh - 20px);overflow-y:auto;background:var(--bg-elev,#fff);border:1px solid var(--rule,#e5dcc7);border-radius:18px;padding:16px 18px 18px;font-family:inherit;box-shadow:0 30px 80px rgba(0,0,0,.4);">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:2px;">
@@ -4953,9 +5061,11 @@
       <button type="submit" style="width:100%;margin-top:12px;background:var(--primary,#ff4d1f);color:#fff;border:0;border-radius:11px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Create the invite →</button>
     </form>
     <div id="sf-done" style="display:none;">
-      <p style="color:var(--ink,#161312);font-size:14px;line-height:1.45;margin:0 0 10px;">Two quick steps to lock it in:</p>
+      <p style="color:var(--ink,#161312);font-size:14px;line-height:1.45;margin:0 0 10px;">Lock it in — each option sends me the date, day, time, duration and the calendar link:</p>
       <a id="sf-gcal" href="#" target="_blank" rel="noopener" class="sf-step">📅 <span><b>Add to Google Calendar</b> — invites you + me, with a Meet link</span></a>
-      <a id="sf-wa" href="#" target="_blank" rel="noopener" class="sf-step">💬 <span><b>Confirm on WhatsApp</b> — sends me the details</span></a>
+      <a id="sf-wa" href="#" target="_blank" rel="noopener" class="sf-step">💬 <span><b>Confirm on WhatsApp</b> — prefilled message to me</span></a>
+      <a id="sf-sms" href="#" class="sf-step">📲 <span><b>Confirm by SMS</b> — prefilled text to me</span></a>
+      <a id="sf-mail" href="#" target="_blank" rel="noopener" class="sf-step">✉️ <span><b>Confirm by email</b> — prefilled mail with the invite link</span></a>
       <button type="button" id="sf-again" style="margin-top:8px;background:none;border:0;color:var(--ink-dim,#5a554e);font-size:12.5px;cursor:pointer;text-decoration:underline;">← Change details</button>
     </div>
   </div>
@@ -5021,8 +5131,15 @@
     var timeStr=start.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
     // WhatsApp message from the user's number, in the requested template.
     var roleCo = (role||company) ? ("I am a "+(role||"professional")+(company?" at "+company:"")+" and ") : "";
-    var waMsg=encodeURIComponent("Hi Anchit, this is "+name+". "+roleCo+"I would like to meet you on "+dateStr+" at "+timeStr+". Looking forward to the same.");
+    var plainMsg="Hi Anchit, this is "+name+". "+roleCo+"I would like to meet you on "+dateStr+" at "+timeStr+" for a 30-min Google Meet. Calendar invite: "+gcal+" Looking forward to it.";
+    var waMsg=encodeURIComponent(plainMsg);
     document.getElementById('sf-wa').href="https://wa.me/"+HOST_WA+"?text="+waMsg;
+    // SMS to my number, prefilled with the same details (cross-platform body separator).
+    document.getElementById('sf-sms').href="sms:+"+HOST_WA+"?&body="+waMsg;
+    // Email to me, prefilled subject + body with the full invite details and Meet link.
+    var mailSub=encodeURIComponent("Google Meet request — "+name+" × Anchit Tandon ("+dateStr+", "+timeStr+")");
+    var mailBody=encodeURIComponent("Hi Anchit,\n\nI'd like to book a 30-minute Google Meet.\n\nGuest: "+who+"\nEmail: "+email+"\nMobile: "+phone+"\nWhen: "+dateStr+" at "+timeStr+" (IST)\nDuration: 30 minutes\n\nAdd to calendar (auto-creates the Meet link): "+gcal+"\n\nLooking forward to it.\n"+name);
+    document.getElementById('sf-mail').href="mailto:"+HOST_EMAIL+"?subject="+mailSub+"&body="+mailBody;
     form.style.display='none'; done.style.display='block';
   });
 })();
@@ -5221,8 +5338,7 @@
 	  body.view-chat #view-chat .chat-caption.active,
 	  body.chat-guide-open #view-chat .chat-caption.active,
 	  #view-chat.active .chat-caption.active {
-    flex-shrink: 0;
-    max-height: 92px;
+    max-height: 140px;
     overflow-y: auto;
   }
   @media (max-width: 720px) {
@@ -5248,6 +5364,133 @@
       bottom: 16px;
       width: calc(100vw - 32px);
     }
+  }
+
+  /* ============ 2026 FIXES — homepage cards, top-bar icons, chat tiles, contact menu ============ */
+
+  /* (#7) Homepage explore cards were unstyled → giant SVGs. Give them a proper grid + small icons. */
+  .navigation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .nav-card {
+    display: flex; align-items: center; gap: 16px;
+    padding: 18px 20px; border-radius: 16px;
+    background: linear-gradient(145deg, rgba(22,13,5,.86), rgba(5,3,1,.88));
+    border: 1px solid var(--rule);
+    text-decoration: none; color: var(--ink);
+    transition: transform .22s cubic-bezier(.22,1,.36,1), border-color .2s, box-shadow .2s;
+  }
+  .nav-card:hover { transform: translateY(-4px); border-color: rgba(255,106,26,.45); box-shadow: 0 18px 50px rgba(0,0,0,.4), 0 0 26px rgba(255,106,26,.12); }
+  .nav-card-icon {
+    flex: 0 0 46px; width: 46px; height: 46px; border-radius: 12px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--accent-soft); color: var(--primary);
+    border: 1px solid var(--rule-strong);
+  }
+  .nav-card-icon svg { width: 22px; height: 22px; }
+  .nav-card-content { flex: 1; min-width: 0; }
+  .nav-card-title { font-family: var(--font-display); font-size: 17px; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
+  .nav-card-desc { font-size: 13px; line-height: 1.45; color: var(--ink-dim); }
+  .nav-card-arrow { flex: 0 0 auto; color: var(--ink-mute); font-size: 18px; transition: transform .2s, color .2s; }
+  .nav-card:hover .nav-card-arrow { color: var(--primary); transform: translateX(4px); }
+  @media (max-width: 480px) {
+    .navigation-grid { grid-template-columns: 1fr; gap: 12px; }
+    .nav-card { padding: 14px 16px; gap: 13px; }
+    .nav-card-icon { flex-basis: 42px; width: 42px; height: 42px; }
+    .nav-card-icon svg { width: 20px; height: 20px; }
+  }
+
+  /* (#1) Show the colourful channel icons on desktop too (not just mobile), alongside labels. */
+  .top-bar-link .tb-icon { display: inline-block !important; width: 15px; height: 15px; }
+  .top-bar-links { overflow-x: auto; scrollbar-width: none; }
+  .top-bar-links::-webkit-scrollbar { display: none; }
+  .top-bar-link {
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 6px 12px;
+    background: rgba(255,255,255,.03);
+  }
+  .top-bar-link:hover { border-color: rgba(255,106,26,.5); background: rgba(255,106,26,.08); }
+
+  /* WhatsApp action sheet (message / call choice) */
+  .wa-sheet { position: fixed; inset: 0; z-index: 100000; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(0,0,0,.55); backdrop-filter: blur(6px); }
+  .wa-sheet.open { display: flex; }
+  .wa-sheet-card { width: 100%; max-width: 360px; background: var(--bg-elev); border: 1px solid var(--rule-strong); border-radius: 18px; padding: 18px; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+  .wa-sheet-card h4 { font-family: var(--font-display); font-size: 18px; color: var(--ink); margin: 0 0 4px; }
+  .wa-sheet-card p { font-size: 13px; color: var(--ink-dim); margin: 0 0 14px; }
+  .wa-opt { display: flex; align-items: center; gap: 12px; padding: 13px 14px; border-radius: 12px; border: 1px solid var(--rule); background: var(--bg-deep); color: var(--ink); text-decoration: none; margin-bottom: 10px; transition: border-color .2s, transform .15s; }
+  .wa-opt:hover { border-color: var(--primary); transform: translateY(-1px); }
+  .wa-opt svg { width: 22px; height: 22px; flex: 0 0 auto; }
+  .wa-opt .wa-opt-msg { color: #25D366; }
+  .wa-opt .wa-opt-call { color: #22C55E; }
+  .wa-opt b { display: block; font-size: 14px; }
+  .wa-opt span { font-size: 12px; color: var(--ink-dim); }
+  .wa-sheet-close { width: 100%; margin-top: 4px; background: none; border: 0; color: var(--ink-dim); font-size: 13px; cursor: pointer; padding: 8px; }
+
+  /* (#2) Sidebar Contact group — collapsible channel sub-items with colour icons */
+  .sidebar-group-toggle { display: flex; align-items: center; width: 100%; background: none; border: 0; font: inherit; cursor: pointer; }
+  .sidebar-group-toggle .sidebar-caret { margin-left: auto; transition: transform .2s; flex: 0 0 auto; width: 14px; height: 14px; color: var(--ink-mute); }
+  .sidebar-contact-group.open .sidebar-caret { transform: rotate(90deg); }
+  .sidebar-subnav { display: none; flex-direction: column; padding: 2px 0 4px; }
+  .sidebar-contact-group.open .sidebar-subnav { display: flex; }
+  .sidebar-subitem { display: flex; align-items: center; gap: 12px; padding: 8px 10px 8px 30px; border-radius: 10px; color: var(--ink-dim); text-decoration: none; font-size: 13px; transition: background .15s, color .15s; }
+  .sidebar-subitem:hover { background: rgba(255,106,26,.08); color: var(--ink); }
+  .sidebar-subitem svg { width: 16px; height: 16px; flex: 0 0 auto; }
+  .sidebar-subitem[data-c="whatsapp"] svg { color: #25D366; }
+  .sidebar-subitem[data-c="call"] svg { color: #22C55E; }
+  .sidebar-subitem[data-c="meet"] svg { color: #F59E0B; }
+  .sidebar-subitem[data-c="sms"] svg { color: #38BDF8; }
+  .sidebar-subitem[data-c="email"] svg { color: #EF4444; }
+  .sidebar-subitem[data-c="resume"] svg { color: #A78BFA; }
+  body.sidebar-collapsed .sidebar-subnav,
+  body.sidebar-collapsed .sidebar-caret { display: none; }
+
+  /* (#4) Chat suggestion chips → compact, horizontally scrollable tiles (saves vertical room) */
+  body.view-chat #view-chat .chips,
+  body.chat-guide-open #view-chat .chips,
+  #view-chat.active .chips {
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    max-height: none !important;
+    gap: 8px;
+    padding: 10px 14px 12px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  body.view-chat #view-chat .chips::-webkit-scrollbar,
+  body.chat-guide-open #view-chat .chips::-webkit-scrollbar,
+  #view-chat.active .chips::-webkit-scrollbar { display: none; }
+  body.view-chat #view-chat .chips .chip,
+  body.chat-guide-open #view-chat .chips .chip,
+  #view-chat.active .chips .chip {
+    flex: 0 0 auto;
+    width: auto;
+    white-space: nowrap;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 12.5px;
+  }
+  #view-chat.active .chips .chip::after { content: ''; }
+
+  /* Larger, more readable chat content inside the floating window (esp. desktop) */
+  #view-chat .chat-body { padding: 22px 24px; gap: 16px; }
+  #view-chat .msg-bubble { font-size: 16px; line-height: 1.62; max-width: 86%; padding: 13px 18px; }
+  #view-chat .guide-card { padding: 20px; gap: 16px; }
+  #view-chat .guide-title { font-size: clamp(20px, 2.4vw, 26px); }
+  #view-chat .guide-copy { font-size: 15.5px; line-height: 1.55; }
+  #view-chat .coach-text { font-size: 14px; line-height: 1.5; }
+  #view-chat .coach-mark { padding: 11px 12px; }
+  #view-chat .chat-caption.active { font-size: 16px; }
+  @media (min-width: 821px) {
+    #view-chat .chat-body { padding: 26px 30px; gap: 18px; }
+    #view-chat .msg-bubble { font-size: 17px; line-height: 1.65; }
+    #view-chat .guide-copy { font-size: 16px; }
+    #view-chat .coach-text { font-size: 14.5px; }
+    #view-chat .chat-caption.active { font-size: 17px; }
   }
 </style>
 <div class="chat-return" id="chatReturnBtn" role="group" aria-label="Chat with Anchit">
@@ -5333,6 +5576,7 @@
 	  }
   window.openFullChat = openFullChat;
   window.minimizeChat = minimizeChat;
+  document.getElementById('chatMinimizeBtn')?.addEventListener('click', () => minimizeChat());
 	  if (sessionStorage.getItem('anchit-chat-minimized') === '1') {
 	    chatBlock?.classList.add('minimized');
 	    viewChatEl?.classList.add('chat-view-minimized');
