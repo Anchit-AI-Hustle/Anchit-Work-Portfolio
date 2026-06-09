@@ -11,8 +11,14 @@ not transfer between them. **The work does, via this repo.** To continue in Cowo
 repo as a project and tell it *"Read SESSION-HANDOFF.md + CLAUDE.md, then continue."*
 
 ## Where things stand
-- **Repo:** `Anchit-AI-Hustle/Anchit-Work-Portfolio` · branch `main` · HEAD `6f7aa27`
-- **Live:** https://anchits-work.vercel.app  (Vercel project `anchit-work-portfolio`)
+- **Repo:** `Anchit-AI-Hustle/Anchit-Work-Portfolio` · branch `main`
+- **Live:** https://anchit-tandon.vercel.app  (Vercel project `anchit-work-portfolio`).
+  Note: the old `anchits-work.vercel.app` alias is dead (404) — do not use it.
+- **Chatbot:** wired to a real Claude backend. Frontend `llmReply()` (index.html ~4274) POSTs to
+  `/api/chat`; `api/chat.js` calls Claude (default `claude-haiku-4-5-20251001`) with Anchit's persona,
+  and falls back to the offline `KB` keyword bot on any failure. `ANTHROPIC_API_KEY` is set in Vercel
+  (Production). **It only produces live LLM replies once the Anthropic account has credits** — until
+  then `/api/chat` returns 502 (billing) and the site silently uses the offline bot.
 - **State:** working tree clean, in sync with origin.
 - **Canonical local copy:** `~/Library/Mobile Documents/com~apple~CloudDocs/ANCHIT'S AI HUSTLE/Anchit-Work-Portfolio`
   (iCloud copy — this is the active one. Older stray copies exist under `~/ANCHIT'S AI HUSTLE/`,
