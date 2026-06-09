@@ -12,7 +12,7 @@ Single-file static portfolio site for Anchit Tandon. The entire app — markup, 
 - **Deploy preview**: `vercel` (from repo root). **Production**: `vercel --prod`. Vercel framework preset is "Other" — pure static.
 - **No tests, no lint, no build** — edits to `index.html` are the entire dev loop.
 
-See `DEPLOY.md` for the GitHub + Vercel setup, custom domain steps, and the recipe for upgrading the chatbot to a real Claude-backed `/api/chat.js` serverless function (currently not wired up).
+The chatbot is wired to a real Claude-backed `/api/chat.js` serverless function (`api/chat.js`), with the offline keyword bot as a graceful fallback. See `DEPLOY.md` for the GitHub + Vercel setup and custom domain steps.
 
 ## Architecture
 
@@ -25,7 +25,7 @@ Everything is in `index.html`, organized in three contiguous sections:
 3. **`<script>` (lines ~800–end)** — Three concerns:
    - **View router** (`switchView`, line ~830): toggles `.active` on nav items + panels, syncs `location.hash`, handles the nested "Side projects" parent-child highlighting, and is also reachable via `[data-go]` buttons inside panels and via inline `<a data-nav="...">` links rendered by the chatbot.
    - **Theme + sidebar persistence**: `localStorage` keys `anchit-theme` and `anchit-sidebar`.
-   - **Chatbot** (line ~860+): The `KB` array is the entire knowledge base — each entry has `keywords[]`, an HTML `response` (often containing `data-nav` links into other views), and a `nextChips[]` array of context-aware follow-up suggestions. `findMatch(text)` does case-insensitive keyword overlap scoring against `KB`; `handleMessage` renders the chosen response and replaces the chip row with that entry's `nextChips`. There is **no LLM call** — it's deterministic keyword matching that ships offline in the single HTML file.
+   - **Chatbot** (line ~860+): The `KB` array is the entire knowledge base — each entry has `keywords[]`, an HTML `response` (often containing `data-nav` links into other views), and a `nextChips[]` array of context-aware follow-up suggestions. `findMatch(text)` does case-insensitive keyword overlap scoring against `KB`. `handleMessage` first calls `llmReply()` (POST `/api/chat`, with short `chatHistory` for context); if Claude returns a reply it renders that, otherwise it falls back to `findMatch`/`KB` and renders the matched response with that entry's `nextChips`. So the `KB` array is now the **offline fallback** layer, not the only brain — it still ships in the single HTML file and works with no network.
 
 ### Adding content
 

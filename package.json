@@ -7,6 +7,7 @@
     "dev": "npx --yes serve@latest -l ${PORT:-5173} .",
     "build": "node scripts/build-www.mjs",
     "preview": "npx --yes serve@latest -l 4173 .",
+    "tts:serve": "cd tts-server && .venv/bin/uvicorn app:app --host 127.0.0.1 --port 8000",
     "cap:add:ios": "npm run build && npx cap add ios",
     "cap:add:android": "npm run build && npx cap add android",
     "cap:sync": "npm run build && npx cap sync",
@@ -19,14 +20,14 @@
   },
   "dependencies": {
     "@capacitor/android": "^6.1.2",
-    "@capacitor/app": "^6.0.0",
+    "@capacitor/app": "^8.1.0",
     "@capacitor/browser": "^8.0.3",
-    "@capacitor/core": "^6.1.2",
+    "@capacitor/core": "^8.4.0",
     "@capacitor/haptics": "^8.0.2",
     "@capacitor/ios": "^8.4.0",
-    "@capacitor/share": "^6.0.0",
+    "@capacitor/share": "^8.0.1",
     "@capacitor/splash-screen": "^8.0.1",
-    "@capacitor/status-bar": "^6.0.0"
+    "@capacitor/status-bar": "^8.0.2"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
