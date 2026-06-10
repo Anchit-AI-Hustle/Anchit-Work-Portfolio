@@ -237,6 +237,11 @@
   [data-theme="dark"] .sidebar-item .icon-sun { display: block; }
   [data-theme="dark"] .sidebar-item .icon-moon { display: none; }
 
+  /* ============ CHAT CAPTION ============ */
+  .chat-caption {
+    display: none !important;
+  }
+
   /* Mobile toggle button */
   .sidebar-toggle {
     position: fixed; top: calc(14px + var(--safe-top)); left: 14px; z-index: 300;
@@ -1260,7 +1265,7 @@
 
   /* ============ FLOATING AUDIO WIDGET ============ */
   .audio-float {
-    position: fixed; bottom: calc(24px + var(--safe-bottom)); right: 24px;
+    position: fixed; bottom: calc(84px + var(--safe-bottom)); right: 24px;
     z-index: 200; font-family: var(--font-mono);
   }
   .af-idle {
@@ -1329,7 +1334,7 @@
   }
   .af-stop-btn:hover { color: var(--ink); }
   @media (max-width: 600px) {
-    .audio-float { bottom: 16px; right: 16px; }
+    .audio-float { bottom: 76px; right: 16px; }
     .af-active { width: 200px; }
   }
 
@@ -1363,7 +1368,7 @@
   .sticky-cta.listen.paused .listen-pause { display: none; }
   .sticky-cta.listen.paused .listen-resume { display: inline-flex; align-items: center; gap: 6px; }
   @media (max-width: 600px) {
-    .sticky-ctas { bottom: calc(16px + var(--safe-bottom)); right: 16px; }
+    .sticky-ctas { bottom: calc(76px + var(--safe-bottom)); right: 16px; }
     .sticky-cta { padding: 10px 16px; font-size: 12px; }
   }
 
@@ -3589,43 +3594,25 @@
     const text = viewName === 'home'
       ? "Hey, I'm Anchit Tandon. Currently A.G.M., Product Management, D2C Growth at Vahdam India across U.S., U.K. and global, where I joined on twentieth April twenty twenty six. My biggest Vahdam highlight so far is Vahdam Lifecycle O.S., and we have also increased U.K. marketing revenue."
       : "Ask me anything about my work, side projects, product philosophy, or how to connect.";
-    const caption = document.getElementById('chatCaption');
-    const words = text.trim().split(/\s+/);
-    if (caption) {
-      caption.innerHTML = words.map((w, i) => `<span class="chat-caption-word" data-i="${i}">${w}</span>`).join(' ');
-      caption.classList.add('active');
+    
+    if (typeof window.openFullChat === 'function') {
+      window.openFullChat();
     }
-    document.querySelectorAll('#view-home .active-narrate').forEach(el => el.classList.remove('active-narrate'));
-    const cleanup = () => {
-      caption?.classList.remove('active');
-      document.querySelectorAll('#view-home .active-narrate').forEach(el => el.classList.remove('active-narrate'));
-    };
-    if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) {
-      setTimeout(cleanup, 3000);
-      return;
+    if (typeof addBot === 'function') {
+      audioModeEnabled = true; // ensure audio triggers on addBot
+      addBot(text);
     }
-    window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.rate = 0.95; utter.pitch = 1; utter.lang = 'en-IN';
-    const _v = window.anchitPickVoice && window.anchitPickVoice();
-    if (_v) utter.voice = _v;
-    utter.onboundary = (event) => {
-      if (!caption || event.charIndex == null) return;
-      const idx = Math.max(0, text.slice(0, event.charIndex).trim().split(/\s+/).filter(Boolean).length - 1);
-      caption.querySelectorAll('.current').forEach(el => el.classList.remove('current'));
-      caption.querySelector(`[data-i="${idx}"]`)?.classList.add('current');
-    };
-    utter.onend = cleanup;
-    utter.onerror = function() {};
-    window.speechSynthesis.speak(utter);
   };
 
+
   /* ============ THEME ============ */
-  const savedTheme = 'dark';
+  const savedTheme = localStorage.getItem('anchit-theme') || 'dark';
   root.setAttribute('data-theme', savedTheme);
   document.getElementById('themeToggle').addEventListener('click', () => {
-    root.setAttribute('data-theme', 'dark');
-    localStorage.setItem('anchit-theme', 'dark');
+    const currentTheme = root.getAttribute('data-theme');
+    const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', nextTheme);
+    localStorage.setItem('anchit-theme', nextTheme);
   });
 
   /* ============ SIDEBAR COLLAPSE (desktop) ============ */
@@ -4083,7 +4070,7 @@
 	  // Shared audio element for the cloned-voice path.
 	  let cloneAudio = null;
 	  function ttsEndpoint() {
-	    const localHosts = ['localhost', '127.0.0.1', '0.0.0.0'];
+	    const localHosts = ['localhost', '127.0.0.1', '0.0.0.0', ''];
 	    return localHosts.includes(location.hostname)
 	      ? 'http://127.0.0.1:8000/api/tts'
 	      : '/api/tts';
@@ -5033,6 +5020,17 @@
       navigator.serviceWorker.register('sw.js').catch(() => {});
     });
   }
+
+  window.addEventListener('load', () => {
+    const isFirstTime = !localStorage.getItem('anchit-visited');
+    const msg = isFirstTime 
+      ? "Welcome. I'm Virtual Anchit. This is my interactive portfolio. I will guide you page by page, answer questions, and narrate the story when you press play. What would you like to know?"
+      : "Welcome back. I'm Virtual Anchit. How can I help you today?";
+    
+    if (typeof openFullChat === 'function') openFullChat();
+    if (typeof seedChatIntro === 'function') seedChatIntro(msg);
+    localStorage.setItem('anchit-visited', '1');
+  });
 </script>
 
 <!-- ───────── Schedule-a-call modal (Google Meet invite) ───────── -->
