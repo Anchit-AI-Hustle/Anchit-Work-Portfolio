@@ -257,9 +257,9 @@
     display: flex; flex-direction: column; align-items: stretch; gap: 2px; flex-shrink: 0;
     padding: 0 10px;
   }
-  .sidebar-item .icon-sun { display: none; }
-  [data-theme="dark"] .sidebar-item .icon-sun { display: block; }
-  [data-theme="dark"] .sidebar-item .icon-moon { display: none; }
+  .sidebar-item .icon-sun { display: none !important; }
+  [data-theme="dark"] .sidebar-item .icon-sun { display: block !important; }
+  [data-theme="dark"] .sidebar-item .icon-moon { display: none !important; }
 
   /* ============ CHAT CAPTION ============ */
   .chat-caption {
@@ -2425,94 +2425,119 @@
       </div>
 
       <!-- Side Hustle teaser -->
-      <div class="section-head" style="margin-top: 48px; margin-bottom: 24px;">
-        <div class="eyebrow">Side Hustle · Built on weekends, all live</div>
-      </div>
-      <div class="products-grid reveal-stagger" style="margin-bottom: 48px;">
-        <a class="product-chip" href="#project-lifecycle" data-view="project-lifecycle" style="cursor:pointer;">
-          <div class="product-chip-name">VAHDAM Lifecycle OS</div>
-          <div class="product-chip-co">D2C Retention · PWA</div>
-          <div class="product-chip-metric">Dashboard &rarr; calendar &rarr; mailers</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://vahdam-lifecycle-os.vercel.app/', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
+      <div class="section      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-12">
+        <a class="group relative rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] hover:border-[var(--primary)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_20px_var(--primary-soft)] overflow-hidden" href="#project-lifecycle" data-view="project-lifecycle" style="cursor:pointer;">
+          <div class="absolute inset-0 bg-gradient-to-br from-[var(--primary-soft)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div class="relative z-10 flex flex-col h-full justify-between">
+            <div>
+              <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-1">D2C Retention · PWA</div>
+              <h3 class="text-lg font-bold text-[var(--ink)] mb-1 group-hover:text-[var(--primary)] transition-colors">VAHDAM Lifecycle OS</h3>
+              <p class="text-sm text-[var(--primary)] font-mono mt-2">Dashboard &rarr; calendar &rarr; mailers</p>
+            </div>
+            <div class="mt-4 self-end text-[var(--ink-dim)] group-hover:text-[var(--primary)] transition-colors transform group-hover:translate-x-1 group-hover:-translate-y-1 duration-300">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+            </div>
+          </div>
         </a>
-        <a class="product-chip" href="#project-music" data-view="project-music" style="cursor:pointer;">
-          <div class="product-chip-name">MusicGenAI</div>
-          <div class="product-chip-co">Generative AI · Music</div>
-          <div class="product-chip-metric">Prompt &rarr; full track with vocals</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://music-gen-ai-blue.vercel.app/', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
+
+        <a class="group relative rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] hover:border-[var(--accent)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_20px_var(--accent-soft)] overflow-hidden" href="#project-music" data-view="project-music" style="cursor:pointer;">
+          <div class="absolute inset-0 bg-gradient-to-br from-[var(--accent-soft)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div class="relative z-10 flex flex-col h-full justify-between">
+            <div>
+              <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-1">Generative AI · Music</div>
+              <h3 class="text-lg font-bold text-[var(--ink)] mb-1 group-hover:text-[var(--accent)] transition-colors">MusicGenAI</h3>
+              <p class="text-sm text-[var(--accent)] font-mono mt-2">Prompt &rarr; full track with vocals</p>
+            </div>
+            <div class="mt-4 self-end text-[var(--ink-dim)] group-hover:text-[var(--accent)] transition-colors transform group-hover:translate-x-1 group-hover:-translate-y-1 duration-300">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+            </div>
+          </div>
         </a>
-        <a class="product-chip" href="#project-tasktracker" data-view="project-tasktracker" style="cursor:pointer;">
-          <div class="product-chip-name">Task Tracker</div>
-          <div class="product-chip-co">Personal Productivity · AI</div>
-          <div class="product-chip-metric">Email/meeting/voice &rarr; task board</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://personal-ai-assistant-anchit.vercel.app/', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
+
+        <a class="group relative rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] hover:border-[var(--primary)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_20px_var(--primary-soft)] overflow-hidden" href="#project-tasktracker" data-view="project-tasktracker" style="cursor:pointer;">
+          <div class="absolute inset-0 bg-gradient-to-br from-[var(--primary-soft)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div class="relative z-10 flex flex-col h-full justify-between">
+            <div>
+              <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-1">Personal Productivity · AI</div>
+              <h3 class="text-lg font-bold text-[var(--ink)] mb-1 group-hover:text-[var(--primary)] transition-colors">Task Tracker</h3>
+              <p class="text-sm text-[var(--primary)] font-mono mt-2">Email/meeting/voice &rarr; task board</p>
+            </div>
+            <div class="mt-4 self-end text-[var(--ink-dim)] group-hover:text-[var(--primary)] transition-colors transform group-hover:translate-x-1 group-hover:-translate-y-1 duration-300">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+            </div>
+          </div>
         </a>
-        <a class="product-chip" href="#project-thirdeye" data-view="project-thirdeye" style="cursor:pointer;">
-          <div class="product-chip-name">The Third Eye</div>
-          <div class="product-chip-co">Personal AI OS</div>
-          <div class="product-chip-metric">Agent-orchestrated AI OS</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://the-third-eye-anchit.vercel.app/', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
+
+        <a class="group relative rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] hover:border-[var(--accent)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_20px_var(--accent-soft)] overflow-hidden" href="#project-thirdeye" data-view="project-thirdeye" style="cursor:pointer;">
+          <div class="absolute inset-0 bg-gradient-to-br from-[var(--accent-soft)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div class="relative z-10 flex flex-col h-full justify-between">
+            <div>
+              <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-1">Personal AI OS</div>
+              <h3 class="text-lg font-bold text-[var(--ink)] mb-1 group-hover:text-[var(--accent)] transition-colors">The Third Eye</h3>
+              <p class="text-sm text-[var(--accent)] font-mono mt-2">Agent-orchestrated AI OS</p>
+            </div>
+            <div class="mt-4 self-end text-[var(--ink-dim)] group-hover:text-[var(--accent)] transition-colors transform group-hover:translate-x-1 group-hover:-translate-y-1 duration-300">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+            </div>
+          </div>
         </a>
-        <a class="product-chip" href="#project-yaara" data-view="project-yaara" style="cursor:pointer;">
-          <div class="product-chip-name">Hey Yaara</div>
-          <div class="product-chip-co">AI Voice · Consumer</div>
-          <div class="product-chip-metric">Voice companion for elderly</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://hey-yaara.vercel.app/', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
+
+        <a class="group relative rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] hover:border-[var(--primary)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_20px_var(--primary-soft)] overflow-hidden" href="#project-yaara" data-view="project-yaara" style="cursor:pointer;">
+          <div class="absolute inset-0 bg-gradient-to-br from-[var(--primary-soft)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div class="relative z-10 flex flex-col h-full justify-between">
+            <div>
+              <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-1">AI Voice · Consumer</div>
+              <h3 class="text-lg font-bold text-[var(--ink)] mb-1 group-hover:text-[var(--primary)] transition-colors">Hey Yaara</h3>
+              <p class="text-sm text-[var(--primary)] font-mono mt-2">Voice companion for elderly</p>
+            </div>
+            <div class="mt-4 self-end text-[var(--ink-dim)] group-hover:text-[var(--primary)] transition-colors transform group-hover:translate-x-1 group-hover:-translate-y-1 duration-300">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+            </div>
+          </div>
         </a>
-        <a class="product-chip" href="#project-mailer" data-view="project-mailer" style="cursor:pointer;">
-          <div class="product-chip-name">Mailer Architect</div>
-          <div class="product-chip-co">AI Tooling · Marketing</div>
-          <div class="product-chip-metric">Multi-LLM cascade &rarr; HTML email</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://marketing-mailers-html-architect.vercel.app/', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
+
+        <a class="group relative rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] hover:border-[var(--accent)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_20px_var(--accent-soft)] overflow-hidden" href="#project-mailer" data-view="project-mailer" style="cursor:pointer;">
+          <div class="absolute inset-0 bg-gradient-to-br from-[var(--accent-soft)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div class="relative z-10 flex flex-col h-full justify-between">
+            <div>
+              <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-1">AI Tooling · Marketing</div>
+              <h3 class="text-lg font-bold text-[var(--ink)] mb-1 group-hover:text-[var(--accent)] transition-colors">Mailer Architect</h3>
+              <p class="text-sm text-[var(--accent)] font-mono mt-2">Multi-LLM cascade &rarr; HTML email</p>
+            </div>
+            <div class="mt-4 self-end text-[var(--ink-dim)] group-hover:text-[var(--accent)] transition-colors transform group-hover:translate-x-1 group-hover:-translate-y-1 duration-300">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+            </div>
+          </div>
         </a>
-        <a class="product-chip" href="#project-telesuite" data-view="project-telesuite" style="cursor:pointer;">
-          <div class="product-chip-name">AI TeleSuite</div>
-          <div class="product-chip-co">AI Workflow · Sales</div>
-          <div class="product-chip-metric">Real-time pitch scoring</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://ai-tele-suite.vercel.app/', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
+
+        <a class="group relative rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] hover:border-[var(--primary)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_20px_var(--primary-soft)] overflow-hidden" href="#project-telesuite" data-view="project-telesuite" style="cursor:pointer;">
+          <div class="absolute inset-0 bg-gradient-to-br from-[var(--primary-soft)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div class="relative z-10 flex flex-col h-full justify-between">
+            <div>
+              <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-1">AI Workflow · Sales</div>
+              <h3 class="text-lg font-bold text-[var(--ink)] mb-1 group-hover:text-[var(--primary)] transition-colors">AI TeleSuite</h3>
+              <p class="text-sm text-[var(--primary)] font-mono mt-2">Real-time pitch scoring</p>
+            </div>
+            <div class="mt-4 self-end text-[var(--ink-dim)] group-hover:text-[var(--primary)] transition-colors transform group-hover:translate-x-1 group-hover:-translate-y-1 duration-300">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+            </div>
+          </div>
         </a>
-        <a class="product-chip" href="#project-lifeengine" data-view="project-lifeengine" style="cursor:pointer;">
-          <div class="product-chip-name">TH+ LifeEngine</div>
-          <div class="product-chip-co">AI Wellness</div>
-          <div class="product-chip-metric">Personalised daily plans</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://th-life-engine.vercel.app/', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
+
+        <a class="group relative rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] hover:border-[var(--accent)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_20px_var(--accent-soft)] overflow-hidden" href="#project-lifeengine" data-view="project-lifeengine" style="cursor:pointer;">
+          <div class="absolute inset-0 bg-gradient-to-br from-[var(--accent-soft)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div class="relative z-10 flex flex-col h-full justify-between">
+            <div>
+              <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-1">AI Wellness</div>
+              <h3 class="text-lg font-bold text-[var(--ink)] mb-1 group-hover:text-[var(--accent)] transition-colors">TH+ LifeEngine</h3>
+              <p class="text-sm text-[var(--accent)] font-mono mt-2">Personalised daily plans</p>
+            </div>
+            <div class="mt-4 self-end text-[var(--ink-dim)] group-hover:text-[var(--accent)] transition-colors transform group-hover:translate-x-1 group-hover:-translate-y-1 duration-300">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+            </div>
+          </div>
+        </a>
+      </div>1="17" x2="17" y2="7"></line>
               <polyline points="7 7 17 7 17 17"></polyline>
             </svg>
           </span>
