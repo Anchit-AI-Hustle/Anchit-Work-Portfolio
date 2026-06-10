@@ -9,10 +9,11 @@ import os
 import subprocess
 import tempfile
 import uuid
+import asyncio
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -89,6 +90,7 @@ print("XTTS‑v2 model loaded.")
 
 class TTSRequest(BaseModel):
     text: str
+    format: str | None = "wav"
 
 
 def preprocess_text(text: str) -> str:
@@ -111,6 +113,24 @@ def preprocess_text(text: str) -> str:
     return " ".join(text.split())[:1200]
 
 
+def synthesize_to_file(text: str) -> Path:
+    """Blocking XTTS synthesis wrapped by async endpoints.
+
+    XTTS-v2 is not truly sample-streaming in this setup, so the practical
+    low-latency strategy is packetization: synthesize 2-3 second text chunks in
+    sequence, return each chunk immediately, and let the browser buffer/play
+    while later chunks are still generating.
+    """
+    output_path = Path(tempfile.gettempdir()) / f"anchit-xtts-{uuid.uuid4()}.wav"
+    tts.tts_to_file(
+        text=text,
+        speaker_wav=str(REFERENCE_WAV),
+        language="en",
+        file_path=str(output_path),
+    )
+    return output_path
+
+
 @app.get("/health")
 async def health() -> dict[str, Any]:
     """Simple health check endpoint returning server status and speaker path."""
@@ -128,14 +148,8 @@ async def generate_audio(req: TTSRequest):
     if not text:
         raise HTTPException(status_code=400, detail="Text cannot be empty")
 
-    output_path = Path(tempfile.gettempdir()) / f"anchit-xtts-{uuid.uuid4()}.wav"
     try:
-        tts.tts_to_file(
-            text=text,
-            speaker_wav=str(REFERENCE_WAV),
-            language="en",
-            file_path=str(output_path),
-        )
+        output_path = await asyncio.to_thread(synthesize_to_file, text)
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
@@ -144,6 +158,58 @@ async def generate_audio(req: TTSRequest):
         media_type="audio/wav",
         filename="anchit-narration.wav",
     )
+
+
+@app.post("/api/tts-packet")
+async def generate_audio_packet(req: TTSRequest):
+    """Generate one small XTTS packet for live chat playback.
+
+    Keep upstream text chunks short (roughly one sentence / 120-220 chars). The
+    client receives many packets and plays them sequentially, which gives a
+    YouTube-style buffering feel without waiting for a full answer.
+    """
+    text = preprocess_text(req.text or "")[:320]
+    if not text:
+        raise HTTPException(status_code=400, detail="Text cannot be empty")
+    try:
+        output_path = await asyncio.to_thread(synthesize_to_file, text)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    return FileResponse(
+        str(output_path),
+        media_type="audio/wav",
+        filename=f"anchit-packet-{uuid.uuid4()}.wav",
+    )
+
+
+@app.websocket("/ws/tts")
+async def tts_socket(websocket: WebSocket):
+    """Streaming socket contract for GPU deployments.
+
+    Client sends JSON messages: {"seq": 0, "text": "..."}.
+    Server responds with a status JSON, then the generated audio bytes, then a
+    done JSON. This mirrors the HTTP packet endpoint while avoiding request
+    setup overhead on long-lived GPU hosts.
+    """
+    await websocket.accept()
+    try:
+        while True:
+            payload = await websocket.receive_json()
+            seq = payload.get("seq")
+            text = preprocess_text((payload.get("text") or ""))[:320]
+            if not text:
+                await websocket.send_json({"type": "error", "seq": seq, "error": "empty_text"})
+                continue
+            await websocket.send_json({"type": "buffering", "seq": seq})
+            try:
+                output_path = await asyncio.to_thread(synthesize_to_file, text)
+                await websocket.send_json({"type": "audio", "seq": seq, "mime": "audio/wav", "text": text})
+                await websocket.send_bytes(output_path.read_bytes())
+                await websocket.send_json({"type": "done", "seq": seq})
+            except Exception as exc:
+                await websocket.send_json({"type": "error", "seq": seq, "error": str(exc)})
+    except WebSocketDisconnect:
+        return
 
 
 if __name__ == "__main__":
