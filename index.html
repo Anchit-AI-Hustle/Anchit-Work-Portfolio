@@ -5778,8 +5778,8 @@
   window.openFullChat = openFullChat;
   window.minimizeChat = minimizeChat;
   document.getElementById('chatMinimizeBtn')?.addEventListener('click', () => minimizeChat());
-	  // Chat is expanded by default.
-	  openFullChat();
+	  // Chat is expanded by default as a floating guide rather than taking over the full page.
+	  openGuideChat();
 	  const isFirstTime = !localStorage.getItem('anchit-visited');
 	  const msg = isFirstTime 
 	    ? "Welcome. I'm Anchit. This is my interactive portfolio. I will guide you page by page, answer questions, and narrate the story when you press play. What would you like to know?"
