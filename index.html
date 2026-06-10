@@ -22,6 +22,13 @@
 <meta property="og:description" content="Funnels, subscriptions, 0→1 consumer products, AI side builds." />
 <meta property="og:type" content="website" />
 
+<script>
+  try {
+    const savedTheme = localStorage.getItem('anchit-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  } catch (e) {}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -1577,14 +1584,9 @@
     font-family: var(--font-body); font-size: 15px; letter-spacing: 0.01em;
     color: var(--ink-dim); line-height: 1.62;
     padding: 13px 16px 13px 42px;
-    border-radius: 16px; border-bottom-left-radius: 5px;
-    background:
-      linear-gradient(180deg, rgba(255,106,26,0.07), transparent 60%),
-      var(--bg-deep);
-    border: 1px solid rgba(255,106,26,0.32);
-    box-shadow: 0 6px 22px rgba(0,0,0,0.28);
+    display: none !important;
   }
-  .chat-caption.active { display: block; }
+  .chat-caption.active { display: none !important; }
   /* little speaking indicator dot */
   .chat-caption.active::before {
     content: ''; position: absolute; left: 16px; top: 17px;
@@ -2050,11 +2052,7 @@
 <div id="onboarding" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:linear-gradient(90deg, rgba(5,5,5,0.34), rgba(5,5,5,0.10) 46%, rgba(5,5,5,0.28)); z-index:10000; display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; pointer-events:none; transition:opacity 0.5s, visibility 0.5s;">
   <div class="chat-container-center" style="align-items:center; justify-content:center; display:flex; flex-direction:column; background:rgba(20,20,20,0.72); border:1px solid rgba(255, 95, 21, 0.4); box-shadow:0 0 50px rgba(255, 95, 21, 0.15), inset 0 0 20px rgba(255, 95, 21, 0.05); border-radius:24px; padding:40px; width:90%; max-width:500px; text-align:center;">
     
-    <div style="margin-bottom:24px;">
-      <img src="AnchitTandon-AppLogo.png" alt="Anchit Tandon" style="width:88px; height:88px; border-radius:22px; object-fit:cover; border:1px solid rgba(255,183,54,.7); box-shadow: 0 0 28px rgba(255, 153, 31, 0.45);">
-    </div>
-    
-    <h2 style="font-family:var(--font-display); font-size:28px; font-weight:700; color:#FFF; margin-bottom:12px;">Anchit Tandon</h2>
+    <h2 id="onboarding-title" style="font-family:var(--font-display); font-size:28px; font-weight:700; color:#FFF; margin-bottom:12px;">Anchit Tandon</h2>
     <p id="onboarding-copy" style="color:var(--ink-dim); font-size:16px; margin-bottom:32px; line-height:1.5;">Choose a guided walkthrough or continue exploring the portfolio.</p>
 
     <div id="onboarding-actions" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center;">
@@ -4400,10 +4398,9 @@
   chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendCurrent(); });
 
   
-	  // Seed the chat's guide content, but leave it minimised as a floating CTA.
+	  // Only open guide chat. Do NOT minimize it.
 	  setTimeout(() => {
 	    renderPageGuide(currentViewName(), { initial: true });
-	    if (typeof window.minimizeChat === 'function') window.minimizeChat();
 	  }, 800);
 
   const obStartBtn = document.getElementById('ob-start-btn');
@@ -4452,6 +4449,25 @@
   if (obSubmit) { obSubmit.addEventListener('click', finishOnboarding); }
   if (obInput) { obInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') finishOnboarding(); }); }
 
+  // Show the interactive popup immediately
+  const ob = document.getElementById('onboarding');
+  if (ob) {
+    const isVisited = localStorage.getItem('anchit-visited');
+    const obTitle = document.getElementById('onboarding-title');
+    
+    if (isVisited) {
+      if (obTitle) obTitle.textContent = 'Welcome back';
+      if (obCopy) obCopy.textContent = 'Ready to continue where you left off, or explore something new?';
+      if (obStartBtn) obStartBtn.textContent = 'Restart walkthrough';
+    } else {
+      if (obTitle) obTitle.textContent = 'Welcome';
+      if (obCopy) obCopy.textContent = 'Choose a guided walkthrough or continue exploring the portfolio.';
+    }
+
+    ob.style.opacity = '1';
+    ob.style.visibility = 'visible';
+    ob.style.pointerEvents = 'auto';
+  }
 
   // ---- In-chat mic: speak → transcribe into the input → auto-send ----
   (function(){
