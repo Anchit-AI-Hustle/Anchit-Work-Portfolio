@@ -716,6 +716,30 @@
     box-shadow: 0 0 0 1px rgba(255,77,31,0.18) inset;
   }
 
+  /* Chat voice sub-control (Text / Voice reply / Call) */
+  .chat-audio-row {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 6px; padding: 6px 18px 2px;
+  }
+  .chat-audio-label {
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--ink-faint, var(--ink-dim)); margin-right: 2px;
+  }
+  .chat-audio {
+    font-family: var(--font-mono); font-size: 9.5px; font-weight: 600;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    padding: 4px 9px; border-radius: 8px; cursor: pointer;
+    background: transparent; color: var(--ink-dim);
+    border: 1px solid var(--rule); transition: all 0.18s ease;
+  }
+  .chat-audio:hover { color: var(--ink); border-color: var(--rule-strong); }
+  .chat-audio.active { background: var(--primary-soft); color: var(--primary); border-color: rgba(255,77,31,0.42); }
+  /* The voice sub-control only applies to Chat mode. */
+  body.mode-narrate .chat-audio-row { display: none; }
+  /* Call mode: pulse the mic to show the line is open. */
+  body.call-active .chat-audio[data-chataudio-btn="call"] { box-shadow: 0 0 0 0 rgba(255,77,31,.5); animation: callPulse 1.8s ease-out infinite; }
+  @keyframes callPulse { 0% { box-shadow: 0 0 0 0 rgba(255,77,31,.45); } 70%,100% { box-shadow: 0 0 0 10px rgba(255,77,31,0); } }
+
   /* Onboarding first-open mode choice */
   .ob-mode-btn {
     display: flex; flex-direction: column; align-items: center; gap: 6px;
@@ -2228,17 +2252,13 @@
     <p id="onboarding-copy" style="color:var(--ink-dim); font-size:16px; margin-bottom:32px; line-height:1.5;">Pick a way to explore — you can switch anytime from the toggle at the top of the chat.</p>
 
     <div id="onboarding-actions" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center;">
-      <button class="ob-mode-btn" data-ob-mode="talk" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
-        <span>Talk</span><small>Ask out loud, hear me answer</small>
+      <button class="ob-mode-btn" data-ob-mode="chat" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>Chat</span><small>Talk with my AI — type, voice, or call</small>
       </button>
-      <button class="ob-mode-btn" data-ob-mode="listen" type="button">
+      <button class="ob-mode-btn" data-ob-mode="narrate" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
-        <span>Listen</span><small>I narrate each page</small>
-      </button>
-      <button class="ob-mode-btn" data-ob-mode="read" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-        <span>Read</span><small>Text only, no audio</small>
+        <span>Narrate</span><small>I read the portfolio in my voice</small>
       </button>
     </div>
     
@@ -2814,19 +2834,21 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
           </button>
         </div>
-        <div class="chat-modes" role="group" aria-label="Choose how Anchit responds">
-          <button type="button" class="chat-mode" data-mode-btn="talk" aria-pressed="true" title="Talk — ask out loud and hear me answer in my voice">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
-            <span>Talk</span>
+        <div class="chat-modes" role="group" aria-label="Chat with Anchit or have him narrate the portfolio">
+          <button type="button" class="chat-mode" data-mode-btn="chat" aria-pressed="true" title="Chat — full conversation with Anchit's AI">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>Chat</span>
           </button>
-          <button type="button" class="chat-mode" data-mode-btn="listen" aria-pressed="false" title="Listen — I narrate each page aloud as you browse">
+          <button type="button" class="chat-mode" data-mode-btn="narrate" aria-pressed="false" title="Narrate — Anchit reads the portfolio aloud in his voice">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
-            <span>Listen</span>
+            <span>Narrate</span>
           </button>
-          <button type="button" class="chat-mode" data-mode-btn="read" aria-pressed="false" title="Read — text only, nothing is spoken">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-            <span>Read</span>
-          </button>
+        </div>
+        <div class="chat-audio-row" role="group" aria-label="Voice for the conversation">
+          <span class="chat-audio-label">Voice</span>
+          <button type="button" class="chat-audio" data-chataudio-btn="text" aria-pressed="false" title="Text only — replies are written, nothing is spoken">Text</button>
+          <button type="button" class="chat-audio" data-chataudio-btn="reply" aria-pressed="true" title="Voice reply — answers are written and spoken in Anchit's voice">Voice reply</button>
+          <button type="button" class="chat-audio" data-chataudio-btn="call" aria-pressed="false" title="Call — hands-free voice both ways, every line transcribed">Call</button>
         </div>
         <div class="chat-body" id="chatBody">
           <div class="chat-caption" id="chatCaption" aria-live="polite" aria-label="Currently spoken text"></div>
@@ -4050,43 +4072,153 @@
   window.userInteracted = false;
   ['pointerdown','keydown'].forEach(ev => document.addEventListener(ev, () => { window.userInteracted = true; }, { once: true, capture: true }));
 
-  /* ---- Interaction mode: how Anchit responds ----
-     'talk'   → two-way voice: replies are spoken + shown.
-     'listen' → page narration: each page is read aloud as you browse.
-     'read'   → text only: nothing is spoken anywhere.
-     The two legacy audio gates are derived from this single source of truth so
-     the rest of the audio plumbing keeps working unchanged. */
-  const MODE_VALUES = ['talk', 'listen', 'read'];
-  window.anchitMode = MODE_VALUES.includes(localStorage.getItem('anchit-chat-mode'))
-    ? localStorage.getItem('anchit-chat-mode') : 'talk';
+  /* ---- Interaction model ----
+     Two top-level modes, surfaced as a toggle and at first open:
+       'chat'    → full-screen conversation, an LLM of Anchit. A voice sub-mode
+                   controls audio: 'text' (silent), 'reply' (spoken answers),
+                   'call' (hands-free voice both ways, both sides transcribed).
+       'narrate' → the real portfolio view, read aloud page-by-page in Anchit's
+                   cloned voice (its own script + on-page captions).
+     The two legacy audio gates are derived from this so the rest of the audio
+     plumbing keeps working unchanged. */
+  const MODE_VALUES = ['chat', 'narrate'];
+  const CHAT_AUDIO_VALUES = ['text', 'reply', 'call'];
+  function migrateMode(v) {
+    if (v === 'listen') return 'narrate';                 // old name
+    if (v === 'talk' || v === 'read') return 'chat';      // old names
+    return MODE_VALUES.includes(v) ? v : 'chat';
+  }
+  window.anchitMode = migrateMode(localStorage.getItem('anchit-chat-mode'));
+  window.anchitChatAudio = (function () {
+    const stored = localStorage.getItem('anchit-chat-audio');
+    if (CHAT_AUDIO_VALUES.includes(stored)) return stored;
+    return localStorage.getItem('anchit-chat-mode') === 'read' ? 'text' : 'reply';
+  })();
   // Once the visitor stops audio, nothing auto-plays again until they explicitly
-  // press play, send a message, or pick an audio mode. Gates the auto-play paths.
+  // press play, send a message, or pick a mode. Gates the auto-play paths.
   window.anchitAudioStopped = false;
-  function applyAnchitMode(mode, opts = {}) {
-    if (!MODE_VALUES.includes(mode)) mode = 'talk';
-    window.anchitMode = mode;
-    try { localStorage.setItem('anchit-chat-mode', mode); } catch {}
-    audioModeEnabled = (mode === 'listen');      // gates page narration
-    window.chatVoiceMuted = (mode === 'read');   // silences chat replies
-    // Choosing an audio mode is an explicit opt-in to hearing audio again.
-    if (mode !== 'read') window.anchitAudioStopped = false;
-    if (mode === 'read') {
-      try { window.speechSynthesis?.cancel(); } catch {}
-      try { if (typeof cloneAudio !== 'undefined' && cloneAudio) cloneAudio.pause(); } catch {}
-      try { window.anchitAudioControls?.stop?.(); } catch {}
-      document.getElementById('chatCaption')?.classList.remove('active');
-    }
+  let lastPortfolioView = 'home';
+
+  function refreshAudioGates() {
+    audioModeEnabled = (window.anchitMode === 'narrate');                 // page narration
+    window.chatVoiceMuted = !(window.anchitMode === 'chat' && window.anchitChatAudio !== 'text'); // spoken replies
+  }
+  function paintModeUI() {
     document.querySelectorAll('[data-mode-btn]').forEach(b => {
-      const on = b.getAttribute('data-mode-btn') === mode;
+      const on = b.getAttribute('data-mode-btn') === window.anchitMode;
       b.classList.toggle('active', on);
       b.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
-    if (mode === 'listen' && opts.narrate && typeof window.anchitNarrate === 'function') {
-      window.anchitNarrate(typeof currentViewName === 'function' ? currentViewName() : undefined);
+    document.querySelectorAll('[data-chataudio-btn]').forEach(b => {
+      const on = b.getAttribute('data-chataudio-btn') === window.anchitChatAudio;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    document.body.classList.toggle('mode-narrate', window.anchitMode === 'narrate');
+    document.body.classList.toggle('mode-chat', window.anchitMode === 'chat');
+  }
+
+  function applyAnchitMode(mode, opts = {}) {
+    if (!MODE_VALUES.includes(mode)) mode = 'chat';
+    window.anchitMode = mode;
+    try { localStorage.setItem('anchit-chat-mode', mode); } catch {}
+    refreshAudioGates();
+    window.anchitAudioStopped = false; // choosing a mode is an opt-in to audio
+    paintModeUI();
+
+    if (!opts.silent) {
+      if (mode === 'chat') {
+        try { window.anchitAudioControls?.stop?.(); } catch {}  // halt any page narration
+        if (typeof window.openFullChat === 'function') window.openFullChat();
+        if (window.anchitChatAudio === 'call') startCallMode(); else stopCallMode();
+      } else { // narrate → leave the conversation, show the portfolio, read it aloud
+        stopCallMode();
+        const active = typeof currentViewName === 'function' ? currentViewName() : 'home';
+        const target = (active === 'chat') ? (lastPortfolioView || 'home') : active;
+        if (typeof window.minimizeChat === 'function') window.minimizeChat();
+        if (typeof switchView === 'function') switchView(target);
+        if (opts.narrate !== false && typeof window.anchitNarrate === 'function') {
+          setTimeout(() => window.anchitNarrate(typeof currentViewName === 'function' ? currentViewName() : target), 220);
+        }
+      }
     }
     document.dispatchEvent(new CustomEvent('anchitModeChanged', { detail: mode }));
   }
   window.applyAnchitMode = applyAnchitMode;
+
+  function setChatAudio(audio, opts = {}) {
+    if (!CHAT_AUDIO_VALUES.includes(audio)) audio = 'reply';
+    window.anchitChatAudio = audio;
+    try { localStorage.setItem('anchit-chat-audio', audio); } catch {}
+    refreshAudioGates();
+    window.anchitAudioStopped = false;
+    paintModeUI();
+    if (audio === 'text') { try { window.speechSynthesis?.cancel(); } catch {} }
+    if (!opts.silent && window.anchitMode === 'chat') {
+      if (audio === 'call') startCallMode(); else stopCallMode();
+    }
+  }
+  window.setChatAudio = setChatAudio;
+
+  /* ---- Call mode: continuous hands-free voice conversation ----
+     Listen → transcribe to a user bubble → send → speak the reply → listen
+     again. Both sides land in the chat window as text. */
+  let callRec = null, callActive = false;
+  function isAnchitSpeaking() {
+    if (typeof cloneAudio !== 'undefined' && cloneAudio && !cloneAudio.paused && !cloneAudio.ended) return true;
+    if (typeof packetPlaying !== 'undefined' && packetPlaying) return true;
+    return !!(window.speechSynthesis && window.speechSynthesis.speaking);
+  }
+  function beginCallListen() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!callActive || !SR) return;
+    if (isAnchitSpeaking()) { setTimeout(beginCallListen, 450); return; }
+    let finalText = '';
+    try {
+      callRec = new SR();
+      callRec.lang = 'en-IN'; callRec.interimResults = true; callRec.continuous = false;
+      document.getElementById('chatMic')?.classList.add('listening');
+      callRec.onresult = (e) => {
+        let t = ''; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+        finalText = t;
+        const input = document.getElementById('chatInput'); if (input) input.value = t;
+        if (e.results[e.results.length - 1].isFinal) { try { callRec.stop(); } catch {} }
+      };
+      callRec.onend = () => {
+        document.getElementById('chatMic')?.classList.remove('listening');
+        const input = document.getElementById('chatInput'); if (input) input.value = '';
+        if (!callActive) return;
+        if (finalText.trim()) { handleMessage(finalText.trim()); waitForReplyThenListen(); }
+        else setTimeout(beginCallListen, 350);
+      };
+      callRec.onerror = () => { document.getElementById('chatMic')?.classList.remove('listening'); if (callActive) setTimeout(beginCallListen, 800); };
+      callRec.start();
+    } catch { if (callActive) setTimeout(beginCallListen, 800); }
+  }
+  function waitForReplyThenListen() {
+    if (!callActive) return;
+    setTimeout(function check() {
+      if (!callActive) return;
+      if (isAnchitSpeaking()) { setTimeout(check, 400); return; }
+      beginCallListen();
+    }, 1400);
+  }
+  function startCallMode() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { if (typeof addBot === 'function') addBot("Call mode needs a browser with speech recognition (Chrome works best). Falling back to voice replies — tap the mic to talk."); setChatAudio('reply'); return; }
+    if (callActive) return;
+    callActive = true;
+    document.body.classList.add('call-active');
+    beginCallListen();
+  }
+  function stopCallMode() {
+    callActive = false;
+    document.body.classList.remove('call-active');
+    try { callRec && callRec.stop(); } catch {}
+    callRec = null;
+    document.getElementById('chatMic')?.classList.remove('listening');
+  }
+  window.anchitStopCall = stopCallMode;
 
   const root = document.documentElement;
   const nextFrame = window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : (cb) => setTimeout(cb, 0);
@@ -4831,9 +4963,9 @@
 	  let packetPlaying = false;
 	  let packetAudio = null;
 	  function playNextPacket(statusEl) {
-	    if (window.anchitMode === 'read' || window.chatVoiceMuted || window.anchitAudioStopped) {
+	    if (window.chatVoiceMuted || window.anchitAudioStopped) {
 	      packetQueue = [];
-	      if (statusEl) statusEl.textContent = window.anchitAudioStopped ? 'Voice stopped' : 'Read mode — voice muted';
+	      if (statusEl) statusEl.textContent = window.anchitAudioStopped ? 'Voice stopped' : 'Text mode — voice off';
 	      return;
 	    }
 	    if (packetPlaying || packetQueue.length === 0) return;
@@ -5036,7 +5168,7 @@
   }
 
   function finishOnboarding(mode) {
-    if (mode) applyAnchitMode(mode, { narrate: false });
+    const chosen = MODE_VALUES.includes(mode) ? mode : window.anchitMode;
     const ob = document.getElementById('onboarding');
     if (ob) {
       ob.style.opacity = '0';
@@ -5044,30 +5176,36 @@
       setTimeout(() => ob.style.visibility = 'hidden', 500);
     }
 	    chatIntroShown = true;
-	    if (typeof window.openGuideChat === 'function') window.openGuideChat();
-	    // Render the page guide (shown, never auto-spoken). If the visitor chose
-	    // Listen, narrate the page itself once the guide is in place.
-	    setTimeout(() => {
-	      renderPageGuide(currentViewName(), { initial: true });
-	      if (window.anchitMode === 'listen' && typeof window.anchitNarrate === 'function') {
-	        window.anchitNarrate(currentViewName());
-	      }
-	    }, 180);
+	    // Chat → full-screen conversation; Narrate → portfolio + page narration.
+	    // applyAnchitMode (non-silent) performs the open/narrate side-effects.
+	    applyAnchitMode(chosen, { narrate: chosen === 'narrate' });
+	    if (chosen === 'chat') {
+	      setTimeout(() => { renderPageGuide(currentViewName(), { initial: true }); }, 180);
+	    }
 	  }
 
   // First-open mode choice → sets the interaction mode, then dismisses onboarding.
   document.querySelectorAll('[data-ob-mode]').forEach(b => {
     b.addEventListener('click', () => finishOnboarding(b.getAttribute('data-ob-mode')));
   });
-  // Header segmented control: switch mode anytime; switching to Listen narrates now.
+  // Header tabs: Chat ↔ Narrate. Switching to Narrate reads the page now.
   document.querySelectorAll('[data-mode-btn]').forEach(b => {
     b.addEventListener('click', () => {
       const mode = b.getAttribute('data-mode-btn');
-      applyAnchitMode(mode, { narrate: mode === 'listen' });
+      applyAnchitMode(mode, { narrate: mode === 'narrate' });
     });
   });
-  // Reflect the persisted mode in the toggle UI on load (no narration on boot).
-  applyAnchitMode(window.anchitMode, { narrate: false });
+  // Chat voice sub-control: Text / Voice reply / Call.
+  document.querySelectorAll('[data-chataudio-btn]').forEach(b => {
+    b.addEventListener('click', () => setChatAudio(b.getAttribute('data-chataudio-btn')));
+  });
+  // Remember the last real portfolio view so Narrate has somewhere to return to.
+  document.addEventListener('viewChanged', (e) => {
+    if (e.detail && e.detail !== 'chat') lastPortfolioView = e.detail;
+  });
+  // Reflect the persisted mode + voice in the UI on load (no side-effects on boot).
+  applyAnchitMode(window.anchitMode, { silent: true });
+  setChatAudio(window.anchitChatAudio, { silent: true });
 
   if (obSubmit) { obSubmit.addEventListener('click', () => finishOnboarding()); }
   if (obInput) { obInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') finishOnboarding(); }); }
@@ -6731,11 +6869,16 @@
   window.openFullChat = openFullChat;
   window.minimizeChat = minimizeChat;
   document.getElementById('chatMinimizeBtn')?.addEventListener('click', () => minimizeChat());
-	  // Chat is expanded by default as a floating guide rather than taking over the full page.
-	  openGuideChat();
+	  // Returning Narrate users start on the portfolio (chat minimized); everyone
+	  // else gets the floating chat guide. First-time visitors see the chooser.
+	  if (window.anchitMode === 'narrate' && localStorage.getItem('anchit-chat-mode')) {
+	    minimizeChat();
+	  } else {
+	    openGuideChat();
+	  }
 	  const isFirstTime = !localStorage.getItem('anchit-visited');
-	  const msg = isFirstTime 
-	    ? "Welcome. I'm Anchit. This is my interactive portfolio. I will guide you page by page, answer questions, and narrate the story when you press play. What would you like to know?"
+	  const msg = isFirstTime
+	    ? "Welcome. I'm Anchit. Ask me anything about my work, builds, or how to reach me — type, talk, or start a call. Or switch to Narrate and I'll read the portfolio in my voice."
 	    : "Welcome back. I'm Anchit. How can I help you today?";
 	  seedChatIntro(msg);
 	  localStorage.setItem('anchit-visited', '1');
@@ -6801,12 +6944,17 @@
     }
   }
 
-  returnMain?.addEventListener('click', openGuideChat);
+  // The floating launcher opens the full-screen Chat conversation.
+  returnMain?.addEventListener('click', () => {
+    if (typeof window.applyAnchitMode === 'function') window.applyAnchitMode('chat');
+    else openFullChat();
+  });
 	  returnMic?.addEventListener('click', (e) => {
 	    e.stopPropagation();
-	    if (!chatAudioMuted && typeof audioModeEnabled !== 'undefined') audioModeEnabled = true;
-	    openGuideChat();
-	    setTimeout(() => document.getElementById('chatMic')?.click(), 260);
+	    // Mic on the launcher → open Chat and start a hands-free call.
+	    if (typeof window.setChatAudio === 'function') window.setChatAudio('call', { silent: true });
+	    if (typeof window.applyAnchitMode === 'function') window.applyAnchitMode('chat');
+	    else openFullChat();
 	  });
 	  returnPlay?.addEventListener('click', (e) => {
 	    e.stopPropagation();
