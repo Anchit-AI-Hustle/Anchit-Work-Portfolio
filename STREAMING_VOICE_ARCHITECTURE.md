@@ -59,7 +59,18 @@ ANTHROPIC_API_KEY=...
 CLAUDE_MODEL=claude-haiku-4-5-20251001
 XTTS_PACKET_URL=https://your-gpu-host.example.com
 XTTS_API_URL=https://your-gpu-host.example.com
+
+# Cloned voice via Hugging Face (used by /api/tts). Prefer a dedicated
+# Inference Endpoint URL; the model-id form falls back to the public API.
+HF_TOKEN=hf_...
+HF_TTS_URL=https://xxxxxxxx.endpoints.huggingface.cloud   # recommended
+# HF_TTS_MODEL=your-username/your-voice-model              # public Inference API alt
 ```
+
+`/api/tts` tries providers in order — self-hosted XTTS → ElevenLabs → Hugging Face
+(your clone) → browser voice — and returns the first that yields audio. The HF path
+waits once for a cold endpoint to warm up (HTTP 503 + `estimated_time`) so the first
+narration after idle returns audio instead of failing silently.
 
 `XTTS_PACKET_URL` may point either to the host root or directly to `/api/tts-packet`.
 

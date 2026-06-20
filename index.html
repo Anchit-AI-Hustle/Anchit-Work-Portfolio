@@ -695,6 +695,46 @@
     border-radius: 6px; padding: 4px 9px;
   }
 
+  /* Interaction-mode segmented control (Talk / Listen / Read) */
+  .chat-modes {
+    position: relative; z-index: 1;
+    display: flex; gap: 5px; padding: 10px 18px 4px;
+  }
+  .chat-mode {
+    flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+    letter-spacing: 0.09em; text-transform: uppercase;
+    padding: 7px 6px; border-radius: 10px; cursor: pointer;
+    background: var(--bg-elev); color: var(--ink-dim);
+    border: 1px solid var(--rule); transition: all 0.2s ease;
+  }
+  .chat-mode svg { width: 13px; height: 13px; flex-shrink: 0; }
+  .chat-mode:hover { color: var(--ink); border-color: var(--rule-strong); }
+  .chat-mode.active {
+    background: var(--primary-soft); color: var(--primary);
+    border-color: rgba(255,77,31,0.42);
+    box-shadow: 0 0 0 1px rgba(255,77,31,0.18) inset;
+  }
+
+  /* Onboarding first-open mode choice */
+  .ob-mode-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 18px 16px; min-width: 122px; flex: 1;
+    border-radius: 18px; cursor: pointer; text-align: center;
+    background: rgba(255,255,255,0.05); color: #fff;
+    border: 1px solid rgba(255,183,54,0.28); transition: all 0.25s ease;
+    font-family: var(--font-display); font-size: 16px; font-weight: 600;
+  }
+  .ob-mode-btn svg { width: 22px; height: 22px; color: var(--primary); }
+  .ob-mode-btn small {
+    font-family: var(--font-mono); font-size: 9.5px; font-weight: 400;
+    color: var(--ink-dim); letter-spacing: 0.04em; text-transform: uppercase; line-height: 1.3;
+  }
+  .ob-mode-btn:hover {
+    border-color: var(--primary); transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(255,95,21,0.18);
+  }
+
   .chat-body {
     padding: 20px 24px; min-height: 320px; max-height: 480px; overflow-y: auto;
     display: flex; flex-direction: column; gap: 12px; flex: 1;
@@ -1548,6 +1588,11 @@
     transition: opacity 0.5s ease;
   }
   .audio-ambient.active { opacity: 1; }
+  /* While the cloned voice is warming up, dim and pulse the meter. */
+  .audio-ambient.loading { opacity: 1; }
+  .audio-ambient.loading .audio-ambient-bars span { animation: loadPulse 1s ease-in-out infinite; background: var(--accent); }
+  .audio-ambient.loading .audio-ambient-label { color: var(--accent); }
+  @keyframes loadPulse { 0%,100% { opacity: 0.25; } 50% { opacity: 0.9; } }
   .audio-ambient-bars {
     display: flex; align-items: flex-end; gap: 2px; height: 18px;
   }
@@ -2179,12 +2224,22 @@
 <div id="onboarding" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:linear-gradient(90deg, rgba(5,5,5,0.34), rgba(5,5,5,0.10) 46%, rgba(5,5,5,0.28)); z-index:10000; display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; pointer-events:none; transition:opacity 0.5s, visibility 0.5s;">
   <div class="chat-container-center" style="align-items:center; justify-content:center; display:flex; flex-direction:column; background:rgba(20,20,20,0.72); border:1px solid rgba(255, 95, 21, 0.4); box-shadow:0 0 50px rgba(255, 95, 21, 0.15), inset 0 0 20px rgba(255, 95, 21, 0.05); border-radius:24px; padding:40px; width:90%; max-width:500px; text-align:center;">
     
-    <h2 id="onboarding-title" style="font-family:var(--font-display); font-size:28px; font-weight:700; color:#FFF; margin-bottom:12px;">Anchit Tandon</h2>
-    <p id="onboarding-copy" style="color:var(--ink-dim); font-size:16px; margin-bottom:32px; line-height:1.5;">Choose a guided walkthrough or continue exploring the portfolio.</p>
+    <h2 id="onboarding-title" style="font-family:var(--font-display); font-size:28px; font-weight:700; color:#FFF; margin-bottom:12px;">How do you want to experience this?</h2>
+    <p id="onboarding-copy" style="color:var(--ink-dim); font-size:16px; margin-bottom:32px; line-height:1.5;">Pick a way to explore — you can switch anytime from the toggle at the top of the chat.</p>
 
     <div id="onboarding-actions" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center;">
-      <button id="ob-start-btn" style="padding:14px 26px; background:var(--primary); color:#000; font-weight:bold; border-radius:30px; border:none; cursor:pointer; font-size:16px; box-shadow:0 0 20px rgba(255,95,21,0.5); transition:all 0.3s ease;">Start fresh</button>
-      <button id="ob-continue-btn" style="padding:14px 26px; background:rgba(255,255,255,.08); color:#fff; font-weight:bold; border-radius:30px; border:1px solid rgba(255,183,54,.35); cursor:pointer; font-size:16px; transition:all 0.3s ease;">Continue</button>
+      <button class="ob-mode-btn" data-ob-mode="talk" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
+        <span>Talk</span><small>Ask out loud, hear me answer</small>
+      </button>
+      <button class="ob-mode-btn" data-ob-mode="listen" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+        <span>Listen</span><small>I narrate each page</small>
+      </button>
+      <button class="ob-mode-btn" data-ob-mode="read" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <span>Read</span><small>Text only, no audio</small>
+      </button>
     </div>
     
     <div class="input-row" id="onboarding-input-row" style="display:none; width:100%; max-width:400px; margin-top:24px;">
@@ -2757,6 +2812,20 @@
           </div>
           <button class="chat-minimize-btn" id="chatMinimizeBtn" type="button" aria-label="Minimise chat" title="Minimise chat — keep it docked on this page">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </div>
+        <div class="chat-modes" role="group" aria-label="Choose how Anchit responds">
+          <button type="button" class="chat-mode" data-mode-btn="talk" aria-pressed="true" title="Talk — ask out loud and hear me answer in my voice">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
+            <span>Talk</span>
+          </button>
+          <button type="button" class="chat-mode" data-mode-btn="listen" aria-pressed="false" title="Listen — I narrate each page aloud as you browse">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+            <span>Listen</span>
+          </button>
+          <button type="button" class="chat-mode" data-mode-btn="read" aria-pressed="false" title="Read — text only, nothing is spoken">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            <span>Read</span>
           </button>
         </div>
         <div class="chat-body" id="chatBody">
@@ -3980,6 +4049,45 @@
   // greeting stays silent but every user-triggered reply speaks.
   window.userInteracted = false;
   ['pointerdown','keydown'].forEach(ev => document.addEventListener(ev, () => { window.userInteracted = true; }, { once: true, capture: true }));
+
+  /* ---- Interaction mode: how Anchit responds ----
+     'talk'   → two-way voice: replies are spoken + shown.
+     'listen' → page narration: each page is read aloud as you browse.
+     'read'   → text only: nothing is spoken anywhere.
+     The two legacy audio gates are derived from this single source of truth so
+     the rest of the audio plumbing keeps working unchanged. */
+  const MODE_VALUES = ['talk', 'listen', 'read'];
+  window.anchitMode = MODE_VALUES.includes(localStorage.getItem('anchit-chat-mode'))
+    ? localStorage.getItem('anchit-chat-mode') : 'talk';
+  // Once the visitor stops audio, nothing auto-plays again until they explicitly
+  // press play, send a message, or pick an audio mode. Gates the auto-play paths.
+  window.anchitAudioStopped = false;
+  function applyAnchitMode(mode, opts = {}) {
+    if (!MODE_VALUES.includes(mode)) mode = 'talk';
+    window.anchitMode = mode;
+    try { localStorage.setItem('anchit-chat-mode', mode); } catch {}
+    audioModeEnabled = (mode === 'listen');      // gates page narration
+    window.chatVoiceMuted = (mode === 'read');   // silences chat replies
+    // Choosing an audio mode is an explicit opt-in to hearing audio again.
+    if (mode !== 'read') window.anchitAudioStopped = false;
+    if (mode === 'read') {
+      try { window.speechSynthesis?.cancel(); } catch {}
+      try { if (typeof cloneAudio !== 'undefined' && cloneAudio) cloneAudio.pause(); } catch {}
+      try { window.anchitAudioControls?.stop?.(); } catch {}
+      document.getElementById('chatCaption')?.classList.remove('active');
+    }
+    document.querySelectorAll('[data-mode-btn]').forEach(b => {
+      const on = b.getAttribute('data-mode-btn') === mode;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    if (mode === 'listen' && opts.narrate && typeof window.anchitNarrate === 'function') {
+      window.anchitNarrate(typeof currentViewName === 'function' ? currentViewName() : undefined);
+    }
+    document.dispatchEvent(new CustomEvent('anchitModeChanged', { detail: mode }));
+  }
+  window.applyAnchitMode = applyAnchitMode;
+
   const root = document.documentElement;
   const nextFrame = window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : (cb) => setTimeout(cb, 0);
   window.anchitNarrate = window.anchitNarrate || function() {
@@ -4451,8 +4559,9 @@
 	    chatBody.appendChild(w);
 	    bindChatActions(w);
     scrollChat();
-    // Reply with voice + text together, unless the user muted chat audio.
-    if ((audioModeEnabled || !window.chatVoiceMuted) && window.userInteracted) {
+    // Reply with voice + text together, unless the user muted chat audio or
+    // stopped playback (in which case it stays silent until they opt back in).
+    if ((audioModeEnabled || !window.chatVoiceMuted) && window.userInteracted && !window.anchitAudioStopped) {
       const bubble = w.querySelector('.msg-bubble');
       const tmp = document.createElement('div');
       tmp.innerHTML = html;
@@ -4722,6 +4831,11 @@
 	  let packetPlaying = false;
 	  let packetAudio = null;
 	  function playNextPacket(statusEl) {
+	    if (window.anchitMode === 'read' || window.chatVoiceMuted || window.anchitAudioStopped) {
+	      packetQueue = [];
+	      if (statusEl) statusEl.textContent = window.anchitAudioStopped ? 'Voice stopped' : 'Read mode — voice muted';
+	      return;
+	    }
 	    if (packetPlaying || packetQueue.length === 0) return;
 	    const packet = packetQueue.shift();
 	    packetPlaying = true;
@@ -4816,6 +4930,8 @@
 	  }
 	  function handleMessage(text) {
 	    if (!text.trim()) return;
+	    // Sending a message is an explicit re-engagement, so audio is allowed again.
+	    window.anchitAudioStopped = false;
 	    addUser(text);
 	    if (/\b(narrate|read|speak|voice|play audio|listen)\b/i.test(text)) {
 	      if (typeof window.anchitNarrate === 'function') window.anchitNarrate(currentViewName());
@@ -4919,42 +5035,57 @@
     });
   }
 
-  function finishOnboarding() {
+  function finishOnboarding(mode) {
+    if (mode) applyAnchitMode(mode, { narrate: false });
     const ob = document.getElementById('onboarding');
     if (ob) {
       ob.style.opacity = '0';
       ob.style.pointerEvents = 'none';
       setTimeout(() => ob.style.visibility = 'hidden', 500);
     }
-	    audioModeEnabled = true;
 	    chatIntroShown = true;
 	    if (typeof window.openGuideChat === 'function') window.openGuideChat();
+	    // Render the page guide (shown, never auto-spoken). If the visitor chose
+	    // Listen, narrate the page itself once the guide is in place.
 	    setTimeout(() => {
-	      renderPageGuide(currentViewName(), { initial: true, speak: true });
+	      renderPageGuide(currentViewName(), { initial: true });
+	      if (window.anchitMode === 'listen' && typeof window.anchitNarrate === 'function') {
+	        window.anchitNarrate(currentViewName());
+	      }
 	    }, 180);
 	  }
 
-  if (obSubmit) { obSubmit.addEventListener('click', finishOnboarding); }
+  // First-open mode choice → sets the interaction mode, then dismisses onboarding.
+  document.querySelectorAll('[data-ob-mode]').forEach(b => {
+    b.addEventListener('click', () => finishOnboarding(b.getAttribute('data-ob-mode')));
+  });
+  // Header segmented control: switch mode anytime; switching to Listen narrates now.
+  document.querySelectorAll('[data-mode-btn]').forEach(b => {
+    b.addEventListener('click', () => {
+      const mode = b.getAttribute('data-mode-btn');
+      applyAnchitMode(mode, { narrate: mode === 'listen' });
+    });
+  });
+  // Reflect the persisted mode in the toggle UI on load (no narration on boot).
+  applyAnchitMode(window.anchitMode, { narrate: false });
+
+  if (obSubmit) { obSubmit.addEventListener('click', () => finishOnboarding()); }
   if (obInput) { obInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') finishOnboarding(); }); }
 
-  // Show the interactive popup immediately
+  // Show the mode chooser on first visit only. Returning visitors keep their
+  // saved mode and go straight in — the header toggle lets them change it.
   const ob = document.getElementById('onboarding');
   if (ob) {
-    const isVisited = localStorage.getItem('anchit-visited');
-    const obTitle = document.getElementById('onboarding-title');
-    
-    if (isVisited) {
-      if (obTitle) obTitle.textContent = 'Welcome back';
-      if (obCopy) obCopy.textContent = 'Ready to continue where you left off, or explore something new?';
-      if (obStartBtn) obStartBtn.textContent = 'Restart walkthrough';
+    const hasChosenMode = !!localStorage.getItem('anchit-chat-mode');
+    if (hasChosenMode) {
+      ob.style.opacity = '0';
+      ob.style.visibility = 'hidden';
+      ob.style.pointerEvents = 'none';
     } else {
-      if (obTitle) obTitle.textContent = 'Welcome';
-      if (obCopy) obCopy.textContent = 'Choose a guided walkthrough or continue exploring the portfolio.';
+      ob.style.opacity = '1';
+      ob.style.visibility = 'visible';
+      ob.style.pointerEvents = 'auto';
     }
-
-    ob.style.opacity = '1';
-    ob.style.visibility = 'visible';
-    ob.style.pointerEvents = 'auto';
   }
 
   // ---- In-chat mic: speak → transcribe into the input → auto-send ----
@@ -5203,7 +5334,16 @@
       if (!indicator) return;
       const key = viewName?.startsWith('project-') ? 'Projects' : (VIEW_LABELS[viewName] || 'Anchit');
       indicator.querySelector('.audio-ambient-label').textContent = 'Playing · ' + key;
+      indicator.classList.remove('loading');
       indicator.classList.add('active');
+    }
+    function showLoadingIndicator(viewName) {
+      if (!indicator) return;
+      const key = viewName?.startsWith('project-') ? 'Projects' : (VIEW_LABELS[viewName] || 'Anchit');
+      indicator.querySelector('.audio-ambient-label').textContent = 'Loading voice · ' + key;
+      indicator.classList.add('active', 'loading');
+      const status = document.getElementById('streamAudioStatus');
+      if (status) status.textContent = "Loading Anchit's voice…";
     }
     function hideIndicator() {
       indicator?.classList.remove('active', 'listening');
@@ -5291,6 +5431,9 @@
           caption.innerHTML = words.map((w, i) => `<span class="chat-caption-word" data-i="${i}">${w}</span>`).join(' ');
           caption.classList.add('active');
         }
+	        // Surface a "loading voice" state while the cloned-voice request is in
+	        // flight — XTTS / HF endpoints can take a moment to warm up.
+	        showLoadingIndicator(viewName);
 	        const endpoint = typeof ttsEndpoint === 'function'
 	          ? ttsEndpoint()
 	          : (['localhost', '127.0.0.1', '0.0.0.0'].includes(location.hostname) ? 'http://127.0.0.1:8000/api/tts' : '/api/tts');
@@ -5298,9 +5441,9 @@
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text })
         });
-        if (!r.ok) return false;
+        if (!r.ok) { indicator?.classList.remove('loading'); return false; }
         const ct = r.headers.get('content-type') || '';
-        if (!ct.includes('audio')) return false;
+        if (!ct.includes('audio')) { indicator?.classList.remove('loading'); return false; }
         const blob = await r.blob();
         const url = URL.createObjectURL(blob);
         stopPageAudio();
@@ -5323,12 +5466,16 @@
           setPlayerState(false, viewName);
           stopProgressBar();
           if (caption) { caption.classList.remove('active'); caption.innerHTML = ''; }
+          const status = document.getElementById('streamAudioStatus');
+          if (status) status.textContent = '';
           pageAudio = null;
         };
         pageAudio.onended = done; pageAudio.onerror = done;
         await pageAudio.play();
+        const status = document.getElementById('streamAudioStatus');
+        if (status) status.textContent = '';
         return true;
-      } catch { return false; }
+      } catch { indicator?.classList.remove('loading'); return false; }
     }
 
     function speakViaBrowserVoice(viewName, text) {
@@ -5406,6 +5553,7 @@
 
 	    function trySpeak(viewName) { speakView(viewName); }
 	    window.anchitNarrate = function(viewName) {
+	      window.anchitAudioStopped = false;   // explicit narrate re-enables audio
 	      audioModeEnabled = true;
 	      const activeEl = document.querySelector('.view.active');
 	      trySpeak(viewName || (activeEl ? activeEl.id.replace('view-', '') : 'home'));
@@ -5418,6 +5566,7 @@
 	    }
 
 	    function toggleNarrationPlayback() {
+	      window.anchitAudioStopped = false;   // user pressed play/pause control
 	      audioModeEnabled = true;
 	      if (audioMuted) {
 	        audioMuted = false;
@@ -5490,6 +5639,7 @@
 	    });
 
     function stopAllPlayback() {
+	      window.anchitAudioStopped = true;   // stay stopped until an explicit play
 	      stopPageAudio();
 	      stopHighlighting();
 	      audioModeEnabled = false;
@@ -5507,6 +5657,7 @@
     stopBtn?.addEventListener('click', stopAllPlayback);
 
     playBtn?.addEventListener('click', () => {
+      window.anchitAudioStopped = false;   // explicit play re-enables audio
       audioModeEnabled = true;
       const activeEl = document.querySelector('.view.active');
       const vName = activeEl ? activeEl.id.replace('view-', '') : 'home';
@@ -5515,7 +5666,7 @@
 
     dismissBtn?.addEventListener('click', () => { nudge?.classList.add('dismissed'); });
 
-    document.addEventListener('viewChanged', (e) => { if (audioModeEnabled) trySpeak(e.detail); });
+    document.addEventListener('viewChanged', (e) => { if (audioModeEnabled && !window.anchitAudioStopped) trySpeak(e.detail); });
 
   })();
   } catch (err) {
