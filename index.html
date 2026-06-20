@@ -4059,12 +4059,17 @@
   const MODE_VALUES = ['talk', 'listen', 'read'];
   window.anchitMode = MODE_VALUES.includes(localStorage.getItem('anchit-chat-mode'))
     ? localStorage.getItem('anchit-chat-mode') : 'talk';
+  // Once the visitor stops audio, nothing auto-plays again until they explicitly
+  // press play, send a message, or pick an audio mode. Gates the auto-play paths.
+  window.anchitAudioStopped = false;
   function applyAnchitMode(mode, opts = {}) {
     if (!MODE_VALUES.includes(mode)) mode = 'talk';
     window.anchitMode = mode;
     try { localStorage.setItem('anchit-chat-mode', mode); } catch {}
     audioModeEnabled = (mode === 'listen');      // gates page narration
     window.chatVoiceMuted = (mode === 'read');   // silences chat replies
+    // Choosing an audio mode is an explicit opt-in to hearing audio again.
+    if (mode !== 'read') window.anchitAudioStopped = false;
     if (mode === 'read') {
       try { window.speechSynthesis?.cancel(); } catch {}
       try { if (typeof cloneAudio !== 'undefined' && cloneAudio) cloneAudio.pause(); } catch {}
@@ -4554,8 +4559,9 @@
 	    chatBody.appendChild(w);
 	    bindChatActions(w);
     scrollChat();
-    // Reply with voice + text together, unless the user muted chat audio.
-    if ((audioModeEnabled || !window.chatVoiceMuted) && window.userInteracted) {
+    // Reply with voice + text together, unless the user muted chat audio or
+    // stopped playback (in which case it stays silent until they opt back in).
+    if ((audioModeEnabled || !window.chatVoiceMuted) && window.userInteracted && !window.anchitAudioStopped) {
       const bubble = w.querySelector('.msg-bubble');
       const tmp = document.createElement('div');
       tmp.innerHTML = html;
@@ -4825,9 +4831,9 @@
 	  let packetPlaying = false;
 	  let packetAudio = null;
 	  function playNextPacket(statusEl) {
-	    if (window.anchitMode === 'read' || window.chatVoiceMuted) {
+	    if (window.anchitMode === 'read' || window.chatVoiceMuted || window.anchitAudioStopped) {
 	      packetQueue = [];
-	      if (statusEl) statusEl.textContent = 'Read mode — voice muted';
+	      if (statusEl) statusEl.textContent = window.anchitAudioStopped ? 'Voice stopped' : 'Read mode — voice muted';
 	      return;
 	    }
 	    if (packetPlaying || packetQueue.length === 0) return;
@@ -4924,6 +4930,8 @@
 	  }
 	  function handleMessage(text) {
 	    if (!text.trim()) return;
+	    // Sending a message is an explicit re-engagement, so audio is allowed again.
+	    window.anchitAudioStopped = false;
 	    addUser(text);
 	    if (/\b(narrate|read|speak|voice|play audio|listen)\b/i.test(text)) {
 	      if (typeof window.anchitNarrate === 'function') window.anchitNarrate(currentViewName());
@@ -5545,6 +5553,7 @@
 
 	    function trySpeak(viewName) { speakView(viewName); }
 	    window.anchitNarrate = function(viewName) {
+	      window.anchitAudioStopped = false;   // explicit narrate re-enables audio
 	      audioModeEnabled = true;
 	      const activeEl = document.querySelector('.view.active');
 	      trySpeak(viewName || (activeEl ? activeEl.id.replace('view-', '') : 'home'));
@@ -5557,6 +5566,7 @@
 	    }
 
 	    function toggleNarrationPlayback() {
+	      window.anchitAudioStopped = false;   // user pressed play/pause control
 	      audioModeEnabled = true;
 	      if (audioMuted) {
 	        audioMuted = false;
@@ -5629,6 +5639,7 @@
 	    });
 
     function stopAllPlayback() {
+	      window.anchitAudioStopped = true;   // stay stopped until an explicit play
 	      stopPageAudio();
 	      stopHighlighting();
 	      audioModeEnabled = false;
@@ -5646,6 +5657,7 @@
     stopBtn?.addEventListener('click', stopAllPlayback);
 
     playBtn?.addEventListener('click', () => {
+      window.anchitAudioStopped = false;   // explicit play re-enables audio
       audioModeEnabled = true;
       const activeEl = document.querySelector('.view.active');
       const vName = activeEl ? activeEl.id.replace('view-', '') : 'home';
@@ -5654,7 +5666,7 @@
 
     dismissBtn?.addEventListener('click', () => { nudge?.classList.add('dismissed'); });
 
-    document.addEventListener('viewChanged', (e) => { if (audioModeEnabled) trySpeak(e.detail); });
+    document.addEventListener('viewChanged', (e) => { if (audioModeEnabled && !window.anchitAudioStopped) trySpeak(e.detail); });
 
   })();
   } catch (err) {
