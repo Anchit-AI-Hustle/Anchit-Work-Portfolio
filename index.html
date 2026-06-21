@@ -2245,8 +2245,8 @@
 <body>
 
 <!-- ONBOARDING MODAL -->
-<div id="onboarding" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:linear-gradient(90deg, rgba(5,5,5,0.34), rgba(5,5,5,0.10) 46%, rgba(5,5,5,0.28)); z-index:10000; display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; pointer-events:none; transition:opacity 0.5s, visibility 0.5s;">
-  <div class="chat-container-center" style="align-items:center; justify-content:center; display:flex; flex-direction:column; background:rgba(20,20,20,0.72); border:1px solid rgba(255, 95, 21, 0.4); box-shadow:0 0 50px rgba(255, 95, 21, 0.15), inset 0 0 20px rgba(255, 95, 21, 0.05); border-radius:24px; padding:40px; width:90%; max-width:500px; text-align:center;">
+<div id="onboarding" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(4,3,2,0.82); backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px); z-index:10000; display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; pointer-events:none; transition:opacity 0.45s ease, visibility 0.45s ease;">
+  <div class="chat-container-center" style="align-items:center; justify-content:center; display:flex; flex-direction:column; background:#16130F; border:1px solid rgba(255, 95, 21, 0.45); box-shadow:0 30px 90px rgba(0,0,0,0.6), 0 0 60px rgba(255, 95, 21, 0.18), inset 0 0 20px rgba(255, 95, 21, 0.05); border-radius:24px; padding:40px; width:90%; max-width:500px; text-align:center;">
     
     <h2 id="onboarding-title" style="font-family:var(--font-display); font-size:28px; font-weight:700; color:#FFF; margin-bottom:12px;">How do you want to experience this?</h2>
     <p id="onboarding-copy" style="color:var(--ink-dim); font-size:16px; margin-bottom:32px; line-height:1.5;">Pick a way to explore — you can switch anytime from the toggle at the top of the chat.</p>
@@ -2271,6 +2271,12 @@
 
   </div>
 </div>
+<style>
+#onboarding.intro-open{opacity:1 !important;visibility:visible !important;pointer-events:auto !important;transition:none !important;animation:obIntroIn .35s ease both;}
+#onboarding.intro-open .chat-container-center{animation:obCardIn .4s cubic-bezier(.2,.7,.2,1) both;}
+@keyframes obIntroIn{from{opacity:0}to{opacity:1}}
+@keyframes obCardIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+</style>
 
 
 <div class="scroll-progress" id="scrollProgress"></div>
@@ -2311,6 +2317,10 @@
     <a class="sidebar-item" href="#projects" data-view="projects" aria-label="Side Hustle">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
       <span class="sidebar-label">Side Hustle</span>
+    </a>
+    <a class="sidebar-item" href="#chat" data-view="chat" aria-label="Chat with Anchit">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span class="sidebar-label">Chat</span>
     </a>
     <a class="sidebar-item" href="assets/resume.pdf" target="_blank" rel="noopener" aria-label="Open resume PDF">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
@@ -2830,7 +2840,11 @@
             </div>
             <div class="sub">Ask about work, projects, metrics, or the fastest way to connect.</div>
           </div>
-          <button class="chat-minimize-btn" id="chatMinimizeBtn" type="button" aria-label="Minimise chat" title="Minimise chat — keep it docked on this page">
+          <button class="chat-minimize-btn" id="chatMaximizeBtn" type="button" aria-label="Maximise chat" title="Maximise — open the full chat page with all options">
+            <svg class="ic-maximize" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h7M4 4v7M20 20h-7M20 20v-7"/></svg>
+            <svg class="ic-restore" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M9 4H4v5M15 20h5v-5"/></svg>
+          </button>
+          <button class="chat-minimize-btn" id="chatMinimizeBtn" type="button" aria-label="Minimise chat" title="Minimise — collapse to the floating chat button">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
           </button>
         </div>
@@ -2855,12 +2869,41 @@
           <div class="stream-audio-status" id="streamAudioStatus" aria-live="polite"></div>
         </div>
         <div class="chips" id="chipRow"></div>
-        <div class="chat-input">
-          <input type="text" id="chatInput" placeholder="Ask me anything — or tap the mic to talk…" autocomplete="off" />
+        <div class="chat-input" id="chatComposer">
+          <div class="composer-mode" id="composerMode">
+            <button class="composer-mode-btn" id="composerModeBtn" type="button" aria-haspopup="true" aria-expanded="false" title="Switch between Chat and Narrate">
+              <svg class="cm-ic cm-ic-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <svg class="cm-ic cm-ic-narrate" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+              <span class="cm-label">Chat</span>
+              <svg class="cm-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="composer-menu" id="composerMenu" role="menu" hidden>
+              <button class="composer-menu-item" type="button" role="menuitem" data-mode="chat" aria-current="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span><b>Chat</b><em>Type &amp; read answers</em></span>
+              </button>
+              <button class="composer-menu-item" type="button" role="menuitem" data-mode="narrate">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14"/></svg>
+                <span><b>Narrate</b><em>Listen to this page</em></span>
+              </button>
+            </div>
+          </div>
+          <input type="text" id="chatInput" placeholder="Ask me anything…" autocomplete="off" />
+          <div class="composer-reply" role="group" aria-label="How replies come back">
+            <button class="reply-opt on" type="button" data-reply="text" aria-pressed="true" aria-label="Text only" title="Text only — silent answers">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5h16v2M9 19h6M12 5v14"/></svg>
+            </button>
+            <button class="reply-opt" type="button" data-reply="voice" aria-pressed="false" aria-label="Voice reply" title="Voice reply — answers read aloud">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+            </button>
+            <button class="reply-opt" type="button" data-reply="call" aria-pressed="false" aria-label="Call — hands-free" title="Call — hands-free voice conversation">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2 4.1 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1 1 .3 1.9.6 2.8a2 2 0 0 1-.4 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.5 2.8.6A2 2 0 0 1 22 16.9z"/></svg>
+            </button>
+          </div>
           <button class="chat-mic" id="chatMic" aria-label="Dictate message" title="Dictate with live transcript">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
           </button>
-          <button class="chat-mic" id="chatAudioUploadBtn" aria-label="Send audio file" title="Send audio file directly" type="button">
+          <button class="chat-mic chat-mic-secondary" id="chatAudioUploadBtn" aria-label="Send audio file" title="Send audio file directly" type="button">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           </button>
           <input type="file" id="chatAudioFile" accept="audio/*" hidden>
@@ -3335,7 +3378,7 @@
       <div class="section-head reveal">
         <div class="eyebrow">Personal projects · All live · Built end-to-end</div>
         <h1 class="display-lg">Side Hustle</h1>
-        <p class="lede" style="margin-top: 16px;">Nine AI-first experiments, built end-to-end on weekends and evenings out of curiosity and love for technology. <em>Ideas that wouldn't wait for permission.</em></p>
+        <p class="lede" style="margin-top: 16px;">Ten AI-first experiments, built end-to-end on weekends and evenings out of curiosity and love for technology. <em>Ideas that wouldn't wait for permission.</em></p>
       </div>
 
       <div class="builds-grid reveal-stagger">
@@ -3352,6 +3395,21 @@
           <div class="build-actions">
             <a class="btn primary" href="#project-lifecycle" data-view="project-lifecycle">Case Study &rarr;</a>
             <a class="btn" href="https://vahdam-lifecycle-os.vercel.app/" target="_blank" rel="noopener">Live Demo ↗</a>
+          </div>
+        </div>
+
+        <!-- Card — All-in-One LP Agent -->
+        <div class="build-card tilt-card">
+          <div class="build-tag"><span>Conversational Commerce · D2C</span><span class="status">Live</span></div>
+          <h3>All-in-One <em>LP Agent</em></h3>
+          <p>A marketing landing page with one embedded agent doing four jobs — auto-playing audio narration, two-way voice conversation, text chat and a "help me choose" recommendation engine — live on a VAHDAM UK funnel.</p>
+          <ul class="build-details">
+            <li>Built narration, talk, chat and recommendations as a single widget sharing the page's own content as context, with selectable British voices.</li>
+            <li>Implemented narrate-on-load with play/pause/mute, tap-to-talk conversation, ask-anything chat and guided product picks inside the buying flow.</li>
+          </ul>
+          <div class="build-actions">
+            <a class="btn primary" href="#project-agentlp" data-view="project-agentlp">Case Study &rarr;</a>
+            <a class="btn" href="https://try.vahdam.co.uk/lp_all_in_one_agent" target="_blank" rel="noopener">Live Demo ↗</a>
           </div>
         </div>
 
@@ -3945,6 +4003,63 @@
     </div>
   </section>
 
+  <!-- PROJECT: ALL-IN-ONE LP AGENT -->
+  <section class="view" id="view-project-agentlp">
+    <div class="container">
+      <a class="back-link" href="#projects" data-view="projects">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        All side projects
+      </a>
+      <div class="project-hero reveal">
+        <div class="eyebrow">Conversational Commerce · Narration + Voice + Chat + Recommendations · Live Funnel</div>
+        <h1 class="display-lg">All-in-One <em>LP Agent</em></h1>
+        <p class="quote">"A landing page that talks, listens, chats and recommends — one agent doing the work of a salesperson on the page."</p>
+        <div class="project-meta">
+          <div><span class="label">Role</span><span>Architect · Builder</span></div>
+          <div><span class="label">Status</span><span>Live · On a VAHDAM UK funnel</span></div>
+          <div><span class="label">What it does</span><span>Narration · Voice · Chat · Recommendations</span></div>
+        </div>
+        <div class="project-cta">
+          <a href="https://try.vahdam.co.uk/lp_all_in_one_agent" target="_blank" rel="noopener" class="btn primary">Open live page ↗</a>
+        </div>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">The pitch</div>
+        <h2>What it is</h2>
+        <p>A long-form D2C marketing landing page with an all-in-one AI agent embedded right at the top. The agent starts narrating the page aloud the moment you land (selectable British voices, with play/pause and mute), holds a two-way voice conversation when you tap Talk, answers typed questions in chat, and runs a "help me choose" recommendation flow — all four sharing the same page context, so every answer is grounded in what the page is actually selling.</p>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">Origin</div>
+        <h2>Why I built it</h2>
+        <p>D2C landing pages are monologues — thousands of words of persuasion with no way for the visitor to ask the one question actually blocking the purchase. The best-converting sales channel is still a human who explains, listens, answers and recommends. I wanted the page itself to behave like that salesperson, without making the visitor read a word if they'd rather just listen and talk.</p>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">Problem it solves</div>
+        <h2>What's broken without it</h2>
+        <ul>
+          <li><strong>Reading is friction.</strong> Most visitors skim 20% of a long-form LP. Auto-narration delivers the full pitch hands-free, the way a podcast does.</li>
+          <li><strong>Questions go unanswered.</strong> Objections — "will this work for me?", "how is it different?" — normally send visitors to Google and they don't come back. Voice and chat answer them in the moment, on the page.</li>
+          <li><strong>One-size pitch.</strong> "Help me choose" turns a static offer into a guided recommendation tied to what the visitor actually needs.</li>
+          <li><strong>Four vendors, one widget.</strong> A narrator, a voice agent, a chatbot and a recommender are normally four separate tools with four contexts. Here one agent shares state, content and controls.</li>
+        </ul>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">What I'd build next</div>
+        <h2>The roadmap in my head</h2>
+        <p>Conversion attribution per interaction (do narration listeners or talkers buy more?), scroll-aware narration that follows the section you're reading, multilingual voices for other markets, and piping conversation transcripts into the Lifecycle OS dashboard as objection-mining data for the next campaign.</p>
+      </div>
+
+      <div class="iframe-wrap reveal">
+        <div class="iframe-bar"><div class="dots"><span></span><span></span><span></span></div>try.vahdam.co.uk/lp_all_in_one_agent</div>
+        <iframe src="https://try.vahdam.co.uk/lp_all_in_one_agent" loading="lazy" title="All-in-One LP Agent live preview"></iframe>
+      </div>
+    </div>
+  </section>
+
   <!-- RESUME -->
   <section class="view" id="view-resume">
     <div class="container">
@@ -4311,7 +4426,7 @@
     if (viewName === 'schedule') { if (window.openScheduleModal) window.openScheduleModal(); return; }
     // Chat is a floating overlay available on every page — open it maximised
     // instead of navigating to a separate page.
-    if (viewName === 'chat') { if (window.openGuideChat) window.openGuideChat(); return; }
+    if (viewName === 'chat') { if (window.openFullChat) window.openFullChat(); else if (window.openGuideChat) window.openGuideChat(); return; }
     if (!ALL_VIEWS.includes(viewName)) return;
 
     // Animate out old view, animate in new
@@ -4366,6 +4481,7 @@
     // Re-trigger reveals for the new view
     nextFrame(() => observeReveals());
   }
+  window.switchView = switchView;
 
   navLinks.forEach(n => {
     n.addEventListener('click', (e) => {
@@ -4417,7 +4533,7 @@
 	      response: "This portfolio is my hobby product: a living, interactive OS-style profile instead of a static resume page. The home view gives the quick positioning, Work Experience explains the Vahdam and Times Internet story, Side Hustle opens the builds, Resume opens the PDF in a new tab, and Contact gives the fastest ways to reach me. The chat is meant to guide each page, answer specific questions in my voice, and keep narration controls available from the bottom tile.",
 	      nextChips: ["Start the tour","Show me your work","Tell me about Vahdam","How do I reach you?"] },
 	    { keywords: ['side','project','projects','build','builds','weekend','personal','ship','github','vercel'],
-	      response: "My side builds come from curiosity and the inability to stop at surface level. VAHDAM Lifecycle OS is the most important work project right now. My portfolio itself is a hobby build. MusicGenAI is my passion project because music matters to me personally. The broader set includes Hey Yaara, MusicGenAI, The Third Eye, Mailer Architect, AI TeleSuite, TH+ LifeEngine, Task Tracker, and VAHDAM Lifecycle OS. <a data-nav='projects'>See them all →</a>",
+	      response: "My side builds come from curiosity and the inability to stop at surface level. VAHDAM Lifecycle OS is the most important work project right now. My portfolio itself is a hobby build. MusicGenAI is my passion project because music matters to me personally. The broader set includes Hey Yaara, MusicGenAI, The Third Eye, Mailer Architect, AI TeleSuite, TH+ LifeEngine, Task Tracker, the All-in-One LP Agent, and VAHDAM Lifecycle OS. <a data-nav='projects'>See them all →</a>",
 	      nextChips: ["Tell me about Hey Yaara","Tell me about Jarvis","Tell me about MusicGenAI","Why build on weekends?"] },
     { keywords: ['hey yaara','yaara','elderly','companion'],
       response: "Hey Yaara is an AI-powered voice companion designed specifically for elderly users to combat loneliness and assist with daily queries through a simple voice-first interface. I designed and built this PWA from scratch to remove all screen-based friction — users simply tap one button to talk and one to stop. Everything from transcription to speech response is handled entirely by voice. <a data-nav='project-yaara'>Full deep dive →</a>",
@@ -4431,6 +4547,9 @@
     { keywords: ['lifeengine','life engine','th+','th plus'],
       response: "TH+ LifeEngine is a secure, personalized AI wellness platform that transforms generic health advice into structured, actionable daily routines tailored to an individual's specific health goals. I built this login-gated, privacy-first platform to take the subscription-led wellness models I developed at Times Health+ to the next level, offering deep personalization. <a data-nav='project-lifeengine'>Full deep dive →</a>",
       nextChips: ["Open LifeEngine page","Tell me about Times Health+","Tell me about other builds","How do I reach you?"] },
+    { keywords: ['lp agent','agent lp','all-in-one agent','all in one agent','landing page agent','narrator','recommendation engine','conversational commerce'],
+      response: "The All-in-One LP Agent is a live VAHDAM UK marketing landing page with one embedded AI agent doing four jobs: it narrates the page aloud the moment you land, holds a two-way voice conversation when you tap Talk, answers typed questions in chat, and runs a 'help me choose' recommendation flow — all grounded in the page's own content. It's the landing page behaving like a salesperson instead of a monologue. <a data-nav='project-agentlp'>Full deep dive →</a>",
+      nextChips: ["Open LP Agent page","Tell me about Lifecycle OS","Tell me about Hey Yaara","How do I reach you?"] },
     { keywords: ['jarvis','ai os','operating system','vision','dream project','most attached'],
       response: "Jarvis is a proactive, context-aware AI operating system designed to act as an intelligent agent across multiple devices and workflows, rather than a simple conversational chatbot. I initiated this project to build a truly integrated AI workspace that understands context across apps and files. It's a long-term vision that I'm building step-by-step, and it is the side build I'm most passionate about.",
       nextChips: ["Why build on weekends?","Tell me about Hey Yaara","Your AI stack?","Show me your day job"] },
@@ -4572,7 +4691,8 @@
 	    'project-thirdeye': ['The Third Eye', 'Agent-orchestrated AI OS', ['Explores agent workflows and multi-step task orchestration.', 'Built around AI operating-system style interactions.', 'Ask what the long-term AI OS vision is.']],
 	    'project-mailer': ['Mailer Architect', 'Marketing mailer generator', ['Creates multi-LLM HTML email cascades.', 'Focuses on production-ready mailer structure and speed.', 'Ask how lifecycle marketing connects to Vahdam.']],
 	    'project-tasktracker': ['Task Tracker', 'Personal productivity system', ['Converts meetings, emails and voice notes into tasks.', 'Built as a personal AI assistant workflow.', 'Ask how it differs from ordinary to-do tools.']],
-	    'project-lifecycle': ['VAHDAM Lifecycle OS', 'Most important current work project', ['Connects lifecycle planning, segmentation and mailer workflows.', 'Built for retention and D2C growth operating rhythm.', 'Ask why this is the headline Vahdam project.']]
+	    'project-lifecycle': ['VAHDAM Lifecycle OS', 'Most important current work project', ['Connects lifecycle planning, segmentation and mailer workflows.', 'Built for retention and D2C growth operating rhythm.', 'Ask why this is the headline Vahdam project.']],
+	    'project-agentlp': ['All-in-One LP Agent', 'Conversational landing page agent', ['One agent: audio narration, two-way voice, chat and recommendations.', 'Live on a VAHDAM UK funnel, grounded in the page content.', 'Ask how it changes landing page conversion.']]
 	  };
 
 	  const chatBody = document.getElementById('chatBody');
@@ -4698,8 +4818,11 @@
       const tmp = document.createElement('div');
       tmp.innerHTML = html;
       const plain = tmp.textContent.trim();
+      const after = (replyMode === 'call')
+        ? () => { setTimeout(() => { try { document.getElementById('chatMic')?.click(); } catch {} }, 450); }
+        : null;
       // Small delay so the bubble is scrolled into view first
-      setTimeout(() => speakBotResponse(bubble, plain), 200);
+      setTimeout(() => speakBotResponse(bubble, plain, after), 200);
     }
   }
 
@@ -4742,8 +4865,8 @@
     } catch { return false; }
   }
 
-  function speakBotResponse(bubbleEl, plainText) {
-    if (!plainText || !bubbleEl) return;
+  function speakBotResponse(bubbleEl, plainText, onComplete) {
+    if (!plainText || !bubbleEl) { if (typeof onComplete === 'function') { try { onComplete(); } catch {} } return; }
     if (window.speechSynthesis) window.speechSynthesis.cancel();
 
     // Highlight each word inside the reply bubble as it is spoken: wrap the
@@ -4789,6 +4912,7 @@
 	        if (progress >= 1) clearInterval(transcriptTimer);
 	      }, 120);
 	    }
+	    let _spoke = false;
 	    const finishTranscript = () => {
 	      clearInterval(transcriptTimer);
 	      transcriptTimer = null;
@@ -5139,6 +5263,18 @@
 	    renderPageGuide(currentViewName(), { initial: true });
 	  }, 800);
 
+	  // First visit this session opens with a centered introduction popup. The
+	  // chat sits minimised behind it; dismissing the popup reveals the floating
+	  // icon. "Start fresh" continues into the guided chat.
+	  function showAnchitIntro() {
+	    const ob = document.getElementById('onboarding');
+	    if (!ob) return;
+	    ob.classList.add('intro-open');   // .intro-open uses !important so it beats the inline opacity:0
+	  }
+	  window.showAnchitIntro = showAnchitIntro;
+	  // Show the centered introduction on every page load (a refresh re-shows it).
+	  setTimeout(showAnchitIntro, 450);
+
   const obStartBtn = document.getElementById('ob-start-btn');
   const obContinueBtn = document.getElementById('ob-continue-btn');
   const obActions = document.getElementById('onboarding-actions');
@@ -5160,6 +5296,7 @@
     obContinueBtn.addEventListener('click', () => {
       const ob = document.getElementById('onboarding');
       if (ob) {
+        ob.classList.remove('intro-open');
         ob.style.opacity = '0';
         ob.style.pointerEvents = 'none';
         setTimeout(() => ob.style.visibility = 'hidden', 500);
@@ -5171,6 +5308,7 @@
     const chosen = MODE_VALUES.includes(mode) ? mode : window.anchitMode;
     const ob = document.getElementById('onboarding');
     if (ob) {
+      ob.classList.remove('intro-open');
       ob.style.opacity = '0';
       ob.style.pointerEvents = 'none';
       setTimeout(() => ob.style.visibility = 'hidden', 500);
@@ -5528,20 +5666,28 @@
       if (timeEl) timeEl.textContent = '0:00';
     }
 
+    // Build flowing, full-sentence narration from a view's prose. We read only
+    // sentence-bearing copy (headings + paragraphs + list items + quotes) and
+    // deliberately skip UI chrome — eyebrows, stat numbers like "5x", tags,
+    // chip labels — because joining those fragments with ". " is exactly what
+    // made the voice sound broken ("five x. M.R.R. growth. three crore plus.").
+    // Each part is normalised to end on real sentence punctuation, then joined
+    // with a single space so the speech engine reads it as continuous prose.
     function collectNarrationText(viewName) {
       let key = viewName || 'home';
       const view = document.getElementById('view-' + key);
       if (!view || key === 'chat') return NARRATIONS[key] || '';
       const parts = [];
       const seen = new Set();
-      view.querySelectorAll('h1,h2,h3,p,li,.eyebrow,.hero-stat .num,.hero-stat .label,.product-chip-name,.product-chip-co,.product-chip-metric,.build-tag,.label,.value,.quote').forEach(el => {
-        if (el.closest('script,style,iframe,.chat-caption,.dictation-transcript,.chat-input')) return;
-        const text = (el.textContent || '').replace(/\s+/g, ' ').trim();
-        if (!text || text.length < 2 || seen.has(text)) return;
+      view.querySelectorAll('h1,h2,h3,p,li,.lede,.quote').forEach(el => {
+        if (el.closest('script,style,iframe,.chat-caption,.dictation-transcript,.chat-input,.chat-return,.eyebrow,.tags,.work-impact-bar,.work-stats,.hero-stat')) return;
+        let text = (el.textContent || '').replace(/\s+/g, ' ').trim();
+        if (!text || text.length < 12 || seen.has(text)) return;   // 12+ chars ⇒ a sentence, not a label
         seen.add(text);
+        if (!/[.!?:;]$/.test(text)) text += '.';                    // give every clause a full stop
         parts.push(text);
       });
-      const fullText = parts.join('. ').replace(/\s+/g, ' ').trim();
+      const fullText = parts.join(' ').replace(/\s+/g, ' ').trim();
       return fullText || NARRATIONS[key] || NARRATIONS[key?.startsWith('project-') ? 'projects' : key] || '';
     }
 
@@ -5667,7 +5813,10 @@
       stopHighlighting();
       if (window.speechSynthesis) window.speechSynthesis.cancel();
       let key = viewName; if (key?.startsWith('project-')) key = 'projects';
-      const text = collectNarrationText(viewName) || NARRATIONS[key];
+      // Prefer a hand-written full-sentence script for the main views; only the
+      // deep project pages (no dedicated script) fall back to the prose scraper.
+      const scripted = viewName && !viewName.startsWith('project-') ? NARRATIONS[viewName] : null;
+      const text = scripted || collectNarrationText(viewName) || NARRATIONS[key];
       if (!text) { hideIndicator(); setPlayerState(false, viewName); return; }
       currentViewName = viewName;
 
@@ -6601,29 +6750,63 @@
     }
   }
 
-  /* ============ Portfolio vNext: restrained shadcn-style component skin ============ */
-  :root {
-    --bg: #080807;
-    --bg-deep: #0c0c0b;
-    --bg-elev: #11110f;
-    --ink: #f4f1ea;
-    --ink-dim: #b9b1a5;
-    --ink-mute: #7f776d;
-    --rule: rgba(244, 241, 234, .11);
-    --rule-strong: rgba(244, 241, 234, .18);
-    --primary: #e7a643;
-    --primary-deep: #c46f2b;
-    --primary-soft: rgba(231, 166, 67, .10);
-    --accent: #8cc7b5;
-    --accent-soft: rgba(140, 199, 181, .10);
-    --shadow-sm: 0 1px 2px rgba(0,0,0,.24);
-    --shadow-md: 0 10px 28px rgba(0,0,0,.28);
-    --shadow-lg: 0 18px 52px rgba(0,0,0,.34);
+  /* ============ Paperclip skin — dark-first, monochrome, zero glare ============
+     Final cascade layer. Inspired by paperclip.ing (Linear-grade restraint) and
+     gumloop.com (color confined to cards, never on text). One accent: champagne.
+     Everything decorative that emits light — gradients, glows, shimmer, grain,
+     drifting grids — dies here. */
+  :root,
+  :root[data-theme="dark"] {
+    /* Warm black + orange + gold — flat, no glow. */
+    --bg: #070503;
+    --bg-deep: #030201;
+    --bg-elev: #14100A;
+    --ink: #F8F2E4;
+    --ink-dim: #C9BCA4;
+    --ink-mute: #8A7E66;
+    --rule: rgba(255, 176, 64, .14);
+    --rule-strong: rgba(255, 176, 64, .30);
+    --primary: #FF7A1F;
+    --primary-deep: #E55F00;
+    --primary-soft: rgba(255, 122, 31, .10);
+    --accent: #E8B14E;
+    --accent-soft: rgba(232, 177, 78, .12);
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
+    --shadow-md: 0 8px 24px rgba(0,0,0,.32);
+    --shadow-lg: 0 16px 48px rgba(0,0,0,.38);
+  }
+  :root[data-theme="light"] {
+    --bg: #FBF6EC;
+    --bg-deep: #F3EBDC;
+    --bg-elev: #FFFFFF;
+    --ink: #1A140A;
+    --ink-dim: #5F543F;
+    --ink-mute: #9A8D72;
+    --rule: rgba(140, 100, 30, .14);
+    --rule-strong: rgba(140, 100, 30, .28);
+    --primary: #E55F00;
+    --primary-deep: #C24E00;
+    --primary-soft: rgba(229, 95, 0, .08);
+    --accent: #A87B22;
+    --accent-soft: rgba(168, 123, 34, .10);
+    --shadow-sm: 0 1px 2px rgba(26,20,10,.06);
+    --shadow-md: 0 8px 24px rgba(26,20,10,.08);
+    --shadow-lg: 0 16px 48px rgba(26,20,10,.10);
+  }
+  :root[data-theme="light"] body { background: var(--bg) !important; }
+  :root[data-theme="light"] .sidebar,
+  :root[data-theme="light"] .top-bar,
+  :root[data-theme="light"] .chat-return {
+    background: rgba(247, 246, 243, .94) !important;
+  }
+  :root[data-theme="light"] .btn.primary,
+  :root[data-theme="light"] .chat-send,
+  :root[data-theme="light"] .home-cta.primary,
+  :root[data-theme="light"] .hero-current-block .arrow {
+    color: #FFFFFF !important;
   }
   body {
-    background:
-      radial-gradient(circle at 50% -10%, rgba(231,166,67,.08), transparent 34%),
-      var(--bg) !important;
+    background: var(--bg) !important;
     font-size: 16px;
     line-height: 1.72;
   }
@@ -6634,11 +6817,19 @@
   .home-hero::after {
     display: none !important;
   }
+  /* Gold "live" pulse — soft ring, no glow bloom */
+  @keyframes live {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(232, 177, 78, .45); }
+    50% { box-shadow: 0 0 0 8px rgba(232, 177, 78, 0); }
+  }
+  .live-dot, .hero-current-block .dot { background: var(--accent); box-shadow: none; }
   main .container {
     max-width: 1180px;
   }
   .home-hero,
   .work-item,
+  .work-card,
+  .feature-card,
   .project-card,
   .project-hero,
   .project-section,
@@ -6647,14 +6838,32 @@
   .hero-stat,
   .work-stat,
   .product-chip,
-  .chat-block {
-    background: rgba(17, 17, 15, .82) !important;
+  .chat-block,
+  .hero-current-block,
+  .wa-sheet-card {
+    background: var(--bg-elev) !important;
     border: 1px solid var(--rule) !important;
-    border-radius: 14px !important;
-    box-shadow: var(--shadow-sm) !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
+  .hero-current-block { color: var(--ink) !important; }
+  .hero-current-block .text em { color: var(--primary) !important; }
+  .hero-current-block .arrow { background: var(--primary) !important; color: #14110A !important; box-shadow: none !important; }
+  /* Cards never rotate, lift max 2px, no light emission */
+  .hero-stat:hover,
+  .hero-stat:nth-child(2):hover,
+  .hero-stat:nth-child(4):hover {
+    transform: translateY(-2px) !important;
+    box-shadow: none !important;
+    border-color: var(--rule-strong) !important;
+  }
+  .home-hero .profile-pic {
+    animation: none !important;
+    box-shadow: 0 0 0 1px var(--rule-strong) !important;
+  }
+  .home-hero em:hover, .hero-persona em:hover { filter: none !important; }
   .home-hero {
     padding: clamp(42px, 7vw, 84px) clamp(22px, 5vw, 64px) !important;
     min-height: auto !important;
@@ -6717,10 +6926,12 @@
   .contact-card:hover,
   .project-card:hover,
   .product-chip:hover,
-  .work-item:hover {
+  .work-item:hover,
+  .contact-card[data-c]:hover,
+  .home-tl-item:hover {
     transform: translateY(-2px) !important;
-    border-color: rgba(231,166,67,.38) !important;
-    box-shadow: var(--shadow-md) !important;
+    border-color: var(--rule-strong) !important;
+    box-shadow: none !important;
   }
   .btn,
   .chip,
@@ -6728,24 +6939,129 @@
   .chat-send,
   .chat-mic,
   .sidebar-item,
-  .top-bar-link {
+  .top-bar-link,
+  .home-cta,
+  .hero-current-block .arrow {
     border-radius: 10px !important;
   }
   .btn.primary,
-  .chat-send {
-    background: #f2b45b !important;
-    color: #14110c !important;
+  .chat-send,
+  .home-cta.primary {
+    background: var(--primary) !important;
+    color: #14110A !important;
     box-shadow: none !important;
+  }
+  .btn.primary:hover,
+  .home-cta.primary:hover {
+    background: var(--primary-deep) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: none !important;
+  }
+  .home-cta.secondary:hover {
+    border-color: var(--rule-strong) !important;
+    color: var(--ink) !important;
   }
   .sidebar,
   .top-bar,
   .chat-return {
-    background: rgba(10, 10, 9, .94) !important;
+    background: rgba(10, 10, 10, .94) !important;
     box-shadow: none !important;
   }
-  .chat-return {
-    border-color: var(--rule-strong) !important;
+  .sidebar { border-right: 1px solid var(--rule) !important; }
+  .top-bar { border-bottom: 1px solid var(--rule) !important; }
+  .sidebar-logo span { color: var(--ink-dim); }
+  .top-bar-link {
+    background: transparent !important;
+    border-color: var(--rule) !important;
   }
+  .top-bar-link:hover {
+    background: var(--bg-elev) !important;
+    border-color: var(--rule-strong) !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+  .sidebar-item:hover { box-shadow: none !important; transform: none !important; }
+  .chat-return {
+    border: 1px solid var(--rule-strong) !important;
+    background: var(--bg-elev) !important;
+  }
+
+  /* ---- Paperclip numbered timeline (01 / 02 / 03 career steps) ---- */
+  .home-timeline { padding-left: 0 !important; counter-reset: tlstep; }
+  .home-timeline::before { display: none !important; }
+  .home-tl-dot { display: none !important; }
+  .home-tl-item {
+    counter-increment: tlstep;
+    border-top: 1px solid var(--rule);
+    border-radius: 0 !important;
+    padding: 18px 8px !important;
+    gap: 20px;
+  }
+  .home-tl-item:last-child { border-bottom: 1px solid var(--rule); }
+  .home-tl-item::before {
+    content: counter(tlstep, decimal-leading-zero);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-mute);
+    flex: 0 0 32px;
+  }
+  .home-tl-item:hover { background: var(--bg-elev) !important; transform: none !important; }
+  .home-tl-item:hover::before { color: var(--primary); }
+
+  /* ---- Guide-chat overlay + floating chrome: flatten upstream amber glows ---- */
+  body.chat-guide-open #view-chat:not(.chat-view-minimized) {
+    border: 1px solid var(--rule-strong) !important;
+    background: rgba(10, 10, 10, .97) !important;
+    box-shadow: var(--shadow-lg) !important;
+  }
+  body.chat-guide-open #view-chat .chat-block { border-color: var(--rule) !important; }
+  body.view-chat #view-chat .chat-block,
+  #view-chat.active .chat-block {
+    border: 1px solid var(--rule) !important;
+    box-shadow: none !important;
+  }
+  .chat-block::before { display: none !important; }
+  /* ---- Icon visibility: every icon gets a clear, warm, high-contrast state ---- */
+  .nav-card-icon {
+    background: var(--primary-soft) !important;
+    border: 1px solid var(--rule-strong) !important;
+    color: var(--accent) !important;
+  }
+  .nav-card:hover .nav-card-icon { color: var(--primary) !important; }
+  .sidebar svg, .nav-item svg, .sidebar-item svg {
+    color: var(--ink-dim);
+    opacity: 1 !important;
+  }
+  .nav-item.active svg, .sidebar-item.active svg,
+  .nav-item:hover svg, .sidebar-item:hover svg {
+    color: var(--primary) !important;
+  }
+  .chat-mic, .chat-mic svg { color: var(--ink-dim) !important; }
+  .chat-mic:hover, .chat-mic:hover svg { color: var(--primary) !important; }
+  .top-bar-link .tb-icon { opacity: 1 !important; }
+  .contact-icon { border: 1px solid var(--rule) !important; }
+  .home-tl-arrow, .nav-card-arrow { color: var(--ink-dim) !important; }
+  .build-actions .btn:not(.primary) {
+    border: 1px solid var(--rule-strong) !important;
+    color: var(--ink) !important;
+  }
+  .build-actions .btn:not(.primary):hover { border-color: var(--primary) !important; color: var(--primary) !important; }
+
+  /* ---- Guided journey: guide cards + chips readable and inviting ---- */
+  .guide-card {
+    background: var(--bg-deep) !important;
+    border: 1px solid var(--rule-strong) !important;
+    border-radius: 12px !important;
+  }
+  .guide-title { color: var(--ink) !important; }
+  .guide-copy, .coach-text { color: var(--ink-dim) !important; }
+  .guide-action {
+    background: var(--primary) !important;
+    color: #1A0E02 !important;
+    border: none !important;
+  }
+  :root[data-theme="light"] .guide-action { color: #FFFFFF !important; }
+  .guide-action:hover { background: var(--primary-deep) !important; }
   .packet-player,
   .stream-audio-status {
     margin-top: 10px;
@@ -6772,6 +7088,117 @@
   @keyframes packetPulse {
     50% { opacity: .42; transform: scale(.82); }
   }
+
+  /* ---- Sticky CTAs: flat, square-ish, no spring/glow ---- */
+  .sticky-cta {
+    border-radius: 10px !important;
+    box-shadow: var(--shadow-md) !important;
+    transition: background .2s ease, border-color .2s ease, transform .2s ease !important;
+  }
+  .sticky-cta.talk { background: var(--primary) !important; color: #14110A !important; }
+  .sticky-cta.talk:hover {
+    background: var(--primary-deep) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: var(--shadow-md) !important;
+  }
+  :root[data-theme="light"] .sticky-cta.talk { color: #FFFFFF !important; }
+
+  /* ---- Chat: terminal-window framing (Paperclip npm/claude block) ---- */
+  .chat-head {
+    background: var(--bg-deep) !important;
+    border-bottom: 1px solid var(--rule) !important;
+    position: relative;
+  }
+  .chat-head::before {
+    content: '';
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent);
+    flex: 0 0 10px;
+    margin-right: 2px;
+    box-shadow: 16px 0 0 var(--rule-strong), 32px 0 0 var(--rule-strong);
+  }
+  .chat-head-avatar { display: none !important; }
+  .chat-head-info .title,
+  .chat-head-info .title span {
+    font-family: var(--font-mono) !important;
+    font-size: 12px !important;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-dim) !important;
+  }
+  .chat-head-info .sub { color: var(--ink-mute) !important; font-size: 12px !important; }
+  .chat-input { border-top: 1px solid var(--rule) !important; background: var(--bg-deep) !important; }
+  .chat-input input {
+    font-family: var(--font-mono) !important;
+    font-size: 13.5px !important;
+  }
+  .chat-input input::placeholder { color: var(--ink-mute) !important; }
+  .msg-bubble {
+    border-radius: 10px !important;
+    box-shadow: none !important;
+  }
+  .msg.bot .msg-bubble {
+    background: var(--bg-deep) !important;
+    border: 1px solid var(--rule) !important;
+    color: var(--ink) !important;
+  }
+  .msg.user .msg-bubble {
+    background: var(--primary-soft) !important;
+    border: 1px solid rgba(255, 122, 31, .30) !important;
+    color: var(--ink) !important;
+  }
+  .chips .chip {
+    background: transparent !important;
+    border: 1px solid var(--rule) !important;
+    color: var(--ink-dim) !important;
+    box-shadow: none !important;
+  }
+  .chips .chip:hover {
+    border-color: var(--primary) !important;
+    color: var(--primary) !important;
+    background: var(--primary-soft) !important;
+  }
+
+  /* ---- Builds: Paperclip bento grid ---- */
+  .build-card {
+    background: var(--bg-elev) !important;
+    border: 1px solid var(--rule) !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+  .build-card:hover {
+    transform: translateY(-2px) !important;
+    border-color: var(--rule-strong) !important;
+    box-shadow: none !important;
+  }
+  .tilt-card, .tilt-card:hover { transform: none !important; transition: transform .2s ease, border-color .2s ease !important; }
+  .tilt-card:hover { transform: translateY(-2px) !important; }
+  .build-tag {
+    font-family: var(--font-mono) !important;
+    font-size: 10px !important;
+    letter-spacing: .08em !important;
+    text-transform: uppercase !important;
+    color: var(--ink-mute) !important;
+  }
+  .build-tag .status {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--accent) !important;
+    background: var(--accent-soft) !important;
+    border: 1px solid transparent !important;
+    border-radius: 999px !important;
+    padding: 2px 10px !important;
+    box-shadow: none !important;
+  }
+  .build-tag .status::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); animation: live 2s ease-in-out infinite;
+  }
+  @media (min-width: 1100px) {
+    .builds-grid { grid-template-columns: repeat(3, 1fr) !important; }
+    .builds-grid .build-card:first-child { grid-column: span 2; }
+  }
+
   @media (max-width: 820px) {
     .home-hero {
       padding: 30px 18px !important;
@@ -6783,6 +7210,109 @@
     .display-xl {
       font-size: clamp(42px, 16vw, 68px) !important;
     }
+  }
+</style>
+<style id="chat-composer-redesign">
+  /* ===== Composer-integrated control (Option B) ===== */
+  #view-chat .chat-input { flex-wrap: wrap; row-gap: 8px; padding: 7px 8px 7px 8px; }
+  .composer-mode { position: relative; flex: 0 0 auto; }
+  .composer-mode-btn {
+    display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: .04em;
+    color: var(--primary); background: var(--primary-soft);
+    border: 1px solid rgba(255,105,64,.32); border-radius: 99px; padding: 8px 11px;
+    transition: border-color .18s ease, background .18s ease;
+  }
+  .composer-mode-btn:hover { border-color: var(--primary-deep); }
+  .composer-mode-btn .cm-ic { width: 14px; height: 14px; flex: none; }
+  .composer-mode-btn .cm-caret { width: 12px; height: 12px; opacity: .7; }
+  .composer-menu {
+    position: absolute; bottom: calc(100% + 8px); left: 0; z-index: 40;
+    width: 220px; padding: 6px; display: grid; gap: 2px;
+    background: var(--bg-elev); border: 1px solid var(--rule-strong); border-radius: 14px;
+    box-shadow: 0 16px 40px rgba(0,0,0,.5);
+  }
+  .composer-menu[hidden] { display: none; }
+  .composer-menu-item {
+    display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; cursor: pointer;
+    background: transparent; border: 0; border-radius: 10px; padding: 9px 10px; color: var(--ink-dim);
+  }
+  .composer-menu-item:hover { background: var(--bg-deep); }
+  .composer-menu-item[aria-current="true"] { color: var(--primary); }
+  .composer-menu-item svg { width: 15px; height: 15px; flex: none; }
+  .composer-menu-item span { display: grid; line-height: 1.25; }
+  .composer-menu-item b { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .composer-menu-item[aria-current="true"] b { color: var(--primary); }
+  .composer-menu-item em { font-style: normal; font-size: 11.5px; color: var(--ink-mute); }
+
+  .composer-reply {
+    display: inline-flex; align-items: center; gap: 2px; flex: 0 0 auto;
+    background: var(--bg-elev); border: 1px solid var(--rule); border-radius: 99px; padding: 3px;
+  }
+  .reply-opt {
+    width: 32px; height: 28px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+    background: transparent; border: 0; border-radius: 99px; color: var(--ink-mute);
+    transition: background .16s ease, color .16s ease;
+  }
+  .reply-opt svg { width: 15px; height: 15px; }
+  .reply-opt:hover { color: var(--ink-dim); }
+  .reply-opt.on { background: var(--primary-soft); color: var(--primary); }
+  .reply-opt.on[data-reply="call"] { background: rgba(37,211,102,.14); color: #25D366; }
+
+  .chat-mic-secondary { opacity: .62; }
+  .chat-mic-secondary:hover { opacity: 1; }
+
+  /* maximize / restore toggle in the chat header */
+  body.view-chat #chatMaximizeBtn .ic-maximize { display: none; }
+  body.view-chat #chatMaximizeBtn .ic-restore { display: block; }
+
+  @media (max-width: 560px) {
+    .composer-menu { width: min(240px, calc(100vw - 48px)); }
+    #view-chat .chat-input input { min-width: 120px; }
+  }
+
+  /* ===== Minimised chat = floating icon that expands (the new intro) ===== */
+  .chat-return {
+    width: 60px; height: 60px; min-height: 60px; padding: 0; gap: 0; overflow: hidden;
+    border-radius: 999px;
+    transition: width .26s cubic-bezier(.4,0,.2,1), border-radius .26s ease, padding .26s ease;
+  }
+  .chat-return::after {
+    content: ''; position: absolute; top: 12px; right: 12px; width: 11px; height: 11px;
+    border-radius: 50%; background: #25D366; border: 2px solid #1a0f08; z-index: 3;
+    transition: opacity .2s ease;
+  }
+  .chat-return .chat-return-main { flex: 0 0 auto; width: 60px; height: 60px; justify-content: center; gap: 0; padding: 0; }
+  .chat-return .chat-return-main svg { width: 25px; height: 25px; flex: none; }
+  .chat-return .chat-return-copy { display: none; }
+  .chat-return .chat-return-icon { display: none; }
+  .chat-return::before {
+    content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    box-shadow: 0 0 0 0 rgba(255,105,64,.45); animation: chatFabPulse 2.6s ease-out infinite;
+  }
+  @keyframes chatFabPulse {
+    0% { box-shadow: 0 0 0 0 rgba(255,105,64,.40); }
+    70% { box-shadow: 0 0 0 16px rgba(255,105,64,0); }
+    100% { box-shadow: 0 0 0 0 rgba(255,105,64,0); }
+  }
+  .chat-return:hover, .chat-return:focus-within {
+    width: min(360px, calc(100vw - 32px)); border-radius: 18px; padding: 10px;
+  }
+  .chat-return:hover::before, .chat-return:focus-within::before { animation: none; }
+  .chat-return:hover::after, .chat-return:focus-within::after { opacity: 0; }
+  .chat-return:hover .chat-return-main, .chat-return:focus-within .chat-return-main {
+    flex: 1; width: auto; justify-content: flex-start; gap: 10px; padding: 4px 6px;
+  }
+  .chat-return:hover .chat-return-copy, .chat-return:focus-within .chat-return-copy { display: grid; }
+  .chat-return:hover .chat-return-icon, .chat-return:focus-within .chat-return-icon { display: inline-flex; }
+  @media (hover: none) {
+    /* touch: no hover, so show the expanded pill so controls are reachable */
+    .chat-return { width: min(360px, calc(100vw - 32px)); border-radius: 18px; padding: 10px; }
+    .chat-return .chat-return-main { flex: 1; width: auto; justify-content: flex-start; gap: 10px; padding: 4px 6px; }
+    .chat-return .chat-return-copy { display: grid; }
+    .chat-return .chat-return-icon { display: inline-flex; }
+    .chat-return::before { animation: none; }
+    .chat-return::after { display: none; }
   }
 </style>
 <div class="chat-return" id="chatReturnBtn" role="group" aria-label="Chat with Anchit">
@@ -6850,12 +7380,17 @@
   }
   function openFullChat() {
     sessionStorage.removeItem('anchit-chat-minimized');
-	    chatBlock?.classList.remove('minimized');
-	    viewChatEl?.classList.remove('chat-view-minimized');
-	    returnBtn?.classList.remove('visible');
-	    document.body.classList.remove('chat-guide-open');
-	    if (typeof switchView === 'function') switchView('chat');
-	    document.body.classList.add('view-chat');
+    chatBlock?.classList.remove('minimized');
+    viewChatEl?.classList.remove('chat-view-minimized');
+    returnBtn?.classList.remove('visible');
+    document.body.classList.remove('chat-guide-open');
+    // Activate the dedicated chat view as a genuine full page. switchView('chat')
+    // routes here, so toggle .active directly instead of calling back into it.
+    document.querySelectorAll('.view').forEach((v) => v.classList.toggle('active', v.id === 'view-chat'));
+    document.querySelectorAll('.sidebar-item[data-view]').forEach((n) => n.classList.toggle('active', n.getAttribute('data-view') === 'chat'));
+    document.body.classList.add('view-chat');
+    try { history.replaceState(null, '', '#chat'); } catch {}
+    try { window.scrollTo({ top: 0, behavior: 'instant' }); } catch {}
     setTimeout(() => chatInputEl?.focus(), 160);
   }
   function minimizeChat() {
@@ -7064,6 +7599,92 @@
         .replace(new RegExp('Interactive\\s+Portfolio', 'gi'), 'Anchit Tandon')
         .replace(new RegExp('portfolio\\s+is\\s+interactive', 'gi'), 'experience is guided');
     }
+  });
+})();
+</script>
+<script id="chat-controls-wiring">
+(function(){
+  function activeView(){ const a = document.querySelector('.view.active'); return a ? a.id.replace('view-','') : 'home'; }
+
+  /* ----- Reply mode: text | voice | call ----- */
+  const replyOpts = Array.from(document.querySelectorAll('.composer-reply .reply-opt'));
+  function setReplyMode(mode){
+    window.chatReplyMode = mode;
+    replyOpts.forEach(b => {
+      const on = b.dataset.reply === mode;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    if (mode !== 'text' && window.anchitAudioControls?.unmute) {
+      try { window.anchitAudioControls.unmute(); } catch {}
+    }
+  }
+  window.setChatReplyMode = setReplyMode;
+  replyOpts.forEach(b => b.addEventListener('click', () => {
+    setReplyMode(b.dataset.reply);
+    if (b.dataset.reply === 'call') {
+      setTimeout(() => { try { document.getElementById('chatMic')?.click(); } catch {} }, 140);
+    }
+  }));
+  setReplyMode('text');
+
+  /* ----- Mode chip: Chat <-> Narrate (Narrate is a one-shot action) ----- */
+  const modeBtn = document.getElementById('composerModeBtn');
+  const menu = document.getElementById('composerMenu');
+  const cmLabel = modeBtn && modeBtn.querySelector('.cm-label');
+  const icChat = modeBtn && modeBtn.querySelector('.cm-ic-chat');
+  const icNarrate = modeBtn && modeBtn.querySelector('.cm-ic-narrate');
+  function openMenu(open){ if (!menu || !modeBtn) return; menu.hidden = !open; modeBtn.setAttribute('aria-expanded', open ? 'true':'false'); }
+  function setChip(narrate){
+    if (cmLabel) cmLabel.textContent = narrate ? 'Narrate' : 'Chat';
+    if (icChat) icChat.style.display = narrate ? 'none' : '';
+    if (icNarrate) icNarrate.style.display = narrate ? '' : 'none';
+  }
+  modeBtn?.addEventListener('click', (e) => { e.stopPropagation(); openMenu(menu && menu.hidden); });
+  document.addEventListener('click', (e) => { if (menu && !menu.hidden && !e.target.closest('#composerMode')) openMenu(false); });
+  menu?.querySelectorAll('.composer-menu-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const mode = item.dataset.mode;
+      menu.querySelectorAll('.composer-menu-item').forEach(i => i.setAttribute('aria-current', i === item ? 'true':'false'));
+      openMenu(false);
+      if (mode === 'narrate') {
+        setChip(true);
+        // Narrate = take the visitor home, collapse the chat to the floating
+        // icon, then read the homepage aloud in full sentences.
+        if (typeof window.switchView === 'function') window.switchView('home');
+        else { const homeNav = document.querySelector('.sidebar-item[data-view="home"], [data-view="home"]'); if (homeNav) homeNav.click(); }
+        if (typeof window.minimizeChat === 'function') window.minimizeChat();
+        setTimeout(() => { if (typeof window.anchitNarrate === 'function') window.anchitNarrate('home'); }, 400);
+        setTimeout(() => {
+          setChip(false);
+          menu.querySelectorAll('.composer-menu-item').forEach(i => i.setAttribute('aria-current', i.dataset.mode === 'chat' ? 'true':'false'));
+        }, 1200);
+      } else {
+        setChip(false);
+        document.getElementById('chatInput')?.focus();
+      }
+    });
+  });
+
+  /* ----- Maximize / restore between docked panel and full chat page ----- */
+  function forceFullChat(){
+    // switchView('chat') deliberately redirects to the docked overlay, so we
+    // activate the dedicated chat page directly to get a true full-screen view
+    // with every option and toggle.
+    document.body.classList.remove('chat-guide-open');
+    document.body.classList.add('view-chat');
+    document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-chat'));
+    const vc = document.getElementById('view-chat');
+    vc?.classList.remove('chat-view-minimized');
+    vc?.querySelector('.chat-block')?.classList.remove('minimized');
+    document.getElementById('chatReturnBtn')?.classList.remove('visible');
+    try { sessionStorage.removeItem('anchit-chat-minimized'); } catch {}
+    setTimeout(() => { try { document.getElementById('chatInput')?.focus(); } catch {} }, 120);
+  }
+  document.getElementById('chatMaximizeBtn')?.addEventListener('click', () => {
+    const isFull = document.body.classList.contains('view-chat');
+    if (isFull) { if (typeof window.openGuideChat === 'function') window.openGuideChat(); }
+    else { forceFullChat(); }
   });
 })();
 </script>
