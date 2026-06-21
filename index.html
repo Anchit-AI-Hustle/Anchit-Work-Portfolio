@@ -4506,7 +4506,10 @@
     { keywords: ['et markets','markets','revamp','finance','stocks'],
       response: "ET Markets is the stock market and financial tracking arm of The Economic Times (India's leading business daily), serving as one of the country's highest-traffic financial platforms with real-time market data. I led the end-to-end product revamp of ET Markets across Web, mobile Web, Android, and iOS. By restructuring the information architecture and testing relentlessly, we achieved a +27% boost in user engagement, +25% in DAUs, and added ₹3Cr+ in incremental ARR. <a data-nav='experience'>Full work view →</a>",
       nextChips: ["Tell me about Assisted Sales","What about Times Health+?","Your engineering background?","Show me a side build"] },
-    { keywords: ['et prime','prime','assisted sales','sales','subscription','conversion','roi','growth','biggest','win','proudest','proud'],
+    { keywords: ['biggest','win','wins','proudest','proud','greatest','career win','biggest career win','most proud','achievement','top achievement'],
+      response: "Two wins stand out equally, both from Times Internet. First, I scaled ET Prime's Assisted Sales 5× from ₹15L to ₹80L MRR in about six months, building an AI telesuite — live call transcription, pitch scoring and conversion assists — that delivered 400%+ ROI and won the Times Internet Team Award. Second, I launched the Times Internet Delhi Half Marathon 2026 from 0→1: a brand-new consumer IP at Dhyan Chand National Stadium, 15,000+ participants and a new revenue stream. One is a growth win, the other a 0→1 product launch. <a data-nav='experience'>Full work view →</a>",
+      nextChips: ["Tell me about the marathon","What's the AI telesuite?","What are you building now?","How do I reach you?"] },
+    { keywords: ['et prime','prime','assisted sales','sales','subscription','conversion','roi','growth'],
       response: "ET Prime is the premium, member-only business subscription service of The Economic Times, offering high-quality, ad-free investigative journalism and business analysis. I led growth for ET Prime's Assisted Sales channel, scaling it 5× from ₹15L to ₹80L MRR in six months. To achieve this, I built an AI-powered telesuite featuring real-time call transcription, pitch scoring, and conversion assists, which boosted our team's sales conversion and delivered over 400% ROI. This work won me the Times Internet Team Award.",
       nextChips: ["What's the AI telesuite?","Your product philosophy?","What are you building now?","How do I reach you?"] },
     { keywords: ['marathon','event','running','half','0 to 1','zero to one','zero-to-one'],
@@ -4995,15 +4998,10 @@
     contactOrder: 'WhatsApp, call, a focused 30-minute Google Meet, WhatsApp, SMS, email, then resume'
   };
   function frameAnswer(question, match) {
-    const q = question.trim();
     if (!match) return null;
-    const ql = q.toLowerCase();
-    let lead = "Here is the direct answer:";
-    if (/\b(contact|reach|call|whatsapp|sms|meet|schedule|book)\b/.test(ql)) lead = "Best route:";
-    else if (/\b(why|how)\b/.test(ql)) lead = "The honest answer:";
-    else if (/\b(who|about|background|bio|describe)\b/.test(ql)) lead = "Short version:";
-    else if (/\b(metric|number|win|impact|growth|result)\b/.test(ql)) lead = "Impact view:";
-    return `<strong>${lead}</strong><br><span class="answer-context">You asked: “${escapeHtml(q)}”</span><br>${match.response}`;
+    // Answer naturally — just speak, no rigid "Short version: / You asked:"
+    // template wrapper (that made offline replies feel canned and robotic).
+    return match.response;
   }
   function contextualFallback(question) {
     const q = question.toLowerCase();
