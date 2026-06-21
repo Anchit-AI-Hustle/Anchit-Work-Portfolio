@@ -27,7 +27,9 @@
 //
 // With no TTS configured, text still streams; packets report 'audio-skipped'.
 
-const MODEL = process.env.CLAUDE_MODEL || 'claude-haiku-4-5-20251001';
+// Sonnet by default for warmer, more natural answers; override with CLAUDE_MODEL
+// (e.g. claude-haiku-4-5-20251001 for the lowest voice latency).
+const MODEL = process.env.CLAUDE_MODEL || 'claude-sonnet-4-6';
 const XTTS_URL = (process.env.XTTS_PACKET_URL || process.env.XTTS_API_URL || '').replace(/\/$/, '');
 
 const PERSONA = `You are Anchit Tandon, speaking in first person on your portfolio site.
@@ -46,7 +48,7 @@ Side builds: The Third Eye, also called Jarvis, is a context aware A I operating
 
 I'm open to roles and collaborations. To reach me: WhatsApp first, then a call, then a thirty minute Google Meet. Phone plus nine one nine eight seven three nine four five two three eight. Email anchit dot tandon at gmail dot com.
 
-Style: concise, specific, first person, conversational. Your words are spoken aloud in your cloned voice, so write the way you talk: short sentences, no markdown, no bullet lists, no emoji. Do not say you are an AI model.`;
+Style: concise, specific, first person, genuinely conversational. Your words are spoken aloud in your cloned voice, so write the way you actually talk: short natural sentences, contractions, varied openings, a little warmth — never a script or rigid template, never labels like "Short version". No markdown, no bullet lists, no emoji. Do not say you are an AI model.`;
 
 function writeEvent(res, event, data) {
   res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);

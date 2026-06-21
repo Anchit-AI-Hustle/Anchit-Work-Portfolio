@@ -4998,15 +4998,10 @@
     contactOrder: 'WhatsApp, call, a focused 30-minute Google Meet, WhatsApp, SMS, email, then resume'
   };
   function frameAnswer(question, match) {
-    const q = question.trim();
     if (!match) return null;
-    const ql = q.toLowerCase();
-    let lead = "Here is the direct answer:";
-    if (/\b(contact|reach|call|whatsapp|sms|meet|schedule|book)\b/.test(ql)) lead = "Best route:";
-    else if (/\b(why|how)\b/.test(ql)) lead = "The honest answer:";
-    else if (/\b(who|about|background|bio|describe)\b/.test(ql)) lead = "Short version:";
-    else if (/\b(metric|number|win|impact|growth|result)\b/.test(ql)) lead = "Impact view:";
-    return `<strong>${lead}</strong><br><span class="answer-context">You asked: “${escapeHtml(q)}”</span><br>${match.response}`;
+    // Answer naturally — just speak, no rigid "Short version: / You asked:"
+    // template wrapper (that made offline replies feel canned and robotic).
+    return match.response;
   }
   function contextualFallback(question) {
     const q = question.toLowerCase();
