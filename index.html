@@ -4657,12 +4657,8 @@
 	    ob.classList.add('intro-open');   // .intro-open uses !important so it beats the inline opacity:0
 	  }
 	  window.showAnchitIntro = showAnchitIntro;
-	  try {
-	    if (!sessionStorage.getItem('anchit-intro-seen')) {
-	      sessionStorage.setItem('anchit-intro-seen', '1');
-	      setTimeout(showAnchitIntro, 450);
-	    }
-	  } catch (e) { setTimeout(showAnchitIntro, 450); }
+	  // Show the centered introduction on every page load (a refresh re-shows it).
+	  setTimeout(showAnchitIntro, 450);
 
   const obStartBtn = document.getElementById('ob-start-btn');
   const obContinueBtn = document.getElementById('ob-continue-btn');
