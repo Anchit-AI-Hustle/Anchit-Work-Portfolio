@@ -85,7 +85,28 @@ async function ttsElevenLabs(text) {
   return { mime: 'audio/mpeg', buf: Buffer.from(await r.arrayBuffer()) };
 }
 
-async function synthesize(text) {
+// Pronounce acronyms as letters (US -> "U S", not "us") before synthesis.
+function forSpeech(t) {
+  let s = String(t || '');
+  const rules = [
+    [/\bU\.?S\.?A\.?\b/g, 'U S A'], [/\bU\.?S\.?D\b/g, 'U S D'],
+    [/\bU\.?S\.?\b/g, 'U S'], [/\bU\.?K\.?\b/g, 'U K'],
+    [/\bD2C\b/g, 'D to C'], [/\bB2B\b/g, 'B to B'], [/\bB2C\b/g, 'B to C'],
+    [/\bDAUs?\b/g, 'daily active users'],
+    [/\bAGM\b/g, 'A G M'], [/\bMRR\b/g, 'M R R'], [/\bARR\b/g, 'A R R'],
+    [/\bROI\b/g, 'R O I'], [/\bAPI\b/g, 'A P I'], [/\bPWA\b/g, 'P W A'],
+    [/\bLLM\b/g, 'L L M'], [/\bCRM\b/g, 'C R M'], [/\bCSE\b/g, 'C S E'],
+    [/\bTOI\b/g, 'T O I'], [/\bIST\b/g, 'I S T'], [/\bINR\b/g, 'I N R'],
+    [/\bSMS\b/g, 'S M S'], [/\bPDF\b/g, 'P D F'], [/\bUX\b/g, 'U X'], [/\bUI\b/g, 'U I'],
+    [/\bIP\b/g, 'I P'], [/\bAI\b/g, 'A I'], [/\bOS\b/g, 'O S'], [/\bET\b/g, 'E T'],
+    [/\bKSM-?66\b/gi, 'K S M sixty-six'],
+  ];
+  for (const [re, rep] of rules) s = s.replace(re, rep);
+  return s;
+}
+
+async function synthesize(rawText) {
+  const text = forSpeech(rawText);
   for (const provider of [ttsXtts, ttsElevenLabs]) {
     try {
       const out = await provider(text);
