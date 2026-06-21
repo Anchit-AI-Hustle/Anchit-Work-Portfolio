@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anchit Tandon — Portfolio Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,400..600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0F0D0A; --bg-elev:#1A1814; --bg-deep:#060503;
+    --ink:#FBF5EC; --ink-dim:#A39E94; --ink-mute:#5A554E;
+    --rule:#2A261F; --rule-strong:#3D3830;
+    --primary:#FF6940; --primary-deep:#FF4D1F; --accent:#2EE5AC;
+    --font-display:'Fraunces','Times New Roman',serif;
+    --font-body:'Inter',-apple-system,sans-serif;
+    --font-mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#070605;font-family:var(--font-body);color:var(--ink);
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:18px;padding:40px 16px}
+  .hint{font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ink-mute);text-align:center}
+  .hint a{color:var(--primary);text-decoration:none}
+
+  /* ---- The export artboard: 1080 x 1350 scaled to fit ---- */
+  .card{
+    width:540px;height:675px;border-radius:34px;overflow:hidden;position:relative;
+    background:
+      radial-gradient(120% 80% at 50% -10%, rgba(255,105,64,.22), transparent 60%),
+      radial-gradient(90% 60% at 50% 115%, rgba(46,229,172,.10), transparent 55%),
+      linear-gradient(180deg,#15120E 0%, var(--bg) 42%, var(--bg-deep) 100%);
+    border:1px solid var(--rule-strong);
+    box-shadow:0 40px 90px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.02);
+    display:flex;flex-direction:column;
+  }
+  /* fine grain + ring glow */
+  .card::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background-image:radial-gradient(rgba(255,255,255,.025) 1px,transparent 1px);
+    background-size:3px 3px;mix-blend-mode:overlay;opacity:.5}
+  .ring{position:absolute;width:340px;height:340px;border-radius:50%;
+    top:-120px;left:50%;transform:translateX(-50%);
+    border:1px solid rgba(255,105,64,.28);box-shadow:0 0 60px rgba(255,77,31,.25)}
+
+  .top{flex:1;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;text-align:center;padding:48px 44px 30px;position:relative;z-index:2}
+  .logo{width:104px;height:104px;border-radius:26px;object-fit:cover;
+    border:1px solid rgba(255,105,64,.5);
+    box-shadow:0 0 0 6px rgba(255,77,31,.10), 0 18px 40px rgba(0,0,0,.5)}
+  .name{font-family:var(--font-display);font-weight:600;font-size:46px;
+    line-height:1.02;letter-spacing:-.02em;margin-top:26px}
+  .name b{color:var(--primary);font-weight:600}
+  .role{font-family:var(--font-mono);font-size:12px;letter-spacing:.34em;
+    text-transform:uppercase;color:var(--accent);margin-top:14px}
+  .tagline{font-size:15px;line-height:1.5;color:var(--ink-dim);
+    max-width:330px;margin-top:16px}
+  .tagline em{color:var(--ink);font-style:normal;font-weight:600}
+
+  .creds{display:flex;gap:8px;margin-top:26px}
+  .chip{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--ink-dim);
+    border:1px solid var(--rule-strong);border-radius:999px;
+    padding:7px 11px;background:rgba(255,255,255,.02)}
+  .chip.on{color:var(--primary);border-color:rgba(255,105,64,.4)}
+
+  /* ---- QR footer band ---- */
+  .qrband{display:flex;align-items:center;justify-content:center;gap:18px;
+    padding:24px 30px;background:rgba(6,5,3,.55);
+    border-top:1px solid var(--rule);backdrop-filter:blur(4px);
+    position:relative;z-index:2}
+  .qrbox{width:108px;height:108px;border-radius:16px;background:#fff;
+    padding:8px;flex:none;box-shadow:0 10px 26px rgba(0,0,0,.45)}
+  .qrbox img{width:100%;height:100%;display:block;border-radius:8px}
+  .qrtext{text-align:center}
+  .qrtext .h{font-family:var(--font-display);font-size:21px;font-weight:600}
+  .qrtext .s{font-size:12.5px;color:var(--ink-dim);margin-top:3px}
+  .qrtext .u{display:inline-block;margin-top:11px;font-family:var(--font-mono);
+    font-size:11px;letter-spacing:.04em;color:var(--primary);
+    border:1px solid rgba(255,105,64,.35);border-radius:8px;padding:5px 10px}
+</style>
+</head>
+<body>
+  <div class="card" id="card">
+    <div class="ring"></div>
+    <div class="top">
+      <img class="logo" src="AnchitTandon-AppLogo.png" alt="AT">
+      <h1 class="name">Anchit <b>Tandon</b></h1>
+      <div class="role">Product · Growth · Revenue</div>
+      <p class="tagline">An engineer who <em>learned to love the funnel.</em></p>
+      <div class="creds">
+        <span class="chip on">Visionary</span>
+        <span class="chip">Builder</span>
+        <span class="chip">Operator</span>
+        <span class="chip on">Achiever</span>
+      </div>
+    </div>
+    <div class="qrband">
+      <div class="qrtext">
+        <div class="h">See my portfolio</div>
+        <div class="s">Projects, case studies &amp; contact.</div>
+        <span class="u">anchittandon.vercel.app</span>
+      </div>
+    </div>
+  </div>
+  <p class="hint">Screenshot the card above · edit the URL in source if your domain differs · <a href="brand-futuristic.html">see the animated variant →</a></p>
+</body>
+</html>

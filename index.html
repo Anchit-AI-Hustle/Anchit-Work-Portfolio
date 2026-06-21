@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Anchit Tandon — Product leader & AI builder turning funnels into growth</title>
+<title>Anchit Tandon — An engineer who learned to love the funnel</title>
 <meta name="description" content="Anchit Tandon — AGM, Product Management, D2C Growth at Vahdam India. US, UK and global growth, AI workflows, and side builds." />
 
 <!-- PWA -->
@@ -18,7 +18,7 @@
 <link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
 
 <!-- Open Graph -->
-<meta property="og:title" content="Anchit Tandon — Product leader & AI builder turning funnels into growth" />
+<meta property="og:title" content="Anchit Tandon — An engineer who learned to love the funnel" />
 <meta property="og:description" content="Funnels, subscriptions, 0→1 consumer products, AI side builds." />
 <meta property="og:type" content="website" />
 
@@ -2001,6 +2001,30 @@
   .view.v-enter { animation: viewFadeUp 0.42s cubic-bezier(0.16, 1, 0.3, 1) both; }
   .view.v-leave { animation: viewFadeOut 0.22s ease forwards; pointer-events: none; }
 
+  /* ============ NARRATE PAGE-TURN — one book-style flip per section ============ */
+  /* In Narrate mode, changing section turns a "page": a dark on-brand leaf
+     hinged at the left spine sweeps across and flips away, revealing the new
+     view beneath. Fires exactly once per navigation. */
+  #pageTurnFx { position: fixed; inset: 0; z-index: 60; pointer-events: none;
+    perspective: 2600px; display: none; }
+  #pageTurnFx.go { display: block; }
+  #pageTurnFx .leaf {
+    position: absolute; inset: 0; transform-origin: left center; transform: rotateY(0deg);
+    background:
+      linear-gradient(108deg, #241D16 0%, #15110C 52%, #0B0907 86%,
+        rgba(255,77,31,.30) 97%, rgba(255,233,224,.55) 100%);
+    box-shadow: 34px 0 90px rgba(0,0,0,.65),
+      inset 1px 0 0 rgba(255,233,224,.10), inset -2px 0 0 rgba(255,105,64,.35);
+    backface-visibility: hidden;
+  }
+  /* faint paper sheen so the turning surface is legible against the dark UI */
+  #pageTurnFx .leaf::after { content:""; position:absolute; inset:0;
+    background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,.06) 50%, transparent 60%);
+    opacity:1; }
+  #pageTurnFx.go .leaf { animation: pageLeaf 0.74s cubic-bezier(.42,.12,.18,1) forwards; }
+  @keyframes pageLeaf { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(-176deg); } }
+  @media (prefers-reduced-motion: reduce) { #pageTurnFx { display: none !important; } }
+
   /* ============ HERO DOT GRID ============ */
   .hero-dot-grid {
     position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0;
@@ -2248,8 +2272,8 @@
 <div id="onboarding" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(4,3,2,0.82); backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px); z-index:10000; display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; pointer-events:none; transition:opacity 0.45s ease, visibility 0.45s ease;">
   <div class="chat-container-center" style="align-items:center; justify-content:center; display:flex; flex-direction:column; background:#16130F; border:1px solid rgba(255, 95, 21, 0.45); box-shadow:0 30px 90px rgba(0,0,0,0.6), 0 0 60px rgba(255, 95, 21, 0.18), inset 0 0 20px rgba(255, 95, 21, 0.05); border-radius:24px; padding:40px; width:90%; max-width:500px; text-align:center;">
     
-    <h2 id="onboarding-title" style="font-family:var(--font-display); font-size:28px; font-weight:700; color:#FFF; margin-bottom:12px;">How do you want to experience this?</h2>
-    <p id="onboarding-copy" style="color:var(--ink-dim); font-size:16px; margin-bottom:32px; line-height:1.5;">Pick a way to explore — you can switch anytime from the toggle at the top of the chat.</p>
+    <h2 id="onboarding-title" style="font-family:var(--font-display); font-size:28px; font-weight:700; color:#FFF; margin-bottom:12px;">Hi, I'm Anchit.</h2>
+    <p id="onboarding-copy" style="color:var(--ink-dim); font-size:16px; margin-bottom:32px; line-height:1.5;">Glad you're here. Want to chat with my AI, or have me narrate the portfolio in my voice? You can switch anytime from the toggle at the top.</p>
 
     <div id="onboarding-actions" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center;">
       <button class="ob-mode-btn" data-ob-mode="chat" type="button">
@@ -2453,9 +2477,27 @@
 
   // Normalise text for SPEECH so acronyms are pronounced as letters (US -> "U S",
   // not the word "us"). Applied only to spoken/TTS text, never the on-screen text.
+  // Strip markdown + emoji and turn line breaks / list items into sentence
+  // stops so every spoken reply reads as flowing sentences — never literal
+  // asterisks, bullets, or run-on lists. Runs before the pronunciation rules.
+  window.anchitCleanForSpeech = function(t){
+    if (!t) return '';
+    var s = String(t);
+    s = s.replace(/```[a-zA-Z0-9]*\n?/g, ' ').replace(/```/g, ' ').replace(/`/g, '');
+    s = s.replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1');           // [label](url) -> label
+    s = s.replace(/^[ \t]{0,3}#{1,6}\s*/gm, '');               // headings
+    s = s.replace(/^[ \t]{0,3}>\s?/gm, '');                    // blockquotes
+    s = s.replace(/^\s*([-*+•]|\d+[.)])\s+/gm, '');             // list markers
+    s = s.replace(/(\*\*|\*|__|_|~~)/g, '');                    // emphasis
+    s = s.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F0FF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}\u{FE00}-\u{FE0F}\u{1F1E6}-\u{1F1FF}\u{200D}♀♂⚖❤]+/gu, ' ');
+    var lines = s.split(/\r?\n/).map(function(l){ return l.trim(); }).filter(Boolean)
+      .map(function(l){ return /[.!?:;,…]$/.test(l) ? l : (l + '.'); });
+    return lines.join(' ').replace(/\s+([.,!?;:])/g, '$1').replace(/\s+/g, ' ').trim();
+  };
+
   window.anchitSpeechText = function(t){
     if (!t) return t;
-    var s = String(t);
+    var s = window.anchitCleanForSpeech(t);
     var rules = [
       [/\bU\.?S\.?A\.?\b/g, 'U S A'], [/\bU\.?S\.?D\b/g, 'U S D'],
       [/\bU\.?S\.?\b/g, 'U S'], [/\bU\.?K\.?\b/g, 'U K'],
@@ -2805,7 +2847,7 @@
           </div>
           <div class="nav-card-content">
             <div class="nav-card-title">Work Experience</div>
-            <div class="nav-card-desc">Detailed timeline of my product and growth leadership at Vahdam India and Times Internet.</div>
+            <div class="nav-card-desc">Detailed timeline of my product and growth work at Vahdam India and Times Internet.</div>
           </div>
           <div class="nav-card-arrow">&rarr;</div>
         </a>
@@ -4408,6 +4450,25 @@
   const views = document.querySelectorAll('.view');
   const navLinks = document.querySelectorAll('[data-view]');
 
+  // One book-style page flip, used as the Narrate-mode section transition.
+  let pageTurnFx = null;
+  function playPageTurn() {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!pageTurnFx) {
+      pageTurnFx = document.createElement('div');
+      pageTurnFx.id = 'pageTurnFx';
+      pageTurnFx.setAttribute('aria-hidden', 'true');
+      pageTurnFx.innerHTML = '<div class="leaf"></div>';
+      document.body.appendChild(pageTurnFx);
+      pageTurnFx.querySelector('.leaf').addEventListener('animationend', () => pageTurnFx.classList.remove('go'));
+    }
+    pageTurnFx.classList.remove('go');
+    // reflow so the animation restarts even on rapid navigation
+    void pageTurnFx.offsetWidth;
+    pageTurnFx.classList.add('go');
+  }
+  window.playPageTurn = playPageTurn;
+
   function switchView(viewName, anchorId) {
     if (viewName === 'schedule') { if (window.openScheduleModal) window.openScheduleModal(); return; }
     // Chat is a floating overlay available on every page — open it maximised
@@ -4424,6 +4485,8 @@
     if (prev && prev.id !== 'view-' + viewName) {
       prev.classList.add('v-leave');
       setTimeout(() => prev.classList.remove('v-leave'), 250);
+      // In Narrate mode, each section change turns a page (one flip).
+      if (window.anchitMode === 'narrate') playPageTurn();
     }
 
     views.forEach(v => {
@@ -4492,7 +4555,7 @@
 	      response: "Hey — glad you're here. I'm Anchit. Ask me anything: my <a data-nav='experience'>work</a>, my <a data-nav='projects'>side builds</a>, how I think about product, roles or collaborations, or what I'm solving right now at Vahdam.",
 	      nextChips: ["What do you do?","Your biggest career win?","What are you building?","Why product over engineering?"] },
 	    { keywords: ['tour','tutorial','walkthrough','guide','coach','what is here','what all is there','show me around'],
-	      response: "Here is the tour: Home gives the quick positioning and proof points; Work Experience explains Vahdam, Times Internet and my engineering-to-product arc; Side Hustle shows the products I build; Resume is the formal PDF path; Contact gives WhatsApp, call, Google Meet, WhatsApp, SMS, Email and Resume. I will update the guide card every time you open a page.",
+	      response: "Happy to show you around. Home is the quick positioning and proof points; Work Experience covers Vahdam, Times Internet and my engineering-to-product arc; Side Hustle is the products I build; Resume is the formal PDF; and Contact has WhatsApp, call, Google Meet, SMS, email and the resume. I'll refresh the guide card each time you open a page.",
 	      nextChips: ["Open Work Experience","Open Side Hustle","How do I reach you?","Narrate this page"] },
     { keywords: ['who','about','tell me about you','yourself','background','bio','introduce','what do you do','describe'],
       response: "I'm Anchit Tandon — AGM, Product Management, D2C Growth at Vahdam India across the US, UK and global markets. I started on 20 April 2026. Before this I was at Times Internet, moving from APM to Senior PM. I started as a backend engineer, moved to product because I wanted to understand the <em>why</em> behind what we build, and I keep going deep until I understand the real system underneath a problem. <a data-nav='experience'>Full story →</a>",
@@ -4689,6 +4752,19 @@
   const chatInput = document.getElementById('chatInput');
   const chatSend = document.getElementById('chatSend');
   let chatIntroShown = false;
+  // First-touch greeting: I say hi, introduce myself, and ask the visitor's
+  // name — captured through the SAME composer used for chat / talk / narrate.
+  let awaitingName = false;
+  function visitorName() { try { return (localStorage.getItem('anchit-visitor-name') || '').trim(); } catch (e) { return ''; } }
+  function cleanVisitorName(raw) {
+    let s = (raw || '').replace(/\s+/g, ' ').trim();
+    s = s.replace(/^(hi|hey|hello|yo|namaste)[,!.\s-]*/i, '');
+    s = s.replace(/^(i\s*am|i'?m|my name is|name's|name is|it'?s|this is|they call me|you can call me|call me)\s+/i, '');
+    s = s.replace(/[^A-Za-z'’.\- ]/g, '').trim();
+    if (!s) return '';
+    const parts = s.split(' ').slice(0, 2);
+    return parts.map(w => w ? w.charAt(0).toUpperCase() + w.slice(1) : w).join(' ').slice(0, 40);
+  }
 
 	  function scrollChat() {
 	    nextFrame(() => { chatBody.scrollTop = chatBody.scrollHeight; });
@@ -5017,7 +5093,7 @@
       hints.push(`My edge is ${about.strongestSignals}. I do not like surface-level answers; I keep digging until I understand the system, then I test ideas until the outcome moves.`);
     }
     if (/\b(team|lead|stakeholder|cross[- ]?functional|manage|people)\b/.test(q)) {
-      hints.push("For team and stakeholder work, the strongest evidence is the Delhi Half Marathon launch, ET Markets multi-platform revamp, ET Prime Assisted Sales, and Vahdam D2C growth work. Those required product, tech, marketing, sales, ops, and leadership alignment.");
+      hints.push("For team and stakeholder work, the strongest evidence is the Delhi Half Marathon launch, ET Markets multi-platform revamp, ET Prime Assisted Sales, and Vahdam D2C growth work. Those required product, tech, marketing, sales, ops, and cross-functional alignment.");
     }
     if (/\b(fail|mistake|learn|lesson|improve)\b/.test(q)) {
       hints.push("My learning pattern is consistent: start with engineering, move closer to customer and business decisions, test fast, read the funnel honestly, and improve the system instead of defending the first idea.");
@@ -5035,9 +5111,9 @@
       hints.push(`Best route: ${about.contactOrder}. WhatsApp/call/SMS are on <a href='tel:+919873945238'>+91 98739 45238</a>, email is <a href='mailto:anchit.tandon@gmail.com'>anchit.tandon@gmail.com</a>, and the <a href='assets/resume.pdf' target='_blank' rel='noopener'>resume opens in a new tab</a>.`);
     }
     if (hints.length) {
-      return `<strong>Answering directly:</strong><br>${hints.join(' ')}`;
+      return hints.join(' ');
     }
-    return `<strong>Here is the closest accurate answer:</strong><br>I am ${about.currentRole}, started on ${about.startDate}, and I am open to ${about.lookingFor}. My strongest signals are ${about.strongestSignals}. If your question is about fit, I would anchor on my engineering-to-product journey, ET Prime Assisted Sales, ET Markets, ${about.vahdamHighlight}, ${about.hobbyProject}, and ${about.passionProject}.`;
+    return `I'm ${about.currentRole}, started ${about.startDate}, and I'm open to ${about.lookingFor}. Where I'm strongest is ${about.strongestSignals}. If you're sizing up fit, I'd point you to my engineering-to-product journey, ET Prime Assisted Sales, ET Markets, ${about.vahdamHighlight}, ${about.hobbyProject}, and ${about.passionProject}.`;
   }
 	  // Conversation memory passed to the LLM for follow-up context.
 	  let chatHistory = [];
@@ -5186,6 +5262,21 @@
 	    // Sending a message is an explicit re-engagement, so audio is allowed again.
 	    window.anchitAudioStopped = false;
 	    addUser(text);
+	    // First reply after the greeting is taken as the visitor's name — same
+	    // input, no separate field. "Skip"/refusals just move on warmly.
+	    if (awaitingName) {
+	      awaitingName = false;
+	      const skip = /\b(skip|no|nope|later|rather not|prefer not|anonymous|n\/a)\b/i.test(text);
+	      const name = skip ? '' : cleanVisitorName(text);
+	      if (name) {
+	        try { localStorage.setItem('anchit-visitor-name', name); } catch (e) {}
+	        addBot(`Lovely to meet you, ${escapeHtml(name)}. Ask me anything about my work — or switch to Narrate any time and I'll read the page aloud in my voice.`);
+	      } else {
+	        addBot("No problem at all. Ask me anything about my work — or switch to Narrate any time and I'll read the page aloud in my voice.");
+	      }
+	      renderChips(DEFAULT_CHIPS);
+	      return;
+	    }
 	    if (/\b(narrate|read|speak|voice|play audio|listen)\b/i.test(text)) {
 	      if (typeof window.anchitNarrate === 'function') window.anchitNarrate(currentViewName());
 	      addBot("Playing the current page narration now. Use the bottom tile to pause, resume, or mute me.");
@@ -7408,11 +7499,15 @@
 	  } else {
 	    openGuideChat();
 	  }
-	  const isFirstTime = !localStorage.getItem('anchit-visited');
-	  const msg = isFirstTime
-	    ? "Welcome. I'm Anchit. Ask me anything about my work, builds, or how to reach me — type, talk, or start a call. Or switch to Narrate and I'll read the portfolio in my voice."
-	    : "Welcome back. I'm Anchit. How can I help you today?";
+	  // One warm intro: greet by name if I already know it, otherwise say hi,
+	  // introduce myself, and ask — captured through this same composer.
+	  const vname = visitorName();
+	  if (!vname) awaitingName = true;
+	  const msg = vname
+	    ? `Welcome back, ${escapeHtml(vname)}. Ask me anything about my work — type, talk, or start a call. Or switch to Narrate and I'll read the portfolio in my voice.`
+	    : "Hey, I'm Anchit — an engineer who learned to love the funnel, and genuinely glad you stopped by. Before we get into it, what should I call you?";
 	  seedChatIntro(msg);
+	  if (awaitingName) renderChips(["I'll skip that", "Tell me about your work", "What are you building?"]);
 	  localStorage.setItem('anchit-visited', '1');
 	  function paintTileAudioState(state = {}) {
 	    const muted = !!state.muted;

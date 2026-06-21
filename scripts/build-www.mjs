@@ -15,6 +15,10 @@ const WWW = join(ROOT, 'www');
 
 const assets = [
   'index.html',
+  'brand-card.html',
+  'brand-qr.html',
+  'brand-futuristic.html',
+  'resume-reader.html',
   'manifest.json',
   'sw.js',
   'AnchitTandon-AppLogo.png',

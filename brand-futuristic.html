@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anchit Tandon — Futuristic Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400..700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0807; --ink:#FBF5EC; --ink-dim:#A39E94;
+    --primary:#FF6940; --primary-deep:#FF4D1F; --accent:#2EE5AC;
+    --font-display:'Fraunces',serif; --font-body:'Inter',sans-serif;
+    --font-mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:#050403;font-family:var(--font-body);color:var(--ink);
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:22px;padding:40px 16px;overflow:hidden;perspective:1400px}
+
+  /* ---- animated aurora background ---- */
+  .aurora{position:fixed;inset:-20%;z-index:0;filter:blur(60px);opacity:.55;
+    background:
+      radial-gradient(40% 40% at 25% 30%, rgba(255,77,31,.55), transparent 60%),
+      radial-gradient(35% 35% at 78% 25%, rgba(46,229,172,.40), transparent 60%),
+      radial-gradient(45% 45% at 60% 80%, rgba(255,105,64,.45), transparent 60%);
+    animation:drift 14s ease-in-out infinite alternate}
+  @keyframes drift{
+    0%{transform:translate3d(-4%,-2%,0) scale(1)}
+    100%{transform:translate3d(5%,4%,0) scale(1.15)}}
+  .grid{position:fixed;inset:0;z-index:0;opacity:.10;
+    background-image:linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px);
+    background-size:44px 44px;
+    mask-image:radial-gradient(circle at 50% 45%, #000 0%, transparent 70%)}
+
+  /* ---- 3D tilting card ---- */
+  .stage{z-index:2;transform-style:preserve-3d;animation:float 6s ease-in-out infinite}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+  .card{width:430px;border-radius:30px;position:relative;overflow:hidden;
+    padding:44px 40px 36px;transform-style:preserve-3d;transition:transform .15s ease-out;
+    background:linear-gradient(160deg, rgba(34,28,22,.92), rgba(10,8,7,.92));
+    border:1px solid rgba(255,105,64,.30);
+    box-shadow:0 50px 120px rgba(0,0,0,.7),
+      inset 0 1px 0 rgba(255,255,255,.08),
+      0 0 80px rgba(255,77,31,.18)}
+  /* sheen sweep */
+  .card::before{content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.14) 48%,transparent 60%);
+    transform:translateX(-120%);animation:sheen 5.5s ease-in-out infinite}
+  @keyframes sheen{0%,72%{transform:translateX(-120%)}88%,100%{transform:translateX(120%)}}
+
+  .halo{position:absolute;top:-60px;left:50%;width:260px;height:260px;
+    transform:translateX(-50%);border-radius:50%;pointer-events:none;
+    background:conic-gradient(from 0deg, rgba(255,77,31,.0), rgba(255,105,64,.8), rgba(46,229,172,.3), rgba(255,77,31,0));
+    filter:blur(22px);opacity:.5;animation:spin 9s linear infinite}
+  @keyframes spin{to{transform:translateX(-50%) rotate(360deg)}}
+
+  .inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center}
+  .logo{width:92px;height:92px;border-radius:24px;object-fit:cover;transform:translateZ(40px);
+    border:1px solid rgba(255,105,64,.6);
+    box-shadow:0 0 0 5px rgba(255,77,31,.12),0 18px 40px rgba(0,0,0,.6)}
+  .name{font-family:var(--font-display);font-weight:600;font-size:40px;line-height:1.04;
+    margin-top:22px;transform:translateZ(28px);
+    background:linear-gradient(90deg,#FFE9DF,#FF6940 55%,#FFB89E);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 0 30px rgba(255,77,31,.25)}
+  .role{font-family:var(--font-mono);font-size:11px;letter-spacing:.34em;text-transform:uppercase;
+    color:var(--accent);margin-top:12px;transform:translateZ(20px)}
+  .tag{font-size:14px;color:var(--ink-dim);margin-top:14px;max-width:280px;line-height:1.5;transform:translateZ(14px)}
+  .tag em{color:var(--ink);font-style:normal;font-weight:600}
+
+  .qr{width:160px;height:160px;background:#fff;border-radius:18px;padding:11px;margin-top:26px;
+    transform:translateZ(50px);position:relative;
+    box-shadow:0 18px 50px rgba(0,0,0,.6),0 0 0 1px rgba(255,105,64,.4),0 0 40px rgba(255,77,31,.25)}
+  .qr img{width:100%;height:100%;display:block;border-radius:8px}
+  /* scanline sweeping the QR */
+  .qr .scan{position:absolute;left:8px;right:8px;top:8px;height:26px;border-radius:8px;
+    background:linear-gradient(180deg,rgba(46,229,172,.0),rgba(46,229,172,.55),rgba(46,229,172,0));
+    mix-blend-mode:screen;animation:sweep 2.6s ease-in-out infinite}
+  @keyframes sweep{0%{transform:translateY(0)}50%{transform:translateY(118px)}100%{transform:translateY(0)}}
+  .url{margin-top:20px;font-family:var(--font-mono);font-size:11.5px;letter-spacing:.05em;
+    color:var(--primary);border:1px solid rgba(255,105,64,.4);border-radius:9px;padding:7px 13px;
+    transform:translateZ(16px)}
+
+  .hint{z-index:2;font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:#6b655c;text-align:center}
+  .hint a{color:var(--primary);text-decoration:none}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+  <div class="aurora"></div><div class="grid"></div>
+  <div class="stage">
+    <div class="card" id="card">
+      <div class="halo"></div>
+      <div class="inner">
+        <img class="logo" src="AnchitTandon-AppLogo.png" alt="AT">
+        <h1 class="name">Anchit Tandon</h1>
+        <div class="role">Product · Growth · Revenue</div>
+        <p class="tag">An engineer who <em>learned to love the funnel.</em></p>
+        <span class="url">anchittandon.vercel.app</span>
+      </div>
+    </div>
+  </div>
+  <p class="hint">Move your cursor — the card tilts in 3D · <a href="brand-card.html">← static card</a> · <a href="brand-qr.html">square card →</a></p>
+<script>
+  // Mouse-reactive 3D tilt (pointer-driven, layered over the idle float animation).
+  var card = document.getElementById('card');
+  var maxT = 12;
+  window.addEventListener('pointermove', function(e){
+    var r = card.getBoundingClientRect();
+    var px = (e.clientX - (r.left + r.width/2)) / (r.width/2);
+    var py = (e.clientY - (r.top + r.height/2)) / (r.height/2);
+    card.style.transform = 'rotateY(' + (px*maxT).toFixed(2) + 'deg) rotateX(' + (-py*maxT).toFixed(2) + 'deg)';
+  });
+  window.addEventListener('pointerleave', function(){ card.style.transform=''; });
+</script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anchit Tandon — Resume Reader</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0F0D0A; --bg-deep:#060503; --ink:#FBF5EC; --ink-dim:#A39E94;
+    --primary:#FF6940; --primary-deep:#FF4D1F; --accent:#2EE5AC;
+    --paper:#F7EFE0; --paper-edge:#E7DAC2; --paper-ink:#211C16; --paper-dim:#6B5E4B;
+    --font-display:'Fraunces',serif; --font-body:'Inter',sans-serif; --font-mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:radial-gradient(120% 90% at 50% -10%, #19140E, var(--bg) 55%, var(--bg-deep));
+    font-family:var(--font-body);color:var(--ink);min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:32px 16px}
+
+  /* ---- "now reading" header ---- */
+  .reader-head{display:flex;align-items:center;gap:12px}
+  .reader-head .dot{width:34px;height:34px;border-radius:11px;background:rgba(255,105,64,.12);
+    border:1px solid rgba(255,105,64,.4);display:flex;align-items:center;justify-content:center}
+  .reader-head .label{font-family:var(--font-mono);font-size:11px;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--ink-dim)}
+  .reader-head .label b{color:var(--ink);font-weight:600}
+  /* animated voice bars */
+  .bars{display:inline-flex;align-items:flex-end;gap:2px;height:14px;margin-left:8px;vertical-align:-2px}
+  .bars i{width:3px;background:var(--primary);border-radius:2px;animation:eq 1s ease-in-out infinite}
+  .bars i:nth-child(2){animation-delay:.15s}.bars i:nth-child(3){animation-delay:.3s}
+  .bars i:nth-child(4){animation-delay:.45s}.bars i:nth-child(5){animation-delay:.6s}
+  @keyframes eq{0%,100%{height:4px}50%{height:14px}}
+  .paused .bars i{animation-play-state:paused}
+
+  /* ---- the book ---- */
+  .book{position:relative;width:380px;height:496px;perspective:2400px}
+  .book .stage{position:absolute;inset:0;transform-style:preserve-3d}
+  .page{position:absolute;inset:0;transform-origin:left center;transform-style:preserve-3d;
+    transition:transform 1.15s cubic-bezier(.42,.12,.18,1);
+    border-radius:5px 12px 12px 5px;overflow:hidden;
+    background:linear-gradient(105deg,var(--paper-edge),var(--paper) 7%);
+    box-shadow:0 28px 60px rgba(0,0,0,.55), inset 0 0 0 1px rgba(0,0,0,.04);
+    will-change:transform}
+  .page.turned{transform:rotateY(-172deg)}
+  /* spine shading on the left edge */
+  .page::before{content:"";position:absolute;top:0;bottom:0;left:0;width:26px;
+    background:linear-gradient(90deg, rgba(0,0,0,.16), transparent);pointer-events:none}
+  /* page face */
+  .face{position:absolute;inset:0;padding:34px 30px 28px 40px;backface-visibility:hidden;
+    display:flex;flex-direction:column;color:var(--paper-ink)}
+  .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:.26em;text-transform:uppercase;
+    color:var(--primary-deep)}
+  .ptitle{font-family:var(--font-display);font-weight:600;font-size:27px;line-height:1.08;margin-top:10px}
+  .rule{height:2px;width:46px;background:var(--primary-deep);margin:14px 0 16px;border-radius:2px}
+  .ln{font-size:13.5px;line-height:1.5;color:var(--paper-ink);margin:8px 0;
+    padding-left:16px;position:relative;transition:color .3s, opacity .3s;opacity:.5}
+  .ln::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;
+    background:var(--paper-dim);transition:background .3s, box-shadow .3s}
+  .ln.read{opacity:1}
+  .ln.read::before{background:var(--primary-deep);box-shadow:0 0 0 3px rgba(255,77,31,.15)}
+  .ln em{font-style:normal;font-weight:600}
+  .pfoot{margin-top:auto;display:flex;justify-content:space-between;align-items:center;
+    font-family:var(--font-mono);font-size:10px;color:var(--paper-dim)}
+  .cover{justify-content:center;align-items:flex-start;background:
+    radial-gradient(80% 50% at 20% 0%, rgba(255,77,31,.10), transparent 60%)}
+  .cover .ptitle{font-size:40px;margin-top:14px}
+  .cover .sig{font-family:var(--font-mono);font-size:11px;letter-spacing:.04em;color:var(--paper-dim);margin-top:18px}
+
+  /* ---- controls ---- */
+  .controls{display:flex;align-items:center;gap:14px}
+  .dots{display:flex;gap:7px}
+  .dots span{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.18);transition:.3s}
+  .dots span.on{background:var(--primary);box-shadow:0 0 10px rgba(255,77,31,.5);transform:scale(1.25)}
+  .btn{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;color:var(--ink);
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:9px;
+    padding:8px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+  .btn:hover{border-color:var(--primary);color:var(--primary)}
+  .hint{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#6b655c}
+  @media (prefers-reduced-motion:reduce){.page{transition:opacity .4s}.page.turned{transform:none;opacity:0}.bars i{animation:none}}
+</style>
+</head>
+<body>
+  <div class="reader-head" id="readerHead">
+    <span class="dot"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#FF6940" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></span>
+    <span class="label">Reading the resume<span class="bars"><i></i><i></i><i></i><i></i><i></i></span></span>
+  </div>
+
+  <div class="book"><div class="stage" id="stage"></div></div>
+
+  <div class="controls">
+    <div class="dots" id="dots"></div>
+    <button class="btn" id="toggle" aria-label="Pause">⏸ Pause</button>
+    <button class="btn" id="restart" aria-label="Restart">↺ Restart</button>
+  </div>
+  <p class="hint">Prototype · auto-flips through the resume as it's read aloud</p>
+
+<script>
+  // Resume content — one entry per page. Lines highlight in sequence to mimic
+  // reading; the page turns when the page's lines are "read".
+  const PAGES = [
+    { cover:true, eyebrow:'Resume', title:'Anchit Tandon', lines:[
+      'An engineer who learned to love the funnel.'], sig:'Product · Growth · Revenue — Delhi, IST' },
+    { eyebrow:'Now — Vahdam India', title:'AGM, Product & D2C Growth', lines:[
+      'Driving growth across the <em>US, UK and global</em> markets for a leading consumer tea brand.',
+      'Own lifecycle, funnels, experiments and the retention operating system end to end.',
+      'Built <em>VAHDAM Lifecycle OS</em> — analytics, planning, segmentation and mailers in one loop.'] },
+    { eyebrow:'Times Internet', title:'Growth & Monetisation', lines:[
+      'Scaled ET Prime Assisted Sales <em>5× to ₹80L MRR</em> in ~10 months.',
+      'Rebuilt ET Markets & ET across iOS, Android and web → <em>₹3Cr+ incremental ARR</em>.',
+      'Led the inaugural <em>Delhi Half Marathon</em> — new IP, 15,000+ participants, new revenue line.'] },
+    { eyebrow:'Roots', title:'Engineering → Product', lines:[
+      'Backend engineer at Citymall (2022) and Tuple Technologies (2020–2022).',
+      'VIT — Computer Science, 2016–2020.',
+      'Systems thinking first; product and growth judgement layered on top.'] },
+    { eyebrow:'Builds', title:'Things I ship for fun', lines:[
+      'The Third Eye — a proactive multi-persona AI operating system.',
+      'Hey Yaara, MusicGenAI, Mailer Architect — AI mapped to real workflows.',
+      'Reach me: anchit.tandon@gmail.com · anchittandon.vercel.app'] },
+  ];
+
+  const stage = document.getElementById('stage');
+  const dotsWrap = document.getElementById('dots');
+  const toggleBtn = document.getElementById('toggle');
+  const restartBtn = document.getElementById('restart');
+  const head = document.getElementById('readerHead');
+
+  const pageEls = [];
+  PAGES.forEach((p, i) => {
+    const el = document.createElement('div');
+    el.className = 'page';
+    el.style.zIndex = String(PAGES.length - i);
+    const lines = p.lines.map(l => `<div class="ln">${l}</div>`).join('');
+    el.innerHTML = `<div class="face ${p.cover ? 'cover' : ''}">
+        <div class="eyebrow">${p.eyebrow}</div>
+        <div class="ptitle">${p.title}</div>
+        <div class="rule"></div>
+        ${lines}
+        ${p.cover ? `<div class="sig">${p.sig}</div>` : ''}
+        <div class="pfoot"><span>Anchit Tandon</span><span>${String(i+1).padStart(2,'0')} / ${String(PAGES.length).padStart(2,'0')}</span></div>
+      </div>`;
+    stage.appendChild(el);
+    pageEls.push(el);
+    const dot = document.createElement('span');
+    dotsWrap.appendChild(dot);
+    el.addEventListener('transitionend', (e) => { if (e.propertyName === 'transform' && el.classList.contains('turned')) el.style.zIndex = String(i); });
+  });
+  const dotEls = [].slice.call(dotsWrap.children);
+
+  let cur = 0, lineIdx = -1, paused = false, timer = null;
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function setDots(){ dotEls.forEach((d,i)=>d.classList.toggle('on', i===cur)); }
+
+  function readPage(){
+    if (paused) return;
+    const lns = pageEls[cur].querySelectorAll('.ln');
+    lineIdx++;
+    if (lineIdx < lns.length){
+      lns[lineIdx].classList.add('read');
+      timer = setTimeout(readPage, 1150);           // pace per line ≈ a spoken sentence
+    } else {
+      timer = setTimeout(turnPage, 900);            // pause, then flip
+    }
+  }
+  function turnPage(){
+    if (paused) return;
+    if (cur < PAGES.length - 1){
+      pageEls[cur].classList.add('turned');
+      cur++; lineIdx = -1; setDots();
+      timer = setTimeout(readPage, 650);
+    } else {
+      // gentle loop: flip everything back, then replay
+      timer = setTimeout(() => {
+        pageEls.forEach((el,i)=>{ el.classList.remove('turned'); el.style.zIndex=String(PAGES.length-i); el.querySelectorAll('.ln').forEach(l=>l.classList.remove('read')); });
+        cur = 0; lineIdx = -1; setDots();
+        timer = setTimeout(readPage, 700);
+      }, 1600);
+    }
+  }
+  function start(){ setDots(); timer = setTimeout(readPage, 500); }
+  function stop(){ if (timer){ clearTimeout(timer); timer = null; } }
+
+  toggleBtn.addEventListener('click', () => {
+    paused = !paused;
+    head.classList.toggle('paused', paused);
+    toggleBtn.textContent = paused ? '▶ Play' : '⏸ Pause';
+    if (paused) stop(); else readPage();
+  });
+  restartBtn.addEventListener('click', () => {
+    stop(); paused = false; head.classList.remove('paused'); toggleBtn.textContent = '⏸ Pause';
+    pageEls.forEach((el,i)=>{ el.classList.remove('turned'); el.style.zIndex=String(PAGES.length-i); el.querySelectorAll('.ln').forEach(l=>l.classList.remove('read')); });
+    cur = 0; lineIdx = -1; start();
+  });
+
+  start();
+</script>
+</body>
+</html>
