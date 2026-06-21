@@ -22,9 +22,40 @@
 <meta property="og:description" content="Funnels, subscriptions, 0→1 consumer products, AI side builds." />
 <meta property="og:type" content="website" />
 
+<script>
+  try {
+    const savedTheme = localStorage.getItem('anchit-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  } catch (e) {}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          bg: 'var(--bg)',
+          elev: 'var(--bg-elev)',
+          ink: 'var(--ink)',
+          dim: 'var(--ink-dim)',
+          primary: 'var(--primary)',
+          accent: 'var(--accent)',
+          rule: 'var(--rule)',
+        },
+        fontFamily: {
+          sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+          serif: ['Fraunces', 'ui-serif', 'serif']
+        }
+      }
+    }
+  }
+</script>
 
 <style>
   /* ============ DESIGN TOKENS ============ */
@@ -233,9 +264,14 @@
     display: flex; flex-direction: column; align-items: stretch; gap: 2px; flex-shrink: 0;
     padding: 0 10px;
   }
-  .sidebar-item .icon-sun { display: none; }
-  [data-theme="dark"] .sidebar-item .icon-sun { display: block; }
-  [data-theme="dark"] .sidebar-item .icon-moon { display: none; }
+  .sidebar-item .icon-sun { display: none !important; }
+  [data-theme="dark"] .sidebar-item .icon-sun { display: block !important; }
+  [data-theme="dark"] .sidebar-item .icon-moon { display: none !important; }
+
+  /* ============ CHAT CAPTION ============ */
+  .chat-caption {
+    display: none !important;
+  }
 
   /* Mobile toggle button */
   .sidebar-toggle {
@@ -657,6 +693,70 @@
     background: var(--primary-soft); color: var(--primary);
     border: 1px solid rgba(255,77,31,0.2);
     border-radius: 6px; padding: 4px 9px;
+  }
+
+  /* Interaction-mode segmented control (Talk / Listen / Read) */
+  .chat-modes {
+    position: relative; z-index: 1;
+    display: flex; gap: 5px; padding: 10px 18px 4px;
+  }
+  .chat-mode {
+    flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+    letter-spacing: 0.09em; text-transform: uppercase;
+    padding: 7px 6px; border-radius: 10px; cursor: pointer;
+    background: var(--bg-elev); color: var(--ink-dim);
+    border: 1px solid var(--rule); transition: all 0.2s ease;
+  }
+  .chat-mode svg { width: 13px; height: 13px; flex-shrink: 0; }
+  .chat-mode:hover { color: var(--ink); border-color: var(--rule-strong); }
+  .chat-mode.active {
+    background: var(--primary-soft); color: var(--primary);
+    border-color: rgba(255,77,31,0.42);
+    box-shadow: 0 0 0 1px rgba(255,77,31,0.18) inset;
+  }
+
+  /* Chat voice sub-control (Text / Voice reply / Call) */
+  .chat-audio-row {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 6px; padding: 6px 18px 2px;
+  }
+  .chat-audio-label {
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--ink-faint, var(--ink-dim)); margin-right: 2px;
+  }
+  .chat-audio {
+    font-family: var(--font-mono); font-size: 9.5px; font-weight: 600;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    padding: 4px 9px; border-radius: 8px; cursor: pointer;
+    background: transparent; color: var(--ink-dim);
+    border: 1px solid var(--rule); transition: all 0.18s ease;
+  }
+  .chat-audio:hover { color: var(--ink); border-color: var(--rule-strong); }
+  .chat-audio.active { background: var(--primary-soft); color: var(--primary); border-color: rgba(255,77,31,0.42); }
+  /* The voice sub-control only applies to Chat mode. */
+  body.mode-narrate .chat-audio-row { display: none; }
+  /* Call mode: pulse the mic to show the line is open. */
+  body.call-active .chat-audio[data-chataudio-btn="call"] { box-shadow: 0 0 0 0 rgba(255,77,31,.5); animation: callPulse 1.8s ease-out infinite; }
+  @keyframes callPulse { 0% { box-shadow: 0 0 0 0 rgba(255,77,31,.45); } 70%,100% { box-shadow: 0 0 0 10px rgba(255,77,31,0); } }
+
+  /* Onboarding first-open mode choice */
+  .ob-mode-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 18px 16px; min-width: 122px; flex: 1;
+    border-radius: 18px; cursor: pointer; text-align: center;
+    background: rgba(255,255,255,0.05); color: #fff;
+    border: 1px solid rgba(255,183,54,0.28); transition: all 0.25s ease;
+    font-family: var(--font-display); font-size: 16px; font-weight: 600;
+  }
+  .ob-mode-btn svg { width: 22px; height: 22px; color: var(--primary); }
+  .ob-mode-btn small {
+    font-family: var(--font-mono); font-size: 9.5px; font-weight: 400;
+    color: var(--ink-dim); letter-spacing: 0.04em; text-transform: uppercase; line-height: 1.3;
+  }
+  .ob-mode-btn:hover {
+    border-color: var(--primary); transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(255,95,21,0.18);
   }
 
   .chat-body {
@@ -1147,6 +1247,36 @@
     color: var(--ink-dim); text-align: right; flex-shrink: 0;
   }
 
+  .about-values { margin-top: 32px; display: flex; flex-direction: column; gap: 12px; }
+  .about-value-item { padding: 14px 16px; background: var(--bg-elev); border: 1px solid var(--rule); border-radius: 10px; display: flex; gap: 14px; align-items: baseline; }
+  .about-value-label { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 600; color: var(--primary); min-width: 140px; flex-shrink: 0; }
+  .about-value-desc { font-size: 0.875rem; color: var(--ink-dim); font-family: inherit; font-weight: 300; }
+  .about-meta-col { }
+
+  /* ============ NOW VIEW ============ */
+  .now-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; margin-top: 32px; }
+  @media (max-width: 900px) { .now-grid { grid-template-columns: 1fr; } }
+  .now-role-card { background: var(--bg-elev); border: 1px solid var(--rule); border-radius: 16px; padding: 28px; margin-bottom: 20px; }
+  .now-role-eyebrow { font-size: 0.7rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--primary); margin-bottom: 8px; }
+  .now-role-title { font-family: var(--font-display); font-size: clamp(1.3rem, 2.5vw, 1.8rem); font-weight: 300; font-style: italic; color: var(--ink); margin: 0 0 6px; }
+  .now-role-company { font-size: 0.9rem; color: var(--ink-dim); margin-bottom: 4px; }
+  .now-role-period { font-size: 0.78rem; font-family: var(--font-mono); color: var(--ink-dim); opacity: 0.7; margin-bottom: 16px; }
+  .now-role-desc { font-size: 0.93rem; color: var(--ink-dim); line-height: 1.7; margin: 0; }
+  .now-focus-list { display: flex; flex-direction: column; gap: 12px; }
+  .now-focus-eyebrow { font-size: 0.68rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-dim); opacity: 0.6; margin-bottom: 12px; }
+  .now-focus-item { display: flex; gap: 16px; padding: 16px; background: var(--bg-elev); border: 1px solid var(--rule); border-radius: 12px; }
+  .now-focus-num { font-family: var(--font-mono); font-size: 0.72rem; color: var(--primary); min-width: 24px; padding-top: 2px; }
+  .now-focus-label { font-size: 0.88rem; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+  .now-focus-desc { font-size: 0.82rem; color: var(--ink-dim); line-height: 1.6; }
+  .now-metrics-card, .now-stack-card, .now-vahdam-card { background: var(--bg-elev); border: 1px solid var(--rule); border-radius: 16px; padding: 24px; margin-bottom: 16px; }
+  .now-metrics-eyebrow { font-size: 0.68rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-dim); opacity: 0.6; margin-bottom: 16px; }
+  .now-metric { padding: 12px 0; border-bottom: 1px solid var(--rule); }
+  .now-metric:last-child { border-bottom: none; padding-bottom: 0; }
+  .now-metric-val { font-family: var(--font-display); font-size: clamp(1.1rem, 1.8vw, 1.4rem); font-style: italic; color: var(--ink); margin-bottom: 4px; }
+  .now-metric-tag { font-size: 0.72rem; font-family: var(--font-mono); background: var(--primary-soft); color: var(--primary); padding: 2px 8px; border-radius: 4px; vertical-align: middle; font-style: normal; }
+  .now-metric-label { font-size: 0.8rem; color: var(--ink-dim); }
+  .now-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+
   .about-timeline { margin-top: 96px; padding-top: 64px; border-top: 1px solid var(--rule); }
   .about-timeline .section-head { margin-bottom: 48px; }
   .timeline-item {
@@ -1219,9 +1349,24 @@
     body { font-size: 20px; }
   }
 
-  /* ============ REVEAL — all visible immediately ============ */
-  .reveal, .reveal.in { opacity: 1; transform: none; }
-  .reveal-stagger > *, .reveal-stagger.in > * { opacity: 1; transform: none; transition-delay: 0s; }
+  /* ============ REVEAL — animate in on scroll ============ */
+  .reveal {
+    opacity: 0; transform: translateY(26px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal.in { opacity: 1; transform: none; }
+  .reveal-stagger > * {
+    opacity: 0; transform: translateY(22px);
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal-stagger.in > * { opacity: 1; transform: none; }
+  .reveal-stagger.in > *:nth-child(1) { transition-delay: 0.05s; }
+  .reveal-stagger.in > *:nth-child(2) { transition-delay: 0.13s; }
+  .reveal-stagger.in > *:nth-child(3) { transition-delay: 0.21s; }
+  .reveal-stagger.in > *:nth-child(4) { transition-delay: 0.29s; }
+  .reveal-stagger.in > *:nth-child(5) { transition-delay: 0.37s; }
+  .reveal-stagger.in > *:nth-child(6) { transition-delay: 0.45s; }
+  .reveal-stagger.in > *:nth-child(n+7) { transition-delay: 0.53s; }
 
   /* ============ CURSOR GLOW ============ */
   .cursor-glow {
@@ -1233,10 +1378,16 @@
     will-change: left, top;
   }
 
-  /* ============ ENHANCED REVEALS — all visible immediately ============ */
-  .reveal-left, .reveal-left.in { opacity: 1; transform: none; }
-  .reveal-right, .reveal-right.in { opacity: 1; transform: none; }
-  .reveal-scale, .reveal-scale.in { opacity: 1; transform: none; }
+  /* ============ ENHANCED REVEALS ============ */
+  .reveal-left  { opacity: 0; transform: translateX(-32px); transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); }
+  .reveal-right { opacity: 0; transform: translateX(32px);  transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); }
+  .reveal-scale { opacity: 0; transform: scale(0.94);       transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); }
+  .reveal-left.in, .reveal-right.in, .reveal-scale.in { opacity: 1; transform: none; }
+
+  /* Respect reduced-motion: show everything immediately, no movement */
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .reveal-stagger > *, .reveal-left, .reveal-right, .reveal-scale { opacity: 1 !important; transform: none !important; transition: none !important; }
+  }
 
   /* ============ ANIMATED COUNTERS ============ */
   .counter { font-variant-numeric: tabular-nums; }
@@ -1260,7 +1411,7 @@
 
   /* ============ FLOATING AUDIO WIDGET ============ */
   .audio-float {
-    position: fixed; bottom: calc(24px + var(--safe-bottom)); right: 24px;
+    position: fixed; bottom: calc(84px + var(--safe-bottom)); right: 24px;
     z-index: 200; font-family: var(--font-mono);
   }
   .af-idle {
@@ -1329,7 +1480,7 @@
   }
   .af-stop-btn:hover { color: var(--ink); }
   @media (max-width: 600px) {
-    .audio-float { bottom: 16px; right: 16px; }
+    .audio-float { bottom: 76px; right: 16px; }
     .af-active { width: 200px; }
   }
 
@@ -1363,7 +1514,7 @@
   .sticky-cta.listen.paused .listen-pause { display: none; }
   .sticky-cta.listen.paused .listen-resume { display: inline-flex; align-items: center; gap: 6px; }
   @media (max-width: 600px) {
-    .sticky-ctas { bottom: calc(16px + var(--safe-bottom)); right: 16px; }
+    .sticky-ctas { bottom: calc(76px + var(--safe-bottom)); right: 16px; }
     .sticky-cta { padding: 10px 16px; font-size: 12px; }
   }
 
@@ -1461,6 +1612,11 @@
     transition: opacity 0.5s ease;
   }
   .audio-ambient.active { opacity: 1; }
+  /* While the cloned voice is warming up, dim and pulse the meter. */
+  .audio-ambient.loading { opacity: 1; }
+  .audio-ambient.loading .audio-ambient-bars span { animation: loadPulse 1s ease-in-out infinite; background: var(--accent); }
+  .audio-ambient.loading .audio-ambient-label { color: var(--accent); }
+  @keyframes loadPulse { 0%,100% { opacity: 0.25; } 50% { opacity: 0.9; } }
   .audio-ambient-bars {
     display: flex; align-items: flex-end; gap: 2px; height: 18px;
   }
@@ -1493,7 +1649,17 @@
     background: var(--bg-elev); border: 1px solid var(--rule-strong);
     border-radius: 99px; padding: 6px 8px 6px 6px;
     box-shadow: var(--shadow-md);
+    transition: box-shadow 0.2s;
   }
+  .anp-nudge.playing { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-soft), var(--shadow-md); }
+  .anp-waveform { display: none; align-items: center; gap: 2px; height: 18px; padding: 0 4px; }
+  .anp-nudge.playing .anp-waveform { display: flex; }
+  .anp-waveform span { display: block; width: 3px; border-radius: 2px; background: var(--primary); height: 4px; }
+  .anp-nudge.playing .anp-waveform span:nth-child(1) { animation: anpBar 0.7s ease-in-out infinite; }
+  .anp-nudge.playing .anp-waveform span:nth-child(2) { animation: anpBar 0.7s ease-in-out 0.13s infinite; }
+  .anp-nudge.playing .anp-waveform span:nth-child(3) { animation: anpBar 0.7s ease-in-out 0.26s infinite; }
+  .anp-nudge.playing .anp-waveform span:nth-child(4) { animation: anpBar 0.7s ease-in-out 0.39s infinite; }
+  @keyframes anpBar { 0%,100%{height:3px} 50%{height:14px} }
   .anp-nudge.dismissed { display: none !important; }
   .anp-play-btn {
     display: inline-flex; align-items: center; gap: 6px;
@@ -1548,14 +1714,9 @@
     font-family: var(--font-body); font-size: 15px; letter-spacing: 0.01em;
     color: var(--ink-dim); line-height: 1.62;
     padding: 13px 16px 13px 42px;
-    border-radius: 16px; border-bottom-left-radius: 5px;
-    background:
-      linear-gradient(180deg, rgba(255,106,26,0.07), transparent 60%),
-      var(--bg-deep);
-    border: 1px solid rgba(255,106,26,0.32);
-    box-shadow: 0 6px 22px rgba(0,0,0,0.28);
+    display: none !important;
   }
-  .chat-caption.active { display: block; }
+  .chat-caption.active { display: none !important; }
   /* little speaking indicator dot */
   .chat-caption.active::before {
     content: ''; position: absolute; left: 16px; top: 17px;
@@ -1994,6 +2155,72 @@
     border-color: #F3B331;
   }
 
+  /* ============ MICRO-INTERACTIONS — hover, press, focus across all views ============ */
+  .work-stat, .work-item, .now-focus-item, .now-metrics-card, .now-stack-card, .now-vahdam-card,
+  .now-role-card, .about-value-item, .nav-card, .contact-card, .build-card, .product-chip,
+  .meta-block li, .home-tl-item {
+    transition: transform 0.32s cubic-bezier(0.16,1,0.3,1), border-color 0.32s ease, box-shadow 0.32s ease, background 0.32s ease;
+  }
+  .work-stat:hover, .now-focus-item:hover, .about-value-item:hover,
+  .now-metrics-card:hover, .now-stack-card:hover, .now-vahdam-card:hover, .now-role-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary);
+    box-shadow: 0 12px 32px rgba(255, 77, 31, 0.10);
+  }
+  .work-item:hover { transform: translateX(6px); }
+  .product-chip:hover, .home-tl-item:hover { transform: translateY(-3px); border-color: var(--primary); }
+  .meta-block li { padding-left: 0; }
+  .meta-block li:hover { padding-left: 8px; border-bottom-color: var(--primary); }
+
+  /* Animated counters / stat numbers pulse on hover */
+  .work-stat .num { transition: transform 0.32s cubic-bezier(0.16,1,0.3,1), color 0.32s ease; transform-origin: left bottom; }
+  .work-stat:hover .num { transform: scale(1.08); color: var(--primary); }
+
+  /* Numbered focus chips rotate their index on hover */
+  .now-focus-num { transition: transform 0.3s cubic-bezier(0.16,1,0.3,1); }
+  .now-focus-item:hover .now-focus-num { transform: scale(1.3); }
+
+  /* Tags flip to accent on hover everywhere */
+  .tag { transition: background 0.22s ease, color 0.22s ease, transform 0.22s ease, border-color 0.22s ease; cursor: default; }
+  .tag:hover { background: var(--primary); color: #FFF; transform: translateY(-2px); }
+
+  /* Buttons: press feedback */
+  .btn:active, .icon-btn:active, .chip:active, .anp-btn:active { transform: scale(0.96); }
+
+  /* Heading accent: underline draws in when revealed */
+  .section-head h1 em, .section-head h2 em {
+    background-image: linear-gradient(var(--primary), var(--primary));
+    background-repeat: no-repeat; background-position: 0 100%;
+    background-size: 0% 2px;
+    transition: background-size 0.9s cubic-bezier(0.16,1,0.3,1) 0.35s;
+  }
+  .section-head.in h1 em, .section-head.in h2 em { background-size: 100% 2px; }
+
+  /* Eyebrow live-dot ping */
+  .eyebrow.has-dot .live-dot { position: relative; }
+  .eyebrow.has-dot .live-dot::after {
+    content: ''; position: absolute; inset: -3px; border-radius: 50%;
+    border: 1px solid var(--primary); opacity: 0;
+    animation: dotPing 2.2s ease-out infinite;
+  }
+  @keyframes dotPing { 0% { transform: scale(0.6); opacity: 0.9; } 70% { transform: scale(1.8); opacity: 0; } 100% { opacity: 0; } }
+
+  /* Sidebar items: icon nudge on hover */
+  .sidebar-item svg { transition: transform 0.25s cubic-bezier(0.16,1,0.3,1); }
+  .sidebar-item:hover svg { transform: translateX(2px) scale(1.1); }
+
+  /* Spoken-word highlight inside chat reply bubbles */
+  .msg-bubble .tts-w { border-radius: 3px; transition: background 0.12s ease, color 0.12s ease; }
+  .msg-bubble .tts-w.current { background: var(--primary-soft); color: var(--primary); }
+
+  /* Keyboard focus visibility */
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; border-radius: 4px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .work-stat:hover, .work-item:hover, .now-focus-item:hover, .about-value-item:hover,
+    .product-chip:hover, .home-tl-item:hover, .tag:hover { transform: none; }
+  }
+
 </style>
   
 <style>
@@ -2021,16 +2248,18 @@
 <div id="onboarding" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(4,3,2,0.82); backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px); z-index:10000; display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; pointer-events:none; transition:opacity 0.45s ease, visibility 0.45s ease;">
   <div class="chat-container-center" style="align-items:center; justify-content:center; display:flex; flex-direction:column; background:#16130F; border:1px solid rgba(255, 95, 21, 0.45); box-shadow:0 30px 90px rgba(0,0,0,0.6), 0 0 60px rgba(255, 95, 21, 0.18), inset 0 0 20px rgba(255, 95, 21, 0.05); border-radius:24px; padding:40px; width:90%; max-width:500px; text-align:center;">
     
-    <div style="margin-bottom:24px;">
-      <img src="AnchitTandon-AppLogo.png" alt="Anchit Tandon" style="width:88px; height:88px; border-radius:22px; object-fit:cover; border:1px solid rgba(255,183,54,.7); box-shadow: 0 0 28px rgba(255, 153, 31, 0.45);">
-    </div>
-    
-    <h2 style="font-family:var(--font-display); font-size:28px; font-weight:700; color:#FFF; margin-bottom:12px;">Anchit Tandon</h2>
-    <p id="onboarding-copy" style="color:var(--ink-dim); font-size:16px; margin-bottom:32px; line-height:1.5;">Choose a guided walkthrough or continue exploring the portfolio.</p>
+    <h2 id="onboarding-title" style="font-family:var(--font-display); font-size:28px; font-weight:700; color:#FFF; margin-bottom:12px;">How do you want to experience this?</h2>
+    <p id="onboarding-copy" style="color:var(--ink-dim); font-size:16px; margin-bottom:32px; line-height:1.5;">Pick a way to explore — you can switch anytime from the toggle at the top of the chat.</p>
 
     <div id="onboarding-actions" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center;">
-      <button id="ob-start-btn" style="padding:14px 26px; background:var(--primary); color:#000; font-weight:bold; border-radius:30px; border:none; cursor:pointer; font-size:16px; box-shadow:0 0 20px rgba(255,95,21,0.5); transition:all 0.3s ease;">Start fresh</button>
-      <button id="ob-continue-btn" style="padding:14px 26px; background:rgba(255,255,255,.08); color:#fff; font-weight:bold; border-radius:30px; border:1px solid rgba(255,183,54,.35); cursor:pointer; font-size:16px; transition:all 0.3s ease;">Continue</button>
+      <button class="ob-mode-btn" data-ob-mode="chat" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>Chat</span><small>Talk with my AI — type, voice, or call</small>
+      </button>
+      <button class="ob-mode-btn" data-ob-mode="narrate" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+        <span>Narrate</span><small>I read the portfolio in my voice</small>
+      </button>
     </div>
     
     <div class="input-row" id="onboarding-input-row" style="display:none; width:100%; max-width:400px; margin-top:24px;">
@@ -2072,6 +2301,14 @@
     <a class="sidebar-item active" href="#home" data-view="home" aria-label="Home">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       <span class="sidebar-label">Home</span>
+    </a>
+    <a class="sidebar-item" href="#about" data-view="about" aria-label="About Me">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      <span class="sidebar-label">About Me</span>
+    </a>
+    <a class="sidebar-item" href="#now" data-view="now" aria-label="Current Role">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span class="sidebar-label">Now</span>
     </a>
     <a class="sidebar-item" href="#experience" data-view="experience" aria-label="Work Experience">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
@@ -2255,26 +2492,58 @@
 
   <!-- HOME -->
   <section class="view active" id="view-home">
-    <div class="container">
-      <div class="home-hero reveal">
-        <div class="hero-dot-grid" aria-hidden="true"></div>
-        <div class="eyebrow has-dot"><span class="live-dot"></span>Live · AGM – Product Management, D2C Growth · Vahdam India</div>
-        <div class="hero-profile-wrap" style="display:flex; align-items:center; gap:20px; margin-bottom:16px;">
-          <img src="AnchitTandon-AppLogo.png" alt="Anchit Tandon" class="profile-pic" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 2px solid var(--rule);">
-          <h1 class="display-xl name" style="margin:0;">
-            <span class="greeting narrate-span" data-n-idx="0">Hey, I'm </span><span class="firstline narrate-span" data-n-idx="0">Anchit </span><span class="secondline"><span class="narrate-span" data-n-idx="0">Tandon.</span></span>
-          </h1>
+    <div class="container mx-auto max-w-6xl py-8 md:py-12 px-4">
+      <!-- BENTO GRID CONTAINER -->
+      <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-auto">
+        
+        <!-- HERO TILE (spans 2 cols, 2 rows) -->
+        <div class="md:col-span-2 md:row-span-2 rounded-3xl p-8 lg:p-10 flex flex-col justify-end relative overflow-hidden bg-[var(--bg-elev)] border border-[var(--rule)] shadow-sm hover:shadow-md transition-shadow group">
+          <div class="hero-dot-grid absolute inset-0 opacity-30" aria-hidden="true"></div>
+          <div class="relative z-10 flex items-center gap-6 mb-8">
+            <img src="AnchitTandon-AppLogo.png" alt="Anchit Tandon" class="w-24 h-24 rounded-full object-cover border-2 border-[var(--rule)] group-hover:scale-105 transition-transform duration-500">
+            <div>
+              <div class="eyebrow has-dot mb-2 text-xs opacity-80"><span class="live-dot"></span>Live · AGM – Vahdam India</div>
+              <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight m-0 leading-none">
+                <span class="greeting text-[var(--ink-dim)] narrate-span" data-n-idx="0">Hey, I'm </span><span class="firstline text-[var(--ink)] narrate-span" data-n-idx="0">Anchit</span><br><span class="secondline text-[var(--ink)]"><span class="narrate-span" data-n-idx="0">Tandon.</span></span>
+              </h1>
+            </div>
+          </div>
+          <p class="text-xl md:text-2xl text-[var(--ink-dim)] font-light leading-snug relative z-10 narrate-span" data-n-idx="1">
+            An <em class="text-[var(--primary)] not-italic font-medium">engineer</em> who learned to love the funnel.<br>
+            <span class="text-lg mt-2 inline-block">Building products. Scaling growth. Creating leverage.</span>
+          </p>
         </div>
-        <p class="hero-persona narrate-span" data-n-idx="1" style="margin-top:12px; margin-bottom:16px;">
-          An <em>engineer</em> who learned to love the funnel.<br>
-          <span style="font-size: clamp(16px, 2vw, 22px); color: var(--ink-dim); font-weight: 300;">Building products. Scaling growth. Creating leverage.</span>
-        </p>
-        <div class="hero-tagline" style="display: flex; flex-direction: column; gap: 16px;">
-          <p class="narrate-span" data-n-idx="2" style="margin:0;">Currently AGM – Product Management &amp; D2C Growth at <em>Vahdam India</em>, driving growth across the US, UK and global markets while helping scale a leading consumer brand.</p>
-          <p class="narrate-span" data-n-idx="3" style="margin:0;">Previously at <em>Times Internet</em>, I owned growth and monetisation across ET Prime and TOI Plus — scaling Assisted Sales <em>5&times; to &#8377;80L MRR</em> in ~10 months, rebuilding ET Markets &amp; ET across iOS, Android and web to <em>&#8377;3Cr+ incremental ARR</em>, and building high-performing acquisition and retention funnels.</p>
-          <p class="narrate-span" data-n-idx="4" style="margin:0;">I also led the end-to-end launch and execution of the inaugural <em>Times Internet Delhi Half Marathon 2026</em> at Dhyan Chand National Stadium — establishing a new IP, delivering a 15,000+ participant experience, and creating a new revenue stream for the business.</p>
-          <p class="narrate-span" data-n-idx="5" style="margin:0;">Today, I operate at the intersection of Product, Growth and Revenue — building systems, optimising funnels, running experiments, and creating scalable pathways to sustainable growth.</p>
+
+        <!-- METRIC TILE 1: Vahdam -->
+        <div class="rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] flex flex-col justify-center relative overflow-hidden hover:border-[var(--primary)] transition-colors group narrate-span" data-n-idx="2">
+          <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-2">Current Focus</div>
+          <h3 class="text-xl font-bold mb-1 text-[var(--ink)]">Vahdam India</h3>
+          <p class="text-sm text-[var(--ink-dim)] leading-relaxed">AGM – Product Management &amp; D2C Growth. Driving growth across US, UK &amp; global markets.</p>
+          <div class="absolute top-4 right-4 opacity-10 group-hover:opacity-30 transition-opacity">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+          </div>
         </div>
+
+        <!-- METRIC TILE 2: Times Internet -->
+        <div class="rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] flex flex-col justify-center relative overflow-hidden hover:border-[var(--accent)] transition-colors group narrate-span" data-n-idx="3">
+          <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-2">Previously</div>
+          <h3 class="text-xl font-bold mb-1 text-[var(--ink)]">Times Internet</h3>
+          <p class="text-sm text-[var(--ink-dim)] leading-relaxed">Scaled Assisted Sales 5&times; to &#8377;80L MRR. Built ET Markets to &#8377;3Cr+ incremental ARR.</p>
+          <div class="absolute top-4 right-4 opacity-10 group-hover:opacity-30 transition-opacity">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+          </div>
+        </div>
+
+        <!-- EXPERIENCE TILE (spans 2 cols) -->
+        <div class="md:col-span-2 lg:col-span-2 rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] flex flex-col justify-center hover:border-gray-500 transition-colors">
+          <p class="text-base text-[var(--ink-dim)] leading-relaxed mb-3 narrate-span" data-n-idx="4">
+            I also led the launch of the inaugural <strong class="text-[var(--ink)] font-semibold">Times Internet Delhi Half Marathon 2026</strong> — establishing a new IP and delivering a 15,000+ participant experience.
+          </p>
+          <p class="text-base text-[var(--ink-dim)] leading-relaxed narrate-span" data-n-idx="5">
+            Today, I operate at the intersection of Product, Growth and Revenue — building systems, optimising funnels, and creating scalable pathways to sustainable growth.
+          </p>
+        </div>
+        
       </div>
     </div>
 
@@ -2378,105 +2647,119 @@
       </div>
 
       <!-- Side Hustle teaser -->
-      <div class="section-head" style="margin-top: 48px; margin-bottom: 24px;">
-        <div class="eyebrow">Side Hustle · Built on weekends, all live</div>
-      </div>
-      <div class="products-grid reveal-stagger" style="margin-bottom: 48px;">
-        <a class="product-chip" href="#project-lifecycle" data-view="project-lifecycle" style="cursor:pointer;">
-          <div class="product-chip-name">VAHDAM Lifecycle OS</div>
-          <div class="product-chip-co">D2C Retention · PWA</div>
-          <div class="product-chip-metric">Dashboard &rarr; calendar &rarr; mailers</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://vahdam-lifecycle-os.vercel.app/', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
+      <div class="section      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-12">
+        <a class="group relative rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] hover:border-[var(--primary)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_20px_var(--primary-soft)] overflow-hidden" href="#project-lifecycle" data-view="project-lifecycle" style="cursor:pointer;">
+          <div class="absolute inset-0 bg-gradient-to-br from-[var(--primary-soft)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div class="relative z-10 flex flex-col h-full justify-between">
+            <div>
+              <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-1">D2C Retention · PWA</div>
+              <h3 class="text-lg font-bold text-[var(--ink)] mb-1 group-hover:text-[var(--primary)] transition-colors">VAHDAM Lifecycle OS</h3>
+              <p class="text-sm text-[var(--primary)] font-mono mt-2">Dashboard &rarr; calendar &rarr; mailers</p>
+            </div>
+            <div class="mt-4 self-end text-[var(--ink-dim)] group-hover:text-[var(--primary)] transition-colors transform group-hover:translate-x-1 group-hover:-translate-y-1 duration-300">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+            </div>
+          </div>
         </a>
-        <a class="product-chip" href="#project-agentlp" data-view="project-agentlp" style="cursor:pointer;">
-          <div class="product-chip-name">All-in-One LP Agent</div>
-          <div class="product-chip-co">Conversational Commerce · D2C</div>
-          <div class="product-chip-metric">Narration · voice · chat · recos</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://try.vahdam.co.uk/lp_all_in_one_agent', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
+
+        <a class="group relative rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] hover:border-[var(--accent)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_20px_var(--accent-soft)] overflow-hidden" href="#project-music" data-view="project-music" style="cursor:pointer;">
+          <div class="absolute inset-0 bg-gradient-to-br from-[var(--accent-soft)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div class="relative z-10 flex flex-col h-full justify-between">
+            <div>
+              <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-1">Generative AI · Music</div>
+              <h3 class="text-lg font-bold text-[var(--ink)] mb-1 group-hover:text-[var(--accent)] transition-colors">MusicGenAI</h3>
+              <p class="text-sm text-[var(--accent)] font-mono mt-2">Prompt &rarr; full track with vocals</p>
+            </div>
+            <div class="mt-4 self-end text-[var(--ink-dim)] group-hover:text-[var(--accent)] transition-colors transform group-hover:translate-x-1 group-hover:-translate-y-1 duration-300">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+            </div>
+          </div>
         </a>
-        <a class="product-chip" href="#project-music" data-view="project-music" style="cursor:pointer;">
-          <div class="product-chip-name">MusicGenAI</div>
-          <div class="product-chip-co">Generative AI · Music</div>
-          <div class="product-chip-metric">Prompt &rarr; full track with vocals</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://music-gen-ai-blue.vercel.app/', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
+
+        <a class="group relative rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] hover:border-[var(--primary)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_20px_var(--primary-soft)] overflow-hidden" href="#project-tasktracker" data-view="project-tasktracker" style="cursor:pointer;">
+          <div class="absolute inset-0 bg-gradient-to-br from-[var(--primary-soft)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div class="relative z-10 flex flex-col h-full justify-between">
+            <div>
+              <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-1">Personal Productivity · AI</div>
+              <h3 class="text-lg font-bold text-[var(--ink)] mb-1 group-hover:text-[var(--primary)] transition-colors">Task Tracker</h3>
+              <p class="text-sm text-[var(--primary)] font-mono mt-2">Email/meeting/voice &rarr; task board</p>
+            </div>
+            <div class="mt-4 self-end text-[var(--ink-dim)] group-hover:text-[var(--primary)] transition-colors transform group-hover:translate-x-1 group-hover:-translate-y-1 duration-300">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+            </div>
+          </div>
         </a>
-        <a class="product-chip" href="#project-tasktracker" data-view="project-tasktracker" style="cursor:pointer;">
-          <div class="product-chip-name">Task Tracker</div>
-          <div class="product-chip-co">Personal Productivity · AI</div>
-          <div class="product-chip-metric">Email/meeting/voice &rarr; task board</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://personal-ai-assistant-anchit.vercel.app/', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
+
+        <a class="group relative rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] hover:border-[var(--accent)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_20px_var(--accent-soft)] overflow-hidden" href="#project-thirdeye" data-view="project-thirdeye" style="cursor:pointer;">
+          <div class="absolute inset-0 bg-gradient-to-br from-[var(--accent-soft)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div class="relative z-10 flex flex-col h-full justify-between">
+            <div>
+              <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-1">Personal AI OS</div>
+              <h3 class="text-lg font-bold text-[var(--ink)] mb-1 group-hover:text-[var(--accent)] transition-colors">The Third Eye</h3>
+              <p class="text-sm text-[var(--accent)] font-mono mt-2">Agent-orchestrated AI OS</p>
+            </div>
+            <div class="mt-4 self-end text-[var(--ink-dim)] group-hover:text-[var(--accent)] transition-colors transform group-hover:translate-x-1 group-hover:-translate-y-1 duration-300">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+            </div>
+          </div>
         </a>
-        <a class="product-chip" href="#project-thirdeye" data-view="project-thirdeye" style="cursor:pointer;">
-          <div class="product-chip-name">The Third Eye</div>
-          <div class="product-chip-co">Personal AI OS</div>
-          <div class="product-chip-metric">Agent-orchestrated AI OS</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://the-third-eye-anchit.vercel.app/', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
+
+        <a class="group relative rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] hover:border-[var(--primary)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_20px_var(--primary-soft)] overflow-hidden" href="#project-yaara" data-view="project-yaara" style="cursor:pointer;">
+          <div class="absolute inset-0 bg-gradient-to-br from-[var(--primary-soft)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div class="relative z-10 flex flex-col h-full justify-between">
+            <div>
+              <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-1">AI Voice · Consumer</div>
+              <h3 class="text-lg font-bold text-[var(--ink)] mb-1 group-hover:text-[var(--primary)] transition-colors">Hey Yaara</h3>
+              <p class="text-sm text-[var(--primary)] font-mono mt-2">Voice companion for elderly</p>
+            </div>
+            <div class="mt-4 self-end text-[var(--ink-dim)] group-hover:text-[var(--primary)] transition-colors transform group-hover:translate-x-1 group-hover:-translate-y-1 duration-300">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+            </div>
+          </div>
         </a>
-        <a class="product-chip" href="#project-yaara" data-view="project-yaara" style="cursor:pointer;">
-          <div class="product-chip-name">Hey Yaara</div>
-          <div class="product-chip-co">AI Voice · Consumer</div>
-          <div class="product-chip-metric">Voice companion for elderly</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://hey-yaara.vercel.app/', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
+
+        <a class="group relative rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] hover:border-[var(--accent)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_20px_var(--accent-soft)] overflow-hidden" href="#project-mailer" data-view="project-mailer" style="cursor:pointer;">
+          <div class="absolute inset-0 bg-gradient-to-br from-[var(--accent-soft)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div class="relative z-10 flex flex-col h-full justify-between">
+            <div>
+              <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-1">AI Tooling · Marketing</div>
+              <h3 class="text-lg font-bold text-[var(--ink)] mb-1 group-hover:text-[var(--accent)] transition-colors">Mailer Architect</h3>
+              <p class="text-sm text-[var(--accent)] font-mono mt-2">Multi-LLM cascade &rarr; HTML email</p>
+            </div>
+            <div class="mt-4 self-end text-[var(--ink-dim)] group-hover:text-[var(--accent)] transition-colors transform group-hover:translate-x-1 group-hover:-translate-y-1 duration-300">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+            </div>
+          </div>
         </a>
-        <a class="product-chip" href="#project-mailer" data-view="project-mailer" style="cursor:pointer;">
-          <div class="product-chip-name">Mailer Architect</div>
-          <div class="product-chip-co">AI Tooling · Marketing</div>
-          <div class="product-chip-metric">Multi-LLM cascade &rarr; HTML email</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://marketing-mailers-html-architect.vercel.app/', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
+
+        <a class="group relative rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] hover:border-[var(--primary)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_20px_var(--primary-soft)] overflow-hidden" href="#project-telesuite" data-view="project-telesuite" style="cursor:pointer;">
+          <div class="absolute inset-0 bg-gradient-to-br from-[var(--primary-soft)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div class="relative z-10 flex flex-col h-full justify-between">
+            <div>
+              <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-1">AI Workflow · Sales</div>
+              <h3 class="text-lg font-bold text-[var(--ink)] mb-1 group-hover:text-[var(--primary)] transition-colors">AI TeleSuite</h3>
+              <p class="text-sm text-[var(--primary)] font-mono mt-2">Real-time pitch scoring</p>
+            </div>
+            <div class="mt-4 self-end text-[var(--ink-dim)] group-hover:text-[var(--primary)] transition-colors transform group-hover:translate-x-1 group-hover:-translate-y-1 duration-300">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+            </div>
+          </div>
         </a>
-        <a class="product-chip" href="#project-telesuite" data-view="project-telesuite" style="cursor:pointer;">
-          <div class="product-chip-name">AI TeleSuite</div>
-          <div class="product-chip-co">AI Workflow · Sales</div>
-          <div class="product-chip-metric">Real-time pitch scoring</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://ai-tele-suite.vercel.app/', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
+
+        <a class="group relative rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] hover:border-[var(--accent)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_20px_var(--accent-soft)] overflow-hidden" href="#project-lifeengine" data-view="project-lifeengine" style="cursor:pointer;">
+          <div class="absolute inset-0 bg-gradient-to-br from-[var(--accent-soft)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div class="relative z-10 flex flex-col h-full justify-between">
+            <div>
+              <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-1">AI Wellness</div>
+              <h3 class="text-lg font-bold text-[var(--ink)] mb-1 group-hover:text-[var(--accent)] transition-colors">TH+ LifeEngine</h3>
+              <p class="text-sm text-[var(--accent)] font-mono mt-2">Personalised daily plans</p>
+            </div>
+            <div class="mt-4 self-end text-[var(--ink-dim)] group-hover:text-[var(--accent)] transition-colors transform group-hover:translate-x-1 group-hover:-translate-y-1 duration-300">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+            </div>
+          </div>
         </a>
-        <a class="product-chip" href="#project-lifeengine" data-view="project-lifeengine" style="cursor:pointer;">
-          <div class="product-chip-name">TH+ LifeEngine</div>
-          <div class="product-chip-co">AI Wellness</div>
-          <div class="product-chip-metric">Personalised daily plans</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://th-life-engine.vercel.app/', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
+      </div>1="17" x2="17" y2="7"></line>
               <polyline points="7 7 17 7 17 17"></polyline>
             </svg>
           </span>
@@ -2565,6 +2848,22 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
           </button>
         </div>
+        <div class="chat-modes" role="group" aria-label="Chat with Anchit or have him narrate the portfolio">
+          <button type="button" class="chat-mode" data-mode-btn="chat" aria-pressed="true" title="Chat — full conversation with Anchit's AI">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>Chat</span>
+          </button>
+          <button type="button" class="chat-mode" data-mode-btn="narrate" aria-pressed="false" title="Narrate — Anchit reads the portfolio aloud in his voice">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+            <span>Narrate</span>
+          </button>
+        </div>
+        <div class="chat-audio-row" role="group" aria-label="Voice for the conversation">
+          <span class="chat-audio-label">Voice</span>
+          <button type="button" class="chat-audio" data-chataudio-btn="text" aria-pressed="false" title="Text only — replies are written, nothing is spoken">Text</button>
+          <button type="button" class="chat-audio" data-chataudio-btn="reply" aria-pressed="true" title="Voice reply — answers are written and spoken in Anchit's voice">Voice reply</button>
+          <button type="button" class="chat-audio" data-chataudio-btn="call" aria-pressed="false" title="Call — hands-free voice both ways, every line transcribed">Call</button>
+        </div>
         <div class="chat-body" id="chatBody">
           <div class="chat-caption" id="chatCaption" aria-live="polite" aria-label="Currently spoken text"></div>
           <div class="stream-audio-status" id="streamAudioStatus" aria-live="polite"></div>
@@ -2618,6 +2917,170 @@
 
   <!-- NOW — Current Role -->
   <!-- EXPERIENCE — Full work history -->
+  <!-- ABOUT ME -->
+  <section class="view" id="view-about">
+    <div class="container">
+      <div class="section-head reveal">
+        <div class="eyebrow">About · Who I am</div>
+        <h1 class="display-lg">An engineer who learned to <em>love the funnel.</em></h1>
+      </div>
+
+      <div class="about-grid reveal">
+        <div class="about-prose">
+          <p>I started as a backend engineer — building real-time sports commentary, e-commerce flows, and consumer apps at scale. The kind of work where you watch your code touch a million people in a weekend.</p>
+          <p>Then I moved to product, and what I really fell for was <em>the funnel</em>. The way it tells you the unfiltered truth about every decision you make.</p>
+          <p>These days I'm at Vahdam India as AGM – Product Management, spearheading D2C growth across US, UK, and global markets. Before this, nearly four years at Times Internet — APM to Senior PM — across ET Markets, ET Prime, Times Health+, and the Half Marathon.</p>
+          <p>All four side projects are AI-first consumer experiments I prototype end-to-end on weekends. I build because I can't sit still.</p>
+          <div class="about-values reveal-stagger">
+            <div class="about-value-item"><span class="about-value-label">Think in systems</span><span class="about-value-desc">Every product problem is a funnel problem in disguise.</span></div>
+            <div class="about-value-item"><span class="about-value-label">Ship in experiments</span><span class="about-value-desc">Opinions are hypotheses until the data speaks.</span></div>
+            <div class="about-value-item"><span class="about-value-label">Build on weekends</span><span class="about-value-desc">Curiosity compounds faster than a salary.</span></div>
+          </div>
+        </div>
+        <div class="about-meta-col reveal-stagger">
+          <div class="meta-block">
+            <h4>Currently</h4>
+            <ul>
+              <li><span>AGM – Product Management</span><span>Vahdam India</span></li>
+              <li><span>D2C growth · US, UK, Global</span><span>Apr '26 →</span></li>
+              <li><span>Delhi, India</span><span>Open to remote</span></li>
+            </ul>
+          </div>
+          <div class="meta-block">
+            <h4>Education</h4>
+            <ul>
+              <li><span>B.Tech · Computer Science &amp; Engineering</span><span>VIT · 2020</span></li>
+            </ul>
+          </div>
+          <div class="meta-block">
+            <h4>Core skills</h4>
+            <ul>
+              <li><span>Growth funnels &amp; conversion optimisation</span><span>Expert</span></li>
+              <li><span>0→1 product development</span><span>Expert</span></li>
+              <li><span>Subscriptions &amp; monetisation</span><span>Expert</span></li>
+              <li><span>A/B testing &amp; experimentation</span><span>Expert</span></li>
+              <li><span>AI workflows &amp; LLM integration</span><span>Advanced</span></li>
+              <li><span>Backend engineering · Node / Python</span><span>Proficient</span></li>
+            </ul>
+          </div>
+          <div class="meta-block">
+            <h4>Tech I reach for</h4>
+            <ul>
+              <li><span>React · TypeScript · Node.js</span></li>
+              <li><span>Python · Supabase · Vercel</span></li>
+              <li><span>Klaviyo · WebEngage · Mixpanel</span></li>
+              <li><span>Figma · SQL · Jira</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NOW — CURRENT ROLE -->
+  <section class="view" id="view-now">
+    <div class="container">
+      <div class="section-head reveal">
+        <div class="eyebrow">Current Role · Apr 2026 → Present</div>
+        <h1 class="display-lg">Building <em>Vahdam's</em> next chapter.</h1>
+      </div>
+
+      <div class="now-grid reveal">
+        <div class="now-left">
+          <div class="now-role-card">
+            <div class="now-role-eyebrow">Full-time · Current</div>
+            <h2 class="now-role-title">AGM — Product Management</h2>
+            <div class="now-role-company">Vahdam India <span style="opacity:0.4">·</span> Delhi</div>
+            <div class="now-role-period">April 2026 → Present</div>
+            <p class="now-role-desc">Spearheading D2C growth across US, UK, and global markets. I own product performance, customer experience, CRM experimentation, conversion optimisation, and revenue initiatives — simultaneously. The challenge isn't finding opportunities; it's knowing which ones compound.</p>
+          </div>
+
+          <div class="now-focus-list reveal-stagger">
+            <div class="now-focus-eyebrow">Current focus areas</div>
+            <div class="now-focus-item">
+              <div class="now-focus-num">01</div>
+              <div>
+                <div class="now-focus-label">VAHDAM Lifecycle OS</div>
+                <div class="now-focus-desc">My biggest work highlight so far — a retention workflow connecting analytics, planning, segmentation, and mailer generation to drive sustainable D2C growth.</div>
+              </div>
+            </div>
+            <div class="now-focus-item">
+              <div class="now-focus-num">02</div>
+              <div>
+                <div class="now-focus-label">CRM &amp; Retention</div>
+                <div class="now-focus-desc">Lifecycle marketing via Klaviyo and WebEngage — daily campaigns, segmentation experiments, UK marketing revenue growth.</div>
+              </div>
+            </div>
+            <div class="now-focus-item">
+              <div class="now-focus-num">03</div>
+              <div>
+                <div class="now-focus-label">D2C Acquisition &amp; Conversion</div>
+                <div class="now-focus-desc">PDP optimisation, checkout experiments, bundle strategies, and pricing architecture for US, UK, and global markets.</div>
+              </div>
+            </div>
+            <div class="now-focus-item">
+              <div class="now-focus-num">04</div>
+              <div>
+                <div class="now-focus-label">Product Quality &amp; Reviews</div>
+                <div class="now-focus-desc">Cross-functional experiments across sourcing, fulfilment, and experience — driven by data, not guesswork.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="now-right reveal-stagger">
+          <div class="now-metrics-card">
+            <div class="now-metrics-eyebrow">Highlights so far</div>
+            <div class="now-metric">
+              <div class="now-metric-val">VAHDAM <span class="now-metric-tag">Lifecycle OS</span></div>
+              <div class="now-metric-label">Retention workflow — analytics → segmentation → mailers</div>
+            </div>
+            <div class="now-metric">
+              <div class="now-metric-val">UK <span style="color:var(--primary);font-style:normal;">↑</span></div>
+              <div class="now-metric-label">UK marketing revenue increased</div>
+            </div>
+            <div class="now-metric">
+              <div class="now-metric-val">D2C <span class="now-metric-tag">Global</span></div>
+              <div class="now-metric-label">US · UK · International markets</div>
+            </div>
+            <div class="now-metric">
+              <div class="now-metric-val">20 Apr 2026</div>
+              <div class="now-metric-label">Start date — building fast from day one</div>
+            </div>
+          </div>
+
+          <div class="now-stack-card">
+            <div class="now-metrics-eyebrow">Stack &amp; tools</div>
+            <div class="now-tags">
+              <span class="tag">Klaviyo</span>
+              <span class="tag">WebEngage</span>
+              <span class="tag">Shopify</span>
+              <span class="tag">Google Analytics</span>
+              <span class="tag">A/B Testing</span>
+              <span class="tag">SQL</span>
+              <span class="tag">Figma</span>
+              <span class="tag">Jira</span>
+            </div>
+          </div>
+
+          <div class="now-vahdam-card">
+            <div class="now-metrics-eyebrow">About Vahdam India</div>
+            <p style="font-size:0.87rem;color:var(--ink-dim);line-height:1.65;margin:0 0 12px;">One of India's fastest-growing D2C brands — selling premium garden-fresh teas to 100+ countries, direct from source to consumer. Founded in 2015, it's a business where product quality and growth are inseparably linked.</p>
+            <div class="now-tags">
+              <span class="tag">D2C</span>
+              <span class="tag">Global E-commerce</span>
+              <span class="tag">Premium Tea</span>
+              <span class="tag">100+ Countries</span>
+            </div>
+            <div style="margin-top:16px">
+              <a href="https://www.vahdam.com/" target="_blank" rel="noopener" class="btn" style="padding:8px 18px;font-size:13px;">Visit Vahdam.com ↗</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="view" id="view-experience">
     <div class="container">
       <div class="section-head reveal">
@@ -3678,6 +4141,7 @@
     <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><polygon points="5 3 19 12 5 21 5 3"/></svg>
     <span>Listen</span>
   </button>
+  <div class="anp-waveform" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
   <div class="anp-player">
     <span class="anp-label" id="anpLabel">Home</span>
     <div class="anp-progress" id="anpProgress"><div class="anp-fill" id="anpFill"></div></div>
@@ -3715,8 +4179,162 @@
 
 <script>
   /* ============ STATE ============ */
-  const ALL_VIEWS = ['home','chat','experience','projects','resume','contact','project-lifecycle','project-music','project-tasktracker','project-thirdeye','project-yaara','project-mailer','project-telesuite','project-lifeengine','project-agentlp'];
-  let audioModeEnabled = false; // true once user has clicked Play — gates TTS for chat
+  const ALL_VIEWS = ['home','about','now','chat','experience','projects','resume','contact','project-lifecycle','project-music','project-tasktracker','project-thirdeye','project-yaara','project-mailer','project-telesuite','project-lifeengine'];
+  let audioModeEnabled = false; // true once user has clicked Play — gates page narration
+  window.chatVoiceMuted = false; // chat replies speak aloud by default; mute toggle flips this
+  // Browsers block speech before the first gesture — track it so the load-time
+  // greeting stays silent but every user-triggered reply speaks.
+  window.userInteracted = false;
+  ['pointerdown','keydown'].forEach(ev => document.addEventListener(ev, () => { window.userInteracted = true; }, { once: true, capture: true }));
+
+  /* ---- Interaction model ----
+     Two top-level modes, surfaced as a toggle and at first open:
+       'chat'    → full-screen conversation, an LLM of Anchit. A voice sub-mode
+                   controls audio: 'text' (silent), 'reply' (spoken answers),
+                   'call' (hands-free voice both ways, both sides transcribed).
+       'narrate' → the real portfolio view, read aloud page-by-page in Anchit's
+                   cloned voice (its own script + on-page captions).
+     The two legacy audio gates are derived from this so the rest of the audio
+     plumbing keeps working unchanged. */
+  const MODE_VALUES = ['chat', 'narrate'];
+  const CHAT_AUDIO_VALUES = ['text', 'reply', 'call'];
+  function migrateMode(v) {
+    if (v === 'listen') return 'narrate';                 // old name
+    if (v === 'talk' || v === 'read') return 'chat';      // old names
+    return MODE_VALUES.includes(v) ? v : 'chat';
+  }
+  window.anchitMode = migrateMode(localStorage.getItem('anchit-chat-mode'));
+  window.anchitChatAudio = (function () {
+    const stored = localStorage.getItem('anchit-chat-audio');
+    if (CHAT_AUDIO_VALUES.includes(stored)) return stored;
+    return localStorage.getItem('anchit-chat-mode') === 'read' ? 'text' : 'reply';
+  })();
+  // Once the visitor stops audio, nothing auto-plays again until they explicitly
+  // press play, send a message, or pick a mode. Gates the auto-play paths.
+  window.anchitAudioStopped = false;
+  let lastPortfolioView = 'home';
+
+  function refreshAudioGates() {
+    audioModeEnabled = (window.anchitMode === 'narrate');                 // page narration
+    window.chatVoiceMuted = !(window.anchitMode === 'chat' && window.anchitChatAudio !== 'text'); // spoken replies
+  }
+  function paintModeUI() {
+    document.querySelectorAll('[data-mode-btn]').forEach(b => {
+      const on = b.getAttribute('data-mode-btn') === window.anchitMode;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    document.querySelectorAll('[data-chataudio-btn]').forEach(b => {
+      const on = b.getAttribute('data-chataudio-btn') === window.anchitChatAudio;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    document.body.classList.toggle('mode-narrate', window.anchitMode === 'narrate');
+    document.body.classList.toggle('mode-chat', window.anchitMode === 'chat');
+  }
+
+  function applyAnchitMode(mode, opts = {}) {
+    if (!MODE_VALUES.includes(mode)) mode = 'chat';
+    window.anchitMode = mode;
+    try { localStorage.setItem('anchit-chat-mode', mode); } catch {}
+    refreshAudioGates();
+    window.anchitAudioStopped = false; // choosing a mode is an opt-in to audio
+    paintModeUI();
+
+    if (!opts.silent) {
+      if (mode === 'chat') {
+        try { window.anchitAudioControls?.stop?.(); } catch {}  // halt any page narration
+        if (typeof window.openFullChat === 'function') window.openFullChat();
+        if (window.anchitChatAudio === 'call') startCallMode(); else stopCallMode();
+      } else { // narrate → leave the conversation, show the portfolio, read it aloud
+        stopCallMode();
+        const active = typeof currentViewName === 'function' ? currentViewName() : 'home';
+        const target = (active === 'chat') ? (lastPortfolioView || 'home') : active;
+        if (typeof window.minimizeChat === 'function') window.minimizeChat();
+        if (typeof switchView === 'function') switchView(target);
+        if (opts.narrate !== false && typeof window.anchitNarrate === 'function') {
+          setTimeout(() => window.anchitNarrate(typeof currentViewName === 'function' ? currentViewName() : target), 220);
+        }
+      }
+    }
+    document.dispatchEvent(new CustomEvent('anchitModeChanged', { detail: mode }));
+  }
+  window.applyAnchitMode = applyAnchitMode;
+
+  function setChatAudio(audio, opts = {}) {
+    if (!CHAT_AUDIO_VALUES.includes(audio)) audio = 'reply';
+    window.anchitChatAudio = audio;
+    try { localStorage.setItem('anchit-chat-audio', audio); } catch {}
+    refreshAudioGates();
+    window.anchitAudioStopped = false;
+    paintModeUI();
+    if (audio === 'text') { try { window.speechSynthesis?.cancel(); } catch {} }
+    if (!opts.silent && window.anchitMode === 'chat') {
+      if (audio === 'call') startCallMode(); else stopCallMode();
+    }
+  }
+  window.setChatAudio = setChatAudio;
+
+  /* ---- Call mode: continuous hands-free voice conversation ----
+     Listen → transcribe to a user bubble → send → speak the reply → listen
+     again. Both sides land in the chat window as text. */
+  let callRec = null, callActive = false;
+  function isAnchitSpeaking() {
+    if (typeof cloneAudio !== 'undefined' && cloneAudio && !cloneAudio.paused && !cloneAudio.ended) return true;
+    if (typeof packetPlaying !== 'undefined' && packetPlaying) return true;
+    return !!(window.speechSynthesis && window.speechSynthesis.speaking);
+  }
+  function beginCallListen() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!callActive || !SR) return;
+    if (isAnchitSpeaking()) { setTimeout(beginCallListen, 450); return; }
+    let finalText = '';
+    try {
+      callRec = new SR();
+      callRec.lang = 'en-IN'; callRec.interimResults = true; callRec.continuous = false;
+      document.getElementById('chatMic')?.classList.add('listening');
+      callRec.onresult = (e) => {
+        let t = ''; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+        finalText = t;
+        const input = document.getElementById('chatInput'); if (input) input.value = t;
+        if (e.results[e.results.length - 1].isFinal) { try { callRec.stop(); } catch {} }
+      };
+      callRec.onend = () => {
+        document.getElementById('chatMic')?.classList.remove('listening');
+        const input = document.getElementById('chatInput'); if (input) input.value = '';
+        if (!callActive) return;
+        if (finalText.trim()) { handleMessage(finalText.trim()); waitForReplyThenListen(); }
+        else setTimeout(beginCallListen, 350);
+      };
+      callRec.onerror = () => { document.getElementById('chatMic')?.classList.remove('listening'); if (callActive) setTimeout(beginCallListen, 800); };
+      callRec.start();
+    } catch { if (callActive) setTimeout(beginCallListen, 800); }
+  }
+  function waitForReplyThenListen() {
+    if (!callActive) return;
+    setTimeout(function check() {
+      if (!callActive) return;
+      if (isAnchitSpeaking()) { setTimeout(check, 400); return; }
+      beginCallListen();
+    }, 1400);
+  }
+  function startCallMode() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { if (typeof addBot === 'function') addBot("Call mode needs a browser with speech recognition (Chrome works best). Falling back to voice replies — tap the mic to talk."); setChatAudio('reply'); return; }
+    if (callActive) return;
+    callActive = true;
+    document.body.classList.add('call-active');
+    beginCallListen();
+  }
+  function stopCallMode() {
+    callActive = false;
+    document.body.classList.remove('call-active');
+    try { callRec && callRec.stop(); } catch {}
+    callRec = null;
+    document.getElementById('chatMic')?.classList.remove('listening');
+  }
+  window.anchitStopCall = stopCallMode;
+
   const root = document.documentElement;
   const nextFrame = window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : (cb) => setTimeout(cb, 0);
   window.anchitNarrate = window.anchitNarrate || function() {
@@ -3725,43 +4343,25 @@
     const text = viewName === 'home'
       ? "Hey, I'm Anchit Tandon. Currently A.G.M., Product Management, D2C Growth at Vahdam India across U.S., U.K. and global, where I joined on twentieth April twenty twenty six. My biggest Vahdam highlight so far is Vahdam Lifecycle O.S., and we have also increased U.K. marketing revenue."
       : "Ask me anything about my work, side projects, product philosophy, or how to connect.";
-    const caption = document.getElementById('chatCaption');
-    const words = text.trim().split(/\s+/);
-    if (caption) {
-      caption.innerHTML = words.map((w, i) => `<span class="chat-caption-word" data-i="${i}">${w}</span>`).join(' ');
-      caption.classList.add('active');
+    
+    if (typeof window.openFullChat === 'function') {
+      window.openFullChat();
     }
-    document.querySelectorAll('#view-home .active-narrate').forEach(el => el.classList.remove('active-narrate'));
-    const cleanup = () => {
-      caption?.classList.remove('active');
-      document.querySelectorAll('#view-home .active-narrate').forEach(el => el.classList.remove('active-narrate'));
-    };
-    if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) {
-      setTimeout(cleanup, 3000);
-      return;
+    if (typeof addBot === 'function') {
+      audioModeEnabled = true; // ensure audio triggers on addBot
+      addBot(text);
     }
-    window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.rate = 0.95; utter.pitch = 1; utter.lang = 'en-IN';
-    const _v = window.anchitPickVoice && window.anchitPickVoice();
-    if (_v) utter.voice = _v;
-    utter.onboundary = (event) => {
-      if (!caption || event.charIndex == null) return;
-      const idx = Math.max(0, text.slice(0, event.charIndex).trim().split(/\s+/).filter(Boolean).length - 1);
-      caption.querySelectorAll('.current').forEach(el => el.classList.remove('current'));
-      caption.querySelector(`[data-i="${idx}"]`)?.classList.add('current');
-    };
-    utter.onend = cleanup;
-    utter.onerror = function() {};
-    window.speechSynthesis.speak(utter);
   };
 
+
   /* ============ THEME ============ */
-  const savedTheme = 'dark';
+  const savedTheme = localStorage.getItem('anchit-theme') || 'dark';
   root.setAttribute('data-theme', savedTheme);
   document.getElementById('themeToggle').addEventListener('click', () => {
-    root.setAttribute('data-theme', 'dark');
-    localStorage.setItem('anchit-theme', 'dark');
+    const currentTheme = root.getAttribute('data-theme');
+    const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', nextTheme);
+    localStorage.setItem('anchit-theme', nextTheme);
   });
 
   /* ============ SIDEBAR COLLAPSE (desktop) ============ */
@@ -4211,12 +4811,9 @@
 	    chatBody.appendChild(w);
 	    bindChatActions(w);
     scrollChat();
-    // Reply mode governs whether answers are spoken. 'text' = silent,
-    // 'voice' = read the full answer aloud, 'call' = read aloud then re-open
-    // the mic so the conversation continues hands-free. Falls back to the
-    // legacy audioModeEnabled flag when no explicit mode is set.
-    const replyMode = window.chatReplyMode || (audioModeEnabled ? 'voice' : 'text');
-    if (replyMode !== 'text') {
+    // Reply with voice + text together, unless the user muted chat audio or
+    // stopped playback (in which case it stays silent until they opt back in).
+    if ((audioModeEnabled || !window.chatVoiceMuted) && window.userInteracted && !window.anchitAudioStopped) {
       const bubble = w.querySelector('.msg-bubble');
       const tmp = document.createElement('div');
       tmp.innerHTML = html;
@@ -4232,7 +4829,7 @@
 	  // Shared audio element for the cloned-voice path.
 	  let cloneAudio = null;
 	  function ttsEndpoint() {
-	    const localHosts = ['localhost', '127.0.0.1', '0.0.0.0'];
+	    const localHosts = ['localhost', '127.0.0.1', '0.0.0.0', ''];
 	    return localHosts.includes(location.hostname)
 	      ? 'http://127.0.0.1:8000/api/tts'
 	      : '/api/tts';
@@ -4272,12 +4869,28 @@
     if (!plainText || !bubbleEl) { if (typeof onComplete === 'function') { try { onComplete(); } catch {} } return; }
     if (window.speechSynthesis) window.speechSynthesis.cancel();
 
-    // Chat replies are already shown as a message bubble — don't mirror the text
-    // into the separate transcript (that caused the words to appear twice). The
-    // bubble glows while it is being read; the in-chat transcript bubble is used
-    // only by full-page narration (Listen), where there is no reply bubble.
-    const caption = null;
+    // Highlight each word inside the reply bubble as it is spoken: wrap the
+    // bubble's text nodes in indexed spans and let the voice boundary events
+    // drive the .current marker. Element children (links, em) stay intact.
     const words = plainText.trim().split(/\s+/);
+    let wi = 0;
+    const walker = document.createTreeWalker(bubbleEl, NodeFilter.SHOW_TEXT, null);
+    const textNodes = [];
+    while (walker.nextNode()) textNodes.push(walker.currentNode);
+    textNodes.forEach(node => {
+      if (!node.nodeValue.trim()) return;
+      const frag = document.createDocumentFragment();
+      node.nodeValue.split(/(\s+)/).forEach(part => {
+        if (!part) return;
+        if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+        const s = document.createElement('span');
+        s.className = 'tts-w'; s.setAttribute('data-i', wi++);
+        s.textContent = part;
+        frag.appendChild(s);
+      });
+      node.parentNode.replaceChild(frag, node);
+    });
+    const caption = wi > 0 ? bubbleEl : null;
 
 	    const msgEl = bubbleEl.closest('.msg');
 	    msgEl?.classList.add('speaking');
@@ -4304,15 +4917,11 @@
 	      clearInterval(transcriptTimer);
 	      transcriptTimer = null;
 	      msgEl?.classList.remove('speaking');
-	      if (caption) {
-	        markTranscriptWord(words.length - 1);
-	        caption.classList.add('active');
-	      }
-	      if (!_spoke) { _spoke = true; if (typeof onComplete === 'function') { try { onComplete(); } catch {} } }
+	      caption?.querySelectorAll('.current').forEach(el => el.classList.remove('current'));
 	    };
 	    startTranscriptTimer();
 
-	    speakViaClone(plainText, () => { if (caption) caption.classList.add('active'); }, finishTranscript, { caption, words })
+	    speakViaClone(plainText, null, finishTranscript, { caption, words })
 	      .then((usedClone) => {
 	        if (usedClone) return;
 	        if (!window.speechSynthesis) {
@@ -4478,6 +5087,11 @@
 	  let packetPlaying = false;
 	  let packetAudio = null;
 	  function playNextPacket(statusEl) {
+	    if (window.chatVoiceMuted || window.anchitAudioStopped) {
+	      packetQueue = [];
+	      if (statusEl) statusEl.textContent = window.anchitAudioStopped ? 'Voice stopped' : 'Text mode — voice off';
+	      return;
+	    }
 	    if (packetPlaying || packetQueue.length === 0) return;
 	    const packet = packetQueue.shift();
 	    packetPlaying = true;
@@ -4572,6 +5186,8 @@
 	  }
 	  function handleMessage(text) {
 	    if (!text.trim()) return;
+	    // Sending a message is an explicit re-engagement, so audio is allowed again.
+	    window.anchitAudioStopped = false;
 	    addUser(text);
 	    if (/\b(narrate|read|speak|voice|play audio|listen)\b/i.test(text)) {
 	      if (typeof window.anchitNarrate === 'function') window.anchitNarrate(currentViewName());
@@ -4642,10 +5258,9 @@
   chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendCurrent(); });
 
   
-	  // Seed the chat's guide content, but leave it minimised as a floating CTA.
+	  // Only open guide chat. Do NOT minimize it.
 	  setTimeout(() => {
 	    renderPageGuide(currentViewName(), { initial: true });
-	    if (typeof window.minimizeChat === 'function') window.minimizeChat();
 	  }, 800);
 
 	  // First visit this session opens with a centered introduction popup. The
@@ -4689,7 +5304,8 @@
     });
   }
 
-  function finishOnboarding() {
+  function finishOnboarding(mode) {
+    const chosen = MODE_VALUES.includes(mode) ? mode : window.anchitMode;
     const ob = document.getElementById('onboarding');
     if (ob) {
       ob.classList.remove('intro-open');
@@ -4697,17 +5313,56 @@
       ob.style.pointerEvents = 'none';
       setTimeout(() => ob.style.visibility = 'hidden', 500);
     }
-	    audioModeEnabled = true;
 	    chatIntroShown = true;
-	    if (typeof window.openGuideChat === 'function') window.openGuideChat();
-	    setTimeout(() => {
-	      renderPageGuide(currentViewName(), { initial: true, speak: true });
-	    }, 180);
+	    // Chat → full-screen conversation; Narrate → portfolio + page narration.
+	    // applyAnchitMode (non-silent) performs the open/narrate side-effects.
+	    applyAnchitMode(chosen, { narrate: chosen === 'narrate' });
+	    if (chosen === 'chat') {
+	      setTimeout(() => { renderPageGuide(currentViewName(), { initial: true }); }, 180);
+	    }
 	  }
 
-  if (obSubmit) { obSubmit.addEventListener('click', finishOnboarding); }
+  // First-open mode choice → sets the interaction mode, then dismisses onboarding.
+  document.querySelectorAll('[data-ob-mode]').forEach(b => {
+    b.addEventListener('click', () => finishOnboarding(b.getAttribute('data-ob-mode')));
+  });
+  // Header tabs: Chat ↔ Narrate. Switching to Narrate reads the page now.
+  document.querySelectorAll('[data-mode-btn]').forEach(b => {
+    b.addEventListener('click', () => {
+      const mode = b.getAttribute('data-mode-btn');
+      applyAnchitMode(mode, { narrate: mode === 'narrate' });
+    });
+  });
+  // Chat voice sub-control: Text / Voice reply / Call.
+  document.querySelectorAll('[data-chataudio-btn]').forEach(b => {
+    b.addEventListener('click', () => setChatAudio(b.getAttribute('data-chataudio-btn')));
+  });
+  // Remember the last real portfolio view so Narrate has somewhere to return to.
+  document.addEventListener('viewChanged', (e) => {
+    if (e.detail && e.detail !== 'chat') lastPortfolioView = e.detail;
+  });
+  // Reflect the persisted mode + voice in the UI on load (no side-effects on boot).
+  applyAnchitMode(window.anchitMode, { silent: true });
+  setChatAudio(window.anchitChatAudio, { silent: true });
+
+  if (obSubmit) { obSubmit.addEventListener('click', () => finishOnboarding()); }
   if (obInput) { obInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') finishOnboarding(); }); }
 
+  // Show the mode chooser on first visit only. Returning visitors keep their
+  // saved mode and go straight in — the header toggle lets them change it.
+  const ob = document.getElementById('onboarding');
+  if (ob) {
+    const hasChosenMode = !!localStorage.getItem('anchit-chat-mode');
+    if (hasChosenMode) {
+      ob.style.opacity = '0';
+      ob.style.visibility = 'hidden';
+      ob.style.pointerEvents = 'none';
+    } else {
+      ob.style.opacity = '1';
+      ob.style.visibility = 'visible';
+      ob.style.pointerEvents = 'auto';
+    }
+  }
 
   // ---- In-chat mic: speak → transcribe into the input → auto-send ----
   (function(){
@@ -4920,13 +5575,15 @@
 
     const NARRATIONS = {
       home:       "Hey, I'm Anchit Tandon. An engineer who learned to love the funnel. Building products. Scaling growth. Creating leverage. Currently AGM – Product Management and D to C Growth at Vahdam India, driving growth across the US, UK and global markets while helping scale a leading consumer brand. Previously at Times Internet, I owned growth and monetisation across ET Prime and TOI Plus, scaling Assisted Sales five times to eighty lakh rupees in monthly recurring revenue in about ten months, rebuilding ET Markets and ET across iOS, Android and web to three crore plus in incremental annual recurring revenue, and building high-performing acquisition and retention funnels. I also led the end-to-end launch and execution of the inaugural Times Internet Delhi Half Marathon twenty twenty six at Dhyan Chand National Stadium — establishing a new I P, delivering a fifteen thousand plus participant experience, and creating a new revenue stream for the business. Today, I operate at the intersection of Product, Growth and Revenue — building systems, optimising funnels, running experiments, and creating scalable pathways to sustainable growth.",
+      about:      "An engineer who learned to love the funnel. I started building real-time consumer apps — live sports, e-commerce — the kind of work where your code touches a million people in a weekend. Then I moved to product and fell for the funnel: the unfiltered truth about every decision you make. B. Tech Computer Science at V.I.T., then software engineering at Tuple Technologies and City Mall, then product at Times Internet, A.P.M. to Senior P.M., now A.G.M. Product at Vahdam India. I think in systems, ship in experiments, and build A.I. side projects on weekends because I can't sit still.",
+      now:        "Current role at Vahdam India. A.G.M. Product Management, D2C Growth, since April twenty twenty six. I own product performance, customer experience, C.R.M. experimentation, conversion optimisation, and revenue initiatives simultaneously. My biggest highlight so far is VAHDAM Lifecycle O.S. — a retention workflow connecting analytics, planning, segmentation, and mailer generation. I've also helped increase U.K. marketing revenue. The challenge isn't finding opportunities, it's knowing which ones compound.",
       chat:       "Ask me anything — my work, my side projects, why I moved from engineering to product, or what I'm solving right now.",
       experience: "Work experience. Currently A.G.M., Product Management, D2C Growth at Vah-dahm India across U.S., U.K. and global. I joined on twentieth April twenty twenty six, and the headline so far is Vahdam Lifecycle O.S. plus increased U.K. marketing revenue. Previously at Times Internet — A.P.M. to Senior P.M. Five x M.R.R. on Assisted Sales, three crore plus A.R.R. from the E.T. Markets revamp. Started as a backend engineer at Tuple Technologies and City Mall.",
       projects:   "Personal projects, built out of curiosity, depth and experimentation. Vahdam Lifecycle O.S. is my most important work project right now. Music Gen A.I. is my passion project for music, and this portfolio is also a hobby build. Other live builds include Hey Yaara, The Third Eye, Mailer Architect, A.I. Tele Suite and T.H. Plus Life Engine.",
       resume:     "My resume. Download or view the full P.D.F.",
       contact:    "Let's build something worth measuring. I am open to roles, collaborations, and honest conversations about funnels, subscriptions, A.I. workflows and consumer product."
     };
-    const VIEW_LABELS = { home: 'Home', chat: 'Chat with me', experience: 'Experience', projects: 'Side Hustle', resume: 'My Resume', contact: 'Contact' };
+    const VIEW_LABELS = { home: 'Home', about: 'About Me', now: 'Now', chat: 'Chat with me', experience: 'Experience', projects: 'Side Hustle', resume: 'My Resume', contact: 'Contact' };
 
 	    let progressTimer = null, utterStart = 0, utterDuration = 0;
 	    let currentViewName = 'home';
@@ -4953,7 +5610,16 @@
       if (!indicator) return;
       const key = viewName?.startsWith('project-') ? 'Projects' : (VIEW_LABELS[viewName] || 'Anchit');
       indicator.querySelector('.audio-ambient-label').textContent = 'Playing · ' + key;
+      indicator.classList.remove('loading');
       indicator.classList.add('active');
+    }
+    function showLoadingIndicator(viewName) {
+      if (!indicator) return;
+      const key = viewName?.startsWith('project-') ? 'Projects' : (VIEW_LABELS[viewName] || 'Anchit');
+      indicator.querySelector('.audio-ambient-label').textContent = 'Loading voice · ' + key;
+      indicator.classList.add('active', 'loading');
+      const status = document.getElementById('streamAudioStatus');
+      if (status) status.textContent = "Loading Anchit's voice…";
     }
     function hideIndicator() {
       indicator?.classList.remove('active', 'listening');
@@ -5049,6 +5715,9 @@
           caption.innerHTML = words.map((w, i) => `<span class="chat-caption-word" data-i="${i}">${w}</span>`).join(' ');
           caption.classList.add('active');
         }
+	        // Surface a "loading voice" state while the cloned-voice request is in
+	        // flight — XTTS / HF endpoints can take a moment to warm up.
+	        showLoadingIndicator(viewName);
 	        const endpoint = typeof ttsEndpoint === 'function'
 	          ? ttsEndpoint()
 	          : (['localhost', '127.0.0.1', '0.0.0.0'].includes(location.hostname) ? 'http://127.0.0.1:8000/api/tts' : '/api/tts');
@@ -5056,9 +5725,9 @@
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text })
         });
-        if (!r.ok) return false;
+        if (!r.ok) { indicator?.classList.remove('loading'); return false; }
         const ct = r.headers.get('content-type') || '';
-        if (!ct.includes('audio')) return false;
+        if (!ct.includes('audio')) { indicator?.classList.remove('loading'); return false; }
         const blob = await r.blob();
         const url = URL.createObjectURL(blob);
         stopPageAudio();
@@ -5081,12 +5750,16 @@
           setPlayerState(false, viewName);
           stopProgressBar();
           if (caption) { caption.classList.remove('active'); caption.innerHTML = ''; }
+          const status = document.getElementById('streamAudioStatus');
+          if (status) status.textContent = '';
           pageAudio = null;
         };
         pageAudio.onended = done; pageAudio.onerror = done;
         await pageAudio.play();
+        const status = document.getElementById('streamAudioStatus');
+        if (status) status.textContent = '';
         return true;
-      } catch { return false; }
+      } catch { indicator?.classList.remove('loading'); return false; }
     }
 
     function speakViaBrowserVoice(viewName, text) {
@@ -5167,6 +5840,7 @@
 
 	    function trySpeak(viewName) { speakView(viewName); }
 	    window.anchitNarrate = function(viewName) {
+	      window.anchitAudioStopped = false;   // explicit narrate re-enables audio
 	      audioModeEnabled = true;
 	      const activeEl = document.querySelector('.view.active');
 	      trySpeak(viewName || (activeEl ? activeEl.id.replace('view-', '') : 'home'));
@@ -5179,6 +5853,7 @@
 	    }
 
 	    function toggleNarrationPlayback() {
+	      window.anchitAudioStopped = false;   // user pressed play/pause control
 	      audioModeEnabled = true;
 	      if (audioMuted) {
 	        audioMuted = false;
@@ -5251,6 +5926,7 @@
 	    });
 
     function stopAllPlayback() {
+	      window.anchitAudioStopped = true;   // stay stopped until an explicit play
 	      stopPageAudio();
 	      stopHighlighting();
 	      audioModeEnabled = false;
@@ -5268,6 +5944,7 @@
     stopBtn?.addEventListener('click', stopAllPlayback);
 
     playBtn?.addEventListener('click', () => {
+      window.anchitAudioStopped = false;   // explicit play re-enables audio
       audioModeEnabled = true;
       const activeEl = document.querySelector('.view.active');
       const vName = activeEl ? activeEl.id.replace('view-', '') : 'home';
@@ -5276,7 +5953,7 @@
 
     dismissBtn?.addEventListener('click', () => { nudge?.classList.add('dismissed'); });
 
-    document.addEventListener('viewChanged', (e) => { if (audioModeEnabled) trySpeak(e.detail); });
+    document.addEventListener('viewChanged', (e) => { if (audioModeEnabled && !window.anchitAudioStopped) trySpeak(e.detail); });
 
   })();
   } catch (err) {
@@ -5368,6 +6045,10 @@
       navigator.serviceWorker.register('sw.js').catch(() => {});
     });
   }
+
+  window.addEventListener('load', () => {
+    // Service worker load logic can go here if needed
+  });
 </script>
 
 <!-- ───────── Schedule-a-call modal (Google Meet invite) ───────── -->
@@ -6723,12 +7404,19 @@
   window.openFullChat = openFullChat;
   window.minimizeChat = minimizeChat;
   document.getElementById('chatMinimizeBtn')?.addEventListener('click', () => minimizeChat());
-	  // Chat is a floating CTA on every page — start minimised by default.
-	  chatBlock?.classList.add('minimized');
-	  viewChatEl?.classList.add('chat-view-minimized');
-	  returnBtn?.classList.add('visible');
-	  document.body.classList.remove('view-chat');
-	  document.body.classList.remove('chat-guide-open');
+	  // Returning Narrate users start on the portfolio (chat minimized); everyone
+	  // else gets the floating chat guide. First-time visitors see the chooser.
+	  if (window.anchitMode === 'narrate' && localStorage.getItem('anchit-chat-mode')) {
+	    minimizeChat();
+	  } else {
+	    openGuideChat();
+	  }
+	  const isFirstTime = !localStorage.getItem('anchit-visited');
+	  const msg = isFirstTime
+	    ? "Welcome. I'm Anchit. Ask me anything about my work, builds, or how to reach me — type, talk, or start a call. Or switch to Narrate and I'll read the portfolio in my voice."
+	    : "Welcome back. I'm Anchit. How can I help you today?";
+	  seedChatIntro(msg);
+	  localStorage.setItem('anchit-visited', '1');
 	  function paintTileAudioState(state = {}) {
 	    const muted = !!state.muted;
 	    const playing = !!state.playing;
@@ -6768,6 +7456,7 @@
 	  }
 
 	  function setChatAudioMuted(nextMuted) {
+	    window.chatVoiceMuted = nextMuted;
 	    if (window.anchitAudioControls) {
 	      if (nextMuted) window.anchitAudioControls.mute?.();
 	      else window.anchitAudioControls.unmute?.();
@@ -6790,12 +7479,17 @@
     }
   }
 
-  returnMain?.addEventListener('click', openGuideChat);
+  // The floating launcher opens the full-screen Chat conversation.
+  returnMain?.addEventListener('click', () => {
+    if (typeof window.applyAnchitMode === 'function') window.applyAnchitMode('chat');
+    else openFullChat();
+  });
 	  returnMic?.addEventListener('click', (e) => {
 	    e.stopPropagation();
-	    if (!chatAudioMuted && typeof audioModeEnabled !== 'undefined') audioModeEnabled = true;
-	    openGuideChat();
-	    setTimeout(() => document.getElementById('chatMic')?.click(), 260);
+	    // Mic on the launcher → open Chat and start a hands-free call.
+	    if (typeof window.setChatAudio === 'function') window.setChatAudio('call', { silent: true });
+	    if (typeof window.applyAnchitMode === 'function') window.applyAnchitMode('chat');
+	    else openFullChat();
 	  });
 	  returnPlay?.addEventListener('click', (e) => {
 	    e.stopPropagation();
@@ -6877,8 +7571,15 @@
         rec.onend = () => {
           listening = false;
           freshMic.classList.remove('listening');
-          if (chatInputEl.value.trim()) {
-            if (transcript) transcript.textContent = 'Transcript ready. Press send to submit as a chat message.';
+          const heard = chatInputEl.value.trim();
+          if (heard) {
+            // User spoke — answer with voice and text together.
+            if (typeof audioModeEnabled !== 'undefined') audioModeEnabled = true;
+            window.chatVoiceMuted = false;
+            if (transcript) transcript.textContent = '“' + heard + '”';
+            const sendBtn = document.getElementById('chatSend');
+            if (sendBtn) sendBtn.click();
+            setTimeout(() => transcript?.classList.remove('active'), 1400);
           } else {
             transcript?.classList.remove('active');
           }
