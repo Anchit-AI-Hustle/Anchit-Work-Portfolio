@@ -4496,7 +4496,10 @@
   const hash = window.location.hash.replace('#', '');
   if (hash) {
     const [viewPart, anchorPart] = hash.split('/');
-    switchView(viewPart, anchorPart || undefined);
+    // Never auto-route into the chat overlay on load — always land on HOME; chat
+    // opens via the chooser or a click. openFullChat() writes #chat to the URL,
+    // which would otherwise bounce returning visitors straight back into chat.
+    if (viewPart && viewPart !== 'chat') switchView(viewPart, anchorPart || undefined);
   }
 
   /* ============ REVEAL ON SCROLL — defined below ============ */
