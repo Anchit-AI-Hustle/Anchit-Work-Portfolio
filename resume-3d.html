@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anchit Tandon — 3D Resume Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0807; --bg-deep:#050403; --ink:#FBF5EC; --ink-dim:#A39E94; --ink-mute:#5A554E;
+    --primary:#FF6940; --primary-deep:#FF4D1F; --accent:#2EE5AC;
+    --font-display:'Fraunces',serif; --font-body:'Inter',sans-serif; --font-mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:radial-gradient(130% 90% at 50% -10%, #1A140E, var(--bg) 55%, var(--bg-deep));
+    color:var(--ink);font-family:var(--font-body);overflow:hidden}
+  #stage{position:fixed;inset:0}
+  #c{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+  #c:active{cursor:grabbing}
+
+  .hud{position:fixed;top:28px;left:28px;z-index:10;pointer-events:none;max-width:70%}
+  .hud h1{font-family:var(--font-display);font-weight:600;font-size:clamp(22px,3.4vw,38px);line-height:1.05;
+    background:linear-gradient(90deg,#FFE9DF,var(--primary) 60%,#FFB89E);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .hud p{color:var(--ink-dim);margin-top:8px;font-size:14px}
+  .hud .eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+
+  .dock{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:10;display:flex;gap:6px;
+    background:rgba(8,6,5,.7);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.10);
+    border-radius:999px;padding:8px;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+  .dock a,.dock button{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;
+    font-family:var(--font-mono);font-size:12px;letter-spacing:.04em;color:var(--ink);padding:9px 15px;border-radius:999px}
+  .dock a:hover,.dock button:hover{color:var(--primary);background:rgba(255,105,64,.10)}
+  .dock .sep{width:1px;align-self:stretch;background:rgba(255,255,255,.12);margin:4px 2px}
+  .dock svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+  .loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:5;
+    font-family:var(--font-mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-mute)}
+  .loading.hidden{display:none}
+
+  /* HTML fallback (no WebGL) — a clean static card */
+  #fallback{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:24px;z-index:6}
+  #fallback.show{display:flex}
+  .fcard{width:min(460px,92vw);border-radius:24px;padding:40px 34px;text-align:center;
+    background:linear-gradient(160deg,#15120E,var(--bg) 60%,var(--bg-deep));border:1px solid #3D3830;
+    box-shadow:0 40px 90px rgba(0,0,0,.6)}
+  .fcard img{width:96px;height:96px;border-radius:24px;border:1px solid rgba(255,105,64,.5);box-shadow:0 0 0 5px rgba(255,77,31,.12)}
+  .fcard h2{font-family:var(--font-display);font-size:34px;margin-top:18px}
+  .fcard .t{font-size:15px;color:var(--ink-dim);margin-top:10px}.fcard .t em{color:var(--primary);font-style:normal;font-weight:600}
+  .fcard .r{font-family:var(--font-mono);font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--accent);margin-top:14px}
+</style>
+</head>
+<body>
+  <div class="hud">
+    <div class="eyebrow">Interactive resume</div>
+    <h1>Anchit Tandon</h1>
+    <p>Move to lean the card · click or tap to flip it.</p>
+  </div>
+
+  <div id="stage"><canvas id="c"></canvas></div>
+  <div class="loading" id="loading">Loading 3D…</div>
+
+  <div id="fallback">
+    <div class="fcard">
+      <img src="AnchitTandon-AppLogo.png" alt="AT">
+      <h2>Anchit Tandon</h2>
+      <p class="t">An engineer who <em>learned to love the funnel.</em></p>
+      <div class="r">Product · Growth · Revenue</div>
+    </div>
+  </div>
+
+  <div class="dock">
+    <a href="index.html#projects"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Projects</a>
+    <span class="sep"></span>
+    <a href="assets/resume.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Résumé PDF</a>
+    <span class="sep"></span>
+    <a href="index.html#contact"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>Contact</a>
+  </div>
+
+  <script type="importmap">
+  { "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js"
+  } }
+  </script>
+  <script type="module">
+    const loadingEl = document.getElementById('loading');
+    const fallbackEl = document.getElementById('fallback');
+    function useFallback(){ loadingEl.classList.add('hidden'); fallbackEl.classList.add('show'); }
+
+    let THREE;
+    try { THREE = await import('three'); }
+    catch (e) { console.warn('three import failed', e); useFallback(); throw e; }
+
+    const canvas = document.getElementById('c');
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+    } catch (e) { console.warn('webgl unavailable', e); useFallback(); throw e; }
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+    camera.position.set(0, 0, 6);
+
+    // ---- lights ----
+    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+    const key = new THREE.DirectionalLight(0xffd9c2, 1.2); key.position.set(-4, 5, 4); scene.add(key);
+    const rim = new THREE.PointLight(0xff4d1f, 2.2, 40); rim.position.set(5, -2, 3); scene.add(rim);
+    const fill = new THREE.PointLight(0x2ee5ac, 1.0, 40); fill.position.set(-5, 2, 2); scene.add(fill);
+
+    // ---- card faces drawn to canvas textures (crisp, branded, no font CDN in WebGL) ----
+    await (document.fonts ? document.fonts.ready : Promise.resolve());
+    const logo = new Image(); logo.crossOrigin = 'anonymous'; logo.src = 'AnchitTandon-AppLogo.png';
+    await new Promise(res => { logo.onload = res; logo.onerror = res; });
+
+    function roundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+    function faceCanvas(draw){
+      const W=1024,H=640,cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+      const ctx=cv.getContext('2d'); draw(ctx,W,H); return cv;
+    }
+    function bg(ctx,W,H){
+      const g=ctx.createLinearGradient(0,0,W,H); g.addColorStop(0,'#221C16'); g.addColorStop(.55,'#120F0B'); g.addColorStop(1,'#0A0807');
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+      const r=ctx.createRadialGradient(W*0.2,H*0.1,10,W*0.2,H*0.1,W*0.6); r.addColorStop(0,'rgba(255,77,31,.18)'); r.addColorStop(1,'transparent');
+      ctx.fillStyle=r; ctx.fillRect(0,0,W,H);
+      ctx.strokeStyle='rgba(255,105,64,.30)'; ctx.lineWidth=4; roundRect(ctx,12,12,W-24,H-24,40); ctx.stroke();
+    }
+    const frontCv = faceCanvas((ctx,W,H)=>{
+      bg(ctx,W,H);
+      // logo in a circle, right side
+      const d=230, lx=W-d-70, ly=H/2-d/2;
+      ctx.save(); ctx.beginPath(); ctx.arc(lx+d/2,ly+d/2,d/2,0,Math.PI*2); ctx.closePath(); ctx.clip();
+      if(logo.complete && logo.naturalWidth){ const s=d*1.05; ctx.drawImage(logo, lx+d/2-s/2, ly+d/2-s*0.62, s, s); }
+      ctx.restore();
+      ctx.strokeStyle='rgba(255,105,64,.55)'; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(lx+d/2,ly+d/2,d/2,0,Math.PI*2); ctx.stroke();
+      // text, left
+      ctx.textBaseline='alphabetic';
+      ctx.fillStyle='#FBF5EC'; ctx.font='600 72px Fraunces, Georgia, serif'; ctx.fillText('Anchit', 70, 250);
+      ctx.fillStyle='#FF6940'; ctx.fillText('Tandon', 70, 332);
+      ctx.fillStyle='#2EE5AC'; ctx.font='500 24px "JetBrains Mono", monospace'; ctx.fillText('PRODUCT · GROWTH · REVENUE', 72, 392);
+      ctx.fillStyle='#A39E94'; ctx.font='400 30px Inter, sans-serif';
+      ctx.fillText('An engineer who learned', 72, 452);
+      ctx.fillStyle='#FBF5EC'; ctx.fillText('to love the funnel.', 72, 492);
+      ctx.fillStyle='#5A554E'; ctx.font='500 20px "JetBrains Mono", monospace'; ctx.fillText('CLICK TO FLIP →', 72, 575);
+    });
+    const backCv = faceCanvas((ctx,W,H)=>{
+      bg(ctx,W,H);
+      ctx.fillStyle='#2EE5AC'; ctx.font='500 22px "JetBrains Mono", monospace'; ctx.fillText('WHAT I DO', 72, 120);
+      ctx.fillStyle='#FBF5EC'; ctx.font='600 56px Fraunces, Georgia, serif'; ctx.fillText('Core expertise', 70, 184);
+      ctx.fillStyle='#FF4D1F'; ctx.fillRect(72,214,84,4);
+      const items=[
+        'Product management & 0→1 consumer products',
+        'D2C growth across US, UK & global markets',
+        'Lifecycle, funnels & retention systems',
+        'Experimentation — read the funnel, compound wins',
+        'AI workflows & agents mapped to real work',
+      ];
+      ctx.font='400 28px Inter, sans-serif';
+      items.forEach((t,i)=>{ const y=288+i*62;
+        ctx.fillStyle='#FF6940'; ctx.beginPath(); ctx.arc(86,y-9,7,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='#F1EAD9'; ctx.fillText(t,112,y);
+      });
+      ctx.fillStyle='#FF6940'; ctx.font='500 22px "JetBrains Mono", monospace'; ctx.fillText('anchittandon.vercel.app', 72, H-46);
+    });
+
+    const frontTex = new THREE.CanvasTexture(frontCv);
+    const backTex  = new THREE.CanvasTexture(backCv);
+    [frontTex,backTex].forEach(t=>{ t.anisotropy = renderer.capabilities.getMaxAnisotropy(); t.colorSpace = THREE.SRGBColorSpace; });
+
+    const faceMat = (tex)=> new THREE.MeshStandardMaterial({ map:tex, roughness:0.45, metalness:0.35 });
+    const edgeMat = new THREE.MeshStandardMaterial({ color:0x17120D, roughness:0.5, metalness:0.6 });
+    // BoxGeometry material order: px, nx, py, ny, pz(front), nz(back)
+    const card = new THREE.Mesh(
+      new THREE.BoxGeometry(4, 2.5, 0.12),
+      [edgeMat, edgeMat, edgeMat, edgeMat, faceMat(frontTex), faceMat(backTex)]
+    );
+    scene.add(card);
+
+    // ---- interaction ----
+    const pointer = { x:0, y:0 };
+    addEventListener('pointermove', e => { pointer.x = (e.clientX/innerWidth)*2-1; pointer.y = (e.clientY/innerHeight)*2-1; });
+    let flipped = false;
+    canvas.addEventListener('click', ()=> flipped = !flipped );
+
+    function resize(){
+      const w=innerWidth,h=innerHeight; renderer.setSize(w,h,false);
+      camera.aspect=w/h;
+      // pull the camera back so the whole 4×2.5 card fits any aspect (with margin)
+      const vFov = camera.fov*Math.PI/180;
+      const fitH = (2.5*1.4)/(2*Math.tan(vFov/2));
+      const fitW = (4*1.25)/(2*Math.tan(vFov/2)*camera.aspect);
+      camera.position.z = Math.max(5, fitH, fitW);
+      camera.updateProjectionMatrix();
+    }
+    addEventListener('resize', resize); resize();
+
+    const lerp = (a,b,t)=> a + (b-a)*t;
+    const clock = new THREE.Clock();
+    loadingEl.classList.add('hidden');
+    function tick(){
+      const t = clock.getElapsedTime();
+      const tX = flipped ? 0 : -pointer.y * 0.35;
+      const tY = (flipped ? Math.PI : 0) + pointer.x * 0.45;
+      card.rotation.x = lerp(card.rotation.x, tX, 0.08);
+      card.rotation.y = lerp(card.rotation.y, tY, 0.08);
+      card.position.y = lerp(card.position.y, Math.sin(t*0.9)*0.08, 0.1);
+      rim.position.x = Math.cos(t*0.4)*5; rim.position.y = Math.sin(t*0.4)*3;
+      renderer.render(scene, camera);
+      requestAnimationFrame(tick);
+    }
+    tick();
+  </script>
+</body>
+</html>

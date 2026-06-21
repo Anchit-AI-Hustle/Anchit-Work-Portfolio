@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anchit — Opening Intro (prototype)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0F0D0A; --bg-deep:#060503; --ink:#FBF5EC; --ink-dim:#A39E94; --ink-mute:#5A554E;
+    --primary:#FF6940; --primary-deep:#FF4D1F; --accent:#2EE5AC;
+    --book:#17120D; --book-edge:#241B12;
+    --font-display:'Fraunces',serif; --font-body:'Inter',sans-serif; --font-mono:'JetBrains Mono',monospace;
+    --portrait:url('AnchitTandon-AppLogo.png');
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:radial-gradient(130% 90% at 50% -5%, #1A140E, var(--bg) 55%, var(--bg-deep));
+    font-family:var(--font-body);color:var(--ink);min-height:100vh;overflow:hidden;
+    display:flex;align-items:center;justify-content:center}
+
+  .scene{position:relative;width:min(560px,94vw);height:min(720px,94vh);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;perspective:1700px}
+
+  /* ambient glow that breathes while speaking */
+  .halo{position:absolute;top:46%;left:50%;width:340px;height:340px;transform:translate(-50%,-50%);
+    border-radius:50%;background:radial-gradient(circle, rgba(255,77,31,.32), transparent 62%);
+    filter:blur(20px);opacity:.0;transition:opacity .6s;pointer-events:none}
+  .speaking .halo{opacity:.7;animation:halopulse 1.6s ease-in-out infinite}
+  @keyframes halopulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.08)}}
+
+  /* ---------- the book ---------- */
+  .book{position:relative;width:300px;height:380px;transform-style:preserve-3d;
+    transform:rotateX(6deg) rotateY(-12deg);transition:transform 1s ease}
+  .opened .book{transform:rotateX(4deg) rotateY(0deg)}
+  .inside{position:absolute;inset:0;border-radius:8px 12px 12px 8px;
+    background:linear-gradient(100deg,#0B0907,#15110C);
+    box-shadow:inset 0 0 50px rgba(0,0,0,.7), 0 40px 80px rgba(0,0,0,.6);
+    overflow:hidden}
+  .inside::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;
+    background:linear-gradient(rgba(0,0,0,.6),rgba(255,105,64,.25),rgba(0,0,0,.6));transform:translateX(-50%)}
+  /* hard cover, hinged at the left spine; swings open like a door */
+  .cover{position:absolute;inset:0;transform-origin:left center;transform-style:preserve-3d;
+    border-radius:6px 12px 12px 6px;
+    background:
+      radial-gradient(120% 80% at 70% 30%, rgba(255,105,64,.10), transparent 55%),
+      linear-gradient(125deg, var(--book-edge), var(--book) 60%, #0C0907);
+    box-shadow:0 30px 70px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,233,224,.05);
+    transition:transform 1.15s cubic-bezier(.5,.05,.2,1);backface-visibility:hidden;z-index:5}
+  .opened .cover{transform:rotateY(-158deg)}
+  .cover .mono{position:absolute;left:0;right:0;top:46%;text-align:center;
+    font-family:var(--font-display);font-weight:600;font-size:58px;color:var(--primary);
+    text-shadow:0 0 26px rgba(255,77,31,.5);letter-spacing:.04em}
+  .cover .tag{position:absolute;left:0;right:0;top:62%;text-align:center;
+    font-family:var(--font-mono);font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--ink-dim)}
+  .cover .spineglint{position:absolute;left:0;top:0;bottom:0;width:10px;
+    background:linear-gradient(90deg, rgba(255,233,224,.18), transparent)}
+
+  /* ---------- the face that rises from the book ---------- */
+  .face{position:absolute;left:50%;top:50%;width:210px;height:210px;
+    transform:translate(-50%,-30%) translateZ(-40px) scale(.2);opacity:0;
+    transition:transform 1.1s cubic-bezier(.2,.8,.25,1) .35s, opacity .6s .35s;
+    border-radius:50%;z-index:4;
+    filter:drop-shadow(0 18px 30px rgba(0,0,0,.6))}
+  .opened .face{transform:translate(-50%,-64%) translateZ(120px) scale(1);opacity:1}
+  /* round portrait, split into an upper face and a hinged jaw */
+  /* crop tight to the head so the FACE fills the circle (the asset is a full
+     figure with a small face up top), and split at the mouth line. */
+  .face .half{position:absolute;inset:0;border-radius:50%;overflow:hidden;
+    background-image:var(--portrait);background-size:300% auto;background-position:50% 14%;
+    box-shadow:inset 0 0 0 2px rgba(255,105,64,.5), 0 0 0 5px rgba(255,77,31,.12)}
+  .face .top{clip-path:inset(0 0 38% 0)}             /* upper face */
+  .face .jaw{clip-path:inset(62% 0 0 0);transform-origin:50% 38%;  /* mouth/chin */
+    transition:transform .06s linear;box-shadow:none}
+  .face .ring{position:absolute;inset:-6px;border-radius:50%;border:1px solid rgba(255,105,64,.35);
+    box-shadow:0 0 30px rgba(255,77,31,.3)}
+  .speaking .face{animation:headbob 2.4s ease-in-out infinite}
+  @keyframes headbob{0%,100%{} 50%{}}
+
+  /* ---------- intro UI ---------- */
+  .panel{position:absolute;bottom:6%;left:50%;transform:translateX(-50%);width:min(440px,90vw);
+    text-align:center;z-index:8;opacity:0;transition:opacity .6s .9s}
+  .opened .panel{opacity:1}
+  .caption{min-height:44px;font-size:15px;line-height:1.45;color:var(--ink);margin-bottom:16px}
+  .caption b{color:var(--primary)}
+  .row{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap}
+  .name{flex:1;min-width:180px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);
+    border-radius:12px;padding:12px 14px;color:var(--ink);font-size:15px;outline:none;font-family:var(--font-body)}
+  .name:focus{border-color:var(--primary)}
+  .modes{display:flex;gap:10px;justify-content:center;margin-top:12px}
+  .mode{flex:1;max-width:180px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.14);
+    border-radius:14px;padding:13px 14px;cursor:pointer;color:var(--ink);text-align:center}
+  .mode:hover{border-color:var(--primary);background:rgba(255,105,64,.08)}
+  .mode .t{font-family:var(--font-display);font-size:17px;font-weight:600}
+  .mode .s{font-family:var(--font-mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-dim);margin-top:4px}
+
+  .tapcue{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9;
+    font-family:var(--font-mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink);
+    background:rgba(6,5,3,.7);border:1px solid rgba(255,105,64,.4);border-radius:999px;padding:12px 20px;
+    cursor:pointer;animation:cuepulse 1.8s ease-in-out infinite}
+  @keyframes cuepulse{0%,100%{box-shadow:0 0 0 0 rgba(255,77,31,.0)}50%{box-shadow:0 0 0 8px rgba(255,77,31,.06)}}
+  .started .tapcue{display:none}
+
+  .hint{position:absolute;bottom:14px;left:0;right:0;text-align:center;font-family:var(--font-mono);
+    font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6b655c}
+  @media (prefers-reduced-motion:reduce){.cover{transition:opacity .4s}.opened .cover{transform:none;opacity:0}.face{transition:opacity .5s}}
+</style>
+</head>
+<body>
+  <div class="scene" id="scene">
+    <div class="halo"></div>
+    <div class="book">
+      <div class="inside"></div>
+      <div class="face" id="face">
+        <div class="ring"></div>
+        <div class="half top"></div>
+        <div class="half jaw" id="jaw"></div>
+      </div>
+      <div class="cover">
+        <div class="spineglint"></div>
+        <div class="mono">AT</div>
+        <div class="tag">Anchit Tandon</div>
+      </div>
+    </div>
+
+    <div class="tapcue" id="tapcue">▶ Tap to meet Anchit</div>
+
+    <div class="panel" id="panel">
+      <div class="caption" id="caption"></div>
+      <div class="row">
+        <input class="name" id="name" type="text" placeholder="What's your name?" autocomplete="off">
+      </div>
+      <div class="modes">
+        <div class="mode" data-mode="talk"><div class="t">Talk to me</div><div class="s">Chat · type or voice</div></div>
+        <div class="mode" data-mode="narrate"><div class="t">Narrate</div><div class="s">I read it aloud</div></div>
+      </div>
+    </div>
+    <div class="hint">Prototype · the face lip-syncs to speech · audio starts on your first tap</div>
+  </div>
+
+<script>
+  const scene = document.getElementById('scene');
+  const jaw = document.getElementById('jaw');
+  const caption = document.getElementById('caption');
+  const tapcue = document.getElementById('tapcue');
+  const nameEl = document.getElementById('name');
+  let started = false, mouthTimer = null;
+  // Book stays closed until the first tap — then it opens, the face rises,
+  // and the voice begins, all as one moment.
+
+  // --- mouth (jaw) driven by speech ---
+  function setMouth(open){ // open: 0..1
+    const drop = (open * 9).toFixed(1);             // px the jaw/chin drops (subtle)
+    const rot = (open * 5).toFixed(1);              // slight hinge
+    jaw.style.transform = `translateY(${drop}px) rotateX(${rot}deg)`;
+  }
+  function idleFlap(on){
+    clearInterval(mouthTimer);
+    if(!on){ setMouth(0); return; }
+    // gentle continuous flap as a base; word boundaries punch it open
+    let t=0; mouthTimer = setInterval(()=>{ t+=0.18; setMouth(0.25 + 0.2*Math.abs(Math.sin(t*6))); }, 55);
+  }
+
+  function speak(text, onend){
+    caption.innerHTML = text.replace(/Anchit/, '<b>Anchit</b>');
+    scene.classList.add('speaking');
+    if(!('speechSynthesis' in window)){ idleFlap(true); setTimeout(()=>{ idleFlap(false); scene.classList.remove('speaking'); onend&&onend(); }, 2600); return; }
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.97; u.pitch = 1; u.lang='en-IN';
+    const v = (window.speechSynthesis.getVoices()||[]).find(v=>/en[-_]?(IN|GB|US)/i.test(v.lang));
+    if(v) u.voice = v;
+    idleFlap(true);
+    // each spoken word punches the mouth wider, then it eases back
+    u.onboundary = (e)=>{ if(e.name==='word'||e.charIndex!=null){ setMouth(0.9); setTimeout(()=>setMouth(0.3),90); } };
+    u.onend = ()=>{ idleFlap(false); scene.classList.remove('speaking'); onend&&onend(); };
+    u.onerror = u.onend;
+    window.speechSynthesis.speak(u);
+  }
+
+  const INTRO = "Hey — I'm Anchit, an engineer who learned to love the funnel. Would you like to talk with me, or should I narrate my resume? Tell me your name, pick a mode, and I'll begin.";
+
+  function begin(){
+    if(started) return; started = true;
+    scene.classList.add('started');     // hide the tap cue
+    scene.classList.add('opened');      // book swings open + face rises
+    // warm up voices, then speak once the cover has opened and the face is up
+    try{ window.speechSynthesis && window.speechSynthesis.getVoices(); }catch(e){}
+    setTimeout(()=>speak(INTRO, ()=> nameEl.focus()), 1150);
+  }
+  tapcue.addEventListener('click', begin);
+  // any first gesture also unlocks + begins
+  window.addEventListener('pointerdown', begin, { once:true });
+  window.addEventListener('keydown', begin, { once:true });
+
+  function choose(mode){
+    const nm = (nameEl.value||'').trim().replace(/[^A-Za-z'’.\- ]/g,'').split(' ').slice(0,2)
+      .map(w=>w?w[0].toUpperCase()+w.slice(1):w).join(' ');
+    const who = nm ? `, ${nm}` : '';
+    const line = mode==='narrate'
+      ? `Lovely to meet you${who}. Sit back — I'll read my resume to you now.`
+      : `Lovely to meet you${who}. Ask me anything — I'm all yours.`;
+    speak(line, ()=>{ caption.innerHTML = `<b>Starting ${mode==='narrate'?'narration':'chat'}…</b> (prototype — this is where it hands off to the portfolio)`; });
+  }
+  document.querySelectorAll('.mode').forEach(b=> b.addEventListener('click', ()=>choose(b.dataset.mode)));
+</script>
+</body>
+</html>

@@ -19,6 +19,8 @@ const assets = [
   'brand-qr.html',
   'brand-futuristic.html',
   'resume-reader.html',
+  'intro-book.html',
+  'resume-3d.html',
   'manifest.json',
   'sw.js',
   'AnchitTandon-AppLogo.png',
