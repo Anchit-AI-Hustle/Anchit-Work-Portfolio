@@ -23,10 +23,8 @@
 <meta property="og:type" content="website" />
 
 <script>
-  try {
-    const savedTheme = localStorage.getItem('anchit-theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-  } catch (e) {}
+  // Dark only — light mode removed.
+  document.documentElement.setAttribute('data-theme', 'dark');
 </script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2394,11 +2392,7 @@
 
   <div class="sidebar-social">
 
-    <button class="sidebar-item" id="themeToggle" aria-label="Toggle light / dark">
-      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
-      <span class="sidebar-label">Light / Dark</span>
-    </button>
+    <!-- Light/Dark toggle removed — site is dark-only. -->
 
   </div>
 </aside>
@@ -4356,15 +4350,8 @@
   };
 
 
-  /* ============ THEME ============ */
-  const savedTheme = localStorage.getItem('anchit-theme') || 'dark';
-  root.setAttribute('data-theme', savedTheme);
-  document.getElementById('themeToggle').addEventListener('click', () => {
-    const currentTheme = root.getAttribute('data-theme');
-    const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    root.setAttribute('data-theme', nextTheme);
-    localStorage.setItem('anchit-theme', nextTheme);
-  });
+  /* ============ THEME — dark only (light mode removed) ============ */
+  root.setAttribute('data-theme', 'dark');
 
   /* ============ SIDEBAR COLLAPSE (desktop) ============ */
   // Safari Intelligent Tracking Prevention can clear localStorage after long
@@ -4474,9 +4461,9 @@
       history.replaceState(null, '', '#' + viewName);
     }
 
-	    // Keep the compact coach chat visible on page changes so each view can
-	    // introduce itself without forcing visitors to hunt for context.
-	    if (typeof window.openGuideChat === 'function') window.openGuideChat();
+	    // Chat is NOT auto-opened on navigation — it stays docked (floating icon)
+	    // and opens only when the visitor goes to the Chat view or picks it. (Was
+	    // openGuideChat() here, which forced the chat overlay onto every page.)
 
     document.dispatchEvent(new CustomEvent('viewChanged', { detail: viewName }));
 
@@ -4496,7 +4483,10 @@
   const hash = window.location.hash.replace('#', '');
   if (hash) {
     const [viewPart, anchorPart] = hash.split('/');
-    switchView(viewPart, anchorPart || undefined);
+    // Never auto-route into the chat overlay on load — always land on HOME; chat
+    // opens via the chooser or a click. openFullChat() writes #chat to the URL,
+    // which would otherwise bounce returning visitors straight back into chat.
+    if (viewPart && viewPart !== 'chat') switchView(viewPart, anchorPart || undefined);
   }
 
   /* ============ REVEAL ON SCROLL — defined below ============ */
