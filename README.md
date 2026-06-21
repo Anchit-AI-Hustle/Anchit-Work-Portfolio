@@ -1,7 +1,7 @@
 # Anchit Tandon — Portfolio
 
-Personal portfolio for **Anchit Tandon**, Senior Product Manager at Times Internet.
-Ships as **web (any device + TV)**, **installable PWA**, and **native iOS + Android** via Capacitor.
+Personal portfolio for **Anchit Tandon**, AGM - Product Management, D2C Growth - US, UK and Global at Vahdam India.
+Ships as **web (any device + TV)**, **installable PWA**, **native iOS + Android** via Capacitor, and an AI-powered portfolio assistant.
 
 **Live:** [anchits-work.vercel.app](https://anchits-work.vercel.app)
 
@@ -11,26 +11,35 @@ Ships as **web (any device + TV)**, **installable PWA**, and **native iOS + Andr
 
 ```
 .
-├── index.html              # The whole site — single-file static, no build step
+├── index.html              # The whole site — single-file static shell
+├── api/                    # Vercel functions for chat, streaming chat, and TTS proxy
+├── tts-server/             # Self-hosted XTTS/FastAPI cloned-voice service
 ├── manifest.json           # PWA manifest (installable on iOS/Android/desktop)
 ├── sw.js                   # Service worker — offline cache for the shell
 ├── icons/                  # PWA + favicon + apple-touch + iOS splash
 ├── capacitor.config.json   # Native app config (bundle id, splash, status bar)
 ├── package.json            # Capacitor dependencies + helper scripts
 ├── vercel.json             # Vercel static-host config (security headers)
+├── STREAMING_VOICE_ARCHITECTURE.md # Anchit LLM + cloned-voice streaming design
 ├── DEPLOY.md               # Web + native deploy walkthroughs
 └── README.md
 ```
 
-No framework, no bundler. The site is a single `index.html` (~88 KB) with embedded CSS + JS.
-Capacitor wraps that same `index.html` into native iOS and Android apps.
+No frontend framework. The site is a static `index.html` with embedded CSS + JS, backed by Vercel functions for grounded chat and voice. Capacitor wraps the generated `www/index.html` into native iOS and Android apps.
 
 ## Design system
 
-- **Palette:** Cream (`#FBF5EC`) + electric coral (`#FF4D1F`) + mint (`#00B584`). Inky-black ink. Full dark mode (`#0F0D0A` background).
+- **Palette:** Restrained dark neutral surfaces with amber and muted teal accents. Glare/glow is intentionally reduced for readability.
 - **Type:** Fraunces (display, variable axes — uses `SOFT` + `WONK`), Inter (body), JetBrains Mono (labels).
-- **Layout:** Top nav + scrolling ticker. Big serif hero. Section-paneled content. IntersectionObserver-driven scroll reveals.
+- **Layout:** Strong minimal hero, dashboard-style cards, long-form readable sections, section-paneled content. IntersectionObserver-driven scroll reveals.
 - **Responsive:** Phone → tablet → laptop → 4K TV. Container scales up to 1920px on TV-class screens; type fluids via `clamp()`.
+
+## Anchit LLM + cloned voice
+
+- `api/chat-stream.js` streams first-person LLM tokens and cloned-voice audio packet events.
+- `api/chat.js` remains the non-streaming fallback.
+- `tts-server/app.py` exposes `/api/tts`, `/api/tts-packet`, and `/ws/tts` for self-hosted XTTS.
+- Deployment and GPU notes live in [`STREAMING_VOICE_ARCHITECTURE.md`](./STREAMING_VOICE_ARCHITECTURE.md).
 
 ## Running locally
 

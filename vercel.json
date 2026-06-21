@@ -2,6 +2,12 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "outputDirectory": "www",
+  "rewrites": [
+    {
+      "source": "/favicon.ico",
+      "destination": "/icons/favicon.svg"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
@@ -28,6 +34,13 @@
       "source": "/icons/(.*)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=604800, immutable" }
+      ]
+    },
+    {
+      "source": "/assets/(.*).pdf",
+      "headers": [
+        { "key": "Content-Type", "value": "application/pdf" },
+        { "key": "Content-Disposition", "value": "inline" }
       ]
     }
   ]

@@ -4,7 +4,7 @@
  * so that Capacitor (webDir: "www") can package them into the native apps.
  * Vercel continues to deploy from the repo root — this is only for native builds.
  */
-import { cp, mkdir, rm, stat } from 'node:fs/promises';
+import { copyFile, mkdir, readdir, rm, stat } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -17,8 +17,27 @@ const assets = [
   'index.html',
   'manifest.json',
   'sw.js',
+  'AnchitTandon-AppLogo.png',
   'icons',
+  'assets',
+  'audio',
+  'cyber',
 ];
+
+async function copyEntry(src, dest) {
+  const s = await stat(src);
+  if (!s.isDirectory()) {
+    await mkdir(dirname(dest), { recursive: true });
+    await copyFile(src, dest);
+    return;
+  }
+
+  await mkdir(dest, { recursive: true });
+  const entries = await readdir(src, { withFileTypes: true });
+  for (const entry of entries) {
+    await copyEntry(join(src, entry.name), join(dest, entry.name));
+  }
+}
 
 async function main() {
   console.log(`[build-www] cleaning ${WWW}`);
@@ -32,12 +51,7 @@ async function main() {
       continue;
     }
     const dest = join(WWW, a);
-    const s = await stat(src);
-    if (s.isDirectory()) {
-      await cp(src, dest, { recursive: true });
-    } else {
-      await cp(src, dest);
-    }
+    await copyEntry(src, dest);
     console.log(`[build-www] copied ${a}`);
   }
 
