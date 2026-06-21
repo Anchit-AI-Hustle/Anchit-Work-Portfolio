@@ -2018,8 +2018,8 @@
 <body>
 
 <!-- ONBOARDING MODAL -->
-<div id="onboarding" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:linear-gradient(90deg, rgba(5,5,5,0.34), rgba(5,5,5,0.10) 46%, rgba(5,5,5,0.28)); z-index:10000; display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; pointer-events:none; transition:opacity 0.5s, visibility 0.5s;">
-  <div class="chat-container-center" style="align-items:center; justify-content:center; display:flex; flex-direction:column; background:rgba(20,20,20,0.72); border:1px solid rgba(255, 95, 21, 0.4); box-shadow:0 0 50px rgba(255, 95, 21, 0.15), inset 0 0 20px rgba(255, 95, 21, 0.05); border-radius:24px; padding:40px; width:90%; max-width:500px; text-align:center;">
+<div id="onboarding" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(4,3,2,0.82); backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px); z-index:10000; display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; pointer-events:none; transition:opacity 0.45s ease, visibility 0.45s ease;">
+  <div class="chat-container-center" style="align-items:center; justify-content:center; display:flex; flex-direction:column; background:#16130F; border:1px solid rgba(255, 95, 21, 0.45); box-shadow:0 30px 90px rgba(0,0,0,0.6), 0 0 60px rgba(255, 95, 21, 0.18), inset 0 0 20px rgba(255, 95, 21, 0.05); border-radius:24px; padding:40px; width:90%; max-width:500px; text-align:center;">
     
     <div style="margin-bottom:24px;">
       <img src="AnchitTandon-AppLogo.png" alt="Anchit Tandon" style="width:88px; height:88px; border-radius:22px; object-fit:cover; border:1px solid rgba(255,183,54,.7); box-shadow: 0 0 28px rgba(255, 153, 31, 0.45);">
@@ -2042,6 +2042,12 @@
 
   </div>
 </div>
+<style>
+#onboarding.intro-open{opacity:1 !important;visibility:visible !important;pointer-events:auto !important;transition:none !important;animation:obIntroIn .35s ease both;}
+#onboarding.intro-open .chat-container-center{animation:obCardIn .4s cubic-bezier(.2,.7,.2,1) both;}
+@keyframes obIntroIn{from{opacity:0}to{opacity:1}}
+@keyframes obCardIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+</style>
 
 
 <div class="scroll-progress" id="scrollProgress"></div>
@@ -2074,6 +2080,10 @@
     <a class="sidebar-item" href="#projects" data-view="projects" aria-label="Side Hustle">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
       <span class="sidebar-label">Side Hustle</span>
+    </a>
+    <a class="sidebar-item" href="#chat" data-view="chat" aria-label="Chat with Anchit">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span class="sidebar-label">Chat</span>
     </a>
     <a class="sidebar-item" href="assets/resume.pdf" target="_blank" rel="noopener" aria-label="Open resume PDF">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
@@ -3816,7 +3826,7 @@
     if (viewName === 'schedule') { if (window.openScheduleModal) window.openScheduleModal(); return; }
     // Chat is a floating overlay available on every page — open it maximised
     // instead of navigating to a separate page.
-    if (viewName === 'chat') { if (window.openGuideChat) window.openGuideChat(); return; }
+    if (viewName === 'chat') { if (window.openFullChat) window.openFullChat(); else if (window.openGuideChat) window.openGuideChat(); return; }
     if (!ALL_VIEWS.includes(viewName)) return;
 
     // Animate out old view, animate in new
@@ -4638,6 +4648,22 @@
 	    if (typeof window.minimizeChat === 'function') window.minimizeChat();
 	  }, 800);
 
+	  // First visit this session opens with a centered introduction popup. The
+	  // chat sits minimised behind it; dismissing the popup reveals the floating
+	  // icon. "Start fresh" continues into the guided chat.
+	  function showAnchitIntro() {
+	    const ob = document.getElementById('onboarding');
+	    if (!ob) return;
+	    ob.classList.add('intro-open');   // .intro-open uses !important so it beats the inline opacity:0
+	  }
+	  window.showAnchitIntro = showAnchitIntro;
+	  try {
+	    if (!sessionStorage.getItem('anchit-intro-seen')) {
+	      sessionStorage.setItem('anchit-intro-seen', '1');
+	      setTimeout(showAnchitIntro, 450);
+	    }
+	  } catch (e) { setTimeout(showAnchitIntro, 450); }
+
   const obStartBtn = document.getElementById('ob-start-btn');
   const obContinueBtn = document.getElementById('ob-continue-btn');
   const obActions = document.getElementById('onboarding-actions');
@@ -4659,6 +4685,7 @@
     obContinueBtn.addEventListener('click', () => {
       const ob = document.getElementById('onboarding');
       if (ob) {
+        ob.classList.remove('intro-open');
         ob.style.opacity = '0';
         ob.style.pointerEvents = 'none';
         setTimeout(() => ob.style.visibility = 'hidden', 500);
@@ -4669,6 +4696,7 @@
   function finishOnboarding() {
     const ob = document.getElementById('onboarding');
     if (ob) {
+      ob.classList.remove('intro-open');
       ob.style.opacity = '0';
       ob.style.pointerEvents = 'none';
       setTimeout(() => ob.style.visibility = 'hidden', 500);
@@ -6675,12 +6703,17 @@
   }
   function openFullChat() {
     sessionStorage.removeItem('anchit-chat-minimized');
-	    chatBlock?.classList.remove('minimized');
-	    viewChatEl?.classList.remove('chat-view-minimized');
-	    returnBtn?.classList.remove('visible');
-	    document.body.classList.remove('chat-guide-open');
-	    if (typeof switchView === 'function') switchView('chat');
-	    document.body.classList.add('view-chat');
+    chatBlock?.classList.remove('minimized');
+    viewChatEl?.classList.remove('chat-view-minimized');
+    returnBtn?.classList.remove('visible');
+    document.body.classList.remove('chat-guide-open');
+    // Activate the dedicated chat view as a genuine full page. switchView('chat')
+    // routes here, so toggle .active directly instead of calling back into it.
+    document.querySelectorAll('.view').forEach((v) => v.classList.toggle('active', v.id === 'view-chat'));
+    document.querySelectorAll('.sidebar-item[data-view]').forEach((n) => n.classList.toggle('active', n.getAttribute('data-view') === 'chat'));
+    document.body.classList.add('view-chat');
+    try { history.replaceState(null, '', '#chat'); } catch {}
+    try { window.scrollTo({ top: 0, behavior: 'instant' }); } catch {}
     setTimeout(() => chatInputEl?.focus(), 160);
   }
   function minimizeChat() {
