@@ -2414,10 +2414,6 @@
         <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <span class="tb-label">Google Meet</span>
       </a>
-      <button type="button" data-wa-choice class="top-bar-link" data-channel="whatsapp-followup" aria-label="WhatsApp follow-up" title="WhatsApp follow-up">
-        <svg class="tb-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.8.7.8-2.7-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2.1-.2 0-.3 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3-.8.8-1 1.9-.6 3.1a9.3 9.3 0 0 0 4.6 4.9c1.6.7 2.6.6 3.4.4.5-.1 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.1l-.4-.1z"/></svg>
-        <span class="tb-label">WhatsApp</span>
-      </button>
       <a href="sms:+919873945238" class="top-bar-link" data-channel="sms" aria-label="SMS" title="SMS">
         <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         <span class="tb-label">SMS</span>
@@ -2455,6 +2451,28 @@
   // Voices populate asynchronously on some browsers — warm them up.
   if (window.speechSynthesis) { try { window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged = function(){ window.speechSynthesis.getVoices(); }; } catch (e) {} }
 
+  // Normalise text for SPEECH so acronyms are pronounced as letters (US -> "U S",
+  // not the word "us"). Applied only to spoken/TTS text, never the on-screen text.
+  window.anchitSpeechText = function(t){
+    if (!t) return t;
+    var s = String(t);
+    var rules = [
+      [/\bU\.?S\.?A\.?\b/g, 'U S A'], [/\bU\.?S\.?D\b/g, 'U S D'],
+      [/\bU\.?S\.?\b/g, 'U S'], [/\bU\.?K\.?\b/g, 'U K'],
+      [/\bD2C\b/g, 'D to C'], [/\bB2B\b/g, 'B to B'], [/\bB2C\b/g, 'B to C'],
+      [/\bDAUs?\b/g, 'daily active users'],
+      [/\bAGM\b/g, 'A G M'], [/\bMRR\b/g, 'M R R'], [/\bARR\b/g, 'A R R'],
+      [/\bROI\b/g, 'R O I'], [/\bAPI\b/g, 'A P I'], [/\bPWA\b/g, 'P W A'],
+      [/\bLLM\b/g, 'L L M'], [/\bCRM\b/g, 'C R M'], [/\bCSE\b/g, 'C S E'],
+      [/\bTOI\b/g, 'T O I'], [/\bIST\b/g, 'I S T'], [/\bINR\b/g, 'I N R'],
+      [/\bSMS\b/g, 'S M S'], [/\bPDF\b/g, 'P D F'], [/\bUX\b/g, 'U X'], [/\bUI\b/g, 'U I'],
+      [/\bIP\b/g, 'I P'], [/\bAI\b/g, 'A I'], [/\bOS\b/g, 'O S'], [/\bET\b/g, 'E T'],
+      [/\bKSM-?66\b/gi, 'K S M sixty-six']
+    ];
+    for (var i = 0; i < rules.length; i++) s = s.replace(rules[i][0], rules[i][1]);
+    return s;
+  };
+
   window.anchitHardNarrate = function() {
     var text = "Hey, I'm Anchit Tandon. An engineer who learned to love the funnel. Building products. Scaling growth. Creating leverage. Currently AGM – Product Management and D to C Growth at Vahdam India, driving growth across the US, UK and global markets while helping scale a leading consumer brand. Previously at Times Internet, I owned growth and monetisation across ET Prime and TOI Plus, scaling Assisted Sales five times to eighty lakh rupees in monthly recurring revenue in about ten months, rebuilding ET Markets and ET across iOS, Android and web to three crore plus in incremental annual recurring revenue, and building high-performing acquisition and retention funnels. I also led the end-to-end launch and execution of the inaugural Times Internet Delhi Half Marathon twenty twenty six at Dhyan Chand National Stadium — establishing a new I P, delivering a fifteen thousand plus participant experience, and creating a new revenue stream for the business. Today, I operate at the intersection of Product, Growth and Revenue — building systems, optimising funnels, running experiments, and creating scalable pathways to sustainable growth.";
     var caption = document.getElementById('chatCaption');
@@ -2470,7 +2488,7 @@
     document.querySelectorAll('#view-home .active-narrate').forEach(function(el){ el.classList.remove('active-narrate'); });
     if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
     window.speechSynthesis.cancel();
-    var utter = new SpeechSynthesisUtterance(text);
+    var utter = new SpeechSynthesisUtterance(window.anchitSpeechText(text));
     utter.rate = 0.95; utter.pitch = 1; utter.lang = 'en-IN';
     var _v = window.anchitPickVoice && window.anchitPickVoice();
     if (_v) utter.voice = _v;
@@ -2870,43 +2888,11 @@
         </div>
         <div class="chips" id="chipRow"></div>
         <div class="chat-input" id="chatComposer">
-          <div class="composer-mode" id="composerMode">
-            <button class="composer-mode-btn" id="composerModeBtn" type="button" aria-haspopup="true" aria-expanded="false" title="Switch between Chat and Narrate">
-              <svg class="cm-ic cm-ic-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              <svg class="cm-ic cm-ic-narrate" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
-              <span class="cm-label">Chat</span>
-              <svg class="cm-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-            </button>
-            <div class="composer-menu" id="composerMenu" role="menu" hidden>
-              <button class="composer-menu-item" type="button" role="menuitem" data-mode="chat" aria-current="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                <span><b>Chat</b><em>Type &amp; read answers</em></span>
-              </button>
-              <button class="composer-menu-item" type="button" role="menuitem" data-mode="narrate">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14"/></svg>
-                <span><b>Narrate</b><em>Listen to this page</em></span>
-              </button>
-            </div>
-          </div>
           <input type="text" id="chatInput" placeholder="Ask me anything…" autocomplete="off" />
-          <div class="composer-reply" role="group" aria-label="How replies come back">
-            <button class="reply-opt on" type="button" data-reply="text" aria-pressed="true" aria-label="Text only" title="Text only — silent answers">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5h16v2M9 19h6M12 5v14"/></svg>
-            </button>
-            <button class="reply-opt" type="button" data-reply="voice" aria-pressed="false" aria-label="Voice reply" title="Voice reply — answers read aloud">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
-            </button>
-            <button class="reply-opt" type="button" data-reply="call" aria-pressed="false" aria-label="Call — hands-free" title="Call — hands-free voice conversation">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2 4.1 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1 1 .3 1.9.6 2.8a2 2 0 0 1-.4 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.5 2.8.6A2 2 0 0 1 22 16.9z"/></svg>
-            </button>
-          </div>
+          <input type="file" id="chatAudioFile" accept="audio/*" hidden>
           <button class="chat-mic" id="chatMic" aria-label="Dictate message" title="Dictate with live transcript">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
           </button>
-          <button class="chat-mic chat-mic-secondary" id="chatAudioUploadBtn" aria-label="Send audio file" title="Send audio file directly" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          </button>
-          <input type="file" id="chatAudioFile" accept="audio/*" hidden>
           <button class="chat-send" id="chatSend" aria-label="Send">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           </button>
@@ -4520,7 +4506,7 @@
     { keywords: ['et markets','markets','revamp','finance','stocks'],
       response: "ET Markets is the stock market and financial tracking arm of The Economic Times (India's leading business daily), serving as one of the country's highest-traffic financial platforms with real-time market data. I led the end-to-end product revamp of ET Markets across Web, mobile Web, Android, and iOS. By restructuring the information architecture and testing relentlessly, we achieved a +27% boost in user engagement, +25% in DAUs, and added ₹3Cr+ in incremental ARR. <a data-nav='experience'>Full work view →</a>",
       nextChips: ["Tell me about Assisted Sales","What about Times Health+?","Your engineering background?","Show me a side build"] },
-    { keywords: ['prime','assisted sales','sales','subscription','conversion','roi','growth','biggest','win','proudest','proud'],
+    { keywords: ['et prime','prime','assisted sales','sales','subscription','conversion','roi','growth','biggest','win','proudest','proud'],
       response: "ET Prime is the premium, member-only business subscription service of The Economic Times, offering high-quality, ad-free investigative journalism and business analysis. I led growth for ET Prime's Assisted Sales channel, scaling it 5× from ₹15L to ₹80L MRR in six months. To achieve this, I built an AI-powered telesuite featuring real-time call transcription, pitch scoring, and conversion assists, which boosted our team's sales conversion and delivered over 400% ROI. This work won me the Times Internet Team Award.",
       nextChips: ["What's the AI telesuite?","Your product philosophy?","What are you building now?","How do I reach you?"] },
     { keywords: ['marathon','event','running','half','0 to 1','zero to one','zero-to-one'],
@@ -4818,7 +4804,7 @@
       const tmp = document.createElement('div');
       tmp.innerHTML = html;
       const plain = tmp.textContent.trim();
-      const after = (replyMode === 'call')
+      const after = (window.anchitChatAudio === 'call')
         ? () => { setTimeout(() => { try { document.getElementById('chatMic')?.click(); } catch {} }, 450); }
         : null;
       // Small delay so the bubble is scrolled into view first
@@ -4842,7 +4828,7 @@
     try {
 	      const r = await fetch(ttsEndpoint(), {
 	        method: 'POST', headers: { 'Content-Type': 'application/json' },
-	        body: JSON.stringify({ text: plainText }),
+	        body: JSON.stringify({ text: window.anchitSpeechText(plainText) }),
 	      });
       if (!r.ok) return false;
       const ct = r.headers.get('content-type') || '';
@@ -4928,7 +4914,7 @@
 	          finishTranscript();
 	          return;
 	        }
-        const utter = new SpeechSynthesisUtterance(plainText);
+        const utter = new SpeechSynthesisUtterance(window.anchitSpeechText(plainText));
         utter.rate = 0.95;
         utter.pitch = 1;
         utter.volume = 1;
@@ -5057,11 +5043,15 @@
   }
 	  // Conversation memory passed to the LLM for follow-up context.
 	  let chatHistory = [];
+	  // Where the Claude-backed chat lives. Relative '/api' works on the deployed
+	  // site; a packaged/static build can't reach it, so set window.ANCHIT_API_BASE
+	  // (e.g. the Vercel URL) to point the live LLM at the deployment.
+	  const API_BASE = (window.ANCHIT_API_BASE || '').replace(/\/$/, '');
 	  // Calls the Claude-backed /api/chat. Returns the reply string, or null if the
 	  // endpoint isn't configured / unreachable so we can fall back to the offline KB.
 	  async function llmReply(text) {
 	    try {
-	      const r = await fetch('/api/chat', {
+	      const r = await fetch(API_BASE + '/api/chat', {
 	        method: 'POST', headers: { 'Content-Type': 'application/json' },
 	        body: JSON.stringify({ message: text, history: chatHistory }),
 	      });
@@ -5136,12 +5126,19 @@
 	  }
 	  async function llmVoiceStream(text) {
 	    const streamUi = createStreamingBotMessage();
-	    const r = await fetch('/api/chat-stream', {
-	      method: 'POST',
-	      headers: { 'Content-Type': 'application/json' },
-	      body: JSON.stringify({ message: text, history: chatHistory }),
-	    });
-	    if (!r.ok || !r.body) {
+	    let r;
+	    try {
+	      r = await fetch(API_BASE + '/api/chat-stream', {
+	        method: 'POST',
+	        headers: { 'Content-Type': 'application/json' },
+	        body: JSON.stringify({ message: text, history: chatHistory }),
+	      });
+	    } catch { streamUi.msg.remove(); return null; }
+	    // Only consume a genuine SSE stream. On a static/packaged host the request
+	    // can 200 with HTML (SPA fallback) — treat that as "no stream" and remove
+	    // the placeholder so it never lingers as an orphan "Thinking…" bubble.
+	    const ctype = (r.headers.get('content-type') || '');
+	    if (!r.ok || !r.body || ctype.indexOf('text/event-stream') === -1) {
 	      streamUi.msg.remove();
 	      return null;
 	    }
@@ -5179,8 +5176,10 @@
 	        }
 	      }
 	    }
+	    if (!answer.trim()) { streamUi.msg.remove(); return null; }   // stream produced nothing → fall through, no orphan bubble
 	    streamUi.msg.classList.remove('streaming');
-	    streamUi.status.textContent = packetQueue.length || packetPlaying ? 'Voice finishing...' : 'Answer complete';
+	    // The streamed answer IS the dialogue — drop the "Thinking…/packet" status row.
+	    if (streamUi.status) { const pp = streamUi.status.closest('.packet-player'); if (pp) pp.remove(); }
 	    bindChatActions(streamUi.msg);
 	    return answer.trim();
 	  }
@@ -5723,7 +5722,7 @@
 	          : (['localhost', '127.0.0.1', '0.0.0.0'].includes(location.hostname) ? 'http://127.0.0.1:8000/api/tts' : '/api/tts');
 	        const r = await fetch(endpoint, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text })
+          body: JSON.stringify({ text: window.anchitSpeechText(text) })
         });
         if (!r.ok) { indicator?.classList.remove('loading'); return false; }
         const ct = r.headers.get('content-type') || '';
@@ -5772,7 +5771,7 @@
         caption.classList.add('active');
       }
 
-	      const utter = new SpeechSynthesisUtterance(text);
+	      const utter = new SpeechSynthesisUtterance(window.anchitSpeechText(text));
       utter.lang = 'en-IN';
       utter.voice = (window.anchitPickVoice && window.anchitPickVoice()) || null;
       utter.rate = 0.95;
@@ -5982,7 +5981,7 @@
         return;
       }
       window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(fallbackText);
+      const utter = new SpeechSynthesisUtterance(window.anchitSpeechText(fallbackText));
       utter.rate = 0.95; utter.pitch = 1; utter.lang = 'en-IN';
       const _v = window.anchitPickVoice && window.anchitPickVoice();
       if (_v) utter.voice = _v;
