@@ -2244,6 +2244,56 @@
 </head>
 <body>
 
+<!-- ───────── PAGE PRELOADER (covers first paint, fades on load) ───────── -->
+<div id="preloader" aria-hidden="true">
+  <div class="preloader-inner">
+    <div class="preloader-mark">AT</div>
+    <div class="preloader-name">Anchit&nbsp;Tandon</div>
+    <div class="preloader-track"><span class="preloader-fill"></span></div>
+  </div>
+</div>
+<style>
+  #preloader{
+    position:fixed; inset:0; z-index:100000;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--bg-deep, #060503);
+    transition:opacity .6s ease, visibility .6s ease;
+  }
+  #preloader.done{ opacity:0; visibility:hidden; pointer-events:none; }
+  .preloader-inner{
+    display:flex; flex-direction:column; align-items:center; gap:20px;
+    animation:preFadeUp .5s cubic-bezier(.16,1,.3,1) both;
+  }
+  .preloader-mark{
+    font-family:var(--font-display, serif);
+    font-size:52px; font-weight:700; letter-spacing:3px; line-height:1;
+    color:var(--primary, #ff6940);
+    text-shadow:0 0 28px rgba(255,105,64,.35);
+  }
+  .preloader-name{
+    font-family:var(--font-mono, monospace);
+    font-size:11px; letter-spacing:5px; text-transform:uppercase;
+    color:var(--ink, #fbf5ec); opacity:.7;
+  }
+  .preloader-track{
+    position:relative; width:160px; height:2px; overflow:hidden;
+    background:rgba(255,255,255,.12); border-radius:2px;
+  }
+  .preloader-fill{
+    position:absolute; top:0; left:0; height:100%; width:40%;
+    background:var(--primary, #ff6940); border-radius:2px;
+    animation:preSweep 1.1s ease-in-out infinite;
+  }
+  @keyframes preFadeUp{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:none; } }
+  @keyframes preSweep{
+    0%{ left:-40%; } 50%{ left:60%; } 100%{ left:120%; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .preloader-inner, .preloader-fill{ animation:none; }
+    .preloader-fill{ width:100%; left:0; }
+  }
+</style>
+
 <!-- ONBOARDING MODAL -->
 <div id="onboarding" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(4,3,2,0.82); backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px); z-index:10000; display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; pointer-events:none; transition:opacity 0.45s ease, visibility 0.45s ease;">
   <div class="chat-container-center" style="align-items:center; justify-content:center; display:flex; flex-direction:column; background:#16130F; border:1px solid rgba(255, 95, 21, 0.45); box-shadow:0 30px 90px rgba(0,0,0,0.6), 0 0 60px rgba(255, 95, 21, 0.18), inset 0 0 20px rgba(255, 95, 21, 0.05); border-radius:24px; padding:40px; width:90%; max-width:500px; text-align:center;">
@@ -6043,9 +6093,25 @@
     });
   }
 
-  window.addEventListener('load', () => {
-    // Service worker load logic can go here if needed
-  });
+  /* ============ PAGE PRELOADER ============ */
+  (function () {
+    const pre = document.getElementById('preloader');
+    if (!pre) return;
+    let hidden = false;
+    function hide() {
+      if (hidden) return;
+      hidden = true;
+      pre.classList.add('done');
+      setTimeout(() => pre.remove(), 700);
+    }
+    if (document.readyState === 'complete') {
+      setTimeout(hide, 400);
+    } else {
+      window.addEventListener('load', () => setTimeout(hide, 350));
+    }
+    // Hard fallback so a slow asset never traps visitors behind the curtain.
+    setTimeout(hide, 4000);
+  })();
 </script>
 
 <!-- ───────── Schedule-a-call modal (Google Meet invite) ───────── -->
