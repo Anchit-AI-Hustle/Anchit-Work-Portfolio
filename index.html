@@ -2268,8 +2268,10 @@
       radial-gradient(46% 40% at 62% 12%, rgba(120,80,255,.05), transparent 60%);
     filter:blur(8px); will-change:transform; animation:floatAura 22s ease-in-out infinite alternate; }
   @keyframes floatAura{ from{transform:translate3d(-2%,-1%,0)} to{transform:translate3d(3%,2%,0)} }
-  /* lift real content above the floating layer */
-  main, .sidebar, aside.sidebar, .top-bar, .scroll-progress, .audio-float, .audio-ambient, .chat-return { position:relative; z-index:1; }
+  /* Lift only the in-flow content above the floating layer. Fixed elements
+     (sidebar, top-bar, chat launcher, audio widgets) must KEEP their own
+     position — they already stack above the z-0 canvas by DOM order. */
+  main { position:relative; z-index:1; }
   /* gentle levitation — uses `translate` so it composes with existing hover transforms */
   @keyframes floatLev{ 0%,100%{translate:0 0} 50%{translate:0 -8px} }
   .hero-stat, .nav-card, .home-tl-item, .current-card { animation:floatLev 7s ease-in-out infinite; will-change:translate; }
