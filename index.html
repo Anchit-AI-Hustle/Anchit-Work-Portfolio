@@ -819,6 +819,30 @@
     box-shadow: 0 6px 18px rgba(255,77,31,0.32);
   }
   .msg-bubble:hover { transform: translateY(-1px); }
+  /* Was-this-helpful feedback on each reply */
+  .msg-feedback {
+    display: flex; align-items: center; gap: 6px;
+    margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--rule);
+  }
+  .msg-fb-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 27px; height: 27px; padding: 0; flex: 0 0 auto;
+    background: transparent; border: 1px solid var(--rule); border-radius: 8px;
+    color: var(--ink-dim); cursor: pointer; transition: all .18s ease;
+  }
+  .msg-fb-btn svg { width: 14px; height: 14px; }
+  .msg-fb-btn:hover { color: var(--primary); border-color: var(--primary); transform: translateY(-1px); }
+  .msg-fb-btn.chosen {
+    color: var(--primary); border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 14%, transparent);
+  }
+  .msg-feedback.done .msg-fb-btn { pointer-events: none; }
+  .msg-feedback.done .msg-fb-btn:not(.chosen) { opacity: .35; }
+  .msg-fb-note {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: .03em;
+    color: var(--ink-dim); margin-left: 4px; opacity: 0; transition: opacity .25s ease;
+  }
+  .msg-feedback.done .msg-fb-note { opacity: .8; }
 	  .msg-bubble a {
 	    color: var(--primary); font-weight: 500;
 	    text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px;
@@ -2293,6 +2317,24 @@
     <div class="preloader-track"><span class="preloader-fill"></span></div>
   </div>
 </div>
+<noscript><style>#preloader{display:none!important;}</style></noscript>
+<script>
+  /* Self-contained remover, registered immediately after the markup — so a throw
+     in any later initializer can never leave the curtain stuck over the page. */
+  (function () {
+    var pre = document.getElementById('preloader');
+    if (!pre) return;
+    var hidden = false;
+    function hide() {
+      if (hidden) return; hidden = true;
+      pre.classList.add('done');
+      setTimeout(function () { if (pre && pre.parentNode) pre.parentNode.removeChild(pre); }, 700);
+    }
+    if (document.readyState === 'complete') { setTimeout(hide, 400); }
+    else { window.addEventListener('load', function () { setTimeout(hide, 350); }); }
+    setTimeout(hide, 4000); // hard fallback
+  })();
+</script>
 <style>
   #preloader{
     position:fixed; inset:0; z-index:100000;
@@ -4989,6 +5031,34 @@
 	    rootEl.querySelectorAll('[data-guide-query]').forEach(btn => {
 	      btn.addEventListener('click', () => handleMessage(btn.dataset.guideQuery || btn.textContent || ''));
 	    });
+	    // Thumbs up/down feedback on real replies (not the live page-guide card)
+	    if (rootEl.classList.contains('bot') && !rootEl.classList.contains('page-guide')) {
+	      const bubble = rootEl.querySelector('.msg-bubble');
+	      if (bubble && !bubble.querySelector('.msg-feedback')) {
+	        const fb = document.createElement('div');
+	        fb.className = 'msg-feedback';
+	        fb.innerHTML = `
+	          <button type="button" class="msg-fb-btn" data-fb="up" aria-label="Helpful" title="Helpful"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></svg></button>
+	          <button type="button" class="msg-fb-btn" data-fb="down" aria-label="Not helpful" title="Not helpful"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z"/></svg></button>
+	          <span class="msg-fb-note" aria-live="polite"></span>`;
+	        bubble.appendChild(fb);
+	        fb.querySelectorAll('.msg-fb-btn').forEach(btn => {
+	          btn.addEventListener('click', () => {
+	            if (fb.classList.contains('done')) return;
+	            const val = btn.dataset.fb;
+	            btn.classList.add('chosen');
+	            fb.classList.add('done');
+	            const note = fb.querySelector('.msg-fb-note');
+	            if (note) note.textContent = val === 'up' ? 'Thanks — glad that landed.' : 'Thanks — noted, I’ll sharpen it.';
+	            try {
+	              const log = JSON.parse(localStorage.getItem('anchit-chat-feedback') || '[]');
+	              log.push({ v: val, t: Date.now(), text: (bubble.textContent || '').trim().slice(0, 140) });
+	              localStorage.setItem('anchit-chat-feedback', JSON.stringify(log));
+	            } catch {}
+	          });
+	        });
+	      }
+	    }
 	  }
 	  function renderPageGuide(viewName, opts = {}) {
 	    if (!chatBody) return;
@@ -6266,25 +6336,8 @@
     });
   }
 
-  /* ============ PAGE PRELOADER ============ */
-  (function () {
-    const pre = document.getElementById('preloader');
-    if (!pre) return;
-    let hidden = false;
-    function hide() {
-      if (hidden) return;
-      hidden = true;
-      pre.classList.add('done');
-      setTimeout(() => pre.remove(), 700);
-    }
-    if (document.readyState === 'complete') {
-      setTimeout(hide, 400);
-    } else {
-      window.addEventListener('load', () => setTimeout(hide, 350));
-    }
-    // Hard fallback so a slow asset never traps visitors behind the curtain.
-    setTimeout(hide, 4000);
-  })();
+  /* Preloader removal now lives in an inline script right after the markup
+     (see <body>), so it is registered before any initializer here can throw. */
 </script>
 
 <!-- ───────── Schedule-a-call modal (Google Meet invite) ───────── -->
