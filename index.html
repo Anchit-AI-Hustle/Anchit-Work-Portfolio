@@ -2259,32 +2259,42 @@
 <!-- ═══ FLOATING BACKGROUND LAYER (drifting particles + soft aura) ═══ -->
 <canvas id="floatBg" aria-hidden="true"></canvas>
 <div class="float-aura" aria-hidden="true"></div>
-<!-- Energy-core watermark: a pulsing circle with revolving triangular pulses -->
+<!-- Energy graph watermark: a radar of skill/passion/energy that pulses, with
+     revolving triangular pulses on the OUTER ring (a border, never over content) -->
 <div class="energy-mark" aria-hidden="true">
-  <svg viewBox="0 0 200 200">
+  <svg viewBox="0 0 240 240" class="em-svg">
     <defs>
-      <radialGradient id="emCore" cx="40%" cy="36%" r="68%">
-        <stop offset="0%" stop-color="#fff4e6"/>
-        <stop offset="34%" stop-color="#ffb736"/>
-        <stop offset="74%" stop-color="#ff5f15"/>
-        <stop offset="100%" stop-color="#5e1c03"/>
+      <radialGradient id="emCore" cx="42%" cy="38%" r="70%">
+        <stop offset="0%" stop-color="#fff4e6"/><stop offset="40%" stop-color="#ffb736"/>
+        <stop offset="78%" stop-color="#ff5f15"/><stop offset="100%" stop-color="#5e1c03"/>
       </radialGradient>
-      <polygon id="emTri" points="100,18 93.5,44 106.5,44"/>
-      <polygon id="emTriS" points="100,50 95.5,67 104.5,67"/>
+      <polygon id="emTri" points="120,3 114.5,16 125.5,16"/>
     </defs>
-    <circle class="em-ring" cx="100" cy="100" r="58"/>
-    <circle class="em-ring em-ring-b" cx="100" cy="100" r="80"/>
+    <polygon class="em-grid" points="120,20 206.6,70 206.6,170 120,220 33.4,170 33.4,70"/>
+    <polygon class="em-grid" points="120,50 180.6,85 180.6,155 120,190 59.4,155 59.4,85"/>
+    <polygon class="em-grid" points="120,80 154.6,100 154.6,140 120,160 85.4,140 85.4,100"/>
+    <g class="em-axes">
+      <line x1="120" y1="120" x2="120" y2="20"/><line x1="120" y1="120" x2="206.6" y2="70"/>
+      <line x1="120" y1="120" x2="206.6" y2="170"/><line x1="120" y1="120" x2="120" y2="220"/>
+      <line x1="120" y1="120" x2="33.4" y2="170"/><line x1="120" y1="120" x2="33.4" y2="70"/>
+    </g>
+    <polygon class="em-data" points="120,34 182.4,84 201.4,167 120,186 50.7,160 54.2,82"/>
     <g class="em-spin">
-      <use href="#emTri"/><use href="#emTri" transform="rotate(45 100 100)"/>
-      <use href="#emTri" transform="rotate(90 100 100)"/><use href="#emTri" transform="rotate(135 100 100)"/>
-      <use href="#emTri" transform="rotate(180 100 100)"/><use href="#emTri" transform="rotate(225 100 100)"/>
-      <use href="#emTri" transform="rotate(270 100 100)"/><use href="#emTri" transform="rotate(315 100 100)"/>
+      <use href="#emTri"/><use href="#emTri" transform="rotate(60 120 120)"/><use href="#emTri" transform="rotate(120 120 120)"/>
+      <use href="#emTri" transform="rotate(180 120 120)"/><use href="#emTri" transform="rotate(240 120 120)"/><use href="#emTri" transform="rotate(300 120 120)"/>
     </g>
     <g class="em-spin-rev">
-      <use href="#emTriS" transform="rotate(22.5 100 100)"/><use href="#emTriS" transform="rotate(112.5 100 100)"/>
-      <use href="#emTriS" transform="rotate(202.5 100 100)"/><use href="#emTriS" transform="rotate(292.5 100 100)"/>
+      <use href="#emTri" transform="rotate(30 120 120)"/><use href="#emTri" transform="rotate(150 120 120)"/><use href="#emTri" transform="rotate(270 120 120)"/>
     </g>
-    <circle class="em-core" cx="100" cy="100" r="25" fill="url(#emCore)"/>
+    <g class="em-label">
+      <text x="120" y="11" text-anchor="middle">SKILL</text>
+      <text x="214" y="64" text-anchor="start">PASSION</text>
+      <text x="214" y="178" text-anchor="start">ENERGY</text>
+      <text x="120" y="233" text-anchor="middle">PRODUCT</text>
+      <text x="26" y="178" text-anchor="end">GROWTH</text>
+      <text x="26" y="64" text-anchor="end">REVENUE</text>
+    </g>
+    <circle class="em-core" cx="120" cy="120" r="12" fill="url(#emCore)"/>
   </svg>
 </div>
 <style>
@@ -2296,21 +2306,24 @@
       radial-gradient(46% 40% at 62% 12%, rgba(120,80,255,.05), transparent 60%);
     filter:blur(8px); will-change:transform; animation:floatAura 22s ease-in-out infinite alternate; }
   @keyframes floatAura{ from{transform:translate3d(-2%,-1%,0)} to{transform:translate3d(3%,2%,0)} }
-  /* ── Energy-core watermark: pulsing circle + revolving triangular pulses ── */
-  .energy-mark{ position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:min(74vmin,680px); aspect-ratio:1; z-index:0; pointer-events:none; opacity:.22; }
-  .energy-mark svg{ width:100%; height:100%; overflow:visible; }
-  .em-ring, .em-spin, .em-spin-rev, .em-core { transform-box:view-box; transform-origin:center; }
-  .em-ring{ fill:none; stroke:rgba(216,184,120,.5); stroke-width:.4; animation:emRipple 4.2s ease-in-out infinite; }
-  .em-ring-b{ stroke:rgba(255,95,21,.4); animation-delay:-2.1s; }
+  /* ── Energy graph watermark: a radar of skill/passion/energy that pulses; the
+     triangular pulses revolve on the OUTER ring (a border). Faint lines + edge
+     labels behind the content, so nothing solid ever overlaps the text. ── */
+  .energy-mark{ position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:min(94vmin,1060px); aspect-ratio:1; z-index:0; pointer-events:none; opacity:.6; }
+  .em-svg{ width:100%; height:100%; overflow:visible; }
+  .em-data, .em-spin, .em-spin-rev, .em-core { transform-box:view-box; transform-origin:center; }
+  .em-grid{ fill:none; stroke:rgba(216,184,120,.18); stroke-width:.4; }
+  .em-axes line{ stroke:rgba(255,138,61,.13); stroke-width:.4; }
+  .em-data{ fill:rgba(255,95,21,.06); stroke:rgba(255,138,61,.55); stroke-width:.7; animation:emPulse 4.2s ease-in-out infinite; }
+  .em-label text{ fill:rgba(216,184,120,.85); font-family:var(--font-mono,ui-monospace,monospace); font-size:6.6px; letter-spacing:.16em; }
   .em-spin use{ fill:rgba(255,138,61,.9); }
-  .em-spin-rev use{ fill:rgba(216,184,120,.72); }
-  .em-spin{ animation:emSpin 26s linear infinite, emFlicker 3.4s ease-in-out infinite; }
-  .em-spin-rev{ animation:emSpin 34s linear infinite reverse, emFlicker 4.3s ease-in-out infinite; }
-  .em-core{ animation:emPulse 3.6s ease-in-out infinite; filter:drop-shadow(0 0 16px rgba(255,95,21,.55)); }
+  .em-spin-rev use{ fill:rgba(216,184,120,.7); }
+  .em-spin{ animation:emSpin 30s linear infinite, emFlicker 3.4s ease-in-out infinite; }
+  .em-spin-rev{ animation:emSpin 40s linear infinite reverse, emFlicker 4.3s ease-in-out infinite; }
+  .em-core{ animation:emPulse 3.6s ease-in-out infinite; filter:drop-shadow(0 0 10px rgba(255,95,21,.45)); }
   @keyframes emSpin{ to{ transform:rotate(360deg) } }
-  @keyframes emPulse{ 0%,100%{ transform:scale(1); opacity:.92 } 50%{ transform:scale(1.2); opacity:1 } }
-  @keyframes emRipple{ 0%,100%{ transform:scale(.95); opacity:.45 } 50%{ transform:scale(1.05); opacity:.95 } }
-  @keyframes emFlicker{ 0%,100%{ opacity:.82 } 50%{ opacity:1 } }
+  @keyframes emPulse{ 0%,100%{ transform:scale(.97); opacity:.85 } 50%{ transform:scale(1.06); opacity:1 } }
+  @keyframes emFlicker{ 0%,100%{ opacity:.8 } 50%{ opacity:1 } }
   /* Lift only the in-flow content above the floating layer. Fixed elements
      (sidebar, top-bar, chat launcher, audio widgets) must KEEP their own
      position — they already stack above the z-0 canvas by DOM order. */
