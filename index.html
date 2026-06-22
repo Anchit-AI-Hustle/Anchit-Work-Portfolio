@@ -2349,20 +2349,48 @@
 </div>
 <noscript><style>#preloader{display:none!important;}</style></noscript>
 <script>
-  /* Self-contained remover, registered immediately after the markup — so a throw
-     in any later initializer can never leave the curtain stuck over the page. */
+  /* Drives the loading steps and hides the curtain. Registered immediately
+     after the markup so a throw in any later initializer can't leave it stuck.
+     Steps advance one at a time and the curtain stays up for a readable minimum
+     even when the page loads instantly. */
   (function () {
     var pre = document.getElementById('preloader');
     if (!pre) return;
-    var hidden = false;
+    var steps = pre.querySelectorAll('.pstep');
+    var STEP_MS = 720;                                   // dwell per step (readable)
+    var MIN_MS  = steps.length * STEP_MS + 350;          // keep curtain up this long
+    var start   = (window.performance && performance.now) ? performance.now() : 0;
+    function now() { return (window.performance && performance.now) ? performance.now() : (start + MIN_MS); }
+
+    // Light each step in turn; leave finished ones marked done.
+    var i = 0;
+    function advance() {
+      steps.forEach(function (s, idx) {
+        s.classList.toggle('active', idx === i);
+        s.classList.toggle('done', idx < i);
+      });
+      i++;
+      if (i < steps.length) setTimeout(advance, STEP_MS);
+      else setTimeout(function () { steps.forEach(function (s) { s.classList.remove('active'); s.classList.add('done'); }); }, STEP_MS);
+    }
+    if (steps.length) advance();
+
+    var hidden = false, loaded = false;
     function hide() {
       if (hidden) return; hidden = true;
+      // Let the page elements run their entrance animation as the curtain lifts.
+      if (document.body) document.body.classList.add('loaded');
       pre.classList.add('done');
       setTimeout(function () { if (pre && pre.parentNode) pre.parentNode.removeChild(pre); }, 700);
     }
-    if (document.readyState === 'complete') { setTimeout(hide, 400); }
-    else { window.addEventListener('load', function () { setTimeout(hide, 350); }); }
-    setTimeout(hide, 4000); // hard fallback
+    function maybeHide() {
+      if (!loaded) return;
+      var wait = Math.max(0, MIN_MS - (now() - start));
+      setTimeout(hide, wait);
+    }
+    if (document.readyState === 'complete') { loaded = true; maybeHide(); }
+    else { window.addEventListener('load', function () { loaded = true; maybeHide(); }); }
+    setTimeout(hide, 8000); // hard fallback — never trap the visitor
   })();
 </script>
 <style>
@@ -2404,32 +2432,42 @@
     font-family:var(--font-mono, monospace);
     font-size:11px; letter-spacing:.1em;
   }
+  /* Steps are driven by JS (.active / .done) so they stay readable and never
+     loop faster than the eye can follow. */
   .pstep{
     display:flex; align-items:center; gap:10px;
-    color:var(--ink, #fbf5ec); opacity:.28;
-    animation:stepCycle 2.4s ease-in-out infinite both;
+    color:var(--ink, #fbf5ec); opacity:.3;
+    transition:opacity .35s ease, color .35s ease;
   }
-  .pstep[data-step="0"]{ animation-delay:0s; }
-  .pstep[data-step="1"]{ animation-delay:.45s; }
-  .pstep[data-step="2"]{ animation-delay:.9s; }
+  .pstep.active{ opacity:1; color:var(--primary, #ff6940); }
+  .pstep.done{ opacity:.65; color:var(--ink, #fbf5ec); }
   .pstep-dot{
     width:7px; height:7px; border-radius:50%; flex:0 0 auto;
-    background:currentColor; box-shadow:0 0 7px currentColor;
+    background:currentColor; box-shadow:none; transition:box-shadow .35s ease;
   }
+  .pstep.active .pstep-dot{ box-shadow:0 0 9px 1px var(--primary, #ff6940); }
   @keyframes preFadeUp{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:none; } }
   @keyframes preSweep{
     0%{ left:-40%; } 50%{ left:60%; } 100%{ left:120%; }
   }
-  @keyframes stepCycle{
-    0%, 14%   { opacity:.28; color:var(--ink, #fbf5ec); }
-    26%, 64%  { opacity:1;   color:var(--primary, #ff6940); }
-    80%, 100% { opacity:.28; color:var(--ink, #fbf5ec); }
-  }
   @media (prefers-reduced-motion: reduce){
-    .preloader-inner, .preloader-fill, .pstep{ animation:none; }
+    .preloader-inner, .preloader-fill{ animation:none; }
     .preloader-fill{ width:100%; left:0; }
-    .pstep{ opacity:1; }
+    .pstep{ opacity:1; transition:none; }
   }
+  /* Home bento tiles rise in, staggered, once the curtain lifts (body.loaded).
+     Default state is fully visible so a JS failure never hides content. */
+  body.loaded .home-bento > * { animation: tileRise .6s cubic-bezier(.22,1,.36,1) both; }
+  body.loaded .home-bento > *:nth-child(1){ animation-delay:.04s; }
+  body.loaded .home-bento > *:nth-child(2){ animation-delay:.11s; }
+  body.loaded .home-bento > *:nth-child(3){ animation-delay:.18s; }
+  body.loaded .home-bento > *:nth-child(4){ animation-delay:.25s; }
+  body.loaded .home-bento > *:nth-child(5){ animation-delay:.32s; }
+  body.loaded .home-bento > *:nth-child(6){ animation-delay:.39s; }
+  body.loaded .home-bento > *:nth-child(7){ animation-delay:.46s; }
+  body.loaded .home-bento > *:nth-child(n+8){ animation-delay:.53s; }
+  @keyframes tileRise { from { opacity:0; transform:translateY(20px) scale(.98); } to { opacity:1; transform:none; } }
+  @media (prefers-reduced-motion: reduce){ body.loaded .home-bento > * { animation:none; } }
 </style>
 
 <!-- ═══ FLOATING BACKGROUND LAYER (drifting particles + soft aura) ═══ -->
@@ -2803,7 +2841,7 @@
   <section class="view active" id="view-home">
     <div class="container mx-auto max-w-6xl py-8 md:py-12 px-4">
       <!-- BENTO GRID CONTAINER -->
-      <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-auto">
+      <div class="home-bento grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-auto">
         
         <!-- HERO TILE (spans 2 cols, 2 rows) -->
         <div class="md:col-span-2 md:row-span-2 rounded-3xl p-8 lg:p-10 flex flex-col justify-end relative overflow-hidden bg-[var(--bg-elev)] border border-[var(--rule)] shadow-sm hover:shadow-md transition-shadow group">
