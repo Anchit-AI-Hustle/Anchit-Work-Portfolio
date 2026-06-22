@@ -2259,6 +2259,15 @@
 <!-- ═══ FLOATING BACKGROUND LAYER (drifting particles + soft aura) ═══ -->
 <canvas id="floatBg" aria-hidden="true"></canvas>
 <div class="float-aura" aria-hidden="true"></div>
+<!-- Energy orb wallpaper: glowing core + revolving orbital rings, faint, behind
+     everything (no solid nodes over content) -->
+<div class="energy-orb" aria-hidden="true">
+  <div class="eo-ring eo-r1"></div>
+  <div class="eo-ring eo-r2"></div>
+  <div class="eo-ring eo-r3"></div>
+  <div class="eo-core"></div>
+</div>
+
 <!-- Energy border: a heartbeat pulse travelling the page perimeter, with the
      skill/passion/energy labels living around the border, pulsing in a wave -->
 <div class="energy-border" aria-hidden="true">
@@ -2279,6 +2288,20 @@
       radial-gradient(46% 40% at 62% 12%, rgba(120,80,255,.05), transparent 60%);
     filter:blur(8px); will-change:transform; animation:floatAura 22s ease-in-out infinite alternate; }
   @keyframes floatAura{ from{transform:translate3d(-2%,-1%,0)} to{transform:translate3d(3%,2%,0)} }
+  /* ── Energy orb wallpaper: glowing core + revolving orbital rings (faint) ── */
+  .energy-orb{ position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:min(82vmin,900px); aspect-ratio:1; z-index:0; pointer-events:none; opacity:.34; display:flex; align-items:center; justify-content:center; perspective:1200px; }
+  .eo-ring{ position:absolute; inset:0; border-radius:50%; border:1px solid rgba(216,184,120,.32); transform-style:preserve-3d; }
+  .eo-r1{ animation:eoSpinX 22s linear infinite; }
+  .eo-r2{ inset:12%; border-color:rgba(255,95,21,.34); animation:eoSpinY 16s linear infinite; }
+  .eo-r3{ inset:24%; border-color:rgba(255,183,54,.28); animation:eoSpin 12s linear infinite; }
+  .eo-core{ width:34%; height:34%; border-radius:50%;
+    background:radial-gradient(circle at 38% 32%, #fff4e6, #ffb736 26%, #ff5f15 62%, #5e1c03 100%);
+    box-shadow:0 0 70px rgba(255,95,21,.5), 0 0 150px rgba(255,138,61,.3), inset 0 0 30px rgba(255,255,255,.25);
+    animation:eoBreathe 4.5s ease-in-out infinite; }
+  @keyframes eoSpin{ to{ transform:rotate(360deg) } }
+  @keyframes eoSpinX{ to{ transform:rotateX(360deg) } }
+  @keyframes eoSpinY{ to{ transform:rotateY(360deg) } }
+  @keyframes eoBreathe{ 0%,100%{ transform:scale(1) } 50%{ transform:scale(1.06); box-shadow:0 0 90px rgba(255,95,21,.62), 0 0 185px rgba(255,138,61,.4), inset 0 0 30px rgba(255,255,255,.32) } }
   /* ── Energy border: a heartbeat pulse that travels the page perimeter, pumped
      up (lub-dub glow), with skill/passion/energy labels living around the border
      and pulsing in a wave. Sits at z-0 behind content; nothing overlaps text. ── */
