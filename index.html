@@ -4279,7 +4279,12 @@
     if (!opts.silent) {
       if (mode === 'chat') {
         try { window.anchitAudioControls?.stop?.(); } catch {}  // halt any page narration
-        if (typeof window.openFullChat === 'function') window.openFullChat();
+        // Launcher + chooser open the docked chat WINDOW (an overlay on the
+        // current page) — NOT the full chat page. The full chat page loads only
+        // when the visitor explicitly goes there via the sidebar "Chat" nav
+        // (switchView('chat') → openFullChat).
+        if (typeof window.openGuideChat === 'function') window.openGuideChat();
+        else if (typeof window.openFullChat === 'function') window.openFullChat();
         if (window.anchitChatAudio === 'call') startCallMode(); else stopCallMode();
       } else { // narrate → leave the conversation, show the portfolio, read it aloud
         stopCallMode();
