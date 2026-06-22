@@ -237,7 +237,18 @@
     cursor: pointer; border: none; outline: none;
   }
   .sidebar-item:hover { background: rgba(255,255,255,0.09); color: rgba(251,245,236,0.85); }
-  .sidebar-item.active { background: rgba(255,255,255,0.14); color: #FBF5EC; }
+  .sidebar-item.active {
+    background: color-mix(in srgb, var(--primary) 16%, transparent);
+    color: var(--ink);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 30%, transparent);
+  }
+  .sidebar-item.active .sidebar-label { color: var(--primary); font-weight: 600; }
+  /* Glowing accent bar marks the current page — clearly visible on every view */
+  .sidebar-item.active::before {
+    content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+    width: 3px; height: 22px; border-radius: 0 3px 3px 0;
+    background: var(--primary); box-shadow: 0 0 10px var(--primary);
+  }
   .sidebar-item svg { width: 18px; height: 18px; flex-shrink: 0; }
   .sidebar-label {
     font-family: var(--font-mono); font-size: 10px; font-weight: 500;
@@ -6747,6 +6758,7 @@
   .sidebar-contact-group.open .sidebar-subnav { display: flex; }
   .sidebar-subitem { display: flex; align-items: center; gap: 12px; padding: 8px 10px 8px 30px; border-radius: 10px; color: var(--ink-dim); text-decoration: none; font-size: 13px; transition: background .15s, color .15s; }
   .sidebar-subitem:hover { background: rgba(255,106,26,.08); color: var(--ink); }
+  .sidebar-subitem.active { background: color-mix(in srgb, var(--primary) 16%, transparent); color: var(--primary); font-weight: 600; }
   .sidebar-subitem svg { width: 16px; height: 16px; flex: 0 0 auto; }
   .sidebar-subitem[data-c="whatsapp"] svg { color: #25D366; }
   .sidebar-subitem[data-c="call"] svg { color: #22C55E; }
