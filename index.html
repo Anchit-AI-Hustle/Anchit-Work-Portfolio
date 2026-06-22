@@ -647,6 +647,20 @@
     0%   { transform: translateX(-5%) scale(1.03); opacity: .8; }
     100% { transform: translateX(5%)  scale(1.07); opacity: 1; }
   }
+  /* Ambient energy wallpaper inside the chat window — same drifting orb glow
+     the page carries, sitting above the panel fill but behind all messages. */
+  .chat-block::after {
+    content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(42% 32% at 50% 40%, rgba(255,95,21,0.10), transparent 62%),
+      radial-gradient(38% 30% at 82% 84%, rgba(216,184,120,0.07), transparent 64%),
+      radial-gradient(40% 30% at 14% 78%, rgba(255,138,61,0.06), transparent 64%);
+    animation: chatEnergy 16s ease-in-out infinite alternate;
+  }
+  @keyframes chatEnergy {
+    from { transform: translate3d(-2%, -1.5%, 0); }
+    to   { transform: translate3d(3%, 2%, 0); }
+  }
   .chat-head {
     position: relative; z-index: 1;
     padding: 18px 22px 16px; border-bottom: 1px solid var(--rule);
@@ -660,7 +674,16 @@
     background: linear-gradient(135deg, var(--primary) 0%, #FF6940 100%); color: #FFF;
     display: inline-flex; align-items: center; justify-content: center;
     font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: 19px;
-    flex-shrink: 0; box-shadow: 0 4px 16px rgba(255,77,31,0.42);
+    flex-shrink: 0;
+    /* Heartbeat is a glow pulse only — the photo never scales / zooms. */
+    animation: avatarHeartbeat 1.5s ease-in-out infinite;
+  }
+  @keyframes avatarHeartbeat {
+    0%       { box-shadow: 0 4px 16px rgba(255,77,31,0.42), 0 0 0 0 rgba(255,105,64,0); }
+    12%      { box-shadow: 0 4px 16px rgba(255,77,31,0.42), 0 0 16px 3px rgba(255,105,64,0.55); }
+    24%      { box-shadow: 0 4px 16px rgba(255,77,31,0.42), 0 0 6px 1px rgba(255,105,64,0.2); }
+    40%      { box-shadow: 0 4px 16px rgba(255,77,31,0.42), 0 0 22px 5px rgba(255,138,61,0.6); }
+    55%,100% { box-shadow: 0 4px 16px rgba(255,77,31,0.42), 0 0 0 0 rgba(255,105,64,0); }
   }
   .chat-head-avatar::before {
     content: ''; position: absolute; inset: -3px; border-radius: 50%; z-index: -1;
@@ -670,10 +693,17 @@
   .chat-head-avatar::after {
     content: ''; position: absolute; inset: 0; border-radius: 50%; z-index: -2;
     box-shadow: 0 0 0 0 rgba(255,77,31,.5);
-    animation: orbHalo 2.8s ease-out infinite;
+    animation: orbHalo 1.5s ease-out infinite;
   }
   @keyframes orbSpin { to { transform: rotate(360deg); } }
-  @keyframes orbHalo { 0% { box-shadow: 0 0 0 0 rgba(255,77,31,.5); } 70%,100% { box-shadow: 0 0 0 13px rgba(255,77,31,0); } }
+  /* Lub-dub: two expanding rings per beat, in sync with avatarHeartbeat. */
+  @keyframes orbHalo {
+    0%       { box-shadow: 0 0 0 0 rgba(255,77,31,.5); }
+    12%      { box-shadow: 0 0 0 8px rgba(255,77,31,0); }
+    24%      { box-shadow: 0 0 0 0 rgba(255,77,31,.4); }
+    40%      { box-shadow: 0 0 0 11px rgba(255,77,31,0); }
+    55%,100% { box-shadow: 0 0 0 0 rgba(255,77,31,0); }
+  }
   .chat-head-info { flex: 1; min-width: 0; }
   .chat-minimize-btn {
     flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
@@ -7410,7 +7440,10 @@
     margin-right: 2px;
     box-shadow: 16px 0 0 var(--rule-strong), 32px 0 0 var(--rule-strong);
   }
-  .chat-head-avatar { display: none !important; }
+  /* Keep the photo (with its heartbeat) visible on mobile too; the terminal
+     dots are redundant once the avatar is shown, so drop them. */
+  .chat-head-avatar { display: inline-flex !important; width: 36px !important; height: 36px !important; }
+  .chat-head::before { display: none !important; }
   .chat-head-info .title,
   .chat-head-info .title span {
     font-family: var(--font-mono) !important;
