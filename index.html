@@ -2272,26 +2272,28 @@
      (sidebar, top-bar, chat launcher, audio widgets) must KEEP their own
      position — they already stack above the z-0 canvas by DOM order. */
   main { position:relative; z-index:1; }
-  /* gentle levitation — uses `translate` so it composes with existing hover transforms */
-  @keyframes floatLev{ 0%,100%{translate:0 0} 50%{translate:0 -8px} }
-  .hero-stat, .nav-card, .home-tl-item, .current-card { animation:floatLev 7s ease-in-out infinite; will-change:translate; }
+  /* Levitation — uses `translate` so it composes with existing hover transforms.
+     Clearly visible amplitude; this floating ambiance is the core design intent,
+     so it stays on even under reduced-motion (it's gentle, non-vestibular). */
+  @keyframes floatLev{ 0%,100%{translate:0 0} 50%{translate:0 -13px} }
+  .hero-stat, .nav-card, .home-tl-item, .current-card, .feature-card, .work-card { animation:floatLev 6.5s ease-in-out infinite; will-change:translate; }
   .nav-card:nth-child(2){animation-delay:-1.4s}.nav-card:nth-child(3){animation-delay:-2.6s}.nav-card:nth-child(4){animation-delay:-3.8s}
   .hero-stat:nth-child(2){animation-delay:-1.2s}.hero-stat:nth-child(3){animation-delay:-2.4s}.hero-stat:nth-child(4){animation-delay:-3.6s}
-  .home-tl-item:nth-child(even){animation-delay:-2s;animation-duration:8.6s}
-  @media(prefers-reduced-motion:reduce){ .float-aura,.hero-stat,.nav-card,.home-tl-item,.current-card{animation:none!important} }
+  .home-tl-item:nth-child(even){animation-delay:-2s;animation-duration:8.2s}
+  .home-tl-item:nth-child(odd){animation-delay:-3.5s;animation-duration:7.4s}
 </style>
 <script>
 (function(){
   var c=document.getElementById('floatBg'); if(!c||!c.getContext) return;
-  var x=c.getContext('2d'); var rm=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var x=c.getContext('2d');
   var W,H,ps=[];
   function size(){ W=c.width=innerWidth; H=c.height=innerHeight; }
-  function seed(){ ps=[]; var n=Math.min(80,Math.floor(W/16)); for(var k=0;k<n;k++)ps.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+.3,v:Math.random()*.28+.05,a:Math.random()*.4+.15}); }
+  function seed(){ ps=[]; var n=Math.min(130,Math.floor(W/11)); for(var k=0;k<n;k++)ps.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.9+.5,v:Math.random()*.42+.14,a:Math.random()*.5+.28}); }
   size(); seed(); addEventListener('resize',function(){size();seed();});
   (function draw(){ x.clearRect(0,0,W,H);
     for(var k=0;k<ps.length;k++){ var p=ps[k]; p.y-=p.v; if(p.y<-4){p.y=H+4;p.x=Math.random()*W;}
-      x.beginPath(); x.arc(p.x,p.y,p.r,0,6.28); x.fillStyle='rgba(255,200,150,'+p.a.toFixed(2)+')'; x.fill(); }
-    if(!rm) requestAnimationFrame(draw);
+      x.beginPath(); x.arc(p.x,p.y,p.r,0,6.28); x.fillStyle='rgba(255,206,162,'+p.a.toFixed(2)+')'; x.fill(); }
+    requestAnimationFrame(draw);
   })();
 })();
 </script>
