@@ -1603,17 +1603,30 @@
   @media (max-width: 820px) {
     #view-chat .container { flex: 1 1 auto !important; min-height: 0 !important; height: auto !important; padding-top: calc(52px + var(--safe-top)) !important; }
   }
-  /* Short viewports: compact the chrome so the message area never collapses to nothing. */
-  @media (max-height: 640px) {
+  /* Short viewports: shrink the chrome HARD so the chat itself (the messages) is
+     the priority — it's the whole point of the window. */
+  @media (max-height: 700px) {
     #view-chat .container > div:first-child { display: none !important; }   /* drop redundant eyebrow label */
-    #view-chat .chat-head { padding: 8px 12px !important; }
-    #view-chat .chat-head-avatar { width: 34px !important; height: 34px !important; }
+    #view-chat .chat-head { padding: 6px 12px !important; }
+    #view-chat .chat-head-avatar { width: 30px !important; height: 30px !important; }
     #view-chat .chat-head .sub { display: none !important; }
-    #view-chat .chat-modes { margin: 6px 0 !important; }
-    #view-chat .chat-modes .chat-mode { padding: 6px 12px !important; }
-    #view-chat .chat-audio-row { margin: 4px 0 !important; }
-    #view-chat .chips { padding: 6px 0 !important; }
-    #view-chat .chat-body { min-height: 64px !important; }
+    #view-chat .chat-modes { margin: 4px 0 !important; }
+    #view-chat .chat-modes .chat-mode { padding: 5px 10px !important; font-size: 12px !important; }
+    #view-chat .chat-modes .chat-mode svg { width: 15px !important; height: 15px !important; }
+    #view-chat .chat-audio-row { margin: 3px 0 !important; }
+    #view-chat .chat-audio { padding: 3px 9px !important; font-size: 11px !important; }
+    #view-chat .chips { padding: 4px 0 !important; }
+    #view-chat .chips .chip { padding: 5px 11px !important; }
+    #view-chat .chat-body { flex: 1 1 0 !important; min-height: 90px !important; }
+  }
+  /* Very short: drop the secondary voice sub-control AND the prompt chips so the
+     conversation itself gets the majority of the window (both return when there's
+     room). The messages are what matter here. */
+  @media (max-height: 500px) {
+    #view-chat .chat-audio-row { display: none !important; }
+    #view-chat .chips { display: none !important; }
+    #view-chat .chat-modes { margin: 2px 0 !important; }
+    #view-chat .chat-body { flex: 1 1 0 !important; min-height: 120px !important; }
   }
 
   /* ============ VOICE — AMBIENT INDICATOR ============ */
@@ -2259,6 +2272,26 @@
 <!-- ═══ FLOATING BACKGROUND LAYER (drifting particles + soft aura) ═══ -->
 <canvas id="floatBg" aria-hidden="true"></canvas>
 <div class="float-aura" aria-hidden="true"></div>
+<!-- Energy orb wallpaper: glowing core + revolving orbital rings, faint, behind
+     everything (no solid nodes over content) -->
+<div class="energy-orb" aria-hidden="true">
+  <div class="eo-ring eo-r1"></div>
+  <div class="eo-ring eo-r2"></div>
+  <div class="eo-ring eo-r3"></div>
+  <div class="eo-core"></div>
+</div>
+
+<!-- Energy border: a heartbeat pulse travelling the page perimeter, with the
+     skill/passion/energy labels living around the border, pulsing in a wave -->
+<div class="energy-border" aria-hidden="true">
+  <div class="eb-frame"></div>
+  <span class="eb-l eb-l1">SKILL</span>
+  <span class="eb-l eb-l2">PASSION</span>
+  <span class="eb-l eb-l3">ENERGY</span>
+  <span class="eb-l eb-l4">PRODUCT</span>
+  <span class="eb-l eb-l5">GROWTH</span>
+  <span class="eb-l eb-l6">REVENUE</span>
+</div>
 <style>
   #floatBg, .float-aura { position:fixed; inset:0; z-index:0; pointer-events:none; }
   .float-aura{ inset:-22%;
@@ -2268,30 +2301,73 @@
       radial-gradient(46% 40% at 62% 12%, rgba(120,80,255,.05), transparent 60%);
     filter:blur(8px); will-change:transform; animation:floatAura 22s ease-in-out infinite alternate; }
   @keyframes floatAura{ from{transform:translate3d(-2%,-1%,0)} to{transform:translate3d(3%,2%,0)} }
+  /* ── Energy orb wallpaper: glowing core + revolving orbital rings (faint) ── */
+  .energy-orb{ position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:min(82vmin,900px); aspect-ratio:1; z-index:0; pointer-events:none; opacity:.34; display:flex; align-items:center; justify-content:center; perspective:1200px; }
+  .eo-ring{ position:absolute; inset:0; border-radius:50%; border:1px solid rgba(216,184,120,.32); transform-style:preserve-3d; }
+  .eo-r1{ animation:eoSpinX 22s linear infinite; }
+  .eo-r2{ inset:12%; border-color:rgba(255,95,21,.34); animation:eoSpinY 16s linear infinite; }
+  .eo-r3{ inset:24%; border-color:rgba(255,183,54,.28); animation:eoSpin 12s linear infinite; }
+  .eo-core{ width:34%; height:34%; border-radius:50%;
+    background:radial-gradient(circle at 38% 32%, #fff4e6, #ffb736 26%, #ff5f15 62%, #5e1c03 100%);
+    box-shadow:0 0 70px rgba(255,95,21,.5), 0 0 150px rgba(255,138,61,.3), inset 0 0 30px rgba(255,255,255,.25);
+    animation:eoBreathe 4.5s ease-in-out infinite; }
+  @keyframes eoSpin{ to{ transform:rotate(360deg) } }
+  @keyframes eoSpinX{ to{ transform:rotateX(360deg) } }
+  @keyframes eoSpinY{ to{ transform:rotateY(360deg) } }
+  @keyframes eoBreathe{ 0%,100%{ transform:scale(1) } 50%{ transform:scale(1.06); box-shadow:0 0 90px rgba(255,95,21,.62), 0 0 185px rgba(255,138,61,.4), inset 0 0 30px rgba(255,255,255,.32) } }
+  /* ── Energy border: a heartbeat pulse that travels the page perimeter, pumped
+     up (lub-dub glow), with skill/passion/energy labels living around the border
+     and pulsing in a wave. Sits at z-0 behind content; nothing overlaps text. ── */
+  @property --eb-a { syntax:'<angle>'; initial-value:0deg; inherits:false; }
+  .energy-border{ position:fixed; inset:0; z-index:0; pointer-events:none; }
+  .energy-border::before{ content:''; position:absolute; inset:10px; border-radius:20px; border:1px solid rgba(216,184,120,.12); }
+  .eb-frame{ position:absolute; inset:10px; border-radius:20px; padding:2px;
+    background: conic-gradient(from var(--eb-a), rgba(255,95,21,0) 0deg 284deg, rgba(255,138,61,.85) 318deg, #ffd89a 338deg, rgba(255,138,61,.85) 356deg, rgba(255,95,21,0) 360deg);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor;
+    mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite:exclude;
+    animation: ebSweep 4.4s linear infinite, ebBeat 1.5s ease-in-out infinite; }
+  @keyframes ebSweep{ to{ --eb-a:360deg } }
+  @keyframes ebBeat{
+    0%{ filter:drop-shadow(0 0 3px rgba(255,95,21,.4)) }
+    12%{ filter:drop-shadow(0 0 14px rgba(255,95,21,.95)) }
+    24%{ filter:drop-shadow(0 0 4px rgba(255,95,21,.4)) }
+    40%{ filter:drop-shadow(0 0 16px rgba(255,138,61,.9)) }
+    55%,100%{ filter:drop-shadow(0 0 3px rgba(255,95,21,.4)) } }
+  .eb-l{ position:absolute; font-family:var(--font-mono,ui-monospace,monospace); font-size:10px; letter-spacing:.22em; color:rgba(216,184,120,.5); animation:ebLabelBeat 1.5s ease-in-out infinite; }
+  @keyframes ebLabelBeat{ 0%,100%{ opacity:.32; text-shadow:none } 14%{ opacity:.95; text-shadow:0 0 9px rgba(255,138,61,.6) } 46%{ opacity:.42 } }
+  .eb-l1{ top:68px; left:50%; transform:translateX(-50%); }   /* SKILL — top, below the contact bar */
+  .eb-l2{ top:32%; right:22px; }                              /* PASSION — right upper */
+  .eb-l3{ top:60%; right:22px; animation-delay:-.2s; }        /* ENERGY — right lower */
+  .eb-l4{ bottom:18px; left:62%; animation-delay:-.4s; }      /* PRODUCT — bottom */
+  .eb-l5{ bottom:18px; left:40%; animation-delay:-.6s; }      /* GROWTH — bottom */
+  .eb-l6{ top:50%; left:270px; animation-delay:-.8s; }        /* REVENUE — past the sidebar */
+  @media (max-width:820px){ .eb-l6{ left:24px } .eb-l1{ top:60px } }
   /* Lift only the in-flow content above the floating layer. Fixed elements
      (sidebar, top-bar, chat launcher, audio widgets) must KEEP their own
      position — they already stack above the z-0 canvas by DOM order. */
   main { position:relative; z-index:1; }
-  /* gentle levitation — uses `translate` so it composes with existing hover transforms */
-  @keyframes floatLev{ 0%,100%{translate:0 0} 50%{translate:0 -8px} }
-  .hero-stat, .nav-card, .home-tl-item, .current-card { animation:floatLev 7s ease-in-out infinite; will-change:translate; }
+  /* Levitation — uses `translate` so it composes with existing hover transforms.
+     Clearly visible amplitude; this floating ambiance is the core design intent,
+     so it stays on even under reduced-motion (it's gentle, non-vestibular). */
+  @keyframes floatLev{ 0%,100%{translate:0 0} 50%{translate:0 -13px} }
+  .hero-stat, .nav-card, .home-tl-item, .current-card, .feature-card, .work-card { animation:floatLev 6.5s ease-in-out infinite; will-change:translate; }
   .nav-card:nth-child(2){animation-delay:-1.4s}.nav-card:nth-child(3){animation-delay:-2.6s}.nav-card:nth-child(4){animation-delay:-3.8s}
   .hero-stat:nth-child(2){animation-delay:-1.2s}.hero-stat:nth-child(3){animation-delay:-2.4s}.hero-stat:nth-child(4){animation-delay:-3.6s}
-  .home-tl-item:nth-child(even){animation-delay:-2s;animation-duration:8.6s}
-  @media(prefers-reduced-motion:reduce){ .float-aura,.hero-stat,.nav-card,.home-tl-item,.current-card{animation:none!important} }
+  .home-tl-item:nth-child(even){animation-delay:-2s;animation-duration:8.2s}
+  .home-tl-item:nth-child(odd){animation-delay:-3.5s;animation-duration:7.4s}
 </style>
 <script>
 (function(){
   var c=document.getElementById('floatBg'); if(!c||!c.getContext) return;
-  var x=c.getContext('2d'); var rm=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var x=c.getContext('2d');
   var W,H,ps=[];
   function size(){ W=c.width=innerWidth; H=c.height=innerHeight; }
-  function seed(){ ps=[]; var n=Math.min(80,Math.floor(W/16)); for(var k=0;k<n;k++)ps.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+.3,v:Math.random()*.28+.05,a:Math.random()*.4+.15}); }
+  function seed(){ ps=[]; var n=Math.min(130,Math.floor(W/11)); for(var k=0;k<n;k++)ps.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.9+.5,v:Math.random()*.42+.14,a:Math.random()*.5+.28}); }
   size(); seed(); addEventListener('resize',function(){size();seed();});
   (function draw(){ x.clearRect(0,0,W,H);
     for(var k=0;k<ps.length;k++){ var p=ps[k]; p.y-=p.v; if(p.y<-4){p.y=H+4;p.x=Math.random()*W;}
-      x.beginPath(); x.arc(p.x,p.y,p.r,0,6.28); x.fillStyle='rgba(255,200,150,'+p.a.toFixed(2)+')'; x.fill(); }
-    if(!rm) requestAnimationFrame(draw);
+      x.beginPath(); x.arc(p.x,p.y,p.r,0,6.28); x.fillStyle='rgba(255,206,162,'+p.a.toFixed(2)+')'; x.fill(); }
+    requestAnimationFrame(draw);
   })();
 })();
 </script>
