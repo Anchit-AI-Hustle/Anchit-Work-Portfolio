@@ -2259,6 +2259,34 @@
 <!-- ═══ FLOATING BACKGROUND LAYER (drifting particles + soft aura) ═══ -->
 <canvas id="floatBg" aria-hidden="true"></canvas>
 <div class="float-aura" aria-hidden="true"></div>
+<!-- Energy-core watermark: a pulsing circle with revolving triangular pulses -->
+<div class="energy-mark" aria-hidden="true">
+  <svg viewBox="0 0 200 200">
+    <defs>
+      <radialGradient id="emCore" cx="40%" cy="36%" r="68%">
+        <stop offset="0%" stop-color="#fff4e6"/>
+        <stop offset="34%" stop-color="#ffb736"/>
+        <stop offset="74%" stop-color="#ff5f15"/>
+        <stop offset="100%" stop-color="#5e1c03"/>
+      </radialGradient>
+      <polygon id="emTri" points="100,18 93.5,44 106.5,44"/>
+      <polygon id="emTriS" points="100,50 95.5,67 104.5,67"/>
+    </defs>
+    <circle class="em-ring" cx="100" cy="100" r="58"/>
+    <circle class="em-ring em-ring-b" cx="100" cy="100" r="80"/>
+    <g class="em-spin">
+      <use href="#emTri"/><use href="#emTri" transform="rotate(45 100 100)"/>
+      <use href="#emTri" transform="rotate(90 100 100)"/><use href="#emTri" transform="rotate(135 100 100)"/>
+      <use href="#emTri" transform="rotate(180 100 100)"/><use href="#emTri" transform="rotate(225 100 100)"/>
+      <use href="#emTri" transform="rotate(270 100 100)"/><use href="#emTri" transform="rotate(315 100 100)"/>
+    </g>
+    <g class="em-spin-rev">
+      <use href="#emTriS" transform="rotate(22.5 100 100)"/><use href="#emTriS" transform="rotate(112.5 100 100)"/>
+      <use href="#emTriS" transform="rotate(202.5 100 100)"/><use href="#emTriS" transform="rotate(292.5 100 100)"/>
+    </g>
+    <circle class="em-core" cx="100" cy="100" r="25" fill="url(#emCore)"/>
+  </svg>
+</div>
 <style>
   #floatBg, .float-aura { position:fixed; inset:0; z-index:0; pointer-events:none; }
   .float-aura{ inset:-22%;
@@ -2268,6 +2296,21 @@
       radial-gradient(46% 40% at 62% 12%, rgba(120,80,255,.05), transparent 60%);
     filter:blur(8px); will-change:transform; animation:floatAura 22s ease-in-out infinite alternate; }
   @keyframes floatAura{ from{transform:translate3d(-2%,-1%,0)} to{transform:translate3d(3%,2%,0)} }
+  /* ── Energy-core watermark: pulsing circle + revolving triangular pulses ── */
+  .energy-mark{ position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:min(74vmin,680px); aspect-ratio:1; z-index:0; pointer-events:none; opacity:.22; }
+  .energy-mark svg{ width:100%; height:100%; overflow:visible; }
+  .em-ring, .em-spin, .em-spin-rev, .em-core { transform-box:view-box; transform-origin:center; }
+  .em-ring{ fill:none; stroke:rgba(216,184,120,.5); stroke-width:.4; animation:emRipple 4.2s ease-in-out infinite; }
+  .em-ring-b{ stroke:rgba(255,95,21,.4); animation-delay:-2.1s; }
+  .em-spin use{ fill:rgba(255,138,61,.9); }
+  .em-spin-rev use{ fill:rgba(216,184,120,.72); }
+  .em-spin{ animation:emSpin 26s linear infinite, emFlicker 3.4s ease-in-out infinite; }
+  .em-spin-rev{ animation:emSpin 34s linear infinite reverse, emFlicker 4.3s ease-in-out infinite; }
+  .em-core{ animation:emPulse 3.6s ease-in-out infinite; filter:drop-shadow(0 0 16px rgba(255,95,21,.55)); }
+  @keyframes emSpin{ to{ transform:rotate(360deg) } }
+  @keyframes emPulse{ 0%,100%{ transform:scale(1); opacity:.92 } 50%{ transform:scale(1.2); opacity:1 } }
+  @keyframes emRipple{ 0%,100%{ transform:scale(.95); opacity:.45 } 50%{ transform:scale(1.05); opacity:.95 } }
+  @keyframes emFlicker{ 0%,100%{ opacity:.82 } 50%{ opacity:1 } }
   /* Lift only the in-flow content above the floating layer. Fixed elements
      (sidebar, top-bar, chat launcher, audio widgets) must KEEP their own
      position — they already stack above the z-0 canvas by DOM order. */
