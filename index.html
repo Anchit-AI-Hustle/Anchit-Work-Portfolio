@@ -1603,17 +1603,30 @@
   @media (max-width: 820px) {
     #view-chat .container { flex: 1 1 auto !important; min-height: 0 !important; height: auto !important; padding-top: calc(52px + var(--safe-top)) !important; }
   }
-  /* Short viewports: compact the chrome so the message area never collapses to nothing. */
-  @media (max-height: 640px) {
+  /* Short viewports: shrink the chrome HARD so the chat itself (the messages) is
+     the priority — it's the whole point of the window. */
+  @media (max-height: 700px) {
     #view-chat .container > div:first-child { display: none !important; }   /* drop redundant eyebrow label */
-    #view-chat .chat-head { padding: 8px 12px !important; }
-    #view-chat .chat-head-avatar { width: 34px !important; height: 34px !important; }
+    #view-chat .chat-head { padding: 6px 12px !important; }
+    #view-chat .chat-head-avatar { width: 30px !important; height: 30px !important; }
     #view-chat .chat-head .sub { display: none !important; }
-    #view-chat .chat-modes { margin: 6px 0 !important; }
-    #view-chat .chat-modes .chat-mode { padding: 6px 12px !important; }
-    #view-chat .chat-audio-row { margin: 4px 0 !important; }
-    #view-chat .chips { padding: 6px 0 !important; }
-    #view-chat .chat-body { min-height: 64px !important; }
+    #view-chat .chat-modes { margin: 4px 0 !important; }
+    #view-chat .chat-modes .chat-mode { padding: 5px 10px !important; font-size: 12px !important; }
+    #view-chat .chat-modes .chat-mode svg { width: 15px !important; height: 15px !important; }
+    #view-chat .chat-audio-row { margin: 3px 0 !important; }
+    #view-chat .chat-audio { padding: 3px 9px !important; font-size: 11px !important; }
+    #view-chat .chips { padding: 4px 0 !important; }
+    #view-chat .chips .chip { padding: 5px 11px !important; }
+    #view-chat .chat-body { flex: 1 1 0 !important; min-height: 90px !important; }
+  }
+  /* Very short: drop the secondary voice sub-control AND the prompt chips so the
+     conversation itself gets the majority of the window (both return when there's
+     room). The messages are what matter here. */
+  @media (max-height: 500px) {
+    #view-chat .chat-audio-row { display: none !important; }
+    #view-chat .chips { display: none !important; }
+    #view-chat .chat-modes { margin: 2px 0 !important; }
+    #view-chat .chat-body { flex: 1 1 0 !important; min-height: 120px !important; }
   }
 
   /* ============ VOICE — AMBIENT INDICATOR ============ */
