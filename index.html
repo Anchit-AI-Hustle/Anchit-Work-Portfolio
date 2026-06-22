@@ -1348,16 +1348,17 @@
   }
 
   /* ============ REVEAL — animate in on scroll ============ */
+  /* Floating entrance — every step rises, un-blurs and scales into place. */
   .reveal {
-    opacity: 0; transform: translateY(26px);
-    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity: 0; transform: translateY(40px) scale(0.97); filter: blur(6px);
+    transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), filter 0.85s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .reveal.in { opacity: 1; transform: none; }
+  .reveal.in { opacity: 1; transform: none; filter: none; }
   .reveal-stagger > * {
-    opacity: 0; transform: translateY(22px);
-    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity: 0; transform: translateY(34px) scale(0.96); filter: blur(5px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), filter 0.7s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .reveal-stagger.in > * { opacity: 1; transform: none; }
+  .reveal-stagger.in > * { opacity: 1; transform: none; filter: none; }
   .reveal-stagger.in > *:nth-child(1) { transition-delay: 0.05s; }
   .reveal-stagger.in > *:nth-child(2) { transition-delay: 0.13s; }
   .reveal-stagger.in > *:nth-child(3) { transition-delay: 0.21s; }
@@ -2254,6 +2255,44 @@
 
 </head>
 <body>
+
+<!-- ═══ FLOATING BACKGROUND LAYER (drifting particles + soft aura) ═══ -->
+<canvas id="floatBg" aria-hidden="true"></canvas>
+<div class="float-aura" aria-hidden="true"></div>
+<style>
+  #floatBg, .float-aura { position:fixed; inset:0; z-index:0; pointer-events:none; }
+  .float-aura{ inset:-22%;
+    background:
+      radial-gradient(38% 34% at 18% 22%, rgba(255,95,21,.11), transparent 60%),
+      radial-gradient(42% 38% at 84% 74%, rgba(216,184,120,.085), transparent 62%),
+      radial-gradient(46% 40% at 62% 12%, rgba(120,80,255,.05), transparent 60%);
+    filter:blur(8px); will-change:transform; animation:floatAura 22s ease-in-out infinite alternate; }
+  @keyframes floatAura{ from{transform:translate3d(-2%,-1%,0)} to{transform:translate3d(3%,2%,0)} }
+  /* lift real content above the floating layer */
+  main, .sidebar, aside.sidebar, .top-bar, .scroll-progress, .audio-float, .audio-ambient, .chat-return { position:relative; z-index:1; }
+  /* gentle levitation — uses `translate` so it composes with existing hover transforms */
+  @keyframes floatLev{ 0%,100%{translate:0 0} 50%{translate:0 -8px} }
+  .hero-stat, .nav-card, .home-tl-item, .current-card { animation:floatLev 7s ease-in-out infinite; will-change:translate; }
+  .nav-card:nth-child(2){animation-delay:-1.4s}.nav-card:nth-child(3){animation-delay:-2.6s}.nav-card:nth-child(4){animation-delay:-3.8s}
+  .hero-stat:nth-child(2){animation-delay:-1.2s}.hero-stat:nth-child(3){animation-delay:-2.4s}.hero-stat:nth-child(4){animation-delay:-3.6s}
+  .home-tl-item:nth-child(even){animation-delay:-2s;animation-duration:8.6s}
+  @media(prefers-reduced-motion:reduce){ .float-aura,.hero-stat,.nav-card,.home-tl-item,.current-card{animation:none!important} }
+</style>
+<script>
+(function(){
+  var c=document.getElementById('floatBg'); if(!c||!c.getContext) return;
+  var x=c.getContext('2d'); var rm=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var W,H,ps=[];
+  function size(){ W=c.width=innerWidth; H=c.height=innerHeight; }
+  function seed(){ ps=[]; var n=Math.min(80,Math.floor(W/16)); for(var k=0;k<n;k++)ps.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+.3,v:Math.random()*.28+.05,a:Math.random()*.4+.15}); }
+  size(); seed(); addEventListener('resize',function(){size();seed();});
+  (function draw(){ x.clearRect(0,0,W,H);
+    for(var k=0;k<ps.length;k++){ var p=ps[k]; p.y-=p.v; if(p.y<-4){p.y=H+4;p.x=Math.random()*W;}
+      x.beginPath(); x.arc(p.x,p.y,p.r,0,6.28); x.fillStyle='rgba(255,200,150,'+p.a.toFixed(2)+')'; x.fill(); }
+    if(!rm) requestAnimationFrame(draw);
+  })();
+})();
+</script>
 
 <!-- ONBOARDING MODAL -->
 <div id="onboarding" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(4,3,2,0.82); backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px); z-index:10000; display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; pointer-events:none; transition:opacity 0.45s ease, visibility 0.45s ease;">
@@ -4240,7 +4279,12 @@
     if (!opts.silent) {
       if (mode === 'chat') {
         try { window.anchitAudioControls?.stop?.(); } catch {}  // halt any page narration
-        if (typeof window.openFullChat === 'function') window.openFullChat();
+        // Launcher + chooser open the docked chat WINDOW (an overlay on the
+        // current page) — NOT the full chat page. The full chat page loads only
+        // when the visitor explicitly goes there via the sidebar "Chat" nav
+        // (switchView('chat') → openFullChat).
+        if (typeof window.openGuideChat === 'function') window.openGuideChat();
+        else if (typeof window.openFullChat === 'function') window.openFullChat();
         if (window.anchitChatAudio === 'call') startCallMode(); else stopCallMode();
       } else { // narrate → leave the conversation, show the portfolio, read it aloud
         stopCallMode();
