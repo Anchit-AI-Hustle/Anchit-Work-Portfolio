@@ -807,8 +807,8 @@
 
   .msg { display: flex; gap: 10px; max-width: 100%; animation: msgInBot 0.5s cubic-bezier(0.22,1,0.36,1) both; }
   .msg.user { justify-content: flex-end; animation: msgInUser 0.5s cubic-bezier(0.22,1,0.36,1) both; }
-  @keyframes msgInBot  { from { opacity: 0; transform: translateX(-14px) translateY(8px) scale(.96); filter: blur(3px); } to { opacity: 1; transform: none; filter: blur(0); } }
-  @keyframes msgInUser { from { opacity: 0; transform: translateX(14px)  translateY(8px) scale(.96); filter: blur(3px); } to { opacity: 1; transform: none; filter: blur(0); } }
+  @keyframes msgInBot  { from { opacity: 0; transform: translateX(-12px) translateY(6px) scale(.97); } to { opacity: 1; transform: none; } }
+  @keyframes msgInUser { from { opacity: 0; transform: translateX(12px)  translateY(6px) scale(.97); } to { opacity: 1; transform: none; } }
   .msg-avatar {
     position: relative;
     width: 30px; height: 30px; border-radius: 50%;
@@ -883,8 +883,8 @@
 	    animation: guideIn .42s cubic-bezier(.16,1,.3,1) both;
 	  }
 	  @keyframes guideIn {
-	    from { opacity: 0; transform: translateY(12px) scale(.98); filter: blur(4px); }
-	    to { opacity: 1; transform: none; filter: blur(0); }
+	    from { opacity: 0; transform: translateY(10px) scale(.98); }
+	    to { opacity: 1; transform: none; }
 	  }
 	  .msg.page-guide .msg-bubble {
 	    max-width: 100%;
@@ -2503,11 +2503,11 @@
     filter:blur(8px); will-change:transform; animation:floatAura 22s ease-in-out infinite alternate; }
   @keyframes floatAura{ from{transform:translate3d(-2%,-1%,0)} to{transform:translate3d(3%,2%,0)} }
   /* ── Energy orb wallpaper: glowing core + revolving orbital rings (faint) ── */
-  .energy-orb{ position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:min(82vmin,900px); aspect-ratio:1; z-index:0; pointer-events:none; opacity:.34; display:flex; align-items:center; justify-content:center; perspective:1200px; }
-  .eo-ring{ position:absolute; inset:0; border-radius:50%; border:1px solid rgba(216,184,120,.32); transform-style:preserve-3d; }
-  .eo-r1{ animation:eoSpinX 22s linear infinite; }
-  .eo-r2{ inset:12%; border-color:rgba(255,95,21,.34); animation:eoSpinY 16s linear infinite; }
-  .eo-r3{ inset:24%; border-color:rgba(255,183,54,.28); animation:eoSpin 12s linear infinite; }
+  .energy-orb{ position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:min(82vmin,900px); aspect-ratio:1; z-index:0; pointer-events:none; opacity:.22; display:flex; align-items:center; justify-content:center; perspective:1200px; }
+  .eo-ring{ position:absolute; inset:0; border-radius:50%; border:1px solid rgba(216,184,120,.28); transform-style:preserve-3d; }
+  .eo-r1{ animation:eoSpinX 36s linear infinite; }
+  .eo-r2{ inset:12%; border-color:rgba(255,95,21,.26); animation:eoSpinY 28s linear infinite; }
+  .eo-r3{ inset:24%; border-color:rgba(255,183,54,.20); animation:eoSpin 20s linear infinite; }
   .eo-core{ width:34%; height:34%; border-radius:50%;
     background:radial-gradient(circle at 38% 32%, #fff4e6, #ffb736 26%, #ff5f15 62%, #5e1c03 100%);
     box-shadow:0 0 70px rgba(255,95,21,.5), 0 0 150px rgba(255,138,61,.3), inset 0 0 30px rgba(255,255,255,.25);
@@ -2515,7 +2515,7 @@
   @keyframes eoSpin{ to{ transform:rotate(360deg) } }
   @keyframes eoSpinX{ to{ transform:rotateX(360deg) } }
   @keyframes eoSpinY{ to{ transform:rotateY(360deg) } }
-  @keyframes eoBreathe{ 0%,100%{ transform:scale(1) } 50%{ transform:scale(1.06); box-shadow:0 0 90px rgba(255,95,21,.62), 0 0 185px rgba(255,138,61,.4), inset 0 0 30px rgba(255,255,255,.32) } }
+  @keyframes eoBreathe{ 0%,100%{ transform:scale(1) } 50%{ transform:scale(1.04) } }
   /* ── Energy border: a heartbeat pulse that travels the page perimeter, pumped
      up (lub-dub glow), with skill/passion/energy labels living around the border
      and pulsing in a wave. Sits at z-0 behind content; nothing overlaps text. ── */
@@ -2554,12 +2554,9 @@
   /* Levitation — uses `translate` so it composes with existing hover transforms.
      Clearly visible amplitude; this floating ambiance is the core design intent,
      so it stays on even under reduced-motion (it's gentle, non-vestibular). */
-  @keyframes floatLev{ 0%,100%{translate:0 0} 50%{translate:0 -13px} }
-  .hero-stat, .nav-card, .home-tl-item, .current-card, .feature-card, .work-card { animation:floatLev 6.5s ease-in-out infinite; will-change:translate; }
+  @keyframes floatLev{ 0%,100%{translate:0 0} 50%{translate:0 -6px} }
+  .nav-card { animation:floatLev 7s ease-in-out infinite; will-change:translate; }
   .nav-card:nth-child(2){animation-delay:-1.4s}.nav-card:nth-child(3){animation-delay:-2.6s}.nav-card:nth-child(4){animation-delay:-3.8s}
-  .hero-stat:nth-child(2){animation-delay:-1.2s}.hero-stat:nth-child(3){animation-delay:-2.4s}.hero-stat:nth-child(4){animation-delay:-3.6s}
-  .home-tl-item:nth-child(even){animation-delay:-2s;animation-duration:8.2s}
-  .home-tl-item:nth-child(odd){animation-delay:-3.5s;animation-duration:7.4s}
 </style>
 <script>
 (function(){
@@ -2630,22 +2627,22 @@
 .intro-kicker{font-family:var(--font-mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin:0 0 14px;}
 .intro-orbit{position:relative;width:84px;height:84px;margin-bottom:18px;display:grid;place-items:center;}
 .intro-orbit::before{content:'AT';font-family:var(--font-display);font-size:28px;font-weight:700;color:var(--ink);text-shadow:0 0 24px rgba(232,177,78,.34);}
-.intro-orbit span{position:absolute;inset:0;border:1px solid rgba(232,177,78,.46);border-radius:50%;animation:introOrbit 8s linear infinite;}
-.intro-orbit span:nth-child(2){inset:10px;border-color:rgba(255,122,31,.42);animation-duration:5.8s;animation-direction:reverse;}
-.intro-orbit span:nth-child(3){inset:22px;border-color:rgba(232,177,78,.4);animation-duration:4.2s;}
+.intro-orbit span{position:absolute;inset:0;border:1px solid rgba(232,177,78,.38);border-radius:50%;animation:introOrbit 12s linear infinite;}
+.intro-orbit span:nth-child(2){inset:14px;border-color:rgba(232,177,78,.22);animation-duration:18s;animation-direction:reverse;}
+.intro-orbit span:nth-child(3){display:none;}
 .intro-actions{position:relative;z-index:1;}
 .ob-mode-btn.intro-primary{border-color:rgba(232,177,78,.48);box-shadow:0 0 34px rgba(255,122,31,.10);}
 .coach-tour{position:fixed;inset:0;z-index:10000;display:none;pointer-events:none;}
 .coach-tour.open{display:block;}
-.coach-tour::before{content:'';position:absolute;inset:0;background:rgba(0,0,0,.30);backdrop-filter:none;-webkit-backdrop-filter:none;pointer-events:auto;}
-.coach-spotlight{position:absolute;left:var(--spot-x,24px);top:var(--spot-y,24px);width:var(--spot-w,260px);height:var(--spot-h,120px);border:1px solid rgba(232,177,78,.56);border-radius:18px;box-shadow:0 0 0 9999px rgba(0,0,0,.18),0 0 28px rgba(255,122,31,.20),inset 0 0 18px rgba(232,177,78,.06);transition:all .42s cubic-bezier(.16,1,.3,1);pointer-events:none;z-index:1;}
-.coach-popover{position:absolute;left:var(--tip-x,24px);top:var(--tip-y,24px);width:min(360px,calc(100vw - 32px));background:rgba(17,13,8,.97);border:1px solid rgba(232,177,78,.34);border-radius:18px;padding:18px;box-shadow:0 28px 90px rgba(0,0,0,.58),0 0 28px rgba(255,122,31,.14);z-index:2;pointer-events:auto;animation:coachPop .34s cubic-bezier(.16,1,.3,1) both;}
-.coach-step-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+.coach-tour::before{content:'';position:absolute;inset:0;pointer-events:auto;}
+.coach-spotlight{position:absolute;left:var(--spot-x,24px);top:var(--spot-y,24px);width:var(--spot-w,260px);height:var(--spot-h,120px);border:2px solid rgba(232,177,78,.9);border-radius:16px;box-shadow:0 0 0 9999px rgba(0,0,0,.72),0 0 0 4px rgba(232,177,78,.18),0 0 24px rgba(232,177,78,.5),inset 0 0 0 1px rgba(232,177,78,.14);transition:left .32s ease,top .32s ease,width .32s ease,height .32s ease;pointer-events:none;z-index:1;}
+.coach-popover{position:absolute;left:var(--tip-x,24px);top:var(--tip-y,24px);width:min(360px,calc(100vw - 32px));background:rgba(13,10,6,.99);border:1px solid rgba(232,177,78,.55);border-radius:16px;padding:20px;box-shadow:0 24px 80px rgba(0,0,0,.7),0 0 0 1px rgba(232,177,78,.12),0 -1px 0 0 rgba(232,177,78,.6) inset;z-index:2;pointer-events:auto;animation:coachPop .28s ease both;}
+.coach-step-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;opacity:.9;}
 .coach-popover h3{font-family:var(--font-display);font-size:24px;line-height:1.05;color:var(--ink);margin:0 0 8px;}
 .coach-popover p{font-size:14px;line-height:1.55;color:var(--ink-dim);margin:0 0 14px;}
-.coach-progress{display:flex;gap:6px;margin:12px 0 16px;}
-.coach-progress span{height:4px;flex:1;border-radius:999px;background:var(--rule);}
-.coach-progress span.active{background:linear-gradient(90deg,var(--primary),var(--accent));}
+.coach-progress{display:flex;gap:5px;margin:12px 0 16px;}
+.coach-progress span{height:3px;flex:1;border-radius:999px;background:rgba(255,255,255,.12);}
+.coach-progress span.active{background:linear-gradient(90deg,var(--primary),var(--accent));box-shadow:0 0 6px rgba(232,177,78,.5);}
 .coach-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;}
 .coach-control-right{display:flex;gap:8px;}
 .coach-btn{border:1px solid var(--rule-strong);border-radius:10px;padding:9px 13px;font-size:13px;font-weight:600;background:var(--bg-elev);color:var(--ink);cursor:pointer;}
@@ -2653,10 +2650,10 @@
 .coach-btn.subtle{color:var(--ink-dim);}
 .tour-focus{position:relative;z-index:9999 !important;}
 @keyframes obIntroIn{from{opacity:0}to{opacity:1}}
-@keyframes obCardIn{from{opacity:0;transform:translateY(28px) scale(.94);filter:blur(10px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes obCardIn{from{opacity:0;transform:translateY(22px) scale(.96)}to{opacity:1;transform:none}}
 @keyframes introOrbit{to{transform:rotate(360deg)}}
 @keyframes introScan{0%,100%{transform:translateX(-45%);opacity:.16}50%{transform:translateX(45%);opacity:.54}}
-@keyframes coachPop{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes coachPop{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @media (max-width:560px){#onboarding .chat-container-center{padding:30px 20px!important}.intro-actions{flex-direction:column}.ob-mode-btn{width:100%}.coach-popover{left:16px!important;right:16px!important;width:auto}.coach-spotlight{border-radius:14px}}
 @media (prefers-reduced-motion:reduce){#onboarding.intro-open .chat-container-center,.intro-orbit span,#onboarding .chat-container-center::before,.coach-popover{animation:none!important}.coach-spotlight{transition:none!important}}
 </style>
@@ -7120,7 +7117,7 @@
 
   /* ===== Hero: make it feel alive — animation & interactivity, no copy changes ===== */
   @keyframes heroShimmer { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
-  @keyframes heroRise { from { opacity: 0; transform: translateY(18px); filter: blur(6px); } to { opacity: 1; transform: none; filter: blur(0); } }
+  @keyframes heroRise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
   @keyframes heroFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
 
   /* Shimmering gradient name */
@@ -7903,8 +7900,8 @@
     animation: viewIn .5s cubic-bezier(.16, 1, .3, 1), futurePageFocus .72s cubic-bezier(.16, 1, .3, 1);
   }
   @keyframes futurePageFocus {
-    from { clip-path: inset(0 0 7% 0); filter: blur(8px) saturate(.82); }
-    to { clip-path: inset(0); filter: blur(0) saturate(1); }
+    from { clip-path: inset(0 0 7% 0); opacity: .7; }
+    to { clip-path: inset(0); opacity: 1; }
   }
   .display-xl,
   .display-lg,
