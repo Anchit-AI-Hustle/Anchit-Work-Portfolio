@@ -338,9 +338,9 @@
   .top-bar-link[data-channel="whatsapp"] .tb-icon { color: #25D366; }
   .top-bar-link[data-channel="call"] .tb-icon { color: #22C55E; }
   .top-bar-link[data-channel="meet"] .tb-icon { color: #F59E0B; }
-  .top-bar-link[data-channel="sms"] .tb-icon { color: #38BDF8; }
+  .top-bar-link[data-channel="sms"] .tb-icon { color: #E8B14E; }
   .top-bar-link[data-channel="email"] .tb-icon { color: #EF4444; }
-  .top-bar-link[data-channel="resume"] .tb-icon { color: #A78BFA; }
+  .top-bar-link[data-channel="resume"] .tb-icon { color: #C9973A; }
   .top-bar-link:hover { color: var(--primary); }
   .view-dropdown { appearance: none; background: var(--bg-deep); border: 1px solid var(--rule); border-radius: 99px; padding: 4px 12px; font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--ink); cursor: pointer; outline: none; }
   .view-dropdown:hover { background: var(--rule); }
@@ -2580,35 +2580,85 @@
 <!-- ONBOARDING MODAL -->
 <div id="onboarding" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(4,3,2,0.82); backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px); z-index:10000; display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; pointer-events:none; transition:opacity 0.45s ease, visibility 0.45s ease;">
   <div class="chat-container-center" style="align-items:center; justify-content:center; display:flex; flex-direction:column; background:#16130F; border:1px solid rgba(255, 95, 21, 0.45); box-shadow:0 30px 90px rgba(0,0,0,0.6), 0 0 60px rgba(255, 95, 21, 0.18), inset 0 0 20px rgba(255, 95, 21, 0.05); border-radius:24px; padding:40px; width:90%; max-width:500px; text-align:center;">
-    
-    <h2 id="onboarding-title" style="font-family:var(--font-display); font-size:28px; font-weight:700; color:#FFF; margin-bottom:12px;">How do you want to experience this?</h2>
-    <p id="onboarding-copy" style="color:var(--ink-dim); font-size:16px; margin-bottom:32px; line-height:1.5;">Pick a way to explore — you can switch anytime from the toggle at the top of the chat.</p>
+    <div class="intro-orbit" aria-hidden="true"><span></span><span></span><span></span></div>
+    <div class="intro-kicker">Interactive portfolio OS</div>
+    <h2 id="onboarding-title" style="font-family:var(--font-display); font-size:28px; font-weight:700; color:#FFF; margin-bottom:12px;">Hey, I'm Anchit. Let me show you around.</h2>
+    <p id="onboarding-copy" style="color:var(--ink-dim); font-size:16px; margin-bottom:28px; line-height:1.5;">This is not a static resume page. It has guided navigation, voice narration, an AI chat layer, project deep dives and quick contact paths. Start with the tour, or jump straight in.</p>
 
-    <div id="onboarding-actions" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center;">
-      <button class="ob-mode-btn" data-ob-mode="chat" type="button">
+    <div id="onboarding-actions" class="intro-actions" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center;">
+      <button class="ob-mode-btn intro-primary" data-intro-action="tour" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h6l3-8 3 16 3-8h3"/><path d="M4 20h16"/></svg>
+        <span>Start tour</span><small>Coachmarks guide the interface</small>
+      </button>
+      <button class="ob-mode-btn" data-intro-action="explore" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m16 8-4 8-4-4 8-4Z"/></svg>
+        <span>Explore</span><small>Enter the portfolio first</small>
+      </button>
+      <button class="ob-mode-btn" data-intro-action="chat" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        <span>Chat</span><small>Talk with my AI — type, voice, or call</small>
-      </button>
-      <button class="ob-mode-btn" data-ob-mode="narrate" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
-        <span>Narrate</span><small>I read the portfolio in my voice</small>
-      </button>
-    </div>
-    
-    <div class="input-row" id="onboarding-input-row" style="display:none; width:100%; max-width:400px; margin-top:24px;">
-      <input type="text" id="ob-input" placeholder="What's your name?" autocomplete="off" style="flex:1; background:var(--bg-deep); border:1px solid var(--rule); padding:12px 16px; border-radius:24px; color:#FFF; font-size:16px; outline:none;">
-      <button class="icon-btn" id="ob-submit" style="background:var(--primary); border:none; color:#000; width:44px; height:44px; border-radius:50%; margin-left:12px; cursor:pointer; display:flex; align-items:center; justify-content:center;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        <span>Chat</span><small>Open the AI guide</small>
       </button>
     </div>
 
   </div>
 </div>
+<div id="coachTour" class="coach-tour" aria-hidden="true">
+  <div class="coach-spotlight" aria-hidden="true"></div>
+  <div class="coach-popover" role="dialog" aria-live="polite" aria-label="Portfolio tour">
+    <div class="coach-step-label" id="coachStepLabel">Step 1 of 5</div>
+    <h3 id="coachTitle">Start here</h3>
+    <p id="coachCopy">A quick guide to the portfolio.</p>
+    <div class="coach-progress" id="coachProgress" aria-hidden="true"></div>
+    <div class="coach-controls">
+      <button type="button" class="coach-btn subtle" id="coachSkip">Skip</button>
+      <div class="coach-control-right">
+        <button type="button" class="coach-btn subtle" id="coachPrev">Back</button>
+        <button type="button" class="coach-btn primary" id="coachNext">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
 <style>
-#onboarding.intro-open{opacity:1 !important;visibility:visible !important;pointer-events:auto !important;transition:none !important;animation:obIntroIn .35s ease both;}
-#onboarding.intro-open .chat-container-center{animation:obCardIn .4s cubic-bezier(.2,.7,.2,1) both;}
+#onboarding.intro-open{opacity:1 !important;visibility:visible !important;pointer-events:auto !important;transition:none !important;animation:obIntroIn .45s ease both;}
+#onboarding.intro-open .chat-container-center{animation:obCardIn .58s cubic-bezier(.16,1,.3,1) both;}
+#onboarding .chat-container-center{position:relative; overflow:hidden;}
+#onboarding .chat-container-center::before{
+  content:''; position:absolute; inset:-2px; pointer-events:none;
+  background:linear-gradient(120deg, transparent, rgba(232,177,78,.24), transparent 34%);
+  animation:introScan 4.8s ease-in-out infinite;
+}
+.intro-kicker{font-family:var(--font-mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin:0 0 14px;}
+.intro-orbit{position:relative;width:84px;height:84px;margin-bottom:18px;display:grid;place-items:center;}
+.intro-orbit::before{content:'AT';font-family:var(--font-display);font-size:28px;font-weight:700;color:var(--ink);text-shadow:0 0 24px rgba(232,177,78,.34);}
+.intro-orbit span{position:absolute;inset:0;border:1px solid rgba(232,177,78,.46);border-radius:50%;animation:introOrbit 8s linear infinite;}
+.intro-orbit span:nth-child(2){inset:10px;border-color:rgba(255,122,31,.42);animation-duration:5.8s;animation-direction:reverse;}
+.intro-orbit span:nth-child(3){inset:22px;border-color:rgba(232,177,78,.4);animation-duration:4.2s;}
+.intro-actions{position:relative;z-index:1;}
+.ob-mode-btn.intro-primary{border-color:rgba(232,177,78,.48);box-shadow:0 0 34px rgba(255,122,31,.10);}
+.coach-tour{position:fixed;inset:0;z-index:10000;display:none;pointer-events:none;}
+.coach-tour.open{display:block;}
+.coach-tour::before{content:'';position:absolute;inset:0;background:rgba(0,0,0,.30);backdrop-filter:none;-webkit-backdrop-filter:none;pointer-events:auto;}
+.coach-spotlight{position:absolute;left:var(--spot-x,24px);top:var(--spot-y,24px);width:var(--spot-w,260px);height:var(--spot-h,120px);border:1px solid rgba(232,177,78,.56);border-radius:18px;box-shadow:0 0 0 9999px rgba(0,0,0,.18),0 0 28px rgba(255,122,31,.20),inset 0 0 18px rgba(232,177,78,.06);transition:all .42s cubic-bezier(.16,1,.3,1);pointer-events:none;z-index:1;}
+.coach-popover{position:absolute;left:var(--tip-x,24px);top:var(--tip-y,24px);width:min(360px,calc(100vw - 32px));background:rgba(17,13,8,.97);border:1px solid rgba(232,177,78,.34);border-radius:18px;padding:18px;box-shadow:0 28px 90px rgba(0,0,0,.58),0 0 28px rgba(255,122,31,.14);z-index:2;pointer-events:auto;animation:coachPop .34s cubic-bezier(.16,1,.3,1) both;}
+.coach-step-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+.coach-popover h3{font-family:var(--font-display);font-size:24px;line-height:1.05;color:var(--ink);margin:0 0 8px;}
+.coach-popover p{font-size:14px;line-height:1.55;color:var(--ink-dim);margin:0 0 14px;}
+.coach-progress{display:flex;gap:6px;margin:12px 0 16px;}
+.coach-progress span{height:4px;flex:1;border-radius:999px;background:var(--rule);}
+.coach-progress span.active{background:linear-gradient(90deg,var(--primary),var(--accent));}
+.coach-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.coach-control-right{display:flex;gap:8px;}
+.coach-btn{border:1px solid var(--rule-strong);border-radius:10px;padding:9px 13px;font-size:13px;font-weight:600;background:var(--bg-elev);color:var(--ink);cursor:pointer;}
+.coach-btn.primary{border:0;background:linear-gradient(135deg,var(--primary),var(--accent));color:#090603;}
+.coach-btn.subtle{color:var(--ink-dim);}
+.tour-focus{position:relative;z-index:9999 !important;}
 @keyframes obIntroIn{from{opacity:0}to{opacity:1}}
-@keyframes obCardIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes obCardIn{from{opacity:0;transform:translateY(28px) scale(.94);filter:blur(10px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes introOrbit{to{transform:rotate(360deg)}}
+@keyframes introScan{0%,100%{transform:translateX(-45%);opacity:.16}50%{transform:translateX(45%);opacity:.54}}
+@keyframes coachPop{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+@media (max-width:560px){#onboarding .chat-container-center{padding:30px 20px!important}.intro-actions{flex-direction:column}.ob-mode-btn{width:100%}.coach-popover{left:16px!important;right:16px!important;width:auto}.coach-spotlight{border-radius:14px}}
+@media (prefers-reduced-motion:reduce){#onboarding.intro-open .chat-container-center,.intro-orbit span,#onboarding .chat-container-center::before,.coach-popover{animation:none!important}.coach-spotlight{transition:none!important}}
 </style>
 
 
@@ -3109,10 +3159,19 @@
             </div>
           </div>
         </a>
-      </div>1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
+
+        <a class="group relative rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] hover:border-[var(--primary)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_20px_var(--primary-soft)] overflow-hidden" href="#project-jobfit" data-view="project-jobfit" style="cursor:pointer;">
+          <div class="absolute inset-0 bg-gradient-to-br from-[var(--primary-soft)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div class="relative z-10 flex flex-col h-full justify-between">
+            <div>
+              <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-1">AI Careers · ChatGPT</div>
+              <h3 class="text-lg font-bold text-[var(--ink)] mb-1 group-hover:text-[var(--primary)] transition-colors">JobFit Agent</h3>
+              <p class="text-sm text-[var(--primary)] font-mono mt-2">Job link + resume &rarr; docs or site</p>
+            </div>
+            <div class="mt-4 self-end text-[var(--ink-dim)] group-hover:text-[var(--primary)] transition-colors transform group-hover:translate-x-1 group-hover:-translate-y-1 duration-300">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+            </div>
+          </div>
         </a>
       </div>
 
@@ -3694,9 +3753,9 @@
   <section class="view" id="view-projects">
     <div class="container">
       <div class="section-head reveal">
-        <div class="eyebrow">Personal projects · All live · Built end-to-end</div>
+        <div class="eyebrow">Personal projects · Live + in build · Built end-to-end</div>
         <h1 class="display-lg">Side Hustle</h1>
-        <p class="lede" style="margin-top: 16px;">Ten AI-first experiments, built end-to-end on weekends and evenings out of curiosity and love for technology. <em>Ideas that wouldn't wait for permission.</em></p>
+        <p class="lede" style="margin-top: 16px;">Eleven AI-first experiments, built or actively being built on weekends and evenings out of curiosity and love for technology. <em>Ideas that wouldn't wait for permission.</em></p>
       </div>
 
       <div class="builds-grid reveal-stagger">
@@ -3728,6 +3787,20 @@
           <div class="build-actions">
             <a class="btn primary" href="#project-agentlp" data-view="project-agentlp">Case Study &rarr;</a>
             <a class="btn" href="https://try.vahdam.co.uk/lp_all_in_one_agent" target="_blank" rel="noopener">Live Demo ↗</a>
+          </div>
+        </div>
+
+        <!-- Card — JobFit Agent -->
+        <div class="build-card tilt-card">
+          <div class="build-tag"><span>AI Careers · ChatGPT</span><span class="status">In build</span></div>
+          <h3>JobFit <em>Agent</em></h3>
+          <p>Upload a job link, base resume or existing portfolio; the agent understands the role, maps the strongest proof points, then creates a tailored resume, cover letter and portfolio website update using free template options.</p>
+          <ul class="build-details">
+            <li>Designed around job-link analysis, resume/portfolio context extraction, fit-gap mapping, theme choice and role-specific positioning.</li>
+            <li>Planned with ChatGPT as the first LLM, human approval before export, free code-friendly templates, and output paths for DOCX, PDF, TXT or hosted resume pages.</li>
+          </ul>
+          <div class="build-actions">
+            <a class="btn primary" href="#project-jobfit" data-view="project-jobfit">Case Study &rarr;</a>
           </div>
         </div>
 
@@ -4378,6 +4451,66 @@
     </div>
   </section>
 
+  <!-- PROJECT: JOBFIT AGENT -->
+  <section class="view" id="view-project-jobfit">
+    <div class="container">
+      <a class="back-link" href="#projects" data-view="projects">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        All side projects
+      </a>
+      <div class="project-hero reveal">
+        <div class="eyebrow">AI Careers · Job Link Analysis · Resume Tailoring · Cover Letter Generator · Portfolio Site Builder</div>
+        <h1 class="display-lg">JobFit <em>Agent</em></h1>
+        <p class="quote">"A job link and a base resume go in; a sharper, role-specific application kit comes out."</p>
+        <div class="project-meta">
+          <div><span class="label">Role</span><span>Product Designer · Builder</span></div>
+          <div><span class="label">Status</span><span>In build · ChatGPT-first prototype</span></div>
+          <div><span class="label">What it does</span><span>Job parsing · Resume + portfolio adaptation · Cover letter drafting · Theme + animation choice · Export choice</span></div>
+        </div>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">The pitch</div>
+        <h2>What it is</h2>
+        <p>JobFit Agent is an AI application assistant. You paste a job posting link, upload a base resume or point it at an existing portfolio site, and the system reads both sides of the equation: what the company is actually hiring for, and what proof already exists in the candidate's background. It then proposes a tailored resume version, a contextual cover letter, a clear fit-gap summary, and optional portfolio-site updates so the user can decide what to download, edit or publish.</p>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">Origin</div>
+        <h2>Why I am building it</h2>
+        <p>Most job applications fail before the interview because the resume is generic. The candidate may have the right experience, but the wording, sequence and proof points do not match the job posting. I wanted to build an agent that behaves like a practical career strategist: read the role deeply, pull the most relevant evidence from the resume, and make the application feel specific without fabricating anything.</p>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">Product flow</div>
+        <h2>How it should work</h2>
+        <ul>
+          <li><strong>Job link input.</strong> The user pastes a posting URL; the agent extracts responsibilities, must-have skills, seniority, domain signals and hidden keywords.</li>
+          <li><strong>Resume context.</strong> The user uploads a base resume; the agent identifies experience blocks, measurable wins, tools, skills and transferable strengths.</li>
+          <li><strong>Portfolio context.</strong> If the user already has a portfolio website, the agent can suggest updates to project copy, positioning, sections and calls-to-action so the site matches the target role.</li>
+          <li><strong>Fit analysis.</strong> The app compares the posting to the resume, highlights strong matches, weak spots and suggested emphasis.</li>
+          <li><strong>Free template library.</strong> The user can choose from free, code-friendly templates and blocks such as HTML5 UP-style static templates, shadcn/ui-style React blocks, Astro/Vercel/GitHub portfolio starters, or the current portfolio's own template.</li>
+          <li><strong>Theme and motion controls.</strong> The user can choose the resume or portfolio website theme and animation style — clean corporate, product-led, creative, minimal, bold, static, subtle motion or more expressive transitions.</li>
+          <li><strong>Domain choice.</strong> If the user wants a website version, the flow includes a domain/subdomain selection step before publishing a shareable resume link.</li>
+          <li><strong>Human-controlled output.</strong> The user chooses a tailored resume, cover letter, website page, portfolio update, or any combination, reviews the generated draft, then exports the final version.</li>
+          <li><strong>Document formats.</strong> Resume and cover letter downloads should support DOCX/Word, PDF and plain TXT so the same draft can be submitted formally, shared cleanly, or edited in a notepad-style editor.</li>
+        </ul>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">Guardrails</div>
+        <h2>What matters most</h2>
+        <p>The product should improve positioning, not invent credentials. The first version uses ChatGPT as the LLM, keeps the user in control before export or publishing, and treats every generated bullet as a suggestion grounded in the uploaded resume. The differentiator is not just generation; it is analysis, fit reasoning, document-quality output and editable drafts that feel recruiter-ready.</p>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">What I'd build next</div>
+        <h2>The roadmap in my head</h2>
+        <p>LinkedIn and PDF job-post ingestion, scorecards by role family, resume-version history, ATS-friendly formatting, one-click DOCX/PDF/TXT export, hosted resume pages with custom domains, free-template portfolio refreshes, theme presets, animation presets, and a feedback loop where rejected or shortlisted applications teach the agent which positioning works best.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- RESUME -->
   <section class="view" id="view-resume">
     <div class="container">
@@ -4497,7 +4630,7 @@
 
 <script>
   /* ============ STATE ============ */
-  const ALL_VIEWS = ['home','about','now','chat','experience','projects','resume','contact','project-lifecycle','project-music','project-tasktracker','project-thirdeye','project-yaara','project-mailer','project-telesuite','project-lifeengine'];
+  const ALL_VIEWS = ['home','about','now','chat','experience','projects','resume','contact','project-lifecycle','project-agentlp','project-jobfit','project-music','project-tasktracker','project-thirdeye','project-yaara','project-mailer','project-telesuite','project-lifeengine'];
   let audioModeEnabled = false; // true once user has clicked Play — gates page narration
   window.chatVoiceMuted = false; // chat replies speak aloud by default; mute toggle flips this
   // Browsers block speech before the first gesture — track it so the load-time
@@ -4855,7 +4988,7 @@
 	      response: "This portfolio is my hobby product: a living, interactive OS-style profile instead of a static resume page. The home view gives the quick positioning, Work Experience explains the Vahdam and Times Internet story, Side Hustle opens the builds, Resume opens the PDF in a new tab, and Contact gives the fastest ways to reach me. The chat is meant to guide each page, answer specific questions in my voice, and keep narration controls available from the bottom tile.",
 	      nextChips: ["Start the tour","Show me your work","Tell me about Vahdam","How do I reach you?"] },
 	    { keywords: ['side','project','projects','build','builds','weekend','personal','ship','github','vercel'],
-	      response: "My side builds come from curiosity and the inability to stop at surface level. VAHDAM Lifecycle OS is the most important work project right now. My portfolio itself is a hobby build. MusicGenAI is my passion project because music matters to me personally. The broader set includes Hey Yaara, MusicGenAI, The Third Eye, Mailer Architect, AI TeleSuite, TH+ LifeEngine, Task Tracker, the All-in-One LP Agent, and VAHDAM Lifecycle OS. <a data-nav='projects'>See them all →</a>",
+	      response: "My side builds come from curiosity and the inability to stop at surface level. VAHDAM Lifecycle OS is the most important work project right now. My portfolio itself is a hobby build. MusicGenAI is my passion project because music matters to me personally. The broader set includes Hey Yaara, MusicGenAI, The Third Eye, Mailer Architect, AI TeleSuite, TH+ LifeEngine, Task Tracker, the All-in-One LP Agent, JobFit Agent, and VAHDAM Lifecycle OS. <a data-nav='projects'>See them all →</a>",
 	      nextChips: ["Tell me about Hey Yaara","Tell me about Jarvis","Tell me about MusicGenAI","Why build on weekends?"] },
     { keywords: ['hey yaara','yaara','elderly','companion'],
       response: "Hey Yaara is an AI-powered voice companion designed specifically for elderly users to combat loneliness and assist with daily queries through a simple voice-first interface. I designed and built this PWA from scratch to remove all screen-based friction — users simply tap one button to talk and one to stop. Everything from transcription to speech response is handled entirely by voice. <a data-nav='project-yaara'>Full deep dive →</a>",
@@ -4872,6 +5005,9 @@
     { keywords: ['lp agent','agent lp','all-in-one agent','all in one agent','landing page agent','narrator','recommendation engine','conversational commerce'],
       response: "The All-in-One LP Agent is a live VAHDAM UK marketing landing page with one embedded AI agent doing four jobs: it narrates the page aloud the moment you land, holds a two-way voice conversation when you tap Talk, answers typed questions in chat, and runs a 'help me choose' recommendation flow — all grounded in the page's own content. It's the landing page behaving like a salesperson instead of a monologue. <a data-nav='project-agentlp'>Full deep dive →</a>",
       nextChips: ["Open LP Agent page","Tell me about Lifecycle OS","Tell me about Hey Yaara","How do I reach you?"] },
+    { keywords: ['jobfit','job fit','resume agent','job agent','cover letter','job link','application assistant','tailored resume','job posting'],
+      response: "JobFit Agent is the ChatGPT-first career application assistant I am building: paste a job posting link, upload a base resume or connect an existing portfolio, and get a role-specific fit analysis, tailored resume draft, cover letter draft, and optional website/portfolio update. The user can choose free code-friendly templates, theme, animation style, domain/subdomain, and export as DOCX, PDF or TXT. The important guardrail is that it should reposition real proof from the resume and portfolio, not invent credentials. <a data-nav='project-jobfit'>Full deep dive →</a>",
+      nextChips: ["Open JobFit page","Show me your other builds","Tell me about Lifecycle OS","How do I reach you?"] },
     { keywords: ['jarvis','ai os','operating system','vision','dream project','most attached'],
       response: "Jarvis is a proactive, context-aware AI operating system designed to act as an intelligent agent across multiple devices and workflows, rather than a simple conversational chatbot. I initiated this project to build a truly integrated AI workspace that understands context across apps and files. It's a long-term vision that I'm building step-by-step, and it is the side build I'm most passionate about.",
       nextChips: ["Why build on weekends?","Tell me about Hey Yaara","Your AI stack?","Show me your day job"] },
@@ -5014,7 +5150,8 @@
 	    'project-mailer': ['Mailer Architect', 'Marketing mailer generator', ['Creates multi-LLM HTML email cascades.', 'Focuses on production-ready mailer structure and speed.', 'Ask how lifecycle marketing connects to Vahdam.']],
 	    'project-tasktracker': ['Task Tracker', 'Personal productivity system', ['Converts meetings, emails and voice notes into tasks.', 'Built as a personal AI assistant workflow.', 'Ask how it differs from ordinary to-do tools.']],
 	    'project-lifecycle': ['VAHDAM Lifecycle OS', 'Most important current work project', ['Connects lifecycle planning, segmentation and mailer workflows.', 'Built for retention and D2C growth operating rhythm.', 'Ask why this is the headline Vahdam project.']],
-	    'project-agentlp': ['All-in-One LP Agent', 'Conversational landing page agent', ['One agent: audio narration, two-way voice, chat and recommendations.', 'Live on a VAHDAM UK funnel, grounded in the page content.', 'Ask how it changes landing page conversion.']]
+	    'project-agentlp': ['All-in-One LP Agent', 'Conversational landing page agent', ['One agent: audio narration, two-way voice, chat and recommendations.', 'Live on a VAHDAM UK funnel, grounded in the page content.', 'Ask how it changes landing page conversion.']],
+	    'project-jobfit': ['JobFit Agent', 'AI application assistant', ['Analyzes a job posting link against a base resume and portfolio.', 'Drafts a tailored resume, cover letter and optional hosted resume or portfolio site.', 'Includes free templates, theme, animation, domain and DOCX/PDF/TXT export choices.']]
 	  };
 
 	  const chatBody = document.getElementById('chatBody');
@@ -5627,11 +5764,181 @@
 	  function showAnchitIntro() {
 	    const ob = document.getElementById('onboarding');
 	    if (!ob) return;
+	    document.body.classList.add('intro-active');
 	    ob.classList.add('intro-open');   // .intro-open uses !important so it beats the inline opacity:0
 	  }
 	  window.showAnchitIntro = showAnchitIntro;
 	  // Show the centered introduction on every page load (a refresh re-shows it).
 	  setTimeout(showAnchitIntro, 450);
+
+	  function hideAnchitIntro() {
+	    const ob = document.getElementById('onboarding');
+	    document.body.classList.remove('intro-active');
+	    if (!ob) return;
+	    ob.classList.remove('intro-open');
+	    ob.style.opacity = '0';
+	    ob.style.pointerEvents = 'none';
+	    setTimeout(() => ob.style.visibility = 'hidden', 420);
+	  }
+
+	  const coachTour = document.getElementById('coachTour');
+	  const coachTitle = document.getElementById('coachTitle');
+	  const coachCopy = document.getElementById('coachCopy');
+	  const coachStepLabel = document.getElementById('coachStepLabel');
+	  const coachProgress = document.getElementById('coachProgress');
+	  const coachNext = document.getElementById('coachNext');
+	  const coachPrev = document.getElementById('coachPrev');
+	  const coachSkip = document.getElementById('coachSkip');
+	  const tourSteps = [
+	    {
+	      view: 'home',
+	      selector: '.home-hero',
+	      title: 'Start with the signal',
+	      copy: 'The home view gives the fast read: who I am, what I own now, and the strongest proof points before anyone has to dig.'
+	    },
+	    {
+	      view: 'home',
+	      selector: '.home-timeline',
+	      title: 'Follow the career arc',
+	      copy: 'The timeline shows the move from engineering into product, subscriptions, growth, events and AI systems.'
+	    },
+	    {
+	      view: 'projects',
+	      selector: '.builds-grid',
+	      title: 'Explore the side-build lab',
+	      copy: 'Side Hustle is where the AI builds live: Lifecycle OS, JobFit Agent, voice products, music, productivity and more.'
+	    },
+	    {
+	      view: 'experience',
+	      selector: '.work-stats',
+	      title: 'Check the measurable work',
+	      copy: 'Experience is structured around outcomes: revenue, retention, assisted sales, 0-to-1 launches and D2C operating systems.'
+	    },
+	    {
+	      view: 'home',
+	      selector: '#chatReturnBtn',
+	      title: 'Use the AI guide anytime',
+	      copy: 'The floating chat control stays closed on entry. Open it when you want answers, voice, narration or help navigating.'
+	    },
+	    {
+	      view: 'contact',
+	      selector: '.contact-grid',
+	      title: 'End with action',
+	      copy: 'Contact gives direct ways to reach me: WhatsApp, call, meet, SMS, email and resume.'
+	    }
+	  ];
+	  let tourIndex = 0;
+
+	  function clearTourFocus() {
+	    document.querySelectorAll('.tour-focus').forEach(el => el.classList.remove('tour-focus'));
+	  }
+
+	  function repositionCoachStep() {
+	    if (!coachTour?.classList.contains('open')) return;
+	    const step = tourSteps[tourIndex];
+	    const target = document.querySelector(step.selector);
+	    if (!target) return;
+	    const rect = target.getBoundingClientRect();
+	    const pad = 10;
+	    const spotX = Math.max(12, rect.left - pad);
+	    const spotY = Math.max(12, rect.top - pad);
+	    const spotW = Math.min(window.innerWidth - 24, rect.width + pad * 2);
+	    const spotH = Math.min(window.innerHeight - 24, rect.height + pad * 2);
+	    const popW = Math.min(360, window.innerWidth - 32);
+	    let tipX = Math.min(window.innerWidth - popW - 16, Math.max(16, rect.left));
+	    let tipY = rect.bottom + 18;
+	    if (tipY + 240 > window.innerHeight) tipY = Math.max(16, rect.top - 260);
+	    coachTour.style.setProperty('--spot-x', spotX + 'px');
+	    coachTour.style.setProperty('--spot-y', spotY + 'px');
+	    coachTour.style.setProperty('--spot-w', spotW + 'px');
+	    coachTour.style.setProperty('--spot-h', spotH + 'px');
+	    coachTour.style.setProperty('--tip-x', tipX + 'px');
+	    coachTour.style.setProperty('--tip-y', tipY + 'px');
+	  }
+
+	  function positionCoachStep() {
+	    if (!coachTour?.classList.contains('open')) return;
+	    const step = tourSteps[tourIndex];
+	    const target = document.querySelector(step.selector);
+	    if (!target) {
+	      nextCoachStep(1);
+	      return;
+	    }
+	    clearTourFocus();
+	    target.classList.add('tour-focus');
+	    target.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+	    setTimeout(repositionCoachStep, 360);
+	  }
+
+	  function renderCoachStep() {
+	    const step = tourSteps[tourIndex];
+	    if (!step) return endCoachTour();
+	    if (step.view && currentViewName() !== step.view && typeof switchView === 'function') {
+	      switchView(step.view);
+	    }
+	    if (coachTitle) coachTitle.textContent = step.title;
+	    if (coachCopy) coachCopy.textContent = step.copy;
+	    if (coachStepLabel) coachStepLabel.textContent = `Step ${tourIndex + 1} of ${tourSteps.length}`;
+	    if (coachPrev) coachPrev.disabled = tourIndex === 0;
+	    if (coachNext) coachNext.textContent = tourIndex === tourSteps.length - 1 ? 'Finish' : 'Next';
+	    if (coachProgress) {
+	      coachProgress.innerHTML = tourSteps.map((_, i) => `<span class="${i <= tourIndex ? 'active' : ''}"></span>`).join('');
+	    }
+	    positionCoachStep();
+	  }
+
+	  function startCoachTour() {
+	    hideAnchitIntro();
+	    if (!coachTour) return;
+	    if (typeof minimizeChat === 'function') minimizeChat();
+	    tourIndex = 0;
+	    coachTour.classList.add('open');
+	    coachTour.setAttribute('aria-hidden', 'false');
+	    renderCoachStep();
+	  }
+	  window.startCoachTour = startCoachTour;
+
+	  function endCoachTour() {
+	    coachTour?.classList.remove('open');
+	    coachTour?.setAttribute('aria-hidden', 'true');
+	    clearTourFocus();
+	  }
+
+	  function nextCoachStep(delta) {
+	    const next = tourIndex + delta;
+	    if (next >= tourSteps.length) return endCoachTour();
+	    tourIndex = Math.max(0, next);
+	    renderCoachStep();
+	  }
+
+	  coachNext?.addEventListener('click', () => nextCoachStep(1));
+	  coachPrev?.addEventListener('click', () => nextCoachStep(-1));
+	  coachSkip?.addEventListener('click', endCoachTour);
+	  window.addEventListener('resize', repositionCoachStep, { passive: true });
+	  window.addEventListener('scroll', repositionCoachStep, { passive: true });
+	  document.addEventListener('keydown', (e) => {
+	    if (!coachTour?.classList.contains('open')) return;
+	    if (e.key === 'Escape') endCoachTour();
+	    if (e.key === 'ArrowRight') nextCoachStep(1);
+	    if (e.key === 'ArrowLeft') nextCoachStep(-1);
+	  });
+
+	  document.querySelectorAll('[data-intro-action]').forEach(btn => {
+	    btn.addEventListener('click', () => {
+	      const action = btn.getAttribute('data-intro-action');
+	      if (action === 'tour') return startCoachTour();
+	      hideAnchitIntro();
+	      if (action === 'chat') {
+	        if (typeof applyAnchitMode === 'function') applyAnchitMode('chat');
+	        if (typeof window.openFullChat === 'function') window.openFullChat();
+	      } else {
+	        if (typeof window.minimizeChat === 'function') window.minimizeChat();
+	        // Only navigate home if no deep-linked view is already active
+	        const deepView = location.hash.replace('#', '').trim();
+	        if (!deepView && typeof switchView === 'function') switchView('home');
+	      }
+	    });
+	  });
 
   const obStartBtn = document.getElementById('ob-start-btn');
   const obContinueBtn = document.getElementById('ob-continue-btn');
@@ -5652,25 +5959,13 @@
 
   if (obContinueBtn) {
     obContinueBtn.addEventListener('click', () => {
-      const ob = document.getElementById('onboarding');
-      if (ob) {
-        ob.classList.remove('intro-open');
-        ob.style.opacity = '0';
-        ob.style.pointerEvents = 'none';
-        setTimeout(() => ob.style.visibility = 'hidden', 500);
-      }
+      hideAnchitIntro();
     });
   }
 
   function finishOnboarding(mode) {
     const chosen = MODE_VALUES.includes(mode) ? mode : window.anchitMode;
-    const ob = document.getElementById('onboarding');
-    if (ob) {
-      ob.classList.remove('intro-open');
-      ob.style.opacity = '0';
-      ob.style.pointerEvents = 'none';
-      setTimeout(() => ob.style.visibility = 'hidden', 500);
-    }
+    hideAnchitIntro();
 	    chatIntroShown = true;
 	    // Chat → full-screen conversation; Narrate → portfolio + page narration.
 	    // applyAnchitMode (non-silent) performs the open/narrate side-effects.
@@ -5706,20 +6001,13 @@
   if (obSubmit) { obSubmit.addEventListener('click', () => finishOnboarding()); }
   if (obInput) { obInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') finishOnboarding(); }); }
 
-  // Show the mode chooser on first visit only. Returning visitors keep their
-  // saved mode and go straight in — the header toggle lets them change it.
+  // The new entry flow always starts as a deliberate intro popup after the
+  // preloader; keep the raw overlay hidden until showAnchitIntro() opens it.
   const ob = document.getElementById('onboarding');
   if (ob) {
-    const hasChosenMode = !!localStorage.getItem('anchit-chat-mode');
-    if (hasChosenMode) {
-      ob.style.opacity = '0';
-      ob.style.visibility = 'hidden';
-      ob.style.pointerEvents = 'none';
-    } else {
-      ob.style.opacity = '1';
-      ob.style.visibility = 'visible';
-      ob.style.pointerEvents = 'auto';
-    }
+    ob.style.opacity = '0';
+    ob.style.visibility = 'hidden';
+    ob.style.pointerEvents = 'none';
   }
 
   // ---- In-chat mic: speak → transcribe into the input → auto-send ----
@@ -5937,7 +6225,7 @@
       now:        "Current role at Vahdam India. A.G.M. Product Management, D2C Growth, since April twenty twenty six. I own product performance, customer experience, C.R.M. experimentation, conversion optimisation, and revenue initiatives simultaneously. My biggest highlight so far is VAHDAM Lifecycle O.S. — a retention workflow connecting analytics, planning, segmentation, and mailer generation. I've also helped increase U.K. marketing revenue. The challenge isn't finding opportunities, it's knowing which ones compound.",
       chat:       "Ask me anything — my work, my side projects, why I moved from engineering to product, or what I'm solving right now.",
       experience: "Work experience. Currently A.G.M., Product Management, D2C Growth at Vah-dahm India across U.S., U.K. and global. I joined on twentieth April twenty twenty six, and the headline so far is Vahdam Lifecycle O.S. plus increased U.K. marketing revenue. Previously at Times Internet — A.P.M. to Senior P.M. Five x M.R.R. on Assisted Sales, three crore plus A.R.R. from the E.T. Markets revamp. Started as a backend engineer at Tuple Technologies and City Mall.",
-      projects:   "Personal projects, built out of curiosity, depth and experimentation. Vahdam Lifecycle O.S. is my most important work project right now. Music Gen A.I. is my passion project for music, and this portfolio is also a hobby build. Other live builds include Hey Yaara, The Third Eye, Mailer Architect, A.I. Tele Suite and T.H. Plus Life Engine.",
+      projects:   "Personal projects, built out of curiosity, depth and experimentation. Vahdam Lifecycle O.S. is my most important work project right now. Music Gen A.I. is my passion project for music, and JobFit Agent is the career application assistant I am building with ChatGPT. Other builds include Hey Yaara, The Third Eye, Mailer Architect, A.I. Tele Suite and T.H. Plus Life Engine.",
       resume:     "My resume. Download or view the full P.D.F.",
       contact:    "Let's build something worth measuring. I am open to roles, collaborations, and honest conversations about funnels, subscriptions, A.I. workflows and consumer product."
     };
@@ -6823,9 +7111,9 @@
   .contact-card[data-c="whatsapp"] { --_c: #25D366; }
   .contact-card[data-c="call"]     { --_c: #22C55E; }
   .contact-card[data-c="meet"]     { --_c: #F59E0B; }
-  .contact-card[data-c="sms"]      { --_c: #38BDF8; }
+  .contact-card[data-c="sms"]      { --_c: #E8B14E; }
   .contact-card[data-c="email"]    { --_c: #EF4444; }
-  .contact-card[data-c="resume"]   { --_c: #A78BFA; }
+  .contact-card[data-c="resume"]   { --_c: #C9973A; }
   .contact-card[data-c] .contact-icon svg { color: var(--_c); }
   .contact-card[data-c]:hover .contact-icon { background: var(--_c); color: #fff; }
   .contact-card[data-c]:hover .contact-icon svg { color: #fff; }
@@ -6918,9 +7206,9 @@
   .sidebar-subitem[data-c="whatsapp"] svg { color: #25D366; }
   .sidebar-subitem[data-c="call"] svg { color: #22C55E; }
   .sidebar-subitem[data-c="meet"] svg { color: #F59E0B; }
-  .sidebar-subitem[data-c="sms"] svg { color: #38BDF8; }
+  .sidebar-subitem[data-c="sms"] svg { color: #E8B14E; }
   .sidebar-subitem[data-c="email"] svg { color: #EF4444; }
-  .sidebar-subitem[data-c="resume"] svg { color: #A78BFA; }
+  .sidebar-subitem[data-c="resume"] svg { color: #C9973A; }
   body.sidebar-collapsed .sidebar-subnav,
   body.sidebar-collapsed .sidebar-caret { display: none; }
 
@@ -7575,6 +7863,234 @@
       font-size: clamp(42px, 16vw, 68px) !important;
     }
   }
+
+  /* ============ Futuristic motion layer — holographic, responsive, restrained ============ */
+  :root[data-theme="dark"] {
+    --holo-gold: #E8B14E;
+    --holo-bronze: #B66B20;
+    --holo-orange: #FF9A3D;
+    --holo-grid: rgba(232, 177, 78, .11);
+    --holo-line: rgba(255, 122, 31, .34);
+  }
+  body {
+    position: relative;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    display: block !important;
+    opacity: .58;
+    background:
+      linear-gradient(90deg, transparent 0 97%, rgba(232, 177, 78, .12) 98% 100%),
+      linear-gradient(0deg, transparent 0 97%, rgba(255, 122, 31, .09) 98% 100%),
+      radial-gradient(60% 42% at var(--fx, 74%) var(--fy, 18%), rgba(232, 177, 78, .16), transparent 58%),
+      radial-gradient(48% 38% at 12% 86%, rgba(255, 122, 31, .12), transparent 62%);
+    background-size: 54px 54px, 54px 54px, auto, auto;
+    mask-image: radial-gradient(circle at 50% 28%, black, transparent 78%);
+    animation: futureGridDrift 28s linear infinite, futureBreath 7s ease-in-out infinite alternate;
+  }
+  @keyframes futureGridDrift {
+    to { background-position: 54px 54px, 54px 54px, center, center; }
+  }
+  @keyframes futureBreath {
+    from { opacity: .38; filter: saturate(1); }
+    to { opacity: .72; filter: saturate(1.26); }
+  }
+  .view.active {
+    animation: viewIn .5s cubic-bezier(.16, 1, .3, 1), futurePageFocus .72s cubic-bezier(.16, 1, .3, 1);
+  }
+  @keyframes futurePageFocus {
+    from { clip-path: inset(0 0 7% 0); filter: blur(8px) saturate(.82); }
+    to { clip-path: inset(0); filter: blur(0) saturate(1); }
+  }
+  .display-xl,
+  .display-lg,
+  .display-md,
+  .home-hero .name .firstline,
+  .home-hero .name .secondline {
+    background: linear-gradient(105deg, var(--ink) 0%, var(--holo-gold) 28%, var(--accent) 48%, var(--primary) 66%, var(--ink) 100%) !important;
+    background-size: 240% auto !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+    animation: futureTextFlow 8s ease-in-out infinite !important;
+    text-shadow: 0 0 28px rgba(232, 177, 78, .08);
+  }
+  .display-lg em,
+  .display-md em,
+  .display-sm em,
+  .project-section h2 em,
+  .work-content h3 em,
+  .lede em,
+  .quote em {
+    color: var(--holo-gold) !important;
+    -webkit-text-fill-color: currentColor !important;
+    text-shadow: 0 0 18px rgba(232, 177, 78, .24);
+  }
+  @keyframes futureTextFlow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  .home-hero,
+  .project-hero,
+  .project-section,
+  .build-card,
+  .nav-card,
+  .hero-stat,
+  .work-stat,
+  .work-item,
+  .product-chip,
+  .contact-card,
+  .chat-block {
+    position: relative;
+    overflow: hidden;
+    background:
+      linear-gradient(145deg, rgba(18, 14, 9, .92), rgba(5, 3, 1, .9)) !important;
+    border-color: rgba(232, 177, 78, .16) !important;
+    box-shadow: 0 18px 60px rgba(0, 0, 0, .28), inset 0 1px 0 rgba(255, 255, 255, .045) !important;
+  }
+  .home-hero::before,
+  .project-hero::before,
+  .project-section::before,
+  .build-card::before,
+  .nav-card::before,
+  .hero-stat::before,
+  .work-stat::before,
+  .work-item::before,
+  .product-chip::before,
+  .contact-card::before,
+  .chat-block::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    pointer-events: none;
+    display: block !important;
+    opacity: .82;
+    background:
+      linear-gradient(120deg, transparent, rgba(232, 177, 78, .17), transparent 34%),
+      radial-gradient(420px circle at var(--mx, 50%) var(--my, 0%), rgba(255, 122, 31, .13), transparent 42%);
+    transform: translateX(-38%);
+    animation: futureSurfaceScan 6.4s ease-in-out infinite;
+    mix-blend-mode: screen;
+  }
+  @keyframes futureSurfaceScan {
+    0%, 100% { transform: translateX(-42%); opacity: .22; }
+    48%, 58% { transform: translateX(42%); opacity: .68; }
+  }
+  .motion-reactive {
+    transform-style: preserve-3d;
+    transition: transform .28s cubic-bezier(.22, 1, .36, 1), border-color .22s ease, box-shadow .22s ease !important;
+    will-change: transform;
+  }
+  .motion-reactive:hover {
+    transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-5px) !important;
+    border-color: rgba(232, 177, 78, .42) !important;
+    box-shadow: 0 24px 90px rgba(0, 0, 0, .38), 0 0 34px rgba(255, 122, 31, .12), inset 0 1px 0 rgba(255, 255, 255, .07) !important;
+  }
+  .btn,
+  .home-cta,
+  .guide-action,
+  .chip,
+  .top-bar-link,
+  .sidebar-item {
+    position: relative;
+    overflow: hidden;
+  }
+  .btn::after,
+  .home-cta::after,
+  .guide-action::after,
+  .chip::after,
+  .top-bar-link::after,
+  .sidebar-item::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(110deg, transparent 0 36%, rgba(255,255,255,.22) 48%, transparent 60% 100%);
+    transform: translateX(-120%);
+    transition: transform .55s cubic-bezier(.22, 1, .36, 1);
+  }
+  .btn:hover::after,
+  .home-cta:hover::after,
+  .guide-action:hover::after,
+  .chip:hover::after,
+  .top-bar-link:hover::after,
+  .sidebar-item:hover::after {
+    transform: translateX(120%);
+  }
+  .btn.primary,
+  .chat-send,
+  .home-cta.primary,
+  .hero-current-block .arrow,
+  .guide-action {
+    background: linear-gradient(135deg, var(--primary), var(--accent), #FFB25C) !important;
+    color: #090603 !important;
+    box-shadow: 0 0 26px rgba(255, 122, 31, .14) !important;
+  }
+  .eyebrow::before,
+  .ticker,
+  .scroll-progress,
+  #scrollProgress {
+    box-shadow: 0 0 18px rgba(232, 177, 78, .18);
+  }
+  .chat-head-avatar,
+  .msg-avatar,
+  .sidebar-logo img {
+    box-shadow: 0 0 0 1px rgba(232, 177, 78, .26), 0 0 24px rgba(255, 122, 31, .22) !important;
+  }
+  .build-tag .status,
+  .live-dot,
+  .hero-current-block .dot {
+    animation: live 2s ease-in-out infinite, futureStatusFlicker 5.5s steps(1, end) infinite !important;
+  }
+  @keyframes futureStatusFlicker {
+    0%, 92%, 100% { opacity: 1; }
+    93% { opacity: .52; }
+    94% { opacity: .95; }
+    96% { opacity: .68; }
+  }
+  .reveal {
+    transform: translateY(28px) scale(.985) !important;
+  }
+  .reveal.in {
+    transform: none !important;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    body::after,
+    .view.active,
+    .display-xl,
+    .display-lg,
+    .display-md,
+    .home-hero .name .firstline,
+    .home-hero .name .secondline,
+    .home-hero::before,
+    .project-hero::before,
+    .project-section::before,
+    .build-card::before,
+    .nav-card::before,
+    .hero-stat::before,
+    .work-stat::before,
+    .work-item::before,
+    .product-chip::before,
+    .contact-card::before,
+    .chat-block::before,
+    .build-tag .status,
+    .live-dot,
+    .hero-current-block .dot {
+      animation: none !important;
+    }
+    .motion-reactive,
+    .motion-reactive:hover,
+    .reveal,
+    .reveal.in {
+      transform: none !important;
+      transition: none !important;
+    }
+  }
 </style>
 <style id="chat-composer-redesign">
   /* ===== Composer-integrated control (Option B) ===== */
@@ -8048,6 +8564,67 @@
     if (isFull) { if (typeof window.openGuideChat === 'function') window.openGuideChat(); }
     else { forceFullChat(); }
   });
+})();
+</script>
+<script id="future-motion-wiring">
+(function(){
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.body.classList.add('futurist-ready');
+  if (reduceMotion) return;
+
+  const reactiveSelector = [
+    '.build-card',
+    '.nav-card',
+    '.hero-stat',
+    '.work-stat',
+    '.work-item',
+    '.product-chip',
+    '.contact-card',
+    '.project-hero',
+    '.project-section'
+  ].join(',');
+
+  document.querySelectorAll(reactiveSelector).forEach(card => {
+    card.classList.add('motion-reactive');
+    card.addEventListener('pointermove', event => {
+      const rect = card.getBoundingClientRect();
+      const px = (event.clientX - rect.left) / rect.width;
+      const py = (event.clientY - rect.top) / rect.height;
+      const ry = (px - .5) * 7;
+      const rx = (.5 - py) * 6;
+      card.style.setProperty('--mx', (px * 100).toFixed(2) + '%');
+      card.style.setProperty('--my', (py * 100).toFixed(2) + '%');
+      card.style.setProperty('--rx', rx.toFixed(2) + 'deg');
+      card.style.setProperty('--ry', ry.toFixed(2) + 'deg');
+    }, { passive: true });
+    card.addEventListener('pointerleave', () => {
+      card.style.removeProperty('--rx');
+      card.style.removeProperty('--ry');
+      card.style.removeProperty('--mx');
+      card.style.removeProperty('--my');
+    });
+  });
+
+  let targetX = 74, targetY = 18, currentX = targetX, currentY = targetY, ticking = false;
+  function paintPointerAura() {
+    currentX += (targetX - currentX) * .08;
+    currentY += (targetY - currentY) * .08;
+    document.documentElement.style.setProperty('--fx', currentX.toFixed(2) + '%');
+    document.documentElement.style.setProperty('--fy', currentY.toFixed(2) + '%');
+    if (Math.abs(targetX - currentX) > .05 || Math.abs(targetY - currentY) > .05) {
+      requestAnimationFrame(paintPointerAura);
+    } else {
+      ticking = false;
+    }
+  }
+  window.addEventListener('pointermove', event => {
+    targetX = (event.clientX / window.innerWidth) * 100;
+    targetY = (event.clientY / window.innerHeight) * 100;
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(paintPointerAura);
+    }
+  }, { passive: true });
 })();
 </script>
 </body>
