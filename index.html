@@ -2850,7 +2850,7 @@
       <div class="home-bento grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-auto">
         
         <!-- HERO TILE (spans 2 cols, 2 rows) -->
-        <div class="md:col-span-2 md:row-span-2 rounded-3xl p-8 lg:p-10 flex flex-col justify-end relative overflow-hidden bg-[var(--bg-elev)] border border-[var(--rule)] shadow-sm hover:shadow-md transition-shadow group">
+        <div id="homeHeroTile" class="md:col-span-2 md:row-span-2 rounded-3xl p-8 lg:p-10 flex flex-col justify-end relative overflow-hidden bg-[var(--bg-elev)] border border-[var(--rule)] shadow-sm hover:shadow-md transition-shadow group">
           <div class="hero-dot-grid absolute inset-0 opacity-30" aria-hidden="true"></div>
           <div class="relative z-10 flex items-center gap-6 mb-8">
             <img src="AnchitTandon-AppLogo.png" alt="Anchit Tandon" class="w-24 h-24 rounded-full object-cover border-2 border-[var(--rule)] group-hover:scale-105 transition-transform duration-500">
@@ -5748,7 +5748,7 @@
 	  const tourSteps = [
 	    {
 	      view: 'home',
-	      selector: '.home-hero',
+	      selector: '#homeHeroTile',
 	      title: 'Start with the signal',
 	      copy: 'The home view gives the fast read: who I am, what I own now, and the strongest proof points before anyone has to dig.'
 	    },
@@ -5794,26 +5794,46 @@
 	    const step = tourSteps[tourIndex];
 	    const target = document.querySelector(step.selector);
 	    if (!target) return;
+	    const vw = window.innerWidth, vh = window.innerHeight;
+	    const pad = 10, gap = 16, edge = 12;
 	    const rect = target.getBoundingClientRect();
-	    const pad = 10;
-	    // Clamp the spotlight to the visible slice of the target and never let it
-	    // exceed ~60% of the viewport height — otherwise tall sections punch a
-	    // full-screen hole and the page never dims behind the coach mark.
-	    const visTop = Math.max(rect.top, 0);
-	    const visBottom = Math.min(rect.bottom, window.innerHeight);
-	    const spotX = Math.max(12, rect.left - pad);
-	    const spotY = Math.max(12, visTop - pad);
-	    const spotW = Math.min(window.innerWidth - 24, rect.width + pad * 2);
-	    const spotH = Math.max(72, Math.min(visBottom - visTop + pad * 2, window.innerHeight * 0.6));
-	    const popW = Math.min(360, window.innerWidth - 32);
-	    let tipX = Math.min(window.innerWidth - popW - 16, Math.max(16, rect.left));
-	    let tipY = rect.bottom + 18;
-	    if (tipY + 240 > window.innerHeight) tipY = Math.max(16, rect.top - 260);
+	    // Spotlight = the visible slice of the target, capped so a tall section
+	    // can't fill the screen (that would leave nowhere to put the popover).
+	    const maxSpotH = vh * 0.55;
+	    const visTop = Math.max(rect.top, edge);
+	    const visBottom = Math.min(rect.bottom, vh - edge);
+	    const spotX = Math.max(edge, rect.left - pad);
+	    const spotY = Math.max(edge, visTop - pad);
+	    const spotW = Math.min(vw - edge * 2, rect.width + pad * 2);
+	    const spotH = Math.max(64, Math.min(visBottom - visTop + pad * 2, maxSpotH));
+	    const spotRight = spotX + spotW, spotBottom = spotY + spotH;
+
+	    // Measure the popover so we can drop it in a band that clears the
+	    // spotlight entirely — the coach mark must never cover its own section.
+	    const popEl = coachTour.querySelector('.coach-popover');
+	    const popW = Math.min(360, vw - 32);
+	    const popH = (popEl && popEl.offsetHeight) || 230;
+	    const clampX = (x) => Math.min(vw - popW - edge, Math.max(edge, x));
+	    const clampY = (y) => Math.min(vh - popH - edge, Math.max(edge, y));
+	    const centreX = clampX(spotX + spotW / 2 - popW / 2);
+
+	    // Free space on each side of the spotlight; prefer below, then above,
+	    // then right, then left — whichever fits the popover without overlap.
+	    const below = vh - spotBottom, above = spotY, right = vw - spotRight, left = spotX;
+	    let tipX, tipY;
+	    if (below >= popH + gap)        { tipY = spotBottom + gap;      tipX = centreX; }
+	    else if (above >= popH + gap)   { tipY = spotY - gap - popH;    tipX = centreX; }
+	    else if (right >= popW + gap)   { tipX = spotRight + gap;       tipY = clampY(spotY); }
+	    else if (left >= popW + gap)    { tipX = spotX - gap - popW;    tipY = clampY(spotY); }
+	    else {                          // last resort: sit in the largest band
+	      if (below >= above) { tipY = clampY(spotBottom + gap); tipX = centreX; }
+	      else                { tipY = clampY(spotY - gap - popH); tipX = centreX; }
+	    }
 	    coachTour.style.setProperty('--spot-x', spotX + 'px');
 	    coachTour.style.setProperty('--spot-y', spotY + 'px');
 	    coachTour.style.setProperty('--spot-w', spotW + 'px');
 	    coachTour.style.setProperty('--spot-h', spotH + 'px');
-	    coachTour.style.setProperty('--tip-x', tipX + 'px');
+	    coachTour.style.setProperty('--tip-x', clampX(tipX) + 'px');
 	    coachTour.style.setProperty('--tip-y', tipY + 'px');
 	  }
 
@@ -5827,8 +5847,12 @@
 	    }
 	    clearTourFocus();
 	    target.classList.add('tour-focus');
-	    target.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
-	    setTimeout(repositionCoachStep, 360);
+	    // Scroll the target near the top of the viewport (clear of the sticky
+	    // bar) so there is always room to place the popover below it.
+	    const r = target.getBoundingClientRect();
+	    const targetTop = window.pageYOffset + r.top - 96;
+	    window.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+	    setTimeout(repositionCoachStep, 440);
 	  }
 
 	  function renderCoachStep() {
