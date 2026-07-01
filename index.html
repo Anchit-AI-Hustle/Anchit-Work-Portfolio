@@ -5833,6 +5833,29 @@
 	    document.querySelectorAll('.tour-focus').forEach(el => el.classList.remove('tour-focus'));
 	  }
 
+	  function repositionCoachStep() {
+	    if (!coachTour?.classList.contains('open')) return;
+	    const step = tourSteps[tourIndex];
+	    const target = document.querySelector(step.selector);
+	    if (!target) return;
+	    const rect = target.getBoundingClientRect();
+	    const pad = 10;
+	    const spotX = Math.max(12, rect.left - pad);
+	    const spotY = Math.max(12, rect.top - pad);
+	    const spotW = Math.min(window.innerWidth - 24, rect.width + pad * 2);
+	    const spotH = Math.min(window.innerHeight - 24, rect.height + pad * 2);
+	    const popW = Math.min(360, window.innerWidth - 32);
+	    let tipX = Math.min(window.innerWidth - popW - 16, Math.max(16, rect.left));
+	    let tipY = rect.bottom + 18;
+	    if (tipY + 240 > window.innerHeight) tipY = Math.max(16, rect.top - 260);
+	    coachTour.style.setProperty('--spot-x', spotX + 'px');
+	    coachTour.style.setProperty('--spot-y', spotY + 'px');
+	    coachTour.style.setProperty('--spot-w', spotW + 'px');
+	    coachTour.style.setProperty('--spot-h', spotH + 'px');
+	    coachTour.style.setProperty('--tip-x', tipX + 'px');
+	    coachTour.style.setProperty('--tip-y', tipY + 'px');
+	  }
+
 	  function positionCoachStep() {
 	    if (!coachTour?.classList.contains('open')) return;
 	    const step = tourSteps[tourIndex];
@@ -5844,24 +5867,7 @@
 	    clearTourFocus();
 	    target.classList.add('tour-focus');
 	    target.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
-	    setTimeout(() => {
-	      const rect = target.getBoundingClientRect();
-	      const pad = 10;
-	      const spotX = Math.max(12, rect.left - pad);
-	      const spotY = Math.max(12, rect.top - pad);
-	      const spotW = Math.min(window.innerWidth - 24, rect.width + pad * 2);
-	      const spotH = Math.min(window.innerHeight - 24, rect.height + pad * 2);
-	      const popW = Math.min(360, window.innerWidth - 32);
-	      let tipX = Math.min(window.innerWidth - popW - 16, Math.max(16, rect.left));
-	      let tipY = rect.bottom + 18;
-	      if (tipY + 240 > window.innerHeight) tipY = Math.max(16, rect.top - 260);
-	      coachTour.style.setProperty('--spot-x', spotX + 'px');
-	      coachTour.style.setProperty('--spot-y', spotY + 'px');
-	      coachTour.style.setProperty('--spot-w', spotW + 'px');
-	      coachTour.style.setProperty('--spot-h', spotH + 'px');
-	      coachTour.style.setProperty('--tip-x', tipX + 'px');
-	      coachTour.style.setProperty('--tip-y', tipY + 'px');
-	    }, 360);
+	    setTimeout(repositionCoachStep, 360);
 	  }
 
 	  function renderCoachStep() {
@@ -5908,8 +5914,8 @@
 	  coachNext?.addEventListener('click', () => nextCoachStep(1));
 	  coachPrev?.addEventListener('click', () => nextCoachStep(-1));
 	  coachSkip?.addEventListener('click', endCoachTour);
-	  window.addEventListener('resize', positionCoachStep, { passive: true });
-	  window.addEventListener('scroll', positionCoachStep, { passive: true });
+	  window.addEventListener('resize', repositionCoachStep, { passive: true });
+	  window.addEventListener('scroll', repositionCoachStep, { passive: true });
 	  document.addEventListener('keydown', (e) => {
 	    if (!coachTour?.classList.contains('open')) return;
 	    if (e.key === 'Escape') endCoachTour();
