@@ -1695,9 +1695,14 @@
   }
 
   /* ============ VOICE — AMBIENT INDICATOR ============ */
+  /* Retired: the mini-player (.anp-nudge) is the single source of narration
+     status now. This pill used to stack on top of it in the bottom-right, so
+     it is hidden to leave exactly one bar. Markup + JS are left intact as
+     harmless no-ops. */
   .audio-ambient {
+    display: none !important;
     position: fixed; bottom: calc(28px + var(--safe-bottom)); right: 28px;
-    z-index: 150; display: flex; align-items: center; gap: 8px;
+    z-index: 150; align-items: center; gap: 8px;
     pointer-events: none; opacity: 0;
     transition: opacity 0.5s ease;
   }
