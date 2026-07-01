@@ -2644,8 +2644,9 @@
 .ob-mode-btn.intro-primary{border-color:rgba(232,177,78,.48);box-shadow:0 0 34px rgba(255,122,31,.10);}
 .coach-tour{position:fixed;inset:0;z-index:10000;display:none;pointer-events:none;}
 .coach-tour.open{display:block;}
-.coach-tour::before{content:'';position:absolute;inset:0;pointer-events:auto;}
-.coach-spotlight{position:absolute;left:var(--spot-x,24px);top:var(--spot-y,24px);width:var(--spot-w,260px);height:var(--spot-h,120px);border:2px solid rgba(232,177,78,.9);border-radius:16px;box-shadow:0 0 0 9999px rgba(0,0,0,.72),0 0 0 4px rgba(232,177,78,.18),0 0 24px rgba(232,177,78,.5),inset 0 0 0 1px rgba(232,177,78,.14);transition:left .32s ease,top .32s ease,width .32s ease,height .32s ease;pointer-events:none;z-index:1;}
+.coach-tour::before{content:'';position:absolute;inset:0;pointer-events:auto;background:rgba(8,5,2,.78);-webkit-backdrop-filter:blur(4px) saturate(.7);backdrop-filter:blur(4px) saturate(.7);opacity:0;transition:opacity .35s ease;clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,var(--spot-x,24px) var(--spot-y,24px),var(--spot-x,24px) calc(var(--spot-y,24px) + var(--spot-h,120px)),calc(var(--spot-x,24px) + var(--spot-w,260px)) calc(var(--spot-y,24px) + var(--spot-h,120px)),calc(var(--spot-x,24px) + var(--spot-w,260px)) var(--spot-y,24px),var(--spot-x,24px) var(--spot-y,24px));}
+.coach-tour.open::before{opacity:1;}
+.coach-spotlight{position:absolute;left:var(--spot-x,24px);top:var(--spot-y,24px);width:var(--spot-w,260px);height:var(--spot-h,120px);border:2px solid rgba(232,177,78,.9);border-radius:16px;box-shadow:0 0 0 4px rgba(232,177,78,.18),0 0 24px rgba(232,177,78,.5),inset 0 0 0 1px rgba(232,177,78,.14);transition:left .32s ease,top .32s ease,width .32s ease,height .32s ease;pointer-events:none;z-index:1;}
 .coach-popover{position:absolute;left:var(--tip-x,24px);top:var(--tip-y,24px);width:min(360px,calc(100vw - 32px));background:rgba(13,10,6,.99);border:1px solid rgba(232,177,78,.55);border-radius:16px;padding:20px;box-shadow:0 24px 80px rgba(0,0,0,.7),0 0 0 1px rgba(232,177,78,.12),0 -1px 0 0 rgba(232,177,78,.6) inset;z-index:2;pointer-events:auto;animation:coachPop .28s ease both;}
 .coach-step-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;opacity:.9;}
 .coach-popover h3{font-family:var(--font-display);font-size:24px;line-height:1.05;color:var(--ink);margin:0 0 8px;}
@@ -5847,10 +5848,15 @@
 	    if (!target) return;
 	    const rect = target.getBoundingClientRect();
 	    const pad = 10;
+	    // Clamp the spotlight to the visible slice of the target and never let it
+	    // exceed ~60% of the viewport height — otherwise tall sections punch a
+	    // full-screen hole and the page never dims behind the coach mark.
+	    const visTop = Math.max(rect.top, 0);
+	    const visBottom = Math.min(rect.bottom, window.innerHeight);
 	    const spotX = Math.max(12, rect.left - pad);
-	    const spotY = Math.max(12, rect.top - pad);
+	    const spotY = Math.max(12, visTop - pad);
 	    const spotW = Math.min(window.innerWidth - 24, rect.width + pad * 2);
-	    const spotH = Math.min(window.innerHeight - 24, rect.height + pad * 2);
+	    const spotH = Math.max(72, Math.min(visBottom - visTop + pad * 2, window.innerHeight * 0.6));
 	    const popW = Math.min(360, window.innerWidth - 32);
 	    let tipX = Math.min(window.innerWidth - popW - 16, Math.max(16, rect.left));
 	    let tipY = rect.bottom + 18;
