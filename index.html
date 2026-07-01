@@ -1738,9 +1738,14 @@
   }
 
   /* ============ FLOATING AUDIO NUDGE + PLAYER ============ */
+  /* Retired: this LISTEN pill sat in the same bottom-right corner as the chat
+     launcher (.chat-return) and overlapped it. The launcher already carries the
+     narration controls (play / mute / state), so it is the single floating bar
+     now. Markup + JS stay intact as harmless no-ops. */
   .anp-nudge {
+    display: none !important;
     position: fixed; bottom: calc(24px + var(--safe-bottom)); right: 24px;
-    z-index: 160; display: flex; align-items: center; gap: 8px;
+    z-index: 160; align-items: center; gap: 8px;
     background: var(--bg-elev); border: 1px solid var(--rule-strong);
     border-radius: 99px; padding: 6px 8px 6px 6px;
     box-shadow: var(--shadow-md);
@@ -8197,6 +8202,17 @@
     70% { box-shadow: 0 0 0 16px rgba(255,105,64,0); }
     100% { box-shadow: 0 0 0 0 rgba(255,105,64,0); }
   }
+  /* While narration is playing the launcher is the only status cue — glow green. */
+  .chat-return.playing { border-color: rgba(37,211,102,.55); }
+  .chat-return.playing::after { background: #25D366; opacity: 1; }
+  .chat-return.playing::before {
+    animation: chatFabPulseGreen 1.5s ease-out infinite;
+  }
+  @keyframes chatFabPulseGreen {
+    0% { box-shadow: 0 0 0 0 rgba(37,211,102,.5); }
+    70% { box-shadow: 0 0 0 16px rgba(37,211,102,0); }
+    100% { box-shadow: 0 0 0 0 rgba(37,211,102,0); }
+  }
   .chat-return:hover, .chat-return:focus-within {
     width: min(360px, calc(100vw - 32px)); border-radius: 18px; padding: 10px;
   }
@@ -8322,6 +8338,11 @@
 	    const playing = !!state.playing;
 	    const paused = !!state.paused && !playing;
 	    chatAudioMuted = muted;
+	    // Reflect narration state on the collapsed launcher too (it is now the
+	    // single floating control, so it must show playing/paused/muted itself).
+	    returnBtn?.classList.toggle('playing', playing);
+	    returnBtn?.classList.toggle('paused', paused);
+	    returnBtn?.classList.toggle('muted', muted);
 	    returnMute?.classList.toggle('muted', muted);
 	    returnMute?.setAttribute('aria-pressed', muted ? 'true' : 'false');
 	    returnMute?.setAttribute('aria-label', muted ? 'Unmute narration' : 'Mute narration');
