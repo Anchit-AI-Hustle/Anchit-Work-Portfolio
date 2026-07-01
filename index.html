@@ -1695,9 +1695,14 @@
   }
 
   /* ============ VOICE — AMBIENT INDICATOR ============ */
+  /* Retired: the mini-player (.anp-nudge) is the single source of narration
+     status now. This pill used to stack on top of it in the bottom-right, so
+     it is hidden to leave exactly one bar. Markup + JS are left intact as
+     harmless no-ops. */
   .audio-ambient {
+    display: none !important;
     position: fixed; bottom: calc(28px + var(--safe-bottom)); right: 28px;
-    z-index: 150; display: flex; align-items: center; gap: 8px;
+    z-index: 150; align-items: center; gap: 8px;
     pointer-events: none; opacity: 0;
     transition: opacity 0.5s ease;
   }
@@ -1733,9 +1738,14 @@
   }
 
   /* ============ FLOATING AUDIO NUDGE + PLAYER ============ */
+  /* Retired: this LISTEN pill sat in the same bottom-right corner as the chat
+     launcher (.chat-return) and overlapped it. The launcher already carries the
+     narration controls (play / mute / state), so it is the single floating bar
+     now. Markup + JS stay intact as harmless no-ops. */
   .anp-nudge {
+    display: none !important;
     position: fixed; bottom: calc(24px + var(--safe-bottom)); right: 24px;
-    z-index: 160; display: flex; align-items: center; gap: 8px;
+    z-index: 160; align-items: center; gap: 8px;
     background: var(--bg-elev); border: 1px solid var(--rule-strong);
     border-radius: 99px; padding: 6px 8px 6px 6px;
     box-shadow: var(--shadow-md);
@@ -5889,28 +5899,48 @@
 	    if (!coachTour) return;
 	    if (typeof minimizeChat === 'function') minimizeChat();
 	    tourIndex = 0;
+	    tourLanded = false;
 	    coachTour.classList.add('open');
 	    coachTour.setAttribute('aria-hidden', 'false');
 	    renderCoachStep();
 	  }
 	  window.startCoachTour = startCoachTour;
 
-	  function endCoachTour() {
+	  // Where the visitor can jump after the tour. Labels map to KB answers via
+	  // handleMessage, so clicking one starts a real conversation.
+	  const START_CHIPS = ["Show me your work", "Explore your side projects", "What are you building now?", "How do I reach you?"];
+	  let tourLanded = false;
+	  function landAfterTour() {
+	    if (tourLanded) return;      // land only once per tour, whether finished or skipped
+	    tourLanded = true;
+	    // Bring the visitor back to Home and open the chat with a guided prompt.
+	    if (typeof switchView === 'function') switchView('home');
+	    if (typeof window.openGuideChat === 'function') window.openGuideChat();
+	    setTimeout(() => {
+	      if (typeof addBot !== 'function') return;
+	      addBot("That's the quick tour. Where would you like to start? Pick one below, or just ask me anything.");
+	      if (typeof renderChips === 'function') renderChips(START_CHIPS);
+	      if (typeof scrollChat === 'function') scrollChat();
+	    }, 440);
+	  }
+
+	  function endCoachTour(opts = {}) {
 	    coachTour?.classList.remove('open');
 	    coachTour?.setAttribute('aria-hidden', 'true');
 	    clearTourFocus();
+	    if (opts.land !== false) landAfterTour();
 	  }
 
 	  function nextCoachStep(delta) {
 	    const next = tourIndex + delta;
-	    if (next >= tourSteps.length) return endCoachTour();
+	    if (next >= tourSteps.length) return endCoachTour();   // Finish → guided landing
 	    tourIndex = Math.max(0, next);
 	    renderCoachStep();
 	  }
 
 	  coachNext?.addEventListener('click', () => nextCoachStep(1));
 	  coachPrev?.addEventListener('click', () => nextCoachStep(-1));
-	  coachSkip?.addEventListener('click', endCoachTour);
+	  coachSkip?.addEventListener('click', () => endCoachTour());
 	  window.addEventListener('resize', repositionCoachStep, { passive: true });
 	  window.addEventListener('scroll', repositionCoachStep, { passive: true });
 	  document.addEventListener('keydown', (e) => {
@@ -8172,6 +8202,17 @@
     70% { box-shadow: 0 0 0 16px rgba(255,105,64,0); }
     100% { box-shadow: 0 0 0 0 rgba(255,105,64,0); }
   }
+  /* While narration is playing the launcher is the only status cue — glow green. */
+  .chat-return.playing { border-color: rgba(37,211,102,.55); }
+  .chat-return.playing::after { background: #25D366; opacity: 1; }
+  .chat-return.playing::before {
+    animation: chatFabPulseGreen 1.5s ease-out infinite;
+  }
+  @keyframes chatFabPulseGreen {
+    0% { box-shadow: 0 0 0 0 rgba(37,211,102,.5); }
+    70% { box-shadow: 0 0 0 16px rgba(37,211,102,0); }
+    100% { box-shadow: 0 0 0 0 rgba(37,211,102,0); }
+  }
   .chat-return:hover, .chat-return:focus-within {
     width: min(360px, calc(100vw - 32px)); border-radius: 18px; padding: 10px;
   }
@@ -8297,6 +8338,11 @@
 	    const playing = !!state.playing;
 	    const paused = !!state.paused && !playing;
 	    chatAudioMuted = muted;
+	    // Reflect narration state on the collapsed launcher too (it is now the
+	    // single floating control, so it must show playing/paused/muted itself).
+	    returnBtn?.classList.toggle('playing', playing);
+	    returnBtn?.classList.toggle('paused', paused);
+	    returnBtn?.classList.toggle('muted', muted);
 	    returnMute?.classList.toggle('muted', muted);
 	    returnMute?.setAttribute('aria-pressed', muted ? 'true' : 'false');
 	    returnMute?.setAttribute('aria-label', muted ? 'Unmute narration' : 'Mute narration');
