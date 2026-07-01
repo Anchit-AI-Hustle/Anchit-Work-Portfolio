@@ -5894,28 +5894,48 @@
 	    if (!coachTour) return;
 	    if (typeof minimizeChat === 'function') minimizeChat();
 	    tourIndex = 0;
+	    tourLanded = false;
 	    coachTour.classList.add('open');
 	    coachTour.setAttribute('aria-hidden', 'false');
 	    renderCoachStep();
 	  }
 	  window.startCoachTour = startCoachTour;
 
-	  function endCoachTour() {
+	  // Where the visitor can jump after the tour. Labels map to KB answers via
+	  // handleMessage, so clicking one starts a real conversation.
+	  const START_CHIPS = ["Show me your work", "Explore your side projects", "What are you building now?", "How do I reach you?"];
+	  let tourLanded = false;
+	  function landAfterTour() {
+	    if (tourLanded) return;      // land only once per tour, whether finished or skipped
+	    tourLanded = true;
+	    // Bring the visitor back to Home and open the chat with a guided prompt.
+	    if (typeof switchView === 'function') switchView('home');
+	    if (typeof window.openGuideChat === 'function') window.openGuideChat();
+	    setTimeout(() => {
+	      if (typeof addBot !== 'function') return;
+	      addBot("That's the quick tour. Where would you like to start? Pick one below, or just ask me anything.");
+	      if (typeof renderChips === 'function') renderChips(START_CHIPS);
+	      if (typeof scrollChat === 'function') scrollChat();
+	    }, 440);
+	  }
+
+	  function endCoachTour(opts = {}) {
 	    coachTour?.classList.remove('open');
 	    coachTour?.setAttribute('aria-hidden', 'true');
 	    clearTourFocus();
+	    if (opts.land !== false) landAfterTour();
 	  }
 
 	  function nextCoachStep(delta) {
 	    const next = tourIndex + delta;
-	    if (next >= tourSteps.length) return endCoachTour();
+	    if (next >= tourSteps.length) return endCoachTour();   // Finish → guided landing
 	    tourIndex = Math.max(0, next);
 	    renderCoachStep();
 	  }
 
 	  coachNext?.addEventListener('click', () => nextCoachStep(1));
 	  coachPrev?.addEventListener('click', () => nextCoachStep(-1));
-	  coachSkip?.addEventListener('click', endCoachTour);
+	  coachSkip?.addEventListener('click', () => endCoachTour());
 	  window.addEventListener('resize', repositionCoachStep, { passive: true });
 	  window.addEventListener('scroll', repositionCoachStep, { passive: true });
 	  document.addEventListener('keydown', (e) => {
