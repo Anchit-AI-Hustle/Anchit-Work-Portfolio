@@ -5923,8 +5923,8 @@
 	      if (action === 'tour') return startCoachTour();
 	      hideAnchitIntro();
 	      if (action === 'chat') {
+	        if (typeof applyAnchitMode === 'function') applyAnchitMode('chat');
 	        if (typeof window.openFullChat === 'function') window.openFullChat();
-	        else if (typeof applyAnchitMode === 'function') applyAnchitMode('chat');
 	      } else {
 	        if (typeof window.minimizeChat === 'function') window.minimizeChat();
 	        if (typeof switchView === 'function') switchView('home');
