@@ -5933,7 +5933,9 @@
 	        if (typeof window.openFullChat === 'function') window.openFullChat();
 	      } else {
 	        if (typeof window.minimizeChat === 'function') window.minimizeChat();
-	        if (typeof switchView === 'function') switchView('home');
+	        // Only navigate home if no deep-linked view is already active
+	        const deepView = location.hash.replace('#', '').trim();
+	        if (!deepView && typeof switchView === 'function') switchView('home');
 	      }
 	    });
 	  });
