@@ -4619,6 +4619,12 @@
   // Once the visitor stops audio, nothing auto-plays again until they explicitly
   // press play, send a message, or pick a mode. Gates the auto-play paths.
   window.anchitAudioStopped = false;
+  // Session-sticky mute latch: once the visitor mutes the voice, NOTHING is
+  // allowed to auto-play again for the rest of the session (page-change
+  // narration, spoken replies, streamed voice). It is only released by an
+  // explicit user action — unmute, press play, pick Narrate, or choose a
+  // spoken voice mode. Every auto-play path checks this before speaking.
+  window.anchitVoiceMutedLatch = false;
   let lastPortfolioView = 'home';
 
   function refreshAudioGates() {
@@ -4679,6 +4685,8 @@
     try { localStorage.setItem('anchit-chat-audio', audio); } catch {}
     refreshAudioGates();
     window.anchitAudioStopped = false;
+    // Explicitly choosing a spoken mode is an opt-in that releases the mute latch.
+    if (!opts.silent && (audio === 'reply' || audio === 'call')) window.anchitVoiceMutedLatch = false;
     paintModeUI();
     if (audio === 'text') { try { window.speechSynthesis?.cancel(); } catch {} }
     if (!opts.silent && window.anchitMode === 'chat') {
@@ -5256,7 +5264,7 @@
     scrollChat();
     // Reply with voice + text together, unless the user muted chat audio or
     // stopped playback (in which case it stays silent until they opt back in).
-    if ((audioModeEnabled || !window.chatVoiceMuted) && window.userInteracted && !window.anchitAudioStopped) {
+    if ((audioModeEnabled || !window.chatVoiceMuted) && window.userInteracted && !window.anchitAudioStopped && !window.anchitVoiceMutedLatch) {
       const bubble = w.querySelector('.msg-bubble');
       const tmp = document.createElement('div');
       tmp.innerHTML = html;
@@ -5310,6 +5318,8 @@
 
   function speakBotResponse(bubbleEl, plainText, onComplete) {
     if (!plainText || !bubbleEl) { if (typeof onComplete === 'function') { try { onComplete(); } catch {} } return; }
+    // Safety net: never speak a reply while the session mute latch is set.
+    if (window.anchitVoiceMutedLatch) { if (typeof onComplete === 'function') { try { onComplete(); } catch {} } return; }
     if (window.speechSynthesis) window.speechSynthesis.cancel();
 
     // Highlight each word inside the reply bubble as it is spoken: wrap the
@@ -5529,9 +5539,9 @@
 	  let packetPlaying = false;
 	  let packetAudio = null;
 	  function playNextPacket(statusEl) {
-	    if (window.chatVoiceMuted || window.anchitAudioStopped) {
+	    if (window.chatVoiceMuted || window.anchitAudioStopped || window.anchitVoiceMutedLatch) {
 	      packetQueue = [];
-	      if (statusEl) statusEl.textContent = window.anchitAudioStopped ? 'Voice stopped' : 'Text mode — voice off';
+	      if (statusEl) statusEl.textContent = (window.anchitAudioStopped || window.anchitVoiceMutedLatch) ? 'Voice muted' : 'Text mode — voice off';
 	      return;
 	    }
 	    if (packetPlaying || packetQueue.length === 0) return;
@@ -6492,6 +6502,7 @@
 	    function trySpeak(viewName) { speakView(viewName); }
 	    window.anchitNarrate = function(viewName) {
 	      window.anchitAudioStopped = false;   // explicit narrate re-enables audio
+	      window.anchitVoiceMutedLatch = false; // explicit narrate is an opt-in to voice
 	      audioModeEnabled = true;
 	      const activeEl = document.querySelector('.view.active');
 	      trySpeak(viewName || (activeEl ? activeEl.id.replace('view-', '') : 'home'));
@@ -6505,6 +6516,7 @@
 
 	    function toggleNarrationPlayback() {
 	      window.anchitAudioStopped = false;   // user pressed play/pause control
+	      window.anchitVoiceMutedLatch = false; // pressing play is an explicit opt-in
 	      audioModeEnabled = true;
 	      if (audioMuted) {
 	        audioMuted = false;
@@ -6537,6 +6549,9 @@
 
 	    function setNarrationMuted(nextMuted) {
 	      audioMuted = !!nextMuted;
+	      // Muting latches the whole session silent; unmuting is an explicit
+	      // opt-in that releases it.
+	      window.anchitVoiceMutedLatch = !!nextMuted;
 	      applyMute();
 	      if (audioMuted) {
 	        if (pageAudio && !pageAudio.paused) pageAudio.pause();
@@ -6596,6 +6611,7 @@
 
     playBtn?.addEventListener('click', () => {
       window.anchitAudioStopped = false;   // explicit play re-enables audio
+      window.anchitVoiceMutedLatch = false; // explicit play is an opt-in to voice
       audioModeEnabled = true;
       const activeEl = document.querySelector('.view.active');
       const vName = activeEl ? activeEl.id.replace('view-', '') : 'home';
@@ -6604,7 +6620,7 @@
 
     dismissBtn?.addEventListener('click', () => { nudge?.classList.add('dismissed'); });
 
-    document.addEventListener('viewChanged', (e) => { if (audioModeEnabled && !window.anchitAudioStopped) trySpeak(e.detail); });
+    document.addEventListener('viewChanged', (e) => { if (audioModeEnabled && !window.anchitAudioStopped && !window.anchitVoiceMutedLatch) trySpeak(e.detail); });
 
   })();
   } catch (err) {
@@ -8355,6 +8371,9 @@
 	  }
 
 	  function setChatAudioMuted(nextMuted) {
+	    // Muting latches the session silent against every auto-play path; only an
+	    // explicit unmute / play / voice-mode choice releases it.
+	    window.anchitVoiceMutedLatch = !!nextMuted;
 	    window.chatVoiceMuted = nextMuted;
 	    if (window.anchitAudioControls) {
 	      if (nextMuted) window.anchitAudioControls.mute?.();
