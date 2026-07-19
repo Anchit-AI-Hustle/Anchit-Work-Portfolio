@@ -34,11 +34,14 @@
 <script src="https://cdn.tailwindcss.com"></script>
 
 <!-- ═══ MOTION LIBS: Three.js (WebGL backdrop) + GSAP/ScrollTrigger (timelines) ═══
-     Deferred so they load without blocking render; the immersive-motion script at
-     the end of <body> waits for them and degrades gracefully if a CDN fails. -->
-<script defer src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+     Served SAME-ORIGIN from /assets/vendor so they always load (no external CDN
+     to be blocked, throttled, or privacy-filtered) and get cached by the service
+     worker for offline PWA use. Deferred so they don't block render; the
+     immersive-motion script at end of <body> waits for them and degrades
+     gracefully if they are ever missing. -->
+<script defer src="/assets/vendor/three.min.js"></script>
+<script defer src="/assets/vendor/gsap.min.js"></script>
+<script defer src="/assets/vendor/ScrollTrigger.min.js"></script>
 <script>
   tailwind.config = {
     theme: {
@@ -294,9 +297,15 @@
     position: fixed; top: calc(14px + var(--safe-top)); left: 14px; z-index: 300;
     width: 42px; height: 42px; border-radius: 12px;
     background: var(--bg-elev); border: 1px solid var(--rule);
-    color: var(--ink); display: inline-flex; align-items: center; justify-content: center;
+    color: var(--ink); display: none; align-items: center; justify-content: center;
     box-shadow: var(--shadow-md); cursor: pointer; transition: all 0.2s;
   }
+  /* The fixed toggle is a MOBILE affordance to open the off-screen drawer. On
+     desktop the sidebar (and its in-header hamburger) is always visible, so the
+     fixed toggle is hidden there — it was overlapping the header logo. And when
+     the mobile drawer is open, hide it too: the drawer's own header hamburger /
+     the backdrop close it, and the fixed button would sit over the logo. */
+  .sidebar.open ~ .sidebar-toggle { display: none !important; }
   .sidebar-toggle:hover { background: var(--bg-deep); }
   .sidebar-toggle svg { width: 18px; height: 18px; }
   .sidebar-backdrop {
@@ -2598,7 +2607,10 @@
 .intro-actions{position:relative;z-index:1;}
 .ob-mode-btn.intro-primary{border-color:rgba(232,177,78,.48);box-shadow:0 0 34px rgba(255,122,31,.10);}
 .coach-tour{position:fixed;inset:0;z-index:10000;display:none;pointer-events:none;}
-.coach-tour.open{display:block;}
+.coach-tour.open{display:block;transition:opacity .3s ease;}
+/* Prime: stay invisible until the first step is measured & positioned, so the
+   spotlight/popover never flash at their default top-left position first. */
+.coach-tour.coach-priming{opacity:0 !important;transition:none !important;}
 .coach-tour::before{content:'';position:absolute;inset:0;pointer-events:auto;background:rgba(8,5,2,.78);-webkit-backdrop-filter:blur(4px) saturate(.7);backdrop-filter:blur(4px) saturate(.7);opacity:0;transition:opacity .35s ease;clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,var(--spot-x,24px) var(--spot-y,24px),var(--spot-x,24px) calc(var(--spot-y,24px) + var(--spot-h,120px)),calc(var(--spot-x,24px) + var(--spot-w,260px)) calc(var(--spot-y,24px) + var(--spot-h,120px)),calc(var(--spot-x,24px) + var(--spot-w,260px)) var(--spot-y,24px),var(--spot-x,24px) var(--spot-y,24px));}
 .coach-tour.open::before{opacity:1;}
 .coach-spotlight{position:absolute;left:var(--spot-x,24px);top:var(--spot-y,24px);width:var(--spot-w,260px);height:var(--spot-h,120px);border:2px solid rgba(232,177,78,.9);border-radius:16px;box-shadow:0 0 0 4px rgba(232,177,78,.18),0 0 24px rgba(232,177,78,.5),inset 0 0 0 1px rgba(232,177,78,.14);transition:left .32s ease,top .32s ease,width .32s ease,height .32s ease;pointer-events:none;z-index:1;}
@@ -5852,6 +5864,9 @@
 	    coachTour.style.setProperty('--spot-h', spotH + 'px');
 	    coachTour.style.setProperty('--tip-x', clampX(tipX) + 'px');
 	    coachTour.style.setProperty('--tip-y', tipY + 'px');
+	    // Positioned now — safe to reveal the tour (removes the priming veil on the
+	    // first step; a no-op on later steps, which animate via CSS transitions).
+	    coachTour.classList.remove('coach-priming');
 	  }
 
 	  function positionCoachStep() {
@@ -5869,7 +5884,8 @@
 	    const r = target.getBoundingClientRect();
 	    const targetTop = window.pageYOffset + r.top - 96;
 	    window.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
-	    setTimeout(repositionCoachStep, 440);
+	    requestAnimationFrame(repositionCoachStep);   // position immediately so the reveal is snappy
+	    setTimeout(repositionCoachStep, 440);          // refine once the smooth-scroll settles
 	  }
 
 	  function renderCoachStep() {
@@ -5896,6 +5912,7 @@
 	    tourIndex = 0;
 	    tourLanded = false;
 	    coachTour.classList.add('open');
+	    coachTour.classList.add('coach-priming');   // hidden until positioned (no flash)
 	    coachTour.setAttribute('aria-hidden', 'false');
 	    renderCoachStep();
 	  }
@@ -7340,10 +7357,10 @@
     right: 18px !important;
     top: auto !important;
     bottom: calc(18px + var(--safe-bottom)) !important;
-    width: min(430px, calc(100vw - var(--sidebar-w) - 36px)) !important;
-    height: min(620px, calc(100vh - 88px - var(--safe-top))) !important;
-    max-width: 430px !important;
-    max-height: calc(100vh - 88px - var(--safe-top)) !important;
+    width: min(460px, calc(100vw - var(--sidebar-w) - 36px)) !important;
+    height: calc(100vh - 36px - var(--safe-top)) !important;
+    max-width: 460px !important;
+    max-height: calc(100vh - 36px - var(--safe-top)) !important;
     border: 1px solid rgba(255, 190, 73, .38) !important;
     border-radius: 18px !important;
     background: rgba(8, 6, 4, .88) !important;
@@ -7411,8 +7428,8 @@
       top: auto !important;
       bottom: calc(12px + var(--safe-bottom)) !important;
       width: calc(100vw - 24px) !important;
-      height: min(590px, calc(100vh - 82px - var(--safe-top))) !important;
-      max-height: calc(100vh - 82px - var(--safe-top)) !important;
+      height: calc(100vh - 24px - var(--safe-top) - var(--safe-bottom)) !important;
+      max-height: calc(100vh - 24px - var(--safe-top) - var(--safe-bottom)) !important;
       border-radius: 16px !important;
     }
     body.chat-guide-open #view-chat .container {
@@ -8674,6 +8691,48 @@
   }, { passive: true });
 })();
 </script>
+<style id="chat-maximize-space">
+  /* ── Maximize visible conversation ─────────────────────────────────────────
+     In the maximized / guide-chat states, trim the header + control chrome and
+     tighten message spacing so as much of the chat as possible is on screen.
+     Scoped to those states so the compact docked card is unaffected. */
+  body.chat-guide-open #view-chat .chat-head,
+  body.view-chat #view-chat .chat-head,
+  #view-chat.active .chat-head { padding: 9px 14px; gap: 10px; }
+
+  body.chat-guide-open #view-chat .chat-head-avatar,
+  body.view-chat #view-chat .chat-head-avatar,
+  #view-chat.active .chat-head-avatar { width: 34px; height: 34px; }
+
+  /* The sub description is redundant once you're chatting — hide it in the
+     expanded states to reclaim a full row of vertical space. */
+  body.chat-guide-open #view-chat .chat-head-info .sub,
+  body.view-chat #view-chat .chat-head-info .sub,
+  #view-chat.active .chat-head-info .sub { display: none; }
+
+  body.chat-guide-open #view-chat .chat-modes,
+  body.view-chat #view-chat .chat-modes,
+  #view-chat.active .chat-modes { margin: 6px 0; }
+  body.chat-guide-open #view-chat .chat-mode,
+  body.view-chat #view-chat .chat-mode,
+  #view-chat.active .chat-mode { padding: 6px 11px; }
+
+  body.chat-guide-open #view-chat .chat-audio-row,
+  body.view-chat #view-chat .chat-audio-row,
+  #view-chat.active .chat-audio-row { margin: 4px 0; }
+
+  /* Give the freed height to the message list and pack messages tighter. */
+  body.chat-guide-open #view-chat .chat-body,
+  body.view-chat #view-chat .chat-body,
+  #view-chat.active .chat-body { padding: 12px 16px !important; gap: 12px !important; }
+  body.chat-guide-open #view-chat .chips,
+  body.view-chat #view-chat .chips,
+  #view-chat.active .chips { margin: 6px 0 !important; }
+  /* The message list takes ALL remaining height so 5-6 messages are visible. */
+  body.chat-guide-open #view-chat .chat-body,
+  body.view-chat #view-chat .chat-body,
+  #view-chat.active .chat-body { flex: 1 1 auto !important; min-height: 0 !important; }
+</style>
 <!-- ═══════════════════════════════════════════════════════════════════════════
      IMMERSIVE MOTION LAYER — Three.js WebGL backdrop + GSAP flourishes.
      Additive by design: it never touches the router, chatbot, reveal-on-scroll
@@ -8742,7 +8801,7 @@
     var accent  = tone('--accent',  '#2EE5AC');
     var gold     = new THREE.Color('#FFB736');
 
-    var COUNT = isMobile ? 900 : 1800;
+    var COUNT = isMobile ? 1100 : 2400;
     var SPREAD = 70;
     var geo = new THREE.BufferGeometry();
     var pos = new Float32Array(COUNT * 3);
@@ -8759,9 +8818,9 @@
     geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
 
     var mat = new THREE.PointsMaterial({
-      size: isMobile ? 0.5 : 0.42, map: softSprite(THREE), vertexColors: true,
+      size: isMobile ? 0.7 : 0.6, map: softSprite(THREE), vertexColors: true,
       transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-      opacity: 0.9, sizeAttenuation: true
+      opacity: 1.0, sizeAttenuation: true
     });
     var points = new THREE.Points(geo, mat);
     scene.add(points);
@@ -8794,7 +8853,7 @@
     });
     function tick() {
       if (!running) return;
-      t += 0.0016;
+      t += 0.0022;
       mx += (mxT - mx) * 0.04; my += (myT - my) * 0.04;
       points.rotation.y = t * 0.4 + mx * 0.5;
       points.rotation.x = Math.sin(t * 0.5) * 0.06 - my * 0.4;
@@ -8844,8 +8903,8 @@
     wipe.id = 'view-wipe';
     wipe.setAttribute('aria-hidden', 'true');
     wipe.style.cssText = 'position:fixed;inset:0;z-index:60;pointer-events:none;opacity:0;' +
-      'background:linear-gradient(115deg, transparent 0%, var(--primary-soft) 42%, ' +
-      'var(--accent-soft) 58%, transparent 100%);transform:translateX(-100%);';
+      'background:linear-gradient(115deg, transparent 0%, rgba(255,105,64,0.30) 42%, ' +
+      'rgba(46,229,172,0.24) 58%, transparent 100%);transform:translateX(-100%);';
     document.body.appendChild(wipe);
 
     document.addEventListener('viewChanged', function () {
