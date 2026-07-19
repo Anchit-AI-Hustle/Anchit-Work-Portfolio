@@ -4,13 +4,13 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>JobHunt — a live AI job-search agent · Anchit Tandon</title>
-<meta name="description" content="A live AI job-search agent powered by Claude. Sign in with your email, bring your own Anthropic key, and it searches LinkedIn, Indeed, Glassdoor and Upwork in real time." />
+<meta name="description" content="A live AI job-search agent powered by Claude. Sign in with Google, bring your own Anthropic key, and it searches LinkedIn, Indeed, Glassdoor and Upwork in real time." />
 <meta name="theme-color" content="#0F0D0A" />
 <link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
 
 <!-- Open Graph -->
 <meta property="og:title" content="JobHunt — a live AI job-search agent" />
-<meta property="og:description" content="Sign in with your email, bring your own Anthropic key, and Claude searches LinkedIn, Indeed, Glassdoor & Upwork in real time." />
+<meta property="og:description" content="Sign in with Google, bring your own Anthropic key, and Claude searches LinkedIn, Indeed, Glassdoor & Upwork in real time." />
 <meta property="og:type" content="website" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -102,6 +102,10 @@
   .btn.primary{background:linear-gradient(135deg,var(--primary),var(--gold)); color:#160b04;}
   .btn.primary:hover{transform:translateY(-2px); box-shadow:0 10px 30px rgba(255,105,64,.32);}
   .btn.primary:disabled{opacity:.6; cursor:not-allowed; transform:none; box-shadow:none;}
+  .btn.google{background:#fff; color:#1f1f1f; border:1px solid var(--rule-strong);}
+  .btn.google:hover{transform:translateY(-2px); box-shadow:0 10px 30px rgba(0,0,0,.32);}
+  .btn.google:disabled{opacity:.6; cursor:not-allowed; transform:none; box-shadow:none;}
+  .btn.google svg{width:18px; height:18px; display:block;}
   .microcopy{font-family:var(--font-mono); font-size:12px; color:var(--ink-dim); letter-spacing:.02em;}
 
   .spin{width:16px; height:16px; border:2px solid rgba(22,11,4,.35); border-top-color:#160b04; border-radius:50%; animation:sp .7s linear infinite;}
@@ -154,7 +158,7 @@
 
   <div class="eyebrow">Side hustle · Live AI agent · Powered by Claude</div>
   <h1>JobHunt — <em>a live job-search agent</em>.</h1>
-  <p class="lede">Sign in with your email and bring your own Anthropic key. A Claude agent then searches LinkedIn, Indeed, Glassdoor and Upwork in real time and hands you the openings it actually finds — your key, your searches, billed to your own account.</p>
+  <p class="lede">Sign in with Google and bring your own Anthropic key. A Claude agent then searches LinkedIn, Indeed, Glassdoor and Upwork in real time and hands you the openings it actually finds — your key, your searches, billed to your own account.</p>
 
   <!-- ============ GATE PANEL (auth + key) ============ -->
   <div class="panel" id="gate">
@@ -171,22 +175,15 @@
       <p class="keynote">Building this yourself? <a href="mailto:anchit.tandon@gmail.com?subject=JobHunt%20setup">Ask me how it’s wired.</a></p>
     </div>
 
-    <!-- signed out: email magic-link -->
+    <!-- signed out: Google OAuth -->
     <div id="state-signedout" class="hidden">
       <div class="gate-head"><span class="step">Step 1</span><span class="h">Sign in to continue</span></div>
-      <p class="gate-copy">JobHunt is gated. Enter your email and we’ll send you a one-tap sign-in link — no password. Nothing is charged by signing in; you’ll add your own Anthropic key next.</p>
-      <div class="keyrow">
-        <input id="email-input" type="email" placeholder="you@example.com" autocomplete="email" spellcheck="false">
-        <button class="btn primary" type="button" id="email-send">Email me a link →</button>
-      </div>
+      <p class="gate-copy">JobHunt is gated. Sign in with your Google account — nothing is charged by signing in; you’ll add your own Anthropic key next.</p>
+      <button class="btn google" type="button" id="google-btn">
+        <svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Continue with Google
+      </button>
       <div id="signin-msg" class="msg"></div>
-    </div>
-
-    <!-- link sent -->
-    <div id="state-sent" class="hidden">
-      <div class="gate-head"><span class="step">Step 1</span><span class="h">Check your inbox</span></div>
-      <p class="gate-copy">We sent a sign-in link to <b id="sent-email">your email</b>. Open it on this device to continue — you can come right back to this tab.</p>
-      <button class="link-btn" type="button" id="sent-change">← Use a different email</button>
     </div>
 
     <!-- signed in, need key -->
@@ -202,7 +199,7 @@
       </div>
       <div class="divider"></div>
       <div class="gate-head"><span class="step">Step 2</span><span class="h">Link your Anthropic key</span></div>
-      <p class="gate-copy">Paste your own Anthropic API key. It’s stored only in <b>this browser</b>, linked to your email — never sent to or saved on any server except passed straight to Anthropic for your searches.</p>
+      <p class="gate-copy">Paste your own Anthropic API key. It’s stored only in <b>this browser</b>, linked to your Google account — never sent to or saved on any server except passed straight to Anthropic for your searches.</p>
       <div class="keyrow">
         <input id="key-input" type="password" placeholder="sk-ant-…" autocomplete="off" spellcheck="false">
         <button class="btn primary" type="button" id="key-save">Link key →</button>
@@ -258,7 +255,7 @@
   <div class="status" id="jh-status" aria-live="polite"></div>
 
   <p class="disclaimer">
-    JobHunt is a live demo of an agentic build — a Claude agent with web search, wired to this page and gated behind email sign-in.
+    JobHunt is a live demo of an agentic build — a Claude agent with web search, wired to this page and gated behind Google sign-in.
     You bring your own Anthropic key; it stays in your browser and is used only to run your searches. Results come straight from the web at
     search time, so availability and details can change — always confirm on the original posting before applying.
   </p>
@@ -278,8 +275,8 @@
   var anthKey = null;            // caller's Anthropic key for the active session
 
   var els = {};
-  ['state-loading','state-noconfig','state-signedout','state-sent','state-needkey','state-ready',
-   'email-input','email-send','signin-msg','sent-email','sent-change',
+  ['state-loading','state-noconfig','state-signedout','state-needkey','state-ready',
+   'google-btn','signin-msg',
    'nk-av','nk-email','nk-signout','key-input','key-save','key-err',
    'rd-av','rd-email','rd-changekey','rd-signout','jh-form','jh-role','jh-location','jh-boards','jh-go'
   ].forEach(function(id){ els[id] = document.getElementById(id); });
@@ -296,7 +293,7 @@
   function saveKey(email, k){ try{ localStorage.setItem(keyName(email), k); }catch(e){} }
   function clearKey(email){ try{ localStorage.removeItem(keyName(email)); }catch(e){} }
 
-  var STATES = ['state-loading','state-noconfig','state-signedout','state-sent','state-needkey','state-ready'];
+  var STATES = ['state-loading','state-noconfig','state-signedout','state-needkey','state-ready'];
   function show(state){ STATES.forEach(function(s){ els[s].classList.toggle('hidden', s !== state); }); }
 
   // ---- config + client bootstrap ----
@@ -305,8 +302,8 @@
     .then(function(cfg){
       CFG.url = cfg && cfg.supabaseUrl; CFG.anon = cfg && cfg.supabaseAnonKey; CFG.gated = !!(cfg && cfg.gated);
       if (!CFG.url || !CFG.anon || !window.supabase){ show('state-noconfig'); return; }
-      sb = window.supabase.createClient(CFG.url, CFG.anon, { auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true } });
-      // React to the magic-link redirect + existing sessions.
+      sb = window.supabase.createClient(CFG.url, CFG.anon, { auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true, flowType:'pkce' } });
+      // React to the OAuth redirect return + existing sessions.
       sb.auth.onAuthStateChange(function(_evt, session){ applySession(session); });
       sb.auth.getSession().then(function(res){ applySession(res && res.data && res.data.session); });
     })
@@ -339,30 +336,28 @@
     if (els['rd-email']) els['rd-email'].textContent = user.email;
   }
 
-  // ---- magic-link sign-in ----
-  function sendLink(){
-    var email = (els['email-input'].value || '').trim();
-    els['signin-msg'].className = 'msg';
-    els['signin-msg'].textContent = '';
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){
-      els['signin-msg'].className = 'msg err'; els['signin-msg'].textContent = 'Enter a valid email address.'; return;
+  // ---- Google sign-in (via Supabase OAuth) ----
+  // If the provider bounces back with an error, Supabase puts it in the query/hash.
+  (function surfaceOAuthError(){
+    var m = (location.search + location.hash).match(/error_description=([^&]+)/);
+    if (m && els['signin-msg']){
+      els['signin-msg'].className = 'msg err';
+      els['signin-msg'].textContent = decodeURIComponent(m[1].replace(/\+/g, ' '));
+      try { history.replaceState(null, '', location.pathname); } catch(e){}
     }
+  })();
+  function signInGoogle(){
+    els['signin-msg'].className = 'msg'; els['signin-msg'].textContent = '';
     if (!sb){ els['signin-msg'].className = 'msg err'; els['signin-msg'].textContent = 'Sign-in isn’t ready yet — reload and try again.'; return; }
-    els['email-send'].disabled = true;
-    els['email-send'].innerHTML = '<span class="spin"></span> Sending…';
-    sb.auth.signInWithOtp({ email: email, options: { emailRedirectTo: location.origin + '/jobhunt' } })
-      .then(function(res){
-        if (res && res.error){ throw res.error; }
-        els['sent-email'].textContent = email;
-        show('state-sent');
-      })
+    els['google-btn'].disabled = true;
+    els['google-btn'].innerHTML = '<span class="spin"></span> Redirecting…';
+    sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + '/jobhunt' } })
+      .then(function(res){ if (res && res.error){ throw res.error; } })
       .catch(function(e){
         els['signin-msg'].className = 'msg err';
-        els['signin-msg'].textContent = (e && e.message) ? e.message : 'Couldn’t send the link. Try again in a moment.';
-      })
-      .then(function(){
-        els['email-send'].disabled = false;
-        els['email-send'].innerHTML = 'Email me a link →';
+        els['signin-msg'].textContent = (e && e.message) ? e.message : 'Couldn’t start Google sign-in. Try again in a moment.';
+        els['google-btn'].disabled = false;
+        els['google-btn'].innerHTML = 'Continue with Google';
       });
   }
   function signOut(){
@@ -370,9 +365,7 @@
     accessToken = null; user = null; anthKey = null; statusEl.innerHTML = '';
     show('state-signedout');
   }
-  if (els['email-send']) els['email-send'].addEventListener('click', sendLink);
-  if (els['email-input']) els['email-input'].addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); sendLink(); } });
-  if (els['sent-change']) els['sent-change'].addEventListener('click', function(){ show('state-signedout'); els['email-input'].focus(); });
+  if (els['google-btn']) els['google-btn'].addEventListener('click', signInGoogle);
   if (els['nk-signout']) els['nk-signout'].addEventListener('click', signOut);
   if (els['rd-signout']) els['rd-signout'].addEventListener('click', signOut);
 
