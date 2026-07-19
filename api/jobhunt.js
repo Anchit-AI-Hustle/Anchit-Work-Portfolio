@@ -1,21 +1,21 @@
 // /api/jobhunt — a gated, bring-your-own-key live job-search agent.
 //
-//   GET  /api/jobhunt  → { googleClientId, gated }  (public config for the page)
+//   GET  /api/jobhunt  → { supabaseUrl, supabaseAnonKey, gated }  (public config)
 //   POST /api/jobhunt  → runs a live search using the CALLER'S own Anthropic key
 //
-// Gating: when GOOGLE_CLIENT_ID is set, every POST must carry a valid Google
-// ID token (Authorization: Bearer <id_token>) proving the caller signed in with
-// Google. The caller also supplies their OWN Anthropic key per request
-// (x-anthropic-key header); that key is used transiently for that one search and
-// is NEVER stored or logged anywhere on the server.
+// Gating: when SUPABASE_URL + SUPABASE_ANON_KEY are set, every POST must carry a
+// valid Supabase auth token (Authorization: Bearer <access_token>) from a user
+// who signed in via email magic-link. We verify it against Supabase's own auth
+// server and require a confirmed email. The caller also supplies their OWN
+// Anthropic key per request (x-anthropic-key header); that key is used
+// transiently for that one search and is NEVER stored or logged on the server.
 //
 // Env:
-//   GOOGLE_CLIENT_ID   Enables Google sign-in gating when set. Without it the
-//                      page shows a friendly "sign-in not configured" state.
-//   ANTHROPIC_API_KEY  Optional owner fallback for private testing only. The
-//                      public flow expects every visitor to bring their own key,
-//                      so this is normally left UNSET in production.
-//   CLAUDE_MODEL       Optional; default claude-opus-4-8.
+//   SUPABASE_URL        e.g. https://abcd.supabase.co  (public project URL)
+//   SUPABASE_ANON_KEY   the project's anon/publishable key (public, safe in browser)
+//   ANTHROPIC_API_KEY   Optional owner fallback for private testing only. The
+//                       public flow expects each visitor to bring their own key.
+//   CLAUDE_MODEL        Optional; default claude-opus-4-8.
 
 const MODEL = process.env.CLAUDE_MODEL || 'claude-opus-4-8';
 const ALL_BOARDS = ['LinkedIn', 'Indeed', 'Glassdoor', 'Upwork'];
@@ -82,19 +82,23 @@ function parseListings(text) {
   }
 }
 
-// Verify a Google ID token by asking Google's tokeninfo endpoint to validate the
-// signature + expiry, then checking the audience is our own client. Returns the
-// signed-in email on success. When no client id is configured, gating is off.
-async function verifyGoogle(idToken, clientId) {
-  if (!clientId) return { ok: true, email: null };
-  if (!idToken) return { ok: false };
+// Verify a Supabase access token by asking the project's own auth server who it
+// belongs to. Requires a confirmed email. When Supabase isn't configured, gating
+// is off (the page shows a "not switched on" state instead).
+async function verifySupabase(token, url, anonKey) {
+  if (!url || !anonKey) return { ok: true, email: null };
+  if (!token) return { ok: false };
   try {
-    const r = await fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idToken));
+    const base = url.replace(/\/+$/, '');
+    const r = await fetch(base + '/auth/v1/user', {
+      headers: { apikey: anonKey, Authorization: 'Bearer ' + token },
+    });
     if (!r.ok) return { ok: false };
-    const p = await r.json();
-    if (!p || p.aud !== clientId) return { ok: false };
-    if (p.email_verified === false || p.email_verified === 'false') return { ok: false };
-    return { ok: true, email: p.email || null };
+    const u = await r.json();
+    if (!u || !u.email) return { ok: false };
+    // Only trust a verified email.
+    if (!u.email_confirmed_at && !u.confirmed_at) return { ok: false };
+    return { ok: true, email: u.email };
   } catch (e) {
     return { ok: false };
   }
@@ -106,19 +110,25 @@ async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-anthropic-key');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const clientId = process.env.GOOGLE_CLIENT_ID || '';
+  const supabaseUrl = process.env.SUPABASE_URL || '';
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
+  const gated = !!(supabaseUrl && supabaseAnonKey);
 
   // Public config the page reads on load so it knows whether/how to gate.
   if (req.method === 'GET') {
     res.setHeader('Cache-Control', 'no-store');
-    return res.status(200).json({ googleClientId: clientId || null, gated: !!clientId });
+    return res.status(200).json({
+      supabaseUrl: supabaseUrl || null,
+      supabaseAnonKey: supabaseAnonKey || null,
+      gated,
+    });
   }
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
-  // --- Gate: require a valid Google sign-in when configured ---
+  // --- Gate: require a valid magic-link sign-in when configured ---
   const auth = (req.headers['authorization'] || '').toString();
-  const idToken = auth.replace(/^Bearer\s+/i, '').trim();
-  const gate = await verifyGoogle(idToken, clientId);
+  const token = auth.replace(/^Bearer\s+/i, '').trim();
+  const gate = await verifySupabase(token, supabaseUrl, supabaseAnonKey);
   if (!gate.ok) return res.status(401).json({ error: 'signin_required' });
 
   // --- Bring-your-own key: use the caller's Anthropic key, transiently ---
