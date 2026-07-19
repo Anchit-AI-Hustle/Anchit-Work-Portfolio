@@ -5882,10 +5882,19 @@
 	    // Scroll the target near the top of the viewport (clear of the sticky
 	    // bar) so there is always room to place the popover below it.
 	    const r = target.getBoundingClientRect();
-	    const targetTop = window.pageYOffset + r.top - 96;
-	    window.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
-	    requestAnimationFrame(repositionCoachStep);   // position immediately so the reveal is snappy
-	    setTimeout(repositionCoachStep, 440);          // refine once the smooth-scroll settles
+	    const targetTop = Math.max(0, window.pageYOffset + r.top - 96);
+	    const priming = coachTour.classList.contains('coach-priming');
+	    // First reveal: scroll INSTANTLY so the target is already at its final
+	    // position before we place + unveil the spotlight — no "appears wrong,
+	    // then snaps into place" flash. Later steps keep the smooth scroll and
+	    // let the spotlight's CSS transition glide between positions.
+	    window.scrollTo({ top: targetTop, behavior: priming ? 'auto' : 'smooth' });
+	    if (priming) {
+	      requestAnimationFrame(repositionCoachStep);          // place + reveal, already at final spot
+	    } else {
+	      requestAnimationFrame(repositionCoachStep);          // start moving immediately
+	      setTimeout(repositionCoachStep, 440);                // settle after the smooth scroll
+	    }
 	  }
 
 	  function renderCoachStep() {
