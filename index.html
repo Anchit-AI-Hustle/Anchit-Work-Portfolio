@@ -5120,6 +5120,8 @@
 	          window.open('https://wa.me/919873945238', '_blank', 'noopener');
 	        } else if (action === 'email') {
 	          window.location.href = 'mailto:anchit.tandon@gmail.com';
+	        } else if (action === 'ask') {
+	          document.getElementById('chatInput')?.focus();
 	        } else if (action) {
 	          switchView(action);
 	        }
@@ -5848,7 +5850,15 @@
 	    if (typeof window.openGuideChat === 'function') window.openGuideChat();
 	    setTimeout(() => {
 	      if (typeof addBot !== 'function') return;
-	      addBot("That's the quick tour. Where would you like to start? Pick one below, or just ask me anything.");
+	      addBot(
+	        "Hey — I’m <strong>Anchit Tandon</strong>. An engineer who learned to love the funnel: I build products, scale growth, and create leverage. " +
+	        "You can reach me whichever way suits you — just choose: Call, Chat, or Text." +
+	        '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;">' +
+	          '<a class=\'chip\' style=\'text-decoration:none;\' href=\'tel:+919873945238\'>Call</a>' +
+	          '<button type=\'button\' class=\'chip\' data-guide-action=\'ask\'>Chat</button>' +
+	          '<a class=\'chip\' style=\'text-decoration:none;\' href=\'https://wa.me/919873945238\' target=\'_blank\' rel=\'noopener\'>Text</a>' +
+	        '</div>'
+	      );
 	      if (typeof renderChips === 'function') renderChips(START_CHIPS);
 	      if (typeof scrollChat === 'function') scrollChat();
 	    }, 440);
