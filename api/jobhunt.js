@@ -142,13 +142,19 @@ async function handler(req, res) {
   if (!boards.length) boards = ALL_BOARDS.slice();
   if (!role) return res.status(400).json({ error: 'role required' });
 
+  const prompt = buildPrompt(role, location, boards);
   try {
-    const r = await callGemini(geminiKey, buildPrompt(role, location, boards));
+    // The free tier can burst-limit (429); retry once after a short backoff.
+    let r = await callGemini(geminiKey, prompt);
+    if (r.status === 429) {
+      await new Promise((rs) => setTimeout(rs, 3000));
+      r = await callGemini(geminiKey, prompt);
+    }
     if (!r.ok) {
       const detail = await r.text().catch(() => '');
-      if (r.status === 429) return res.status(429).json({ error: 'rate_limited' });
-      if (r.status === 400 || r.status === 403) return res.status(502).json({ error: 'engine_error', detail: detail.slice(0, 200) });
-      return res.status(502).json({ error: 'upstream', status: r.status, detail: detail.slice(0, 200) });
+      if (r.status === 429) return res.status(429).json({ error: 'rate_limited', detail: detail.slice(0, 300) });
+      if (r.status === 400 || r.status === 403) return res.status(502).json({ error: 'engine_error', detail: detail.slice(0, 300) });
+      return res.status(502).json({ error: 'upstream', status: r.status, detail: detail.slice(0, 300) });
     }
     const data = await r.json();
     const results = parseListings(extractText(data));
