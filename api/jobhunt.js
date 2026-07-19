@@ -110,8 +110,8 @@ async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-anthropic-key');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const supabaseUrl = process.env.SUPABASE_URL || '';
-  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
+  const supabaseUrl = process.env.SUPABASE_URL || 'https://rhvmpzjeyjminlvuhozx.supabase.co';
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJodm1wempleWptaW5sdnVob3p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4ODE2MTgsImV4cCI6MjA5NTQ1NzYxOH0.qmwLy5GYg5ymby-TY1Jc2k9s49XmqoAX_9NMq2ILjdg';
   const gated = !!(supabaseUrl && supabaseAnonKey);
 
   // Public config the page reads on load so it knows whether/how to gate.
