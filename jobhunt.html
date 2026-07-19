@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>AI Job Search Agent — Anchit Tandon</title>
+<meta name="description" content="A plug-and-play AI job search agent, built in n8n (no code), that hunts LinkedIn, Indeed, Glassdoor and Upwork on autopilot and logs new roles to your Google Sheet." />
+<meta name="theme-color" content="#0F0D0A" />
+<link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
+
+<!-- Open Graph -->
+<meta property="og:title" content="AI Job Search Agent — your job hunt on autopilot" />
+<meta property="og:description" content="One click searches LinkedIn, Indeed, Glassdoor & Upwork, de-dupes against your Google Sheet, and logs only new roles. 50+ listings per run." />
+<meta property="og:type" content="website" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#0F0D0A; --bg-elev:#16130F; --bg-deep:#0A0806;
+    --ink:#FBF5EC; --ink-dim:#B3A996;
+    --primary:#FF6940; --primary-deep:#FF4D1F; --primary-soft:rgba(255,105,64,.12);
+    --accent:#2EE5AC; --gold:#FFB736; --rule:rgba(255,247,232,.12); --rule-strong:rgba(255,247,232,.2);
+    --font-display:'Fraunces',ui-serif,serif; --font-sans:'Inter',ui-sans-serif,system-ui,sans-serif; --font-mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--font-sans);
+    line-height:1.6; -webkit-font-smoothing:antialiased; overflow-x:hidden;
+    min-height:100vh;
+  }
+  /* Ambient glow, on-brand with the portfolio */
+  body::before{
+    content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(50% 40% at 20% 12%, rgba(255,105,64,.12), transparent 60%),
+      radial-gradient(46% 38% at 84% 30%, rgba(255,183,54,.09), transparent 62%),
+      radial-gradient(50% 42% at 60% 88%, rgba(46,229,172,.06), transparent 60%);
+    filter:blur(6px);
+  }
+  .wrap{position:relative; z-index:1; max-width:860px; margin:0 auto; padding:28px 22px 96px;}
+  .topbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:56px;}
+  .brand{display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--ink);}
+  .brand img{width:38px; height:38px; border-radius:10px; object-fit:cover; border:1px solid rgba(255,183,54,.5); box-shadow:0 0 12px rgba(255,133,24,.18);}
+  .brand span{font-family:var(--font-display); font-weight:600; font-size:15px; letter-spacing:-.01em;}
+  .back{font-family:var(--font-mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-dim); text-decoration:none; padding:8px 14px; border:1px solid var(--rule); border-radius:10px; transition:all .2s;}
+  .back:hover{color:var(--primary); border-color:var(--primary);}
+
+  .eyebrow{font-family:var(--font-mono); font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:var(--accent); margin-bottom:14px; display:flex; align-items:center; gap:10px;}
+  .eyebrow::before{content:''; width:22px; height:1px; background:var(--primary);}
+  h1{font-family:var(--font-display); font-weight:600; font-size:clamp(2.4rem,7vw,4rem); line-height:1.02; letter-spacing:-.02em; margin-bottom:18px;}
+  h1 em{font-style:italic; color:var(--primary);}
+  .lede{font-size:clamp(1.05rem,2.4vw,1.3rem); color:var(--ink-dim); max-width:60ch; margin-bottom:30px;}
+  .cta-row{display:flex; flex-wrap:wrap; gap:12px; margin-bottom:16px;}
+  .btn{display:inline-flex; align-items:center; gap:9px; font-weight:600; font-size:15px; padding:13px 22px; border-radius:12px; text-decoration:none; transition:transform .2s, box-shadow .2s, background .2s; border:1px solid var(--rule-strong);}
+  .btn.primary{background:linear-gradient(135deg,var(--primary),var(--gold)); color:#160b04; border:0;}
+  .btn.primary:hover{transform:translateY(-2px); box-shadow:0 10px 30px rgba(255,105,64,.32);}
+  .btn.ghost{background:transparent; color:var(--ink);}
+  .btn.ghost:hover{border-color:var(--primary); color:var(--primary);}
+  .microcopy{font-family:var(--font-mono); font-size:12px; color:var(--ink-dim); letter-spacing:.02em;}
+
+  .stat-band{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin:48px 0;}
+  @media(max-width:620px){.stat-band{grid-template-columns:1fr; }}
+  .stat{background:var(--bg-elev); border:1px solid var(--rule); border-radius:16px; padding:20px;}
+  .stat .n{font-family:var(--font-display); font-size:2rem; font-weight:600; color:var(--primary); line-height:1;}
+  .stat .n em{font-style:italic;}
+  .stat .l{font-size:.86rem; color:var(--ink-dim); margin-top:8px;}
+
+  section{margin-top:52px;}
+  h2{font-family:var(--font-display); font-weight:600; font-size:clamp(1.5rem,4vw,2.1rem); letter-spacing:-.01em; margin-bottom:8px;}
+  .sub{color:var(--ink-dim); margin-bottom:22px; max-width:60ch;}
+  .list{display:grid; gap:12px;}
+  .item{display:flex; gap:14px; align-items:flex-start; background:var(--bg-elev); border:1px solid var(--rule); border-radius:14px; padding:16px 18px; transition:border-color .2s, transform .2s;}
+  .item:hover{border-color:var(--primary); transform:translateY(-2px);}
+  .item .ico{font-size:1.35rem; line-height:1.3; flex:0 0 auto;}
+  .item .t{font-weight:600; margin-bottom:2px;}
+  .item .d{color:var(--ink-dim); font-size:.94rem;}
+  .item.simple .d{color:var(--ink); font-size:1rem;}
+
+  .who{background:linear-gradient(135deg, rgba(255,105,64,.08), rgba(46,229,172,.05)); border:1px solid var(--rule); border-radius:18px; padding:26px 24px;}
+  .who p{color:var(--ink); font-size:1.05rem;}
+  .who p + p{margin-top:12px; color:var(--ink-dim);}
+
+  .final{margin-top:60px; text-align:center; background:var(--bg-elev); border:1px solid var(--rule-strong); border-radius:20px; padding:40px 26px;}
+  .final h2{margin-bottom:12px;}
+  .final .sub{margin:0 auto 24px;}
+  .footer{margin-top:56px; padding-top:22px; border-top:1px solid var(--rule); display:flex; flex-wrap:wrap; gap:8px; justify-content:space-between; align-items:center; color:var(--ink-dim); font-size:.85rem;}
+  .footer a{color:var(--ink-dim); text-decoration:none;}
+  .footer a:hover{color:var(--primary);}
+  @media (prefers-reduced-motion: reduce){*{transition:none !important; scroll-behavior:auto;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <a class="brand" href="/" aria-label="Anchit Tandon home">
+      <img src="AnchitTandon-AppLogo.png" alt="Anchit Tandon">
+      <span>Anchit Tandon</span>
+    </a>
+    <a class="back" href="/#projects">← Back to portfolio</a>
+  </div>
+
+  <div class="eyebrow">Side hustle · n8n automation · No-code</div>
+  <h1>Your job hunt, <em>on autopilot</em>.</h1>
+  <p class="lede">A plug-and-play AI job search agent, built in n8n (no code required), that does your job hunting for you — searching four boards at once and logging only the roles you haven't seen yet.</p>
+  <div class="cta-row">
+    <a class="btn primary" href="https://wa.me/919873945238?text=Hi%20Anchit%2C%20I%27d%20like%20the%20AI%20Job%20Search%20Agent%20(n8n%20workflow)." target="_blank" rel="noopener">Get the workflow →</a>
+    <a class="btn ghost" href="mailto:anchit.tandon@gmail.com?subject=AI%20Job%20Search%20Agent">Ask a question</a>
+  </div>
+  <p class="microcopy">Complete n8n workflow · setup guide · support group access</p>
+
+  <div class="stat-band">
+    <div class="stat"><div class="n">50+</div><div class="l">new listings per run</div></div>
+    <div class="stat"><div class="n">4</div><div class="l">boards searched at once</div></div>
+    <div class="stat"><div class="n">20<em>→</em>2</div><div class="l">hours/week on my own search</div></div>
+  </div>
+
+  <section>
+    <h2>What it does</h2>
+    <p class="sub">One click, four platforms, zero copy-paste — and it never shows you the same job twice.</p>
+    <div class="list">
+      <div class="item"><div class="ico">🔍</div><div><div class="t">Searches 4 boards simultaneously</div><div class="d">LinkedIn, Indeed, Glassdoor & Upwork — one click hits all four platforms at once.</div></div></div>
+      <div class="item"><div class="ico">🧠</div><div><div class="t">De-dupes against your Google Sheet</div><div class="d">Checks your existing sheet first, so you never see a duplicate listing again.</div></div></div>
+      <div class="item"><div class="ico">📋</div><div><div class="t">Formats every result the same way</div><div class="d">Title, company, link, source — clean and consistent, no messy copy-paste.</div></div></div>
+      <div class="item"><div class="ico">📊</div><div><div class="t">Appends straight to your Google Sheet</div><div class="d">New listings land in your sheet automatically, ready to track and apply.</div></div></div>
+      <div class="item"><div class="ico">🔁</div><div><div class="t">Re-run anytime for fresh listings</div><div class="d">Only new jobs get added — run it whenever you want without the noise.</div></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>What you get</h2>
+    <div class="list">
+      <div class="item simple"><div class="ico">📦</div><div class="d">The complete n8n workflow file, ready to import.</div></div>
+      <div class="item simple"><div class="ico">🧭</div><div class="d">Step-by-step setup guide (20–30 mins, even if you've never used automation before).</div></div>
+      <div class="item simple"><div class="ico">🤝</div><div class="d">Access to a support group where I help you customize it for your own job search.</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Who this is for</h2>
+    <div class="who">
+      <p>Anyone actively job hunting who's sick of manually checking multiple job boards, copy-pasting listings, and losing track of what they've already applied to.</p>
+      <p>If your job search is eating your evenings, this gets you your time back.</p>
+    </div>
+  </section>
+
+  <div class="final">
+    <h2>Real results</h2>
+    <p class="sub">50+ new listings per run. My own search went from 20 hours/week down to 2.</p>
+    <div class="cta-row" style="justify-content:center;">
+      <a class="btn primary" href="https://wa.me/919873945238?text=Hi%20Anchit%2C%20I%27d%20like%20the%20AI%20Job%20Search%20Agent%20(n8n%20workflow)." target="_blank" rel="noopener">Get the workflow →</a>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>© Anchit Tandon · AI Job Search Agent</span>
+    <a href="/#projects">See the rest of the portfolio →</a>
+  </div>
+</div>
+</body>
+</html>

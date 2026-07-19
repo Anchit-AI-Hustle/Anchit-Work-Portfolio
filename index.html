@@ -3779,6 +3779,20 @@
           </div>
         </div>
 
+        <!-- Card — AI Job Search Agent (Job Hunting) -->
+        <div class="build-card tilt-card">
+          <div class="build-tag"><span>Job Hunting · n8n · No-code</span><span class="status">Live</span></div>
+          <h3>AI Job Search <em>Agent</em></h3>
+          <p>A plug-and-play AI job search agent, built in n8n (no code), that does your job hunting on autopilot — searching LinkedIn, Indeed, Glassdoor &amp; Upwork at once, de-duping against your Google Sheet and logging only new roles.</p>
+          <ul class="build-details">
+            <li>One click hits all four boards, formats every result (title, company, link, source) and appends new listings straight to your sheet — re-run anytime, only new jobs get added.</li>
+            <li>Ships as a ready-to-import workflow + a 20–30 min setup guide + a support group. 50+ new listings per run; my own search went from 20 → 2 hours a week.</li>
+          </ul>
+          <div class="build-actions">
+            <a class="btn primary" href="/jobhunt">Get it &rarr;</a>
+          </div>
+        </div>
+
         <!-- Card 2 -->
         <div class="build-card tilt-card">
           <div class="build-tag"><span>Generative AI · Music</span><span class="status">Live</span></div>
@@ -4860,6 +4874,14 @@
     // instead of navigating to a separate page.
     if (viewName === 'chat') { if (window.openFullChat) window.openFullChat(); else if (window.openGuideChat) window.openGuideChat(); return; }
     if (!ALL_VIEWS.includes(viewName)) return;
+
+    // Leaving the chat surface for another page: tuck the chat back to its
+    // floating launcher so it never lingers as a broken overlay over the new
+    // view (fixes the layout break when navigating chat → another tab).
+    if (document.body.classList.contains('view-chat') || document.body.classList.contains('chat-guide-open')) {
+      if (typeof window.minimizeChat === 'function') window.minimizeChat();
+      else document.body.classList.remove('view-chat', 'chat-guide-open');
+    }
 
     // Animate out old view, animate in new
     const prev = document.querySelector('.view.active');
@@ -8740,7 +8762,13 @@
   /* The message list takes ALL remaining height so 5-6 messages are visible. */
   body.chat-guide-open #view-chat .chat-body,
   body.view-chat #view-chat .chat-body,
+  #view-chat.active #view-chat .chat-body,
   #view-chat.active .chat-body { flex: 1 1 auto !important; min-height: 0 !important; }
+
+  /* On the dedicated full-page chat, there is nothing to minimise/maximise to —
+     you leave via the sidebar like any other page. Hide those controls there. */
+  body.view-chat #chatMinimizeBtn,
+  body.view-chat #chatMaximizeBtn { display: none !important; }
 </style>
 <!-- ═══════════════════════════════════════════════════════════════════════════
      IMMERSIVE MOTION LAYER — Three.js WebGL backdrop + GSAP flourishes.
