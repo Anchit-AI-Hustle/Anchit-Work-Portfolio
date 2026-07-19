@@ -9003,5 +9003,73 @@
   }
 })();
 </script>
+<style id="reading-focus">
+  /* Keep text crisp over the animated backdrop (readability). */
+  .reading-scrim{ position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(120% 90% at 50% 0%, rgba(10,8,6,.30), transparent 60%),
+      linear-gradient(180deg, rgba(10,8,6,.20), rgba(10,8,6,.10) 42%, rgba(10,8,6,.24)); }
+  /* Section focus: the block the reader is on stays full; the rest recede
+     gently so attention lands where they are. Kept subtle and gated. */
+  .uf-off{ opacity:.46; filter:saturate(.9); transition:opacity .5s ease, filter .5s ease; }
+  .uf-on{ opacity:1; filter:none; transition:opacity .5s ease, filter .5s ease; }
+  .uf-on{ position:relative; }
+  @media (prefers-reduced-motion: reduce){
+    .uf-off,.uf-on{ transition:none !important; }
+    .uf-off{ opacity:.72; }
+  }
+</style>
+<script id="reading-focus-js">
+(function(){
+  'use strict';
+  var mq = window.matchMedia;
+  var reduce = !!(mq && mq('(prefers-reduced-motion: reduce)').matches);
+  var coarse = !!(mq && mq('(pointer: coarse)').matches);
+
+  // Readability scrim — appended after the WebGL/particle layer so it dims the
+  // busy backdrop a touch (content sits above it at z-index:1, so text is crisp).
+  var scrim = document.createElement('div');
+  scrim.className = 'reading-scrim';
+  scrim.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(scrim);
+
+  // Blocks we treat as "sections" for focus. Only engage when a view has enough
+  // of them, so short pages (chat, contact) are never dimmed.
+  var SEL = '.work-item, .project-section, .build-card, .now-focus-item, .about-value-item';
+  var raf = 0;
+
+  function clearAll(scope) {
+    (scope || document).querySelectorAll('.uf-off,.uf-on').forEach(function (n) {
+      n.classList.remove('uf-off', 'uf-on');
+    });
+  }
+
+  function update() {
+    raf = 0;
+    var active = document.querySelector('.view.active');
+    if (!active) return;
+    var nodes = active.querySelectorAll(SEL);
+    if (nodes.length < 3) { clearAll(active); return; }
+    var focusY = window.innerHeight * 0.4;
+    var best = null, bestD = Infinity;
+    nodes.forEach(function (n) {
+      var r = n.getBoundingClientRect();
+      var mid = r.top + r.height / 2;
+      var d = Math.abs(mid - focusY);
+      if (d < bestD) { bestD = d; best = n; }
+    });
+    nodes.forEach(function (n) {
+      if (n === best) { n.classList.add('uf-on'); n.classList.remove('uf-off'); }
+      else { n.classList.add('uf-off'); n.classList.remove('uf-on'); }
+    });
+  }
+
+  function onScroll() { if (!raf) raf = requestAnimationFrame(update); }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  document.addEventListener('viewChanged', function () { clearAll(); setTimeout(update, 90); });
+  setTimeout(update, 500);
+})();
+</script>
 </body>
 </html>
