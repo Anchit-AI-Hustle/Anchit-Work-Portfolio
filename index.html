@@ -4159,7 +4159,7 @@
         <div class="project-meta">
           <div><span class="label">Role</span><span>Architect · Builder</span></div>
           <div><span class="label">Status</span><span>Live · Self-hosted</span></div>
-          <div><span class="label">Stack</span><span>Next.js · FastAPI · Postgres+pgvector · Gemini</span></div>
+          <div><span class="label">Stack</span><span>Next.js 14 · NextAuth · Supabase + pgvector · 7-LLM Cascade · Gemini Vision · PWA</span></div>
         </div>
         <div class="project-cta">
           <a href="https://the-third-eye-anchit.vercel.app/" target="_blank" rel="noopener" class="btn primary">Open live app ↗</a>
@@ -4192,9 +4192,25 @@
       </div>
 
       <div class="project-section reveal">
+        <div class="eyebrow">Under the hood</div>
+        <h2>How it's built</h2>
+        <p>A Next.js 14 App Router app on Vercel, Google sign-in via NextAuth (JWT), all data server-scoped through one authenticated API route, and a 7-provider LLM cascade behind every generation. The assistant is a real tool-calling agent, not a chat box.</p>
+        <ul>
+          <li><strong>Agent tool-loop.</strong> <code>/api/chat</code> streams a Gemini function-calling loop with ~25 tools — tasks, notes, goals, knowledge search, web/news/weather/stocks, calendar, email, reminders, multi-agent reasoning, and a Studio asset generator. Sensitive actions (send email, etc.) are confirm-then-act; created items get a short-lived Undo.</li>
+          <li><strong>Personas that actually change behaviour.</strong> JARVIS / FRIDAY / E.D.I.T.H. / ULTRON each inject their persona into the system prompt and drive a matching TTS voice — same tools underneath, different character on top.</li>
+          <li><strong>RLS-safe data layer.</strong> The browser never talks to Supabase directly; every read/write goes through a session-authenticated server route using the service role scoped to the user's email, with Row-Level-Security enforced by a tracked migration. A "Cloud synced / Local only" badge surfaces the persistence state.</li>
+          <li><strong>Real RAG memory (Cortex).</strong> Uploaded docs and past exchanges are embedded into Supabase pgvector; the assistant does semantic recall + document search with citations, falling back to keyword search when embeddings aren't configured.</li>
+          <li><strong>Mode-aware runtime.</strong> A Personal / Professional / Enterprise switcher re-frames the assistant's priorities and scopes Tasks, Notes, Goals, Knowledge and Finance to the active mode — plus a Studio of per-mode generators (landing pages, HTML mailers, lifecycle plans, creative).</li>
+          <li><strong>Ambient capture + vision.</strong> Live Capture uses the Web Speech API to transcribe continuously, auto-extracts tasks into the tracker (with a Wake Lock so the mic survives), and Gemini multimodal analyzes a shared screen or webcam frame (E.D.I.T.H.-style). Gmail/Chat scraping turns inbox activity into tasks on a schedule.</li>
+          <li><strong>Agent safety layer.</strong> A global kill switch plus an append-only, exportable audit log of every action the agent takes, surfaced on a dedicated Activity page and a dashboard widget.</li>
+          <li><strong>Cinematic front-end.</strong> A Three.js arc-reactor hero and GSAP scroll-reveals (both reduced-motion-aware and paused on hidden tabs), a command-center dashboard where every feature is a live widget, and an installable PWA.</li>
+        </ul>
+      </div>
+
+      <div class="project-section reveal">
         <div class="eyebrow">What I'd build next</div>
         <h2>The roadmap in my head</h2>
-        <p>Vision (Gemini multimodal on live camera, EDITH-style), wake-word via Porcupine for true always-on, Gmail/Calendar OAuth so the agent can read mail and book meetings, threat/anomaly scanning over inbound info, predictive routine ("you usually do X now").</p>
+        <p>Wake-word via Porcupine for true always-on, a native desktop capture bridge for background/screen-off listening (the one thing a browser can't do), dedicated audio/music generation, deeper permission tiers for the agent, and predictive routines ("you usually do X now"). Vision, wake-word-on-name and Gmail/Calendar tools are already live.</p>
       </div>
 
       <div class="iframe-wrap reveal">
@@ -4326,7 +4342,7 @@
         <div class="project-meta">
           <div><span class="label">Role</span><span>Architect · Builder</span></div>
           <div><span class="label">Status</span><span>Live · Powering the retention queue</span></div>
-          <div><span class="label">Stack</span><span>Supabase · ApexCharts · Vercel Functions · 7-LLM Cascade · PWA</span></div>
+          <div><span class="label">Stack</span><span>Supabase · DuckDB · ApexCharts · Vercel Functions · 8-LLM Cascade · Capacitor PWA</span></div>
         </div>
         <div class="project-cta">
           <a href="https://vahdam-lifecycle-os.vercel.app/" target="_blank" rel="noopener" class="btn primary">Open live app ↗</a>
@@ -4354,6 +4370,23 @@
           <li><strong>Mailer cold start.</strong> Every send begins from a blank brief. Each calendar row hands the Studio a pre-generated strategy + four variants (2 image, 2 text) tied to the right product/collection URL.</li>
           <li><strong>Exec-grade exports.</strong> Colour-preserving Excel of every dashboard table plus a "complete analysis" workbook compiled live from the linked Supabase views — schedulable, no spreadsheet of truth.</li>
         </ul>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">Under the hood</div>
+        <h2>How it's built</h2>
+        <p>A single Vercel project: ~43 self-contained static HTML apps wired together by URL rewrites, backed by Node serverless functions, a two-tier data layer, and an 8-provider LLM cascade. The whole OS also ships as one installable super app.</p>
+        <ul>
+          <li><strong>The 3-stage pipeline.</strong> Data Analysis (<code>/rfm</code>) computes 9 RFM segments, cohorts and cross-sell affinity client-side and persists state locally → Marketing Calendar (<code>/plan</code>) POSTs that state to a serverless planner that returns a 30-day, segment- and festival-aware, capacity-guarded plan → Mailer Studio (<code>/studio</code>) turns any row into four on-brand variants.</li>
+          <li><strong>Mailer generation is a "think → lock → execute" pipeline.</strong> Five serverless stages: <em>strategy</em> locks products/theme/structure/variant concepts, then <em>variant → images → html</em> are pure executors, and a final <em>score</em> stage grades both variants on strategy-alignment, content density, copy quality and divergence — retrying below a quality threshold. Bad upstream thinking is caught before a broken mailer ships.</li>
+          <li><strong>8-provider tier-routed LLM cascade.</strong> Anthropic → OpenAI → Gemini → Grok → Groq → Cerebras → Ollama → Sakana, with premium/standard/fast tiers. Failures are classified (quota vs auth vs transient vs a request bug) so it demotes intelligently instead of hammering dead providers; OpenAI rotates three keys before falling through. One outage never takes the app down.</li>
+          <li><strong>Smart Brain autopilot.</strong> A daily loop — analyze → plan → prebuild → review → approve — over a 90-day rolling horizon with a convergent background prebuild worker, human-in-the-loop approval, MVT weight-learning and confidence tracking, all gated by a daily-revenue feasibility target.</li>
+          <li><strong>Two-tier data layer.</strong> Python ingestors load Matrixify/Shopify/Klaviyo/WebEngage exports into a local DuckDB warehouse (46 tables), aggregates sync to Supabase (Postgres) as the runtime store, read via a hand-rolled PostgREST client to keep the serverless bundle small. Product catalogs (US/UK/Global) build at deploy; a festivals dataset covers 11 markets.</li>
+          <li><strong>Constraint-driven design: the 12-function cap.</strong> Vercel Hobby allows only 12 serverless functions, so every capability folds into <code>?action=</code> routers plus an <code>api/_shared/</code> module layer (excluded from the function scan) — and CI fails the build if a 13th function ever sneaks in.</li>
+          <li><strong>Guardrails.</strong> A 4-colour brand palette and typography baked into every image/HTML prompt, a banned-phrase + no-em-dash sanitizer over all generated copy, and deterministic calendar guardrails (15% discount cap with a real code registry, per-cohort offer depth, progressive suppression so it never over-mails).</li>
+          <li><strong>One deploy = a mobile release.</strong> An installable PWA plus native Android/iOS Capacitor shells that render the live deployment, built and published by a GitHub Actions "Mobile Builds" workflow. Other CI: an HTML/JS smoke suite, the function-count guard, Playwright e2e, and cron-driven daily intelligence + revenue-alert jobs.</li>
+        </ul>
+        <p>Full engineering write-up: <a href="https://github.com/Anchit-AI-Hustle/vahdam-lifecycle-os/blob/main/DEVELOPMENT.md" target="_blank" rel="noopener">DEVELOPMENT.md</a> in the repo.</p>
       </div>
 
       <div class="project-section reveal">
