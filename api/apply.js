@@ -40,9 +40,16 @@ async function fetchProfileFromUrl(url) {
     clearTimeout(t);
     if (!r.ok) return '';
     let html = await r.text();
-    html = html.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ');
-    const text = html.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/\s+/g, ' ').trim();
+    // Strip scripts/styles (closing tag tolerates whitespace/attrs), then tags.
+    html = html.replace(/<script\b[^<]*(?:(?!<\/script\s*>)<[^<]*)*<\/script\s*>/gi, ' ')
+               .replace(/<style\b[^<]*(?:(?!<\/style\s*>)<[^<]*)*<\/style\s*>/gi, ' ');
+    // Decode a minimal entity set; ampersand LAST to avoid double-unescaping.
+    const text = html.replace(/<[^>]+>/g, ' ')
+      .replace(/&(?:nbsp|#0*160);/gi, ' ')
+      .replace(/&(?:lt|#0*60);/gi, '<')
+      .replace(/&(?:gt|#0*62);/gi, '>')
+      .replace(/&(?:amp|#0*38);/gi, '&')
+      .replace(/\s+/g, ' ').trim();
     return text.slice(0, 6000);
   } catch (e) { return ''; }
 }
