@@ -1,0 +1,13 @@
+{
+  "//": "Reference snippet. Merge the 'tencentdb-memory' entry into your Claude Code MCP config (project .mcp.json or ~/.claude.json). Replace ABSOLUTE_PATH with the real path to this folder, e.g. /home/user/Anchit-Work-Portfolio/tencentdb-memory-mcp.",
+  "mcpServers": {
+    "tencentdb-memory": {
+      "command": "node",
+      "args": ["ABSOLUTE_PATH/tencentdb-memory-mcp/dist/index.js"],
+      "env": {
+        "TDAI_GATEWAY_URL": "http://127.0.0.1:8420",
+        "TDAI_SESSION_KEY": "claude-code"
+      }
+    }
+  }
+}
