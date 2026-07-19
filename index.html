@@ -3135,13 +3135,13 @@
           </div>
         </a>
 
-        <a class="group relative rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] hover:border-[var(--primary)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_20px_var(--primary-soft)] overflow-hidden" href="#project-jobfit" data-view="project-jobfit" style="cursor:pointer;">
+        <a class="group relative rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] hover:border-[var(--primary)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_20px_var(--primary-soft)] overflow-hidden" href="/jobhunt" style="cursor:pointer;">
           <div class="absolute inset-0 bg-gradient-to-br from-[var(--primary-soft)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div class="relative z-10 flex flex-col h-full justify-between">
             <div>
-              <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-1">AI Careers · ChatGPT</div>
-              <h3 class="text-lg font-bold text-[var(--ink)] mb-1 group-hover:text-[var(--primary)] transition-colors">JobFit Agent</h3>
-              <p class="text-sm text-[var(--primary)] font-mono mt-2">Job link + resume &rarr; docs or site</p>
+              <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-1">Job Hunting · n8n · No-code</div>
+              <h3 class="text-lg font-bold text-[var(--ink)] mb-1 group-hover:text-[var(--primary)] transition-colors">JobHunt</h3>
+              <p class="text-sm text-[var(--primary)] font-mono mt-2">4 job boards &rarr; your Google Sheet</p>
             </div>
             <div class="mt-4 self-end text-[var(--ink-dim)] group-hover:text-[var(--primary)] transition-colors transform group-hover:translate-x-1 group-hover:-translate-y-1 duration-300">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
@@ -3765,31 +3765,17 @@
           </div>
         </div>
 
-        <!-- Card — JobFit Agent -->
-        <div class="build-card tilt-card">
-          <div class="build-tag"><span>AI Careers · ChatGPT</span><span class="status">In build</span></div>
-          <h3>JobFit <em>Agent</em></h3>
-          <p>Upload a job link, base resume or existing portfolio; the agent understands the role, maps the strongest proof points, then creates a tailored resume, cover letter and portfolio website update using free template options.</p>
-          <ul class="build-details">
-            <li>Designed around job-link analysis, resume/portfolio context extraction, fit-gap mapping, theme choice and role-specific positioning.</li>
-            <li>Planned with ChatGPT as the first LLM, human approval before export, free code-friendly templates, and output paths for DOCX, PDF, TXT or hosted resume pages.</li>
-          </ul>
-          <div class="build-actions">
-            <a class="btn primary" href="#project-jobfit" data-view="project-jobfit">Case Study &rarr;</a>
-          </div>
-        </div>
-
-        <!-- Card — AI Job Search Agent (Job Hunting) -->
+        <!-- Card — JobHunt (AI Job Search Agent) -->
         <div class="build-card tilt-card">
           <div class="build-tag"><span>Job Hunting · n8n · No-code</span><span class="status">Live</span></div>
-          <h3>AI Job Search <em>Agent</em></h3>
+          <h3>Job<em>Hunt</em></h3>
           <p>A plug-and-play AI job search agent, built in n8n (no code), that does your job hunting on autopilot — searching LinkedIn, Indeed, Glassdoor &amp; Upwork at once, de-duping against your Google Sheet and logging only new roles.</p>
           <ul class="build-details">
             <li>One click hits all four boards, formats every result (title, company, link, source) and appends new listings straight to your sheet — re-run anytime, only new jobs get added.</li>
             <li>Ships as a ready-to-import workflow + a 20–30 min setup guide + a support group. 50+ new listings per run; my own search went from 20 → 2 hours a week.</li>
           </ul>
           <div class="build-actions">
-            <a class="btn primary" href="/jobhunt">Get it &rarr;</a>
+            <a class="btn primary" href="/jobhunt">Open JobHunt &rarr;</a>
           </div>
         </div>
 
@@ -4993,7 +4979,7 @@
 	      response: "This portfolio is my hobby product: a living, interactive OS-style profile instead of a static resume page. The home view gives the quick positioning, Work Experience explains the Vahdam and Times Internet story, Side Hustle opens the builds, Resume opens the PDF in a new tab, and Contact gives the fastest ways to reach me. The chat is meant to guide each page, answer specific questions in my voice, and keep narration controls available from the bottom tile.",
 	      nextChips: ["Start the tour","Show me your work","Tell me about Vahdam","How do I reach you?"] },
 	    { keywords: ['side','project','projects','build','builds','weekend','personal','ship','github','vercel'],
-	      response: "My side builds come from curiosity and the inability to stop at surface level. VAHDAM Lifecycle OS is the most important work project right now. My portfolio itself is a hobby build. MusicGenAI is my passion project because music matters to me personally. The broader set includes Hey Yaara, MusicGenAI, The Third Eye, Mailer Architect, AI TeleSuite, TH+ LifeEngine, Task Tracker, the All-in-One LP Agent, JobFit Agent, and VAHDAM Lifecycle OS. <a data-nav='projects'>See them all →</a>",
+	      response: "My side builds come from curiosity and the inability to stop at surface level. VAHDAM Lifecycle OS is the most important work project right now. My portfolio itself is a hobby build. MusicGenAI is my passion project because music matters to me personally. The broader set includes Hey Yaara, MusicGenAI, The Third Eye, Mailer Architect, AI TeleSuite, TH+ LifeEngine, Task Tracker, the All-in-One LP Agent, JobHunt, and VAHDAM Lifecycle OS. <a data-nav='projects'>See them all →</a>",
 	      nextChips: ["Tell me about Hey Yaara","Tell me about Jarvis","Tell me about MusicGenAI","Why build on weekends?"] },
     { keywords: ['hey yaara','yaara','elderly','companion'],
       response: "Hey Yaara is an AI-powered voice companion designed specifically for elderly users to combat loneliness and assist with daily queries through a simple voice-first interface. I designed and built this PWA from scratch to remove all screen-based friction — users simply tap one button to talk and one to stop. Everything from transcription to speech response is handled entirely by voice. <a data-nav='project-yaara'>Full deep dive →</a>",
@@ -5010,9 +4996,9 @@
     { keywords: ['lp agent','agent lp','all-in-one agent','all in one agent','landing page agent','narrator','recommendation engine','conversational commerce'],
       response: "The All-in-One LP Agent is a live VAHDAM UK marketing landing page with one embedded AI agent doing four jobs: it narrates the page aloud the moment you land, holds a two-way voice conversation when you tap Talk, answers typed questions in chat, and runs a 'help me choose' recommendation flow — all grounded in the page's own content. It's the landing page behaving like a salesperson instead of a monologue. <a data-nav='project-agentlp'>Full deep dive →</a>",
       nextChips: ["Open LP Agent page","Tell me about Lifecycle OS","Tell me about Hey Yaara","How do I reach you?"] },
-    { keywords: ['jobfit','job fit','resume agent','job agent','cover letter','job link','application assistant','tailored resume','job posting'],
-      response: "JobFit Agent is the ChatGPT-first career application assistant I am building: paste a job posting link, upload a base resume or connect an existing portfolio, and get a role-specific fit analysis, tailored resume draft, cover letter draft, and optional website/portfolio update. The user can choose free code-friendly templates, theme, animation style, domain/subdomain, and export as DOCX, PDF or TXT. The important guardrail is that it should reposition real proof from the resume and portfolio, not invent credentials. <a data-nav='project-jobfit'>Full deep dive →</a>",
-      nextChips: ["Open JobFit page","Show me your other builds","Tell me about Lifecycle OS","How do I reach you?"] },
+    { keywords: ['jobhunt','job hunt','job search','jobfit','job fit','job agent','job board','linkedin','indeed','glassdoor','upwork','n8n','job posting'],
+      response: "JobHunt is my no-code AI job-search agent, built in n8n. One click searches LinkedIn, Indeed, Glassdoor and Upwork at once, checks your existing Google Sheet so you never see a duplicate, formats every result (title, company, link, source), and appends only the new roles automatically. Re-run anytime — around 50+ fresh listings a run. It cut my own search from ~20 hours a week down to ~2. You get the importable workflow, a 20–30 min setup guide, and a support group. <a href='/jobhunt'>Open JobHunt →</a>",
+      nextChips: ["Open JobHunt","Show me your other builds","Tell me about Lifecycle OS","How do I reach you?"] },
     { keywords: ['jarvis','ai os','operating system','vision','dream project','most attached'],
       response: "Jarvis is a proactive, context-aware AI operating system designed to act as an intelligent agent across multiple devices and workflows, rather than a simple conversational chatbot. I initiated this project to build a truly integrated AI workspace that understands context across apps and files. It's a long-term vision that I'm building step-by-step, and it is the side build I'm most passionate about.",
       nextChips: ["Why build on weekends?","Tell me about Hey Yaara","Your AI stack?","Show me your day job"] },
@@ -5813,7 +5799,7 @@
 	      view: 'projects',
 	      selector: '.builds-grid',
 	      title: 'Explore the side-build lab',
-	      copy: 'Side Hustle is where the AI builds live: Lifecycle OS, JobFit Agent, voice products, music, productivity and more.'
+	      copy: 'Side Hustle is where the AI builds live: Lifecycle OS, JobHunt, voice products, music, productivity and more.'
 	    },
 	    {
 	      view: 'experience',
@@ -6295,7 +6281,7 @@
       now:        "Current role at Vahdam India. A.G.M. Product Management, D2C Growth, since April twenty twenty six. I own product performance, customer experience, C.R.M. experimentation, conversion optimisation, and revenue initiatives simultaneously. My biggest highlight so far is VAHDAM Lifecycle O.S. — a retention workflow connecting analytics, planning, segmentation, and mailer generation. I've also helped increase U.K. marketing revenue. The challenge isn't finding opportunities, it's knowing which ones compound.",
       chat:       "Ask me anything — my work, my side projects, why I moved from engineering to product, or what I'm solving right now.",
       experience: "Work experience. Currently A.G.M., Product Management, D2C Growth at Vah-dahm India across U.S., U.K. and global. I joined on twentieth April twenty twenty six, and the headline so far is Vahdam Lifecycle O.S. plus increased U.K. marketing revenue. Previously at Times Internet — A.P.M. to Senior P.M. Five x M.R.R. on Assisted Sales, three crore plus A.R.R. from the E.T. Markets revamp. Started as a backend engineer at Tuple Technologies and City Mall.",
-      projects:   "Personal projects, built out of curiosity, depth and experimentation. Vahdam Lifecycle O.S. is my most important work project right now. Music Gen A.I. is my passion project for music, and JobFit Agent is the career application assistant I am building with ChatGPT. Other builds include Hey Yaara, The Third Eye, Mailer Architect, A.I. Tele Suite and T.H. Plus Life Engine.",
+      projects:   "Personal projects, built out of curiosity, depth and experimentation. Vahdam Lifecycle O.S. is my most important work project right now. Music Gen A.I. is my passion project for music, and Job Hunt is my no-code n8n job-search agent that scans four job boards at once. Other builds include Hey Yaara, The Third Eye, Mailer Architect, A.I. Tele Suite and T.H. Plus Life Engine.",
       resume:     "My resume. Download or view the full P.D.F.",
       contact:    "Let's build something worth measuring. I am open to roles, collaborations, and honest conversations about funnels, subscriptions, A.I. workflows and consumer product."
     };
@@ -8769,6 +8755,30 @@
      you leave via the sidebar like any other page. Hide those controls there. */
   body.view-chat #chatMinimizeBtn,
   body.view-chat #chatMaximizeBtn { display: none !important; }
+
+  /* TRUE full-screen chat page: fill the whole content canvas edge-to-edge with
+     a solid backing so the animated background never bleeds around a floating
+     card. (Was a centred 1060px rounded panel with padding.) */
+  body.view-chat #view-chat:not(.chat-view-minimized),
+  #view-chat.active:not(.chat-view-minimized) { padding: 0 !important; }
+  body.view-chat #view-chat .container,
+  #view-chat.active #view-chat .container,
+  #view-chat.active .container {
+    max-width: none !important; width: 100% !important; height: 100% !important;
+    margin: 0 !important; padding: 0 !important;
+  }
+  body.view-chat #view-chat .chat-block,
+  #view-chat.active .chat-block {
+    border: 0 !important; border-radius: 0 !important; box-shadow: none !important;
+    height: 100% !important; background: var(--bg-elev) !important;
+  }
+  /* Drop the "Anchit Tandon · Ask me anything" eyebrow line on the full page —
+     the header already says it, and this reclaims the last strip of dead space. */
+  body.view-chat #view-chat .container > div:has(> .eyebrow),
+  #view-chat.active .container > div:has(> .eyebrow) { display: none !important; }
+  /* Keep message lines readable even on a very wide canvas. */
+  body.view-chat #view-chat .msg-bubble,
+  #view-chat.active .msg-bubble { max-width: min(78%, 760px) !important; }
 </style>
 <!-- ═══════════════════════════════════════════════════════════════════════════
      IMMERSIVE MOTION LAYER — Three.js WebGL backdrop + GSAP flourishes.
@@ -8991,6 +9001,74 @@
     }
     animateStats(document);
   }
+})();
+</script>
+<style id="reading-focus">
+  /* Keep text crisp over the animated backdrop (readability). */
+  .reading-scrim{ position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(120% 90% at 50% 0%, rgba(10,8,6,.30), transparent 60%),
+      linear-gradient(180deg, rgba(10,8,6,.20), rgba(10,8,6,.10) 42%, rgba(10,8,6,.24)); }
+  /* Section focus: the block the reader is on stays full; the rest recede
+     gently so attention lands where they are. Kept subtle and gated. */
+  .uf-off{ opacity:.46; filter:saturate(.9); transition:opacity .5s ease, filter .5s ease; }
+  .uf-on{ opacity:1; filter:none; transition:opacity .5s ease, filter .5s ease; }
+  .uf-on{ position:relative; }
+  @media (prefers-reduced-motion: reduce){
+    .uf-off,.uf-on{ transition:none !important; }
+    .uf-off{ opacity:.72; }
+  }
+</style>
+<script id="reading-focus-js">
+(function(){
+  'use strict';
+  var mq = window.matchMedia;
+  var reduce = !!(mq && mq('(prefers-reduced-motion: reduce)').matches);
+  var coarse = !!(mq && mq('(pointer: coarse)').matches);
+
+  // Readability scrim — appended after the WebGL/particle layer so it dims the
+  // busy backdrop a touch (content sits above it at z-index:1, so text is crisp).
+  var scrim = document.createElement('div');
+  scrim.className = 'reading-scrim';
+  scrim.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(scrim);
+
+  // Blocks we treat as "sections" for focus. Only engage when a view has enough
+  // of them, so short pages (chat, contact) are never dimmed.
+  var SEL = '.work-item, .project-section, .build-card, .now-focus-item, .about-value-item';
+  var raf = 0;
+
+  function clearAll(scope) {
+    (scope || document).querySelectorAll('.uf-off,.uf-on').forEach(function (n) {
+      n.classList.remove('uf-off', 'uf-on');
+    });
+  }
+
+  function update() {
+    raf = 0;
+    var active = document.querySelector('.view.active');
+    if (!active) return;
+    var nodes = active.querySelectorAll(SEL);
+    if (nodes.length < 3) { clearAll(active); return; }
+    var focusY = window.innerHeight * 0.4;
+    var best = null, bestD = Infinity;
+    nodes.forEach(function (n) {
+      var r = n.getBoundingClientRect();
+      var mid = r.top + r.height / 2;
+      var d = Math.abs(mid - focusY);
+      if (d < bestD) { bestD = d; best = n; }
+    });
+    nodes.forEach(function (n) {
+      if (n === best) { n.classList.add('uf-on'); n.classList.remove('uf-off'); }
+      else { n.classList.add('uf-off'); n.classList.remove('uf-on'); }
+    });
+  }
+
+  function onScroll() { if (!raf) raf = requestAnimationFrame(update); }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  document.addEventListener('viewChanged', function () { clearAll(); setTimeout(update, 90); });
+  setTimeout(update, 500);
 })();
 </script>
 </body>
