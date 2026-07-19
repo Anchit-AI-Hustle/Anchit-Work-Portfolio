@@ -133,6 +133,49 @@
   .card .meta b{color:var(--ink); font-weight:600;}
   .card .open{font-family:var(--font-mono); font-size:12px; color:var(--primary); margin-top:12px; display:inline-flex; align-items:center; gap:6px;}
 
+  /* auto-apply setup */
+  .apply-setup{margin-top:20px; border-top:1px solid var(--rule); padding-top:16px;}
+  .apply-setup summary{cursor:pointer; font-weight:600; font-size:.95rem; list-style:none; display:flex; align-items:center; gap:8px;}
+  .apply-setup summary::-webkit-details-marker{display:none;}
+  .apply-setup summary .spark{filter:saturate(1.4);}
+  .apply-setup .setup-state{font-family:var(--font-mono); font-size:11.5px; font-weight:400; color:var(--ink-dim);}
+  .apply-setup[data-ready="1"] .setup-state{color:var(--accent);}
+  .apply-setup textarea{width:100%; background:var(--bg-deep); border:1px solid var(--rule); border-radius:12px; color:var(--ink); font-family:var(--font-sans); font-size:14px; padding:12px 14px; resize:vertical; transition:border-color .2s, box-shadow .2s;}
+  .apply-setup textarea:focus{outline:none; border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-soft);}
+  .apply-setup input{width:100%; background:var(--bg-deep); border:1px solid var(--rule); border-radius:12px; color:var(--ink); font-family:var(--font-sans); font-size:14px; padding:12px 14px;}
+  .apply-setup input:focus{outline:none; border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-soft);}
+
+  /* deep-link big-board searches */
+  .deeplinks{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:18px 0 4px;}
+  .deeplinks .dl-lbl{font-family:var(--font-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-dim); margin-right:2px;}
+  .deeplinks a{font-size:12.5px; font-weight:500; color:var(--ink); text-decoration:none; border:1px solid var(--rule-strong); border-radius:999px; padding:6px 13px; transition:all .18s;}
+  .deeplinks a:hover{border-color:var(--primary); color:var(--primary); transform:translateY(-1px);}
+
+  /* result card actions */
+  .card .row2{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:12px;}
+  .card .open{font-family:var(--font-mono); font-size:12px; color:var(--primary); display:inline-flex; align-items:center; gap:6px; text-decoration:none;}
+  .card .tailor{font-family:var(--font-sans); font-weight:600; font-size:12.5px; color:#160b04; background:linear-gradient(135deg,var(--primary),var(--gold)); border:0; border-radius:999px; padding:7px 14px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:transform .18s, box-shadow .18s;}
+  .card .tailor:hover{transform:translateY(-1px); box-shadow:0 8px 20px rgba(255,105,64,.3);}
+  .card .titlelink{text-decoration:none; color:inherit;}
+  .card .titlelink:hover .title{color:var(--primary);}
+
+  /* modal */
+  .modal-scrim{position:fixed; inset:0; z-index:50; background:rgba(6,4,2,.72); backdrop-filter:blur(4px); display:flex; align-items:flex-start; justify-content:center; padding:5vh 16px; overflow-y:auto;}
+  .modal{background:var(--bg-elev); border:1px solid var(--rule-strong); border-radius:20px; width:100%; max-width:760px; box-shadow:0 30px 80px rgba(0,0,0,.5);}
+  .modal-head{display:flex; justify-content:space-between; align-items:flex-start; gap:14px; padding:20px 22px; border-bottom:1px solid var(--rule);}
+  .modal-title{font-family:var(--font-display); font-weight:600; font-size:1.25rem;}
+  .modal-sub{font-family:var(--font-mono); font-size:12px; color:var(--ink-dim); margin-top:4px;}
+  .modal-x{background:none; border:1px solid var(--rule); color:var(--ink-dim); border-radius:9px; width:32px; height:32px; cursor:pointer; font-size:14px; flex:0 0 auto;}
+  .modal-x:hover{color:var(--primary); border-color:var(--primary);}
+  .modal-body{padding:20px 22px 24px;}
+  .tabs{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
+  .tab{font-family:var(--font-mono); font-size:12px; letter-spacing:.04em; padding:7px 14px; border:1px solid var(--rule); border-radius:999px; background:none; color:var(--ink-dim); cursor:pointer;}
+  .tab.on{border-color:var(--primary); color:var(--ink); background:var(--primary-soft);}
+  .kit-panel{white-space:pre-wrap; font-family:var(--font-sans); font-size:14px; line-height:1.65; color:var(--ink); background:var(--bg-deep); border:1px solid var(--rule); border-radius:12px; padding:16px 18px; max-height:48vh; overflow-y:auto;}
+  .kit-panel.fit{color:var(--ink-dim); font-style:italic;}
+  .kit-actions{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px;}
+  .modal .gen{display:flex; flex-direction:column; gap:12px; align-items:center; padding:26px; text-align:center; color:var(--accent); font-family:var(--font-mono); font-size:13px;}
+  .modal .gen .spin{border-color:rgba(255,247,232,.2); border-top-color:var(--primary); width:26px; height:26px;}
   .disclaimer{margin-top:30px; font-family:var(--font-mono); font-size:11.5px; color:var(--ink-dim); line-height:1.7; letter-spacing:.01em; opacity:.85;}
   .footer{margin-top:56px; padding-top:22px; border-top:1px solid var(--rule); display:flex; flex-wrap:wrap; gap:8px; justify-content:space-between; align-items:center; color:var(--ink-dim); font-size:.85rem;}
   .footer a{color:var(--ink-dim); text-decoration:none;}
@@ -152,7 +195,7 @@
 
   <div class="eyebrow">Side hustle · Live AI agent · Free to use</div>
   <h1>JobHunt — <em>a live job-search agent</em>.</h1>
-  <p class="lede">Sign in with Google and search. It pulls real, current openings from free public job boards — Remotive, RemoteOK, Arbeitnow and The Muse — and hands you the ones that match, with direct apply links. Free, no API key, no setup.</p>
+  <p class="lede">Sign in with Google and search. It pulls real, current openings from free job boards, gives you one-click searches on LinkedIn, Indeed, Glassdoor &amp; Upwork, and can write a resume + cover letter tailored to any role — free, no API key, no setup.</p>
 
   <!-- ============ GATE PANEL ============ -->
   <div class="panel" id="gate">
@@ -218,10 +261,42 @@
           <span class="microcopy">Live search · usually 15–30 seconds · free</span>
         </div>
       </form>
+
+      <details class="apply-setup" id="apply-setup">
+        <summary><span class="spark">✨</span> Set up 1-click apply <span class="setup-state" id="setup-state">— add your resume or portfolio</span></summary>
+        <p class="gate-copy" style="margin-top:14px;">Add your background once. When you tap <b>Tailor &amp; apply</b> on any result, it writes a resume and cover letter tuned to that exact job — grounded in what you give it, never invented. Stored only in <b>this browser</b>.</p>
+        <div class="field" style="margin-bottom:12px;">
+          <label for="prof-url">Portfolio / resume URL <span style="text-transform:none;letter-spacing:0;opacity:.7;">(optional)</span></label>
+          <input id="prof-url" type="url" placeholder="https://anchit-tandon.com" spellcheck="false">
+        </div>
+        <div class="field">
+          <label for="prof-resume">Or paste your resume / background</label>
+          <textarea id="prof-resume" rows="6" placeholder="Paste your resume text, or a few lines about your experience, skills and wins…"></textarea>
+        </div>
+        <div class="go-row">
+          <button class="btn primary" type="button" id="prof-save">Save profile</button>
+          <button class="link-btn" type="button" id="prof-clear">Clear</button>
+          <span class="microcopy" id="prof-msg"></span>
+        </div>
+      </details>
     </div>
   </div>
 
   <div class="status" id="jh-status" aria-live="polite"></div>
+
+  <!-- Auto-apply kit modal -->
+  <div class="modal-scrim hidden" id="apply-modal">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title" id="apply-title">Your application kit</div>
+          <div class="modal-sub" id="apply-sub"></div>
+        </div>
+        <button class="modal-x" type="button" id="apply-close" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body" id="apply-body"></div>
+    </div>
+  </div>
 
   <p class="disclaimer">
     JobHunt is a live demo — it aggregates real, current openings from free public job boards (Remotive, RemoteOK, Arbeitnow, The Muse), gated behind Google sign-in and free to use.
@@ -244,10 +319,14 @@
   var els = {};
   ['state-loading','state-noconfig','state-signedout','state-ready',
    'google-btn','signin-msg','rd-av','rd-email','rd-signout','engine-warn',
-   'jh-form','jh-role','jh-location','jh-boards','jh-go'
+   'jh-form','jh-role','jh-location','jh-boards','jh-go',
+   'apply-setup','setup-state','prof-url','prof-resume','prof-save','prof-clear','prof-msg',
+   'apply-modal','apply-title','apply-sub','apply-body','apply-close'
   ].forEach(function(id){ els[id] = document.getElementById(id); });
   var statusEl = document.getElementById('jh-status');
   var loadingTimer = null;
+  var lastResults = [];          // results of the latest search, for the apply flow
+  var profile = { resume:'', portfolioUrl:'' };
 
   function esc(s){
     return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
@@ -280,6 +359,7 @@
       }
       renderIdentity();
       if (els['engine-warn']) els['engine-warn'].classList.toggle('hidden', CFG.engineReady);
+      loadProfile();
       show('state-ready');
       if (els['jh-role']) els['jh-role'].focus();
     } else if (accessToken || user){
@@ -350,26 +430,55 @@
   function note(icon, html, isErr){
     statusEl.innerHTML = '<div class="note'+(isErr?' err':'')+'"><div class="ico">'+icon+'</div><div>'+html+'</div></div>';
   }
+  // Direct search deep-links to the big boards (which have no free listings API).
+  function deepLinks(role, location){
+    var q = encodeURIComponent(role), l = encodeURIComponent(location || '');
+    var links = [
+      ['LinkedIn', 'https://www.linkedin.com/jobs/search/?keywords='+q+(location?('&location='+l):'')],
+      ['Indeed', 'https://www.indeed.com/jobs?q='+q+(location?('&l='+l):'')],
+      ['Glassdoor', 'https://www.glassdoor.com/Job/jobs.htm?sc.keyword='+q],
+      ['Upwork', 'https://www.upwork.com/nx/search/jobs/?q='+q]
+    ];
+    return '<div class="deeplinks"><span class="dl-lbl">Search directly on</span>' +
+      links.map(function(x){ return '<a href="'+x[1]+'" target="_blank" rel="noopener">'+x[0]+' ↗</a>'; }).join('') + '</div>';
+  }
+
   function renderResults(data){
     var list = (data && data.results) || [];
+    lastResults = list;
+    var dl = deepLinks(data.role, data.location);
     if (!list.length){
-      note('🕳️', 'No live openings came back for <b>'+esc(data.role||'that search')+'</b>'+(data.location?(' in <b>'+esc(data.location)+'</b>'):'')+
-        ' just now. Try broadening the role, clearing the location, or selecting more boards.', false);
+      statusEl.innerHTML = '<div class="note"><div class="ico">🕳️</div><div>No inline openings came back for <b>'+esc(data.role||'that search')+'</b>'+(data.location?(' in <b>'+esc(data.location)+'</b>'):'')+
+        ' from the free boards just now — try broadening the role or clearing the location. You can still search the big boards directly:</div></div>' + dl;
       return;
     }
     var head = '<div class="results-head"><h2>Openings for “'+esc(data.role)+'”'+(data.location?(' · '+esc(data.location)):'')+'</h2>'+
       '<span class="count">'+list.length+' found · live</span></div>';
-    var cards = list.map(function(j){
+    var cards = list.map(function(j, i){
       var metaBits = [];
       if (j.company) metaBits.push('<b>'+esc(j.company)+'</b>');
       if (j.location) metaBits.push(esc(j.location));
-      return '<a class="card" href="'+esc(j.link)+'" target="_blank" rel="noopener nofollow">'+
-        '<div class="top"><div class="title">'+esc(j.title)+'</div>'+(j.source?'<div class="src">'+esc(j.source)+'</div>':'')+'</div>'+
-        (metaBits.length?'<div class="meta">'+metaBits.join('<span style="opacity:.4">·</span>')+'</div>':'')+
-        '<div class="open">Open posting ↗</div></a>';
+      return '<div class="card">'+
+        '<a class="titlelink" href="'+esc(j.link)+'" target="_blank" rel="noopener nofollow">'+
+          '<div class="top"><div class="title">'+esc(j.title)+'</div>'+(j.source?'<div class="src">'+esc(j.source)+'</div>':'')+'</div>'+
+          (metaBits.length?'<div class="meta">'+metaBits.join('<span style="opacity:.4">·</span>')+'</div>':'')+
+        '</a>'+
+        '<div class="row2">'+
+          '<a class="open" href="'+esc(j.link)+'" target="_blank" rel="noopener nofollow">Open posting ↗</a>'+
+          '<button class="tailor" type="button" data-idx="'+i+'">✨ Tailor &amp; apply</button>'+
+        '</div>'+
+      '</div>';
     }).join('');
-    statusEl.innerHTML = head + '<div class="cards">'+cards+'</div>';
+    statusEl.innerHTML = head + dl + '<div class="cards">'+cards+'</div>';
   }
+
+  // Delegate "Tailor & apply" clicks.
+  statusEl.addEventListener('click', function(ev){
+    var btn = ev.target.closest && ev.target.closest('.tailor');
+    if (!btn) return;
+    var idx = parseInt(btn.getAttribute('data-idx'), 10);
+    if (!isNaN(idx) && lastResults[idx]) applyFor(lastResults[idx]);
+  });
 
   if (els['jh-form']) els['jh-form'].addEventListener('submit', function(ev){
     ev.preventDefault();
@@ -416,8 +525,127 @@
     });
   });
 
+  // ---- profile (for auto-apply) ----
+  function profName(){ return 'jobhunt-profile:' + ((user && user.email) || 'anon'); }
+  function loadProfile(){
+    try { profile = JSON.parse(localStorage.getItem(profName()) || '{}') || {}; } catch(e){ profile = {}; }
+    profile.resume = profile.resume || ''; profile.portfolioUrl = profile.portfolioUrl || '';
+    if (els['prof-resume']) els['prof-resume'].value = profile.resume;
+    if (els['prof-url']) els['prof-url'].value = profile.portfolioUrl;
+    refreshSetupState();
+  }
+  function hasProfile(){ return !!((profile.resume && profile.resume.trim()) || (profile.portfolioUrl && /^https?:\/\//i.test(profile.portfolioUrl))); }
+  function refreshSetupState(){
+    if (!els['apply-setup']) return;
+    els['apply-setup'].setAttribute('data-ready', hasProfile() ? '1' : '0');
+    if (els['setup-state']) els['setup-state'].textContent = hasProfile() ? '— ready ✓' : '— add your resume or portfolio';
+  }
+  if (els['prof-save']) els['prof-save'].addEventListener('click', function(){
+    profile.resume = (els['prof-resume'].value || '').trim();
+    profile.portfolioUrl = (els['prof-url'].value || '').trim();
+    try { localStorage.setItem(profName(), JSON.stringify(profile)); } catch(e){}
+    if (els['prof-msg']){ els['prof-msg'].textContent = hasProfile() ? 'Saved ✓' : 'Add a resume or a URL first.'; setTimeout(function(){ if(els['prof-msg']) els['prof-msg'].textContent=''; }, 2500); }
+    refreshSetupState();
+  });
+  if (els['prof-clear']) els['prof-clear'].addEventListener('click', function(){
+    profile = { resume:'', portfolioUrl:'' };
+    try { localStorage.removeItem(profName()); } catch(e){}
+    if (els['prof-resume']) els['prof-resume'].value = '';
+    if (els['prof-url']) els['prof-url'].value = '';
+    refreshSetupState();
+  });
+
+  // ---- auto-apply kit ----
+  function openModal(){ els['apply-modal'].classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+  function closeModal(){ els['apply-modal'].classList.add('hidden'); document.body.style.overflow = ''; }
+  if (els['apply-close']) els['apply-close'].addEventListener('click', closeModal);
+  if (els['apply-modal']) els['apply-modal'].addEventListener('click', function(e){ if (e.target === els['apply-modal']) closeModal(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && els['apply-modal'] && !els['apply-modal'].classList.contains('hidden')) closeModal(); });
+
+  function download(name, text){
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type:'text/markdown' }));
+    a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 100);
+  }
+
+  function applyFor(job){
+    if (!hasProfile()){
+      closeModal();
+      if (els['apply-setup']){ els['apply-setup'].open = true; els['apply-setup'].scrollIntoView({ behavior:'smooth', block:'center' }); }
+      if (els['prof-resume']) els['prof-resume'].focus();
+      if (els['prof-msg']) els['prof-msg'].textContent = 'Add your resume or portfolio, then Save — one time.';
+      return;
+    }
+    els['apply-title'].textContent = 'Tailoring your application…';
+    els['apply-sub'].textContent = job.title + (job.company ? ' · ' + job.company : '');
+    els['apply-body'].innerHTML = '<div class="gen"><div class="spin"></div><div>Writing a resume &amp; cover letter tuned to this role…</div></div>';
+    openModal();
+
+    fetch('/api/apply', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+accessToken },
+      body: JSON.stringify({ job: job, resume: profile.resume, portfolioUrl: profile.portfolioUrl })
+    }).then(function(r){
+      return r.json().catch(function(){ return {}; }).then(function(b){ return { ok:r.ok, status:r.status, body:b }; });
+    }).then(function(res){
+      if (res.ok){ renderKit(job, res.body); return; }
+      var err = res.body && res.body.error;
+      var msg = err === 'profile_required' ? 'Add your resume or a working portfolio URL first.'
+        : err === 'rate_limited' ? 'The free writer is busy — give it a minute and try again.'
+        : err === 'signin_required' ? 'Your sign-in expired — please sign in again.'
+        : (res.body && (res.body.message || res.body.detail || err)) || ('request failed ('+res.status+')');
+      els['apply-title'].textContent = 'Couldn’t generate the kit';
+      els['apply-body'].innerHTML = '<div class="note err"><div class="ico">⚠️</div><div>'+esc(msg)+'</div></div>';
+      if (err === 'signin_required') signOut();
+    }).catch(function(){
+      els['apply-title'].textContent = 'Couldn’t reach the writer';
+      els['apply-body'].innerHTML = '<div class="note err"><div class="ico">📡</div><div>Check your connection and try again.</div></div>';
+    });
+  }
+
+  function renderKit(job, kit){
+    els['apply-title'].textContent = 'Your application kit';
+    var panels = {
+      resume: kit.resume || '(no resume returned)',
+      cover: kit.coverLetter || '(no cover letter returned)',
+      fit: kit.fit || ''
+    };
+    var tabs = '<div class="tabs">'+
+      '<button class="tab on" data-t="resume">Resume</button>'+
+      '<button class="tab" data-t="cover">Cover letter</button>'+
+      (panels.fit ? '<button class="tab" data-t="fit">Fit notes</button>' : '')+
+      '</div>';
+    var body = '<div class="kit-panel" id="kit-view"></div>'+
+      '<div class="kit-actions">'+
+        '<button class="btn primary" type="button" id="kit-copy">Copy</button>'+
+        '<button class="btn google" type="button" id="kit-dl">Download .md</button>'+
+        (job.link ? '<a class="btn" href="'+esc(job.link)+'" target="_blank" rel="noopener nofollow">Open apply page ↗</a>' : '')+
+      '</div>';
+    els['apply-body'].innerHTML = tabs + body;
+    var cur = 'resume';
+    var view = document.getElementById('kit-view');
+    function paint(){ view.textContent = panels[cur]; view.classList.toggle('fit', cur === 'fit'); }
+    paint();
+    els['apply-body'].querySelectorAll('.tab').forEach(function(tb){
+      tb.addEventListener('click', function(){
+        els['apply-body'].querySelectorAll('.tab').forEach(function(x){ x.classList.remove('on'); });
+        tb.classList.add('on'); cur = tb.getAttribute('data-t'); paint();
+      });
+    });
+    document.getElementById('kit-copy').addEventListener('click', function(){
+      var t = panels[cur]; if (navigator.clipboard) navigator.clipboard.writeText(t);
+      this.textContent = 'Copied ✓'; var self = this; setTimeout(function(){ self.textContent = 'Copy'; }, 1800);
+    });
+    document.getElementById('kit-dl').addEventListener('click', function(){
+      var base = (job.company || 'application').replace(/[^a-z0-9]+/gi,'-').toLowerCase();
+      download(base + '-' + cur + '.md', panels[cur]);
+    });
+  }
+
   // Test seam: drive the signed-in state without real OAuth.
   window.__jobhuntTestSession = function(session){ applySession(session); };
+  window.__jobhuntTestKit = function(job, kit){ renderKit(job, kit); openModal(); };
 })();
 </script>
 </body>

@@ -68,6 +68,39 @@ async function fromMuse(role) {
   }));
 }
 
+// Adzuna aggregates real listings across the big boards (incl. LinkedIn/Indeed-
+// sourced roles). Free tier; needs ADZUNA_APP_ID + ADZUNA_APP_KEY. Skipped
+// gracefully when unconfigured.
+function detectCountry(location) {
+  const l = (location || '').toLowerCase();
+  const map = [
+    ['in', /india|bengaluru|bangalore|mumbai|delhi|hyderabad|pune|chennai|gurgaon|gurugram|noida|kolkata/],
+    ['gb', /united kingdom|\buk\b|england|london|manchester|scotland|wales/],
+    ['us', /united states|\busa?\b|u\.s|new york|san francisco|seattle|austin|boston|chicago/],
+    ['ca', /canada|toronto|vancouver|montreal/],
+    ['au', /australia|sydney|melbourne|brisbane/],
+    ['de', /germany|berlin|munich|münchen/],
+    ['sg', /singapore/],
+    ['nl', /netherlands|amsterdam/],
+    ['fr', /france|paris/],
+    ['nz', /new zealand|auckland/],
+  ];
+  for (const [c, re] of map) { if (re.test(l)) return c; }
+  return process.env.ADZUNA_COUNTRY || 'us';
+}
+async function fromAdzuna(role, location) {
+  const id = process.env.ADZUNA_APP_ID, key = process.env.ADZUNA_APP_KEY;
+  if (!id || !key) return [];
+  const country = detectCountry(location);
+  let url = 'https://api.adzuna.com/v1/api/jobs/' + country + '/search/1'
+    + '?app_id=' + encodeURIComponent(id) + '&app_key=' + encodeURIComponent(key)
+    + '&results_per_page=25&content-type=application/json&what=' + encodeURIComponent(role);
+  if (location && !/remote|anywhere|worldwide/i.test(location)) url += '&where=' + encodeURIComponent(location);
+  const d = await fetchJSON(url);
+  const arr = (d && d.results) || [];
+  return arr.map((x) => clean({ title: x.title, company: (x.company || {}).display_name, location: (x.location || {}).display_name, link: x.redirect_url, source: 'Adzuna' }));
+}
+
 const FETCHERS = {
   Remotive: fromRemotive,
   RemoteOK: fromRemoteOK,
@@ -163,12 +196,15 @@ async function handler(req, res) {
   if (!role) return res.status(400).json({ error: 'role required' });
 
   try {
-    const batches = await Promise.all(boards.map((b) => FETCHERS[b](role).catch(() => [])));
+    // Selected free boards + Adzuna (always, when configured) run in parallel.
+    const tasks = boards.map((b) => FETCHERS[b](role, location).catch(() => []));
+    tasks.push(fromAdzuna(role, location).catch(() => []));
+    const batches = await Promise.all(tasks);
     let all = [];
-    boards.forEach((b, i) => {
-      // Title-match every source (even Remotive's loose server-side search) so
-      // results are actually about the role the user asked for.
-      all = all.concat(keywordFilter(batches[i] || [], role));
+    batches.forEach((part) => {
+      // Title-match every source (even servers' loose search) so results are
+      // actually about the role the user asked for.
+      all = all.concat(keywordFilter(part || [], role));
     });
     all = locationFilter(all, location);
     const results = dedupe(all).slice(0, 40);
