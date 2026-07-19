@@ -4,13 +4,13 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>JobHunt — a live AI job-search agent · Anchit Tandon</title>
-<meta name="description" content="A live AI job-search agent powered by Claude. Sign in with Google, bring your own Anthropic key, and it searches LinkedIn, Indeed, Glassdoor and Upwork in real time." />
+<meta name="description" content="A free live AI job-search agent. Sign in with Google and it searches LinkedIn, Indeed, Glassdoor and Upwork in real time and hands you the openings it finds." />
 <meta name="theme-color" content="#0F0D0A" />
 <link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
 
 <!-- Open Graph -->
 <meta property="og:title" content="JobHunt — a live AI job-search agent" />
-<meta property="og:description" content="Sign in with Google, bring your own Anthropic key, and Claude searches LinkedIn, Indeed, Glassdoor & Upwork in real time." />
+<meta property="og:description" content="Free. Sign in with Google and an AI agent searches LinkedIn, Indeed, Glassdoor & Upwork in real time." />
 <meta property="og:type" content="website" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -69,11 +69,6 @@
   .who .spacer{flex:1;}
   .link-btn{background:none; border:0; color:var(--ink-dim); font-family:var(--font-mono); font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; cursor:pointer; padding:6px 8px; border-radius:8px; transition:color .2s;}
   .link-btn:hover{color:var(--primary);}
-
-  .keyrow{display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;}
-  .keyrow input{flex:1 1 260px; background:var(--bg-deep); border:1px solid var(--rule); border-radius:12px; color:var(--ink); font-family:var(--font-mono); font-size:13.5px; padding:13px 14px; transition:border-color .2s, box-shadow .2s;}
-  .keyrow input:focus{outline:none; border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-soft);}
-  .keyrow input::placeholder{color:rgba(179,169,150,.55);}
   .keynote{font-family:var(--font-mono); font-size:11.5px; color:var(--ink-dim); margin-top:12px; line-height:1.7;}
   .keynote a{color:var(--primary); text-decoration:none;}
   .keynote a:hover{text-decoration:underline;}
@@ -109,7 +104,6 @@
   .microcopy{font-family:var(--font-mono); font-size:12px; color:var(--ink-dim); letter-spacing:.02em;}
 
   .spin{width:16px; height:16px; border:2px solid rgba(22,11,4,.35); border-top-color:#160b04; border-radius:50%; animation:sp .7s linear infinite;}
-  .spin.dark{border-color:rgba(255,247,232,.25); border-top-color:var(--primary);}
   @keyframes sp{to{transform:rotate(360deg);}}
   .divider{height:1px; background:var(--rule); margin:20px 0;}
 
@@ -156,11 +150,11 @@
     <a class="back" href="/#projects">← Back to portfolio</a>
   </div>
 
-  <div class="eyebrow">Side hustle · Live AI agent · Powered by Claude</div>
+  <div class="eyebrow">Side hustle · Live AI agent · Free to use</div>
   <h1>JobHunt — <em>a live job-search agent</em>.</h1>
-  <p class="lede">Sign in with Google and bring your own Anthropic key. A Claude agent then searches LinkedIn, Indeed, Glassdoor and Upwork in real time and hands you the openings it actually finds — your key, your searches, billed to your own account.</p>
+  <p class="lede">Sign in with Google and search. An AI agent scans LinkedIn, Indeed, Glassdoor and Upwork in real time and hands you the openings it actually finds — free, no API key, no setup.</p>
 
-  <!-- ============ GATE PANEL (auth + key) ============ -->
+  <!-- ============ GATE PANEL ============ -->
   <div class="panel" id="gate">
     <!-- loading -->
     <div id="state-loading">
@@ -168,17 +162,17 @@
       <p class="gate-copy">Checking how sign-in is configured for this deployment.</p>
     </div>
 
-    <!-- sign-in not configured -->
+    <!-- library failed to load -->
     <div id="state-noconfig" class="hidden">
-      <div class="gate-head"><span class="step">Setup</span><span class="h">Sign-in isn’t switched on yet</span></div>
-      <p class="gate-copy">The sign-in library couldn’t load, so Google sign-in can’t start. This is usually a browser extension (ad/script blocker) blocking it, or a temporary network hiccup — try disabling blockers for this site or reloading.</p>
+      <div class="gate-head"><span class="step">Heads up</span><span class="h">Sign-in couldn’t load</span></div>
+      <p class="gate-copy">The sign-in library didn’t load, so Google sign-in can’t start. This is usually a browser extension (ad/script blocker) blocking it, or a temporary network hiccup — try disabling blockers for this site or reloading.</p>
       <p class="keynote">Building this yourself? <a href="mailto:anchit.tandon@gmail.com?subject=JobHunt%20setup">Ask me how it’s wired.</a></p>
     </div>
 
     <!-- signed out: Google OAuth -->
     <div id="state-signedout" class="hidden">
-      <div class="gate-head"><span class="step">Step 1</span><span class="h">Sign in to continue</span></div>
-      <p class="gate-copy">JobHunt is gated. Sign in with your Google account — nothing is charged by signing in; you’ll add your own Anthropic key next.</p>
+      <div class="gate-head"><span class="step">Sign in</span><span class="h">One tap to continue</span></div>
+      <p class="gate-copy">JobHunt is free. Sign in with your Google account to keep things fair, then search as much as you like — no key, no cost.</p>
       <button class="btn google" type="button" id="google-btn">
         <svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
         Continue with Google
@@ -186,43 +180,18 @@
       <div id="signin-msg" class="msg"></div>
     </div>
 
-    <!-- signed in, need key -->
-    <div id="state-needkey" class="hidden">
-      <div class="who">
-        <div class="av" id="nk-av">?</div>
-        <div>
-          <div class="nm">Signed in</div>
-          <div class="em" id="nk-email"></div>
-        </div>
-        <div class="spacer"></div>
-        <button class="link-btn" type="button" id="nk-signout">Sign out</button>
-      </div>
-      <div class="divider"></div>
-      <div class="gate-head"><span class="step">Step 2</span><span class="h">Link your Anthropic key</span></div>
-      <p class="gate-copy">Paste your own Anthropic API key. It’s stored only in <b>this browser</b>, linked to your Google account — never sent to or saved on any server except passed straight to Anthropic for your searches.</p>
-      <div class="keyrow">
-        <input id="key-input" type="password" placeholder="sk-ant-…" autocomplete="off" spellcheck="false">
-        <button class="btn primary" type="button" id="key-save">Link key →</button>
-      </div>
-      <div id="key-err" class="msg err"></div>
-      <p class="keynote">
-        No key yet? Create one at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a> (starts with <span style="color:var(--ink)">sk-ant-</span>).
-        Searches use Claude with web search, billed to your own Anthropic account.
-      </p>
-    </div>
-
     <!-- ready -->
     <div id="state-ready" class="hidden">
       <div class="who">
         <div class="av" id="rd-av">?</div>
         <div>
-          <div class="nm">Ready</div>
+          <div class="nm">Signed in</div>
           <div class="em" id="rd-email"></div>
         </div>
         <div class="spacer"></div>
-        <button class="link-btn" type="button" id="rd-changekey">Change key</button>
         <button class="link-btn" type="button" id="rd-signout">Sign out</button>
       </div>
+      <div id="engine-warn" class="msg err hidden">Search isn’t switched on yet — the server needs a GEMINI_API_KEY. Everything else works.</div>
       <div class="divider"></div>
       <form id="jh-form" autocomplete="off">
         <div class="field-row">
@@ -246,7 +215,7 @@
         </div>
         <div class="go-row">
           <button class="btn primary" id="jh-go" type="submit">Search jobs →</button>
-          <span class="microcopy">Live search · usually 20–40 seconds · your key</span>
+          <span class="microcopy">Live search · usually 15–30 seconds · free</span>
         </div>
       </form>
     </div>
@@ -255,9 +224,8 @@
   <div class="status" id="jh-status" aria-live="polite"></div>
 
   <p class="disclaimer">
-    JobHunt is a live demo of an agentic build — a Claude agent with web search, wired to this page and gated behind Google sign-in.
-    You bring your own Anthropic key; it stays in your browser and is used only to run your searches. Results come straight from the web at
-    search time, so availability and details can change — always confirm on the original posting before applying.
+    JobHunt is a live demo of an agentic build — an AI agent with live web search, gated behind Google sign-in and free to use.
+    Results come straight from the web at search time, so availability and details can change — always confirm on the original posting before applying.
   </p>
 
   <div class="footer">
@@ -268,17 +236,15 @@
 
 <script>
 (function(){
-  var CFG = { url:null, anon:null, gated:false };
+  var CFG = { url:null, anon:null, gated:false, engineReady:true };
   var sb = null;                 // Supabase client
   var accessToken = null;        // current session access token
   var user = null;               // { email }
-  var anthKey = null;            // caller's Anthropic key for the active session
 
   var els = {};
-  ['state-loading','state-noconfig','state-signedout','state-needkey','state-ready',
-   'google-btn','signin-msg',
-   'nk-av','nk-email','nk-signout','key-input','key-save','key-err',
-   'rd-av','rd-email','rd-changekey','rd-signout','jh-form','jh-role','jh-location','jh-boards','jh-go'
+  ['state-loading','state-noconfig','state-signedout','state-ready',
+   'google-btn','signin-msg','rd-av','rd-email','rd-signout','engine-warn',
+   'jh-form','jh-role','jh-location','jh-boards','jh-go'
   ].forEach(function(id){ els[id] = document.getElementById(id); });
   var statusEl = document.getElementById('jh-status');
   var loadingTimer = null;
@@ -288,12 +254,8 @@
       return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
     });
   }
-  function keyName(email){ return 'jobhunt-key:' + email; }
-  function loadKey(email){ try{ return localStorage.getItem(keyName(email)) || null; }catch(e){ return null; } }
-  function saveKey(email, k){ try{ localStorage.setItem(keyName(email), k); }catch(e){} }
-  function clearKey(email){ try{ localStorage.removeItem(keyName(email)); }catch(e){} }
 
-  var STATES = ['state-loading','state-noconfig','state-signedout','state-needkey','state-ready'];
+  var STATES = ['state-loading','state-noconfig','state-signedout','state-ready'];
   function show(state){ STATES.forEach(function(s){ els[s].classList.toggle('hidden', s !== state); }); }
 
   // ---- config + client bootstrap ----
@@ -301,9 +263,9 @@
     .then(function(r){ return r.json(); })
     .then(function(cfg){
       CFG.url = cfg && cfg.supabaseUrl; CFG.anon = cfg && cfg.supabaseAnonKey; CFG.gated = !!(cfg && cfg.gated);
+      CFG.engineReady = cfg ? cfg.engineReady !== false : true;
       if (!CFG.url || !CFG.anon || !window.supabase){ show('state-noconfig'); return; }
       sb = window.supabase.createClient(CFG.url, CFG.anon, { auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true, flowType:'pkce' } });
-      // React to the OAuth redirect return + existing sessions.
       sb.auth.onAuthStateChange(function(_evt, session){ applySession(session); });
       sb.auth.getSession().then(function(res){ applySession(res && res.data && res.data.session); });
     })
@@ -313,16 +275,15 @@
     if (session && session.user && session.user.email){
       accessToken = session.access_token;
       user = { email: session.user.email };
-      // Clean the magic-link tokens out of the URL bar.
       if (location.hash && /access_token=/.test(location.hash)){
         try { history.replaceState(null, '', location.pathname + location.search); } catch(e){}
       }
       renderIdentity();
-      anthKey = loadKey(user.email);
-      if (anthKey){ show('state-ready'); } else { show('state-needkey'); if (els['key-input']) els['key-input'].focus(); }
+      if (els['engine-warn']) els['engine-warn'].classList.toggle('hidden', CFG.engineReady);
+      show('state-ready');
+      if (els['jh-role']) els['jh-role'].focus();
     } else if (accessToken || user){
-      // was signed in, now signed out
-      accessToken = null; user = null; anthKey = null; statusEl.innerHTML = ''; show('state-signedout');
+      accessToken = null; user = null; statusEl.innerHTML = ''; show('state-signedout');
     } else {
       show('state-signedout');
     }
@@ -330,14 +291,11 @@
 
   function renderIdentity(){
     var initial = (user.email || '?').trim().charAt(0).toUpperCase();
-    if (els['nk-av']) els['nk-av'].textContent = initial;
     if (els['rd-av']) els['rd-av'].textContent = initial;
-    if (els['nk-email']) els['nk-email'].textContent = user.email;
     if (els['rd-email']) els['rd-email'].textContent = user.email;
   }
 
   // ---- Google sign-in (via Supabase OAuth) ----
-  // If the provider bounces back with an error, Supabase puts it in the query/hash.
   (function surfaceOAuthError(){
     var m = (location.search + location.hash).match(/error_description=([^&]+)/);
     if (m && els['signin-msg']){
@@ -362,33 +320,11 @@
   }
   function signOut(){
     if (sb){ try { sb.auth.signOut(); } catch(e){} }
-    accessToken = null; user = null; anthKey = null; statusEl.innerHTML = '';
+    accessToken = null; user = null; statusEl.innerHTML = '';
     show('state-signedout');
   }
   if (els['google-btn']) els['google-btn'].addEventListener('click', signInGoogle);
-  if (els['nk-signout']) els['nk-signout'].addEventListener('click', signOut);
   if (els['rd-signout']) els['rd-signout'].addEventListener('click', signOut);
-
-  // ---- key linking ----
-  function linkKey(){
-    var k = (els['key-input'].value || '').trim();
-    els['key-err'].textContent = '';
-    if (!/^sk-ant-/.test(k)){
-      els['key-err'].textContent = 'That doesn’t look like an Anthropic key — it should start with sk-ant-.';
-      return;
-    }
-    anthKey = k;
-    if (user && user.email) saveKey(user.email, k);
-    els['key-input'].value = '';
-    show('state-ready');
-    if (els['jh-role']) els['jh-role'].focus();
-  }
-  if (els['key-save']) els['key-save'].addEventListener('click', linkKey);
-  if (els['key-input']) els['key-input'].addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); linkKey(); } });
-  if (els['rd-changekey']) els['rd-changekey'].addEventListener('click', function(){
-    if (user && user.email) clearKey(user.email);
-    anthKey = null; show('state-needkey'); if (els['key-input']) els['key-input'].focus();
-  });
 
   // ---- search ----
   function selectedBoards(){
@@ -438,7 +374,6 @@
   if (els['jh-form']) els['jh-form'].addEventListener('submit', function(ev){
     ev.preventDefault();
     if (!accessToken){ show('state-signedout'); return; }
-    if (!anthKey){ show('state-needkey'); return; }
     var role = els['jh-role'].value.trim();
     if (!role){ els['jh-role'].focus(); return; }
     var boards = selectedBoards();
@@ -450,7 +385,7 @@
 
     fetch('/api/jobhunt', {
       method:'POST',
-      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+accessToken, 'x-anthropic-key':anthKey },
+      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+accessToken },
       body: JSON.stringify({ role: role, location: els['jh-location'].value.trim(), boards: boards })
     }).then(function(r){
       return r.json().catch(function(){ return {}; }).then(function(b){ return { ok:r.ok, status:r.status, body:b }; });
@@ -462,13 +397,13 @@
         note('🔐','Your sign-in expired. Please <b>sign in again</b> to keep searching.', true);
         signOut(); return;
       }
-      if (err === 'bad_key'){
-        note('🔑','Anthropic rejected that key. <b>Check it and re-link</b> — it should be an active key from your console with billing enabled.', true);
-        if (user && user.email) clearKey(user.email); anthKey = null; show('state-needkey'); return;
+      if (res.status === 503 && err === 'engine_not_configured'){
+        note('🔌','The search engine isn’t switched on for this deployment yet (the server needs a free <span style="font-family:var(--font-mono)">GEMINI_API_KEY</span>). Sign-in works; search will run once it’s set.', true);
+        return;
       }
-      if (err === 'byo_key_required'){
-        note('🔑','No Anthropic key on the request. Please link your key and try again.', true);
-        show('state-needkey'); return;
+      if (res.status === 429 || err === 'rate_limited'){
+        note('⏳','The free search tier is busy right now — give it a minute and try again.', true);
+        return;
       }
       var msg = (res.body && (res.body.message || res.body.detail || err)) || ('request failed ('+res.status+')');
       note('⚠️','The agent hit a snag: <b>'+esc(msg)+'</b>. Give it another go in a moment.', true);
@@ -481,7 +416,7 @@
     });
   });
 
-  // Test seam: lets headless checks drive the signed-in state without real email.
+  // Test seam: drive the signed-in state without real OAuth.
   window.__jobhuntTestSession = function(session){ applySession(session); };
 })();
 </script>
