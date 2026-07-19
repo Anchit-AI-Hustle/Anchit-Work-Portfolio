@@ -4,13 +4,13 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>JobHunt — a live AI job-search agent · Anchit Tandon</title>
-<meta name="description" content="A free live AI job-search agent. Sign in with Google and it searches LinkedIn, Indeed, Glassdoor and Upwork in real time and hands you the openings it finds." />
+<meta name="description" content="A free live job-search tool. Sign in with Google and it pulls real, current openings from free public job boards — with direct apply links." />
 <meta name="theme-color" content="#0F0D0A" />
 <link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
 
 <!-- Open Graph -->
 <meta property="og:title" content="JobHunt — a live AI job-search agent" />
-<meta property="og:description" content="Free. Sign in with Google and an AI agent searches LinkedIn, Indeed, Glassdoor & Upwork in real time." />
+<meta property="og:description" content="Free. Sign in with Google and pull real, current openings from free public job boards — with direct apply links." />
 <meta property="og:type" content="website" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -152,7 +152,7 @@
 
   <div class="eyebrow">Side hustle · Live AI agent · Free to use</div>
   <h1>JobHunt — <em>a live job-search agent</em>.</h1>
-  <p class="lede">Sign in with Google and search. An AI agent scans LinkedIn, Indeed, Glassdoor and Upwork in real time and hands you the openings it actually finds — free, no API key, no setup.</p>
+  <p class="lede">Sign in with Google and search. It pulls real, current openings from free public job boards — Remotive, RemoteOK, Arbeitnow and The Muse — and hands you the ones that match, with direct apply links. Free, no API key, no setup.</p>
 
   <!-- ============ GATE PANEL ============ -->
   <div class="panel" id="gate">
@@ -191,7 +191,7 @@
         <div class="spacer"></div>
         <button class="link-btn" type="button" id="rd-signout">Sign out</button>
       </div>
-      <div id="engine-warn" class="msg err hidden">Search isn’t switched on yet — the server needs a GEMINI_API_KEY. Everything else works.</div>
+      <div id="engine-warn" class="msg err hidden">Search is temporarily unavailable — please try again in a moment.</div>
       <div class="divider"></div>
       <form id="jh-form" autocomplete="off">
         <div class="field-row">
@@ -207,10 +207,10 @@
         <div class="boards">
           <div class="lbl">Search these boards</div>
           <div class="chips" id="jh-boards">
-            <label class="chip"><input type="checkbox" value="LinkedIn" checked><span>LinkedIn</span></label>
-            <label class="chip"><input type="checkbox" value="Indeed" checked><span>Indeed</span></label>
-            <label class="chip"><input type="checkbox" value="Glassdoor" checked><span>Glassdoor</span></label>
-            <label class="chip"><input type="checkbox" value="Upwork" checked><span>Upwork</span></label>
+            <label class="chip"><input type="checkbox" value="Remotive" checked><span>Remotive</span></label>
+            <label class="chip"><input type="checkbox" value="RemoteOK" checked><span>RemoteOK</span></label>
+            <label class="chip"><input type="checkbox" value="Arbeitnow" checked><span>Arbeitnow</span></label>
+            <label class="chip"><input type="checkbox" value="The Muse" checked><span>The Muse</span></label>
           </div>
         </div>
         <div class="go-row">
@@ -224,8 +224,8 @@
   <div class="status" id="jh-status" aria-live="polite"></div>
 
   <p class="disclaimer">
-    JobHunt is a live demo of an agentic build — an AI agent with live web search, gated behind Google sign-in and free to use.
-    Results come straight from the web at search time, so availability and details can change — always confirm on the original posting before applying.
+    JobHunt is a live demo — it aggregates real, current openings from free public job boards (Remotive, RemoteOK, Arbeitnow, The Muse), gated behind Google sign-in and free to use.
+    Listings come straight from those boards at search time, so availability and details can change — always confirm on the original posting before applying.
   </p>
 
   <div class="footer">
@@ -332,7 +332,7 @@
   }
   var LOAD_LINES = [
     'Briefing the agent…',
-    'Searching LinkedIn, Indeed, Glassdoor & Upwork…',
+    'Searching Remotive, RemoteOK, Arbeitnow & The Muse…',
     'Reading live postings…',
     'De-duplicating and formatting results…'
   ];

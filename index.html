@@ -3635,12 +3635,12 @@
 
         <!-- Card — JobHunt (AI Job Search Agent) -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span>Job Hunting · AI · Live web search</span><span class="status">Live</span></div>
+          <div class="build-tag"><span>Job Hunting · Live job boards</span><span class="status">Live</span></div>
           <h3>Job<em>Hunt</em></h3>
-          <p>A free, live AI job-search agent. Sign in with Google and it searches LinkedIn, Indeed, Glassdoor &amp; Upwork in real time, then hands you the openings it actually finds — no spreadsheet, no setup, no API key.</p>
+          <p>A free, live job-search tool. Sign in with Google, type a role, and it pulls real, current openings from free public job boards — Remotive, RemoteOK, Arbeitnow and The Muse — with direct apply links. No spreadsheet, no setup, no API key.</p>
           <ul class="build-details">
-            <li>Built as a Vercel serverless function on Google Gemini with live web-search grounding, gated behind Google sign-in via Supabase.</li>
-            <li>Type a role and location, pick your boards, and get real, de-duplicated postings with direct apply links — free to use, nothing to install.</li>
+            <li>Built as a Vercel serverless function that aggregates several free, keyless job APIs in parallel, gated behind Google sign-in via Supabase.</li>
+            <li>Type a role and location, pick your boards, and get real, de-duplicated postings with direct apply links — genuinely free, nothing to install, no rate-limited key to run out.</li>
           </ul>
           <div class="build-actions">
             <a class="btn primary" href="#project-jobfit" data-view="project-jobfit">Case Study &rarr;</a>
@@ -4336,13 +4336,13 @@
         All side projects
       </a>
       <div class="project-hero reveal">
-        <div class="eyebrow">AI Careers · Live web search · LinkedIn · Indeed · Glassdoor · Upwork</div>
+        <div class="eyebrow">AI Careers · Free public job boards · Remotive · RemoteOK · Arbeitnow · The Muse</div>
         <h1 class="display-lg">Job<em>Hunt</em></h1>
-        <p class="quote">"A role goes in; real, current openings from four boards come out — live, on request."</p>
+        <p class="quote">"A role goes in; real, current openings from several free job boards come out — live, on request."</p>
         <div class="project-meta">
           <div><span class="label">Role</span><span>Product · Builder</span></div>
           <div><span class="label">Status</span><span>Live · Free to use</span></div>
-          <div><span class="label">What it does</span><span>Google sign-in · live web search · four boards · de-duplicated openings with apply links</span></div>
+          <div><span class="label">What it does</span><span>Google sign-in · aggregates free public job boards · de-duplicated openings with apply links</span></div>
         </div>
         <div class="build-actions" style="margin-top:20px;">
           <a class="btn primary" href="/jobhunt">Open Live Project ↗</a>
@@ -4352,23 +4352,23 @@
       <div class="project-section reveal">
         <div class="eyebrow">The pitch</div>
         <h2>What it is</h2>
-        <p>JobHunt is a free, live AI job-search agent. You sign in with Google, type a role and (optionally) a location, and an agent searches LinkedIn, Indeed, Glassdoor and Upwork in real time — then hands back the openings it actually finds, de-duplicated, each with a direct link to apply. No spreadsheet, no workflow to import, no API key: just type and search.</p>
+        <p>JobHunt is a free, live job-search tool. You sign in with Google, type a role and (optionally) a location, and it pulls current openings from free, keyless public job boards — Remotive, RemoteOK, Arbeitnow and The Muse — matches them to your query, de-duplicates, and hands back each with a direct link to apply. No spreadsheet, no workflow to import, no API key: just type and search.</p>
       </div>
 
       <div class="project-section reveal">
         <div class="eyebrow">Origin</div>
         <h2>Why I built it</h2>
-        <p>Job hunting means checking the same four boards over and over, copy-pasting listings, and losing track of what you've already seen. I wanted a single box where you describe the role once and an agent does the scanning for you — pulling live, real postings rather than a stale cached list, and showing them cleanly so you can go straight to applying.</p>
+        <p>Job hunting means checking board after board, copy-pasting listings, and losing track of what you've already seen. I wanted a single box where you describe the role once and the tool does the scanning for you — pulling live, real postings from several boards at once and showing them cleanly so you can go straight to applying.</p>
       </div>
 
       <div class="project-section reveal">
         <div class="eyebrow">How it works</div>
         <h2>Under the hood</h2>
         <ul>
-          <li><strong>Gated by Google sign-in.</strong> Access runs through Supabase auth, so the tool is tied to a real Google account — light protection that keeps the free search tier fair.</li>
-          <li><strong>Live web search, not a cache.</strong> A Vercel serverless function calls Google Gemini with live web-search grounding, searching the boards you pick at request time.</li>
-          <li><strong>Real results only.</strong> The agent returns openings it actually found in search — title, company, location, source and a direct link — and de-duplicates the same role at the same company.</li>
-          <li><strong>Free, server-side key.</strong> Searches run on a single free Gemini key on the server, so no visitor ever needs their own API key and there's nothing to install.</li>
+          <li><strong>Gated by Google sign-in.</strong> Access runs through Supabase auth, so the tool is tied to a real Google account — light protection against abuse.</li>
+          <li><strong>Free public job APIs.</strong> A Vercel serverless function queries several free, keyless job boards (Remotive, RemoteOK, Arbeitnow, The Muse) in parallel at request time — no paid key, no per-minute rate limit to hit.</li>
+          <li><strong>Matched to your role.</strong> Results are title-matched to what you searched, de-duplicated across boards, and each carries a company, location, source and a direct apply link.</li>
+          <li><strong>Genuinely free.</strong> No API key anywhere — visitors never need one and there is nothing to install or run out of.</li>
           <li><strong>Results you can act on.</strong> Every opening opens straight to the original posting in a new tab, so you go from search to apply in one click.</li>
         </ul>
       </div>
@@ -4376,7 +4376,7 @@
       <div class="project-section reveal">
         <div class="eyebrow">Guardrails</div>
         <h2>What matters most</h2>
-        <p>The agent only lists openings it genuinely found in live search — it never invents a company, title or link — and always sends you to the original posting to confirm before applying. Because it's public, it's gated behind sign-in and runs on a rate-limited free tier, so it stays honest, free and abuse-resistant.</p>
+        <p>Every listing comes straight from a real job board's own API — nothing is invented — and always links back to the original posting to confirm before applying. Because it's public, it's gated behind sign-in, so it stays honest, free and abuse-resistant.</p>
       </div>
 
       <div class="project-section reveal">
