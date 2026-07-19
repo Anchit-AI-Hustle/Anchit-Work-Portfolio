@@ -250,11 +250,16 @@
         <div class="boards">
           <div class="lbl">Search these boards</div>
           <div class="chips" id="jh-boards">
+            <label class="chip"><input type="checkbox" value="LinkedIn" checked><span>LinkedIn</span></label>
+            <label class="chip"><input type="checkbox" value="Indeed" checked><span>Indeed</span></label>
+            <label class="chip"><input type="checkbox" value="Glassdoor" checked><span>Glassdoor</span></label>
+            <label class="chip"><input type="checkbox" value="Upwork" checked><span>Upwork</span></label>
             <label class="chip"><input type="checkbox" value="Remotive" checked><span>Remotive</span></label>
             <label class="chip"><input type="checkbox" value="RemoteOK" checked><span>RemoteOK</span></label>
             <label class="chip"><input type="checkbox" value="Arbeitnow" checked><span>Arbeitnow</span></label>
             <label class="chip"><input type="checkbox" value="The Muse" checked><span>The Muse</span></label>
           </div>
+          <div class="microcopy" style="margin-top:10px;">LinkedIn, Indeed, Glassdoor &amp; Upwork open as one-click live searches (and return inline results when Adzuna is enabled). The rest return listings inline.</div>
         </div>
         <div class="go-row">
           <button class="btn primary" id="jh-go" type="submit">Search jobs →</button>
@@ -430,17 +435,23 @@
   function note(icon, html, isErr){
     statusEl.innerHTML = '<div class="note'+(isErr?' err':'')+'"><div class="ico">'+icon+'</div><div>'+html+'</div></div>';
   }
-  // Direct search deep-links to the big boards (which have no free listings API).
+  // Direct search deep-links to the big boards (which have no free listings API),
+  // shown only for the big boards the user selected.
   function deepLinks(role, location){
     var q = encodeURIComponent(role), l = encodeURIComponent(location || '');
-    var links = [
-      ['LinkedIn', 'https://www.linkedin.com/jobs/search/?keywords='+q+(location?('&location='+l):'')],
-      ['Indeed', 'https://www.indeed.com/jobs?q='+q+(location?('&l='+l):'')],
-      ['Glassdoor', 'https://www.glassdoor.com/Job/jobs.htm?sc.keyword='+q],
-      ['Upwork', 'https://www.upwork.com/nx/search/jobs/?q='+q]
-    ];
+    var urls = {
+      LinkedIn: 'https://www.linkedin.com/jobs/search/?keywords='+q+(location?('&location='+l):''),
+      Indeed: 'https://www.indeed.com/jobs?q='+q+(location?('&l='+l):''),
+      Glassdoor: 'https://www.glassdoor.com/Job/jobs.htm?sc.keyword='+q,
+      Upwork: 'https://www.upwork.com/nx/search/jobs/?q='+q
+    };
+    var picked = ['LinkedIn','Indeed','Glassdoor','Upwork'].filter(function(b){
+      var cb = els['jh-boards'].querySelector('input[value="'+b+'"]');
+      return cb && cb.checked;
+    });
+    if (!picked.length) return '';
     return '<div class="deeplinks"><span class="dl-lbl">Search directly on</span>' +
-      links.map(function(x){ return '<a href="'+x[1]+'" target="_blank" rel="noopener">'+x[0]+' ↗</a>'; }).join('') + '</div>';
+      picked.map(function(b){ return '<a href="'+urls[b]+'" target="_blank" rel="noopener">'+b+' ↗</a>'; }).join('') + '</div>';
   }
 
   function renderResults(data){

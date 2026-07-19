@@ -13,7 +13,11 @@
 //   SUPABASE_URL        public project URL
 //   SUPABASE_ANON_KEY   public anon key (safe in browser)
 
-const ALL_BOARDS = ['Remotive', 'RemoteOK', 'Arbeitnow', 'The Muse'];
+// Big boards (no free listings API) — covered by Adzuna inline + deep-link
+// searches on the page. Free boards have direct keyless APIs.
+const BIG_BOARDS = ['LinkedIn', 'Indeed', 'Glassdoor', 'Upwork'];
+const FREE_BOARDS = ['Remotive', 'RemoteOK', 'Arbeitnow', 'The Muse'];
+const ALL_BOARDS = BIG_BOARDS.concat(FREE_BOARDS);
 const UA = 'Mozilla/5.0 (compatible; JobHunt/1.0; +https://anchit-tandon.com/jobhunt)';
 
 async function fetchJSON(url, ms) {
@@ -196,9 +200,12 @@ async function handler(req, res) {
   if (!role) return res.status(400).json({ error: 'role required' });
 
   try {
-    // Selected free boards + Adzuna (always, when configured) run in parallel.
-    const tasks = boards.map((b) => FETCHERS[b](role, location).catch(() => []));
-    tasks.push(fromAdzuna(role, location).catch(() => []));
+    // Selected free boards fetch directly; selecting any big board pulls Adzuna,
+    // which aggregates real listings across LinkedIn/Indeed/Glassdoor/etc.
+    const freeSel = boards.filter((b) => FREE_BOARDS.includes(b));
+    const bigSel = boards.filter((b) => BIG_BOARDS.includes(b));
+    const tasks = freeSel.map((b) => FETCHERS[b](role, location).catch(() => []));
+    if (bigSel.length) tasks.push(fromAdzuna(role, location).catch(() => []));
     const batches = await Promise.all(tasks);
     let all = [];
     batches.forEach((part) => {
