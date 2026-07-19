@@ -4,18 +4,19 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>JobHunt — a live AI job-search agent · Anchit Tandon</title>
-<meta name="description" content="A live AI job-search agent powered by Claude. Type a role, and it searches LinkedIn, Indeed, Glassdoor and Upwork in real time and hands you the openings it finds." />
+<meta name="description" content="A live AI job-search agent powered by Claude. Sign in with Google, bring your own Anthropic key, and it searches LinkedIn, Indeed, Glassdoor and Upwork in real time." />
 <meta name="theme-color" content="#0F0D0A" />
 <link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
 
 <!-- Open Graph -->
 <meta property="og:title" content="JobHunt — a live AI job-search agent" />
-<meta property="og:description" content="Type a role. Claude searches LinkedIn, Indeed, Glassdoor & Upwork in real time and returns the openings it finds — live, on request." />
+<meta property="og:description" content="Sign in with Google, bring your own Anthropic key, and Claude searches LinkedIn, Indeed, Glassdoor & Upwork in real time." />
 <meta property="og:type" content="website" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 
 <style>
   :root{
@@ -32,7 +33,6 @@
     line-height:1.6; -webkit-font-smoothing:antialiased; overflow-x:hidden;
     min-height:100vh;
   }
-  /* Ambient glow, on-brand with the portfolio */
   body::before{
     content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
     background:
@@ -55,19 +55,40 @@
   h1 em{font-style:italic; color:var(--primary);}
   .lede{font-size:clamp(1.02rem,2.2vw,1.2rem); color:var(--ink-dim); max-width:62ch; margin-bottom:30px;}
 
+  .panel{background:var(--bg-elev); border:1px solid var(--rule-strong); border-radius:20px; padding:24px 22px; box-shadow:0 24px 60px rgba(0,0,0,.35);}
+  .hidden{display:none !important;}
+
+  /* ---- Gate / auth ---- */
+  .gate-head{display:flex; align-items:center; gap:12px; margin-bottom:14px;}
+  .gate-head .step{font-family:var(--font-mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); border:1px solid rgba(46,229,172,.35); border-radius:999px; padding:4px 11px;}
+  .gate-head .h{font-family:var(--font-display); font-weight:600; font-size:1.25rem; letter-spacing:-.01em;}
+  .gate-copy{color:var(--ink-dim); font-size:.96rem; margin-bottom:18px; max-width:60ch;}
+  #g-btn{min-height:44px;}
+  .who{display:flex; align-items:center; gap:12px; padding:12px 14px; border:1px solid var(--rule); border-radius:12px; background:var(--bg-deep);}
+  .who img{width:34px; height:34px; border-radius:50%; object-fit:cover; border:1px solid var(--rule-strong);}
+  .who .nm{font-weight:600; font-size:.95rem;}
+  .who .em{font-family:var(--font-mono); font-size:12px; color:var(--ink-dim);}
+  .who .spacer{flex:1;}
+  .link-btn{background:none; border:0; color:var(--ink-dim); font-family:var(--font-mono); font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; cursor:pointer; padding:6px 8px; border-radius:8px; transition:color .2s;}
+  .link-btn:hover{color:var(--primary);}
+
+  /* ---- Key entry ---- */
+  .keyrow{display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;}
+  .keyrow input{flex:1 1 260px; background:var(--bg-deep); border:1px solid var(--rule); border-radius:12px; color:var(--ink); font-family:var(--font-mono); font-size:13.5px; padding:13px 14px; transition:border-color .2s, box-shadow .2s;}
+  .keyrow input:focus{outline:none; border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-soft);}
+  .keyrow input::placeholder{color:rgba(179,169,150,.55);}
+  .keynote{font-family:var(--font-mono); font-size:11.5px; color:var(--ink-dim); margin-top:12px; line-height:1.7;}
+  .keynote a{color:var(--primary); text-decoration:none;}
+  .keynote a:hover{text-decoration:underline;}
+
   /* ---- Search tool ---- */
-  .tool{background:var(--bg-elev); border:1px solid var(--rule-strong); border-radius:20px; padding:24px 22px; box-shadow:0 24px 60px rgba(0,0,0,.35);}
   .field-row{display:grid; grid-template-columns:1.4fr 1fr; gap:12px;}
   @media(max-width:600px){.field-row{grid-template-columns:1fr;}}
   .field{display:flex; flex-direction:column; gap:6px;}
   .field label{font-family:var(--font-mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-dim);}
-  .field input{
-    background:var(--bg-deep); border:1px solid var(--rule); border-radius:12px; color:var(--ink);
-    font-family:var(--font-sans); font-size:15px; padding:13px 14px; transition:border-color .2s, box-shadow .2s;
-  }
+  .field input{background:var(--bg-deep); border:1px solid var(--rule); border-radius:12px; color:var(--ink); font-family:var(--font-sans); font-size:15px; padding:13px 14px; transition:border-color .2s, box-shadow .2s;}
   .field input:focus{outline:none; border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-soft);}
   .field input::placeholder{color:rgba(179,169,150,.6);}
-
   .boards{margin-top:16px;}
   .boards .lbl{font-family:var(--font-mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:10px;}
   .chips{display:flex; flex-wrap:wrap; gap:9px;}
@@ -78,7 +99,6 @@
   .chip input:checked + span{border-color:var(--primary); color:var(--ink); background:var(--primary-soft);}
   .chip input:checked + span::before{background:var(--primary); box-shadow:0 0 8px var(--primary);}
   .chip:hover span{border-color:var(--rule-strong);}
-
   .go-row{display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin-top:20px;}
   .btn{display:inline-flex; align-items:center; justify-content:center; gap:9px; font-weight:600; font-size:15px; padding:13px 26px; border-radius:12px; text-decoration:none; cursor:pointer; transition:transform .2s, box-shadow .2s, opacity .2s; border:0; font-family:var(--font-sans);}
   .btn.primary{background:linear-gradient(135deg,var(--primary),var(--gold)); color:#160b04;}
@@ -86,16 +106,16 @@
   .btn.primary:disabled{opacity:.6; cursor:not-allowed; transform:none; box-shadow:none;}
   .microcopy{font-family:var(--font-mono); font-size:12px; color:var(--ink-dim); letter-spacing:.02em;}
 
-  /* spinner */
   .spin{width:16px; height:16px; border:2px solid rgba(22,11,4,.35); border-top-color:#160b04; border-radius:50%; animation:sp .7s linear infinite;}
   @keyframes sp{to{transform:rotate(360deg);}}
+
+  .divider{height:1px; background:var(--rule); margin:20px 0;}
 
   /* ---- Results ---- */
   .status{margin-top:26px; min-height:8px;}
   .note{display:flex; gap:12px; align-items:flex-start; background:var(--bg-elev); border:1px solid var(--rule); border-radius:14px; padding:16px 18px; color:var(--ink-dim); font-size:.95rem;}
   .note.err{border-color:rgba(255,105,64,.5); color:var(--ink);}
   .note .ico{font-size:1.2rem; line-height:1.3;}
-
   .loading{display:flex; flex-direction:column; gap:12px; margin-top:26px;}
   .loading .line{font-family:var(--font-mono); font-size:13px; color:var(--accent); display:flex; align-items:center; gap:10px;}
   .loading .line .dot{width:7px; height:7px; border-radius:50%; background:var(--accent); animation:pulse 1.1s ease-in-out infinite;}
@@ -105,7 +125,6 @@
   @keyframes shimmer{100%{transform:translateX(100%);}}
   .skel .bar{height:12px; border-radius:6px; background:var(--rule); margin-bottom:10px;}
   .skel .bar.w1{width:55%;} .skel .bar.w2{width:80%; height:9px;} .skel .bar.w3{width:35%; height:9px; margin-bottom:0;}
-
   .results-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin:30px 0 14px; flex-wrap:wrap;}
   .results-head h2{font-family:var(--font-display); font-weight:600; font-size:1.5rem; letter-spacing:-.01em;}
   .results-head .count{font-family:var(--font-mono); font-size:12px; color:var(--ink-dim); letter-spacing:.04em;}
@@ -138,41 +157,102 @@
 
   <div class="eyebrow">Side hustle · Live AI agent · Powered by Claude</div>
   <h1>JobHunt — <em>a live job-search agent</em>.</h1>
-  <p class="lede">Type a role and, optionally, a location. A Claude agent searches LinkedIn, Indeed, Glassdoor and Upwork in real time and hands you the openings it actually finds — no sign-up, no spreadsheet, just live results.</p>
+  <p class="lede">Sign in with Google and bring your own Anthropic key. A Claude agent then searches LinkedIn, Indeed, Glassdoor and Upwork in real time and hands you the openings it actually finds — your key, your searches, billed to your own account.</p>
 
-  <form class="tool" id="jh-form" autocomplete="off">
-    <div class="field-row">
-      <div class="field">
-        <label for="jh-role">Role / keywords</label>
-        <input id="jh-role" name="role" type="text" placeholder="e.g. Senior Product Manager, AI" required maxlength="160" />
-      </div>
-      <div class="field">
-        <label for="jh-location">Location <span style="text-transform:none;letter-spacing:0;opacity:.7;">(optional)</span></label>
-        <input id="jh-location" name="location" type="text" placeholder="e.g. Remote, London, Bengaluru" maxlength="120" />
-      </div>
+  <!-- ============ GATE PANEL (auth + key) ============ -->
+  <div class="panel" id="gate">
+    <!-- loading -->
+    <div id="state-loading">
+      <div class="gate-head"><span class="step">·</span><span class="h">Getting ready…</span></div>
+      <p class="gate-copy">Checking how sign-in is configured for this deployment.</p>
     </div>
 
-    <div class="boards">
-      <div class="lbl">Search these boards</div>
-      <div class="chips" id="jh-boards">
-        <label class="chip"><input type="checkbox" value="LinkedIn" checked><span>LinkedIn</span></label>
-        <label class="chip"><input type="checkbox" value="Indeed" checked><span>Indeed</span></label>
-        <label class="chip"><input type="checkbox" value="Glassdoor" checked><span>Glassdoor</span></label>
-        <label class="chip"><input type="checkbox" value="Upwork" checked><span>Upwork</span></label>
-      </div>
+    <!-- sign-in not configured -->
+    <div id="state-noconfig" class="hidden">
+      <div class="gate-head"><span class="step">Setup</span><span class="h">Sign-in isn’t switched on yet</span></div>
+      <p class="gate-copy">This deployment doesn’t have a Google client configured, so the gated sign-in flow can’t start. Once <span style="font-family:var(--font-mono)">GOOGLE_CLIENT_ID</span> is set on the server, this page will ask visitors to sign in with Google and bring their own key.</p>
+      <p class="keynote">Building this yourself? <a href="mailto:anchit.tandon@gmail.com?subject=JobHunt%20setup">Ask me how it’s wired.</a></p>
     </div>
 
-    <div class="go-row">
-      <button class="btn primary" id="jh-go" type="submit">Search jobs →</button>
-      <span class="microcopy">Live search · usually 20–40 seconds</span>
+    <!-- signed out -->
+    <div id="state-signedout" class="hidden">
+      <div class="gate-head"><span class="step">Step 1</span><span class="h">Sign in to continue</span></div>
+      <p class="gate-copy">JobHunt is gated — sign in with Google so it’s tied to you. Nothing is charged by signing in; you’ll add your own Anthropic key in the next step.</p>
+      <div id="g-btn"></div>
     </div>
-  </form>
+
+    <!-- signed in, need key -->
+    <div id="state-needkey" class="hidden">
+      <div class="who">
+        <img id="nk-pic" alt="" referrerpolicy="no-referrer">
+        <div>
+          <div class="nm" id="nk-name">Signed in</div>
+          <div class="em" id="nk-email"></div>
+        </div>
+        <div class="spacer"></div>
+        <button class="link-btn" type="button" id="nk-signout">Sign out</button>
+      </div>
+      <div class="divider"></div>
+      <div class="gate-head"><span class="step">Step 2</span><span class="h">Link your Anthropic key</span></div>
+      <p class="gate-copy">Paste your own Anthropic API key. It’s stored only in <b>this browser</b>, linked to your Google account — never sent to or saved on any server except passed straight to Anthropic for your searches.</p>
+      <div class="keyrow">
+        <input id="key-input" type="password" placeholder="sk-ant-…" autocomplete="off" spellcheck="false">
+        <button class="btn primary" type="button" id="key-save">Link key →</button>
+      </div>
+      <div id="key-err" class="keynote" style="color:var(--primary);"></div>
+      <p class="keynote">
+        No key yet? Create one at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a> (starts with <span style="color:var(--ink)">sk-ant-</span>).
+        Searches use Claude with web search, billed to your own Anthropic account.
+      </p>
+    </div>
+
+    <!-- ready: signed in + key linked -->
+    <div id="state-ready" class="hidden">
+      <div class="who">
+        <img id="rd-pic" alt="" referrerpolicy="no-referrer">
+        <div>
+          <div class="nm" id="rd-name">Ready</div>
+          <div class="em" id="rd-email"></div>
+        </div>
+        <div class="spacer"></div>
+        <button class="link-btn" type="button" id="rd-changekey">Change key</button>
+        <button class="link-btn" type="button" id="rd-signout">Sign out</button>
+      </div>
+      <div class="divider"></div>
+      <form id="jh-form" autocomplete="off">
+        <div class="field-row">
+          <div class="field">
+            <label for="jh-role">Role / keywords</label>
+            <input id="jh-role" name="role" type="text" placeholder="e.g. Senior Product Manager, AI" required maxlength="160" />
+          </div>
+          <div class="field">
+            <label for="jh-location">Location <span style="text-transform:none;letter-spacing:0;opacity:.7;">(optional)</span></label>
+            <input id="jh-location" name="location" type="text" placeholder="e.g. Remote, London, Bengaluru" maxlength="120" />
+          </div>
+        </div>
+        <div class="boards">
+          <div class="lbl">Search these boards</div>
+          <div class="chips" id="jh-boards">
+            <label class="chip"><input type="checkbox" value="LinkedIn" checked><span>LinkedIn</span></label>
+            <label class="chip"><input type="checkbox" value="Indeed" checked><span>Indeed</span></label>
+            <label class="chip"><input type="checkbox" value="Glassdoor" checked><span>Glassdoor</span></label>
+            <label class="chip"><input type="checkbox" value="Upwork" checked><span>Upwork</span></label>
+          </div>
+        </div>
+        <div class="go-row">
+          <button class="btn primary" id="jh-go" type="submit">Search jobs →</button>
+          <span class="microcopy">Live search · usually 20–40 seconds · your key</span>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <div class="status" id="jh-status" aria-live="polite"></div>
 
   <p class="disclaimer">
-    JobHunt is a live demo of an agentic build — a Claude agent with web search, wired to this page.
-    Results come straight from the web at search time, so availability and details can change; always confirm on the original posting before applying.
+    JobHunt is a live demo of an agentic build — a Claude agent with web search, wired to this page and gated behind Google sign-in.
+    You bring your own Anthropic key; it stays in your browser and is used only to run your searches. Results come straight from the web at
+    search time, so availability and details can change — always confirm on the original posting before applying.
   </p>
 
   <div class="footer">
@@ -183,12 +263,17 @@
 
 <script>
 (function(){
-  var form = document.getElementById('jh-form');
-  var roleEl = document.getElementById('jh-role');
-  var locEl = document.getElementById('jh-location');
-  var boardsWrap = document.getElementById('jh-boards');
+  var CFG = { clientId:null, gated:false };
+  var idToken = null;            // Google ID token, in memory only (short-lived)
+  var user = null;               // { email, name, picture }
+  var anthKey = null;            // caller's Anthropic key for the active session
+
+  var els = {};
+  ['state-loading','state-noconfig','state-signedout','state-needkey','state-ready',
+   'g-btn','nk-pic','nk-name','nk-email','nk-signout','key-input','key-save','key-err',
+   'rd-pic','rd-name','rd-email','rd-changekey','rd-signout','jh-form','jh-role','jh-location',
+   'jh-boards','jh-go'].forEach(function(id){ els[id] = document.getElementById(id); });
   var statusEl = document.getElementById('jh-status');
-  var goBtn = document.getElementById('jh-go');
   var loadingTimer = null;
 
   function esc(s){
@@ -196,112 +281,200 @@
       return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
     });
   }
-  function selectedBoards(){
-    return Array.prototype.slice.call(boardsWrap.querySelectorAll('input:checked')).map(function(i){ return i.value; });
+  function keyName(email){ return 'jobhunt-key:' + email; }
+  function loadKey(email){ try{ return localStorage.getItem(keyName(email)) || null; }catch(e){ return null; } }
+  function saveKey(email, k){ try{ localStorage.setItem(keyName(email), k); }catch(e){} }
+  function clearKey(email){ try{ localStorage.removeItem(keyName(email)); }catch(e){} }
+
+  function decodeJwt(t){
+    try{
+      var seg = t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+      return JSON.parse(decodeURIComponent(escape(atob(seg))));
+    }catch(e){ return {}; }
   }
 
+  var STATES = ['state-loading','state-noconfig','state-signedout','state-needkey','state-ready'];
+  function show(state){
+    STATES.forEach(function(s){ els[s].classList.toggle('hidden', s !== state); });
+  }
+
+  // ---- config ----
+  fetch('/api/jobhunt', { method:'GET' })
+    .then(function(r){ return r.json(); })
+    .then(function(cfg){
+      CFG.clientId = cfg && cfg.googleClientId; CFG.gated = !!(cfg && cfg.gated);
+      if (!CFG.clientId){ show('state-noconfig'); return; }
+      initGoogle();
+    })
+    .catch(function(){ show('state-noconfig'); });
+
+  function initGoogle(){
+    function go(){
+      try {
+        google.accounts.id.initialize({ client_id: CFG.clientId, callback: onCredential });
+        show('state-signedout');
+        google.accounts.id.renderButton(els['g-btn'], { theme:'filled_black', size:'large', text:'signin_with', shape:'pill', width:260 });
+      } catch(e){ show('state-noconfig'); }
+    }
+    if (window.google && window.google.accounts && window.google.accounts.id){ go(); return; }
+    var tries = 0;
+    var t = setInterval(function(){
+      tries++;
+      if (window.google && window.google.accounts && window.google.accounts.id){ clearInterval(t); go(); }
+      else if (tries > 40){ clearInterval(t); show('state-noconfig'); }
+    }, 150);
+  }
+
+  function onCredential(resp){
+    if (!resp || !resp.credential){ return; }
+    idToken = resp.credential;
+    var p = decodeJwt(idToken);
+    user = { email: p.email || '', name: p.name || p.email || 'Signed in', picture: p.picture || '' };
+    anthKey = user.email ? loadKey(user.email) : null;
+    renderIdentity();
+    if (anthKey){ show('state-ready'); } else { show('state-needkey'); if(els['key-input']) els['key-input'].focus(); }
+  }
+
+  function renderIdentity(){
+    var initials = (user.name || '?').trim().charAt(0).toUpperCase();
+    var fallback = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="34" height="34"><rect width="34" height="34" rx="17" fill="%23FF6940"/><text x="17" y="22" font-family="sans-serif" font-size="15" fill="%23160b04" text-anchor="middle">'+initials+'</text></svg>');
+    [['nk-pic','nk-name','nk-email'],['rd-pic','rd-name','rd-email']].forEach(function(t){
+      var pic = els[t[0]]; pic.src = user.picture || fallback;
+      pic.onerror = function(){ pic.onerror=null; pic.src = fallback; };
+      els[t[1]].textContent = user.name;
+      els[t[2]].textContent = user.email;
+    });
+  }
+
+  function signOut(){
+    if (window.google && window.google.accounts && window.google.accounts.id){
+      try { google.accounts.id.disableAutoSelect(); } catch(e){}
+    }
+    idToken = null; user = null; anthKey = null;
+    statusEl.innerHTML = '';
+    show('state-signedout');
+  }
+
+  // ---- key linking ----
+  function linkKey(){
+    var k = (els['key-input'].value || '').trim();
+    els['key-err'].textContent = '';
+    if (!/^sk-ant-/.test(k)){
+      els['key-err'].textContent = 'That doesn’t look like an Anthropic key — it should start with sk-ant-.';
+      return;
+    }
+    anthKey = k;
+    if (user && user.email) saveKey(user.email, k);
+    els['key-input'].value = '';
+    show('state-ready');
+    if (els['jh-role']) els['jh-role'].focus();
+  }
+  if (els['key-save']) els['key-save'].addEventListener('click', linkKey);
+  if (els['key-input']) els['key-input'].addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); linkKey(); } });
+  if (els['nk-signout']) els['nk-signout'].addEventListener('click', signOut);
+  if (els['rd-signout']) els['rd-signout'].addEventListener('click', signOut);
+  if (els['rd-changekey']) els['rd-changekey'].addEventListener('click', function(){
+    if (user && user.email) clearKey(user.email);
+    anthKey = null;
+    show('state-needkey');
+    if (els['key-input']) els['key-input'].focus();
+  });
+
+  // ---- search ----
+  function selectedBoards(){
+    return Array.prototype.slice.call(els['jh-boards'].querySelectorAll('input:checked')).map(function(i){ return i.value; });
+  }
   var LOAD_LINES = [
     'Briefing the agent…',
     'Searching LinkedIn, Indeed, Glassdoor & Upwork…',
     'Reading live postings…',
     'De-duplicating and formatting results…'
   ];
-
   function showLoading(){
     var skel = '';
-    for (var i=0;i<4;i++){
-      skel += '<div class="skel"><div class="bar w1"></div><div class="bar w2"></div><div class="bar w3"></div></div>';
-    }
+    for (var i=0;i<4;i++){ skel += '<div class="skel"><div class="bar w1"></div><div class="bar w2"></div><div class="bar w3"></div></div>'; }
     statusEl.innerHTML =
-      '<div class="loading">' +
-        '<div class="line"><span class="dot"></span><span id="jh-load-line">'+LOAD_LINES[0]+'</span></div>' +
-        skel +
-      '</div>';
+      '<div class="loading"><div class="line"><span class="dot"></span><span id="jh-load-line">'+LOAD_LINES[0]+'</span></div>'+skel+'</div>';
     var idx = 0;
     loadingTimer = setInterval(function(){
       idx = (idx + 1) % LOAD_LINES.length;
-      var el = document.getElementById('jh-load-line');
-      if (el) el.textContent = LOAD_LINES[idx];
+      var el = document.getElementById('jh-load-line'); if (el) el.textContent = LOAD_LINES[idx];
     }, 4000);
   }
-  function stopLoading(){
-    if (loadingTimer){ clearInterval(loadingTimer); loadingTimer = null; }
-  }
-
+  function stopLoading(){ if (loadingTimer){ clearInterval(loadingTimer); loadingTimer = null; } }
   function note(icon, html, isErr){
     statusEl.innerHTML = '<div class="note'+(isErr?' err':'')+'"><div class="ico">'+icon+'</div><div>'+html+'</div></div>';
   }
-
   function renderResults(data){
     var list = (data && data.results) || [];
     if (!list.length){
-      note('🕳️',
-        'No live openings came back for <b>'+esc(data.role||'that search')+'</b>'+(data.location?(' in <b>'+esc(data.location)+'</b>'):'')+
+      note('🕳️', 'No live openings came back for <b>'+esc(data.role||'that search')+'</b>'+(data.location?(' in <b>'+esc(data.location)+'</b>'):'')+
         ' just now. Try broadening the role, clearing the location, or selecting more boards.', false);
       return;
     }
-    var head =
-      '<div class="results-head">' +
-        '<h2>Openings for “'+esc(data.role)+'”'+(data.location?(' · '+esc(data.location)):'')+'</h2>' +
-        '<span class="count">'+list.length+' found · live</span>' +
-      '</div>';
+    var head = '<div class="results-head"><h2>Openings for “'+esc(data.role)+'”'+(data.location?(' · '+esc(data.location)):'')+'</h2>'+
+      '<span class="count">'+list.length+' found · live</span></div>';
     var cards = list.map(function(j){
       var metaBits = [];
       if (j.company) metaBits.push('<b>'+esc(j.company)+'</b>');
       if (j.location) metaBits.push(esc(j.location));
-      return '<a class="card" href="'+esc(j.link)+'" target="_blank" rel="noopener nofollow">' +
-        '<div class="top">' +
-          '<div class="title">'+esc(j.title)+'</div>' +
-          (j.source ? '<div class="src">'+esc(j.source)+'</div>' : '') +
-        '</div>' +
-        (metaBits.length ? '<div class="meta">'+metaBits.join('<span style="opacity:.4">·</span>')+'</div>' : '') +
-        '<div class="open">Open posting ↗</div>' +
-      '</a>';
+      return '<a class="card" href="'+esc(j.link)+'" target="_blank" rel="noopener nofollow">'+
+        '<div class="top"><div class="title">'+esc(j.title)+'</div>'+(j.source?'<div class="src">'+esc(j.source)+'</div>':'')+'</div>'+
+        (metaBits.length?'<div class="meta">'+metaBits.join('<span style="opacity:.4">·</span>')+'</div>':'')+
+        '<div class="open">Open posting ↗</div></a>';
     }).join('');
     statusEl.innerHTML = head + '<div class="cards">'+cards+'</div>';
   }
 
-  form.addEventListener('submit', function(ev){
+  if (els['jh-form']) els['jh-form'].addEventListener('submit', function(ev){
     ev.preventDefault();
-    var role = roleEl.value.trim();
-    if (!role){ roleEl.focus(); return; }
+    if (!idToken){ show('state-signedout'); return; }
+    if (!anthKey){ show('state-needkey'); return; }
+    var role = els['jh-role'].value.trim();
+    if (!role){ els['jh-role'].focus(); return; }
     var boards = selectedBoards();
-    if (!boards.length){
-      note('☑️', 'Pick at least one job board to search.', true);
-      return;
-    }
+    if (!boards.length){ note('☑️','Pick at least one job board to search.', true); return; }
 
-    goBtn.disabled = true;
-    goBtn.innerHTML = '<span class="spin"></span> Searching…';
+    els['jh-go'].disabled = true;
+    els['jh-go'].innerHTML = '<span class="spin"></span> Searching…';
     showLoading();
 
     fetch('/api/jobhunt', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ role: role, location: locEl.value.trim(), boards: boards })
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+idToken, 'x-anthropic-key':anthKey },
+      body: JSON.stringify({ role: role, location: els['jh-location'].value.trim(), boards: boards })
     }).then(function(r){
-      return r.json().catch(function(){ return {}; }).then(function(body){ return { ok: r.ok, status: r.status, body: body }; });
+      return r.json().catch(function(){ return {}; }).then(function(b){ return { ok:r.ok, status:r.status, body:b }; });
     }).then(function(res){
       stopLoading();
       if (res.ok){ renderResults(res.body); return; }
-      if (res.status === 503 || (res.body && res.body.error === 'not_configured')){
-        note('🔌',
-          'The live agent isn’t switched on for this deployment yet — it needs an <span style="font-family:var(--font-mono)">ANTHROPIC_API_KEY</span> configured on the server. ' +
-          'The search box, agent and API are all wired and ready; add the key and it runs for real. ' +
-          '<br><br>Want to see it live or talk through the build? <a href="mailto:anchit.tandon@gmail.com?subject=JobHunt%20live%20demo" style="color:var(--primary)">Drop me a note</a>.',
-          true);
-        return;
+      var err = res.body && res.body.error;
+      if (res.status === 401 && err === 'signin_required'){
+        note('🔐','Your sign-in expired. Please <b>sign in with Google again</b> to keep searching.', true);
+        signOut(); return;
       }
-      var msg = (res.body && (res.body.message || res.body.detail || res.body.error)) || ('request failed ('+res.status+')');
-      note('⚠️', 'The agent hit a snag: <b>'+esc(msg)+'</b>. Give it another go in a moment.', true);
-    }).catch(function(e){
+      if (err === 'bad_key'){
+        note('🔑','Anthropic rejected that key. <b>Check it and re-link</b> — it should be an active key from your console with billing enabled.', true);
+        if (user && user.email) clearKey(user.email); anthKey = null; show('state-needkey'); return;
+      }
+      if (err === 'byo_key_required'){
+        note('🔑','No Anthropic key on the request. Please link your key and try again.', true);
+        show('state-needkey'); return;
+      }
+      var msg = (res.body && (res.body.message || res.body.detail || err)) || ('request failed ('+res.status+')');
+      note('⚠️','The agent hit a snag: <b>'+esc(msg)+'</b>. Give it another go in a moment.', true);
+    }).catch(function(){
       stopLoading();
-      note('📡', 'Couldn’t reach the agent — check your connection and try again.', true);
+      note('📡','Couldn’t reach the agent — check your connection and try again.', true);
     }).then(function(){
-      goBtn.disabled = false;
-      goBtn.innerHTML = 'Search jobs →';
+      els['jh-go'].disabled = false;
+      els['jh-go'].innerHTML = 'Search jobs →';
     });
   });
+
+  // Test seam: lets headless checks drive the signed-in state without real OAuth.
+  window.__jobhuntTestSignIn = function(credential){ onCredential({ credential: credential }); };
 })();
 </script>
 </body>
