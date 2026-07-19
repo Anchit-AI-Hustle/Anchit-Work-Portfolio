@@ -15,6 +15,7 @@ const WWW = join(ROOT, 'www');
 
 const assets = [
   'index.html',
+  'jobhunt.html',
   'manifest.json',
   'sw.js',
   'AnchitTandon-AppLogo.png',
