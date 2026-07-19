@@ -8769,6 +8769,30 @@
      you leave via the sidebar like any other page. Hide those controls there. */
   body.view-chat #chatMinimizeBtn,
   body.view-chat #chatMaximizeBtn { display: none !important; }
+
+  /* TRUE full-screen chat page: fill the whole content canvas edge-to-edge with
+     a solid backing so the animated background never bleeds around a floating
+     card. (Was a centred 1060px rounded panel with padding.) */
+  body.view-chat #view-chat:not(.chat-view-minimized),
+  #view-chat.active:not(.chat-view-minimized) { padding: 0 !important; }
+  body.view-chat #view-chat .container,
+  #view-chat.active #view-chat .container,
+  #view-chat.active .container {
+    max-width: none !important; width: 100% !important; height: 100% !important;
+    margin: 0 !important; padding: 0 !important;
+  }
+  body.view-chat #view-chat .chat-block,
+  #view-chat.active .chat-block {
+    border: 0 !important; border-radius: 0 !important; box-shadow: none !important;
+    height: 100% !important; background: var(--bg-elev) !important;
+  }
+  /* Drop the "Anchit Tandon · Ask me anything" eyebrow line on the full page —
+     the header already says it, and this reclaims the last strip of dead space. */
+  body.view-chat #view-chat .container > div:has(> .eyebrow),
+  #view-chat.active .container > div:has(> .eyebrow) { display: none !important; }
+  /* Keep message lines readable even on a very wide canvas. */
+  body.view-chat #view-chat .msg-bubble,
+  #view-chat.active .msg-bubble { max-width: min(78%, 760px) !important; }
 </style>
 <!-- ═══════════════════════════════════════════════════════════════════════════
      IMMERSIVE MOTION LAYER — Three.js WebGL backdrop + GSAP flourishes.
