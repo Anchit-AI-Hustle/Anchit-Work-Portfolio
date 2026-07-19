@@ -8816,7 +8816,6 @@
      view, so all pages gain living depth. Replaces the 2D #floatBg when active. */
   function initWebGL() {
     if (reduceMotion || !window.THREE) return;
-    // WebGL support probe.
     try {
       var probe = document.createElement('canvas');
       if (!(probe.getContext('webgl') || probe.getContext('experimental-webgl'))) return;
@@ -8827,93 +8826,136 @@
     canvas.id = 'webglBg';
     canvas.setAttribute('aria-hidden', 'true');
     canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:0;' +
-      'pointer-events:none;opacity:0;transition:opacity 1.2s ease;';
-    // Insert at the very back so the branded ambient layers still glow in front.
+      'pointer-events:none;opacity:0;transition:opacity 1.4s ease;';
     document.body.insertBefore(canvas, document.body.firstChild);
 
-    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, powerPreference: 'low-power' });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2));
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: !isMobile, alpha: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.25 : 1.75));
+    renderer.autoClear = false;
 
-    var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
-    camera.position.z = 26;
-
-    // Pull colors straight from the live theme tokens so it stays on-brand.
+    // Theme colors → shader/material tints.
     var css = getComputedStyle(document.documentElement);
-    function tone(varName, fallback) {
-      var v = (css.getPropertyValue(varName) || '').trim();
-      try { return new THREE.Color(v || fallback); } catch (e) { return new THREE.Color(fallback); }
-    }
+    function tone(v, fb) { var s = (css.getPropertyValue(v) || '').trim(); try { return new THREE.Color(s || fb); } catch (e) { return new THREE.Color(fb); } }
     var primary = tone('--primary', '#FF6940');
     var accent  = tone('--accent',  '#2EE5AC');
-    var gold     = new THREE.Color('#FFB736');
+    var gold    = new THREE.Color('#FFB736');
 
-    var COUNT = isMobile ? 1100 : 2400;
-    var SPREAD = 70;
+    // ─── 1) Flowing energy-field background (fullscreen GLSL, domain-warped FBM) ───
+    var bgScene = new THREE.Scene();
+    var bgCam = new THREE.Camera();
+    var uNeb = {
+      uTime:  { value: 0 },
+      uMouse: { value: new THREE.Vector2(0, 0) },
+      uRes:   { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+      uBoost: { value: 1.0 },
+      uC1: { value: primary }, uC2: { value: accent }, uC3: { value: gold }
+    };
+    var nebMat = new THREE.ShaderMaterial({
+      uniforms: uNeb, depthTest: false, depthWrite: false,
+      vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position, 1.0); }',
+      fragmentShader: [
+        'precision highp float;',
+        'uniform float uTime; uniform vec2 uMouse; uniform vec2 uRes; uniform float uBoost;',
+        'uniform vec3 uC1; uniform vec3 uC2; uniform vec3 uC3; varying vec2 vUv;',
+        'float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }',
+        'float noise(vec2 p){ vec2 i=floor(p), f=fract(p); float a=hash(i),b=hash(i+vec2(1.,0.)),c=hash(i+vec2(0.,1.)),d=hash(i+vec2(1.,1.)); vec2 u=f*f*(3.-2.*f); return mix(a,b,u.x)+(c-a)*u.y*(1.-u.x)+(d-b)*u.x*u.y; }',
+        'float fbm(vec2 p){ float v=0.,a=0.5; for(int i=0;i<5;i++){ v+=a*noise(p); p*=2.02; a*=0.5; } return v; }',
+        'void main(){',
+        '  vec2 uv=vUv; vec2 p=(uv-0.5); p.x*=uRes.x/uRes.y; p+=uMouse*0.12;',
+        '  float t=uTime*0.05;',
+        '  vec2 q=vec2(fbm(p*2.2+vec2(t,0.)), fbm(p*2.2+vec2(5.2,t*0.8)));',
+        '  float n=fbm(p*3.0 + q*1.6 + vec2(-t*0.6, t*0.4));',
+        '  float n2=fbm(p*5.0 - q*0.8 + vec2(t, -t));',
+        '  vec3 col=mix(uC1,uC2,smoothstep(0.25,0.78,n));',
+        '  col=mix(col,uC3,pow(clamp(n2,0.,1.),3.0)*0.7);',
+        '  float energy=pow(clamp(n,0.,1.),2.1);',
+        '  col*=energy*1.35*uBoost;',
+        '  float r=length((uv-0.5)*vec2(1.35,1.15));',
+        '  col*=smoothstep(1.05,0.12,r)*0.8;',
+        '  gl_FragColor=vec4(col,1.0);',
+        '}'
+      ].join('\n')
+    });
+    bgScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), nebMat));
+
+    // ─── 2) Foreground: depth particle field + a glowing geometric core ───
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 0.1, 260);
+    camera.position.z = 30;
+
+    var COUNT = isMobile ? 1400 : 3200, SPREAD = 90;
     var geo = new THREE.BufferGeometry();
-    var pos = new Float32Array(COUNT * 3);
-    var col = new Float32Array(COUNT * 3);
+    var pos = new Float32Array(COUNT * 3), col = new Float32Array(COUNT * 3);
     for (var i = 0; i < COUNT; i++) {
-      pos[i * 3]     = (Math.random() - 0.5) * SPREAD;
-      pos[i * 3 + 1] = (Math.random() - 0.5) * SPREAD;
-      pos[i * 3 + 2] = (Math.random() - 0.5) * SPREAD;
-      var r = Math.random();
-      var c = r < 0.55 ? primary : (r < 0.82 ? gold : accent);
-      col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b;
+      pos[i*3] = (Math.random()-0.5)*SPREAD; pos[i*3+1] = (Math.random()-0.5)*SPREAD; pos[i*3+2] = (Math.random()-0.5)*SPREAD;
+      var rr = Math.random(); var cc = rr<0.55 ? primary : (rr<0.82 ? gold : accent);
+      col[i*3]=cc.r; col[i*3+1]=cc.g; col[i*3+2]=cc.b;
     }
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
-
-    var mat = new THREE.PointsMaterial({
-      size: isMobile ? 0.7 : 0.6, map: softSprite(THREE), vertexColors: true,
-      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-      opacity: 1.0, sizeAttenuation: true
-    });
+    var mat = new THREE.PointsMaterial({ size: isMobile ? 0.55 : 0.5, map: softSprite(THREE), vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.95, sizeAttenuation: true });
     var points = new THREE.Points(geo, mat);
     scene.add(points);
 
+    // Glowing core: two counter-rotating wireframe icosahedra (an "AI core").
+    function shell(radius, detail, color, opacity) {
+      var m = new THREE.Mesh(new THREE.IcosahedronGeometry(radius, detail),
+        new THREE.MeshBasicMaterial({ color: color, wireframe: true, transparent: true, opacity: opacity, blending: THREE.AdditiveBlending, depthWrite: false }));
+      scene.add(m); return m;
+    }
+    var coreOuter = shell(9, 1, primary, 0.16);
+    var coreInner = shell(5.2, 0, accent, 0.14);
+    var coreGlow  = shell(3.0, 0, gold, 0.22);
+
     var mxT = 0, myT = 0, mx = 0, my = 0, scrollY = 0;
-    window.addEventListener('pointermove', function (e) {
-      mxT = (e.clientX / window.innerWidth) - 0.5;
-      myT = (e.clientY / window.innerHeight) - 0.5;
-    }, { passive: true });
+    window.addEventListener('pointermove', function (e) { mxT = (e.clientX/window.innerWidth)-0.5; myT = (e.clientY/window.innerHeight)-0.5; }, { passive: true });
     window.addEventListener('scroll', function () { scrollY = window.scrollY || 0; }, { passive: true });
 
     function resize() {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
+      camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight, false);
+      uNeb.uRes.value.set(window.innerWidth, window.innerHeight);
     }
     resize();
     window.addEventListener('resize', resize);
 
-    // Retire the 2D particle canvas so we don't double up.
-    var old = document.getElementById('floatBg');
-    if (old) old.style.opacity = '0';
+    // Retire the older/2D ambient layers so the WebGL is the single hero.
+    var old = document.getElementById('floatBg'); if (old) old.style.opacity = '0';
+    var orb = document.querySelector('.energy-orb'); if (orb) orb.style.opacity = '0';
+    var aura = document.querySelector('.float-aura'); if (aura) aura.style.opacity = '0';
 
     requestAnimationFrame(function () { canvas.style.opacity = '1'; });
 
     var running = true, t = 0;
-    document.addEventListener('visibilitychange', function () {
-      running = !document.hidden;
-      if (running) requestAnimationFrame(tick);
-    });
+    document.addEventListener('visibilitychange', function () { running = !document.hidden; if (running) requestAnimationFrame(tick); });
     function tick() {
       if (!running) return;
-      t += 0.0022;
-      mx += (mxT - mx) * 0.04; my += (myT - my) * 0.04;
-      points.rotation.y = t * 0.4 + mx * 0.5;
-      points.rotation.x = Math.sin(t * 0.5) * 0.06 - my * 0.4;
-      camera.position.x = mx * 4;
-      camera.position.y = -my * 3 - scrollY * 0.004;
+      t += 0.0016;
+      mx += (mxT - mx) * 0.045; my += (myT - my) * 0.045;
+      uNeb.uTime.value = t * 10.0;
+      uNeb.uMouse.value.set(mx, my);
+
+      points.rotation.y = t * 0.28 + mx * 0.5;
+      points.rotation.x = Math.sin(t * 0.4) * 0.05 - my * 0.4;
+
+      var pulse = 1 + Math.sin(t * 1.6) * 0.03;
+      coreOuter.rotation.y += 0.0016; coreOuter.rotation.x += 0.0008; coreOuter.scale.setScalar(pulse);
+      coreInner.rotation.y -= 0.0028; coreInner.rotation.z += 0.0016; coreInner.scale.setScalar(1 + Math.sin(t*1.6+1.0)*0.05);
+      coreGlow.rotation.x += 0.004; coreGlow.rotation.y -= 0.003;
+
+      camera.position.x = mx * 6;
+      camera.position.y = -my * 4.5 - scrollY * 0.006;
       camera.lookAt(scene.position);
+
+      renderer.clear();
+      renderer.render(bgScene, bgCam);
       renderer.render(scene, camera);
       requestAnimationFrame(tick);
     }
     tick();
 
-    // Exposed so GSAP can nudge intensity on navigation.
-    window.__webglBg = { mat: mat };
+    // Exposed so GSAP can spike intensity on navigation.
+    window.__webglBg = { mat: mat, neb: uNeb, coreOuter: coreOuter, coreInner: coreInner };
   }
 
   function softSprite(THREE) {
@@ -8956,11 +8998,19 @@
 
     document.addEventListener('viewChanged', function () {
       if (reduceMotion) return;
-      gsap.fromTo(wipe, { xPercent: -100, opacity: 0.85 },
+      gsap.fromTo(wipe, { xPercent: -100, opacity: 0.9 },
         { xPercent: 100, opacity: 0, duration: 0.7, ease: 'power2.inOut' });
-      if (window.__webglBg && window.__webglBg.mat) {
-        gsap.fromTo(window.__webglBg.mat, { opacity: 1.25 },
-          { opacity: 0.9, duration: 1.0, ease: 'power2.out' });
+      var w = window.__webglBg;
+      if (w) {
+        // Spike the energy field and kick the core into a spin on every jump.
+        if (w.neb) gsap.fromTo(w.neb.uBoost, { value: 2.1 }, { value: 1.0, duration: 1.1, ease: 'power2.out' });
+        if (w.mat) gsap.fromTo(w.mat, { opacity: 1.35 }, { opacity: 0.95, duration: 1.0, ease: 'power2.out' });
+        if (w.coreOuter) gsap.fromTo(w.coreOuter.rotation, { z: '-=0.5' }, { z: '+=0.5', duration: 1.2, ease: 'power3.out' });
+      }
+      // A brief incoming-view "materialize" — subtle scale/blur clear.
+      var enterView = document.querySelector('.view.active');
+      if (enterView) {
+        gsap.fromTo(enterView, { filter: 'brightness(1.35)' }, { filter: 'brightness(1)', duration: 0.6, ease: 'power2.out', clearProps: 'filter' });
       }
       // Pop in any stat figures the newly active view just revealed.
       var active = document.querySelector('.view.active');
@@ -9007,8 +9057,8 @@
   /* Keep text crisp over the animated backdrop (readability). */
   .reading-scrim{ position:fixed; inset:0; z-index:0; pointer-events:none;
     background:
-      radial-gradient(120% 90% at 50% 0%, rgba(10,8,6,.30), transparent 60%),
-      linear-gradient(180deg, rgba(10,8,6,.20), rgba(10,8,6,.10) 42%, rgba(10,8,6,.24)); }
+      radial-gradient(120% 90% at 50% 0%, rgba(10,8,6,.18), transparent 62%),
+      linear-gradient(180deg, rgba(10,8,6,.12), rgba(10,8,6,.05) 42%, rgba(10,8,6,.16)); }
   /* Section focus: the block the reader is on stays full; the rest recede
      gently so attention lands where they are. Kept subtle and gated. */
   .uf-off{ opacity:.46; filter:saturate(.9); transition:opacity .5s ease, filter .5s ease; }
