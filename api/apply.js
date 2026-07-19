@@ -16,7 +16,14 @@ function geminiKey() {
   return (e.GEMINI_API_KEY || e.Gemini_API_Key || e.GEMINI_KEY || e.GOOGLE_API_KEY
     || e.GOOGLE_GENAI_API_KEY || e.GOOGLE_GEMINI_API_KEY || '').trim();
 }
-const MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
+const CEREBRAS_MODEL = process.env.CEREBRAS_MODEL || 'llama-3.3-70b';
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct:free';
+
+function haveAnyProvider() {
+  return !!(process.env.GROQ_API_KEY || process.env.CEREBRAS_API_KEY || geminiKey() || process.env.OPENROUTER_API_KEY);
+}
 
 async function verifySupabase(token, url, anonKey) {
   if (!url || !anonKey) return { ok: true, email: null };
@@ -93,21 +100,55 @@ OUTPUT FORMAT — return ONLY a JSON object, no markdown fences, no commentary:
 {"resume": string, "coverLetter": string, "fit": string}`;
 }
 
-async function callGemini(key, prompt) {
-  const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + MODEL + ':generateContent?key=' + encodeURIComponent(key);
-  const r = await fetch(url, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { temperature: 0.5, maxOutputTokens: 4096 } }),
-  });
-  return r;
+async function fetchTO(url, opts, ms) {
+  const c = new AbortController();
+  const t = setTimeout(() => c.abort(), ms || 18000);
+  try { return await fetch(url, Object.assign({}, opts, { signal: c.signal })); }
+  finally { clearTimeout(t); }
 }
 
-function extractText(data) {
-  try {
-    const parts = (data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) || [];
-    return parts.filter((p) => typeof p.text === 'string').map((p) => p.text).join('').trim();
-  } catch (e) { return ''; }
+// One OpenAI-compatible chat call (Groq / Cerebras / OpenRouter). Returns the
+// message text, or throws (with '429' when rate-limited) so the cascade moves on.
+async function oaiChat(url, key, model, prompt, jsonMode, extraHeaders) {
+  const body = { model, messages: [{ role: 'user', content: prompt }], temperature: 0.5, max_tokens: 4096 };
+  if (jsonMode) body.response_format = { type: 'json_object' };
+  const r = await fetchTO(url, { method: 'POST', headers: Object.assign({ 'content-type': 'application/json', Authorization: 'Bearer ' + key }, extraHeaders || {}), body: JSON.stringify(body) });
+  if (r.status === 429) throw new Error('429');
+  if (!r.ok) throw new Error('http_' + r.status);
+  const d = await r.json();
+  return (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
+}
+
+async function geminiGen(key, prompt) {
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + GEMINI_MODEL + ':generateContent?key=' + encodeURIComponent(key);
+  const opts = { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { temperature: 0.5, maxOutputTokens: 4096 } }) };
+  let r = await fetchTO(url, opts);
+  if (r.status === 429) { await new Promise((s) => setTimeout(s, 2500)); r = await fetchTO(url, opts); }
+  if (r.status === 429) throw new Error('429');
+  if (!r.ok) throw new Error('http_' + r.status);
+  const d = await r.json();
+  const parts = (d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts) || [];
+  return parts.filter((p) => typeof p.text === 'string').map((p) => p.text).join('').trim();
+}
+
+// Try free providers in order of free-tier generosity until one returns a kit.
+async function generate(prompt) {
+  const providers = [];
+  if (process.env.GROQ_API_KEY) providers.push({ n: 'groq', run: () => oaiChat('https://api.groq.com/openai/v1/chat/completions', process.env.GROQ_API_KEY, GROQ_MODEL, prompt, true) });
+  if (process.env.CEREBRAS_API_KEY) providers.push({ n: 'cerebras', run: () => oaiChat('https://api.cerebras.ai/v1/chat/completions', process.env.CEREBRAS_API_KEY, CEREBRAS_MODEL, prompt, true) });
+  const gk = geminiKey();
+  if (gk) providers.push({ n: 'gemini', run: () => geminiGen(gk, prompt) });
+  if (process.env.OPENROUTER_API_KEY) providers.push({ n: 'openrouter', run: () => oaiChat('https://openrouter.ai/api/v1/chat/completions', process.env.OPENROUTER_API_KEY, OPENROUTER_MODEL, prompt, false, { 'HTTP-Referer': 'https://anchit-tandon.com/jobhunt', 'X-Title': 'JobHunt' }) });
+
+  const errs = [];
+  for (const p of providers) {
+    try {
+      const kit = parseKit(await p.run());
+      if (kit && (kit.resume || kit.coverLetter)) return { kit };
+      errs.push(p.n + ':bad_output');
+    } catch (e) { errs.push(p.n + ':' + String((e && e.message) || e).slice(0, 30)); }
+  }
+  return { detail: errs.join(' | ') };
 }
 
 function parseKit(text) {
@@ -139,8 +180,7 @@ async function handler(req, res) {
   const gate = await verifySupabase(auth.replace(/^Bearer\s+/i, '').trim(), supabaseUrl, supabaseAnonKey);
   if (!gate.ok) return res.status(401).json({ error: 'signin_required' });
 
-  const key = geminiKey();
-  if (!key) return res.status(503).json({ error: 'engine_not_configured' });
+  if (!haveAnyProvider()) return res.status(503).json({ error: 'engine_not_configured' });
 
   let body = {};
   try { body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {}); } catch {}
@@ -153,17 +193,14 @@ async function handler(req, res) {
   if (!job.title) return res.status(400).json({ error: 'job_required' });
 
   try {
-    let r = await callGemini(key, buildPrompt(profile, job));
-    if (r.status === 429) { await new Promise((rs) => setTimeout(rs, 3000)); r = await callGemini(key, buildPrompt(profile, job)); }
-    if (!r.ok) {
-      const detail = await r.text().catch(() => '');
-      if (r.status === 429) return res.status(429).json({ error: 'rate_limited', detail: detail.slice(0, 300) });
-      return res.status(502).json({ error: 'engine_error', status: r.status, detail: detail.slice(0, 300) });
+    const out = await generate(buildPrompt(profile, job));
+    if (out.kit) {
+      res.setHeader('Cache-Control', 'no-store');
+      return res.status(200).json(out.kit);
     }
-    const kit = parseKit(extractText(await r.json()));
-    if (!kit) return res.status(502).json({ error: 'bad_output' });
-    res.setHeader('Cache-Control', 'no-store');
-    return res.status(200).json(kit);
+    // Every configured provider failed. If it was rate limits, say so.
+    const rateLimited = /429/.test(out.detail || '');
+    return res.status(rateLimited ? 429 : 502).json({ error: rateLimited ? 'rate_limited' : 'engine_error', detail: (out.detail || '').slice(0, 300) });
   } catch (e) {
     return res.status(502).json({ error: 'fetch_failed', message: String(e).slice(0, 200) });
   }
@@ -171,3 +208,4 @@ async function handler(req, res) {
 
 module.exports = handler;
 module.exports.config = { runtime: 'nodejs', maxDuration: 30 };
+module.exports._test = { generate, parseKit, stripTagBlocks };
