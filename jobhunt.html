@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/assets/vendor/supabase.min.js"></script>
 
 <style>
   :root{
@@ -171,7 +171,7 @@
     <!-- sign-in not configured -->
     <div id="state-noconfig" class="hidden">
       <div class="gate-head"><span class="step">Setup</span><span class="h">Sign-in isn’t switched on yet</span></div>
-      <p class="gate-copy">This deployment doesn’t have Supabase auth configured, so the gated email sign-in can’t start. Once <span style="font-family:var(--font-mono)">SUPABASE_URL</span> and <span style="font-family:var(--font-mono)">SUPABASE_ANON_KEY</span> are set on the server, this page will ask visitors to sign in by email and bring their own key.</p>
+      <p class="gate-copy">The sign-in library couldn’t load, so Google sign-in can’t start. This is usually a browser extension (ad/script blocker) blocking it, or a temporary network hiccup — try disabling blockers for this site or reloading.</p>
       <p class="keynote">Building this yourself? <a href="mailto:anchit.tandon@gmail.com?subject=JobHunt%20setup">Ask me how it’s wired.</a></p>
     </div>
 
