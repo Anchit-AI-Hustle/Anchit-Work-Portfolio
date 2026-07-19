@@ -7570,10 +7570,15 @@
     border-color: var(--rule-strong) !important;
     color: var(--ink) !important;
   }
-  .sidebar,
   .top-bar,
   .chat-return {
     background: rgba(10, 10, 10, .94) !important;
+    box-shadow: none !important;
+  }
+  /* Sidebar reads as translucent warm glass so the ambient field shows through
+     instead of a flat black block. */
+  .sidebar {
+    background: linear-gradient(180deg, rgba(24,15,7,.56), rgba(12,8,4,.42)) !important;
     box-shadow: none !important;
   }
   .sidebar { border-right: 1px solid var(--rule) !important; }
