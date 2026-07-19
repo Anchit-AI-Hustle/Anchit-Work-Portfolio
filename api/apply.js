@@ -31,6 +31,24 @@ async function verifySupabase(token, url, anonKey) {
   } catch (e) { return { ok: false }; }
 }
 
+// Remove <tag>…</tag> blocks (script/style) via a plain scan — no regex, so it
+// can't be fooled by odd closing tags the way a tag-filtering regexp can.
+function stripTagBlocks(html, tag) {
+  const lower = html.toLowerCase();
+  const openStr = '<' + tag, closeStr = '</' + tag;
+  let out = '', i = 0;
+  for (;;) {
+    const open = lower.indexOf(openStr, i);
+    if (open === -1) return out + html.slice(i);
+    out += html.slice(i, open);
+    const close = lower.indexOf(closeStr, open);
+    if (close === -1) return out;            // unterminated — drop the tail
+    const gt = lower.indexOf('>', close);
+    if (gt === -1) return out;
+    i = gt + 1;
+  }
+}
+
 // Fetch a portfolio/CV URL and reduce it to readable text.
 async function fetchProfileFromUrl(url) {
   try {
@@ -40,9 +58,8 @@ async function fetchProfileFromUrl(url) {
     clearTimeout(t);
     if (!r.ok) return '';
     let html = await r.text();
-    // Strip scripts/styles (closing tag tolerates whitespace/attrs), then tags.
-    html = html.replace(/<script\b[^<]*(?:(?!<\/script\s*>)<[^<]*)*<\/script\s*>/gi, ' ')
-               .replace(/<style\b[^<]*(?:(?!<\/style\s*>)<[^<]*)*<\/style\s*>/gi, ' ');
+    // Strip script/style blocks with a plain scan, then remove remaining tags.
+    html = stripTagBlocks(stripTagBlocks(html, 'script'), 'style');
     // Decode a minimal entity set; ampersand LAST to avoid double-unescaping.
     const text = html.replace(/<[^>]+>/g, ' ')
       .replace(/&(?:nbsp|#0*160);/gi, ' ')
