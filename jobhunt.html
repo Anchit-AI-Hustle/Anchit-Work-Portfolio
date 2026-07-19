@@ -573,11 +573,55 @@
   if (els['apply-modal']) els['apply-modal'].addEventListener('click', function(e){ if (e.target === els['apply-modal']) closeModal(); });
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && els['apply-modal'] && !els['apply-modal'].classList.contains('hidden')) closeModal(); });
 
-  function download(name, text){
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([text], { type:'text/markdown' }));
-    a.download = name; document.body.appendChild(a); a.click();
-    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 100);
+  // Minimal Markdown -> HTML for the generated resume/cover letter.
+  function mdToHtml(md){
+    function esc(s){ return String(s).replace(/[&<>]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }); }
+    function inline(s){
+      s = esc(s);
+      s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      s = s.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>');
+      s = s.replace(/\[([^\]]+)\]\((https?:[^)]+)\)/g, '<a href="$2">$1</a>');
+      return s;
+    }
+    var lines = String(md || '').replace(/\r/g, '').split('\n');
+    var out = [], inList = false;
+    function closeList(){ if (inList){ out.push('</ul>'); inList = false; } }
+    lines.forEach(function(raw){
+      var line = raw.replace(/\s+$/, '');
+      if (/^\s*[-*+]\s+/.test(line)){
+        if (!inList){ out.push('<ul>'); inList = true; }
+        out.push('<li>' + inline(line.replace(/^\s*[-*+]\s+/, '')) + '</li>');
+        return;
+      }
+      closeList();
+      if (/^###\s+/.test(line)) out.push('<h3>' + inline(line.replace(/^###\s+/, '')) + '</h3>');
+      else if (/^##\s+/.test(line)) out.push('<h2>' + inline(line.replace(/^##\s+/, '')) + '</h2>');
+      else if (/^#\s+/.test(line)) out.push('<h1>' + inline(line.replace(/^#\s+/, '')) + '</h1>');
+      else if (/^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(line)) out.push('<hr>');
+      else if (line.trim() === '') out.push('');
+      else out.push('<p>' + inline(line) + '</p>');
+    });
+    closeList();
+    return out.join('\n');
+  }
+
+  // Open a clean, print-styled document and trigger Save-as-PDF. Keeps the text
+  // selectable/vector (ATS-parseable), unlike a rasterised image PDF.
+  function downloadPdf(title, md){
+    var css = '@page{margin:16mm 15mm;} *{box-sizing:border-box;} '
+      + 'body{font-family:Georgia,"Times New Roman",serif; color:#111; font-size:11.5pt; line-height:1.5; margin:0;} '
+      + 'h1{font-size:20pt; margin:0 0 4pt; letter-spacing:-.01em;} '
+      + 'h2{font-size:13pt; margin:15pt 0 5pt; border-bottom:1px solid #bbb; padding-bottom:2pt; text-transform:uppercase; letter-spacing:.04em;} '
+      + 'h3{font-size:11.5pt; margin:10pt 0 2pt;} p{margin:0 0 6pt;} '
+      + 'ul{margin:2pt 0 8pt 16pt; padding:0;} li{margin:0 0 3pt;} '
+      + 'hr{border:0; border-top:1px solid #ddd; margin:10pt 0;} a{color:#111; text-decoration:none;}';
+    var html = '<!doctype html><html><head><meta charset="utf-8"><title>' + esc(title) + '</title><style>' + css + '</style></head><body>' + mdToHtml(md) + '</body></html>';
+    var w = window.open('', '_blank');
+    if (!w){ return false; }   // pop-up blocked
+    w.document.open(); w.document.write(html); w.document.close();
+    w.focus();
+    setTimeout(function(){ try { w.print(); } catch (e) {} }, 400);
+    return true;
   }
 
   function applyFor(job){
@@ -630,7 +674,7 @@
     var body = '<div class="kit-panel" id="kit-view"></div>'+
       '<div class="kit-actions">'+
         '<button class="btn primary" type="button" id="kit-copy">Copy</button>'+
-        '<button class="btn google" type="button" id="kit-dl">Download .md</button>'+
+        '<button class="btn google" type="button" id="kit-dl">Download PDF</button>'+
         (job.link ? '<a class="btn" href="'+esc(job.link)+'" target="_blank" rel="noopener nofollow">Open apply page ↗</a>' : '')+
       '</div>';
     els['apply-body'].innerHTML = tabs + body;
@@ -650,7 +694,12 @@
     });
     document.getElementById('kit-dl').addEventListener('click', function(){
       var base = (job.company || 'application').replace(/[^a-z0-9]+/gi,'-').toLowerCase();
-      download(base + '-' + cur + '.md', panels[cur]);
+      var label = cur === 'resume' ? 'Resume' : cur === 'cover' ? 'Cover Letter' : 'Fit Notes';
+      var ok = downloadPdf(base + '-' + cur + ' — ' + label, panels[cur]);
+      if (!ok){
+        this.textContent = 'Allow pop-ups ↗'; var self = this;
+        setTimeout(function(){ self.textContent = 'Download PDF'; }, 2600);
+      }
     });
   }
 
