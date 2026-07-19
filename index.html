@@ -1417,6 +1417,107 @@
     .reveal, .reveal-stagger > *, .reveal-left, .reveal-right, .reveal-scale { opacity: 1 !important; transform: none !important; transition: none !important; }
   }
 
+  /* ============ SEMANTIC MOTION ============ */
+  /* Every animation here is chosen to echo what the element MEANS —
+     growth numbers rise, a 0→1 metric is born by spinning out of nothing,
+     achievement badges stamp in (the biggest wins keep breathing), the
+     career path slides in phase-by-phase, and explore portals invite a click. */
+
+  /* Growth metrics — rise with a confident overshoot, then the highlighted
+     figure glows once as it lands. Reads as an upward trend. */
+  @keyframes mGrowRise {
+    0%   { opacity: 0; transform: translateY(16px) scale(.82); }
+    60%  { opacity: 1; transform: translateY(-5px) scale(1.05); }
+    100% { opacity: 1; transform: translateY(0)    scale(1); }
+  }
+  @keyframes mAccentPulse {
+    0%, 100% { text-shadow: none; }
+    50%      { text-shadow: 0 0 16px var(--primary); }
+  }
+  .hero-stats.in .hero-stat .num,
+  .work-stats.in .work-stat .num {
+    animation: mGrowRise .85s cubic-bezier(.2,.9,.25,1.2) both;
+  }
+  .hero-stats.in .hero-stat:nth-child(1) .num, .work-stats.in .work-stat:nth-child(1) .num { animation-delay: .10s; }
+  .hero-stats.in .hero-stat:nth-child(2) .num, .work-stats.in .work-stat:nth-child(2) .num { animation-delay: .20s; }
+  .hero-stats.in .hero-stat:nth-child(3) .num, .work-stats.in .work-stat:nth-child(3) .num { animation-delay: .30s; }
+  .hero-stats.in .hero-stat:nth-child(4) .num, .work-stats.in .work-stat:nth-child(4) .num { animation-delay: .40s; }
+  .hero-stats.in .hero-stat .num em,
+  .work-stats.in .work-stat .num em { animation: mAccentPulse 1.1s ease-out .55s 1; }
+
+  /* The one "0 → 1" metric literally spins into existence from nothing. */
+  @keyframes mSpawn {
+    0%   { opacity: 0; transform: scale(0)    rotate(-160deg); }
+    65%  { opacity: 1; transform: scale(1.18) rotate(10deg); }
+    100% { opacity: 1; transform: scale(1)    rotate(0); }
+  }
+  .hero-stats.in .hero-stat:nth-child(3) .num {
+    animation: mSpawn 1s cubic-bezier(.2,.8,.2,1.2) .25s both;
+  }
+
+  /* Achievement badges stamp in with a bounce, slightly rotated like a seal. */
+  @keyframes mStamp {
+    0%   { opacity: 0; transform: scale(.3)  rotate(-8deg); }
+    55%  { opacity: 1; transform: scale(1.14) rotate(3deg); }
+    100% { opacity: 1; transform: scale(1)   rotate(0); }
+  }
+  @keyframes mBadgeBreath {
+    0%, 100% { transform: none; }
+    50%      { transform: translateY(-2px) scale(1.03); }
+  }
+  .work-item.in .work-impact-chip { animation: mStamp .7s cubic-bezier(.2,.9,.3,1.3) both; }
+  .work-item.in .work-impact-row .work-impact-chip:nth-child(1) { animation-delay: .15s; }
+  .work-item.in .work-impact-row .work-impact-chip:nth-child(2) { animation-delay: .30s; }
+  .work-item.in .work-impact-row .work-impact-chip:nth-child(3) { animation-delay: .45s; }
+  /* The strongest wins (red / gold) keep a slow, living breathe after landing. */
+  .work-item.in .work-impact-chip.red,
+  .work-item.in .work-impact-chip.gold {
+    animation: mStamp .7s cubic-bezier(.2,.9,.3,1.3) both,
+               mBadgeBreath 3.4s ease-in-out 1.3s infinite;
+  }
+
+  /* Skill tags do a light staggered pop as the story fills in. */
+  @keyframes mTagPop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .work-item.in .tags .tag { animation: mTagPop .5s ease-out both; }
+  .work-item.in .tags .tag:nth-child(1) { animation-delay: .10s; }
+  .work-item.in .tags .tag:nth-child(2) { animation-delay: .16s; }
+  .work-item.in .tags .tag:nth-child(3) { animation-delay: .22s; }
+  .work-item.in .tags .tag:nth-child(4) { animation-delay: .28s; }
+  .work-item.in .tags .tag:nth-child(5) { animation-delay: .34s; }
+  .work-item.in .tags .tag:nth-child(n+6) { animation-delay: .40s; }
+
+  /* Career journey — each phase slides in along the path, and its dot pings
+     as it "arrives". Hovering nudges the arrow forward: an invitation to explore. */
+  .home-timeline.tl-armed .home-tl-item { opacity: 0; transform: translateX(-26px); }
+  @keyframes mPathIn { from { opacity: 0; transform: translateX(-26px); } to { opacity: 1; transform: none; } }
+  .home-timeline.tl-armed .home-tl-item.tl-in { animation: mPathIn .7s cubic-bezier(.16,1,.3,1) both; }
+  @keyframes mDotPing { 0% { transform: scale(.6); opacity: .8; } 100% { transform: scale(2.6); opacity: 0; } }
+  .home-tl-item.tl-in .home-tl-dot { position: relative; }
+  .home-tl-item.tl-in .home-tl-dot::after {
+    content: ''; position: absolute; inset: -2px; border-radius: 50%;
+    border: 2px solid var(--primary); animation: mDotPing .9s ease-out .25s 1 both;
+  }
+  .home-tl-item .home-tl-arrow { transition: transform .3s cubic-bezier(.16,1,.3,1); }
+  .home-tl-item:hover .home-tl-arrow { transform: translateX(6px); }
+
+  /* Explore portals — the icon completes a full turn and the arrow advances,
+     signalling "click me to go forward". */
+  .nav-card .nav-card-icon { transition: transform .55s cubic-bezier(.16,1,.3,1); }
+  .nav-card:hover .nav-card-icon { transform: rotate(360deg) scale(1.08); }
+  .nav-card .nav-card-arrow { transition: transform .3s cubic-bezier(.16,1,.3,1); }
+  .nav-card:hover .nav-card-arrow { transform: translateX(6px); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-stats.in .hero-stat .num, .work-stats.in .work-stat .num,
+    .hero-stats.in .hero-stat .num em, .work-stats.in .work-stat .num em,
+    .work-item.in .work-impact-chip, .work-item.in .work-impact-chip.red, .work-item.in .work-impact-chip.gold,
+    .work-item.in .tags .tag,
+    .home-timeline.tl-armed .home-tl-item, .home-timeline.tl-armed .home-tl-item.tl-in {
+      animation: none !important; opacity: 1 !important; transform: none !important;
+    }
+    .home-tl-item.tl-in .home-tl-dot::after { animation: none !important; opacity: 0 !important; }
+  }
+
   /* ============ ANIMATED COUNTERS ============ */
   .counter { font-variant-numeric: tabular-nums; }
 
@@ -3325,8 +3426,8 @@
         <div class="work-item reveal" id="exp-vahdam-d2c">
           <div class="work-num">00</div>
           <div class="work-content">
-            <h3>D2C <em>Global Growth</em></h3>
-            <p>Spearheading D2C growth across the US, UK, and global markets. The biggest work highlight so far is building VAHDAM Lifecycle OS: a retention workflow that connects analytics, planning, segmentation, and mailer generation. In the first 1.5–2 months, I have also helped increase UK marketing revenue; rating improvements are a supporting outcome, not the headline.</p>
+            <h3>D2C <em>US Growth</em></h3>
+            <p>Spearheading D2C growth across the US, UK, and global markets. VAHDAM Lifecycle OS is the clearest expression of how I already read this problem — a retention workflow that threads analytics, planning, segmentation, and mailer generation into a single loop. I don't call it my biggest win; I call it proof of the approach — an early, working piece of the larger vision I'm building toward. In the first 1.5–2 months, I have also helped increase UK marketing revenue; rating improvements are a supporting outcome, not the headline.</p>
             <div class="tags"><span class="tag">D2C Growth</span><span class="tag">Lifecycle OS</span><span class="tag">CRM · Klaviyo</span><span class="tag">WebEngage</span><span class="tag">US · UK · Global</span></div>
             <div class="work-impact-bar"><div class="work-impact-row"><span class="work-impact-chip gold">VAHDAM Lifecycle OS</span><span class="work-impact-chip gold">UK marketing revenue increased</span><span class="work-impact-chip gold">Joined 20 Apr 2026</span></div></div>
             <div style="margin-top: 16px;">
@@ -6079,6 +6180,32 @@
     });
     card.addEventListener('mouseleave', () => { card.style.transform = ''; });
   });
+
+  /* ============ SEMANTIC MOTION: journey path reveal ============ */
+  (function() {
+    const tl = document.querySelector('.home-timeline');
+    if (!tl) return;
+    const items = tl.querySelectorAll('.home-tl-item');
+    if (!items.length) return;
+    // Arm only when JS is present, so the phases never stay hidden without it.
+    if (!('IntersectionObserver' in window) ||
+        (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+      return;
+    }
+    tl.classList.add('tl-armed');
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        const el = e.target;
+        // Stagger each phase so the path draws in sequence.
+        const idx = Array.prototype.indexOf.call(items, el);
+        el.style.animationDelay = Math.max(0, idx) * 0.12 + 's';
+        el.classList.add('tl-in');
+        obs.unobserve(el);
+      });
+    }, { threshold: 0.35 });
+    items.forEach((el) => obs.observe(el));
+  })();
 
   /* ============ LIFECYCLE TIMELINE ============ */
   (function() {
