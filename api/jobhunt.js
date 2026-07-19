@@ -107,7 +107,10 @@ async function handler(req, res) {
 
   const supabaseUrl = process.env.SUPABASE_URL || 'https://rhvmpzjeyjminlvuhozx.supabase.co';
   const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJodm1wempleWptaW5sdnVob3p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4ODE2MTgsImV4cCI6MjA5NTQ1NzYxOH0.qmwLy5GYg5ymby-TY1Jc2k9s49XmqoAX_9NMq2ILjdg';
-  const geminiKey = process.env.GEMINI_API_KEY || '';
+  // Accept common name/casing variants so a mis-cased env var still works.
+  const env = process.env;
+  const geminiKey = (env.GEMINI_API_KEY || env.Gemini_API_Key || env.GEMINI_KEY
+    || env.GOOGLE_API_KEY || env.GOOGLE_GENAI_API_KEY || env.GOOGLE_GEMINI_API_KEY || '').trim();
   const gated = !!(supabaseUrl && supabaseAnonKey);
 
   // Public config the page reads on load.
