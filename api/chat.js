@@ -43,7 +43,7 @@ SIDE / PERSONAL BUILDS (personal projects unless noted)
 - AI TeleSuite: a real-time sales-intelligence product (live transcription, pitch scoring, conversion recommendations) — I packaged the ET Prime growth playbook into a lightweight tool for solo operators and small teams.
 - TH+ LifeEngine: a secure, login-gated, privacy-first AI wellness platform turning generic advice into personalised daily routines — extending the subscription wellness models from Times Health+.
 - Task Tracker: turns emails, meetings and voice notes into tasks on a live Jira-style board.
-- AI Job Search Agent (personal build, lives at /jobhunt): a no-code job-hunting agent built in n8n. One click searches LinkedIn, Indeed, Glassdoor and Upwork at once, de-dupes against your Google Sheet, formats every result (title, company, link, source) and appends only new roles. Ships as an importable workflow + a 20–30 min setup guide + a support group. ~50+ new listings per run; it cut my own search from ~20 hours a week to ~2.
+- JobHunt (personal build, lives at /jobhunt): a no-code AI job-search agent built in n8n. One click searches LinkedIn, Indeed, Glassdoor and Upwork at once, de-dupes against your Google Sheet, formats every result (title, company, link, source) and appends only new roles. Ships as an importable workflow + a 20–30 min setup guide + a support group. ~50+ new listings per run; it cut my own search from ~20 hours a week to ~2.
 - This portfolio: a hobby build — an interactive, OS-style profile (guided navigation, voice narration, in-page chat, responsive PWA) instead of a static resume.
 - Stacks across these span React/TypeScript, Next.js, Supabase, Vercel Functions, FastAPI, Postgres/pgvector, and multi-LLM cascades.
 
