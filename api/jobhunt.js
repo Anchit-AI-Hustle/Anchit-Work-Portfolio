@@ -1,14 +1,21 @@
-// /api/jobhunt — a live Claude-agent job search.
+// /api/jobhunt — a gated, bring-your-own-key live job-search agent.
 //
-// Given a role (and optional location + boards), Claude uses its web-search
-// tool to actually look across LinkedIn, Indeed, Glassdoor and Upwork and
-// returns a clean, de-duplicated JSON list of real openings. No n8n, no Google
-// Sheet — the agent does the hunting on request.
+//   GET  /api/jobhunt  → { googleClientId, gated }  (public config for the page)
+//   POST /api/jobhunt  → runs a live search using the CALLER'S own Anthropic key
+//
+// Gating: when GOOGLE_CLIENT_ID is set, every POST must carry a valid Google
+// ID token (Authorization: Bearer <id_token>) proving the caller signed in with
+// Google. The caller also supplies their OWN Anthropic key per request
+// (x-anthropic-key header); that key is used transiently for that one search and
+// is NEVER stored or logged anywhere on the server.
 //
 // Env:
-//   ANTHROPIC_API_KEY  (required — without it the endpoint 503s and the page
-//                       shows a friendly "not configured yet" message)
-//   CLAUDE_MODEL       (optional; default claude-opus-4-8)
+//   GOOGLE_CLIENT_ID   Enables Google sign-in gating when set. Without it the
+//                      page shows a friendly "sign-in not configured" state.
+//   ANTHROPIC_API_KEY  Optional owner fallback for private testing only. The
+//                      public flow expects every visitor to bring their own key,
+//                      so this is normally left UNSET in production.
+//   CLAUDE_MODEL       Optional; default claude-opus-4-8.
 
 const MODEL = process.env.CLAUDE_MODEL || 'claude-opus-4-8';
 const ALL_BOARDS = ['LinkedIn', 'Indeed', 'Glassdoor', 'Upwork'];
@@ -75,15 +82,50 @@ function parseListings(text) {
   }
 }
 
+// Verify a Google ID token by asking Google's tokeninfo endpoint to validate the
+// signature + expiry, then checking the audience is our own client. Returns the
+// signed-in email on success. When no client id is configured, gating is off.
+async function verifyGoogle(idToken, clientId) {
+  if (!clientId) return { ok: true, email: null };
+  if (!idToken) return { ok: false };
+  try {
+    const r = await fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idToken));
+    if (!r.ok) return { ok: false };
+    const p = await r.json();
+    if (!p || p.aud !== clientId) return { ok: false };
+    if (p.email_verified === false || p.email_verified === 'false') return { ok: false };
+    return { ok: true, email: p.email || null };
+  } catch (e) {
+    return { ok: false };
+  }
+}
+
 async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-anthropic-key');
   if (req.method === 'OPTIONS') return res.status(200).end();
+
+  const clientId = process.env.GOOGLE_CLIENT_ID || '';
+
+  // Public config the page reads on load so it knows whether/how to gate.
+  if (req.method === 'GET') {
+    res.setHeader('Cache-Control', 'no-store');
+    return res.status(200).json({ googleClientId: clientId || null, gated: !!clientId });
+  }
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return res.status(503).json({ error: 'not_configured' });
+  // --- Gate: require a valid Google sign-in when configured ---
+  const auth = (req.headers['authorization'] || '').toString();
+  const idToken = auth.replace(/^Bearer\s+/i, '').trim();
+  const gate = await verifyGoogle(idToken, clientId);
+  if (!gate.ok) return res.status(401).json({ error: 'signin_required' });
+
+  // --- Bring-your-own key: use the caller's Anthropic key, transiently ---
+  const headerKey = (req.headers['x-anthropic-key'] || '').toString().trim();
+  const apiKey = headerKey || process.env.ANTHROPIC_API_KEY || '';
+  if (!apiKey) return res.status(400).json({ error: 'byo_key_required' });
+  if (!/^sk-ant-/.test(apiKey)) return res.status(400).json({ error: 'bad_key' });
 
   let body = {};
   try { body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {}); } catch {}
@@ -103,6 +145,8 @@ async function handler(req, res) {
       const r = await callAnthropic(apiKey, buildSystem(boards), messages);
       if (!r.ok) {
         const detail = await r.text().catch(() => '');
+        // 401/403 from Anthropic almost always means the caller's own key is bad.
+        if (r.status === 401 || r.status === 403) return res.status(401).json({ error: 'bad_key' });
         return res.status(502).json({ error: 'upstream', status: r.status, detail: detail.slice(0, 200) });
       }
       const d = await r.json();
