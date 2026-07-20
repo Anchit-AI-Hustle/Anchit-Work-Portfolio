@@ -6021,6 +6021,9 @@
 	    if (typeof window.openGuideChat === 'function') window.openGuideChat();
 	    setTimeout(() => {
 	      if (typeof addBot !== 'function') return;
+	      // Only one intro: remove the generic page-guide bubble so this greeting
+	      // is the single welcome in the chat window (avoids two stacked intros).
+	      try { const pg = document.querySelector('#chatBody .msg.page-guide'); if (pg) pg.remove(); } catch (e) {}
 	      addBot(
 	        "Hey — I’m <strong>Anchit Tandon</strong>. An engineer who learned to love the funnel: I build products, scale growth, and create leverage. " +
 	        "You can reach me whichever way suits you — just choose: Call, Chat, or Text." +
