@@ -9006,9 +9006,10 @@
     var orb = document.querySelector('.energy-orb'); if (orb) orb.style.opacity = '0';
     var aura = document.querySelector('.float-aura'); if (aura) aura.style.opacity = '0';
 
-    // Keep the 3D backdrop visibly alive but below the text — full brightness
-    // was overpowering copy, so cap it and let the reading scrim carry contrast.
-    requestAnimationFrame(function () { canvas.style.opacity = '0.6'; });
+    // Keep the 3D backdrop (incl. the energy core) clearly visible — just a
+    // gentle fade from full brightness so copy stays readable without washing
+    // out the scene.
+    requestAnimationFrame(function () { canvas.style.opacity = '0.85'; });
 
     var running = true, t = 0;
     document.addEventListener('visibilitychange', function () { running = !document.hidden; if (running) requestAnimationFrame(tick); });
@@ -9141,8 +9142,8 @@
   /* Keep text crisp over the animated backdrop (readability). */
   .reading-scrim{ position:fixed; inset:0; z-index:0; pointer-events:none;
     background:
-      radial-gradient(130% 95% at 50% 0%, rgba(6,4,3,.58), rgba(6,4,3,.34) 55%, transparent 82%),
-      linear-gradient(180deg, rgba(6,4,3,.56), rgba(6,4,3,.48) 45%, rgba(6,4,3,.60)); }
+      radial-gradient(130% 95% at 50% 0%, rgba(6,4,3,.40), rgba(6,4,3,.20) 55%, transparent 82%),
+      linear-gradient(180deg, rgba(6,4,3,.40), rgba(6,4,3,.30) 45%, rgba(6,4,3,.44)); }
   /* Section focus: the block the reader is on stays full; the rest recede
      gently so attention lands where they are. Kept subtle and gated. */
   .uf-off{ opacity:.74; filter:saturate(.96); transition:opacity .5s ease, filter .5s ease; }
