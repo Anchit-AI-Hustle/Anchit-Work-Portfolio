@@ -3735,7 +3735,7 @@
       <div class="section-head reveal">
         <div class="eyebrow">Personal projects · Live + in build · Built end-to-end</div>
         <h1 class="display-lg">Side Hustle</h1>
-        <p class="lede" style="margin-top: 16px;">Eleven AI-first experiments, built or actively being built on weekends and evenings out of curiosity and love for technology. <em>Ideas that wouldn't wait for permission.</em></p>
+        <p class="lede" style="margin-top: 16px;">Thirteen AI-first experiments, built or actively being built on weekends and evenings out of curiosity and love for technology. <em>Ideas that wouldn't wait for permission.</em></p>
       </div>
 
       <div class="builds-grid reveal-stagger">
@@ -3752,6 +3752,34 @@
           <div class="build-actions">
             <a class="btn primary" href="#project-lifecycle" data-view="project-lifecycle">Case Study &rarr;</a>
             <a class="btn" href="https://vahdam-lifecycle-os.vercel.app/" target="_blank" rel="noopener">Open Live Project ↗</a>
+          </div>
+        </div>
+
+        <!-- Card — D2C-LifeCycle-OS (universal, plug-and-play spin-off) -->
+        <div class="build-card tilt-card">
+          <div class="build-tag"><span>D2C Marketing Automation · Startup idea</span><span class="status">Live</span></div>
+          <h3>D2C-<em>LifeCycle-OS</em></h3>
+          <p>The plug-and-play, brand-agnostic version of the VAHDAM Lifecycle OS — for <em>any</em> D2C brand. Enter a brand and it designs the whole lifecycle live: segments, a campaign calendar, on-brand mailers, retention flows and KPIs.</p>
+          <ul class="build-details">
+            <li>Built as a Vercel serverless engine on the same free multi-provider LLM cascade, with a deterministic fallback so the demo always returns a usable plan.</li>
+            <li>Plug in any brand name or URL and get an AI-generated, ESP-ready lifecycle plan in seconds — the universal take on an OS already running in production.</li>
+          </ul>
+          <div class="build-actions">
+            <a class="btn primary" href="/d2c-lifecycle-os">Open Live Demo ↗</a>
+          </div>
+        </div>
+
+        <!-- Card — AI Video Avatar (photoreal talking agent) -->
+        <div class="build-card tilt-card">
+          <div class="build-tag"><span>AI Avatar · Conversational</span><span class="status">Live</span></div>
+          <h3>AI <em>Video Avatar</em></h3>
+          <p>A photoreal talking-head version of me. Ask anything — my AI answers on camera in my own cloned voice, with a graceful voice-only fallback when the video engine isn't keyed.</p>
+          <ul class="build-details">
+            <li>Built on a D-ID talking-head engine driven from my portrait, my chatbot LLM for answers, and my TTS cascade for the cloned voice — with mic input where supported.</li>
+            <li>Degrades cleanly: portrait + spoken reply when the video avatar isn't configured, so it always responds.</li>
+          </ul>
+          <div class="build-actions">
+            <a class="btn primary" href="/agent">Talk to my avatar ↗</a>
           </div>
         </div>
 
@@ -5037,6 +5065,12 @@
     { keywords: ['jobhunt','job hunt','job search','jobfit','job fit','job agent','job board','linkedin','indeed','glassdoor','upwork','n8n','job posting'],
       response: "JobHunt is my no-code AI job-search agent, built in n8n. One click searches LinkedIn, Indeed, Glassdoor and Upwork at once, checks your existing Google Sheet so you never see a duplicate, formats every result (title, company, link, source), and appends only the new roles automatically. Re-run anytime — around 50+ fresh listings a run. It cut my own search from ~20 hours a week down to ~2. You get the importable workflow, a 20–30 min setup guide, and a support group. <a href='/jobhunt'>Open JobHunt →</a>",
       nextChips: ["Open JobHunt","Show me your other builds","Tell me about Lifecycle OS","How do I reach you?"] },
+    { keywords: ['d2c lifecycle os','d2c-lifecycle-os','lifecycle os startup','universal lifecycle','plug and play','marketing automation','lifecycle startup','brand agnostic'],
+      response: "D2C-LifeCycle-OS is the plug-and-play, brand-agnostic version of the VAHDAM Lifecycle OS I built in-house — turned into a startup idea for any D2C brand. You enter a brand name or URL and it designs the whole lifecycle live: audience segments, a campaign calendar, an on-brand sample mailer, retention automations and target KPIs. It runs on the same free multi-provider LLM cascade as my other tools, with a deterministic fallback so the demo always returns a usable plan. <a href='/d2c-lifecycle-os'>Open the live demo →</a>",
+      nextChips: ["Open D2C-LifeCycle-OS","Tell me about Lifecycle OS","Show me your other builds","How do I reach you?"] },
+    { keywords: ['video avatar','talking head','avatar','talk to you','on camera','3d agent','digital twin','face','d-id','talking avatar'],
+      response: "The AI Video Avatar is a photoreal, talking-head version of me: ask anything and my AI answers on camera in my own cloned voice. It's built on a D-ID talking-head engine driven from my portrait, my chatbot for the answers, and my TTS cascade for the voice — with mic input where the browser supports it. If the video engine isn't keyed it degrades gracefully to portrait + spoken reply, so it always responds. <a href='/agent'>Talk to my avatar →</a>",
+      nextChips: ["Talk to my avatar","Show me your other builds","Tell me about D2C-LifeCycle-OS","How do I reach you?"] },
     { keywords: ['jarvis','ai os','operating system','vision','dream project','most attached'],
       response: "Jarvis is a proactive, context-aware AI operating system designed to act as an intelligent agent across multiple devices and workflows, rather than a simple conversational chatbot. I initiated this project to build a truly integrated AI workspace that understands context across apps and files. It's a long-term vision that I'm building step-by-step, and it is the side build I'm most passionate about.",
       nextChips: ["Why build on weekends?","Tell me about Hey Yaara","Your AI stack?","Show me your day job"] },
@@ -9006,7 +9040,10 @@
     var orb = document.querySelector('.energy-orb'); if (orb) orb.style.opacity = '0';
     var aura = document.querySelector('.float-aura'); if (aura) aura.style.opacity = '0';
 
-    requestAnimationFrame(function () { canvas.style.opacity = '1'; });
+    // Keep the 3D backdrop (incl. the energy core) clearly visible — just a
+    // gentle fade from full brightness so copy stays readable without washing
+    // out the scene.
+    requestAnimationFrame(function () { canvas.style.opacity = '0.85'; });
 
     var running = true, t = 0;
     document.addEventListener('visibilitychange', function () { running = !document.hidden; if (running) requestAnimationFrame(tick); });
@@ -9139,8 +9176,8 @@
   /* Keep text crisp over the animated backdrop (readability). */
   .reading-scrim{ position:fixed; inset:0; z-index:0; pointer-events:none;
     background:
-      radial-gradient(120% 90% at 50% 0%, rgba(8,6,4,.36), transparent 60%),
-      linear-gradient(180deg, rgba(8,6,4,.34), rgba(8,6,4,.24) 45%, rgba(8,6,4,.38)); }
+      radial-gradient(130% 95% at 50% 0%, rgba(6,4,3,.40), rgba(6,4,3,.20) 55%, transparent 82%),
+      linear-gradient(180deg, rgba(6,4,3,.40), rgba(6,4,3,.30) 45%, rgba(6,4,3,.44)); }
   /* Section focus: the block the reader is on stays full; the rest recede
      gently so attention lands where they are. Kept subtle and gated. */
   .uf-off{ opacity:.74; filter:saturate(.96); transition:opacity .5s ease, filter .5s ease; }

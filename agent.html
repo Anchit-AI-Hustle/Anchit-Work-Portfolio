@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Talk to Anchit — AI video avatar · Anchit Tandon</title>
+<meta name="description" content="A photoreal AI video avatar of Anchit Tandon. Ask anything and he answers on camera, in his own cloned voice." />
+<meta name="theme-color" content="#0F0D0A" />
+<link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0F0D0A; --bg-elev:#16130F; --bg-deep:#0A0806;
+    --ink:#FBF5EC; --ink-dim:#B3A996; --ink-mute:#6B655C;
+    --primary:#FF6940; --primary-deep:#FF4D1F; --primary-soft:rgba(255,105,64,.12);
+    --accent:#2EE5AC; --gold:#FFB736;
+    --rule:rgba(255,247,232,.12); --rule-strong:rgba(255,247,232,.22);
+    --font-display:'Fraunces',ui-serif,serif; --font-sans:'Inter',ui-sans-serif,system-ui,sans-serif; --font-mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{ background:var(--bg); color:var(--ink); font-family:var(--font-sans); line-height:1.6;
+    -webkit-font-smoothing:antialiased; min-height:100vh; overflow-x:hidden; }
+  body::before{ content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(46% 40% at 20% 8%, rgba(255,105,64,.13), transparent 60%),
+      radial-gradient(44% 40% at 82% 84%, rgba(46,229,172,.08), transparent 64%); }
+  .wrap{ position:relative; z-index:1; max-width:760px; margin:0 auto; padding:clamp(20px,4vw,44px);
+    min-height:100vh; display:flex; flex-direction:column; }
+  a{ color:inherit; }
+  .top{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:clamp(20px,4vw,40px); }
+  .back{ display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:12px;
+    letter-spacing:.05em; text-transform:uppercase; color:var(--ink-dim); text-decoration:none;
+    padding:8px 14px; border:1px solid var(--rule); border-radius:99px; transition:border-color .2s,color .2s; }
+  .back:hover{ border-color:var(--primary); color:var(--ink); }
+  .eyebrow{ font-family:var(--font-mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--primary); display:flex; align-items:center; gap:8px; justify-content:center; margin-bottom:10px; }
+  .eyebrow .dot{ width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent); }
+  h1{ font-family:var(--font-display); font-weight:600; font-size:clamp(28px,5vw,44px); text-align:center; letter-spacing:-.01em; margin-bottom:6px; }
+  .sub{ text-align:center; color:var(--ink-dim); margin-bottom:24px; font-weight:300; }
+
+  /* Avatar stage */
+  .stage{ position:relative; width:min(360px,72vw); aspect-ratio:1/1; margin:0 auto 22px; border-radius:24px;
+    overflow:hidden; border:1px solid var(--rule-strong); box-shadow:0 30px 70px rgba(0,0,0,.5); background:var(--bg-deep); }
+  .stage img,.stage video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .stage video{ opacity:0; transition:opacity .4s ease; }
+  .stage.playing video{ opacity:1; }
+  .stage .ring{ position:absolute; inset:0; border-radius:24px; pointer-events:none;
+    box-shadow:inset 0 0 0 0 rgba(255,105,64,0); transition:box-shadow .3s ease; }
+  .stage.speaking .ring{ box-shadow:inset 0 0 0 3px rgba(255,105,64,.7), 0 0 40px rgba(255,105,64,.35); animation:pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{ box-shadow:inset 0 0 0 3px rgba(255,105,64,.55), 0 0 26px rgba(255,105,64,.28) } 50%{ box-shadow:inset 0 0 0 3px rgba(255,105,64,.9), 0 0 48px rgba(255,105,64,.5) } }
+  @media (prefers-reduced-motion: reduce){ .stage.speaking .ring{ animation:none } }
+  .status{ text-align:center; min-height:20px; font-size:13px; color:var(--ink-dim); font-family:var(--font-mono); letter-spacing:.03em; margin-bottom:16px; }
+
+  .reply{ background:var(--bg-elev); border:1px solid var(--rule); border-radius:14px; padding:14px 16px; margin:0 auto 18px;
+    max-width:560px; font-size:15px; color:var(--ink); display:none; }
+  .reply.show{ display:block; }
+
+  .composer{ display:flex; gap:10px; max-width:620px; margin:auto auto 8px; width:100%; }
+  .composer input{ flex:1; background:var(--bg-deep); border:1px solid var(--rule-strong); border-radius:12px;
+    padding:14px 16px; color:var(--ink); font-family:var(--font-sans); font-size:15px; outline:none; transition:border-color .2s; }
+  .composer input:focus{ border-color:var(--primary); }
+  .composer input::placeholder{ color:var(--ink-mute); }
+  .iconbtn,.btn{ cursor:pointer; border:none; border-radius:12px; font-family:var(--font-mono); font-size:13px; font-weight:500;
+    letter-spacing:.04em; text-transform:uppercase; transition:transform .15s, box-shadow .2s, background .2s, border-color .2s; }
+  .btn{ background:var(--primary); color:#1a0d06; padding:14px 20px; }
+  .btn:hover{ transform:translateY(-1px); box-shadow:0 10px 26px rgba(255,105,64,.32); }
+  .btn:disabled{ opacity:.5; cursor:not-allowed; transform:none; box-shadow:none; }
+  .iconbtn{ background:transparent; border:1px solid var(--rule-strong); color:var(--ink-dim); width:50px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+  .iconbtn:hover{ border-color:var(--primary); color:var(--ink); }
+  .iconbtn.rec{ border-color:var(--primary); color:var(--primary); animation:pulse 1.2s ease-in-out infinite; }
+  .chips{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; max-width:620px; margin:6px auto 0; }
+  .chip{ background:transparent; border:1px solid var(--rule); border-radius:99px; padding:6px 12px; font-size:12.5px; color:var(--ink-dim); cursor:pointer; transition:border-color .2s,color .2s; }
+  .chip:hover{ border-color:var(--primary); color:var(--ink); }
+  .note{ text-align:center; font-size:12px; color:var(--ink-mute); margin-top:18px; }
+  .note code{ font-family:var(--font-mono); color:var(--ink-dim); }
+  footer{ margin-top:auto; padding-top:24px; text-align:center; font-size:12.5px; color:var(--ink-mute); }
+  footer a{ color:var(--ink-dim); border-bottom:1px solid var(--rule); text-decoration:none; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="back" href="/#chat">← Anchit Tandon · Portfolio</a>
+      <span style="font-family:var(--font-mono);font-size:12px;color:var(--ink-mute);letter-spacing:.06em;">AI video avatar</span>
+    </div>
+
+    <div class="eyebrow"><span class="dot"></span>Talk to me — on camera</div>
+    <h1>Ask Anchit anything</h1>
+    <p class="sub">A photoreal AI avatar answers in his own voice. Type or tap the mic.</p>
+
+    <div class="stage" id="stage">
+      <img id="portrait" src="AnchitTandon-AppLogo.png" alt="Anchit Tandon" />
+      <video id="video" playsinline></video>
+      <div class="ring"></div>
+    </div>
+    <div class="status" id="status">Ask a question to begin.</div>
+
+    <div class="reply" id="reply"></div>
+
+    <div class="composer">
+      <input id="q" type="text" placeholder="Ask about my work, growth playbook, or side projects…" autocomplete="off" />
+      <button class="iconbtn" id="mic" title="Speak" aria-label="Speak">🎙</button>
+      <button class="btn" id="ask">Ask</button>
+    </div>
+    <div class="chips">
+      <button class="chip">What do you do at Vahdam?</button>
+      <button class="chip">Walk me through the Lifecycle OS.</button>
+      <button class="chip">What's your growth playbook?</button>
+    </div>
+
+    <div class="note" id="note"></div>
+
+    <footer>An experiment by <a href="/#projects">Anchit Tandon</a> · video avatar via D-ID, voice via the site's own TTS cascade.</footer>
+  </div>
+
+<script>
+(function(){
+  'use strict';
+  var $=function(id){return document.getElementById(id);};
+  var stage=$('stage'), video=$('video'), status=$('status'), replyEl=$('reply'), qEl=$('q'), askEl=$('ask'), micEl=$('mic'), noteEl=$('note');
+  var avatarConfigured=false, busy=false;
+
+  // Discover whether the photoreal avatar is wired up.
+  fetch('/api/avatar').then(function(r){return r.json();}).then(function(j){
+    avatarConfigured = !!(j && j.configured);
+    if(!avatarConfigured){ noteEl.innerHTML='Video avatar is in fallback mode (voice only). Add <code>DID_API_KEY</code> in Vercel to enable the on-camera avatar.'; }
+    else if(j.voice!=='cloned'){ noteEl.innerHTML='Tip: connect ElevenLabs in D-ID and set <code>ELEVENLABS_VOICE_ID</code> to speak in the cloned voice.'; }
+  }).catch(function(){});
+
+  document.querySelectorAll('.chip').forEach(function(c){ c.addEventListener('click', function(){ qEl.value=c.textContent; ask(); }); });
+  askEl.addEventListener('click', ask);
+  qEl.addEventListener('keydown', function(e){ if(e.key==='Enter') ask(); });
+
+  function setStatus(s){ status.textContent=s; }
+
+  function ask(){
+    var q=qEl.value.trim(); if(!q || busy) return;
+    busy=true; askEl.disabled=true; replyEl.classList.remove('show'); stage.classList.remove('playing','speaking');
+    setStatus('Thinking…');
+    fetch('/api/chat', { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({ message:q }) })
+      .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+      .then(function(res){
+        if(!res.ok || !res.j || !res.j.reply) throw new Error('chat');
+        var reply=res.j.reply;
+        replyEl.textContent=reply; replyEl.classList.add('show');
+        return speak(reply);
+      })
+      .catch(function(){ setStatus('Something went wrong — please try again.'); })
+      .then(function(){ busy=false; askEl.disabled=false; });
+  }
+
+  // Prefer the photoreal video; fall back to portrait + cloned-voice audio.
+  function speak(text){
+    if(avatarConfigured){
+      setStatus('Rendering the avatar…');
+      return fetch('/api/avatar', { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({ text:text }) })
+        .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+        .then(function(res){
+          if(res.ok && res.j && res.j.resultUrl){
+            video.src=res.j.resultUrl; stage.classList.add('playing');
+            setStatus('Speaking…');
+            var p=video.play(); if(p&&p.catch)p.catch(function(){});
+            video.onended=function(){ stage.classList.remove('playing'); setStatus('Ask another question.'); };
+            return;
+          }
+          return voiceFallback(text); // credits/render issue → voice
+        })
+        .catch(function(){ return voiceFallback(text); });
+    }
+    return voiceFallback(text);
+  }
+
+  function voiceFallback(text){
+    setStatus('Speaking…'); stage.classList.add('speaking');
+    return fetch('/api/tts', { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({ text:text.slice(0,1200) }) })
+      .then(function(r){ if(!r.ok) throw new Error('tts'); return r.blob(); })
+      .then(function(blob){
+        var a=new Audio(URL.createObjectURL(blob));
+        a.onended=function(){ stage.classList.remove('speaking'); setStatus('Ask another question.'); };
+        return a.play();
+      })
+      .catch(function(){
+        // Last resort: device speech synthesis.
+        try{ var u=new SpeechSynthesisUtterance(text); u.onend=function(){ stage.classList.remove('speaking'); setStatus('Ask another question.'); }; speechSynthesis.speak(u); }
+        catch(e){ stage.classList.remove('speaking'); setStatus('Ask another question.'); }
+      });
+  }
+
+  // Optional voice input.
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(SR){
+    var rec=new SR(); rec.lang='en-US'; rec.interimResults=false; var listening=false;
+    micEl.addEventListener('click', function(){ if(listening){ rec.stop(); return; } try{ rec.start(); }catch(e){} });
+    rec.onstart=function(){ listening=true; micEl.classList.add('rec'); setStatus('Listening…'); };
+    rec.onerror=function(){ listening=false; micEl.classList.remove('rec'); };
+    rec.onend=function(){ listening=false; micEl.classList.remove('rec'); };
+    rec.onresult=function(e){ qEl.value=e.results[0][0].transcript; ask(); };
+  } else { micEl.style.display='none'; }
+})();
+</script>
+</body>
+</html>
