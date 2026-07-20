@@ -9243,5 +9243,180 @@
   setTimeout(update, 500);
 })();
 </script>
+
+<style id="jarvis-css">
+  /* ============ WAKE-WORD AGENT ("Jarvis") ============ */
+  #jarvisPill{ position:fixed; left:16px; bottom:16px; z-index:9997; display:inline-flex; align-items:center; gap:9px;
+    padding:9px 14px; border-radius:99px; border:1px solid var(--rule-strong,rgba(255,247,232,.22));
+    background:rgba(12,8,4,.72); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+    color:var(--ink,#FBF5EC); font-family:var(--font-mono,monospace); font-size:11px; letter-spacing:.05em;
+    text-transform:uppercase; cursor:pointer; user-select:none; box-shadow:0 8px 26px rgba(0,0,0,.4);
+    transition:border-color .2s, color .2s, opacity .3s; }
+  #jarvisPill:hover{ border-color:var(--primary,#FF6940); }
+  #jarvisPill .jdot{ width:9px; height:9px; border-radius:50%; background:var(--ink-mute,#6B655C); transition:background .3s, box-shadow .3s; }
+  #jarvisPill[data-state="listening"] .jdot{ background:var(--accent,#2EE5AC); box-shadow:0 0 10px var(--accent,#2EE5AC); animation:jpulse 1.6s ease-in-out infinite; }
+  #jarvisPill[data-state="active"] .jdot,#jarvisPill[data-state="active"]{ }
+  #jarvisPill[data-state="active"] .jdot{ background:var(--primary,#FF6940); box-shadow:0 0 12px var(--primary,#FF6940); }
+  #jarvisPill[data-state="off"]{ opacity:.7; }
+  #jarvisPill[data-state="off"] .jdot{ background:var(--ink-mute,#6B655C); box-shadow:none; }
+  @keyframes jpulse{ 0%,100%{ transform:scale(1); opacity:.85 } 50%{ transform:scale(1.35); opacity:1 } }
+  @media (max-width:560px){ #jarvisPill{ left:12px; bottom:12px; font-size:10px; padding:8px 12px; } }
+
+  #agentsModal{ position:fixed; inset:0; z-index:10000; display:none; align-items:center; justify-content:center;
+    background:rgba(6,4,3,.72); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); padding:20px; }
+  #agentsModal.open{ display:flex; animation:jfade .3s ease; }
+  @keyframes jfade{ from{ opacity:0 } to{ opacity:1 } }
+  #agentsModal .sheet{ width:min(760px,96vw); max-height:88vh; overflow:auto; background:var(--bg-elev,#16130F);
+    border:1px solid var(--rule-strong,rgba(255,247,232,.22)); border-radius:20px; padding:clamp(20px,3vw,30px);
+    box-shadow:0 40px 90px rgba(0,0,0,.6); }
+  #agentsModal h2{ font-family:var(--font-display,serif); font-size:clamp(22px,4vw,30px); font-weight:600; margin-bottom:4px; }
+  #agentsModal .amsub{ color:var(--ink-dim,#B3A996); font-size:14px; margin-bottom:20px; }
+  #agentsModal .agent{ display:flex; gap:14px; padding:14px 0; border-top:1px solid var(--rule,rgba(255,247,232,.12)); }
+  #agentsModal .agent:first-of-type{ border-top:none; }
+  #agentsModal .st{ flex:0 0 auto; margin-top:5px; width:9px; height:9px; border-radius:50%; background:var(--accent,#2EE5AC); box-shadow:0 0 8px var(--accent,#2EE5AC); }
+  #agentsModal .st.warn{ background:var(--gold,#FFB736); box-shadow:0 0 8px var(--gold,#FFB736); }
+  #agentsModal .an{ font-weight:600; font-size:15.5px; margin-bottom:2px; }
+  #agentsModal .an .badge{ font-family:var(--font-mono,monospace); font-size:9.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--accent,#2EE5AC); border:1px solid var(--rule,rgba(255,247,232,.12)); border-radius:6px; padding:2px 6px; margin-left:8px; }
+  #agentsModal .an .badge.warn{ color:var(--gold,#FFB736); }
+  #agentsModal .ad{ font-size:13.5px; color:var(--ink-dim,#B3A996); }
+  #agentsModal .ad a{ color:var(--primary,#FF6940); text-decoration:none; }
+  #agentsModal .amclose{ margin-top:20px; display:inline-flex; cursor:pointer; background:var(--primary,#FF6940); color:#1a0d06;
+    border:none; border-radius:10px; padding:11px 20px; font-family:var(--font-mono,monospace); font-size:12px; letter-spacing:.05em; text-transform:uppercase; }
+  @media (prefers-reduced-motion: reduce){ #jarvisPill .jdot{ animation:none !important } #agentsModal.open{ animation:none } }
+</style>
+<script id="jarvis-js">
+(function(){
+  'use strict';
+  if (window.__jarvisBooted) return; window.__jarvisBooted = true;
+
+  var WAKE = ['jarvis','hey jarvis','hey anchit','ok anchit','hey agent'];
+  var ASSEMBLE = ['agents assemble','agent assemble','assemble the agents','avengers assemble'];
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var rec = null, wantOn = false, restartTimer = null, activating = false;
+
+  // ── UI pill ──
+  var pill = document.createElement('button');
+  pill.id = 'jarvisPill'; pill.type = 'button'; pill.setAttribute('aria-label','Voice agent');
+  pill.innerHTML = '<span class="jdot" aria-hidden="true"></span><span class="jlabel">Voice: off</span>';
+  document.body.appendChild(pill);
+  var label = pill.querySelector('.jlabel');
+  function setState(s, text){ pill.setAttribute('data-state', s); if (text) label.textContent = text; }
+
+  function saved(){ try { return localStorage.getItem('jarvis-voice'); } catch(e){ return null; } }
+  function save(v){ try { localStorage.setItem('jarvis-voice', v); } catch(e){} }
+
+  // ── speak (cloned voice via /api/tts, else device) ──
+  function speak(text){
+    try {
+      fetch('/api/tts', { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({ text:text.slice(0,600) }) })
+        .then(function(r){ if(!r.ok) throw 0; return r.blob(); })
+        .then(function(b){ new Audio(URL.createObjectURL(b)).play().catch(function(){}); })
+        .catch(function(){ try{ var u=new SpeechSynthesisUtterance(text); speechSynthesis.speak(u); }catch(e){} });
+    } catch(e){}
+  }
+
+  // ── activation on wake word ──
+  function activate(){
+    if (activating) return; activating = true;
+    setState('active','Agent active');
+    try { if (typeof switchView === 'function') switchView('chat'); } catch(e){}
+    try { if (typeof window.openGuideChat === 'function') window.openGuideChat(); } catch(e){}
+    var greet = "At your service. I'm Anchit's AI agent — ask me anything, or say ‘agents assemble’ to see what each of my agents can do.";
+    try { if (typeof addBot === 'function') addBot(greet); } catch(e){}
+    try { var ci = document.getElementById('chatInput'); if (ci) ci.focus(); } catch(e){}
+    speak("At your service. Ask me anything, or say agents assemble.");
+    setTimeout(function(){ activating = false; if (wantOn) setState('listening','Listening…'); }, 6000);
+  }
+
+  // ── agents roll-call ──
+  var AGENTS = [
+    { name:'Chat Clone', online:true, desc:"Ask me anything about my work, metrics and background — I answer in real time. <a href='#chat' data-nav='chat'>Open chat</a>" },
+    { name:'AI Video Avatar', online:true, key:'avatar', desc:"I answer on camera in my own voice. <a href='/agent'>Talk to my avatar</a>" },
+    { name:'D2C-LifeCycle-OS', online:true, desc:"Plug in any D2C brand and I design its full lifecycle — segments, calendar, mailers, retention, KPIs. <a href='/d2c-lifecycle-os'>Open demo</a>" },
+    { name:'JobHunt', online:true, desc:"Live job search across free boards with direct apply links. <a href='/jobhunt'>Open JobHunt</a>" },
+    { name:'VAHDAM Lifecycle OS', online:true, desc:"Production retention OS: analytics → 30-day mailer calendar → drafted emails." },
+    { name:'Voice', online:true, key:'voice', desc:"Narration and spoken replies across the site." },
+  ];
+  var modal = null;
+  function buildModal(){
+    modal = document.createElement('div'); modal.id='agentsModal'; modal.setAttribute('aria-hidden','true');
+    modal.innerHTML = '<div class="sheet" role="dialog" aria-label="Agents assemble">'
+      + '<h2>Agents, assembled.</h2><div class="amsub" id="amsub">Every agent reporting in with what it can do right now.</div>'
+      + '<div id="amlist"></div>'
+      + '<button class="amclose" type="button">Dismiss</button></div>';
+    document.body.appendChild(modal);
+    modal.addEventListener('click', function(e){ if (e.target === modal || e.target.classList.contains('amclose')) close(); });
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && modal.classList.contains('open')) close(); });
+  }
+  function close(){ if (modal) { modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); } if (wantOn) setState('listening','Listening…'); }
+
+  function assemble(){
+    if (!modal) buildModal();
+    // Reflect real status for the keyed agents (avatar video, cloned voice).
+    Promise.all([
+      fetch('/api/avatar').then(function(r){return r.json();}).catch(function(){return {};}),
+      fetch('/api/tts').then(function(r){return r.json();}).catch(function(){return {};}),
+    ]).then(function(res){
+      var av = res[0]||{}, tts = res[1]||{};
+      var list = document.getElementById('amlist'); list.innerHTML='';
+      AGENTS.forEach(function(a){
+        var warn=false, badge='Online', note=a.desc;
+        if (a.key==='avatar' && !av.configured){ warn=true; badge='Voice-only'; note="On-camera video needs a D-ID key; until then I reply in voice. "+a.desc; }
+        if (a.key==='voice'){ if (tts && tts.configured===false){ warn=true; badge='Device voice'; note="Cloned voice needs a provider key; using the device voice for now. "+a.desc; } else if (av && av.voice==='cloned'){ badge='Cloned'; } }
+        var row=document.createElement('div'); row.className='agent';
+        row.innerHTML='<span class="st'+(warn?' warn':'')+'"></span><div><div class="an">'+a.name+'<span class="badge'+(warn?' warn':'')+'">'+badge+'</span></div><div class="ad">'+note+'</div></div>';
+        list.appendChild(row);
+      });
+      // deep-link + nav handling inside the modal
+      list.querySelectorAll('a[data-nav]').forEach(function(x){ x.addEventListener('click', function(ev){ ev.preventDefault(); close(); try{ switchView(x.getAttribute('data-nav')); }catch(e){} }); });
+      modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
+      var online = AGENTS.length;
+      speak("Agents assembled. "+online+" online. Chat clone, video avatar, D2C LifeCycle OS, JobHunt and the Lifecycle OS are ready to help.");
+    });
+  }
+
+  // ── transcript handling ──
+  function handle(text){
+    var t = (text||'').toLowerCase();
+    if (ASSEMBLE.some(function(w){ return t.indexOf(w) !== -1; })) { assemble(); return true; }
+    if (WAKE.some(function(w){ return t.indexOf(w) !== -1; })) { activate(); return true; }
+    return false;
+  }
+
+  // ── recognition lifecycle (self-healing; backs off if mic is busy) ──
+  function start(){
+    if (!SR || !wantOn) return;
+    try {
+      rec = new SR(); rec.lang='en-IN'; rec.continuous=true; rec.interimResults=true;
+      rec.onresult = function(e){
+        for (var i=e.resultIndex;i<e.results.length;i++){ handle(e.results[i][0].transcript); }
+      };
+      rec.onend = function(){ if (wantOn && !activating) scheduleRestart(400); };
+      rec.onerror = function(ev){
+        // 'not-allowed' → permission denied; stop and show enable.
+        if (ev && ev.error === 'not-allowed'){ wantOn=false; save('off'); setState('off','Tap to enable'); return; }
+        if (wantOn) scheduleRestart(1200); // busy/other → back off then retry
+      };
+      rec.start();
+      setState('listening','Listening…');
+    } catch(e){ scheduleRestart(1500); }
+  }
+  function scheduleRestart(ms){ clearTimeout(restartTimer); restartTimer = setTimeout(function(){ if (wantOn && !activating) start(); }, ms); }
+  function stop(){ wantOn=false; try { rec && rec.stop(); } catch(e){} setState('off','Voice: off'); }
+  function enable(){ wantOn=true; save('on'); start(); }
+
+  // pill toggles listening on/off (privacy)
+  pill.addEventListener('click', function(){ if (wantOn) { stop(); save('off'); } else { enable(); } });
+
+  // Expose hooks for testing / programmatic use.
+  window.__jarvis = { activate:activate, assemble:assemble, handle:handle, enable:enable, stop:stop };
+
+  if (!SR){ setState('off','Voice n/a'); pill.title='Voice wake-word needs Chrome/Edge'; return; }
+
+  // Auto-listen on open unless the user turned it off before.
+  if (saved() === 'off'){ setState('off','Tap to enable'); }
+  else { wantOn = true; setState('listening','Starting…'); setTimeout(start, 800); }
+})();
+</script>
 </body>
 </html>
