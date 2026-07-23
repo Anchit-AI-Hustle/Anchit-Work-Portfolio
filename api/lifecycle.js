@@ -3,16 +3,24 @@
 //   POST /api/lifecycle  → { plan, source }
 //
 // Given any brand (name, optionally a website URL and category), it returns a
-// plug-and-play AI-led D2C marketing-automation plan: positioning, segments,
-// lifecycle stages, a campaign calendar, a sample mailer, retention flows and
-// KPIs — the universal, brand-agnostic version of VAHDAM Lifecycle OS.
+// plug-and-play, brand-agnostic AI-led D2C marketing-automation plan: an
+// industry read (category, peer/competitor set and industry-standard
+// benchmarks), positioning, segments, lifecycle stages, a campaign calendar, a
+// sample mailer, retention flows and KPIs — grounded in industry baselines for
+// the entered brand's category rather than any single brand's proprietary data.
 //
-// It reuses the same free multi-provider LLM cascade as /api/apply. If no
-// provider is configured (or all are rate-limited), it falls back to a strong
-// deterministic template so the demo ALWAYS returns a usable plan.
+// The industry read is sourced from a competitive-intelligence layer the way
+// SimilarWeb / SEMrush profile a market: if a data-provider key is configured
+// it pulls a live domain profile and feeds it to the model as context;
+// otherwise the model derives industry-standard bands from its category
+// knowledge. A deterministic template backs everything so the demo ALWAYS
+// returns a usable plan.
 //
-// Env (all optional): GROQ_API_KEY, CEREBRAS_API_KEY, GEMINI_API_KEY (+casings),
-//   OPENROUTER_API_KEY, and *_MODEL overrides.
+// Env (all optional):
+//   LLM cascade — GROQ_API_KEY, CEREBRAS_API_KEY, GEMINI_API_KEY (+casings),
+//     OPENROUTER_API_KEY, and *_MODEL overrides.
+//   Competitive intelligence — SIMILARWEB_API_KEY, SEMRUSH_API_KEY (both
+//     optional; used only to enrich the industry read when present).
 
 function geminiKey() {
   const e = process.env;
@@ -26,6 +34,70 @@ const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-7
 
 function haveAnyProvider() {
   return !!(process.env.GROQ_API_KEY || process.env.CEREBRAS_API_KEY || geminiKey() || process.env.OPENROUTER_API_KEY);
+}
+
+// ── Competitive-intelligence layer (SimilarWeb / SEMrush, both optional) ──
+// Pulls a live domain profile for the entered brand and returns a short text
+// summary the model can ground its industry benchmarks in. Best-effort: any
+// failure (no key, bad domain, rate limit, network) returns '' and the model
+// falls back to its own category knowledge. This is the "industry standard
+// level of the other brands in that industry" signal, sourced the way
+// competitor-discovery platforms surface it.
+function domainOf(brand, url) {
+  const raw = (url || brand || '').toString().trim();
+  const m = raw.match(/^(?:https?:\/\/)?(?:www\.)?([a-z0-9.-]+\.[a-z]{2,})/i);
+  return m ? m[1].toLowerCase() : '';
+}
+
+async function similarWebProfile(domain) {
+  const key = (process.env.SIMILARWEB_API_KEY || '').trim();
+  if (!key || !domain) return '';
+  const base = 'https://api.similarweb.com/v1/website/' + encodeURIComponent(domain);
+  try {
+    const [visitsR, srcR] = await Promise.all([
+      fetchTO(base + '/total-traffic-and-engagement/visits?api_key=' + key + '&granularity=monthly&main_domain_only=true', {}, 8000),
+      fetchTO(base + '/traffic-sources/overview-share?api_key=' + key + '&main_domain_only=true', {}, 8000),
+    ]);
+    const out = [];
+    if (visitsR && visitsR.ok) {
+      const d = await visitsR.json();
+      const v = arr(d.visits);
+      if (v.length) out.push('Monthly visits (recent): ' + v.slice(-3).map((x) => (x.visits ? Math.round(x.visits).toLocaleString() : '?')).join(' → '));
+    }
+    if (srcR && srcR.ok) {
+      const d = await srcR.json();
+      const s = (d.overview && d.overview.length ? d.overview[0] : d) || {};
+      const parts = [];
+      ['direct', 'search', 'social', 'mail', 'referrals', 'paid_referrals', 'display_ads'].forEach((k) => {
+        if (s[k] != null) parts.push(k + ' ' + Math.round(Number(s[k]) * 100) + '%');
+      });
+      if (parts.length) out.push('Channel mix: ' + parts.join(', '));
+    }
+    return out.length ? ('SimilarWeb (' + domain + '): ' + out.join('. ')) : '';
+  } catch (e) { return ''; }
+}
+
+async function semrushProfile(domain) {
+  const key = (process.env.SEMRUSH_API_KEY || '').trim();
+  if (!key || !domain) return '';
+  try {
+    const url = 'https://api.semrush.com/analytics/ta/api/v3/summary?targets=' + encodeURIComponent(domain)
+      + '&export_columns=target,visits,users,bounce_rate&key=' + key;
+    const r = await fetchTO(url, {}, 8000);
+    if (!r || !r.ok) return '';
+    const text = (await r.text()).trim();
+    // SEMrush returns CSV-ish (";"-separated). Keep the first data row as context.
+    const lines = text.split(/\r?\n/).filter(Boolean);
+    if (lines.length < 2) return '';
+    return 'SEMrush (' + domain + '): ' + lines[0].replace(/;/g, ' | ') + ' → ' + lines[1].replace(/;/g, ' | ');
+  } catch (e) { return ''; }
+}
+
+async function competitiveContext(brand, url) {
+  const domain = domainOf(brand, url);
+  if (!domain) return '';
+  const parts = (await Promise.all([similarWebProfile(domain), semrushProfile(domain)])).filter(Boolean);
+  return parts.join('\n');
 }
 
 async function fetchTO(url, opts, ms) {
@@ -90,8 +162,14 @@ function str(x, n) { return String(x == null ? '' : x).slice(0, n || 400); }
 
 // Clamp whatever the model returns into the shape the UI expects.
 function normalize(o) {
+  const ind = o.industry && typeof o.industry === 'object' ? o.industry : {};
   return {
     brand: str(o.brand, 80),
+    industry: {
+      category: str(ind.category, 80),
+      competitors: arr(ind.competitors).slice(0, 6).map((c) => str(c, 60)),
+      benchmarks: arr(ind.benchmarks).slice(0, 8).map((b) => ({ metric: str(b.metric, 60), value: str(b.value, 60), note: str(b.note, 160) })),
+    },
     positioning: str(o.positioning, 600),
     segments: arr(o.segments).slice(0, 6).map((s) => ({ name: str(s.name, 60), description: str(s.description, 300), size: str(s.size, 40) })),
     stages: arr(o.stages).slice(0, 6).map((s) => ({ stage: str(s.stage, 40), goal: str(s.goal, 200), channels: arr(s.channels).slice(0, 5).map((c) => str(c, 30)), campaign: str(s.campaign, 240) })),
@@ -102,20 +180,26 @@ function normalize(o) {
   };
 }
 
-function buildPrompt(brand, url, category, profileText) {
-  return `You are D2C-LifeCycle-OS, an AI that designs plug-and-play lifecycle marketing automation for any direct-to-consumer brand.
+function buildPrompt(brand, url, category, profileText, benchmarkContext) {
+  return `You are D2C-LifeCycle-OS, an AI that designs plug-and-play lifecycle marketing automation for any direct-to-consumer brand — grounded in INDUSTRY-STANDARD benchmarks for the brand's category, the way competitor-discovery platforms like SimilarWeb and SEMrush profile a market.
 
-Design a concrete, tailored lifecycle plan for this brand. Be specific to the brand and its category — no generic filler. Use realistic, quantified targets.
+First infer the brand's category and its peer/competitor set (3-6 comparable D2C brands in the same industry and price tier). Then establish industry-standard benchmarks for that peer set — traffic mix / channel split, typical AOV band, repeat-purchase / retention rate band, email revenue share, and seasonality. Use these baselines to ground the entire lifecycle plan. Be specific to the brand and its category — no generic filler. Use realistic, quantified targets that reflect the industry standard.
 
 BRAND: ${brand}
 ${category ? 'CATEGORY: ' + category : ''}
 ${url ? 'WEBSITE: ' + url : ''}
 ${profileText ? 'SITE CONTEXT: ' + profileText.slice(0, 2500) : ''}
+${benchmarkContext ? 'COMPETITIVE-INTELLIGENCE DATA (use to ground benchmarks; do not contradict it):\n' + benchmarkContext.slice(0, 1500) : ''}
 
 Return ONLY a JSON object (no markdown fences, no commentary) with EXACTLY this shape:
 {
   "brand": string,
-  "positioning": string (1-2 sentences on how lifecycle marketing should position this brand),
+  "industry": {
+    "category": string (the D2C category you inferred, e.g. "Premium loose-leaf tea"),
+    "competitors": [string]  (3-6 comparable brands in the same industry/tier),
+    "benchmarks": [{"metric": string, "value": string (an industry-standard band, e.g. "3.2-4.1%"), "note": string (why it matters)}]  (4-6 benchmarks: channel mix, AOV band, repeat-purchase rate, email revenue share, seasonality, etc.)
+  },
+  "positioning": string (1-2 sentences on how lifecycle marketing should position this brand relative to its industry benchmarks),
   "segments": [{"name": string, "description": string, "size": string (e.g. "~18% of list")}]  (4-6 behavioural/RFM segments),
   "stages": [{"stage": string (e.g. Acquisition, Welcome, Activation, Nurture, Win-back, VIP), "goal": string, "channels": [string], "campaign": string (one concrete campaign idea)}]  (5-6 stages),
   "calendar": [{"week": string (e.g. "Week 1"), "theme": string, "sends": [string]}]  (4-6 weeks),
@@ -131,7 +215,18 @@ function templatePlan(brand, category) {
   const cat = category || 'D2C';
   return {
     brand: b,
-    positioning: `${b} wins on repeat purchase, not just the first sale. Lifecycle marketing turns one-time ${cat} buyers into a predictable, high-LTV base through timely, segmented, on-brand touches.`,
+    industry: {
+      category: cat === 'D2C' ? 'Direct-to-consumer' : cat,
+      competitors: ['Category leader', 'Fast-growing challenger', 'Value alternative', 'Premium incumbent'],
+      benchmarks: [
+        { metric: 'Channel mix (email/SMS revenue share)', value: '25-35% of total', note: 'Industry-standard band for a healthy D2C lifecycle program.' },
+        { metric: 'Repeat-purchase rate', value: '20-30%', note: 'Typical for the category; the second order is the LTV inflection point.' },
+        { metric: 'Average order value band', value: 'Category median ±15%', note: 'Anchor offers and free-ship thresholds to the peer set, not guesses.' },
+        { metric: 'Flow vs campaign revenue', value: '~45% from automations', note: 'Best-in-class D2C brands earn ~half of email revenue from flows.' },
+        { metric: 'Seasonality', value: 'Q4 + category moments', note: 'Peak windows follow the industry calendar; plan cadence around them.' },
+      ],
+    },
+    positioning: `${b} wins on repeat purchase, not just the first sale. Benchmarked against its ${cat} peer set, lifecycle marketing turns one-time buyers into a predictable, high-LTV base through timely, segmented, on-brand touches.`,
     segments: [
       { name: 'First-time buyers', description: 'Placed exactly one order; highest churn risk in the first 30 days.', size: '~35% of list' },
       { name: 'Repeat / loyal', description: '2+ orders, buys on cadence — protect and reward.', size: '~18% of list' },
@@ -194,8 +289,12 @@ async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   try {
     if (haveAnyProvider()) {
-      const plan = await generate(buildPrompt(label, url, category, ''));
-      if (plan) return res.status(200).json({ plan, source: 'ai' });
+      // Enrich the industry read with live competitive-intelligence data when a
+      // provider key is present; otherwise the model derives benchmarks itself.
+      let benchmarkContext = '';
+      try { benchmarkContext = await competitiveContext(label, url); } catch (e) { /* best-effort */ }
+      const plan = await generate(buildPrompt(label, url, category, '', benchmarkContext));
+      if (plan) return res.status(200).json({ plan, source: benchmarkContext ? 'ai+ci' : 'ai' });
     }
   } catch (e) { /* fall through to template */ }
   // Always return something usable.

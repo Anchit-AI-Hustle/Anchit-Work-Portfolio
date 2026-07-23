@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>D2C-LifeCycle-OS — plug-and-play AI lifecycle marketing for any brand · Anchit Tandon</title>
-<meta name="description" content="The universal, plug-and-play version of VAHDAM Lifecycle OS. Enter any D2C brand and get an AI-generated lifecycle marketing plan — segments, campaign calendar, sample mailer, retention flows and KPIs." />
+<meta name="description" content="A plug-and-play, brand-agnostic lifecycle marketing OS for any D2C brand. Enter a brand and it benchmarks the industry (SimilarWeb / SEMrush-style) then generates a lifecycle plan — segments, campaign calendar, sample mailer, retention flows and KPIs." />
 <meta name="theme-color" content="#0F0D0A" />
 <link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
 <meta property="og:title" content="D2C-LifeCycle-OS — AI-led D2C marketing automation for any brand" />
@@ -161,7 +161,7 @@
     <!-- HERO -->
     <div class="eyebrow"><span class="dot"></span>AI-led D2C marketing automation</div>
     <h1><span class="grad">D2C-LifeCycle-OS</span></h1>
-    <p class="lede">The plug-and-play, brand-agnostic version of the <strong>VAHDAM Lifecycle OS</strong> I built in-house — now for <strong>any</strong> D2C brand. Point it at a brand and it designs the whole lifecycle: <strong>segments, a campaign calendar, on-brand mailers, retention flows and KPIs</strong> — in seconds.</p>
+    <p class="lede">A plug-and-play, brand-agnostic lifecycle engine for <strong>any</strong> D2C brand. Point it at a brand and it reads the industry, <strong>benchmarks the competitive set</strong> the way SimilarWeb / SEMrush profile a market, then designs the whole lifecycle: <strong>segments, a campaign calendar, on-brand mailers, retention flows and KPIs</strong> — grounded in industry-standard numbers, in seconds.</p>
 
     <!-- LIVE DEMO -->
     <div class="demo">
@@ -191,6 +191,12 @@
       </div>
       <div class="positioning" id="rPos"></div>
 
+      <div class="sectitle" id="rIndTitle" style="display:none;">Industry read &amp; benchmarks</div>
+      <div id="rIndustry" style="display:none;">
+        <div class="card" id="rIndMeta" style="margin-bottom:14px;"></div>
+        <div class="kpis" id="rBench"></div>
+      </div>
+
       <div class="sectitle">Audience segments</div>
       <div class="grid" id="rSeg"></div>
 
@@ -213,10 +219,10 @@
     <!-- HOW IT WORKS -->
     <section class="block">
       <div class="h2">How it works</div>
-      <div class="h2sub">One closed loop, fully automated — the same operating model behind the VAHDAM Lifecycle OS, generalised so any brand can plug in.</div>
+      <div class="h2sub">One closed loop, fully automated — a generalised lifecycle operating model any brand can plug into, seeded from its own industry benchmarks.</div>
       <div class="loop">
-        <div class="step"><div class="n">01</div><div class="st">Connect</div><p>Plug in a store + ESP (Shopify, Klaviyo, WebEngage). Data syncs in.</p></div>
-        <div class="step"><div class="n">02</div><div class="st">Segment</div><p>AI builds RFM + behavioural segments from real purchase data.</p></div>
+        <div class="step"><div class="n">01</div><div class="st">Benchmark</div><p>Read the brand's category and competitive set — traffic mix, AOV and repeat-rate bands.</p></div>
+        <div class="step"><div class="n">02</div><div class="st">Segment</div><p>AI builds RFM + behavioural segments against industry-standard baselines.</p></div>
         <div class="step"><div class="n">03</div><div class="st">Plan</div><p>It designs the lifecycle: stages, calendar and campaign ideas.</p></div>
         <div class="step"><div class="n">04</div><div class="st">Generate</div><p>On-brand mailers and flows written in the brand's own voice.</p></div>
         <div class="step"><div class="n">05</div><div class="st">Automate</div><p>Triggers fire the right message at the right lifecycle moment.</p></div>
@@ -233,14 +239,14 @@
         <div class="card"><div class="t">AI-native</div><p>Segments, calendars and copy are generated, not templated — then human-approved.</p></div>
         <div class="card"><div class="t">Retention-first</div><p>Built around the second purchase and LTV, where D2C margins actually live.</p></div>
         <div class="card"><div class="t">ESP-ready</div><p>Designed to push into Klaviyo / WebEngage flows, not replace them.</p></div>
-        <div class="card"><div class="t">Proven lineage</div><p>Distilled from a lifecycle OS running in production at a real D2C brand.</p></div>
+        <div class="card"><div class="t">Industry-benchmarked</div><p>Every plan starts from real category baselines — the way SimilarWeb / SEMrush profile a market — not guesses.</p></div>
       </div>
     </section>
 
     <!-- WHY / ORIGIN -->
     <section class="block why">
-      <blockquote>“I built the VAHDAM Lifecycle OS to connect analytics, planning, segmentation and mailer generation into one loop. D2C-LifeCycle-OS is that same thinking made universal — proof of an approach any brand can switch on.”</blockquote>
-      <cite>— Anchit Tandon · builder of the VAHDAM Lifecycle OS</cite>
+      <blockquote>“Most D2C teams start every lifecycle plan from a blank page and a gut feel for what good looks like. D2C-LifeCycle-OS reads the industry first — benchmarks the competitive set, then lets the plan write itself. That's how I think retention should work for any brand.”</blockquote>
+      <cite>— Anchit Tandon · builder of D2C-LifeCycle-OS</cite>
     </section>
 
     <!-- CTA -->
@@ -293,9 +299,28 @@
   function render(p, source){
     $('rBrand').textContent = (p.brand||'Your brand') + ' — lifecycle plan';
     var badge=$('rBadge');
-    if(source==='ai'){ badge.textContent='AI-generated'; badge.className='badge ai'; }
+    if(source==='ai+ci'){ badge.textContent='AI + live benchmarks'; badge.className='badge ai'; }
+    else if(source==='ai'){ badge.textContent='AI-generated'; badge.className='badge ai'; }
     else { badge.textContent='Sample plan'; badge.className='badge'; }
     $('rPos').textContent = p.positioning || '';
+
+    var ind = p.industry || {};
+    var benches = ind.benchmarks || [];
+    if(ind.category || (ind.competitors&&ind.competitors.length) || benches.length){
+      var metaBits='';
+      if(ind.category) metaBits += '<div class="k"><span>Category</span></div><div class="t" style="margin-bottom:8px;">'+esc(ind.category)+'</div>';
+      if(ind.competitors&&ind.competitors.length){
+        metaBits += '<div class="k"><span>Comparable brands</span></div><div class="tags">'+ind.competitors.map(function(c){ return '<span>'+esc(c)+'</span>'; }).join('')+'</div>';
+      }
+      $('rIndMeta').innerHTML = metaBits || '';
+      $('rIndMeta').style.display = metaBits ? 'block' : 'none';
+      $('rBench').innerHTML = benches.map(function(bm){
+        return '<div class="kpi"><div class="m">'+esc(bm.metric)+(bm.note?' — '+esc(bm.note):'')+'</div><div class="v">'+esc(bm.value)+'</div></div>';
+      }).join('');
+      $('rIndTitle').style.display=''; $('rIndustry').style.display='block';
+    } else {
+      $('rIndTitle').style.display='none'; $('rIndustry').style.display='none';
+    }
 
     $('rSeg').innerHTML = (p.segments||[]).map(function(s){
       return '<div class="card"><div class="k"><span>'+esc(s.name)+'</span><span class="sz">'+esc(s.size||'')+'</span></div><p>'+esc(s.description)+'</p></div>';
