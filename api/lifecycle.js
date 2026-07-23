@@ -160,6 +160,26 @@ function parsePlan(text) {
 function arr(x) { return Array.isArray(x) ? x : []; }
 function str(x, n) { return String(x == null ? '' : x).slice(0, n || 400); }
 
+// Mailer shape follows the Smart-Brain "think → lock → execute" model: a single
+// locked theme, a strategy-driven hero + structured sections, and one primary
+// CTA — so the content is coherent, not a random blob. The UI renders it as a
+// designed HTML email (Mailer-Architect visual quality), falling back to `body`.
+function normalizeMailer(m) {
+  if (!m || typeof m !== 'object') return null;
+  const h = m.hero && typeof m.hero === 'object' ? m.hero : {};
+  const c = m.cta && typeof m.cta === 'object' ? m.cta : {};
+  return {
+    theme: str(m.theme, 120),
+    subject: str(m.subject, 140),
+    preview: str(m.preview, 160),
+    hero: { kicker: str(h.kicker, 40), headline: str(h.headline, 140), subhead: str(h.subhead, 220) },
+    sections: arr(m.sections).slice(0, 4).map((s) => ({ title: str(s.title, 60), body: str(s.body, 340) })),
+    cta: { label: str(c.label, 40), note: str(c.note, 120) },
+    signoff: str(m.signoff, 80),
+    body: str(m.body, 1600),
+  };
+}
+
 // Clamp whatever the model returns into the shape the UI expects.
 function normalize(o) {
   const ind = o.industry && typeof o.industry === 'object' ? o.industry : {};
@@ -174,7 +194,7 @@ function normalize(o) {
     segments: arr(o.segments).slice(0, 6).map((s) => ({ name: str(s.name, 60), description: str(s.description, 300), size: str(s.size, 40) })),
     stages: arr(o.stages).slice(0, 6).map((s) => ({ stage: str(s.stage, 40), goal: str(s.goal, 200), channels: arr(s.channels).slice(0, 5).map((c) => str(c, 30)), campaign: str(s.campaign, 240) })),
     calendar: arr(o.calendar).slice(0, 8).map((c) => ({ week: str(c.week, 24), theme: str(c.theme, 80), sends: arr(c.sends).slice(0, 5).map((x) => str(x, 80)) })),
-    mailer: o.mailer && typeof o.mailer === 'object' ? { subject: str(o.mailer.subject, 140), preview: str(o.mailer.preview, 160), body: str(o.mailer.body, 1600) } : null,
+    mailer: normalizeMailer(o.mailer),
     retention: arr(o.retention).slice(0, 6).map((r) => ({ trigger: str(r.trigger, 80), flow: str(r.flow, 280) })),
     kpis: arr(o.kpis).slice(0, 6).map((k) => ({ metric: str(k.metric, 60), target: str(k.target, 60) })),
   };
@@ -203,7 +223,15 @@ Return ONLY a JSON object (no markdown fences, no commentary) with EXACTLY this 
   "segments": [{"name": string, "description": string, "size": string (e.g. "~18% of list")}]  (4-6 behavioural/RFM segments),
   "stages": [{"stage": string (e.g. Acquisition, Welcome, Activation, Nurture, Win-back, VIP), "goal": string, "channels": [string], "campaign": string (one concrete campaign idea)}]  (5-6 stages),
   "calendar": [{"week": string (e.g. "Week 1"), "theme": string, "sends": [string]}]  (4-6 weeks),
-  "mailer": {"subject": string, "preview": string, "body": string (a short, on-brand sample email in the brand's voice)},
+  "mailer": {  // "think -> lock -> execute": lock ONE theme, then a structured, strategy-driven email
+    "theme": string (the single locked angle of this send, e.g. "Welcome & first order: story -> hero products -> nudge"),
+    "subject": string,
+    "preview": string (inbox preview text),
+    "hero": {"kicker": string (2-3 words), "headline": string (one strong line), "subhead": string (one supporting line)},
+    "sections": [{"title": string, "body": string}]  (2-3 tight, on-brand content blocks that follow the locked theme),
+    "cta": {"label": string (button text), "note": string (one supporting line under the button)},
+    "signoff": string (e.g. "Team <brand>")
+  },
   "retention": [{"trigger": string (e.g. "Cart abandon", "60 days no purchase"), "flow": string (the automated flow)}]  (4-6),
   "kpis": [{"metric": string, "target": string}]  (4-6 lifecycle KPIs with realistic targets)
 }`;
@@ -249,9 +277,21 @@ function templatePlan(brand, category) {
       { week: 'Week 4', theme: 'Retention & replenishment', sends: ['Replenishment reminder', 'VIP early access', 'Win-back for 60-day lapsers'] },
     ],
     mailer: {
+      theme: 'Welcome & first order: story → hero products → first-order nudge',
       subject: `A little something to start your ${b} journey`,
       preview: 'Your welcome gift is inside — plus where to begin.',
-      body: `Hi {{ first_name | default: "there" }},\n\nWelcome to ${b}. We build for people who care about the details — and we think you'll feel it from the first order.\n\nHere's 10% to get you started: WELCOME10\n\nNot sure where to begin? Our bestsellers are loved for a reason — start there, and reply to this email anytime. A real human reads it.\n\n— Team ${b}`,
+      hero: {
+        kicker: 'Welcome',
+        headline: `Welcome to ${b}.`,
+        subhead: `We build for people who care about the details — and you'll feel it from the first order.`,
+      },
+      sections: [
+        { title: 'Here’s 10% to start', body: 'Use code WELCOME10 at checkout — consider it a thank-you for giving us a try.' },
+        { title: 'Not sure where to begin?', body: 'Our bestsellers are loved for a reason. Start there, and reply to this email anytime — a real human reads every one.' },
+      ],
+      cta: { label: 'Shop bestsellers', note: 'Free returns, and we read every reply.' },
+      signoff: `Team ${b}`,
+      body: `Hi there,\n\nWelcome to ${b}. Here's 10% to get started: WELCOME10. Not sure where to begin? Start with our bestsellers, and reply anytime.\n\n— Team ${b}`,
     },
     retention: [
       { trigger: 'Browse abandon', flow: '2 emails + 1 SMS over 24h with the exact product viewed and a soft nudge.' },
@@ -324,9 +364,22 @@ function anchitPlan() {
       { week: 'Week 4', theme: 'Interview & nurture', sends: ['Interview prep case studies', 'Same-day thank-you follow-ups', 'Win-back on no-replies'] },
     ],
     mailer: {
+      theme: 'Proof-led intro: compounding wins → clickable résumé → 20-minute conversation',
       subject: 'Anchit Tandon — Product & Growth leader who ships compounding wins',
       preview: '5× MRR, ₹3Cr+ ARR, D2C growth across US/UK/global — and a portfolio you can click.',
-      body: 'Hi {{ first_name | default: "there" }},\n\nI\'m Anchit — an engineer who learned to love the funnel, now leading Product & D2C Growth. A few things I\'ve shipped: scaled Assisted Sales 5× to ₹80L MRR, added ₹3Cr+ incremental ARR from the ET Markets revamp, and I now drive D2C growth across US, UK and global markets.\n\nI market myself the way I\'d market a high-LTV product — which is exactly what my portfolio does. anchit-tandon.com is an interactive résumé: a chat clone that answers as me, a talking AI avatar, and live demos I built end-to-end.\n\nIf you\'re hiring for a senior Product or Growth role, I\'d love 20 minutes. Reply here, or open anchit-tandon.com.\n\n— Anchit Tandon\nanchit-tandon.com',
+      hero: {
+        kicker: 'Product & D2C Growth',
+        headline: 'I market myself the way I’d grow a high-LTV brand.',
+        subhead: 'An engineer who learned to love the funnel — now leading product and growth with quantified, compounding wins.',
+      },
+      sections: [
+        { title: 'Wins that compound', body: 'Scaled Assisted Sales 5× to ₹80L MRR. Added ₹3Cr+ incremental ARR from the ET Markets revamp. Now driving D2C growth across US, UK and global markets.' },
+        { title: 'A résumé you can click', body: 'anchit-tandon.com is an interactive portfolio — a chat clone that answers as me, a talking AI avatar, and live demos I built end-to-end (including this one).' },
+        { title: 'What I’m looking for', body: 'A senior Product or Growth role with a real mandate to build compounding systems. If that’s open on your team, let’s talk.' },
+      ],
+      cta: { label: 'Open anchit-tandon.com', note: 'Or just reply — 20 minutes is all I’m asking.' },
+      signoff: 'Anchit Tandon · anchit-tandon.com',
+      body: 'Hi there,\n\nI\'m Anchit — an engineer who learned to love the funnel, now leading Product & D2C Growth. I scaled Assisted Sales 5× to ₹80L MRR, added ₹3Cr+ ARR from the ET Markets revamp, and now drive D2C growth across US, UK and global markets. My portfolio, anchit-tandon.com, is an interactive résumé. If you\'re hiring for a senior Product or Growth role, I\'d love 20 minutes.\n\n— Anchit Tandon\nanchit-tandon.com',
     },
     retention: [
       { trigger: 'Outreach opened, no reply (3 days)', flow: 'One-nudge follow-up adding a second, role-specific proof point.' },

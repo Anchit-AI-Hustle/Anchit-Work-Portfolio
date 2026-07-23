@@ -118,6 +118,41 @@
   .mailer .mh .s{ font-weight:600; font-size:15px; }
   .mailer .mh .p{ font-size:12.5px; color:var(--ink-mute); margin-top:2px; }
   .mailer .mb{ padding:16px; font-size:14px; color:var(--ink-dim); white-space:pre-wrap; line-height:1.7; font-family:var(--font-sans); }
+  /* Designed mailer — Smart-Brain structure, Mailer-Architect visual quality */
+  .m-theme{ display:flex; align-items:center; gap:8px; padding:11px 16px; border-bottom:1px solid var(--rule);
+    font-family:var(--font-mono); font-size:11px; color:var(--ink-mute); letter-spacing:.03em; background:rgba(255,255,255,.02); }
+  .m-theme .lk{ color:var(--accent); }
+  .m-theme b{ color:var(--ink-dim); font-weight:500; }
+  .m-body{ background:var(--bg-deep); }
+  .m-hero{ position:relative; padding:26px 22px 22px; overflow:hidden;
+    background:
+      radial-gradient(120% 130% at 0% 0%, rgba(255,105,64,.26), transparent 55%),
+      radial-gradient(120% 130% at 100% 15%, rgba(255,183,54,.20), transparent 55%),
+      linear-gradient(160deg, #17130E, #0C0A07); }
+  .m-hero::after{ content:''; position:absolute; right:-40px; bottom:-60px; width:180px; height:180px; border-radius:50%;
+    background:radial-gradient(circle, rgba(46,229,172,.14), transparent 68%); pointer-events:none; }
+  .m-kicker{ font-family:var(--font-mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--gold);
+    margin-bottom:14px; display:inline-flex; align-items:center; gap:10px; }
+  .m-badge{ width:34px; height:34px; border-radius:9px; display:grid; place-items:center; font-family:var(--font-display);
+    font-weight:600; font-size:16px; color:#1a0d06; background:linear-gradient(135deg,var(--primary),var(--gold));
+    box-shadow:0 6px 18px rgba(255,105,64,.35); }
+  .m-hero h4{ font-family:var(--font-display); font-size:clamp(19px,3.2vw,23px); font-weight:600; line-height:1.2;
+    margin:0 0 9px; color:var(--ink); max-width:34ch; position:relative; }
+  .m-hero .m-sub{ font-size:14px; color:var(--ink-dim); max-width:46ch; position:relative; }
+  .m-secs{ padding:20px 22px 6px; display:flex; flex-direction:column; gap:15px; }
+  .m-sec{ border-left:2px solid var(--primary); padding-left:14px; }
+  .m-sec .st{ font-weight:600; font-size:14.5px; margin-bottom:4px; color:var(--ink); }
+  .m-sec p{ font-size:13.5px; color:var(--ink-dim); margin:0; line-height:1.6; }
+  .m-cta{ padding:16px 22px 20px; }
+  .m-cta a{ display:inline-block; background:linear-gradient(100deg,var(--primary),var(--primary-deep)); color:#1a0d06;
+    text-decoration:none; font-family:var(--font-mono); font-size:12.5px; font-weight:600; letter-spacing:.04em;
+    text-transform:uppercase; padding:12px 22px; border-radius:10px; box-shadow:0 10px 26px rgba(255,105,64,.3);
+    transition:transform .15s, box-shadow .2s; }
+  .m-cta a:hover{ transform:translateY(-1px); box-shadow:0 14px 32px rgba(255,105,64,.42); }
+  .m-cta .m-note{ font-size:12px; color:var(--ink-mute); margin-top:11px; }
+  .m-foot{ border-top:1px solid var(--rule); padding:14px 22px; font-family:var(--font-mono); font-size:11px;
+    color:var(--ink-mute); letter-spacing:.04em; display:flex; align-items:center; gap:8px; }
+  .m-foot .dotm{ width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px var(--accent); }
 
   /* kpis */
   .kpis{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:10px; }
@@ -203,7 +238,7 @@
       <div class="sectitle">Campaign calendar</div>
       <div class="rows" id="rCal"></div>
 
-      <div class="sectitle">Sample mailer</div>
+      <div class="sectitle">Sample mailer · strategy-locked, on-brand design</div>
       <div class="mailer" id="rMailer"></div>
 
       <div class="sectitle">Retention automations</div>
@@ -335,10 +370,7 @@
       return '<div class="lrow"><div class="w">'+esc(c.week)+'</div><div><div class="th">'+esc(c.theme)+'</div><ul>'+sends+'</ul></div></div>';
     }).join('');
 
-    if(p.mailer){
-      $('rMailer').innerHTML = '<div class="mh"><div class="s">'+esc(p.mailer.subject)+'</div><div class="p">'+esc(p.mailer.preview)+'</div></div><div class="mb">'+esc(p.mailer.body)+'</div>';
-      $('rMailer').style.display='block';
-    } else { $('rMailer').style.display='none'; }
+    renderMailer(p.mailer, (p.brand||'A').trim().charAt(0).toUpperCase() || 'A');
 
     $('rRet').innerHTML = (p.retention||[]).map(function(r){
       return '<div class="lrow"><div class="w">'+esc(r.trigger)+'</div><div><div class="th" style="margin:0;font-weight:400;color:var(--ink-dim);font-size:14px;">'+esc(r.flow)+'</div></div></div>';
@@ -350,6 +382,40 @@
 
     resEl.style.display='block';
     if(!noScroll) resEl.scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  // Render the mailer as a DESIGNED HTML email: Smart-Brain structure (locked
+  // theme → hero → strategy sections → one CTA) with Mailer-Architect visuals.
+  function renderMailer(m, initial){
+    var el=$('rMailer');
+    if(!m || (!m.subject && !m.body && !(m.hero&&m.hero.headline))){ el.style.display='none'; return; }
+    var h=m.hero||{}, cta=m.cta||{}, secs=m.sections||[];
+    var out='';
+    out += '<div class="mh"><div class="s">'+esc(m.subject||'')+'</div><div class="p">'+esc(m.preview||'')+'</div></div>';
+    if(m.theme) out += '<div class="m-theme"><span class="lk">◆ Strategy locked</span> — <b>'+esc(m.theme)+'</b></div>';
+    out += '<div class="m-body">';
+    if(h.kicker || h.headline || h.subhead){
+      out += '<div class="m-hero">';
+      out += '<div class="m-kicker"><span class="m-badge">'+esc(initial||'A')+'</span>'+esc(h.kicker||'')+'</div>';
+      if(h.headline) out += '<h4>'+esc(h.headline)+'</h4>';
+      if(h.subhead) out += '<div class="m-sub">'+esc(h.subhead)+'</div>';
+      out += '</div>';
+    }
+    if(secs.length){
+      out += '<div class="m-secs">'+secs.map(function(s){
+        return '<div class="m-sec"><div class="st">'+esc(s.title)+'</div><p>'+esc(s.body)+'</p></div>';
+      }).join('')+'</div>';
+    } else if(m.body){
+      out += '<div class="mb">'+esc(m.body)+'</div>';
+    }
+    if(cta.label){
+      out += '<div class="m-cta"><a href="#" onclick="return false;">'+esc(cta.label)+'</a>';
+      if(cta.note) out += '<div class="m-note">'+esc(cta.note)+'</div>';
+      out += '</div>';
+    }
+    if(m.signoff) out += '<div class="m-foot"><span class="dotm"></span>'+esc(m.signoff)+'</div>';
+    out += '</div>';
+    el.innerHTML=out; el.style.display='block';
   }
 
   // Default subject: anchit-tandon.com — preload and draft the plan on open,
