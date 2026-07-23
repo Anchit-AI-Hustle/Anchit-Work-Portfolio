@@ -195,7 +195,7 @@ Return ONLY a JSON object (no markdown fences, no commentary) with EXACTLY this 
 {
   "brand": string,
   "industry": {
-    "category": string (the D2C category you inferred, e.g. "Premium loose-leaf tea"),
+    "category": string (the D2C category you inferred, e.g. "Premium skincare"),
     "competitors": [string]  (3-6 comparable brands in the same industry/tier),
     "benchmarks": [{"metric": string, "value": string (an industry-standard band, e.g. "3.2-4.1%"), "note": string (why it matters)}]  (4-6 benchmarks: channel mix, AOV band, repeat-purchase rate, email revenue share, seasonality, etc.)
   },
@@ -271,6 +271,81 @@ function templatePlan(brand, category) {
   };
 }
 
+// ── Default demo subject: anchit-tandon.com ──
+// The demo markets Anchit Tandon's own candidacy the way you'd grow a high-LTV
+// D2C product: the "brand" is the résumé at anchit-tandon.com, the "buy" is a
+// senior Product/Growth role, and the "lifecycle" is the job search itself.
+// This is deterministic so the default demo is always great and never depends
+// on an LLM key. Any other brand still routes through the generic engine.
+function isAnchit(brand, url) {
+  const s = ((brand || '') + ' ' + (url || '')).toLowerCase();
+  return /anchit/.test(s) || /anchit-?tandon/.test(s.replace(/\s+/g, '-'));
+}
+
+function anchitPlan() {
+  return {
+    brand: 'Anchit Tandon',
+    industry: {
+      category: 'Product & Growth leadership — personal-brand / candidate marketing',
+      competitors: [
+        'Senior PMs in D2C growth',
+        'Growth leads at consumer startups',
+        'Product leaders from media & subscription',
+        'Ex-founder operators moving into product',
+      ],
+      benchmarks: [
+        { metric: 'Recruiter reply rate (targeted outreach)', value: '8–15%', note: 'Personalised senior-PM outreach vs ~2% for generic applications.' },
+        { metric: 'Application → first interview', value: '10–20%', note: 'A clickable portfolio + a warm referral lifts this materially.' },
+        { metric: 'First interview → onsite', value: '35–50%', note: 'Won on a clear, quantified growth-impact narrative.' },
+        { metric: 'Onsite → offer', value: '20–30%', note: 'Senior roles convert on proof of compounding wins.' },
+        { metric: 'Focused search cycle', value: '6–10 weeks', note: 'Funnel-driven search, not spray-and-pray.' },
+      ],
+    },
+    positioning: 'Market Anchit Tandon like a high-LTV product: an engineer who learned to love the funnel, now a Product & Growth leader with compounding, quantified wins — 5× MRR on Assisted Sales (₹15L → ₹80L), ₹3Cr+ incremental ARR from the ET Markets revamp, and D2C growth across US, UK and global markets. The "buy" is a senior Product/Growth role; anchit-tandon.com is the always-on landing page and the job search is the funnel.',
+    segments: [
+      { name: 'High-growth D2C brands', description: 'Scaling consumer brands that need retention, LTV and lifecycle leadership.', size: 'Primary target' },
+      { name: 'Media & subscription businesses', description: 'Where the Times Internet subscription and growth wins map one-to-one.', size: 'Warm fit' },
+      { name: 'Seed–Series B startups', description: 'Founders who need a builder-operator across product, growth and revenue.', size: 'High upside' },
+      { name: 'Product & growth recruiters', description: 'Specialist recruiters placing senior product and growth talent.', size: 'Amplifiers' },
+      { name: 'Warm network / referrals', description: 'Ex-colleagues and peers — the highest-conversion channel.', size: 'Highest intent' },
+    ],
+    stages: [
+      { stage: 'Awareness', goal: 'Get on the radar of the right teams', channels: ['Portfolio', 'LinkedIn', 'Referrals'], campaign: 'Keep anchit-tandon.com as the always-on landing page; ship a weekly growth-teardown post to stay top-of-feed.' },
+      { stage: 'Interest', goal: 'Turn a click into a conversation', channels: ['Email', 'LinkedIn DM'], campaign: 'Personalised outreach that leads with one relevant, quantified win per company.' },
+      { stage: 'Outreach / Apply', goal: 'Convert interest into a first call', channels: ['Email', 'Referral intro'], campaign: 'Role-tailored one-pager + a deep-link into the matching portfolio case, plus a warm referral ask.' },
+      { stage: 'Interview', goal: 'Prove compounding impact', channels: ['Live', 'Portfolio'], campaign: 'Case-led narrative: constraint → experiment → measured outcome, mapped directly to the role.' },
+      { stage: 'Offer & Close', goal: 'Land the right offer, not just any offer', channels: ['Email', 'Call'], campaign: 'Compare scope, growth mandate and compounding upside; negotiate on impact, not just title.' },
+      { stage: 'Onboard', goal: 'Start compounding from week one', channels: ['30-60-90 plan'], campaign: 'Send a 30-60-90 growth plan before day one to anchor the mandate.' },
+    ],
+    calendar: [
+      { week: 'Week 1', theme: 'Set up the funnel', sends: ['Refresh anchit-tandon.com', 'Target-list of 25 companies', 'Growth-teardown post #1'] },
+      { week: 'Week 2', theme: 'Warm outreach', sends: ['Referral asks (10)', 'Personalised recruiter DMs', 'Growth-teardown post #2'] },
+      { week: 'Week 3', theme: 'Direct outreach', sends: ['Role-tailored one-pagers', 'Hiring-manager cold emails', 'Follow-up on Week-1 opens'] },
+      { week: 'Week 4', theme: 'Interview & nurture', sends: ['Interview prep case studies', 'Same-day thank-you follow-ups', 'Win-back on no-replies'] },
+    ],
+    mailer: {
+      subject: 'Anchit Tandon — Product & Growth leader who ships compounding wins',
+      preview: '5× MRR, ₹3Cr+ ARR, D2C growth across US/UK/global — and a portfolio you can click.',
+      body: 'Hi {{ first_name | default: "there" }},\n\nI\'m Anchit — an engineer who learned to love the funnel, now leading Product & D2C Growth. A few things I\'ve shipped: scaled Assisted Sales 5× to ₹80L MRR, added ₹3Cr+ incremental ARR from the ET Markets revamp, and I now drive D2C growth across US, UK and global markets.\n\nI market myself the way I\'d market a high-LTV product — which is exactly what my portfolio does. anchit-tandon.com is an interactive résumé: a chat clone that answers as me, a talking AI avatar, and live demos I built end-to-end.\n\nIf you\'re hiring for a senior Product or Growth role, I\'d love 20 minutes. Reply here, or open anchit-tandon.com.\n\n— Anchit Tandon\nanchit-tandon.com',
+    },
+    retention: [
+      { trigger: 'Outreach opened, no reply (3 days)', flow: 'One-nudge follow-up adding a second, role-specific proof point.' },
+      { trigger: 'Applied, no response (7 days)', flow: 'Referral-backed follow-up to the hiring manager via a warm intro.' },
+      { trigger: 'Post-interview', flow: 'Same-day thank-you + a tailored mini-case answering their hardest question.' },
+      { trigger: 'No fit right now', flow: 'Gracious "keep in touch" + add to a quarterly value-add nurture.' },
+      { trigger: 'Offer stage', flow: 'Send a 30-60-90 growth plan to de-risk the hire and anchor the mandate.' },
+    ],
+    kpis: [
+      { metric: 'Recruiter / HM replies', target: '12%+ of outreach' },
+      { metric: 'First interviews booked', target: '8–10 in 6 weeks' },
+      { metric: 'Onsite conversion', target: '40%+ of first interviews' },
+      { metric: 'Quality offers', target: '2–3' },
+      { metric: 'anchit-tandon.com → conversation', target: 'CTR up 20%' },
+      { metric: 'Search cycle', target: 'Signed in 6–10 weeks' },
+    ],
+  };
+}
+
 async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -283,10 +358,19 @@ async function handler(req, res) {
   const brand = (body.brand || '').toString().slice(0, 80).trim();
   const url = (body.url || '').toString().slice(0, 300).trim();
   const category = (body.category || '').toString().slice(0, 60).trim();
+
+  res.setHeader('Cache-Control', 'no-store');
+
+  // Default demo subject: anchit-tandon.com. Empty input or any Anchit-matching
+  // brand/url returns the deterministic career-growth plan — always available,
+  // no LLM key required.
+  if ((!brand && !url) || isAnchit(brand, url)) {
+    return res.status(200).json({ plan: anchitPlan(), source: 'anchit' });
+  }
+
   if (!brand && !/^https?:\/\//i.test(url)) return res.status(400).json({ error: 'brand_or_url_required' });
   const label = brand || url.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
 
-  res.setHeader('Cache-Control', 'no-store');
   try {
     if (haveAnyProvider()) {
       // Enrich the industry read with live competitive-intelligence data when a
@@ -303,4 +387,4 @@ async function handler(req, res) {
 
 module.exports = handler;
 module.exports.config = { runtime: 'nodejs', maxDuration: 30 };
-module.exports._test = { normalize, parsePlan, templatePlan, buildPrompt };
+module.exports._test = { normalize, parsePlan, templatePlan, buildPrompt, anchitPlan, isAnchit };
