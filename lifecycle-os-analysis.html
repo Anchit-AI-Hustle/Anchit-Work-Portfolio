@@ -496,7 +496,7 @@
     { id:'discount', title:'Discounted vs full-price', sub:'Margin exposure', span:'span6',
       mini:function(m){ var t=m.discount; var items=t.map(function(x){return {label:x.discounted?'Discounted':'Full price',v:x.sales,disp:money(x.sales)};}); return donut(items,{s:150})+legend(items); },
       detail:function(m){ var t=m.discount; var disc=t.find(function(x){return x.discounted;})||{}, full=t.find(function(x){return !x.discounted;})||{};
-        var totS=(disc.sales||0)+(full.sales||0), totO=(disc.orders||0)+(full.orders||0);
+        var totO=(disc.orders||0)+(full.orders||0);
         var rows=t.map(function(x){return [x.discounted?'Discounted':'Full price',intf(x.orders),moneyFull(x.sales),moneyFull(x.aov)];});
         return {insight:'<b>'+pct((disc.orders||0)/totO)+' of orders use a discount</b>, and discounted AOV ('+moneyFull(disc.aov)+') is '+((full.aov&&disc.aov)?Math.round((1-disc.aov/full.aov)*100):0)+'% below full-price AOV ('+moneyFull(full.aov)+'). Discount is training a cheaper basket — reserve offers for the switcher / win-back cohort and protect full-margin buyers.',
         chart:donut(t.map(function(x){return {label:x.discounted?'Discounted':'Full price',v:x.sales};}),{s:210})+legend(t.map(function(x){return {label:(x.discounted?'Discounted':'Full price'),disp:money(x.sales)};})),
@@ -544,10 +544,10 @@
         chart:barChart(p.slice(0,15).map(function(x){return {label:trunc(x.title,30),v:x.quantity,disp:intf(x.quantity)};}),{w:820,h:15*30,labelW:230}),
         table:table(['#','Product','Qty','Net sales','Orders'],rows,{num:[2,3,4]}), csv:'top_products_by_quantity'}; } },
     { id:'weekly', title:'Weekly sales trend', sub:'Granular momentum', span:'span12', usOnly:true,
-      mini:function(m){ return lineChart((m.weekly||[]).map(function(x){return {x:x.week,y:x.sales,label:mLabel(x.week)};}),{money:true,h:180}); },
+      mini:function(m){ return lineChart((m.weekly||[]).map(function(x){return {x:x.week,y:x.sales,label:weekLabel(x.week)};}),{money:true,h:180}); },
       detail:function(m){ var w=m.weekly||[]; var rows=w.map(function(x){return [x.week,intf(x.orders),moneyFull(x.sales),moneyFull(x.net),moneyFull(x.aov)];});
         return {insight:'<b>Week-level view exposes campaign spikes and post-promo troughs.</b> Use it to attribute revenue lift to specific sends and to spot the decay window where a follow-up flow should fire.',
-        chart:lineChart(w.map(function(x){return {x:x.week,y:x.sales,label:mLabel(x.week)};}),{money:true,w:900,h:300,yLabel:'Weekly total sales'}), table:table(['Week','Orders','Total sales','Net sales','AOV'],rows,{num:[1,2,3,4]}), csv:'weekly_sales_trend'}; } },
+        chart:lineChart(w.map(function(x){return {x:x.week,y:x.sales,label:weekLabel(x.week)};}),{money:true,w:900,h:300,yLabel:'Weekly total sales'}), table:table(['Week','Orders','Total sales','Net sales','AOV'],rows,{num:[1,2,3,4]}), csv:'weekly_sales_trend'}; } },
     { id:'country', title:'Sales by shipping country', sub:'Geography', span:'span6', ukOnly:true,
       mini:function(m){ return barChart((m.shipping_country||[]).slice(0,6).map(function(x){return {label:trunc(x.country,18),v:x.sales,disp:money(x.sales)};}),{h:180,labelW:120}); },
       detail:function(m){ var c=m.shipping_country||[]; var rows=c.map(function(x){return [x.country,intf(x.orders),moneyFull(x.sales)];});
