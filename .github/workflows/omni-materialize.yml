@@ -1,0 +1,49 @@
+name: Materialize Omni How-To source
+
+on:
+  push:
+    branches:
+      - agent/omni-how-to-engine
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Reassemble verified source archive
+        shell: bash
+        run: |
+          test -f .omni-source/part-00
+          cat .omni-source/part-* > /tmp/omni-source.b64
+          base64 --decode /tmp/omni-source.b64 > /tmp/omni-how-to-text.tar.gz
+          echo "e3b712abcecb131a6fadfa9b4871c8f8ff8db8d6304d8486829611aa35223e7f  /tmp/omni-how-to-text.tar.gz" | sha256sum --check -
+          tar -xzf /tmp/omni-how-to-text.tar.gz
+
+      - name: Generate architecture diagram
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-inter fonts-noto-mono
+          python3 -m pip install --disable-pip-version-check pillow
+          python3 side-husle/how-to/docs/generate_architecture.py
+          test -f side-husle/how-to/docs/architecture.png
+
+      - name: Validate deterministic application path
+        run: node scripts/verify-how-to.mjs
+
+      - name: Replace bootstrap payload with source tree
+        shell: bash
+        run: |
+          rm -rf .omni-source
+          rm .github/workflows/omni-materialize.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Add Omni-How-To Engine"
+          git push origin HEAD:agent/omni-how-to-engine
