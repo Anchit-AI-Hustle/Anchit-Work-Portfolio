@@ -12,7 +12,17 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5178,
-    proxy: { '/api': { target: 'http://localhost:3000', changeOrigin: true } },
+    // The client calls `${BASE_URL}api/...` = `/how-to/api/...`. With a
+    // non-relative base, proxy keys must include that base, so map
+    // /how-to/api/* → the functions runtime (stripping the /how-to prefix).
+    proxy: {
+      '/how-to/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/how-to/, ''),
+      },
+      '/api': { target: 'http://localhost:3000', changeOrigin: true },
+    },
   },
   build: { target: 'es2020', sourcemap: true },
 });

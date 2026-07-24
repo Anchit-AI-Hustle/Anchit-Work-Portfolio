@@ -1,16 +1,23 @@
 // Per-step animated guide. Requests a clip from the Text-to-Video pipeline and
 // shows the animated poster while it renders (never a broken box).
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { HowToStep, VideoClip } from '../types';
 import { requestClip, pollClip } from '../services/textToVideo';
 
 export default function StepVideo({ step }: { step: HowToStep }) {
   const [clip, setClip] = useState<VideoClip | null>(null);
   const [open, setOpen] = useState(false);
+  // Track which step we've already kicked a request for, so the effect fires
+  // exactly once per (open, step) — NOT on every setClip. Depending on `clip`
+  // here would re-run the effect and its cleanup, flipping `alive` to false and
+  // cancelling the in-flight request before it resolves.
+  const startedFor = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!open || clip) return;
+    if (!open) return;
+    if (startedFor.current === step.id) return;
+    startedFor.current = step.id;
     let alive = true;
     setClip({ stepId: step.id, status: 'rendering' });
     requestClip({ stepId: step.id, prompt: step.videoPrompt || step.title, seconds: 5 })
@@ -25,7 +32,7 @@ export default function StepVideo({ step }: { step: HowToStep }) {
         }
       });
     return () => { alive = false; };
-  }, [open, clip, step]);
+  }, [open, step.id, step.videoPrompt, step.title]);
 
   return (
     <div className="step-video">
