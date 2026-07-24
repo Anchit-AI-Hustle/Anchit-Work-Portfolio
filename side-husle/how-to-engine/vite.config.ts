@@ -6,20 +6,20 @@ import react from '@vitejs/plugin-react';
 // /api/text-to-video endpoints run as serverless functions so provider API
 // keys never reach the browser.
 export default defineConfig({
-  // Served at the /how-to route (assets resolve under /how-to/…). The SPA and
-  // its serverless /api functions sit behind that path on the deployed domain.
-  base: '/how-to/',
+  // Served at the /how-to-1 route (assets resolve under /how-to-1/…). The SPA
+  // and its serverless /api functions sit behind that path on deployment.
+  base: '/how-to-1/',
   plugins: [react()],
   server: {
     port: 5178,
-    // The client calls `${BASE_URL}api/...` = `/how-to/api/...`. With a
+    // The client calls `${BASE_URL}api/...` = `/how-to-1/api/...`. With a
     // non-relative base, proxy keys must include that base, so map
-    // /how-to/api/* → the functions runtime (stripping the /how-to prefix).
+    // /how-to-1/api/* → the functions runtime (stripping the route prefix).
     proxy: {
-      '/how-to/api': {
+      '/how-to-1/api': {
         target: 'http://localhost:3000',
         changeOrigin: true,
-        rewrite: (p) => p.replace(/^\/how-to/, ''),
+        rewrite: (p) => p.replace(/^\/how-to-1/, ''),
       },
       '/api': { target: 'http://localhost:3000', changeOrigin: true },
     },
