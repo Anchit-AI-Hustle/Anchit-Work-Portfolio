@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="/lifecycle-os-kit.css" rel="stylesheet">
 <style>
   :root, :root[data-theme="dark"]{
     --bg:#0F0D0A; --bg-elev:#1A1814; --bg-deep:#060503;
@@ -129,11 +130,13 @@
       <div class="vgrid" id="vgrid"></div>
     </div>
 
+    <div id="extras" style="margin-top:8px"></div>
     <footer>
       Mailer Studio · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>. Brand-agnostic, no proprietary data — the demo always returns designed HTML.
     </footer>
   </div>
 
+<script src="/lifecycle-os-kit.js"></script>
 <script>
 (function(){
   'use strict';
@@ -200,6 +203,7 @@
 
   // Auto-generate on load with the default subject.
   run();
+  if(window.LOS&&LOS.mountExtras) LOS.mountExtras('studio', run);
 })();
 </script>
 </body>

@@ -107,11 +107,15 @@
     </div>
 
     <!-- CORE PIPELINE -->
-    <div class="sectitle">The pipeline · data → plan → generate</div>
+    <div class="sectitle">The pipeline · analyze → plan → generate</div>
     <div class="grid" id="coreGrid"></div>
 
-    <!-- INTELLIGENCE + CREATIVE -->
-    <div class="sectitle">Intelligence &amp; creative</div>
+    <!-- CREATIVE + CHANNELS -->
+    <div class="sectitle">Creative &amp; channels</div>
+    <div class="grid" id="chanGrid"></div>
+
+    <!-- INTELLIGENCE + AUTOPILOT -->
+    <div class="sectitle">Intelligence, autopilot &amp; more</div>
     <div class="grid" id="intelGrid"></div>
 
     <!-- AUTOPILOT -->
@@ -146,15 +150,25 @@
   // status: 'live' links out now; 'soon' is scaffolded for a later pass.
   var CORE=[
     { ic:'📊', name:'Data Analysis', desc:'RFM segments, cohort retention, send-time and cross-sell affinity — benchmarked to the subject’s industry.', href:'/lifecycle-os-analysis' },
+    { ic:'👥', name:'Cohort Builder', desc:'Behavioural cohort definitions — the rule for each, its share of the base, and the play to run.', href:'/lifecycle-os-cohorts' },
     { ic:'🗓️', name:'Marketing Calendar', desc:'A 30-day, segment- and cadence-aware send calendar with seasonality and guardrails.', href:'/lifecycle-os-calendar' },
     { ic:'✉️', name:'Mailer Studio', desc:'Turn a brief into a designed, on-brand HTML mailer — multiple quality-scored variants per send.', href:'/lifecycle-os-studio' },
   ];
+  var CHAN=[
+    { ic:'📣', name:'Social Studio', desc:'On-brand social posts — caption + hashtags — tailored per platform from the subject’s positioning.', href:'/lifecycle-os-social' },
+    { ic:'🎯', name:'Ads Studio', desc:'A full ad-copy matrix — headlines × primary text × CTAs across platforms — with benchmark targets.', href:'/lifecycle-os-ads' },
+    { ic:'🎨', name:'Creative Gallery', desc:'On-brand creative concepts — ad, banner, social tile and email hero — in the brand palette.', href:'/lifecycle-os-creative' },
+    { ic:'🖼️', name:'Landing Page Studio', desc:'Generate a live, downloadable, conversion-shaped landing page from the positioning.', href:'/lifecycle-os-landing' },
+    { ic:'🎵', name:'Sonic Branding', desc:'A generated brand melody you can play, plus a sonic-identity brief — real Web-Audio synthesis.', href:'/lifecycle-os-music' },
+  ];
   var INTEL=[
-    { ic:'🧠', name:'Smart Brain', desc:'The analyze → plan → prebuild → review → approve autopilot over a rolling horizon.', href:'/lifecycle-os-brain' },
     { ic:'🔭', name:'Competitive Intelligence', desc:'Profile the peer set the way SimilarWeb / SEMrush would — traffic mix, AOV and repeat-rate bands.', href:'/lifecycle-os-intel' },
-    { ic:'🎯', name:'Full lifecycle plan', desc:'The end-to-end one-shot: segments, calendar, mailer, retention flows and KPIs in one pass.', href:'/d2c-lifecycle-os' },
-    { ic:'🖼️', name:'Landing Page Studio', desc:'Generate an on-brand, conversion-shaped landing page from a positioning brief.', href:'/lifecycle-os-landing' },
+    { ic:'🧠', name:'Smart Brain', desc:'The analyze → plan → prebuild → review → approve autopilot, with a live run and guardrails.', href:'/lifecycle-os-brain' },
     { ic:'📚', name:'Retention Playbook', desc:'A library of lifecycle plays — triggers, flows and offers — tuned to the subject’s category.', href:'/lifecycle-os-playbook' },
+    { ic:'🧩', name:'Frameworks', desc:'Classic growth frameworks (AARRR, RFM, JTBD, Hook) applied concretely to the subject.', href:'/lifecycle-os-frameworks' },
+    { ic:'🔍', name:'Growth Audit', desc:'A prioritised lifecycle audit — where the leaks are and the concrete fix for each.', href:'/lifecycle-os-audit' },
+    { ic:'💬', name:'Ask the Brand Brain', desc:'Ask a lifecycle / growth question about the subject and get a grounded answer.', href:'/lifecycle-os-ask' },
+    { ic:'🎯', name:'Full lifecycle plan', desc:'The end-to-end one-shot: segments, calendar, mailer, retention flows and KPIs in one pass.', href:'/d2c-lifecycle-os' },
     { ic:'🔌', name:'Connectors', desc:'Where a store + ESP plugs in (Shopify, Klaviyo, ESP) — off by default, no data required.', href:'/lifecycle-os-connectors' },
   ];
   function card(t){
@@ -165,6 +179,7 @@
     return el;
   }
   CORE.forEach(function(t){ $('coreGrid').appendChild(card(t)); });
+  CHAN.forEach(function(t){ $('chanGrid').appendChild(card(t)); });
   INTEL.forEach(function(t){ $('intelGrid').appendChild(card(t)); });
 
   // Persist the subject so tool pages can pick it up.

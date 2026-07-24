@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Sonic Branding — Lifecycle OS · Anchit Tandon</title>
+<meta name="description" content="Sonic Branding — generate and play a short brand melody plus a sonic-identity brief (mood, tempo, instrumentation, usage) for the subject. Part of the Lifecycle OS." />
+<link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="/lifecycle-os-kit.css" rel="stylesheet">
+<style>.player{display:flex;align-items:center;gap:16px;background:var(--bg-elev);border:1px solid var(--rule);border-radius:16px;padding:22px}.play{width:58px;height:58px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--primary),var(--gold));color:#1a0d06;font-size:22px;cursor:pointer;flex:0 0 58px}.viz{flex:1;display:flex;align-items:flex-end;gap:3px;height:52px}.viz i{flex:1;background:linear-gradient(180deg,var(--primary),var(--gold));border-radius:2px;height:8px;transition:height .12s}</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top"><a class="back" href="/lifecycle-os">← Lifecycle OS</a><span class="crumbs"><a href="/#projects">Portfolio</a> / <a href="/lifecycle-os">Lifecycle OS</a> / Sonic Branding</span></div>
+    <div class="eyebrow"><span class="dot"></span>Lifecycle OS · Sonic Branding</div>
+    <h1><span class="grad">Sonic Branding</span></h1>
+    <p class="lede">A generated brand melody you can actually play — plus a sonic-identity brief (mood, tempo, instrumentation, usage). Real audio, synthesised in your browser. Loaded with <strong>anchit-tandon.com</strong> by default; type any brand.</p>
+    <div class="subject"><span class="lbl">Subject</span><input id="brand" type="text"><input id="url" type="text" style="flex:0 1 220px"><button id="go">Compose</button></div>
+    <div id="out" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="font-family:var(--font-display);font-size:clamp(19px,3vw,24px);font-weight:600" id="hd"></div><span class="badge" id="bdg"></span></div>
+      <div class="sectitle">Brand melody · <span id="key" style="text-transform:none;letter-spacing:0;color:var(--ink-dim)"></span></div>
+      <div class="player"><button class="play" id="playBtn">▶</button><div class="viz" id="viz"></div></div>
+      <div class="sectitle">Sonic identity brief</div><div class="grid" id="brief"></div>
+    </div>
+    <div id="extras" style="margin-top:8px"></div>
+    <footer>Sonic Branding · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>. Audio is generated locally with the Web Audio API — no external service.</footer>
+  </div>
+<script src="/lifecycle-os-kit.js"></script>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i);}, esc=LOS.esc; var MEL=[], KEY='', ac=null, playing=false;
+  LOS.wireSubject('brand','url',run);
+  var SCALES={ bright:[0,2,4,7,9], warm:[0,3,5,7,10], calm:[0,2,5,7,9] };
+  function hash(s){ var h=0; for(var i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))>>>0; } return h; }
+  function compose(f){
+    var h=hash(f.name+f.mood), bright= f.anchit?'bright':'warm';
+    var scale=SCALES[bright]||SCALES.bright, root=57+(h%5); // around A3
+    var n=10, mel=[]; for(var i=0;i<n;i++){ var deg=scale[(h>>(i%12))%scale.length]; var oct=((h>>i)&1)?12:0; mel.push(root+deg+oct); }
+    KEY=(bright==='bright'?'A major pentatonic · 96 BPM':'A minor pentatonic · 84 BPM'); return mel;
+  }
+  function midi(m){ return 440*Math.pow(2,(m-69)/12); }
+  function play(){
+    if(playing) return; playing=true; $('playBtn').textContent='◼';
+    ac=ac||new (window.AudioContext||window.webkitAudioContext)(); if(ac.state==='suspended') ac.resume();
+    var t=ac.currentTime, dur=0.26, bars=$('viz').children;
+    MEL.forEach(function(m,i){
+      var o=ac.createOscillator(), g=ac.createGain(); o.type='triangle'; o.frequency.value=midi(m);
+      var st=t+i*dur; g.gain.setValueAtTime(0,st); g.gain.linearRampToValueAtTime(0.22,st+0.02); g.gain.exponentialRampToValueAtTime(0.001,st+dur*0.95);
+      o.connect(g); g.connect(ac.destination); o.start(st); o.stop(st+dur);
+      setTimeout(function(){ for(var b=0;b<bars.length;b++) bars[b].style.height=(8+Math.random()*40)+'px'; }, i*dur*1000);
+    });
+    setTimeout(function(){ playing=false; $('playBtn').textContent='▶'; for(var b=0;b<bars.length;b++) bars[b].style.height='8px'; }, MEL.length*dur*1000+120);
+  }
+  $('playBtn').addEventListener('click',play);
+  function run(){
+    var f=LOS.facts($('brand').value.trim(),$('url').value.trim()); MEL=compose(f);
+    $('hd').textContent=f.name+' — sonic identity'; LOS.badge($('bdg'),f.anchit?'anchit':'template'); $('key').textContent=KEY;
+    $('viz').innerHTML=Array.from({length:14}).map(function(){return '<i></i>';}).join('');
+    var brief=[
+      ['Mood', f.mood], ['Tempo & key', KEY],
+      ['Instrumentation', f.anchit?'Warm triangle-synth lead, soft pad, light percussive tick':'Plucked lead, airy pad, gentle mallets'],
+      ['Usage', 'Logo sting (2s), intro loop, hold music, video outro'],
+      ['Feeling to leave', f.anchit?'Sharp, credible, human':'Premium, warm, trustworthy'],
+      ['Signature motif', 'A rising '+ (KEY.indexOf('major')>-1?'major':'minor') +' pentatonic run resolving up — press play above'],
+    ];
+    $('brief').innerHTML=brief.map(function(b){return '<div class="card"><div class="k">'+esc(b[0])+'</div><p style="color:var(--ink)">'+esc(b[1])+'</p></div>';}).join('');
+    $('out').style.display='block';
+  }
+  run();
+  LOS.mountExtras('music', run);
+})();
+</script>
+</body>
+</html>

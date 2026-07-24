@@ -25,6 +25,7 @@
       <div class="sectitle">Industry-standard benchmarks</div><div class="kpis" id="bench"></div>
       <div class="sectitle">How the subject should be positioned</div><div class="card"><p id="pos" style="font-size:15px;color:var(--ink)"></p></div>
     </div>
+    <div id="extras" style="margin-top:8px"></div>
     <footer>Competitive Intelligence · part of the <a href="/lifecycle-os">Lifecycle OS</a>. Benchmarks are industry-standard estimates unless a SimilarWeb / SEMrush key is configured.</footer>
   </div>
 <script src="/lifecycle-os-kit.js"></script>
@@ -48,6 +49,7 @@
     .then(function(){ $('loading').classList.remove('on'); });
   }
   run();
+  LOS.mountExtras('intel', run);
 })();
 </script>
 </body>
