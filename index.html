@@ -4769,7 +4769,7 @@
   /* ---- Call mode: continuous hands-free voice conversation ----
      Listen → transcribe to a user bubble → send → speak the reply → listen
      again. Both sides land in the chat window as text. */
-  let callRec = null, callActive = false;
+  let callRec = null, callActive = false, callReqToken = 0;
   function isAnchitSpeaking() {
     if (typeof cloneAudio !== 'undefined' && cloneAudio && !cloneAudio.paused && !cloneAudio.ended) return true;
     if (typeof packetPlaying !== 'undefined' && packetPlaying) return true;
@@ -4829,8 +4829,13 @@
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) { if (typeof addBot === 'function') addBot("Call mode needs a browser with speech recognition (Chrome works best). Falling back to voice replies — tap the mic to talk."); setChatAudio('reply'); return; }
     if (callActive) return;
+    // Capture this request; stopCallMode() (e.g. the user switches to Text /
+    // Narrate while the mic prompt is still pending) bumps the token so a late
+    // permission grant can't silently re-enter call mode after they left it.
+    const myToken = ++callReqToken;
     // Prime mic access from THIS gesture; only open the line once it's granted.
     ensureMicPermission().then(function (ok) {
+      if (myToken !== callReqToken) return;   // user changed their mind while the prompt was open
       if (!ok) {
         if (typeof addBot === 'function') addBot("I need microphone access for hands-free calls. When the browser asks, choose Allow — or tap the mic button to talk instead.");
         if (typeof setChatAudio === 'function') setChatAudio('reply');
@@ -4843,6 +4848,7 @@
     });
   }
   function stopCallMode() {
+    callReqToken++;   // invalidate any call request whose mic prompt is still pending
     callActive = false;
     document.body.classList.remove('call-active');
     try { callRec && callRec.stop(); } catch {}
