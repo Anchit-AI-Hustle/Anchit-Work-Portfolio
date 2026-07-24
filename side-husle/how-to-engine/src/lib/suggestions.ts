@@ -35,7 +35,10 @@ const FRAMINGS = [
 
 /** Deterministic-ish random creative prompt for the empty-state CTA. */
 export function randomPrompt(seed = Date.now()): string {
-  const s = SUBJECTS[seed % SUBJECTS.length];
-  const f = FRAMINGS[(seed >> 3) % FRAMINGS.length];
+  // Use arithmetic (not bit shifts): Date.now() exceeds 32 bits, so `seed >> 3`
+  // would coerce to a signed int and often go negative → undefined index → throw.
+  const n = Math.floor(Math.abs(seed));
+  const s = SUBJECTS[n % SUBJECTS.length];
+  const f = FRAMINGS[Math.floor(n / 8) % FRAMINGS.length];
   return f.replace('{s}', s);
 }

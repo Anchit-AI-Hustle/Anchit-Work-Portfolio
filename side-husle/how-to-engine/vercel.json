@@ -4,6 +4,8 @@
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/how-to/api/:fn*", "destination": "/api/:fn*" },
-    { "source": "/how-to/:path*", "destination": "/how-to/index.html" }
+    { "source": "/how-to/assets/:path*", "destination": "/assets/:path*" },
+    { "source": "/how-to", "destination": "/index.html" },
+    { "source": "/how-to/:path*", "destination": "/index.html" }
   ]
 }

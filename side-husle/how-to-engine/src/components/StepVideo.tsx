@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import type { HowToStep, VideoClip } from '../types';
-import { requestClip } from '../services/textToVideo';
+import { requestClip, pollClip } from '../services/textToVideo';
 
 export default function StepVideo({ step }: { step: HowToStep }) {
   const [clip, setClip] = useState<VideoClip | null>(null);
@@ -14,7 +14,16 @@ export default function StepVideo({ step }: { step: HowToStep }) {
     let alive = true;
     setClip({ stepId: step.id, status: 'rendering' });
     requestClip({ stepId: step.id, prompt: step.videoPrompt || step.title, seconds: 5 })
-      .then((c) => { if (alive) setClip(c); });
+      .then((c) => {
+        if (!alive) return;
+        // Queued/rendering jobs return a jobId in `url` — poll until it's ready.
+        if ((c.status === 'queued' || c.status === 'rendering') && c.url) {
+          setClip({ stepId: step.id, status: 'rendering' });
+          pollClip(step.id, c.url).then((fin) => { if (alive) setClip(fin); });
+        } else {
+          setClip(c);
+        }
+      });
     return () => { alive = false; };
   }, [open, clip, step]);
 

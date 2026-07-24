@@ -80,14 +80,21 @@ function extractJson<T>(raw: string): T | null {
   }
 }
 
+const VALID_BADGES: HowToStep['badge'][] = ['start', 'action', 'watch-out', 'checkpoint', 'finish'];
+
 function normalizeGuide(g: Partial<MasterGuide> | null, task: string): MasterGuide | undefined {
   if (!g || !Array.isArray(g.steps) || g.steps.length === 0) return undefined;
+  const last = g.steps.length - 1;
   const steps: HowToStep[] = g.steps.map((s, i) => ({
     id: s.id || `s${i + 1}`,
     index: i + 1,
     title: (s.title || 'Step').trim(),
     detail: (s.detail || '').trim(),
-    badge: s.badge || (i === 0 ? 'start' : i === g.steps!.length - 1 ? 'finish' : 'action'),
+    // Coerce to a supported badge — a model may return e.g. "warning"/"caution",
+    // which would otherwise crash the UI's BADGE[...] lookup.
+    badge: VALID_BADGES.includes(s.badge as HowToStep['badge'])
+      ? (s.badge as HowToStep['badge'])
+      : (i === 0 ? 'start' : i === last ? 'finish' : 'action'),
     branches: s.branches,
     estSeconds: s.estSeconds,
     videoPrompt: s.videoPrompt,
