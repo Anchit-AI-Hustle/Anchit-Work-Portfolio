@@ -168,6 +168,7 @@ function normalizeMailer(m) {
   if (!m || typeof m !== 'object') return null;
   const h = m.hero && typeof m.hero === 'object' ? m.hero : {};
   const c = m.cta && typeof m.cta === 'object' ? m.cta : {};
+  const clampScore = (v) => { const n = Math.round(Number(v)); return Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : null; };
   return {
     theme: str(m.theme, 120),
     subject: str(m.subject, 140),
@@ -177,6 +178,15 @@ function normalizeMailer(m) {
     cta: { label: str(c.label, 40), note: str(c.note, 120) },
     signoff: str(m.signoff, 80),
     body: str(m.body, 1600),
+    // Mailer Studio: multiple variant concepts per send, each quality-scored
+    // (strategy alignment · copy · content density · divergence · overall).
+    variants: arr(m.variants).slice(0, 4).map((v) => {
+      const sc = v.score && typeof v.score === 'object' ? v.score : {};
+      const score = { strategy: clampScore(sc.strategy), copy: clampScore(sc.copy), density: clampScore(sc.density), divergence: clampScore(sc.divergence), overall: clampScore(sc.overall) };
+      const nums = ['strategy', 'copy', 'density', 'divergence'].map((k) => score[k]).filter((n) => n != null);
+      if (score.overall == null && nums.length) score.overall = Math.round(nums.reduce((a, b) => a + b, 0) / nums.length);
+      return { label: str(v.label, 40), type: /image/i.test(v.type) ? 'image' : 'text', angle: str(v.angle, 240), score };
+    }),
   };
 }
 
@@ -193,10 +203,36 @@ function normalize(o) {
     positioning: str(o.positioning, 600),
     segments: arr(o.segments).slice(0, 6).map((s) => ({ name: str(s.name, 60), description: str(s.description, 300), size: str(s.size, 40) })),
     stages: arr(o.stages).slice(0, 6).map((s) => ({ stage: str(s.stage, 40), goal: str(s.goal, 200), channels: arr(s.channels).slice(0, 5).map((c) => str(c, 30)), campaign: str(s.campaign, 240) })),
-    calendar: arr(o.calendar).slice(0, 8).map((c) => ({ week: str(c.week, 24), theme: str(c.theme, 80), sends: arr(c.sends).slice(0, 5).map((x) => str(x, 80)) })),
+    calendar: arr(o.calendar).slice(0, 8).map((c) => ({ week: str(c.week, 24), theme: str(c.theme, 80), cadence: str(c.cadence, 60), sends: arr(c.sends).slice(0, 5).map((x) => str(x, 80)) })),
+    analysis: normalizeAnalysis(o.analysis),
     mailer: normalizeMailer(o.mailer),
     retention: arr(o.retention).slice(0, 6).map((r) => ({ trigger: str(r.trigger, 80), flow: str(r.flow, 280) })),
     kpis: arr(o.kpis).slice(0, 6).map((k) => ({ metric: str(k.metric, 60), target: str(k.target, 60) })),
+    smartBrain: normalizeSmartBrain(o.smartBrain),
+    guardrails: arr(o.guardrails).slice(0, 8).map((g) => (typeof g === 'string' ? { rule: str(g, 60), detail: '' } : { rule: str(g.rule, 60), detail: str(g.detail, 180) })),
+  };
+}
+
+// Data-Analysis stage (RFM segmentation model, cohort retention, best send-time
+// heatmap, cross-sell affinity) — the analytical layer of the original OS.
+function normalizeAnalysis(a) {
+  if (!a || typeof a !== 'object') return null;
+  const st = a.sendTime && typeof a.sendTime === 'object' ? a.sendTime : {};
+  return {
+    model: str(a.model, 80),
+    cohortNote: str(a.cohortNote, 240),
+    sendTime: { window: str(st.window, 60), note: str(st.note, 160) },
+    crossSell: arr(a.crossSell).slice(0, 6).map((x) => str(x, 60)),
+  };
+}
+
+// Smart-Brain autopilot loop (analyze → plan → prebuild → review → approve).
+function normalizeSmartBrain(b) {
+  if (!b || typeof b !== 'object') return null;
+  return {
+    horizon: str(b.horizon, 60),
+    loop: arr(b.loop).slice(0, 6).map((s) => (typeof s === 'string' ? { step: str(s, 30), detail: '' } : { step: str(s.step, 30), detail: str(s.detail, 180) })),
+    note: str(b.note, 240),
   };
 }
 
@@ -222,7 +258,13 @@ Return ONLY a JSON object (no markdown fences, no commentary) with EXACTLY this 
   "positioning": string (1-2 sentences on how lifecycle marketing should position this brand relative to its industry benchmarks),
   "segments": [{"name": string, "description": string, "size": string (e.g. "~18% of list")}]  (4-6 behavioural/RFM segments),
   "stages": [{"stage": string (e.g. Acquisition, Welcome, Activation, Nurture, Win-back, VIP), "goal": string, "channels": [string], "campaign": string (one concrete campaign idea)}]  (5-6 stages),
-  "calendar": [{"week": string (e.g. "Week 1"), "theme": string, "sends": [string]}]  (4-6 weeks),
+  "calendar": [{"week": string (e.g. "Week 1"), "theme": string, "cadence": string (per-segment send cadence guard, e.g. "≤3 sends/segment"), "sends": [string]}]  (4-6 weeks),
+  "analysis": {  // Data-Analysis stage
+    "model": string (segmentation model, e.g. "RFM — 9 behavioural segments"),
+    "cohortNote": string (one cohort-retention insight for this category),
+    "sendTime": {"window": string (best send window, e.g. "Tue & Thu, 10am-12pm"), "note": string},
+    "crossSell": [string]  (3-6 cross-sell / affinity ideas)
+  },
   "mailer": {  // "think -> lock -> execute": lock ONE theme, then a structured, strategy-driven email
     "theme": string (the single locked angle of this send, e.g. "Welcome & first order: story -> hero products -> nudge"),
     "subject": string,
@@ -230,10 +272,17 @@ Return ONLY a JSON object (no markdown fences, no commentary) with EXACTLY this 
     "hero": {"kicker": string (2-3 words), "headline": string (one strong line), "subhead": string (one supporting line)},
     "sections": [{"title": string, "body": string}]  (2-3 tight, on-brand content blocks that follow the locked theme),
     "cta": {"label": string (button text), "note": string (one supporting line under the button)},
-    "signoff": string (e.g. "Team <brand>")
+    "signoff": string (e.g. "Team <brand>"),
+    "variants": [{"label": string (e.g. "A - Story-led"), "type": "text" | "image", "angle": string (what makes this variant different), "score": {"strategy": number (0-100), "copy": number, "density": number, "divergence": number, "overall": number}}]  (2-4 scored variant concepts, the Mailer-Studio output)
   },
   "retention": [{"trigger": string (e.g. "Cart abandon", "60 days no purchase"), "flow": string (the automated flow)}]  (4-6),
-  "kpis": [{"metric": string, "target": string}]  (4-6 lifecycle KPIs with realistic targets)
+  "kpis": [{"metric": string, "target": string}]  (4-6 lifecycle KPIs with realistic targets),
+  "smartBrain": {  // the autopilot operating loop
+    "horizon": string (e.g. "90-day rolling"),
+    "loop": [{"step": string (Analyze | Plan | Prebuild | Review | Approve), "detail": string}]  (the 5 loop steps),
+    "note": string
+  },
+  "guardrails": [{"rule": string, "detail": string}]  (3-5 safety guardrails: discount cap, suppression/cadence, banned-phrase, brand lock)
 }`;
 }
 
@@ -271,11 +320,17 @@ function templatePlan(brand, category) {
       { stage: 'VIP', goal: 'Reward and retain top spenders', channels: ['Email', 'SMS'], campaign: 'Early access drops + surprise gift at spend milestones.' },
     ],
     calendar: [
-      { week: 'Week 1', theme: 'Onboarding & story', sends: ['Welcome #1 (story)', 'Bestsellers #2', 'Browse-abandon (triggered)'] },
-      { week: 'Week 2', theme: 'Activation & social proof', sends: ['UGC / reviews', 'Cart recovery (triggered)', 'SMS first-order nudge'] },
-      { week: 'Week 3', theme: 'Education & cross-sell', sends: ['How-to / usage', 'Complementary products', 'Segment: browsers re-engage'] },
-      { week: 'Week 4', theme: 'Retention & replenishment', sends: ['Replenishment reminder', 'VIP early access', 'Win-back for 60-day lapsers'] },
+      { week: 'Week 1', theme: 'Onboarding & story', cadence: '≤3 sends/segment · new subs only', sends: ['Welcome #1 (story)', 'Bestsellers #2', 'Browse-abandon (triggered)'] },
+      { week: 'Week 2', theme: 'Activation & social proof', cadence: '≤3 sends/segment · suppress converters', sends: ['UGC / reviews', 'Cart recovery (triggered)', 'SMS first-order nudge'] },
+      { week: 'Week 3', theme: 'Education & cross-sell', cadence: '≤2 sends/segment', sends: ['How-to / usage', 'Complementary products', 'Segment: browsers re-engage'] },
+      { week: 'Week 4', theme: 'Retention & replenishment', cadence: '≤2 sends/segment · VIP +1', sends: ['Replenishment reminder', 'VIP early access', 'Win-back for 60-day lapsers'] },
     ],
+    analysis: {
+      model: 'RFM — 9 behavioural segments (recency × frequency × monetary)',
+      cohortNote: `New-buyer cohorts in ${cat} typically retain 20–30% into a second order; the 30–60 day replenishment window is the LTV inflection point to target.`,
+      sendTime: { window: 'Tue & Thu, 10am–12pm local', note: 'Category-typical peak open/click window; SMS best late-afternoon.' },
+      crossSell: ['Bestseller bundles', 'Replenishment kits', 'Complementary category', 'Gifting sets', 'Subscription upgrade'],
+    },
     mailer: {
       theme: 'Welcome & first order: story → hero products → first-order nudge',
       subject: `A little something to start your ${b} journey`,
@@ -292,6 +347,11 @@ function templatePlan(brand, category) {
       cta: { label: 'Shop bestsellers', note: 'Free returns, and we read every reply.' },
       signoff: `Team ${b}`,
       body: `Hi there,\n\nWelcome to ${b}. Here's 10% to get started: WELCOME10. Not sure where to begin? Start with our bestsellers, and reply anytime.\n\n— Team ${b}`,
+      variants: [
+        { label: 'A · Story-led', type: 'text', angle: `Opens on the ${b} origin story, then the welcome offer — builds brand affinity first.`, score: { strategy: 90, copy: 88, density: 80, divergence: 72, overall: 88 } },
+        { label: 'B · Offer-led', type: 'text', angle: 'Leads with WELCOME10 and bestsellers — highest first-order conversion for deal-seekers.', score: { strategy: 86, copy: 82, density: 78, divergence: 80 } },
+        { label: 'C · Hero-image', type: 'image', angle: 'Full-bleed hero product image + one-line promise and CTA — for visual-first mobile readers.', score: { strategy: 84, copy: 80, density: 86, divergence: 85 } },
+      ],
     },
     retention: [
       { trigger: 'Browse abandon', flow: '2 emails + 1 SMS over 24h with the exact product viewed and a soft nudge.' },
@@ -307,6 +367,23 @@ function templatePlan(brand, category) {
       { metric: '90-day retention', target: '+10 pts vs baseline' },
       { metric: 'Win-back recovery rate', target: '6–10% of lapsed' },
       { metric: 'List → revenue (RPME)', target: '₹ / $ per email up 15%' },
+    ],
+    smartBrain: {
+      horizon: '90-day rolling',
+      loop: [
+        { step: 'Analyze', detail: 'Recompute RFM segments, cohorts and cross-sell affinity from the latest data.' },
+        { step: 'Plan', detail: 'Generate the segment- and seasonality-aware send calendar with cadence guards.' },
+        { step: 'Prebuild', detail: 'Pre-draft each send’s mailer variants so nothing starts from a blank page.' },
+        { step: 'Review', detail: 'Human-approve the plan; every variant is quality-scored before it ships.' },
+        { step: 'Approve', detail: 'Release the winning variant, then feed performance back into the next cycle.' },
+      ],
+      note: 'A convergent daily loop over a rolling horizon, with human-in-the-loop approval and confidence tracking.',
+    },
+    guardrails: [
+      { rule: 'Discount cap', detail: 'Offers capped (≤15%) against a real code registry; per-cohort offer depth enforced.' },
+      { rule: 'Progressive suppression', detail: 'Cadence guards per segment so the program never over-mails.' },
+      { rule: 'Banned-phrase sanitizer', detail: 'Copy is scrubbed of spam-trigger phrases before send.' },
+      { rule: 'Brand lock', detail: 'A fixed palette and typography are baked into every generated mailer.' },
     ],
   };
 }
@@ -358,11 +435,17 @@ function anchitPlan() {
       { stage: 'Onboard', goal: 'Start compounding from week one', channels: ['30-60-90 plan'], campaign: 'Send a 30-60-90 growth plan before day one to anchor the mandate.' },
     ],
     calendar: [
-      { week: 'Week 1', theme: 'Set up the funnel', sends: ['Refresh anchit-tandon.com', 'Target-list of 25 companies', 'Growth-teardown post #1'] },
-      { week: 'Week 2', theme: 'Warm outreach', sends: ['Referral asks (10)', 'Personalised recruiter DMs', 'Growth-teardown post #2'] },
-      { week: 'Week 3', theme: 'Direct outreach', sends: ['Role-tailored one-pagers', 'Hiring-manager cold emails', 'Follow-up on Week-1 opens'] },
-      { week: 'Week 4', theme: 'Interview & nurture', sends: ['Interview prep case studies', 'Same-day thank-you follow-ups', 'Win-back on no-replies'] },
+      { week: 'Week 1', theme: 'Set up the funnel', cadence: 'Foundation — no cold outreach yet', sends: ['Refresh anchit-tandon.com', 'Target-list of 25 companies', 'Growth-teardown post #1'] },
+      { week: 'Week 2', theme: 'Warm outreach', cadence: '≤5 personalised touches/day', sends: ['Referral asks (10)', 'Personalised recruiter DMs', 'Growth-teardown post #2'] },
+      { week: 'Week 3', theme: 'Direct outreach', cadence: '≤8 touches/day · 1 follow-up max', sends: ['Role-tailored one-pagers', 'Hiring-manager cold emails', 'Follow-up on Week-1 opens'] },
+      { week: 'Week 4', theme: 'Interview & nurture', cadence: 'Reactive — reply within 24h', sends: ['Interview prep case studies', 'Same-day thank-you follow-ups', 'Win-back on no-replies'] },
     ],
+    analysis: {
+      model: 'Candidate funnel model — 5 employer segments scored by fit × intent',
+      cohortNote: 'Warm-referral cohort converts ~3× cold outreach to first interview; prioritise the network cohort first, then media/subscription (closest role fit).',
+      sendTime: { window: 'Tue–Thu, 8–10am local', note: 'Highest open/reply window for senior recruiter and hiring-manager outreach.' },
+      crossSell: ['Product leadership', 'Growth / lifecycle', 'Revenue & monetisation', 'AI-product / automation', '0→1 & 1→n scaling'],
+    },
     mailer: {
       theme: 'Proof-led intro: compounding wins → clickable résumé → 20-minute conversation',
       subject: 'Anchit Tandon — Product & Growth leader who ships compounding wins',
@@ -380,6 +463,11 @@ function anchitPlan() {
       cta: { label: 'Open anchit-tandon.com', note: 'Or just reply — 20 minutes is all I’m asking.' },
       signoff: 'Anchit Tandon · anchit-tandon.com',
       body: 'Hi there,\n\nI\'m Anchit — an engineer who learned to love the funnel, now leading Product & D2C Growth. I scaled Assisted Sales 5× to ₹80L MRR, added ₹3Cr+ ARR from the ET Markets revamp, and now drive D2C growth across US, UK and global markets. My portfolio, anchit-tandon.com, is an interactive résumé. If you\'re hiring for a senior Product or Growth role, I\'d love 20 minutes.\n\n— Anchit Tandon\nanchit-tandon.com',
+      variants: [
+        { label: 'A · Proof-led', type: 'text', angle: 'Leads with the three hardest numbers (5× MRR, ₹3Cr+ ARR, US/UK/global) — for data-driven hiring managers.', score: { strategy: 94, copy: 90, density: 88, divergence: 70, overall: 90 } },
+        { label: 'B · Referral-led', type: 'text', angle: 'Opens on the shared connection / warm intro, then one proof point — highest reply rate.', score: { strategy: 91, copy: 88, density: 82, divergence: 85 } },
+        { label: 'C · Role-fit-led', type: 'image', angle: 'Portrait + a one-glance stat card mapping my wins to the exact role — for visual-first recruiters.', score: { strategy: 88, copy: 84, density: 90, divergence: 88 } },
+      ],
     },
     retention: [
       { trigger: 'Outreach opened, no reply (3 days)', flow: 'One-nudge follow-up adding a second, role-specific proof point.' },
@@ -395,6 +483,23 @@ function anchitPlan() {
       { metric: 'Quality offers', target: '2–3' },
       { metric: 'anchit-tandon.com → conversation', target: 'CTR up 20%' },
       { metric: 'Search cycle', target: 'Signed in 6–10 weeks' },
+    ],
+    smartBrain: {
+      horizon: '6–10 week rolling search',
+      loop: [
+        { step: 'Analyze', detail: 'Score the target list by fit × intent; refresh from new openings daily.' },
+        { step: 'Plan', detail: 'Sequence outreach by cohort — warm network first, then closest role fit.' },
+        { step: 'Prebuild', detail: 'Pre-draft the role-tailored one-pager and email variants before each send window.' },
+        { step: 'Review', detail: 'Human-approve every message; quality-score each variant before it ships.' },
+        { step: 'Approve', detail: 'Send the winning variant, log the outcome, and feed replies back into scoring.' },
+      ],
+      note: 'A convergent daily loop over a rolling horizon — the same autopilot rhythm applied to a job search instead of a send calendar.',
+    },
+    guardrails: [
+      { rule: 'Personalisation required', detail: 'No message ships without one company- or role-specific proof point — never a mass blast.' },
+      { rule: 'Cadence cap', detail: 'One follow-up per contact max; progressive suppression once someone replies or declines.' },
+      { rule: 'Honest claims only', detail: 'Every metric is real and verifiable on anchit-tandon.com — no inflated numbers.' },
+      { rule: 'Tone lock', detail: 'Warm, specific, first-person; no buzzword filler or generic recruiter-speak.' },
     ],
   };
 }

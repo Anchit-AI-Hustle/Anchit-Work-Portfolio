@@ -86,6 +86,36 @@
   #result{ display:none; }
   .result-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin:6px 0 18px; }
   .result-head h3{ font-family:var(--font-display); font-size:clamp(22px,3vw,30px); font-weight:600; }
+  .rhead-right{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .xport{ background:transparent; border:1px solid var(--rule-strong); border-radius:99px; color:var(--ink-dim);
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.04em; padding:7px 13px; cursor:pointer; transition:border-color .2s,color .2s; }
+  .xport:hover{ border-color:var(--primary); color:var(--ink); }
+  /* Data analysis + Smart Brain + guardrails + variant scores */
+  .ana-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-bottom:24px; }
+  .ana-card{ background:var(--bg-elev); border:1px solid var(--rule); border-radius:14px; padding:16px 18px; }
+  .ana-card .k{ font-family:var(--font-mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--primary); margin-bottom:8px; }
+  .ana-card .v{ font-size:14px; color:var(--ink); font-weight:500; }
+  .ana-card p{ font-size:13px; color:var(--ink-dim); margin-top:4px; }
+  .ana-card .tags{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+  .ana-card .tags span{ font-family:var(--font-mono); font-size:10.5px; color:var(--ink-dim); border:1px solid var(--rule); border-radius:6px; padding:3px 7px; }
+  .vcard{ background:var(--bg-elev); border:1px solid var(--rule); border-radius:14px; padding:16px 18px; }
+  .vcard .vtop{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
+  .vcard .vlabel{ font-weight:600; font-size:14.5px; }
+  .vcard .vtype{ font-family:var(--font-mono); font-size:10px; letter-spacing:.05em; text-transform:uppercase; color:var(--gold); border:1px solid var(--rule); border-radius:6px; padding:3px 7px; }
+  .vcard .vtype.image{ color:var(--accent); }
+  .vcard p{ font-size:13px; color:var(--ink-dim); margin-bottom:12px; }
+  .vscore{ display:flex; align-items:center; gap:8px; margin-top:6px; }
+  .vscore .lab{ font-family:var(--font-mono); font-size:10.5px; color:var(--ink-mute); width:70px; flex:0 0 70px; text-transform:capitalize; }
+  .vbar{ flex:1; height:6px; border-radius:99px; background:rgba(255,255,255,.08); overflow:hidden; }
+  .vbar i{ display:block; height:100%; border-radius:99px; background:linear-gradient(90deg,var(--primary),var(--gold)); }
+  .vscore .num{ font-family:var(--font-mono); font-size:11px; color:var(--ink-dim); width:30px; text-align:right; }
+  .voverall{ display:inline-flex; align-items:baseline; gap:4px; font-family:var(--font-display); }
+  .voverall b{ font-size:22px; color:var(--ink); font-weight:600; } .voverall span{ font-size:11px; color:var(--ink-mute); font-family:var(--font-mono); }
+  .brain{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; align-items:stretch; }
+  .bstep{ flex:1; min-width:150px; background:var(--bg-elev); border:1px solid var(--rule); border-radius:12px; padding:14px 16px; position:relative; }
+  .bstep .bn{ font-family:var(--font-mono); font-size:10.5px; color:var(--primary); letter-spacing:.06em; text-transform:uppercase; margin-bottom:6px; }
+  .bstep .bs{ font-weight:600; font-size:14px; margin-bottom:4px; }
+  .bstep p{ font-size:12.5px; color:var(--ink-dim); }
   .badge{ font-family:var(--font-mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
     padding:5px 10px; border-radius:99px; border:1px solid var(--rule); color:var(--ink-dim); }
   .badge.ai{ border-color:var(--accent); color:var(--accent); }
@@ -219,7 +249,11 @@
     <div id="result">
       <div class="result-head">
         <h3 id="rBrand"></h3>
-        <span class="badge" id="rBadge"></span>
+        <div class="rhead-right">
+          <span class="badge" id="rBadge"></span>
+          <button class="xport" id="rExport" title="Download the full plan as JSON">↓ Export plan</button>
+          <button class="xport" id="rCopy" title="Copy the plan to the clipboard">⧉ Copy</button>
+        </div>
       </div>
       <div class="positioning" id="rPos"></div>
 
@@ -228,6 +262,9 @@
         <div class="card" id="rIndMeta" style="margin-bottom:14px;"></div>
         <div class="kpis" id="rBench"></div>
       </div>
+
+      <div class="sectitle" id="rAnaTitle" style="display:none;">Data analysis</div>
+      <div id="rAnalysis" style="display:none;"></div>
 
       <div class="sectitle">Audience segments</div>
       <div class="grid" id="rSeg"></div>
@@ -241,8 +278,17 @@
       <div class="sectitle">Sample mailer · strategy-locked, on-brand design</div>
       <div class="mailer" id="rMailer"></div>
 
+      <div class="sectitle" id="rVarTitle" style="display:none;">Mailer Studio · scored variants</div>
+      <div class="grid" id="rVariants" style="display:none;"></div>
+
       <div class="sectitle">Retention automations</div>
       <div class="rows" id="rRet"></div>
+
+      <div class="sectitle" id="rBrainTitle" style="display:none;">Smart Brain · autopilot loop</div>
+      <div id="rBrain" style="display:none;"></div>
+
+      <div class="sectitle" id="rGuardTitle" style="display:none;">Guardrails</div>
+      <div class="grid" id="rGuards" style="display:none;"></div>
 
       <div class="sectitle">Target KPIs</div>
       <div class="kpis" id="rKpi"></div>
@@ -307,6 +353,21 @@
   brandEl.addEventListener('keydown', function(e){ if(e.key==='Enter') run(); });
   urlEl.addEventListener('keydown', function(e){ if(e.key==='Enter') run(); });
 
+  var lastPlan=null, lastSource=null;
+  function planFilename(){ return (lastPlan&&lastPlan.brand||'plan').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-lifecycle-plan.json'; }
+  $('rExport').addEventListener('click', function(){
+    if(!lastPlan) return;
+    var blob=new Blob([JSON.stringify({ source:lastSource, plan:lastPlan }, null, 2)], {type:'application/json'});
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=planFilename();
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+  });
+  $('rCopy').addEventListener('click', function(){
+    if(!lastPlan) return;
+    var txt=JSON.stringify({ source:lastSource, plan:lastPlan }, null, 2), btn=$('rCopy'), orig=btn.textContent;
+    var done=function(){ btn.textContent='✓ Copied'; setTimeout(function(){ btn.textContent=orig; }, 1600); };
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done, done); } else { done(); }
+  });
+
   var phrases=['Reading the brand…','Building segments…','Designing the calendar…','Writing the mailer…','Wiring retention flows…'];
   var pv=0, timer=null;
 
@@ -356,6 +417,18 @@
       $('rIndTitle').style.display='none'; $('rIndustry').style.display='none';
     }
 
+    // Data analysis stage
+    var a = p.analysis;
+    if(a && (a.model || a.cohortNote || (a.sendTime&&a.sendTime.window) || (a.crossSell&&a.crossSell.length))){
+      var ab='<div class="ana-grid">';
+      if(a.model) ab += '<div class="ana-card"><div class="k">Segmentation model</div><div class="v">'+esc(a.model)+'</div></div>';
+      if(a.sendTime&&a.sendTime.window) ab += '<div class="ana-card"><div class="k">Best send window</div><div class="v">'+esc(a.sendTime.window)+'</div>'+(a.sendTime.note?'<p>'+esc(a.sendTime.note)+'</p>':'')+'</div>';
+      if(a.cohortNote) ab += '<div class="ana-card"><div class="k">Cohort retention</div><p style="margin-top:0">'+esc(a.cohortNote)+'</p></div>';
+      if(a.crossSell&&a.crossSell.length) ab += '<div class="ana-card"><div class="k">Cross-sell affinity</div><div class="tags">'+a.crossSell.map(function(x){return '<span>'+esc(x)+'</span>';}).join('')+'</div></div>';
+      ab += '</div>';
+      $('rAnalysis').innerHTML=ab; $('rAnaTitle').style.display=''; $('rAnalysis').style.display='block';
+    } else { $('rAnaTitle').style.display='none'; $('rAnalysis').style.display='none'; }
+
     $('rSeg').innerHTML = (p.segments||[]).map(function(s){
       return '<div class="card"><div class="k"><span>'+esc(s.name)+'</span><span class="sz">'+esc(s.size||'')+'</span></div><p>'+esc(s.description)+'</p></div>';
     }).join('') || '<p style="color:var(--ink-mute)">—</p>';
@@ -367,19 +440,55 @@
 
     $('rCal').innerHTML = (p.calendar||[]).map(function(c){
       var sends=(c.sends||[]).map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('');
-      return '<div class="lrow"><div class="w">'+esc(c.week)+'</div><div><div class="th">'+esc(c.theme)+'</div><ul>'+sends+'</ul></div></div>';
+      var cad = c.cadence ? '<div style="font-family:var(--font-mono);font-size:10.5px;color:var(--ink-mute);margin-top:6px">⚙ '+esc(c.cadence)+'</div>' : '';
+      return '<div class="lrow"><div class="w">'+esc(c.week)+'</div><div><div class="th">'+esc(c.theme)+'</div><ul>'+sends+'</ul>'+cad+'</div></div>';
     }).join('');
 
     renderMailer(p.mailer, (p.brand||'A').trim().charAt(0).toUpperCase() || 'A');
+
+    // Mailer Studio · scored variants
+    var vars = (p.mailer && p.mailer.variants) || [];
+    if(vars.length){
+      $('rVariants').innerHTML = vars.map(function(v){
+        var sc=v.score||{};
+        var bars=['strategy','copy','density','divergence'].filter(function(k){return sc[k]!=null;}).map(function(k){
+          return '<div class="vscore"><span class="lab">'+k+'</span><span class="vbar"><i style="width:'+Math.max(0,Math.min(100,sc[k]))+'%"></i></span><span class="num">'+sc[k]+'</span></div>';
+        }).join('');
+        var overall = sc.overall!=null ? '<div class="voverall"><b>'+sc.overall+'</b><span>/100 overall</span></div>' : '';
+        return '<div class="vcard"><div class="vtop"><span class="vlabel">'+esc(v.label||'Variant')+'</span><span class="vtype '+(v.type==='image'?'image':'')+'">'+esc(v.type||'text')+'</span></div>'+(v.angle?'<p>'+esc(v.angle)+'</p>':'')+bars+(overall?'<div style="margin-top:10px">'+overall+'</div>':'')+'</div>';
+      }).join('');
+      $('rVarTitle').style.display=''; $('rVariants').style.display='grid';
+    } else { $('rVarTitle').style.display='none'; $('rVariants').style.display='none'; }
 
     $('rRet').innerHTML = (p.retention||[]).map(function(r){
       return '<div class="lrow"><div class="w">'+esc(r.trigger)+'</div><div><div class="th" style="margin:0;font-weight:400;color:var(--ink-dim);font-size:14px;">'+esc(r.flow)+'</div></div></div>';
     }).join('');
 
+    // Smart Brain · autopilot loop
+    var sb = p.smartBrain;
+    if(sb && sb.loop && sb.loop.length){
+      var steps = sb.loop.map(function(s,i){
+        return '<div class="bstep"><div class="bn">0'+(i+1)+' · '+esc(s.step)+'</div>'+(s.detail?'<p>'+esc(s.detail)+'</p>':'')+'</div>';
+      }).join('');
+      $('rBrain').innerHTML = '<div class="brain">'+steps+'</div>'+
+        ((sb.horizon||sb.note)?'<div class="note" style="font-size:13px;color:var(--ink-dim)">'+(sb.horizon?'<b style="color:var(--ink)">'+esc(sb.horizon)+'</b> — ':'')+esc(sb.note||'')+'</div>':'');
+      $('rBrainTitle').style.display=''; $('rBrain').style.display='block';
+    } else { $('rBrainTitle').style.display='none'; $('rBrain').style.display='none'; }
+
+    // Guardrails
+    var g = p.guardrails||[];
+    if(g.length){
+      $('rGuards').innerHTML = g.map(function(x){
+        return '<div class="card"><div class="k">'+esc(x.rule||'')+'</div>'+(x.detail?'<p>'+esc(x.detail)+'</p>':'')+'</div>';
+      }).join('');
+      $('rGuardTitle').style.display=''; $('rGuards').style.display='grid';
+    } else { $('rGuardTitle').style.display='none'; $('rGuards').style.display='none'; }
+
     $('rKpi').innerHTML = (p.kpis||[]).map(function(k){
       return '<div class="kpi"><div class="m">'+esc(k.metric)+'</div><div class="v">'+esc(k.target)+'</div></div>';
     }).join('');
 
+    lastPlan=p; lastSource=source;
     resEl.style.display='block';
     if(!noScroll) resEl.scrollIntoView({ behavior:'smooth', block:'start' });
   }
