@@ -1,48 +1,43 @@
-// Serverless endpoint: Text-to-Video broker.
+// Serverless endpoint: Text-to-Video broker (Web Request/Response handler shape;
+// named GET/POST exports so Vercel serves it as a fetch-style function).
 //   POST /api/text-to-video      { stepId, prompt, seconds?, aspect? }  -> queue
 //   GET  /api/text-to-video?jobId=...                                  -> poll
 //
-// This is a provider-agnostic WRAPPER. Wire the fetch calls to Runway / Luma /
-// Sora using whichever key is set. Until then it returns a graceful mock so the
-// UI renders animated placeholders instead of breaking.
+// Provider-agnostic WRAPPER. Wire the fetch calls to Runway / Luma / Sora using
+// whichever key is set. Until then it returns a graceful mock so the UI renders
+// animated placeholders instead of breaking.
 
 export const config = { runtime: 'nodejs' };
 
 const env = (k: string) => process.env?.[k] || '';
 
-export default async function handler(req: Request): Promise<Response> {
-  const url = new URL(req.url);
+export async function GET(req: Request): Promise<Response> {
+  const jobId = new URL(req.url).searchParams.get('jobId') || '';
+  // Real impl: query the provider's job status here. Mock → immediately ready.
+  return json({ stepId: jobId, status: 'ready', url: mockClip(jobId), posterUrl: mockPoster(jobId) });
+}
 
-  if (req.method === 'GET') {
-    const jobId = url.searchParams.get('jobId') || '';
-    // Real impl: query the provider's job status here. Mock → immediately ready.
-    return json({ stepId: jobId, status: 'ready', url: mockClip(jobId), posterUrl: mockPoster(jobId) });
-  }
+export async function POST(req: Request): Promise<Response> {
+  const body = await req.json().catch(() => ({}));
+  const { stepId, prompt, seconds = 5, aspect = '16:9' } = body as {
+    stepId: string; prompt: string; seconds?: number; aspect?: string;
+  };
+  if (!prompt) return json({ error: 'Missing prompt' }, 400);
 
-  if (req.method === 'POST') {
-    const body = await req.json().catch(() => ({}));
-    const { stepId, prompt, seconds = 5, aspect = '16:9' } = body as {
-      stepId: string; prompt: string; seconds?: number; aspect?: string;
-    };
-    if (!prompt) return json({ error: 'Missing prompt' }, 400);
+  // ── Runway example (uncomment + set RUNWAY_API_KEY) ──────────────────────
+  // if (env('RUNWAY_API_KEY')) {
+  //   const r = await fetch('https://api.runwayml.com/v1/text_to_video', {
+  //     method: 'POST',
+  //     headers: { authorization: `Bearer ${env('RUNWAY_API_KEY')}`, 'content-type': 'application/json' },
+  //     body: JSON.stringify({ promptText: prompt, duration: seconds, ratio: aspect }),
+  //   });
+  //   const j = await r.json();
+  //   return json({ stepId, status: 'rendering', url: j.id }); // url carries jobId for polling
+  // }
 
-    // ── Runway example (uncomment + set RUNWAY_API_KEY) ────────────────────
-    // if (env('RUNWAY_API_KEY')) {
-    //   const r = await fetch('https://api.runwayml.com/v1/text_to_video', {
-    //     method: 'POST',
-    //     headers: { authorization: `Bearer ${env('RUNWAY_API_KEY')}`, 'content-type': 'application/json' },
-    //     body: JSON.stringify({ promptText: prompt, duration: seconds, ratio: aspect }),
-    //   });
-    //   const j = await r.json();
-    //   return json({ stepId, status: 'rendering', url: j.id }); // url carries jobId for polling
-    // }
-
-    void env; void seconds; void aspect;
-    // Mock: pretend the job is queued; the GET poll returns it ready.
-    return json({ stepId, status: 'queued', url: stepId });
-  }
-
-  return json({ error: 'method' }, 405);
+  void env; void seconds; void aspect;
+  // Mock: pretend the job is queued; the GET poll returns it ready.
+  return json({ stepId, status: 'queued', url: stepId });
 }
 
 // Deterministic pretty gradient poster (data URI) so placeholders look intentional.

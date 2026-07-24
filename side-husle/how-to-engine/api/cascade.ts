@@ -1,18 +1,19 @@
 // Serverless endpoint: POST /api/cascade  { task: string }
 // Runs the Agentic Cascade server-side so provider API keys never reach the
-// browser. Deploy on Vercel/Netlify functions (Node runtime).
+// browser. Uses the Web Request/Response handler shape via a NAMED method
+// export (`POST`), which Vercel serves as a fetch-style function on the Node
+// runtime — a `export default (req,res)` would be treated as legacy Node.
 
 import { AgentCascadeService } from '../src/services/AgentCascadeService';
 
 export const config = { runtime: 'nodejs' };
 
-export default async function handler(req: Request): Promise<Response> {
-  if (req.method !== 'POST') return json({ error: 'POST only' }, 405);
+export async function POST(req: Request): Promise<Response> {
   let task = '';
   try {
     task = (await req.json())?.task?.toString().trim() || '';
   } catch {
-    /* ignore */
+    /* ignore malformed body */
   }
   if (!task) return json({ error: 'Missing "task"' }, 400);
 
@@ -20,8 +21,7 @@ export default async function handler(req: Request): Promise<Response> {
     const result = await new AgentCascadeService().run(task);
     return json(result, 200);
   } catch (e) {
-    // Log the detail server-side; return only a generic message so internal
-    // stack/trace information is never exposed to the client (CodeQL).
+    // Log detail server-side; return a generic message (no stack exposure).
     console.error('[cascade]', e);
     return json({ error: 'The cascade failed to run. Please try again.' }, 500);
   }
