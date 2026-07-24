@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Data Analysis — Lifecycle OS · Anchit Tandon</title>
+<meta name="description" content="Data Analysis — RFM segments, cohort retention, send-time heatmap and cross-sell affinity, benchmarked to the subject's industry. Part of the Lifecycle OS." />
+<link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="/lifecycle-os-kit.css" rel="stylesheet">
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="back" href="/lifecycle-os">← Lifecycle OS</a>
+      <span class="crumbs"><a href="/#projects">Portfolio</a> / <a href="/lifecycle-os">Lifecycle OS</a> / Data Analysis</span>
+    </div>
+    <div class="eyebrow"><span class="dot"></span>Lifecycle OS · Data Analysis</div>
+    <h1><span class="grad">Data Analysis</span></h1>
+    <p class="lede">RFM segments, cohort retention, the best send-time window and cross-sell affinity — benchmarked to the subject's industry. Loaded with <strong>anchit-tandon.com</strong> by default; type any brand to generalise. No proprietary data.</p>
+    <div class="subject"><span class="lbl">Subject</span><input id="brand" type="text" value="Anchit Tandon"><input id="url" type="text" value="anchit-tandon.com" style="flex:0 1 220px"><button id="go">Analyze</button></div>
+    <div class="loading" id="loading"><span class="spinner"></span><span>Crunching the numbers…</span></div>
+    <div class="err" id="err"></div>
+    <div id="out" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="font-family:var(--font-display);font-size:clamp(19px,3vw,24px);font-weight:600" id="hd"></div><span class="badge" id="bdg"></span></div>
+      <div class="sectitle">Segments · share of base + RFM</div><div class="bars" id="seg"></div>
+      <div class="sectitle">Cohort conversion / retention</div><div class="card"><div id="cohortWrap"></div></div>
+      <div class="sectitle">Best send-time window</div><div class="card"><div id="heatBest" style="font-family:var(--font-mono);font-size:12px;color:var(--accent);margin-bottom:12px"></div><div class="heat" id="heat"></div></div>
+      <div class="sectitle">Cross-sell affinity</div><div class="bars" id="cross"></div>
+      <div class="sectitle">Target KPIs</div><div class="kpis" id="kpi"></div>
+    </div>
+    <footer>Data Analysis · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>. Synthetic, industry-benchmarked — no proprietary data.</footer>
+  </div>
+<script src="/lifecycle-os-kit.js"></script>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i);}, esc=LOS.esc;
+  var s=LOS.subject(); $('brand').value=s.brand; $('url').value=s.url||'';
+  $('go').addEventListener('click',run);
+  function bar(lab,sub,pct){ return '<div class="brow"><div class="lab">'+esc(lab)+(sub?' <small>'+esc(sub)+'</small>':'')+'</div><div class="track"><i style="width:'+Math.max(2,Math.min(100,pct))+'%"></i></div><div class="val">'+pct+'</div></div>'; }
+  function cohortSVG(d){
+    var w=680,h=200,pad=28,cols=(d.cohortAxis||[]).length||6, maxX=cols-1;
+    var xs=function(i){return pad+ i*((w-2*pad)/maxX);}, ys=function(v){return pad+ (100-v)/100*(h-2*pad);};
+    var colors=['#FF6940','#2EE5AC','#c9a96e'];
+    var lines=(d.cohorts||[]).map(function(c,ci){ var pts=(c.points||[]).map(function(v,i){return xs(i)+','+ys(v);}).join(' '); return '<polyline fill="none" stroke="'+colors[ci%3]+'" stroke-width="2.5" points="'+pts+'"/>'+ (c.points||[]).map(function(v,i){return '<circle cx="'+xs(i)+'" cy="'+ys(v)+'" r="3" fill="'+colors[ci%3]+'"/>';}).join(''); }).join('');
+    var axis=(d.cohortAxis||[]).map(function(a,i){return '<text x="'+xs(i)+'" y="'+(h-6)+'" fill="#A39E94" font-size="10" font-family="monospace" text-anchor="middle">'+esc(a)+'</text>';}).join('');
+    var legend=(d.cohorts||[]).map(function(c,ci){return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:16px;font-size:12px;color:var(--ink-dim)"><span style="width:10px;height:10px;border-radius:2px;background:'+colors[ci%3]+'"></span>'+esc(c.label)+'</span>';}).join('');
+    var grid=[0,25,50,75,100].map(function(v){return '<line x1="'+pad+'" y1="'+ys(v)+'" x2="'+(w-pad)+'" y2="'+ys(v)+'" stroke="#2A261F" stroke-width="1"/><text x="'+(pad-6)+'" y="'+(ys(v)+3)+'" fill="#5A554E" font-size="9" font-family="monospace" text-anchor="end">'+v+'</text>';}).join('');
+    return '<div style="margin-bottom:10px">'+legend+'</div><svg class="chart" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="xMidYMid meet">'+grid+lines+axis+'</svg>';
+  }
+  function heatGrid(d){
+    var H=d.sendHeat||{}; var days=H.days||[], parts=H.parts||[], grid=H.grid||[];
+    var cols=days.length; var html='';
+    var el=$('heat'); el.style.gridTemplateColumns='70px repeat('+cols+',1fr)';
+    html+='<div class="hh"></div>'+days.map(function(dn){return '<div class="hh">'+esc(dn)+'</div>';}).join('');
+    parts.forEach(function(p,pi){ html+='<div class="hh" style="text-align:right;padding-right:8px">'+esc(p)+'</div>';
+      days.forEach(function(_,di){ var v=(grid[di]&&grid[di][pi])||0; var a=0.15+0.85*(v/100); html+='<div class="hc" style="background:rgba(255,105,64,'+a.toFixed(2)+')">'+v+'</div>'; }); });
+    el.innerHTML=html;
+    $('heatBest').textContent='◆ Peak: '+(H.best||'—');
+  }
+  function run(){
+    $('err').style.display='none'; $('out').style.display='none'; $('loading').classList.add('on');
+    LOS.post('/api/analysis',{brand:$('brand').value.trim(),url:$('url').value.trim()}).then(function(d){
+      if(!d||!d.segments) throw new Error('failed');
+      $('hd').textContent=(d.brand||'Subject')+' — '+(d.industry||'analysis'); LOS.badge($('bdg'),d.source);
+      $('seg').innerHTML=(d.segments||[]).map(function(x){return bar(x.name+(x.note?'':''),'R'+x.r+' F'+x.f+' M'+x.m+(x.note?' · '+x.note:''),x.pct);}).join('');
+      $('cohortWrap').innerHTML=cohortSVG(d);
+      heatGrid(d);
+      $('cross').innerHTML=(d.crossSell||[]).map(function(x){return bar(x.pair,'',x.affinity);}).join('');
+      $('kpi').innerHTML=(d.kpis||[]).map(function(k){return '<div class="kpi"><div class="m">'+esc(k.metric)+'</div><div class="v">'+esc(k.value)+'</div></div>';}).join('');
+      $('out').style.display='block';
+    }).catch(function(){ $('err').textContent='Could not load analysis — try again in a moment.'; $('err').style.display='block'; })
+    .then(function(){ $('loading').classList.remove('on'); });
+  }
+  run();
+})();
+</script>
+</body>
+</html>

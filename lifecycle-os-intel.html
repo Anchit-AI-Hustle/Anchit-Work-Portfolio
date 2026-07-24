@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Competitive Intelligence — Lifecycle OS · Anchit Tandon</title>
+<meta name="description" content="Competitive Intelligence — profile the peer set the way SimilarWeb / SEMrush would: category, comparable brands, and industry-standard benchmark bands. Part of the Lifecycle OS." />
+<link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="/lifecycle-os-kit.css" rel="stylesheet">
+</head>
+<body>
+  <div class="wrap">
+    <div class="top"><a class="back" href="/lifecycle-os">← Lifecycle OS</a><span class="crumbs"><a href="/#projects">Portfolio</a> / <a href="/lifecycle-os">Lifecycle OS</a> / Competitive Intelligence</span></div>
+    <div class="eyebrow"><span class="dot"></span>Lifecycle OS · Competitive Intelligence</div>
+    <h1><span class="grad">Competitive Intelligence</span></h1>
+    <p class="lede">Profiles the subject's category and peer set the way SimilarWeb / SEMrush would — comparable brands and industry-standard benchmark bands (channel mix, AOV, repeat-rate, seasonality). Loaded with <strong>anchit-tandon.com</strong> by default; type any brand.</p>
+    <div class="subject"><span class="lbl">Subject</span><input id="brand" type="text" value="Anchit Tandon"><input id="url" type="text" value="anchit-tandon.com" style="flex:0 1 220px"><button id="go">Profile</button></div>
+    <div class="loading" id="loading"><span class="spinner"></span><span>Profiling the market…</span></div>
+    <div class="err" id="err"></div>
+    <div id="out" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="font-family:var(--font-display);font-size:clamp(19px,3vw,24px);font-weight:600" id="hd"></div><span class="badge" id="bdg"></span></div>
+      <div class="card" id="meta" style="margin:14px 0"></div>
+      <div class="sectitle">Industry-standard benchmarks</div><div class="kpis" id="bench"></div>
+      <div class="sectitle">How the subject should be positioned</div><div class="card"><p id="pos" style="font-size:15px;color:var(--ink)"></p></div>
+    </div>
+    <footer>Competitive Intelligence · part of the <a href="/lifecycle-os">Lifecycle OS</a>. Benchmarks are industry-standard estimates unless a SimilarWeb / SEMrush key is configured.</footer>
+  </div>
+<script src="/lifecycle-os-kit.js"></script>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i);}, esc=LOS.esc;
+  var s=LOS.subject(); $('brand').value=s.brand; $('url').value=s.url||'';
+  $('go').addEventListener('click',run);
+  function run(){
+    $('err').style.display='none'; $('out').style.display='none'; $('loading').classList.add('on');
+    LOS.post('/api/lifecycle',{brand:$('brand').value.trim(),url:$('url').value.trim()}).then(function(r){
+      var p=r.plan, ind=(p&&p.industry)||{}; if(!p) throw new Error('failed');
+      $('hd').textContent=(p.brand||'Subject')+' — market profile'; LOS.badge($('bdg'),r.source);
+      var mb=''; if(ind.category) mb+='<div class="k"><span>Category</span></div><div class="t" style="margin-bottom:10px">'+esc(ind.category)+'</div>';
+      if(ind.competitors&&ind.competitors.length) mb+='<div class="k"><span>Comparable brands</span></div><div class="tags">'+ind.competitors.map(function(c){return '<span>'+esc(c)+'</span>';}).join('')+'</div>';
+      $('meta').innerHTML=mb||'<p style="color:var(--ink-mute)">—</p>';
+      $('bench').innerHTML=(ind.benchmarks||[]).map(function(b){return '<div class="kpi"><div class="m">'+esc(b.metric)+(b.note?' — '+esc(b.note):'')+'</div><div class="v">'+esc(b.value)+'</div></div>';}).join('');
+      $('pos').textContent=p.positioning||'';
+      $('out').style.display='block';
+    }).catch(function(){ $('err').textContent='Could not profile the market — try again in a moment.'; $('err').style.display='block'; })
+    .then(function(){ $('loading').classList.remove('on'); });
+  }
+  run();
+})();
+</script>
+</body>
+</html>

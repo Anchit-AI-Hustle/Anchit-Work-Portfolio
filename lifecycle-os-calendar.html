@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Marketing Calendar — Lifecycle OS · Anchit Tandon</title>
+<meta name="description" content="Marketing Calendar — a segment- and cadence-aware send calendar with guardrails, benchmarked to the subject's industry. Part of the Lifecycle OS." />
+<link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="/lifecycle-os-kit.css" rel="stylesheet">
+</head>
+<body>
+  <div class="wrap">
+    <div class="top"><a class="back" href="/lifecycle-os">← Lifecycle OS</a><span class="crumbs"><a href="/#projects">Portfolio</a> / <a href="/lifecycle-os">Lifecycle OS</a> / Marketing Calendar</span></div>
+    <div class="eyebrow"><span class="dot"></span>Lifecycle OS · Marketing Calendar</div>
+    <h1><span class="grad">Marketing Calendar</span></h1>
+    <p class="lede">A segment- and cadence-aware send calendar with per-week guardrails, seasonality and lifecycle stages — grounded in industry benchmarks. Loaded with <strong>anchit-tandon.com</strong> by default; type any brand.</p>
+    <div class="subject"><span class="lbl">Subject</span><input id="brand" type="text" value="Anchit Tandon"><input id="url" type="text" value="anchit-tandon.com" style="flex:0 1 220px"><button id="go">Build calendar</button></div>
+    <div class="loading" id="loading"><span class="spinner"></span><span>Planning the calendar…</span></div>
+    <div class="err" id="err"></div>
+    <div id="out" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="font-family:var(--font-display);font-size:clamp(19px,3vw,24px);font-weight:600" id="hd"></div><span class="badge" id="bdg"></span></div>
+      <div class="sectitle">Lifecycle stages</div><div class="grid" id="stages"></div>
+      <div class="sectitle">Send calendar · with cadence guards</div><div class="rows" id="cal"></div>
+      <div class="sectitle">Target KPIs</div><div class="kpis" id="kpi"></div>
+    </div>
+    <footer>Marketing Calendar · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>.</footer>
+  </div>
+<script src="/lifecycle-os-kit.js"></script>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i);}, esc=LOS.esc;
+  var s=LOS.subject(); $('brand').value=s.brand; $('url').value=s.url||'';
+  $('go').addEventListener('click',run);
+  function run(){
+    $('err').style.display='none'; $('out').style.display='none'; $('loading').classList.add('on');
+    LOS.post('/api/lifecycle',{brand:$('brand').value.trim(),url:$('url').value.trim()}).then(function(r){
+      var p=r.plan; if(!p) throw new Error('failed');
+      $('hd').textContent=(p.brand||'Subject')+' — 30-day calendar'; LOS.badge($('bdg'),r.source);
+      $('stages').innerHTML=(p.stages||[]).map(function(x){var tg=(x.channels||[]).map(function(c){return '<span>'+esc(c)+'</span>';}).join('');return '<div class="card"><div class="k">'+esc(x.stage)+'</div><div class="t">'+esc(x.goal)+'</div><p>'+esc(x.campaign)+'</p><div class="tags">'+tg+'</div></div>';}).join('');
+      $('cal').innerHTML=(p.calendar||[]).map(function(c){var sends=(c.sends||[]).map(function(x){return '<li>'+esc(x)+'</li>';}).join('');var cad=c.cadence?'<div style="font-family:var(--font-mono);font-size:10.5px;color:var(--ink-mute);margin-top:6px">⚙ '+esc(c.cadence)+'</div>':'';return '<div class="lrow"><div class="w">'+esc(c.week)+'</div><div><div class="th">'+esc(c.theme)+'</div><ul>'+sends+'</ul>'+cad+'</div></div>';}).join('');
+      $('kpi').innerHTML=(p.kpis||[]).map(function(k){return '<div class="kpi"><div class="m">'+esc(k.metric)+'</div><div class="v">'+esc(k.target)+'</div></div>';}).join('');
+      $('out').style.display='block';
+    }).catch(function(){ $('err').textContent='Could not build the calendar — try again in a moment.'; $('err').style.display='block'; })
+    .then(function(){ $('loading').classList.remove('on'); });
+  }
+  run();
+})();
+</script>
+</body>
+</html>
