@@ -74,11 +74,11 @@ async function patchHowToCardRoute() {
 }
 
 // Build the How-To Engine (standalone Vite + React app under
-// side-husle/how-to-engine, base '/how-to-1/') and mirror its dist into
+// side-husle/how-to-1, base '/how-to-1/') and mirror its dist into
 // www/how-to-1 so it ships at /how-to-1 on the main static deployment.
 // Wrapped so a failure here never takes down the rest of the portfolio.
 async function buildHowTo() {
-  const engine = join(ROOT, 'side-husle', 'how-to-engine');
+  const engine = join(ROOT, 'side-husle', 'how-to-1');
   if (!existsSync(join(engine, 'package.json'))) {
     console.warn('[build-www] skip how-to: engine not found');
     return;

@@ -2,7 +2,7 @@
 
 An ADHD-friendly, 3D interactive learning engine that explains **any** humanly-doable task — from *switching on a phone* to *swimming breaststroke* or *solving a quadratic* — as a visual, step-by-step guide. Multiple frontier AIs answer in parallel; the best three are fused by a consensus evaluator into one branchable master guide, and every step gets an animated clip from a text-to-video pipeline.
 
-> Source lives at `anchit-work-portfolio/side-husle/how-to-engine`. It is a **standalone Vite app** because the portfolio shell itself is intentionally framework-free. The portfolio build emits it at **`/how-to-1`**.
+> Source lives at `anchit-work-portfolio/side-husle/how-to-1`. It is a **standalone Vite app** because the portfolio shell itself is intentionally framework-free. The portfolio build emits it at **`/how-to-1`**.
 
 ## Experience flow
 1. **Intro / explainer** — a cinematic 3D hero card explains what the engine does.
@@ -33,7 +33,7 @@ Provider API keys live **only** in the serverless functions — never in the bro
 
 ## Setup
 ```bash
-cd side-husle/how-to-engine
+cd side-husle/how-to-1
 npm install
 cp .env.example .env          # add whichever provider keys you have
 # local dev with serverless functions (keys server-side):
