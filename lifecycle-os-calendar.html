@@ -1,54 +1,770 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Marketing Calendar — Lifecycle OS · Anchit Tandon</title>
-<meta name="description" content="Marketing Calendar — a segment- and cadence-aware send calendar with guardrails, benchmarked to the subject's industry. Part of the Lifecycle OS." />
-<link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link href="/lifecycle-os-kit.css" rel="stylesheet">
-</head>
-<body>
-  <div class="wrap">
-    <div class="top"><a class="back" href="/lifecycle-os">← Lifecycle OS</a><span class="crumbs"><a href="/#projects">Portfolio</a> / <a href="/lifecycle-os">Lifecycle OS</a> / Marketing Calendar</span></div>
-    <div class="eyebrow"><span class="dot"></span>Lifecycle OS · Marketing Calendar</div>
-    <h1><span class="grad">Marketing Calendar</span></h1>
-    <p class="lede">A segment- and cadence-aware send calendar with per-week guardrails, seasonality and lifecycle stages — grounded in industry benchmarks. Loaded with <strong>anchit-tandon.com</strong> by default; type any brand.</p>
-    <div class="subject"><span class="lbl">Subject</span><input id="brand" type="text" value="Anchit Tandon"><input id="url" type="text" value="anchit-tandon.com" style="flex:0 1 220px"><button id="go">Build calendar</button></div>
-    <div class="loading" id="loading"><span class="spinner"></span><span>Planning the calendar…</span></div>
-    <div class="err" id="err"></div>
-    <div id="out" style="display:none">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="font-family:var(--font-display);font-size:clamp(19px,3vw,24px);font-weight:600" id="hd"></div><span class="badge" id="bdg"></span></div>
-      <div class="sectitle">Lifecycle stages</div><div class="grid" id="stages"></div>
-      <div class="sectitle">Send calendar · with cadence guards</div><div class="rows" id="cal"></div>
-      <div class="sectitle">Target KPIs</div><div class="kpis" id="kpi"></div>
-    </div>
-    <div id="extras" style="margin-top:8px"></div>
-    <footer>Marketing Calendar · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>.</footer>
-  </div>
-<script src="/lifecycle-os-kit.js"></script>
-<script>
-(function(){
-  var $=function(i){return document.getElementById(i);}, esc=LOS.esc;
-  var s=LOS.subject(); $('brand').value=s.brand; $('url').value=s.url||'';
-  $('go').addEventListener('click',run);
-  function run(){
-    $('err').style.display='none'; $('out').style.display='none'; $('loading').classList.add('on');
-    LOS.post('/api/lifecycle',{brand:$('brand').value.trim(),url:$('url').value.trim()}).then(function(r){
-      var p=r.plan; if(!p) throw new Error('failed');
-      $('hd').textContent=(p.brand||'Subject')+' — 30-day calendar'; LOS.badge($('bdg'),r.source);
-      $('stages').innerHTML=(p.stages||[]).map(function(x){var tg=(x.channels||[]).map(function(c){return '<span>'+esc(c)+'</span>';}).join('');return '<div class="card"><div class="k">'+esc(x.stage)+'</div><div class="t">'+esc(x.goal)+'</div><p>'+esc(x.campaign)+'</p><div class="tags">'+tg+'</div></div>';}).join('');
-      $('cal').innerHTML=(p.calendar||[]).map(function(c){var sends=(c.sends||[]).map(function(x){return '<li>'+esc(x)+'</li>';}).join('');var cad=c.cadence?'<div style="font-family:var(--font-mono);font-size:10.5px;color:var(--ink-mute);margin-top:6px">⚙ '+esc(c.cadence)+'</div>':'';return '<div class="lrow"><div class="w">'+esc(c.week)+'</div><div><div class="th">'+esc(c.theme)+'</div><ul>'+sends+'</ul>'+cad+'</div></div>';}).join('');
-      $('kpi').innerHTML=(p.kpis||[]).map(function(k){return '<div class="kpi"><div class="m">'+esc(k.metric)+'</div><div class="v">'+esc(k.target)+'</div></div>';}).join('');
-      $('out').style.display='block';
-    }).catch(function(){ $('err').textContent='Could not build the calendar — try again in a moment.'; $('err').style.display='block'; })
-    .then(function(){ $('loading').classList.remove('on'); });
+<meta name="description" content="A 90-day marketing calendar — segment- and festival-aware email planning with a per-slot mailer pipeline (strategy → 4 variants → verify/approve). Part of the Lifecycle OS.">
+<link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png">
+<meta name="theme-color" content="#FF6940">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  /* Champagne palette — anchit-tandon.com Lifecycle OS. RGB triplets so Tailwind
+     opacity modifiers (bg-gold/20 etc.) resolve via rgb(var(--x)/<alpha-value>). */
+  :root, :root[data-theme="dark"]{
+    --bg-rgb:15 13 10; --surface-rgb:26 24 20; --card-rgb:26 24 20;
+    --ink-rgb:251 245 236; --ink-dim-rgb:163 158 148; --ink-mute-rgb:90 85 78;
+    --primary-rgb:255 105 64; --accent-rgb:46 229 172; --gold-rgb:201 169 110; --cream-rgb:22 13 7;
+    --chip-rgb:20 17 13; --line-rgb:201 169 110;
   }
-  run();
-  LOS.mountExtras('calendar', run);
-})();
+  :root[data-theme="light"]{
+    --bg-rgb:251 245 236; --surface-rgb:255 255 255; --card-rgb:242 234 220;
+    --ink-rgb:22 19 18; --ink-dim-rgb:90 85 78; --ink-mute-rgb:163 158 148;
+    --primary-rgb:255 77 31; --accent-rgb:0 181 132; --gold-rgb:168 134 63; --cream-rgb:251 245 236;
+    --chip-rgb:242 234 220; --line-rgb:168 134 63;
+  }
+</style>
+<script>
+  if (typeof tailwind !== 'undefined') tailwind.config = { theme: { extend: {
+    colors: {
+      bg:   { DEFAULT:'rgb(var(--bg-rgb)/<alpha-value>)', soft:'rgb(var(--surface-rgb)/<alpha-value>)', card:'rgb(var(--card-rgb)/<alpha-value>)' },
+      ink:  { DEFAULT:'rgb(var(--ink-rgb)/<alpha-value>)', dim:'rgb(var(--ink-dim-rgb)/<alpha-value>)', mute:'rgb(var(--ink-mute-rgb)/<alpha-value>)' },
+      green:{ DEFAULT:'rgb(var(--primary-rgb)/<alpha-value>)', bright:'rgb(var(--accent-rgb)/<alpha-value>)' },
+      gold: { DEFAULT:'rgb(var(--gold-rgb)/<alpha-value>)' }, cream:'rgb(var(--cream-rgb)/<alpha-value>)',
+    },
+    fontFamily: { sans:['Inter','sans-serif'], mono:['"JetBrains Mono"','monospace'], serif:['Fraunces','Georgia','serif'] },
+  }}};
 </script>
+<style>
+  body { background:rgb(var(--bg-rgb)); color:rgb(var(--ink-rgb)); font-family:'Inter',sans-serif; overflow-x:hidden; }
+  body::before{ content:''; position:fixed; inset:0; z-index:0; pointer-events:none; background:radial-gradient(44% 38% at 14% 8%, rgba(255,105,64,.10), transparent 60%), radial-gradient(40% 36% at 88% 16%, rgba(201,169,110,.10), transparent 62%); }
+  main, header { position:relative; z-index:1; }
+  .label { font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:rgb(var(--ink-mute-rgb)); font-weight:500; }
+  .card { background:rgb(var(--surface-rgb)); border:1px solid rgb(var(--line-rgb) / 0.18); border-radius:12px; }
+  .pill { display:inline-flex; align-items:center; gap:6px; font-size:10px; font-weight:600; padding:3px 9px; border-radius:99px; }
+  .b-US { background:rgba(59,130,246,0.16); color:#93c5fd; }
+  .b-UK { background:rgba(234,88,12,0.16); color:#fdba74; }
+  .b-Global { background:rgba(201,169,110,0.18); color:#d9bd85; }
+  .b-IN { background:rgba(34,197,94,0.16); color:#86efac; }
+  .ct-promo       { background:rgba(239,68,68,0.14); color:#f87171; }
+  .ct-editorial   { background:rgba(168,85,247,0.14); color:#c084fc; }
+  .ct-lifecycle   { background:rgba(34,197,94,0.14); color:#4ade80; }
+  .ct-launch      { background:rgba(59,130,246,0.14); color:#60a5fa; }
+  .ct-winback     { background:rgba(245,158,11,0.14); color:#fbbf24; }
+  .ct-transactional { background:rgba(148,163,184,0.14); color:#cbd5e1; }
+  .seg-Champions     { color:#34d399; }
+  .seg-Loyal         { color:#4ade80; }
+  .seg-Promising     { color:#a3e635; }
+  .seg-New           { color:#60a5fa; }
+  .seg-Need-Attention{ color:#fbbf24; }
+  .seg-About-to-Sleep{ color:#fb923c; }
+  .seg-At-Risk       { color:#f87171; }
+  .seg-Hibernating   { color:#c084fc; }
+  .day { background:rgb(var(--surface-rgb)); border:1px solid rgb(var(--line-rgb) / 0.18); border-radius:10px; padding:10px; min-height:96px; transition: border-color .15s; }
+  .day:hover { border-color:rgb(var(--line-rgb) / 0.4); cursor:pointer; }
+  .day.festival { border-color: rgb(var(--gold-rgb) / 0.5); background: rgb(var(--gold-rgb) / 0.06); }
+  .day-num { font-family:'JetBrains Mono',monospace; font-size:11px; color:rgb(var(--ink-dim-rgb)); }
+  .day-fest { font-size:9px; color:rgb(var(--gold-rgb)); text-transform:uppercase; letter-spacing:0.08em; font-weight:600; margin-top:2px; }
+  .entry { font-size:11px; line-height:1.35; padding:3px 6px; margin-top:4px; border-radius:4px; background:rgb(var(--chip-rgb)); color:rgb(var(--ink-rgb)); cursor:help; }
+  .entry-market { font-weight:700; font-family:'JetBrains Mono',monospace; }
+  .filter-chip { padding:5px 11px; border-radius:99px; font-size:11px; font-weight:600; border:1px solid rgb(var(--line-rgb) / 0.28); color:rgb(var(--ink-dim-rgb)); cursor:pointer; background:transparent; }
+  .filter-chip.active { background:rgb(var(--gold-rgb)); color:rgb(var(--cream-rgb)); border-color:rgb(var(--gold-rgb)); }
+  th { font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:rgb(var(--ink-mute-rgb)); padding:10px 8px; border-bottom:1px solid rgb(var(--line-rgb) / 0.18); text-align:left; }
+  td { padding:10px 8px; border-bottom:1px solid rgb(var(--line-rgb) / 0.08); font-size:12.5px; vertical-align:top; }
+  tr:hover td { background:rgb(var(--line-rgb) / 0.05); }
+  .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.78); backdrop-filter:blur(4px); z-index:80; display:none; align-items:center; justify-content:center; padding:20px; }
+  .modal-backdrop.open { display:flex; }
+  .modal-card { background:rgb(var(--surface-rgb)); border:1px solid rgb(var(--line-rgb) / 0.3); border-radius:12px; max-width:920px; width:100%; max-height:90vh; overflow-y:auto; }
+  iframe.preview { width:100%; min-height:600px; background:#FBF5EA; border:0; border-radius:8px; }
+  details summary::-webkit-details-marker{ display:none; }
+  /* LOS chrome + shared "take it further" / uploader */
+  .back{ display:inline-flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.05em; text-transform:uppercase; color:rgb(var(--ink-dim-rgb)); text-decoration:none; padding:8px 14px; border:1px solid rgb(var(--line-rgb) / 0.4); border-radius:99px; }
+  .back:hover{ border-color:rgb(var(--primary-rgb)); color:rgb(var(--ink-rgb)); }
+  .crumbs{ font-family:'JetBrains Mono',monospace; font-size:11px; color:rgb(var(--ink-mute-rgb)); letter-spacing:.06em; }
+  .crumbs a{ color:rgb(var(--ink-dim-rgb)); text-decoration:none; } .crumbs a:hover{ color:rgb(var(--primary-rgb)); }
+  .themebtn{ background:none; border:1px solid rgb(var(--line-rgb) / 0.4); border-radius:99px; color:rgb(var(--ink-dim-rgb)); font-size:15px; cursor:pointer; padding:6px 11px; }
+  .sectitle{ font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:rgb(var(--ink-mute-rgb)); margin:30px 0 14px; display:flex; align-items:center; gap:10px; }
+  .sectitle::after{ content:''; flex:1; height:1px; background:rgb(var(--line-rgb) / 0.18); }
+  .related{ display:flex; flex-wrap:wrap; gap:10px; }
+  .rchip{ display:inline-flex; align-items:center; gap:8px; text-decoration:none; background:rgb(var(--surface-rgb)); border:1px solid rgb(var(--line-rgb) / 0.18); border-radius:12px; padding:12px 15px; color:rgb(var(--ink-rgb)); transition:border-color .2s, transform .15s; }
+  .rchip:hover{ border-color:rgb(var(--primary-rgb)); transform:translateY(-1px); }
+  .rchip .ic{ font-size:18px; } .rchip .nm{ font-weight:600; font-size:14px; } .rchip .go{ font-family:'JetBrains Mono',monospace; font-size:11px; color:rgb(var(--primary-rgb)); margin-left:4px; }
+  .extras{ background:rgb(var(--surface-rgb)); border:1px solid rgb(var(--line-rgb) / 0.3); border-radius:16px; padding:16px; }
+  .extras textarea{ width:100%; min-height:74px; resize:vertical; background:rgb(var(--bg-rgb)); border:1px solid rgb(var(--line-rgb) / 0.3); border-radius:10px; padding:12px 14px; color:rgb(var(--ink-rgb)); font-family:Inter,sans-serif; font-size:14px; outline:none; }
+  .extras textarea:focus{ border-color:rgb(var(--primary-rgb)); }
+  .uploader{ display:inline-flex; align-items:center; gap:8px; margin-top:10px; cursor:pointer; border:1px dashed rgb(var(--line-rgb) / 0.4); border-radius:10px; padding:11px 15px; color:rgb(var(--ink-dim-rgb)); font-size:13px; }
+  .uploader:hover{ border-color:rgb(var(--primary-rgb)); color:rgb(var(--ink-rgb)); }
+  .uploader input{ display:none; }
+  .filelist{ display:flex; flex-direction:column; gap:6px; margin-top:10px; }
+  .fitem{ display:flex; align-items:center; gap:10px; font-size:12.5px; color:rgb(var(--ink-dim-rgb)); background:rgb(var(--surface-rgb)); border:1px solid rgb(var(--line-rgb) / 0.18); border-radius:9px; padding:8px 12px; }
+  .fitem .ft{ font-family:'JetBrains Mono',monospace; font-size:10px; color:rgb(var(--ink-mute-rgb)); text-transform:uppercase; border:1px solid rgb(var(--line-rgb) / 0.18); border-radius:5px; padding:2px 6px; }
+  .fitem .rm{ margin-left:auto; cursor:pointer; color:rgb(var(--ink-mute-rgb)); border:none; background:none; font-size:15px; }
+  .applybtn{ margin-top:12px; background:rgb(var(--primary-rgb)); color:rgb(var(--cream-rgb)); border:none; border-radius:10px; padding:11px 20px; font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; cursor:pointer; }
+  .ctxnote{ font-size:12px; color:rgb(var(--ink-mute-rgb)); margin-top:8px; }
+  .ctxcard{ background:rgba(46,229,172,.08); border:1px solid rgb(var(--accent-rgb)); border-radius:12px; padding:14px 16px; margin-top:12px; }
+  .ctxcard .k{ font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:rgb(var(--accent-rgb)); margin-bottom:6px; }
+  .ctxcard p{ font-size:13.5px; color:rgb(var(--ink-rgb)); }
+</style>
+</head>
+<body class="min-h-screen">
+
+<header class="border-b border-gold/15 px-6 py-4 sticky bg-bg/95 backdrop-blur z-30" style="top:0">
+  <div class="max-w-7xl mx-auto flex flex-wrap items-center gap-3">
+    <a class="back" href="/lifecycle-os">← Lifecycle OS</a>
+    <div>
+      <div class="text-[10px] uppercase tracking-widest text-gold font-bold">Lifecycle OS</div>
+      <div class="text-green font-semibold text-base" style="font-family:Fraunces,Georgia,serif">Marketing Calendar · 90-day plan</div>
+    </div>
+    <div class="flex-1"></div>
+    <span class="crumbs hidden sm:inline"><a href="/#projects">Portfolio</a> / <a href="/lifecycle-os">Lifecycle OS</a> / Calendar</span>
+    <button class="themebtn" id="themeBtn" title="Toggle theme">◐</button>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto p-6 space-y-6">
+
+  <!-- Embedded KPI Dashboard -->
+  <section class="card p-4">
+    <div class="flex items-center justify-between mb-3">
+      <div class="label">Sample metrics <span style="color:#fbbf24;font-weight:700">· illustrative benchmark, not live data</span></div>
+      <a href="/lifecycle-os-analysis" class="text-[11px] uppercase tracking-wider text-gold hover:text-green">Open Data Analysis →</a>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="embeddedDashboard">
+      <div class="p-3 bg-bg-card rounded-lg border border-gold/10">
+        <div class="text-[10px] uppercase tracking-wider text-ink-mute font-semibold">Total Revenue (30d)</div>
+        <div class="text-lg font-bold text-ink mt-1">$212,450</div>
+        <div class="text-[10px] text-green-bright mt-1">↑ 12% vs prior</div>
+      </div>
+      <div class="p-3 bg-bg-card rounded-lg border border-gold/10">
+        <div class="text-[10px] uppercase tracking-wider text-ink-mute font-semibold">Avg Open Rate</div>
+        <div class="text-lg font-bold text-ink mt-1">42.8%</div>
+        <div class="text-[10px] text-green-bright mt-1">↑ 2.1% vs prior</div>
+      </div>
+      <div class="p-3 bg-bg-card rounded-lg border border-gold/10">
+        <div class="text-[10px] uppercase tracking-wider text-ink-mute font-semibold">Active Customers</div>
+        <div class="text-lg font-bold text-ink mt-1">12,405</div>
+        <div class="text-[10px] text-green-bright mt-1">↑ 5.4% vs prior</div>
+      </div>
+      <div class="p-3 bg-bg-card rounded-lg border border-gold/10">
+        <div class="text-[10px] uppercase tracking-wider text-ink-mute font-semibold">Top Segment</div>
+        <div class="text-lg font-bold text-ink mt-1">Champions</div>
+        <div class="text-[10px] text-ink-mute mt-1">45% of revenue</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filter & action bar -->
+  <section class="card p-4">
+    <div class="flex flex-wrap items-center gap-3">
+      <div>
+        <div class="label">Markets</div>
+        <div class="flex gap-1.5 mt-2" id="marketChips">
+          <button class="filter-chip active" data-market="US">US</button>
+          <button class="filter-chip" data-market="UK">UK</button>
+          <button class="filter-chip" data-market="Global">Global</button>
+          <button class="filter-chip" data-market="IN">India</button>
+        </div>
+      </div>
+      <div>
+        <div class="label">Plan window</div>
+        <div class="flex gap-1.5 mt-2" id="daysChips">
+          <button class="filter-chip" data-days="14">14d</button>
+          <button class="filter-chip" data-days="30">30d</button>
+          <button class="filter-chip" data-days="45">45d</button>
+          <button class="filter-chip" data-days="60">60d</button>
+          <button class="filter-chip active" data-days="90">90d</button>
+        </div>
+      </div>
+      <div>
+        <div class="label">Send capacity / market / week</div>
+        <input id="capInput" type="number" min="2" max="10" value="4" class="mt-2 w-16 px-2 py-1.5 text-sm bg-bg-card border border-gold/20 rounded text-ink">
+      </div>
+      <div class="flex-1"></div>
+      <button id="btnGenerate" class="text-[11px] uppercase tracking-wider font-semibold px-4 py-2 rounded bg-gold text-cream hover:opacity-90">⚡ Generate plan</button>
+      <button id="btnExport" class="text-[11px] uppercase tracking-wider font-semibold px-3 py-2 rounded border border-gold/30 text-ink-dim hover:border-gold hover:text-ink">↓ Export CSV</button>
+    </div>
+    <div id="planMeta" class="mt-3 text-[12px] text-ink-dim"></div>
+  </section>
+
+  <!-- Calendar grid -->
+  <section>
+    <div class="flex items-end justify-between mb-3">
+      <div>
+        <h2 class="text-lg font-bold tracking-tight" style="font-family:Fraunces,Georgia,serif">Calendar</h2>
+        <p class="text-xs text-ink-dim mt-1">Each chip = one planned email: <b class="text-ink font-semibold">Market · Customer segment · Story format</b>. Click a day for details.</p>
+      </div>
+      <div class="flex gap-3 text-[11px] text-ink-mute flex-wrap">
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full" style="background:rgb(var(--gold-rgb) / 0.6);"></span> Festival</span>
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-bright"></span> Lifecycle</span>
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full" style="background:#f87171;"></span> Promo</span>
+        <span class="flex items-center gap-1" id="assetLegend">Assets: <b class="text-gold font-semibold">M</b> mailer, <b class="text-gold font-semibold">A</b> ads, <b class="text-gold font-semibold">L</b> landing page, <b class="text-gold font-semibold">S</b> social</span>
+      </div>
+    </div>
+    <div class="overflow-x-auto -mx-1 px-1"><div id="calendarGrid" class="grid grid-cols-7 gap-2 min-w-[640px] sm:min-w-0"></div></div>
+  </section>
+
+  <!-- Table view -->
+  <section class="card p-4">
+    <div class="flex items-end justify-between mb-3">
+      <div>
+        <h2 class="text-lg font-bold tracking-tight" style="font-family:Fraunces,Georgia,serif">All planned sends</h2>
+        <p class="text-xs text-ink-dim mt-1">Click "View / Build" to run the row through the strategy → variants pipeline.</p>
+      </div>
+      <input id="planSearch" type="text" placeholder="Filter…" class="text-xs bg-bg-card border border-gold/20 rounded px-3 py-1.5 text-ink w-56">
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[1000px]">
+        <thead><tr>
+          <th>Date</th><th>Mkt</th><th>Segment</th><th>Content</th><th>Archetype</th><th>Hero</th><th>Subject hint</th><th>Why (analysis)</th><th>Festival</th><th></th>
+        </tr></thead>
+        <tbody id="planTable"><tr><td colspan="10" class="text-center text-ink-mute py-8">Click "Generate plan" to build the calendar.</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <div id="extras"></div>
+
+  <footer style="border-top:1px solid rgb(var(--line-rgb) / 0.15);margin-top:40px;padding:24px 0 12px;color:rgb(var(--ink-mute-rgb));font-size:13px;text-align:center">
+    Marketing Calendar · part of the <a href="/lifecycle-os" style="color:rgb(var(--ink-dim-rgb));border-bottom:1px solid rgb(var(--line-rgb) / 0.3)">Lifecycle OS</a> by <a href="/#projects" style="color:rgb(var(--ink-dim-rgb));border-bottom:1px solid rgb(var(--line-rgb) / 0.3)">Anchit Tandon</a>. Sample-brand benchmark — no proprietary data; everything generated client-side.
+  </footer>
+
+</main>
+
+<!-- Mailer preview modal -->
+<div id="mailerModal" class="modal-backdrop">
+  <div class="modal-card p-5">
+    <div class="flex items-center justify-between mb-3">
+      <div>
+        <h2 class="text-lg font-semibold" id="mailerTitle" style="font-family:Fraunces,Georgia,serif">Mailer preview</h2>
+        <p class="text-xs text-ink-dim" id="mailerSubtitle"></p>
+        <p class="text-[11px] text-gold mt-1" id="mailerAssets"></p>
+      </div>
+      <button class="text-ink-mute hover:text-ink text-2xl leading-none" onclick="closeMailer()">×</button>
+    </div>
+    <div class="flex flex-wrap gap-1.5 mb-3" id="daySwitch"></div>
+    <div class="flex gap-2 mb-3" id="variantTabs"></div>
+    <div id="variantPanels"></div>
+    <!-- Verify / approve / request-changes loop -->
+    <div class="mt-4 pt-4 border-t border-gold/15">
+      <div class="text-[11px] uppercase tracking-wider text-gold mb-1.5">Verify, approve, or request changes</div>
+      <textarea id="mailerFeedback" rows="2" placeholder="Leave changes or feedback to incorporate, then Regenerate. Example: lead with the 90-day guarantee, warmer tone, feature the gift set." class="w-full text-sm bg-bg-card border border-gold/20 rounded px-3 py-2 text-ink"></textarea>
+      <div class="flex items-center justify-between gap-2 mt-2 flex-wrap">
+        <div id="approveState" class="text-[11px] text-ink-mute"></div>
+        <div class="flex gap-2">
+          <button id="btnRegen" class="text-[11px] uppercase tracking-wider px-3 py-2 rounded border border-gold/30 text-ink-dim hover:border-gold hover:text-ink">↻ Regenerate with feedback</button>
+          <button id="btnApprove" class="text-[11px] uppercase tracking-wider px-3 py-2 rounded font-semibold" style="background:#7fd6a6;color:#0a1f14">✓ Approve</button>
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center justify-end gap-2 mt-4 pt-4 border-t border-gold/15">
+      <a id="openInStudio" href="/lifecycle-os-studio" target="_blank" rel="noopener" class="text-[11px] uppercase tracking-wider px-3 py-2 rounded border border-gold/30 text-ink-dim hover:border-gold hover:text-ink">Open in Mailer Studio ↗</a>
+      <button onclick="closeMailer()" class="text-[11px] uppercase tracking-wider px-3 py-2 rounded bg-gold text-cream font-semibold">Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+const STATE = { markets: ['US'], days: 90, capacity: 4, plan: [], meta: {}, analytics: null };
+
+// Deterministic seeded RNG (stable output across reloads, no proprietary data).
+function seeded(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0; var t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+
+// Load analytics summary from localStorage (set by the analysis tool if present).
+function loadAnalyticsSummary() {
+  try {
+    const stored = JSON.parse(localStorage.getItem('lifecycle-os-retention-data') || 'null');
+    if (!stored) return null;
+    const segCount = {}; const segRev = {};
+    (stored.customers || []).forEach((c) => {
+      const seg = c.rfm_segment || guessSegment(c);
+      segCount[seg] = (segCount[seg] || 0) + 1;
+      segRev[seg] = (segRev[seg] || 0) + (c.total_spent || 0);
+    });
+    const segments = Object.keys(segCount).map((name) => ({ name, count: segCount[name], revenue: +segRev[name].toFixed(0) }));
+    return { segments, products: seedAnalytics().products, bestHourByMarket: seedAnalytics().bestHourByMarket };
+  } catch { return null; }
+}
+function guessSegment(c) {
+  const days = (Date.now() - new Date(c.last_order_at).getTime()) / 86400000;
+  if (days <= 30 && c.orders_count >= 5) return 'Champions';
+  if (days <= 60 && c.orders_count >= 3) return 'Loyal';
+  if (days <= 30 && c.orders_count === 2) return 'Promising';
+  if (days <= 30 && c.orders_count === 1) return 'New';
+  if (days <= 90 && c.orders_count >= 2)  return 'Need-Attention';
+  if (days <= 120) return 'About-to-Sleep';
+  if (days <= 180) return 'At-Risk';
+  if (c.orders_count >= 1) return 'Hibernating';
+  return 'Lost';
+}
+// Generic D2C seed (no brand/tea/coffee) — an industry-benchmark sample brand.
+function seedAnalytics() {
+  return {
+    segments: [
+      { name: 'Champions',     count: 480,  revenue: 92000 },
+      { name: 'Loyal',         count: 1200, revenue: 168000 },
+      { name: 'Promising',     count: 760,  revenue: 41000 },
+      { name: 'New',           count: 900,  revenue: 28000 },
+      { name: 'Need-Attention',count: 720,  revenue: 38000 },
+      { name: 'About-to-Sleep',count: 540,  revenue: 22000 },
+      { name: 'At-Risk',       count: 410,  revenue: 16000 },
+      { name: 'Hibernating',   count: 380,  revenue: 12000 },
+    ],
+    products: [
+      { sku:'KIT-100', title:'Everyday Essentials Kit', category:'Bundles & Kits', revenue: 38500, units: 1700, promos: 4 },
+      { sku:'REF-400', title:'Daily Refill Pack',       category:'Refills',        revenue: 31200, units: 1450, promos: 5 },
+      { sku:'GFT-900', title:'The Gift Set',            category:'Gifting',        revenue: 28100, units: 580,  promos: 2 },
+      { sku:'STB-300', title:'Starter Bundle',          category:'Bundles & Kits', revenue: 21500, units: 980,  promos: 3 },
+      { sku:'SUB-810', title:'Core Membership Box',     category:'Subscriptions',  revenue: 18600, units: 700,  promos: 1 },
+      { sku:'SRM-600', title:'Signature Serum',         category:'Single Items',   revenue: 17200, units: 350,  promos: 0 },
+    ],
+    bestHourByMarket: { US: 14, UK: 9, Global: 6, IN: 4 },
+  };
+}
+
+// ── Client-side plan generator (replaces the /api/calendar server endpoint) ──
+const ARCH = [
+  { a:'ritual-journey',         ct:'lifecycle', segs:['Loyal','Champions','Promising'] },
+  { a:'storytelling-narrative', ct:'editorial', segs:['New','Promising','Loyal'] },
+  { a:'product-education',      ct:'editorial', segs:['New','Need-Attention'] },
+  { a:'social-proof',           ct:'lifecycle', segs:['Promising','Need-Attention','Loyal'] },
+  { a:'win-back-offer',         ct:'winback',   segs:['At-Risk','About-to-Sleep','Hibernating'] },
+  { a:'launch-announcement',    ct:'launch',    segs:['Champions','Loyal'] },
+  { a:'seasonal-gifting',       ct:'promo',     segs:['Champions','Loyal','New'] },
+];
+const FESTIVALS = { '1-1':'New Year','2-14':"Valentine's",'3-8':'Spring Launch','5-11':"Mother's Day",'6-15':"Father's Day",'7-4':'Summer Sale','8-15':'Mid-Season Sale','9-1':'Back to School','10-10':'Autumn Edit','11-28':'Black Friday','12-1':'Cyber Monday','12-15':'Holiday Gifting' };
+function festivalFor(ds){ const p=ds.split('-'); return FESTIVALS[(+p[1])+'-'+(+p[2])] || null; }
+function subjectHint(arch, hero, seg, fest){
+  const H = hero.title;
+  const map = {
+    'ritual-journey': 'Your '+H+' routine, dialled in',
+    'storytelling-narrative': 'The story behind '+H,
+    'product-education': 'How to get the most from '+H,
+    'social-proof': 'Why '+seg.name+' keep reordering '+H,
+    'win-back-offer': 'We saved your spot — '+H+' inside',
+    'launch-announcement': 'New: '+H+' just dropped',
+    'seasonal-gifting': (fest? fest+': ' : 'Gifting season: ')+H+' picks',
+  };
+  return map[arch.a] || H;
+}
+function rationale(seg, arch, hero, mk){
+  return marketName(mk)+' · '+seg.name+' → '+String(arch.a).replace(/-/g,' ')+' featuring '+hero.title+'.';
+}
+function analysisFor(seg, arch, hero, mk, fest){
+  const conf = Math.min(0.94, 0.62 + (seg.name==='Champions'||seg.name==='Loyal'?0.18:0.06) + (fest?0.06:0));
+  return {
+    summary: seg.name+' respond best to '+String(arch.a).replace(/-/g,' ')+(fest?(' around '+fest):'')+'.',
+    drivers: [
+      { signal:'Segment', value:seg.name+' ('+seg.count.toLocaleString()+' subs)', implication:'sized from the RFM base' },
+      { signal:'Best send hour', value:(({US:14,UK:9,Global:6,IN:4})[mk]||9)+':00 UTC', implication:marketName(mk)+' open-rate peak' },
+      { signal:'Hero', value:hero.title, implication:hero.category+' — reorder-cycle anchor' },
+    ].concat(fest?[{ signal:'Festival', value:fest, implication:'seasonal demand lift' }]:[]),
+    hypothesis: arch.ct==='winback' ? 'A timed offer reactivates lapsing buyers before they churn.' : 'On-format storytelling lifts CTR and second-order rate for this segment.',
+    expected_impact: { metric: arch.ct==='winback'?'reactivation rate':'CTR / repeat rate', direction:'up' },
+    confidence: { score:conf, label: conf>0.8?'high':conf>0.68?'medium':'exploratory', factors:[
+      { label:'Segment fit', delta: arch.segs.indexOf(seg.name)>=0?12:-4 },
+      { label:'Timing', delta: 6 },
+      { label:fest?'Festival tailwind':'No festival', delta: fest?8:-2 },
+    ] },
+  };
+}
+function buildPlan(cfg){
+  const { days, markets, capacity, analytics } = cfg;
+  const segs = analytics.segments.slice().sort((a,b)=>b.revenue-a.revenue);
+  const prods = analytics.products;
+  const bestHour = analytics.bestHourByMarket || { US:14, UK:9, Global:6, IN:4 };
+  const start = new Date(new Date().toISOString().slice(0,10)+'T00:00:00Z');
+  const weeks = Math.ceil(days/7);
+  const plan = []; let idc = 0;
+  markets.forEach((mk, mi) => {
+    const rnd = seeded(1000 + mi*97);
+    for (let w=0; w<weeks; w++){
+      const used = {};
+      for (let s=0; s<capacity; s++){
+        let dayOffset = w*7 + Math.floor(rnd()*7);
+        while (used[dayOffset] && Object.keys(used).length<7) dayOffset = w*7 + Math.floor(rnd()*7);
+        used[dayOffset]=1;
+        if (dayOffset>=days) continue;
+        const date = new Date(start.getTime()+dayOffset*86400000);
+        const ds = date.toISOString().slice(0,10);
+        const seg = segs[Math.floor(rnd()*Math.min(segs.length, s+3)) % segs.length];
+        let cand = ARCH.filter(x=>x.segs.indexOf(seg.name)>=0); if(!cand.length) cand=ARCH;
+        const arch = cand[Math.floor(rnd()*cand.length)];
+        const hero = prods[Math.floor(rnd()*prods.length)];
+        const fest = festivalFor(ds);
+        const assets = ['mailer'];
+        if (arch.ct==='promo'||arch.ct==='launch'){ assets.push('meta_ad','google_ad'); }
+        if (arch.ct==='launch') assets.push('landing_page');
+        if (arch.ct==='editorial') assets.push('social_post');
+        plan.push({
+          id:'e'+(idc++), date:ds, send_hour_utc:bestHour[mk]||9,
+          market:mk, segment:seg.name, segment_size:seg.count,
+          content_type:arch.ct, archetype:arch.a,
+          hero_product:hero.title, hero_sku:hero.sku,
+          subject_hint:subjectHint(arch, hero, seg, fest),
+          festival:fest, rationale:rationale(seg, arch, hero, mk),
+          analysis:analysisFor(seg, arch, hero, mk, fest), asset_types:assets,
+        });
+      }
+    }
+  });
+  plan.sort((a,b)=> a.date<b.date?-1 : a.date>b.date?1 : (a.market<b.market?-1:1));
+  const dist = {}; plan.forEach(p=>dist[p.archetype]=(dist[p.archetype]||0)+1);
+  return { plan, meta:{ archetype_distribution:dist }, total_sends_planned:plan.length, markets };
+}
+
+// ── Display helpers ───────────────────────────────────────────────────────
+const MONTH_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function marketName(m) { return m === 'IN' ? 'India' : m; }
+function humanDate(ds) { const d = new Date(ds + 'T00:00:00Z'); if (isNaN(d)) return ds; return MONTH_SHORT[d.getUTCMonth()] + ' ' + d.getUTCDate(); }
+const ASSET_LABELS = { mailer:'mailer', meta_ad:'Meta ad', google_ad:'Google ad', tiktok_ad:'TikTok ad', landing_page:'landing page', social_post:'social post' };
+function assetLetter(t) { if (t === 'mailer') return 'M'; if (t === 'landing_page') return 'L'; if (t === 'social_post') return 'S'; return 'A'; }
+function assetLetters(e) { const seen = []; (e.asset_types || []).forEach((t) => { const l = assetLetter(t); if (seen.indexOf(l) === -1) seen.push(l); }); return seen.join(''); }
+function assetNames(e) { return (e.asset_types || []).map((t) => ASSET_LABELS[t] || String(t).replace(/_/g, ' ')).join(', '); }
+function chipTooltip(e) { const assets = assetNames(e); return marketName(e.market) + ' market — ' + e.segment + ' customers — ' + String(e.archetype || '').replace(/-/g, ' ') + ' email on ' + humanDate(e.date) + (assets ? '. Assets: ' + assets : ''); }
+function formatPlanSummary(data) {
+  const markets = (data.markets || []).map(marketName);
+  const marketText = markets.length > 1 ? markets.slice(0, -1).join(', ') + ' and ' + markets[markets.length - 1] : (markets[0] || 'all markets');
+  const friendly = (k) => k.replace(/-/g, ' ');
+  const dist = Object.entries((data.meta && data.meta.archetype_distribution) || {}).filter(([, v]) => v).sort((a, b) => b[1] - a[1]);
+  let formatText = '';
+  if (dist.length === 1) formatText = ' — all in the ' + friendly(dist[0][0]) + ' format';
+  else if (dist.length > 1) formatText = ' — mostly ' + friendly(dist[0][0]) + ' (' + dist[0][1] + ') and ' + friendly(dist[1][0]) + ' (' + dist[1][1] + ') formats';
+  const n = data.total_sends_planned;
+  const rows = data.plan || [];
+  const hasAsset = (p, t) => Array.isArray(p.asset_types) && p.asset_types.indexOf(t) !== -1;
+  const nMailers = rows.filter((p) => hasAsset(p, 'mailer')).length;
+  const nAdSets  = rows.filter((p) => hasAsset(p, 'meta_ad') || hasAsset(p, 'google_ad') || hasAsset(p, 'tiktok_ad')).length;
+  const nPages   = rows.filter((p) => hasAsset(p, 'landing_page')).length;
+  const nSocial  = rows.filter((p) => hasAsset(p, 'social_post')).length;
+  let assetText = '';
+  if (nMailers || nAdSets || nPages || nSocial) {
+    assetText = ', with ' + nMailers + ' mailer' + (nMailers === 1 ? '' : 's') + ', ' + nAdSets + ' ad set' + (nAdSets === 1 ? '' : 's') + ', ' + nPages + ' landing page' + (nPages === 1 ? '' : 's') + ' and ' + nSocial + ' social post' + (nSocial === 1 ? '' : 's');
+  }
+  return n + ' email' + (n === 1 ? '' : 's') + ' planned across ' + marketText + formatText + assetText + '.';
+}
+
+async function generatePlan() {
+  const analytics = loadAnalyticsSummary() || seedAnalytics();
+  STATE.analytics = analytics;
+  $('btnGenerate').disabled = true; $('btnGenerate').textContent = 'Generating…';
+  try {
+    const data = buildPlan({ days: STATE.days, markets: STATE.markets.length ? STATE.markets : ['US'], capacity: STATE.capacity, analytics });
+    STATE.plan = data.plan; STATE.meta = data.meta || {};
+    $('planMeta').textContent = formatPlanSummary(data);
+    renderCalendar(); renderTable();
+  } catch (e) {
+    $('planMeta').innerHTML = '<span style="color:#f0916f">Failed: ' + e.message + '</span>';
+  } finally {
+    $('btnGenerate').disabled = false; $('btnGenerate').textContent = '⚡ Generate plan';
+  }
+}
+
+function renderCalendar() {
+  const today = new Date();
+  const start = new Date(today.toISOString().slice(0, 10));
+  const offset = start.getUTCDay();
+  const gridStart = new Date(start); gridStart.setUTCDate(gridStart.getUTCDate() - offset);
+  const cells = [];
+  const total = Math.ceil((STATE.days + offset) / 7) * 7;
+  for (let i = 0; i < total; i++) {
+    const day = new Date(gridStart); day.setUTCDate(gridStart.getUTCDate() + i);
+    const ds = day.toISOString().slice(0, 10);
+    const entriesForDay = STATE.plan.filter((p) => p.date === ds);
+    const festival = entriesForDay.find((p) => p.festival)?.festival;
+    const inPlan = day >= start && day < new Date(start.getTime() + STATE.days * 86400000);
+    cells.push(`
+      <div class="day ${festival ? 'festival' : ''} ${!inPlan ? 'opacity-40' : ''}" data-date="${ds}">
+        <div class="flex items-start justify-between">
+          <div class="day-num">${day.getUTCDate()}</div>
+          <div class="text-[9px] text-ink-mute">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][day.getUTCDay()]}</div>
+        </div>
+        ${festival ? `<div class="day-fest">★ ${festival}</div>` : ''}
+        ${entriesForDay.slice(0, 4).map((e) => `
+          <div class="entry ct-${e.content_type}" title="${chipTooltip(e)}">
+            <span class="entry-market">${e.market}</span> · ${e.segment} · ${e.archetype.split('-')[0]}
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:rgb(var(--gold-rgb));margin-left:3px">${assetLetters(e)}</span>
+          </div>
+        `).join('')}
+        ${entriesForDay.length > 4 ? `<div class="text-[9px] text-ink-mute mt-1">+${entriesForDay.length - 4} more</div>` : ''}
+      </div>
+    `);
+  }
+  $('calendarGrid').innerHTML = cells.join('');
+  $$('#calendarGrid .day').forEach((cell) => {
+    cell.addEventListener('click', () => {
+      const ds = cell.dataset.date;
+      const list = STATE.plan.filter((p) => p.date === ds);
+      if (list.length) openMailer(list[0], list);
+    });
+  });
+}
+
+function calEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function calTrunc(s,n){ s=String(s||''); return s.length>n?s.slice(0,n-1)+'…':s; }
+function analysisDetails(p){
+  const a = p && p.analysis;
+  const conf = (a && a.confidence) ? a.confidence : (p.confidence!=null ? { score:p.confidence } : null);
+  const confTxt = (conf && conf.score!=null) ? Math.round(conf.score*100)+'%'+(conf.label?' · '+conf.label:'') : '';
+  const summary = (a && a.summary) || p.rationale || '';
+  if(!a && !summary) return '<span class="text-ink-mute">—</span>';
+  let body='';
+  if(a){
+    const drivers = (a.drivers||[]).map(function(dd){
+      return '<div style="margin:3px 0;color:rgb(var(--ink-rgb))"><b style="color:rgb(var(--gold-rgb))">'+calEsc(dd.signal)+':</b> '+calEsc(dd.value)+
+        (dd.implication?'<div style="font-size:10px;color:rgb(var(--ink-dim-rgb))">'+calEsc(dd.implication)+'</div>':'')+'</div>';
+    }).join('');
+    const factors = ((a.confidence&&a.confidence.factors)||[]).map(function(f){
+      return '<div style="display:flex;justify-content:space-between;gap:8px;color:rgb(var(--ink-rgb))"><span>'+calEsc(f.label)+'</span><span style="color:'+(f.delta>=0?'#4ade80':'#f87171')+'">'+(f.delta>=0?'+':'')+f.delta+'</span></div>';
+    }).join('');
+    body = '<div style="font-size:11px;line-height:1.5;max-width:320px;color:rgb(var(--ink-rgb))">'+drivers+
+      (a.hypothesis?'<div style="margin:6px 0"><b style="color:rgb(var(--gold-rgb))">Hypothesis:</b> '+calEsc(a.hypothesis)+'</div>':'')+
+      (a.expected_impact?'<div style="margin:4px 0"><b style="color:rgb(var(--gold-rgb))">Expected:</b> '+calEsc(a.expected_impact.metric||'')+' '+calEsc(a.expected_impact.direction||'up')+'</div>':'')+
+      (factors?'<div style="margin-top:6px;border-top:1px solid rgb(var(--gold-rgb) / 0.35);padding-top:4px"><b style="color:rgb(var(--gold-rgb))">Confidence '+confTxt+'</b>'+factors+'</div>':'')+
+      '</div>';
+  } else {
+    body = '<div style="font-size:11px;max-width:320px;color:rgb(var(--ink-rgb))">'+calEsc(summary)+'</div>';
+  }
+  return '<details><summary style="cursor:pointer;font-size:11px;color:rgb(var(--gold-rgb))">'+calEsc(calTrunc(summary,56))+
+    (confTxt?' <span style="color:rgb(var(--ink-dim-rgb))">('+confTxt+')</span>':'')+'</summary><div style="margin-top:6px">'+body+'</div></details>';
+}
+
+function renderTable(filter = '') {
+  const f = filter.toLowerCase();
+  const rows = STATE.plan.filter((p) =>
+    !f || [p.market, p.segment, p.archetype, p.hero_product, p.subject_hint, p.festival, p.date].join(' ').toLowerCase().includes(f)
+  );
+  if (!rows.length) { $('planTable').innerHTML = `<tr><td colspan="10" class="text-center text-ink-mute py-8">No entries match.</td></tr>`; return; }
+  $('planTable').innerHTML = rows.map((p) => `
+    <tr data-id="${p.id}">
+      <td class="font-mono text-[11px]">${p.date}<div class="text-[10px] text-ink-mute">${String(p.send_hour_utc).padStart(2,'0')}:00 UTC</div></td>
+      <td><span class="pill b-${p.market}">${p.market}</span></td>
+      <td><span class="seg-${p.segment.replace(/[^a-zA-Z]/g,'-')} font-semibold">${p.segment}</span><div class="text-[10px] text-ink-mute">${p.segment_size ? p.segment_size.toLocaleString() + ' subs' : ''}</div></td>
+      <td><span class="pill ct-${p.content_type}">${p.content_type}</span></td>
+      <td class="text-[12px]">${p.archetype}</td>
+      <td class="text-[12px]">${p.hero_product || p.hero_sku || '—'}</td>
+      <td class="text-[12px] max-w-[260px]">${p.subject_hint}</td>
+      <td class="max-w-[260px]">${analysisDetails(p)}</td>
+      <td class="text-[11px]">${p.festival ? '★ ' + p.festival : '—'}</td>
+      <td>${APPROVED.has(p.id) ? '<span title="Approved" style="color:#7fd6a6;margin-right:6px;font-weight:700">✓</span>' : ''}<button onclick='openMailerById("${p.id}")' class="text-[10px] uppercase tracking-wider px-2 py-1 rounded bg-gold/20 text-gold hover:bg-gold hover:text-cream">${APPROVED.has(p.id) ? 'Review' : 'View / Build →'}</button></td>
+    </tr>
+  `).join('');
+}
+
+function openMailerById(id) { const entry = STATE.plan.find((p) => p.id === id); if (entry) openMailer(entry, STATE.plan.filter((p)=>p.date===entry.date)); }
+
+// ── Client-side mailer pipeline (replaces /api/calendar?action=trigger-mailer) ──
+function subjectUrl(){ return 'https://sample-brand.com'; }
+function imageBrief(entry, style){
+  return style.charAt(0).toUpperCase()+style.slice(1)+' hero for a '+String(entry.archetype).replace(/-/g,' ')+' email — feature "'+entry.hero_product+'" for the '+entry.segment+' segment ('+marketName(entry.market)+'). Warm champagne + charcoal palette, generous negative space, premium editorial lighting, no text baked in. 1200×1500, mobile-first crop safe.';
+}
+function bodyCopy(entry){
+  const H = entry.hero_product;
+  const m = {
+    'ritual-journey': 'Here is a simple way to make '+H+' part of your everyday routine — small, consistent, and built around how you already live.',
+    'storytelling-narrative': 'Every '+H+' has a story. Here is ours — why we made it, and what makes it worth coming back to.',
+    'product-education': 'A quick guide to getting the most out of '+H+', from first use to your third reorder.',
+    'social-proof': 'People like you keep reordering '+H+'. Here is what they say — and why it might be your next staple.',
+    'win-back-offer': 'It has been a while. We kept your favourite, '+H+', ready — plus a little something to welcome you back.',
+    'launch-announcement': 'It is here. '+H+' just launched, and early access is open to you first.',
+    'seasonal-gifting': (entry.festival?entry.festival+' is close. ':'Gifting season is close. ')+'Our '+H+' picks make it easy to give something that lands.',
+  };
+  return m[entry.archetype] || 'A note about '+H+', picked for you.';
+}
+function ctaLabel(entry){ return entry.content_type==='winback' ? 'Claim your welcome-back' : entry.content_type==='launch' ? 'Get early access' : entry.content_type==='promo' ? 'Shop the edit' : 'Explore '+entry.hero_product; }
+function emailHTML(entry, subj, withVisual){
+  const acc='#FF6940', gold='#c9a96e', ink='#171717', paper='#FBF5EA';
+  const cta = subjectUrl();
+  const visual = withVisual
+    ? '<tr><td style="padding:0 32px"><div style="height:220px;border-radius:12px;background:linear-gradient(135deg,'+gold+'22,'+acc+'22);border:1px solid '+gold+'55;display:flex;align-items:center;justify-content:center;color:#8a7a5a;font:600 13px Inter,sans-serif">['+calEsc(entry.hero_product)+' — hero visual]</div></td></tr>'
+    : '';
+  return '<div style="margin:0;background:'+paper+';padding:24px 0;font-family:Inter,Helvetica,Arial,sans-serif">'+
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;border:1px solid '+gold+'33">'+
+    '<tr><td style="padding:26px 32px 8px"><div style="font:700 11px \'JetBrains Mono\',monospace;letter-spacing:.14em;text-transform:uppercase;color:'+gold+'">Sample Brand · '+calEsc(marketName(entry.market))+'</div>'+
+    '<h1 style="margin:8px 0 0;font:600 24px Georgia,serif;color:'+ink+'">'+calEsc(subj)+'</h1></td></tr>'+
+    visual+
+    '<tr><td style="padding:16px 32px 4px;font-size:15px;line-height:1.6;color:#333">Hi there,<br><br>'+calEsc(bodyCopy(entry))+'</td></tr>'+
+    '<tr><td style="padding:18px 32px 30px"><a href="'+cta+'" style="display:inline-block;background:'+acc+';color:#160d07;font:600 14px Inter,sans-serif;text-decoration:none;padding:13px 26px;border-radius:10px">'+calEsc(ctaLabel(entry))+'</a>'+
+    '<div style="margin-top:16px;font-size:11px;color:#999">You are receiving this because you are in the '+calEsc(entry.segment)+' segment. Unsubscribe · Manage preferences.</div></td></tr>'+
+    '</table></div>';
+}
+function buildVariants(entry){
+  const url = subjectUrl();
+  const subj = entry.subject_hint;
+  return {
+    A1: { label:'A1 · Premium image', kind:'image', hero_image_brief:imageBrief(entry,'premium editorial'), cta_url:url },
+    A2: { label:'A2 · Graphic image', kind:'image', hero_image_brief:imageBrief(entry,'bold graphic'), cta_url:url },
+    B1: { label:'B1 · Text + visual', kind:'text', html:emailHTML(entry, subj, true), cta_url:url },
+    B2: { label:'B2 · Pure text',     kind:'text', html:emailHTML(entry, subj, false), cta_url:url },
+  };
+}
+
+// Stash the plan row + variants so the Studio can open at the same mailer.
+function setStudioHandoff(entry, strategy, ctaUrl, variants) {
+  const payload = { source:'calendar', entry, strategy:strategy||null, cta_url:ctaUrl||null, variants:variants||null, ts:Date.now() };
+  try { localStorage.setItem('lifecycle-os-studio-handoff', JSON.stringify(payload)); } catch {}
+  const btn = $('openInStudio');
+  if (btn) btn.onclick = () => { try { localStorage.setItem('lifecycle-os-studio-handoff', JSON.stringify(payload)); } catch {} };
+}
+
+let CURRENT_ENTRY = null;
+let APPROVED = (() => { try { return new Set(JSON.parse(localStorage.getItem('lifecycle-os-cal-approved') || '[]')); } catch { return new Set(); } })();
+function saveApproved() { try { localStorage.setItem('lifecycle-os-cal-approved', JSON.stringify([...APPROVED])); } catch {} }
+function refreshApproveState() {
+  const el = $('approveState'); if (!el || !CURRENT_ENTRY) return;
+  el.innerHTML = APPROVED.has(CURRENT_ENTRY.id)
+    ? '<span style="color:#7fd6a6;font-weight:700">✓ Approved</span> · assets locked for this slot'
+    : 'Not yet approved. Review the assets above, leave feedback and regenerate, or approve.';
+}
+
+function openMailer(entry, dayList) {
+  CURRENT_ENTRY = entry;
+  $('mailerTitle').textContent = `${entry.date} · ${entry.market} · ${entry.segment}`;
+  $('mailerSubtitle').textContent = entry.rationale || '';
+  $('mailerAssets').textContent = 'Assets: ' + (assetNames(entry) || 'mailer');
+  var fb = $('mailerFeedback'); if (fb) fb.value = entry.feedback || '';
+  var sw = $('daySwitch');
+  if (sw) {
+    var sibs = (dayList && dayList.length > 1) ? dayList : [];
+    sw.innerHTML = sibs.map(function (p) { return '<button class="filter-chip' + (p.id === entry.id ? ' active' : '') + '" data-eid="' + p.id + '">' + p.market + ' · ' + p.segment + (APPROVED.has(p.id) ? ' ✓' : '') + '</button>'; }).join('');
+    $$('#daySwitch .filter-chip').forEach(function (b) { b.addEventListener('click', function () { var e = STATE.plan.find(function (x) { return x.id === b.dataset.eid; }); if (e) openMailer(e, dayList); }); });
+  }
+  refreshApproveState();
+  $('variantTabs').innerHTML = '';
+  $('variantPanels').innerHTML = `<div class="text-ink-mute text-center py-8">Running strategy + variant pipeline…</div>`;
+  $('mailerModal').classList.add('open');
+  setStudioHandoff(entry, null, null, null);
+
+  // Deterministic client-side pipeline (was a server call in the source).
+  setTimeout(function(){
+    try {
+      const strategy = { subject_line: entry.subject_hint };
+      const cta_url = subjectUrl();
+      const variants = buildVariants(entry);
+      setStudioHandoff(entry, strategy, cta_url, variants);
+      const tabs = ['A1','A2','B1','B2'];
+      $('variantTabs').innerHTML = tabs.map((k, i) => `<button class="filter-chip ${i===0 ? 'active' : ''}" data-variant="${k}">${variants[k]?.label || k}</button>`).join('');
+      $('variantPanels').innerHTML = tabs.map((k, i) => `<div data-panel="${k}" style="${i===0 ? '' : 'display:none'}">${renderVariantPanel(variants[k], strategy, cta_url)}</div>`).join('');
+      $$('#variantTabs .filter-chip').forEach((b) => b.addEventListener('click', (e) => {
+        const k = e.target.dataset.variant;
+        $$('#variantTabs .filter-chip').forEach((x) => x.classList.toggle('active', x === e.target));
+        $$('#variantPanels > [data-panel]').forEach((p) => p.style.display = p.dataset.panel === k ? 'block' : 'none');
+      }));
+      $$('#variantPanels [data-dl-mailer]').forEach((b) => b.addEventListener('click', (e) => {
+        const k = e.target.closest('[data-panel]').dataset.panel; const v = variants[k]; if (!v || !v.html) return;
+        const safe = (s) => String(s || '').replace(/[^A-Za-z0-9_-]+/g, '-');
+        const blob = new Blob([v.html], { type: 'text/html' }); const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `mailer-${safe(entry.date)}-${safe(entry.market)}-${k}.html`;
+        document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      }));
+      $$('#variantPanels [data-copy-brief]').forEach((b) => b.addEventListener('click', (e) => {
+        const txt = decodeURIComponent(e.target.dataset.copyBrief || '');
+        const done = (ok) => { const t = e.target.textContent; e.target.textContent = ok ? '✓ Copied' : 'Copy failed'; setTimeout(() => { e.target.textContent = t; }, 1500); };
+        try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(txt).then(() => done(true), () => done(false)); return; } } catch (_) {}
+        try { const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); done(true); } catch (_) { done(false); }
+      }));
+      $$('#variantPanels [data-dl-brief]').forEach((b) => b.addEventListener('click', (e) => {
+        const txt = decodeURIComponent(e.target.dataset.dlBrief || '');
+        const safe = (s) => String(s || '').replace(/[^A-Za-z0-9_-]+/g, '-');
+        const blob = new Blob([txt], { type: 'text/plain' }); const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `image-brief-${safe(entry.date)}-${safe(entry.market)}.txt`;
+        document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      }));
+    } catch (e) {
+      $('variantPanels').innerHTML = `<div style="color:#f0916f" class="text-center py-8">Pipeline error: ${e.message}</div>`;
+    }
+  }, 220);
+}
+
+function ctaLine(url) { if (!url) return ''; return `<div class="text-[11px] text-ink-mute mt-2">CTA links to <a href="${url}" target="_blank" rel="noopener" class="text-gold hover:underline">${url} ↗</a></div>`; }
+function renderVariantPanel(v, strategy, ctaUrl) {
+  if (!v) return `<div class="text-ink-mute">Variant unavailable.</div>`;
+  const cta = ctaUrl || v.cta_url || '';
+  const subj = (strategy && strategy.subject_line) || '';
+  if (v.kind === 'text') {
+    return `
+      <div class="text-xs text-ink-dim mb-2">${v.label}${subj ? ` · subject "${subj}"` : ''}</div>
+      <iframe class="preview" srcdoc='${(v.html || '').replace(/'/g, "&apos;")}'></iframe>
+      <div class="flex items-center gap-2 mt-2">
+        <button data-dl-mailer="1" class="text-[11px] uppercase tracking-wider px-3 py-2 rounded border border-gold/30 text-ink-dim hover:border-gold hover:text-ink">Download HTML</button>
+      </div>
+      ${ctaLine(cta)}
+    `;
+  }
+  const brief = v.hero_image_brief || '';
+  const enc = encodeURIComponent(brief);
+  const preview = v.hero_image_url
+    ? `<img src="${v.hero_image_url}" alt="${v.label}" style="width:100%;max-height:260px;object-fit:cover;border-radius:8px;border:1px solid rgb(var(--gold-rgb) / 0.3)">`
+    : `<div style="width:100%;height:180px;border:2px dashed rgb(var(--gold-rgb) / 0.5);border-radius:8px;display:flex;align-items:center;justify-content:center;text-align:center;color:rgb(var(--ink-dim-rgb));font-size:12px;background:rgb(var(--surface-rgb))">Image renders in Mailer Studio<br>(drop the brief into the image cascade)</div>`;
+  return `
+    <div class="space-y-2">
+      <div class="text-xs uppercase tracking-wider text-gold">${v.label}</div>
+      ${preview}
+      <div class="card p-3 text-[12px] leading-relaxed">
+        <b class="text-ink">Image generation brief:</b><br>${calEsc(brief)}
+      </div>
+      <div class="flex items-center gap-2">
+        <button data-copy-brief="${enc}" class="text-[11px] uppercase tracking-wider px-3 py-2 rounded border border-gold/30 text-ink-dim hover:border-gold hover:text-ink">Copy brief</button>
+        <button data-dl-brief="${enc}" class="text-[11px] uppercase tracking-wider px-3 py-2 rounded border border-gold/30 text-ink-dim hover:border-gold hover:text-ink">Download brief</button>
+      </div>
+      ${ctaLine(cta)}
+    </div>
+  `;
+}
+
+function closeMailer() { $('mailerModal').classList.remove('open'); }
+
+// Wire filters
+$('marketChips').addEventListener('click', (e) => { if (!e.target.dataset.market) return; e.target.classList.toggle('active'); STATE.markets = $$('#marketChips .filter-chip.active').map((c) => c.dataset.market); });
+$('daysChips').addEventListener('click', (e) => { if (!e.target.dataset.days) return; $$('#daysChips .filter-chip').forEach((c) => c.classList.toggle('active', c === e.target)); STATE.days = +e.target.dataset.days; });
+$('capInput').addEventListener('change', (e) => { STATE.capacity = +e.target.value || 4; });
+$('btnGenerate').addEventListener('click', generatePlan);
+$('btnRegen').addEventListener('click', () => {
+  if (!CURRENT_ENTRY) return;
+  const fb = ($('mailerFeedback').value || '').trim();
+  CURRENT_ENTRY.feedback = fb; APPROVED.delete(CURRENT_ENTRY.id); saveApproved();
+  const dayList = STATE.plan.filter((p) => p.date === CURRENT_ENTRY.date);
+  openMailer(CURRENT_ENTRY, dayList);
+});
+$('btnApprove').addEventListener('click', () => {
+  if (!CURRENT_ENTRY) return;
+  APPROVED.add(CURRENT_ENTRY.id); saveApproved(); refreshApproveState();
+  renderTable($('planSearch').value); renderCalendar();
+});
+$('planSearch').addEventListener('input', (e) => renderTable(e.target.value));
+
+// CSV export (self-contained serialiser — no external CDN dependency).
+function toCSV(rows){
+  const cols = ['date','send_hour_utc','market','segment','segment_size','content_type','archetype','hero_product','subject_hint','festival'];
+  const esc = (v)=>{ v = v==null?'':String(v); return /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; };
+  const head = cols.concat(['assets']).join(',');
+  const body = rows.map((p)=> cols.map((c)=>esc(p[c])).concat([esc((p.asset_types||[]).join(' '))]).join(',')).join('\n');
+  return head+'\n'+body;
+}
+$('btnExport').addEventListener('click', () => {
+  if (!STATE.plan.length) return alert('Generate a plan first.');
+  const blob = new Blob([toCSV(STATE.plan)], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `lifecycle-os-calendar-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+});
+
+// theme toggle (persisted, shared with the rest of the portfolio)
+(function(){ try{ var t=localStorage.getItem('anchit-theme'); if(t) document.documentElement.setAttribute('data-theme',t); }catch(e){} })();
+$('themeBtn').addEventListener('click', function(){
+  var cur=document.documentElement.getAttribute('data-theme')==='light'?'light':'dark';
+  var next=cur==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',next);
+  try{ localStorage.setItem('anchit-theme',next); }catch(e){}
+});
+
+// Auto-generate on load (uses the sample-brand benchmark).
+generatePlan();
+</script>
+<script src="/lifecycle-os-kit.js"></script>
+<script>if(window.LOS&&LOS.mountExtras){LOS.mountExtras('calendar');}</script>
 </body>
 </html>
