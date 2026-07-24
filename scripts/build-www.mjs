@@ -1,10 +1,9 @@
 #!/usr/bin/env node
 /**
- * Build step for Capacitor: mirror the static web assets into ./www
- * so that Capacitor (webDir: "www") can package them into the native apps.
- * Vercel continues to deploy from the repo root — this is only for native builds.
+ * Build step for Capacitor/Vercel: mirror static web assets into ./www and
+ * compile the standalone How-To Engine into the requested /how-to-1 route.
  */
-import { copyFile, mkdir, readdir, rm, stat } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
@@ -62,12 +61,22 @@ async function copyEntry(src, dest) {
   }
 }
 
-// Build the How-To Engine (a standalone Vite + React app under
-// side-husle/how-to-engine, base '/how-to/') and mirror its dist into
-// www/how-to so the module ships at /how-to on the main static deploy.
-// Wrapped so a failure here NEVER breaks the portfolio build — the app degrades
-// to a "coming soon"-style 404 rather than taking the whole site down, and the
-// SPA itself carries a client-side offline guide so it works without functions.
+// The source portfolio shell is intentionally a single large HTML document.
+// Patch only the generated www copy so the live Side Hustle card points at the
+// requested route without making the root shell build fragile.
+async function patchHowToCardRoute() {
+  const target = join(WWW, 'index.html');
+  if (!existsSync(target)) return;
+  const before = await readFile(target, 'utf8');
+  const after = before.replace(/href="\/how-to"/g, 'href="/how-to-1"');
+  await writeFile(target, after, 'utf8');
+  console.log('[build-www] how-to: Side Hustle card → /how-to-1');
+}
+
+// Build the How-To Engine (standalone Vite + React app under
+// side-husle/how-to-engine, base '/how-to-1/') and mirror its dist into
+// www/how-to-1 so it ships at /how-to-1 on the main static deployment.
+// Wrapped so a failure here never takes down the rest of the portfolio.
 async function buildHowTo() {
   const engine = join(ROOT, 'side-husle', 'how-to-engine');
   if (!existsSync(join(engine, 'package.json'))) {
@@ -79,12 +88,12 @@ async function buildHowTo() {
       console.log('[build-www] how-to: installing deps…');
       execSync('npm install --no-audit --no-fund --loglevel=error', { cwd: engine, stdio: 'inherit' });
     }
-    console.log('[build-www] how-to: building…');
+    console.log('[build-www] how-to: building for /how-to-1…');
     execSync('npm run build', { cwd: engine, stdio: 'inherit' });
     const dist = join(engine, 'dist');
     if (!existsSync(dist)) throw new Error('dist not produced');
-    await copyEntry(dist, join(WWW, 'how-to'));
-    console.log('[build-www] how-to: mirrored dist → www/how-to');
+    await copyEntry(dist, join(WWW, 'how-to-1'));
+    console.log('[build-www] how-to: mirrored dist → www/how-to-1');
   } catch (err) {
     console.warn(`[build-www] how-to build failed (skipping, main build unaffected): ${err?.message || err}`);
   }
@@ -106,6 +115,7 @@ async function main() {
     console.log(`[build-www] copied ${a}`);
   }
 
+  await patchHowToCardRoute();
   await buildHowTo();
 
   console.log(`[build-www] done → ${WWW}`);
