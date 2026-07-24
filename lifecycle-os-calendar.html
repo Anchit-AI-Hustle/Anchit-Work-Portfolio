@@ -378,7 +378,7 @@ function buildPlan(cfg){
   const bestHour = analytics.bestHourByMarket || { US:14, UK:9, Global:6, IN:4 };
   const start = new Date(new Date().toISOString().slice(0,10)+'T00:00:00Z');
   const weeks = Math.ceil(days/7);
-  const plan = []; let idc = 0;
+  const plan = []; const keyCount = {};
   markets.forEach((mk, mi) => {
     const rnd = seeded(1000 + mi*97);
     for (let w=0; w<weeks; w++){
@@ -399,8 +399,13 @@ function buildPlan(cfg){
         if (arch.ct==='promo'||arch.ct==='launch'){ assets.push('meta_ad','google_ad'); }
         if (arch.ct==='launch') assets.push('landing_page');
         if (arch.ct==='editorial') assets.push('social_post');
+        // Stable id derived from the row's own fields (not a reset-on-regenerate
+        // counter), so a persisted approval only ever re-marks the same send —
+        // changing market/window/capacity yields different ids, no leak.
+        const skey = ds+'|'+mk+'|'+seg.name+'|'+arch.a;
+        keyCount[skey] = (keyCount[skey]||0)+1;
         plan.push({
-          id:'e'+(idc++), date:ds, send_hour_utc:bestHour[mk]||9,
+          id: skey+'#'+keyCount[skey], date:ds, send_hour_utc:bestHour[mk]||9,
           market:mk, segment:seg.name, segment_size:seg.count,
           content_type:arch.ct, archetype:arch.a,
           hero_product:hero.title, hero_sku:hero.sku,
