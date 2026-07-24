@@ -51,14 +51,17 @@ function Vortex() {
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" count={COUNT} array={positions} itemSize={3} />
       </bufferGeometry>
-      <pointsMaterial size={0.035} color="#8b5cff" transparent opacity={0.9} depthWrite={false} blending={THREE.AdditiveBlending} />
+      <pointsMaterial size={0.035} color="#FF6940" transparent opacity={0.92} depthWrite={false} blending={THREE.AdditiveBlending} />
     </points>
   );
 }
 
-export default function TornadoLoader({ label = 'Spinning up your guide…', onDone, ms = 2200 }: {
-  label?: string; onDone?: () => void; ms?: number;
+export default function TornadoLoader({ label = 'Spinning up your guide…', sub, onDone, ms = 2200 }: {
+  label?: string; sub?: string; onDone?: () => void; ms?: number;
 }) {
+  // When onDone is provided it self-times (intro transition). When omitted it
+  // stays up for as long as it is mounted — used as the query "search buffer"
+  // while the user's input is being turned into a guide.
   useEffect(() => {
     if (!onDone) return;
     const t = setTimeout(onDone, ms);
@@ -68,11 +71,12 @@ export default function TornadoLoader({ label = 'Spinning up your guide…', onD
   return (
     <div className="tornado-wrap">
       <Canvas camera={{ position: [0, 0.4, 6], fov: 55 }} dpr={[1, 2]}>
-        <color attach="background" args={["#07060d"]} />
-        <fog attach="fog" args={["#07060d", 5, 11]} />
+        <color attach="background" args={["#0A0806"]} />
+        <fog attach="fog" args={["#0A0806", 5, 11]} />
         <Vortex />
       </Canvas>
       <div className="tornado-label">{label}</div>
+      {sub ? <div className="tornado-sub">{sub}</div> : null}
     </div>
   );
 }

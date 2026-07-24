@@ -6,11 +6,11 @@ import type { HowToStep } from '../types';
 import StepVideo from './StepVideo';
 
 const BADGE: Record<HowToStep['badge'], { label: string; color: string }> = {
-  start: { label: 'START', color: '#2ee5ac' },
-  action: { label: 'DO', color: '#5b8cff' },
-  'watch-out': { label: 'WATCH OUT', color: '#ff8a3d' },
+  start: { label: 'START', color: '#FFB736' },
+  action: { label: 'DO', color: '#FF6940' },
+  'watch-out': { label: 'WATCH OUT', color: '#FF4D1F' },
   checkpoint: { label: 'CHECK', color: '#c9a96e' },
-  finish: { label: 'DONE', color: '#ff5fd2' },
+  finish: { label: 'DONE', color: '#FF8A3D' },
 };
 
 export default function StepCard({ step, active, onFocus }: {
@@ -19,6 +19,7 @@ export default function StepCard({ step, active, onFocus }: {
   const badge = BADGE[step.badge];
   return (
     <motion.article
+      id={`howto-step-${step.id}`}
       className={`step-card glass ${active ? 'active' : ''}`}
       onMouseEnter={onFocus}
       initial={{ opacity: 0, y: 24 }}

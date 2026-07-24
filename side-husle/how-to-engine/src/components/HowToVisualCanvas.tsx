@@ -9,13 +9,14 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Stars, Environment } from '@react-three/drei';
+import { Stars } from '@react-three/drei';
 import { AnimatePresence, motion } from 'framer-motion';
 import * as THREE from 'three';
 
 import PromptOptimizer from './PromptOptimizer';
 import FlowDiagram from './FlowDiagram';
 import StepCard from './StepCard';
+import TornadoLoader from './TornadoLoader';
 import { useCascade } from '../hooks/useCascade';
 
 // ── 3D backdrop: a slowly drifting knot behind the glass, reacts to scroll ──
@@ -38,7 +39,7 @@ function Backdrop() {
   return (
     <mesh ref={mesh} position={[2.2, 0, -2]}>
       <torusKnotGeometry args={[1.5, 0.42, 220, 32]} />
-      <meshStandardMaterial color="#6b4bff" roughness={0.2} metalness={0.7} emissive="#2a1e66" emissiveIntensity={0.4} />
+      <meshStandardMaterial color="#FF6940" roughness={0.22} metalness={0.72} emissive="#FF4D1F" emissiveIntensity={0.45} />
     </mesh>
   );
 }
@@ -46,12 +47,14 @@ function Backdrop() {
 function Scene() {
   return (
     <Canvas className="bg-canvas" camera={{ position: [0, 0, 6], fov: 55 }} dpr={[1, 2]}>
-      <color attach="background" args={["#08070f"]} />
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[5, 6, 4]} intensity={1.2} />
-      <Stars radius={60} depth={30} count={1800} factor={4} fade speed={1} />
+      <color attach="background" args={["#0A0806"]} />
+      {/* Lit entirely by local lights — no external HDR environment fetch, so
+          the scene works fully offline / under a strict CSP. */}
+      <ambientLight intensity={0.55} />
+      <directionalLight position={[5, 6, 4]} intensity={1.3} color="#FFB736" />
+      <directionalLight position={[-4, -2, 3]} intensity={0.5} color="#FF6940" />
+      <Stars radius={60} depth={30} count={1500} factor={4} fade speed={1} />
       <Backdrop />
-      <Environment preset="city" />
     </Canvas>
   );
 }
@@ -68,9 +71,24 @@ export default function HowToVisualCanvas() {
     if (guide?.steps.length) setActiveId(guide.steps[0].id);
   }, [guide]);
 
+  // Selecting a step (via the flow diagram OR a card) makes it active AND
+  // scrolls its card into view — clicking any node in the flow map jumps you
+  // straight to that step.
+  const selectStep = (id: string) => {
+    setActiveId(id);
+    const el = document.getElementById(`howto-step-${id}`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
   return (
     <div className="canvas-root">
       <div className="bg-fixed"><Scene /></div>
+
+      {/* The 3D tornado is the "search buffer" while the user's input is turned
+          into a guide — it stays up for as long as the cascade is running. */}
+      {loading && !guide && (
+        <TornadoLoader label="Searching the model cascade…" sub="Fusing the best answers into your guide" />
+      )}
 
       <main className="content">
         <PromptOptimizer onSubmit={run} busy={loading} />
@@ -124,18 +142,12 @@ export default function HowToVisualCanvas() {
                   ))}
                 </div>
                 <aside className="flow-pane">
-                  <FlowDiagram guide={guide} activeId={activeId} onSelect={setActiveId} />
+                  <FlowDiagram guide={guide} activeId={activeId} onSelect={selectStep} />
                 </aside>
               </div>
             </motion.section>
           )}
         </AnimatePresence>
-
-        {loading && !guide && (
-          <div className="skeletons">
-            {Array.from({ length: 4 }).map((_, i) => <div key={i} className="skeleton glass" />)}
-          </div>
-        )}
       </main>
     </div>
   );

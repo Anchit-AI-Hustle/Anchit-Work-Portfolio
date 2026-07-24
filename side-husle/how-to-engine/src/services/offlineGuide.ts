@@ -7,16 +7,18 @@ import type { CascadeResult, HowToStep, MasterGuide } from '../types';
 
 export function offlineGuide(task: string): MasterGuide {
   const clean = (task || 'do this').trim();
+  // Lower-cased for natural mid-sentence use ("…everything you need to swim…").
+  const lc = clean.charAt(0).toLowerCase() + clean.slice(1);
   const steps: HowToStep[] = [
-    { id: 's1', index: 1, badge: 'start', title: 'Get set up', detail: `Gather everything you need to ${clean}. Clear a calm space.`, videoPrompt: `A tidy desk prepared to ${clean}, warm cinematic light` },
-    { id: 's2', index: 2, badge: 'action', title: 'Do the first move', detail: 'Start with the single easiest action. Momentum beats perfection.', videoPrompt: `Close-up hands beginning to ${clean}` },
+    { id: 's1', index: 1, badge: 'start', title: 'Get set up', detail: `Gather everything you need to ${lc}. Clear a calm space.`, videoPrompt: `A tidy desk prepared to ${lc}, warm cinematic light` },
+    { id: 's2', index: 2, badge: 'action', title: 'Do the first move', detail: 'Start with the single easiest action. Momentum beats perfection.', videoPrompt: `Close-up hands beginning to ${lc}` },
     { id: 's3', index: 3, badge: 'watch-out', title: 'Avoid the common trap', detail: 'Go slow here — this is where most people slip.', videoPrompt: 'A gentle warning highlight over the tricky part' },
     { id: 's4', index: 4, badge: 'checkpoint', title: 'Check your progress', detail: 'Pause and confirm it looks right before continuing.', videoPrompt: 'A checkmark glowing as progress is verified' },
-    { id: 's5', index: 5, badge: 'finish', title: 'Finish and celebrate', detail: `You did it — you now know how to ${clean}.`, videoPrompt: 'Confetti and a satisfied smile, cinematic' },
+    { id: 's5', index: 5, badge: 'finish', title: 'Finish and celebrate', detail: `You did it — you now know how to ${lc}.`, videoPrompt: 'Confetti and a satisfied smile, cinematic' },
   ];
   return {
     task: clean,
-    summary: `A calm, can't-fail path to ${clean}.`,
+    summary: `A calm, can't-fail path to ${lc}.`,
     difficulty: 'moderate',
     estMinutes: 5,
     steps,
