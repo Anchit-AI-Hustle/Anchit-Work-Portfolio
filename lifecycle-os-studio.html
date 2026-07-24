@@ -152,6 +152,9 @@
     var ho=JSON.parse(localStorage.getItem('lifecycle-os-studio-handoff')||'null');
     if(ho && ho.source==='calendar' && ho.entry && (Date.now()-(ho.ts||0) < 15*60*1000)){
       var en=ho.entry;
+      // The Calendar plans a generic sample D2C brand — set the subject to match
+      // so /api/mailer uses the brand branch (not the personal Anchit branch).
+      $('brand').value='Sample Brand'; $('url').value='sample-brand.com';
       $('brief').value='Build the "'+(en.subject_hint||'')+'" email — '+String(en.archetype||'').replace(/-/g,' ')+' for the '+(en.segment||'')+' segment'+(en.market?(' ('+en.market+' market)'):'')+(en.hero_product?(', hero product '+en.hero_product):'')+(en.feedback?('. Requested changes: '+en.feedback):'')+'.';
       if(en.segment) $('segment').value=en.segment;
       if(en.hero_product) $('offer').value=en.hero_product;
