@@ -145,26 +145,23 @@
   // Tool registry — mirrors the Lifecycle OS surface, generalised + de-branded.
   // status: 'live' links out now; 'soon' is scaffolded for a later pass.
   var CORE=[
-    { ic:'📊', name:'Data Analysis', desc:'RFM segments, cohort retention, send-time and cross-sell affinity — benchmarked to the subject’s industry.', href:'/lifecycle-os-analysis', status:'soon' },
-    { ic:'🗓️', name:'Marketing Calendar', desc:'A 30-day, segment- and cadence-aware send calendar with seasonality and guardrails.', href:'/lifecycle-os-calendar', status:'soon' },
-    { ic:'✉️', name:'Mailer Studio', desc:'Turn a brief into a designed, on-brand HTML mailer — multiple quality-scored variants per send.', href:'/lifecycle-os-studio', status:'live' },
+    { ic:'📊', name:'Data Analysis', desc:'RFM segments, cohort retention, send-time and cross-sell affinity — benchmarked to the subject’s industry.', href:'/lifecycle-os-analysis' },
+    { ic:'🗓️', name:'Marketing Calendar', desc:'A 30-day, segment- and cadence-aware send calendar with seasonality and guardrails.', href:'/lifecycle-os-calendar' },
+    { ic:'✉️', name:'Mailer Studio', desc:'Turn a brief into a designed, on-brand HTML mailer — multiple quality-scored variants per send.', href:'/lifecycle-os-studio' },
   ];
   var INTEL=[
-    { ic:'🧠', name:'Smart Brain', desc:'The analyze → plan → prebuild → review → approve autopilot over a rolling horizon.', href:'/lifecycle-os-brain', status:'soon' },
-    { ic:'🔭', name:'Competitive Intelligence', desc:'Profile the peer set the way SimilarWeb / SEMrush would — traffic mix, AOV and repeat-rate bands.', href:'/lifecycle-os-intel', status:'soon' },
-    { ic:'🎯', name:'Full lifecycle plan', desc:'The end-to-end one-shot: segments, calendar, mailer, retention flows and KPIs in one pass.', href:'/d2c-lifecycle-os', status:'live' },
-    { ic:'🖼️', name:'Landing Page Studio', desc:'Generate an on-brand, conversion-shaped landing page from a positioning brief.', href:'/lifecycle-os-landing', status:'soon' },
-    { ic:'📚', name:'Retention Playbook', desc:'A library of lifecycle plays — triggers, flows and offers — tuned to the subject’s category.', href:'/lifecycle-os-playbook', status:'soon' },
-    { ic:'🔌', name:'Connectors', desc:'Where a store + ESP would plug in (Shopify, Klaviyo, ESP) — off by default, no data required.', href:'/lifecycle-os-connectors', status:'soon' },
+    { ic:'🧠', name:'Smart Brain', desc:'The analyze → plan → prebuild → review → approve autopilot over a rolling horizon.', href:'/lifecycle-os-brain' },
+    { ic:'🔭', name:'Competitive Intelligence', desc:'Profile the peer set the way SimilarWeb / SEMrush would — traffic mix, AOV and repeat-rate bands.', href:'/lifecycle-os-intel' },
+    { ic:'🎯', name:'Full lifecycle plan', desc:'The end-to-end one-shot: segments, calendar, mailer, retention flows and KPIs in one pass.', href:'/d2c-lifecycle-os' },
+    { ic:'🖼️', name:'Landing Page Studio', desc:'Generate an on-brand, conversion-shaped landing page from a positioning brief.', href:'/lifecycle-os-landing' },
+    { ic:'📚', name:'Retention Playbook', desc:'A library of lifecycle plays — triggers, flows and offers — tuned to the subject’s category.', href:'/lifecycle-os-playbook' },
+    { ic:'🔌', name:'Connectors', desc:'Where a store + ESP plugs in (Shopify, Klaviyo, ESP) — off by default, no data required.', href:'/lifecycle-os-connectors' },
   ];
   function card(t){
-    var live=t.status==='live';
-    var el=document.createElement(live?'a':'div');
-    el.className='tool'+(live?'':' disabled');
-    if(live) el.href=t.href;
+    var el=document.createElement('a');
+    el.className='tool'; el.href=t.href; el.target='_blank'; el.rel='noopener';
     el.innerHTML='<div class="ic">'+t.ic+'</div><h3>'+t.name+'</h3><p>'+t.desc+'</p>'
-      +'<div class="row"><span class="badge '+(live?'live':'soon')+'">'+(live?'Live':'Building')+'</span>'
-      +(live?'<span class="go">Open ↗</span>':'<span class="go" style="color:var(--ink-mute)">Next pass</span>')+'</div>';
+      +'<div class="row"><span class="badge live">Live</span><span class="go">Open ↗</span></div>';
     return el;
   }
   CORE.forEach(function(t){ $('coreGrid').appendChild(card(t)); });

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Landing Page Studio — Lifecycle OS · Anchit Tandon</title>
+<meta name="description" content="Landing Page Studio — generate an on-brand, conversion-shaped landing page from a positioning brief, with a live preview and downloadable HTML. Part of the Lifecycle OS." />
+<link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="/lifecycle-os-kit.css" rel="stylesheet">
+<style>.preview{ border:1px solid var(--rule); border-radius:12px; overflow:hidden; background:#fff; margin-top:8px } .preview iframe{ width:100%; height:640px; border:0; display:block } .vbtn{ background:transparent; border:1px solid var(--rule-strong); color:var(--ink-dim); border-radius:9px; padding:8px 12px; font-family:var(--font-mono); font-size:11px; cursor:pointer; margin-right:8px } .vbtn:hover{ border-color:var(--primary); color:var(--ink) }</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top"><a class="back" href="/lifecycle-os">← Lifecycle OS</a><span class="crumbs"><a href="/#projects">Portfolio</a> / <a href="/lifecycle-os">Lifecycle OS</a> / Landing Page Studio</span></div>
+    <div class="eyebrow"><span class="dot"></span>Lifecycle OS · Landing Page Studio</div>
+    <h1><span class="grad">Landing Page Studio</span></h1>
+    <p class="lede">Generates an on-brand, conversion-shaped landing page from the subject's positioning — hero, proof sections and a CTA — with a live preview you can download. Loaded with <strong>anchit-tandon.com</strong> by default; type any brand.</p>
+    <div class="subject"><span class="lbl">Subject</span><input id="brand" type="text" value="Anchit Tandon"><input id="url" type="text" value="anchit-tandon.com" style="flex:0 1 220px"><button id="go">Generate page</button></div>
+    <div class="loading" id="loading"><span class="spinner"></span><span>Designing the landing page…</span></div>
+    <div class="err" id="err"></div>
+    <div id="out" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="font-family:var(--font-display);font-size:clamp(19px,3vw,24px);font-weight:600" id="hd"></div><span class="badge" id="bdg"></span></div>
+      <div style="margin:12px 0 4px"><button class="vbtn" id="copy">⧉ Copy HTML</button><button class="vbtn" id="dl">↓ Download .html</button><button class="vbtn" id="open">↗ Open</button></div>
+      <div class="preview"><iframe id="frame" title="Landing page preview" sandbox=""></iframe></div>
+    </div>
+    <footer>Landing Page Studio · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>. Generated from the subject's positioning — no proprietary data.</footer>
+  </div>
+<script src="/lifecycle-os-kit.js"></script>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i);}, esc=LOS.esc; var lastHtml='', lastBrand='landing';
+  var s=LOS.subject(); $('brand').value=s.brand; $('url').value=s.url||'';
+  $('go').addEventListener('click',run);
+  var P={ bg:'#fbf7ef', card:'#fff', ink:'#1a1714', dim:'#5a554e', rule:'#e7ddca', primary:'#c9a96e', deep:'#a8863f', dark:'#17130e' };
+  function buildLanding(p){
+    var m=p.mailer||{}, hero=m.hero||{};
+    var headline=hero.headline||p.positioning||(p.brand+' — built for growth');
+    var sub=hero.subhead||p.positioning||'';
+    var cta=(m.cta&&m.cta.label)||'Get started';
+    var feats=(p.stages||[]).slice(0,3).map(function(st){ return '<div style="flex:1;min-width:200px;background:'+P.card+';border:1px solid '+P.rule+';border-radius:14px;padding:22px"><div style="font-family:monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:'+P.deep+';margin-bottom:8px">'+esc(st.stage)+'</div><div style="font-family:Georgia,serif;font-size:18px;font-weight:bold;color:'+P.ink+';margin-bottom:6px">'+esc(st.goal)+'</div><div style="font-family:Arial,sans-serif;font-size:13.5px;line-height:1.6;color:'+P.dim+'">'+esc(st.campaign)+'</div></div>'; }).join('');
+    var proof=(p.kpis||[]).slice(0,4).map(function(k){ return '<div style="text-align:center;padding:14px 10px"><div style="font-family:Georgia,serif;font-size:22px;font-weight:bold;color:'+P.ink+'">'+esc(k.target||k.value||'')+'</div><div style="font-family:Arial,sans-serif;font-size:12px;color:'+P.dim+'">'+esc(k.metric)+'</div></div>'; }).join('');
+    return '<!doctype html><html><body style="margin:0;background:'+P.bg+';font-family:Arial,Helvetica,sans-serif;color:'+P.ink+'">'
+      +'<div style="background:'+P.dark+';padding:16px 28px"><span style="font-family:Georgia,serif;font-size:18px;font-weight:bold;color:#fff">'+esc(p.brand)+'</span></div>'
+      +'<div style="max-width:820px;margin:0 auto;padding:56px 24px 32px;text-align:center">'
+      +'<div style="font-family:monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:'+P.deep+';margin-bottom:16px">'+esc(hero.kicker||'Introducing')+'</div>'
+      +'<div style="font-family:Georgia,\'Times New Roman\',serif;font-size:40px;line-height:1.1;font-weight:bold;max-width:16ch;margin:0 auto 18px">'+esc(headline)+'</div>'
+      +'<div style="font-size:17px;line-height:1.6;color:'+P.dim+';max-width:52ch;margin:0 auto 28px">'+esc(sub)+'</div>'
+      +'<a href="#" style="display:inline-block;background:'+P.dark+';color:#fff;text-decoration:none;font-weight:bold;font-size:15px;padding:15px 34px;border-radius:9px">'+esc(cta)+'</a>'
+      +'</div>'
+      +'<div style="height:6px;background:linear-gradient(90deg,'+P.primary+','+P.deep+')"></div>'
+      +'<div style="max-width:960px;margin:0 auto;padding:40px 24px"><div style="display:flex;gap:16px;flex-wrap:wrap">'+feats+'</div></div>'
+      +'<div style="background:'+P.card+';border-top:1px solid '+P.rule+';border-bottom:1px solid '+P.rule+'"><div style="max-width:820px;margin:0 auto;padding:8px 24px;display:flex;flex-wrap:wrap;justify-content:space-around">'+proof+'</div></div>'
+      +'<div style="max-width:820px;margin:0 auto;padding:44px 24px;text-align:center"><div style="font-family:Georgia,serif;font-size:26px;font-weight:bold;margin-bottom:18px">Ready when you are.</div><a href="#" style="display:inline-block;background:'+P.primary+';color:'+P.dark+';text-decoration:none;font-weight:bold;font-size:15px;padding:15px 34px;border-radius:9px">'+esc(cta)+'</a></div>'
+      +'<div style="background:'+P.dark+';padding:20px 28px;text-align:center;font-size:12px;color:#c9bfa8">'+esc(p.brand)+' · '+esc((s.url||'anchit-tandon.com'))+'</div>'
+      +'</body></html>';
+  }
+  $('copy').addEventListener('click',function(){var b=$('copy'),o=b.textContent;(navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(lastHtml):Promise.resolve()).then(function(){b.textContent='✓ Copied';setTimeout(function(){b.textContent=o;},1500);},function(){});});
+  $('dl').addEventListener('click',function(){var bl=new Blob([lastHtml],{type:'text/html'});var a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download=lastBrand.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-landing.html';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href);},2000);});
+  $('open').addEventListener('click',function(){var w=window.open('','_blank');if(w){w.document.open();w.document.write(lastHtml);w.document.close();}});
+  function run(){
+    $('err').style.display='none'; $('out').style.display='none'; $('loading').classList.add('on');
+    LOS.post('/api/lifecycle',{brand:$('brand').value.trim(),url:$('url').value.trim()}).then(function(r){
+      var p=r.plan; if(!p) throw new Error('failed');
+      lastBrand=p.brand||'landing'; lastHtml=buildLanding(p);
+      $('hd').textContent=(p.brand||'Subject')+' — landing page'; LOS.badge($('bdg'),r.source);
+      $('frame').srcdoc=lastHtml; $('out').style.display='block';
+    }).catch(function(){ $('err').textContent='Could not generate the page — try again in a moment.'; $('err').style.display='block'; })
+    .then(function(){ $('loading').classList.remove('on'); });
+  }
+  run();
+})();
+</script>
+</body>
+</html>

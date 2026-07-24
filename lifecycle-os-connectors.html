@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Connectors — Lifecycle OS · Anchit Tandon</title>
+<meta name="description" content="Connectors — where a store, ESP and analytics would plug into the Lifecycle OS. Off by default, no data required; the OS runs on industry benchmarks until connected." />
+<link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="/lifecycle-os-kit.css" rel="stylesheet">
+<style>.conn{ display:flex; align-items:center; gap:14px; background:var(--bg-elev); border:1px solid var(--rule); border-radius:14px; padding:16px 18px } .conn .ic{ font-size:24px } .conn .body{ flex:1 } .conn .nm{ font-weight:600; font-size:15px } .conn .ds{ font-size:13px; color:var(--ink-dim) } .dot2{ width:9px; height:9px; border-radius:50%; background:var(--ink-mute); box-shadow:0 0 8px rgba(0,0,0,.2) } .st{ font-family:var(--font-mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-mute); border:1px solid var(--rule-strong); border-radius:99px; padding:4px 9px }</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top"><a class="back" href="/lifecycle-os">← Lifecycle OS</a><span class="crumbs"><a href="/#projects">Portfolio</a> / <a href="/lifecycle-os">Lifecycle OS</a> / Connectors</span></div>
+    <div class="eyebrow"><span class="dot"></span>Lifecycle OS · Connectors</div>
+    <h1><span class="grad">Connectors</span></h1>
+    <p class="lede">Where a store, ESP and analytics would plug in. <strong>All off by default</strong> — the OS runs entirely on industry-standard benchmarks and needs no proprietary data. Connecting a source swaps the synthetic baselines for the brand's real numbers.</p>
+    <div class="card" style="margin-bottom:20px;border-color:var(--accent);background:var(--accent-soft,rgba(46,229,172,.08))"><div class="k" style="color:var(--accent)"><span>Status</span></div><p style="color:var(--ink)">This is a public, brand-agnostic demo. No data source is connected — every number you see across the OS is a synthetic, industry-benchmarked estimate. Nothing is read from or written to any live account.</p></div>
+    <div class="sectitle">Data sources</div>
+    <div class="rows" id="list"></div>
+    <div class="sectitle">What connecting would change</div>
+    <div class="grid">
+      <div class="card"><div class="t">Real segments</div><p>RFM segments computed from your actual order + email data instead of category bands.</p></div>
+      <div class="card"><div class="t">Live benchmarks</div><p>SimilarWeb / SEMrush pulls replace the estimated industry bands with your real peer set.</p></div>
+      <div class="card"><div class="t">Ship, not draft</div><p>The Mailer Studio and Calendar push straight into your ESP instead of exporting HTML.</p></div>
+    </div>
+    <footer>Connectors · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>. Off by default — no proprietary data.</footer>
+  </div>
+<script src="/lifecycle-os-kit.js"></script>
+<script>
+(function(){
+  var C=[
+    {ic:'🛍️',nm:'Storefront',ds:'Shopify / Woo — orders, catalog, customers.'},
+    {ic:'✉️',nm:'ESP',ds:'Klaviyo / ESP — sends, opens, flows, revenue.'},
+    {ic:'📈',nm:'Web analytics',ds:'GA4 / analytics — sessions, funnels, conversion.'},
+    {ic:'🔭',nm:'Competitive intel',ds:'SimilarWeb / SEMrush — traffic mix, peer benchmarks.'},
+    {ic:'🗄️',nm:'Warehouse',ds:'A data warehouse — historical / deep metrics mirror.'},
+  ];
+  document.getElementById('list').innerHTML=C.map(function(c){return '<div class="conn"><span class="ic">'+c.ic+'</span><span class="dot2"></span><div class="body"><div class="nm">'+c.nm+'</div><div class="ds">'+c.ds+'</div></div><span class="st">Not connected</span></div>';}).join('');
+})();
+</script>
+</body>
+</html>
