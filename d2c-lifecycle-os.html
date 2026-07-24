@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>D2C-LifeCycle-OS — plug-and-play AI lifecycle marketing for any brand · Anchit Tandon</title>
-<meta name="description" content="The universal, plug-and-play version of VAHDAM Lifecycle OS. Enter any D2C brand and get an AI-generated lifecycle marketing plan — segments, campaign calendar, sample mailer, retention flows and KPIs." />
+<meta name="description" content="A plug-and-play, brand-agnostic lifecycle marketing OS for any D2C brand. Enter a brand and it benchmarks the industry (SimilarWeb / SEMrush-style) then generates a lifecycle plan — segments, campaign calendar, sample mailer, retention flows and KPIs." />
 <meta name="theme-color" content="#0F0D0A" />
 <link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
 <meta property="og:title" content="D2C-LifeCycle-OS — AI-led D2C marketing automation for any brand" />
@@ -86,6 +86,36 @@
   #result{ display:none; }
   .result-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin:6px 0 18px; }
   .result-head h3{ font-family:var(--font-display); font-size:clamp(22px,3vw,30px); font-weight:600; }
+  .rhead-right{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .xport{ background:transparent; border:1px solid var(--rule-strong); border-radius:99px; color:var(--ink-dim);
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.04em; padding:7px 13px; cursor:pointer; transition:border-color .2s,color .2s; }
+  .xport:hover{ border-color:var(--primary); color:var(--ink); }
+  /* Data analysis + Smart Brain + guardrails + variant scores */
+  .ana-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-bottom:24px; }
+  .ana-card{ background:var(--bg-elev); border:1px solid var(--rule); border-radius:14px; padding:16px 18px; }
+  .ana-card .k{ font-family:var(--font-mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--primary); margin-bottom:8px; }
+  .ana-card .v{ font-size:14px; color:var(--ink); font-weight:500; }
+  .ana-card p{ font-size:13px; color:var(--ink-dim); margin-top:4px; }
+  .ana-card .tags{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+  .ana-card .tags span{ font-family:var(--font-mono); font-size:10.5px; color:var(--ink-dim); border:1px solid var(--rule); border-radius:6px; padding:3px 7px; }
+  .vcard{ background:var(--bg-elev); border:1px solid var(--rule); border-radius:14px; padding:16px 18px; }
+  .vcard .vtop{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
+  .vcard .vlabel{ font-weight:600; font-size:14.5px; }
+  .vcard .vtype{ font-family:var(--font-mono); font-size:10px; letter-spacing:.05em; text-transform:uppercase; color:var(--gold); border:1px solid var(--rule); border-radius:6px; padding:3px 7px; }
+  .vcard .vtype.image{ color:var(--accent); }
+  .vcard p{ font-size:13px; color:var(--ink-dim); margin-bottom:12px; }
+  .vscore{ display:flex; align-items:center; gap:8px; margin-top:6px; }
+  .vscore .lab{ font-family:var(--font-mono); font-size:10.5px; color:var(--ink-mute); width:70px; flex:0 0 70px; text-transform:capitalize; }
+  .vbar{ flex:1; height:6px; border-radius:99px; background:rgba(255,255,255,.08); overflow:hidden; }
+  .vbar i{ display:block; height:100%; border-radius:99px; background:linear-gradient(90deg,var(--primary),var(--gold)); }
+  .vscore .num{ font-family:var(--font-mono); font-size:11px; color:var(--ink-dim); width:30px; text-align:right; }
+  .voverall{ display:inline-flex; align-items:baseline; gap:4px; font-family:var(--font-display); }
+  .voverall b{ font-size:22px; color:var(--ink); font-weight:600; } .voverall span{ font-size:11px; color:var(--ink-mute); font-family:var(--font-mono); }
+  .brain{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; align-items:stretch; }
+  .bstep{ flex:1; min-width:150px; background:var(--bg-elev); border:1px solid var(--rule); border-radius:12px; padding:14px 16px; position:relative; }
+  .bstep .bn{ font-family:var(--font-mono); font-size:10.5px; color:var(--primary); letter-spacing:.06em; text-transform:uppercase; margin-bottom:6px; }
+  .bstep .bs{ font-weight:600; font-size:14px; margin-bottom:4px; }
+  .bstep p{ font-size:12.5px; color:var(--ink-dim); }
   .badge{ font-family:var(--font-mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
     padding:5px 10px; border-radius:99px; border:1px solid var(--rule); color:var(--ink-dim); }
   .badge.ai{ border-color:var(--accent); color:var(--accent); }
@@ -118,6 +148,41 @@
   .mailer .mh .s{ font-weight:600; font-size:15px; }
   .mailer .mh .p{ font-size:12.5px; color:var(--ink-mute); margin-top:2px; }
   .mailer .mb{ padding:16px; font-size:14px; color:var(--ink-dim); white-space:pre-wrap; line-height:1.7; font-family:var(--font-sans); }
+  /* Designed mailer — Smart-Brain structure, Mailer-Architect visual quality */
+  .m-theme{ display:flex; align-items:center; gap:8px; padding:11px 16px; border-bottom:1px solid var(--rule);
+    font-family:var(--font-mono); font-size:11px; color:var(--ink-mute); letter-spacing:.03em; background:rgba(255,255,255,.02); }
+  .m-theme .lk{ color:var(--accent); }
+  .m-theme b{ color:var(--ink-dim); font-weight:500; }
+  .m-body{ background:var(--bg-deep); }
+  .m-hero{ position:relative; padding:26px 22px 22px; overflow:hidden;
+    background:
+      radial-gradient(120% 130% at 0% 0%, rgba(255,105,64,.26), transparent 55%),
+      radial-gradient(120% 130% at 100% 15%, rgba(255,183,54,.20), transparent 55%),
+      linear-gradient(160deg, #17130E, #0C0A07); }
+  .m-hero::after{ content:''; position:absolute; right:-40px; bottom:-60px; width:180px; height:180px; border-radius:50%;
+    background:radial-gradient(circle, rgba(46,229,172,.14), transparent 68%); pointer-events:none; }
+  .m-kicker{ font-family:var(--font-mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--gold);
+    margin-bottom:14px; display:inline-flex; align-items:center; gap:10px; }
+  .m-badge{ width:34px; height:34px; border-radius:9px; display:grid; place-items:center; font-family:var(--font-display);
+    font-weight:600; font-size:16px; color:#1a0d06; background:linear-gradient(135deg,var(--primary),var(--gold));
+    box-shadow:0 6px 18px rgba(255,105,64,.35); }
+  .m-hero h4{ font-family:var(--font-display); font-size:clamp(19px,3.2vw,23px); font-weight:600; line-height:1.2;
+    margin:0 0 9px; color:var(--ink); max-width:34ch; position:relative; }
+  .m-hero .m-sub{ font-size:14px; color:var(--ink-dim); max-width:46ch; position:relative; }
+  .m-secs{ padding:20px 22px 6px; display:flex; flex-direction:column; gap:15px; }
+  .m-sec{ border-left:2px solid var(--primary); padding-left:14px; }
+  .m-sec .st{ font-weight:600; font-size:14.5px; margin-bottom:4px; color:var(--ink); }
+  .m-sec p{ font-size:13.5px; color:var(--ink-dim); margin:0; line-height:1.6; }
+  .m-cta{ padding:16px 22px 20px; }
+  .m-cta a{ display:inline-block; background:linear-gradient(100deg,var(--primary),var(--primary-deep)); color:#1a0d06;
+    text-decoration:none; font-family:var(--font-mono); font-size:12.5px; font-weight:600; letter-spacing:.04em;
+    text-transform:uppercase; padding:12px 22px; border-radius:10px; box-shadow:0 10px 26px rgba(255,105,64,.3);
+    transition:transform .15s, box-shadow .2s; }
+  .m-cta a:hover{ transform:translateY(-1px); box-shadow:0 14px 32px rgba(255,105,64,.42); }
+  .m-cta .m-note{ font-size:12px; color:var(--ink-mute); margin-top:11px; }
+  .m-foot{ border-top:1px solid var(--rule); padding:14px 22px; font-family:var(--font-mono); font-size:11px;
+    color:var(--ink-mute); letter-spacing:.04em; display:flex; align-items:center; gap:8px; }
+  .m-foot .dotm{ width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px var(--accent); }
 
   /* kpis */
   .kpis{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:10px; }
@@ -155,31 +220,28 @@
   <div class="wrap">
     <div class="top">
       <a class="back" href="/#projects">← Anchit Tandon · Portfolio</a>
-      <span class="brandmark"><img src="AnchitTandon-AppLogo.png" alt="" />Side hustle · a startup idea</span>
+      <span class="brandmark"><img src="AnchitTandon-AppLogo.png" alt="" />Side hustle · marketing myself like a product</span>
     </div>
 
     <!-- HERO -->
-    <div class="eyebrow"><span class="dot"></span>AI-led D2C marketing automation</div>
+    <div class="eyebrow"><span class="dot"></span>A D2C growth playbook — applied to a résumé</div>
     <h1><span class="grad">D2C-LifeCycle-OS</span></h1>
-    <p class="lede">The plug-and-play, brand-agnostic version of the <strong>VAHDAM Lifecycle OS</strong> I built in-house — now for <strong>any</strong> D2C brand. Point it at a brand and it designs the whole lifecycle: <strong>segments, a campaign calendar, on-brand mailers, retention flows and KPIs</strong> — in seconds.</p>
+    <p class="lede">I market myself the way I'd grow a high-LTV D2C brand. This engine proves it live — pointed by default at <strong>anchit-tandon.com</strong>, it treats my candidacy as the product and designs the whole growth funnel: <strong>audiences, a search calendar, recruiter outreach, follow-up flows and KPIs</strong> — the D2C lifecycle, turned on a job search. <span style="color:var(--ink-mute)">(Type any brand and the same engine generalises.)</span></p>
 
     <!-- LIVE DEMO -->
     <div class="demo">
-      <h2>Try it — plug in any brand</h2>
-      <div class="sub">Enter a brand name (and optionally its site). The engine drafts a full lifecycle plan live.</div>
+      <h2>The default subject: anchit-tandon.com</h2>
+      <div class="sub">Loaded with me by default — a résumé marketed with a D2C growth approach to land a better role. The plan drafts live; edit the field to run it on any brand.</div>
       <div class="row">
-        <input id="brand" type="text" placeholder="Brand name — e.g. boAt, Mamaearth, Sleepy Owl" autocomplete="off" />
-        <input id="url" type="text" placeholder="Website (optional) — e.g. boat-lifestyle.com" autocomplete="off" style="flex:0 1 260px;" />
+        <input id="brand" type="text" placeholder="Brand or person — defaults to Anchit Tandon" autocomplete="off" />
+        <input id="url" type="text" placeholder="Website (optional) — e.g. anchit-tandon.com" autocomplete="off" style="flex:0 1 260px;" />
         <button class="btn" id="go">Generate plan</button>
       </div>
       <div class="chips">
-        <span class="lbl">Try:</span>
-        <button class="chip" data-b="boAt" data-u="boat-lifestyle.com">boAt</button>
-        <button class="chip" data-b="Mamaearth" data-u="mamaearth.in">Mamaearth</button>
-        <button class="chip" data-b="Sleepy Owl" data-u="sleepyowl.co">Sleepy Owl</button>
-        <button class="chip" data-b="The Whole Truth" data-u="thewholetruthfoods.com">The Whole Truth</button>
+        <span class="lbl">Subject:</span>
+        <button class="chip" data-b="Anchit Tandon" data-u="anchit-tandon.com">↺ Anchit Tandon (default)</button>
       </div>
-      <div class="loading" id="loading"><span class="spinner"></span><span id="loadingText">Designing the lifecycle plan…</span></div>
+      <div class="loading" id="loading"><span class="spinner"></span><span id="loadingText">Designing the growth plan…</span></div>
       <div class="err" id="err"></div>
     </div>
 
@@ -187,9 +249,22 @@
     <div id="result">
       <div class="result-head">
         <h3 id="rBrand"></h3>
-        <span class="badge" id="rBadge"></span>
+        <div class="rhead-right">
+          <span class="badge" id="rBadge"></span>
+          <button class="xport" id="rExport" title="Download the full plan as JSON">↓ Export plan</button>
+          <button class="xport" id="rCopy" title="Copy the plan to the clipboard">⧉ Copy</button>
+        </div>
       </div>
       <div class="positioning" id="rPos"></div>
+
+      <div class="sectitle" id="rIndTitle" style="display:none;">Industry read &amp; benchmarks</div>
+      <div id="rIndustry" style="display:none;">
+        <div class="card" id="rIndMeta" style="margin-bottom:14px;"></div>
+        <div class="kpis" id="rBench"></div>
+      </div>
+
+      <div class="sectitle" id="rAnaTitle" style="display:none;">Data analysis</div>
+      <div id="rAnalysis" style="display:none;"></div>
 
       <div class="sectitle">Audience segments</div>
       <div class="grid" id="rSeg"></div>
@@ -200,11 +275,20 @@
       <div class="sectitle">Campaign calendar</div>
       <div class="rows" id="rCal"></div>
 
-      <div class="sectitle">Sample mailer</div>
+      <div class="sectitle">Sample mailer · strategy-locked, on-brand design</div>
       <div class="mailer" id="rMailer"></div>
+
+      <div class="sectitle" id="rVarTitle" style="display:none;">Mailer Studio · scored variants</div>
+      <div class="grid" id="rVariants" style="display:none;"></div>
 
       <div class="sectitle">Retention automations</div>
       <div class="rows" id="rRet"></div>
+
+      <div class="sectitle" id="rBrainTitle" style="display:none;">Smart Brain · autopilot loop</div>
+      <div id="rBrain" style="display:none;"></div>
+
+      <div class="sectitle" id="rGuardTitle" style="display:none;">Guardrails</div>
+      <div class="grid" id="rGuards" style="display:none;"></div>
 
       <div class="sectitle">Target KPIs</div>
       <div class="kpis" id="rKpi"></div>
@@ -213,14 +297,14 @@
     <!-- HOW IT WORKS -->
     <section class="block">
       <div class="h2">How it works</div>
-      <div class="h2sub">One closed loop, fully automated — the same operating model behind the VAHDAM Lifecycle OS, generalised so any brand can plug in.</div>
+      <div class="h2sub">One closed loop — the same D2C lifecycle model, whether the "product" is a consumer brand or a résumé. By default it runs on anchit-tandon.com; point it at any brand and it generalises.</div>
       <div class="loop">
-        <div class="step"><div class="n">01</div><div class="st">Connect</div><p>Plug in a store + ESP (Shopify, Klaviyo, WebEngage). Data syncs in.</p></div>
-        <div class="step"><div class="n">02</div><div class="st">Segment</div><p>AI builds RFM + behavioural segments from real purchase data.</p></div>
-        <div class="step"><div class="n">03</div><div class="st">Plan</div><p>It designs the lifecycle: stages, calendar and campaign ideas.</p></div>
-        <div class="step"><div class="n">04</div><div class="st">Generate</div><p>On-brand mailers and flows written in the brand's own voice.</p></div>
-        <div class="step"><div class="n">05</div><div class="st">Automate</div><p>Triggers fire the right message at the right lifecycle moment.</p></div>
-        <div class="step"><div class="n">06</div><div class="st">Measure</div><p>KPIs close the loop and feed the next planning cycle.</p></div>
+        <div class="step"><div class="n">01</div><div class="st">Benchmark</div><p>Read the subject's category and comparable set — for me, the senior product/growth market and its response-rate bands.</p></div>
+        <div class="step"><div class="n">02</div><div class="st">Segment</div><p>Build the audiences — for a brand, RFM buyers; for a candidate, the employer types most likely to convert.</p></div>
+        <div class="step"><div class="n">03</div><div class="st">Plan</div><p>Design the funnel: stages, a week-by-week calendar and the campaign for each moment.</p></div>
+        <div class="step"><div class="n">04</div><div class="st">Generate</div><p>Write the outreach — on-brand mailers, or recruiter emails in the candidate's own voice.</p></div>
+        <div class="step"><div class="n">05</div><div class="st">Automate</div><p>Trigger the right follow-up at the right moment — cart-abandon, or interview thank-you.</p></div>
+        <div class="step"><div class="n">06</div><div class="st">Measure</div><p>KPIs close the loop — repeat-rate, or interviews booked and offers landed.</p></div>
       </div>
     </section>
 
@@ -228,26 +312,26 @@
     <section class="block">
       <div class="h2">Why it's different</div>
       <div class="feat">
-        <div class="card"><div class="t">Plug-and-play</div><p>No 3-month setup. Connect a store and get a working lifecycle plan the same day.</p></div>
-        <div class="card"><div class="t">Brand-agnostic</div><p>Beauty, F&amp;B, electronics, apparel — the engine adapts positioning and voice to each brand.</p></div>
+        <div class="card"><div class="t">Marketing myself</div><p>By default it runs on anchit-tandon.com — a résumé grown with a D2C playbook to land a better role.</p></div>
+        <div class="card"><div class="t">Subject-agnostic</div><p>A consumer brand or a personal brand — the engine adapts positioning, audiences and voice either way.</p></div>
         <div class="card"><div class="t">AI-native</div><p>Segments, calendars and copy are generated, not templated — then human-approved.</p></div>
-        <div class="card"><div class="t">Retention-first</div><p>Built around the second purchase and LTV, where D2C margins actually live.</p></div>
-        <div class="card"><div class="t">ESP-ready</div><p>Designed to push into Klaviyo / WebEngage flows, not replace them.</p></div>
-        <div class="card"><div class="t">Proven lineage</div><p>Distilled from a lifecycle OS running in production at a real D2C brand.</p></div>
+        <div class="card"><div class="t">Funnel-first</div><p>Built around the next conversion — the second purchase, or the next interview and offer.</p></div>
+        <div class="card"><div class="t">Outreach-ready</div><p>Mailers and follow-up flows come drafted, ready to push into an ESP or a job-search inbox.</p></div>
+        <div class="card"><div class="t">Industry-benchmarked</div><p>Every plan starts from real baselines — the way SimilarWeb / SEMrush profile a market — not guesses.</p></div>
       </div>
     </section>
 
     <!-- WHY / ORIGIN -->
     <section class="block why">
-      <blockquote>“I built the VAHDAM Lifecycle OS to connect analytics, planning, segmentation and mailer generation into one loop. D2C-LifeCycle-OS is that same thinking made universal — proof of an approach any brand can switch on.”</blockquote>
-      <cite>— Anchit Tandon · builder of the VAHDAM Lifecycle OS</cite>
+      <blockquote>“The best way to prove I can grow a D2C brand is to grow one — so I pointed the engine at myself. anchit-tandon.com is the product, a senior Product &amp; Growth role is the conversion, and the job search is the funnel. Type any brand and the same model runs on it.”</blockquote>
+      <cite>— Anchit Tandon · builder of D2C-LifeCycle-OS</cite>
     </section>
 
     <!-- CTA -->
     <section class="cta">
-      <div class="h2">Plug in your brand ↑</div>
-      <p class="h2sub" style="margin:0 auto 22px;">Scroll up, drop in a brand, and watch a full lifecycle plan build itself.</p>
-      <a class="btn" href="#brand" style="text-decoration:none;">Try the live demo</a>
+      <div class="h2">See how I'd market myself ↑</div>
+      <p class="h2sub" style="margin:0 auto 22px;">Scroll up — it's already loaded with anchit-tandon.com. Watch the growth plan build itself, or drop in any brand to generalise.</p>
+      <a class="btn" href="#brand" style="text-decoration:none;">Open the live demo</a>
     </section>
 
     <footer>
@@ -269,12 +353,27 @@
   brandEl.addEventListener('keydown', function(e){ if(e.key==='Enter') run(); });
   urlEl.addEventListener('keydown', function(e){ if(e.key==='Enter') run(); });
 
+  var lastPlan=null, lastSource=null;
+  function planFilename(){ return (lastPlan&&lastPlan.brand||'plan').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-lifecycle-plan.json'; }
+  $('rExport').addEventListener('click', function(){
+    if(!lastPlan) return;
+    var blob=new Blob([JSON.stringify({ source:lastSource, plan:lastPlan }, null, 2)], {type:'application/json'});
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=planFilename();
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+  });
+  $('rCopy').addEventListener('click', function(){
+    if(!lastPlan) return;
+    var txt=JSON.stringify({ source:lastSource, plan:lastPlan }, null, 2), btn=$('rCopy'), orig=btn.textContent;
+    var done=function(){ btn.textContent='✓ Copied'; setTimeout(function(){ btn.textContent=orig; }, 1600); };
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done, done); } else { done(); }
+  });
+
   var phrases=['Reading the brand…','Building segments…','Designing the calendar…','Writing the mailer…','Wiring retention flows…'];
   var pv=0, timer=null;
 
-  function run(){
+  function run(noScroll){
     var brand=brandEl.value.trim(), url=urlEl.value.trim();
-    if(!brand && !url){ brandEl.focus(); return; }
+    if(!brand && !url){ brand='Anchit Tandon'; url='anchit-tandon.com'; brandEl.value=brand; urlEl.value=url; }
     errEl.style.display='none'; resEl.style.display='none';
     goEl.disabled=true; loadEl.classList.add('on'); pv=0; loadTxt.textContent=phrases[0];
     timer=setInterval(function(){ pv=(pv+1)%phrases.length; loadTxt.textContent=phrases[pv]; }, 1400);
@@ -284,18 +383,51 @@
       .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
       .then(function(res){
         if(!res.ok || !res.j || !res.j.plan) throw new Error((res.j&&res.j.error)||'failed');
-        render(res.j.plan, res.j.source);
+        render(res.j.plan, res.j.source, noScroll);
       })
       .catch(function(){ errEl.textContent='Could not generate a plan just now — please try again in a moment.'; errEl.style.display='block'; })
       .then(function(){ clearInterval(timer); goEl.disabled=false; loadEl.classList.remove('on'); });
   }
 
-  function render(p, source){
-    $('rBrand').textContent = (p.brand||'Your brand') + ' — lifecycle plan';
+  function render(p, source, noScroll){
+    var isAnchit = source==='anchit';
+    $('rBrand').textContent = (p.brand||'Your brand') + (isAnchit ? ' — career growth plan' : ' — lifecycle plan');
     var badge=$('rBadge');
-    if(source==='ai'){ badge.textContent='AI-generated'; badge.className='badge ai'; }
+    if(isAnchit){ badge.textContent='Marketing myself · anchit-tandon.com'; badge.className='badge ai'; }
+    else if(source==='ai+ci'){ badge.textContent='AI + live benchmarks'; badge.className='badge ai'; }
+    else if(source==='ai'){ badge.textContent='AI-generated'; badge.className='badge ai'; }
     else { badge.textContent='Sample plan'; badge.className='badge'; }
     $('rPos').textContent = p.positioning || '';
+
+    var ind = p.industry || {};
+    var benches = ind.benchmarks || [];
+    if(ind.category || (ind.competitors&&ind.competitors.length) || benches.length){
+      var metaBits='';
+      if(ind.category) metaBits += '<div class="k"><span>Category</span></div><div class="t" style="margin-bottom:8px;">'+esc(ind.category)+'</div>';
+      if(ind.competitors&&ind.competitors.length){
+        metaBits += '<div class="k"><span>Comparable brands</span></div><div class="tags">'+ind.competitors.map(function(c){ return '<span>'+esc(c)+'</span>'; }).join('')+'</div>';
+      }
+      $('rIndMeta').innerHTML = metaBits || '';
+      $('rIndMeta').style.display = metaBits ? 'block' : 'none';
+      $('rBench').innerHTML = benches.map(function(bm){
+        return '<div class="kpi"><div class="m">'+esc(bm.metric)+(bm.note?' — '+esc(bm.note):'')+'</div><div class="v">'+esc(bm.value)+'</div></div>';
+      }).join('');
+      $('rIndTitle').style.display=''; $('rIndustry').style.display='block';
+    } else {
+      $('rIndTitle').style.display='none'; $('rIndustry').style.display='none';
+    }
+
+    // Data analysis stage
+    var a = p.analysis;
+    if(a && (a.model || a.cohortNote || (a.sendTime&&a.sendTime.window) || (a.crossSell&&a.crossSell.length))){
+      var ab='<div class="ana-grid">';
+      if(a.model) ab += '<div class="ana-card"><div class="k">Segmentation model</div><div class="v">'+esc(a.model)+'</div></div>';
+      if(a.sendTime&&a.sendTime.window) ab += '<div class="ana-card"><div class="k">Best send window</div><div class="v">'+esc(a.sendTime.window)+'</div>'+(a.sendTime.note?'<p>'+esc(a.sendTime.note)+'</p>':'')+'</div>';
+      if(a.cohortNote) ab += '<div class="ana-card"><div class="k">Cohort retention</div><p style="margin-top:0">'+esc(a.cohortNote)+'</p></div>';
+      if(a.crossSell&&a.crossSell.length) ab += '<div class="ana-card"><div class="k">Cross-sell affinity</div><div class="tags">'+a.crossSell.map(function(x){return '<span>'+esc(x)+'</span>';}).join('')+'</div></div>';
+      ab += '</div>';
+      $('rAnalysis').innerHTML=ab; $('rAnaTitle').style.display=''; $('rAnalysis').style.display='block';
+    } else { $('rAnaTitle').style.display='none'; $('rAnalysis').style.display='none'; }
 
     $('rSeg').innerHTML = (p.segments||[]).map(function(s){
       return '<div class="card"><div class="k"><span>'+esc(s.name)+'</span><span class="sz">'+esc(s.size||'')+'</span></div><p>'+esc(s.description)+'</p></div>';
@@ -308,25 +440,97 @@
 
     $('rCal').innerHTML = (p.calendar||[]).map(function(c){
       var sends=(c.sends||[]).map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('');
-      return '<div class="lrow"><div class="w">'+esc(c.week)+'</div><div><div class="th">'+esc(c.theme)+'</div><ul>'+sends+'</ul></div></div>';
+      var cad = c.cadence ? '<div style="font-family:var(--font-mono);font-size:10.5px;color:var(--ink-mute);margin-top:6px">⚙ '+esc(c.cadence)+'</div>' : '';
+      return '<div class="lrow"><div class="w">'+esc(c.week)+'</div><div><div class="th">'+esc(c.theme)+'</div><ul>'+sends+'</ul>'+cad+'</div></div>';
     }).join('');
 
-    if(p.mailer){
-      $('rMailer').innerHTML = '<div class="mh"><div class="s">'+esc(p.mailer.subject)+'</div><div class="p">'+esc(p.mailer.preview)+'</div></div><div class="mb">'+esc(p.mailer.body)+'</div>';
-      $('rMailer').style.display='block';
-    } else { $('rMailer').style.display='none'; }
+    renderMailer(p.mailer, (p.brand||'A').trim().charAt(0).toUpperCase() || 'A');
+
+    // Mailer Studio · scored variants
+    var vars = (p.mailer && p.mailer.variants) || [];
+    if(vars.length){
+      $('rVariants').innerHTML = vars.map(function(v){
+        var sc=v.score||{};
+        var bars=['strategy','copy','density','divergence'].filter(function(k){return sc[k]!=null;}).map(function(k){
+          return '<div class="vscore"><span class="lab">'+k+'</span><span class="vbar"><i style="width:'+Math.max(0,Math.min(100,sc[k]))+'%"></i></span><span class="num">'+sc[k]+'</span></div>';
+        }).join('');
+        var overall = sc.overall!=null ? '<div class="voverall"><b>'+sc.overall+'</b><span>/100 overall</span></div>' : '';
+        return '<div class="vcard"><div class="vtop"><span class="vlabel">'+esc(v.label||'Variant')+'</span><span class="vtype '+(v.type==='image'?'image':'')+'">'+esc(v.type||'text')+'</span></div>'+(v.angle?'<p>'+esc(v.angle)+'</p>':'')+bars+(overall?'<div style="margin-top:10px">'+overall+'</div>':'')+'</div>';
+      }).join('');
+      $('rVarTitle').style.display=''; $('rVariants').style.display='grid';
+    } else { $('rVarTitle').style.display='none'; $('rVariants').style.display='none'; }
 
     $('rRet').innerHTML = (p.retention||[]).map(function(r){
       return '<div class="lrow"><div class="w">'+esc(r.trigger)+'</div><div><div class="th" style="margin:0;font-weight:400;color:var(--ink-dim);font-size:14px;">'+esc(r.flow)+'</div></div></div>';
     }).join('');
 
+    // Smart Brain · autopilot loop
+    var sb = p.smartBrain;
+    if(sb && sb.loop && sb.loop.length){
+      var steps = sb.loop.map(function(s,i){
+        return '<div class="bstep"><div class="bn">0'+(i+1)+' · '+esc(s.step)+'</div>'+(s.detail?'<p>'+esc(s.detail)+'</p>':'')+'</div>';
+      }).join('');
+      $('rBrain').innerHTML = '<div class="brain">'+steps+'</div>'+
+        ((sb.horizon||sb.note)?'<div class="note" style="font-size:13px;color:var(--ink-dim)">'+(sb.horizon?'<b style="color:var(--ink)">'+esc(sb.horizon)+'</b> — ':'')+esc(sb.note||'')+'</div>':'');
+      $('rBrainTitle').style.display=''; $('rBrain').style.display='block';
+    } else { $('rBrainTitle').style.display='none'; $('rBrain').style.display='none'; }
+
+    // Guardrails
+    var g = p.guardrails||[];
+    if(g.length){
+      $('rGuards').innerHTML = g.map(function(x){
+        return '<div class="card"><div class="k">'+esc(x.rule||'')+'</div>'+(x.detail?'<p>'+esc(x.detail)+'</p>':'')+'</div>';
+      }).join('');
+      $('rGuardTitle').style.display=''; $('rGuards').style.display='grid';
+    } else { $('rGuardTitle').style.display='none'; $('rGuards').style.display='none'; }
+
     $('rKpi').innerHTML = (p.kpis||[]).map(function(k){
       return '<div class="kpi"><div class="m">'+esc(k.metric)+'</div><div class="v">'+esc(k.target)+'</div></div>';
     }).join('');
 
+    lastPlan=p; lastSource=source;
     resEl.style.display='block';
-    resEl.scrollIntoView({ behavior:'smooth', block:'start' });
+    if(!noScroll) resEl.scrollIntoView({ behavior:'smooth', block:'start' });
   }
+
+  // Render the mailer as a DESIGNED HTML email: Smart-Brain structure (locked
+  // theme → hero → strategy sections → one CTA) with Mailer-Architect visuals.
+  function renderMailer(m, initial){
+    var el=$('rMailer');
+    if(!m || (!m.subject && !m.body && !(m.hero&&m.hero.headline))){ el.style.display='none'; return; }
+    var h=m.hero||{}, cta=m.cta||{}, secs=m.sections||[];
+    var out='';
+    out += '<div class="mh"><div class="s">'+esc(m.subject||'')+'</div><div class="p">'+esc(m.preview||'')+'</div></div>';
+    if(m.theme) out += '<div class="m-theme"><span class="lk">◆ Strategy locked</span> — <b>'+esc(m.theme)+'</b></div>';
+    out += '<div class="m-body">';
+    if(h.kicker || h.headline || h.subhead){
+      out += '<div class="m-hero">';
+      out += '<div class="m-kicker"><span class="m-badge">'+esc(initial||'A')+'</span>'+esc(h.kicker||'')+'</div>';
+      if(h.headline) out += '<h4>'+esc(h.headline)+'</h4>';
+      if(h.subhead) out += '<div class="m-sub">'+esc(h.subhead)+'</div>';
+      out += '</div>';
+    }
+    if(secs.length){
+      out += '<div class="m-secs">'+secs.map(function(s){
+        return '<div class="m-sec"><div class="st">'+esc(s.title)+'</div><p>'+esc(s.body)+'</p></div>';
+      }).join('')+'</div>';
+    } else if(m.body){
+      out += '<div class="mb">'+esc(m.body)+'</div>';
+    }
+    if(cta.label){
+      out += '<div class="m-cta"><a href="#" onclick="return false;">'+esc(cta.label)+'</a>';
+      if(cta.note) out += '<div class="m-note">'+esc(cta.note)+'</div>';
+      out += '</div>';
+    }
+    if(m.signoff) out += '<div class="m-foot"><span class="dotm"></span>'+esc(m.signoff)+'</div>';
+    out += '</div>';
+    el.innerHTML=out; el.style.display='block';
+  }
+
+  // Default subject: anchit-tandon.com — preload and draft the plan on open,
+  // without scrolling past the hero.
+  brandEl.value='Anchit Tandon'; urlEl.value='anchit-tandon.com';
+  run(true);
 })();
 </script>
 </body>

@@ -175,8 +175,10 @@ async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const supabaseUrl = process.env.SUPABASE_URL || 'https://rhvmpzjeyjminlvuhozx.supabase.co';
-  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJodm1wempleWptaW5sdnVob3p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4ODE2MTgsImV4cCI6MjA5NTQ1NzYxOH0.qmwLy5GYg5ymby-TY1Jc2k9s49XmqoAX_9NMq2ILjdg';
+  // Env-driven only — no hardcoded project. Set SUPABASE_URL + SUPABASE_ANON_KEY
+  // to a project you own to gate behind Google sign-in; leave unset to run open.
+  const supabaseUrl = (process.env.SUPABASE_URL || '').trim();
+  const supabaseAnonKey = (process.env.SUPABASE_ANON_KEY || '').trim();
   const gated = !!(supabaseUrl && supabaseAnonKey);
 
   if (req.method === 'GET') {
