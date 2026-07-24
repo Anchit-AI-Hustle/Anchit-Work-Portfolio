@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Cohort Builder — Lifecycle OS · Anchit Tandon</title>
+<meta name="description" content="Cohort Builder — behavioural cohort definitions with rules, sizes and the recommended play for each. Part of the Lifecycle OS." />
+<link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="/lifecycle-os-kit.css" rel="stylesheet">
+<style>.co{background:var(--bg-elev);border:1px solid var(--rule);border-radius:12px;padding:16px 18px}.co .nm{font-weight:600;font-size:15px;margin-bottom:4px}.co .rule{font-family:var(--font-mono);font-size:11.5px;color:var(--accent);background:var(--accent-soft,rgba(46,229,172,.08));border:1px solid var(--rule);border-radius:7px;padding:6px 9px;margin:8px 0}.co .play{font-size:13px;color:var(--ink-dim)}.co .sz{float:right;font-family:var(--font-mono);font-size:12px;color:var(--gold)}</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top"><a class="back" href="/lifecycle-os">← Lifecycle OS</a><span class="crumbs"><a href="/#projects">Portfolio</a> / <a href="/lifecycle-os">Lifecycle OS</a> / Cohort Builder</span></div>
+    <div class="eyebrow"><span class="dot"></span>Lifecycle OS · Cohort Builder</div>
+    <h1><span class="grad">Cohort Builder</span></h1>
+    <p class="lede">Behavioural cohort definitions — the rule that defines each cohort, its share of the base, and the recommended play. Loaded with <strong>anchit-tandon.com</strong> by default; type any brand.</p>
+    <div class="subject"><span class="lbl">Subject</span><input id="brand" type="text"><input id="url" type="text" style="flex:0 1 220px"><button id="go">Build cohorts</button></div>
+    <div class="loading" id="loading"><span class="spinner"></span><span>Defining cohorts…</span></div>
+    <div id="out" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="font-family:var(--font-display);font-size:clamp(19px,3vw,24px);font-weight:600" id="hd"></div><span class="badge" id="bdg"></span></div>
+      <div class="sectitle">Cohort definitions</div><div class="grid" id="cos"></div>
+    </div>
+    <div id="extras" style="margin-top:8px"></div>
+    <footer>Cohort Builder · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>.</footer>
+  </div>
+<script src="/lifecycle-os-kit.js"></script>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i);}, esc=LOS.esc;
+  LOS.wireSubject('brand','url',run);
+  function run(){
+    $('loading').classList.add('on'); $('out').style.display='none';
+    LOS.post('/api/analysis',{brand:$('brand').value.trim(),url:$('url').value.trim()}).then(function(d){
+      if(!d||!d.segments) throw 0;
+      $('hd').textContent=(d.brand||'Subject')+' — cohorts'; LOS.badge($('bdg'),d.source);
+      $('cos').innerHTML=(d.segments||[]).map(function(s){
+        var rule=d.source==='anchit'?('intent≥'+s.r+' · fit-signal≥'+s.f+' · value-tier '+s.m):('R≥'+s.r+' · F≥'+s.f+' · M≥'+s.m);
+        return '<div class="co"><span class="sz">'+esc(s.pct)+'%</span><div class="nm">'+esc(s.name)+'</div><div class="rule">WHERE '+esc(rule)+'</div><div class="play">'+esc(s.note||'')+'</div></div>';
+      }).join('');
+      $('out').style.display='block';
+    }).catch(function(){ $('hd').textContent='Could not build cohorts — try again.'; $('out').style.display='block'; })
+    .then(function(){ $('loading').classList.remove('on'); });
+  }
+  run();
+  LOS.mountExtras('cohorts', run);
+})();
+</script>
+</body>
+</html>

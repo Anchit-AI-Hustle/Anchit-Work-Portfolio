@@ -25,6 +25,7 @@
       <div style="margin:12px 0 4px"><button class="vbtn" id="copy">⧉ Copy HTML</button><button class="vbtn" id="dl">↓ Download .html</button><button class="vbtn" id="open">↗ Open</button></div>
       <div class="preview"><iframe id="frame" title="Landing page preview" sandbox=""></iframe></div>
     </div>
+    <div id="extras" style="margin-top:8px"></div>
     <footer>Landing Page Studio · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>. Generated from the subject's positioning — no proprietary data.</footer>
   </div>
 <script src="/lifecycle-os-kit.js"></script>
@@ -70,6 +71,7 @@
     .then(function(){ $('loading').classList.remove('on'); });
   }
   run();
+  LOS.mountExtras('landing', run);
 })();
 </script>
 </body>

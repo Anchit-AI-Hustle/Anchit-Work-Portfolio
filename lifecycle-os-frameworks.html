@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Frameworks — Lifecycle OS · Anchit Tandon</title>
+<meta name="description" content="Frameworks — named growth frameworks (AARRR, RFM, JTBD, Hook, Bullseye) applied concretely to the subject. Part of the Lifecycle OS." />
+<link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="/lifecycle-os-kit.css" rel="stylesheet">
+<style>.fw{background:var(--bg-elev);border:1px solid var(--rule);border-radius:14px;padding:18px}.fw .nm{font-family:var(--font-display);font-size:18px;font-weight:600;margin-bottom:2px}.fw .sub{font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}.fw ol{margin:0;padding-left:18px}.fw li{font-size:13.5px;color:var(--ink-dim);margin-bottom:7px}.fw li b{color:var(--ink)}</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top"><a class="back" href="/lifecycle-os">← Lifecycle OS</a><span class="crumbs"><a href="/#projects">Portfolio</a> / <a href="/lifecycle-os">Lifecycle OS</a> / Frameworks</span></div>
+    <div class="eyebrow"><span class="dot"></span>Lifecycle OS · Frameworks</div>
+    <h1><span class="grad">Frameworks</span></h1>
+    <p class="lede">The classic growth frameworks — applied <em>concretely</em> to the subject, not in the abstract. Loaded with <strong>anchit-tandon.com</strong> by default; type any brand.</p>
+    <div class="subject"><span class="lbl">Subject</span><input id="brand" type="text"><input id="url" type="text" style="flex:0 1 220px"><button id="go">Apply frameworks</button></div>
+    <div id="out" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="font-family:var(--font-display);font-size:clamp(19px,3vw,24px);font-weight:600" id="hd"></div><span class="badge" id="bdg"></span></div>
+      <div class="sectitle">Frameworks applied</div><div class="grid" id="fws"></div>
+    </div>
+    <div id="extras" style="margin-top:8px"></div>
+    <footer>Frameworks · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>.</footer>
+  </div>
+<script src="/lifecycle-os-kit.js"></script>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i);}, esc=LOS.esc;
+  LOS.wireSubject('brand','url',run);
+  function apply(f){
+    var A=f.audiences, w=f.wins;
+    if(f.anchit) return [
+      {nm:'AARRR (Pirate funnel)',sub:'Applied to the job search',steps:[['Acquisition','Ship anchit-tandon.com + weekly growth-teardown posts to get on radar.'],['Activation','A recruiter/HM opens the portfolio and books a call.'],['Retention','Stay top-of-mind with the '+A[0]+' cohort via value-add follow-ups.'],['Referral','Turn every warm contact into an intro at a target company.'],['Revenue','The offer — negotiate on mandate and compounding upside.']]},
+      {nm:'Jobs-to-be-Done',sub:'What a hiring team "hires" me for',steps:[['Job','"Grow our D2C/product without breaking what works."'],['Proof','"'+w[0]+'; '+w[1]+'."'],['Anxiety to kill','"Is this person an operator or a slide-maker?" → the live demos answer it.']]},
+      {nm:'RFM',sub:'Scoring the target list',steps:[['Recency','How recently they posted the role / engaged.'],['Frequency','How often they hire this profile.'],['Monetary','Scope + comp of the mandate.']]},
+    ];
+    return [
+      {nm:'AARRR (Pirate funnel)',sub:'Applied to '+f.name,steps:[['Acquisition','Popup + paid social capturing email/SMS with a first-order offer.'],['Activation','Welcome flow → first order within 7 days.'],['Retention','Replenishment + cross-sell at the consumption cycle; win-back at 60–90d.'],['Referral','Post-delivery review request routes happy buyers to referral.'],['Revenue','VIP tier + subscription for the top '+A[2]+'.']]},
+      {nm:'RFM',sub:'Segmenting the base',steps:[['Recency','Days since last order → drives win-back timing.'],['Frequency','Order count → separates one-timers from loyal.'],['Monetary','Spend → isolates VIP / high-LTV for concierge touches.']]},
+      {nm:'Hook model',sub:'Building the habit',steps:[['Trigger','Timely email/SMS at the reorder moment.'],['Action','One-tap reorder / replenish.'],['Reward','Loyalty perk or surprise gift at milestones.'],['Investment','Saved preferences make the next order easier.']]},
+    ];
+  }
+  function run(){
+    var f=LOS.facts($('brand').value.trim(),$('url').value.trim());
+    $('hd').textContent=f.name+' — frameworks'; LOS.badge($('bdg'),f.anchit?'anchit':'template');
+    $('fws').innerHTML=apply(f).map(function(x){return '<div class="fw"><div class="nm">'+esc(x.nm)+'</div><div class="sub">'+esc(x.sub)+'</div><ol>'+x.steps.map(function(s){return '<li><b>'+esc(s[0])+':</b> '+esc(s[1])+'</li>';}).join('')+'</ol></div>';}).join('');
+    $('out').style.display='block';
+  }
+  run();
+  LOS.mountExtras('frameworks', run);
+})();
+</script>
+</body>
+</html>

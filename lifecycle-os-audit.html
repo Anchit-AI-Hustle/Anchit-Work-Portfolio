@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Growth Audit — Lifecycle OS · Anchit Tandon</title>
+<meta name="description" content="Growth Audit — a lifecycle / funnel audit with prioritised findings and concrete fixes for the subject. Part of the Lifecycle OS." />
+<link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="/lifecycle-os-kit.css" rel="stylesheet">
+<style>.find{background:var(--bg-elev);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;border-left:3px solid var(--rule-strong)}.find.high{border-left-color:#ff6a4a}.find.med{border-left-color:var(--gold)}.find.low{border-left-color:var(--accent)}.find .sev{float:right;font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-mute)}.find .a{font-weight:600;font-size:14.5px;margin-bottom:5px}.find .why{font-size:13px;color:var(--ink-dim);margin-bottom:8px}.find .fix{font-size:13px;color:var(--ink)}.find .fix b{color:var(--accent);font-family:var(--font-mono);font-size:11px;letter-spacing:.05em}</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top"><a class="back" href="/lifecycle-os">← Lifecycle OS</a><span class="crumbs"><a href="/#projects">Portfolio</a> / <a href="/lifecycle-os">Lifecycle OS</a> / Growth Audit</span></div>
+    <div class="eyebrow"><span class="dot"></span>Lifecycle OS · Growth Audit</div>
+    <h1><span class="grad">Growth Audit</span></h1>
+    <p class="lede">A prioritised lifecycle / funnel audit — where the leaks are and the concrete fix for each. Loaded with <strong>anchit-tandon.com</strong> by default; type any brand, or paste your own funnel notes below.</p>
+    <div class="subject"><span class="lbl">Subject</span><input id="brand" type="text"><input id="url" type="text" style="flex:0 1 220px"><button id="go">Run audit</button></div>
+    <div id="out" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="font-family:var(--font-display);font-size:clamp(19px,3vw,24px);font-weight:600" id="hd"></div><span class="badge" id="bdg"></span></div>
+      <div class="sectitle">Score</div><div class="kpis" id="score"></div>
+      <div class="sectitle">Findings · highest impact first</div><div class="grid" id="finds"></div>
+    </div>
+    <div id="extras" style="margin-top:8px"></div>
+    <footer>Growth Audit · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>.</footer>
+  </div>
+<script src="/lifecycle-os-kit.js"></script>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i);}, esc=LOS.esc;
+  LOS.wireSubject('brand','url',run);
+  function findings(f){
+    if(f.anchit) return [
+      {sev:'high',a:'Outreach is not personalised enough',why:'Generic applications convert ~2%; personalised senior-PM outreach hits 8–15%.',fix:'Lead every message with one company-specific proof point mapped to the role.'},
+      {sev:'high',a:'Portfolio not the first touch',why:'A clickable, interactive résumé converts far better than a PDF.',fix:'Put anchit-tandon.com at the top of every outreach and profile.'},
+      {sev:'med',a:'No follow-up cadence',why:'A single touch leaves most replies on the table.',fix:'Add one value-add follow-up per contact, then progressive suppression.'},
+      {sev:'med',a:'Warm network under-used',why:'Referrals convert ~3× cold but are often left last.',fix:'Sequence the warm-network cohort first, before cold outreach.'},
+      {sev:'low',a:'No post-interview asset',why:'Momentum is lost after the call.',fix:'Send a tailored mini-case answering the hardest question within a day.'},
+    ];
+    return [
+      {sev:'high',a:'First→second purchase leaks',why:'The LTV inflection is the 30–60 day window; most brands under-invest here.',fix:'Add a replenishment + cross-sell flow timed to the consumption cycle.'},
+      {sev:'high',a:'Email revenue share below band',why:'Healthy D2C earns 25–35% of revenue from owned channels.',fix:'Stand up welcome, browse/cart, win-back and VIP flows before more paid spend.'},
+      {sev:'med',a:'No cadence guardrails',why:'Over-mailing burns the list and lifts unsubscribes.',fix:'Cap sends per segment per week; add progressive suppression.'},
+      {sev:'med',a:'Weak first-order incentive',why:'Signup→first-order conversion sits below 2–4% without a clear hook.',fix:'Gate a first-order offer behind email + SMS opt-in.'},
+      {sev:'low',a:'No win-back series',why:'Lapsed buyers churn silently.',fix:'Trigger an escalating win-back at 60–90 days no purchase.'},
+    ];
+  }
+  function run(){
+    var f=LOS.facts($('brand').value.trim(),$('url').value.trim()); var F=findings(f);
+    var high=F.filter(function(x){return x.sev==='high';}).length;
+    var score=Math.max(52, 92-high*9-F.length*2);
+    $('hd').textContent=f.name+' — growth audit'; LOS.badge($('bdg'),f.anchit?'anchit':'template');
+    $('score').innerHTML='<div class="kpi"><div class="m">Lifecycle health</div><div class="v">'+score+'/100</div></div>'
+      +'<div class="kpi"><div class="m">Findings</div><div class="v">'+F.length+'</div></div>'
+      +'<div class="kpi"><div class="m">High impact</div><div class="v">'+high+'</div></div>'
+      +'<div class="kpi"><div class="m">Quick wins</div><div class="v">'+F.filter(function(x){return x.sev!=='high';}).length+'</div></div>';
+    var order={high:0,med:1,low:2};
+    $('finds').innerHTML=F.sort(function(a,b){return order[a.sev]-order[b.sev];}).map(function(x){return '<div class="find '+x.sev+'"><span class="sev">'+x.sev+'</span><div class="a">'+esc(x.a)+'</div><div class="why">'+esc(x.why)+'</div><div class="fix"><b>FIX →</b> '+esc(x.fix)+'</div></div>';}).join('');
+    $('out').style.display='block';
+  }
+  run();
+  LOS.mountExtras('audit', run);
+})();
+</script>
+</body>
+</html>

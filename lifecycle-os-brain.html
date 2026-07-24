@@ -34,6 +34,7 @@
       <div class="card" id="note" style="margin-top:12px"></div>
       <div class="sectitle">Guardrails</div><div class="grid" id="guards"></div>
     </div>
+    <div id="extras" style="margin-top:8px"></div>
     <footer>Smart Brain · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>.</footer>
   </div>
 <script src="/lifecycle-os-kit.js"></script>
@@ -70,6 +71,7 @@
     .then(function(){ $('loading').classList.remove('on'); });
   }
   run();
+  LOS.mountExtras('brain', run);
 })();
 </script>
 </body>

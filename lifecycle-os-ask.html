@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Ask the Brand Brain — Lifecycle OS · Anchit Tandon</title>
+<meta name="description" content="Ask the Brand Brain — a Q&A that answers lifecycle and growth questions about the subject from generated brand facts. Part of the Lifecycle OS." />
+<link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="/lifecycle-os-kit.css" rel="stylesheet">
+<style>.qa{background:var(--bg-elev);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;margin-bottom:10px}.qa .q{font-weight:600;font-size:14px;color:var(--ink);margin-bottom:6px}.qa .a{font-size:13.5px;color:var(--ink-dim);line-height:1.6}.askrow{display:flex;gap:10px;margin:6px 0 14px}.askrow input{flex:1}.chip{background:transparent;border:1px solid var(--rule);border-radius:99px;padding:6px 12px;font-size:12.5px;color:var(--ink-dim);cursor:pointer;margin:0 6px 6px 0}.chip:hover{border-color:var(--primary);color:var(--ink)}</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top"><a class="back" href="/lifecycle-os">← Lifecycle OS</a><span class="crumbs"><a href="/#projects">Portfolio</a> / <a href="/lifecycle-os">Lifecycle OS</a> / Ask the Brand Brain</span></div>
+    <div class="eyebrow"><span class="dot"></span>Lifecycle OS · Brand Brain</div>
+    <h1><span class="grad">Ask the Brand Brain</span></h1>
+    <p class="lede">Ask a lifecycle / growth question about the subject and get a grounded answer. Loaded with <strong>anchit-tandon.com</strong> by default; type any brand.</p>
+    <div class="subject"><span class="lbl">Subject</span><input id="brand" type="text"><input id="url" type="text" style="flex:0 1 220px"><button id="go">Load</button></div>
+    <div class="askrow"><input id="q" type="text" placeholder="Ask anything — e.g. Where should growth focus first?"><button class="applybtn" id="ask" style="margin:0">Ask</button></div>
+    <div id="chips"></div>
+    <div id="hd" style="font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);margin:8px 0 12px"></div>
+    <div id="ans"></div>
+    <div id="extras" style="margin-top:20px"></div>
+    <footer>Ask the Brand Brain · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>.</footer>
+  </div>
+<script src="/lifecycle-os-kit.js"></script>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i);}, esc=LOS.esc; var F;
+  LOS.wireSubject('brand','url',load);
+  var PRESETS=['Where should growth focus first?','What are the highest-intent audiences?','What is the fastest win?','Which channel matters most?','What is the retention play?'];
+  function answer(qq){
+    var q=qq.toLowerCase();
+    if(/focus|first|start|priorit/.test(q)) return 'Start where intent is highest: '+F.audiences[0]+'. '+(F.anchit?'Warm-network outreach converts ~3× cold — sequence that cohort first, then the closest role fit.':'Win the first→second purchase (the LTV inflection) before spending more on acquisition.');
+    if(/audience|segment|who|target/.test(q)) return 'Primary audiences: '+F.audiences.join(', ')+'. '+F.audiences[0]+' is highest-intent and should lead.';
+    if(/win|fast|quick|leverage/.test(q)) return 'Fastest win: '+F.wins[0]+' as the headline proof, paired with '+(F.anchit?'a personalised, referral-led outreach sequence.':'a welcome + first-order flow with a clear incentive.');
+    if(/channel|where|platform/.test(q)) return (F.anchit?'Email + warm intros beat cold channels for senior roles; LinkedIn for reach, referrals for conversion.':'Owned channels (email/SMS) drive 25–35% of D2C revenue — that is the compounding channel; paid handles acquisition.');
+    if(/reten|churn|loyal|repeat/.test(q)) return (F.anchit?'Retention here = staying top-of-mind with the network: a quarterly value-add nurture and fast, tailored follow-ups after every touch.':'Protect the second purchase with a replenishment/cross-sell flow at the consumption cycle, and a win-back series at 60–90 days.');
+    return 'For '+F.name+': '+F.one+' The move is to lead with '+F.wins[0]+' and route effort to '+F.audiences[0]+'. Ask about focus, audiences, channels or retention for specifics.';
+  }
+  function ask(qq){
+    var q=qq|| $('q').value.trim(); if(!q){ q=PRESETS[0]; $('q').value=q; }
+    var card='<div class="qa"><div class="q">'+esc(q)+'</div><div class="a">'+esc(answer(q))+'</div></div>';
+    $('ans').innerHTML=card+$('ans').innerHTML;
+  }
+  function load(){
+    F=LOS.facts($('brand').value.trim(),$('url').value.trim());
+    $('hd').textContent='Brand brain loaded for '+F.name+' · '+F.category;
+    $('chips').innerHTML=PRESETS.map(function(p){return '<button class="chip" data-q="'+esc(p)+'">'+esc(p)+'</button>';}).join('');
+    $('chips').querySelectorAll('.chip').forEach(function(b){ b.addEventListener('click',function(){ $('q').value=b.getAttribute('data-q'); ask(b.getAttribute('data-q')); }); });
+    $('ans').innerHTML='';
+  }
+  $('ask').addEventListener('click',function(){ ask(); });
+  $('q').addEventListener('keydown',function(e){ if(e.key==='Enter') ask(); });
+  load();
+  LOS.mountExtras('ask', function(){ var b=LOS.extraBrief(); if(b){ $('q').value=b.slice(0,140); ask('Given this context: '+b.slice(0,300)); } });
+})();
+</script>
+</body>
+</html>

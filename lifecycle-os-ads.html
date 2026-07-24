@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Ads Studio — Lifecycle OS · Anchit Tandon</title>
+<meta name="description" content="Ads Studio — generate an ad-copy matrix (headlines × primary text × CTAs) across platforms from a brief, with benchmark targets. Part of the Lifecycle OS." />
+<link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="/lifecycle-os-kit.css" rel="stylesheet">
+<style>.ad{background:var(--bg-elev);border:1px solid var(--rule);border-radius:12px;padding:14px 16px}.ad .plat{font-family:var(--font-mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);border:1px solid var(--rule);border-radius:6px;padding:3px 7px;float:right}.ad .h{font-weight:600;font-size:14.5px;margin-bottom:5px;color:var(--ink)}.ad .b{font-size:13px;color:var(--ink-dim);margin-bottom:8px}.ad .c{font-family:var(--font-mono);font-size:11px;color:var(--primary)}</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top"><a class="back" href="/lifecycle-os">← Lifecycle OS</a><span class="crumbs"><a href="/#projects">Portfolio</a> / <a href="/lifecycle-os">Lifecycle OS</a> / Ads Studio</span></div>
+    <div class="eyebrow"><span class="dot"></span>Lifecycle OS · Ads Studio</div>
+    <h1><span class="grad">Ads Studio</span></h1>
+    <p class="lede">A full ad-copy matrix — headlines × primary text × CTAs across platforms — generated from the subject, with industry-benchmark targets to test against. Loaded with <strong>anchit-tandon.com</strong> by default; type any brand.</p>
+    <div class="subject"><span class="lbl">Subject</span><input id="brand" type="text"><input id="url" type="text" style="flex:0 1 220px"><button id="go">Generate ad matrix</button></div>
+    <div id="out" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="font-family:var(--font-display);font-size:clamp(19px,3vw,24px);font-weight:600" id="hd"></div><span class="badge" id="bdg"></span></div>
+      <div class="sectitle">Benchmark targets to test against</div><div class="kpis" id="kpi"></div>
+      <div class="sectitle">Ad copy matrix <span id="cnt" style="text-transform:none;letter-spacing:0;color:var(--ink-dim)"></span></div><div class="grid" id="ads"></div>
+    </div>
+    <div id="extras" style="margin-top:8px"></div>
+    <footer>Ads Studio · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>.</footer>
+  </div>
+<script src="/lifecycle-os-kit.js"></script>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i);}, esc=LOS.esc;
+  LOS.wireSubject('brand','url',run);
+  function gen(f){
+    var heads = f.anchit
+      ? ['Hire the operator behind 5× MRR','An engineer who loves the funnel','Product & Growth, proven not promised','The résumé you can click','Compounding wins, on demand']
+      : ['Meet '+f.name,f.name+', made for you','The details you can feel','Loved for a reason','Start with the favourites'];
+    var bodies = f.anchit
+      ? ['5× MRR, ₹3Cr+ ARR, US/UK/global D2C growth — 20 minutes?','I market myself like a high-LTV product. See how at anchit-tandon.com.','Senior Product/Growth leader open to the right mandate.','Retention, lifecycle and revenue — one operator.']
+      : ['Repeat purchase beats first purchase. See why.','10% off your first order — WELCOME10.','Bestsellers, loved for a reason.','Free returns, always. Try us risk-free.'];
+    var ctas = f.anchit ? ['Book 20 min','Open portfolio','Let\'s talk'] : ['Shop now','Claim 10%','Explore'];
+    var plats = ['Meta','Google','LinkedIn','TikTok'];
+    var out=[], k=0;
+    for(var p=0;p<plats.length;p++){ for(var i=0;i<5;i++){ out.push({ plat:plats[p], h:heads[i%heads.length], b:bodies[(i+p)%bodies.length], c:ctas[(i+p)%ctas.length] }); k++; if(k>=20) break; } if(k>=20) break; }
+    return out;
+  }
+  function run(){
+    var f=LOS.facts($('brand').value.trim(),$('url').value.trim());
+    $('hd').textContent=f.name+' — ad matrix'; LOS.badge($('bdg'),f.anchit?'anchit':'template');
+    var ben = f.anchit ? [['CTR target','1.2–2.0%'],['Reply/apply rate','8–15%'],['CPL target','under ₹2k'],['Onsite→offer','20–30%']] : [['CTR target','1.5–3.0%'],['ROAS target','2.5×+'],['CPA target','≤ category AOV'],['First-order conv.','2–4%']];
+    $('kpi').innerHTML=ben.map(function(x){return '<div class="kpi"><div class="m">'+esc(x[0])+'</div><div class="v">'+esc(x[1])+'</div></div>';}).join('');
+    var ads=gen(f); $('cnt').textContent='· '+ads.length+' variations';
+    $('ads').innerHTML=ads.map(function(a){return '<div class="ad"><span class="plat">'+esc(a.plat)+'</span><div class="h">'+esc(a.h)+'</div><div class="b">'+esc(a.b)+'</div><div class="c">→ '+esc(a.c)+'</div></div>';}).join('');
+    $('out').style.display='block';
+  }
+  run();
+  LOS.mountExtras('ads', run);
+})();
+</script>
+</body>
+</html>

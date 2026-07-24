@@ -25,6 +25,7 @@
       <div class="sectitle">Send calendar · with cadence guards</div><div class="rows" id="cal"></div>
       <div class="sectitle">Target KPIs</div><div class="kpis" id="kpi"></div>
     </div>
+    <div id="extras" style="margin-top:8px"></div>
     <footer>Marketing Calendar · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>.</footer>
   </div>
 <script src="/lifecycle-os-kit.js"></script>
@@ -46,6 +47,7 @@
     .then(function(){ $('loading').classList.remove('on'); });
   }
   run();
+  LOS.mountExtras('calendar', run);
 })();
 </script>
 </body>

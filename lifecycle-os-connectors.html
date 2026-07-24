@@ -26,6 +26,7 @@
       <div class="card"><div class="t">Live benchmarks</div><p>SimilarWeb / SEMrush pulls replace the estimated industry bands with your real peer set.</p></div>
       <div class="card"><div class="t">Ship, not draft</div><p>The Mailer Studio and Calendar push straight into your ESP instead of exporting HTML.</p></div>
     </div>
+    <div id="extras" style="margin-top:8px"></div>
     <footer>Connectors · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>. Off by default — no proprietary data.</footer>
   </div>
 <script src="/lifecycle-os-kit.js"></script>
@@ -39,6 +40,7 @@
     {ic:'🗄️',nm:'Warehouse',ds:'A data warehouse — historical / deep metrics mirror.'},
   ];
   document.getElementById('list').innerHTML=C.map(function(c){return '<div class="conn"><span class="ic">'+c.ic+'</span><span class="dot2"></span><div class="body"><div class="nm">'+c.nm+'</div><div class="ds">'+c.ds+'</div></div><span class="st">Not connected</span></div>';}).join('');
+  LOS.mountExtras('connectors');
 })();
 </script>
 </body>

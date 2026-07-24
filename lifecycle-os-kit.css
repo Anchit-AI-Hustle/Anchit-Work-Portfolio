@@ -80,3 +80,25 @@ h1 .grad{ background:linear-gradient(100deg,var(--primary),var(--gold)); -webkit
 footer{ border-top:1px solid var(--rule); margin-top:44px; padding:24px 0 12px; color:var(--ink-mute); font-size:13px; text-align:center; }
 footer a{ color:var(--ink-dim); text-decoration:none; border-bottom:1px solid var(--rule); }
 svg.chart{ width:100%; height:auto; display:block; }
+/* Related tools + "add your own context" (shared across every tool) */
+.related{ display:flex; flex-wrap:wrap; gap:10px; }
+.rchip{ display:inline-flex; align-items:center; gap:8px; text-decoration:none; background:var(--bg-elev); border:1px solid var(--rule); border-radius:12px; padding:12px 15px; color:var(--ink); transition:border-color .2s, transform .15s; }
+.rchip:hover{ border-color:var(--primary); transform:translateY(-1px); }
+.rchip .ic{ font-size:18px; } .rchip .nm{ font-weight:600; font-size:14px; } .rchip .go{ font-family:var(--font-mono); font-size:11px; color:var(--primary); margin-left:4px; }
+.extras{ background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.008)); border:1px solid var(--rule-strong); border-radius:16px; padding:16px; }
+.extras textarea{ width:100%; min-height:74px; resize:vertical; background:var(--bg-deep); border:1px solid var(--rule-strong); border-radius:10px; padding:12px 14px; color:var(--ink); font-family:var(--font-body); font-size:14px; outline:none; }
+.extras textarea:focus{ border-color:var(--primary); }
+.uploader{ display:inline-flex; align-items:center; gap:8px; margin-top:10px; cursor:pointer; border:1px dashed var(--rule-strong); border-radius:10px; padding:11px 15px; color:var(--ink-dim); font-size:13px; transition:border-color .2s,color .2s; }
+.uploader:hover{ border-color:var(--primary); color:var(--ink); }
+.uploader input{ display:none; }
+.filelist{ display:flex; flex-direction:column; gap:6px; margin-top:10px; }
+.fitem{ display:flex; align-items:center; gap:10px; font-size:12.5px; color:var(--ink-dim); background:var(--bg-elev); border:1px solid var(--rule); border-radius:9px; padding:8px 12px; }
+.fitem .ft{ font-family:var(--font-mono); font-size:10px; color:var(--ink-mute); text-transform:uppercase; border:1px solid var(--rule); border-radius:5px; padding:2px 6px; }
+.fitem .rm{ margin-left:auto; cursor:pointer; color:var(--ink-mute); border:none; background:none; font-size:15px; }
+.fitem .rm:hover{ color:#ff8a6a; }
+.applybtn{ margin-top:12px; background:var(--primary); color:#1a0d06; border:none; border-radius:10px; padding:11px 20px; font-family:var(--font-mono); font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; cursor:pointer; }
+.applybtn:hover{ box-shadow:0 8px 22px rgba(255,105,64,.3); }
+.ctxnote{ font-size:12px; color:var(--ink-mute); margin-top:8px; }
+.ctxcard{ background:var(--accent-soft,rgba(46,229,172,.08)); border:1px solid var(--accent); border-radius:12px; padding:14px 16px; margin-top:12px; }
+.ctxcard .k{ font-family:var(--font-mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); margin-bottom:6px; }
+.ctxcard p{ font-size:13.5px; color:var(--ink); }

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Creative Gallery — Lifecycle OS · Anchit Tandon</title>
+<meta name="description" content="Creative Gallery — on-brand creative concepts (ad, banner, social tile, email hero) generated from the subject. Part of the Lifecycle OS." />
+<link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="/lifecycle-os-kit.css" rel="stylesheet">
+<style>.creative{border:1px solid var(--rule);border-radius:14px;overflow:hidden;background:var(--bg-elev)}.cv{position:relative;color:#fff;padding:26px 22px;min-height:150px;display:flex;flex-direction:column;justify-content:flex-end}.cv .kick{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.85;margin-bottom:8px}.cv .hl{font-family:var(--font-display);font-size:22px;line-height:1.15;font-weight:600}.cv .cta{display:inline-block;margin-top:12px;background:#fff;color:#17130e;font-family:var(--font-mono);font-size:11px;font-weight:600;padding:8px 14px;border-radius:7px;align-self:flex-start}.cmeta{padding:12px 16px;font-size:12px;color:var(--ink-mute);font-family:var(--font-mono)}</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top"><a class="back" href="/lifecycle-os">← Lifecycle OS</a><span class="crumbs"><a href="/#projects">Portfolio</a> / <a href="/lifecycle-os">Lifecycle OS</a> / Creative Gallery</span></div>
+    <div class="eyebrow"><span class="dot"></span>Lifecycle OS · Creative Gallery</div>
+    <h1><span class="grad">Creative Gallery</span></h1>
+    <p class="lede">On-brand creative concepts — ad, banner, social tile and email hero — generated from the subject's positioning. Loaded with <strong>anchit-tandon.com</strong> by default; type any brand.</p>
+    <div class="subject"><span class="lbl">Subject</span><input id="brand" type="text"><input id="url" type="text" style="flex:0 1 220px"><button id="go">Generate concepts</button></div>
+    <div id="out" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="font-family:var(--font-display);font-size:clamp(19px,3vw,24px);font-weight:600" id="hd"></div><span class="badge" id="bdg"></span></div>
+      <div class="sectitle">Concepts</div><div class="grid" id="gal"></div>
+    </div>
+    <div id="extras" style="margin-top:8px"></div>
+    <footer>Creative Gallery · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>.</footer>
+  </div>
+<script src="/lifecycle-os-kit.js"></script>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i);}, esc=LOS.esc;
+  LOS.wireSubject('brand','url',run);
+  var G=['linear-gradient(135deg,#FF6940,#FF4D1F)','linear-gradient(135deg,#c9a96e,#a8863f)','linear-gradient(135deg,#2EE5AC,#0B7)','linear-gradient(135deg,#17130e,#3d3830)'];
+  function run(){
+    var f=LOS.facts($('brand').value.trim(),$('url').value.trim());
+    var extra=LOS.extraBrief();
+    $('hd').textContent=f.name+' — creative concepts'; LOS.badge($('bdg'),f.anchit?'anchit':'template');
+    var concepts=[
+      {fmt:'Hero banner · 16:9',kick:f.category,hl:f.anchit?'I grow brands. Starting with mine.':f.name+', made for you.',cta:f.cta},
+      {fmt:'Square ad · 1:1',kick:'Proof',hl:f.wins[0],cta:'See more'},
+      {fmt:'Social tile · 4:5',kick:f.name,hl:f.one.split('—')[0],cta:f.cta},
+      {fmt:'Email hero',kick:'Welcome',hl:extra?extra.slice(0,60):f.wins[2],cta:f.cta},
+    ];
+    $('gal').innerHTML=concepts.map(function(c,i){return '<div class="creative"><div class="cv" style="background:'+G[i%G.length]+'"><div class="kick">'+esc(c.kick)+'</div><div class="hl">'+esc(c.hl)+'</div><span class="cta">'+esc(c.cta)+'</span></div><div class="cmeta">◆ '+esc(c.fmt)+' · on-brand palette</div></div>';}).join('');
+    $('out').style.display='block';
+  }
+  run();
+  LOS.mountExtras('creative', run);
+})();
+</script>
+</body>
+</html>

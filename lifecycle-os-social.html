@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Social Studio — Lifecycle OS · Anchit Tandon</title>
+<meta name="description" content="Social Studio — generate on-brand social posts (caption + hashtags) per platform from the subject's positioning. Part of the Lifecycle OS." />
+<link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="/lifecycle-os-kit.css" rel="stylesheet">
+<style>.post{background:var(--bg-elev);border:1px solid var(--rule);border-radius:14px;padding:16px 18px}.post .pf{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.post .pl{font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--primary)}.post .cap{font-size:14px;color:var(--ink);white-space:pre-wrap;line-height:1.6}.post .tags{margin-top:10px;font-size:12.5px;color:var(--accent)}.cp{background:transparent;border:1px solid var(--rule-strong);color:var(--ink-dim);border-radius:8px;padding:6px 10px;font-family:var(--font-mono);font-size:10.5px;cursor:pointer}.cp:hover{border-color:var(--primary);color:var(--ink)}</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top"><a class="back" href="/lifecycle-os">← Lifecycle OS</a><span class="crumbs"><a href="/#projects">Portfolio</a> / <a href="/lifecycle-os">Lifecycle OS</a> / Social Studio</span></div>
+    <div class="eyebrow"><span class="dot"></span>Lifecycle OS · Social Studio</div>
+    <h1><span class="grad">Social Studio</span></h1>
+    <p class="lede">On-brand social posts — caption + hashtags — tailored per platform from the subject's positioning. Loaded with <strong>anchit-tandon.com</strong> by default; type any brand.</p>
+    <div class="subject"><span class="lbl">Subject</span><input id="brand" type="text"><input id="url" type="text" style="flex:0 1 220px"><button id="go">Generate posts</button></div>
+    <div id="out" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="font-family:var(--font-display);font-size:clamp(19px,3vw,24px);font-weight:600" id="hd"></div><span class="badge" id="bdg"></span></div>
+      <div class="sectitle">Platform posts</div><div class="grid" id="posts"></div>
+    </div>
+    <div id="extras" style="margin-top:8px"></div>
+    <footer>Social Studio · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>. Generated from positioning — no proprietary data.</footer>
+  </div>
+<script src="/lifecycle-os-kit.js"></script>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i);}, esc=LOS.esc;
+  LOS.wireSubject('brand','url',run);
+  function gen(f){
+    var w=f.wins, plat=[
+      { n:'LinkedIn', cap:(f.anchit?'Reflection: ':'')+f.one+'\n\nRecent: '+w[0]+', '+w[1]+'.\n\n'+(f.anchit?'Open to senior Product/Growth roles — details in bio.':'How we think about growth →'), tags:['#ProductManagement','#Growth','#D2C'] },
+      { n:'Instagram', cap:f.name+' — '+w[2]+' 🚀\n'+(f.anchit?'Swipe for the story.':'Tap the link to explore.'), tags:['#'+f.handle,'#growth','#build'] },
+      { n:'X / Twitter', cap:(f.anchit?'i market myself the way i\'d grow a high-LTV brand.\n\n':'')+w[0]+'. '+w[1]+'.', tags:['#buildinpublic','#growth'] },
+      { n:'Threads', cap:f.one+'\n\nThe one-liner: '+w[2]+'.', tags:['#'+f.handle] },
+      { n:'Facebook', cap:'Meet '+f.name+'. '+f.one+' '+(f.anchit?'Let\'s talk — anchit-tandon.com.':'Learn more on our site.'), tags:['#'+f.handle,'#D2C'] },
+    ];
+    return plat;
+  }
+  function run(){
+    var f=LOS.facts($('brand').value.trim(),$('url').value.trim());
+    $('hd').textContent=f.name+' — social posts'; LOS.badge($('bdg'),f.anchit?'anchit':'template');
+    $('posts').innerHTML=gen(f).map(function(p,i){
+      return '<div class="post"><div class="pf"><span class="pl">'+esc(p.n)+'</span><button class="cp" data-i="'+i+'">⧉ Copy</button></div><div class="cap">'+esc(p.cap)+'</div><div class="tags">'+p.tags.map(esc).join(' ')+'</div></div>';
+    }).join('');
+    var posts=gen(f);
+    $('posts').querySelectorAll('.cp').forEach(function(b){ b.addEventListener('click',function(){ var p=posts[+b.getAttribute('data-i')]; var txt=p.cap+'\n\n'+p.tags.join(' '); var o=b.textContent; (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(txt):Promise.resolve()).then(function(){b.textContent='✓';setTimeout(function(){b.textContent=o;},1200);},function(){}); }); });
+    $('out').style.display='block';
+  }
+  run();
+  LOS.mountExtras('social', run);
+})();
+</script>
+</body>
+</html>

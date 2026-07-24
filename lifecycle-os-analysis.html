@@ -30,6 +30,7 @@
       <div class="sectitle">Cross-sell affinity</div><div class="bars" id="cross"></div>
       <div class="sectitle">Target KPIs</div><div class="kpis" id="kpi"></div>
     </div>
+    <div id="extras" style="margin-top:8px"></div>
     <footer>Data Analysis · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>. Synthetic, industry-benchmarked — no proprietary data.</footer>
   </div>
 <script src="/lifecycle-os-kit.js"></script>
@@ -74,6 +75,7 @@
     .then(function(){ $('loading').classList.remove('on'); });
   }
   run();
+  LOS.mountExtras('analysis', run);
 })();
 </script>
 </body>
