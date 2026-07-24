@@ -27,10 +27,11 @@ jobs:
       - name: Build portfolio and How-To Engine
         run: npm run build
 
-      - name: Verify /how-to-1 route
+      - name: Verify /how-to-2 route
         run: |
-          test -f www/how-to-1/index.html
-          grep -q '/how-to-1/' www/how-to-1/index.html
-          grep -q 'href="/how-to-1"' www/index.html
+          test -f www/how-to-2/index.html
+          grep -q '/how-to-2/' www/how-to-2/index.html
+          grep -q 'href="/how-to-2"' www/index.html
           test ! -d www/how-to
-          echo 'How-To Engine route OK: /how-to-1'
+          test ! -d www/how-to-1
+          echo 'How-To Engine route OK: /how-to-2'
