@@ -11,27 +11,30 @@ Ships as **web (any device + TV)**, **installable PWA**, **native iOS + Android*
 
 ```text
 .
-├── index.html                      # Main single-file portfolio shell
-├── api/                            # Vercel functions for chat, voice, lifecycle tools, and agents
-├── assets/app-skill-map.js         # Shared cross-app capability registry + runtime
-├── assets/app-skill-map.css        # Shared visual skill-tree UI
-├── side-husle/how-to-1/            # React/R3F Omni How-To Engine, emitted at /how-to-2
-├── lifecycle-os-*.html             # First-party lifecycle intelligence and execution apps
-├── scripts/build-www.mjs           # Production build, route assembly, and universal skill-map injection
-├── docs/APP_SKILL_MAP.md           # Skill-map architecture and extension guide
-├── tts-server/                     # Self-hosted XTTS/FastAPI cloned-voice service
-├── manifest.json                   # PWA manifest (installable on iOS/Android/desktop)
-├── sw.js                           # Service worker and offline shell cache
-├── icons/                          # PWA + favicon + Apple touch + native splash assets
-├── capacitor.config.json           # Native app config
-├── package.json                    # Capacitor dependencies + helper scripts
-├── vercel.json                     # Vercel static-host config and app routes
-├── STREAMING_VOICE_ARCHITECTURE.md # Anchit LLM + cloned-voice streaming design
-├── DEPLOY.md                       # Web + native deploy walkthroughs
+├── index.html                         # Main single-file portfolio shell
+├── api/                               # Vercel functions for chat, voice, lifecycle tools, and agents
+├── assets/app-skill-map.js            # Shared cross-app capability registry + runtime
+├── assets/app-skill-map.css           # Shared visual app skill-tree UI
+├── assets/project-playbooks.js        # Project paths, guide library and prompt generator
+├── assets/project-playbooks.css       # Shared project-tree and guide-library UI
+├── side-husle/how-to-1/               # React/R3F Omni How-To Engine, emitted at /how-to-2
+├── lifecycle-os-*.html                # First-party lifecycle intelligence and execution apps
+├── scripts/build-www.mjs              # Production build, route assembly and universal UI injection
+├── docs/APP_SKILL_MAP.md              # App-level architecture and extension guide
+├── docs/PROJECT_SKILLTREE_GUIDES.md   # Project-level architecture and guide contracts
+├── tts-server/                        # Self-hosted XTTS/FastAPI cloned-voice service
+├── manifest.json                      # PWA manifest (installable on iOS/Android/desktop)
+├── sw.js                              # Service worker and offline shell cache
+├── icons/                             # PWA + favicon + Apple touch + native splash assets
+├── capacitor.config.json              # Native app config
+├── package.json                       # Capacitor dependencies + helper scripts
+├── vercel.json                        # Vercel static-host config and app routes
+├── STREAMING_VOICE_ARCHITECTURE.md    # Anchit LLM + cloned-voice streaming design
+├── DEPLOY.md                          # Web + native deploy walkthroughs
 └── README.md
 ```
 
-The main portfolio remains a static `index.html` with embedded CSS + JS, backed by Vercel functions for grounded chat and voice. The repository also contains a set of first-party HTML applications plus the standalone React How-To Engine. `scripts/build-www.mjs` assembles them into one production tree under `www/`.
+The main portfolio remains a static `index.html` with embedded CSS + JS, backed by Vercel functions for grounded chat and voice. The repository also contains a set of first-party HTML applications plus the standalone React How-To Engine. `scripts/build-www.mjs` assembles them into one production tree under `www/` and injects the shared navigation and guide systems into every HTML entry point.
 
 ## Design system
 
@@ -47,6 +50,21 @@ Every generated HTML app receives the same visual capability map. It organizes t
 The map is implemented once in `assets/app-skill-map.js` and `assets/app-skill-map.css`. The build injects those assets into every `www/**/*.html` entry point after static copying and after the `/how-to-2` Vite build, so the portfolio, JobHunt, avatar, Lifecycle OS modules, and the Omni How-To Engine stay consistent without duplicating source markup.
 
 Keyboard access: **Cmd/Ctrl + K** toggles the map and **Escape** closes it. Full architecture and external-app adoption instructions live in [`docs/APP_SKILL_MAP.md`](./docs/APP_SKILL_MAP.md).
+
+## Project SkillTree & Guide Library
+
+Every app capability now becomes a project node. The project layer automatically creates an ordered path inside each app, tracks project progress, rolls project completion up to the App Skill Map, and generates four original playbooks for every project:
+
+- Quickstart Guide
+- Operator Mega-Prompt
+- Evidence Audit Prompt
+- 9.5/10 Improvement Loop
+
+The Guide Library is searchable by app, project, department, outcome, model and guide type. Visitors can save guides, customize goal/context/inputs/constraints/output fields, copy the generated result, and build a structured prompt from any project. Prompts follow a portable five-part contract: **Role · Context · Task · Constraints · Output Format**.
+
+The implementation lives in `assets/project-playbooks.js` and `assets/project-playbooks.css`. It reads the App Skill Map at runtime, so every current capability—and every future app capability added to the registry—automatically receives a project path and guide pack.
+
+Keyboard access: **Cmd/Ctrl + Shift + K** toggles Project Playbooks. Full architecture, APIs and separately deployed app adoption instructions live in [`docs/PROJECT_SKILLTREE_GUIDES.md`](./docs/PROJECT_SKILLTREE_GUIDES.md).
 
 ## Anchit LLM + cloned voice
 
@@ -64,12 +82,12 @@ npm install
 # Fast source preview (does not run the production injection step)
 npm run dev
 
-# Production-equivalent preview: builds every app, injects the Skill Map,
+# Production-equivalent preview: builds every app, injects both shared systems,
 # and serves the assembled www/ directory
 npm run dev:built
 ```
 
-The built preview is the correct path for testing cross-app navigation and `/how-to-2` asset routing.
+The built preview is the correct path for testing cross-app navigation, project playbooks, the guide library and `/how-to-2` asset routing.
 
 ## Native apps — iOS + Android via Capacitor
 
@@ -79,7 +97,7 @@ The built preview is the correct path for testing cross-app navigation and `/how
 ### How it's wired
 
 - Root HTML, `manifest.json`, `sw.js`, `icons/`, and other static assets are copied into `www/`.
-- `npm run build` runs `scripts/build-www.mjs`, compiles the How-To Engine, injects the App Skill Map into all HTML entry points, and emits the complete web bundle.
+- `npm run build` runs `scripts/build-www.mjs`, compiles the How-To Engine, injects the App Skill Map and Project Playbooks into all HTML entry points, and emits the complete web bundle.
 - Capacitor's `webDir` is set to `www`, so `npx cap sync` copies from there into the native projects (`android/app/src/main/assets/public/` and `ios/App/App/public/`).
 
 ### Every time you change web code
