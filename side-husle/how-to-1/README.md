@@ -2,7 +2,7 @@
 
 An ADHD-friendly, 3D interactive learning engine that explains **any** humanly-doable task — from *switching on a phone* to *swimming breaststroke* or *solving a quadratic* — as a visual, step-by-step guide. Multiple frontier AIs answer in parallel; the best three are fused by a consensus evaluator into one branchable master guide, and every step gets an animated clip from a text-to-video pipeline.
 
-> Source lives at `anchit-work-portfolio/side-husle/how-to-1`. It is a **standalone Vite app** because the portfolio shell itself is intentionally framework-free. The portfolio build emits it at **`/how-to-1`**.
+> Source lives at `anchit-work-portfolio/side-husle/how-to-1`. It is a **standalone Vite app** because the portfolio shell itself is intentionally framework-free. The portfolio build emits it at **`/how-to-2`**.
 
 ## Experience flow
 1. **Intro / explainer** — a cinematic 3D hero card explains what the engine does.
@@ -38,18 +38,19 @@ npm install
 cp .env.example .env          # add whichever provider keys you have
 # local dev with serverless functions (keys server-side):
 npx vercel dev                # serves /api/* on :3000
-npm run dev                   # Vite SPA → http://localhost:5178/how-to-1/
+npm run dev                   # Vite SPA → http://localhost:5178/how-to-2/
 ```
 
-### Route: `/how-to-1`
-The app is built with Vite `base: '/how-to-1/'` and ships at the **`/how-to-1`** route.
-The root portfolio build mirrors the Vite `dist` directory into `www/how-to-1/`,
-updates the Side Hustle card to the same route, and keeps `/how-to` as a redirect
-for previously shared links. The client calls APIs via `import.meta.env.BASE_URL`,
-so the prefix remains correct in local and standalone deployments.
+### Route: `/how-to-2`
+The app is built with Vite `base: '/how-to-2/'` and ships at the **`/how-to-2`** route.
+The root portfolio build mirrors the Vite `dist` directory into `www/how-to-2/`
+and updates the Side Hustle card to the same canonical path. Compatibility
+redirects keep both `/how-to` and `/how-to-1` working for previously shared links.
+The client calls APIs via `import.meta.env.BASE_URL`, so the prefix remains correct
+in local and standalone deployments.
 
 For a standalone Vercel project rooted at this folder, `vercel.json` maps
-`/how-to-1/api/:fn*` to the serverless functions and sends SPA paths to
+`/how-to-2/api/:fn*` to the serverless functions and sends SPA paths to
 `index.html`. With **zero** keys the app still runs end-to-end using a
 deterministic offline guide + animated placeholders.
 
