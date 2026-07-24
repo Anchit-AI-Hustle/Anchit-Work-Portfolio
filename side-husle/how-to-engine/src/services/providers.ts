@@ -29,10 +29,12 @@ const anthropic: ModelProvider = {
   async call(system, user) {
     const client = new Anthropic({ apiKey: env('ANTHROPIC_API_KEY') });
     // Adaptive thinking is the current default for hard reasoning on 4.6+ models.
+    // The pinned SDK's types predate the "adaptive" thinking mode (they only know
+    // "enabled"/"disabled"), so cast the value — the API accepts it at runtime.
     const msg = await client.messages.create({
       model: 'claude-opus-4-8',
       max_tokens: 8000,
-      thinking: { type: 'adaptive' },
+      thinking: { type: 'adaptive' } as unknown as Anthropic.ThinkingConfigParam,
       system,
       messages: [{ role: 'user', content: user }],
     });

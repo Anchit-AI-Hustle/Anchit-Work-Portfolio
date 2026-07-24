@@ -160,10 +160,16 @@
         .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
         .then(function(res){
           if(res.ok && res.j && res.j.resultUrl){
+            // Guard so a clip that errors OR fails to autoplay falls back to
+            // voice instead of sticking on "Speaking…" forever.
+            var settled=false;
+            var finish=function(){ if(settled) return; settled=true; stage.classList.remove('playing','speaking'); setStatus('Ask another question.'); };
+            var toVoice=function(){ if(settled) return; settled=true; stage.classList.remove('playing'); return voiceFallback(text); };
+            video.onended=finish;
+            video.onerror=toVoice;
             video.src=res.j.resultUrl; stage.classList.add('playing');
             setStatus('Speaking…');
-            var p=video.play(); if(p&&p.catch)p.catch(function(){});
-            video.onended=function(){ stage.classList.remove('playing'); setStatus('Ask another question.'); };
+            var p=video.play(); if(p&&p.catch)p.catch(toVoice);
             return;
           }
           return voiceFallback(text); // credits/render issue → voice

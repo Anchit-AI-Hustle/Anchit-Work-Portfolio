@@ -1,13 +1,18 @@
-// /api/mailer — Lifecycle OS · Mailer Studio engine.
+// /api/mailer — Universal Mailer Architect engine.
 //
-//   POST /api/mailer  → { variants:[{label,type,subject,preview,html,score}], source }
+//   POST /api/mailer  → { variants:[{label,type,subject,preview,html,score}], source, kind }
 //
-// Turns a brief (brand + campaign angle/offer/segment) into multiple designed,
-// on-brand, ready-to-send HTML email variants, each quality-scored. Brand-
-// agnostic; defaults to anchit-tandon.com (a "hire me" outreach mailer). Uses
-// the same free multi-provider LLM cascade as /api/lifecycle for the copy, with
-// a deterministic fallback that ALWAYS returns fully designed HTML — no key
-// required. No proprietary data.
+// Turns a brief into multiple designed, ready-to-send HTML email variants, each
+// quality-scored. UNIVERSAL, complete-coverage: works for ANY context a mailer
+// could exist for — a company or D2C brand, a product or item, a school or
+// college (admissions, announcements, events), an office/team (internal memos,
+// updates), a task or submission reminder (deadlines), an event invite, a
+// nonprofit appeal, or personal outreach. It infers the CONTEXT KIND from the
+// inputs and adopts the right tone + structure for that kind — it never assumes
+// e-commerce. Defaults to anchit-tandon.com (a "hire me" outreach mailer) when
+// no brand/context is given. Uses a free multi-provider LLM cascade for the
+// copy, with a deterministic fallback that ALWAYS returns fully designed HTML —
+// no key required. No proprietary data, no brand-specific hardcoding.
 
 function geminiKey() {
   const e = process.env;
@@ -136,15 +141,135 @@ function brandVariants(brand, brief) {
   ];
 }
 
-function buildPrompt(brand, brief, segment, offer) {
-  return `You are the Mailer Studio inside a D2C growth OS. Write 3 DISTINCT, on-brand marketing email variants for the brand below. Each must be a real, send-ready email with a clear angle.
+// ── Universal context detection ─────────────────────────────────────────────
+// Infer what KIND of mailer this is from the free-text inputs, so the engine
+// covers any use case — not just commerce.
+const KINDS = {
+  commerce: { label: 'Commerce / D2C', hints: ['shop','store','brand','product','buy','cart','checkout','sale','discount','sku','catalog','order','ecommerce','e-commerce','d2c','retail','collection','launch','coupon'] },
+  school: { label: 'School / K-12', hints: ['school','pta','parent','student','pupil','classroom','principal','teacher','term','semester','admission','enrol','enroll','holiday','field trip','report card','grade'] },
+  college: { label: 'College / University', hints: ['college','university','campus','faculty','department','undergraduate','graduate','alumni','semester','course','lecture','scholarship','fest','placement','convocation','admission'] },
+  office: { label: 'Office / Internal', hints: ['office','team','company update','all-hands','internal','employee','staff','hr','memo','policy','onboarding','townhall','town hall','meeting','manager','department','colleague'] },
+  event: { label: 'Event / Invite', hints: ['event','invite','invitation','rsvp','conference','webinar','workshop','meetup','summit','gala','ceremony','session','register','ticket','agenda','keynote'] },
+  reminder: { label: 'Task / Submission / Deadline', hints: ['reminder','deadline','due','submit','submission','assignment','form','application','renew','renewal','payment due','overdue','last date','pending','complete','fill'] },
+  nonprofit: { label: 'Nonprofit / Fundraising', hints: ['donate','donation','fundraiser','fundraising','charity','ngo','nonprofit','non-profit','cause','volunteer','pledge','give','campaign for','relief'] },
+};
+function detectKind(brand, brief, segment, offer) {
+  const hay = [brand, brief, segment, offer].filter(Boolean).join(' ').toLowerCase();
+  if (!hay.trim()) return 'generic';
+  let best = 'generic', bestScore = 0;
+  for (const [kind, def] of Object.entries(KINDS)) {
+    let s = 0;
+    for (const h of def.hints) { if (hay.includes(h)) s += h.length; }
+    if (s > bestScore) { bestScore = s; best = kind; }
+  }
+  return bestScore > 0 ? best : 'generic';
+}
+function kindLabel(kind) { return (KINDS[kind] && KINDS[kind].label) || 'General'; }
 
-BRAND: ${brand}
-${brief ? 'CAMPAIGN BRIEF: ' + brief : ''}
-${segment ? 'AUDIENCE SEGMENT: ' + segment : ''}
-${offer ? 'OFFER: ' + offer : ''}
+// ── Universal deterministic templates (one set per context kind) ────────────
+// Every kind returns 3 send-ready, genuinely different-angle variants. Nothing
+// here is brand-specific; the sender label + brief are interpolated.
+function universalVariants(label, brief, segment, offer, kind) {
+  const b = label || 'Your organisation';
+  const angle = brief ? ` ${brief}` : '';
+  const who = segment ? segment : 'everyone on this list';
+  const detail = offer || '';
+  switch (kind) {
+    case 'commerce':
+      return brandVariants(b, brief);
+    case 'school':
+    case 'college': {
+      const inst = b; const isCol = kind === 'college';
+      return [
+        { label: 'A · Warm announcement', type: 'text', _divergence: 74, kicker: isCol ? 'From the campus' : 'A note home', headline: `An update from ${inst}.`, subhead: `For ${who} — here’s what’s happening and what to do next.`,
+          sections: [ { title: 'What’s new', body: `${brief ? brief : `A quick update from ${inst}.`}${detail ? ' ' + detail : ''}` }, { title: 'What we need from you', body: isCol ? 'Read through, note any dates, and reach the department if you have questions.' : 'Please read this with your child and reply if you have any questions.' } ],
+          cta: 'Read the details', ctaNote: 'Questions? Just reply to this email.', signoff: inst },
+        { label: 'B · Dates & logistics', type: 'text', _divergence: 82, kicker: 'Key dates', headline: `${inst}: important dates and next steps.`, subhead: 'Everything you need to stay on track, in one place.',
+          sections: [ { title: 'Mark your calendar', body: detail ? detail : 'Key dates and deadlines are listed below — add them to your calendar now.' }, { title: 'How to prepare', body: `${angle ? angle.trim() : 'A short checklist follows so nothing gets missed.'}` } ],
+          cta: 'View the full schedule', ctaNote: 'Save this email for reference.', signoff: `${inst} · Administration` },
+        { label: 'C · Highlight (image)', type: 'image', _divergence: 86, kicker: isCol ? 'Campus life' : 'Our community', headline: `${inst}, together.`, subhead: 'One update, one click.',
+          sections: [ { title: 'In brief', body: `${brief ? brief : `The latest from ${inst}.`}${detail ? ' ' + detail : ''}` } ],
+          cta: 'See more', ctaNote: 'We read every reply.', signoff: inst },
+      ];
+    }
+    case 'office':
+      return [
+        { label: 'A · Team update', type: 'text', _divergence: 72, kicker: 'Internal', headline: `Update from ${b}.`, subhead: `For ${who} — a quick, no-fluff summary.`,
+          sections: [ { title: 'What’s changing', body: `${brief ? brief : 'Here’s the latest for the team.'}${detail ? ' ' + detail : ''}` }, { title: 'What you need to do', body: 'Action items are below. If none apply to you, no action needed.' } ],
+          cta: 'Read the full memo', ctaNote: 'Reply with questions anytime.', signoff: `${b} · Team` },
+        { label: 'B · Action required', type: 'text', _divergence: 84, kicker: 'Action needed', headline: `A quick action for ${who}.`, subhead: detail ? detail : 'Two minutes now saves a follow-up later.',
+          sections: [ { title: 'The ask', body: `${brief ? brief : 'Please complete the step below.'}` }, { title: 'By when', body: detail ? detail : 'As soon as you can — ideally this week.' } ],
+          cta: 'Take action', ctaNote: 'Done already? Ignore this.', signoff: `${b}` },
+        { label: 'C · Highlight (image)', type: 'image', _divergence: 80, kicker: 'All hands', headline: `${b}: what matters this week.`, subhead: 'The short version, up top.',
+          sections: [ { title: 'TL;DR', body: `${brief ? brief : 'The week in one line.'}${detail ? ' ' + detail : ''}` } ],
+          cta: 'Open the update', ctaNote: 'Full notes inside.', signoff: `${b}` },
+      ];
+    case 'event':
+      return [
+        { label: 'A · Warm invite', type: 'text', _divergence: 76, kicker: 'You’re invited', headline: `${b} would love to see you there.`, subhead: detail ? detail : 'Save the date — details inside.',
+          sections: [ { title: 'What & why', body: `${brief ? brief : `Join ${b} for something worth your time.`}` }, { title: 'The essentials', body: detail ? detail : 'Date, time and place are below. Add it to your calendar.' } ],
+          cta: 'RSVP now', ctaNote: 'Seats are limited.', signoff: `${b}` },
+        { label: 'B · Logistics-first', type: 'text', _divergence: 82, kicker: 'Event details', headline: `Everything you need for ${b}.`, subhead: 'Where, when, and how to join — in one place.',
+          sections: [ { title: 'The details', body: detail ? detail : 'Date, time, venue and agenda are listed below.' }, { title: 'Before you come', body: `${angle ? angle.trim() : 'A short note on what to bring or expect.'}` } ],
+          cta: 'Reserve my spot', ctaNote: 'Confirm by replying if you prefer.', signoff: `${b}` },
+        { label: 'C · Don’t-miss (image)', type: 'image', _divergence: 88, kicker: 'Almost full', headline: `A few spots left for ${b}.`, subhead: 'One click to hold yours.',
+          sections: [ { title: 'Why go', body: `${brief ? brief : 'The one you’ll be glad you didn’t skip.'}${detail ? ' ' + detail : ''}` } ],
+          cta: 'Grab a seat', ctaNote: 'First come, first served.', signoff: `${b}` },
+      ];
+    case 'reminder':
+      return [
+        { label: 'A · Friendly nudge', type: 'text', _divergence: 74, kicker: 'Quick reminder', headline: `A gentle nudge from ${b}.`, subhead: detail ? detail : 'This one’s quick — and easy to finish now.',
+          sections: [ { title: 'What’s pending', body: `${brief ? brief : 'You have one step left to complete.'}` }, { title: 'How to finish', body: 'Tap the button below and you’re done in a couple of minutes.' } ],
+          cta: 'Complete it now', ctaNote: 'Already done? Thank you — ignore this.', signoff: `${b}` },
+        { label: 'B · Firm deadline', type: 'text', _divergence: 86, kicker: 'Deadline', headline: `Action needed before the deadline.`, subhead: detail ? detail : 'Please complete this before the due date.',
+          sections: [ { title: 'What’s due', body: `${brief ? brief : 'Your submission is still pending.'}` }, { title: 'By when', body: detail ? detail : 'The deadline is approaching — please don’t leave it to the last day.' } ],
+          cta: 'Submit now', ctaNote: 'Late submissions may not be accepted.', signoff: `${b}` },
+        { label: 'C · Help-and-consequences (image)', type: 'image', _divergence: 84, kicker: 'Last call', headline: `Final reminder from ${b}.`, subhead: 'A little help so nothing slips.',
+          sections: [ { title: 'If you’re stuck', body: `${brief ? brief : 'Reply to this email and we’ll help you finish.'}${detail ? ' ' + detail : ''}` } ],
+          cta: 'Finish or ask for help', ctaNote: 'We’re here if you need us.', signoff: `${b}` },
+      ];
+    case 'nonprofit':
+      return [
+        { label: 'A · Story-led', type: 'text', _divergence: 78, kicker: 'Your impact', headline: `With you, ${b} can do more.`, subhead: detail ? detail : 'A small gift goes a long way here.',
+          sections: [ { title: 'The story', body: `${brief ? brief : `Here’s what your support makes possible at ${b}.`}` }, { title: 'How to help', body: 'Every contribution counts — and it takes under a minute.' } ],
+          cta: 'Donate now', ctaNote: 'Every amount helps.', signoff: `${b}` },
+        { label: 'B · Specific ask', type: 'text', _divergence: 84, kicker: 'A clear goal', headline: `Help ${b} reach the goal.`, subhead: detail ? detail : 'A concrete target, and exactly what it funds.',
+          sections: [ { title: 'What we’re raising for', body: `${brief ? brief : 'Your gift funds the work below.'}` }, { title: 'Where it goes', body: detail ? detail : '100% of what you give goes to the cause.' } ],
+          cta: 'Give today', ctaNote: 'Cancel a recurring gift anytime.', signoff: `${b}` },
+        { label: 'C · Community (image)', type: 'image', _divergence: 82, kicker: 'Together', headline: `${b}: powered by people like you.`, subhead: 'One click to be part of it.',
+          sections: [ { title: 'Join in', body: `${brief ? brief : 'Add your support to the movement.'}${detail ? ' ' + detail : ''}` } ],
+          cta: 'Support the cause', ctaNote: 'Volunteer options inside too.', signoff: `${b}` },
+      ];
+    default: // generic — any organisation / announcement
+      return [
+        { label: 'A · Clear & direct', type: 'text', _divergence: 72, kicker: 'A note from', headline: `A message from ${b}.`, subhead: `For ${who} — the short version first.`,
+          sections: [ { title: 'What this is', body: `${brief ? brief : `An update from ${b}.`}${detail ? ' ' + detail : ''}` }, { title: 'What to do', body: 'If it’s relevant to you, the next step is below.' } ],
+          cta: 'Read more', ctaNote: 'Reply anytime — a real person reads it.', signoff: `${b}` },
+        { label: 'B · Detail-led', type: 'text', _divergence: 80, kicker: 'The details', headline: `${b}: everything in one place.`, subhead: 'No hunting around — it’s all here.',
+          sections: [ { title: 'The essentials', body: detail ? detail : (brief || 'Key details are listed below.') }, { title: 'Next steps', body: `${angle ? angle.trim() : 'A short list of what to do next.'}` } ],
+          cta: 'See the details', ctaNote: 'Save this for reference.', signoff: `${b}` },
+        { label: 'C · Highlight (image)', type: 'image', _divergence: 84, kicker: 'In brief', headline: `${b}, in one glance.`, subhead: 'One click for the rest.',
+          sections: [ { title: 'TL;DR', body: `${brief ? brief : `The latest from ${b}.`}${detail ? ' ' + detail : ''}` } ],
+          cta: 'Open it', ctaNote: 'We read every reply.', signoff: `${b}` },
+      ];
+  }
+}
 
-Return ONLY JSON (no fences): {"variants":[{"label":string (e.g. "A · Story-led"),"type":"text"|"image","kicker":string,"headline":string,"subhead":string,"sections":[{"title":string,"body":string}],"cta":string,"ctaNote":string,"signoff":string}]}  — exactly 3 variants, each a genuinely different angle (e.g. story-led, offer-led, image/hero-led). Keep copy tight and specific; no em-dashes in the copy body.`;
+function buildPrompt(brand, brief, segment, offer, kind) {
+  const kindLine = kind && kind !== 'generic'
+    ? `DETECTED CONTEXT: ${kindLabel(kind)} — write for this kind of audience and purpose, NOT a generic sales email.`
+    : 'DETECTED CONTEXT: general — infer the right purpose and tone from the brief.';
+  return `You are a UNIVERSAL Mailer Architect. You can write a send-ready HTML email for ANY context — a company or D2C brand, a product or item, a school or college (admissions, announcements, events, results), an office or team (internal memos, updates, all-hands), a task/submission/deadline reminder, an event invitation, a nonprofit appeal, or personal outreach. Never assume e-commerce unless the context clearly is commerce.
+
+CONTEXT / SENDER: ${brand}
+${kindLine}
+${brief ? 'BRIEF: ' + brief : ''}
+${segment ? 'AUDIENCE: ' + segment : ''}
+${offer ? 'OFFER / KEY DETAIL / DEADLINE: ' + offer : ''}
+
+Write 3 DISTINCT, genuinely different-angle variants appropriate to the context (for commerce: story/offer/hero; for a reminder: friendly nudge / firm deadline / consequences-and-help; for an event: warm invite / logistics-first / FOMO; adapt sensibly for schools, colleges, offices, nonprofits). Each must be a real, send-ready email. The CTA must match the purpose (e.g. "Submit your form", "RSVP now", "Read the update", "Donate", "Shop the collection").
+
+Return ONLY JSON (no fences): {"variants":[{"label":string (e.g. "A · Warm invite"),"type":"text"|"image","kicker":string,"headline":string,"subhead":string,"sections":[{"title":string,"body":string}],"cta":string,"ctaNote":string,"signoff":string}]}  — exactly 3 variants. Keep copy tight and specific; no em-dashes in the copy body.`;
 }
 
 function normalizeVariants(brand, variants) {
@@ -174,23 +299,26 @@ async function handler(req, res) {
   const brief = (body.brief || '').toString().slice(0, 600).trim();
   const segment = (body.segment || '').toString().slice(0, 120).trim();
   const offer = (body.offer || '').toString().slice(0, 120).trim();
-  const anchit = isAnchit(brand, url) || (!brand && !url);
-  const label = anchit ? 'Anchit Tandon' : (brand || url.replace(/^https?:\/\//, '').replace(/\/.*$/, ''));
+  const anchit = isAnchit(brand, url) || (!brand && !url && !brief && !segment && !offer);
+  const label = anchit ? 'Anchit Tandon' : (brand || url.replace(/^https?:\/\//, '').replace(/\/.*$/, '') || 'Your organisation');
+  // Detect the CONTEXT KIND so both the AI prompt and the deterministic
+  // fallback produce the right kind of mailer (not a generic sales email).
+  const kind = anchit ? 'commerce' : detectKind(brand, brief, segment, offer);
 
   // Try the LLM cascade for tailored copy; always fall back to deterministic.
   try {
     if (haveAnyProvider()) {
-      const parsed = await generateCopy(buildPrompt(label, brief, segment, offer));
+      const parsed = await generateCopy(buildPrompt(label, brief, segment, offer, kind));
       if (parsed && parsed.variants && parsed.variants.length) {
-        return res.status(200).json({ brand: label, variants: normalizeVariants(label, parsed.variants), source: 'ai' });
+        return res.status(200).json({ brand: label, kind, variants: normalizeVariants(label, parsed.variants), source: 'ai' });
       }
     }
   } catch (e) { /* fall through */ }
 
-  const det = anchit ? anchitVariants() : brandVariants(label, brief);
-  return res.status(200).json({ brand: label, variants: normalizeVariants(label, det), source: anchit ? 'anchit' : 'template' });
+  const det = anchit ? anchitVariants() : universalVariants(label, brief, segment, offer, kind);
+  return res.status(200).json({ brand: label, kind, variants: normalizeVariants(label, det), source: anchit ? 'anchit' : 'template' });
 }
 
 module.exports = handler;
 module.exports.config = { runtime: 'nodejs', maxDuration: 30 };
-module.exports._test = { renderEmail, scoreVariant, anchitVariants, brandVariants, normalizeVariants, isAnchit };
+module.exports._test = { renderEmail, scoreVariant, anchitVariants, brandVariants, universalVariants, detectKind, normalizeVariants, isAnchit };

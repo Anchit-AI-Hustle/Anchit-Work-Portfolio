@@ -692,6 +692,12 @@
     background: conic-gradient(from 0deg, var(--primary), #FFB736, var(--accent), var(--primary));
     filter: blur(10px); opacity: .32; animation: cpSpin 9s linear infinite; }
   @keyframes cpSpin { to { transform: rotate(360deg); } }
+  /* Video-call avatar: the talking-head clip covers the portrait while it speaks. */
+  .cp-stage video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    border-radius: 50%; border: 2px solid var(--rule-strong); opacity: 0; pointer-events: none;
+    transition: opacity .3s ease; box-shadow: 0 16px 44px rgba(0,0,0,.5); }
+  .chat-persona.video-on video { opacity: 1; }
+  .chat-persona.video-on img { opacity: 0; }
   .cp-name { font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); }
   .chat-persona.speaking .cp-ring { opacity: .7; animation-duration: 3s; }
   .chat-persona.speaking .cp-stage img { box-shadow: 0 16px 50px rgba(255,105,64,.42), 0 0 0 2px rgba(255,105,64,.6) inset; }
@@ -1261,6 +1267,46 @@
   }
   .iframe-wrap iframe { width: 100%; height: 600px; border: 0; background: #FFF; display: block; }
   @media (max-width: 720px) { .iframe-wrap iframe { height: 460px; } }
+
+  /* ============ UNIVERSAL MAILER STUDIO ============ */
+  .mailer-studio {
+    margin-top: 48px; padding: clamp(22px, 3vw, 34px); border-radius: 20px;
+    background: var(--bg-elev); border: 1px solid var(--rule); box-shadow: var(--shadow-lg);
+  }
+  .mailer-studio h2 { margin: 6px 0 6px; }
+  .mailer-studio .ms-hint { color: var(--ink-dim); max-width: 640px; margin-bottom: 22px; }
+  .ms-form { display: grid; gap: 16px; }
+  .ms-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .ms-row { grid-template-columns: 1fr; } }
+  .ms-form label { display: grid; gap: 7px; font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-dim); }
+  .ms-form .ms-opt { text-transform: none; letter-spacing: 0; color: var(--ink-mute); }
+  .ms-form input {
+    font-family: var(--font-sans); font-size: 15px; text-transform: none; letter-spacing: 0;
+    padding: 12px 14px; border-radius: 11px; border: 1px solid var(--rule-strong);
+    background: var(--bg-deep); color: var(--ink); outline: none; transition: border-color .2s;
+  }
+  .ms-form input:focus { border-color: var(--gold); }
+  .ms-form input::placeholder { color: var(--ink-mute); }
+  .ms-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .ms-status { font-family: var(--font-mono); font-size: 12px; color: var(--ink-dim); }
+  .ms-results { margin-top: 26px; display: grid; gap: 20px; }
+  .ms-results:empty { margin-top: 0; }
+  .ms-kind { font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--gold); }
+  .ms-card { border: 1px solid var(--rule); border-radius: 16px; overflow: hidden; background: var(--bg-deep); }
+  .ms-card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 14px 16px; border-bottom: 1px solid var(--rule); flex-wrap: wrap; }
+  .ms-card-head .ms-label { font-family: var(--font-mono); font-size: 12px; color: var(--ink); }
+  .ms-card-head .ms-score { font-family: var(--font-mono); font-size: 11px; color: var(--gold);
+    border: 1px solid var(--rule-strong); border-radius: 99px; padding: 3px 10px; }
+  .ms-subject { padding: 12px 16px 2px; font-family: var(--font-display); font-size: 16px; color: var(--ink); }
+  .ms-preview { padding: 0 16px 12px; font-size: 13px; color: var(--ink-dim); }
+  .ms-card iframe { width: 100%; height: 420px; border: 0; border-top: 1px solid var(--rule);
+    background: #FFF; display: block; }
+  .ms-card .ms-toggle { font-family: var(--font-mono); font-size: 11px; color: var(--ink-dim);
+    background: transparent; border: none; cursor: pointer; padding: 10px 16px; }
+  .ms-card .ms-toggle:hover { color: var(--gold); }
 
   /* ============ ABOUT ============ */
   .about-grid {
@@ -3254,7 +3300,7 @@
           </button>
         </div>
         <div class="chat-persona" id="chatPersona">
-          <div class="cp-stage"><span class="cp-ring" aria-hidden="true"></span><img src="AnchitTandon-AppLogo.png" alt="Anchit Tandon"></div>
+          <div class="cp-stage"><span class="cp-ring" aria-hidden="true"></span><img src="AnchitTandon-AppLogo.png" alt="Anchit Tandon"><video id="chatPersonaVideo" playsinline></video></div>
           <div class="cp-name">Anchit · AI persona</div>
         </div>
         <div class="chat-modes" role="group" aria-label="Chat with Anchit or have him narrate the portfolio">
@@ -3272,6 +3318,7 @@
           <button type="button" class="chat-audio" data-chataudio-btn="text" aria-pressed="false" title="Text only — replies are written, nothing is spoken">Text</button>
           <button type="button" class="chat-audio" data-chataudio-btn="reply" aria-pressed="true" title="Voice reply — answers are written and spoken in Anchit's voice">Voice reply</button>
           <button type="button" class="chat-audio" data-chataudio-btn="call" aria-pressed="false" title="Call — hands-free voice both ways, every line transcribed">Call</button>
+          <button type="button" class="chat-audio" data-chataudio-btn="video" aria-pressed="false" title="Video call — Anchit answers on camera as a talking avatar, with voice fallback">Video call</button>
         </div>
         <div class="chat-body" id="chatBody">
           <div class="chat-caption" id="chatCaption" aria-live="polite" aria-label="Currently spoken text"></div>
@@ -3759,7 +3806,21 @@
       </div>
 
       <div class="builds-grid reveal-stagger">
-        
+
+        <!-- Featured widget — How-To Engine (agentic multi-model how-to guides) -->
+        <div class="build-card tilt-card">
+          <div class="build-tag"><span>Agentic How-To Engine · New</span><span class="status">Live</span></div>
+          <h3>The <em>How-To Engine</em></h3>
+          <p>Ask how to do literally anything. A cascade of frontier models answers in parallel, the best three get synthesised into one calm, ADHD-friendly step-by-step guide — rendered as a 3D flow you can watch step by step.</p>
+          <ul class="build-details">
+            <li>Agentic model cascade: parallel dispatch &rarr; structural scoring &rarr; top-3 &rarr; a consensus evaluator merges them into one master guide.</li>
+            <li>Built with React, React-Three-Fiber and the official Claude SDK, with a deterministic offline guide so it always answers.</li>
+          </ul>
+          <div class="build-actions">
+            <a class="btn primary" href="/how-to">Open the How-To Engine ↗</a>
+          </div>
+        </div>
+
         <!-- Featured first: The Third Eye -->
         <div class="build-card tilt-card">
           <div class="build-tag"><span>AI Operating System</span><span class="status">Live</span></div>
@@ -4266,54 +4327,158 @@
         All side projects
       </a>
       <div class="project-hero reveal">
-        <div class="eyebrow">AI Tooling · Marketing · Multi-LLM cascade</div>
+        <div class="eyebrow">AI Tooling · Universal mailer · Multi-LLM cascade</div>
         <h1 class="display-lg">Mailer <em>Architect</em></h1>
-        <p class="quote">"Brief in. Production-grade HTML email out. Six LLMs trading off when one runs out."</p>
+        <p class="quote">"Brief in. Production-grade HTML email out — for any brand, school, office, event, or reminder."</p>
         <div class="project-meta">
           <div><span class="label">Role</span><span>Architect · Builder</span></div>
-          <div><span class="label">Status</span><span>Live · D2C marketing tool</span></div>
+          <div><span class="label">Status</span><span>Live · universal mailer engine</span></div>
           <div><span class="label">Stack</span><span>Vercel Functions · OpenAI · Anthropic · Gemini · xAI · Groq · Cerebras</span></div>
         </div>
         <div class="project-cta">
-          <a href="https://marketing-mailers-html-architect.vercel.app/" target="_blank" rel="noopener" class="btn primary">Open live app ↗</a>
+          <a href="#mailerStudio" class="btn primary" data-mailer-jump>Try the Mailer Studio ↓</a>
         </div>
       </div>
 
       <div class="project-section reveal">
         <div class="eyebrow">The pitch</div>
         <h2>What it is</h2>
-        <p>Mailer Architect turns a one-line campaign brief into a fully designed HTML email — copy, product picks from the live Shopify catalog, hero image, layout, subject line. A six-tier LLM cascade handles failover: OpenAI → Anthropic → Gemini → xAI → Groq → Cerebras. When one provider exhausts quota, the next takes over inside the same request.</p>
+        <p>Mailer Architect turns a one-line brief into a fully designed, send-ready HTML email — copy, layout, hero, subject line, quality score. It's <em>universal</em>: it reads the context and writes the right kind of mailer for a company or D2C brand, a product, a school or college, an office team, an event invite, a task or submission reminder, a nonprofit appeal — anything a mailer could exist for. A six-tier LLM cascade handles failover: OpenAI → Anthropic → Gemini → xAI → Groq → Cerebras. When one provider exhausts quota, the next takes over inside the same request.</p>
       </div>
 
       <div class="project-section reveal">
         <div class="eyebrow">Origin</div>
         <h2>Why I built it</h2>
-        <p>D2C marketing teams routinely ship 4–6 campaigns a week per region. Each one costs hours of designer + copywriter time, and the cost of <em>not</em> sending is bigger than the cost of mediocre output. I wanted a tool that gives a competent first draft in under a minute and lets humans edit instead of starting from blank.</p>
+        <p>Every organisation sends email — not just marketing teams. Schools send notices, offices send updates, event hosts send invites, and everyone chases deadlines with reminders. Each one costs time at a blank page, and the cost of <em>not</em> sending is bigger than the cost of a mediocre first draft. I wanted one tool that gives a competent, on-tone first draft in under a minute for <em>any</em> context, and lets a human edit instead of starting from scratch.</p>
       </div>
 
       <div class="project-section reveal">
         <div class="eyebrow">Problem it solves</div>
         <h2>What's broken without it</h2>
         <ul>
-          <li><strong>Catalog drift.</strong> Manual emails reference products that are sold out, mispriced, or wrong-region. Architect pulls live PDPs at generation time.</li>
-          <li><strong>LLM single-point-of-failure.</strong> OpenAI billing limit hits — your weekly campaign dies. The cascade routes around it without anyone noticing.</li>
-          <li><strong>Brand drift.</strong> Brand palette + typography are locked at the generator layer; copywriters can't accidentally introduce off-brand styling.</li>
-          <li><strong>11 layout archetypes.</strong> Hero-led, narrative, comparison, gift bundle, etc. — the AI picks the right one for the campaign type, not just one template.</li>
+          <li><strong>One template for everything.</strong> Most generators only know "sales email." Architect detects the context — commerce, school, college, office, event, reminder, nonprofit — and adapts tone, structure and call-to-action to match.</li>
+          <li><strong>LLM single-point-of-failure.</strong> One provider's billing limit hits and your send dies. The cascade routes around it without anyone noticing.</li>
+          <li><strong>Blank-page cost.</strong> Three genuinely different-angle variants land in seconds, each quality-scored, so a human edits instead of writing from zero.</li>
+          <li><strong>Always answers.</strong> A deterministic engine ships fully designed HTML even with no API keys — the demo never returns an error.</li>
         </ul>
       </div>
 
       <div class="project-section reveal">
         <div class="eyebrow">What I'd build next</div>
         <h2>The roadmap in my head</h2>
-        <p>Live campaign performance dashboard, AI-generated monthly mailer calendar built from past performance, automated daily creation + send. (In flight.)</p>
+        <p>Saved brand kits (palette + logo) per sender, a performance dashboard, an AI-generated mailer calendar built from past sends, and automated scheduling. (In flight.)</p>
       </div>
 
-      <div class="iframe-wrap reveal">
-        <div class="iframe-bar"><div class="dots"><span></span><span></span><span></span></div>marketing-mailers-html-architect.vercel.app</div>
-        <iframe src="https://marketing-mailers-html-architect.vercel.app/" loading="lazy" title="Mailer Architect live preview"></iframe>
+      <!-- Universal Mailer Studio — self-contained, powered by /api/mailer -->
+      <div class="mailer-studio reveal" id="mailerStudio">
+        <div class="eyebrow">Try it — universal Mailer Studio</div>
+        <h2>Generate a mailer for anything</h2>
+        <p class="ms-hint">Describe the sender and the brief. Architect detects the context and writes three send-ready variants — for a brand, a school, an office, an event, a reminder, a fundraiser, anything.</p>
+        <form class="ms-form" id="mailerForm">
+          <div class="ms-row">
+            <label>Sender / brand / organisation
+              <input type="text" id="msBrand" placeholder="e.g. Green Valley School, Acme Corp, Bloom Boutique…" autocomplete="off">
+            </label>
+            <label>Audience <span class="ms-opt">(optional)</span>
+              <input type="text" id="msSegment" placeholder="e.g. parents, alumni, all employees, VIP shoppers…" autocomplete="off">
+            </label>
+          </div>
+          <label>Brief — what's this email about?
+            <input type="text" id="msBrief" placeholder="e.g. reminder to submit the annual consent form; spring collection launch; all-hands update…" autocomplete="off">
+          </label>
+          <label>Offer / key detail / deadline <span class="ms-opt">(optional)</span>
+            <input type="text" id="msOffer" placeholder="e.g. due Friday; 20% off; RSVP by Aug 10; goal ₹5 lakh…" autocomplete="off">
+          </label>
+          <div class="ms-actions">
+            <button type="submit" class="btn primary" id="msGenerate">Generate mailers</button>
+            <span class="ms-status" id="msStatus" aria-live="polite"></span>
+          </div>
+        </form>
+        <div class="ms-results" id="msResults" aria-live="polite"></div>
       </div>
     </div>
   </section>
+  <script id="mailer-studio-js">
+  (function () {
+    'use strict';
+    var form = document.getElementById('mailerForm');
+    if (!form) return;
+    var statusEl = document.getElementById('msStatus');
+    var resultsEl = document.getElementById('msResults');
+    var btn = document.getElementById('msGenerate');
+    var esc = function (s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    };
+    var KIND_LABEL = {
+      commerce: 'Commerce / D2C', school: 'School', college: 'College / University',
+      office: 'Office / Internal', event: 'Event / Invite', reminder: 'Task / Reminder',
+      nonprofit: 'Nonprofit / Fundraising', generic: 'General', anchit: 'Outreach'
+    };
+    function render(data) {
+      resultsEl.innerHTML = '';
+      var kind = (data && data.kind) || 'generic';
+      var head = document.createElement('div');
+      head.className = 'ms-kind';
+      head.textContent = 'Detected context: ' + (KIND_LABEL[kind] || kind) +
+        ' · ' + (data.source === 'ai' ? 'AI-written' : 'template') + ' · ' + data.variants.length + ' variants';
+      resultsEl.appendChild(head);
+      (data.variants || []).forEach(function (v) {
+        var card = document.createElement('div');
+        card.className = 'ms-card';
+        var score = (v.score && (v.score.overall != null ? v.score.overall : v.score)) || '';
+        card.innerHTML =
+          '<div class="ms-card-head"><span class="ms-label">' + esc(v.label) + '</span>' +
+          (score !== '' ? '<span class="ms-score">Score ' + esc(score) + '/100</span>' : '') + '</div>' +
+          '<div class="ms-subject">' + esc(v.subject) + '</div>' +
+          '<div class="ms-preview">' + esc(v.preview) + '</div>' +
+          '<button type="button" class="ms-toggle">Preview email ▾</button>';
+        var toggle = card.querySelector('.ms-toggle');
+        var frame = null;
+        toggle.addEventListener('click', function () {
+          if (frame) {
+            var showing = frame.style.display !== 'none';
+            frame.style.display = showing ? 'none' : 'block';
+            toggle.textContent = showing ? 'Preview email ▾' : 'Hide preview ▴';
+            return;
+          }
+          frame = document.createElement('iframe');
+          frame.setAttribute('sandbox', '');
+          frame.setAttribute('title', 'Mailer preview — ' + v.label);
+          frame.srcdoc = v.html || '<p style="font-family:sans-serif;padding:20px">No preview.</p>';
+          card.appendChild(frame);
+          toggle.textContent = 'Hide preview ▴';
+        });
+        resultsEl.appendChild(card);
+      });
+    }
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var payload = {
+        brand: (document.getElementById('msBrand').value || '').trim(),
+        segment: (document.getElementById('msSegment').value || '').trim(),
+        brief: (document.getElementById('msBrief').value || '').trim(),
+        offer: (document.getElementById('msOffer').value || '').trim()
+      };
+      btn.disabled = true;
+      statusEl.textContent = 'Architecting…';
+      fetch('/api/mailer', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+      })
+        .then(function (r) { if (!r.ok) throw new Error('http_' + r.status); return r.json(); })
+        .then(function (data) {
+          if (!data || !data.variants || !data.variants.length) throw new Error('empty');
+          statusEl.textContent = '';
+          render(data);
+        })
+        .catch(function () {
+          statusEl.textContent = 'The live engine runs on the deployed site (anchit-tandon.com). Try it there.';
+        })
+        .then(function () { btn.disabled = false; });
+    });
+  })();
+  </script>
 
   <!-- PROJECT: TASK TRACKER -->
   <section class="view" id="view-project-tasktracker">
@@ -4675,7 +4840,7 @@
      The two legacy audio gates are derived from this so the rest of the audio
      plumbing keeps working unchanged. */
   const MODE_VALUES = ['chat', 'narrate'];
-  const CHAT_AUDIO_VALUES = ['text', 'reply', 'call'];
+  const CHAT_AUDIO_VALUES = ['text', 'reply', 'call', 'video'];
   function migrateMode(v) {
     if (v === 'listen') return 'narrate';                 // old name
     if (v === 'talk' || v === 'read') return 'chat';      // old names
@@ -4757,9 +4922,16 @@
     refreshAudioGates();
     window.anchitAudioStopped = false;
     // Explicitly choosing a spoken mode is an opt-in that releases the mute latch.
-    if (!opts.silent && (audio === 'reply' || audio === 'call')) window.anchitVoiceMutedLatch = false;
+    if (!opts.silent && (audio === 'reply' || audio === 'call' || audio === 'video')) window.anchitVoiceMutedLatch = false;
     paintModeUI();
     if (audio === 'text') { try { window.speechSynthesis?.cancel(); } catch {} }
+    // Leaving Video-call mode: stop and hide any talking-head clip so it can't
+    // keep playing with sound behind another mode.
+    if (audio !== 'video') {
+      const pv = document.getElementById('chatPersonaVideo');
+      if (pv) { try { pv.pause(); } catch {} }
+      document.getElementById('chatPersona')?.classList.remove('video-on');
+    }
     if (!opts.silent && window.anchitMode === 'chat') {
       if (audio === 'call') startCallMode(); else stopCallMode();
     }
@@ -5227,7 +5399,7 @@
 	    'project-telesuite': ['AI TeleSuite', 'Sales intelligence assistant', ['Live transcription, pitch scoring and conversion recommendations.', 'Productized the ET Prime assisted-sales playbook.', 'Ask how it improved sales conversion.']],
 	    'project-lifeengine': ['LifeEngine', 'Personalized health engine', ['Turns generic wellness advice into daily routines.', 'Login-gated, privacy-conscious personalization flow.', 'Ask how its personalisation engine works.']],
 	    'project-thirdeye': ['The Third Eye', 'Agent-orchestrated AI OS', ['Explores agent workflows and multi-step task orchestration.', 'Built around AI operating-system style interactions.', 'Ask what the long-term AI OS vision is.']],
-	    'project-mailer': ['Mailer Architect', 'Marketing mailer generator', ['Creates multi-LLM HTML email cascades.', 'Focuses on production-ready mailer structure and speed.', 'Ask how it speeds up lifecycle marketing.']],
+	    'project-mailer': ['Mailer Architect', 'Universal mailer generator', ['Detects the context and writes send-ready HTML mailers for anything — brands, schools, offices, events, reminders, nonprofits.', 'Multi-LLM cascade with a deterministic fallback that always returns designed HTML.', 'Try the built-in Mailer Studio right on the page.']],
 	    'project-tasktracker': ['Task Tracker', 'Personal productivity system', ['Converts meetings, emails and voice notes into tasks.', 'Built as a personal AI assistant workflow.', 'Ask how it differs from ordinary to-do tools.']],
 	    'project-lifecycle': ['D2C-LifeCycle-OS', 'Brand-agnostic lifecycle engine', ['Enter any D2C brand and get an industry-benchmarked lifecycle plan.', 'Benchmarks the competitive set the way SimilarWeb / SEMrush profile a market.', 'Ask how the industry-standard baselines drive the plan.']],
 	    'project-agentlp': ['All-in-One LP Agent', 'Conversational landing page agent', ['One agent: audio narration, two-way voice, chat and recommendations.', 'Built for a live D2C funnel, grounded in the page content.', 'Ask how it changes landing page conversion.']],
@@ -5434,6 +5606,47 @@
     } catch { return false; }
   }
 
+  // Video-call path: render the reply as a photoreal talking-head clip in the
+  // persona stage (same /api/avatar engine as the /agent page). The clip carries
+  // its own audio, so when it plays we DON'T also fire the cloned-voice path.
+  // Returns true only when a clip actually played; false → caller falls back to
+  // the normal spoken/text path. Skipped on localhost (no serverless /api).
+  function avatarConfiguredEndpoint() {
+    const localHosts = ['localhost', '127.0.0.1', '0.0.0.0', ''];
+    return localHosts.includes(location.hostname) ? null : '/api/avatar';
+  }
+  async function speakViaAvatar(plainText, onEnd) {
+    const endpoint = avatarConfiguredEndpoint();
+    const persona = document.getElementById('chatPersona');
+    const vid = document.getElementById('chatPersonaVideo');
+    if (!endpoint || !vid) return false;
+    try {
+      const r = await fetch(endpoint, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: window.anchitSpeechText ? window.anchitSpeechText(plainText) : plainText }),
+      });
+      if (!r.ok) return false;
+      const j = await r.json().catch(() => null);
+      if (!j || !j.resultUrl) return false;   // not keyed / render failed → voice
+      return await new Promise((resolve) => {
+        let settled = false;
+        const done = (ok) => {
+          if (settled) return; settled = true;
+          persona && persona.classList.remove('video-on');
+          vid.onended = null; vid.onerror = null;
+          if (ok && typeof onEnd === 'function') { try { onEnd(); } catch {} }
+          resolve(ok);
+        };
+        vid.onended = () => done(true);
+        vid.onerror = () => done(false);
+        vid.src = j.resultUrl;
+        persona && persona.classList.add('video-on');
+        const p = vid.play();
+        if (p && p.catch) p.catch(() => done(false));   // autoplay blocked → voice
+      });
+    } catch { return false; }
+  }
+
   function speakBotResponse(bubbleEl, plainText, onComplete) {
     if (!plainText || !bubbleEl) { if (typeof onComplete === 'function') { try { onComplete(); } catch {} } return; }
     // Safety net: never speak a reply while the session mute latch is set.
@@ -5492,6 +5705,9 @@
 	    };
 	    startTranscriptTimer();
 
+	    // The cloned-voice → device-speech ladder. In Video-call mode we try the
+	    // talking-head clip first and only fall back to this if it can't play.
+	    const runVoicePath = () => {
 	    speakViaClone(plainText, null, finishTranscript, { caption, words })
 	      .then((usedClone) => {
 	        if (usedClone) return;
@@ -5517,6 +5733,13 @@
 	        utter.onerror = finishTranscript;
 	        window.speechSynthesis.speak(utter);
 	      });
+	    };
+
+	    if (window.anchitChatAudio === 'video') {
+	      speakViaAvatar(plainText, finishTranscript).then((usedAvatar) => { if (!usedAvatar) runVoicePath(); });
+	    } else {
+	      runVoicePath();
+	    }
 
   }
   function addUser(text) {

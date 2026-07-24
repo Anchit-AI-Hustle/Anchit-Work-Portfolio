@@ -21,7 +21,7 @@ CURRENT — VAHDAM INDIA (joined 20 April 2026)
 - Role: AGM — Product Management, D2C Growth, across US, UK and Global. Still early (~1.5–2 months in).
 - Customer lifecycle & retention OS (my headline project here): a retention/lifecycle operating workflow that connects analytics, lifecycle planning, customer segmentation and mailer generation into one system.
 - All-in-One LP Agent (a personal D2C build): a marketing landing page with ONE embedded AI agent doing four jobs — narrates the page aloud on arrival, holds a two-way voice conversation, answers typed chat, and runs a "help me choose" product recommendation flow, all grounded in the page's own content.
-- Mailer Architect (a personal D2C build): a multi-LLM HTML email generator for D2C marketing.
+- Mailer Architect (a personal build): a universal multi-LLM HTML email generator. It detects the context from a one-line brief and writes send-ready mailers for ANY use case — a company or D2C brand, a product, a school or college, an office team, an event invite, a task/submission reminder, or a nonprofit appeal — not just marketing.
 - Also helped increase UK marketing revenue early on. (If ratings come up: rating improvement is a supporting contribution, not the headline.)
 
 PREVIOUS — TIMES INTERNET (2022 → April 2026; APM → PM → Senior PM)
