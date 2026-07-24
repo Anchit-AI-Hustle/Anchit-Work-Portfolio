@@ -2674,22 +2674,19 @@
     <div class="intro-orbit" aria-hidden="true"><span></span><span></span><span></span></div>
     <div class="intro-kicker">Interactive portfolio OS</div>
     <h2 id="onboarding-title" style="font-family:var(--font-display); font-size:28px; font-weight:700; color:#FFF; margin-bottom:12px;">Hey, I'm Anchit. Let me show you around.</h2>
-    <p id="onboarding-copy" style="color:var(--ink-dim); font-size:16px; margin-bottom:28px; line-height:1.5;">This is not a static resume page. It has guided navigation, voice narration, an AI chat layer, project deep dives and quick contact paths. Start with the tour, or jump straight in.</p>
+    <p id="onboarding-copy" style="color:var(--ink-dim); font-size:16px; margin-bottom:28px; line-height:1.5;">An interactive résumé you can actually talk to. Jump straight in — or ask my AI guide anything.</p>
 
     <div id="onboarding-actions" class="intro-actions" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center;">
-      <button class="ob-mode-btn intro-primary" data-intro-action="tour" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h6l3-8 3 16 3-8h3"/><path d="M4 20h16"/></svg>
-        <span>Start tour</span><small>Coachmarks guide the interface</small>
-      </button>
-      <button class="ob-mode-btn" data-intro-action="explore" type="button">
+      <button class="ob-mode-btn intro-primary" data-intro-action="explore" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m16 8-4 8-4-4 8-4Z"/></svg>
-        <span>Explore</span><small>Enter the portfolio first</small>
+        <span>Enter portfolio</span><small>Start exploring right away</small>
       </button>
       <button class="ob-mode-btn" data-intro-action="chat" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        <span>Chat</span><small>Open the AI guide</small>
+        <span>Ask my AI</span><small>Chat or talk with my guide</small>
       </button>
     </div>
+    <button type="button" data-intro-action="tour" class="ob-tour-link" style="margin-top:16px; background:none; border:none; color:var(--ink-dim); font-size:13px; cursor:pointer; text-decoration:underline; text-underline-offset:3px;">Prefer a guided tour? Start it →</button>
 
   </div>
 </div>
@@ -4812,13 +4809,38 @@
       beginCallListen();
     }, 1400);
   }
+  // Chrome only shows the microphone permission prompt for a getUserMedia()
+  // call made synchronously inside a real user gesture (tap/click). Requesting
+  // it on load — or via a setTimeout / programmatic .click() — is silently
+  // suppressed. So we prime the permission here, and callers MUST invoke this
+  // straight from a click handler (which startCallMode is). Resolves true once
+  // access is granted (or already granted); SpeechRecognition then reuses it.
+  window.__micPrimed = window.__micPrimed || false;
+  function ensureMicPermission() {
+    if (window.__micPrimed) return Promise.resolve(true);
+    if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) return Promise.resolve(true);
+    return navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(function (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); window.__micPrimed = true; return true; })
+      .catch(function () { return false; });
+  }
+  window.ensureMicPermission = ensureMicPermission;
+
   function startCallMode() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) { if (typeof addBot === 'function') addBot("Call mode needs a browser with speech recognition (Chrome works best). Falling back to voice replies — tap the mic to talk."); setChatAudio('reply'); return; }
     if (callActive) return;
-    callActive = true;
-    document.body.classList.add('call-active');
-    beginCallListen();
+    // Prime mic access from THIS gesture; only open the line once it's granted.
+    ensureMicPermission().then(function (ok) {
+      if (!ok) {
+        if (typeof addBot === 'function') addBot("I need microphone access for hands-free calls. When the browser asks, choose Allow — or tap the mic button to talk instead.");
+        if (typeof setChatAudio === 'function') setChatAudio('reply');
+        return;
+      }
+      if (callActive) return;
+      callActive = true;
+      document.body.classList.add('call-active');
+      beginCallListen();
+    });
   }
   function stopCallMode() {
     callActive = false;
@@ -8687,7 +8709,11 @@
   replyOpts.forEach(b => b.addEventListener('click', () => {
     setReplyMode(b.dataset.reply);
     if (b.dataset.reply === 'call') {
-      setTimeout(() => { try { document.getElementById('chatMic')?.click(); } catch {} }, 140);
+      // Open call mode straight from this tap — startCallMode() primes the mic
+      // permission within the gesture. A deferred/synthetic click is ignored by
+      // Chrome, so the prompt would never appear.
+      if (typeof startCallMode === 'function') startCallMode();
+      else if (window.ensureMicPermission) window.ensureMicPermission().then(() => { try { document.getElementById('chatMic')?.click(); } catch {} });
     }
   }));
   setReplyMode('text');
