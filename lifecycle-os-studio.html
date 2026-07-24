@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Mailer Studio — Lifecycle OS · Anchit Tandon</title>
+<meta name="description" content="Mailer Studio — turn a brief into designed, on-brand, ready-to-send HTML email variants, each quality-scored. Part of the Lifecycle OS. Brand-agnostic; defaults to anchit-tandon.com." />
+<meta name="theme-color" content="#0F0D0A" />
+<link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root, :root[data-theme="dark"]{
+    --bg:#0F0D0A; --bg-elev:#1A1814; --bg-deep:#060503;
+    --ink:#FBF5EC; --ink-dim:#A39E94; --ink-mute:#5A554E;
+    --rule:#2A261F; --rule-strong:#3D3830;
+    --primary:#FF6940; --primary-deep:#FF4D1F; --primary-soft:rgba(255,105,64,.12);
+    --accent:#2EE5AC; --gold:#c9a96e;
+    --font-display:'Fraunces',ui-serif,serif; --font-body:'Inter',ui-sans-serif,system-ui,sans-serif; --font-mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  :root[data-theme="light"]{
+    --bg:#FBF5EC; --bg-elev:#FFFFFF; --bg-deep:#F2EADC;
+    --ink:#161312; --ink-dim:#5A554E; --ink-mute:#A39E94;
+    --rule:#E5DCC7; --rule-strong:#C9BFA8;
+    --primary:#FF4D1F; --primary-deep:#D63B12; --accent:#00B584; --gold:#a8863f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{ background:var(--bg); color:var(--ink); font-family:var(--font-body); line-height:1.6; -webkit-font-smoothing:antialiased; overflow-x:hidden; min-height:100vh; }
+  body::before{ content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:radial-gradient(44% 38% at 14% 8%, rgba(255,105,64,.12), transparent 60%), radial-gradient(40% 36% at 88% 16%, rgba(201,169,110,.12), transparent 62%); }
+  .wrap{ position:relative; z-index:1; max-width:1120px; margin:0 auto; padding:clamp(20px,4vw,44px); }
+  a{ color:inherit; }
+  .top{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:clamp(22px,4vw,40px); flex-wrap:wrap; }
+  .back{ display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:12px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-dim); text-decoration:none; padding:8px 14px; border:1px solid var(--rule-strong); border-radius:99px; }
+  .back:hover{ border-color:var(--primary); color:var(--ink); }
+  .crumbs{ font-family:var(--font-mono); font-size:11px; color:var(--ink-mute); letter-spacing:.06em; }
+  .crumbs a{ color:var(--ink-dim); text-decoration:none; } .crumbs a:hover{ color:var(--primary); }
+  .eyebrow{ font-family:var(--font-mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--primary); display:inline-flex; align-items:center; gap:8px; margin-bottom:14px; }
+  .eyebrow .dot{ width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px var(--accent); }
+  h1{ font-family:var(--font-display); font-weight:600; font-size:clamp(34px,6vw,60px); line-height:1.03; letter-spacing:-.02em; margin-bottom:14px; }
+  h1 .grad{ background:linear-gradient(100deg,var(--primary),var(--gold)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  .lede{ font-size:clamp(15px,2vw,18px); color:var(--ink-dim); max-width:64ch; margin-bottom:26px; font-weight:300; }
+
+  .form{ background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.008)); border:1px solid var(--rule-strong); border-radius:18px; padding:clamp(18px,3vw,26px); margin-bottom:22px; }
+  .frow{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
+  .frow input{ flex:1; min-width:180px; }
+  input, textarea{ background:var(--bg-deep); border:1px solid var(--rule-strong); border-radius:10px; padding:12px 14px; color:var(--ink); font-family:var(--font-body); font-size:15px; outline:none; width:100%; transition:border-color .2s; }
+  input:focus, textarea:focus{ border-color:var(--primary); }
+  textarea{ min-height:70px; resize:vertical; }
+  label.fl{ font-family:var(--font-mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-mute); display:block; margin:0 0 6px 2px; }
+  .actions{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:6px; }
+  .btn{ display:inline-flex; align-items:center; gap:8px; cursor:pointer; background:var(--primary); color:#1a0d06; border:none; border-radius:11px; padding:13px 24px; font-family:var(--font-mono); font-size:13px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; transition:transform .15s, box-shadow .2s; }
+  .btn:hover{ transform:translateY(-1px); box-shadow:0 10px 26px rgba(255,105,64,.32); }
+  .btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; box-shadow:none; }
+  .chips{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .chip{ background:transparent; border:1px solid var(--rule); border-radius:99px; padding:6px 12px; font-size:12.5px; color:var(--ink-dim); cursor:pointer; }
+  .chip:hover{ border-color:var(--primary); color:var(--ink); }
+  .loading{ display:none; align-items:center; gap:12px; color:var(--ink-dim); font-size:14px; padding:6px 0; }
+  .loading.on{ display:flex; }
+  .spinner{ width:18px; height:18px; border:2px solid var(--rule-strong); border-top-color:var(--primary); border-radius:50%; animation:spin .8s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg) } }
+  .err{ display:none; color:#ff8a6a; font-size:14px; padding:6px 0; }
+
+  #out{ display:none; }
+  .badge{ font-family:var(--font-mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; padding:5px 10px; border-radius:99px; border:1px solid var(--rule); color:var(--ink-dim); }
+  .badge.ai{ border-color:var(--accent); color:var(--accent); }
+  .vgrid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:18px; margin-top:16px; }
+  .vcard{ background:var(--bg-elev); border:1px solid var(--rule); border-radius:16px; overflow:hidden; display:flex; flex-direction:column; }
+  .vhead{ padding:14px 16px; border-bottom:1px solid var(--rule); display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .vhead .vl{ font-weight:600; font-size:14.5px; }
+  .vtype{ font-family:var(--font-mono); font-size:10px; letter-spacing:.05em; text-transform:uppercase; color:var(--gold); border:1px solid var(--rule); border-radius:6px; padding:3px 7px; }
+  .vtype.image{ color:var(--accent); }
+  .vmeta{ padding:12px 16px 4px; }
+  .vmeta .s{ font-weight:600; font-size:14px; } .vmeta .p{ font-size:12.5px; color:var(--ink-mute); margin-top:2px; }
+  .preview{ margin:12px 16px; border:1px solid var(--rule); border-radius:10px; overflow:hidden; background:#fff; }
+  .preview iframe{ width:100%; height:420px; border:0; display:block; background:#fff; }
+  .scores{ padding:4px 16px 12px; }
+  .srow{ display:flex; align-items:center; gap:8px; margin-top:6px; }
+  .srow .lab{ font-family:var(--font-mono); font-size:10.5px; color:var(--ink-mute); width:74px; flex:0 0 74px; text-transform:capitalize; }
+  .bar{ flex:1; height:6px; border-radius:99px; background:rgba(255,255,255,.08); overflow:hidden; }
+  .bar i{ display:block; height:100%; background:linear-gradient(90deg,var(--primary),var(--gold)); }
+  .srow .num{ font-family:var(--font-mono); font-size:11px; color:var(--ink-dim); width:30px; text-align:right; }
+  .voverall{ font-family:var(--font-display); font-size:15px; color:var(--ink); }
+  .vfoot{ display:flex; gap:8px; padding:0 16px 16px; }
+  .vbtn{ background:transparent; border:1px solid var(--rule-strong); color:var(--ink-dim); border-radius:9px; padding:8px 12px; font-family:var(--font-mono); font-size:11px; cursor:pointer; }
+  .vbtn:hover{ border-color:var(--primary); color:var(--ink); }
+  footer{ border-top:1px solid var(--rule); margin-top:44px; padding:24px 0 12px; color:var(--ink-mute); font-size:13px; text-align:center; }
+  footer a{ color:var(--ink-dim); text-decoration:none; border-bottom:1px solid var(--rule); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="back" href="/lifecycle-os">← Lifecycle OS</a>
+      <span class="crumbs"><a href="/#projects">Portfolio</a> / <a href="/lifecycle-os">Lifecycle OS</a> / Mailer Studio</span>
+    </div>
+
+    <div class="eyebrow"><span class="dot"></span>Lifecycle OS · Mailer Studio</div>
+    <h1><span class="grad">Mailer Studio</span></h1>
+    <p class="lede">Give it a brief — it returns three designed, on-brand, ready-to-send HTML email variants, each quality-scored. Loaded with <strong>anchit-tandon.com</strong> by default; type any brand to generalise.</p>
+
+    <div class="form">
+      <div class="frow">
+        <div style="flex:1;min-width:180px"><label class="fl">Brand or person</label><input id="brand" type="text" placeholder="Defaults to Anchit Tandon" value="Anchit Tandon" autocomplete="off"></div>
+        <div style="flex:0 1 220px"><label class="fl">Website (optional)</label><input id="url" type="text" placeholder="anchit-tandon.com" value="anchit-tandon.com" autocomplete="off"></div>
+      </div>
+      <div style="margin-bottom:10px"><label class="fl">Campaign brief</label><textarea id="brief" placeholder="e.g. Reach out to hiring managers for a senior Product/Growth role — lead with compounding wins."></textarea></div>
+      <div class="frow">
+        <div style="flex:1;min-width:160px"><label class="fl">Audience segment (optional)</label><input id="segment" type="text" placeholder="e.g. High-growth D2C brands"></div>
+        <div style="flex:1;min-width:160px"><label class="fl">Offer / hook (optional)</label><input id="offer" type="text" placeholder="e.g. 20-minute intro call"></div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="go">Generate mailers</button>
+        <span class="chips">
+          <button class="chip" data-b="Anchit Tandon" data-u="anchit-tandon.com" data-br="Reach out to hiring managers for a senior Product/Growth role — lead with compounding wins.">↺ Anchit (default)</button>
+        </span>
+      </div>
+      <div class="loading" id="loading"><span class="spinner"></span><span id="loadingText">Writing variants…</span></div>
+      <div class="err" id="err"></div>
+    </div>
+
+    <div id="out">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:4px">
+        <div style="font-family:var(--font-display);font-size:clamp(20px,3vw,26px);font-weight:600" id="outTitle"></div>
+        <span class="badge" id="outBadge"></span>
+      </div>
+      <div class="vgrid" id="vgrid"></div>
+    </div>
+
+    <footer>
+      Mailer Studio · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>. Brand-agnostic, no proprietary data — the demo always returns designed HTML.
+    </footer>
+  </div>
+
+<script>
+(function(){
+  'use strict';
+  var $=function(id){return document.getElementById(id);};
+  var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  try{ var t=localStorage.getItem('anchit-theme'); if(t) document.documentElement.setAttribute('data-theme',t); }catch(e){}
+  // Pick up subject from the hub if set.
+  try{ var s=JSON.parse(localStorage.getItem('lifecycle-os-subject')||'null'); if(s&&s.brand){ $('brand').value=s.brand; $('url').value=s.url||''; } }catch(e){}
+
+  document.querySelectorAll('.chip').forEach(function(c){
+    c.addEventListener('click',function(){ $('brand').value=c.getAttribute('data-b')||''; $('url').value=c.getAttribute('data-u')||''; $('brief').value=c.getAttribute('data-br')||''; run(); });
+  });
+  $('go').addEventListener('click',run);
+
+  var phrases=['Reading the brief…','Locking the angle for each variant…','Writing on-brand copy…','Designing the HTML…','Scoring the variants…'];
+  var pv=0,timer=null,lastData=null;
+
+  function run(){
+    var payload={ brand:$('brand').value.trim(), url:$('url').value.trim(), brief:$('brief').value.trim(), segment:$('segment').value.trim(), offer:$('offer').value.trim() };
+    $('err').style.display='none'; $('out').style.display='none';
+    $('go').disabled=true; $('loading').classList.add('on'); pv=0; $('loadingText').textContent=phrases[0];
+    timer=setInterval(function(){ pv=(pv+1)%phrases.length; $('loadingText').textContent=phrases[pv]; },1300);
+    fetch('/api/mailer',{ method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify(payload) })
+      .then(function(r){ return r.json(); })
+      .then(function(d){ if(!d||!d.variants) throw new Error('failed'); lastData=d; render(d); })
+      .catch(function(){ $('err').textContent='Could not generate mailers just now — please try again in a moment.'; $('err').style.display='block'; })
+      .then(function(){ clearInterval(timer); $('go').disabled=false; $('loading').classList.remove('on'); });
+  }
+
+  function render(d){
+    $('outTitle').textContent=(d.brand||'Your brand')+' — mailer variants';
+    var badge=$('outBadge');
+    if(d.source==='ai'){ badge.textContent='AI-generated'; badge.className='badge ai'; }
+    else if(d.source==='anchit'){ badge.textContent='Marketing myself · anchit-tandon.com'; badge.className='badge ai'; }
+    else { badge.textContent='Sample variants'; badge.className='badge'; }
+    $('vgrid').innerHTML=(d.variants||[]).map(function(v,i){
+      var sc=v.score||{};
+      var bars=['strategy','copy','density','divergence'].filter(function(k){return sc[k]!=null;}).map(function(k){
+        return '<div class="srow"><span class="lab">'+k+'</span><span class="bar"><i style="width:'+Math.max(0,Math.min(100,sc[k]))+'%"></i></span><span class="num">'+sc[k]+'</span></div>';
+      }).join('');
+      return '<div class="vcard">'
+        +'<div class="vhead"><span class="vl">'+esc(v.label||('Variant '+(i+1)))+'</span><span class="vtype '+(v.type==='image'?'image':'')+'">'+esc(v.type||'text')+'</span></div>'
+        +'<div class="vmeta"><div class="s">'+esc(v.subject||'')+'</div><div class="p">'+esc(v.preview||'')+'</div></div>'
+        +'<div class="preview"><iframe title="'+esc(v.label||'')+' preview" sandbox=""></iframe></div>'
+        +'<div class="scores">'+bars+(sc.overall!=null?'<div class="srow"><span class="lab">overall</span><span class="voverall">'+sc.overall+'<span style="font-size:11px;color:var(--ink-mute);font-family:var(--font-mono)"> /100</span></span></div>':'')+'</div>'
+        +'<div class="vfoot"><button class="vbtn" data-act="copy" data-i="'+i+'">⧉ Copy HTML</button><button class="vbtn" data-act="dl" data-i="'+i+'">↓ Download .html</button><button class="vbtn" data-act="open" data-i="'+i+'">↗ Open</button></div>'
+        +'</div>';
+    }).join('');
+    // Inject HTML into each iframe via srcdoc (sandboxed, no scripts).
+    var frames=$('vgrid').querySelectorAll('iframe');
+    (d.variants||[]).forEach(function(v,i){ if(frames[i]) frames[i].srcdoc=v.html||''; });
+    // Wire per-variant actions.
+    $('vgrid').querySelectorAll('.vbtn').forEach(function(b){
+      b.addEventListener('click',function(){
+        var i=+b.getAttribute('data-i'), act=b.getAttribute('data-act'), v=(lastData.variants||[])[i]; if(!v) return;
+        if(act==='copy'){ var o=b.textContent; (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(v.html):Promise.resolve()).then(function(){ b.textContent='✓ Copied'; setTimeout(function(){b.textContent=o;},1500); },function(){}); }
+        else if(act==='dl'){ var blob=new Blob([v.html],{type:'text/html'}); var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=(d.brand||'mailer').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-variant-'+String.fromCharCode(65+i)+'.html'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(a.href);},2000); }
+        else if(act==='open'){ var w=window.open('','_blank'); if(w){ w.document.open(); w.document.write(v.html); w.document.close(); } }
+      });
+    });
+    $('out').style.display='block';
+    $('out').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  // Auto-generate on load with the default subject.
+  run();
+})();
+</script>
+</body>
+</html>
