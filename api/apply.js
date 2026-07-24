@@ -174,8 +174,10 @@ async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
-  const supabaseUrl = process.env.SUPABASE_URL || 'https://rhvmpzjeyjminlvuhozx.supabase.co';
-  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJodm1wempleWptaW5sdnVob3p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4ODE2MTgsImV4cCI6MjA5NTQ1NzYxOH0.qmwLy5GYg5ymby-TY1Jc2k9s49XmqoAX_9NMq2ILjdg';
+  // Env-driven only — no hardcoded project. Set SUPABASE_URL + SUPABASE_ANON_KEY
+  // to a project you own to gate behind Google sign-in; leave unset to run open.
+  const supabaseUrl = (process.env.SUPABASE_URL || '').trim();
+  const supabaseAnonKey = (process.env.SUPABASE_ANON_KEY || '').trim();
   const auth = (req.headers['authorization'] || '').toString();
   const gate = await verifySupabase(auth.replace(/^Bearer\s+/i, '').trim(), supabaseUrl, supabaseAnonKey);
   if (!gate.ok) return res.status(401).json({ error: 'signin_required' });
