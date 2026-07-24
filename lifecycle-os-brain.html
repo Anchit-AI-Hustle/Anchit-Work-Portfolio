@@ -484,7 +484,7 @@ window.setDur = function(d){
 function renderPlan(){
   if(!PLAN.length){ $('plan').innerHTML = '<tr><td colspan="9" style="color:#48524c">No plan yet — click “Run Daily Sync”.</td></tr>'; return; }
   $('entries').textContent = PLAN.length;
-  const isGenerated = e => !!(e.generated_campaign_id || e.status === 'approved' || e.status === 'final' || (e.__prebuilt && e.__prebuilt.campaign_id));
+  const isGenerated = e => !!(e.generated_campaign_id || e.status === 'approved' || e.status === 'final' || e.__built || (e.__prebuilt && e.__prebuilt.campaign_id));
   $('pending').textContent = PLAN.filter(e => !isGenerated(e)).length;
   const shown = PLAN.filter(slotVisible).length;
   const mc = $('mktcount'); if(mc) mc.textContent = SELECTED_MKT.size ? `Region: showing ${shown}` : `all regions`;
@@ -1039,7 +1039,7 @@ async function runSync(){
 // (mailer + ads + landing page). No approval step — this simply builds the
 // definitive version so it can be viewed and downloaded. Returns the campaign
 // payload (also cached) or throws.
-async function generateEntry(i, { silent = false } = {}){
+async function generateEntry(i, { silent = false, approve = false } = {}){
   const e = PLAN[i];
   let row = $('exprow-'+i), body = $('expbody-'+i);
   if(!silent){
@@ -1049,8 +1049,9 @@ async function generateEntry(i, { silent = false } = {}){
   }
   await new Promise(r=>setTimeout(r,200));
   const data = SB_preview(e);
-  e.status = 'final';   // locked/approved; no hosted /lp id in this static build
-  PREVIEW_CACHE[e.id] = data;   // cache the FINAL so re-opening always shows it
+  e.__built = true;                      // assets built + cached (does NOT approve)
+  if(approve) e.status = 'final';        // only the Approve flows lock/approve a slot
+  PREVIEW_CACHE[e.id] = data;   // cache so re-opening always shows the same assets
   if(!silent){
     renderPlan();
     row = $('exprow-'+i); body = $('expbody-'+i);
@@ -1180,7 +1181,7 @@ async function approveAll(){
     if(rev) rev.innerHTML = '<span class="pvnote"><span class="sbspin"></span> approving…</span>';
     if(det) det.innerHTML = `<span class="sbspin"></span> Approving <b>${n+1}</b> of <b>${targets.length}</b>: ${esc(e.date)} ${esc(e.market)} — ${esc(e.objective)} &nbsp; ✓${ok}${fails.length?` ✕${fails.length}`:''} `+
       `<button class="btn sm secondary" onclick="window.__SB_GEN_CANCEL=true">Stop</button>`;
-    try{ await generateEntry(i, { silent: true }); ok++; }
+    try{ await generateEntry(i, { silent: true, approve: true }); ok++; }
     catch(err){ fails.push(`${e.date} ${e.market}: ${err.message}`); if(rev) rev.innerHTML = `<span style="color:#b91c1c;font-size:11px">approve failed: ${esc(err.message)}</span>`; }
     await new Promise(r=>setTimeout(r, 0));   // yield → the UI repaints each step
   }
@@ -1198,7 +1199,7 @@ async function approveRow(i){
   const rev = $('rev-'+i);
   if(rev) rev.innerHTML = '<span class="pvnote"><span class="spinner"></span> approving — building final assets…</span>';
   try{
-    await generateEntry(i, { silent: true });
+    await generateEntry(i, { silent: true, approve: true });
     renderPlan();
   }catch(err){ if(rev) rev.innerHTML = `<span style="color:#b91c1c;font-size:11px">approve failed: ${esc(err.message)}</span>`; }
 }
