@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Lifecycle OS — an AI-led D2C growth operating system · Anchit Tandon</title>
+<meta name="description" content="Lifecycle OS — a brand-agnostic, AI-led D2C growth operating system: data analysis, a marketing calendar, a mailer studio, competitive intelligence and a smart-brain autopilot, in one loop. Defaults to anchit-tandon.com; works for any brand." />
+<meta name="theme-color" content="#0F0D0A" />
+<link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* anchit-tandon.com champagne palette (dark default + light) */
+  :root, :root[data-theme="dark"]{
+    --bg:#0F0D0A; --bg-elev:#1A1814; --bg-deep:#060503;
+    --ink:#FBF5EC; --ink-dim:#A39E94; --ink-mute:#5A554E;
+    --rule:#2A261F; --rule-strong:#3D3830;
+    --primary:#FF6940; --primary-deep:#FF4D1F; --primary-soft:rgba(255,105,64,.12);
+    --accent:#2EE5AC; --accent-soft:rgba(46,229,172,.10); --gold:#c9a96e;
+    --font-display:'Fraunces',ui-serif,serif; --font-body:'Inter',ui-sans-serif,system-ui,sans-serif; --font-mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  :root[data-theme="light"]{
+    --bg:#FBF5EC; --bg-elev:#FFFFFF; --bg-deep:#F2EADC;
+    --ink:#161312; --ink-dim:#5A554E; --ink-mute:#A39E94;
+    --rule:#E5DCC7; --rule-strong:#C9BFA8;
+    --primary:#FF4D1F; --primary-deep:#D63B12; --primary-soft:rgba(255,77,31,.10);
+    --accent:#00B584; --accent-soft:rgba(0,181,132,.10); --gold:#a8863f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{ background:var(--bg); color:var(--ink); font-family:var(--font-body); line-height:1.6; -webkit-font-smoothing:antialiased; overflow-x:hidden; min-height:100vh; }
+  body::before{ content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(44% 38% at 16% 8%, rgba(255,105,64,.12), transparent 60%),
+      radial-gradient(40% 36% at 88% 18%, rgba(201,169,110,.12), transparent 62%),
+      radial-gradient(46% 42% at 72% 92%, rgba(46,229,172,.07), transparent 64%); }
+  .wrap{ position:relative; z-index:1; max-width:1120px; margin:0 auto; padding:clamp(20px,4vw,44px); }
+  a{ color:inherit; }
+  .top{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:clamp(26px,5vw,54px); }
+  .back{ display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:12px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-dim); text-decoration:none; padding:8px 14px; border:1px solid var(--rule-strong); border-radius:99px; transition:border-color .2s,color .2s; }
+  .back:hover{ border-color:var(--primary); color:var(--ink); }
+  .brandmark{ display:inline-flex; align-items:center; gap:10px; font-family:var(--font-mono); font-size:12px; color:var(--ink-mute); letter-spacing:.06em; }
+  .brandmark img{ width:26px; height:26px; border-radius:7px; }
+
+  .eyebrow{ font-family:var(--font-mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--primary); display:inline-flex; align-items:center; gap:8px; margin-bottom:16px; }
+  .eyebrow .dot{ width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px var(--accent); }
+  h1{ font-family:var(--font-display); font-weight:600; font-size:clamp(38px,7vw,72px); line-height:1.02; letter-spacing:-.02em; margin-bottom:18px; }
+  h1 .grad{ background:linear-gradient(100deg,var(--primary),var(--gold)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  .lede{ font-size:clamp(16px,2.3vw,21px); color:var(--ink-dim); max-width:70ch; margin-bottom:30px; font-weight:300; }
+  .lede strong{ color:var(--ink); font-weight:500; }
+
+  /* subject bar */
+  .subject{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.008)); border:1px solid var(--rule-strong); border-radius:16px; padding:16px; margin-bottom:clamp(28px,5vw,48px); }
+  .subject .lbl{ font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-mute); }
+  .subject input{ flex:1; min-width:200px; background:var(--bg-deep); border:1px solid var(--rule-strong); border-radius:10px; padding:12px 14px; color:var(--ink); font-family:var(--font-body); font-size:15px; outline:none; }
+  .subject input:focus{ border-color:var(--primary); }
+  .subject .hint{ font-size:12.5px; color:var(--ink-mute); flex-basis:100%; }
+
+  .sectitle{ font-family:var(--font-mono); font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-mute); margin:28px 0 14px; display:flex; align-items:center; gap:10px; }
+  .sectitle::after{ content:''; flex:1; height:1px; background:var(--rule); }
+
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px; }
+  .tool{ display:flex; flex-direction:column; gap:8px; background:var(--bg-elev); border:1px solid var(--rule); border-radius:16px; padding:20px; text-decoration:none; color:inherit; transition:transform .15s, border-color .2s, box-shadow .2s; position:relative; overflow:hidden; }
+  .tool:hover{ transform:translateY(-2px); border-color:var(--primary); box-shadow:0 16px 40px rgba(0,0,0,.35); }
+  .tool .ic{ font-size:26px; line-height:1; }
+  .tool h3{ font-family:var(--font-display); font-size:20px; font-weight:600; }
+  .tool p{ font-size:13.5px; color:var(--ink-dim); flex:1; }
+  .tool .row{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:6px; }
+  .badge{ font-family:var(--font-mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; padding:4px 9px; border-radius:99px; border:1px solid var(--rule-strong); color:var(--ink-mute); }
+  .badge.live{ border-color:var(--accent); color:var(--accent); }
+  .badge.soon{ border-color:var(--gold); color:var(--gold); }
+  .tool .go{ font-family:var(--font-mono); font-size:12px; color:var(--primary); }
+  .tool.disabled{ opacity:.72; cursor:default; }
+  .tool.disabled:hover{ transform:none; border-color:var(--rule); box-shadow:none; }
+
+  .loop{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-top:6px; }
+  .step{ background:var(--bg-elev); border:1px solid var(--rule); border-radius:14px; padding:16px; }
+  .step .n{ font-family:var(--font-mono); font-size:11px; color:var(--primary); margin-bottom:6px; }
+  .step .st{ font-weight:600; margin-bottom:3px; font-size:14.5px; }
+  .step p{ font-size:12.5px; color:var(--ink-dim); }
+
+  footer{ border-top:1px solid var(--rule); margin-top:clamp(40px,7vw,72px); padding:26px 0 12px; color:var(--ink-mute); font-size:13px; text-align:center; }
+  footer a{ color:var(--ink-dim); border-bottom:1px solid var(--rule); text-decoration:none; }
+  .theme-toggle{ background:transparent; border:1px solid var(--rule-strong); color:var(--ink-dim); border-radius:99px; padding:7px 12px; font-family:var(--font-mono); font-size:11px; cursor:pointer; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="back" href="/#projects">← Anchit Tandon · Portfolio</a>
+      <span style="display:inline-flex;gap:10px;align-items:center;">
+        <button class="theme-toggle" id="themeToggle" type="button">◐ Theme</button>
+        <span class="brandmark"><img src="AnchitTandon-AppLogo.png" alt="" />Side hustle · a growth OS</span>
+      </span>
+    </div>
+
+    <div class="eyebrow"><span class="dot"></span>An AI-led D2C growth operating system</div>
+    <h1><span class="grad">Lifecycle OS</span></h1>
+    <p class="lede">One operating loop for D2C growth — <strong>read the data, plan the calendar, generate the mailers, and let it run</strong>. Brand-agnostic and grounded in industry benchmarks; it defaults to <strong>anchit-tandon.com</strong> as the subject and works for any brand you plug in. No proprietary data required.</p>
+
+    <div class="subject">
+      <span class="lbl">Subject</span>
+      <input id="brand" type="text" placeholder="Brand or person — defaults to Anchit Tandon" value="Anchit Tandon" autocomplete="off" />
+      <input id="url" type="text" placeholder="Website (optional) — e.g. anchit-tandon.com" value="anchit-tandon.com" autocomplete="off" style="flex:0 1 240px;" />
+      <span class="hint">The subject flows into every tool below. Type any brand to generalise; leave it as me for the default demo.</span>
+    </div>
+
+    <!-- CORE PIPELINE -->
+    <div class="sectitle">The pipeline · data → plan → generate</div>
+    <div class="grid" id="coreGrid"></div>
+
+    <!-- INTELLIGENCE + CREATIVE -->
+    <div class="sectitle">Intelligence &amp; creative</div>
+    <div class="grid" id="intelGrid"></div>
+
+    <!-- AUTOPILOT -->
+    <div class="sectitle">Autopilot · the closed loop</div>
+    <div class="loop">
+      <div class="step"><div class="n">01 · Analyze</div><div class="st">Read</div><p>Segments, cohorts and benchmarks from the subject's industry.</p></div>
+      <div class="step"><div class="n">02 · Plan</div><div class="st">Calendar</div><p>A segment- and cadence-aware send plan.</p></div>
+      <div class="step"><div class="n">03 · Prebuild</div><div class="st">Draft</div><p>On-brand mailer variants pre-generated per send.</p></div>
+      <div class="step"><div class="n">04 · Review</div><div class="st">Approve</div><p>Human-in-the-loop; every variant quality-scored.</p></div>
+      <div class="step"><div class="n">05 · Ship</div><div class="st">Measure</div><p>KPIs close the loop and feed the next cycle.</p></div>
+    </div>
+
+    <footer>
+      A side-hustle growth OS by <a href="/#projects">Anchit Tandon</a> · lives on the same site as the portfolio, at <code>/lifecycle-os</code>. Built brand-agnostic — no proprietary data.
+    </footer>
+  </div>
+
+<script>
+(function(){
+  'use strict';
+  var $=function(id){return document.getElementById(id);};
+  // Theme toggle (persisted), mirrors the portfolio.
+  try{ var t=localStorage.getItem('anchit-theme'); if(t) document.documentElement.setAttribute('data-theme',t); }catch(e){}
+  $('themeToggle').addEventListener('click',function(){
+    var cur=document.documentElement.getAttribute('data-theme')==='light'?'light':'dark';
+    var next=cur==='light'?'dark':'light';
+    document.documentElement.setAttribute('data-theme',next);
+    try{ localStorage.setItem('anchit-theme',next); }catch(e){}
+  });
+
+  // Tool registry — mirrors the Lifecycle OS surface, generalised + de-branded.
+  // status: 'live' links out now; 'soon' is scaffolded for a later pass.
+  var CORE=[
+    { ic:'📊', name:'Data Analysis', desc:'RFM segments, cohort retention, send-time and cross-sell affinity — benchmarked to the subject’s industry.', href:'/lifecycle-os-analysis', status:'soon' },
+    { ic:'🗓️', name:'Marketing Calendar', desc:'A 30-day, segment- and cadence-aware send calendar with seasonality and guardrails.', href:'/lifecycle-os-calendar', status:'soon' },
+    { ic:'✉️', name:'Mailer Studio', desc:'Turn a brief into a designed, on-brand HTML mailer — multiple quality-scored variants per send.', href:'/lifecycle-os-studio', status:'soon' },
+  ];
+  var INTEL=[
+    { ic:'🧠', name:'Smart Brain', desc:'The analyze → plan → prebuild → review → approve autopilot over a rolling horizon.', href:'/lifecycle-os-brain', status:'soon' },
+    { ic:'🔭', name:'Competitive Intelligence', desc:'Profile the peer set the way SimilarWeb / SEMrush would — traffic mix, AOV and repeat-rate bands.', href:'/lifecycle-os-intel', status:'soon' },
+    { ic:'🎯', name:'Full lifecycle plan', desc:'The end-to-end one-shot: segments, calendar, mailer, retention flows and KPIs in one pass.', href:'/d2c-lifecycle-os', status:'live' },
+    { ic:'🖼️', name:'Landing Page Studio', desc:'Generate an on-brand, conversion-shaped landing page from a positioning brief.', href:'/lifecycle-os-landing', status:'soon' },
+    { ic:'📚', name:'Retention Playbook', desc:'A library of lifecycle plays — triggers, flows and offers — tuned to the subject’s category.', href:'/lifecycle-os-playbook', status:'soon' },
+    { ic:'🔌', name:'Connectors', desc:'Where a store + ESP would plug in (Shopify, Klaviyo, ESP) — off by default, no data required.', href:'/lifecycle-os-connectors', status:'soon' },
+  ];
+  function card(t){
+    var live=t.status==='live';
+    var el=document.createElement(live?'a':'div');
+    el.className='tool'+(live?'':' disabled');
+    if(live) el.href=t.href;
+    el.innerHTML='<div class="ic">'+t.ic+'</div><h3>'+t.name+'</h3><p>'+t.desc+'</p>'
+      +'<div class="row"><span class="badge '+(live?'live':'soon')+'">'+(live?'Live':'Building')+'</span>'
+      +(live?'<span class="go">Open ↗</span>':'<span class="go" style="color:var(--ink-mute)">Next pass</span>')+'</div>';
+    return el;
+  }
+  CORE.forEach(function(t){ $('coreGrid').appendChild(card(t)); });
+  INTEL.forEach(function(t){ $('intelGrid').appendChild(card(t)); });
+
+  // Persist the subject so tool pages can pick it up.
+  function saveSubject(){ try{ localStorage.setItem('lifecycle-os-subject', JSON.stringify({brand:$('brand').value.trim(), url:$('url').value.trim()})); }catch(e){} }
+  $('brand').addEventListener('input',saveSubject); $('url').addEventListener('input',saveSubject); saveSubject();
+})();
+</script>
+</body>
+</html>
