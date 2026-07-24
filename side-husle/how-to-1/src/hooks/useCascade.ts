@@ -22,7 +22,20 @@ export function useCascade() {
       });
       if (!r.ok) throw new Error(`Cascade failed (${r.status})`);
       const result = (await r.json()) as CascadeResult;
-      if (result.guide) result.guide.task = title;   // keep the displayed title clean
+      // If the server had no provider keys (or all providers failed) it returns
+      // its OWN deterministic offlineGuide built from the raw `task` — which,
+      // for an optimized ask, is the long "Act as a world-class instructional
+      // designer…" paragraph, so its summary/steps read wrong ("Gather
+      // everything you need to Act as…"). Detect that and rebuild the whole
+      // guide from the clean `title`, not just the header.
+      const models = result?.guide?.provenance?.models || [];
+      const serverOffline = models.length === 1 && models[0] === 'offline';
+      if (serverOffline) {
+        const rebuilt = offlineCascadeResult(title);
+        setState({ loading: false, result: rebuilt, error: null, offline: true });
+        return rebuilt;
+      }
+      if (result.guide) result.guide.task = title;   // real guide → keep the displayed title clean
       setState({ loading: false, result, error: null, offline: false });
       return result;
     } catch {
