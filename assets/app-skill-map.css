@@ -1,0 +1,1174 @@
+/* Anchit App Skill Map — isolated, dependency-free cross-app navigation. */
+#anchit-app-skill-map-root,
+#anchit-app-skill-map-root * {
+  box-sizing: border-box;
+}
+
+#anchit-app-skill-map-root {
+  --asm-bg: color-mix(in srgb, var(--bg, #0f0d0a) 94%, #000 6%);
+  --asm-surface: color-mix(in srgb, var(--bg-elev, #1a1814) 92%, #111 8%);
+  --asm-surface-2: color-mix(in srgb, var(--bg-deep, #060503) 90%, #202028 10%);
+  --asm-ink: var(--ink, #fbf5ec);
+  --asm-dim: var(--ink-dim, #a39e94);
+  --asm-muted: var(--ink-mute, #69645b);
+  --asm-rule: color-mix(in srgb, var(--rule, #2a261f) 76%, transparent 24%);
+  --asm-rule-strong: color-mix(in srgb, var(--rule-strong, #3d3830) 88%, #fff 12%);
+  --asm-accent: var(--primary, #ff6940);
+  --asm-accent-2: var(--accent, #2ee5ac);
+  --asm-warning: #f0b34c;
+  --asm-complete: #54d99a;
+  --asm-blue: #70a7ff;
+  --asm-shadow: 0 28px 90px rgba(0, 0, 0, .52);
+  --asm-font-body: var(--font-body, Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+  --asm-font-display: var(--font-display, Fraunces, Georgia, serif);
+  --asm-font-mono: var(--font-mono, "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace);
+  position: relative;
+  z-index: 2147482000;
+  font-family: var(--asm-font-body);
+  color: var(--asm-ink);
+}
+
+html.asm-modal-open,
+html.asm-modal-open body {
+  overflow: hidden !important;
+}
+
+.asm-sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.asm-launcher {
+  position: fixed;
+  left: calc(var(--sidebar-w, 0px) + 18px);
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  z-index: 2147482001;
+  min-width: 186px;
+  min-height: 54px;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 11px 8px 9px;
+  border: 1px solid color-mix(in srgb, var(--asm-accent) 38%, var(--asm-rule));
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--asm-surface) 90%, transparent 10%);
+  -webkit-backdrop-filter: blur(20px) saturate(1.15);
+  backdrop-filter: blur(20px) saturate(1.15);
+  box-shadow: 0 14px 44px rgba(0, 0, 0, .34), 0 0 0 1px rgba(255, 255, 255, .025) inset;
+  color: var(--asm-ink);
+  cursor: pointer;
+  text-align: left;
+  transition: transform .24s ease, border-color .24s ease, box-shadow .24s ease, background .24s ease;
+  isolation: isolate;
+}
+
+.asm-launcher::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(circle at 15% 10%, color-mix(in srgb, var(--asm-accent) 18%, transparent), transparent 48%);
+  pointer-events: none;
+}
+
+.asm-launcher:hover,
+.asm-launcher:focus-visible {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--asm-accent) 72%, var(--asm-rule));
+  box-shadow: 0 18px 54px rgba(0, 0, 0, .42), 0 0 28px color-mix(in srgb, var(--asm-accent) 16%, transparent);
+  outline: none;
+}
+
+.asm-launcher-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--asm-accent) 17%, transparent);
+  color: var(--asm-accent);
+  border: 1px solid color-mix(in srgb, var(--asm-accent) 30%, transparent);
+}
+
+.asm-launcher-icon svg,
+.asm-icon-button svg,
+.asm-search svg,
+.asm-text-button svg,
+.asm-open-app svg,
+.asm-cycle-status svg,
+.asm-brain-action svg,
+.asm-recommendation button svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: 0 0 auto;
+}
+
+.asm-launcher-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.asm-launcher-copy strong {
+  font-size: 12px;
+  line-height: 1.15;
+  letter-spacing: .01em;
+  color: var(--asm-ink);
+}
+
+.asm-launcher-copy small {
+  overflow: hidden;
+  color: var(--asm-dim);
+  font-family: var(--asm-font-mono);
+  font-size: 9px;
+  line-height: 1.3;
+  letter-spacing: .04em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.asm-launcher-ring {
+  --asm-ring-progress: 0;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: conic-gradient(var(--asm-complete) calc(var(--asm-ring-progress) * 1turn), color-mix(in srgb, var(--asm-rule-strong) 76%, transparent) 0);
+}
+
+.asm-launcher-ring span {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--asm-surface);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .05) inset;
+}
+
+.asm-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 2147482002;
+  display: grid;
+  place-items: center;
+  padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .25s ease, visibility .25s ease;
+}
+
+.asm-shell.asm-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.asm-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background:
+    radial-gradient(circle at 18% 12%, color-mix(in srgb, var(--asm-accent) 14%, transparent), transparent 34%),
+    radial-gradient(circle at 80% 85%, color-mix(in srgb, var(--asm-accent-2) 10%, transparent), transparent 36%),
+    rgba(3, 3, 7, .82);
+  -webkit-backdrop-filter: blur(12px) saturate(.8);
+  backdrop-filter: blur(12px) saturate(.8);
+  cursor: default;
+}
+
+.asm-panel {
+  position: relative;
+  width: min(96vw, 1580px);
+  height: min(94vh, 1000px);
+  max-height: calc(100dvh - 36px);
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--asm-rule-strong) 82%, var(--asm-accent) 18%);
+  border-radius: 28px;
+  background: color-mix(in srgb, var(--asm-bg) 97%, transparent 3%);
+  box-shadow: var(--asm-shadow), 0 0 0 1px rgba(255, 255, 255, .025) inset;
+  color: var(--asm-ink);
+  transform: translateY(16px) scale(.985);
+  opacity: 0;
+  transition: transform .28s cubic-bezier(.16, 1, .3, 1), opacity .22s ease;
+  isolation: isolate;
+}
+
+.asm-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--asm-rule) 44%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--asm-rule) 44%, transparent) 1px, transparent 1px);
+  background-size: 34px 34px;
+  opacity: .22;
+  pointer-events: none;
+  mask-image: linear-gradient(to bottom, #000 0, transparent 62%);
+}
+
+.asm-shell.asm-open .asm-panel {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.asm-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 20px;
+  padding: clamp(20px, 2.5vw, 34px) clamp(20px, 3vw, 42px) 18px;
+  border-bottom: 1px solid var(--asm-rule);
+  background: color-mix(in srgb, var(--asm-bg) 88%, transparent 12%);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+.asm-heading {
+  min-width: 0;
+}
+
+.asm-kicker,
+.asm-node-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--asm-accent);
+  font-family: var(--asm-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.asm-kicker::before,
+.asm-node-eyebrow::before {
+  content: "";
+  width: 20px;
+  height: 1px;
+  background: currentColor;
+}
+
+.asm-heading h2 {
+  margin: 5px 0 7px;
+  color: var(--asm-ink);
+  font-family: var(--asm-font-display);
+  font-size: clamp(28px, 4vw, 56px);
+  font-weight: 520;
+  letter-spacing: -.035em;
+  line-height: 1;
+}
+
+.asm-heading p {
+  max-width: 850px;
+  margin: 0;
+  color: var(--asm-dim);
+  font-size: clamp(13px, 1.4vw, 16px);
+  line-height: 1.55;
+}
+
+.asm-icon-button {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--asm-rule);
+  border-radius: 14px;
+  background: var(--asm-surface);
+  color: var(--asm-dim);
+  cursor: pointer;
+  transition: color .2s ease, border-color .2s ease, transform .2s ease, background .2s ease;
+}
+
+.asm-icon-button:hover,
+.asm-icon-button:focus-visible {
+  color: var(--asm-ink);
+  border-color: var(--asm-accent);
+  background: color-mix(in srgb, var(--asm-accent) 10%, var(--asm-surface));
+  transform: rotate(3deg);
+  outline: none;
+}
+
+.asm-toolbar {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px clamp(20px, 3vw, 42px);
+  border-bottom: 1px solid var(--asm-rule);
+  background: color-mix(in srgb, var(--asm-surface) 62%, transparent 38%);
+}
+
+.asm-search {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border: 1px solid var(--asm-rule-strong);
+  border-radius: 14px;
+  background: var(--asm-surface-2);
+  color: var(--asm-dim);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.asm-search:focus-within {
+  border-color: var(--asm-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--asm-accent) 14%, transparent);
+}
+
+.asm-search input {
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--asm-ink);
+  font: 500 13px/1 var(--asm-font-body);
+}
+
+.asm-search input::placeholder {
+  color: var(--asm-muted);
+}
+
+.asm-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--asm-rule);
+  border-radius: 12px;
+  color: var(--asm-dim);
+  font-family: var(--asm-font-mono);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.asm-summary strong {
+  color: var(--asm-ink);
+  font-size: 11px;
+}
+
+.asm-text-button {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid var(--asm-rule);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--asm-dim);
+  font: 600 11px/1 var(--asm-font-body);
+  cursor: pointer;
+  transition: color .2s ease, border-color .2s ease, background .2s ease;
+}
+
+.asm-text-button:hover,
+.asm-text-button:focus-visible {
+  color: var(--asm-ink);
+  border-color: var(--asm-accent);
+  background: color-mix(in srgb, var(--asm-accent) 9%, transparent);
+  outline: none;
+}
+
+.asm-recommendation {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 11px clamp(20px, 3vw, 42px);
+  border-bottom: 1px solid color-mix(in srgb, var(--asm-accent) 22%, var(--asm-rule));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--asm-accent) 11%, transparent), color-mix(in srgb, var(--asm-accent-2) 7%, transparent));
+  color: var(--asm-dim);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.asm-recommendation[hidden] {
+  display: none;
+}
+
+.asm-recommendation strong {
+  color: var(--asm-ink);
+}
+
+.asm-recommendation button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border: 1px solid color-mix(in srgb, var(--asm-accent) 35%, var(--asm-rule));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--asm-accent) 13%, var(--asm-surface));
+  color: var(--asm-ink);
+  font: 650 11px/1 var(--asm-font-body);
+  cursor: pointer;
+}
+
+.asm-content {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--asm-rule-strong) transparent;
+}
+
+.asm-content::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.asm-content::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 99px;
+  background: var(--asm-rule-strong);
+  background-clip: content-box;
+}
+
+.asm-tree {
+  min-width: 1260px;
+  padding: 28px clamp(20px, 3vw, 42px) 44px;
+}
+
+.asm-brain-node {
+  position: relative;
+  width: min(920px, calc(100% - 80px));
+  min-height: 150px;
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 22px;
+  margin: 0 auto;
+  padding: 20px 22px;
+  border: 1px solid color-mix(in srgb, var(--asm-accent) 42%, var(--asm-rule));
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 9% 50%, color-mix(in srgb, var(--asm-accent) 17%, transparent), transparent 30%),
+    color-mix(in srgb, var(--asm-surface) 96%, transparent 4%);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .22), 0 0 38px color-mix(in srgb, var(--asm-accent) 9%, transparent);
+}
+
+.asm-brain-orbit {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--asm-accent) 85%, #fff 15%) 0 7%, color-mix(in srgb, var(--asm-accent) 32%, transparent) 8% 24%, transparent 25%);
+}
+
+.asm-brain-orbit::after {
+  content: "AI";
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid color-mix(in srgb, var(--asm-accent) 64%, #fff 10%);
+  border-radius: 50%;
+  background: var(--asm-surface-2);
+  color: var(--asm-ink);
+  font-family: var(--asm-font-mono);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  box-shadow: 0 0 24px color-mix(in srgb, var(--asm-accent) 30%, transparent);
+}
+
+.asm-brain-orbit i {
+  position: absolute;
+  inset: 8px;
+  border: 1px solid color-mix(in srgb, var(--asm-accent) 32%, transparent);
+  border-radius: 50%;
+  animation: asmOrbit 15s linear infinite;
+}
+
+.asm-brain-orbit i::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--asm-accent);
+  box-shadow: 0 0 10px var(--asm-accent);
+}
+
+.asm-brain-orbit i:nth-child(2) {
+  inset: 16px;
+  border-color: color-mix(in srgb, var(--asm-accent-2) 32%, transparent);
+  animation-duration: 20s;
+  animation-direction: reverse;
+}
+
+.asm-brain-orbit i:nth-child(2)::after {
+  background: var(--asm-accent-2);
+  box-shadow: 0 0 10px var(--asm-accent-2);
+}
+
+.asm-brain-orbit i:nth-child(3) {
+  inset: 1px;
+  opacity: .35;
+  animation-duration: 27s;
+}
+
+@keyframes asmOrbit {
+  to { transform: rotate(360deg); }
+}
+
+.asm-brain-copy {
+  min-width: 0;
+}
+
+.asm-brain-copy h3 {
+  margin: 4px 0 6px;
+  color: var(--asm-ink);
+  font-family: var(--asm-font-display);
+  font-size: clamp(23px, 2.6vw, 34px);
+  font-weight: 550;
+  letter-spacing: -.025em;
+}
+
+.asm-brain-copy p {
+  margin: 0;
+  color: var(--asm-dim);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.asm-capability-row,
+.asm-capabilities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.asm-capability-row {
+  margin-top: 12px;
+}
+
+.asm-capability-row span,
+.asm-capabilities span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 23px;
+  padding: 4px 8px;
+  border: 1px solid var(--asm-rule);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--asm-surface-2) 78%, transparent 22%);
+  color: var(--asm-dim);
+  font-family: var(--asm-font-mono);
+  font-size: 8.5px;
+  letter-spacing: .02em;
+  line-height: 1.25;
+}
+
+.asm-brain-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 15px;
+  border: 1px solid color-mix(in srgb, var(--asm-accent) 45%, var(--asm-rule));
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--asm-accent) 14%, var(--asm-surface));
+  color: var(--asm-ink);
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: transform .2s ease, border-color .2s ease, background .2s ease;
+}
+
+.asm-brain-action:hover,
+.asm-brain-action:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--asm-accent);
+  background: color-mix(in srgb, var(--asm-accent) 22%, var(--asm-surface));
+  outline: none;
+}
+
+.asm-trunk {
+  position: relative;
+  width: 2px;
+  height: 38px;
+  margin: 0 auto;
+  background: linear-gradient(to bottom, var(--asm-accent), color-mix(in srgb, var(--asm-accent) 36%, var(--asm-rule)));
+}
+
+.asm-trunk::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  width: min(1190px, calc(100vw - 140px));
+  height: 2px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--asm-accent) 48%, var(--asm-rule)) 7%, color-mix(in srgb, var(--asm-accent-2) 42%, var(--asm-rule)) 93%, transparent);
+}
+
+.asm-departments {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(230px, 1fr));
+  align-items: start;
+  gap: 14px;
+  padding-top: 24px;
+}
+
+.asm-department {
+  position: relative;
+  min-width: 0;
+}
+
+.asm-department::before {
+  content: "";
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  width: 2px;
+  height: 24px;
+  transform: translateX(-50%);
+  background: color-mix(in srgb, var(--asm-accent) 38%, var(--asm-rule));
+}
+
+.asm-department-head {
+  min-height: 112px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 9px;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--asm-accent) 20%, var(--asm-rule));
+  border-radius: 17px;
+  background: color-mix(in srgb, var(--asm-surface) 90%, transparent 10%);
+}
+
+.asm-department-index {
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--asm-accent) 15%, transparent);
+  color: var(--asm-accent);
+  font-family: var(--asm-font-mono);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.asm-department-head h3 {
+  margin: 1px 0 5px;
+  color: var(--asm-ink);
+  font-size: 12.5px;
+  font-weight: 750;
+  letter-spacing: -.01em;
+  line-height: 1.25;
+}
+
+.asm-department-head p {
+  margin: 0;
+  color: var(--asm-dim);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.asm-department-progress {
+  display: inline-flex;
+  align-items: center;
+  min-height: 23px;
+  padding: 0 7px;
+  border: 1px solid var(--asm-rule);
+  border-radius: 999px;
+  color: var(--asm-dim);
+  font-family: var(--asm-font-mono);
+  font-size: 8px;
+  white-space: nowrap;
+}
+
+.asm-node-stack {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  padding: 22px 0 0 14px;
+}
+
+.asm-node-stack::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 16px;
+  left: 1px;
+  width: 1px;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--asm-accent) 38%, var(--asm-rule)), var(--asm-rule));
+}
+
+.asm-app-node {
+  position: relative;
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid var(--asm-rule);
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--asm-surface) 92%, transparent 8%);
+  box-shadow: 0 7px 20px rgba(0, 0, 0, .12);
+  transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, background .22s ease;
+}
+
+.asm-app-node::before {
+  content: "";
+  position: absolute;
+  top: 22px;
+  left: -14px;
+  width: 13px;
+  height: 1px;
+  background: var(--asm-rule-strong);
+}
+
+.asm-app-node::after {
+  content: "";
+  position: absolute;
+  top: 18px;
+  left: -18px;
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--asm-bg);
+  border-radius: 50%;
+  background: var(--asm-muted);
+  box-shadow: 0 0 0 1px var(--asm-rule-strong);
+}
+
+.asm-app-node:hover,
+.asm-app-node:focus-within {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--asm-accent) 48%, var(--asm-rule));
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .2);
+}
+
+.asm-app-node.asm-status-current {
+  border-color: color-mix(in srgb, var(--asm-accent) 68%, var(--asm-rule));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--asm-accent) 11%, var(--asm-surface)), var(--asm-surface));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--asm-accent) 9%, transparent), 0 12px 32px rgba(0, 0, 0, .18);
+}
+
+.asm-app-node.asm-status-current::after {
+  background: var(--asm-accent);
+  box-shadow: 0 0 12px var(--asm-accent), 0 0 0 1px var(--asm-accent);
+}
+
+.asm-app-node.asm-status-started {
+  border-color: color-mix(in srgb, var(--asm-blue) 42%, var(--asm-rule));
+}
+
+.asm-app-node.asm-status-started::after {
+  background: var(--asm-blue);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--asm-blue) 62%, transparent);
+}
+
+.asm-app-node.asm-status-completed {
+  border-color: color-mix(in srgb, var(--asm-complete) 50%, var(--asm-rule));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--asm-complete) 8%, var(--asm-surface)), var(--asm-surface));
+}
+
+.asm-app-node.asm-status-completed::after {
+  background: var(--asm-complete);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--asm-complete) 70%, transparent);
+}
+
+.asm-app-node.asm-is-current {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--asm-accent) 10%, transparent), 0 12px 32px rgba(0, 0, 0, .18);
+}
+
+.asm-app-node.asm-is-current::after {
+  box-shadow: 0 0 12px var(--asm-accent), 0 0 0 1px var(--asm-accent);
+}
+
+.asm-app-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.asm-status,
+.asm-role {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--asm-dim);
+  font-family: var(--asm-font-mono);
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.asm-status i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--asm-muted);
+}
+
+.asm-status-current .asm-status,
+.asm-is-current .asm-status {
+  color: var(--asm-accent);
+}
+
+.asm-status-current .asm-status i,
+.asm-is-current .asm-status i {
+  background: var(--asm-accent);
+}
+
+.asm-status-started .asm-status {
+  color: var(--asm-blue);
+}
+
+.asm-status-started .asm-status i {
+  background: var(--asm-blue);
+}
+
+.asm-status-completed .asm-status {
+  color: var(--asm-complete);
+}
+
+.asm-status-completed .asm-status i {
+  background: var(--asm-complete);
+}
+
+.asm-role {
+  padding: 3px 6px;
+  border: 1px solid color-mix(in srgb, var(--asm-accent) 26%, var(--asm-rule));
+  border-radius: 999px;
+  color: var(--asm-accent);
+  letter-spacing: .04em;
+}
+
+.asm-app-node h4 {
+  margin: 0 0 6px;
+  color: var(--asm-ink);
+  font-size: 12px;
+  font-weight: 760;
+  letter-spacing: -.01em;
+  line-height: 1.25;
+}
+
+.asm-app-node > p {
+  margin: 0 0 10px;
+  color: var(--asm-dim);
+  font-size: 9.5px;
+  line-height: 1.48;
+}
+
+.asm-capabilities {
+  gap: 4px;
+}
+
+.asm-capabilities span {
+  min-height: 20px;
+  padding: 3px 6px;
+  font-size: 7.3px;
+}
+
+.asm-app-meta {
+  margin-top: 9px;
+  padding-top: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--asm-rule) 78%, transparent);
+}
+
+.asm-dependency {
+  color: var(--asm-complete);
+  font-family: var(--asm-font-mono);
+  font-size: 7.5px;
+  line-height: 1.35;
+}
+
+.asm-dependency.asm-has-unmet {
+  color: var(--asm-warning);
+}
+
+.asm-app-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.asm-open-app,
+.asm-cycle-status {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease, color .18s ease;
+}
+
+.asm-open-app {
+  padding: 0 9px;
+  border: 1px solid color-mix(in srgb, var(--asm-accent) 35%, var(--asm-rule));
+  background: color-mix(in srgb, var(--asm-accent) 11%, var(--asm-surface-2));
+  color: var(--asm-ink);
+  font: 680 8.5px/1 var(--asm-font-body);
+}
+
+.asm-cycle-status {
+  padding: 0 8px;
+  border: 1px solid var(--asm-rule);
+  background: transparent;
+  color: var(--asm-dim);
+  font: 650 8px/1 var(--asm-font-body);
+}
+
+.asm-open-app svg,
+.asm-cycle-status svg {
+  width: 13px;
+  height: 13px;
+}
+
+.asm-open-app:hover,
+.asm-open-app:focus-visible,
+.asm-cycle-status:hover,
+.asm-cycle-status:focus-visible {
+  transform: translateY(-1px);
+  border-color: var(--asm-accent);
+  color: var(--asm-ink);
+  outline: none;
+}
+
+.asm-cycle-status:hover,
+.asm-cycle-status:focus-visible {
+  background: color-mix(in srgb, var(--asm-accent) 8%, transparent);
+}
+
+.asm-empty {
+  width: min(560px, 90vw);
+  display: grid;
+  gap: 7px;
+  margin: 48px auto;
+  padding: 26px;
+  border: 1px dashed var(--asm-rule-strong);
+  border-radius: 18px;
+  color: var(--asm-dim);
+  text-align: center;
+}
+
+.asm-empty strong {
+  color: var(--asm-ink);
+  font-family: var(--asm-font-display);
+  font-size: 22px;
+}
+
+.asm-empty span {
+  font-size: 12px;
+}
+
+.asm-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px clamp(20px, 3vw, 42px);
+  border-top: 1px solid var(--asm-rule);
+  background: color-mix(in srgb, var(--asm-bg) 88%, transparent 12%);
+  color: var(--asm-muted);
+  font-family: var(--asm-font-mono);
+  font-size: 8.5px;
+  letter-spacing: .03em;
+}
+
+.asm-footer kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  min-height: 20px;
+  padding: 0 5px;
+  border: 1px solid var(--asm-rule-strong);
+  border-radius: 6px;
+  background: var(--asm-surface-2);
+  color: var(--asm-dim);
+  font: inherit;
+}
+
+@media (max-width: 1100px) {
+  .asm-launcher {
+    left: 16px;
+  }
+
+  .asm-toolbar {
+    grid-template-columns: minmax(220px, 1fr) auto;
+  }
+
+  .asm-reset {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .asm-summary {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .asm-search {
+    grid-row: 1 / span 2;
+  }
+}
+
+@media (max-width: 720px) {
+  .asm-launcher {
+    left: 12px;
+    bottom: calc(82px + env(safe-area-inset-bottom));
+    min-width: 54px;
+    width: 54px;
+    grid-template-columns: 1fr;
+    padding: 9px;
+    border-radius: 17px;
+  }
+
+  .asm-launcher-copy,
+  .asm-launcher-ring {
+    display: none;
+  }
+
+  .asm-launcher-icon {
+    width: 34px;
+    height: 34px;
+    margin: auto;
+  }
+
+  .asm-shell {
+    padding: 0;
+    place-items: stretch;
+  }
+
+  .asm-panel {
+    width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .asm-header {
+    padding: calc(15px + env(safe-area-inset-top)) 16px 14px;
+  }
+
+  .asm-heading h2 {
+    font-size: 30px;
+  }
+
+  .asm-heading p {
+    font-size: 12px;
+  }
+
+  .asm-toolbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 10px 14px;
+  }
+
+  .asm-search {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .asm-summary {
+    grid-column: 1;
+    grid-row: 2;
+    justify-content: center;
+  }
+
+  .asm-reset {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .asm-recommendation {
+    grid-template-columns: 1fr;
+    padding: 10px 14px;
+  }
+
+  .asm-recommendation button {
+    justify-self: start;
+  }
+
+  .asm-tree {
+    min-width: 1180px;
+    padding: 22px 18px 38px;
+  }
+
+  .asm-brain-node {
+    width: 760px;
+    grid-template-columns: 84px minmax(0, 1fr) auto;
+  }
+
+  .asm-brain-orbit {
+    width: 74px;
+    height: 74px;
+  }
+
+  .asm-departments {
+    grid-template-columns: repeat(7, minmax(220px, 1fr));
+  }
+
+  .asm-footer {
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+  }
+
+  .asm-footer span:last-child {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .asm-launcher,
+  .asm-shell,
+  .asm-panel,
+  .asm-app-node,
+  .asm-open-app,
+  .asm-cycle-status,
+  .asm-icon-button,
+  .asm-brain-action {
+    transition: none !important;
+  }
+
+  .asm-brain-orbit i {
+    animation: none !important;
+  }
+}
+
+@media print {
+  #anchit-app-skill-map-root {
+    display: none !important;
+  }
+}
