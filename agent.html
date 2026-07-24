@@ -73,6 +73,15 @@
   .chips{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; max-width:620px; margin:6px auto 0; }
   .chip{ background:transparent; border:1px solid var(--rule); border-radius:99px; padding:6px 12px; font-size:12.5px; color:var(--ink-dim); cursor:pointer; transition:border-color .2s,color .2s; }
   .chip:hover{ border-color:var(--primary); color:var(--ink); }
+  .cta-row{ display:flex; align-items:center; justify-content:center; gap:10px; margin-top:20px; flex-wrap:wrap;
+    font-size:13.5px; color:var(--ink-dim); }
+  .cta-link{ display:inline-flex; align-items:center; gap:6px; font-family:var(--font-mono); font-size:12px;
+    letter-spacing:.04em; text-transform:uppercase; color:#1a0d06; background:var(--primary);
+    text-decoration:none; padding:9px 16px; border-radius:99px; transition:transform .15s, box-shadow .2s; }
+  .cta-link:hover{ transform:translateY(-1px); box-shadow:0 10px 26px rgba(255,105,64,.32); }
+  /* Visible keyboard focus for every interactive control. */
+  .iconbtn:focus-visible,.btn:focus-visible,.chip:focus-visible,.cta-link:focus-visible,.back:focus-visible,.composer input:focus-visible{
+    outline:2px solid var(--primary); outline-offset:2px; }
   .note{ text-align:center; font-size:12px; color:var(--ink-mute); margin-top:18px; }
   .note code{ font-family:var(--font-mono); color:var(--ink-dim); }
   footer{ margin-top:auto; padding-top:24px; text-align:center; font-size:12.5px; color:var(--ink-mute); }
@@ -218,19 +227,24 @@
       <video id="video" playsinline></video>
       <div class="ring"></div>
     </div>
-    <div class="status" id="status">Ask a question to begin.</div>
+    <div class="status" id="status" role="status" aria-live="polite">Ask a question to begin.</div>
 
-    <div class="reply" id="reply"></div>
+    <div class="reply" id="reply" aria-live="polite"></div>
 
     <div class="composer">
-      <input id="q" type="text" placeholder="Ask about my work, growth playbook, or side projects…" autocomplete="off" />
-      <button class="iconbtn" id="mic" title="Speak" aria-label="Speak">🎙</button>
+      <input id="q" type="text" placeholder="Ask about my work, growth playbook, or side projects…" aria-label="Ask Anchit's AI avatar a question" autocomplete="off" />
+      <button class="iconbtn" id="mic" title="Speak" aria-label="Speak your question">🎙</button>
       <button class="btn" id="ask">Ask</button>
     </div>
     <div class="chips">
       <button class="chip">What do you do at Vahdam?</button>
       <button class="chip">Walk me through the Lifecycle OS.</button>
       <button class="chip">What's your growth playbook?</button>
+    </div>
+
+    <div class="cta-row">
+      <span>Like what you hear?</span>
+      <a class="cta-link" href="/#contact">Work with Anchit →</a>
     </div>
 
     <div class="note" id="note"></div>
@@ -245,11 +259,10 @@
   var stage=$('stage'), video=$('video'), status=$('status'), replyEl=$('reply'), qEl=$('q'), askEl=$('ask'), micEl=$('mic'), noteEl=$('note');
   var avatarConfigured=false, busy=false;
 
-  // Discover whether the photoreal avatar is wired up.
+  // Discover whether the photoreal avatar is wired up. (No deploy/config
+  // details are ever surfaced to visitors.)
   fetch('/api/avatar').then(function(r){return r.json();}).then(function(j){
     avatarConfigured = !!(j && j.configured);
-    if(!avatarConfigured){ noteEl.innerHTML='Video avatar is in fallback mode (voice only). Add <code>DID_API_KEY</code> in Vercel to enable the on-camera avatar.'; }
-    else if(j.voice!=='cloned'){ noteEl.innerHTML='Tip: connect ElevenLabs in D-ID and set <code>ELEVENLABS_VOICE_ID</code> to speak in the cloned voice.'; }
   }).catch(function(){});
 
   document.querySelectorAll('.chip').forEach(function(c){ c.addEventListener('click', function(){ qEl.value=c.textContent; ask(); }); });
@@ -258,41 +271,68 @@
 
   function setStatus(s){ status.textContent=s; }
 
+  // fetch with an abort timeout so a hung request can never freeze the UI.
+  function fetchTO(url, opts, ms){
+    var c = new AbortController();
+    var t = setTimeout(function(){ c.abort(); }, ms || 25000);
+    var p = fetch(url, Object.assign({}, opts, { signal: c.signal }));
+    p.then(function(){ clearTimeout(t); }, function(){ clearTimeout(t); });
+    return p;
+  }
+
+  // Short rolling transcript so the avatar keeps conversational context.
+  var chatHist = [];
+  // The single audio element in flight, so a new question stops the old one.
+  var currentAudio = null;
+  function stopSpeaking(){
+    try{ if(currentAudio){ currentAudio.pause(); currentAudio.src=''; currentAudio=null; } }catch(e){}
+    try{ if(window.speechSynthesis) speechSynthesis.cancel(); }catch(e){}
+    try{ video.pause(); }catch(e){}
+  }
+
   function ask(){
     var q=qEl.value.trim(); if(!q || busy) return;
     busy=true; askEl.disabled=true; replyEl.classList.remove('show'); stage.classList.remove('playing','speaking');
+    stopSpeaking();                        // never overlap a previous answer
     setStatus('Thinking…');
-    fetch('/api/chat', { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({ message:q }) })
+    fetchTO('/api/chat', { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({ message:q, chatHistory: chatHist.slice(-8) }) }, 30000)
       .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
       .then(function(res){
         if(!res.ok || !res.j || !res.j.reply) throw new Error('chat');
         var reply=res.j.reply;
+        chatHist.push({ role:'user', content:q }, { role:'assistant', content:reply });
+        if(chatHist.length>16) chatHist=chatHist.slice(-16);
         replyEl.textContent=reply; replyEl.classList.add('show');
-        return speak(reply);
+        return speak(reply);            // resolves only when playback ENDS
       })
       .catch(function(){ setStatus('Something went wrong — please try again.'); })
+      // busy is released after playback finishes, not when it starts, so a new
+      // question can't interrupt the current answer mid-sentence.
       .then(function(){ busy=false; askEl.disabled=false; });
   }
 
   // Prefer the photoreal video; fall back to portrait + cloned-voice audio.
+  // Returns a promise that settles when the answer has finished playing.
   function speak(text){
+    stopSpeaking();
     if(avatarConfigured){
       setStatus('Rendering the avatar…');
-      return fetch('/api/avatar', { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({ text:text }) })
+      return fetchTO('/api/avatar', { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({ text:text }) }, 45000)
         .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
         .then(function(res){
           if(res.ok && res.j && res.j.resultUrl){
-            // Guard so a clip that errors OR fails to autoplay falls back to
-            // voice instead of sticking on "Speaking…" forever.
-            var settled=false;
-            var finish=function(){ if(settled) return; settled=true; stage.classList.remove('playing','speaking'); setStatus('Ask another question.'); };
-            var toVoice=function(){ if(settled) return; settled=true; stage.classList.remove('playing'); return voiceFallback(text); };
-            video.onended=finish;
-            video.onerror=toVoice;
-            video.src=res.j.resultUrl; stage.classList.add('playing');
-            setStatus('Speaking…');
-            var p=video.play(); if(p&&p.catch)p.catch(toVoice);
-            return;
+            return new Promise(function(resolve){
+              // Guard so a clip that errors OR fails to autoplay falls back to
+              // voice instead of sticking on "Speaking…" forever.
+              var settled=false;
+              var finish=function(){ if(settled) return; settled=true; stage.classList.remove('playing','speaking'); setStatus('Ask another question.'); resolve(); };
+              var toVoice=function(){ if(settled) return; settled=true; stage.classList.remove('playing'); voiceFallback(text).then(resolve); };
+              video.onended=finish;
+              video.onerror=toVoice;
+              video.src=res.j.resultUrl; stage.classList.add('playing');
+              setStatus('Speaking…');
+              var p=video.play(); if(p&&p.catch)p.catch(toVoice);
+            });
           }
           return voiceFallback(text); // credits/render issue → voice
         })
@@ -303,17 +343,23 @@
 
   function voiceFallback(text){
     setStatus('Speaking…'); stage.classList.add('speaking');
-    return fetch('/api/tts', { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({ text:text.slice(0,1200) }) })
+    return fetchTO('/api/tts', { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({ text:text.slice(0,1200) }) }, 30000)
       .then(function(r){ if(!r.ok) throw new Error('tts'); return r.blob(); })
       .then(function(blob){
-        var a=new Audio(URL.createObjectURL(blob));
-        a.onended=function(){ stage.classList.remove('speaking'); setStatus('Ask another question.'); };
-        return a.play();
+        return new Promise(function(resolve){
+          var url=URL.createObjectURL(blob);
+          var a=new Audio(url); currentAudio=a;
+          var done=function(){ try{ URL.revokeObjectURL(url); }catch(e){} if(currentAudio===a) currentAudio=null; stage.classList.remove('speaking'); setStatus('Ask another question.'); resolve(); };
+          a.onended=done; a.onerror=done;   // revoke the blob URL either way
+          var pp=a.play(); if(pp&&pp.catch) pp.catch(done);
+        });
       })
       .catch(function(){
         // Last resort: device speech synthesis.
-        try{ var u=new SpeechSynthesisUtterance(text); u.onend=function(){ stage.classList.remove('speaking'); setStatus('Ask another question.'); }; speechSynthesis.speak(u); }
-        catch(e){ stage.classList.remove('speaking'); setStatus('Ask another question.'); }
+        return new Promise(function(resolve){
+          try{ var u=new SpeechSynthesisUtterance(text); u.onend=function(){ stage.classList.remove('speaking'); setStatus('Ask another question.'); resolve(); }; u.onerror=function(){ stage.classList.remove('speaking'); resolve(); }; speechSynthesis.speak(u); }
+          catch(e){ stage.classList.remove('speaking'); setStatus('Ask another question.'); resolve(); }
+        });
       });
   }
 
