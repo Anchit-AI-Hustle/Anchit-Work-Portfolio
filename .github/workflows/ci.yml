@@ -24,6 +24,16 @@ jobs:
           test -f index.html
           node -e "const fs=require('fs');const s=fs.readFileSync('index.html','utf8');if(!s.includes('<!DOCTYPE html>'))process.exit(1);console.log('index.html OK ('+s.length+' bytes)')"
 
+      - name: Validate shared App Skill Map source
+        run: |
+          node --check assets/app-skill-map.js
+          test -s assets/app-skill-map.css
+          test -s docs/APP_SKILL_MAP.md
+          if grep -R "mcp_token=" assets/app-skill-map.js assets/app-skill-map.css docs/APP_SKILL_MAP.md scripts/build-www.mjs; then
+            echo "Reference access token must never be committed"
+            exit 1
+          fi
+
       - name: Build portfolio and How-To Engine
         run: npm run build
 
@@ -35,3 +45,37 @@ jobs:
           test ! -d www/how-to
           test ! -d www/how-to-1
           echo 'How-To Engine route OK: /how-to-2'
+
+      - name: Verify App Skill Map across all built apps
+        run: |
+          test -s www/assets/app-skill-map.js
+          test -s www/assets/app-skill-map.css
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+
+          function walk(dir) {
+            return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+              const file = path.join(dir, entry.name);
+              return entry.isDirectory() ? walk(file) : entry.isFile() && entry.name.endsWith('.html') ? [file] : [];
+            });
+          }
+
+          const htmlFiles = walk('www');
+          if (htmlFiles.length < 20) {
+            console.error(`Expected at least 20 built HTML apps, found ${htmlFiles.length}`);
+            process.exit(1);
+          }
+
+          const missing = htmlFiles.filter((file) => {
+            const html = fs.readFileSync(file, 'utf8');
+            return !html.includes('data-app-skill-map="styles"') || !html.includes('data-app-skill-map="runtime"');
+          });
+
+          if (missing.length) {
+            console.error('App Skill Map injection missing from:\n' + missing.join('\n'));
+            process.exit(1);
+          }
+
+          console.log(`App Skill Map present in ${htmlFiles.length} built HTML apps`);
+          NODE
