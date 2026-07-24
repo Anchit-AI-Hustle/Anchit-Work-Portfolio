@@ -17,6 +17,7 @@ const assets = [
   'index.html',
   'jobhunt.html',
   'd2c-lifecycle-os.html',
+  'lifecycle-os.html',
   'agent.html',
   'manifest.json',
   'sw.js',
