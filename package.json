@@ -5,8 +5,9 @@
   "private": true,
   "scripts": {
     "dev": "npx --yes serve@latest -l ${PORT:-5173} .",
+    "dev:built": "npm run build && npx --yes serve@latest -l ${PORT:-5173} www",
     "build": "node scripts/build-www.mjs",
-    "preview": "npx --yes serve@latest -l 4173 .",
+    "preview": "npx --yes serve@latest -l 4173 www",
     "tts:serve": "cd tts-server && .venv/bin/uvicorn app:app --host 127.0.0.1 --port 8000",
     "cap:add:ios": "npm run build && npx cap add ios",
     "cap:add:android": "npm run build && npx cap add android",

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
- * Build step for Capacitor/Vercel: mirror static web assets into ./www and
- * compile the standalone How-To Engine into the canonical /how-to-2 route.
+ * Build step for Capacitor/Vercel: mirror static web assets into ./www,
+ * compile the standalone How-To Engine into /how-to-2, and attach the shared
+ * App Skill Map to every first-party HTML entry point.
  */
 import { copyFile, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
@@ -14,6 +15,11 @@ const ROOT = join(__dirname, '..');
 const WWW = join(ROOT, 'www');
 const HOW_TO_ROUTE = 'how-to-2';
 const HOW_TO_PATH = `/${HOW_TO_ROUTE}`;
+const APP_SKILL_MAP_MARKER = 'data-app-skill-map';
+const APP_SKILL_MAP_TAGS = [
+  `  <link rel="stylesheet" href="/assets/app-skill-map.css" ${APP_SKILL_MAP_MARKER}="styles">`,
+  `  <script defer src="/assets/app-skill-map.js" ${APP_SKILL_MAP_MARKER}="runtime"></script>`,
+].join('\n');
 
 const assets = [
   'index.html',
@@ -101,6 +107,46 @@ async function buildHowTo() {
   }
 }
 
+async function collectHtmlFiles(dir) {
+  const output = [];
+  if (!existsSync(dir)) return output;
+  const entries = await readdir(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) output.push(...await collectHtmlFiles(path));
+    else if (entry.isFile() && entry.name.toLowerCase().endsWith('.html')) output.push(path);
+  }
+  return output;
+}
+
+// One shared runtime is injected into every generated HTML app — the portfolio,
+// Lifecycle OS modules, JobHunt, avatar, nested How-To SPA and future HTML apps.
+// This keeps the visual capability tree consistent without duplicating markup in
+// each source file. The runtime is fully client-side and stores progress locally.
+async function injectAppSkillMap() {
+  const htmlFiles = await collectHtmlFiles(WWW);
+  let injected = 0;
+  let skipped = 0;
+
+  for (const file of htmlFiles) {
+    const before = await readFile(file, 'utf8');
+    if (before.includes(APP_SKILL_MAP_MARKER)) {
+      skipped++;
+      continue;
+    }
+    if (!/<\/head>/i.test(before)) {
+      console.warn(`[build-www] skill-map: skip HTML without </head>: ${file}`);
+      skipped++;
+      continue;
+    }
+    const after = before.replace(/<\/head>/i, `${APP_SKILL_MAP_TAGS}\n</head>`);
+    await writeFile(file, after, 'utf8');
+    injected++;
+  }
+
+  console.log(`[build-www] skill-map: injected into ${injected} HTML apps${skipped ? `; skipped ${skipped}` : ''}`);
+}
+
 async function main() {
   console.log(`[build-www] cleaning ${WWW}`);
   await rm(WWW, { recursive: true, force: true });
@@ -119,6 +165,7 @@ async function main() {
 
   await patchHowToCardRoute();
   await buildHowTo();
+  await injectAppSkillMap();
 
   console.log(`[build-www] done → ${WWW}`);
 }

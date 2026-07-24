@@ -9,23 +9,29 @@ Ships as **web (any device + TV)**, **installable PWA**, **native iOS + Android*
 
 ## What's in this repo
 
-```
+```text
 .
-├── index.html              # The whole site — single-file static shell
-├── api/                    # Vercel functions for chat, streaming chat, and TTS proxy
-├── tts-server/             # Self-hosted XTTS/FastAPI cloned-voice service
-├── manifest.json           # PWA manifest (installable on iOS/Android/desktop)
-├── sw.js                   # Service worker — offline cache for the shell
-├── icons/                  # PWA + favicon + apple-touch + iOS splash
-├── capacitor.config.json   # Native app config (bundle id, splash, status bar)
-├── package.json            # Capacitor dependencies + helper scripts
-├── vercel.json             # Vercel static-host config (security headers)
+├── index.html                      # Main single-file portfolio shell
+├── api/                            # Vercel functions for chat, voice, lifecycle tools, and agents
+├── assets/app-skill-map.js         # Shared cross-app capability registry + runtime
+├── assets/app-skill-map.css        # Shared visual skill-tree UI
+├── side-husle/how-to-1/            # React/R3F Omni How-To Engine, emitted at /how-to-2
+├── lifecycle-os-*.html             # First-party lifecycle intelligence and execution apps
+├── scripts/build-www.mjs           # Production build, route assembly, and universal skill-map injection
+├── docs/APP_SKILL_MAP.md           # Skill-map architecture and extension guide
+├── tts-server/                     # Self-hosted XTTS/FastAPI cloned-voice service
+├── manifest.json                   # PWA manifest (installable on iOS/Android/desktop)
+├── sw.js                           # Service worker and offline shell cache
+├── icons/                          # PWA + favicon + Apple touch + native splash assets
+├── capacitor.config.json           # Native app config
+├── package.json                    # Capacitor dependencies + helper scripts
+├── vercel.json                     # Vercel static-host config and app routes
 ├── STREAMING_VOICE_ARCHITECTURE.md # Anchit LLM + cloned-voice streaming design
-├── DEPLOY.md               # Web + native deploy walkthroughs
+├── DEPLOY.md                       # Web + native deploy walkthroughs
 └── README.md
 ```
 
-No frontend framework. The site is a static `index.html` with embedded CSS + JS, backed by Vercel functions for grounded chat and voice. Capacitor wraps the generated `www/index.html` into native iOS and Android apps.
+The main portfolio remains a static `index.html` with embedded CSS + JS, backed by Vercel functions for grounded chat and voice. The repository also contains a set of first-party HTML applications plus the standalone React How-To Engine. `scripts/build-www.mjs` assembles them into one production tree under `www/`.
 
 ## Design system
 
@@ -33,6 +39,14 @@ No frontend framework. The site is a static `index.html` with embedded CSS + JS,
 - **Type:** Fraunces (display, variable axes — uses `SOFT` + `WONK`), Inter (body), JetBrains Mono (labels).
 - **Layout:** Strong minimal hero, dashboard-style cards, long-form readable sections, section-paneled content. IntersectionObserver-driven scroll reveals.
 - **Responsive:** Phone → tablet → laptop → 4K TV. Container scales up to 1920px on TV-class screens; type fluids via `clamp()`.
+
+## Universal App Skill Map
+
+Every generated HTML app receives the same visual capability map. It organizes the suite into seven functional branches around one shared **Anchit Intelligence** node, highlights the current route, exposes app-level capabilities and suggested dependencies, and stores Available → In progress → Completed states locally in the browser.
+
+The map is implemented once in `assets/app-skill-map.js` and `assets/app-skill-map.css`. The build injects those assets into every `www/**/*.html` entry point after static copying and after the `/how-to-2` Vite build, so the portfolio, JobHunt, avatar, Lifecycle OS modules, and the Omni How-To Engine stay consistent without duplicating source markup.
+
+Keyboard access: **Cmd/Ctrl + K** toggles the map and **Escape** closes it. Full architecture and external-app adoption instructions live in [`docs/APP_SKILL_MAP.md`](./docs/APP_SKILL_MAP.md).
 
 ## Anchit LLM + cloned voice
 
@@ -44,13 +58,18 @@ No frontend framework. The site is a static `index.html` with embedded CSS + JS,
 ## Running locally
 
 ```bash
-# 1. Install deps (only needed for native builds)
+# Install dependencies
 npm install
 
-# 2. Serve the site locally (any port)
-npm run dev          # → http://localhost:5173
-# or just open index.html in a browser
+# Fast source preview (does not run the production injection step)
+npm run dev
+
+# Production-equivalent preview: builds every app, injects the Skill Map,
+# and serves the assembled www/ directory
+npm run dev:built
 ```
+
+The built preview is the correct path for testing cross-app navigation and `/how-to-2` asset routing.
 
 ## Native apps — iOS + Android via Capacitor
 
@@ -59,8 +78,8 @@ npm run dev          # → http://localhost:5173
 
 ### How it's wired
 
-- `index.html`, `manifest.json`, `sw.js`, `icons/` live at the **repo root** (so Vercel can serve them as a static site).
-- `npm run build` runs `scripts/build-www.mjs`, which mirrors those files into `www/`.
+- Root HTML, `manifest.json`, `sw.js`, `icons/`, and other static assets are copied into `www/`.
+- `npm run build` runs `scripts/build-www.mjs`, compiles the How-To Engine, injects the App Skill Map into all HTML entry points, and emits the complete web bundle.
 - Capacitor's `webDir` is set to `www`, so `npx cap sync` copies from there into the native projects (`android/app/src/main/assets/public/` and `ios/App/App/public/`).
 
 ### Every time you change web code
