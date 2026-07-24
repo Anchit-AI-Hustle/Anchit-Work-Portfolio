@@ -1,38 +1,31 @@
-// Per-step animated guide. Requests a clip from the Text-to-Video pipeline and
-// shows the animated poster while it renders (never a broken box).
+// Per-step animated scene. Fully self-contained: it renders an on-theme
+// (black / orange / gold) animated visual built from CSS + the step's own
+// videoPrompt — no network, no serverless dependency, so it can never show a
+// broken box or "preview unavailable". (A real text-to-video provider can be
+// swapped in later behind /api/text-to-video; until then this always works.)
 
-import { useEffect, useRef, useState } from 'react';
-import type { HowToStep, VideoClip } from '../types';
-import { requestClip, pollClip } from '../services/textToVideo';
+import { useState } from 'react';
+import type { HowToStep } from '../types';
+
+// Warm, on-theme tint per badge — matches the flow diagram + step cards.
+const TINT: Record<HowToStep['badge'], string> = {
+  start: '#FFB736', action: '#FF6940', 'watch-out': '#FF4D1F', checkpoint: '#c9a96e', finish: '#FF8A3D',
+};
+
+// A few deterministic particle positions/timings so the scene feels alive
+// without pulling in randomness (which would also break SSR/build determinism).
+const PARTICLES = [
+  { left: '18%', delay: '0s', dur: '3.4s' },
+  { left: '34%', delay: '1.1s', dur: '4.2s' },
+  { left: '52%', delay: '0.5s', dur: '3.8s' },
+  { left: '68%', delay: '1.8s', dur: '4.6s' },
+  { left: '82%', delay: '0.9s', dur: '3.2s' },
+];
 
 export default function StepVideo({ step }: { step: HowToStep }) {
-  const [clip, setClip] = useState<VideoClip | null>(null);
   const [open, setOpen] = useState(false);
-  // Track which step we've already kicked a request for, so the effect fires
-  // exactly once per (open, step) — NOT on every setClip. Depending on `clip`
-  // here would re-run the effect and its cleanup, flipping `alive` to false and
-  // cancelling the in-flight request before it resolves.
-  const startedFor = useRef<string | null>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    if (startedFor.current === step.id) return;
-    startedFor.current = step.id;
-    let alive = true;
-    setClip({ stepId: step.id, status: 'rendering' });
-    requestClip({ stepId: step.id, prompt: step.videoPrompt || step.title, seconds: 5 })
-      .then((c) => {
-        if (!alive) return;
-        // Queued/rendering jobs return a jobId in `url` — poll until it's ready.
-        if ((c.status === 'queued' || c.status === 'rendering') && c.url) {
-          setClip({ stepId: step.id, status: 'rendering' });
-          pollClip(step.id, c.url).then((fin) => { if (alive) setClip(fin); });
-        } else {
-          setClip(c);
-        }
-      });
-    return () => { alive = false; };
-  }, [open, step.id, step.videoPrompt, step.title]);
+  const tint = TINT[step.badge] || '#FF6940';
+  const caption = step.videoPrompt || step.title;
 
   return (
     <div className="step-video">
@@ -40,13 +33,18 @@ export default function StepVideo({ step }: { step: HowToStep }) {
         <button className="btn tiny" onClick={() => setOpen(true)}>▶ Watch this step</button>
       ) : (
         <div className="video-frame glass">
-          {clip?.status === 'ready' && clip.url && !clip.url.startsWith('data:') ? (
-            <video src={clip.url} poster={clip.posterUrl} controls autoPlay muted loop playsInline />
-          ) : (
-            <div className="video-poster" style={{ backgroundImage: clip?.posterUrl ? `url(${clip.posterUrl})` : undefined }}>
-              <span className="pulse-dot" /> {clip?.status === 'error' ? 'Preview unavailable' : 'Rendering animation…'}
+          <div className="anim-preview" style={{ ['--v-tint' as string]: tint }} role="img" aria-label={caption}>
+            <div className="anim-orb" />
+            <div className="anim-particles" aria-hidden>
+              {PARTICLES.map((p, i) => (
+                <i key={i} style={{ left: p.left, animationDelay: p.delay, animationDuration: p.dur }} />
+              ))}
             </div>
-          )}
+            <div className="anim-cap">
+              <span className="anim-kicker">Step {step.index} · animated scene</span>
+              {caption}
+            </div>
+          </div>
         </div>
       )}
     </div>

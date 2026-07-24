@@ -6,8 +6,10 @@ import ReactFlow, { Background, Controls, type Edge, type Node } from 'reactflow
 import 'reactflow/dist/style.css';
 import type { MasterGuide } from '../types';
 
+// Warm, on-theme palette (black / orange / gold) — every badge stays in family
+// but is still distinguishable.
 const COLOR: Record<string, string> = {
-  start: '#2ee5ac', action: '#5b8cff', 'watch-out': '#ff8a3d', checkpoint: '#c9a96e', finish: '#ff5fd2',
+  start: '#FFB736', action: '#FF6940', 'watch-out': '#FF4D1F', checkpoint: '#c9a96e', finish: '#FF8A3D',
 };
 
 export default function FlowDiagram({ guide, activeId, onSelect }: {
@@ -19,10 +21,10 @@ export default function FlowDiagram({ guide, activeId, onSelect }: {
       position: { x: (i % 2) * 220, y: i * 108 },
       data: { label: `${s.index}. ${s.title}` },
       style: {
-        border: `2px solid ${COLOR[s.badge] || '#5b8cff'}`,
-        background: activeId === s.id ? 'rgba(255,255,255,0.14)' : 'rgba(20,18,28,0.72)',
-        color: '#f5f2ff', borderRadius: 14, padding: 10, width: 200, fontSize: 12,
-        backdropFilter: 'blur(8px)',
+        border: `2px solid ${COLOR[s.badge] || '#FF6940'}`,
+        background: activeId === s.id ? 'rgba(255,105,64,0.18)' : 'rgba(22,18,14,0.78)',
+        color: '#FBF5EC', borderRadius: 14, padding: 10, width: 200, fontSize: 12,
+        backdropFilter: 'blur(8px)', cursor: 'pointer',
       },
     })),
     [guide, activeId],
@@ -31,7 +33,7 @@ export default function FlowDiagram({ guide, activeId, onSelect }: {
   const edges: Edge[] = useMemo(
     () => guide.edges.map((e, i) => ({
       id: `e${i}`, source: e.from, target: e.to, label: e.label,
-      animated: true, style: { stroke: '#6b62a8' }, labelStyle: { fill: '#c9c4e6', fontSize: 10 },
+      animated: true, style: { stroke: '#7a5a2e' }, labelStyle: { fill: '#c9a96e', fontSize: 10 },
     })),
     [guide],
   );
@@ -43,7 +45,7 @@ export default function FlowDiagram({ guide, activeId, onSelect }: {
         onNodeClick={(_, n) => onSelect?.(n.id)}
         nodesDraggable={false} nodesConnectable={false} elementsSelectable
       >
-        <Background color="#2a2540" gap={22} />
+        <Background color="#3a2c1a" gap={22} />
         <Controls showInteractive={false} />
       </ReactFlow>
     </div>
