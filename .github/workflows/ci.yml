@@ -24,12 +24,17 @@ jobs:
           test -f index.html
           node -e "const fs=require('fs');const s=fs.readFileSync('index.html','utf8');if(!s.includes('<!DOCTYPE html>'))process.exit(1);console.log('index.html OK ('+s.length+' bytes)')"
 
-      - name: Validate shared App Skill Map source
+      - name: Validate shared app and project systems
         run: |
           node --check assets/app-skill-map.js
+          node --check assets/project-playbooks.js
           test -s assets/app-skill-map.css
+          test -s assets/project-playbooks.css
           test -s docs/APP_SKILL_MAP.md
-          if grep -R "mcp_token=" assets/app-skill-map.js assets/app-skill-map.css docs/APP_SKILL_MAP.md scripts/build-www.mjs; then
+          test -s docs/PROJECT_SKILLTREE_GUIDES.md
+          grep -q "AnchitProjectPlaybooks" assets/project-playbooks.js
+          grep -q "GUIDE_KINDS" assets/project-playbooks.js
+          if grep -R "mcp_token=" assets/app-skill-map.js assets/app-skill-map.css assets/project-playbooks.js assets/project-playbooks.css docs/APP_SKILL_MAP.md docs/PROJECT_SKILLTREE_GUIDES.md scripts/build-www.mjs; then
             echo "Reference access token must never be committed"
             exit 1
           fi
@@ -46,10 +51,12 @@ jobs:
           test ! -d www/how-to-1
           echo 'How-To Engine route OK: /how-to-2'
 
-      - name: Verify App Skill Map across all built apps
+      - name: Verify shared systems across all built apps
         run: |
           test -s www/assets/app-skill-map.js
           test -s www/assets/app-skill-map.css
+          test -s www/assets/project-playbooks.js
+          test -s www/assets/project-playbooks.css
           node <<'NODE'
           const fs = require('fs');
           const path = require('path');
@@ -69,13 +76,24 @@ jobs:
 
           const missing = htmlFiles.filter((file) => {
             const html = fs.readFileSync(file, 'utf8');
-            return !html.includes('data-app-skill-map="styles"') || !html.includes('data-app-skill-map="runtime"');
+            return !html.includes('data-app-skill-map="styles"') ||
+              !html.includes('data-app-skill-map="runtime"') ||
+              !html.includes('data-project-playbooks="styles"') ||
+              !html.includes('data-project-playbooks="runtime"');
           });
 
           if (missing.length) {
-            console.error('App Skill Map injection missing from:\n' + missing.join('\n'));
+            console.error('Shared UI injection missing from:\n' + missing.join('\n'));
             process.exit(1);
           }
 
-          console.log(`App Skill Map present in ${htmlFiles.length} built HTML apps`);
+          const projectSource = fs.readFileSync('www/assets/project-playbooks.js', 'utf8');
+          const required = ['Quickstart Guide', 'Operator Mega-Prompt', 'Evidence Audit Prompt', '9.5/10 Improvement Loop', 'ROLE', 'CONTEXT', 'TASK', 'CONSTRAINTS', 'OUTPUT FORMAT'];
+          const absent = required.filter((needle) => !projectSource.includes(needle));
+          if (absent.length) {
+            console.error('Project playbook source is missing required contracts: ' + absent.join(', '));
+            process.exit(1);
+          }
+
+          console.log(`App Skill Map and Project Playbooks present in ${htmlFiles.length} built HTML apps`);
           NODE

@@ -2,7 +2,7 @@
 /**
  * Build step for Capacitor/Vercel: mirror static web assets into ./www,
  * compile the standalone How-To Engine into /how-to-2, and attach the shared
- * App Skill Map to every first-party HTML entry point.
+ * App Skill Map plus Project SkillTree & Guide Library to every HTML app.
  */
 import { copyFile, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
@@ -16,9 +16,14 @@ const WWW = join(ROOT, 'www');
 const HOW_TO_ROUTE = 'how-to-2';
 const HOW_TO_PATH = `/${HOW_TO_ROUTE}`;
 const APP_SKILL_MAP_MARKER = 'data-app-skill-map';
+const PROJECT_PLAYBOOK_MARKER = 'data-project-playbooks';
 const APP_SKILL_MAP_TAGS = [
   `  <link rel="stylesheet" href="/assets/app-skill-map.css" ${APP_SKILL_MAP_MARKER}="styles">`,
   `  <script defer src="/assets/app-skill-map.js" ${APP_SKILL_MAP_MARKER}="runtime"></script>`,
+].join('\n');
+const PROJECT_PLAYBOOK_TAGS = [
+  `  <link rel="stylesheet" href="/assets/project-playbooks.css" ${PROJECT_PLAYBOOK_MARKER}="styles">`,
+  `  <script defer src="/assets/project-playbooks.js" ${PROJECT_PLAYBOOK_MARKER}="runtime"></script>`,
 ].join('\n');
 
 const assets = [
@@ -122,32 +127,43 @@ async function collectHtmlFiles(dir) {
   return output;
 }
 
-// One shared runtime is injected into every generated HTML app — the portfolio,
-// Lifecycle OS modules, JobHunt, avatar, nested How-To SPA and future HTML apps.
-// This keeps the visual capability tree consistent without duplicating markup in
-// each source file. The runtime is fully client-side and stores progress locally.
-async function injectAppSkillMap() {
+// Shared runtimes are injected after all static files are copied and after the
+// nested React app is built. Every first-party HTML entry point therefore gets:
+//   1) app-level navigation and dependencies; and
+//   2) project-level paths, guide packs, copyable prompts and local progress.
+async function injectSharedExperience() {
   const htmlFiles = await collectHtmlFiles(WWW);
-  let injected = 0;
+  let skillMapInjected = 0;
+  let playbooksInjected = 0;
   let skipped = 0;
 
   for (const file of htmlFiles) {
     const before = await readFile(file, 'utf8');
-    if (before.includes(APP_SKILL_MAP_MARKER)) {
-      skipped++;
-      continue;
-    }
     if (!/<\/head>/i.test(before)) {
-      console.warn(`[build-www] skill-map: skip HTML without </head>: ${file}`);
+      console.warn(`[build-www] shared-ui: skip HTML without </head>: ${file}`);
       skipped++;
       continue;
     }
-    const after = before.replace(/<\/head>/i, `${APP_SKILL_MAP_TAGS}\n</head>`);
+
+    const additions = [];
+    if (!before.includes(APP_SKILL_MAP_MARKER)) {
+      additions.push(APP_SKILL_MAP_TAGS);
+      skillMapInjected++;
+    }
+    if (!before.includes(PROJECT_PLAYBOOK_MARKER)) {
+      additions.push(PROJECT_PLAYBOOK_TAGS);
+      playbooksInjected++;
+    }
+    if (!additions.length) {
+      skipped++;
+      continue;
+    }
+
+    const after = before.replace(/<\/head>/i, `${additions.join('\n')}\n</head>`);
     await writeFile(file, after, 'utf8');
-    injected++;
   }
 
-  console.log(`[build-www] skill-map: injected into ${injected} HTML apps${skipped ? `; skipped ${skipped}` : ''}`);
+  console.log(`[build-www] shared-ui: skill map injected into ${skillMapInjected}; project playbooks into ${playbooksInjected}${skipped ? `; skipped ${skipped}` : ''}`);
 }
 
 async function main() {
@@ -168,7 +184,7 @@ async function main() {
 
   await patchHowToCardRoute();
   await buildHowTo();
-  await injectAppSkillMap();
+  await injectSharedExperience();
 
   console.log(`[build-www] done → ${WWW}`);
 }
