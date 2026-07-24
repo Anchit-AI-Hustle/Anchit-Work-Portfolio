@@ -2,14 +2,26 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "outputDirectory": "www",
+  "redirects": [
+    {
+      "source": "/how-to",
+      "destination": "/how-to-1",
+      "permanent": false
+    },
+    {
+      "source": "/how-to/:path*",
+      "destination": "/how-to-1/:path*",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     {
       "source": "/favicon.ico",
       "destination": "/icons/favicon.svg"
     },
     {
-      "source": "/how-to",
-      "destination": "/how-to/index.html"
+      "source": "/how-to-1",
+      "destination": "/how-to-1/index.html"
     }
   ],
   "headers": [

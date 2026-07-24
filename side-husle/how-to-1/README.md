@@ -2,7 +2,7 @@
 
 An ADHD-friendly, 3D interactive learning engine that explains **any** humanly-doable task — from *switching on a phone* to *swimming breaststroke* or *solving a quadratic* — as a visual, step-by-step guide. Multiple frontier AIs answer in parallel; the best three are fused by a consensus evaluator into one branchable master guide, and every step gets an animated clip from a text-to-video pipeline.
 
-> Lives at `anchit-work-portfolio/side-husle/how-to-engine`. It is a **standalone Vite app** (the portfolio site itself is intentionally single-file static), deployed separately.
+> Source lives at `anchit-work-portfolio/side-husle/how-to-1`. It is a **standalone Vite app** because the portfolio shell itself is intentionally framework-free. The portfolio build emits it at **`/how-to-1`**.
 
 ## Experience flow
 1. **Intro / explainer** — a cinematic 3D hero card explains what the engine does.
@@ -33,23 +33,25 @@ Provider API keys live **only** in the serverless functions — never in the bro
 
 ## Setup
 ```bash
-cd side-husle/how-to-engine
+cd side-husle/how-to-1
 npm install
 cp .env.example .env          # add whichever provider keys you have
 # local dev with serverless functions (keys server-side):
 npx vercel dev                # serves /api/* on :3000
-npm run dev                   # Vite SPA → http://localhost:5178/how-to/
+npm run dev                   # Vite SPA → http://localhost:5178/how-to-1/
 ```
 
-### Route: `/how-to`
-The app is built with Vite `base: '/how-to/'` and ships at the **`/how-to`** route.
-`vercel.json` rewrites `/how-to/:path*` → the SPA shell (client-side routing) and
-`/how-to/api/:fn*` → the serverless functions. The client calls the API via
-`import.meta.env.BASE_URL` so it stays correct under that base. To mount it on the
-apex portfolio domain, add a rewrite on the main site: `/how-to/:path*` → this
-Vercel project. Deploy: point a Vercel project at this folder (framework: Vite),
-set the env vars from `.env.example`. With **zero** keys the app still runs
-end-to-end using a deterministic offline guide + animated placeholders.
+### Route: `/how-to-1`
+The app is built with Vite `base: '/how-to-1/'` and ships at the **`/how-to-1`** route.
+The root portfolio build mirrors the Vite `dist` directory into `www/how-to-1/`,
+updates the Side Hustle card to the same route, and keeps `/how-to` as a redirect
+for previously shared links. The client calls APIs via `import.meta.env.BASE_URL`,
+so the prefix remains correct in local and standalone deployments.
+
+For a standalone Vercel project rooted at this folder, `vercel.json` maps
+`/how-to-1/api/:fn*` to the serverless functions and sends SPA paths to
+`index.html`. With **zero** keys the app still runs end-to-end using a
+deterministic offline guide + animated placeholders.
 
 ## Notes
 - Claude (`claude-opus-4-8`, adaptive thinking) is the top-ranked node and the

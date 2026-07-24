@@ -2,12 +2,35 @@ name: CI
 on:
   push: { branches: [main] }
   pull_request: {}
+
 jobs:
   smoke:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - name: HTML smoke test (file present + parses)
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            package.json
+            side-husle/how-to-1/package.json
+
+      - name: Install portfolio dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: HTML smoke test
         run: |
           test -f index.html
           node -e "const fs=require('fs');const s=fs.readFileSync('index.html','utf8');if(!s.includes('<!DOCTYPE html>'))process.exit(1);console.log('index.html OK ('+s.length+' bytes)')"
+
+      - name: Build portfolio and How-To Engine
+        run: npm run build
+
+      - name: Verify /how-to-1 route
+        run: |
+          test -f www/how-to-1/index.html
+          grep -q '/how-to-1/' www/how-to-1/index.html
+          grep -q 'href="/how-to-1"' www/index.html
+          test ! -d www/how-to
+          echo 'How-To Engine route OK: /how-to-1'

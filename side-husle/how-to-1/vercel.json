@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/how-to-1/api/:fn*", "destination": "/api/:fn*" },
+    { "source": "/how-to-1/assets/:path*", "destination": "/assets/:path*" },
+    { "source": "/how-to-1", "destination": "/index.html" },
+    { "source": "/how-to-1/:path*", "destination": "/index.html" }
+  ]
+}
