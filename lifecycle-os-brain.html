@@ -951,9 +951,10 @@ window.sbZipAll = function(){
     const lps = (c.assets && c.assets.landing_pages) || (p.landing_html ? [{ html:p.landing_html }] : []);
     lps.forEach((lp,li)=>{ if(lp && lp.html){ const n=`${base}/landing_${slug(lp.variant)||('v'+(li+1))}.html`; files.push({ name:n, data:lp.html }); links.push({label:'Landing · '+(lp.variant||('v'+(li+1))), path:n, kind:'landing'}); } });
     const ads = p.ads || (c.assets && c.assets.ads) || [];
-    ads.forEach((ad,ai)=>{ const n=`${base}/ad_${slug(ad.platform)||('ad'+(ai+1))}.json`; files.push({ name:n, data:JSON.stringify(ad,null,2) }); links.push({label:'Ad · '+(ad.platform||('ad'+(ai+1))), path:n, kind:'ad'}); });
+    ads.forEach((ad,ai)=>{ const vv=slug(ad.variant)||('v'+(ai+1)); const n=`${base}/ad_${slug(ad.platform)||'ad'}_${vv}.json`; files.push({ name:n, data:JSON.stringify(ad,null,2) }); links.push({label:'Ad · '+(ad.platform||'ad')+(ad.variant?(' '+ad.variant):(' '+(ai+1))), path:n, kind:'ad'}); });
     files.push({ name:`${base}/_slot.json`, data:JSON.stringify({ date:e.date, market:e.market, cohort:e.cohort, objective:e.objective, hero:e.heroProduct, bundle:e.supportingProducts, offer:e.offer, reach:e.reach, feasibility:e.feasibility, confidence:e.confidence }, null, 2) });
-    rows.push({ date:e.date, market:e.market, cohort:(e.cohort&&e.cohort.name)||'', objective:e.objective||'', hero:(e.heroProduct&&(e.heroProduct.name||e.heroProduct))||'', offer:e.offer||'', confidence:e.confidence, feasibility:e.feasibility, links });
+    const _off=e.decision&&e.decision.offer; const _offTxt=_off&&_off.code?(Math.round((_off.pct||0)*100)+'% · '+_off.code):'';
+    rows.push({ date:e.date, market:e.market, cohort:(e.cohort&&e.cohort.name)||'', objective:e.objective||'', hero:(e.heroProduct&&(e.heroProduct.title||e.heroProduct.name))||'', offer:_offTxt, confidence:e.confidence, feasibility:e.feasibility, links });
   }
   // Top-level self-contained CALENDAR DASHBOARD (index.html) + machine manifest.
   files.push({ name:'index.html', data:_zipDashboardHTML(rows) });
