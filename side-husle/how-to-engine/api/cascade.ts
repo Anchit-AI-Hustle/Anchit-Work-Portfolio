@@ -20,7 +20,10 @@ export default async function handler(req: Request): Promise<Response> {
     const result = await new AgentCascadeService().run(task);
     return json(result, 200);
   } catch (e) {
-    return json({ error: String((e as Error).message || e) }, 500);
+    // Log the detail server-side; return only a generic message so internal
+    // stack/trace information is never exposed to the client (CodeQL).
+    console.error('[cascade]', e);
+    return json({ error: 'The cascade failed to run. Please try again.' }, 500);
   }
 }
 
