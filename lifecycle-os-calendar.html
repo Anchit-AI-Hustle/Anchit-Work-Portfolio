@@ -559,7 +559,7 @@ function openMailerById(id) { const entry = STATE.plan.find((p) => p.id === id);
 // ── Client-side mailer pipeline (replaces /api/calendar?action=trigger-mailer) ──
 function subjectUrl(){ return 'https://sample-brand.com'; }
 function imageBrief(entry, style){
-  return style.charAt(0).toUpperCase()+style.slice(1)+' hero for a '+String(entry.archetype).replace(/-/g,' ')+' email — feature "'+entry.hero_product+'" for the '+entry.segment+' segment ('+marketName(entry.market)+'). Warm champagne + charcoal palette, generous negative space, premium editorial lighting, no text baked in. 1200×1500, mobile-first crop safe.';
+  return style.charAt(0).toUpperCase()+style.slice(1)+' hero for a '+String(entry.archetype).replace(/-/g,' ')+' email — feature "'+entry.hero_product+'" for the '+entry.segment+' segment ('+marketName(entry.market)+'). Warm champagne + charcoal palette, generous negative space, premium editorial lighting, no text baked in. 1200×1500, mobile-first crop safe.'+(entry.feedback?(' Reviewer changes to honour: '+entry.feedback):'');
 }
 function bodyCopy(entry){
   const H = entry.hero_product;
@@ -572,7 +572,9 @@ function bodyCopy(entry){
     'launch-announcement': 'It is here. '+H+' just launched, and early access is open to you first.',
     'seasonal-gifting': (entry.festival?entry.festival+' is close. ':'Gifting season is close. ')+'Our '+H+' picks make it easy to give something that lands.',
   };
-  return m[entry.archetype] || 'A note about '+H+', picked for you.';
+  var base = m[entry.archetype] || 'A note about '+H+', picked for you.';
+  if (entry.feedback) base += ' As you asked, we also reworked this: '+entry.feedback;
+  return base;
 }
 function ctaLabel(entry){ return entry.content_type==='winback' ? 'Claim your welcome-back' : entry.content_type==='launch' ? 'Get early access' : entry.content_type==='promo' ? 'Shop the edit' : 'Explore '+entry.hero_product; }
 function emailHTML(entry, subj, withVisual){
