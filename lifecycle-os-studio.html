@@ -145,6 +145,26 @@
   try{ var t=localStorage.getItem('anchit-theme'); if(t) document.documentElement.setAttribute('data-theme',t); }catch(e){}
   // Pick up subject from the hub if set.
   try{ var s=JSON.parse(localStorage.getItem('lifecycle-os-subject')||'null'); if(s&&s.brand){ $('brand').value=s.brand; $('url').value=s.url||''; } }catch(e){}
+  // Consume a Calendar handoff (set by lifecycle-os-calendar.html when the user
+  // clicks "Open in Mailer Studio"): prefill the brief/segment/offer from the
+  // selected send so this page opens focused on the same mailer, then clear it.
+  try{
+    var ho=JSON.parse(localStorage.getItem('lifecycle-os-studio-handoff')||'null');
+    if(ho && ho.source==='calendar' && ho.entry && (Date.now()-(ho.ts||0) < 15*60*1000)){
+      var en=ho.entry;
+      // The Calendar plans a generic sample D2C brand — set the subject to match
+      // so /api/mailer uses the brand branch (not the personal Anchit branch).
+      $('brand').value='Sample Brand'; $('url').value='sample-brand.com';
+      $('brief').value='Build the "'+(en.subject_hint||'')+'" email — '+String(en.archetype||'').replace(/-/g,' ')+' for the '+(en.segment||'')+' segment'+(en.market?(' ('+en.market+' market)'):'')+(en.hero_product?(', hero product '+en.hero_product):'')+(en.feedback?('. Requested changes: '+en.feedback):'')+'.';
+      if(en.segment) $('segment').value=en.segment;
+      if(en.hero_product) $('offer').value=en.hero_product;
+      var note=document.createElement('div');
+      note.style.cssText='margin:-6px 0 18px 2px;font-family:var(--font-mono);font-size:12px;color:var(--accent)';
+      note.textContent='↳ Opened from the Marketing Calendar — '+(en.date||'')+' · '+(en.market||'')+' · '+(en.segment||'')+'. Brief prefilled below.';
+      var form=document.querySelector('.form'); if(form&&form.parentNode){ form.parentNode.insertBefore(note, form); }
+      try{ localStorage.removeItem('lifecycle-os-studio-handoff'); }catch(_e){}
+    }
+  }catch(e){}
 
   document.querySelectorAll('.chip').forEach(function(c){
     c.addEventListener('click',function(){ $('brand').value=c.getAttribute('data-b')||''; $('url').value=c.getAttribute('data-u')||''; $('brief').value=c.getAttribute('data-br')||''; run(); });

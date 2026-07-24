@@ -1,82 +1,852 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Data Analysis — Lifecycle OS · Anchit Tandon</title>
-<meta name="description" content="Data Analysis — RFM segments, cohort retention, send-time heatmap and cross-sell affinity, benchmarked to the subject's industry. Part of the Lifecycle OS." />
+<meta name="description" content="The full D2C growth analytics workbench — KPIs, an auto-computed signals board, cohort retention, channel and product breakdowns, and per-widget drill-downs with CSV export. Part of the Lifecycle OS.">
 <link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link href="/lifecycle-os-kit.css" rel="stylesheet">
+<style>
+  /* Champagne palette — anchit-tandon.com Lifecycle OS. Exact port of the
+     Data Analysis dashboard UI + mechanism; only the theme tokens changed. */
+  :root, :root[data-theme="dark"]{
+    --serif:'Fraunces',Georgia,serif;
+    --bg:#0F0D0A; --surface:#1A1814; --tile:#16130F; --bg-deep:#060503;
+    --ink:#FBF5EC; --head:#FBF5EC; --soft:#A39E94; --mute:#5A554E;
+    --line:#2A261F; --line-strong:#3D3830; --chip:#14110D;
+    --primary:#FF6940; --accent:#FF6940; --gold:#c9a96e; --mint:#2EE5AC;
+    --cream:#160d07;
+    /* Chart categorical palette — high contrast on the near-black canvas */
+    --c1:#FF6940; --c2:#c9a96e; --c3:#2EE5AC; --c4:#F2C879; --c5:#7CE8CE; --c6:#FFB199;
+  }
+  :root[data-theme="light"]{
+    --bg:#FBF5EC; --surface:#FFFFFF; --tile:#F2EADC; --bg-deep:#F2EADC;
+    --ink:#161312; --head:#161312; --soft:#5A554E; --mute:#A39E94;
+    --line:#E5DCC7; --line-strong:#C9BFA8; --chip:#F2EADC;
+    --primary:#FF4D1F; --accent:#FF4D1F; --gold:#a8863f; --mint:#00B584;
+    --cream:#FBF5EC;
+    --c1:#FF4D1F; --c2:#a8863f; --c3:#00B584; --c4:#C79A3A; --c5:#5FB487; --c6:#FF9C7A;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:Inter,'Helvetica Neue',Arial,sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden;min-height:100vh;}
+  body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(44% 38% at 14% 8%, rgba(255,105,64,.10), transparent 60%), radial-gradient(40% 36% at 88% 16%, rgba(201,169,110,.10), transparent 62%);}
+  .wrap{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:26px 22px 96px;}
+  h1,h2,h3{font-family:var(--serif);color:var(--head);margin:0;text-wrap:balance;font-weight:600;}
+  h1{font-size:30px;} h2{font-size:20px;} h3{font-size:15px;}
+  a{color:inherit;}
+  /* top nav (Lifecycle OS kit chrome) */
+  .top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap;}
+  .back{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--soft);text-decoration:none;padding:8px 14px;border:1px solid var(--line-strong);border-radius:99px;}
+  .back:hover{border-color:var(--primary);color:var(--ink);}
+  .crumbs{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mute);letter-spacing:.06em;}
+  .crumbs a{color:var(--soft);text-decoration:none;} .crumbs a:hover{color:var(--primary);}
+  .themebtn{background:none;border:1px solid var(--line-strong);border-radius:99px;color:var(--soft);font-size:15px;cursor:pointer;padding:7px 12px;}
+  .themebtn:hover{border-color:var(--primary);color:var(--ink);}
+  .eyebrow{text-transform:uppercase;letter-spacing:.14em;font-size:11px;color:var(--accent);font-weight:700;}
+  p.lede{color:var(--soft);max-width:78ch;margin:6px 0 0;}
+  .topbar{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:8px;}
+  /* Market toggle */
+  .mkt{display:inline-flex;gap:6px;background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px;}
+  .mkt button{border:0;background:transparent;color:var(--soft);font-family:inherit;font-weight:700;font-size:13px;padding:7px 16px;border-radius:999px;cursor:pointer;transition:all .15s;}
+  .mkt button.on{background:var(--primary);color:var(--cream);box-shadow:0 0 0 1.5px var(--gold);}
+  /* KPI tiles */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px;margin:18px 0 6px;}
+  .kpi{background:var(--tile);border:1px solid var(--line);border-radius:12px;padding:15px 16px;min-width:0;overflow:hidden;}
+  .kpi .kl{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--soft);font-weight:700;}
+  .kpi .kv{font-family:var(--serif);font-size:clamp(20px,2vw,25px);color:var(--head);margin-top:4px;font-variant-numeric:tabular-nums;line-height:1.15;overflow-wrap:anywhere;}
+  .kpi .kd{font-size:11.5px;margin-top:6px;color:var(--soft);}
+  .kpi .up{color:#4fd08a;font-weight:700;} .kpi .down{color:#f0916f;font-weight:700;}
+  /* Signals board — auto-computed "what needs attention", ranked by severity. */
+  .signals{margin:16px 0 4px;}
+  .sig-head{font-family:var(--serif);font-size:17px;color:var(--head);font-weight:700;margin-bottom:10px;}
+  .sig-sub{font-family:Inter,sans-serif;font-size:11px;color:var(--soft);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-left:8px;}
+  .sig-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(238px,1fr));gap:12px;}
+  .sig{background:var(--tile);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:10px;padding:12px 14px;}
+  .sig-h{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--soft);font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+  .sig-dot{width:8px;height:8px;border-radius:50%;flex:none;}
+  .sig-v{font-family:var(--serif);font-size:20px;color:var(--head);margin:5px 0 4px;font-variant-numeric:tabular-nums;line-height:1.1;}
+  .sig-d{font-size:12.5px;color:var(--soft);line-height:1.45;}
+  .sig-decomp{margin-top:12px;background:var(--chip);border-radius:10px;padding:11px 14px;font-size:13px;color:var(--soft);border-left:3px solid var(--gold);line-height:1.5;}
+  .sig-decomp b{color:var(--head);} .sig-decomp .up{color:#4fd08a;} .sig-decomp .down{color:#f0916f;}
+  /* Widget grid */
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-top:16px;}
+  .w{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;grid-column:span 6;display:flex;flex-direction:column;min-width:0;}
+  .w.span4{grid-column:span 4;} .w.span8{grid-column:span 8;} .w.span12{grid-column:span 12;} .w.span6{grid-column:span 6;}
+  @media (max-width:900px){.w,.w.span4,.w.span8,.w.span6{grid-column:span 12;}}
+  @media (max-width:520px){.kpis{grid-template-columns:1fr;}.kpi .kv{font-size:22px;}}
+  .w .wh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:4px;}
+  .w .wt{font-family:var(--serif);font-size:16px;color:var(--head);font-weight:700;}
+  .w .ws{font-size:12px;color:var(--soft);}
+  .w .open{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.05em;background:none;border:0;cursor:pointer;padding:2px 4px;white-space:nowrap;}
+  .w .open:hover{text-decoration:underline;}
+  .w.link{cursor:pointer;transition:border-color .15s,box-shadow .15s;}
+  .w.link:hover{border-color:var(--accent);box-shadow:0 6px 22px rgba(0,0,0,.35);}
+  .wbody{margin-top:8px;flex:1;min-width:0;}
+  /* charts */
+  svg{display:block;max-width:100%;height:auto;overflow:visible;}
+  /* time-granularity view toggle (detail drill-down) */
+  .tv-toggle{display:inline-flex;gap:4px;background:var(--chip);border:1px solid var(--line);border-radius:11px;padding:4px;margin-top:14px;flex-wrap:wrap;}
+  .tv-tile{border:none;background:transparent;color:var(--soft);font:inherit;font-size:12.5px;font-weight:700;padding:6px 13px;border-radius:8px;cursor:pointer;transition:background .12s,color .12s;}
+  .tv-tile:hover:not(.dis):not(.on){color:var(--ink);}
+  .tv-tile.on{background:var(--primary);color:var(--cream);}
+  .tv-tile.dis{opacity:.42;cursor:not-allowed;}
+  .tv-note{font-size:11.5px;color:var(--soft);margin-top:9px;line-height:1.5;}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:10px;font-size:12px;color:var(--soft);}
+  .legend .li{display:inline-flex;align-items:center;gap:6px;}
+  .legend .sw{width:11px;height:11px;border-radius:3px;display:inline-block;}
+  /* tables */
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;min-width:520px;}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;white-space:nowrap;}
+  th{color:var(--head);font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:10.5px;background:var(--chip);position:sticky;top:0;}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;}
+  tr:last-child td{border-bottom:0;}
+  /* heatmap */
+  .heat{border-collapse:separate;border-spacing:3px;min-width:520px;}
+  .heat td{border:0;border-radius:5px;text-align:center;font-size:11.5px;padding:8px 6px;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .heat td.lbl{background:transparent;color:var(--soft);font-weight:700;text-align:left;}
+  .heat th{background:transparent;color:var(--soft);font-size:10px;text-transform:none;letter-spacing:0;}
+  /* insight box */
+  .insight{background:var(--chip);border-radius:10px;padding:14px 16px;color:var(--soft);font-size:13.5px;margin:14px 0;border-left:3px solid var(--gold);}
+  .insight b{color:var(--head);}
+  /* detail view */
+  #detail{display:none;}
+  body.detailing #dash{display:none;}
+  body.detailing #detail{display:block;}
+  .crumb{display:inline-flex;align-items:center;gap:7px;background:none;border:0;color:var(--accent);font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;padding:6px 0;margin-bottom:6px;}
+  .btn-dl{font-size:12px;font-weight:700;color:var(--cream);background:var(--gold);border:0;border-radius:8px;padding:8px 14px;cursor:pointer;}
+  .btn-dl:hover{filter:brightness(1.08);}
+  .note{color:var(--soft);font-size:12.5px;border-top:1px solid var(--line);margin-top:26px;padding-top:14px;}
+  .datalink{color:var(--head);text-decoration-color:var(--accent);}
+  .bignum{font-family:var(--serif);font-size:30px;color:var(--head);}
+  .empty{color:var(--soft);text-align:center;padding:26px;font-size:13px;}
+  /* Related tools + "add your own context" (shared kit look, inlined) */
+  .sectitle{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin:30px 0 14px;display:flex;align-items:center;gap:10px;}
+  .sectitle::after{content:'';flex:1;height:1px;background:var(--line);}
+  .related{display:flex;flex-wrap:wrap;gap:10px;}
+  .rchip{display:inline-flex;align-items:center;gap:8px;text-decoration:none;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 15px;color:var(--ink);transition:border-color .2s, transform .15s;}
+  .rchip:hover{border-color:var(--primary);transform:translateY(-1px);}
+  .rchip .ic{font-size:18px;} .rchip .nm{font-weight:600;font-size:14px;} .rchip .go{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--primary);margin-left:4px;}
+  .extras{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.008));border:1px solid var(--line-strong);border-radius:16px;padding:16px;}
+  .extras textarea{width:100%;min-height:74px;resize:vertical;background:var(--bg-deep);border:1px solid var(--line-strong);border-radius:10px;padding:12px 14px;color:var(--ink);font-family:Inter,sans-serif;font-size:14px;outline:none;}
+  .extras textarea:focus{border-color:var(--primary);}
+  .uploader{display:inline-flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer;border:1px dashed var(--line-strong);border-radius:10px;padding:11px 15px;color:var(--soft);font-size:13px;transition:border-color .2s,color .2s;}
+  .uploader:hover{border-color:var(--primary);color:var(--ink);}
+  .uploader input{display:none;}
+  .filelist{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+  .fitem{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--soft);background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:8px 12px;}
+  .fitem .ft{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--mute);text-transform:uppercase;border:1px solid var(--line);border-radius:5px;padding:2px 6px;}
+  .fitem .rm{margin-left:auto;cursor:pointer;color:var(--mute);border:none;background:none;font-size:15px;}
+  .fitem .rm:hover{color:#f0916f;}
+  .applybtn{margin-top:12px;background:var(--primary);color:var(--cream);border:none;border-radius:10px;padding:11px 20px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;}
+  .applybtn:hover{box-shadow:0 8px 22px rgba(255,105,64,.3);}
+  .ctxnote{font-size:12px;color:var(--mute);margin-top:8px;}
+  .ctxcard{background:rgba(46,229,172,.08);border:1px solid var(--mint);border-radius:12px;padding:14px 16px;margin-top:12px;}
+  .ctxcard .k{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mint);margin-bottom:6px;}
+  .ctxcard p{font-size:13.5px;color:var(--ink);}
+  footer{border-top:1px solid var(--line);margin-top:44px;padding:24px 0 12px;color:var(--mute);font-size:13px;text-align:center;}
+  footer a{color:var(--soft);text-decoration:none;border-bottom:1px solid var(--line);}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="top">
-      <a class="back" href="/lifecycle-os">← Lifecycle OS</a>
-      <span class="crumbs"><a href="/#projects">Portfolio</a> / <a href="/lifecycle-os">Lifecycle OS</a> / Data Analysis</span>
-    </div>
-    <div class="eyebrow"><span class="dot"></span>Lifecycle OS · Data Analysis</div>
-    <h1><span class="grad">Data Analysis</span></h1>
-    <p class="lede">RFM segments, cohort retention, the best send-time window and cross-sell affinity — benchmarked to the subject's industry. Loaded with <strong>anchit-tandon.com</strong> by default; type any brand to generalise. No proprietary data.</p>
-    <div class="subject"><span class="lbl">Subject</span><input id="brand" type="text" value="Anchit Tandon"><input id="url" type="text" value="anchit-tandon.com" style="flex:0 1 220px"><button id="go">Analyze</button></div>
-    <div class="loading" id="loading"><span class="spinner"></span><span>Crunching the numbers…</span></div>
-    <div class="err" id="err"></div>
-    <div id="out" style="display:none">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="font-family:var(--font-display);font-size:clamp(19px,3vw,24px);font-weight:600" id="hd"></div><span class="badge" id="bdg"></span></div>
-      <div class="sectitle">Segments · share of base + RFM</div><div class="bars" id="seg"></div>
-      <div class="sectitle">Cohort conversion / retention</div><div class="card"><div id="cohortWrap"></div></div>
-      <div class="sectitle">Best send-time window</div><div class="card"><div id="heatBest" style="font-family:var(--font-mono);font-size:12px;color:var(--accent);margin-bottom:12px"></div><div class="heat" id="heat"></div></div>
-      <div class="sectitle">Cross-sell affinity</div><div class="bars" id="cross"></div>
-      <div class="sectitle">Target KPIs</div><div class="kpis" id="kpi"></div>
-    </div>
-    <div id="extras" style="margin-top:8px"></div>
-    <footer>Data Analysis · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>. Synthetic, industry-benchmarked — no proprietary data.</footer>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="/lifecycle-os">← Lifecycle OS</a>
+    <span class="crumbs"><a href="/#projects">Portfolio</a> / <a href="/lifecycle-os">Lifecycle OS</a> / Data Analysis</span>
+    <button class="themebtn" id="themeBtn" title="Toggle theme">◐</button>
   </div>
-<script src="/lifecycle-os-kit.js"></script>
+  <span class="eyebrow">Lifecycle OS · Research &amp; Benchmark</span>
+
+  <div id="dash">
+    <div class="topbar">
+      <div>
+        <h1>Data Analysis</h1>
+        <p class="lede">The full D2C growth analytics workbench. Every widget drills into a detailed page with the complete data, a bigger chart, a growth read, and a CSV download. This is where all the analysis a D2C growth team needs gets done — shown on an <strong>industry-benchmark sample brand</strong> (synthetic, SimilarWeb / SEMrush-shaped data), so the whole mechanism works with zero proprietary data.</p>
+      </div>
+      <div class="mkt" id="mktToggle" role="tablist" aria-label="Market">
+        <button data-mkt="US" class="on">🇺🇸 United States</button>
+        <button data-mkt="UK">🇬🇧 United Kingdom</button>
+        <button data-mkt="GLOBAL">🌍 Global</button>
+        <button data-mkt="IN">🇮🇳 India</button>
+      </div>
+    </div>
+
+    <div class="mkt" id="anTabs" role="tablist" aria-label="Analysis section" style="margin:14px 0 4px;flex-wrap:wrap">
+      <button data-tab="control" class="on">Control Room</button>
+      <button data-tab="acq">Acquisition · Ads + LP</button>
+      <button data-tab="ret">Retention · Mailer + LP</button>
+      <button data-tab="cohort">Cohort &amp; Calendar</button>
+    </div>
+
+    <a href="/d2c-lifecycle-os" id="reviewCta" style="display:block;margin:14px 0 6px;padding:14px 18px;border:1px solid var(--line-strong);border-left:4px solid var(--accent);border-radius:11px;background:var(--surface);text-decoration:none;box-shadow:0 4px 14px rgba(0,0,0,.25)">
+      <span style="display:block;font-weight:700;color:var(--head);font-size:15.5px">Full D2C lifecycle plan — segments, stages, calendar &amp; flows &nbsp;→</span>
+      <span style="display:block;margin-top:4px;color:var(--soft);font-size:13px">Turn this analysis into a plan: customer segments · lifecycle stages · a marketing calendar · designed mailer variants · a Smart-Brain optimisation loop · guardrails &amp; KPIs.</span>
+    </a>
+
+    <div class="kpis" id="kpis"></div>
+    <div class="signals" id="signals"></div>
+    <div class="grid" id="grid"></div>
+
+    <p class="note" id="footnote"></p>
+
+    <div id="extras" style="margin-top:10px"></div>
+  </div>
+
+  <div id="detail"></div>
+
+  <footer>Data Analysis · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>. Data shown is a synthetic industry benchmark — no proprietary data.</footer>
+</div>
+
 <script>
+/* ── Synthetic industry-benchmark dataset (SimilarWeb / SEMrush-shaped) ──────
+   Generated deterministically at load so the entire dashboard mechanism works
+   with zero proprietary data. Same object shape the dashboard renderer expects:
+   markets[MK] = { summary, monthly, aov_trend, channels, product_types,
+   discount, day_of_week, new_vs_returning, returning_rate, acquisition,
+   cohort, top_products, top_by_qty, weekly, shipping_country }. */
 (function(){
-  var $=function(i){return document.getElementById(i);}, esc=LOS.esc;
-  var s=LOS.subject(); $('brand').value=s.brand; $('url').value=s.url||'';
-  $('go').addEventListener('click',run);
-  function bar(lab,sub,pct){ return '<div class="brow"><div class="lab">'+esc(lab)+(sub?' <small>'+esc(sub)+'</small>':'')+'</div><div class="track"><i style="width:'+Math.max(2,Math.min(100,pct))+'%"></i></div><div class="val">'+pct+'</div></div>'; }
-  function cohortSVG(d){
-    var w=680,h=200,pad=28,cols=(d.cohortAxis||[]).length||6, maxX=cols-1;
-    var xs=function(i){return pad+ i*((w-2*pad)/maxX);}, ys=function(v){return pad+ (100-v)/100*(h-2*pad);};
-    var colors=['#FF6940','#2EE5AC','#c9a96e'];
-    var lines=(d.cohorts||[]).map(function(c,ci){ var pts=(c.points||[]).map(function(v,i){return xs(i)+','+ys(v);}).join(' '); return '<polyline fill="none" stroke="'+colors[ci%3]+'" stroke-width="2.5" points="'+pts+'"/>'+ (c.points||[]).map(function(v,i){return '<circle cx="'+xs(i)+'" cy="'+ys(v)+'" r="3" fill="'+colors[ci%3]+'"/>';}).join(''); }).join('');
-    var axis=(d.cohortAxis||[]).map(function(a,i){return '<text x="'+xs(i)+'" y="'+(h-6)+'" fill="#A39E94" font-size="10" font-family="monospace" text-anchor="middle">'+esc(a)+'</text>';}).join('');
-    var legend=(d.cohorts||[]).map(function(c,ci){return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:16px;font-size:12px;color:var(--ink-dim)"><span style="width:10px;height:10px;border-radius:2px;background:'+colors[ci%3]+'"></span>'+esc(c.label)+'</span>';}).join('');
-    var grid=[0,25,50,75,100].map(function(v){return '<line x1="'+pad+'" y1="'+ys(v)+'" x2="'+(w-pad)+'" y2="'+ys(v)+'" stroke="#2A261F" stroke-width="1"/><text x="'+(pad-6)+'" y="'+(ys(v)+3)+'" fill="#5A554E" font-size="9" font-family="monospace" text-anchor="end">'+v+'</text>';}).join('');
-    return '<div style="margin-bottom:10px">'+legend+'</div><svg class="chart" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="xMidYMid meet">'+grid+lines+axis+'</svg>';
+  function seeded(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0; var t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+  function monthsBack(n){ var d=new Date(), a=[]; for(var i=n-1;i>=0;i--){ var dt=new Date(d.getFullYear(), d.getMonth()-i, 1); a.push(dt.getFullYear()+'-'+('0'+(dt.getMonth()+1)).slice(-2)); } return a; }
+  function weeksBack(n){ var d=new Date(), a=[]; var day=d.getDay(); var monday=new Date(d.getFullYear(),d.getMonth(),d.getDate()-((day+6)%7)); for(var i=n-1;i>=0;i--){ var dt=new Date(monday.getFullYear(),monday.getMonth(),monday.getDate()-i*7); a.push(dt.getFullYear()+'-'+('0'+(dt.getMonth()+1)).slice(-2)+'-'+('0'+dt.getDate()).slice(-2)); } return a; }
+  // Seasonal multiplier: Q4 (Oct-Dec) gifting lift, Jan-Jul trough.
+  function seasonal(monthStr){ var mo=+String(monthStr).split('-')[1]; var s=[0.82,0.80,0.88,0.90,0.95,0.98,0.92,0.96,1.05,1.28,1.62,1.85]; return s[(mo-1+12)%12]; }
+  var PRODUCTS=[
+    'Everyday Essentials Kit','Daily Refill Pack','Starter Bundle','Signature Serum','Core Membership Box',
+    'Travel Minis Set','Refill · 3-pack','The Gift Set','Limited Edition Box','Daily Boost',
+    'Hydration Set','Nightly Ritual','Value Pack · 6','Discovery Sampler','Complete Routine'];
+  var PTYPES=['Bundles & Kits','Refills','Subscriptions','Single Items','Gifting','Accessories','Limited Edition'];
+  var CHANNELS_US=[['Online Store',0.58],['Subscription',0.17],['Amazon',0.13],['Retail / Wholesale',0.07],['Marketplace',0.03],['POS',0.02]];
+  var CHANNELS_SM=[['Online Store',0.66],['Subscription',0.15],['Marketplace',0.11],['Retail / Wholesale',0.08]];
+  var COUNTRIES=[['United Kingdom',0.72],['Ireland',0.08],['Germany',0.06],['France',0.05],['Netherlands',0.04],['Spain',0.03],['Italy',0.02]];
+
+  function makeMarket(cfg){
+    var r=seeded(cfg.seed), scale=cfg.scale, aovBase=cfg.aov;
+    // ── acquisition: 25 months (drives YoY on New Customers) ──────────────
+    var am=monthsBack(25);
+    var acquisition=am.map(function(mo,i){
+      var grow=1+ i*0.011; var noise=0.9+r()*0.2;
+      var new_c=Math.round(cfg.newBase*scale*seasonal(mo)*grow*noise);
+      var firstAov=aovBase*0.86*(0.97+r()*0.06);
+      return { month:mo, new_c:new_c, orders:new_c, sales:Math.round(new_c*firstAov) };
+    });
+    // ── monthly: last 13 months (total sales/orders/aov), AOV compressing ─
+    var mm=monthsBack(13);
+    var monthly=mm.map(function(mo,i){
+      var grow=1+i*0.008, noise=0.92+r()*0.16;
+      var orders=Math.round(cfg.orderBase*scale*seasonal(mo)*grow*noise);
+      // AOV compresses over the window (discount-led, smaller baskets)
+      var aov=aovBase*(1.09 - i*0.012)*(0.98+r()*0.04);
+      var sales=Math.round(orders*aov*1.065); // AOV column runs ~6% below sales/orders
+      return { month:mo, orders:orders, sales:sales, net:Math.round(sales*0.86), aov:Math.round(aov) };
+    });
+    var aov_trend=monthly.map(function(x){ return { month:x.month, aov:x.aov, orders:x.orders, sales:x.sales }; });
+    // ── new vs returning + returning rate (aligned to monthly) ────────────
+    var new_vs_returning=monthly.map(function(x,i){
+      var retShare=Math.min(0.72, 0.40 + i*0.012 + (r()-0.5)*0.05);
+      var ret_c=Math.round(x.orders*retShare), new_c=Math.max(0,x.orders-ret_c);
+      return { month:x.month, new_c:new_c, ret_c:ret_c };
+    });
+    var returning_rate=new_vs_returning.map(function(x){ var tot=x.new_c+x.ret_c; return { month:x.month, rate:tot?x.ret_c/tot:0, ret_c:x.ret_c, new_c:x.new_c }; });
+    // ── channels ──────────────────────────────────────────────────────────
+    var totalSales=monthly.reduce(function(a,b){return a+b.sales;},0);
+    var totalOrders=monthly.reduce(function(a,b){return a+b.orders;},0);
+    var chSrc=cfg.big?CHANNELS_US:CHANNELS_SM;
+    var channels=chSrc.map(function(c){ var s=Math.round(totalSales*c[1]*(0.96+r()*0.08)); var o=Math.round(totalOrders*c[1]*(0.9+r()*0.2)); return { channel:c[0], sales:s, orders:o, aov:Math.round(s/(o||1)) }; }).sort(function(a,b){return b.sales-a.sales;});
+    // ── product types ──────────────────────────────────────────────────────
+    var ptWeights=[0.27,0.20,0.16,0.13,0.11,0.08,0.05];
+    var product_types=PTYPES.map(function(t,i){ var net=Math.round(totalSales*0.86*ptWeights[i]*(0.94+r()*0.12)); var o=Math.round(totalOrders*ptWeights[i]*(0.9+r()*0.2)); return { type:t, net:net, orders:o, quantity:Math.round(o*(1.3+r()*0.9)) }; }).sort(function(a,b){return b.net-a.net;});
+    // ── discount split ──────────────────────────────────────────────────────
+    var discShare=0.34+r()*0.06;
+    var discOrders=Math.round(totalOrders*discShare), fullOrders=totalOrders-discOrders;
+    var fullAov=aovBase*1.12, discAov=fullAov*0.78;
+    var discount=[
+      { discounted:true, orders:discOrders, sales:Math.round(discOrders*discAov), aov:Math.round(discAov) },
+      { discounted:false, orders:fullOrders, sales:Math.round(fullOrders*fullAov), aov:Math.round(fullAov) }
+    ];
+    // ── day of week (Tue/Wed strongest) ────────────────────────────────────
+    var dowW=[0.11,0.17,0.18,0.15,0.14,0.13,0.12];
+    var day_of_week=dowW.map(function(w,i){ var o=Math.round(totalOrders*w*(0.95+r()*0.1)); var s=Math.round(o*aovBase*1.05); return { dow:i, orders:o, sales:s, aov:Math.round(s/(o||1)) }; });
+    // ── cohort retention (8 quarterly cohorts) ──────────────────────────────
+    var cq=[]; var dd=new Date(); for(var q=7;q>=0;q--){ var dt=new Date(dd.getFullYear(), dd.getMonth()-q*3, 1); cq.push(dt.getFullYear()+'-'+('0'+(dt.getMonth()+1)).slice(-2)); }
+    var cohort=cq.map(function(mo,ci){
+      var base=Math.round(cfg.newBase*scale*3*seasonal(mo)*(0.9+r()*0.2));
+      var ret=[100]; var decay=0.55+r()*0.12; var floor=18+Math.round(r()*8);
+      for(var k=1;k<8;k++){ if(ci+k>7){ ret.push(null); continue; } var v=Math.round(Math.max(floor, ret[k-1]*decay + (r()-0.4)*4)); ret.push(v); }
+      return { cohort:mo, base:base, retention:ret };
+    });
+    // ── top products ────────────────────────────────────────────────────────
+    var top_products=PRODUCTS.map(function(t,i){ var net=Math.round(totalSales*0.86*(0.19/(i+1.4))*(0.9+r()*0.2)); var q=Math.round(net/(aovBase*0.55)); return { title:t, net:net, quantity:q, orders:Math.round(q*0.8) }; }).sort(function(a,b){return b.net-a.net;});
+    var top_by_qty=top_products.slice().map(function(x){return {title:x.title,quantity:Math.round(x.quantity*(0.8+r()*0.8)),net:x.net,orders:x.orders};}).sort(function(a,b){return b.quantity-a.quantity;});
+    // ── weekly (US only) 53 weeks ────────────────────────────────────────────
+    var wk=weeksBack(53);
+    var weekly=wk.map(function(w,i){ var mo=w.slice(0,7); var orders=Math.round(cfg.orderBase*scale/4.3*seasonal(mo)*(0.85+r()*0.3)); var sales=Math.round(orders*aovBase*1.06); return { week:w, orders:orders, sales:sales, net:Math.round(sales*0.86), aov:Math.round(sales/(orders||1)) }; });
+    // ── shipping country (UK only) ────────────────────────────────────────────
+    var shipping_country=COUNTRIES.map(function(c){ var s=Math.round(totalSales*c[1]*(0.95+r()*0.1)); return { country:c[0], sales:s, orders:Math.round(totalOrders*c[1]) }; });
+    // ── summary ────────────────────────────────────────────────────────────
+    var qtyTotal=product_types.reduce(function(a,b){return a+b.quantity;},0);
+    var newTotal=new_vs_returning.reduce(function(a,b){return a+b.new_c;},0);
+    var retTotal=new_vs_returning.reduce(function(a,b){return a+b.ret_c;},0);
+    var summary={ total_sales:totalSales, orders:totalOrders, net_sales:Math.round(totalSales*0.86), aov:Math.round(totalSales/(totalOrders||1)), quantity:qtyTotal, new_customers:newTotal, returning_customers:retTotal, returning_rate: (newTotal+retTotal)?retTotal/(newTotal+retTotal):0 };
+
+    var m={ summary:summary, monthly:monthly, aov_trend:aov_trend, channels:channels, product_types:product_types, discount:discount, day_of_week:day_of_week, new_vs_returning:new_vs_returning, returning_rate:returning_rate, acquisition:acquisition, cohort:cohort, top_products:top_products };
+    if(cfg.big){ m.top_by_qty=top_by_qty; m.weekly=weekly; }   // US: full dataset
+    if(cfg.country){ m.shipping_country=shipping_country; }     // UK: geography
+    return m;
   }
-  function heatGrid(d){
-    var H=d.sendHeat||{}; var days=H.days||[], parts=H.parts||[], grid=H.grid||[];
-    var cols=days.length; var html='';
-    var el=$('heat'); el.style.gridTemplateColumns='70px repeat('+cols+',1fr)';
-    html+='<div class="hh"></div>'+days.map(function(dn){return '<div class="hh">'+esc(dn)+'</div>';}).join('');
-    parts.forEach(function(p,pi){ html+='<div class="hh" style="text-align:right;padding-right:8px">'+esc(p)+'</div>';
-      days.forEach(function(_,di){ var v=(grid[di]&&grid[di][pi])||0; var a=0.15+0.85*(v/100); html+='<div class="hc" style="background:rgba(255,105,64,'+a.toFixed(2)+')">'+v+'</div>'; }); });
-    el.innerHTML=html;
-    $('heatBest').textContent='◆ Peak: '+(H.best||'—');
-  }
-  function run(){
-    $('err').style.display='none'; $('out').style.display='none'; $('loading').classList.add('on');
-    LOS.post('/api/analysis',{brand:$('brand').value.trim(),url:$('url').value.trim()}).then(function(d){
-      if(!d||!d.segments) throw new Error('failed');
-      $('hd').textContent=(d.brand||'Subject')+' — '+(d.industry||'analysis'); LOS.badge($('bdg'),d.source);
-      $('seg').innerHTML=(d.segments||[]).map(function(x){return bar(x.name+(x.note?'':''),'R'+x.r+' F'+x.f+' M'+x.m+(x.note?' · '+x.note:''),x.pct);}).join('');
-      $('cohortWrap').innerHTML=cohortSVG(d);
-      heatGrid(d);
-      $('cross').innerHTML=(d.crossSell||[]).map(function(x){return bar(x.pair,'',x.affinity);}).join('');
-      $('kpi').innerHTML=(d.kpis||[]).map(function(k){return '<div class="kpi"><div class="m">'+esc(k.metric)+'</div><div class="v">'+esc(k.value)+'</div></div>';}).join('');
-      $('out').style.display='block';
-    }).catch(function(){ $('err').textContent='Could not load analysis — try again in a moment.'; $('err').style.display='block'; })
-    .then(function(){ $('loading').classList.remove('on'); });
-  }
-  run();
-  LOS.mountExtras('analysis', run);
+
+  window.LOS_ANALYTICS={ markets:{
+    US:     makeMarket({ seed:101, scale:1.00,  aov:64,    orderBase:5200, newBase:1900, big:true }),
+    UK:     makeMarket({ seed:202, scale:0.30,  aov:52,    orderBase:5200, newBase:1900, country:true }),
+    GLOBAL: makeMarket({ seed:303, scale:0.58,  aov:71,    orderBase:5200, newBase:1900 }),
+    IN:     makeMarket({ seed:404, scale:0.42,  aov:1650,  orderBase:5200, newBase:1900 })
+  }};
 })();
 </script>
+
+<script>
+(function(){
+  var A = (window.LOS_ANALYTICS) || {markets:{}};
+  var MKT = ({ US:'US', UK:'UK', GLOBAL:'GLOBAL', IN:'IN' })[(new URLSearchParams(location.search).get('mkt') || 'US').toUpperCase()] || 'US';
+
+  Object.keys(A.markets).forEach(function(mk){
+    var m = A.markets[mk];
+    if(!m) return;
+    if((!m.aov_trend || !m.aov_trend.length) && m.monthly && m.monthly.length){
+      m.aov_trend = m.monthly.map(function(x){ return { month:x.month, aov:x.aov, orders:x.orders, sales:x.sales }; });
+    }
+  });
+  var WIDGET_REQ = {
+    revenue:['monthly'], 'kpi-orders':['monthly'], aov:['aov_trend'], channels:['channels'],
+    ptype:['product_types'], discount:['discount'], dow:['day_of_week'], newret:['new_vs_returning'],
+    retrate:['returning_rate'], acq:['acquisition'], cohort:['cohort'], topprod:['top_products'],
+    topqty:['top_by_qty'], weekly:['weekly'], country:['shipping_country']
+  };
+  function nonEmpty(v){ return Array.isArray(v) ? v.length>0 : (v && typeof v==='object' ? Object.keys(v).length>0 : !!v); }
+  function widgetAvailable(w, m){
+    if(w.usOnly && MKT!=='US') return false;
+    if(w.ukOnly && MKT!=='UK') return false;
+    var req = WIDGET_REQ[w.id]; if(!req) return true;
+    return req.every(function(k){ return m && nonEmpty(m[k]); });
+  }
+
+  // ── market metadata (all four regions are first-class) ───────────────────
+  var MARKET_META = {
+    US:     { label:'United States', region:'us',     cur:'$', store:'sample-brand.com' },
+    UK:     { label:'United Kingdom', region:'uk',     cur:'£', store:'uk.sample-brand.com' },
+    GLOBAL: { label:'Global',         region:'global', cur:'$', store:'sample-brand.com/global' },
+    IN:     { label:'India',          region:'in',     cur:'₹', store:'in.sample-brand.com' }
+  };
+  function meta(mk){ return MARKET_META[mk] || { label:mk, region:String(mk||'').toLowerCase(), cur:'$', store:'' }; }
+  function mktLabel(mk){ return meta(mk||MKT).label; }
+
+  // ── formatting ──────────────────────────────────────────────────────────
+  function cur(){ return meta(MKT).cur || '$'; }
+  function money(v){ v=+v||0; if(Math.abs(v)>=1000000) return cur()+(v/1000000).toFixed(2)+'M'; if(Math.abs(v)>=1000) return cur()+(v/1000).toFixed(1)+'K'; return cur()+v.toFixed(0); }
+  function moneyFull(v){ return cur()+(+v||0).toLocaleString(undefined,{maximumFractionDigits:2}); }
+  function intf(v){ return (+v||0).toLocaleString(); }
+  function pct(v){ return (v*100).toFixed(1)+'%'; }
+  function mLabel(m){ if(!m) return ''; var p=String(m).split('-'); var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return (mo[(+p[1]||1)-1]||'')+" "+(p[0]||'').slice(2); }
+  var DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function escA(s){ return esc(s).replace(/"/g,'&quot;'); }
+
+  // ── hover tooltips: show the exact metric at the hovered point ─────────────
+  var _daTip=null;
+  function _tipEl(){
+    if(_daTip) return _daTip;
+    _daTip=document.createElement('div');
+    _daTip.style.cssText='position:fixed;z-index:99999;pointer-events:none;background:#1A1814;color:#FBF5EC;border:1px solid #c9a96e;border-radius:7px;padding:6px 9px;font:600 11.5px/1.35 Inter,system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.55);opacity:0;transition:opacity .1s;white-space:pre;max-width:280px;';
+    document.body.appendChild(_daTip);
+    return _daTip;
+  }
+  function _tipShow(txt,x,y){ var t=_tipEl(); t.textContent=txt; t.style.opacity='1'; var w=t.offsetWidth,h=t.offsetHeight; t.style.left=Math.min(Math.max(8,x+14),window.innerWidth-w-8)+'px'; t.style.top=Math.max(8,y-h-12)+'px'; }
+  function _tipHide(){ if(_daTip) _daTip.style.opacity='0'; }
+  function _tipTarget(e){ return (e.target && e.target.closest) ? e.target.closest('[data-tip]') : null; }
+  document.addEventListener('mouseover', function(e){ var el=_tipTarget(e); if(el) _tipShow(el.getAttribute('data-tip'),e.clientX,e.clientY); });
+  document.addEventListener('mousemove', function(e){ if(!_daTip||_daTip.style.opacity==='0') return; var el=_tipTarget(e); if(el) _tipShow(el.getAttribute('data-tip'),e.clientX,e.clientY); else _tipHide(); });
+  document.addEventListener('mouseout', function(e){ if(_tipTarget(e)) _tipHide(); });
+
+  // ── tiny SVG chart kit (brand palette, high contrast on dark) ────────────
+  var PAL=['var(--c1)','var(--c2)','var(--c3)','var(--c4)','var(--c5)','var(--c6)'];
+  function lineChart(pts, opts){
+    opts=opts||{}; var W=opts.w||560, H=opts.h||190, pad=46, padR=54, padT=18, padB=30;
+    if(!pts.length) return '<div class="empty">No data.</div>';
+    var ys=pts.map(function(p){return p.y;});
+    var maxY=(opts.max!=null?opts.max:Math.max.apply(null,ys)*1.14)||1, minY=(opts.min!=null?opts.min:0);
+    var iw=W-pad-padR, ih=H-padT-padB;
+    var fmt=function(v){ return opts.money?money(v):(opts.pct?(v.toFixed(1)+'%'):Math.round(v).toLocaleString()); };
+    function X(i){ return pad + (pts.length<=1?iw/2:(i/(pts.length-1))*iw); }
+    function Y(v){ return padT + ih - ((v-minY)/(maxY-minY))*ih; }
+    var dpath=pts.map(function(p,i){return (i?'L':'M')+X(i).toFixed(1)+' '+Y(p.y).toFixed(1);}).join(' ');
+    var area=dpath+' L'+X(pts.length-1).toFixed(1)+' '+(padT+ih)+' L'+X(0).toFixed(1)+' '+(padT+ih)+' Z';
+    var grid=''; for(var g=0;g<=4;g++){ var gy=padT+(ih*g/4); var gv=maxY-(maxY-minY)*g/4; grid+='<line x1="'+pad+'" y1="'+gy.toFixed(1)+'" x2="'+(W-padR)+'" y2="'+gy.toFixed(1)+'" stroke="var(--line)" stroke-width="1"/><text x="'+(pad-6)+'" y="'+(gy+3).toFixed(1)+'" text-anchor="end" font-size="9" fill="var(--soft)">'+fmt(gv)+'</text>'; }
+    var avg=ys.reduce(function(a,b){return a+b;},0)/ys.length, ay=Y(avg);
+    var meanLine='<line x1="'+pad+'" y1="'+ay.toFixed(1)+'" x2="'+(W-padR)+'" y2="'+ay.toFixed(1)+'" stroke="var(--c2)" stroke-width="1" stroke-dasharray="4 3" opacity="0.85"/><text x="'+(W-padR+3)+'" y="'+(ay+3).toFixed(1)+'" font-size="8.5" fill="var(--c2)">avg '+fmt(avg)+'</text>';
+    var lbls=''; var step=Math.ceil(pts.length/8);
+    pts.forEach(function(p,i){ if(i%step===0||i===pts.length-1) lbls+='<text x="'+X(i).toFixed(1)+'" y="'+(H-10)+'" text-anchor="middle" font-size="9" fill="var(--soft)">'+esc(p.label||'')+'</text>'; });
+    var dots=pts.map(function(p,i){var cx=X(i).toFixed(1),cy=Y(p.y).toFixed(1);var tip=(p.label?p.label+'\n':'')+fmt(p.y);return '<circle cx="'+cx+'" cy="'+cy+'" r="2.1" fill="var(--c1)"/><circle cx="'+cx+'" cy="'+cy+'" r="11" fill="transparent" data-tip="'+escA(tip)+'" style="cursor:pointer"/>';}).join('');
+    var peakI=0; ys.forEach(function(v,i){ if(v>ys[peakI]) peakI=i; });
+    var lastI=pts.length-1;
+    var peakDot='<circle cx="'+X(peakI).toFixed(1)+'" cy="'+Y(ys[peakI]).toFixed(1)+'" r="3.6" fill="var(--c4)"/><text x="'+X(peakI).toFixed(1)+'" y="'+(Y(ys[peakI])-7).toFixed(1)+'" text-anchor="middle" font-size="8.5" font-weight="700" fill="var(--head)">peak</text>';
+    var lastDot='<circle cx="'+X(lastI).toFixed(1)+'" cy="'+Y(ys[lastI]).toFixed(1)+'" r="3.6" fill="var(--c1)"/><text x="'+X(lastI).toFixed(1)+'" y="'+(Y(ys[lastI])-7).toFixed(1)+'" text-anchor="end" font-size="9" font-weight="700" fill="var(--head)">'+fmt(ys[lastI])+'</text>';
+    var delta=ys[0]?((ys[lastI]-ys[0])/ys[0]):0;
+    var deltaBadge='<text x="'+pad+'" y="11" font-size="10" font-weight="700" fill="'+(delta>=0?'var(--c1)':'#f0916f')+'">'+(delta>=0?'▲ +':'▼ ')+Math.round(delta*100)+'% first to last</text>';
+    var yTitle=opts.yLabel?'<text x="12" y="'+(padT+ih/2).toFixed(1)+'" transform="rotate(-90 12 '+(padT+ih/2).toFixed(1)+')" text-anchor="middle" font-size="9" fill="var(--soft)">'+esc(opts.yLabel)+'</text>':'';
+    return '<svg viewBox="0 0 '+W+' '+H+'" role="img">'+grid+meanLine+
+      '<path d="'+area+'" fill="var(--c1)" opacity="0.10"/>'+
+      '<path d="'+dpath+'" fill="none" stroke="var(--c1)" stroke-width="2.2" stroke-linejoin="round"/>'+dots+peakDot+lastDot+lbls+deltaBadge+yTitle+'</svg>';
+  }
+  function barChart(items, opts){
+    opts=opts||{}; var W=opts.w||560, rowH=opts.rowH||26, pad=opts.labelW||150, padR=54;
+    if(!items.length) return '<div class="empty">No data.</div>';
+    var H=items.length*rowH+8, max=Math.max.apply(null,items.map(function(d){return d.v;}))||1, iw=W-pad-padR;
+    var rows=items.map(function(d,i){
+      var y=i*rowH+4, bw=Math.max(2,(d.v/max)*iw), col=PAL[i%PAL.length];
+      return '<text x="'+(pad-8)+'" y="'+(y+rowH/2+3)+'" text-anchor="end" font-size="11" fill="var(--ink)">'+esc(d.label)+'</text>'+
+        '<rect x="'+pad+'" y="'+(y+3)+'" width="'+bw.toFixed(1)+'" height="'+(rowH-9)+'" rx="3" fill="'+col+'" data-tip="'+escA(d.label+'\n'+(d.disp!=null?d.disp:d.v))+'" style="cursor:pointer"/>'+
+        '<text x="'+(pad+bw+6)+'" y="'+(y+rowH/2+3)+'" font-size="10.5" fill="var(--soft)">'+esc(d.disp)+'</text>';
+    }).join('');
+    return '<svg viewBox="0 0 '+W+' '+H+'" role="img">'+rows+'</svg>';
+  }
+  function stackedBars(items, opts){
+    opts=opts||{}; var W=opts.w||560, H=opts.h||200, padT=16, padB=28, pad=44, padR=8;
+    if(!items.length) return '<div class="empty">No data.</div>';
+    var max=Math.max.apply(null,items.map(function(d){return d.a+d.b;}))*1.1||1;
+    var iw=W-pad-padR, ih=H-padT-padB, bw=Math.min(30, iw/items.length*0.62), gap=iw/items.length;
+    var fmt=function(v){ return Math.round(v).toLocaleString(); };
+    var grid=''; for(var g=0;g<=4;g++){ var gy=padT+(ih*g/4); var gv=max-max*g/4; grid+='<line x1="'+pad+'" y1="'+gy.toFixed(1)+'" x2="'+(W-padR)+'" y2="'+gy.toFixed(1)+'" stroke="var(--line)" stroke-width="1"/><text x="'+(pad-6)+'" y="'+(gy+3).toFixed(1)+'" text-anchor="end" font-size="9" fill="var(--soft)">'+fmt(gv)+'</text>'; }
+    var out=items.map(function(d,i){
+      var x=pad+i*gap+(gap-bw)/2, ha=(d.a/max)*ih, hb=(d.b/max)*ih;
+      var yb=padT+ih-ha, ya=yb-hb;
+      return '<rect x="'+x.toFixed(1)+'" y="'+yb.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+ha.toFixed(1)+'" fill="var(--c1)" data-tip="'+escA(d.label+'\nNew: '+fmt(d.a)+'\nTotal: '+fmt(d.a+d.b))+'" style="cursor:pointer"/>'+
+             '<rect x="'+x.toFixed(1)+'" y="'+ya.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hb.toFixed(1)+'" fill="var(--c3)" data-tip="'+escA(d.label+'\nReturning: '+fmt(d.b)+'\nTotal: '+fmt(d.a+d.b))+'" style="cursor:pointer"/>'+
+             (i%Math.ceil(items.length/8)===0||i===items.length-1?'<text x="'+(x+bw/2).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle" font-size="9" fill="var(--soft)">'+esc(d.label)+'</text>':'');
+    }).join('');
+    var yTitle=opts.yLabel?'<text x="12" y="'+(padT+ih/2).toFixed(1)+'" transform="rotate(-90 12 '+(padT+ih/2).toFixed(1)+')" text-anchor="middle" font-size="9" fill="var(--soft)">'+esc(opts.yLabel)+'</text>':'';
+    return '<svg viewBox="0 0 '+W+' '+H+'" role="img">'+grid+out+yTitle+'</svg>';
+  }
+  function donut(items, opts){
+    opts=opts||{}; var S=opts.s||150, r=54, cx=S/2, cy=S/2, C=2*Math.PI*r;
+    var total=items.reduce(function(a,d){return a+d.v;},0)||1, off=0;
+    var segs=items.map(function(d,i){
+      var frac=d.v/total, len=frac*C, seg='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+PAL[i%PAL.length]+'" stroke-width="20" stroke-dasharray="'+len.toFixed(2)+' '+(C-len).toFixed(2)+'" stroke-dashoffset="'+(-off).toFixed(2)+'" transform="rotate(-90 '+cx+' '+cy+')" data-tip="'+escA(d.label+'\n'+money(d.v)+' ('+(frac*100).toFixed(1)+'%)')+'" style="cursor:pointer"/>';
+      off+=len; return seg;
+    }).join('');
+    return '<svg viewBox="0 0 '+S+' '+S+'" width="'+S+'" role="img">'+segs+
+      '<text x="'+cx+'" y="'+(cy-2)+'" text-anchor="middle" font-size="17" font-family="Fraunces,Georgia,serif" fill="var(--head)">'+money(total)+'</text>'+
+      '<text x="'+cx+'" y="'+(cy+15)+'" text-anchor="middle" font-size="9" fill="var(--soft)">TOTAL</text></svg>';
+  }
+  function legend(items){ return '<div class="legend">'+items.map(function(d,i){return '<span class="li"><span class="sw" style="background:'+PAL[i%PAL.length]+'"></span>'+esc(d.label)+(d.disp?' · '+esc(d.disp):'')+'</span>';}).join('')+'</div>'; }
+  function heatColor(v){ if(v==null) return 'var(--chip)'; var t=Math.min(1,v/35); function mix(a,b){return Math.round(a+(b-a)*t);} return 'rgb('+mix(0x2A,0xFF)+','+mix(0x26,0x69)+','+mix(0x1F,0x40)+')'; }
+  function heatText(v){ return (v!=null && v/35>0.55)?'#160d07':'var(--ink)'; }
+  function table(head, rows, opts){
+    opts=opts||{};
+    var th='<tr>'+head.map(function(h,i){return '<th class="'+((opts.num&&opts.num.indexOf(i)>=0)?'num':'')+'">'+esc(h)+'</th>';}).join('')+'</tr>';
+    var tr=rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td class="'+((opts.num&&opts.num.indexOf(i)>=0)?'num':'')+'">'+(c==null?'':esc(c))+'</td>';}).join('')+'</tr>';}).join('');
+    return '<div class="tbl-wrap"><table>'+th+tr+'</table></div>';
+  }
+
+  // ── widget registry ───────────────────────────────────────────────────────
+  function d(){ return A.markets[MKT]; }
+  function delta(cur,prev){ if(prev==null||prev===0) return ''; var p=(cur-prev)/prev; var cls=p>=0?'up':'down'; var ar=p>=0?'▲':'▼'; return '<span class="'+cls+'">'+ar+' '+Math.abs(p*100).toFixed(0)+'%</span>'; }
+
+  var WIDGETS = [
+    { id:'revenue', title:'Total sales over time', sub:'Monthly', span:'span8',
+      mini:function(m){ var s=m.monthly.map(function(x){return {x:x.month,y:x.sales,label:mLabel(x.month)};}); return lineChart(s,{money:true,h:180}); },
+      detail:function(m){
+        var mm=m.monthly; var fm=fullMonths(mm); var last=fm[fm.length-1], prev=fm[fm.length-2];
+        var peak=mm.reduce(function(a,b){return b.sales>a.sales?b:a;},mm[0]);
+        var rows=mm.map(function(x){return [mLabel(x.month), intf(x.orders), moneyFull(x.sales), moneyFull(x.aov)];});
+        return {
+          insight:'<b>Peak month was '+mLabel(peak.month)+'</b> at '+moneyFull(peak.sales)+' ('+intf(peak.orders)+' orders). Most recent complete month '+mLabel(last.month)+' did '+moneyFull(last.sales)+', '+delta(last.sales,prev.sales)+' vs the prior month (a trailing partial month is excluded from this comparison). Revenue is seasonally front-loaded into the Q4 gifting window; the growth job is lifting the Jan–Jul trough with subscription and replenishment programs.',
+          chart:lineChart(mm.map(function(x){return {x:x.month,y:x.sales,label:mLabel(x.month)};}),{money:true,w:820,h:280,yLabel:'Total sales'}),
+          table:table(['Month','Orders','Total sales','AOV'], rows, {num:[1,2,3]}),
+          csv:'monthly_order_revenue_trend'
+        };
+      } },
+    { id:'kpi-orders', title:'Orders over time', sub:'Monthly volume', span:'span4',
+      mini:function(m){ return barChartVertical(m.monthly.map(function(x){return {label:mLabel(x.month),v:x.orders};}),{h:180}); },
+      detail:function(m){ var mm=m.monthly; var rows=mm.map(function(x){return [mLabel(x.month),intf(x.orders),moneyFull(x.aov)];});
+        var fm=fullMonths(mm); var last=fm[fm.length-1],prev=fm[fm.length-2];
+        return {insight:'<b>'+intf(m.summary.orders)+' orders</b> over the trailing window. Most recent complete month '+delta(last.orders,prev.orders)+' MoM (a trailing partial month is excluded). Order volume, not AOV, is the primary revenue lever here.',
+        chart:barChartVertical(mm.map(function(x){return {label:mLabel(x.month),v:x.orders};}),{w:820,h:280,yLabel:'Orders'}), table:table(['Month','Orders','AOV'],rows,{num:[1,2]}), csv:'monthly_order_revenue_trend'}; } },
+    { id:'aov', title:'Average order value', sub:'Monthly', span:'span6',
+      mini:function(m){ return lineChart(m.aov_trend.map(function(x){return {x:x.month,y:x.aov,label:mLabel(x.month)};}),{money:true,h:170}); },
+      detail:function(m){ var t=m.aov_trend; var ft=fullMonths(t); var first=ft[0],last=ft[ft.length-1];
+        var rows=t.map(function(x){return [mLabel(x.month),moneyFull(x.aov),intf(x.orders),moneyFull(x.sales)];});
+        return {insight:'<b>AOV has compressed from '+moneyFull(first.aov)+' to '+moneyFull(last.aov)+'</b> across the window of complete months, '+delta(last.aov,first.aov)+'. Falling AOV alongside rising orders signals discount-led acquisition and smaller entry baskets. The fix: bundle logic, free-shipping thresholds set just above current AOV, and subscription anchors on the hero SKU.',
+        chart:lineChart(t.map(function(x){return {x:x.month,y:x.aov,label:mLabel(x.month)};}),{money:true,w:820,h:280,yLabel:'Average order value'}), table:table(['Month','AOV','Orders','Total sales'],rows,{num:[1,2,3]}), csv:'aov_trend_by_month'}; } },
+    { id:'channels', title:'Total sales by channel', sub:'Where revenue comes from', span:'span6',
+      mini:function(m){ var top=m.channels.slice(0,5).map(function(x){return {label:x.channel,v:x.sales,disp:money(x.sales)};}); return donut(top,{s:150})+legend(top); },
+      detail:function(m){ var c=m.channels; var total=c.reduce(function(a,b){return a+b.sales;},0);
+        var rows=c.map(function(x){return [x.channel,intf(x.orders),moneyFull(x.sales),moneyFull(x.aov),pct(x.sales/total)];});
+        var sub=c.find(function(x){return /subscription/i.test(x.channel);});
+        return {insight:'<b>Online Store drives '+pct(c[0].sales/total)+' of revenue.</b>'+(sub?' Subscriptions are '+pct(sub.sales/total)+' of sales at a '+moneyFull(sub.aov)+' AOV — the recurring base to defend and grow.':''),
+        chart:donut(c.slice(0,6).map(function(x){return {label:x.channel,v:x.sales};}),{s:210})+legend(c.slice(0,6).map(function(x){return {label:x.channel,disp:money(x.sales)};})),
+        table:table(['Channel','Orders','Total sales','AOV','Share'],rows,{num:[1,2,3,4]}), csv:'sales_by_sales_channel'}; } },
+    { id:'ptype', title:'Sales by product type', sub:'Category mix', span:'span6',
+      mini:function(m){ return barChart(m.product_types.slice(0,7).map(function(x){return {label:trunc(x.type,20),v:x.net,disp:money(x.net)};}),{h:190,labelW:130}); },
+      detail:function(m){ var p=m.product_types; var total=p.reduce(function(a,b){return a+b.net;},0);
+        var rows=p.map(function(x){return [x.type,moneyFull(x.net),intf(x.orders),intf(x.quantity),pct(x.net/total)];});
+        return {insight:'<b>'+p[0].type+' leads with '+moneyFull(p[0].net)+'</b> ('+pct(p[0].net/total)+' of category revenue). Bundles and subscriptions are the recurring-revenue engines; single items and refills are the high-frequency habit categories worth cross-grading into higher-AOV bundles.',
+        chart:barChart(p.slice(0,14).map(function(x){return {label:trunc(x.type,26),v:x.net,disp:money(x.net)};}),{w:820,h:14*30,labelW:200}),
+        table:table(['Product type','Net sales','Orders','Qty','Share'],rows,{num:[1,2,3,4]}), csv:'sales_by_product_type'}; } },
+    { id:'discount', title:'Discounted vs full-price', sub:'Margin exposure', span:'span6',
+      mini:function(m){ var t=m.discount; var items=t.map(function(x){return {label:x.discounted?'Discounted':'Full price',v:x.sales,disp:money(x.sales)};}); return donut(items,{s:150})+legend(items); },
+      detail:function(m){ var t=m.discount; var disc=t.find(function(x){return x.discounted;})||{}, full=t.find(function(x){return !x.discounted;})||{};
+        var totO=(disc.orders||0)+(full.orders||0);
+        var rows=t.map(function(x){return [x.discounted?'Discounted':'Full price',intf(x.orders),moneyFull(x.sales),moneyFull(x.aov)];});
+        return {insight:'<b>'+pct((disc.orders||0)/totO)+' of orders use a discount</b>, and discounted AOV ('+moneyFull(disc.aov)+') is '+((full.aov&&disc.aov)?Math.round((1-disc.aov/full.aov)*100):0)+'% below full-price AOV ('+moneyFull(full.aov)+'). Discount is training a cheaper basket — reserve offers for the switcher / win-back cohort and protect full-margin buyers.',
+        chart:donut(t.map(function(x){return {label:x.discounted?'Discounted':'Full price',v:x.sales};}),{s:210})+legend(t.map(function(x){return {label:(x.discounted?'Discounted':'Full price'),disp:money(x.sales)};})),
+        table:table(['Order type','Orders','Total sales','AOV'],rows,{num:[1,2,3]}), csv:'sales_by_discount_usage'}; } },
+    { id:'dow', title:'Sales by day of week', sub:'Send-timing signal', span:'span6',
+      mini:function(m){ return barChart((m.day_of_week||[]).slice().sort(function(a,b){return a.dow-b.dow;}).map(function(x){return {label:DOW[x.dow]||x.dow,v:x.sales,disp:money(x.sales)};}),{h:190,labelW:52}); },
+      detail:function(m){ var dw=(m.day_of_week||[]).slice().sort(function(a,b){return b.sales-a.sales;});
+        var rows=dw.map(function(x){return [DOW[x.dow]||x.dow,intf(x.orders),moneyFull(x.sales),moneyFull(x.aov)];});
+        return {insight:dw.length?('<b>'+(DOW[dw[0].dow])+' and '+(DOW[dw[1].dow])+' are the strongest revenue days.</b> Weight primary sends and paid pushes to the top two days; keep the weakest day for lighter re-engagement touches.'):'No day-of-week data for this market.',
+        chart:barChart((m.day_of_week||[]).slice().sort(function(a,b){return a.dow-b.dow;}).map(function(x){return {label:DOW[x.dow]||x.dow,v:x.sales,disp:money(x.sales)+' · '+intf(x.orders)+' ord'};}),{w:760,h:7*34,labelW:60}),
+        table:table(['Day','Orders','Total sales','AOV'],rows,{num:[1,2,3]}), csv:'sales_by_day_of_week'}; } },
+    { id:'newret', title:'New vs returning customers', sub:'Monthly acquisition/retention split', span:'span8',
+      mini:function(m){ return stackedBars((m.new_vs_returning||[]).map(function(x){return {label:mLabel(x.month),a:x.new_c,b:x.ret_c};}),{h:190})+legend([{label:'New'},{label:'Returning'}].map(function(l,i){return {label:l.label};})); },
+      detail:function(m){ var nr=m.new_vs_returning||[]; var rows=nr.map(function(x){var tot=x.new_c+x.ret_c;return [mLabel(x.month),intf(x.new_c),intf(x.ret_c),tot?pct(x.ret_c/tot):'—'];});
+        return {insight:'<b>Returning customers are the volume base most months.</b> The healthy retention months cluster where returning-order share sits above 50% — protect that base with lifecycle flows; the acquisition spikes (gifting season) need a strong second-order nudge or they leak straight to churn.',
+        chart:stackedBars(nr.map(function(x){return {label:mLabel(x.month),a:x.new_c,b:x.ret_c};}),{w:820,h:300,yLabel:'Customers'})+legend([{label:'New customers'},{label:'Returning customers'}]),
+        table:table(['Month','New','Returning','Returning share'],rows,{num:[1,2,3]}), csv:'new_vs_returning_customers_by_month'}; } },
+    { id:'retrate', title:'Returning customer rate', sub:'Monthly retention %', span:'span4',
+      mini:function(m){ return lineChart((m.returning_rate||[]).map(function(x){return {x:x.month,y:x.rate*100,label:mLabel(x.month)};}),{h:180,pct:true,yLabel:'Returning rate'}); },
+      detail:function(m){ var rr=m.returning_rate||[]; var avg=rr.reduce(function(a,b){return a+b.rate;},0)/(rr.length||1);
+        var rows=rr.map(function(x){return [mLabel(x.month),pct(x.rate),intf(x.ret_c),intf(x.new_c)];});
+        return {insight:'<b>Average returning-customer rate is '+pct(avg)+'.</b> Dips align with heavy new-customer acquisition (dilution), not retention failure — read this alongside cohort retention before reacting.',
+        chart:lineChart(rr.map(function(x){return {x:x.month,y:x.rate*100,label:mLabel(x.month)};}),{w:820,h:280,pct:true,yLabel:'Returning customer rate (%)'}), table:table(['Month','Returning rate','Returning','New'],rows,{num:[1,2,3]}), csv:'returning_customer_rate_by_month'}; } },
+    { id:'acq', title:'Customer acquisition', sub:'New customers by month', span:'span8',
+      mini:function(m){ return barChartVertical((m.acquisition||[]).map(function(x){return {label:mLabel(x.month),v:x.new_c};}),{h:180}); },
+      detail:function(m){ var ac=m.acquisition||[]; if(!ac.length) return {insight:'No acquisition series for this market.',chart:'',table:'',csv:''};
+        var peak=ac.reduce(function(a,b){return b.new_c>a.new_c?b:a;},ac[0]);
+        var rows=ac.map(function(x){return [mLabel(x.month),intf(x.new_c),intf(x.orders),moneyFull(x.sales)];});
+        return {insight:'<b>Acquisition peaks in the Q4 gifting window</b> ('+mLabel(peak.month)+': '+intf(peak.new_c)+' new customers). First-order revenue per new customer is low relative to LTV — the money is made on order 2+, so the second-order conversion program is the highest-leverage growth investment.',
+        chart:barChartVertical(ac.map(function(x){return {label:mLabel(x.month),v:x.new_c};}),{w:820,h:280,yLabel:'New customers'}), table:table(['Month','New customers','First orders','First-order sales'],rows,{num:[1,2,3]}), csv:'customer_acquisition_by_month'}; } },
+    { id:'cohort', title:'Customer cohort retention', sub:'By acquisition quarter', span:'span12',
+      mini:function(m){ return cohortHeat(m.cohort, 6); },
+      detail:function(m){ return {insight:'<b>Read across each row to see how a quarter’s cohort keeps ordering over time.</b> Retention is normalised to each cohort’s first observed quarter (=100%). Warmer cells = stronger repeat behaviour. Use this to set realistic LTV assumptions and to spot which acquisition quarters produced stickier customers (usually the non-discount, non-gifting cohorts).',
+        chart:cohortHeat(m.cohort, 8), table:'', csv:'customer_cohort_retention'}; } },
+    { id:'topprod', title:'Top products by net sales', sub:'Revenue leaders', span:'span6',
+      mini:function(m){ return barChart(m.top_products.slice(0,8).map(function(x){return {label:trunc(x.title,22),v:x.net,disp:money(x.net)};}),{h:220,labelW:150}); },
+      detail:function(m){ var p=m.top_products; var rows=p.slice(0,50).map(function(x,i){return [String(i+1),x.title,moneyFull(x.net),intf(x.quantity),intf(x.orders)];});
+        return {insight:'<b>'+p[0].title+' is the #1 revenue product at '+moneyFull(p[0].net)+'.</b> The hero-SKU franchise (base, refill, packs, starter kit) is the growth spine — every retention program should orbit its reorder rhythm.',
+        chart:barChart(p.slice(0,15).map(function(x){return {label:trunc(x.title,30),v:x.net,disp:money(x.net)};}),{w:820,h:15*30,labelW:230}),
+        table:table(['#','Product','Net sales','Qty','Orders'],rows,{num:[2,3,4]}), csv:'top_50_products_by_net_sales'}; } },
+    { id:'topqty', title:'Top products by quantity', sub:'Units sold', span:'span6', usOnly:true,
+      mini:function(m){ return barChart((m.top_by_qty||[]).slice(0,8).map(function(x){return {label:trunc(x.title,22),v:x.quantity,disp:intf(x.quantity)};}),{h:220,labelW:150}); },
+      detail:function(m){ var p=m.top_by_qty||[]; var rows=p.map(function(x,i){return [String(i+1),x.title,intf(x.quantity),moneyFull(x.net),intf(x.orders)];});
+        return {insight:'<b>Unit leaders vs revenue leaders diverge</b> — high-quantity, lower-price SKUs (refills, everyday singles) drive frequency and are the ideal entry point for first-time buyers before cross-grading them into higher-AOV bundles and gifting.',
+        chart:barChart(p.slice(0,15).map(function(x){return {label:trunc(x.title,30),v:x.quantity,disp:intf(x.quantity)};}),{w:820,h:15*30,labelW:230}),
+        table:table(['#','Product','Qty','Net sales','Orders'],rows,{num:[2,3,4]}), csv:'top_products_by_quantity'}; } },
+    { id:'weekly', title:'Weekly sales trend', sub:'Granular momentum', span:'span12', usOnly:true,
+      mini:function(m){ return lineChart((m.weekly||[]).map(function(x){return {x:x.week,y:x.sales,label:weekLabel(x.week)};}),{money:true,h:180}); },
+      detail:function(m){ var w=m.weekly||[]; var rows=w.map(function(x){return [x.week,intf(x.orders),moneyFull(x.sales),moneyFull(x.net),moneyFull(x.aov)];});
+        return {insight:'<b>Week-level view exposes campaign spikes and post-promo troughs.</b> Use it to attribute revenue lift to specific sends and to spot the decay window where a follow-up flow should fire.',
+        chart:lineChart(w.map(function(x){return {x:x.week,y:x.sales,label:weekLabel(x.week)};}),{money:true,w:900,h:300,yLabel:'Weekly total sales'}), table:table(['Week','Orders','Total sales','Net sales','AOV'],rows,{num:[1,2,3,4]}), csv:'weekly_sales_trend'}; } },
+    { id:'country', title:'Sales by shipping country', sub:'Geography', span:'span6', ukOnly:true,
+      mini:function(m){ return barChart((m.shipping_country||[]).slice(0,6).map(function(x){return {label:trunc(x.country,18),v:x.sales,disp:money(x.sales)};}),{h:180,labelW:120}); },
+      detail:function(m){ var c=m.shipping_country||[]; var rows=c.map(function(x){return [x.country,intf(x.orders),moneyFull(x.sales)];});
+        return {insight:'<b>The UK storefront is domestically concentrated.</b> That focus keeps shipping economics and messaging simple; regional-within-UK cuts are the next expansion of this view.',
+        chart:barChart(c.slice(0,10).map(function(x){return {label:trunc(x.country,22),v:x.sales,disp:money(x.sales)};}),{w:760,labelW:180}), table:table(['Country','Orders','Total sales'],rows,{num:[1,2]}), csv:'sales_by_shipping_country'}; } },
+  ];
+
+  function trunc(s,n){ s=String(s||''); return s.length>n?s.slice(0,n-1)+'…':s; }
+  function barChartVertical(items, opts){
+    opts=opts||{}; var W=opts.w||560, H=opts.h||190, padT=18, padB=28, pad=46, padR=10;
+    if(!items.length) return '<div class="empty">No data.</div>';
+    var vals=items.map(function(d){return d.v;});
+    var max=Math.max.apply(null,vals)*1.12||1;
+    var iw=W-pad-padR, ih=H-padT-padB, gap=iw/items.length, bw=Math.min(34,gap*0.62);
+    var fmt=function(v){ return opts.money?money(v):Math.round(v).toLocaleString(); };
+    var grid=''; for(var g=0;g<=4;g++){ var gy=padT+(ih*g/4); var gv=max-max*g/4; grid+='<line x1="'+pad+'" y1="'+gy.toFixed(1)+'" x2="'+(W-padR)+'" y2="'+gy.toFixed(1)+'" stroke="var(--line)" stroke-width="1"/><text x="'+(pad-6)+'" y="'+(gy+3).toFixed(1)+'" text-anchor="end" font-size="9" fill="var(--soft)">'+fmt(gv)+'</text>'; }
+    var avg=vals.reduce(function(a,b){return a+b;},0)/vals.length, ay=padT+ih-(avg/max)*ih;
+    var meanLine='<line x1="'+pad+'" y1="'+ay.toFixed(1)+'" x2="'+(W-padR)+'" y2="'+ay.toFixed(1)+'" stroke="var(--c2)" stroke-width="1" stroke-dasharray="4 3" opacity="0.85"/><text x="'+(W-padR-2)+'" y="'+(ay-3).toFixed(1)+'" text-anchor="end" font-size="8.5" fill="var(--c2)">avg '+fmt(avg)+'</text>';
+    var peakI=0; vals.forEach(function(v,i){ if(v>vals[peakI]) peakI=i; }); var lastI=items.length-1;
+    var out=items.map(function(dd,i){ var x=pad+i*gap+(gap-bw)/2, h=(dd.v/max)*ih, y=padT+ih-h;
+      var col=(i===peakI)?'var(--c4)':'var(--c1)';
+      var valLbl=(i===peakI||i===lastI)?'<text x="'+(x+bw/2).toFixed(1)+'" y="'+(y-4).toFixed(1)+'" text-anchor="middle" font-size="8.5" font-weight="700" fill="var(--head)">'+fmt(dd.v)+'</text>':'';
+      return '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="2" fill="'+col+'" data-tip="'+escA(dd.label+'\n'+fmt(dd.v))+'" style="cursor:pointer"/>'+valLbl+
+        (i%Math.ceil(items.length/8)===0||i===lastI?'<text x="'+(x+bw/2).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle" font-size="9" fill="var(--soft)">'+esc(dd.label)+'</text>':'');
+    }).join('');
+    var yTitle=opts.yLabel?'<text x="12" y="'+(padT+ih/2).toFixed(1)+'" transform="rotate(-90 12 '+(padT+ih/2).toFixed(1)+')" text-anchor="middle" font-size="9" fill="var(--soft)">'+esc(opts.yLabel)+'</text>':'';
+    return '<svg viewBox="0 0 '+W+' '+H+'" role="img">'+grid+meanLine+out+yTitle+'</svg>';
+  }
+  function cohortHeat(cohorts, cols){
+    if(!cohorts||!cohorts.length) return '<div class="empty">No cohort data.</div>';
+    var head='<tr><th>Cohort (quarter)</th><th>Base</th>'; for(var c=0;c<cols;c++) head+='<th>'+(c===0?'Q+0 (acq)':'Q+'+c)+'</th>'; head+='</tr>';
+    var body=cohorts.map(function(row){
+      var tds='<td class="lbl">'+esc(mLabel(row.cohort))+'</td><td class="lbl">'+intf(row.base)+'</td>';
+      for(var i=0;i<cols;i++){ var v=row.retention[i]; var qt=(i===0?'Q+0 (acquisition)':'Q+'+i); tds+='<td style="background:'+heatColor(v)+';color:'+heatText(v)+(v==null?'':';cursor:pointer')+'"'+(v==null?'':' data-tip="'+escA(mLabel(row.cohort)+' · '+qt+'\nRetention: '+v+'%\nBase: '+intf(row.base))+'"')+'>'+(v==null?'':v+'%')+'</td>'; }
+      return '<tr>'+tds+'</tr>';
+    }).join('');
+    return '<div class="tbl-wrap"><table class="heat">'+head+body+'</table></div>';
+  }
+
+  // ── KPI row / Signals board + revenue-driver decomposition ────────────────
+  function pctChange(a,b){ return b ? (a-b)/b : 0; }
+  function isCurrentMonth(monthStr){
+    var parts=String(monthStr||'').split('-'); if(parts.length<2) return false;
+    var y=+parts[0], mo=+parts[1]-1; if(isNaN(y)||isNaN(mo)) return false;
+    var now=new Date(); return y===now.getFullYear() && mo===now.getMonth();
+  }
+  function fullMonths(mm){
+    if(mm.length>=1 && isCurrentMonth(mm[mm.length-1].month)) return mm.slice(0,-1);
+    return mm;
+  }
+  function computeSignals(m){
+    var sig=[], mm=m.monthly||[], fm=fullMonths(mm);
+    if(fm.length>=2){ var l=fm[fm.length-1], p=fm[fm.length-2], c=pctChange(l.sales,p.sales);
+      sig.push({sev:c<-0.15?'critical':(c<0?'watch':'good'), label:'Revenue momentum', value:(c>=0?'+':'')+Math.round(c*100)+'% MoM',
+        detail:'Last complete month '+mLabel(l.month)+' '+moneyFull(l.sales)+' vs '+moneyFull(p.sales)+' prior. A trailing partial month is excluded so this compares like-for-like.'}); }
+    var at=fullMonths(m.aov_trend&&m.aov_trend.length?m.aov_trend:mm);
+    if(at.length>=2){ var f=at[0], la=at[at.length-1], c2=pctChange(la.aov,f.aov);
+      sig.push({sev:c2<-0.10?'critical':(c2<-0.03?'watch':'good'), label:'AOV trend', value:(c2>=0?'+':'')+Math.round(c2*100)+'% over window',
+        detail:'AOV moved from '+moneyFull(f.aov)+' to '+moneyFull(la.aov)+'. Falling AOV with rising orders is a discount-led, smaller-basket signal.'}); }
+    var rr=m.summary&&m.summary.returning_rate;
+    if(rr!=null){ sig.push({sev:rr<0.25?'critical':(rr<0.35?'watch':'good'), label:'Returning-customer rate', value:pct(rr),
+      detail:'Share of customers ordering more than once. Below 35% needs lifecycle flows to defend; above 45% is healthy.'}); }
+    if(m.discount&&m.discount.length){ var dc=m.discount.find(function(x){return x.discounted;})||{}, fu=m.discount.find(function(x){return !x.discounted;})||{};
+      var tO=(dc.orders||0)+(fu.orders||0), sh=tO?(dc.orders||0)/tO:0, gap=(fu.aov&&dc.aov)?(1-dc.aov/fu.aov):0;
+      sig.push({sev:sh>0.4?'critical':(sh>0.25?'watch':'good'), label:'Discount reliance', value:pct(sh)+' of orders',
+        detail:'Discounted AOV ('+moneyFull(dc.aov)+') is '+Math.round(gap*100)+'% below full price ('+moneyFull(fu.aov)+'). Reserve offers for winback and switcher cohorts.'}); }
+    var tp=m.top_products||[];
+    if(tp.length){ var tot=tp.reduce(function(a,b){return a+(b.net||0);},0), sh2=tot?tp[0].net/tot:0;
+      sig.push({sev:sh2>0.4?'watch':'good', label:'Revenue concentration', value:pct(sh2)+' in top SKU',
+        detail:trunc(tp[0].title,40)+' is '+pct(sh2)+' of top-product revenue. High concentration is a dependency risk, broaden the second-order path.'}); }
+    if(m.channels&&m.channels.length){ var tc=m.channels.reduce(function(a,b){return a+b.sales;},0), cs=tc?m.channels[0].sales/tc:0;
+      sig.push({sev:cs>0.85?'watch':'good', label:'Channel concentration', value:pct(cs)+' via '+trunc(m.channels[0].channel,16),
+        detail:'Revenue leans on a single channel. Diversify acquisition to de-risk the base.'}); }
+    if(mm.length>=6){ var pk=mm.reduce(function(a,b){return b.sales>a.sales?b:a;},mm[0]), tr=mm.reduce(function(a,b){return b.sales<a.sales?b:a;},mm[0]);
+      sig.push({sev:'watch', label:'Seasonality', value:'Peak '+mLabel(pk.month), disp:true,
+        detail:'Peak '+mLabel(pk.month)+' at '+moneyFull(pk.sales)+', trough '+mLabel(tr.month)+' at '+moneyFull(tr.sales)+'. Lift the off-season with subscription and replenishment.'}); }
+    var order={critical:0,watch:1,good:2};
+    return sig.sort(function(a,b){return order[a.sev]-order[b.sev];});
+  }
+  function revenueDecomp(m){
+    var mm=fullMonths(m.monthly||[]); if(mm.length<2) return null;
+    var t=mm[mm.length-1], p=mm[mm.length-2];
+    var dRev = (t.sales||0) - (p.sales||0);
+    var aovPrev = p.orders ? (p.sales/p.orders) : 0;
+    var ordersEffect = ((t.orders||0) - (p.orders||0)) * aovPrev;
+    var aovEffect = dRev - ordersEffect;
+    return { from:p, to:t, dRev:dRev, ordersEffect:ordersEffect, aovEffect:aovEffect };
+  }
+  function renderSignals(){
+    var m=d(); var sig=computeSignals(m), dec=revenueDecomp(m);
+    var col={critical:'#f0916f',watch:'var(--gold)',good:'#4fd08a'};
+    var cards=sig.map(function(s){ return '<div class="sig" style="border-left-color:'+col[s.sev]+'">'+
+      '<div class="sig-h"><span class="sig-dot" style="background:'+col[s.sev]+'"></span>'+esc(s.label)+'</div>'+
+      '<div class="sig-v">'+esc(s.value)+'</div><div class="sig-d">'+esc(s.detail)+'</div></div>'; }).join('');
+    var dh='';
+    if(dec){ var dir=dec.dRev>=0?'up':'down';
+      dh='<div class="sig-decomp"><b>Revenue driver split</b> ('+mLabel(dec.from.month)+' to '+mLabel(dec.to.month)+', order volume × basket size): <b class="'+dir+'">'+(dec.dRev>=0?'+':'')+moneyFull(dec.dRev)+'</b> total, of which <b class="'+(dec.ordersEffect>=0?'up':'down')+'">'+(dec.ordersEffect>=0?'+':'')+moneyFull(dec.ordersEffect)+'</b> is from order volume and <b class="'+(dec.aovEffect>=0?'up':'down')+'">'+(dec.aovEffect>=0?'+':'')+moneyFull(dec.aovEffect)+'</b> is from AOV. This is where the month moved, and which lever moved it.</div>'; }
+    document.getElementById('signals').innerHTML='<div class="sig-head">Signals · what needs attention<span class="sig-sub">auto-computed from the '+esc(mktLabel())+' benchmark data</span></div><div class="sig-grid">'+cards+'</div>'+dh;
+  }
+
+  function renderKPIs(){
+    var s=d().summary;
+    var tiles=[
+      {l:'Total sales', v:moneyFull(s.total_sales)},
+      {l:'Orders', v:intf(s.orders)},
+      {l:'Net sales', v:moneyFull(s.net_sales)},
+      {l:'Avg order value', v:moneyFull(s.aov)},
+      {l:'Quantity sold', v:intf(s.quantity)},
+      {l:'New customers', v:intf(s.new_customers)},
+      {l:'Returning customers', v:intf(s.returning_customers)},
+      {l:'Returning rate', v:pct(s.returning_rate)},
+    ];
+    document.getElementById('kpis').innerHTML = tiles.map(function(t){return '<div class="kpi"><div class="kl">'+t.l+'</div><div class="kv">'+t.v+'</div></div>';}).join('');
+  }
+
+  // ── Tabs ──────────────────────────────────────────────────────────────────
+  var ACTIVE_TAB='control';
+  var TAB_MAP={
+    revenue:'control','kpi-orders':'control',aov:'control',weekly:'control',dow:'control',
+    ptype:'control',topprod:'control',topqty:'control',country:'control',
+    channels:'acq',acq:'acq',
+    newret:'ret',retrate:'ret',discount:'ret',
+    cohort:'cohort'
+  };
+  var UNLOCK={
+    control:[
+      {t:'Marketing Efficiency Ratio (MER)', s:'Net sales ÷ total ad spend', need:'ad-platform spend', why:'MER/ROAS need ad spend from Meta/Google/TikTok Ads — not part of the read-only commerce set. Connect ad-platform read access to unlock.'},
+      {t:'Intraday sales pacer + EOD forecast', s:'Today vs yesterday, projected close', need:'read-only store Admin', why:'Needs a live hourly order stream. A twice-daily batch cannot power intraday pacing; connect the read-only store Admin token (+ webhooks) to unlock.'}
+    ],
+    acq:[
+      {t:'Ad → Landing Page ledger', s:'Creative → LP: spend, CR, CPA, ROAS', need:'ad-platform + store Admin', why:'Needs ad spend plus order-level attribution (gclid/fbclid, last-interactive-touch). Connect ad-platform read + store Admin to unlock.'},
+      {t:'Channel spend split & blended ROAS', s:'Meta / Google / TikTok', need:'ad-platform spend', why:'No spend source exists in the read-only commerce set. Connect ad-platform read access to unlock.'}
+    ],
+    ret:[
+      {t:'Retention ledger (Mailer + LP)', s:'Flow/campaign: open, CTR, POR, unsub, revenue', need:'email/ESP sync', why:'Fills automatically once the read-only email-platform sync populates the warehouse.'}
+    ],
+    cohort:[
+      {t:'LTV by acquisition channel (30 / 60 / 90d)', s:'Cohort LTV growth by first-touch source', need:'read-only store Admin', why:'Needs order-level lifetime value plus channel attribution. Connect the read-only store Admin token to unlock.'},
+      {t:'Automated optimization calendar', s:'Creative-rotation triggers on CTR decay', need:'ad + email performance', why:'Needs ad + email CTR history to detect content decay. Connect ad-platform read + ESP to unlock.'}
+    ]
+  };
+  function unlockCard(u){
+    return '<div class="w span6"><div class="wh"><span class="wt">'+esc(u.t)+'</span>'+
+      '<span style="font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);background:rgba(201,169,110,.16);padding:3px 8px;border-radius:6px;white-space:nowrap">🔒 Connect '+esc(u.need)+'</span></div>'+
+      '<div class="ws">'+esc(u.s)+'</div>'+
+      '<div class="wbody"><div class="empty" style="padding:22px 16px;text-align:center;line-height:1.6">'+esc(u.why)+'</div></div></div>';
+  }
+
+  function renderGrid(){
+    var m=d();
+    var html=WIDGETS.filter(function(w){ return TAB_MAP[w.id]===ACTIVE_TAB && widgetAvailable(w, m); }).map(function(w){
+      var body='';
+      try{ body=w.mini(m)||''; }catch(e){ body='<div class="empty">—</div>'; }
+      return '<div class="w '+(w.span||'span6')+' link" data-wid="'+w.id+'">'+
+        '<div class="wh"><span class="wt">'+esc(w.title)+'</span><button class="open" data-wid="'+w.id+'">Detail ↗</button></div>'+
+        '<div class="ws">'+esc(w.sub||'')+'</div>'+
+        '<div class="wbody">'+body+'</div></div>';
+    }).join('');
+    html += (UNLOCK[ACTIVE_TAB]||[]).map(unlockCard).join('');
+    document.getElementById('grid').innerHTML = html;
+    document.querySelectorAll('.w.link').forEach(function(el){ el.addEventListener('click',function(){ openDetail(el.dataset.wid); }); });
+    var onControl = ACTIVE_TAB==='control';
+    var kp=document.getElementById('kpis'), sg=document.getElementById('signals');
+    if(kp) kp.style.display = onControl ? '' : 'none';
+    if(sg) sg.style.display = onControl ? '' : 'none';
+  }
+
+  // ── time-granularity views (Week on Week / Month on Month / Year on Year) ──
+  var TV_VIEWS=[{k:'wow',label:'Week on Week'},{k:'mom',label:'Month on Month'},{k:'yoy',label:'Year on Year'}];
+  var TV_METRIC={ 'revenue':'sales', 'kpi-orders':'orders', 'aov':'aov', 'acq':'new_c' };
+  function weekLabel(w){ var p=String(w||'').split('-'); if(p.length<3) return w||''; var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][(+p[1]||1)-1]; return mo+' '+(+p[2]); }
+  function metricVal(row, metric){
+    if(metric==='aov') return (row.aov!=null && !isNaN(row.aov)) ? row.aov : (row.orders ? row.sales/row.orders : 0);
+    if(metric==='new_c') return row.new_c!=null?row.new_c:0;
+    return row[metric]!=null?row[metric]:0;
+  }
+  function tvData(m, metric, view){
+    if(view==='wow'){
+      if(metric==='new_c') return {available:false, note:'No weekly new-customer split in the dataset. Week on Week covers sales, orders and AOV.'};
+      var wk=m.weekly||[]; if(wk.length<2) return {available:false, note:'No weekly series in this market.'};
+      return {available:true, pct:false, pts:wk.map(function(x){return {x:x.week, y:metricVal(x,metric), label:weekLabel(x.week)};}), note:wk.length+' weeks of weekly data.'};
+    }
+    if(view==='yoy'){
+      var a = (metric==='new_c') ? (m.acquisition||[]) : (m.monthly||[]);
+      if(a.length<24) return {available:false, note: metric==='new_c'
+        ? ('Year on Year needs 24+ months; this series has '+a.length+'.')
+        : ('Year on Year needs 24+ months of total '+metric+'; the dataset holds only '+a.length+'. The one 2-year series here is new-customer acquisition, so YoY is live on the New Customers graph.')};
+      var pts=[]; for(var i=12;i<a.length;i++){ var cur=metricVal(a[i],metric), prev=metricVal(a[i-12],metric); if(prev) pts.push({x:a[i].month, y:(cur-prev)/prev*100, label:mLabel(a[i].month)}); }
+      if(pts.length<2) return {available:false, note:'Not enough overlapping months for a Year on Year trend.'};
+      return {available:true, pct:true, pts:pts, note:'Year-over-year % change: each month vs the same month a year earlier ('+a.length+'-month new-customer acquisition series).'};
+    }
+    var src = (metric==='new_c') ? (m.acquisition||[]) : (m.monthly||[]);
+    if(src.length<2) return {available:false, note:'No monthly series in this market.'};
+    return {available:true, pct:false, pts:src.map(function(x){return {x:x.month, y:metricVal(x,metric), label:mLabel(x.month)};}), note:src.length+' months of monthly data.'};
+  }
+  function tvIsMoney(metric){ return metric==='sales'||metric==='aov'; }
+  function tvChart(m, metric, view){
+    var r=tvData(m, metric, view);
+    if(!r.available) return '<div class="empty" style="padding:26px 18px;text-align:center;line-height:1.6">'+esc(r.note)+'</div>';
+    var opts={w:820,h:280}; if(view==='yoy'){ opts.yLabel='YoY % change'; }
+    if(r.pct){ opts.pct=true; var ys=r.pts.map(function(p){return p.y;}); var lo=Math.min.apply(null,ys), hi=Math.max.apply(null,ys); opts.min=lo<0?lo*1.15:0; opts.max=hi>0?hi*1.15:(hi||1); }
+    else if(tvIsMoney(metric)) opts.money=true;
+    return lineChart(r.pts, opts)+'<div class="tv-note">'+esc(r.note)+'</div>';
+  }
+  function tvToggle(m, id, metric, active){
+    var tiles=TV_VIEWS.map(function(v){ var r=tvData(m, metric, v.k); var on=v.k===active; var dis=!r.available;
+      return '<button class="tv-tile'+(on?' on':'')+(dis?' dis':'')+'" data-view="'+v.k+'"'+(dis?' title="'+escA(r.note)+'" aria-disabled="true"':'')+'>'+esc(v.label)+'</button>';
+    }).join('');
+    return '<div class="tv-toggle" role="group" aria-label="Time granularity view">'+tiles+'</div>';
+  }
+
+  // ── detail view ───────────────────────────────────────────────────────────
+  var _lastDetail=null;
+  function openDetail(id){
+    var w=WIDGETS.find(function(x){return x.id===id;}); if(!w) return;
+    var m=d(); var det; try{ det=w.detail(m); }catch(e){ det={insight:'—',chart:'',table:'',csv:''}; }
+    _lastDetail={ csv:det.csv||id };
+    var dl = det.csv ? '<button class="btn-dl" id="dlBtn">Download CSV</button>' : '';
+    var metric=TV_METRIC[id];
+    var chartBlock;
+    if(metric){
+      chartBlock='<div id="tvwrap">'+tvToggle(m,id,metric,'mom')+
+        '<div class="w span12" style="margin-top:10px"><div class="wbody" id="tvchart">'+tvChart(m,metric,'mom')+'</div></div></div>';
+    } else {
+      chartBlock='<div class="w span12" style="margin-top:14px"><div class="wbody">'+(det.chart||'')+'</div></div>';
+    }
+    document.getElementById('detail').innerHTML =
+      '<button class="crumb" id="backBtn">← Back to dashboard</button>'+
+      '<div class="topbar"><div><h1>'+esc(w.title)+'</h1><p class="lede">'+esc(w.sub||'')+' · '+esc(mktLabel())+' market</p></div>'+dl+'</div>'+
+      chartBlock+
+      (det.insight?'<div class="insight">'+det.insight+'</div>':'')+
+      (det.table||'');
+    document.getElementById('backBtn').addEventListener('click', closeDetail);
+    var dlb=document.getElementById('dlBtn'); if(dlb) dlb.addEventListener('click',function(){ downloadCSV(_lastDetail.csv); });
+    if(metric){
+      document.querySelectorAll('#tvwrap .tv-tile').forEach(function(t){ t.addEventListener('click',function(){
+        if(t.classList.contains('dis')) return;
+        var v=t.getAttribute('data-view');
+        document.querySelectorAll('#tvwrap .tv-tile').forEach(function(x){ x.classList.toggle('on', x===t); });
+        var cw=document.getElementById('tvchart'); if(cw) cw.innerHTML=tvChart(m, metric, v);
+      }); });
+    }
+    document.body.classList.add('detailing');
+    try{ history.replaceState(null,'','?mkt='+MKT+'#'+id); }catch(e){}
+    window.scrollTo(0,0);
+  }
+  function closeDetail(){ document.body.classList.remove('detailing'); try{ history.replaceState(null,'','?mkt='+MKT); }catch(e){} window.scrollTo(0,0); }
+
+  // Serialise the visible detail table to CSV (data is synthetic + client-side,
+  // so we export exactly what is on screen — no server file dependency).
+  function downloadCSV(name){
+    var tbl=document.querySelector('#detail table:not(.heat)') || document.querySelector('#detail table');
+    var lines=[];
+    if(tbl){
+      tbl.querySelectorAll('tr').forEach(function(tr){
+        var cells=[]; tr.querySelectorAll('th,td').forEach(function(c){ var t=(c.textContent||'').replace(/\s+/g,' ').trim(); if(/[",\n]/.test(t)) t='"'+t.replace(/"/g,'""')+'"'; cells.push(t); });
+        lines.push(cells.join(','));
+      });
+    }
+    if(!lines.length) lines.push('no tabular data for this view');
+    var blob=new Blob([lines.join('\n')],{type:'text/csv'});
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=(name||'export')+'_'+meta(MKT).region+'.csv'; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+  }
+
+  function renderFootnote(){
+    document.getElementById('footnote').innerHTML='Source: <span class="datalink">synthetic industry-benchmark dataset</span> (SimilarWeb / SEMrush-shaped), generated client-side so the full workbench runs with <b>no proprietary data</b>. Trailing 12-month window. Connect your own store, ad and email sources to replace the benchmark with live numbers — see <a class="datalink" href="/lifecycle-os-connectors">Connectors</a>.';
+  }
+
+  function marketHasData(mk){ var m=A.markets[mk]; return !!(m && Object.keys(m).length && (m.summary || (m.monthly && m.monthly.length))); }
+  function renderMarket(){ renderKPIs(); renderSignals(); renderGrid(); renderFootnote(); }
+  function setMarket(mk){ MKT=mk; document.querySelectorAll('#mktToggle button').forEach(function(b){ b.classList.toggle('on', b.dataset.mkt===mk); }); renderMarket(); closeDetail(); }
+
+  document.querySelectorAll('#mktToggle button').forEach(function(b){ b.addEventListener('click',function(){ setMarket(b.dataset.mkt); }); });
+  document.querySelectorAll('#anTabs button').forEach(function(b){ b.addEventListener('click',function(){
+    ACTIVE_TAB=b.dataset.tab;
+    document.querySelectorAll('#anTabs button').forEach(function(x){ x.classList.toggle('on', x===b); });
+    closeDetail(); renderGrid(); window.scrollTo(0,0);
+  }); });
+
+  // theme toggle (persisted, shared with the rest of the portfolio)
+  var tb=document.getElementById('themeBtn');
+  if(tb) tb.addEventListener('click',function(){
+    var cur=document.documentElement.getAttribute('data-theme')==='light'?'light':'dark';
+    var next=cur==='light'?'dark':'light';
+    document.documentElement.setAttribute('data-theme',next);
+    try{ localStorage.setItem('anchit-theme',next); }catch(e){}
+  });
+
+  function boot(){
+    if(!marketHasData(MKT)){ var k=Object.keys(A.markets).filter(marketHasData); if(k.length) MKT=k[0]; }
+    document.querySelectorAll('#mktToggle button').forEach(function(b){ b.classList.toggle('on', b.dataset.mkt===MKT); });
+    renderMarket();
+    var hash=(location.hash||'').replace('#',''); if(hash && WIDGETS.find(function(w){return w.id===hash;})) openDetail(hash);
+  }
+  boot();
+})();
+</script>
+<script src="/lifecycle-os-kit.js"></script>
+<script>if(window.LOS&&LOS.mountExtras){LOS.mountExtras('analysis');}</script>
 </body>
 </html>
