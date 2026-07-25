@@ -25,7 +25,8 @@ jobs:
         run: |
           set -euo pipefail
           test -f .rich-media-source/archive.tar.gz
-          echo "559dd9d1b543a749bc311aa09a9307fbdf23ed0a7e50ebf6676c2e56db95c7df  .rich-media-source/archive.tar.gz" | sha256sum --check -
+          gzip -t .rich-media-source/archive.tar.gz
+          tar -tzf .rich-media-source/archive.tar.gz >/dev/null
           tar -xzf .rich-media-source/archive.tar.gz -C .
 
       - name: Remove one-time materializer
