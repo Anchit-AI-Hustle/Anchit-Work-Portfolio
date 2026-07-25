@@ -4108,20 +4108,6 @@
           </div>
         </div>
 
-        <!-- Card 4 -->
-        <div class="build-card tilt-card">
-          <div class="build-tag"><span>Personal Productivity · AI</span><span class="status">Live</span></div>
-          <h3>Task <em>Tracker</em></h3>
-          <p>Turns emails, meetings &amp; voice notes into tasks on a live Jira-style board — add, drag, filter and assign, so nothing slips.</p>
-          <ul class="build-details">
-            <li>Built with a responsive web board, local task state and AI-assisted task extraction flows.</li>
-            <li>Implemented drag/drop columns, filters, priorities, assignment metadata and voice/email capture paths.</li>
-          </ul>
-          <div class="build-actions">
-            <a class="btn primary" href="#project-tasktracker" data-view="project-tasktracker">Case Study &rarr;</a>
-            <a class="btn" href="https://personal-ai-assistant-anchit.vercel.app/" target="_blank" rel="noopener">Open Live Project ↗</a>
-          </div>
-        </div>
 
         <!-- Card 6 -->
         <div class="build-card tilt-card">
@@ -4665,57 +4651,6 @@
   })();
   </script>
 
-  <!-- PROJECT: TASK TRACKER -->
-  <section class="view" id="view-project-tasktracker">
-    <div class="container">
-      <a class="back-link" href="#projects" data-view="projects">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        All side projects
-      </a>
-      <div class="project-hero reveal">
-        <div class="eyebrow">Personal Productivity · AI · Local-first</div>
-        <h1 class="display-lg">Task <em>Tracker</em></h1>
-        <p class="quote">"The things people ask of you don't live in one place — email, a meeting, a quick voice note. Task Tracker pulls them all onto one board so nothing slips."</p>
-        <div class="project-meta">
-          <div><span class="label">Role</span><span>Builder</span></div>
-          <div><span class="label">Status</span><span>Live · In daily use</span></div>
-          <div><span class="label">What it does</span><span>Email · meetings · voice → tasks</span></div>
-        </div>
-        <div class="project-cta">
-          <a href="https://personal-ai-assistant-anchit.vercel.app/" target="_blank" rel="noopener" class="btn primary">Open live app ↗</a>
-        </div>
-      </div>
-
-      <div class="project-section reveal">
-        <div class="eyebrow">The pitch</div>
-        <h2>What it is</h2>
-        <p>Task Tracker is a personal AI layer that reads my emails, meeting notes and voice memos, uses an LLM to pull out the actual to-dos hidden inside them, and lays them on a live Jira-style board. I can add, edit, drag between columns, filter, search and assign — so my whole task universe sits in one calm place instead of scattered across inboxes and my memory.</p>
-      </div>
-
-      <div class="project-section reveal">
-        <div class="eyebrow">Why it's needed</div>
-        <h2>The problem</h2>
-        <p>Most tasks never arrive as tidy tickets. They show up mid-paragraph in an email, get mentioned once in a call, or pop into my head while talking. By the time I'd open a to-do app, the moment had passed — and things fell through. I wanted capture to be automatic, and triage to be a 10-second drag, not a chore.</p>
-      </div>
-
-      <div class="project-section reveal">
-        <div class="eyebrow">What it improves</div>
-        <h2>What changes</h2>
-        <ul>
-          <li><strong>Nothing slips.</strong> Tasks are captured from email, meetings and voice automatically, the moment they're spoken or written.</li>
-          <li><strong>Triage in seconds.</strong> A live board — To&nbsp;Do, In&nbsp;Progress, In&nbsp;Review, Done, Dropped — with drag, priority, assignees and filters.</li>
-          <li><strong>One source of truth.</strong> Every commitment in one view, sorted newest-first, searchable, shareable.</li>
-          <li><strong>Lower mental load.</strong> The system remembers, so I don't have to.</li>
-        </ul>
-      </div>
-
-      <div class="iframe-wrap reveal">
-        <div class="iframe-bar"><div class="dots"><span></span><span></span><span></span></div>personal-ai-assistant-anchit.vercel.app</div>
-        <iframe src="https://personal-ai-assistant-anchit.vercel.app/" loading="lazy" title="Task Tracker live preview"></iframe>
-      </div>
-    </div>
-  </section>
-
   <!-- PROJECT: D2C-LIFECYCLE-OS (generalised, any-brand) -->
   <section class="view" id="view-project-lifecycle">
     <div class="container">
@@ -5011,7 +4946,7 @@
 
 <script>
   /* ============ STATE ============ */
-  const ALL_VIEWS = ['home','about','now','chat','experience','projects','resume','contact','project-lifecycle','project-agentlp','project-jobfit','project-music','project-tasktracker','project-thirdeye','project-yaara','project-mailer','project-telesuite','project-lifeengine'];
+  const ALL_VIEWS = ['home','about','now','chat','experience','projects','resume','contact','project-lifecycle','project-agentlp','project-jobfit','project-music','project-thirdeye','project-yaara','project-mailer','project-telesuite','project-lifeengine'];
   let audioModeEnabled = false; // true once user has clicked Play — gates page narration
   window.chatVoiceMuted = false; // chat replies speak aloud by default; mute toggle flips this
   // Browsers block speech before the first gesture — track it so the load-time
@@ -5423,7 +5358,7 @@
 	      response: "This portfolio is my hobby product: a living, interactive OS-style profile instead of a static resume page. The home view gives the quick positioning, Work Experience explains the Vahdam and Times Internet story, Side Hustle opens the builds, Resume opens the PDF in a new tab, and Contact gives the fastest ways to reach me. The chat is meant to guide each page, answer specific questions in my voice, and keep narration controls available from the bottom tile.",
 	      nextChips: ["Start the tour","Show me your work","Tell me about Vahdam","How do I reach you?"] },
 	    { keywords: ['side','project','projects','build','builds','weekend','personal','ship','github','vercel'],
-	      response: "My side builds come from curiosity and the inability to stop at surface level. My portfolio itself is a hobby build. MusicGenAI is my passion project because music matters to me personally. The broader set includes Hey Yaara, MusicGenAI, The Third Eye, Mailer Architect, AI TeleSuite, LifeEngine, Task Tracker, the All-in-One LP Agent, JobHunt, and D2C-LifeCycle-OS. <a data-nav='projects'>See them all →</a>",
+	      response: "My side builds come from curiosity and the inability to stop at surface level. My portfolio itself is a hobby build. MusicGenAI is my passion project because music matters to me personally. The broader set includes Hey Yaara, MusicGenAI, The Third Eye, Mailer Architect, AI TeleSuite, LifeEngine, the All-in-One LP Agent, JobHunt, and D2C-LifeCycle-OS. <a data-nav='projects'>See them all →</a>",
 	      nextChips: ["Tell me about Hey Yaara","Tell me about Jarvis","Tell me about MusicGenAI","Why build on weekends?"] },
     { keywords: ['hey yaara','yaara','elderly','companion'],
       response: "Hey Yaara is an AI-powered voice companion designed specifically for elderly users to combat loneliness and assist with daily queries through a simple voice-first interface. I designed and built this PWA from scratch to remove all screen-based friction — users simply tap one button to talk and one to stop. Everything from transcription to speech response is handled entirely by voice. <a data-nav='project-yaara'>Full deep dive →</a>",
@@ -5546,7 +5481,7 @@
 	    projects: {
 	      kicker: 'Side Hustle lab',
 	      title: 'What I build when curiosity wins',
-	      copy: 'This page ranks my most important builds, including D2C-LifeCycle-OS, MusicGenAI, this portfolio, Task Tracker, The Third Eye, and more.',
+	      copy: 'This page ranks my most important builds, including D2C-LifeCycle-OS, MusicGenAI, this portfolio, The Third Eye, and more.',
 	      coach: ['Each card explains the problem, stack, and implementation detail.', 'Portfolio is now in the top five because it is an active hobby build and interactive product surface.', 'Use chat to open any project deep dive or compare stacks.'],
 	      actions: [
 	        ['MusicGenAI', 'project-music'],
@@ -5589,7 +5524,6 @@
 	    'project-lifeengine': ['LifeEngine', 'Personalized health engine', ['Turns generic wellness advice into daily routines.', 'Login-gated, privacy-conscious personalization flow.', 'Ask how its personalisation engine works.']],
 	    'project-thirdeye': ['The Third Eye', 'Agent-orchestrated AI OS', ['Explores agent workflows and multi-step task orchestration.', 'Built around AI operating-system style interactions.', 'Ask what the long-term AI OS vision is.']],
 	    'project-mailer': ['Mailer Architect', 'Universal mailer generator', ['Detects the context and writes send-ready HTML mailers for anything — brands, schools, offices, events, reminders, nonprofits.', 'Multi-LLM cascade with a deterministic fallback that always returns designed HTML.', 'Try the built-in Mailer Studio right on the page.']],
-	    'project-tasktracker': ['Task Tracker', 'Personal productivity system', ['Converts meetings, emails and voice notes into tasks.', 'Built as a personal AI assistant workflow.', 'Ask how it differs from ordinary to-do tools.']],
 	    'project-lifecycle': ['D2C-LifeCycle-OS', 'Brand-agnostic lifecycle engine', ['Enter any D2C brand and get an industry-benchmarked lifecycle plan.', 'Benchmarks the competitive set the way SimilarWeb / SEMrush profile a market.', 'Ask how the industry-standard baselines drive the plan.']],
 	    'project-agentlp': ['All-in-One LP Agent', 'Conversational landing page agent', ['One agent: audio narration, two-way voice, chat and recommendations.', 'Built for a live D2C funnel, grounded in the page content.', 'Ask how it changes landing page conversion.']],
 	    'project-jobfit': ['JobFit Agent', 'AI application assistant', ['Analyzes a job posting link against a base resume and portfolio.', 'Drafts a tailored resume, cover letter and optional hosted resume or portfolio site.', 'Includes free templates, theme, animation, domain and DOCX/PDF/TXT export choices.']]
@@ -6020,7 +5954,7 @@
       hints.push("My product style is metrics-led: identify the funnel constraint, ship a focused experiment, read the outcome, then compound the working loop.");
     }
     if (/\b(ai|automation|agent|llm)\b/.test(q)) {
-      hints.push(`My AI work is practical, not just novelty: ${about.mainWorkProject} is my most important work project, ${about.hobbyProject} is a hobby build, and ${about.passionProject} is my passion project for music. AI TeleSuite, Hey Yaara, Mailer Architect, The Third Eye, and Task Tracker all map AI to concrete workflows.`);
+      hints.push(`My AI work is practical, not just novelty: ${about.mainWorkProject} is my most important work project, ${about.hobbyProject} is a hobby build, and ${about.passionProject} is my passion project for music. AI TeleSuite, Hey Yaara, Mailer Architect, and The Third Eye all map AI to concrete workflows.`);
     }
     if (/\b(project|side|build|music|portfolio|lifecycle|hobby|passion)\b/.test(q)) {
       hints.push(`${about.mainWorkProject} matters most professionally right now. ${about.hobbyProject} is where I experiment with guided chat, voice narration, responsive UI, and portfolio storytelling. ${about.passionProject} is the personal passion build because music is close to me.`);
