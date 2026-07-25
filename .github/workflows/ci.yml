@@ -58,6 +58,13 @@ jobs:
           grep -q 'data-app-skill-map="runtime"' www/task-tracker.html
           grep -q 'data-project-playbooks="runtime"' www/task-tracker.html
           grep -q 'personal-ai-assistant-anchit.vercel.app' www/task-tracker.html
+          grep -Fq "path: '/task-tracker'" www/assets/app-skill-map.js
+          grep -Fq "aliases: ['/task-tracker.html']" www/assets/app-skill-map.js
+          grep -Fq "path: '/task-tracker'" www/assets/project-playbooks.js
+          if grep -Fq "path: 'https://personal-ai-assistant-anchit.vercel.app/'" www/assets/app-skill-map.js; then
+            echo 'Generated App Skill Map still routes Task Tracker outside the shared shell'
+            exit 1
+          fi
           node -e "const v=require('./vercel.json');const r=v.rewrites.find(x=>x.source==='/task-tracker');if(!r||r.destination!=='/task-tracker.html')process.exit(1);console.log('Task Tracker route OK: /task-tracker')"
           echo 'How-To Engine route OK: /how-to-2'
 
