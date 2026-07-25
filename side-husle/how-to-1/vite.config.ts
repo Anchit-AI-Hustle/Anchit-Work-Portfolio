@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-const HOW_TO_BASE = '/how-to-2';
+const HOW_TO_BASE = '/how-to';
 
 // Dev: `npm run dev` serves the SPA and proxies /api to a local functions
 // runtime (e.g. `vercel dev` on :3000). In production the /api/cascade and

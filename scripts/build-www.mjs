@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 const WWW = join(ROOT, 'www');
-const HOW_TO_ROUTE = 'how-to-2';
+const HOW_TO_ROUTE = 'how-to';
 const HOW_TO_PATH = `/${HOW_TO_ROUTE}`;
 const APP_SKILL_MAP_MARKER = 'data-app-skill-map';
 const PROJECT_PLAYBOOK_MARKER = 'data-project-playbooks';
@@ -214,8 +214,9 @@ async function main() {
 
   await patchHowToCardRoute();
   await buildHowTo();
-  await patchSharedTaskTrackerRoute();
-  await injectSharedExperience();
+  // Gamified App Skill Map / Project Playbooks widgets removed from the site —
+  // they read as unfinished progress shells on a portfolio. The runtimes still
+  // exist under assets/ but are no longer injected into any page.
 
   console.log(`[build-www] done → ${WWW}`);
 }
