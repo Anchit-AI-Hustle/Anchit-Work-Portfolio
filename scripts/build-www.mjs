@@ -92,39 +92,30 @@ async function patchHowToCardRoute() {
 
 // The original Task Tracker source is not in the connected repository set, so
 // the portfolio hosts a first-party /task-tracker shell around the live app.
-// Patch the generated shared registries so every app navigates to that shell and
-// retains the shared map/playbook controls, rather than opening the bare external
-// deployment. Source registries remain untouched; production output is canonical.
+// Patch the generated canonical App Skill Map so every first-party and external
+// app that loads the shared registry navigates through that shell. Project
+// Playbooks reads this same map at runtime and inherits the route automatically.
 async function patchSharedTaskTrackerRoute() {
   const skillMapPath = join(WWW, 'assets', 'app-skill-map.js');
-  const playbooksPath = join(WWW, 'assets', 'project-playbooks.js');
-
-  if (!existsSync(skillMapPath) || !existsSync(playbooksPath)) {
-    throw new Error('shared app registries missing before Task Tracker route patch');
+  if (!existsSync(skillMapPath)) {
+    throw new Error('generated App Skill Map missing before Task Tracker route patch');
   }
 
-  const skillMapBefore = await readFile(skillMapPath, 'utf8');
-  const skillMapPattern = /path: 'https:\/\/personal-ai-assistant-anchit\.vercel\.app\/',\s*external: true,/;
-  if (!skillMapPattern.test(skillMapBefore)) {
+  const before = await readFile(skillMapPath, 'utf8');
+  const pattern = /path: 'https:\/\/personal-ai-assistant-anchit\.vercel\.app\/',\s*external: true,/;
+  if (!pattern.test(before)) {
     throw new Error('Task Tracker entry not found in generated App Skill Map');
   }
-  const skillMapAfter = skillMapBefore.replace(
-    skillMapPattern,
+
+  const after = before.replace(
+    pattern,
     "path: '/task-tracker',\n            aliases: ['/task-tracker.html'],",
   );
-  await writeFile(skillMapPath, skillMapAfter, 'utf8');
-
-  const playbooksBefore = await readFile(playbooksPath, 'utf8');
-  const playbooksPattern = /path: 'https:\/\/personal-ai-assistant-anchit\.vercel\.app\/', department: \{ id: 'opportunity', title: 'Opportunity & Productivity' \}, capabilities:/;
-  if (!playbooksPattern.test(playbooksBefore)) {
-    throw new Error('Task Tracker fallback entry not found in generated Project Playbooks');
+  if (!after.includes("path: '/task-tracker'") || after.includes("path: 'https://personal-ai-assistant-anchit.vercel.app/'")) {
+    throw new Error('Task Tracker canonical route patch did not produce the expected registry');
   }
-  const playbooksAfter = playbooksBefore.replace(
-    playbooksPattern,
-    "path: '/task-tracker', aliases: ['/task-tracker.html'], department: { id: 'opportunity', title: 'Opportunity & Productivity' }, capabilities:",
-  );
-  await writeFile(playbooksPath, playbooksAfter, 'utf8');
 
+  await writeFile(skillMapPath, after, 'utf8');
   console.log('[build-www] shared-ui: Task Tracker canonical route → /task-tracker');
 }
 
