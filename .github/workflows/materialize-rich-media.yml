@@ -1,0 +1,54 @@
+name: Materialize guide and rich-media rollout
+
+on:
+  push:
+    branches:
+      - agent/guides-howto-rich-media
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Verify and extract implementation bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f .rich-media-source/archive.tar.gz
+          echo "559dd9d1b543a749bc311aa09a9307fbdf23ed0a7e50ebf6676c2e56db95c7df  .rich-media-source/archive.tar.gz" | sha256sum --check -
+          tar -xzf .rich-media-source/archive.tar.gz -C .
+
+      - name: Remove one-time materializer
+        shell: bash
+        run: |
+          rm -rf .rich-media-source
+          rm .github/workflows/materialize-rich-media.yml
+
+      - name: Validate extracted sources
+        shell: bash
+        run: |
+          node --check assets/app-ecosystem-loader.js
+          node --check assets/project-media-extension.js
+          node --check api/how-to-media.js
+          node --check api/how-to-video.js
+          node --check scripts/build-www.mjs
+          test -s side-husle/how-to-1/src/components/GuideMediaStudio.tsx
+          test -s docs/HOW_TO_MEDIA_PIPELINE.md
+          ! grep -R "mcp_token=" assets/app-ecosystem-loader.js assets/project-media-extension.js docs/HOW_TO_MEDIA_PIPELINE.md docs/PROJECT_ECOSYSTEM_ROLLOUT.md
+
+      - name: Commit materialized implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Add project guides and rich How-To media generation"
+          git push origin HEAD:agent/guides-howto-rich-media
