@@ -138,7 +138,7 @@ export default function HowToVisualCanvas() {
               <div className="result-grid">
                 <div className="steps">
                   {guide.steps.map((s) => (
-                    <StepCard key={s.id} step={s} active={s.id === activeId} onFocus={() => setActiveId(s.id)} />
+                    <StepCard key={s.id} step={s} task={guide.task} active={s.id === activeId} onFocus={() => setActiveId(s.id)} />
                   ))}
                 </div>
                 <aside className="flow-pane">
