@@ -29,6 +29,7 @@ const PROJECT_PLAYBOOK_TAGS = [
 const assets = [
   'index.html',
   'jobhunt.html',
+  'task-tracker.html',
   'd2c-lifecycle-os.html',
   'lifecycle-os.html',
   'lifecycle-os-studio.html',
