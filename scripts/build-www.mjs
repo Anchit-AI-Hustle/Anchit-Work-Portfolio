@@ -90,6 +90,35 @@ async function patchHowToCardRoute() {
   console.log(`[build-www] how-to: Side Hustle card → ${HOW_TO_PATH}`);
 }
 
+// The original Task Tracker source is not in the connected repository set, so
+// the portfolio hosts a first-party /task-tracker shell around the live app.
+// Patch the generated canonical App Skill Map so every first-party and external
+// app that loads the shared registry navigates through that shell. Project
+// Playbooks reads this same map at runtime and inherits the route automatically.
+async function patchSharedTaskTrackerRoute() {
+  const skillMapPath = join(WWW, 'assets', 'app-skill-map.js');
+  if (!existsSync(skillMapPath)) {
+    throw new Error('generated App Skill Map missing before Task Tracker route patch');
+  }
+
+  const before = await readFile(skillMapPath, 'utf8');
+  const pattern = /path: 'https:\/\/personal-ai-assistant-anchit\.vercel\.app\/',\s*external: true,/;
+  if (!pattern.test(before)) {
+    throw new Error('Task Tracker entry not found in generated App Skill Map');
+  }
+
+  const after = before.replace(
+    pattern,
+    "path: '/task-tracker',\n            aliases: ['/task-tracker.html'],",
+  );
+  if (!after.includes("path: '/task-tracker'") || after.includes("path: 'https://personal-ai-assistant-anchit.vercel.app/'")) {
+    throw new Error('Task Tracker canonical route patch did not produce the expected registry');
+  }
+
+  await writeFile(skillMapPath, after, 'utf8');
+  console.log('[build-www] shared-ui: Task Tracker canonical route → /task-tracker');
+}
+
 // Build the How-To Engine (standalone Vite + React app under
 // side-husle/how-to-1, base '/how-to-2/') and mirror its dist into
 // www/how-to-2 so it ships at /how-to-2 on the main static deployment.
@@ -185,6 +214,7 @@ async function main() {
 
   await patchHowToCardRoute();
   await buildHowTo();
+  await patchSharedTaskTrackerRoute();
   await injectSharedExperience();
 
   console.log(`[build-www] done → ${WWW}`);
