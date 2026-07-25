@@ -13,8 +13,8 @@ const BADGE: Record<HowToStep['badge'], { label: string; color: string }> = {
   finish: { label: 'DONE', color: '#FF8A3D' },
 };
 
-export default function StepCard({ step, active, onFocus }: {
-  step: HowToStep; active: boolean; onFocus: () => void;
+export default function StepCard({ step, active, onFocus, task }: {
+  step: HowToStep; active: boolean; onFocus: () => void; task?: string;
 }) {
   const badge = BADGE[step.badge];
   return (
@@ -44,7 +44,7 @@ export default function StepCard({ step, active, onFocus }: {
         </ul>
       ) : null}
 
-      <StepVideo step={step} />
+      <StepVideo step={step} task={task} />
     </motion.article>
   );
 }

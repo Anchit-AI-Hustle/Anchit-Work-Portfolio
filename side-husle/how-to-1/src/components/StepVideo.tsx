@@ -22,10 +22,16 @@ const PARTICLES = [
   { left: '82%', delay: '0.9s', dur: '3.2s' },
 ];
 
-export default function StepVideo({ step }: { step: HowToStep }) {
+export default function StepVideo({ step, task }: { step: HowToStep; task?: string }) {
   const [open, setOpen] = useState(false);
   const tint = TINT[step.badge] || '#FF6940';
   const caption = step.videoPrompt || step.title;
+
+  // A real, always-working "video": a YouTube tutorial search for this exact
+  // step (the animated scene above it is just visual flair). No API key, no
+  // paid text-to-video provider — and it opens actual footage of the step.
+  const query = `how to ${[task, step.title].filter(Boolean).join(' ')}`.replace(/\s+/g, ' ').trim();
+  const ytUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
 
   return (
     <div className="step-video">
@@ -45,6 +51,9 @@ export default function StepVideo({ step }: { step: HowToStep }) {
               {caption}
             </div>
           </div>
+          <a className="video-yt" href={ytUrl} target="_blank" rel="noopener noreferrer">
+            ▶ Watch real tutorials for this step on YouTube ↗
+          </a>
         </div>
       )}
     </div>
