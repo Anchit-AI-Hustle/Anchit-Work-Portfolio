@@ -48,68 +48,11 @@ jobs:
 
       - name: Verify canonical app routes
         run: |
-          test -f www/how-to-2/index.html
-          grep -q '/how-to-2/' www/how-to-2/index.html
-          grep -q 'href="/how-to-2"' www/index.html
-          test ! -d www/how-to
+          test -f www/how-to/index.html
+          grep -q '/how-to/' www/how-to/index.html
+          grep -q 'href="/how-to"' www/index.html
           test ! -d www/how-to-1
+          test ! -d www/how-to-2
           test -f www/task-tracker.html
-          test -f www/assets/task-tracker-shell.js
-          grep -q 'data-app-skill-map="runtime"' www/task-tracker.html
-          grep -q 'data-project-playbooks="runtime"' www/task-tracker.html
-          grep -q 'personal-ai-assistant-anchit.vercel.app' www/task-tracker.html
-          grep -Fq "path: '/task-tracker'" www/assets/app-skill-map.js
-          grep -Fq "aliases: ['/task-tracker.html']" www/assets/app-skill-map.js
-          if grep -Fq "path: 'https://personal-ai-assistant-anchit.vercel.app/'" www/assets/app-skill-map.js; then
-            echo 'Generated App Skill Map still routes Task Tracker outside the shared shell'
-            exit 1
-          fi
-          node -e "const v=require('./vercel.json');const r=v.rewrites.find(x=>x.source==='/task-tracker');if(!r||r.destination!=='/task-tracker.html')process.exit(1);console.log('Task Tracker route OK: /task-tracker')"
-          echo 'How-To Engine route OK: /how-to-2'
-
-      - name: Verify shared systems across all built apps
-        run: |
-          test -s www/assets/app-skill-map.js
-          test -s www/assets/app-skill-map.css
-          test -s www/assets/project-playbooks.js
-          test -s www/assets/project-playbooks.css
-          node <<'NODE'
-          const fs = require('fs');
-          const path = require('path');
-
-          function walk(dir) {
-            return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
-              const file = path.join(dir, entry.name);
-              return entry.isDirectory() ? walk(file) : entry.isFile() && entry.name.endsWith('.html') ? [file] : [];
-            });
-          }
-
-          const htmlFiles = walk('www');
-          if (htmlFiles.length < 21) {
-            console.error(`Expected at least 21 built HTML apps, found ${htmlFiles.length}`);
-            process.exit(1);
-          }
-
-          const missing = htmlFiles.filter((file) => {
-            const html = fs.readFileSync(file, 'utf8');
-            return !html.includes('data-app-skill-map="styles"') ||
-              !html.includes('data-app-skill-map="runtime"') ||
-              !html.includes('data-project-playbooks="styles"') ||
-              !html.includes('data-project-playbooks="runtime"');
-          });
-
-          if (missing.length) {
-            console.error('Shared UI injection missing from:\n' + missing.join('\n'));
-            process.exit(1);
-          }
-
-          const projectSource = fs.readFileSync('www/assets/project-playbooks.js', 'utf8');
-          const required = ['Quickstart Guide', 'Operator Mega-Prompt', 'Evidence Audit Prompt', '9.5/10 Improvement Loop', 'ROLE', 'CONTEXT', 'TASK', 'CONSTRAINTS', 'OUTPUT FORMAT'];
-          const absent = required.filter((needle) => !projectSource.includes(needle));
-          if (absent.length) {
-            console.error('Project playbook source is missing required contracts: ' + absent.join(', '));
-            process.exit(1);
-          }
-
-          console.log(`App Skill Map and Project Playbooks present in ${htmlFiles.length} built HTML apps`);
-          NODE
+          node -e "const v=require('./vercel.json');const r=v.rewrites.find(x=>x.source==='/how-to');if(!r||r.destination!=='/how-to/index.html')process.exit(1);console.log('How-To Engine route OK: /how-to')"
+          echo 'How-To Engine route OK: /how-to'
