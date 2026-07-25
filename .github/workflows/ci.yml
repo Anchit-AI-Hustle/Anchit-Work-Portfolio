@@ -22,19 +22,23 @@ jobs:
       - name: HTML smoke test
         run: |
           test -f index.html
-          node -e "const fs=require('fs');const s=fs.readFileSync('index.html','utf8');if(!s.includes('<!DOCTYPE html>'))process.exit(1);console.log('index.html OK ('+s.length+' bytes)')"
+          test -f task-tracker.html
+          node -e "const fs=require('fs');for(const f of ['index.html','task-tracker.html']){const s=fs.readFileSync(f,'utf8');if(!/<!doctype html>/i.test(s))process.exit(1);console.log(f+' OK ('+s.length+' bytes)')}"
 
       - name: Validate shared app and project systems
         run: |
           node --check assets/app-skill-map.js
           node --check assets/project-playbooks.js
+          node --check assets/task-tracker-shell.js
           test -s assets/app-skill-map.css
           test -s assets/project-playbooks.css
           test -s docs/APP_SKILL_MAP.md
           test -s docs/PROJECT_SKILLTREE_GUIDES.md
           grep -q "AnchitProjectPlaybooks" assets/project-playbooks.js
           grep -q "GUIDE_KINDS" assets/project-playbooks.js
-          if grep -R "mcp_token=" assets/app-skill-map.js assets/app-skill-map.css assets/project-playbooks.js assets/project-playbooks.css docs/APP_SKILL_MAP.md docs/PROJECT_SKILLTREE_GUIDES.md scripts/build-www.mjs; then
+          grep -q "taskTracker.path = '/task-tracker'" assets/task-tracker-shell.js
+          grep -q "personal-ai-assistant-anchit.vercel.app" task-tracker.html
+          if grep -R "mcp_token=" assets/app-skill-map.js assets/app-skill-map.css assets/project-playbooks.js assets/project-playbooks.css assets/task-tracker-shell.js docs/APP_SKILL_MAP.md docs/PROJECT_SKILLTREE_GUIDES.md scripts/build-www.mjs task-tracker.html; then
             echo "Reference access token must never be committed"
             exit 1
           fi
@@ -42,13 +46,19 @@ jobs:
       - name: Build portfolio and How-To Engine
         run: npm run build
 
-      - name: Verify /how-to-2 route
+      - name: Verify canonical app routes
         run: |
           test -f www/how-to-2/index.html
           grep -q '/how-to-2/' www/how-to-2/index.html
           grep -q 'href="/how-to-2"' www/index.html
           test ! -d www/how-to
           test ! -d www/how-to-1
+          test -f www/task-tracker.html
+          test -f www/assets/task-tracker-shell.js
+          grep -q 'data-app-skill-map="runtime"' www/task-tracker.html
+          grep -q 'data-project-playbooks="runtime"' www/task-tracker.html
+          grep -q 'personal-ai-assistant-anchit.vercel.app' www/task-tracker.html
+          node -e "const v=require('./vercel.json');const r=v.rewrites.find(x=>x.source==='/task-tracker');if(!r||r.destination!=='/task-tracker.html')process.exit(1);console.log('Task Tracker route OK: /task-tracker')"
           echo 'How-To Engine route OK: /how-to-2'
 
       - name: Verify shared systems across all built apps
@@ -69,8 +79,8 @@ jobs:
           }
 
           const htmlFiles = walk('www');
-          if (htmlFiles.length < 20) {
-            console.error(`Expected at least 20 built HTML apps, found ${htmlFiles.length}`);
+          if (htmlFiles.length < 21) {
+            console.error(`Expected at least 21 built HTML apps, found ${htmlFiles.length}`);
             process.exit(1);
           }
 

@@ -2,16 +2,17 @@
  * Cache name is version-stamped so each deploy purges the previous cache
  * (the activate handler deletes every cache whose name !== CACHE). Bump
  * this string on every deploy that changes assets. */
-const CACHE = 'anchit-portfolio-20260725-project-playbooks';
+const CACHE = 'anchit-portfolio-20260725-task-tracker-shell';
 const SHELL = [
   '/',
   '/index.html',
-  '/',
+  '/task-tracker.html',
   '/manifest.json',
   '/assets/app-skill-map.css',
   '/assets/app-skill-map.js',
   '/assets/project-playbooks.css',
   '/assets/project-playbooks.js',
+  '/assets/task-tracker-shell.js',
   '/assets/vendor/three.min.js',
   '/assets/vendor/gsap.min.js',
   '/assets/vendor/ScrollTrigger.min.js',

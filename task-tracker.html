@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Task Tracker — AI Project Board</title>
+  <meta name="description" content="Task Tracker turns meetings, emails and voice notes into organized work, with the shared Anchit App Skill Map and Project Playbooks.">
+  <meta name="theme-color" content="#0f0d0a">
+  <link rel="icon" type="image/png" href="/AnchitTandon-AppLogo.png">
+  <link rel="stylesheet" href="/assets/app-skill-map.css" data-app-skill-map="styles">
+  <script defer src="/assets/app-skill-map.js" data-app-skill-map="runtime"></script>
+  <link rel="stylesheet" href="/assets/project-playbooks.css" data-project-playbooks="styles">
+  <script defer src="/assets/project-playbooks.js" data-project-playbooks="runtime"></script>
+  <script defer src="/assets/task-tracker-shell.js"></script>
+  <style>
+    :root{color-scheme:dark;--shell-bg:#0f0d0a;--shell-ink:#fbf5ec;--shell-dim:#a39e94;--shell-accent:#ffb736}
+    *{box-sizing:border-box}
+    html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--shell-bg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    .task-frame{position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff}
+    .task-fallback{position:fixed;inset:0;display:grid;place-items:center;padding:28px;background:
+      radial-gradient(circle at 18% 18%,rgba(255,183,54,.12),transparent 34%),
+      radial-gradient(circle at 82% 76%,rgba(46,229,172,.08),transparent 34%),var(--shell-bg);color:var(--shell-ink);text-align:center}
+    .task-fallback-card{max-width:620px;padding:28px;border:1px solid rgba(255,183,54,.26);border-radius:22px;background:rgba(26,24,20,.88);box-shadow:0 28px 80px rgba(0,0,0,.45)}
+    .task-fallback-card span{display:block;margin-bottom:8px;color:var(--shell-accent);font-size:10px;font-weight:750;letter-spacing:.16em;text-transform:uppercase}
+    .task-fallback-card h1{margin:0 0 10px;font-family:Georgia,serif;font-size:clamp(30px,6vw,54px);font-weight:500;letter-spacing:-.035em}
+    .task-fallback-card p{margin:0 0 20px;color:var(--shell-dim);line-height:1.6}
+    .task-fallback-card a{display:inline-flex;min-height:42px;align-items:center;padding:0 16px;border:1px solid rgba(255,183,54,.45);border-radius:999px;background:rgba(255,183,54,.1);color:var(--shell-ink);font-weight:700;text-decoration:none}
+  </style>
+</head>
+<body>
+  <div class="task-fallback" aria-live="polite">
+    <div class="task-fallback-card">
+      <span>Opportunity &amp; Productivity</span>
+      <h1>Task Tracker</h1>
+      <p>Loading the live AI project board. The shared project tree and guide library remain available from the floating controls.</p>
+      <a href="https://personal-ai-assistant-anchit.vercel.app/" target="_blank" rel="noopener noreferrer">Open the original app ↗</a>
+    </div>
+  </div>
+  <iframe
+    class="task-frame"
+    src="https://personal-ai-assistant-anchit.vercel.app/"
+    title="Task Tracker live application"
+    loading="eager"
+    allow="microphone; clipboard-read; clipboard-write"
+    referrerpolicy="strict-origin-when-cross-origin"
+  ></iframe>
+</body>
+</html>
