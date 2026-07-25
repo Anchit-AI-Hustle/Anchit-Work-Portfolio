@@ -90,6 +90,44 @@ async function patchHowToCardRoute() {
   console.log(`[build-www] how-to: Side Hustle card → ${HOW_TO_PATH}`);
 }
 
+// The original Task Tracker source is not in the connected repository set, so
+// the portfolio hosts a first-party /task-tracker shell around the live app.
+// Patch the generated shared registries so every app navigates to that shell and
+// retains the shared map/playbook controls, rather than opening the bare external
+// deployment. Source registries remain untouched; production output is canonical.
+async function patchSharedTaskTrackerRoute() {
+  const skillMapPath = join(WWW, 'assets', 'app-skill-map.js');
+  const playbooksPath = join(WWW, 'assets', 'project-playbooks.js');
+
+  if (!existsSync(skillMapPath) || !existsSync(playbooksPath)) {
+    throw new Error('shared app registries missing before Task Tracker route patch');
+  }
+
+  const skillMapBefore = await readFile(skillMapPath, 'utf8');
+  const skillMapPattern = /path: 'https:\/\/personal-ai-assistant-anchit\.vercel\.app\/',\s*external: true,/;
+  if (!skillMapPattern.test(skillMapBefore)) {
+    throw new Error('Task Tracker entry not found in generated App Skill Map');
+  }
+  const skillMapAfter = skillMapBefore.replace(
+    skillMapPattern,
+    "path: '/task-tracker',\n            aliases: ['/task-tracker.html'],",
+  );
+  await writeFile(skillMapPath, skillMapAfter, 'utf8');
+
+  const playbooksBefore = await readFile(playbooksPath, 'utf8');
+  const playbooksPattern = /path: 'https:\/\/personal-ai-assistant-anchit\.vercel\.app\/', department: \{ id: 'opportunity', title: 'Opportunity & Productivity' \}, capabilities:/;
+  if (!playbooksPattern.test(playbooksBefore)) {
+    throw new Error('Task Tracker fallback entry not found in generated Project Playbooks');
+  }
+  const playbooksAfter = playbooksBefore.replace(
+    playbooksPattern,
+    "path: '/task-tracker', aliases: ['/task-tracker.html'], department: { id: 'opportunity', title: 'Opportunity & Productivity' }, capabilities:",
+  );
+  await writeFile(playbooksPath, playbooksAfter, 'utf8');
+
+  console.log('[build-www] shared-ui: Task Tracker canonical route → /task-tracker');
+}
+
 // Build the How-To Engine (standalone Vite + React app under
 // side-husle/how-to-1, base '/how-to-2/') and mirror its dist into
 // www/how-to-2 so it ships at /how-to-2 on the main static deployment.
@@ -185,6 +223,7 @@ async function main() {
 
   await patchHowToCardRoute();
   await buildHowTo();
+  await patchSharedTaskTrackerRoute();
   await injectSharedExperience();
 
   console.log(`[build-www] done → ${WWW}`);
