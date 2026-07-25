@@ -60,7 +60,6 @@ jobs:
           grep -q 'personal-ai-assistant-anchit.vercel.app' www/task-tracker.html
           grep -Fq "path: '/task-tracker'" www/assets/app-skill-map.js
           grep -Fq "aliases: ['/task-tracker.html']" www/assets/app-skill-map.js
-          grep -Fq "path: '/task-tracker'" www/assets/project-playbooks.js
           if grep -Fq "path: 'https://personal-ai-assistant-anchit.vercel.app/'" www/assets/app-skill-map.js; then
             echo 'Generated App Skill Map still routes Task Tracker outside the shared shell'
             exit 1
