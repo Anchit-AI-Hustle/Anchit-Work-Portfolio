@@ -13,8 +13,9 @@
 //   1) ElevenLabs   ELEVENLABS_API_KEY + ELEVENLABS_VOICE_ID   [ELEVENLABS_MODEL]
 //   2) Cartesia     CARTESIA_API_KEY   + CARTESIA_VOICE_ID     [CARTESIA_MODEL]
 //   3) Fish Audio   FISH_API_KEY       + FISH_VOICE_ID         [FISH_MODEL]
-//   4) Hugging Face HF_TOKEN + (HF_TTS_URL | HF_TTS_MODEL)     (generic open voice)
-//   5) XTTS self-host  XTTS_API_URL                            (your voice, fallback)
+//   4) Sarvam AI    SARVAM_API_KEY     [SARVAM_LANG|SARVAM_VOICE|SARVAM_MODEL]  (Indic voices)
+//   5) Hugging Face HF_TOKEN + (HF_TTS_URL | HF_TTS_MODEL)     (generic open voice)
+//   6) XTTS self-host  XTTS_API_URL                            (your voice, fallback)
 //
 // Each provider is SKIPPED when unconfigured; a rate-limit / out-of-credits
 // response (429 / 402 / 403) moves the cascade to the next provider instead of
@@ -90,7 +91,31 @@ async function viaFish(text) {
   return { type: r.headers.get('content-type') || 'audio/mpeg', buf: Buffer.from(await r.arrayBuffer()) };
 }
 
-// 4) Hugging Face — a generic open TTS voice (Inference Endpoint or public model).
+// 4) Sarvam AI — native Indian-language voices (English-IN, Hindi, Tamil, Telugu,
+// Kannada, Malayalam, +more). The right voice engine for Indic content; a strong
+// fallback when the cloned English voice isn't the goal. Free/dev tier available.
+async function viaSarvam(text) {
+  const key = process.env.SARVAM_API_KEY;
+  if (!key) return null;
+  const r = await fetchTO('https://api.sarvam.ai/text-to-speech', {
+    method: 'POST',
+    headers: { 'api-subscription-key': key, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      text: text.slice(0, 1500),
+      target_language_code: process.env.SARVAM_LANG || 'en-IN',   // hi-IN, ta-IN, te-IN, kn-IN, ml-IN…
+      speaker: process.env.SARVAM_VOICE || 'anushka',
+      model: process.env.SARVAM_MODEL || 'bulbul:v2',
+    }),
+  });
+  if (isQuota(r.status)) return null;          // spent → next provider
+  if (!r.ok) return null;
+  const j = await r.json().catch(() => null);
+  const b64 = j && Array.isArray(j.audios) && j.audios[0];
+  if (!b64) return null;
+  return { type: 'audio/wav', buf: Buffer.from(b64, 'base64') };
+}
+
+// 5) Hugging Face — a generic open TTS voice (Inference Endpoint or public model).
 // Handles the "model is loading" 503 by waiting once for it to warm up.
 async function viaHuggingFace(text) {
   const token = process.env.HF_TOKEN;
@@ -136,6 +161,7 @@ const PROVIDERS = [
   { name: 'elevenlabs', run: viaElevenLabs },
   { name: 'cartesia',   run: viaCartesia },
   { name: 'fish',       run: viaFish },
+  { name: 'sarvam',     run: viaSarvam },
   { name: 'huggingface', run: viaHuggingFace },
   { name: 'xtts',       run: viaXTTS },
 ];
@@ -147,6 +173,7 @@ function configured() {
     elevenlabs: !!(e.ELEVENLABS_API_KEY && e.ELEVENLABS_VOICE_ID),
     cartesia: !!(e.CARTESIA_API_KEY && e.CARTESIA_VOICE_ID),
     fish: !!(e.FISH_API_KEY && e.FISH_VOICE_ID),
+    sarvam: !!e.SARVAM_API_KEY,
     huggingface: !!(e.HF_TOKEN && (e.HF_TTS_URL || e.HF_TTS_MODEL)),
     xtts: !!(e.XTTS_API_URL || e.LOCAL_XTTS_API_URL),
   };
