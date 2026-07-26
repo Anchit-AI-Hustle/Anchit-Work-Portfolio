@@ -1104,6 +1104,17 @@
   }
   @media (max-width: 820px) { .builds-grid { grid-template-columns: 1fr; gap: 16px; } }
 
+  /* Module cards — each suite module as an individual project */
+  .mod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(258px, 1fr)); gap: 14px; }
+  .mod { display: flex; flex-direction: column; gap: 7px; padding: 16px 18px; border-radius: 14px;
+    background: var(--bg-elev); border: 1px solid var(--rule); text-decoration: none; color: inherit;
+    transition: border-color .2s, transform .2s, box-shadow .2s; }
+  .mod:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: var(--shadow-md); }
+  .mod .suite { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
+  .mod h4 { font-family: var(--font-display); font-size: 17px; font-weight: 600; color: var(--ink); margin: 0; }
+  .mod p { font-size: 13px; color: var(--ink-dim); margin: 0; line-height: 1.5; }
+  .mod .open { margin-top: auto; font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .05em;
+    text-transform: uppercase; color: var(--primary); }
   .build-card {
     background: var(--bg-elev); border-radius: 18px;
     padding: 26px 24px; min-height: 320px;
@@ -4171,6 +4182,15 @@
           </div>
         </div>
       </div>
+
+      <!-- Every module inside the two suites, as an individual project. Rendered
+           from the MODULES data below so the list stays one source of truth. -->
+      <div class="section-head reveal" style="margin-top:64px">
+        <div class="eyebrow">Inside the suites · every module, individually</div>
+        <h2 class="display-md">Each build, on its own</h2>
+        <p class="lede" style="margin-top:12px">LifeCycle-OS and The Third Eye are suites — each of these is a working module inside them, built as its own tool.</p>
+      </div>
+      <div class="mod-grid reveal-stagger" id="modGrid"></div>
     </div>
   </section>
 
@@ -4948,6 +4968,49 @@
 
 <script>
   /* ============ STATE ============ */
+  /* ── Suite modules ─────────────────────────────────────────────────────────
+     LifeCycle-OS and The Third Eye are suites; every module inside them is a
+     build in its own right, so each gets its own project card. One data array
+     keeps the list honest — add a module here and it appears on the page. */
+  const MODULES = [
+    // LifeCycle-OS (on-site, brand-agnostic)
+    ['LifeCycle-OS','Mailer Studio','Turns a brief into designed, send-ready HTML email variants, each quality-scored.','/lifecycle-os-studio'],
+    ['LifeCycle-OS','Data Analysis','Funnel, cohort and retention analytics with generated, evidence-quoting insights.','/lifecycle-os-analysis'],
+    ['LifeCycle-OS','Marketing Calendar','Builds a dated campaign calendar per market and segment, with approvals.','/lifecycle-os-calendar'],
+    ['LifeCycle-OS','Competitive Intelligence','Benchmarks a category the way SimilarWeb / SEMrush profile a market.','/lifecycle-os-intel'],
+    ['LifeCycle-OS','Smart Brain','Think → lock → execute: one locked strategy drives every downstream asset.','/lifecycle-os-brain'],
+    ['LifeCycle-OS','Retention Playbook','Lifecycle plays, triggers and flow templates mapped to each segment.','/lifecycle-os-playbook'],
+    ['LifeCycle-OS','Landing Page Studio','Generates a landing page structure and copy from the locked offer.','/lifecycle-os-landing'],
+    ['LifeCycle-OS','Connectors','Store, ESP and analytics integrations that feed the whole OS.','/lifecycle-os-connectors'],
+    ['LifeCycle-OS','Social Studio','Turns the calendar into platform-shaped social posts.','/lifecycle-os-social'],
+    ['LifeCycle-OS','Ads Studio','A full Meta-style account: campaigns → ad sets → ads, with drill-down.','/lifecycle-os-ads'],
+    ['LifeCycle-OS','Creative Gallery','Creative concepts and asset briefs generated per campaign.','/lifecycle-os-creative'],
+    ['LifeCycle-OS','Cohort Builder','Behavioural cohorts (RFM, recency, value) built from the data.','/lifecycle-os-cohorts'],
+    ['LifeCycle-OS','Ask the Brand Brain','Conversational growth Q&A grounded in the brand\u2019s own numbers.','/lifecycle-os-ask'],
+    ['LifeCycle-OS','Sonic Branding','Generates a brand melody and audio identity.','/lifecycle-os-music'],
+    ['LifeCycle-OS','Growth Audit','Audits the lifecycle and funnel, scoring gaps by impact.','/lifecycle-os-audit'],
+    ['LifeCycle-OS','Frameworks','AARRR, RFM and JTBD applied to the entered brand.','/lifecycle-os-frameworks'],
+    // The Third Eye (external app)
+    ['The Third Eye','AI Assistant','Chat that searches the web, queries your own data and takes actions.','https://the-third-eye.anchit-tandon.com/'],
+    ['The Third Eye','Tasks','Captures to-dos with priorities and due dates, straight out of conversations.','https://the-third-eye.anchit-tandon.com/'],
+    ['The Third Eye','Knowledge','Upload documents and query them in natural language, with cited passages.','https://the-third-eye.anchit-tandon.com/'],
+    ['The Third Eye','Notes','Fast capture for thoughts and meeting notes, organised and private.','https://the-third-eye.anchit-tandon.com/'],
+    ['The Third Eye','Reminders & Daily Plan','Deadline nudges plus a morning agenda built from everything else.','https://the-third-eye.anchit-tandon.com/'],
+    ['The Third Eye','Goals & Finance','Tracks personal objectives over time next to a unified financial view.','https://the-third-eye.anchit-tandon.com/'],
+  ];
+  (function renderModules(){
+    const host = document.getElementById('modGrid');
+    if (!host) return;
+    host.innerHTML = MODULES.map(function (m) {
+      const ext = /^https?:/.test(m[3]);
+      return '<a class="mod" href="' + m[3] + '"' + (ext ? ' target="_blank" rel="noopener"' : '') + '>' +
+        '<span class="suite">' + m[0] + '</span>' +
+        '<h4>' + m[1] + '</h4>' +
+        '<p>' + m[2] + '</p>' +
+        '<span class="open">Open ' + (ext ? '\u2197' : '\u2192') + '</span></a>';
+    }).join('');
+  })();
+
   const ALL_VIEWS = ['home','about','now','chat','experience','projects','resume','contact','project-lifecycle','project-agentlp','project-jobfit','project-music','project-thirdeye','project-yaara','project-mailer','project-telesuite','project-lifeengine'];
   let audioModeEnabled = false; // true once user has clicked Play — gates page narration
   window.chatVoiceMuted = false; // chat replies speak aloud by default; mute toggle flips this

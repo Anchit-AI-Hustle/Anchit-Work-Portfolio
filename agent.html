@@ -223,7 +223,9 @@
     <p class="sub">A photoreal AI avatar answers in his own voice. Type or tap the mic.</p>
 
     <div class="stage" id="stage">
-      <img id="portrait" src="AnchitTandon-AppLogo.png" alt="Anchit Tandon" />
+      <!-- A real portrait: the app logo is a branded poster and cannot drive a
+           talking head, so the avatar and this still both use the photo. -->
+      <img id="portrait" src="assets/anchit-profile.jpg" alt="Anchit Tandon" />
       <video id="video" playsinline></video>
       <div class="ring"></div>
     </div>
@@ -263,6 +265,9 @@
   // details are ever surfaced to visitors.)
   fetch('/api/avatar').then(function(r){return r.json();}).then(function(j){
     avatarConfigured = !!(j && j.configured);
+    // Tell the visitor plainly which mode they are in, so voice-only never
+    // reads as "the page is broken". No deploy/config details are exposed.
+    if(!avatarConfigured){ noteEl.textContent='Voice mode — Anchit answers aloud over his portrait. On-camera video is switched on when the avatar engine is available.'; }
   }).catch(function(){});
 
   document.querySelectorAll('.chip').forEach(function(c){ c.addEventListener('click', function(){ qEl.value=c.textContent; ask(); }); });

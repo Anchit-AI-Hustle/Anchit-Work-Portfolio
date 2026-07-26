@@ -23,7 +23,12 @@
 //   DID_VOICE_ID       Microsoft voice id fallback (default en-US-GuyNeural)
 
 const DID_BASE = 'https://api.d-id.com';
-const DEFAULT_SOURCE = process.env.DID_SOURCE_URL || 'https://anchit-tandon.com/AnchitTandon-AppLogo.png';
+// The source MUST be a clear, front-facing photo of a real face — talking-head
+// engines reject logos/posters ("no face detected"). AnchitTandon-AppLogo.png is
+// a branded poster (monogram + text + sunglasses), so it can never drive an
+// avatar; the portrait photo is used instead. For best results set
+// DID_SOURCE_URL to a close, front-facing, well-lit headshot with no sunglasses.
+const DEFAULT_SOURCE = process.env.DID_SOURCE_URL || 'https://anchit-tandon.com/assets/anchit-profile.jpg';
 
 function authHeader() {
   const key = (process.env.DID_API_KEY || '').trim();
