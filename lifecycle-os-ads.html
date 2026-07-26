@@ -7,7 +7,30 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link href="/lifecycle-os-kit.css" rel="stylesheet">
-<style>.ad{background:var(--bg-elev);border:1px solid var(--rule);border-radius:12px;padding:14px 16px}.ad .plat{font-family:var(--font-mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);border:1px solid var(--rule);border-radius:6px;padding:3px 7px;float:right}.ad .h{font-weight:600;font-size:14.5px;margin-bottom:5px;color:var(--ink)}.ad .b{font-size:13px;color:var(--ink-dim);margin-bottom:8px}.ad .c{font-family:var(--font-mono);font-size:11px;color:var(--primary)}</style>
+<style>
+/* Meta-style hierarchy: campaigns → ad sets → ads → ad detail */
+.crumb{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-family:var(--font-mono);font-size:11.5px;margin:18px 0 2px}
+.crumb button{background:none;border:0;padding:0;cursor:pointer;color:var(--primary);font:inherit;text-decoration:underline;text-underline-offset:2px}
+.crumb button:hover{color:var(--ink)}
+.crumb .sep{color:var(--ink-mute)}
+.crumb .cur{color:var(--ink-dim)}
+.hrow{display:grid;grid-template-columns:minmax(0,2.2fr) repeat(4,minmax(64px,1fr)) auto;gap:10px;align-items:center;
+  background:var(--bg-elev);border:1px solid var(--rule);border-radius:12px;padding:12px 14px;margin-bottom:8px;
+  width:100%;text-align:left;cursor:pointer;font:inherit;color:inherit;transition:border-color .18s,transform .18s}
+.hrow:hover{border-color:var(--primary);transform:translateY(-1px)}
+.hrow[data-leaf="1"]{cursor:pointer}
+.hrow .nm{min-width:0}
+.hrow .nm b{display:block;font-size:14px;color:var(--ink);font-weight:600;overflow-wrap:anywhere}
+.hrow .nm span{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-mute)}
+.hrow .mt{min-width:0}
+.hrow .mt i{display:block;font-style:normal;font-family:var(--font-mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-mute)}
+.hrow .mt b{font-weight:600;font-size:13px;color:var(--ink-dim)}
+.hrow .go{font-family:var(--font-mono);font-size:14px;color:var(--primary)}
+.pill{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--rule);border-radius:6px;padding:2px 6px;color:var(--gold)}
+.pill.on{color:var(--accent);border-color:var(--accent)}
+.pill.off{color:var(--ink-mute)}
+@media(max-width:760px){.hrow{grid-template-columns:minmax(0,1fr) auto;row-gap:8px}.hrow .mt{display:inline-block;margin-right:14px}}
+.ad{background:var(--bg-elev);border:1px solid var(--rule);border-radius:12px;padding:14px 16px}.ad .plat{font-family:var(--font-mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);border:1px solid var(--rule);border-radius:6px;padding:3px 7px;float:right}.ad .h{font-weight:600;font-size:14.5px;margin-bottom:5px;color:var(--ink)}.ad .b{font-size:13px;color:var(--ink-dim);margin-bottom:8px}.ad .c{font-family:var(--font-mono);font-size:11px;color:var(--primary)}</style>
 <!-- seo:auto:start -->
 <!-- Managed by scripts/seo-inject.mjs — edit seo.config.json, not here. -->
 <meta name="description" content="Ads Studio — generate an ad-copy matrix (headlines × primary text × CTAs) across platforms from a brief, with benchmark targets. Part of the Lifecycle OS." />
@@ -96,7 +119,9 @@
     <div id="out" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="font-family:var(--font-display);font-size:clamp(19px,3vw,24px);font-weight:600" id="hd"></div><span class="badge" id="bdg"></span></div>
       <div class="sectitle">Benchmark targets to test against</div><div class="kpis" id="kpi"></div>
-      <div class="sectitle">Ad copy matrix <span id="cnt" style="text-transform:none;letter-spacing:0;color:var(--ink-dim)"></span></div><div class="grid" id="ads"></div>
+      <nav class="crumb" id="crumb" aria-label="Ads hierarchy"></nav>
+      <div class="sectitle" id="lvlTitle">Campaigns <span id="cnt" style="text-transform:none;letter-spacing:0;color:var(--ink-dim)"></span></div>
+      <div id="lvl"></div>
     </div>
     <div id="extras" style="margin-top:8px"></div>
     <footer>Ads Studio · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>.</footer>
@@ -119,13 +144,154 @@
     for(var p=0;p<plats.length;p++){ for(var i=0;i<5;i++){ out.push({ plat:plats[p], h:heads[i%heads.length], b:bodies[(i+p)%bodies.length], c:ctas[(i+p)%ctas.length] }); k++; if(k>=20) break; } if(k>=20) break; }
     return out;
   }
+  /* ── Meta-style account structure ────────────────────────────────────────
+     Campaign → ad sets → ads → ad detail, with metrics rolling UP from the ad
+     (the only level that owns numbers) exactly like Ads Manager. Clicking any
+     row drills in; the breadcrumb walks back out. Figures are deterministic
+     per name so the same brand always renders the same account. */
+  function seed(s){ var h=0; for(var i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))>>>0; } return h; }
+  function rnd(s,min,max){ return min + (seed(s)%1000)/1000*(max-min); }
+  var money=function(v){ return '$'+Math.round(v).toLocaleString('en-US'); };
+  var intf=function(v){ return Math.round(v).toLocaleString('en-US'); };
+  var pct=function(v){ return v.toFixed(2)+'%'; };
+
+  var ACCOUNT=null, PATH=[];   // PATH: [] | [ci] | [ci,si] | [ci,si,ai]
+
+  function buildAccount(f){
+    var copy=gen(f);
+    var camps = f.anchit
+      ? [['Recruiter outreach','Traffic'],['Founder outreach','Leads'],['Portfolio retargeting','Retargeting'],['Referral warm-up','Engagement']]
+      : [['Prospecting — broad','Conversions'],['Retargeting — site visitors','Retargeting'],['Retention — repeat buyers','Retention'],['Winback — lapsed','Winback']];
+    var audiences = f.anchit
+      ? ['Product leaders · US/UK','Founders · seed–series B','Site visitors 30d','Referral lookalike 1%']
+      : ['Broad · 25–54','Interest stack · category','Site visitors 30d','Purchasers 180d · lookalike 1%'];
+    var places=['Feed + Stories','Reels + Feed','Search + Performance Max','Feed only'];
+    var k=0;
+    return camps.map(function(c,ci){
+      var nSets = 2 + (seed(c[0])%2);            // 2–3 ad sets per campaign
+      var sets = [];
+      for (var si=0; si<nSets; si++){
+        var sname = audiences[(ci+si)%audiences.length];
+        var nAds = 2 + (seed(sname+ci+si)%2);    // 2–3 ads per ad set
+        var ads=[];
+        for (var ai=0; ai<nAds; ai++){
+          var src = copy[k++ % copy.length];
+          var key = c[0]+'|'+sname+'|'+ai;
+          var impressions = Math.round(rnd(key+'i', 18000, 240000));
+          var ctr = rnd(key+'c', 0.8, 3.4);
+          var clicks = Math.round(impressions*ctr/100);
+          var cpc = rnd(key+'p', 0.35, 2.6);
+          var spend = clicks*cpc;
+          var convRate = rnd(key+'v', 1.2, 5.5);
+          var conv = Math.max(1, Math.round(clicks*convRate/100));
+          var aov = f.anchit ? 0 : rnd(key+'a', 32, 96);
+          ads.push({ name:(f.anchit?'Ad':'Creative')+' '+(ai+1)+' · '+src.plat, plat:src.plat,
+            h:src.h, b:src.b, c:src.c, active:(seed(key)%5)!==0,
+            impressions:impressions, clicks:clicks, spend:spend, conv:conv, aov:aov,
+            place:places[(ci+si+ai)%places.length] });
+        }
+        sets.push({ name:sname, place:places[(ci+si)%places.length], ads:ads,
+          active: ads.some(function(a){return a.active;}) });
+      }
+      return { name:c[0], objective:c[1], sets:sets, active: sets.some(function(s){return s.active;}) };
+    });
+  }
+
+  // Roll metrics up from the ads beneath any node.
+  function roll(ads){
+    var t={impressions:0,clicks:0,spend:0,conv:0,rev:0};
+    ads.forEach(function(a){ t.impressions+=a.impressions; t.clicks+=a.clicks; t.spend+=a.spend; t.conv+=a.conv; t.rev+=a.conv*(a.aov||0); });
+    t.ctr = t.impressions? t.clicks/t.impressions*100 : 0;
+    t.cpc = t.clicks? t.spend/t.clicks : 0;
+    t.roas = t.spend? t.rev/t.spend : 0;
+    return t;
+  }
+  var adsOfCampaign=function(c){ return c.sets.reduce(function(m,s){ return m.concat(s.ads); },[]); };
+
+  function rowHtml(title, sub, t, activeFlag, isLeaf){
+    var fourth = t.roas ? ['ROAS', t.roas.toFixed(2)+'×'] : ['Conversions', intf(t.conv)];
+    return '<div class="nm"><b>'+esc(title)+'</b><span>'+esc(sub)+' · <span class="pill '+(activeFlag?'on':'off')+'">'+(activeFlag?'Active':'Paused')+'</span></span></div>'+
+      '<div class="mt"><i>Spend</i><b>'+money(t.spend)+'</b></div>'+
+      '<div class="mt"><i>Impressions</i><b>'+intf(t.impressions)+'</b></div>'+
+      '<div class="mt"><i>CTR</i><b>'+pct(t.ctr)+'</b></div>'+
+      '<div class="mt"><i>'+fourth[0]+'</i><b>'+fourth[1]+'</b></div>'+
+      '<div class="go">'+(isLeaf?'▤':'›')+'</div>';
+  }
+
+  function crumb(){
+    var f=ACCOUNT.f, parts=[['Campaigns',[]]];
+    if(PATH.length>=1) parts.push([ACCOUNT.camps[PATH[0]].name, PATH.slice(0,1)]);
+    if(PATH.length>=2) parts.push([ACCOUNT.camps[PATH[0]].sets[PATH[1]].name, PATH.slice(0,2)]);
+    if(PATH.length>=3) parts.push([ACCOUNT.camps[PATH[0]].sets[PATH[1]].ads[PATH[2]].name, PATH.slice(0,3)]);
+    var el=$('crumb'); el.innerHTML='';
+    parts.forEach(function(p,i){
+      if(i) el.insertAdjacentHTML('beforeend','<span class="sep">›</span>');
+      if(i===parts.length-1){ el.insertAdjacentHTML('beforeend','<span class="cur">'+esc(p[0])+'</span>'); return; }
+      var b=document.createElement('button'); b.type='button'; b.textContent=p[0];
+      b.addEventListener('click', function(){ PATH=p[1].slice(); paint(); });
+      el.appendChild(b);
+    });
+    void f;
+  }
+
+  function paint(){
+    crumb();
+    var host=$('lvl'); host.innerHTML='';
+    var camps=ACCOUNT.camps;
+
+    if(PATH.length===0){                                  // campaigns
+      $('lvlTitle').innerHTML='Campaigns <span id="cnt" style="text-transform:none;letter-spacing:0;color:var(--ink-dim)">· '+camps.length+' campaigns · click to see ad sets</span>';
+      camps.forEach(function(c,ci){
+        var b=document.createElement('button'); b.type='button'; b.className='hrow';
+        b.innerHTML=rowHtml(c.name, c.objective+' · '+c.sets.length+' ad sets', roll(adsOfCampaign(c)), c.active, false);
+        b.addEventListener('click', function(){ PATH=[ci]; paint(); });
+        host.appendChild(b);
+      });
+      return;
+    }
+    var c=camps[PATH[0]];
+    if(PATH.length===1){                                  // ad sets in a campaign
+      $('lvlTitle').innerHTML='Ad sets in “'+esc(c.name)+'” <span style="text-transform:none;letter-spacing:0;color:var(--ink-dim)">· '+c.sets.length+' ad sets · click to see ads</span>';
+      c.sets.forEach(function(s,si){
+        var b=document.createElement('button'); b.type='button'; b.className='hrow';
+        b.innerHTML=rowHtml(s.name, s.place+' · '+s.ads.length+' ads', roll(s.ads), s.active, false);
+        b.addEventListener('click', function(){ PATH=[PATH[0],si]; paint(); });
+        host.appendChild(b);
+      });
+      return;
+    }
+    var s=c.sets[PATH[1]];
+    if(PATH.length===2){                                  // ads in an ad set
+      $('lvlTitle').innerHTML='Ads in “'+esc(s.name)+'” <span style="text-transform:none;letter-spacing:0;color:var(--ink-dim)">· '+s.ads.length+' ads · click for the ad detail</span>';
+      s.ads.forEach(function(a,ai){
+        var b=document.createElement('button'); b.type='button'; b.className='hrow'; b.setAttribute('data-leaf','1');
+        b.innerHTML=rowHtml(a.name, a.plat+' · '+a.place, roll([a]), a.active, true);
+        b.addEventListener('click', function(){ PATH=[PATH[0],PATH[1],ai]; paint(); });
+        host.appendChild(b);
+      });
+      return;
+    }
+    // ad detail
+    var a=s.ads[PATH[2]], t=roll([a]);
+    $('lvlTitle').innerHTML='Ad detail <span style="text-transform:none;letter-spacing:0;color:var(--ink-dim)">· '+esc(a.name)+'</span>';
+    var stats=[['Spend',money(t.spend)],['Impressions',intf(t.impressions)],['Clicks',intf(t.clicks)],['CTR',pct(t.ctr)],['CPC',money(t.cpc)],
+               (a.aov?['ROAS',t.roas.toFixed(2)+'×']:['Conversions',intf(t.conv)])];
+    host.innerHTML =
+      '<div class="kpis" style="margin-bottom:14px">'+stats.map(function(x){return '<div class="kpi"><div class="m">'+esc(x[0])+'</div><div class="v">'+esc(x[1])+'</div></div>';}).join('')+'</div>'+
+      '<div class="ad"><span class="plat">'+esc(a.plat)+'</span>'+
+        '<div class="h">'+esc(a.h)+'</div><div class="b">'+esc(a.b)+'</div><div class="c">→ '+esc(a.c)+'</div>'+
+        '<div style="margin-top:12px;font-family:var(--font-mono);font-size:11px;color:var(--ink-mute)">'+
+          'Campaign: '+esc(c.name)+' · Ad set: '+esc(s.name)+' · Placement: '+esc(a.place)+' · <span class="pill '+(a.active?'on':'off')+'">'+(a.active?'Active':'Paused')+'</span>'+
+        '</div></div>';
+  }
+
   function run(){
     var f=LOS.facts($('brand').value.trim(),$('url').value.trim());
-    $('hd').textContent=f.name+' — ad matrix'; LOS.badge($('bdg'),f.anchit?'anchit':'template');
+    $('hd').textContent=f.name+' — ads account'; LOS.badge($('bdg'),f.anchit?'anchit':'template');
     var ben = f.anchit ? [['CTR target','1.2–2.0%'],['Reply/apply rate','8–15%'],['CPL target','under ₹2k'],['Onsite→offer','20–30%']] : [['CTR target','1.5–3.0%'],['ROAS target','2.5×+'],['CPA target','≤ category AOV'],['First-order conv.','2–4%']];
     $('kpi').innerHTML=ben.map(function(x){return '<div class="kpi"><div class="m">'+esc(x[0])+'</div><div class="v">'+esc(x[1])+'</div></div>';}).join('');
-    var ads=gen(f); $('cnt').textContent='· '+ads.length+' variations';
-    $('ads').innerHTML=ads.map(function(a){return '<div class="ad"><span class="plat">'+esc(a.plat)+'</span><div class="h">'+esc(a.h)+'</div><div class="b">'+esc(a.b)+'</div><div class="c">→ '+esc(a.c)+'</div></div>';}).join('');
+    ACCOUNT={ f:f, camps:buildAccount(f) }; PATH=[];
+    paint();
     $('out').style.display='block';
   }
   run();
