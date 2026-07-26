@@ -42,3 +42,4 @@ The serverless function pattern is documented in `DEPLOY.md` (`api/chat.js` + sw
 - Single-file constraint is intentional — keep it that way unless explicitly asked. New CSS goes in the existing `<style>` block, new JS in the existing `<script>` block.
 - Editorial tone: copy is first-person ("I'm building…"), warm, specific with numbers. Match that voice when editing copy or chatbot responses.
 - All theming flows through CSS variables — never hardcode colors in component styles.
+- **Follow the design system in `DESIGN.md` for all styling.** It is the machine-readable source of truth for the palette (black / orange / gold), typography, spacing, radius, components, motion and focus states. Read it before writing styles; add a token there before inventing a value. Never use framework palette utilities (`gray-500`, `blue-600`, …) for brand surfaces.
