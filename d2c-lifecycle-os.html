@@ -137,6 +137,24 @@
   .lrow ul li{ font-size:12.5px; color:var(--ink-dim); border:1px solid var(--rule); border-radius:6px; padding:3px 8px; }
   @media (max-width:560px){ .lrow{ grid-template-columns:1fr; gap:8px; } }
 
+  /* generated assets */
+  .a-status{ font-family:var(--font-mono); font-size:12px; color:var(--ink-dim); margin-bottom:10px; }
+  .a-list{ display:grid; gap:14px; margin-bottom:24px; }
+  .a-card{ background:var(--bg-deep); border:1px solid var(--rule-strong); border-radius:14px; overflow:hidden; }
+  .a-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+    padding:12px 16px; border-bottom:1px solid var(--rule); }
+  .a-head .lbl{ font-family:var(--font-mono); font-size:12px; color:var(--ink); }
+  .a-head .sc{ font-family:var(--font-mono); font-size:11px; color:var(--gold,#c9a96e);
+    border:1px solid var(--rule-strong); border-radius:99px; padding:3px 10px; }
+  .a-subj{ padding:12px 16px 2px; font-size:15px; color:var(--ink); font-weight:600; }
+  .a-prev{ padding:0 16px 12px; font-size:12.5px; color:var(--ink-dim); }
+  .a-acts{ display:flex; gap:8px; padding:0 16px 14px; flex-wrap:wrap; }
+  .a-acts a, .a-acts button{ font-family:var(--font-mono); font-size:11.5px; letter-spacing:.03em;
+    text-decoration:none; cursor:pointer; padding:8px 12px; border-radius:9px;
+    border:1px solid var(--rule-strong); background:transparent; color:var(--ink-dim); }
+  .a-acts a:hover, .a-acts button:hover{ border-color:var(--primary); color:var(--ink); }
+  .a-frame{ width:100%; height:420px; border:0; border-top:1px solid var(--rule); background:#fff; display:none; }
+  .a-frame.on{ display:block; }
   /* mailer */
   .mailer{ background:var(--bg-deep); border:1px solid var(--rule-strong); border-radius:14px; overflow:hidden; margin-bottom:24px; }
   .mailer .mh{ padding:12px 16px; border-bottom:1px solid var(--rule); }
@@ -382,6 +400,7 @@
         <h3 id="rBrand"></h3>
         <div class="rhead-right">
           <span class="badge" id="rBadge"></span>
+          <button class="xport" id="rAssets" title="Generate send-ready HTML email assets from this plan">✦ Create assets</button>
           <button class="xport" id="rExport" title="Download the full plan as JSON">↓ Export plan</button>
           <button class="xport" id="rCopy" title="Copy the plan to the clipboard">⧉ Copy</button>
         </div>
@@ -411,6 +430,10 @@
 
       <div class="sectitle" id="rVarTitle" style="display:none;">Mailer Studio · scored variants</div>
       <div class="grid" id="rVariants" style="display:none;"></div>
+
+      <div class="sectitle" id="rAssetTitle" style="display:none;">Generated assets · send-ready</div>
+      <div id="rAssetStatus" class="a-status" aria-live="polite"></div>
+      <div id="rAssets2" class="a-list"></div>
 
       <div class="sectitle">Retention automations</div>
       <div class="rows" id="rRet"></div>
@@ -497,6 +520,99 @@
     var txt=JSON.stringify({ source:lastSource, plan:lastPlan }, null, 2), btn=$('rCopy'), orig=btn.textContent;
     var done=function(){ btn.textContent='✓ Copied'; setTimeout(function(){ btn.textContent=orig; }, 1600); };
     if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done, done); } else { done(); }
+  });
+
+  /* ── Generated assets ──────────────────────────────────────────────────────
+     The plan renders an on-page mailer preview, but a preview is not an asset.
+     This produces REAL, send-ready files: designed, table-based, inline-styled
+     HTML emails (600px content width — the universal safe width for Outlook /
+     Gmail / Apple Mail / Klaviyo), each downloadable. It asks /api/mailer for
+     scored on-brand variants and, if that is unreachable, still builds a
+     send-ready file locally from the plan's own mailer — so an asset is ALWAYS
+     produced. Brand-agnostic: everything comes from the entered brand + plan. */
+  function slug(s){ return String(s||'brand').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'brand'; }
+
+  // Minimal, client-side send-ready email from the plan's mailer (fallback path).
+  function localEmailHtml(brand, m){
+    m = m || {};
+    var h = m.hero || {}, cta = m.cta || {}, secs = m.sections || [];
+    var P = { bg:'#f4f1ea', card:'#ffffff', ink:'#1a1714', dim:'#6b655c', rule:'#e6dfd0', dark:'#17130e', gold:'#c9a96e' };
+    var blocks = secs.map(function(s){
+      return '<tr><td style="padding:0 32px 18px"><div style="font-family:Georgia,serif;font-size:17px;font-weight:bold;color:'+P.ink+';margin-bottom:6px">'+esc(s.title||'')+'</div>'+
+             '<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.65;color:'+P.dim+'">'+esc(s.body||'')+'</div></td></tr>';
+    }).join('') || (m.body ? '<tr><td style="padding:0 32px 18px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.7;color:'+P.dim+'">'+esc(m.body)+'</td></tr>' : '');
+    var button = cta.label ? '<tr><td style="padding:6px 32px 30px"><a href="#" style="display:inline-block;background:'+P.dark+';color:#fff;text-decoration:none;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;padding:14px 30px;border-radius:8px">'+esc(cta.label)+'</a>'+
+      (cta.note?'<div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:'+P.dim+';margin-top:12px">'+esc(cta.note)+'</div>':'')+'</td></tr>' : '';
+    return '<!doctype html><html><body style="margin:0;padding:0;background:'+P.bg+'">'+
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:'+P.bg+';padding:24px 12px"><tr><td align="center">'+
+      '<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:'+P.card+';border:1px solid '+P.rule+';border-radius:14px;overflow:hidden">'+
+      '<tr><td style="background:'+P.dark+';padding:16px 32px"><span style="font-family:Georgia,serif;font-size:18px;font-weight:bold;color:#fff">'+esc(brand)+'</span></td></tr>'+
+      '<tr><td style="padding:28px 32px 8px">'+
+        (h.kicker?'<div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:'+P.gold+';margin-bottom:10px">'+esc(h.kicker)+'</div>':'')+
+        '<div style="font-family:Georgia,serif;font-size:26px;line-height:1.2;font-weight:bold;color:'+P.ink+'">'+esc(h.headline||m.subject||'')+'</div>'+
+        (h.subhead?'<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:'+P.dim+';margin-top:10px">'+esc(h.subhead)+'</div>':'')+
+      '</td></tr><tr><td style="padding:20px 0 0"></td></tr>'+blocks+button+
+      '<tr><td style="border-top:1px solid '+P.rule+';padding:16px 32px"><div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:'+P.dim+'">'+esc(m.signoff||brand)+' · You are receiving this because you opted in. Unsubscribe anytime.</div></td></tr>'+
+      '</table></td></tr></table></body></html>';
+  }
+
+  function downloadFile(name, text, type){
+    var blob=new Blob([text], {type:type||'text/html'});
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+  }
+
+  function renderAssets(brand, items, note){
+    $('rAssetTitle').style.display='block';
+    $('rAssetStatus').textContent = note || '';
+    var wrap=$('rAssets2'); wrap.innerHTML='';
+    items.forEach(function(it, i){
+      var card=document.createElement('div'); card.className='a-card';
+      var score = it.score && (it.score.overall!=null?it.score.overall:it.score);
+      card.innerHTML =
+        '<div class="a-head"><span class="lbl">'+esc(it.label||('Variant '+(i+1)))+'</span>'+
+          (score!=null&&score!==''?'<span class="sc">Score '+esc(score)+'/100</span>':'')+'</div>'+
+        (it.subject?'<div class="a-subj">'+esc(it.subject)+'</div>':'')+
+        (it.preview?'<div class="a-prev">'+esc(it.preview)+'</div>':'')+
+        '<div class="a-acts"><button type="button" data-act="prev">◱ Preview</button>'+
+          '<button type="button" data-act="dl">↓ Download .html</button></div>'+
+        '<iframe class="a-frame" title="Email preview"></iframe>';
+      var frame=card.querySelector('.a-frame');
+      card.querySelector('[data-act="prev"]').addEventListener('click', function(){
+        if(!frame.classList.contains('on')){ frame.srcdoc=it.html; frame.classList.add('on'); this.textContent='◲ Hide'; }
+        else { frame.classList.remove('on'); this.textContent='◱ Preview'; }
+      });
+      card.querySelector('[data-act="dl"]').addEventListener('click', function(){
+        downloadFile(slug(brand)+'-'+slug(it.label||('variant-'+(i+1)))+'.html', it.html);
+      });
+      wrap.appendChild(card);
+    });
+  }
+
+  $('rAssets').addEventListener('click', function(){
+    if(!lastPlan) return;
+    var btn=this, orig=btn.textContent, brand=lastPlan.brand||'Your brand';
+    var m=lastPlan.mailer||{};
+    btn.disabled=true; btn.textContent='✦ Creating…';
+    $('rAssetTitle').style.display='block'; $('rAssetStatus').textContent='Designing send-ready emails…'; $('rAssets2').innerHTML='';
+    var body={ brand:brand,
+      brief:(m.theme||lastPlan.positioning||'lifecycle campaign').toString().slice(0,600),
+      segment:((lastPlan.segments&&lastPlan.segments[0]&&(lastPlan.segments[0].name||lastPlan.segments[0].title))||'').toString().slice(0,120),
+      offer:((m.cta&&m.cta.label)||'').toString().slice(0,120) };
+    fetch('/api/mailer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+      .then(function(r){ if(!r.ok) throw new Error('http_'+r.status); return r.json(); })
+      .then(function(d){
+        var vs=(d&&d.variants||[]).filter(function(v){ return v&&v.html; });
+        if(!vs.length) throw new Error('empty');
+        renderAssets(brand, vs, vs.length+' send-ready email'+(vs.length>1?'s':'')+' generated'+(d.source==='ai'?' · AI-written':' · template')+' — preview or download.');
+      })
+      .catch(function(){
+        // Always produce an asset, even with no serverless engine reachable.
+        renderAssets(brand, [{ label:'A · From this plan', subject:m.subject||'', preview:m.preview||'', html:localEmailHtml(brand,m) }],
+          'Built locally from this plan (the live engine was unreachable) — still send-ready.');
+      })
+      .then(function(){ btn.disabled=false; btn.textContent=orig; });
   });
 
   var phrases=['Reading the brand…','Building segments…','Designing the calendar…','Writing the mailer…','Wiring retention flows…'];

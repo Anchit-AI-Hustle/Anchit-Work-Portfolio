@@ -69,7 +69,7 @@ const openai: ModelProvider = {
 const gemini: ModelProvider = {
   id: 'gemini-2.5-pro',
   label: 'Gemini 2.5 Pro',
-  rank: 3,
+  rank: 4,
   enabled: () => !!env('GEMINI_API_KEY'),
   async call(system, user) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${env('GEMINI_API_KEY')}`;
@@ -91,7 +91,7 @@ const gemini: ModelProvider = {
 const grok: ModelProvider = {
   id: 'grok-4',
   label: 'Grok 4',
-  rank: 4,
+  rank: 5,
   enabled: () => !!env('XAI_API_KEY'),
   async call(system, user) {
     const r = await fetch('https://api.x.ai/v1/chat/completions', {
@@ -108,8 +108,34 @@ const grok: ModelProvider = {
   },
 };
 
+// ── Meta · Muse Spark 1.1 ───────────────────────────────────────────────────
+// Strong on tool use / real-work tasks (MCP Atlas 88.1, JobBench 54.7) and a 1M
+// context, so it is a good extra voice in the cascade. The Meta Model API is in
+// public preview and OpenAI-compatible in shape, but the exact base URL can move
+// during preview — so it is taken from META_API_URL rather than hardcoded here.
+// Unset URL or key ⇒ the provider is simply disabled.
+const muse: ModelProvider = {
+  id: 'muse-spark-1.1',
+  label: 'Muse Spark 1.1',
+  rank: 3,
+  enabled: () => !!(env('META_API_KEY') && env('META_API_URL')),
+  async call(system, user) {
+    const r = await fetch(env('META_API_URL'), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${env('META_API_KEY')}` },
+      body: JSON.stringify({
+        model: env('META_MODEL') || 'muse-spark-1.1',
+        messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
+      }),
+    });
+    if (!r.ok) throw new Error(`muse ${r.status}`);
+    const j = await r.json();
+    return j.choices?.[0]?.message?.content ?? '';
+  },
+};
+
 /** Ranked registry. Ranking is benchmark-driven and fully config-swappable. */
-export const PROVIDERS: ModelProvider[] = [anthropic, openai, gemini, grok].sort((a, b) => a.rank - b.rank);
+export const PROVIDERS: ModelProvider[] = [anthropic, openai, muse, gemini, grok].sort((a, b) => a.rank - b.rank);
 
 /** The strongest available model is used as the consensus/evaluator node. */
 export function evaluatorProvider(): ModelProvider {
