@@ -1,7 +1,7 @@
 // Dynamic flow diagram of the whole guide using React Flow. Auto-lays the steps
 // in a vertical track, colour-coded by badge, with branch edges labelled.
 
-import { useMemo } from 'react';
+import { useMemo, type CSSProperties } from 'react';
 import ReactFlow, { Background, Controls, type Edge, type Node } from 'reactflow';
 import 'reactflow/dist/style.css';
 import type { MasterGuide } from '../types';
@@ -39,7 +39,12 @@ export default function FlowDiagram({ guide, activeId, onSelect }: {
   );
 
   return (
-    <div className="flow glass" style={{ height: Math.min(560, 140 + guide.steps.length * 108) }}>
+    // Height travels as a CSS custom property so the stylesheet can shrink the
+    // map on narrow screens instead of it eating the whole viewport.
+    <div
+      className="flow glass"
+      style={{ '--flow-h': `${Math.min(560, 140 + guide.steps.length * 108)}px` } as CSSProperties}
+    >
       <ReactFlow
         nodes={nodes} edges={edges} fitView proOptions={{ hideAttribution: true }}
         onNodeClick={(_, n) => onSelect?.(n.id)}
