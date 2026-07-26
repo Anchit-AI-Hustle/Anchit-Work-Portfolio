@@ -140,35 +140,18 @@ strong{color:var(--ink)}
 .flow{overflow:hidden;border-radius:16px;height:var(--flow-h,420px)}
 .flow-pane{position:sticky;top:20px}
 
-/* ── narrow screens: map and steps share the screen without overlapping ──
-   The map stays pinned to the top so it is visible alongside whichever step
-   you are reading, but it gets an OPAQUE backing and its own stacking context
-   so the cards scroll cleanly underneath instead of bleeding through the
-   frosted glass. Steps then reserve that pinned height as scroll offset. */
+/* ── narrow screens: map and steps stack, never overlap ──
+   The pane must NOT stay sticky here. A sticky grid item pins for the whole
+   height of the grid, so every step card scrolls underneath the map and is
+   covered by it. On one column we drop it into normal flow: map first, then
+   the steps below it. Both render, nothing is ever on top of anything. */
 @media(max-width:900px){
-  .result-grid{grid-template-columns:1fr;gap:0}
-  .flow-pane{
-    order:-1;
-    position:sticky;
-    top:0;
-    z-index:5;
-    /* full-bleed backing so nothing shows through the pinned map */
-    margin:0 -20px;
-    padding:10px 20px 12px;
-    background:var(--bg-deep);
-    box-shadow:0 10px 24px -12px rgba(0,0,0,.9);
-  }
-  .flow{height:clamp(190px,30vh,290px)}
-  /* steps start below the pinned map and never scroll under it */
-  .steps{padding-top:16px}
-  .step-card{scroll-margin-top:calc(30vh + 28px)}
-}
-
-/* Very short viewports (landscape phones): shrink the map further so the
-   step cards still get meaningful room. */
-@media(max-width:900px) and (max-height:560px){
-  .flow{height:150px}
-  .step-card{scroll-margin-top:178px}
+  .result-grid{grid-template-columns:1fr;gap:18px}
+  .flow-pane{order:-1;position:static;top:auto;z-index:auto}
+  /* Keep the map off the whole phone screen (it was a fixed 560px) while
+     leaving enough box that the fitted flow stays legible. */
+  .flow{height:clamp(240px,44vh,360px)}
+  .step-card{scroll-margin-top:16px}
 }
 
 .banner{padding:12px 16px;margin-top:16px}
