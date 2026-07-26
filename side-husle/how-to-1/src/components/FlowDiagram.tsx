@@ -1,8 +1,8 @@
 // Dynamic flow diagram of the whole guide using React Flow. Auto-lays the steps
 // in a vertical track, colour-coded by badge, with branch edges labelled.
 
-import { useMemo } from 'react';
-import ReactFlow, { Background, Controls, type Edge, type Node } from 'reactflow';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import ReactFlow, { Background, Controls, type Edge, type Node, type ReactFlowInstance } from 'reactflow';
 import 'reactflow/dist/style.css';
 import type { MasterGuide } from '../types';
 
@@ -38,10 +38,36 @@ export default function FlowDiagram({ guide, activeId, onSelect }: {
     [guide],
   );
 
+  // fitView only runs once on mount, so the map stays framed for whatever size
+  // it had then. The stylesheet gives it a much shorter box on phones, which
+  // cropped the first and last nodes — re-fit whenever the box actually resizes.
+  const wrap = useRef<HTMLDivElement>(null);
+  const [rf, setRf] = useState<ReactFlowInstance | null>(null);
+  useEffect(() => {
+    if (!rf || !wrap.current || typeof ResizeObserver === 'undefined') return;
+    const refit = () => rf.fitView({ padding: 0.16, duration: 160 });
+    const ro = new ResizeObserver(refit);
+    ro.observe(wrap.current);
+    return () => ro.disconnect();
+  }, [rf]);
+  // Re-frame when the step count changes too (a new guide = a new node set).
+  useEffect(() => { rf?.fitView({ padding: 0.16 }); }, [rf, guide.steps.length]);
+
   return (
-    <div className="flow glass" style={{ height: Math.min(560, 140 + guide.steps.length * 108) }}>
+    // Height travels as a CSS custom property so the stylesheet can shrink the
+    // map on narrow screens instead of it eating the whole viewport.
+    <div
+      ref={wrap}
+      className="flow glass"
+      style={{ '--flow-h': `${Math.min(560, 140 + guide.steps.length * 108)}px` } as CSSProperties}
+    >
       <ReactFlow
-        nodes={nodes} edges={edges} fitView proOptions={{ hideAttribution: true }}
+        nodes={nodes} edges={edges} fitView fitViewOptions={{ padding: 0.16 }}
+        /* default minZoom is 0.5, which clamps fitView on a short phone-sized
+           box and crops the first/last nodes — let it zoom out far enough that
+           the whole flow always fits, however many steps the guide has. */
+        minZoom={0.25}
+        onInit={setRf} proOptions={{ hideAttribution: true }}
         onNodeClick={(_, n) => onSelect?.(n.id)}
         nodesDraggable={false} nodesConnectable={false} elementsSelectable
       >

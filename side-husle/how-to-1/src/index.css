@@ -94,7 +94,6 @@ strong{color:var(--ink)}
 .track-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--primary));border-radius:99px}
 
 .result-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;align-items:start}
-@media(max-width:900px){.result-grid{grid-template-columns:1fr}.flow-pane{order:-1}}
 .steps{display:flex;flex-direction:column;gap:16px}
 
 /* step card */
@@ -138,8 +137,22 @@ strong{color:var(--ink)}
 .video-yt:hover{background:rgba(255,105,64,.16);border-color:var(--primary)}
 @media (prefers-reduced-motion:reduce){.anim-preview::before,.anim-orb,.anim-particles i{animation:none}}
 
-.flow{overflow:hidden;border-radius:16px}
+.flow{overflow:hidden;border-radius:16px;height:var(--flow-h,420px)}
 .flow-pane{position:sticky;top:20px}
+
+/* ── narrow screens: map and steps stack, never overlap ──
+   The pane must NOT stay sticky here. A sticky grid item pins for the whole
+   height of the grid, so every step card scrolls underneath the map and is
+   covered by it. On one column we drop it into normal flow: map first, then
+   the steps below it. Both render, nothing is ever on top of anything. */
+@media(max-width:900px){
+  .result-grid{grid-template-columns:1fr;gap:18px}
+  .flow-pane{order:-1;position:static;top:auto;z-index:auto}
+  /* Keep the map off the whole phone screen (it was a fixed 560px) while
+     leaving enough box that the fitted flow stays legible. */
+  .flow{height:clamp(240px,44vh,360px)}
+  .step-card{scroll-margin-top:16px}
+}
 
 .banner{padding:12px 16px;margin-top:16px}
 .banner.error{border-left:3px solid #ff7d5c;color:#ffb9a3}
