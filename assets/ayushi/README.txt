@@ -1,0 +1,1 @@
+Ayushi portfolio assets served through /ayushi. The production route is configured in vercel.json.
