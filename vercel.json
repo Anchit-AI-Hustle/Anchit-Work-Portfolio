@@ -41,11 +41,15 @@
     },
     {
       "source": "/ayushi",
-      "destination": "/ayushi/index.html"
+      "destination": "/assets/ayushi/index.html"
     },
     {
       "source": "/ayushi/resume",
-      "destination": "/ayushi/resume.html"
+      "destination": "/assets/ayushi/resume.html"
+    },
+    {
+      "source": "/ayushi/:path*",
+      "destination": "/assets/ayushi/:path*"
     },
     {
       "source": "/how-to",
@@ -89,13 +93,6 @@
       "headers": [
         { "key": "Content-Type", "value": "application/pdf" },
         { "key": "Content-Disposition", "value": "inline" }
-      ]
-    },
-    {
-      "source": "/ayushi/assets/(.*).pdf",
-      "headers": [
-        { "key": "Content-Type", "value": "application/pdf" },
-        { "key": "Content-Disposition", "value": "attachment" }
       ]
     }
   ]
