@@ -4,6 +4,16 @@
   "outputDirectory": "www",
   "redirects": [
     {
+      "source": "/Ayushi",
+      "destination": "/ayushi",
+      "permanent": true
+    },
+    {
+      "source": "/Ayushi/:path*",
+      "destination": "/ayushi/:path*",
+      "permanent": true
+    },
+    {
       "source": "/how-to-1",
       "destination": "/how-to",
       "permanent": false
@@ -28,6 +38,14 @@
     {
       "source": "/favicon.ico",
       "destination": "/icons/favicon.svg"
+    },
+    {
+      "source": "/ayushi",
+      "destination": "/ayushi/index.html"
+    },
+    {
+      "source": "/ayushi/resume",
+      "destination": "/ayushi/resume.html"
     },
     {
       "source": "/how-to",
@@ -71,6 +89,13 @@
       "headers": [
         { "key": "Content-Type", "value": "application/pdf" },
         { "key": "Content-Disposition", "value": "inline" }
+      ]
+    },
+    {
+      "source": "/ayushi/assets/(.*).pdf",
+      "headers": [
+        { "key": "Content-Type", "value": "application/pdf" },
+        { "key": "Content-Disposition", "value": "attachment" }
       ]
     }
   ]
