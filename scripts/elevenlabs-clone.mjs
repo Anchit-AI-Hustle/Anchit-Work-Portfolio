@@ -19,7 +19,7 @@
  * (Starter or above). On the free tier the API returns 401/403 with a
  * can_not_use_instant_voice_cloning message — upgrade, then re-run.
  */
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { basename } from 'node:path';
 
@@ -63,5 +63,34 @@ if (!voiceId) { console.error(`✗ No voice_id in response:\n${text}`); process.
 
 console.log('\n✓ Voice clone created.');
 console.log(`  ELEVENLABS_VOICE_ID = ${voiceId}`);
+
+// Prove the clone actually speaks before anyone wires it into the site — a
+// created voice is not the same as a working one (quota and plan limits only
+// surface at synthesis time).
+console.log('\n→ Verifying the clone by synthesizing a test line…');
+const model = process.env.ELEVENLABS_MODEL || 'eleven_multilingual_v2';
+const probe = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + encodeURIComponent(voiceId), {
+  method: 'POST',
+  headers: { 'xi-api-key': key, 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
+  body: JSON.stringify({
+    text: "Hi, I'm Anchit. This is my cloned voice speaking on my portfolio.",
+    model_id: model,
+    voice_settings: { stability: 0.4, similarity_boost: 0.85 },   // same settings api/tts.js uses
+  }),
+});
+if (probe.ok) {
+  const audio = Buffer.from(await probe.arrayBuffer());
+  const out = 'audio/clone-test.mp3';
+  await writeFile(out, audio);
+  console.log(`✓ Clone speaks — ${(audio.length / 1024).toFixed(0)} KB written to ${out}.`);
+  console.log('  Play it to confirm it sounds like you before wiring it up.');
+} else {
+  const why = await probe.text();
+  console.error(`✗ The voice was created but will not synthesize (HTTP ${probe.status}):\n${why}`);
+  console.error('  Instant voice cloning needs a Starter plan or above. api/tts.js will');
+  console.error('  skip ElevenLabs and fall through to the next provider until this works.');
+  process.exit(1);
+}
+
 console.log('\nNext: add ELEVENLABS_API_KEY and the ELEVENLABS_VOICE_ID above to your');
 console.log('Vercel env vars and redeploy. Verify with:  GET /api/tts?debug=1');
