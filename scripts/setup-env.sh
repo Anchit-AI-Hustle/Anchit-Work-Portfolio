@@ -54,7 +54,9 @@ set_key() {
 echo "=== Voice (cloned + Indian languages) ==="
 set_key ELEVENLABS_API_KEY  "Your cloned voice (needs a plan with instant voice cloning)." "https://elevenlabs.io/app/settings/api-keys"
 set_key ELEVENLABS_VOICE_ID "The cloned voice id — run: ELEVENLABS_API_KEY=… node scripts/elevenlabs-clone.mjs" "printed by that script"
-set_key SARVAM_API_KEY      "Native Indian-language TTS (Hindi, Tamil, Telugu, Kannada, Malayalam)." "https://dashboard.sarvam.ai/"
+set_key SARVAM_API_KEY      "Native Indian-language TTS + STT (Hindi, Tamil, Telugu, Kannada, Malayalam, Bengali…). Preset voices only — Sarvam cannot serve a cloned voice over its API." "https://dashboard.sarvam.ai/"
+set_key SARVAM_VOICE        "Which preset Sarvam voice (default shubh). Try them with: SARVAM_API_KEY=… node scripts/sarvam-quickstart.mjs --speaker ritu" "see SARVAM.md for the full roster"
+set_key SARVAM_LANG         "Sarvam output language (default en-IN). hi-IN, ta-IN, te-IN, kn-IN, ml-IN, bn-IN, mr-IN, gu-IN, pa-IN, od-IN." "optional"
 
 echo "=== Video avatar (pick either) ==="
 set_key DID_API_KEY   "D-ID talking head (paid, credit-metered)." "https://studio.d-id.com/account-settings"

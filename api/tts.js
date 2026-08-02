@@ -13,7 +13,9 @@
 //   1) ElevenLabs   ELEVENLABS_API_KEY + ELEVENLABS_VOICE_ID   [ELEVENLABS_MODEL]
 //   2) Cartesia     CARTESIA_API_KEY   + CARTESIA_VOICE_ID     [CARTESIA_MODEL]
 //   3) Fish Audio   FISH_API_KEY       + FISH_VOICE_ID         [FISH_MODEL]
-//   4) Sarvam AI    SARVAM_API_KEY     [SARVAM_LANG|SARVAM_VOICE|SARVAM_MODEL]  (Indic voices)
+//   4) Sarvam AI    SARVAM_API_KEY     [SARVAM_LANG|SARVAM_VOICE|SARVAM_MODEL|
+//                                       SARVAM_CODEC|SARVAM_PACE|SARVAM_TEMPERATURE|
+//                                       SARVAM_SAMPLE_RATE]   (Indic voices, preset only)
 //   5) Hugging Face HF_TOKEN + (HF_TTS_URL | HF_TTS_MODEL)     (generic open voice)
 //   6) XTTS self-host  XTTS_API_URL                            (your voice, fallback)
 //
@@ -92,27 +94,107 @@ async function viaFish(text) {
 }
 
 // 4) Sarvam AI — native Indian-language voices (English-IN, Hindi, Tamil, Telugu,
-// Kannada, Malayalam, +more). The right voice engine for Indic content; a strong
-// fallback when the cloned English voice isn't the goal. Free/dev tier available.
+// Kannada, Malayalam, +more). The right voice engine for Indic content.
+//
+// NOT a cloned-voice provider. Sarvam's `speaker` field is a closed enum of
+// preset voices (below) — there is no field for a custom voice id. Sarvam DOES
+// offer voice cloning, but only inside Creative Studio (a live ~10s browser
+// recording), and those clones are reachable from Studio TTS and Dubbing, never
+// from this REST endpoint. So Anchit's cloned voice stays on ElevenLabs (#1);
+// Sarvam is the Indic-language voice. Docs: https://docs.sarvam.ai
+//
+// Env: SARVAM_API_KEY, and optionally SARVAM_LANG / SARVAM_VOICE / SARVAM_MODEL
+//      / SARVAM_CODEC / SARVAM_PACE / SARVAM_TEMPERATURE / SARVAM_SAMPLE_RATE.
+
+// The 11 languages the TTS endpoint accepts (note: Odia is `od-IN`, not `or-IN`).
+const SARVAM_LANGS = new Set([
+  'bn-IN', 'en-IN', 'gu-IN', 'hi-IN', 'kn-IN', 'ml-IN', 'mr-IN', 'od-IN', 'pa-IN', 'ta-IN', 'te-IN',
+]);
+
+// Speakers are model-specific and Sarvam rejects a mismatched pair, so the two
+// rosters are kept apart rather than merged into one list.
+const SARVAM_V3_SPEAKERS = new Set([
+  'shubh', 'aditya', 'ritu', 'priya', 'neha', 'rahul', 'pooja', 'rohan', 'simran', 'kavya',
+  'amit', 'dev', 'ishita', 'shreya', 'ratan', 'varun', 'manan', 'sumit', 'roopa', 'kabir',
+  'aayan', 'ashutosh', 'advait', 'anand', 'tanya', 'tarun', 'sunny', 'mani', 'gokul', 'vijay',
+  'shruti', 'suhani', 'mohit', 'kavitha', 'rehan', 'soham', 'rupali',
+]);
+const SARVAM_V2_SPEAKERS = new Set(['anushka', 'manisha', 'vidya', 'arya', 'abhilash', 'karun', 'hitesh']);
+
+const SARVAM_CODEC_MIME = {
+  wav: 'audio/wav', linear16: 'audio/wav', mp3: 'audio/mpeg', flac: 'audio/flac',
+  aac: 'audio/aac', opus: 'audio/ogg', mulaw: 'audio/basic', alaw: 'audio/basic',
+};
+
+// Env values are strings typed by hand, so every one is range-checked before it
+// reaches Sarvam — an out-of-range number is a 422, which would look to the
+// cascade like "provider down" and silently cost us the best Indic voice.
+function envNum(name, min, max, fallback) {
+  const n = parseFloat(process.env[name]);
+  if (!Number.isFinite(n) || n < min || n > max) return fallback;
+  return n;
+}
+
+// Resolved separately from the request so /api/tts?debug=1 can show what would
+// actually be sent, and so an invalid env value degrades to a working default
+// instead of failing the call.
+function sarvamConfig() {
+  const model = (process.env.SARVAM_MODEL || 'bulbul:v3').trim() === 'bulbul:v2' ? 'bulbul:v2' : 'bulbul:v3';
+  const v3 = model === 'bulbul:v3';
+
+  const roster = v3 ? SARVAM_V3_SPEAKERS : SARVAM_V2_SPEAKERS;
+  const wanted = (process.env.SARVAM_VOICE || '').trim().toLowerCase();  // names are case-sensitive, lowercase
+  const speaker = roster.has(wanted) ? wanted : (v3 ? 'shubh' : 'anushka');
+
+  const wantedLang = (process.env.SARVAM_LANG || '').trim();
+  const language = SARVAM_LANGS.has(wantedLang) ? wantedLang : 'en-IN';
+
+  const wantedCodec = (process.env.SARVAM_CODEC || '').trim().toLowerCase();
+  const codec = SARVAM_CODEC_MIME[wantedCodec] ? wantedCodec : 'wav';
+
+  return {
+    model, v3, speaker, language, codec,
+    mime: SARVAM_CODEC_MIME[codec],
+    limit: v3 ? 2500 : 1500,              // per-request character cap
+    pace: envNum('SARVAM_PACE', v3 ? 0.5 : 0.3, v3 ? 2.0 : 3.0, 1.0),
+    temperature: envNum('SARVAM_TEMPERATURE', 0.01, 2.0, 0.6),   // v3 only
+    sampleRate: String(process.env.SARVAM_SAMPLE_RATE || '24000'),
+  };
+}
+
 async function viaSarvam(text) {
   const key = process.env.SARVAM_API_KEY;
   if (!key) return null;
+  const c = sarvamConfig();
+
+  // `language_code` — NOT `target_language_code`, which belongs to the translate
+  // endpoint. Sending the wrong one 422s on a required field.
+  const body = {
+    text: text.slice(0, c.limit),
+    language_code: c.language,
+    speaker: c.speaker,
+    model: c.model,
+    pace: c.pace,
+    output_audio_codec: c.codec,
+    speech_sample_rate: c.sampleRate,
+  };
+  if (c.v3) {
+    body.temperature = c.temperature;      // v3 only; ignored by v2
+  } else {
+    body.enable_preprocessing = true;      // v2 only; normalises English words + numerals
+  }
+
   const r = await fetchTO('https://api.sarvam.ai/text-to-speech', {
     method: 'POST',
     headers: { 'api-subscription-key': key, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      text: text.slice(0, 1500),
-      target_language_code: process.env.SARVAM_LANG || 'en-IN',   // hi-IN, ta-IN, te-IN, kn-IN, ml-IN…
-      speaker: process.env.SARVAM_VOICE || 'anushka',
-      model: process.env.SARVAM_MODEL || 'bulbul:v2',
-    }),
+    body: JSON.stringify(body),
   });
   if (isQuota(r.status)) return null;          // spent → next provider
   if (!r.ok) return null;
   const j = await r.json().catch(() => null);
   const b64 = j && Array.isArray(j.audios) && j.audios[0];
   if (!b64) return null;
-  return { type: 'audio/wav', buf: Buffer.from(b64, 'base64') };
+  return { type: c.mime, buf: Buffer.from(b64, 'base64') };
 }
 
 // 5) Hugging Face — a generic open TTS voice (Inference Endpoint or public model).
@@ -188,11 +270,19 @@ async function handler(req, res) {
   // Diagnostic: report which providers are wired, in cascade order.
   if (req.method === 'GET') {
     const cfg = configured();
+    const s = sarvamConfig();
     res.setHeader('Cache-Control', 'no-store');
     return res.status(200).json({
       order: PROVIDERS.map((p) => p.name),
       configured: cfg,
       anyConfigured: Object.values(cfg).some(Boolean),
+      // Resolved Sarvam settings, so a bad SARVAM_VOICE/SARVAM_LANG is visible
+      // here rather than only showing up as a silent skip in the cascade.
+      sarvam: {
+        model: s.model, speaker: s.speaker, language: s.language,
+        codec: s.codec, pace: s.pace, sampleRate: s.sampleRate,
+        clonedVoice: false,   // preset speakers only — see viaSarvam
+      },
     });
   }
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
@@ -218,4 +308,7 @@ async function handler(req, res) {
 
 module.exports = handler;
 module.exports.config = { runtime: 'nodejs', maxDuration: 60 };
-module.exports._test = { PROVIDERS, configured, isQuota };
+module.exports._test = {
+  PROVIDERS, configured, isQuota,
+  sarvamConfig, SARVAM_LANGS, SARVAM_V3_SPEAKERS, SARVAM_V2_SPEAKERS, SARVAM_CODEC_MIME,
+};
