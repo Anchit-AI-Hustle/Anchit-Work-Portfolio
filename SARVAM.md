@@ -25,6 +25,26 @@ from ElevenLabs, Cartesia, Fish, a Hugging Face fine-tune, or self-hosted XTTS.
 > `SARVAM_VOICE=<the id>`. `api/tts.js` sends any unrecognised speaker as-is and
 > retries once with the model default, so trying it can't break narration.
 
+### Tested, not assumed
+
+A voice named after the account owner was tried against the live key, on the
+chance that a Studio clone might be addressable by name. It is not:
+
+| speaker sent | Sarvam | audio returned |
+| --- | --- | --- |
+| `Anchit`, `anchit`, `ANCHIT`, `anchit_tandon`, `anchit-tandon` | `400` | fell back to `shubh` |
+| `shubh` (control) | `200` | `shubh` |
+
+Every spelling was rejected and retried away. This is precisely why audio
+responses carry `X-Voice-Speaker` — it reports the voice that *actually*
+produced the clip, so a rejected voice can't masquerade as an accepted one.
+Re-run the probe any time with:
+
+```bash
+curl -sS -D - -o /dev/null -X POST -H 'Content-Type: application/json' \
+  -d '{"text":"probe","speaker":"Anchit"}' https://anchit-tandon.com/api/tts | grep -i x-voice
+```
+
 ## What changed in `api/tts.js`
 
 Two live defects, both fixed:
@@ -68,6 +88,18 @@ elevenlabs → cartesia → fish → huggingface → xtts → sarvam (stock)
    npm run sarvam:check -- --speaker ritu --lang hi-IN
    npm run sarvam:check -- --model bulbul:v2
    ```
+
+   Or audition against the **deployed** key, with no local key and no redeploy —
+   `POST /api/tts` takes an optional `speaker` alongside `text`:
+
+   ```bash
+   curl -sS -X POST -H 'Content-Type: application/json' \
+     -d '{"text":"Hey, I am Anchit Tandon.","speaker":"aditya"}' \
+     https://anchit-tandon.com/api/tts --output aditya.wav
+   ```
+
+   Check `X-Voice-Speaker` on the response: if it differs from what you asked
+   for, Sarvam rejected the name and the retry substituted the model default.
 
 3. Deploy the key: `scripts/setup-env.sh`, or `npx vercel env add SARVAM_API_KEY`.
 
