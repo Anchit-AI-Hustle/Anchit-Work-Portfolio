@@ -286,6 +286,7 @@ async function handler(req, res) {
   // Diagnostic: report which providers are wired, in cascade order.
   if (req.method === 'GET') {
     const cfg = configured();
+    const s = sarvamConfig();
     res.setHeader('Cache-Control', 'no-store');
     return res.status(200).json({
       order: PROVIDERS.map((p) => p.name),
