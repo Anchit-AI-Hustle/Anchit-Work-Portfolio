@@ -195,13 +195,25 @@ function envIn(name, allowed, fallback) {
 // Resolved separately from the request so GET /api/tts can show exactly what
 // would be sent — a typo'd SARVAM_LANG is then visible there rather than only
 // as an unexplained absence of Sarvam audio.
-function sarvamConfig() {
+// Stock names are documented as lowercase, so one typed with capitals is
+// corrected. Anything unrecognised keeps its exact case: a cloned-voice id would
+// be opaque and quite possibly case-sensitive, and lowercasing it would turn a
+// working id into a 400.
+function sarvamSpeaker(raw, model) {
+  const v = (raw || '').trim();
+  if (!v) return SARVAM_DEFAULT_SPEAKER[model];
+  return SARVAM_SPEAKERS[model].has(v.toLowerCase()) ? v.toLowerCase() : v;
+}
+
+// `override` lets a caller audition a voice against the live key without
+// redeploying — POST /api/tts { text, speaker }. Env stays the default.
+function sarvamConfig(override) {
   const model = SARVAM_SPEAKERS[process.env.SARVAM_MODEL] ? process.env.SARVAM_MODEL : 'bulbul:v3';
   const v3 = model === 'bulbul:v3';
   const codec = envIn('SARVAM_CODEC', new Set(Object.keys(SARVAM_MIME)), 'wav');
   // Speaker is deliberately NOT corrected here — viaSarvam sends it and retries,
   // so a future cloned-voice id gets a real attempt instead of being discarded.
-  const speaker = (process.env.SARVAM_VOICE || SARVAM_DEFAULT_SPEAKER[model]).trim().toLowerCase();
+  const speaker = sarvamSpeaker(override || process.env.SARVAM_VOICE, model);
   return {
     model, v3, speaker, codec,
     mime: SARVAM_MIME[codec],
@@ -214,10 +226,10 @@ function sarvamConfig() {
   };
 }
 
-async function viaSarvam(text) {
+async function viaSarvam(text, opts) {
   const key = process.env.SARVAM_API_KEY;
   if (!key) return null;
-  const c = sarvamConfig();
+  const c = sarvamConfig(opts && opts.speaker);
 
   // v3 takes 2500 chars, v2 only 1500 — truncating to the wrong one either
   // clips good audio or 400s the request.
@@ -239,17 +251,24 @@ async function viaSarvam(text) {
     body: JSON.stringify(Object.assign({}, body, { speaker })),
   });
 
-  let r = await send(c.speaker);
+  let used = c.speaker;
+  let r = await send(used);
   // An unrecognised speaker is the one failure worth retrying: it means either a
   // v2/v3 mismatch or a forward-looking id Sarvam does not accept yet.
-  if (r.status === 400 && !c.knownSpeaker) r = await send(SARVAM_DEFAULT_SPEAKER[c.model]);
+  if (r.status === 400 && !c.knownSpeaker) {
+    used = SARVAM_DEFAULT_SPEAKER[c.model];
+    r = await send(used);
+  }
 
   if (isQuota(r.status)) return null;          // spent → next provider
   if (!r.ok) return null;
   const j = await r.json().catch(() => null);
   const b64 = j && Array.isArray(j.audios) && j.audios[0];
   if (!b64) return null;
-  return { type: c.mime, buf: Buffer.from(b64, 'base64') };
+  // `used` may differ from what was asked for, if the retry fired. Reporting it
+  // is what makes auditioning honest — otherwise a rejected voice is
+  // indistinguishable from an accepted one.
+  return { type: c.mime, buf: Buffer.from(b64, 'base64'), speaker: used };
 }
 
 // Ordered cascade: every provider that can be Anchit's voice (`clone: true`)
@@ -315,14 +334,23 @@ async function handler(req, res) {
   const text = (body.text || '').toString().replace(/\s+/g, ' ').trim().slice(0, 1200);
   if (!text) return res.status(400).json({ error: 'text required' });
 
+  // Optional per-request voice, for auditioning against the live key without a
+  // redeploy. Constrained to an id-shaped token so nothing odd reaches Sarvam;
+  // an unusable value simply gets retried away as the model default.
+  const wanted = (body.speaker || '').toString().trim();
+  const opts = { speaker: /^[A-Za-z0-9_.:-]{1,64}$/.test(wanted) ? wanted : '' };
+
   for (const provider of PROVIDERS) {
     try {
-      const out = await provider.run(text);
+      const out = await provider.run(text, opts);
       if (out && out.buf && out.buf.length > 0) {
         res.setHeader('Content-Type', out.type);
         res.setHeader('Cache-Control', 'no-store');
         res.setHeader('X-Voice-Provider', provider.name);
         res.setHeader('X-Voice-Clone', provider.clone ? 'true' : 'false');
+        // Which voice actually produced this audio — not necessarily the one
+        // asked for, if it was rejected and the retry fired.
+        if (out.speaker) res.setHeader('X-Voice-Speaker', out.speaker);
         return res.status(200).send(out.buf);
       }
     } catch { /* try next provider */ }
