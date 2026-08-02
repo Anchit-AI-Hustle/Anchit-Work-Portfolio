@@ -67,10 +67,23 @@ HF_TTS_URL=https://xxxxxxxx.endpoints.huggingface.cloud   # recommended
 # HF_TTS_MODEL=your-username/your-voice-model              # public Inference API alt
 ```
 
-`/api/tts` tries providers in order — self-hosted XTTS → ElevenLabs → Hugging Face
-(your clone) → browser voice — and returns the first that yields audio. The HF path
-waits once for a cold endpoint to warm up (HTTP 503 + `estimated_time`) so the first
-narration after idle returns audio instead of failing silently.
+`/api/tts` tries providers in order and returns the first that yields audio:
+
+```
+elevenlabs → cartesia → fish → huggingface → xtts → sarvam → browser voice
+└──────────── all of these can be Anchit's voice ─────────┘   └ stock ┘
+```
+
+Every clone-capable provider is tried before Sarvam, because Sarvam's API has no
+voice cloning — its `speaker` is a closed enum of stock voices — and a stock
+voice reading first-person copy is the wrong answer. See `SARVAM.md`.
+
+The HF path waits once for a cold endpoint to warm up (HTTP 503 +
+`estimated_time`) so the first narration after idle returns audio instead of
+failing silently.
+
+`GET /api/tts` reports `clonedVoiceReady`; audio responses carry
+`X-Voice-Provider` and `X-Voice-Clone`.
 
 `XTTS_PACKET_URL` may point either to the host root or directly to `/api/tts-packet`.
 
