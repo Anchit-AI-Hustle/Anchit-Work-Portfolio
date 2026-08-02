@@ -8,10 +8,13 @@
  *
  * Usage:
  *   ELEVENLABS_API_KEY=sk_... node scripts/elevenlabs-clone.mjs
+ *   ELEVENLABS_API_KEY=sk_... node scripts/elevenlabs-clone.mjs --push
  *   ELEVENLABS_API_KEY=sk_... node scripts/elevenlabs-clone.mjs audio/anchit.m4a "Anchit Tandon"
  *
- * Then set BOTH of these in your Vercel project (Settings → Environment
- * Variables) and redeploy — api/tts.js uses ElevenLabs first in its cascade:
+ * It clones the voice, proves the clone can actually speak, and with --push
+ * writes both variables into Vercel for you (requires `vercel login` + `link`).
+ * Without --push, set these two by hand and redeploy — api/tts.js tries
+ * ElevenLabs first in its cascade:
  *   ELEVENLABS_API_KEY = <your key>
  *   ELEVENLABS_VOICE_ID = <the voice_id printed below>
  *
@@ -22,6 +25,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { basename } from 'node:path';
+import { spawnSync } from 'node:child_process';
 
 const key = process.env.ELEVENLABS_API_KEY;
 if (!key) {
@@ -92,5 +96,41 @@ if (probe.ok) {
   process.exit(1);
 }
 
-console.log('\nNext: add ELEVENLABS_API_KEY and the ELEVENLABS_VOICE_ID above to your');
-console.log('Vercel env vars and redeploy. Verify with:  GET /api/tts?debug=1');
+// With --push, finish the job: write both vars straight into Vercel so there is
+// no copy-paste step between creating the voice and the site actually using it.
+// Values go over stdin, never argv, so they never appear in a process list.
+if (process.argv.includes('--push')) {
+  const vercelEnv = (name, value) => new Promise((resolve) => {
+    const targets = ['production', 'preview', 'development'];
+    let done = 0, ok = 0;
+    for (const t of targets) {
+      // Drop any existing value first; `env add` will not overwrite.
+      spawnSync('npx', ['--yes', 'vercel@latest', 'env', 'rm', name, t, '-y'], { stdio: 'ignore' });
+      const r = spawnSync('npx', ['--yes', 'vercel@latest', 'env', 'add', name, t], {
+        input: value, encoding: 'utf8', stdio: ['pipe', 'ignore', 'ignore'],
+      });
+      done++; if (r.status === 0) { ok++; console.log(`  ✓ ${name} → ${t}`); }
+      else console.log(`  ✗ ${name} → ${t} (failed)`);
+      if (done === targets.length) resolve(ok === targets.length);
+    }
+  });
+
+  console.log('\n→ Writing the voice into Vercel…');
+  const a = await vercelEnv('ELEVENLABS_API_KEY', key);
+  const b = await vercelEnv('ELEVENLABS_VOICE_ID', voiceId);
+  if (a && b) {
+    console.log('\n✓ Both variables set. Redeploy for them to take effect:');
+    console.log('    npx vercel --prod');
+    console.log('  Then confirm:  curl -s https://anchit-tandon.com/api/tts');
+    console.log('  You want  "configured": { "elevenlabs": true, ... }');
+  } else {
+    console.error('\n✗ Could not write to Vercel. Are you logged in and linked?');
+    console.error('    npx vercel login && npx vercel link');
+    console.error(`  Or set them by hand — ELEVENLABS_VOICE_ID = ${voiceId}`);
+    process.exit(1);
+  }
+} else {
+  console.log('\nNext: add ELEVENLABS_API_KEY and the ELEVENLABS_VOICE_ID above to your');
+  console.log('Vercel env vars and redeploy — or re-run this with --push to do both');
+  console.log('automatically. Verify with:  curl -s https://anchit-tandon.com/api/tts');
+}
