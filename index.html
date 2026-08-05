@@ -26,7 +26,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-<script src="https://cdn.tailwindcss.com"></script>
+<!-- Tailwind: built from this file's own markup and served SAME-ORIGIN, matching
+     the vendored Three.js/GSAP above. The old cdn.tailwindcss.com script compiled
+     CSS in the browser on every load — a render-blocking single point of failure
+     that flashed unstyled content. Rebuild after changing classes:
+       npx tailwindcss -c tailwind.config.js -i assets/tailwind.src.css -o assets/vendor/tailwind.css --minify -->
+<link rel="stylesheet" href="assets/vendor/tailwind.css">
 
 <!-- ═══ MOTION LIBS: Three.js (WebGL backdrop) + GSAP/ScrollTrigger (timelines) ═══
      Served SAME-ORIGIN from /assets/vendor so they always load (no external CDN
@@ -37,28 +42,6 @@
 <script defer src="/assets/vendor/three.min.js"></script>
 <script defer src="/assets/vendor/gsap.min.js"></script>
 <script defer src="/assets/vendor/ScrollTrigger.min.js"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          bg: 'var(--bg)',
-          elev: 'var(--bg-elev)',
-          ink: 'var(--ink)',
-          dim: 'var(--ink-dim)',
-          primary: 'var(--primary)',
-          accent: 'var(--accent)',
-          rule: 'var(--rule)',
-        },
-        fontFamily: {
-          sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-          mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
-          serif: ['Fraunces', 'ui-serif', 'serif']
-        }
-      }
-    }
-  }
-</script>
 
 <style>
   /* ============ DESIGN TOKENS ============ */
@@ -2898,10 +2881,14 @@
   function size(){ W=c.width=innerWidth; H=c.height=innerHeight; }
   function seed(){ ps=[]; var n=Math.min(130,Math.floor(W/11)); for(var k=0;k<n;k++)ps.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.9+.5,v:Math.random()*.42+.14,a:Math.random()*.5+.28}); }
   size(); seed(); addEventListener('resize',function(){size();seed();});
+  // Honour the Motion toggle (default: off). When motion is off, paint the
+  // particle field ONCE and stop — the texture stays, the drifting does not.
+  var still=(function(){ try{ var m=localStorage.getItem('anchit-motion');
+    if(m==='on') return false; if(m==='off') return true; }catch(e){} return true; })();
   (function draw(){ x.clearRect(0,0,W,H);
-    for(var k=0;k<ps.length;k++){ var p=ps[k]; p.y-=p.v; if(p.y<-4){p.y=H+4;p.x=Math.random()*W;}
+    for(var k=0;k<ps.length;k++){ var p=ps[k]; if(!still){ p.y-=p.v; if(p.y<-4){p.y=H+4;p.x=Math.random()*W;} }
       x.beginPath(); x.arc(p.x,p.y,p.r,0,6.28); x.fillStyle='rgba(255,206,162,'+p.a.toFixed(2)+')'; x.fill(); }
-    requestAnimationFrame(draw);
+    if(!still) requestAnimationFrame(draw);
   })();
 })();
 </script>
@@ -3121,7 +3108,7 @@
     (function(){
       var btn=document.getElementById('motionToggle'); if(!btn) return;
       var order=['auto','on','off'], lbl=btn.querySelector('.motion-label');
-      function get(){ try{ return localStorage.getItem('anchit-motion')||'auto'; }catch(e){ return 'auto'; } }
+      function get(){ try{ return localStorage.getItem('anchit-motion')||'off'; }catch(e){ return 'off'; } }
       function render(s){ btn.setAttribute('data-state', s); lbl.textContent='Motion: '+s.charAt(0).toUpperCase()+s.slice(1); }
       render(get());
       btn.addEventListener('click', function(){
@@ -3264,10 +3251,10 @@
       <div class="home-bento grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-auto">
         
         <!-- HERO TILE (spans 2 cols, 2 rows) -->
-        <div id="homeHeroTile" class="md:col-span-2 md:row-span-2 rounded-3xl p-8 lg:p-10 flex flex-col justify-end relative overflow-hidden bg-[var(--bg-elev)] border border-[var(--rule)] shadow-sm hover:shadow-md transition-shadow group">
+        <div id="homeHeroTile" class="md:col-span-2 md:row-span-2 rounded-3xl p-8 lg:p-10 flex flex-col justify-center relative overflow-hidden bg-[var(--bg-elev)] border border-[var(--rule)] shadow-sm">
           <div class="hero-dot-grid absolute inset-0 opacity-30" aria-hidden="true"></div>
-          <div class="relative z-10 flex items-center gap-6 mb-8">
-            <img src="AnchitTandon-AppLogo.png" alt="Anchit Tandon" class="w-36 h-36 md:w-44 md:h-44 rounded-full object-cover border-2 border-[var(--rule)] group-hover:scale-105 transition-transform duration-500">
+          <div class="hero-id relative z-10 flex flex-col items-center sm:items-start text-center sm:text-left gap-5 mb-7">
+            <img src="AnchitTandon-AppLogo.png" alt="Anchit Tandon" class="hero-portrait shrink-0 rounded-full object-cover border-2 border-[var(--rule)]">
             <div>
               <div class="eyebrow has-dot mb-2 text-xs opacity-80"><span class="live-dot"></span>Live · AGM – Vahdam India</div>
               <h1 class="text-4xl md:text-5xl lg:text-6xl tracking-tight m-0 leading-none" style="font-family:var(--font-display);font-weight:600;">
@@ -9199,7 +9186,7 @@
 (function(){
   // Honour an explicit in-page choice ('on'/'off') over the OS setting, so the
   // Motion toggle can force cinematic motion even when the OS prefers reduced.
-  const reduceMotion = (function(){ try { var m = localStorage.getItem('anchit-motion'); if (m === 'on') return false; if (m === 'off') return true; } catch(e){} return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); })();
+  const reduceMotion = (function(){ try { var m = localStorage.getItem('anchit-motion'); if (m === 'on') return false; if (m === 'off') return true; } catch(e){} return true /* motion off unless explicitly turned on */; })();
   document.body.classList.add('futurist-ready');
   if (reduceMotion) return;
 
@@ -9343,7 +9330,7 @@
   'use strict';
   var mq = window.matchMedia;
   // Explicit Motion-toggle choice ('on'/'off') overrides the OS preference.
-  var reduceMotion = (function(){ try { var m = localStorage.getItem('anchit-motion'); if (m === 'on') return false; if (m === 'off') return true; } catch(e){} return !!(mq && mq('(prefers-reduced-motion: reduce)').matches); })();
+  var reduceMotion = (function(){ try { var m = localStorage.getItem('anchit-motion'); if (m === 'on') return false; if (m === 'off') return true; } catch(e){} return true /* motion off unless explicitly turned on */; })();
   var isMobile = !!(mq && mq('(max-width: 820px)').matches);
 
   // Wait for the deferred CDN libs, then boot. Give up quietly after ~6s so a
@@ -9887,6 +9874,129 @@
     }).observe(body, { childList: true });
   }
 })();
+</script>
+
+<!-- ============================================================
+     LAYOUT + STILLNESS OVERRIDES  (last stylesheet = wins cascade)
+     ============================================================ -->
+<style>
+  /* ---- Bigger profile portrait ---------------------------------------
+     Was w-36 / md:w-44 (144px / 176px). Scales with the viewport now and
+     tops out much larger, so it anchors the hero instead of reading as an
+     icon next to a 60px headline. */
+  .hero-portrait {
+    width: clamp(168px, 17vw, 280px);
+    height: clamp(168px, 17vw, 280px);
+    /* keep the round crop centred on the face at every size */
+    object-fit: cover;
+    object-position: center;
+  }
+
+  /* ---- Home bento: clear the fixed top bar ---------------------------
+     `main` deliberately has no top padding on #view-home ("the home canvas
+     owns its vertical rhythm"), and that rhythm was meant to come from the
+     bento container's Tailwind `py-8 md:py-12`. But the site's own
+     `.container { padding: 0 var(--gutter) }` shorthand resets padding-top to
+     0, so the first tile slid under the 44px fixed action bar and its top edge
+     was clipped. Restore the offset above 820px only — at or below that width
+     `main` already carries a 58px offset and would otherwise double up. */
+  @media (min-width: 821px) {
+    #view-home > .container {
+      padding-top: calc(44px + var(--safe-top, 0px) + 20px);
+      padding-bottom: 48px;
+    }
+  }
+
+  /* The portrait now sits ABOVE the name rather than beside it. Side-by-side
+     inside a half-width bento tile squeezed the headline into four cramped
+     lines once the portrait grew; stacking gives the name the full tile width. */
+  .hero-id h1 { line-height: 1.02; }
+  .hero-id .eyebrow { margin-bottom: 6px; }
+  /* "Hey, I'm Anchit / Tandon." reads as two lines here, so the hard <br>
+     after "Anchit" is all the breaking it needs. */
+  .hero-id h1 br { display: inline; }
+
+  /* ---- No motion -----------------------------------------------------
+     Every animation and transition off, everywhere, for everyone — not just
+     for users who set prefers-reduced-motion.
+
+     `*` alone is NOT enough: rules like `.motion-reactive { transition: …
+     !important }` are class-level, and between two !important declarations
+     the more specific selector wins — a class (0,1,0) beats `*` (0,0,0).
+     `:not(#_)` matches everything but borrows an id's specificity (1,0,0),
+     so these outrank any class-level !important without matching an id. */
+  *:not(#_), *:not(#_)::before, *:not(#_)::after {
+    animation: none !important;
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+    transition: none !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+  html, body { scroll-behavior: auto !important; }
+
+  /* The 3D tilt cards set a perspective transform on hover with !important.
+     With transitions gone that becomes an instant jump, which still reads as
+     motion — so pin the transform flat. */
+  .motion-reactive, .motion-reactive:hover, .tilt-card, .tilt-card:hover {
+    transform: none !important;
+    will-change: auto !important;
+  }
+
+  /* Scroll-reveal elements fade in via transition. With transitions off,
+     anything the observer has not marked .in would stay invisible forever —
+     so force every reveal variant fully visible and unmoved. */
+  .reveal, .reveal.in,
+  .reveal-stagger > *, .reveal-stagger.in > *,
+  .reveal-left, .reveal-left.in,
+  .reveal-right, .reveal-right.in,
+  .reveal-scale, .reveal-scale.in,
+  .view.v-enter, .view.v-leave {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  /* Hover effects that move things stay put (colour changes are fine). */
+  .tilt-card:hover, .build-card:hover, .work-item:hover, .work-stat:hover,
+  .now-focus-item:hover, .about-value-item:hover, .product-chip:hover,
+  .home-tl-item:hover, .nav-card:hover, .contact-card:hover, .tag:hover,
+  .btn:hover, .btn:active, .icon-btn:hover, .chip:hover {
+    transform: none !important;
+  }
+
+  /* The ticker marquee and decorative pulses are motion — hold them still. */
+  .ticker-track { animation: none !important; transform: none !important; }
+  .cursor-glow { display: none !important; }
+</style>
+<script>
+  /* CSS cannot stop motion that JavaScript drives, so neutralise the two
+     sources that remain: smooth scrolling and the count-up numbers. Runs last,
+     after every other script has been defined. */
+  (function () {
+    // 1) Jump instantly instead of gliding — for both scroll APIs, however
+    //    they are called (with or without an options object).
+    const patch = (obj, fn) => {
+      const orig = obj[fn];
+      if (typeof orig !== 'function') return;
+      obj[fn] = function (...args) {
+        if (args[0] && typeof args[0] === 'object') args[0] = { ...args[0], behavior: 'instant' };
+        return orig.apply(this, args);
+      };
+    };
+    patch(window, 'scrollTo'); patch(window, 'scrollBy');
+    patch(Element.prototype, 'scrollIntoView');
+    patch(Element.prototype, 'scrollTo');
+
+    // 2) Show every counter at its final value rather than ticking up to it.
+    const settle = () => document.querySelectorAll('[data-count]').forEach((el) => {
+      el.dataset.counted = '1';   // stops the observer re-animating it
+      el.textContent = (el.dataset.prefix || '') + el.dataset.count + (el.dataset.suffix || '');
+    });
+    settle();
+    document.addEventListener('viewChanged', settle);
+  })();
 </script>
 </body>
 </html>
