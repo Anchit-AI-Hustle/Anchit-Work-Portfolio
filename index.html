@@ -9938,6 +9938,24 @@
     filter: none !important;
   }
 
+  /* Some elements start at opacity:0 and are revealed BY a one-shot animation
+     rather than by a transition — with animations off they would never appear,
+     leaving a block of blank page. The career-journey timeline did exactly that.
+     The site's own prefers-reduced-motion block already lists these; apply the
+     same forcing unconditionally, since motion is now off for everyone. */
+  .home-timeline.tl-armed .home-tl-item,
+  .home-timeline.tl-armed .home-tl-item.tl-in,
+  .hero-stats.in .hero-stat .num, .work-stats.in .work-stat .num,
+  .hero-stats.in .hero-stat .num em, .work-stats.in .work-stat .num em,
+  .work-item.in .work-impact-chip, .work-item.in .work-impact-chip.red,
+  .work-item.in .work-impact-chip.gold, .work-item.in .tags .tag {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  /* The dot's "arrival" ping is pure decoration — keep it suppressed. */
+  .home-tl-item.tl-in .home-tl-dot::after { animation: none !important; opacity: 0 !important; }
+
   /* Hover effects that move things stay put (colour changes are fine). */
   .tilt-card:hover, .build-card:hover, .work-item:hover, .work-stat:hover,
   .now-focus-item:hover, .about-value-item:hover, .product-chip:hover,
