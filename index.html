@@ -3253,7 +3253,7 @@
         <!-- HERO TILE (spans 2 cols, 2 rows) -->
         <div id="homeHeroTile" class="md:col-span-2 md:row-span-2 rounded-3xl p-8 lg:p-10 flex flex-col justify-center relative overflow-hidden bg-[var(--bg-elev)] border border-[var(--rule)] shadow-sm">
           <div class="hero-dot-grid absolute inset-0 opacity-30" aria-hidden="true"></div>
-          <div class="hero-id relative z-10 flex flex-col items-center sm:items-start text-center sm:text-left gap-5 mb-7">
+          <div class="hero-id relative z-10 flex items-center gap-6 mb-8">
             <img src="AnchitTandon-AppLogo.png" alt="Anchit Tandon" class="hero-portrait shrink-0 rounded-full object-cover border-2 border-[var(--rule)]">
             <div>
               <div class="eyebrow has-dot mb-2 text-xs opacity-80"><span class="live-dot"></span>Live · AGM – Vahdam India</div>
@@ -9881,40 +9881,20 @@
      ============================================================ -->
 <style>
   /* ---- Bigger profile portrait ---------------------------------------
-     Was w-36 / md:w-44 (144px / 176px). Scales with the viewport now and
-     tops out much larger, so it anchors the hero instead of reading as an
-     icon next to a 60px headline. */
+     Was w-36 / md:w-44 (144px / 176px), now up to 210px — about 19% larger.
+     This is the ONLY hero change: the portrait still sits beside the name, and
+     the headline size, tile spacing and layout are exactly as they were.
+
+     210px is a measured ceiling, not a guess: at 220px the headline rewraps
+     from "Hey, I'm / Anchit / Tandon." to four lines (verified identically at
+     1440, 1680 and 2000px wide), which changes the hero's look. */
   .hero-portrait {
-    width: clamp(168px, 17vw, 280px);
-    height: clamp(168px, 17vw, 280px);
+    width: clamp(150px, 14vw, 210px);
+    height: clamp(150px, 14vw, 210px);
     /* keep the round crop centred on the face at every size */
     object-fit: cover;
     object-position: center;
   }
-
-  /* ---- Home bento: clear the fixed top bar ---------------------------
-     `main` deliberately has no top padding on #view-home ("the home canvas
-     owns its vertical rhythm"), and that rhythm was meant to come from the
-     bento container's Tailwind `py-8 md:py-12`. But the site's own
-     `.container { padding: 0 var(--gutter) }` shorthand resets padding-top to
-     0, so the first tile slid under the 44px fixed action bar and its top edge
-     was clipped. Restore the offset above 820px only — at or below that width
-     `main` already carries a 58px offset and would otherwise double up. */
-  @media (min-width: 821px) {
-    #view-home > .container {
-      padding-top: calc(44px + var(--safe-top, 0px) + 20px);
-      padding-bottom: 48px;
-    }
-  }
-
-  /* The portrait now sits ABOVE the name rather than beside it. Side-by-side
-     inside a half-width bento tile squeezed the headline into four cramped
-     lines once the portrait grew; stacking gives the name the full tile width. */
-  .hero-id h1 { line-height: 1.02; }
-  .hero-id .eyebrow { margin-bottom: 6px; }
-  /* "Hey, I'm Anchit / Tandon." reads as two lines here, so the hard <br>
-     after "Anchit" is all the breaking it needs. */
-  .hero-id h1 br { display: inline; }
 
   /* ---- No motion -----------------------------------------------------
      Every animation and transition off, everywhere, for everyone — not just
