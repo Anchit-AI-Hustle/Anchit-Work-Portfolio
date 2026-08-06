@@ -58,6 +58,7 @@
     --primary-deep: #D63B12;
     --primary-soft: rgba(255, 77, 31, 0.10);
     --accent: #a8863f;
+    --accent-warm: #FFB736;
     --accent-soft: rgba(168, 134, 63, 0.10);
     --shadow-sm: 0 2px 8px rgba(22, 19, 18, 0.05);
     --shadow-md: 0 12px 32px rgba(22, 19, 18, 0.08);
@@ -77,6 +78,7 @@
     --primary-deep: #FF4D1F;
     --primary-soft: rgba(255, 105, 64, 0.12);
     --accent: #c9a96e;
+    --accent-warm: #FFB736;
     --accent-soft: rgba(201, 169, 110, 0.12);
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.4);
@@ -619,6 +621,124 @@
     transition: transform 0.2s;
   }
   .hero-current-block .arrow:hover { transform: translateX(4px); }
+
+  /* ============ CINEMATIC HERO (home) ============
+     A scroll-driven boot sequence with the AT brand mark as the centrepiece.
+     The stage is `position: sticky`, NOT a ScrollTrigger pin — pinning injects a
+     spacer element, and this site is a panel router whose views are shown and
+     hidden, so an injected spacer belonging to a hidden panel would leave a
+     dead gap. Sticky achieves the same "stays put while the page moves past it"
+     with no DOM surgery, so it survives every view change untouched.
+     Scroll only drives transform/opacity/filter — all compositor properties. */
+  .cine { position: relative; height: 260vh; margin: 0 0 clamp(24px, 5vw, 64px); }
+  @media (max-width: 820px) { .cine { height: 200vh; } }
+  .cine-stage {
+    position: sticky; top: 0; height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: clamp(14px, 2.2vh, 26px); overflow: hidden; text-align: center;
+  }
+
+  /* Brand mark + the HUD that assembles around it. */
+  .cine-mark { position: relative; width: clamp(190px, 34vh, 330px); aspect-ratio: 1; flex: none; }
+  .cine-mark img {
+    position: absolute; inset: 8%; width: 84%; height: 84%;
+    object-fit: contain; border-radius: 50%;
+    /* The source art is a square poster on black; a radial mask feathers its
+       corners into the page instead of showing a hard tile edge. */
+    -webkit-mask-image: radial-gradient(circle at 50% 46%, #000 60%, transparent 76%);
+    mask-image: radial-gradient(circle at 50% 46%, #000 60%, transparent 76%);
+  }
+  .cine-ring {
+    position: absolute; inset: 0; border-radius: 50%;
+    border: 1px solid color-mix(in oklab, var(--primary) 42%, transparent);
+    /* Drawn from nothing on load — the brief's "nothing appears instantly". */
+    transform: scale(0.7); opacity: 0;
+  }
+  .cine-ring.r2 { inset: -9%; border-color: color-mix(in oklab, var(--accent-warm) 34%, transparent); border-style: dashed; }
+  .cine-ring.r3 { inset: -19%; border-color: color-mix(in oklab, var(--primary) 18%, transparent); }
+  /* One live arc per ring, so rotation actually reads as motion. */
+  .cine-arc {
+    position: absolute; inset: -9%; border-radius: 50%; opacity: 0;
+    background: conic-gradient(from 0deg,
+      transparent 0deg 300deg,
+      color-mix(in oklab, var(--primary) 70%, transparent) 344deg,
+      transparent 360deg);
+    -webkit-mask: radial-gradient(circle, transparent 68%, #000 69.5%, #000 71%, transparent 72%);
+    mask: radial-gradient(circle, transparent 68%, #000 69.5%, #000 71%, transparent 72%);
+  }
+  .cine-arc.a2 {
+    inset: -19%;
+    background: conic-gradient(from 180deg, transparent 0deg 322deg,
+      color-mix(in oklab, var(--accent-warm) 62%, transparent) 352deg, transparent 360deg);
+  }
+  /* Scanning line that sweeps the mark. */
+  .cine-scan {
+    position: absolute; left: 6%; right: 6%; top: 0; height: 2px; opacity: 0;
+    background: linear-gradient(90deg, transparent,
+      color-mix(in oklab, var(--accent-warm) 85%, transparent), transparent);
+    filter: blur(0.4px);
+  }
+
+  /* Name, revealed one letter at a time. */
+  .cine-name {
+    font-family: var(--font-display); font-weight: 600; margin: 0;
+    font-size: clamp(38px, 9vw, 104px); line-height: 0.92; letter-spacing: -0.03em;
+    color: var(--ink);
+  }
+  .cine-name .ch { display: inline-block; opacity: 0; transform: translateY(0.42em); will-change: transform, opacity; }
+  .cine-name .sp { display: inline-block; width: 0.28em; }
+
+  /* Role titles that morph into one another rather than swapping. */
+  .cine-roles { position: relative; height: 1.6em; width: 100%; }
+  .cine-role {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: clamp(11px, 1.5vw, 15px);
+    letter-spacing: 0.24em; text-transform: uppercase; color: var(--primary);
+    opacity: 0; filter: blur(6px); transform: scale(1.04);
+  }
+
+  /* Boot readout. */
+  .cine-boot { width: min(440px, 78vw); font-family: var(--font-mono); font-size: 11px; }
+  .cine-boot-row { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; opacity: 0; }
+  .cine-boot-label { color: var(--ink-dim); letter-spacing: 0.1em; white-space: nowrap; }
+  /* 4px, not 2 — over the animated WebGL backdrop a 2px track and its fill were
+     both effectively invisible, so the boot sequence read as three blank lines. */
+  .cine-boot-track {
+    flex: 1; height: 4px; border-radius: 3px; overflow: hidden;
+    background: color-mix(in oklab, var(--ink) 22%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ink) 10%, transparent);
+  }
+  .cine-boot-fill {
+    /* A <span> is inline by default, and width/height do not apply to inline
+       boxes — without this the fill is 0×0 and only the empty track ever shows.
+       The track escapes the same trap only because `flex: 1` blockifies it. */
+    display: block;
+    height: 100%; width: 0%; border-radius: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--accent-warm));
+    /* Lifts the fill off a busy backdrop the way the ember glow does elsewhere. */
+    box-shadow: 0 0 10px color-mix(in oklab, var(--primary) 55%, transparent);
+  }
+  .cine-boot-pct { color: var(--primary); width: 3.4em; text-align: right; }
+  .cine-hint {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--ink-dim); opacity: 0;
+  }
+
+  /* No-motion / no-JS: the stage is a plain, fully legible header. Every
+     animated element is authored at opacity 0, so this must reset them all —
+     otherwise a reduced-motion visitor sees an empty screen. */
+  .cine.is-static { height: auto; margin-bottom: clamp(20px, 4vw, 40px); }
+  .cine.is-static .cine-stage { position: static; height: auto; padding: clamp(24px, 6vw, 56px) 0; }
+  .cine.is-static .cine-name .ch,
+  .cine.is-static .cine-ring,
+  .cine.is-static .cine-arc,
+  .cine.is-static .cine-boot-row,
+  .cine.is-static .cine-hint { opacity: 1; transform: none; }
+  .cine.is-static .cine-roles { height: auto; }
+  .cine.is-static .cine-role { position: static; opacity: 1; filter: none; transform: none; }
+  .cine.is-static .cine-role + .cine-role { display: none; }
+  .cine.is-static .cine-boot-fill { width: 100%; }
+  .cine.is-static .cine-scan { display: none; }
 
   /* ============ CHAT ============ */
   .chat-block {
@@ -3246,6 +3366,45 @@
 
   <!-- HOME -->
   <section class="view active" id="view-home">
+    <!-- ═══ CINEMATIC BOOT SEQUENCE ═══
+         The brand mark assembles, the name types itself in, the four pillars
+         from the mark morph through one another, then the whole stage scales
+         away into the bento grid below. Marked aria-hidden because every word
+         here is repeated as real text in the hero tile immediately after it —
+         a screen reader should hear the content once, not twice. `.is-static`
+         is applied by script when motion is off, and is also the authored
+         default so a no-JS visitor gets the legible version. -->
+    <div class="cine is-static" id="cineHero" aria-hidden="true">
+      <div class="cine-stage">
+        <div class="cine-mark" id="cineMark">
+          <div class="cine-ring r1"></div>
+          <div class="cine-ring r2"></div>
+          <div class="cine-ring r3"></div>
+          <div class="cine-arc a1"></div>
+          <div class="cine-arc a2"></div>
+          <img src="assets/logo-at.jpg" alt="" width="330" height="330" decoding="async" fetchpriority="high">
+          <div class="cine-scan" id="cineScan"></div>
+        </div>
+
+        <h2 class="cine-name" id="cineName">Anchit Tandon</h2>
+
+        <div class="cine-roles" id="cineRoles">
+          <div class="cine-role">Visionary</div>
+          <div class="cine-role">Innovative Creator</div>
+          <div class="cine-role">Game Changer</div>
+          <div class="cine-role">Achiever</div>
+        </div>
+
+        <div class="cine-boot" id="cineBoot">
+          <div class="cine-boot-row"><span class="cine-boot-label">Loading experience</span><span class="cine-boot-track"><span class="cine-boot-fill"></span></span><span class="cine-boot-pct">100%</span></div>
+          <div class="cine-boot-row"><span class="cine-boot-label">Loading products</span><span class="cine-boot-track"><span class="cine-boot-fill"></span></span><span class="cine-boot-pct">100%</span></div>
+          <div class="cine-boot-row"><span class="cine-boot-label">Loading engineering</span><span class="cine-boot-track"><span class="cine-boot-fill"></span></span><span class="cine-boot-pct">100%</span></div>
+        </div>
+
+        <div class="cine-hint" id="cineHint">Scroll to continue</div>
+      </div>
+    </div>
+
     <div class="container mx-auto max-w-6xl py-8 md:py-12 px-4">
       <!-- BENTO GRID CONTAINER -->
       <div class="home-bento grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-auto">
@@ -9533,8 +9692,10 @@
     wipe.id = 'view-wipe';
     wipe.setAttribute('aria-hidden', 'true');
     wipe.style.cssText = 'position:fixed;inset:0;z-index:60;pointer-events:none;opacity:0;' +
+      // Ember → gold, matching the brand mark. The second stop was still the
+      // retired teal accent, which flashed a non-brand colour on every jump.
       'background:linear-gradient(115deg, transparent 0%, rgba(255,105,64,0.30) 42%, ' +
-      'rgba(46,229,172,0.24) 58%, transparent 100%);transform:translateX(-100%);';
+      'rgba(255,183,54,0.24) 58%, transparent 100%);transform:translateX(-100%);';
     document.body.appendChild(wipe);
 
     document.addEventListener('viewChanged', function () {
@@ -9591,6 +9752,98 @@
       });
     }
     animateStats(document);
+
+    // 4) Cinematic boot hero: the brand mark assembles, the name types itself
+    //    in, the pillars morph, then scroll scales the whole stage away into the
+    //    bento grid. Runs only when motion is allowed — `.is-static` is the
+    //    authored default, so doing nothing here is already the correct
+    //    reduced-motion and no-JS rendering.
+    initCinematicHero(gsap);
+  }
+
+  function initCinematicHero(gsap) {
+    var cine = document.getElementById('cineHero');
+    if (!cine || reduceMotion) return;
+    cine.classList.remove('is-static');
+
+    // Split the name into per-letter spans. Spaces get their own fixed-width
+    // element: an inline-block holding a plain space collapses to zero.
+    var nameEl = document.getElementById('cineName');
+    var letters = [];
+    if (nameEl) {
+      var text = nameEl.textContent;
+      nameEl.textContent = '';
+      for (var i = 0; i < text.length; i++) {
+        var s = document.createElement('span');
+        if (text[i] === ' ') { s.className = 'sp'; }
+        else { s.className = 'ch'; s.textContent = text[i]; letters.push(s); }
+        nameEl.appendChild(s);
+      }
+    }
+
+    // ── Assembly, once, on load ──────────────────────────────────────────────
+    var tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    tl.to('#cineHero .cine-ring', { scale: 1, opacity: 1, duration: 1.0, stagger: 0.12 })
+      .to('#cineHero .cine-arc', { opacity: 1, duration: 0.7 }, '-=0.6')
+      .to(letters, { opacity: 1, y: 0, duration: 0.5, stagger: 0.035 }, '-=0.45')
+      .to('#cineHero .cine-boot-row', { opacity: 1, duration: 0.4, stagger: 0.12 }, '-=0.2')
+      .to('#cineHint', { opacity: 1, duration: 0.6 }, '-=0.1');
+
+    // Each progress bar fills and its readout counts with it. The markup ships
+    // complete (100%) so the reduced-motion and no-JS renderings read as a
+    // finished boot rather than a stalled one; motion mode rewinds to 0 here.
+    document.querySelectorAll('#cineBoot .cine-boot-row').forEach(function (row, idx) {
+      var fill = row.querySelector('.cine-boot-fill');
+      var pct = row.querySelector('.cine-boot-pct');
+      fill.style.width = '0%';
+      pct.textContent = '0%';
+      var o = { v: 0 };
+      tl.to(o, {
+        v: 100, duration: 0.9, ease: 'power1.inOut',
+        onUpdate: function () {
+          var v = Math.round(o.v);
+          fill.style.width = v + '%';
+          pct.textContent = v + '%';
+        },
+      }, 1.5 + idx * 0.28);
+    });
+
+    // ── Continuous life: rings rotate, the scan line sweeps ──────────────────
+    gsap.to('#cineHero .cine-arc.a1', { rotate: 360, duration: 18, ease: 'none', repeat: -1 });
+    gsap.to('#cineHero .cine-arc.a2', { rotate: -360, duration: 26, ease: 'none', repeat: -1 });
+    gsap.to('#cineHero .cine-ring.r2', { rotate: 360, duration: 44, ease: 'none', repeat: -1 });
+    gsap.fromTo('#cineScan',
+      { top: '4%', opacity: 0 },
+      { top: '94%', opacity: 1, duration: 2.6, ease: 'sine.inOut', repeat: -1, repeatDelay: 1.4,
+        yoyo: true, delay: 1.2 });
+
+    // ── Pillars morph into one another (blur + scale, never a hard swap) ─────
+    var roles = document.querySelectorAll('#cineRoles .cine-role');
+    if (roles.length) {
+      var rtl = gsap.timeline({ repeat: -1, delay: 1.1 });
+      roles.forEach(function (r) {
+        rtl.to(r, { opacity: 1, filter: 'blur(0px)', scale: 1, duration: 0.7, ease: 'power2.out' })
+           .to(r, { opacity: 0, filter: 'blur(6px)', scale: 0.97, duration: 0.6, ease: 'power2.in' }, '+=1.5');
+      });
+    }
+
+    // ── Scroll hand-off: the stage recedes instead of cutting ────────────────
+    if (window.ScrollTrigger) {
+      gsap.to('#cineHero .cine-stage', {
+        scale: 0.82, opacity: 0, filter: 'blur(7px)', ease: 'none',
+        scrollTrigger: {
+          trigger: cine,
+          start: 'top top',
+          // Ends where the sticky stage stops sticking, so the fade completes
+          // exactly as the stage lets go — no visible jump at the hand-off.
+          end: 'bottom bottom',
+          scrub: 0.6,
+        },
+      });
+      // The stage is 260vh of scroll that exists only on the home view. When the
+      // router swaps panels, every measurement below it shifts, so recompute.
+      document.addEventListener('viewChanged', function () { window.ScrollTrigger.refresh(); });
+    }
   }
 })();
 </script>
