@@ -3306,6 +3306,21 @@
   window.anchitSpeechText = function(t){
     if (!t) return t;
     var s = String(t);
+
+    // Quotation marks are punctuation for the eye. Some engines announce them,
+    // and none of them add anything spoken, so they go before anything else —
+    // a pull-quote was being read as: '"Enter any brand…in seconds.".'
+    s = s.replace(/[“”„‟«»"]/g, '');
+
+    // KSM-66 has to be caught before hyphens are flattened below.
+    s = s.replace(/\bKSM[-\s]?66\b/gi, 'K S M sixty-six');
+
+    // A hyphen joining two words is a pause, not a sound. Flattening it here —
+    // BEFORE the acronym rules — also stops a hyphenated product name being
+    // half-expanded: \bOS\b matches after a hyphen, so "D2C-LifeCycle-OS" was
+    // spoken as "D to C-LifeCycle-O S". Now it separates cleanly first.
+    s = s.replace(/([A-Za-z0-9])-([A-Za-z0-9])/g, '$1 $2');
+
     var rules = [
       [/\bU\.?S\.?A\.?\b/g, 'U S A'], [/\bU\.?S\.?D\b/g, 'U S D'],
       [/\bU\.?S\.?\b/g, 'U S'], [/\bU\.?K\.?\b/g, 'U K'],
@@ -3317,9 +3332,16 @@
       [/\bTOI\b/g, 'T O I'], [/\bIST\b/g, 'I S T'], [/\bINR\b/g, 'I N R'],
       [/\bSMS\b/g, 'S M S'], [/\bPDF\b/g, 'P D F'], [/\bUX\b/g, 'U X'], [/\bUI\b/g, 'U I'],
       [/\bIP\b/g, 'I P'], [/\bAI\b/g, 'A I'], [/\bOS\b/g, 'O S'], [/\bET\b/g, 'E T'],
-      [/\bKSM-?66\b/gi, 'K S M sixty-six']
     ];
     for (var i = 0; i < rules.length; i++) s = s.replace(rules[i][0], rules[i][1]);
+
+    // Tidy the punctuation the DOM scraper inevitably doubles up. Stitching
+    // separate elements into one script gives things like "…in seconds.." or a
+    // space before a comma, and a speech engine pauses awkwardly on both.
+    s = s.replace(/([.!?;:])[\s]*[.]+/g, '$1')      // "seconds.." → "seconds."
+         .replace(/\s+([,.;:!?])/g, '$1')           // "word ." → "word."
+         .replace(/\s{2,}/g, ' ')
+         .trim();
     return s;
   };
 
@@ -6988,6 +7010,27 @@
 	      }));
 	    }
 
+    // The interface must not promise Anchit's voice when the clone providers are
+    // unconfigured. With only the stock Indic voice wired, "Anchit's voice" is
+    // untrue for whoever is listening — they hear a stranger. GET /api/tts
+    // reports which providers are actually live, so the live labels follow
+    // reality. One cached, non-blocking request; failure changes nothing.
+    let clonedVoiceReady = null;
+    function labelVoiceHonestly() {
+      if (clonedVoiceReady !== false) return;
+      const reply = document.querySelector('[data-chataudio-btn="reply"]');
+      if (reply) reply.title = 'Voice reply — answers are written and read aloud';
+      const ambient = document.getElementById('audioAmbient');
+      if (ambient) ambient.title = 'Voice narration playing';
+    }
+    (function probeVoiceProviders() {
+      const url = typeof ttsEndpoint === 'function' ? ttsEndpoint() : '/api/tts';
+      fetch(url)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j) => { if (j) { clonedVoiceReady = !!j.clonedVoiceReady; labelVoiceHonestly(); } })
+        .catch(() => { /* offline or unkeyed — leave the labels as authored */ });
+    })();
+
     function showIndicator(viewName) {
       if (!indicator) return;
       const key = viewName?.startsWith('project-') ? 'Projects' : (VIEW_LABELS[viewName] || 'Anchit');
@@ -7001,7 +7044,7 @@
       indicator.querySelector('.audio-ambient-label').textContent = 'Loading voice · ' + key;
       indicator.classList.add('active', 'loading');
       const status = document.getElementById('streamAudioStatus');
-      if (status) status.textContent = "Loading Anchit's voice…";
+      if (status) status.textContent = clonedVoiceReady === false ? 'Loading voice…' : "Loading Anchit's voice…";
     }
     function hideIndicator() {
       indicator?.classList.remove('active', 'listening');
@@ -7055,6 +7098,34 @@
     // made the voice sound broken ("five x. M.R.R. growth. three crore plus.").
     // Each part is normalised to end on real sentence punctuation, then joined
     // with a single space so the speech engine reads it as continuous prose.
+    // `textContent` is wrong for speech: it fuses adjacent elements with no
+    // separator, so a card reading "AGM – Product Management" above "Vahdam
+    // India" was spoken as one word — "Product ManagementVahdam India". This
+    // walks the tree instead and puts a real break wherever the layout has one.
+    function readableText(el) {
+      let out = '';
+      el.childNodes.forEach((node) => {
+        if (node.nodeType === 3) { out += node.nodeValue; return; }
+        if (node.nodeType !== 1) return;
+        if (node.getAttribute('aria-hidden') === 'true') return;   // decorative
+        if (/^(SCRIPT|STYLE|BUTTON|SVG|SELECT|TEXTAREA|INPUT)$/.test(node.tagName)) return;
+        const inner = readableText(node);
+        if (!inner.trim()) return;
+        let sep = '';
+        if (node.tagName === 'BR') {
+          sep = ' ';                                  // a line break is a breath
+        } else {
+          const d = getComputedStyle(node).display;
+          // Anything laid out as its own box is a separate thought aloud.
+          if (d === 'block' || d === 'flex' || d === 'grid' || d === 'list-item' || d === 'table') sep = '. ';
+        }
+        if (sep && out && !/[\s]$/.test(out)) out += sep;
+        out += inner;
+        if (sep) out += sep;
+      });
+      return out;
+    }
+
     function collectNarrationText(viewName) {
       let key = viewName || 'home';
       const view = document.getElementById('view-' + key);
@@ -7063,7 +7134,11 @@
       const seen = new Set();
       view.querySelectorAll('h1,h2,h3,p,li,.lede,.quote').forEach(el => {
         if (el.closest('script,style,iframe,.chat-caption,.dictation-transcript,.chat-input,.chat-return,.eyebrow,.tags,.work-impact-bar,.work-stats,.hero-stat')) return;
-        let text = (el.textContent || '').replace(/\s+/g, ' ').trim();
+        // Purely decorative regions (the cinematic title stage, icon-only bits)
+        // are marked aria-hidden precisely because their words are repeated as
+        // real content elsewhere. Narrating them says everything twice.
+        if (el.closest('[aria-hidden="true"]')) return;
+        let text = readableText(el).replace(/\s+/g, ' ').trim();
         if (!text || text.length < 12 || seen.has(text)) return;   // 12+ chars ⇒ a sentence, not a label
         seen.add(text);
         if (!/[.!?:;]$/.test(text)) text += '.';                    // give every clause a full stop
