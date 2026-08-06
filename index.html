@@ -724,21 +724,15 @@
     text-transform: uppercase; color: var(--ink-dim); opacity: 0;
   }
 
-  /* No-motion / no-JS: the stage is a plain, fully legible header. Every
-     animated element is authored at opacity 0, so this must reset them all —
-     otherwise a reduced-motion visitor sees an empty screen. */
-  .cine.is-static { height: auto; margin-bottom: clamp(20px, 4vw, 40px); }
-  .cine.is-static .cine-stage { position: static; height: auto; padding: clamp(24px, 6vw, 56px) 0; }
-  .cine.is-static .cine-name .ch,
-  .cine.is-static .cine-ring,
-  .cine.is-static .cine-arc,
-  .cine.is-static .cine-boot-row,
-  .cine.is-static .cine-hint { opacity: 1; transform: none; }
-  .cine.is-static .cine-roles { height: auto; }
-  .cine.is-static .cine-role { position: static; opacity: 1; filter: none; transform: none; }
-  .cine.is-static .cine-role + .cine-role { display: none; }
-  .cine.is-static .cine-boot-fill { width: 100%; }
-  .cine.is-static .cine-scan { display: none; }
+  /* No-motion / no-JS: the stage is REMOVED, not frozen.
+     It was previously rendered as a static header, which was wrong on three
+     counts — it repeated the same brand mark and name that the hero tile below
+     already shows, "Scroll to continue" promised a sequence that never ran, and
+     three bars sat at "Loading… 100%" permanently. A title sequence that cannot
+     play has nothing to say, so it steps aside and the bento hero (which is the
+     real content) leads. `.is-static` is the authored default, so this is also
+     what a no-JS visitor gets. */
+  .cine.is-static { display: none; }
 
   /* ============ CHAT ============ */
   .chat-block {
@@ -3372,8 +3366,9 @@
          away into the bento grid below. Marked aria-hidden because every word
          here is repeated as real text in the hero tile immediately after it —
          a screen reader should hear the content once, not twice. `.is-static`
-         is applied by script when motion is off, and is also the authored
-         default so a no-JS visitor gets the legible version. -->
+         hides the stage entirely and is the authored default, so it only ever
+         appears when script has confirmed motion is wanted; no-JS and
+         reduced-motion visitors go straight to the bento hero. -->
     <div class="cine is-static" id="cineHero" aria-hidden="true">
       <div class="cine-stage">
         <div class="cine-mark" id="cineMark">
@@ -9761,9 +9756,25 @@
     initCinematicHero(gsap);
   }
 
+  // The global Motion toggle defaults to OFF, which keeps the heavy Three.js
+  // nebula off for everyone — a deliberate performance call. This title sequence
+  // is a different order of cost (a handful of transform/opacity tweens and one
+  // scrubbed ScrollTrigger), so it gets its own decision rather than inheriting
+  // that default and never playing for anyone. An explicit choice always wins;
+  // with nothing stored it follows the OS accessibility signal, which is the
+  // signal that actually means "don't animate for me".
+  function heroMotionAllowed() {
+    try {
+      var m = localStorage.getItem('anchit-motion');
+      if (m === 'on') return true;
+      if (m === 'off') return false;
+    } catch (e) { /* storage blocked — fall through to the OS preference */ }
+    return !(mq && mq('(prefers-reduced-motion: reduce)').matches);
+  }
+
   function initCinematicHero(gsap) {
     var cine = document.getElementById('cineHero');
-    if (!cine || reduceMotion) return;
+    if (!cine || !heroMotionAllowed()) return;   // stays .is-static → display:none
     cine.classList.remove('is-static');
 
     // Split the name into per-letter spans. Spaces get their own fixed-width
@@ -9790,8 +9801,8 @@
       .to('#cineHint', { opacity: 1, duration: 0.6 }, '-=0.1');
 
     // Each progress bar fills and its readout counts with it. The markup ships
-    // complete (100%) so the reduced-motion and no-JS renderings read as a
-    // finished boot rather than a stalled one; motion mode rewinds to 0 here.
+    // complete (100%) and is rewound to 0 here, so the bars can never be caught
+    // sitting empty in the gap between paint and the tween starting.
     document.querySelectorAll('#cineBoot .cine-boot-row').forEach(function (row, idx) {
       var fill = row.querySelector('.cine-boot-fill');
       var pct = row.querySelector('.cine-boot-pct');
