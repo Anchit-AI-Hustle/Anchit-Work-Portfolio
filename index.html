@@ -724,21 +724,15 @@
     text-transform: uppercase; color: var(--ink-dim); opacity: 0;
   }
 
-  /* No-motion / no-JS: the stage is a plain, fully legible header. Every
-     animated element is authored at opacity 0, so this must reset them all —
-     otherwise a reduced-motion visitor sees an empty screen. */
-  .cine.is-static { height: auto; margin-bottom: clamp(20px, 4vw, 40px); }
-  .cine.is-static .cine-stage { position: static; height: auto; padding: clamp(24px, 6vw, 56px) 0; }
-  .cine.is-static .cine-name .ch,
-  .cine.is-static .cine-ring,
-  .cine.is-static .cine-arc,
-  .cine.is-static .cine-boot-row,
-  .cine.is-static .cine-hint { opacity: 1; transform: none; }
-  .cine.is-static .cine-roles { height: auto; }
-  .cine.is-static .cine-role { position: static; opacity: 1; filter: none; transform: none; }
-  .cine.is-static .cine-role + .cine-role { display: none; }
-  .cine.is-static .cine-boot-fill { width: 100%; }
-  .cine.is-static .cine-scan { display: none; }
+  /* No-motion / no-JS: the stage is REMOVED, not frozen.
+     It was previously rendered as a static header, which was wrong on three
+     counts — it repeated the same brand mark and name that the hero tile below
+     already shows, "Scroll to continue" promised a sequence that never ran, and
+     three bars sat at "Loading… 100%" permanently. A title sequence that cannot
+     play has nothing to say, so it steps aside and the bento hero (which is the
+     real content) leads. `.is-static` is the authored default, so this is also
+     what a no-JS visitor gets. */
+  .cine.is-static { display: none; }
 
   /* ============ CHAT ============ */
   .chat-block {
@@ -3312,6 +3306,21 @@
   window.anchitSpeechText = function(t){
     if (!t) return t;
     var s = String(t);
+
+    // Quotation marks are punctuation for the eye. Some engines announce them,
+    // and none of them add anything spoken, so they go before anything else —
+    // a pull-quote was being read as: '"Enter any brand…in seconds.".'
+    s = s.replace(/[“”„‟«»"]/g, '');
+
+    // KSM-66 has to be caught before hyphens are flattened below.
+    s = s.replace(/\bKSM[-\s]?66\b/gi, 'K S M sixty-six');
+
+    // A hyphen joining two words is a pause, not a sound. Flattening it here —
+    // BEFORE the acronym rules — also stops a hyphenated product name being
+    // half-expanded: \bOS\b matches after a hyphen, so "D2C-LifeCycle-OS" was
+    // spoken as "D to C-LifeCycle-O S". Now it separates cleanly first.
+    s = s.replace(/([A-Za-z0-9])-([A-Za-z0-9])/g, '$1 $2');
+
     var rules = [
       [/\bU\.?S\.?A\.?\b/g, 'U S A'], [/\bU\.?S\.?D\b/g, 'U S D'],
       [/\bU\.?S\.?\b/g, 'U S'], [/\bU\.?K\.?\b/g, 'U K'],
@@ -3323,9 +3332,16 @@
       [/\bTOI\b/g, 'T O I'], [/\bIST\b/g, 'I S T'], [/\bINR\b/g, 'I N R'],
       [/\bSMS\b/g, 'S M S'], [/\bPDF\b/g, 'P D F'], [/\bUX\b/g, 'U X'], [/\bUI\b/g, 'U I'],
       [/\bIP\b/g, 'I P'], [/\bAI\b/g, 'A I'], [/\bOS\b/g, 'O S'], [/\bET\b/g, 'E T'],
-      [/\bKSM-?66\b/gi, 'K S M sixty-six']
     ];
     for (var i = 0; i < rules.length; i++) s = s.replace(rules[i][0], rules[i][1]);
+
+    // Tidy the punctuation the DOM scraper inevitably doubles up. Stitching
+    // separate elements into one script gives things like "…in seconds.." or a
+    // space before a comma, and a speech engine pauses awkwardly on both.
+    s = s.replace(/([.!?;:])[\s]*[.]+/g, '$1')      // "seconds.." → "seconds."
+         .replace(/\s+([,.;:!?])/g, '$1')           // "word ." → "word."
+         .replace(/\s{2,}/g, ' ')
+         .trim();
     return s;
   };
 
@@ -3372,8 +3388,9 @@
          away into the bento grid below. Marked aria-hidden because every word
          here is repeated as real text in the hero tile immediately after it —
          a screen reader should hear the content once, not twice. `.is-static`
-         is applied by script when motion is off, and is also the authored
-         default so a no-JS visitor gets the legible version. -->
+         hides the stage entirely and is the authored default, so it only ever
+         appears when script has confirmed motion is wanted; no-JS and
+         reduced-motion visitors go straight to the bento hero. -->
     <div class="cine is-static" id="cineHero" aria-hidden="true">
       <div class="cine-stage">
         <div class="cine-mark" id="cineMark">
@@ -6993,6 +7010,27 @@
 	      }));
 	    }
 
+    // The interface must not promise Anchit's voice when the clone providers are
+    // unconfigured. With only the stock Indic voice wired, "Anchit's voice" is
+    // untrue for whoever is listening — they hear a stranger. GET /api/tts
+    // reports which providers are actually live, so the live labels follow
+    // reality. One cached, non-blocking request; failure changes nothing.
+    let clonedVoiceReady = null;
+    function labelVoiceHonestly() {
+      if (clonedVoiceReady !== false) return;
+      const reply = document.querySelector('[data-chataudio-btn="reply"]');
+      if (reply) reply.title = 'Voice reply — answers are written and read aloud';
+      const ambient = document.getElementById('audioAmbient');
+      if (ambient) ambient.title = 'Voice narration playing';
+    }
+    (function probeVoiceProviders() {
+      const url = typeof ttsEndpoint === 'function' ? ttsEndpoint() : '/api/tts';
+      fetch(url)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j) => { if (j) { clonedVoiceReady = !!j.clonedVoiceReady; labelVoiceHonestly(); } })
+        .catch(() => { /* offline or unkeyed — leave the labels as authored */ });
+    })();
+
     function showIndicator(viewName) {
       if (!indicator) return;
       const key = viewName?.startsWith('project-') ? 'Projects' : (VIEW_LABELS[viewName] || 'Anchit');
@@ -7006,7 +7044,7 @@
       indicator.querySelector('.audio-ambient-label').textContent = 'Loading voice · ' + key;
       indicator.classList.add('active', 'loading');
       const status = document.getElementById('streamAudioStatus');
-      if (status) status.textContent = "Loading Anchit's voice…";
+      if (status) status.textContent = clonedVoiceReady === false ? 'Loading voice…' : "Loading Anchit's voice…";
     }
     function hideIndicator() {
       indicator?.classList.remove('active', 'listening');
@@ -7060,6 +7098,34 @@
     // made the voice sound broken ("five x. M.R.R. growth. three crore plus.").
     // Each part is normalised to end on real sentence punctuation, then joined
     // with a single space so the speech engine reads it as continuous prose.
+    // `textContent` is wrong for speech: it fuses adjacent elements with no
+    // separator, so a card reading "AGM – Product Management" above "Vahdam
+    // India" was spoken as one word — "Product ManagementVahdam India". This
+    // walks the tree instead and puts a real break wherever the layout has one.
+    function readableText(el) {
+      let out = '';
+      el.childNodes.forEach((node) => {
+        if (node.nodeType === 3) { out += node.nodeValue; return; }
+        if (node.nodeType !== 1) return;
+        if (node.getAttribute('aria-hidden') === 'true') return;   // decorative
+        if (/^(SCRIPT|STYLE|BUTTON|SVG|SELECT|TEXTAREA|INPUT)$/.test(node.tagName)) return;
+        const inner = readableText(node);
+        if (!inner.trim()) return;
+        let sep = '';
+        if (node.tagName === 'BR') {
+          sep = ' ';                                  // a line break is a breath
+        } else {
+          const d = getComputedStyle(node).display;
+          // Anything laid out as its own box is a separate thought aloud.
+          if (d === 'block' || d === 'flex' || d === 'grid' || d === 'list-item' || d === 'table') sep = '. ';
+        }
+        if (sep && out && !/[\s]$/.test(out)) out += sep;
+        out += inner;
+        if (sep) out += sep;
+      });
+      return out;
+    }
+
     function collectNarrationText(viewName) {
       let key = viewName || 'home';
       const view = document.getElementById('view-' + key);
@@ -7068,7 +7134,11 @@
       const seen = new Set();
       view.querySelectorAll('h1,h2,h3,p,li,.lede,.quote').forEach(el => {
         if (el.closest('script,style,iframe,.chat-caption,.dictation-transcript,.chat-input,.chat-return,.eyebrow,.tags,.work-impact-bar,.work-stats,.hero-stat')) return;
-        let text = (el.textContent || '').replace(/\s+/g, ' ').trim();
+        // Purely decorative regions (the cinematic title stage, icon-only bits)
+        // are marked aria-hidden precisely because their words are repeated as
+        // real content elsewhere. Narrating them says everything twice.
+        if (el.closest('[aria-hidden="true"]')) return;
+        let text = readableText(el).replace(/\s+/g, ' ').trim();
         if (!text || text.length < 12 || seen.has(text)) return;   // 12+ chars ⇒ a sentence, not a label
         seen.add(text);
         if (!/[.!?:;]$/.test(text)) text += '.';                    // give every clause a full stop
@@ -9761,9 +9831,25 @@
     initCinematicHero(gsap);
   }
 
+  // The global Motion toggle defaults to OFF, which keeps the heavy Three.js
+  // nebula off for everyone — a deliberate performance call. This title sequence
+  // is a different order of cost (a handful of transform/opacity tweens and one
+  // scrubbed ScrollTrigger), so it gets its own decision rather than inheriting
+  // that default and never playing for anyone. An explicit choice always wins;
+  // with nothing stored it follows the OS accessibility signal, which is the
+  // signal that actually means "don't animate for me".
+  function heroMotionAllowed() {
+    try {
+      var m = localStorage.getItem('anchit-motion');
+      if (m === 'on') return true;
+      if (m === 'off') return false;
+    } catch (e) { /* storage blocked — fall through to the OS preference */ }
+    return !(mq && mq('(prefers-reduced-motion: reduce)').matches);
+  }
+
   function initCinematicHero(gsap) {
     var cine = document.getElementById('cineHero');
-    if (!cine || reduceMotion) return;
+    if (!cine || !heroMotionAllowed()) return;   // stays .is-static → display:none
     cine.classList.remove('is-static');
 
     // Split the name into per-letter spans. Spaces get their own fixed-width
@@ -9790,8 +9876,8 @@
       .to('#cineHint', { opacity: 1, duration: 0.6 }, '-=0.1');
 
     // Each progress bar fills and its readout counts with it. The markup ships
-    // complete (100%) so the reduced-motion and no-JS renderings read as a
-    // finished boot rather than a stalled one; motion mode rewinds to 0 here.
+    // complete (100%) and is rewound to 0 here, so the bars can never be caught
+    // sitting empty in the gap between paint and the tween starting.
     document.querySelectorAll('#cineBoot .cine-boot-row').forEach(function (row, idx) {
       var fill = row.querySelector('.cine-boot-fill');
       var pct = row.querySelector('.cine-boot-pct');
