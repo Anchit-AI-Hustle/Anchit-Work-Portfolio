@@ -51,6 +51,7 @@ const assets = [
   'lifecycle-os-kit.css',
   'lifecycle-os-kit.js',
   'agent.html',
+  'hotel.html',
   'manifest.json',
   'sw.js',
   'robots.txt',

@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Residence — a hotel, unveiled</title>
+<meta name="description" content="A scroll-scrubbed film of a modern five-star hotel: the cloth lifts off the building as you scroll, then the camera moves inside — lobby, bar, gym, dining, pool.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/icons/favicon.svg">
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     SCROLL-SCRUBBED FILM PAGE
+
+     The mechanic: scroll position is bound to a video's currentTime, so the
+     visitor physically drives the footage. Scrolling down lifts a cloth off the
+     building; scrolling back up drapes it again.
+
+     Written to work BEFORE the clips exist. Every section ships a CSS
+     performance of its own move, and swaps to video the moment its file appears
+     in assets/hotel/ — checked per section, so one clip landing doesn't depend
+     on the others. Prompts and file names: GOOGLE-FLOW-HOTEL.md
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<style>
+  :root {
+    --ink: #F6EFE4;
+    --ink-dim: rgba(246, 239, 228, 0.62);
+    --bg: #100B06;
+    --bg-2: #1A120A;
+    --amber: #E8A552;
+    --amber-deep: #C4762A;
+    --sand: #D9C3A0;
+    --rule: rgba(232, 165, 82, 0.18);
+    --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+    --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: auto; }          /* scrubbing needs raw scroll */
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--font-sans); -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  ::selection { background: var(--amber); color: #1A120A; }
+
+  /* ── Shared section scaffolding ────────────────────────────────────────
+     Each scene is a tall scroll track with a sticky stage inside it. Sticky,
+     not a JS pin: no injected spacers, and it survives resize without
+     recalculation. The track's height is the scrub duration. */
+  .scene { position: relative; }
+  .scene-track { height: 320vh; }
+  .scene-track.short { height: 220vh; }
+  .stage {
+    position: sticky; top: 0; height: 100vh; overflow: hidden;
+    display: grid; place-items: center;
+  }
+  .stage video, .stage .fallback {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover;
+  }
+  .stage video { opacity: 0; transition: opacity 600ms ease; }
+  .stage.has-video video { opacity: 1; }
+  .stage.has-video .fallback { opacity: 0; }
+  .fallback { transition: opacity 600ms ease; }
+
+  /* Legibility over any footage, without dimming the golden hour. */
+  .veil {
+    position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(180deg, rgba(16,11,6,0.55) 0%, transparent 28%,
+                transparent 62%, rgba(16,11,6,0.78) 100%);
+  }
+
+  .caption {
+    position: relative; z-index: 2; text-align: center; padding: 0 24px;
+    max-width: 900px; transform: translateY(0);
+  }
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.36em;
+    text-transform: uppercase; color: var(--amber); margin: 0 0 18px;
+  }
+  .caption h2 {
+    font-family: var(--font-display); font-weight: 600; margin: 0;
+    font-size: clamp(34px, 6.4vw, 86px); line-height: 0.98; letter-spacing: -0.025em;
+  }
+  .caption p {
+    margin: 20px auto 0; max-width: 46ch; color: var(--ink-dim);
+    font-size: clamp(15px, 1.7vw, 19px); line-height: 1.65;
+  }
+
+  /* ── Scene 1: the drape ────────────────────────────────────────────────
+     The CSS stand-in for clip 1A. A building is drawn beneath a cotton sheet;
+     --p (0→1, written by script from scroll progress) lifts the sheet. The
+     grounds are deliberately outside the sheet, matching the prompt: only the
+     building is ever covered. */
+  /* Golden hour needs an actual horizon: sky burning brightest just above the
+     ground line, land falling away dark beneath it. A single dark gradient read
+     as flat brown and none of the scene was legible. */
+  .grounds {
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(180deg,
+        #3B2A5A 0%,        /* the last of the upper sky */
+        #8E4A2E 34%,
+        #D97C34 52%,
+        #F2B863 61%,       /* the burn along the horizon */
+        #7A4A20 62.2%,     /* ground begins */
+        #2A1B0C 100%);
+  }
+  .sun {
+    position: absolute; left: 50%; top: 61%; width: 30vmin; height: 30vmin;
+    transform: translate(-50%, -50%);
+    background:
+      radial-gradient(circle, #FFE6B0 0%, #FFC470 26%, rgba(255,170,80,0.55) 42%, transparent 68%);
+    filter: blur(3px);
+  }
+  /* Light spilling across the lawns toward the camera. */
+  .grounds::after {
+    content: ''; position: absolute; left: 0; right: 0; top: 62%; bottom: 0;
+    background: radial-gradient(60% 120% at 50% 0%, rgba(255,190,110,0.34), transparent 70%);
+  }
+  .building {
+    position: absolute; left: 50%; bottom: 16%; transform: translateX(-50%);
+    width: min(62vw, 720px); height: min(46vh, 380px);
+    background: linear-gradient(180deg, #2E2114 0%, #1E150C 100%);
+    border: 1px solid rgba(217,195,160,0.28);
+    border-bottom: none;
+    box-shadow: 0 0 90px rgba(232,165,82,0.14);
+  }
+  /* Window grid — lit from within, warmer toward the bottom. */
+  .building::before {
+    content: ''; position: absolute; inset: 12% 8% 0;
+    background-image:
+      linear-gradient(90deg, rgba(255,198,120,0.30) 1px, transparent 1px),
+      linear-gradient(180deg, rgba(255,198,120,0.22) 1px, transparent 1px);
+    background-size: 8.5% 17%;
+    mask-image: linear-gradient(180deg, transparent, #000 22%, #000 100%);
+  }
+  .canopy {
+    position: absolute; left: 50%; bottom: 16%; transform: translateX(-50%);
+    width: min(30vw, 320px); height: 14px; border-radius: 3px;
+    background: linear-gradient(90deg, transparent, var(--sand), transparent);
+    opacity: 0.75;
+  }
+  .palms { position: absolute; inset: 0; }
+  .palms span {
+    position: absolute; bottom: 14%; width: 3px; height: 13vh;
+    background: linear-gradient(180deg, transparent, #2A1D0E);
+    box-shadow: 0 -1vh 0 -1px rgba(60,44,22,0.9);
+  }
+  .palms span:nth-child(1){ left: 14%; height: 15vh; }
+  .palms span:nth-child(2){ left: 21%; height: 11vh; }
+  .palms span:nth-child(3){ right: 15%; height: 14vh; }
+  .palms span:nth-child(4){ right: 23%; height: 10vh; }
+
+  /* The sheet. Follows the building's box, ripples, and rises with --p. */
+  .cloth {
+    --p: 0;
+    position: absolute; left: 50%; bottom: 16%;
+    transform: translateX(-50%) translateY(calc(var(--p) * -78vh));
+    width: min(64vw, 750px); height: min(50vh, 410px);
+    background:
+      repeating-linear-gradient(97deg, rgba(0,0,0,0.05) 0 14px, transparent 14px 34px),
+      linear-gradient(180deg, #EDE2CE 0%, #D8C7AC 46%, #BFAA8C 100%);
+    border-radius: 10px 10px 4px 4px;
+    box-shadow: 0 -12px 40px rgba(0,0,0,0.4), inset 0 -30px 60px rgba(0,0,0,0.16);
+    opacity: calc(1 - (var(--p) * var(--p) * 0.85));
+    clip-path: polygon(0% 4%, 6% 1%, 14% 4%, 24% 1%, 34% 4%, 46% 1%, 58% 4%,
+                       70% 1%, 82% 4%, 92% 1%, 100% 4%, 100% 100%, 0% 100%);
+  }
+  .cloth::after {           /* light catching the folds as it lifts */
+    content: ''; position: absolute; inset: 0; border-radius: inherit;
+    background: linear-gradient(103deg, transparent 20%,
+                rgba(255,232,198,0.55) 47%, transparent 72%);
+    opacity: calc(var(--p) * 0.9);
+  }
+
+  /* ── Scene: the pool, scrubbed under the surface and back up ───────────── */
+  .pool { position: absolute; inset: 0; background: linear-gradient(180deg, #E9A960 0%, #B46C25 42%, #10476A 43%, #062B44 100%); }
+  .pool .surface {
+    --p: 0;
+    position: absolute; inset: 0;
+    /* Sinking under: the horizon line rides up past the camera. */
+    transform: translateY(calc((0.5 - abs(var(--p) - 0.5)) * -120vh));
+  }
+  .caustics {
+    --p: 0;
+    position: absolute; inset: 0; opacity: calc(0.5 - abs(var(--p) - 0.5));
+    background:
+      repeating-radial-gradient(circle at 30% 40%, rgba(255,224,170,0.20) 0 2px, transparent 2px 26px),
+      repeating-radial-gradient(circle at 72% 62%, rgba(255,224,170,0.16) 0 2px, transparent 2px 32px);
+    mix-blend-mode: screen;
+  }
+
+  /* ── Intro + outro ─────────────────────────────────────────────────────── */
+  .lede { min-height: 78vh; display: grid; place-items: center; text-align: center; padding: 12vh 24px; }
+  .lede h1 {
+    font-family: var(--font-display); font-weight: 600; margin: 0 0 18px;
+    font-size: clamp(44px, 9.5vw, 130px); line-height: 0.9; letter-spacing: -0.035em;
+  }
+  .lede .sub { color: var(--ink-dim); max-width: 52ch; margin: 0 auto; line-height: 1.7; }
+  .cue {
+    margin-top: 42px; font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber);
+  }
+  .cue::after { content: ' ↓'; display: inline-block; animation: bob 2.4s ease-in-out infinite; }
+  @keyframes bob { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(5px); } }
+
+  footer {
+    padding: 14vh 24px 10vh; text-align: center; border-top: 1px solid var(--rule);
+    color: var(--ink-dim); font-size: 14px;
+  }
+  footer a { color: var(--amber); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* Progress rail — the scrub made visible. */
+  #rail { position: fixed; left: 0; top: 0; height: 2px; width: 100%; z-index: 20; background: transparent; }
+  #rail i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--amber-deep), var(--amber)); }
+
+  /* Reduced motion: no scrubbing, no sticky stages. Each scene becomes a still
+     with its caption — the page still tells the story, it just doesn't move. */
+  @media (prefers-reduced-motion: reduce) {
+    .scene-track, .scene-track.short { height: auto; }
+    .stage { position: static; height: 78vh; }
+    .cloth { transform: translateX(-50%) translateY(-78vh); opacity: 0.06; }
+    .pool .surface, .caustics { transform: none; opacity: 1; }
+    .cue::after { animation: none; }
+    #rail { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="rail" aria-hidden="true"><i></i></div>
+
+<header class="lede">
+  <div>
+    <p class="eyebrow">Google Flow · six clips · golden hour</p>
+    <h1>The Residence</h1>
+    <p class="sub">A film you scroll. The cloth comes off the building at your pace — then the camera keeps moving, and doesn't stop until the water closes over it.</p>
+    <p class="cue">Scroll to lift</p>
+  </div>
+</header>
+
+<!-- ═══ 1A — the drape lifts. The hero mechanic. ═══ -->
+<section class="scene" id="scene-drape" data-clip="assets/hotel/1a-drape.mp4" data-scrub="1">
+  <div class="scene-track">
+    <div class="stage">
+      <div class="fallback" aria-hidden="true">
+        <div class="grounds"></div>
+        <div class="sun"></div>
+        <div class="palms"><span></span><span></span><span></span><span></span></div>
+        <div class="building"></div>
+        <div class="canopy"></div>
+        <div class="cloth" data-p></div>
+      </div>
+      <video muted playsinline preload="auto" aria-hidden="true"></video>
+      <div class="veil"></div>
+      <div class="caption">
+        <p class="eyebrow">Unveiling</p>
+        <h2>It was always there.</h2>
+        <p>Locked-off camera, one continuous sheet, one linear lift. Scroll down and it rises; scroll up and it settles back over the roof.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 1B — inside ═══ -->
+<section class="scene" id="scene-lobby" data-clip="assets/hotel/1b-lobby.mp4">
+  <div class="scene-track short">
+    <div class="stage">
+      <div class="fallback" aria-hidden="true" style="background:
+        radial-gradient(90% 60% at 50% 40%, rgba(255,206,140,0.22), transparent 70%),
+        linear-gradient(180deg,#241A0F,#120C07);"></div>
+      <video muted playsinline preload="metadata" loop aria-hidden="true"></video>
+      <div class="veil"></div>
+      <div class="caption">
+        <p class="eyebrow">The lobby</p>
+        <h2>Then it lets you in.</h2>
+        <p>Through the glass, into double height and marble, with the last of the sun coming in sideways.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 2 — the bar ═══ -->
+<section class="scene" id="scene-bar" data-clip="assets/hotel/2-bar.mp4">
+  <div class="scene-track short">
+    <div class="stage">
+      <div class="fallback" aria-hidden="true" style="background:
+        repeating-linear-gradient(90deg, rgba(232,165,82,0.13) 0 3px, transparent 3px 26px),
+        linear-gradient(180deg,#2A1B0E,#150E07);"></div>
+      <video muted playsinline preload="metadata" loop aria-hidden="true"></video>
+      <div class="veil"></div>
+      <div class="caption">
+        <p class="eyebrow">The bar</p>
+        <h2>Amber, backlit, in rows.</h2>
+        <p>The camera tracks the rack, then keeps going until the lounge opens out behind it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 3 — the gym ═══ -->
+<section class="scene" id="scene-gym" data-clip="assets/hotel/3-gym.mp4">
+  <div class="scene-track short">
+    <div class="stage">
+      <div class="fallback" aria-hidden="true" style="background:
+        linear-gradient(100deg, rgba(255,214,150,0.16) 0 22%, transparent 60%),
+        linear-gradient(180deg,#20180F,#100B06);"></div>
+      <video muted playsinline preload="metadata" loop aria-hidden="true"></video>
+      <div class="veil"></div>
+      <div class="caption">
+        <p class="eyebrow">Wellness</p>
+        <h2>Light, all down one wall.</h2>
+        <p>A corridor of glass, then folded towels on marble catching it on the way past.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 4 — dining ═══ -->
+<section class="scene" id="scene-dining" data-clip="assets/hotel/4-dining.mp4">
+  <div class="scene-track short">
+    <div class="stage">
+      <div class="fallback" aria-hidden="true" style="background:
+        radial-gradient(60% 50% at 50% 62%, rgba(255,196,120,0.26), transparent 72%),
+        linear-gradient(180deg,#231809,#120C06);"></div>
+      <video muted playsinline preload="metadata" loop aria-hidden="true"></video>
+      <div class="veil"></div>
+      <div class="caption">
+        <p class="eyebrow">Dining</p>
+        <h2>One table, then all of them.</h2>
+        <p>Gold rim, ivory linen, marigold — and the room arriving around it as the camera lifts.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 5 — the pool, scrubbed down and back up ═══ -->
+<section class="scene" id="scene-pool" data-clip="assets/hotel/5-pool.mp4" data-scrub="1">
+  <div class="scene-track">
+    <div class="stage">
+      <div class="fallback pool" aria-hidden="true">
+        <div class="surface" data-p></div>
+        <div class="caustics" data-p></div>
+      </div>
+      <video muted playsinline preload="auto" aria-hidden="true"></video>
+      <div class="veil"></div>
+      <div class="caption">
+        <p class="eyebrow">The pool</p>
+        <h2>Under, and back.</h2>
+        <p>Keep scrolling and the surface closes over you. Keep going and it breaks again.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Six clips, generated in Google Flow. Prompts, file names and encoding settings: <a href="https://github.com/Anchit-AI-Hustle/Anchit-Work-Portfolio/blob/main/GOOGLE-FLOW-HOTEL.md">GOOGLE-FLOW-HOTEL.md</a></p>
+  <p style="margin-top:10px;"><a href="/">← Anchit Tandon</a></p>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var rail = document.querySelector('#rail i');
+
+  // Progress of a scroll track through the viewport, 0→1.
+  function progressOf(track) {
+    var r = track.getBoundingClientRect();
+    var travel = r.height - window.innerHeight;
+    if (travel <= 0) return 0;
+    var p = -r.top / travel;
+    return p < 0 ? 0 : p > 1 ? 1 : p;
+  }
+
+  var scenes = [].map.call(document.querySelectorAll('.scene'), function (el) {
+    return {
+      el: el,
+      track: el.querySelector('.scene-track'),
+      stage: el.querySelector('.stage'),
+      video: el.querySelector('video'),
+      src: el.getAttribute('data-clip'),
+      scrub: el.getAttribute('data-scrub') === '1',
+      vars: [].slice.call(el.querySelectorAll('[data-p]')),
+      ready: false,      // video has metadata and can be sought
+      target: 0,         // where the scrub wants currentTime
+      current: 0,        // where it actually is, eased
+      visible: false,
+    };
+  });
+
+  // ── Load each clip independently ────────────────────────────────────────
+  // A missing file must not disturb the others, so nothing is awaited and the
+  // stage only switches to video after 'loadedmetadata' actually fires. Until
+  // then the CSS fallback is what's on screen, which is why the page works with
+  // no clips at all.
+  scenes.forEach(function (s) {
+    if (!s.src || reduced) return;
+    s.video.addEventListener('loadedmetadata', function () {
+      if (!isFinite(s.video.duration) || s.video.duration <= 0) return;
+      s.ready = true;
+      s.stage.classList.add('has-video');
+      if (!s.scrub) {
+        // Ambient scenes just play while they're on screen.
+        s.video.loop = true;
+        if (s.visible) s.video.play().catch(function () {});
+      } else {
+        s.video.pause();     // scrubbed scenes are driven by scroll, never played
+      }
+    });
+    s.video.addEventListener('error', function () { /* stay on the fallback */ });
+    s.video.src = s.src;
+  });
+
+  // Only the scenes on screen do any work.
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        var s = scenes.filter(function (x) { return x.el === en.target; })[0];
+        if (!s) return;
+        s.visible = en.isIntersecting;
+        if (!s.ready || s.scrub) return;
+        if (s.visible) s.video.play().catch(function () {});
+        else s.video.pause();
+      });
+    }, { rootMargin: '10% 0px' });
+    scenes.forEach(function (s) { io.observe(s.el); });
+  } else {
+    scenes.forEach(function (s) { s.visible = true; });
+  }
+
+  if (reduced) return;   // stills only — nothing below this line should run
+
+  // ── The scrub ───────────────────────────────────────────────────────────
+  // Scroll events fire far more often than frames render, and seeking a video
+  // is expensive, so scroll only records a target and one rAF loop does the
+  // work. currentTime is eased toward the target rather than snapped: a raw
+  // 1:1 seek looks stepped, because the browser can only land on a keyframe.
+  var ticking = false;
+
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(frame);
+  }
+
+  function frame() {
+    ticking = false;
+    var any = false;
+
+    scenes.forEach(function (s) {
+      if (!s.visible) return;
+      var p = progressOf(s.track);
+
+      // Drive the CSS fallback whether or not the video exists — it is the
+      // same 0→1 signal, so both perform the identical move.
+      s.vars.forEach(function (n) { n.style.setProperty('--p', p.toFixed(4)); });
+
+      if (!s.scrub || !s.ready) return;
+      s.target = p * s.video.duration;
+      var delta = s.target - s.current;
+      if (Math.abs(delta) < 0.008) return;         // already there; don't seek
+      s.current += delta * 0.22;
+      try { s.video.currentTime = s.current; } catch (e) { /* seek not ready */ }
+      any = true;
+    });
+
+    // Keep easing while any scrub is still catching up to its target.
+    if (any) requestAnimationFrame(frame);
+
+    if (rail) {
+      var h = document.documentElement;
+      var max = h.scrollHeight - h.clientHeight;
+      rail.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0).toFixed(2) + '%';
+    }
+  }
+
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', onScroll, { passive: true });
+  onScroll();
+})();
+</script>
+</body>
+</html>
