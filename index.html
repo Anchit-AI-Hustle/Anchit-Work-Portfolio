@@ -1585,6 +1585,118 @@
     .reveal, .reveal-stagger > *, .reveal-left, .reveal-right, .reveal-scale { opacity: 1 !important; transform: none !important; transition: none !important; }
   }
 
+  /* ============ DEPTH SYSTEM ============
+     The site's motion vocabulary beyond flat reveals. Three layers:
+
+       depth   — real perspective transforms, so surfaces have orientation
+       time    — motion driven continuously by scroll and pointer, not by
+                 fixed-duration keyframes, so nothing feels canned
+       state   — surfaces react to what the visitor is doing right now
+                 (pointer position, pointer speed, which view they entered)
+
+     Every rule animates only transform / opacity / filter, so the compositor
+     handles it and nothing triggers layout. Perspective is applied per element
+     inside its own transform rather than on an ancestor — `perspective` on a
+     parent would make it the containing block for fixed/sticky descendants and
+     would break the pinned title stage and the fixed chat launcher.
+     `.no-depth` on <html> (set by script when motion is off) disables the lot. */
+
+  /* Pointer-reactive card tilt. The rotation values are written by script into
+     custom properties, so the browser interpolates them on the compositor. */
+  .d3 {
+    --rx: 0deg; --ry: 0deg; --lift: 0px;
+    transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(var(--lift));
+    transition: transform 340ms cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: 50% 50%;
+    position: relative;
+  }
+  /* A specular highlight that tracks the pointer across the surface — this is
+     what makes the tilt read as a lit physical panel rather than a skewed box. */
+  .d3::after {
+    content: ''; position: absolute; inset: 0; border-radius: inherit;
+    pointer-events: none; opacity: 0; transition: opacity 260ms ease;
+    background: radial-gradient(420px circle at var(--px, 50%) var(--py, 50%),
+      color-mix(in oklab, var(--primary) 20%, transparent), transparent 62%);
+    mix-blend-mode: screen;
+  }
+  .d3.is-lit::after { opacity: 1; }
+  .d3.is-lit { z-index: 2; }
+
+  /* Depth reveal — surfaces arrive by rotating up out of the page rather than
+     fading. Paired with .reveal so a single observer drives both. */
+  .d3-rise { opacity: 0; transform: perspective(1100px) rotateX(14deg) translateY(34px) scale(0.97); }
+  .d3-rise.in { opacity: 1; transform: perspective(1100px) rotateX(0deg) translateY(0) scale(1); }
+  .d3-rise { transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.9s cubic-bezier(0.16,1,0.3,1); }
+
+  /* A single light sweep across a surface the first time it arrives. */
+  .d3-sheen { position: relative; overflow: hidden; }
+  .d3-sheen::before {
+    content: ''; position: absolute; top: 0; bottom: 0; width: 55%;
+    left: -70%; pointer-events: none; opacity: 0;
+    background: linear-gradient(100deg, transparent,
+      color-mix(in oklab, var(--accent-warm) 26%, transparent), transparent);
+    transform: skewX(-14deg);
+  }
+  .d3-sheen.in::before { animation: d3Sweep 1.15s cubic-bezier(0.22,1,0.36,1) 0.12s both; }
+  @keyframes d3Sweep {
+    from { left: -70%; opacity: 0; }
+    35%  { opacity: 1; }
+    to   { left: 130%; opacity: 0; }
+  }
+
+  /* Section headings assemble a word at a time. */
+  .d3-words > .d3-w { display: inline-block; opacity: 0; transform: translateY(0.5em) rotateX(-40deg); }
+  .d3-words.in > .d3-w {
+    opacity: 1; transform: none;
+    transition: opacity .55s cubic-bezier(0.16,1,0.3,1), transform .7s cubic-bezier(0.16,1,0.3,1);
+  }
+
+  /* Buttons pull very slightly toward the pointer, then release. */
+  .d3-mag { transition: transform 260ms cubic-bezier(0.16,1,0.3,1); will-change: transform; }
+
+  /* A soft light that follows the pointer, sitting under all content. Fixed and
+     pointer-events:none, so it can never intercept a click. */
+  #d3Cursor {
+    position: fixed; left: 0; top: 0; width: 520px; height: 520px; margin: -260px 0 0 -260px;
+    border-radius: 50%; pointer-events: none; z-index: 0; opacity: 0;
+    transition: opacity 500ms ease;
+    background: radial-gradient(circle,
+      color-mix(in oklab, var(--primary) 13%, transparent) 0%,
+      color-mix(in oklab, var(--accent-warm) 7%, transparent) 38%, transparent 68%);
+    filter: blur(14px);
+  }
+  #d3Cursor.on { opacity: 1; }
+
+  /* Incoming view arrives with depth on every route change. */
+  .view.d3-enter { animation: d3Enter 620ms cubic-bezier(0.16,1,0.3,1) both; }
+  @keyframes d3Enter {
+    from { opacity: 0; transform: perspective(1400px) rotateX(4deg) translateY(22px) scale(0.985); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* Touch devices get the reveals and the sheen but no pointer tilt or cursor
+     light — there is no hover, and the tilt would only ever fire on tap. */
+  @media (hover: none) {
+    .d3 { transform: none; }
+    .d3::after { display: none; }
+    #d3Cursor { display: none; }
+  }
+  /* Single switch for motion-off, and for browsers that ask for reduced motion. */
+  html.no-depth .d3,
+  html.no-depth .d3-mag { transform: none !important; transition: none !important; }
+  html.no-depth .d3::after,
+  html.no-depth .d3-sheen::before,
+  html.no-depth #d3Cursor { display: none !important; }
+  html.no-depth .d3-rise,
+  html.no-depth .d3-words > .d3-w { opacity: 1 !important; transform: none !important; }
+  html.no-depth .view.d3-enter { animation: none !important; }
+  @media (prefers-reduced-motion: reduce) {
+    .d3, .d3-mag { transform: none !important; transition: none !important; }
+    .d3::after, .d3-sheen::before, #d3Cursor { display: none !important; }
+    .d3-rise, .d3-words > .d3-w { opacity: 1 !important; transform: none !important; }
+    .view.d3-enter { animation: none !important; }
+  }
+
   /* ============ SEMANTIC MOTION ============ */
   /* Every animation here is chosen to echo what the element MEANS —
      growth numbers rise, a 0→1 metric is born by spinning out of nothing,
@@ -9856,6 +9968,189 @@
     //    authored default, so doing nothing here is already the correct
     //    reduced-motion and no-JS rendering.
     initCinematicHero(gsap);
+
+    // 5) The depth system across every view — see the DEPTH SYSTEM styles.
+    initDepthSystem();
+  }
+
+  /* ─────────────────────────── Depth system ────────────────────────────────
+     Applies the depth vocabulary to every view, not just the home hero.
+
+     Design constraints that shaped this:
+       • One delegated pointer listener for the whole document, not a listener
+         per card. There are 100+ candidate surfaces; per-element listeners
+         would be the expensive part, not the transforms.
+       • Pointer work is coalesced into a single requestAnimationFrame. Moving a
+         mouse fires far more events than there are frames to render.
+       • Values are written to CSS custom properties and the browser interpolates
+         them, rather than JS animating each frame.
+       • One IntersectionObserver drives all reveals and unobserves each element
+         once it has arrived, so nothing accumulates.
+       • Everything is skipped wholesale when motion is off, and the stylesheet
+         has `html.no-depth` as a belt-and-braces switch. */
+  function initDepthSystem() {
+    var root = document.documentElement;
+    if (!heroMotionAllowed()) { root.classList.add('no-depth'); return; }
+
+    var hasHover = !!(mq && mq('(hover: hover)').matches);
+
+    // ── Which surfaces get which treatment ───────────────────────────────────
+    // Deliberately semantic class names only. The home bento is Tailwind-styled
+    // with no stable hook of its own, so its direct children are taken by
+    // structure instead — matching on utility soup would silently stop working
+    // the first time a class list is edited.
+    var TILT = '.hero-stat, .work-stat, .contact-card, .mod, .home-bento > *, [data-d3]';
+    var RISE = '.hero-stat, .work-stat, .contact-card, .mod, .section-head';
+    // The nav rails are included deliberately: they are the controls a visitor
+    // actually touches most, and leaving them inert made the effect feel like it
+    // only applied to decorative content.
+    var MAG  = '.btn, .chip, .top-bar-link, .sidebar-item, .sidebar-subitem';
+
+    function each(sel, fn) {
+      try { document.querySelectorAll(sel).forEach(fn); } catch (e) { /* selector unsupported */ }
+    }
+
+    // ── Depth: tag surfaces, then light and tilt whichever one is under the
+    //    pointer. Only the hovered element is ever transformed. ──────────────
+    each(TILT, function (el) { el.classList.add('d3'); });
+
+    if (hasHover) {
+      var active = null, pending = null;
+
+      document.addEventListener('pointerover', function (e) {
+        var el = e.target && e.target.closest && e.target.closest('.d3');
+        if (el === active) return;
+        if (active) reset(active);
+        active = el;
+        if (active) active.classList.add('is-lit');
+      }, { passive: true });
+
+      document.addEventListener('pointerout', function (e) {
+        if (!active) return;
+        // Only release when the pointer has actually left the surface, not when
+        // it crosses onto a child element inside it.
+        if (e.relatedTarget && active.contains(e.relatedTarget)) return;
+        reset(active); active = null;
+      }, { passive: true });
+
+      document.addEventListener('pointermove', function (e) {
+        if (!active) return;
+        pending = e;
+        if (!frame) frame = requestAnimationFrame(apply);
+      }, { passive: true });
+
+      var frame = 0;
+      function apply() {
+        frame = 0;
+        var el = active, e = pending;
+        if (!el || !e) return;
+        var r = el.getBoundingClientRect();
+        if (!r.width || !r.height) return;
+        // -0.5 … 0.5 from the centre of the surface.
+        var nx = (e.clientX - r.left) / r.width - 0.5;
+        var ny = (e.clientY - r.top) / r.height - 0.5;
+        var MAX = 7;                                  // degrees; more reads as broken
+        el.style.setProperty('--ry', (nx * MAX).toFixed(2) + 'deg');
+        el.style.setProperty('--rx', (-ny * MAX).toFixed(2) + 'deg');
+        el.style.setProperty('--lift', '-4px');
+        el.style.setProperty('--px', ((nx + 0.5) * 100).toFixed(1) + '%');
+        el.style.setProperty('--py', ((ny + 0.5) * 100).toFixed(1) + '%');
+      }
+      function reset(el) {
+        el.classList.remove('is-lit');
+        el.style.setProperty('--rx', '0deg');
+        el.style.setProperty('--ry', '0deg');
+        el.style.setProperty('--lift', '0px');
+      }
+    }
+
+    // ── State: buttons lean toward the pointer while it is over them ─────────
+    if (hasHover) {
+      each(MAG, function (el) { el.classList.add('d3-mag'); });
+      document.addEventListener('pointermove', function (e) {
+        var el = e.target && e.target.closest && e.target.closest('.d3-mag');
+        if (!el) return;
+        var r = el.getBoundingClientRect();
+        var dx = (e.clientX - (r.left + r.width / 2)) / r.width;
+        var dy = (e.clientY - (r.top + r.height / 2)) / r.height;
+        el.style.transform = 'translate(' + (dx * 5).toFixed(1) + 'px,' + (dy * 4).toFixed(1) + 'px)';
+      }, { passive: true });
+      document.addEventListener('pointerout', function (e) {
+        var el = e.target && e.target.closest && e.target.closest('.d3-mag');
+        if (el) el.style.transform = '';
+      }, { passive: true });
+    }
+
+    // ── Time: a light that trails the pointer, easing toward it each frame ───
+    if (hasHover) {
+      var glow = document.createElement('div');
+      glow.id = 'd3Cursor';
+      glow.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(glow);
+      var tx = innerWidth / 2, ty = innerHeight / 2, cx = tx, cy = ty, running = false;
+      document.addEventListener('pointermove', function (e) {
+        tx = e.clientX; ty = e.clientY;
+        glow.classList.add('on');
+        if (!running) { running = true; requestAnimationFrame(trail); }
+      }, { passive: true });
+      function trail() {
+        // Lerp rather than snap: the lag is what makes it feel like light with
+        // mass instead of a cursor sprite.
+        cx += (tx - cx) * 0.085;
+        cy += (ty - cy) * 0.085;
+        glow.style.transform = 'translate3d(' + cx.toFixed(1) + 'px,' + cy.toFixed(1) + 'px,0)';
+        if (Math.abs(tx - cx) > 0.4 || Math.abs(ty - cy) > 0.4) requestAnimationFrame(trail);
+        else running = false;
+      }
+    }
+
+    // ── Depth reveals + word assembly, driven by one observer ────────────────
+    each(RISE, function (el) { el.classList.add('d3-rise'); });
+    each('.section-head, .mod, .contact-card', function (el) { el.classList.add('d3-sheen'); });
+
+    // Split section headings into words. Only the heading element inside, so the
+    // eyebrow/label text above it is left alone.
+    each('.section-head h2, .section-head h3', function (h) {
+      if (h.querySelector('.d3-w') || h.children.length) return;   // already split, or has markup to preserve
+      var words = (h.textContent || '').trim().split(/\s+/);
+      if (words.length < 2 || words.length > 14) return;
+      h.textContent = '';
+      words.forEach(function (w, i) {
+        var s = document.createElement('span');
+        s.className = 'd3-w';
+        s.textContent = w;
+        s.style.transitionDelay = (i * 0.055).toFixed(3) + 's';
+        h.appendChild(s);
+        if (i < words.length - 1) h.appendChild(document.createTextNode(' '));
+      });
+      h.classList.add('d3-words');
+    });
+
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (!en.isIntersecting) return;
+          en.target.classList.add('in');
+          io.unobserve(en.target);        // arrived — stop watching it
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+      each('.d3-rise, .d3-sheen, .d3-words', function (el) { io.observe(el); });
+    } else {
+      each('.d3-rise, .d3-sheen, .d3-words', function (el) { el.classList.add('in'); });
+    }
+
+    // ── State: every route change arrives with depth ─────────────────────────
+    document.addEventListener('viewChanged', function () {
+      var v = document.querySelector('.view.active');
+      if (!v) return;
+      v.classList.remove('d3-enter');
+      void v.offsetWidth;                 // restart the animation
+      v.classList.add('d3-enter');
+      // Surfaces revealed by the incoming view have not been observed yet.
+      each('.view.active .d3-rise, .view.active .d3-sheen, .view.active .d3-words', function (el) {
+        el.classList.add('in');
+      });
+    });
   }
 
   // The global Motion toggle defaults to OFF, which keeps the heavy Three.js
