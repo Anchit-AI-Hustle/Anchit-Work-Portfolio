@@ -69,6 +69,13 @@ set_key OPENAI_API_KEY    "OpenAI — cascade provider (optional)." "https://pla
 set_key META_API_URL      "Meta Model API base URL (Muse Spark, public preview) — the provider stays off unless this AND the key are set." "https://ai.meta.com/ (Model API docs)"
 set_key META_API_KEY      "Meta Model API key." "https://ai.meta.com/"
 
+echo "=== Google Vertex AI Agent Builder (optional; answers the chat first when set) ==="
+set_key GOOGLE_PROJECT_ID     "GCP project id that owns the agent." "https://console.cloud.google.com/"
+set_key GOOGLE_AGENT_ENGINE   "Agent Builder app / engine id." "https://console.cloud.google.com/gen-app-builder"
+set_key GOOGLE_AGENT_LOCATION "Agent location: global (default), eu or us." "optional"
+set_key GOOGLE_SERVICE_ACCOUNT_JSON "The service-account JSON, pasted verbatim (needs Discovery Engine access). A token is minted from it automatically." "https://console.cloud.google.com/iam-admin/serviceaccounts"
+set_key GOOGLE_AGENT_URL      "OPTIONAL alternative: a full endpoint URL, used verbatim — for Dialogflow CX, a Reasoning Engine or an ADK service instead of a Discovery Engine app." "your agent's endpoint"
+
 echo "=== Optional extras ==="
 set_key CARTESIA_API_KEY "Cartesia TTS (another voice-clone tier in the cascade)." "https://play.cartesia.ai/keys"
 set_key FISH_API_KEY     "Fish Audio TTS (free developer tier)." "https://fish.audio/go-api/"

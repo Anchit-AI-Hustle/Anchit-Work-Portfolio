@@ -1,12 +1,23 @@
-// /api/chat — Claude-backed chat as Anchit's AI persona.
+// /api/chat — chat as Anchit's AI persona.
 //
-// Answers in first person from the portfolio facts below. If ANTHROPIC_API_KEY
-// is not set (or the call fails), it returns 503 and the frontend silently falls
-// back to the built-in offline knowledge base — so the site never breaks.
+// Answer engines, in order. Each is skipped when unconfigured, so a partial
+// setup is fine and the chat never breaks:
+//
+//   1) Google Vertex AI Agent Builder — your own agent, grounded on your own
+//      data store. Tried first when configured, because it is the engine you
+//      control. See api/_google-agent.js for the env it needs.
+//   2) Claude — the persona prompt below, which is the site's default voice.
+//   3) Neither configured → 503, and the frontend falls back to the offline
+//      knowledge base built into index.html.
+//
+// GET /api/chat reports which engines are wired (no secrets).
 //
 // Env:
-//   ANTHROPIC_API_KEY  (required for live LLM answers)
-//   CLAUDE_MODEL       (optional; default claude-haiku-4-5-20251001)
+//   ANTHROPIC_API_KEY  (required for Claude answers)
+//   CLAUDE_MODEL       (optional; default claude-sonnet-4-6)
+//   GOOGLE_*           (optional; see api/_google-agent.js)
+
+const googleAgent = require('./_google-agent.js');
 
 // Sonnet by default for warmer, more natural answers; override with CLAUDE_MODEL
 // (e.g. claude-haiku-4-5-20251001 for lower latency/cost).
@@ -55,15 +66,46 @@ async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
+
+  // Which engines are live. Mirrors /api/tts?debug=1 so both are checkable the
+  // same way after a deploy.
+  if (req.method === 'GET') {
+    res.setHeader('Cache-Control', 'no-store');
+    return res.status(200).json({
+      order: ['google-agent', 'claude'],
+      configured: {
+        'google-agent': googleAgent.configured(),
+        claude: !!process.env.ANTHROPIC_API_KEY,
+      },
+      claudeModel: MODEL,
+    });
+  }
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return res.status(503).json({ error: 'not_configured' });
+  if (!apiKey && !googleAgent.configured()) return res.status(503).json({ error: 'not_configured' });
 
   let body = {};
   try { body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {}); } catch {}
   const message = (body.message || '').toString().slice(0, 2000).trim();
   if (!message) return res.status(400).json({ error: 'message required' });
+
+  // 1) Your own Agent Builder agent, when configured. Any failure — unreachable,
+  //    expired credentials, no grounded answer — falls through to Claude rather
+  //    than surfacing an error, so a half-set-up agent can't take the chat down.
+  if (googleAgent.configured()) {
+    try {
+      const out = await googleAgent.ask(message, (body.googleSession || '').toString().slice(0, 300));
+      if (out && out.ok && out.reply) {
+        res.setHeader('Cache-Control', 'no-store');
+        res.setHeader('X-Chat-Engine', 'google-agent');
+        // The session id goes back to the client so the next question continues
+        // the same Agent Builder conversation.
+        return res.status(200).json({ reply: out.reply, engine: 'google-agent', googleSession: out.session || '' });
+      }
+    } catch { /* fall through to Claude */ }
+    if (!apiKey) return res.status(502).json({ error: 'google_agent_failed' });
+  }
 
   // Optional short history: [{role:'user'|'assistant', content:'...'}]
   const history = Array.isArray(body.history) ? body.history.slice(-6).filter(
@@ -90,7 +132,8 @@ async function handler(req, res) {
     const reply = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('').trim();
     if (!reply) return res.status(502).json({ error: 'empty' });
     res.setHeader('Cache-Control', 'no-store');
-    return res.status(200).json({ reply });
+    res.setHeader('X-Chat-Engine', 'claude');
+    return res.status(200).json({ reply, engine: 'claude' });
   } catch (e) {
     return res.status(502).json({ error: 'fetch_failed', message: String(e).slice(0, 200) });
   }

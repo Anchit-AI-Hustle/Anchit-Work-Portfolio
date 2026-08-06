@@ -2763,7 +2763,18 @@
 </head>
 <body>
 
-<!-- ───────── PAGE PRELOADER (covers first paint, fades on load) ───────── -->
+<!-- ───────── PAGE PRELOADER — DISABLED ─────────
+     Commented out because it was the first of two curtains in front of the
+     cinematic title sequence, and it said the same things: "AT", "Anchit
+     Tandon", stepped loading copy and a progress bar. The visitor met that,
+     then the intro popup, and only then the title sequence — which had already
+     finished animating behind them, so the assembly was never actually seen.
+
+     It held the page for at least (3 steps x 720ms) + 350ms = 2510ms.
+
+     To restore: uncomment the markup and the driver below, and delete the
+     body.loaded shim that replaces it. -->
+<!--
 <div id="preloader" aria-hidden="true">
   <div class="preloader-inner">
     <div class="preloader-mark">AT</div>
@@ -2778,20 +2789,14 @@
 </div>
 <noscript><style>#preloader{display:none!important;}</style></noscript>
 <script>
-  /* Drives the loading steps and hides the curtain. Registered immediately
-     after the markup so a throw in any later initializer can't leave it stuck.
-     Steps advance one at a time and the curtain stays up for a readable minimum
-     even when the page loads instantly. */
   (function () {
     var pre = document.getElementById('preloader');
     if (!pre) return;
     var steps = pre.querySelectorAll('.pstep');
-    var STEP_MS = 720;                                   // dwell per step (readable)
-    var MIN_MS  = steps.length * STEP_MS + 350;          // keep curtain up this long
+    var STEP_MS = 720;
+    var MIN_MS  = steps.length * STEP_MS + 350;
     var start   = (window.performance && performance.now) ? performance.now() : 0;
     function now() { return (window.performance && performance.now) ? performance.now() : (start + MIN_MS); }
-
-    // Light each step in turn; leave finished ones marked done.
     var i = 0;
     function advance() {
       steps.forEach(function (s, idx) {
@@ -2803,11 +2808,9 @@
       else setTimeout(function () { steps.forEach(function (s) { s.classList.remove('active'); s.classList.add('done'); }); }, STEP_MS);
     }
     if (steps.length) advance();
-
     var hidden = false, loaded = false;
     function hide() {
       if (hidden) return; hidden = true;
-      // Let the page elements run their entrance animation as the curtain lifts.
       if (document.body) document.body.classList.add('loaded');
       pre.classList.add('done');
       setTimeout(function () { if (pre && pre.parentNode) pre.parentNode.removeChild(pre); }, 700);
@@ -2819,7 +2822,18 @@
     }
     if (document.readyState === 'complete') { loaded = true; maybeHide(); }
     else { window.addEventListener('load', function () { loaded = true; maybeHide(); }); }
-    setTimeout(hide, 8000); // hard fallback — never trap the visitor
+    setTimeout(hide, 8000);
+  })();
+</script>
+-->
+<script>
+  /* Shim for the disabled preloader. `body.loaded` is what triggers the staggered
+     tileRise entrance on the home bento, and it was only ever set when the
+     curtain lifted — without this the tiles would simply appear with no motion. */
+  (function () {
+    function mark() { if (document.body) document.body.classList.add('loaded'); }
+    if (document.readyState === 'complete') mark();
+    else window.addEventListener('load', mark);
   })();
 </script>
 <style>
@@ -6201,16 +6215,23 @@
 	  // site; a packaged/static build can't reach it, so set window.ANCHIT_API_BASE
 	  // (e.g. the Vercel URL) to point the live LLM at the deployment.
 	  const API_BASE = (window.ANCHIT_API_BASE || '').replace(/\/$/, '');
-	  // Calls the Claude-backed /api/chat. Returns the reply string, or null if the
+	  // Multi-turn context for a Google Agent Builder agent is held on Google's
+	  // side and keyed by a session id. The server hands one back; echoing it on
+	  // the next question is what makes the agent's conversation continuous.
+	  // Empty (and ignored) whenever Claude is answering instead.
+	  let googleSession = '';
+	  // Calls /api/chat, which tries a Google Agent Builder agent first when it is
+	  // configured and Claude otherwise. Returns the reply string, or null if the
 	  // endpoint isn't configured / unreachable so we can fall back to the offline KB.
 	  async function llmReply(text) {
 	    try {
 	      const r = await fetch(API_BASE + '/api/chat', {
 	        method: 'POST', headers: { 'Content-Type': 'application/json' },
-	        body: JSON.stringify({ message: text, history: chatHistory }),
+	        body: JSON.stringify({ message: text, history: chatHistory, googleSession }),
 	      });
 	      if (!r.ok) return null;
 	      const data = await r.json();
+	      if (data && typeof data.googleSession === 'string') googleSession = data.googleSession;
 	      return (data && typeof data.reply === 'string' && data.reply.trim()) ? data.reply.trim() : null;
 	    } catch { return null; }
 	  }
@@ -6426,8 +6447,14 @@
 	    ob.classList.add('intro-open');   // .intro-open uses !important so it beats the inline opacity:0
 	  }
 	  window.showAnchitIntro = showAnchitIntro;
-	  // Show the centered introduction on every page load (a refresh re-shows it).
-	  setTimeout(showAnchitIntro, 450);
+	  // DISABLED: the intro popup was the second curtain in front of the cinematic
+	  // title sequence. It opened over the stage on every single load, so the
+	  // sequence played behind a blurred scrim and was finished by the time the
+	  // visitor dismissed it. The markup and showAnchitIntro() are kept intact so
+	  // the tour is still reachable — window.showAnchitIntro() opens it on demand,
+	  // and the "Prefer a guided tour?" path still works from there.
+	  // To restore the automatic popup, uncomment the line below.
+	  // setTimeout(showAnchitIntro, 450);
 
 	  function hideAnchitIntro() {
 	    const ob = document.getElementById('onboarding');
@@ -9867,8 +9894,13 @@
       }
     }
 
-    // ── Assembly, once, on load ──────────────────────────────────────────────
-    var tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    // ── Assembly, once, when the stage is actually on screen ─────────────────
+    // Built paused. This sequence only exists to be watched, so starting it on
+    // script load was a mistake: anything covering the viewport at that moment —
+    // a preloader curtain, a modal, or simply landing deep-linked on another
+    // view — consumed the whole animation and the visitor arrived to a finished
+    // screen. It now waits until the stage is genuinely visible.
+    var tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
     tl.to('#cineHero .cine-ring', { scale: 1, opacity: 1, duration: 1.0, stagger: 0.12 })
       .to('#cineHero .cine-arc', { opacity: 1, duration: 0.7 }, '-=0.6')
       .to(letters, { opacity: 1, y: 0, duration: 0.5, stagger: 0.035 }, '-=0.45')
@@ -9893,6 +9925,19 @@
         },
       }, 1.5 + idx * 0.28);
     });
+
+    // Start the assembly the first time the stage is on screen, then stop
+    // watching. No IntersectionObserver (very old browser) just plays it.
+    if (typeof IntersectionObserver === 'function') {
+      var io = new IntersectionObserver(function (entries) {
+        if (!entries.some(function (e) { return e.isIntersecting; })) return;
+        io.disconnect();
+        tl.play();
+      }, { threshold: 0.25 });
+      io.observe(cine);
+    } else {
+      tl.play();
+    }
 
     // ── Continuous life: rings rotate, the scan line sweeps ──────────────────
     gsap.to('#cineHero .cine-arc.a1', { rotate: 360, duration: 18, ease: 'none', repeat: -1 });
