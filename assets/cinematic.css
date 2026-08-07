@@ -1,0 +1,73 @@
+/* cinematic.css — the shared arrival motion. Pairs with cinematic.js.
+ *
+ * One curve and one distance for every page, so the site moves the same way
+ * everywhere. Only transform and opacity animate, so this is compositor work
+ * and never triggers layout.
+ *
+ * Sections are hidden ONLY once the script has confirmed motion is wanted
+ * (html.cine-on). Authoring `opacity: 0` in the stylesheet would hide content
+ * from anyone without JS, or with the script blocked — the page must be fully
+ * readable on its own and gain the motion afterwards, never depend on it.
+ */
+
+:root {
+  --cine-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --cine-dur: 0.85s;
+  --cine-rise: 30px;
+  --cine-tilt: 6deg;
+}
+
+html.cine-on .cine-section {
+  opacity: 0;
+  transform: perspective(1200px) rotateX(var(--cine-tilt)) translateY(var(--cine-rise));
+  transform-origin: 50% 100%;
+  transition:
+    opacity var(--cine-dur) var(--cine-ease),
+    transform var(--cine-dur) var(--cine-ease);
+  will-change: opacity, transform;
+}
+
+html.cine-on .cine-section.cine-in {
+  opacity: 1;
+  transform: none;
+  /* Released once arrived: leaving will-change on every section permanently
+     keeps a compositor layer alive for each one, which costs memory for motion
+     that has already finished. */
+  will-change: auto;
+}
+
+/* A single light passes across a section as it arrives. Purely decorative, so
+   it is drawn on a pseudo-element and never affects layout or hit-testing. */
+html.cine-on .cine-section { position: relative; }
+html.cine-on .cine-section.cine-in::after {
+  content: '';
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 1;
+  background: linear-gradient(100deg, transparent 38%,
+    rgba(255, 183, 54, 0.10) 50%, transparent 62%);
+  animation: cineSweep 1s var(--cine-ease) 0.1s both;
+}
+@keyframes cineSweep {
+  from { opacity: 0; transform: translateX(-24%); }
+  40%  { opacity: 1; }
+  to   { opacity: 0; transform: translateX(24%); }
+}
+
+/* Motion off, by explicit choice or by OS preference: nothing moves and
+   nothing is hidden. `cine-static` is what the script sets; the media query
+   covers the case where the script never ran. */
+html.cine-static .cine-section {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+html.cine-static .cine-section::after { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  html.cine-on .cine-section {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  html.cine-on .cine-section.cine-in::after { display: none !important; }
+}

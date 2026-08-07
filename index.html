@@ -10126,12 +10126,43 @@
       h.classList.add('d3-words');
     });
 
+    // ── Surfaces arrive ONE AT A TIME, never in a clump ──────────────────────
+    // A viewport usually contains several surfaces, and a route change exposes a
+    // whole screen of them at once. Revealing on intersection alone made them
+    // all pop together, which reads as a page loading rather than a sequence
+    // being performed. Arrivals go through a queue instead: sorted into document
+    // order and released on a fixed beat, so the eye is always led top-to-bottom.
+    var queue = [], releasing = false;
+    var STEP_MS = 110;                    // beat between consecutive arrivals
+
+    function inDocOrder(a, b) {
+      var pos = a.compareDocumentPosition(b);
+      if (pos & Node.DOCUMENT_POSITION_FOLLOWING) return -1;
+      if (pos & Node.DOCUMENT_POSITION_PRECEDING) return 1;
+      return 0;
+    }
+    function enqueue(el) {
+      if (el.__cineQueued || el.classList.contains('in')) return;
+      el.__cineQueued = true;
+      queue.push(el);
+      if (!releasing) { releasing = true; requestAnimationFrame(release); }
+    }
+    function release() {
+      // Re-sorted each beat because more surfaces may have queued since the
+      // last one, and a later arrival can sit above an earlier one on the page.
+      queue.sort(inDocOrder);
+      var el = queue.shift();
+      if (!el) { releasing = false; return; }
+      el.classList.add('in');
+      setTimeout(release, STEP_MS);
+    }
+
     if ('IntersectionObserver' in window) {
       var io = new IntersectionObserver(function (entries) {
         entries.forEach(function (en) {
           if (!en.isIntersecting) return;
-          en.target.classList.add('in');
-          io.unobserve(en.target);        // arrived — stop watching it
+          enqueue(en.target);
+          io.unobserve(en.target);        // queued — stop watching it
         });
       }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
       each('.d3-rise, .d3-sheen, .d3-words', function (el) { io.observe(el); });
@@ -10146,10 +10177,12 @@
       v.classList.remove('d3-enter');
       void v.offsetWidth;                 // restart the animation
       v.classList.add('d3-enter');
-      // Surfaces revealed by the incoming view have not been observed yet.
-      each('.view.active .d3-rise, .view.active .d3-sheen, .view.active .d3-words', function (el) {
-        el.classList.add('in');
-      });
+      // The incoming view's surfaces go through the same queue, so a route
+      // change performs the page in order instead of flashing it all at once.
+      // Queued after the view's own entrance so the two don't fight.
+      setTimeout(function () {
+        each('.view.active .d3-rise, .view.active .d3-sheen, .view.active .d3-words', enqueue);
+      }, 180);
     });
   }
 
