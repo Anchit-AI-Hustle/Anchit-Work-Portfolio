@@ -1544,25 +1544,46 @@
     body { font-size: 20px; }
   }
 
-  /* ============ REVEAL — animate in on scroll ============ */
+  /* ============ REVEAL — animate in on scroll ============
+     Three tiers, each with its own timeline, in this order:
+
+       section   a scope only. It never moves; it exists to give the blocks
+                 inside it a shared starting instant, so one section's cascade
+                 can never be pulled along by a neighbouring section's.
+       block     the thing that actually rises into place (.reveal).
+       element   the children of a block (.reveal-stagger > *), each one step
+                 behind the last.
+
+     Every delay comes from --anim-d, set per element by the sequencer in JS.
+     It used to be six nth-child rules with everything from the 7th onwards
+     collapsed onto one delay — so a 22-card grid played 6 steps and then
+     dumped the remaining 16 simultaneously. A single custom property has no
+     such ceiling and stays strictly ordered at any count. */
+
   /* Floating entrance — every step rises, un-blurs and scales into place. */
   .reveal {
-    opacity: 0; transform: translateY(40px) scale(0.97); filter: blur(6px);
+    opacity: 0; transform: translateY(28px) scale(0.985); filter: blur(6px);
     transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), filter 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+    transition-delay: var(--anim-d, 0s);
   }
   .reveal.in { opacity: 1; transform: none; filter: none; }
   .reveal-stagger > * {
     opacity: 0; transform: translateY(34px) scale(0.96); filter: blur(5px);
     transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), filter 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    transition-delay: var(--anim-d, 0s);
   }
   .reveal-stagger.in > * { opacity: 1; transform: none; filter: none; }
-  .reveal-stagger.in > *:nth-child(1) { transition-delay: 0.05s; }
-  .reveal-stagger.in > *:nth-child(2) { transition-delay: 0.13s; }
-  .reveal-stagger.in > *:nth-child(3) { transition-delay: 0.21s; }
-  .reveal-stagger.in > *:nth-child(4) { transition-delay: 0.29s; }
-  .reveal-stagger.in > *:nth-child(5) { transition-delay: 0.37s; }
-  .reveal-stagger.in > *:nth-child(6) { transition-delay: 0.45s; }
-  .reveal-stagger.in > *:nth-child(n+7) { transition-delay: 0.53s; }
+
+  /* A block that contains other reveals is demoted to a pure scope: it keeps
+     its trigger role but drops its own opacity/transform/filter. Otherwise the
+     motion compounds — the parent's blur and fade sit on top of the child's,
+     and the parent's transform makes a containing block that the child then
+     animates inside. The nested pairs (about-grid > about-values, now-grid >
+     now-focus-list) looked muddy for exactly this reason. */
+  .reveal.is-scope,
+  .reveal.is-scope.in {
+    opacity: 1; transform: none; filter: none; transition: none;
+  }
 
   /* ============ CURSOR GLOW ============ */
   .cursor-glow {
@@ -1575,9 +1596,9 @@
   }
 
   /* ============ ENHANCED REVEALS ============ */
-  .reveal-left  { opacity: 0; transform: translateX(-32px); transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); }
-  .reveal-right { opacity: 0; transform: translateX(32px);  transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); }
-  .reveal-scale { opacity: 0; transform: scale(0.94);       transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); }
+  .reveal-left  { opacity: 0; transform: translateX(-32px); transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); transition-delay: var(--anim-d, 0s); }
+  .reveal-right { opacity: 0; transform: translateX(32px);  transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); transition-delay: var(--anim-d, 0s); }
+  .reveal-scale { opacity: 0; transform: scale(0.94);       transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); transition-delay: var(--anim-d, 0s); }
   .reveal-left.in, .reveal-right.in, .reveal-scale.in { opacity: 1; transform: none; }
 
   /* Respect reduced-motion: show everything immediately, no movement */
@@ -7617,29 +7638,117 @@
 
   /* floating year removed — phase separators already show the date context */
 
-  /* ============ ENHANCED REVEAL OBSERVER ============ */
-  function observeReveals() {
-    if (!('IntersectionObserver' in window)) {
-      const sel = '.view.active .reveal, .view.active .reveal-stagger, .view.active .reveal-left, .view.active .reveal-right, .view.active .reveal-scale';
-      document.querySelectorAll(sel).forEach(el => el.classList.add('in'));
-      return;
+  /* ============ REVEAL SEQUENCER ============
+     Turns "everything that is on screen appears now" into a cascade that runs
+     section by section, block by block, element by element.
+
+     Independent: a section is its own timeline origin. Blocks in section B
+     never inherit an offset earned by section A, so a long page does not
+     accumulate an ever-growing delay, and deep-linking into the middle of the
+     page starts that section's cascade from zero.
+
+     Sequential: blocks that arrive together within one section are handed
+     increasing offsets in DOM order; a block arriving on its own gets no
+     offset, because there is nothing for it to queue behind. Inside a block,
+     every child is one step behind the previous one — with no cap. */
+
+  const REVEAL_SEL = '.reveal, .reveal-stagger, .reveal-left, .reveal-right, .reveal-scale';
+
+  // Steps grow sub-linearly so a long grid stays strictly ordered without the
+  // last card waiting on a linear pile-up: 22 cards land across ~0.6s rather
+  // than ~1.5s, and no two share an instant.
+  function stepDelay(i, step) { return i <= 0 ? 0 : step * Math.pow(i, 0.72); }
+
+  // Blocks entering within this window count as one arrival and are cascaded
+  // against each other. Beyond it, a block is on its own and starts at zero.
+  const BURST_MS = 260;
+  const sectionBursts = new WeakMap();
+
+  function scopeOf(el) {
+    return el.closest('.panel, section, .view') || document.body;
+  }
+
+  // Position within the parent, so element order follows the DOM — which for a
+  // CSS grid is exactly reading order, left to right and top to bottom.
+  function indexIn(el) {
+    return Array.prototype.indexOf.call(el.parentElement.children, el);
+  }
+
+  function playBlock(block) {
+    const scope = scopeOf(block);
+    const now = performance.now();
+    let burst = sectionBursts.get(scope);
+    if (!burst || now - burst.at > BURST_MS) burst = { at: now, n: 0 };
+
+    // Cap the block offset: with many blocks landing at once the later ones
+    // should still feel prompt, and order is already carried by the sequence.
+    const blockDelay = Math.min(burst.n, 4) * 0.085;
+    burst.n += 1;
+    burst.at = now;
+    sectionBursts.set(scope, burst);
+
+    if (!block.classList.contains('is-scope')) {
+      block.style.setProperty('--anim-d', blockDelay.toFixed(3) + 's');
     }
+
+    // Children continue their block's timeline rather than restarting it, so
+    // the whole section reads as one sentence instead of several.
+    if (block.classList.contains('reveal-stagger')) {
+      Array.prototype.forEach.call(block.children, (child, i) => {
+        child.style.setProperty('--anim-d', (blockDelay + stepDelay(i, 0.062)).toFixed(3) + 's');
+      });
+    }
+    block.classList.add('in');
+  }
+
+  function showAll() {
+    document.querySelectorAll(REVEAL_SEL).forEach((el) => el.classList.add('in'));
+  }
+
+  function observeReveals() {
+    // A block wrapping other blocks becomes a scope, so the two never animate
+    // on top of each other. Marked before observing, since it changes whether
+    // the block gets a delay of its own.
+    document.querySelectorAll('.reveal').forEach((el) => {
+      if (el.querySelector(REVEAL_SEL)) el.classList.add('is-scope');
+    });
+
+    if (!('IntersectionObserver' in window)) return showAll();
+
     if (revealObserver) revealObserver.disconnect();
     revealObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('in');
+      // In DOM order, so a burst cascades down the page rather than in whatever
+      // order the observer happens to report.
+      entries
+        .filter((e) => e.isIntersecting)
+        .sort((a, z) => (a.target.compareDocumentPosition(z.target) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1))
+        .forEach((entry) => {
+          playBlock(entry.target);
           revealObserver.unobserve(entry.target);
-        }
-      });
+        });
     }, { threshold: 0.1, rootMargin: '0px 0px -32px 0px' });
-    const sel = '.view.active .reveal, .view.active .reveal-stagger, .view.active .reveal-left, .view.active .reveal-right, .view.active .reveal-scale';
-    document.querySelectorAll(sel).forEach(el => {
+
+    document.querySelectorAll('.view.active ' + REVEAL_SEL.split(', ').join(', .view.active ')).forEach((el) => {
       if (!el.classList.contains('in')) revealObserver.observe(el);
     });
   }
 
   observeReveals();
+
+  // Fail-safe. Everything above starts at opacity:0, so any block the observer
+  // never reports — a hidden ancestor at observe time, a layout that leaves it
+  // permanently outside the root margin — would be invisible for good. This is
+  // the failure a previous fix worked around by disabling motion site-wide;
+  // catching it directly is what let the motion come back.
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.querySelectorAll('.view.active ' + REVEAL_SEL.split(', ').join(', .view.active ')).forEach((el) => {
+        const r = el.getBoundingClientRect();
+        const onScreen = r.top < window.innerHeight && r.bottom > 0;
+        if (onScreen && !el.classList.contains('in')) playBlock(el);
+      });
+    }, 1200);
+  });
 
   /* ============ SERVICE WORKER ============ */
   if ('serviceWorker' in navigator) {
@@ -9014,12 +9123,9 @@
     94% { opacity: .95; }
     96% { opacity: .68; }
   }
-  .reveal {
-    transform: translateY(28px) scale(.985) !important;
-  }
-  .reveal.in {
-    transform: none !important;
-  }
+  /* The translateY(28px) scale(.985) that used to be forced from here is now
+     the base .reveal value itself. As an !important override it also beat the
+     stagger's transition-delay in some orders, which flattened the cascade. */
   @media (prefers-reduced-motion: reduce) {
     body::after,
     .view.active,
@@ -10608,24 +10714,21 @@
     object-position: center;
   }
 
-  /* ---- No motion -----------------------------------------------------
-     Every animation and transition off, everywhere, for everyone — not just
-     for users who set prefers-reduced-motion.
+  /* ---- Motion policy -------------------------------------------------
+     This used to switch every animation and transition off for everyone via
+     `*:not(#_) { transition: none !important }`. That made a sequenced reveal
+     impossible by construction: the cascade is built from transition-delay,
+     and a zeroed delay collapses every tier onto the same instant.
 
-     `*` alone is NOT enough: rules like `.motion-reactive { transition: …
-     !important }` are class-level, and between two !important declarations
-     the more specific selector wins — a class (0,1,0) beats `*` (0,0,0).
-     `:not(#_)` matches everything but borrows an id's specificity (1,0,0),
-     so these outrank any class-level !important without matching an id. */
-  *:not(#_), *:not(#_)::before, *:not(#_)::after {
-    animation: none !important;
-    animation-duration: 0s !important;
-    animation-delay: 0s !important;
-    transition: none !important;
-    transition-duration: 0s !important;
-    transition-delay: 0s !important;
-    scroll-behavior: auto !important;
-  }
+     It was defending against a real failure — reveals start at opacity:0, so a
+     block the observer never reported stayed invisible for good. That is now
+     handled at the source instead, by the sequencer's fail-safe sweep, so the
+     blanket rule is gone and the cascade can run.
+
+     Motion still stops completely for anyone who asks for it: the
+     prefers-reduced-motion blocks earlier in this file force every reveal
+     variant visible and unmoved. The narrower suppressions below stay as they
+     were — they are about individual decorative effects, not about flow. */
   html, body { scroll-behavior: auto !important; }
 
   /* The 3D tilt cards set a perspective transform on hover with !important.
@@ -10636,19 +10739,11 @@
     will-change: auto !important;
   }
 
-  /* Scroll-reveal elements fade in via transition. With transitions off,
-     anything the observer has not marked .in would stay invisible forever —
-     so force every reveal variant fully visible and unmoved. */
-  .reveal, .reveal.in,
-  .reveal-stagger > *, .reveal-stagger.in > *,
-  .reveal-left, .reveal-left.in,
-  .reveal-right, .reveal-right.in,
-  .reveal-scale, .reveal-scale.in,
-  .view.v-enter, .view.v-leave {
-    opacity: 1 !important;
-    transform: none !important;
-    filter: none !important;
-  }
+  /* The reveal variants were forced visible and unmoved here, as the companion
+     to the blanket transition kill above. Both are gone: forcing opacity:1 on
+     `.reveal` with !important is precisely what a scroll reveal must not do,
+     since it leaves nothing to reveal. The view-transition classes keep their
+     own timing, which never depended on this. */
 
   /* Some elements start at opacity:0 and are revealed BY a one-shot animation
      rather than by a transition — with animations off they would never appear,
