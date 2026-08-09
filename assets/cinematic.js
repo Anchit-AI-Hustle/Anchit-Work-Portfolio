@@ -30,7 +30,41 @@
   var on = true;
   try { if (localStorage.getItem('anchit-motion') === 'off') on = false; } catch (e) {}
   if (!root.hasAttribute('data-motion')) root.setAttribute('data-motion', on ? 'on' : 'off');
-  if (root.getAttribute('data-motion') === 'off') return;   // calm mode: do nothing at all
+  var motionOff = root.getAttribute('data-motion') === 'off';
+
+  // A control on EVERY page, because 'off' is stored globally.
+  //
+  // The Motion toggle only exists on the homepage, so one click there set
+  // anchit-motion=off for the whole origin and left all 22 other pages
+  // permanently static with no way to undo it — verified: tagged=0, played=0,
+  // and no control anywhere on the page. A global switch needs a global way
+  // back, so this injects a small one wherever the homepage's is absent.
+  function injectToggle() {
+    if (document.getElementById('motionToggle') || document.getElementById('cinMotion')) return;
+    var btn = document.createElement('button');
+    btn.id = 'cinMotion';
+    btn.type = 'button';
+    btn.setAttribute('aria-pressed', motionOff ? 'false' : 'true');
+    btn.title = motionOff ? 'Motion is off — click to turn it on' : 'Click to turn motion off';
+    btn.textContent = motionOff ? 'Motion: off' : 'Motion: on';
+    btn.style.cssText = 'position:fixed;left:14px;bottom:14px;z-index:2147483000;' +
+      'font:500 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em;' +
+      'text-transform:uppercase;padding:7px 11px;border-radius:99px;cursor:pointer;' +
+      'color:#B3A996;background:#16130F;border:1px solid rgba(255,247,232,.16);opacity:.75';
+    btn.addEventListener('mouseenter', function () { btn.style.opacity = '1'; });
+    btn.addEventListener('mouseleave', function () { btn.style.opacity = '.75'; });
+    btn.addEventListener('click', function () {
+      var next = root.getAttribute('data-motion') === 'off' ? 'on' : 'off';
+      try { localStorage.setItem('anchit-motion', next); } catch (e) {}
+      location.reload();                       // simplest correct re-apply
+    });
+    (document.body || root).appendChild(btn);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectToggle);
+  } else { injectToggle(); }
+
+  if (motionOff) return;                       // calm mode: nothing else runs
 
   // ── styles, injected so the script can never arrive without them ─────────
   var css = document.createElement('style');
