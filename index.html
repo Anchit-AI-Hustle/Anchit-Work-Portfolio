@@ -2845,7 +2845,22 @@
       var btn=document.getElementById('motionToggle'); if(!btn) return;
       var order=['auto','on','off'], lbl=btn.querySelector('.motion-label');
       function get(){ try{ return localStorage.getItem('anchit-motion')||'auto'; }catch(e){ return 'auto'; } }
-      function render(s){ btn.setAttribute('data-state', s); lbl.textContent='Motion: '+s.charAt(0).toUpperCase()+s.slice(1); }
+      // "Auto" follows the operating system, so on a machine with Reduce Motion
+      // enabled the whole cinematic layer is suppressed and the control still
+      // read a reassuring "Motion: Auto" — no clue that anything was off, or
+      // that one click restores it. Say which way Auto actually resolved.
+      function render(s){
+        btn.setAttribute('data-state', s);
+        var osReduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+        var label = 'Motion: ' + s.charAt(0).toUpperCase() + s.slice(1);
+        if (s === 'auto' && osReduced) {
+          label = 'Motion: Off · system';
+          btn.title = 'Your system asks for reduced motion, so the cinematic layer is off. Click to turn it on anyway.';
+        } else {
+          btn.title = 'Cinematic motion: auto follows your system, or force it on/off.';
+        }
+        lbl.textContent = label;
+      }
       render(get());
       btn.addEventListener('click', function(){
         var next=order[(order.indexOf(get())+1)%order.length];
