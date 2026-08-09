@@ -7223,6 +7223,43 @@
       el.classList.add(kids.length >= 3 ? 'reveal-stagger' : 'reveal');
       el.dataset.autoMotion = '1';
     });
+
+    // Second pass — the boxes INSIDE grids.
+    //
+    // The pass above only reaches two levels below .container, so a grid nested
+    // deeper never became a stagger scope and its cards arrived as one silent
+    // slab. Only `.reveal-stagger > *` earns a per-child delay, so a grid that
+    // is merely inside a `.reveal` block gives its cards no beat of their own.
+    // An audit put the Side Hustle view at 61% of boxes animating individually.
+    //
+    // So: any grid or flex row at ANY depth holding three or more real boxes
+    // becomes a stagger scope, and every card in it gets its own moment.
+    view.querySelectorAll('.container div, .container ul, .container ol').forEach((el) => {
+      if (el.dataset.autoGrid) return;
+      if (el.classList.contains('reveal-stagger')) return;
+      if (el.matches(AUTO_SKIP) || el.closest(AUTO_SKIP)) return;
+      // Not "is the parent a grid?" but "are the children cards?". Keying on
+      // display:grid|flex missed .now-left, a plain block wrapper holding two
+      // real content cards, so .now-role-card arrived with no beat of its own.
+      const boxKids = [...el.children].filter((c) => {
+        const cr = c.getBoundingClientRect();
+        if (cr.height <= 48 || cr.width <= 80) return false;
+        const cs = getComputedStyle(c);
+        return cs.borderRadius !== '0px' &&
+               (parseFloat(cs.borderTopWidth) > 0 || cs.backgroundColor !== 'rgba(0, 0, 0, 0)' || cs.boxShadow !== 'none');
+      });
+      const s = getComputedStyle(el);
+      const gridish = /grid|flex/.test(s.display);
+      // A grid of anything cascades; a plain wrapper only when its children are
+      // themselves cards, so ordinary prose wrappers are left alone.
+      const kids = gridish ? [...el.children].filter((c) => {
+        const cr = c.getBoundingClientRect();
+        return cr.height > 48 && cr.width > 80;
+      }) : boxKids;
+      if (kids.length < 2) return;
+      el.classList.add('reveal-stagger');
+      el.dataset.autoGrid = '1';
+    });
   }
 
   function observeReveals() {
