@@ -67,35 +67,53 @@
        s.boxShadow !== 'none');
   }
 
+  // index.html and index-motion.html carry an older inline reveal system. This
+  // runtime must not double-animate what that already owns, so anything it has
+  // claimed counts as covered and is left completely alone. That makes the two
+  // safe to run side by side: this one fills only the gaps.
+  var INLINE = '.reveal,.reveal-stagger,.reveal-left,.reveal-right,.reveal-scale';
+  function covered(el) {
+    if (el.__cin || el.classList.contains('cin') || el.classList.contains('cin-stagger')) return true;
+    if (el.parentElement &&
+        (el.parentElement.classList.contains('cin-stagger') ||
+         el.parentElement.classList.contains('reveal-stagger'))) return true;
+    return el.matches(INLINE) || el.closest(INLINE) !== null;
+  }
+
   function tag(scope) {
     var host = scope || document.body;
     if (!host) return;
+    var all = host.querySelectorAll('*');
+    if (all.length > 6000) return;            // pathological DOM: leave it alone
 
-    // Blocks: direct content children of the page's main containers.
-    var containers = host.querySelectorAll(
-      'main,section,article,.container,.wrap,.content,.page,.shell,.panel,.card-grid,.grid');
-    var seen = [];
-    Array.prototype.forEach.call(containers, function (c) {
-      Array.prototype.forEach.call(c.children, function (el) { seen.push(el); });
-    });
-    if (!seen.length && host.children) {
-      Array.prototype.forEach.call(host.children, function (el) { seen.push(el); });
-    }
-
-    seen.forEach(function (el) {
-      if (el.__cin || el.classList.contains('cin') || el.classList.contains('cin-stagger')) return;
+    // Pass 1 — anything holding two or more cards becomes a stagger scope, at
+    // ANY depth. Walking only the direct children of known containers left
+    // nested grids untouched: 78% of boxes across these pages had no beat.
+    Array.prototype.forEach.call(all, function (el) {
+      if (el.__cinGrid || covered(el)) return;
       if (skip(el)) return;
-      var r = el.getBoundingClientRect();
-      if (r.height < 36 || r.width < 60) return;                 // rules, spacers, icons
-      // A container of cards cascades its children; anything else arrives whole.
       var kids = Array.prototype.filter.call(el.children, function (c) {
         var cr = c.getBoundingClientRect();
         return cr.height > 40 && cr.width > 60;
       });
-      var s = getComputedStyle(el);
-      var gridish = /grid|flex/.test(s.display);
-      var cardKids = kids.filter(boxLike);
-      el.classList.add((gridish && kids.length >= 2) || cardKids.length >= 2 ? 'cin-stagger' : 'cin');
+      if (kids.length < 2) return;
+      var gridish = /grid|flex/.test(getComputedStyle(el).display);
+      // A grid of anything cascades; a plain wrapper only when its children are
+      // themselves cards, so ordinary prose wrappers are left alone.
+      if (!gridish && kids.filter(boxLike).length < 2) return;
+      el.classList.add('cin-stagger');
+      el.__cinGrid = 1; el.__cin = 1;
+    });
+
+    // Pass 2 — every remaining card-like box arrives on its own.
+    Array.prototype.forEach.call(all, function (el) {
+      if (covered(el)) return;
+      if (skip(el)) return;
+      var r = el.getBoundingClientRect();
+      if (r.height < 40 || r.width < 60) return;
+      if (!boxLike(el)) return;
+      if (el.querySelector('.cin,.cin-stagger')) return;   // a scope already covers its insides
+      el.classList.add('cin');
       el.__cin = 1;
     });
   }
