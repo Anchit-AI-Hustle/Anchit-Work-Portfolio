@@ -1710,7 +1710,7 @@
 
   /* ============ ANIMATED COUNTERS ============ */
   .counter { font-variant-numeric: tabular-nums; }
-  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+  
 
   /* ============ 3D TILT ============ */
   .tilt-card { transform-style: preserve-3d; }
@@ -1981,11 +1981,7 @@
   }
 
   /* Flash highlight when node is jumped to */
-  @keyframes nodeFlash {
-    0%   { box-shadow: 0 0 0 0 var(--primary-soft), inset 0 0 0 0 var(--primary-soft); }
-    40%  { box-shadow: 0 0 0 8px rgba(255,77,31,0.2), inset 0 0 32px rgba(255,77,31,0.06); }
-    100% { box-shadow: none; }
-  }
+  
 
   /* ============ LIFECYCLE TIMELINE ============ */
   .lifecycle { margin-top: 80px; padding-top: 64px; border-top: 1px solid var(--rule); }
@@ -2507,10 +2503,8 @@
     transition:opacity .6s ease, visibility .6s ease;
   }
   #preloader.done{ opacity:0; visibility:hidden; pointer-events:none; }
-  @keyframes preFadeUp{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:none; } }
-  @keyframes preSweep{
-    0%{ left:-40%; } 50%{ left:60%; } 100%{ left:120%; }
-  }
+  
+  
   /* Home bento tiles rise in, staggered, once the curtain lifts (body.loaded).
      Default state is fully visible so a JS failure never hides content. */
   body.loaded .home-bento > * { animation: tileRise .6s cubic-bezier(.22,1,.36,1) both; }
@@ -7750,15 +7744,11 @@
   .contact-card[data-c]:hover .contact-icon svg { color: #fff; }
 
   /* ===== Hero: make it feel alive — animation & interactivity, no copy changes ===== */
-  @keyframes heroShimmer { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
-  @keyframes heroRise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-  @keyframes heroFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+  
+  
+  
 
   /* Floating, glowing profile orb */
-  .home-hero .profile-pic {
-    animation: heroFloat 5.5s ease-in-out infinite;
-    box-shadow: 0 0 0 2px var(--rule-strong), 0 14px 44px rgba(255,106,26,.28);
-  }
 
   /* (#1) Show the colourful channel icons on desktop too (not just mobile), alongside labels. */
   .top-bar-link .tb-icon { display: inline-block !important; width: 15px; height: 15px; }
