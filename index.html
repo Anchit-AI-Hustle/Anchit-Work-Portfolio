@@ -10287,8 +10287,8 @@
   html[data-motion="off"] #ambientToggle .abar i { animation:none !important; }
   @media (max-width:820px){ #ambientToggle{ bottom:58px; } }
 </style>
-<button type="button" id="ambientToggle" data-on="0" aria-pressed="false" title="Ambient score">
-  <span class="abar" aria-hidden="true"><i></i><i></i><i></i></span><span class="alabel">Score: off</span>
+<button type="button" id="ambientToggle" data-on="0" aria-pressed="false" title="Ambient background music — pauses automatically while anyone is speaking">
+  <span class="abar" aria-hidden="true"><i></i><i></i><i></i></span><span class="alabel">Music: off</span>
 </button>
 <script id="ambient-score-js">
 (function(){
@@ -10308,7 +10308,7 @@
     btn.setAttribute('data-on', on ? '1' : '0');
     btn.setAttribute('data-ducked', ducked ? '1' : '0');
     btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-    label.textContent = on ? (ducked ? 'Score: paused' : 'Score: on') : 'Score: off';
+    label.textContent = on ? (ducked ? 'Music: paused' : 'Music: on') : 'Music: off';
   }
 
   // A slow, warm drone in the site's key — three detuned voices through a
