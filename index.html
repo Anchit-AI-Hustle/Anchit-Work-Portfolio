@@ -20,6 +20,28 @@
 <script>
   // Dark only — light mode removed.
   document.documentElement.setAttribute('data-theme', 'dark');
+
+  // Decide the cinematic hero HERE, before the first paint.
+  //
+  // It used to be display:none in the markup and only un-hidden inside
+  // initCinematicHero(), which waits for GSAP — a deferred 71KB script polled
+  // every 100ms. So the visitor watched the bento hero paint first, then the
+  // 260vh title sequence got inserted ABOVE it and the whole page jumped down.
+  // That is the "screen first, then the animation" everyone was seeing.
+  //
+  // This runs synchronously in <head>, so the class is on <html> before a
+  // single pixel is painted: the page opens ON the cinematic sequence, or
+  // opens on the bento hero with no sequence at all. Never one then the other.
+  (function () {
+    var on;
+    try {
+      var m = localStorage.getItem('anchit-motion');
+      on = m === 'on' ? true
+         : m === 'off' ? false
+         : !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    } catch (e) { on = true; }   // storage blocked → assume the full experience
+    if (on) document.documentElement.classList.add('cine-ready');
+  })();
 </script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -741,6 +763,10 @@
      real content) leads. `.is-static` is the authored default, so this is also
      what a no-JS visitor gets. */
   .cine.is-static { display: none; }
+  /* …unless the pre-paint check above already decided the sequence is on, in
+     which case it must be laid out from the very first frame. initCinematicHero
+     still removes .is-static later; this only stops the gap in between. */
+  html.cine-ready .cine.is-static { display: block; }
 
   /* ============ CHAT ============ */
   .chat-block {
