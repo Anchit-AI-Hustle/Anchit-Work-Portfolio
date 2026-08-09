@@ -24,7 +24,15 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Fonts load WITHOUT blocking the first paint. A plain stylesheet link
+     here meant the page could not render a single pixel until Google's
+     server answered — on a slow or filtered network that is a white
+     screen for as long as the request takes. rel="preload" fetches it
+     without blocking rendering; onload then promotes it to a real
+     stylesheet. Fallback text shows immediately either way (display=swap),
+     and <noscript> keeps it working with JS disabled. -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"></noscript>
 
 <!-- Tailwind: built from this file's own markup and served SAME-ORIGIN, matching
      the vendored Three.js/GSAP above. The old cdn.tailwindcss.com script compiled
@@ -3254,7 +3262,7 @@
       </svg>
     </button>
     <a class="sidebar-logo" href="#home" data-view="home" aria-label="Home">
-      <img src="AnchitTandon-AppLogo.png" alt="Anchit Tandon Logo">
+      <img src="assets/anchit-mark-440.webp" alt="Anchit Tandon Logo" width="40" height="40" decoding="async">
       <span>Anchit Tandon</span>
     </a>
   </div>
@@ -3547,7 +3555,7 @@
           <div class="cine-ring r3"></div>
           <div class="cine-arc a1"></div>
           <div class="cine-arc a2"></div>
-          <img src="assets/logo-at.jpg" alt="" width="330" height="330" decoding="async" fetchpriority="high">
+          <img src="assets/logo-at-660.webp" alt="" width="330" height="330" decoding="async" fetchpriority="high">
           <div class="cine-scan" id="cineScan"></div>
         </div>
 
@@ -3578,7 +3586,7 @@
         <div id="homeHeroTile" class="md:col-span-2 md:row-span-2 rounded-3xl p-8 lg:p-10 flex flex-col justify-center relative overflow-hidden bg-[var(--bg-elev)] border border-[var(--rule)] shadow-sm">
           <div class="hero-dot-grid absolute inset-0 opacity-30" aria-hidden="true"></div>
           <div class="hero-id relative z-10 flex items-center gap-6 mb-8">
-            <img src="AnchitTandon-AppLogo.png" alt="Anchit Tandon" class="hero-portrait shrink-0 rounded-full object-cover border-2 border-[var(--rule)]">
+            <img src="assets/anchit-mark-440.webp" alt="Anchit Tandon" width="440" height="440" fetchpriority="high" class="hero-portrait shrink-0 rounded-full object-cover border-2 border-[var(--rule)]">
             <div>
               <div class="eyebrow has-dot mb-2 text-xs opacity-80"><span class="live-dot"></span>Live · AGM – Vahdam India</div>
               <h1 class="text-4xl md:text-5xl lg:text-6xl tracking-tight m-0 leading-none" style="font-family:var(--font-display);font-weight:600;">
@@ -3791,7 +3799,7 @@
       </div>
       <div class="chat-block">
         <div class="chat-head">
-          <div class="chat-head-avatar"><img src="AnchitTandon-AppLogo.png" alt="Anchit Tandon" style="width:100%; height:100%; object-fit:cover; border-radius:50%;"></div>
+          <div class="chat-head-avatar"><img src="assets/anchit-mark-440.webp" width="64" height="64" loading="lazy" decoding="async" alt="Anchit Tandon" style="width:100%; height:100%; object-fit:cover; border-radius:50%;"></div>
           <div class="chat-head-info">
             <div class="title" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
               <span>Talk with Anchit</span>
@@ -3807,7 +3815,7 @@
           </button>
         </div>
         <div class="chat-persona" id="chatPersona">
-          <div class="cp-stage"><span class="cp-ring" aria-hidden="true"></span><img src="AnchitTandon-AppLogo.png" alt="Anchit Tandon"><video id="chatPersonaVideo" playsinline></video></div>
+          <div class="cp-stage"><span class="cp-ring" aria-hidden="true"></span><img src="assets/anchit-mark-440.webp" width="220" height="220" loading="lazy" decoding="async" alt="Anchit Tandon"><video id="chatPersonaVideo" playsinline></video></div>
           <div class="cp-name">Anchit · AI persona</div>
         </div>
         <div class="chat-modes" role="group" aria-label="Chat with Anchit or have him narrate the portfolio">
