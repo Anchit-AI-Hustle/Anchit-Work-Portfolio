@@ -6297,7 +6297,7 @@
     lookingFor: 'roles and collaborations',
     strongestSignals: 'curiosity, depth, innovation, experimentation on creative ideas, and hunger to succeed',
     vahdamHighlight: 'the customer lifecycle & retention OS I am building, plus successful UK marketing revenue growth',
-    note: 'I am still early at Vahdam, roughly 1.5 to 2 months into the role, so the highlight is the operating system I am building rather than claiming a long list of finished wins.',
+    note: 'I am still early at Vahdam, so the highlight is the operating system I am building rather than a long list of finished wins.',
     mainWorkProject: 'a customer lifecycle & retention OS',
     hobbyProject: 'this interactive portfolio',
     passionProject: 'MusicGenAI',
@@ -6314,36 +6314,38 @@
     const hints = [];
     const about = ANCHIT_PROFILE;
     if (/\b(role|job|current|vahdam|company|title|designation|what do you do|doing)\b/.test(q)) {
-      hints.push(`I am ${about.currentRole}. I started on ${about.startDate}. The headline right now is ${about.vahdamHighlight}. ${about.note}`);
+      hints.push(`Right now I'm AGM for Product Management and D2C Growth at Vahdam India, across the US, UK and global markets. I joined on 20 April 2026, so I'm still early in it — the thing I'd point at isn't a long list of finished wins, it's the customer lifecycle and retention OS I'm building. We've also moved UK marketing revenue.`);
     }
     if (/\b(open|looking|hire|hiring|role|roles|collab|collaboration|available|opportunit)\b/.test(q)) {
-      hints.push(`Yes, I am open to ${about.lookingFor}. The right fit is a place where I can combine engineering thinking, product judgement, D2C growth, creative experimentation, and measurable execution.`);
+      hints.push(`Yes — I'm open to both roles and collaborations. What I'm actually looking for is somewhere I can use the engineering side and the product side together: D2C growth, room to run experiments, and a number at the end of it that tells me whether I was right.`);
     }
     if (/\b(strength|strong|edge|why you|different|stand out|best at|superpower)\b/.test(q)) {
-      hints.push(`My edge is ${about.strongestSignals}. I do not like surface-level answers; I keep digging until I understand the system, then I test ideas until the outcome moves.`);
+      hints.push(`Honestly? Curiosity, and not being satisfied with a surface-level answer. I keep digging until I actually understand the system underneath, then I start testing until the outcome moves. That's the whole method.`);
     }
     if (/\b(team|lead|stakeholder|cross[- ]?functional|manage|people)\b/.test(q)) {
-      hints.push("For team and stakeholder work, the strongest evidence is the Delhi Half Marathon launch, ET Markets multi-platform revamp, ET Prime Assisted Sales, and Vahdam D2C growth work. Those required product, tech, marketing, sales, ops, and leadership alignment.");
+      hints.push("The clearest examples are the Delhi Half Marathon launch, the ET Markets revamp across iOS, Android and web, ET Prime Assisted Sales, and the D2C work at Vahdam. Each one needed product, engineering, marketing, sales and ops pointing the same way — the marathon especially, because it also had a hard date and 15,000 people showing up.");
     }
     if (/\b(fail|mistake|learn|lesson|improve)\b/.test(q)) {
-      hints.push("My learning pattern is consistent: start with engineering, move closer to customer and business decisions, test fast, read the funnel honestly, and improve the system instead of defending the first idea.");
+      hints.push("My pattern is pretty consistent: start from the engineering, get closer to the customer and the business, ship something small, then read the funnel honestly. The hard part is fixing the system instead of defending the first idea — I've had to unlearn that more than once.");
     }
     if (/\b(strategy|roadmap|prioriti|decide|tradeoff)\b/.test(q)) {
-      hints.push("My product style is metrics-led: identify the funnel constraint, ship a focused experiment, read the outcome, then compound the working loop.");
+      hints.push("I work backwards from the funnel. Find the actual constraint, ship one focused experiment against it, read what happened, then compound whatever worked. Prioritisation gets much easier once you know which number you're moving.");
     }
     if (/\b(ai|automation|agent|llm)\b/.test(q)) {
-      hints.push(`My AI work is practical, not just novelty: ${about.mainWorkProject} is my most important work project, ${about.hobbyProject} is a hobby build, and ${about.passionProject} is my passion project for music. AI TeleSuite, Hey Yaara, Mailer Architect, and The Third Eye all map AI to concrete workflows.`);
+      hints.push(`My AI work is deliberately practical rather than novelty. The lifecycle and retention OS is the one that matters most professionally. This portfolio is a hobby build, MusicGenAI is the passion project. AI TeleSuite, Hey Yaara, Mailer Architect and The Third Eye all exist because there was a real workflow worth automating.`);
     }
     if (/\b(project|side|build|music|portfolio|lifecycle|hobby|passion)\b/.test(q)) {
-      hints.push(`${about.mainWorkProject} matters most professionally right now. ${about.hobbyProject} is where I experiment with guided chat, voice narration, responsive UI, and portfolio storytelling. ${about.passionProject} is the personal passion build because music is close to me.`);
+      hints.push(`Professionally, the lifecycle and retention OS matters most right now. This portfolio is where I mess around with guided chat, voice narration and the storytelling side. MusicGenAI is the personal one — music is close to me, so that's the build I keep coming back to on weekends.`);
     }
     if (/\b(contact|reach|call|meet|whatsapp|sms|email|resume)\b/.test(q)) {
-      hints.push(`Best route: ${about.contactOrder}. WhatsApp/call/SMS are on <a href='tel:+919873945238'>+91 98739 45238</a>, email is <a href='mailto:anchit.tandon@gmail.com'>anchit.tandon@gmail.com</a>, and the <a href='assets/resume.pdf' target='_blank' rel='noopener'>resume opens in a new tab</a>.`);
+      hints.push(`Easiest is WhatsApp or a call on <a href='tel:+919873945238'>+91 98739 45238</a> — SMS works too. If you'd rather talk properly, book a 30-minute Google Meet. Email is <a href='mailto:anchit.tandon@gmail.com'>anchit.tandon@gmail.com</a>, and my <a href='assets/resume.pdf' target='_blank' rel='noopener'>resume opens in a new tab</a>.`);
     }
     if (hints.length) {
-      return `<strong>Answering directly:</strong><br>${hints.join(' ')}`;
+      // Just answer — no "Answering directly:" preamble. Announcing that you
+      // are about to answer is the tell that gives away a machine.
+      return hints.join(' ');
     }
-    return `<strong>Here is the closest accurate answer:</strong><br>I am ${about.currentRole}, started on ${about.startDate}, and I am open to ${about.lookingFor}. My strongest signals are ${about.strongestSignals}. If your question is about fit, I would anchor on my engineering-to-product journey, ET Prime Assisted Sales, ET Markets, ${about.vahdamHighlight}, ${about.hobbyProject}, and ${about.passionProject}.`;
+    return `Short version: I'm AGM for Product Management and D2C Growth at Vahdam India since April 2026, and I'm open to roles and collaborations. If you're weighing up fit, the things I'd point you at are the move from engineering into product, ET Prime Assisted Sales, the ET Markets rebuild, and the lifecycle OS I'm building now. Ask me about any of those and I'll go deeper.`;
   }
 	  // Conversation memory passed to the LLM for follow-up context.
 	  let chatHistory = [];
@@ -10374,8 +10376,26 @@
         if (!entries.some(function (e) { return e.isIntersecting; })) return;
         io.disconnect();
         tl.play();
-      }, { threshold: 0.25 });
+      // The stage is 260vh tall, so it can never intersect by more than
+      // 100/260 = 0.38. A 0.25 threshold left almost no margin — on a short
+      // viewport, or with the browser throttling the callback, it could miss
+      // entirely. Every element in this sequence starts at opacity 0, so a
+      // missed trigger is not a missing animation, it is a blank first screen.
+      }, { threshold: 0.05 });
       io.observe(cine);
+
+      // Watchdog. If the assembly still has not started while the home view is
+      // on screen, start it; if it is still stuck a moment later, jump to the
+      // finished state. Better a sequence the visitor did not see play than a
+      // hero that never appears.
+      setTimeout(function () {
+        var homeLive = document.getElementById('view-home');
+        if (!homeLive || !homeLive.classList.contains('active')) return;
+        if (tl.progress() === 0 && !tl.isActive()) { try { io.disconnect(); } catch (e) {} tl.play(); }
+        setTimeout(function () {
+          if (tl.progress() === 0 && !tl.isActive()) tl.progress(1).pause();
+        }, 1500);
+      }, 2500);
     } else {
       tl.play();
     }
@@ -10934,13 +10954,31 @@
   }, 400);
   // 4) The visitor speaking: the mic button carries .listening, and the
   //    wake-word pill flips to "active" during a conversation.
+  // Watch ONLY the two elements that carry this state. Observing the whole
+  // document fired on every class change on the page — and the cinematic intro
+  // animates dozens of letter spans continuously, so that was thousands of
+  // callbacks a second, each running querySelector, competing with the intro
+  // for the main thread.
   if ('MutationObserver' in window) {
-    new MutationObserver(function(){
-      var micLive = !!document.querySelector('.chat-mic.listening, #chatMic.listening');
+    var readMic = function(){
+      var mic = document.getElementById('chatMic');
       var pill = document.getElementById('jarvisPill');
-      var inConvo = pill && pill.getAttribute('data-state') === 'active';
-      setDuck('mic', micLive || !!inConvo);
-    }).observe(document.documentElement, { subtree:true, attributes:true, attributeFilter:['class','data-state'] });
+      setDuck('mic', !!(mic && mic.classList.contains('listening')) ||
+                     !!(pill && pill.getAttribute('data-state') === 'active'));
+    };
+    var watch = function(){
+      var mic = document.getElementById('chatMic');
+      var pill = document.getElementById('jarvisPill');
+      var mo = new MutationObserver(readMic);
+      if (mic)  mo.observe(mic,  { attributes:true, attributeFilter:['class'] });
+      if (pill) mo.observe(pill, { attributes:true, attributeFilter:['data-state'] });
+      return !!(mic || pill);
+    };
+    // Both are injected late, so retry briefly rather than observing everything.
+    if (!watch()) {
+      var tries = 0;
+      var iv = setInterval(function(){ if (watch() || ++tries > 20) clearInterval(iv); }, 400);
+    }
   }
 
   btn.addEventListener('click', function(){ on ? stop() : start(); });
