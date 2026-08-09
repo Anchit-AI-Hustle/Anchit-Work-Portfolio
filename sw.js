@@ -2,21 +2,22 @@
  * Cache name is version-stamped so each deploy purges the previous cache
  * (the activate handler deletes every cache whose name !== CACHE). Bump
  * this string on every deploy that changes assets. */
-const CACHE = 'anchit-portfolio-20260725-task-tracker-shell';
+const CACHE = 'anchit-portfolio-20260810-slim-shell';
 const SHELL = [
   '/',
   '/index.html',
   '/task-tracker.html',
   '/manifest.json',
-  '/assets/app-skill-map.css',
-  '/assets/app-skill-map.js',
-  '/assets/project-playbooks.css',
-  '/assets/project-playbooks.js',
   '/assets/task-tracker-shell.js',
   '/assets/vendor/three.min.js',
   '/assets/vendor/gsap.min.js',
   '/assets/vendor/ScrollTrigger.min.js',
-  '/AnchitTandon-AppLogo.png',
+  /* The page renders the optimised WebP; the 1.5MB PNG it replaced is kept
+     in the repo only for og:image, which social scrapers fetch server-side
+     and never from this cache — so precaching it cost 1.5MB per install
+     for a file no visitor loads. */
+  '/assets/anchit-mark-440.webp',
+  '/assets/logo-at-660.webp',
   '/icons/apple-touch-icon.png',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
