@@ -7191,7 +7191,44 @@
     document.querySelectorAll(REVEAL_SEL).forEach((el) => el.classList.add('in'));
   }
 
+  /* ── Universal coverage ────────────────────────────────────────────────
+     The choreography above is only as complete as the markup that opts into
+     it, and an audit found 92%: home sat at 42% (the bento tiles and the
+     Tailwind-classed hero were never tagged), chat at 0%, experience at 89%.
+
+     Hand-tagging the gaps would fix today and rot tomorrow — anything added
+     later arrives with no motion and nobody notices. So the view is walked on
+     entry and every untagged content block is given its role automatically:
+     a container of three or more children becomes a stagger scope so its
+     children cascade; anything else arrives as one block.
+
+     Deliberately skipped, because motion there is wrong rather than missing:
+     live chat messages (they stream in and would fight their own animation),
+     form controls, canvases, and the cinematic hero, which runs its own
+     timeline. `[data-no-motion]` opts anything else out by hand. */
+  const AUTO_SKIP = '.chat-body, .chat-input, .chips, .msg, .cine, input, textarea, select, button, canvas, svg, [data-no-motion]';
+
+  function autoChoreograph(view) {
+    if (!view) return;
+    view.querySelectorAll('.container > *, .container > * > *').forEach((el) => {
+      if (el.dataset.autoMotion) return;                 // idempotent
+      if (el.matches(REVEAL_SEL) || el.closest(REVEAL_SEL)) return;
+      if (el.matches(AUTO_SKIP) || el.closest(AUTO_SKIP)) return;
+      const r = el.getBoundingClientRect();
+      if (r.height < 40 || r.width < 80) return;         // rules, spacers, icons
+      const kids = [...el.children].filter((c) => {
+        const cr = c.getBoundingClientRect();
+        return cr.height > 24 && cr.width > 40;
+      });
+      el.classList.add(kids.length >= 3 ? 'reveal-stagger' : 'reveal');
+      el.dataset.autoMotion = '1';
+    });
+  }
+
   function observeReveals() {
+    // Tag first, so anything auto-assigned this pass is observed with the rest.
+    autoChoreograph(document.querySelector('.view.active'));
+
     // A block wrapping other blocks becomes a scope, so the two never animate
     // on top of each other. Marked before observing, since it changes whether
     // the block gets a delay of its own.
@@ -7226,15 +7263,32 @@
   // permanently outside the root margin — would be invisible for good. This is
   // the failure a previous fix worked around by disabling motion site-wide;
   // catching it directly is what let the motion come back.
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      document.querySelectorAll('.view.active ' + REVEAL_SEL.split(', ').join(', .view.active ')).forEach((el) => {
-        const r = el.getBoundingClientRect();
-        const onScreen = r.top < window.innerHeight && r.bottom > 0;
-        if (onScreen && !el.classList.contains('in')) playBlock(el);
-      });
-    }, 1200);
-  });
+  // It has to keep sweeping, not fire once. The original ran a single pass
+  // 1200ms after load and only for what was on screen at that instant, so a
+  // block further down whose observer entry was missed stayed invisible for
+  // good however far you scrolled — .mailer-studio on the Mailer project was
+  // exactly that: still opacity 0 after being scrolled to the centre of the
+  // viewport. The sweep now runs whenever the viewport changes.
+  function sweepVisible() {
+    document.querySelectorAll('.view.active ' + REVEAL_SEL.split(', ').join(', .view.active ')).forEach((el) => {
+      if (el.classList.contains('in')) return;
+      const r = el.getBoundingClientRect();
+      if (r.top < window.innerHeight && r.bottom > 0) playBlock(el);
+    });
+  }
+
+  let sweepQueued = false;
+  function queueSweep() {
+    if (sweepQueued) return;
+    sweepQueued = true;
+    // rAF + a short settle, so a fast scroll costs one sweep rather than dozens.
+    requestAnimationFrame(() => setTimeout(() => { sweepQueued = false; sweepVisible(); }, 180));
+  }
+
+  window.addEventListener('load', () => setTimeout(sweepVisible, 1200));
+  window.addEventListener('scroll', queueSweep, { passive: true });
+  window.addEventListener('resize', queueSweep, { passive: true });
+  document.addEventListener('viewChanged', () => setTimeout(sweepVisible, 400));
 
   /* ============ SERVICE WORKER ============ */
   if ('serviceWorker' in navigator) {
