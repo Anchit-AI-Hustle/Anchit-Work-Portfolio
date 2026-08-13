@@ -157,6 +157,30 @@
       el.__cinGrid = 1; el.__cin = 1;
     });
 
+    // Pass 3 — structural blocks that are not card-like at all.
+    //
+    // Passes 1 and 2 only recognise grids and boxes (border, background or
+    // shadow). That left whole pages untouched: hotel's six <section class=
+    // "scene"> blocks scored 0/6, and the plain wrapper divs on the lifecycle
+    // tool pages 0-50%. A block is a block whether or not it has a border, so
+    // any section-sized container that nothing else has claimed now arrives on
+    // its own beat — which is what makes the page progressive rather than a
+    // few animated cards floating in a static layout.
+    Array.prototype.forEach.call(
+      host.querySelectorAll('section,article,main>div,.container>div,.wrap>div,.shell>div,.page>div'),
+      function (el) {
+        if (covered(el) || skip(el)) return;
+        var r = el.getBoundingClientRect();
+        if (r.height < 60 || r.width < 120) return;
+        // If something inside is already choreographed, let that carry the
+        // section — animating both would fade the same content twice.
+        if (el.querySelector('.cin,.cin-stagger,.reveal,.reveal-stagger')) return;
+        if (!(el.textContent || '').trim()) return;          // spacers and rules
+        el.classList.add('cin');
+        el.__cin = 1;
+      }
+    );
+
     // Pass 2 — every remaining card-like box arrives on its own.
     Array.prototype.forEach.call(all, function (el) {
       if (covered(el)) return;
