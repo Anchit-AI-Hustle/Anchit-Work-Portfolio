@@ -393,20 +393,16 @@
   }
 
   /* ── Bento card anatomy ───────────────────────────────────────────────────
-     An index, a category, and a launch arrow — so a grid of work reads as a
-     catalogue with an order to it, rather than as tiles that happen to be
-     adjacent. */
+     An index and a category dot, so a grid of work reads as a catalogue with
+     an order to it rather than as tiles that happen to be adjacent. There is
+     no separate topline rule: .build-tag already is that row. */
   .bento-index {
     font-family: var(--font-mono); font-size: 10px; letter-spacing: .18em;
-    color: var(--primary); opacity: .75;
+    color: var(--primary); opacity: .75; font-variant-numeric: tabular-nums;
   }
-  .bento-topline {
-    display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
-    font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em;
-    text-transform: uppercase; color: var(--ink-dim);
-  }
-  .bento-topline .bento-eyebrow-dot {
-    width: 5px; height: 5px; border-radius: 50%; background: var(--primary); opacity: .8;
+  .bento-eyebrow-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--primary); opacity: .8;
   }
   /* ── Hold to reveal ───────────────────────────────────────────────────────
      chandan.dev's signature move: two images stacked, and the pointer opens a
@@ -464,15 +460,6 @@
   html[data-motion="off"] .hold-reveal .hr-under,
   html[data-motion="off"] .hold-reveal .hr-ring { transition: none; }
 
-  .bento-launch {
-    margin-left: auto; display: inline-flex; align-items: center; justify-content: center;
-    width: 26px; height: 26px; border-radius: 50%;
-    border: 1px solid var(--rule); color: var(--ink-dim);
-    transition: transform .3s cubic-bezier(.16, 1, .3, 1), border-color .25s ease, color .25s ease;
-  }
-  .device-card:hover .bento-launch, a:hover > .bento-launch {
-    transform: translate(2px, -2px); border-color: var(--primary); color: var(--primary);
-  }
   .sidebar-rule {
     width: auto; height: 1px; border: none;
     background: rgba(255,255,255,0.1); margin: 8px 10px; flex-shrink: 0;
@@ -1372,6 +1359,11 @@
     display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 24px; position: relative; z-index: 1;
   }
+  .build-tag { gap: 10px; }
+  /* space-between would fling index / dot / label to opposite ends of the row.
+     Only the status belongs on the right; the rest hug the left together. */
+  .build-tag > span:not(.status) { flex: 0 0 auto; }
+  .build-tag > span:nth-last-child(2):not(.status) { margin-right: auto; }
   .build-tag .status { color: var(--accent); display: inline-flex; align-items: center; gap: 6px; }
   .build-tag .status::before {
     content: ''; width: 6px; height: 6px; background: var(--accent);
@@ -4066,7 +4058,7 @@
 
         <!-- Featured widget — How-To Engine (agentic multi-model how-to guides) -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span>Agentic How-To Engine · New</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">01</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Agentic How-To Engine · New</span><span class="status">Live</span></div>
           <h3>The <em>How-To Engine</em></h3>
           <p>Ask how to do literally anything. A cascade of frontier models answers in parallel, the best three get synthesised into one calm, ADHD-friendly step-by-step guide — rendered as a 3D flow you can watch step by step.</p>
           <ul class="build-details">
@@ -4080,7 +4072,7 @@
 
         <!-- Featured first: The Third Eye -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span>AI Operating System</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">02</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Operating System</span><span class="status">Live</span></div>
           <h3>The Third <em>Eye</em></h3>
           <p>An agent-orchestrated personal AI operating system — memory-backed chat, tasks and multi-phase automation in one place.</p>
           <ul class="build-details">
@@ -4095,7 +4087,7 @@
 
         <!-- Card — D2C-LifeCycle-OS (generalised, any-brand lifecycle OS) -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span>D2C Marketing Automation · Startup idea</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">03</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>D2C Marketing Automation · Startup idea</span><span class="status">Live</span></div>
           <h3><em>LifeCycle-OS</em></h3>
           <p>My flagship side build: a full customer-lifecycle &amp; retention operating system — data analysis, segmentation, a campaign calendar, a mailer studio, competitive intelligence, creative and ads, all in one suite. <em>D2C-LifeCycle-OS</em> is its brand-agnostic front door: enter <em>any</em> brand or URL and it reads the industry, benchmarks the competitive set, then designs the whole lifecycle live — segments, calendar, send-ready mailers, retention flows and KPIs, grounded in industry-standard numbers rather than guesses.</p>
           <ul class="build-details">
@@ -4111,7 +4103,7 @@
 
         <!-- Card — AI Video Avatar (photoreal talking agent) -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span>AI Avatar · Conversational</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">04</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Avatar · Conversational</span><span class="status">Live</span></div>
           <h3>AI <em>Video Avatar</em></h3>
           <p>A photoreal talking-head version of me. Ask anything — my AI answers on camera in my own cloned voice, with a graceful voice-only fallback when the video engine isn't keyed.</p>
           <ul class="build-details">
@@ -4125,7 +4117,7 @@
 
         <!-- Card — All-in-One LP Agent -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span>Conversational Commerce · D2C</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">05</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Conversational Commerce · D2C</span><span class="status">Live</span></div>
           <h3>All-in-One <em>LP Agent</em></h3>
           <p>A marketing landing page with one embedded agent doing four jobs — auto-playing audio narration, two-way voice conversation, text chat and a "help me choose" recommendation engine — built for a live D2C funnel.</p>
           <ul class="build-details">
@@ -4139,7 +4131,7 @@
 
         <!-- Card — JobHunt (AI Job Search Agent) -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span>Job Hunting · Live job boards</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">06</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Job Hunting · Live job boards</span><span class="status">Live</span></div>
           <h3>Job<em>Hunt</em></h3>
           <p>A free, live job-search tool. Sign in with Google, type a role, and it pulls real, current openings from free public job boards — Remotive, RemoteOK, Arbeitnow and The Muse — with direct apply links. No spreadsheet, no setup, no API key.</p>
           <ul class="build-details">
@@ -4154,7 +4146,7 @@
 
         <!-- Card 2 -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span>Generative AI · Music</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">07</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Generative AI · Music</span><span class="status">Live</span></div>
           <h3>Music<em>GenAI</em></h3>
           <p>Type a prompt, get a full song — lyrics, vocals and production. A hobby build exploring how far text-to-music can go.</p>
           <ul class="build-details">
@@ -4169,7 +4161,7 @@
 
         <!-- Card 3 -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span>Portfolio OS · Voice UI</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">08</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Portfolio OS · Voice UI</span><span class="status">Live</span></div>
           <h3>Interactive <em>Portfolio</em></h3>
           <p>This portfolio is also a hobby product: guided navigation, voice narration, chat, resume handling, mobile PWA branding and responsive OS-style UI.</p>
           <ul class="build-details">
@@ -4185,7 +4177,7 @@
 
         <!-- Card 6 -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span>AI Voice · Consumer</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">09</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Voice · Consumer</span><span class="status">Live</span></div>
           <h3>Hey <em>Yaara</em></h3>
           <p>A voice-first AI companion for the elderly — one button to talk, one to stop. Built for people who find apps intimidating.</p>
           <ul class="build-details">
@@ -4200,7 +4192,7 @@
 
         <!-- Card 7 -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span>AI Tooling · Marketing</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">10</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Tooling · Marketing</span><span class="status">Live</span></div>
           <h3>Mailer <em>Architect</em></h3>
           <p>Turns a brief into a production-ready HTML email via a multi-LLM cascade with automatic failover.</p>
           <ul class="build-details">
@@ -4215,7 +4207,7 @@
 
         <!-- Card 8 -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span>AI Workflow · Sales</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">11</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Workflow · Sales</span><span class="status">Live</span></div>
           <h3>AI <em>TeleSuite</em></h3>
           <p>Real-time transcription, pitch scoring and conversion assist — the consumer take on the telesuite I shipped at ET.</p>
           <ul class="build-details">
@@ -4230,7 +4222,7 @@
 
         <!-- Card 9 -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span>AI Wellness · Personalised</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">12</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Wellness · Personalised</span><span class="status">Live</span></div>
           <h3><em>LifeEngine</em></h3>
           <p>AI wellness planning that turns generic health advice into a daily plan tied to your goals.</p>
           <ul class="build-details">
