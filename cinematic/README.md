@@ -7,16 +7,30 @@ Next.js (App Router) · Tailwind · GSAP + ScrollTrigger · Lenis · Framer Moti
     npm install
     npm run dev
 
-## Deploy to its own URL
+## This is a reference build, not a second site
 
-From THIS directory (not the repo root — the parent is a separate static site):
+There is one URL — anchit-tandon.com, served by `index.html` in the repo root —
+and everything here is meant to land there rather than beside it. So this
+directory has no `vercel.json` and is deliberately not deployable: standing it
+up on its own URL would split the portfolio in two, which is exactly what we
+decided against.
 
-    npx vercel            # preview URL
-    npx vercel --prod     # production URL for this project
+Use it as the working model. Each component here is the clean, typed version of
+an idea; the job is to port that idea into the single-file site with its own
+palette and its own performance budget. Ported so far:
 
-Vercel will prompt to create a new project on first run. Accept the defaults;
-`vercel.json` already pins the framework, so detection cannot pick up the
-static site in the parent directory.
+  · SmoothScroll  → Lenis, ticked by gsap.ticker, in assets/cinematic.js
+  · Cursor        → cinCursor
+  · MagneticButton→ initMagnetic
+  · Marquee       → .ticker-track
+  · PageTransition→ #view-wipe
+  · Preloader     → the pre-paint cinematic hero gate
+  · HoldReveal    → .hold-reveal on the homepage portrait (CSS clip-path with a
+                    registered custom property, rather than a GLSL plane — the
+                    shader version cost a WebGL context for one interaction)
+
+Still to port: per-project routes with the circle-wipe between them, and the
+Work grid's hover-video treatment.
 
 anchit-tandon.com is untouched by this. Pointing the domain here is a separate,
 deliberate step in the Vercel dashboard — and would take the chat, cloned voice,
