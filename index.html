@@ -45,6 +45,36 @@
     } catch (e) {}
     document.documentElement.setAttribute('data-motion', on ? 'on' : 'off');
     if (on) document.documentElement.classList.add('cine-ready');
+
+    // ── Ambient tier ────────────────────────────────────────────────────────
+    // The backdrop is six independent full-viewport systems stacked at z-0:
+    // the particle canvas, the colour aura, the holo grid, the energy orb, the
+    // perimeter border, and (later, on idle) the WebGL nebula. Six overlapping
+    // faint fields are indistinguishable from three, but the compositor pays
+    // for every one of them on every frame — which is most of what a phone or
+    // an older laptop was spending its frame budget on.
+    //
+    // So the tier is decided ONCE, here, before the first paint, and it is the
+    // single authority: every ambient rule keys off this attribute instead of
+    // deciding for itself. Nothing is deleted — a lower tier simply stops
+    // paying for the layers you cannot pick out anyway.
+    //
+    //   full  · everything, as designed. Capable desktop with motion on.
+    //   lite  · aura + border + particles. Orb and grid stop animating.
+    //   still · one static gradient. Motion off, or the visitor asked for calm.
+    var tier = 'full';
+    if (!on) {
+      tier = 'still';
+    } else {
+      var coarse = window.matchMedia && matchMedia('(pointer: coarse)').matches;
+      var cores = navigator.hardwareConcurrency || 4;
+      var mem = navigator.deviceMemory || 4;
+      var save = navigator.connection && navigator.connection.saveData;
+      var narrow = Math.min(screen.width, screen.height) < 820;
+      if (save || cores < 4 || mem < 4) tier = 'still';
+      else if (coarse || narrow) tier = 'lite';
+    }
+    document.documentElement.setAttribute('data-ambient', tier);
   })();
 </script>
 
@@ -274,6 +304,273 @@
     letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
     overflow: hidden; text-overflow: ellipsis;
   }
+
+  /* ── Morphing nav labels ──────────────────────────────────────────────────
+     The name of a page and what the page is FOR are two different things, and
+     a nav rail only has room for one of them at a time. So it holds both: the
+     name at rest, the promise on hover, sliding through the same slot.
+
+     Both labels occupy one grid cell, so the rail never changes width; the
+     swap is a transform on two spans, which is compositor-only and costs
+     nothing per frame. The hover copy is aria-hidden so the accessible name
+     stays equal to the visible label at rest (WCAG 2.5.3). */
+  .morph-label {
+    display: inline-grid; position: relative; overflow: hidden;
+    line-height: 1.35; vertical-align: bottom;
+  }
+  .morph-label > span {
+    grid-area: 1 / 1; display: block; white-space: nowrap;
+    transition: transform .42s cubic-bezier(.16, 1, .3, 1), opacity .28s ease;
+  }
+  .morph-label .ml-hover {
+    transform: translateY(105%); opacity: 0;
+    color: var(--primary); font-weight: 600;
+  }
+  .sidebar-item:hover .morph-label .ml-default,
+  .sidebar-item:focus-visible .morph-label .ml-default,
+  .sidebar-group-toggle:hover .morph-label .ml-default,
+  .sidebar-group-toggle:focus-visible .morph-label .ml-default {
+    transform: translateY(-105%); opacity: 0;
+  }
+  .sidebar-item:hover .morph-label .ml-hover,
+  .sidebar-item:focus-visible .morph-label .ml-hover,
+  .sidebar-group-toggle:hover .morph-label .ml-hover,
+  .sidebar-group-toggle:focus-visible .morph-label .ml-hover {
+    transform: translateY(0); opacity: 1;
+  }
+  /* Collapsed rail shows icons only, and a calm visitor gets a plain swap. */
+  body.sidebar-collapsed .morph-label .ml-hover { display: none; }
+  html[data-motion="off"] .morph-label > span { transition: none; }
+
+  /* ── Device cards ─────────────────────────────────────────────────────────
+     A card that reads as a piece of hardware rather than a box: bracket marks
+     at the corners, a serial stamp, and a header that dates the work. Borrowed
+     structure, our palette — champagne on ink, never a framework grey.
+
+     Every part is a static pseudo-element or an absolutely-positioned span, so
+     the whole treatment is one extra paint at load and nothing per frame. */
+  .device-card { --dc-line: color-mix(in srgb, var(--primary) 42%, transparent); }
+  .dc-corner {
+    position: absolute; width: 11px; height: 11px; pointer-events: none;
+    border: 1px solid var(--dc-line); opacity: .62;
+    transition: opacity .28s ease, width .28s ease, height .28s ease;
+  }
+  .dc-tl { top: 10px; left: 10px;  border-right: 0; border-bottom: 0; border-radius: 3px 0 0 0; }
+  .dc-tr { top: 10px; right: 10px; border-left: 0;  border-bottom: 0; border-radius: 0 3px 0 0; }
+  .dc-bl { bottom: 10px; left: 10px;  border-right: 0; border-top: 0; border-radius: 0 0 0 3px; }
+  .dc-br { bottom: 10px; right: 10px; border-left: 0;  border-top: 0; border-radius: 0 0 3px 0; }
+  .device-card:hover .dc-corner { opacity: 1; width: 15px; height: 15px; }
+
+  /* Top-left, in the strip the corner brackets already reserve — clear of the
+     badge row on the right and clear of the copy below. A serial number laid
+     over either is just two labels fighting for one line. */
+  .dc-stamp {
+    /* Always its own row, so the header reads the same on a narrow card and a
+       wide one instead of wrapping differently per tile. */
+    flex: 1 0 100%;
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: .16em;
+    /* ink-dim, not ink-mute: at 9px the muted tone measured 2.06:1 against the
+       card, well under the 4.5:1 small-text floor. Still clearly secondary. */
+    text-transform: lowercase; color: var(--ink-dim, #B3A996); opacity: .8;
+  }
+  .dc-head {
+    display: flex; align-items: center; gap: 8px 10px; flex-wrap: wrap;
+    margin: 0 0 14px;
+  }
+  .dc-badge {
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink-dim);
+    border: 1px solid var(--rule); border-radius: 99px; padding: 3px 9px;
+  }
+  .dc-status {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--accent);
+  }
+  .dc-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  /* ── Bento card anatomy ───────────────────────────────────────────────────
+     An index and a category dot, so a grid of work reads as a catalogue with
+     an order to it rather than as tiles that happen to be adjacent. There is
+     no separate topline rule: .build-tag already is that row. */
+  .bento-index {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: .18em;
+    color: var(--primary); opacity: .75; font-variant-numeric: tabular-nums;
+  }
+  .bento-eyebrow-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--primary); opacity: .8;
+  }
+  /* ── Current work, staged as a device ─────────────────────────────────────
+     The rest of the homepage is a grid; this is the one place that stops and
+     stages something. The panel sits on a plinth, lit from both sides, and is
+     pinned while it assembles — so the work in progress reads as an object you
+     are looking at rather than another tile you are scrolling past.
+
+     Every moving part is a transform or an opacity. There is no `will-change`
+     here: GSAP claims and releases it around the tween it actually runs, which
+     is the whole difference between a layer that exists for 800ms and one that
+     exists forever. */
+  .cw-section { padding: clamp(48px, 9vh, 110px) 0; position: relative; }
+  .cw-stage {
+    position: relative; max-width: 1180px; margin: 0 auto; padding: 0 24px;
+    perspective: 1400px;
+  }
+  .cw-panel {
+    position: relative; border-radius: 22px; overflow: hidden;
+    background: linear-gradient(168deg,
+      color-mix(in srgb, var(--bg-elev) 94%, var(--primary) 6%),
+      var(--bg-elev) 62%);
+    border: 1px solid var(--rule);
+    box-shadow: 0 40px 90px -40px rgba(0, 0, 0, .8), 0 0 0 1px rgba(255, 255, 255, .02) inset;
+    transform-origin: 50% 100%;
+  }
+  /* The plinth the panel stands on, and the two lights raking across it. Both
+     are static gradients — they read as light without being lights. */
+  .cw-platform {
+    display: block; height: 26px; margin: -1px auto 0; max-width: 78%;
+    border-radius: 0 0 40px 40px;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 12%, transparent), transparent 78%);
+    filter: none;
+  }
+  .cw-light {
+    position: absolute; top: 12%; width: 22%; height: 62%; pointer-events: none;
+    border-radius: 50%; opacity: .5;
+  }
+  .cw-light-l { left: -4%;  background: radial-gradient(closest-side, color-mix(in srgb, var(--primary) 34%, transparent), transparent 72%); }
+  .cw-light-r { right: -4%; background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 26%, transparent), transparent 72%); }
+
+  .cw-corner {
+    position: absolute; width: 15px; height: 15px; pointer-events: none; z-index: 2;
+    border: 1px solid color-mix(in srgb, var(--primary) 48%, transparent); opacity: .7;
+  }
+  .cw-tl { top: 12px; left: 12px;  border-right: 0; border-bottom: 0; border-radius: 4px 0 0 0; }
+  .cw-tr { top: 12px; right: 12px; border-left: 0;  border-bottom: 0; border-radius: 0 4px 0 0; }
+  .cw-bl { bottom: 12px; left: 12px;  border-right: 0; border-top: 0; border-radius: 0 0 0 4px; }
+  .cw-br { bottom: 12px; right: 12px; border-left: 0;  border-top: 0; border-radius: 0 0 4px 0; }
+
+  .cw-screen { padding: clamp(26px, 4vw, 52px); }
+  .cw-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: clamp(20px, 3vw, 34px); }
+  .cw-stamp {
+    flex: 1 0 100%; font-family: var(--font-mono); font-size: 9px; letter-spacing: .16em;
+    text-transform: lowercase; color: var(--ink-dim); opacity: .8;
+  }
+  .cw-badge {
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--ink-dim); border: 1px solid var(--rule); border-radius: 99px; padding: 4px 10px;
+  }
+  .cw-status {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--accent);
+  }
+  .cw-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+
+  .cw-body { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: center; }
+  .cw-title {
+    font-family: var(--font-display); font-weight: 600; margin: 0 0 14px;
+    font-size: clamp(26px, 3.4vw, 46px); line-height: 1.08; letter-spacing: -.01em;
+    color: var(--ink);
+  }
+  .cw-desc { margin: 0 0 22px; color: var(--ink-dim); font-size: clamp(15px, 1.3vw, 18px); line-height: 1.6; }
+  .cw-desc strong { color: var(--ink); font-weight: 600; }
+  .cw-skills { list-style: none; margin: 0 0 26px; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 18px; }
+  .cw-skills li {
+    display: flex; align-items: center; gap: 9px;
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+  .cw-bullet { width: 5px; height: 5px; border-radius: 50%; background: var(--primary); flex: 0 0 auto; }
+
+  .cw-visual { position: relative; display: flex; align-items: center; justify-content: center; min-height: 200px; }
+  .cw-glow {
+    position: absolute; width: 74%; aspect-ratio: 1; border-radius: 50%;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--primary) 30%, transparent), transparent 70%);
+    opacity: .75;
+  }
+  .cw-frame {
+    position: relative; display: grid; place-items: center;
+    width: min(220px, 60%); aspect-ratio: 1; border-radius: 50%;
+    border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
+  }
+  .cw-microstamp {
+    position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
+    font-family: var(--font-mono); font-size: 8px; letter-spacing: .18em;
+    text-transform: lowercase; color: var(--ink-dim); opacity: .75; white-space: nowrap;
+  }
+  .cw-mark { width: 78%; height: auto; border-radius: 50%; }
+
+  @media (max-width: 900px) {
+    .cw-body { grid-template-columns: 1fr; }
+    .cw-visual { order: -1; min-height: 150px; }
+    .cw-skills { grid-template-columns: 1fr; }
+  }
+
+  /* Armed only when the pin is actually running, so a failed or skipped
+     ScrollTrigger can never leave the section invisible. */
+  .cw-section.cw-armed .cw-panel { opacity: 0; transform: translateY(46px) rotateX(9deg) scale(.965); }
+  .cw-section.cw-armed .cw-light { opacity: 0; }
+  .cw-section.cw-armed .cw-skills li { opacity: 0; transform: translateY(10px); }
+
+  /* ── Hold to reveal ───────────────────────────────────────────────────────
+     chandan.dev's signature move: two images stacked, and the pointer opens a
+     window from one into the other. Ours goes the other way round — the crest
+     is the mask, the photograph is the person under it.
+
+     The radius is a registered custom property so it can be TRANSITIONED while
+     the centre tracks the pointer instantly. Animating `clip-path` wholesale
+     would fight the pointer, and easing the centre would make the window lag
+     behind the cursor. Only the clipped element repaints, and only while the
+     pointer is on it. */
+  @property --hr-r { syntax: '<length>'; inherits: false; initial-value: 0px; }
+  .hold-reveal { position: relative; display: inline-block; line-height: 0; }
+  .hold-reveal .hr-under {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    clip-path: circle(var(--hr-r, 0px) at var(--hx, 50%) var(--hy, 50%));
+    transition: --hr-r .42s cubic-bezier(.16, 1, .3, 1);
+  }
+  .hold-reveal:hover .hr-under,
+  .hold-reveal:focus-within .hr-under,
+  .hold-reveal.is-held .hr-under { --hr-r: 66px; }
+  .hold-reveal.is-held .hr-under { --hr-r: 66px; }
+
+  /* A thin champagne ring rides the window edge so the reveal reads as an
+     instrument aperture rather than a smudge. */
+  .hold-reveal .hr-ring {
+    position: absolute; left: var(--hx, 50%); top: var(--hy, 50%);
+    width: 0; height: 0; border-radius: 50%; pointer-events: none;
+    border: 1px solid color-mix(in srgb, var(--primary) 55%, transparent);
+    box-shadow: 0 0 18px color-mix(in srgb, var(--primary) 28%, transparent);
+    transform: translate(-50%, -50%); opacity: 0;
+    transition: width .42s cubic-bezier(.16, 1, .3, 1), height .42s cubic-bezier(.16, 1, .3, 1), opacity .3s ease;
+  }
+  .hold-reveal:hover .hr-ring, .hold-reveal.is-held .hr-ring { width: 100px; height: 100px; opacity: 1; }
+  .hold-reveal.is-held .hr-ring { width: 132px; height: 132px; }
+
+  .hold-reveal .hr-cue {
+    position: absolute; left: 50%; bottom: -22px; transform: translateX(-50%);
+    white-space: nowrap; line-height: 1.2;
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--ink-dim);
+    opacity: .72; transition: opacity .3s ease, color .3s ease;
+  }
+  .hold-reveal:hover .hr-cue { opacity: 1; color: var(--primary); }
+  /* On a narrow screen the headline sits immediately to the right of the
+     portrait, so a single-line cue reaches straight into it. Constrain the cue
+     to the portrait it belongs to and let it wrap instead. */
+  @media (max-width: 820px) {
+    .hold-reveal .hr-cue {
+      font-size: 8px; bottom: -24px; letter-spacing: .12em;
+      max-width: 100%; white-space: normal; text-align: center;
+    }
+  }
+  /* A calm visitor still gets the reveal — it just arrives without the ease. */
+  html[data-motion="off"] .hold-reveal .hr-under,
+  html[data-motion="off"] .hold-reveal .hr-ring { transition: none; }
+
   .sidebar-rule {
     width: auto; height: 1px; border: none;
     background: rgba(255,255,255,0.1); margin: 8px 10px; flex-shrink: 0;
@@ -1173,6 +1470,11 @@
     display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 24px; position: relative; z-index: 1;
   }
+  .build-tag { gap: 10px; }
+  /* space-between would fling index / dot / label to opposite ends of the row.
+     Only the status belongs on the right; the rest hug the left together. */
+  .build-tag > span:not(.status) { flex: 0 0 auto; }
+  .build-tag > span:nth-last-child(2):not(.status) { margin-right: auto; }
   .build-tag .status { color: var(--accent); display: inline-flex; align-items: center; gap: 6px; }
   .build-tag .status::before {
     content: ''; width: 6px; height: 6px; background: var(--accent);
@@ -2640,11 +2942,11 @@
   function size(){ W=c.width=innerWidth; H=c.height=innerHeight; }
   function seed(){ ps=[]; var n=Math.min(130,Math.floor(W/11)); for(var k=0;k<n;k++)ps.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.9+.5,v:Math.random()*.42+.14,a:Math.random()*.5+.28}); }
   size(); seed(); addEventListener('resize',function(){size();seed();});
-  // Honour the Motion toggle. Default follows the OS: drifting particles for
-  // everyone, a single static frame for visitors who ask for reduced motion.
-  var still=(function(){ try{ var m=localStorage.getItem('anchit-motion');
-    if(m==='on') return false; if(m==='off') return true; }catch(e){}
-    return document.documentElement.getAttribute('data-motion') === 'off'; })();
+  // Defer to the ambient tier resolved before the first paint, rather than
+  // reading the preference again and risking a different answer. At the `still`
+  // tier the canvas is hidden by CSS as well, so this also stops the rAF loop
+  // instead of animating something nobody can see.
+  var still = document.documentElement.getAttribute('data-ambient') === 'still';
   (function draw(){
     // Skip the redraw entirely while the page is scrolling. A full-viewport
     // canvas clear + 130 arcs is a whole extra painted layer competing with the
@@ -2771,36 +3073,36 @@
   <nav class="sidebar-nav">
     <a class="sidebar-item active" href="#home" data-view="home" aria-label="Home">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span class="sidebar-label">Home</span>
+      <span class="sidebar-label morph-label"><span class="ml-default">Home</span><span class="ml-hover" aria-hidden="true">Start here</span></span>
     </a>
     <a class="sidebar-item" href="#about" data-view="about" aria-label="About Me">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-      <span class="sidebar-label">About Me</span>
+      <span class="sidebar-label morph-label"><span class="ml-default">About Me</span><span class="ml-hover" aria-hidden="true">The short version</span></span>
     </a>
     <a class="sidebar-item" href="#now" data-view="now" aria-label="Now — current role">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <span class="sidebar-label">Now</span>
+      <span class="sidebar-label morph-label"><span class="ml-default">Now</span><span class="ml-hover" aria-hidden="true">What I am building</span></span>
     </a>
     <a class="sidebar-item" href="#experience" data-view="experience" aria-label="Work Experience">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-      <span class="sidebar-label">Experience</span>
+      <span class="sidebar-label morph-label"><span class="ml-default">Experience</span><span class="ml-hover" aria-hidden="true">Where I have worked</span></span>
     </a>
     <a class="sidebar-item" href="#projects" data-view="projects" aria-label="Side Hustle">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-      <span class="sidebar-label">Side Hustle</span>
+      <span class="sidebar-label morph-label"><span class="ml-default">Side Hustle</span><span class="ml-hover" aria-hidden="true">Things I build at night</span></span>
     </a>
     <a class="sidebar-item" href="#chat" data-view="chat" aria-label="Chat with Anchit">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      <span class="sidebar-label">Chat</span>
+      <span class="sidebar-label morph-label"><span class="ml-default">Chat</span><span class="ml-hover" aria-hidden="true">Ask me anything</span></span>
     </a>
     <a class="sidebar-item" href="assets/resume.pdf" target="_blank" rel="noopener" aria-label="My Resume (PDF, opens in a new tab)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-      <span class="sidebar-label">My Resume</span>
+      <span class="sidebar-label morph-label"><span class="ml-default">My Resume</span><span class="ml-hover" aria-hidden="true">Open the PDF</span></span>
     </a>
     <div class="sidebar-contact-group" id="sidebarContactGroup">
       <button type="button" class="sidebar-item sidebar-group-toggle" id="sidebarContactToggle" aria-expanded="false" aria-controls="sidebarContactSub" aria-label="Contact channels">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        <span class="sidebar-label">Contact</span>
+        <span class="sidebar-label morph-label"><span class="ml-default">Contact</span><span class="ml-hover" aria-hidden="true">Say hi</span></span>
         <svg class="sidebar-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
       <div class="sidebar-subnav" id="sidebarContactSub">
@@ -3108,7 +3410,15 @@
         <div id="homeHeroTile" class="md:col-span-2 md:row-span-2 rounded-3xl p-8 lg:p-10 flex flex-col justify-center relative overflow-hidden bg-[var(--bg-elev)] border border-[var(--rule)] shadow-sm">
           <div class="hero-dot-grid absolute inset-0 opacity-30" aria-hidden="true"></div>
           <div class="hero-id relative z-10 flex items-center gap-6 mb-8">
-            <img src="assets/anchit-mark-220.webp" srcset="assets/anchit-mark-220.webp 1x, assets/anchit-mark-440.webp 2x" alt="Anchit Tandon" width="440" height="440" fetchpriority="high" class="hero-portrait shrink-0 rounded-full object-cover border-2 border-[var(--rule)]">
+            <!-- Hold to see the person behind the mark. The crest is what the
+                 site wears; the photograph is who is underneath it, and you get
+                 to it by holding rather than by being shown. -->
+            <div class="hold-reveal shrink-0" data-hold-reveal>
+              <img src="assets/anchit-mark-220.webp" srcset="assets/anchit-mark-220.webp 1x, assets/anchit-mark-440.webp 2x" alt="Anchit Tandon" width="440" height="440" fetchpriority="high" class="hero-portrait rounded-full object-cover border-2 border-[var(--rule)]">
+              <img src="assets/anchit-face-220.webp" srcset="assets/anchit-face-220.webp 1x, assets/anchit-face-440.webp 2x" alt="" aria-hidden="true" width="440" height="440" loading="lazy" decoding="async" class="hero-portrait hr-under rounded-full object-cover border-2 border-[var(--rule)]">
+              <span class="hr-ring" aria-hidden="true"></span>
+              <span class="hr-cue" aria-hidden="true">hold to see the human</span>
+            </div>
             <div>
               <div class="eyebrow has-dot mb-2 text-xs opacity-80"><span class="live-dot"></span>Live · AGM – Vahdam India</div>
               <h1 class="text-4xl md:text-5xl lg:text-6xl tracking-tight m-0 leading-none" style="font-family:var(--font-display);font-weight:600;">
@@ -3123,7 +3433,14 @@
         </div>
 
         <!-- METRIC TILE 1: Vahdam -->
-        <div class="rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] flex flex-col justify-center relative overflow-hidden hover:border-[var(--primary)] transition-colors group narrate-span" data-n-idx="2">
+        <div class="device-card rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] flex flex-col justify-center relative overflow-hidden hover:border-[var(--primary)] transition-colors group narrate-span" data-n-idx="2">
+          <span class="dc-corner dc-tl" aria-hidden="true"></span><span class="dc-corner dc-tr" aria-hidden="true"></span>
+          <span class="dc-corner dc-bl" aria-hidden="true"></span><span class="dc-corner dc-br" aria-hidden="true"></span>
+          <div class="dc-head">
+            <span class="dc-stamp" aria-hidden="true">vahdam/id-01</span>
+            <span class="dc-badge">At the moment // Y2026</span>
+            <span class="dc-status"><span class="dc-dot" aria-hidden="true"></span>live</span>
+          </div>
           <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-2">Current Focus</div>
           <h2 class="text-xl font-bold mb-1 text-[var(--ink)]">Vahdam India</h2>
           <p class="text-sm text-[var(--ink-dim)] leading-relaxed">AGM – Product Management &amp; D2C Growth. Driving growth across US, UK &amp; global markets.</p>
@@ -3133,7 +3450,13 @@
         </div>
 
         <!-- METRIC TILE 2: Times Internet -->
-        <div class="rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] flex flex-col justify-center relative overflow-hidden hover:border-[var(--accent)] transition-colors group narrate-span" data-n-idx="3">
+        <div class="device-card rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] flex flex-col justify-center relative overflow-hidden hover:border-[var(--accent)] transition-colors group narrate-span" data-n-idx="3">
+          <span class="dc-corner dc-tl" aria-hidden="true"></span><span class="dc-corner dc-tr" aria-hidden="true"></span>
+          <span class="dc-corner dc-bl" aria-hidden="true"></span><span class="dc-corner dc-br" aria-hidden="true"></span>
+          <div class="dc-head">
+            <span class="dc-stamp" aria-hidden="true">ti/id-02</span>
+            <span class="dc-badge">Y2023 &ndash; Y2026 // shipped</span>
+          </div>
           <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-2">Previously</div>
           <h2 class="text-xl font-bold mb-1 text-[var(--ink)]">Times Internet</h2>
           <p class="text-sm text-[var(--ink-dim)] leading-relaxed">Scaled Assisted Sales 5&times; to &#8377;80L MRR. Built ET Markets to &#8377;3Cr+ incremental ARR.</p>
@@ -3180,6 +3503,51 @@
         <span class="sparkle">/</span>
       </div>
     </div>
+
+    <!-- ── Current work, staged as a device ─────────────────────────────────
+         One deliberate, scroll-choreographed moment rather than another card in
+         a grid: the panel is pinned while it assembles, so the work you are
+         doing right now gets the room the rest of the page does not give it. -->
+    <section class="cw-section" id="currentWork" aria-labelledby="cwTitle">
+      <div class="cw-stage">
+        <span class="cw-light cw-light-l" aria-hidden="true"></span>
+        <span class="cw-light cw-light-r" aria-hidden="true"></span>
+        <div class="cw-panel">
+          <span class="cw-corner cw-tl" aria-hidden="true"></span><span class="cw-corner cw-tr" aria-hidden="true"></span>
+          <span class="cw-corner cw-bl" aria-hidden="true"></span><span class="cw-corner cw-br" aria-hidden="true"></span>
+          <div class="cw-screen">
+            <div class="cw-head">
+              <span class="cw-stamp" aria-hidden="true">vahdam/id-01</span>
+              <span class="cw-badge">At the moment // Y2026</span>
+              <span class="cw-status"><span class="cw-dot" aria-hidden="true"></span>live</span>
+            </div>
+            <div class="cw-body">
+              <div class="cw-copy">
+                <h2 class="cw-title" id="cwTitle">Building the lifecycle OS behind the growth.</h2>
+                <p class="cw-desc">Leading product across lifecycle, retention and D2C growth at
+                  <strong>Vahdam India</strong> — US, UK and global.</p>
+                <ul class="cw-skills">
+                  <li><span class="cw-bullet" aria-hidden="true"></span>Lifecycle &amp; retention</li>
+                  <li><span class="cw-bullet" aria-hidden="true"></span>D2C growth</li>
+                  <li><span class="cw-bullet" aria-hidden="true"></span>0&rarr;1 products</li>
+                  <li><span class="cw-bullet" aria-hidden="true"></span>Go to market</li>
+                </ul>
+                <a class="btn primary cw-cta" href="#now" data-view="now">What I'm building now &rarr;</a>
+              </div>
+              <div class="cw-visual" aria-hidden="true">
+                <span class="cw-glow"></span>
+                <div class="cw-frame">
+                  <span class="cw-microstamp">vahdam/access</span>
+                  <img src="assets/anchit-mark-220.webp" srcset="assets/anchit-mark-220.webp 1x, assets/anchit-mark-440.webp 2x"
+                       alt="" width="220" height="220" loading="lazy" decoding="async" class="cw-mark">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <span class="cw-platform" aria-hidden="true"></span>
+      </div>
+    </section>
 
     <div class="container">
       <!-- Career Journey Timeline -->
@@ -3846,7 +4214,7 @@
 
         <!-- Featured widget — How-To Engine (agentic multi-model how-to guides) -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span>Agentic How-To Engine · New</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">01</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Agentic How-To Engine · New</span><span class="status">Live</span></div>
           <h3>The <em>How-To Engine</em></h3>
           <p>Ask how to do literally anything. A cascade of frontier models answers in parallel, the best three get synthesised into one calm, ADHD-friendly step-by-step guide — rendered as a 3D flow you can watch step by step.</p>
           <ul class="build-details">
@@ -3860,7 +4228,7 @@
 
         <!-- Featured first: The Third Eye -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span>AI Operating System</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">02</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Operating System</span><span class="status">Live</span></div>
           <h3>The Third <em>Eye</em></h3>
           <p>An agent-orchestrated personal AI operating system — memory-backed chat, tasks and multi-phase automation in one place.</p>
           <ul class="build-details">
@@ -3875,7 +4243,7 @@
 
         <!-- Card — D2C-LifeCycle-OS (generalised, any-brand lifecycle OS) -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span>D2C Marketing Automation · Startup idea</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">03</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>D2C Marketing Automation · Startup idea</span><span class="status">Live</span></div>
           <h3><em>LifeCycle-OS</em></h3>
           <p>My flagship side build: a full customer-lifecycle &amp; retention operating system — data analysis, segmentation, a campaign calendar, a mailer studio, competitive intelligence, creative and ads, all in one suite. <em>D2C-LifeCycle-OS</em> is its brand-agnostic front door: enter <em>any</em> brand or URL and it reads the industry, benchmarks the competitive set, then designs the whole lifecycle live — segments, calendar, send-ready mailers, retention flows and KPIs, grounded in industry-standard numbers rather than guesses.</p>
           <ul class="build-details">
@@ -3891,7 +4259,7 @@
 
         <!-- Card — AI Video Avatar (photoreal talking agent) -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span>AI Avatar · Conversational</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">04</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Avatar · Conversational</span><span class="status">Live</span></div>
           <h3>AI <em>Video Avatar</em></h3>
           <p>A photoreal talking-head version of me. Ask anything — my AI answers on camera in my own cloned voice, with a graceful voice-only fallback when the video engine isn't keyed.</p>
           <ul class="build-details">
@@ -3905,7 +4273,7 @@
 
         <!-- Card — All-in-One LP Agent -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span>Conversational Commerce · D2C</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">05</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Conversational Commerce · D2C</span><span class="status">Live</span></div>
           <h3>All-in-One <em>LP Agent</em></h3>
           <p>A marketing landing page with one embedded agent doing four jobs — auto-playing audio narration, two-way voice conversation, text chat and a "help me choose" recommendation engine — built for a live D2C funnel.</p>
           <ul class="build-details">
@@ -3919,7 +4287,7 @@
 
         <!-- Card — JobHunt (AI Job Search Agent) -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span>Job Hunting · Live job boards</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">06</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Job Hunting · Live job boards</span><span class="status">Live</span></div>
           <h3>Job<em>Hunt</em></h3>
           <p>A free, live job-search tool. Sign in with Google, type a role, and it pulls real, current openings from free public job boards — Remotive, RemoteOK, Arbeitnow and The Muse — with direct apply links. No spreadsheet, no setup, no API key.</p>
           <ul class="build-details">
@@ -3934,7 +4302,7 @@
 
         <!-- Card 2 -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span>Generative AI · Music</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">07</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Generative AI · Music</span><span class="status">Live</span></div>
           <h3>Music<em>GenAI</em></h3>
           <p>Type a prompt, get a full song — lyrics, vocals and production. A hobby build exploring how far text-to-music can go.</p>
           <ul class="build-details">
@@ -3949,7 +4317,7 @@
 
         <!-- Card 3 -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span>Portfolio OS · Voice UI</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">08</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Portfolio OS · Voice UI</span><span class="status">Live</span></div>
           <h3>Interactive <em>Portfolio</em></h3>
           <p>This portfolio is also a hobby product: guided navigation, voice narration, chat, resume handling, mobile PWA branding and responsive OS-style UI.</p>
           <ul class="build-details">
@@ -3965,7 +4333,7 @@
 
         <!-- Card 6 -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span>AI Voice · Consumer</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">09</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Voice · Consumer</span><span class="status">Live</span></div>
           <h3>Hey <em>Yaara</em></h3>
           <p>A voice-first AI companion for the elderly — one button to talk, one to stop. Built for people who find apps intimidating.</p>
           <ul class="build-details">
@@ -3980,7 +4348,7 @@
 
         <!-- Card 7 -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span>AI Tooling · Marketing</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">10</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Tooling · Marketing</span><span class="status">Live</span></div>
           <h3>Mailer <em>Architect</em></h3>
           <p>Turns a brief into a production-ready HTML email via a multi-LLM cascade with automatic failover.</p>
           <ul class="build-details">
@@ -3995,7 +4363,7 @@
 
         <!-- Card 8 -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span>AI Workflow · Sales</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">11</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Workflow · Sales</span><span class="status">Live</span></div>
           <h3>AI <em>TeleSuite</em></h3>
           <p>Real-time transcription, pitch scoring and conversion assist — the consumer take on the telesuite I shipped at ET.</p>
           <ul class="build-details">
@@ -4010,7 +4378,7 @@
 
         <!-- Card 9 -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span>AI Wellness · Personalised</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">12</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Wellness · Personalised</span><span class="status">Live</span></div>
           <h3><em>LifeEngine</em></h3>
           <p>AI wellness planning that turns generic health advice into a daily plan tied to your goals.</p>
           <ul class="build-details">
@@ -8746,7 +9114,7 @@
   }
 </style>
 <div class="chat-return" id="chatReturnBtn" role="group" aria-label="Chat with Anchit">
-  <button class="chat-return-main" type="button" data-chat-open aria-label="Chat with me">
+  <button class="chat-return-main" type="button" data-chat-open>
     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     <span class="chat-return-copy">
       <span class="chat-return-title">Chat with me</span>
@@ -9311,11 +9679,11 @@
      particle canvas covers the gap and stays if the nebula never arrives. */
   function loadNebulaWhenIdle() {
     if (reduceMotion || window.THREE) return;
-    var coarse = window.matchMedia && matchMedia('(pointer: coarse)').matches;
-    var cores = navigator.hardwareConcurrency || 4;
-    var mem = navigator.deviceMemory || 4;
-    var save = navigator.connection && navigator.connection.saveData;
-    if (coarse || cores < 4 || mem < 4 || save) return;
+    // The capability question was already asked and answered before the first
+    // paint. Asking it again here is how two pieces of code end up disagreeing
+    // about the same device, so this defers to the tier rather than re-deriving
+    // it: the nebula is a `full`-tier luxury and nothing else.
+    if (document.documentElement.getAttribute('data-ambient') !== 'full') return;
     // Idle alone is not enough. "Idle" arrives about a second in — which is
     // exactly when someone makes their first scroll — and parsing 670 KB plus
     // compiling shaders in the middle of that gesture is the stutter we were
@@ -10020,6 +10388,94 @@
   }
 })();
 </script>
+<script id="current-work-pin">
+(function () {
+  'use strict';
+  var sec = document.getElementById('currentWork');
+  if (!sec) return;
+
+  var tier = document.documentElement.getAttribute('data-ambient');
+  // At the `still` tier nothing is choreographed anywhere on the page, so the
+  // section simply exists. It is fully readable without a single tween.
+  if (tier === 'still') return;
+
+  var tries = 0;
+  (function whenReady() {
+    if (window.gsap && window.ScrollTrigger) return build();
+    if (tries++ > 60) return;                 // ~6s, then leave it static
+    setTimeout(whenReady, 100);
+  })();
+
+  function build() {
+    var gsap = window.gsap, ST = window.ScrollTrigger;
+    try { gsap.registerPlugin(ST); } catch (e) {}
+
+    var touch = window.matchMedia && matchMedia('(pointer: coarse)').matches;
+    var panel = sec.querySelector('.cw-panel');
+    var lights = sec.querySelectorAll('.cw-light');
+    var skills = sec.querySelectorAll('.cw-skills li');
+
+    // Arm ONLY now — the hidden start state is applied at the last possible
+    // moment, so every path that gets here without building a timeline (no
+    // GSAP, a thrown plugin, the `still` tier) leaves the section visible
+    // rather than blank. This page has been blank three times for exactly that
+    // reason and it is not worth a fourth.
+    sec.classList.add('cw-armed');
+
+    var tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: sec,
+        // `top 78%` pinned the section with its top near the BOTTOM of the
+        // viewport, so the whole hold happened four-fifths off screen. Pinning
+        // on centre locks it where you are actually looking, which is the only
+        // position a pin is worth paying for.
+        start: touch ? 'top 82%' : 'center center',
+        // Pinned only where a pin feels good. On touch, hijacking the scroll to
+        // hold a section still is the fastest way to make a page feel broken,
+        // so there it plays as an ordinary reveal.
+        end: touch ? 'top 45%' : '+=72%',
+        pin: !touch,
+        pinSpacing: !touch,
+        scrub: touch ? false : 0.6,
+        anticipatePin: touch ? 0 : 1,
+        invalidateOnRefresh: true,
+      },
+      defaults: { ease: 'power3.out' },
+    });
+
+    tl.to(panel, { opacity: 1, y: 0, rotateX: 0, scale: 1, duration: 0.55 })
+      .to(lights, { opacity: 0.5, duration: 0.4 }, '-=0.3')
+      .to(skills, { opacity: 1, y: 0, duration: 0.35, stagger: 0.09 }, '-=0.15');
+
+    // The router changes the document height under every measurement below it.
+    document.addEventListener('viewChanged', function () { try { ST.refresh(); } catch (e) {} });
+
+    // Last line of defence: if the timeline never ran — a refresh that measured
+    // the section at zero height, a trigger that never fired — show it anyway.
+    //
+    // Deliberately NOT a plain timer. A timer fires while the section is still
+    // far below the fold, where progress is legitimately 0, and un-arms it
+    // early — so by the time you scroll down the panel is already sitting
+    // there and the reveal you were meant to see has been given away. This
+    // only intervenes once the section has actually been on screen for a beat
+    // and the timeline still has not moved.
+    var stuck = 0;
+    var watch = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) { clearTimeout(stuck); return; }
+        stuck = setTimeout(function () {
+          if (tl.progress() === 0 && !tl.isActive()) {
+            sec.classList.remove('cw-armed');
+            try { watch.disconnect(); } catch (err) {}
+          }
+        }, 1500);
+      });
+    }, { threshold: 0.25 });
+    watch.observe(sec);
+    tl.eventCallback('onUpdate', function () { try { watch.disconnect(); } catch (e) {} });
+  }
+})();
+</script>
 <style id="reading-focus">
   /* Keep text crisp over the animated backdrop (readability). */
   .reading-scrim{ position:fixed; inset:0; z-index:0; pointer-events:none;
@@ -10051,8 +10507,90 @@
   body.is-scrolling .ticker-track,
   body.is-scrolling .nav-card,
   body.is-scrolling::after { animation-play-state: paused !important; }
+
+  /* ── Ambient tiers ────────────────────────────────────────────────────────
+     One authority (data-ambient on <html>, resolved pre-paint) decides how much
+     backdrop this device pays for. Every ambient layer keys off it here rather
+     than each deciding for itself, so there is one place to read and one place
+     to change. Colours are untouched — this is about how many layers animate,
+     never about the palette. */
+
+  /* lite — the orb and the perimeter sweep are the two most expensive pieces of
+     decoration on the page, and they are also the two you notice least on a
+     small screen. The aura, the grid, the border ring and the particles stay. */
+  html[data-ambient="lite"] .energy-orb { display: none; }
+  html[data-ambient="lite"] .eb-frame { animation: none; }
+  html[data-ambient="lite"] body::after { animation: none; opacity: .5; }
+  /* The gradient sweep across every display heading animates background-position
+     under `background-clip: text`, so the glyphs are re-rasterised on every
+     frame — on 16 headings at once. The gradient itself stays (it is the
+     palette); only the sweep is a full-tier luxury. */
+  html[data-ambient="lite"] .display-xl,
+  html[data-ambient="lite"] .display-lg,
+  html[data-ambient="lite"] .display-md,
+  html[data-ambient="lite"] .home-hero .name .firstline,
+  html[data-ambient="lite"] .home-hero .name .secondline { animation: none !important; background-position: 32% 50% !important; }
+
+  /* still — one static colour field, and nothing moves. Everything is still
+     drawn, so the page looks like itself; it just costs a single paint. */
+  html[data-ambient="still"] .energy-orb,
+  html[data-ambient="still"] .eb-frame,
+  html[data-ambient="still"] #floatBg { display: none; }
+  html[data-ambient="still"] .float-aura,
+  html[data-ambient="still"] .eb-l,
+  html[data-ambient="still"] .energy-border::before,
+  html[data-ambient="still"] .ticker-track,
+  html[data-ambient="still"] .nav-card,
+  html[data-ambient="still"]::after,
+  html[data-ambient="still"] body::after { animation: none !important; }
+  html[data-ambient="still"] body::after { opacity: .46; }
+  html[data-ambient="still"] .eb-l { opacity: .42; }
+  html[data-ambient="still"] .display-xl,
+  html[data-ambient="still"] .display-lg,
+  html[data-ambient="still"] .display-md,
+  html[data-ambient="still"] .home-hero .name .firstline,
+  html[data-ambient="still"] .home-hero .name .secondline { animation: none !important; background-position: 32% 50% !important; }
+
+  /* The heading sweep is also the most expensive thing to keep running while
+     the page is moving, so it stands down with the rest of the ambience. */
+  body.is-scrolling .display-xl,
+  body.is-scrolling .display-lg,
+  body.is-scrolling .display-md,
+  body.is-scrolling .home-hero .name .firstline,
+  body.is-scrolling .home-hero .name .secondline { animation-play-state: paused !important; }
   html[data-motion="off"] .uf-off { opacity:.72; }
 </style>
+<script id="hold-reveal">
+(function () {
+  'use strict';
+  // Track the pointer inside each hold-reveal and write the window centre onto
+  // THAT element — never onto :root, which would re-resolve the style of every
+  // element in the document on each pointer frame. Touch gets press-and-hold,
+  // keyboard gets the centred reveal via :focus-within in CSS.
+  document.querySelectorAll('[data-hold-reveal]').forEach(function (el) {
+    var raf = 0, px = 50, py = 50;
+    function paint() { raf = 0; el.style.setProperty('--hx', px + '%'); el.style.setProperty('--hy', py + '%'); }
+    function track(e) {
+      var r = el.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      px = ((e.clientX - r.left) / r.width) * 100;
+      py = ((e.clientY - r.top) / r.height) * 100;
+      if (!raf) raf = requestAnimationFrame(paint);
+    }
+    el.addEventListener('pointermove', track, { passive: true });
+    el.addEventListener('pointerdown', function (e) { track(e); el.classList.add('is-held'); }, { passive: true });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) {
+      el.addEventListener(ev, function () { el.classList.remove('is-held'); }, { passive: true });
+    });
+    // Long-press on touch should reveal, not select or scroll the page away.
+    el.addEventListener('contextmenu', function (e) { if (e.pointerType !== 'mouse') e.preventDefault(); });
+    // Make it reachable without a pointer at all.
+    var mark = el.querySelector('img:not(.hr-under)');
+    if (mark) { mark.tabIndex = 0; mark.setAttribute('role', 'button');
+      mark.setAttribute('aria-label', 'Anchit Tandon — hold to see the photograph'); }
+  });
+})();
+</script>
 <script id="scroll-quiet">
 (function(){
   'use strict';

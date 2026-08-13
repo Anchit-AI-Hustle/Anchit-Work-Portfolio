@@ -7,14 +7,16 @@
 //     animated video from the text-to-video pipeline).
 // ============================================================================
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Stars } from '@react-three/drei';
 import { AnimatePresence, motion } from 'framer-motion';
 import * as THREE from 'three';
 
 import PromptOptimizer from './PromptOptimizer';
-import FlowDiagram from './FlowDiagram';
+// React Flow and its stylesheet are only needed once a guide exists, which is
+// after the cascade returns — so they are not part of the first load at all.
+const FlowDiagram = lazy(() => import('./FlowDiagram'));
 import StepCard from './StepCard';
 import TornadoLoader from './TornadoLoader';
 import { useCascade } from '../hooks/useCascade';
@@ -142,7 +144,9 @@ export default function HowToVisualCanvas() {
                   ))}
                 </div>
                 <aside className="flow-pane">
-                  <FlowDiagram guide={guide} activeId={activeId} onSelect={selectStep} />
+                  <Suspense fallback={<div className="flow-pane-placeholder" aria-hidden="true" />}>
+                    <FlowDiagram guide={guide} activeId={activeId} onSelect={selectStep} />
+                  </Suspense>
                 </aside>
               </div>
             </motion.section>

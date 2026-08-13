@@ -26,5 +26,25 @@ export default defineConfig({
       '/api': { target: 'http://localhost:3000', changeOrigin: true },
     },
   },
-  build: { target: 'es2020', sourcemap: true },
+  build: {
+    target: 'es2020',
+    // Source maps for `vite build --mode development`, never for the deploy:
+    // the production map was 4.27 MB — three times the app itself — mirrored
+    // into www/ and served publicly on every release.
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        // One 1.24 MB chunk meant a single byte of app code invalidated the
+        // whole download, three.js included. Splitting by library keeps the
+        // heavy, rarely-changing vendors cached across deploys, and lets the
+        // lazy boundaries below actually defer something.
+        manualChunks: {
+          three: ['three', '@react-three/fiber', '@react-three/drei'],
+          flow: ['reactflow'],
+          motion: ['framer-motion'],
+          react: ['react', 'react-dom'],
+        },
+      },
+    },
+  },
 });

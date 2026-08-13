@@ -1,11 +1,15 @@
 // Orchestrates the three phases the brief asks for:
 //   intro (explain the page) → click → tornado (spinning load) → app (ask UI).
 
-import { useState } from 'react';
+import { Suspense, lazy, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import IntroExplainer from './components/IntroExplainer';
 import TornadoLoader from './components/TornadoLoader';
-import HowToVisualCanvas from './components/HowToVisualCanvas';
+// The main canvas pulls in React Flow, the step cards and the cascade hook —
+// none of which the intro screen needs. It is fetched while the tornado is
+// spinning, so the 2.2s loader IS the loading state and nobody waits twice.
+const HowToVisualCanvas = lazy(() => import('./components/HowToVisualCanvas'));
+const preloadCanvas = () => { void import('./components/HowToVisualCanvas'); };
 
 type Phase = 'intro' | 'loading' | 'app';
 
@@ -16,7 +20,7 @@ export default function App() {
     <AnimatePresence mode="wait">
       {phase === 'intro' && (
         <motion.div key="intro" exit={{ opacity: 0, scale: 0.98 }} transition={{ duration: 0.4 }}>
-          <IntroExplainer onEnter={() => setPhase('loading')} />
+          <IntroExplainer onEnter={() => { preloadCanvas(); setPhase('loading'); }} />
         </motion.div>
       )}
 
@@ -28,7 +32,9 @@ export default function App() {
 
       {phase === 'app' && (
         <motion.div key="app" initial={{ opacity: 0, scale: 1.02 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}>
-          <HowToVisualCanvas />
+          <Suspense fallback={null}>
+            <HowToVisualCanvas />
+          </Suspense>
         </motion.div>
       )}
     </AnimatePresence>
