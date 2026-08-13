@@ -79,12 +79,18 @@
     '.cin.cin-in,.cin-stagger.cin-in>*{opacity:1;transform:none}',
     '.cin-anim,.cin-anim>*{will-change:opacity,transform}',
     // Anything still hidden when the deadline passes is shown outright.
-    // Richer vocabulary. Depth (scale + blur) for feature cards, a lift for
-    // parallax elements, and word-level reveal for headings.
-    '.cin-depth{opacity:0;transform:scale(.965) translateY(16px);filter:blur(6px);' +
-      'transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1),filter .8s ease;' +
+    // Richer vocabulary. Depth for feature cards, a lift for parallax elements,
+    // and word-level reveal for headings.
+    //
+    // Depth is a deeper scale + rise, not a blur. An animating `filter: blur()`
+    // cannot run on the compositor — the element is re-rasterised on every
+    // frame of the tween — and the resting state holds a render surface on
+    // every card still waiting to arrive. A whole page of feature cards paid
+    // that at once on the first scroll.
+    '.cin-depth{opacity:0;transform:scale(.94) translateY(22px);' +
+      'transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1);' +
       'transition-delay:var(--cin-d,0s)}',
-    '.cin-depth.cin-in{opacity:1;transform:none;filter:blur(0)}',
+    '.cin-depth.cin-in{opacity:1;transform:none}',
     '.cin-word{display:inline-block;opacity:0;transform:translateY(.5em) rotate(1.5deg);' +
       'transition:opacity .5s cubic-bezier(.16,1,.3,1),transform .5s cubic-bezier(.16,1,.3,1);' +
       'transition-delay:var(--cin-wd,0s)}',
