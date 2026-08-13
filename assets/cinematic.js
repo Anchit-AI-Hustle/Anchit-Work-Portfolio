@@ -87,10 +87,10 @@
     '.cin-word{display:inline-block;opacity:0;transform:translateY(.5em) rotate(1.5deg);' +
       'transition:opacity .5s cubic-bezier(.16,1,.3,1),transform .5s cubic-bezier(.16,1,.3,1);' +
       'transition-delay:var(--cin-wd,0s)}',
-    '.cin-in .cin-word,.cin-word.cin-in{opacity:1;transform:none}',
+    '.cin-in .cin-word,.cin-word.cin-in,.in .cin-word,.reveal.in .cin-word{opacity:1;transform:none}',
     '.cin-par{will-change:transform}',
     // Controls and fields inside an arriving card ride in just behind it.
-    '.cin-in .cin-ctl{animation:cinCtl .5s cubic-bezier(.16,1,.3,1) both;animation-delay:var(--cin-cd,.18s)}',
+    '.cin-in .cin-ctl,.in .cin-ctl{animation:cinCtl .5s cubic-bezier(.16,1,.3,1) both;animation-delay:var(--cin-cd,.18s)}',
     '@keyframes cinCtl{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}',
     'html.cin-bail .cin,html.cin-bail .cin-stagger>*,html.cin-bail .cin-depth,html.cin-bail .cin-word' +
       '{opacity:1!important;transform:none!important;filter:none!important;transition:none!important}'
@@ -320,7 +320,9 @@
     // (3) Controls and fields ride in behind their card rather than being
     // excluded. They are never observed individually — a button that arrives
     // after its own card reads as lag, not choreography.
-    document.querySelectorAll('.cin,.cin-stagger>*').forEach(function (card) {
+    // Also reach cards owned by the inline reveal system on index.html —
+    // otherwise the flagship page is the one place with no controls choreography.
+    document.querySelectorAll('.cin,.cin-stagger>*,.reveal,.reveal-stagger>*').forEach(function (card) {
       if (card.__enriched) return;
       card.__enriched = 1;
       var ctl = card.querySelectorAll('button,input,select,textarea,a.btn,.btn,.chip,.tag');
