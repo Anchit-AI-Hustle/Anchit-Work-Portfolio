@@ -316,6 +316,26 @@ async function handler(req, res) {
       // provider is unconfigured.
       clonedVoiceReady: PROVIDERS.some((p) => p.clone && cfg[p.name]),
       clonedOnly: String(process.env.VOICE_ALLOW_STOCK || '').toLowerCase() !== 'true',
+      // WHICH variable is missing, never its value. A provider needs every var
+      // in its pair; setting the key but never running the clone leaves the
+      // voice id blank, which reads as "not configured" and is easy to misread
+      // as "my key did not work".
+      missing: (() => {
+        const need = {
+          elevenlabs: ['ELEVENLABS_API_KEY', 'ELEVENLABS_VOICE_ID'],
+          cartesia:   ['CARTESIA_API_KEY', 'CARTESIA_VOICE_ID'],
+          fish:       ['FISH_API_KEY', 'FISH_VOICE_ID'],
+          xtts:       ['XTTS_API_URL'],
+        };
+        const out = {};
+        for (const [name, vars] of Object.entries(need)) {
+          const absent = vars.filter((v) => !process.env[v]);
+          // Only report a partially-configured provider — an untouched one is
+          // not a problem, it is simply not in use.
+          if (absent.length && absent.length < vars.length) out[name] = absent;
+        }
+        return out;
+      })(),
       // What Sarvam would actually be sent, after validation. No secrets.
       sarvam: (() => {
         const s = sarvamConfig();
