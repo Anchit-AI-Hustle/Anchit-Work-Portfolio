@@ -404,6 +404,117 @@
     width: 5px; height: 5px; border-radius: 50%;
     background: var(--primary); opacity: .8;
   }
+  /* ── Current work, staged as a device ─────────────────────────────────────
+     The rest of the homepage is a grid; this is the one place that stops and
+     stages something. The panel sits on a plinth, lit from both sides, and is
+     pinned while it assembles — so the work in progress reads as an object you
+     are looking at rather than another tile you are scrolling past.
+
+     Every moving part is a transform or an opacity. There is no `will-change`
+     here: GSAP claims and releases it around the tween it actually runs, which
+     is the whole difference between a layer that exists for 800ms and one that
+     exists forever. */
+  .cw-section { padding: clamp(48px, 9vh, 110px) 0; position: relative; }
+  .cw-stage {
+    position: relative; max-width: 1180px; margin: 0 auto; padding: 0 24px;
+    perspective: 1400px;
+  }
+  .cw-panel {
+    position: relative; border-radius: 22px; overflow: hidden;
+    background: linear-gradient(168deg,
+      color-mix(in srgb, var(--bg-elev) 94%, var(--primary) 6%),
+      var(--bg-elev) 62%);
+    border: 1px solid var(--rule);
+    box-shadow: 0 40px 90px -40px rgba(0, 0, 0, .8), 0 0 0 1px rgba(255, 255, 255, .02) inset;
+    transform-origin: 50% 100%;
+  }
+  /* The plinth the panel stands on, and the two lights raking across it. Both
+     are static gradients — they read as light without being lights. */
+  .cw-platform {
+    display: block; height: 26px; margin: -1px auto 0; max-width: 78%;
+    border-radius: 0 0 40px 40px;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 12%, transparent), transparent 78%);
+    filter: none;
+  }
+  .cw-light {
+    position: absolute; top: 12%; width: 22%; height: 62%; pointer-events: none;
+    border-radius: 50%; opacity: .5;
+  }
+  .cw-light-l { left: -4%;  background: radial-gradient(closest-side, color-mix(in srgb, var(--primary) 34%, transparent), transparent 72%); }
+  .cw-light-r { right: -4%; background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 26%, transparent), transparent 72%); }
+
+  .cw-corner {
+    position: absolute; width: 15px; height: 15px; pointer-events: none; z-index: 2;
+    border: 1px solid color-mix(in srgb, var(--primary) 48%, transparent); opacity: .7;
+  }
+  .cw-tl { top: 12px; left: 12px;  border-right: 0; border-bottom: 0; border-radius: 4px 0 0 0; }
+  .cw-tr { top: 12px; right: 12px; border-left: 0;  border-bottom: 0; border-radius: 0 4px 0 0; }
+  .cw-bl { bottom: 12px; left: 12px;  border-right: 0; border-top: 0; border-radius: 0 0 0 4px; }
+  .cw-br { bottom: 12px; right: 12px; border-left: 0;  border-top: 0; border-radius: 0 0 4px 0; }
+
+  .cw-screen { padding: clamp(26px, 4vw, 52px); }
+  .cw-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: clamp(20px, 3vw, 34px); }
+  .cw-stamp {
+    flex: 1 0 100%; font-family: var(--font-mono); font-size: 9px; letter-spacing: .16em;
+    text-transform: lowercase; color: var(--ink-dim); opacity: .8;
+  }
+  .cw-badge {
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--ink-dim); border: 1px solid var(--rule); border-radius: 99px; padding: 4px 10px;
+  }
+  .cw-status {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--accent);
+  }
+  .cw-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+
+  .cw-body { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: center; }
+  .cw-title {
+    font-family: var(--font-display); font-weight: 600; margin: 0 0 14px;
+    font-size: clamp(26px, 3.4vw, 46px); line-height: 1.08; letter-spacing: -.01em;
+    color: var(--ink);
+  }
+  .cw-desc { margin: 0 0 22px; color: var(--ink-dim); font-size: clamp(15px, 1.3vw, 18px); line-height: 1.6; }
+  .cw-desc strong { color: var(--ink); font-weight: 600; }
+  .cw-skills { list-style: none; margin: 0 0 26px; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 18px; }
+  .cw-skills li {
+    display: flex; align-items: center; gap: 9px;
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+  .cw-bullet { width: 5px; height: 5px; border-radius: 50%; background: var(--primary); flex: 0 0 auto; }
+
+  .cw-visual { position: relative; display: flex; align-items: center; justify-content: center; min-height: 200px; }
+  .cw-glow {
+    position: absolute; width: 74%; aspect-ratio: 1; border-radius: 50%;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--primary) 30%, transparent), transparent 70%);
+    opacity: .75;
+  }
+  .cw-frame {
+    position: relative; display: grid; place-items: center;
+    width: min(220px, 60%); aspect-ratio: 1; border-radius: 50%;
+    border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
+  }
+  .cw-microstamp {
+    position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
+    font-family: var(--font-mono); font-size: 8px; letter-spacing: .18em;
+    text-transform: lowercase; color: var(--ink-dim); opacity: .75; white-space: nowrap;
+  }
+  .cw-mark { width: 78%; height: auto; border-radius: 50%; }
+
+  @media (max-width: 900px) {
+    .cw-body { grid-template-columns: 1fr; }
+    .cw-visual { order: -1; min-height: 150px; }
+    .cw-skills { grid-template-columns: 1fr; }
+  }
+
+  /* Armed only when the pin is actually running, so a failed or skipped
+     ScrollTrigger can never leave the section invisible. */
+  .cw-section.cw-armed .cw-panel { opacity: 0; transform: translateY(46px) rotateX(9deg) scale(.965); }
+  .cw-section.cw-armed .cw-light { opacity: 0; }
+  .cw-section.cw-armed .cw-skills li { opacity: 0; transform: translateY(10px); }
+
   /* ── Hold to reveal ───────────────────────────────────────────────────────
      chandan.dev's signature move: two images stacked, and the pointer opens a
      window from one into the other. Ours goes the other way round — the crest
@@ -3392,6 +3503,51 @@
         <span class="sparkle">/</span>
       </div>
     </div>
+
+    <!-- ── Current work, staged as a device ─────────────────────────────────
+         One deliberate, scroll-choreographed moment rather than another card in
+         a grid: the panel is pinned while it assembles, so the work you are
+         doing right now gets the room the rest of the page does not give it. -->
+    <section class="cw-section" id="currentWork" aria-labelledby="cwTitle">
+      <div class="cw-stage">
+        <span class="cw-light cw-light-l" aria-hidden="true"></span>
+        <span class="cw-light cw-light-r" aria-hidden="true"></span>
+        <div class="cw-panel">
+          <span class="cw-corner cw-tl" aria-hidden="true"></span><span class="cw-corner cw-tr" aria-hidden="true"></span>
+          <span class="cw-corner cw-bl" aria-hidden="true"></span><span class="cw-corner cw-br" aria-hidden="true"></span>
+          <div class="cw-screen">
+            <div class="cw-head">
+              <span class="cw-stamp" aria-hidden="true">vahdam/id-01</span>
+              <span class="cw-badge">At the moment // Y2026</span>
+              <span class="cw-status"><span class="cw-dot" aria-hidden="true"></span>live</span>
+            </div>
+            <div class="cw-body">
+              <div class="cw-copy">
+                <h2 class="cw-title" id="cwTitle">Building the lifecycle OS behind the growth.</h2>
+                <p class="cw-desc">Leading product across lifecycle, retention and D2C growth at
+                  <strong>Vahdam India</strong> — US, UK and global.</p>
+                <ul class="cw-skills">
+                  <li><span class="cw-bullet" aria-hidden="true"></span>Lifecycle &amp; retention</li>
+                  <li><span class="cw-bullet" aria-hidden="true"></span>D2C growth</li>
+                  <li><span class="cw-bullet" aria-hidden="true"></span>0&rarr;1 products</li>
+                  <li><span class="cw-bullet" aria-hidden="true"></span>Go to market</li>
+                </ul>
+                <a class="btn primary cw-cta" href="#now" data-view="now">What I'm building now &rarr;</a>
+              </div>
+              <div class="cw-visual" aria-hidden="true">
+                <span class="cw-glow"></span>
+                <div class="cw-frame">
+                  <span class="cw-microstamp">vahdam/access</span>
+                  <img src="assets/anchit-mark-220.webp" srcset="assets/anchit-mark-220.webp 1x, assets/anchit-mark-440.webp 2x"
+                       alt="" width="220" height="220" loading="lazy" decoding="async" class="cw-mark">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <span class="cw-platform" aria-hidden="true"></span>
+      </div>
+    </section>
 
     <div class="container">
       <!-- Career Journey Timeline -->
@@ -10229,6 +10385,94 @@
       // router swaps panels, every measurement below it shifts, so recompute.
       document.addEventListener('viewChanged', function () { window.ScrollTrigger.refresh(); });
     }
+  }
+})();
+</script>
+<script id="current-work-pin">
+(function () {
+  'use strict';
+  var sec = document.getElementById('currentWork');
+  if (!sec) return;
+
+  var tier = document.documentElement.getAttribute('data-ambient');
+  // At the `still` tier nothing is choreographed anywhere on the page, so the
+  // section simply exists. It is fully readable without a single tween.
+  if (tier === 'still') return;
+
+  var tries = 0;
+  (function whenReady() {
+    if (window.gsap && window.ScrollTrigger) return build();
+    if (tries++ > 60) return;                 // ~6s, then leave it static
+    setTimeout(whenReady, 100);
+  })();
+
+  function build() {
+    var gsap = window.gsap, ST = window.ScrollTrigger;
+    try { gsap.registerPlugin(ST); } catch (e) {}
+
+    var touch = window.matchMedia && matchMedia('(pointer: coarse)').matches;
+    var panel = sec.querySelector('.cw-panel');
+    var lights = sec.querySelectorAll('.cw-light');
+    var skills = sec.querySelectorAll('.cw-skills li');
+
+    // Arm ONLY now — the hidden start state is applied at the last possible
+    // moment, so every path that gets here without building a timeline (no
+    // GSAP, a thrown plugin, the `still` tier) leaves the section visible
+    // rather than blank. This page has been blank three times for exactly that
+    // reason and it is not worth a fourth.
+    sec.classList.add('cw-armed');
+
+    var tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: sec,
+        // `top 78%` pinned the section with its top near the BOTTOM of the
+        // viewport, so the whole hold happened four-fifths off screen. Pinning
+        // on centre locks it where you are actually looking, which is the only
+        // position a pin is worth paying for.
+        start: touch ? 'top 82%' : 'center center',
+        // Pinned only where a pin feels good. On touch, hijacking the scroll to
+        // hold a section still is the fastest way to make a page feel broken,
+        // so there it plays as an ordinary reveal.
+        end: touch ? 'top 45%' : '+=72%',
+        pin: !touch,
+        pinSpacing: !touch,
+        scrub: touch ? false : 0.6,
+        anticipatePin: touch ? 0 : 1,
+        invalidateOnRefresh: true,
+      },
+      defaults: { ease: 'power3.out' },
+    });
+
+    tl.to(panel, { opacity: 1, y: 0, rotateX: 0, scale: 1, duration: 0.55 })
+      .to(lights, { opacity: 0.5, duration: 0.4 }, '-=0.3')
+      .to(skills, { opacity: 1, y: 0, duration: 0.35, stagger: 0.09 }, '-=0.15');
+
+    // The router changes the document height under every measurement below it.
+    document.addEventListener('viewChanged', function () { try { ST.refresh(); } catch (e) {} });
+
+    // Last line of defence: if the timeline never ran — a refresh that measured
+    // the section at zero height, a trigger that never fired — show it anyway.
+    //
+    // Deliberately NOT a plain timer. A timer fires while the section is still
+    // far below the fold, where progress is legitimately 0, and un-arms it
+    // early — so by the time you scroll down the panel is already sitting
+    // there and the reveal you were meant to see has been given away. This
+    // only intervenes once the section has actually been on screen for a beat
+    // and the timeline still has not moved.
+    var stuck = 0;
+    var watch = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) { clearTimeout(stuck); return; }
+        stuck = setTimeout(function () {
+          if (tl.progress() === 0 && !tl.isActive()) {
+            sec.classList.remove('cw-armed');
+            try { watch.disconnect(); } catch (err) {}
+          }
+        }, 1500);
+      });
+    }, { threshold: 0.25 });
+    watch.observe(sec);
+    tl.eventCallback('onUpdate', function () { try { watch.disconnect(); } catch (e) {} });
   }
 })();
 </script>
