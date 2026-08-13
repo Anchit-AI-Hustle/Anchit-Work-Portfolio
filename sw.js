@@ -2,22 +2,26 @@
  * Cache name is version-stamped so each deploy purges the previous cache
  * (the activate handler deletes every cache whose name !== CACHE). Bump
  * this string on every deploy that changes assets. */
-const CACHE = 'anchit-portfolio-20260810-slim-shell';
+const CACHE = 'anchit-portfolio-20260813-paint-lean';
 const SHELL = [
   '/',
   '/index.html',
   '/task-tracker.html',
   '/manifest.json',
   '/assets/task-tracker-shell.js',
-  '/assets/vendor/three.min.js',
+  /* three.min.js is deliberately NOT precached. It is 670 KB, it is fetched
+     lazily on idle and only on hardware that can keep the nebula, and half the
+     visitors never request it at all — precaching it spent that download on
+     every install. It still lands in the runtime cache the first time a page
+     actually asks for it. */
   '/assets/vendor/gsap.min.js',
   '/assets/vendor/ScrollTrigger.min.js',
   /* The page renders the optimised WebP; the 1.5MB PNG it replaced is kept
      in the repo only for og:image, which social scrapers fetch server-side
      and never from this cache — so precaching it cost 1.5MB per install
      for a file no visitor loads. */
-  '/assets/anchit-mark-440.webp',
-  '/assets/logo-at-660.webp',
+  '/assets/anchit-mark-220.webp',
+  '/assets/logo-at-330.webp',
   '/icons/apple-touch-icon.png',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
