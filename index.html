@@ -9286,7 +9286,10 @@
     document.body.insertBefore(canvas, document.body.firstChild);
 
     var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: !isMobile, alpha: true, powerPreference: 'high-performance' });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.25 : 1.75));
+    // Cost scales with the SQUARE of pixel ratio: 1.75 renders 3.1x the pixels
+    // of 1.0, 1.25 renders 1.6x. For a soft out-of-focus nebula the extra
+    // resolution is invisible, but the GPU work is not.
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 1.25));
     renderer.autoClear = false;
 
     // Theme colors → shader/material tints.
@@ -9387,9 +9390,45 @@
 
     var running = true, t = 0;
     document.addEventListener('visibilitychange', function () { running = !document.hidden; if (running) requestAnimationFrame(tick); });
-    function tick() {
+    // The backdrop drifts slowly — 60fps renders twice the frames for motion
+    // nobody can perceive, while competing with the reveal animations and
+    // ScrollTrigger for the same frame budget. Capped at ~30fps, which halves
+    // the GPU and main-thread cost and looks identical.
+    var lastFrame = 0;
+
+    // ── adaptive quality ────────────────────────────────────────────────
+    // No amount of tuning makes a heavy WebGL backdrop smooth on every device:
+    // an integrated GPU, a software renderer, or a busy machine will stutter
+    // no matter what constants are chosen. So the page measures ITSELF and
+    // drops its most expensive layer when it cannot hold a usable frame rate.
+    // The 2D particle field underneath stays, so the look degrades rather than
+    // disappearing, and the rest of the site keeps its budget.
+    var qFrames = 0, qStart = 0, qChecked = false;
+    function qualityGuard(now) {
+      if (qChecked) return true;
+      if (!qStart) { qStart = now; return true; }
+      qFrames++;
+      if (now - qStart < 2500) return true;              // sample ~2.5s
+      qChecked = true;
+      var fps = qFrames / ((now - qStart) / 1000);
+      if (fps < 24) {
+        running = false;
+        canvas.style.display = 'none';                   // reveal the 2D field
+        document.documentElement.setAttribute('data-webgl', 'dropped');
+        try { renderer.dispose(); } catch (e) {}
+        return false;
+      }
+      return true;
+    }
+
+    function tick(now) {
       if (!running) return;
-      t += 0.0016;
+      requestAnimationFrame(tick);
+      if (!qualityGuard(now || performance.now())) return;
+      if (now && now - lastFrame < 32) return;          // ~30fps
+      lastFrame = now || 0;
+      t += 0.0032;                                      // twice the step, same speed
+
       mx += (mxT - mx) * 0.045; my += (myT - my) * 0.045;
       uNeb.uTime.value = t * 10.0;
       uNeb.uMouse.value.set(mx, my);
@@ -9409,9 +9448,8 @@
       renderer.clear();
       renderer.render(bgScene, bgCam);
       renderer.render(scene, camera);
-      requestAnimationFrame(tick);
     }
-    tick();
+    requestAnimationFrame(tick);
 
     // Exposed so GSAP can spike intensity on navigation.
     window.__webglBg = { mat: mat, neb: uNeb, coreOuter: coreOuter, coreInner: coreInner };

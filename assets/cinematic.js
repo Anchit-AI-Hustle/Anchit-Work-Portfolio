@@ -72,11 +72,12 @@
   css.textContent = [
     '.cin{opacity:0;transform:translateY(22px);' +
       'transition:opacity .68s cubic-bezier(.16,1,.3,1),transform .68s cubic-bezier(.16,1,.3,1);' +
-      'transition-delay:var(--cin-d,0s);will-change:opacity,transform}',
+      'transition-delay:var(--cin-d,0s)}',
     '.cin-stagger>*{opacity:0;transform:translateY(18px);' +
       'transition:opacity .6s cubic-bezier(.16,1,.3,1),transform .6s cubic-bezier(.16,1,.3,1);' +
-      'transition-delay:var(--cin-cd,0s);will-change:opacity,transform}',
+      'transition-delay:var(--cin-cd,0s)}',
     '.cin.cin-in,.cin-stagger.cin-in>*{opacity:1;transform:none}',
+    '.cin-anim,.cin-anim>*{will-change:opacity,transform}',
     // Anything still hidden when the deadline passes is shown outright.
     // Richer vocabulary. Depth (scale + blur) for feature cards, a lift for
     // parallax elements, and word-level reveal for headings.
@@ -206,7 +207,10 @@
       });
     }
     order++;
-    el.classList.add('cin-in');
+    el.classList.add('cin-anim', 'cin-in');
+    // Release the compositor layer once the reveal is done; holding will-change
+    // forever is what turned ~250 elements into permanent GPU layers.
+    setTimeout(function () { el.classList.remove('cin-anim'); }, 1600);
   }
 
   var io = null;
@@ -507,7 +511,23 @@
     addEventListener('resize', sweep, { passive: true });
     // New content (these are apps, not just documents) gets tagged too.
     if ('MutationObserver' in window) {
-      var mo = new MutationObserver(function () { observe(); enrich(); initMagnetic(); });
+      // Was: full rescan on EVERY mutation. On these app pages that fires
+      // continuously, and each pass walks every element calling
+      // getComputedStyle — 81 long tasks and 4 FPS while scrolling. Now it
+      // only reacts to ADDED elements, and coalesces bursts into one pass.
+      var moTimer = null;
+      var mo = new MutationObserver(function (records) {
+        var added = false;
+        for (var i = 0; i < records.length && !added; i++) {
+          var n = records[i].addedNodes;
+          for (var j = 0; j < n.length; j++) {
+            if (n[j].nodeType === 1) { added = true; break; }
+          }
+        }
+        if (!added) return;
+        clearTimeout(moTimer);
+        moTimer = setTimeout(function () { observe(); enrich(); initMagnetic(); }, 350);
+      });
       mo.observe(document.body, { childList: true, subtree: true });
     }
     // Hard deadline. Whatever happened, nothing stays invisible.
