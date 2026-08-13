@@ -504,7 +504,16 @@
 
   function boot() {
     observe();
-    setTimeout(function () { enrich(); railify(); pinRails(); initParallax(); initLenis(); initCursor(); initMagnetic(); onParScroll(); }, 400);
+    // Reveals and smooth scroll are what the FIRST scroll needs; everything
+    // else is decoration and can wait. Loading it all at 400ms put parallax
+    // scanning, 38 magnetic listeners and a cursor rAF into exactly the frame
+    // budget the opening scroll was competing for.
+    setTimeout(function () { enrich(); railify(); initLenis(); }, 300);
+
+    var idle = window.requestIdleCallback || function (fn) { return setTimeout(fn, 900); };
+    idle(function () {
+      pinRails(); initParallax(); onParScroll(); initCursor(); initMagnetic();
+    }, { timeout: 2000 });
     addEventListener('scroll', onParScroll, { passive: true });
     sweep();
     addEventListener('scroll', sweep, { passive: true });

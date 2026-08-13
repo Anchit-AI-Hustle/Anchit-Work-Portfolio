@@ -1481,16 +1481,6 @@
     opacity: 1; transform: none; filter: none; transition: none;
   }
 
-  /* ============ CURSOR GLOW ============ */
-  .cursor-glow {
-    position: fixed; pointer-events: none; z-index: 9999;
-    width: 380px; height: 380px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,77,31,0.06) 0%, transparent 70%);
-    transform: translate(-50%, -50%);
-    transition: opacity 0.5s;
-    will-change: left, top;
-  }
-
   /* ============ ENHANCED REVEALS ============ */
   .reveal-left  { opacity: 0; transform: translateX(-32px); transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); transition-delay: var(--anim-d, 0s); }
   .reveal-right { opacity: 0; transform: translateX(32px);  transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); transition-delay: var(--anim-d, 0s); }
@@ -4757,7 +4747,6 @@
 </div>
 
 <!-- Cursor glow -->
-<div class="cursor-glow" id="cursorGlow"></div>
 
 <footer>
   <div>© Anchit Tandon · 2026 · Delhi, IST</div>
@@ -6446,23 +6435,6 @@
     if (e.key === 'Escape') { chatInput.value = ''; chatInput.blur(); closeSidebar(); }
   });
 
-  /* ============ CURSOR GLOW ============ */
-  (function() {
-    const glow = document.getElementById('cursorGlow');
-    if (!glow || !window.matchMedia || window.matchMedia('(hover: none)').matches || !window.requestAnimationFrame) {
-      if (glow) glow.style.display = 'none';
-      return;
-    }
-    let mx = 0, my = 0, gx = 0, gy = 0;
-    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
-    function tick() {
-      gx += (mx - gx) * 0.07; gy += (my - gy) * 0.07;
-      glow.style.left = gx + 'px'; glow.style.top = gy + 'px';
-      requestAnimationFrame(tick);
-    }
-    tick();
-  })();
-
   /* ============ ANIMATED COUNTERS ============ */
   (function() {
     if (!('IntersectionObserver' in window)) {
@@ -8055,7 +8027,6 @@
     line-height: 1.72;
   }
   body::before,
-  .cursor-glow,
   .hero-dot-grid,
   .home-hero::before,
   .home-hero::after {
