@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+
+html { -webkit-font-smoothing: antialiased; }
+body { @apply bg-void text-silver font-display; }
+
+/* Lenis needs the page to scroll normally; it translates, it does not fake it. */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+
+/* The custom cursor replaces the pointer, so hide the real one — but only on
+   devices that HAVE one. Touch users keep their native affordances. */
+@media (hover: hover) and (pointer: fine) {
+  * { cursor: none !important; }
+}
+
+/* Text-reveal mask: characters translate up from behind this edge. */
+.reveal-mask { overflow: hidden; display: block; }
+.reveal-mask .char { display: inline-block; will-change: transform; }
+
+/* Fallback so nothing is invisible if JS fails before the split runs. */
+.no-js .reveal-mask .char { transform: none !important; }
