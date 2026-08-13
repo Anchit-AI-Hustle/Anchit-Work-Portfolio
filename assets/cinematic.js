@@ -203,8 +203,61 @@
 
   function bail() { root.classList.add('cin-bail'); }
 
+  // ── horizontal rails ──────────────────────────────────────────────────
+  // Mixed into the vertical flow, but only where the content earns it. An
+  // analysis across the tool pages found almost nothing qualifies: they are
+  // forms and panels, not galleries. So this is a RULE rather than a list —
+  // a row of five or more uniform cards costing real vertical height becomes
+  // a side-scrolling rail, and anything else is left to scroll normally.
+  function railify() {
+    if (motionOff) return;
+    document.querySelectorAll('.cin-stagger:not([data-railed])').forEach(function (grid) {
+      var kids = Array.prototype.filter.call(grid.children, function (c) {
+        var r = c.getBoundingClientRect();
+        return r.height > 60 && r.width > 90;
+      });
+      if (kids.length < 5) return;                       // too few to be a gallery
+      var hs = kids.map(function (k) { return k.getBoundingClientRect().height; });
+      if (Math.max.apply(null, hs) - Math.min.apply(null, hs) > 70) return;  // not uniform
+      if (grid.getBoundingClientRect().height < innerHeight * 0.7) return;   // costs no real height
+      if (grid.closest('[data-no-rail]')) return;
+
+      grid.dataset.railed = '1';
+      grid.style.cssText += ';display:flex;gap:18px;overflow-x:auto;overflow-y:hidden;' +
+        'scroll-snap-type:x mandatory;scroll-behavior:smooth;padding-bottom:16px;' +
+        '-webkit-overflow-scrolling:touch;';
+      grid.setAttribute('tabindex', '0');
+      grid.setAttribute('role', 'region');
+      grid.setAttribute('aria-label', 'Scrollable card row — use arrow keys or swipe');
+      kids.forEach(function (c) {
+        c.style.cssText += ';scroll-snap-align:start;flex:0 0 clamp(240px,24vw,340px);';
+      });
+
+      var nav = document.createElement('div');
+      nav.style.cssText = 'display:flex;gap:6px;justify-content:flex-end;margin-bottom:8px';
+      nav.innerHTML = '<button type="button" aria-label="Previous">\u2039</button>' +
+                      '<button type="button" aria-label="Next">\u203a</button>';
+      Array.prototype.forEach.call(nav.children, function (btn) {
+        btn.style.cssText = 'width:28px;height:28px;border-radius:50%;cursor:pointer;' +
+          'background:transparent;color:inherit;opacity:.6;' +
+          'border:1px solid currentColor;line-height:1;font-size:13px';
+      });
+      grid.parentNode.insertBefore(nav, grid);
+      function page(dir) {
+        var max = grid.scrollWidth - grid.clientWidth;
+        var t = Math.max(0, Math.min(max, grid.scrollLeft + dir * Math.round(grid.clientWidth * 0.85)));
+        try { grid.scrollTo({ left: t, behavior: 'smooth' }); } catch (e) { grid.scrollLeft = t; }
+        // scrollBy/scrollTo can be patched elsewhere on these pages; make sure.
+        setTimeout(function () { if (Math.abs(grid.scrollLeft - t) > 4) grid.scrollLeft = t; }, 340);
+      }
+      nav.children[0].addEventListener('click', function () { page(-1); });
+      nav.children[1].addEventListener('click', function () { page(1); });
+    });
+  }
+
   function boot() {
     observe();
+    setTimeout(railify, 400);
     sweep();
     addEventListener('scroll', sweep, { passive: true });
     addEventListener('resize', sweep, { passive: true });
