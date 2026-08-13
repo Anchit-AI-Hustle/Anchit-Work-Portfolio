@@ -5,20 +5,23 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 const BUILDS = [
-  { n: '01', title: 'VAHDAM Lifecycle OS', role: 'AGM — Product, D2C Growth',
-    blurb: 'A retention workflow connecting analytics, planning, segmentation and mailer generation into one loop.',
-    stack: ['Klaviyo', 'WebEngage', 'SQL', 'Experimentation'], year: '2026' },
-  { n: '02', title: 'ET Markets Rebuild', role: 'Product Manager · Times Internet',
-    blurb: 'Rebuilt across iOS, Android and web into ₹3Cr+ of new annual revenue.',
-    stack: ['iOS', 'Android', 'Web', 'Growth'], year: '2023—25' },
-  { n: '03', title: 'Assisted Sales 5×', role: 'Product Manager · Times Internet',
-    blurb: 'Scaled from ₹15L to ₹80L MRR in eight to ten months.',
-    stack: ['Funnels', 'CRM', 'Pricing'], year: '2023' },
-  { n: '04', title: 'Delhi Half Marathon', role: 'Senior PM · 0→1 IP',
-    blurb: 'A new consumer IP taken from zero to fifteen thousand runners on the ground.',
-    stack: ['0→1', 'Events', 'Acquisition'], year: '2026' },
+  { n: '01', title: 'MusicGenAI', role: 'Generative audio',
+    blurb: 'Prompt to a finished track — lyrics, vocals, production. Every stage exposed, so a drifting vocal can be debugged instead of re-rolled.',
+    stack: ['Next.js', 'Python', 'Supabase', 'Audio DSP'], year: '2026' },
+  { n: '02', title: 'Hey-Yaara', role: 'Voice-first companion',
+    blurb: 'An AI companion for elderly users. One button to talk, one to stop. Voice first, not screen first — built for people apps intimidate.',
+    stack: ['PWA', 'Web Speech', 'LLM', 'Accessibility'], year: '2025' },
+  { n: '03', title: 'AI_TeleSuite', role: 'Sales intelligence',
+    blurb: 'Real-time transcription, pitch scoring and conversion assist — the ET Prime playbook packaged for solo operators.',
+    stack: ['GraphQL', 'Whisper', 'LLM', 'Realtime'], year: '2025' },
 ];
 
+/**
+ * PHASE 1: all Tailwind transition-* / duration-* / ease-* classes deleted.
+ * PHASE 2: every state change is GSAP, so hover and scroll share one engine
+ * and one ticker — a CSS transition running beside a GSAP tween on the same
+ * property is the classic source of fighting animations.
+ */
 export default function Work() {
   const root = useRef<HTMLElement>(null);
 
@@ -26,26 +29,38 @@ export default function Work() {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
       gsap.utils.toArray<HTMLElement>('[data-build]').forEach((card) => {
-        // Bottom-up fade…
+        // Heavy and deliberate: a long ease with a real distance to travel.
         gsap.from(card, {
-          y: 64, opacity: 0, duration: 1.1, ease: 'power3.out',
-          scrollTrigger: { trigger: card, start: 'top 88%', once: true },
+          y: 90,
+          opacity: 0,
+          duration: 1.35,
+          ease: 'power4.out',
+          scrollTrigger: { trigger: card, start: 'top 90%', once: true },
         });
-        // …plus a slow parallax on the index numeral, so the row has depth
-        // rather than moving as one flat slab.
+
+        // Parallax delay — the numeral lags the card, so the row has depth
+        // instead of arriving as one flat slab.
         gsap.to(card.querySelector('[data-num]'), {
-          yPercent: -38, ease: 'none',
-          scrollTrigger: { trigger: card, start: 'top bottom', end: 'bottom top', scrub: true },
+          yPercent: -55,
+          ease: 'none',
+          scrollTrigger: { trigger: card, start: 'top bottom', end: 'bottom top', scrub: 1.1 },
         });
+
+        // Hover, in GSAP rather than a CSS transition.
+        const title = card.querySelector('[data-title]');
+        const enter = () => gsap.to(title, { color: '#EAEAEA', x: 10, duration: 0.5, ease: 'power3.out' });
+        const leave = () => gsap.to(title, { color: '#8A8A8A', x: 0, duration: 0.5, ease: 'power3.out' });
+        card.addEventListener('pointerenter', enter);
+        card.addEventListener('pointerleave', leave);
       });
     }, root);
     return () => ctx.revert();
   }, []);
 
   return (
-    <section ref={root} className="px-6 py-28 md:px-10" id="work">
-      <h2 className="mb-14 font-mono text-[11px] uppercase tracking-[0.3em] text-ash">
-        Selected builds
+    <section ref={root} className="px-6 py-32 md:px-10" id="work">
+      <h2 className="mb-16 font-mono text-[11px] uppercase tracking-[0.3em] text-ash">
+        The Work — selected systems
       </h2>
 
       <ul className="border-t border-edge">
@@ -53,22 +68,23 @@ export default function Work() {
           <li
             key={b.n}
             data-build
-            className="group relative grid grid-cols-1 gap-4 border-b border-edge py-10 transition-colors duration-500 ease-cine hover:bg-white/[0.02] md:grid-cols-12 md:gap-8"
+            data-cursor="link"
+            className="group relative grid grid-cols-1 gap-4 border-b border-edge py-12 md:grid-cols-12 md:gap-8"
           >
             <span data-num className="font-mono text-[11px] text-ash md:col-span-1">{b.n}</span>
 
             <div className="md:col-span-6">
-              <h3 className="text-[clamp(1.6rem,3.4vw,2.8rem)] font-semibold leading-[1.02] tracking-tightest transition-colors duration-500 ease-cine group-hover:text-signal">
+              <h3
+                data-title
+                className="text-[clamp(1.8rem,4vw,3.4rem)] font-semibold leading-[1.0] tracking-tightest text-ash"
+              >
                 {b.title}
               </h3>
-              <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.2em] text-ash">{b.role}</p>
+              <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-ash">{b.role}</p>
             </div>
 
             <p className="text-sm leading-relaxed text-ash md:col-span-4">{b.blurb}</p>
-
-            <div className="flex flex-wrap items-start gap-2 md:col-span-1 md:justify-end">
-              <span className="font-mono text-[10px] text-ash">{b.year}</span>
-            </div>
+            <span className="font-mono text-[10px] text-ash md:col-span-1 md:text-right">{b.year}</span>
 
             <div className="flex flex-wrap gap-2 md:col-span-12">
               {b.stack.map((s) => (

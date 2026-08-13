@@ -3,25 +3,49 @@
 import { useEffect, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 
-/** Minimal dot that expands over anything interactive. Pointer-devices only. */
+/**
+ * White dot replacing the pointer. It SNAPS to the centre of a project link or
+ * a footer social — magnetic in the true sense, not merely enlarged: the target
+ * pulls the cursor, so the interface feels like it has mass.
+ */
 export default function Cursor() {
   const x = useMotionValue(-100);
   const y = useMotionValue(-100);
-  const sx = useSpring(x, { stiffness: 900, damping: 55, mass: 0.4 });
-  const sy = useSpring(y, { stiffness: 900, damping: 55, mass: 0.4 });
-  const [variant, setVariant] = useState<'default' | 'link' | 'hold'>('default');
-  const [enabled, setEnabled] = useState(false);
+  const sx = useSpring(x, { stiffness: 700, damping: 42, mass: 0.45 });
+  const sy = useSpring(y, { stiffness: 700, damping: 42, mass: 0.45 });
+  const [mode, setMode] = useState<'dot' | 'link' | 'hold'>('dot');
+  const [on, setOn] = useState(false);
 
   useEffect(() => {
     if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-    setEnabled(true);
+    setOn(true);
 
-    const move = (e: PointerEvent) => { x.set(e.clientX); y.set(e.clientY); };
+    let target: HTMLElement | null = null;
+
+    const move = (e: PointerEvent) => {
+      if (target) {
+        // Snap toward the target's centre, easing off with distance so it
+        // releases naturally instead of sticking.
+        const r = target.getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+        x.set(e.clientX + (cx - e.clientX) * 0.32);
+        y.set(e.clientY + (cy - e.clientY) * 0.32);
+      } else {
+        x.set(e.clientX);
+        y.set(e.clientY);
+      }
+    };
+
     const over = (e: PointerEvent) => {
       const t = e.target as HTMLElement;
-      if (t.closest('[data-cursor="hold"]')) return setVariant('hold');
-      setVariant(t.closest('a,button,[role="button"]') ? 'link' : 'default');
+      const hold = t.closest('[data-cursor="hold"]') as HTMLElement | null;
+      if (hold) { target = null; return setMode('hold'); }
+      const link = t.closest('[data-build],[data-magnetic],a,button') as HTMLElement | null;
+      target = link;
+      setMode(link ? 'link' : 'dot');
     };
+
     window.addEventListener('pointermove', move, { passive: true });
     window.addEventListener('pointerover', over, { passive: true });
     return () => {
@@ -30,22 +54,21 @@ export default function Cursor() {
     };
   }, [x, y]);
 
-  if (!enabled) return null;
-
-  const size = variant === 'default' ? 8 : variant === 'link' ? 44 : 72;
+  if (!on) return null;
+  const size = mode === 'dot' ? 8 : mode === 'link' ? 56 : 84;
 
   return (
     <motion.div
       aria-hidden
       className="pointer-events-none fixed left-0 top-0 z-[9999] rounded-full mix-blend-difference"
-      style={{ x: sx, y: sy, translateX: '-50%', translateY: '-50%' }}
+      style={{ x: sx, y: sy, translateX: '-50%', translateY: '-50%', borderColor: '#FFFFFF', borderStyle: 'solid' }}
       animate={{
         width: size,
         height: size,
-        backgroundColor: variant === 'default' ? '#EAEAEA' : 'transparent',
-        border: variant === 'default' ? '0px solid #EAEAEA' : '1px solid #EAEAEA',
+        backgroundColor: mode === 'dot' ? '#FFFFFF' : 'rgba(255,255,255,0)',
+        borderWidth: mode === 'dot' ? 0 : 1,
       }}
-      transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
     />
   );
 }

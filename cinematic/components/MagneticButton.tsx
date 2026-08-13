@@ -1,35 +1,47 @@
 'use client';
 
 import { useRef, type ReactNode } from 'react';
-import { motion, useMotionValue, useSpring } from 'framer-motion';
+import gsap from 'gsap';
 
-/** Pulls toward the cursor, then springs home. Strength is distance-scaled so
- *  it feels weighted rather than sticky. */
+/**
+ * PHASE 1: the Tailwind transition-colors / duration-300 / ease-cine classes
+ * were deleted. Colour and position are both GSAP now, so hover state cannot
+ * fight a CSS transition running on the same property.
+ */
 export default function MagneticButton({
-  children, href, strength = 0.35,
+  children, href, strength = 0.4,
 }: { children: ReactNode; href: string; strength?: number }) {
   const ref = useRef<HTMLAnchorElement>(null);
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const sx = useSpring(x, { stiffness: 260, damping: 18, mass: 0.5 });
-  const sy = useSpring(y, { stiffness: 260, damping: 18, mass: 0.5 });
 
   return (
-    <motion.a
+    <a
       ref={ref}
       href={href}
+      data-magnetic
       target={href.startsWith('http') ? '_blank' : undefined}
       rel="noopener"
-      style={{ x: sx, y: sy }}
       onPointerMove={(e) => {
-        const r = ref.current!.getBoundingClientRect();
-        x.set((e.clientX - (r.left + r.width / 2)) * strength);
-        y.set((e.clientY - (r.top + r.height / 2)) * strength);
+        const el = ref.current!;
+        const r = el.getBoundingClientRect();
+        gsap.to(el, {
+          x: (e.clientX - (r.left + r.width / 2)) * strength,
+          y: (e.clientY - (r.top + r.height / 2)) * strength,
+          borderColor: '#EAEAEA',
+          color: '#EAEAEA',
+          duration: 0.4,
+          ease: 'power3.out',
+        });
       }}
-      onPointerLeave={() => { x.set(0); y.set(0); }}
-      className="inline-flex items-center gap-2 border border-edge px-6 py-3 font-mono text-[11px] uppercase tracking-[0.18em] text-silver transition-colors duration-300 ease-cine hover:border-signal hover:text-signal"
+      onPointerLeave={() => {
+        // Overshoot on release: the pull had weight, so letting go should too.
+        gsap.to(ref.current, {
+          x: 0, y: 0, borderColor: 'rgba(234,234,234,0.10)', color: '#8A8A8A',
+          duration: 0.9, ease: 'elastic.out(1, 0.4)',
+        });
+      }}
+      className="inline-flex items-center gap-2 border border-edge px-7 py-4 font-mono text-[11px] uppercase tracking-[0.18em] text-ash"
     >
       {children}
-    </motion.a>
+    </a>
   );
 }
