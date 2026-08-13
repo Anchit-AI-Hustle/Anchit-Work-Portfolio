@@ -411,16 +411,103 @@
     });
   }
 
+  // ── Lenis: filmic scroll, ticked by GSAP ──────────────────────────────
+  // Running Lenis on its own rAF while ScrollTrigger runs another means two
+  // loops disagree about "now" and every scroll-triggered animation lands a
+  // frame late — the exact jerkiness Lenis is added to remove. So Lenis is
+  // ticked BY gsap.ticker where GSAP exists, and ScrollTrigger updates on
+  // every Lenis scroll.
+  function initLenis() {
+    if (motionOff || window.__lenis) return;
+    if (typeof window.Lenis !== 'function') return;          // script not loaded: native scroll
+    if (matchMedia('(pointer: coarse)').matches) return;     // touch already has momentum
+
+    var lenis = new window.Lenis({
+      duration: 1.05,
+      easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); },
+      smoothWheel: true
+    });
+    window.__lenis = lenis;
+
+    if (window.gsap && window.ScrollTrigger) {
+      lenis.on('scroll', window.ScrollTrigger.update);
+      window.gsap.ticker.add(function (time) { lenis.raf(time * 1000); });
+      window.gsap.ticker.lagSmoothing(0);
+    } else {
+      var raf = function (t) { lenis.raf(t); requestAnimationFrame(raf); };
+      requestAnimationFrame(raf);
+    }
+    // The rails intercept the wheel; Lenis must not fight them.
+    document.querySelectorAll('[data-railed]').forEach(function (r) {
+      r.setAttribute('data-lenis-prevent', '');
+    });
+  }
+
+  // ── custom cursor ─────────────────────────────────────────────────────
+  function initCursor() {
+    if (motionOff || !matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    if (document.getElementById('cinCursor')) return;
+    var dot = document.createElement('div');
+    dot.id = 'cinCursor';
+    dot.setAttribute('aria-hidden', 'true');
+    dot.style.cssText = 'position:fixed;left:0;top:0;z-index:2147482000;pointer-events:none;' +
+      'width:8px;height:8px;border-radius:50%;background:currentColor;color:#EAEAEA;' +
+      'mix-blend-mode:difference;transform:translate3d(-100px,-100px,0) translate(-50%,-50%);' +
+      'transition:width .28s cubic-bezier(.16,1,.3,1),height .28s cubic-bezier(.16,1,.3,1),' +
+      'background-color .28s ease,border-color .28s ease;border:1px solid transparent';
+    document.body.appendChild(dot);
+
+    var tx = -100, ty = -100, cx = -100, cy = -100;
+    addEventListener('pointermove', function (e) { tx = e.clientX; ty = e.clientY; }, { passive: true });
+    (function loop() {
+      cx += (tx - cx) * 0.22; cy += (ty - cy) * 0.22;         // trails slightly: weight
+      dot.style.transform = 'translate3d(' + cx.toFixed(1) + 'px,' + cy.toFixed(1) + 'px,0) translate(-50%,-50%)';
+      requestAnimationFrame(loop);
+    })();
+
+    addEventListener('pointerover', function (e) {
+      var t = e.target;
+      var interactive = t && t.closest && t.closest('a,button,[role="button"],input,select,textarea,[data-cursor]');
+      dot.style.width = dot.style.height = interactive ? '42px' : '8px';
+      dot.style.background = interactive ? 'transparent' : '#EAEAEA';
+      dot.style.borderColor = interactive ? '#EAEAEA' : 'transparent';
+    }, { passive: true });
+  }
+
+  // ── magnetic buttons ──────────────────────────────────────────────────
+  function initMagnetic() {
+    if (motionOff || matchMedia('(pointer: coarse)').matches) return;
+    document.querySelectorAll('a.btn,button.btn,.chip,[data-magnetic]').forEach(function (el) {
+      if (el.__mag) return; el.__mag = 1;
+      var raf = null;
+      el.addEventListener('pointermove', function (e) {
+        if (raf) return;
+        raf = requestAnimationFrame(function () {
+          raf = null;
+          var r = el.getBoundingClientRect();
+          var dx = (e.clientX - (r.left + r.width / 2)) * 0.28;
+          var dy = (e.clientY - (r.top + r.height / 2)) * 0.28;
+          el.style.transform = 'translate3d(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px,0)';
+          el.style.transition = 'transform .08s linear';
+        });
+      });
+      el.addEventListener('pointerleave', function () {
+        el.style.transition = 'transform .5s cubic-bezier(.16,1,.3,1)';
+        el.style.transform = '';
+      });
+    });
+  }
+
   function boot() {
     observe();
-    setTimeout(function () { enrich(); railify(); pinRails(); initParallax(); onParScroll(); }, 400);
+    setTimeout(function () { enrich(); railify(); pinRails(); initParallax(); initLenis(); initCursor(); initMagnetic(); onParScroll(); }, 400);
     addEventListener('scroll', onParScroll, { passive: true });
     sweep();
     addEventListener('scroll', sweep, { passive: true });
     addEventListener('resize', sweep, { passive: true });
     // New content (these are apps, not just documents) gets tagged too.
     if ('MutationObserver' in window) {
-      var mo = new MutationObserver(function () { observe(); enrich(); });
+      var mo = new MutationObserver(function () { observe(); enrich(); initMagnetic(); });
       mo.observe(document.body, { childList: true, subtree: true });
     }
     // Hard deadline. Whatever happened, nothing stays invisible.
