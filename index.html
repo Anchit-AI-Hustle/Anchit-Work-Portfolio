@@ -10424,5 +10424,112 @@
   }
 })();
 </script>
+<!-- ============================================================
+     HORIZONTAL RAILS — mixed into the vertical flow
+     Applied only where the content earns it: sections with many uniform,
+     gallery-like cards that otherwise cost multiple screens of scrolling.
+     Measured before choosing: builds-grid is 12 cards over ~3 screens and
+     products-grid is 11 uniform chips. Narrative sections (work-list,
+     about-prose) stay vertical — turning prose sideways hurts reading.
+
+     Deliberately NOT scroll-hijacking. Pinning the section and converting
+     vertical wheel into horizontal movement is the flashier version, but it
+     breaks native scrolling, traps keyboard and trackpad users, and would
+     fight the existing ScrollTrigger layer. A snap rail gives the same
+     side-scrolling feel, works with swipe, wheel, keyboard and scrollbar,
+     and degrades to a plain grid when motion is off.
+     ============================================================ -->
+<style>
+  .h-rail{
+    display:flex; gap:20px; overflow-x:auto; overflow-y:hidden;
+    scroll-snap-type:x mandatory; scroll-behavior:smooth;
+    padding:4px 2px 18px; margin:0 -2px;
+    scrollbar-width:thin; scrollbar-color:var(--rule) transparent;
+    /* fade the edges so it reads as continuing rather than cut off */
+    -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 24px,#000 calc(100% - 24px),transparent 100%);
+    mask-image:linear-gradient(90deg,transparent 0,#000 24px,#000 calc(100% - 24px),transparent 100%);
+  }
+  .h-rail::-webkit-scrollbar{height:6px}
+  .h-rail::-webkit-scrollbar-thumb{background:var(--rule);border-radius:99px}
+  .h-rail > *{ scroll-snap-align:start; flex:0 0 clamp(260px,26vw,360px); }
+  /* the chip rail carries smaller items */
+  .h-rail.h-rail-sm > *{ flex-basis:clamp(190px,18vw,240px); }
+  .h-rail-head{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .h-rail-hint{
+    font-family:var(--font-mono); font-size:10px; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--ink-dim); opacity:.7;
+  }
+  .h-rail-nav{ margin-left:auto; display:flex; gap:6px; }
+  .h-rail-btn{
+    width:30px; height:30px; border-radius:50%; cursor:pointer;
+    background:var(--bg-elev); color:var(--ink-dim);
+    border:1px solid var(--rule); display:inline-flex;
+    align-items:center; justify-content:center; font-size:13px; line-height:1;
+  }
+  .h-rail-btn:hover{ border-color:var(--primary); color:var(--ink); }
+  .h-rail-btn[disabled]{ opacity:.35; cursor:default; }
+  /* Motion off, or a narrow phone: fall back to the normal stacked grid. */
+  html[data-motion="off"] .h-rail{
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+    overflow:visible; mask-image:none; -webkit-mask-image:none;
+  }
+  html[data-motion="off"] .h-rail > *{ flex-basis:auto; }
+  @media (max-width:560px){ .h-rail > *{ flex-basis:82vw } .h-rail.h-rail-sm > *{ flex-basis:62vw } }
+</style>
+<script>
+(function(){
+  'use strict';
+  if (document.documentElement.getAttribute('data-motion') === 'off') return;
+  var TARGETS = [['.builds-grid',''], ['.products-grid','h-rail-sm']];
+
+  function build(sel, extra){
+    document.querySelectorAll(sel).forEach(function(grid){
+      if (grid.dataset.railed) return;
+      if (grid.children.length < 4) return;              // too few to be worth a rail
+      grid.classList.add('h-rail'); if (extra) grid.classList.add(extra);
+      grid.dataset.railed = '1';
+      grid.setAttribute('tabindex','0');                  // keyboard scrollable
+      grid.setAttribute('role','region');
+      grid.setAttribute('aria-label','Scrollable card row — use arrow keys or swipe');
+
+      var head = document.createElement('div');
+      head.className = 'h-rail-head';
+      head.innerHTML = '<span class="h-rail-hint">Scroll sideways</span>' +
+        '<span class="h-rail-nav"><button class="h-rail-btn" type="button" aria-label="Previous">\u2039</button>' +
+        '<button class="h-rail-btn" type="button" aria-label="Next">\u203a</button></span>';
+      grid.parentNode.insertBefore(head, grid);
+
+      var btns = head.querySelectorAll('.h-rail-btn');
+      function sync(){
+        btns[0].disabled = grid.scrollLeft < 8;
+        btns[1].disabled = grid.scrollLeft + grid.clientWidth >= grid.scrollWidth - 8;
+      }
+      // scrollBy alone proved unreliable here — the page patches scroll APIs
+      // elsewhere, and the button moved nothing (scrollLeft 2 -> 2). Compute an
+      // explicit clamped target, then verify it actually moved and force it.
+      function page(dir){
+        var max = grid.scrollWidth - grid.clientWidth;
+        var target = Math.max(0, Math.min(max, grid.scrollLeft + dir * Math.round(grid.clientWidth * 0.85)));
+        try { grid.scrollTo({ left: target, behavior: 'smooth' }); }
+        catch (e) { grid.scrollLeft = target; }
+        setTimeout(function(){
+          if (Math.abs(grid.scrollLeft - target) > 4) grid.scrollLeft = target;
+          sync();
+        }, 340);
+      }
+      btns[0].addEventListener('click', function(){ page(-1); });
+      btns[1].addEventListener('click', function(){ page(1); });
+
+      grid.addEventListener('scroll', sync, { passive:true });
+      addEventListener('resize', sync, { passive:true });
+      requestAnimationFrame(sync);
+    });
+  }
+  function run(){ TARGETS.forEach(function(t){ build(t[0], t[1]); }); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+  document.addEventListener('viewChanged', function(){ setTimeout(run, 120); });
+})();
+</script>
 </body>
 </html>
