@@ -45,6 +45,36 @@
     } catch (e) {}
     document.documentElement.setAttribute('data-motion', on ? 'on' : 'off');
     if (on) document.documentElement.classList.add('cine-ready');
+
+    // ── Ambient tier ────────────────────────────────────────────────────────
+    // The backdrop is six independent full-viewport systems stacked at z-0:
+    // the particle canvas, the colour aura, the holo grid, the energy orb, the
+    // perimeter border, and (later, on idle) the WebGL nebula. Six overlapping
+    // faint fields are indistinguishable from three, but the compositor pays
+    // for every one of them on every frame — which is most of what a phone or
+    // an older laptop was spending its frame budget on.
+    //
+    // So the tier is decided ONCE, here, before the first paint, and it is the
+    // single authority: every ambient rule keys off this attribute instead of
+    // deciding for itself. Nothing is deleted — a lower tier simply stops
+    // paying for the layers you cannot pick out anyway.
+    //
+    //   full  · everything, as designed. Capable desktop with motion on.
+    //   lite  · aura + border + particles. Orb and grid stop animating.
+    //   still · one static gradient. Motion off, or the visitor asked for calm.
+    var tier = 'full';
+    if (!on) {
+      tier = 'still';
+    } else {
+      var coarse = window.matchMedia && matchMedia('(pointer: coarse)').matches;
+      var cores = navigator.hardwareConcurrency || 4;
+      var mem = navigator.deviceMemory || 4;
+      var save = navigator.connection && navigator.connection.saveData;
+      var narrow = Math.min(screen.width, screen.height) < 820;
+      if (save || cores < 4 || mem < 4) tier = 'still';
+      else if (coarse || narrow) tier = 'lite';
+    }
+    document.documentElement.setAttribute('data-ambient', tier);
   })();
 </script>
 
@@ -273,6 +303,119 @@
     font-family: var(--font-mono); font-size: 10px; font-weight: 500;
     letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
     overflow: hidden; text-overflow: ellipsis;
+  }
+
+  /* ── Morphing nav labels ──────────────────────────────────────────────────
+     The name of a page and what the page is FOR are two different things, and
+     a nav rail only has room for one of them at a time. So it holds both: the
+     name at rest, the promise on hover, sliding through the same slot.
+
+     Both labels occupy one grid cell, so the rail never changes width; the
+     swap is a transform on two spans, which is compositor-only and costs
+     nothing per frame. The hover copy is aria-hidden so the accessible name
+     stays equal to the visible label at rest (WCAG 2.5.3). */
+  .morph-label {
+    display: inline-grid; position: relative; overflow: hidden;
+    line-height: 1.35; vertical-align: bottom;
+  }
+  .morph-label > span {
+    grid-area: 1 / 1; display: block; white-space: nowrap;
+    transition: transform .42s cubic-bezier(.16, 1, .3, 1), opacity .28s ease;
+  }
+  .morph-label .ml-hover {
+    transform: translateY(105%); opacity: 0;
+    color: var(--primary); font-weight: 600;
+  }
+  .sidebar-item:hover .morph-label .ml-default,
+  .sidebar-item:focus-visible .morph-label .ml-default,
+  .sidebar-group-toggle:hover .morph-label .ml-default,
+  .sidebar-group-toggle:focus-visible .morph-label .ml-default {
+    transform: translateY(-105%); opacity: 0;
+  }
+  .sidebar-item:hover .morph-label .ml-hover,
+  .sidebar-item:focus-visible .morph-label .ml-hover,
+  .sidebar-group-toggle:hover .morph-label .ml-hover,
+  .sidebar-group-toggle:focus-visible .morph-label .ml-hover {
+    transform: translateY(0); opacity: 1;
+  }
+  /* Collapsed rail shows icons only, and a calm visitor gets a plain swap. */
+  body.sidebar-collapsed .morph-label .ml-hover { display: none; }
+  html[data-motion="off"] .morph-label > span { transition: none; }
+
+  /* ── Device cards ─────────────────────────────────────────────────────────
+     A card that reads as a piece of hardware rather than a box: bracket marks
+     at the corners, a serial stamp, and a header that dates the work. Borrowed
+     structure, our palette — champagne on ink, never a framework grey.
+
+     Every part is a static pseudo-element or an absolutely-positioned span, so
+     the whole treatment is one extra paint at load and nothing per frame. */
+  .device-card { --dc-line: color-mix(in srgb, var(--primary) 42%, transparent); }
+  .dc-corner {
+    position: absolute; width: 11px; height: 11px; pointer-events: none;
+    border: 1px solid var(--dc-line); opacity: .62;
+    transition: opacity .28s ease, width .28s ease, height .28s ease;
+  }
+  .dc-tl { top: 10px; left: 10px;  border-right: 0; border-bottom: 0; border-radius: 3px 0 0 0; }
+  .dc-tr { top: 10px; right: 10px; border-left: 0;  border-bottom: 0; border-radius: 0 3px 0 0; }
+  .dc-bl { bottom: 10px; left: 10px;  border-right: 0; border-top: 0; border-radius: 0 0 0 3px; }
+  .dc-br { bottom: 10px; right: 10px; border-left: 0;  border-top: 0; border-radius: 0 0 3px 0; }
+  .device-card:hover .dc-corner { opacity: 1; width: 15px; height: 15px; }
+
+  /* Top-left, in the strip the corner brackets already reserve — clear of the
+     badge row on the right and clear of the copy below. A serial number laid
+     over either is just two labels fighting for one line. */
+  .dc-stamp {
+    /* Always its own row, so the header reads the same on a narrow card and a
+       wide one instead of wrapping differently per tile. */
+    flex: 1 0 100%;
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: .16em;
+    /* ink-dim, not ink-mute: at 9px the muted tone measured 2.06:1 against the
+       card, well under the 4.5:1 small-text floor. Still clearly secondary. */
+    text-transform: lowercase; color: var(--ink-dim, #B3A996); opacity: .8;
+  }
+  .dc-head {
+    display: flex; align-items: center; gap: 8px 10px; flex-wrap: wrap;
+    margin: 0 0 14px;
+  }
+  .dc-badge {
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink-dim);
+    border: 1px solid var(--rule); border-radius: 99px; padding: 3px 9px;
+  }
+  .dc-status {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--accent);
+  }
+  .dc-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  /* ── Bento card anatomy ───────────────────────────────────────────────────
+     An index, a category, and a launch arrow — so a grid of work reads as a
+     catalogue with an order to it, rather than as tiles that happen to be
+     adjacent. */
+  .bento-index {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: .18em;
+    color: var(--primary); opacity: .75;
+  }
+  .bento-topline {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink-dim);
+  }
+  .bento-topline .bento-eyebrow-dot {
+    width: 5px; height: 5px; border-radius: 50%; background: var(--primary); opacity: .8;
+  }
+  .bento-launch {
+    margin-left: auto; display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    border: 1px solid var(--rule); color: var(--ink-dim);
+    transition: transform .3s cubic-bezier(.16, 1, .3, 1), border-color .25s ease, color .25s ease;
+  }
+  .device-card:hover .bento-launch, a:hover > .bento-launch {
+    transform: translate(2px, -2px); border-color: var(--primary); color: var(--primary);
   }
   .sidebar-rule {
     width: auto; height: 1px; border: none;
@@ -2640,11 +2783,11 @@
   function size(){ W=c.width=innerWidth; H=c.height=innerHeight; }
   function seed(){ ps=[]; var n=Math.min(130,Math.floor(W/11)); for(var k=0;k<n;k++)ps.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.9+.5,v:Math.random()*.42+.14,a:Math.random()*.5+.28}); }
   size(); seed(); addEventListener('resize',function(){size();seed();});
-  // Honour the Motion toggle. Default follows the OS: drifting particles for
-  // everyone, a single static frame for visitors who ask for reduced motion.
-  var still=(function(){ try{ var m=localStorage.getItem('anchit-motion');
-    if(m==='on') return false; if(m==='off') return true; }catch(e){}
-    return document.documentElement.getAttribute('data-motion') === 'off'; })();
+  // Defer to the ambient tier resolved before the first paint, rather than
+  // reading the preference again and risking a different answer. At the `still`
+  // tier the canvas is hidden by CSS as well, so this also stops the rAF loop
+  // instead of animating something nobody can see.
+  var still = document.documentElement.getAttribute('data-ambient') === 'still';
   (function draw(){
     // Skip the redraw entirely while the page is scrolling. A full-viewport
     // canvas clear + 130 arcs is a whole extra painted layer competing with the
@@ -2771,36 +2914,36 @@
   <nav class="sidebar-nav">
     <a class="sidebar-item active" href="#home" data-view="home" aria-label="Home">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span class="sidebar-label">Home</span>
+      <span class="sidebar-label morph-label"><span class="ml-default">Home</span><span class="ml-hover" aria-hidden="true">Start here</span></span>
     </a>
     <a class="sidebar-item" href="#about" data-view="about" aria-label="About Me">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-      <span class="sidebar-label">About Me</span>
+      <span class="sidebar-label morph-label"><span class="ml-default">About Me</span><span class="ml-hover" aria-hidden="true">The short version</span></span>
     </a>
     <a class="sidebar-item" href="#now" data-view="now" aria-label="Now — current role">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <span class="sidebar-label">Now</span>
+      <span class="sidebar-label morph-label"><span class="ml-default">Now</span><span class="ml-hover" aria-hidden="true">What I am building</span></span>
     </a>
     <a class="sidebar-item" href="#experience" data-view="experience" aria-label="Work Experience">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-      <span class="sidebar-label">Experience</span>
+      <span class="sidebar-label morph-label"><span class="ml-default">Experience</span><span class="ml-hover" aria-hidden="true">Where I have worked</span></span>
     </a>
     <a class="sidebar-item" href="#projects" data-view="projects" aria-label="Side Hustle">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-      <span class="sidebar-label">Side Hustle</span>
+      <span class="sidebar-label morph-label"><span class="ml-default">Side Hustle</span><span class="ml-hover" aria-hidden="true">Things I build at night</span></span>
     </a>
     <a class="sidebar-item" href="#chat" data-view="chat" aria-label="Chat with Anchit">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      <span class="sidebar-label">Chat</span>
+      <span class="sidebar-label morph-label"><span class="ml-default">Chat</span><span class="ml-hover" aria-hidden="true">Ask me anything</span></span>
     </a>
     <a class="sidebar-item" href="assets/resume.pdf" target="_blank" rel="noopener" aria-label="My Resume (PDF, opens in a new tab)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-      <span class="sidebar-label">My Resume</span>
+      <span class="sidebar-label morph-label"><span class="ml-default">My Resume</span><span class="ml-hover" aria-hidden="true">Open the PDF</span></span>
     </a>
     <div class="sidebar-contact-group" id="sidebarContactGroup">
       <button type="button" class="sidebar-item sidebar-group-toggle" id="sidebarContactToggle" aria-expanded="false" aria-controls="sidebarContactSub" aria-label="Contact channels">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        <span class="sidebar-label">Contact</span>
+        <span class="sidebar-label morph-label"><span class="ml-default">Contact</span><span class="ml-hover" aria-hidden="true">Say hi</span></span>
         <svg class="sidebar-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
       <div class="sidebar-subnav" id="sidebarContactSub">
@@ -3123,7 +3266,14 @@
         </div>
 
         <!-- METRIC TILE 1: Vahdam -->
-        <div class="rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] flex flex-col justify-center relative overflow-hidden hover:border-[var(--primary)] transition-colors group narrate-span" data-n-idx="2">
+        <div class="device-card rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] flex flex-col justify-center relative overflow-hidden hover:border-[var(--primary)] transition-colors group narrate-span" data-n-idx="2">
+          <span class="dc-corner dc-tl" aria-hidden="true"></span><span class="dc-corner dc-tr" aria-hidden="true"></span>
+          <span class="dc-corner dc-bl" aria-hidden="true"></span><span class="dc-corner dc-br" aria-hidden="true"></span>
+          <div class="dc-head">
+            <span class="dc-stamp" aria-hidden="true">vahdam/id-01</span>
+            <span class="dc-badge">At the moment // Y2026</span>
+            <span class="dc-status"><span class="dc-dot" aria-hidden="true"></span>live</span>
+          </div>
           <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-2">Current Focus</div>
           <h2 class="text-xl font-bold mb-1 text-[var(--ink)]">Vahdam India</h2>
           <p class="text-sm text-[var(--ink-dim)] leading-relaxed">AGM – Product Management &amp; D2C Growth. Driving growth across US, UK &amp; global markets.</p>
@@ -3133,7 +3283,13 @@
         </div>
 
         <!-- METRIC TILE 2: Times Internet -->
-        <div class="rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] flex flex-col justify-center relative overflow-hidden hover:border-[var(--accent)] transition-colors group narrate-span" data-n-idx="3">
+        <div class="device-card rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] flex flex-col justify-center relative overflow-hidden hover:border-[var(--accent)] transition-colors group narrate-span" data-n-idx="3">
+          <span class="dc-corner dc-tl" aria-hidden="true"></span><span class="dc-corner dc-tr" aria-hidden="true"></span>
+          <span class="dc-corner dc-bl" aria-hidden="true"></span><span class="dc-corner dc-br" aria-hidden="true"></span>
+          <div class="dc-head">
+            <span class="dc-stamp" aria-hidden="true">ti/id-02</span>
+            <span class="dc-badge">Y2023 &ndash; Y2026 // shipped</span>
+          </div>
           <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-2">Previously</div>
           <h2 class="text-xl font-bold mb-1 text-[var(--ink)]">Times Internet</h2>
           <p class="text-sm text-[var(--ink-dim)] leading-relaxed">Scaled Assisted Sales 5&times; to &#8377;80L MRR. Built ET Markets to &#8377;3Cr+ incremental ARR.</p>
@@ -8746,7 +8902,7 @@
   }
 </style>
 <div class="chat-return" id="chatReturnBtn" role="group" aria-label="Chat with Anchit">
-  <button class="chat-return-main" type="button" data-chat-open aria-label="Chat with me">
+  <button class="chat-return-main" type="button" data-chat-open>
     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     <span class="chat-return-copy">
       <span class="chat-return-title">Chat with me</span>
@@ -9311,11 +9467,11 @@
      particle canvas covers the gap and stays if the nebula never arrives. */
   function loadNebulaWhenIdle() {
     if (reduceMotion || window.THREE) return;
-    var coarse = window.matchMedia && matchMedia('(pointer: coarse)').matches;
-    var cores = navigator.hardwareConcurrency || 4;
-    var mem = navigator.deviceMemory || 4;
-    var save = navigator.connection && navigator.connection.saveData;
-    if (coarse || cores < 4 || mem < 4 || save) return;
+    // The capability question was already asked and answered before the first
+    // paint. Asking it again here is how two pieces of code end up disagreeing
+    // about the same device, so this defers to the tier rather than re-deriving
+    // it: the nebula is a `full`-tier luxury and nothing else.
+    if (document.documentElement.getAttribute('data-ambient') !== 'full') return;
     // Idle alone is not enough. "Idle" arrives about a second in — which is
     // exactly when someone makes their first scroll — and parsing 670 KB plus
     // compiling shaders in the middle of that gesture is the stutter we were
@@ -10051,6 +10207,57 @@
   body.is-scrolling .ticker-track,
   body.is-scrolling .nav-card,
   body.is-scrolling::after { animation-play-state: paused !important; }
+
+  /* ── Ambient tiers ────────────────────────────────────────────────────────
+     One authority (data-ambient on <html>, resolved pre-paint) decides how much
+     backdrop this device pays for. Every ambient layer keys off it here rather
+     than each deciding for itself, so there is one place to read and one place
+     to change. Colours are untouched — this is about how many layers animate,
+     never about the palette. */
+
+  /* lite — the orb and the perimeter sweep are the two most expensive pieces of
+     decoration on the page, and they are also the two you notice least on a
+     small screen. The aura, the grid, the border ring and the particles stay. */
+  html[data-ambient="lite"] .energy-orb { display: none; }
+  html[data-ambient="lite"] .eb-frame { animation: none; }
+  html[data-ambient="lite"] body::after { animation: none; opacity: .5; }
+  /* The gradient sweep across every display heading animates background-position
+     under `background-clip: text`, so the glyphs are re-rasterised on every
+     frame — on 16 headings at once. The gradient itself stays (it is the
+     palette); only the sweep is a full-tier luxury. */
+  html[data-ambient="lite"] .display-xl,
+  html[data-ambient="lite"] .display-lg,
+  html[data-ambient="lite"] .display-md,
+  html[data-ambient="lite"] .home-hero .name .firstline,
+  html[data-ambient="lite"] .home-hero .name .secondline { animation: none !important; background-position: 32% 50% !important; }
+
+  /* still — one static colour field, and nothing moves. Everything is still
+     drawn, so the page looks like itself; it just costs a single paint. */
+  html[data-ambient="still"] .energy-orb,
+  html[data-ambient="still"] .eb-frame,
+  html[data-ambient="still"] #floatBg { display: none; }
+  html[data-ambient="still"] .float-aura,
+  html[data-ambient="still"] .eb-l,
+  html[data-ambient="still"] .energy-border::before,
+  html[data-ambient="still"] .ticker-track,
+  html[data-ambient="still"] .nav-card,
+  html[data-ambient="still"]::after,
+  html[data-ambient="still"] body::after { animation: none !important; }
+  html[data-ambient="still"] body::after { opacity: .46; }
+  html[data-ambient="still"] .eb-l { opacity: .42; }
+  html[data-ambient="still"] .display-xl,
+  html[data-ambient="still"] .display-lg,
+  html[data-ambient="still"] .display-md,
+  html[data-ambient="still"] .home-hero .name .firstline,
+  html[data-ambient="still"] .home-hero .name .secondline { animation: none !important; background-position: 32% 50% !important; }
+
+  /* The heading sweep is also the most expensive thing to keep running while
+     the page is moving, so it stands down with the rest of the ambience. */
+  body.is-scrolling .display-xl,
+  body.is-scrolling .display-lg,
+  body.is-scrolling .display-md,
+  body.is-scrolling .home-hero .name .firstline,
+  body.is-scrolling .home-hero .name .secondline { animation-play-state: paused !important; }
   html[data-motion="off"] .uf-off { opacity:.72; }
 </style>
 <script id="scroll-quiet">
