@@ -399,7 +399,15 @@
   // stage only switches to video after 'loadedmetadata' actually fires. Until
   // then the CSS fallback is what's on screen, which is why the page works with
   // no clips at all.
-  scenes.forEach(function (s) {
+  // The clips are not in the repo yet (assets/hotel/ does not exist), so every
+  // visitor fired six 404s before falling back. The fallback is correct and the
+  // page is designed to work without them — but there is no reason to ask six
+  // times. Probe the first clip; if it is not there, none of them are, so skip
+  // the rest and stay on the CSS fallback silently.
+  // Setting every src in one synchronous pass meant all six requests were in
+  // flight before the first error could fire — the flag never had a chance.
+  // So load the FIRST clip alone; the rest are wired only once it succeeds.
+  function wire(s, i) {
     if (!s.src || reduced) return;
     s.video.addEventListener('loadedmetadata', function () {
       if (!isFinite(s.video.duration) || s.video.duration <= 0) return;
@@ -415,7 +423,16 @@
     });
     s.video.addEventListener('error', function () { /* stay on the fallback */ });
     s.video.src = s.src;
-  });
+  }
+
+  if (scenes.length && scenes[0].src && !reduced) {
+    var first = scenes[0];
+    first.video.addEventListener('loadedmetadata', function once() {
+      first.video.removeEventListener('loadedmetadata', once);
+      scenes.slice(1).forEach(wire);          // clips exist: load the rest
+    });
+    wire(first, 0);                           // if this 404s, the rest are never asked for
+  }
 
   // Only the scenes on screen do any work.
   if ('IntersectionObserver' in window) {
