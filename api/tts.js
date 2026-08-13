@@ -315,6 +315,7 @@ async function handler(req, res) {
       // voice, or fall through to a stock one? False means every clone-capable
       // provider is unconfigured.
       clonedVoiceReady: PROVIDERS.some((p) => p.clone && cfg[p.name]),
+      clonedOnly: String(process.env.VOICE_ALLOW_STOCK || '').toLowerCase() !== 'true',
       // What Sarvam would actually be sent, after validation. No secrets.
       sarvam: (() => {
         const s = sarvamConfig();
@@ -340,7 +341,22 @@ async function handler(req, res) {
   const wanted = (body.speaker || '').toString().trim();
   const opts = { speaker: /^[A-Za-z0-9_.:-]{1,64}$/.test(wanted) ? wanted : '' };
 
-  for (const provider of PROVIDERS) {
+  // ── cloned voice only ───────────────────────────────────────────────────
+  // This site speaks in the first person as Anchit. A stock voice reading those
+  // words is not a lesser version of the feature — it is a stranger claiming to
+  // be him, which is worse than silence. So non-cloning providers are skipped
+  // unless someone deliberately opts in with VOICE_ALLOW_STOCK=true.
+  //
+  // Sarvam is the live example: it is configured and works, but its REST API
+  // only offers preset speakers (cloning is Studio-only), so it was answering
+  // in "shubh" — a voice that is not Anchit's.
+  const allowStock = String(process.env.VOICE_ALLOW_STOCK || '').toLowerCase() === 'true';
+  const usable = PROVIDERS.filter((p) => p.clone || allowStock || opts.speaker);
+  // An explicit ?speaker= is an audition request, so it may reach a stock
+  // provider — that is a deliberate act by whoever sent it, not the site
+  // silently substituting a voice.
+
+  for (const provider of usable) {
     try {
       const out = await provider.run(text, opts);
       if (out && out.buf && out.buf.length > 0) {
@@ -355,7 +371,22 @@ async function handler(req, res) {
       }
     } catch { /* try next provider */ }
   }
-  return res.status(503).json({ error: 'tts_unavailable' });
+  // Say WHY rather than a bare 503, so the browser can fall back knowingly and
+  // whoever is debugging is not left guessing.
+  const clonedConfigured = PROVIDERS.some((p) => p.clone && configured()[p.name]);
+  return res.status(503).json({
+    error: 'tts_unavailable',
+    reason: clonedConfigured
+      ? 'cloned_provider_failed'
+      : 'no_cloned_voice_configured',
+    hint: clonedConfigured
+      ? 'A cloning provider is configured but returned no audio.'
+      : 'No cloning-capable provider is set. Sarvam offers preset speakers only, ' +
+        'so it is skipped: the site will not speak in a voice that is not Anchit\'s. ' +
+        'Set ELEVENLABS_API_KEY + ELEVENLABS_VOICE_ID (or Cartesia/Fish/XTTS), or ' +
+        'set VOICE_ALLOW_STOCK=true to accept a stock voice.',
+    clonedOnly: !allowStock,
+  });
 }
 
 module.exports = handler;
