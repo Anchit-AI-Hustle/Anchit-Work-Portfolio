@@ -78,11 +78,29 @@
       'transition-delay:var(--cin-cd,0s);will-change:opacity,transform}',
     '.cin.cin-in,.cin-stagger.cin-in>*{opacity:1;transform:none}',
     // Anything still hidden when the deadline passes is shown outright.
-    'html.cin-bail .cin,html.cin-bail .cin-stagger>*{opacity:1!important;transform:none!important;transition:none!important}'
+    // Richer vocabulary. Depth (scale + blur) for feature cards, a lift for
+    // parallax elements, and word-level reveal for headings.
+    '.cin-depth{opacity:0;transform:scale(.965) translateY(16px);filter:blur(6px);' +
+      'transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1),filter .8s ease;' +
+      'transition-delay:var(--cin-d,0s)}',
+    '.cin-depth.cin-in{opacity:1;transform:none;filter:blur(0)}',
+    '.cin-word{display:inline-block;opacity:0;transform:translateY(.5em) rotate(1.5deg);' +
+      'transition:opacity .5s cubic-bezier(.16,1,.3,1),transform .5s cubic-bezier(.16,1,.3,1);' +
+      'transition-delay:var(--cin-wd,0s)}',
+    '.cin-in .cin-word,.cin-word.cin-in{opacity:1;transform:none}',
+    '.cin-par{will-change:transform}',
+    // Controls and fields inside an arriving card ride in just behind it.
+    '.cin-in .cin-ctl{animation:cinCtl .5s cubic-bezier(.16,1,.3,1) both;animation-delay:var(--cin-cd,.18s)}',
+    '@keyframes cinCtl{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}',
+    'html.cin-bail .cin,html.cin-bail .cin-stagger>*,html.cin-bail .cin-depth,html.cin-bail .cin-word' +
+      '{opacity:1!important;transform:none!important;filter:none!important;transition:none!important}'
   ].join('');
   (document.head || root).appendChild(css);
 
-  var SKIP = 'input,textarea,select,button,canvas,svg,iframe,video,audio,' +
+  // Controls and fields are no longer excluded outright — they now ride in
+  // just behind the card they belong to (see enrich()). Only things that would
+  // fight their own updates, or that animate themselves, stay out.
+  var SKIP = 'canvas,svg,iframe,video,audio,' +
              '[data-no-motion],[aria-live],[role="alert"],[contenteditable="true"]';
 
   function skip(el) {
@@ -255,15 +273,128 @@
     });
   }
 
+  // ── (1) Pinned horizontal sections ────────────────────────────────────
+  // Scrolling down drives the rail sideways. The reason this is normally a bad
+  // idea is that it steals the scroll and traps people; this version only takes
+  // over while the rail is centred AND has somewhere left to go, and hands the
+  // page straight back at either end, so a determined scroll always continues
+  // down. Desktop with a real wheel only — never on touch, where the native
+  // swipe is already the right gesture.
+  function pinRails() {
+    if (motionOff || innerWidth < 900) return;
+    if (matchMedia('(pointer: coarse)').matches) return;
+
+    document.querySelectorAll('[data-railed]:not([data-pinned])').forEach(function (rail) {
+      rail.dataset.pinned = '1';
+      var releasing = false;
+
+      rail.closest('section,div').addEventListener('wheel', function (e) {
+        if (releasing) return;
+        var dy = e.deltaY;
+        if (Math.abs(e.deltaX) > Math.abs(dy)) return;      // genuine sideways gesture: leave it
+
+        var r = rail.getBoundingClientRect();
+        var centred = r.top < innerHeight * 0.35 && r.bottom > innerHeight * 0.65;
+        if (!centred) return;                                // only while it owns the screen
+
+        var max = rail.scrollWidth - rail.clientWidth;
+        var atStart = rail.scrollLeft <= 1, atEnd = rail.scrollLeft >= max - 1;
+        // Hand the page back at the ends so the section can never trap anyone.
+        if ((dy < 0 && atStart) || (dy > 0 && atEnd)) return;
+
+        e.preventDefault();
+        rail.scrollLeft += dy;
+
+        // If we just hit an end, stop intercepting briefly so the next wheel
+        // event scrolls the page instead of fighting the boundary.
+        if (rail.scrollLeft <= 1 || rail.scrollLeft >= max - 1) {
+          releasing = true;
+          setTimeout(function () { releasing = false; }, 320);
+        }
+      }, { passive: false });
+    });
+  }
+
+  // ── enrich: apply the richer vocabulary once blocks are tagged ─────────
+  function enrich() {
+    // (3) Controls and fields ride in behind their card rather than being
+    // excluded. They are never observed individually — a button that arrives
+    // after its own card reads as lag, not choreography.
+    document.querySelectorAll('.cin,.cin-stagger>*').forEach(function (card) {
+      if (card.__enriched) return;
+      card.__enriched = 1;
+      var ctl = card.querySelectorAll('button,input,select,textarea,a.btn,.btn,.chip,.tag');
+      Array.prototype.forEach.call(ctl, function (c, i) {
+        if (c.closest('[aria-live],[data-no-motion]')) return;
+        c.classList.add('cin-ctl');
+        c.style.setProperty('--cin-cd', (0.16 + Math.min(i, 5) * 0.045) + 's');
+      });
+    });
+
+    // (2) Depth for feature cards: the biggest boxes get scale + blur instead
+    // of a plain rise, so a hero card lands with more weight than a chip.
+    document.querySelectorAll('.cin:not(.cin-depth)').forEach(function (el) {
+      var r = el.getBoundingClientRect();
+      if (r.height > 220 && r.width > 260) el.classList.add('cin-depth');
+    });
+
+    // (2) Word-level reveal for headings — a sentence assembles rather than
+    // fading as one slab. Split once, guarded so it never runs twice.
+    document.querySelectorAll('h1,h2').forEach(function (h) {
+      if (h.__split || h.closest('[data-no-motion]')) return;
+      if (h.children.length || h.textContent.trim().length > 90) return;  // leave rich/long headings alone
+      h.__split = 1;
+      var words = h.textContent.split(/\s+/).filter(Boolean);
+      if (words.length < 2 || words.length > 14) return;
+      h.textContent = '';
+      words.forEach(function (w, i) {
+        var span = document.createElement('span');
+        span.className = 'cin-word';
+        span.textContent = w;
+        span.style.setProperty('--cin-wd', (i * 0.045) + 's');
+        h.appendChild(span);
+        if (i < words.length - 1) h.appendChild(document.createTextNode(' '));
+      });
+      if (!h.closest('.cin,.cin-stagger')) h.classList.add('cin');   // give it something to trigger on
+    });
+  }
+
+  // (2) Parallax — a slow counter-drift on large media so the page has depth.
+  var parallax = [];
+  function initParallax() {
+    if (innerWidth < 720) return;                       // phones: no spare frames
+    document.querySelectorAll('img,.stage,[data-parallax]').forEach(function (el) {
+      var r = el.getBoundingClientRect();
+      if (r.height < 180 || el.__par) return;
+      el.__par = 1; el.classList.add('cin-par'); parallax.push(el);
+    });
+  }
+  var parQueued = false;
+  function onParScroll() {
+    if (parQueued || !parallax.length) return;
+    parQueued = true;
+    requestAnimationFrame(function () {
+      parQueued = false;
+      var vh = innerHeight;
+      parallax.forEach(function (el) {
+        var r = el.getBoundingClientRect();
+        if (r.bottom < -100 || r.top > vh + 100) return;
+        var mid = (r.top + r.height / 2 - vh / 2) / vh;   // -1 .. 1
+        el.style.transform = 'translate3d(0,' + (mid * -14).toFixed(1) + 'px,0)';
+      });
+    });
+  }
+
   function boot() {
     observe();
-    setTimeout(railify, 400);
+    setTimeout(function () { enrich(); railify(); pinRails(); initParallax(); onParScroll(); }, 400);
+    addEventListener('scroll', onParScroll, { passive: true });
     sweep();
     addEventListener('scroll', sweep, { passive: true });
     addEventListener('resize', sweep, { passive: true });
     // New content (these are apps, not just documents) gets tagged too.
     if ('MutationObserver' in window) {
-      var mo = new MutationObserver(function () { observe(); });
+      var mo = new MutationObserver(function () { observe(); enrich(); });
       mo.observe(document.body, { childList: true, subtree: true });
     }
     // Hard deadline. Whatever happened, nothing stays invisible.
