@@ -443,6 +443,10 @@
   }
   .home-tl-item { contain-intrinsic-size: auto 92px; }
   .build-card   { contain-intrinsic-size: auto 640px; }
+  /* The sign-off is ~4,800px down. Laying it out during the hero's assembly —
+     the busiest 900ms of the page — buys nothing, because nobody can see it
+     for another four screens. */
+  .signoff { content-visibility: auto; contain-intrinsic-size: auto 320px; }
   /* Never skip what the pin measures, or what is mid-reveal. */
   #currentWork, #currentWork *, .cine, .cine * { content-visibility: visible; }
 
@@ -556,6 +560,124 @@
   .cw-section.cw-armed .cw-panel { opacity: 0; transform: translateY(46px) rotateX(9deg) scale(.965); }
   .cw-section.cw-armed .cw-light { opacity: 0; }
   .cw-section.cw-armed .cw-skills li { opacity: 0; transform: translateY(10px); }
+
+  /* ── Sign-off ─────────────────────────────────────────────────────────────
+     The reward for reaching the bottom. Every link here exists elsewhere on the
+     page already — this is a send-off, not a second navigation. */
+  .signoff { text-align: center; padding: clamp(56px, 9vh, 110px) 20px clamp(28px, 5vh, 56px); }
+  .signoff-line {
+    font-family: var(--font-display); font-weight: 600; color: var(--ink);
+    font-size: clamp(24px, 3.2vw, 42px); line-height: 1.12; margin: 0 0 14px;
+  }
+  .signoff-sub { margin: 0 0 26px; }
+  .signoff-cta {
+    font-family: var(--font-mono); font-size: 12px; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--primary); text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);
+    padding-bottom: 3px; transition: color .25s ease, border-color .25s ease;
+  }
+  .signoff-cta:hover, .signoff-cta:focus-visible { color: var(--ink); border-color: var(--ink); }
+  .signoff-links { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px 28px; }
+  .signoff-links a {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--ink-dim); text-decoration: none;
+    transition: color .25s ease;
+  }
+  .signoff-links a:hover, .signoff-links a:focus-visible { color: var(--primary); }
+  html[data-motion="off"] .signoff-cta, html[data-motion="off"] .signoff-links a { transition: none; }
+
+  /* ── Company row ──────────────────────────────────────────────────────────
+     Wordmarks, not logos — there are no logo assets for these and inventing
+     them would be worse than type doing the job honestly. */
+  .client-row {
+    display: flex; align-items: center; justify-content: center; flex-wrap: wrap;
+    gap: 12px 28px; max-width: 1180px; margin: 0 auto;
+    padding: 22px 24px; position: relative; z-index: 1;
+    border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+  }
+  .client-row-label {
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--ink-mute, #6B655C);
+  }
+  .client-row-list { display: flex; flex-wrap: wrap; gap: 12px 28px; list-style: none; margin: 0; padding: 0; }
+  .client-row-list li {
+    font-family: var(--font-display); font-size: clamp(14px, 1.5vw, 19px); font-weight: 600;
+    letter-spacing: .01em; color: var(--ink-dim); opacity: .78;
+    transition: opacity .28s ease, color .28s ease;
+  }
+  .client-row-list li:hover { opacity: 1; color: var(--ink); }
+  html[data-motion="off"] .client-row-list li { transition: none; }
+  @media (max-width: 640px) { .client-row { gap: 10px 18px; padding: 18px 16px; } .client-row-list { gap: 10px 18px; } }
+
+  /* ── Hero depth ───────────────────────────────────────────────────────────
+     The stage's pieces sit on planes that answer to the pointer at different
+     rates, so the hero has depth rather than being one flat card. Transform
+     only — no layout, no paint — and the whole thing is off at the `still`
+     tier and under reduced motion. */
+  .cine-stage { --px: 0; --py: 0; }
+  /* `translate`, not `transform`. GSAP drives `transform` on these same
+     elements for the assembly sequence and the scroll hand-off, and an inline
+     transform beats any stylesheet rule — the depth simply never appeared.
+     `translate` is its own property, so the two compose instead of one winning. */
+  html[data-motion="on"] .cine-mark  { translate: calc(var(--px) * 14px) calc(var(--py) * 10px); }
+  html[data-motion="on"] .cine-name  { translate: calc(var(--px) * 8px)  calc(var(--py) * 6px); }
+  html[data-motion="on"] .cine-roles { translate: calc(var(--px) * 5px)  calc(var(--py) * 4px); }
+  html[data-motion="on"] .cine-boot,
+  html[data-motion="on"] .cine-meta  { translate: calc(var(--px) * 3px)  calc(var(--py) * 2px); }
+  html[data-ambient="still"] .cine-mark, html[data-ambient="still"] .cine-name,
+  html[data-ambient="still"] .cine-roles, html[data-ambient="still"] .cine-boot,
+  html[data-ambient="still"] .cine-meta { translate: none !important; }
+
+  /* ── Hero meta + exit scrim ───────────────────────────────────────────────
+     A rotating line of where-and-when under the boot readout, and a scrim that
+     eases the stage into the content rather than ending on a hard edge. The
+     meta lines are stacked in one grid cell, so the swap is opacity only and
+     the line never changes height — no layout on any frame. */
+  .cine-meta {
+    display: inline-grid; margin-top: 2px; min-height: 1.2em;
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--ink-dim);
+  }
+  .cine-meta-item {
+    grid-area: 1 / 1; opacity: 0; transition: opacity .7s ease; white-space: nowrap;
+  }
+  .cine-meta-item.active { opacity: .72; }
+  .cine-exit-scrim {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 28vh;
+    pointer-events: none; z-index: 1;
+    background: linear-gradient(180deg, transparent, var(--bg) 92%);
+  }
+  html[data-motion="off"] .cine-meta-item { transition: none; }
+  @media (max-width: 560px) { .cine-meta { font-size: 8px; letter-spacing: .12em; } }
+
+  /* ── Work-card stack + launch ─────────────────────────────────────────────
+     chandan.dev closes each product card with its stack, then a meta line. Ours
+     carries the stack only: the card above it already has an eyebrow, a title,
+     a paragraph and two detail bullets, so a further summary line would be the
+     third description of the same thing. The stack IS the footer.
+
+     Every chip is lifted from that card's own "Built as/on/with" sentence —
+     nothing here is asserted that the copy did not already say. */
+  .build-stack {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin: 14px 0 2px; padding-top: 14px;
+    border-top: 1px solid var(--rule);
+  }
+  .build-chip {
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--ink-dim);
+    border: 1px solid var(--rule); border-radius: 99px; padding: 4px 9px;
+    white-space: nowrap; transition: border-color .25s ease, color .25s ease;
+  }
+  .build-card:hover .build-chip { border-color: color-mix(in srgb, var(--primary) 34%, transparent); color: var(--ink); }
+
+  /* Decoration on the existing link, never a second link to the same place. */
+  .build-launch {
+    display: inline-block; margin-left: 2px;
+    transition: transform .3s cubic-bezier(.16, 1, .3, 1);
+  }
+  .btn:hover .build-launch, .btn:focus-visible .build-launch { transform: translate(3px, -3px); }
+  html[data-motion="off"] .build-launch, html[data-motion="off"] .build-chip { transition: none; }
 
   /* ── Hold to reveal ───────────────────────────────────────────────────────
      chandan.dev's signature move: two images stacked, and the pointer opens a
@@ -3443,8 +3565,34 @@
           <div class="cine-boot-row"><span class="cine-boot-label">Loading engineering</span><span class="cine-boot-track"><span class="cine-boot-fill"></span></span><span class="cine-boot-pct">100%</span></div>
         </div>
 
+        <!-- Rotating meta, chandan.dev's "Planet Earth-616 / coordinates" idea
+             in our own terms: where this is being built from, and when. Two
+             lines cross-fading in place, so the line never changes height. -->
+        <div class="cine-meta" id="cineMeta" aria-hidden="true">
+          <span class="cine-meta-item active">Planet Earth &middot; Delhi NCR, India</span>
+          <span class="cine-meta-item">Y2026 &mdash; 28&deg;37'N, 77&deg;13'E</span>
+          <span class="cine-meta-item">Building at Vahdam &middot; US, UK &amp; global</span>
+        </div>
+
         <div class="cine-hint" id="cineHint">Scroll to continue</div>
       </div>
+      <!-- Eases the stage into the content below instead of ending on an edge. -->
+      <span class="cine-exit-scrim" aria-hidden="true"></span>
+    </div>
+
+    <!-- Where the work has been done. A wordmark row rather than logos: there
+         are no logo assets for these and fabricating them would be worse than
+         type. Same job — establishing who this has been for, immediately after
+         the hero. -->
+    <div class="client-row reveal" aria-label="Organisations worked with">
+      <span class="client-row-label">Work done at</span>
+      <ul class="client-row-list">
+        <li>Vahdam India</li>
+        <li>Times Internet</li>
+        <li>ET Markets</li>
+        <li>ET Prime</li>
+        <li>AIESEC</li>
+      </ul>
     </div>
 
     <div class="container mx-auto max-w-6xl py-8 md:py-12 px-4">
@@ -3722,6 +3870,22 @@
           </div>
           <div class="nav-card-arrow">&rarr;</div>
         </a>
+      </div>
+
+      <!-- Sign-off. chandan.dev rewards getting to the bottom with a line that
+           sounds like a person rather than a footer; this is the same move in
+           Anchit's voice, and every link here already exists elsewhere on the
+           page — it is a send-off, not a second navigation. -->
+      <div class="signoff reveal">
+        <p class="signoff-line">Still here? That is further than most.</p>
+        <p class="signoff-sub">
+          <a class="signoff-cta" href="#contact" data-view="contact">Tell me what you are building &#10230;</a>
+        </p>
+        <div class="signoff-links">
+          <a href="https://www.linkedin.com/in/anchittandon" target="_blank" rel="noopener">LinkedIn</a>
+          <a href="mailto:anchit.tandon@gmail.com">Email</a>
+          <a href="assets/resume.pdf" target="_blank" rel="noopener">Resume</a>
+        </div>
       </div>
     </div>
   </section>
@@ -4266,8 +4430,9 @@
             <li>Agentic model cascade: parallel dispatch &rarr; structural scoring &rarr; top-3 &rarr; a consensus evaluator merges them into one master guide.</li>
             <li>Built with React, React-Three-Fiber and the official Claude SDK, with a deterministic offline guide so it always answers.</li>
           </ul>
+          <div class="build-stack"><span class="build-chip">React</span><span class="build-chip">React-Three-Fiber</span><span class="build-chip">Claude SDK</span></div>
           <div class="build-actions">
-            <a class="btn primary" href="/how-to">Open the How-To Engine ↗</a>
+            <a class="btn primary" href="/how-to">Open the How-To Engine<span class="build-launch" aria-hidden="true">↗</span></a>
           </div>
         </div>
 
@@ -4280,8 +4445,9 @@
             <li>Built with Next.js, FastAPI, Postgres/pgvector and Gemini-backed agent orchestration.</li>
             <li>Implemented personas, RAG memory, tasks, tools, voice control and multi-agent reasoning modes.</li>
           </ul>
+          <div class="build-stack"><span class="build-chip">Next.js</span><span class="build-chip">FastAPI</span><span class="build-chip">Postgres/pgvector</span><span class="build-chip">Gemini</span></div>
           <div class="build-actions">
-            <a class="btn primary" href="#project-thirdeye" data-view="project-thirdeye">Case Study &rarr;</a>
+            <a class="btn primary" href="#project-thirdeye" data-view="project-thirdeye">Case Study<span class="build-launch" aria-hidden="true">↗</span></a>
             <a class="btn" href="https://the-third-eye-anchit.vercel.app/" target="_blank" rel="noopener">Open Live Project ↗</a>
           </div>
         </div>
@@ -4295,8 +4461,9 @@
             <li>Pulls competitive-intelligence-style benchmarks (traffic mix, channel split, AOV and repeat-rate bands, seasonality) for the entered brand's category — the way SimilarWeb / SEMrush profile a market — so every plan starts from real industry baselines.</li>
             <li>Built as a Vercel serverless engine on a free multi-provider LLM cascade, with a deterministic fallback so the demo always returns an ESP-ready plan in seconds — no login, no brand data required.</li>
           </ul>
+          <div class="build-stack"><span class="build-chip">Vercel Serverless</span><span class="build-chip">LLM cascade</span></div>
           <div class="build-actions">
-            <a class="btn primary" href="/lifecycle-os">Open LifeCycle-OS ↗</a>
+            <a class="btn primary" href="/lifecycle-os">Open LifeCycle-OS<span class="build-launch" aria-hidden="true">↗</span></a>
             <a class="btn" href="/d2c-lifecycle-os">Any-brand demo ↗</a>
             <a class="btn" href="#project-lifecycle" data-view="project-lifecycle">Case Study &rarr;</a>
           </div>
@@ -4311,8 +4478,9 @@
             <li>Built on a D-ID talking-head engine driven from my portrait, my chatbot LLM for answers, and my TTS cascade for the cloned voice — with mic input where supported.</li>
             <li>Degrades cleanly: portrait + spoken reply when the video avatar isn't configured, so it always responds.</li>
           </ul>
+          <div class="build-stack"><span class="build-chip">D-ID</span><span class="build-chip">TTS cascade</span><span class="build-chip">Cloned voice</span></div>
           <div class="build-actions">
-            <a class="btn primary" href="/agent">Talk to my avatar ↗</a>
+            <a class="btn primary" href="/agent">Talk to my avatar<span class="build-launch" aria-hidden="true">↗</span></a>
           </div>
         </div>
 
@@ -4325,8 +4493,9 @@
             <li>Built narration, talk, chat and recommendations as a single widget sharing the page's own content as context, with selectable British voices.</li>
             <li>Implemented narrate-on-load with play/pause/mute, tap-to-talk conversation, ask-anything chat and guided product picks inside the buying flow.</li>
           </ul>
+          <div class="build-stack"><span class="build-chip">Narration</span><span class="build-chip">Tap-to-talk</span><span class="build-chip">Chat</span></div>
           <div class="build-actions">
-            <a class="btn primary" href="#project-agentlp" data-view="project-agentlp">Case Study &rarr;</a>
+            <a class="btn primary" href="#project-agentlp" data-view="project-agentlp">Case Study<span class="build-launch" aria-hidden="true">↗</span></a>
           </div>
         </div>
 
@@ -4339,8 +4508,9 @@
             <li>Built as a Vercel serverless function that aggregates several free, keyless job APIs in parallel, gated behind Google sign-in via Supabase.</li>
             <li>Type a role and location, pick your boards, and get real, de-duplicated postings with direct apply links — genuinely free, nothing to install, no rate-limited key to run out.</li>
           </ul>
+          <div class="build-stack"><span class="build-chip">Vercel Serverless</span><span class="build-chip">Supabase</span><span class="build-chip">Google sign-in</span></div>
           <div class="build-actions">
-            <a class="btn primary" href="#project-jobfit" data-view="project-jobfit">Case Study &rarr;</a>
+            <a class="btn primary" href="#project-jobfit" data-view="project-jobfit">Case Study<span class="build-launch" aria-hidden="true">↗</span></a>
             <a class="btn" href="/jobhunt">Open Live Project ↗</a>
           </div>
         </div>
@@ -4354,8 +4524,9 @@
             <li>Built with Vite, React, TypeScript, Supabase storage/auth and a Python audio service.</li>
             <li>Implemented prompt parsing, lyric validation, vocal synthesis handoff and generation history.</li>
           </ul>
+          <div class="build-stack"><span class="build-chip">Vite</span><span class="build-chip">React</span><span class="build-chip">TypeScript</span><span class="build-chip">Supabase</span><span class="build-chip">Python</span></div>
           <div class="build-actions">
-            <a class="btn primary" href="#project-music" data-view="project-music">Case Study &rarr;</a>
+            <a class="btn primary" href="#project-music" data-view="project-music">Case Study<span class="build-launch" aria-hidden="true">↗</span></a>
             <a class="btn" href="https://music-gen-ai-blue.vercel.app/" target="_blank" rel="noopener">Open Live Project ↗</a>
           </div>
         </div>
@@ -4369,8 +4540,9 @@
             <li>Built as a fast static web app with vanilla JS, responsive CSS, PWA assets and local TTS hooks.</li>
             <li>Implemented onboarding, chat knowledge base, word-level narration captions and device-scaled layouts.</li>
           </ul>
+          <div class="build-stack"><span class="build-chip">Vanilla JS</span><span class="build-chip">PWA</span><span class="build-chip">TTS</span></div>
           <div class="build-actions">
-            <a class="btn primary" href="#home" data-view="home">Explore &rarr;</a>
+            <a class="btn primary" href="#home" data-view="home">Explore<span class="build-launch" aria-hidden="true">↗</span></a>
             <a class="btn" href="./" target="_blank" rel="noopener">Open Live Project ↗</a>
           </div>
         </div>
@@ -4385,8 +4557,9 @@
             <li>Built as an installable PWA with voice-first interaction and LLM response handling.</li>
             <li>Implemented a minimal one-button flow, speech input, spoken replies and elderly-friendly UI states.</li>
           </ul>
+          <div class="build-stack"><span class="build-chip">PWA</span><span class="build-chip">Speech input</span><span class="build-chip">LLM</span></div>
           <div class="build-actions">
-            <a class="btn primary" href="#project-yaara" data-view="project-yaara">Case Study &rarr;</a>
+            <a class="btn primary" href="#project-yaara" data-view="project-yaara">Case Study<span class="build-launch" aria-hidden="true">↗</span></a>
             <a class="btn" href="https://hey-yaara.vercel.app/" target="_blank" rel="noopener">Open Live Project ↗</a>
           </div>
         </div>
@@ -4400,8 +4573,9 @@
             <li>Built with Vercel Functions and a provider cascade across OpenAI, Anthropic, Gemini, xAI, Groq and Cerebras.</li>
             <li>Implemented catalog-aware product picks, brand-locked layouts, subject lines and HTML email output.</li>
           </ul>
+          <div class="build-stack"><span class="build-chip">Vercel Functions</span><span class="build-chip">OpenAI</span><span class="build-chip">Anthropic</span><span class="build-chip">Gemini</span><span class="build-chip">xAI</span><span class="build-chip">Groq</span><span class="build-chip">Cerebras</span></div>
           <div class="build-actions">
-            <a class="btn primary" href="#project-mailer" data-view="project-mailer">Case Study &rarr;</a>
+            <a class="btn primary" href="#project-mailer" data-view="project-mailer">Case Study<span class="build-launch" aria-hidden="true">↗</span></a>
             <a class="btn" href="https://marketing-mailers-html-architect.vercel.app/" target="_blank" rel="noopener">Open Live Project ↗</a>
           </div>
         </div>
@@ -4415,8 +4589,9 @@
             <li>Built with real-time speech transcription, LLM scoring logic and a call-coaching UI.</li>
             <li>Implemented pitch criteria, objection hints, conversion assists and post-call quality feedback.</li>
           </ul>
+          <div class="build-stack"><span class="build-chip">Speech transcription</span><span class="build-chip">LLM scoring</span></div>
           <div class="build-actions">
-            <a class="btn primary" href="#project-telesuite" data-view="project-telesuite">Case Study &rarr;</a>
+            <a class="btn primary" href="#project-telesuite" data-view="project-telesuite">Case Study<span class="build-launch" aria-hidden="true">↗</span></a>
             <a class="btn" href="https://ai-tele-suite.vercel.app/" target="_blank" rel="noopener">Open Live Project ↗</a>
           </div>
         </div>
@@ -4430,8 +4605,9 @@
             <li>Built with auth-gated web flows and AI planning prompts for personal wellness goals.</li>
             <li>Implemented daily routines, check-ins, goal context and personalised plan generation.</li>
           </ul>
+          <div class="build-stack"><span class="build-chip">Auth-gated web</span><span class="build-chip">AI planning</span></div>
           <div class="build-actions">
-            <a class="btn primary" href="#project-lifeengine" data-view="project-lifeengine">Case Study &rarr;</a>
+            <a class="btn primary" href="#project-lifeengine" data-view="project-lifeengine">Case Study<span class="build-launch" aria-hidden="true">↗</span></a>
             <a class="btn" href="https://th-life-engine.vercel.app/" target="_blank" rel="noopener">Open Live Project ↗</a>
           </div>
         </div>
@@ -5057,7 +5233,7 @@
           <div><span class="label">What it does</span><span>Google sign-in · aggregates free public job boards · de-duplicated openings with apply links</span></div>
         </div>
         <div class="build-actions" style="margin-top:20px;">
-          <a class="btn primary" href="/jobhunt">Open Live Project ↗</a>
+          <a class="btn primary" href="/jobhunt">Open Live Project<span class="build-launch" aria-hidden="true">↗</span></a>
         </div>
       </div>
 
@@ -10703,6 +10879,53 @@
     if (mark) { mark.tabIndex = 0; mark.setAttribute('role', 'button');
       mark.setAttribute('aria-label', 'Anchit Tandon — hold to see the photograph'); }
   });
+})();
+</script>
+<script id="cine-depth">
+(function () {
+  'use strict';
+  var stage = document.querySelector('#cineHero .cine-stage');
+  if (!stage || (window.motionOff && window.motionOff())) return;
+  if (window.matchMedia && matchMedia('(pointer: coarse)').matches) return;   // no pointer to follow
+  var tx = 0, ty = 0, cx = 0, cy = 0, raf = 0;
+  function paint() {
+    raf = 0;
+    cx += (tx - cx) * 0.08;
+    cy += (ty - cy) * 0.08;
+    // Written on the stage, not on :root. A custom property on the document
+    // root invalidates the computed style of every element on the page, which
+    // is the bug that cost this site a frame on every pointer move.
+    stage.style.setProperty('--px', cx.toFixed(3));
+    stage.style.setProperty('--py', cy.toFixed(3));
+    if (Math.abs(tx - cx) > 0.002 || Math.abs(ty - cy) > 0.002) raf = requestAnimationFrame(paint);
+  }
+  addEventListener('pointermove', function (e) {
+    if (window.__scrolling) return;                 // the scroll owns the frame
+    tx = (e.clientX / innerWidth) * 2 - 1;
+    ty = (e.clientY / innerHeight) * 2 - 1;
+    if (!raf) raf = requestAnimationFrame(paint);
+  }, { passive: true });
+})();
+</script>
+<script id="cine-meta-rotate">
+(function () {
+  'use strict';
+  var items = document.querySelectorAll('#cineMeta .cine-meta-item');
+  if (items.length < 2) return;
+  // Held still for anyone who asked for calm, and paused while the tab is
+  // hidden — a timer that keeps firing in a background tab is a battery cost
+  // for something nobody is looking at.
+  if (window.motionOff && window.motionOff()) return;
+  var i = 0, timer = 0;
+  function step() {
+    items[i].classList.remove('active');
+    i = (i + 1) % items.length;
+    items[i].classList.add('active');
+  }
+  function start() { if (!timer) timer = setInterval(step, 3200); }
+  function stop() { clearInterval(timer); timer = 0; }
+  document.addEventListener('visibilitychange', function () { document.hidden ? stop() : start(); });
+  start();
 })();
 </script>
 <script id="scroll-quiet">
