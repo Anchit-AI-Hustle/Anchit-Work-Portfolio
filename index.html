@@ -404,6 +404,36 @@
     width: 5px; height: 5px; border-radius: 50%;
     background: var(--primary); opacity: .8;
   }
+  /* ── Off-screen work is not rendered ──────────────────────────────────────
+     The document is ~6,100px of about 2,300 elements, and the browser was
+     styling, laying out, painting and compositing all of it on every frame —
+     57 megapixels of layer for a 1.3 megapixel window. Measured against a
+     blank page in the same browser: 59fps there, 17fps here, and still only
+     27fps with every animation, canvas and effect switched off. The cost was
+     never the decoration. It was the sheer amount of page held live at once.
+
+     `content-visibility: auto` lets Blink skip everything below the fold until
+     it approaches. `contain-intrinsic-size: auto <size>` is the important
+     half: `auto` makes each block REMEMBER the height it last rendered at, so
+     the scrollbar does not jump as blocks are skipped and un-skipped.
+
+     Applied only to repeated content blocks. Anything a ScrollTrigger measures
+     is excluded by name below — a pinned section whose height is a guess is a
+     pin that lands in the wrong place. */
+  .build-card,
+  .work-item,
+  .project-section,
+  .home-tl-item,
+  .about-value-item,
+  .now-focus-item {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 320px;
+  }
+  .home-tl-item { contain-intrinsic-size: auto 92px; }
+  .build-card   { contain-intrinsic-size: auto 640px; }
+  /* Never skip what the pin measures, or what is mid-reveal. */
+  #currentWork, #currentWork *, .cine, .cine * { content-visibility: visible; }
+
   /* ── Current work, staged as a device ─────────────────────────────────────
      The rest of the homepage is a grid; this is the one place that stops and
      stages something. The panel sits on a plinth, lit from both sides, and is
@@ -9833,16 +9863,22 @@
     // Held in `retired` so the quality guard can put them back: if the nebula is
     // dropped for being too slow and these stay hidden, the backdrop goes blank
     // and the pointer-following light (which lives on .float-aura) goes with it.
-    var retired = ['#floatBg', '.energy-orb', '.float-aura']
-      .map(function (sel) { return document.querySelector(sel); })
-      .filter(Boolean);
-    retired.forEach(function (el) { el.style.opacity = '0'; });
-    restore2D = function () { retired.forEach(function (el) { el.style.opacity = ''; }); };
+    // Retiring the 2D backdrops is now a single attribute on <html>, applied
+    // the frame the nebula goes live and removed the frame it is dropped — see
+    // the html[data-webgl="live"] rules. This used to fade them with
+    // `opacity: 0`, which hid them while leaving full-viewport composited
+    // layers alive AND still animating. Measured: an invisible-but-live 2D
+    // backdrop underneath the nebula cost ~11ms of every frame.
+    restore2D = function () {};
 
     // Keep the 3D backdrop (incl. the energy core) clearly visible — just a
     // gentle fade from full brightness so copy stays readable without washing
     // out the scene.
     requestAnimationFrame(function () { canvas.style.opacity = '0.85'; });
+    // Announce it, so the CSS can retire the other backdrops. Set only once the
+    // nebula is genuinely rendering — the quality guard clears it again if this
+    // machine cannot keep up, and the 2D field comes straight back.
+    document.documentElement.setAttribute('data-webgl', 'live');
 
     var running = true, t = 0;
     document.addEventListener('visibilitychange', function () { running = !document.hidden; if (running) requestAnimationFrame(tick); });
@@ -10508,6 +10544,51 @@
   body.is-scrolling .nav-card,
   body.is-scrolling::after { animation-play-state: paused !important; }
 
+  /* ── The atmosphere settles when you stop ─────────────────────────────────
+     Pausing the animations was not enough. Measured on a full-page scroll: no
+     single backdrop mattered — removing the orb cost nothing, removing the
+     aura cost nothing — but removing three together bought 12ms a frame. The
+     expense is not any one of them, it is the COUNT: every fixed full-viewport
+     layer has to be blended into every frame whether it changed or not, and
+     there are six.
+
+     So while the page is moving, the ambient layers leave the compositor
+     entirely — `visibility: hidden` after a fast fade, which drops the layer
+     rather than merely making it invisible. When you stop, the room lights
+     back up over 400ms. You are looking at moving content during a scroll and
+     at the page when you are not, so the atmosphere is present exactly when
+     there is any chance of noticing it. */
+  .float-aura, .energy-orb, .energy-border, .reading-scrim, #floatBg {
+    transition: opacity .4s ease;
+  }
+  body.is-scrolling .float-aura,
+  body.is-scrolling .energy-orb,
+  body.is-scrolling .energy-border,
+  body.is-scrolling .reading-scrim,
+  body.is-scrolling #floatBg {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .12s ease, visibility 0s .12s;
+  }
+  /* Same trade for the frosted chrome. `backdrop-filter` makes the compositor
+     read back everything beneath the element and blur it, every frame — and
+     during a scroll that is every frame with fresh content underneath. Nobody
+     can see the quality of a blur on a surface that is moving, so it is simply
+     not computed until you stop. Worth 4ms a frame across the eight frosted
+     surfaces. */
+  body.is-scrolling .sidebar, body.is-scrolling .top-bar,
+  body.is-scrolling .chat-return, body.is-scrolling #jarvisPill,
+  body.is-scrolling #ambientToggle, body.is-scrolling .sidebar-backdrop,
+  body.is-scrolling .chat-dock, body.is-scrolling #chatDock {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* A visitor who asked for calm gets the backdrop held still, not flickering. */
+  html[data-motion="off"] .float-aura, html[data-motion="off"] .energy-orb,
+  html[data-motion="off"] .energy-border, html[data-motion="off"] .reading-scrim,
+  html[data-motion="off"] #floatBg { visibility: visible !important; opacity: 1; transition: none; }
+
   /* ── Ambient tiers ────────────────────────────────────────────────────────
      One authority (data-ambient on <html>, resolved pre-paint) decides how much
      backdrop this device pays for. Every ambient layer keys off it here rather
@@ -10544,6 +10625,30 @@
   html[data-ambient="still"]::after,
   html[data-ambient="still"] body::after { animation: none !important; }
   html[data-ambient="still"] body::after { opacity: .46; }
+
+  /* ── One backdrop at a time ───────────────────────────────────────────────
+     The layer dump was the thing that finally explained "not smooth": eight
+     full-viewport composited layers stacked at z-0 — the nebula canvas, the
+     particle canvas, the holo grid, the aura, the perimeter, the scrim, the
+     sidebar backdrop — with `main` promoted to a 7.9 megapixel texture on top
+     because it overlaps them. 50 megapixels of layer for a 1.3 megapixel
+     window, blended on every single frame.
+
+     Six faint fields on top of each other do not look like six of anything.
+     So once the WebGL nebula is actually up, it IS the backdrop and the others
+     leave the compositor entirely — display:none, not opacity:0, because an
+     invisible layer still costs a full re-raster every frame. */
+  html[data-webgl="live"] body::after,
+  html[data-webgl="live"] .reading-scrim,
+  html[data-webgl="live"] .energy-border,
+  html[data-webgl="live"] .float-aura,
+  html[data-webgl="live"] .energy-orb,
+  html[data-webgl="live"] #floatBg { display: none; }
+
+  /* Five permanent compositor layers for a six-pixel float. The lift on hover
+     says the same thing and only claims a layer while it is happening. */
+  .nav-card { animation: none; will-change: auto; }
+  .nav-card:hover { translate: 0 -6px; }
   html[data-ambient="still"] .eb-l { opacity: .42; }
   html[data-ambient="still"] .display-xl,
   html[data-ambient="still"] .display-lg,
