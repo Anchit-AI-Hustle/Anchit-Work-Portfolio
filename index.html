@@ -904,8 +904,22 @@
      dead gap. Sticky achieves the same "stays put while the page moves past it"
      with no DOM surgery, so it survives every view change untouched.
      Scroll only drives transform/opacity/filter — all compositor properties. */
-  .cine { position: relative; height: 260vh; margin: 0 0 clamp(24px, 5vw, 64px); }
-  @media (max-width: 820px) { .cine { height: 200vh; } }
+  /* 260vh was 2,340px on a laptop — two and a half screens of title card, and
+     NOTHING else on the homepage began until 2,404px. Every piece of work below
+     it (the bento, the hold-to-reveal portrait, the device cards, the pinned
+     current-work section) was unreachable without scrolling past a wall, and
+     that wall is also the most expensive part of the page to scroll.
+     140vh keeps the hand-off — the stage still recedes as you leave it — and
+     puts the rest of the page within one flick of the first screen. */
+  /* 120vh, not 140, and the number is arithmetic rather than taste. The stage
+     is sticky at 100vh and the scroll hand-off ends at `bottom bottom` — i.e.
+     at scrollY = height − viewport. At 140vh the hero had finished receding
+     360px in but the section ran on for another 860px, so you scrolled through
+     half a screen of nothing before the content arrived. At 120vh the fade
+     completes at exactly the scroll position where the bento enters the
+     viewport: no overlap, no void. */
+  .cine { position: relative; height: 120vh; margin: 0 0 clamp(24px, 5vw, 64px); }
+  @media (max-width: 820px) { .cine { height: 112vh; } }
   .cine-stage {
     position: sticky; top: 0; height: 100vh;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -10403,9 +10417,12 @@
         scrollTrigger: {
           trigger: cine,
           start: 'top top',
-          // Ends where the sticky stage stops sticking, so the fade completes
-          // exactly as the stage lets go — no visible jump at the hand-off.
-          end: 'bottom bottom',
+          // Ends when the section's bottom clears the TOP of the viewport, so
+          // the stage stays visible the whole time it is on screen and fades as
+          // it leaves. `bottom bottom` finished the fade while a full viewport
+          // of sticky stage was still travelling, which left the reader looking
+          // at a screen of nothing between the hero and the content.
+          end: 'bottom top',
           scrub: 0.6,
         },
       });
