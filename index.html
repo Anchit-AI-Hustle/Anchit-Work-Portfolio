@@ -75,6 +75,18 @@
       else if (coarse || narrow) tier = 'lite';
     }
     document.documentElement.setAttribute('data-ambient', tier);
+
+    // ── One authority, read everywhere else ─────────────────────────────────
+    // This block is the only code that resolves the motion preference. It runs
+    // before the first paint and writes the answer onto <html>, where CSS and
+    // every later script can read it.
+    //
+    // Four other places used to re-read localStorage and re-derive the same
+    // booleans — three of them character-for-character identical. That is not
+    // just repetition: if the rule here ever changes, those copies disagree
+    // silently, and a visitor ends up with half a page animating.
+    window.motionOff   = function () { return document.documentElement.getAttribute('data-motion') === 'off'; };
+    window.ambientTier = function () { return document.documentElement.getAttribute('data-ambient') || 'full'; };
   })();
 </script>
 
@@ -1906,19 +1918,6 @@
   .d3-mag { transition: transform 260ms cubic-bezier(0.16,1,0.3,1); }
   .d3-mag:hover, .d3-mag:focus-visible { will-change: transform; }
 
-  /* A soft light that follows the pointer, sitting under all content. Fixed and
-     pointer-events:none, so it can never intercept a click. */
-  #d3Cursor {
-    position: fixed; left: 0; top: 0; width: 520px; height: 520px; margin: -260px 0 0 -260px;
-    border-radius: 50%; pointer-events: none; z-index: 0; opacity: 0;
-    transition: opacity 500ms ease;
-    background: radial-gradient(circle,
-      color-mix(in oklab, var(--primary) 13%, transparent) 0%,
-      color-mix(in oklab, var(--accent-warm) 7%, transparent) 38%, transparent 68%);
-    filter: blur(14px);
-  }
-  #d3Cursor.on { opacity: 1; }
-
   /* Incoming view arrives with depth on every route change. */
   .view.d3-enter { animation: d3Enter 620ms cubic-bezier(0.16,1,0.3,1) both; }
   @keyframes d3Enter {
@@ -1931,20 +1930,18 @@
   @media (hover: none) {
     .d3 { transform: none; }
     .d3::after { display: none; }
-    #d3Cursor { display: none; }
   }
   /* Single switch for motion-off, and for browsers that ask for reduced motion. */
   html.no-depth .d3,
   html.no-depth .d3-mag { transform: none !important; transition: none !important; }
   html.no-depth .d3::after,
   html.no-depth .d3-sheen::before,
-  html.no-depth #d3Cursor { display: none !important; }
   html.no-depth .d3-rise,
   html.no-depth .d3-words > .d3-w { opacity: 1 !important; transform: none !important; }
   html.no-depth .view.d3-enter { animation: none !important; }
   
   html[data-motion="off"] .d3, html[data-motion="off"] .d3-mag { transform: none !important; transition: none !important; }
-  html[data-motion="off"] .d3::after, html[data-motion="off"] .d3-sheen::before, html[data-motion="off"] #d3Cursor { display: none !important; }
+  html[data-motion="off"] .d3::after, html[data-motion="off"] .d3-sheen::before { display: none !important; }
   html[data-motion="off"] .d3-rise, html[data-motion="off"] .d3-words > .d3-w { opacity: 1 !important; transform: none !important; }
   html[data-motion="off"] .view.d3-enter { animation: none !important; }
 
@@ -2957,6 +2954,10 @@
      (sidebar, top-bar, chat launcher, audio widgets) must KEEP their own
      position — they already stack above the z-0 canvas by DOM order. */
   main { position:relative; z-index:1; }
+  /* Nothing may push the page sideways. `clip`, never `hidden`: hidden turns
+     body into a scroll container, which silently breaks `position: sticky` and
+     every pinned ScrollTrigger. clip trims without creating one. */
+  html, body { overflow-x: clip; }
   /* Levitation — uses `translate` so it composes with existing hover transforms.
      Clearly visible amplitude; this floating ambiance is the core design intent,
      so it stays on even under reduced-motion (it's gentle, non-vestibular). */
@@ -2976,7 +2977,7 @@
   // reading the preference again and risking a different answer. At the `still`
   // tier the canvas is hidden by CSS as well, so this also stops the rAF loop
   // instead of animating something nobody can see.
-  var still = document.documentElement.getAttribute('data-ambient') === 'still';
+  var still = window.ambientTier() === 'still';
   (function draw(){
     // Skip the redraw entirely while the page is scrolling. A full-viewport
     // canvas clear + 130 arcs is a whole extra painted layer competing with the
@@ -7106,13 +7107,29 @@
       const ambient = document.getElementById('audioAmbient');
       if (ambient) ambient.title = 'Voice narration playing';
     }
-    (function probeVoiceProviders() {
+    // Probed on first contact with an audio control, not on load. This used to
+    // be an IIFE, so every visitor — including everyone who never plays a
+    // single second of audio — spent a serverless invocation before the page
+    // had finished settling, to decide the wording of two tooltips. The label
+    // only has to be honest by the time somebody is about to read it.
+    let voiceProbed = false;
+    function probeVoiceProviders() {
+      if (voiceProbed) return;
+      voiceProbed = true;
       const url = typeof ttsEndpoint === 'function' ? ttsEndpoint() : '/api/tts';
       fetch(url)
         .then((r) => (r.ok ? r.json() : null))
         .then((j) => { if (j) { clonedVoiceReady = !!j.clonedVoiceReady; labelVoiceHonestly(); } })
         .catch(() => { /* offline or unkeyed — leave the labels as authored */ });
-    })();
+    }
+    ['pointerdown', 'focusin', 'keydown'].forEach(function (ev) {
+      document.addEventListener(ev, function (e) {
+        if (e.target && e.target.closest && e.target.closest(
+          '[data-chataudio-btn], #audioAmbient, #jarvisPill, #ambientToggle, [data-narrate], .audio-widget')) {
+          probeVoiceProviders();
+        }
+      }, { passive: true, capture: true });
+    });
 
     function showIndicator(viewName) {
       if (!indicator) return;
@@ -9533,7 +9550,7 @@
 (function(){
   // Honour an explicit in-page choice ('on'/'off') over the OS setting, so the
   // Motion toggle can force cinematic motion even when the OS prefers reduced.
-  const reduceMotion = (function(){ try { var m = localStorage.getItem('anchit-motion'); if (m === 'on') return false; if (m === 'off') return true; } catch(e){} return document.documentElement.getAttribute('data-motion') === 'off'; })();
+  const reduceMotion = window.motionOff();
   document.body.classList.add('futurist-ready');
   if (reduceMotion) return;
 
@@ -9682,7 +9699,7 @@
   'use strict';
   var mq = window.matchMedia;
   // Explicit Motion-toggle choice ('on'/'off') overrides the OS preference.
-  var reduceMotion = (function(){ try { var m = localStorage.getItem('anchit-motion'); if (m === 'on') return false; if (m === 'off') return true; } catch(e){} return document.documentElement.getAttribute('data-motion') === 'off'; })();
+  var reduceMotion = window.motionOff();
   var isMobile = !!(mq && mq('(max-width: 820px)').matches);
 
   // Wait for the deferred CDN libs, then boot. Give up quietly after ~6s so a
@@ -9713,7 +9730,7 @@
     // paint. Asking it again here is how two pieces of code end up disagreeing
     // about the same device, so this defers to the tier rather than re-deriving
     // it: the nebula is a `full`-tier luxury and nothing else.
-    if (document.documentElement.getAttribute('data-ambient') !== 'full') return;
+    if (window.ambientTier() !== 'full') return;
     // Idle alone is not enough. "Idle" arrives about a second in — which is
     // exactly when someone makes their first scroll — and parsing 670 KB plus
     // compiling shaders in the middle of that gesture is the stutter we were
@@ -10162,28 +10179,10 @@
       }, { passive: true });
     }
 
-    // ── Time: a light that trails the pointer, easing toward it each frame ───
-    if (hasHover) {
-      var glow = document.createElement('div');
-      glow.id = 'd3Cursor';
-      glow.setAttribute('aria-hidden', 'true');
-      document.body.appendChild(glow);
-      var tx = innerWidth / 2, ty = innerHeight / 2, cx = tx, cy = ty, running = false;
-      document.addEventListener('pointermove', function (e) {
-        tx = e.clientX; ty = e.clientY;
-        glow.classList.add('on');
-        if (!running) { running = true; requestAnimationFrame(trail); }
-      }, { passive: true });
-      function trail() {
-        // Lerp rather than snap: the lag is what makes it feel like light with
-        // mass instead of a cursor sprite.
-        cx += (tx - cx) * 0.085;
-        cy += (ty - cy) * 0.085;
-        glow.style.transform = 'translate3d(' + cx.toFixed(1) + 'px,' + cy.toFixed(1) + 'px,0)';
-        if (Math.abs(tx - cx) > 0.4 || Math.abs(ty - cy) > 0.4) requestAnimationFrame(trail);
-        else running = false;
-      }
-    }
+    // The pointer light lives in assets/cinematic.js as #cinCursor. There used
+    // to be a second one here — #d3Cursor — a 520px blurred circle pinned at
+    // z-index 0, under every piece of content, re-composited on every pointer
+    // frame for a glow almost nobody could see past the page. One cursor.
 
     // ── Depth reveals + word assembly, driven by one observer ────────────────
     each(RISE, function (el) { el.classList.add('d3-rise'); });
@@ -10274,14 +10273,7 @@
   // that default and never playing for anyone. An explicit choice always wins;
   // with nothing stored it follows the OS accessibility signal, which is the
   // signal that actually means "don't animate for me".
-  function heroMotionAllowed() {
-    try {
-      var m = localStorage.getItem('anchit-motion');
-      if (m === 'on') return true;
-      if (m === 'off') return false;
-    } catch (e) { /* storage blocked — fall through to the OS preference */ }
-    return document.documentElement.getAttribute('data-motion') !== 'off';
-  }
+  function heroMotionAllowed() { return !window.motionOff(); }
 
   function initCinematicHero(gsap) {
     var cine = document.getElementById('cineHero');
@@ -10430,7 +10422,7 @@
   var sec = document.getElementById('currentWork');
   if (!sec) return;
 
-  var tier = document.documentElement.getAttribute('data-ambient');
+  var tier = window.ambientTier();
   // At the `still` tier nothing is choreographed anywhere on the page, so the
   // section simply exists. It is fully readable without a single tween.
   if (tier === 'still') return;
@@ -10795,8 +10787,13 @@
   @keyframes jpulse{ 0%,100%{ transform:scale(1); opacity:.85 } 50%{ transform:scale(1.35); opacity:1 } }
   body.sidebar-collapsed #jarvisPill{ left:calc(var(--sidebar-w-collapsed, 60px) + 16px); }
   /* Below 820px the rail is an overlay drawer, so the pills reclaim the edge. */
-  @media (max-width:820px){ #jarvisPill, body.sidebar-collapsed #jarvisPill{ left:16px; } }
-  @media (max-width:560px){ #jarvisPill, body.sidebar-collapsed #jarvisPill{ left:12px; bottom:12px; font-size:10px; padding:8px 12px; } }
+  /* Clear of the chat launcher, which is a full-width bar pinned to the bottom
+     on small screens and sits above these on z-index. Both pills were inside
+     its band and therefore untappable. */
+  @media (max-width:820px){ #jarvisPill, body.sidebar-collapsed #jarvisPill{ left:16px; bottom:88px; } }
+  /* Keeps the 88px lift — a narrower phone does not move the chat bar, so
+     dropping back to bottom:12px here put the pill straight back underneath it. */
+  @media (max-width:560px){ #jarvisPill, body.sidebar-collapsed #jarvisPill{ left:12px; bottom:88px; font-size:10px; padding:8px 12px; } }
 
   #agentsModal{ position:fixed; inset:0; z-index:10000; display:none; align-items:center; justify-content:center;
     background:rgba(6,4,3,.72); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); padding:20px; }
@@ -11132,7 +11129,7 @@
   
   html[data-motion="off"] #ambientToggle .abar i { animation:none !important; }
   body.sidebar-collapsed #ambientToggle{ left:calc(var(--sidebar-w-collapsed, 60px) + 16px); }
-  @media (max-width:820px){ #ambientToggle, body.sidebar-collapsed #ambientToggle{ left:16px; bottom:62px; } }
+  @media (max-width:820px){ #ambientToggle, body.sidebar-collapsed #ambientToggle{ left:16px; bottom:132px; } }
 </style>
 <button type="button" id="ambientToggle" data-on="0" aria-pressed="false" title="Ambient background music — pauses automatically while anyone is speaking">
   <span class="abar" aria-hidden="true"><i></i><i></i><i></i></span><span class="alabel">Music: off</span>
