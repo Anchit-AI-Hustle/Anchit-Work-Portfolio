@@ -902,13 +902,10 @@
   .eyebrow::before { content: ''; width: 24px; height: 1px; background: var(--primary); }
   .live-dot {
     width: 8px; height: 8px; background: var(--primary); border-radius: 50%;
-    box-shadow: 0 0 0 0 var(--primary);
+    box-shadow: 0 0 7px color-mix(in srgb, var(--primary) 70%, transparent);
     animation: live 2s ease-in-out infinite;
   }
-  @keyframes live {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 77, 31, 0.6); }
-    50% { box-shadow: 0 0 0 10px rgba(255, 77, 31, 0); }
-  }
+  @keyframes live { 0%, 100% { opacity: 1; } 50% { opacity: .42; } }
   .eyebrow.has-dot::before { display: none; }
   .display-lg {
     font-family: var(--font-display); font-weight: 400;
@@ -8693,11 +8690,14 @@
     display: none !important;
   }
   /* Gold "live" pulse — soft ring, no glow bloom */
-  @keyframes live {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(232, 177, 78, .45); }
-    50% { box-shadow: 0 0 0 8px rgba(232, 177, 78, 0); }
+  @keyframes live { 0%, 100% { opacity: 1; } 50% { opacity: .42; } }
+  /* A glow that is painted once. `box-shadow: none` here was undoing the one
+     set above — correct while the pulse WAS a growing shadow, pointless now
+     that the pulse is opacity and the shadow never changes. */
+  .live-dot, .hero-current-block .dot {
+    background: var(--accent);
+    box-shadow: 0 0 7px color-mix(in srgb, var(--accent) 65%, transparent);
   }
-  .live-dot, .hero-current-block .dot { background: var(--accent); box-shadow: none; }
   main .container {
     max-width: 1180px;
   }
@@ -9092,9 +9092,9 @@
     from { clip-path: inset(0 0 7% 0); opacity: .7; }
     to { clip-path: inset(0); opacity: 1; }
   }
-  .display-xl,
-  .display-lg,
-  .display-md,
+  .view.active .display-xl,
+  .view.active .display-lg,
+  .view.active .display-md,
   .home-hero .name .firstline,
   .home-hero .name .secondline {
     background: linear-gradient(105deg, var(--ink) 0%, var(--holo-gold) 28%, var(--accent) 48%, var(--primary) 66%, var(--ink) 100%) !important;
