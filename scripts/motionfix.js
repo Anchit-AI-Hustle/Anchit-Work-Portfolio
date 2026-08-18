@@ -9,6 +9,8 @@
 //   4. the invisible sidebar backdrop staying composited via backdrop-filter
 //   5. native `scroll-behavior: smooth` fighting Lenis, which stopped the page
 //      scrolling at all once Lenis had initialised
+//   6. the browser and Lenis both applying the same wheel notch as Lenis starts
+//      up, which threw an early scroller back to the top of the page
 //
 // Every test is paired with a MUTATION that undoes the fix, so the suite can be
 // shown to actually fail when the bug comes back:
@@ -19,6 +21,7 @@
 //   MUT=no_governor node scripts/motionfix.js  # expect a FAIL
 //   MUT=no_park node scripts/motionfix.js      # expect a FAIL
 //   MUT=smooth_scroll node scripts/motionfix.js # expect a FAIL
+//   MUT=no_drift_fix node scripts/motionfix.js  # see the caveat on check 7
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 const MUT = process.env.MUT || '';
 const BASE = process.env.BASE || 'http://127.0.0.1:8099';
@@ -53,6 +56,16 @@ const mutations = {
     const apply = () => document.documentElement.style.setProperty('scroll-behavior', 'smooth', 'important');
     apply();
     setInterval(apply, 100);
+  },
+  // stop the handover correction from running, so Lenis is free to tween from
+  // a position the page has already left
+  no_drift_fix: () => {
+    const iv = setInterval(() => {
+      const l = window.__lenis;
+      if (!l) return;
+      clearInterval(iv);
+      l.reset = function () {};        // the correction becomes a no-op
+    }, 10);
   },
   // never park the hero loops
   no_park: () => {
@@ -186,6 +199,48 @@ const mutations = {
   });
   chk('idle sidebar backdrop not composited', !!sb && sb.vis === 'hidden',
       sb ? `visibility:${sb.vis} opacity:${sb.op}` : 'element missing');
+
+  // ── 7. an early scroll is never thrown backwards ──
+  // Sampled once per RENDERED frame: a backwards step between two painted
+  // frames is something a person sees, whereas two scroll events inside one
+  // frame are not. Repeated across the load window because the fault was
+  // intermittent — 4 to 7 runs in 14 before the fix, 0 in 26 after it.
+  //
+  // CAVEAT, so nobody reads more into this check than it earns: unlike the
+  // others here, it has NOT been shown to fail on demand. `MUT=no_drift_fix`
+  // stubs out the correction — verified to be installed, and the correction is
+  // verified to fire twice in a normal run — yet ten mutated passes did not
+  // reproduce a visible jump. The fault is timing-dependent enough that a fixed
+  // set of start times cannot be relied on to provoke it. Treat this as a guard
+  // that will catch a regression which reproduces, not as proof of one that
+  // does not.
+  const jumps = [];
+  for (const startAt of [0, 77, 150, 231, 300, 385, 500, 650, 800, 1000]) {
+    const p3 = await ctx.newPage();
+    await p3.route(/fonts\.(googleapis|gstatic)\.com/, r=>r.fulfill({status:200,contentType:'text/css',body:''}));
+    if (MUT) {
+      const src = mutations[MUT].toString();
+      await p3.addInitScript(`document.addEventListener('DOMContentLoaded',()=>{(${src})()})`);
+    }
+    await p3.addInitScript(() => {
+      window.__fr = [];
+      const t = () => { window.__fr.push([Math.round(performance.now()), Math.round(scrollY)]); requestAnimationFrame(t); };
+      requestAnimationFrame(t);
+    });
+    await p3.goto(BASE + '/index.html', { waitUntil: 'commit' });
+    if (startAt) await p3.waitForTimeout(startAt);
+    await p3.mouse.move(720, 500);
+    for (let i = 0; i < 14; i++) { await p3.mouse.wheel(0, 200); await p3.waitForTimeout(25); }
+    await p3.waitForTimeout(3000);
+    const fr = await p3.evaluate(() => window.__fr);
+    for (let i = 1; i < fr.length; i++) {
+      const d = fr[i][1] - fr[i-1][1];
+      if (d < -4) jumps.push(`T=${startAt}ms: ${fr[i-1][1]}px -> ${fr[i][1]}px at ${fr[i][0]}ms`);
+    }
+    await p3.close();
+  }
+  chk('early scroll is never thrown back', jumps.length === 0,
+      jumps.length ? jumps.join('; ') : '10 start times across the load window, no backwards step between any two painted frames');
 
   const errs = [];
   p.on('pageerror', e => errs.push(e.message));
