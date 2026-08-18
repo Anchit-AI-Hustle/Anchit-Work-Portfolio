@@ -9981,6 +9981,20 @@
     // that moment comes, stand down and ask again later.
     var idle = window.requestIdleCallback || function (fn) { return setTimeout(fn, 1400); };
     var attempts = 0;
+
+    // Fetching and building are two different costs and only one of them is
+    // expensive on the main thread, so they are no longer scheduled together.
+    // The 655 KB download starts NOW, in parallel with everything else the page
+    // is doing; the construction waits for a still moment. Previously both were
+    // behind the same gate, which is why the backdrop could not appear until
+    // seconds after it was actually needed.
+    var modulePromise = null;
+    function fetchModule() {
+      if (!modulePromise) modulePromise = import('/assets/vendor/three.module.min.js');
+      return modulePromise;
+    }
+    fetchModule();
+
     function inject() {
       // The ES module build, not the UMD one. three.min.js prints a deprecation
       // warning on load ("deprecated with r150+, will be removed with r160")
@@ -9990,7 +10004,7 @@
       //
       // A namespace import has the identical shape to the old global, so
       // initWebGL() keeps reading window.THREE and needs no changes.
-      import('/assets/vendor/three.module.min.js')
+      fetchModule()
         .then(function (mod) {
           window.THREE = mod;
           // Same rule for the shader compile, which is its own long task —
@@ -10001,7 +10015,15 @@
             if (!quiet()) return setTimeout(compile, 500);
             idle(function () {
               if (!quiet()) return setTimeout(compile, 500);
-              try { initWebGL(); } catch (e) { /* keep the 2D fallback */ }
+              // One more turn of the event loop before committing. A wheel
+              // event that has been dispatched but not yet delivered has not
+              // set __scrolling, so without this yield the setup can win a race
+              // against the visitor's first flick and land right on top of it —
+              // which is exactly what a ~250ms task at 1.3s looked like.
+              setTimeout(function () {
+                if (!quiet()) return setTimeout(compile, 500);
+                try { initWebGL(); } catch (e) { /* keep the 2D fallback */ }
+              }, 0);
             }, { timeout: 4000 });
           })();
         })
@@ -10013,22 +10035,21 @@
     // blocked main thread for anyone who scrolled around the four second mark.
     // So the page must also have been STILL for a while first.
     var QUIET_MS = 900;
-    var GRACE_MS = 9000;
-    var armed = performance.now();
     function quiet() {
       if (window.__scrolling) return false;
       var last = window.__lastScroll || 0;
-      // Nothing decorative may land on the visitor's FIRST scroll. Setting up
-      // this scene costs ~120ms of construction and a shader compile even on a
-      // good machine, and a fixed timer that fires a few seconds in fires
-      // exactly while someone is reading the hero and about to flick down —
-      // measured as a ~280ms block for anyone who scrolled around then.
+      // A page nobody has scrolled yet IS still. An earlier version made this
+      // case wait out a nine second grace period, on the theory that the
+      // visitor might scroll at any moment — but that is just as true at nine
+      // seconds as at one, so all it bought was a backdrop that took 10.4s to
+      // appear for everybody who sat and read the hero. Measured, and the
+      // single worst number on the whole page.
       //
-      // So it waits for the visitor to have scrolled at least once and then
-      // stopped: a pause after a scroll is the one moment we know they are not
-      // mid-gesture. Someone who simply sits on the hero and never scrolls has
-      // nothing to disturb, so after the grace period it goes ahead anyway.
-      if (!last) return (performance.now() - armed) > GRACE_MS;
+      // What must not happen is this landing on someone's FIRST scroll: setting
+      // the scene up costs ~120ms of construction plus a shader compile. So a
+      // visitor who HAS scrolled waits for them to stop — a pause after a
+      // scroll is the one moment we know they are not mid-gesture.
+      if (!last) return true;
       return (performance.now() - last) > QUIET_MS;
     }
     function attempt() {
@@ -10046,7 +10067,13 @@
         inject();
       }, { timeout: 4000 });
     }
-    setTimeout(attempt, 3200);
+    // Driven by the module actually arriving, not by a guessed delay. A timer
+    // can only be too early (nothing to build yet) or too late (the backdrop
+    // waits for no reason) — and being early matters here for a second reason:
+    // the sooner this runs, the more likely it is to finish BEFORE the visitor
+    // has scrolled at all, which is the only moment it is guaranteed to cost
+    // them nothing.
+    modulePromise.then(function () { attempt(); }, function () {});
   }
 
   /* ───────────────────────── Three.js WebGL backdrop ───────────────────────

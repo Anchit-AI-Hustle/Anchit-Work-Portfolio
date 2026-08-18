@@ -609,12 +609,19 @@
     // Everything else is decoration and can wait. Loading it all at 400ms put
     // parallax scanning, 38 magnetic listeners and a cursor rAF into exactly
     // the frame budget the opening scroll was competing for.
-    setTimeout(function () { enrich(); railify(); }, 300);
+    // The cursor rides up here, with enrich and railify, rather than in the
+    // idle group below. It is the one effect a visitor sees before they do
+    // anything at all — it replaces their pointer — and it was arriving at
+    // 1150ms, which reads as the site booting rather than being alive. It costs
+    // one element and one rAF loop, so it does not belong in the same bucket as
+    // a full parallax scan.
+    setTimeout(function () { enrich(); railify(); initCursor(); }, 300);
 
+    // These genuinely scan the DOM, so they still wait for an idle moment.
     var idle = window.requestIdleCallback || function (fn) { return setTimeout(fn, 900); };
     idle(function () {
-      pinRails(); initParallax(); onParScroll(); initCursor(); initMagnetic();
-    }, { timeout: 2000 });
+      pinRails(); initParallax(); onParScroll(); initMagnetic();
+    }, { timeout: 1200 });
     addEventListener('scroll', onParScroll, { passive: true });
     sweep();
     addEventListener('scroll', sweep, { passive: true });
