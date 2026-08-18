@@ -164,7 +164,8 @@
     --font-display: 'Fraunces', 'Times New Roman', serif;
     --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-    --header-h: 64px;
+    --sidebar-w: 176px;
+    --sidebar-w-collapsed: 60px;
     --max-w: 1600px;
     --gutter: clamp(20px, 3vw, 48px);
     --safe-top: env(safe-area-inset-top);
@@ -210,11 +211,11 @@
     transition: background 0.5s ease, color 0.5s ease;
     overflow-x: hidden;
     overscroll-behavior-y: none;
-    padding-top: var(--header-h);
+    padding-left: var(--sidebar-w);
   }
   /* Fixed/sticky chrome can visually detach during iOS rubber-band overscroll —
      promoting to their own composited layer keeps them pinned at the edges. */
-   .sticky-ctas, .chat-return {
+  .top-bar, .sticky-ctas, .chat-return {
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
   }
@@ -227,6 +228,140 @@
   img, svg { display: block; max-width: 100%; }
   button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
 
+
+  /* Shown only when /api/tts reports no cloning provider configured. The site
+     speaks in the first person, so a device voice reading those words is a
+     stranger claiming to be Anchit — the audio still plays, but it never gets
+     to pass as his. Remove the badge by configuring a cloning provider, at
+     which point data-voice is never set at all. */
+  html[data-voice="stock"] .chat-audio.active::after,
+  html[data-voice="stock"] #audioAmbient::after {
+    content: 'device voice';
+    position: absolute; left: 50%; bottom: -15px; transform: translateX(-50%);
+    font-family: var(--font-mono); font-size: 8px; letter-spacing: .1em;
+    text-transform: uppercase; white-space: nowrap;
+    color: var(--ink-mute); pointer-events: none;
+  }
+  html[data-voice="stock"] .chat-audio.active,
+  html[data-voice="stock"] #audioAmbient { position: relative; overflow: visible; }
+
+  /* ============ SIDEBAR ============ */
+  .sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0;
+    width: var(--sidebar-w); z-index: 200;
+    background: #0D0B09;
+    border-right: 1px solid rgba(255,255,255,0.07);
+    display: flex; flex-direction: column; align-items: stretch;
+    padding: calc(20px + var(--safe-top)) 0 calc(20px + var(--safe-bottom));
+    transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1), width 0.25s ease;
+  }
+  /* Desktop collapsed mode: icon-only rail */
+  body.sidebar-collapsed { padding-left: var(--sidebar-w-collapsed); }
+  body.sidebar-collapsed .sidebar { width: var(--sidebar-w-collapsed); }
+  body.sidebar-collapsed .top-bar { left: var(--sidebar-w-collapsed); }
+  body.sidebar-collapsed .sidebar-label,
+  body.sidebar-collapsed .sidebar-logo span { display: none; }
+  body.sidebar-collapsed .sidebar-item { justify-content: center; padding: 0; }
+  
+  .sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 10px 24px;
+    flex-shrink: 0;
+    width: calc(100% - 20px);
+  }
+  body.sidebar-collapsed .sidebar-header {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 24px;
+    width: 100%;
+  }
+  .sidebar-hamburger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: transparent;
+    color: rgba(251, 245, 236, 0.65);
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .sidebar-hamburger:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #FBF5EC;
+  }
+  .sidebar-hamburger svg {
+    width: 20px;
+    height: 20px;
+  }
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-display); font-weight: 600;
+    font-size: 16px; line-height: 1.2; letter-spacing: -0.02em;
+    color: #FBF5EC;
+    flex-shrink: 1;
+    min-width: 0;
+    transition: color 0.2s;
+  }
+  body.sidebar-collapsed .sidebar-logo {
+    justify-content: center;
+    width: 100%;
+  }
+  .sidebar-logo img {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 1px solid rgba(255, 183, 54, 0.6);
+    box-shadow: 0 0 12px rgba(255, 133, 24, 0.18);
+    transition: transform 0.2s;
+  }
+  .sidebar-logo:hover img {
+    transform: scale(1.05);
+  }
+  .sidebar-logo span { display: block; color: var(--primary); font-style: italic; font-weight: 500; }
+  .sidebar-logo:hover { color: var(--primary); }
+  .sidebar-nav {
+    flex: 1; display: flex; flex-direction: column; align-items: stretch;
+    gap: 2px; width: 100%; overflow-y: auto; scrollbar-width: none;
+    padding: 0 10px;
+  }
+  .sidebar-nav::-webkit-scrollbar { display: none; }
+  .sidebar-item {
+    position: relative;
+    width: 100%; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 14px;
+    color: rgba(251,245,236,0.4); background: transparent;
+    transition: all 0.2s ease; flex-shrink: 0;
+    cursor: pointer; border: none; outline: none;
+  }
+  .sidebar-item:hover { background: rgba(255,255,255,0.09); color: rgba(251,245,236,0.85); }
+  .sidebar-item.active {
+    background: color-mix(in srgb, var(--primary) 16%, transparent);
+    color: var(--ink);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 30%, transparent);
+  }
+  .sidebar-item.active .sidebar-label { color: var(--primary); font-weight: 600; }
+  /* Glowing accent bar marks the current page — clearly visible on every view */
+  .sidebar-item.active::before {
+    content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+    width: 3px; height: 22px; border-radius: 0 3px 3px 0;
+    background: var(--primary); box-shadow: 0 0 10px var(--primary);
+  }
+  .sidebar-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .sidebar-label {
+    font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+  }
+
   /* ── Morphing nav labels ──────────────────────────────────────────────────
      The name of a page and what the page is FOR are two different things, and
      a nav rail only has room for one of them at a time. So it holds both: the
@@ -236,150 +371,6 @@
      swap is a transform on two spans, which is compositor-only and costs
      nothing per frame. The hover copy is aria-hidden so the accessible name
      stays equal to the visible label at rest (WCAG 2.5.3). */
-
-  /* Anything the page scrolls to has to clear the fixed bar.
-     Without this, every in-page anchor, every scrollIntoView and every
-     ScrollTrigger start lands its target under 64px of glass — the heading you
-     navigated to is the one thing you cannot read. `:where()` keeps the
-     specificity at zero so any component can still set its own value. */
-  :where([id]) { scroll-margin-top: calc(var(--header-h) + 18px); }
-
-  /* ============ SITE HEADER (glass) ============ */
-  /* Colour comes entirely from the tokens above — this is the reference's
-     anatomy in Anchit's palette, never its palette. */
-  .site-header {
-    position: fixed; inset: 0 0 auto 0; z-index: 300;
-    padding: 10px var(--gutter) 0;
-    padding-top: calc(10px + var(--safe-top, 0px));
-    pointer-events: none;                 /* only the bar itself is clickable */
-  }
-  .hdr-glass {
-    pointer-events: auto;
-    /* Above the panel, and it has to be said INSIDE the header's stacking
-       context to mean anything. The panel is a child of .site-header, which is
-       itself positioned with a z-index — so the panel's z-index is resolved
-       against its siblings here, not against the page. It sits later in the
-       DOM, so without this it painted over the bar and swallowed the
-       hamburger: the menu opened and could not be closed. */
-    position: relative; z-index: 2;
-    max-width: var(--max-w); margin: 0 auto;
-    border: 1px solid var(--rule);
-    border-radius: 999px;
-    background: color-mix(in oklab, var(--bg-elev) 78%, transparent);
-    -webkit-backdrop-filter: blur(14px) saturate(1.3);
-    backdrop-filter: blur(14px) saturate(1.3);
-    box-shadow: var(--shadow-md);
-    transition: border-color .3s ease, background .3s ease;
-  }
-  .hdr-glass:hover { border-color: var(--rule-strong); }
-  .hdr-row {
-    display: flex; align-items: center; gap: clamp(10px, 2vw, 26px);
-    height: calc(var(--header-h) - 12px);
-    padding: 0 8px 0 12px;
-  }
-
-  .hdr-logo {
-    display: inline-flex; align-items: center; gap: 9px;
-    text-decoration: none; color: var(--ink); flex: 0 0 auto;
-  }
-  .hdr-logo img { width: 30px; height: 30px; border-radius: 50%; display: block; }
-  .hdr-logo-label {
-    font-family: var(--font-display); font-weight: 600; font-size: 15px;
-    letter-spacing: -0.01em; white-space: nowrap;
-  }
-
-  .hdr-links {
-    display: flex; align-items: center; gap: clamp(6px, 1.4vw, 20px);
-    margin-inline: auto;                  /* centred, with the ends pinned */
-  }
-  .hdr-link {
-    text-decoration: none; color: var(--ink-dim);
-    font-size: 13px; font-weight: 500; letter-spacing: .01em;
-    padding: 7px 10px; border-radius: 999px;
-    transition: color .25s ease, background .25s ease;
-  }
-  .hdr-link:hover, .hdr-link:focus-visible { color: var(--ink); background: var(--primary-soft); }
-  .hdr-link.active { color: var(--ink); }
-  .hdr-link.active .ml-default { color: var(--primary); }
-
-  .hdr-status {
-    display: inline-flex; align-items: center; gap: 8px; flex: 0 0 auto;
-    text-decoration: none; color: var(--ink-dim);
-    font-size: 12px; font-family: var(--font-mono); letter-spacing: .02em;
-    padding: 7px 14px 7px 11px; border-radius: 999px;
-    border: 1px solid var(--rule);
-    background: color-mix(in oklab, var(--accent) 8%, transparent);
-    transition: border-color .25s ease, color .25s ease;
-  }
-  .hdr-status:hover { border-color: var(--accent); color: var(--ink); }
-  .hdr-status-dot {
-    width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto;
-    background: var(--accent-warm);
-    /* A static glow with an opacity pulse — the shadow is rasterised once
-       instead of on every frame, which is the rule the rest of this file
-       follows for anything that runs forever. */
-    box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent-warm) 22%, transparent);
-    animation: hdrDot 2.4s ease-in-out infinite;
-  }
-  @keyframes hdrDot { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
-
-  .hdr-ham {
-    display: none; flex: 0 0 auto;
-    width: 38px; height: 38px; border-radius: 50%;
-    border: 1px solid var(--rule); background: transparent;
-    cursor: pointer; padding: 0;
-    align-items: center; justify-content: center; flex-direction: column; gap: 4px;
-  }
-  .hdr-ham span {
-    display: block; width: 15px; height: 1.5px; background: var(--ink);
-    transition: transform .32s cubic-bezier(.16,1,.3,1), opacity .2s ease;
-  }
-  .hdr-ham[aria-expanded="true"] span:first-child { transform: translateY(2.75px) rotate(45deg); }
-  .hdr-ham[aria-expanded="true"] span:last-child  { transform: translateY(-2.75px) rotate(-45deg); }
-
-  /* Full-surface panel, the reference's mobile pattern: sections with a title
-     and a column of links, rather than a drawer of icons. */
-  .hdr-panel {
-    pointer-events: none;
-    position: fixed; inset: 0; z-index: 1;
-    background: color-mix(in oklab, var(--bg) 94%, transparent);
-    -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
-    opacity: 0; visibility: hidden;
-    transition: opacity .34s ease, visibility 0s linear .34s;
-    overflow-y: auto;
-    padding: calc(var(--header-h) + 26px) var(--gutter) 40px;
-  }
-  .hdr-panel.open {
-    pointer-events: auto; opacity: 1; visibility: visible;
-    transition: opacity .34s ease, visibility 0s linear 0s;
-  }
-  .hdr-panel-inner {
-    max-width: 640px; margin: 0 auto;
-    display: grid; gap: 34px;
-  }
-  .hdr-panel-title {
-    font-family: var(--font-mono); font-size: 10px; letter-spacing: .16em;
-    text-transform: uppercase; color: var(--ink-mute); margin-bottom: 12px;
-  }
-  .hdr-panel-links { display: grid; gap: 2px; }
-  .hdr-panel-link {
-    display: block; width: 100%; text-align: left;
-    font-family: var(--font-display); font-size: 26px; font-weight: 500;
-    letter-spacing: -0.015em; color: var(--ink); text-decoration: none;
-    padding: 9px 0; border: 0; background: transparent; cursor: pointer;
-    transition: color .22s ease, transform .32s cubic-bezier(.16,1,.3,1);
-  }
-  .hdr-panel-link:hover, .hdr-panel-link:focus-visible {
-    color: var(--primary); transform: translateX(7px);
-  }
-
-  @media (max-width: 980px) {
-    .hdr-links, .hdr-status { display: none; }
-    .hdr-ham { display: flex; }
-    .hdr-row { justify-content: space-between; }
-  }
-  @media (max-width: 420px) { .hdr-logo-label { display: none; } }
-
   .morph-label {
     display: inline-grid; position: relative; overflow: hidden;
     line-height: 1.35; vertical-align: bottom;
@@ -392,18 +383,20 @@
     transform: translateY(105%); opacity: 0;
     color: var(--primary); font-weight: 600;
   }
-  .hdr-link:hover .morph-label .ml-default,
-  .hdr-link:focus-visible .morph-label .ml-default,
-  .hdr-status:hover .morph-label .ml-default,
-  .hdr-status:focus-visible .morph-label .ml-default{
+  .sidebar-item:hover .morph-label .ml-default,
+  .sidebar-item:focus-visible .morph-label .ml-default,
+  .sidebar-group-toggle:hover .morph-label .ml-default,
+  .sidebar-group-toggle:focus-visible .morph-label .ml-default {
     transform: translateY(-105%); opacity: 0;
   }
-  .hdr-link:hover .morph-label .ml-hover,
-  .hdr-link:focus-visible .morph-label .ml-hover,
-  .hdr-status:hover .morph-label .ml-hover,
-  .hdr-status:focus-visible .morph-label .ml-hover{
+  .sidebar-item:hover .morph-label .ml-hover,
+  .sidebar-item:focus-visible .morph-label .ml-hover,
+  .sidebar-group-toggle:hover .morph-label .ml-hover,
+  .sidebar-group-toggle:focus-visible .morph-label .ml-hover {
     transform: translateY(0); opacity: 1;
   }
+  /* Collapsed rail shows icons only, and a calm visitor gets a plain swap. */
+  body.sidebar-collapsed .morph-label .ml-hover { display: none; }
   html[data-motion="off"] .morph-label > span { transition: none; }
 
   /* ── Device cards ─────────────────────────────────────────────────────────
@@ -527,21 +520,14 @@
     transform-origin: 50% 100%;
   }
   /* The plinth the panel stands on, and the two lights raking across it.
-     ------------------------------------------------------------------
      This was a 26px lip under the panel's bottom edge, which reads as a bevel
-     rather than as a surface. The reference stands its panel on a floor: there
-     is a plane below the object, the object sits ON it, and a pool of light
-     spreads outward from where the two meet. That is three things, so it is
-     three layers here — the plane, the contact shadow that proves the panel is
-     touching it, and the pool.
-
-     All of them are static gradients on a static box. Nothing here animates,
-     so the whole plinth rasterises once and then only ever gets composited —
-     the same rule every other permanent decoration on this page follows. */
+     rather than a surface. The reference stands its panel on a floor: a plane,
+     the object resting ON it, and a pool of light where the two meet. Three
+     things, so three layers. All static gradients on a static box — it
+     rasterises once and is only ever composited after that. */
   .cw-platform {
     position: relative; display: block; height: 96px; margin: -1px auto 0;
     max-width: 92%; pointer-events: none;
-    /* the plane itself, falling away from the panel's foot */
     background:
       linear-gradient(180deg,
         color-mix(in srgb, var(--primary) 14%, transparent) 0,
@@ -549,14 +535,13 @@
         transparent 72%);
     border-radius: 0 0 46px 46px;
   }
-  /* Contact shadow: tight and dark directly under the panel, so the panel
-     reads as resting on the plane instead of hovering above it. */
+  /* Contact shadow, so the panel rests on the plane instead of hovering. */
   .cw-platform::before {
     content: ''; position: absolute; inset: 0 8% auto 8%; height: 26px;
     background: radial-gradient(60% 100% at 50% 0,
       rgba(0, 0, 0, .55), rgba(0, 0, 0, .22) 55%, transparent 100%);
   }
-  /* The pool the two rake lights make where they land on the floor. */
+  /* The pool the rake lights make where they land on the floor. */
   .cw-platform::after {
     content: ''; position: absolute; left: 50%; top: 8px;
     width: 116%; height: 84px; transform: translateX(-50%);
@@ -699,26 +684,22 @@
      only — no layout, no paint — and the whole thing is off at the `still`
      tier and under reduced motion. */
   /* Real depth, not a parallax impression of it.
-     ------------------------------------------------------------------
      The stage carries a perspective and each layer sits at its own Z, so the
      hero is a set of planes at different distances from the camera rather than
      flat text sliding by different amounts. Depths follow the reference's
-     ladder — its furthest content layer sits at 20px, its mid layer at 34px
-     and its portrait at 76px — spread across the five layers this hero has.
-     Perspective is on the stage rather than on each layer: one camera for the
-     whole scene, so the planes share a vanishing point instead of each
-     inventing its own.
-     `transform-style: preserve-3d` is deliberately NOT set here — the stage
-     carries `overflow: hidden`, which forces the computed value back to flat,
-     so it would be a line of CSS that reads as load-bearing and does nothing.
-     It is not needed: a child is placed in 3D by its ANCESTOR's perspective,
-     and nothing here nests a second level of depth.
+     ladder — 20px for its furthest content layer, 34px mid, 76px for the
+     portrait — spread across the five layers this hero has. One camera on the
+     stage, so the planes share a vanishing point.
+
+     preserve-3d is deliberately absent: the stage carries overflow:hidden,
+     which forces the computed value back to flat, so it would read as
+     load-bearing and do nothing. It is not needed — a child is placed in 3D by
+     its ANCESTOR's perspective, and nothing here nests a second level.
 
      Still `translate` and not `transform`. GSAP drives `transform` on these
      same elements for the assembly and the scroll hand-off, and an inline
-     transform beats any stylesheet rule — the depth simply never appeared.
-     `translate` is its own property, takes a third value for Z, and composes
-     with whatever GSAP is doing instead of losing to it. */
+     transform beats any stylesheet rule. `translate` is its own property,
+     takes a third value for Z, and composes instead of losing. */
   .cine-stage { --px: 0; --py: 0; perspective: 1400px; perspective-origin: 50% 45%; }
   html[data-motion="on"] .cine-mark  { translate: calc(var(--px) * 14px) calc(var(--py) * 10px) 76px; }
   html[data-motion="on"] .cine-name  { translate: calc(var(--px) * 8px)  calc(var(--py) * 6px)  48px; }
@@ -795,20 +776,16 @@
   .hold-reveal .hr-under {
     position: absolute; inset: 0; width: 100%; height: 100%;
     /* A feathered mask, not a hard clip. The reference's portrait reveal has a
-       soft boundary that reads as a light moving across a surface; a
-       clip-path circle gives a cut-out with a visible rim, which is a
-       different object. The gradient is opaque to 58% of the radius and then
-       falls away, so the two portraits cross-fade at the edge instead of one
-       ending abruptly. Same driver as before — one registered custom property
-       so the radius can transition at all. */
+       soft boundary that reads as light moving across a surface; a clip-path
+       circle gives a cut-out with a visible rim, which is a different object. */
     -webkit-mask-image: radial-gradient(circle var(--hr-r, 0px) at var(--hx, 50%) var(--hy, 50%),
       #000 58%, rgba(0,0,0,.55) 80%, transparent 100%);
     mask-image: radial-gradient(circle var(--hr-r, 0px) at var(--hx, 50%) var(--hy, 50%),
       #000 58%, rgba(0,0,0,.55) 80%, transparent 100%);
     transition: --hr-r .42s cubic-bezier(.16, 1, .3, 1);
   }
-  /* Wider than the old 66px aperture: the reference reveals most of the face as
-     the cursor crosses it rather than showing a coin-sized window of it. */
+  /* Wider than the old 66px aperture: the reveal shows the face as the cursor
+     crosses it rather than a coin-sized window of it. */
   .hold-reveal:hover .hr-under,
   .hold-reveal:focus-within .hr-under { --hr-r: 92px; }
   .hold-reveal.is-held .hr-under { --hr-r: 108px; }
@@ -847,15 +824,96 @@
   html[data-motion="off"] .hold-reveal .hr-under,
   html[data-motion="off"] .hold-reveal .hr-ring { transition: none; }
 
+  .sidebar-rule {
+    width: auto; height: 1px; border: none;
+    background: rgba(255,255,255,0.1); margin: 8px 10px; flex-shrink: 0;
+  }
+  .sidebar-social {
+    display: flex; flex-direction: column; align-items: stretch; gap: 2px; flex-shrink: 0;
+    padding: 0 10px;
+  }
+
   /* ============ CHAT CAPTION ============ */
   .chat-caption {
     display: none !important;
   }
 
+  /* Mobile toggle button */
+  .sidebar-toggle {
+    position: fixed; top: calc(14px + var(--safe-top)); left: 14px; z-index: 300;
+    width: 42px; height: 42px; border-radius: 12px;
+    background: var(--bg-elev); border: 1px solid var(--rule);
+    color: var(--ink); display: none; align-items: center; justify-content: center;
+    box-shadow: var(--shadow-md); cursor: pointer; transition: all 0.2s;
+  }
+  /* The fixed toggle is a MOBILE affordance to open the off-screen drawer. On
+     desktop the sidebar (and its in-header hamburger) is always visible, so the
+     fixed toggle is hidden there — it was overlapping the header logo. And when
+     the mobile drawer is open, hide it too: the drawer's own header hamburger /
+     the backdrop close it, and the fixed button would sit over the logo. */
+  .sidebar.open ~ .sidebar-toggle { display: none !important; }
+  .sidebar-toggle:hover { background: var(--bg-deep); }
+  .sidebar-toggle svg { width: 18px; height: 18px; }
+  /* visibility, not just opacity. `backdrop-filter` forces this onto the
+     compositor whether or not it is visible, so at opacity 0 it was still a
+     full-viewport composited layer (measured: 4.9 MB) sitting above the whole
+     document for the entire life of the page, on every visit, for a sidebar
+     nobody had opened. `visibility: hidden` takes it out of compositing
+     altogether; the delayed visibility transition lets the 300ms fade-out
+     still play before it goes. */
+  .sidebar-backdrop {
+    position: fixed; inset: 0; z-index: 190;
+    background: rgba(0,0,0,0.55); backdrop-filter: blur(2px);
+    opacity: 0; pointer-events: none; visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+  }
+  .sidebar-backdrop.visible {
+    opacity: 1; pointer-events: auto; visibility: visible;
+    transition: opacity 0.3s ease, visibility 0s linear 0s;
+  }
+
   @media (max-width: 820px) {
-    body{ padding-left: 0; } /* Mobile uses hamburger pattern only */
+    body, body.sidebar-collapsed { padding-left: 0; }
+    .sidebar { transform: translateX(-100%); width: var(--sidebar-w); }
+    body.sidebar-collapsed .sidebar { width: var(--sidebar-w); }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-toggle { display: inline-flex; } /* Mobile uses hamburger pattern only */
     main { padding-top: calc(58px + var(--safe-top)); }
   }
+
+  /* ============ TOP ACTION BAR ============ */
+  .top-bar {
+    position: fixed; top: 0; left: var(--sidebar-w); right: 0;
+    z-index: 150;
+    padding-top: var(--safe-top);
+    min-height: calc(44px + var(--safe-top));
+    background: rgba(15,13,10,0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex; align-items: center;
+    overflow: hidden;
+  }
+  [data-theme="light"] .top-bar { background: rgba(251,245,236,0.88); border-bottom-color: var(--rule); }
+  .top-bar-inner {
+    width: 100%; max-width: var(--max-w); margin: 0 auto;
+    padding: 0 var(--gutter);
+    display: flex; align-items: center; justify-content: flex-start;
+  }
+  .top-bar-links { display: flex; gap: 20px; align-items: center; flex-wrap: nowrap; min-width: 0; }
+  .top-bar-link {
+    font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--ink-dim); transition: color 0.2s;
+    display: inline-flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+  }
+  .top-bar-link .tb-icon { width: 13px; height: 13px; display: none; flex: 0 0 auto; }
+  .top-bar-link[data-channel="whatsapp"] .tb-icon { color: #25D366; }
+  .top-bar-link[data-channel="call"] .tb-icon { color: #22C55E; }
+  .top-bar-link[data-channel="meet"] .tb-icon { color: #F59E0B; }
+  .top-bar-link[data-channel="sms"] .tb-icon { color: #E8B14E; }
+  .top-bar-link[data-channel="email"] .tb-icon { color: #EF4444; }
+  .top-bar-link[data-channel="resume"] .tb-icon { color: #C9973A; }
+  .top-bar-link:hover { color: var(--primary); }
 
   /* The home canvas owns its vertical rhythm; secondary views sit below the top bar. */
   main { padding-top: 0; }
@@ -863,11 +921,40 @@
   #view-home { padding-top: 0; }
 
   @media (max-width: 820px) {
+    .top-bar { left: 0; }
+    /* Make room for the hamburger (42px wide at left:14px) on the left side */
+    .top-bar-inner { padding: 6px 10px 6px 58px; gap: 8px; max-width: none; overflow: hidden; }
+    .top-bar-links {
+      gap: 8px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      width: 100%;
+    }
+    .top-bar-links::-webkit-scrollbar { display: none; }
+    .top-bar-link {
+      padding: 7px 9px;
+      border: 1px solid rgba(255, 190, 73, .18);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .035);
+      font-size: 9px;
+      letter-spacing: .04em;
+      max-width: 118px;
+    }
+    .top-bar-link .tb-label { display: inline-block; overflow: hidden; text-overflow: ellipsis; }
+    .top-bar-link .tb-icon { display: inline-block; }
+    /* Hamburger button sits inside the safe-area top of the bar */
+    .sidebar-toggle { top: calc(var(--safe-top) + 6px); width: 36px; height: 36px; }
     main { padding-top: calc(58px + var(--safe-top)); }
     main:has(#view-home.active) { padding-top: calc(58px + var(--safe-top)); }
   }
 
   @media (max-width: 480px) {
+    .top-bar-inner { padding: 6px 8px 6px 54px; gap: 6px; }
+    .top-bar-links { gap: 6px; }
+    .top-bar-link { padding: 7px 8px; max-width: 104px; }
+    .top-bar-link .tb-icon { width: 13px; height: 13px; }
   }
   
 
@@ -1621,12 +1708,6 @@
   .work-meta .impact { font-size: 10px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.08em; }
 
   /* ============ BUILDS (Side projects) ============ */
-  /* Left as a two-column grid on purpose. An earlier pass converted this into a
-     horizontal rail (see railify in cinematic.js: five or more uniform cards
-     costing real vertical height become a side-scrolling row), and there is a
-     `repeat(3, 1fr) !important` rule downstream that finishes the job. A bento
-     of varied spans here would fight both. The bento lives on the product
-     chips, which are a grid and stay one. */
   .builds-grid {
     display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;
   }
@@ -2214,7 +2295,7 @@
     position: fixed;
     bottom: 24px;
     right: 24px;
-    width: min(760px, calc(100vw - 48px));
+    width: min(760px, calc(100vw - var(--sidebar-w) - 48px));
     height: min(800px, calc(100vh - 96px));
     max-height: calc(100vh - 96px);
     border-radius: 16px;
@@ -2243,11 +2324,16 @@
 	    display: flex !important;
 	    bottom: calc(22px + var(--safe-bottom)) !important;
     right: 22px !important;
-    width: min(760px, calc(100vw - 48px)) !important;
+    width: min(760px, calc(100vw - var(--sidebar-w) - 48px)) !important;
     height: min(760px, calc(100vh - 92px)) !important;
     max-height: calc(100vh - 92px) !important;
     border-radius: 18px !important;
   }
+		  body.sidebar-collapsed.view-chat #view-chat,
+		  body.sidebar-collapsed.chat-guide-open #view-chat,
+		  body.sidebar-collapsed #view-chat.active {
+	    width: min(760px, calc(100vw - var(--sidebar-w-collapsed) - 48px)) !important;
+	  }
   @media (max-width: 820px) {
 	    body.view-chat #view-chat,
 	    body.chat-guide-open #view-chat,
@@ -2535,9 +2621,8 @@
   [data-theme="dark"] .work-impact-chip.gold { color: #E0B040; }
 
   /* ============ PRODUCTS SHIPPED GRID (ATS + visual) ============ */
-  /* The chips follow the same bento idea at a smaller scale: a six-column bed
-     with a 2/2/1/1 phrase, so a row of products has texture instead of being a
-     wall of identical pills. */
+  /* Bento: a six-column bed with a 2/2/3/3 phrase, so a row of products has
+     texture instead of being a wall of identical pills. */
   .products-grid {
     display: grid; grid-template-columns: repeat(6, 1fr);
     gap: 12px; margin-top: 32px;
@@ -2609,7 +2694,9 @@
   [data-theme="light"] .narrate-span.active-narrate {
     background-color: rgba(181, 135, 10, 0.22);
     color: #8f6000;
-  } .floating-chat {
+  }
+
+  .sidebar, .top-bar, .floating-chat {
     background: rgba(10, 10, 10, 0.65) !important;
     backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(12px) !important;
@@ -2685,6 +2772,10 @@
     animation: dotPing 2.2s ease-out infinite;
   }
   @keyframes dotPing { 0% { transform: scale(0.6); opacity: 0.9; } 70% { transform: scale(1.8); opacity: 0; } 100% { opacity: 0; } }
+
+  /* Sidebar items: icon nudge on hover */
+  .sidebar-item svg { transition: transform 0.25s cubic-bezier(0.16,1,0.3,1); }
+  .sidebar-item:hover svg { transform: translateX(2px) scale(1.1); }
 
   /* Spoken-word highlight inside chat reply bubbles */
   .msg-bubble .tts-w { border-radius: 3px; transition: background 0.12s ease, color 0.12s ease; }
@@ -3235,84 +3326,213 @@
 <div class="scroll-progress" id="scrollProgress"></div>
 
 <!-- ============ SIDEBAR ============ -->
-<!-- ============================================================
-     SITE HEADER — a floating glass bar, replacing the left sidebar.
-     The sidebar occupied 176px of every viewport on every page and gave the
-     site a completely different silhouette from the reference this design
-     follows. The header carries the same routing: every link still has a
-     `data-view`, and `navLinks` is `querySelectorAll('[data-view]')`, so the
-     existing switchView wiring and active-state sync pick these up with no
-     change. Only the chrome moved.
-     ============================================================ -->
-<header class="site-header" id="siteHeader">
-  <div class="hdr-glass">
-    <div class="hdr-row">
-      <!-- WCAG 2.5.3 (Label in Name): the accessible name contains the visible
-           text, so "click Anchit Tandon" in a voice control hits this link. -->
-      <a class="hdr-logo" href="#home" data-view="home" aria-label="Anchit Tandon — home">
-        <img src="assets/anchit-mark-220.webp" srcset="assets/anchit-mark-220.webp 1x, assets/anchit-mark-440.webp 2x" alt="" width="32" height="32" decoding="async" aria-hidden="true">
-        <span class="hdr-logo-label">Anchit Tandon</span>
-      </a>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <button class="sidebar-hamburger" id="sidebarHamburgerBtn" aria-label="Toggle Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+    <!-- WCAG 2.5.3 (Label in Name): the accessible name has to contain the
+         visible text, so someone saying "click Anchit Tandon" to a voice
+         control actually hits this link. -->
+    <a class="sidebar-logo" href="#home" data-view="home" aria-label="Anchit Tandon — home">
+      <img src="assets/anchit-mark-220.webp" srcset="assets/anchit-mark-220.webp 1x, assets/anchit-mark-440.webp 2x" alt="Anchit Tandon Logo" width="40" height="40" decoding="async">
+      <span>Anchit Tandon</span>
+    </a>
+  </div>
 
-      <nav class="hdr-links" aria-label="Primary">
-        <a class="hdr-link active" href="#home" data-view="home"><span class="morph-label"><span class="ml-default">Home</span><span class="ml-hover" aria-hidden="true">Start here</span></span></a>
-        <a class="hdr-link" href="#about" data-view="about"><span class="morph-label"><span class="ml-default">About Me</span><span class="ml-hover" aria-hidden="true">The short version</span></span></a>
-        <a class="hdr-link" href="#now" data-view="now"><span class="morph-label"><span class="ml-default">Now</span><span class="ml-hover" aria-hidden="true">What I am building</span></span></a>
-        <a class="hdr-link" href="#experience" data-view="experience"><span class="morph-label"><span class="ml-default">Experience</span><span class="ml-hover" aria-hidden="true">Where I have worked</span></span></a>
-        <a class="hdr-link" href="#projects" data-view="projects"><span class="morph-label"><span class="ml-default">Side Hustle</span><span class="ml-hover" aria-hidden="true">Things I build at night</span></span></a>
-        <a class="hdr-link" href="#chat" data-view="chat"><span class="morph-label"><span class="ml-default">Chat</span><span class="ml-hover" aria-hidden="true">Ask me anything</span></span></a>
-      </nav>
-
-      <a class="hdr-status" href="#contact" data-view="contact">
-        <span class="hdr-status-dot" aria-hidden="true"></span>
-        <span class="morph-label"><span class="ml-default">Open to roles &amp; collaborations</span><span class="ml-hover" aria-hidden="true">Get in touch</span></span>
-      </a>
-
-      <button class="hdr-ham" id="hdrHam" type="button" aria-label="Menu" aria-expanded="false" aria-controls="hdrPanel">
-        <span aria-hidden="true"></span><span aria-hidden="true"></span>
+  <nav class="sidebar-nav">
+    <a class="sidebar-item active" href="#home" data-view="home" aria-label="Home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span class="sidebar-label morph-label"><span class="ml-default">Home</span><span class="ml-hover" aria-hidden="true">Start here</span></span>
+    </a>
+    <a class="sidebar-item" href="#about" data-view="about" aria-label="About Me">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      <span class="sidebar-label morph-label"><span class="ml-default">About Me</span><span class="ml-hover" aria-hidden="true">The short version</span></span>
+    </a>
+    <a class="sidebar-item" href="#now" data-view="now" aria-label="Now — current role">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span class="sidebar-label morph-label"><span class="ml-default">Now</span><span class="ml-hover" aria-hidden="true">What I am building</span></span>
+    </a>
+    <a class="sidebar-item" href="#experience" data-view="experience" aria-label="Work Experience">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      <span class="sidebar-label morph-label"><span class="ml-default">Experience</span><span class="ml-hover" aria-hidden="true">Where I have worked</span></span>
+    </a>
+    <a class="sidebar-item" href="#projects" data-view="projects" aria-label="Side Hustle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      <span class="sidebar-label morph-label"><span class="ml-default">Side Hustle</span><span class="ml-hover" aria-hidden="true">Things I build at night</span></span>
+    </a>
+    <a class="sidebar-item" href="#chat" data-view="chat" aria-label="Chat with Anchit">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span class="sidebar-label morph-label"><span class="ml-default">Chat</span><span class="ml-hover" aria-hidden="true">Ask me anything</span></span>
+    </a>
+    <a class="sidebar-item" href="assets/resume.pdf" target="_blank" rel="noopener" aria-label="My Resume (PDF, opens in a new tab)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <span class="sidebar-label morph-label"><span class="ml-default">My Resume</span><span class="ml-hover" aria-hidden="true">Open the PDF</span></span>
+    </a>
+    <div class="sidebar-contact-group" id="sidebarContactGroup">
+      <button type="button" class="sidebar-item sidebar-group-toggle" id="sidebarContactToggle" aria-expanded="false" aria-controls="sidebarContactSub" aria-label="Contact channels">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span class="sidebar-label morph-label"><span class="ml-default">Contact</span><span class="ml-hover" aria-hidden="true">Get in touch</span></span>
+        <svg class="sidebar-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
-    </div>
-  </div>
-
-  <div class="hdr-panel" id="hdrPanel" aria-hidden="true">
-    <div class="hdr-panel-inner">
-      <div class="hdr-panel-section">
-        <p class="hdr-panel-title">Pages</p>
-        <div class="hdr-panel-links">
-          <a class="hdr-panel-link" href="#home" data-view="home">Home</a>
-          <a class="hdr-panel-link" href="#about" data-view="about">About Me</a>
-          <a class="hdr-panel-link" href="#now" data-view="now">Now</a>
-          <a class="hdr-panel-link" href="#experience" data-view="experience">Experience</a>
-          <a class="hdr-panel-link" href="#projects" data-view="projects">Side Hustle</a>
-          <a class="hdr-panel-link" href="#chat" data-view="chat">Chat</a>
-          <a class="hdr-panel-link" href="assets/resume.pdf" target="_blank" rel="noopener">My Resume</a>
-        </div>
+      <div class="sidebar-subnav" id="sidebarContactSub">
+        <a class="sidebar-subitem" href="#contact" data-view="contact" data-c="page">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/></svg>
+          <span>Contact page</span>
+        </a>
+        <button type="button" class="sidebar-subitem" data-wa-choice data-c="whatsapp">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm4.4 12c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2.1-.2 0-.3 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3-.8.8-1 1.9-.6 3.1a9.3 9.3 0 0 0 4.6 4.9c1.6.7 2.6.6 3.4.4.5-.1 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.1l-.4-.1z"/></svg>
+          <span>WhatsApp</span>
+        </button>
+        <a class="sidebar-subitem" href="tel:+919873945238" data-c="call">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <span>Phone call</span>
+        </a>
+        <a class="sidebar-subitem" href="#schedule" data-schedule data-c="meet">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>Google Meet</span>
+        </a>
+        <a class="sidebar-subitem" href="sms:+919873945238" data-c="sms">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>SMS</span>
+        </a>
+        <a class="sidebar-subitem" href="mailto:anchit.tandon@gmail.com" data-c="email">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <span>Email</span>
+        </a>
+        <a class="sidebar-subitem" href="assets/resume.pdf" target="_blank" rel="noopener" data-c="resume">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span>Resume</span>
+        </a>
       </div>
-      <div class="hdr-panel-section">
-        <p class="hdr-panel-title">Get in touch</p>
-        <div class="hdr-panel-links">
-          <a class="hdr-panel-link" href="#contact" data-view="contact">Contact page</a>
-          <button type="button" class="hdr-panel-link" data-wa-choice data-c="whatsapp">WhatsApp</button>
-          <a class="hdr-panel-link" href="tel:+919873945238" data-c="call">Phone call</a>
-          <a class="hdr-panel-link" href="#schedule" data-schedule data-c="meet">Google Meet</a>
-          <a class="hdr-panel-link" href="sms:+919873945238" data-c="sms">SMS</a>
-          <a class="hdr-panel-link" href="mailto:anchit.tandon@gmail.com" data-c="email">Email</a>
-          <a class="hdr-panel-link" href="https://www.linkedin.com/in/anchit-tandon" target="_blank" rel="noopener">LinkedIn</a>
-        </div>
-      </div>
     </div>
-  </div>
-</header>
+  </nav>
+  <script>
+    (function(){
+      var group=document.getElementById('sidebarContactGroup');
+      var toggle=document.getElementById('sidebarContactToggle');
+      if(group&&toggle){
+        toggle.addEventListener('click', function(){
+          var open=group.classList.toggle('open');
+          toggle.setAttribute('aria-expanded', open ? 'true':'false');
+        });
+      }
+    })();
+  </script>
 
-<!-- The mobile drawer and its backdrop left with the sidebar; the header
-     owns the small-screen navigation now (see #hdrPanel). -->
+  <hr class="sidebar-rule" />
+
+  <div class="sidebar-social">
+    <!-- Cinematic motion toggle: Auto (respect OS) · On (force) · Off (static).
+         Lets the site force the WebGL + GSAP motion on even when the OS has
+         "Reduce Motion" enabled, which otherwise disables the whole stack. -->
+    <!-- No aria-label: the accessible name comes from the visible "Motion: Auto"
+         text, which the toggle rewrites as the state changes. A fixed label
+         would drift out of sync with what the button actually says. -->
+    <button id="motionToggle" class="motion-toggle" type="button" data-state="auto"
+            title="Cinematic motion: Auto / On / Off">
+      <span class="motion-ico" aria-hidden="true">✦</span>
+      <span class="motion-label">Motion: Auto</span>
+    </button>
+  </div>
+  <style>
+    /* min-height + a clear gap from the control above it: WCAG 2.5.8 wants a
+       24×24 target with 24px of separation, and this sat just under it. */
+    .motion-toggle{ display:inline-flex; align-items:center; gap:8px; width:100%;
+      min-height:40px; margin-top:8px;
+      padding:9px 12px; border:1px solid var(--rule); border-radius:10px;
+      background:transparent; color:var(--ink-dim);
+      font-family:var(--font-mono, 'JetBrains Mono', monospace);
+      font-size:11px; letter-spacing:.07em; text-transform:uppercase; cursor:pointer;
+      transition:border-color .2s, color .2s, background .2s; }
+    .motion-toggle:hover{ border-color:var(--primary); color:var(--ink);
+      background:color-mix(in srgb, var(--primary) 8%, transparent); }
+    .motion-toggle[data-state="on"]{ border-color:var(--primary); color:var(--primary); }
+    .motion-toggle[data-state="off"]{ opacity:.65; }
+    .motion-toggle .motion-ico{ font-size:13px; line-height:1; }
+    .motion-toggle[data-state="on"] .motion-ico{ animation:motSpin 3.5s linear infinite; }
+    @keyframes motSpin{ to{ transform:rotate(360deg); } }
+  </style>
+  <script>
+    (function(){
+      var btn=document.getElementById('motionToggle'); if(!btn) return;
+      var order=['auto','on','off'], lbl=btn.querySelector('.motion-label');
+      function get(){ try{ return localStorage.getItem('anchit-motion')||'on'; }catch(e){ return 'on'; } }
+      // "Auto" follows the operating system, so on a machine with Reduce Motion
+      // enabled the whole cinematic layer is suppressed and the control still
+      // read a reassuring "Motion: Auto" — no clue that anything was off, or
+      // that one click restores it. Say which way Auto actually resolved.
+      function render(s){
+        btn.setAttribute('data-state', s);
+        var osReduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+        var label = 'Motion: ' + s.charAt(0).toUpperCase() + s.slice(1);
+        if (s === 'auto' && osReduced) {
+          label = 'Motion: Off · system';
+          btn.title = 'Your system asks for reduced motion, so the cinematic layer is off. Click to turn it on anyway.';
+        } else {
+          btn.title = 'Cinematic motion: auto follows your system, or force it on/off.';
+        }
+        lbl.textContent = label;
+      }
+      render(get());
+      btn.addEventListener('click', function(){
+        var next=order[(order.indexOf(get())+1)%order.length];
+        try{ localStorage.setItem('anchit-motion', next); }catch(e){}
+        render(next);
+        // Reload so the motion stack re-boots with the new preference.
+        location.reload();
+      });
+    })();
+  </script>
+</aside>
+
+<!-- Mobile sidebar backdrop -->
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+<!-- Mobile toggle button -->
+<button class="sidebar-toggle" id="sidebarToggle" aria-label="Open menu">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
+</button>
 
 <!-- ============ TOP ACTION BAR ============ -->
-<!-- The contact top-bar is gone with the sidebar. It existed because the
-     sidebar owned the left edge and the channels needed somewhere to live;
-     the header carries them now — the status pill routes to the contact page,
-     and every channel it held (WhatsApp, call, Meet, SMS, email, LinkedIn,
-     resume) is in #hdrPanel under "Get in touch". -->
+<div class="top-bar" id="topBar">
+  <div class="top-bar-inner">
+    <div class="top-bar-links" aria-label="Reach me">
+      <button type="button" data-wa-choice class="top-bar-link" data-channel="whatsapp" aria-label="WhatsApp — message or call" title="WhatsApp — message or call">
+        <svg class="tb-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.8.7.8-2.7-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2.1-.2 0-.3 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3-.8.8-1 1.9-.6 3.1a9.3 9.3 0 0 0 4.6 4.9c1.6.7 2.6.6 3.4.4.5-.1 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.1l-.4-.1z"/></svg>
+        <span class="tb-label">WhatsApp</span>
+      </button>
+      <a href="tel:+919873945238" class="top-bar-link" data-channel="call" aria-label="Phone Call" title="Phone Call">
+        <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <span class="tb-label">Call</span>
+      </a>
+      <a href="#schedule" data-schedule class="top-bar-link" data-channel="meet" aria-label="Set up a 30-min Google Meet" title="Set up a 30-min Google Meet">
+        <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span class="tb-label">Google Meet</span>
+      </a>
+      <a href="sms:+919873945238" class="top-bar-link" data-channel="sms" aria-label="SMS" title="SMS">
+        <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span class="tb-label">SMS</span>
+      </a>
+      <a href="mailto:anchit.tandon@gmail.com" class="top-bar-link" data-channel="email" aria-label="Email" title="Email">
+        <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span class="tb-label">Email</span>
+      </a>
+      <a href="https://www.linkedin.com/in/anchit-tandon" target="_blank" rel="noopener" class="top-bar-link" data-channel="linkedin" aria-label="LinkedIn" title="LinkedIn">
+        <svg class="tb-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5A2.5 2.5 0 1 1 0 3.5a2.5 2.5 0 0 1 4.98 0zM.25 8h4.5v12H.25zM8.5 8h4.3v1.64h.06c.6-1.1 2.06-2.26 4.24-2.26 4.53 0 5.37 2.98 5.37 6.86V20h-4.5v-5.9c0-1.4-.03-3.2-1.95-3.2-1.95 0-2.25 1.52-2.25 3.1V20H8.5z"/></svg>
+        <span class="tb-label">LinkedIn</span>
+      </a>
+      <a href="assets/resume.pdf" target="_blank" rel="noopener" class="top-bar-link" data-channel="resume" aria-label="View Resume" title="View Resume">
+        <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span class="tb-label">Resume</span>
+      </a>
+    </div>
+  </div>
+</div>
 
 <script>
   // Shared voice picker — prefers an Indian-accented English voice (en-IN /
@@ -4029,7 +4249,7 @@
       </div>
 
       <!-- Current: Vahdam India -->
-      <div id="exp-vahdam" class="section-head reveal" style="margin-bottom: 24px;">
+      <div id="exp-vahdam" class="section-head reveal" style="margin-bottom: 24px; scroll-margin-top: 24px;">
         <div class="eyebrow">Current · Vahdam India · 20 Apr 2026 → Present</div>
         <h2 class="display-sm">AGM — Product Management, D2C Growth · <em>US, UK &amp; Global</em></h2>
       </div>
@@ -4052,7 +4272,7 @@
       </div>
 
       <!-- Times Internet -->
-      <div id="exp-ti" class="section-head reveal" style="margin-bottom: 24px;">
+      <div id="exp-ti" class="section-head reveal" style="margin-bottom: 24px; scroll-margin-top: 24px;">
         <div class="eyebrow">Times Internet · Jun 2022 — Apr 2026</div>
         <h2 class="display-sm">APM → PM → Senior PM · <em>Times Internet</em></h2>
       </div>
@@ -4131,7 +4351,7 @@
       </div>
 
       <!-- Earlier -->
-      <div id="exp-swe" class="section-head reveal" style="margin-bottom: 24px;">
+      <div id="exp-swe" class="section-head reveal" style="margin-bottom: 24px; scroll-margin-top: 24px;">
         <div class="eyebrow">Earlier · 2020 — 2022</div>
         <h2 class="display-sm">Software Engineer · <em>Where it started</em></h2>
       </div>
@@ -4157,7 +4377,7 @@
       </div>
 
       <!-- Education -->
-      <div id="exp-vit" class="section-head reveal" style="margin-bottom: 24px;">
+      <div id="exp-vit" class="section-head reveal" style="margin-bottom: 24px; scroll-margin-top: 24px;">
         <div class="eyebrow">Education · 2016 — 2020</div>
         <h2 class="display-sm">B.Tech CSE · <em>VIT Vellore</em></h2>
       </div>
@@ -4178,11 +4398,9 @@
         <div class="eyebrow">All products shipped</div>
         <h2 class="display-sm">Every product I've put into the world.</h2>
       </div>
-      <!-- data-no-rail: railify() turns any row of five or more uniform cards
-           into a side-scrolling rail. That is the right call for a gallery of
-           identical tiles and the wrong one for a bento, whose whole point is
-           that the tiles are NOT uniform. The opt-out already exists for this
-           case, so this uses it rather than fighting the rule. -->
+      <!-- data-no-rail: railify() turns a row of five or more uniform cards into
+           a side-scrolling rail, which is right for a gallery and wrong for a
+           bento, whose whole point is that the tiles are not uniform. -->
       <div class="products-grid reveal-stagger" data-no-rail>
         <a class="product-chip" href="#experience/exp-vahdam-d2c" data-view="experience" data-anchor="exp-vahdam-d2c" style="cursor:pointer;">
           <div class="product-chip-name">Vahdam India D2C</div>
@@ -5574,43 +5792,55 @@
   // Safari Intelligent Tracking Prevention can clear localStorage after long
   // inactivity. Read both stores and write to both so a clean Safari reload
   // doesn't lose the user's collapsed-sidebar preference.
-  // The collapsed-rail preference (anchit-sidebar-collapsed) went with the
-  // sidebar. It is deliberately NOT migrated: there is no half-width state for
-  // a header to remember, and a stale key that silently sets a body class is
-  // exactly the kind of thing that outlives everyone's memory of why.
+  function readSidebarCollapsed() {
+    try {
+      const ls = localStorage.getItem('anchit-sidebar-collapsed');
+      if (ls !== null) return ls === '1';
+    } catch {}
+    return (document.cookie.match(/(?:^|; )sb_collapsed=(\d)/)?.[1] === '1');
+  }
+  function writeSidebarCollapsed(collapsed) {
+    try { localStorage.setItem('anchit-sidebar-collapsed', collapsed ? '1' : '0'); } catch {}
+    // 1-year same-site cookie as fallback when localStorage is purged
+    document.cookie = `sb_collapsed=${collapsed ? 1 : 0}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
+  }
+  if (readSidebarCollapsed()) {
+    document.body.classList.add('sidebar-collapsed');
+  }
+  const sidebarHamburgerBtn = document.getElementById('sidebarHamburgerBtn');
+  if (sidebarHamburgerBtn) {
+    sidebarHamburgerBtn.addEventListener('click', () => {
+      const onDesktop = window.matchMedia('(min-width: 861px)').matches;
+      if (onDesktop) {
+        const collapsed = document.body.classList.toggle('sidebar-collapsed');
+        writeSidebarCollapsed(collapsed);
+        sidebarHamburgerBtn.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
+      } else {
+        closeSidebar();
+      }
+    });
+  }
 
-  /* ============ HEADER MENU (mobile) ============ */
-  // The sidebar is gone, and with it the collapse/expand state it persisted.
-  // What remains is one panel that is either open or shut. `closeSidebar` keeps
-  // its name because it is called from switchView and from several other places
-  // that have no business knowing which chrome the site is wearing this month —
-  // it means "put the navigation away", and it still does exactly that.
-  const hdrHam = document.getElementById('hdrHam');
-  const hdrPanel = document.getElementById('hdrPanel');
-  function openSidebar() {
-    if (!hdrPanel) return;
-    hdrPanel.classList.add('open');
-    hdrPanel.setAttribute('aria-hidden', 'false');
-    if (hdrHam) hdrHam.setAttribute('aria-expanded', 'true');
-    document.body.classList.add('nav-open');
-  }
-  function closeSidebar() {
-    if (!hdrPanel) return;
-    hdrPanel.classList.remove('open');
-    hdrPanel.setAttribute('aria-hidden', 'true');
-    if (hdrHam) hdrHam.setAttribute('aria-expanded', 'false');
-    document.body.classList.remove('nav-open');
-  }
+  /* ============ SIDEBAR (MOBILE) ============ */
+  const sidebar = document.getElementById('sidebar');
+  const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  function openSidebar() { sidebar.classList.add('open'); sidebarBackdrop.classList.add('visible'); if(sidebarToggle) sidebarToggle.setAttribute('aria-expanded','true'); }
+  function closeSidebar() { sidebar.classList.remove('open'); sidebarBackdrop.classList.remove('visible'); if(sidebarToggle) sidebarToggle.setAttribute('aria-expanded','false'); }
+  // The hamburger now TOGGLES based on current state (expand ⇄ collapse),
+  // on every viewport — fixes the bug where tapping ☰ while open did nothing.
   function toggleSidebar() {
-    if (!hdrPanel) return;
-    hdrPanel.classList.contains('open') ? closeSidebar() : openSidebar();
+    const onDesktop = window.matchMedia('(min-width: 861px)').matches;
+    if (onDesktop) {
+      const collapsed = document.body.classList.toggle('sidebar-collapsed');
+      try { localStorage.setItem('anchit-sidebar-collapsed', collapsed ? '1' : '0'); } catch {}
+      sidebarToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    } else {
+      if (sidebar.classList.contains('open')) closeSidebar(); else openSidebar();
+    }
   }
-  if (hdrHam) hdrHam.addEventListener('click', toggleSidebar);
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && hdrPanel && hdrPanel.classList.contains('open')) closeSidebar();
-  });
-  // Tapping the panel's own backdrop area closes it.
-  if (hdrPanel) hdrPanel.addEventListener('click', (e) => { if (e.target === hdrPanel) closeSidebar(); });
+  if (sidebarToggle) sidebarToggle.addEventListener('click', toggleSidebar);
+  sidebarBackdrop.addEventListener('click', closeSidebar);
 
   /* ============ VIEW SWITCHING ============ */
   const views = document.querySelectorAll('.view');
@@ -7183,7 +7413,19 @@
       if (reply) reply.title = 'Voice reply — answers are written and read aloud';
       const ambient = document.getElementById('audioAmbient');
       if (ambient) ambient.title = 'Voice narration playing';
+      // A tooltip is not enough. Nobody hovers a button to find out whose voice
+      // just spoke, so when the clone is not wired the substitution has to be
+      // visible while it is happening: the server refuses to answer in a stock
+      // voice for exactly this reason (see the "cloned voice only" block in
+      // api/tts.js), and the browser's speechSynthesis fallback was quietly
+      // undoing that policy on the client. It still speaks — going silent would
+      // be its own kind of broken — but it says whose voice it is not.
+      document.documentElement.setAttribute('data-voice', 'stock');
     }
+    // Announced in the page, not just in a title attribute. `aria-live` off,
+    // because this is a property of the audio rather than an event worth
+    // interrupting a screen reader for; the text is in the control's label.
+    window.__voiceIsClone = function () { return clonedVoiceReady !== false; };
     // Probed on first contact with an audio control, not on load. This used to
     // be an IIFE, so every visitor — including everyone who never plays a
     // single second of audio — spent a serverless invocation before the page
@@ -8056,15 +8298,31 @@
   }
   @keyframes gridDrift { to { transform: translate3d(44px, 44px, 0); } }
   footer { position: relative; z-index: 1; }
+  .sidebar {
+    background: linear-gradient(180deg, rgba(8,5,2,.96), rgba(18,10,3,.92));
+    border-right: 1px solid rgba(255, 170, 40, .22);
+    box-shadow: inset -1px 0 rgba(255, 209, 93, .12), 12px 0 60px rgba(255, 106, 26, .07);
+  }
+  .sidebar-logo span {
+    color: #f7ddb0;
+    font-family: var(--font-mono);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .top-bar {
+    background: rgba(5, 3, 1, .78);
+    border-bottom: 1px solid rgba(255, 170, 40, .2);
+    backdrop-filter: blur(18px);
+  }
   .home-hero, .feature-card, .work-card, .project-card, .contact-card, .chat-block {
     background: linear-gradient(145deg, rgba(22, 13, 5, .86), rgba(5, 3, 1, .88));
     border-color: rgba(255, 171, 46, .24);
     box-shadow: 0 24px 80px rgba(0,0,0,.38), inset 0 0 40px rgba(255, 115, 23, .035);
   }
-  .contact-card{
+  .contact-card, .sidebar-item, .top-bar-link {
     transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, color .22s ease;
   }
-  .contact-card:hover{
+  .contact-card:hover, .sidebar-item:hover, .top-bar-link:hover {
     transform: translateY(-2px);
     border-color: rgba(255, 190, 73, .65);
     box-shadow: 0 16px 46px rgba(255, 106, 26, .14);
@@ -8190,6 +8448,22 @@
     overflow-y: auto;
   }
   @media (max-width: 720px) {
+    .top-bar-inner { gap: 8px; }
+	    .sidebar {
+	      left: 0 !important;
+	      right: auto !important;
+	    }
+	    .sidebar.open {
+	      transform: translateX(0) !important;
+	    }
+    .sidebar-toggle {
+      left: 12px !important;
+      right: auto !important;
+    }
+    .sidebar-backdrop {
+      left: 0 !important;
+      right: 0 !important;
+    }
     .chat-return {
       left: 16px;
       right: auto;
@@ -8253,7 +8527,17 @@
 
   /* Floating, glowing profile orb */
 
-  /* (#1) Show the colourful channel icons on desktop too (not just mobile){ display: inline-block !important; width: 15px; height: 15px; }
+  /* (#1) Show the colourful channel icons on desktop too (not just mobile), alongside labels. */
+  .top-bar-link .tb-icon { display: inline-block !important; width: 15px; height: 15px; }
+  .top-bar-links { overflow-x: auto; scrollbar-width: none; }
+  .top-bar-links::-webkit-scrollbar { display: none; }
+  .top-bar-link {
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 6px 12px;
+    background: rgba(255,255,255,.03);
+  }
+  .top-bar-link:hover { border-color: rgba(255,106,26,.5); background: rgba(255,106,26,.08); }
 
   /* WhatsApp action sheet (message / call choice) */
   .wa-sheet { position: fixed; inset: 0; z-index: 100000; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(0,0,0,.55); backdrop-filter: blur(6px); }
@@ -8269,6 +8553,25 @@
   .wa-opt b { display: block; font-size: 14px; }
   .wa-opt span { font-size: 12px; color: var(--ink-dim); }
   .wa-sheet-close { width: 100%; margin-top: 4px; background: none; border: 0; color: var(--ink-dim); font-size: 13px; cursor: pointer; padding: 8px; }
+
+  /* (#2) Sidebar Contact group — collapsible channel sub-items with colour icons */
+  .sidebar-group-toggle { display: flex; align-items: center; width: 100%; background: none; border: 0; font: inherit; cursor: pointer; }
+  .sidebar-group-toggle .sidebar-caret { margin-left: auto; transition: transform .2s; flex: 0 0 auto; width: 14px; height: 14px; color: var(--ink-mute); }
+  .sidebar-contact-group.open .sidebar-caret { transform: rotate(90deg); }
+  .sidebar-subnav { display: none; flex-direction: column; padding: 2px 0 4px; }
+  .sidebar-contact-group.open .sidebar-subnav { display: flex; }
+  .sidebar-subitem { display: flex; align-items: center; gap: 12px; padding: 8px 10px 8px 30px; border-radius: 10px; color: var(--ink-dim); text-decoration: none; font-size: 13px; transition: background .15s, color .15s; }
+  .sidebar-subitem:hover { background: rgba(255,106,26,.08); color: var(--ink); }
+  .sidebar-subitem.active { background: color-mix(in srgb, var(--primary) 16%, transparent); color: var(--primary); font-weight: 600; }
+  .sidebar-subitem svg { width: 16px; height: 16px; flex: 0 0 auto; }
+  .sidebar-subitem[data-c="whatsapp"] svg { color: #25D366; }
+  .sidebar-subitem[data-c="call"] svg { color: #22C55E; }
+  .sidebar-subitem[data-c="meet"] svg { color: #F59E0B; }
+  .sidebar-subitem[data-c="sms"] svg { color: #E8B14E; }
+  .sidebar-subitem[data-c="email"] svg { color: #EF4444; }
+  .sidebar-subitem[data-c="resume"] svg { color: #C9973A; }
+  body.sidebar-collapsed .sidebar-subnav,
+  body.sidebar-collapsed .sidebar-caret { display: none; }
 
   /* (#4) Chat suggestion chips → compact, horizontally scrollable tiles (saves vertical room) */
   body.view-chat #view-chat .chips,
@@ -8323,7 +8626,7 @@
   @media (min-width: 821px) {
     body.view-chat #view-chat:not(.chat-view-minimized),
     #view-chat.active:not(.chat-view-minimized) {
-      left: 0 !important;
+      left: var(--sidebar-w) !important;
       right: 0 !important;
       top: calc(44px + var(--safe-top)) !important;
       bottom: 0 !important;
@@ -8339,6 +8642,10 @@
       box-shadow: none !important;
       padding: 20px 24px 24px !important;
       display: flex !important;
+    }
+    body.sidebar-collapsed.view-chat #view-chat:not(.chat-view-minimized),
+    body.sidebar-collapsed #view-chat.active:not(.chat-view-minimized) {
+      left: var(--sidebar-w-collapsed) !important;
     }
     body.view-chat #view-chat .container,
     #view-chat.active .container {
@@ -8366,7 +8673,7 @@
     right: 18px !important;
     top: auto !important;
     bottom: calc(18px + var(--safe-bottom)) !important;
-    width: min(460px, calc(100vw - 36px)) !important;
+    width: min(460px, calc(100vw - var(--sidebar-w) - 36px)) !important;
     height: calc(100vh - 36px - var(--safe-top)) !important;
     max-width: 460px !important;
     max-height: calc(100vh - 36px - var(--safe-top)) !important;
@@ -8378,6 +8685,9 @@
     box-shadow: 0 22px 70px rgba(0,0,0,.54), 0 0 34px rgba(255,106,26,.18) !important;
     padding: 0 !important;
     z-index: 9999 !important;
+  }
+  body.sidebar-collapsed.chat-guide-open #view-chat:not(.chat-view-minimized) {
+    width: min(430px, calc(100vw - var(--sidebar-w-collapsed) - 36px)) !important;
   }
   body.chat-guide-open #view-chat .container {
     width: 100% !important;
@@ -8409,6 +8719,18 @@
     font-size: 21px !important;
   }
   @media (max-width: 820px) {
+    .sidebar {
+      left: 0 !important;
+      right: auto !important;
+      transform: translateX(-100%) !important;
+    }
+    .sidebar.open {
+      transform: translateX(0) !important;
+    }
+    .sidebar-toggle {
+      left: 12px !important;
+      right: auto !important;
+    }
     body.chat-guide-open #view-chat:not(.chat-view-minimized) {
       left: 12px !important;
       right: auto !important;
@@ -8472,6 +8794,8 @@
     --shadow-lg: 0 16px 48px rgba(26,20,10,.10);
   }
   :root[data-theme="light"] body { background: var(--bg) !important; }
+  :root[data-theme="light"] .sidebar,
+  :root[data-theme="light"] .top-bar,
   :root[data-theme="light"] .chat-return {
     background: rgba(247, 246, 243, .94) !important;
   }
@@ -8559,7 +8883,9 @@
   .eyebrow,
   .tag,
   .build-tag,
-  .work-impact-chip{
+  .work-impact-chip,
+  .top-bar-link,
+  .sidebar-label {
     letter-spacing: .04em !important;
   }
   .ticker {
@@ -8584,6 +8910,8 @@
   .guide-action,
   .chat-send,
   .chat-mic,
+  .sidebar-item,
+  .top-bar-link,
   .home-cta,
   .hero-current-block .arrow {
     border-radius: 10px !important;
@@ -8601,10 +8929,31 @@
     transform: translateY(-1px) !important;
     box-shadow: none !important;
   }
+  .top-bar,
   .chat-return {
     background: rgba(10, 10, 10, .94) !important;
     box-shadow: none !important;
   }
+  /* Sidebar reads as translucent warm glass so the ambient field shows through
+     instead of a flat black block. */
+  .sidebar {
+    background: linear-gradient(180deg, rgba(24,15,7,.56), rgba(12,8,4,.42)) !important;
+    box-shadow: none !important;
+  }
+  .sidebar { border-right: 1px solid var(--rule) !important; }
+  .top-bar { border-bottom: 1px solid var(--rule) !important; }
+  .sidebar-logo span { color: var(--ink-dim); }
+  .top-bar-link {
+    background: transparent !important;
+    border-color: var(--rule) !important;
+  }
+  .top-bar-link:hover {
+    background: var(--bg-elev) !important;
+    border-color: var(--rule-strong) !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+  .sidebar-item:hover { box-shadow: none !important; transform: none !important; }
   .chat-return {
     border: 1px solid var(--rule-strong) !important;
     background: var(--bg-elev) !important;
@@ -8651,16 +9000,18 @@
     border: 1px solid var(--rule-strong) !important;
     color: var(--accent) !important;
   }
-  .nav-card:hover .nav-card-icon { color: var(--primary) !important; } .nav-item svg{
+  .nav-card:hover .nav-card-icon { color: var(--primary) !important; }
+  .sidebar svg, .nav-item svg, .sidebar-item svg {
     color: var(--ink-dim);
     opacity: 1 !important;
   }
-  .nav-item.active svg,
-  .nav-item:hover svg{
+  .nav-item.active svg, .sidebar-item.active svg,
+  .nav-item:hover svg, .sidebar-item:hover svg {
     color: var(--primary) !important;
   }
   .chat-mic, .chat-mic svg { color: var(--ink-dim) !important; }
   .chat-mic:hover, .chat-mic:hover svg { color: var(--primary) !important; }
+  .top-bar-link .tb-icon { opacity: 1 !important; }
   .contact-icon { border: 1px solid var(--rule) !important; }
   .home-tl-arrow, .nav-card-arrow { color: var(--ink-dim) !important; }
   .build-actions .btn:not(.primary) {
@@ -8960,14 +9311,18 @@
   .btn,
   .home-cta,
   .guide-action,
-  .chip{
+  .chip,
+  .top-bar-link,
+  .sidebar-item {
     position: relative;
     overflow: hidden;
   }
   .btn::after,
   .home-cta::after,
   .guide-action::after,
-  .chip::after{
+  .chip::after,
+  .top-bar-link::after,
+  .sidebar-item::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -8979,7 +9334,9 @@
   .btn:hover::after,
   .home-cta:hover::after,
   .guide-action:hover::after,
-  .chip:hover::after{
+  .chip:hover::after,
+  .top-bar-link:hover::after,
+  .sidebar-item:hover::after {
     transform: translateX(120%);
   }
   .btn.primary,
@@ -8998,7 +9355,8 @@
     box-shadow: 0 0 18px rgba(232, 177, 78, .18);
   }
   .chat-head-avatar,
-  .msg-avatar{
+  .msg-avatar,
+  .sidebar-logo img {
     box-shadow: 0 0 0 1px rgba(232, 177, 78, .26), 0 0 24px rgba(255, 122, 31, .22) !important;
   }
   .build-tag .status,
@@ -9200,7 +9558,7 @@
     // Activate the dedicated chat view as a genuine full page. switchView('chat')
     // routes here, so toggle .active directly instead of calling back into it.
     document.querySelectorAll('.view').forEach((v) => v.classList.toggle('active', v.id === 'view-chat'));
-    document.querySelectorAll('[data-view]').forEach((n) => n.classList.toggle('active', n.getAttribute('data-view') === 'chat'));
+    document.querySelectorAll('.sidebar-item[data-view]').forEach((n) => n.classList.toggle('active', n.getAttribute('data-view') === 'chat'));
     document.body.classList.add('view-chat');
     try { history.replaceState(null, '', '#chat'); } catch {}
     try { window.scrollTo({ top: 0, behavior: 'instant' }); } catch {}
@@ -9325,7 +9683,7 @@
 	  });
 	  document.addEventListener('anchitAudioState', (e) => paintTileAudioState(e.detail || {}));
 	  refreshTileAudioState();
-  document.querySelectorAll('[data-view="chat"]').forEach(a => {
+  document.querySelectorAll('.sidebar-item[data-view="chat"]').forEach(a => {
     a.addEventListener('click', (e) => { e.preventDefault(); openFullChat(); });
   });
 
@@ -9478,7 +9836,7 @@
         // Narrate = take the visitor home, collapse the chat to the floating
         // icon, then read the homepage aloud in full sentences.
         if (typeof window.switchView === 'function') window.switchView('home');
-        else { const homeNav = document.querySelector('[data-view="home"]'); if (homeNav) homeNav.click(); }
+        else { const homeNav = document.querySelector('.sidebar-item[data-view="home"], [data-view="home"]'); if (homeNav) homeNav.click(); }
         if (typeof window.minimizeChat === 'function') window.minimizeChat();
         setTimeout(() => { if (typeof window.anchitNarrate === 'function') window.anchitNarrate('home'); }, 400);
         setTimeout(() => {
@@ -10275,7 +10633,7 @@
     // The nav rails are included deliberately: they are the controls a visitor
     // actually touches most, and leaving them inert made the effect feel like it
     // only applied to decorative content.
-    var MAG  = '.btn, .chip, .top-bar-link, .hdr-link, .hdr-panel-link';
+    var MAG  = '.btn, .chip, .top-bar-link, .sidebar-item, .sidebar-subitem';
 
     function each(sel, fn) {
       try { document.querySelectorAll(sel).forEach(fn); } catch (e) { /* selector unsupported */ }
@@ -10798,16 +11156,9 @@
      can see the quality of a blur on a surface that is moving, so it is simply
      not computed until you stop. Worth 4ms a frame across the eight frosted
      surfaces. */
-   
-  /* .hdr-glass belongs here more than anything else on the page: it is frosted,
-     it is full width, and unlike every other surface in this list it is on
-     screen for the entire visit with fresh content passing under it on every
-     single scroll frame. It was left out when the sidebar (which used to hold
-     this slot) was removed, and index.html went from 17ms a frame to 31-34ms
-     with 52% of frames over budget — the whole cost of the new header, in one
-     missing selector. */
-  body.is-scrolling .hdr-glass, body.is-scrolling .hdr-panel,
+  body.is-scrolling .sidebar, body.is-scrolling .top-bar,
   body.is-scrolling .chat-return, body.is-scrolling #jarvisPill,
+  body.is-scrolling .sidebar-backdrop,
   body.is-scrolling .chat-dock, body.is-scrolling #chatDock {
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
@@ -11170,10 +11521,11 @@
 
 <style id="jarvis-css">
   /* ============ WAKE-WORD AGENT ("Jarvis") ============ */
-   where they covered the Motion toggle completely
+  /* Both floating pills used to sit at left:16px — directly on top of the
+     sidebar's own footer, where they covered the Motion toggle completely
      and made it unclickable. They now start where the rail ends, and
      follow it when it collapses. */
-  #jarvisPill{ position:fixed; left:16px; bottom:16px; z-index:9997; display:inline-flex; align-items:center; gap:9px;
+  #jarvisPill{ position:fixed; left:calc(var(--sidebar-w, 176px) + 16px); bottom:16px; z-index:9997; display:inline-flex; align-items:center; gap:9px;
     padding:9px 14px; border-radius:99px; border:1px solid var(--rule-strong,rgba(255,247,232,.22));
     background:rgba(12,8,4,.72); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
     color:var(--ink,#FBF5EC); font-family:var(--font-mono,monospace); font-size:11px; letter-spacing:.05em;
@@ -11187,14 +11539,15 @@
   #jarvisPill[data-state="off"]{ opacity:.7; }
   #jarvisPill[data-state="off"] .jdot{ background:var(--ink-mute,#6B655C); box-shadow:none; }
   @keyframes jpulse{ 0%,100%{ transform:scale(1); opacity:.85 } 50%{ transform:scale(1.35); opacity:1 } }
+  body.sidebar-collapsed #jarvisPill{ left:calc(var(--sidebar-w-collapsed, 60px) + 16px); }
   /* Below 820px the rail is an overlay drawer, so the pills reclaim the edge. */
   /* Clear of the chat launcher, which is a full-width bar pinned to the bottom
      on small screens and sits above these on z-index. Both pills were inside
      its band and therefore untappable. */
-  @media (max-width:820px){ #jarvisPill{ left:16px; bottom:88px; } }
+  @media (max-width:820px){ #jarvisPill, body.sidebar-collapsed #jarvisPill{ left:16px; bottom:88px; } }
   /* Keeps the 88px lift — a narrower phone does not move the chat bar, so
      dropping back to bottom:12px here put the pill straight back underneath it. */
-  @media (max-width:560px){ #jarvisPill{ left:12px; bottom:88px; font-size:10px; padding:8px 12px; } }
+  @media (max-width:560px){ #jarvisPill, body.sidebar-collapsed #jarvisPill{ left:12px; bottom:88px; font-size:10px; padding:8px 12px; } }
 
   #agentsModal{ position:fixed; inset:0; z-index:10000; display:none; align-items:center; justify-content:center;
     background:rgba(6,4,3,.72); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); padding:20px; }
@@ -11606,12 +11959,11 @@
 (function(){
   'use strict';
   if (document.documentElement.getAttribute('data-motion') === 'off') return;
-  // .products-grid is no longer a rail: it is the bento now (see the
-  // .products-grid span phrase in the stylesheet). A rail wants uniform tiles
-  // it can snap between; a bento wants tiles of different sizes. Trying to be
-  // both gives a side-scrolling row of mismatched cards, which is neither.
-  // .builds-grid stays a rail — twelve uniform project cards over several
-  // screens is exactly the case the rail was written for.
+  // .products-grid is the bento now (see its span phrase in the stylesheet).
+  // A rail wants uniform tiles it can snap between; a bento wants tiles of
+  // different sizes. Being both gives a side-scrolling row of mismatched cards,
+  // which is neither. .builds-grid stays a rail — twelve uniform project cards
+  // over several screens is exactly what the rail was written for.
   var TARGETS = [['.builds-grid','']];
 
   function build(sel, extra){
