@@ -43,3 +43,30 @@ The serverless function pattern is documented in `DEPLOY.md` (`api/chat.js` + sw
 - Editorial tone: copy is first-person ("I'm building…"), warm, specific with numbers. Match that voice when editing copy or chatbot responses.
 - All theming flows through CSS variables — never hardcode colors in component styles.
 - **Follow the design system in `DESIGN.md` for all styling.** It is the machine-readable source of truth for the palette (black / orange / gold), typography, spacing, radius, components, motion and focus states. Read it before writing styles; add a token there before inventing a value. Never use framework palette utilities (`gray-500`, `blue-600`, …) for brand surfaces.
+
+## Borrowing from reference sites
+
+chandan.dev (and any other site used as a reference) is a source of **form only**:
+layout, interaction, motion, timing, easing, the anatomy of a component. Take
+the structure of a card; never the words inside it.
+
+This is not a style preference. It shipped a fabricated credential: AIESEC
+appeared in the "Work done at" row on the live site because it was lifted from
+chandan.dev's own project list while porting his layout. It is one of HIS
+projects. Three more of his strings came across the same way — his badge copy
+("At the moment // Y2026"), two of his four skill bullets ("0→1 products",
+"Go to market") and his nav label ("Say hi").
+
+The rule, concretely:
+
+- **Take**: grid anatomy, corner brackets, pinned reveals, hover-morph labels,
+  parallax depth, easing curves, the *idea* of a stamp or a status dot.
+- **Never take**: company names, project names, role titles, skill labels,
+  taglines, badge text, button copy, coordinates, or any factual claim.
+- Every factual string on this site must be traceable to something already in
+  this repo. Before adding a name to any credential list (the company row, the
+  work cards, the experience timeline), grep for it in `index.html` first. Zero
+  prior mentions means it is not Anchit's.
+- When porting a component, replace its copy with wording drawn from Anchit's
+  own vocabulary — the file already contains it. "Product Management" appears
+  28 times, "D2C Growth" 21, "US, UK & global markets" 16.
