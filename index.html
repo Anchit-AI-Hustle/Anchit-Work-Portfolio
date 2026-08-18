@@ -9935,17 +9935,24 @@
     var idle = window.requestIdleCallback || function (fn) { return setTimeout(fn, 1400); };
     var attempts = 0;
     function inject() {
-      var el = document.createElement('script');
-      el.src = '/assets/vendor/three.min.js';
-      el.async = true;
-      el.onload = function () {
-        // Same rule for the shader compile, which is its own long task.
-        (function compile() {
-          if (window.__scrolling) return setTimeout(compile, 500);
-          try { initWebGL(); } catch (e) { /* keep the 2D fallback */ }
-        })();
-      };
-      document.head.appendChild(el);
+      // The ES module build, not the UMD one. three.min.js prints a deprecation
+      // warning on load ("deprecated with r150+, will be removed with r160")
+      // because the classic script build is on its way out — and we are pinned
+      // at exactly r160, so this is the last version where it works at all.
+      // Same revision, same size, one fewer warning in everyone's console.
+      //
+      // A namespace import has the identical shape to the old global, so
+      // initWebGL() keeps reading window.THREE and needs no changes.
+      import('/assets/vendor/three.module.min.js')
+        .then(function (mod) {
+          window.THREE = mod;
+          // Same rule for the shader compile, which is its own long task.
+          (function compile() {
+            if (window.__scrolling) return setTimeout(compile, 500);
+            try { initWebGL(); } catch (e) { /* keep the 2D fallback */ }
+          })();
+        })
+        .catch(function () { /* no nebula; the 2D particle field stays */ });
     }
     function attempt() {
       if (attempts++ > 40) return;                 // ~2 minutes of patience, then give up
