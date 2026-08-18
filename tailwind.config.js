@@ -3,7 +3,6 @@
 module.exports = {
   content: [
     './index.html',
-    './index-motion.html',
     './lifecycle-os-calendar.html',
   ],
   theme: {

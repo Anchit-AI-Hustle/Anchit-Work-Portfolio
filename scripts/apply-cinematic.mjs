@@ -34,7 +34,7 @@ ${END}`;
 // on an ancestor makes that ancestor the containing block, which breaks sticky
 // — and the reveal animates exactly that. Its scenes already arrive one at a
 // time by construction, since each owns a full scroll track.
-const SKIP = new Set(['index.html', 'index-motion.html', 'hotel.html']);
+const SKIP = new Set(['index.html', 'hotel.html']);
 
 // Byte ranges covered by <script> elements, so markup can be told apart from
 // HTML that merely appears inside JavaScript.

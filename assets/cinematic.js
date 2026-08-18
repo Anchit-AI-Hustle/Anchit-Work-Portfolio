@@ -126,10 +126,10 @@
        s.boxShadow !== 'none');
   }
 
-  // index.html and index-motion.html carry an older inline reveal system. This
-  // runtime must not double-animate what that already owns, so anything it has
-  // claimed counts as covered and is left completely alone. That makes the two
-  // safe to run side by side: this one fills only the gaps.
+  // index.html carries an older inline reveal system. This runtime must not
+  // double-animate what that already owns, so anything it has claimed counts as
+  // covered and is left completely alone. That makes the two safe to run side
+  // by side: this one fills only the gaps.
   var INLINE = '.reveal,.reveal-stagger,.reveal-left,.reveal-right,.reveal-scale';
   function covered(el) {
     if (el.__cin || el.classList.contains('cin') || el.classList.contains('cin-stagger')) return true;
