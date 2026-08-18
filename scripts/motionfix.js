@@ -7,6 +7,8 @@
 //   2. off-screen infinite CSS animations holding compositor layers
 //   3. the hero's forever-running GSAP tweens never parking
 //   4. the invisible sidebar backdrop staying composited via backdrop-filter
+//   5. native `scroll-behavior: smooth` fighting Lenis, which stopped the page
+//      scrolling at all once Lenis had initialised
 //
 // Every test is paired with a MUTATION that undoes the fix, so the suite can be
 // shown to actually fail when the bug comes back:
@@ -16,6 +18,7 @@
 //   MUT=scan_top node scripts/motionfix.js     # expect a FAIL
 //   MUT=no_governor node scripts/motionfix.js  # expect a FAIL
 //   MUT=no_park node scripts/motionfix.js      # expect a FAIL
+//   MUT=smooth_scroll node scripts/motionfix.js # expect a FAIL
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 const MUT = process.env.MUT || '';
 const BASE = process.env.BASE || 'http://127.0.0.1:8099';
@@ -42,6 +45,14 @@ const mutations = {
       const rest = [...arguments].filter(c => c !== 'amb-idle');
       return rest.length ? a.apply(this, rest) : undefined;
     };
+  },
+  // put native smooth scrolling back, which is what broke scrolling entirely:
+  // Lenis calls scrollTo every frame, and the browser restarts an animated
+  // scroll for each one, so the document never gets anywhere.
+  smooth_scroll: () => {
+    const apply = () => document.documentElement.style.setProperty('scroll-behavior', 'smooth', 'important');
+    apply();
+    setInterval(apply, 100);
   },
   // never park the hero loops
   no_park: () => {
@@ -140,7 +151,35 @@ const mutations = {
   else chk('hero loops park off-screen', park.nearStates > 1 && park.farStates === 1,
       `arc transform took ${park.nearStates} distinct values while the hero was on screen, ${park.farStates} while it was not`);
 
-  // ── 5. the invisible sidebar backdrop is out of compositing ──
+  // ── 5. the page actually scrolls, from the first gesture after Lenis is up ──
+  // The window matters: before Lenis initialises the page scrolls natively and
+  // this passes trivially, so the check waits until Lenis has taken over.
+  const scrolled = await (async () => {
+    const p2 = await ctx.newPage();
+    await p2.route(/fonts\.(googleapis|gstatic)\.com/, r=>r.fulfill({status:200,contentType:'text/css',body:''}));
+    if (MUT) {
+      const src = mutations[MUT].toString();
+      await p2.addInitScript(`document.addEventListener('DOMContentLoaded',()=>{(${src})()})`);
+    }
+    await p2.goto(BASE + '/index.html', { waitUntil: 'commit' });
+    await p2.waitForTimeout(1600);
+    const lenisUp = await p2.evaluate(() => !!window.__lenis);
+    await p2.mouse.move(720, 500);
+    for (let i = 0; i < 12; i++) { await p2.mouse.wheel(0, 200); await p2.waitForTimeout(40); }
+    await p2.waitForTimeout(700);
+    const r = await p2.evaluate(() => ({
+      y: Math.round(scrollY),
+      behavior: getComputedStyle(document.documentElement).scrollBehavior,
+      lenisScroll: window.__lenis ? Math.round(window.__lenis.scroll || 0) : null,
+    }));
+    await p2.close();
+    return { ...r, lenisUp };
+  })();
+  chk('page scrolls once Lenis is driving', scrolled.y > 1500 && scrolled.behavior === 'auto',
+      `wheeled 2400px → scrollY ${scrolled.y} (lenis ${scrolled.lenisUp ? 'up at ' + scrolled.lenisScroll : 'not up'}), `
+      + `computed scroll-behavior "${scrolled.behavior}"`);
+
+  // ── 6. the invisible sidebar backdrop is out of compositing ──
   const sb = await p.evaluate(() => {
     const e = document.getElementById('sidebarBackdrop');
     return e ? { vis:getComputedStyle(e).visibility, op:getComputedStyle(e).opacity } : null;
