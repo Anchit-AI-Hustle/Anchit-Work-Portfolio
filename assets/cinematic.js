@@ -446,26 +446,14 @@
     if (typeof window.Lenis !== 'function') return;          // script not loaded: native scroll
     if (matchMedia('(pointer: coarse)').matches) return;     // touch already has momentum
 
-    // Never take over a scroll that is already in flight.
+    // Callers must reach this through whenPageStill (see boot). Starting while
+    // the browser's own wheel animation is still travelling puts two engines on
+    // the same frames, and the page visibly snaps backwards.
     //
-    // The browser runs its own animation for wheel input. Start Lenis while one
-    // is still travelling and there are two engines writing the scroll position
-    // on the same frames: Lenis writes its value, the browser writes its own,
-    // and the page visibly snaps backwards. Measured by sampling scrollY once
-    // per RENDERED frame — a backwards step between two painted frames is
-    // something a person actually sees, two scroll events inside one frame are
-    // not — anyone who scrolled in the first half second got a 200px jump
-    // backwards at ~950ms, which is when this runs. Caught in the act by
-    // watching writes to documentElement.scrollTop: Lenis.setScroll writing
-    // 0.199px while the page sat at 200px.
-    //
-    // `window.__scrolling` is not a strict enough test: it is driven by scroll
-    // EVENTS, and it goes quiet while the browser's animation is still
-    // travelling. The document itself is the authority — three consecutive
-    // frames at the same offset means nothing is animating it any more.
-    //
-    // Waiting costs nothing. Until Lenis exists the browser scrolls natively,
-    // which is exactly what was happening during that window anyway.
+    // `window.__scrolling` is not a strict enough test for that: it is driven
+    // by scroll EVENTS, which go quiet while the animation is still running.
+    // The document itself is the authority — three consecutive frames at the
+    // same offset means nothing is moving it any more.
     var lenis = new window.Lenis({
       duration: 1.05,
       easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); },
@@ -506,22 +494,6 @@
       if (now > driftUntil) return;                 // handover is over; stop paying for it
       try {
         var y = window.scrollY || document.documentElement.scrollTop || 0;
-          // Only the START of the tween is corrected, never its destination.
-          //
-          // Instrumented, one wheel notch into a fresh page:
-          //   scrollY=200  animatedScroll=0  targetScroll=200
-          // The browser had already applied the notch while Lenis was still
-          // setting up, so Lenis began tweening 0 -> 200 across a page that was
-          // at 200 — and its first written frame threw the visitor back to the
-          // top. Moving `animatedScroll` up to where the document actually is
-          // leaves `targetScroll` alone, so the tween finishes at the place the
-          // visitor asked for; it simply no longer starts from the past.
-          //
-          // reset() is the wrong tool here: it drags the target back to the
-          // current position too, which cancels the scroll instead of fixing
-          // it. And the earlier `!lenis.isScrolling` guard could never be true —
-          // isScrolling is the STRING 'smooth' while Lenis animates, so the
-          // check was always false and this never ran at all.
         // The wheel notch that lands as Lenis starts up is applied TWICE, and
         // reset() is what un-does the duplicate.
         //
@@ -543,6 +515,11 @@
         // is the supported way to say "you are here now", and because the
         // movement has ALREADY been applied natively, dropping the duplicate
         // target is exactly right rather than a lost scroll.
+        //
+        // Do not add an `if (!lenis.isScrolling)` guard here. It reads as the
+        // obvious safety check and it can never be true: isScrolling is the
+        // STRING 'smooth' while Lenis animates, so an earlier version of this
+        // never ran at all.
         if (Math.abs(lenis.animatedScroll - y) > 4) lenis.reset();
       } catch (e) {}
     }
