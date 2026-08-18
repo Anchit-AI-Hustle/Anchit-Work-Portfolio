@@ -11,6 +11,8 @@
 //      scrolling at all once Lenis had initialised
 //   6. the browser and Lenis both applying the same wheel notch as Lenis starts
 //      up, which threw an early scroller back to the top of the page
+//   7. the mobile nav panel painting over its own close button, so the menu
+//      opened and could not be shut
 //
 // Every test is paired with a MUTATION that undoes the fix, so the suite can be
 // shown to actually fail when the bug comes back:
@@ -66,6 +68,15 @@ const mutations = {
       clearInterval(iv);
       l.reset = function () {};        // the correction becomes a no-op
     }, 10);
+  },
+  // put the nav panel back on top of the header bar, which is what hid the
+  // close button. The panel is a CHILD of .site-header, so its z-index resolves
+  // against its siblings there — raising it above .hdr-glass buries the
+  // hamburger even though the header outranks the panel on the page.
+  panel_over_ham: () => {
+    const st = document.createElement('style');
+    st.textContent = '.hdr-panel{z-index:9 !important}.hdr-glass{z-index:1 !important}';
+    document.documentElement.appendChild(st);
   },
   // never park the hero loops
   no_park: () => {
@@ -192,13 +203,20 @@ const mutations = {
       `wheeled 2400px → scrollY ${scrolled.y} (lenis ${scrolled.lenisUp ? 'up at ' + scrolled.lenisScroll : 'not up'}), `
       + `computed scroll-behavior "${scrolled.behavior}"`);
 
-  // ── 6. the invisible sidebar backdrop is out of compositing ──
+  // ── 6. the idle nav overlay is out of compositing ──
+  // Originally this guarded #sidebarBackdrop. The sidebar is gone, but the
+  // hazard moved rather than disappearing: #hdrPanel is the same shape of
+  // thing — a full-viewport fixed element carrying backdrop-filter, which
+  // composites whether or not anyone can see it. Repointed rather than
+  // deleted, because deleting it would have retired the guard at exactly the
+  // moment a new element inherited the bug it was written for.
   const sb = await p.evaluate(() => {
-    const e = document.getElementById('sidebarBackdrop');
-    return e ? { vis:getComputedStyle(e).visibility, op:getComputedStyle(e).opacity } : null;
+    const e = document.getElementById('hdrPanel');
+    return e ? { vis:getComputedStyle(e).visibility, op:getComputedStyle(e).opacity,
+                 bf:getComputedStyle(e).backdropFilter } : null;
   });
-  chk('idle sidebar backdrop not composited', !!sb && sb.vis === 'hidden',
-      sb ? `visibility:${sb.vis} opacity:${sb.op}` : 'element missing');
+  chk('idle nav overlay not composited', !!sb && sb.vis === 'hidden',
+      sb ? `visibility:${sb.vis} opacity:${sb.op} backdrop-filter:${sb.bf}` : 'element missing');
 
   // ── 7. an early scroll is never thrown backwards ──
   // Sampled once per RENDERED frame: a backwards step between two painted
@@ -241,6 +259,40 @@ const mutations = {
   }
   chk('early scroll is never thrown back', jumps.length === 0,
       jumps.length ? jumps.join('; ') : '10 start times across the load window, no backwards step between any two painted frames');
+
+  // ── 8. the mobile menu can always be closed ──
+  // It opened over its own hamburger once. A menu you cannot shut is a trap,
+  // so this asserts the close button is the thing under the cursor while the
+  // panel is open, and that tapping it actually closes.
+  const menu = await (async () => {
+    const m = await ctx.newPage();
+    await m.setViewportSize({ width: 390, height: 844 });
+    await m.route(/fonts\.(googleapis|gstatic)\.com/, r=>r.fulfill({status:200,contentType:'text/css',body:''}));
+    if (MUT) {
+      const src = mutations[MUT].toString();
+      await m.addInitScript(`document.addEventListener('DOMContentLoaded',()=>{(${src})()})`);
+    }
+    await m.goto(BASE + '/index.html', { waitUntil: 'load' });
+    await m.waitForTimeout(4000);
+    await m.click('#hdrHam');
+    await m.waitForTimeout(600);
+    const probe = await m.evaluate(() => {
+      const ham = document.getElementById('hdrHam').getBoundingClientRect();
+      const hit = document.elementFromPoint(ham.x + ham.width / 2, ham.y + ham.height / 2);
+      return { open: document.getElementById('hdrPanel').classList.contains('open'),
+               reachable: !!(hit && hit.closest && hit.closest('#hdrHam')) };
+    });
+    let closed = false;
+    if (probe.reachable) {
+      await m.click('#hdrHam').catch(() => {});
+      await m.waitForTimeout(600);
+      closed = await m.evaluate(() => !document.getElementById('hdrPanel').classList.contains('open'));
+    }
+    await m.close();
+    return { ...probe, closed };
+  })();
+  chk('mobile menu can be closed', menu.open && menu.reachable && menu.closed,
+      `opened=${menu.open}, close button reachable=${menu.reachable}, second tap closed=${menu.closed}`);
 
   const errs = [];
   p.on('pageerror', e => errs.push(e.message));
