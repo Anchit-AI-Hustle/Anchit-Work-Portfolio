@@ -2396,7 +2396,6 @@
     "Route /how-to-2 is served from source file side-husle/how-to-1/index.html via the vercel.json rewrite, and /how-to, /how-to-1 redirect to /how-to-2 (currently permanent:false / 307). Consider making those redirects permanent (301) once the /how-to-2 URL is final, so link equity consolidates.",
     "sitemap.xml lastmod is set to 2026-07-24 for all URLs; regenerate lastmod per-file from real git commit dates on future deploys for accuracy.",
     "robots.txt disallows /api/ (serverless functions) and explicitly allows major AI/answer-engine crawlers (GPTBot, ClaudeBot, PerplexityBot, Google-Extended, etc.) for AEO. Confirm this matches Anchit's preference on AI training/answer usage.",
-    "index-motion.html exists in the repo but is not in the 22-file scope and has no route/canonical here; ensure it is not deployed to a crawlable URL or add a canonical/ noindex to avoid duplicate-content with /.",
     "Verify all canonicals resolve without trailing slash except the homepage (vercel.json has trailingSlash:false + cleanUrls:true) \u2014 canonicals here use extensionless paths (e.g. /lifecycle-os-studio) to match.",
     "Only three pages ship FAQPage schema (/, /agent, /d2c-lifecycle-os) because only those had source FAQ content. Add FAQ blocks + FAQPage to high-intent tool pages (jobhunt, how-to-2, lifecycle-os) later to capture more AEO surface."
   ]
