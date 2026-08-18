@@ -765,12 +765,23 @@
   .sidebar.open ~ .sidebar-toggle { display: none !important; }
   .sidebar-toggle:hover { background: var(--bg-deep); }
   .sidebar-toggle svg { width: 18px; height: 18px; }
+  /* visibility, not just opacity. `backdrop-filter` forces this onto the
+     compositor whether or not it is visible, so at opacity 0 it was still a
+     full-viewport composited layer (measured: 4.9 MB) sitting above the whole
+     document for the entire life of the page, on every visit, for a sidebar
+     nobody had opened. `visibility: hidden` takes it out of compositing
+     altogether; the delayed visibility transition lets the 300ms fade-out
+     still play before it goes. */
   .sidebar-backdrop {
     position: fixed; inset: 0; z-index: 190;
     background: rgba(0,0,0,0.55); backdrop-filter: blur(2px);
-    opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+    opacity: 0; pointer-events: none; visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
   }
-  .sidebar-backdrop.visible { opacity: 1; pointer-events: auto; }
+  .sidebar-backdrop.visible {
+    opacity: 1; pointer-events: auto; visibility: visible;
+    transition: opacity 0.3s ease, visibility 0s linear 0s;
+  }
 
   @media (max-width: 820px) {
     body, body.sidebar-collapsed { padding-left: 0; }
@@ -1283,8 +1294,8 @@
   /* The voice sub-control only applies to Chat mode. */
   body.mode-narrate .chat-audio-row { display: none; }
   /* Call mode: pulse the mic to show the line is open. */
-  body.call-active .chat-audio[data-chataudio-btn="call"] { box-shadow: 0 0 0 0 rgba(255,77,31,.5); animation: callPulse 1.8s ease-out infinite; }
-  @keyframes callPulse { 0% { box-shadow: 0 0 0 0 rgba(255,77,31,.45); } 70%,100% { box-shadow: 0 0 0 10px rgba(255,77,31,0); } }
+  body.call-active .chat-audio[data-chataudio-btn="call"] { box-shadow: 0 0 10px rgba(255,77,31,.4); position: relative; }
+  @keyframes callPulse { 0% { transform: scale(1); opacity: .45; } 70%,100% { transform: scale(1.7); opacity: 0; } }
 
   /* Onboarding first-open mode choice */
   .ob-mode-btn {
@@ -1442,13 +1453,10 @@
 	  .msg.user .msg-bubble a { color: rgba(255,255,255,0.95); text-decoration-color: rgba(255,255,255,0.6); }
   /* speaking — animated glow ring while narrating */
   .msg.bot.speaking .msg-bubble { animation: bubbleGlow 1.5s ease-in-out infinite; }
-  @keyframes bubbleGlow {
-    0%,100% { box-shadow: 0 0 0 0 rgba(255,77,31,0); }
-    50%     { box-shadow: 0 0 0 3px rgba(255,77,31,0.18), 0 6px 18px rgba(255,77,31,0.16); }
-  }
+  @keyframes bubbleGlow { 0%,100% { opacity: .55; } 50% { opacity: 1; } }
   /* typing — gentle wave dots + glowing avatar */
   .msg.typing .msg-avatar { animation: orbSpin 6s linear infinite, avatarThink 1.4s ease-in-out infinite; }
-  @keyframes avatarThink { 0%,100% { box-shadow: 0 2px 8px rgba(255,77,31,0.32); } 50% { box-shadow: 0 2px 16px rgba(255,77,31,0.7); } }
+  @keyframes avatarThink { 0%,100% { opacity: .62; } 50% { opacity: 1; } }
   .msg.typing .msg-bubble { display: inline-flex; gap: 5px; padding: 13px 16px; align-items: center; }
   .msg.typing .msg-bubble span {
     width: 7px; height: 7px; border-radius: 50%;
@@ -2033,16 +2041,16 @@
   .d3-sheen { position: relative; overflow: hidden; }
   .d3-sheen::before {
     content: ''; position: absolute; top: 0; bottom: 0; width: 55%;
-    left: -70%; pointer-events: none; opacity: 0;
+    left: 0; pointer-events: none; opacity: 0;
     background: linear-gradient(100deg, transparent,
       color-mix(in oklab, var(--accent-warm) 26%, transparent), transparent);
     transform: skewX(-14deg);
   }
   .d3-sheen.in::before { animation: d3Sweep 1.15s cubic-bezier(0.22,1,0.36,1) 0.12s both; }
   @keyframes d3Sweep {
-    from { left: -70%; opacity: 0; }
+    from { transform: translateX(-70%); opacity: 0; }
     35%  { opacity: 1; }
-    to   { left: 130%; opacity: 0; }
+    to   { transform: translateX(130%); opacity: 0; }
   }
 
   /* Section headings assemble a word at a time. */
@@ -2096,10 +2104,7 @@
     60%  { opacity: 1; transform: translateY(-5px) scale(1.05); }
     100% { opacity: 1; transform: translateY(0)    scale(1); }
   }
-  @keyframes mAccentPulse {
-    0%, 100% { text-shadow: none; }
-    50%      { text-shadow: 0 0 16px var(--primary); }
-  }
+  @keyframes mAccentPulse { 0%, 100% { opacity: .82; } 50% { opacity: 1; } }
   .hero-stats.in .hero-stat .num,
   .work-stats.in .work-stat .num {
     animation: mGrowRise .85s cubic-bezier(.2,.9,.25,1.2) both;
@@ -2369,7 +2374,10 @@
   .anp-nudge.playing .anp-waveform span:nth-child(2) { animation: anpBar 0.7s ease-in-out 0.13s infinite; }
   .anp-nudge.playing .anp-waveform span:nth-child(3) { animation: anpBar 0.7s ease-in-out 0.26s infinite; }
   .anp-nudge.playing .anp-waveform span:nth-child(4) { animation: anpBar 0.7s ease-in-out 0.39s infinite; }
-  @keyframes anpBar { 0%,100%{height:3px} 50%{height:14px} }
+  /* scaleY, not height: animating height relayouts the whole bar row on every
+   frame for as long as audio is playing. The bar is drawn at full height
+   once and squashed from the bottom. */
+  @keyframes anpBar { 0%,100%{transform:scaleY(.21)} 50%{transform:scaleY(1)} }
   .anp-nudge.dismissed { display: none !important; }
   .anp-play-btn {
     display: inline-flex; align-items: center; gap: 6px;
@@ -3271,7 +3279,7 @@
     <div class="sidebar-contact-group" id="sidebarContactGroup">
       <button type="button" class="sidebar-item sidebar-group-toggle" id="sidebarContactToggle" aria-expanded="false" aria-controls="sidebarContactSub" aria-label="Contact channels">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        <span class="sidebar-label morph-label"><span class="ml-default">Contact</span><span class="ml-hover" aria-hidden="true">Say hi</span></span>
+        <span class="sidebar-label morph-label"><span class="ml-default">Contact</span><span class="ml-hover" aria-hidden="true">Get in touch</span></span>
         <svg class="sidebar-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
       <div class="sidebar-subnav" id="sidebarContactSub">
@@ -3640,7 +3648,7 @@
           <span class="dc-corner dc-bl" aria-hidden="true"></span><span class="dc-corner dc-br" aria-hidden="true"></span>
           <div class="dc-head">
             <span class="dc-stamp" aria-hidden="true">vahdam/id-01</span>
-            <span class="dc-badge">At the moment // Y2026</span>
+            <span class="dc-badge">Current focus // 2026</span>
             <span class="dc-status"><span class="dc-dot" aria-hidden="true"></span>live</span>
           </div>
           <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-2">Current Focus</div>
@@ -3720,7 +3728,7 @@
           <div class="cw-screen">
             <div class="cw-head">
               <span class="cw-stamp" aria-hidden="true">vahdam/id-01</span>
-              <span class="cw-badge">At the moment // Y2026</span>
+              <span class="cw-badge">Current focus // 2026</span>
               <span class="cw-status"><span class="cw-dot" aria-hidden="true"></span>live</span>
             </div>
             <div class="cw-body">
@@ -3731,8 +3739,8 @@
                 <ul class="cw-skills">
                   <li><span class="cw-bullet" aria-hidden="true"></span>Lifecycle &amp; retention</li>
                   <li><span class="cw-bullet" aria-hidden="true"></span>D2C growth</li>
-                  <li><span class="cw-bullet" aria-hidden="true"></span>0&rarr;1 products</li>
-                  <li><span class="cw-bullet" aria-hidden="true"></span>Go to market</li>
+                  <li><span class="cw-bullet" aria-hidden="true"></span>Product management</li>
+                  <li><span class="cw-bullet" aria-hidden="true"></span>US, UK &amp; global</li>
                 </ul>
                 <a class="btn primary cw-cta" href="#now" data-view="now">What I'm building now &rarr;</a>
               </div>
@@ -9076,14 +9084,15 @@
       radial-gradient(48% 38% at 12% 86%, rgba(255, 122, 31, .12), transparent 62%);
     background-size: 54px 54px, 54px 54px, auto;
     mask-image: radial-gradient(circle at 50% 28%, black, transparent 78%);
-    animation: futureGridDrift 28s linear infinite, futureBreath 7s ease-in-out infinite alternate;
+    /* No drift. Moving a 54px grid by 54px over 28 seconds is not something
+       anyone can see, and it repainted the whole viewport every frame to do
+       it. Only the breath (opacity) remains, which is compositor-only. */
+    animation: futureBreath 7s ease-in-out infinite alternate;
   }
   /* The pointer-following light used to be a fourth layer here, positioned from
      `--fx`/`--fy` on :root. A custom property on the root invalidates the style
      of the whole document, so every pointer frame re-resolved ~2,300 elements.
      It now lives on .float-aura, which owns those variables alone. */
-  @keyframes futureGridDrift {
-    to { background-position: 54px 54px, 54px 54px, center; }
   }
   /* Opacity only. Animating `filter: saturate()` on a full-viewport masked layer
      forces a colour-matrix pass over 1.3 megapixels every frame; the saturation
@@ -9093,11 +9102,8 @@
     to { opacity: .72; }
   }
   .view.active {
-    animation: viewIn .5s cubic-bezier(.16, 1, .3, 1), futurePageFocus .72s cubic-bezier(.16, 1, .3, 1);
+    animation: viewIn .5s cubic-bezier(.16, 1, .3, 1);
   }
-  @keyframes futurePageFocus {
-    from { clip-path: inset(0 0 7% 0); opacity: .7; }
-    to { clip-path: inset(0); opacity: 1; }
   }
   .view.active .display-xl,
   .view.active .display-lg,
@@ -9110,7 +9116,11 @@
     background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
     color: transparent !important;
-    animation: futureTextFlow 8s ease-in-out infinite !important;
+    /* The gradient stays — it is the palette on the headline. The SWEEP is
+       gone: animating background-position under `background-clip: text`
+       re-rasterises every glyph on every frame, and it was the last thing
+       on this page still animating paint. */
+    background-position: 32% 50% !important;
     text-shadow: 0 0 28px rgba(232, 177, 78, .08);
   }
   .display-lg em,
@@ -9124,8 +9134,6 @@
     -webkit-text-fill-color: currentColor !important;
     text-shadow: 0 0 18px rgba(232, 177, 78, .24);
   }
-  @keyframes futureTextFlow {
-    0%, 100% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
   }
   .home-hero,
@@ -9322,23 +9330,27 @@
   .chat-return .chat-return-main svg { width: 25px; height: 25px; flex: none; }
   .chat-return .chat-return-copy { display: none; }
   .chat-return .chat-return-icon { display: none; }
+  /* A ring that scales and fades, not a shadow that grows. ::before draws
+     nothing else, so it can be the ring itself — transform and opacity, which
+     the compositor handles, instead of a box-shadow repaint on every frame of
+     an animation that never stops. */
   .chat-return::before {
     content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-    box-shadow: 0 0 0 0 rgba(255,105,64,.45); animation: chatFabPulse 2.6s ease-out infinite;
+    border: 2px solid rgba(255,105,64,.55);
+    animation: chatFabPulse 2.6s ease-out infinite;
   }
   @keyframes chatFabPulse {
-    0% { box-shadow: 0 0 0 0 rgba(255,105,64,.40); }
-    70% { box-shadow: 0 0 0 16px rgba(255,105,64,0); }
-    100% { box-shadow: 0 0 0 0 rgba(255,105,64,0); }
+    0%   { transform: scale(1);    opacity: .55; }
+    70%  { transform: scale(1.55); opacity: 0; }
+    100% { transform: scale(1.55); opacity: 0; }
   }
   /* While narration is playing the launcher is the only status cue — glow green. */
   .chat-return.playing { border-color: rgba(37,211,102,.55); }
   .chat-return.playing::after { background: #25D366; opacity: 1; }
   .chat-return.playing::before {
-    animation: chatFabPulseGreen 1.5s ease-out infinite;
+    border-color: rgba(37,211,102,.6);
+    animation: chatFabPulse 1.5s ease-out infinite;   /* same motion, green ring */
   }
-  @keyframes chatFabPulseGreen {
-    0% { box-shadow: 0 0 0 0 rgba(37,211,102,.5); }
     70% { box-shadow: 0 0 0 16px rgba(37,211,102,0); }
     100% { box-shadow: 0 0 0 0 rgba(37,211,102,0); }
   }
@@ -9992,11 +10004,21 @@
       'pointer-events:none;opacity:0;transition:opacity 1.4s ease;';
     document.body.insertBefore(canvas, document.body.firstChild);
 
-    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: !isMobile, alpha: true, powerPreference: 'high-performance' });
+    // antialias:false. This scene is a soft additive nebula, a point cloud and
+    // three wireframe shells — there is not a hard edge in it for MSAA to
+    // smooth. With antialias:true the driver allocated a 4x multisampled
+    // full-viewport buffer (SAMPLES=4, confirmed via gl.getParameter) and paid
+    // 4x the fragment bandwidth every frame to resolve it, for a difference
+    // nobody can see through a 0.85-opacity blur.
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: false, alpha: true, powerPreference: 'high-performance' });
     // Cost scales with the SQUARE of pixel ratio: 1.75 renders 3.1x the pixels
     // of 1.0, 1.25 renders 1.6x. For a soft out-of-focus nebula the extra
     // resolution is invisible, but the GPU work is not.
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 1.25));
+    var resScale = 1;
+    function applyRes() {
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 1.25) * resScale);
+    }
+    applyRes();
     renderer.autoClear = false;
 
     // Theme colors → shader/material tints.
@@ -10016,16 +10038,20 @@
       uBoost: { value: 1.0 },
       uC1: { value: primary }, uC2: { value: accent }, uC3: { value: gold }
     };
-    var nebMat = new THREE.ShaderMaterial({
-      uniforms: uNeb, depthTest: false, depthWrite: false,
-      vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position, 1.0); }',
-      fragmentShader: [
+    // The nebula's whole cost is in this fragment shader, and the cost is
+    // literally `octaves x fbm-chains x pixels`. Four fbm chains at five
+    // octaves is 20 noise() calls per pixel, each one four sin()-based hashes —
+    // roughly 80 transcendental ops for every pixel on screen, every frame.
+    // The octave count is therefore a parameter, not a constant, so the quality
+    // guard below can lower it on a machine that cannot afford it instead of
+    // having only "full" and "gone" to choose between.
+    function nebFrag(octaves) { return [
         'precision highp float;',
         'uniform float uTime; uniform vec2 uMouse; uniform vec2 uRes; uniform float uBoost;',
         'uniform vec3 uC1; uniform vec3 uC2; uniform vec3 uC3; varying vec2 vUv;',
         'float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }',
         'float noise(vec2 p){ vec2 i=floor(p), f=fract(p); float a=hash(i),b=hash(i+vec2(1.,0.)),c=hash(i+vec2(0.,1.)),d=hash(i+vec2(1.,1.)); vec2 u=f*f*(3.-2.*f); return mix(a,b,u.x)+(c-a)*u.y*(1.-u.x)+(d-b)*u.x*u.y; }',
-        'float fbm(vec2 p){ float v=0.,a=0.5; for(int i=0;i<5;i++){ v+=a*noise(p); p*=2.02; a*=0.5; } return v; }',
+        'float fbm(vec2 p){ float v=0.,a=0.5; for(int i=0;i<' + octaves + ';i++){ v+=a*noise(p); p*=2.02; a*=0.5; } return v; }',
         'void main(){',
         '  vec2 uv=vUv; vec2 p=(uv-0.5); p.x*=uRes.x/uRes.y; p+=uMouse*0.12;',
         '  float t=uTime*0.05;',
@@ -10040,7 +10066,16 @@
         '  col*=smoothstep(1.05,0.12,r)*0.8;',
         '  gl_FragColor=vec4(col,1.0);',
         '}'
-      ].join('\n')
+      ].join('\n'); }
+
+    // Four octaves, not five. The fifth contributes detail at a spatial
+    // frequency finer than the blur this sits behind — it is paid for and then
+    // thrown away.
+    var nebOct = 4;
+    var nebMat = new THREE.ShaderMaterial({
+      uniforms: uNeb, depthTest: false, depthWrite: false,
+      vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position, 1.0); }',
+      fragmentShader: nebFrag(nebOct)
     });
     bgScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), nebMat));
 
@@ -10079,6 +10114,7 @@
 
     function resize() {
       camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix();
+      applyRes();
       renderer.setSize(window.innerWidth, window.innerHeight, false);
       uNeb.uRes.value.set(window.innerWidth, window.innerHeight);
     }
@@ -10107,7 +10143,10 @@
     document.documentElement.setAttribute('data-webgl', 'live');
 
     var running = true, t = 0;
-    document.addEventListener('visibilitychange', function () { running = !document.hidden; if (running) requestAnimationFrame(tick); });
+    document.addEventListener('visibilitychange', function () {
+      running = !document.hidden;
+      if (running) { resetSample(); requestAnimationFrame(tick); }
+    });
     // The backdrop drifts slowly — 60fps renders twice the frames for motion
     // nobody can perceive, while competing with the reveal animations and
     // ScrollTrigger for the same frame budget. Capped at ~30fps, which halves
@@ -10118,34 +10157,70 @@
     // No amount of tuning makes a heavy WebGL backdrop smooth on every device:
     // an integrated GPU, a software renderer, or a busy machine will stutter
     // no matter what constants are chosen. So the page measures ITSELF and
-    // drops its most expensive layer when it cannot hold a usable frame rate.
-    // The 2D particle field underneath stays, so the look degrades rather than
-    // disappearing, and the rest of the site keeps its budget.
-    var qFrames = 0, qStart = 0, qChecked = false;
-    function qualityGuard(now) {
-      if (qChecked) return true;
-      if (!qStart) { qStart = now; return true; }
-      qFrames++;
-      if (now - qStart < 2500) return true;              // sample ~2.5s
-      qChecked = true;
-      var fps = qFrames / ((now - qStart) / 1000);
-      if (fps < 24) {
-        running = false;
-        canvas.style.display = 'none';                   // reveal the 2D field
-        restore2D();                                     // …and un-hide it
-        document.documentElement.setAttribute('data-webgl', 'dropped');
-        try { renderer.dispose(); } catch (e) {}
-        return false;
-      }
-      return true;
+    // sheds work when it cannot hold a usable frame rate.
+    //
+    // The previous version measured requestAnimationFrame frequency, which is
+    // the browser's heartbeat and not this scene's cost. rAF keeps firing at
+    // 60Hz on any healthy machine however much GPU the nebula is eating, so
+    // that check only ever tripped on a machine already in freefall — it fires
+    // under a software renderer and essentially never on real hardware. The
+    // case it exists for, a laptop that still paints 60 frames but stutters
+    // when you scroll, was invisible to it. Worse, it was sampled once and
+    // never again, so a machine that got busy later was never reconsidered.
+    //
+    // It now samples continuously, measures the cost of THIS scene's frames,
+    // and responds in stages instead of all-or-nothing:
+    //   over budget once  → shed quality (0.62x buffer, one less octave)
+    //   over budget again → drop to the 2D field, as before.
+    var LOD_FULL = 0, LOD_LOW = 1, lod = LOD_FULL;
+    var qCost = 0, qN = 0, qWindow = 0;
+
+    function resetSample() { qCost = 0; qN = 0; qWindow = 0; }
+
+    function shedQuality() {
+      lod = LOD_LOW;
+      resScale = 0.62;                                   // ~38% of the fragments
+      resize();
+      nebOct = 3;
+      nebMat.fragmentShader = nebFrag(nebOct);
+      nebMat.needsUpdate = true;
+    }
+    function dropWebGL() {
+      running = false;
+      canvas.style.display = 'none';                     // reveal the 2D field
+      restore2D();                                       // …and un-hide it
+      document.documentElement.setAttribute('data-webgl', 'dropped');
+      try { renderer.dispose(); } catch (e) {}
+    }
+
+    // `cost` is how long one rendered frame of this scene actually took.
+    function qualityGuard(now, cost) {
+      if (!qWindow) { qWindow = now; qCost = 0; qN = 0; return; }
+      qCost += cost; qN++;
+      if (now - qWindow < 2500) return;                  // ~2.5s of real frames
+      var avg = qCost / Math.max(1, qN);
+      var fps = qN / ((now - qWindow) / 1000);
+      resetSample(); qWindow = now;
+      // This backdrop asks for 30fps, so it may not spend more than about a
+      // third of one of those 33ms frames, and it has to actually land ~20 of
+      // them a second. Failing either means it is taking budget the scroll needs.
+      if (avg <= 11 && fps >= 20) return;
+      if (lod === LOD_FULL) shedQuality(); else dropWebGL();
     }
 
     function tick(now) {
       if (!running) return;
       requestAnimationFrame(tick);
-      if (!qualityGuard(now || performance.now())) return;
-      if (now && now - lastFrame < 32) return;          // ~30fps
-      lastFrame = now || 0;
+      now = now || performance.now();
+      // Hand the whole GPU to the scroll. This is a slow drift nobody watches
+      // while flicking down a page, and it is the one full-viewport per-frame
+      // cost the homepage pays that no other page on the site does. The sample
+      // is reset too, so frames skipped for scrolling are never mistaken for
+      // frames this machine failed to deliver.
+      if (window.__scrolling) { lastFrame = now; resetSample(); return; }
+      if (now - lastFrame < 32) return;                 // ~30fps
+      lastFrame = now;
+      var frameStart = performance.now();
       t += 0.0032;                                      // twice the step, same speed
 
       mx += (mxT - mx) * 0.045; my += (myT - my) * 0.045;
@@ -10167,6 +10242,7 @@
       renderer.clear();
       renderer.render(bgScene, bgCam);
       renderer.render(scene, camera);
+      qualityGuard(now, performance.now() - frameStart);
     }
     requestAnimationFrame(tick);
 
@@ -10578,13 +10654,48 @@
     setTimeout(function () { document.documentElement.classList.add('cine-settled'); }, 7000);
 
     // ── Continuous life: rings rotate, the scan line sweeps ──────────────────
-    gsap.to('#cineHero .cine-arc.a1', { rotate: 360, duration: 18, ease: 'none', repeat: -1 });
-    gsap.to('#cineHero .cine-arc.a2', { rotate: -360, duration: 26, ease: 'none', repeat: -1 });
-    gsap.to('#cineHero .cine-ring.r2', { rotate: 360, duration: 44, ease: 'none', repeat: -1 });
-    gsap.fromTo('#cineScan',
-      { top: '4%', opacity: 0 },
-      { top: '94%', opacity: 1, duration: 2.6, ease: 'sine.inOut', repeat: -1, repeatDelay: 1.4,
-        yoyo: true, delay: 1.2 });
+    // Every tween here repeats forever, so each one is collected in `forever`
+    // and parked whenever the hero is off screen (see below). A tween that runs
+    // for the whole visit is not "free because it is only a transform" — it
+    // holds a compositor layer and takes a slot in the ticker for as long as
+    // the tab is open.
+    var forever = [
+      gsap.to('#cineHero .cine-arc.a1', { rotate: 360, duration: 18, ease: 'none', repeat: -1 }),
+      gsap.to('#cineHero .cine-arc.a2', { rotate: -360, duration: 26, ease: 'none', repeat: -1 }),
+      gsap.to('#cineHero .cine-ring.r2', { rotate: 360, duration: 44, ease: 'none', repeat: -1 }),
+    ];
+
+    // The scan line travels on `y`, not on `top`.
+    //
+    // `top` is a layout property. Tweening it from 4% to 94% and back, on
+    // repeat: -1, asked the engine to lay this element out again on every
+    // frame for the entire life of the page — and because the line carries a
+    // blur filter, to repaint it too. It was the single loudest thing in a
+    // style-invalidation trace of a homepage scroll (237 recalcs in six
+    // seconds, more than any other element). `y` is a transform: the same
+    // sweep, handled by the compositor, with no layout at all.
+    var scan = document.getElementById('cineScan');
+    if (scan) {
+      var scanTween = null;
+      var armScan = function () {
+        var host = scan.offsetParent || scan.parentElement;
+        var travel = Math.max(0, (host ? host.clientHeight : 0) * 0.90);
+        if (scanTween) { scanTween.kill(); forever.splice(forever.indexOf(scanTween), 1); }
+        gsap.set(scan, { top: '4%', y: 0 });
+        scanTween = gsap.fromTo(scan,
+          { y: 0, opacity: 0 },
+          { y: travel, opacity: 1, duration: 2.6, ease: 'sine.inOut', repeat: -1,
+            repeatDelay: 1.4, yoyo: true, delay: 1.2 });
+        forever.push(scanTween);
+      };
+      armScan();
+      // `top: 4%` and the travel distance are both relative to a box that
+      // changes with the viewport, so re-measure when it does.
+      var scanResize;
+      window.addEventListener('resize', function () {
+        clearTimeout(scanResize); scanResize = setTimeout(armScan, 200);
+      }, { passive: true });
+    }
 
     // ── Pillars morph into one another (blur + scale, never a hard swap) ─────
     var roles = document.querySelectorAll('#cineRoles .cine-role');
@@ -10597,6 +10708,21 @@
         rtl.to(r, { opacity: 1, scale: 1, duration: 0.7, ease: 'power2.out' })
            .to(r, { opacity: 0, scale: 0.97, duration: 0.6, ease: 'power2.in' }, '+=1.5');
       });
+    }
+
+    // Park all of it while the hero is off screen. The stage is the top ~120vh
+    // of one view; on a page this long it spends most of the visit scrolled
+    // past, and none of these loops mean anything to someone reading the work
+    // below. They resume before the stage can be seen again, so scrolling back
+    // up finds it already alive.
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) {
+        var vis = entries[0] && entries[0].isIntersecting;
+        for (var i = 0; i < forever.length; i++) {
+          try { vis ? forever[i].resume() : forever[i].pause(); } catch (e) {}
+        }
+        try { vis ? rtl.resume() : rtl.pause(); } catch (e) {}
+      }, { rootMargin: '30% 0px 30% 0px' }).observe(cine);
     }
 
     // ── Scroll hand-off: the stage recedes instead of cutting ────────────────
@@ -10810,11 +10936,6 @@
      under `background-clip: text`, so the glyphs are re-rasterised on every
      frame — on 16 headings at once. The gradient itself stays (it is the
      palette); only the sweep is a full-tier luxury. */
-  html[data-ambient="lite"] .display-xl,
-  html[data-ambient="lite"] .display-lg,
-  html[data-ambient="lite"] .display-md,
-  html[data-ambient="lite"] .home-hero .name .firstline,
-  html[data-ambient="lite"] .home-hero .name .secondline { animation: none !important; background-position: 32% 50% !important; }
 
   /* still — one static colour field, and nothing moves. Everything is still
      drawn, so the page looks like itself; it just costs a single paint. */
@@ -10854,19 +10975,6 @@
   .nav-card { animation: none; will-change: auto; }
   .nav-card:hover { translate: 0 -6px; }
   html[data-ambient="still"] .eb-l { opacity: .42; }
-  html[data-ambient="still"] .display-xl,
-  html[data-ambient="still"] .display-lg,
-  html[data-ambient="still"] .display-md,
-  html[data-ambient="still"] .home-hero .name .firstline,
-  html[data-ambient="still"] .home-hero .name .secondline { animation: none !important; background-position: 32% 50% !important; }
-
-  /* The heading sweep is also the most expensive thing to keep running while
-     the page is moving, so it stands down with the rest of the ambience. */
-  body.is-scrolling .display-xl,
-  body.is-scrolling .display-lg,
-  body.is-scrolling .display-md,
-  body.is-scrolling .home-hero .name .firstline,
-  body.is-scrolling .home-hero .name .secondline { animation-play-state: paused !important; }
   html[data-motion="off"] .uf-off { opacity:.72; }
 </style>
 <script id="hold-reveal">
@@ -10924,6 +11032,91 @@
     ty = (e.clientY / innerHeight) * 2 - 1;
     if (!raf) raf = requestAnimationFrame(paint);
   }, { passive: true });
+})();
+</script>
+<style id="ambient-governor-css">
+  /* Set by the ambient governor on anything looping off-screen. `animation:
+     none` (not `paused`) because a paused compositable animation can still
+     hold its compositor layer, and the layer is the cost being reclaimed. */
+  .amb-idle, .amb-idle::before, .amb-idle::after { animation: none !important; }
+</style>
+<script id="ambient-governor">
+(function () {
+  'use strict';
+  // ── ambient animation governor ──────────────────────────────────────────
+  // Measured on this page: 115 composited layers holding ~160 MB of layer
+  // texture, against 10 layers / 34 MB on a page of the same site with no
+  // ambient decoration. 47 of those layers existed for one reason — Blink
+  // promotes any element running a compositable animation to its own layer —
+  // and another 21 existed only because they overlapped one of the 47. Every
+  // compositor commit then had to walk all 115, which is why a homepage frame
+  // cost ~7.5ms to commit while other pages cost 0.08ms.
+  //
+  // The animations themselves are wanted; paying for them while they are three
+  // screens below the fold is not. So each looping element keeps its animation
+  // exactly while it is near the viewport, and gives the layer back otherwise.
+  // Nothing about the design changes — by the time a visitor can see one of
+  // these, it is running.
+  if (window.motionOff && window.motionOff()) return;
+  if (!('IntersectionObserver' in window)) return;
+
+  var IDLE = 'amb-idle';
+  var io = new IntersectionObserver(function (entries) {
+    for (var i = 0; i < entries.length; i++) {
+      var e = entries[i];
+      e.target.classList.toggle(IDLE, !e.isIntersecting);
+    }
+  }, { rootMargin: '40% 0px 40% 0px' });   // wake well before it can be seen
+
+  var watched = 'undefined' !== typeof WeakSet ? new WeakSet() : null;
+
+  // An element counts if it, or either of its pseudo-elements, runs forever.
+  function loops(el) {
+    var c = getComputedStyle(el);
+    if (c.animationName !== 'none' && c.animationIterationCount.indexOf('infinite') !== -1) return true;
+    for (var i = 0; i < 2; i++) {
+      var pc = getComputedStyle(el, i ? '::after' : '::before');
+      if (pc.animationName !== 'none' && pc.animationIterationCount.indexOf('infinite') !== -1) return true;
+    }
+    return false;
+  }
+
+  function scan(root) {
+    var els = (root || document).querySelectorAll('*');
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      if (watched && watched.has(el)) continue;
+      // Reading computed style for every element is the one expensive thing
+      // here, so it happens at idle and each element is only ever asked once.
+      if (!loops(el)) continue;
+      if (watched) watched.add(el);
+      io.observe(el);
+    }
+  }
+
+  var idle = window.requestIdleCallback || function (f) { return setTimeout(f, 200); };
+  function sweep(root) { idle(function () { try { scan(root); } catch (e) {} }, { timeout: 2000 }); }
+
+  function boot() {
+    sweep(document);
+    // Views render lazily and the chat appends nodes, so newly added subtrees
+    // get the same treatment — coalesced, and never during a scroll.
+    if (!('MutationObserver' in window)) return;
+    var pending = false;
+    new MutationObserver(function (muts) {
+      if (pending) return;
+      for (var i = 0; i < muts.length; i++) {
+        if (muts[i].addedNodes && muts[i].addedNodes.length) {
+          pending = true;
+          idle(function () { pending = false; try { scan(document); } catch (e) {} }, { timeout: 3000 });
+          return;
+        }
+      }
+    }).observe(document.body, { childList: true, subtree: true });
+  }
+
+  if (document.readyState === 'complete') sweep(document), boot();
+  else window.addEventListener('load', boot, { once: true });
 })();
 </script>
 <script id="cine-meta-rotate">
@@ -11197,11 +11390,25 @@
     if (!SR || !wantOn || suspended) return;
     if (document.hidden) { scheduleRestart(1500); return; }   // don't churn in a background tab
     try {
-      rec = new SR(); rec.lang='en-IN'; rec.continuous=true; rec.interimResults=true;
+      // interimResults=false. This is a WAKE-WORD listener: it only needs the
+      // finished transcript of an utterance to look for "hey anchit". With
+      // interim results on, Chrome fires `onresult` many times a second for as
+      // long as there is any sound in the room — and each one runs the handler,
+      // keeps the recognition pipeline hot, and (in Chrome) keeps streaming
+      // audio to a remote recogniser. That is a permanent cost for information
+      // this listener throws away.
+      //
+      // No test in this repo could have caught it: headless Chromium has no
+      // microphone, so this whole path is dead in every automated run. It was
+      // only visible because the pill on the live site read "Listening…".
+      rec = new SR(); rec.lang='en-IN'; rec.continuous=true; rec.interimResults=false;
       rec.onresult = function(e){
         for (var i=e.resultIndex;i<e.results.length;i++){ handle(e.results[i][0].transcript); }
       };
-      rec.onend = function(){ if (wantOn && !activating && !suspended) scheduleRestart(400); };
+      // 400ms was rebuilding the whole audio pipeline several times a minute —
+      // Chrome ends continuous recognition on its own after a stretch of
+      // silence. 2s is still instant to a person about to say a wake word.
+      rec.onend = function(){ if (wantOn && !activating && !suspended) scheduleRestart(2000); };
       rec.onerror = function(ev){
         // 'not-allowed' → permission denied; stop and show enable.
         if (ev && ev.error === 'not-allowed'){ wantOn=false; save('off'); setState('off','Tap to enable'); return; }
@@ -11214,7 +11421,17 @@
       setState('listening','Listening…');
     } catch(e){ scheduleRestart(1500); }
   }
-  function scheduleRestart(ms){ clearTimeout(restartTimer); restartTimer = setTimeout(function(){ if (wantOn && !activating && !suspended) start(); }, ms); }
+  function scheduleRestart(ms){
+    clearTimeout(restartTimer);
+    restartTimer = setTimeout(function(){
+      if (!wantOn || activating || suspended) return;
+      // Do not restart mid-scroll. Rebuilding the audio pipeline competes with
+      // the gesture for the same main thread, and nobody says a wake word while
+      // they are flicking down a page.
+      if (window.__scrolling) return scheduleRestart(600);
+      start();
+    }, ms);
+  }
   function stop(){ wantOn=false; try { rec && rec.stop(); } catch(e){} setState('off','Voice: off'); }
   function enable(){ wantOn=true; save('on'); start(); }
 
@@ -11268,8 +11485,28 @@
   if (!SR){ setState('off','Voice n/a'); pill.title='Voice wake-word needs Chrome/Edge'; return; }
 
   // Auto-listen on open unless the user turned it off before.
+  //
+  // Not at 800ms. Starting a SpeechRecognition opens the audio input device and
+  // (in Chrome) a streaming connection to a remote recogniser — main-thread and
+  // network work landing squarely in the window where the visitor is making
+  // their first scroll. Wait for load, then for the browser to actually be
+  // idle, then for the page to be still. A wake word is ambient; it has no
+  // deadline, so it should never compete with the first gesture.
+  function bootListener(){
+    if (!wantOn) return;
+    if (window.__scrolling) return setTimeout(bootListener, 700);
+    start();
+  }
+  function armListener(){
+    var ric = window.requestIdleCallback || function(f){ return setTimeout(f, 1200); };
+    ric(bootListener, { timeout: 4000 });
+  }
   if (saved() === 'off'){ setState('off','Tap to enable'); }
-  else { wantOn = true; setState('listening','Starting…'); setTimeout(start, 800); }
+  else {
+    wantOn = true; setState('listening','Starting…');
+    if (document.readyState === 'complete') setTimeout(armListener, 1200);
+    else window.addEventListener('load', function(){ setTimeout(armListener, 1200); }, { once: true });
+  }
 })();
 </script>
 <script id="chat-persona-js">
