@@ -10358,6 +10358,52 @@
     var gsap = window.gsap;
     if (window.ScrollTrigger) gsap.registerPlugin(window.ScrollTrigger);
 
+    // ── never measure the document out from under a scroll ────────────────
+    // ScrollTrigger.refresh() measures by JUMPING the page to 0, reading the
+    // layout, and putting the scroll back where it found it. That is fine on a
+    // still page and wrong on a moving one: it restores the position it saved a
+    // few milliseconds ago, so a visitor who is mid-gesture gets pulled
+    // backwards. Caught in a scroll trace of an immediate scroll — the page ran
+    // 200 -> 400px and was then yanked to 200px at 879ms by the refresh that
+    // fires on `load`.
+    //
+    // So the automatic refresh on DOMContentLoaded and load is turned off and
+    // replaced with one that waits for the page to be still. resize and
+    // visibilitychange stay automatic: both already imply the visitor is not
+    // mid-scroll, and a stale measurement after a resize is worse.
+    if (window.ScrollTrigger) {
+      try { window.ScrollTrigger.config({ autoRefreshEvents: 'visibilitychange,resize' }); } catch (e) {}
+      // One authority for "refresh, but not right now". Every caller uses it,
+      // so no path can reintroduce a mid-scroll jump.
+      // `window.__scrolling` is driven by scroll EVENTS, which go quiet in the
+      // gaps of the browser's own wheel animation — so a refresh could still
+      // slip in while the page was travelling, jump it to 0 to measure, and
+      // leave the visitor at the top. Measured: 5 runs in 14 showed a hard
+      // 200px -> 0px snap between two painted frames, always at ~900-1000ms,
+      // which is when this fires. The document is the authority instead: three
+      // consecutive frames at the same offset means nothing is moving it.
+      var stillness = window.__whenPageStill || function (fn) {
+        var lastY = -1, still = 0;
+        (function step() {
+          var y = window.scrollY || document.documentElement.scrollTop || 0;
+          if (y === lastY) still++; else { still = 0; lastY = y; }
+          if (still < 3) return requestAnimationFrame(step);
+          fn();
+        })();
+      };
+      window.__stRefresh = function () {
+        if (!window.ScrollTrigger) return;
+        stillness(function () {
+          try { window.ScrollTrigger.refresh(); } catch (e) {}
+        });
+      };
+      // ScrollTrigger still needs its first real measurement once the page has
+      // laid out — without it every pin and start/end value is wrong — so take
+      // the first still moment after load.
+      if (document.readyState === 'complete') setTimeout(window.__stRefresh, 60);
+      else window.addEventListener('load', function () { setTimeout(window.__stRefresh, 60); }, { once: true });
+    }
+
     // 1) Home hero entrance (once, on load). Targets Tailwind-classed hero bits,
     //    which the reveal observer does not manage, so there's no conflict.
     if (!reduceMotion) {
@@ -10838,7 +10884,9 @@
       });
       // The stage is 260vh of scroll that exists only on the home view. When the
       // router swaps panels, every measurement below it shifts, so recompute.
-      document.addEventListener('viewChanged', function () { window.ScrollTrigger.refresh(); });
+      document.addEventListener('viewChanged', function () {
+        (window.__stRefresh || window.ScrollTrigger.refresh)();
+      });
     }
   }
 })();
@@ -10903,7 +10951,9 @@
       .to(skills, { opacity: 1, y: 0, duration: 0.35, stagger: 0.09 }, '-=0.15');
 
     // The router changes the document height under every measurement below it.
-    document.addEventListener('viewChanged', function () { try { ST.refresh(); } catch (e) {} });
+    document.addEventListener('viewChanged', function () {
+      try { (window.__stRefresh || ST.refresh.bind(ST))(); } catch (e) {}
+    });
 
     // Last line of defence: if the timeline never ran — a refresh that measured
     // the section at zero height, a trigger that never fired — show it anyway.

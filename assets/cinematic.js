@@ -427,11 +427,45 @@
   // frame late — the exact jerkiness Lenis is added to remove. So Lenis is
   // ticked BY gsap.ticker where GSAP exists, and ScrollTrigger updates on
   // every Lenis scroll.
+  // Runs `fn` once the document has been at the same scroll offset for three
+  // consecutive frames — i.e. nothing is animating it any more. See initLenis
+  // for why that is the test rather than "is a scroll event firing".
+  window.__whenPageStill = function (fn) { whenPageStill(fn); };
+  function whenPageStill(fn) {
+    var lastY = -1, still = 0;
+    (function step() {
+      var y = window.scrollY || document.documentElement.scrollTop || 0;
+      if (y === lastY) still++; else { still = 0; lastY = y; }
+      if (still < 3) return requestAnimationFrame(step);
+      fn();
+    })();
+  }
+
   function initLenis() {
     if (motionOff || window.__lenis) return;
     if (typeof window.Lenis !== 'function') return;          // script not loaded: native scroll
     if (matchMedia('(pointer: coarse)').matches) return;     // touch already has momentum
 
+    // Never take over a scroll that is already in flight.
+    //
+    // The browser runs its own animation for wheel input. Start Lenis while one
+    // is still travelling and there are two engines writing the scroll position
+    // on the same frames: Lenis writes its value, the browser writes its own,
+    // and the page visibly snaps backwards. Measured by sampling scrollY once
+    // per RENDERED frame — a backwards step between two painted frames is
+    // something a person actually sees, two scroll events inside one frame are
+    // not — anyone who scrolled in the first half second got a 200px jump
+    // backwards at ~950ms, which is when this runs. Caught in the act by
+    // watching writes to documentElement.scrollTop: Lenis.setScroll writing
+    // 0.199px while the page sat at 200px.
+    //
+    // `window.__scrolling` is not a strict enough test: it is driven by scroll
+    // EVENTS, and it goes quiet while the browser's animation is still
+    // travelling. The document itself is the authority — three consecutive
+    // frames at the same offset means nothing is animating it any more.
+    //
+    // Waiting costs nothing. Until Lenis exists the browser scrolls natively,
+    // which is exactly what was happening during that window anyway.
     var lenis = new window.Lenis({
       duration: 1.05,
       easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); },
@@ -439,12 +473,86 @@
     });
     window.__lenis = lenis;
 
+    // Keep Lenis's idea of the scroll and the document's from drifting apart.
+    //
+    // Lenis normally re-syncs itself when something else scrolls the page — it
+    // listens for the scroll event and calls onNativeScroll. But it also sets
+    // `preventNextNativeScrollEvent` after each of its own writes, so that it
+    // does not treat its own output as somebody else's input. During the
+    // handover from native scrolling that flag lands on the WRONG event: the
+    // visitor's real wheel scroll arrives, gets swallowed as "ours", and Lenis
+    // carries on animating from a position the page left several frames ago.
+    //
+    // The symptom was always the same size — exactly one wheel notch backwards,
+    // caught by sampling scrollY once per rendered frame and traced to
+    // Lenis.setScroll writing 0.199px while the document sat at 200px.
+    //
+    // reset() is Lenis's own remedy: it snaps its internal state to where the
+    // document actually is. It is called once on start-up and then watched for
+    // over the handover window, after which no native scrolling remains to
+    // race with and the watchdog retires.
+    try { lenis.reset(); } catch (e) {}
+
+    // Correct the drift IN Lenis's own tick, immediately before it computes the
+    // frame. An earlier version did this from a separate requestAnimationFrame
+    // and still let ~4 runs in 14 jump: rAF callbacks run in registration
+    // order, so the correction landed BEFORE Lenis's tick and Lenis simply
+    // overwrote it with the stale tween value in the same frame. Fixing the
+    // start position has to be the last thing that happens before the tween is
+    // evaluated.
+    var driftUntil = (window.performance && performance.now ? performance.now() : 0) + 2500;
+    function fixDrift() {
+      var now = window.performance && performance.now ? performance.now() : driftUntil + 1;
+      if (now > driftUntil) return;                 // handover is over; stop paying for it
+      try {
+        var y = window.scrollY || document.documentElement.scrollTop || 0;
+          // Only the START of the tween is corrected, never its destination.
+          //
+          // Instrumented, one wheel notch into a fresh page:
+          //   scrollY=200  animatedScroll=0  targetScroll=200
+          // The browser had already applied the notch while Lenis was still
+          // setting up, so Lenis began tweening 0 -> 200 across a page that was
+          // at 200 — and its first written frame threw the visitor back to the
+          // top. Moving `animatedScroll` up to where the document actually is
+          // leaves `targetScroll` alone, so the tween finishes at the place the
+          // visitor asked for; it simply no longer starts from the past.
+          //
+          // reset() is the wrong tool here: it drags the target back to the
+          // current position too, which cancels the scroll instead of fixing
+          // it. And the earlier `!lenis.isScrolling` guard could never be true —
+          // isScrolling is the STRING 'smooth' while Lenis animates, so the
+          // check was always false and this never ran at all.
+        // The wheel notch that lands as Lenis starts up is applied TWICE, and
+        // reset() is what un-does the duplicate.
+        //
+        // Captured frame by frame, with every write to scrollTop traced:
+        //
+        //     779ms  scrollY   0   (Lenis not up yet)
+        //     894ms  scrollY 200   animated   0   target 200
+        //     895ms  Lenis.setScroll writes 0.2
+        //     976ms  scrollY   0   <- the visitor is thrown back to the top
+        //
+        // The browser handled that notch itself (page -> 200) and Lenis also
+        // counted it (target -> 200) while its own position was still 0, so it
+        // began tweening 0 -> 200 across a page that had already arrived — and
+        // its first written frame put the visitor back at the top.
+        //
+        // Assigning `animatedScroll` cannot fix it: Lenis's Animate object owns
+        // the tween's start value and writes it back out on every frame, so an
+        // external assignment is overwritten before it can be painted. reset()
+        // is the supported way to say "you are here now", and because the
+        // movement has ALREADY been applied natively, dropping the duplicate
+        // target is exactly right rather than a lost scroll.
+        if (Math.abs(lenis.animatedScroll - y) > 4) lenis.reset();
+      } catch (e) {}
+    }
+
     if (window.gsap && window.ScrollTrigger) {
       lenis.on('scroll', window.ScrollTrigger.update);
-      window.gsap.ticker.add(function (time) { lenis.raf(time * 1000); });
+      window.gsap.ticker.add(function (time) { fixDrift(); lenis.raf(time * 1000); });
       window.gsap.ticker.lagSmoothing(0);
     } else {
-      var raf = function (t) { lenis.raf(t); requestAnimationFrame(raf); };
+      var raf = function (t) { fixDrift(); lenis.raf(t); requestAnimationFrame(raf); };
       requestAnimationFrame(raf);
     }
     // The rails intercept the wheel; Lenis must not fight them.
@@ -510,11 +618,21 @@
 
   function boot() {
     observe();
-    // Reveals and smooth scroll are what the FIRST scroll needs; everything
-    // else is decoration and can wait. Loading it all at 400ms put parallax
-    // scanning, 38 magnetic listeners and a cursor rAF into exactly the frame
-    // budget the opening scroll was competing for.
-    setTimeout(function () { enrich(); railify(); initLenis(); }, 300);
+    // Lenis goes up FIRST, not on a timer.
+    //
+    // Every jump this page used to make on an early scroll was exactly one
+    // wheel notch backwards, and that is the signature of a handover: a wheel
+    // event handled natively while Lenis is still being set up, then Lenis's
+    // next frame writing its own position over the top of it. Deferring the
+    // setup only widens the window in which that can happen. The fix is to
+    // close it — be the scroll engine before there is a scroll to hand over.
+    //
+    // whenPageStill still guards it, for anyone who manages to scroll first.
+    whenPageStill(initLenis);
+    // Everything else is decoration and can wait. Loading it all at 400ms put
+    // parallax scanning, 38 magnetic listeners and a cursor rAF into exactly
+    // the frame budget the opening scroll was competing for.
+    setTimeout(function () { enrich(); railify(); }, 300);
 
     var idle = window.requestIdleCallback || function (fn) { return setTimeout(fn, 900); };
     idle(function () {
