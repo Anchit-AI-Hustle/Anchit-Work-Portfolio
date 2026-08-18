@@ -2,14 +2,14 @@
  * Cache name is version-stamped so each deploy purges the previous cache
  * (the activate handler deletes every cache whose name !== CACHE). Bump
  * this string on every deploy that changes assets. */
-const CACHE = 'anchit-portfolio-20260813-paint-lean';
+const CACHE = 'anchit-portfolio-20260817-three-esm';
 const SHELL = [
   '/',
   '/index.html',
   '/task-tracker.html',
   '/manifest.json',
   '/assets/task-tracker-shell.js',
-  /* three.min.js is deliberately NOT precached. It is 670 KB, it is fetched
+  /* three.module.min.js is deliberately NOT precached. It is 670 KB, it is fetched
      lazily on idle and only on hardware that can keep the nebula, and half the
      visitors never request it at all — precaching it spent that download on
      every install. It still lands in the runtime cache the first time a page
