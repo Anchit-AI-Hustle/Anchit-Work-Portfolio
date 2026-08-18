@@ -62,7 +62,7 @@ function Scene() {
 }
 
 export default function HowToVisualCanvas() {
-  const { loading, result, error, run } = useCascade();
+  const { loading, result, error, offline, run } = useCascade();
   const [activeId, setActiveId] = useState<string>();
   const guide = result?.guide;
 
@@ -131,6 +131,18 @@ export default function HowToVisualCanvas() {
                   <span>{guide.steps.length} steps</span>
                 </div>
               </header>
+
+              {/* A generic outline must never be mistaken for a real answer.
+                  This banner is the whole reason the placeholder guide could
+                  sit in production unnoticed: nothing on screen distinguished
+                  "the models wrote this for your task" from "the service was
+                  unreachable, so here is a template". */}
+              {offline && (
+                <div className="fallback-note" role="status">
+                  <strong>Generic outline</strong>
+                  <span>{error || 'The guide service did not answer, so these are placeholder steps rather than real instructions for this task.'}</span>
+                </div>
+              )}
 
               {/* Progress track */}
               <div className="track" aria-label="Progress">

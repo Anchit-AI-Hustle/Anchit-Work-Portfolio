@@ -32,18 +32,22 @@ export function useCascade() {
       const serverOffline = models.length === 1 && models[0] === 'offline';
       if (serverOffline) {
         const rebuilt = offlineCascadeResult(title);
-        setState({ loading: false, result: rebuilt, error: null, offline: true });
+        setState({ loading: false, result: rebuilt, error: 'No model produced a guide — showing a generic outline.', offline: true });
         return rebuilt;
       }
       if (result.guide) result.guide.task = title;   // real guide → keep the displayed title clean
       setState({ loading: false, result, error: null, offline: false });
       return result;
-    } catch {
-      // No serverless cascade reachable (e.g. a static /how-to build with no
-      // functions or keys) → produce a deterministic guide on the client so the
-      // engine always answers instead of showing an error.
+    } catch (e) {
+      // Still answer rather than showing a dead screen — but SAY SO. The old
+      // version swallowed the reason and set error:null, so a completely
+      // unreachable endpoint looked identical to a real guide. That is how
+      // "Get set up / Do the first move / Avoid the common trap" reached
+      // production and stayed there: the placeholder was indistinguishable
+      // from an answer, to the user and to anyone testing it.
       const result = offlineCascadeResult(title);
-      setState({ loading: false, result, error: null, offline: true });
+      const why = e instanceof Error ? e.message : 'the guide service is unreachable';
+      setState({ loading: false, result, error: why, offline: true });
       return result;
     }
   }, []);
