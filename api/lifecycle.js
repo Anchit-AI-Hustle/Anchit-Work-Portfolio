@@ -27,10 +27,9 @@ function geminiKey() {
   return (e.GEMINI_API_KEY || e.Gemini_API_Key || e.GEMINI_KEY || e.GOOGLE_API_KEY
     || e.GOOGLE_GENAI_API_KEY || e.GOOGLE_GEMINI_API_KEY || '').trim();
 }
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
-const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
-const CEREBRAS_MODEL = process.env.CEREBRAS_MODEL || 'llama-3.3-70b';
-const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct:free';
+// Model ids live in _models.js as a chain per provider, not one pinned id here.
+// Every id this file used to hardcode has since been retired by its provider.
+const { tryModels, httpError } = require('./_models.js');
 
 function haveAnyProvider() {
   return !!(process.env.GROQ_API_KEY || process.env.CEREBRAS_API_KEY || geminiKey() || process.env.OPENROUTER_API_KEY);
@@ -111,19 +110,17 @@ async function oaiChat(url, key, model, prompt, jsonMode, extraHeaders) {
   const body = { model, messages: [{ role: 'user', content: prompt }], temperature: 0.6, max_tokens: 4096 };
   if (jsonMode) body.response_format = { type: 'json_object' };
   const r = await fetchTO(url, { method: 'POST', headers: Object.assign({ 'content-type': 'application/json', Authorization: 'Bearer ' + key }, extraHeaders || {}), body: JSON.stringify(body) });
-  if (r.status === 429) throw new Error('429');
-  if (!r.ok) throw new Error('http_' + r.status);
+  if (!r.ok) throw await httpError(r);
   const d = await r.json();
   return (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
 }
 
-async function geminiGen(key, prompt) {
-  const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + GEMINI_MODEL + ':generateContent?key=' + encodeURIComponent(key);
+async function geminiGen(key, model, prompt) {
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + encodeURIComponent(key);
   const opts = { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { temperature: 0.6, maxOutputTokens: 4096 } }) };
   let r = await fetchTO(url, opts);
   if (r.status === 429) { await new Promise((s) => setTimeout(s, 2500)); r = await fetchTO(url, opts); }
-  if (r.status === 429) throw new Error('429');
-  if (!r.ok) throw new Error('http_' + r.status);
+  if (!r.ok) throw await httpError(r);
   const d = await r.json();
   const parts = (d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts) || [];
   return parts.filter((p) => typeof p.text === 'string').map((p) => p.text).join('').trim();
@@ -131,17 +128,24 @@ async function geminiGen(key, prompt) {
 
 async function generate(prompt) {
   const providers = [];
-  if (process.env.GROQ_API_KEY) providers.push(() => oaiChat('https://api.groq.com/openai/v1/chat/completions', process.env.GROQ_API_KEY, GROQ_MODEL, prompt, true));
-  if (process.env.CEREBRAS_API_KEY) providers.push(() => oaiChat('https://api.cerebras.ai/v1/chat/completions', process.env.CEREBRAS_API_KEY, CEREBRAS_MODEL, prompt, true));
+  if (process.env.GROQ_API_KEY) providers.push(() => tryModels('groq', (m) => oaiChat('https://api.groq.com/openai/v1/chat/completions', process.env.GROQ_API_KEY, m, prompt, true)));
+  if (process.env.CEREBRAS_API_KEY) providers.push(() => tryModels('cerebras', (m) => oaiChat('https://api.cerebras.ai/v1/chat/completions', process.env.CEREBRAS_API_KEY, m, prompt, true)));
   const gk = geminiKey();
-  if (gk) providers.push(() => geminiGen(gk, prompt));
-  if (process.env.OPENROUTER_API_KEY) providers.push(() => oaiChat('https://openrouter.ai/api/v1/chat/completions', process.env.OPENROUTER_API_KEY, OPENROUTER_MODEL, prompt, false, { 'HTTP-Referer': 'https://anchit-tandon.com/d2c-lifecycle-os', 'X-Title': 'D2C-LifeCycle-OS' }));
+  if (gk) providers.push(() => tryModels('gemini', (m) => geminiGen(gk, m, prompt)));
+  if (process.env.OPENROUTER_API_KEY) providers.push(() => tryModels('openrouter', (m) => oaiChat('https://openrouter.ai/api/v1/chat/completions', process.env.OPENROUTER_API_KEY, m, prompt, false, { 'HTTP-Referer': 'https://anchit-tandon.com/d2c-lifecycle-os', 'X-Title': 'D2C-LifeCycle-OS' })));
+  // Why the failures are collected rather than swallowed: a silent `catch`
+  // here is what made a fully dead cascade look identical to "no key set" —
+  // both produced the deterministic template with nothing to explain it.
+  const errs = [];
   for (const run of providers) {
     try {
-      const plan = parsePlan(await run());
-      if (plan) return plan;
-    } catch (e) { /* next provider */ }
+      const { out, model } = await run();
+      const plan = parsePlan(out);
+      if (plan) { plan.model = model; return plan; }
+      errs.push(model + ':bad_output');
+    } catch (e) { errs.push(String((e && e.message) || e).slice(0, 200)); }
   }
+  if (errs.length) console.error('lifecycle: all providers failed: ' + errs.join(' | '));
   return null;
 }
 

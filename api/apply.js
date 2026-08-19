@@ -9,17 +9,16 @@
 // Env:
 //   SUPABASE_URL, SUPABASE_ANON_KEY   gate (same project as /api/jobhunt)
 //   GEMINI_API_KEY (or Gemini_API_Key / GEMINI_KEY / GOOGLE_API_KEY …)  free Gemini key
-//   GEMINI_MODEL   optional; default gemini-2.0-flash
+//   GEMINI_MODEL   optional; forced first, else the chain in _models.js
 
 function geminiKey() {
   const e = process.env;
   return (e.GEMINI_API_KEY || e.Gemini_API_Key || e.GEMINI_KEY || e.GOOGLE_API_KEY
     || e.GOOGLE_GENAI_API_KEY || e.GOOGLE_GEMINI_API_KEY || '').trim();
 }
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
-const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
-const CEREBRAS_MODEL = process.env.CEREBRAS_MODEL || 'llama-3.3-70b';
-const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct:free';
+// Model ids live in _models.js as a chain per provider, not one pinned id here.
+// Every id this file used to hardcode has since been retired by its provider.
+const { tryModels, httpError } = require('./_models.js');
 
 function haveAnyProvider() {
   return !!(process.env.GROQ_API_KEY || process.env.CEREBRAS_API_KEY || geminiKey() || process.env.OPENROUTER_API_KEY);
@@ -113,19 +112,17 @@ async function oaiChat(url, key, model, prompt, jsonMode, extraHeaders) {
   const body = { model, messages: [{ role: 'user', content: prompt }], temperature: 0.5, max_tokens: 4096 };
   if (jsonMode) body.response_format = { type: 'json_object' };
   const r = await fetchTO(url, { method: 'POST', headers: Object.assign({ 'content-type': 'application/json', Authorization: 'Bearer ' + key }, extraHeaders || {}), body: JSON.stringify(body) });
-  if (r.status === 429) throw new Error('429');
-  if (!r.ok) throw new Error('http_' + r.status);
+  if (!r.ok) throw await httpError(r);
   const d = await r.json();
   return (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
 }
 
-async function geminiGen(key, prompt) {
-  const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + GEMINI_MODEL + ':generateContent?key=' + encodeURIComponent(key);
+async function geminiGen(key, model, prompt) {
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + encodeURIComponent(key);
   const opts = { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { temperature: 0.5, maxOutputTokens: 4096 } }) };
   let r = await fetchTO(url, opts);
   if (r.status === 429) { await new Promise((s) => setTimeout(s, 2500)); r = await fetchTO(url, opts); }
-  if (r.status === 429) throw new Error('429');
-  if (!r.ok) throw new Error('http_' + r.status);
+  if (!r.ok) throw await httpError(r);
   const d = await r.json();
   const parts = (d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts) || [];
   return parts.filter((p) => typeof p.text === 'string').map((p) => p.text).join('').trim();
@@ -134,19 +131,22 @@ async function geminiGen(key, prompt) {
 // Try free providers in order of free-tier generosity until one returns a kit.
 async function generate(prompt) {
   const providers = [];
-  if (process.env.GROQ_API_KEY) providers.push({ n: 'groq', run: () => oaiChat('https://api.groq.com/openai/v1/chat/completions', process.env.GROQ_API_KEY, GROQ_MODEL, prompt, true) });
-  if (process.env.CEREBRAS_API_KEY) providers.push({ n: 'cerebras', run: () => oaiChat('https://api.cerebras.ai/v1/chat/completions', process.env.CEREBRAS_API_KEY, CEREBRAS_MODEL, prompt, true) });
+  if (process.env.GROQ_API_KEY) providers.push({ n: 'groq', run: () => tryModels('groq', (m) => oaiChat('https://api.groq.com/openai/v1/chat/completions', process.env.GROQ_API_KEY, m, prompt, true)) });
+  if (process.env.CEREBRAS_API_KEY) providers.push({ n: 'cerebras', run: () => tryModels('cerebras', (m) => oaiChat('https://api.cerebras.ai/v1/chat/completions', process.env.CEREBRAS_API_KEY, m, prompt, true)) });
   const gk = geminiKey();
-  if (gk) providers.push({ n: 'gemini', run: () => geminiGen(gk, prompt) });
-  if (process.env.OPENROUTER_API_KEY) providers.push({ n: 'openrouter', run: () => oaiChat('https://openrouter.ai/api/v1/chat/completions', process.env.OPENROUTER_API_KEY, OPENROUTER_MODEL, prompt, false, { 'HTTP-Referer': 'https://anchit-tandon.com/jobhunt', 'X-Title': 'JobHunt' }) });
+  if (gk) providers.push({ n: 'gemini', run: () => tryModels('gemini', (m) => geminiGen(gk, m, prompt)) });
+  if (process.env.OPENROUTER_API_KEY) providers.push({ n: 'openrouter', run: () => tryModels('openrouter', (m) => oaiChat('https://openrouter.ai/api/v1/chat/completions', process.env.OPENROUTER_API_KEY, m, prompt, false, { 'HTTP-Referer': 'https://anchit-tandon.com/jobhunt', 'X-Title': 'JobHunt' })) });
 
   const errs = [];
   for (const p of providers) {
     try {
-      const kit = parseKit(await p.run());
-      if (kit && (kit.resume || kit.coverLetter)) return { kit };
-      errs.push(p.n + ':bad_output');
-    } catch (e) { errs.push(p.n + ':' + String((e && e.message) || e).slice(0, 30)); }
+      const { out, model } = await p.run();
+      const kit = parseKit(out);
+      if (kit && (kit.resume || kit.coverLetter)) return { kit, model: p.n + '/' + model };
+      errs.push(p.n + '/' + model + ':bad_output');
+      // Every model id in the chain answered but none parsed — report the
+      // provider that got furthest rather than collapsing it to one word.
+    } catch (e) { errs.push(String((e && e.message) || e).slice(0, 200)); }
   }
   return { detail: errs.join(' | ') };
 }
