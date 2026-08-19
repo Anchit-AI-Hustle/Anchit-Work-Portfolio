@@ -29,6 +29,8 @@ const MUTANT_CSS = `
   .build-details li { -webkit-line-clamp: none !important; display: flex !important; }
   .build-tag { flex-wrap: wrap !important; height: auto !important; }
   .build-card .build-actions { height: auto !important; min-height: 68px !important; flex-wrap: wrap !important; margin-top: auto !important; }
+  .hero-problem { display: none !important; }
+  .hero-problem .bp-text { -webkit-line-clamp: 1 !important; display: -webkit-box !important; overflow: hidden !important; }
   .builds-grid { align-items: flex-start !important; }
   .build-card:nth-child(3) { height: 380px !important; }
 `;
@@ -180,10 +182,42 @@ const MUTANT_CSS = `
     sliced.length === 0,
     sliced.length ? sliced.slice(0, 3).join(' | ') : 'every clamped box is a whole number of lines');
 
+  // Back to home, then scroll the hero tile into view — it sits below the
+  // cinematic boot sequence, so measuring it at scroll 0 measures an element
+  // that has not been reached yet, not one that is broken.
+  await p.click('.sidebar-item[data-view="home"]');
+  await p.waitForTimeout(1200);
+  await p.evaluate(() => document.querySelector('#homeHeroTile')
+    .scrollIntoView({ block: 'center', behavior: 'instant' }));
+  await p.waitForTimeout(2500);
+
   const spill = m.overflow.map((o, i) => (o > TOL ? `${m.titles[i]}:+${o}px` : null)).filter(Boolean);
   check('no card overflows its own box',
     spill.length === 0,
     spill.length ? spill.join(', ') : 'none');
+
+  // The homepage has to answer the same question the cards do — what problem
+  // is this solving — and it must not be truncated or hidden.
+  const home = await p.evaluate(() => {
+    const el = document.querySelector('.hero-problem');
+    if (!el) return { present: false };
+    const t = el.querySelector('.bp-text');
+    return {
+      present: true,
+      visible: el.getBoundingClientRect().height > 0 && parseFloat(getComputedStyle(el).opacity) > 0.9,
+      label: (el.querySelector('.bp-label')?.textContent || '').trim(),
+      chars: (t?.textContent || '').trim().length,
+      // A hidden box has scrollHeight === clientHeight === 0, which reads as
+      // "nothing is cut off". It is the most cut off it can possibly be.
+      truncated: (!t || t.getBoundingClientRect().height === 0)
+        ? 999 : Math.max(0, t.scrollHeight - t.clientHeight),
+    };
+  });
+  check('the homepage states the problem it solves',
+    home.present && home.visible && home.chars > 80,
+    home.present ? `"${home.label}", ${home.chars} chars, visible=${home.visible}` : 'no .hero-problem on the page');
+  check('that statement is not truncated',
+    home.truncated === 0, `${home.truncated}px cut off`);
 
   for (const [ok, name, detail, covered] of results)
     console.log(`  ${ok}  ${name.padEnd(56)}${covered ? '' : ' [content]'} ${detail}`);

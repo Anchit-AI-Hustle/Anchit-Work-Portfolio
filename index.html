@@ -1922,7 +1922,7 @@
 
   /* Plain "what is this for" line — the same field on every card, so the answer
      is always in the same place rather than buried in the prose below it. */
-  .build-purpose {
+  .build-purpose, .hero-problem {
     position: relative; z-index: 1;
     margin: 0 0 12px; padding: 10px 12px;
     border-radius: 10px;
@@ -1939,6 +1939,11 @@
     overflow: hidden;
     min-height: calc(1.45em * 2);
   }
+  .hero-problem { margin-top: 18px; font-size: 15px; max-width: 52ch; }
+  /* The card version clamps to two lines because thirteen cards have to match.
+     The hero has one of these and it is the page's thesis — it must never be
+     cut off, so the clamp is lifted here. */
+  .hero-problem .bp-text { -webkit-line-clamp: unset; display: block; min-height: 0; overflow: visible; }
   .bp-label {
     display: block;
     font-family: var(--font-mono); font-size: 9px; font-weight: 500;
@@ -3949,6 +3954,10 @@
           <p class="text-xl md:text-2xl text-[var(--ink-dim)] font-light leading-snug relative z-10 narrate-span" data-n-idx="1">
             An <em class="text-[var(--primary)] not-italic font-medium">engineer</em> who learned to love the funnel.<br>
             <span class="text-lg mt-2 inline-block">Building products. Scaling growth. Creating leverage.</span>
+          </p>
+          <p class="hero-problem narrate-span" data-n-idx="1">
+            <span class="bp-label">The problem I work on</span>
+            <span class="bp-text">Most D2C teams plan lifecycle and retention from a blank page and a gut feel for what good looks like. I build the systems that replace it — retention data, lifecycle planning, segmentation and mailer generation in one loop.</span>
           </p>
         </div>
 

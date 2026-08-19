@@ -194,13 +194,33 @@ built site and assert on what a visitor would actually see. Serve `www/` first
 node scripts/motionfix.js        # motion regressions — 8 checks
 node scripts/turn-by-turn.js     # blocks arrive one at a time, entrances differ
 npm run test:providers           # LLM cascade survives a retired model id — 6 checks
-npm run test:cards               # Side Hustle cards are equal and explained — 10 checks
+npm run test:cascade             # the REAL handlers, driven end-to-end — 9 checks
+npm run test:cards               # cards equal + the page explains itself — 12 checks
 npm run test:entrance            # nothing parked at an unfinished 3D entrance — 8 checks
 ```
 
 `provider-chain.js` needs no server; it stubs the network. It is also fully
 mutation-covered — `MUT=1 npm run test:providers` must report every check
 failing.
+
+`cascade-e2e.js` goes a level further: it calls the **real exported handlers**
+of `api/mailer.js` with a fake `req`/`res` and a stubbed `global.fetch`, then
+asserts on the requests actually made and the JSON actually returned.
+`provider-chain.js` proves the helper is right; this proves the routes *use* it
+right, which is where the shipped bug lived. It has two targeted mutation modes,
+and each must break only the checks it targets while the rest keep passing:
+
+```bash
+MUT=ids      npm run test:cascade   # one pinned retired id per provider (the shipped bug)
+MUT=classify npm run test:cascade   # isModelMiss always true — chain burnt on any error
+```
+
+Two modes rather than one because a single blanket mutation cannot break both
+properties: shortening a chain to one id breaks "a 404 advances within the
+provider", but simultaneously makes "a 401 does not burn the chain" trivially
+true. `MUT=classify` rewrites the module source and injects it into
+`require.cache`, because `tryModels` calls `isModelMiss` as a module-local
+reference that reassigning the export cannot reach.
 
 `motionfix.js` pairs **every** check with a mutation that reintroduces the bug it
 guards, so the suite can be shown to fail rather than assumed to work:
