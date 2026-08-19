@@ -210,7 +210,10 @@
           const opex = v.fixed * v.months;
           const marketing = v.orders * v.cac * v.months * 0.6;   // ramping, not flat from day one
           const total = stock + opex + marketing;
-          const payback = contribution > 0 ? v.cac / contribution : Infinity;
+          // How long before the money comes back. This is the question that
+          // follows "what capital would it take?", and the model was computing
+          // a half-formed version of it and then throwing it away.
+          const monthsToRecover = netMonthly > 0 ? total / netMonthly : Infinity;
           return {
             out: [
               { k: 'Opening stock', v: money(stock), cls: '' },
@@ -218,6 +221,8 @@
               { k: 'After ad cost', v: money(contribution), cls: contribution > 0 ? 'ok' : 'warn' },
               { k: 'Capital needed', v: money(total), cls: 'warn' },
               { k: 'Monthly net at run-rate', v: money(netMonthly), cls: netMonthly >= 0 ? 'ok' : 'warn' },
+              { k: 'Months to earn it back', v: isFinite(monthsToRecover) ? Math.ceil(monthsToRecover) + ' mo' : 'never, yet',
+                cls: isFinite(monthsToRecover) && monthsToRecover <= 24 ? 'ok' : 'warn' },
             ],
             verdict: contribution <= 0
               ? '<strong>This does not work yet.</strong> Every order loses ' + money(-contribution) +
@@ -225,7 +230,9 @@
               : '<strong>Each order contributes ' + money(contribution) + '.</strong> You need roughly ' +
                 money(total) + ' to open with ' + v.skus + ' SKUs and survive ' + v.months +
                 ' months. Stock is ' + Math.round((stock / total) * 100) + '% of that — in a catalogue business it usually is, which is why narrow ranges start cheaper. At ' +
-                v.orders + ' orders a month you are ' + (netMonthly >= 0 ? 'above water by ' + money(netMonthly) + ' a month.' : 'still short by ' + money(-netMonthly) + ' a month.'),
+                v.orders + ' orders a month you are ' + (netMonthly >= 0
+                  ? 'above water by ' + money(netMonthly) + ' a month, which returns the capital in about ' + Math.ceil(monthsToRecover) + ' months.'
+                  : 'still short by ' + money(-netMonthly) + ' a month, so the capital never comes back at this run-rate.'),
           };
         },
       },
