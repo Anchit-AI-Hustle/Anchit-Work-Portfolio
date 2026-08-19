@@ -3,77 +3,178 @@
   "trailingSlash": false,
   "outputDirectory": "www",
   "redirects": [
-    { "source": "/Ayushi", "destination": "/ayushi", "permanent": true },
-    { "source": "/Ayushi/:path*", "destination": "/ayushi/:path*", "permanent": true },
-    { "source": "/how-to-1", "destination": "/how-to", "permanent": false },
-    { "source": "/how-to-1/:path*", "destination": "/how-to/:path*", "permanent": false },
-    { "source": "/how-to-2", "destination": "/how-to", "permanent": false },
-    { "source": "/how-to-2/:path*", "destination": "/how-to/:path*", "permanent": false }
+    {
+      "source": "/Ayushi",
+      "destination": "/ayushi",
+      "permanent": true
+    },
+    {
+      "source": "/Ayushi/:path*",
+      "destination": "/ayushi/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/how-to-1",
+      "destination": "/how-to",
+      "permanent": false
+    },
+    {
+      "source": "/how-to-1/:path*",
+      "destination": "/how-to/:path*",
+      "permanent": false
+    },
+    {
+      "source": "/how-to-2",
+      "destination": "/how-to",
+      "permanent": false
+    },
+    {
+      "source": "/how-to-2/:path*",
+      "destination": "/how-to/:path*",
+      "permanent": false
+    }
   ],
   "rewrites": [
-    { "source": "/money-minter", "destination": "https://money-minter-rose.vercel.app/money-minter" },
-    { "source": "/money-minter/:path*", "destination": "https://money-minter-rose.vercel.app/money-minter/:path*" },
-    { "source": "/markets-pro", "destination": "https://markets-pro.vercel.app/markets-pro" },
-    { "source": "/markets-pro/:path*", "destination": "https://markets-pro.vercel.app/markets-pro/:path*" },
-    { "source": "/favicon.ico", "destination": "/icons/favicon.svg" },
-    { "source": "/ayushi", "destination": "/ayushi/index.html" },
-    { "source": "/ayushi/resume", "destination": "/ayushi/resume.html" },
-    { "source": "/how-to/api/:fn*", "destination": "/api/:fn*" },
-    { "source": "/how-to", "destination": "/how-to/index.html" },
-    { "source": "/task-tracker", "destination": "/task-tracker.html" },
-    { "source": "/marketing-101", "destination": "/marketing-101.html" }
+    {
+      "source": "/money-minter",
+      "destination": "https://money-minter-rose.vercel.app/money-minter"
+    },
+    {
+      "source": "/money-minter/:path*",
+      "destination": "https://money-minter-rose.vercel.app/money-minter/:path*"
+    },
+    {
+      "source": "/markets-pro",
+      "destination": "https://markets-pro.vercel.app/markets-pro"
+    },
+    {
+      "source": "/markets-pro/:path*",
+      "destination": "https://markets-pro.vercel.app/markets-pro/:path*"
+    },
+    {
+      "source": "/favicon.ico",
+      "destination": "/icons/favicon.svg"
+    },
+    {
+      "source": "/ayushi",
+      "destination": "/ayushi/index.html"
+    },
+    {
+      "source": "/ayushi/resume",
+      "destination": "/ayushi/resume.html"
+    },
+    {
+      "source": "/how-to/api/:fn*",
+      "destination": "/api/:fn*"
+    },
+    {
+      "source": "/how-to",
+      "destination": "/how-to/index.html"
+    },
+    {
+      "source": "/task-tracker",
+      "destination": "/task-tracker.html"
+    },
+    {
+      "source": "/marketing-101",
+      "destination": "/marketing-101.html"
+    },
+    {
+      "source": "/growth-school",
+      "destination": "/growth-school.html"
+    },
+    {
+      "source": "/ayushi/course",
+      "destination": "/ayushi/course.html"
+    }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
       ]
     },
     {
       "source": "/sw.js",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" },
-        { "key": "Service-Worker-Allowed", "value": "/" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        },
+        {
+          "key": "Service-Worker-Allowed",
+          "value": "/"
+        }
       ]
     },
     {
       "source": "/manifest.json",
       "headers": [
-        { "key": "Content-Type", "value": "application/manifest+json" },
-        { "key": "Cache-Control", "value": "public, max-age=3600" }
+        {
+          "key": "Content-Type",
+          "value": "application/manifest+json"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
       ]
     },
     {
       "source": "/icons/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=604800, immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=604800, immutable"
+        }
       ]
     },
     {
       "source": "/assets/vendor/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
       ]
     },
     {
       "source": "/assets/(.*).(webp|png|jpg|jpeg|svg|avif)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=2592000" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=2592000"
+        }
       ]
     },
     {
       "source": "/assets/(.*).(js|css)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
       ]
     },
     {
       "source": "/assets/(.*).pdf",
       "headers": [
-        { "key": "Content-Type", "value": "application/pdf" },
-        { "key": "Content-Disposition", "value": "inline" }
+        {
+          "key": "Content-Type",
+          "value": "application/pdf"
+        },
+        {
+          "key": "Content-Disposition",
+          "value": "inline"
+        }
       ]
     }
   ]

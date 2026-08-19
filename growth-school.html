@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Growth School — social, search, brand and growth, taught properly</title>
+<meta name="description" content="A free, practical course in social media marketing, SEO, brand and growth. Short chapters, real arithmetic, working simulators, and activities you can do without an account." />
+<link rel="icon" type="image/svg+xml" href="icons/favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/growth-school.css" />
+</head>
+<body>
+<div id="app"></div>
+
+<script src="assets/growth-school-content.js"></script>
+<script src="assets/growth-school.js"></script>
+<script>
+  // One engine, one content file. This page only decides the framing.
+  //
+  // There is deliberately no beginner/intermediate/advanced switch: every beat
+  // carries its own "go deeper" fold, so the depth is chosen per idea by the
+  // person reading rather than declared up front by someone who cannot yet know
+  // which parts they will find easy.
+  GrowthSchool({
+    id: 'growth-school',
+    kicker: 'Free course · no account',
+    title: 'Growth <em>School</em>',
+    railSub: 'Social, search, brand and growth — in short chapters, with the arithmetic shown and simulators you can push around.',
+    tracks: GS_CONTENT.baseTracks(),
+  }, document.getElementById('app'));
+</script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>A course for Ayushi❤️ — building a brand, from the question to the number</title>
+<meta name="description" content="A written course on social, search, brand and growth, built around one real question: can I start a D2C brand, and what would it cost?" />
+<meta name="robots" content="noindex, nofollow" />
+<link rel="icon" type="image/svg+xml" href="../icons/favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/growth-school.css" />
+</head>
+<body>
+<div id="app"></div>
+
+<script src="../assets/growth-school-content.js"></script>
+<script src="../assets/growth-school.js"></script>
+<script>
+  // Same engine and same teaching as the public course — her chapters are added
+  // on top rather than in place of them, so a correction to how something is
+  // taught reaches both versions at once and they cannot drift apart.
+  //
+  // noindex above: this one is hers, not a public page.
+  GrowthSchool({
+    id: 'ayushi-course',
+    kicker: 'Written for Ayushi❤️',
+    title: 'For <em>Ayushi❤️</em>',
+    railSub: 'You asked whether you could build a brand. This is the long answer — the question first, the arithmetic after, and every assumption on a slider so you can argue with me.',
+    // Her question comes first, then the shared foundations it depends on.
+    tracks: GS_CONTENT.ayushiTracks().concat(GS_CONTENT.baseTracks()),
+  }, document.getElementById('app'));
+</script>
+</body>
+</html>
