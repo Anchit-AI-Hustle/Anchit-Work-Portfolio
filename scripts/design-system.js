@@ -14,9 +14,6 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 const MUT = process.env.MUT === '1';
 const TYPE = [11, 12, 14, 16, 20, 25, 31, 39, 49, 61, 76, 88];
 const SPACE = [0, 4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 88];
-// Sizes clamp against the viewport, so a step can land a pixel either side.
-const near = (v, scale) => scale.some((s) => Math.abs(s - v) <= 1);
-
 // Enough distinct off-scale steps to reproduce the sprawl the scale was
 // introduced to end, not just one stray value.
 const MUTANT = `
@@ -56,6 +53,7 @@ const PAGES = [
     await p.waitForTimeout(2500);
 
     const found = await p.evaluate(({ TYPE, SPACE }) => {
+      // Sizes clamp against the viewport, so a step can land a pixel either side.
       const nearJs = (v, s) => s.some((x) => Math.abs(x - v) <= 1);
       const lum = (c) => { const [r, g, bl] = c.map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g + 0.0722 * bl; };
       const rgba = (s) => { const m = s.match(/rgba?\(([^)]+)\)/); if (!m) return null; const a = m[1].split(',').map(Number); return { c: a.slice(0, 3), a: a.length > 3 ? a[3] : 1 }; };
