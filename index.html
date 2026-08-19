@@ -8107,7 +8107,14 @@
 
   function playBlockNow(block) {
     if (!block || block.classList.contains('in')) return;
-    if (!block.classList.contains('is-scope') && !/(^|\s)rv-v[1-6](\s|$)/.test(block.className)) {
+    // Same rule as the shared runtime: a variant is for a BLOCK, never for a
+    // container the size of the page. These entrances hold their element off
+    // in three dimensions until it plays, which is an arrival for a card and a
+    // blank screen for a wrapper.
+    const box = block.getBoundingClientRect();
+    const blockSized = box.height > 0 && box.height <= window.innerHeight;
+    if (blockSized && !block.classList.contains('is-scope')
+        && !/(^|\s)rv-v[1-6](\s|$)/.test(block.className)) {
       block.classList.add(variantFor());
     }
     const scope = scopeOf(block);

@@ -388,7 +388,21 @@
 
   function reveal(el) {
     if (!el || el.classList.contains('cin-in')) return;
-    if (!/(^|\s)cin-v[1-6](\s|$)/.test(el.className)) el.classList.add(variantFor());
+    // A variant is for a BLOCK, never for a container the size of the page.
+    //
+    // These entrances hold their element off-screen in three dimensions until
+    // it plays — cin-v4 sits at translateZ(-420px). That is a nice arrival for
+    // a card and a catastrophe for a page wrapper: tag() had classed a site's
+    // root .app element as a stagger scope, so the whole document was pushed
+    // back in Z and rendered as an empty screen until its turn came. Caught on
+    // the marketing course, where .app is 12,193px tall and was sitting at
+    // top: 1789px with nothing above it.
+    //
+    // Anything taller than the viewport is scenery rather than a card, and
+    // keeps the plain rise it always had.
+    var box = el.getBoundingClientRect();
+    var blockSized = box.height > 0 && box.height <= window.innerHeight;
+    if (blockSized && !/(^|\s)cin-v[1-6](\s|$)/.test(el.className)) el.classList.add(variantFor());
     el.style.setProperty('--cin-d', '0s');          // the queue is the timing now
     if (el.classList.contains('cin-stagger')) {
       Array.prototype.forEach.call(el.children, function (c, i) {
