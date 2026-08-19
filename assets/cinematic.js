@@ -100,7 +100,46 @@
     '.cin-in .cin-ctl,.in .cin-ctl{animation:cinCtl .5s cubic-bezier(.16,1,.3,1) both;animation-delay:var(--cin-cd,.18s)}',
     '@keyframes cinCtl{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}',
     'html.cin-bail .cin,html.cin-bail .cin-stagger>*,html.cin-bail .cin-depth,html.cin-bail .cin-word' +
-      '{opacity:1!important;transform:none!important;filter:none!important;transition:none!important}'
+      '{opacity:1!important;transform:none!important;filter:none!important;transition:none!important}',
+
+    // ── futurist layer, on every page rather than only the homepage ──
+    // A holographic sheen crosses a block as it arrives. A block that only
+    // fades in has no surface; a light travelling over it says the block is a
+    // panel catching a source somewhere off-frame. One pass, on arrival only —
+    // transform and opacity, so it is compositor work and costs no repaint.
+    '@keyframes cinSheen{from{transform:translate3d(-130%,0,0) skewX(-14deg);opacity:0}' +
+      '18%{opacity:1}to{transform:translate3d(130%,0,0) skewX(-14deg);opacity:0}}',
+    '.cin-sheen{position:relative}',
+    '.cin-sheen>.cin-sheen-l{position:absolute;inset:0;z-index:4;pointer-events:none;' +
+      'border-radius:inherit;opacity:0;background:linear-gradient(100deg,transparent 40%,' +
+      'rgba(255,183,54,.16) 50%,transparent 60%)}',
+    '.cin-sheen.cin-in>.cin-sheen-l,.cin-in .cin-sheen>.cin-sheen-l' +
+      '{animation:cinSheen 1.15s cubic-bezier(.16,1,.3,1) .16s 1 both}',
+
+    // A specular highlight that tracks the pointer across a panel. --mx/--my
+    // are written on the ELEMENT, never on :root — a custom property on the
+    // document root re-resolves the computed style of every element on the
+    // page, once per pointer frame.
+    '.cin-spec-host{position:relative}',
+    '.cin-spec{position:absolute;inset:0;z-index:3;pointer-events:none;border-radius:inherit;' +
+      'opacity:0;transition:opacity .35s ease;background:radial-gradient(220px circle at ' +
+      'var(--mx,50%) var(--my,50%),rgba(255,183,54,.16),transparent 70%)}',
+    '.cin-spec-host:hover>.cin-spec{opacity:1}',
+    // Not every page has panels. The tool pages are dense UI — their blocks are
+    // 30-70px headings, labels and rows — and a light sweeping across a 44px
+    // label is noise rather than an effect. Those get an edge draw instead: a
+    // hairline that wipes along the block's baseline as it arrives. Same
+    // vocabulary, scaled to what is actually there, so no page is left with
+    // nothing.
+    '@keyframes cinEdge{from{transform:scaleX(0)}to{transform:scaleX(1)}}',
+    '.cin-edge{position:relative}',
+    '.cin-edge>.cin-edge-l{position:absolute;left:0;right:0;bottom:-1px;height:1px;' +
+      'pointer-events:none;transform-origin:0 50%;transform:scaleX(0);' +
+      'background:linear-gradient(90deg,rgba(255,183,54,.55),rgba(255,105,64,.25) 60%,transparent)}',
+    '.cin-edge.cin-in>.cin-edge-l,.cin-in .cin-edge>.cin-edge-l' +
+      '{animation:cinEdge .62s cubic-bezier(.16,1,.3,1) .1s both}',
+    'html[data-motion="off"] .cin-spec,html[data-motion="off"] .cin-sheen-l,' +
+      'html[data-motion="off"] .cin-edge-l{display:none}'
   ].join('');
   (document.head || root).appendChild(css);
 
@@ -538,6 +577,78 @@
     });
   }
 
+  // ── futurist surface treatments ───────────────────────────────────────
+  // Applied to blocks this runtime has already decided are card-like, so it
+  // inherits all of tag()'s judgement about what is a panel and what is prose,
+  // instead of inventing a second opinion about it.
+  function initSurfaces() {
+    if (motionOff) return;
+    // `.cin` is included, not just `.cin-depth` and grid children: five pages
+    // came back with no treatment at all because tag() had classed their blocks
+    // as plain sections. A block is a panel whether or not it happens to sit in
+    // a grid.
+    var cards = document.querySelectorAll('.cin, .cin-depth, .cin-stagger > *');
+    for (var i = 0; i < cards.length; i++) {
+      var el = cards[i];
+      if (el.__cinSurface) continue;
+      el.__cinSurface = 1;
+      var r = el.getBoundingClientRect();
+      if (r.width < 130) continue;
+      // A sweep across a whole screen-height section is a screen wipe, not a
+      // highlight, so anything that tall keeps its plain arrival.
+      if (r.height > window.innerHeight * 0.72) continue;
+      var panel = r.height >= 90;
+      el.classList.add(panel ? 'cin-sheen' : 'cin-edge');
+      var l = document.createElement('span');
+      l.className = panel ? 'cin-sheen-l' : 'cin-edge-l';
+      l.setAttribute('aria-hidden', 'true');
+      el.appendChild(l);
+    }
+  }
+
+  // Pointer specular. Nothing is listened to until the pointer is actually over
+  // a panel, and the listener is dropped again on leave, so a page full of them
+  // costs nothing while you are only reading it.
+  function initSpecular() {
+    if (motionOff) return;
+    if (!matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    var hosts = document.querySelectorAll('.cin, .cin-depth, .cin-stagger > *, .device-card, .build-card, .cw-panel, .nav-card');
+    for (var i = 0; i < hosts.length; i++) arm(hosts[i]);
+
+    function arm(el) {
+      if (el.__cinSpec) return;
+      var r = el.getBoundingClientRect();
+      if (r.height < 90 || r.width < 130) return;
+      if (r.height > window.innerHeight * 0.72) return;   // a section, not a panel
+      el.__cinSpec = 1;
+      el.classList.add('cin-spec-host');
+      var spec = document.createElement('span');
+      spec.className = 'cin-spec'; spec.setAttribute('aria-hidden', 'true');
+      el.appendChild(spec);
+
+      var raf = 0, mx = 50, my = 50;
+      function paint() {
+        raf = 0;
+        el.style.setProperty('--mx', mx.toFixed(1) + '%');
+        el.style.setProperty('--my', my.toFixed(1) + '%');
+      }
+      function move(e) {
+        var b = el.getBoundingClientRect();
+        if (!b.width || !b.height) return;
+        mx = ((e.clientX - b.left) / b.width) * 100;
+        my = ((e.clientY - b.top) / b.height) * 100;
+        if (!raf) raf = requestAnimationFrame(paint);
+      }
+      el.addEventListener('pointerenter', function () {
+        el.addEventListener('pointermove', move, { passive: true });
+      }, { passive: true });
+      el.addEventListener('pointerleave', function () {
+        el.removeEventListener('pointermove', move);
+        if (raf) { cancelAnimationFrame(raf); raf = 0; }
+      }, { passive: true });
+    }
+  }
+
   // ── custom cursor ─────────────────────────────────────────────────────
   function initCursor() {
     if (motionOff || !matchMedia('(hover: hover) and (pointer: fine)').matches) return;
@@ -615,12 +726,12 @@
     // 1150ms, which reads as the site booting rather than being alive. It costs
     // one element and one rAF loop, so it does not belong in the same bucket as
     // a full parallax scan.
-    setTimeout(function () { enrich(); railify(); initCursor(); }, 300);
+    setTimeout(function () { enrich(); railify(); initSurfaces(); initCursor(); }, 300);
 
     // These genuinely scan the DOM, so they still wait for an idle moment.
     var idle = window.requestIdleCallback || function (fn) { return setTimeout(fn, 900); };
     idle(function () {
-      pinRails(); initParallax(); onParScroll(); initMagnetic();
+      pinRails(); initParallax(); onParScroll(); initMagnetic(); initSpecular();
     }, { timeout: 1200 });
     addEventListener('scroll', onParScroll, { passive: true });
     sweep();
@@ -643,7 +754,9 @@
         }
         if (!added) return;
         clearTimeout(moTimer);
-        moTimer = setTimeout(function () { observe(); enrich(); initMagnetic(); }, 350);
+        moTimer = setTimeout(function () {
+          observe(); enrich(); initMagnetic(); initSurfaces(); initSpecular();
+        }, 350);
       });
       mo.observe(document.body, { childList: true, subtree: true });
     }

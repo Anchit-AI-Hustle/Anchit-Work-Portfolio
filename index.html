@@ -11328,86 +11328,8 @@
   html[data-ambient="still"] .eb-l { opacity: .42; }
   html[data-motion="off"] .uf-off { opacity:.72; }
 </style>
-<script id="hud-specular">
-(function () {
-  'use strict';
-  // A highlight that tracks the pointer across a card, so the card reads as a
-  // lit surface rather than a printed rectangle.
-  //
-  // Three rules this follows, all of them lessons this file already paid for:
-  //  · --mx/--my are written on the CARD, never on :root. A custom property on
-  //    the document root invalidates the computed style of every element on the
-  //    page, once per pointer frame.
-  //  · one rAF per element, coalesced — pointermove fires far faster than the
-  //    screen refreshes and there is no point computing a frame nobody sees.
-  //  · nothing is listened to until the pointer is actually over a card, and
-  //    the listener is dropped again on leave, so a page full of cards costs
-  //    nothing while you are only reading it.
-  if (window.motionOff && window.motionOff()) return;
-  if (!window.matchMedia || !matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-
-  var SEL = '.device-card, .build-card, .cw-panel, .nav-card';
-
-  function arm(card) {
-    if (card.__hud) return;
-    card.__hud = 1;
-    card.classList.add('hud-tilt');
-    var spec = document.createElement('span');
-    spec.className = 'hud-spec';
-    spec.setAttribute('aria-hidden', 'true');
-    card.appendChild(spec);
-
-    var raf = 0, mx = 50, my = 50;
-    function paint() {
-      raf = 0;
-      card.style.setProperty('--mx', mx.toFixed(1) + '%');
-      card.style.setProperty('--my', my.toFixed(1) + '%');
-    }
-    function move(e) {
-      var r = card.getBoundingClientRect();
-      if (!r.width || !r.height) return;
-      mx = ((e.clientX - r.left) / r.width) * 100;
-      my = ((e.clientY - r.top) / r.height) * 100;
-      if (!raf) raf = requestAnimationFrame(paint);
-    }
-    card.addEventListener('pointerenter', function () {
-      card.addEventListener('pointermove', move, { passive: true });
-    }, { passive: true });
-    card.addEventListener('pointerleave', function () {
-      card.removeEventListener('pointermove', move);
-      if (raf) { cancelAnimationFrame(raf); raf = 0; }
-    }, { passive: true });
-  }
-
-  function sweep(root) {
-    try { (root || document).querySelectorAll(SEL).forEach(arm); } catch (e) {}
-  }
-
-  var idle = window.requestIdleCallback || function (f) { return setTimeout(f, 400); };
-  function boot() {
-    idle(function () {
-      if (window.__scrolling) return boot();     // never during a gesture
-      sweep(document);
-    }, { timeout: 2500 });
-  }
-  if (document.readyState === 'complete') boot();
-  else window.addEventListener('load', boot, { once: true });
-
-  // Views render lazily, so newly added cards get armed too — coalesced, and
-  // only when something was actually added.
-  if ('MutationObserver' in window) {
-    var t = null;
-    new MutationObserver(function (muts) {
-      for (var i = 0; i < muts.length; i++) {
-        if (muts[i].addedNodes && muts[i].addedNodes.length) {
-          clearTimeout(t); t = setTimeout(function () { sweep(document); }, 400);
-          return;
-        }
-      }
-    }).observe(document.body, { childList: true, subtree: true });
-  }
-})();
-</script>
+<!-- The pointer specular moved into assets/cinematic.js so every page gets
+     it, not just this one. See initSpecular there. -->
 <script id="hold-reveal">
 (function () {
   'use strict';
