@@ -126,7 +126,8 @@
     '.cin-stagger>*{opacity:0;transform:translateY(18px);' +
       'transition:opacity .6s cubic-bezier(.16,1,.3,1),transform .6s cubic-bezier(.16,1,.3,1);' +
       'transition-delay:var(--cin-cd,0s)}',
-    '.cin.cin-in,.cin-stagger.cin-in>*{opacity:1;transform:none}',
+    // .cin-stagger.cin-in itself, not only its children — see the note below.
+    '.cin.cin-in,.cin-stagger.cin-in,.cin-stagger.cin-in>*{opacity:1;transform:none}',
 
     // Six distinct entrances, not one repeated. A page where every block does
     // the same thing reads as a template filling itself in; blocks that arrive
@@ -164,8 +165,16 @@
       '.cin-v4{transform:perspective(1400px) translate3d(0,0,-180px)}' +
       '.cin-v6{transform:perspective(760px) translate3d(0,-22px,-90px) rotateX(-16deg)}' +
     '}',
-    '.cin.cin-in.cin-v1,.cin.cin-in.cin-v2,.cin.cin-in.cin-v3,' +
-      '.cin.cin-in.cin-v4,.cin.cin-in.cin-v5,.cin.cin-in.cin-v6{transform:none}',
+    // Scoped to .cin only, this left every .cin-stagger element that had been
+    // given a variant parked at its entrance transform FOREVER: the variant
+    // rules above match any element carrying .cin-vN, but nothing here cleared
+    // it unless the element also had .cin. That is why the sidebar sat at a
+    // permanent rotateX and .cw-body at a permanent rotateY — visible as a
+    // skewed panel whose children each projected to a different height under
+    // the ancestor's perspective. Match on .cin-in plus the variant, whichever
+    // container class carries it.
+    '.cin-in.cin-v1,.cin-in.cin-v2,.cin-in.cin-v3,' +
+      '.cin-in.cin-v4,.cin-in.cin-v5,.cin-in.cin-v6{transform:none}',
     '.cin-anim,.cin-anim>*{will-change:opacity,transform}',
     // Anything still hidden when the deadline passes is shown outright.
     // Richer vocabulary. Depth for feature cards, a lift for parallax elements,

@@ -50,6 +50,40 @@ The main portfolio remains a static `index.html` with embedded CSS + JS, backed 
 - **Responsive:** Phone → tablet → laptop → 4K TV. Container scales up to 1920px on TV-class screens; type fluids via `clamp()`.
 - **Full rules:** [`DESIGN.md`](./DESIGN.md) is the source of truth. Read it before writing styles; add a token there before inventing a value.
 
+## The two reveal runtimes
+
+`assets/cinematic.js` runs on every page and `index.html` has its own inline
+reveal system. CLAUDE.md already warns that a change to arrival behaviour
+usually has to be made twice. The sharper rule, learned the hard way:
+
+**A section with a bespoke reveal must opt out of both**, with `data-no-motion`
+on the section — the shared opt-out honoured by `cinematic.js`'s `skip()` and by
+the inline system's `AUTO_SKIP`. `#currentWork` had its own pinned timeline and
+was *also* claimed by `cinematic.js`, which gave `.cw-body` a `cin-v3` entrance
+that never completed. Parked at `rotateY(26deg)` under the stage's
+`perspective: 1400px`, every child projected to a different height — the four
+skill items rendered at 24.9 / 20.9 / 28.9 / 23.9px and the panel read as
+skewed.
+
+The root cause was in `cinematic.js` itself. The variant rules apply to any
+element carrying `.cin-vN`, but the rule that clears them was scoped to
+`.cin`:
+
+```css
+.cin.cin-in.cin-v1, … {transform:none}     /* before — misses .cin-stagger */
+.cin-in.cin-v1, …     {transform:none}     /* after  — whichever class carries it */
+```
+
+So every `.cin-stagger` element that had been given a variant stayed at its
+entrance transform permanently. That is why the sidebar sat at a visible tilt on
+all 23 pages. `npm run test:entrance` sweeps four pages for it.
+
+Second rule from the same section: **never gate legibility on scroll progress.**
+The panel's reveal was driven by a scrubbed timeline whose start is the pin
+start, so at the moment the section locked to the middle of the screen its
+progress was 0 and the whole panel was invisible. Content now reveals on entry,
+plays once, and the pinned scrub carries only depth.
+
 ## Motion system
 
 `assets/cinematic.js` is one runtime, loaded by every page, so the site moves
@@ -160,6 +194,8 @@ built site and assert on what a visitor would actually see. Serve `www/` first
 node scripts/motionfix.js        # motion regressions — 8 checks
 node scripts/turn-by-turn.js     # blocks arrive one at a time, entrances differ
 npm run test:providers           # LLM cascade survives a retired model id — 6 checks
+npm run test:cards               # Side Hustle cards are equal and explained — 10 checks
+npm run test:entrance            # nothing parked at an unfinished 3D entrance — 8 checks
 ```
 
 `provider-chain.js` needs no server; it stubs the network. It is also fully

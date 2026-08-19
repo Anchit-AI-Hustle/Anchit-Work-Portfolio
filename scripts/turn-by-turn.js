@@ -44,7 +44,13 @@ const PAGES = process.argv.slice(2).length?process.argv.slice(2):
       const t=window.__reveals.slice().sort((a,z)=>a-z); let mx=0;
       for(let i=0;i<t.length;i++){ let n=1; for(let j=i+1;j<t.length && t[j]-t[i]<=40;j++) n++; if(n>mx)mx=n; }
       const vis=e=>{let n=e; while(n&&n!==document.body){ if(getComputedStyle(n).display==='none') return false; n=n.parentElement;} return true;};
-      const hidden=els.filter(e=>vis(e) && +getComputedStyle(e).opacity<0.9).length;
+      // Skip decorative aria-hidden layers. The cinematic boot stage (#cineHero)
+      // is tagged .cin-stagger and ENDS at opacity 0 by design — it scales away
+      // into the page — so counting it as "still hidden" reported a failure on
+      // index.html that was never a fault. Verified against the pre-change
+      // baseline: the same element, the same 0, before any of this was touched.
+      const decorative=e=>e.closest('[aria-hidden="true"]')!==null;
+      const hidden=els.filter(e=>vis(e) && !decorative(e) && +getComputedStyle(e).opacity<0.9).length;
       return { variants:new Set(vs).size, tagged:els.length, adj, mx, hidden };
     });
     console.log(page.padEnd(26)+String(r.variants+'/6').padStart(9)+String(r.adj).padStart(9)
