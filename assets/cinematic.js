@@ -127,6 +127,21 @@
       'transition:opacity .6s cubic-bezier(.16,1,.3,1),transform .6s cubic-bezier(.16,1,.3,1);' +
       'transition-delay:var(--cin-cd,0s)}',
     '.cin.cin-in,.cin-stagger.cin-in>*{opacity:1;transform:none}',
+
+    // Six distinct entrances, not one repeated. A page where every block does
+    // the same thing reads as a template filling itself in; blocks that arrive
+    // differently read as a sequence that was directed. Each variant only ever
+    // sets transform and opacity, so they cost the same as the plain rise did.
+    // Assigned so that no block matches the one before or after it (see
+    // variantFor) rather than cycling 1..6, which is its own visible pattern.
+    '.cin-v1{transform:translateY(30px)}',                       // rise
+    '.cin-v2{transform:translateX(-42px)}',                      // in from the left
+    '.cin-v3{transform:translateX(42px)}',                       // in from the right
+    '.cin-v4{transform:scale(.90)}',                             // settle forward
+    '.cin-v5{transform:translateY(26px) scale(.965) rotate(-.9deg)}',  // tilt up
+    '.cin-v6{transform:perspective(900px) rotateX(11deg) translateY(24px)}', // hinge
+    '.cin.cin-in.cin-v1,.cin.cin-in.cin-v2,.cin.cin-in.cin-v3,' +
+      '.cin.cin-in.cin-v4,.cin.cin-in.cin-v5,.cin.cin-in.cin-v6{transform:none}',
     '.cin-anim,.cin-anim>*{will-change:opacity,transform}',
     // Anything still hidden when the deadline passes is shown outright.
     // Richer vocabulary. Depth for feature cards, a lift for parallax elements,
@@ -290,23 +305,93 @@
     });
   }
 
-  var order = 0;
-  function play(el) {
-    if (el.classList.contains('cin-in')) return;
-    // Blocks arriving in the same burst queue behind each other; a block
-    // arriving alone gets no offset, because there is nothing to queue behind.
-    el.style.setProperty('--cin-d', step(order % 6) + 's');
+  // Which entrance a block gets. Deterministic from its position in the
+  // document, and chosen so a block never matches its neighbour: cycling
+  // 1..6 in order is a pattern people see after two screens, and random
+  // assignment lets the same variant land twice in a row.
+  var vSeq = 0, vLast = 0;
+  function variantFor() {
+    var v = 1 + ((vSeq * 2 + Math.floor(vSeq / 3)) % 6);
+    if (v === vLast) v = 1 + (v % 6);
+    vSeq++; vLast = v;
+    return 'cin-v' + v;
+  }
+
+  // ── turn by turn ────────────────────────────────────────────────────────
+  // Blocks used to arrive in bursts: everything that crossed the threshold in
+  // the same frame animated together, separated only by a CSS delay. Six things
+  // moving at once is a page loading, not a sequence.
+  //
+  // They queue instead, and each one waits for the one before it. The gap
+  // tightens as the queue grows, because "one at a time" must never turn into
+  // "content you cannot read yet": a long page scrolled quickly can put twenty
+  // blocks on screen at once, and twenty times a comfortable gap is twenty
+  // seconds of hidden text. Anything that has waited too long gives up its turn
+  // and simply appears.
+  var queue = [], draining = false;
+  var GAP_MIN = 55, GAP_MAX = 190, PATIENCE = 1100;
+
+  // The gap is enforced across bursts, not just inside one.
+  //
+  // The first version called drain() straight from enqueue() whenever it was
+  // not already draining — and because each drain emptied the queue and cleared
+  // the flag, a loop of enqueues found it idle every time and revealed each one
+  // SYNCHRONOUSLY. Measured: thirteen blocks all landing at 309ms, which is the
+  // burst the queue exists to prevent. Remembering when the last one played is
+  // what makes the spacing real.
+  var lastAt = 0;
+
+  function enqueue(el) {
+    if (el.classList.contains('cin-in') || el.__cinQueued) return;
+    el.__cinQueued = performance.now();
+    queue.push(el);
+    schedule();
+  }
+
+  function gapFor() {
+    var now = performance.now();
+    if (queue.length && (now - queue[0].__cinQueued) > PATIENCE) return 16;
+    return queue.length > 10 ? GAP_MIN
+         : queue.length > 4  ? Math.round((GAP_MIN + GAP_MAX) / 2)
+         : GAP_MAX;
+  }
+
+  function schedule() {
+    if (draining) return;
+    draining = true;
+    setTimeout(drain, Math.max(0, gapFor() - (performance.now() - lastAt)));
+  }
+
+  function drain() {
+    var el = queue.shift();
+    while (el && el.classList.contains('cin-in')) el = queue.shift();
+    if (!el) { draining = false; return; }
+    reveal(el);
+    lastAt = performance.now();
+    // The more that is waiting, the less each one waits.
+    // Still one at a time when it is behind, just faster: a block past its
+    // patience gets the next frame instead of the next beat, so a twenty-block
+    // backlog drains in about a third of a second and still arrives in order.
+    if (queue.length) setTimeout(drain, gapFor());
+    else draining = false;
+  }
+
+  function reveal(el) {
+    if (!el || el.classList.contains('cin-in')) return;
+    if (!/(^|\s)cin-v[1-6](\s|$)/.test(el.className)) el.classList.add(variantFor());
+    el.style.setProperty('--cin-d', '0s');          // the queue is the timing now
     if (el.classList.contains('cin-stagger')) {
       Array.prototype.forEach.call(el.children, function (c, i) {
-        c.style.setProperty('--cin-cd', (step(order % 6) + step(i)) + 's');
+        c.style.setProperty('--cin-cd', step(i) + 's');
       });
     }
-    order++;
     el.classList.add('cin-anim', 'cin-in');
     // Release the compositor layer once the reveal is done; holding will-change
     // forever is what turned ~250 elements into permanent GPU layers.
     setTimeout(function () { el.classList.remove('cin-anim'); }, 1600);
   }
+
+  function play(el) { enqueue(el); }
 
   var io = null;
   function observe() {
@@ -319,7 +404,6 @@
           return a.target.compareDocumentPosition(z.target) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
         })
         .forEach(function (e) { play(e.target); io.unobserve(e.target); });
-      order = 0;                                   // each burst starts its own count
     }, { threshold: 0.08, rootMargin: '0px 0px -28px 0px' });
     document.querySelectorAll('.cin:not(.cin-in),.cin-stagger:not(.cin-in)').forEach(function (el) {
       io.observe(el);

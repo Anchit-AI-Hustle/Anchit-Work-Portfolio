@@ -2136,6 +2136,20 @@
     transition-delay: var(--anim-d, 0s);
   }
   .reveal.in { opacity: 1; transform: none; }
+
+  /* Six entrances rather than one. Every block doing the same thing reads as a
+     template filling itself in; blocks that arrive differently read as a
+     sequence somebody directed. Each is transform + opacity only, so they cost
+     exactly what the single rise cost. Assigned so no block matches the one
+     before or after it — see variantFor() in the reveal script. */
+  .reveal.rv-v1 { transform: translateY(28px) scale(0.985); }
+  .reveal.rv-v2 { transform: translateX(-44px); }
+  .reveal.rv-v3 { transform: translateX(44px); }
+  .reveal.rv-v4 { transform: scale(0.90); }
+  .reveal.rv-v5 { transform: translateY(26px) scale(0.965) rotate(-0.9deg); }
+  .reveal.rv-v6 { transform: perspective(900px) rotateX(11deg) translateY(24px); }
+  .reveal.in.rv-v1, .reveal.in.rv-v2, .reveal.in.rv-v3,
+  .reveal.in.rv-v4, .reveal.in.rv-v5, .reveal.in.rv-v6 { transform: none; }
   .reveal-stagger > * {
     opacity: 0; transform: translateY(34px) scale(0.96);
     transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
@@ -8016,7 +8030,73 @@
     return Array.prototype.indexOf.call(el.parentElement.children, el);
   }
 
+  // ── turn by turn ────────────────────────────────────────────────────────
+  // Blocks used to arrive in bursts: everything crossing the threshold in the
+  // same frame animated together, separated only by a capped CSS delay. Thirteen
+  // blocks landing inside 40ms is a page loading, not a sequence — measured on
+  // this page before this change.
+  //
+  // They queue now, and each waits for the one before it. The gap tightens as
+  // the queue grows, because "one at a time" must never become "text you cannot
+  // read yet": scrolled quickly, this page can put twenty blocks on screen at
+  // once, and twenty comfortable gaps is twenty seconds of hidden copy. Anything
+  // that has waited past its patience gives up its turn and simply appears.
+  let rvSeq = 0, rvLast = 0;
+  function variantFor() {
+    let v = 1 + ((rvSeq * 2 + Math.floor(rvSeq / 3)) % 6);
+    if (v === rvLast) v = 1 + (v % 6);
+    rvSeq++; rvLast = v;
+    return 'rv-v' + v;
+  }
+  const rvQueue = [];
+  let rvDraining = false;
+  const RV_GAP_MIN = 55, RV_GAP_MAX = 190, RV_PATIENCE = 1100;
+
+  // The gap is enforced ACROSS bursts, not just inside one. Calling the drain
+  // straight from the enqueue whenever it was not already draining looks right
+  // and is not: each drain empties the queue and clears the flag, so a loop of
+  // enqueues finds it idle every time and reveals each one synchronously.
+  // Measured on this page as thirteen blocks landing in the same millisecond —
+  // exactly the burst the queue exists to prevent. Remembering when the last
+  // one played is what makes the spacing real.
+  let rvLastAt = 0;
+
   function playBlock(block) {
+    if (!block || block.classList.contains('in') || block.__rvQueued) return;
+    block.__rvQueued = performance.now();
+    rvQueue.push(block);
+    rvSchedule();
+  }
+
+  function rvGap() {
+    const now = performance.now();
+    if (rvQueue.length && (now - rvQueue[0].__rvQueued) > RV_PATIENCE) return 16;
+    return rvQueue.length > 10 ? RV_GAP_MIN
+         : rvQueue.length > 4  ? Math.round((RV_GAP_MIN + RV_GAP_MAX) / 2)
+         : RV_GAP_MAX;
+  }
+
+  function rvSchedule() {
+    if (rvDraining) return;
+    rvDraining = true;
+    setTimeout(rvDrain, Math.max(0, rvGap() - (performance.now() - rvLastAt)));
+  }
+
+  function rvDrain() {
+    let el = rvQueue.shift();
+    while (el && el.classList.contains('in')) el = rvQueue.shift();
+    if (!el) { rvDraining = false; return; }
+    playBlockNow(el);
+    rvLastAt = performance.now();
+    if (rvQueue.length) setTimeout(rvDrain, rvGap());
+    else rvDraining = false;
+  }
+
+  function playBlockNow(block) {
+    if (!block || block.classList.contains('in')) return;
+    if (!block.classList.contains('is-scope') && !/(^|\s)rv-v[1-6](\s|$)/.test(block.className)) {
+      block.classList.add(variantFor());
+    }
     const scope = scopeOf(block);
     const now = performance.now();
     let burst = sectionBursts.get(scope);
