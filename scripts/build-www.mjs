@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Build step for Capacitor/Vercel: mirror static web assets into ./www,
- * compile the standalone How-To Engine into /how-to-2, and attach the shared
+ * compile the standalone How-To Engine into /how-to, and attach the shared
  * App Skill Map plus Project SkillTree & Guide Library to every HTML app.
  */
 import { copyFile, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
@@ -122,8 +122,10 @@ async function patchSharedTaskTrackerRoute() {
 }
 
 // Build the How-To Engine (standalone Vite + React app under
-// side-husle/how-to-1, base '/how-to-2/') and mirror its dist into
-// www/how-to-2 so it ships at /how-to-2 on the main static deployment.
+// side-husle/how-to-1) and mirror its dist into www/how-to so it ships at
+// /how-to on the main static deployment. The route is driven by HOW_TO_ROUTE
+// above — /how-to-1 and /how-to-2 survive only as redirects in vercel.json for
+// links that were shared before the route settled.
 // Wrapped so a failure here never takes down the rest of the portfolio.
 async function buildHowTo() {
   const engine = join(ROOT, 'side-husle', 'how-to-1');

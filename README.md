@@ -3,7 +3,7 @@
 Personal portfolio for **Anchit Tandon**, AGM - Product Management, D2C Growth - US, UK and Global at Vahdam India.
 Ships as **web (any device + TV)**, **installable PWA**, **native iOS + Android** via Capacitor, and an AI-powered portfolio assistant.
 
-**Live:** [anchits-work.vercel.app](https://anchits-work.vercel.app)
+**Live:** [anchit-tandon.com](https://anchit-tandon.com)
 
 ---
 
@@ -17,9 +17,13 @@ Ships as **web (any device + TV)**, **installable PWA**, **native iOS + Android*
 ├── assets/app-skill-map.css           # Shared visual app skill-tree UI
 ├── assets/project-playbooks.js        # Project paths, guide library and prompt generator
 ├── assets/project-playbooks.css       # Shared project-tree and guide-library UI
-├── side-husle/how-to-1/               # React/R3F Omni How-To Engine, emitted at /how-to-2
+├── marketing-101.html                 # The Signal Desk — 13-chapter marketing course, served at /marketing-101
+├── assets/cinematic.js                # Shared motion runtime: arrival queue, entrances, surface treatments
+├── side-husle/how-to-1/               # React/R3F How-To Engine, served at /how-to
 ├── lifecycle-os-*.html                # First-party lifecycle intelligence and execution apps
 ├── scripts/build-www.mjs              # Production build, route assembly and universal UI injection
+├── scripts/motionfix.js               # Motion regression suite, each check paired with a mutation
+├── scripts/turn-by-turn.js            # Asserts blocks arrive one at a time with distinct entrances
 ├── docs/APP_SKILL_MAP.md              # App-level architecture and extension guide
 ├── docs/PROJECT_SKILLTREE_GUIDES.md   # Project-level architecture and guide contracts
 ├── tts-server/                        # Self-hosted XTTS/FastAPI cloned-voice service
@@ -30,6 +34,8 @@ Ships as **web (any device + TV)**, **installable PWA**, **native iOS + Android*
 ├── package.json                       # Capacitor dependencies + helper scripts
 ├── vercel.json                        # Vercel static-host config and app routes
 ├── STREAMING_VOICE_ARCHITECTURE.md    # Anchit LLM + cloned-voice streaming design
+├── VOICE.md                           # Which provider speaks, and how to wire the clone
+├── DESIGN.md                          # Palette, type, motion rules — the styling source of truth
 ├── DEPLOY.md                          # Web + native deploy walkthroughs
 └── README.md
 ```
@@ -38,16 +44,37 @@ The main portfolio remains a static `index.html` with embedded CSS + JS, backed 
 
 ## Design system
 
-- **Palette:** Restrained dark neutral surfaces with amber and muted teal accents. Glare/glow is intentionally reduced for readability.
+- **Palette:** Black, orange and gold on restrained dark neutral surfaces (`#0F0D0A` ground, `#FF6940` primary, `#c9a96e` / `#FFB736` accents). Glare/glow is intentionally reduced for readability. Teal is legacy — see the migration note in [`DESIGN.md`](./DESIGN.md), and do not add more of it.
 - **Type:** Fraunces (display, variable axes — uses `SOFT` + `WONK`), Inter (body), JetBrains Mono (labels).
 - **Layout:** Strong minimal hero, dashboard-style cards, long-form readable sections, section-paneled content. IntersectionObserver-driven scroll reveals.
 - **Responsive:** Phone → tablet → laptop → 4K TV. Container scales up to 1920px on TV-class screens; type fluids via `clamp()`.
+- **Full rules:** [`DESIGN.md`](./DESIGN.md) is the source of truth. Read it before writing styles; add a token there before inventing a value.
+
+## Motion system
+
+`assets/cinematic.js` is one runtime, loaded by every page, so the site moves
+the same way everywhere instead of each page inventing its own choreography.
+
+- **One thing at a time.** Blocks queue and each waits for the one before it;
+  their children do the same inside them. The gap tightens as the queue grows,
+  because "one at a time" must never become "text you cannot read yet".
+- **Six dimensional entrances**, assigned so no block matches its neighbour.
+- **Surface treatments** sized to the block: a holographic sheen on panels, a
+  hairline wipe on smaller blocks, a pointer-tracked specular on both.
+- **Fail-visible.** Everything starts hidden, so a stall would mean a blank
+  page. A sweep re-checks on scroll and resize, and a hard deadline reveals
+  everything regardless.
+- **`window.__cinRescan()`** re-scans on demand, for pages that reveal regions
+  by dropping a `display:none` class rather than by inserting nodes.
+
+Everything animates `transform` and `opacity` only. The budget is real and
+measured: every page holds ~17ms a frame with no page over budget.
 
 ## Universal App Skill Map
 
 Every generated HTML app receives the same visual capability map. It organizes the suite into seven functional branches around one shared **Anchit Intelligence** node, highlights the current route, exposes app-level capabilities and suggested dependencies, and stores Available → In progress → Completed states locally in the browser.
 
-The map is implemented once in `assets/app-skill-map.js` and `assets/app-skill-map.css`. The build injects those assets into every `www/**/*.html` entry point after static copying and after the `/how-to-2` Vite build, so the portfolio, JobHunt, avatar, Lifecycle OS modules, and the Omni How-To Engine stay consistent without duplicating source markup.
+The map is implemented once in `assets/app-skill-map.js` and `assets/app-skill-map.css`. The build injects those assets into every `www/**/*.html` entry point after static copying and after the `/how-to` Vite build, so the portfolio, JobHunt, avatar, Lifecycle OS modules, and the Omni How-To Engine stay consistent without duplicating source markup.
 
 Keyboard access: **Cmd/Ctrl + K** toggles the map and **Escape** closes it. Full architecture and external-app adoption instructions live in [`docs/APP_SKILL_MAP.md`](./docs/APP_SKILL_MAP.md).
 
@@ -87,7 +114,34 @@ npm run dev
 npm run dev:built
 ```
 
-The built preview is the correct path for testing cross-app navigation, project playbooks, the guide library and `/how-to-2` asset routing.
+The built preview is the correct path for testing cross-app navigation, project playbooks, the guide library and `/how-to` asset routing.
+
+## Testing
+
+There is no unit-test runner. What exists are browser suites that drive the real
+built site and assert on what a visitor would actually see. Serve `www/` first
+(`npm run dev:built`, or any static server on port 8099), then:
+
+```bash
+node scripts/motionfix.js        # motion regressions — 8 checks
+node scripts/turn-by-turn.js     # blocks arrive one at a time, entrances differ
+```
+
+`motionfix.js` pairs **every** check with a mutation that reintroduces the bug it
+guards, so the suite can be shown to fail rather than assumed to work:
+
+```bash
+MUT=scan_top      node scripts/motionfix.js   # expect a FAIL
+MUT=no_governor   node scripts/motionfix.js   # expect a FAIL
+MUT=no_park       node scripts/motionfix.js   # expect a FAIL
+MUT=smooth_scroll node scripts/motionfix.js   # expect a FAIL
+```
+
+One check is honest about its limits: `early scroll is never thrown back` has
+**not** been shown to fail on demand — the fault is timing-dependent enough that
+a fixed set of start times cannot be relied on to provoke it. Its header says so.
+Treat it as a guard against a regression that reproduces, not as proof of one
+that does not.
 
 ## Native apps — iOS + Android via Capacitor
 
