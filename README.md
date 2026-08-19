@@ -100,6 +100,40 @@ Keyboard access: **Cmd/Ctrl + Shift + K** toggles Project Playbooks. Full archit
 - `tts-server/app.py` exposes `/api/tts`, `/api/tts-packet`, and `/ws/tts` for self-hosted XTTS.
 - Deployment and GPU notes live in [`STREAMING_VOICE_ARCHITECTURE.md`](./STREAMING_VOICE_ARCHITECTURE.md).
 
+## LLM provider cascade
+
+`api/apply.js`, `api/lifecycle.js` and `api/mailer.js` fall back through the
+free providers — Groq → Cerebras → Gemini → OpenRouter — before giving up to a
+deterministic template. Each one used to pin a single model id, and by August
+2026 every one of those ids was dead:
+
+| Provider | Pinned id | Retired | Now leads with |
+|---|---|---|---|
+| Groq | `llama-3.3-70b-versatile` | 2026-06-17 | `openai/gpt-oss-120b` |
+| Cerebras | `llama-3.3-70b` | 2026-02-16 | `gpt-oss-120b` |
+| Gemini | `gemini-2.0-flash` | 2026-06-01 (shut down) | `gemini-3.6-flash` |
+
+So the entire free cascade 404'd, and because each caller swallowed the error
+(`catch (e) { /* next provider */ }`) it fell silently into the template — the
+response looked the same whether a key was missing or every provider was dead.
+That is the "the AI provider is unavailable" class of failure.
+
+Model ids now live in one place, **`api/_models.js`**, as a *chain* per provider
+rather than a single id (the rule `api/cascade.js` already used for Anthropic):
+
+- Newest id first, previous generation next, the retired id last — kept, not
+  deleted, because it is still correct on a committed-spend contract where the
+  deprecation does not apply.
+- A **404** (or a 400 naming the model) advances the chain, so the next
+  retirement self-heals at the cost of one round-trip.
+- A **401/403/429/5xx** does *not* advance it — a bad key or an outage fails
+  identically for every id, so burning the chain only adds latency.
+- `*_MODEL` env vars still work and are tried first, so a model can be forced
+  from the dashboard without a deploy.
+- Failures are collected and logged with the id and reason, and a successful
+  response now names the model that answered. A silent cascade is what made the
+  original fault invisible.
+
 ## Running locally
 
 ```bash
@@ -125,7 +159,12 @@ built site and assert on what a visitor would actually see. Serve `www/` first
 ```bash
 node scripts/motionfix.js        # motion regressions — 8 checks
 node scripts/turn-by-turn.js     # blocks arrive one at a time, entrances differ
+npm run test:providers           # LLM cascade survives a retired model id — 6 checks
 ```
+
+`provider-chain.js` needs no server; it stubs the network. It is also fully
+mutation-covered — `MUT=1 npm run test:providers` must report every check
+failing.
 
 `motionfix.js` pairs **every** check with a mutation that reintroduces the bug it
 guards, so the suite can be shown to fail rather than assumed to work:
