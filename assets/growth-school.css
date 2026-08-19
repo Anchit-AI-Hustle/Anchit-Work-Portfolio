@@ -1,0 +1,230 @@
+/* growth-school.css — one stylesheet, two courses.
+ *
+ * The general course and Ayushi❤️'s course share this file and
+ * assets/growth-school.js so that a change to how learning WORKS lands in both
+ * at once. Only the content script differs between them. That is the same
+ * "one source of truth, shared by every surface" rule the lifecycle-os repo
+ * applies with brand-context.js / region-context.js / analysis-registry.js.
+ *
+ * Design tokens follow DESIGN.md: warm near-black paper, cream ink, one orange
+ * for action, gold for craft. Type comes off the scale, never invented.
+ */
+
+:root {
+  --gs-bg: #0F0D0A; --gs-elev: #1A1814; --gs-deep: #060503;
+  --gs-ink: #FBF5EC; --gs-dim: #A39E94; --gs-mute: #5A554E;
+  --gs-rule: #2A261F; --gs-rule-strong: #3D3830;
+  --gs-primary: #FF6940; --gs-primary-deep: #FF4D1F;
+  --gs-primary-soft: rgba(255,105,64,.12);
+  --gs-accent: #c9a96e; --gs-accent-warm: #FFB736;
+  --gs-good: #FFB736;
+
+  --gs-fs-micro: 11px; --gs-fs-label: 12px; --gs-fs-sm: 14px; --gs-fs-body: 16px;
+  --gs-fs-lead: 20px;  --gs-fs-h3: 25px;   --gs-fs-h2: 31px;  --gs-fs-h1: 39px;
+
+  --gs-1: 4px; --gs-2: 8px; --gs-3: 12px; --gs-4: 16px; --gs-5: 20px;
+  --gs-6: 24px; --gs-7: 32px; --gs-8: 40px; --gs-9: 48px; --gs-10: 64px;
+
+  --gs-r-sm: 8px; --gs-r-md: 12px; --gs-r-lg: 16px; --gs-r-xl: 20px; --gs-r-pill: 99px;
+
+  --gs-font-display: 'Fraunces', 'Times New Roman', serif;
+  --gs-font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --gs-font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* One measure for every column of prose. A line you lose your place in is a
+     line you read twice. */
+  --gs-measure: 62ch;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--gs-bg); color: var(--gs-ink);
+  font-family: var(--gs-font-body); font-size: var(--gs-fs-body); line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--gs-primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--gs-primary); outline-offset: 3px; border-radius: var(--gs-r-sm); }
+
+/* ── Shell ──────────────────────────────────────────────────────────────── */
+.gs-shell { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+@media (max-width: 900px) { .gs-shell { grid-template-columns: 1fr; } }
+
+.gs-rail {
+  border-right: 1px solid var(--gs-rule); background: var(--gs-deep);
+  padding: var(--gs-6) var(--gs-5); position: sticky; top: 0; height: 100vh;
+  overflow-y: auto; overscroll-behavior: contain;
+}
+@media (max-width: 900px) {
+  .gs-rail { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--gs-rule); }
+}
+.gs-brand { font-family: var(--gs-font-display); font-size: var(--gs-fs-h3); font-weight: 600; line-height: 1.1; }
+.gs-brand em { font-style: italic; color: var(--gs-accent); }
+.gs-kicker {
+  font-family: var(--gs-font-mono); font-size: var(--gs-fs-micro); letter-spacing: .14em;
+  text-transform: uppercase; color: var(--gs-primary); margin-bottom: var(--gs-2);
+}
+.gs-rail-sub { color: var(--gs-dim); font-size: var(--gs-fs-sm); margin-top: var(--gs-2); }
+
+/* Progress: the single most useful thing on screen when a session gets
+   interrupted, so it is always visible and always exact. */
+.gs-progress { margin: var(--gs-6) 0; }
+.gs-bar { height: 6px; border-radius: var(--gs-r-pill); background: var(--gs-rule); overflow: hidden; }
+.gs-bar > i { display: block; height: 100%; width: 0; border-radius: inherit;
+  background: linear-gradient(90deg, var(--gs-primary), var(--gs-accent-warm)); transition: width .5s cubic-bezier(.16,1,.3,1); }
+.gs-progress-meta { display: flex; justify-content: space-between; margin-top: var(--gs-2);
+  font-family: var(--gs-font-mono); font-size: var(--gs-fs-micro); color: var(--gs-dim); letter-spacing: .08em; }
+
+.gs-track-name {
+  font-family: var(--gs-font-mono); font-size: var(--gs-fs-micro); letter-spacing: .14em;
+  text-transform: uppercase; color: var(--gs-mute); margin: var(--gs-6) 0 var(--gs-2);
+}
+.gs-nav { list-style: none; display: grid; gap: var(--gs-1); }
+.gs-nav button {
+  width: 100%; text-align: left; cursor: pointer; font: inherit; color: var(--gs-dim);
+  background: transparent; border: 1px solid transparent; border-radius: var(--gs-r-md);
+  padding: var(--gs-2) var(--gs-3); font-size: var(--gs-fs-sm);
+  display: grid; grid-template-columns: 22px 1fr auto; align-items: center; gap: var(--gs-2);
+  transition: color .2s, background .2s, border-color .2s;
+}
+.gs-nav button:hover { color: var(--gs-ink); background: var(--gs-elev); }
+.gs-nav button[aria-current="true"] { color: var(--gs-ink); border-color: var(--gs-primary); background: var(--gs-primary-soft); }
+.gs-nav .n { font-family: var(--gs-font-mono); font-size: var(--gs-fs-micro); color: var(--gs-mute); }
+.gs-nav .tick { color: var(--gs-good); font-size: var(--gs-fs-sm); opacity: 0; transition: opacity .2s; }
+.gs-nav button.done .tick { opacity: 1; }
+.gs-nav button.done .n { color: var(--gs-good); }
+
+/* ── Reading column ─────────────────────────────────────────────────────── */
+.gs-main { padding: var(--gs-9) var(--gs-7) var(--gs-10); }
+@media (max-width: 900px) { .gs-main { padding: var(--gs-7) var(--gs-5) var(--gs-9); } }
+.gs-col { max-width: var(--gs-measure); margin: 0 auto; }
+.gs-col.wide { max-width: 78ch; }
+
+.gs-h1 { font-family: var(--gs-font-display); font-weight: 600; font-size: var(--gs-fs-h1);
+  line-height: 1.08; letter-spacing: -.02em; margin-bottom: var(--gs-3); text-wrap: balance; }
+.gs-h2 { font-family: var(--gs-font-display); font-weight: 600; font-size: var(--gs-fs-h2);
+  line-height: 1.15; margin: var(--gs-9) 0 var(--gs-3); text-wrap: balance; }
+.gs-h3 { font-family: var(--gs-font-display); font-weight: 600; font-size: var(--gs-fs-h3);
+  line-height: 1.2; margin: var(--gs-7) 0 var(--gs-3); }
+.gs-p { color: var(--gs-dim); margin-bottom: var(--gs-4); }
+.gs-p strong { color: var(--gs-ink); font-weight: 600; }
+.gs-p em { color: var(--gs-accent); font-style: italic; }
+
+/* The promise: what you will be able to DO. Stated before the work, so the
+   chapter can be judged against it afterwards. */
+.gs-promise {
+  border-left: 2px solid color-mix(in srgb, var(--gs-primary) 45%, transparent);
+  background: color-mix(in srgb, var(--gs-primary) 7%, transparent);
+  border-radius: var(--gs-r-md); padding: var(--gs-3) var(--gs-4); margin: var(--gs-5) 0;
+}
+.gs-promise .lbl { display: block; font-family: var(--gs-font-mono); font-size: var(--gs-fs-micro);
+  letter-spacing: .14em; text-transform: uppercase; color: var(--gs-primary); margin-bottom: var(--gs-1); }
+
+/* ── Beats: one idea per card ───────────────────────────────────────────── */
+.gs-beat { border: 1px solid var(--gs-rule); border-radius: var(--gs-r-lg);
+  background: var(--gs-elev); padding: var(--gs-5); margin: var(--gs-4) 0; }
+.gs-beat > h4 { font-family: var(--gs-font-display); font-size: var(--gs-fs-lead); font-weight: 600;
+  margin-bottom: var(--gs-2); line-height: 1.25; }
+.gs-beat .tag { font-family: var(--gs-font-mono); font-size: var(--gs-fs-micro); letter-spacing: .12em;
+  text-transform: uppercase; color: var(--gs-accent); display: block; margin-bottom: var(--gs-2); }
+
+/* "Go deeper" is how beginner and expert live in ONE mode instead of two.
+   The basic path is the visible text; the depth is one click away on the same
+   page, so nobody has to pick a level before they know what the levels are. */
+.gs-deeper { margin-top: var(--gs-3); border-top: 1px dashed var(--gs-rule); padding-top: var(--gs-3); }
+.gs-deeper > summary { cursor: pointer; list-style: none; font-family: var(--gs-font-mono);
+  font-size: var(--gs-fs-label); letter-spacing: .1em; text-transform: uppercase; color: var(--gs-primary); }
+.gs-deeper > summary::-webkit-details-marker { display: none; }
+.gs-deeper > summary::before { content: '+ '; }
+.gs-deeper[open] > summary::before { content: '– '; }
+.gs-deeper > div { margin-top: var(--gs-3); color: var(--gs-dim); font-size: var(--gs-fs-sm); }
+
+/* ── Video ──────────────────────────────────────────────────────────────── */
+.gs-video { margin: var(--gs-5) 0; }
+.gs-video .frame { position: relative; aspect-ratio: 16/9; border-radius: var(--gs-r-lg);
+  overflow: hidden; border: 1px solid var(--gs-rule); background: var(--gs-deep); }
+.gs-video iframe { width: 100%; height: 100%; border: 0; display: block; }
+/* Click-to-load: the poster is ours, the iframe is only created on click. No
+   third-party frame is embedded until the learner asks for it. */
+.gs-video button.poster { position: absolute; inset: 0; width: 100%; height: 100%; cursor: pointer;
+  border: 0; background: linear-gradient(160deg, #1a1410, #0d0b08); color: var(--gs-ink);
+  display: grid; place-content: center; gap: var(--gs-3); font: inherit; padding: var(--gs-5); }
+.gs-video .play { width: 54px; height: 54px; border-radius: 50%; margin: 0 auto;
+  border: 1px solid var(--gs-primary); display: grid; place-content: center; color: var(--gs-primary); font-size: 20px; }
+.gs-video .cap { font-family: var(--gs-font-mono); font-size: var(--gs-fs-micro); letter-spacing: .1em;
+  text-transform: uppercase; color: var(--gs-dim); margin-top: var(--gs-2); }
+
+/* ── Repo references ────────────────────────────────────────────────────── */
+.gs-repos { display: grid; gap: var(--gs-2); margin: var(--gs-4) 0; }
+.gs-repo { display: block; border: 1px solid var(--gs-rule); border-radius: var(--gs-r-md);
+  padding: var(--gs-3) var(--gs-4); background: var(--gs-elev); text-decoration: none; color: inherit;
+  transition: border-color .2s, transform .2s; }
+.gs-repo:hover { border-color: var(--gs-primary); transform: translateY(-2px); text-decoration: none; }
+.gs-repo .nm { font-family: var(--gs-font-mono); font-size: var(--gs-fs-sm); color: var(--gs-primary); }
+.gs-repo .why { color: var(--gs-dim); font-size: var(--gs-fs-sm); margin-top: var(--gs-1); }
+
+/* ── Quiz ───────────────────────────────────────────────────────────────── */
+.gs-quiz { border: 1px solid var(--gs-rule-strong); border-radius: var(--gs-r-lg);
+  padding: var(--gs-5); margin: var(--gs-6) 0; background: var(--gs-deep); }
+.gs-q { margin-bottom: var(--gs-5); }
+.gs-q:last-of-type { margin-bottom: 0; }
+.gs-q > p { margin-bottom: var(--gs-3); }
+.gs-opts { display: grid; gap: var(--gs-2); }
+.gs-opt { display: flex; gap: var(--gs-3); align-items: flex-start; cursor: pointer;
+  border: 1px solid var(--gs-rule); border-radius: var(--gs-r-md); padding: var(--gs-3);
+  background: var(--gs-elev); font-size: var(--gs-fs-sm); color: var(--gs-dim);
+  transition: border-color .2s, color .2s; }
+.gs-opt:hover { border-color: var(--gs-rule-strong); color: var(--gs-ink); }
+.gs-opt input { margin-top: 3px; accent-color: var(--gs-primary); }
+.gs-opt.right { border-color: var(--gs-good); color: var(--gs-ink); }
+.gs-opt.wrong { border-color: var(--gs-primary-deep); }
+/* The explanation is the point of the quiz, so it appears for right AND wrong
+   answers. A tick alone teaches nothing. */
+.gs-why { margin-top: var(--gs-2); font-size: var(--gs-fs-sm); color: var(--gs-dim);
+  border-left: 2px solid var(--gs-accent); padding-left: var(--gs-3); }
+
+/* ── Activity ───────────────────────────────────────────────────────────── */
+.gs-activity { border: 1px dashed var(--gs-rule-strong); border-radius: var(--gs-r-lg);
+  padding: var(--gs-5); margin: var(--gs-6) 0; }
+.gs-activity ol { margin: var(--gs-3) 0 0 var(--gs-5); color: var(--gs-dim); font-size: var(--gs-fs-sm); }
+.gs-activity li { margin-bottom: var(--gs-2); }
+.gs-free { font-family: var(--gs-font-mono); font-size: var(--gs-fs-micro); letter-spacing: .12em;
+  text-transform: uppercase; color: var(--gs-good); }
+
+/* ── Simulator ──────────────────────────────────────────────────────────── */
+.gs-sim { border: 1px solid var(--gs-primary); border-radius: var(--gs-r-lg);
+  padding: var(--gs-5); margin: var(--gs-6) 0; background: var(--gs-elev); }
+.gs-sim-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: var(--gs-4); margin: var(--gs-4) 0; }
+.gs-field label { display: block; font-family: var(--gs-font-mono); font-size: var(--gs-fs-micro);
+  letter-spacing: .1em; text-transform: uppercase; color: var(--gs-dim); margin-bottom: var(--gs-1); }
+.gs-field input[type=range] { width: 100%; accent-color: var(--gs-primary); }
+.gs-field .val { font-family: var(--gs-font-mono); font-size: var(--gs-fs-body); color: var(--gs-ink); }
+.gs-out { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: var(--gs-3);
+  border-top: 1px solid var(--gs-rule); padding-top: var(--gs-4); }
+.gs-out .k { font-family: var(--gs-font-mono); font-size: var(--gs-fs-micro); letter-spacing: .1em;
+  text-transform: uppercase; color: var(--gs-dim); }
+.gs-out .v { font-family: var(--gs-font-display); font-size: var(--gs-fs-h3); color: var(--gs-ink); line-height: 1.1; }
+.gs-out .v.warn { color: var(--gs-primary); }
+.gs-out .v.ok { color: var(--gs-good); }
+.gs-verdict { margin-top: var(--gs-4); padding-top: var(--gs-4); border-top: 1px solid var(--gs-rule);
+  font-size: var(--gs-fs-sm); color: var(--gs-dim); }
+
+/* ── Footer nav ─────────────────────────────────────────────────────────── */
+.gs-foot { display: flex; gap: var(--gs-3); align-items: center; flex-wrap: wrap;
+  margin-top: var(--gs-9); padding-top: var(--gs-6); border-top: 1px solid var(--gs-rule); }
+.gs-btn { cursor: pointer; font: inherit; font-size: var(--gs-fs-sm); border-radius: var(--gs-r-pill);
+  padding: var(--gs-3) var(--gs-5); border: 1px solid var(--gs-rule-strong);
+  background: transparent; color: var(--gs-ink); transition: border-color .2s, background .2s; }
+.gs-btn:hover { border-color: var(--gs-primary); }
+.gs-btn.primary { background: linear-gradient(135deg, var(--gs-primary), var(--gs-primary-deep));
+  border-color: transparent; color: #090603; font-weight: 600; }
+.gs-btn.primary:hover { filter: brightness(1.06); }
+.gs-note { color: var(--gs-mute); font-size: var(--gs-fs-sm); margin-left: auto; }
+
+/* A signature line, used only where the content script asks for one. */
+.gs-love { color: var(--gs-accent); font-family: var(--gs-font-display); font-style: italic; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

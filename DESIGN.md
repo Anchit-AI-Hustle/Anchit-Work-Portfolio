@@ -59,9 +59,44 @@ Rules:
   letter-spacing `.08em`–`.14em`, 10–12px.
 - Emphasis (`<em>`) renders italic in `--accent` (gold), not orange.
 
+### Type scale (px)
+
+A major third (1.25) from a 16px base. Editorial ratio, and its top step lands
+on the 60px the hero already used.
+
+| Token | Value | Use |
+|---|---|---|
+| `--fs-micro` | `11px` | Mono micro-labels, stamps |
+| `--fs-label` | `12px` | Mono eyebrows, metadata, badges |
+| `--fs-sm` | `14px` | Captions, dense secondary copy |
+| `--fs-body` | `16px` | Body |
+| `--fs-lead` | `20px` | Ledes, large body |
+| `--fs-h3` | `25px` | |
+| `--fs-h2` | `31px` | |
+| `--fs-h1` | `39px` | |
+| `--fs-display` | `61px` | Hero |
+
+**Pick a step; never invent one.** This scale exists because there wasn't one:
+an audit of a single home-page viewport found **11 distinct sizes** — 9, 11, 12,
+14, 15, 16, 18, 19, 20, 24, 60. 15-against-16 and 18/19/20 are not hierarchy,
+they are near-identical steps that read as carelessness, and nothing sat between
+24 and 60 at all. It is 7 now, every one a named step.
+
+Two specific traps that produced that spread:
+
+- **9px mono labels.** Six rules sat below this file's own 10–12px floor. They
+  were the smallest type on the page and the hardest to read.
+- **Framework size utilities.** The hero used Tailwind's `text-lg` /
+  `text-2xl` / `text-6xl` — 18 / 24 / 60px, answering to Tailwind's ratio, not
+  ours. The same rule that bans framework *palette* utilities applies to sizes:
+  use the token.
+
 ### Spacing scale (px)
 
-`4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 88`
+`4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 88` — as tokens `--sp-1` … `--sp-11`.
+
+The same audit found **170 off-scale paddings and gaps** on the main layout
+blocks (22px, 18px, 7px …). It is 4 now.
 
 Section padding uses `--gutter: clamp(20px, 3vw, 48px)`.
 
