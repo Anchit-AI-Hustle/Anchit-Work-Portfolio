@@ -59,6 +59,56 @@
       location.reload();                       // simplest correct re-apply
     });
     (document.body || root).appendChild(btn);
+    place(btn);
+  }
+
+  // Bottom-left is only the FIRST choice. This runtime is added to pages it did
+  // not design, and some of them already own that corner — on the marketing
+  // course it landed on top of two chapter links and a Library button, which
+  // the toggle then covered and made unreachable. So it asks what is already
+  // there and moves if the spot is taken. Measured once, after layout, with
+  // elementFromPoint at the corners it is considering.
+  function place(btn) {
+    // The toggle has to be taken OUT of hit-testing while it looks, or
+    // elementFromPoint just returns the toggle and every corner reads as free —
+    // which is exactly how the first version of this decided the occupied
+    // corner was fine and stayed there.
+    function occupied(x, y) {
+      var el = document.elementFromPoint(x, y);
+      if (!el || el === btn || btn.contains(el)) return false;
+      return !!(el.closest && el.closest('a, button, input, select, textarea, [role="button"], [onclick]'));
+    }
+    requestAnimationFrame(function () {
+      var pe = btn.style.pointerEvents;
+      btn.style.pointerEvents = 'none';
+      try { choose(); } finally { btn.style.pointerEvents = pe; }
+    });
+    function choose() {
+      var r = btn.getBoundingClientRect();
+      var pad = 14, w = r.width || 92, h = r.height || 26;
+      var spots = [
+        { l: pad,                    b: pad },                       // bottom-left, as authored
+        { l: innerWidth - w - pad,   b: pad },                       // bottom-right
+        { l: pad,                    b: pad + h + 10 },              // one row up on the left
+        { l: innerWidth - w - pad,   b: pad + h + 10 }               // one row up on the right
+      ];
+      for (var i = 0; i < spots.length; i++) {
+        var s = spots[i];
+        var cx = s.l + w / 2, cy = innerHeight - s.b - h / 2;
+        if (cx < 0 || cy < 0) continue;
+        // sample the middle and both ends, so a wide neighbour is not missed
+        if (!occupied(cx, cy) && !occupied(s.l + 4, cy) && !occupied(s.l + w - 4, cy)) {
+          btn.style.left = s.l + 'px';
+          btn.style.right = 'auto';
+          btn.style.bottom = s.b + 'px';
+          return;
+        }
+      }
+      // Every candidate is taken: sit above the last one rather than on a control.
+      btn.style.left = 'auto';
+      btn.style.right = pad + 'px';
+      btn.style.bottom = (pad + (h + 10) * 2) + 'px';
+    }
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', injectToggle);
@@ -77,6 +127,21 @@
       'transition:opacity .6s cubic-bezier(.16,1,.3,1),transform .6s cubic-bezier(.16,1,.3,1);' +
       'transition-delay:var(--cin-cd,0s)}',
     '.cin.cin-in,.cin-stagger.cin-in>*{opacity:1;transform:none}',
+
+    // Six distinct entrances, not one repeated. A page where every block does
+    // the same thing reads as a template filling itself in; blocks that arrive
+    // differently read as a sequence that was directed. Each variant only ever
+    // sets transform and opacity, so they cost the same as the plain rise did.
+    // Assigned so that no block matches the one before or after it (see
+    // variantFor) rather than cycling 1..6, which is its own visible pattern.
+    '.cin-v1{transform:translateY(30px)}',                       // rise
+    '.cin-v2{transform:translateX(-42px)}',                      // in from the left
+    '.cin-v3{transform:translateX(42px)}',                       // in from the right
+    '.cin-v4{transform:scale(.90)}',                             // settle forward
+    '.cin-v5{transform:translateY(26px) scale(.965) rotate(-.9deg)}',  // tilt up
+    '.cin-v6{transform:perspective(900px) rotateX(11deg) translateY(24px)}', // hinge
+    '.cin.cin-in.cin-v1,.cin.cin-in.cin-v2,.cin.cin-in.cin-v3,' +
+      '.cin.cin-in.cin-v4,.cin.cin-in.cin-v5,.cin.cin-in.cin-v6{transform:none}',
     '.cin-anim,.cin-anim>*{will-change:opacity,transform}',
     // Anything still hidden when the deadline passes is shown outright.
     // Richer vocabulary. Depth for feature cards, a lift for parallax elements,
@@ -100,7 +165,46 @@
     '.cin-in .cin-ctl,.in .cin-ctl{animation:cinCtl .5s cubic-bezier(.16,1,.3,1) both;animation-delay:var(--cin-cd,.18s)}',
     '@keyframes cinCtl{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}',
     'html.cin-bail .cin,html.cin-bail .cin-stagger>*,html.cin-bail .cin-depth,html.cin-bail .cin-word' +
-      '{opacity:1!important;transform:none!important;filter:none!important;transition:none!important}'
+      '{opacity:1!important;transform:none!important;filter:none!important;transition:none!important}',
+
+    // ── futurist layer, on every page rather than only the homepage ──
+    // A holographic sheen crosses a block as it arrives. A block that only
+    // fades in has no surface; a light travelling over it says the block is a
+    // panel catching a source somewhere off-frame. One pass, on arrival only —
+    // transform and opacity, so it is compositor work and costs no repaint.
+    '@keyframes cinSheen{from{transform:translate3d(-130%,0,0) skewX(-14deg);opacity:0}' +
+      '18%{opacity:1}to{transform:translate3d(130%,0,0) skewX(-14deg);opacity:0}}',
+    '.cin-sheen{position:relative}',
+    '.cin-sheen>.cin-sheen-l{position:absolute;inset:0;z-index:4;pointer-events:none;' +
+      'border-radius:inherit;opacity:0;background:linear-gradient(100deg,transparent 40%,' +
+      'rgba(255,183,54,.16) 50%,transparent 60%)}',
+    '.cin-sheen.cin-in>.cin-sheen-l,.cin-in .cin-sheen>.cin-sheen-l' +
+      '{animation:cinSheen 1.15s cubic-bezier(.16,1,.3,1) .16s 1 both}',
+
+    // A specular highlight that tracks the pointer across a panel. --mx/--my
+    // are written on the ELEMENT, never on :root — a custom property on the
+    // document root re-resolves the computed style of every element on the
+    // page, once per pointer frame.
+    '.cin-spec-host{position:relative}',
+    '.cin-spec{position:absolute;inset:0;z-index:3;pointer-events:none;border-radius:inherit;' +
+      'opacity:0;transition:opacity .35s ease;background:radial-gradient(220px circle at ' +
+      'var(--mx,50%) var(--my,50%),rgba(255,183,54,.16),transparent 70%)}',
+    '.cin-spec-host:hover>.cin-spec{opacity:1}',
+    // Not every page has panels. The tool pages are dense UI — their blocks are
+    // 30-70px headings, labels and rows — and a light sweeping across a 44px
+    // label is noise rather than an effect. Those get an edge draw instead: a
+    // hairline that wipes along the block's baseline as it arrives. Same
+    // vocabulary, scaled to what is actually there, so no page is left with
+    // nothing.
+    '@keyframes cinEdge{from{transform:scaleX(0)}to{transform:scaleX(1)}}',
+    '.cin-edge{position:relative}',
+    '.cin-edge>.cin-edge-l{position:absolute;left:0;right:0;bottom:-1px;height:1px;' +
+      'pointer-events:none;transform-origin:0 50%;transform:scaleX(0);' +
+      'background:linear-gradient(90deg,rgba(255,183,54,.55),rgba(255,105,64,.25) 60%,transparent)}',
+    '.cin-edge.cin-in>.cin-edge-l,.cin-in .cin-edge>.cin-edge-l' +
+      '{animation:cinEdge .62s cubic-bezier(.16,1,.3,1) .1s both}',
+    'html[data-motion="off"] .cin-spec,html[data-motion="off"] .cin-sheen-l,' +
+      'html[data-motion="off"] .cin-edge-l{display:none}'
   ].join('');
   (document.head || root).appendChild(css);
 
@@ -201,23 +305,93 @@
     });
   }
 
-  var order = 0;
-  function play(el) {
-    if (el.classList.contains('cin-in')) return;
-    // Blocks arriving in the same burst queue behind each other; a block
-    // arriving alone gets no offset, because there is nothing to queue behind.
-    el.style.setProperty('--cin-d', step(order % 6) + 's');
+  // Which entrance a block gets. Deterministic from its position in the
+  // document, and chosen so a block never matches its neighbour: cycling
+  // 1..6 in order is a pattern people see after two screens, and random
+  // assignment lets the same variant land twice in a row.
+  var vSeq = 0, vLast = 0;
+  function variantFor() {
+    var v = 1 + ((vSeq * 2 + Math.floor(vSeq / 3)) % 6);
+    if (v === vLast) v = 1 + (v % 6);
+    vSeq++; vLast = v;
+    return 'cin-v' + v;
+  }
+
+  // ── turn by turn ────────────────────────────────────────────────────────
+  // Blocks used to arrive in bursts: everything that crossed the threshold in
+  // the same frame animated together, separated only by a CSS delay. Six things
+  // moving at once is a page loading, not a sequence.
+  //
+  // They queue instead, and each one waits for the one before it. The gap
+  // tightens as the queue grows, because "one at a time" must never turn into
+  // "content you cannot read yet": a long page scrolled quickly can put twenty
+  // blocks on screen at once, and twenty times a comfortable gap is twenty
+  // seconds of hidden text. Anything that has waited too long gives up its turn
+  // and simply appears.
+  var queue = [], draining = false;
+  var GAP_MIN = 55, GAP_MAX = 190, PATIENCE = 1100;
+
+  // The gap is enforced across bursts, not just inside one.
+  //
+  // The first version called drain() straight from enqueue() whenever it was
+  // not already draining — and because each drain emptied the queue and cleared
+  // the flag, a loop of enqueues found it idle every time and revealed each one
+  // SYNCHRONOUSLY. Measured: thirteen blocks all landing at 309ms, which is the
+  // burst the queue exists to prevent. Remembering when the last one played is
+  // what makes the spacing real.
+  var lastAt = 0;
+
+  function enqueue(el) {
+    if (el.classList.contains('cin-in') || el.__cinQueued) return;
+    el.__cinQueued = performance.now();
+    queue.push(el);
+    schedule();
+  }
+
+  function gapFor() {
+    var now = performance.now();
+    if (queue.length && (now - queue[0].__cinQueued) > PATIENCE) return 16;
+    return queue.length > 10 ? GAP_MIN
+         : queue.length > 4  ? Math.round((GAP_MIN + GAP_MAX) / 2)
+         : GAP_MAX;
+  }
+
+  function schedule() {
+    if (draining) return;
+    draining = true;
+    setTimeout(drain, Math.max(0, gapFor() - (performance.now() - lastAt)));
+  }
+
+  function drain() {
+    var el = queue.shift();
+    while (el && el.classList.contains('cin-in')) el = queue.shift();
+    if (!el) { draining = false; return; }
+    reveal(el);
+    lastAt = performance.now();
+    // The more that is waiting, the less each one waits.
+    // Still one at a time when it is behind, just faster: a block past its
+    // patience gets the next frame instead of the next beat, so a twenty-block
+    // backlog drains in about a third of a second and still arrives in order.
+    if (queue.length) setTimeout(drain, gapFor());
+    else draining = false;
+  }
+
+  function reveal(el) {
+    if (!el || el.classList.contains('cin-in')) return;
+    if (!/(^|\s)cin-v[1-6](\s|$)/.test(el.className)) el.classList.add(variantFor());
+    el.style.setProperty('--cin-d', '0s');          // the queue is the timing now
     if (el.classList.contains('cin-stagger')) {
       Array.prototype.forEach.call(el.children, function (c, i) {
-        c.style.setProperty('--cin-cd', (step(order % 6) + step(i)) + 's');
+        c.style.setProperty('--cin-cd', step(i) + 's');
       });
     }
-    order++;
     el.classList.add('cin-anim', 'cin-in');
     // Release the compositor layer once the reveal is done; holding will-change
     // forever is what turned ~250 elements into permanent GPU layers.
     setTimeout(function () { el.classList.remove('cin-anim'); }, 1600);
   }
+
+  function play(el) { enqueue(el); }
 
   var io = null;
   function observe() {
@@ -230,7 +404,6 @@
           return a.target.compareDocumentPosition(z.target) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
         })
         .forEach(function (e) { play(e.target); io.unobserve(e.target); });
-      order = 0;                                   // each burst starts its own count
     }, { threshold: 0.08, rootMargin: '0px 0px -28px 0px' });
     document.querySelectorAll('.cin:not(.cin-in),.cin-stagger:not(.cin-in)').forEach(function (el) {
       io.observe(el);
@@ -538,6 +711,78 @@
     });
   }
 
+  // ── futurist surface treatments ───────────────────────────────────────
+  // Applied to blocks this runtime has already decided are card-like, so it
+  // inherits all of tag()'s judgement about what is a panel and what is prose,
+  // instead of inventing a second opinion about it.
+  function initSurfaces() {
+    if (motionOff) return;
+    // `.cin` is included, not just `.cin-depth` and grid children: five pages
+    // came back with no treatment at all because tag() had classed their blocks
+    // as plain sections. A block is a panel whether or not it happens to sit in
+    // a grid.
+    var cards = document.querySelectorAll('.cin, .cin-depth, .cin-stagger > *');
+    for (var i = 0; i < cards.length; i++) {
+      var el = cards[i];
+      if (el.__cinSurface) continue;
+      el.__cinSurface = 1;
+      var r = el.getBoundingClientRect();
+      if (r.width < 130) continue;
+      // A sweep across a whole screen-height section is a screen wipe, not a
+      // highlight, so anything that tall keeps its plain arrival.
+      if (r.height > window.innerHeight * 0.72) continue;
+      var panel = r.height >= 90;
+      el.classList.add(panel ? 'cin-sheen' : 'cin-edge');
+      var l = document.createElement('span');
+      l.className = panel ? 'cin-sheen-l' : 'cin-edge-l';
+      l.setAttribute('aria-hidden', 'true');
+      el.appendChild(l);
+    }
+  }
+
+  // Pointer specular. Nothing is listened to until the pointer is actually over
+  // a panel, and the listener is dropped again on leave, so a page full of them
+  // costs nothing while you are only reading it.
+  function initSpecular() {
+    if (motionOff) return;
+    if (!matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    var hosts = document.querySelectorAll('.cin, .cin-depth, .cin-stagger > *, .device-card, .build-card, .cw-panel, .nav-card');
+    for (var i = 0; i < hosts.length; i++) arm(hosts[i]);
+
+    function arm(el) {
+      if (el.__cinSpec) return;
+      var r = el.getBoundingClientRect();
+      if (r.height < 90 || r.width < 130) return;
+      if (r.height > window.innerHeight * 0.72) return;   // a section, not a panel
+      el.__cinSpec = 1;
+      el.classList.add('cin-spec-host');
+      var spec = document.createElement('span');
+      spec.className = 'cin-spec'; spec.setAttribute('aria-hidden', 'true');
+      el.appendChild(spec);
+
+      var raf = 0, mx = 50, my = 50;
+      function paint() {
+        raf = 0;
+        el.style.setProperty('--mx', mx.toFixed(1) + '%');
+        el.style.setProperty('--my', my.toFixed(1) + '%');
+      }
+      function move(e) {
+        var b = el.getBoundingClientRect();
+        if (!b.width || !b.height) return;
+        mx = ((e.clientX - b.left) / b.width) * 100;
+        my = ((e.clientY - b.top) / b.height) * 100;
+        if (!raf) raf = requestAnimationFrame(paint);
+      }
+      el.addEventListener('pointerenter', function () {
+        el.addEventListener('pointermove', move, { passive: true });
+      }, { passive: true });
+      el.addEventListener('pointerleave', function () {
+        el.removeEventListener('pointermove', move);
+        if (raf) { cancelAnimationFrame(raf); raf = 0; }
+      }, { passive: true });
+    }
+  }
+
   // ── custom cursor ─────────────────────────────────────────────────────
   function initCursor() {
     if (motionOff || !matchMedia('(hover: hover) and (pointer: fine)').matches) return;
@@ -615,12 +860,12 @@
     // 1150ms, which reads as the site booting rather than being alive. It costs
     // one element and one rAF loop, so it does not belong in the same bucket as
     // a full parallax scan.
-    setTimeout(function () { enrich(); railify(); initCursor(); }, 300);
+    setTimeout(function () { enrich(); railify(); initSurfaces(); initCursor(); }, 300);
 
     // These genuinely scan the DOM, so they still wait for an idle moment.
     var idle = window.requestIdleCallback || function (fn) { return setTimeout(fn, 900); };
     idle(function () {
-      pinRails(); initParallax(); onParScroll(); initMagnetic();
+      pinRails(); initParallax(); onParScroll(); initMagnetic(); initSpecular();
     }, { timeout: 1200 });
     addEventListener('scroll', onParScroll, { passive: true });
     sweep();
@@ -643,10 +888,22 @@
         }
         if (!added) return;
         clearTimeout(moTimer);
-        moTimer = setTimeout(function () { observe(); enrich(); initMagnetic(); }, 350);
+        moTimer = setTimeout(function () {
+          observe(); enrich(); initMagnetic(); initSurfaces(); initSpecular();
+        }, 350);
       });
       mo.observe(document.body, { childList: true, subtree: true });
     }
+    // Re-scan on demand, for pages that reveal whole regions by removing a
+    // `display:none` class rather than by inserting nodes. The MutationObserver
+    // above only watches childList, and deliberately so — watching attributes
+    // across the whole document would fire on every class toggle this site
+    // makes, including the one it sets on <body> during a scroll. A page that
+    // knows it just revealed something can say so instead.
+    window.__cinRescan = function () {
+      try { observe(); enrich(); initSurfaces(); initSpecular(); initMagnetic(); } catch (e) {}
+    };
+
     // Hard deadline. Whatever happened, nothing stays invisible.
     setTimeout(bail, 4000);
   }

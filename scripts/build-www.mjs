@@ -30,6 +30,7 @@ const assets = [
   'index.html',
   'jobhunt.html',
   'task-tracker.html',
+  'marketing-101.html',
   'd2c-lifecycle-os.html',
   'lifecycle-os.html',
   'lifecycle-os-studio.html',
