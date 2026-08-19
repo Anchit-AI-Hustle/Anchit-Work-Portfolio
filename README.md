@@ -17,7 +17,7 @@ Ships as **web (any device + TV)**, **installable PWA**, **native iOS + Android*
 ├── assets/app-skill-map.css           # Shared visual app skill-tree UI
 ├── assets/project-playbooks.js        # Project paths, guide library and prompt generator
 ├── assets/project-playbooks.css       # Shared project-tree and guide-library UI
-├── marketing-101.html                 # The Signal Desk — 13-chapter marketing course, served at /marketing-101
+├── marketing-101.html                 # The Signal Desk — marketing course, served at /marketing-101, linked from Side Hustle
 ├── assets/cinematic.js                # Shared motion runtime: arrival queue, entrances, surface treatments
 ├── side-husle/how-to-1/               # React/R3F How-To Engine, served at /how-to
 ├── lifecycle-os-*.html                # First-party lifecycle intelligence and execution apps
