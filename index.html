@@ -568,7 +568,15 @@
     contain-intrinsic-size: auto 320px;
   }
   .home-tl-item { contain-intrinsic-size: auto 92px; }
-  .build-card   { contain-intrinsic-size: auto 640px; }
+  /* The placeholder height for a card that has not been laid out yet. In a
+     flex rail the row takes the tallest item, so an over-large estimate here
+     inflates every card on first paint — 640px produced a 686px row against a
+     real 428px card, which is what read as "too long" before any of them had
+     been scrolled into view. Note it sizes the CONTENT box, so it is the
+     measured card height minus its 44px of vertical padding — setting the
+     border-box height here re-adds the padding and inflates the row by 48px.
+     scripts/build-cards.js asserts the two agree. */
+  .build-card   { contain-intrinsic-size: auto 404px; }
   /* The sign-off is ~4,800px down. Laying it out during the hero's assembly —
      the busiest 900ms of the page — buys nothing, because nobody can see it
      for another four screens. */
@@ -1798,8 +1806,20 @@
      land on a common line however much copy is above them. The chip row carries
      a min-height because it wraps to two lines on some cards and one on others,
      and an unequal chip row moves everything under it. */
-  .build-card .build-stack { margin-top: auto; min-height: 72px; align-content: flex-start; }
-  .build-card .build-actions { min-height: 68px; }
+  /* Exactly one auto margin in the column. A second one (there used to be one
+     on .build-actions too) makes flexbox share the slack between them, so the
+     action row floated to a different height on every card. */
+  .build-card .build-stack { margin-top: auto; align-content: flex-start; }
+  .build-card .build-actions {
+    min-height: 0; height: 58px; margin-top: 0;
+    flex-wrap: nowrap; align-items: center;
+  }
+  /* Shrink to fit rather than wrap. Labels are short enough that this never
+     actually ellipses at the rail's card width — it is the guard, not the look. */
+  .build-card .build-actions .btn {
+    flex: 0 1 auto; min-width: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
 
   /* ============ BUILDS (Side projects) ============ */
   .builds-grid {
@@ -1820,7 +1840,7 @@
     text-transform: uppercase; color: var(--primary); }
   .build-card {
     background: var(--bg-elev); border-radius: 18px;
-    padding: 26px 24px; min-height: 320px;
+    padding: 22px 22px; min-height: 0;
     display: flex; flex-direction: column; position: relative; overflow: hidden;
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
   }
@@ -1839,9 +1859,14 @@
     font-family: var(--font-mono); font-size: 10px; font-weight: 500;
     letter-spacing: 0.12em; text-transform: uppercase; color: var(--primary);
     display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 24px; position: relative; z-index: 1;
+    margin-bottom: 14px; position: relative; z-index: 1;
   }
-  .build-tag { gap: 10px; }
+  .build-tag { gap: 10px; flex-wrap: nowrap; height: 16px; }
+  /* Truncate rather than wrap. A second line here moved the whole card. */
+  .build-tag > span:not(.status):not(.bento-index):not(.bento-eyebrow-dot) {
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+  }
+  .build-tag .status { flex: 0 0 auto; white-space: nowrap; }
   /* space-between would fling index / dot / label to opposite ends of the row.
      Only the status belongs on the right; the rest hug the left together. */
   .build-tag > span:not(.status) { flex: 0 0 auto; }
@@ -1855,7 +1880,7 @@
   .build-card h3 {
     font-family: var(--font-display); font-weight: 400;
     font-size: clamp(22px, 2.4vw, 30px); line-height: 1.08;
-    letter-spacing: -0.025em; margin-bottom: 14px; color: var(--ink);
+    letter-spacing: -0.025em; margin-bottom: 10px; color: var(--ink);
     position: relative; z-index: 1;
     font-variation-settings: "SOFT" 70;
   }
@@ -1866,8 +1891,8 @@
   }
   .build-details {
     position: relative; z-index: 1;
-    margin: 16px 0 0; padding: 0; list-style: none;
-    display: grid; gap: 7px;
+    margin: 12px 0 0; padding: 0; list-style: none;
+    display: grid; gap: 6px;
     color: var(--ink-dim); font-size: 13px; line-height: 1.45;
   }
   .build-details li { display: flex; gap: 8px; }
@@ -1880,8 +1905,78 @@
   .build-actions {
     position: relative; z-index: 1;
     margin-top: auto;
-    padding-top: 20px;
+    padding-top: 14px;
     display: flex; flex-wrap: wrap; gap: 10px;
+  }
+
+  /* ---- Equal, synchronised build cards -------------------------------------
+     The rail is a flexbox, so every card already stretched to the tallest one.
+     What was unequal was the CONTENT: descriptions ran 91-507 characters, so a
+     single card set the row height and the rest carried a void — and on a
+     laptop the row overshot the viewport and got clipped mid-card.
+
+     Fixing it by shortening copy alone would not hold; the next long paragraph
+     re-breaks it. So each field gets a fixed line budget and the card cannot be
+     driven past it. Clamping is line-based rather than a pixel max-height, so
+     it still adapts to the reader's font size. ------------------------------ */
+
+  /* Plain "what is this for" line — the same field on every card, so the answer
+     is always in the same place rather than buried in the prose below it. */
+  .build-purpose {
+    position: relative; z-index: 1;
+    margin: 0 0 12px; padding: 10px 12px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--primary) 7%, transparent);
+    border-left: 2px solid color-mix(in srgb, var(--primary) 45%, transparent);
+    color: var(--ink); font-size: 14px; line-height: 1.45;
+    overflow: hidden;
+  }
+  /* The clamp goes on the sentence, not on the block. A -webkit-box counts every
+     child box as a line, so with the label inside it the sentence got one line
+     and a sliced second — visible as text cut through the middle. */
+  .bp-text {
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+    overflow: hidden;
+    min-height: calc(1.45em * 2);
+  }
+  .bp-label {
+    display: block;
+    font-family: var(--font-mono); font-size: 9px; font-weight: 500;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--primary); opacity: .85; margin-bottom: 3px;
+  }
+
+  /* Description: exactly three lines, always. */
+  .build-card > p:not(.build-purpose) {
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+    overflow: hidden;
+    min-height: calc(1.55em * 2);
+  }
+
+  /* Bullets: two rows, two lines each, so a long bullet cannot push the card. */
+  /* Two bullets, two lines each — a fixed budget, not a floor. The dot is drawn
+     as a background image rather than a ::before, because a pseudo-element is a
+     child box inside a -webkit-box and would eat one of the clamped lines. */
+  .build-details { height: calc(1.45em * 4 + 6px); align-content: start; overflow: hidden; }
+  .build-details li {
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+    overflow: hidden; padding-left: 14px; gap: 0;
+    background-image: radial-gradient(circle 3px at 3px 0.72em, var(--primary) 99%, transparent 100%);
+    background-repeat: no-repeat;
+  }
+  .build-details li::before { content: none; }
+
+  /* Chips: one row. Wrapping to a second row moved everything under it. */
+  .build-card .build-stack {
+    min-height: 34px; max-height: 34px; overflow: hidden;
+    flex-wrap: nowrap;
+  }
+  .build-card .build-stack .build-chip { flex: 0 0 auto; }
+
+  @media (max-width: 560px) {
+    /* Phones read one card at a time — give the copy more room, keep it equal. */
+    .bp-text { -webkit-line-clamp: 4; }   /* the clamp lives on the sentence now */
+    .build-card > p:not(.build-purpose) { -webkit-line-clamp: 4; min-height: calc(1.55em * 4); }
   }
 
   /* ============ PROJECT DETAIL ============ */
@@ -3933,7 +4028,15 @@
          One deliberate, scroll-choreographed moment rather than another card in
          a grid: the panel is pinned while it assembles, so the work you are
          doing right now gets the room the rest of the page does not give it. -->
-    <section class="cw-section" id="currentWork" aria-labelledby="cwTitle">
+    <!-- data-no-motion: this section has its own pinned, bespoke reveal below.
+         Without it BOTH generic runtimes also claim it — index.html's inline
+         AUTO_SKIP list and assets/cinematic.js — and cinematic.js was giving
+         .cw-body a 'cin-v3' 3D entrance that never completed, leaving it parked
+         at rotateY(~26deg). Under .cw-stage's perspective:1400px that projects
+         every child differently by position, which is why the four skill items
+         rendered at four different heights and the whole panel looked skewed.
+         One section, one reveal. -->
+    <section class="cw-section" id="currentWork" aria-labelledby="cwTitle" data-no-motion>
       <div class="cw-stage">
         <span class="cw-light cw-light-l" aria-hidden="true"></span>
         <span class="cw-light cw-light-r" aria-hidden="true"></span>
@@ -4661,8 +4764,9 @@
 
         <!-- Featured widget — How-To Engine (agentic multi-model how-to guides) -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span class="bento-index">01</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Agentic How-To Engine · New</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">01</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Agentic How-To Engine</span><span class="status">Live</span></div>
           <h3>The <em>How-To Engine</em></h3>
+          <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Turning any “how do I…” question into a guide you can actually follow.</span></p>
           <p>Ask how to do literally anything. A cascade of frontier models answers in parallel, the best three get synthesised into one calm, ADHD-friendly step-by-step guide — rendered as a 3D flow you can watch step by step.</p>
           <ul class="build-details">
             <li>Agentic model cascade: parallel dispatch &rarr; structural scoring &rarr; top-3 &rarr; a consensus evaluator merges them into one master guide.</li>
@@ -4678,6 +4782,7 @@
         <div class="build-card tilt-card">
           <div class="build-tag"><span class="bento-index">02</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Operating System</span><span class="status">Live</span></div>
           <h3>The Third <em>Eye</em></h3>
+          <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Running the day from one assistant that remembers your context.</span></p>
           <p>An agent-orchestrated personal AI operating system — memory-backed chat, tasks and multi-phase automation in one place.</p>
           <ul class="build-details">
             <li>Built with Next.js, FastAPI, Postgres/pgvector and Gemini-backed agent orchestration.</li>
@@ -4692,18 +4797,18 @@
 
         <!-- Card — D2C-LifeCycle-OS (generalised, any-brand lifecycle OS) -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span class="bento-index">03</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>D2C Marketing Automation · Startup idea</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">03</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>D2C Marketing Automation</span><span class="status">Live</span></div>
           <h3><em>LifeCycle-OS</em></h3>
-          <p>My flagship side build: a full customer-lifecycle &amp; retention operating system — data analysis, segmentation, a campaign calendar, a mailer studio, competitive intelligence, creative and ads, all in one suite. <em>D2C-LifeCycle-OS</em> is its brand-agnostic front door: enter <em>any</em> brand or URL and it reads the industry, benchmarks the competitive set, then designs the whole lifecycle live — segments, calendar, send-ready mailers, retention flows and KPIs, grounded in industry-standard numbers rather than guesses.</p>
+          <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Designing a brand’s whole retention lifecycle before you write a campaign.</span></p>
+          <p>My flagship side build — a full customer-lifecycle &amp; retention suite. Enter <em>any</em> brand or URL and it reads the industry, benchmarks the competitive set, then designs the whole lifecycle live.</p>
           <ul class="build-details">
             <li>Pulls competitive-intelligence-style benchmarks (traffic mix, channel split, AOV and repeat-rate bands, seasonality) for the entered brand's category — the way SimilarWeb / SEMrush profile a market — so every plan starts from real industry baselines.</li>
             <li>Built as a Vercel serverless engine on a free multi-provider LLM cascade, with a deterministic fallback so the demo always returns an ESP-ready plan in seconds — no login, no brand data required.</li>
           </ul>
           <div class="build-stack"><span class="build-chip">Vercel Serverless</span><span class="build-chip">LLM cascade</span></div>
           <div class="build-actions">
-            <a class="btn primary" href="/lifecycle-os">Open LifeCycle-OS<span class="build-launch" aria-hidden="true">↗</span></a>
-            <a class="btn" href="/d2c-lifecycle-os">Any-brand demo ↗</a>
-            <a class="btn" href="#project-lifecycle" data-view="project-lifecycle">Case Study &rarr;</a>
+            <a class="btn primary" href="#project-lifecycle" data-view="project-lifecycle">Case Study<span class="build-launch" aria-hidden="true">→</span></a>
+            <a class="btn" href="/lifecycle-os">Open Live Project ↗</a>
           </div>
         </div>
 
@@ -4711,6 +4816,7 @@
         <div class="build-card tilt-card">
           <div class="build-tag"><span class="bento-index">04</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Avatar · Conversational</span><span class="status">Live</span></div>
           <h3>AI <em>Video Avatar</em></h3>
+          <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Answering questions on camera, in my own voice, when I can’t be there.</span></p>
           <p>A photoreal talking-head version of me. Ask anything — my AI answers on camera in my own cloned voice, with a graceful voice-only fallback when the video engine isn't keyed.</p>
           <ul class="build-details">
             <li>Built on a D-ID talking-head engine driven from my portrait, my chatbot LLM for answers, and my TTS cascade for the cloned voice — with mic input where supported.</li>
@@ -4724,8 +4830,9 @@
 
         <!-- Card — All-in-One LP Agent -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span class="bento-index">05</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Conversational Commerce · D2C</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">05</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Conversational Commerce</span><span class="status">Live</span></div>
           <h3>All-in-One <em>LP Agent</em></h3>
+          <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Letting a landing page talk, listen and recommend, not just sit there.</span></p>
           <p>A marketing landing page with one embedded agent doing four jobs — auto-playing audio narration, two-way voice conversation, text chat and a "help me choose" recommendation engine — built for a live D2C funnel.</p>
           <ul class="build-details">
             <li>Built narration, talk, chat and recommendations as a single widget sharing the page's own content as context, with selectable British voices.</li>
@@ -4739,8 +4846,9 @@
 
         <!-- Card — JobHunt (AI Job Search Agent) -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span class="bento-index">06</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Job Hunting · Live job boards</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">06</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Job Hunting</span><span class="status">Live</span></div>
           <h3>Job<em>Hunt</em></h3>
+          <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Finding real, current openings without a spreadsheet or an API key.</span></p>
           <p>A free, live job-search tool. Sign in with Google, type a role, and it pulls real, current openings from free public job boards — Remotive, RemoteOK, Arbeitnow and The Muse — with direct apply links. No spreadsheet, no setup, no API key.</p>
           <ul class="build-details">
             <li>Built as a Vercel serverless function that aggregates several free, keyless job APIs in parallel, gated behind Google sign-in via Supabase.</li>
@@ -4757,6 +4865,7 @@
         <div class="build-card tilt-card">
           <div class="build-tag"><span class="bento-index">07</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Generative AI · Music</span><span class="status">Live</span></div>
           <h3>Music<em>GenAI</em></h3>
+          <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Turning a written prompt into a finished, produced song.</span></p>
           <p>Type a prompt, get a full song — lyrics, vocals and production. A hobby build exploring how far text-to-music can go.</p>
           <ul class="build-details">
             <li>Built with Vite, React, TypeScript, Supabase storage/auth and a Python audio service.</li>
@@ -4773,6 +4882,7 @@
         <div class="build-card tilt-card">
           <div class="build-tag"><span class="bento-index">08</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Portfolio OS · Voice UI</span><span class="status">Live</span></div>
           <h3>Interactive <em>Portfolio</em></h3>
+          <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Showing what I build by making the portfolio itself one of them.</span></p>
           <p>This portfolio is also a hobby product: guided navigation, voice narration, chat, resume handling, mobile PWA branding and responsive OS-style UI.</p>
           <ul class="build-details">
             <li>Built as a fast static web app with vanilla JS, responsive CSS, PWA assets and local TTS hooks.</li>
@@ -4790,6 +4900,7 @@
         <div class="build-card tilt-card">
           <div class="build-tag"><span class="bento-index">09</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Voice · Consumer</span><span class="status">Live</span></div>
           <h3>Hey <em>Yaara</em></h3>
+          <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Giving someone who finds apps intimidating a single button to talk to.</span></p>
           <p>A voice-first AI companion for the elderly — one button to talk, one to stop. Built for people who find apps intimidating.</p>
           <ul class="build-details">
             <li>Built as an installable PWA with voice-first interaction and LLM response handling.</li>
@@ -4806,6 +4917,7 @@
         <div class="build-card tilt-card">
           <div class="build-tag"><span class="bento-index">10</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Tooling · Marketing</span><span class="status">Live</span></div>
           <h3>Mailer <em>Architect</em></h3>
+          <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Getting a send-ready HTML email out of a one-line brief.</span></p>
           <p>Turns a brief into a production-ready HTML email via a multi-LLM cascade with automatic failover.</p>
           <ul class="build-details">
             <li>Built with Vercel Functions and a provider cascade across OpenAI, Anthropic, Gemini, xAI, Groq and Cerebras.</li>
@@ -4822,6 +4934,7 @@
         <div class="build-card tilt-card">
           <div class="build-tag"><span class="bento-index">11</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Workflow · Sales</span><span class="status">Live</span></div>
           <h3>AI <em>TeleSuite</em></h3>
+          <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Coaching a sales call while it is still happening.</span></p>
           <p>Real-time transcription, pitch scoring and conversion assist — the consumer take on the telesuite I shipped at ET.</p>
           <ul class="build-details">
             <li>Built with real-time speech transcription, LLM scoring logic and a call-coaching UI.</li>
@@ -4838,6 +4951,7 @@
         <div class="build-card tilt-card">
           <div class="build-tag"><span class="bento-index">12</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Wellness · Personalised</span><span class="status">Live</span></div>
           <h3><em>LifeEngine</em></h3>
+          <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Turning generic health advice into a daily plan tied to your goals.</span></p>
           <p>AI wellness planning that turns generic health advice into a daily plan tied to your goals.</p>
           <ul class="build-details">
             <li>Built with auth-gated web flows and AI planning prompts for personal wellness goals.</li>
@@ -4854,8 +4968,9 @@
              rather than as its own sidebar entry: it is a thing that was built,
              like everything else in this grid, not a section of the site. -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span class="bento-index">13</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Marketing course · The Signal Desk</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">13</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Marketing Course</span><span class="status">Live</span></div>
           <h3>Marketing <em>101</em></h3>
+          <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Learning modern marketing by practising it, not reading about it.</span></p>
           <p>A working course in modern marketing for people who have to produce results, not pass a module. Twelve chapters in one page, every idea practised where you read it.</p>
           <ul class="build-details">
             <li>12 chapters and 47 lessons, with 11 live simulators, 60 questions and 12 field tasks — the arithmetic is playable rather than described.</li>
@@ -5375,7 +5490,8 @@
           <div><span class="label">Stack</span><span>Vercel Functions · Multi-provider LLM cascade · Deterministic fallback</span></div>
         </div>
         <div class="project-cta">
-          <a href="/d2c-lifecycle-os" class="btn primary">Open live demo ↗</a>
+          <a href="/lifecycle-os" class="btn primary">Open LifeCycle-OS ↗</a>
+          <a href="/d2c-lifecycle-os" class="btn">Any-brand demo ↗</a>
         </div>
       </div>
 
@@ -5412,6 +5528,13 @@
           <li><strong>Deterministic fallback.</strong> If every provider is unavailable, a template planner still returns a coherent, ESP-ready plan — segments, calendar, mailer and KPIs — so the demo always shows something usable.</li>
           <li><strong>Brand-agnostic by design.</strong> Nothing is hard-coded to a single brand or dataset; the same engine works for any D2C name you type, drawing only on public/industry-standard signals.</li>
         </ul>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">The suite</div>
+        <h2>Every module, live</h2>
+        <p>LifeCycle-OS is not one page — it is a suite. Each module below is a working tool you can open right now, and each one reads from the same locked strategy, so a decision made in Smart Brain shows up in the calendar, the mailers, the ads and the creative briefs without being re-entered.</p>
+        <div class="mod-grid reveal-stagger" id="lifecycleModGrid"></div>
       </div>
 
       <div class="project-section reveal">
@@ -5683,6 +5806,19 @@
     ['The Third Eye','Goals & Finance','Tracks personal objectives over time next to a unified financial view.','https://the-third-eye.anchit-tandon.com/'],
   ];
   (function renderModules(){
+    function card(m) {
+      const ext = /^https?:/.test(m[3]);
+      return '<a class="mod" href="' + m[3] + '"' + (ext ? ' target="_blank" rel="noopener"' : '') + '>' +
+        '<span class="suite">' + m[0] + '</span>' +
+        '<h4>' + m[1] + '</h4>' +
+        '<p>' + m[2] + '</p>' +
+        '<span class="open">Open ' + (ext ? '\u2197' : '\u2192') + '</span></a>';
+    }
+    // The LifeCycle-OS case study lists the suite's own modules. Same data,
+    // filtered — not a second copy that can drift out of step.
+    const lc = document.getElementById('lifecycleModGrid');
+    if (lc) lc.innerHTML = MODULES.filter(function (m) { return m[0] === 'LifeCycle-OS'; }).map(card).join('');
+
     const host = document.getElementById('modGrid');
     if (!host) return;
     host.innerHTML = MODULES.map(function (m) {
@@ -11306,9 +11442,23 @@
       defaults: { ease: 'power3.out' },
     });
 
-    tl.to(panel, { opacity: 1, y: 0, rotateX: 0, scale: 1, duration: 0.55 })
-      .to(lights, { opacity: 0.5, duration: 0.4 }, '-=0.3')
-      .to(skills, { opacity: 1, y: 0, duration: 0.35, stagger: 0.09 }, '-=0.15');
+    // Readability first: this plays once, on entry, at its own pace. It is not
+    // scrubbed, so there is no scroll position at which the panel is blank.
+    ST.create({
+      trigger: sec,
+      start: 'top 85%',
+      once: true,
+      onEnter: function () {
+        gsap.to(panel, { opacity: 1, y: 0, rotateX: 0, scale: 1, duration: 0.7, ease: 'power3.out' });
+        gsap.to(skills, { opacity: 1, y: 0, duration: 0.4, stagger: 0.09, delay: 0.25, ease: 'power3.out' });
+      },
+    });
+
+    // The pinned hold now carries depth only — nothing here decides whether the
+    // section can be read.
+    tl.to(lights, { opacity: 0.5, duration: 0.4 })
+      .to(sec.querySelector('.cw-visual'), { y: -18, duration: 1 }, 0)
+      .to(sec.querySelector('.cw-copy'), { y: 10, duration: 1 }, 0);
 
     // The router changes the document height under every measurement below it.
     document.addEventListener('viewChanged', function () {
@@ -11329,7 +11479,7 @@
       entries.forEach(function (e) {
         if (!e.isIntersecting) { clearTimeout(stuck); return; }
         stuck = setTimeout(function () {
-          if (tl.progress() === 0 && !tl.isActive()) {
+          if (parseFloat(getComputedStyle(panel).opacity) < 0.9) {
             sec.classList.remove('cw-armed');
             try { watch.disconnect(); } catch (err) {}
           }
@@ -11337,7 +11487,15 @@
       });
     }, { threshold: 0.25 });
     watch.observe(sec);
-    tl.eventCallback('onUpdate', function () { try { watch.disconnect(); } catch (e) {} });
+    // NOT tl.onUpdate — a scrubbed timeline ticks even while its progress stays
+    // at 0, so hooking that disconnected the net before it could ever help.
+    // Stand down only when the panel has genuinely been revealed.
+    var settled = setInterval(function () {
+      if (parseFloat(getComputedStyle(panel).opacity) > 0.9) {
+        clearInterval(settled);
+        try { watch.disconnect(); } catch (e) {}
+      }
+    }, 400);
   }
 })();
 </script>
