@@ -150,6 +150,20 @@
     '.cin-v4{transform:perspective(1400px) translate3d(0,0,-420px)}',                        // arrive out of depth
     '.cin-v5{transform:perspective(1000px) translate3d(0,26px,-90px) rotateX(10deg) rotateZ(-2.5deg)}', // tilt-roll
     '.cin-v6{transform:perspective(760px)  translate3d(0,-30px,-150px) rotateX(-24deg)}',    // drop from above
+
+    // On a narrow screen there is no room to come in from the side. A block is
+    // the full width of a phone, so holding it 58px to the left puts its first
+    // characters past the edge — which is what a card mid-reveal looked like at
+    // 390px: "Building the lifecycle OS" reading as "uilding". The sideways
+    // entrances become short ones, and the deep push-back eases off too,
+    // because at this width it shrinks a block enough to read as a glitch
+    // rather than as depth.
+    '@media (max-width:560px){' +
+      '.cin-v2{transform:perspective(900px) translate3d(-16px,0,-70px) rotateY(-12deg)}' +
+      '.cin-v3{transform:perspective(900px) translate3d(16px,0,-70px) rotateY(12deg)}' +
+      '.cin-v4{transform:perspective(1400px) translate3d(0,0,-180px)}' +
+      '.cin-v6{transform:perspective(760px) translate3d(0,-22px,-90px) rotateX(-16deg)}' +
+    '}',
     '.cin.cin-in.cin-v1,.cin.cin-in.cin-v2,.cin.cin-in.cin-v3,' +
       '.cin.cin-in.cin-v4,.cin.cin-in.cin-v5,.cin.cin-in.cin-v6{transform:none}',
     '.cin-anim,.cin-anim>*{will-change:opacity,transform}',
@@ -405,8 +419,30 @@
     if (blockSized && !/(^|\s)cin-v[1-6](\s|$)/.test(el.className)) el.classList.add(variantFor());
     el.style.setProperty('--cin-d', '0s');          // the queue is the timing now
     if (el.classList.contains('cin-stagger')) {
-      Array.prototype.forEach.call(el.children, function (c, i) {
-        c.style.setProperty('--cin-cd', step(i) + 's');
+      // One child at a time, and far enough apart to see it.
+      //
+      // step() is sub-linear — sqrt-based — which was written to stop a long
+      // row pile-up. For six children it produces 62, 88, 107, 124, 139 and
+      // 152ms: a spread of ninety milliseconds, which the eye reads as all of
+      // them arriving together. That is why the elements inside a block never
+      // looked like they were taking turns.
+      //
+      // Linear spacing instead, tightened as the count grows so a twenty-item
+      // grid does not take three seconds to finish: six children land across
+      // 600ms and are unmistakably sequential, twenty across 900ms.
+      var kids = el.children, n = kids.length;
+      var gap = n > 12 ? 0.045 : n > 6 ? 0.08 : 0.12;
+      Array.prototype.forEach.call(kids, function (c, i) {
+        var d = (i * gap).toFixed(3) + 's';
+        c.style.setProperty('--cin-cd', d);
+        // …and set the delay itself, not only the variable it is read from.
+        // `.cin-stagger>*` declares `transition-delay:var(--cin-cd)`, but any
+        // child carrying its own `transition:` SHORTHAND resets delay back to
+        // zero — the shorthand sets every longhand it does not mention. The
+        // variable was landing correctly (0.000s, 0.120s, 0.240s…) while the
+        // computed delay stayed 0 on most blocks, which is why the children
+        // still arrived together. An inline delay outranks the shorthand.
+        c.style.transitionDelay = d;
       });
     }
     el.classList.add('cin-anim', 'cin-in');

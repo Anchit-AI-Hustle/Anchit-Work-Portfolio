@@ -2161,6 +2161,16 @@
   .reveal.rv-v4 { transform: perspective(1400px) translate3d(0, 0, -420px); }
   .reveal.rv-v5 { transform: perspective(1000px) translate3d(0, 26px, -90px) rotateX(10deg) rotateZ(-2.5deg); }
   .reveal.rv-v6 { transform: perspective(760px)  translate3d(0, -30px, -150px) rotateX(-24deg); }
+
+  /* No room to come in from the side on a phone: a block is the full width of
+     the screen, so holding it 58px left puts its first characters past the
+     edge — a card mid-reveal read as "uilding the lifecycle OS". */
+  @media (max-width: 560px) {
+    .reveal.rv-v2 { transform: perspective(900px) translate3d(-16px, 0, -70px) rotateY(-12deg); }
+    .reveal.rv-v3 { transform: perspective(900px) translate3d(16px, 0, -70px) rotateY(12deg); }
+    .reveal.rv-v4 { transform: perspective(1400px) translate3d(0, 0, -180px); }
+    .reveal.rv-v6 { transform: perspective(760px) translate3d(0, -22px, -90px) rotateX(-16deg); }
+  }
   .reveal.in.rv-v1, .reveal.in.rv-v2, .reveal.in.rv-v3,
   .reveal.in.rv-v4, .reveal.in.rv-v5, .reveal.in.rv-v6 { transform: none; }
   .reveal-stagger > * {
@@ -3935,11 +3945,14 @@
           <span class="cw-corner cw-tl" aria-hidden="true"></span><span class="cw-corner cw-tr" aria-hidden="true"></span>
           <span class="cw-corner cw-bl" aria-hidden="true"></span><span class="cw-corner cw-br" aria-hidden="true"></span>
           <div class="cw-screen">
-            <div class="cw-head">
-              <span class="cw-stamp" aria-hidden="true">vahdam/id-01</span>
-              <span class="cw-badge">Current focus // 2026</span>
-              <span class="cw-status"><span class="cw-dot" aria-hidden="true"></span>live</span>
-            </div>
+            <!-- The stamp, the badge and the live dot used to sit here too, and
+                 they are the SAME three values as the Vahdam tile a section
+                 above: vahdam/id-01, "Current focus // 2026", live. Reading the
+                 page top to bottom you met that row twice inside one screen of
+                 scrolling, which makes the second one look like a rendering
+                 mistake rather than a second thought. The tile establishes the
+                 label; this panel is the deep dive and starts with what it has
+                 to say. -->
             <div class="cw-body">
               <div class="cw-copy">
                 <h2 class="cw-title" id="cwTitle">Building the lifecycle OS behind the growth.</h2>
@@ -8136,8 +8149,26 @@
     // Children continue their block's timeline rather than restarting it, so
     // the whole section reads as one sentence instead of several.
     if (block.classList.contains('reveal-stagger')) {
-      Array.prototype.forEach.call(block.children, (child, i) => {
-        child.style.setProperty('--anim-d', (blockDelay + stepDelay(i, 0.062)).toFixed(3) + 's');
+      // One child at a time, and far enough apart to see it.
+      //
+      // stepDelay is sub-linear, written to stop a long row piling up. For six
+      // children it spreads them over about ninety milliseconds, which the eye
+      // reads as all of them arriving at once — which is why the elements
+      // inside a block never looked like they were taking turns.
+      //
+      // Linear spacing instead, tightened as the count grows so a twenty-item
+      // grid does not take three seconds: six children land across 600ms and
+      // are unmistakably sequential, twenty across 900ms.
+      const kids = block.children, n = kids.length;
+      const gap = n > 12 ? 0.045 : n > 6 ? 0.08 : 0.12;
+      Array.prototype.forEach.call(kids, (child, i) => {
+        const d = (blockDelay + i * gap).toFixed(3) + 's';
+        child.style.setProperty('--anim-d', d);
+        // …and the delay itself, not only the variable it is read from. Any
+        // child carrying its own `transition:` shorthand resets delay to zero,
+        // because a shorthand sets every longhand it does not mention — the
+        // variable was correct while the computed delay stayed 0. Inline wins.
+        child.style.transitionDelay = d;
       });
     }
     block.classList.add('in');
