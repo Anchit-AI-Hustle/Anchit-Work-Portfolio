@@ -245,6 +245,87 @@
   html[data-voice="stock"] .chat-audio.active,
   html[data-voice="stock"] #audioAmbient { position: relative; overflow: visible; }
 
+
+  /* ============ FUTURIST LAYER ============
+     Everything below animates transform or opacity and nothing else, because
+     this page has spent a long time getting to 17ms a frame and none of it is
+     worth giving back for decoration. No rule here runs forever: each is a
+     one-shot on reveal or bound to a pointer that has to be over the element.
+     ======================================== */
+
+  /* ── view transition: edge, chromatic fringe, scanline band ── */
+  .view-wipe > span { position: absolute; inset: 0; display: block; pointer-events: none; }
+  .vw-edge {
+    background: linear-gradient(100deg, transparent 47.6%,
+      color-mix(in srgb, var(--accent-warm) 92%, white) 49.4%,
+      color-mix(in srgb, var(--accent-warm) 92%, white) 50.6%, transparent 52.4%);
+  }
+  /* The fringe is the brand's own two hues pulled apart, not a red/cyan cliché —
+     a split in colours the site already owns still reads as a split. */
+  .vw-split {
+    background:
+      linear-gradient(100deg, transparent 46%, color-mix(in srgb, var(--primary) 55%, transparent) 49%, transparent 52%),
+      linear-gradient(100deg, transparent 50%, color-mix(in srgb, var(--accent) 45%, transparent) 53%, transparent 56%);
+  }
+  .vw-scan {
+    background: repeating-linear-gradient(0deg,
+      color-mix(in srgb, var(--accent-warm) 12%, transparent) 0 1px, transparent 1px 4px);
+    -webkit-mask-image: linear-gradient(100deg, transparent 38%, #000 50%, transparent 62%);
+    mask-image: linear-gradient(100deg, transparent 38%, #000 50%, transparent 62%);
+  }
+
+  /* ── holographic sheen: one pass across a card as it arrives ──
+     A card that merely fades in has no surface. A light crossing it says the
+     card is a physical panel catching a source somewhere off-frame. */
+  @keyframes hudSheen {
+    from { transform: translate3d(-130%, 0, 0) skewX(-14deg); opacity: 0; }
+    18%  { opacity: 1; }
+    to   { transform: translate3d(130%, 0, 0) skewX(-14deg); opacity: 0; }
+  }
+  .device-card, .cw-panel, .build-card, .work-item { position: relative; }
+  .device-card::after, .cw-panel::after, .build-card::after {
+    content: ''; position: absolute; inset: 0; z-index: 4; pointer-events: none;
+    border-radius: inherit; opacity: 0;
+    background: linear-gradient(100deg, transparent 40%,
+      color-mix(in srgb, var(--accent-warm) 26%, transparent) 50%, transparent 60%);
+  }
+  .reveal.in .device-card::after, .device-card.in::after,
+  .cw-section:not(.cw-armed) .cw-panel::after,
+  .reveal.in .build-card::after, .build-card.in::after {
+    animation: hudSheen 1.15s cubic-bezier(.16,1,.3,1) .16s 1 both;
+  }
+
+  /* ── HUD brackets draw themselves in rather than appearing ── */
+  @keyframes hudBracket {
+    from { transform: scale(.35); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+  .reveal.in .dc-corner, .cw-section:not(.cw-armed) .cw-corner {
+    animation: hudBracket .5s cubic-bezier(.16,1,.3,1) both;
+  }
+  .reveal.in .dc-corner:nth-child(2), .cw-section:not(.cw-armed) .cw-corner:nth-child(2) { animation-delay: .06s; }
+  .reveal.in .dc-corner:nth-child(3), .cw-section:not(.cw-armed) .cw-corner:nth-child(3) { animation-delay: .12s; }
+  .reveal.in .dc-corner:nth-child(4), .cw-section:not(.cw-armed) .cw-corner:nth-child(4) { animation-delay: .18s; }
+
+  /* ── pointer specular: a highlight that tracks the cursor over a card ──
+     --mx/--my are written on the CARD, never on :root — a custom property on the
+     document root re-resolves the computed style of every element on the page,
+     which is a bug this file has paid for before. */
+  .hud-tilt { transform-style: preserve-3d; will-change: auto; }
+  .hud-tilt > .hud-spec {
+    content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+    border-radius: inherit; opacity: 0;
+    transition: opacity .35s ease;
+    background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%),
+      color-mix(in srgb, var(--accent-warm) 20%, transparent), transparent 70%);
+  }
+  .hud-tilt:hover > .hud-spec { opacity: 1; }
+  html[data-motion="off"] .hud-tilt > .hud-spec { display: none; }
+
+  html[data-motion="off"] .vw-edge,
+  html[data-motion="off"] .vw-split,
+  html[data-motion="off"] .vw-scan { display: none; }
+
   /* ============ SIDEBAR ============ */
   .sidebar {
     position: fixed; left: 0; top: 0; bottom: 0;
@@ -3339,7 +3420,7 @@
          visible text, so someone saying "click Anchit Tandon" to a voice
          control actually hits this link. -->
     <a class="sidebar-logo" href="#home" data-view="home" aria-label="Anchit Tandon — home">
-      <img src="assets/anchit-mark-220.webp" srcset="assets/anchit-mark-220.webp 1x, assets/anchit-mark-440.webp 2x" alt="Anchit Tandon Logo" width="40" height="40" decoding="async">
+      <img src="assets/anchit-mark-220.webp" srcset="assets/anchit-mark-220.webp 1x, assets/anchit-mark-440.webp 2x, assets/anchit-mark-880.webp 4x" alt="Anchit Tandon Logo" width="40" height="40" decoding="async">
       <span>Anchit Tandon</span>
     </a>
   </div>
@@ -3721,7 +3802,7 @@
                  site wears; the photograph is who is underneath it, and you get
                  to it by holding rather than by being shown. -->
             <div class="hold-reveal shrink-0" data-hold-reveal>
-              <img src="assets/anchit-mark-220.webp" srcset="assets/anchit-mark-220.webp 1x, assets/anchit-mark-440.webp 2x" alt="Anchit Tandon" width="440" height="440" fetchpriority="high" class="hero-portrait rounded-full object-cover border-2 border-[var(--rule)]">
+              <img src="assets/anchit-mark-220.webp" srcset="assets/anchit-mark-220.webp 1x, assets/anchit-mark-440.webp 2x, assets/anchit-mark-880.webp 4x" alt="Anchit Tandon" width="440" height="440" fetchpriority="high" class="hero-portrait rounded-full object-cover border-2 border-[var(--rule)]">
               <img src="assets/anchit-face-220.webp" srcset="assets/anchit-face-220.webp 1x, assets/anchit-face-440.webp 2x" alt="" aria-hidden="true" width="440" height="440" loading="lazy" decoding="async" class="hero-portrait hr-under rounded-full object-cover border-2 border-[var(--rule)]">
               <span class="hr-ring" aria-hidden="true"></span>
               <span class="hr-cue" aria-hidden="true">hold to see the human</span>
@@ -3845,7 +3926,7 @@
                 <span class="cw-glow"></span>
                 <div class="cw-frame">
                   <span class="cw-microstamp">vahdam/access</span>
-                  <img src="assets/anchit-mark-220.webp" srcset="assets/anchit-mark-220.webp 1x, assets/anchit-mark-440.webp 2x"
+                  <img src="assets/anchit-mark-220.webp" srcset="assets/anchit-mark-220.webp 1x, assets/anchit-mark-440.webp 2x, assets/anchit-mark-880.webp 4x"
                        alt="" width="220" height="220" loading="lazy" decoding="async" class="cw-mark">
                 </div>
               </div>
@@ -4012,7 +4093,7 @@
       </div>
       <div class="chat-block">
         <div class="chat-head">
-          <div class="chat-head-avatar"><img src="assets/anchit-mark-220.webp" srcset="assets/anchit-mark-220.webp 1x, assets/anchit-mark-440.webp 2x" width="64" height="64" loading="lazy" decoding="async" alt="Anchit Tandon" style="width:100%; height:100%; object-fit:cover; border-radius:50%;"></div>
+          <div class="chat-head-avatar"><img src="assets/anchit-mark-220.webp" srcset="assets/anchit-mark-220.webp 1x, assets/anchit-mark-440.webp 2x, assets/anchit-mark-880.webp 4x" width="64" height="64" loading="lazy" decoding="async" alt="Anchit Tandon" style="width:100%; height:100%; object-fit:cover; border-radius:50%;"></div>
           <div class="chat-head-info">
             <div class="title" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
               <span>Talk with Anchit</span>
@@ -4028,7 +4109,7 @@
           </button>
         </div>
         <div class="chat-persona" id="chatPersona">
-          <div class="cp-stage"><span class="cp-ring" aria-hidden="true"></span><img src="assets/anchit-mark-220.webp" srcset="assets/anchit-mark-220.webp 1x, assets/anchit-mark-440.webp 2x" width="220" height="220" loading="lazy" decoding="async" alt="Anchit Tandon"><video id="chatPersonaVideo" playsinline></video></div>
+          <div class="cp-stage"><span class="cp-ring" aria-hidden="true"></span><img src="assets/anchit-mark-220.webp" srcset="assets/anchit-mark-220.webp 1x, assets/anchit-mark-440.webp 2x, assets/anchit-mark-880.webp 4x" width="220" height="220" loading="lazy" decoding="async" alt="Anchit Tandon"><video id="chatPersonaVideo" playsinline></video></div>
           <div class="cp-name">Anchit · AI persona</div>
         </div>
         <div class="chat-modes" role="group" aria-label="Chat with Anchit or have him narrate the portfolio">
@@ -10534,12 +10615,32 @@
       // retired teal accent, which flashed a non-brand colour on every jump.
       'background:linear-gradient(115deg, transparent 0%, rgba(255,105,64,0.30) 42%, ' +
       'rgba(255,183,54,0.24) 58%, transparent 100%);transform:translateX(-100%);';
+    // Three passes instead of one, so a jump reads as a machine cutting to a new
+    // frame rather than a colour wash going by:
+    //   edge   a hard leading line, the thing the eye actually tracks
+    //   split  a chromatic fringe trailing it, offset a few pixels
+    //   scan   a band of scanlines crossing behind
+    // Each is its own element moving on transform and fading on opacity, so all
+    // three are compositor work and none of them costs a repaint.
+    wipe.className = 'view-wipe';
+    wipe.innerHTML = '<span class="vw-edge"></span><span class="vw-split"></span><span class="vw-scan"></span>';
     document.body.appendChild(wipe);
 
     document.addEventListener('viewChanged', function () {
       if (reduceMotion) return;
       gsap.fromTo(wipe, { xPercent: -100, opacity: 0.9 },
         { xPercent: 100, opacity: 0, duration: 0.7, ease: 'power2.inOut' });
+      // The fringe runs a beat behind the edge and the scan a beat behind that,
+      // which is what makes it read as depth rather than as one flat object.
+      var edge  = wipe.querySelector('.vw-edge');
+      var split = wipe.querySelector('.vw-split');
+      var scan  = wipe.querySelector('.vw-scan');
+      if (edge)  gsap.fromTo(edge,  { xPercent: -6, opacity: 1 },
+        { xPercent: 6, opacity: 0, duration: 0.7, ease: 'power2.inOut' });
+      if (split) gsap.fromTo(split, { xPercent: -14, opacity: 0.85 },
+        { xPercent: 10, opacity: 0, duration: 0.78, ease: 'power2.inOut' });
+      if (scan)  gsap.fromTo(scan,  { xPercent: -30, opacity: 0.55 },
+        { xPercent: 30, opacity: 0, duration: 0.86, ease: 'power1.inOut' });
       var w = window.__webglBg;
       if (w) {
         // Spike the energy field and kick the core into a spin on every jump.
@@ -11227,6 +11328,86 @@
   html[data-ambient="still"] .eb-l { opacity: .42; }
   html[data-motion="off"] .uf-off { opacity:.72; }
 </style>
+<script id="hud-specular">
+(function () {
+  'use strict';
+  // A highlight that tracks the pointer across a card, so the card reads as a
+  // lit surface rather than a printed rectangle.
+  //
+  // Three rules this follows, all of them lessons this file already paid for:
+  //  · --mx/--my are written on the CARD, never on :root. A custom property on
+  //    the document root invalidates the computed style of every element on the
+  //    page, once per pointer frame.
+  //  · one rAF per element, coalesced — pointermove fires far faster than the
+  //    screen refreshes and there is no point computing a frame nobody sees.
+  //  · nothing is listened to until the pointer is actually over a card, and
+  //    the listener is dropped again on leave, so a page full of cards costs
+  //    nothing while you are only reading it.
+  if (window.motionOff && window.motionOff()) return;
+  if (!window.matchMedia || !matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+  var SEL = '.device-card, .build-card, .cw-panel, .nav-card';
+
+  function arm(card) {
+    if (card.__hud) return;
+    card.__hud = 1;
+    card.classList.add('hud-tilt');
+    var spec = document.createElement('span');
+    spec.className = 'hud-spec';
+    spec.setAttribute('aria-hidden', 'true');
+    card.appendChild(spec);
+
+    var raf = 0, mx = 50, my = 50;
+    function paint() {
+      raf = 0;
+      card.style.setProperty('--mx', mx.toFixed(1) + '%');
+      card.style.setProperty('--my', my.toFixed(1) + '%');
+    }
+    function move(e) {
+      var r = card.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      mx = ((e.clientX - r.left) / r.width) * 100;
+      my = ((e.clientY - r.top) / r.height) * 100;
+      if (!raf) raf = requestAnimationFrame(paint);
+    }
+    card.addEventListener('pointerenter', function () {
+      card.addEventListener('pointermove', move, { passive: true });
+    }, { passive: true });
+    card.addEventListener('pointerleave', function () {
+      card.removeEventListener('pointermove', move);
+      if (raf) { cancelAnimationFrame(raf); raf = 0; }
+    }, { passive: true });
+  }
+
+  function sweep(root) {
+    try { (root || document).querySelectorAll(SEL).forEach(arm); } catch (e) {}
+  }
+
+  var idle = window.requestIdleCallback || function (f) { return setTimeout(f, 400); };
+  function boot() {
+    idle(function () {
+      if (window.__scrolling) return boot();     // never during a gesture
+      sweep(document);
+    }, { timeout: 2500 });
+  }
+  if (document.readyState === 'complete') boot();
+  else window.addEventListener('load', boot, { once: true });
+
+  // Views render lazily, so newly added cards get armed too — coalesced, and
+  // only when something was actually added.
+  if ('MutationObserver' in window) {
+    var t = null;
+    new MutationObserver(function (muts) {
+      for (var i = 0; i < muts.length; i++) {
+        if (muts[i].addedNodes && muts[i].addedNodes.length) {
+          clearTimeout(t); t = setTimeout(function () { sweep(document); }, 400);
+          return;
+        }
+      }
+    }).observe(document.body, { childList: true, subtree: true });
+  }
+})();
+</script>
 <script id="hold-reveal">
 (function () {
   'use strict';
