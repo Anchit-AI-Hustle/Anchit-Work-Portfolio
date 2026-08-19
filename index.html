@@ -1788,6 +1788,19 @@
   .work-meta .year { color: var(--primary); font-weight: 500; margin-bottom: 6px; }
   .work-meta .impact { font-size: 10px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.08em; }
 
+  /* Cards in the rail are the same height, but their INSIDES were not in sync:
+     measured across five cards, the chip row drifted over a 322px range (303,
+     383, 387, 408, 625) and the call to action over 123px. Every card
+     top-aligns its content and every card has a different amount of it, so the
+     further down an element sits the more it drifts — which is what reads as a
+     broken row.
+     The tail of the card is anchored to its bottom instead, so chips and action
+     land on a common line however much copy is above them. The chip row carries
+     a min-height because it wraps to two lines on some cards and one on others,
+     and an unequal chip row moves everything under it. */
+  .build-card .build-stack { margin-top: auto; min-height: 72px; align-content: flex-start; }
+  .build-card .build-actions { min-height: 68px; }
+
   /* ============ BUILDS (Side projects) ============ */
   .builds-grid {
     display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;
@@ -2142,12 +2155,12 @@
      sequence somebody directed. Each is transform + opacity only, so they cost
      exactly what the single rise cost. Assigned so no block matches the one
      before or after it — see variantFor() in the reveal script. */
-  .reveal.rv-v1 { transform: translateY(28px) scale(0.985); }
-  .reveal.rv-v2 { transform: translateX(-44px); }
-  .reveal.rv-v3 { transform: translateX(44px); }
-  .reveal.rv-v4 { transform: scale(0.90); }
-  .reveal.rv-v5 { transform: translateY(26px) scale(0.965) rotate(-0.9deg); }
-  .reveal.rv-v6 { transform: perspective(900px) rotateX(11deg) translateY(24px); }
+  .reveal.rv-v1 { transform: perspective(1100px) translate3d(0, 34px, -140px) rotateX(14deg); }
+  .reveal.rv-v2 { transform: perspective(900px)  translate3d(-58px, 0, -120px) rotateY(-26deg); }
+  .reveal.rv-v3 { transform: perspective(900px)  translate3d(58px, 0, -120px)  rotateY(26deg); }
+  .reveal.rv-v4 { transform: perspective(1400px) translate3d(0, 0, -420px); }
+  .reveal.rv-v5 { transform: perspective(1000px) translate3d(0, 26px, -90px) rotateX(10deg) rotateZ(-2.5deg); }
+  .reveal.rv-v6 { transform: perspective(760px)  translate3d(0, -30px, -150px) rotateX(-24deg); }
   .reveal.in.rv-v1, .reveal.in.rv-v2, .reveal.in.rv-v3,
   .reveal.in.rv-v4, .reveal.in.rv-v5, .reveal.in.rv-v6 { transform: none; }
   .reveal-stagger > * {

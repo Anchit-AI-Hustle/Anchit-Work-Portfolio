@@ -134,12 +134,22 @@
     // sets transform and opacity, so they cost the same as the plain rise did.
     // Assigned so that no block matches the one before or after it (see
     // variantFor) rather than cycling 1..6, which is its own visible pattern.
-    '.cin-v1{transform:translateY(30px)}',                       // rise
-    '.cin-v2{transform:translateX(-42px)}',                      // in from the left
-    '.cin-v3{transform:translateX(42px)}',                       // in from the right
-    '.cin-v4{transform:scale(.90)}',                             // settle forward
-    '.cin-v5{transform:translateY(26px) scale(.965) rotate(-.9deg)}',  // tilt up
-    '.cin-v6{transform:perspective(900px) rotateX(11deg) translateY(24px)}', // hinge
+    // Six entrances, each of them actually dimensional: every one carries its
+    // own perspective and moves through Z, so a block arrives from somewhere in
+    // space rather than sliding in on the flat. The perspective is written into
+    // each transform rather than relying on an ancestor, because these are
+    // applied to blocks all over the site and most of their parents are not
+    // 3D contexts.
+    //
+    // Perspective values differ on purpose — a shorter one is a wider lens and
+    // a more violent arrival — so a hinge and a swing do not read as the same
+    // move at two angles.
+    '.cin-v1{transform:perspective(1100px) translate3d(0,34px,-140px) rotateX(14deg)}',      // hinge up off the floor
+    '.cin-v2{transform:perspective(900px)  translate3d(-58px,0,-120px) rotateY(-26deg)}',    // swing in, left
+    '.cin-v3{transform:perspective(900px)  translate3d(58px,0,-120px)  rotateY(26deg)}',     // swing in, right
+    '.cin-v4{transform:perspective(1400px) translate3d(0,0,-420px)}',                        // arrive out of depth
+    '.cin-v5{transform:perspective(1000px) translate3d(0,26px,-90px) rotateX(10deg) rotateZ(-2.5deg)}', // tilt-roll
+    '.cin-v6{transform:perspective(760px)  translate3d(0,-30px,-150px) rotateX(-24deg)}',    // drop from above
     '.cin.cin-in.cin-v1,.cin.cin-in.cin-v2,.cin.cin-in.cin-v3,' +
       '.cin.cin-in.cin-v4,.cin.cin-in.cin-v5,.cin.cin-in.cin-v6{transform:none}',
     '.cin-anim,.cin-anim>*{will-change:opacity,transform}',
