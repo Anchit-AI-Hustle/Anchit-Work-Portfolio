@@ -50,6 +50,43 @@ The main portfolio remains a static `index.html` with embedded CSS + JS, backed 
 - **Responsive:** Phone → tablet → laptop → 4K TV. Container scales up to 1920px on TV-class screens; type fluids via `clamp()`.
 - **Full rules:** [`DESIGN.md`](./DESIGN.md) is the source of truth. Read it before writing styles; add a token there before inventing a value.
 
+## The design system is enforced, not aspirational
+
+`DESIGN.md` named three font families and a spacing scale but never a **size**
+scale, so sizes drifted with nothing to catch them. An audit of one home-page
+viewport found **11 distinct font sizes** — 9, 11, 12, 14, 15, 16, 18, 19, 20,
+24, 60 — and **170 off-scale paddings and gaps** on the main layout blocks.
+15-against-16 and 18/19/20 are not hierarchy; nothing sat between 24 and 60 at
+all.
+
+Both scales are tokens now (`--fs-*`, `--sp-*`, documented in `DESIGN.md`) and
+`npm run test:design` measures the rendered page against them: 7 sizes on home,
+all named steps; 4 off-scale spacing values left, all sub-3px hairlines.
+
+Two traps worth knowing:
+
+- **Framework size utilities bypass the scale.** The hero used Tailwind's
+  `text-lg` / `text-2xl` / `text-6xl` — 18 / 24 / 60px, answering to Tailwind's
+  ratio rather than ours. The rule that bans framework *palette* utilities
+  applies to sizes too.
+- **9px mono labels.** Six rules sat below `DESIGN.md`'s own 10–12px floor.
+
+### Measuring contrast is easy to get wrong
+
+The contrast check in that suite reported three failures that were all artefacts
+of its own probe, and each is worth remembering before trusting a number:
+
+1. **A translucent background read as opaque.** Gold text on a 12% tint *of that
+   same gold* measured 1:1. The real backdrop is the card behind it (~8:1). The
+   alpha stack has to be composited.
+2. **A gradient was invisible.** `.btn.primary` paints with `background-image`,
+   so `backgroundColor` is transparent and near-black text on an orange button
+   scored against nothing.
+3. **A decorative gradient counted as a backdrop.** After fixing (2), the 3px
+   `radial-gradient` bullet dot in `.build-details` became the "background" for
+   the body copy beside it — 1.39:1 on text that is fine. Only *filling*
+   gradients are backdrops.
+
 ## The two reveal runtimes
 
 `assets/cinematic.js` runs on every page and `index.html` has its own inline
@@ -197,6 +234,7 @@ npm run test:providers           # LLM cascade survives a retired model id — 6
 npm run test:cascade             # the REAL handlers, driven end-to-end — 9 checks
 npm run test:cards               # cards equal + the page explains itself — 12 checks
 npm run test:entrance            # nothing parked at an unfinished 3D entrance — 8 checks
+npm run test:design              # DESIGN.md's scales, enforced on the rendered page — 4 checks
 ```
 
 `provider-chain.js` needs no server; it stubs the network. It is also fully

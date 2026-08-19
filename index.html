@@ -170,6 +170,36 @@
     --gutter: clamp(20px, 3vw, 48px);
     --safe-top: env(safe-area-inset-top);
     --safe-bottom: env(safe-area-inset-bottom);
+
+    /* ── Type scale ────────────────────────────────────────────────────────
+       DESIGN.md named the three families and a spacing scale but never a SIZE
+       scale, so sizes drifted: a single viewport of the home page rendered 11
+       distinct ones — 9, 11, 12, 14, 15, 16, 18, 19, 20, 24, 60. 15-against-16
+       and 18/19/20 are not hierarchy, they are three near-identical steps that
+       read as carelessness, and there was nothing at all between 24 and 60.
+
+       This is a major-third (1.25) scale from a 16px base, which is the right
+       ratio for editorial setting and — usefully — lands its top step on the
+       60px the hero already used. Sizes are tokens now so the next component
+       picks a step instead of inventing one. --fs-micro is 11px, not the 9px
+       that had crept in: DESIGN.md's own rule says mono labels are 10-12px. */
+    --fs-micro: 11px;   /* mono: micro labels, stamps          */
+    --fs-label: 12px;   /* mono: eyebrows, metadata, badges    */
+    --fs-sm:    14px;   /* captions, dense secondary copy      */
+    --fs-body:  16px;   /* body                                */
+    --fs-lead:  20px;   /* ledes, large body                   */
+    --fs-h3:    25px;
+    --fs-h2:    31px;
+    --fs-h1:    39px;
+    --fs-display: 61px; /* hero                                */
+
+    /* ── Spacing ───────────────────────────────────────────────────────────
+       The scale DESIGN.md already defines, as tokens. The audit found 170
+       off-scale paddings and gaps on the main layout blocks — 22px among them,
+       which this session introduced. A named step is harder to nudge. */
+    --sp-1: 4px;  --sp-2: 8px;   --sp-3: 12px; --sp-4: 16px;
+    --sp-5: 20px; --sp-6: 24px;  --sp-7: 32px; --sp-8: 40px;
+    --sp-9: 48px; --sp-10: 64px; --sp-11: 88px;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -506,7 +536,7 @@
     /* Always its own row, so the header reads the same on a narrow card and a
        wide one instead of wrapping differently per tile. */
     flex: 1 0 100%;
-    font-family: var(--font-mono); font-size: 9px; letter-spacing: .16em;
+    font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .16em;
     /* ink-dim, not ink-mute: at 9px the muted tone measured 2.06:1 against the
        card, well under the 4.5:1 small-text floor. Still clearly secondary. */
     text-transform: lowercase; color: var(--ink-dim, #B3A996); opacity: .8;
@@ -516,13 +546,13 @@
     margin: 0 0 14px;
   }
   .dc-badge {
-    font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em;
+    font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .14em;
     text-transform: uppercase; color: var(--ink-dim);
     border: 1px solid var(--rule); border-radius: 99px; padding: 3px 9px;
   }
   .dc-status {
     display: inline-flex; align-items: center; gap: 6px;
-    font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em;
+    font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .14em;
     text-transform: uppercase; color: var(--accent);
   }
   .dc-dot {
@@ -576,7 +606,7 @@
      measured card height minus its 44px of vertical padding — setting the
      border-box height here re-adds the padding and inflates the row by 48px.
      scripts/build-cards.js asserts the two agree. */
-  .build-card   { contain-intrinsic-size: auto 404px; }
+  .build-card   { contain-intrinsic-size: auto 420px; }
   /* The sign-off is ~4,800px down. Laying it out during the hero's assembly —
      the busiest 900ms of the page — buys nothing, because nobody can see it
      for another four screens. */
@@ -659,16 +689,16 @@
   .cw-screen { padding: clamp(26px, 4vw, 52px); }
   .cw-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: clamp(20px, 3vw, 34px); }
   .cw-stamp {
-    flex: 1 0 100%; font-family: var(--font-mono); font-size: 9px; letter-spacing: .16em;
+    flex: 1 0 100%; font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .16em;
     text-transform: lowercase; color: var(--ink-dim); opacity: .8;
   }
   .cw-badge {
-    font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+    font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .14em; text-transform: uppercase;
     color: var(--ink-dim); border: 1px solid var(--rule); border-radius: 99px; padding: 4px 10px;
   }
   .cw-status {
     display: inline-flex; align-items: center; gap: 6px;
-    font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+    font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .14em; text-transform: uppercase;
     color: var(--accent);
   }
   .cw-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
@@ -684,7 +714,7 @@
   .cw-skills { list-style: none; margin: 0 0 26px; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 18px; }
   .cw-skills li {
     display: flex; align-items: center; gap: 9px;
-    font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+    font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .1em; text-transform: uppercase;
     color: var(--ink-dim);
   }
   .cw-bullet { width: 5px; height: 5px; border-radius: 50%; background: var(--primary); flex: 0 0 auto; }
@@ -754,12 +784,12 @@
     border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
   }
   .client-row-label {
-    font-family: var(--font-mono); font-size: 9px; letter-spacing: .18em;
+    font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .18em;
     text-transform: uppercase; color: var(--ink-mute, #6B655C);
   }
   .client-row-list { display: flex; flex-wrap: wrap; gap: 12px 28px; list-style: none; margin: 0; padding: 0; }
   .client-row-list li {
-    font-family: var(--font-display); font-size: clamp(14px, 1.5vw, 19px); font-weight: 600;
+    font-family: var(--font-display); font-size: clamp(var(--fs-sm), 1.5vw, var(--fs-lead)); font-weight: 600;
     letter-spacing: .01em; color: var(--ink-dim); opacity: .78;
     transition: opacity .28s ease, color .28s ease;
   }
@@ -835,7 +865,7 @@
     border-top: 1px solid var(--rule);
   }
   .build-chip {
-    font-family: var(--font-mono); font-size: 9px; letter-spacing: .08em;
+    font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .08em;
     text-transform: uppercase; color: var(--ink-dim);
     border: 1px solid var(--rule); border-radius: 99px; padding: 4px 9px;
     white-space: nowrap; transition: border-color .25s ease, color .25s ease;
@@ -895,11 +925,12 @@
   .hold-reveal .hr-cue {
     position: absolute; left: 50%; bottom: -22px; transform: translateX(-50%);
     white-space: nowrap; line-height: 1.2;
-    font-family: var(--font-mono); font-size: 9px; letter-spacing: .16em;
+    font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .16em;
     text-transform: uppercase; color: var(--ink-dim);
-    opacity: .72; transition: opacity .3s ease, color .3s ease;
+    opacity: 0; transition: opacity .3s ease, color .3s ease;
   }
-  .hold-reveal:hover .hr-cue { opacity: 1; color: var(--primary); }
+  .hold-reveal:hover .hr-cue,
+  .hold-reveal:focus-within .hr-cue { opacity: 1; color: var(--primary); }
   /* On a narrow screen the headline sits immediately to the right of the
      portrait, so a single-line cue reaches straight into it. Constrain the cue
      to the portrait it belongs to and let it wrap instead. */
@@ -1098,13 +1129,13 @@
   .eyebrow.has-dot::before { display: none; }
   .display-lg {
     font-family: var(--font-display); font-weight: 400;
-    font-size: clamp(40px, 7vw, 88px); line-height: 1.0;
+    font-size: clamp(var(--fs-h1), 7vw, 88px); line-height: 1.0;
     letter-spacing: -0.03em; color: var(--ink);
   }
   .display-lg em { font-style: italic; color: var(--primary); font-weight: 500; }
   .display-md {
     font-family: var(--font-display); font-weight: 400;
-    font-size: clamp(28px, 4.4vw, 56px); line-height: 1.1;
+    font-size: clamp(var(--fs-h2), 4.4vw, var(--fs-display)); line-height: 1.1;
     letter-spacing: -0.025em; color: var(--ink);
   }
   .display-md em { font-style: italic; color: var(--primary); }
@@ -1457,7 +1488,7 @@
     display: flex; align-items: center; gap: 6px; padding: 6px 18px 2px;
   }
   .chat-audio-label {
-    font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em;
+    font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: 0.12em;
     text-transform: uppercase; color: var(--ink-faint, var(--ink-dim)); margin-right: 2px;
   }
   .chat-audio {
@@ -1592,7 +1623,7 @@
 	  }
 	  @keyframes guideScan { 0%,100% { opacity: .35; transform: translateX(-18%); } 50% { opacity: 1; transform: translateX(18%); } }
 	  .guide-kicker {
-	    font-family: var(--font-mono); font-size: 9px; letter-spacing: .16em;
+	    font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .16em;
 	    text-transform: uppercase; color: var(--accent);
 	  }
 	  .guide-title {
@@ -1829,7 +1860,7 @@
 
   /* Module cards — each suite module as an individual project */
   .mod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(258px, 1fr)); gap: 14px; }
-  .mod { display: flex; flex-direction: column; gap: 7px; padding: 16px 18px; border-radius: 14px;
+  .mod { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-4); border-radius: var(--r-lg, 16px);
     background: var(--bg-elev); border: 1px solid var(--rule); text-decoration: none; color: inherit;
     transition: border-color .2s, transform .2s, box-shadow .2s; }
   .mod:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: var(--shadow-md); }
@@ -1840,7 +1871,7 @@
     text-transform: uppercase; color: var(--primary); }
   .build-card {
     background: var(--bg-elev); border-radius: 18px;
-    padding: 22px 22px; min-height: 0;
+    padding: var(--sp-6); min-height: 0;
     display: flex; flex-direction: column; position: relative; overflow: hidden;
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
   }
@@ -1856,7 +1887,7 @@
   .build-card:hover::before { transform: scale(1.4); background: var(--accent-soft); }
 
   .build-tag {
-    font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+    font-family: var(--font-mono); font-size: var(--fs-label); font-weight: 500;
     letter-spacing: 0.12em; text-transform: uppercase; color: var(--primary);
     display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 14px; position: relative; z-index: 1;
@@ -1886,14 +1917,14 @@
   }
   .build-card h3 em { font-style: italic; color: var(--primary); font-weight: 500; }
   .build-card p {
-    color: var(--ink-dim); font-size: 15px; line-height: 1.55; flex: 0 0 auto;
+    color: var(--ink-dim); font-size: var(--fs-body); line-height: 1.55; flex: 0 0 auto;
     position: relative; z-index: 1;
   }
   .build-details {
     position: relative; z-index: 1;
     margin: 12px 0 0; padding: 0; list-style: none;
     display: grid; gap: 6px;
-    color: var(--ink-dim); font-size: 13px; line-height: 1.45;
+    color: var(--ink-dim); font-size: var(--fs-sm); line-height: 1.45;
   }
   .build-details li { display: flex; gap: 8px; }
   .build-details li::before {
@@ -1928,7 +1959,7 @@
     border-radius: 10px;
     background: color-mix(in srgb, var(--primary) 7%, transparent);
     border-left: 2px solid color-mix(in srgb, var(--primary) 45%, transparent);
-    color: var(--ink); font-size: 14px; line-height: 1.45;
+    color: var(--ink); font-size: var(--fs-sm); line-height: 1.45;
     overflow: hidden;
   }
   /* The clamp goes on the sentence, not on the block. A -webkit-box counts every
@@ -1939,16 +1970,45 @@
     overflow: hidden;
     min-height: calc(1.45em * 2);
   }
-  .hero-problem { margin-top: 18px; font-size: 15px; max-width: 52ch; }
+  /* Hero type, on the scale. These were Tailwind's text-6xl / text-2xl /
+     text-lg — 60 / 24 / 18px, a different ratio from ours, which is how the
+     page ended up with two competing scales. */
+  .hero-name {
+    font-family: var(--font-display); font-weight: 600;
+    font-size: clamp(var(--fs-h1), 5vw, var(--fs-display));
+    color: var(--ink);
+    /* Optical, not metric: a serif display line hangs left of the box it sits
+       in, so an unadjusted headline reads as indented against the copy below. */
+    margin-left: -0.03em;
+    text-wrap: balance;
+  }
+
+  /* The portrait and the headline shared a row, and the portrait took 202px of
+     a 535px tile — leaving 61px display type to set in a 227px column, which
+     wrapped "Hey, I'm Anchit Tandon." onto three lines of roughly four
+     characters each. Display type needs its measure. The portrait keeps its
+     hold-to-reveal interaction, at a size that reads as a mark beside the
+     eyebrow rather than a second logo competing with the name. */
+  @media (min-width: 768px) {
+    .hero-id { display: grid; grid-template-columns: auto 1fr; column-gap: var(--sp-5);
+               grid-template-areas: "mark eyebrow" "name name"; align-items: center; }
+    .hero-id > .hold-reveal { grid-area: mark; }
+    .hero-id > div:not(.hold-reveal) { grid-area: eyebrow; }
+    .hero-id .hero-name { grid-area: name; margin-top: var(--sp-4); }
+    .hero-id .hero-portrait { width: clamp(96px, 8vw, 124px); height: clamp(96px, 8vw, 124px); }
+  }
+  .hero-lede { font-size: clamp(var(--fs-lead), 2vw, var(--fs-h3)); }
+  .hero-lede-sub { font-size: var(--fs-lead); margin-top: var(--sp-2); }
+  .hero-problem { margin-top: var(--sp-5); font-size: var(--fs-body); max-width: 52ch; }
   /* The card version clamps to two lines because thirteen cards have to match.
      The hero has one of these and it is the page's thesis — it must never be
      cut off, so the clamp is lifted here. */
   .hero-problem .bp-text { -webkit-line-clamp: unset; display: block; min-height: 0; overflow: visible; }
   .bp-label {
     display: block;
-    font-family: var(--font-mono); font-size: 9px; font-weight: 500;
+    font-family: var(--font-mono); font-size: var(--fs-micro); font-weight: 500;
     letter-spacing: 0.14em; text-transform: uppercase;
-    color: var(--primary); opacity: .85; margin-bottom: 3px;
+    color: var(--primary); opacity: .85; margin-bottom: var(--sp-1);
   }
 
   /* Description: exactly three lines, always. */
@@ -3946,14 +4006,14 @@
             </div>
             <div>
               <div class="eyebrow has-dot mb-2 text-xs opacity-80"><span class="live-dot"></span>Live · AGM – Vahdam India</div>
-              <h1 class="text-4xl md:text-5xl lg:text-6xl tracking-tight m-0 leading-none" style="font-family:var(--font-display);font-weight:600;">
-                <span class="greeting text-[var(--ink-dim)] narrate-span" data-n-idx="0">Hey, I'm </span><span class="firstline text-[var(--ink)] narrate-span" data-n-idx="0">Anchit</span><br><span class="secondline text-[var(--ink)]"><span class="narrate-span" data-n-idx="0">Tandon.</span></span>
-              </h1>
             </div>
+            <h1 class="hero-name tracking-tight m-0 leading-none">
+              <span class="greeting text-[var(--ink-dim)] narrate-span" data-n-idx="0">Hey, I'm </span><span class="firstline text-[var(--ink)] narrate-span" data-n-idx="0">Anchit</span> <span class="secondline text-[var(--ink)]"><span class="narrate-span" data-n-idx="0">Tandon.</span></span>
+            </h1>
           </div>
-          <p class="text-xl md:text-2xl text-[var(--ink-dim)] font-light leading-snug relative z-10 narrate-span" data-n-idx="1">
+          <p class="hero-lede text-[var(--ink-dim)] font-light leading-snug relative z-10 narrate-span" data-n-idx="1">
             An <em class="text-[var(--primary)] not-italic font-medium">engineer</em> who learned to love the funnel.<br>
-            <span class="text-lg mt-2 inline-block">Building products. Scaling growth. Creating leverage.</span>
+            <span class="hero-lede-sub inline-block">Building products. Scaling growth. Creating leverage.</span>
           </p>
           <p class="hero-problem narrate-span" data-n-idx="1">
             <span class="bp-label">The problem I work on</span>
