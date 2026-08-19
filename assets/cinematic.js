@@ -142,15 +142,28 @@
     // applied to blocks all over the site and most of their parents are not
     // 3D contexts.
     //
-    // Perspective values differ on purpose — a shorter one is a wider lens and
-    // a more violent arrival — so a hinge and a swing do not read as the same
-    // move at two angles.
-    '.cin-v1{transform:perspective(1100px) translate3d(0,34px,-140px) rotateX(14deg)}',      // hinge up off the floor
-    '.cin-v2{transform:perspective(900px)  translate3d(-58px,0,-120px) rotateY(-26deg)}',    // swing in, left
-    '.cin-v3{transform:perspective(900px)  translate3d(58px,0,-120px)  rotateY(26deg)}',     // swing in, right
-    '.cin-v4{transform:perspective(1400px) translate3d(0,0,-420px)}',                        // arrive out of depth
-    '.cin-v5{transform:perspective(1000px) translate3d(0,26px,-90px) rotateX(10deg) rotateZ(-2.5deg)}', // tilt-roll
-    '.cin-v6{transform:perspective(760px)  translate3d(0,-30px,-150px) rotateX(-24deg)}',    // drop from above
+    // NOTHING HERE ROTATES.
+    //
+    // Five of the six variants used to hinge, swing or roll — rotateX, rotateY,
+    // rotateZ. A rotation under a shared perspective is the one entrance that
+    // cannot look straight while it plays: the far edge of the element is
+    // foreshortened, so a panel arrives visibly crooked and its children each
+    // project by a different amount on the way in. Two separate rounds of
+    // "the design looks skewed" traced back to exactly that, and when one of
+    // these got stuck mid-flight it left the sidebar tilted on all 23 pages.
+    //
+    // The variety now comes from six different KINDS of movement rather than
+    // six angles of the same one, which is also the more legible sequence: a
+    // rise then a glide then a depth arrival reads as choreography, where six
+    // tilts read as one effect repeated. Every one is transform + opacity only,
+    // so they stay on the compositor, and translateZ is kept because pure Z
+    // under perspective scales uniformly — it adds depth without skew.
+    '.cin-v1{transform:translate3d(0,34px,0)}',                          // rise
+    '.cin-v2{transform:translate3d(-52px,0,0)}',                         // glide in, left
+    '.cin-v3{transform:translate3d(52px,0,0)}',                          // glide in, right
+    '.cin-v4{transform:perspective(1400px) translate3d(0,0,-420px)}',    // arrive out of depth
+    '.cin-v5{transform:scale(.94) translate3d(0,18px,0)}',               // settle into place
+    '.cin-v6{transform:translate3d(0,-30px,0) scale(1.03)}',             // descend
 
     // On a narrow screen there is no room to come in from the side. A block is
     // the full width of a phone, so holding it 58px to the left puts its first
@@ -160,10 +173,11 @@
     // because at this width it shrinks a block enough to read as a glitch
     // rather than as depth.
     '@media (max-width:560px){' +
-      '.cin-v2{transform:perspective(900px) translate3d(-16px,0,-70px) rotateY(-12deg)}' +
-      '.cin-v3{transform:perspective(900px) translate3d(16px,0,-70px) rotateY(12deg)}' +
+      '.cin-v2{transform:translate3d(-16px,0,0)}' +
+      '.cin-v3{transform:translate3d(16px,0,0)}' +
       '.cin-v4{transform:perspective(1400px) translate3d(0,0,-180px)}' +
-      '.cin-v6{transform:perspective(760px) translate3d(0,-22px,-90px) rotateX(-16deg)}' +
+      '.cin-v5{transform:scale(.97) translate3d(0,12px,0)}' +
+      '.cin-v6{transform:translate3d(0,-18px,0) scale(1.02)}' +
     '}',
     // Scoped to .cin only, this left every .cin-stagger element that had been
     // given a variant parked at its entrance transform FOREVER: the variant
@@ -362,7 +376,7 @@
   // seconds of hidden text. Anything that has waited too long gives up its turn
   // and simply appears.
   var queue = [], draining = false;
-  var GAP_MIN = 55, GAP_MAX = 190, PATIENCE = 1100;
+  var GAP_MIN = 55, GAP_MAX = 190, PATIENCE = 1100, GAP_FLOOR = 45;
 
   // The gap is enforced across bursts, not just inside one.
   //
@@ -372,7 +386,10 @@
   // SYNCHRONOUSLY. Measured: thirteen blocks all landing at 309ms, which is the
   // burst the queue exists to prevent. Remembering when the last one played is
   // what makes the spacing real.
-  var lastAt = 0;
+  // ONE clock, shared with the inline reveal system in index.html — see the
+  // note there. Two queues each spacing only their own reveals is how blocks
+  // still arrived in pairs while both gaps read 55ms.
+  var clock = (window.__revealClock = window.__revealClock || { last: 0 });
 
   function enqueue(el) {
     if (el.classList.contains('cin-in') || el.__cinQueued) return;
@@ -383,7 +400,13 @@
 
   function gapFor() {
     var now = performance.now();
-    if (queue.length && (now - queue[0].__cinQueued) > PATIENCE) return 16;
+    // Was 16 — the backlog valve. 16ms is one frame, so a
+    // drained backlog put two or three reveals inside the same 40ms window and
+    // the one-at-a-time property quietly stopped holding under load — which is
+    // exactly when it matters most, because that is when several blocks are
+    // waiting. 45ms still clears twenty blocks in under a second, and is wide
+    // enough that two can never share a window.
+    if (queue.length && (now - queue[0].__cinQueued) > PATIENCE) return GAP_FLOOR;
     return queue.length > 10 ? GAP_MIN
          : queue.length > 4  ? Math.round((GAP_MIN + GAP_MAX) / 2)
          : GAP_MAX;
@@ -392,7 +415,7 @@
   function schedule() {
     if (draining) return;
     draining = true;
-    setTimeout(drain, Math.max(0, gapFor() - (performance.now() - lastAt)));
+    setTimeout(drain, Math.max(0, gapFor() - (performance.now() - clock.last)));
   }
 
   function drain() {
@@ -400,7 +423,7 @@
     while (el && el.classList.contains('cin-in')) el = queue.shift();
     if (!el) { draining = false; return; }
     reveal(el);
-    lastAt = performance.now();
+    clock.last = performance.now();
     // The more that is waiting, the less each one waits.
     // Still one at a time when it is behind, just faster: a block past its
     // patience gets the next frame instead of the next beat, so a twenty-block

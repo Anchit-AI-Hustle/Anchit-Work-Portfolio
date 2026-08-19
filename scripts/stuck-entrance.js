@@ -49,6 +49,30 @@ const PROBE = `(() => {
   const results = [];
   const check = (n, ok, d) => results.push([ok ? 'PASS' : 'FAIL', n, d]);
 
+  // ── 0. No entrance may rotate ────────────────────────────────────────────
+  // A rotation under a shared perspective foreshortens the far edge, so the
+  // element is visibly crooked for the whole time it plays and its children
+  // each project by a different amount. Five of the six variants used to do
+  // this, in both runtimes; when one got stuck it tilted the sidebar on every
+  // page. Variety comes from six different kinds of movement instead.
+  {
+    const fsMod = require('fs');
+    const sources = [
+      ['assets/cinematic.js', /\.cin-v[1-6]\{transform:[^}]*\}/g],
+      ['index.html',          /\.reveal\.rv-v[1-6] \{ transform:[^}]*\}/g],
+    ];
+    const spinning = [];
+    for (const [file, re] of sources) {
+      const src = fsMod.readFileSync(require('path').join(__dirname, '..', file), 'utf8');
+      const rules = src.match(re) || [];
+      if (!rules.length) spinning.push(file + ': no variant rules found (did they move?)');
+      for (const r of rules) if (/rotate/i.test(r)) spinning.push(file + ': ' + r.slice(0, 52));
+    }
+    check('no entrance variant rotates, in either runtime',
+      spinning.length === 0,
+      spinning.length ? spinning.slice(0, 3).join(' | ') : '12 variants across both runtimes, none rotating');
+  }
+
   // ── 1. The section that broke: readable the moment it is on screen ────────
   {
     const p = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
@@ -140,12 +164,19 @@ const PROBE = `(() => {
   await b.close();
 
   if (MUT) {
-    // Only the index.html checks are re-broken by the mutation; the other pages
-    // were never mis-wired, so they legitimately stay green.
-    const idx = results.slice(0, 5);
-    const idxFailed = idx.filter((r) => r[0] === 'FAIL').length;
-    if (idxFailed === idx.length) { console.log(`MUT: all ${idx.length} current-work checks failed, as they must`); process.exit(0); }
-    console.log('MUT: still passing — ' + idx.filter((r) => r[0] === 'PASS').map((r) => r[1]).join('; '));
+    // By name, not by position — this was results.slice(0, 5) and quietly
+    // pointed at the wrong set as soon as a check was added above it.
+    // The no-rotation check reads the SOURCE, and the other pages were never
+    // mis-wired, so neither is touched by a mutation of the rendered page.
+    const NOT_MUTATED = /rotates, in either runtime|agent\.html|lifecycle-os\.html|marketing-101\.html/;
+    const target = results.filter((r) => !NOT_MUTATED.test(r[1]));
+    const wrong = target.filter((r) => r[0] === 'PASS').map((r) => r[1])
+      .concat(results.filter((r) => NOT_MUTATED.test(r[1]) && r[0] === 'FAIL').map((r) => r[1] + ' (broke unexpectedly)'));
+    if (!wrong.length) {
+      console.log(`MUT: all ${target.length} checks it targets failed, and the other ${results.length - target.length} still pass`);
+      process.exit(0);
+    }
+    console.log('MUT: wrong outcome — ' + wrong.join('; '));
     process.exit(1);
   }
   process.exit(failed ? 1 : 0);

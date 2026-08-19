@@ -2315,21 +2315,28 @@
      sequence somebody directed. Each is transform + opacity only, so they cost
      exactly what the single rise cost. Assigned so no block matches the one
      before or after it — see variantFor() in the reveal script. */
-  .reveal.rv-v1 { transform: perspective(1100px) translate3d(0, 34px, -140px) rotateX(14deg); }
-  .reveal.rv-v2 { transform: perspective(900px)  translate3d(-58px, 0, -120px) rotateY(-26deg); }
-  .reveal.rv-v3 { transform: perspective(900px)  translate3d(58px, 0, -120px)  rotateY(26deg); }
-  .reveal.rv-v4 { transform: perspective(1400px) translate3d(0, 0, -420px); }
-  .reveal.rv-v5 { transform: perspective(1000px) translate3d(0, 26px, -90px) rotateX(10deg) rotateZ(-2.5deg); }
-  .reveal.rv-v6 { transform: perspective(760px)  translate3d(0, -30px, -150px) rotateX(-24deg); }
+  /* Rotation-free, and kept in step with the same six in assets/cinematic.js —
+     this file has its own reveal system and a change to arrival behaviour has
+     to be made in both (CLAUDE.md). A rotation under a shared perspective
+     cannot look straight while it plays: the far edge foreshortens, so a panel
+     arrives crooked and its children each project by a different amount. The
+     variety is six different KINDS of movement now, not six angles of one. */
+  .reveal.rv-v1 { transform: translate3d(0, 34px, 0); }                        /* rise            */
+  .reveal.rv-v2 { transform: translate3d(-52px, 0, 0); }                       /* glide in, left  */
+  .reveal.rv-v3 { transform: translate3d(52px, 0, 0); }                        /* glide in, right */
+  .reveal.rv-v4 { transform: perspective(1400px) translate3d(0, 0, -420px); }  /* out of depth    */
+  .reveal.rv-v5 { transform: scale(.94) translate3d(0, 18px, 0); }             /* settle          */
+  .reveal.rv-v6 { transform: translate3d(0, -30px, 0) scale(1.03); }           /* descend         */
 
   /* No room to come in from the side on a phone: a block is the full width of
      the screen, so holding it 58px left puts its first characters past the
      edge — a card mid-reveal read as "uilding the lifecycle OS". */
   @media (max-width: 560px) {
-    .reveal.rv-v2 { transform: perspective(900px) translate3d(-16px, 0, -70px) rotateY(-12deg); }
-    .reveal.rv-v3 { transform: perspective(900px) translate3d(16px, 0, -70px) rotateY(12deg); }
+    .reveal.rv-v2 { transform: translate3d(-16px, 0, 0); }
+    .reveal.rv-v3 { transform: translate3d(16px, 0, 0); }
     .reveal.rv-v4 { transform: perspective(1400px) translate3d(0, 0, -180px); }
-    .reveal.rv-v6 { transform: perspective(760px) translate3d(0, -22px, -90px) rotateX(-16deg); }
+    .reveal.rv-v5 { transform: scale(.97) translate3d(0, 12px, 0); }
+    .reveal.rv-v6 { transform: translate3d(0, -18px, 0) scale(1.02); }
   }
   .reveal.in.rv-v1, .reveal.in.rv-v2, .reveal.in.rv-v3,
   .reveal.in.rv-v4, .reveal.in.rv-v5, .reveal.in.rv-v6 { transform: none; }
@@ -8294,7 +8301,7 @@
   }
   const rvQueue = [];
   let rvDraining = false;
-  const RV_GAP_MIN = 55, RV_GAP_MAX = 190, RV_PATIENCE = 1100;
+  const RV_GAP_MIN = 55, RV_GAP_MAX = 190, RV_PATIENCE = 1100, RV_GAP_FLOOR = 45;
 
   // The gap is enforced ACROSS bursts, not just inside one. Calling the drain
   // straight from the enqueue whenever it was not already draining looks right
@@ -8303,7 +8310,15 @@
   // Measured on this page as thirteen blocks landing in the same millisecond —
   // exactly the burst the queue exists to prevent. Remembering when the last
   // one played is what makes the spacing real.
-  let rvLastAt = 0;
+  // ONE clock, shared with assets/cinematic.js.
+  //
+  // Each runtime used to keep its own `lastAt`, so each spaced its own reveals
+  // correctly and neither knew about the other's. Two queues draining
+  // independently put one block from each inside the same 40ms window — which
+  // is the "two at once" the turn-by-turn suite kept reporting even though
+  // both gaps are 55ms and neither queue could produce it alone. Whichever
+  // file loads first creates the clock; both then read and write it.
+  const rvClock = (window.__revealClock = window.__revealClock || { last: 0 });
 
   function playBlock(block) {
     if (!block || block.classList.contains('in') || block.__rvQueued) return;
@@ -8314,7 +8329,13 @@
 
   function rvGap() {
     const now = performance.now();
-    if (rvQueue.length && (now - rvQueue[0].__rvQueued) > RV_PATIENCE) return 16;
+    // Was 16 — the backlog valve. 16ms is one frame, so a
+    // drained backlog put two or three reveals inside the same 40ms window and
+    // the one-at-a-time property quietly stopped holding under load — which is
+    // exactly when it matters most, because that is when several blocks are
+    // waiting. 45ms still clears twenty blocks in under a second, and is wide
+    // enough that two can never share a window.
+    if (rvQueue.length && (now - rvQueue[0].__rvQueued) > RV_PATIENCE) return RV_GAP_FLOOR;
     return rvQueue.length > 10 ? RV_GAP_MIN
          : rvQueue.length > 4  ? Math.round((RV_GAP_MIN + RV_GAP_MAX) / 2)
          : RV_GAP_MAX;
@@ -8323,7 +8344,7 @@
   function rvSchedule() {
     if (rvDraining) return;
     rvDraining = true;
-    setTimeout(rvDrain, Math.max(0, rvGap() - (performance.now() - rvLastAt)));
+    setTimeout(rvDrain, Math.max(0, rvGap() - (performance.now() - rvClock.last)));
   }
 
   function rvDrain() {
@@ -8331,7 +8352,7 @@
     while (el && el.classList.contains('in')) el = rvQueue.shift();
     if (!el) { rvDraining = false; return; }
     playBlockNow(el);
-    rvLastAt = performance.now();
+    rvClock.last = performance.now();
     if (rvQueue.length) setTimeout(rvDrain, rvGap());
     else rvDraining = false;
   }
