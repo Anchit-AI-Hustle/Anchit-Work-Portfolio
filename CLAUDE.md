@@ -4,13 +4,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository overview
 
-Single-file static portfolio site for Anchit Tandon. The entire app — markup, CSS, JS, content, and chatbot knowledge base — lives in `index.html` (~1,085 lines). There is no build step, no package.json, no framework, and no bundler.
+Portfolio site for Anchit Tandon, built around a single-file `index.html`
+(~12,250 lines: markup, CSS, JS, content and the chatbot knowledge base all in
+one file, deliberately). That page is one of **24 HTML entry points** at the
+repo root, plus a standalone React/Vite app under `side-husle/how-to-1/`.
+
+There **is** a build: `scripts/build-www.mjs` assembles every page, compiles the
+How-To Engine and injects the shared systems into `www/`, which is what Vercel
+serves. There is a `package.json`. There are browser test suites. Earlier
+revisions of this file said otherwise and it was wrong.
 
 ## Commands
 
-- **Run locally**: open `index.html` directly in a browser, or serve the folder (e.g. `python -m http.server` / `npx serve`). No install step.
-- **Deploy preview**: `vercel` (from repo root). **Production**: `vercel --prod`. Vercel framework preset is "Other" — pure static.
-- **No tests, no lint, no build** — edits to `index.html` are the entire dev loop.
+- **Build**: `npm run build` → `scripts/build-www.mjs` + `scripts/copy-ayushi.mjs`, emitting `www/`. **Always rebuild before testing** — the suites drive `www/`, not the source, and a stale `www/` has more than once made a fix look like it did nothing.
+- **Run locally**: `npm run dev` for a fast source preview, `npm run dev:built` to build and serve the real `www/` tree. Anything touching routing, the How-To Engine or the shared injected systems must be checked against the built tree.
+- **Test**: serve `www/` on port 8099, then `node scripts/motionfix.js` and `node scripts/turn-by-turn.js`. See the Testing section of `README.md`, including which check is a guard rather than a proof.
+- **Deploy**: pushes to `main` deploy automatically. `vercel --prod` from the repo root also works.
 
 The chatbot is wired to a real Claude-backed `/api/chat.js` serverless function (`api/chat.js`), with the offline keyword bot as a graceful fallback. See `DEPLOY.md` for the GitHub + Vercel setup and custom domain steps.
 
@@ -18,14 +27,18 @@ The chatbot is wired to a real Claude-backed `/api/chat.js` serverless function 
 
 Everything is in `index.html`, organized in three contiguous sections:
 
-1. **`<style>` (lines ~15–300)** — Design tokens live in `:root[data-theme="dark"]` and `:root[data-theme="light"]`. The whole palette (champagne accent `#c9a96e`, ink/bg/rule scales) and typography (Fraunces serif / JetBrains Mono / Inter) is driven by CSS variables on `:root`; the theme toggle just flips `data-theme`. Layout is a two-column CSS grid (`.app`) with a collapsible sidebar (`--sidebar-w` ↔ `--sidebar-w-collapsed`).
+1. **`<style>`** (line numbers in this file go stale fast — grep instead) — Design tokens live in `:root[data-theme="dark"]` and `:root[data-theme="light"]`. The whole palette (champagne accent `#c9a96e`, ink/bg/rule scales) and typography (Fraunces serif / JetBrains Mono / Inter) is driven by CSS variables on `:root`; the theme toggle just flips `data-theme`. Layout is a two-column CSS grid (`.app`) with a collapsible sidebar (`--sidebar-w` ↔ `--sidebar-w-collapsed`).
 
-2. **`<body>` markup (lines ~300–800)** — Sidebar nav (`.nav-item[data-view=...]`) + a single `<main class="view">` containing one `<section class="panel" id="panel-{view}">` per view. Views: `chat`, `work`, `projects`, `about`, `experience`, `contact`, plus per-project detail panels `project-yaara`, `project-music`, `project-telesuite`, `project-lifeengine`. Only the panel with `.active` is visible.
+2. **`<body>` markup** — A left sidebar (`<aside class="sidebar">`, items carrying `data-view`) plus one `<section class="view" id="view-{name}">` per view. Only the view with `.active` is visible. The live list is `ALL_VIEWS` in the script — currently `home`, `about`, `now`, `chat`, `experience`, `projects`, `resume`, `contact` and eleven `project-*` detail views. **Read `ALL_VIEWS` rather than trusting this sentence**; anything not in that array is rejected by `switchView`.
 
-3. **`<script>` (lines ~800–end)** — Three concerns:
-   - **View router** (`switchView`, line ~830): toggles `.active` on nav items + panels, syncs `location.hash`, handles the nested "Side projects" parent-child highlighting, and is also reachable via `[data-go]` buttons inside panels and via inline `<a data-nav="...">` links rendered by the chatbot.
+   Navigation is wired by attribute, not by class: `navLinks` is
+   `querySelectorAll('[data-view]')`, so any element anywhere that carries a
+   `data-view` gets click routing and active-state sync for free.
+
+3. **`<script>`** — Three concerns:
+   - **View router** (`switchView`): toggles `.active` on nav items + panels, syncs `location.hash`, handles the nested "Side projects" parent-child highlighting, and is also reachable via `[data-go]` buttons inside panels and via inline `<a data-nav="...">` links rendered by the chatbot.
    - **Theme + sidebar persistence**: `localStorage` keys `anchit-theme` and `anchit-sidebar`.
-   - **Chatbot** (line ~860+): The `KB` array is the entire knowledge base — each entry has `keywords[]`, an HTML `response` (often containing `data-nav` links into other views), and a `nextChips[]` array of context-aware follow-up suggestions. `findMatch(text)` does case-insensitive keyword overlap scoring against `KB`. `handleMessage` first calls `llmReply()` (POST `/api/chat`, with short `chatHistory` for context); if Claude returns a reply it renders that, otherwise it falls back to `findMatch`/`KB` and renders the matched response with that entry's `nextChips`. So the `KB` array is now the **offline fallback** layer, not the only brain — it still ships in the single HTML file and works with no network.
+   - **Chatbot**: The `KB` array is the entire knowledge base — each entry has `keywords[]`, an HTML `response` (often containing `data-nav` links into other views), and a `nextChips[]` array of context-aware follow-up suggestions. `findMatch(text)` does case-insensitive keyword overlap scoring against `KB`. `handleMessage` first calls `llmReply()` (POST `/api/chat`, with short `chatHistory` for context); if Claude returns a reply it renders that, otherwise it falls back to `findMatch`/`KB` and renders the matched response with that entry's `nextChips`. So the `KB` array is now the **offline fallback** layer, not the only brain — it still ships in the single HTML file and works with no network.
 
 ### Adding content
 
@@ -43,6 +56,51 @@ The serverless function pattern is documented in `DEPLOY.md` (`api/chat.js` + sw
 - Editorial tone: copy is first-person ("I'm building…"), warm, specific with numbers. Match that voice when editing copy or chatbot responses.
 - All theming flows through CSS variables — never hardcode colors in component styles.
 - **Follow the design system in `DESIGN.md` for all styling.** It is the machine-readable source of truth for the palette (black / orange / gold), typography, spacing, radius, components, motion and focus states. Read it before writing styles; add a token there before inventing a value. Never use framework palette utilities (`gray-500`, `blue-600`, …) for brand surfaces.
+
+## Motion
+
+`assets/cinematic.js` is one runtime loaded by every page; `index.html` also has
+its own older inline reveal system. **Both exist, and a change to arrival
+behaviour usually has to be made twice** — they have had the same bug
+independently more than once.
+
+The rules are in `DESIGN.md`. The short version: animate `transform` and
+`opacity` and nothing else, never leave `will-change` on at rest, and nothing
+decorative runs while off screen.
+
+### Traps this codebase has already fallen into
+
+Each of these cost real debugging time. They are listed so the next person
+recognises the shape rather than rediscovering it.
+
+- **A `transition:` shorthand silently resets `transition-delay`.** A stagger
+  written to a custom property (`transition-delay: var(--cin-cd)`) landed
+  perfectly while the computed delay stayed `0s`, because the children carried
+  their own shorthand. Set the delay inline as well.
+- **GSAP owns `transform` on the elements it drives.** An inline transform beats
+  any stylesheet rule, so CSS depth on those elements simply never appears. Use
+  the separate `translate` / `rotate` properties, which compose.
+- **A custom property on `:root` invalidates the computed style of every element
+  on the page.** Pointer-driven variables go on the element, never the root.
+- **`elementFromPoint` returns the element you are asking on behalf of.** Take it
+  out of hit-testing first or every position reads as free.
+- **A queue that reveals from its own enqueue is not a queue.** If each drain
+  empties the queue and clears its flag, the next enqueue finds it idle and
+  reveals synchronously. Enforce the gap across bursts, not within one.
+- **An entrance that holds an element off in 3D is a blank screen if it lands on
+  a page wrapper.** Size-guard anything that hides before it plays.
+- **`overflow-x: hidden` on `body` makes it a scroll container** and silently
+  breaks `position: sticky` and every pinned ScrollTrigger. Use `clip`.
+- **Native smooth scrolling fights Lenis.** `html { scroll-behavior: smooth }`
+  turns every one of Lenis's per-frame `scrollTo` calls into a new animated
+  scroll; the page then barely moves. The guard is in the stylesheet and needs
+  `!important`, because ScrollTrigger restores the property inline.
+
+### Verify against the built tree
+
+The suites drive `www/`. Run `npm run build` before testing, and prefer
+measuring the rendered page over reading the diff — several bugs here looked
+correct in source and wrong on screen.
 
 ## Borrowing from reference sites
 

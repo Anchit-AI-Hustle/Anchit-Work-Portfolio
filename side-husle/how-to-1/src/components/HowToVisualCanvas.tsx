@@ -2,12 +2,12 @@
 // HowToVisualCanvas — the main animated UI.
 //   • A WebGL 3D backdrop (scroll/parallax-reactive) behind frosted-glass cards.
 //   • The PromptOptimizer (ask bar + suggestions).
-//   • On submit → cascade runs → a progress track, a live model-cascade strip,
-//     a dynamic React Flow diagram, and the step-by-step cards (each with an
-//     animated video from the text-to-video pipeline).
+//   • On submit → cascade runs → a live model-cascade strip, then the guide
+//     itself, rendered by GuideDesk: a rail of steps, one step at a time, and
+//     the route map folded away underneath.
 // ============================================================================
 
-import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Stars } from '@react-three/drei';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -17,7 +17,7 @@ import PromptOptimizer from './PromptOptimizer';
 // React Flow and its stylesheet are only needed once a guide exists, which is
 // after the cascade returns — so they are not part of the first load at all.
 const FlowDiagram = lazy(() => import('./FlowDiagram'));
-import StepCard from './StepCard';
+import GuideDesk from './GuideDesk';
 import TornadoLoader from './TornadoLoader';
 import { useCascade } from '../hooks/useCascade';
 
@@ -65,9 +65,6 @@ export default function HowToVisualCanvas() {
   const { loading, result, error, offline, run } = useCascade();
   const [activeId, setActiveId] = useState<string>();
   const guide = result?.guide;
-
-  const done = useMemo(() => guide?.steps.findIndex((s) => s.id === activeId) ?? -1, [guide, activeId]);
-  const progress = guide ? Math.max(0, done + 1) / guide.steps.length : 0;
 
   useEffect(() => {
     if (guide?.steps.length) setActiveId(guide.steps[0].id);
@@ -144,23 +141,19 @@ export default function HowToVisualCanvas() {
                 </div>
               )}
 
-              {/* Progress track */}
-              <div className="track" aria-label="Progress">
-                <motion.div className="track-fill" animate={{ width: `${progress * 100}%` }} />
-              </div>
+              {/* The steps used to be a scrolling column of cards with the map
+                  pinned beside it — everything on screen at once, and the
+                  reader deciding where to look. The desk shows one step at a
+                  time, with the rail carrying the sense of where you are. The
+                  map is still here, below, as a map rather than as a sidebar. */}
+              <GuideDesk guide={guide} activeId={activeId} onSelect={selectStep} />
 
-              <div className="result-grid">
-                <div className="steps">
-                  {guide.steps.map((s) => (
-                    <StepCard key={s.id} step={s} task={guide.task} active={s.id === activeId} onFocus={() => setActiveId(s.id)} />
-                  ))}
-                </div>
-                <aside className="flow-pane">
-                  <Suspense fallback={<div className="flow-pane-placeholder" aria-hidden="true" />}>
-                    <FlowDiagram guide={guide} activeId={activeId} onSelect={selectStep} />
-                  </Suspense>
-                </aside>
-              </div>
+              <details className="gd-map">
+                <summary>See the whole route</summary>
+                <Suspense fallback={<div className="flow-pane-placeholder" aria-hidden="true" />}>
+                  <FlowDiagram guide={guide} activeId={activeId} onSelect={selectStep} />
+                </Suspense>
+              </details>
             </motion.section>
           )}
         </AnimatePresence>

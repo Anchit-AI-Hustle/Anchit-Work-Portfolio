@@ -134,12 +134,36 @@
     // sets transform and opacity, so they cost the same as the plain rise did.
     // Assigned so that no block matches the one before or after it (see
     // variantFor) rather than cycling 1..6, which is its own visible pattern.
-    '.cin-v1{transform:translateY(30px)}',                       // rise
-    '.cin-v2{transform:translateX(-42px)}',                      // in from the left
-    '.cin-v3{transform:translateX(42px)}',                       // in from the right
-    '.cin-v4{transform:scale(.90)}',                             // settle forward
-    '.cin-v5{transform:translateY(26px) scale(.965) rotate(-.9deg)}',  // tilt up
-    '.cin-v6{transform:perspective(900px) rotateX(11deg) translateY(24px)}', // hinge
+    // Six entrances, each of them actually dimensional: every one carries its
+    // own perspective and moves through Z, so a block arrives from somewhere in
+    // space rather than sliding in on the flat. The perspective is written into
+    // each transform rather than relying on an ancestor, because these are
+    // applied to blocks all over the site and most of their parents are not
+    // 3D contexts.
+    //
+    // Perspective values differ on purpose — a shorter one is a wider lens and
+    // a more violent arrival — so a hinge and a swing do not read as the same
+    // move at two angles.
+    '.cin-v1{transform:perspective(1100px) translate3d(0,34px,-140px) rotateX(14deg)}',      // hinge up off the floor
+    '.cin-v2{transform:perspective(900px)  translate3d(-58px,0,-120px) rotateY(-26deg)}',    // swing in, left
+    '.cin-v3{transform:perspective(900px)  translate3d(58px,0,-120px)  rotateY(26deg)}',     // swing in, right
+    '.cin-v4{transform:perspective(1400px) translate3d(0,0,-420px)}',                        // arrive out of depth
+    '.cin-v5{transform:perspective(1000px) translate3d(0,26px,-90px) rotateX(10deg) rotateZ(-2.5deg)}', // tilt-roll
+    '.cin-v6{transform:perspective(760px)  translate3d(0,-30px,-150px) rotateX(-24deg)}',    // drop from above
+
+    // On a narrow screen there is no room to come in from the side. A block is
+    // the full width of a phone, so holding it 58px to the left puts its first
+    // characters past the edge — which is what a card mid-reveal looked like at
+    // 390px: "Building the lifecycle OS" reading as "uilding". The sideways
+    // entrances become short ones, and the deep push-back eases off too,
+    // because at this width it shrinks a block enough to read as a glitch
+    // rather than as depth.
+    '@media (max-width:560px){' +
+      '.cin-v2{transform:perspective(900px) translate3d(-16px,0,-70px) rotateY(-12deg)}' +
+      '.cin-v3{transform:perspective(900px) translate3d(16px,0,-70px) rotateY(12deg)}' +
+      '.cin-v4{transform:perspective(1400px) translate3d(0,0,-180px)}' +
+      '.cin-v6{transform:perspective(760px) translate3d(0,-22px,-90px) rotateX(-16deg)}' +
+    '}',
     '.cin.cin-in.cin-v1,.cin.cin-in.cin-v2,.cin.cin-in.cin-v3,' +
       '.cin.cin-in.cin-v4,.cin.cin-in.cin-v5,.cin.cin-in.cin-v6{transform:none}',
     '.cin-anim,.cin-anim>*{will-change:opacity,transform}',
@@ -378,11 +402,47 @@
 
   function reveal(el) {
     if (!el || el.classList.contains('cin-in')) return;
-    if (!/(^|\s)cin-v[1-6](\s|$)/.test(el.className)) el.classList.add(variantFor());
+    // A variant is for a BLOCK, never for a container the size of the page.
+    //
+    // These entrances hold their element off-screen in three dimensions until
+    // it plays — cin-v4 sits at translateZ(-420px). That is a nice arrival for
+    // a card and a catastrophe for a page wrapper: tag() had classed a site's
+    // root .app element as a stagger scope, so the whole document was pushed
+    // back in Z and rendered as an empty screen until its turn came. Caught on
+    // the marketing course, where .app is 12,193px tall and was sitting at
+    // top: 1789px with nothing above it.
+    //
+    // Anything taller than the viewport is scenery rather than a card, and
+    // keeps the plain rise it always had.
+    var box = el.getBoundingClientRect();
+    var blockSized = box.height > 0 && box.height <= window.innerHeight;
+    if (blockSized && !/(^|\s)cin-v[1-6](\s|$)/.test(el.className)) el.classList.add(variantFor());
     el.style.setProperty('--cin-d', '0s');          // the queue is the timing now
     if (el.classList.contains('cin-stagger')) {
-      Array.prototype.forEach.call(el.children, function (c, i) {
-        c.style.setProperty('--cin-cd', step(i) + 's');
+      // One child at a time, and far enough apart to see it.
+      //
+      // step() is sub-linear — sqrt-based — which was written to stop a long
+      // row pile-up. For six children it produces 62, 88, 107, 124, 139 and
+      // 152ms: a spread of ninety milliseconds, which the eye reads as all of
+      // them arriving together. That is why the elements inside a block never
+      // looked like they were taking turns.
+      //
+      // Linear spacing instead, tightened as the count grows so a twenty-item
+      // grid does not take three seconds to finish: six children land across
+      // 600ms and are unmistakably sequential, twenty across 900ms.
+      var kids = el.children, n = kids.length;
+      var gap = n > 12 ? 0.045 : n > 6 ? 0.08 : 0.12;
+      Array.prototype.forEach.call(kids, function (c, i) {
+        var d = (i * gap).toFixed(3) + 's';
+        c.style.setProperty('--cin-cd', d);
+        // …and set the delay itself, not only the variable it is read from.
+        // `.cin-stagger>*` declares `transition-delay:var(--cin-cd)`, but any
+        // child carrying its own `transition:` SHORTHAND resets delay back to
+        // zero — the shorthand sets every longhand it does not mention. The
+        // variable was landing correctly (0.000s, 0.120s, 0.240s…) while the
+        // computed delay stayed 0 on most blocks, which is why the children
+        // still arrived together. An inline delay outranks the shorthand.
+        c.style.transitionDelay = d;
       });
     }
     el.classList.add('cin-anim', 'cin-in');

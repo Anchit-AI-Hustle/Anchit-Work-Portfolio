@@ -1788,6 +1788,19 @@
   .work-meta .year { color: var(--primary); font-weight: 500; margin-bottom: 6px; }
   .work-meta .impact { font-size: 10px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.08em; }
 
+  /* Cards in the rail are the same height, but their INSIDES were not in sync:
+     measured across five cards, the chip row drifted over a 322px range (303,
+     383, 387, 408, 625) and the call to action over 123px. Every card
+     top-aligns its content and every card has a different amount of it, so the
+     further down an element sits the more it drifts — which is what reads as a
+     broken row.
+     The tail of the card is anchored to its bottom instead, so chips and action
+     land on a common line however much copy is above them. The chip row carries
+     a min-height because it wraps to two lines on some cards and one on others,
+     and an unequal chip row moves everything under it. */
+  .build-card .build-stack { margin-top: auto; min-height: 72px; align-content: flex-start; }
+  .build-card .build-actions { min-height: 68px; }
+
   /* ============ BUILDS (Side projects) ============ */
   .builds-grid {
     display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;
@@ -2142,12 +2155,22 @@
      sequence somebody directed. Each is transform + opacity only, so they cost
      exactly what the single rise cost. Assigned so no block matches the one
      before or after it — see variantFor() in the reveal script. */
-  .reveal.rv-v1 { transform: translateY(28px) scale(0.985); }
-  .reveal.rv-v2 { transform: translateX(-44px); }
-  .reveal.rv-v3 { transform: translateX(44px); }
-  .reveal.rv-v4 { transform: scale(0.90); }
-  .reveal.rv-v5 { transform: translateY(26px) scale(0.965) rotate(-0.9deg); }
-  .reveal.rv-v6 { transform: perspective(900px) rotateX(11deg) translateY(24px); }
+  .reveal.rv-v1 { transform: perspective(1100px) translate3d(0, 34px, -140px) rotateX(14deg); }
+  .reveal.rv-v2 { transform: perspective(900px)  translate3d(-58px, 0, -120px) rotateY(-26deg); }
+  .reveal.rv-v3 { transform: perspective(900px)  translate3d(58px, 0, -120px)  rotateY(26deg); }
+  .reveal.rv-v4 { transform: perspective(1400px) translate3d(0, 0, -420px); }
+  .reveal.rv-v5 { transform: perspective(1000px) translate3d(0, 26px, -90px) rotateX(10deg) rotateZ(-2.5deg); }
+  .reveal.rv-v6 { transform: perspective(760px)  translate3d(0, -30px, -150px) rotateX(-24deg); }
+
+  /* No room to come in from the side on a phone: a block is the full width of
+     the screen, so holding it 58px left puts its first characters past the
+     edge — a card mid-reveal read as "uilding the lifecycle OS". */
+  @media (max-width: 560px) {
+    .reveal.rv-v2 { transform: perspective(900px) translate3d(-16px, 0, -70px) rotateY(-12deg); }
+    .reveal.rv-v3 { transform: perspective(900px) translate3d(16px, 0, -70px) rotateY(12deg); }
+    .reveal.rv-v4 { transform: perspective(1400px) translate3d(0, 0, -180px); }
+    .reveal.rv-v6 { transform: perspective(760px) translate3d(0, -22px, -90px) rotateX(-16deg); }
+  }
   .reveal.in.rv-v1, .reveal.in.rv-v2, .reveal.in.rv-v3,
   .reveal.in.rv-v4, .reveal.in.rv-v5, .reveal.in.rv-v6 { transform: none; }
   .reveal-stagger > * {
@@ -3464,10 +3487,6 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       <span class="sidebar-label morph-label"><span class="ml-default">Chat</span><span class="ml-hover" aria-hidden="true">Ask me anything</span></span>
     </a>
-    <a class="sidebar-item" href="/marketing-101" aria-label="Marketing 101 — The Signal Desk">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><polyline points="7 14 11 10 15 13 21 6"/></svg>
-      <span class="sidebar-label morph-label"><span class="ml-default">Marketing 101</span><span class="ml-hover" aria-hidden="true">The Signal Desk</span></span>
-    </a>
     <a class="sidebar-item" href="assets/resume.pdf" target="_blank" rel="noopener" aria-label="My Resume (PDF, opens in a new tab)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
       <span class="sidebar-label morph-label"><span class="ml-default">My Resume</span><span class="ml-hover" aria-hidden="true">Open the PDF</span></span>
@@ -3922,11 +3941,14 @@
           <span class="cw-corner cw-tl" aria-hidden="true"></span><span class="cw-corner cw-tr" aria-hidden="true"></span>
           <span class="cw-corner cw-bl" aria-hidden="true"></span><span class="cw-corner cw-br" aria-hidden="true"></span>
           <div class="cw-screen">
-            <div class="cw-head">
-              <span class="cw-stamp" aria-hidden="true">vahdam/id-01</span>
-              <span class="cw-badge">Current focus // 2026</span>
-              <span class="cw-status"><span class="cw-dot" aria-hidden="true"></span>live</span>
-            </div>
+            <!-- The stamp, the badge and the live dot used to sit here too, and
+                 they are the SAME three values as the Vahdam tile a section
+                 above: vahdam/id-01, "Current focus // 2026", live. Reading the
+                 page top to bottom you met that row twice inside one screen of
+                 scrolling, which makes the second one look like a rendering
+                 mistake rather than a second thought. The tile establishes the
+                 label; this panel is the deep dive and starts with what it has
+                 to say. -->
             <div class="cw-body">
               <div class="cw-copy">
                 <h2 class="cw-title" id="cwTitle">Building the lifecycle OS behind the growth.</h2>
@@ -4825,6 +4847,23 @@
           <div class="build-actions">
             <a class="btn primary" href="#project-lifeengine" data-view="project-lifeengine">Case Study<span class="build-launch" aria-hidden="true">↗</span></a>
             <a class="btn" href="https://th-life-engine.vercel.app/" target="_blank" rel="noopener">Open Live Project ↗</a>
+          </div>
+        </div>
+
+        <!-- The Signal Desk — the marketing course. It lives in Side Hustle
+             rather than as its own sidebar entry: it is a thing that was built,
+             like everything else in this grid, not a section of the site. -->
+        <div class="build-card tilt-card">
+          <div class="build-tag"><span class="bento-index">13</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Marketing course · The Signal Desk</span><span class="status">Live</span></div>
+          <h3>Marketing <em>101</em></h3>
+          <p>A working course in modern marketing for people who have to produce results, not pass a module. Twelve chapters in one page, every idea practised where you read it.</p>
+          <ul class="build-details">
+            <li>12 chapters and 47 lessons, with 11 live simulators, 60 questions and 12 field tasks — the arithmetic is playable rather than described.</li>
+            <li>One self-contained page: it tracks your progress, keeps your notes per chapter, and needs no account to use.</li>
+          </ul>
+          <div class="build-stack"><span class="build-chip">12 chapters</span><span class="build-chip">47 lessons</span><span class="build-chip">11 simulators</span></div>
+          <div class="build-actions">
+            <a class="btn primary" href="/marketing-101">Open Marketing 101<span class="build-launch" aria-hidden="true">↗</span></a>
           </div>
         </div>
       </div>
@@ -8094,7 +8133,14 @@
 
   function playBlockNow(block) {
     if (!block || block.classList.contains('in')) return;
-    if (!block.classList.contains('is-scope') && !/(^|\s)rv-v[1-6](\s|$)/.test(block.className)) {
+    // Same rule as the shared runtime: a variant is for a BLOCK, never for a
+    // container the size of the page. These entrances hold their element off
+    // in three dimensions until it plays, which is an arrival for a card and a
+    // blank screen for a wrapper.
+    const box = block.getBoundingClientRect();
+    const blockSized = box.height > 0 && box.height <= window.innerHeight;
+    if (blockSized && !block.classList.contains('is-scope')
+        && !/(^|\s)rv-v[1-6](\s|$)/.test(block.className)) {
       block.classList.add(variantFor());
     }
     const scope = scopeOf(block);
@@ -8116,8 +8162,26 @@
     // Children continue their block's timeline rather than restarting it, so
     // the whole section reads as one sentence instead of several.
     if (block.classList.contains('reveal-stagger')) {
-      Array.prototype.forEach.call(block.children, (child, i) => {
-        child.style.setProperty('--anim-d', (blockDelay + stepDelay(i, 0.062)).toFixed(3) + 's');
+      // One child at a time, and far enough apart to see it.
+      //
+      // stepDelay is sub-linear, written to stop a long row piling up. For six
+      // children it spreads them over about ninety milliseconds, which the eye
+      // reads as all of them arriving at once — which is why the elements
+      // inside a block never looked like they were taking turns.
+      //
+      // Linear spacing instead, tightened as the count grows so a twenty-item
+      // grid does not take three seconds: six children land across 600ms and
+      // are unmistakably sequential, twenty across 900ms.
+      const kids = block.children, n = kids.length;
+      const gap = n > 12 ? 0.045 : n > 6 ? 0.08 : 0.12;
+      Array.prototype.forEach.call(kids, (child, i) => {
+        const d = (blockDelay + i * gap).toFixed(3) + 's';
+        child.style.setProperty('--anim-d', d);
+        // …and the delay itself, not only the variable it is read from. Any
+        // child carrying its own `transition:` shorthand resets delay to zero,
+        // because a shorthand sets every longhand it does not mention — the
+        // variable was correct while the computed delay stayed 0. Inline wins.
+        child.style.transitionDelay = d;
       });
     }
     block.classList.add('in');

@@ -1,51 +1,72 @@
 # `index.html` Landmarks
 
-This is a deliberately-single-file portfolio (~4500 lines). Use the
-line ranges below as a map. If you're using Claude / Cursor / Codex,
-paste the relevant range as context instead of the whole file.
+This is a deliberately-single-file portfolio (**~12,250 lines**). Use the line
+ranges below as a map: paste the relevant range as context instead of the whole
+file.
 
-## Top-level layout
+> **These numbers go stale.** They were generated from the file, not typed by
+> hand, and the previous version of this document claimed the file was ~4,500
+> lines — off by around 8,000, which made it worse than having no map at all.
+> If a range looks wrong, grep for the landmark string instead of trusting the
+> number, and regenerate this table rather than patching it.
+
+## Top-level map
 
 | Lines | Section |
 |---|---|
-| 1–80 | `<head>`, fonts, manifest, favicons, theme-color |
-| 80–250 | CSS design tokens — `:root[data-theme="dark"]`, `:root[data-theme="light"]`, theme variables |
-| 250–700 | Layout CSS — sidebar, top-bar, hamburger, main, footer, container, breakpoints |
-| 700–1100 | Component CSS — chat bubble, build cards, project hero, work timeline, hero stats |
-| 1100–1500 | Page-specific CSS — `#view-chat`, project detail pages, resume iframe, contact form |
-| 1500–1620 | Sidebar markup (`<aside class="sidebar">`), hamburger, top-action bar |
-| 1620–1750 | Home view (`#view-home`) — hero, career timeline, side-project teaser, hero stats |
-| 1750–1820 | Chat view (`#view-chat`) — input + chips + message body |
-| 1820–1900 | Experience view (`#view-experience`) — Vahdam / Times Internet / SWE / VIT sections |
-| 1900–2200 | Side Projects index (`#view-projects`) — 7 build cards |
-| 2200–2780 | Project detail pages — `view-project-yaara`, `-music`, `-telesuite`, `-lifeengine`, `-thirdeye`, `-mailer`, `-dtc` |
-| 2780–2900 | Resume view (`#view-resume`) — Google Docs iframe |
-| 2900–2960 | Contact view (`#view-contact`) |
-| 2960–end | `<script>` — see breakdown below |
-
-## `<script>` breakdown
-
-| Lines | What it does |
-|---|---|
-| 2360–2410 | State + theme bootstrap |
-| 2410–2440 | Sidebar collapse toggle (desktop) + cookie fallback |
-| 2440–2480 | Sidebar drawer (mobile) — `openSidebar`/`closeSidebar` |
-| 2480–2620 | View router — `switchView(view, anchor)`, hash parsing, click delegation |
-| 2620–2700 | Reveal-on-scroll IntersectionObserver |
-| 2700–2750 | Top-bar TTS "Hear this page" + voice loading |
-| 2750–2820 | Cursor glow effect (desktop only) |
-| 2820–3700 | Chat KB array — deterministic keyword matching, `findMatch`, `handleMessage`, response rendering |
+| 121–166 | first <style> — design tokens (:root) begin |
+| 167–248 | sidebar layout tokens |
+| 249–454 | futurist layer CSS (sheen / brackets / specular) |
+| 455–1803 | morph-label (two-state nav labels) |
+| 1804–2145 | builds grid / side-project cards |
+| 2146–3446 | reveal system CSS + the six rv-v* entrances |
+| 3447–3759 | sidebar markup |
+| 3760–3769 | home view markup |
+| 3770–3939 | cinematic hero stage |
+| 3940–4132 | pinned current-work section |
+| 4133–4360 | chat view |
+| 4361–4655 | experience view |
+| 4656–5542 | side-hustle view |
+| 5543–5684 | contact view |
+| 5685–5973 | ALL_VIEWS — the router allow-list |
+| 5974–6063 | switchView router |
+| 6064–8089 | chatbot KB array (offline fallback) |
+| 8090–8251 | reveal queue: playBlock / rvDrain (turn-by-turn) |
+| 8252–10383 | reveal IntersectionObserver |
+| 10384–11467 | WebGL nebula backdrop |
+| 11468–11530 | hold-to-reveal portrait script |
+| 11531–11680 | ambient animation governor |
+| 11681–12258 | scroll-quiet authority (window.__scrolling) |
 
 ## Conventions
 
-- **Adding a new view**: extend `ALL_VIEWS` (line ~2360), add a sidebar nav item, add a matching `<section class="view" id="view-{name}">` block.
-- **Adding a new project detail page**: follow the `view-project-*` pattern in lines 2200–2780, and add the matching tile in the Side Projects index (lines 1900–2200).
-- **Adding a chatbot answer**: append to the `KB` array (line ~2820). Earlier entries win on keyword overlap ties.
-- **No build step**: edit `index.html` directly, open in a browser. `vercel --prod` to deploy.
+- **Adding a view**: extend `ALL_VIEWS`, add a `.sidebar-item` carrying
+  `data-view`, and add a matching `<section class="view" id="view-{name}">`.
+  Anything not in `ALL_VIEWS` is rejected by `switchView`.
+- **Navigation is wired by attribute.** `navLinks` is
+  `querySelectorAll('[data-view]')`, so any element anywhere with a `data-view`
+  gets routing and active-state sync without extra code.
+- **Adding a chatbot answer**: append to the `KB` array. Earlier entries win on
+  keyword-overlap ties. `KB` is the offline fallback now, not the only brain —
+  `/api/chat` answers first when it can.
+- **There is a build.** Run `npm run build` and test against `www/`; editing
+  `index.html` and opening it directly will not exercise routing or the shared
+  injected systems.
 
 ## Hidden landmines
 
-- **CSS variables only** — never hardcode hex in component styles; the light-theme toggle relies on `:root[data-theme]` swaps.
-- **Top bar height = 44px + safe-area-inset-top** — anything fixed at top needs to respect that.
-- **The chatbot is NOT live AI** — it's a keyword-overlap router over the `KB` array. See `ISSUES.md#C1.8` for the upgrade path.
-- **Project detail panels share a template** — keep all 7 in sync structurally (hero / pitch / origin / problem / roadmap / iframe).
+- **CSS variables only** — never hardcode hex in component styles.
+- **Two reveal systems.** `assets/cinematic.js` is shared across every page and
+  `index.html` has its own older inline one. A change to arrival behaviour
+  usually has to be made in both; they have had the same bug independently.
+- **GSAP owns `transform`** on the hero elements it drives. Use the separate
+  `translate` / `rotate` properties for anything CSS-side, or it will silently
+  never appear.
+- **`body` uses `overflow-x: clip`, not `hidden`** — `hidden` makes body a
+  scroll container and silently breaks `position: sticky` and pinned
+  ScrollTriggers.
+- **`html { scroll-behavior: smooth }` fights Lenis.** The `html.lenis` guard
+  needs `!important`, because ScrollTrigger restores the property inline around
+  every refresh.
+- **The chatbot is live AI with a keyword fallback** — the reverse of what an
+  earlier version of this file said.
