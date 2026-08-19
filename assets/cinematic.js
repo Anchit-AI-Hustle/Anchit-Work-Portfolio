@@ -59,6 +59,56 @@
       location.reload();                       // simplest correct re-apply
     });
     (document.body || root).appendChild(btn);
+    place(btn);
+  }
+
+  // Bottom-left is only the FIRST choice. This runtime is added to pages it did
+  // not design, and some of them already own that corner — on the marketing
+  // course it landed on top of two chapter links and a Library button, which
+  // the toggle then covered and made unreachable. So it asks what is already
+  // there and moves if the spot is taken. Measured once, after layout, with
+  // elementFromPoint at the corners it is considering.
+  function place(btn) {
+    // The toggle has to be taken OUT of hit-testing while it looks, or
+    // elementFromPoint just returns the toggle and every corner reads as free —
+    // which is exactly how the first version of this decided the occupied
+    // corner was fine and stayed there.
+    function occupied(x, y) {
+      var el = document.elementFromPoint(x, y);
+      if (!el || el === btn || btn.contains(el)) return false;
+      return !!(el.closest && el.closest('a, button, input, select, textarea, [role="button"], [onclick]'));
+    }
+    requestAnimationFrame(function () {
+      var pe = btn.style.pointerEvents;
+      btn.style.pointerEvents = 'none';
+      try { choose(); } finally { btn.style.pointerEvents = pe; }
+    });
+    function choose() {
+      var r = btn.getBoundingClientRect();
+      var pad = 14, w = r.width || 92, h = r.height || 26;
+      var spots = [
+        { l: pad,                    b: pad },                       // bottom-left, as authored
+        { l: innerWidth - w - pad,   b: pad },                       // bottom-right
+        { l: pad,                    b: pad + h + 10 },              // one row up on the left
+        { l: innerWidth - w - pad,   b: pad + h + 10 }               // one row up on the right
+      ];
+      for (var i = 0; i < spots.length; i++) {
+        var s = spots[i];
+        var cx = s.l + w / 2, cy = innerHeight - s.b - h / 2;
+        if (cx < 0 || cy < 0) continue;
+        // sample the middle and both ends, so a wide neighbour is not missed
+        if (!occupied(cx, cy) && !occupied(s.l + 4, cy) && !occupied(s.l + w - 4, cy)) {
+          btn.style.left = s.l + 'px';
+          btn.style.right = 'auto';
+          btn.style.bottom = s.b + 'px';
+          return;
+        }
+      }
+      // Every candidate is taken: sit above the last one rather than on a control.
+      btn.style.left = 'auto';
+      btn.style.right = pad + 'px';
+      btn.style.bottom = (pad + (h + 10) * 2) + 'px';
+    }
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', injectToggle);
@@ -760,6 +810,16 @@
       });
       mo.observe(document.body, { childList: true, subtree: true });
     }
+    // Re-scan on demand, for pages that reveal whole regions by removing a
+    // `display:none` class rather than by inserting nodes. The MutationObserver
+    // above only watches childList, and deliberately so — watching attributes
+    // across the whole document would fire on every class toggle this site
+    // makes, including the one it sets on <body> during a scroll. A page that
+    // knows it just revealed something can say so instead.
+    window.__cinRescan = function () {
+      try { observe(); enrich(); initSurfaces(); initSpecular(); initMagnetic(); } catch (e) {}
+    };
+
     // Hard deadline. Whatever happened, nothing stays invisible.
     setTimeout(bail, 4000);
   }
