@@ -4015,7 +4015,19 @@ function show(id, push){
   sec.classList.remove('hide');
   $$('.strip').forEach(function(el){ el.classList.toggle('on', el.getAttribute('data-ch')===id); });
   var t = sec.getAttribute('data-title'), n = sec.getAttribute('data-num');
-  var cr = $('#crumb'); if(cr) cr.innerHTML = 'Chapter '+n+' &nbsp;/&nbsp; <b>'+t+'</b>';
+  // Built with textContent rather than innerHTML. n and t come from the
+  // section's own data-num / data-title, so nothing here is attacker-supplied —
+  // the hash only ever selects an existing section by id. But getAttribute()
+  // into innerHTML is CodeQL's js/xss-through-dom sink, and the rule is right
+  // in general: the day one of these attributes becomes dynamic, the old line
+  // would have been a real DOM XSS. Constructing the node removes the sink.
+  var cr = $('#crumb');
+  if(cr){
+    cr.textContent = 'Chapter ' + n + ' \u00a0/\u00a0 ';
+    var crB = document.createElement('b');
+    crB.textContent = t;
+    cr.appendChild(crB);
+  }
   document.title = n+' · '+t+' — '+(window.__TITLE__||'The Signal Desk');
   try{ if(push!==false && location.hash !== '#'+id) history.replaceState(null,'','#'+id); }catch(e){}
   CUR = id;
