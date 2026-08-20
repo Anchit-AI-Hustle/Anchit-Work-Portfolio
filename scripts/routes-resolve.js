@@ -67,6 +67,31 @@ check('every page in the build manifest reaches www/',
   notBuilt.length === 0,
   notBuilt.length ? notBuilt.join(', ') : `${listed.length} pages, all present`);
 
+// The sitemap is the third place the site advertises a URL, and it is the one
+// search engines act on. A listed URL that 404s is worse than an unlisted page.
+//
+// Redirects count as resolved: /how-to-2 is in the sitemap and is NOT built,
+// because vercel.json redirects it to /how-to. Checking only `rewrites` reports
+// that as broken — it returns 200 in production. Follow redirects first.
+{
+  const sm = fs.readFileSync(path.join(ROOT, 'sitemap.xml'), 'utf8');
+  const paths = [...sm.matchAll(/<loc>([^<]+)<\/loc>/g)]
+    .map((m) => m[1].replace(/^https?:\/\/[^/]+/, '').replace(/\/$/, '') || '/');
+  const redirects = new Map((vercel.redirects || []).map((r) => [r.source, r.destination]));
+  const rewrites = new Map((vercel.rewrites || []).map((r) => [r.source, r.destination]));
+
+  const dead = paths.filter((p) => {
+    let q = p;
+    for (let i = 0; i < 3 && redirects.has(q); i++) q = redirects.get(q);   // follow, with a loop bound
+    if (q === '/') return !fs.existsSync(path.join(WWW, 'index.html'));
+    if (rewrites.has(q)) return !resolves(rewrites.get(q));
+    return !resolves(q);
+  });
+  check('every sitemap URL resolves (following redirects)',
+    dead.length === 0,
+    dead.length ? dead.join(', ') : `${paths.length} URLs, all reachable`);
+}
+
 // The page this check was written for, by name — it has vanished twice.
 const ayushi = fs.existsSync(path.join(WWW, 'marketing-101-for-ayushi.html'));
 check('Ayushi❤️’s Growth Studio is in the build',
