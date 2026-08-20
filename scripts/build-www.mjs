@@ -31,6 +31,15 @@ const assets = [
   'jobhunt.html',
   'task-tracker.html',
   'marketing-101.html',
+  // Ayushi❤️'s Growth Studio. This page was live for months WITHOUT ever being
+  // committed: it was deployed straight from a working tree with `vercel --prod`
+  // (two production deploys carry gitDirty:1 and a claude@local author, on
+  // commits fef8c6c and 0aae37d that exist nowhere in this repository). Every
+  // git-based deploy rebuilds www/ from the repo alone, so each one silently
+  // deleted it — once before, hence a commit literally titled "restore
+  // /marketing-101-for-ayushi", and again when #147 merged. Committing it is
+  // what actually ends that cycle.
+  'marketing-101-for-ayushi.html',
   // Growth School — the public course and Ayushi❤️'s version. Both are thin
   // shells over assets/growth-school.{css,js} and the shared content file, so
   // the pair cannot drift; see the note at the top of growth-school-content.js.
