@@ -1062,7 +1062,14 @@
       letter-spacing: .04em;
       max-width: 118px;
     }
-    .top-bar-link .tb-label { display: inline-block; overflow: hidden; text-overflow: ellipsis; }
+    /* The row is a horizontal scroller, so a pill should keep its own width and
+       let the row scroll — flex was shrinking them below their content, down to
+       3px, and "WhatsApp" rendered as "W". `text-overflow: ellipsis` cannot fire
+       without `white-space: nowrap`, so the overflow was a hard clip with no
+       ellipsis: some labels lost every character but the first, and only the
+       ones that happened to break at a space showed the dots. */
+    .top-bar-link { flex: 0 0 auto; }
+    .top-bar-link .tb-label { display: inline-block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 9ch; }
     .top-bar-link .tb-icon { display: inline-block; }
     /* Hamburger button sits inside the safe-area top of the bar */
     .sidebar-toggle { top: calc(var(--safe-top) + 6px); width: 36px; height: 36px; }
@@ -1988,13 +1995,27 @@
      wrapped "Hey, I'm Anchit Tandon." onto three lines of roughly four
      characters each. Display type needs its measure. The portrait keeps its
      hold-to-reveal interaction, at a size that reads as a mark beside the
-     eyebrow rather than a second logo competing with the name. */
+     eyebrow rather than a second logo competing with the name.
+
+     THIS RULE USED TO LIVE INSIDE @media (min-width: 768px), which is the one
+     place the defect it fixes barely showed. On a 390px phone the flex row
+     survived: the portrait took 138px, the eyebrow 56px, and the h1 was left a
+     123px column to set 39px display type whose natural width is 401px. It
+     wrapped to FOUR lines and its right edge landed 41px past the viewport, so
+     the name rendered as "Hey, I'" / "Anchi" / "Tando" — clipped mid-word. The
+     narrower the screen, the worse it got, and the fix started at 768px.
+
+     It is the default now. Mark and eyebrow share the first row, the name gets
+     a full-width row of its own, at every width. */
+  .hero-id { display: grid; grid-template-columns: auto 1fr; column-gap: var(--sp-5);
+             grid-template-areas: "mark eyebrow" "name name"; align-items: center; }
+  .hero-id > .hold-reveal { grid-area: mark; }
+  .hero-id > div:not(.hold-reveal) { grid-area: eyebrow; }
+  .hero-id .hero-name { grid-area: name; margin-top: var(--sp-4); }
+  /* On a phone the mark shares its row with the eyebrow inside ~270px, so it
+     cannot also be 138px wide without squeezing the eyebrow to two words. */
+  .hero-id .hero-portrait { width: clamp(76px, 22vw, 124px); height: clamp(76px, 22vw, 124px); }
   @media (min-width: 768px) {
-    .hero-id { display: grid; grid-template-columns: auto 1fr; column-gap: var(--sp-5);
-               grid-template-areas: "mark eyebrow" "name name"; align-items: center; }
-    .hero-id > .hold-reveal { grid-area: mark; }
-    .hero-id > div:not(.hold-reveal) { grid-area: eyebrow; }
-    .hero-id .hero-name { grid-area: name; margin-top: var(--sp-4); }
     .hero-id .hero-portrait { width: clamp(96px, 8vw, 124px); height: clamp(96px, 8vw, 124px); }
   }
   .hero-lede { font-size: clamp(var(--fs-lead), 2vw, var(--fs-h3)); }
