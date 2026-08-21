@@ -93,17 +93,81 @@ check('every page in the build manifest reaches www/',
 }
 
 // The page this check was written for, by name — it has vanished twice.
-const ayushi = fs.existsSync(path.join(WWW, 'marketing-101-for-ayushi.html'));
+// MUT looks for a name the build never produces, standing in for the file
+// going missing from the manifest again.
+const ayushiFile = MUT ? 'marketing-101-for-ayushi.GONE.html' : 'marketing-101-for-ayushi.html';
+const ayushi = fs.existsSync(path.join(WWW, ayushiFile));
 check('Ayushi❤️’s Growth Studio is in the build',
-  ayushi && !MUT,
+  ayushi,
   ayushi ? 'present' : 'MISSING — it is uncommitted again, or dropped from the manifest');
+
+// ── Discoverability, both directions ──────────────────────────────────────
+// The rule: marketing-101 is the course people are meant to find, and
+// marketing-101-for-ayushi is reachable only by someone who already has the
+// link. Right now that is true by accident — nothing stops a future card, nav
+// item or sitemap entry from quietly exposing it. This makes it a rule.
+{
+  const HIDDEN = 'marketing-101-for-ayushi';
+  const PUBLIC = 'marketing-101';
+
+  const pages = fs.readdirSync(WWW).filter((f) => f.endsWith('.html'));
+  const linkRe = new RegExp('(?:href|src)="[^"]*' + HIDDEN + '[^"]*"', 'g');
+  const linkedFrom = pages.filter((p) => {
+    if (p === HIDDEN + '.html') return false;              // its own og:url is not an entry point
+    return linkRe.test(fs.readFileSync(path.join(WWW, p), 'utf8'));
+  });
+  if (MUT) linkedFrom.push('mutant.html');
+  check('the private course is linked from no page',
+    linkedFrom.length === 0,
+    linkedFrom.length ? 'linked from: ' + linkedFrom.join(', ') : `checked ${pages.length} built pages`);
+
+  const advertisers = ['sitemap.xml', 'llms.txt', 'robots.txt'].filter((f) => {
+    const p = path.join(WWW, f);
+    if (!fs.existsSync(p)) return false;
+    // MUT publishes the path in the sitemap — the exact regression this forbids.
+    const body = fs.readFileSync(p, 'utf8') + (MUT && f === 'sitemap.xml' ? `<loc>/${HIDDEN}</loc>` : '');
+    return body.includes(HIDDEN);
+  });
+  check('the private course is named in no index file',
+    advertisers.length === 0,
+    advertisers.length ? 'named in: ' + advertisers.join(', ') : 'absent from sitemap, llms.txt and robots.txt');
+
+  // robots.txt deserves a word: listing it under Disallow would PUBLISH the
+  // path to anyone who reads robots.txt, which is the opposite of hidden.
+  // Absence is the correct treatment, and the check above enforces it.
+
+  // MUT strips the noindex meta before the check reads it.
+  let html = fs.readFileSync(path.join(WWW, HIDDEN + '.html'), 'utf8');
+  if (MUT) html = html.replace(/<meta name="robots"[^>]*>/i, '');
+  const hasNoindex = /name="robots"[^>]*noindex/i.test(html);
+  check('the private course still carries its noindex',
+    hasNoindex,
+    hasNoindex ? 'meta robots noindex present in the page' : 'NO noindex meta — it would be indexable');
+
+  // The other half of the rule: the public one must stay findable.
+  // MUT drops index.html from the search, standing in for the card being removed.
+  const entryPoints = pages.filter((p) => (MUT && p === 'index.html') ? false :
+    new RegExp('href="/' + PUBLIC + '"').test(fs.readFileSync(path.join(WWW, p), 'utf8')));
+  check('the public course still has an entry point',
+    entryPoints.length > 0,
+    entryPoints.length ? 'linked from: ' + entryPoints.join(', ') : 'NOT linked from anywhere');
+}
 
 for (const [ok, n, d] of results) console.log(`  ${ok}  ${n.padEnd(52)} ${d}`);
 const failed = results.filter((r) => r[0] === 'FAIL').length;
 console.log(`\n${results.length - failed}/${results.length} passed`);
 if (MUT) {
-  if (failed >= 2) { console.log('MUT: the route and the named-page checks both failed, as they must'); process.exit(0); }
-  console.log('MUT: still passing — ' + results.filter((r) => r[0] === 'PASS').map((r) => r[1]).join('; '));
+  // Named explicitly rather than counted, so adding a check cannot silently
+  // change what the mutation is claimed to prove.
+  const TOUCHED = /rewrite resolves|Growth Studio is in the build|linked from no page|named in no index file|carries its noindex|has an entry point/;
+  const target = results.filter((r) => TOUCHED.test(r[1]));
+  const wrong = target.filter((r) => r[0] === 'PASS').map((r) => r[1])
+    .concat(results.filter((r) => !TOUCHED.test(r[1]) && r[0] === 'FAIL').map((r) => r[1] + ' (broke unexpectedly)'));
+  if (!wrong.length) {
+    console.log(`MUT: all ${target.length} checks it touches failed, and the other ${results.length - target.length} still pass`);
+    process.exit(0);
+  }
+  console.log('MUT: wrong outcome — ' + wrong.join('; '));
   process.exit(1);
 }
 process.exit(failed ? 1 : 0);
