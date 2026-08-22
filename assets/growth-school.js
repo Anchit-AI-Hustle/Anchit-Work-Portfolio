@@ -46,19 +46,48 @@
 
   function GrowthSchool(COURSE, mount) {
     const KEY = 'gs-' + COURSE.id;
-    let done = {};
-    try { done = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { done = {}; }
-    const save = () => { try { localStorage.setItem(KEY, JSON.stringify(done)); } catch (e) {} };
+    // One record per course. Progress was the only thing kept before; a course
+    // that cannot tell you what you got wrong, or hand you your notes back,
+    // is a document with buttons.
+    const BLANK = { done: {}, notes: {}, wrong: {}, exam: null, name: '' };
+    let S = Object.assign({}, BLANK);
+    try { S = Object.assign({}, BLANK, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
+    if (S.done == null) S.done = {};                       // tolerate the older shape
+    const done = S.done;
+    const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
 
     const chapters = [];
     COURSE.tracks.forEach((t) => t.chapters.forEach((c) => chapters.push({ ...c, track: t.name })));
+    // Review and the assessment are destinations, not asides — if they live in
+    // a corner of some chapter nobody meets them.
+    const REVIEW_ID = '__review', EXAM_ID = '__exam';
+    chapters.push({ id: REVIEW_ID, title: 'Review what you missed', track: 'Finish', synthetic: true });
+    chapters.push({ id: EXAM_ID, title: 'Final assessment', track: 'Finish', synthetic: true });
     let current = 0;
     const firstUndone = chapters.findIndex((c) => !done[c.id]);
     if (firstUndone > 0) current = firstUndone;
 
-    const rail = h('aside', { class: 'gs-rail' });
-    const main = h('main', { class: 'gs-main' });
+    const rail = h('aside', { class: 'gs-rail', id: 'gs-rail' });
+    const main = h('main', { class: 'gs-main', id: 'gs-main', tabindex: '-1' });
+
+    // Straight past 40-odd rail links to the lesson. Without this the keyboard
+    // path to the actual content is the entire table of contents, every time.
+    mount.appendChild(h('a', { class: 'gs-skip', href: '#gs-main' }, 'Skip to the lesson'));
+
+    // On a phone the rail was 400px of chapter list stacked above the lesson,
+    // so every visit began with a scroll past the index. It is a drawer now.
+    const menuBtn = h('button', {
+      class: 'gs-menu-btn', type: 'button', 'aria-expanded': 'false', 'aria-controls': 'gs-rail',
+      onclick: () => {
+        const open = rail.classList.toggle('open');
+        menuBtn.setAttribute('aria-expanded', String(open));
+        menuBtn.lastChild.textContent = open ? 'Hide chapters' : 'Chapters';
+      },
+    }, [h('span', { class: 'bars' }, '☰'), h('span', null, 'Chapters')]);
+    mount.appendChild(menuBtn);
     mount.appendChild(h('div', { class: 'gs-shell' }, [rail, main]));
+
+    let query = '';
 
     // ── rail ───────────────────────────────────────────────────────────────
     function renderRail() {
@@ -66,6 +95,18 @@
       rail.appendChild(h('div', { class: 'gs-kicker' }, COURSE.kicker));
       rail.appendChild(h('div', { class: 'gs-brand', html: COURSE.title }));
       if (COURSE.railSub) rail.appendChild(h('p', { class: 'gs-rail-sub', html: COURSE.railSub }));
+
+      // Search. Five chapters do not need it; a curriculum does, and the cost
+      // of adding it later is every learner who gave up looking in between.
+      const box = h('input', {
+        type: 'search', value: query, 'aria-label': 'Search the course',
+        placeholder: 'Search chapters and ideas…',
+        oninput: (e) => { query = e.target.value; applyFilter(); },
+      });
+      const count = h('div', { class: 'gs-search-count' });
+      rail.appendChild(h('div', { class: 'gs-search' }, [h('span', { class: 'ico' }, '⌕'), box]));
+      rail.appendChild(count);
+      rail.__count = count;
 
       const n = chapters.filter((c) => done[c.id]).length;
       const pct = Math.round((n / chapters.length) * 100);
@@ -79,13 +120,15 @@
       ]));
       requestAnimationFrame(() => { bar.firstChild.style.width = pct + '%'; });
 
-      COURSE.tracks.forEach((t) => {
+      const groups = COURSE.tracks.concat([{ name: 'Finish', chapters: chapters.filter((c) => c.synthetic) }]);
+      groups.forEach((t) => {
         rail.appendChild(h('div', { class: 'gs-track-name' }, t.name));
         const ul = h('ul', { class: 'gs-nav' });
         t.chapters.forEach((c) => {
           const i = chapters.findIndex((x) => x.id === c.id);
           const btn = h('button', {
             type: 'button',
+            'data-id': c.id,
             class: done[c.id] ? 'done' : '',
             'aria-current': i === current ? 'true' : 'false',
             onclick: () => go(i),
@@ -98,6 +141,38 @@
         });
         rail.appendChild(ul);
       });
+      // Take-aways live at the bottom of the rail so they are reachable from
+      // anywhere, not buried on a final screen.
+      const imp = h('input', { type: 'file', accept: 'application/json', style: 'display:none',
+        onchange: (e) => { if (e.target.files[0]) importProgress(e.target.files[0]); } });
+      rail.appendChild(h('div', { style: 'margin-top:28px;display:grid;gap:8px' }, [
+        h('button', { class: 'gs-btn', type: 'button', onclick: exportNotes }, 'Export my notes'),
+        h('button', { class: 'gs-btn', type: 'button', onclick: exportProgress }, 'Save my progress'),
+        h('button', { class: 'gs-btn', type: 'button', onclick: () => imp.click() }, 'Restore progress'),
+        imp,
+      ]));
+      applyFilter();
+    }
+
+    function haystack(c) {
+      if (c.__hay) return c.__hay;
+      const parts = [c.title, c.intro || '', c.promise || ''];
+      (c.beats || []).forEach((b) => parts.push(b.title || '', b.body || '', b.deeper || ''));
+      (c.quiz || []).forEach((q) => parts.push(q.q || ''));
+      c.__hay = parts.join(' ').replace(/<[^>]+>/g, ' ').toLowerCase();
+      return c.__hay;
+    }
+    function applyFilter() {
+      const q = query.trim().toLowerCase();
+      let shown = 0;
+      rail.querySelectorAll('.gs-nav li').forEach((li) => {
+        const id = li.firstChild && li.firstChild.dataset ? li.firstChild.dataset.id : null;
+        const c = chapters.find((x) => x.id === id);
+        const hit = !q || (c && haystack(c).indexOf(q) > -1);
+        li.classList.toggle('filtered', !hit);
+        if (hit) shown++;
+      });
+      if (rail.__count) rail.__count.textContent = q ? shown + ' of ' + chapters.length + ' match' : '';
     }
 
     // ── pieces ─────────────────────────────────────────────────────────────
@@ -149,7 +224,7 @@
 
     // The explanation shows for right AND wrong answers — a tick on its own
     // teaches nothing, and the reason is the part worth remembering.
-    function quizEl(qs) {
+    function quizEl(qs, chapterId) {
       const box = h('div', { class: 'gs-quiz' }, h('h3', { class: 'gs-h3', style: 'margin-top:0' }, 'Check yourself'));
       qs.forEach((q, qi) => {
         const wrap = h('div', { class: 'gs-q' }, h('p', { html: q.q }));
@@ -160,10 +235,16 @@
           const label = h('label', { class: 'gs-opt' }, [input, h('span', { html: opt })]);
           input.addEventListener('change', () => {
             [...opts.children].forEach((c) => c.classList.remove('right', 'wrong'));
-            label.classList.add(oi === q.answer ? 'right' : 'wrong');
-            if (oi !== q.answer) opts.children[q.answer].classList.add('right');
+            const right = oi === q.answer;
+            label.classList.add(right ? 'right' : 'wrong');
+            if (!right) opts.children[q.answer].classList.add('right');
             why.style.display = '';
-            why.innerHTML = (oi === q.answer ? '<strong>Yes.</strong> ' : '<strong>Not quite.</strong> ') + q.why;
+            why.innerHTML = (right ? '<strong>Yes.</strong> ' : '<strong>Not quite.</strong> ') + q.why;
+            // Remember misses. Getting a question wrong and never meeting it
+            // again is the single biggest hole in a self-paced course.
+            const qk = chapterId + '|' + qi;
+            if (right) delete S.wrong[qk]; else S.wrong[qk] = { c: chapterId, i: qi };
+            save();
           });
           opts.appendChild(label);
         });
@@ -180,6 +261,68 @@
         h('div', { class: 'gs-p', html: a.intro || '' }),
         h('ol', null, a.steps.map((s) => h('li', { html: s }))),
       ]);
+    }
+
+    // A course you cannot take anything away from is a course you re-read.
+    // Notes are per chapter, saved locally, and exportable as one Markdown file.
+    function notesEl(c) {
+      const ta = h('textarea', {
+        placeholder: 'What does this change about how you work? Write it in your own words — that is what makes it stick.',
+        'aria-label': 'Your notes for this chapter',
+      });
+      ta.value = S.notes[c.id] || '';
+      const meta = h('div', { class: 'gs-notes-meta' });
+      const paint = () => {
+        const w = ta.value.trim() ? ta.value.trim().split(/\s+/).length : 0;
+        meta.textContent = w + (w === 1 ? ' word' : ' words') + ' · saved on this device';
+      };
+      let t;
+      ta.addEventListener('input', () => {
+        clearTimeout(t);
+        t = setTimeout(() => { S.notes[c.id] = ta.value; save(); paint(); }, 400);
+      });
+      paint();
+      return h('div', { class: 'gs-notes' }, [
+        h('h3', { class: 'gs-h3', style: 'margin-top:0' }, 'Your notes'),
+        h('div', { class: 'gs-p' }, 'Only you can see these. They stay on this device, and you can export them all at any time.'),
+        ta, meta,
+      ]);
+    }
+
+    function download(name, text, type) {
+      const blob = new Blob([text], { type: type || 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = h('a', { href: url, download: name });
+      document.body.appendChild(a); a.click();
+      setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 0);
+    }
+    function exportNotes() {
+      const lines = ['# ' + COURSE.title.replace(/<[^>]+>/g, '') + ' — my notes', ''];
+      chapters.forEach((c, i) => {
+        const n = (S.notes[c.id] || '').trim();
+        if (!n) return;
+        lines.push('## ' + String(i + 1).padStart(2, '0') + '. ' + c.title.replace(/<[^>]+>/g, ''));
+        lines.push('', n, '');
+      });
+      if (lines.length === 2) lines.push('_No notes yet._');
+      download('course-notes.md', lines.join('\n'), 'text/markdown;charset=utf-8');
+    }
+    // Progress is local by design — no account, nothing sent anywhere. The
+    // honest answer to "so I lose it on a new laptop" is a file you control.
+    function exportProgress() {
+      download('course-progress.json', JSON.stringify({ course: COURSE.id, saved: new Date().toISOString(), state: S }, null, 2), 'application/json');
+    }
+    function importProgress(file) {
+      const r = new FileReader();
+      r.onload = () => {
+        try {
+          const d = JSON.parse(r.result);
+          if (!d || d.course !== COURSE.id) return alert('That file is from a different course.');
+          Object.assign(S, BLANK, d.state || {});
+          save(); renderRail(); renderChapter();
+        } catch (e) { alert('That file could not be read.'); }
+      };
+      r.readAsText(file);
     }
 
     // ── simulators ─────────────────────────────────────────────────────────
@@ -343,12 +486,141 @@
       return box;
     }
 
+    // Every question in the course, as one graded paper. Reading a chapter and
+    // ticking "done" proves attendance; this is the only thing here that
+    // attempts to measure whether any of it landed.
+    function allQuestions() {
+      const out = [];
+      chapters.forEach((c) => (c.quiz || []).forEach((q, i) => out.push({ q, chapter: c, i })));
+      return out;
+    }
+    const PASS = 0.8;   // 80%. Low enough to be fair on 12 questions, high enough to mean something.
+
+    function examEl() {
+      const pool = allQuestions();
+      const answers = {};
+      const wrap = h('div');
+      const intro = h('div', { class: 'gs-exam-intro' }, [
+        h('h3', { class: 'gs-h3', style: 'margin-top:0' }, 'Final assessment'),
+        h('div', { class: 'gs-p', html: 'Every question from the course, in one pass — <strong>' + pool.length +
+          '</strong> of them. You need <strong>' + Math.round(PASS * 100) + '%</strong>. ' +
+          'Nothing is timed and you can retake it; the point is to find the gaps, not to gate you.' }),
+      ]);
+      wrap.appendChild(intro);
+
+      const paper = h('div', { class: 'gs-quiz' });
+      pool.forEach((item, n) => {
+        const qq = h('div', { class: 'gs-q' }, h('p', { html: '<strong>' + (n + 1) + '.</strong> ' + item.q.q }));
+        const opts = h('div', { class: 'gs-opts' });
+        item.q.options.forEach((opt, oi) => {
+          const input = h('input', { type: 'radio', name: 'exam-' + n });
+          input.addEventListener('change', () => { answers[n] = oi; });
+          opts.appendChild(h('label', { class: 'gs-opt' }, [input, h('span', { html: opt })]));
+        });
+        qq.appendChild(opts);
+        paper.appendChild(qq);
+      });
+      wrap.appendChild(paper);
+
+      const result = h('div');
+      wrap.appendChild(result);
+      wrap.appendChild(h('div', { class: 'gs-foot' }, [
+        h('button', { class: 'gs-btn primary', type: 'button', onclick: () => {
+          const answered = Object.keys(answers).length;
+          if (answered < pool.length && !confirm((pool.length - answered) + ' unanswered. Mark it anyway?')) return;
+          let right = 0; const missed = [];
+          pool.forEach((item, n) => { if (answers[n] === item.q.answer) right++; else missed.push(item); });
+          const pct = right / pool.length;
+          S.exam = { right: right, total: pool.length, pct: pct, at: new Date().toISOString() };
+          // Feed misses back into the review queue rather than just scoring them.
+          missed.forEach((m) => { S.wrong[m.chapter.id + '|' + m.i] = { c: m.chapter.id, i: m.i }; });
+          save(); renderRail();
+          result.innerHTML = '';
+          result.appendChild(h('div', { class: 'gs-score' }, [
+            h('div', null, [h('div', { class: 'k' }, 'Score'), h('div', { class: 'v ' + (pct >= PASS ? 'ok' : 'warn') }, right + '/' + pool.length)]),
+            h('div', null, [h('div', { class: 'k' }, 'Percentage'), h('div', { class: 'v ' + (pct >= PASS ? 'ok' : 'warn') }, Math.round(pct * 100) + '%')]),
+            h('div', null, [h('div', { class: 'k' }, 'Result'), h('div', { class: 'v ' + (pct >= PASS ? 'ok' : 'warn') }, pct >= PASS ? 'Passed' : 'Not yet')]),
+          ]));
+          result.appendChild(h('div', { class: 'gs-p', html: pct >= PASS
+            ? 'Passed. The certificate is below — and the ' + missed.length + ' you missed have gone into your review list, because a pass is not the same as knowing all of it.'
+            : 'Not yet — you need ' + Math.round(PASS * pool.length) + ' of ' + pool.length + '. The ' + missed.length +
+              ' you missed are in your review list now. Work through those and come back; nothing is lost.' }));
+          if (pct >= PASS) result.appendChild(certEl());
+          result.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        } }, 'Mark my paper'),
+      ]));
+      return wrap;
+    }
+
+    // A completion record, and deliberately modest about what it is: a local
+    // attestation, not an accredited qualification. Claiming more would be a lie
+    // a corporate buyer would catch in one question.
+    function certEl() {
+      const nameIn = h('input', { type: 'text', placeholder: 'Your name', 'aria-label': 'Name for the certificate', value: S.name || '' });
+      const who = h('div', { class: 'who' }, S.name || 'Your name');
+      nameIn.addEventListener('input', () => { S.name = nameIn.value; who.textContent = nameIn.value || 'Your name'; save(); });
+      const ex = S.exam || { right: 0, total: 0, pct: 0, at: new Date().toISOString() };
+      const when = new Date(ex.at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+      const card = h('div', { class: 'gs-cert' }, [
+        h('div', { class: 'eyebrow' }, 'Record of completion'),
+        h('h3', { html: COURSE.title }),
+        who,
+        h('div', { class: 'meta', html:
+          'scored ' + ex.right + ' of ' + ex.total + ' (' + Math.round(ex.pct * 100) + '%)<br>' +
+          when + '<br>' + chapters.length + ' chapters · ' + allQuestions().length + ' questions' }),
+        h('div', { class: 'gs-p', style: 'margin-top:20px;font-size:14px' },
+          'This is a self-assessed record generated in your browser. It is honest about being that — it is not an accredited qualification, and nobody has verified it.'),
+        nameIn,
+        h('div', { class: 'gs-foot', style: 'justify-content:center;border:0;margin-top:8px' }, [
+          h('button', { class: 'gs-btn', type: 'button', onclick: () => window.print() }, 'Print / save as PDF'),
+        ]),
+      ]);
+      return card;
+    }
+
+    // Spaced review: the questions you got wrong, and only those.
+    function reviewEl() {
+      const keys = Object.keys(S.wrong);
+      if (!keys.length) {
+        return h('div', { class: 'gs-review' }, [
+          h('h3', { class: 'gs-h3', style: 'margin-top:0' }, 'Nothing to review'),
+          h('div', { class: 'gs-p' }, 'Every question you have answered, you got right. Anything you miss will collect here.'),
+        ]);
+      }
+      const items = keys.map((k) => {
+        const rec = S.wrong[k];
+        const c = chapters.find((x) => x.id === rec.c);
+        return c && c.quiz && c.quiz[rec.i] ? { c: c, q: c.quiz[rec.i], i: rec.i } : null;
+      }).filter(Boolean);
+      const box = h('div', { class: 'gs-review' }, [
+        h('div', { class: 'n' }, String(items.length)),
+        h('h3', { class: 'gs-h3', style: 'margin-top:0' }, items.length === 1 ? 'question to revisit' : 'questions to revisit'),
+        h('div', { class: 'gs-p' }, 'These are the ones you missed. Answer correctly and it leaves the list.'),
+      ]);
+      items.forEach((it) => box.appendChild(quizEl([it.q], it.c.id)));
+      return box;
+    }
+
     // ── chapter ────────────────────────────────────────────────────────────
     function renderChapter() {
       const c = chapters[current];
       main.innerHTML = '';
       const col = h('div', { class: 'gs-col' });
 
+      if (c.synthetic) {
+        col.appendChild(h('div', { class: 'gs-kicker' }, 'Finish'));
+        col.appendChild(h('h1', { class: 'gs-h1' }, c.title));
+        col.appendChild(c.id === EXAM_ID ? examEl() : reviewEl());
+        const f2 = h('div', { class: 'gs-foot' }, [
+          h('button', { class: 'gs-btn', type: 'button', onclick: () => go(current - 1) }, '← Back'),
+          h('span', { class: 'gs-note' }, 'Nothing here is sent anywhere.'),
+        ]);
+        col.appendChild(f2);
+        main.appendChild(col);
+        main.focus({ preventScroll: true });
+        window.scrollTo(0, 0);
+        return;
+      }
       col.appendChild(h('div', { class: 'gs-kicker' }, c.track + ' · Chapter ' + String(current + 1).padStart(2, '0') + (c.minutes ? ' · ' + c.minutes + ' min' : '')));
       col.appendChild(h('h1', { class: 'gs-h1', html: c.title }));
       if (c.intro) col.appendChild(h('p', { class: 'gs-p', html: c.intro }));
@@ -362,7 +634,8 @@
       if (c.repos) { col.appendChild(h('h3', { class: 'gs-h3' }, 'Read the real thing')); col.appendChild(reposEl(c.repos)); }
       if (c.sim) col.appendChild(simEl(c.sim));
       if (c.activity) col.appendChild(activityEl(c.activity));
-      if (c.quiz) col.appendChild(quizEl(c.quiz));
+      if (c.quiz) col.appendChild(quizEl(c.quiz, c.id));
+      col.appendChild(notesEl(c));
       if (c.outro) col.appendChild(h('p', { class: 'gs-p', html: c.outro }));
 
       const markBtn = h('button', {
@@ -376,7 +649,8 @@
       col.appendChild(foot);
 
       main.appendChild(col);
-      main.scrollIntoView({ block: 'start', behavior: 'instant' });
+      main.focus({ preventScroll: true });
+      rail.classList.remove('open');
       window.scrollTo(0, 0);
     }
 
