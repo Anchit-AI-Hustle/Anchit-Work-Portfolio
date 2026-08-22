@@ -156,6 +156,55 @@ const PAGES = [
     await p.close();
   }
 
+  // Two bugs that only showed up when the HAPPY path was finally exercised.
+  // Both were shipped and both were wrong about the size of the course.
+  {
+    const p = await (await b.newContext({ viewport: { width: 1280, height: 900 } })).newPage();
+    p.on('dialog', (d) => d.accept());
+    await p.goto('http://127.0.0.1:8099/growth-school.html', { waitUntil: 'load', timeout: 25000 });
+    await p.waitForTimeout(900);
+
+    // Review and the assessment are destinations, not lessons, and neither can
+    // be marked done. Counting them made the bar top out at 82% for someone who
+    // had finished everything.
+    const prog = await p.evaluate(async () => {
+      for (let i = 0; i < 40; i++) {
+        const btn = [...document.querySelectorAll('.gs-btn.primary')].find((x) => /Mark done|Done ✓/.test(x.textContent));
+        if (!btn) break;
+        btn.click();
+        await new Promise((r) => setTimeout(r, 130));
+      }
+      return {
+        text: (document.querySelector('.gs-progress-meta') || {}).innerText || '',
+        width: (document.querySelector('.gs-bar > i') || {}).style.width,
+      };
+    });
+    check('finishing every chapter reaches 100%',
+      /100%/.test(prog.text) && prog.width === '100%' && !MUT,
+      prog.text.replace(/\n/g, ' | ') + ' · bar ' + prog.width);
+
+    // The certificate must not claim more chapters than the course contains.
+    const cert = await p.evaluate(async () => {
+      const btn = [...document.querySelectorAll('.gs-nav button')].find((x) => /Final assessment/.test(x.textContent));
+      btn.click();
+      await new Promise((r) => setTimeout(r, 450));
+      const tracks = GS_CONTENT.baseTracks();
+      const pool = [];
+      tracks.forEach((t) => t.chapters.forEach((c) => (c.quiz || []).forEach((q) => pool.push(q))));
+      [...document.querySelectorAll('.gs-quiz .gs-q')].forEach((q, i) => q.querySelectorAll('.gs-opt input')[pool[i].answer].click());
+      [...document.querySelectorAll('.gs-btn')].find((x) => /Mark my paper/.test(x.textContent)).click();
+      await new Promise((r) => setTimeout(r, 550));
+      const meta = (document.querySelector('.gs-cert .meta') || {}).innerText || '';
+      const claimed = (meta.match(/(\d+) chapters/) || [])[1];
+      return { claimed: claimed ? +claimed : null, real: tracks.reduce((n, t) => n + t.chapters.length, 0), shown: !!document.querySelector('.gs-cert') };
+    });
+    check('a passing paper produces a certificate', cert.shown && !MUT, cert.shown ? 'certificate rendered' : 'no certificate on a pass');
+    check('the certificate states the real chapter count',
+      cert.claimed === cert.real && !MUT,
+      'claims ' + cert.claimed + ', course has ' + cert.real);
+    await p.close();
+  }
+
   // A phone should not open on 400px of contents list.
   {
     const p = await (await b.newContext({ viewport: { width: 390, height: 844 } })).newPage();

@@ -108,13 +108,19 @@
       rail.appendChild(count);
       rail.__count = count;
 
-      const n = chapters.filter((c) => done[c.id]).length;
-      const pct = Math.round((n / chapters.length) * 100);
+      // Real chapters only. Review and the assessment are destinations, not
+      // lessons, and neither can be marked done — so counting them made the
+      // bar top out at 9 of 11 (82%). A progress bar that cannot reach the end
+      // is worse than no progress bar: it reads as "you have missed something"
+      // to someone who has in fact finished.
+      const real = chapters.filter((c) => !c.synthetic);
+      const n = real.filter((c) => done[c.id]).length;
+      const pct = real.length ? Math.round((n / real.length) * 100) : 0;
       const bar = h('div', { class: 'gs-bar' }, h('i'));
       rail.appendChild(h('div', { class: 'gs-progress' }, [
         bar,
         h('div', { class: 'gs-progress-meta' }, [
-          h('span', null, n + ' of ' + chapters.length + ' done'),
+          h('span', null, n + ' of ' + real.length + ' done'),
           h('span', null, pct + '%'),
         ]),
       ]));
@@ -567,7 +573,12 @@
         who,
         h('div', { class: 'meta', html:
           'scored ' + ex.right + ' of ' + ex.total + ' (' + Math.round(ex.pct * 100) + '%)<br>' +
-          when + '<br>' + chapters.length + ' chapters · ' + allQuestions().length + ' questions' }),
+          // Real chapters only. `chapters` also holds the two synthetic
+          // destinations (Review, Final assessment), so counting it told the
+          // holder they had completed 11 chapters of a 9-chapter course — an
+          // overstatement, on the one artefact whose whole value is being
+          // accurate about what was done.
+          when + '<br>' + chapters.filter((c) => !c.synthetic).length + ' chapters · ' + allQuestions().length + ' questions' }),
         h('div', { class: 'gs-p', style: 'margin-top:20px;font-size:14px' },
           'This is a self-assessed record generated in your browser. It is honest about being that — it is not an accredited qualification, and nobody has verified it.'),
         nameIn,
