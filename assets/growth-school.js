@@ -42,6 +42,28 @@
       el.appendChild(typeof c === 'string' ? document.createTextNode(c) : c));
     return el;
   }
+  // Course copy is authored as small HTML fragments. Two places need it as plain
+  // text instead - the search haystack and the notes export. A /<[^>]+>/ strip is
+  // the obvious move and the wrong one: it mangles entities, keeps comment bodies,
+  // and cuts a tag short at the first `>` inside a quoted attribute. Parse it with
+  // DOMParser instead, which builds an inert document - no scripts, no image loads,
+  // nothing attached to this page - and read the text back off it.
+  function plain(s) {
+    if (s == null) return '';
+    const str = String(s);
+    if (str.indexOf('<') < 0 && str.indexOf('&') < 0) return str;
+    try {
+      const doc = new DOMParser().parseFromString(str, 'text/html');
+      const walk = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT);
+      const out = [];
+      for (let n = walk.nextNode(); n; n = walk.nextNode()) out.push(n.nodeValue);
+      // Join across element boundaries, so two list items stay two words.
+      return out.join(' ').replace(/\s+/g, ' ').trim();
+    } catch (e) {
+      return str;
+    }
+  }
+
   const money = (n, cur) => (cur || '₹') + Math.round(n).toLocaleString('en-IN');
 
   function GrowthSchool(COURSE, mount) {
@@ -197,7 +219,7 @@
       const parts = [c.title, c.intro || '', c.promise || ''];
       (c.beats || []).forEach((b) => parts.push(b.title || '', b.body || '', b.deeper || ''));
       (c.quiz || []).forEach((q) => parts.push(q.q || ''));
-      c.__hay = parts.join(' ').replace(/<[^>]+>/g, ' ').toLowerCase();
+      c.__hay = parts.map(plain).join(' ').toLowerCase();
       return c.__hay;
     }
     function applyFilter() {
@@ -350,11 +372,11 @@
       setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 0);
     }
     function exportNotes() {
-      const lines = ['# ' + COURSE.title.replace(/<[^>]+>/g, '') + ' — my notes', ''];
+      const lines = ['# ' + plain(COURSE.title) + ' — my notes', ''];
       chapters.forEach((c, i) => {
         const n = (S.notes[c.id] || '').trim();
         if (!n) return;
-        lines.push('## ' + String(i + 1).padStart(2, '0') + '. ' + c.title.replace(/<[^>]+>/g, ''));
+        lines.push('## ' + String(i + 1).padStart(2, '0') + '. ' + plain(c.title));
         lines.push('', n, '');
       });
       if (lines.length === 2) lines.push('_No notes yet._');
