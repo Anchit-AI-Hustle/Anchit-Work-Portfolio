@@ -10144,7 +10144,10 @@
     const el = document.getElementById('chatNudge');
     if (!el) return;
 
-    let seen = true;                       // fail closed: a storage error must
+    // Fail closed. If storage is unreadable (private mode, blocked cookies) we
+    // cannot tell a first-time visitor from a returning one, so assume returning
+    // and stay quiet -- the catch below is where that decision lives.
+    let seen;
     try { seen = !!localStorage.getItem(KEY); } catch (e) { seen = true; }
     if (seen) return;                      // never nudge a returning visitor.
 
