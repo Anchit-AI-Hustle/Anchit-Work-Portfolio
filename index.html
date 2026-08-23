@@ -8851,6 +8851,58 @@
     box-shadow: 0 18px 54px rgba(0, 0, 0, .52), 0 0 38px rgba(255, 120, 24, .28);
   }
   .chat-return.visible { display: flex; }
+
+  /* First-visit nudge.
+     Deliberately NOT a modal. The previous intro popup was disabled because it
+     opened a blurred scrim over the cinematic title sequence on every single
+     load, so the sequence played behind it and was over by the time anyone
+     dismissed it (see the note by showAnchitIntro). This is tethered to the
+     launcher, blocks nothing, steals no focus, and waits for the boot sequence
+     to finish before it appears. */
+  .chat-nudge {
+    position: fixed;
+    right: 22px;
+    bottom: 92px;
+    z-index: 9998;
+    max-width: min(292px, calc(100vw - 44px));
+    display: none;
+    padding: 12px 40px 12px 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 190, 73, .42);
+    background: linear-gradient(135deg, rgba(20, 14, 9, .97), rgba(58, 26, 8, .95));
+    color: #fff7e8;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, .5), 0 0 26px rgba(255, 120, 24, .2);
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity .34s ease, transform .34s cubic-bezier(.16,1,.3,1);
+  }
+  .chat-nudge.showing { display: block; }
+  .chat-nudge.in { opacity: 1; transform: none; }
+  .chat-nudge-title { font-weight: 700; font-size: 13.5px; line-height: 1.3; margin-bottom: 3px; }
+  .chat-nudge-sub { font-size: 12px; line-height: 1.45; color: rgba(255, 247, 232, .72); }
+  .chat-nudge-close {
+    position: absolute; top: 6px; right: 6px;
+    width: 26px; height: 26px; border-radius: 50%;
+    display: grid; place-items: center; cursor: pointer;
+    background: transparent; border: 0; color: rgba(255, 247, 232, .6);
+    font-size: 15px; line-height: 1;
+  }
+  .chat-nudge-close:hover { color: #fff7e8; background: rgba(255, 255, 255, .08); }
+  .chat-nudge-close:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  /* A tail pointing at the launcher, so it reads as belonging to it. */
+  .chat-nudge::after {
+    content: ''; position: absolute; right: 30px; bottom: -7px;
+    width: 12px; height: 12px; transform: rotate(45deg);
+    background: linear-gradient(135deg, rgba(58, 26, 8, .95), rgba(58, 26, 8, .95));
+    border-right: 1px solid rgba(255, 190, 73, .42);
+    border-bottom: 1px solid rgba(255, 190, 73, .42);
+  }
+  /* Pointless on the chat surface itself. */
+  body.view-chat .chat-nudge, body.chat-guide-open .chat-nudge { display: none !important; }
+  @media (max-width: 560px) { .chat-nudge { bottom: 104px; right: 12px; } }
+  @media (prefers-reduced-motion: reduce) {
+    .chat-nudge { transition: none; transform: none; }
+  }
   .chat-return-main,
   .chat-return-icon {
     appearance: none;
@@ -9975,6 +10027,14 @@
     .chat-return::after { display: none; }
   }
 </style>
+<!-- First-visit nudge. role="status" not "dialog": it announces itself once
+     without trapping focus or interrupting whatever the visitor is doing. -->
+<div class="chat-nudge" id="chatNudge" role="status" aria-live="polite" hidden>
+  <div class="chat-nudge-title">There's an AI version of me here.</div>
+  <div class="chat-nudge-sub">Ask it about the work, the builds, or whether I'd be a fit — it answers in my voice.</div>
+  <button class="chat-nudge-close" type="button" id="chatNudgeClose" aria-label="Dismiss">&times;</button>
+</div>
+
 <div class="chat-return" id="chatReturnBtn" role="group" aria-label="Chat with Anchit">
   <button class="chat-return-main" type="button" data-chat-open>
     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -10063,6 +10123,83 @@
 	  }
   window.openFullChat = openFullChat;
   window.minimizeChat = minimizeChat;
+
+  /* ── First-visit chat nudge ───────────────────────────────────────────────
+     Shown once, ever, to someone who has not seen it before.
+
+     localStorage, not sessionStorage: "the first time they open the website"
+     has to survive closing the tab, otherwise every new tab is a first visit
+     and a returning visitor gets nudged forever.
+
+     The flag is written when the nudge is SHOWN, not when it is dismissed.
+     Writing it on dismiss means anyone who ignores it — which is most people —
+     is shown it again on every visit, which is the opposite of the intent.
+
+     It waits for the cinematic boot sequence to finish. That sequence is the
+     first thing a new visitor sees, and the previous intro popup was disabled
+     precisely because it covered it. Interrupting the same sequence with a
+     different overlay would repeat that mistake.                             */
+  (function chatNudge() {
+    const KEY = 'anchit-chat-nudge-seen';
+    const el = document.getElementById('chatNudge');
+    if (!el) return;
+
+    // Fail closed. If storage is unreadable (private mode, blocked cookies) we
+    // cannot tell a first-time visitor from a returning one, so assume returning
+    // and stay quiet -- the catch below is where that decision lives.
+    let seen;
+    try { seen = !!localStorage.getItem(KEY); } catch (e) { seen = true; }
+    if (seen) return;                      // never nudge a returning visitor.
+
+    let shown = false, hideTimer = null;
+
+    function dismiss() {
+      if (!shown) return;
+      el.classList.remove('in');
+      clearTimeout(hideTimer);
+      setTimeout(() => { el.classList.remove('showing'); el.hidden = true; }, 360);
+    }
+
+    function show() {
+      if (shown) return;
+      // Not over the chat itself, and not while the intro tour is open.
+      if (document.body.classList.contains('view-chat') ||
+          document.body.classList.contains('chat-guide-open') ||
+          document.body.classList.contains('intro-active')) return;
+      shown = true;
+      try { localStorage.setItem(KEY, String(Date.now())); } catch (e) {}
+      el.hidden = false;
+      el.classList.add('showing');
+      requestAnimationFrame(() => el.classList.add('in'));
+      // Long enough to read twice, short enough not to become furniture.
+      hideTimer = setTimeout(dismiss, 14000);
+    }
+
+    document.getElementById('chatNudgeClose')?.addEventListener('click', dismiss);
+    // Opening the chat answers the nudge — it should not linger behind it.
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('[data-chat-open], .chat-return, .sidebar-item[data-view="chat"]')) dismiss();
+    }, true);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') dismiss(); });
+
+    // Wait for the boot sequence. #cineHero carries .cine while it is playing
+    // and the class is removed when it exits; if it never runs (motion off,
+    // reduced motion, no JS path) fall through on a timer instead of waiting
+    // for something that will not happen.
+    const cine = document.getElementById('cineHero');
+    const bootRunning = () => cine && cine.classList.contains('cine') && !cine.classList.contains('is-static');
+    if (!bootRunning()) {
+      setTimeout(show, 2600);
+    } else {
+      const started = Date.now();
+      const poll = setInterval(() => {
+        if (!bootRunning() || Date.now() - started > 12000) {   // hard ceiling
+          clearInterval(poll);
+          setTimeout(show, 900);
+        }
+      }, 400);
+    }
+  })();
   document.getElementById('chatMinimizeBtn')?.addEventListener('click', () => minimizeChat());
 	  // Every visit lands on the HOME page with the onboarding chooser on top of
 	  // it — the chat is NEVER auto-opened behind the popup. Picking "Chat" opens

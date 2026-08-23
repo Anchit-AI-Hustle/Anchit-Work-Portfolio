@@ -228,3 +228,99 @@ a:hover { text-decoration: underline; }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PRODUCT LAYER
+   The teaching was there; the things that make it usable as a course were not.
+   Search, notes you can take away, a real assessment, a completion record, a
+   review queue, and navigation that works on a phone.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Skip link — the rail is 40+ tab stops, so keyboard users need a way past it. */
+.gs-skip {
+  position: absolute; left: -9999px; top: 0; z-index: 100;
+  background: var(--gs-primary); color: #090603; font-weight: 600;
+  padding: var(--gs-3) var(--gs-5); border-radius: 0 0 var(--gs-r-md) 0;
+}
+.gs-skip:focus { left: 0; text-decoration: none; }
+
+/* Search */
+.gs-search { position: relative; margin: var(--gs-4) 0 var(--gs-2); }
+.gs-search input {
+  width: 100%; font: inherit; font-size: var(--gs-fs-sm);
+  background: var(--gs-elev); color: var(--gs-ink);
+  border: 1px solid var(--gs-rule); border-radius: var(--gs-r-md);
+  padding: var(--gs-2) var(--gs-3) var(--gs-2) 30px;
+}
+.gs-search input::placeholder { color: var(--gs-mute); }
+.gs-search input:focus { border-color: var(--gs-primary); outline: none; }
+.gs-search .ico { position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  color: var(--gs-mute); font-size: var(--gs-fs-sm); pointer-events: none; }
+.gs-search-count { font-family: var(--gs-font-mono); font-size: var(--gs-fs-micro);
+  color: var(--gs-dim); letter-spacing: .08em; margin-top: var(--gs-1); }
+.gs-nav button.hit mark { background: color-mix(in srgb, var(--gs-accent-warm) 30%, transparent);
+  color: var(--gs-ink); border-radius: 3px; }
+.gs-nav li.filtered { display: none; }
+
+/* Mobile: the rail becomes a drawer instead of 400px of list above the lesson */
+.gs-menu-btn { display: none; }
+@media (max-width: 900px) {
+  .gs-menu-btn {
+    display: flex; align-items: center; gap: var(--gs-2); cursor: pointer;
+    position: sticky; top: 0; z-index: 30; width: 100%;
+    font: inherit; font-size: var(--gs-fs-sm); color: var(--gs-ink);
+    background: var(--gs-deep); border: 0; border-bottom: 1px solid var(--gs-rule);
+    padding: var(--gs-3) var(--gs-5);
+  }
+  .gs-menu-btn .bars { font-size: 15px; color: var(--gs-primary); }
+  .gs-rail { display: none; }
+  .gs-rail.open { display: block; }
+  .gs-main { padding-top: var(--gs-5); }
+}
+
+/* Notes — the thing a learner actually takes away */
+.gs-notes { border: 1px solid var(--gs-rule); border-radius: var(--gs-r-lg);
+  padding: var(--gs-5); margin: var(--gs-6) 0; background: var(--gs-deep); }
+.gs-notes textarea {
+  width: 100%; min-height: 110px; resize: vertical; font: inherit;
+  font-size: var(--gs-fs-sm); line-height: 1.6; color: var(--gs-ink);
+  background: var(--gs-elev); border: 1px solid var(--gs-rule);
+  border-radius: var(--gs-r-md); padding: var(--gs-3); margin-top: var(--gs-3);
+}
+.gs-notes textarea:focus { border-color: var(--gs-primary); outline: none; }
+.gs-notes-meta { display: flex; gap: var(--gs-3); align-items: center; flex-wrap: wrap;
+  margin-top: var(--gs-2); font-family: var(--gs-font-mono);
+  font-size: var(--gs-fs-micro); color: var(--gs-dim); letter-spacing: .08em; }
+
+/* Assessment + result */
+.gs-exam-intro { border: 1px solid var(--gs-primary); border-radius: var(--gs-r-lg);
+  padding: var(--gs-5); margin: var(--gs-5) 0; background: var(--gs-elev); }
+.gs-score { display: grid; grid-template-columns: repeat(auto-fit,minmax(130px,1fr));
+  gap: var(--gs-4); margin: var(--gs-5) 0; }
+.gs-score .k { font-family: var(--gs-font-mono); font-size: var(--gs-fs-micro);
+  letter-spacing: .1em; text-transform: uppercase; color: var(--gs-dim); }
+.gs-score .v { font-family: var(--gs-font-display); font-size: var(--gs-fs-h2);
+  line-height: 1.1; color: var(--gs-ink); }
+.gs-score .v.ok { color: var(--gs-good); }
+.gs-score .v.warn { color: var(--gs-primary); }
+
+/* Certificate — deliberately plain and honest about what it attests */
+.gs-cert { border: 1px solid var(--gs-accent); border-radius: var(--gs-r-lg);
+  padding: var(--gs-8) var(--gs-6); margin: var(--gs-6) 0; text-align: center;
+  background: linear-gradient(160deg, #191510, #0d0b08); }
+.gs-cert .eyebrow { font-family: var(--gs-font-mono); font-size: var(--gs-fs-micro);
+  letter-spacing: .18em; text-transform: uppercase; color: var(--gs-accent); }
+.gs-cert h3 { font-family: var(--gs-font-display); font-size: var(--gs-fs-h2);
+  margin: var(--gs-3) 0; color: var(--gs-ink); font-weight: 600; }
+.gs-cert .who { font-family: var(--gs-font-display); font-size: var(--gs-fs-h1);
+  color: var(--gs-accent); font-style: italic; margin: var(--gs-4) 0; line-height: 1.1; }
+.gs-cert .meta { font-family: var(--gs-font-mono); font-size: var(--gs-fs-micro);
+  color: var(--gs-dim); letter-spacing: .08em; line-height: 1.9; }
+.gs-cert input { font: inherit; font-size: var(--gs-fs-body); text-align: center;
+  background: var(--gs-deep); color: var(--gs-ink); border: 1px solid var(--gs-rule);
+  border-radius: var(--gs-r-md); padding: var(--gs-2) var(--gs-4); margin: var(--gs-3) 0; }
+
+/* Review queue */
+.gs-review { border: 1px dashed var(--gs-accent); border-radius: var(--gs-r-lg);
+  padding: var(--gs-5); margin: var(--gs-6) 0; }
+.gs-review .n { font-family: var(--gs-font-display); font-size: var(--gs-fs-h2); color: var(--gs-accent); }
