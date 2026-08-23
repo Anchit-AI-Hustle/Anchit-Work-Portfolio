@@ -156,6 +156,69 @@ const PAGES = [
     await p.close();
   }
 
+  // ── robustness ───────────────────────────────────────────────────────────
+  // A stored record is untrusted input: it can be hand-edited, half-written, or
+  // restored from an old export. {"notes":null} is valid JSON with the wrong
+  // SHAPE, and it used to take the entire page down — the try/catch around
+  // JSON.parse never fired, because parsing succeeded.
+  {
+    const SHAPES = [
+      ['malformed json', '{not json'],
+      ['null', 'null'],
+      ['an array', '[1,2,3]'],
+      ['a bare string', '"hello"'],
+      ['notes is null', '{"notes":null,"wrong":null}'],
+      ['done is a string', '{"done":"nope"}'],
+      ['exam is a number', '{"exam":7,"name":42}'],
+    ];
+    const broken = [];
+    for (const [label, bad] of SHAPES) {
+      const ctx = await b.newContext({ viewport: { width: 1100, height: 800 } });
+      const p = await ctx.newPage();
+      const errs = [];
+      p.on('pageerror', (e) => errs.push(String(e).slice(0, 80)));
+      await p.goto('http://127.0.0.1:8099/growth-school.html', { waitUntil: 'load', timeout: 25000 });
+      await p.evaluate((v) => localStorage.setItem('gs-growth-school', v), MUT ? '{"notes":null}' : bad);
+      await p.goto('http://127.0.0.1:8099/growth-school.html', { waitUntil: 'load', timeout: 25000 });
+      await p.waitForTimeout(700);
+      const ok = await p.evaluate(() => !!document.querySelector('.gs-h1') && document.querySelectorAll('.gs-nav button').length > 0);
+      if (!ok || errs.length) broken.push(label + (errs[0] ? ' (' + errs[0] + ')' : ''));
+      await ctx.close();
+    }
+    check('a corrupt saved record never takes the page down',
+      broken.length === 0 && !MUT,
+      broken.length ? 'broke on: ' + broken.join(', ') : SHAPES.length + ' bad shapes, all survived');
+  }
+
+  // Radio groups must be keyed on identity, not on content. Two questions of
+  // equal length rendered together would otherwise share a group and deselect
+  // each other — which is exactly what the review list does.
+  {
+    const p = await (await b.newContext({ viewport: { width: 1280, height: 900 } })).newPage();
+    await p.goto('http://127.0.0.1:8099/growth-school.html', { waitUntil: 'load', timeout: 25000 });
+    await p.waitForTimeout(800);
+    const r = await p.evaluate(() => {
+      const names = [...document.querySelectorAll('.gs-quiz .gs-opt input')].map((i) => i.name);
+      const groups = [...new Set(names)];
+      const qs = document.querySelectorAll('.gs-quiz .gs-q').length;
+      return { groups: groups.length, questions: qs, usesLength: names.some((n) => /-q\d+-\d{2,}$/.test(n)) };
+    });
+    check('each question owns its own radio group',
+      r.groups === r.questions && !r.usesLength && !MUT,
+      r.groups + ' groups for ' + r.questions + ' questions');
+
+    check('the progress bar is exposed to assistive tech',
+      await p.evaluate(() => {
+        const bar = document.querySelector('.gs-bar');
+        return !!bar && bar.getAttribute('role') === 'progressbar' && bar.hasAttribute('aria-valuenow');
+      }) && !MUT, 'role=progressbar with aria-valuenow');
+
+    check('quiz options are grouped under their question',
+      await p.evaluate(() => !!document.querySelector('.gs-quiz fieldset legend')) && !MUT,
+      'fieldset + legend per question');
+    await p.close();
+  }
+
   // Two bugs that only showed up when the HAPPY path was finally exercised.
   // Both were shipped and both were wrong about the size of the course.
   {

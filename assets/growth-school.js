@@ -49,12 +49,40 @@
     // One record per course. Progress was the only thing kept before; a course
     // that cannot tell you what you got wrong, or hand you your notes back,
     // is a document with buttons.
-    const BLANK = { done: {}, notes: {}, wrong: {}, exam: null, name: '' };
-    let S = Object.assign({}, BLANK);
-    try { S = Object.assign({}, BLANK, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
-    if (S.done == null) S.done = {};                       // tolerate the older shape
+    const SCHEMA = 1;
+    const BLANK = () => ({ v: SCHEMA, done: {}, notes: {}, wrong: {}, exam: null, name: '' });
+
+    // Hydrate by TYPE, not by merge. Object.assign copies an explicit null
+    // straight over the default, so a record containing {"notes":null} — which
+    // a hand-edited or half-written file easily produces — replaced the object
+    // with null and the first `S.notes[id]` read killed the whole page. The
+    // page rendered nothing at all, and the try/catch around JSON.parse did not
+    // help because the JSON was perfectly valid; it was the SHAPE that was wrong.
+    function hydrate(raw) {
+      const s = BLANK();
+      let d = null;
+      try { d = JSON.parse(raw || '{}'); } catch (e) { return s; }
+      if (!d || typeof d !== 'object' || Array.isArray(d)) return s;
+      const obj = (x) => (x && typeof x === 'object' && !Array.isArray(x)) ? x : {};
+      s.done = obj(d.done);
+      s.notes = obj(d.notes);
+      s.wrong = obj(d.wrong);
+      s.exam = (d.exam && typeof d.exam === 'object') ? d.exam : null;
+      s.name = typeof d.name === 'string' ? d.name : '';
+      s.v = SCHEMA;
+      return s;
+    }
+    let S = hydrate(localStorage.getItem(KEY));
     const done = S.done;
-    const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+
+    // A failed write used to be swallowed, so a full quota lost notes silently
+    // while the UI kept saying "saved". Report it instead.
+    let saveOk = true;
+    const save = () => {
+      try { localStorage.setItem(KEY, JSON.stringify(S)); saveOk = true; }
+      catch (e) { saveOk = false; }
+      return saveOk;
+    };
 
     const chapters = [];
     COURSE.tracks.forEach((t) => t.chapters.forEach((c) => chapters.push({ ...c, track: t.name })));
@@ -103,7 +131,7 @@
         placeholder: 'Search chapters and ideas…',
         oninput: (e) => { query = e.target.value; applyFilter(); },
       });
-      const count = h('div', { class: 'gs-search-count' });
+      const count = h('div', { class: 'gs-search-count', role: 'status', 'aria-live': 'polite' });
       rail.appendChild(h('div', { class: 'gs-search' }, [h('span', { class: 'ico' }, '⌕'), box]));
       rail.appendChild(count);
       rail.__count = count;
@@ -116,7 +144,11 @@
       const real = chapters.filter((c) => !c.synthetic);
       const n = real.filter((c) => done[c.id]).length;
       const pct = real.length ? Math.round((n / real.length) * 100) : 0;
-      const bar = h('div', { class: 'gs-bar' }, h('i'));
+      const bar = h('div', {
+        class: 'gs-bar', role: 'progressbar',
+        'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-valuenow': String(pct),
+        'aria-label': 'Course progress: ' + n + ' of ' + real.length + ' chapters complete',
+      }, h('i'));
       rail.appendChild(h('div', { class: 'gs-progress' }, [
         bar,
         h('div', { class: 'gs-progress-meta' }, [
@@ -232,12 +264,21 @@
     // teaches nothing, and the reason is the part worth remembering.
     function quizEl(qs, chapterId) {
       const box = h('div', { class: 'gs-quiz' }, h('h3', { class: 'gs-h3', style: 'margin-top:0' }, 'Check yourself'));
+      // The explanation is announced when it appears, not silently inserted.
       qs.forEach((q, qi) => {
-        const wrap = h('div', { class: 'gs-q' }, h('p', { html: q.q }));
-        const opts = h('div', { class: 'gs-opts' });
-        const why = h('div', { class: 'gs-why', style: 'display:none' });
+        // A fieldset/legend, so a screen reader announces the question when it
+        // reaches the options rather than reading four bare radio labels.
+        const wrap = h('fieldset', { class: 'gs-q' });
+        wrap.appendChild(h('legend', { html: q.q }));
+        const opts = h('div', { class: 'gs-opts', role: 'radiogroup' });
+        const why = h('div', { class: 'gs-why', style: 'display:none', role: 'status', 'aria-live': 'polite' });
         q.options.forEach((opt, oi) => {
-          const input = h('input', { type: 'radio', name: COURSE.id + '-q' + qi + '-' + q.q.length });
+          // Named from the chapter and the question index. It used to include
+          // q.q.length, which is not an identity: two questions of equal length
+          // rendered on the same page — as they are on the review list, where
+          // each is its own quiz block and qi restarts at 0 — would share a
+          // radio group and silently deselect each other.
+          const input = h('input', { type: 'radio', name: COURSE.id + '-' + chapterId + '-q' + qi });
           const label = h('label', { class: 'gs-opt' }, [input, h('span', { html: opt })]);
           input.addEventListener('change', () => {
             [...opts.children].forEach((c) => c.classList.remove('right', 'wrong'));
@@ -280,13 +321,19 @@
       const meta = h('div', { class: 'gs-notes-meta' });
       const paint = () => {
         const w = ta.value.trim() ? ta.value.trim().split(/\s+/).length : 0;
-        meta.textContent = w + (w === 1 ? ' word' : ' words') + ' · saved on this device';
+        // Tell the truth about whether the write succeeded. Claiming "saved"
+        // while the quota is full is how someone loses an afternoon of notes.
+        meta.textContent = w + (w === 1 ? ' word' : ' words') +
+          (saveOk ? ' · saved on this device' : ' · NOT SAVED — this browser refused to store it');
+        meta.style.color = saveOk ? '' : 'var(--gs-primary)';
       };
       let t;
       ta.addEventListener('input', () => {
         clearTimeout(t);
         t = setTimeout(() => { S.notes[c.id] = ta.value; save(); paint(); }, 400);
       });
+      meta.setAttribute('role', 'status');
+      meta.setAttribute('aria-live', 'polite');
       paint();
       return h('div', { class: 'gs-notes' }, [
         h('h3', { class: 'gs-h3', style: 'margin-top:0' }, 'Your notes'),
