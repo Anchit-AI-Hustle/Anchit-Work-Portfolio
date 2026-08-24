@@ -1859,6 +1859,31 @@
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
 
+  /* The through-line section. Scoped entirely to .thesis-* so it cannot reach
+     into the card layout below it. */
+  .thesis {
+    border-left: 2px solid color-mix(in srgb, var(--primary) 45%, transparent);
+    background: color-mix(in srgb, var(--primary) 6%, transparent);
+    border-radius: var(--r-lg, 16px);
+    padding: var(--sp-6);
+    margin: var(--sp-7) 0 var(--sp-8);
+    max-width: 78ch;
+  }
+  .thesis-label { display: block; font-family: var(--font-mono); font-size: var(--fs-micro);
+    letter-spacing: .14em; text-transform: uppercase; color: var(--primary); margin-bottom: var(--sp-2); }
+  .thesis-h { font-family: var(--font-display); font-weight: 600;
+    font-size: clamp(var(--fs-lead), 2.4vw, var(--fs-h3)); line-height: 1.2;
+    color: var(--ink); margin-bottom: var(--sp-3); text-wrap: balance; }
+  .thesis-p { color: var(--ink-dim); font-size: var(--fs-body); line-height: 1.6; margin-bottom: var(--sp-4); }
+  .thesis-p em { color: var(--accent); font-style: italic; }
+  .thesis-list { list-style: none; display: grid; gap: var(--sp-3); margin: 0 0 var(--sp-4); padding: 0; }
+  .thesis-list li { color: var(--ink-dim); font-size: var(--fs-sm); line-height: 1.55; padding-left: var(--sp-4);
+    background-image: radial-gradient(circle 3px at 3px .72em, var(--accent) 99%, transparent 100%);
+    background-repeat: no-repeat; }
+  .thesis-list strong { color: var(--ink); font-weight: 600; }
+  .thesis-close { margin-bottom: 0; color: var(--ink); }
+  @media (max-width: 560px) { .thesis { padding: var(--sp-5) var(--sp-4); } }
+
   /* ============ BUILDS (Side projects) ============ */
   .builds-grid {
     display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;
@@ -4855,6 +4880,23 @@
         <div class="eyebrow">Personal projects · Live + in build · Built end-to-end</div>
         <h1 class="display-lg">Side Hustle</h1>
         <p class="lede" style="margin-top: 16px;">Twelve AI-first experiments, built or actively being built on weekends and evenings out of curiosity and love for technology. <em>Ideas that wouldn't wait for permission.</em></p>
+
+        <!-- The through-line, stated. An audit of these builds found the same
+             idea running through most of them and noted it was nowhere on the
+             page: read as a list they look like range, read together they are
+             one argument. Both examples are quoted from copy already on this
+             site, so nothing here is a new claim about the work. -->
+        <section class="thesis reveal">
+          <span class="thesis-label">The through-line</span>
+          <h3 class="thesis-h">Every one of these refuses to do something, and says so on the box.</h3>
+          <p class="thesis-p">Generative tools make producing an asset fast and producing a <em>false</em> one exactly as fast. So the useful engineering is not the generating — it is the part that declines. What I keep building is the machinery that makes a claim checkable, and then I put the limits in the product copy rather than the footnotes.</p>
+          <ul class="thesis-list">
+            <li><strong>The limit is a feature, not a disclaimer.</strong> LifeCycle-OS ships a <em>deterministic fallback</em>, so when every model is down the demo still returns a usable plan instead of a confident invention.</li>
+            <li><strong>Claims are bound to mechanisms.</strong> The any-brand demo needs <em>no login, no proprietary data</em> — a promise you can falsify in ten seconds rather than a line in a policy.</li>
+            <li><strong>The record is published, including when it is bad.</strong> Where a build has a track record, it sits on the same screen as the thing it is judging.</li>
+          </ul>
+          <p class="thesis-p thesis-close">If you only take one thing from the grid below: the interesting work is not that these generate. It is that each one can tell you when it should not.</p>
+        </section>
       </div>
 
       <div class="builds-grid reveal-stagger">
