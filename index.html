@@ -6936,6 +6936,42 @@
     passionProject: 'MusicGenAI',
     contactOrder: 'WhatsApp, call, a focused 30-minute Google Meet, WhatsApp, SMS, email, then resume'
   };
+  /* ---- Offline honesty gate -------------------------------------------
+     KB can only repeat what is written in it: my own history. Keyword matching
+     is willing to answer anything, and that is the danger — someone asking
+     whether AI-native case studies are worth building to stand out as a product
+     intern hit the 'stand out' keyword and got back my "why hire me" paragraph.
+     Fluent, confident, and an answer to a question they never asked.
+
+     A wrong answer delivered with certainty is worse than admitting the limit,
+     so questions that want judgement are intercepted before matching runs. */
+
+  // Wants an opinion, advice, or a comparison — none of which lives in KB.
+  // Apostrophes are optional and come in both shapes: real visitors type
+  // "whats your take" as often as "what's your take".
+  const OFFLINE_WANTS_JUDGEMENT = /\b(what(?:['’]s|s| is| are)? your (?:take|view|opinion|advice|thoughts?)|what do you (?:think|reckon)|do you think|would you recommend|recommendations? for|should i|should we|how (?:do|would|should) i|any (?:advice|tips|suggestions)|thoughts on|is it worth|worth (?:doing|it|building|pursuing)|more feasible|feasible|which is better|better (?:than|option)|compare|versus|\bvs\b)/i;
+
+  // …but these read like judgement questions and are genuinely about me, where
+  // KB is the right source. Checked second so it wins.
+  const OFFLINE_ABOUT_ME = /\b(why (?:should (?:we|i|you)|hire|you\b)|what sets you|your (?:edge|biggest win|philosophy|strength|superpower)|how do i (?:reach|contact)|reach you|contact you|hire you)/i;
+
+  // Sincerely asking who is on the other end. Always answered honestly.
+  const OFFLINE_ASKS_IF_HUMAN = /\b(are you (?:a )?(?:real|human|bot|an? ai|robot|actually)|is (?:this|that) (?:really )?(?:you|anchit|a bot|an ai|automated|human)|am i (?:talking|speaking|chatting) (?:to|with)|who am i (?:talking|speaking) (?:to|with)|real person|a human)/i;
+
+  function offlineHonestReply(question) {
+    const q = (question || '').trim();
+
+    if (OFFLINE_ASKS_IF_HUMAN.test(q)) {
+      return "Straight answer: you're talking to an AI version of me, trained on my own work — not me typing this. Everything it tells you about my background is drawn from what I've written down, but it isn't me. If you want the real thing, <a data-nav='contact'>WhatsApp or a call</a> reaches me directly.";
+    }
+
+    if (OFFLINE_WANTS_JUDGEMENT.test(q) && !OFFLINE_ABOUT_ME.test(q)) {
+      return "I'd rather tell you the truth than fake this one: my live answering isn't running at the moment, so all this offline mode can do is quote what's already written about my own work — and that isn't an answer to what you actually asked. Ask me about anything I've built or worked on and I can be genuinely useful. For a real opinion on your situation, <a data-nav='contact'>WhatsApp or a 30-minute call</a> is the honest route.";
+    }
+
+    return null;
+  }
+
   function frameAnswer(question, match) {
     if (!match) return null;
     // Answer naturally — just speak, no rigid "Short version: / You asked:"
@@ -7158,6 +7194,10 @@
 	        renderChips(DEFAULT_CHIPS);
 	      } else {
 	        // Offline fallback: built-in knowledge base.
+	        // Honesty first: if offline mode cannot really answer this, say so
+	        // instead of letting a stray keyword produce a confident wrong answer.
+	        const honest = offlineHonestReply(text);
+	        if (honest) { addBot(honest); renderChips(["Work history","Hard metrics","AI side builds","How do I reach you?"]); return; }
 	        const m = findMatch(text);
 	        if (m) { addBot(frameAnswer(text, m)); renderChips(m.nextChips || DEFAULT_CHIPS); }
 	        else { addBot(contextualFallback(text)); renderChips(["Work history","Hard metrics","AI side builds","Product philosophy"]); }
@@ -7172,6 +7212,10 @@
 	          renderChips(DEFAULT_CHIPS);
 	          return;
 	        }
+	        // Honesty first: if offline mode cannot really answer this, say so
+	        // instead of letting a stray keyword produce a confident wrong answer.
+	        const honest = offlineHonestReply(text);
+	        if (honest) { addBot(honest); renderChips(["Work history","Hard metrics","AI side builds","How do I reach you?"]); return; }
 	        const m = findMatch(text);
 	        if (m) { addBot(frameAnswer(text, m)); renderChips(m.nextChips || DEFAULT_CHIPS); }
 	        else { addBot(contextualFallback(text)); renderChips(["Work history","Hard metrics","AI side builds","Product philosophy"]); }
