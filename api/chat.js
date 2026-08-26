@@ -197,3 +197,6 @@ async function handler(req, res) {
 
 module.exports = handler;
 module.exports.config = { runtime: 'nodejs' };
+// Exported so the failure classification can be tested against real upstream
+// error bodies without spending a request. Matches the pattern in api/tts.js.
+module.exports._test = { classifyUpstream, PERSONA };
