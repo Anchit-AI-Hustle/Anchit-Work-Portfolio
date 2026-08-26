@@ -3841,22 +3841,72 @@
 </div>
 
 <script>
-  // Shared voice picker — prefers an Indian-accented English voice (en-IN /
-  // named Indian voices like Rishi, Veena, Heera), with Hindi as an option.
+  // Shared voice picker for the device-speech fallback.
+  //
+  // This reads Anchit's first-person copy aloud, so GENDER IS NOT COSMETIC: a
+  // female voice saying "I'm building…" is immediately wrong, and it was the
+  // common case. The previous list preferred `Rishi|Veena|Lekha|Heera|Priya|
+  // Isha|Aditi|Kanya` — every name but Rishi is a female voice — and it ran a
+  // bare `en-IN` lookup FIRST, which returns whichever en-IN voice the platform
+  // happens to enumerate first (Veena on Apple, Heera on Windows, a female
+  // Google voice on Android). Different wrong voice per platform, which is why
+  // web and mobile both sounded wrong in different ways.
+  //
+  // Order now: Indian male → any male → Indian (any) → any English. Accent is
+  // worth a lot, but not at the cost of the wrong gender.
+
+  // Male voices actually shipped by the platforms, by name.
+  var VOICE_MALE_IN = /\b(Rishi|Ravi|Prabhat|Hemant|Madhur|Arjun)\b/i;                 // en-IN / hi-IN male
+  var VOICE_MALE_ANY = /\b(Daniel|Alex|Aaron|Fred|Oliver|Thomas|Google UK English Male|David|Mark|Guy|Brian|Christopher|Eric|Roger|Steffan|Tony)\b/i;
+  // Named female voices to step over when hunting for a male one.
+  var VOICE_FEMALE = /\b(Veena|Lekha|Heera|Kalpana|Swara|Neerja|Aditi|Priya|Isha|Kanya|Aarohi|Samantha|Victoria|Karen|Moira|Tessa|Fiona|Zira|Susan|Hazel|Catherine|Linda|Jenny|Aria|Ava|Emma|Michelle|Sara)\b/i;
+
   window.anchitPickVoice = function(preferHindi) {
     if (!window.speechSynthesis) return null;
     var vs = window.speechSynthesis.getVoices() || [];
-    var byLang = function(p){ return vs.find(function(v){ return (v.lang||'').toLowerCase().replace('_','-').indexOf(p) === 0; }); };
-    var byName = function(re){ return vs.find(function(v){ return re.test((v.name||'') + ' ' + (v.lang||'')); }); };
+    if (!vs.length) return null;
+
+    var norm = function(v){ return ((v.lang || '').toLowerCase().replace('_', '-')); };
+    var label = function(v){ return (v.name || '') + ' ' + (v.lang || ''); };
+    var find = function(fn){ return vs.find(fn) || null; };
+
+    var isLang = function(v, p){ return norm(v).indexOf(p) === 0; };
+    var namedMaleIN = function(v){ return VOICE_MALE_IN.test(label(v)); };
+    var namedMale = function(v){ return VOICE_MALE_ANY.test(label(v)); };
+    // Not provably male, but not a known female voice either — better than a
+    // coin flip when a platform ships voices this code has never heard of.
+    var notKnownFemale = function(v){ return !VOICE_FEMALE.test(label(v)); };
+
+    // Hindi deliberately weights language above gender, the opposite of the
+    // English path below: a Hindi female voice reads Devanagari intelligibly,
+    // whereas an en-IN male voice may mangle it or say nothing at all, and
+    // unintelligible beats mismatched. Nothing calls this today — no caller
+    // passes preferHindi — so it is kept for the Indic voice input work rather
+    // than being live behaviour.
     if (preferHindi) {
-      return byLang('hi-in') || byLang('hi') || byName(/hindi/i) || byLang('en-in') || byName(/india|indian/i) || byLang('en') || vs[0] || null;
+      return find(function(v){ return isLang(v, 'hi') && namedMaleIN(v); })
+          || find(function(v){ return isLang(v, 'hi') && notKnownFemale(v); })
+          || find(function(v){ return isLang(v, 'hi'); })
+          || find(function(v){ return isLang(v, 'en-in') && namedMaleIN(v); })
+          || find(function(v){ return isLang(v, 'en-in') && notKnownFemale(v); })
+          || window.anchitPickVoice(false);
     }
-    return byLang('en-in')
-      || byName(/\b(Rishi|Veena|Lekha|Heera|Priya|Isha|Aditi|Kanya)\b/i)
-      || byName(/india|indian/i)
-      || byName(/Google.*English.*India/i)
-      || byName(/Google.*English/i)
-      || byLang('en') || vs[0] || null;
+
+    // The Web Speech API exposes no gender field, so a voice like "Google
+    // English (India)" — the usual pick on Android — is unknowable, and Google's
+    // en-IN default is commonly female. A KNOWN male voice in the wrong accent
+    // is therefore preferred over an unknown-gender voice in the right one:
+    // both are wrong, but the gender mismatch is the jarring one when the line
+    // starts "Hey, I'm Anchit". Swap steps 3 and 4 to weight accent higher.
+    return find(function(v){ return isLang(v, 'en-in') && namedMaleIN(v); })      // 1. right accent + right gender
+        || find(namedMaleIN)                                                       // 2. Indian male on any lang tag
+        || find(function(v){ return isLang(v, 'en') && namedMale(v); })            // 3. certain male, any accent
+        || find(function(v){ return isLang(v, 'en-in') && notKnownFemale(v); })    // 4. en-IN, gender unknown
+        || find(function(v){ return /india|indian/i.test(label(v)) && notKnownFemale(v); })
+        || find(function(v){ return isLang(v, 'en-in'); })                         // accent only — device has no male voice
+        || find(function(v){ return isLang(v, 'en') && notKnownFemale(v); })
+        || find(function(v){ return isLang(v, 'en'); })
+        || vs[0] || null;
   };
   // Voices populate asynchronously on some browsers — warm them up.
   if (window.speechSynthesis) { try { window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged = function(){ window.speechSynthesis.getVoices(); }; } catch (e) {} }
