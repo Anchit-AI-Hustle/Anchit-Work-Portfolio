@@ -276,10 +276,14 @@
       <p class="gate-copy">Checking how sign-in is configured for this deployment.</p>
     </div>
 
-    <!-- library failed to load -->
+    <!-- sign-in genuinely unavailable. The copy is filled in at runtime, because
+         the three causes need three different answers and only one of them is
+         anything the visitor can act on. Blaming a script blocker for a missing
+         server config sends people to disable extensions over a problem on our
+         side, which is what this page used to do. -->
     <div id="state-noconfig" class="hidden">
-      <div class="gate-head"><span class="step">Heads up</span><span class="h">Sign-in couldn’t load</span></div>
-      <p class="gate-copy">The sign-in library didn’t load, so Google sign-in can’t start. This is usually a browser extension (ad/script blocker) blocking it, or a temporary network hiccup — try disabling blockers for this site or reloading.</p>
+      <div class="gate-head"><span class="step">Heads up</span><span class="h" id="nc-title">Sign-in isn’t available</span></div>
+      <p class="gate-copy" id="nc-copy"></p>
       <p class="keynote">Building this yourself? <a href="mailto:anchit.tandon@gmail.com?subject=JobHunt%20setup">Ask me how it’s wired.</a></p>
     </div>
 
@@ -296,7 +300,10 @@
 
     <!-- ready -->
     <div id="state-ready" class="hidden">
-      <div class="who">
+      <!-- Hidden when this deployment isn't gated: with nobody signed in, an
+           avatar reading "?", a blank email under the word "Signed in", and a
+           Sign out button that has nothing to sign out of are all lies. -->
+      <div class="who" id="rd-who">
         <div class="av" id="rd-av">?</div>
         <div>
           <div class="nm">Signed in</div>
@@ -394,7 +401,8 @@
 
   var els = {};
   ['state-loading','state-noconfig','state-signedout','state-ready',
-   'google-btn','signin-msg','rd-av','rd-email','rd-signout','engine-warn',
+   'google-btn','signin-msg','rd-av','rd-email','rd-signout','rd-who','engine-warn',
+   'nc-title','nc-copy',
    'jh-form','jh-role','jh-location','jh-boards','jh-go',
    'apply-setup','setup-state','prof-url','prof-resume','prof-save','prof-clear','prof-msg',
    'apply-modal','apply-title','apply-sub','apply-body','apply-close'
@@ -414,17 +422,69 @@
   function show(state){ STATES.forEach(function(s){ els[s].classList.toggle('hidden', s !== state); }); }
 
   // ---- config + client bootstrap ----
+  // Only one of the ways this can fail is the visitor's problem, so each is
+  // named separately rather than funnelled into one "disable your ad blocker".
+  // Ungated deployments have no token, and sending the string "Bearer null"
+  // instead of simply omitting the header is the kind of thing that reads as a
+  // real credential in a log.
+  function authHeaders(){
+    var h = { 'Content-Type':'application/json' };
+    if (accessToken) h['Authorization'] = 'Bearer ' + accessToken;
+    return h;
+  }
+
+  function blocked(title, copy){
+    if (els['nc-title']) els['nc-title'].textContent = title;
+    if (els['nc-copy']) els['nc-copy'].textContent = copy;
+    show('state-noconfig');
+  }
+
   fetch('/api/jobhunt', { method:'GET' })
     .then(function(r){ return r.json(); })
     .then(function(cfg){
       CFG.url = cfg && cfg.supabaseUrl; CFG.anon = cfg && cfg.supabaseAnonKey; CFG.gated = !!(cfg && cfg.gated);
       CFG.engineReady = cfg ? cfg.engineReady !== false : true;
-      if (!CFG.url || !CFG.anon || !window.supabase){ show('state-noconfig'); return; }
+
+      // The server decides whether this deployment is gated at all: it reports
+      // gated=false when no Supabase project is configured, and in that case
+      // /api/jobhunt accepts searches with no token (verifySupabase returns ok).
+      // So there is nothing to sign in to, and showing a sign-in wall here just
+      // blocks a search that would have worked. Go straight to the app.
+      if (!CFG.gated){
+        if (els['rd-who']) els['rd-who'].classList.add('hidden');
+        if (els['engine-warn']) els['engine-warn'].classList.toggle('hidden', CFG.engineReady);
+        // profName() already falls back to an 'anon' key, so the saved resume
+        // and portfolio URL work perfectly well without an account — skipping
+        // this left the apply flow thinking no profile had ever been set up.
+        loadProfile();
+        show('state-ready');
+        if (els['jh-role']) els['jh-role'].focus();
+        return;
+      }
+
+      // Gated, but the client library never arrived — this one really can be a
+      // script blocker or a bad network.
+      if (!window.supabase){
+        blocked('Sign-in couldn’t load',
+          'The sign-in library didn’t load, so Google sign-in can’t start. That is usually a browser extension (ad or script blocker) or a temporary network hiccup — try disabling blockers for this site, or reload.');
+        return;
+      }
+      // Gated per the server, yet the credentials are missing: a deployment
+      // problem, not the visitor's. Don't send them to fiddle with extensions.
+      if (!CFG.url || !CFG.anon){
+        blocked('Sign-in isn’t set up on this deployment',
+          'This site says sign-in is required but hasn’t been given the credentials for it, so there is nothing you can do from your side. Nothing is wrong with your browser.');
+        return;
+      }
+
       sb = window.supabase.createClient(CFG.url, CFG.anon, { auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true, flowType:'pkce' } });
       sb.auth.onAuthStateChange(function(_evt, session){ applySession(session); });
       sb.auth.getSession().then(function(res){ applySession(res && res.data && res.data.session); });
     })
-    .catch(function(){ show('state-noconfig'); });
+    .catch(function(){
+      blocked('Couldn’t reach the server',
+        'The page couldn’t load its configuration, so it can’t tell whether sign-in is needed. Reload in a moment — if it keeps happening it is a problem on this site, not on your device.');
+    });
 
   function applySession(session){
     if (session && session.user && session.user.email){
@@ -564,7 +624,11 @@
 
   if (els['jh-form']) els['jh-form'].addEventListener('submit', function(ev){
     ev.preventDefault();
-    if (!accessToken){ show('state-signedout'); return; }
+    // A token is only required where this deployment is actually gated. Bailing
+    // on a null token unconditionally sent ungated visitors back to a sign-in
+    // wall they could never pass, for a search the API answers happily without
+    // one.
+    if (CFG.gated && !accessToken){ show('state-signedout'); return; }
     var role = els['jh-role'].value.trim();
     if (!role){ els['jh-role'].focus(); return; }
     var boards = selectedBoards();
@@ -576,7 +640,7 @@
 
     fetch('/api/jobhunt', {
       method:'POST',
-      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+accessToken },
+      headers: authHeaders(),
       body: JSON.stringify({ role: role, location: els['jh-location'].value.trim(), boards: boards })
     }).then(function(r){
       return r.json().catch(function(){ return {}; }).then(function(b){ return { ok:r.ok, status:r.status, body:b }; });
@@ -710,7 +774,7 @@
 
     fetch('/api/apply', {
       method:'POST',
-      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+accessToken },
+      headers: authHeaders(),
       body: JSON.stringify({ job: job, resume: profile.resume, portfolioUrl: profile.portfolioUrl })
     }).then(function(r){
       return r.json().catch(function(){ return {}; }).then(function(b){ return { ok:r.ok, status:r.status, body:b }; });
