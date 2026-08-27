@@ -73,6 +73,29 @@ SIDE / PERSONAL BUILDS (personal projects unless noted)
 STYLE & CONTACT
 - First person, warm, specific. Strongest signals: curiosity, depth, innovation, experimentation, and hunger to succeed. Open to roles and collaborations. To connect: WhatsApp first, then a call, then a 30-minute Google Meet; also SMS, Email, or the résumé PDF. Phone +91 98739 45238, email anchit.tandon@gmail.com.`;
 
+// Is this caller the site's operator rather than a visitor?
+//
+// Two things here are for whoever runs the site, not for the public: the probe,
+// which spends real money on the shared key, and the named failure reason, which
+// says whether that key is missing, invalid or simply out of credit. This
+// endpoint is CORS-open to every origin, so both need a gate.
+//
+// Timing-safe comparison, since a plain === on a secret leaks its prefix through
+// response timing to anyone willing to measure.
+function isOperator(req) {
+  const expected = (process.env.CHAT_DEBUG_TOKEN || '').trim();
+  if (!expected) return false;                       // unset → nobody, not everybody
+  const given = (
+    req.headers['x-debug-token'] ||
+    (/[?&]token=([^&]+)/.exec(req.url || '') || [])[1] ||
+    ''
+  ).toString().trim();
+  if (given.length !== expected.length) return false;
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ given.charCodeAt(i);
+  return diff === 0;
+}
+
 // Turns an upstream failure into something a human can act on. "upstream 400"
 // says nothing; "insufficient_credit" says go and top up the account.
 function classifyUpstream(status, detail) {
@@ -102,32 +125,38 @@ async function handler(req, res) {
         claude: !!process.env.ANTHROPIC_API_KEY,
       },
       claudeModel: MODEL,
-      // A configured key is not a working key. An unfunded account answers every
-      // request with a 400, and the site then silently serves offline keyword
-      // answers indefinitely with nothing to show why — which is how a dead chat
-      // stayed dead unnoticed. ?probe=1 spends one token to tell the truth.
-      note: 'configured = key present. Add ?probe=1 to test whether it actually answers.',
+      // Deliberately does NOT mention the probe. Advertising it in a public,
+      // CORS-open response is an invitation for any crawler to spend the key.
+      note: 'configured = key present, which is not the same as working.',
     };
-    if (/[?&]probe=1/.test(req.url || '') && process.env.ANTHROPIC_API_KEY) {
-      out.claudeLive = false;
-      try {
-        const r = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: {
-            'content-type': 'application/json',
-            'x-api-key': process.env.ANTHROPIC_API_KEY,
-            'anthropic-version': '2023-06-01',
-          },
-          body: JSON.stringify({ model: MODEL, max_tokens: 1, messages: [{ role: 'user', content: 'hi' }] }),
-        });
-        out.claudeLive = r.ok;
-        if (!r.ok) {
-          const detail = await r.text().catch(() => '');
-          out.claudeStatus = r.status;
-          out.claudeReason = classifyUpstream(r.status, detail);
+    if (/[?&]probe=1/.test(req.url || '')) {
+      if (!isOperator(req)) {
+        // Fails closed: with no CHAT_DEBUG_TOKEN set there is no way to run the
+        // probe at all, rather than a weaker default that anyone can trigger.
+        out.probe = 'unauthorized';
+      } else if (!process.env.ANTHROPIC_API_KEY) {
+        out.probe = 'no_key_configured';
+      } else {
+        out.claudeLive = false;
+        try {
+          const r = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/json',
+              'x-api-key': process.env.ANTHROPIC_API_KEY,
+              'anthropic-version': '2023-06-01',
+            },
+            body: JSON.stringify({ model: MODEL, max_tokens: 1, messages: [{ role: 'user', content: 'hi' }] }),
+          });
+          out.claudeLive = r.ok;
+          if (!r.ok) {
+            const detail = await r.text().catch(() => '');
+            out.claudeStatus = r.status;
+            out.claudeReason = classifyUpstream(r.status, detail);
+          }
+        } catch (e) {
+          out.claudeReason = 'unreachable';
         }
-      } catch (e) {
-        out.claudeReason = 'unreachable';
       }
     }
     return res.status(200).json(out);
@@ -179,10 +208,15 @@ async function handler(req, res) {
     if (!r.ok) {
       const detail = await r.text().catch(() => '');
       const reason = classifyUpstream(r.status, detail);
-      // Named in the response and the headers so the cause is visible from the
-      // browser's network tab, not only in a server log nobody is reading.
-      res.setHeader('X-Chat-Error', reason);
-      return res.status(502).json({ error: 'upstream', reason, status: r.status, detail: detail.slice(0, 200) });
+      // The reason names the account's billing state, and `detail` is a raw
+      // slice of the upstream body — operator diagnostics, not something to
+      // hand every caller of a CORS-open endpoint. The client never read
+      // either: it only needs to know the call failed, so it can fall back.
+      if (isOperator(req)) {
+        res.setHeader('X-Chat-Error', reason);
+        return res.status(502).json({ error: 'upstream', reason, status: r.status, detail: detail.slice(0, 200) });
+      }
+      return res.status(502).json({ error: 'upstream' });
     }
     const data = await r.json();
     const reply = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('').trim();
@@ -199,4 +233,4 @@ module.exports = handler;
 module.exports.config = { runtime: 'nodejs' };
 // Exported so the failure classification can be tested against real upstream
 // error bodies without spending a request. Matches the pattern in api/tts.js.
-module.exports._test = { classifyUpstream, PERSONA };
+module.exports._test = { classifyUpstream, isOperator, PERSONA };
