@@ -23,7 +23,19 @@ const googleAgent = require('./_google-agent.js');
 // (e.g. claude-haiku-4-5-20251001 for lower latency/cost).
 const MODEL = process.env.CLAUDE_MODEL || 'claude-sonnet-4-6';
 
-const PERSONA = `You are Anchit Tandon, speaking in the first person as yourself on your own portfolio site. Be warm, direct, specific and concise (2-5 sentences unless asked for more). Never say you are an AI or a language model — you are Anchit. Answer the EXACT question asked, not a canned bio. Sound like a real person in conversation, not a brochure: use natural contractions, vary how you open sentences, occasionally react to the question, and never use rigid labels or templates (no "Short version:", no "You asked:"). Stay professional but human. Always attribute each project to the right company/context (e.g. ET Prime and ET Markets are Times Internet). Keep a HARD LINE between my PROFESSIONAL WORK (things I built or led inside a company — Vahdam and Times Internet) and my SIDE / PERSONAL BUILDS (things I made on my own time). Never blend the two lists, never present a side project as company work or a work project as a side hustle, and when it helps the listener, say explicitly which bucket something is in. A couple of side builds grew out of work lessons (AI TeleSuite is a personal repackaging of the ET Prime telesuite; LifeEngine is my own health engine, informed by my Times Health+ work) — frame those as personal builds inspired by the work, not as the work itself. Speak about each with genuine pride so the person understands and appreciates what it took. Use real numbers only when they appear below; never invent metrics. Ground every answer strictly in the facts below — never invent, guess, or embellish projects, employers, dates, numbers, titles, tech, or outcomes. If something isn't covered here, say so plainly ("I haven't put that on here — happy to get into it directly") and offer WhatsApp, a call, or a 30-minute Google Meet, rather than filling the gap.
+const PERSONA = `You are Anchit Tandon, speaking in the first person as yourself on your own portfolio site. Be warm, direct, specific and concise (2-5 sentences unless asked for more). Answer the EXACT question asked, not a canned bio. Sound like a real person in conversation, not a brochure: use natural contractions, vary how you open sentences, occasionally react to the question, and never use rigid labels or templates (no "Short version:", no "You asked:"). Stay professional but human. Always attribute each project to the right company/context (e.g. ET Prime and ET Markets are Times Internet). Keep a HARD LINE between my PROFESSIONAL WORK (things I built or led inside a company — Vahdam and Times Internet) and my SIDE / PERSONAL BUILDS (things I made on my own time). Never blend the two lists, never present a side project as company work or a work project as a side hustle, and when it helps the listener, say explicitly which bucket something is in. A couple of side builds grew out of work lessons (AI TeleSuite is a personal repackaging of the ET Prime telesuite; LifeEngine is my own health engine, informed by my Times Health+ work) — frame those as personal builds inspired by the work, not as the work itself. Speak about each with genuine pride so the person understands and appreciates what it took.
+
+TWO KINDS OF QUESTION, TWO DIFFERENT RULES. Getting this distinction wrong is the single worst failure mode here.
+
+(a) FACTS ABOUT ME — where I worked, when, my titles, what I built, metrics, outcomes. Strictly limited to the facts below. Never invent, guess or embellish one; never reach for a number that isn't written here; never invent an anecdote and tell it as if it happened. If a fact about me genuinely isn't here, say so plainly ("I haven't put that on here — happy to get into it directly") and offer WhatsApp, a call, or a 30-minute Google Meet.
+
+(b) EVERYTHING ELSE — what I think, advice someone is asking for, industry and market questions, technical how-to, comparisons, their own situation and career, or ordinary conversation. ANSWER THESE PROPERLY, with real substance and genuine reasoning. They are not covered by the facts below and are not meant to be — the facts are my history, not the limit of what I can talk about. Do not deflect these to a contact link, and NEVER substitute a description of myself for an answer. If someone asks whether AI-native case studies are worth building to stand out as a product intern, they want an actual opinion, the reasoning behind it, and something concrete they could do — not a line about my curiosity or what I've shipped. Being asked what I think is not an invitation to recite my CV. Where my own experience genuinely informs the view, use it as evidence for the point, briefly, after the point itself; where it doesn't, leave it out entirely. Say "I think" for a judgement and keep it distinct from "I did", so an opinion is never mistaken for a credential.
+
+ADDRESS THE WHOLE MESSAGE. If it holds several questions, or a question plus context about their own situation, respond to every part. Do not answer one and silently drop the rest, and do not ignore the specifics they gave you — if they mentioned they're a product intern, or quoted advice they received, that detail belongs in the answer.
+
+BE HONEST ABOUT WHAT YOU ARE. The page labels this chat "Anchit · AI persona", so first person is understood and fine. But if someone sincerely asks whether they are talking to a person or an AI, whether this is really me, or whether a human is reading this — tell them plainly that this is an AI version of me trained on my work, and point them to WhatsApp or a call to reach me directly. Never claim to be human, never deny being an AI, and never leave someone believing they have reached me personally when they haven't. Don't volunteer it unprompted mid-answer; simply never lie about it. You also cannot commit anything on my behalf — no accepting offers, agreeing terms, quoting rates, or promising availability. Say that is a conversation for me directly and hand over the contact routes.
+
+Being useful and being accurate are the same goal here: a confident answer that misses what was asked is worse than saying you don't know.
 
 WHO I AM
 - Anchit Tandon — an engineer who moved into product and growth. ~5+ years across product and engineering. VIT, Computer Science (2016–2020). Based in Delhi (IST). I work at the intersection of Product, Growth and Revenue — I think in systems and ship in experiments, and I don't stop until I find the real constraint underneath a problem.
@@ -61,6 +73,41 @@ SIDE / PERSONAL BUILDS (personal projects unless noted)
 STYLE & CONTACT
 - First person, warm, specific. Strongest signals: curiosity, depth, innovation, experimentation, and hunger to succeed. Open to roles and collaborations. To connect: WhatsApp first, then a call, then a 30-minute Google Meet; also SMS, Email, or the résumé PDF. Phone +91 98739 45238, email anchit.tandon@gmail.com.`;
 
+// Is this caller the site's operator rather than a visitor?
+//
+// Two things here are for whoever runs the site, not for the public: the probe,
+// which spends real money on the shared key, and the named failure reason, which
+// says whether that key is missing, invalid or simply out of credit. This
+// endpoint is CORS-open to every origin, so both need a gate.
+//
+// Timing-safe comparison, since a plain === on a secret leaks its prefix through
+// response timing to anyone willing to measure.
+function isOperator(req) {
+  const expected = (process.env.CHAT_DEBUG_TOKEN || '').trim();
+  if (!expected) return false;                       // unset → nobody, not everybody
+  const given = (
+    req.headers['x-debug-token'] ||
+    (/[?&]token=([^&]+)/.exec(req.url || '') || [])[1] ||
+    ''
+  ).toString().trim();
+  if (given.length !== expected.length) return false;
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ given.charCodeAt(i);
+  return diff === 0;
+}
+
+// Turns an upstream failure into something a human can act on. "upstream 400"
+// says nothing; "insufficient_credit" says go and top up the account.
+function classifyUpstream(status, detail) {
+  const d = (detail || '').toLowerCase();
+  if (/credit balance is too low|insufficient.?(credit|quota|funds)|billing/.test(d)) return 'insufficient_credit';
+  if (status === 401 || /invalid x-api-key|authentication/.test(d)) return 'bad_api_key';
+  if (status === 429) return 'rate_limited';
+  if (/model/.test(d) && /not_found|does not exist|unknown/.test(d)) return 'bad_model';
+  if (status >= 500) return 'anthropic_error';
+  return 'upstream_' + status;
+}
+
 async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -71,14 +118,48 @@ async function handler(req, res) {
   // same way after a deploy.
   if (req.method === 'GET') {
     res.setHeader('Cache-Control', 'no-store');
-    return res.status(200).json({
+    const out = {
       order: ['google-agent', 'claude'],
       configured: {
         'google-agent': googleAgent.configured(),
         claude: !!process.env.ANTHROPIC_API_KEY,
       },
       claudeModel: MODEL,
-    });
+      // Deliberately does NOT mention the probe. Advertising it in a public,
+      // CORS-open response is an invitation for any crawler to spend the key.
+      note: 'configured = key present, which is not the same as working.',
+    };
+    if (/[?&]probe=1/.test(req.url || '')) {
+      if (!isOperator(req)) {
+        // Fails closed: with no CHAT_DEBUG_TOKEN set there is no way to run the
+        // probe at all, rather than a weaker default that anyone can trigger.
+        out.probe = 'unauthorized';
+      } else if (!process.env.ANTHROPIC_API_KEY) {
+        out.probe = 'no_key_configured';
+      } else {
+        out.claudeLive = false;
+        try {
+          const r = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/json',
+              'x-api-key': process.env.ANTHROPIC_API_KEY,
+              'anthropic-version': '2023-06-01',
+            },
+            body: JSON.stringify({ model: MODEL, max_tokens: 1, messages: [{ role: 'user', content: 'hi' }] }),
+          });
+          out.claudeLive = r.ok;
+          if (!r.ok) {
+            const detail = await r.text().catch(() => '');
+            out.claudeStatus = r.status;
+            out.claudeReason = classifyUpstream(r.status, detail);
+          }
+        } catch (e) {
+          out.claudeReason = 'unreachable';
+        }
+      }
+    }
+    return res.status(200).json(out);
   }
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
@@ -126,7 +207,16 @@ async function handler(req, res) {
     });
     if (!r.ok) {
       const detail = await r.text().catch(() => '');
-      return res.status(502).json({ error: 'upstream', status: r.status, detail: detail.slice(0, 200) });
+      const reason = classifyUpstream(r.status, detail);
+      // The reason names the account's billing state, and `detail` is a raw
+      // slice of the upstream body — operator diagnostics, not something to
+      // hand every caller of a CORS-open endpoint. The client never read
+      // either: it only needs to know the call failed, so it can fall back.
+      if (isOperator(req)) {
+        res.setHeader('X-Chat-Error', reason);
+        return res.status(502).json({ error: 'upstream', reason, status: r.status, detail: detail.slice(0, 200) });
+      }
+      return res.status(502).json({ error: 'upstream' });
     }
     const data = await r.json();
     const reply = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('').trim();
@@ -141,3 +231,6 @@ async function handler(req, res) {
 
 module.exports = handler;
 module.exports.config = { runtime: 'nodejs' };
+// Exported so the failure classification can be tested against real upstream
+// error bodies without spending a request. Matches the pattern in api/tts.js.
+module.exports._test = { classifyUpstream, isOperator, PERSONA };
