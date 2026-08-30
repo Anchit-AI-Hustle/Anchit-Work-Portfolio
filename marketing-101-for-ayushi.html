@@ -4051,7 +4051,7 @@ function bindNav(){
     el.addEventListener('click', function(e){ e.preventDefault(); show(el.getAttribute('data-goto')); });
   });
   window.addEventListener('hashchange', function(){
-    var h = location.hash.replace('#',''); if(h && h!==CUR) show(h,false);
+    var h = location.hash.slice(1); if(h && h!==CUR) show(h,false);
   });
 }
 
@@ -4111,7 +4111,7 @@ async function boot(){
   var mb = $('#menuBtn'); if(mb) mb.addEventListener('click', openMenu);
   var sc = $('#scrim'); if(sc) sc.addEventListener('click', closeMenu);
   paintDesk();
-  var h = location.hash.replace('#','');
+  var h = location.hash.slice(1);
   show(h || window.__FIRST__, false);
   document.addEventListener('keydown', function(e){
     if(e.key==='Escape') closeMenu();

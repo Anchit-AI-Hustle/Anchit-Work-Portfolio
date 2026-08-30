@@ -52,6 +52,32 @@ const MUTANT_CSS = `
   // display:none, so every card measured 0x0 and the whole suite passed on
   // nothing. Drive it the way a visitor does.
   await p.click('.sidebar-item[data-view="projects"]');
+  // Reveal everything up front, with no stagger, and measure the state a
+  // visitor ends in.
+  //
+  // Reveals are one-at-a-time and blockDelay accumulates across the whole page,
+  // so the cards at the end of this row are still mid-entrance many SECONDS
+  // after the section opens, and every element added above the grid pushes them
+  // later still. Measuring on a fixed timer therefore measured whatever the
+  // queue had reached: a child still at .reveal-stagger > *'s start state,
+  // scale(.96) translateY(34px), reports a rect 4% short of its own layout box,
+  // which reads here as unequal action rows and text cut mid-line. That is how
+  // a section added ABOVE the grid could fail card geometry that had not
+  // changed.
+  //
+  // Not data-motion="off": that is the reduced-motion path and it also collapses
+  // the horizontal rail, so the cards stop being the fixed-basis row this suite
+  // exists to measure (widths went 351-722px). Only the reveal state is forced.
+  // Entrances that never finish are a real defect, but they belong to
+  // scripts/stuck-entrance.js, not here.
+  await p.evaluate(() => {
+    document.querySelectorAll('.reveal, .reveal-stagger, .reveal-left, .reveal-right, .reveal-scale')
+      .forEach((el) => {
+        el.style.transitionDelay = '0s';
+        for (const k of el.children) k.style.transitionDelay = '0s';
+        el.classList.add('in');
+      });
+  });
   if (MUT) await p.addStyleTag({ content: MUTANT_CSS });
   await p.waitForTimeout(2500);
   const visible = await p.evaluate(() =>
@@ -72,7 +98,29 @@ const MUTANT_CSS = `
     }, i);
     await p.waitForTimeout(120);
   }
-  await p.waitForTimeout(400);
+  // 0.7s transitions with the delays zeroed; wait for the geometry itself to
+  // stop moving rather than trusting a timer, and FAIL if it never does.
+  const settled = await p.waitForFunction(() => {
+    const identity = (el) => {
+      const t = getComputedStyle(el).transform;
+      if (t === 'none') return true;
+      const m = t.match(/matrix\(([^)]+)\)/);
+      if (!m) return false;
+      const v = m[1].split(',').map(Number);
+      // The easing (cubic-bezier(.16,1,.3,1)) has a long asymptotic tail, so
+      // "finished" is never exactly identity. These bounds admit the tail and
+      // still catch a park: the start state is scale(.96) translateY(34px), an
+      // order of magnitude outside both. At 1% the residual on a 41px box is
+      // 0.4px, inside the 2px these checks allow.
+      return Math.abs(v[0] - 1) < 0.01 && Math.abs(v[3] - 1) < 0.01 && Math.abs(v[5]) < 3;
+    };
+    return [...document.querySelectorAll('.builds-grid .build-card')]
+      .every((c) => c.classList.contains('in') && [...c.children].every(identity));
+  }, { timeout: 20000 }).then(() => true).catch(() => false);
+  if (!settled) {
+    console.log('  FAIL  the cards never stopped moving, so they cannot be measured');
+    process.exit(1);
+  }
 
   const m = await p.evaluate(() => {
     const cards = [...document.querySelectorAll('.builds-grid .build-card')];

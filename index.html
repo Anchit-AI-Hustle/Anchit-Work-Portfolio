@@ -1859,6 +1859,57 @@
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
 
+  /* The through-line section. Scoped entirely to .thesis-* so it cannot reach
+     into the card layout below it. */
+  .thesis {
+    border-left: 2px solid color-mix(in srgb, var(--primary) 45%, transparent);
+    background: color-mix(in srgb, var(--primary) 6%, transparent);
+    border-radius: var(--r-lg, 16px);
+    padding: var(--sp-6);
+    margin: var(--sp-7) 0 var(--sp-8);
+    max-width: 78ch;
+  }
+  .thesis-label { display: block; font-family: var(--font-mono); font-size: var(--fs-micro);
+    letter-spacing: .14em; text-transform: uppercase; color: var(--primary); margin-bottom: var(--sp-2); }
+  .thesis-h { font-family: var(--font-display); font-weight: 600;
+    font-size: clamp(var(--fs-lead), 2.4vw, var(--fs-h3)); line-height: 1.2;
+    color: var(--ink); margin-bottom: var(--sp-3); text-wrap: balance; }
+  .thesis-p { color: var(--ink-dim); font-size: var(--fs-body); line-height: 1.6; margin-bottom: var(--sp-4); }
+  .thesis-p em { color: var(--accent); font-style: italic; }
+  .thesis-list { list-style: none; display: grid; gap: var(--sp-3); margin: 0 0 var(--sp-4); padding: 0; }
+  .thesis-list li { color: var(--ink-dim); font-size: var(--fs-sm); line-height: 1.55; padding-left: var(--sp-4);
+    background-image: radial-gradient(circle 3px at 3px .72em, var(--accent) 99%, transparent 100%);
+    background-repeat: no-repeat; }
+  .thesis-list strong { color: var(--ink); font-weight: 600; }
+  .thesis-close { margin-bottom: 0; color: var(--ink); }
+  @media (max-width: 560px) { .thesis { padding: var(--sp-5) var(--sp-4); } }
+
+  /* The repository index. Scoped to .repo-* so it cannot reach the cards.
+     Type is restricted to steps this view already renders (micro/label/sm/
+     body/h3) — the projects view sits at the 8-step ceiling design-system.js
+     enforces, so a new size here would fail it. */
+  .repo-index { margin: var(--sp-8) 0 var(--sp-6); max-width: 100%; }
+  .repo-index-label { display: block; font-family: var(--font-mono); font-size: var(--fs-micro);
+    letter-spacing: .14em; text-transform: uppercase; color: var(--primary); margin-bottom: var(--sp-2); }
+  .repo-index-h { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-h3);
+    line-height: 1.2; color: var(--ink); margin-bottom: var(--sp-3); text-wrap: balance; }
+  .repo-index-note { color: var(--ink-dim); font-size: var(--fs-body); line-height: 1.6;
+    margin-bottom: var(--sp-6); max-width: 68ch; }
+  .repo-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--sp-6); }
+  .repo-group { min-width: 0; }
+  .repo-group-h { font-family: var(--font-mono); font-size: var(--fs-label); font-weight: 500;
+    letter-spacing: .1em; text-transform: uppercase; color: var(--ink);
+    padding-bottom: var(--sp-2); margin-bottom: var(--sp-3);
+    border-bottom: 1px solid var(--rule); display: flex; align-items: baseline; gap: var(--sp-2); }
+  .repo-count { margin-left: auto; font-size: var(--fs-micro); color: var(--primary); }
+  .repo-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-3); }
+  .repo-list li { min-width: 0; }
+  /* Repo names are unbroken tokens and one of them is 99 characters, so it has
+     to be allowed to break or it pushes the whole grid wide. */
+  .repo-name { display: block; font-family: var(--font-mono); font-size: var(--fs-sm);
+    color: var(--ink); line-height: 1.45; overflow-wrap: anywhere; }
+  .repo-desc { display: block; font-size: var(--fs-sm); line-height: 1.45; color: var(--ink-dim); margin-top: 2px; }
+
   /* ============ BUILDS (Side projects) ============ */
   .builds-grid {
     display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;
@@ -4855,6 +4906,23 @@
         <div class="eyebrow">Personal projects · Live + in build · Built end-to-end</div>
         <h1 class="display-lg">Side Hustle</h1>
         <p class="lede" style="margin-top: 16px;">Twelve AI-first experiments, built or actively being built on weekends and evenings out of curiosity and love for technology. <em>Ideas that wouldn't wait for permission.</em></p>
+
+        <!-- The through-line, stated. An audit of these builds found the same
+             idea running through most of them and noted it was nowhere on the
+             page: read as a list they look like range, read together they are
+             one argument. Both examples are quoted from copy already on this
+             site, so nothing here is a new claim about the work. -->
+        <section class="thesis reveal">
+          <span class="thesis-label">The through-line</span>
+          <h3 class="thesis-h">Every one of these refuses to do something, and says so on the box.</h3>
+          <p class="thesis-p">Generative tools make producing an asset fast and producing a <em>false</em> one exactly as fast. So the useful engineering is not the generating — it is the part that declines. What I keep building is the machinery that makes a claim checkable, and then I put the limits in the product copy rather than the footnotes.</p>
+          <ul class="thesis-list">
+            <li><strong>The limit is a feature, not a disclaimer.</strong> LifeCycle-OS ships a <em>deterministic fallback</em>, so when every model is down the demo still returns a usable plan instead of a confident invention.</li>
+            <li><strong>Claims are bound to mechanisms.</strong> The any-brand demo needs <em>no login, no proprietary data</em> — a promise you can falsify in ten seconds rather than a line in a policy.</li>
+            <li><strong>The record is published, including when it is bad.</strong> Where a build has a track record, it sits on the same screen as the thing it is judging.</li>
+          </ul>
+          <p class="thesis-p thesis-close">If you only take one thing from the grid below: the interesting work is not that these generate. It is that each one can tell you when it should not.</p>
+        </section>
       </div>
 
       <div class="builds-grid reveal-stagger">
@@ -5079,6 +5147,93 @@
           </div>
         </div>
       </div>
+
+        <!-- Every repository behind the work above, named and not linked. The
+             names are the record; the code is deliberately not on offer, so
+             nothing here is an anchor. Grouped because 49 flat entries is a
+             wall, not an index. -->
+        <section class="repo-index reveal">
+          <span class="repo-index-label">The workshop</span>
+          <h3 class="repo-index-h">Everything that got built, not only what shipped</h3>
+          <p class="repo-index-note">The 49 repositories behind the work above — including the dead ends, the rewrites and the three separate attempts at the same idea. Names only: the code stays closed.</p>
+          <div class="repo-groups">
+            <div class="repo-group">
+              <h4 class="repo-group-h">Lifecycle &amp; marketing systems <span class="repo-count">13</span></h4>
+              <ul class="repo-list">
+                <li><span class="repo-name">lifecycle-os</span><span class="repo-desc">Retention and lifecycle-marketing platform for any brand</span></li>
+                <li><span class="repo-name">vahdam-lifecycle-os</span><span class="repo-desc">Data analysis, a 30-day marketing calendar and a mailer creator</span></li>
+                <li><span class="repo-name">vahdam_dtc_data_engine</span><span class="repo-desc">DuckDB analytics layer — 15 metrics, 4 schemas, 46 tables</span></li>
+                <li><span class="repo-name">marketing_mailers__html_architect</span></li>
+                <li><span class="repo-name">Vahdam---Marketing-Automation</span></li>
+                <li><span class="repo-name">vahdam-marketing-automation</span></li>
+                <li><span class="repo-name">Marketing-Daa-Analysis-Mails-Ad-Campaigns-Generation-Business-for-Any-Brand-Real-Time-Data-Analysis</span><span class="repo-desc">Analysis plus mail and ad-campaign generation for any brand, on live data</span></li>
+                <li><span class="repo-name">Data-Analysis---Mailer-Calendar-Creation---Mailer-Generation</span></li>
+                <li><span class="repo-name">Mailer</span></li>
+                <li><span class="repo-name">vahdam-lp-assets</span></li>
+                <li><span class="repo-name">LandingPages-Improved</span></li>
+                <li><span class="repo-name">vahdam-superapp</span><span class="repo-desc">Expo iOS/Android tea shop with an AI assistant</span></li>
+                <li><span class="repo-name">vahdam-super-app</span></li>
+              </ul>
+            </div>
+            <div class="repo-group">
+              <h4 class="repo-group-h">Assistants &amp; agent systems <span class="repo-count">11</span></h4>
+              <ul class="repo-list">
+                <li><span class="repo-name">The-Third-Eye</span></li>
+                <li><span class="repo-name">AI-TeleSuite</span></li>
+                <li><span class="repo-name">hey-yaara</span></li>
+                <li><span class="repo-name">HeyYaara-GoogleAIStudio</span></li>
+                <li><span class="repo-name">HeyYaara-EmergentAI</span></li>
+                <li><span class="repo-name">your-personal-ai-companion</span></li>
+                <li><span class="repo-name">TH-LifeEngine</span></li>
+                <li><span class="repo-name">TH--LifeEngine.app</span></li>
+                <li><span class="repo-name">mirror-private-intelligence-os</span></li>
+                <li><span class="repo-name">mirror-venture-os</span></li>
+                <li><span class="repo-name">PetMind</span></li>
+              </ul>
+            </div>
+            <div class="repo-group">
+              <h4 class="repo-group-h">Music generation <span class="repo-count">11</span></h4>
+              <ul class="repo-list">
+                <li><span class="repo-name">MusicGenAI</span></li>
+                <li><span class="repo-name">Shoutout</span><span class="repo-desc">One platform for the independent music economy</span></li>
+                <li><span class="repo-name">MuseWave</span></li>
+                <li><span class="repo-name">MuseWave-Studio</span><span class="repo-desc">Music generation in MuseWave Studio</span></li>
+                <li><span class="repo-name">MuseVibe-Studio</span><span class="repo-desc">Music studio — an app for music generation</span></li>
+                <li><span class="repo-name">MuseWave_EmergentAI</span></li>
+                <li><span class="repo-name">MuseWave_EmergentAI_Old</span></li>
+                <li><span class="repo-name">SoundWave</span><span class="repo-desc">Music generation</span></li>
+                <li><span class="repo-name">SoundWeave</span><span class="repo-desc">Music generation app</span></li>
+                <li><span class="repo-name">creative-sound-hub</span></li>
+                <li><span class="repo-name">creative-sound-hub-95a32067</span></li>
+              </ul>
+            </div>
+            <div class="repo-group">
+              <h4 class="repo-group-h">Ventures &amp; research <span class="repo-count">9</span></h4>
+              <ul class="repo-list">
+                <li><span class="repo-name">markets-pro</span><span class="repo-desc">Multi-region systematic trading research, with region-correct costs, taxes and settlement</span></li>
+                <li><span class="repo-name">money-minter</span><span class="repo-desc">Fourteen free financial calculators, static and dependency-free</span></li>
+                <li><span class="repo-name">Kolab</span><span class="repo-desc">User, brand and marketplace tie-ups</span></li>
+                <li><span class="repo-name">The-Passion-Table</span></li>
+                <li><span class="repo-name">The-Passion-Table-Idea-1</span></li>
+                <li><span class="repo-name">mint-insights</span></li>
+                <li><span class="repo-name">build-and-grow</span></li>
+                <li><span class="repo-name">vibe-coding-platform</span></li>
+                <li><span class="repo-name">github-love-notes</span></li>
+              </ul>
+            </div>
+            <div class="repo-group">
+              <h4 class="repo-group-h">This site, and the scaffolding <span class="repo-count">5</span></h4>
+              <ul class="repo-list">
+                <li><span class="repo-name">Anchit-Work-Portfolio</span><span class="repo-desc">The repository behind anchit-tandon.com</span></li>
+                <li><span class="repo-name">anchit-portfolio-cyberpunk</span><span class="repo-desc">An earlier portfolio cut — Three.js, GSAP, Lenis</span></li>
+                <li><span class="repo-name">ANCHIT-S-AI-HUSTLE</span></li>
+                <li><span class="repo-name">demo-repository</span></li>
+                <li><span class="repo-name">super-duper-waddle</span></li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
 
       <!-- Every module inside the two suites, as an individual project. Rendered
            from the MODULES data below so the list stays one source of truth. -->
@@ -5594,7 +5749,6 @@
                The repo moved: every deploy, PR and CI run for this project is
                against Anchit-AI-Hustle/lifecycle-os. -->
           <a href="https://lifecycle-os.anchit-tandon.com/" class="btn primary" target="_blank" rel="noopener">Open Lifecycle OS ↗</a>
-          <a href="https://github.com/Anchit-AI-Hustle/lifecycle-os" class="btn" target="_blank" rel="noopener">The GitHub project ↗</a>
           <a href="/lifecycle-os" class="btn">Feature walkthrough ↗</a>
           <a href="/d2c-lifecycle-os" class="btn">Any-brand demo ↗</a>
         </div>
@@ -5647,10 +5801,10 @@
         <h2>One source of truth, four times over</h2>
         <p>Sixteen modules only feel like one product because four small files refuse to let them disagree. They are the most reusable thing in the repository, and each exists because the alternative had already gone wrong.</p>
         <ul>
-          <li><strong><a href="https://github.com/anchittandon-create/lifecycle-os/blob/main/region-context.js" target="_blank" rel="noopener">region-context.js</a></strong> — one active region, shared by every page. Region selection had been built on 17 of 66 pages in six different ways, none of them sharing state, so choosing UK in one place left another showing whatever its default was.</li>
-          <li><strong><a href="https://github.com/anchittandon-create/lifecycle-os/blob/main/brand-context.js" target="_blank" rel="noopener">brand-context.js</a></strong> — one active brand, driving tokens, fonts, title and favicon everywhere at once, so every page re-skins without knowing the file exists.</li>
-          <li><strong><a href="https://github.com/anchittandon-create/lifecycle-os/blob/main/brand-catalog.js" target="_blank" rel="noopener">brand-catalog.js</a></strong> — one catalogue resolver. Pages used to read the shipped product file directly, which meant any other workspace was quietly shown the first tenant's products as if they were its own.</li>
-          <li><strong><a href="https://github.com/anchittandon-create/lifecycle-os/blob/main/analysis-registry.js" target="_blank" rel="noopener">analysis-registry.js</a></strong> — one place that says which analysis lives where. Seven surfaces had each decided for themselves, and several analysed the same thing; nothing stated the intended arrangement, so every drift stayed invisible until two pages were opened side by side.</li>
+          <li><strong><code>region-context.js</code></strong> — one active region, shared by every page. Region selection had been built on 17 of 66 pages in six different ways, none of them sharing state, so choosing UK in one place left another showing whatever its default was.</li>
+          <li><strong><code>brand-context.js</code></strong> — one active brand, driving tokens, fonts, title and favicon everywhere at once, so every page re-skins without knowing the file exists.</li>
+          <li><strong><code>brand-catalog.js</code></strong> — one catalogue resolver. Pages used to read the shipped product file directly, which meant any other workspace was quietly shown the first tenant's products as if they were its own.</li>
+          <li><strong><code>analysis-registry.js</code></strong> — one place that says which analysis lives where. Seven surfaces had each decided for themselves, and several analysed the same thing; nothing stated the intended arrangement, so every drift stayed invisible until two pages were opened side by side.</li>
         </ul>
       </div>
 
