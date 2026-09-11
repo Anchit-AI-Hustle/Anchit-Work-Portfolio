@@ -28,6 +28,7 @@ const PROJECT_PLAYBOOK_TAGS = [
 
 const assets = [
   'index.html',
+  'freelancer.html',
   'jobhunt.html',
   'task-tracker.html',
   'marketing-101.html',
