@@ -3644,6 +3644,12 @@
 .intro-orbit::before{content:'AT';font-family:var(--font-display);font-size:28px;font-weight:700;color:var(--ink);text-shadow:0 0 24px rgba(232,177,78,.34);}
 .intro-orbit span{position:absolute;inset:0;border:1px solid rgba(232,177,78,.38);border-radius:50%;animation:introOrbit 12s linear infinite;}
 .intro-orbit span:nth-child(2){inset:14px;border-color:rgba(232,177,78,.22);animation-duration:18s;animation-direction:reverse;}
+/* The orbit rings live inside the onboarding modal, which is hidden on every
+   visit after the first. They were rotating forever anyway: measured as two
+   infinite animations still running on elements at opacity 0. Paused unless
+   the modal is actually open — the site's own rule is that nothing
+   decorative runs while nobody can see it. */
+#onboarding:not(.intro-open) .intro-orbit span{animation-play-state:paused;}
 .intro-orbit span:nth-child(3){display:none;}
 .intro-actions{position:relative;z-index:1;}
 .ob-mode-btn.intro-primary{border-color:rgba(232,177,78,.48);box-shadow:0 0 34px rgba(255,122,31,.10);}
@@ -4955,7 +4961,7 @@
       <div class="section-head reveal">
         <div class="eyebrow">Personal projects · Live + in build · Built end-to-end</div>
         <h1 class="display-lg">Side Hustle</h1>
-        <p class="lede" style="margin-top: 16px;">Twelve AI-first experiments, built or actively being built on weekends and evenings out of curiosity and love for technology. <em>Ideas that wouldn't wait for permission.</em></p>
+        <p class="lede" style="margin-top: 16px;">Thirteen AI-first experiments, built or actively being built on weekends and evenings out of curiosity and love for technology. <em>Ideas that wouldn't wait for permission.</em></p>
 
         <!-- The through-line, stated. An audit of these builds found the same
              idea running through most of them and noted it was nowhere on the
@@ -5205,7 +5211,7 @@
         <section class="repo-index reveal">
           <span class="repo-index-label">The workshop</span>
           <h3 class="repo-index-h">Everything that got built, not only what shipped</h3>
-          <p class="repo-index-note">The 49 repositories behind the work above — including the dead ends, the rewrites and the three separate attempts at the same idea. Names only: the code stays closed.</p>
+          <p class="repo-index-note">The 51 repositories behind the work above — including the dead ends, the rewrites and the three separate attempts at the same idea. Names only: the code stays closed.</p>
           <div class="repo-groups">
             <div class="repo-group">
               <h4 class="repo-group-h">Lifecycle &amp; marketing systems <span class="repo-count">13</span></h4>
@@ -5242,9 +5248,10 @@
               </ul>
             </div>
             <div class="repo-group">
-              <h4 class="repo-group-h">Music generation <span class="repo-count">11</span></h4>
+              <h4 class="repo-group-h">Music generation <span class="repo-count">12</span></h4>
               <ul class="repo-list">
                 <li><span class="repo-name">MusicGenAI</span></li>
+                <li><span class="repo-name">anchor-autopilot</span><span class="repo-desc">A new industrial hard techno track every day, fully automated</span></li>
                 <li><span class="repo-name">Shoutout</span><span class="repo-desc">One platform for the independent music economy</span></li>
                 <li><span class="repo-name">MuseWave</span></li>
                 <li><span class="repo-name">MuseWave-Studio</span><span class="repo-desc">Music generation in MuseWave Studio</span></li>
@@ -5258,13 +5265,14 @@
               </ul>
             </div>
             <div class="repo-group">
-              <h4 class="repo-group-h">Ventures &amp; research <span class="repo-count">9</span></h4>
+              <h4 class="repo-group-h">Ventures &amp; research <span class="repo-count">10</span></h4>
               <ul class="repo-list">
                 <li><span class="repo-name">markets-pro</span><span class="repo-desc">Multi-region systematic trading research, with region-correct costs, taxes and settlement</span></li>
                 <li><span class="repo-name">money-minter</span><span class="repo-desc">Fourteen free financial calculators, static and dependency-free</span></li>
                 <li><span class="repo-name">Kolab</span><span class="repo-desc">User, brand and marketplace tie-ups</span></li>
                 <li><span class="repo-name">The-Passion-Table</span></li>
                 <li><span class="repo-name">The-Passion-Table-Idea-1</span></li>
+                <li><span class="repo-name">parwah-hq</span></li>
                 <li><span class="repo-name">mint-insights</span></li>
                 <li><span class="repo-name">build-and-grow</span></li>
                 <li><span class="repo-name">vibe-coding-platform</span></li>
