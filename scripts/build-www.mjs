@@ -5,6 +5,7 @@
  * App Skill Map plus Project SkillTree & Guide Library to every HTML app.
  */
 import { copyFile, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
@@ -78,6 +79,48 @@ const assets = [
   'audio',
   'cyber',
 ];
+
+// Stamp the service worker's cache name from the content it will serve.
+//
+// sw.js is cache-first for same-origin assets, so a stale cache name freezes
+// every script and stylesheet on the site for anyone who has visited before.
+// The constant carried a hand-written date and the instruction "bump this
+// string on every deploy" — it was last bumped on 2026-08-17 and drifted a
+// month behind, which shipped new HTML against August's JavaScript to every
+// returning visitor.
+//
+// A hash rather than a timestamp: it changes when the bytes change and not
+// otherwise, so a rebuild that alters nothing does not throw away a warm cache
+// for every visitor. Nothing to remember, and it cannot drift again.
+async function stampServiceWorker() {
+  const swPath = join(WWW, 'sw.js');
+  if (!existsSync(swPath)) return;
+
+  const hash = createHash('sha256');
+  const walk = async (dir) => {
+    const entries = (await readdir(dir, { withFileTypes: true })).sort((a, b) => a.name < b.name ? -1 : 1);
+    for (const e of entries) {
+      const full = join(dir, e.name);
+      if (e.isDirectory()) { await walk(full); continue; }
+      // Only what the worker can serve stale. Images and icons are content-
+      // addressed by name here already and dominate the byte count.
+      if (!/\.(js|mjs|css|html|json)$/i.test(e.name)) continue;
+      hash.update(e.name);
+      hash.update(await readFile(full));
+    }
+  };
+  await walk(WWW);
+
+  const stamp = hash.digest('hex').slice(0, 12);
+  const src = await readFile(swPath, 'utf8');
+  const next = src.replace(/^const CACHE = '[^']*';$/m, `const CACHE = 'anchit-portfolio-${stamp}';`);
+  if (next === src) {
+    console.warn('[build-www] sw.js: CACHE constant not found — cache version NOT stamped');
+    return;
+  }
+  await writeFile(swPath, next);
+  console.log(`[build-www] sw.js cache stamped → anchit-portfolio-${stamp}`);
+}
 
 async function copyEntry(src, dest) {
   const s = await stat(src);
@@ -232,6 +275,7 @@ async function main() {
 
   await patchHowToCardRoute();
   await buildHowTo();
+  await stampServiceWorker();
   // Gamified App Skill Map / Project Playbooks widgets removed from the site —
   // they read as unfinished progress shells on a portfolio. The runtimes still
   // exist under assets/ but are no longer injected into any page.

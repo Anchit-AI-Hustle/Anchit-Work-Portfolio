@@ -1,8 +1,12 @@
 /* Service worker — minimal offline cache for the portfolio shell.
- * Cache name is version-stamped so each deploy purges the previous cache
- * (the activate handler deletes every cache whose name !== CACHE). Bump
- * this string on every deploy that changes assets. */
-const CACHE = 'anchit-portfolio-20260817-three-esm';
+ *
+ * The cache name is STAMPED BY THE BUILD, from a hash of every js/css/html/json
+ * file it will serve (see stampServiceWorker in scripts/build-www.mjs). Do not
+ * hand-edit it. It used to be a hand-written date with a comment saying "bump
+ * this string on every deploy"; it was last bumped on 2026-08-17 and drifted a
+ * month, which served August's JavaScript to every returning visitor while the
+ * HTML updated underneath it — new markup running against old scripts. */
+const CACHE = 'anchit-portfolio-dev';
 const SHELL = [
   '/',
   '/index.html',
@@ -68,18 +72,28 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Cache-first for same-origin static assets
+  // Stale-while-revalidate for same-origin static assets.
+  //
+  // Was cache-first with no revalidation: a hit returned and nothing ever
+  // re-fetched, so an asset stayed frozen for the whole life of a cache
+  // version. That is only safe if the version always changes, and once it
+  // didn't, every script on the site was a month stale.
+  //
+  // The cached copy is still served immediately, so this costs nothing that
+  // anyone can feel; the network copy lands in the cache for the next load.
+  // Belt and braces with the build stamp: if a version ever fails to change,
+  // the site now heals itself on the following visit instead of staying stuck.
   if (url.origin === location.origin) {
     e.respondWith(
       caches.match(req).then(cached => {
-        if (cached) return cached;
-        return fetch(req).then(res => {
-          if (res.ok) {
+        const fresh = fetch(req).then(res => {
+          if (res && res.ok) {
             const copy = res.clone();
             caches.open(CACHE).then(c => c.put(req, copy));
           }
           return res;
         }).catch(() => cached);
+        return cached || fresh;
       })
     );
   }
