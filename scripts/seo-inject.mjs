@@ -29,6 +29,26 @@ const esc = (s) => String(s == null ? '' : s)
 // JSON-LD is embedded verbatim; only guard against a literal </script> break.
 const jsonForScript = (obj) => JSON.stringify(obj, null, 2).replace(/<\/(script)/gi, '<\\/$1');
 
+function sitemapWithExtras(xml, extras = []) {
+  if (!Array.isArray(extras) || extras.length === 0) return xml;
+  if (!xml.includes('</urlset>')) throw new Error('sitemapXml is missing </urlset>');
+
+  const urls = extras.map((entry) => {
+    if (!entry || !/^https:\/\//.test(entry.loc || '')) {
+      throw new Error(`Invalid sitemap URL: ${entry?.loc || '<missing>'}`);
+    }
+    const fields = [
+      `<loc>${esc(entry.loc)}</loc>`,
+      entry.lastmod && `<lastmod>${esc(entry.lastmod)}</lastmod>`,
+      entry.changefreq && `<changefreq>${esc(entry.changefreq)}</changefreq>`,
+      entry.priority && `<priority>${esc(entry.priority)}</priority>`,
+    ].filter(Boolean).join('');
+    return `  <url>${fields}</url>`;
+  }).join('\n');
+
+  return xml.replace('</urlset>', `${urls}\n</urlset>`);
+}
+
 function buildBlock(page, domain) {
   const L = [START, '<!-- Managed by scripts/seo-inject.mjs — edit seo.config.json, not here. -->'];
   if (page.description) L.push(`<meta name="description" content="${esc(page.description)}" />`);
@@ -115,7 +135,11 @@ async function main() {
   for (const page of cfg.pages || []) if (await applyPage(page, domain)) n++;
 
   if (cfg.robotsTxt) { await writeFile(join(ROOT, 'robots.txt'), cfg.robotsTxt.trimEnd() + '\n'); console.log('[seo] wrote robots.txt'); }
-  if (cfg.sitemapXml) { await writeFile(join(ROOT, 'sitemap.xml'), cfg.sitemapXml.trimEnd() + '\n'); console.log('[seo] wrote sitemap.xml'); }
+  if (cfg.sitemapXml) {
+    const sitemap = sitemapWithExtras(cfg.sitemapXml.trimEnd(), cfg.sitemapExtraUrls);
+    await writeFile(join(ROOT, 'sitemap.xml'), sitemap + '\n');
+    console.log('[seo] wrote sitemap.xml');
+  }
   if (cfg.llmsTxt) { await writeFile(join(ROOT, 'llms.txt'), cfg.llmsTxt.trimEnd() + '\n'); console.log('[seo] wrote llms.txt'); }
   console.log(`[seo] done — ${n} pages injected`);
 }
