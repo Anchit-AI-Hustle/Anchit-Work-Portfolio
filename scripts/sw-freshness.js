@@ -76,17 +76,30 @@ self.addEventListener('fetch', (e) => {
     return got ? (await got.text()).slice(0, 40) : null;
   }, marker);
 
-  let served = '(not fetched)';
+  const read = () => p.evaluate(async () =>
+    (await (await fetch('/assets/cinematic.js')).text()).slice(0, 60));
+
+  // Both halves of stale-while-revalidate are worth asserting, and the first
+  // read was previously taken and thrown away - which github-code-quality
+  // correctly flagged as a dead store. It is not a useless read, it is the
+  // half that says the cache still answers instantly.
+  let firstLoad = '(not fetched)', secondLoad = '(not fetched)';
   if (poisoned) {
-    served = await p.evaluate(async () => (await (await fetch('/assets/cinematic.js')).text()).slice(0, 60));
-    // second load: what stale-while-revalidate wrote back
-    await p.waitForTimeout(700);
-    served = await p.evaluate(async () => (await (await fetch('/assets/cinematic.js')).text()).slice(0, 60));
+    firstLoad = await read();          // serves the cached (poisoned) body at once
+    await p.waitForTimeout(700);       // and refetches behind it
+    secondLoad = await read();         // which the next load picks up
   }
-  check('a poisoned cache heals on the next load',
-    poisoned !== null && !served.includes('STALE_MARKER') && /cinematic\.js|motion grammar|use strict/.test(served),
+
+  check('the cached copy still answers immediately',
+    poisoned !== null && firstLoad.includes('STALE_MARKER'),
     poisoned === null ? 'no cache to poison (service worker never took control)'
-      : (served.includes('STALE_MARKER') ? 'still serving the stale body' : 'current body served back'));
+      : (firstLoad.includes('STALE_MARKER') ? 'cache hit served without waiting on the network'
+                                            : 'did not serve from cache: ' + firstLoad.slice(0, 30)));
+
+  check('a poisoned cache heals on the next load',
+    poisoned !== null && !secondLoad.includes('STALE_MARKER') && /cinematic\.js|motion grammar|use strict/.test(secondLoad),
+    poisoned === null ? 'no cache to poison (service worker never took control)'
+      : (secondLoad.includes('STALE_MARKER') ? 'still serving the stale body' : 'current body served back'));
 
   await b.close();
 
