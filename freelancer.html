@@ -420,7 +420,7 @@ window.addEventListener('scroll',()=>{if(!scrollScheduled){scrollScheduled=true;
   <header class="chat-head">
     <div>
       <strong>Anchit &#183; AI persona</strong>
-      <span>An AI trained on my work &#8212; not me. For me, use WhatsApp or a call.</span>
+      <span>Ask me anything about the work. Straight to me: WhatsApp or a call.</span>
     </div>
     <button class="chat-x" id="chatClose" type="button" aria-label="Close chat">&#215;</button>
   </header>
@@ -432,7 +432,7 @@ window.addEventListener('scroll',()=>{if(!scrollScheduled){scrollScheduled=true;
   </div>
   <form class="chat-form" id="chatForm">
     <label class="sr-only" for="chatInput">Your message</label>
-    <input id="chatInput" type="text" autocomplete="off" placeholder="Ask about the work, or a project you have in mind" />
+    <input id="chatInput" type="text" autocomplete="off" placeholder="Ask me about the work, or a project you have in mind" />
     <button type="submit" aria-label="Send">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-7 7 7-7 7"/></svg>
     </button>
@@ -457,6 +457,17 @@ window.addEventListener('scroll',()=>{if(!scrollScheduled){scrollScheduled=true;
   var closeBtn = document.getElementById('chatClose');
   var history = [], session = '', busy = false, greeted = false;
 
+  // In my voice, not about me in the third person - and honest about which
+  // wall we hit, because "something went wrong" tells nobody anything.
+  function reachMe(why) {
+    var line = (why === 'not_configured')
+      ? 'My AI is not switched on at the moment.'
+      : (why === 'overloaded' || why === 'rate_limited')
+        ? 'My AI is busy right now \u2014 give it a minute, or skip it.'
+        : 'I cannot get to my AI just now.';
+    return line + ' Either way, message me directly: WhatsApp +91 98739 45238, or anchit.tandon@gmail.com.';
+  }
+
   function bubble(text, cls) {
     var d = document.createElement('div');
     d.className = 'chat-msg ' + cls;
@@ -478,7 +489,7 @@ window.addEventListener('scroll',()=>{if(!scrollScheduled){scrollScheduled=true;
     fab.setAttribute('aria-expanded', 'true');
     if (!greeted) {
       greeted = true;
-      bubble('Hi — I am an AI version of Anchit, trained on his work. Ask me what he has built, how he works, or whether he is a fit for what you need.', 'bot');
+      bubble('Hey — I\u2019m Anchit. Ask me about the work, how I build, or whether I\u2019m the right fit for what you need.', 'bot');
     }
     setTimeout(function () { input.focus(); }, 60);
   }
@@ -506,20 +517,29 @@ window.addEventListener('scroll',()=>{if(!scrollScheduled){scrollScheduled=true;
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text, history: history, googleSession: session })
       });
-      var data = r.ok ? await r.json() : null;
+      // Read the body either way. Throwing away a non-ok response turns a
+      // specific, diagnosable failure - not configured, upstream overloaded,
+      // rate limited - into one vague sentence, which is exactly what happened
+      // the first time this failed in the wild and left nothing to go on.
+      var data = null;
+      try { data = await r.json(); } catch (e) {}
       wait.remove();
       if (data && typeof data.googleSession === 'string') session = data.googleSession;
-      if (data && data.reply && data.reply.trim()) {
+
+      if (r.ok && data && data.reply && data.reply.trim()) {
         bubble(data.reply.trim(), 'bot');
         history.push({ role: 'user', content: text });
         history.push({ role: 'assistant', content: data.reply.trim() });
         if (history.length > 12) history = history.slice(-12);
       } else {
-        bubble('I could not reach the assistant just now. Anchit is on WhatsApp at +91 98739 45238 or anchit.tandon@gmail.com — that reaches him directly.', 'err');
+        var why = (data && (data.reason || data.error)) || ('http_' + r.status);
+        try { console.warn('[chat] /api/chat failed:', r.status, data); } catch (e) {}
+        bubble(reachMe(why), 'err');
       }
     } catch (e) {
       wait.remove();
-      bubble('I could not reach the assistant just now. Anchit is on WhatsApp at +91 98739 45238 or anchit.tandon@gmail.com — that reaches him directly.', 'err');
+      try { console.warn('[chat] /api/chat unreachable:', e); } catch (e2) {}
+      bubble(reachMe('network'), 'err');
     }
     busy = false;
   }
