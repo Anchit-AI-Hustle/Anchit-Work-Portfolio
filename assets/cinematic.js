@@ -719,8 +719,14 @@
     // by scroll EVENTS, which go quiet while the animation is still running.
     // The document itself is the authority — three consecutive frames at the
     // same offset means nothing is moving it any more.
+    // 1.05s was a full second of glide after every gesture: measured at 1,155ms
+    // from one wheel notch to the page coming to rest on lifecycle-os.html,
+    // against 29ms with motion off. On a trackpad, which already has momentum
+    // of its own, that reads as input lag rather than as smoothness - the page
+    // keeps moving long after the fingers stop. 0.55s still smooths a notchy
+    // mouse wheel without putting a second of inertia in front of the reader.
     var lenis = new window.Lenis({
-      duration: 1.05,
+      duration: 0.55,
       easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); },
       smoothWheel: true
     });

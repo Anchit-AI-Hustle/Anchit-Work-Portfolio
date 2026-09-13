@@ -205,7 +205,15 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   *::selection { background: var(--primary); color: var(--bg); }
 
-  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; overscroll-behavior-y: none; background: var(--bg); }
+  /* NOT scroll-behavior:smooth. On the scrolling element Chrome applies it to
+     WHEEL scrolling too, so every notch became an animation and the page
+     glided for about a second after the gesture ended - the same lag Lenis
+     was separately adding, still there on every path where Lenis does not
+     run (coarse pointer, script blocked, motion partially on). The guard
+     below only ever covered the Lenis case.
+     Smooth programmatic scrolling is unaffected: the call sites that want
+     it already pass behavior:'smooth' themselves. */
+  html { -webkit-text-size-adjust: 100%; overscroll-behavior-y: none; background: var(--bg); }
 
   /* Native smooth scrolling must be OFF wherever Lenis is driving.
      ------------------------------------------------------------------
