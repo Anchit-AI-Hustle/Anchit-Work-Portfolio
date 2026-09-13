@@ -251,6 +251,12 @@ NET=1 npm run test:redirects     # also verifies off-site destinations over the 
 
 Links are read out of the **rendered DOM**, so anything a page injects at runtime
 is checked too, and nav targets are actually clicked rather than pattern-matched.
+Fragments are validated in a second pass, against the page they actually **land
+on** rather than the page containing the link — `/#projects`, `/ayushi#experience`
+and `./#skills` are all used here, and `./#skills` points from `ayushi/resume` at
+an id that lives in `ayushi/index`. Checking those against the containing page
+passes every one of them, so a typo in `/#projets` would resolve 200 and never be
+looked at. 30 of the site's 114 fragment links are cross-page.
 It found two live bugs that `routes-resolve.js` structurally cannot see, because
 neither is a missing file:
 
@@ -264,11 +270,15 @@ neither is a missing file:
   canonical profile — uses `/in/anchit-tandon`.
 
 Each of its five checks is paired with a mutation that reintroduces the bug it
-guards, and each must break only its own check:
+guards, and each must break only its own check. The mutation is injected into the
+**served DOM before any link is collected**, so each mode drives the same
+discovery and validation path a real regression would — a mutation appended to
+the results afterwards would still report success with the detector deleted,
+which is the failure mode this design avoids:
 
 ```bash
 MUT=dead_link    npm run test:redirects   # a link that 404s
-MUT=orphan_frag  npm run test:redirects   # a #fragment with no target
+MUT=orphan_frag  npm run test:redirects   # a #fragment with no target on its page
 MUT=dead_nav     npm run test:redirects   # a nav target that switches nothing
 MUT=private_repo npm run test:redirects   # bug 1: a page links a private repo
 MUT=two_handles  npm run test:redirects   # bug 2: one identity, two spellings

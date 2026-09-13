@@ -25,9 +25,22 @@
 //   rewrites or cleanUrls, so resolving against it would prove nothing about
 //   production.
 //
+// WHY TWO PASSES
+//   A fragment can point at another page: /#projects, /ayushi#experience and
+//   ./#skills are all used here, and ./#skills is a link from ayushi/resume to
+//   an id that lives in ayushi/index. Checking a fragment only against the page
+//   that CONTAINS the link silently passes every one of them — a typo in
+//   /#projets would resolve as a 200 and never be looked at. So the crawl
+//   records what each page can reach, and fragments are validated afterwards,
+//   against the page they actually land on.
+//
 // Run after a build:  node scripts/redirects-resolve.js
 //   NET=1   also verifies off-site destinations over the network
-//   MUT=... reintroduces one bug; the check that covers it must fail
+//   MUT=... injects one real defect into a served page; the check that covers
+//           it must fail. The mutation goes into the DOM BEFORE links are
+//           collected, so each mode drives the same discovery and validation
+//           path a real regression would — a mutation appended to the results
+//           afterwards would still pass with the detector deleted.
 const path = require('path');
 const fs = require('fs');
 
@@ -35,6 +48,11 @@ const ROOT = path.join(__dirname, '..');
 const WWW = path.join(ROOT, 'www');
 const MUT = process.env.MUT || '';
 const NET = process.env.NET === '1';
+
+// Every other browser suite here launches this binary explicitly rather than
+// letting Playwright search its default install, which is not declared in
+// package.json. Match them.
+const CHROME = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
 
 const results = [];
 const check = (n, ok, d) => results.push([ok ? 'PASS' : 'FAIL', n, d]);
@@ -44,14 +62,16 @@ if (!fs.existsSync(WWW)) {
   process.exit(1);
 }
 
-// Projects this repo owns and links to. A link to the SOURCE of one of these is
-// only safe if the repository is public; the live app always is. Bug 1 was a
-// card pointing at a private source, so the rule is: link the live app.
-const OWN_APPS = {
-  'The-Third-Eye': 'https://the-third-eye-anchit.vercel.app/',
-  'lifecycle-os': 'https://lifecycle-os.anchit-tandon.com/',
-  'AI-TeleSuite': 'https://ai-tele-suite.vercel.app/',
+// One real defect per mode, injected into the rendered page before anything is
+// collected from it.
+const MUTATIONS = {
+  dead_link: '<a href="/deliberately-not-a-page">mutant</a>',
+  orphan_frag: '<a href="#deliberately-no-such-anchor">mutant</a>',
+  dead_nav: '<a data-view="deliberately-no-such-view">mutant</a>',
+  private_repo: '<a href="https://github.com/Anchit-AI-Hustle/The-Third-Eye">mutant</a>',
+  two_handles: '<a href="https://www.linkedin.com/in/anchittandon">mutant</a>',
 };
+
 // Repositories under the org that are private, and so must never be linked from
 // a page. Kept explicit rather than probed, so the suite still runs offline.
 const PRIVATE_REPOS = new Set([
@@ -60,6 +80,11 @@ const PRIVATE_REPOS = new Set([
   'demo-repository', 'mirror-venture-os', 'Kolab', 'super-duper-waddle',
   'PetMind', 'vahdam-lifecycle-os',
 ]);
+const OWN_APPS = {
+  'The-Third-Eye': 'https://the-third-eye-anchit.vercel.app/',
+  'lifecycle-os': 'https://lifecycle-os.anchit-tandon.com/',
+  'AI-TeleSuite': 'https://ai-tele-suite.vercel.app/',
+};
 
 // One identity, one spelling. Bug 2 was a second spelling of the same profile.
 const CANONICAL = {
@@ -82,13 +107,14 @@ const CANONICAL = {
     }
     return o;
   };
-  const routes = walk(WWW)
-    .filter((f) => f.endsWith('.html'))
-    .map((f) => ('/' + path.relative(WWW, f).split(path.sep).join('/'))
-      .replace(/\/index\.html$/, '').replace(/\.html$/, '') || '/')
-    .sort();
+  // The canonical URL of a built page, in the form cleanUrls serves it.
+  const toRoute = (p) => p.replace(/\/index\.html$/, '').replace(/\.html$/, '') || '/';
+  const routes = walk(WWW).filter((f) => f.endsWith('.html'))
+    .map((f) => toRoute('/' + path.relative(WWW, f).split(path.sep).join('/'))).sort();
+  const isPage = new Set(routes);
+  const normalise = (p) => toRoute(p.replace(/\/+$/, '') || '/') || '/';
 
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({ executablePath: CHROME });
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   // Nothing off-site is fetched while crawling: irrelevant to routing, and it
   // makes the suite depend on someone else's uptime.
@@ -106,12 +132,13 @@ const CANONICAL = {
     return out;
   };
 
-  const dead = [];        // internal links that do not resolve
-  const orphanFrag = [];  // fragments with nothing to scroll or switch to
+  const dead = [];        // links that do not resolve
   const deadNav = [];     // SPA nav that does not change the view
   const srcLinks = [];    // links to our own repositories
   const identity = {};    // spellings seen per identity
-  let linkCount = 0, navCount = 0, fragCount = 0;
+  const reach = new Map();    // route -> what that page can be scrolled or switched to
+  const pending = [];         // every fragment, checked in pass 2 against its TARGET
+  let linkCount = 0, navCount = 0;
 
   for (const route of routes) {
     const page = await ctx.newPage();
@@ -121,12 +148,31 @@ const CANONICAL = {
       await page.waitForTimeout(800);
     } catch (e) { dead.push(`${route} (load failed: ${e.message.slice(0, 60)})`); await page.close(); continue; }
 
-    const html = fs.readFileSync(path.join(WWW, route === '/' ? 'index.html'
-      : (fs.existsSync(path.join(WWW, route.replace(/^\//, '') + '.html'))
-        ? route.replace(/^\//, '') + '.html' : route.replace(/^\//, '') + '/index.html')), 'utf8');
+    // The defect goes in here — before a single link is read off the page.
+    if (MUT && route === '/') {
+      await page.evaluate((frag) => {
+        const d = document.createElement('div');
+        d.innerHTML = frag;
+        document.body.appendChild(d);
+      }, MUTATIONS[MUT]);
+    }
 
+    // What this page can reach, for pass 2. Read from the live DOM so
+    // runtime-rendered sections count.
+    reach.set(route, await page.evaluate(() => {
+      const ids = new Set(), views = new Set();
+      for (const el of document.querySelectorAll('[id]')) ids.add(el.id);
+      for (const el of document.getElementsByName('*')) ids.add(el.getAttribute('name'));
+      for (const el of document.querySelectorAll('[name]')) ids.add(el.getAttribute('name'));
+      const av = document.documentElement.innerHTML.match(/ALL_VIEWS\s*=\s*\[([^\]]*)\]/);
+      if (av) for (const m of av[1].matchAll(/'([^']+)'/g)) views.add(m[1]);
+      for (const el of document.querySelectorAll('[data-view]')) views.add(el.getAttribute('data-view'));
+      return { ids: [...ids], views: [...views], schedule: typeof window.openScheduleModal === 'function' };
+    }));
+
+    const content = await page.content();
     for (const [name, re] of Object.entries(CANONICAL)) {
-      for (const m of html.matchAll(new RegExp(re.source, 'g'))) {
+      for (const m of content.matchAll(new RegExp(re.source, 'g'))) {
         (identity[name] ||= new Map()).set(m[1], (identity[name].get(m[1]) || new Set()).add(route));
       }
     }
@@ -155,68 +201,61 @@ const CANONICAL = {
       linkCount++;
       const r = await resolve(u.origin + u.pathname + u.search);
       // 203 is the emulator saying an external rewrite fired; production proxies it.
-      if (r.code !== 200 && r.code !== 203) dead.push(`${route}  ${l.raw}  -> HTTP ${r.code}${l.text ? `  ["${l.text}"]` : ''}`);
-    }
-
-    // A fragment must resolve to something this page can actually reach: a real
-    // element, a chapter section (marketing-101's router prefixes ch-), or a
-    // view name the SPA router accepts.
-    const frags = [...new Set(links.map((l) => l.raw).filter((h) => h.startsWith('#') && h.length > 1).map((h) => h.slice(1)))];
-    if (frags.length) {
-      fragCount += frags.length;
-      const bad = await page.evaluate((list) => {
-        const views = new Set();
-        const src = document.documentElement.innerHTML;
-        const av = src.match(/ALL_VIEWS\s*=\s*\[([^\]]*)\]/);
-        if (av) for (const m of av[1].matchAll(/'([^']+)'/g)) views.add(m[1]);
-        for (const el of document.querySelectorAll('[data-view]')) views.add(el.getAttribute('data-view'));
-        return list.filter((f) => {
-          const head = f.split('/')[0];                       // #view/anchor
-          const tail = f.split('/')[1];
-          if (document.getElementById(f) || document.getElementsByName(f).length) return false;
-          if (document.getElementById('ch-' + f)) return false;
-          if (views.has(head) && (!tail || document.getElementById(tail))) return false;
-          if (window.openScheduleModal && head === 'schedule') return false;
-          return true;
-        });
-      }, frags);
-      for (const f of bad) orphanFrag.push(`${route}  #${f}`);
+      if (r.code !== 200 && r.code !== 203) {
+        dead.push(`${route}  ${l.raw}  -> HTTP ${r.code}${l.text ? `  ["${l.text}"]` : ''}`);
+        continue;
+      }
+      // Same-origin and carrying a hash: queue it against the page it LANDS on,
+      // which is not necessarily this one.
+      if (u.hash && u.hash.length > 1) {
+        const target = normalise(new URL(r.final).pathname);
+        if (isPage.has(target)) pending.push({ from: route, raw: l.raw, target, frag: decodeURIComponent(u.hash.slice(1)) });
+      }
     }
 
     // The SPA's real redirections: clicking a nav target must change the view.
-    const navTargets = await page.evaluate(() => {
-      const src = document.documentElement.innerHTML;
-      const av = src.match(/ALL_VIEWS\s*=\s*\[([^\]]*)\]/);
-      if (!av) return [];
-      return [...new Set([...document.querySelectorAll('[data-view]')].map((e) => e.getAttribute('data-view')))];
-    });
-    for (const v of navTargets) {
-      if (v === 'schedule') continue;                        // opens a modal, not a view
-      navCount++;
-      const ok = await page.evaluate((view) => {
-        const el = document.querySelector(`[data-view="${view}"]`);
-        if (!el) return false;
-        el.click();
-        const panel = document.getElementById('view-' + view);
-        return !!(panel && panel.classList.contains('active'));
-      }, v);
-      if (!ok) deadNav.push(`${route}  data-view="${v}"`);
-      await page.waitForTimeout(60);
+    const hasRouter = await page.evaluate(() => /ALL_VIEWS\s*=\s*\[/.test(document.documentElement.innerHTML));
+    if (hasRouter) {
+      const navTargets = await page.evaluate(() =>
+        [...new Set([...document.querySelectorAll('[data-view]')].map((e) => e.getAttribute('data-view')))]);
+      for (const v of navTargets) {
+        if (v === 'schedule') continue;                      // opens a modal, not a view
+        navCount++;
+        const ok = await page.evaluate((view) => {
+          const el = document.querySelector(`[data-view="${view}"]`);
+          if (!el) return false;
+          el.click();
+          const panel = document.getElementById('view-' + view);
+          return !!(panel && panel.classList.contains('active'));
+        }, v);
+        if (!ok) deadNav.push(`${route}  data-view="${v}"`);
+        await page.waitForTimeout(60);
+      }
     }
     await page.close();
   }
 
-  if (MUT === 'dead_link') dead.push('mutant.html  /nope  -> HTTP 404');
-  if (MUT === 'orphan_frag') orphanFrag.push('mutant.html  #nowhere');
-  if (MUT === 'dead_nav') deadNav.push('mutant.html  data-view="nowhere"');
+  // Pass 2 — every fragment against the page it actually lands on.
+  const orphanFrag = [];
+  for (const f of pending) {
+    const idx = reach.get(f.target);
+    if (!idx) { orphanFrag.push(`${f.from}  ${f.raw}  (target ${f.target} never loaded)`); continue; }
+    const [head, tail] = f.frag.split('/');
+    const ok = idx.ids.includes(f.frag)
+      || idx.ids.includes('ch-' + f.frag)                    // marketing-101's chapter router
+      || (idx.views.includes(head) && (!tail || idx.ids.includes(tail)))
+      || (idx.schedule && head === 'schedule');
+    if (!ok) orphanFrag.push(`${f.from}  ${f.raw}  -> no "${f.frag}" on ${f.target}`);
+  }
 
   check('every internal link on every page resolves',
     dead.length === 0,
     dead.length ? dead.slice(0, 4).join(' ; ') : `${linkCount} links across ${routes.length} pages`);
 
-  check('every in-page fragment has a target',
+  check('every fragment resolves on the page it lands on',
     orphanFrag.length === 0,
-    orphanFrag.length ? orphanFrag.slice(0, 4).join(' ; ') : `${fragCount} fragments, all reachable`);
+    orphanFrag.length ? orphanFrag.slice(0, 4).join(' ; ')
+      : `${pending.length} fragments (${new Set(pending.filter((f) => f.target !== f.from).map((f) => f.raw)).size} cross-page)`);
 
   check('every nav target switches the view',
     deadNav.length === 0,
@@ -226,7 +265,6 @@ const CANONICAL = {
   {
     const bad = srcLinks.filter((l) => PRIVATE_REPOS.has(l.repo))
       .map((l) => `${l.route} -> ${l.repo}${OWN_APPS[l.repo] ? ` (link ${OWN_APPS[l.repo]} instead)` : ''}`);
-    if (MUT === 'private_repo') bad.push('mutant.html -> The-Third-Eye');
     check('no page links a private repository',
       bad.length === 0,
       bad.length ? bad.join(' ; ') : `${srcLinks.length} source links, all public`);
@@ -236,7 +274,6 @@ const CANONICAL = {
   {
     const bad = [];
     for (const [name, spellings] of Object.entries(identity)) {
-      if (MUT === 'two_handles' && name === 'LinkedIn') spellings.set('anchittandon', new Set(['mutant.html']));
       if (spellings.size > 1) {
         bad.push(`${name}: ${[...spellings.entries()].map(([v, pages]) => `${v} (${[...pages][0]}${pages.size > 1 ? ` +${pages.size - 1}` : ''})`).join(' vs ')}`);
       }
