@@ -237,6 +237,43 @@ npm run test:entrance            # nothing parked at an unfinished 3D entrance �
 npm run test:design              # DESIGN.md's scales, enforced on the rendered page — 4 checks
 ```
 
+`npm run test:redirects` needs **no** server — it starts its own, because the
+question it asks cannot be answered by `npx serve`. `serve` knows nothing about
+`vercel.json`, so every redirect, rewrite and cleanUrls hop it performs is
+invented by the dev server; a link resolved against it proves nothing about
+production. `scripts/vercel-emu.mjs` reads `vercel.json` and applies the same
+four rules Vercel does, in order, and the suite drives a browser against that:
+
+```bash
+npm run test:redirects           # every link on every page lands somewhere — 5 checks
+NET=1 npm run test:redirects     # also verifies off-site destinations over the network
+```
+
+Links are read out of the **rendered DOM**, so anything a page injects at runtime
+is checked too, and nav targets are actually clicked rather than pattern-matched.
+It found two live bugs that `routes-resolve.js` structurally cannot see, because
+neither is a missing file:
+
+- The freelancer page's "Third Eye — View project" card pointed at
+  `github.com/Anchit-AI-Hustle/The-Third-Eye`, a **private** repository. It
+  rendered GitHub's 404 for every visitor while looking correct to the author,
+  who can see the repo. `index.html` had always linked that project to its live
+  app; only this card pointed at the source.
+- `index.html`'s sign-off linked `/in/anchittandon`. Every other LinkedIn
+  reference — including the JSON-LD `sameAs` that search engines read as the
+  canonical profile — uses `/in/anchit-tandon`.
+
+Each of its five checks is paired with a mutation that reintroduces the bug it
+guards, and each must break only its own check:
+
+```bash
+MUT=dead_link    npm run test:redirects   # a link that 404s
+MUT=orphan_frag  npm run test:redirects   # a #fragment with no target
+MUT=dead_nav     npm run test:redirects   # a nav target that switches nothing
+MUT=private_repo npm run test:redirects   # bug 1: a page links a private repo
+MUT=two_handles  npm run test:redirects   # bug 2: one identity, two spellings
+```
+
 `provider-chain.js` needs no server; it stubs the network. It is also fully
 mutation-covered — `MUT=1 npm run test:providers` must report every check
 failing.
