@@ -280,14 +280,21 @@ Both halves are enforced, because each caught something the other could not:
 
 - **The links.** Every `github.com` href on every page, whoever owns it — our own
   repositories and third-party ones alike.
-- **The word, in rendered copy.** A link's own label can name GitHub after the
-  href is fixed (`Explore the implementation on GitHub`), and a repository can
-  be named in plain text with no link at all — `index.html` listed **51** of
-  them under "The workshop". The check walks `textContent` with `<script>` and
-  `<style>` stripped, not `innerText`, because `index.html` keeps 16 of its 17
-  panels hidden at any moment and a nav click makes them visible; stripping the
-  scripts also stops the chatbot's `'github'` *matching keyword*, which is never
-  rendered, from reading as a visible mention.
+- **GitHub, or a repository, in rendered copy.** A link's own label can name
+  GitHub after the href is fixed (`Explore the implementation on GitHub`), and a
+  repository can be named in plain text with no link at all — `index.html`
+  listed **51** of them under "The workshop". Checking only for the word
+  "GitHub" is not enough either: the growth-school teaching copy said *"in the
+  lifecycle-os repository"* twice, naming one without ever saying GitHub, and
+  marketing-101's library lede went on promising "open-source repositories"
+  after that section was deleted. So the scan covers `github`, `repository`,
+  `repositories` and `repos`.
+
+  It walks `textContent` with `<script>` and `<style>` stripped, not
+  `innerText`, because `index.html` keeps 16 of its 17 panels hidden at any
+  moment and a nav click makes them visible; stripping the scripts also stops
+  the chatbot's `'github'` *matching keyword*, which is never rendered, from
+  reading as a visible mention.
 
 The link check is what found `/ayushi/course` — it renders
 `assets/growth-school-content.js`, the same content file as `/growth-school`, so
@@ -310,6 +317,7 @@ MUT=orphan_frag  npm run test:redirects   # a #fragment with no target on its pa
 MUT=dead_nav     npm run test:redirects   # a nav target that switches nothing
 MUT=github_link  npm run test:redirects   # a page links to GitHub
 MUT=github_text  npm run test:redirects   # rendered copy says "GitHub"
+MUT=repo_text    npm run test:redirects   # rendered copy names a repository
 MUT=two_handles  npm run test:redirects   # one identity, two spellings
 ```
 

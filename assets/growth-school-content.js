@@ -296,7 +296,7 @@ function baseTracks() {
           deeper: 'The cheapest way to ask it honestly is a holdout — withhold the activity from a random slice and compare. It feels wasteful, because you are deliberately not marketing to some people. What you are buying is the ability to tell whether the marketing works at all, which is worth more than the revenue you forgo.' },
         { tag: 'Hygiene', title: 'A number nobody can reproduce is an opinion',
           body: 'If two people compute "revenue this month" and get different answers, the problem is not the dashboard, it is that nobody wrote down what the number means. Definitions first, tooling second.',
-          deeper: 'This is the same disease that produced <code>region-context.js</code> in the lifecycle-os repository: region selection had been built on 17 of 66 pages in six different ways, none of which shared state, so the same question got different answers depending on which page you asked. Metrics rot exactly like that, and for the same reason — no single place says what the thing is.' },
+          deeper: 'This is the same disease that produced a single shared <code>region-context</code> module in one of my own systems: region selection had been built on 17 of 66 pages in six different ways, none of which shared state, so the same question got different answers depending on which page you asked. Metrics rot exactly like that, and for the same reason — no single place says what the thing is.' },
         { tag: 'Judgement', title: 'Significance is not importance',
           body: 'A difference can be statistically real and commercially irrelevant, and a difference can be commercially enormous and never reach significance because the sample is small. Decide what size of effect would change your decision <em>before</em> you look.',
           deeper: 'Writing the decision rule down first is the whole discipline: "if the lift is under 3% we ship neither, because the engineering cost is not worth it." Without it, every result becomes an argument, and the person who argues best wins rather than the option that is better.' },
@@ -335,7 +335,7 @@ window.GS_CONTENT = {
  * to a number.
  *
  * The catalogue figures below are from Knickgasm's PUBLIC Shopify feed
- * (knickgasm.com/products.json), captured in the lifecycle-os repository on
+ * (knickgasm.com/products.json), captured for the lifecycle work on
  * 2026-08-03: 436 active SKUs, USA list median $153 with a median compare-at of
  * $197, and 349 of the 436 in a single silhouette. Public storefront data, and
  * every derived number below is arithmetic on top of it.
@@ -353,7 +353,7 @@ window.GS_CONTENT.ayushiTracks = function () {
             deeper: 'People usually ask the capital question first because it feels like the gate. It is not. Plenty of well-funded brands fail with money left in the bank because the second question was never answered — every order lost money and more money simply bought more orders. We will answer them in order.' },
           { tag: 'The example', title: 'What the reference brand actually is',
             body: 'Knickgasm’s public product feed lists <strong>436 active SKUs</strong>, and <strong>349 of them are one silhouette</strong> — Nike Air Force 1. Median list price on the US feed is <strong>$153</strong>, against a median compare-at of <strong>$197</strong>. So: a narrow catalogue, one hero product, and a permanent discount posture of around 22%.',
-            deeper: 'This shape matters more than the category. A narrow catalogue means less capital tied up in stock and a simpler story to tell. One hero product means the marketing has a single subject. A standing compare-at price means the brand has chosen to compete on perceived value rather than exclusivity — which sets the tone for everything downstream, from the ads to the emails. <em>Source: the catalogue export in the lifecycle-os repository, taken from the brand’s public products.json.</em>' },
+            deeper: 'This shape matters more than the category. A narrow catalogue means less capital tied up in stock and a simpler story to tell. One hero product means the marketing has a single subject. A standing compare-at price means the brand has chosen to compete on perceived value rather than exclusivity — which sets the tone for everything downstream, from the ads to the emails. <em>Source: a catalogue export I captured from the brand’s public products.json.</em>' },
           { tag: 'The honest part', title: 'What this reference does not tell us',
             body: 'A public feed shows prices and range. It does not show what those units cost to buy, what the ads cost, or whether the brand makes money. So we will not pretend to know. Instead we will make our assumptions visible, and you can move each one and watch what happens.',
             deeper: 'This is the habit worth taking from the whole course: when a number is unknown, do not drop the calculation — state the assumption, keep going, and mark it as the thing to verify first. A model with named assumptions is useful. A model with hidden ones is a story.' },

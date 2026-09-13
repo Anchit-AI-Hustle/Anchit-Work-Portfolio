@@ -77,6 +77,7 @@ const MUTATIONS = {
   dead_nav: '<a data-view="deliberately-no-such-view">mutant</a>',
   github_link: '<a href="https://github.com/Anchit-AI-Hustle/The-Third-Eye">mutant</a>',
   github_text: '<p>Explore the implementation on GitHub</p>',
+  repo_text: '<p>as captured in the lifecycle-os repository</p>',
   two_handles: '<a href="https://www.linkedin.com/in/anchittandon">mutant</a>',
 };
 
@@ -184,7 +185,10 @@ const CANONICAL = {
       const body = document.body.cloneNode(true);
       for (const el of body.querySelectorAll('script, style, template')) el.remove();
       const text = (body.textContent || '').replace(/\s+/g, ' ');
-      return [...text.matchAll(/.{0,40}\bgit\s?hub\b.{0,40}/gi)].map((m) => m[0].trim());
+      // "GitHub" is not the only tell: copy that says "the lifecycle-os
+      // repository" names one without ever saying GitHub, and a stale lede
+      // promising "open-source repositories" outlives the section it described.
+      return [...text.matchAll(/.{0,40}\b(?:git\s?hub|repositor(?:y|ies)|repos)\b.{0,40}/gi)].map((m) => m[0].trim());
     })) ghText.push({ route, quote });
 
     for (const [name, re] of Object.entries(CANONICAL)) {
@@ -292,7 +296,7 @@ const CANONICAL = {
   // named in plain copy with no link at all — index.html listed 51 of them.
   // innerText is what the viewer actually reads, so that is what is checked.
   {
-    check('no page shows the word "GitHub"',
+    check('no page names GitHub or a repository',
       ghText.length === 0,
       ghText.length ? ghText.slice(0, 4).map((g) => `${g.route}: "${g.quote}"`).join(' ; ')
         : `${routes.length} pages, rendered copy is clean`);
@@ -321,7 +325,7 @@ const CANONICAL = {
   if (MUT) {
     const TOUCHED = {
       dead_link: /internal link/, orphan_frag: /fragment/, dead_nav: /nav target/,
-      github_link: /links to GitHub/, github_text: /shows the word/,
+      github_link: /links to GitHub/, github_text: /names GitHub/, repo_text: /names GitHub/,
       two_handles: /one spelling/,
     }[MUT];
     if (!TOUCHED) { console.log(`MUT: unknown mutation "${MUT}"`); process.exit(1); }
