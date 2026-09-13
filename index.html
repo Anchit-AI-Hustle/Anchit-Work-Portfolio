@@ -1892,31 +1892,6 @@
   .thesis-close { margin-bottom: 0; color: var(--ink); }
   @media (max-width: 560px) { .thesis { padding: var(--sp-5) var(--sp-4); } }
 
-  /* The repository index. Scoped to .repo-* so it cannot reach the cards.
-     Type is restricted to steps this view already renders (micro/label/sm/
-     body/h3) — the projects view sits at the 8-step ceiling design-system.js
-     enforces, so a new size here would fail it. */
-  .repo-index { margin: var(--sp-8) 0 var(--sp-6); max-width: 100%; }
-  .repo-index-label { display: block; font-family: var(--font-mono); font-size: var(--fs-micro);
-    letter-spacing: .14em; text-transform: uppercase; color: var(--primary); margin-bottom: var(--sp-2); }
-  .repo-index-h { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-h3);
-    line-height: 1.2; color: var(--ink); margin-bottom: var(--sp-3); text-wrap: balance; }
-  .repo-index-note { color: var(--ink-dim); font-size: var(--fs-body); line-height: 1.6;
-    margin-bottom: var(--sp-6); max-width: 68ch; }
-  .repo-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--sp-6); }
-  .repo-group { min-width: 0; }
-  .repo-group-h { font-family: var(--font-mono); font-size: var(--fs-label); font-weight: 500;
-    letter-spacing: .1em; text-transform: uppercase; color: var(--ink);
-    padding-bottom: var(--sp-2); margin-bottom: var(--sp-3);
-    border-bottom: 1px solid var(--rule); display: flex; align-items: baseline; gap: var(--sp-2); }
-  .repo-count { margin-left: auto; font-size: var(--fs-micro); color: var(--primary); }
-  .repo-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-3); }
-  .repo-list li { min-width: 0; }
-  /* Repo names are unbroken tokens and one of them is 99 characters, so it has
-     to be allowed to break or it pushes the whole grid wide. */
-  .repo-name { display: block; font-family: var(--font-mono); font-size: var(--fs-sm);
-    color: var(--ink); line-height: 1.45; overflow-wrap: anywhere; }
-  .repo-desc { display: block; font-size: var(--fs-sm); line-height: 1.45; color: var(--ink-dim); margin-top: 2px; }
 
   .sidebar-external .ml-hover { color: var(--primary); }
   .sidebar-external svg { opacity: .92; }
@@ -5233,89 +5208,6 @@
              names are the record; the code is deliberately not on offer, so
              nothing here is an anchor. Grouped because 49 flat entries is a
              wall, not an index. -->
-        <section class="repo-index reveal">
-          <span class="repo-index-label">The workshop</span>
-          <h3 class="repo-index-h">Everything that got built, not only what shipped</h3>
-          <p class="repo-index-note">The 51 repositories behind the work above — including the dead ends, the rewrites and the three separate attempts at the same idea. Names only: the code stays closed.</p>
-          <div class="repo-groups">
-            <div class="repo-group">
-              <h4 class="repo-group-h">Lifecycle &amp; marketing systems <span class="repo-count">13</span></h4>
-              <ul class="repo-list">
-                <li><span class="repo-name">lifecycle-os</span><span class="repo-desc">Retention and lifecycle-marketing platform for any brand</span></li>
-                <li><span class="repo-name">vahdam-lifecycle-os</span><span class="repo-desc">Data analysis, a 30-day marketing calendar and a mailer creator</span></li>
-                <li><span class="repo-name">vahdam_dtc_data_engine</span><span class="repo-desc">DuckDB analytics layer — 15 metrics, 4 schemas, 46 tables</span></li>
-                <li><span class="repo-name">marketing_mailers__html_architect</span></li>
-                <li><span class="repo-name">Vahdam---Marketing-Automation</span></li>
-                <li><span class="repo-name">vahdam-marketing-automation</span></li>
-                <li><span class="repo-name">Marketing-Daa-Analysis-Mails-Ad-Campaigns-Generation-Business-for-Any-Brand-Real-Time-Data-Analysis</span><span class="repo-desc">Analysis plus mail and ad-campaign generation for any brand, on live data</span></li>
-                <li><span class="repo-name">Data-Analysis---Mailer-Calendar-Creation---Mailer-Generation</span></li>
-                <li><span class="repo-name">Mailer</span></li>
-                <li><span class="repo-name">vahdam-lp-assets</span></li>
-                <li><span class="repo-name">LandingPages-Improved</span></li>
-                <li><span class="repo-name">vahdam-superapp</span><span class="repo-desc">Expo iOS/Android tea shop with an AI assistant</span></li>
-                <li><span class="repo-name">vahdam-super-app</span></li>
-              </ul>
-            </div>
-            <div class="repo-group">
-              <h4 class="repo-group-h">Assistants &amp; agent systems <span class="repo-count">11</span></h4>
-              <ul class="repo-list">
-                <li><span class="repo-name">The-Third-Eye</span></li>
-                <li><span class="repo-name">AI-TeleSuite</span></li>
-                <li><span class="repo-name">hey-yaara</span></li>
-                <li><span class="repo-name">HeyYaara-GoogleAIStudio</span></li>
-                <li><span class="repo-name">HeyYaara-EmergentAI</span></li>
-                <li><span class="repo-name">your-personal-ai-companion</span></li>
-                <li><span class="repo-name">TH-LifeEngine</span></li>
-                <li><span class="repo-name">TH--LifeEngine.app</span></li>
-                <li><span class="repo-name">mirror-private-intelligence-os</span></li>
-                <li><span class="repo-name">mirror-venture-os</span></li>
-                <li><span class="repo-name">PetMind</span></li>
-              </ul>
-            </div>
-            <div class="repo-group">
-              <h4 class="repo-group-h">Music generation <span class="repo-count">12</span></h4>
-              <ul class="repo-list">
-                <li><span class="repo-name">MusicGenAI</span></li>
-                <li><span class="repo-name">anchor-autopilot</span><span class="repo-desc">A new industrial hard techno track every day, fully automated</span></li>
-                <li><span class="repo-name">Shoutout</span><span class="repo-desc">One platform for the independent music economy</span></li>
-                <li><span class="repo-name">MuseWave</span></li>
-                <li><span class="repo-name">MuseWave-Studio</span><span class="repo-desc">Music generation in MuseWave Studio</span></li>
-                <li><span class="repo-name">MuseVibe-Studio</span><span class="repo-desc">Music studio — an app for music generation</span></li>
-                <li><span class="repo-name">MuseWave_EmergentAI</span></li>
-                <li><span class="repo-name">MuseWave_EmergentAI_Old</span></li>
-                <li><span class="repo-name">SoundWave</span><span class="repo-desc">Music generation</span></li>
-                <li><span class="repo-name">SoundWeave</span><span class="repo-desc">Music generation app</span></li>
-                <li><span class="repo-name">creative-sound-hub</span></li>
-                <li><span class="repo-name">creative-sound-hub-95a32067</span></li>
-              </ul>
-            </div>
-            <div class="repo-group">
-              <h4 class="repo-group-h">Ventures &amp; research <span class="repo-count">10</span></h4>
-              <ul class="repo-list">
-                <li><span class="repo-name">markets-pro</span><span class="repo-desc">Multi-region systematic trading research, with region-correct costs, taxes and settlement</span></li>
-                <li><span class="repo-name">money-minter</span><span class="repo-desc">Fourteen free financial calculators, static and dependency-free</span></li>
-                <li><span class="repo-name">Kolab</span><span class="repo-desc">User, brand and marketplace tie-ups</span></li>
-                <li><span class="repo-name">The-Passion-Table</span></li>
-                <li><span class="repo-name">The-Passion-Table-Idea-1</span></li>
-                <li><span class="repo-name">parwah-hq</span></li>
-                <li><span class="repo-name">mint-insights</span></li>
-                <li><span class="repo-name">build-and-grow</span></li>
-                <li><span class="repo-name">vibe-coding-platform</span></li>
-                <li><span class="repo-name">github-love-notes</span></li>
-              </ul>
-            </div>
-            <div class="repo-group">
-              <h4 class="repo-group-h">This site, and the scaffolding <span class="repo-count">5</span></h4>
-              <ul class="repo-list">
-                <li><span class="repo-name">Anchit-Work-Portfolio</span><span class="repo-desc">The repository behind anchit-tandon.com</span></li>
-                <li><span class="repo-name">anchit-portfolio-cyberpunk</span><span class="repo-desc">An earlier portfolio cut — Three.js, GSAP, Lenis</span></li>
-                <li><span class="repo-name">ANCHIT-S-AI-HUSTLE</span></li>
-                <li><span class="repo-name">demo-repository</span></li>
-                <li><span class="repo-name">super-duper-waddle</span></li>
-              </ul>
-            </div>
-          </div>
-        </section>
 
 
       <!-- Every module inside the two suites, as an individual project. Rendered
