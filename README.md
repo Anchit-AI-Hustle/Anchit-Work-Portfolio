@@ -237,6 +237,53 @@ npm run test:entrance            # nothing parked at an unfinished 3D entrance �
 npm run test:design              # DESIGN.md's scales, enforced on the rendered page — 4 checks
 ```
 
+`npm run test:redirects` needs **no** server — it starts its own, because the
+question it asks cannot be answered by `npx serve`. `serve` knows nothing about
+`vercel.json`, so every redirect, rewrite and cleanUrls hop it performs is
+invented by the dev server; a link resolved against it proves nothing about
+production. `scripts/vercel-emu.mjs` reads `vercel.json` and applies the same
+four rules Vercel does, in order, and the suite drives a browser against that:
+
+```bash
+npm run test:redirects           # every link on every page lands somewhere — 5 checks
+NET=1 npm run test:redirects     # also verifies off-site destinations over the network
+```
+
+Links are read out of the **rendered DOM**, so anything a page injects at runtime
+is checked too, and nav targets are actually clicked rather than pattern-matched.
+Fragments are validated in a second pass, against the page they actually **land
+on** rather than the page containing the link — `/#projects`, `/ayushi#experience`
+and `./#skills` are all used here, and `./#skills` points from `ayushi/resume` at
+an id that lives in `ayushi/index`. Checking those against the containing page
+passes every one of them, so a typo in `/#projets` would resolve 200 and never be
+looked at. 30 of the site's 114 fragment links are cross-page.
+It found two live bugs that `routes-resolve.js` structurally cannot see, because
+neither is a missing file:
+
+- The freelancer page's "Third Eye — View project" card pointed at
+  `github.com/Anchit-AI-Hustle/The-Third-Eye`, a **private** repository. It
+  rendered GitHub's 404 for every visitor while looking correct to the author,
+  who can see the repo. `index.html` had always linked that project to its live
+  app; only this card pointed at the source.
+- `index.html`'s sign-off linked `/in/anchittandon`. Every other LinkedIn
+  reference — including the JSON-LD `sameAs` that search engines read as the
+  canonical profile — uses `/in/anchit-tandon`.
+
+Each of its five checks is paired with a mutation that reintroduces the bug it
+guards, and each must break only its own check. The mutation is injected into the
+**served DOM before any link is collected**, so each mode drives the same
+discovery and validation path a real regression would — a mutation appended to
+the results afterwards would still report success with the detector deleted,
+which is the failure mode this design avoids:
+
+```bash
+MUT=dead_link    npm run test:redirects   # a link that 404s
+MUT=orphan_frag  npm run test:redirects   # a #fragment with no target on its page
+MUT=dead_nav     npm run test:redirects   # a nav target that switches nothing
+MUT=private_repo npm run test:redirects   # bug 1: a page links a private repo
+MUT=two_handles  npm run test:redirects   # bug 2: one identity, two spellings
+```
+
 `provider-chain.js` needs no server; it stubs the network. It is also fully
 mutation-covered — `MUT=1 npm run test:providers` must report every check
 failing.
