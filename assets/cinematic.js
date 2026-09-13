@@ -62,6 +62,36 @@
     place(btn);
   }
 
+  // A way back to the main portfolio, on every page that does not already have
+  // one. 24 of the 27 pages had no route home at all: a visitor landing on a
+  // project page from search was stuck there, and the freelance site and the
+  // portfolio had no connection in either direction.
+  //
+  // Injected here for the same reason the motion toggle is: this runtime is the
+  // one file every page already loads, and 24 hand-edited headers would drift.
+  // Pages that already link home are left alone, and so is the homepage itself.
+  function injectHomeLink() {
+    if (document.getElementById('cinHome')) return;
+    // The homepage IS the destination. It is the page carrying the view router,
+    // so .sidebar / #view-home identifies it without depending on a filename.
+    if (document.querySelector('.sidebar') || document.getElementById('view-home')) return;
+    // Anything that already offers a route home, in any form.
+    if (document.querySelector('a[href="/"], a[href="/index.html"], a[href="index.html"], a[href^="/#"]')) return;
+
+    var a = document.createElement('a');
+    a.id = 'cinHome';
+    a.href = '/';
+    a.textContent = '\u2190 Anchit Tandon';
+    a.title = 'Back to the main portfolio';
+    a.style.cssText = 'position:fixed;left:14px;top:14px;z-index:2147483000;' +
+      'font:500 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em;' +
+      'text-transform:uppercase;padding:7px 11px;border-radius:99px;text-decoration:none;' +
+      'color:#B3A996;background:#16130F;border:1px solid rgba(255,247,232,.16);opacity:.75';
+    a.addEventListener('mouseenter', function () { a.style.opacity = '1'; });
+    a.addEventListener('mouseleave', function () { a.style.opacity = '.75'; });
+    (document.body || root).appendChild(a);
+  }
+
   // Bottom-left is only the FIRST choice. This runtime is added to pages it did
   // not design, and some of them already own that corner — on the marketing
   // course it landed on top of two chapter links and a Library button, which
@@ -110,9 +140,10 @@
       btn.style.bottom = (pad + (h + 10) * 2) + 'px';
     }
   }
+  function injectChrome() { injectToggle(); injectHomeLink(); }
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', injectToggle);
-  } else { injectToggle(); }
+    document.addEventListener('DOMContentLoaded', injectChrome);
+  } else { injectChrome(); }
 
   if (motionOff) return;                       // calm mode: nothing else runs
 

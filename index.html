@@ -1918,6 +1918,8 @@
     color: var(--ink); line-height: 1.45; overflow-wrap: anywhere; }
   .repo-desc { display: block; font-size: var(--fs-sm); line-height: 1.45; color: var(--ink-dim); margin-top: 2px; }
 
+  .sidebar-external .ml-hover { color: var(--primary); }
+  .sidebar-external svg { opacity: .92; }
   /* ============ BUILDS (Side projects) ============ */
   .builds-grid {
     display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;
@@ -3781,7 +3783,22 @@
         </a>
       </div>
     </div>
-  </nav>
+  
+          <!-- Route to the freelance site. Deliberately NO data-view: navLinks is
+               querySelectorAll('[data-view]'), so anything carrying one is claimed
+               by switchView and rejected unless it is in ALL_VIEWS. This is a real
+               page, so it has to stay an ordinary link. -->
+          <a class="sidebar-item sidebar-external" href="/freelancer" aria-label="Freelance work — hire me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 7h16a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1Z"/>
+              <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 12h18"/>
+            </svg>
+            <span class="sidebar-label morph-label">
+              <span class="ml-default">Hire Me</span>
+              <span class="ml-hover" aria-hidden="true">Freelance work ↗</span>
+            </span>
+          </a>
+        </nav>
   <script>
     (function(){
       var group=document.getElementById('sidebarContactGroup');
