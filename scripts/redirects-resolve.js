@@ -8,6 +8,13 @@
 //      had always linked the same project to its live app; only this one card
 //      pointed at the source.
 //
+//      That is now the narrow case of a blanket rule: no page sends a visitor
+//      to GitHub at all, and no page names a repository. A private repo 404s,
+//      a public one shows source nobody asked to read, and either way the
+//      viewer has left the portfolio. The suite enforces both halves — the
+//      links, and the word itself in rendered copy, since "Explore the
+//      implementation on GitHub" was a link whose own LABEL gave it away.
+//
 //   2. index.html's sign-off linked /in/anchittandon. Every other LinkedIn
 //      reference on the site — both visible links and the JSON-LD sameAs that
 //      search engines read as the canonical profile — uses /in/anchit-tandon.
@@ -68,18 +75,14 @@ const MUTATIONS = {
   dead_link: '<a href="/deliberately-not-a-page">mutant</a>',
   orphan_frag: '<a href="#deliberately-no-such-anchor">mutant</a>',
   dead_nav: '<a data-view="deliberately-no-such-view">mutant</a>',
-  private_repo: '<a href="https://github.com/Anchit-AI-Hustle/The-Third-Eye">mutant</a>',
+  github_link: '<a href="https://github.com/Anchit-AI-Hustle/The-Third-Eye">mutant</a>',
+  github_text: '<p>Explore the implementation on GitHub</p>',
+  repo_text: '<p>as captured in the lifecycle-os repository</p>',
   two_handles: '<a href="https://www.linkedin.com/in/anchittandon">mutant</a>',
 };
 
-// Repositories under the org that are private, and so must never be linked from
-// a page. Kept explicit rather than probed, so the suite still runs offline.
-const PRIVATE_REPOS = new Set([
-  'The-Third-Eye', 'Shoutout', 'anchit-portfolio-cyberpunk', 'The-Passion-Table',
-  'The-Passion-Table-Idea-1', 'markets-pro', 'parwah-hq', 'vahdam-superapp',
-  'demo-repository', 'mirror-venture-os', 'Kolab', 'super-duper-waddle',
-  'PetMind', 'vahdam-lifecycle-os',
-]);
+// Where a project's own page lives, so a stray source link can be reported with
+// the thing it should have pointed at instead.
 const OWN_APPS = {
   'The-Third-Eye': 'https://the-third-eye-anchit.vercel.app/',
   'lifecycle-os': 'https://lifecycle-os.anchit-tandon.com/',
@@ -134,7 +137,8 @@ const CANONICAL = {
 
   const dead = [];        // links that do not resolve
   const deadNav = [];     // SPA nav that does not change the view
-  const srcLinks = [];    // links to our own repositories
+  const ghLinks = [];     // any link that would send a visitor to GitHub
+  const ghText = [];      // pages whose RENDERED copy says "GitHub"
   const identity = {};    // spellings seen per identity
   const reach = new Map();    // route -> what that page can be scrolled or switched to
   const pending = [];         // every fragment, checked in pass 2 against its TARGET
@@ -171,6 +175,22 @@ const CANONICAL = {
     }));
 
     const content = await page.content();
+
+    // Copy a viewer could read. innerText would miss every inactive SPA view
+    // (index.html keeps 16 of its 17 panels hidden at any moment) and those
+    // become visible on a nav click, so this walks textContent instead, with
+    // <script>/<style> stripped so the chatbot's 'github' MATCHING KEYWORD —
+    // which is never rendered — does not read as a visible mention.
+    for (const quote of await page.evaluate(() => {
+      const body = document.body.cloneNode(true);
+      for (const el of body.querySelectorAll('script, style, template')) el.remove();
+      const text = (body.textContent || '').replace(/\s+/g, ' ');
+      // "GitHub" is not the only tell: copy that says "the lifecycle-os
+      // repository" names one without ever saying GitHub, and a stale lede
+      // promising "open-source repositories" outlives the section it described.
+      return [...text.matchAll(/.{0,40}\b(?:git\s?hub|repositor(?:y|ies)|repos)\b.{0,40}/gi)].map((m) => m[0].trim());
+    })) ghText.push({ route, quote });
+
     for (const [name, re] of Object.entries(CANONICAL)) {
       for (const m of content.matchAll(new RegExp(re.source, 'g'))) {
         (identity[name] ||= new Map()).set(m[1], (identity[name].get(m[1]) || new Set()).add(route));
@@ -187,8 +207,8 @@ const CANONICAL = {
       done.add(l.raw);
       if (/^(mailto:|tel:|sms:|javascript:|data:|blob:)/i.test(l.raw)) continue;
 
-      const repo = l.href.match(/github\.com\/Anchit-AI-Hustle\/([A-Za-z0-9_.-]+)/);
-      if (repo) srcLinks.push({ route, repo: repo[1], text: l.text });
+      const gh = l.href.match(/github\.com\/([A-Za-z0-9_.-]+(?:\/[A-Za-z0-9_.-]+)?)/);
+      if (gh) ghLinks.push({ route, repo: gh[1].split('/').pop(), target: gh[1], text: l.text });
 
       const u = new URL(l.href);
       if (u.origin !== BASE) {
@@ -261,13 +281,25 @@ const CANONICAL = {
     deadNav.length === 0,
     deadNav.length ? deadNav.slice(0, 4).join(' ; ') : `${navCount} nav targets, all switch`);
 
-  // Bug 1, as a rule: a page may link one of our repos only if it is public.
+  // Bug 1, generalised: a visitor is never sent to GitHub, by anyone's link.
   {
-    const bad = srcLinks.filter((l) => PRIVATE_REPOS.has(l.repo))
-      .map((l) => `${l.route} -> ${l.repo}${OWN_APPS[l.repo] ? ` (link ${OWN_APPS[l.repo]} instead)` : ''}`);
-    check('no page links a private repository',
+    const bad = ghLinks.map((l) => `${l.route} -> ${l.target}`
+      + (OWN_APPS[l.repo] ? ` (link ${OWN_APPS[l.repo]} instead)` : '')
+      + (l.text ? `  ["${l.text}"]` : ''));
+    check('no page links to GitHub',
       bad.length === 0,
-      bad.length ? bad.join(' ; ') : `${srcLinks.length} source links, all public`);
+      bad.length ? bad.slice(0, 4).join(' ; ') : `${routes.length} pages, no source links`);
+  }
+
+  // The other half: a link's own LABEL can name GitHub even after the href is
+  // fixed ("Explore the implementation on GitHub"), and a repository can be
+  // named in plain copy with no link at all — index.html listed 51 of them.
+  // innerText is what the viewer actually reads, so that is what is checked.
+  {
+    check('no page names GitHub or a repository',
+      ghText.length === 0,
+      ghText.length ? ghText.slice(0, 4).map((g) => `${g.route}: "${g.quote}"`).join(' ; ')
+        : `${routes.length} pages, rendered copy is clean`);
   }
 
   // Bug 2, as a rule: one identity, one spelling, site-wide.
@@ -293,7 +325,8 @@ const CANONICAL = {
   if (MUT) {
     const TOUCHED = {
       dead_link: /internal link/, orphan_frag: /fragment/, dead_nav: /nav target/,
-      private_repo: /private repository/, two_handles: /one spelling/,
+      github_link: /links to GitHub/, github_text: /names GitHub/, repo_text: /names GitHub/,
+      two_handles: /one spelling/,
     }[MUT];
     if (!TOUCHED) { console.log(`MUT: unknown mutation "${MUT}"`); process.exit(1); }
     const target = results.filter((r) => TOUCHED.test(r[1]));

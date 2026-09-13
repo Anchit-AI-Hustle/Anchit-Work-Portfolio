@@ -55,6 +55,7 @@ The serverless function pattern is documented in `DEPLOY.md` (`api/chat.js` + sw
 - Single-file constraint is intentional — keep it that way unless explicitly asked. New CSS goes in the existing `<style>` block, new JS in the existing `<script>` block.
 - Editorial tone: copy is first-person ("I'm building…"), warm, specific with numbers. Match that voice when editing copy or chatbot responses.
 - All theming flows through CSS variables — never hardcode colors in component styles.
+- **Never link a viewer to GitHub, and never name a repository in viewer-facing copy.** No `github.com` href on any page — ours or third-party — and no repo name, owner/repo string, or the words "GitHub", "repository" or "repos" in rendered text (copy saying "in the lifecycle-os repository" names one without ever saying GitHub). Link the project's own live app instead; `OWN_APPS` in `scripts/redirects-resolve.js` maps the three that have one. `npm run test:redirects` enforces both halves (`MUT=github_link`, `MUT=github_text`). Note that `assets/growth-school-content.js` renders on **two** pages, `/growth-school` and `/ayushi/course`.
 - **Follow the design system in `DESIGN.md` for all styling.** It is the machine-readable source of truth for the palette (black / orange / gold), typography, spacing, radius, components, motion and focus states. Read it before writing styles; add a token there before inventing a value. Never use framework palette utilities (`gray-500`, `blue-600`, …) for brand surfaces.
 
 ## Motion

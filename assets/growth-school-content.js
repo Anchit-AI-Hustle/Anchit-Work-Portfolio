@@ -13,27 +13,12 @@ const V_YC = { src: 'https://www.youtube-nocookie.com/embed/hyYCn_kAngI',
   title: 'How to Get Your First Customers', source: 'Y Combinator · Startup School',
   note: 'Gustaf Alströmer, former Head of Growth at Airbnb, on where the first customers actually come from.' };
 
-const REPO_LIFECYCLE = { name: 'anchittandon-create/lifecycle-os',
-  url: 'https://github.com/anchittandon-create/lifecycle-os',
-  why: 'The working system this course teaches from — segmentation, calendar, mailer studio, competitive benchmarks. Read <code>analysis-registry.js</code> for how one place decides which analysis lives where.' };
-const REPO_REGION = { name: 'lifecycle-os · region-context.js',
-  url: 'https://github.com/anchittandon-create/lifecycle-os/blob/main/region-context.js',
-  why: 'Region selection existed on 17 of 66 pages, implemented six different ways, none sharing state. This is the fix: one active region, every page. The same disease shows up in marketing stacks constantly.' };
-const REPO_BRANDCTX = { name: 'lifecycle-os · brand-context.js',
-  url: 'https://github.com/anchittandon-create/lifecycle-os/blob/main/brand-context.js',
-  why: 'One active brand drives tokens, fonts, title and favicon everywhere. Worth reading if you have ever run two brands out of one stack and watched them bleed into each other.' };
-const REPO_CATALOG = { name: 'lifecycle-os · brand-catalog.js',
-  url: 'https://github.com/anchittandon-create/lifecycle-os/blob/main/brand-catalog.js',
-  why: 'A catalogue resolver that stops one tenant seeing another tenant’s products. The comment at the top is a good short lesson in multi-brand data hygiene.' };
 const REPO_SEARCHDOCS = { name: 'Google Search Central — documentation',
   url: 'https://developers.google.com/search/docs',
   why: 'The primary source. Most SEO advice you will read is someone’s summary of this, usually out of date.' };
 const REPO_YC = { name: 'Y Combinator — Startup Library',
   url: 'https://www.ycombinator.com/library',
   why: 'Free, specific, and written by people who have done it. Start with the customer-acquisition entries.' };
-const REPO_OPENSRC = { name: 'PostHog — open-source product analytics',
-  url: 'https://github.com/PostHog/posthog',
-  why: 'Read how funnels, retention and cohorts are actually modelled in code. It makes the vocabulary concrete in a way no article does.' };
 
 // ── shared chapters (identical teaching in both courses) ───────────────────
 function baseTracks() {
@@ -52,7 +37,7 @@ function baseTracks() {
           deeper: 'A useful test: if ' + Y + ' doubled traffic tomorrow at the same conversion and repeat rates, would the business be healthy? If the answer is "no, we would just lose money twice as fast", the problem is not reach. Contribution per order is the number that decides this, and it is the one the capital simulator later in this course puts in front of ' + Y + '.' },
       ],
       video: V_YC,
-      repos: [REPO_YC, REPO_LIFECYCLE],
+      repos: [REPO_YC],
       quiz: [
         { q: 'A brand gets 50,000 visits a month, converts 0.4%, and 8% of customers order again. Where is it stuck?',
           options: ['Reach — it needs more traffic', 'Convert — the site turns almost nobody into a buyer', 'Keep — the repeat rate is the only real issue', 'Learn — it needs better dashboards'],
@@ -85,7 +70,6 @@ function baseTracks() {
           deeper: 'Treat 3× as a smell test, not a law. A business with near-zero fixed costs can live at 2×. One carrying a warehouse and a team cannot. What matters more than the ratio is the <em>payback period</em>: how many orders before ' + Y + ' get the acquisition cost back. If that number is larger than the orders a customer actually places, the ratio is fiction.' },
       ],
       sim: 'payback',
-      repos: [REPO_OPENSRC],
       quiz: [
         { q: 'AOV is ₹4,000, gross margin 50%, CAC ₹2,400, and customers order 1.2 times a year. What is true?',
           options: ['Healthy — margin covers CAC comfortably', 'Each order contributes ₹2,000 gross, so it is fine', 'It loses money: ₹2,000 margin against ₹2,400 to acquire, and 1.2 orders does not close the gap', 'It cannot be judged without knowing ad spend'],
@@ -187,7 +171,6 @@ function baseTracks() {
           body: 'A usable position answers three things: who is it <em>for</em>, what is it <em>instead of</em>, and what makes the claim <em>credible</em>. If ' + Y + ' cannot answer all three, no amount of content will make the brand distinct.',
           deeper: 'The "instead of" is the part people skip, and it is the one that creates meaning. Being "for busy professionals" says nothing; being "for busy professionals instead of a two-hour weekend meal-prep ritual" tells them exactly what they are giving up and what they get back. Positioning is subtraction.' },
       ],
-      repos: [REPO_BRANDCTX],
       quiz: [
         { q: 'Which is a genuine positioning statement?',
           options: ['"Premium quality at affordable prices"', '"For people who cook once and eat well for three days, instead of ordering in every night"', '"India’s most loved wellness brand"', '"Curated, conscious, considered"'],
@@ -216,7 +199,6 @@ function baseTracks() {
           body: 'The efficient unit is not a post, it is an <strong>idea</strong> that can take several shapes across places. One genuine insight becomes a short video, a carousel, a written post and a section of an email — same argument, different container.',
           deeper: 'The failure mode is the reverse: a calendar of slots to fill, which forces the production of content with nothing to say. If ' + Y + ' cannot state the idea in one sentence before making it, the piece will not survive its first three seconds.' },
       ],
-      repos: [REPO_LIFECYCLE, REPO_REGION],
       quiz: [
         { q: 'A brand posts daily for three months with almost no reach. Best next move?',
           options: ['Post twice a day — volume compounds', 'Study which few posts did get reach and make more of that specific thing', 'Move to a different platform', 'Buy followers to raise the baseline'],
@@ -283,7 +265,6 @@ function baseTracks() {
           body: 'Every send spends a little of the permission you have. Sending more raises this month’s revenue and lowers the ceiling on every month after it, and the damage does not show up in the campaign report that made it look like a good idea.',
           deeper: 'Watch unsubscribes and complaint rate per send, not just opens and clicks — those are the cost side of the ledger. A calendar that lifts revenue 5% while doubling unsubscribes is not a win, it is borrowing from next year at a bad rate.' },
       ],
-      repos: [window.GS_CONTENT.repos.lifecycle, window.GS_CONTENT.repos.region],
       quiz: [
         { q: 'A team sends three newsletters a week and has no abandoned-basket flow. Best first move?',
           options: ['Add a fourth newsletter', 'Build the basket flow and cut the newsletters back', 'Redesign the newsletter template', 'Grow the list faster'],
@@ -315,12 +296,11 @@ function baseTracks() {
           deeper: 'The cheapest way to ask it honestly is a holdout — withhold the activity from a random slice and compare. It feels wasteful, because you are deliberately not marketing to some people. What you are buying is the ability to tell whether the marketing works at all, which is worth more than the revenue you forgo.' },
         { tag: 'Hygiene', title: 'A number nobody can reproduce is an opinion',
           body: 'If two people compute "revenue this month" and get different answers, the problem is not the dashboard, it is that nobody wrote down what the number means. Definitions first, tooling second.',
-          deeper: 'This is the same disease that produced <code>region-context.js</code> in the lifecycle-os repository: region selection had been built on 17 of 66 pages in six different ways, none of which shared state, so the same question got different answers depending on which page you asked. Metrics rot exactly like that, and for the same reason — no single place says what the thing is.' },
+          deeper: 'This is the same disease that produced a single shared <code>region-context</code> module in one of my own systems: region selection had been built on 17 of 66 pages in six different ways, none of which shared state, so the same question got different answers depending on which page you asked. Metrics rot exactly like that, and for the same reason — no single place says what the thing is.' },
         { tag: 'Judgement', title: 'Significance is not importance',
           body: 'A difference can be statistically real and commercially irrelevant, and a difference can be commercially enormous and never reach significance because the sample is small. Decide what size of effect would change your decision <em>before</em> you look.',
           deeper: 'Writing the decision rule down first is the whole discipline: "if the lift is under 3% we ship neither, because the engineering cost is not worth it." Without it, every result becomes an argument, and the person who argues best wins rather than the option that is better.' },
       ],
-      repos: [window.GS_CONTENT.repos.opensrc, window.GS_CONTENT.repos.region],
       quiz: [
         { q: 'Brand-search ads report a very low cost per order. What is the most likely explanation?',
           options: ['Brand search is the most efficient channel available', 'Many of those people were going to buy anyway and searched your name to get there', 'The campaign is under-funded', 'The attribution window is too short'],
@@ -346,8 +326,7 @@ function baseTracks() {
 window.GS_CONTENT = {
   baseTracks: baseTracks,
   V_YC: V_YC,
-  repos: { lifecycle: REPO_LIFECYCLE, region: REPO_REGION, brandctx: REPO_BRANDCTX,
-           catalog: REPO_CATALOG, searchdocs: REPO_SEARCHDOCS, yc: REPO_YC, opensrc: REPO_OPENSRC },
+  repos: { searchdocs: REPO_SEARCHDOCS, yc: REPO_YC },
 };
 
 /* ── Ayushi❤️'s chapters ─────────────────────────────────────────────────────
@@ -356,7 +335,7 @@ window.GS_CONTENT = {
  * to a number.
  *
  * The catalogue figures below are from Knickgasm's PUBLIC Shopify feed
- * (knickgasm.com/products.json), captured in the lifecycle-os repository on
+ * (knickgasm.com/products.json), captured for the lifecycle work on
  * 2026-08-03: 436 active SKUs, USA list median $153 with a median compare-at of
  * $197, and 349 of the 436 in a single silhouette. Public storefront data, and
  * every derived number below is arithmetic on top of it.
@@ -374,12 +353,11 @@ window.GS_CONTENT.ayushiTracks = function () {
             deeper: 'People usually ask the capital question first because it feels like the gate. It is not. Plenty of well-funded brands fail with money left in the bank because the second question was never answered — every order lost money and more money simply bought more orders. We will answer them in order.' },
           { tag: 'The example', title: 'What the reference brand actually is',
             body: 'Knickgasm’s public product feed lists <strong>436 active SKUs</strong>, and <strong>349 of them are one silhouette</strong> — Nike Air Force 1. Median list price on the US feed is <strong>$153</strong>, against a median compare-at of <strong>$197</strong>. So: a narrow catalogue, one hero product, and a permanent discount posture of around 22%.',
-            deeper: 'This shape matters more than the category. A narrow catalogue means less capital tied up in stock and a simpler story to tell. One hero product means the marketing has a single subject. A standing compare-at price means the brand has chosen to compete on perceived value rather than exclusivity — which sets the tone for everything downstream, from the ads to the emails. <em>Source: the catalogue export in the lifecycle-os repository, taken from the brand’s public products.json.</em>' },
+            deeper: 'This shape matters more than the category. A narrow catalogue means less capital tied up in stock and a simpler story to tell. One hero product means the marketing has a single subject. A standing compare-at price means the brand has chosen to compete on perceived value rather than exclusivity — which sets the tone for everything downstream, from the ads to the emails. <em>Source: a catalogue export I captured from the brand’s public products.json.</em>' },
           { tag: 'The honest part', title: 'What this reference does not tell us',
             body: 'A public feed shows prices and range. It does not show what those units cost to buy, what the ads cost, or whether the brand makes money. So we will not pretend to know. Instead we will make our assumptions visible, and you can move each one and watch what happens.',
             deeper: 'This is the habit worth taking from the whole course: when a number is unknown, do not drop the calculation — state the assumption, keep going, and mark it as the thing to verify first. A model with named assumptions is useful. A model with hidden ones is a story.' },
         ],
-        repos: [window.GS_CONTENT.repos.lifecycle, window.GS_CONTENT.repos.catalog],
         quiz: [
           { q: 'Of the 436 SKUs in the reference catalogue, 349 are one silhouette. What does that most suggest?',
             options: ['A wide range that spreads risk', 'A narrow, hero-product catalogue with less capital tied up in stock', 'That the brand is about to close', 'That the products are unpopular'],
@@ -415,7 +393,6 @@ window.GS_CONTENT.ayushiTracks = function () {
             deeper: 'This is sensitivity analysis, and it is the difference between a plan and a wish. A plan says “this works provided unit cost lands under X, and here is how I will find out by spending a small amount first.” A wish says “this works” and only discovers the sensitive variable after the money is gone.' },
         ],
         sim: 'capital',
-        repos: [window.GS_CONTENT.repos.lifecycle, window.GS_CONTENT.repos.opensrc],
         quiz: [
           { q: 'The simulator shows contribution per order is negative. What does raising more capital do?',
             options: ['Fixes it — scale brings costs down', 'Buys time for the brand to find its audience', 'Funds more loss-making orders, faster', 'Improves the ratio automatically'],

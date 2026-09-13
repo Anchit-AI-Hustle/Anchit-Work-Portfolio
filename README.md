@@ -245,7 +245,7 @@ production. `scripts/vercel-emu.mjs` reads `vercel.json` and applies the same
 four rules Vercel does, in order, and the suite drives a browser against that:
 
 ```bash
-npm run test:redirects           # every link on every page lands somewhere — 5 checks
+npm run test:redirects           # every link on every page lands somewhere — 6 checks
 NET=1 npm run test:redirects     # also verifies off-site destinations over the network
 ```
 
@@ -269,7 +269,42 @@ neither is a missing file:
   reference — including the JSON-LD `sameAs` that search engines read as the
   canonical profile — uses `/in/anchit-tandon`.
 
-Each of its five checks is paired with a mutation that reintroduces the bug it
+### No page sends a visitor to GitHub
+
+The private-repo case above is now the narrow instance of a blanket rule: **no
+page links to GitHub, and no page names a repository.** A private repo 404s, a
+public one shows source nobody asked to read, and either way the reader has left
+the portfolio.
+
+Both halves are enforced, because each caught something the other could not:
+
+- **The links.** Every `github.com` href on every page, whoever owns it — our own
+  repositories and third-party ones alike.
+- **GitHub, or a repository, in rendered copy.** A link's own label can name
+  GitHub after the href is fixed (`Explore the implementation on GitHub`), and a
+  repository can be named in plain text with no link at all — `index.html`
+  listed **51** of them under "The workshop". Checking only for the word
+  "GitHub" is not enough either: the growth-school teaching copy said *"in the
+  lifecycle-os repository"* twice, naming one without ever saying GitHub, and
+  marketing-101's library lede went on promising "open-source repositories"
+  after that section was deleted. So the scan covers `github`, `repository`,
+  `repositories` and `repos`.
+
+  It walks `textContent` with `<script>` and `<style>` stripped, not
+  `innerText`, because `index.html` keeps 16 of its 17 panels hidden at any
+  moment and a nav click makes them visible; stripping the scripts also stops
+  the chatbot's `'github'` *matching keyword*, which is never rendered, from
+  reading as a visible mention.
+
+The link check is what found `/ayushi/course` — it renders
+`assets/growth-school-content.js`, the same content file as `/growth-school`, so
+a fix that looks like one page is two. Four of that file's chapters reached the
+removed constants through the `GS_CONTENT.repos` map by lowercase key rather
+than by `REPO_*` name, and the renderer does `if (c.repos)` — which is truthy
+for `[]`, so a chapter left with no references has to lose the key entirely or
+it renders a "Read the real thing" heading over nothing.
+
+Each of its six checks is paired with a mutation that reintroduces the bug it
 guards, and each must break only its own check. The mutation is injected into the
 **served DOM before any link is collected**, so each mode drives the same
 discovery and validation path a real regression would — a mutation appended to
@@ -280,8 +315,10 @@ which is the failure mode this design avoids:
 MUT=dead_link    npm run test:redirects   # a link that 404s
 MUT=orphan_frag  npm run test:redirects   # a #fragment with no target on its page
 MUT=dead_nav     npm run test:redirects   # a nav target that switches nothing
-MUT=private_repo npm run test:redirects   # bug 1: a page links a private repo
-MUT=two_handles  npm run test:redirects   # bug 2: one identity, two spellings
+MUT=github_link  npm run test:redirects   # a page links to GitHub
+MUT=github_text  npm run test:redirects   # rendered copy says "GitHub"
+MUT=repo_text    npm run test:redirects   # rendered copy names a repository
+MUT=two_handles  npm run test:redirects   # one identity, two spellings
 ```
 
 `provider-chain.js` needs no server; it stubs the network. It is also fully
