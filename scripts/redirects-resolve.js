@@ -302,6 +302,39 @@ const CANONICAL = {
         : `${routes.length} pages, rendered copy is clean`);
   }
 
+  // The rendered-copy scan above only sees what a viewer READS. It cannot see a
+  // comment in a served .js or .css, and two of those named a repository —
+  // growth-school.js and growth-school.css both cited "the lifecycle-os repo",
+  // and an index.html comment carried the owner/repo string outright. They ship
+  // to the browser, so anyone who opens the file finds them. This reads the
+  // built bytes instead of the DOM.
+  {
+    const VENDOR = /\/assets\/vendor\/|\/how-to\/assets\//;   // third-party bundles' own error strings
+    const named = [];
+    const scan = (dir) => {
+      for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+        const f = path.join(dir, e.name);
+        if (e.isDirectory()) { scan(f); continue; }
+        if (!/\.(html|js|css|json|txt|xml)$/.test(e.name)) continue;
+        const rel = '/' + path.relative(WWW, f).split(path.sep).join('/');
+        if (VENDOR.test(rel)) continue;
+        const body = fs.readFileSync(f, 'utf8');
+        // A repository NAME, not the word. "the repo" and "this repo" are
+        // internal notes about this codebase and name nothing; a real slug
+        // carries a hyphen or an underscore ("lifecycle-os repo"), which is
+        // what separates the two without a list of stop-words.
+        for (const m of body.matchAll(/github\.com\/[\w.-]+|Anchit-AI-Hustle\/[\w.-]+|\b\w+[-_][\w-]* repo(?:sitory)?\b/g)) {
+          named.push(`${rel}: "${m[0]}"`);
+        }
+      }
+    };
+    scan(WWW);
+    if (MUT === 'source_repo') named.push('/mutant.js: "Anchit-AI-Hustle/The-Third-Eye"');
+    check('no served file names a repository',
+      named.length === 0,
+      named.length ? [...new Set(named)].slice(0, 4).join(' ; ') : 'checked every built html/js/css, vendor bundles aside');
+  }
+
   // Bug 2, as a rule: one identity, one spelling, site-wide.
   {
     const bad = [];
@@ -326,6 +359,7 @@ const CANONICAL = {
     const TOUCHED = {
       dead_link: /internal link/, orphan_frag: /fragment/, dead_nav: /nav target/,
       github_link: /links to GitHub/, github_text: /names GitHub/, repo_text: /names GitHub/,
+      source_repo: /served file names/,
       two_handles: /one spelling/,
     }[MUT];
     if (!TOUCHED) { console.log(`MUT: unknown mutation "${MUT}"`); process.exit(1); }
