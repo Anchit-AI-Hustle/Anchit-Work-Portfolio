@@ -84,7 +84,7 @@ const MUTATIONS = {
 // Where a project's own page lives, so a stray source link can be reported with
 // the thing it should have pointed at instead.
 const OWN_APPS = {
-  'The-Third-Eye': 'https://the-third-eye-anchit.vercel.app/',
+  'The-Third-Eye': 'https://the-third-eye.anchit-tandon.com/',
   'lifecycle-os': 'https://lifecycle-os.anchit-tandon.com/',
   'AI-TeleSuite': 'https://ai-tele-suite.vercel.app/',
 };

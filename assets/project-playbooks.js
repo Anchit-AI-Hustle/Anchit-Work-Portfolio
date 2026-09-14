@@ -62,10 +62,11 @@
   ];
 
   var HOST_APP_IDS = {
-    'the-third-eye-anchit.vercel.app': 'third-eye',
+    'the-third-eye.anchit-tandon.com': 'third-eye',
+    'personal-ai-os.anchit-tandon.com': 'task-tracker',
     'personal-ai-assistant-anchit.vercel.app': 'task-tracker',
     'th-life-engine.vercel.app': 'life-engine',
-    'marketing-mailers-html-architect.vercel.app': 'mailer-architect',
+    'marketing-mailers-html-architect.anchit-tandon.com': 'mailer-architect',
     'music-gen-ai-blue.vercel.app': 'musicgenai',
     'ai-tele-suite.vercel.app': 'ai-telesuite',
     'hey-yaara.vercel.app': 'hey-yaara'

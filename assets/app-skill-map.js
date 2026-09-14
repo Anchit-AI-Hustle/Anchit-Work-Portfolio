@@ -58,7 +58,7 @@
             id: 'third-eye',
             title: 'The Third Eye',
             description: 'An agent-orchestrated personal AI operating system with memory, tasks, tools and personas.',
-            path: 'https://the-third-eye-anchit.vercel.app/',
+            path: 'https://the-third-eye.anchit-tandon.com/',
             external: true,
             capabilities: ['Agent personas', 'Memory and RAG', 'Task orchestration', 'Voice and tools'],
             dependsOn: ['portfolio-os']
@@ -84,7 +84,7 @@
             id: 'task-tracker',
             title: 'Task Tracker',
             description: 'Turns meetings, emails and voice notes into movable, prioritized work.',
-            path: 'https://personal-ai-assistant-anchit.vercel.app/',
+            path: 'https://personal-ai-os.anchit-tandon.com/',
             external: true,
             capabilities: ['Task extraction', 'Drag-and-drop board', 'Priorities and owners', 'Voice capture']
           },
@@ -278,7 +278,7 @@
             id: 'mailer-architect',
             title: 'Mailer Architect',
             description: 'A universal multi-model HTML email generator for any communication context.',
-            path: 'https://marketing-mailers-html-architect.vercel.app/',
+            path: 'https://marketing-mailers-html-architect.anchit-tandon.com/',
             external: true,
             capabilities: ['Context detection', 'Multi-model copy', 'HTML output', 'Quality scoring'],
             dependsOn: ['lifecycle-studio']

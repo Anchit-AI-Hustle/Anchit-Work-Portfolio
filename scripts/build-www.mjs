@@ -149,35 +149,6 @@ async function patchHowToCardRoute() {
   console.log(`[build-www] how-to: Side Hustle card → ${HOW_TO_PATH}`);
 }
 
-// The original Task Tracker source is not in the connected repository set, so
-// the portfolio hosts a first-party /task-tracker shell around the live app.
-// Patch the generated canonical App Skill Map so every first-party and external
-// app that loads the shared registry navigates through that shell. Project
-// Playbooks reads this same map at runtime and inherits the route automatically.
-async function patchSharedTaskTrackerRoute() {
-  const skillMapPath = join(WWW, 'assets', 'app-skill-map.js');
-  if (!existsSync(skillMapPath)) {
-    throw new Error('generated App Skill Map missing before Task Tracker route patch');
-  }
-
-  const before = await readFile(skillMapPath, 'utf8');
-  const pattern = /path: 'https:\/\/personal-ai-assistant-anchit\.vercel\.app\/',\s*external: true,/;
-  if (!pattern.test(before)) {
-    throw new Error('Task Tracker entry not found in generated App Skill Map');
-  }
-
-  const after = before.replace(
-    pattern,
-    "path: '/task-tracker',\n            aliases: ['/task-tracker.html'],",
-  );
-  if (!after.includes("path: '/task-tracker'") || after.includes("path: 'https://personal-ai-assistant-anchit.vercel.app/'")) {
-    throw new Error('Task Tracker canonical route patch did not produce the expected registry');
-  }
-
-  await writeFile(skillMapPath, after, 'utf8');
-  console.log('[build-www] shared-ui: Task Tracker canonical route → /task-tracker');
-}
-
 // Build the How-To Engine (standalone Vite + React app under
 // side-husle/how-to-1) and mirror its dist into www/how-to so it ships at
 // /how-to on the main static deployment. The route is driven by HOW_TO_ROUTE
@@ -279,6 +250,20 @@ async function main() {
   // Gamified App Skill Map / Project Playbooks widgets removed from the site —
   // they read as unfinished progress shells on a portfolio. The runtimes still
   // exist under assets/ but are no longer injected into any page.
+  //
+  // They are NOT dead code. marketing-mailers-html-architect.anchit-tandon.com
+  // loads app-skill-map.js cross-origin from this domain, so whatever ships in
+  // www/assets/ still opens links for real visitors of that app. That is why
+  // the project hosts in those two files are held to the same link guard as
+  // the pages (scripts/project-links.js).
+  //
+  // A patchSharedTaskTrackerRoute() lived here and rewrote the Task Tracker
+  // entry to the first-party path '/task-tracker'. It was never called, and
+  // calling it would have been a bug: '/task-tracker' resolves against
+  // whichever origin loaded the script, so the one consumer left would have
+  // sent visitors to a 404 on its own domain. The entry keeps its absolute
+  // URL. Removed rather than left uncalled, so it cannot be "fixed" by
+  // wiring it up.
 
   console.log(`[build-www] done → ${WWW}`);
 }
