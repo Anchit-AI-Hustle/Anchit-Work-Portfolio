@@ -37,7 +37,10 @@ jobs:
           grep -q "AnchitProjectPlaybooks" assets/project-playbooks.js
           grep -q "GUIDE_KINDS" assets/project-playbooks.js
           grep -q "taskTracker.path = '/task-tracker'" assets/task-tracker-shell.js
-          grep -q "personal-ai-assistant-anchit.vercel.app" task-tracker.html
+          # The shell must embed the live app. Pinned to the canonical custom
+          # domain: personal-ai-assistant-anchit.vercel.app only 308s here, so
+          # the old host was one alias repoint away from a blank iframe.
+          grep -q "personal-ai-os.anchit-tandon.com" task-tracker.html
           if grep -R "mcp_token=" assets/app-skill-map.js assets/app-skill-map.css assets/project-playbooks.js assets/project-playbooks.css assets/task-tracker-shell.js docs/APP_SKILL_MAP.md docs/PROJECT_SKILLTREE_GUIDES.md scripts/build-www.mjs task-tracker.html; then
             echo "Reference access token must never be committed"
             exit 1
