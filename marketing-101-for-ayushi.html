@@ -5203,8 +5203,18 @@ else boot();
 })();
 </script>
 <!-- Route back to the main portfolio. Added inline because this page does not
-     load assets/cinematic.js, which injects this on every page that does. -->
+     load assets/cinematic.js, which injects this on every page that does.
+
+     BOTTOM-left, not top-left. cinematic.js places its copy by asking what is
+     already in a corner and moving if the spot is taken; this hand-written one
+     had no such logic and sat at a fixed top:14/left:14 with z-index
+     2147483000. The "Chapters / Hide chapters" drawer button is a full-width
+     sticky bar at top 0, height 50 - so the chip landed inside it, over the
+     label, and won on z-index. Tapping to collapse the chapter list navigated
+     home instead: the drawer could be opened and not closed, which on a phone
+     is the whole screen. A full-width top bar takes BOTH top corners, so the
+     only honest fix is to leave the top strip alone. -->
 <a id="cinHome" href="/" title="Back to the main portfolio"
-   style="position:fixed;left:14px;top:14px;z-index:2147483000;font:500 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em;text-transform:uppercase;padding:7px 11px;border-radius:99px;text-decoration:none;color:#B3A996;background:#16130F;border:1px solid rgba(255,247,232,.16);opacity:.78">&#8592; Anchit Tandon</a>
+   style="position:fixed;left:14px;bottom:14px;z-index:2147483000;font:500 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em;text-transform:uppercase;padding:7px 11px;border-radius:99px;text-decoration:none;color:#B3A996;background:#16130F;border:1px solid rgba(255,247,232,.16);opacity:.78">&#8592; Anchit Tandon</a>
 </body>
 </html>
