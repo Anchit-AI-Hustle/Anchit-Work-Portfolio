@@ -59,7 +59,22 @@
       location.reload();                       // simplest correct re-apply
     });
     (document.body || root).appendChild(btn);
+
+    // Same re-check the home chip needs, for the same reason. place() runs once
+    // at DOMContentLoaded, and the pages this runtime lands on build their own
+    // content from JavaScript afterwards - so the corner it measured as free is
+    // occupied a beat later. Measured across the Lifecycle OS modules, this
+    // toggle was sitting on top of real content on five of them, including the
+    // "Retention Playbook" and "Cohort Builder" links a visitor is meant to
+    // click. Re-placing is idempotent: a corner that is still free stays chosen.
     place(btn);
+    addEventListener('load', function () { place(btn); });
+    setTimeout(function () { place(btn); }, 700);
+    setTimeout(function () { place(btn); }, 1800);
+    var bt;
+    addEventListener('resize', function () {
+      clearTimeout(bt); bt = setTimeout(function () { place(btn); }, 180);
+    });
   }
 
   // A way back to the main portfolio, on every page that does not already have
@@ -127,7 +142,18 @@
   function occupiedFor(el, x, y) {
     var hit = document.elementFromPoint(x, y);
     if (!hit || hit === el || el.contains(hit)) return false;
-    return !!(hit.closest && hit.closest('a, button, input, select, textarea, [role="button"], [onclick]'));
+    if (hit.closest && hit.closest('a, button, input, select, textarea, [role="button"], [onclick]')) return true;
+    // Text counts too, not only controls. The first version asked whether the
+    // corner held something CLICKABLE, so a paragraph or a list item read as
+    // free and the toggle parked on top of it - visible on the Frameworks
+    // module, sitting over a line of body copy.
+    //
+    // A LEAF with text, deliberately: <main> and the section wrappers are hit
+    // at every corner of every page, and treating those as occupied would make
+    // every spot look taken and the placer give up on its first choice. A pill
+    // floating over a container's padding is fine; over a sentence is not.
+    var leaf = hit.children && hit.children.length === 0;
+    return !!(leaf && (hit.textContent || '').trim().length > 4);
   }
 
   // The home chip is TOP-anchored, so place() - which reasons in `bottom` - was
@@ -187,12 +213,18 @@
     function choose() {
       var r = btn.getBoundingClientRect();
       var pad = 14, w = r.width || 92, h = r.height || 26;
-      var spots = [
-        { l: pad,                    b: pad },                       // bottom-left, as authored
-        { l: innerWidth - w - pad,   b: pad },                       // bottom-right
-        { l: pad,                    b: pad + h + 10 },              // one row up on the left
-        { l: innerWidth - w - pad,   b: pad + h + 10 }               // one row up on the right
-      ];
+      // Four candidates was enough while this only avoided CONTROLS. Now that it
+      // avoids text as well, a dense page - the Frameworks module is one - can
+      // have all four taken, and the old code then gave up and sat on whatever
+      // was in the last one. Climbing a few more rows costs nothing (this runs
+      // once per placement, on already-computed layout) and turns "give up" into
+      // a case that almost never happens.
+      var spots = [];
+      for (var row = 0; row < 6; row++) {
+        var bb = pad + row * (h + 10);
+        spots.push({ l: pad, b: bb });                      // left column, climbing
+        spots.push({ l: innerWidth - w - pad, b: bb });     // right column, climbing
+      }
       for (var i = 0; i < spots.length; i++) {
         var s = spots[i];
         var cx = s.l + w / 2, cy = innerHeight - s.b - h / 2;
