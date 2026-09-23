@@ -14,28 +14,146 @@
     "`live` is the public URL a visitor opens. For a Vercel project set to",
     "all_except_custom_domains this MUST be the custom domain: the *.vercel.app",
     "URL shows a login wall to everyone except the owner, which is why it looks",
-    "fine to the one person who checks it. scripts/project-links.js holds that line."
+    "fine to the one person who checks it. scripts/project-links.js holds that line.",
+    "",
+    "ORDER IS THE ARGUMENT. The grid is read top-down by people deciding something, so it leads with the work closest to the job being sold (lifecycle, retention, revenue), then the builds that prove the engineering underneath it, then range, and puts the consumer experiments and the course last. Keep this array in the same order as the cards in index.html - scripts/sidehustle-sync.mjs checks the count, not the sequence."
   ],
   "projects": [
-    { "id": "how-to",        "title": "The How-To Engine",     "eyebrow": "Agentic How-To Engine",      "status": "Live", "live": "/how-to",                                                  "repo": null },
-    { "id": "third-eye",     "title": "The Third Eye",         "eyebrow": "AI Operating System",        "status": "Live", "live": "https://the-third-eye.anchit-tandon.com/",                  "repo": "Anchit-AI-Hustle/The-Third-Eye" },
-    { "id": "lifecycle-os",  "title": "LifeCycle-OS",          "eyebrow": "D2C Marketing Automation",   "status": "Live", "live": "/lifecycle-os",                                            "repo": "Anchit-AI-Hustle/lifecycle-os" },
-    { "id": "avatar",        "title": "AI Video Avatar",       "eyebrow": "AI Avatar · Conversational", "status": "Live", "live": "/agent",                                                   "repo": null },
-    { "id": "lp-agent",      "title": "All-in-One LP Agent",   "eyebrow": "Conversational Commerce",    "status": "Live", "live": "/hotel",                                                   "repo": null },
-    { "id": "jobhunt",       "title": "JobHunt",               "eyebrow": "Job Hunting",                "status": "Live", "live": "/jobhunt",                                                 "repo": null },
-    { "id": "musicgenai",    "title": "MusicGenAI",            "eyebrow": "Generative AI · Music",      "status": "Live", "live": "https://music-gen-ai-blue.vercel.app/",                     "repo": "anchittandon-create/MusicGenAI" },
-    { "id": "portfolio",     "title": "Interactive Portfolio", "eyebrow": "Portfolio OS · Voice UI",    "status": "Live", "live": "/",                                                        "repo": "Anchit-AI-Hustle/Anchit-Work-Portfolio" },
-    { "id": "hey-yaara",     "title": "Hey Yaara",             "eyebrow": "AI Voice · Consumer",        "status": "Live", "live": "https://hey-yaara.vercel.app/",                             "repo": "anchittandon-create/hey-yaara" },
-    { "id": "mailer",        "title": "Mailer Architect",      "eyebrow": "AI Tooling · Marketing",     "status": "Live", "live": "https://marketing-mailers-html-architect.anchit-tandon.com/", "repo": "Anchit-AI-Hustle/marketing_mailers__html_architect" },
-    { "id": "telesuite",     "title": "AI TeleSuite",          "eyebrow": "AI Workflow · Sales",        "status": "Live", "live": "https://ai-tele-suite.vercel.app/",                         "repo": "Anchit-s-AI-Hustle/AI-TeleSuite" },
-    { "id": "lifeengine",    "title": "LifeEngine",            "eyebrow": "AI Wellness · Personalised", "status": "Live", "live": "https://th-life-engine.vercel.app/",                        "repo": "anchittandon-create/TH-LifeEngine" },
-    { "id": "marketing-101", "title": "Marketing 101",         "eyebrow": "Marketing Course",           "status": "Live", "live": "/marketing-101",                                           "repo": null }
+    {
+      "id": "lifecycle-os",
+      "title": "LifeCycle-OS",
+      "eyebrow": "D2C Marketing Automation",
+      "status": "Live",
+      "live": "/lifecycle-os",
+      "repo": "Anchit-AI-Hustle/lifecycle-os"
+    },
+    {
+      "id": "third-eye",
+      "title": "The Third Eye",
+      "eyebrow": "AI Operating System",
+      "status": "Live",
+      "live": "https://the-third-eye.anchit-tandon.com/",
+      "repo": "Anchit-AI-Hustle/The-Third-Eye"
+    },
+    {
+      "id": "mailer",
+      "title": "Mailer Architect",
+      "eyebrow": "AI Tooling \u00b7 Marketing",
+      "status": "Live",
+      "live": "https://marketing-mailers-html-architect.anchit-tandon.com/",
+      "repo": "Anchit-AI-Hustle/marketing_mailers__html_architect"
+    },
+    {
+      "id": "how-to",
+      "title": "The How-To Engine",
+      "eyebrow": "Agentic How-To Engine",
+      "status": "Live",
+      "live": "/how-to",
+      "repo": null
+    },
+    {
+      "id": "telesuite",
+      "title": "AI TeleSuite",
+      "eyebrow": "AI Workflow \u00b7 Sales",
+      "status": "Live",
+      "live": "https://ai-tele-suite.vercel.app/",
+      "repo": "Anchit-s-AI-Hustle/AI-TeleSuite"
+    },
+    {
+      "id": "jobhunt",
+      "title": "JobHunt",
+      "eyebrow": "Job Hunting",
+      "status": "Live",
+      "live": "/jobhunt",
+      "repo": null
+    },
+    {
+      "id": "lp-agent",
+      "title": "All-in-One LP Agent",
+      "eyebrow": "Conversational Commerce",
+      "status": "Live",
+      "live": "/hotel",
+      "repo": null
+    },
+    {
+      "id": "avatar",
+      "title": "AI Video Avatar",
+      "eyebrow": "AI Avatar \u00b7 Conversational",
+      "status": "Live",
+      "live": "/agent",
+      "repo": null
+    },
+    {
+      "id": "hey-yaara",
+      "title": "Hey Yaara",
+      "eyebrow": "AI Voice \u00b7 Consumer",
+      "status": "Live",
+      "live": "https://hey-yaara.vercel.app/",
+      "repo": "anchittandon-create/hey-yaara"
+    },
+    {
+      "id": "lifeengine",
+      "title": "LifeEngine",
+      "eyebrow": "AI Wellness \u00b7 Personalised",
+      "status": "Live",
+      "live": "https://th-life-engine.vercel.app/",
+      "repo": "anchittandon-create/TH-LifeEngine"
+    },
+    {
+      "id": "musicgenai",
+      "title": "MusicGenAI",
+      "eyebrow": "Generative AI \u00b7 Music",
+      "status": "Live",
+      "live": "https://music-gen-ai-blue.vercel.app/",
+      "repo": "anchittandon-create/MusicGenAI"
+    },
+    {
+      "id": "portfolio",
+      "title": "Interactive Portfolio",
+      "eyebrow": "Portfolio OS \u00b7 Voice UI",
+      "status": "Live",
+      "live": "/",
+      "repo": "Anchit-AI-Hustle/Anchit-Work-Portfolio"
+    },
+    {
+      "id": "marketing-101",
+      "title": "Marketing 101",
+      "eyebrow": "Marketing Course",
+      "status": "Live",
+      "live": "/marketing-101",
+      "repo": null
+    }
   ],
   "pending": [
-    { "id": "parwah",        "title": "Parwah",                     "live": "https://parwah-hq.anchit-tandon.com/",                "repo": "Anchit-AI-Hustle/parwah-hq" },
-    { "id": "passion-table", "title": "The Passion Table",          "live": "https://the-passion-table.anchit-tandon.com/",        "repo": "Anchit-AI-Hustle/The-Passion-Table" },
-    { "id": "disasters",     "title": "Predict Natural Disasters",  "live": "https://predict-natural-disasters.anchit-tandon.com/", "repo": "anchittandon-create/predict-natural-disasters" },
-    { "id": "markets-pro",   "title": "Markets Pro",                "live": "https://markets-pro.anchit-tandon.com/",              "repo": "Anchit-AI-Hustle/markets-pro" },
-    { "id": "anchor",        "title": "ANCHOR",                     "live": "https://anchor.anchit-tandon.com/",                   "repo": "Anchit-AI-Hustle/anchor-autopilot" }
+    {
+      "id": "parwah",
+      "title": "Parwah",
+      "live": "https://parwah-hq.anchit-tandon.com/",
+      "repo": "Anchit-AI-Hustle/parwah-hq"
+    },
+    {
+      "id": "passion-table",
+      "title": "The Passion Table",
+      "live": "https://the-passion-table.anchit-tandon.com/",
+      "repo": "Anchit-AI-Hustle/The-Passion-Table"
+    },
+    {
+      "id": "disasters",
+      "title": "Predict Natural Disasters",
+      "live": "https://predict-natural-disasters.anchit-tandon.com/",
+      "repo": "anchittandon-create/predict-natural-disasters"
+    },
+    {
+      "id": "markets-pro",
+      "title": "Markets Pro",
+      "live": "https://markets-pro.anchit-tandon.com/",
+      "repo": "Anchit-AI-Hustle/markets-pro"
+    },
+    {
+      "id": "anchor",
+      "title": "ANCHOR",
+      "live": "https://anchor.anchit-tandon.com/",
+      "repo": "Anchit-AI-Hustle/anchor-autopilot"
+    }
   ]
 }
