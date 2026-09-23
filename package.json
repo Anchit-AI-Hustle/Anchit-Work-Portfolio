@@ -1,7 +1,7 @@
 {
   "name": "anchit-portfolio",
   "version": "1.0.0",
-  "description": "Anchit Tandon \u2014 Senior PM portfolio. Static web + PWA + native iOS/Android via Capacitor.",
+  "description": "Anchit Tandon — Senior PM portfolio. Static web + PWA + native iOS/Android via Capacitor.",
   "private": true,
   "scripts": {
     "dev": "npx --yes serve@latest -l ${PORT:-5173} .",
@@ -31,7 +31,10 @@
     "test:nudge": "node scripts/chat-nudge.js",
     "test:sw": "node scripts/sw-freshness.js",
     "test:redirects": "node scripts/redirects-resolve.js",
-    "test:links": "node scripts/project-links.js"
+    "test:links": "node scripts/project-links.js",
+    "test:nogithub": "node scripts/no-github.js",
+    "sync:sidehustle": "node scripts/sidehustle-sync.mjs",
+    "sync:sidehustle:write": "node scripts/sidehustle-sync.mjs --write"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.0",

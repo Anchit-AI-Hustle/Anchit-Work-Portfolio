@@ -1,0 +1,102 @@
+# Daily: keep the Side Hustle grid true, and keep every repository name off the
+# public site.
+#
+# WHY A SCHEDULED JOB AND NOT THE MAC
+#   scripts/autosync.sh and the launchd plist beside it only run while that Mac
+#   is awake and logged in. A portfolio that goes stale the week you are busy is
+#   exactly the week someone is reading it. This runs in the cloud.
+#
+# WHAT IT WILL AND WILL NOT COMMIT
+#   It commits mechanical corrections - the stated experiment count, a link that
+#   has moved. It will NOT write a card for a new project: that is editorial
+#   copy, and a robot inventing claims about work it cannot inspect is how a
+#   fabricated credential reached the live site once already. New projects are
+#   reported in the job summary and in an issue instead.
+name: side-hustle sync
+
+on:
+  schedule:
+    - cron: '17 4 * * *'   # 09:47 IST daily. Off the hour: GitHub delays jobs
+                           # queued on :00, when everyone else's cron fires.
+  workflow_dispatch:        # so it can be run by hand without waiting a day
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: sidehustle-sync
+  cancel-in-progress: false   # never interrupt a run that is mid-commit
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - run: npm install --no-audit --no-fund
+
+      # Reconcile first, with the network on so a dead or login-walled link is
+      # caught the day it breaks rather than the day someone clicks it.
+      - name: Reconcile the Side Hustle grid
+        id: sync
+        env:
+          NET: '1'
+        run: |
+          set +e
+          node scripts/sidehustle-sync.mjs --write | tee sync.log
+          echo "status=$?" >> "$GITHUB_OUTPUT"
+          set -e
+
+      - name: Build
+        run: npm run build
+
+      # The rule the whole job exists to protect. Runs on the BUILT tree, after
+      # the sync has had its chance to write, so nothing it wrote can leak.
+      - name: No repository names anywhere a visitor can see
+        run: node scripts/no-github.js
+
+      - name: Links still open for a visitor
+        run: node scripts/project-links.js
+
+      - name: Commit only if something actually changed
+        run: |
+          if [ -z "$(git status --porcelain -- index.html data/)" ]; then
+            echo "nothing changed"; exit 0
+          fi
+          git config user.name  "side-hustle sync"
+          git config user.email "noreply@anthropic.com"
+          git add index.html data/
+          git commit -m "Side Hustle: daily reconcile
+
+          $(sed -n 's/^  PASS  /ok   /p;s/^  FAIL  /FAIL /p' sync.log)"
+          git push
+
+      - name: Report projects that still need a card
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          { echo '## Side Hustle sync'; echo; echo '```'; cat sync.log; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          PENDING=$(sed -n 's/.*· \([0-9]*\) project(s) live with no card yet: /\1 /p' sync.log)
+          if [ -n "$PENDING" ]; then
+            TITLE="Side Hustle: projects live with no card"
+            BODY=$(printf 'The daily sync found live projects that are not on the grid.\n\n```\n%s\n```\n\nEach needs a hand-written card. The sync deliberately does not write the copy — every factual string on this site has to be traceable, and generated marketing prose is not.\n\nNo repository name or github.com link may appear in the card (enforced by `scripts/no-github.js`). Link the live custom domain: a `*.vercel.app` URL on a protected project shows a login wall to everyone except the owner.' "$(cat sync.log)")
+            EXISTING=$(gh issue list --state open --search "$TITLE in:title" --json number --jq '.[0].number' 2>/dev/null || true)
+            if [ -n "$EXISTING" ]; then
+              gh issue comment "$EXISTING" --body "$BODY" || true
+            else
+              gh issue create --title "$TITLE" --body "$BODY" || true
+            fi
+          fi
+
+      - name: Fail the run if the grid is wrong
+        if: steps.sync.outputs.status != '0'
+        run: |
+          echo "sidehustle-sync reported a problem it could not fix automatically:"
+          grep '^  FAIL' sync.log || true
+          exit 1
