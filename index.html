@@ -4367,7 +4367,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           </div>
           <div class="nav-card-content">
-            <div class="nav-card-title">AI Chat Clone</div>
+            <div class="nav-card-title">Ask Me Anything</div>
             <div class="nav-card-desc">Ask my AI persona anything about my work, metrics, and background in real time.</div>
           </div>
           <div class="nav-card-arrow">&rarr;</div>
@@ -12506,7 +12506,7 @@
 
   // ── agents roll-call ──
   var AGENTS = [
-    { name:'Chat Clone', online:true, desc:"Ask me anything about my work, metrics and background — I answer in real time. <a href='#chat' data-nav='chat'>Open chat</a>" },
+    { name:'Ask Me Anything', online:true, desc:"Ask me anything about my work, metrics and background — I answer in real time. <a href='#chat' data-nav='chat'>Open chat</a>" },
     { name:'AI Video Avatar', online:true, key:'avatar', desc:"I answer on camera in my own voice. <a href='/agent'>Talk to my avatar</a>" },
     { name:'D2C-LifeCycle-OS', online:true, desc:"Plug in any D2C brand and I design its full lifecycle — segments, calendar, mailers, retention, KPIs. <a href='/d2c-lifecycle-os'>Open demo</a>" },
     { name:'JobHunt', online:true, desc:"Live job search across free boards with direct apply links. <a href='/jobhunt'>Open JobHunt</a>" },
@@ -12546,7 +12546,7 @@
       list.querySelectorAll('a[data-nav]').forEach(function(x){ x.addEventListener('click', function(ev){ ev.preventDefault(); close(); try{ switchView(x.getAttribute('data-nav')); }catch(e){} }); });
       modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
       var online = AGENTS.length;
-      speak("Agents assembled. "+online+" online. Chat clone, video avatar, D2C LifeCycle OS, JobHunt and the Lifecycle OS are ready to help.");
+      speak("Agents assembled. "+online+" online. Ask Me Anything, video avatar, D2C LifeCycle OS, JobHunt and the Lifecycle OS are ready to help.");
     });
   }
 
