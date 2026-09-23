@@ -175,7 +175,13 @@ const MUTANT_CSS = `
 
   const span = (a) => Math.max(...a) - Math.min(...a);
 
-  check('all 13 cards are present', m.count === 13, `${m.count} cards`, false);
+  // Read the expected count from the manifest rather than hardcoding it. This
+  // assertion said 13 and had to be edited by hand every time a card was added,
+  // which means the next person either updates two places or sees a red suite
+  // for doing the right thing. data/projects.json is the source of truth the
+  // daily sync already reconciles against.
+  const EXPECTED = require('../data/projects.json').projects.length;
+  check(`all ${EXPECTED} cards are present`, m.count === EXPECTED, `${m.count} cards`, false);
 
   check('every card is the same height',
     span(m.heights) <= TOL,
