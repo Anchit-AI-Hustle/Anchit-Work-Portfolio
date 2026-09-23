@@ -6447,7 +6447,15 @@
     // Never auto-route into the chat overlay on load — always land on HOME; chat
     // opens via the chooser or a click. openFullChat() writes #chat to the URL,
     // which would otherwise bounce returning visitors straight back into chat.
-    if (viewPart && viewPart !== 'chat') switchView(viewPart, anchorPart || undefined);
+    if (viewPart && viewPart !== 'chat') {
+      switchView(viewPart, anchorPart || undefined);
+    } else if (viewPart === 'chat') {
+      // Deliberately landing on home (see above). The URL still said #chat, so
+      // the address bar described a page that was not on screen and a reload
+      // repeated the confusion. Drop the fragment instead of acting on it, so
+      // the state shown and the state in the URL agree.
+      try { history.replaceState(null, '', location.pathname + location.search); } catch {}
+    }
   }
 
   /* ============ REVEAL ON SCROLL — defined below ============ */
@@ -10267,6 +10275,7 @@
 	  window.openGuideChat = openGuideChat;
 
 	  function openSmallChat() {
+	    rememberReturnView();
 	    sessionStorage.removeItem('anchit-chat-minimized');
 	    chatBlock?.classList.remove('minimized');
 	    viewChatEl?.classList.remove('chat-view-minimized');
@@ -10276,7 +10285,18 @@
 	    if (typeof switchView === 'function') switchView('chat');
     setTimeout(() => chatInputEl?.focus(), 120);
   }
+  // The view chat was opened FROM. Minimising has to put the visitor back on a
+  // real page; without this it had nowhere to send them. 'home' is the floor,
+  // never 'chat', or minimising would restore the thing being minimised.
+  let chatReturnView = 'home';
+  const rememberReturnView = () => {
+    const cur = document.querySelector('.view.active');
+    const id = cur && cur.id.startsWith('view-') ? cur.id.slice(5) : '';
+    if (id && id !== 'chat') chatReturnView = id;
+  };
+
   function openFullChat() {
+    rememberReturnView();
     sessionStorage.removeItem('anchit-chat-minimized');
     chatBlock?.classList.remove('minimized');
     viewChatEl?.classList.remove('chat-view-minimized');
@@ -10298,6 +10318,22 @@
 	    returnBtn?.classList.add('visible');
 	    document.body.classList.remove('view-chat');
 	    document.body.classList.remove('chat-guide-open');
+	    // MINIMISING MUST LEAVE A PAGE BEHIND.
+	    //
+	    // #view-chat.chat-view-minimized is `display: none !important`, and this
+	    // used to add that class while leaving `.active` on the same element and
+	    // activating nothing else. Only the active view is displayed, so hiding
+	    // the active one hid ALL of them: the document collapsed to one empty
+	    // viewport - fixed background grid, fixed contact bar, zero painted
+	    // content. Reported as "the AI Chat Clone page loads blank", and it
+	    // reproduced as exactly that: 0 elements painted, scrollHeight 844.
+	    //
+	    // The minimised chat is a floating button, not a page, so something else
+	    // has to become the page.
+	    if (viewChatEl?.classList.contains('active')) {
+	      viewChatEl.classList.remove('active');
+	      if (typeof switchView === 'function') switchView(chatReturnView || 'home');
+	    }
 	  }
   window.openFullChat = openFullChat;
   window.minimizeChat = minimizeChat;
