@@ -93,14 +93,22 @@ check('no page links a walled or redirecting project host',
 //    Checking the MANIFEST would not have caught this - data/projects.json had
 //    the right URL all along. The defect was in the rendered card, so the card
 //    is what gets read.
+// Reads TEXT out of markup without a sanitising regex. CodeQL flags
+// /<[^>]+>/ as incomplete sanitization and is right: an unterminated "<script"
+// survives it. This is a tokenizer, not a sanitizer - it walks segments after
+// each '>' - and its output is compared, never inserted into a page.
+const textOf = (html) => String(html)
+  .split('<')
+  .map((seg, i) => (i === 0 ? seg : seg.slice(seg.indexOf('>') + 1)))
+  .join('');
+
 const home = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const cards = home.match(/<div class="build-card[\s\S]*?\n        <\/div>/g) || [];
 const liveNoLink = [];
 for (const c of cards) {
   const status = (c.match(/class="status">([^<]*)</) || [])[1] || '';
   if (!/live/i.test(status)) continue;                 // "Building" promises nothing yet
-  const title = ((c.match(/<h3>([\s\S]*?)<\/h3>/) || [])[1] || '?')
-    .replace(/<[^>]+>/g, '').trim();
+  const title = textOf((c.match(/<h3>([\s\S]*?)<\/h3>/) || [])[1] || '?').trim();
   const hrefs = [...c.matchAll(/<a[^>]*href="([^"]+)"/g)].map((m) => m[1]);
   // A '#view' link is in-site navigation to the write-up, not the product.
   if (!hrefs.some((h) => !h.startsWith('#'))) liveNoLink.push(title);

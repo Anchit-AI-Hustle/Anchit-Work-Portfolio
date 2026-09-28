@@ -46,13 +46,39 @@ const clientId = () => process.env.GOOGLE_CLIENT_ID || process.env.GOOGLE_OAUTH_
 let jwks = { keys: [], fetchedAt: 0 };
 const JWKS_TTL = 60 * 60 * 1000;
 
-async function getKeys() {
-  if (jwks.keys.length && Date.now() - jwks.fetchedAt < JWKS_TTL) return jwks.keys;
+async function fetchKeys() {
   const r = await fetch('https://www.googleapis.com/oauth2/v3/certs');
   if (!r.ok) throw new Error('could not fetch Google signing keys');
-  const body = await r.json();
-  jwks = { keys: body.keys || [], fetchedAt: Date.now() };
+  jwks = { keys: (await r.json()).keys || [], fetchedAt: Date.now() };
   return jwks.keys;
+}
+
+async function getKeys() {
+  if (jwks.keys.length && Date.now() - jwks.fetchedAt < JWKS_TTL) return jwks.keys;
+  return fetchKeys();
+}
+
+// A kid we have never seen is the signal that Google rotated, not that the
+// token is bad. Without this, a warm instance holding the previous key set
+// rejects every valid login for the rest of the hour-long TTL - an outage that
+// starts on its own, affects everyone, and ends on its own, which is close to
+// the worst shape a bug can have.
+//
+// The throttle is on REFETCH ATTEMPTS, not on cache age. Written against cache
+// age - "only refetch if the cached set is over a minute old" - it never fires
+// in the case it exists for: the rotation that matters is the one that happens
+// just after a fetch, when the cache is newest. A test caught that.
+let lastMiss = 0;
+const MISS_COOLDOWN = 60 * 1000;
+
+async function keyFor(kid) {
+  const key = (await getKeys()).find((k) => k.kid === kid);
+  if (key) return key;
+  // Cooldown so a stream of forged tokens with random kids cannot turn into a
+  // stream of requests to Google.
+  if (Date.now() - lastMiss < MISS_COOLDOWN) return undefined;
+  lastMiss = Date.now();
+  return (await fetchKeys()).find((k) => k.kid === kid);
 }
 
 const b64url = (s) => Buffer.from(s.replace(/-/g, '+').replace(/_/g, '/'), 'base64');
@@ -63,7 +89,7 @@ async function verify(idToken) {
   const header = JSON.parse(b64url(parts[0]).toString('utf8'));
   const payload = JSON.parse(b64url(parts[1]).toString('utf8'));
 
-  const key = (await getKeys()).find((k) => k.kid === header.kid);
+  const key = await keyFor(header.kid);
   if (!key) throw new Error('unknown signing key');
 
   const { createPublicKey, createVerify } = require('node:crypto');
@@ -111,7 +137,12 @@ module.exports = async (req, res) => {
   // The client ID is public by design; it still is not echoed here, because a
   // status endpoint should not become a way to enumerate configuration.
   if (req.method === 'GET') {
-    return res.status(200).json({ ok: true, configured: Boolean(clientId()) });
+    // The client id is returned, not just a boolean. It is public by design -
+    // there is no client secret in this flow - and a browser has no other way
+    // to get it: a server-side environment variable cannot reach a static
+    // <script> tag, which is exactly why auth-demo.html rendered "not
+    // configured" no matter what was set in Vercel.
+    return res.status(200).json({ ok: true, configured: Boolean(clientId()), clientId: clientId() });
   }
   if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'POST a credential' });
 
@@ -127,3 +158,9 @@ module.exports = async (req, res) => {
     return res.status(401).json({ ok: false, error: 'sign-in could not be verified' });
   }
 };
+
+// Test hook. The key cache and the miss cooldown are module state, so a suite
+// that probes a forged kid leaves the cooldown armed for the next case - which
+// made the rotation test fail for the suite's own reasons rather than the
+// code's. Production never calls this.
+module.exports._resetKeyCache = () => { jwks = { keys: [], fetchedAt: 0 }; lastMiss = 0; };

@@ -25,7 +25,6 @@
 // The daily job runs it with --write and NET=1, then runs the guards, then
 // commits only if something actually changed.
 import { readFile, writeFile } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -78,7 +77,15 @@ const cards = [...html.matchAll(/<div class="build-card[\s\S]*?\n        <\/div>
 // HTML against a plain title never matches. Strip tags and collapse whitespace
 // first, then a card is "for" a project if it carries the project's live href
 // or its title as text.
-const plain = (s) => s.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ');
+// See scripts/project-links.js for why this is a tokenizer and not a regex
+// strip: /<[^>]+>/ leaves an unterminated "<script" intact, which CodeQL flags
+// as incomplete sanitization. Nothing here is inserted into a page - the text
+// is only compared against a project title.
+const plain = (s) => String(s)
+  .split('<')
+  .map((seg, i) => (i === 0 ? seg : seg.slice(seg.indexOf('>') + 1)))
+  .join('')
+  .replace(/\s+/g, ' ');
 const missingCard = live.filter((p) =>
   !cards.some((c) => c.includes(`href="${p.live}"`) || plain(c).includes(p.title)));
 check('every manifest project has a card', missingCard.length === 0,

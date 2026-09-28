@@ -95,18 +95,6 @@
     return out;
   }
 
-  function tx(mode, fn) {
-    return open().then(function (db) {
-      if (!db) return fn(null);
-      return new Promise(function (resolve, reject) {
-        var t = db.transaction(STORE, mode);
-        var s = t.objectStore(STORE);
-        var out = fn(s);
-        t.oncomplete = function () { resolve(out && out.__v !== undefined ? out.__v : out); };
-        t.onerror = function () { reject(t.error); };
-      });
-    });
-  }
 
   function get(collection, id) {
     var k = keyFor(collection, id);
@@ -135,8 +123,10 @@
     });
   }
 
-  function remove(collection, id) {
-    var k = keyFor(collection, id);
+  function remove(collection, id) { return removeFor(collection, id, who()); }
+
+  function removeFor(collection, id, user) {
+    var k = keyFor(collection, id, user);
     return open().then(function (db) {
       if (!db) { lsDel(k); return true; }
       return new Promise(function (resolve) {
@@ -177,7 +167,7 @@
     return entries(prefixFor('')).then(function (rows) {
       return Promise.all(rows.map(function (r) {
         var parts = r.key.split('\u0000');
-        return remove(parts[2], parts[3]);
+        return removeFor(parts[2], parts[3], parts[1]);
       })).then(function () { return true; });
     });
   }
@@ -207,7 +197,12 @@
     return entries(prefixFor('', 'anon')).then(function (rows) {
       return Promise.all(rows.map(function (r) {
         var p = r.key.split('\u0000');
-        return set(p[2], p[3], r.value).then(function () { return remove(p[2], p[3]); });
+        // The delete has to name 'anon' explicitly. remove() derives its key
+        // from whoever is signed in NOW - the same user set() just wrote to -
+        // so calling it here deleted the copy it had only just created and left
+        // the anonymous record in place, while still reporting a successful
+        // adopted count. The caller saw a number and no data.
+        return set(p[2], p[3], r.value).then(function () { return removeFor(p[2], p[3], 'anon'); });
       })).then(function () { return rows.length; });
     });
   }

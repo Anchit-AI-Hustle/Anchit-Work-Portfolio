@@ -99,6 +99,32 @@ const post = async (credential) => {
   }
   check('failures do not reveal which check failed', leaks.length === 0, leaks.join(' | ') || 'one generic message');
 
+  // Key rotation. A kid the cache has never seen means Google rotated, not that
+  // the token is forged - and a warm instance that refuses to refetch rejects
+  // every valid login until its hour-long TTL expires. Simulated by swapping
+  // the key set Google serves AFTER the first verification has warmed the cache.
+  const rotated = generateKeyPairSync('rsa', { modulusLength: 2048 });
+  const rotatedJwk = rotated.publicKey.export({ format: 'jwk' });
+  rotatedJwk.kid = 'rotated-key'; rotatedJwk.alg = 'RS256'; rotatedJwk.use = 'sig';
+
+  // Clear the cooldown the forged-kid cases above armed, then warm the cache
+  // with the OLD key set so the rotation is the only thing under test.
+  verify._resetKeyCache();
+  await post(token(base()));
+  global.fetch = async () => ({ ok: true, json: async () => ({ keys: [rotatedJwk] }) });
+  r = await post(token(base(), { kid: 'rotated-key', key: rotated.privateKey }));
+  check('a token signed with a rotated key still verifies', r.code === 200,
+    r.code === 200 ? 'refetched and accepted' : 'REJECTED A VALID TOKEN AFTER ROTATION');
+
+  // ...but a genuinely unknown kid is still refused, refetch or not.
+  verify._resetKeyCache();
+  global.fetch = async () => ({ ok: true, json: async () => ({ keys: [rotatedJwk] }) });
+  r = await post(token(base(), { kid: 'never-existed' }));
+  check('an unknown key is still refused after a refetch', r.code === 401,
+    r.code + ' ' + (r.body.error || 'ACCEPTED'));
+
+  global.fetch = async () => ({ ok: true, json: async () => ({ keys: [jwk] }) });
+
   // No secret is needed in the browser, and none is shipped there.
   // Strip comments first. The header explains WHY there is no password flow, and
   // matching that prose reported a leak in a file that has none - a check that

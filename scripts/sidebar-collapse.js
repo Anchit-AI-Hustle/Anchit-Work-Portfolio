@@ -19,8 +19,10 @@
 //   element - and after a click, the menu is actually closed.
 //
 // Run against a served build:  node scripts/sidebar-collapse.js
-// MUT=1 restores the top-left chip on the course page; the reachability and
-// the close checks must both fail.
+// MUT=1 restores the top-left chip on the course page; the reachability check
+// must fail. It does not reproduce the navigation half - the synthetic click
+// still reaches the toggle - so the navigate-away assertion has its own
+// mutation: NAVMUT=1 makes the tap move the page, and that check must go red.
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 const BASE = process.env.BASE || 'http://127.0.0.1:8099';
 const MUT = process.env.MUT === '1';
@@ -87,28 +89,46 @@ const check = (name, ok, detail) => results.push([ok ? 'PASS' : 'FAIL', name, de
 
     // And the thing it promises actually happens.
     if (spec.openClass) {
-      const before = await page.evaluate((s) => document.querySelector(s.menu).classList.contains(s.openClass), spec);
+      const before = await page.evaluate((s) => ({
+        open: document.querySelector(s.menu).classList.contains(s.openClass),
+        path: location.pathname,
+      }), spec);
       const box = await page.evaluate((s) => {
         const r = document.querySelector(s.toggle).getBoundingClientRect();
         return { x: Math.round(r.left + 6), y: Math.round(r.top + r.height / 2) };
       }, spec);
+      // Negative control for the check below. Without it, "does not navigate
+      // away" has never been observed failing for the right reason.
+      if (process.env.NAVMUT === '1') {
+        await page.evaluate((s) => {
+          document.querySelector(s.toggle)
+            .addEventListener('click', () => { history.pushState({}, '', '/somewhere-else'); });
+        }, spec);
+      }
       await page.mouse.click(box.x, box.y);
       await page.waitForTimeout(600);
       const after = await page.evaluate((s) => ({
         open: !!document.querySelector(s.menu)?.classList.contains(s.openClass),
         path: location.pathname,
       }), spec);
-      check(`${label}: tapping it closes the menu`, before === true && after.open === false,
-        !before ? 'menu was not open to begin with' : (after.open ? 'still open after the tap' : 'closed'));
-      check(`${label}: tapping it does not navigate away`, after.path.replace(/\/index\.html$/, '/') === spec.url.replace(/\/index\.html$/, '/'),
-        after.path);
+      check(`${label}: tapping it closes the menu`, before.open === true && after.open === false,
+        !before.open ? 'menu was not open to begin with' : (after.open ? 'still open after the tap' : 'closed'));
+      // Compare the path against the one the page was ON, not the URL we asked
+      // for. Static servers 301 '/growth-school.html' to '/growth-school', so
+      // after.path never equalled spec.url and this check was red on every run
+      // whether the tap navigated or not - a check that cannot pass, which this
+      // repo has shipped before. Reading the path before the tap is also the
+      // stronger assertion: it fails only if the tap itself moved the page.
+      check(`${label}: tapping it does not navigate away`, after.path === before.path,
+        after.path === before.path ? 'stayed on ' + after.path : before.path + ' -> ' + after.path);
     }
     await page.close();
   }
 
   for (const [s, n, d] of results) console.log('  ' + s + '  ' + n.padEnd(56) + (d || ''));
   const pass = results.filter((r) => r[0] === 'PASS').length;
-  console.log('\n' + pass + '/' + results.length + ' passed' + (MUT ? '  [MUT=1]' : ''));
+  console.log('\n' + pass + '/' + results.length + ' passed' + (MUT ? '  [MUT=1]' : '')
+    + (process.env.NAVMUT === '1' ? '  [NAVMUT=1]' : ''));
   await browser.close();
   process.exit(pass === results.length ? 0 : 1);
 })();
