@@ -133,16 +133,20 @@ function anchitVariants() {
       cta: 'See the portfolio', ctaNote: 'Reply here to start a conversation.', signoff: 'Anchit Tandon' },
   ];
 }
-function brandVariants(brand, brief) {
+function brandVariants(brand, brief, offer) {
   const b = brand || 'Your brand';
   const angle = brief ? ` ${brief}` : '';
+  // Only an offer the user actually typed goes into the email. With none, the
+  // copy carries no discount, code, deadline or returns promise: those are
+  // claims about a real brand's policy, and the tools now open on real brands.
+  const o = (offer || '').trim();
   return [
     { label: 'A · Story-led', type: 'text', _divergence: 72, kicker: 'Welcome', headline: `Welcome to ${b}.`, subhead: 'We build for people who care about the details — and you’ll feel it from the first order.',
-      sections: [ { title: 'Where it started', body: `${b} exists because good products deserve a story worth telling.${angle}` }, { title: 'Here’s 10% to begin', body: 'Use WELCOME10 at checkout. Reply anytime — a real human reads every message.' } ],
-      cta: 'Shop bestsellers', ctaNote: 'Free returns, always.', signoff: `Team ${b}` },
-    { label: 'B · Offer-led', type: 'text', _divergence: 80, kicker: 'A little something', headline: `Your ${b} welcome gift is inside.`, subhead: '10% off your first order — because a great first impression matters.',
+      sections: [ { title: 'Where it started', body: `${b} exists because good products deserve a story worth telling.${angle}` }, o ? { title: 'To begin', body: `${o}. Reply anytime — a real human reads every message.` } : { title: 'Say hello', body: 'Reply anytime — a real human reads every message.' } ],
+      cta: 'Shop bestsellers', ctaNote: o ? o : 'Questions? Just hit reply.', signoff: `Team ${b}` },
+    { label: 'B · Offer-led', type: 'text', _divergence: 80, kicker: o ? 'A little something' : 'Start here', headline: o ? `Your ${b} welcome is inside.` : `Your first ${b} pick, made easy.`, subhead: o ? o : 'The favourites first, because a great first impression matters.',
       sections: [ { title: 'Start with the favourites', body: `Our bestsellers are loved for a reason.${angle}` }, { title: 'No pressure', body: 'Take your time, and reply if you want a recommendation.' } ],
-      cta: 'Claim WELCOME10', ctaNote: 'Ends in 7 days.', signoff: `Team ${b}` },
+      cta: o ? 'Claim it' : 'See the favourites', ctaNote: o ? 'See the site for details.' : 'Reply for a recommendation.', signoff: `Team ${b}` },
     { label: 'C · Hero (image)', type: 'image', _divergence: 86, kicker: 'New here?', headline: `${b}, made for you.`, subhead: 'One promise, one click.',
       sections: [ { title: 'The one-liner', body: `Everything ${b} makes, in one place — start with what everyone loves.${angle}` } ],
       cta: 'Explore now', ctaNote: 'Free to reply — we read every one.', signoff: `Team ${b}` },
@@ -184,7 +188,7 @@ function universalVariants(label, brief, segment, offer, kind) {
   const detail = offer || '';
   switch (kind) {
     case 'commerce':
-      return brandVariants(b, brief);
+      return brandVariants(b, brief, detail);
     case 'school':
     case 'college': {
       const inst = b; const isCol = kind === 'college';
