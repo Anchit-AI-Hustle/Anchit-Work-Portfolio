@@ -34,10 +34,27 @@ const ROOT = path.join(__dirname, '..');
 // this repo - ai-tele-suite, th-life-engine, hey-yaara, music-gen-ai-blue,
 // parwah-hq, the-passion-table, lifecycle-os - answered 200 anonymously with
 // protection off or preview-only, so they are correct as linked.
+//
+// A NOTE ON WHAT THIS FILE CANNOT CATCH
+// It checks that a link OPENS. It cannot check that a link opens the RIGHT
+// THING. The All-in-One LP Agent card pointed at /hotel for two weeks - a
+// cinematic scroll piece for a hotel, carrying none of the narration, voice,
+// chat or recommendations the card describes - and every check here passed,
+// because /hotel served a 200 to anybody. The card-to-manifest agreement check
+// in scripts/sidehustle-sync.mjs covers the drift half of this; the other half,
+// "is this URL actually this product", is a human judgement and both files
+// being wrong together will always look correct to a machine.
 const RELINK = {
   'the-third-eye-anchit.vercel.app': ['walled', 'the-third-eye.anchit-tandon.com'],
   'marketing-mailers-html-architect.vercel.app': ['walled', 'marketing-mailers-html-architect.anchit-tandon.com'],
   'personal-ai-assistant-anchit.vercel.app': ['redirects', 'personal-ai-os.anchit-tandon.com'],
+  // Added 2026-09-28, when the All-in-One LP Agent card was finally pointed at
+  // the page it describes. get_project reports ssoProtection enabled with
+  // deploymentType all_except_custom_domains, so every *.vercel.app alias for
+  // this project shows the login wall and only the custom domain opens for a
+  // visitor. The card uses the custom domain; this stops the walled form being
+  // used by mistake later, which is the failure this whole table exists for.
+  'vahdam-lifecycle-os.vercel.app': ['walled', 'vahdam-lifecycle-os.anchit-tandon.com'],
 };
 
 const results = [];

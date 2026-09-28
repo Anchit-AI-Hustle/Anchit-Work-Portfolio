@@ -86,10 +86,43 @@ const plain = (s) => String(s)
   .map((seg, i) => (i === 0 ? seg : seg.slice(seg.indexOf('>') + 1)))
   .join('')
   .replace(/\s+/g, ' ');
-const missingCard = live.filter((p) =>
-  !cards.some((c) => c.includes(`href="${p.live}"`) || plain(c).includes(p.title)));
+const cardFor = (p) => cards.find((c) => c.includes(`href="${p.live}"`) || plain(c).includes(p.title));
+const missingCard = live.filter((p) => !cardFor(p));
 check('every manifest project has a card', missingCard.length === 0,
   missingCard.length ? missingCard.map((p) => p.id).join(', ') : `${live.length} matched`);
+
+// THE `||` ABOVE IS A HOLE, AND THIS IS THE PATCH FOR IT.
+//
+// A card counts as "for" a project if it carries the live href OR the title.
+// That is deliberate - a card may be found by either - but it means the two
+// files can disagree about the URL forever: the title match absorbs the
+// mismatch and nothing reports it.
+//
+// That is exactly what happened. The All-in-One LP Agent card and
+// data/projects.json both pointed at /hotel - a cinematic scroll piece for a
+// hotel, with none of the narration, voice, chat or recommendations the card
+// describes - and the real page was
+// vahdam-lifecycle-os.anchit-tandon.com/lp/best. Both files agreed with each
+// other, so nothing here fired; both were simply wrong together. The day one
+// of them is corrected on its own, this is what catches the other.
+//
+// Only cards matched BY TITLE are checked, because a card matched by href
+// already agrees by construction.
+// Compare destinations, not strings. The home card writes "./" where the
+// manifest writes "/" - the same place, and reporting it would be the kind of
+// noise that gets a check ignored, which is worse than not having one.
+const dest = (h) => String(h).replace(/^\.\//, '/').replace(/\/+$/, '') || '/';
+const hrefDrift = [];
+for (const p of live) {
+  const c = cardFor(p);
+  if (!c) continue;
+  const hrefs = [...c.matchAll(/<a[^>]*href="([^"]+)"/g)].map((m) => m[1]).filter((h) => !h.startsWith('#'));
+  if (hrefs.length && !hrefs.some((h) => dest(h) === dest(p.live))) {
+    hrefDrift.push(`${p.id}: card -> ${hrefs.map(dest).join(', ')} | manifest -> ${dest(p.live)}`);
+  }
+}
+check('the card and the manifest agree on where a project lives', hrefDrift.length === 0,
+  hrefDrift.length ? hrefDrift.join(' | ') : `${live.length} in agreement`);
 check('card count equals manifest count', cardCount === live.length,
   `${cardCount} cards, ${live.length} in manifest`);
 
