@@ -120,6 +120,32 @@ const check = (name, ok, detail) => results.push([ok ? 'PASS' : 'FAIL', name, de
     rejects.threw ? (rejects.absent ? 'rejects, nothing half-written' : 'rejected but left a partial record')
                   : 'SILENTLY DROPPED');
 
+  // adopt() had a bug that no test could have caught, because no test existed:
+  // it wrote the record under the signed-in user and then called remove(),
+  // which derives its key from that SAME user - so it deleted the copy it had
+  // just made and left the anonymous one untouched, while returning a
+  // successful count. The caller got a number and no data.
+  await load();
+  await asUser(page, null);                       // signed out
+  await page.evaluate(() => AnchitStore.set('notes', 'draft', { text: 'written signed out' }));
+  await asUser(page, 'user-C');
+  const adopted = await page.evaluate(async () => {
+    const before = await AnchitStore.get('notes', 'draft');   // must not see it yet
+    const n = await AnchitStore.adopt();
+    const after = await AnchitStore.get('notes', 'draft');
+    return { isolatedFirst: before === undefined, n, text: after && after.text };
+  });
+  check('adopt moves anonymous data to the signed-in user',
+    adopted.isolatedFirst && adopted.n === 1 && adopted.text === 'written signed out',
+    adopted.n + ' adopted, reads back: ' + JSON.stringify(adopted.text));
+
+  // And the anonymous copy must be GONE, not merely also present - that is the
+  // half the old code got backwards.
+  await asUser(page, null);
+  const leftBehind = await page.evaluate(() => AnchitStore.get('notes', 'draft'));
+  check('the anonymous copy is removed, not duplicated', leftBehind === undefined,
+    leftBehind === undefined ? 'anon copy gone' : 'STILL THERE: ' + JSON.stringify(leftBehind));
+
   // Private-browsing shapes where IndexedDB is refused.
   const page2 = await ctx.newPage();
   await page2.addInitScript(() => {

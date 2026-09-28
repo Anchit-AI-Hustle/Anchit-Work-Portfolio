@@ -121,12 +121,31 @@
     set(null);
   }
 
+  // Ask the verifier for the client id when the page did not supply one. A
+  // server-side environment variable cannot populate a static script tag, so
+  // without this a correctly-configured deployment still renders "not
+  // configured" - which reads as a Google problem rather than a missing
+  // attribute. data-client-id still wins when present.
+  function resolveClientId() {
+    if (CLIENT_ID) return Promise.resolve(CLIENT_ID);
+    return fetch(API, { method: 'GET' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { CLIENT_ID = (d && d.clientId) || ''; return CLIENT_ID; })
+      .catch(function () { return ''; });
+  }
+
   function init() {
-    if (!CLIENT_ID) {
-      fail('Sign-in is not configured for this site yet.');
-      console.warn('[anchit-auth] no data-client-id. Create a free OAuth client at console.cloud.google.com.');
-      return;
-    }
+    resolveClientId().then(function (id) {
+      if (!id) {
+        fail('Sign-in is not configured for this site yet.');
+        console.warn('[anchit-auth] no client id: pass data-client-id, or set GOOGLE_CLIENT_ID on the deployment.');
+        return;
+      }
+      start();
+    });
+  }
+
+  function start() {
     google.accounts.id.initialize({
       client_id: CLIENT_ID,
       callback: onCredential,

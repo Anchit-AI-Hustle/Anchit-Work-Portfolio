@@ -111,7 +111,12 @@ module.exports = async (req, res) => {
   // The client ID is public by design; it still is not echoed here, because a
   // status endpoint should not become a way to enumerate configuration.
   if (req.method === 'GET') {
-    return res.status(200).json({ ok: true, configured: Boolean(clientId()) });
+    // The client id is returned, not just a boolean. It is public by design -
+    // there is no client secret in this flow - and a browser has no other way
+    // to get it: a server-side environment variable cannot reach a static
+    // <script> tag, which is exactly why auth-demo.html rendered "not
+    // configured" no matter what was set in Vercel.
+    return res.status(200).json({ ok: true, configured: Boolean(clientId()), clientId: clientId() });
   }
   if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'POST a credential' });
 
