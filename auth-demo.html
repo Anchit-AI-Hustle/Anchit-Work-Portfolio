@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sign-in — drop-in for every project</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{--bg:#0d0b09;--card:#16130f;--ink:#f6f1e8;--dim:#b3a996;--line:rgba(255,247,232,.14);--accent:#ff6a1a}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.6 ui-sans-serif,system-ui,sans-serif;padding:40px 20px}
+  main{max-width:760px;margin:0 auto}
+  h1{font-size:clamp(28px,5vw,40px);line-height:1.1;margin:0 0 10px}
+  .eyebrow{font:600 11px/1 ui-monospace,monospace;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;margin:22px 0}
+  pre{background:#0a0907;border:1px solid var(--line);border-radius:10px;padding:14px;overflow-x:auto;font:13px/1.55 ui-monospace,monospace;color:#d9d2c6}
+  code{font:13px ui-monospace,monospace}
+  p{color:var(--dim)}
+  ol{color:var(--dim)}
+  #who{font:14px ui-monospace,monospace;color:var(--dim);white-space:pre-wrap;word-break:break-word}
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">Shared sign-in</div>
+  <h1>One script tag. Google sign-in on every project.</h1>
+  <p>No database, no monthly plan, nothing that can pause. Google does not charge for sign-in.</p>
+
+  <div class="card">
+    <div data-anchit-signin></div>
+    <p id="who" style="margin-top:14px">Not signed in.</p>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0;font-size:19px">Add it to any project</h2>
+    <pre>&lt;script src="https://anchit-tandon.com/assets/anchit-auth.js"
+        data-client-id="YOUR_GOOGLE_CLIENT_ID"&gt;&lt;/script&gt;
+&lt;div data-anchit-signin&gt;&lt;/div&gt;</pre>
+    <p>Then read the user anywhere:</p>
+    <pre>AnchitAuth.onChange(user =&gt; {
+  if (user) console.log(user.email, user.name);
+});
+
+await AnchitAuth.require();   // resolves once signed in</pre>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0;font-size:19px">One-time setup, free</h2>
+    <ol>
+      <li>console.cloud.google.com &rarr; APIs &amp; Services &rarr; Credentials</li>
+      <li>Create OAuth client ID &rarr; Web application</li>
+      <li>Add every origin that will sign people in under <em>Authorised JavaScript origins</em></li>
+      <li>Set <code>GOOGLE_CLIENT_ID</code> in the Vercel project, and pass the same value as <code>data-client-id</code></li>
+    </ol>
+    <p>The client ID is public by design. There is no client secret in this flow, and no password is ever created or stored.</p>
+  </div>
+</main>
+
+<script src="/assets/anchit-auth.js"></script>
+<script>
+  AnchitAuth.onChange(function (u) {
+    document.getElementById('who').textContent = u
+      ? 'Signed in as ' + (u.name || '') + ' <' + u.email + '>\nGoogle id: ' + u.sub
+      : 'Not signed in.';
+  });
+</script>
+</body>
+</html>
