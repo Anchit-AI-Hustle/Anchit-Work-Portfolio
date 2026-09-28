@@ -329,7 +329,7 @@
             id: 'hey-yaara',
             title: 'Hey Yaara',
             description: 'A voice-first AI companion designed for elderly users.',
-            path: 'https://hey-yaara.vercel.app/',
+            path: 'https://hey-yaara.anchit-tandon.com/',
             external: true,
             capabilities: ['One-button voice UX', 'Speech input', 'Spoken replies', 'PWA installation']
           }
