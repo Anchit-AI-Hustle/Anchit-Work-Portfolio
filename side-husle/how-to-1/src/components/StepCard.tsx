@@ -36,6 +36,29 @@ export default function StepCard({ step, active, onFocus, task }: {
       <h3>{step.title}</h3>
       <p>{step.detail}</p>
 
+      {/* The card used to end here: title, one sentence, a video. Everything
+          below is the information that makes it a guide rather than a summary,
+          and each block renders only when the model actually supplied it. */}
+      {step.why ? <p className="sc-why"><b>Why:</b> {step.why}</p> : null}
+
+      {step.specifics?.length ? (
+        <ul className="sc-specifics">
+          {step.specifics.map((x) => <li key={x}>{x}</li>)}
+        </ul>
+      ) : null}
+
+      {step.verify ? (
+        <p className="sc-verify"><b>Worked when:</b> {step.verify}</p>
+      ) : null}
+
+      {step.pitfalls?.length ? (
+        <ul className="sc-pitfalls">
+          {step.pitfalls.map((pf) => (
+            <li key={pf.problem}><b>{pf.problem}</b> {pf.fix}</li>
+          ))}
+        </ul>
+      ) : null}
+
       {step.branches?.length ? (
         <ul className="branches">
           {step.branches.map((b) => (
