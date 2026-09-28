@@ -123,6 +123,49 @@ const post = async (credential) => {
   check('an unknown key is still refused after a refetch', r.code === 401,
     r.code + ' ' + (r.body.error || 'ACCEPTED'));
 
+  // THE ATTACK THE FIRST COOLDOWN ALLOWED
+  //
+  // The refetch was throttled by ONE SHARED timestamp, armed by any unknown
+  // kid. This endpoint is public, so anyone could arm it: send a token with a
+  // fabricated kid, and the next VALID token signed with Google's newly rotated
+  // key took the early return and was refused, for the whole cooldown. An
+  // outsider could hold sign-in down on demand, using the very mechanism added
+  // to keep it up.
+  //
+  // The throttle is per kid now, so this must pass. Against the shared-timestamp
+  // version it fails: the rotated token comes back 401.
+  // Warm with the OLD set EXPLICITLY. The first version of this check inherited
+  // whatever global.fetch the preceding case left set - which was already the
+  // rotated set - so the cache was warmed with the rotated key, the "rotated"
+  // token was a plain cache hit, and no rotation was ever exercised. It passed
+  // against the shared-timestamp code it was written to catch. Vacuous.
+  verify._resetKeyCache();
+  global.fetch = async () => ({ ok: true, json: async () => ({ keys: [jwk] }) });
+  await post(token(base()));
+  global.fetch = async () => ({ ok: true, json: async () => ({ keys: [rotatedJwk] }) });
+  const forged = [];
+  for (let i = 0; i < 5; i += 1) {                 // the attacker arms the cooldown
+    const rr = await post(token(base(), { kid: 'forged-' + i }));
+    forged.push(rr.code);
+  }
+  r = await post(token(base(), { kid: 'rotated-key', key: rotated.privateKey }));
+  check('a forged kid cannot suppress the refetch a real rotation needs',
+    r.code === 200 && forged.every((c) => c === 401),
+    r.code === 200 ? 'rotated token accepted despite 5 forged kids first'
+                   : 'ROTATED TOKEN REFUSED - the cooldown is shared, not per kid');
+
+  // And the same kid twice does not refetch twice: the second miss is served
+  // from the negative cache, so Google is asked once.
+  verify._resetKeyCache();
+  global.fetch = async () => ({ ok: true, json: async () => ({ keys: [jwk] }) });
+  await post(token(base()));
+  let fetches = 0;
+  global.fetch = async () => { fetches += 1; return { ok: true, json: async () => ({ keys: [jwk] }) }; };
+  await post(token(base(), { kid: 'same-unknown' }));
+  await post(token(base(), { kid: 'same-unknown' }));
+  check('a repeated unknown kid asks Google once, not once per request', fetches === 1,
+    fetches + ' fetch(es) for 2 requests carrying the same unknown kid');
+
   global.fetch = async () => ({ ok: true, json: async () => ({ keys: [jwk] }) });
 
   // No secret is needed in the browser, and none is shipped there.
