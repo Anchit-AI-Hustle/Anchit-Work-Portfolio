@@ -142,7 +142,7 @@ function brandVariants(brand, brief, offer) {
   const o = (offer || '').trim();
   return [
     { label: 'A · Story-led', type: 'text', _divergence: 72, kicker: 'Welcome', headline: `Welcome to ${b}.`, subhead: 'We build for people who care about the details — and you’ll feel it from the first order.',
-      sections: [ { title: 'Where it started', body: `${b} exists because good products deserve a story worth telling.${angle}` }, o ? { title: 'To begin', body: `${o}. Reply anytime — a real human reads every message.` } : { title: 'Say hello', body: 'Reply anytime — a real human reads every message.' } ],
+      sections: [ { title: 'Where it started', body: `${b} exists because good products deserve a story worth telling.${angle}` }, o ? { title: 'To begin', body: `${o}. Reply anytime - a real human reads every message.` } : { title: 'Say hello', body: 'Reply anytime - a real human reads every message.' } ],
       cta: 'Shop bestsellers', ctaNote: o ? o : 'Questions? Just hit reply.', signoff: `Team ${b}` },
     { label: 'B · Offer-led', type: 'text', _divergence: 80, kicker: o ? 'A little something' : 'Start here', headline: o ? `Your ${b} welcome is inside.` : `Your first ${b} pick, made easy.`, subhead: o ? o : 'The favourites first, because a great first impression matters.',
       sections: [ { title: 'Start with the favourites', body: `Our bestsellers are loved for a reason.${angle}` }, { title: 'No pressure', body: 'Take your time, and reply if you want a recommendation.' } ],
