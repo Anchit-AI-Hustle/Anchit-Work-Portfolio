@@ -82,7 +82,7 @@ function extractJson<T>(raw: string): T | null {
 
 const VALID_BADGES: HowToStep['badge'][] = ['start', 'action', 'watch-out', 'checkpoint', 'finish'];
 
-function normalizeGuide(g: Partial<MasterGuide> | null, task: string): MasterGuide | undefined {
+export function normalizeGuide(g: Partial<MasterGuide> | null, task: string): MasterGuide | undefined {
   if (!g || !Array.isArray(g.steps) || g.steps.length === 0) return undefined;
   const last = g.steps.length - 1;
   const steps: HowToStep[] = g.steps.map((s, i) => ({
@@ -99,9 +99,15 @@ function normalizeGuide(g: Partial<MasterGuide> | null, task: string): MasterGui
     estSeconds: s.estSeconds,
     videoPrompt: s.videoPrompt,
   }));
-  const edges = Array.isArray(g.edges) && g.edges.length
-    ? g.edges
-    : steps.slice(0, -1).map((s, i) => ({ from: s.id, to: steps[i + 1].id }));
+  // Edges the model returned are filtered against the steps that actually
+  // exist. They were passed through untouched, so a model referencing a step
+  // it did not emit - or renumbering ids mid-answer - handed the flow diagram
+  // an edge pointing at nothing. Anything left unconnected falls back to the
+  // linear chain, which is always renderable.
+  const ids = new Set(steps.map((s) => s.id));
+  const linear = steps.slice(0, -1).map((s, i) => ({ from: s.id, to: steps[i + 1].id }));
+  const claimed = Array.isArray(g.edges) ? g.edges.filter((e) => ids.has(e.from) && ids.has(e.to)) : [];
+  const edges = claimed.length ? claimed : linear;
   return {
     task: g.task || task,
     summary: g.summary || '',
@@ -115,10 +121,14 @@ function normalizeGuide(g: Partial<MasterGuide> | null, task: string): MasterGui
 
 // ── structural quality score used to pick the top 3 ────────────────────────
 
-function scoreGuide(g?: MasterGuide): number {
+export function scoreGuide(g?: MasterGuide): number {
   if (!g) return 0;
   const n = g.steps.length;
-  const granularity = Math.min(1, n / 8);                                  // ~8 steps is ideal
+  // The comment said "~8 steps is ideal"; the code said "8 or more is ideal",
+  // so a 40-step wall scored full marks on the one axis meant to reward
+  // breaking work into digestible pieces - on a guide whose whole promise is
+  // "no walls of text". Peak at 8 and fall away on both sides.
+  const granularity = n <= 8 ? n / 8 : Math.max(0, 1 - (n - 8) / 16);
   const conciseness = avg(g.steps.map((s) => (s.detail.length <= 160 ? 1 : 0)));
   const badges = avg(g.steps.map((s) => (s.badge ? 1 : 0)));
   const guardrails = Math.min(1, g.steps.filter((s) => s.badge === 'watch-out').length / 2);
@@ -180,8 +190,11 @@ export class AgentCascadeService {
       return { guide, answers, top: [] };
     }
     if (top.length === 1) {
+      // consensus 0, not 0.6. One model agreeing with itself is not agreement,
+      // and 0.6 was a number chosen to look respectable on a badge. The UI can
+      // say "1 model" honestly; it cannot say "60% consensus" truthfully.
       const guide = { ...top[0].guide! };
-      guide.provenance = { models: [top[0].model], consensus: 0.6 };
+      guide.provenance = { models: [top[0].model], consensus: 0 };
       return { guide, answers, top };
     }
 
@@ -206,8 +219,20 @@ export class AgentCascadeService {
 
 // ── consensus + heuristic merge fallback (if the evaluator call fails) ──────
 
-function consensusScore(top: ModelAnswer[]): number {
-  // Overlap of step titles across candidates → a rough agreement signal.
+export function consensusScore(top: ModelAnswer[]): number {
+  // Overlap of step titles across candidates → an agreement signal.
+  //
+  // THE FLOOR IS GONE, AND THAT WAS THE BUG. This ended with
+  //     return Math.min(1, 0.5 + shared / all.size);
+  // so models that agreed on NOTHING scored 0.5, and the UI renders this
+  // straight to the reader as "consensus 50%". A number invented to look
+  // reassuring is worse than no number: it is the one thing on screen that
+  // claims the answer was corroborated, and it said so most loudly exactly
+  // when corroboration had failed.
+  //
+  // One model is not a consensus either - it is one opinion, and the caller
+  // reports it as such rather than passing a lone answer through here.
+  if (top.length < 2) return 0;
   const titleSets = top.map((t) => new Set((t.guide?.steps || []).map((s) => norm(s.title))));
   const all = new Set<string>();
   titleSets.forEach((s) => s.forEach((x) => all.add(x)));
@@ -217,7 +242,7 @@ function consensusScore(top: ModelAnswer[]): number {
     const hits = titleSets.filter((s) => s.has(title)).length;
     if (hits >= 2) shared++;
   });
-  return Math.min(1, 0.5 + shared / all.size);
+  return shared / all.size;
 }
 
 function mergeHeuristic(top: ModelAnswer[], task: string): MasterGuide {
