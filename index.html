@@ -1912,6 +1912,23 @@
   .mod p { font-size: 13px; color: var(--ink-dim); margin: 0; line-height: 1.5; }
   .mod .open { margin-top: auto; font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .05em;
     text-transform: uppercase; color: var(--primary); }
+  /* Suite feature tabs: one tab per suite above the module grid */
+  .suite-tabs { display: flex; gap: 8px; margin: 0 0 var(--sp-4); overflow-x: auto; scrollbar-width: none;
+    padding-bottom: 2px; }
+  .suite-tabs::-webkit-scrollbar { display: none; }
+  .suite-tab { flex: none; display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px; min-height: 44px;
+    border-radius: 999px; border: 1px solid var(--rule-strong); background: var(--bg-elev); color: var(--ink-dim);
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; cursor: pointer;
+    transition: border-color .2s, color .2s, background-color .2s; }
+  .suite-tab:hover { border-color: var(--primary); color: var(--ink); }
+  .suite-tab[aria-selected="true"] { background: var(--primary-soft); border-color: var(--primary); color: var(--ink); }
+  .suite-tab .count { font-size: 10px; letter-spacing: .04em; padding: 2px 7px; border-radius: 999px;
+    background: var(--bg-deep); color: var(--accent); }
+  .suite-tab:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .suite-panel[hidden] { display: none; }
+  .suite-panel.is-entering { animation: suite-in .32s cubic-bezier(.2,.7,.2,1) both; }
+  @keyframes suite-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .suite-panel.is-entering { animation: none; } }
   .build-card {
     background: var(--bg-elev); border-radius: 18px;
     padding: var(--sp-6); min-height: 0;
@@ -5206,14 +5223,21 @@
 
 
 
-      <!-- Every module inside the two suites, as an individual project. Rendered
-           from the MODULES data below so the list stays one source of truth. -->
+      <!-- Every module inside the suites, grouped into one tab per suite so the
+           projects above read first and each suite's features can be used on
+           their own. Tabs and panels are rendered from the MODULES data below,
+           so the list stays one source of truth. data-no-motion: hidden panels
+           have no size when the auto-reveal systems tag the page, so they would
+           stay invisible when shown; the wrapper arrives as one block instead. -->
       <div class="section-head reveal" style="margin-top:64px">
         <div class="eyebrow">Inside the suites · every module, individually</div>
         <h2 class="display-md">Each build, on its own</h2>
-        <p class="lede" style="margin-top:12px">LifeCycle-OS and The Third Eye are suites — each of these is a working module inside them, built as its own tool.</p>
+        <p class="lede" style="margin-top:12px">LifeCycle-OS and The Third Eye are suites — each of these is a working module inside them, built as its own tool. Pick a suite to see its features.</p>
       </div>
-      <div class="mod-grid reveal-stagger" id="modGrid"></div>
+      <div class="suite-features reveal">
+        <div class="suite-tabs" role="tablist" aria-label="Features by suite" id="suiteTabs" data-no-motion></div>
+        <div id="modGrid" data-no-motion></div>
+      </div>
     </div>
   </section>
 
@@ -6061,16 +6085,56 @@
     const lc = document.getElementById('lifecycleModGrid');
     if (lc) lc.innerHTML = MODULES.filter(function (m) { return m[0] === 'LifeCycle-OS'; }).map(card).join('');
 
+    // Side Hustle view: one tab per suite, each tab showing only that suite's
+    // modules, so the projects above read first and either suite can be used
+    // on its own. Suites come from MODULES in order, so a new suite gets a tab.
     const host = document.getElementById('modGrid');
-    if (!host) return;
-    host.innerHTML = MODULES.map(function (m) {
-      const ext = /^https?:/.test(m[3]);
-      return '<a class="mod" href="' + m[3] + '"' + (ext ? ' target="_blank" rel="noopener"' : '') + '>' +
-        '<span class="suite">' + m[0] + '</span>' +
-        '<h4>' + m[1] + '</h4>' +
-        '<p>' + m[2] + '</p>' +
-        '<span class="open">Open ' + (ext ? '\u2197' : '\u2192') + '</span></a>';
+    const tabs = document.getElementById('suiteTabs');
+    if (!host || !tabs) return;
+    const suites = [];
+    MODULES.forEach(function (m) { if (suites.indexOf(m[0]) < 0) suites.push(m[0]); });
+    const slug = function (x) { return x.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); };
+    tabs.innerHTML = suites.map(function (su, i) {
+      const n = MODULES.filter(function (m) { return m[0] === su; }).length;
+      return '<button type="button" class="suite-tab" role="tab" id="suite-tab-' + slug(su) + '"' +
+        ' aria-controls="suite-panel-' + slug(su) + '" aria-selected="' + (i === 0) + '" tabindex="' + (i === 0 ? 0 : -1) + '">' +
+        su + '<span class="count">' + n + '</span></button>';
     }).join('');
+    host.innerHTML = suites.map(function (su, i) {
+      return '<div class="mod-grid suite-panel" role="tabpanel" id="suite-panel-' + slug(su) + '"' +
+        ' aria-labelledby="suite-tab-' + slug(su) + '" tabindex="0"' + (i === 0 ? '' : ' hidden') + '>' +
+        MODULES.filter(function (m) { return m[0] === su; }).map(card).join('') + '</div>';
+    }).join('');
+    const btns = Array.prototype.slice.call(tabs.querySelectorAll('[role="tab"]'));
+    function select(btn, focus) {
+      btns.forEach(function (b) {
+        const on = b === btn;
+        b.setAttribute('aria-selected', on);
+        b.tabIndex = on ? 0 : -1;
+        const panel = document.getElementById(b.getAttribute('aria-controls'));
+        if (!panel) return;
+        panel.hidden = !on;
+        panel.classList.remove('is-entering');
+        if (on) { void panel.offsetWidth; panel.classList.add('is-entering'); }
+      });
+      if (focus) btn.focus();
+    }
+    tabs.addEventListener('click', function (e) {
+      const b = e.target.closest('[role="tab"]');
+      if (b) select(b, false);
+    });
+    tabs.addEventListener('keydown', function (e) {
+      const i = btns.indexOf(document.activeElement);
+      if (i < 0) return;
+      let j = -1;
+      if (e.key === 'ArrowRight') j = (i + 1) % btns.length;
+      else if (e.key === 'ArrowLeft') j = (i - 1 + btns.length) % btns.length;
+      else if (e.key === 'Home') j = 0;
+      else if (e.key === 'End') j = btns.length - 1;
+      if (j < 0) return;
+      e.preventDefault();
+      select(btns[j], true);
+    });
   })();
 
   const ALL_VIEWS = ['home','about','now','chat','experience','projects','resume','contact','project-lifecycle','project-agentlp','project-jobfit','project-music','project-thirdeye','project-yaara','project-mailer','project-telesuite','project-lifeengine'];

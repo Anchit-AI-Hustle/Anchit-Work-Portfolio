@@ -102,3 +102,15 @@ svg.chart{ width:100%; height:auto; display:block; }
 .ctxcard{ background:var(--accent-soft,rgba(46,229,172,.08)); border:1px solid var(--accent); border-radius:12px; padding:14px 16px; margin-top:12px; }
 .ctxcard .k{ font-family:var(--font-mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); margin-bottom:6px; }
 .ctxcard p{ font-size:13.5px; color:var(--ink); }
+
+/* Brand picker: ready-made D2C subjects above the Subject field */
+.brandpick{ margin-bottom:14px; }
+.brandpick .bp-head{ display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 12px; margin-bottom:8px; }
+.brandpick .bp-lbl{ font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-dim); }
+.brandpick .bp-note{ font-size:12px; color:var(--ink-mute); }
+.brandpick .bp-row{ display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; scrollbar-width:thin; -webkit-overflow-scrolling:touch; }
+.brandpick .bp-chip{ flex:none; display:inline-flex; flex-direction:column; align-items:flex-start; gap:2px; min-height:44px; padding:8px 14px; border-radius:12px; border:1px solid var(--rule-strong); background:var(--bg-deep); color:var(--ink); font-family:var(--font-body); font-size:14px; cursor:pointer; transition:border-color .2s, background-color .2s; }
+.brandpick .bp-chip .bp-ind{ font-family:var(--font-mono); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); }
+.brandpick .bp-chip:hover{ border-color:var(--primary); }
+.brandpick .bp-chip[aria-pressed="true"]{ border-color:var(--primary); background:var(--primary-soft); }
+.brandpick .bp-chip:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }

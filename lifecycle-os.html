@@ -82,6 +82,18 @@
   footer{ border-top:1px solid var(--rule); margin-top:clamp(40px,7vw,72px); padding:26px 0 12px; color:var(--ink-mute); font-size:13px; text-align:center; }
   footer a{ color:var(--ink-dim); border-bottom:1px solid var(--rule); text-decoration:none; }
   .theme-toggle{ background:transparent; border:1px solid var(--rule-strong); color:var(--ink-dim); border-radius:99px; padding:7px 12px; font-family:var(--font-mono); font-size:11px; cursor:pointer; }
+
+  /* Brand picker (mounted by lifecycle-os-kit.js): same rules as the kit CSS */
+  .brandpick{ margin-bottom:14px; }
+  .brandpick .bp-head{ display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 12px; margin-bottom:8px; }
+  .brandpick .bp-lbl{ font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-dim); }
+  .brandpick .bp-note{ font-size:12px; color:var(--ink-mute); }
+  .brandpick .bp-row{ display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; scrollbar-width:thin; -webkit-overflow-scrolling:touch; }
+  .brandpick .bp-chip{ flex:none; display:inline-flex; flex-direction:column; align-items:flex-start; gap:2px; min-height:44px; padding:8px 14px; border-radius:12px; border:1px solid var(--rule-strong); background:var(--bg-deep); color:var(--ink); font-family:var(--font-body); font-size:14px; cursor:pointer; transition:border-color .2s, background-color .2s; }
+  .brandpick .bp-chip .bp-ind{ font-family:var(--font-mono); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); }
+  .brandpick .bp-chip:hover{ border-color:var(--primary); }
+  .brandpick .bp-chip[aria-pressed="true"]{ border-color:var(--primary); background:var(--primary-soft); }
+  .brandpick .bp-chip:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
 </style>
 <!-- seo:auto:start -->
 <!-- Managed by scripts/seo-inject.mjs — edit seo.config.json, not here. -->
@@ -132,7 +144,7 @@
   "applicationSubCategory": "Lifecycle & Retention Marketing",
   "operatingSystem": "Web browser",
   "browserRequirements": "Requires JavaScript. Runs in any modern browser.",
-  "description": "A brand-agnostic, AI-led D2C growth operating system that unifies data analysis, a marketing calendar, a mailer studio, competitive intelligence and a smart-brain autopilot into a single loop. Defaults to anchit-tandon.com; works for any brand.",
+  "description": "A brand-agnostic, AI-led D2C growth operating system that unifies data analysis, a marketing calendar, a mailer studio, competitive intelligence and a smart-brain autopilot into a single loop. Opens on real D2C brands from ten industries; works for any brand.",
   "image": "https://anchit-tandon.com/AnchitTandon-AppLogo.png",
   "featureList": [
     "Data analysis workbench",
@@ -173,7 +185,7 @@
 
     <div class="eyebrow"><span class="dot"></span>An AI-led D2C growth operating system</div>
     <h1><span class="grad">Lifecycle OS</span></h1>
-    <p class="lede">One operating loop for D2C growth — <strong>read the data, plan the calendar, generate the mailers, and let it run</strong>. Brand-agnostic and grounded in industry benchmarks; it defaults to <strong>anchit-tandon.com</strong> as the subject and works for any brand you plug in. No proprietary data required.</p>
+    <p class="lede">One operating loop for D2C growth — <strong>read the data, plan the calendar, generate the mailers, and let it run</strong>. Brand-agnostic and grounded in industry benchmarks; it opens on <strong>real D2C brands from ten industries</strong> and works for any brand you plug in. No proprietary data required.</p>
 
     <!-- The second front door.
          A portfolio audit flagged this product as having two: this walkthrough,
@@ -192,9 +204,9 @@
 
     <div class="subject">
       <span class="lbl">Subject</span>
-      <input id="brand" type="text" placeholder="Brand or person — defaults to Anchit Tandon" value="Anchit Tandon" autocomplete="off" />
-      <input id="url" type="text" placeholder="Website (optional) — e.g. anchit-tandon.com" value="anchit-tandon.com" autocomplete="off" style="flex:0 1 240px;" />
-      <span class="hint">The subject flows into every tool below. Type any brand to generalise; leave it as me for the default demo.</span>
+      <input id="brand" type="text" placeholder="Brand — e.g. Glossier" value="Glossier" autocomplete="off" />
+      <input id="url" type="text" placeholder="Website (optional) — e.g. glossier.com" value="glossier.com" autocomplete="off" style="flex:0 1 240px;" />
+      <span class="hint">The subject flows into every tool below. Pick a ready-made brand above, or type any brand.</span>
     </div>
 
     <!-- CORE PIPELINE -->
@@ -224,6 +236,7 @@
     </footer>
   </div>
 
+<script src="/lifecycle-os-kit.js"></script>
 <script>
 (function(){
   'use strict';
