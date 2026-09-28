@@ -82,6 +82,26 @@ export default function GuideDesk({
           <p className="gd-rail-meta">
             {steps.length} steps · ≈{guide.estMinutes} min · {guide.difficulty}
           </p>
+
+          {/* Before step 1, not discovered at step 4. A guide that sends
+              someone to the shed halfway through has wasted their setup. */}
+          {guide.prerequisites?.length ? (
+            <section className="gd-prereq">
+              <h3 className="gd-prereq-h">Before you start</h3>
+              <ul>
+                {guide.prerequisites.map((p) => (
+                  <li key={p.item}>
+                    <b>{p.item}</b>
+                    {p.note ? <span>{p.note}</span> : null}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
+          {guide.successCriteria ? (
+            <p className="gd-success"><b>Done when:</b> {guide.successCriteria}</p>
+          ) : null}
         </div>
 
         <ol className="gd-steps">
@@ -128,14 +148,47 @@ export default function GuideDesk({
           <h1 className="gd-h1">{step.title}</h1>
           <p className="gd-lede">{step.detail}</p>
 
-          <section className="gd-card">
-            <h3 className="gd-card-h">By the end of this step</h3>
-            <ul className="gd-list">
-              <li>{step.title.replace(/^\w/, (c) => c.toLowerCase())} — done, and you can tell that it worked</li>
-              {step.estSeconds ? <li>about {step.estSeconds} seconds of actual doing</li> : null}
-              {outgoing.length ? <li>you know which way to go next</li> : null}
-            </ul>
-          </section>
+          {/* What used to be here was a card headed "By the end of this step"
+              whose first line was built by lower-casing the step title and
+              appending "- done, and you can tell that it worked". It was the
+              visual centrepiece of this view and contained no information at
+              all: a section shaped like a tutorial, filled with nothing. The
+              model now returns what actually goes in these, and a section is
+              rendered only when there is something real to put in it. */}
+
+          {step.why ? (
+            <p className="gd-why"><b>Why:</b> {step.why}</p>
+          ) : null}
+
+          {step.specifics?.length ? (
+            <section className="gd-card">
+              <h3 className="gd-card-h">Exactly what to do</h3>
+              <ul className="gd-list gd-specifics">
+                {step.specifics.map((x) => <li key={x}>{x}</li>)}
+              </ul>
+            </section>
+          ) : null}
+
+          {step.verify ? (
+            <section className="gd-card">
+              <h3 className="gd-card-h">You'll know it worked when</h3>
+              <p className="gd-verify">{step.verify}</p>
+            </section>
+          ) : null}
+
+          {step.pitfalls?.length ? (
+            <section className="gd-card">
+              <h3 className="gd-card-h">If it goes wrong here</h3>
+              <ul className="gd-pitfalls">
+                {step.pitfalls.map((pf) => (
+                  <li key={pf.problem}>
+                    <b>{pf.problem}</b>
+                    <span>{pf.fix}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
 
           {step.videoPrompt ? (
             <section className="gd-card gd-card--flush">

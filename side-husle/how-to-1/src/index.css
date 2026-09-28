@@ -240,6 +240,49 @@ strong{color:var(--ink)}
 .gd-list li{position:relative;padding-left:20px;font-size:14.5px;line-height:1.55;color:var(--ink-dim)}
 .gd-list li::before{content:'—';position:absolute;left:0;color:var(--primary)}
 
+/* ── the substance of a step ────────────────────────────────────────────────
+   Added with the fields that carry actual instruction. Existing tokens only -
+   no new colours. `specifics` is monospaced because it holds commands, paths,
+   values and settings, and those have to be transcribable exactly. */
+.gd-why{font-size:14.5px;line-height:1.6;color:var(--ink-mute);margin:-10px 0 22px;max-width:60ch}
+.gd-why b{color:var(--ink-dim);font-weight:600}
+
+.gd-specifics li{font-family:var(--mono);font-size:13.5px;line-height:1.6;color:var(--ink);
+  word-break:break-word}
+.gd-specifics li::before{content:'›';font-weight:700}
+
+.gd-verify{font-size:14.5px;line-height:1.6;color:var(--ink-dim);margin:0}
+
+.gd-pitfalls{list-style:none;display:grid;gap:12px}
+.gd-pitfalls li{display:grid;gap:4px;border-left:2px solid var(--primary-2);padding-left:13px}
+.gd-pitfalls b{font-size:14px;font-weight:600;color:var(--ink)}
+.gd-pitfalls span{font-size:14px;line-height:1.55;color:var(--ink-dim)}
+
+.gd-prereq{margin-top:18px;border-top:1px solid var(--glass-brd);padding-top:16px}
+.gd-prereq-h{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--ink-mute);margin-bottom:10px;font-weight:500}
+.gd-prereq ul{list-style:none;display:grid;gap:9px}
+.gd-prereq li{display:grid;gap:2px}
+.gd-prereq b{font-size:13.5px;font-weight:600;color:var(--ink-dim)}
+.gd-prereq span{font-size:12.5px;line-height:1.5;color:var(--ink-mute)}
+
+.gd-success{margin-top:14px;font-size:13px;line-height:1.55;color:var(--ink-mute)}
+.gd-success b{color:var(--gold);font-weight:600}
+
+/* Same content on the scroll cards. */
+.sc-why{font-size:13.5px;line-height:1.55;color:var(--ink-mute);margin:8px 0 0}
+.sc-why b{color:var(--ink-dim);font-weight:600}
+.sc-specifics{list-style:none;margin:10px 0 0;display:grid;gap:5px;
+  border-left:2px solid var(--glass-brd-2);padding-left:12px}
+.sc-specifics li{font-family:var(--mono);font-size:12.5px;line-height:1.55;color:var(--ink);
+  word-break:break-word}
+.sc-verify{margin:10px 0 0;font-size:13.5px;line-height:1.55;color:var(--ink-dim)}
+.sc-verify b{color:var(--gold);font-weight:600}
+.sc-pitfalls{list-style:none;margin:10px 0 0;display:grid;gap:7px}
+.sc-pitfalls li{font-size:13px;line-height:1.55;color:var(--ink-dim);
+  border-left:2px solid var(--primary-2);padding-left:11px}
+.sc-pitfalls b{display:block;color:var(--ink);font-weight:600}
+
 .gd-branches{list-style:none;display:grid;gap:8px}
 .gd-branches button{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;
   border:1px solid var(--glass-brd);background:transparent;border-radius:12px;padding:11px 14px;

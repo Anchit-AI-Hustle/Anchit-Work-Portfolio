@@ -14,8 +14,8 @@
 // The whole thing runs behind /api/cascade so provider keys stay server-side.
 // ============================================================================
 
-import { PROVIDERS, evaluatorProvider, type ModelProvider } from './providers';
-import type { CascadeResult, HowToStep, MasterGuide, ModelAnswer } from '../types';
+import { PROVIDERS, evaluatorProvider, type ModelProvider } from './providers.ts';
+import type { CascadeResult, HowToStep, MasterGuide, ModelAnswer } from '../types.ts';
 
 const MAX_PARALLEL = Number(
   (typeof process !== 'undefined' && process.env?.CASCADE_MAX_PARALLEL) || 4,
@@ -28,10 +28,18 @@ const GUIDE_SHAPE = `{
   "summary": string (<= 240 chars),
   "difficulty": "trivial" | "easy" | "moderate" | "skilled" | "expert",
   "estMinutes": number,
+  "prerequisites": [{ "item": string, "note": string? }] (what to have ready BEFORE step 1),
+  "successCriteria": string (the observable end state of the whole task),
   "steps": [{
     "id": string, "index": number,
     "title": string (3-7 words, imperative),
-    "detail": string (1-2 short sentences, NO walls of text),
+    "detail": string (1-2 short sentences of plain instruction),
+    "why": string (ONE line on why this step exists),
+    "specifics": [string] (1-4 lines carrying the EXACT information: the command,
+                           the menu path, the value, the setting name, what the
+                           screen says. THE MOST IMPORTANT FIELD.),
+    "verify": string (how you know THIS step worked, observably),
+    "pitfalls": [{ "problem": string, "fix": string }] (what actually goes wrong here),
     "badge": "start" | "action" | "watch-out" | "checkpoint" | "finish",
     "branches": [{ "label": string, "goToStepId": string }] (optional),
     "estSeconds": number (optional),
@@ -44,9 +52,17 @@ function solverSystem(): string {
   return [
     'You are a world-class instructional designer for people with ADHD.',
     'Given ANY humanly-doable task, produce a step-by-step guide as STRICT JSON.',
-    'Rules: each step is one atomic action; titles 3-7 words; details 1-2 short sentences;',
-    'no walls of text; add "watch-out" badges for common mistakes; add branches where',
-    'the path forks; give every step a vivid one-line videoPrompt.',
+    'ADHD-FRIENDLY MEANS CHUNKED, NOT EMPTY. Short sentences are a property of',
+    'PROSE - they are not a reason to withhold the command, the menu path, the',
+    'value to type, or what to do when it fails. Keep the prose short and put',
+    'the substance in specifics, verify and pitfalls.',
+    'Rules: each step is one atomic action; titles 3-7 words; detail 1-2 short',
+    'sentences; never filler like "get set up" or "do the first move" - name the',
+    'actual button, command, setting or measurement; give every step specifics',
+    'and a verify; add pitfalls where something really does go wrong; add',
+    '"watch-out" badges for common mistakes; add branches where the path forks;',
+    'list prerequisites the reader needs before step 1; give every step a vivid',
+    'one-line videoPrompt.',
     `Return ONLY JSON matching this shape (no markdown, no prose):\n${GUIDE_SHAPE}`,
   ].join(' ');
 }
@@ -60,6 +76,10 @@ function synthSystem(): string {
     'Prefer steps that multiple models agree on; keep unique "watch-out" insights;',
     'preserve branches; renumber steps from 1; ensure edges form a valid flow from',
     'the "start" step to the "finish" step.',
+    'UNION THE SUBSTANCE, DO NOT INTERSECT IT. specifics, verify, pitfalls and',
+    'prerequisites are why the guide is useful: keep every distinct one any',
+    'candidate supplied, deduplicated. A merged guide thinner than the best',
+    'candidate is a failed merge.',
     `Return ONLY JSON matching this shape (no markdown):\n${GUIDE_SHAPE}`,
   ].join(' ');
 }
@@ -95,6 +115,15 @@ export function normalizeGuide(g: Partial<MasterGuide> | null, task: string): Ma
     badge: VALID_BADGES.includes(s.badge as HowToStep['badge'])
       ? (s.badge as HowToStep['badge'])
       : (i === 0 ? 'start' : i === last ? 'finish' : 'action'),
+    // Carried explicitly. This function rebuilds each step field by field, so
+    // anything not named here is dropped on the way to the UI - which is how a
+    // model could return specifics and the reader would never see them.
+    why: s.why,
+    specifics: Array.isArray(s.specifics) ? s.specifics.filter(Boolean) : undefined,
+    verify: s.verify,
+    pitfalls: Array.isArray(s.pitfalls)
+      ? s.pitfalls.filter((p) => p && p.problem && p.fix)
+      : undefined,
     branches: s.branches,
     estSeconds: s.estSeconds,
     videoPrompt: s.videoPrompt,
@@ -113,6 +142,10 @@ export function normalizeGuide(g: Partial<MasterGuide> | null, task: string): Ma
     summary: g.summary || '',
     difficulty: g.difficulty || 'moderate',
     estMinutes: g.estMinutes || Math.max(1, Math.round(steps.length * 0.6)),
+    prerequisites: Array.isArray(g.prerequisites)
+      ? g.prerequisites.filter((p) => p && p.item)
+      : undefined,
+    successCriteria: g.successCriteria,
     steps,
     edges,
     provenance: { models: [], consensus: 0 },
@@ -129,12 +162,30 @@ export function scoreGuide(g?: MasterGuide): number {
   // breaking work into digestible pieces - on a guide whose whole promise is
   // "no walls of text". Peak at 8 and fall away on both sides.
   const granularity = n <= 8 ? n / 8 : Math.max(0, 1 - (n - 8) / 16);
-  const conciseness = avg(g.steps.map((s) => (s.detail.length <= 160 ? 1 : 0)));
+  // SUBSTANCE, NOT BREVITY. This term used to be
+  //     conciseness = avg(detail.length <= 160 ? 1 : 0)   // weighted 0.20
+  // so a guide that actually told you the command scored BELOW one that did
+  // not, and was less likely to survive into the top 3 the evaluator merges.
+  // The engine selected for thinness and then complained of nothing else.
+  //
+  // `detail` staying short is still worth something - the substance belongs in
+  // the structured fields, not in a paragraph - but it is a small tiebreak now,
+  // and it cannot outweigh a step that carries real instruction.
+  const substance = avg(g.steps.map((s) => {
+    const hasSpecifics = (s.specifics?.length ?? 0) > 0;
+    const hasVerify = !!s.verify;
+    const hasPitfall = (s.pitfalls?.length ?? 0) > 0;
+    const hasWhy = !!s.why;
+    return (hasSpecifics ? 0.5 : 0) + (hasVerify ? 0.25 : 0) + (hasPitfall ? 0.15 : 0) + (hasWhy ? 0.1 : 0);
+  }));
+  const setup = g.prerequisites?.length ? 1 : 0;
+  const proseTidy = avg(g.steps.map((s) => (s.detail.length <= 240 ? 1 : 0)));
   const badges = avg(g.steps.map((s) => (s.badge ? 1 : 0)));
   const guardrails = Math.min(1, g.steps.filter((s) => s.badge === 'watch-out').length / 2);
   const branches = Math.min(1, g.steps.filter((s) => s.branches?.length).length / 2);
   const media = avg(g.steps.map((s) => (s.videoPrompt ? 1 : 0)));
-  return 0.30 * granularity + 0.20 * conciseness + 0.15 * badges + 0.15 * guardrails + 0.1 * branches + 0.1 * media;
+  return 0.20 * granularity + 0.34 * substance + 0.08 * setup + 0.06 * proseTidy
+    + 0.10 * badges + 0.12 * guardrails + 0.05 * branches + 0.05 * media;
 }
 const avg = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
 
@@ -156,7 +207,16 @@ async function pmap<T, R>(items: T[], limit: number, fn: (t: T) => Promise<R>): 
 // ── the engine ──────────────────────────────────────────────────────────────
 
 export class AgentCascadeService {
-  constructor(private providers: ModelProvider[] = PROVIDERS.filter((p) => p.enabled())) {}
+  // A plain field, not a `private` constructor parameter property. The latter
+  // is TypeScript syntax that has to be COMPILED, not merely stripped, so
+  // `node --experimental-strip-types` refused this file - which is the command
+  // cascade.test.mts documents at the top of itself. The suite could only be
+  // run by reaching for tsx, and so it was wired into nothing and ran nowhere.
+  private providers: ModelProvider[];
+
+  constructor(providers: ModelProvider[] = PROVIDERS.filter((p) => p.enabled())) {
+    this.providers = providers;
+  }
 
   /** Run the full cascade for a task and return the synthesized master guide. */
   async run(task: string): Promise<CascadeResult> {

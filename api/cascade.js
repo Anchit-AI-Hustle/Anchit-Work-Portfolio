@@ -31,20 +31,34 @@ const MODELS = [
   'claude-haiku-4-5-20251001',
 ].filter(Boolean);
 
-const SYSTEM = `You write genuinely useful step-by-step guides for people who may be doing the task for the very first time.
+const SYSTEM = `You write genuinely useful step-by-step guides for people who may be doing the task for the very first time. They should be able to finish the task with your guide alone, without opening anything else.
+
+WHAT WAS WRONG BEFORE, AND WHAT TO DO INSTEAD
+Guides came back as a title plus one or two sentences per step. That is a
+summary, not a tutorial: it tells someone WHAT to do and never the specifics
+they actually need. Short prose is good. Withholding information is not the
+same thing as being concise.
+
+So: keep sentences short, and put the substance in the structured fields.
 
 RULES
-- Be SPECIFIC to the task. Never write filler like "get set up", "do the first move" or "avoid the common trap". If the task is switching on a phone, say which button, how long to hold it, and what appears on screen.
+- Be SPECIFIC to the task. Never write filler like "get set up", "do the first move" or "avoid the common trap". Name the actual button, menu path, command, setting, number, or ingredient.
 - Each step is one atomic action a person can do without deciding anything else first.
-- 4-7 steps. Titles are 3-7 words, imperative ("Hold the side button").
-- detail is 1-2 short sentences of real instruction, including the specific thing to look for or press.
+- Use as many steps as the task honestly needs, between 5 and 12. Do not pad, and do not compress two real actions into one step to hit a number.
+- Titles are 3-7 words, imperative ("Hold the side button").
+- detail is 1-2 short sentences of plain instruction.
+- why is ONE line on why this step exists. Someone who knows why can recover when reality differs from the guide.
+- specifics is an array of 1-4 short lines carrying the exact information: the command to run, the menu path to follow, the value to enter, the setting name, the measurement, what the screen says. THIS IS THE MOST IMPORTANT FIELD. If a step has no specifics worth naming, it is probably not a real step.
+- verify is how the person knows THIS step worked, observably. "The light turns green", "the terminal prints ready in 2.1s". Never "you can tell it worked".
+- pitfalls is an array of {problem, fix} for what actually goes wrong here. Write problem in the words someone would use to search for it. Omit the field rather than invent a pitfall that does not exist.
 - badge is one of: start, action, watch-out, checkpoint, finish.
-- Include at least one "watch-out" naming the actual mistake people make at that point in THIS task.
+- prerequisites is a top-level array of {item, note} — what to have ready BEFORE step 1: tools, accounts, versions, materials, permissions. Omit if the task genuinely needs nothing.
+- successCriteria is one line describing the observable end state of the WHOLE task.
 - edges connect step ids in order. Add an extra labelled edge where a real branch exists (e.g. {"from":"s2","to":"s4","label":"if it does not turn on"}).
 - videoPrompt is a short search phrase that would find footage of that exact step.
 
 Reply with ONLY a JSON object, no prose, no markdown fence:
-{"summary":"one sentence","difficulty":"trivial|easy|moderate|skilled|expert","estMinutes":number,"steps":[{"id":"s1","index":1,"title":"","detail":"","badge":"start","estSeconds":number,"videoPrompt":""}],"edges":[{"from":"s1","to":"s2","label":""}]}`;
+{"summary":"one sentence","difficulty":"trivial|easy|moderate|skilled|expert","estMinutes":number,"successCriteria":"","prerequisites":[{"item":"","note":""}],"steps":[{"id":"s1","index":1,"title":"","detail":"","why":"","specifics":[""],"verify":"","pitfalls":[{"problem":"","fix":""}],"badge":"start","estSeconds":number,"videoPrompt":""}],"edges":[{"from":"s1","to":"s2","label":""}]}`;
 
 async function callClaude(model, task, signal) {
   const r = await fetch('https://api.anthropic.com/v1/messages', {
@@ -53,7 +67,10 @@ async function callClaude(model, task, signal) {
     headers: { 'content-type': 'application/json', 'x-api-key': key(), 'anthropic-version': '2023-06-01' },
     body: JSON.stringify({
       model,
-      max_tokens: 2000,
+      // 2000 could not hold a guide with specifics, verification and
+      // troubleshooting - the model had to drop them to fit, whatever the
+      // prompt asked for.
+      max_tokens: 8000,
       system: SYSTEM,
       messages: [{ role: 'user', content: `Write the guide for: ${task}` }],
     }),
@@ -74,11 +91,36 @@ async function callClaude(model, task, signal) {
 // declares, so a missing field can never reach the UI as `undefined`.
 function shape(raw, task) {
   const ok = ['start', 'action', 'watch-out', 'checkpoint', 'finish'];
-  const steps = (Array.isArray(raw.steps) ? raw.steps : []).slice(0, 8).map((s, i) => ({
+  // Bounded, and UNDEFINED WHEN EMPTY rather than [] or ''. The renderer keys
+  // off presence, so an empty array would draw a "Specifics" heading with
+  // nothing under it - a fabricated-looking section, which is the failure this
+  // whole change is fixing.
+  const line = (v, n) => { const t = String(v == null ? '' : v).trim(); return t ? t.slice(0, n) : undefined; };
+  const lines = (v, max, n) => {
+    if (!Array.isArray(v)) return undefined;
+    const out = v.map((x) => line(x, n)).filter(Boolean).slice(0, max);
+    return out.length ? out : undefined;
+  };
+  const pitfalls = (v) => {
+    if (!Array.isArray(v)) return undefined;
+    const out = v
+      .map((x) => ({ problem: line(x && x.problem, 160), fix: line(x && x.fix, 240) }))
+      .filter((x) => x.problem && x.fix)
+      .slice(0, 3);
+    return out.length ? out : undefined;
+  };
+
+  // 8 was a hard cap regardless of the task. A 12-step job silently lost its
+  // last four steps, and the guide just ended.
+  const steps = (Array.isArray(raw.steps) ? raw.steps : []).slice(0, 14).map((s, i) => ({
     id: String(s.id || `s${i + 1}`),
     index: i + 1,
     title: String(s.title || '').slice(0, 80),
     detail: String(s.detail || '').slice(0, 400),
+    why: line(s.why, 200),
+    specifics: lines(s.specifics, 4, 220),
+    verify: line(s.verify, 240),
+    pitfalls: pitfalls(s.pitfalls),
     badge: ok.includes(s.badge) ? s.badge : (i === 0 ? 'start' : 'action'),
     estSeconds: Number(s.estSeconds) > 0 ? Number(s.estSeconds) : 45,
     videoPrompt: String(s.videoPrompt || `${task} step ${i + 1}`).slice(0, 160),
@@ -95,18 +137,33 @@ function shape(raw, task) {
     if (!edges.some((e) => e.from === a && e.to === b)) edges.push({ from: a, to: b });
   }
 
+  const prerequisites = Array.isArray(raw.prerequisites)
+    ? raw.prerequisites
+        .map((p) => ({ item: line(p && p.item, 140), note: line(p && p.note, 200) }))
+        .filter((p) => p.item)
+        .slice(0, 8)
+    : undefined;
+
   const diff = ['trivial', 'easy', 'moderate', 'skilled', 'expert'];
   return {
     task,
     summary: String(raw.summary || '').slice(0, 300) || `How to ${task}.`,
     difficulty: diff.includes(raw.difficulty) ? raw.difficulty : 'easy',
     estMinutes: Number(raw.estMinutes) > 0 ? Math.min(Number(raw.estMinutes), 240) : 5,
+    prerequisites: prerequisites && prerequisites.length ? prerequisites : undefined,
+    successCriteria: line(raw.successCriteria, 240),
     steps,
     edges,
   };
 }
 
-module.exports = async function handler(req, res) {
+module.exports = handler;
+// Exported so scripts/howto-guide-depth.js can drive the shaper directly. The
+// depth of a guide is decided here and in SYSTEM, and neither is reachable
+// through the HTTP handler without a key and a network call.
+module.exports._test = { shape, SYSTEM };
+
+async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');

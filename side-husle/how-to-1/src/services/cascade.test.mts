@@ -69,5 +69,65 @@ check('valid model edges are kept', () => {
   assert.deepEqual(g.edges, [{ from: 'b', to: 'a' }]);
 });
 
+// ── substance, not brevity ─────────────────────────────────────────────────
+//
+// The scorer picks which answers reach the evaluator. 20% of it used to be
+//     conciseness = avg(detail.length <= 160 ? 1 : 0)
+// so the guide that actually told you the command ranked BELOW the one that
+// did not, and was likelier to be discarded before synthesis. The engine
+// selected for thinness, which is what "no information, no details, no
+// tutorials" looks like from the outside.
+
+const thinStep = (id: string) => ({ id, index: 0, title: 't ' + id, detail: 'Do the thing.', badge: 'action' });
+const richStep = (id: string) => ({
+  ...thinStep(id),
+  why: 'Because the bootloader latches on reset.',
+  specifics: ['Run: esptool --port /dev/ttyUSB0 flash_id'],
+  verify: 'The terminal prints "Hash of data verified".',
+  pitfalls: [{ problem: 'Permission denied', fix: 'Add yourself to dialout.' }],
+});
+const g = (steps: unknown[], extra: Record<string, unknown> = {}) => ({ steps, ...extra }) as never;
+const ids = ['s1', 's2', 's3', 's4', 's5', 's6'];
+
+check('a guide carrying real instruction outscores an identical thin one', () => {
+  const rich = scoreGuide(g(ids.map(richStep), { prerequisites: [{ item: 'A USB-C data cable' }] }));
+  const thin = scoreGuide(g(ids.map(thinStep)));
+  assert.ok(rich > thin, `rich ${rich.toFixed(3)} did not beat thin ${thin.toFixed(3)}`);
+});
+
+check('a long detail is no longer punished harder than a missing specific', () => {
+  // The old term flipped to 0 at 161 characters, so padding prose cost more
+  // than omitting the command. Same steps, one with a longer detail.
+  const wordy = ids.map((id) => ({ ...richStep(id), detail: 'D'.repeat(200) }));
+  const terseButEmpty = ids.map(thinStep);
+  assert.ok(scoreGuide(g(wordy)) > scoreGuide(g(terseButEmpty)),
+    'a wordy guide with real instruction still lost to a terse empty one');
+});
+
+check('specifics carry through normalizeGuide to the UI', () => {
+  // normalizeGuide rebuilds each step field by field, so an unnamed field is
+  // dropped silently - the model returns it and the reader never sees it.
+  const out = normalizeGuide(g([richStep('s1'), richStep('s2')], {
+    prerequisites: [{ item: 'A USB-C data cable', note: 'Charge-only will not enumerate.' }],
+    successCriteria: 'The status LED is solid green.',
+  }), 'flash firmware');
+  assert.ok(out, 'guide did not normalize');
+  assert.deepEqual(out!.steps[0].specifics, ['Run: esptool --port /dev/ttyUSB0 flash_id']);
+  assert.match(out!.steps[0].verify!, /Hash of data verified/);
+  assert.equal(out!.steps[0].pitfalls!.length, 1);
+  assert.match(out!.steps[0].why!, /bootloader/);
+  assert.equal(out!.prerequisites!.length, 1);
+  assert.match(out!.successCriteria!, /solid green/);
+});
+
+check('a pitfall missing its fix never reaches the UI half-formed', () => {
+  const out = normalizeGuide(g([
+    { ...thinStep('s1'), pitfalls: [{ problem: 'it breaks' }, { problem: 'x', fix: 'y' }] },
+    thinStep('s2'),
+  ]), 't');
+  assert.equal(out!.steps[0].pitfalls!.length, 1);
+  assert.equal(out!.steps[0].pitfalls![0].problem, 'x');
+});
+
 console.log('\n' + pass + '/' + (pass + fail) + ' passed');
 process.exit(fail ? 1 : 0);
