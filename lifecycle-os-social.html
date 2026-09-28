@@ -96,7 +96,7 @@
     <div class="top"><a class="back" href="/lifecycle-os">← Lifecycle OS</a><span class="crumbs"><a href="/#projects">Portfolio</a> / <a href="/lifecycle-os">Lifecycle OS</a> / Social Studio</span></div>
     <div class="eyebrow"><span class="dot"></span>Lifecycle OS · Social Studio</div>
     <h1><span class="grad">Social Studio</span></h1>
-    <p class="lede">On-brand social posts — caption + hashtags — tailored per platform from the subject's positioning. Pick a ready-made D2C brand below, or type any brand.</p>
+    <p class="lede">On-brand social posts - caption + hashtags - tailored per platform from the subject's positioning. Pick a ready-made D2C brand below, or type any brand.</p>
     <div class="subject"><span class="lbl">Subject</span><input id="brand" type="text"><input id="url" type="text" style="flex:0 1 220px"><button id="go">Generate posts</button></div>
     <div id="out" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="font-family:var(--font-display);font-size:clamp(19px,3vw,24px);font-weight:600" id="hd"></div><span class="badge" id="bdg"></span></div>
@@ -112,8 +112,8 @@
   LOS.wireSubject('brand','url',run);
   function gen(f){
     var w=f.wins, plat=[
-      { n:'LinkedIn', cap:(f.anchit?'Reflection: ':'')+f.one+'\n\n'+(f.preset?'What we stand for: ':'Recent: ')+w[0]+', '+w[1]+'.\n\n'+(f.anchit?'Open to senior Product/Growth roles — details in bio.':'How we think about growth →'), tags:f.preset?['#'+f.handle].concat(f.tags):['#ProductManagement','#Growth','#D2C'] },
-      { n:'Instagram', cap:f.name+' — '+w[2]+' 🚀\n'+(f.anchit?'Swipe for the story.':'Tap the link to explore.'), tags:f.preset?['#'+f.handle].concat(f.tags):['#'+f.handle,'#growth','#build'] },
+      { n:'LinkedIn', cap:(f.anchit?'Reflection: ':'')+f.one+'\n\n'+(f.preset?'What we stand for: ':'Recent: ')+w[0]+', '+w[1]+'.\n\n'+(f.anchit?'Open to senior Product/Growth roles - details in bio.':'How we think about growth →'), tags:f.preset?['#'+f.handle].concat(f.tags):['#ProductManagement','#Growth','#D2C'] },
+      { n:'Instagram', cap:f.name+' - '+w[2]+' 🚀\n'+(f.anchit?'Swipe for the story.':'Tap the link to explore.'), tags:f.preset?['#'+f.handle].concat(f.tags):['#'+f.handle,'#growth','#build'] },
       { n:'X / Twitter', cap:(f.anchit?'i market myself the way i\'d grow a high-LTV brand.\n\n':'')+w[0]+'. '+w[1]+'.', tags:f.preset?f.tags.slice():['#buildinpublic','#growth'] },
       { n:'Threads', cap:f.one+'\n\nThe one-liner: '+w[2]+'.', tags:['#'+f.handle] },
       { n:'Facebook', cap:'Meet '+f.name+'. '+f.one+' '+(f.anchit?'Let\'s talk — anchit-tandon.com.':'Learn more on our site.'), tags:['#'+f.handle,'#D2C'] },
