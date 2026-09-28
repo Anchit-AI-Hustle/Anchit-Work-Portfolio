@@ -10,7 +10,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 
 export interface ModelProvider {
-  id: string;                 // stable id, e.g. "claude-opus-4-8"
+  id: string;                 // stable id, e.g. "claude-opus-5"
   label: string;              // display name
   rank: number;               // 1 = highest benchmark accuracy
   enabled: () => boolean;     // has a key configured?
@@ -20,10 +20,10 @@ export interface ModelProvider {
 
 const env = (k: string) => (typeof process !== 'undefined' ? process.env?.[k] : undefined) || '';
 
-// ── Anthropic · Claude Opus 4.8 (top-ranked; also the evaluator/synthesizer) ─
+// ── Anthropic · Claude Opus 5 (top-ranked; also the evaluator/synthesizer) ─
 const anthropic: ModelProvider = {
-  id: 'claude-opus-4-8',
-  label: 'Claude Opus 4.8',
+  id: 'claude-opus-5',
+  label: 'Claude Opus 5',
   rank: 1,
   enabled: () => !!env('ANTHROPIC_API_KEY'),
   async call(system, user) {
@@ -32,7 +32,7 @@ const anthropic: ModelProvider = {
     // The pinned SDK's types predate the "adaptive" thinking mode (they only know
     // "enabled"/"disabled"), so cast the value — the API accepts it at runtime.
     const msg = await client.messages.create({
-      model: 'claude-opus-4-8',
+      model: 'claude-opus-5',
       max_tokens: 8000,
       thinking: { type: 'adaptive' } as unknown as Anthropic.ThinkingConfigParam,
       system,

@@ -106,7 +106,21 @@ export default function HowToVisualCanvas() {
                 </span>
               );
             })}
-            <span className="consensus">consensus {Math.round((guide?.provenance.consensus ?? 0) * 100)}%</span>
+            {/* Say what was actually measured. consensusScore used to carry a
+                0.5 floor, so this badge read "consensus 50%" when the models
+                had agreed on nothing - the one element claiming the answer was
+                corroborated was loudest exactly when corroboration failed.
+                With the floor gone, 0 is a real answer, and it needs words
+                rather than a percentage: one model is not a disagreement, and
+                two models that share no step is not a 0% consensus so much as
+                no consensus at all. */}
+            {(() => {
+              const models = guide?.provenance.models.length ?? 0;
+              const c = guide?.provenance.consensus ?? 0;
+              if (models <= 1) return <span className="consensus">1 model &middot; no cross-check</span>;
+              if (c === 0) return <span className="consensus">{models} models &middot; no agreement</span>;
+              return <span className="consensus">{models} models &middot; {Math.round(c * 100)}% agreement</span>;
+            })()}
           </div>
         )}
 

@@ -82,6 +82,34 @@ check('no page links a walled or redirecting project host',
   offenders.length === 0,
   offenders.length ? offenders.join(' | ') : 'checked ' + pages.length + ' html/js files');
 
+// 2. A card that says LIVE has to offer a way to open it.
+//
+//    The All-in-One LP Agent card carried the LIVE badge and a Case Study
+//    button, and nothing else - so the one thing the badge promises, opening
+//    the live thing, was the one thing the card could not do. Its case study
+//    page had the same gap: a back link and no CTA. /hotel was built, served
+//    and reachable the whole time; nobody had linked it.
+//
+//    Checking the MANIFEST would not have caught this - data/projects.json had
+//    the right URL all along. The defect was in the rendered card, so the card
+//    is what gets read.
+const home = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+const cards = home.match(/<div class="build-card[\s\S]*?\n        <\/div>/g) || [];
+const liveNoLink = [];
+for (const c of cards) {
+  const status = (c.match(/class="status">([^<]*)</) || [])[1] || '';
+  if (!/live/i.test(status)) continue;                 // "Building" promises nothing yet
+  const title = ((c.match(/<h3>([\s\S]*?)<\/h3>/) || [])[1] || '?')
+    .replace(/<[^>]+>/g, '').trim();
+  const hrefs = [...c.matchAll(/<a[^>]*href="([^"]+)"/g)].map((m) => m[1]);
+  // A '#view' link is in-site navigation to the write-up, not the product.
+  if (!hrefs.some((h) => !h.startsWith('#'))) liveNoLink.push(title);
+}
+check('every card marked Live can actually be opened',
+  liveNoLink.length === 0,
+  liveNoLink.length ? liveNoLink.join(', ') + ' -> case study only'
+                    : cards.length + ' cards, every Live one has a link');
+
 // 2. Every build tile on the freelance page opens a real product.
 const fl = fs.readFileSync(path.join(ROOT, 'freelancer.html'), 'utf8');
 const tiles = [...fl.matchAll(/<article class="buildtile">([\s\S]*?)<\/article>/g)].map((m) => {

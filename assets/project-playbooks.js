@@ -69,6 +69,7 @@
     'marketing-mailers-html-architect.anchit-tandon.com': 'mailer-architect',
     'music-gen-ai-blue.vercel.app': 'musicgenai',
     'ai-tele-suite.vercel.app': 'ai-telesuite',
+    'hey-yaara.anchit-tandon.com': 'hey-yaara',
     'hey-yaara.vercel.app': 'hey-yaara'
   };
 

@@ -67,6 +67,9 @@ const assets = [
   'lifecycle-os-kit.css',
   'lifecycle-os-kit.js',
   'agent.html',
+  // The shared sign-in demo. Also the page that documents how every other
+  // project wires assets/anchit-auth.js, so it ships with the asset it explains.
+  'auth-demo.html',
   'hotel.html',
   'manifest.json',
   'sw.js',

@@ -59,7 +59,22 @@
       location.reload();                       // simplest correct re-apply
     });
     (document.body || root).appendChild(btn);
+
+    // Same re-check the home chip needs, for the same reason. place() runs once
+    // at DOMContentLoaded, and the pages this runtime lands on build their own
+    // content from JavaScript afterwards - so the corner it measured as free is
+    // occupied a beat later. Measured across the Lifecycle OS modules, this
+    // toggle was sitting on top of real content on five of them, including the
+    // "Retention Playbook" and "Cohort Builder" links a visitor is meant to
+    // click. Re-placing is idempotent: a corner that is still free stays chosen.
     place(btn);
+    addEventListener('load', function () { place(btn); });
+    setTimeout(function () { place(btn); }, 700);
+    setTimeout(function () { place(btn); }, 1800);
+    var bt;
+    addEventListener('resize', function () {
+      clearTimeout(bt); bt = setTimeout(function () { place(btn); }, 180);
+    });
   }
 
   // A way back to the main portfolio, on every page that does not already have
@@ -90,6 +105,28 @@
     a.addEventListener('mouseenter', function () { a.style.opacity = '1'; });
     a.addEventListener('mouseleave', function () { a.style.opacity = '.75'; });
     (document.body || root).appendChild(a);
+
+    // PLACEMENT HAS TO BE RE-CHECKED, NOT DECIDED ONCE.
+    //
+    // This runtime injects on DOMContentLoaded, and the pages it lands on build
+    // their own chrome from JavaScript afterwards. On the marketing course the
+    // "Chapters" drawer button does not exist yet at that moment, so the first
+    // look finds the top-left free, parks there, and is then covered by the bar
+    // that appears a beat later - which is the original bug with an extra step,
+    // not a fix for it.
+    //
+    // So it looks again once the page has stopped building: on load, and twice
+    // more on a short timer for content that arrives after that. Re-placing is
+    // idempotent - a free corner stays chosen - and on resize the corner it
+    // picked may simply no longer be free.
+    placeHome(a);
+    addEventListener('load', function () { placeHome(a); });
+    setTimeout(function () { placeHome(a); }, 700);
+    setTimeout(function () { placeHome(a); }, 1800);
+    var rt;
+    addEventListener('resize', function () {
+      clearTimeout(rt); rt = setTimeout(function () { placeHome(a); }, 180);
+    });
   }
 
   // Bottom-left is only the FIRST choice. This runtime is added to pages it did
@@ -98,16 +135,76 @@
   // the toggle then covered and made unreachable. So it asks what is already
   // there and moves if the spot is taken. Measured once, after layout, with
   // elementFromPoint at the corners it is considering.
+  // Shared by both placers. The element must be out of hit-testing before this
+  // is called, or elementFromPoint returns the element itself and every spot
+  // reads as free - the trap that made the first version of this sit happily on
+  // top of a control it had just been asked to avoid.
+  function occupiedFor(el, x, y) {
+    var hit = document.elementFromPoint(x, y);
+    if (!hit || hit === el || el.contains(hit)) return false;
+    if (hit.closest && hit.closest('a, button, input, select, textarea, [role="button"], [onclick]')) return true;
+    // Text counts too, not only controls. The first version asked whether the
+    // corner held something CLICKABLE, so a paragraph or a list item read as
+    // free and the toggle parked on top of it - visible on the Frameworks
+    // module, sitting over a line of body copy.
+    //
+    // A LEAF with text, deliberately: <main> and the section wrappers are hit
+    // at every corner of every page, and treating those as occupied would make
+    // every spot look taken and the placer give up on its first choice. A pill
+    // floating over a container's padding is fine; over a sentence is not.
+    var leaf = hit.children && hit.children.length === 0;
+    return !!(leaf && (hit.textContent || '').trim().length > 4);
+  }
+
+  // The home chip is TOP-anchored, so place() - which reasons in `bottom` - was
+  // never able to move it, and it was never asked to. It sat at a hardcoded
+  // top-left with z-index 2147483000 on every page this runtime reaches.
+  //
+  // On the marketing course that corner belongs to the "Chapters / Hide
+  // chapters" drawer button: a full-width sticky bar at top 0, height 50. The
+  // chip landed at top 14, left 14 - inside it, over the label - and won on
+  // z-index. Tapping to collapse the chapter list navigated home instead, so
+  // the drawer could be opened and not closed. Reported as "I can't collapse
+  // the LHS and it's blocking my view".
+  //
+  // A full-width top bar takes BOTH top corners, so when the top strip is
+  // spoken for the chip stops trying to live in it and hands itself to place(),
+  // which already knows how to find a free bottom corner.
+  function placeHome(a) {
+    requestAnimationFrame(function () {
+      var pe = a.style.pointerEvents;
+      a.style.pointerEvents = 'none';
+      try {
+        var r = a.getBoundingClientRect();
+        var pad = 14, w = r.width || 120, h = r.height || 26;
+        var spots = [
+          { l: pad,                  t: pad },   // top-left, as authored
+          { l: innerWidth - w - pad, t: pad }    // top-right
+        ];
+        for (var i = 0; i < spots.length; i++) {
+          var sp = spots[i], cy = sp.t + h / 2;
+          if (!occupiedFor(a, sp.l + w / 2, cy) &&
+              !occupiedFor(a, sp.l + 4, cy) &&
+              !occupiedFor(a, sp.l + w - 4, cy)) {
+            a.style.left = sp.l + 'px'; a.style.right = 'auto';
+            a.style.top = sp.t + 'px';  a.style.bottom = 'auto';
+            return;
+          }
+        }
+        a.style.top = 'auto';
+        a.style.bottom = pad + 'px';
+        a.style.left = pad + 'px';
+      } finally { a.style.pointerEvents = pe; }
+      place(a);   // bottom corners now, with the same collision rules
+    });
+  }
+
   function place(btn) {
     // The toggle has to be taken OUT of hit-testing while it looks, or
     // elementFromPoint just returns the toggle and every corner reads as free —
     // which is exactly how the first version of this decided the occupied
     // corner was fine and stayed there.
-    function occupied(x, y) {
-      var el = document.elementFromPoint(x, y);
-      if (!el || el === btn || btn.contains(el)) return false;
-      return !!(el.closest && el.closest('a, button, input, select, textarea, [role="button"], [onclick]'));
-    }
+    function occupied(x, y) { return occupiedFor(btn, x, y); }
     requestAnimationFrame(function () {
       var pe = btn.style.pointerEvents;
       btn.style.pointerEvents = 'none';
@@ -116,12 +213,18 @@
     function choose() {
       var r = btn.getBoundingClientRect();
       var pad = 14, w = r.width || 92, h = r.height || 26;
-      var spots = [
-        { l: pad,                    b: pad },                       // bottom-left, as authored
-        { l: innerWidth - w - pad,   b: pad },                       // bottom-right
-        { l: pad,                    b: pad + h + 10 },              // one row up on the left
-        { l: innerWidth - w - pad,   b: pad + h + 10 }               // one row up on the right
-      ];
+      // Four candidates was enough while this only avoided CONTROLS. Now that it
+      // avoids text as well, a dense page - the Frameworks module is one - can
+      // have all four taken, and the old code then gave up and sat on whatever
+      // was in the last one. Climbing a few more rows costs nothing (this runs
+      // once per placement, on already-computed layout) and turns "give up" into
+      // a case that almost never happens.
+      var spots = [];
+      for (var row = 0; row < 6; row++) {
+        var bb = pad + row * (h + 10);
+        spots.push({ l: pad, b: bb });                      // left column, climbing
+        spots.push({ l: innerWidth - w - pad, b: bb });     // right column, climbing
+      }
       for (var i = 0; i < spots.length; i++) {
         var s = spots[i];
         var cx = s.l + w / 2, cy = innerHeight - s.b - h / 2;
