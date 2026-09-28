@@ -245,7 +245,7 @@ production. `scripts/vercel-emu.mjs` reads `vercel.json` and applies the same
 four rules Vercel does, in order, and the suite drives a browser against that:
 
 ```bash
-npm run test:redirects           # every link on every page lands somewhere — 6 checks
+npm run test:redirects           # every link on every page lands somewhere — 7 checks
 NET=1 npm run test:redirects     # also verifies off-site destinations over the network
 ```
 
@@ -304,7 +304,16 @@ than by `REPO_*` name, and the renderer does `if (c.repos)` — which is truthy
 for `[]`, so a chapter left with no references has to lose the key entirely or
 it renders a "Read the real thing" heading over nothing.
 
-Each of its six checks is paired with a mutation that reintroduces the bug it
+A rendered-copy scan only sees what a viewer **reads**, so a third check reads
+the built bytes instead: a comment in a served `.js` or `.css` ships to the
+browser too. `growth-school.js` and `growth-school.css` both cited "the
+lifecycle-os repo" in their header comments, and an `index.html` comment carried
+`Anchit-AI-Hustle/lifecycle-os` outright. It matches a repository *name* rather
+than the word — a real slug carries a hyphen or underscore, which separates
+"lifecycle-os repo" from the internal notes that say "the repo" or "this repo"
+and name nothing.
+
+Each of its seven checks is paired with a mutation that reintroduces the bug it
 guards, and each must break only its own check. The mutation is injected into the
 **served DOM before any link is collected**, so each mode drives the same
 discovery and validation path a real regression would — a mutation appended to
@@ -318,6 +327,7 @@ MUT=dead_nav     npm run test:redirects   # a nav target that switches nothing
 MUT=github_link  npm run test:redirects   # a page links to GitHub
 MUT=github_text  npm run test:redirects   # rendered copy says "GitHub"
 MUT=repo_text    npm run test:redirects   # rendered copy names a repository
+MUT=source_repo  npm run test:redirects   # a served file's source names one
 MUT=two_handles  npm run test:redirects   # one identity, two spellings
 ```
 

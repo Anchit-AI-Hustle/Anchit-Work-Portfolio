@@ -4,8 +4,8 @@
  * (ayushi/course.html) both load this file and pass their own COURSE object.
  * Only the content differs; how learning works is defined once here, so a
  * change to the quiz, the simulators or the progress model lands in both at the
- * same time. That is the rule the lifecycle-os repo applies with
- * brand-context.js and region-context.js: one implementation, every surface.
+ * same time. That is the same rule the Lifecycle OS platform applies with its
+ * brand and region context modules: one implementation, every surface.
  *
  * DESIGN DECISIONS WORTH KNOWING
  *
