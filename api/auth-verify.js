@@ -53,32 +53,71 @@ async function fetchKeys() {
   return jwks.keys;
 }
 
+// One in-flight fetch, shared. Without this, N sign-ins arriving together on a
+// cold or just-rotated instance are N simultaneous requests to Google for the
+// same document, and no throttle below can see them - they are all the same
+// first miss.
+let inFlight = null;
+function fetchKeysOnce() {
+  if (!inFlight) inFlight = fetchKeys().finally(() => { inFlight = null; });
+  return inFlight;
+}
+
 async function getKeys() {
   if (jwks.keys.length && Date.now() - jwks.fetchedAt < JWKS_TTL) return jwks.keys;
-  return fetchKeys();
+  return fetchKeysOnce();
 }
 
 // A kid we have never seen is the signal that Google rotated, not that the
-// token is bad. Without this, a warm instance holding the previous key set
+// token is bad. Without a refetch, a warm instance holding the previous key set
 // rejects every valid login for the rest of the hour-long TTL - an outage that
 // starts on its own, affects everyone, and ends on its own, which is close to
 // the worst shape a bug can have.
 //
-// The throttle is on REFETCH ATTEMPTS, not on cache age. Written against cache
-// age - "only refetch if the cached set is over a minute old" - it never fires
-// in the case it exists for: the rotation that matters is the one that happens
-// just after a fetch, when the cache is newest. A test caught that.
-let lastMiss = 0;
+// THE THROTTLE IS PER KID. TWO EARLIER SHAPES WERE BOTH WRONG.
+//
+// 1. One shared timestamp, armed by any miss. That is what shipped, and this
+//    endpoint is public: a stream of tokens carrying fabricated kids keeps the
+//    single timestamp permanently fresh, so the genuinely rotated kid takes the
+//    early return and never refetches. It hands an outsider, on demand, the
+//    exact outage the refetch exists to prevent. (Codex, P2 on the Passion
+//    Table PR carrying the same code. It is right, and this file was identical.)
+//
+// 2. A window on cache age. A long one ("only refetch if the set is over a
+//    minute old") never fires for the rotation that matters, the one just after
+//    a fetch - a test caught that. A short one still refuses every valid login
+//    for the length of the window when a rotation lands inside it. Trading a
+//    long hole for a short one is not a fix.
+//
+// So the cooldown is keyed on the kid that missed. One unknown kid can cost one
+// refetch; it can never stop a different kid from getting its own. There is no
+// shared state left for a forged token to poison.
+//
+// The residual is that N distinct fabricated kids cost N requests to Google's
+// public certs endpoint - a 1:1 fan-out onto a CDN built for exactly that load,
+// and strictly cheaper than the N invocations of this function the attacker is
+// already paying for. That is an acceptable ceiling; refusing valid sign-ins is
+// not.
 const MISS_COOLDOWN = 60 * 1000;
+// Bounded, because the keys come from the request. Insertion-ordered, and a
+// re-noted kid is deleted before being set again, so the first entry is always
+// the least recently missed.
+const MISS_MAX = 500;
+const missed = new Map();
+
+function noteMiss(kid) {
+  if (missed.size >= MISS_MAX) missed.delete(missed.keys().next().value);
+  missed.delete(kid);
+  missed.set(kid, Date.now());
+}
 
 async function keyFor(kid) {
   const key = (await getKeys()).find((k) => k.kid === kid);
   if (key) return key;
-  // Cooldown so a stream of forged tokens with random kids cannot turn into a
-  // stream of requests to Google.
-  if (Date.now() - lastMiss < MISS_COOLDOWN) return undefined;
-  lastMiss = Date.now();
-  return (await fetchKeys()).find((k) => k.kid === kid);
+  const last = missed.get(kid);
+  if (last !== undefined && Date.now() - last < MISS_COOLDOWN) return undefined;
+  noteMiss(kid);
+  return (await fetchKeysOnce()).find((k) => k.kid === kid);
 }
 
 const b64url = (s) => Buffer.from(s.replace(/-/g, '+').replace(/_/g, '/'), 'base64');
@@ -163,4 +202,4 @@ module.exports = async (req, res) => {
 // that probes a forged kid leaves the cooldown armed for the next case - which
 // made the rotation test fail for the suite's own reasons rather than the
 // code's. Production never calls this.
-module.exports._resetKeyCache = () => { jwks = { keys: [], fetchedAt: 0 }; lastMiss = 0; };
+module.exports._resetKeyCache = () => { jwks = { keys: [], fetchedAt: 0 }; inFlight = null; missed.clear(); };
