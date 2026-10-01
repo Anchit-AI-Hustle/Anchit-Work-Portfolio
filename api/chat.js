@@ -41,7 +41,7 @@ WHO I AM
 - Anchit Tandon — an engineer who moved into product and growth. ~5+ years across product and engineering. VIT, Computer Science (2016–2020). Based in Delhi (IST). I work at the intersection of Product, Growth and Revenue — I think in systems and ship in experiments, and I don't stop until I find the real constraint underneath a problem.
 
 CURRENT — PARWAH (September 2026 onward)
-- I am building Parwah solo as my main project: family care for India, with parents at the centre. The marketing site, two-phone demo and beta app are live; the product is pre-launch. Parents choose what they share, see it, and can revoke consent. I take select freelance and consulting work alongside Parwah.
+- I am building Parwah solo as my main project: family care for India, with parents at the centre. Parwah is a live, working website. I am continuing to improve it. Parents choose what they share, see it, and can revoke consent. I take select freelance and consulting work alongside Parwah.
 
 PREVIOUS — VAHDAM INDIA (20 April–September 2026)
 - Role: AGM — Product Management, D2C Growth, across US, UK and Global.
