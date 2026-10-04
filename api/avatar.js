@@ -22,6 +22,8 @@
 //                        inside the D-ID dashboard first); else a default voice
 //   DID_VOICE_ID       Microsoft voice id fallback (default en-US-GuyNeural)
 
+const { KEYS } = require('./_models.js');
+
 const DID_BASE = 'https://api.d-id.com';
 // The source MUST be a clear, front-facing photo of a real face — talking-head
 // engines reject logos/posters ("no face detected"). AnchitTandon-AppLogo.png is
@@ -38,7 +40,7 @@ function authHeader() {
 }
 
 function buildScript(text) {
-  const eleven = (process.env.ELEVENLABS_VOICE_ID || '').trim();
+  const eleven = KEYS.elevenlabsVoice();
   if (eleven) {
     return { type: 'text', input: text, provider: { type: 'elevenlabs', voice_id: eleven } };
   }
@@ -113,7 +115,7 @@ async function viaSelfHosted(text) {
   const r = await fetchTO(url, {
     method: 'POST',
     headers,
-    body: JSON.stringify({ text, sourceUrl: DEFAULT_SOURCE, voiceId: process.env.ELEVENLABS_VOICE_ID || '' }),
+    body: JSON.stringify({ text, sourceUrl: DEFAULT_SOURCE, voiceId: KEYS.elevenlabsVoice() }),
   }, 55000);
   if (!r.ok) return '';
   const j = await r.json().catch(() => null);
@@ -134,7 +136,7 @@ async function handler(req, res) {
     return res.status(200).json({
       configured: !!(auth || selfHosted),
       engine: selfHosted ? 'self-hosted' : (auth ? 'did' : 'none'),
-      voice: process.env.ELEVENLABS_VOICE_ID ? 'cloned' : 'default',
+      voice: KEYS.elevenlabsVoice() ? 'cloned' : 'default',
       source: DEFAULT_SOURCE,
     });
   }

@@ -252,11 +252,23 @@ async function handler(req, res) {
     }
     const data = await r.json();
     const reply = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('').trim();
-    if (!reply) return res.status(502).json({ error: 'empty' });
+    // An empty 200 is still Anthropic failing to answer. It used to return
+    // 'empty' and stop, which left the free providers untried for one of the
+    // three ways the call can fail.
+    if (!reply) {
+      if (anyFree) { try { return await viaFree(); } catch { /* fall through */ } }
+      return res.status(502).json({ error: 'empty' });
+    }
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('X-Chat-Engine', 'claude');
     return res.status(200).json({ reply, engine: 'claude' });
   } catch (e) {
+    // fetch rejecting (DNS, TLS, abort) and malformed JSON both land here, and
+    // both are Anthropic being unavailable - exactly what the fallback exists
+    // for. Only the non-2xx path was covered before.
+    if (anyFree) {
+      try { return await viaFree(); } catch { /* report the original failure */ }
+    }
     return res.status(502).json({ error: 'fetch_failed', message: String(e).slice(0, 200) });
   }
 }

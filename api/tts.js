@@ -31,6 +31,8 @@
 // failing, so free tiers are chained for maximum free usage.
 
 // Signals "this provider is spent — move to the next one".
+const { KEYS } = require('./_models.js');
+
 function isQuota(status) { return status === 429 || status === 402 || status === 403; }
 
 async function fetchTO(url, opts, ms) {
@@ -42,7 +44,7 @@ async function fetchTO(url, opts, ms) {
 
 // 1) ElevenLabs — instant voice clone of your sample. Free tier ~10k chars/mo.
 async function viaElevenLabs(text) {
-  const key = process.env.ELEVENLABS_API_KEY, voice = process.env.ELEVENLABS_VOICE_ID;
+  const key = KEYS.elevenlabs(), voice = KEYS.elevenlabsVoice();
   if (!key || !voice) return null;
   const model = process.env.ELEVENLABS_MODEL || 'eleven_multilingual_v2';
   const r = await fetchTO('https://api.elevenlabs.io/v1/text-to-speech/' + encodeURIComponent(voice), {
@@ -287,7 +289,7 @@ const PROVIDERS = [
 function configured() {
   const e = process.env;
   return {
-    elevenlabs: !!(e.ELEVENLABS_API_KEY && e.ELEVENLABS_VOICE_ID),
+    elevenlabs: !!(KEYS.elevenlabs() && KEYS.elevenlabsVoice()),
     cartesia: !!(e.CARTESIA_API_KEY && e.CARTESIA_VOICE_ID),
     fish: !!(e.FISH_API_KEY && e.FISH_VOICE_ID),
     sarvam: !!e.SARVAM_API_KEY,

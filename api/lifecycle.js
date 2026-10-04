@@ -22,17 +22,12 @@
 //   Competitive intelligence — SIMILARWEB_API_KEY, SEMRUSH_API_KEY (both
 //     optional; used only to enrich the industry read when present).
 
-function geminiKey() {
-  const e = process.env;
-  return (e.GEMINI_API_KEY || e.Gemini_API_Key || e.GEMINI_KEY || e.GOOGLE_API_KEY
-    || e.GOOGLE_GENAI_API_KEY || e.GOOGLE_GEMINI_API_KEY || '').trim();
-}
 // Model ids live in _models.js as a chain per provider, not one pinned id here.
 // Every id this file used to hardcode has since been retired by its provider.
-const { tryModels, httpError } = require('./_models.js');
+const { tryModels, httpError, KEYS } = require('./_models.js');
 
 function haveAnyProvider() {
-  return !!(process.env.GROQ_API_KEY || process.env.CEREBRAS_API_KEY || geminiKey() || process.env.OPENROUTER_API_KEY);
+  return !!(KEYS.groq() || KEYS.cerebras() || KEYS.gemini() || KEYS.openrouter());
 }
 
 // ── Competitive-intelligence layer (SimilarWeb / SEMrush, both optional) ──
@@ -128,11 +123,11 @@ async function geminiGen(key, model, prompt) {
 
 async function generate(prompt) {
   const providers = [];
-  if (process.env.GROQ_API_KEY) providers.push(() => tryModels('groq', (m) => oaiChat('https://api.groq.com/openai/v1/chat/completions', process.env.GROQ_API_KEY, m, prompt, true)));
-  if (process.env.CEREBRAS_API_KEY) providers.push(() => tryModels('cerebras', (m) => oaiChat('https://api.cerebras.ai/v1/chat/completions', process.env.CEREBRAS_API_KEY, m, prompt, true)));
-  const gk = geminiKey();
+  if (KEYS.groq()) providers.push(() => tryModels('groq', (m) => oaiChat('https://api.groq.com/openai/v1/chat/completions', KEYS.groq(), m, prompt, true)));
+  if (KEYS.cerebras()) providers.push(() => tryModels('cerebras', (m) => oaiChat('https://api.cerebras.ai/v1/chat/completions', KEYS.cerebras(), m, prompt, true)));
+  const gk = KEYS.gemini();
   if (gk) providers.push(() => tryModels('gemini', (m) => geminiGen(gk, m, prompt)));
-  if (process.env.OPENROUTER_API_KEY) providers.push(() => tryModels('openrouter', (m) => oaiChat('https://openrouter.ai/api/v1/chat/completions', process.env.OPENROUTER_API_KEY, m, prompt, false, { 'HTTP-Referer': 'https://anchit-tandon.com/d2c-lifecycle-os', 'X-Title': 'D2C-LifeCycle-OS' })));
+  if (KEYS.openrouter()) providers.push(() => tryModels('openrouter', (m) => oaiChat('https://openrouter.ai/api/v1/chat/completions', KEYS.openrouter(), m, prompt, false, { 'HTTP-Referer': 'https://anchit-tandon.com/d2c-lifecycle-os', 'X-Title': 'D2C-LifeCycle-OS' })));
   // Why the failures are collected rather than swallowed: a silent `catch`
   // here is what made a fully dead cascade look identical to "no key set" —
   // both produced the deterministic template with nothing to explain it.
