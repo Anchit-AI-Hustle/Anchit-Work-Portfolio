@@ -31,6 +31,8 @@
 // failing, so free tiers are chained for maximum free usage.
 
 // Signals "this provider is spent — move to the next one".
+const { KEYS } = require('./_models.js');
+
 function isQuota(status) { return status === 429 || status === 402 || status === 403; }
 
 async function fetchTO(url, opts, ms) {
@@ -42,7 +44,7 @@ async function fetchTO(url, opts, ms) {
 
 // 1) ElevenLabs — instant voice clone of your sample. Free tier ~10k chars/mo.
 async function viaElevenLabs(text) {
-  const key = process.env.ELEVENLABS_API_KEY, voice = process.env.ELEVENLABS_VOICE_ID;
+  const key = KEYS.elevenlabs(), voice = KEYS.elevenlabsVoice();
   if (!key || !voice) return null;
   const model = process.env.ELEVENLABS_MODEL || 'eleven_multilingual_v2';
   const r = await fetchTO('https://api.elevenlabs.io/v1/text-to-speech/' + encodeURIComponent(voice), {
@@ -287,7 +289,7 @@ const PROVIDERS = [
 function configured() {
   const e = process.env;
   return {
-    elevenlabs: !!(e.ELEVENLABS_API_KEY && e.ELEVENLABS_VOICE_ID),
+    elevenlabs: !!(KEYS.elevenlabs() && KEYS.elevenlabsVoice()),
     cartesia: !!(e.CARTESIA_API_KEY && e.CARTESIA_VOICE_ID),
     fish: !!(e.FISH_API_KEY && e.FISH_VOICE_ID),
     sarvam: !!e.SARVAM_API_KEY,
@@ -321,15 +323,24 @@ async function handler(req, res) {
       // voice id blank, which reads as "not configured" and is easy to misread
       // as "my key did not work".
       missing: (() => {
+        // Each entry is [name to report, is it actually set]. The second half
+        // has to use the SAME resolver the provider uses, not the canonical
+        // variable name: with ELEVEN_LABS_API_KEY set and no voice id, checking
+        // process.env.ELEVENLABS_API_KEY saw both names absent, concluded the
+        // provider was untouched, and suppressed the warning — so /api/tts
+        // reported neither a configured provider nor the missing credential.
+        // That is the "my key did not work" confusion this block exists to
+        // prevent, produced by the block itself.
+        const env = (v) => !!process.env[v];
         const need = {
-          elevenlabs: ['ELEVENLABS_API_KEY', 'ELEVENLABS_VOICE_ID'],
-          cartesia:   ['CARTESIA_API_KEY', 'CARTESIA_VOICE_ID'],
-          fish:       ['FISH_API_KEY', 'FISH_VOICE_ID'],
-          xtts:       ['XTTS_API_URL'],
+          elevenlabs: [['ELEVENLABS_API_KEY', !!KEYS.elevenlabs()], ['ELEVENLABS_VOICE_ID', !!KEYS.elevenlabsVoice()]],
+          cartesia:   [['CARTESIA_API_KEY', env('CARTESIA_API_KEY')], ['CARTESIA_VOICE_ID', env('CARTESIA_VOICE_ID')]],
+          fish:       [['FISH_API_KEY', env('FISH_API_KEY')], ['FISH_VOICE_ID', env('FISH_VOICE_ID')]],
+          xtts:       [['XTTS_API_URL', env('XTTS_API_URL')]],
         };
         const out = {};
         for (const [name, vars] of Object.entries(need)) {
-          const absent = vars.filter((v) => !process.env[v]);
+          const absent = vars.filter(([, set]) => !set).map(([v]) => v);
           // Only report a partially-configured provider — an untouched one is
           // not a problem, it is simply not in use.
           if (absent.length && absent.length < vars.length) out[name] = absent;
