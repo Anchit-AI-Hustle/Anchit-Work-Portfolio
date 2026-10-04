@@ -29,6 +29,8 @@
 
 // Sonnet by default for warmer, more natural answers; override with CLAUDE_MODEL
 // (e.g. claude-haiku-4-5-20251001 for the lowest voice latency).
+const { KEYS } = require('./_models.js');
+
 const MODEL = process.env.CLAUDE_MODEL || 'claude-sonnet-4-6';
 const XTTS_URL = (process.env.XTTS_PACKET_URL || process.env.XTTS_API_URL || '').replace(/\/$/, '');
 
@@ -79,7 +81,7 @@ async function ttsXtts(text) {
 }
 
 async function ttsElevenLabs(text) {
-  const key = process.env.ELEVENLABS_API_KEY, voice = process.env.ELEVENLABS_VOICE_ID;
+  const key = KEYS.elevenlabs(), voice = KEYS.elevenlabsVoice();
   if (!key || !voice) return null;
   const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}`, {
     method: 'POST',

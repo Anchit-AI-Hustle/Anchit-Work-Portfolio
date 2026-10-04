@@ -123,6 +123,13 @@ const KEYS = {
   cerebras: () => envAny('CEREBRAS_API_KEY', 'Cerebras_API_Key'),
   openrouter: () => envAny('OPENROUTER_API_KEY', 'OpemRouter_API_KEY',
     'OpenRouter_API_KEY', 'OPEN_ROUTER_API_KEY', 'OPENROUTER_KEY'),
+  // Named in the table above as one of the three mismatches, so it needs a
+  // reader as much as the others do - listing a bug in a comment is not
+  // fixing it, and the comment made it look handled.
+  elevenlabs: () => envAny('ELEVENLABS_API_KEY', 'ELEVEN_LABS_API_KEY',
+    'ElevenLabs_API_Key', 'ELEVENLABS_KEY'),
+  elevenlabsVoice: () => envAny('ELEVENLABS_VOICE_ID', 'ELEVEN_LABS_VOICE_ID',
+    'ElevenLabs_Voice_Id', 'ELEVENLABS_VOICE'),
 };
 
 // ── the free cascade ───────────────────────────────────────────────────────

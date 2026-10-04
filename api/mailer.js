@@ -14,16 +14,12 @@
 // copy, with a deterministic fallback that ALWAYS returns fully designed HTML —
 // no key required. No proprietary data, no brand-specific hardcoding.
 
-function geminiKey() {
-  const e = process.env;
-  return (e.GEMINI_API_KEY || e.Gemini_API_Key || e.GEMINI_KEY || e.GOOGLE_API_KEY || e.GOOGLE_GENAI_API_KEY || '').trim();
-}
 // Model ids live in _models.js as a chain per provider, not one pinned id here.
 // Every id this file used to hardcode has since been retired by its provider.
-const { tryModels, httpError } = require('./_models.js');
+const { tryModels, httpError, KEYS } = require('./_models.js');
 
 function haveAnyProvider() {
-  return !!(process.env.GROQ_API_KEY || process.env.CEREBRAS_API_KEY || geminiKey() || process.env.OPENROUTER_API_KEY);
+  return !!(KEYS.groq() || KEYS.cerebras() || KEYS.gemini() || KEYS.openrouter());
 }
 async function fetchTO(url, opts, ms) {
   const c = new AbortController();
@@ -50,11 +46,11 @@ async function geminiGen(key, model, prompt) {
 }
 async function generateCopy(prompt) {
   const providers = [];
-  if (process.env.GROQ_API_KEY) providers.push(() => tryModels('groq', (m) => oaiChat('https://api.groq.com/openai/v1/chat/completions', process.env.GROQ_API_KEY, m, prompt, true)));
-  if (process.env.CEREBRAS_API_KEY) providers.push(() => tryModels('cerebras', (m) => oaiChat('https://api.cerebras.ai/v1/chat/completions', process.env.CEREBRAS_API_KEY, m, prompt, true)));
-  const gk = geminiKey();
+  if (KEYS.groq()) providers.push(() => tryModels('groq', (m) => oaiChat('https://api.groq.com/openai/v1/chat/completions', KEYS.groq(), m, prompt, true)));
+  if (KEYS.cerebras()) providers.push(() => tryModels('cerebras', (m) => oaiChat('https://api.cerebras.ai/v1/chat/completions', KEYS.cerebras(), m, prompt, true)));
+  const gk = KEYS.gemini();
   if (gk) providers.push(() => tryModels('gemini', (m) => geminiGen(gk, m, prompt)));
-  if (process.env.OPENROUTER_API_KEY) providers.push(() => tryModels('openrouter', (m) => oaiChat('https://openrouter.ai/api/v1/chat/completions', process.env.OPENROUTER_API_KEY, m, prompt, false, { 'HTTP-Referer': 'https://anchit-tandon.com/lifecycle-os', 'X-Title': 'Lifecycle OS Mailer Studio' })));
+  if (KEYS.openrouter()) providers.push(() => tryModels('openrouter', (m) => oaiChat('https://openrouter.ai/api/v1/chat/completions', KEYS.openrouter(), m, prompt, false, { 'HTTP-Referer': 'https://anchit-tandon.com/lifecycle-os', 'X-Title': 'Lifecycle OS Mailer Studio' })));
   // Collected, not swallowed — see the note in _models.js. A dead model id and
   // an unset key used to be indistinguishable from the response.
   const errs = [];

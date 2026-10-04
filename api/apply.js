@@ -11,17 +11,12 @@
 //   GEMINI_API_KEY (or Gemini_API_Key / GEMINI_KEY / GOOGLE_API_KEY …)  free Gemini key
 //   GEMINI_MODEL   optional; forced first, else the chain in _models.js
 
-function geminiKey() {
-  const e = process.env;
-  return (e.GEMINI_API_KEY || e.Gemini_API_Key || e.GEMINI_KEY || e.GOOGLE_API_KEY
-    || e.GOOGLE_GENAI_API_KEY || e.GOOGLE_GEMINI_API_KEY || '').trim();
-}
 // Model ids live in _models.js as a chain per provider, not one pinned id here.
 // Every id this file used to hardcode has since been retired by its provider.
-const { tryModels, httpError } = require('./_models.js');
+const { tryModels, httpError, KEYS } = require('./_models.js');
 
 function haveAnyProvider() {
-  return !!(process.env.GROQ_API_KEY || process.env.CEREBRAS_API_KEY || geminiKey() || process.env.OPENROUTER_API_KEY);
+  return !!(KEYS.groq() || KEYS.cerebras() || KEYS.gemini() || KEYS.openrouter());
 }
 
 async function verifySupabase(token, url, anonKey) {
@@ -131,11 +126,11 @@ async function geminiGen(key, model, prompt) {
 // Try free providers in order of free-tier generosity until one returns a kit.
 async function generate(prompt) {
   const providers = [];
-  if (process.env.GROQ_API_KEY) providers.push({ n: 'groq', run: () => tryModels('groq', (m) => oaiChat('https://api.groq.com/openai/v1/chat/completions', process.env.GROQ_API_KEY, m, prompt, true)) });
-  if (process.env.CEREBRAS_API_KEY) providers.push({ n: 'cerebras', run: () => tryModels('cerebras', (m) => oaiChat('https://api.cerebras.ai/v1/chat/completions', process.env.CEREBRAS_API_KEY, m, prompt, true)) });
-  const gk = geminiKey();
+  if (KEYS.groq()) providers.push({ n: 'groq', run: () => tryModels('groq', (m) => oaiChat('https://api.groq.com/openai/v1/chat/completions', KEYS.groq(), m, prompt, true)) });
+  if (KEYS.cerebras()) providers.push({ n: 'cerebras', run: () => tryModels('cerebras', (m) => oaiChat('https://api.cerebras.ai/v1/chat/completions', KEYS.cerebras(), m, prompt, true)) });
+  const gk = KEYS.gemini();
   if (gk) providers.push({ n: 'gemini', run: () => tryModels('gemini', (m) => geminiGen(gk, m, prompt)) });
-  if (process.env.OPENROUTER_API_KEY) providers.push({ n: 'openrouter', run: () => tryModels('openrouter', (m) => oaiChat('https://openrouter.ai/api/v1/chat/completions', process.env.OPENROUTER_API_KEY, m, prompt, false, { 'HTTP-Referer': 'https://anchit-tandon.com/jobhunt', 'X-Title': 'JobHunt' })) });
+  if (KEYS.openrouter()) providers.push({ n: 'openrouter', run: () => tryModels('openrouter', (m) => oaiChat('https://openrouter.ai/api/v1/chat/completions', KEYS.openrouter(), m, prompt, false, { 'HTTP-Referer': 'https://anchit-tandon.com/jobhunt', 'X-Title': 'JobHunt' })) });
 
   const errs = [];
   for (const p of providers) {
