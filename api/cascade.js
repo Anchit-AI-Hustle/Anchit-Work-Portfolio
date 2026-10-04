@@ -23,6 +23,8 @@ const key = () => process.env.ANTHROPIC_API_KEY;
 // response carried the "request failed" cache header rather than the "no key"
 // one. Trying several and reporting which answered means a wrong id degrades
 // to a slower success instead of an invisible placeholder.
+const { freeGenerate, KEYS } = require('./_models.js');
+
 const MODELS = [
   process.env.CASCADE_MODEL,
   'claude-sonnet-5',
@@ -173,7 +175,18 @@ async function handler(req, res) {
   // Booleans and model names only — never a key. This exists because the same
   // class of failure hid here for months behind a silent fallback.
   if (req.method === 'GET') {
-    if (!key()) return res.status(200).json({ configured: false, reason: 'ANTHROPIC_API_KEY not set', models: MODELS });
+    // Which providers hold a usable key. Reported by NAME ONLY - this is the
+    // view that would have shown, months ago, that Gemini's key was present
+    // all along under a spelling nothing read.
+    const free = { gemini: !!KEYS.gemini(), groq: !!KEYS.groq(), cerebras: !!KEYS.cerebras(), openrouter: !!KEYS.openrouter() };
+    const freeNames = Object.keys(free).filter((k) => free[k]);
+    if (!key()) {
+      return res.status(200).json({
+        configured: freeNames.length > 0, anthropic: false, free, freeProviders: freeNames,
+        reason: freeNames.length ? 'ANTHROPIC_API_KEY not set; serving from the free cascade' : 'no provider key set',
+        models: MODELS,
+      });
+    }
     const c = new AbortController(); const t = setTimeout(() => c.abort(), 20000);
     const tried = [];
     try {
@@ -182,19 +195,27 @@ async function handler(req, res) {
         catch (e) { tried.push({ model: m, ok: false, error: String(e.message).slice(0, 140) }); }
       }
     } finally { clearTimeout(t); }
-    return res.status(200).json({ configured: true, tried });
+    const anthropicOk = tried.some((x) => x.ok);
+    return res.status(200).json({
+      configured: true, anthropic: anthropicOk, tried,
+      free, freeProviders: freeNames,
+      servedBy: anthropicOk ? 'anthropic' : (freeNames.length ? 'free cascade' : 'nothing - every provider is down'),
+    });
   }
 
   let body = {};
   try { body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {}); } catch {}
   const task = String(body.task || '').replace(/\s+/g, ' ').trim().slice(0, 400);
   if (!task) return res.status(400).json({ error: 'Missing "task"' });
-  if (!key()) return res.status(503).json({ error: 'ANTHROPIC_API_KEY is not configured' });
+  const anyFree = KEYS.gemini() || KEYS.groq() || KEYS.cerebras() || KEYS.openrouter();
+  if (!key() && !anyFree) {
+    return res.status(503).json({ error: 'No model provider is configured (Anthropic, Gemini, Groq, Cerebras or OpenRouter).' });
+  }
 
   const c = new AbortController(); const t = setTimeout(() => c.abort(), 45000);
   const attempts = [];
   try {
-    for (const model of MODELS) {
+    for (const model of (key() ? MODELS : [])) {
       const t0 = Date.now();
       try {
         const guide = shape(await callClaude(model, task, c.signal), task);
@@ -206,7 +227,32 @@ async function handler(req, res) {
         attempts.push({ model, rank: attempts.length + 1, ok: false, latencyMs: Date.now() - t0, error: String(e.message).slice(0, 160) });
       }
     }
-    // Every model failed. Say so plainly rather than returning a placeholder
+    // ── Anthropic could not answer. Fall through to the free providers. ──
+    //
+    // The whole chain returns "credit balance is too low" the moment the
+    // Anthropic account runs dry, and every guide then came back as the
+    // generic five-step placeholder. A spent balance on ONE provider should
+    // not take the feature down when Gemini, Groq, Cerebras or OpenRouter is
+    // configured - and Gemini's key has been sitting in the project the whole
+    // time under a name nothing read (see _models.js).
+    if (anyFree) {
+      const t0 = Date.now();
+      try {
+        const { text, provider, model } = await freeGenerate(`Write the guide for: ${task}`, { system: SYSTEM, maxTokens: 8000 });
+        const m = text.match(/\{[\s\S]*\}/);
+        if (!m) throw new Error('no JSON in reply');
+        const guide = shape(JSON.parse(m[0]), task);
+        const id = provider + '/' + model;
+        guide.provenance = { models: [id], consensus: 1 };
+        const answer = { model: id, rank: attempts.length + 1, ok: true, latencyMs: Date.now() - t0, guide };
+        res.setHeader('Cache-Control', 'no-store');
+        return res.status(200).json({ guide, answers: [...attempts, answer], top: [answer] });
+      } catch (e) {
+        attempts.push({ model: 'free-cascade', rank: attempts.length + 1, ok: false, latencyMs: Date.now() - t0, error: String(e.message).slice(0, 220) });
+      }
+    }
+
+    // Every provider failed. Say so plainly rather than returning a placeholder
     // dressed as an answer — that is exactly how the useless guide went live.
     return res.status(502).json({ error: 'Every model failed to produce a guide.', answers: attempts });
   } finally { clearTimeout(t); }

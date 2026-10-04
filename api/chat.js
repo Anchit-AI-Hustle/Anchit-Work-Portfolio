@@ -85,6 +85,8 @@ STYLE & CONTACT
 //
 // Timing-safe comparison, since a plain === on a secret leaks its prefix through
 // response timing to anyone willing to measure.
+const { freeGenerate, KEYS } = require('./_models.js');
+
 function isOperator(req) {
   const expected = (process.env.CHAT_DEBUG_TOKEN || '').trim();
   if (!expected) return false;                       // unset → nobody, not everybody
@@ -126,6 +128,10 @@ async function handler(req, res) {
       configured: {
         'google-agent': googleAgent.configured(),
         claude: !!process.env.ANTHROPIC_API_KEY,
+        gemini: !!KEYS.gemini(),
+        groq: !!KEYS.groq(),
+        cerebras: !!KEYS.cerebras(),
+        openrouter: !!KEYS.openrouter(),
       },
       claudeModel: MODEL,
       // Deliberately does NOT mention the probe. Advertising it in a public,
@@ -167,7 +173,8 @@ async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey && !googleAgent.configured()) return res.status(503).json({ error: 'not_configured' });
+  const anyFree = KEYS.gemini() || KEYS.groq() || KEYS.cerebras() || KEYS.openrouter();
+  if (!apiKey && !googleAgent.configured() && !anyFree) return res.status(503).json({ error: 'not_configured' });
 
   let body = {};
   try { body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {}); } catch {}
@@ -188,7 +195,7 @@ async function handler(req, res) {
         return res.status(200).json({ reply: out.reply, engine: 'google-agent', googleSession: out.session || '' });
       }
     } catch { /* fall through to Claude */ }
-    if (!apiKey) return res.status(502).json({ error: 'google_agent_failed' });
+    if (!apiKey && !anyFree) return res.status(502).json({ error: 'google_agent_failed' });
   }
 
   // Optional short history: [{role:'user'|'assistant', content:'...'}]
@@ -197,6 +204,25 @@ async function handler(req, res) {
   ) : [];
   const messages = [...history.map(m => ({ role: m.role, content: m.content.slice(0, 2000) })),
                     { role: 'user', content: message }];
+
+  // Claude when the key works; the free cascade when it does not. The account
+  // running out of credit returned 502 for every message and dropped the chat
+  // to its offline keyword bot - with Gemini's key sitting unread in the
+  // project the whole time (see _models.js).
+  async function viaFree() {
+    const convo = messages.map((m) => (m.role === 'user' ? 'User: ' : 'Anchit: ') + m.content).join('\n');
+    const { text, provider, model } = await freeGenerate(convo + '\nAnchit:', { system: PERSONA, maxTokens: 700 });
+    const reply = String(text || '').trim();
+    if (!reply) throw new Error('empty');
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Chat-Engine', provider);
+    return res.status(200).json({ reply, engine: provider, model });
+  }
+
+  if (!apiKey) {
+    try { return await viaFree(); }
+    catch (e) { return res.status(502).json({ error: 'upstream', reason: String(e.message).slice(0, 200) }); }
+  }
 
   try {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
@@ -215,6 +241,9 @@ async function handler(req, res) {
       // slice of the upstream body — operator diagnostics, not something to
       // hand every caller of a CORS-open endpoint. The client never read
       // either: it only needs to know the call failed, so it can fall back.
+      if (anyFree) {
+        try { return await viaFree(); } catch { /* report Anthropic's reason below */ }
+      }
       if (isOperator(req)) {
         res.setHeader('X-Chat-Error', reason);
         return res.status(502).json({ error: 'upstream', reason, status: r.status, detail: detail.slice(0, 200) });
