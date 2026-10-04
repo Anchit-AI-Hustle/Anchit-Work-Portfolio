@@ -323,15 +323,24 @@ async function handler(req, res) {
       // voice id blank, which reads as "not configured" and is easy to misread
       // as "my key did not work".
       missing: (() => {
+        // Each entry is [name to report, is it actually set]. The second half
+        // has to use the SAME resolver the provider uses, not the canonical
+        // variable name: with ELEVEN_LABS_API_KEY set and no voice id, checking
+        // process.env.ELEVENLABS_API_KEY saw both names absent, concluded the
+        // provider was untouched, and suppressed the warning — so /api/tts
+        // reported neither a configured provider nor the missing credential.
+        // That is the "my key did not work" confusion this block exists to
+        // prevent, produced by the block itself.
+        const env = (v) => !!process.env[v];
         const need = {
-          elevenlabs: ['ELEVENLABS_API_KEY', 'ELEVENLABS_VOICE_ID'],
-          cartesia:   ['CARTESIA_API_KEY', 'CARTESIA_VOICE_ID'],
-          fish:       ['FISH_API_KEY', 'FISH_VOICE_ID'],
-          xtts:       ['XTTS_API_URL'],
+          elevenlabs: [['ELEVENLABS_API_KEY', !!KEYS.elevenlabs()], ['ELEVENLABS_VOICE_ID', !!KEYS.elevenlabsVoice()]],
+          cartesia:   [['CARTESIA_API_KEY', env('CARTESIA_API_KEY')], ['CARTESIA_VOICE_ID', env('CARTESIA_VOICE_ID')]],
+          fish:       [['FISH_API_KEY', env('FISH_API_KEY')], ['FISH_VOICE_ID', env('FISH_VOICE_ID')]],
+          xtts:       [['XTTS_API_URL', env('XTTS_API_URL')]],
         };
         const out = {};
         for (const [name, vars] of Object.entries(need)) {
-          const absent = vars.filter((v) => !process.env[v]);
+          const absent = vars.filter(([, set]) => !set).map(([v]) => v);
           // Only report a partially-configured provider — an untouched one is
           // not a problem, it is simply not in use.
           if (absent.length && absent.length < vars.length) out[name] = absent;
