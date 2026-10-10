@@ -1167,33 +1167,6 @@
     color: var(--ink-dim); max-width: 880px;
   }
   .lede em { font-style: italic; color: var(--primary); font-weight: 400; }
-  /* Hero stats — compact, consistent */
-  .hero-stats {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
-    margin-bottom: 40px;
-  }
-  @media (max-width: 880px) { .hero-stats { grid-template-columns: repeat(2, 1fr); } }
-  .hero-stat {
-    background: var(--bg-elev); border-radius: 14px; padding: 20px 18px;
-    border: 1px solid var(--rule);
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s, border-color 0.3s;
-    position: relative; overflow: hidden;
-  }
-  .hero-stat:hover { transform: translateY(-6px) rotate(-1deg); box-shadow: var(--shadow-md); border-color: var(--primary); }
-  .hero-stat:nth-child(2):hover { transform: translateY(-6px) rotate(1deg); }
-  .hero-stat:nth-child(4):hover { transform: translateY(-6px) rotate(1deg); }
-  .hero-stat .num {
-    font-family: var(--font-display); font-weight: 400;
-    font-size: clamp(26px, 3.4vw, 42px); line-height: 1;
-    letter-spacing: 0; color: var(--ink);
-    font-variation-settings: "SOFT" 70, "WONK" 1;
-  }
-  .hero-stat .num em { font-style: italic; color: var(--primary); }
-  .hero-stat .label {
-    font-family: var(--font-mono); font-size: 10px; font-weight: 500;
-    letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-dim);
-    margin-top: 12px; line-height: 1.45; max-width: 220px;
-  }
 
   /* ============ HOME IDENTITY + CHAT GRID ============ */
   /* ============ HOME CAREER TIMELINE ============ */
@@ -1897,11 +1870,6 @@
     color: var(--ink); margin-bottom: var(--sp-3); text-wrap: balance; }
   .thesis-p { color: var(--ink-dim); font-size: var(--fs-body); line-height: 1.6; margin-bottom: var(--sp-4); }
   .thesis-p em { color: var(--accent); font-style: italic; }
-  .thesis-list { list-style: none; display: grid; gap: var(--sp-3); margin: 0 0 var(--sp-4); padding: 0; }
-  .thesis-list li { color: var(--ink-dim); font-size: var(--fs-sm); line-height: 1.55; padding-left: var(--sp-4);
-    background-image: radial-gradient(circle 3px at 3px .72em, var(--accent) 99%, transparent 100%);
-    background-repeat: no-repeat; }
-  .thesis-list strong { color: var(--ink); font-weight: 600; }
   .thesis-close { margin-bottom: 0; color: var(--ink); }
   @media (max-width: 560px) { .thesis { padding: var(--sp-5) var(--sp-4); } }
 
@@ -2566,15 +2534,13 @@
     100% { opacity: 1; transform: translateY(0)    scale(1); }
   }
   @keyframes mAccentPulse { 0%, 100% { opacity: .82; } 50% { opacity: 1; } }
-  .hero-stats.in .hero-stat .num,
   .work-stats.in .work-stat .num {
     animation: mGrowRise .85s cubic-bezier(.2,.9,.25,1.2) both;
   }
-  .hero-stats.in .hero-stat:nth-child(1) .num, .work-stats.in .work-stat:nth-child(1) .num { animation-delay: .10s; }
-  .hero-stats.in .hero-stat:nth-child(2) .num, .work-stats.in .work-stat:nth-child(2) .num { animation-delay: .20s; }
-  .hero-stats.in .hero-stat:nth-child(3) .num, .work-stats.in .work-stat:nth-child(3) .num { animation-delay: .30s; }
-  .hero-stats.in .hero-stat:nth-child(4) .num, .work-stats.in .work-stat:nth-child(4) .num { animation-delay: .40s; }
-  .hero-stats.in .hero-stat .num em,
+  .work-stats.in .work-stat:nth-child(1) .num { animation-delay: .10s; }
+  .work-stats.in .work-stat:nth-child(2) .num { animation-delay: .20s; }
+  .work-stats.in .work-stat:nth-child(3) .num { animation-delay: .30s; }
+  .work-stats.in .work-stat:nth-child(4) .num { animation-delay: .40s; }
   .work-stats.in .work-stat .num em { animation: mAccentPulse 1.1s ease-out .55s 1; }
 
   /* The one "0 → 1" metric literally spins into existence from nothing. */
@@ -2583,10 +2549,6 @@
     65%  { opacity: 1; transform: scale(1.18) rotate(10deg); }
     100% { opacity: 1; transform: scale(1)    rotate(0); }
   }
-  .hero-stats.in .hero-stat:nth-child(3) .num {
-    animation: mSpawn 1s cubic-bezier(.2,.8,.2,1.2) .25s both;
-  }
-
   /* Achievement badges stamp in with a bounce, slightly rotated like a seal. */
   @keyframes mStamp {
     0%   { opacity: 0; transform: scale(.3)  rotate(-8deg); }
@@ -2640,7 +2602,7 @@
   .nav-card:hover .nav-card-arrow { transform: translateX(6px); }
 
   
-  html[data-motion="off"] .hero-stats.in .hero-stat .num, html[data-motion="off"] .work-stats.in .work-stat .num, html[data-motion="off"] .hero-stats.in .hero-stat .num em, html[data-motion="off"] .work-stats.in .work-stat .num em, html[data-motion="off"] .work-item.in .work-impact-chip, html[data-motion="off"] .work-item.in .work-impact-chip.red, html[data-motion="off"] .work-item.in .work-impact-chip.gold, html[data-motion="off"] .work-item.in .tags .tag, html[data-motion="off"] .home-timeline.tl-armed .home-tl-item, html[data-motion="off"] .home-timeline.tl-armed .home-tl-item.tl-in {
+  html[data-motion="off"] .work-stats.in .work-stat .num, html[data-motion="off"] .work-stats.in .work-stat .num em, html[data-motion="off"] .work-item.in .work-impact-chip, html[data-motion="off"] .work-item.in .work-impact-chip.red, html[data-motion="off"] .work-item.in .work-impact-chip.gold, html[data-motion="off"] .work-item.in .tags .tag, html[data-motion="off"] .home-timeline.tl-armed .home-tl-item, html[data-motion="off"] .home-timeline.tl-armed .home-tl-item.tl-in {
       animation: none !important; opacity: 1 !important; transform: none !important;
     }
   html[data-motion="off"] .home-tl-item.tl-in .home-tl-dot::after { animation: none !important; opacity: 0 !important; }
@@ -2992,60 +2954,6 @@
   .work-impact-chip.gold { background: rgba(181,135,10,0.14); color: #7A5400; }
   [data-theme="dark"] .work-impact-chip.gold { color: #E0B040; }
 
-  /* ============ PRODUCTS SHIPPED GRID (ATS + visual) ============ */
-  /* Bento: a six-column bed with a 2/2/3/3 phrase, so a row of products has
-     texture instead of being a wall of identical pills. */
-  .products-grid {
-    display: grid; grid-template-columns: repeat(6, 1fr);
-    gap: 12px; margin-top: 32px;
-  }
-  .products-grid > * { grid-column: span 2; }
-  .products-grid > *:nth-child(6n + 3),
-  .products-grid > *:nth-child(6n + 4) { grid-column: span 3; }
-  .product-chip {
-    position: relative;
-    background: var(--bg-elev); border-radius: 14px; padding: 18px 16px;
-    display: flex; flex-direction: column; gap: 6px;
-    transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
-    border: 1px solid var(--rule);
-    text-decoration: none;
-    cursor: pointer;
-  }
-  .product-chip:hover { transform: translateY(-4px); box-shadow: var(--shadow-sm); border-color: var(--primary); }
-  .product-chip-name { font-size: 14px; font-weight: 500; color: var(--ink); padding-right: 20px; }
-  .product-chip-co { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-dim); }
-  .product-chip-metric { font-family: var(--font-mono); font-size: 12px; color: var(--primary); margin-top: 2px; }
-  [data-theme="light"] .product-chip-metric { color: #C03010; }
-  .product-chip-link {
-    position: absolute; top: 12px; right: 12px;
-    width: 28px; height: 28px;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 50%;
-    background: transparent;
-    transition: all 0.22s ease;
-    z-index: 5;
-  }
-  .product-chip-link:hover {
-    background: rgba(255, 255, 255, 0.1);
-  }
-  [data-theme="light"] .product-chip-link:hover {
-    background: rgba(0, 0, 0, 0.05);
-  }
-  .product-chip-arrow {
-    width: 14px; height: 14px; color: var(--ink-dim); opacity: 0.35;
-    transition: all 0.22s ease;
-  }
-  .product-chip:hover .product-chip-arrow {
-    color: var(--primary); opacity: 0.95;
-  }
-  .product-chip-link:hover .product-chip-arrow {
-    color: var(--primary); opacity: 1; transform: translate(1px, -1px);
-  }
-  @media (max-width: 600px) {
-    .products-grid { grid-template-columns: repeat(2, 1fr); }
-    .products-grid > *, .products-grid > *:nth-child(n) { grid-column: span 1; }
-  }
-
   /* ============ ATS KEYWORDS (visible on page, semantic HTML) ============ */
   .ats-section {
     margin-top: 72px; padding: 28px 32px; border-radius: 20px;
@@ -3097,8 +3005,7 @@
 
   /* ============ MICRO-INTERACTIONS — hover, press, focus across all views ============ */
   .work-stat, .work-item, .now-focus-item, .now-metrics-card, .now-stack-card, .now-vahdam-card,
-  .now-role-card, .about-value-item, .nav-card, .contact-card, .build-card, .product-chip,
-  .meta-block li, .home-tl-item {
+  .now-role-card, .about-value-item, .nav-card, .contact-card, .build-card,   .meta-block li, .home-tl-item {
     transition: transform 0.32s cubic-bezier(0.16,1,0.3,1), border-color 0.32s ease, box-shadow 0.32s ease, background 0.32s ease;
   }
   .work-stat:hover, .now-focus-item:hover, .about-value-item:hover,
@@ -3108,7 +3015,7 @@
     box-shadow: 0 12px 32px rgba(255, 77, 31, 0.10);
   }
   .work-item:hover { transform: translateX(6px); }
-  .product-chip:hover, .home-tl-item:hover { transform: translateY(-3px); border-color: var(--primary); }
+  .home-tl-item:hover { transform: translateY(-3px); border-color: var(--primary); }
   .meta-block li { padding-left: 0; }
   .meta-block li:hover { padding-left: 8px; border-bottom-color: var(--primary); }
 
@@ -3157,21 +3064,15 @@
   a:focus-visible, button:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; border-radius: 4px; }
 
   
-  html[data-motion="off"] .work-stat:hover, html[data-motion="off"] .work-item:hover, html[data-motion="off"] .now-focus-item:hover, html[data-motion="off"] .about-value-item:hover, html[data-motion="off"] .product-chip:hover, html[data-motion="off"] .home-tl-item:hover, html[data-motion="off"] .tag:hover { transform: none; }
+  html[data-motion="off"] .work-stat:hover, html[data-motion="off"] .work-item:hover, html[data-motion="off"] .now-focus-item:hover, html[data-motion="off"] .about-value-item:hover, html[data-motion="off"] .home-tl-item:hover, html[data-motion="off"] .tag:hover { transform: none; }
 
 </style>
   
 <style>
   @media (max-width: 600px) {
-    .home-timeline, .products-grid, .hero-stats {
+    .home-timeline {
       padding: 16px !important;
       margin-bottom: 24px !important;
-    }
-    .hero-stats {
-      grid-template-columns: 1fr !important;
-    }
-    .products-grid {
-      grid-template-columns: 1fr !important;
     }
     .home-tl-item {
       padding-right: 0 !important;
@@ -4235,7 +4136,7 @@
         <!-- EXPERIENCE TILE (spans 2 cols) -->
         <div class="md:col-span-2 lg:col-span-2 rounded-3xl p-6 bg-[var(--bg-elev)] border border-[var(--rule)] flex flex-col justify-center hover:border-[var(--primary)] transition-colors">
           <p class="text-base text-[var(--ink-dim)] leading-relaxed mb-3 narrate-span" data-n-idx="5">
-            I also led the launch of the inaugural <strong class="text-[var(--ink)] font-semibold">Times Internet Delhi Half Marathon 2026</strong> — establishing a new IP and delivering a 15,000+ participant experience.
+            I also led the launch of the inaugural <strong class="text-[var(--ink)] font-semibold">Times Internet Delhi Half Marathon 2026</strong> — establishing a new IP end-to-end &mdash; tech, marketing and on-ground &mdash; for 15,000+ participants.
           </p>
           <p class="text-base text-[var(--ink-dim)] leading-relaxed narrate-span" data-n-idx="6">
             Today, I operate at the intersection of Product, Growth and Revenue — building systems, optimising funnels, and creating scalable pathways to sustainable growth.
@@ -4245,28 +4146,27 @@
       </div>
     </div>
 
-    <!-- Ticker: section break between intro and identity+chat -->
+    <!-- Ticker: section break between the bento and the Parwah moment.
+         It used to scroll five lines that the bento tiles immediately above
+         already say — Parwah, the working website, 5× to ₹80L, the UK lift —
+         so the reader met the same four facts twice in one screen. It now
+         carries the one thing this page does not otherwise say until the
+         footer: that he is available, and where. The track is duplicated
+         because the marquee translates -50% to loop seamlessly; that is one
+         loop, not a second reading. -->
     <div class="ticker" aria-hidden="true">
       <div class="ticker-track">
-        <span>✦ Currently <strong>building Parwah</strong> · family care for India</span>
+        <span>✦ <strong>Open to select freelance and consulting work</strong></span>
         <span class="sparkle">/</span>
-        <span>Parwah · working family care website</span>
+        <span>Product · Growth · lifecycle &amp; retention</span>
         <span class="sparkle">/</span>
-        <span>5× MRR on Assisted Sales · ₹15L → ₹80L</span>
+        <span>Delhi, India · remote · IST</span>
         <span class="sparkle">/</span>
-        <span>UK marketing revenue increased at Vahdam</span>
+        <span>✦ <strong>Open to select freelance and consulting work</strong></span>
         <span class="sparkle">/</span>
-        <span>Open to select freelance and consulting work</span>
+        <span>Product · Growth · lifecycle &amp; retention</span>
         <span class="sparkle">/</span>
-        <span>✦ Currently <strong>building Parwah</strong> · family care for India</span>
-        <span class="sparkle">/</span>
-        <span>Parwah · working family care website</span>
-        <span class="sparkle">/</span>
-        <span>5× MRR on Assisted Sales · ₹15L → ₹80L</span>
-        <span class="sparkle">/</span>
-        <span>UK marketing revenue increased at Vahdam</span>
-        <span class="sparkle">/</span>
-        <span>Open to select freelance and consulting work</span>
+        <span>Delhi, India · remote · IST</span>
         <span class="sparkle">/</span>
       </div>
     </div>
@@ -4327,17 +4227,20 @@
     </section>
 
     <div class="container">
-      <!-- Career Journey Timeline -->
+      <!-- Career Journey Timeline.
+           Deliberately years + roles only. The numbers behind each role live on
+           the Experience view; repeating them here was the single largest
+           duplicate on this page and made the home view read as a worse copy
+           of /experience. One link does that job instead. -->
       <div class="section-head" style="margin-bottom: 32px;">
-        <div class="eyebrow">The journey · Click any phase to explore</div>
+        <div class="eyebrow">The journey · 2016 → now</div>
       </div>
       <div class="home-timeline">
         <a class="home-tl-item" href="#now" data-view="now">
           <div class="home-tl-dot" style="background: #B5870A; box-shadow: 0 0 12px rgba(181,135,10,0.4);"></div>
           <div class="home-tl-content">
             <div class="home-tl-year">Sep 2026 → Now</div>
-            <div class="home-tl-title">Building <em>Parwah</em> · Family care for India</div>
-            <div class="home-tl-desc">Building the family care product solo. The website is live and working.</div>
+            <div class="home-tl-title">Building <em>Parwah</em> · family care for India</div>
           </div>
           <div class="home-tl-arrow">→</div>
         </a>
@@ -4345,44 +4248,23 @@
           <div class="home-tl-dot" style="background: var(--primary-deep);"></div>
           <div class="home-tl-content">
             <div class="home-tl-year">Apr — Sep 2026</div>
-            <div class="home-tl-title">AGM, Product Management &amp; D2C Growth · <em>Vahdam India</em></div>
-            <div class="home-tl-desc">D2C growth across US, UK &amp; global. Built a customer lifecycle &amp; retention OS; increased UK marketing revenue.</div>
-          </div>
-          <div class="home-tl-arrow">→</div>
-        </a>
-        <a class="home-tl-item" href="#experience" data-view="experience" data-anchor="exp-ti">
-          <div class="home-tl-dot" style="background: var(--primary-deep);"></div>
-          <div class="home-tl-content">
-            <div class="home-tl-year">2025 — 2026</div>
-            <div class="home-tl-title">Senior PM · <em>Times Internet</em></div>
-            <div class="home-tl-desc">Half Marathon 0→1 consumer IP. Scaled Assisted Sales 5× to ₹80L MRR. Built AI telesuite. Team Award '25.</div>
+            <div class="home-tl-title">AGM, Product &amp; D2C Growth · <em>Vahdam India</em></div>
           </div>
           <div class="home-tl-arrow">→</div>
         </a>
         <a class="home-tl-item" href="#experience" data-view="experience" data-anchor="exp-ti">
           <div class="home-tl-dot" style="background: var(--primary);"></div>
           <div class="home-tl-content">
-            <div class="home-tl-year">2023 — 2025</div>
-            <div class="home-tl-title">PM · <em>Times Internet</em></div>
-            <div class="home-tl-desc">ET Markets revamp: +27% engagement, ₹3Cr+ ARR. ET Prime: 400%+ ROI. Health+ subscriptions from zero. +10% retention.</div>
-          </div>
-          <div class="home-tl-arrow">→</div>
-        </a>
-        <a class="home-tl-item" href="#experience" data-view="experience" data-anchor="exp-ti">
-          <div class="home-tl-dot" style="background: var(--accent);"></div>
-          <div class="home-tl-content">
-            <div class="home-tl-year">2022 — 2023</div>
-            <div class="home-tl-title">APM · <em>Times Internet</em></div>
-            <div class="home-tl-desc">Assisted Buying: leads 30 → 150+/day. ET Markets discovery features. Career pivot from engineering to product.</div>
+            <div class="home-tl-year">Jun 2022 — Apr 2026</div>
+            <div class="home-tl-title">APM → PM → Senior PM · <em>Times Internet</em></div>
           </div>
           <div class="home-tl-arrow">→</div>
         </a>
         <a class="home-tl-item" href="#experience" data-view="experience" data-anchor="exp-swe">
           <div class="home-tl-dot" style="background: #6B4A9E;"></div>
           <div class="home-tl-content">
-            <div class="home-tl-year">2020 — 2022</div>
+            <div class="home-tl-year">Apr 2020 — Jun 2022</div>
             <div class="home-tl-title">Software Engineer · <em>Tuple &amp; Citymall</em></div>
-            <div class="home-tl-desc">Backend services for consumer apps. Data pipelines. Live sports commentary product (as Product Owner).</div>
           </div>
           <div class="home-tl-arrow">→</div>
         </a>
@@ -4391,21 +4273,12 @@
           <div class="home-tl-content">
             <div class="home-tl-year">2016 — 2020</div>
             <div class="home-tl-title">B.Tech CSE · <em>VIT Vellore</em></div>
-            <div class="home-tl-desc">B.Tech in Computer Science &amp; Engineering. The foundation that makes everything else work.</div>
           </div>
           <div class="home-tl-arrow">→</div>
         </a>
       </div>
-
-      <!-- Key highlights -->
-      <div class="section-head narrate-span" data-n-idx="7" style="margin-top: 48px; margin-bottom: 24px;">
-        <div class="eyebrow">Highlights · The numbers that matter</div>
-      </div>
-      <div class="hero-stats reveal-stagger">
-        <div class="hero-stat"><div class="num"><em>5×</em></div><div class="label">MRR Growth · Scaled Assisted Sales from ₹15L to ₹80L in 8-10 months</div></div>
-        <div class="hero-stat"><div class="num">₹3<em>Cr</em>+</div><div class="label">Incremental ARR · Rebuilt ET Markets &amp; ET across iOS, Android, and Web</div></div>
-        <div class="hero-stat"><div class="num">0➔1</div><div class="label">IP Launched · Led Delhi Half Marathon end-to-end (tech, marketing, on-ground)</div></div>
-        <div class="hero-stat"><div class="num"><em>Parwah</em></div><div class="label">Current focus · family care for India, with parents at the centre</div></div>
+      <div style="margin-top: 20px;">
+        <a class="btn" href="#experience" data-view="experience">Every role, with the numbers &rarr;</a>
       </div>
 
       <!-- Explore Navigation Grid -->
@@ -4659,52 +4532,37 @@
           </div>
         </div>
 
+        <!-- Right column. This used to carry three Vahdam cards — highlights,
+             stack and a company explainer. Vahdam ended in Sep 2026, so a view
+             titled "Now" was leading with a past employer while the full Vahdam
+             role (and its company context) already sits on the Experience view.
+             This column now carries current status and the one ask. -->
         <div class="now-right reveal-stagger">
           <div class="now-metrics-card">
-            <div class="now-metrics-eyebrow">Highlights from Vahdam India · Apr–Sep 2026</div>
+            <div class="now-metrics-eyebrow">Parwah &middot; at a glance</div>
             <div class="now-metric">
-              <div class="now-metric-val">Lifecycle <span class="now-metric-tag">& Retention OS</span></div>
-              <div class="now-metric-label">Retention workflow — analytics → segmentation → mailers</div>
+              <div class="now-metric-val">Live <span class="now-metric-tag">website</span></div>
+              <div class="now-metric-label">A working family care website, in India</div>
             </div>
             <div class="now-metric">
-              <div class="now-metric-val">UK <span style="color:var(--primary);font-style:normal;">↑</span></div>
-              <div class="now-metric-label">UK marketing revenue increased</div>
+              <div class="now-metric-val">Solo <span class="now-metric-tag">build</span></div>
+              <div class="now-metric-label">Product, design, the build and the consent model</div>
             </div>
             <div class="now-metric">
-              <div class="now-metric-val">D2C <span class="now-metric-tag">Global</span></div>
-              <div class="now-metric-label">US · UK · International markets</div>
+              <div class="now-metric-val">Sep 2026</div>
+              <div class="now-metric-label">Started &mdash; and where the whole focus goes</div>
             </div>
-            <div class="now-metric">
-              <div class="now-metric-val">20 Apr 2026</div>
-              <div class="now-metric-label">Start date — building fast from day one</div>
+            <div style="margin-top:16px">
+              <a href="https://parwah-hq.anchit-tandon.com/" target="_blank" rel="noopener" class="btn" style="padding:8px 18px;font-size:13px;">Visit Parwah &#8599;</a>
+              <a href="#project-parwah" data-view="project-parwah" class="btn" style="padding:8px 18px;font-size:13px;">Read the case study &rarr;</a>
             </div>
           </div>
 
           <div class="now-stack-card">
-            <div class="now-metrics-eyebrow">Stack &amp; tools</div>
-            <div class="now-tags">
-              <span class="tag">Klaviyo</span>
-              <span class="tag">WebEngage</span>
-              <span class="tag">Shopify</span>
-              <span class="tag">Google Analytics</span>
-              <span class="tag">A/B Testing</span>
-              <span class="tag">SQL</span>
-              <span class="tag">Figma</span>
-              <span class="tag">Jira</span>
-            </div>
-          </div>
-
-          <div class="now-vahdam-card">
-            <div class="now-metrics-eyebrow">Where those numbers come from · Vahdam India</div>
-            <p style="font-size:0.87rem;color:var(--ink-dim);line-height:1.65;margin:0 0 12px;">One of India's fastest-growing D2C brands — selling premium garden-fresh teas to 100+ countries, direct from source to consumer. Founded in 2015, it's a business where product quality and growth are inseparably linked.</p>
-            <div class="now-tags">
-              <span class="tag">D2C</span>
-              <span class="tag">Global E-commerce</span>
-              <span class="tag">Premium Tea</span>
-              <span class="tag">100+ Countries</span>
-            </div>
-            <div style="margin-top:16px">
-              <a href="https://www.vahdam.com/" target="_blank" rel="noopener" class="btn" style="padding:8px 18px;font-size:13px;">Visit Vahdam.com ↗</a>
+            <div class="now-metrics-eyebrow">Alongside it</div>
+            <p style="font-size:0.87rem;color:var(--ink-dim);line-height:1.65;margin:0 0 12px;">I am taking a small amount of freelance and consulting work &mdash; product, lifecycle and retention, and AI products that have to work for someone other than their author.</p>
+            <div style="margin-top:4px">
+              <a href="#contact" data-view="contact" class="btn primary" style="padding:8px 18px;font-size:13px;">Start a conversation &rarr;</a>
             </div>
           </div>
         </div>
@@ -4740,7 +4598,10 @@
           <div class="work-num">00</div>
           <div class="work-content">
             <h3>One app for family care, with parents at the centre</h3>
-            <p>Building it solo: product, design, the build, and the consent model that decides what it will and will not do. The obvious version of this app is a tracker, and the obvious version is the one families refuse &mdash; so every share is chosen by the parent, visible to them, and revocable in one tap. The interface is senior-first: big type, voice-first, three actions per screen. Parwah is live as a website for families, and I am building and improving the product as I learn from real use. I am taking freelance and consulting work alongside it.</p>
+            <!-- Short on purpose. The consent model and the senior-first constraint are
+                 argued in full on the Now view and in the Parwah case study; this is the
+                 timeline entry, so it states the role and points at them. -->
+            <p>Building it solo &mdash; product, design, the build, and the consent model that decides what it will and will not do. Parwah is live as a website for families, and I am improving it as I learn from real use. I am taking freelance and consulting work alongside it. <a href="#project-parwah" data-view="project-parwah">Read the case study &rarr;</a></p>
             <div class="work-impact-bar"><div class="work-impact-row"><span class="work-impact-chip gold">Consent model</span><span class="work-impact-chip gold">Senior-first interface</span><span class="work-impact-chip gold">Live website for families</span></div></div>
             <div style="margin-top: 16px;">
               <a href="https://parwah-hq.anchit-tandon.com" target="_blank" rel="noopener" class="btn" style="padding: 8px 18px; font-size: 13px;">
@@ -4756,6 +4617,9 @@
       <div id="exp-vahdam" class="section-head reveal" style="margin-bottom: 24px; scroll-margin-top: 24px;">
         <div class="eyebrow">Vahdam India · 20 Apr 2026 → Sep 2026</div>
         <h2 class="display-sm">AGM — Product Management, D2C Growth · <em>US, UK &amp; Global</em></h2>
+        <!-- Company context. It used to sit on the Now view, which is the wrong
+             place for a role that ended; the numbers it explains are here. -->
+        <p class="lede" style="margin-top: 14px; font-size: 0.95rem;">One of India's fastest-growing D2C brands — selling premium garden-fresh teas to 100+ countries, direct from source to consumer. Founded in 2015, it's a business where product quality and growth are inseparably linked.</p>
       </div>
       <div class="work-list" style="margin-bottom: 64px;">
         <div class="work-item reveal" id="exp-vahdam-d2c">
@@ -4897,136 +4761,18 @@
         </div>
       </div>
 
-      <!-- All products shipped -->
+      <!-- The "All products shipped" chip grid used to sit here: eleven chips,
+           seven of them linking to sections the reader has just scrolled past on
+           this very page, and four of them (Hey Yaara, MusicGenAI, the consumer
+           TeleSuite, LifeEngine) duplicating full cards on the Projects view.
+           It restated the page inside the page. One pointer does the job. -->
       <div class="section-head reveal" style="margin-top: 72px;">
-        <div class="eyebrow">All products shipped</div>
-        <h2 class="display-sm">Every product I've put into the world.</h2>
-      </div>
-      <!-- data-no-rail: railify() turns a row of five or more uniform cards into
-           a side-scrolling rail, which is right for a gallery and wrong for a
-           bento, whose whole point is that the tiles are not uniform. -->
-      <div class="products-grid reveal-stagger" data-no-rail>
-        <a class="product-chip" href="#experience/exp-vahdam-d2c" data-view="experience" data-anchor="exp-vahdam-d2c" style="cursor:pointer;">
-          <div class="product-chip-name">Vahdam India D2C</div>
-          <div class="product-chip-co">Vahdam India &middot; 2026</div>
-          <div class="product-chip-metric">Lifecycle OS · UK revenue lift</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://www.vahdam.com/', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
-        </a>
-        <a class="product-chip" href="#experience/exp-ti-marathon" data-view="experience" data-anchor="exp-ti-marathon" style="cursor:pointer;">
-          <div class="product-chip-name">TI Half Marathon</div>
-          <div class="product-chip-co">Times Internet &middot; 2026</div>
-          <div class="product-chip-metric">0 &rarr; 1 consumer IP</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://www.timesinternet.in/', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
-        </a>
-        <a class="product-chip" href="#experience/exp-ti-assisted" data-view="experience" data-anchor="exp-ti-assisted" style="cursor:pointer;">
-          <div class="product-chip-name">ET Prime Assisted Sales</div>
-          <div class="product-chip-co">Times Internet &middot; 2025</div>
-          <div class="product-chip-metric">5&times; MRR &middot; &nbsp;80L</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://economictimes.indiatimes.com/prime', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
-        </a>
-        <a class="product-chip" href="#experience/exp-ti-assisted" data-view="experience" data-anchor="exp-ti-assisted" style="cursor:pointer;">
-          <div class="product-chip-name">AI TeleSuite (Enterprise)</div>
-          <div class="product-chip-co">Times Internet &middot; 2024</div>
-          <div class="product-chip-metric">Real-time pitch scoring</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://economictimes.indiatimes.com/prime', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
-        </a>
-        <a class="product-chip" href="#experience/exp-ti-etmarkets" data-view="experience" data-anchor="exp-ti-etmarkets" style="cursor:pointer;">
-          <div class="product-chip-name">ET Markets Revamp</div>
-          <div class="product-chip-co">Times Internet &middot; 2024</div>
-          <div class="product-chip-metric">&#8377;3Cr+ ARR &middot; +25% DAU</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://economictimes.indiatimes.com/markets', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
-        </a>
-        <a class="product-chip" href="#experience/exp-ti-health" data-view="experience" data-anchor="exp-ti-health" style="cursor:pointer;">
-          <div class="product-chip-name">Times Health+ Subs</div>
-          <div class="product-chip-co">Times Internet &middot; 2024</div>
-          <div class="product-chip-metric">Paid tier &middot; 0&rarr;1</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://www.timesinternet.in/', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
-        </a>
-        <a class="product-chip" href="#experience/exp-ti-etmarkets" data-view="experience" data-anchor="exp-ti-etmarkets" style="cursor:pointer;">
-          <div class="product-chip-name">ET Markets Discovery</div>
-          <div class="product-chip-co">Times Internet &middot; 2023</div>
-          <div class="product-chip-metric">Screeners, portfolios</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://economictimes.indiatimes.com/markets', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
-        </a>
-        <a class="product-chip" href="#project-yaara" data-view="project-yaara" style="cursor:pointer;">
-          <div class="product-chip-name">Hey Yaara</div>
-          <div class="product-chip-co">Side project &middot; 2024</div>
-          <div class="product-chip-metric">AI voice companion</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://hey-yaara.anchit-tandon.com/', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
-        </a>
-        <a class="product-chip" href="#project-music" data-view="project-music" style="cursor:pointer;">
-          <div class="product-chip-name">MusicGenAI</div>
-          <div class="product-chip-co">Side project &middot; 2024</div>
-          <div class="product-chip-metric">Text &rarr; full track</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://music-gen-ai-blue.vercel.app/', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
-        </a>
-        <a class="product-chip" href="#project-telesuite" data-view="project-telesuite" style="cursor:pointer;">
-          <div class="product-chip-name">AI TeleSuite (Consumer)</div>
-          <div class="product-chip-co">Side project &middot; 2024</div>
-          <div class="product-chip-metric">Pitch coaching app</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://ai-tele-suite.vercel.app/', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
-        </a>
-        <a class="product-chip" href="#project-lifeengine" data-view="project-lifeengine" style="cursor:pointer;">
-          <div class="product-chip-name">LifeEngine</div>
-          <div class="product-chip-co">Side project &middot; 2024</div>
-          <div class="product-chip-metric">AI wellness planner</div>
-          <span class="product-chip-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://th-life-engine.vercel.app/', '_blank');" title="Open live website">
-            <svg class="product-chip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </span>
-        </a>
+        <div class="eyebrow">Outside the job</div>
+        <h2 class="display-sm">The things I build on my own time.</h2>
+        <p class="lede" style="margin-top: 16px;">Parwah, plus independent builds across AI, growth, music and consumer tools &mdash; each one live, each one with a case study.</p>
+        <div style="margin-top: 20px;">
+          <a class="btn primary" href="#projects" data-view="projects">See the projects &rarr;</a>
+        </div>
       </div>
     </div>
   </section>
@@ -5048,12 +4794,12 @@
           <span class="thesis-label">The through-line</span>
           <h3 class="thesis-h">Every one of these refuses to do something, and says so on the box.</h3>
           <p class="thesis-p">Generative tools make producing an asset fast and producing a <em>false</em> one exactly as fast. So the useful engineering is not the generating — it is the part that declines. What I keep building is the machinery that makes a claim checkable, and then I put the limits in the product copy rather than the footnotes.</p>
-          <ul class="thesis-list">
-            <li><strong>The limit is a feature, not a disclaimer.</strong> LifeCycle-OS ships a <em>deterministic fallback</em>, so when every model is down the demo still returns a usable plan instead of a confident invention.</li>
-            <li><strong>Claims are bound to mechanisms.</strong> The any-brand demo needs <em>no login, no proprietary data</em> — a promise you can falsify in ten seconds rather than a line in a policy.</li>
-            <li><strong>The record is published, including when it is bad.</strong> Where a build has a track record, it sits on the same screen as the thing it is judging.</li>
-          </ul>
-          <p class="thesis-p thesis-close">If you only take one thing from the grid below: the interesting work is not that these generate. It is that each one can tell you when it should not.</p>
+          <!-- The three worked examples that used to sit here — the deterministic
+               fallback, the no-login demo, the published verification record —
+               were previews of three cards directly below, each of which states
+               the same thing in its own card. The argument stays here; the
+               evidence stays on the build it belongs to. -->
+          <p class="thesis-p thesis-close">Read as a list these look like range. Read together they are one argument: each of them can tell you when it should not be trusted.</p>
         </section>
       </div>
 
@@ -8441,7 +8187,7 @@
       const parts = [];
       const seen = new Set();
       view.querySelectorAll('h1,h2,h3,p,li,.lede,.quote').forEach(el => {
-        if (el.closest('script,style,iframe,.chat-caption,.dictation-transcript,.chat-input,.chat-return,.eyebrow,.tags,.work-impact-bar,.work-stats,.hero-stat')) return;
+        if (el.closest('script,style,iframe,.chat-caption,.dictation-transcript,.chat-input,.chat-return,.eyebrow,.tags,.work-impact-bar,.work-stats')) return;
         // Purely decorative regions (the cinematic title stage, icon-only bits)
         // are marked aria-hidden precisely because their words are repeated as
         // real content elsewhere. Narrating them says everything twice.
@@ -9883,9 +9629,7 @@
   .project-section,
   .contact-card,
   .nav-card,
-  .hero-stat,
   .work-stat,
-  .product-chip,
   .chat-block,
   .hero-current-block,
   .wa-sheet-card {
@@ -9897,13 +9641,6 @@
     -webkit-backdrop-filter: none !important;
   }
   /* Cards never rotate, lift max 2px, no light emission */
-  .hero-stat:hover,
-  .hero-stat:nth-child(2):hover,
-  .hero-stat:nth-child(4):hover {
-    transform: translateY(-2px) !important;
-    box-shadow: none !important;
-    border-color: var(--rule-strong) !important;
-  }
   .display-xl,
   .display-lg,
   .display-sm,
@@ -9943,7 +9680,6 @@
   .nav-card:hover,
   .contact-card:hover,
   .project-card:hover,
-  .product-chip:hover,
   .work-item:hover,
   .contact-card[data-c]:hover,
   .home-tl-item:hover {
@@ -10299,10 +10035,8 @@
   .project-section,
   .build-card,
   .nav-card,
-  .hero-stat,
   .work-stat,
   .work-item,
-  .product-chip,
   .contact-card,
   .chat-block {
     position: relative;
@@ -10317,10 +10051,8 @@
   .project-section::before,
   .build-card::before,
   .nav-card::before,
-  .hero-stat::before,
   .work-stat::before,
   .work-item::before,
-  .product-chip::before,
   .contact-card::before,
   .chat-block::before {
     content: '';
@@ -10420,7 +10152,7 @@
      the base .reveal value itself. As an !important override it also beat the
      stagger's transition-delay in some orders, which flattened the cascade. */
   
-  html[data-motion="off"] body::after, html[data-motion="off"] .view.active, html[data-motion="off"] .display-xl, html[data-motion="off"] .display-lg, html[data-motion="off"] .display-md, html[data-motion="off"] .home-hero .name .firstline, html[data-motion="off"] .home-hero .name .secondline, html[data-motion="off"] .home-hero::before, html[data-motion="off"] .project-hero::before, html[data-motion="off"] .project-section::before, html[data-motion="off"] .build-card::before, html[data-motion="off"] .nav-card::before, html[data-motion="off"] .hero-stat::before, html[data-motion="off"] .work-stat::before, html[data-motion="off"] .work-item::before, html[data-motion="off"] .product-chip::before, html[data-motion="off"] .contact-card::before, html[data-motion="off"] .chat-block::before, html[data-motion="off"] .build-tag .status, html[data-motion="off"] .live-dot, html[data-motion="off"] .hero-current-block .dot {
+  html[data-motion="off"] body::after, html[data-motion="off"] .view.active, html[data-motion="off"] .display-xl, html[data-motion="off"] .display-lg, html[data-motion="off"] .display-md, html[data-motion="off"] .home-hero .name .firstline, html[data-motion="off"] .home-hero .name .secondline, html[data-motion="off"] .home-hero::before, html[data-motion="off"] .project-hero::before, html[data-motion="off"] .project-section::before, html[data-motion="off"] .build-card::before, html[data-motion="off"] .nav-card::before, html[data-motion="off"] .work-stat::before, html[data-motion="off"] .work-item::before, html[data-motion="off"] .contact-card::before, html[data-motion="off"] .chat-block::before, html[data-motion="off"] .build-tag .status, html[data-motion="off"] .live-dot, html[data-motion="off"] .hero-current-block .dot {
       animation: none !important;
     }
   html[data-motion="off"] .motion-reactive, html[data-motion="off"] .motion-reactive:hover, html[data-motion="off"] .reveal, html[data-motion="off"] .reveal.in {
@@ -11042,10 +10774,8 @@
   const reactiveSelector = [
     '.build-card',
     '.nav-card',
-    '.hero-stat',
     '.work-stat',
     '.work-item',
-    '.product-chip',
     '.contact-card',
     '.project-hero',
     '.project-section'
@@ -11741,7 +11471,7 @@
     //    value (5×, ₹3Cr+, Global, 0➔1) without disturbing markup. When a figure
     //    happens to be a clean number, it additionally counts up.
     function animateStats(scope) {
-      var nums = scope.querySelectorAll('.hero-stat .num, .work-stat .num');
+      var nums = scope.querySelectorAll('.work-stat .num');
       nums.forEach(function (num) {
         if (num.dataset.animated) return;
         num.dataset.animated = '1';
@@ -11807,8 +11537,8 @@
     // with no stable hook of its own, so its direct children are taken by
     // structure instead — matching on utility soup would silently stop working
     // the first time a class list is edited.
-    var TILT = '.hero-stat, .work-stat, .contact-card, .mod, .home-bento > *, [data-d3]';
-    var RISE = '.hero-stat, .work-stat, .contact-card, .mod, .section-head';
+    var TILT = '.work-stat, .contact-card, .mod, .home-bento > *, [data-d3]';
+    var RISE = '.work-stat, .contact-card, .mod, .section-head';
     // The nav rails are included deliberately: they are the controls a visitor
     // actually touches most, and leaving them inert made the effect feel like it
     // only applied to decorative content.
@@ -13110,9 +12840,9 @@
      HORIZONTAL RAILS — mixed into the vertical flow
      Applied only where the content earns it: sections with many uniform,
      gallery-like cards that otherwise cost multiple screens of scrolling.
-     Measured before choosing: builds-grid is 12 cards over ~3 screens and
-     products-grid is 11 uniform chips. Narrative sections (work-list,
-     about-prose) stay vertical — turning prose sideways hurts reading.
+     Measured before choosing: builds-grid is 15 cards that cost 13.6 screens
+     stacked and 5.3 as a rail. Narrative sections (work-list, about-prose)
+     stay vertical — turning prose sideways hurts reading.
 
      Deliberately NOT scroll-hijacking. Pinning the section and converting
      vertical wheel into horizontal movement is the flashier version, but it
@@ -13162,11 +12892,11 @@
 (function(){
   'use strict';
   if (document.documentElement.getAttribute('data-motion') === 'off') return;
-  // .products-grid is the bento now (see its span phrase in the stylesheet).
-  // A rail wants uniform tiles it can snap between; a bento wants tiles of
-  // different sizes. Being both gives a side-scrolling row of mismatched cards,
-  // which is neither. .builds-grid stays a rail — twelve uniform project cards
-  // over several screens is exactly what the rail was written for.
+  // Only .builds-grid. A rail wants uniform tiles it can snap between; a bento
+  // wants tiles of different sizes, and being both gives a side-scrolling row of
+  // mismatched cards, which is neither. The products chip grid that used to be
+  // the second candidate here is gone — it restated the Experience view inside
+  // the Experience view.
   var TARGETS = [['.builds-grid','']];
 
   function build(sel, extra){
