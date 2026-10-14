@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deli Chic — Food For Thought | Haute Boucherie &amp; Artisanal Larder</title>
+  <meta name="description" content="Artisanal cuts, 100% antibiotic residue-free poultry, handcrafted charcuterie, gourmet dim sum, and chef-curated marinades. Chilled 0°C–4°C delivery across Delhi NCR." />
+  <link rel="canonical" href="https://anchit-tandon.com/deli-chic" />
+  <meta property="og:title" content="Deli Chic — Food For Thought | Haute Boucherie &amp; Artisanal Larder" />
+  <meta property="og:description" content="Artisanal cuts, antibiotic-free poultry, handcrafted charcuterie, and chilled gourmet delicacies. New Delhi." />
+  <meta property="og:url" content="https://anchit-tandon.com/deli-chic" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://i1.wp.com/mh.delichic.co.in/wp-content/uploads/2020/09/Chicken-Breast-Antibiotic-Free-scaled.jpg" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Playfair Display, Cinzel, Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --chic-crimson: #CD2653;
+      --chic-crimson-dark: #8C1434;
+      --chic-burgundy: #4A0E17;
+      --chic-linen: #FDFBF7;
+      --chic-linen-warm: #F7EFE6;
+      --chic-charcoal: #1C1917;
+      --chic-muted: #6B625B;
+      --chic-gold: #C59A45;
+      --chic-green: #2B613B;
+      --font-serif: "Playfair Display", Georgia, serif;
+      --font-luxury: "Cinzel", serif;
+      --font-sans: "Plus Jakarta Sans", sans-serif;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--chic-linen);
+      color: var(--chic-charcoal);
+      overflow-x: hidden;
+      margin: 0;
+      padding: 0;
+    }
+
+    .font-serif-chic { font-family: var(--font-serif); }
+    .font-luxury { font-family: var(--font-luxury); }
+
+    /* Delicate Linen Texture */
+    .linen-texture {
+      background-color: var(--chic-linen);
+      background-image: radial-gradient(rgba(205, 38, 83, 0.04) 1px, transparent 0);
+      background-size: 20px 20px;
+    }
+
+    /* Master Carver Magnifying Loupe */
+    .loupe-container {
+      position: relative;
+      overflow: hidden;
+      cursor: crosshair;
+      border-radius: 28px;
+    }
+    .loupe-glass {
+      position: absolute;
+      width: 150px;
+      height: 150px;
+      border: 3px solid var(--chic-gold);
+      border-radius: 50%;
+      pointer-events: none;
+      display: none;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 0 15px rgba(255, 255, 255, 0.4);
+      background-repeat: no-repeat;
+      z-index: 30;
+      transform: translate(-50%, -50%);
+    }
+
+    /* Editorial Cards */
+    .deli-card {
+      background: #FFFFFF;
+      border: 1px solid rgba(205, 38, 83, 0.15);
+      border-radius: 24px;
+      box-shadow: 0 12px 36px -10px rgba(74, 14, 23, 0.08);
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .deli-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(205, 38, 83, 0.4);
+      box-shadow: 0 22px 50px -12px rgba(205, 38, 83, 0.18);
+    }
+
+    /* Ticker Tape */
+    .deli-ticker {
+      overflow: hidden;
+      background: var(--chic-burgundy);
+      color: #FFF9F4;
+      padding: 14px 0;
+    }
+    .deli-track {
+      display: flex;
+      width: max-content;
+      animation: deliMarquee 38s linear infinite;
+    }
+    .deli-ticker:hover .deli-track { animation-play-state: paused; }
+    .deli-track ul { display: flex; margin: 0; padding: 0; list-style: none; }
+    .deli-track li {
+      display: flex;
+      align-items: center;
+      white-space: nowrap;
+      font-size: 0.95rem;
+      font-family: var(--font-luxury);
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+    .deli-track li::before {
+      content: "✦";
+      color: var(--chic-gold);
+      margin: 0 1.5rem;
+      font-size: 0.8rem;
+    }
+    @keyframes deliMarquee { to { transform: translateX(-50%); } }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--chic-linen); }
+    ::-webkit-scrollbar-thumb { background: #D9A5B3; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--chic-crimson); }
+  </style>
+</head>
+<body class="linen-texture selection:bg-[#CD2653] selection:text-white">
+
+  <!-- ================= TOP FRESH DISPATCH ANNOUNCEMENT ================= -->
+  <div class="fixed top-0 left-0 right-0 z-50 bg-[#4A0E17] text-[#FFF9F4] text-[11px] sm:text-xs font-medium tracking-wider py-2 px-4 border-b border-[#C59A45]/30">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-2 mx-auto sm:mx-0">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="font-bold">DELHI NCR DISPATCH:</span>
+        <span class="text-white/90">Slot 1 (10 AM–1 PM) &amp; Slot 2 (5 PM–8 PM) • Free delivery on orders ₹999+</span>
+      </div>
+      <div class="hidden md:flex items-center gap-5 text-[11px] text-[#F7EFE6]">
+        <span>✦ Use Code <strong class="text-[#FFA517] underline tracking-widest font-black">WoW20</strong> (20% OFF)</span>
+        <span>•</span>
+        <span>Sodexo Accepted</span>
+        <span>•</span>
+        <a href="tel:+919810002023" class="hover:text-white transition-colors">📞 +91 98100 02023</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= EDITORIAL HAUTE BOUCHERIE HEADER ================= -->
+  <header class="fixed top-8 sm:top-8 left-0 right-0 z-40 backdrop-blur-xl bg-white/90 border-b border-[#CD2653]/15 transition-all">
+    <div class="max-w-7xl mx-auto px-6 md:px-10 h-20 flex items-center justify-between">
+      <!-- Brand Logo / Wordmark -->
+      <a href="#" class="flex items-center gap-3.5 group">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#CD2653] to-[#4A0E17] flex items-center justify-center text-white font-luxury font-black text-base shadow-md transition-transform group-hover:scale-105 border border-[#C59A45]/40">
+          DC
+        </div>
+        <div>
+          <span class="block text-2xl font-serif-chic font-black tracking-tight text-[#4A0E17] leading-none">Deli Chic</span>
+          <span class="block text-[9px] tracking-[0.3em] uppercase font-bold text-[#CD2653] mt-1 font-luxury">Food For Thought</span>
+        </div>
+      </a>
+
+      <!-- Navigation Links -->
+      <nav class="hidden lg:flex items-center gap-8 text-xs font-bold uppercase tracking-[0.2em] text-[#1C1917]">
+        <a href="#larder" class="hover:text-[#CD2653] transition-colors">The Larder</a>
+        <a href="#masterCarver" class="hover:text-[#CD2653] transition-colors">Master Carver</a>
+        <a href="#coldChain" class="hover:text-[#CD2653] transition-colors">0°C–4°C Standard</a>
+        <a href="#heritage" class="hover:text-[#CD2653] transition-colors">Our Story</a>
+        <a href="#contact" class="hover:text-[#CD2653] transition-colors">Delivery Slots</a>
+      </nav>
+
+      <!-- Action Controls -->
+      <div class="flex items-center gap-3">
+        <!-- WhatsApp Direct Concierge -->
+        <a href="https://wa.link/bk4b8e" target="_blank" rel="noreferrer" class="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full border border-emerald-600/30 text-emerald-800 text-xs font-bold uppercase tracking-wider hover:bg-emerald-50 transition-all bg-emerald-50/50">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span>WhatsApp Concierge</span>
+        </a>
+
+        <!-- Basket Trigger -->
+        <button onclick="toggleBasket(true)" class="px-5 py-2.5 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#8C1434] transition-all shadow-md shadow-[#CD2653]/30 flex items-center gap-2">
+          <span>Basket</span>
+          <span class="px-2 py-0.5 bg-white/25 rounded-full text-[10px] font-black" id="basketCount">1</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= HERO SECTION: CINEMATIC EDITORIAL CULINARY SHOWCASE ================= -->
+  <section class="relative pt-36 pb-20 md:pt-40 md:pb-28 px-6 md:px-10 max-w-7xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <!-- Left Editorial Storytelling -->
+      <div class="lg:col-span-7 space-y-7 text-center lg:text-left">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#F7EFE6] border border-[#CD2653]/25 text-[#CD2653] text-xs font-bold tracking-[0.2em] uppercase shadow-sm">
+          <span>Haute Boucherie • Est. New Delhi</span>
+          <span>✦</span>
+          <span>100% Antibiotic Residue-Free</span>
+        </div>
+
+        <h1 class="text-5xl sm:text-6xl xl:text-7xl font-serif-chic font-bold tracking-tight leading-[1.02] text-[#4A0E17]">
+          Pure Artisanal Cuts,
+          <span class="block italic font-normal text-[#CD2653] pt-1">
+            Chilled, Never Frozen.
+          </span>
+        </h1>
+
+        <p class="text-base sm:text-lg text-[#524842] max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
+          From farm-tender poultry and wood-smoked charcuterie to handcrafted prawn dim sum and Lucknowi marinades. Vacuum-sealed at peak freshness and dispatched in temperature-controlled cold-chain across Delhi NCR.
+        </p>
+
+        <!-- CTAs -->
+        <div class="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-4">
+          <a href="#larder" class="px-8 py-4 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#8C1434] transition-all shadow-xl shadow-[#CD2653]/25">
+            Explore Fresh Larder (₹)
+          </a>
+          <a href="https://wa.link/bk4b8e" target="_blank" rel="noreferrer" class="px-7 py-4 rounded-full bg-white border border-[#4A0E17]/40 text-[#4A0E17] font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#F7EFE6] transition-all shadow-sm">
+            Quick WhatsApp Order ↗
+          </a>
+        </div>
+
+        <!-- Telemetry Attributes -->
+        <div class="pt-6 grid grid-cols-3 gap-6 border-t border-[#4A0E17]/15 max-w-lg mx-auto lg:mx-0 text-left">
+          <div>
+            <div class="text-3xl font-serif-chic font-bold text-[#4A0E17]">0°C–4°C</div>
+            <div class="text-[11px] uppercase tracking-wider font-bold text-[#CD2653]">Strict Cold Chain</div>
+          </div>
+          <div>
+            <div class="text-3xl font-serif-chic font-bold text-[#4A0E17]">12 Hours</div>
+            <div class="text-[11px] uppercase tracking-wider font-bold text-[#CD2653]">Farm to Door</div>
+          </div>
+          <div>
+            <div class="text-3xl font-serif-chic font-bold text-[#4A0E17]">100%</div>
+            <div class="text-[11px] uppercase tracking-wider font-bold text-[#CD2653]">Antibiotic-Free</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Master Carver's Interactive Loupe Feature -->
+      <div class="lg:col-span-5 relative" id="masterCarver">
+        <div class="loupe-container shadow-2xl border-2 border-[#C59A45]/40 bg-black" id="heroLoupeContainer">
+          <img
+            id="heroLoupeImg"
+            src="https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=1200&q=85"
+            alt="Deli Chic Prime Artisanal Cuts"
+            class="w-full h-[480px] object-cover"
+          />
+          <div id="heroLoupeGlass" class="loupe-glass"></div>
+
+          <!-- Overlay Quality Inspection Badge -->
+          <div class="absolute bottom-5 left-5 right-5 p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-[#CD2653]/20 shadow-lg text-left flex items-center justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-800">Inspection Loupe Active</span>
+              </div>
+              <h4 class="text-base font-serif-chic font-bold text-[#4A0E17] mt-0.5">Prime Wood-Smoked Charcuterie</h4>
+              <p class="text-[11px] text-[#6B625B]">Hover cursor across cut to examine texture grain &amp; curing marble.</p>
+            </div>
+            <div class="text-right">
+              <span class="text-xs font-luxury font-bold text-[#C59A45]">2.4°C</span>
+              <span class="block text-[9px] uppercase tracking-widest text-[#6B625B]">Cold-Chain</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MARQUEE TICKER TAPE ================= -->
+  <div class="deli-ticker" aria-label="Brand offerings ticker">
+    <div class="deli-track">
+      <ul>
+        <li>Antibiotic Residue-Free Poultry</li>
+        <li>Chicken Cheese &amp; Jalapeño Sausages</li>
+        <li>Handcrafted Prawn Momos</li>
+        <li>Lucknowi Chicken Marinades</li>
+        <li>Golden Smoked Franks</li>
+        <li>Single-Origin Mutton Patties</li>
+        <li>Artisanal Belgian Truffles</li>
+        <li>Fresh Basa Fillets</li>
+      </ul>
+      <ul aria-hidden="true">
+        <li>Antibiotic Residue-Free Poultry</li>
+        <li>Chicken Cheese &amp; Jalapeño Sausages</li>
+        <li>Handcrafted Prawn Momos</li>
+        <li>Lucknowi Chicken Marinades</li>
+        <li>Golden Smoked Franks</li>
+        <li>Single-Origin Mutton Patties</li>
+        <li>Artisanal Belgian Truffles</li>
+        <li>Fresh Basa Fillets</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ================= THE GOURMET LARDER CATALOGUE ================= -->
+  <section class="py-24 px-6 md:px-10 max-w-7xl mx-auto" id="larder">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+      <div>
+        <span class="text-xs font-bold uppercase tracking-[0.25em] text-[#CD2653] font-luxury">Gourmet Selection</span>
+        <h2 class="text-4xl md:text-5xl font-serif-chic font-bold tracking-tight text-[#4A0E17] mt-2">
+          The Artisanal Larder.
+        </h2>
+      </div>
+
+      <!-- Promocode Indicator Pill -->
+      <div class="px-5 py-2.5 rounded-full bg-[#FFF5F7] border border-[#CD2653]/30 text-[#CD2653] text-xs font-bold tracking-wider flex items-center gap-2 shadow-sm">
+        <span>🏷️ Promo Code:</span>
+        <span class="font-luxury font-bold text-sm text-[#4A0E17] bg-white px-2 py-0.5 rounded border border-[#CD2653]/20">WoW20</span>
+        <span>• 20% OFF Above ₹999</span>
+      </div>
+    </div>
+
+    <!-- Category Filter Tabs -->
+    <div class="flex items-center gap-2.5 overflow-x-auto pb-4 mb-10 text-xs font-bold uppercase tracking-wider scrollbar-none" id="categoryTabs">
+      <button onclick="filterCategory('all')" id="tab-all" class="cat-pill px-5 py-2.5 rounded-full bg-[#CD2653] text-white shadow-sm transition-all whitespace-nowrap">
+        All Larder (12)
+      </button>
+      <button onclick="filterCategory('poultry')" id="tab-poultry" class="cat-pill px-5 py-2.5 rounded-full bg-white text-[#524842] border border-[#CD2653]/20 hover:border-[#CD2653] transition-all whitespace-nowrap">
+        Fresh Poultry (3)
+      </button>
+      <button onclick="filterCategory('charcuterie')" id="tab-charcuterie" class="cat-pill px-5 py-2.5 rounded-full bg-white text-[#524842] border border-[#CD2653]/20 hover:border-[#CD2653] transition-all whitespace-nowrap">
+        Cold Cuts &amp; Sausages (4)
+      </button>
+      <button onclick="filterCategory('ready-to-cook')" id="tab-ready-to-cook" class="cat-pill px-5 py-2.5 rounded-full bg-white text-[#524842] border border-[#CD2653]/20 hover:border-[#CD2653] transition-all whitespace-nowrap">
+        Heat &amp; Eat / Marinades (3)
+      </button>
+      <button onclick="filterCategory('momos')" id="tab-momos" class="cat-pill px-5 py-2.5 rounded-full bg-white text-[#524842] border border-[#CD2653]/20 hover:border-[#CD2653] transition-all whitespace-nowrap">
+        Gourmet Dim Sum (1)
+      </button>
+      <button onclick="filterCategory('sweet')" id="tab-sweet" class="cat-pill px-5 py-2.5 rounded-full bg-white text-[#524842] border border-[#CD2653]/20 hover:border-[#CD2653] transition-all whitespace-nowrap">
+        Sugary Delights (1)
+      </button>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-7" id="productGrid"></div>
+  </section>
+
+  <!-- ================= THE 0°C–4°C COLD-CHAIN INTEGRITY ================= -->
+  <section class="py-24 px-6 md:px-10 bg-[#FAF4ED] border-y border-[#CD2653]/15" id="coldChain">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-[0.25em] text-[#CD2653] font-luxury">Culinary Standard</span>
+          <h2 class="text-4xl md:text-5xl font-serif-chic font-bold tracking-tight text-[#4A0E17] mt-2">
+            The Three Inviolable Rules.
+          </h2>
+        </div>
+        <p class="max-w-md text-sm font-medium text-[#6B625B]">
+          How Deli Chic preserves cellular tenderness, natural juices, and micronutrient density.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Rule 1 -->
+        <div class="deli-card p-8 space-y-4">
+          <div class="w-12 h-12 rounded-2xl bg-[#FFF0F3] border border-[#CD2653]/25 flex items-center justify-center text-[#CD2653] font-serif-chic font-bold text-xl">
+            01
+          </div>
+          <h3 class="text-2xl font-serif-chic font-bold text-[#4A0E17]">Zero Chemical Intervention</h3>
+          <p class="text-xs font-medium text-[#6B625B] leading-relaxed">
+            All chickens are fed 100% vegetarian grain diets, certified free from prophylactic antibiotics, growth hormones, and artificial steroids.
+          </p>
+          <div class="pt-2 text-[10px] font-luxury font-bold uppercase tracking-widest text-[#CD2653]">
+            ✓ Lab-Tested Residue Free
+          </div>
+        </div>
+
+        <!-- Rule 2 -->
+        <div class="deli-card p-8 space-y-4">
+          <div class="w-12 h-12 rounded-2xl bg-[#FFF0F3] border border-[#CD2653]/25 flex items-center justify-center text-[#CD2653] font-serif-chic font-bold text-xl">
+            02
+          </div>
+          <h3 class="text-2xl font-serif-chic font-bold text-[#4A0E17]">Strict 0°C–4°C Chilled Transport</h3>
+          <p class="text-xs font-medium text-[#6B625B] leading-relaxed">
+            Deep freezing breaks the delicate cellular walls of fresh meat, leaching moisture and flavor. Deli Chic keeps meats strictly chilled between 0°C and 4°C.
+          </p>
+          <div class="pt-2 text-[10px] font-luxury font-bold uppercase tracking-widest text-[#CD2653]">
+            ✓ Chilled, Never Deep-Frozen
+          </div>
+        </div>
+
+        <!-- Rule 3 -->
+        <div class="deli-card p-8 space-y-4">
+          <div class="w-12 h-12 rounded-2xl bg-[#FFF0F3] border border-[#CD2653]/25 flex items-center justify-center text-[#CD2653] font-serif-chic font-bold text-xl">
+            03
+          </div>
+          <h3 class="text-2xl font-serif-chic font-bold text-[#4A0E17]">Precision Slotted Delivery</h3>
+          <p class="text-xs font-medium text-[#6B625B] leading-relaxed">
+            Two daily temperature-controlled slots across New Delhi &amp; Gurgaon (10 AM–1 PM and 5 PM–8 PM), vacuum-sealed in multi-barrier hygienic packaging.
+          </p>
+          <div class="pt-2 text-[10px] font-luxury font-bold uppercase tracking-widest text-[#CD2653]">
+            ✓ Morning &amp; Evening Freshness
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= OUR NEW DELHI HERITAGE & CONCIERGE ================= -->
+  <section class="py-24 px-6 md:px-10 max-w-7xl mx-auto" id="heritage">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <!-- Left Narrative -->
+      <div class="lg:col-span-6 space-y-6">
+        <span class="text-xs font-bold uppercase tracking-[0.25em] text-[#CD2653] font-luxury">Food For Thought</span>
+        <h2 class="text-4xl md:text-5xl font-serif-chic font-bold tracking-tight text-[#4A0E17]">
+          Curated for the Discerning Table.
+        </h2>
+        <p class="text-base text-[#524842] leading-relaxed font-medium">
+          Deli Chic was born in New Delhi with a simple thesis: the meat and charcuterie that reaches your dining table should possess the same uncompromising artisanal integrity as fine European boucheries.
+        </p>
+        <p class="text-sm text-[#6B625B] leading-relaxed">
+          From German-style beechwood smoked frankfurters to tender Coorg-spiced chicken breast and slow-simmered Lucknowi marinades, every offering is cut, cured, and vacuum-sealed by master culinary butchers.
+        </p>
+
+        <!-- Concierge Box -->
+        <div class="deli-card p-6 space-y-4 border-l-4 border-l-[#CD2653]" id="contact">
+          <div class="flex justify-between items-center pb-2 border-b border-[#CD2653]/15">
+            <span class="font-luxury font-bold text-xs text-[#CD2653] uppercase">New Delhi Central Boucherie</span>
+            <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">Open Daily</span>
+          </div>
+          <div class="text-xs space-y-1.5 text-[#524842]">
+            <p><strong>Direct Hotline:</strong> <a href="tel:+919810002023" class="text-[#CD2653] underline font-bold">+91 98100 02023</a></p>
+            <p><strong>WhatsApp Concierge:</strong> <a href="https://wa.link/bk4b8e" target="_blank" class="text-emerald-700 underline font-bold">wa.link/bk4b8e</a></p>
+            <p><strong>Delivery Slots:</strong> 10:00 AM – 1:00 PM &amp; 5:00 PM – 8:00 PM</p>
+            <p><strong>Payment Modes:</strong> Sodexo, UPI, Debit/Credit Cards &amp; Net Banking</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Visual Vignette -->
+      <div class="lg:col-span-6">
+        <div class="rounded-3xl overflow-hidden shadow-2xl border-2 border-[#C59A45]/30 relative h-[460px]">
+          <img
+            src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=85"
+            alt="Artisanal Butcher Preparation"
+            class="w-full h-full object-cover"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-8">
+            <div class="text-white space-y-1">
+              <span class="text-[10px] font-luxury font-bold uppercase tracking-widest text-[#FFA517]">✦ Artisanal Craft</span>
+              <h4 class="text-2xl font-serif-chic font-bold">Hand-Cut by Master Butchers</h4>
+              <p class="text-xs text-white/80">Every portion weighed, trimmed, and inspected prior to vacuum packaging.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="border-t border-[#CD2653]/15 py-12 px-6 md:px-10 bg-white">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-xs text-[#6B625B]">
+      <div>
+        <strong class="font-serif-chic font-bold text-base block text-[#4A0E17]">Deli Chic — Food For Thought</strong>
+        <span>© 2026 Deli Chic. All Rights Reserved. New Delhi &amp; NCR.</span>
+      </div>
+      <div class="flex gap-6 uppercase tracking-wider font-bold">
+        <a href="https://delichic.co.in" target="_blank" class="hover:text-[#CD2653] transition-colors">Official Portal</a>
+        <a href="https://www.instagram.com/delichic.in/" target="_blank" class="hover:text-[#CD2653] transition-colors">Instagram</a>
+        <a href="https://wa.link/bk4b8e" target="_blank" class="hover:text-[#CD2653] transition-colors">WhatsApp Order</a>
+        <a href="tel:+919810002023" class="hover:text-[#CD2653] transition-colors">+91 98100 02023</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= SLIDE-OVER DELI BASKET DRAWER ================= -->
+  <div id="basketModal" class="fixed inset-0 z-50 hidden">
+    <div onclick="toggleBasket(false)" class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+    <div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-[#CD2653]/20 p-8 flex flex-col justify-between shadow-2xl text-[#1C1917]">
+      <div>
+        <!-- Drawer Header -->
+        <div class="flex items-center justify-between border-b border-[#CD2653]/15 pb-5">
+          <div>
+            <h3 class="text-xl font-serif-chic font-bold text-[#4A0E17]">Your Artisanal Basket</h3>
+            <span class="text-[10px] font-luxury font-bold uppercase tracking-widest text-[#CD2653]">0°C–4°C Chilled Dispatch</span>
+          </div>
+          <button onclick="toggleBasket(false)" class="text-xs uppercase tracking-widest text-[#CD2653] font-bold hover:underline">Close ✕</button>
+        </div>
+
+        <!-- Free Delivery Progress Tracker -->
+        <div class="mt-4 p-3.5 rounded-2xl bg-[#FFF5F7] border border-[#CD2653]/20 text-xs text-[#4A0E17]" id="freeShippingBanner">
+          <div class="flex justify-between font-bold mb-1">
+            <span id="shippingText">Free NCR Shipping Status</span>
+            <span id="shippingProgressVal">₹999 Goal</span>
+          </div>
+          <div class="w-full h-1.5 rounded-full bg-[#E8CBD3] overflow-hidden">
+            <div id="shippingProgressBar" class="h-full bg-[#CD2653] transition-all duration-300" style="width: 25%;"></div>
+          </div>
+        </div>
+
+        <!-- Delivery Slot Selector -->
+        <div class="mt-4">
+          <label class="block text-[10px] font-bold uppercase tracking-wider text-[#6B625B] mb-1.5">Select Delivery Slot:</label>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <button onclick="setSlot('10 AM – 1 PM')" id="slot-morning" class="slot-btn py-2 px-3 rounded-xl border border-[#CD2653] bg-[#CD2653] text-white font-bold transition-all">
+              ☀️ 10 AM – 1 PM
+            </button>
+            <button onclick="setSlot('5 PM – 8 PM')" id="slot-evening" class="slot-btn py-2 px-3 rounded-xl border border-[#CD2653]/30 bg-white text-[#524842] font-bold transition-all">
+              🌙 5 PM – 8 PM
+            </button>
+          </div>
+        </div>
+
+        <!-- Items Container -->
+        <div id="basketItemsList" class="mt-5 space-y-3.5 max-h-[42vh] overflow-y-auto pr-1"></div>
+      </div>
+
+      <!-- Drawer Footer -->
+      <div class="border-t border-[#CD2653]/15 pt-5 space-y-3">
+        <!-- Promo Code Input -->
+        <div class="flex gap-2">
+          <input type="text" id="promoInput" placeholder="Enter Promo (e.g. WoW20)" class="w-full px-4 py-2.5 rounded-xl border border-[#CD2653]/30 text-xs font-bold uppercase tracking-wider focus:outline-none focus:border-[#CD2653]" />
+          <button onclick="applyPromo()" class="px-5 py-2.5 rounded-xl bg-[#4A0E17] text-white text-xs font-bold uppercase tracking-wider hover:bg-[#8C1434] transition-all">
+            Apply
+          </button>
+        </div>
+        <div id="promoNotice" class="text-[11px] font-bold text-emerald-700 hidden">✓ Promo WoW20 applied! 20% discount activated.</div>
+
+        <div class="space-y-1 pt-1 text-xs">
+          <div class="flex justify-between text-[#6B625B]">
+            <span>Subtotal</span>
+            <span id="subtotalPrice" class="font-bold text-[#1C1917]">₹0</span>
+          </div>
+          <div class="flex justify-between text-emerald-700 font-bold" id="discountRow" style="display: none;">
+            <span>Discount (WoW20 -20%)</span>
+            <span id="discountPrice">-₹0</span>
+          </div>
+          <div class="flex justify-between text-sm font-bold text-[#4A0E17] pt-2 border-t border-[#CD2653]/15">
+            <span class="font-serif-chic font-bold text-base">Total Due (₹)</span>
+            <span id="finalTotalPrice" class="text-2xl font-serif-chic font-bold text-[#CD2653]">₹0</span>
+          </div>
+        </div>
+
+        <button onclick="dispatchToWhatsApp()" class="w-full py-4 rounded-full bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold text-xs uppercase tracking-[0.2em] transition-all shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2">
+          <span>Order via WhatsApp Concierge ↗</span>
+        </button>
+        <p class="text-[10px] text-center text-[#6B625B]">Direct official WhatsApp dispatch with real-time slot booking.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= GSAP MOTION SCRIPT & LOGIC ================= -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <script>
+    // 1. Authentic Real Deli Chic Catalogue Data
+    const DELI_PRODUCTS = [
+      {
+        id: 'chk-breast-500',
+        name: 'Chicken Breast Antibiotic-Free',
+        category: 'poultry',
+        weight: '500 gm',
+        price: 199,
+        tag: 'Antibiotic Residue-Free',
+        notes: 'Lean whole tender breast cuts, vacuum-sealed. Zero hormones.',
+        image: 'https://i1.wp.com/mh.delichic.co.in/wp-content/uploads/2020/09/Chicken-Breast-Antibiotic-Free-scaled.jpg?resize=450%2C450&ssl=1'
+      },
+      {
+        id: 'chk-cheese-jalapeno-200',
+        name: 'Chicken Cheese & Jalapeño Sausages',
+        category: 'charcuterie',
+        weight: '200 gm',
+        price: 230,
+        tag: 'German Beechwood Smoked',
+        notes: 'Filled with melted cheddar cubes and pickled green jalapeños.',
+        image: 'https://i2.wp.com/mh.delichic.co.in/wp-content/uploads/2020/10/chicken-cheese-onion-sausage-scaled.jpg?resize=450%2C450&ssl=1'
+      },
+      {
+        id: 'chk-pepper-salami-250',
+        name: 'Chicken Black Pepper Salami',
+        category: 'charcuterie',
+        weight: '250 gm',
+        price: 200,
+        tag: 'Cracked Peppercorn',
+        notes: 'Delicately sliced charcuterie cured with Tellicherry black pepper.',
+        image: 'https://i2.wp.com/mh.delichic.co.in/wp-content/uploads/2020/09/chicken-black-pepper-salami-scaled.jpg?resize=450%2C450&ssl=1'
+      },
+      {
+        id: 'chk-bacon-250',
+        name: 'Artisanal Chicken Bacon Strips',
+        category: 'charcuterie',
+        weight: '250 gm',
+        price: 225,
+        tag: 'Crispy Wood Smoke',
+        notes: 'Naturally smoked streaky strips. Pan-fry in 3 minutes to crisp golden.',
+        image: 'https://i1.wp.com/mh.delichic.co.in/wp-content/uploads/2020/11/Chicken-Bacon-1.png?resize=450%2C450&ssl=1'
+      },
+      {
+        id: 'chk-bbq-wings-850',
+        name: 'Barbeque Chicken Wings Marinated',
+        category: 'ready-to-cook',
+        weight: '850 gm',
+        price: 410,
+        tag: 'Smoky Glaze Marinade',
+        notes: 'Coated in chef-crafted hickory barbecue reduction. Grill or air-fry.',
+        image: 'https://i2.wp.com/mh.delichic.co.in/wp-content/uploads/2020/09/barbeque-chicken-wings-marinated-scaled.jpg?resize=450%2C450&ssl=1'
+      },
+      {
+        id: 'chk-burger-patty-280',
+        name: 'Gourmet Chicken Burger Patty',
+        category: 'ready-to-cook',
+        weight: '280 gm',
+        price: 260,
+        tag: 'Juicy Herb Blend',
+        notes: 'Coarsely minced chicken spiced with thyme, rosemary & white pepper.',
+        image: 'https://i0.wp.com/mh.delichic.co.in/wp-content/uploads/2020/09/chicken-burger-patty-scaled.jpg?resize=450%2C450&ssl=1'
+      },
+      {
+        id: 'chk-lucknawi-500',
+        name: 'Chicken Lucknowi Marinade',
+        category: 'ready-to-cook',
+        weight: '500 gm',
+        price: 299,
+        tag: 'Awadhi Shahi Spices',
+        notes: 'Marinated in royal saffron, roasted gram flour, hung curd and mace.',
+        image: 'https://delichic.co.in/wp-content/uploads/2021/07/Chicken-Lakhnavi-Marinade-1-1-450x450.gif'
+      },
+      {
+        id: 'prawn-momos-8pc',
+        name: 'Handcrafted Prawn Momos (8 Pcs)',
+        category: 'momos',
+        weight: '8 Pieces',
+        price: 260,
+        tag: 'Translucent Dim Sum',
+        notes: 'Whole coastal tiger prawns encased in delicate thin wheat dough.',
+        image: 'https://delichic.co.in/wp-content/uploads/2020/09/Chicken-Momos-450x450.png'
+      },
+      {
+        id: 'chk-drumsticks-500',
+        name: 'Chicken Drumsticks Antibiotic-Free',
+        category: 'poultry',
+        weight: '500 gm',
+        price: 220,
+        tag: 'Tender Bone-In',
+        notes: 'Skinless tender leg cuts, washed in ozonated water and vacuum packed.',
+        image: 'https://images.unsplash.com/photo-1587593810167-a84920ea0781?auto=format&fit=crop&w=450&q=85'
+      },
+      {
+        id: 'chk-keema-500',
+        name: 'Chicken Breast Keema',
+        category: 'poultry',
+        weight: '500 gm',
+        price: 200,
+        tag: 'Ultra-Fine Mince',
+        notes: 'Triple-ground breast mince for melt-in-mouth kebabs and koftas.',
+        image: 'https://i0.wp.com/mh.delichic.co.in/wp-content/uploads/2020/09/chicken-keema-scaled.jpg?resize=450%2C450&ssl=1'
+      },
+      {
+        id: 'chk-franks-350',
+        name: 'Chicken Franks Golden Smoked',
+        category: 'charcuterie',
+        weight: '350 gm',
+        price: 290,
+        tag: 'Bavarian Recipe',
+        notes: 'Plump natural smoked frankfurter sausages, ideal for gourmet hot dogs.',
+        image: 'https://images.unsplash.com/photo-1541529086526-db283c563270?auto=format&fit=crop&w=450&q=85'
+      },
+      {
+        id: 'caramel-truffle',
+        name: 'Caramel Chocolate Truffle',
+        category: 'sweet',
+        weight: 'Individual Tub',
+        price: 199,
+        tag: 'Artisanal Dessert',
+        notes: 'Salted butter caramel layered with 54% dark Belgian chocolate ganache.',
+        image: 'https://i0.wp.com/mh.delichic.co.in/wp-content/uploads/2020/09/Caramel-Chocolate-Truffle-1.jpg?resize=450%2C450&ssl=1'
+      }
+    ];
+
+    let currentFilter = 'all';
+    let basket = [
+      { id: 'chk-breast-500', name: 'Chicken Breast Antibiotic-Free', weight: '500 gm', price: 199, qty: 1 }
+    ];
+    let isPromoApplied = false;
+    let selectedSlot = '10 AM – 1 PM';
+
+    // 2. Render Products
+    function renderDeliProducts() {
+      const grid = document.getElementById('productGrid');
+      const filtered = currentFilter === 'all' 
+        ? DELI_PRODUCTS 
+        : DELI_PRODUCTS.filter(p => p.category === currentFilter);
+
+      grid.innerHTML = filtered.map(p => {
+        return `
+          <div class="deli-card overflow-hidden flex flex-col justify-between group">
+            <div>
+              <div class="relative h-52 overflow-hidden bg-[#FAF4ED]">
+                <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-[9px] font-luxury font-bold uppercase tracking-wider bg-[#4A0E17] text-white shadow-sm">
+                  ${p.tag}
+                </span>
+                <span class="absolute bottom-3 right-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/95 text-[#4A0E17] shadow-sm">
+                  ${p.weight}
+                </span>
+              </div>
+              <div class="p-6 space-y-2">
+                <div class="flex justify-between items-start gap-2">
+                  <h3 class="text-lg font-serif-chic font-bold text-[#4A0E17] leading-snug">${p.name}</h3>
+                  <span class="text-xl font-serif-chic font-bold text-[#CD2653] whitespace-nowrap">₹${p.price}</span>
+                </div>
+                <p class="text-xs font-medium text-[#6B625B] leading-relaxed">${p.notes}</p>
+              </div>
+            </div>
+
+            <div class="p-6 pt-0">
+              <button onclick="addToBasket('${p.id}')" class="w-full py-3 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#8C1434] transition-all shadow-md shadow-[#CD2653]/25 flex items-center justify-center gap-2">
+                <span>+ Add to Basket</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterCategory(cat) {
+      currentFilter = cat;
+      document.querySelectorAll('.cat-pill').forEach(btn => {
+        btn.classList.remove('bg-[#CD2653]', 'text-white', 'shadow-sm');
+        btn.classList.add('bg-white', 'text-[#524842]');
+      });
+      const active = document.getElementById(`tab-${cat}`);
+      if (active) {
+        active.classList.add('bg-[#CD2653]', 'text-white', 'shadow-sm');
+        active.classList.remove('bg-white', 'text-[#524842]');
+      }
+      renderDeliProducts();
+    }
+
+    // 3. Master Carver's Optical Inspection Loupe Interaction
+    (function initMasterCarverLoupe() {
+      const container = document.getElementById('heroLoupeContainer');
+      const glass = document.getElementById('heroLoupeGlass');
+      const img = document.getElementById('heroLoupeImg');
+      if (!container || !glass || !img) return;
+
+      const zoom = 2.5;
+
+      container.addEventListener('mouseenter', () => {
+        glass.style.display = 'block';
+        glass.style.backgroundImage = `url('${img.src}')`;
+        glass.style.backgroundSize = `${img.width * zoom}px ${img.height * zoom}px`;
+      });
+
+      container.addEventListener('mouseleave', () => {
+        glass.style.display = 'none';
+      });
+
+      function updateLoupe(clientX, clientY) {
+        const rect = container.getBoundingClientRect();
+        let x = clientX - rect.left;
+        let y = clientY - rect.top;
+
+        if (x < 0) x = 0;
+        if (x > rect.width) x = rect.width;
+        if (y < 0) y = 0;
+        if (y > rect.height) y = rect.height;
+
+        glass.style.left = `${x}px`;
+        glass.style.top = `${y}px`;
+        glass.style.backgroundPosition = `-${x * zoom - glass.offsetWidth / 2}px -${y * zoom - glass.offsetHeight / 2}px`;
+      }
+
+      container.addEventListener('mousemove', (e) => updateLoupe(e.clientX, e.clientY));
+      container.addEventListener('touchmove', (e) => {
+        if (e.touches && e.touches[0]) {
+          glass.style.display = 'block';
+          glass.style.backgroundImage = `url('${img.src}')`;
+          glass.style.backgroundSize = `${img.width * zoom}px ${img.height * zoom}px`;
+          updateLoupe(e.touches[0].clientX, e.touches[0].clientY);
+          e.preventDefault();
+        }
+      }, { passive: false });
+    })();
+
+    // 4. Basket Management
+    function addToBasket(id) {
+      const p = DELI_PRODUCTS.find(item => item.id === id);
+      const exist = basket.find(item => item.id === id);
+      if (exist) {
+        exist.qty += 1;
+      } else {
+        basket.push({ id: p.id, name: p.name, weight: p.weight, price: p.price, qty: 1 });
+      }
+      updateBasketUI();
+      toggleBasket(true);
+    }
+
+    function changeQty(idx, delta) {
+      basket[idx].qty += delta;
+      if (basket[idx].qty <= 0) {
+        basket.splice(idx, 1);
+      }
+      updateBasketUI();
+    }
+
+    function setSlot(slotName) {
+      selectedSlot = slotName;
+      const mBtn = document.getElementById('slot-morning');
+      const eBtn = document.getElementById('slot-evening');
+      if (slotName.includes('Morning') || slotName.includes('10 AM')) {
+        mBtn.className = 'slot-btn py-2 px-3 rounded-xl border border-[#CD2653] bg-[#CD2653] text-white font-bold transition-all';
+        eBtn.className = 'slot-btn py-2 px-3 rounded-xl border border-[#CD2653]/30 bg-white text-[#524842] font-bold transition-all';
+      } else {
+        eBtn.className = 'slot-btn py-2 px-3 rounded-xl border border-[#CD2653] bg-[#CD2653] text-white font-bold transition-all';
+        mBtn.className = 'slot-btn py-2 px-3 rounded-xl border border-[#CD2653]/30 bg-white text-[#524842] font-bold transition-all';
+      }
+    }
+
+    function applyPromo() {
+      const code = document.getElementById('promoInput').value.trim().toUpperCase();
+      if (code === 'WOW20') {
+        const subtotal = basket.reduce((s, i) => s + i.price * i.qty, 0);
+        if (subtotal >= 999) {
+          isPromoApplied = true;
+          document.getElementById('promoNotice').classList.remove('hidden');
+        } else {
+          alert('Promo WoW20 requires minimum order value of ₹999. Add more cuts to qualify!');
+        }
+      } else {
+        alert('Invalid promo code. Use verified code WoW20.');
+      }
+      updateBasketUI();
+    }
+
+    function updateBasketUI() {
+      const count = basket.reduce((s, i) => s + i.qty, 0);
+      const subtotal = basket.reduce((s, i) => s + i.price * i.qty, 0);
+
+      document.getElementById('basketCount').textContent = count;
+      document.getElementById('subtotalPrice').textContent = `₹${subtotal}`;
+
+      // Free shipping calculation (₹999 threshold)
+      const progressBar = document.getElementById('shippingProgressBar');
+      const progressVal = document.getElementById('shippingProgressVal');
+      const shippingText = document.getElementById('shippingText');
+
+      if (subtotal >= 999) {
+        progressBar.style.width = '100%';
+        progressBar.className = 'h-full bg-emerald-500 transition-all duration-300';
+        shippingText.textContent = '🎉 FREE Express NCR Shipping Unlocked!';
+        progressVal.textContent = 'Qualified';
+      } else {
+        const pct = Math.min(100, Math.round((subtotal / 999) * 100));
+        progressBar.style.width = `${pct}%`;
+        progressBar.className = 'h-full bg-[#CD2653] transition-all duration-300';
+        shippingText.textContent = `Add ₹${999 - subtotal} for FREE Delivery`;
+        progressVal.textContent = `₹${subtotal} / ₹999`;
+      }
+
+      // Discount calculation
+      let discount = 0;
+      if (isPromoApplied && subtotal >= 999) {
+        discount = Math.round(subtotal * 0.20);
+        document.getElementById('discountRow').style.display = 'flex';
+        document.getElementById('discountPrice').textContent = `-₹${discount}`;
+      } else {
+        document.getElementById('discountRow').style.display = 'none';
+      }
+
+      const finalTotal = subtotal - discount;
+      document.getElementById('finalTotalPrice').textContent = `₹${finalTotal}`;
+
+      // List rendering
+      const list = document.getElementById('basketItemsList');
+      if (basket.length === 0) {
+        list.innerHTML = `
+          <div class="py-12 text-center text-[#6B625B]">
+            <p class="font-serif-chic text-lg font-bold text-[#4A0E17]">Your basket is empty</p>
+            <p class="text-xs mt-1">Explore our cold cuts, poultry &amp; dim sum above.</p>
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = basket.map((item, idx) => `
+        <div class="p-4 rounded-2xl bg-[#FFF9FA] border border-[#CD2653]/15 flex items-center justify-between">
+          <div>
+            <h4 class="font-bold text-sm text-[#4A0E17]">${item.name}</h4>
+            <span class="text-[11px] text-[#CD2653] font-bold block">${item.weight} • ₹${item.price} each</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="flex items-center border border-[#CD2653]/30 rounded-lg overflow-hidden bg-white text-xs font-bold">
+              <button onclick="changeQty(${idx}, -1)" class="px-2 py-1 hover:bg-[#FFF0F3] text-[#4A0E17]">-</button>
+              <span class="px-2.5 py-1 text-[#CD2653]">${item.qty}</span>
+              <button onclick="changeQty(${idx}, 1)" class="px-2 py-1 hover:bg-[#FFF0F3] text-[#4A0E17]">+</button>
+            </div>
+            <span class="font-serif-chic font-bold text-[#4A0E17] text-sm min-w-[50px] text-right">₹${item.price * item.qty}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleBasket(open) {
+      document.getElementById('basketModal').classList.toggle('hidden', !open);
+    }
+
+    function dispatchToWhatsApp() {
+      if (basket.length === 0) {
+        alert('Your basket is empty!');
+        return;
+      }
+
+      const subtotal = basket.reduce((s, i) => s + i.price * i.qty, 0);
+      const discount = (isPromoApplied && subtotal >= 999) ? Math.round(subtotal * 0.20) : 0;
+      const total = subtotal - discount;
+
+      let msg = `*Deli Chic Artisanal Order Request*\n`;
+      msg += `---------------------------------\n`;
+      basket.forEach((item, i) => {
+        msg += `${i + 1}. ${item.name} (${item.weight}) x ${item.qty} = ₹${item.price * item.qty}\n`;
+      });
+      msg += `---------------------------------\n`;
+      msg += `Subtotal: ₹${subtotal}\n`;
+      if (discount > 0) msg += `Promo WoW20 (-20%): -₹${discount}\n`;
+      msg += `*Total Order Value: ₹${total}*\n`;
+      msg += `Preferred Slot: ${selectedSlot}\n`;
+      msg += `Location: Delhi NCR\n\nPlease confirm availability and payment link.`;
+
+      const encoded = encodeURIComponent(msg);
+      window.open(`https://api.whatsapp.com/send?phone=919810002023&text=${encoded}`, '_blank');
+    }
+
+    // 5. Initializations
+    renderDeliProducts();
+    updateBasketUI();
+  </script>
+</body>
+</html>
