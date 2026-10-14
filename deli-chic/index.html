@@ -25,16 +25,17 @@
       --chic-crimson: #CD2653;
       --chic-crimson-dark: #8C1434;
       --chic-burgundy: #4A0E17;
+      --chic-noir: #180609;
       --chic-linen: #FDFBF7;
       --chic-linen-warm: #F7EFE6;
       --chic-charcoal: #1C1917;
       --chic-muted: #6B625B;
       --chic-gold: #C59A45;
       --chic-gold-bright: #FFA517;
-      --chic-green: #2B613B;
       --font-serif: "Playfair Display", Georgia, serif;
       --font-luxury: "Cinzel", serif;
       --font-sans: "Plus Jakarta Sans", sans-serif;
+      --gold-foil: linear-gradient(135deg, #FFE6A3 0%, #C59A45 35%, #FFF2CC 55%, #9E742A 78%, #E4C882 100%);
     }
 
     body {
@@ -65,42 +66,125 @@
     }
     .loupe-glass {
       position: absolute;
-      width: 160px;
-      height: 160px;
+      width: 170px;
+      height: 170px;
       border: 3px solid var(--chic-gold);
       border-radius: 50%;
       pointer-events: none;
       display: none;
-      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45), inset 0 0 20px rgba(255, 255, 255, 0.45);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), inset 0 0 25px rgba(255, 255, 255, 0.5);
       background-repeat: no-repeat;
       z-index: 30;
       transform: translate(-50%, -50%);
     }
 
-    /* Reticle in Loupe */
+    /* Loupe Reticle */
     .loupe-glass::after {
       content: "";
       position: absolute;
       inset: 0;
       border-radius: 50%;
       background: 
-        linear-gradient(to right, transparent 49%, rgba(197, 154, 69, 0.5) 50%, transparent 51%),
-        linear-gradient(to bottom, transparent 49%, rgba(197, 154, 69, 0.5) 50%, transparent 51%);
+        linear-gradient(to right, transparent 49%, rgba(197, 154, 69, 0.6) 50%, transparent 51%),
+        linear-gradient(to bottom, transparent 49%, rgba(197, 154, 69, 0.6) 50%, transparent 51%);
       pointer-events: none;
+    }
+
+    /* Gold Foil Sheen on Heading */
+    .gold-foil-text {
+      background: var(--gold-foil);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: goldShimmer 8s linear infinite;
+    }
+    @keyframes goldShimmer {
+      to { background-position: 200% center; }
+    }
+
+    /* Damascus Knife Specular Glint */
+    .knife-glint {
+      position: relative;
+      overflow: hidden;
+    }
+    .knife-glint::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -150%;
+      width: 60%;
+      height: 200%;
+      background: linear-gradient(
+        60deg,
+        transparent 20%,
+        rgba(255, 255, 255, 0.5) 45%,
+        rgba(255, 245, 210, 0.8) 50%,
+        rgba(255, 255, 255, 0.5) 55%,
+        transparent 80%
+      );
+      transform: rotate(25deg);
+      pointer-events: none;
+      transition: all 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .knife-glint:hover::before {
+      left: 200%;
+    }
+
+    /* Pinned Haute Boucherie Stage */
+    .deli-stage-wrap {
+      height: 320vh;
+      position: relative;
+    }
+    .deli-stage {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      height: 100svh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      transition: background-color 0.4s ease;
+    }
+    .deli-chapter-item {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      padding: 0 clamp(20px, 6vw, 80px);
+      opacity: 0;
+      pointer-events: none;
+      will-change: opacity, transform;
+      transition: transform 0.4s ease;
+    }
+    .deli-seal {
+      position: absolute;
+      right: -8vw;
+      top: 50%;
+      width: min(50vw, 64vh);
+      aspect-ratio: 1;
+      margin-top: calc(min(50vw, 64vh) / -2);
+      border-radius: 50%;
+      background: conic-gradient(from var(--rot, 0deg), #FFE6A3, #4A0E17, #C59A45, #FFE6A3, #CD2653, #FFE6A3);
+      -webkit-mask: radial-gradient(circle, transparent 0 58%, #000 59%);
+      mask: radial-gradient(circle, transparent 0 58%, #000 59%);
+      transform: scale(var(--s, 1));
+      opacity: 0.85;
+      pointer-events: none;
+      box-shadow: 0 0 70px rgba(197, 154, 69, 0.4);
     }
 
     /* Editorial Cards */
     .deli-card {
       background: #FFFFFF;
-      border: 1px solid rgba(205, 38, 83, 0.15);
-      border-radius: 24px;
-      box-shadow: 0 12px 36px -10px rgba(74, 14, 23, 0.08);
+      border: 1px solid rgba(205, 38, 83, 0.16);
+      border-radius: 26px;
+      box-shadow: 0 14px 40px -10px rgba(74, 14, 23, 0.08);
       transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .deli-card:hover {
-      transform: translateY(-5px);
-      border-color: rgba(205, 38, 83, 0.4);
-      box-shadow: 0 22px 50px -12px rgba(205, 38, 83, 0.18);
+      transform: translateY(-6px);
+      border-color: rgba(205, 38, 83, 0.45);
+      box-shadow: 0 24px 55px -12px rgba(205, 38, 83, 0.2);
     }
 
     /* Ticker Tape */
@@ -108,7 +192,7 @@
       overflow: hidden;
       background: var(--chic-burgundy);
       color: #FFF9F4;
-      padding: 14px 0;
+      padding: 16px 0;
     }
     .deli-track {
       display: flex;
@@ -149,8 +233,8 @@
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       <div class="flex items-center gap-2 mx-auto sm:mx-0">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span class="font-bold">ALL DELHI NCR HUBS OPERATIONAL:</span>
-        <span class="text-white/90">Slot 1 (10 AM–1 PM) &amp; Slot 2 (5 PM–8 PM) • Free Express Delivery on ₹999+</span>
+        <span class="font-bold">ALL 4 DELHI NCR HUBS OPERATIONAL:</span>
+        <span class="text-white/90">Slot 1 (10 AM–1 PM) &amp; Slot 2 (5 PM–8 PM) • Free Express Cold-Chain on ₹999+</span>
       </div>
       <div class="hidden md:flex items-center gap-5 text-[11px] text-[#F7EFE6]">
         <span>✦ Use Code <strong class="text-[#FFA517] underline tracking-widest font-black">WoW20</strong> (20% OFF)</span>
@@ -163,7 +247,7 @@
   </div>
 
   <!-- ================= EDITORIAL HAUTE BOUCHERIE HEADER ================= -->
-  <header class="fixed top-8 sm:top-8 left-0 right-0 z-40 backdrop-blur-xl bg-white/90 border-b border-[#CD2653]/15 transition-all">
+  <header class="fixed top-8 sm:top-8 left-0 right-0 z-40 backdrop-blur-xl bg-white/92 border-b border-[#CD2653]/15 transition-all">
     <div class="max-w-7xl mx-auto px-6 md:px-10 h-20 flex items-center justify-between">
       <!-- Brand Logo / Wordmark -->
       <a href="#" class="flex items-center gap-3.5 group">
@@ -180,7 +264,7 @@
       <nav class="hidden lg:flex items-center gap-8 text-xs font-bold uppercase tracking-[0.2em] text-[#1C1917]">
         <a href="#larder" class="hover:text-[#CD2653] transition-colors">The Larder</a>
         <a href="#masterCarver" class="hover:text-[#CD2653] transition-colors">Master Carver Loupe</a>
-        <a href="#coldChain" class="hover:text-[#CD2653] transition-colors">0°C–4°C Standard</a>
+        <a href="#boucherieExperience" class="hover:text-[#CD2653] transition-colors">Haute Standards</a>
         <a href="#hubs" class="hover:text-[#CD2653] transition-colors">NCR Hubs (4)</a>
         <a href="#heritage" class="hover:text-[#CD2653] transition-colors">Our Story</a>
       </nav>
@@ -202,8 +286,8 @@
     </div>
   </header>
 
-  <!-- ================= HERO SECTION: CINEMATIC EDITORIAL CULINARY SHOWCASE ================= -->
-  <section class="relative pt-36 pb-20 md:pt-40 md:pb-28 px-6 md:px-10 max-w-7xl mx-auto overflow-hidden">
+  <!-- ================= HERO SECTION: CULINARY SHOWCASE WITH LIVE ATMOSPHERIC CANVAS ================= -->
+  <section class="relative pt-36 pb-20 md:pt-42 md:pb-28 px-6 md:px-10 max-w-7xl mx-auto overflow-hidden">
     <!-- Atmospheric Culinary Steam & Golden Particle Canvas -->
     <canvas id="deliAtmosphereCanvas" class="absolute inset-0 pointer-events-none z-10"></canvas>
 
@@ -224,15 +308,15 @@
         </h1>
 
         <p class="text-base sm:text-lg text-[#524842] max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
-          From farm-tender poultry and wood-smoked charcuterie to handcrafted prawn dim sum and Lucknowi marinades. Vacuum-sealed at peak freshness and dispatched in temperature-controlled cold-chain across all 4 Delhi NCR delivery hubs.
+          From farm-tender poultry and wood-smoked charcuterie to handcrafted prawn dim sum and Lucknowi marinades. Vacuum-sealed at peak freshness and dispatched in strict 0°C–4°C temperature-controlled cold-chain across all 4 Delhi NCR delivery hubs.
         </p>
 
-        <!-- CTAs -->
+        <!-- CTAs with Specular Damascus Knife-Glint -->
         <div class="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-4">
-          <a href="#larder" class="px-8 py-4 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#8C1434] transition-all shadow-xl shadow-[#CD2653]/25 hover:scale-105 duration-200">
+          <a href="#larder" class="knife-glint px-8 py-4 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#8C1434] transition-all shadow-xl shadow-[#CD2653]/25 hover:scale-105 duration-200">
             Explore Fresh Larder (₹)
           </a>
-          <a href="https://wa.link/bk4b8e" target="_blank" rel="noreferrer" class="px-7 py-4 rounded-full bg-white border border-[#4A0E17]/40 text-[#4A0E17] font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#F7EFE6] transition-all shadow-sm hover:scale-105 duration-200">
+          <a href="https://wa.link/bk4b8e" target="_blank" rel="noreferrer" class="knife-glint px-7 py-4 rounded-full bg-white border border-[#4A0E17]/40 text-[#4A0E17] font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#F7EFE6] transition-all shadow-sm hover:scale-105 duration-200">
             Quick WhatsApp Order ↗
           </a>
         </div>
@@ -292,7 +376,7 @@
               <p id="loupeDescText" class="text-[11px] text-[#6B625B]">Move cursor or drag finger across cut to inspect curing grain &amp; cellular density.</p>
             </div>
             <div class="text-right">
-              <span class="text-xs font-luxury font-bold text-[#C59A45]">2.4°C</span>
+              <span class="text-xs font-luxury font-bold text-[#C59A45]" id="liveTempSensor">2.4°C</span>
               <span class="block text-[9px] uppercase tracking-widest text-[#6B625B]">Chilled</span>
             </div>
           </div>
@@ -327,6 +411,74 @@
     </div>
   </div>
 
+  <!-- ================= PINNED HAUTE BOUCHERIE SCROLL STAGE ================= -->
+  <section class="deli-stage-wrap" id="boucherieExperience">
+    <div class="deli-stage" id="deliStage">
+      <!-- Chapter 1: Poultry -->
+      <div class="deli-chapter-item" id="deliCh1">
+        <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center text-white">
+          <div class="lg:col-span-7 space-y-6">
+            <span class="text-xs uppercase font-luxury font-bold text-[#FFA517] tracking-[0.25em]">Chapter 01 • The Primal Standard</span>
+            <h2 class="text-5xl sm:text-6xl font-serif-chic font-bold leading-none">100% Antibiotic Residue-Free.</h2>
+            <p class="text-lg text-[#F7EFE6]/90 max-w-xl font-medium leading-relaxed">
+              Every bird is nurtured on pure vegetarian grain feed with clean mountain water. Never fed prophylactic antibiotics, synthetic growth hormones, or chemical plumping agents.
+            </p>
+            <div class="grid grid-cols-2 gap-6 pt-4 border-t border-white/20 text-xs font-bold uppercase tracking-wider text-[#FFA517]">
+              <div>✓ Lab-Tested Residue Purity</div>
+              <div>✓ Ozonated Clean Processing</div>
+            </div>
+          </div>
+          <div class="lg:col-span-5 hidden lg:block">
+            <img src="https://i1.wp.com/mh.delichic.co.in/wp-content/uploads/2020/09/Chicken-Breast-Antibiotic-Free-scaled.jpg?resize=600%2C600&ssl=1" alt="Chicken Breast" class="w-full aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#C59A45]/40" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Chapter 2: Charcuterie -->
+      <div class="deli-chapter-item" id="deliCh2">
+        <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center text-white">
+          <div class="lg:col-span-7 space-y-6">
+            <span class="text-xs uppercase font-luxury font-bold text-[#FFA517] tracking-[0.25em]">Chapter 02 • European Atelier</span>
+            <h2 class="text-5xl sm:text-6xl font-serif-chic font-bold leading-none">Wood-Smoked Charcuterie.</h2>
+            <p class="text-lg text-[#F7EFE6]/90 max-w-xl font-medium leading-relaxed">
+              Bavarian frankfurters, streaky bacon strips, and cracked Tellicherry black pepper salamis smoked naturally over German beechwood shavings.
+            </p>
+            <div class="grid grid-cols-2 gap-6 pt-4 border-t border-white/20 text-xs font-bold uppercase tracking-wider text-[#FFA517]">
+              <div>✓ Real German Beechwood</div>
+              <div>✓ Aged Natural Curing</div>
+            </div>
+          </div>
+          <div class="lg:col-span-5 hidden lg:block">
+            <img src="https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=600&q=85" alt="Charcuterie" class="w-full aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#C59A45]/40" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Chapter 3: Marinades & Dim Sum -->
+      <div class="deli-chapter-item" id="deliCh3">
+        <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center text-white">
+          <div class="lg:col-span-7 space-y-6">
+            <span class="text-xs uppercase font-luxury font-bold text-[#FFA517] tracking-[0.25em]">Chapter 03 • Shahi Marinades</span>
+            <h2 class="text-5xl sm:text-6xl font-serif-chic font-bold leading-none">Royal Awadhi Alchemy.</h2>
+            <p class="text-lg text-[#F7EFE6]/90 max-w-xl font-medium leading-relaxed">
+              Tender chicken steeped in royal saffron, roasted gram flour, hung curd and Awadhi mace. Alongside translucent dim sum filled with whole tiger prawns.
+            </p>
+            <div class="grid grid-cols-2 gap-6 pt-4 border-t border-white/20 text-xs font-bold uppercase tracking-wider text-[#FFA517]">
+              <div>✓ Royal Saffron &amp; Mace</div>
+              <div>✓ Whole Tiger Prawn Momos</div>
+            </div>
+          </div>
+          <div class="lg:col-span-5 hidden lg:block">
+            <img src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=85" alt="Marinades" class="w-full aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#C59A45]/40" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Rotating Brass & Crimson Guilloche Seal -->
+      <div class="deli-seal" id="deliSeal"></div>
+    </div>
+  </section>
+
   <!-- ================= THE GOURMET LARDER CATALOGUE ================= -->
   <section class="py-24 px-6 md:px-10 max-w-7xl mx-auto" id="larder">
     <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
@@ -338,7 +490,7 @@
       </div>
 
       <!-- Promocode Indicator Pill -->
-      <div class="px-5 py-2.5 rounded-full bg-[#FFF5F7] border border-[#CD2653]/30 text-[#CD2653] text-xs font-bold tracking-wider flex items-center gap-2 shadow-sm">
+      <div class="knife-glint px-5 py-2.5 rounded-full bg-[#FFF5F7] border border-[#CD2653]/30 text-[#CD2653] text-xs font-bold tracking-wider flex items-center gap-2 shadow-sm">
         <span>🏷️ Promo Code:</span>
         <span class="font-luxury font-bold text-sm text-[#4A0E17] bg-white px-2 py-0.5 rounded border border-[#CD2653]/20">WoW20</span>
         <span>• 20% OFF Above ₹999</span>
@@ -393,7 +545,7 @@
       <!-- 4 Hub Cards Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <!-- Hub 1: South & Central Delhi -->
-        <div class="p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-[#C59A45]/60 transition-all space-y-3">
+        <div class="knife-glint p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-[#C59A45]/60 transition-all space-y-3">
           <div class="flex items-center justify-between text-xs">
             <span class="font-luxury font-bold text-[#FFA517] uppercase">Hub 01</span>
             <span class="px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-300 font-bold text-[10px]">Active Slot</span>
@@ -408,7 +560,7 @@
         </div>
 
         <!-- Hub 2: Gurugram & Golf Course Road -->
-        <div class="p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-[#C59A45]/60 transition-all space-y-3">
+        <div class="knife-glint p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-[#C59A45]/60 transition-all space-y-3">
           <div class="flex items-center justify-between text-xs">
             <span class="font-luxury font-bold text-[#FFA517] uppercase">Hub 02</span>
             <span class="px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-300 font-bold text-[10px]">Active Slot</span>
@@ -423,7 +575,7 @@
         </div>
 
         <!-- Hub 3: West & North Delhi -->
-        <div class="p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-[#C59A45]/60 transition-all space-y-3">
+        <div class="knife-glint p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-[#C59A45]/60 transition-all space-y-3">
           <div class="flex items-center justify-between text-xs">
             <span class="font-luxury font-bold text-[#FFA517] uppercase">Hub 03</span>
             <span class="px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-300 font-bold text-[10px]">Active Slot</span>
@@ -438,7 +590,7 @@
         </div>
 
         <!-- Hub 4: Noida & Expressway -->
-        <div class="p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-[#C59A45]/60 transition-all space-y-3">
+        <div class="knife-glint p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-[#C59A45]/60 transition-all space-y-3">
           <div class="flex items-center justify-between text-xs">
             <span class="font-luxury font-bold text-[#FFA517] uppercase">Hub 04</span>
             <span class="px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-300 font-bold text-[10px]">Active Slot</span>
@@ -449,67 +601,6 @@
           </p>
           <div class="pt-2 text-[11px] font-bold text-[#FFA517]">
             ✦ Express Afternoon &amp; Dusk Slots
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= THE 0°C–4°C COLD-CHAIN INTEGRITY ================= -->
-  <section class="py-24 px-6 md:px-10 bg-[#FAF4ED] border-y border-[#CD2653]/15" id="coldChain">
-    <div class="max-w-7xl mx-auto">
-      <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-        <div>
-          <span class="text-xs font-bold uppercase tracking-[0.25em] text-[#CD2653] font-luxury">Culinary Standard</span>
-          <h2 class="text-4xl md:text-5xl font-serif-chic font-bold tracking-tight text-[#4A0E17] mt-2">
-            The Three Inviolable Rules.
-          </h2>
-        </div>
-        <p class="max-w-md text-sm font-medium text-[#6B625B]">
-          How Deli Chic preserves cellular tenderness, natural juices, and micronutrient density.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <!-- Rule 1 -->
-        <div class="deli-card p-8 space-y-4">
-          <div class="w-12 h-12 rounded-2xl bg-[#FFF0F3] border border-[#CD2653]/25 flex items-center justify-center text-[#CD2653] font-serif-chic font-bold text-xl">
-            01
-          </div>
-          <h3 class="text-2xl font-serif-chic font-bold text-[#4A0E17]">Zero Chemical Intervention</h3>
-          <p class="text-xs font-medium text-[#6B625B] leading-relaxed">
-            All chickens are fed 100% vegetarian grain diets, certified free from prophylactic antibiotics, growth hormones, and artificial steroids.
-          </p>
-          <div class="pt-2 text-[10px] font-luxury font-bold uppercase tracking-widest text-[#CD2653]">
-            ✓ Lab-Tested Residue Free
-          </div>
-        </div>
-
-        <!-- Rule 2 -->
-        <div class="deli-card p-8 space-y-4">
-          <div class="w-12 h-12 rounded-2xl bg-[#FFF0F3] border border-[#CD2653]/25 flex items-center justify-center text-[#CD2653] font-serif-chic font-bold text-xl">
-            02
-          </div>
-          <h3 class="text-2xl font-serif-chic font-bold text-[#4A0E17]">Strict 0°C–4°C Chilled Transport</h3>
-          <p class="text-xs font-medium text-[#6B625B] leading-relaxed">
-            Deep freezing breaks the delicate cellular walls of fresh meat, leaching moisture and flavor. Deli Chic keeps meats strictly chilled between 0°C and 4°C.
-          </p>
-          <div class="pt-2 text-[10px] font-luxury font-bold uppercase tracking-widest text-[#CD2653]">
-            ✓ Chilled, Never Deep-Frozen
-          </div>
-        </div>
-
-        <!-- Rule 3 -->
-        <div class="deli-card p-8 space-y-4">
-          <div class="w-12 h-12 rounded-2xl bg-[#FFF0F3] border border-[#CD2653]/25 flex items-center justify-center text-[#CD2653] font-serif-chic font-bold text-xl">
-            03
-          </div>
-          <h3 class="text-2xl font-serif-chic font-bold text-[#4A0E17]">Precision Slotted Delivery</h3>
-          <p class="text-xs font-medium text-[#6B625B] leading-relaxed">
-            Two daily temperature-controlled slots across New Delhi &amp; Gurgaon (10 AM–1 PM and 5 PM–8 PM), vacuum-sealed in multi-barrier hygienic packaging.
-          </p>
-          <div class="pt-2 text-[10px] font-luxury font-bold uppercase tracking-widest text-[#CD2653]">
-            ✓ Morning &amp; Evening Freshness
           </div>
         </div>
       </div>
@@ -653,17 +744,14 @@
           </div>
         </div>
 
-        <button onclick="dispatchToWhatsApp()" class="w-full py-4 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#8C1434] transition-all shadow-lg shadow-[#CD2653]/30 flex items-center justify-center gap-2">
+        <button onclick="dispatchToWhatsApp()" class="knife-glint w-full py-4 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#8C1434] transition-all shadow-lg shadow-[#CD2653]/30 flex items-center justify-center gap-2">
           <span>Dispatch via WhatsApp Concierge ↗</span>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ================= GSAP & SCROLLTRIGGER SCRIPT ================= -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-
+  <!-- ================= SCRIPTS: ATMOSPHERE CANVAS + LOUPE + PINNED STAGE ================= -->
   <script>
     // 1. Authentic Real Deli Chic Catalogue Data
     const DELI_PRODUCTS = [
@@ -832,7 +920,7 @@
 
       grid.innerHTML = filtered.map(p => {
         return `
-          <div class="deli-card overflow-hidden flex flex-col justify-between group">
+          <div class="deli-card knife-glint overflow-hidden flex flex-col justify-between group">
             <div>
               <div class="relative h-52 overflow-hidden bg-[#FAF4ED]">
                 <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -889,7 +977,6 @@
         h = canvas.height = window.innerHeight;
       });
 
-      // Saffron golden specks + subtle steam wisps
       const particles = Array.from({ length: 48 }, () => ({
         x: Math.random() * w,
         y: Math.random() * h,
@@ -919,7 +1006,66 @@
       render();
     })();
 
-    // 4. Master Carver's Optical Inspection Loupe Interaction
+    // 4. Pinned Haute Boucherie Stage Transitions
+    (function initDeliStage() {
+      const wrap = document.getElementById('boucherieExperience');
+      const stage = document.getElementById('deliStage');
+      const seal = document.getElementById('deliSeal');
+      const ch1 = document.getElementById('deliCh1');
+      const ch2 = document.getElementById('deliCh2');
+      const ch3 = document.getElementById('deliCh3');
+      if (!wrap || !stage || !seal) return;
+
+      const chs = [ch1, ch2, ch3];
+      const colors = [[74, 14, 23], [24, 6, 9], [44, 26, 9]]; // Burgundy, Charcoal Noir, Royal Saffron Dark
+
+      function ss(a, b, x) {
+        const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+        return t * t * (3 - 2 * t);
+      }
+
+      function total() { return wrap.offsetHeight - window.innerHeight; }
+
+      function update() {
+        const top = wrap.getBoundingClientRect().top;
+        const p = Math.min(1, Math.max(0, -top / total()));
+        const t = p * 3;
+        let r = 0, g = 0, b = 0;
+
+        for (let i = 0; i < 3; i++) {
+          const a = i === 0 ? 1 : ss(i - 0.15, i + 0.15, t);
+          const z = i === 2 ? 1 : 1 - ss(i + 0.85, i + 1.15, t);
+          const w = a * z;
+          chs[i].style.opacity = w.toFixed(3);
+          chs[i].style.transform = `translateY(${((1 - w) * 30).toFixed(1)}px)`;
+          chs[i].style.pointerEvents = w > 0.5 ? 'auto' : 'none';
+
+          r += colors[i][0] * w;
+          g += colors[i][1] * w;
+          b += colors[i][2] * w;
+        }
+
+        seal.style.setProperty('--rot', `${(p * 540).toFixed(1)}deg`);
+        seal.style.setProperty('--s', `${(0.92 + 0.12 * Math.sin(p * Math.PI * 3)).toFixed(3)}`);
+        stage.style.backgroundColor = `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
+      }
+
+      let ticking = false;
+      function onScroll() {
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(() => {
+            ticking = false;
+            update();
+          });
+        }
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll);
+      update();
+    })();
+
+    // 5. Master Carver's Optical Inspection Loupe Interaction
     function setLoupeCut(key) {
       if (!LOUPE_CUTS[key]) return;
       const cut = LOUPE_CUTS[key];
@@ -947,9 +1093,18 @@
       const container = document.getElementById('heroLoupeContainer');
       const glass = document.getElementById('heroLoupeGlass');
       const img = document.getElementById('heroLoupeImg');
+      const tempSensor = document.getElementById('liveTempSensor');
       if (!container || !glass || !img) return;
 
       const zoom = 2.5;
+
+      // Subtle dynamic fluctuation of temperature sensor for ultra-realism
+      setInterval(() => {
+        if (tempSensor) {
+          const val = (2.3 + Math.random() * 0.2).toFixed(1);
+          tempSensor.textContent = `${val}°C`;
+        }
+      }, 2500);
 
       container.addEventListener('mouseenter', () => {
         glass.style.display = 'block';
@@ -988,7 +1143,7 @@
       }, { passive: false });
     })();
 
-    // 5. Basket Management
+    // 6. Basket Management
     function addToBasket(id) {
       const p = DELI_PRODUCTS.find(item => item.id === id);
       const exist = basket.find(item => item.id === id);
@@ -1136,45 +1291,8 @@
       window.open(`https://api.whatsapp.com/send?phone=919810002023&text=${encoded}`, '_blank');
     }
 
-    // 6. GSAP ScrollTrigger Choreography
-    function initScrollTriggers() {
-      if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
-      gsap.registerPlugin(ScrollTrigger);
-
-      gsap.utils.toArray('.deli-card').forEach((card, i) => {
-        gsap.from(card, {
-          scrollTrigger: {
-            trigger: card,
-            start: 'top 88%',
-            toggleActions: 'play none none none'
-          },
-          y: 35,
-          opacity: 0,
-          duration: 0.8,
-          delay: (i % 4) * 0.1,
-          ease: 'power2.out'
-        });
-      });
-
-      gsap.utils.toArray('h2').forEach(title => {
-        gsap.from(title, {
-          scrollTrigger: {
-            trigger: title,
-            start: 'top 90%',
-            toggleActions: 'play none none none'
-          },
-          y: 25,
-          opacity: 0,
-          duration: 0.7,
-          ease: 'power2.out'
-        });
-      });
-    }
-
-    // 7. Initializations
     renderDeliProducts();
     updateBasketUI();
-    setTimeout(initScrollTriggers, 200);
   </script>
 </body>
 </html>
