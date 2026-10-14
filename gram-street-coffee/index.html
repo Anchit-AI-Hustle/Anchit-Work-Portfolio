@@ -126,21 +126,23 @@
     position: relative;
     min-height: 100vh;
     min-height: 100svh;
-    display: grid;
-    align-content: end;
-    padding: 120px var(--pad) clamp(32px, 6vw, 64px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(90px, 12vh, 120px) var(--pad) clamp(40px, 8vh, 60px);
+    box-sizing: border-box;
     overflow: hidden;
     background: var(--lilac);
   }
   .hero.no-gl { background: linear-gradient(135deg, #e7dcff, #cdb8f7 50%, #b79af0); }
   #fx { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
   .hero-inner { position: relative; z-index: 2; max-width: 900px; }
-  .hero h1 { font-size: clamp(2.8rem, 8.8vw, 6.4rem); max-width: 13ch; letter-spacing: -0.04em; line-height: 0.96; }
-  .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.1em; margin-bottom: -0.1em; }
+  .hero h1 { font-size: clamp(2.2rem, 5.2vw, 4.4rem); max-width: 16ch; letter-spacing: -0.04em; line-height: 1.05; }
+  .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.08em; margin-bottom: -0.08em; }
   .w > span { display: inline-block; animation: rise 0.95s cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: calc(var(--i) * 75ms + 250ms); }
   @keyframes rise { from { transform: translateY(112%); } to { transform: none; } }
-  .lede { margin-top: 22px; max-width: 44ch; font-size: clamp(1.1rem, 2vw, 1.35rem); font-weight: 600; line-height: 1.4; animation: fadein 1s ease 1.3s both; }
-  .cta-row { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 14px; animation: fadein 1s ease 1.5s both; }
+  .lede { margin-top: 18px; max-width: 48ch; font-size: clamp(1rem, 1.6vw, 1.25rem); font-weight: 600; line-height: 1.45; animation: fadein 1s ease 1.3s both; }
+  .cta-row { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 12px; animation: fadein 1s ease 1.5s both; }
   @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
 
   .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 28px; font: 700 1rem/1 var(--font); text-decoration: none; border-radius: 999px; border: 2px solid var(--grape); cursor: pointer; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -151,70 +153,164 @@
   .btn-chrome:hover { filter: brightness(1.08); box-shadow: 0 10px 25px rgba(255, 255, 255, 0.4); }
 
   /* marquee */
-  .marquee { overflow: hidden; background: var(--grape); color: var(--lilac); padding: 18px 0; }
+  .marquee { overflow: hidden; background: var(--grape); color: var(--lilac); padding: 16px 0; }
   .track { display: flex; width: max-content; animation: slide 46s linear infinite; }
   .marquee:hover .track { animation-play-state: paused; }
   .track ul { display: flex; gap: 0; margin: 0; padding: 0; list-style: none; }
-  .track li { display: flex; align-items: center; white-space: nowrap; font-size: clamp(1.3rem, 3vw, 2.2rem); font-weight: 800; letter-spacing: -0.02em; text-transform: uppercase; }
+  .track li { display: flex; align-items: center; white-space: nowrap; font-size: clamp(1.2rem, 2.5vw, 1.8rem); font-weight: 800; letter-spacing: -0.02em; text-transform: uppercase; }
   .track li::before { content: ""; width: 0.42em; height: 0.42em; margin: 0 0.9em; border-radius: 50%; background: var(--chrome); }
   @keyframes slide { to { transform: translateX(-50%); } }
 
-  /* CHAPTERS: PINNED STICKY SCROLL STAGE WITH 3D CHROME ORB */
-  .chapter { padding: clamp(56px, 9vw, 112px) var(--pad); background: var(--bg); }
-  .ch-body { max-width: 1180px; }
-  .ch-title { font-size: clamp(3.6rem, min(20vw, 21vh), 12rem); letter-spacing: -0.05em; line-height: 0.86; text-transform: uppercase; }
-  .ch-lead { margin-top: 18px; max-width: 38ch; font-size: clamp(1.1rem, 2vw, 1.45rem); font-weight: 600; line-height: 1.35; }
-  .ch-list { list-style: none; margin: 28px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px 32px; }
-  .ch-list li { padding-top: 12px; border-top: 3px solid; border-image: var(--chrome) 1; }
-  .ch-list strong { display: block; font-size: 1.25rem; letter-spacing: -0.015em; font-weight: 800; }
-  .ch-list span { display: block; margin-top: 4px; font-size: 0.98rem; line-height: 1.45; font-weight: 500; }
+  /* CHAPTERS: PINNED STICKY SCROLL STAGE */
+  .chapter { padding: clamp(40px, 6vw, 80px) var(--pad); background: var(--bg); }
+  .ch-grid {
+    display: grid;
+    gap: 28px;
+    align-items: center;
+    max-width: 1240px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  @media (min-width: 1024px) {
+    .ch-grid {
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 44px;
+      max-height: calc(100vh - 170px);
+    }
+  }
+  .ch-body { width: 100%; }
+  .ch-title {
+    font-size: clamp(2.2rem, 4.4vw, 3.8rem);
+    letter-spacing: -0.04em;
+    line-height: 0.98;
+    text-transform: uppercase;
+    color: var(--grape);
+  }
+  .ch-lead {
+    margin-top: 10px;
+    max-width: 44ch;
+    font-size: clamp(0.95rem, 1.35vw, 1.15rem);
+    font-weight: 600;
+    line-height: 1.38;
+    color: var(--grape);
+  }
+  .ch-list {
+    list-style: none;
+    margin: 18px 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px 20px;
+  }
+  .ch-list li {
+    padding-top: 8px;
+    border-top: 2px solid;
+    border-image: var(--chrome) 1;
+  }
+  .ch-list strong {
+    display: block;
+    font-size: 1.05rem;
+    letter-spacing: -0.015em;
+    font-weight: 800;
+    color: var(--grape);
+  }
+  .ch-list span {
+    display: block;
+    margin-top: 3px;
+    font-size: 0.88rem;
+    line-height: 1.35;
+    font-weight: 500;
+    color: rgba(43, 22, 80, 0.85);
+  }
   .ch-nav { display: none; }
   .orb { display: none; }
 
-  .photo { width: 100%; aspect-ratio: 4 / 5; max-height: 65vh; border-radius: 28px; background-size: cover; background-position: center; box-shadow: 0 20px 50px rgba(43, 22, 80, 0.2); }
-  .has-photo .ch-grid { display: grid; gap: 28px 48px; align-items: center; }
-  @media (min-width: 900px) { .has-photo .ch-grid { grid-template-columns: 1.25fr 0.75fr; } }
+  .photo {
+    width: 100%;
+    max-height: 40vh;
+    aspect-ratio: 16 / 11;
+    border-radius: 24px;
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 16px 40px rgba(43, 22, 80, 0.18);
+    border: 2px solid rgba(255, 255, 255, 0.85);
+  }
+  @media (max-width: 1023px) {
+    .photo { display: none !important; }
+  }
 
-  .is-scroll { height: 340vh; position: relative; }
-  .is-scroll .stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
-  .is-scroll .chapter { position: absolute; inset: 0; display: grid; align-content: center; padding: 84px var(--pad) 96px; background: none; opacity: 0; pointer-events: none; will-change: opacity, transform; }
+  .is-scroll { height: 320vh; position: relative; }
+  .is-scroll .stage {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .is-scroll .chapter {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 84px var(--pad) 76px;
+    box-sizing: border-box;
+    background: none;
+    opacity: 0;
+    pointer-events: none;
+    will-change: opacity, transform;
+  }
   .is-scroll .orb {
     display: block;
     position: absolute;
     z-index: 0;
     right: -10vw;
     top: 50%;
-    width: min(52vw, 66vh);
+    width: min(44vw, 54vh);
     aspect-ratio: 1;
-    margin-top: calc(min(52vw, 66vh) / -2);
+    margin-top: calc(min(44vw, 54vh) / -2);
     border-radius: 50%;
     background: conic-gradient(from var(--rot, 0deg), #fbfaff, #a29cbb, #ffffff, #c4bfd6, #a29cbb, #ffffff, #c4bfd6, #fbfaff);
-    -webkit-mask: radial-gradient(circle, transparent 0 56%, #000 57%);
-    mask: radial-gradient(circle, transparent 0 56%, #000 57%);
+    -webkit-mask: radial-gradient(circle, transparent 0 58%, #000 59%);
+    mask: radial-gradient(circle, transparent 0 58%, #000 59%);
     transform: scale(var(--s, 1));
-    opacity: 0.92;
+    opacity: 0.55;
     pointer-events: none;
-    box-shadow: 0 0 80px rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 60px rgba(255, 255, 255, 0.4);
   }
   .is-scroll .chapter { z-index: 1; }
-  @media (max-width: 699px) { .is-scroll .orb { top: auto; bottom: 62px; margin-top: 0; right: -12vw; width: 34vw; } }
-  .is-scroll .ch-nav { display: flex; position: absolute; left: var(--pad); right: var(--pad); bottom: 20px; gap: 12px; z-index: 2; }
+  @media (max-width: 699px) { .is-scroll .orb { display: none; } }
+  .is-scroll .ch-nav {
+    display: flex;
+    position: absolute;
+    left: var(--pad);
+    right: var(--pad);
+    bottom: 20px;
+    gap: 16px;
+    z-index: 10;
+    max-width: 1240px;
+    margin: 0 auto;
+  }
   .ch-nav button {
     flex: 1;
-    min-height: 48px;
+    min-height: 42px;
     padding: 0;
-    font: 700 1.05rem/1 var(--font);
+    font: 800 0.95rem/1 var(--font);
     color: var(--grape);
     background: transparent;
     border: 0;
-    border-bottom: 3px solid rgba(43, 22, 80, 0.2);
+    border-bottom: 3px solid rgba(43, 22, 80, 0.22);
     cursor: pointer;
     position: relative;
     text-align: left;
     text-transform: uppercase;
+    transition: opacity 0.2s;
   }
   .ch-nav button::after { content: ""; position: absolute; left: 0; bottom: -3px; height: 3px; width: calc(var(--f, 0) * 100%); background: var(--grape); }
-  .ch-nav button[aria-current="true"] { font-weight: 800; }
+  .ch-nav button[aria-current="true"] { font-weight: 900; }
 
   /* chef */
   .chef { padding: clamp(64px, 9vw, 120px) var(--pad); background: var(--lilac-soft); }
@@ -325,6 +421,7 @@
   </a>
   <nav class="nav" aria-label="Main Navigation">
     <a href="#chapters">Flavours</a>
+    <a href="#coffeehouseExperience">Atelier</a>
     <a href="#d2cShop">D2C Roasts</a>
     <a href="#space">The Space</a>
     <a href="#cities">Network</a>
@@ -382,7 +479,7 @@
     </div>
   </div>
 
-  <!-- CHAPTERS: 340vh SCROLL STAGE WITH ROTATING CONIC-GRADIENT CHROME ORB -->
+  <!-- CHAPTERS: 320vh SCROLL STAGE WITH ROTATING CONIC-GRADIENT CHROME ORB -->
   <section id="chapters" aria-label="Coffee, matcha and gelato">
     <div class="stage">
       <!-- Chapter 1: Coffee -->
@@ -397,7 +494,16 @@
               <li><strong>Twisted Cold Coffee</strong><span>Blended with house coffee gelato and topped with frozen espresso cubes that intensify as they melt.</span></li>
             </ul>
           </div>
-          <figure class="photo hidden md:block" style="background-image: url('https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=85');"></figure>
+          <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white" style="background: linear-gradient(180deg, rgba(43,22,80,0.25) 0%, rgba(43,22,80,0.85) 100%), url('https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=85') center/cover;">
+            <div class="flex items-center justify-between z-10">
+              <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur text-[11px] font-black uppercase tracking-wider text-amber-200">✦ 9-Bar Extraction</span>
+              <span class="text-[11px] font-bold text-white/90">93.5°C Brew Temp</span>
+            </div>
+            <div class="z-10">
+              <div class="text-xl font-display font-black text-white">Signature Espresso Crema</div>
+              <div class="text-xs text-white/80 font-medium mt-1">Nagaland Arabica &bull; Wild floral, honey sweetness &amp; dark cacao</div>
+            </div>
+          </div>
         </div>
       </article>
 
@@ -413,7 +519,16 @@
               <li><strong>100-Prong Aeration</strong><span>Whisked fresh at 78°C using traditional Japanese bamboo chasen for rich umami notes.</span></li>
             </ul>
           </div>
-          <figure class="photo hidden md:block" style="background-image: url('https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=800&q=85');"></figure>
+          <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white" style="background: linear-gradient(180deg, rgba(43,22,80,0.2) 0%, rgba(30,55,20,0.85) 100%), url('https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=800&q=85') center/cover;">
+            <div class="flex items-center justify-between z-10">
+              <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur text-[11px] font-black uppercase tracking-wider text-emerald-200">✦ Ceremonial Uji Tencha</span>
+              <span class="text-[11px] font-bold text-white/90">100-Prong Bamboo Chasen</span>
+            </div>
+            <div class="z-10">
+              <div class="text-xl font-display font-black text-white">Jade Micro-Foam</div>
+              <div class="text-xs text-white/80 font-medium mt-1">Kyoto first harvest &bull; Whisked fresh at 78°C for rich umami notes</div>
+            </div>
+          </div>
         </div>
       </article>
 
@@ -429,7 +544,16 @@
               <li><strong>Lighter Sorbets</strong><span>Refreshing fruit sorbets and clean sugar-free options sweetened naturally with erythritol.</span></li>
             </ul>
           </div>
-          <figure class="photo hidden md:block" style="background-image: url('https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=800&q=85');"></figure>
+          <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white" style="background: linear-gradient(180deg, rgba(43,22,80,0.2) 0%, rgba(70,20,50,0.85) 100%), url('https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=800&q=85') center/cover;">
+            <div class="flex items-center justify-between z-10">
+              <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur text-[11px] font-black uppercase tracking-wider text-pink-200">✦ In-House Churn</span>
+              <span class="text-[11px] font-bold text-white/90">-12°C Serving Velvet</span>
+            </div>
+            <div class="z-10">
+              <div class="text-xl font-display font-black text-white">Artisanal Gelato &amp; Sorbet</div>
+              <div class="text-xs text-white/80 font-medium mt-1">Smoked chocolate, roasted hazelnut &amp; caramelized croissant</div>
+            </div>
+          </div>
         </div>
       </article>
 
@@ -442,6 +566,250 @@
         <button type="button">02. Matcha</button>
         <button type="button">03. Gelato</button>
       </nav>
+    </div>
+  </section>
+
+  <!-- ================= SPECIALTY COFFEEHOUSE CRAFT ATELIER ================= -->
+  <section class="py-24 px-6 md:px-12 max-w-7xl mx-auto" id="coffeehouseExperience">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+      <div>
+        <span class="text-xs font-black uppercase tracking-[0.25em] text-[#7C3AED]">The Sensory Roastery Bar</span>
+        <h2 class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight mt-2 text-[#2B1650]">
+          The Coffeehouse Atelier.
+        </h2>
+        <p class="mt-3 text-base text-[#534168] max-w-2xl font-semibold leading-relaxed">
+          Step behind our lilac glass counter. Experience precision 9-bar bottomless espresso extraction, interactive velvety latte art pouring, and origin roast profile telemetry.
+        </p>
+      </div>
+      <!-- Mode Switcher Tabs -->
+      <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-[#2B1650]/20 shadow-sm text-xs font-black uppercase tracking-wider overflow-x-auto">
+        <button onclick="switchAtelierTab('extraction')" id="atelierTab-extraction" class="py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow whitespace-nowrap">
+          1. 9-Bar Extraction
+        </button>
+        <button onclick="switchAtelierTab('latteart')" id="atelierTab-latteart" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650] whitespace-nowrap">
+          2. Latte Art Pour
+        </button>
+        <button onclick="switchAtelierTab('roast')" id="atelierTab-roast" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650] whitespace-nowrap">
+          3. Roast Spectrum
+        </button>
+      </div>
+    </div>
+
+    <!-- Panel 1: 9-Bar Bottomless Naked Portafilter Extraction Simulator -->
+    <div id="atelierPanel-extraction" class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
+      <!-- Left Controls & Telemetry -->
+      <div class="lg:col-span-6 space-y-6">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-black uppercase tracking-wider">
+          <span>● Bottomless Naked Portafilter • 58mm E61 Grouphead</span>
+        </div>
+        <h3 class="text-3xl sm:text-4xl font-display font-black text-[#2B1650] uppercase tracking-tight">
+          Watch The Crema Bloom.
+        </h3>
+        <p class="text-sm sm:text-base text-[#534168] font-medium leading-relaxed">
+          Freshly ground Nagaland Arabica micro-lot dosed at 18.5 grams. Watch the dual streams coalesce into a syrupy, golden-amber flow, yielding a tiger-striped crema with natural blueberry notes.
+        </p>
+
+        <!-- Analog Pressure Gauge & Action -->
+        <div class="flex flex-wrap items-center gap-6 pt-2">
+          <div class="flex items-center gap-4 bg-[#F8F5FF] p-3.5 rounded-2xl border border-[#2B1650]/15 shadow-inner">
+            <div class="relative w-16 h-16 rounded-full border-4 border-[#2B1650] bg-white flex items-center justify-center shadow-md">
+              <div id="pressureNeedle" class="absolute w-1 h-7 bg-[#CD2653] origin-bottom rounded-full transition-transform duration-700 -translate-y-2.5" style="transform: rotate(-120deg);"></div>
+              <div class="w-3 h-3 rounded-full bg-[#2B1650] z-10"></div>
+              <span class="absolute bottom-1.5 text-[8px] font-black uppercase tracking-widest text-[#2B1650]">BAR</span>
+            </div>
+            <div>
+              <div class="text-xs uppercase tracking-widest text-[#7C3AED] font-black">Grouphead Pressure</div>
+              <div id="pressureVal" class="text-xl font-display font-black text-[#2B1650]">0.0 BAR</div>
+            </div>
+          </div>
+
+          <button id="pullShotBtn" onclick="triggerEspressoPull()" class="btn btn-primary shadow-lg shadow-[#2B1650]/20 flex items-center gap-2">
+            <span>☕ Pull 9-Bar Shot</span>
+          </button>
+        </div>
+
+        <!-- Telemetry Matrix -->
+        <div class="grid grid-cols-4 gap-4 pt-4 border-t border-[#2B1650]/10 text-center">
+          <div>
+            <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">Dose</div>
+            <div class="text-lg font-black text-[#2B1650]">18.5g</div>
+          </div>
+          <div>
+            <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">Yield</div>
+            <div id="yieldVal" class="text-lg font-black text-[#2B1650]">0.0g</div>
+          </div>
+          <div>
+            <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">Time</div>
+            <div id="timerVal" class="text-lg font-black text-[#2B1650]">0.0s</div>
+          </div>
+          <div>
+            <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">TDS Purity</div>
+            <div class="text-lg font-black text-[#2B1650]">9.8%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Visual Canvas: Portafilter Extraction Stream & Crema Cup -->
+      <div class="lg:col-span-6 relative flex flex-col items-center justify-center min-h-[380px] bg-gradient-to-b from-[#EFE8FC] to-[#DED2F9] rounded-2xl p-6 border border-[#2B1650]/15 overflow-hidden shadow-inner">
+        <!-- Floating Steam Canvas -->
+        <canvas id="espressoSteamCanvas" class="absolute inset-0 pointer-events-none z-20"></canvas>
+        
+        <!-- Portafilter Head Graphic -->
+        <div class="relative z-10 w-32 h-14 rounded-b-xl bg-gradient-to-b from-[#6366F1] via-[#4338CA] to-[#2B1650] border-2 border-white shadow-xl flex flex-col items-center justify-end pb-1">
+          <div class="w-16 h-2 rounded-full bg-amber-400/80 mb-1"></div>
+          <!-- Extraction Stream -->
+          <div id="espressoStream" class="w-2.5 h-0 bg-gradient-to-b from-amber-500 via-amber-700 to-[#3E1F08] rounded-full transition-all duration-300 opacity-0 shadow-lg"></div>
+        </div>
+
+        <!-- Ceramic Cup Graphic -->
+        <div class="relative z-10 mt-20 w-44 h-28 rounded-b-[48px] bg-gradient-to-b from-[#CDB8F7] to-[#A890E0] border-4 border-white shadow-2xl flex flex-col items-center justify-start pt-2 overflow-hidden">
+          <div class="w-36 h-10 rounded-[50%] bg-[#3E1F08] border-2 border-amber-500/40 relative overflow-hidden shadow-inner">
+            <!-- Crema Fill Layer -->
+            <div id="cremaFill" class="absolute inset-0 bg-gradient-to-r from-amber-600 via-amber-400 to-amber-700 opacity-0 transition-opacity duration-1000"></div>
+          </div>
+          <span class="text-[9px] font-black uppercase tracking-[0.2em] text-[#2B1650] mt-4 opacity-80">Gram Street • Gurugram</span>
+        </div>
+
+        <div class="absolute bottom-3 text-center text-xs font-bold text-[#534168] z-10">
+          Click "Pull 9-Bar Shot" to start pressurized fluid extraction
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 2: Interactive Latte Art Pour Studio -->
+    <div id="atelierPanel-latteart" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
+      <!-- Left Controls -->
+      <div class="lg:col-span-6 space-y-6">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black uppercase tracking-wider">
+          <span>● Silky Microfoam Canvas • 65°C Temperature Sweet Spot</span>
+        </div>
+        <h3 class="text-3xl sm:text-4xl font-display font-black text-[#2B1650] uppercase tracking-tight">
+          Pour Your Own Latte Art.
+        </h3>
+        <p class="text-sm sm:text-base text-[#534168] font-medium leading-relaxed">
+          Select a pattern or freehand-pour steamed velvet milk over rich espresso crema. Drag your cursor or finger across the cup to watch the milk foam bloom through realistic surface tension.
+        </p>
+
+        <!-- Pattern Selector -->
+        <div class="space-y-2">
+          <span class="text-xs uppercase tracking-widest text-[#7C3AED] font-black">Choose Pattern</span>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="setLattePattern('rosetta')" id="pat-rosetta" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#2B1650] text-[#F1E9FF] shadow transition-all">
+              🌿 Rosetta
+            </button>
+            <button onclick="setLattePattern('tulip')" id="pat-tulip" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#F8F5FF] text-[#534168] border border-[#2B1650]/20 hover:text-[#2B1650] transition-all">
+              🌷 Tulip
+            </button>
+            <button onclick="setLattePattern('heart')" id="pat-heart" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#F8F5FF] text-[#534168] border border-[#2B1650]/20 hover:text-[#2B1650] transition-all">
+              🤍 Heart
+            </button>
+            <button onclick="resetLatteCanvas()" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition-all">
+              ↺ Reset Cup
+            </button>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-[#2B1650]/10 flex items-center justify-between text-xs font-semibold text-[#534168]">
+          <span>Microfoam Texture: <strong>0.2mm Velvet Foam</strong></span>
+          <span>Aeration: <strong>100% Glossy Finish</strong></span>
+        </div>
+      </div>
+
+      <!-- Right Interactive Latte Art Cup Canvas -->
+      <div class="lg:col-span-6 relative flex flex-col items-center justify-center p-6 bg-gradient-to-b from-[#F8F5FF] to-[#E9DCFC] rounded-2xl border border-[#2B1650]/15 shadow-inner">
+        <div class="relative w-72 h-72 sm:w-80 sm:h-80 rounded-full border-8 border-white shadow-2xl overflow-hidden cursor-crosshair">
+          <canvas id="latteCanvas" width="320" height="320" class="w-full h-full block touch-none"></canvas>
+          <div class="absolute inset-0 rounded-full pointer-events-none shadow-[inset_0_0_30px_rgba(0,0,0,0.6)]"></div>
+        </div>
+        <div class="mt-4 text-xs font-black uppercase tracking-wider text-[#2B1650]">
+          Drag across the cup to pour velvety microfoam
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 3: Origin Roast Profile & Sensory Wheel -->
+    <div id="atelierPanel-roast" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
+      <!-- Left Origin Profile Details -->
+      <div class="lg:col-span-6 space-y-6">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-black uppercase tracking-wider">
+          <span>● Single-Origin Indian Terroir • Giesen Roaster</span>
+        </div>
+        <h3 id="roastName" class="text-3xl sm:text-4xl font-display font-black text-[#2B1650] uppercase tracking-tight">
+          Nagaland Arabica.
+        </h3>
+        <p id="roastDesc" class="text-sm sm:text-base text-[#534168] font-medium leading-relaxed">
+          Grown under dense wild canopies at 1,450 meters elevation in Kiphire, Nagaland. Lightly roasted to preserve floral jasmine aromatics, peach sweetness, and delicate bergamot finish.
+        </p>
+
+        <!-- Roast Slider -->
+        <div class="space-y-3 pt-2">
+          <div class="flex justify-between text-xs font-black uppercase tracking-wider text-[#2B1650]">
+            <span>Light Cinnamon (196°C)</span>
+            <span>Medium City+ (218°C)</span>
+            <span>Dark French (235°C)</span>
+          </div>
+          <input type="range" min="1" max="3" value="1" id="roastSlider" oninput="changeRoastProfile(this.value)" class="w-full accent-[#7C3AED] cursor-pointer h-2 bg-slate-200 rounded-lg" />
+        </div>
+
+        <!-- Flavor Notes Pills -->
+        <div class="space-y-2 pt-2">
+          <span class="text-xs uppercase tracking-widest text-[#7C3AED] font-black">Cupping Flavor Notes</span>
+          <div id="roastNotes" class="flex flex-wrap gap-2">
+            <span class="px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold">Wild Jasmine</span>
+            <span class="px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold">White Peach</span>
+            <span class="px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold">Bergamot Citrus</span>
+            <span class="px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold">Raw Honey</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Sensory Radar Graphic -->
+      <div class="lg:col-span-6 flex flex-col items-center justify-center p-8 bg-gradient-to-b from-[#F8F5FF] to-[#EAE0FC] rounded-2xl border border-[#2B1650]/15 shadow-inner">
+        <div class="w-full max-w-sm space-y-4">
+          <div class="space-y-1">
+            <div class="flex justify-between text-xs font-bold text-[#2B1650]">
+              <span>Acidity &amp; Brightness</span>
+              <span id="acidityVal">9.4 / 10</span>
+            </div>
+            <div class="h-2 rounded-full bg-white overflow-hidden shadow-inner">
+              <div id="acidityBar" class="h-full bg-[#7C3AED] rounded-full transition-all duration-500" style="width: 94%;"></div>
+            </div>
+          </div>
+          <div class="space-y-1">
+            <div class="flex justify-between text-xs font-bold text-[#2B1650]">
+              <span>Body &amp; Mouthfeel</span>
+              <span id="bodyVal">6.5 / 10</span>
+            </div>
+            <div class="h-2 rounded-full bg-white overflow-hidden shadow-inner">
+              <div id="bodyBar" class="h-full bg-amber-500 rounded-full transition-all duration-500" style="width: 65%;"></div>
+            </div>
+          </div>
+          <div class="space-y-1">
+            <div class="flex justify-between text-xs font-bold text-[#2B1650]">
+              <span>Sweetness</span>
+              <span id="sweetnessVal">8.8 / 10</span>
+            </div>
+            <div class="h-2 rounded-full bg-white overflow-hidden shadow-inner">
+              <div id="sweetnessBar" class="h-full bg-pink-500 rounded-full transition-all duration-500" style="width: 88%;"></div>
+            </div>
+          </div>
+          <div class="space-y-1">
+            <div class="flex justify-between text-xs font-bold text-[#2B1650]">
+              <span>Roast Development Time</span>
+              <span id="roastTimeVal">1:45 min (14.2% DTR)</span>
+            </div>
+            <div class="h-2 rounded-full bg-white overflow-hidden shadow-inner">
+              <div id="roastTimeBar" class="h-full bg-[#2B1650] rounded-full transition-all duration-500" style="width: 72%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 flex items-center gap-3">
+          <button onclick="playBeanCrackle()" class="px-4 py-2 rounded-full bg-white border border-[#2B1650]/20 text-[#2B1650] text-xs font-bold uppercase tracking-wider hover:bg-[#F8F5FF] transition-all flex items-center gap-2 shadow-sm">
+            <span>🔥 Hear First Crack (Audio)</span>
+          </button>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -1127,6 +1495,374 @@
 
   renderProducts();
   updateCartUI();
+})();
+
+/* ================= COFFEEHOUSE ATELIER SENSORY ENGINE ================= */
+(function initCoffeehouseAtelier() {
+  // 1. Tab Switcher
+  window.switchAtelierTab = function(tab) {
+    const tabs = ['extraction', 'latteart', 'roast'];
+    tabs.forEach(t => {
+      const p = document.getElementById(`atelierPanel-${t}`);
+      const btn = document.getElementById(`atelierTab-${t}`);
+      if (p) {
+        if (t === tab) {
+          p.classList.remove('hidden');
+          p.classList.add('grid');
+        } else {
+          p.classList.add('hidden');
+          p.classList.remove('grid');
+        }
+      }
+      if (btn) {
+        if (t === tab) {
+          btn.className = "py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow whitespace-nowrap";
+        } else {
+          btn.className = "py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650] whitespace-nowrap";
+        }
+      }
+    });
+    if (tab === 'latteart') initLatteCanvas();
+  };
+
+  // 2. 9-Bar Bottomless Naked Extraction Simulator
+  let isExtracting = false;
+  window.triggerEspressoPull = function() {
+    if (isExtracting) return;
+    isExtracting = true;
+    const needle = document.getElementById('pressureNeedle');
+    const pVal = document.getElementById('pressureVal');
+    const stream = document.getElementById('espressoStream');
+    const crema = document.getElementById('cremaFill');
+    const timer = document.getElementById('timerVal');
+    const yieldEl = document.getElementById('yieldVal');
+    const btn = document.getElementById('pullShotBtn');
+
+    if (btn) btn.disabled = true;
+
+    // Audio extraction sound synthesis
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(60, ctx.currentTime);
+        osc.frequency.linearRampToValueAtTime(80, ctx.currentTime + 3);
+        gain.gain.setValueAtTime(0.01, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.5);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 3.5);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 3.5);
+      }
+    } catch(e) {}
+
+    // Pressure ramp to 9.2 Bar
+    if (needle) needle.style.transform = 'rotate(42deg)';
+    if (pVal) pVal.textContent = '9.2 BAR';
+    if (stream) {
+      stream.style.opacity = '1';
+      stream.style.height = '85px';
+    }
+
+    let elapsed = 0;
+    const interval = setInterval(() => {
+      elapsed += 0.2;
+      if (timer) timer.textContent = `${elapsed.toFixed(1)}s`;
+      if (yieldEl) yieldEl.textContent = `${(elapsed * 1.34).toFixed(1)}g`;
+
+      if (elapsed >= 2.0 && crema) {
+        crema.style.opacity = '1';
+      }
+
+      if (elapsed >= 3.6) {
+        clearInterval(interval);
+        if (timer) timer.textContent = '27.4s';
+        if (yieldEl) yieldEl.textContent = '36.8g';
+        if (stream) {
+          stream.style.opacity = '0';
+          stream.style.height = '0px';
+        }
+        if (needle) needle.style.transform = 'rotate(-120deg)';
+        if (pVal) pVal.textContent = '0.0 BAR';
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>✓ Shot Pulled • Reset &amp; Pull Again</span>';
+        }
+        isExtracting = false;
+      }
+    }, 200);
+  };
+
+  // 3. Steam Canvas Particle System
+  (function initSteamParticles() {
+    const canvas = document.getElementById('espressoSteamCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = canvas.offsetWidth;
+    let height = canvas.height = canvas.offsetHeight;
+
+    window.addEventListener('resize', () => {
+      if (!canvas) return;
+      width = canvas.width = canvas.offsetWidth;
+      height = canvas.height = canvas.offsetHeight;
+    });
+
+    const particles = [];
+    for (let i = 0; i < 24; i++) {
+      particles.push({
+        x: width * 0.5 + (Math.random() - 0.5) * 40,
+        y: height * 0.7 + Math.random() * 60,
+        r: 10 + Math.random() * 18,
+        vx: (Math.random() - 0.5) * 0.6,
+        vy: -0.6 - Math.random() * 0.8,
+        alpha: 0.1 + Math.random() * 0.2
+      });
+    }
+
+    function renderSteam() {
+      ctx.clearRect(0, 0, width, height);
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.r += 0.15;
+        p.alpha -= 0.002;
+        if (p.alpha <= 0 || p.y < 0) {
+          p.x = width * 0.5 + (Math.random() - 0.5) * 35;
+          p.y = height * 0.75;
+          p.r = 10 + Math.random() * 14;
+          p.alpha = 0.15 + Math.random() * 0.2;
+        }
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+        g.addColorStop(0, `rgba(255, 255, 255, ${p.alpha})`);
+        g.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      requestAnimationFrame(renderSteam);
+    }
+    renderSteam();
+  })();
+
+  // 4. Interactive Latte Art Canvas Studio
+  let currentLattePattern = 'rosetta';
+  window.setLattePattern = function(pat) {
+    currentLattePattern = pat;
+    ['rosetta', 'tulip', 'heart'].forEach(p => {
+      const btn = document.getElementById(`pat-${p}`);
+      if (btn) {
+        if (p === pat) {
+          btn.className = "px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#2B1650] text-[#F1E9FF] shadow transition-all";
+        } else {
+          btn.className = "px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#F8F5FF] text-[#534168] border border-[#2B1650]/20 hover:text-[#2B1650] transition-all";
+        }
+      }
+    });
+    drawPresetPattern(pat);
+  };
+
+  function initLatteCanvas() {
+    const canvas = document.getElementById('latteCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+
+    // Fill Crema Background
+    const g = ctx.createRadialGradient(w/2, h/2, 20, w/2, h/2, w/2);
+    g.addColorStop(0, '#5C2D16');
+    g.addColorStop(0.6, '#3D1C0B');
+    g.addColorStop(1, '#241005');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+
+    // Initial Rosetta
+    drawPresetPattern(currentLattePattern);
+
+    // Interactive Drag Pour
+    let isDrawing = false;
+    function pour(e) {
+      if (!isDrawing) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+      const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+      
+      const pg = ctx.createRadialGradient(x, y, 0, x, y, 16);
+      pg.addColorStop(0, 'rgba(255, 253, 245, 0.95)');
+      pg.addColorStop(0.5, 'rgba(255, 248, 235, 0.8)');
+      pg.addColorStop(1, 'rgba(255, 245, 225, 0)');
+      ctx.fillStyle = pg;
+      ctx.beginPath();
+      ctx.arc(x, y, 16, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    canvas.addEventListener('mousedown', () => isDrawing = true);
+    window.addEventListener('mouseup', () => isDrawing = false);
+    canvas.addEventListener('mousemove', pour);
+
+    canvas.addEventListener('touchstart', (e) => { isDrawing = true; pour(e); }, { passive: true });
+    window.addEventListener('touchend', () => isDrawing = false);
+    canvas.addEventListener('touchmove', pour, { passive: true });
+  }
+
+  function drawPresetPattern(pat) {
+    const canvas = document.getElementById('latteCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+
+    // Reset Crema
+    const g = ctx.createRadialGradient(w/2, h/2, 20, w/2, h/2, w/2);
+    g.addColorStop(0, '#6A351B');
+    g.addColorStop(0.5, '#421E0D');
+    g.addColorStop(1, '#261106');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.fillStyle = 'rgba(255, 252, 244, 0.92)';
+
+    if (pat === 'rosetta') {
+      // Draw artistic rosetta leaves
+      for (let i = 0; i < 9; i++) {
+        const y = 90 + i * 16;
+        const spread = 24 + (8 - i) * 7;
+        ctx.beginPath();
+        ctx.ellipse(w/2 - spread, y, 18, 9, -0.2, 0, Math.PI * 2);
+        ctx.ellipse(w/2 + spread, y, 18, 9, 0.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Top heart
+      ctx.beginPath();
+      ctx.arc(w/2 - 10, 80, 12, 0, Math.PI * 2);
+      ctx.arc(w/2 + 10, 80, 12, 0, Math.PI * 2);
+      ctx.fill();
+      // Stem line
+      ctx.strokeStyle = 'rgba(255, 252, 244, 0.95)';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(w/2, 65);
+      ctx.lineTo(w/2, 250);
+      ctx.stroke();
+    } else if (pat === 'tulip') {
+      // Stacked 4-tier tulip lobes
+      [210, 165, 125, 90].forEach((y, i) => {
+        ctx.beginPath();
+        ctx.arc(w/2 - 20, y, 18 + i * 2, 0, Math.PI * 2);
+        ctx.arc(w/2 + 20, y, 18 + i * 2, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.strokeStyle = 'rgba(255, 252, 244, 0.95)';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(w/2, 75);
+      ctx.lineTo(w/2, 240);
+      ctx.stroke();
+    } else if (pat === 'heart') {
+      // Classic blooming heart
+      ctx.beginPath();
+      ctx.arc(w/2 - 35, 130, 48, 0, Math.PI * 2);
+      ctx.arc(w/2 + 35, 130, 48, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(w/2 - 80, 140);
+      ctx.lineTo(w/2, 240);
+      ctx.lineTo(w/2 + 80, 140);
+      ctx.fill();
+    }
+  }
+
+  window.resetLatteCanvas = function() {
+    drawPresetPattern(currentLattePattern);
+  };
+
+  // 5. Roast Profile Spectrum Dial
+  const ROAST_PROFILES = {
+    1: {
+      name: "Nagaland Arabica.",
+      desc: "Grown under dense wild canopies at 1,450m elevation in Kiphire, Nagaland. Lightly roasted (196°C) to preserve floral jasmine aromatics, white peach, and delicate bergamot finish.",
+      notes: ["Wild Jasmine", "White Peach", "Bergamot Citrus", "Raw Honey"],
+      acidity: "9.4 / 10", acidityW: "94%",
+      body: "6.5 / 10", bodyW: "65%",
+      sweetness: "8.8 / 10", sweetnessW: "88%",
+      dtr: "1:45 min (14.2% DTR)", dtrW: "72%"
+    },
+    2: {
+      name: "Karnataka Chikmagalur.",
+      desc: "Shade-grown at 1,200m in the Western Ghats. Medium City+ roast (218°C) highlighting velvety body, roasted hazelnuts, dark cocoa nibs, and warm panela caramel.",
+      notes: ["Dark Cocoa Nibs", "Roasted Hazelnut", "Raw Panela", "Brown Sugar"],
+      acidity: "7.2 / 10", acidityW: "72%",
+      body: "8.9 / 10", bodyW: "89%",
+      sweetness: "9.1 / 10", sweetnessW: "91%",
+      dtr: "2:20 min (18.5% DTR)", dtrW: "85%"
+    },
+    3: {
+      name: "Kerala Monsoon Malabar.",
+      desc: "Exposed to monsoon winds on the Malabar coast. Dark French roast (235°C) with low acidity, intense smoky chocolate, toasted cedarwood, and ultra-dense hazelnut crema.",
+      notes: ["Smoked Cacao", "Spiced Tobacco", "Toasted Oak", "Dense Crema"],
+      acidity: "4.1 / 10", acidityW: "41%",
+      body: "9.8 / 10", bodyW: "98%",
+      sweetness: "7.6 / 10", sweetnessW: "76%",
+      dtr: "3:05 min (22.8% DTR)", dtrW: "98%"
+    }
+  };
+
+  window.changeRoastProfile = function(val) {
+    const data = ROAST_PROFILES[val] || ROAST_PROFILES[1];
+    const n = document.getElementById('roastName');
+    const d = document.getElementById('roastDesc');
+    const notesEl = document.getElementById('roastNotes');
+    if (n) n.textContent = data.name;
+    if (d) d.textContent = data.desc;
+    if (notesEl) {
+      notesEl.innerHTML = data.notes.map(note => `<span class="px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold">${note}</span>`).join('');
+    }
+    const aVal = document.getElementById('acidityVal');
+    const aBar = document.getElementById('acidityBar');
+    if (aVal) aVal.textContent = data.acidity;
+    if (aBar) aBar.style.width = data.acidityW;
+
+    const bVal = document.getElementById('bodyVal');
+    const bBar = document.getElementById('bodyBar');
+    if (bVal) bVal.textContent = data.body;
+    if (bBar) bBar.style.width = data.bodyW;
+
+    const sVal = document.getElementById('sweetnessVal');
+    const sBar = document.getElementById('sweetnessBar');
+    if (sVal) sVal.textContent = data.sweetness;
+    if (sBar) sBar.style.width = data.sweetnessW;
+
+    const rVal = document.getElementById('roastTimeVal');
+    const rBar = document.getElementById('roastTimeBar');
+    if (rVal) rVal.textContent = data.dtr;
+    if (rBar) rBar.style.width = data.dtrW;
+  };
+
+  window.playBeanCrackle = function() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      for (let i = 0; i < 6; i++) {
+        setTimeout(() => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(350 + Math.random() * 400, ctx.currentTime);
+          gain.gain.setValueAtTime(0.08, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.08);
+        }, i * 90 + Math.random() * 50);
+      }
+    } catch(e) {}
+  };
 })();
 </script>
 </body>
