@@ -30,6 +30,7 @@
       --chic-charcoal: #1C1917;
       --chic-muted: #6B625B;
       --chic-gold: #C59A45;
+      --chic-gold-bright: #FFA517;
       --chic-green: #2B613B;
       --font-serif: "Playfair Display", Georgia, serif;
       --font-luxury: "Cinzel", serif;
@@ -64,16 +65,28 @@
     }
     .loupe-glass {
       position: absolute;
-      width: 150px;
-      height: 150px;
+      width: 160px;
+      height: 160px;
       border: 3px solid var(--chic-gold);
       border-radius: 50%;
       pointer-events: none;
       display: none;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 0 15px rgba(255, 255, 255, 0.4);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45), inset 0 0 20px rgba(255, 255, 255, 0.45);
       background-repeat: no-repeat;
       z-index: 30;
       transform: translate(-50%, -50%);
+    }
+
+    /* Reticle in Loupe */
+    .loupe-glass::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: 
+        linear-gradient(to right, transparent 49%, rgba(197, 154, 69, 0.5) 50%, transparent 51%),
+        linear-gradient(to bottom, transparent 49%, rgba(197, 154, 69, 0.5) 50%, transparent 51%);
+      pointer-events: none;
     }
 
     /* Editorial Cards */
@@ -136,8 +149,8 @@
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       <div class="flex items-center gap-2 mx-auto sm:mx-0">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span class="font-bold">DELHI NCR DISPATCH:</span>
-        <span class="text-white/90">Slot 1 (10 AM–1 PM) &amp; Slot 2 (5 PM–8 PM) • Free delivery on orders ₹999+</span>
+        <span class="font-bold">ALL DELHI NCR HUBS OPERATIONAL:</span>
+        <span class="text-white/90">Slot 1 (10 AM–1 PM) &amp; Slot 2 (5 PM–8 PM) • Free Express Delivery on ₹999+</span>
       </div>
       <div class="hidden md:flex items-center gap-5 text-[11px] text-[#F7EFE6]">
         <span>✦ Use Code <strong class="text-[#FFA517] underline tracking-widest font-black">WoW20</strong> (20% OFF)</span>
@@ -166,10 +179,10 @@
       <!-- Navigation Links -->
       <nav class="hidden lg:flex items-center gap-8 text-xs font-bold uppercase tracking-[0.2em] text-[#1C1917]">
         <a href="#larder" class="hover:text-[#CD2653] transition-colors">The Larder</a>
-        <a href="#masterCarver" class="hover:text-[#CD2653] transition-colors">Master Carver</a>
+        <a href="#masterCarver" class="hover:text-[#CD2653] transition-colors">Master Carver Loupe</a>
         <a href="#coldChain" class="hover:text-[#CD2653] transition-colors">0°C–4°C Standard</a>
+        <a href="#hubs" class="hover:text-[#CD2653] transition-colors">NCR Hubs (4)</a>
         <a href="#heritage" class="hover:text-[#CD2653] transition-colors">Our Story</a>
-        <a href="#contact" class="hover:text-[#CD2653] transition-colors">Delivery Slots</a>
       </nav>
 
       <!-- Action Controls -->
@@ -190,8 +203,11 @@
   </header>
 
   <!-- ================= HERO SECTION: CINEMATIC EDITORIAL CULINARY SHOWCASE ================= -->
-  <section class="relative pt-36 pb-20 md:pt-40 md:pb-28 px-6 md:px-10 max-w-7xl mx-auto">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+  <section class="relative pt-36 pb-20 md:pt-40 md:pb-28 px-6 md:px-10 max-w-7xl mx-auto overflow-hidden">
+    <!-- Atmospheric Culinary Steam & Golden Particle Canvas -->
+    <canvas id="deliAtmosphereCanvas" class="absolute inset-0 pointer-events-none z-10"></canvas>
+
+    <div class="relative z-20 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
       <!-- Left Editorial Storytelling -->
       <div class="lg:col-span-7 space-y-7 text-center lg:text-left">
         <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#F7EFE6] border border-[#CD2653]/25 text-[#CD2653] text-xs font-bold tracking-[0.2em] uppercase shadow-sm">
@@ -208,15 +224,15 @@
         </h1>
 
         <p class="text-base sm:text-lg text-[#524842] max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
-          From farm-tender poultry and wood-smoked charcuterie to handcrafted prawn dim sum and Lucknowi marinades. Vacuum-sealed at peak freshness and dispatched in temperature-controlled cold-chain across Delhi NCR.
+          From farm-tender poultry and wood-smoked charcuterie to handcrafted prawn dim sum and Lucknowi marinades. Vacuum-sealed at peak freshness and dispatched in temperature-controlled cold-chain across all 4 Delhi NCR delivery hubs.
         </p>
 
         <!-- CTAs -->
         <div class="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-4">
-          <a href="#larder" class="px-8 py-4 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#8C1434] transition-all shadow-xl shadow-[#CD2653]/25">
+          <a href="#larder" class="px-8 py-4 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#8C1434] transition-all shadow-xl shadow-[#CD2653]/25 hover:scale-105 duration-200">
             Explore Fresh Larder (₹)
           </a>
-          <a href="https://wa.link/bk4b8e" target="_blank" rel="noreferrer" class="px-7 py-4 rounded-full bg-white border border-[#4A0E17]/40 text-[#4A0E17] font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#F7EFE6] transition-all shadow-sm">
+          <a href="https://wa.link/bk4b8e" target="_blank" rel="noreferrer" class="px-7 py-4 rounded-full bg-white border border-[#4A0E17]/40 text-[#4A0E17] font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#F7EFE6] transition-all shadow-sm hover:scale-105 duration-200">
             Quick WhatsApp Order ↗
           </a>
         </div>
@@ -240,12 +256,28 @@
 
       <!-- Right Master Carver's Interactive Loupe Feature -->
       <div class="lg:col-span-5 relative" id="masterCarver">
+        <!-- Interactive Cut Tabs for Loupe -->
+        <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-white/80 border border-[#CD2653]/20 mb-3 text-[10px] font-bold uppercase tracking-wider overflow-x-auto">
+          <button onclick="setLoupeCut('charcuterie')" id="loupeTab-charcuterie" class="py-1.5 px-3 rounded-xl bg-[#CD2653] text-white transition-all whitespace-nowrap">
+            Charcuterie
+          </button>
+          <button onclick="setLoupeCut('poultry')" id="loupeTab-poultry" class="py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap">
+            Fresh Breast
+          </button>
+          <button onclick="setLoupeCut('marinade')" id="loupeTab-marinade" class="py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap">
+            Lucknowi Cut
+          </button>
+          <button onclick="setLoupeCut('momos')" id="loupeTab-momos" class="py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap">
+            Prawn Dim Sum
+          </button>
+        </div>
+
         <div class="loupe-container shadow-2xl border-2 border-[#C59A45]/40 bg-black" id="heroLoupeContainer">
           <img
             id="heroLoupeImg"
             src="https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=1200&q=85"
             alt="Deli Chic Prime Artisanal Cuts"
-            class="w-full h-[480px] object-cover"
+            class="w-full h-[470px] object-cover transition-opacity duration-300"
           />
           <div id="heroLoupeGlass" class="loupe-glass"></div>
 
@@ -254,14 +286,14 @@
             <div>
               <div class="flex items-center gap-2">
                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-                <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-800">Inspection Loupe Active</span>
+                <span id="loupeBadgeText" class="text-[11px] font-bold uppercase tracking-wider text-emerald-800">Master Carver 2.5x Loupe Active</span>
               </div>
-              <h4 class="text-base font-serif-chic font-bold text-[#4A0E17] mt-0.5">Prime Wood-Smoked Charcuterie</h4>
-              <p class="text-[11px] text-[#6B625B]">Hover cursor across cut to examine texture grain &amp; curing marble.</p>
+              <h4 id="loupeTitleText" class="text-base font-serif-chic font-bold text-[#4A0E17] mt-0.5">Prime Wood-Smoked Charcuterie</h4>
+              <p id="loupeDescText" class="text-[11px] text-[#6B625B]">Move cursor or drag finger across cut to inspect curing grain &amp; cellular density.</p>
             </div>
             <div class="text-right">
               <span class="text-xs font-luxury font-bold text-[#C59A45]">2.4°C</span>
-              <span class="block text-[9px] uppercase tracking-widest text-[#6B625B]">Cold-Chain</span>
+              <span class="block text-[9px] uppercase tracking-widest text-[#6B625B]">Chilled</span>
             </div>
           </div>
         </div>
@@ -337,6 +369,90 @@
 
     <!-- Products Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-7" id="productGrid"></div>
+  </section>
+
+  <!-- ================= DELHI NCR DELIVERY HUBS & REFRIGERATED DISPATCH NETWORK ================= -->
+  <section class="py-20 px-6 md:px-10 bg-[#4A0E17] text-[#FFF9F4] border-y border-[#C59A45]/30 relative overflow-hidden" id="hubs">
+    <div class="max-w-7xl mx-auto space-y-12">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#CD2653]/30 border border-[#C59A45]/40 text-[#FFA517] text-xs font-bold uppercase tracking-wider mb-3">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Temperature-Controlled Cold-Chain</span>
+          </div>
+          <h2 class="text-4xl md:text-5xl font-serif-chic font-bold tracking-tight text-white">
+            Delhi NCR Refrigerated Dispatch.
+          </h2>
+        </div>
+        <div class="text-right text-xs text-[#F7EFE6]/80 font-medium">
+          <div>Slot 1: <strong class="text-white font-bold">10:00 AM – 1:00 PM</strong></div>
+          <div>Slot 2: <strong class="text-white font-bold">5:00 PM – 8:00 PM</strong></div>
+        </div>
+      </div>
+
+      <!-- 4 Hub Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Hub 1: South & Central Delhi -->
+        <div class="p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-[#C59A45]/60 transition-all space-y-3">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-luxury font-bold text-[#FFA517] uppercase">Hub 01</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-300 font-bold text-[10px]">Active Slot</span>
+          </div>
+          <h3 class="text-xl font-serif-chic font-bold text-white">South &amp; Central Delhi</h3>
+          <p class="text-xs text-[#F7EFE6]/80 leading-relaxed">
+            Chanakyapuri, Greater Kailash (GK 1 &amp; 2), Vasant Kunj, Defence Colony, Hauz Khas, Jor Bagh, New Friends Colony.
+          </p>
+          <div class="pt-2 text-[11px] font-bold text-[#FFA517]">
+            ✦ 12-Hour Morning &amp; Evening Dispatch
+          </div>
+        </div>
+
+        <!-- Hub 2: Gurugram & Golf Course Road -->
+        <div class="p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-[#C59A45]/60 transition-all space-y-3">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-luxury font-bold text-[#FFA517] uppercase">Hub 02</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-300 font-bold text-[10px]">Active Slot</span>
+          </div>
+          <h3 class="text-xl font-serif-chic font-bold text-white">Gurugram &amp; GCR</h3>
+          <p class="text-xs text-[#F7EFE6]/80 leading-relaxed">
+            DLF Phase 1 to 5, Cyber City, Golf Course Road, Golf Course Extension, Sector 53/54, Sohna Road.
+          </p>
+          <div class="pt-2 text-[11px] font-bold text-[#FFA517]">
+            ✦ Hyper-Local Cold Vans
+          </div>
+        </div>
+
+        <!-- Hub 3: West & North Delhi -->
+        <div class="p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-[#C59A45]/60 transition-all space-y-3">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-luxury font-bold text-[#FFA517] uppercase">Hub 03</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-300 font-bold text-[10px]">Active Slot</span>
+          </div>
+          <h3 class="text-xl font-serif-chic font-bold text-white">West &amp; North Delhi</h3>
+          <p class="text-xs text-[#F7EFE6]/80 leading-relaxed">
+            Punjabi Bagh, Rajouri Garden, Civil Lines, Model Town, Paschim Vihar, Patel Nagar.
+          </p>
+          <div class="pt-2 text-[11px] font-bold text-[#FFA517]">
+            ✦ Insulated Multi-Barrier Packs
+          </div>
+        </div>
+
+        <!-- Hub 4: Noida & Expressway -->
+        <div class="p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-[#C59A45]/60 transition-all space-y-3">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-luxury font-bold text-[#FFA517] uppercase">Hub 04</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-300 font-bold text-[10px]">Active Slot</span>
+          </div>
+          <h3 class="text-xl font-serif-chic font-bold text-white">Noida &amp; Expressway</h3>
+          <p class="text-xs text-[#F7EFE6]/80 leading-relaxed">
+            Sector 15 to Sector 137, Expressway corridors, Greater Noida West &amp; Alpha commercial hubs.
+          </p>
+          <div class="pt-2 text-[11px] font-bold text-[#FFA517]">
+            ✦ Express Afternoon &amp; Dusk Slots
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- ================= THE 0°C–4°C COLD-CHAIN INTEGRITY ================= -->
@@ -452,99 +568,101 @@
   </section>
 
   <!-- ================= FOOTER ================= -->
-  <footer class="border-t border-[#CD2653]/15 py-12 px-6 md:px-10 bg-white">
+  <footer class="border-t border-[#CD2653]/15 py-12 px-6 md:px-10 text-center sm:text-left bg-white">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-xs text-[#6B625B]">
       <div>
         <strong class="font-serif-chic font-bold text-base block text-[#4A0E17]">Deli Chic — Food For Thought</strong>
-        <span>© 2026 Deli Chic. All Rights Reserved. New Delhi &amp; NCR.</span>
+        <span>© 2026 Deli Chic. All Rights Reserved. New Delhi &amp; NCR Haute Boucherie.</span>
       </div>
-      <div class="flex gap-6 uppercase tracking-wider font-bold">
-        <a href="https://delichic.co.in" target="_blank" class="hover:text-[#CD2653] transition-colors">Official Portal</a>
-        <a href="https://www.instagram.com/delichic.in/" target="_blank" class="hover:text-[#CD2653] transition-colors">Instagram</a>
-        <a href="https://wa.link/bk4b8e" target="_blank" class="hover:text-[#CD2653] transition-colors">WhatsApp Order</a>
+      <div class="flex gap-6 uppercase tracking-widest font-luxury font-bold text-[11px]">
+        <a href="https://delichic.co.in/" target="_blank" class="hover:text-[#CD2653] transition-colors">Official Portal</a>
+        <a href="https://mh.delichic.co.in/shop/" target="_blank" class="hover:text-[#CD2653] transition-colors">Catalogue</a>
         <a href="tel:+919810002023" class="hover:text-[#CD2653] transition-colors">+91 98100 02023</a>
       </div>
     </div>
   </footer>
 
-  <!-- ================= SLIDE-OVER DELI BASKET DRAWER ================= -->
+  <!-- ================= SLIDE-OVER BASKET DRAWER ================= -->
   <div id="basketModal" class="fixed inset-0 z-50 hidden">
-    <div onclick="toggleBasket(false)" class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
-    <div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-[#CD2653]/20 p-8 flex flex-col justify-between shadow-2xl text-[#1C1917]">
+    <div onclick="toggleBasket(false)" class="absolute inset-0 bg-black/75 backdrop-blur-sm"></div>
+    <div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-[#CD2653]/25 p-8 flex flex-col justify-between shadow-2xl text-[#1C1917]">
       <div>
         <!-- Drawer Header -->
-        <div class="flex items-center justify-between border-b border-[#CD2653]/15 pb-5">
+        <div class="flex items-center justify-between border-b border-[#CD2653]/15 pb-4">
           <div>
+            <span class="text-[10px] font-luxury font-bold uppercase tracking-widest text-[#CD2653]">Haute Boucherie</span>
             <h3 class="text-xl font-serif-chic font-bold text-[#4A0E17]">Your Artisanal Basket</h3>
-            <span class="text-[10px] font-luxury font-bold uppercase tracking-widest text-[#CD2653]">0°C–4°C Chilled Dispatch</span>
           </div>
           <button onclick="toggleBasket(false)" class="text-xs uppercase tracking-widest text-[#CD2653] font-bold hover:underline">Close ✕</button>
         </div>
 
-        <!-- Free Delivery Progress Tracker -->
-        <div class="mt-4 p-3.5 rounded-2xl bg-[#FFF5F7] border border-[#CD2653]/20 text-xs text-[#4A0E17]" id="freeShippingBanner">
-          <div class="flex justify-between font-bold mb-1">
-            <span id="shippingText">Free NCR Shipping Status</span>
-            <span id="shippingProgressVal">₹999 Goal</span>
+        <!-- Free Delivery Threshold Meter -->
+        <div class="mt-4 p-3.5 rounded-2xl bg-[#FFF5F7] border border-[#CD2653]/20">
+          <div class="flex justify-between text-xs font-bold mb-1.5">
+            <span id="shippingText" class="text-[#CD2653]">Add ₹799 for FREE Delivery</span>
+            <span id="shippingProgressVal" class="text-[#4A0E17]">₹200 / ₹999</span>
           </div>
-          <div class="w-full h-1.5 rounded-full bg-[#E8CBD3] overflow-hidden">
-            <div id="shippingProgressBar" class="h-full bg-[#CD2653] transition-all duration-300" style="width: 25%;"></div>
-          </div>
-        </div>
-
-        <!-- Delivery Slot Selector -->
-        <div class="mt-4">
-          <label class="block text-[10px] font-bold uppercase tracking-wider text-[#6B625B] mb-1.5">Select Delivery Slot:</label>
-          <div class="grid grid-cols-2 gap-2 text-xs">
-            <button onclick="setSlot('10 AM – 1 PM')" id="slot-morning" class="slot-btn py-2 px-3 rounded-xl border border-[#CD2653] bg-[#CD2653] text-white font-bold transition-all">
-              ☀️ 10 AM – 1 PM
-            </button>
-            <button onclick="setSlot('5 PM – 8 PM')" id="slot-evening" class="slot-btn py-2 px-3 rounded-xl border border-[#CD2653]/30 bg-white text-[#524842] font-bold transition-all">
-              🌙 5 PM – 8 PM
-            </button>
+          <div class="w-full h-2 rounded-full bg-[#F3D7DF] overflow-hidden">
+            <div id="shippingProgressBar" class="h-full bg-[#CD2653] transition-all duration-300" style="width: 20%;"></div>
           </div>
         </div>
 
         <!-- Items Container -->
-        <div id="basketItemsList" class="mt-5 space-y-3.5 max-h-[42vh] overflow-y-auto pr-1"></div>
+        <div id="basketItemsList" class="mt-5 space-y-3.5 max-h-[46vh] overflow-y-auto pr-1"></div>
       </div>
 
-      <!-- Drawer Footer -->
-      <div class="border-t border-[#CD2653]/15 pt-5 space-y-3">
+      <!-- Drawer Footer & Checkout -->
+      <div class="border-t border-[#CD2653]/15 pt-5 space-y-4">
+        <!-- Delivery Slot Selector -->
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-[#6B625B] mb-1.5">Select NCR Delivery Slot:</label>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <button onclick="setSlot('Morning (10 AM–1 PM)')" id="slot-morning" class="slot-btn py-2 px-3 rounded-xl border border-[#CD2653] bg-[#CD2653] text-white font-bold transition-all">
+              10 AM – 1 PM
+            </button>
+            <button onclick="setSlot('Evening (5 PM–8 PM)')" id="slot-evening" class="slot-btn py-2 px-3 rounded-xl border border-[#CD2653]/30 bg-white text-[#524842] font-bold transition-all">
+              5 PM – 8 PM
+            </button>
+          </div>
+        </div>
+
         <!-- Promo Code Input -->
         <div class="flex gap-2">
-          <input type="text" id="promoInput" placeholder="Enter Promo (e.g. WoW20)" class="w-full px-4 py-2.5 rounded-xl border border-[#CD2653]/30 text-xs font-bold uppercase tracking-wider focus:outline-none focus:border-[#CD2653]" />
-          <button onclick="applyPromo()" class="px-5 py-2.5 rounded-xl bg-[#4A0E17] text-white text-xs font-bold uppercase tracking-wider hover:bg-[#8C1434] transition-all">
+          <input type="text" id="promoInput" placeholder="Enter Code (e.g. WoW20)" class="w-full px-4 py-2 rounded-xl border border-[#CD2653]/30 text-xs uppercase font-luxury font-bold focus:outline-none focus:border-[#CD2653]" />
+          <button onclick="applyPromo()" class="px-5 py-2 rounded-xl bg-[#4A0E17] text-white font-bold text-xs uppercase hover:bg-[#2F090F] transition-all">
             Apply
           </button>
         </div>
-        <div id="promoNotice" class="text-[11px] font-bold text-emerald-700 hidden">✓ Promo WoW20 applied! 20% discount activated.</div>
+        <div id="promoNotice" class="text-[11px] text-emerald-700 font-bold hidden">
+          ✓ Code WoW20 Applied! 20% Discount Activated.
+        </div>
 
-        <div class="space-y-1 pt-1 text-xs">
-          <div class="flex justify-between text-[#6B625B]">
+        <!-- Calculations -->
+        <div class="space-y-1.5 text-xs text-[#524842]">
+          <div class="flex justify-between">
             <span>Subtotal</span>
-            <span id="subtotalPrice" class="font-bold text-[#1C1917]">₹0</span>
+            <span id="subtotalPrice" class="font-bold text-sm">₹200</span>
           </div>
           <div class="flex justify-between text-emerald-700 font-bold" id="discountRow" style="display: none;">
-            <span>Discount (WoW20 -20%)</span>
-            <span id="discountPrice">-₹0</span>
+            <span>Discount (WoW20)</span>
+            <span id="discountPrice">-₹40</span>
           </div>
-          <div class="flex justify-between text-sm font-bold text-[#4A0E17] pt-2 border-t border-[#CD2653]/15">
-            <span class="font-serif-chic font-bold text-base">Total Due (₹)</span>
-            <span id="finalTotalPrice" class="text-2xl font-serif-chic font-bold text-[#CD2653]">₹0</span>
+          <div class="flex justify-between text-base font-serif-chic font-bold text-[#4A0E17] pt-2 border-t border-[#CD2653]/10">
+            <span>Total Value</span>
+            <span id="finalTotalPrice" class="text-xl text-[#CD2653]">₹200</span>
           </div>
         </div>
 
-        <button onclick="dispatchToWhatsApp()" class="w-full py-4 rounded-full bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold text-xs uppercase tracking-[0.2em] transition-all shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2">
-          <span>Order via WhatsApp Concierge ↗</span>
+        <button onclick="dispatchToWhatsApp()" class="w-full py-4 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#8C1434] transition-all shadow-lg shadow-[#CD2653]/30 flex items-center justify-center gap-2">
+          <span>Dispatch via WhatsApp Concierge ↗</span>
         </button>
-        <p class="text-[10px] text-center text-[#6B625B]">Direct official WhatsApp dispatch with real-time slot booking.</p>
       </div>
     </div>
   </div>
 
-  <!-- ================= GSAP MOTION SCRIPT & LOGIC ================= -->
+  <!-- ================= GSAP & SCROLLTRIGGER SCRIPT ================= -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
   <script>
     // 1. Authentic Real Deli Chic Catalogue Data
@@ -671,12 +789,39 @@
       }
     ];
 
+    const LOUPE_CUTS = {
+      charcuterie: {
+        title: 'Prime Wood-Smoked Charcuterie',
+        desc: 'Cured with Tellicherry black peppercorns and cold beechwood smoke.',
+        badge: 'Master Carver 2.5x Loupe Active',
+        image: 'https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=1200&q=85'
+      },
+      poultry: {
+        title: '100% Antibiotic Residue-Free Breast',
+        desc: 'Examine cellular firmness and natural pink marbling. Zero deep-freeze cellular collapse.',
+        badge: 'Lab-Tested 100% Residue-Free',
+        image: 'https://i1.wp.com/mh.delichic.co.in/wp-content/uploads/2020/09/Chicken-Breast-Antibiotic-Free-scaled.jpg?resize=800%2C800&ssl=1'
+      },
+      marinade: {
+        title: 'Lucknowi Shahi Saffron Marinade',
+        desc: 'Infused with Awadhi mace, roasted gram flour, hung curd and royal saffron threads.',
+        badge: 'Chef Master Marinade Inspection',
+        image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=85'
+      },
+      momos: {
+        title: 'Handcrafted Coastal Prawn Dim Sum',
+        desc: 'Delicate translucent pleated casing filled with whole juicy sea tiger prawns.',
+        badge: 'Artisanal Dim Sum Inspection',
+        image: 'https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?auto=format&fit=crop&w=1200&q=85'
+      }
+    };
+
     let currentFilter = 'all';
     let basket = [
       { id: 'chk-breast-500', name: 'Chicken Breast Antibiotic-Free', weight: '500 gm', price: 199, qty: 1 }
     ];
     let isPromoApplied = false;
-    let selectedSlot = '10 AM – 1 PM';
+    let selectedSlot = 'Morning (10 AM–1 PM)';
 
     // 2. Render Products
     function renderDeliProducts() {
@@ -731,7 +876,73 @@
       renderDeliProducts();
     }
 
-    // 3. Master Carver's Optical Inspection Loupe Interaction
+    // 3. Atmospheric Culinary Motion Canvas
+    (function initAtmosphere() {
+      const canvas = document.getElementById('deliAtmosphereCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let w = canvas.width = window.innerWidth;
+      let h = canvas.height = window.innerHeight;
+
+      window.addEventListener('resize', () => {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+      });
+
+      // Saffron golden specks + subtle steam wisps
+      const particles = Array.from({ length: 48 }, () => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: Math.random() * 3 + 1,
+        vy: -(Math.random() * 0.4 + 0.15),
+        vx: (Math.random() - 0.5) * 0.3,
+        a: Math.random() * 0.5 + 0.2,
+        color: Math.random() > 0.4 ? 'rgba(197, 154, 69,' : 'rgba(205, 38, 83,'
+      }));
+
+      function render() {
+        ctx.clearRect(0, 0, w, h);
+        particles.forEach(p => {
+          p.y += p.vy;
+          p.x += p.vx;
+          if (p.y < -10) p.y = h + 10;
+          if (p.x < -10) p.x = w + 10;
+          if (p.x > w + 10) p.x = -10;
+
+          ctx.fillStyle = `${p.color}${p.a})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        requestAnimationFrame(render);
+      }
+      render();
+    })();
+
+    // 4. Master Carver's Optical Inspection Loupe Interaction
+    function setLoupeCut(key) {
+      if (!LOUPE_CUTS[key]) return;
+      const cut = LOUPE_CUTS[key];
+      ['charcuterie', 'poultry', 'marinade', 'momos'].forEach(k => {
+        const btn = document.getElementById(`loupeTab-${k}`);
+        if (k === key) {
+          btn.className = 'py-1.5 px-3 rounded-xl bg-[#CD2653] text-white transition-all whitespace-nowrap';
+        } else {
+          btn.className = 'py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap';
+        }
+      });
+
+      const img = document.getElementById('heroLoupeImg');
+      img.style.opacity = '0';
+      setTimeout(() => {
+        img.src = cut.image;
+        img.onload = () => { img.style.opacity = '1'; };
+        document.getElementById('loupeTitleText').textContent = cut.title;
+        document.getElementById('loupeDescText').textContent = cut.desc;
+        document.getElementById('loupeBadgeText').textContent = cut.badge;
+      }, 150);
+    }
+
     (function initMasterCarverLoupe() {
       const container = document.getElementById('heroLoupeContainer');
       const glass = document.getElementById('heroLoupeGlass');
@@ -777,7 +988,7 @@
       }, { passive: false });
     })();
 
-    // 4. Basket Management
+    // 5. Basket Management
     function addToBasket(id) {
       const p = DELI_PRODUCTS.find(item => item.id === id);
       const exist = basket.find(item => item.id === id);
@@ -925,9 +1136,45 @@
       window.open(`https://api.whatsapp.com/send?phone=919810002023&text=${encoded}`, '_blank');
     }
 
-    // 5. Initializations
+    // 6. GSAP ScrollTrigger Choreography
+    function initScrollTriggers() {
+      if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+      gsap.registerPlugin(ScrollTrigger);
+
+      gsap.utils.toArray('.deli-card').forEach((card, i) => {
+        gsap.from(card, {
+          scrollTrigger: {
+            trigger: card,
+            start: 'top 88%',
+            toggleActions: 'play none none none'
+          },
+          y: 35,
+          opacity: 0,
+          duration: 0.8,
+          delay: (i % 4) * 0.1,
+          ease: 'power2.out'
+        });
+      });
+
+      gsap.utils.toArray('h2').forEach(title => {
+        gsap.from(title, {
+          scrollTrigger: {
+            trigger: title,
+            start: 'top 90%',
+            toggleActions: 'play none none none'
+          },
+          y: 25,
+          opacity: 0,
+          duration: 0.7,
+          ease: 'power2.out'
+        });
+      });
+    }
+
+    // 7. Initializations
     renderDeliProducts();
     updateBasketUI();
+    setTimeout(initScrollTriggers, 200);
   </script>
 </body>
 </html>

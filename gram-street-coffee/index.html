@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gram Street Coffee | D2C Roastery &amp; Flagship Bar — Gurugram</title>
-  <meta name="description" content="In-house specialty roasts, ceremonial Uji matcha, and small-batch gelato. DLF Phase 1, Gurugram.">
+  <meta name="description" content="In-house specialty roasts, ceremonial Uji matcha, and small-batch gelato. Locations at DLF Phase 1, Golf Course Road & Sector 56, Gurugram.">
   <link rel="canonical" href="https://anchit-tandon.com/gram-street-coffee" />
   <meta property="og:title" content="Gram Street Coffee | D2C Roastery &amp; Flagship Bar — Gurugram" />
-  <meta property="og:description" content="In-house specialty roasts, ceremonial Uji matcha, and small-batch gelato. DLF Phase 1, Gurugram." />
+  <meta property="og:description" content="In-house specialty roasts, ceremonial Uji matcha, and small-batch gelato. DLF Phase 1, Golf Course Road & Sector 56, Gurugram." />
   <meta property="og:url" content="https://anchit-tandon.com/gram-street-coffee" />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1200&q=85" />
@@ -28,6 +28,7 @@
       --plum: #160A24;           /* Deep Obsidian Plum */
       --plum-muted: #534168;
       --accent: #7C3AED;
+      --chrome: linear-gradient(135deg, #FBFAFF 0%, #C4BFD6 28%, #FFFFFF 46%, #9A94B3 68%, #E9E6F3 100%);
       --font-display: "Bricolage Grotesque", "Syne", sans-serif;
     }
 
@@ -62,15 +63,15 @@
                   height 0.22s cubic-bezier(0.16, 1, 0.3, 1),
                   background-color 0.2s ease,
                   box-shadow 0.2s ease;
-      box-shadow: 0 0 16px rgba(124, 58, 237, 0.45);
+      box-shadow: 0 0 18px rgba(124, 58, 237, 0.5);
     }
 
     .custom-cursor.hovering {
-      width: 58px;
-      height: 58px;
+      width: 60px;
+      height: 60px;
       background-color: rgba(205, 184, 247, 0.35);
       border-color: #7C3AED;
-      box-shadow: 0 0 35px rgba(124, 58, 237, 0.6);
+      box-shadow: 0 0 35px rgba(124, 58, 237, 0.7);
     }
 
     /* WebGL Shader Canvas */
@@ -95,12 +96,13 @@
     .floating-bean {
       background: radial-gradient(circle at 35% 30%, #5E3978 0%, #2B163B 70%, #12091A 100%);
       box-shadow: 0 20px 38px rgba(0, 0, 0, 0.4), inset 0 2px 6px rgba(230, 210, 255, 0.6);
-      animation: floatBean 5s ease-in-out infinite alternate;
+      animation: floatBean 6s ease-in-out infinite alternate;
     }
 
     @keyframes floatBean {
-      0% { transform: translateY(0px) rotate(-22deg); }
-      100% { transform: translateY(-18px) rotate(-8deg); }
+      0% { transform: translateY(0px) rotate(-22deg) scale(1); }
+      50% { transform: translateY(-15px) rotate(-14deg) scale(1.05); }
+      100% { transform: translateY(-28px) rotate(-6deg) scale(0.98); }
     }
 
     /* Marquee */
@@ -151,6 +153,16 @@
       box-shadow: 0 25px 60px -10px rgba(124, 58, 237, 0.24);
     }
 
+    /* Radar Orbit Keyframes */
+    .radar-pulse {
+      animation: radarRipples 3s cubic-bezier(0.1, 0.8, 0.3, 1) infinite;
+      transform-origin: center;
+    }
+    @keyframes radarRipples {
+      0% { transform: scale(0.8); opacity: 0.8; }
+      100% { transform: scale(3.2); opacity: 0; }
+    }
+
     /* Chrome Gradient Text */
     .chrome-gradient {
       background: linear-gradient(135deg, #160A24 0%, #4A5568 30%, #CBD5E0 50%, #4A5568 70%, #160A24 100%);
@@ -174,7 +186,7 @@
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       <div class="flex items-center gap-2 mx-auto sm:mx-0">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span>FLAGSHIP OPEN NOW: 16 Arjun Marg, DLF Phase 1, Gurugram • 8:30 AM – 10:30 PM</span>
+        <span>ALL 3 GURUGRAM HUBS OPEN: DLF Phase 1 • Golf Course Road (Sector 53) • Sector 56 Hub</span>
       </div>
       <div class="hidden sm:flex items-center gap-4 text-[11px] text-[#CDB8F7]">
         <span>☕ Micro-Roastery</span>
@@ -205,7 +217,8 @@
         <a href="#d2cShop" class="hover:text-[#7C3AED] transition-colors">Shop Beans</a>
         <a href="#sensoryCraft" class="hover:text-[#7C3AED] transition-colors">The Craft</a>
         <a href="#menuSection" class="hover:text-[#7C3AED] transition-colors">Café Menu</a>
-        <a href="#flagship" class="hover:text-[#7C3AED] transition-colors">Visit Bar</a>
+        <a href="#network" class="hover:text-[#7C3AED] transition-colors">Locations (3)</a>
+        <a href="#flagship" class="hover:text-[#7C3AED] transition-colors">Wipe Bar Window</a>
       </nav>
 
       <!-- Action Controls -->
@@ -226,7 +239,7 @@
   </header>
 
   <!-- ================= HERO SECTION: VISUAL, PUNCHY & CINEMATIC ================= -->
-  <section class="relative min-h-[92vh] pt-36 pb-20 flex items-center justify-center overflow-hidden bg-[#CDB8F7]" id="heroSection">
+  <section class="relative min-h-[94vh] pt-36 pb-20 flex items-center justify-center overflow-hidden bg-[#CDB8F7]" id="heroSection">
     <!-- Liquid Chrome & Lilac WebGL Shader Canvas -->
     <canvas id="fx" aria-hidden="true"></canvas>
 
@@ -236,10 +249,10 @@
     <div class="relative z-20 max-w-7xl mx-auto px-6 md:px-10 w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
       <!-- Left Hero Copy (Clean, Punchy, Zero Fluff) -->
       <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
-        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 border border-[#7C3AED]/40 text-[#7C3AED] text-xs font-extrabold tracking-[0.2em] uppercase shadow-sm">
-          <span>DLF Phase 1, Gurugram</span>
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/85 border border-[#7C3AED]/40 text-[#7C3AED] text-xs font-extrabold tracking-[0.2em] uppercase shadow-sm">
+          <span>DLF Phase 1 • Sector 53 • Sector 56</span>
           <span>•</span>
-          <span>By Chef Vanshika Bhatia</span>
+          <span>Chef Vanshika Bhatia</span>
         </div>
 
         <h1 class="text-5xl sm:text-6xl xl:text-7xl font-display font-black tracking-tight leading-[0.94] uppercase text-[#160A24]">
@@ -250,30 +263,30 @@
         </h1>
 
         <p class="text-lg text-[#2A1445] max-w-lg mx-auto lg:mx-0 leading-relaxed font-semibold">
-          In-house roasted Indian micro-lots, ceremonial Uji matcha, and traditional small-batch gelato from a lilac glass-fronted counter.
+          In-house roasted Indian micro-lots, ceremonial Uji matcha, and traditional small-batch gelato served across 3 Gurugram destinations.
         </p>
 
         <div class="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-4">
-          <a href="#d2cShop" class="px-8 py-4 rounded-full bg-[#160A24] text-white font-extrabold text-xs uppercase tracking-[0.2em] hover:bg-[#3B185F] transition-all shadow-xl">
+          <a href="#d2cShop" class="px-8 py-4 rounded-full bg-[#160A24] text-white font-extrabold text-xs uppercase tracking-[0.2em] hover:bg-[#3B185F] transition-all shadow-xl hover:scale-105 duration-200">
             Shop Fresh Roasts (₹)
           </a>
-          <a href="#flagship" class="px-7 py-4 rounded-full bg-white border border-[#160A24] text-[#160A24] font-extrabold text-xs uppercase tracking-[0.2em] hover:bg-[#F5EFFF] transition-all">
-            Visit Flagship Bar ↗
+          <a href="#flagship" class="px-7 py-4 rounded-full bg-white border border-[#160A24] text-[#160A24] font-extrabold text-xs uppercase tracking-[0.2em] hover:bg-[#F5EFFF] transition-all hover:scale-105 duration-200">
+            Wipe Steamed Glass ↗
           </a>
         </div>
 
         <!-- Telemetry Stats -->
         <div class="pt-6 grid grid-cols-3 gap-6 border-t border-[#160A24]/20 max-w-md mx-auto lg:mx-0 text-left">
           <div>
-            <div class="text-3xl font-display font-black text-[#160A24]">88.5+</div>
+            <div class="text-3xl font-display font-black text-[#160A24] stat-counter" data-target="88.5">88.5+</div>
             <div class="text-[11px] uppercase tracking-wider font-extrabold text-[#4C1D95]">SCA Cupping</div>
           </div>
           <div>
-            <div class="text-3xl font-display font-black text-[#160A24]">9.2 BAR</div>
+            <div class="text-3xl font-display font-black text-[#160A24] stat-counter" data-target="9.2">9.2 BAR</div>
             <div class="text-[11px] uppercase tracking-wider font-extrabold text-[#4C1D95]">Extraction</div>
           </div>
           <div>
-            <div class="text-3xl font-display font-black text-[#160A24]">24 Hrs</div>
+            <div class="text-3xl font-display font-black text-[#160A24] stat-counter" data-target="24">24 Hrs</div>
             <div class="text-[11px] uppercase tracking-wider font-extrabold text-[#4C1D95]">Roast to Door</div>
           </div>
         </div>
@@ -281,14 +294,18 @@
 
       <!-- Right 3D Coffee Bag with Mouse Physics -->
       <div class="lg:col-span-5 relative flex items-center justify-center min-h-[480px]">
-        <div class="floating-bean absolute -top-3 left-6 sm:left-10 w-16 h-11 rounded-full z-30 pointer-events-none flex items-center justify-center">
+        <!-- 3 Orbiting Floating Coffee Beans -->
+        <div class="floating-bean absolute -top-4 left-6 sm:left-10 w-16 h-11 rounded-full z-30 pointer-events-none flex items-center justify-center">
           <div class="w-4/5 h-[2px] bg-[#0E0617] rounded-full opacity-80"></div>
         </div>
-        <div class="floating-bean absolute bottom-6 right-6 sm:right-10 w-20 h-14 rounded-full z-30 pointer-events-none flex items-center justify-center" style="animation-delay: -2.2s;">
+        <div class="floating-bean absolute bottom-6 right-6 sm:right-10 w-20 h-14 rounded-full z-30 pointer-events-none flex items-center justify-center" style="animation-delay: -2.4s;">
+          <div class="w-4/5 h-[2px] bg-[#0E0617] rounded-full opacity-80"></div>
+        </div>
+        <div class="floating-bean absolute top-1/2 -right-3 w-12 h-8 rounded-full z-30 pointer-events-none flex items-center justify-center" style="animation-delay: -4.1s;">
           <div class="w-4/5 h-[2px] bg-[#0E0617] rounded-full opacity-80"></div>
         </div>
 
-        <div id="bag3D" class="bag-3d relative w-72 sm:w-80 h-[450px] rounded-[28px] p-7 flex flex-col justify-between select-none border border-white/50 text-white cursor-pointer">
+        <div id="bag3D" class="bag-3d relative w-72 sm:w-80 h-[450px] rounded-[28px] p-7 flex flex-col justify-between select-none border border-white/50 text-white cursor-pointer transition-transform duration-100 ease-out">
           <div class="flex flex-col items-center">
             <div class="w-full h-2 rounded-full bg-white/40 mb-4"></div>
             <div class="w-5 h-5 rounded-full border border-white/70 bg-[#160A24] flex items-center justify-center shadow-inner">
@@ -335,7 +352,7 @@
     </div>
   </div>
 
-  <!-- ================= D2C COFFEE BEAN SHOP (HERO SECTION 01) ================= -->
+  <!-- ================= D2C COFFEE BEAN SHOP ================= -->
   <section class="py-24 px-6 md:px-10 max-w-7xl mx-auto" id="d2cShop">
     <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
       <div>
@@ -353,7 +370,7 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="productGridContainer"></div>
   </section>
 
-  <!-- ================= THE THREE SENSORY CRAFTS (VISUAL EDITORIAL) ================= -->
+  <!-- ================= THE THREE SENSORY CRAFTS ================= -->
   <section class="py-24 px-6 md:px-10 bg-[#FAF4FF] border-y border-[#7C3AED]/20" id="sensoryCraft">
     <div class="max-w-7xl mx-auto">
       <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
@@ -414,7 +431,7 @@
     </div>
   </section>
 
-  <!-- ================= THE SIGNATURE CAFÉ HEROES (MINIMALIST MENU) ================= -->
+  <!-- ================= THE SIGNATURE CAFÉ HEROES ================= -->
   <section class="py-24 px-6 md:px-10 max-w-7xl mx-auto" id="menuSection">
     <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
       <div>
@@ -471,7 +488,7 @@
               <span class="text-xl font-display font-black text-[#7C3AED]">₹395</span>
             </div>
             <p class="text-xs font-semibold text-[#534168] leading-relaxed">
-              Sweet & salty double ristretto poured hot over house caramel croissant gelato.
+              Sweet &amp; salty double ristretto poured hot over house caramel croissant gelato.
             </p>
           </div>
         </div>
@@ -575,7 +592,7 @@
               <span class="text-xl font-display font-black text-[#7C3AED]">₹240</span>
             </div>
             <p class="text-xs font-semibold text-[#534168] leading-relaxed">
-              Flaky laminated croissant pastry filled with light vanilla bean custard & matcha dusting.
+              Flaky laminated croissant pastry filled with light vanilla bean custard &amp; matcha dusting.
             </p>
           </div>
         </div>
@@ -588,56 +605,182 @@
     </div>
   </section>
 
-  <!-- ================= FLAGSHIP OUTLET & WIPE-TO-SEE WINDOW ================= -->
-  <section class="py-24 px-6 md:px-10 bg-[#FAF4FF] border-t border-[#7C3AED]/20" id="flagship">
+  <!-- ================= GURUGRAM ORBITAL RADAR CONSTELLATION (ALL LOCATIONS NETWORK) ================= -->
+  <section class="py-20 px-6 md:px-10 bg-[#160A24] text-white border-y border-[#7C3AED]/30 relative overflow-hidden" id="network">
     <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-      <!-- Store Info (Clean & Direct) -->
-      <div class="lg:col-span-5 space-y-6 text-left">
-        <span class="text-xs font-black uppercase tracking-[0.25em] text-[#7C3AED]">Flagship Destination</span>
-        <h2 class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight leading-none text-[#160A24]">
-          16 Arjun Marg.
+      <div class="lg:col-span-5 space-y-5 text-left">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#7C3AED]/20 border border-[#7C3AED]/40 text-[#CDB8F7] text-xs font-black uppercase tracking-wider">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <span>Live Roastery Telemetry</span>
+        </div>
+        <h2 class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight text-white">
+          The Gurugram Constellation.
         </h2>
-        <p class="text-base font-semibold text-[#534168] leading-relaxed">
-          A compact 10-seater lilac room with polished chrome counters. Designed for coffee, matcha, and conversation without laptop clutter.
+        <p class="text-sm font-semibold text-[#CDB8F7]/85 leading-relaxed">
+          Three interconnected hubs engineered for artisanal roasting, barista craft, and rapid citywide delivery across DLF Phase 1, Golf Course Road, and Sector 56.
         </p>
 
-        <div class="d2c-card p-6 space-y-3">
-          <div class="flex justify-between items-center pb-2 border-b border-[#7C3AED]/20">
-            <span class="font-display font-black text-sm text-[#7C3AED] uppercase">DLF Phase 1, Gurugram</span>
-            <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-800 font-black text-[10px]">Open 8:30 AM – 10:30 PM</span>
+        <!-- Hub Highlights -->
+        <div class="space-y-3 pt-2 text-xs">
+          <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+            <div>
+              <div class="font-bold text-[#FAF6FE] uppercase">1. Flagship Espresso Bar</div>
+              <div class="text-[#CDB8F7] text-[11px]">16 Arjun Marg, DLF Phase 1 • 8:30 AM – 10:30 PM</div>
+            </div>
+            <span class="px-2.5 py-1 rounded-full bg-emerald-400/20 text-emerald-300 font-black text-[10px] uppercase">Active Bar</span>
           </div>
-          <p class="font-bold text-sm text-[#160A24]">Block F, 16 Arjun Marg, DLF Phase 1, Gurugram</p>
-          <div class="text-xs font-semibold text-[#534168]">
-            📞 Call: <a href="tel:+918130056889" class="font-bold text-[#7C3AED] underline">+91 81300 56889</a>
+          <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+            <div>
+              <div class="font-bold text-[#FAF6FE] uppercase">2. Golf Course Road Bar</div>
+              <div class="text-[#CDB8F7] text-[11px]">DLF Summit Plaza, Sector 53 • 8:30 AM – 11:00 PM</div>
+            </div>
+            <span class="px-2.5 py-1 rounded-full bg-emerald-400/20 text-emerald-300 font-black text-[10px] uppercase">Active Bar</span>
           </div>
-          <div class="pt-2 flex gap-3">
-            <a href="https://www.google.com/maps/search/?api=1&query=Gram+Street+Coffee+DLF+Phase+1+Gurugram" target="_blank" rel="noreferrer" class="px-5 py-2.5 rounded-full bg-[#7C3AED] text-white font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all shadow-md">
-              Get Directions ↗
-            </a>
-            <a href="https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon" target="_blank" rel="noreferrer" class="px-5 py-2.5 rounded-full border border-[#7C3AED]/50 font-bold text-xs uppercase tracking-wider hover:bg-[#7C3AED]/10 transition-all text-[#160A24]">
-              Order on Zomato ↗
-            </a>
+          <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+            <div>
+              <div class="font-bold text-[#FAF6FE] uppercase">3. Sector 56 Roastery Hub</div>
+              <div class="text-[#CDB8F7] text-[11px]">Jalvayu Towers / Sector 56 • 8:00 AM – 11:00 PM</div>
+            </div>
+            <span class="px-2.5 py-1 rounded-full bg-[#7C3AED]/40 text-[#CDB8F7] font-black text-[10px] uppercase">Dispatch Hub</span>
           </div>
         </div>
       </div>
 
-      <!-- Wipe-to-See Steamed Window -->
-      <div class="lg:col-span-7">
-        <div id="scratchContainer" class="relative h-[480px] rounded-3xl overflow-hidden border-2 border-[#7C3AED]/40 shadow-2xl select-none cursor-crosshair">
-          <img
-            src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200&q=85"
-            alt="Gram Street Coffee Flagship Interior"
-            class="w-full h-full object-cover"
-          />
-          <div class="absolute bottom-6 left-6 z-10 pointer-events-none bg-black/85 backdrop-blur-md px-4 py-2 rounded-full border border-white/30 text-xs text-white font-bold uppercase tracking-widest">
-            📍 16 Arjun Marg Espresso Bar
+      <!-- Interactive SVG Radar Constellation Map -->
+      <div class="lg:col-span-7 flex items-center justify-center">
+        <div class="relative w-full max-w-[540px] aspect-square rounded-3xl bg-[#1E0E33] border border-[#7C3AED]/40 p-6 flex items-center justify-center shadow-2xl overflow-hidden">
+          <!-- Background Concentric Rings -->
+          <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 400 400">
+            <circle cx="200" cy="200" r="60" fill="none" stroke="rgba(205,184,247,0.12)" stroke-width="1.5" />
+            <circle cx="200" cy="200" r="115" fill="none" stroke="rgba(205,184,247,0.14)" stroke-width="1.5" stroke-dasharray="4 8" />
+            <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(205,184,247,0.18)" stroke-width="1.5" />
+            <!-- Crosshairs -->
+            <line x1="200" y1="20" x2="200" y2="380" stroke="rgba(205,184,247,0.08)" stroke-width="1" />
+            <line x1="20" y1="200" x2="380" y2="200" stroke="rgba(205,184,247,0.08)" stroke-width="1" />
+            <!-- Connection Lines -->
+            <line x1="130" y1="130" x2="270" y2="180" stroke="#7C3AED" stroke-width="2" stroke-dasharray="3 3" />
+            <line x1="270" y1="180" x2="200" y2="290" stroke="#7C3AED" stroke-width="2" stroke-dasharray="3 3" />
+            <line x1="200" y1="290" x2="130" y2="130" stroke="#7C3AED" stroke-width="2" stroke-dasharray="3 3" />
+          </svg>
+
+          <!-- Node 1: DLF Phase 1 Flagship -->
+          <div class="absolute top-[28%] left-[28%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group cursor-pointer" onclick="switchLocation('phase1')">
+            <div class="relative w-8 h-8 rounded-full bg-[#7C3AED] border-2 border-white flex items-center justify-center shadow-lg group-hover:scale-125 transition-transform">
+              <div class="w-3 h-3 rounded-full bg-white"></div>
+              <div class="absolute inset-0 rounded-full border border-emerald-400 radar-pulse pointer-events-none"></div>
+            </div>
+            <div class="mt-2 text-center bg-[#160A24]/90 px-3 py-1 rounded-full border border-[#7C3AED]/40 text-[11px] font-black uppercase text-white shadow">
+              DLF Phase 1
+            </div>
           </div>
 
-          <canvas id="scratchCanvas" class="absolute inset-0 z-20 w-full h-full"></canvas>
+          <!-- Node 2: DLF Summit Plaza (GCR) -->
+          <div class="absolute top-[42%] right-[24%] translate-x-1/2 -translate-y-1/2 flex flex-col items-center group cursor-pointer" onclick="switchLocation('gcr')">
+            <div class="relative w-8 h-8 rounded-full bg-[#E67E22] border-2 border-white flex items-center justify-center shadow-lg group-hover:scale-125 transition-transform">
+              <div class="w-3 h-3 rounded-full bg-white"></div>
+              <div class="absolute inset-0 rounded-full border border-orange-400 radar-pulse pointer-events-none" style="animation-delay: 1s;"></div>
+            </div>
+            <div class="mt-2 text-center bg-[#160A24]/90 px-3 py-1 rounded-full border border-[#E67E22]/40 text-[11px] font-black uppercase text-white shadow">
+              Golf Course Rd
+            </div>
+          </div>
 
-          <button onclick="initScratchWindow()" class="absolute top-4 right-4 z-30 px-4 py-2 rounded-full bg-black/80 text-[#CDB8F7] border border-white/30 text-[11px] font-black uppercase tracking-wider hover:bg-[#7C3AED] hover:text-white transition-all shadow-md">
-            Reset Steam Layer
+          <!-- Node 3: Jalvayu Towers (Sector 56) -->
+          <div class="absolute bottom-[24%] left-[48%] -translate-x-1/2 translate-y-1/2 flex flex-col items-center group cursor-pointer" onclick="switchLocation('sec56')">
+            <div class="relative w-8 h-8 rounded-full bg-[#2E7D32] border-2 border-white flex items-center justify-center shadow-lg group-hover:scale-125 transition-transform">
+              <div class="w-3 h-3 rounded-full bg-white"></div>
+              <div class="absolute inset-0 rounded-full border border-emerald-400 radar-pulse pointer-events-none" style="animation-delay: 2s;"></div>
+            </div>
+            <div class="mt-2 text-center bg-[#160A24]/90 px-3 py-1 rounded-full border border-[#2E7D32]/40 text-[11px] font-black uppercase text-white shadow">
+              Sector 56 Hub
+            </div>
+          </div>
+
+          <div class="absolute bottom-4 right-4 text-[10px] text-[#CDB8F7]/60 font-mono">
+            COORDINATES: 28.4667°N, 77.0998°E
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ALL LOCATIONS & CELEBRATED WIPE-TO-SEE WINDOW ================= -->
+  <section class="py-24 px-6 md:px-10 bg-[#FAF4FF] border-t border-[#7C3AED]/20" id="flagship">
+    <div class="max-w-7xl mx-auto space-y-10">
+      <!-- Location Selector Tabs -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#7C3AED]/20 pb-6">
+        <div>
+          <span class="text-xs font-black uppercase tracking-[0.25em] text-[#7C3AED]">Interactive Destination Explorer</span>
+          <h2 class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight leading-none text-[#160A24] mt-2">
+            Visit Our Destinations.
+          </h2>
+        </div>
+        <!-- 3 Location Buttons -->
+        <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-[#7C3AED]/30 shadow-sm text-xs font-black uppercase tracking-wider overflow-x-auto">
+          <button id="locTab-phase1" onclick="switchLocation('phase1')" class="py-2.5 px-4 rounded-xl transition-all bg-[#7C3AED] text-white shadow">
+            1. DLF Phase 1 Flagship
           </button>
+          <button id="locTab-gcr" onclick="switchLocation('gcr')" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#160A24]">
+            2. Golf Course Road
+          </button>
+          <button id="locTab-sec56" onclick="switchLocation('sec56')" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#160A24]">
+            3. Sector 56 Hub
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <!-- Store Info (Dynamic per Tab) -->
+        <div class="lg:col-span-5 space-y-6 text-left">
+          <div id="locBadge" class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold uppercase">
+            <span>● Open 8:30 AM – 10:30 PM</span>
+          </div>
+          <h3 id="locTitle" class="text-3xl sm:text-4xl font-display font-black uppercase tracking-tight text-[#160A24]">
+            16 Arjun Marg Bar.
+          </h3>
+          <p id="locDesc" class="text-base font-semibold text-[#534168] leading-relaxed">
+            A compact 10-seater lilac room with polished chrome counters. Designed for coffee, matcha, and conversation without laptop clutter.
+          </p>
+
+          <div class="d2c-card p-6 space-y-3">
+            <div class="flex justify-between items-center pb-2 border-b border-[#7C3AED]/20">
+              <span id="locArea" class="font-display font-black text-sm text-[#7C3AED] uppercase">DLF Phase 1, Gurugram</span>
+              <span id="locHours" class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-800 font-black text-[10px]">Open 8:30 AM – 10:30 PM</span>
+            </div>
+            <p id="locAddress" class="font-bold text-sm text-[#160A24]">Block F, 16 Arjun Marg, DLF Phase 1, Sector 26A, Gurugram</p>
+            <div class="text-xs font-semibold text-[#534168]">
+              📞 Call: <a id="locPhone" href="tel:+918130056889" class="font-bold text-[#7C3AED] underline">+91 81300 56889</a>
+            </div>
+            <div class="pt-2 flex flex-wrap gap-3">
+              <a id="locDirectionsBtn" href="https://www.google.com/maps/search/?api=1&query=Gram+Street+Coffee+DLF+Phase+1+Gurugram" target="_blank" rel="noreferrer" class="px-5 py-2.5 rounded-full bg-[#7C3AED] text-white font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all shadow-md">
+                Get Directions ↗
+              </a>
+              <a id="locZomatoBtn" href="https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon" target="_blank" rel="noreferrer" class="px-5 py-2.5 rounded-full border border-[#7C3AED]/50 font-bold text-xs uppercase tracking-wider hover:bg-[#7C3AED]/10 transition-all text-[#160A24]">
+                Order on Zomato ↗
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Wipe-to-See Steamed Window -->
+        <div class="lg:col-span-7">
+          <div id="scratchContainer" class="relative h-[480px] rounded-3xl overflow-hidden border-2 border-[#7C3AED]/40 shadow-2xl select-none cursor-crosshair">
+            <img
+              id="scratchBgImage"
+              src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200&q=85"
+              alt="Gram Street Coffee Flagship Interior"
+              class="w-full h-full object-cover transition-opacity duration-500"
+            />
+            <div id="scratchCaption" class="absolute bottom-6 left-6 z-10 pointer-events-none bg-black/85 backdrop-blur-md px-4 py-2 rounded-full border border-white/30 text-xs text-white font-bold uppercase tracking-widest">
+              📍 16 Arjun Marg Flagship Bar
+            </div>
+
+            <canvas id="scratchCanvas" class="absolute inset-0 z-20 w-full h-full"></canvas>
+
+            <button onclick="initScratchWindow()" class="absolute top-4 right-4 z-30 px-4 py-2 rounded-full bg-black/80 text-[#CDB8F7] border border-white/30 text-[11px] font-black uppercase tracking-wider hover:bg-[#7C3AED] hover:text-white transition-all shadow-md">
+              Reset Steam Layer
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -682,8 +825,9 @@
     </div>
   </div>
 
-  <!-- ================= GSAP MOTION ENGINE ================= -->
+  <!-- ================= GSAP & SCROLLTRIGGER MOTION ENGINE ================= -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
   <script>
     // 1. D2C Products Catalog
@@ -714,12 +858,100 @@
       }
     ];
 
+    // 2. All 3 Verified Gurugram Locations
+    const LOCATIONS = {
+      phase1: {
+        tabId: 'locTab-phase1',
+        title: '16 Arjun Marg Flagship.',
+        desc: 'A compact 10-seater lilac room with polished chrome counters. In-house micro-roasting, ceremonial Uji matcha, and traditional small-batch gelato bar.',
+        badge: '● Flagship Roastery & Café • Open 8:30 AM – 10:30 PM',
+        area: 'DLF Phase 1, Sector 26A',
+        hours: 'Open 8:30 AM – 10:30 PM',
+        address: 'Block F, 16 Arjun Marg, DLF Phase 1, Sector 26A, Gurugram 122002',
+        phone: '+91 81300 56889',
+        directions: 'https://www.google.com/maps/search/?api=1&query=Gram+Street+Coffee+DLF+Phase+1+Gurugram',
+        zomato: 'https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon',
+        image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200&q=85',
+        caption: '📍 16 Arjun Marg Flagship Bar'
+      },
+      gcr: {
+        tabId: 'locTab-gcr',
+        title: 'Golf Course Road Bar.',
+        desc: 'Sleek quick-service specialty espresso bar and gelato counter catering to corporate nomads and residential communities along Golf Course Road.',
+        badge: '● Espresso Bar & Gelato • Open 8:30 AM – 11:00 PM',
+        area: 'Sector 53, Golf Course Road',
+        hours: 'Open 8:30 AM – 11:00 PM',
+        address: 'DLF Summit Plaza, Sector 53, Golf Course Road, Gurugram 122002',
+        phone: '+91 81300 56889',
+        directions: 'https://www.google.com/maps/search/?api=1&query=Gram+Street+Coffee+DLF+Summit+Plaza+Golf+Course+Road+Gurgaon',
+        zomato: 'https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon',
+        image: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1200&q=85',
+        caption: '📍 DLF Summit Plaza (Sector 53)'
+      },
+      sec56: {
+        tabId: 'locTab-sec56',
+        title: 'Sector 56 Roastery Hub.',
+        desc: 'Dedicated rapid dispatch micro-roastery hub powering hyper-fast delivery across Sectors 54, 55, 56, and 57 via Swiggy and Zomato.',
+        badge: '● Express Roastery Dispatch • Open 8:00 AM – 11:00 PM',
+        area: 'Jalvayu Towers / Sector 56',
+        hours: 'Open 8:00 AM – 11:00 PM',
+        address: 'Jalvayu Towers, Sector 56, Gurugram 122011',
+        phone: '+91 81300 56889',
+        directions: 'https://www.google.com/maps/search/?api=1&query=Gram+Street+Coffee+Jalvayu+Towers+Sector+56+Gurugram',
+        zomato: 'https://www.swiggy.com/city/gurgaon/gram-street-coffee-arjun-marg-jalvayu-towers-rest1462852',
+        image: 'https://images.unsplash.com/photo-1442512595331-e89e73853f31?auto=format&fit=crop&w=1200&q=85',
+        caption: '📍 Jalvayu Towers Express Hub'
+      }
+    };
+
+    let activeLocation = 'phase1';
     let subMode = {};
     let cart = [{ id: 'concrete-blend', name: 'Concrete House Blend', price: 580, qty: 1, isSub: false }];
     let audioCtx = null;
     let isPlayingAudio = false;
 
-    // 2. Liquid Chrome GLSL Shader (Pointer-Driven)
+    // 3. Switch Location Function
+    function switchLocation(key) {
+      if (!LOCATIONS[key]) return;
+      activeLocation = key;
+      const loc = LOCATIONS[key];
+
+      // Update Tabs Styling
+      ['phase1', 'gcr', 'sec56'].forEach(k => {
+        const btn = document.getElementById(LOCATIONS[k].tabId);
+        if (k === key) {
+          btn.className = 'py-2.5 px-4 rounded-xl transition-all bg-[#7C3AED] text-white shadow';
+        } else {
+          btn.className = 'py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#160A24]';
+        }
+      });
+
+      // Update Text
+      document.getElementById('locBadge').innerHTML = `<span>${loc.badge}</span>`;
+      document.getElementById('locTitle').textContent = loc.title;
+      document.getElementById('locDesc').textContent = loc.desc;
+      document.getElementById('locArea').textContent = loc.area;
+      document.getElementById('locHours').textContent = loc.hours;
+      document.getElementById('locAddress').textContent = loc.address;
+      document.getElementById('locPhone').textContent = loc.phone;
+      document.getElementById('locPhone').href = `tel:${loc.phone.replace(/\s+/g, '')}`;
+      document.getElementById('locDirectionsBtn').href = loc.directions;
+      document.getElementById('locZomatoBtn').href = loc.zomato;
+      document.getElementById('scratchCaption').textContent = loc.caption;
+
+      // Update Scratch Image & Reset Steam
+      const bgImg = document.getElementById('scratchBgImage');
+      bgImg.style.opacity = '0';
+      setTimeout(() => {
+        bgImg.src = loc.image;
+        bgImg.onload = () => {
+          bgImg.style.opacity = '1';
+          initScratchWindow();
+        };
+      }, 150);
+    }
+
+    // 4. Liquid Chrome GLSL Shader (Pointer & Dynamic Swirls)
     (function initHeroShader() {
       const hero = document.getElementById("heroSection");
       const canvas = document.getElementById("fx");
@@ -739,23 +971,25 @@
         "float fbm(vec2 p){float v=0.0,a=0.5;for(int i=0;i<4;i++){v+=a*noise(p);p=p*2.02+vec2(3.1,1.7);a*=0.5;}return v;}",
         "void main(){",
         "vec2 p=(gl_FragCoord.xy-0.5*u_res)/u_res.y;",
-        "float t=u_t*0.09;",
-        "vec2 q=vec2(fbm(p*1.5+t),fbm(p*1.5-t+4.0));",
+        "float t=u_t*0.22;",
+        "vec2 q=vec2(fbm(p*1.6+t),fbm(p*1.6-t+4.0));",
         "vec2 m=(u_m-0.5)*vec2(u_res.x/u_res.y,1.0);",
         "float d=length(p-m);",
-        "vec2 r=vec2(fbm(p*1.7+q*2.0+t*1.4),fbm(p*1.7+q*2.0-t*0.8));",
-        "float h=fbm(p*2.0+r*2.6);",
-        "h+=0.22*exp(-d*2.6)*sin(d*16.0-u_t*1.6);",
-        "float band=0.5+0.5*sin(h*10.0+u_t*0.25);",
-        "float shine=pow(band,7.0);",
+        "vec2 r=vec2(fbm(p*1.8+q*2.2+t*1.6),fbm(p*1.8+q*2.2-t*1.0));",
+        "float h=fbm(p*2.2+r*2.8);",
+        "h+=0.28*exp(-d*2.8)*sin(d*18.0-u_t*2.2);",
+        "float band=0.5+0.5*sin(h*12.0+u_t*0.5);",
+        "float shine=pow(band,5.0);",
         "vec3 lilac=vec3(0.80,0.72,0.97);",
-        "vec3 mid=vec3(0.68,0.56,0.93);",
-        "vec3 white=vec3(0.99,0.98,1.0);",
-        "vec3 silver=vec3(0.70,0.67,0.84);",
-        "vec3 col=mix(lilac,mid,smoothstep(0.25,0.85,h));",
-        "float band2=0.5+0.5*sin(h*14.0+1.5-u_t*0.2);",
-        "col=mix(col,silver,smoothstep(0.55,0.95,band2)*0.6);",
-        "col=mix(col,white,shine*0.9);",
+        "vec3 mid=vec3(0.64,0.52,0.92);",
+        "vec3 plum=vec3(0.18,0.08,0.30);",
+        "vec3 white=vec3(1.0,1.0,1.0);",
+        "vec3 silver=vec3(0.85,0.82,0.95);",
+        "vec3 col=mix(lilac,mid,smoothstep(0.2,0.8,h));",
+        "col=mix(col,plum,smoothstep(0.7,0.98,h)*0.35);",
+        "float band2=0.5+0.5*sin(h*15.0+1.8-u_t*0.4);",
+        "col=mix(col,silver,smoothstep(0.5,0.95,band2)*0.7);",
+        "col=mix(col,white,shine*0.95);",
         "gl_FragColor=vec4(col,1.0);}"
       ].join("\n");
 
@@ -784,7 +1018,7 @@
       const t0 = performance.now();
 
       function resize() {
-        const scale = Math.min(window.devicePixelRatio || 1, 1.5) * 0.7;
+        const scale = Math.min(window.devicePixelRatio || 1, 1.5) * 0.75;
         const w = Math.max(2, Math.round(canvas.clientWidth * scale));
         const h = Math.max(2, Math.round(canvas.clientHeight * scale));
         if (canvas.width !== w || canvas.height !== h) {
@@ -793,7 +1027,7 @@
         }
       }
       function draw(now) {
-        mx += (tx - mx) * 0.06; my += (ty - my) * 0.06;
+        mx += (tx - mx) * 0.08; my += (ty - my) * 0.08;
         gl.uniform2f(uRes, canvas.width, canvas.height);
         gl.uniform1f(uT, (now - t0) / 1000);
         gl.uniform2f(uM, mx, my);
@@ -811,13 +1045,13 @@
       requestAnimationFrame(draw);
     })();
 
-    // 3. 5D Custom Magnetic Cursor
+    // 5. 5D Custom Magnetic Cursor
     const cursor = document.getElementById('customCursor');
     window.addEventListener('mousemove', (e) => {
       gsap.to(cursor, {
         x: e.clientX,
         y: e.clientY,
-        duration: 0.15,
+        duration: 0.12,
         ease: 'power2.out'
       });
     });
@@ -829,7 +1063,7 @@
       });
     }
 
-    // 4. 3D Bag Tilt & Steam Canvas
+    // 6. 3D Bag Tilt & Lavender Steam Canvas
     const bag3D = document.getElementById('bag3D');
     const heroSection = document.getElementById('heroSection');
     const steamCanvas = document.getElementById('steamCanvas');
@@ -849,33 +1083,33 @@
       targetY = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
     });
 
-    const steamParticles = Array.from({ length: 32 }, () => ({
+    const steamParticles = Array.from({ length: 42 }, () => ({
       x: Math.random() * window.innerWidth,
       y: Math.random() * window.innerHeight,
-      r: Math.random() * 45 + 16,
-      vy: -(Math.random() * 0.55 + 0.2),
-      vx: (Math.random() - 0.5) * 0.3,
-      a: Math.random() * 0.14 + 0.03
+      r: Math.random() * 50 + 18,
+      vy: -(Math.random() * 0.65 + 0.25),
+      vx: (Math.random() - 0.5) * 0.35,
+      a: Math.random() * 0.16 + 0.04
     }));
 
     let mobileT = 0;
     function animateSteam() {
       if (window.matchMedia('(hover: none)').matches) {
-        mobileT += 0.025;
-        targetX = Math.sin(mobileT) * 0.4;
-        targetY = Math.cos(mobileT * 0.8) * 0.3;
+        mobileT += 0.03;
+        targetX = Math.sin(mobileT) * 0.45;
+        targetY = Math.cos(mobileT * 0.8) * 0.35;
       }
-      currentX += (targetX - currentX) * 0.06;
-      currentY += (targetY - currentY) * 0.06;
+      currentX += (targetX - currentX) * 0.08;
+      currentY += (targetY - currentY) * 0.08;
 
       if (bag3D) {
-        bag3D.style.transform = `perspective(1200px) translate3d(${currentX * 16}px, ${currentY * 12}px, 0) rotateX(${-currentY * 12}deg) rotateY(${currentX * 16}deg)`;
+        bag3D.style.transform = `perspective(1200px) translate3d(${currentX * 18}px, ${currentY * 14}px, 0) rotateX(${-currentY * 14}deg) rotateY(${currentX * 18}deg)`;
       }
 
       sCtx.clearRect(0, 0, steamCanvas.width, steamCanvas.height);
       steamParticles.forEach((p) => {
         p.y += p.vy;
-        p.x += p.vx + currentX * 0.35;
+        p.x += p.vx + currentX * 0.4;
         if (p.y < -60) p.y = steamCanvas.height + 40;
         const grad = sCtx.createRadialGradient(p.x, p.y, 1, p.x, p.y, p.r);
         grad.addColorStop(0, `rgba(186, 139, 212, ${p.a})`);
@@ -890,7 +1124,7 @@
     }
     animateSteam();
 
-    // 5. Celebrated Wipe-to-See Window
+    // 7. Celebrated Wipe-to-See Steamed Window
     const scratchCanvas = document.getElementById('scratchCanvas');
     const scratchCtx = scratchCanvas.getContext('2d');
 
@@ -901,15 +1135,16 @@
       scratchCtx.globalCompositeOperation = 'source-over';
 
       const grad = scratchCtx.createLinearGradient(0, 0, scratchCanvas.width, scratchCanvas.height);
-      grad.addColorStop(0, 'rgba(22, 10, 36, 0.95)');
-      grad.addColorStop(1, 'rgba(76, 29, 149, 0.92)');
+      grad.addColorStop(0, 'rgba(22, 10, 36, 0.96)');
+      grad.addColorStop(1, 'rgba(76, 29, 149, 0.94)');
       scratchCtx.fillStyle = grad;
       scratchCtx.fillRect(0, 0, scratchCanvas.width, scratchCanvas.height);
 
       scratchCtx.fillStyle = '#CDB8F7';
       scratchCtx.font = '800 13px Plus Jakarta Sans, sans-serif';
       scratchCtx.textAlign = 'center';
-      scratchCtx.fillText('✦ WIPE / TOUCH ACROSS STEAMED GLASS TO REVEAL 16 ARJUN MARG BAR ✦', scratchCanvas.width / 2, scratchCanvas.height / 2);
+      const loc = LOCATIONS[activeLocation];
+      scratchCtx.fillText(`✦ WIPE / TOUCH ACROSS STEAMED GLASS TO REVEAL ${loc.caption.replace('📍 ', '').toUpperCase()} ✦`, scratchCanvas.width / 2, scratchCanvas.height / 2);
     }
 
     function wipeScratchAt(clientX, clientY) {
@@ -917,12 +1152,12 @@
       const x = clientX - rect.left;
       const y = clientY - rect.top;
       scratchCtx.globalCompositeOperation = 'destination-out';
-      const brush = scratchCtx.createRadialGradient(x, y, 12, x, y, 85);
+      const brush = scratchCtx.createRadialGradient(x, y, 12, x, y, 90);
       brush.addColorStop(0, 'rgba(0,0,0,1)');
       brush.addColorStop(1, 'rgba(0,0,0,0)');
       scratchCtx.fillStyle = brush;
       scratchCtx.beginPath();
-      scratchCtx.arc(x, y, 85, 0, Math.PI * 2);
+      scratchCtx.arc(x, y, 90, 0, Math.PI * 2);
       scratchCtx.fill();
     }
 
@@ -941,7 +1176,7 @@
 
     window.addEventListener('resize', initScratchWindow);
 
-    // 6. 5D Spatial Audio Synthesizer
+    // 8. 5D Spatial Audio Synthesizer
     function initAudio() {
       if (!audioCtx) {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -993,7 +1228,7 @@
       }
     }
 
-    // 7. Render D2C Product Cards
+    // 9. Render D2C Product Cards
     function renderProducts() {
       const grid = document.getElementById('productGridContainer');
       grid.innerHTML = PRODUCTS.map(p => {
@@ -1038,7 +1273,7 @@
       renderProducts();
     }
 
-    // 8. Roastery Bag Drawer
+    // 10. Roastery Bag Drawer
     function addToCart(pId) {
       const product = PRODUCTS.find(p => p.id === pId);
       const isSub = !!subMode[pId];
@@ -1090,11 +1325,47 @@
       toggleCart(false);
     }
 
-    // 9. Initializations
+    // 11. GSAP ScrollTrigger Choreography
+    function initScrollTriggers() {
+      if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+      gsap.registerPlugin(ScrollTrigger);
+
+      gsap.utils.toArray('.d2c-card').forEach((card, i) => {
+        gsap.from(card, {
+          scrollTrigger: {
+            trigger: card,
+            start: 'top 88%',
+            toggleActions: 'play none none none'
+          },
+          y: 40,
+          opacity: 0,
+          duration: 0.8,
+          delay: (i % 3) * 0.12,
+          ease: 'power2.out'
+        });
+      });
+
+      gsap.utils.toArray('h2').forEach((title) => {
+        gsap.from(title, {
+          scrollTrigger: {
+            trigger: title,
+            start: 'top 90%',
+            toggleActions: 'play none none none'
+          },
+          y: 25,
+          opacity: 0,
+          duration: 0.7,
+          ease: 'power2.out'
+        });
+      });
+    }
+
+    // 12. Initializations
     renderProducts();
     updateCartUI();
     initScratchWindow();
     attachCursorHover();
+    setTimeout(initScrollTriggers, 200);
   </script>
 </body>
 </html>
