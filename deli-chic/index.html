@@ -22,20 +22,23 @@
 
   <style>
     :root {
+      --delichic-amber: #FFA517;
+      --delichic-amber-dark: #D88A00;
       --chic-crimson: #CD2653;
       --chic-crimson-dark: #8C1434;
       --chic-burgundy: #4A0E17;
       --chic-noir: #180609;
-      --chic-linen: #FDFBF7;
+      --chic-linen: #FAF8F5;
       --chic-linen-warm: #F7EFE6;
       --chic-charcoal: #1C1917;
       --chic-muted: #6B625B;
-      --chic-gold: #C59A45;
+      --chic-gold: #FFA517;
       --chic-gold-bright: #FFA517;
+      --chic-border: #DCD7CA;
       --font-serif: "Playfair Display", Georgia, serif;
       --font-luxury: "Cinzel", serif;
       --font-sans: "Plus Jakarta Sans", sans-serif;
-      --gold-foil: linear-gradient(135deg, #FFE6A3 0%, #C59A45 35%, #FFF2CC 55%, #9E742A 78%, #E4C882 100%);
+      --gold-foil: linear-gradient(135deg, #FFE6A3 0%, #FFA517 35%, #FFF2CC 55%, #D88A00 78%, #E4C882 100%);
     }
 
     body {
@@ -301,34 +304,36 @@
 <body class="linen-texture selection:bg-[#CD2653] selection:text-white">
 
   <!-- ================= TOP FRESH DISPATCH ANNOUNCEMENT ================= -->
-  <div class="fixed top-0 left-0 right-0 z-50 bg-[#4A0E17] text-[#FFF9F4] text-[11px] sm:text-xs font-medium tracking-wider py-2 px-4 border-b border-[#C59A45]/30">
+  <div class="fixed top-0 left-0 right-0 z-50 bg-[#FFA517] text-[#1F1A18] text-[11px] sm:text-xs font-semibold tracking-wider py-2 px-4 border-b border-[#D88A00]/40 shadow-sm">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       <div class="flex items-center gap-2 mx-auto sm:mx-0">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span class="font-bold">ALL 4 DELHI NCR HUBS OPERATIONAL:</span>
-        <span class="text-white/90">Slot 1 (10 AM–1 PM) &amp; Slot 2 (5 PM–8 PM) • Free Express Cold-Chain on ₹999+</span>
+        <span class="w-2.5 h-2.5 rounded-full bg-[#CD2653] animate-pulse"></span>
+        <span class="font-extrabold uppercase tracking-wide text-[#4A0E17]">ALL 4 DELHI NCR HUBS OPERATIONAL:</span>
+        <span class="text-[#1F1A18] font-medium">Slot 1 (10 AM–1 PM) &amp; Slot 2 (5 PM–8 PM) • Free Cold-Chain on ₹999+</span>
       </div>
-      <div class="hidden md:flex items-center gap-5 text-[11px] text-[#F7EFE6]">
-        <span>✦ Use Code <strong class="text-[#FFA517] underline tracking-widest font-black">WoW20</strong> (20% OFF)</span>
+      <div class="hidden md:flex items-center gap-5 text-[11px] text-[#1F1A18]">
+        <span>✦ Use Code <strong class="bg-[#4A0E17] text-white px-2 py-0.5 rounded text-[10px] tracking-widest font-black uppercase shadow-xs">WoW20</strong> (20% OFF)</span>
         <span>•</span>
-        <span>Sodexo Accepted</span>
+        <span class="font-bold text-[#4A0E17]">Sodexo Accepted</span>
         <span>•</span>
-        <a href="tel:+919810002023" class="hover:text-white transition-colors">📞 +91 98100 02023</a>
+        <a href="tel:+919810002023" class="hover:text-[#4A0E17] font-bold transition-colors">📞 +91 98100 02023</a>
       </div>
     </div>
   </div>
 
   <!-- ================= EDITORIAL HAUTE BOUCHERIE HEADER ================= -->
-  <header class="deli-site-header transition-all">
-    <div class="max-w-7xl mx-auto px-6 md:px-10 h-20 flex items-center justify-between">
+  <header class="deli-site-header transition-all bg-[#FAF8F5]/95 backdrop-blur-md border-b border-[#DCD7CA]">
+    <div class="max-w-7xl mx-auto px-6 md:px-10 h-22 flex items-center justify-between">
       <!-- Brand Logo / Wordmark -->
       <a href="#" class="flex items-center gap-3.5 group">
-        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#CD2653] to-[#4A0E17] flex items-center justify-center text-white font-luxury font-black text-base shadow-md transition-transform group-hover:scale-105 border border-[#C59A45]/40">
-          DC
-        </div>
+        <img
+          src="https://i1.wp.com/mh.delichic.co.in/wp-content/uploads/2020/09/logo.png?fit=129%2C129&ssl=1"
+          alt="Deli Chic — Food For Thought"
+          class="w-12 h-12 rounded-full object-contain shadow-md border-2 border-[#FFA517]/70 bg-[#F6F1E7] p-0.5 transition-transform group-hover:scale-105"
+        />
         <div>
           <span class="block text-2xl font-serif-chic font-black tracking-tight text-[#4A0E17] leading-none">Deli Chic</span>
-          <span class="block text-[9px] tracking-[0.3em] uppercase font-bold text-[#CD2653] mt-1 font-luxury">Food For Thought</span>
+          <span class="block text-[10px] tracking-[0.28em] uppercase font-extrabold text-[#CD2653] mt-1 font-luxury">Food For Thought</span>
         </div>
       </a>
 
@@ -428,28 +433,42 @@
           </button>
         </div>
 
-        <div class="loupe-container shadow-2xl border-2 border-[#C59A45]/40 bg-black" id="heroLoupeContainer">
+        <div class="loupe-container shadow-2xl border-2 border-[#FFA517]/50 bg-black relative" id="heroLoupeContainer">
           <img
             id="heroLoupeImg"
-            src="https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=1200&q=85"
+            src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=85"
             alt="Deli Chic Prime Artisanal Cuts"
             class="w-full h-[470px] object-cover transition-opacity duration-300"
           />
+          <canvas id="chilledMistCanvas" class="absolute inset-0 pointer-events-none z-10 w-full h-full"></canvas>
           <div id="heroLoupeGlass" class="loupe-glass"></div>
 
           <!-- Overlay Quality Inspection Badge -->
-          <div class="absolute bottom-5 left-5 right-5 p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-[#CD2653]/20 shadow-lg text-left flex items-center justify-between">
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-                <span id="loupeBadgeText" class="text-[11px] font-bold uppercase tracking-wider text-emerald-800">Master Carver 2.5x Loupe Active</span>
+          <div class="absolute bottom-5 left-5 right-5 p-4 rounded-2xl bg-[#FAF8F5]/95 backdrop-blur-md border-2 border-[#FFA517]/40 shadow-xl text-left z-20">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-[#CD2653] animate-ping"></span>
+                  <span id="loupeBadgeText" class="text-[11px] font-extrabold uppercase tracking-wider text-[#8C1434]">Master Carver 2.5x Loupe Active</span>
+                </div>
+                <h4 id="loupeTitleText" class="text-base font-serif-chic font-bold text-[#4A0E17] mt-0.5">Prime Wood-Smoked Charcuterie</h4>
+                <p id="loupeDescText" class="text-[11px] text-[#524842]">Move cursor or drag finger across cut to inspect curing grain &amp; cellular density.</p>
               </div>
-              <h4 id="loupeTitleText" class="text-base font-serif-chic font-bold text-[#4A0E17] mt-0.5">Prime Wood-Smoked Charcuterie</h4>
-              <p id="loupeDescText" class="text-[11px] text-[#6B625B]">Move cursor or drag finger across cut to inspect curing grain &amp; cellular density.</p>
+              <div class="text-right">
+                <span class="text-sm font-luxury font-black text-[#FFA517]" id="liveTempSensor">2.4°C</span>
+                <span class="block text-[9px] uppercase tracking-widest text-[#8C1434] font-black">Chilled</span>
+              </div>
             </div>
-            <div class="text-right">
-              <span class="text-xs font-luxury font-bold text-[#C59A45]" id="liveTempSensor">2.4°C</span>
-              <span class="block text-[9px] uppercase tracking-widest text-[#6B625B]">Chilled</span>
+
+            <!-- Carver Slice Guideline & Cold-Chain Indicator -->
+            <div class="mt-3 pt-2.5 border-t border-[#DCD7CA] flex flex-wrap items-center justify-between gap-2 text-[10px]">
+              <div class="flex items-center gap-1.5">
+                <span class="px-2 py-0.5 rounded bg-[#FFA517] text-[#1F1A18] font-black uppercase text-[9px] tracking-wider">🔪 Carver Guide</span>
+                <span class="font-bold text-[#4A0E17]" id="carverThickness">3.5mm Charcuterie Ribs</span>
+              </div>
+              <div class="text-[#CD2653] font-black tracking-wider uppercase">
+                ✦ 100% Cold-Chain Dispatched
+              </div>
             </div>
           </div>
         </div>
@@ -524,7 +543,7 @@
             </div>
           </div>
           <div class="lg:col-span-5 hidden lg:block">
-            <img src="https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=600&q=85" alt="Charcuterie" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
+            <img src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=85" alt="Charcuterie" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
           </div>
         </div>
       </div>
@@ -961,24 +980,28 @@
         title: 'Prime Wood-Smoked Charcuterie',
         desc: 'Cured with Tellicherry black peppercorns and cold beechwood smoke.',
         badge: 'Master Carver 2.5x Loupe Active',
-        image: 'https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=1200&q=85'
+        carverThickness: '3.5mm Charcuterie Ribs',
+        image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=85'
       },
       poultry: {
         title: '100% Antibiotic Residue-Free Breast',
         desc: 'Examine cellular firmness and natural pink marbling. Zero deep-freeze cellular collapse.',
         badge: 'Lab-Tested 100% Residue-Free',
+        carverThickness: '1.2mm Carpaccio Cut',
         image: 'https://i1.wp.com/mh.delichic.co.in/wp-content/uploads/2020/09/Chicken-Breast-Antibiotic-Free-scaled.jpg?resize=800%2C800&ssl=1'
       },
       marinade: {
         title: 'Lucknowi Shahi Saffron Marinade',
         desc: 'Infused with Awadhi mace, roasted gram flour, hung curd and royal saffron threads.',
         badge: 'Chef Master Marinade Inspection',
+        carverThickness: '2.5-inch Supreme Cut',
         image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=85'
       },
       momos: {
         title: 'Handcrafted Coastal Prawn Dim Sum',
         desc: 'Delicate translucent pleated casing filled with whole juicy sea tiger prawns.',
         badge: 'Artisanal Dim Sum Inspection',
+        carverThickness: 'Hand-Pleated Coastal Prawn',
         image: 'https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?auto=format&fit=crop&w=1200&q=85'
       }
     };
@@ -1226,6 +1249,8 @@
         document.getElementById('loupeTitleText').textContent = cut.title;
         document.getElementById('loupeDescText').textContent = cut.desc;
         document.getElementById('loupeBadgeText').textContent = cut.badge;
+        const thicknessEl = document.getElementById('carverThickness');
+        if (thicknessEl && cut.carverThickness) thicknessEl.textContent = cut.carverThickness;
       }, 150);
     }
 
@@ -1241,7 +1266,7 @@
       // Subtle dynamic fluctuation of temperature sensor for ultra-realism
       setInterval(() => {
         if (tempSensor) {
-          const val = (2.3 + Math.random() * 0.2).toFixed(1);
+          const val = (2.2 + Math.random() * 0.3).toFixed(1);
           tempSensor.textContent = `${val}°C`;
         }
       }, 2500);
@@ -1281,6 +1306,60 @@
           e.preventDefault();
         }
       }, { passive: false });
+    })();
+
+    // 5b. Cold-Chain Frost & Dry-Ice Vapor Mist Simulation
+    (function initChilledMist() {
+      const canvas = document.getElementById('chilledMistCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let w = canvas.width = canvas.offsetWidth || 500;
+      let h = canvas.height = canvas.offsetHeight || 470;
+
+      window.addEventListener('resize', () => {
+        if (!canvas) return;
+        w = canvas.width = canvas.offsetWidth;
+        h = canvas.height = canvas.offsetHeight;
+      });
+
+      const mists = [];
+      for (let i = 0; i < 24; i++) {
+        mists.push({
+          x: Math.random() * w,
+          y: h * 0.45 + Math.random() * (h * 0.5),
+          vx: (Math.random() - 0.5) * 0.4,
+          vy: 0.18 + Math.random() * 0.35,
+          r: 25 + Math.random() * 45,
+          alpha: 0.04 + Math.random() * 0.07,
+          life: Math.random()
+        });
+      }
+
+      function drawMist() {
+        ctx.clearRect(0, 0, w, h);
+        mists.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.r += 0.12;
+          p.life += 0.003;
+          if (p.y > h || p.life >= 1) {
+            p.x = Math.random() * w;
+            p.y = h * 0.4 + Math.random() * (h * 0.2);
+            p.r = 20 + Math.random() * 30;
+            p.life = 0;
+            p.alpha = 0.04 + Math.random() * 0.07;
+          }
+          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+          grad.addColorStop(0, `rgba(255, 255, 255, ${p.alpha * (1 - p.life)})`);
+          grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        requestAnimationFrame(drawMist);
+      }
+      drawMist();
     })();
 
     // 6. Basket Management

@@ -127,23 +127,168 @@
     min-height: 100vh;
     min-height: 100svh;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    align-items: center;
     padding: clamp(90px, 12vh, 120px) var(--pad) clamp(40px, 8vh, 60px);
     box-sizing: border-box;
     overflow: hidden;
-    background: var(--lilac);
+    background: radial-gradient(circle at 75% 35%, rgba(205, 184, 247, 0.38) 0%, rgba(245, 239, 255, 0.75) 45%, #FAF7FE 100%);
+    background-color: #FAF7FE;
   }
-  .hero.no-gl { background: linear-gradient(135deg, #e7dcff, #cdb8f7 50%, #b79af0); }
-  #fx { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
-  .hero-inner { position: relative; z-index: 2; max-width: 900px; }
-  .hero h1 { font-size: clamp(2.2rem, 5.2vw, 4.4rem); max-width: 16ch; letter-spacing: -0.04em; line-height: 1.05; }
-  .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.08em; margin-bottom: -0.08em; }
-  .w > span { display: inline-block; animation: rise 0.95s cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: calc(var(--i) * 75ms + 250ms); }
-  @keyframes rise { from { transform: translateY(112%); } to { transform: none; } }
-  .lede { margin-top: 18px; max-width: 48ch; font-size: clamp(1rem, 1.6vw, 1.25rem); font-weight: 600; line-height: 1.45; animation: fadein 1s ease 1.3s both; }
-  .cta-row { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 12px; animation: fadein 1s ease 1.5s both; }
-  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+  .hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(43, 22, 80, 0.035) 1px, transparent 0);
+    background-size: 24px 24px;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .hero.no-gl { background: radial-gradient(circle at 75% 35%, rgba(205, 184, 247, 0.38) 0%, rgba(245, 239, 255, 0.75) 45%, #FAF7FE 100%); }
+  #fx { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; opacity: 0.32; mix-blend-mode: multiply; pointer-events: none; }
+  .hero-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 40px;
+    align-items: center;
+  }
+  @media (min-width: 1024px) {
+    .hero-inner {
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 56px;
+    }
+  }
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(43, 22, 80, 0.2);
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--grape);
+    box-shadow: 0 4px 15px rgba(43, 22, 80, 0.05);
+    margin-bottom: 20px;
+  }
+  .hero-tag .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #7C3AED;
+    box-shadow: 0 0 10px #7C3AED;
+  }
+  .hero h1 {
+    font-size: clamp(2.4rem, 4.8vw, 4.1rem);
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    color: var(--grape);
+  }
+  .hero h1 .serif-accent {
+    font-family: "Playfair Display", Georgia, serif;
+    font-style: italic;
+    font-weight: 600;
+    color: #4C1D95;
+  }
+  .w { display: inline-block; vertical-align: top; }
+  .w > span { display: inline-block; }
+  .lede {
+    margin-top: 18px;
+    max-width: 48ch;
+    font-size: clamp(1rem, 1.4vw, 1.2rem);
+    font-weight: 500;
+    line-height: 1.55;
+    color: #381E60;
+  }
+  .cta-row { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+
+  .hero-telemetry-strip {
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(43, 22, 80, 0.18);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .tele-item { text-align: left; }
+  .tele-label { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #6D28D9; }
+  .tele-val { font-size: 1.15rem; font-weight: 900; color: var(--grape); }
+
+  /* Hero Visual Showcase Card */
+  .hero-visual-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  .hero-showcase-card {
+    position: relative;
+    border-radius: 32px;
+    overflow: hidden;
+    background: #1A1224;
+    border: 3px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 0 25px 60px -15px rgba(43, 22, 80, 0.35), 0 0 0 1px rgba(124, 58, 237, 0.25);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+  }
+  .hero-showcase-card:hover {
+    transform: translateY(-8px) scale(1.015);
+    box-shadow: 0 35px 75px -15px rgba(43, 22, 80, 0.45);
+  }
+  .hero-showcase-img {
+    width: 100%;
+    height: 480px;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .hero-showcase-card:hover .hero-showcase-img {
+    transform: scale(1.06);
+  }
+  .hero-steam-canvas {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .hero-floating-badge {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    padding: 8px 14px;
+    background: rgba(26, 18, 36, 0.75);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 999px;
+    color: #F1E9FF;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    z-index: 20;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  }
+  .hero-bottom-glass {
+    position: absolute;
+    bottom: 18px;
+    left: 18px;
+    right: 18px;
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.92);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(43, 22, 80, 0.15);
+    border-radius: 20px;
+    z-index: 20;
+    box-shadow: 0 10px 30px rgba(43, 22, 80, 0.15);
+  }
 
   .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 28px; font: 700 1rem/1 var(--font); text-decoration: none; border-radius: 999px; border: 2px solid var(--grape); cursor: pointer; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
   .btn:hover { transform: translateY(-2px); }
@@ -439,25 +584,84 @@
   <section class="hero" id="top" aria-labelledby="hero-title">
     <canvas id="fx" aria-hidden="true"></canvas>
     <div class="hero-inner">
-      <h1 id="hero-title">
-        <span class="w"><span style="--i:0">The</span></span>
-        <span class="w"><span style="--i:1">global</span></span>
-        <span class="w"><span style="--i:2">coffee,</span></span>
-        <span class="w"><span style="--i:3">matcha</span></span>
-        <span class="w"><span style="--i:4">and</span></span>
-        <span class="w"><span style="--i:5">gelato</span></span>
-        <span class="w"><span style="--i:6">movement,</span></span>
-        <span class="w"><span style="--i:7">now</span></span>
-        <span class="w"><span style="--i:8">in</span></span>
-        <span class="w"><span style="--i:9">India.</span></span>
-      </h1>
-      <p class="lede">
-        Specialty in-house roasts, ceremonial Japanese Uji matcha and traditional small-batch gelato, from a lilac glass-fronted counter in Gurugram.
-      </p>
-      <div class="cta-row">
-        <a class="btn btn-primary" href="#chapters">Explore the Counter</a>
-        <a class="btn btn-chrome" href="#d2cShop">Shop Fresh Roasts (₹)</a>
-        <a class="btn btn-primary" href="#destinations">Visit Bar &amp; Wipe Glass ↗</a>
+      <!-- Left Content Column -->
+      <div class="hero-left">
+        <div class="hero-tag">
+          <span class="dot"></span>
+          <span>DLF Phase 1 Flagship • Gurugram</span>
+        </div>
+        <h1 id="hero-title">
+          The Global Coffee, <span class="serif-accent">Matcha</span> &amp; Gelato Movement.
+        </h1>
+        <p class="lede">
+          Specialty single-origin micro-lots, ceremonial Japanese Uji matcha and traditional small-batch gelato, crafted behind our lilac glass-fronted counter in Gurugram.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#chapters">☕ Explore Counter Menu</a>
+          <a class="btn btn-chrome" href="#d2cShop">📦 Shop D2C Roasts (₹)</a>
+          <a class="btn btn-primary" href="#destinations">Visit Bar &amp; Wipe Glass ↗</a>
+        </div>
+        
+        <!-- Live Bar Telemetry Strip -->
+        <div class="hero-telemetry-strip">
+          <div class="tele-item">
+            <div class="tele-label">E61 Pressure</div>
+            <div class="tele-val" id="heroPressureVal">9.2 BAR</div>
+          </div>
+          <div class="tele-item">
+            <div class="tele-label">Single Origin</div>
+            <div class="tele-val" id="heroDoseVal">18.5g Lot</div>
+          </div>
+          <div class="tele-item">
+            <div class="tele-label">Yield (27s)</div>
+            <div class="tele-val" id="heroYieldVal">36.8g Sweet</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Hero Visual Showcase Card with Interactive Barista Station -->
+      <div class="hero-visual-wrap">
+        <!-- Interactive Roast Lot Selector -->
+        <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-white/90 border border-[#2B1650]/15 mb-3 text-[10px] font-bold uppercase tracking-wider overflow-x-auto shadow-sm">
+          <button onclick="setHeroLot('nagaland')" id="heroLot-nagaland" class="py-1.5 px-3 rounded-xl bg-[#2B1650] text-[#F1E9FF] shadow transition-all whitespace-nowrap">
+            ● 18.5g Nagaland Honey
+          </button>
+          <button onclick="setHeroLot('mysore')" id="heroLot-mysore" class="py-1.5 px-3 rounded-xl text-[#534168] hover:text-[#2B1650] transition-all whitespace-nowrap">
+            Mysore Extra Bold
+          </button>
+          <button onclick="setHeroLot('matcha')" id="heroLot-matcha" class="py-1.5 px-3 rounded-xl text-[#534168] hover:text-[#2B1650] transition-all whitespace-nowrap">
+            Uji Tencha Matcha
+          </button>
+        </div>
+
+        <div class="hero-showcase-card" id="heroCard">
+          <img
+            id="heroShowcaseImg"
+            src="https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?auto=format&fit=crop&w=1200&q=85"
+            alt="Gram Street Coffee Bottomless Naked Portafilter Espresso Extraction"
+            class="hero-showcase-img"
+          />
+          <canvas id="heroSteamCanvas" class="hero-steam-canvas"></canvas>
+          
+          <div class="hero-floating-badge" id="heroLotBadge">
+            <span class="text-amber-400">●</span> 18.5g Nagaland Lot
+          </div>
+
+          <div class="hero-bottom-glass">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-[#7C3AED]" id="heroLotCategory">Flagship Espresso Bar</span>
+                <h3 class="text-base font-black text-[#2B1650] mt-0.5" id="heroLotTitle">Syrupy Crema Bloom</h3>
+                <p class="text-xs text-[#534168] font-medium" id="heroLotNotes">Nagaland Washed Arabica • Wild Blueberry &amp; Cacao</p>
+              </div>
+              <div>
+                <button onclick="pullHeroEspresso()" id="heroPullBtn" class="px-3.5 py-2 rounded-xl bg-[#2B1650] hover:bg-[#4C1D95] text-[#F1E9FF] text-[11px] font-black uppercase tracking-wider shadow-md transition-all flex items-center gap-1.5 whitespace-nowrap">
+                  <span>⚡ Pull Shot</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -1739,9 +1943,9 @@
     } catch(e) {}
   };
 
-  // 6. Interactive 3D Card Tilt on Product & Drink Cards
+  // 6. Interactive 3D Card Tilt on Hero Card, Product & Drink Cards
   function initCoffeeCardTilt() {
-    const cards = document.querySelectorAll('.product-card, .chapter, .visit-window');
+    const cards = document.querySelectorAll('#heroCard, .product-card, .chapter, .visit-window');
     cards.forEach(card => {
       card.addEventListener('mousemove', e => {
         const rect = card.getBoundingClientRect();
@@ -1758,7 +1962,189 @@
       });
     });
   }
-  setTimeout(initCoffeeCardTilt, 500);
+  setTimeout(initCoffeeCardTilt, 400);
+
+  // 7. Hero Steam Particle Canvas
+  (function initHeroSteam() {
+    const canvas = document.getElementById('heroSteamCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = canvas.offsetWidth || 500;
+    let height = canvas.height = canvas.offsetHeight || 480;
+
+    window.addEventListener('resize', () => {
+      if (!canvas) return;
+      width = canvas.width = canvas.offsetWidth;
+      height = canvas.height = canvas.offsetHeight;
+    });
+
+    const particles = [];
+    for (let i = 0; i < 22; i++) {
+      particles.push({
+        x: width * 0.5 + (Math.random() - 0.5) * 80,
+        y: height * 0.7 + Math.random() * 80,
+        r: 14 + Math.random() * 22,
+        vx: (Math.random() - 0.5) * 0.6,
+        vy: -0.6 - Math.random() * 0.8,
+        alpha: 0.08 + Math.random() * 0.14
+      });
+    }
+
+    function renderHeroSteam() {
+      ctx.clearRect(0, 0, width, height);
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.r += 0.18;
+        p.alpha -= 0.0018;
+        if (p.alpha <= 0 || p.y < 0) {
+          p.x = width * 0.5 + (Math.random() - 0.5) * 60;
+          p.y = height * 0.75;
+          p.r = 12 + Math.random() * 16;
+          p.alpha = 0.1 + Math.random() * 0.14;
+        }
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+        g.addColorStop(0, `rgba(255, 255, 255, ${p.alpha})`);
+        g.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      requestAnimationFrame(renderHeroSteam);
+    }
+    renderHeroSteam();
+  })();
+
+  // 8. Live Barista Station: Origin Lots & Double Shot Pull Simulator
+  const HERO_LOTS = {
+    nagaland: {
+      category: 'Flagship Espresso Bar',
+      title: 'Syrupy Crema Bloom',
+      notes: 'Nagaland Washed Arabica • Wild Blueberry & Cacao',
+      badge: '18.5g Nagaland Lot',
+      image: 'https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?auto=format&fit=crop&w=1200&q=85',
+      pressure: '9.2 BAR',
+      dose: '18.5g Lot',
+      yield: '36.8g Sweet'
+    },
+    mysore: {
+      category: 'Single-Estate Lot',
+      title: 'Caramel & Toasted Hazelnut',
+      notes: 'Mysore Extra Bold • Pulped Natural Sweet Crema',
+      badge: '19.0g Mysore Lot',
+      image: 'https://images.unsplash.com/photo-1517256064527-09c73fc73e38?auto=format&fit=crop&w=1200&q=85',
+      pressure: '9.0 BAR',
+      dose: '19.0g Lot',
+      yield: '38.0g Sweet'
+    },
+    matcha: {
+      category: 'Ceremonial Tencha Bar',
+      title: 'Kyoto Stone-Ground Tencha',
+      notes: 'First-Harvest Uji Tencha • Sweet Bamboo & Umami',
+      badge: '4.0g Ceremonial Tencha',
+      image: 'https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=1200&q=85',
+      pressure: '100-Prong Chasen',
+      dose: '4.0g Uji',
+      yield: '60ml Foam'
+    }
+  };
+
+  window.setHeroLot = function(key) {
+    if (!HERO_LOTS[key]) return;
+    const lot = HERO_LOTS[key];
+    ['nagaland', 'mysore', 'matcha'].forEach(k => {
+      const btn = document.getElementById(`heroLot-${k}`);
+      if (btn) {
+        if (k === key) {
+          btn.className = 'py-1.5 px-3 rounded-xl bg-[#2B1650] text-[#F1E9FF] shadow transition-all whitespace-nowrap';
+        } else {
+          btn.className = 'py-1.5 px-3 rounded-xl text-[#534168] hover:text-[#2B1650] transition-all whitespace-nowrap';
+        }
+      }
+    });
+
+    const img = document.getElementById('heroShowcaseImg');
+    if (img) {
+      img.style.opacity = '0';
+      setTimeout(() => {
+        img.src = lot.image;
+        img.onload = () => { img.style.opacity = '1'; };
+        const titleEl = document.getElementById('heroLotTitle');
+        const notesEl = document.getElementById('heroLotNotes');
+        const catEl = document.getElementById('heroLotCategory');
+        const badgeEl = document.getElementById('heroLotBadge');
+        const pEl = document.getElementById('heroPressureVal');
+        const dEl = document.getElementById('heroDoseVal');
+        const yEl = document.getElementById('heroYieldVal');
+        if (titleEl) titleEl.textContent = lot.title;
+        if (notesEl) notesEl.textContent = lot.notes;
+        if (catEl) catEl.textContent = lot.category;
+        if (badgeEl) badgeEl.innerHTML = `<span class="text-amber-400">●</span> ${lot.badge}`;
+        if (pEl) pEl.textContent = lot.pressure;
+        if (dEl) dEl.textContent = lot.dose;
+        if (yEl) yEl.textContent = lot.yield;
+      }, 150);
+    }
+  };
+
+  let isPullingShot = false;
+  window.pullHeroEspresso = function() {
+    if (isPullingShot) return;
+    isPullingShot = true;
+    const btn = document.getElementById('heroPullBtn');
+    const pVal = document.getElementById('heroPressureVal');
+    const yVal = document.getElementById('heroYieldVal');
+
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span>⚙️ Pre-Infusing...</span>';
+    }
+
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(55, ctx.currentTime);
+        osc.frequency.linearRampToValueAtTime(75, ctx.currentTime + 1.2);
+        gain.gain.setValueAtTime(0.01, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.04, ctx.currentTime + 0.3);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.0);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 2.0);
+      }
+    } catch(e) {}
+
+    let count = 0;
+    const timer = setInterval(() => {
+      count++;
+      if (count === 1) {
+        if (pVal) pVal.textContent = '4.2 BAR Pre';
+        if (yVal) yVal.textContent = '4.5g Flow';
+        if (btn) btn.innerHTML = '<span>⏳ 9-Bar Extraction...</span>';
+      } else if (count === 2) {
+        if (pVal) pVal.textContent = '8.9 BAR';
+        if (yVal) yVal.textContent = '18.2g Golden';
+      } else if (count === 3) {
+        if (pVal) pVal.textContent = '9.2 BAR Locked';
+        if (yVal) yVal.textContent = '28.4g Crema';
+      } else if (count >= 4) {
+        clearInterval(timer);
+        if (pVal) pVal.textContent = '9.2 BAR';
+        if (yVal) yVal.textContent = '36.8g Sweet';
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>✓ Extracted (9.2 Bar)</span>';
+        }
+        isPullingShot = false;
+      }
+    }, 400);
+  };
 })();
 </script>
 </body>
