@@ -21,6 +21,49 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
+    @property --beam-angle {
+      syntax: '<angle>';
+      initial-value: 0deg;
+      inherits: false;
+    }
+
+    /* Tactile Physical Film Grain Overlay */
+    .film-grain {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 99999;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* Magic UI / KokonutUI 1px Conic Glowing Border Beam (Golden Amber + Butcher Crimson) */
+    .border-beam {
+      position: relative;
+      border-radius: 28px;
+      overflow: hidden;
+    }
+    .border-beam::before {
+      content: "";
+      position: absolute;
+      inset: -1.5px;
+      border-radius: inherit;
+      padding: 1.5px;
+      background: conic-gradient(from var(--beam-angle, 0deg), transparent 60%, var(--delichic-amber) 80%, #FFE6A3 90%, var(--chic-crimson) 96%, transparent 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      z-index: 25;
+      animation: beamSpin 5s linear infinite;
+    }
+    @keyframes beamSpin {
+      to { --beam-angle: 360deg; }
+    }
+
     :root {
       --delichic-amber: #FFA517;
       --delichic-amber-dark: #D88A00;
@@ -302,6 +345,7 @@
   </style>
 </head>
 <body class="linen-texture selection:bg-[#CD2653] selection:text-white">
+  <div class="film-grain" aria-hidden="true"></div>
 
   <!-- ================= TOP FRESH DISPATCH ANNOUNCEMENT ================= -->
   <div class="fixed top-0 left-0 right-0 z-50 bg-[#FFA517] text-[#1F1A18] text-[11px] sm:text-xs font-semibold tracking-wider py-2 px-4 border-b border-[#D88A00]/40 shadow-sm">
@@ -433,7 +477,7 @@
           </button>
         </div>
 
-        <div class="loupe-container shadow-2xl border-2 border-[#FFA517]/50 bg-black relative" id="heroLoupeContainer">
+        <div class="loupe-container border-beam shadow-2xl border-2 border-[#FFA517]/50 bg-black relative" id="heroLoupeContainer">
           <img
             id="heroLoupeImg"
             src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=85"

@@ -6,7 +6,7 @@
 <title>Gram Street Coffee | D2C Roastery, Japanese Matcha &amp; Gelato — Gurugram</title>
 <meta name="description" content="In-house specialty roasts, ceremonial Uji matcha, and small-batch gelato. DLF Phase 1, Golf Course Road & Sector 56, Gurugram.">
 <link rel="canonical" href="https://anchit-tandon.com/gram-street-coffee" />
-<meta name="theme-color" content="#CDB8F7">
+<meta name="theme-color" content="#FAF8F5">
 <meta property="og:title" content="Gram Street Coffee | D2C Roastery, Japanese Matcha &amp; Gelato — Gurugram">
 <meta property="og:description" content="In-house specialty roasts, ceremonial Uji matcha, and small-batch gelato. DLF Phase 1, Golf Course Road & Sector 56, Gurugram.">
 <meta property="og:url" content="https://anchit-tandon.com/gram-street-coffee" />
@@ -22,13 +22,29 @@
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
+  @property --beam-angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+  }
+
   :root {
-    --lilac: #CDB8F7;
-    --lilac-soft: #F1E9FF;
-    --grape: #2B1650;
-    --berry: #5E32CC;
-    --accent: #7C3AED;
-    --chrome: linear-gradient(135deg, #FBFAFF 0%, #C4BFD6 28%, #FFFFFF 46%, #9A94B3 68%, #E9E6F3 100%);
+    --canvas: #FAF8F5;              /* Ultra-Clean Swiss Paper White */
+    --canvas-warm: #F4EFE6;         /* Tactile Warm Porcelain */
+    --obsidian: #0D0907;            /* Deep Obsidian Carbon */
+    --espresso: #1A110D;            /* Deep Roasted Espresso */
+    --mocha: #2E1D16;               /* Roasted Mocha */
+    --bronze: #C88A4B;              /* Warm Caramel Bronze */
+    --bronze-glow: #E5B263;         /* Searing Honey Gold Highlight */
+    --text-primary: #120B08;        /* Obsidian Black Text */
+    --text-muted: #5C4A42;          /* Editorial Warm Charcoal */
+    --border-light: rgba(46, 29, 22, 0.12);
+    --grape: #0D0907;
+    --lilac: #F4EFE6;
+    --lilac-soft: #FAF8F5;
+    --berry: #C88A4B;
+    --bg: #FAF8F5;
+    --chrome: linear-gradient(135deg, #FFFDF9 0%, #D8CFC4 30%, #FFFFFF 50%, #B8ABA0 70%, #EFEAE2 100%);
     --pad: clamp(18px, 5vw, 64px);
     --font: "Bricolage Grotesque", ui-rounded, "Segoe UI", system-ui, sans-serif;
   }
@@ -39,8 +55,8 @@
     font-family: var(--font);
     font-size: 1.0625rem;
     line-height: 1.55;
-    color: var(--grape);
-    background: var(--lilac);
+    color: var(--text-primary);
+    background: var(--canvas);
     -webkit-text-size-adjust: 100%;
     overflow-x: hidden;
   }
@@ -48,11 +64,48 @@
   p { margin: 0; }
   a { color: inherit; }
 
+  /* Tactile Physical Film Grain Overlay */
+  .film-grain {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 99999;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
+
+  /* Magic UI / KokonutUI 1px Conic Glowing Border Beam */
+  .border-beam {
+    position: relative;
+    border-radius: 28px;
+    overflow: hidden;
+  }
+  .border-beam::before {
+    content: "";
+    position: absolute;
+    inset: -1.5px;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: conic-gradient(from var(--beam-angle, 0deg), transparent 60%, var(--bronze) 82%, #FFF4D9 92%, var(--bronze) 97%, transparent 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 25;
+    animation: beamSpin 5s linear infinite;
+  }
+  @keyframes beamSpin {
+    to { --beam-angle: 360deg; }
+  }
+
   /* Custom 5D Magnetic Cursor */
   .custom-cursor {
     width: 16px;
     height: 16px;
-    border: 2px solid var(--accent);
+    border: 2px solid var(--bronze);
     background: rgba(255, 255, 255, 0.9);
     border-radius: 50%;
     position: fixed;
@@ -63,14 +116,14 @@
                 height 0.22s cubic-bezier(0.16, 1, 0.3, 1),
                 background-color 0.2s ease,
                 box-shadow 0.2s ease;
-    box-shadow: 0 0 18px rgba(124, 58, 237, 0.5);
+    box-shadow: 0 0 18px rgba(200, 138, 75, 0.4);
   }
   .custom-cursor.hovering {
     width: 60px;
     height: 60px;
-    background-color: rgba(205, 184, 247, 0.35);
-    border-color: #7C3AED;
-    box-shadow: 0 0 35px rgba(124, 58, 237, 0.7);
+    background-color: rgba(200, 138, 75, 0.15);
+    border-color: var(--bronze-glow);
+    box-shadow: 0 0 35px rgba(229, 178, 99, 0.6);
   }
   @media (hover: none) or (pointer: coarse) {
     .custom-cursor { display: none !important; }
@@ -87,24 +140,25 @@
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    padding: 8px var(--pad);
-    background: rgba(205, 184, 247, 0.88);
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
-    border-b: 1px solid rgba(43, 22, 80, 0.15);
+    padding: 10px var(--pad);
+    background: rgba(250, 248, 245, 0.9);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid var(--border-light);
   }
-  .wordmark { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.2rem; letter-spacing: -0.03em; text-decoration: none; }
+  .wordmark { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.2rem; letter-spacing: -0.03em; text-decoration: none; color: var(--text-primary); }
   .wordmark-badge {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     border-radius: 10px;
-    background: var(--grape);
-    color: var(--lilac);
+    background: var(--obsidian);
+    color: var(--bronze-glow);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 900;
+    border: 1px solid rgba(200, 138, 75, 0.35);
   }
   .nav { display: flex; align-items: center; gap: 4px; }
   .nav a {
@@ -116,9 +170,10 @@
     font-size: 0.95rem;
     text-decoration: none;
     border-radius: 999px;
-    transition: background 0.2s ease;
+    color: var(--text-primary);
+    transition: background 0.2s ease, color 0.2s ease;
   }
-  .nav a:hover { background: rgba(255, 255, 255, 0.65); }
+  .nav a:hover { background: rgba(26, 17, 13, 0.06); color: var(--bronze); }
   @media (max-width: 640px) { .nav .opt { display: none; } }
 
   /* hero */
@@ -131,20 +186,20 @@
     padding: clamp(90px, 12vh, 120px) var(--pad) clamp(40px, 8vh, 60px);
     box-sizing: border-box;
     overflow: hidden;
-    background: radial-gradient(circle at 75% 35%, rgba(205, 184, 247, 0.38) 0%, rgba(245, 239, 255, 0.75) 45%, #FAF7FE 100%);
-    background-color: #FAF7FE;
+    background: radial-gradient(circle at 75% 35%, rgba(200, 138, 75, 0.12) 0%, rgba(244, 239, 230, 0.55) 45%, var(--canvas) 100%);
+    background-color: var(--canvas);
   }
   .hero::after {
     content: "";
     position: absolute;
     inset: 0;
-    background-image: radial-gradient(rgba(43, 22, 80, 0.035) 1px, transparent 0);
+    background-image: radial-gradient(rgba(26, 17, 13, 0.035) 1px, transparent 0);
     background-size: 24px 24px;
     pointer-events: none;
     z-index: 1;
   }
-  .hero.no-gl { background: radial-gradient(circle at 75% 35%, rgba(205, 184, 247, 0.38) 0%, rgba(245, 239, 255, 0.75) 45%, #FAF7FE 100%); }
-  #fx { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; opacity: 0.32; mix-blend-mode: multiply; pointer-events: none; }
+  .hero.no-gl { background: radial-gradient(circle at 75% 35%, rgba(200, 138, 75, 0.12) 0%, rgba(244, 239, 230, 0.55) 45%, var(--canvas) 100%); }
+  #fx { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; opacity: 0.28; mix-blend-mode: multiply; pointer-events: none; }
   .hero-inner {
     position: relative;
     z-index: 2;
@@ -167,35 +222,35 @@
     align-items: center;
     gap: 8px;
     padding: 6px 14px;
-    background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(43, 22, 80, 0.2);
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid var(--border-light);
     border-radius: 999px;
     font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: var(--grape);
-    box-shadow: 0 4px 15px rgba(43, 22, 80, 0.05);
+    color: var(--text-primary);
+    box-shadow: 0 4px 15px rgba(26, 17, 13, 0.04);
     margin-bottom: 20px;
   }
   .hero-tag .dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #7C3AED;
-    box-shadow: 0 0 10px #7C3AED;
+    background: var(--bronze);
+    box-shadow: 0 0 10px var(--bronze-glow);
   }
   .hero h1 {
     font-size: clamp(2.4rem, 4.8vw, 4.1rem);
     letter-spacing: -0.04em;
     line-height: 1.05;
-    color: var(--grape);
+    color: var(--obsidian);
   }
   .hero h1 .serif-accent {
     font-family: "Playfair Display", Georgia, serif;
     font-style: italic;
     font-weight: 600;
-    color: #4C1D95;
+    color: var(--bronze);
   }
   .w { display: inline-block; vertical-align: top; }
   .w > span { display: inline-block; }
@@ -205,21 +260,21 @@
     font-size: clamp(1rem, 1.4vw, 1.2rem);
     font-weight: 500;
     line-height: 1.55;
-    color: #381E60;
+    color: var(--text-muted);
   }
   .cta-row { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
 
   .hero-telemetry-strip {
     margin-top: 32px;
     padding-top: 20px;
-    border-top: 1px solid rgba(43, 22, 80, 0.18);
+    border-top: 1px solid var(--border-light);
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
   }
   .tele-item { text-align: left; }
-  .tele-label { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #6D28D9; }
-  .tele-val { font-size: 1.15rem; font-weight: 900; color: var(--grape); }
+  .tele-label { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--bronze); }
+  .tele-val { font-size: 1.15rem; font-weight: 900; color: var(--obsidian); }
 
   /* Hero Visual Showcase Card */
   .hero-visual-wrap {
@@ -232,14 +287,14 @@
     position: relative;
     border-radius: 32px;
     overflow: hidden;
-    background: #1A1224;
-    border: 3px solid rgba(255, 255, 255, 0.85);
-    box-shadow: 0 25px 60px -15px rgba(43, 22, 80, 0.35), 0 0 0 1px rgba(124, 58, 237, 0.25);
+    background: var(--obsidian);
+    border: 2px solid rgba(200, 138, 75, 0.35);
+    box-shadow: 0 25px 60px -15px rgba(13, 9, 7, 0.35);
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
   }
   .hero-showcase-card:hover {
     transform: translateY(-8px) scale(1.015);
-    box-shadow: 0 35px 75px -15px rgba(43, 22, 80, 0.45);
+    box-shadow: 0 35px 75px -15px rgba(13, 9, 7, 0.45);
   }
   .hero-showcase-img {
     width: 100%;
@@ -262,12 +317,12 @@
     top: 18px;
     right: 18px;
     padding: 8px 14px;
-    background: rgba(26, 18, 36, 0.75);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(13, 9, 7, 0.8);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(200, 138, 75, 0.4);
     border-radius: 999px;
-    color: #F1E9FF;
+    color: #FFFDF9;
     font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: 0.08em;
@@ -282,23 +337,23 @@
     right: 18px;
     padding: 16px 20px;
     background: rgba(255, 255, 255, 0.92);
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(43, 22, 80, 0.15);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(200, 138, 75, 0.25);
     border-radius: 20px;
     z-index: 20;
-    box-shadow: 0 10px 30px rgba(43, 22, 80, 0.15);
+    box-shadow: 0 16px 35px rgba(13, 9, 7, 0.08);
   }
 
-  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 28px; font: 700 1rem/1 var(--font); text-decoration: none; border-radius: 999px; border: 2px solid var(--grape); cursor: pointer; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 28px; font: 700 1rem/1 var(--font); text-decoration: none; border-radius: 999px; cursor: pointer; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
   .btn:hover { transform: translateY(-2px); }
-  .btn-primary { background: var(--grape); color: var(--lilac-soft); }
-  .btn-primary:hover { background: #3d2272; box-shadow: 0 10px 25px rgba(43, 22, 80, 0.25); }
-  .btn-chrome { background: var(--chrome); color: var(--grape); border-color: rgba(43, 22, 80, 0.4); }
-  .btn-chrome:hover { filter: brightness(1.08); box-shadow: 0 10px 25px rgba(255, 255, 255, 0.4); }
+  .btn-primary { background: var(--obsidian); color: #FAF8F5; border: 1px solid rgba(200, 138, 75, 0.3); }
+  .btn-primary:hover { background: var(--mocha); box-shadow: 0 12px 30px rgba(13, 9, 7, 0.22); }
+  .btn-chrome { background: #FFFFFF; color: var(--text-primary); border: 1px solid var(--border-light); }
+  .btn-chrome:hover { background: var(--canvas-warm); box-shadow: 0 6px 20px rgba(26, 17, 13, 0.06); }
 
   /* marquee */
-  .marquee { overflow: hidden; background: var(--grape); color: var(--lilac); padding: 16px 0; }
+  .marquee { overflow: hidden; background: var(--obsidian); color: var(--bronze-glow); padding: 16px 0; border-top: 1px solid rgba(200, 138, 75, 0.2); border-bottom: 1px solid rgba(200, 138, 75, 0.2); }
   .track { display: flex; width: max-content; animation: slide 46s linear infinite; }
   .marquee:hover .track { animation-play-state: paused; }
   .track ul { display: flex; gap: 0; margin: 0; padding: 0; list-style: none; }
@@ -549,6 +604,7 @@
 </style>
 </head>
 <body>
+<div class="film-grain" aria-hidden="true"></div>
 
 <!-- 5D Custom Magnetic Cursor -->
 <div class="custom-cursor" id="customCursor"></div>
@@ -567,14 +623,14 @@
     <a href="#cities">Network</a>
     <a href="#destinations">Locations (3)</a>
     <!-- 5D Audio Toggle Button -->
-    <button id="audioBtn" onclick="toggleAudio()" class="ml-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-[#2B1650]/40 text-[#2B1650] flex items-center gap-1.5 bg-white/70 hover:bg-white transition-all">
-      <span id="audioDot" class="w-2 h-2 rounded-full bg-slate-400"></span>
+    <button id="audioBtn" onclick="toggleAudio()" class="ml-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-[var(--border-light)] text-[var(--obsidian)] flex items-center gap-1.5 bg-white/80 hover:bg-white transition-all shadow-xs">
+      <span id="audioDot" class="w-2 h-2 rounded-full bg-[var(--bronze)]"></span>
       <span id="audioLabel" class="hidden sm:inline">5D Audio</span>
     </button>
     <!-- Roastery Bag Trigger -->
-    <button onclick="toggleCart(true)" class="ml-2 px-4 py-1.5 rounded-full bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-wider hover:bg-[#4C1D95] transition-all flex items-center gap-1.5 shadow">
+    <button onclick="toggleCart(true)" class="ml-2 px-4 py-1.5 rounded-full bg-[var(--obsidian)] text-[#FAF8F5] font-black text-xs uppercase tracking-wider hover:bg-[var(--mocha)] transition-all flex items-center gap-1.5 shadow">
       <span>Bag</span>
-      <span class="px-1.5 py-0.2 bg-white/30 rounded-full text-[10px]" id="cartCount">1</span>
+      <span class="px-1.5 py-0.2 bg-[var(--bronze)] text-[#FAF8F5] rounded-full text-[10px]" id="cartCount">1</span>
     </button>
   </nav>
 </header>
@@ -622,19 +678,19 @@
       <!-- Right Column: Hero Visual Showcase Card with Interactive Barista Station -->
       <div class="hero-visual-wrap">
         <!-- Interactive Roast Lot Selector -->
-        <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-white/90 border border-[#2B1650]/15 mb-3 text-[10px] font-bold uppercase tracking-wider overflow-x-auto shadow-sm">
-          <button onclick="setHeroLot('nagaland')" id="heroLot-nagaland" class="py-1.5 px-3 rounded-xl bg-[#2B1650] text-[#F1E9FF] shadow transition-all whitespace-nowrap">
+        <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-white/95 border border-[var(--border-light)] mb-3 text-[10px] font-bold uppercase tracking-wider overflow-x-auto shadow-sm">
+          <button onclick="setHeroLot('nagaland')" id="heroLot-nagaland" class="py-1.5 px-3 rounded-xl bg-[var(--obsidian)] text-[#FAF8F5] shadow transition-all whitespace-nowrap">
             ● 18.5g Nagaland Honey
           </button>
-          <button onclick="setHeroLot('mysore')" id="heroLot-mysore" class="py-1.5 px-3 rounded-xl text-[#534168] hover:text-[#2B1650] transition-all whitespace-nowrap">
+          <button onclick="setHeroLot('mysore')" id="heroLot-mysore" class="py-1.5 px-3 rounded-xl text-[var(--text-muted)] hover:text-[var(--obsidian)] transition-all whitespace-nowrap">
             Mysore Extra Bold
           </button>
-          <button onclick="setHeroLot('matcha')" id="heroLot-matcha" class="py-1.5 px-3 rounded-xl text-[#534168] hover:text-[#2B1650] transition-all whitespace-nowrap">
+          <button onclick="setHeroLot('matcha')" id="heroLot-matcha" class="py-1.5 px-3 rounded-xl text-[var(--text-muted)] hover:text-[var(--obsidian)] transition-all whitespace-nowrap">
             Uji Tencha Matcha
           </button>
         </div>
 
-        <div class="hero-showcase-card" id="heroCard">
+        <div class="hero-showcase-card border-beam" id="heroCard">
           <img
             id="heroShowcaseImg"
             src="https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?auto=format&fit=crop&w=1200&q=85"
@@ -650,12 +706,12 @@
           <div class="hero-bottom-glass">
             <div class="flex items-center justify-between gap-3">
               <div>
-                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-[#7C3AED]" id="heroLotCategory">Flagship Espresso Bar</span>
-                <h3 class="text-base font-black text-[#2B1650] mt-0.5" id="heroLotTitle">Syrupy Crema Bloom</h3>
-                <p class="text-xs text-[#534168] font-medium" id="heroLotNotes">Nagaland Washed Arabica • Wild Blueberry &amp; Cacao</p>
+                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--bronze)]" id="heroLotCategory">Flagship Espresso Bar</span>
+                <h3 class="text-base font-black text-[var(--obsidian)] mt-0.5" id="heroLotTitle">Syrupy Crema Bloom</h3>
+                <p class="text-xs text-[var(--text-muted)] font-medium" id="heroLotNotes">Nagaland Washed Arabica • Wild Blueberry &amp; Cacao</p>
               </div>
               <div>
-                <button onclick="pullHeroEspresso()" id="heroPullBtn" class="px-3.5 py-2 rounded-xl bg-[#2B1650] hover:bg-[#4C1D95] text-[#F1E9FF] text-[11px] font-black uppercase tracking-wider shadow-md transition-all flex items-center gap-1.5 whitespace-nowrap">
+                <button onclick="pullHeroEspresso()" id="heroPullBtn" class="px-3.5 py-2 rounded-xl bg-[var(--obsidian)] hover:bg-[var(--mocha)] text-[#FAF8F5] text-[11px] font-black uppercase tracking-wider shadow-md transition-all flex items-center gap-1.5 whitespace-nowrap">
                   <span>⚡ Pull Shot</span>
                 </button>
               </div>
@@ -682,7 +738,7 @@
   <section id="chapters" aria-label="Coffee, matcha and gelato">
     <div class="stage">
       <!-- Chapter 1: Coffee -->
-      <article class="chapter" data-slot="coffee" style="--bg:#CDB8F7">
+      <article class="chapter" data-slot="coffee" style="--bg:#FAF8F5">
         <div class="ch-grid">
           <div class="ch-body">
             <h2 class="ch-title">Coffee</h2>
@@ -772,83 +828,83 @@
   <section class="py-24 px-6 md:px-12 max-w-7xl mx-auto" id="roasteryCraft">
     <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
       <div>
-        <span class="text-xs font-black uppercase tracking-[0.25em] text-[#7C3AED]">The Sensory Extraction & Roastery Bar</span>
-        <h2 class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight mt-2 text-[#2B1650]">
+        <span class="text-xs font-black uppercase tracking-[0.25em] text-[var(--bronze)]">The Sensory Extraction & Roastery Bar</span>
+        <h2 class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight mt-2 text-[var(--obsidian)]">
           The Roastery &amp; Craft.
         </h2>
-        <p class="mt-3 text-base text-[#534168] max-w-2xl font-semibold leading-relaxed">
+        <p class="mt-3 text-base text-[var(--text-muted)] max-w-2xl font-semibold leading-relaxed">
           Step behind our lilac glass counter in DLF Phase 1, Gurugram. Explore our precision 9-bar bottomless espresso extraction telemetry, velvety microfoam emulsion chemistry, and single-origin roast spectrums.
         </p>
       </div>
       <!-- Mode Switcher Tabs -->
-      <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-[#2B1650]/20 shadow-sm text-xs font-black uppercase tracking-wider overflow-x-auto">
-        <button onclick="switchCraftTab('extraction')" id="craftTab-extraction" class="py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow whitespace-nowrap">
+      <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-[var(--border-light)] shadow-sm text-xs font-black uppercase tracking-wider overflow-x-auto">
+        <button onclick="switchCraftTab('extraction')" id="craftTab-extraction" class="py-2.5 px-4 rounded-xl transition-all bg-[var(--obsidian)] text-[#FAF8F5] shadow whitespace-nowrap">
           1. 9-Bar Extraction
         </button>
-        <button onclick="switchCraftTab('microfoam')" id="craftTab-microfoam" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650] whitespace-nowrap">
+        <button onclick="switchCraftTab('microfoam')" id="craftTab-microfoam" class="py-2.5 px-4 rounded-xl transition-all text-[var(--text-muted)] hover:text-[var(--obsidian)] whitespace-nowrap">
           2. Microfoam Pour
         </button>
-        <button onclick="switchCraftTab('roast')" id="craftTab-roast" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650] whitespace-nowrap">
+        <button onclick="switchCraftTab('roast')" id="craftTab-roast" class="py-2.5 px-4 rounded-xl transition-all text-[var(--text-muted)] hover:text-[var(--obsidian)] whitespace-nowrap">
           3. Roast Spectrum
         </button>
       </div>
     </div>
 
     <!-- Panel 1: 9-Bar Bottomless Naked Portafilter Extraction Telemetry -->
-    <div id="craftPanel-extraction" class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
+    <div id="craftPanel-extraction" class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[var(--border-light)] shadow-xl relative overflow-hidden">
       <!-- Left Controls & Telemetry -->
       <div class="lg:col-span-6 space-y-6">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-black uppercase tracking-wider">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--canvas-warm)] text-[var(--bronze)] border border-[var(--border-light)] text-xs font-black uppercase tracking-wider">
           <span>● Bottomless Naked Portafilter • 58mm E61 Grouphead</span>
         </div>
-        <h3 class="text-3xl sm:text-4xl font-display font-black text-[#2B1650] uppercase tracking-tight">
+        <h3 class="text-3xl sm:text-4xl font-display font-black text-[var(--obsidian)] uppercase tracking-tight">
           Syrupy Golden Extraction.
         </h3>
-        <p class="text-sm sm:text-base text-[#534168] font-medium leading-relaxed">
+        <p class="text-sm sm:text-base text-[var(--text-muted)] font-medium leading-relaxed">
           Freshly ground Nagaland Arabica micro-lot dosed at 18.5 grams. Dual streams coalesce into a syrupy, golden-amber flow, yielding a tiger-striped crema with natural wild blueberry and cacao notes.
         </p>
 
         <!-- Real Telemetry Grid -->
         <div class="grid grid-cols-3 gap-3 pt-2">
-          <div class="bg-[#F8F5FF] p-3 rounded-2xl border border-[#2B1650]/10 text-center">
-            <div class="text-[10px] uppercase tracking-wider text-[#7C3AED] font-black">Grouphead</div>
-            <div id="craftPressureVal" class="text-xl font-display font-black text-[#2B1650]">9.2 BAR</div>
+          <div class="bg-[var(--canvas-warm)] p-3 rounded-2xl border border-[var(--border-light)] text-center">
+            <div class="text-[10px] uppercase tracking-wider text-[var(--bronze)] font-black">Grouphead</div>
+            <div id="craftPressureVal" class="text-xl font-display font-black text-[var(--obsidian)]">9.2 BAR</div>
           </div>
-          <div class="bg-[#F8F5FF] p-3 rounded-2xl border border-[#2B1650]/10 text-center">
-            <div class="text-[10px] uppercase tracking-wider text-[#7C3AED] font-black">Extraction Time</div>
-            <div id="craftTimeVal" class="text-xl font-display font-black text-[#2B1650]">27.4s</div>
+          <div class="bg-[var(--canvas-warm)] p-3 rounded-2xl border border-[var(--border-light)] text-center">
+            <div class="text-[10px] uppercase tracking-wider text-[var(--bronze)] font-black">Extraction Time</div>
+            <div id="craftTimeVal" class="text-xl font-display font-black text-[var(--obsidian)]">27.4s</div>
           </div>
-          <div class="bg-[#F8F5FF] p-3 rounded-2xl border border-[#2B1650]/10 text-center">
-            <div class="text-[10px] uppercase tracking-wider text-[#7C3AED] font-black">Liquid Yield</div>
-            <div id="craftYieldVal" class="text-xl font-display font-black text-[#2B1650]">36.8g</div>
+          <div class="bg-[var(--canvas-warm)] p-3 rounded-2xl border border-[var(--border-light)] text-center">
+            <div class="text-[10px] uppercase tracking-wider text-[var(--bronze)] font-black">Liquid Yield</div>
+            <div id="craftYieldVal" class="text-xl font-display font-black text-[var(--obsidian)]">36.8g</div>
           </div>
         </div>
 
         <div class="flex flex-wrap items-center gap-4 pt-2">
-          <button id="craftRunBtn" onclick="runCraftCalibration()" class="btn btn-primary shadow-lg shadow-[#2B1650]/20 flex items-center gap-2">
+          <button id="craftRunBtn" onclick="runCraftCalibration()" class="btn btn-primary shadow-lg flex items-center gap-2">
             <span>☕ Calibrate 9-Bar Extraction</span>
           </button>
-          <span class="text-xs text-[#534168] font-bold">1:2 Ratio • 93.5°C Boiler PID</span>
+          <span class="text-xs text-[var(--text-muted)] font-bold">1:2 Ratio • 93.5°C Boiler PID</span>
         </div>
 
-        <div class="pt-4 border-t border-[#2B1650]/10 grid grid-cols-3 gap-4 text-center">
+        <div class="pt-4 border-t border-[var(--border-light)] grid grid-cols-3 gap-4 text-center">
           <div>
-            <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">Dry Dose</div>
-            <div class="text-lg font-black text-[#2B1650]">18.5g</div>
+            <div class="text-xs uppercase tracking-wider text-[var(--bronze)] font-bold">Dry Dose</div>
+            <div class="text-lg font-black text-[var(--obsidian)]">18.5g</div>
           </div>
           <div>
-            <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">TDS Purity</div>
-            <div class="text-lg font-black text-[#2B1650]">9.8%</div>
+            <div class="text-xs uppercase tracking-wider text-[var(--bronze)] font-bold">TDS Purity</div>
+            <div class="text-lg font-black text-[var(--obsidian)]">9.8%</div>
           </div>
           <div>
-            <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">Flow Rate</div>
-            <div class="text-lg font-black text-[#2B1650]">1.34 g/s</div>
+            <div class="text-xs uppercase tracking-wider text-[var(--bronze)] font-bold">Flow Rate</div>
+            <div class="text-lg font-black text-[var(--obsidian)]">1.34 g/s</div>
           </div>
         </div>
       </div>
 
       <!-- Right Visual Canvas: Macro Photography with Subtle Steam Canvas Overlay -->
-      <div class="lg:col-span-6 relative rounded-2xl overflow-hidden border-2 border-[#2B1650]/15 shadow-2xl min-h-[380px] bg-slate-900 group">
+      <div class="lg:col-span-6 relative rounded-2xl overflow-hidden border-2 border-[var(--border-light)] shadow-2xl min-h-[380px] bg-slate-900 group">
         <img id="craftExtractionImg" src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=1200&q=85" alt="Espresso extraction from bottomless portafilter" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 min-h-[380px]" />
         <!-- Floating Steam Mist Canvas -->
         <canvas id="coffeeSteamCanvas" class="absolute inset-0 pointer-events-none z-10"></canvas>
@@ -860,53 +916,53 @@
     </div>
 
     <!-- Panel 2: Microfoam Pour Studio -->
-    <div id="craftPanel-microfoam" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
+    <div id="craftPanel-microfoam" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[var(--border-light)] shadow-xl relative overflow-hidden">
       <!-- Left Controls -->
       <div class="lg:col-span-6 space-y-6">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black uppercase tracking-wider">
           <span>● Silky Microfoam Emulsion • 65°C Sweet Spot</span>
         </div>
-        <h3 class="text-3xl sm:text-4xl font-display font-black text-[#2B1650] uppercase tracking-tight">
+        <h3 class="text-3xl sm:text-4xl font-display font-black text-[var(--obsidian)] uppercase tracking-tight">
           Microfoam Chemistry.
         </h3>
-        <p class="text-sm sm:text-base text-[#534168] font-medium leading-relaxed">
+        <p class="text-sm sm:text-base text-[var(--text-muted)] font-medium leading-relaxed">
           Aerating whole or oat milk to exactly 65°C converts complex sugars into natural sweetness without scalding whey proteins. Poured at a steady 12ml/second to produce mirror-gloss latte art.
         </p>
 
         <!-- Pattern Selector -->
         <div class="space-y-2">
-          <span class="text-xs uppercase tracking-widest text-[#7C3AED] font-black">Select Pour Pattern</span>
+          <span class="text-xs uppercase tracking-widest text-[var(--bronze)] font-black">Select Pour Pattern</span>
           <div class="flex flex-wrap gap-2">
-            <button onclick="setCraftPattern('rosetta')" id="craftPat-rosetta" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#2B1650] text-[#F1E9FF] shadow transition-all">
+            <button onclick="setCraftPattern('rosetta')" id="craftPat-rosetta" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[var(--obsidian)] text-[#FAF8F5] shadow transition-all">
               🌿 Rosetta
             </button>
-            <button onclick="setCraftPattern('tulip')" id="craftPat-tulip" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#F8F5FF] text-[#534168] border border-[#2B1650]/20 hover:text-[#2B1650] transition-all">
+            <button onclick="setCraftPattern('tulip')" id="craftPat-tulip" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[var(--canvas-warm)] text-[var(--text-muted)] border border-[var(--border-light)] hover:text-[var(--obsidian)] transition-all">
               🌷 Stacked Tulip
             </button>
-            <button onclick="setCraftPattern('heart')" id="craftPat-heart" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#F8F5FF] text-[#534168] border border-[#2B1650]/20 hover:text-[#2B1650] transition-all">
+            <button onclick="setCraftPattern('heart')" id="craftPat-heart" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[var(--canvas-warm)] text-[var(--text-muted)] border border-[var(--border-light)] hover:text-[var(--obsidian)] transition-all">
               🤍 Blooming Heart
             </button>
           </div>
         </div>
 
-        <div class="pt-4 border-t border-[#2B1650]/10 grid grid-cols-3 gap-4 text-center">
+        <div class="pt-4 border-t border-[var(--border-light)] grid grid-cols-3 gap-4 text-center">
           <div>
-            <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">Texture</div>
-            <div class="text-lg font-black text-[#2B1650]">0.2mm Velvet</div>
+            <div class="text-xs uppercase tracking-wider text-[var(--bronze)] font-bold">Texture</div>
+            <div class="text-lg font-black text-[var(--obsidian)]">0.2mm Velvet</div>
           </div>
           <div>
-            <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">Aeration</div>
-            <div class="text-lg font-black text-[#2B1650]">100% Gloss</div>
+            <div class="text-xs uppercase tracking-wider text-[var(--bronze)] font-bold">Aeration</div>
+            <div class="text-lg font-black text-[var(--obsidian)]">100% Gloss</div>
           </div>
           <div>
-            <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">Steam Temp</div>
-            <div class="text-lg font-black text-[#2B1650]">65.0°C</div>
+            <div class="text-xs uppercase tracking-wider text-[var(--bronze)] font-bold">Steam Temp</div>
+            <div class="text-lg font-black text-[var(--obsidian)]">65.0°C</div>
           </div>
         </div>
       </div>
 
       <!-- Right Photo Display -->
-      <div class="lg:col-span-6 relative rounded-2xl overflow-hidden border-2 border-[#2B1650]/15 shadow-2xl min-h-[380px] bg-slate-900 group">
+      <div class="lg:col-span-6 relative rounded-2xl overflow-hidden border-2 border-[var(--border-light)] shadow-2xl min-h-[380px] bg-slate-900 group">
         <img id="craftLatteImg" src="https://images.unsplash.com/photo-1534778101976-62847782c213?auto=format&fit=crop&w=1200&q=85" alt="Handcrafted latte art pouring" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 min-h-[380px]" />
         <div class="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/20 text-white flex items-center justify-between z-20 text-xs font-bold">
           <span id="craftLatteCaption">🌿 Classic 8-Leaf Rosetta Pattern</span>
@@ -916,84 +972,84 @@
     </div>
 
     <!-- Panel 3: Origin Roast Profile & Sensory Wheel -->
-    <div id="craftPanel-roast" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
+    <div id="craftPanel-roast" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[var(--border-light)] shadow-xl relative overflow-hidden">
       <!-- Left Origin Profile Details -->
       <div class="lg:col-span-6 space-y-6">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-black uppercase tracking-wider">
           <span>● Single-Origin Indian Terroir • Giesen W6A Roaster</span>
         </div>
-        <h3 id="craftRoastName" class="text-3xl sm:text-4xl font-display font-black text-[#2B1650] uppercase tracking-tight">
+        <h3 id="craftRoastName" class="text-3xl sm:text-4xl font-display font-black text-[var(--obsidian)] uppercase tracking-tight">
           Nagaland Arabica.
         </h3>
-        <p id="craftRoastDesc" class="text-sm sm:text-base text-[#534168] font-medium leading-relaxed">
+        <p id="craftRoastDesc" class="text-sm sm:text-base text-[var(--text-muted)] font-medium leading-relaxed">
           Grown under dense wild canopies at 1,450 meters elevation in Kiphire, Nagaland. Lightly roasted to preserve floral jasmine aromatics, peach sweetness, and delicate bergamot finish.
         </p>
 
         <!-- Roast Slider -->
         <div class="space-y-3 pt-2">
-          <div class="flex justify-between text-xs font-black uppercase tracking-wider text-[#2B1650]">
+          <div class="flex justify-between text-xs font-black uppercase tracking-wider text-[var(--obsidian)]">
             <span>Light Cinnamon (196°C)</span>
             <span>Medium City+ (218°C)</span>
             <span>Dark French (235°C)</span>
           </div>
-          <input type="range" min="1" max="3" value="1" id="craftRoastSlider" oninput="changeCraftRoastProfile(this.value)" class="w-full accent-[#7C3AED] cursor-pointer h-2 bg-slate-200 rounded-lg" />
+          <input type="range" min="1" max="3" value="1" id="craftRoastSlider" oninput="changeCraftRoastProfile(this.value)" class="w-full accent-[#C88A4B] cursor-pointer h-2 bg-stone-200 rounded-lg" />
         </div>
 
         <!-- Flavor Notes Pills -->
         <div class="space-y-2 pt-2">
-          <span class="text-xs uppercase tracking-widest text-[#7C3AED] font-black">Cupping Flavor Notes</span>
+          <span class="text-xs uppercase tracking-widest text-[var(--bronze)] font-black">Cupping Flavor Notes</span>
           <div id="craftRoastNotes" class="flex flex-wrap gap-2">
-            <span class="px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold">Wild Jasmine</span>
-            <span class="px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold">White Peach</span>
-            <span class="px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold">Bergamot Citrus</span>
-            <span class="px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold">Raw Honey</span>
+            <span class="px-3.5 py-1.5 rounded-full bg-[var(--canvas-warm)] text-[var(--obsidian)] border border-[var(--border-light)] text-xs font-bold">Wild Jasmine</span>
+            <span class="px-3.5 py-1.5 rounded-full bg-[var(--canvas-warm)] text-[var(--obsidian)] border border-[var(--border-light)] text-xs font-bold">White Peach</span>
+            <span class="px-3.5 py-1.5 rounded-full bg-[var(--canvas-warm)] text-[var(--obsidian)] border border-[var(--border-light)] text-xs font-bold">Bergamot Citrus</span>
+            <span class="px-3.5 py-1.5 rounded-full bg-[var(--canvas-warm)] text-[var(--obsidian)] border border-[var(--border-light)] text-xs font-bold">Raw Honey</span>
           </div>
         </div>
       </div>
 
       <!-- Right Sensory Radar Graphic -->
-      <div class="lg:col-span-6 flex flex-col items-center justify-center p-8 bg-gradient-to-b from-[#F8F5FF] to-[#EAE0FC] rounded-2xl border border-[#2B1650]/15 shadow-inner">
+      <div class="lg:col-span-6 flex flex-col items-center justify-center p-8 bg-gradient-to-b from-[#FAF8F5] to-[#F4EFE6] rounded-2xl border border-[var(--border-light)] shadow-inner">
         <div class="w-full max-w-sm space-y-4">
           <div class="space-y-1">
-            <div class="flex justify-between text-xs font-bold text-[#2B1650]">
+            <div class="flex justify-between text-xs font-bold text-[var(--obsidian)]">
               <span>Acidity &amp; Brightness</span>
               <span id="craftAcidityVal">9.4 / 10</span>
             </div>
             <div class="h-2 rounded-full bg-white overflow-hidden shadow-inner">
-              <div id="craftAcidityBar" class="h-full bg-[#7C3AED] rounded-full transition-all duration-500" style="width: 94%;"></div>
+              <div id="craftAcidityBar" class="h-full bg-[var(--bronze)] rounded-full transition-all duration-500" style="width: 94%;"></div>
             </div>
           </div>
           <div class="space-y-1">
-            <div class="flex justify-between text-xs font-bold text-[#2B1650]">
+            <div class="flex justify-between text-xs font-bold text-[var(--obsidian)]">
               <span>Body &amp; Mouthfeel</span>
               <span id="craftBodyVal">6.5 / 10</span>
             </div>
             <div class="h-2 rounded-full bg-white overflow-hidden shadow-inner">
-              <div id="craftBodyBar" class="h-full bg-amber-500 rounded-full transition-all duration-500" style="width: 65%;"></div>
+              <div id="craftBodyBar" class="h-full bg-amber-600 rounded-full transition-all duration-500" style="width: 65%;"></div>
             </div>
           </div>
           <div class="space-y-1">
-            <div class="flex justify-between text-xs font-bold text-[#2B1650]">
+            <div class="flex justify-between text-xs font-bold text-[var(--obsidian)]">
               <span>Sweetness</span>
               <span id="craftSweetnessVal">8.8 / 10</span>
             </div>
             <div class="h-2 rounded-full bg-white overflow-hidden shadow-inner">
-              <div id="craftSweetnessBar" class="h-full bg-pink-500 rounded-full transition-all duration-500" style="width: 88%;"></div>
+              <div id="craftSweetnessBar" class="h-full bg-[var(--bronze-glow)] rounded-full transition-all duration-500" style="width: 88%;"></div>
             </div>
           </div>
           <div class="space-y-1">
-            <div class="flex justify-between text-xs font-bold text-[#2B1650]">
+            <div class="flex justify-between text-xs font-bold text-[var(--obsidian)]">
               <span>Roast Development Time</span>
               <span id="craftRoastTimeVal">1:45 min (14.2% DTR)</span>
             </div>
             <div class="h-2 rounded-full bg-white overflow-hidden shadow-inner">
-              <div id="craftRoastTimeBar" class="h-full bg-[#2B1650] rounded-full transition-all duration-500" style="width: 72%;"></div>
+              <div id="craftRoastTimeBar" class="h-full bg-[var(--obsidian)] rounded-full transition-all duration-500" style="width: 72%;"></div>
             </div>
           </div>
         </div>
 
         <div class="mt-6 flex items-center gap-3">
-          <button onclick="playCraftBeanCrackle()" class="px-4 py-2 rounded-full bg-white border border-[#2B1650]/20 text-[#2B1650] text-xs font-bold uppercase tracking-wider hover:bg-[#F8F5FF] transition-all flex items-center gap-2 shadow-sm">
+          <button onclick="playCraftBeanCrackle()" class="px-4 py-2 rounded-full bg-white border border-[var(--border-light)] text-[var(--obsidian)] text-xs font-bold uppercase tracking-wider hover:bg-[var(--canvas-warm)] transition-all flex items-center gap-2 shadow-sm">
             <span>🔥 Hear First Crack (Audio)</span>
           </button>
         </div>
@@ -1005,12 +1061,12 @@
   <section class="py-24 px-6 md:px-12 max-w-7xl mx-auto" id="d2cShop">
     <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
       <div>
-        <span class="text-xs font-black uppercase tracking-[0.25em] text-[#7C3AED]">D2C Roastery Releases</span>
-        <h2 class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight mt-2 text-[#2B1650]">
+        <span class="text-xs font-black uppercase tracking-[0.25em] text-[var(--bronze)]">D2C Roastery Releases</span>
+        <h2 class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight mt-2 text-[var(--obsidian)]">
           Roasted to Order.
         </h2>
       </div>
-      <div class="text-xs uppercase tracking-[0.2em] text-[#7C3AED] font-black bg-white px-5 py-3 rounded-full border border-[#7C3AED]/30 shadow-sm">
+      <div class="text-xs uppercase tracking-[0.2em] text-[var(--bronze)] font-black bg-white px-5 py-3 rounded-full border border-[var(--bronze)]/30 shadow-sm">
         ✦ Subscribe &amp; Save 15% • Shipped Across India
       </div>
     </div>
@@ -1082,20 +1138,20 @@
     <div class="max-w-7xl mx-auto space-y-10">
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <span class="text-xs font-black uppercase tracking-[0.25em] text-[#7C3AED]">Interactive Destination Explorer</span>
-          <h2 id="visit-title" class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight text-[#2B1650] mt-2">
+          <span class="text-xs font-black uppercase tracking-[0.25em] text-[var(--bronze)]">Interactive Destination Explorer</span>
+          <h2 id="visit-title" class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight text-[var(--obsidian)] mt-2">
             Find the Counter.
           </h2>
         </div>
         <!-- 3 Location Buttons -->
-        <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-[#2B1650]/20 shadow-sm text-xs font-black uppercase tracking-wider overflow-x-auto">
-          <button id="locTab-phase1" onclick="switchLocation('phase1')" class="py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow">
+        <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-[var(--border-light)] shadow-sm text-xs font-black uppercase tracking-wider overflow-x-auto">
+          <button id="locTab-phase1" onclick="switchLocation('phase1')" class="py-2.5 px-4 rounded-xl transition-all bg-[var(--obsidian)] text-[#FAF8F5] shadow">
             1. DLF Phase 1 Flagship
           </button>
-          <button id="locTab-gcr" onclick="switchLocation('gcr')" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650]">
+          <button id="locTab-gcr" onclick="switchLocation('gcr')" class="py-2.5 px-4 rounded-xl transition-all text-[var(--text-muted)] hover:text-[var(--obsidian)]">
             2. Golf Course Road
           </button>
-          <button id="locTab-sec56" onclick="switchLocation('sec56')" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650]">
+          <button id="locTab-sec56" onclick="switchLocation('sec56')" class="py-2.5 px-4 rounded-xl transition-all text-[var(--text-muted)] hover:text-[var(--obsidian)]">
             3. Sector 56 Hub
           </button>
         </div>
@@ -1107,27 +1163,27 @@
           <div id="locBadge" class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold uppercase">
             <span>● Flagship Roastery &amp; Café • Open 8:30 AM – 10:30 PM</span>
           </div>
-          <h3 id="locTitle" class="text-3xl sm:text-4xl font-display font-black uppercase tracking-tight text-[#2B1650]">
+          <h3 id="locTitle" class="text-3xl sm:text-4xl font-display font-black uppercase tracking-tight text-[var(--obsidian)]">
             16 Arjun Marg Flagship.
           </h3>
-          <p id="locDesc" class="text-base font-semibold text-[#534168] leading-relaxed">
+          <p id="locDesc" class="text-base font-semibold text-[var(--text-muted)] leading-relaxed">
             A compact 10-seater lilac room with polished chrome counters. In-house micro-roasting, ceremonial Uji matcha, and traditional small-batch gelato bar.
           </p>
 
           <div class="d2c-card p-6 space-y-3">
-            <div class="flex justify-between items-center pb-2 border-b border-[#2B1650]/15">
-              <span id="locArea" class="font-display font-black text-sm text-[#7C3AED] uppercase">DLF Phase 1, Sector 26A</span>
+            <div class="flex justify-between items-center pb-2 border-b border-[var(--border-light)]">
+              <span id="locArea" class="font-display font-black text-sm text-[var(--bronze)] uppercase">DLF Phase 1, Sector 26A</span>
               <span id="locHours" class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-800 font-black text-[10px]">Open 8:30 AM – 10:30 PM</span>
             </div>
-            <p id="locAddress" class="font-bold text-sm text-[#2B1650]">Block F, 16 Arjun Marg, DLF Phase 1, Sector 26A, Gurugram 122002</p>
-            <div class="text-xs font-semibold text-[#534168]">
-              📞 Call: <a id="locPhone" href="tel:+918130056889" class="font-bold text-[#7C3AED] underline">+91 81300 56889</a>
+            <p id="locAddress" class="font-bold text-sm text-[var(--obsidian)]">Block F, 16 Arjun Marg, DLF Phase 1, Sector 26A, Gurugram 122002</p>
+            <div class="text-xs font-semibold text-[var(--text-muted)]">
+              📞 Call: <a id="locPhone" href="tel:+918130056889" class="font-bold text-[var(--bronze)] underline">+91 81300 56889</a>
             </div>
             <div class="pt-2 flex flex-wrap gap-3">
-              <a id="locDirectionsBtn" href="https://www.google.com/maps/search/?api=1&query=Gram+Street+Coffee+DLF+Phase+1+Gurugram" target="_blank" rel="noreferrer" class="px-5 py-2.5 rounded-full bg-[#2B1650] text-[#F1E9FF] font-bold text-xs uppercase tracking-wider hover:bg-[#3D2272] transition-all shadow-md">
+              <a id="locDirectionsBtn" href="https://www.google.com/maps/search/?api=1&query=Gram+Street+Coffee+DLF+Phase+1+Gurugram" target="_blank" rel="noreferrer" class="px-5 py-2.5 rounded-full bg-[var(--obsidian)] text-[#FAF8F5] font-bold text-xs uppercase tracking-wider hover:bg-[var(--mocha)] transition-all shadow-md">
                 Get Directions ↗
               </a>
-              <a id="locZomatoBtn" href="https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon" target="_blank" rel="noreferrer" class="px-5 py-2.5 rounded-full border border-[#2B1650]/40 font-bold text-xs uppercase tracking-wider hover:bg-[#2B1650]/10 transition-all text-[#2B1650]">
+              <a id="locZomatoBtn" href="https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon" target="_blank" rel="noreferrer" class="px-5 py-2.5 rounded-full border border-[var(--border-light)] font-bold text-xs uppercase tracking-wider hover:bg-[var(--canvas-warm)] transition-all text-[var(--obsidian)]">
                 Order on Zomato ↗
               </a>
             </div>
@@ -1149,7 +1205,7 @@
 
             <canvas id="scratchCanvas" class="absolute inset-0 z-20 w-full h-full"></canvas>
 
-            <button onclick="initScratchWindow()" class="absolute top-4 right-4 z-30 px-4 py-2 rounded-full bg-black/80 text-[#CDB8F7] border border-white/30 text-[11px] font-black uppercase tracking-wider hover:bg-[#7C3AED] hover:text-white transition-all shadow-md">
+            <button onclick="initScratchWindow()" class="absolute top-4 right-4 z-30 px-4 py-2 rounded-full bg-black/80 text-[var(--bronze-glow)] border border-white/30 text-[11px] font-black uppercase tracking-wider hover:bg-[var(--bronze)] hover:text-white transition-all shadow-md">
               Reset Steamed Layer
             </button>
           </div>
@@ -1162,21 +1218,21 @@
 <!-- SLIDE-OVER ROASTERY BAG DRAWER -->
 <div id="cartModal" class="fixed inset-0 z-50 hidden">
   <div onclick="toggleCart(false)" class="absolute inset-0 bg-black/75 backdrop-blur-sm"></div>
-  <div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-[#2B1650]/35 p-8 flex flex-col justify-between shadow-2xl text-[#2B1650]">
+  <div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-[var(--border-light)] p-8 flex flex-col justify-between shadow-2xl text-[var(--obsidian)]">
     <div>
-      <div class="flex items-center justify-between border-b border-[#2B1650]/20 pb-5">
-        <h3 class="text-xl font-display font-black uppercase tracking-tight text-[#2B1650]">Your Roastery Bag</h3>
-        <button onclick="toggleCart(false)" class="text-xs uppercase tracking-widest text-[#7C3AED] font-black hover:underline">Close ✕</button>
+      <div class="flex items-center justify-between border-b border-[var(--border-light)] pb-5">
+        <h3 class="text-xl font-display font-black uppercase tracking-tight text-[var(--obsidian)]">Your Roastery Bag</h3>
+        <button onclick="toggleCart(false)" class="text-xs uppercase tracking-widest text-[var(--bronze)] font-black hover:underline">Close ✕</button>
       </div>
       <div id="cartItemsList" class="mt-6 space-y-4 max-h-[60vh] overflow-y-auto pr-1"></div>
     </div>
 
-    <div class="border-t border-[#2B1650]/20 pt-6 space-y-4">
+    <div class="border-t border-[var(--border-light)] pt-6 space-y-4">
       <div class="flex justify-between text-sm">
-        <span class="font-bold uppercase tracking-wider text-[#534168]">Subtotal</span>
-        <span id="cartTotalPrice" class="text-2xl font-display font-black text-[#7C3AED]">₹580</span>
+        <span class="font-bold uppercase tracking-wider text-[var(--text-muted)]">Subtotal</span>
+        <span id="cartTotalPrice" class="text-2xl font-display font-black text-[var(--bronze)]">₹580</span>
       </div>
-      <button onclick="checkoutBag()" class="w-full py-4 rounded-full bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-[0.2em] hover:bg-[#3D2272] transition-all shadow-lg">
+      <button onclick="checkoutBag()" class="w-full py-4 rounded-full bg-[var(--obsidian)] text-[#FAF8F5] font-black text-xs uppercase tracking-[0.2em] hover:bg-[var(--mocha)] transition-all shadow-lg">
         Proceed to Roast &amp; Dispatch (₹) →
       </button>
     </div>
@@ -1282,9 +1338,9 @@
     ['phase1', 'gcr', 'sec56'].forEach(k => {
       const btn = document.getElementById(LOCATIONS[k].tabId);
       if (k === key) {
-        btn.className = 'py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow';
+        btn.className = 'py-2.5 px-4 rounded-xl transition-all bg-[var(--obsidian)] text-[#FAF8F5] shadow';
       } else {
-        btn.className = 'py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650]';
+        btn.className = 'py-2.5 px-4 rounded-xl transition-all text-[var(--text-muted)] hover:text-[var(--obsidian)]';
       }
     });
 
@@ -1495,12 +1551,12 @@
     scratchCtx.globalCompositeOperation = 'source-over';
 
     const grad = scratchCtx.createLinearGradient(0, 0, scratchCanvas.width, scratchCanvas.height);
-    grad.addColorStop(0, 'rgba(43, 22, 80, 0.96)');
-    grad.addColorStop(1, 'rgba(94, 50, 204, 0.92)');
+    grad.addColorStop(0, 'rgba(13, 9, 7, 0.94)');
+    grad.addColorStop(1, 'rgba(46, 29, 22, 0.91)');
     scratchCtx.fillStyle = grad;
     scratchCtx.fillRect(0, 0, scratchCanvas.width, scratchCanvas.height);
 
-    scratchCtx.fillStyle = '#CDB8F7';
+    scratchCtx.fillStyle = '#E5B263';
     scratchCtx.font = '800 13px Bricolage Grotesque, sans-serif';
     scratchCtx.textAlign = 'center';
     const loc = LOCATIONS[activeLocation];
@@ -1596,27 +1652,27 @@
           <div>
             <div class="relative h-64 rounded-2xl overflow-hidden mb-5 bg-black/10">
               <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
-              <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-[#2B1650] text-[#F1E9FF]">
+              <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-[var(--obsidian)] text-[#FAF8F5]">
                 ${p.sub}
               </span>
             </div>
             <div class="flex justify-between items-start gap-2 mb-2">
-              <h3 class="text-2xl font-black uppercase tracking-tight text-[#2B1650]">${p.name}</h3>
-              <span class="text-2xl font-black text-[#7C3AED]">₹${finalPrice}</span>
+              <h3 class="text-2xl font-black uppercase tracking-tight text-[var(--obsidian)]">${p.name}</h3>
+              <span class="text-2xl font-black text-[var(--bronze)]">₹${finalPrice}</span>
             </div>
-            <p class="text-xs font-semibold text-[#534168] mb-5 leading-relaxed">${p.notes}</p>
+            <p class="text-xs font-semibold text-[var(--text-muted)] mb-5 leading-relaxed">${p.notes}</p>
 
-            <div class="grid grid-cols-2 gap-2 p-1.5 rounded-xl bg-[#F5EFFF] border border-[#7C3AED]/25 text-[11px] font-black uppercase tracking-wider mb-2">
-              <button onclick="window.setSubMode('${p.id}', false)" class="py-2.5 rounded-lg transition-all ${!isSub ? 'bg-[#7C3AED] text-white shadow-sm' : 'text-[#534168]'}">
+            <div class="grid grid-cols-2 gap-2 p-1.5 rounded-xl bg-[var(--canvas-warm)] border border-[var(--border-light)] text-[11px] font-black uppercase tracking-wider mb-2">
+              <button onclick="window.setSubMode('${p.id}', false)" class="py-2.5 rounded-lg transition-all ${!isSub ? 'bg-[var(--obsidian)] text-[#FAF8F5] shadow-sm' : 'text-[var(--text-muted)]'}">
                 One-Time (₹${p.price})
               </button>
-              <button onclick="window.setSubMode('${p.id}', true)" class="py-2.5 rounded-lg transition-all ${isSub ? 'bg-[#7C3AED] text-white shadow-sm' : 'text-[#534168]'}">
+              <button onclick="window.setSubMode('${p.id}', true)" class="py-2.5 rounded-lg transition-all ${isSub ? 'bg-[var(--obsidian)] text-[#FAF8F5] shadow-sm' : 'text-[var(--text-muted)]'}">
                 Subscribe (-15%)
               </button>
             </div>
           </div>
 
-          <button onclick="window.addToCart('${p.id}')" class="w-full py-4 rounded-xl bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-[0.2em] hover:bg-[#3D2272] transition-all shadow-md">
+          <button onclick="window.addToCart('${p.id}')" class="w-full py-4 rounded-xl bg-[var(--obsidian)] text-[#FAF8F5] font-black text-xs uppercase tracking-[0.2em] hover:bg-[var(--mocha)] transition-all shadow-md">
             ${isSub ? 'Subscribe & Save 15%' : 'Add to Roastery Bag'}
           </button>
         </div>
@@ -1650,13 +1706,13 @@
     const list = document.getElementById('cartItemsList');
     if (list) {
       list.innerHTML = cart.map((item, idx) => `
-        <div class="flex items-center justify-between p-4 rounded-2xl bg-[#F5EFFF] border border-[#7C3AED]/25">
+        <div class="flex items-center justify-between p-4 rounded-2xl bg-[var(--canvas-warm)] border border-[var(--border-light)]">
           <div>
-            <div class="font-bold uppercase text-sm text-[#2B1650]">${item.name}</div>
-            <div class="text-[11px] text-[#7C3AED] uppercase tracking-wider font-black">${item.isSub ? 'Monthly Roast Subscription (-15%)' : 'Fresh Single Bag'} • Qty: ${item.qty}</div>
+            <div class="font-bold uppercase text-sm text-[var(--obsidian)]">${item.name}</div>
+            <div class="text-[11px] text-[var(--bronze)] uppercase tracking-wider font-black">${item.isSub ? 'Monthly Roast Subscription (-15%)' : 'Fresh Single Bag'} • Qty: ${item.qty}</div>
           </div>
           <div class="flex items-center gap-3">
-            <span class="font-black text-[#7C3AED]">₹${item.price * item.qty}</span>
+            <span class="font-black text-[var(--bronze)]">₹${item.price * item.qty}</span>
             <button onclick="window.removeCartItem(${idx})" class="text-xs text-rose-600 font-bold hover:scale-110">✕</button>
           </div>
         </div>
@@ -1704,9 +1760,9 @@
       }
       if (btn) {
         if (t === tab) {
-          btn.className = "py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow whitespace-nowrap";
+          btn.className = "py-2.5 px-4 rounded-xl transition-all bg-[var(--obsidian)] text-[#FAF8F5] shadow whitespace-nowrap";
         } else {
-          btn.className = "py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650] whitespace-nowrap";
+          btn.className = "py-2.5 px-4 rounded-xl transition-all text-[var(--text-muted)] hover:text-[var(--obsidian)] whitespace-nowrap";
         }
       }
     });
@@ -1840,9 +1896,9 @@
       const btn = document.getElementById(`craftPat-${p}`);
       if (btn) {
         if (p === pat) {
-          btn.className = "px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#2B1650] text-[#F1E9FF] shadow transition-all";
+          btn.className = "px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[var(--obsidian)] text-[#FAF8F5] shadow transition-all";
         } else {
-          btn.className = "px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#F8F5FF] text-[#534168] border border-[#2B1650]/20 hover:text-[#2B1650] transition-all";
+          btn.className = "px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[var(--canvas-warm)] text-[var(--text-muted)] border border-[var(--border-light)] hover:text-[var(--obsidian)] transition-all";
         }
       }
     });
@@ -1898,7 +1954,7 @@
     if (n) n.textContent = data.name;
     if (d) d.textContent = data.desc;
     if (notesEl) {
-      notesEl.innerHTML = data.notes.map(note => `<span class="px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold">${note}</span>`).join('');
+      notesEl.innerHTML = data.notes.map(note => `<span class="px-3.5 py-1.5 rounded-full bg-[var(--canvas-warm)] text-[var(--obsidian)] border border-[var(--border-light)] text-xs font-bold">${note}</span>`).join('');
     }
     const aVal = document.getElementById('craftAcidityVal');
     const aBar = document.getElementById('craftAcidityBar');
@@ -2057,9 +2113,9 @@
       const btn = document.getElementById(`heroLot-${k}`);
       if (btn) {
         if (k === key) {
-          btn.className = 'py-1.5 px-3 rounded-xl bg-[#2B1650] text-[#F1E9FF] shadow transition-all whitespace-nowrap';
+          btn.className = 'py-1.5 px-3 rounded-xl bg-[var(--obsidian)] text-[#FAF8F5] shadow transition-all whitespace-nowrap';
         } else {
-          btn.className = 'py-1.5 px-3 rounded-xl text-[#534168] hover:text-[#2B1650] transition-all whitespace-nowrap';
+          btn.className = 'py-1.5 px-3 rounded-xl text-[var(--text-muted)] hover:text-[var(--obsidian)] transition-all whitespace-nowrap';
         }
       }
     });
