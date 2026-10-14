@@ -335,7 +335,6 @@
       <!-- Navigation Links -->
       <nav class="hidden lg:flex items-center gap-7 text-xs font-bold uppercase tracking-[0.2em]">
         <a href="#larder" class="deli-nav-link">The Larder</a>
-        <a href="#atelier" class="deli-nav-link">Butcher Atelier</a>
         <a href="#masterCarver" class="deli-nav-link">Master Carver Loupe</a>
         <a href="#boucherieExperience" class="deli-nav-link">Haute Standards</a>
         <a href="#hubs" class="deli-nav-link">NCR Hubs (4)</a>
@@ -556,197 +555,6 @@
         <button type="button" onclick="jumpDeliChapter(1)" id="deliNav1" class="deli-stage-btn">02. Charcuterie</button>
         <button type="button" onclick="jumpDeliChapter(2)" id="deliNav2" class="deli-stage-btn">03. Shahi Marinades</button>
       </nav>
-    </div>
-  </section>
-
-  <!-- ================= THE HAUTE BOUCHERIE CRAFT ATELIER ================= -->
-  <section class="py-24 px-6 md:px-10 max-w-7xl mx-auto" id="atelier">
-    <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-      <div>
-        <span class="text-xs font-bold uppercase tracking-[0.25em] text-[#CD2653] font-luxury">Artisanal Butchery Crafts</span>
-        <h2 class="text-4xl md:text-5xl font-serif-chic font-bold tracking-tight text-[#4A0E17] mt-2">
-          The Boucherie Atelier.
-        </h2>
-        <p class="mt-3 text-base text-[#524842] max-w-2xl font-medium leading-relaxed">
-          The visceral craft of fine butchery. Experience precision Damascus knife slicing, explore intramuscular fat marbling scores, and test cast-iron Maillard searing.
-        </p>
-      </div>
-
-      <!-- Atelier Mode Tabs -->
-      <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-[#CD2653]/25 shadow-sm text-xs font-bold uppercase tracking-wider overflow-x-auto">
-        <button onclick="switchDeliAtelierTab('slicer')" id="deliAtelierTab-slicer" class="py-2.5 px-4 rounded-xl transition-all bg-[#CD2653] text-white shadow whitespace-nowrap">
-          1. Damascus Slicer
-        </button>
-        <button onclick="switchDeliAtelierTab('marbling')" id="deliAtelierTab-marbling" class="py-2.5 px-4 rounded-xl transition-all text-[#524842] hover:text-[#4A0E17] whitespace-nowrap">
-          2. Marbling Scanner
-        </button>
-        <button onclick="switchDeliAtelierTab('sear')" id="deliAtelierTab-sear" class="py-2.5 px-4 rounded-xl transition-all text-[#524842] hover:text-[#4A0E17] whitespace-nowrap">
-          3. Cast-Iron Sear
-        </button>
-      </div>
-    </div>
-
-    <!-- Panel 1: Damascus Cleaver Slicing Experience -->
-    <div id="deliAtelierPanel-slicer" class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border border-[#CD2653]/20 shadow-xl relative overflow-hidden">
-      <!-- Left Narrative -->
-      <div class="lg:col-span-6 space-y-6">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFF5F7] text-[#CD2653] text-xs font-bold tracking-widest uppercase border border-[#CD2653]/30">
-          <span>● Damascus 67-Layer Steel • End-Grain Canadian Maple Block</span>
-        </div>
-        <h3 class="text-3xl sm:text-4xl font-serif-chic font-bold text-[#4A0E17] tracking-tight">
-          Precision Artisanal Carving.
-        </h3>
-        <p class="text-sm sm:text-base text-[#524842] font-medium leading-relaxed">
-          Hover or drag across our butcher block to carve ultra-thin charcuterie ribbons. Experience the razor-clean edge separating natural muscle striations with delicate Himalayan pink salt and cracked black pepper crystals.
-        </p>
-
-        <!-- Slicing Thickness Selector -->
-        <div class="space-y-2 pt-2">
-          <span class="text-xs uppercase tracking-widest text-[#CD2653] font-bold">Cut Style</span>
-          <div class="flex flex-wrap gap-2">
-            <button onclick="setSlicingThickness('paper')" id="thick-paper" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#4A0E17] text-white shadow transition-all">
-              Paper-Thin (0.8mm)
-            </button>
-            <button onclick="setSlicingThickness('bistro')" id="thick-bistro" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-white text-[#524842] border border-[#CD2653]/25 hover:text-[#4A0E17] transition-all">
-              Bistro Cut (2.5mm)
-            </button>
-            <button onclick="resetSlicingBlock()" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition-all">
-              ↺ Reset Block
-            </button>
-          </div>
-        </div>
-
-        <div class="pt-4 border-t border-[#4A0E17]/10 grid grid-cols-3 gap-4 text-center">
-          <div>
-            <div class="text-xs uppercase tracking-wider text-[#CD2653] font-bold">Slices Carved</div>
-            <div id="sliceCount" class="text-2xl font-serif-chic font-bold text-[#4A0E17]">0</div>
-          </div>
-          <div>
-            <div class="text-xs uppercase tracking-wider text-[#CD2653] font-bold">Cold Chain</div>
-            <div class="text-2xl font-serif-chic font-bold text-[#4A0E17]">1.8°C</div>
-          </div>
-          <div>
-            <div class="text-xs uppercase tracking-wider text-[#CD2653] font-bold">Blade Hardness</div>
-            <div class="text-2xl font-serif-chic font-bold text-[#4A0E17]">62 HRC</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right Interactive Slicing Butcher Block Canvas -->
-      <div class="lg:col-span-6 relative flex flex-col items-center justify-center p-6 bg-[#180609] rounded-2xl border-2 border-[#C59A45]/40 shadow-2xl overflow-hidden min-h-[380px]">
-        <canvas id="slicerCanvas" width="460" height="320" class="w-full max-w-[460px] h-[320px] rounded-xl block touch-none cursor-crosshair shadow-2xl border border-white/20"></canvas>
-        <div class="mt-4 text-xs font-luxury font-bold uppercase tracking-widest text-[#FFA517]">
-          Hover or Drag Across The Cut To Carve Charcuterie Ribbons
-        </div>
-      </div>
-    </div>
-
-    <!-- Panel 2: BMS 1-12 Intramuscular Marbling Analyzer -->
-    <div id="deliAtelierPanel-marbling" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border border-[#CD2653]/20 shadow-xl relative overflow-hidden">
-      <!-- Left Controls -->
-      <div class="lg:col-span-6 space-y-6">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 text-amber-900 text-xs font-bold tracking-widest uppercase border border-amber-200">
-          <span>● Intramuscular Lipid Grading • Japanese &amp; USDA Standard</span>
-        </div>
-        <h3 id="marblingGradeTitle" class="text-3xl sm:text-4xl font-serif-chic font-bold text-[#4A0E17] tracking-tight">
-          Grade 03 • Lean Primal Tenderloin.
-        </h3>
-        <p id="marblingGradeDesc" class="text-sm sm:text-base text-[#524842] font-medium leading-relaxed">
-          Dense protein fibers with fine, delicate fat seams. Exceptionally tender when pan-roasted with fresh thyme and cultured butter, offering pure, clean savory depth.
-        </p>
-
-        <!-- Slider -->
-        <div class="space-y-3 pt-2">
-          <div class="flex justify-between text-xs font-bold uppercase tracking-wider text-[#4A0E17]">
-            <span>Grade 03 (Lean Primal)</span>
-            <span>Grade 07 (Prime Ribeye)</span>
-            <span>Grade 12 (Royal Wagyu A5)</span>
-          </div>
-          <input type="range" min="1" max="3" value="1" id="marblingSlider" oninput="changeMarblingGrade(this.value)" class="w-full accent-[#CD2653] cursor-pointer h-2 bg-slate-200 rounded-lg" />
-        </div>
-
-        <!-- Telemetry -->
-        <div class="grid grid-cols-3 gap-4 pt-4 border-t border-[#4A0E17]/10 text-center">
-          <div>
-            <div class="text-xs uppercase tracking-wider text-[#CD2653] font-bold">Lipid Melting Point</div>
-            <div id="meltingVal" class="text-xl font-serif-chic font-bold text-[#4A0E17]">38°C</div>
-          </div>
-          <div>
-            <div class="text-xs uppercase tracking-wider text-[#CD2653] font-bold">Oleic Acid Ratio</div>
-            <div id="oleicVal" class="text-xl font-serif-chic font-bold text-[#4A0E17]">42%</div>
-          </div>
-          <div>
-            <div class="text-xs uppercase tracking-wider text-[#CD2653] font-bold">Ideal Internal Temp</div>
-            <div id="tempVal" class="text-xl font-serif-chic font-bold text-[#4A0E17]">54°C (Med Rare)</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right Visual Marbling Canvas -->
-      <div class="lg:col-span-6 relative flex flex-col items-center justify-center p-6 bg-gradient-to-b from-[#FFF5F7] to-[#F7EFE6] rounded-2xl border border-[#CD2653]/20 shadow-inner">
-        <div class="relative w-full max-w-[400px] h-72 rounded-2xl overflow-hidden shadow-2xl border-2 border-[#C59A45]/40">
-          <canvas id="marblingVisualCanvas" width="400" height="288" class="w-full h-full block"></canvas>
-          <div class="absolute bottom-3 left-3 right-3 bg-black/75 backdrop-blur-md px-4 py-2 rounded-xl text-white flex justify-between items-center text-xs">
-            <span class="font-bold text-[#FFA517]" id="marblingBadge">BMS Grade 03 • Fine Grain</span>
-            <span class="text-white/80">0°C–4°C Chilled</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Panel 3: Cast-Iron Sear & Sizzle Simulator -->
-    <div id="deliAtelierPanel-sear" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border border-[#CD2653]/20 shadow-xl relative overflow-hidden">
-      <!-- Left Narrative & Controls -->
-      <div class="lg:col-span-6 space-y-6">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-900 text-xs font-bold tracking-widest uppercase border border-orange-300">
-          <span>● 260°C Cast Iron • Maillard Reaction Culinary Science</span>
-        </div>
-        <h3 class="text-3xl sm:text-4xl font-serif-chic font-bold text-[#4A0E17] tracking-tight">
-          Hear The Sizzle.
-        </h3>
-        <p class="text-sm sm:text-base text-[#524842] font-medium leading-relaxed">
-          The defining moment of artisanal meat preparation: dropping cold-chain cut onto screaming-hot seasoned cast iron. Watch caramelized crust develop as amino acids and reducing sugars create deep umami.
-        </p>
-
-        <div class="flex flex-wrap items-center gap-4 pt-2">
-          <button id="searActionBtn" onclick="triggerCastIronSear()" class="knife-glint px-8 py-4 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#8C1434] transition-all shadow-xl shadow-[#CD2653]/25 flex items-center gap-2">
-            <span>🔥 Sear Cut on 260°C Skillet</span>
-          </button>
-          <button onclick="resetSearSkillet()" class="px-5 py-4 rounded-full bg-white border border-[#4A0E17]/25 text-[#4A0E17] font-bold text-xs uppercase tracking-wider hover:bg-[#FFF5F7] transition-all">
-            ↺ Reset Skillet
-          </button>
-        </div>
-
-        <div class="pt-4 border-t border-[#4A0E17]/10 flex items-center justify-between text-xs font-semibold text-[#524842]">
-          <span>Surface Temp: <strong class="text-[#CD2653]">260°C</strong></span>
-          <span>Crust Development: <strong id="crustStatus">Raw Chilled</strong></span>
-          <span>Aroma Profile: <strong class="text-amber-800">Brown Butter &amp; Beechwood</strong></span>
-        </div>
-      </div>
-
-      <!-- Right Visual Cast Iron Skillet Canvas -->
-      <div class="lg:col-span-6 relative flex flex-col items-center justify-center p-6 bg-[#180609] rounded-2xl border-2 border-[#C59A45]/40 shadow-2xl overflow-hidden min-h-[380px]">
-        <canvas id="searSmokeCanvas" class="absolute inset-0 pointer-events-none z-20"></canvas>
-        
-        <!-- Cast Iron Skillet Graphic -->
-        <div class="relative z-10 w-64 h-64 sm:w-72 sm:h-72 rounded-full bg-gradient-to-br from-[#2D2825] via-[#1B1715] to-[#0D0B0A] border-8 border-[#3A3430] shadow-2xl flex items-center justify-center">
-          <!-- Diamond Grill Ribs -->
-          <div class="absolute inset-4 rounded-full overflow-hidden opacity-30 pointer-events-none" style="background: repeating-linear-gradient(45deg, #5A524D 0, #5A524D 3px, transparent 3px, transparent 18px), repeating-linear-gradient(-45deg, #5A524D 0, #5A524D 3px, transparent 3px, transparent 18px);"></div>
-          
-          <!-- Searing Steak -->
-          <div id="skilletSteak" class="relative z-10 w-44 h-32 rounded-[28px] bg-[#912037] border-2 border-[#FFA517]/50 shadow-xl transition-all duration-1000 flex items-center justify-center">
-            <!-- Caramelized Crust Overlay -->
-            <div id="caramelCrust" class="absolute inset-0 rounded-[26px] bg-gradient-to-br from-[#4A180E] via-[#2B0A06] to-[#632213] opacity-0 transition-opacity duration-1000 flex items-center justify-center">
-              <span class="text-[10px] font-luxury font-black uppercase tracking-widest text-[#FFA517] drop-shadow">Caramelized Maillard Crust</span>
-            </div>
-            <span id="rawCutLabel" class="text-[10px] font-luxury font-black uppercase tracking-widest text-white/90">Prime Artisanal Cut</span>
-          </div>
-        </div>
-
-        <div class="mt-4 text-xs font-luxury font-bold uppercase tracking-widest text-[#FFA517] z-10">
-          Click "Sear Cut" To Watch Crust Formation &amp; Hear Authentic Sizzle
-        </div>
-      </div>
     </div>
   </section>
 
@@ -1219,6 +1027,26 @@
           </div>
         `;
       }).join('');
+      initCardTilt();
+    }
+
+    function initCardTilt() {
+      const cards = document.querySelectorAll('.deli-card');
+      cards.forEach(card => {
+        card.addEventListener('mousemove', e => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
+          const rotX = ((centerY - y) / centerY * 6).toFixed(2);
+          const rotY = ((x - centerX) / centerX * 6).toFixed(2);
+          card.style.transform = `perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-8px) scale3d(1.02, 1.02, 1.02)`;
+        });
+        card.addEventListener('mouseleave', () => {
+          card.style.transform = '';
+        });
+      });
     }
 
     function filterCategory(cat) {
@@ -1232,35 +1060,61 @@
         active.classList.add('bg-[#CD2653]', 'text-white', 'shadow-sm');
         active.classList.remove('bg-white', 'text-[#524842]');
       }
-      renderDeliProducts();
+      const grid = document.getElementById('productGrid');
+      if (grid) {
+        grid.style.opacity = '0.3';
+        grid.style.transform = 'translateY(8px)';
+        setTimeout(() => {
+          renderDeliProducts();
+          grid.style.transition = 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)';
+          grid.style.opacity = '1';
+          grid.style.transform = 'translateY(0)';
+        }, 80);
+      } else {
+        renderDeliProducts();
+      }
     }
 
-    // 3. Atmospheric Culinary Motion Canvas
+    // 3. Atmospheric Culinary Motion Canvas with Pointer Interaction
     (function initAtmosphere() {
       const canvas = document.getElementById('deliAtmosphereCanvas');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       let w = canvas.width = window.innerWidth;
       let h = canvas.height = window.innerHeight;
+      let mx = w / 2, my = h / 2;
 
       window.addEventListener('resize', () => {
         w = canvas.width = window.innerWidth;
         h = canvas.height = window.innerHeight;
       });
 
-      const particles = Array.from({ length: 48 }, () => ({
+      window.addEventListener('pointermove', (e) => {
+        mx = e.clientX;
+        my = e.clientY;
+      });
+
+      const particles = Array.from({ length: 54 }, () => ({
         x: Math.random() * w,
         y: Math.random() * h,
-        r: Math.random() * 3 + 1,
-        vy: -(Math.random() * 0.4 + 0.15),
+        r: Math.random() * 3.2 + 1,
+        vy: -(Math.random() * 0.45 + 0.15),
         vx: (Math.random() - 0.5) * 0.3,
-        a: Math.random() * 0.5 + 0.2,
+        a: Math.random() * 0.55 + 0.2,
         color: Math.random() > 0.4 ? 'rgba(197, 154, 69,' : 'rgba(205, 38, 83,'
       }));
 
       function render() {
         ctx.clearRect(0, 0, w, h);
         particles.forEach(p => {
+          const dx = mx - p.x;
+          const dy = my - p.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 140) {
+            p.x -= (dx / dist) * 0.8;
+            p.y -= (dy / dist) * 0.8;
+          }
+
           p.y += p.vy;
           p.x += p.vx;
           if (p.y < -10) p.y = h + 10;
@@ -1577,403 +1431,7 @@
       window.open(`https://api.whatsapp.com/send?phone=919810002023&text=${encoded}`, '_blank');
     }
 
-    /* ================= HAUTE BOUCHERIE CRAFT ATELIER SENSORY ENGINE ================= */
-    (function initBoucherieAtelier() {
-      // 1. Tab Switcher
-      window.switchDeliAtelierTab = function(tab) {
-        const tabs = ['slicer', 'marbling', 'sear'];
-        tabs.forEach(t => {
-          const p = document.getElementById(`deliAtelierPanel-${t}`);
-          const btn = document.getElementById(`deliAtelierTab-${t}`);
-          if (p) {
-            if (t === tab) {
-              p.classList.remove('hidden');
-              p.classList.add('grid');
-            } else {
-              p.classList.add('hidden');
-              p.classList.remove('grid');
-            }
-          }
-          if (btn) {
-            if (t === tab) {
-              btn.className = "py-2.5 px-4 rounded-xl transition-all bg-[#CD2653] text-white shadow whitespace-nowrap";
-            } else {
-              btn.className = "py-2.5 px-4 rounded-xl transition-all text-[#524842] hover:text-[#4A0E17] whitespace-nowrap";
-            }
-          }
-        });
-        if (tab === 'slicer') initSlicerCanvas();
-        if (tab === 'marbling') renderMarblingWeb(1);
-        if (tab === 'sear') initSearSmokeCanvas();
-      };
-
-      // 2. Interactive Damascus Slicer on Canadian Maple End-Grain Block
-      let slicesCount = 0;
-      let sliceThickness = 'paper';
-
-      window.setSlicingThickness = function(type) {
-        sliceThickness = type;
-        const bP = document.getElementById('thick-paper');
-        const bB = document.getElementById('thick-bistro');
-        if (bP && bB) {
-          if (type === 'paper') {
-            bP.className = "px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#4A0E17] text-white shadow transition-all";
-            bB.className = "px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-white text-[#524842] border border-[#CD2653]/25 hover:text-[#4A0E17] transition-all";
-          } else {
-            bB.className = "px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#4A0E17] text-white shadow transition-all";
-            bP.className = "px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-white text-[#524842] border border-[#CD2653]/25 hover:text-[#4A0E17] transition-all";
-          }
-        }
-      };
-
-      let slices = [];
-      let saltParticles = [];
-
-      function initSlicerCanvas() {
-        const canvas = document.getElementById('slicerCanvas');
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        const w = canvas.width, h = canvas.height;
-
-        function drawBoard() {
-          // Canadian maple butcher block background
-          const g = ctx.createLinearGradient(0, 0, w, h);
-          g.addColorStop(0, '#5A3825');
-          g.addColorStop(0.5, '#422819');
-          g.addColorStop(1, '#2E1A0F');
-          ctx.fillStyle = g;
-          ctx.fillRect(0, 0, w, h);
-
-          // Wood grain end-grain grid lines
-          ctx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
-          ctx.lineWidth = 1;
-          for (let x = 0; x < w; x += 36) {
-            ctx.beginPath();
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, h);
-            ctx.stroke();
-          }
-          for (let y = 0; y < h; y += 36) {
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(w, y);
-            ctx.stroke();
-          }
-
-          // Prime Charcuterie Slab
-          const slabG = ctx.createLinearGradient(60, 60, 320, 220);
-          slabG.addColorStop(0, '#9E2A3F');
-          slabG.addColorStop(0.5, '#731627');
-          slabG.addColorStop(1, '#4A0E17');
-          ctx.fillStyle = slabG;
-          ctx.beginPath();
-          ctx.roundRect(60, 80, 260, 160, 24);
-          ctx.fill();
-          ctx.strokeStyle = '#FFA517';
-          ctx.lineWidth = 2;
-          ctx.stroke();
-
-          // Natural fat cap rim
-          ctx.fillStyle = '#FFF8EE';
-          ctx.beginPath();
-          ctx.roundRect(60, 80, 260, 18, [24, 24, 0, 0]);
-          ctx.fill();
-
-          // Render fallen slices
-          slices.forEach(sl => {
-            ctx.save();
-            ctx.translate(sl.x, sl.y);
-            ctx.rotate(sl.rot);
-            ctx.fillStyle = 'rgba(180, 50, 75, 0.9)';
-            ctx.strokeStyle = '#FFEAA7';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.roundRect(-sl.w/2, -sl.h/2, sl.w, sl.h, 6);
-            ctx.fill();
-            ctx.stroke();
-            ctx.restore();
-          });
-
-          // Salt & pepper seasoning particles
-          saltParticles.forEach((sp, idx) => {
-            sp.x += sp.vx;
-            sp.y += sp.vy;
-            sp.alpha -= 0.02;
-            ctx.fillStyle = sp.isPepper ? `rgba(20, 15, 12, ${sp.alpha})` : `rgba(255, 200, 220, ${sp.alpha})`;
-            ctx.beginPath();
-            ctx.arc(sp.x, sp.y, sp.r, 0, Math.PI * 2);
-            ctx.fill();
-            if (sp.alpha <= 0) saltParticles.splice(idx, 1);
-          });
-        }
-
-        drawBoard();
-
-        let lastSliceTime = 0;
-        function sliceAt(x, y) {
-          const now = Date.now();
-          if (now - lastSliceTime < 180) return;
-          if (x >= 60 && x <= 320 && y >= 80 && y <= 240) {
-            lastSliceTime = now;
-            slicesCount++;
-            const sCountEl = document.getElementById('sliceCount');
-            if (sCountEl) sCountEl.textContent = slicesCount;
-
-            // Spawn falling slice
-            const slW = sliceThickness === 'paper' ? 12 : 28;
-            slices.push({
-              x: 340 + Math.random() * 40,
-              y: y + (Math.random() - 0.5) * 30,
-              w: slW,
-              h: 120 + Math.random() * 20,
-              rot: (Math.random() - 0.5) * 0.4
-            });
-            if (slices.length > 8) slices.shift();
-
-            // Spawn salt crystals
-            for (let i = 0; i < 8; i++) {
-              saltParticles.push({
-                x: x,
-                y: y,
-                r: 1.5 + Math.random() * 2,
-                vx: (Math.random() - 0.3) * 3,
-                vy: (Math.random() - 0.5) * 3,
-                alpha: 1,
-                isPepper: Math.random() > 0.5
-              });
-            }
-
-            // Knife swoosh chime
-            playKnifeChime();
-            drawBoard();
-          }
-        }
-
-        canvas.addEventListener('mousemove', e => {
-          const rect = canvas.getBoundingClientRect();
-          sliceAt(e.clientX - rect.left, e.clientY - rect.top);
-        });
-
-        canvas.addEventListener('touchmove', e => {
-          const rect = canvas.getBoundingClientRect();
-          const t = e.touches[0];
-          sliceAt(t.clientX - rect.left, t.clientY - rect.top);
-        }, { passive: true });
-      }
-
-      function playKnifeChime() {
-        try {
-          const AudioCtx = window.AudioContext || window.webkitAudioContext;
-          if (!AudioCtx) return;
-          const ctx = new AudioCtx();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(1400, ctx.currentTime);
-          osc.frequency.exponentialRampToValueAtTime(450, ctx.currentTime + 0.08);
-          gain.gain.setValueAtTime(0.06, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start();
-          osc.stop(ctx.currentTime + 0.08);
-        } catch(e) {}
-      }
-
-      window.resetSlicingBlock = function() {
-        slices = [];
-        saltParticles = [];
-        slicesCount = 0;
-        const el = document.getElementById('sliceCount');
-        if (el) el.textContent = '0';
-        initSlicerCanvas();
-      };
-
-      // 3. Intramuscular Marbling Grade Analyzer
-      const MARBLING_GRADES = {
-        1: {
-          title: "Grade 03 • Lean Primal Tenderloin.",
-          desc: "Dense protein fibers with fine, delicate fat seams. Exceptionally tender when pan-roasted with fresh thyme and cultured butter, offering pure, clean savory depth.",
-          melting: "38°C", oleic: "42%", temp: "54°C (Med Rare)",
-          badge: "BMS Grade 03 • Fine Grain"
-        },
-        2: {
-          title: "Grade 07 • Prime Grain-Fed Ribeye.",
-          desc: "Intricate spider-web intramuscular marbling distribution throughout the center eye. Renders into succulent juices under high heat with deep beef umami.",
-          melting: "32°C", oleic: "58%", temp: "52°C (Medium)",
-          badge: "BMS Grade 07 • Prime Spiderweb"
-        },
-        3: {
-          title: "Grade 12 • Royal A5 Miyazaki Wagyu.",
-          desc: "World-class snowflake intramuscular lipid matrix. Melts at human body temperature (25°C) on the tongue, releasing buttery oleic sweetness.",
-          melting: "25°C", oleic: "69%", temp: "50°C (Quick Sear)",
-          badge: "BMS Grade 12 • Royal A5 Snowflake"
-        }
-      };
-
-      window.changeMarblingGrade = function(val) {
-        const d = MARBLING_GRADES[val] || MARBLING_GRADES[1];
-        const t = document.getElementById('marblingGradeTitle');
-        const desc = document.getElementById('marblingGradeDesc');
-        const melt = document.getElementById('meltingVal');
-        const oleic = document.getElementById('oleicVal');
-        const temp = document.getElementById('tempVal');
-        const badge = document.getElementById('marblingBadge');
-
-        if (t) t.textContent = d.title;
-        if (desc) desc.textContent = d.desc;
-        if (melt) melt.textContent = d.melting;
-        if (oleic) oleic.textContent = d.oleic;
-        if (temp) temp.textContent = d.temp;
-        if (badge) badge.textContent = d.badge;
-
-        renderMarblingWeb(val);
-      };
-
-      function renderMarblingWeb(val) {
-        const canvas = document.getElementById('marblingVisualCanvas');
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        const w = canvas.width, h = canvas.height;
-
-        // Rich meat base
-        const g = ctx.createRadialGradient(w/2, h/2, 40, w/2, h/2, w/2);
-        g.addColorStop(0, '#B82842');
-        g.addColorStop(0.6, '#82162A');
-        g.addColorStop(1, '#570B1A');
-        ctx.fillStyle = g;
-        ctx.fillRect(0, 0, w, h);
-
-        // Procedural Marbling Veins
-        const linesCount = val == 1 ? 16 : (val == 2 ? 45 : 120);
-        ctx.strokeStyle = 'rgba(255, 250, 240, 0.85)';
-        ctx.lineWidth = val == 3 ? 1.5 : (val == 2 ? 2.5 : 3.5);
-
-        for (let i = 0; i < linesCount; i++) {
-          ctx.beginPath();
-          let x = Math.random() * w;
-          let y = Math.random() * h;
-          ctx.moveTo(x, y);
-          for (let step = 0; step < 4; step++) {
-            x += (Math.random() - 0.5) * 50;
-            y += (Math.random() - 0.5) * 35;
-            ctx.lineTo(x, y);
-          }
-          ctx.stroke();
-        }
-      }
-
-      // 4. Cast-Iron Sear & Sizzle Simulator
-      window.triggerCastIronSear = function() {
-        const crust = document.getElementById('caramelCrust');
-        const status = document.getElementById('crustStatus');
-        const btn = document.getElementById('searActionBtn');
-
-        if (crust) crust.style.opacity = '1';
-        if (status) status.innerHTML = '<span class="text-amber-500 font-bold">260°C Maillard Caramelizing...</span>';
-        if (btn) btn.disabled = true;
-
-        // Audio Sizzle
-        try {
-          const AudioCtx = window.AudioContext || window.webkitAudioContext;
-          if (AudioCtx) {
-            const ctx = new AudioCtx();
-            const bufferSize = ctx.sampleRate * 3.5;
-            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-            const data = buffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) {
-              data[i] = (Math.random() * 2 - 1) * 0.08;
-            }
-            const noise = ctx.createBufferSource();
-            noise.buffer = buffer;
-            const filter = ctx.createBiquadFilter();
-            filter.type = 'bandpass';
-            filter.frequency.setValueAtTime(1200, ctx.currentTime);
-            filter.Q.setValueAtTime(3, ctx.currentTime);
-
-            const gain = ctx.createGain();
-            gain.gain.setValueAtTime(0.01, ctx.currentTime);
-            gain.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 0.3);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 3.2);
-
-            noise.connect(filter);
-            filter.connect(gain);
-            gain.connect(ctx.destination);
-            noise.start();
-          }
-        } catch(e) {}
-
-        setTimeout(() => {
-          if (status) status.innerHTML = '<span class="text-emerald-600 font-black">✓ Crispy Golden Umami Crust (Perfect 54°C)</span>';
-          if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<span>✓ Cut Seared • Click to Sear Again</span>';
-          }
-        }, 3200);
-      };
-
-      window.resetSearSkillet = function() {
-        const crust = document.getElementById('caramelCrust');
-        const status = document.getElementById('crustStatus');
-        const btn = document.getElementById('searActionBtn');
-        if (crust) crust.style.opacity = '0';
-        if (status) status.textContent = 'Raw Chilled';
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = '<span>🔥 Sear Cut on 260°C Skillet</span>';
-        }
-      };
-
-      // 5. Smoke Particles on Sear Skillet
-      function initSearSmokeCanvas() {
-        const canvas = document.getElementById('searSmokeCanvas');
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        const w = canvas.width = canvas.offsetWidth;
-        const h = canvas.height = canvas.offsetHeight;
-
-        const smoke = [];
-        for (let i = 0; i < 20; i++) {
-          smoke.push({
-            x: w/2 + (Math.random() - 0.5) * 80,
-            y: h/2 + (Math.random() - 0.5) * 40,
-            r: 12 + Math.random() * 18,
-            vx: (Math.random() - 0.5) * 0.8,
-            vy: -0.8 - Math.random() * 1.2,
-            alpha: 0.15 + Math.random() * 0.2
-          });
-        }
-
-        function renderSmoke() {
-          ctx.clearRect(0, 0, w, h);
-          smoke.forEach(p => {
-            p.x += p.vx;
-            p.y += p.vy;
-            p.r += 0.2;
-            p.alpha -= 0.003;
-            if (p.alpha <= 0 || p.y < 0) {
-              p.x = w/2 + (Math.random() - 0.5) * 70;
-              p.y = h/2 + 20;
-              p.r = 10 + Math.random() * 12;
-              p.alpha = 0.2 + Math.random() * 0.2;
-            }
-            const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
-            g.addColorStop(0, `rgba(255, 235, 220, ${p.alpha})`);
-            g.addColorStop(1, 'rgba(255, 235, 220, 0)');
-            ctx.fillStyle = g;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            ctx.fill();
-          });
-          requestAnimationFrame(renderSmoke);
-        }
-        renderSmoke();
-      }
-
-      // Initialize default
-      initSlicerCanvas();
-      renderMarblingWeb(1);
-    })();
+    
 
     renderDeliProducts();
     updateBasketUI();
