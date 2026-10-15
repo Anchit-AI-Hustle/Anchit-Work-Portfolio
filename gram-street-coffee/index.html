@@ -76,6 +76,78 @@
     .custom-cursor { display: none !important; }
   }
 
+  /* Film Grain luxury texture */
+  .film-grain {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 99999;
+    opacity: 0.028;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
+
+  /* 3D Card Tilt with Specular Mouse Sheen */
+  .tilt-card {
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
+    overflow: hidden;
+  }
+  .tilt-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.22) 0%, transparent 60%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 20;
+  }
+  .tilt-card:hover::after {
+    opacity: 1;
+  }
+
+  /* Conic Border Beam Animation */
+  @property --beam-angle {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+  }
+  .conic-beam {
+    position: relative;
+  }
+  .conic-beam::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    padding: 2px;
+    background: conic-gradient(from var(--beam-angle, 0deg), transparent 70%, #7C3AED 90%, #CDB8F7 95%, transparent 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    animation: spinBeam 6s linear infinite;
+  }
+  @keyframes spinBeam {
+    to { --beam-angle: 360deg; }
+  }
+
+  /* Staggered Scroll Reveal Transitions */
+  .scroll-reveal {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+    transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .scroll-reveal.in-view {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
   /* header */
   .site-head {
     position: fixed;
@@ -405,6 +477,9 @@
 </head>
 <body>
 
+<!-- Luxury Film Grain Cinematic Overlay -->
+<div class="film-grain" aria-hidden="true"></div>
+
 <!-- 5D Custom Magnetic Cursor -->
 <div class="custom-cursor" id="customCursor"></div>
 
@@ -489,14 +564,14 @@
               <li><strong>Twisted Cold Coffee</strong><span>Blended with house coffee gelato and topped with frozen espresso cubes that intensify as they melt.</span></li>
             </ul>
           </div>
-          <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white" style="background: linear-gradient(180deg, rgba(43,22,80,0.25) 0%, rgba(43,22,80,0.85) 100%), url('https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=85') center/cover;">
+          <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white rounded-3xl shadow-2xl transition-transform duration-700 hover:scale-[1.02]" style="background: linear-gradient(180deg, rgba(43,22,80,0.2) 0%, rgba(43,22,80,0.85) 100%), url('https://images.unsplash.com/photo-1646954256973-f7fd9ce626b1?auto=format&fit=crop&w=1200&q=85') center/cover;">
             <div class="flex items-center justify-between z-10">
-              <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur text-[11px] font-black uppercase tracking-wider text-amber-200">✦ 9-Bar Extraction</span>
-              <span class="text-[11px] font-bold text-white/90">93.5°C Brew Temp</span>
+              <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-black uppercase tracking-wider text-[#F1E9FF] border border-white/20">✦ Iconic Cult Favorite</span>
+              <span class="text-[11px] font-bold text-white/90">9-Bar Extraction</span>
             </div>
             <div class="z-10">
-              <div class="text-xl font-display font-black text-white">Signature Espresso Crema</div>
-              <div class="text-xs text-white/80 font-medium mt-1">Nagaland Arabica &bull; Wild floral, honey sweetness &amp; dark cacao</div>
+              <div class="text-2xl font-display font-black text-white">Signature Purple Gram Latte</div>
+              <div class="text-xs text-white/90 font-medium mt-1">Nagaland Arabica &bull; Layered wild blueberry lavender foam &amp; double ristretto</div>
             </div>
           </div>
         </div>
@@ -514,14 +589,14 @@
               <li><strong>100-Prong Aeration</strong><span>Whisked fresh at 78°C using traditional Japanese bamboo chasen for rich umami notes.</span></li>
             </ul>
           </div>
-          <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white" style="background: linear-gradient(180deg, rgba(43,22,80,0.2) 0%, rgba(30,55,20,0.85) 100%), url('https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=800&q=85') center/cover;">
+          <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white rounded-3xl shadow-2xl transition-transform duration-700 hover:scale-[1.02]" style="background: linear-gradient(180deg, rgba(43,22,80,0.15) 0%, rgba(20,45,15,0.88) 100%), url('https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=1200&q=85') center/cover;">
             <div class="flex items-center justify-between z-10">
-              <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur text-[11px] font-black uppercase tracking-wider text-emerald-200">✦ Ceremonial Uji Tencha</span>
+              <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-black uppercase tracking-wider text-emerald-200 border border-white/20">✦ Ceremonial Uji Tencha</span>
               <span class="text-[11px] font-bold text-white/90">100-Prong Bamboo Chasen</span>
             </div>
             <div class="z-10">
-              <div class="text-xl font-display font-black text-white">Jade Micro-Foam</div>
-              <div class="text-xs text-white/80 font-medium mt-1">Kyoto first harvest &bull; Whisked fresh at 78°C for rich umami notes</div>
+              <div class="text-2xl font-display font-black text-white">Jade Micro-Foam Ceremony</div>
+              <div class="text-xs text-white/90 font-medium mt-1">Kyoto first harvest &bull; Whisked fresh at 78°C for rich sweet umami finish</div>
             </div>
           </div>
         </div>
@@ -539,14 +614,14 @@
               <li><strong>Lighter Sorbets</strong><span>Refreshing fruit sorbets and clean sugar-free options sweetened naturally with erythritol.</span></li>
             </ul>
           </div>
-          <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white" style="background: linear-gradient(180deg, rgba(43,22,80,0.2) 0%, rgba(70,20,50,0.85) 100%), url('https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=800&q=85') center/cover;">
+          <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white rounded-3xl shadow-2xl transition-transform duration-700 hover:scale-[1.02]" style="background: linear-gradient(180deg, rgba(43,22,80,0.15) 0%, rgba(65,15,45,0.88) 100%), url('https://images.unsplash.com/photo-1575031745961-1ed57f800a4c?auto=format&fit=crop&w=1200&q=85') center/cover;">
             <div class="flex items-center justify-between z-10">
-              <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur text-[11px] font-black uppercase tracking-wider text-pink-200">✦ In-House Churn</span>
+              <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-black uppercase tracking-wider text-pink-200 border border-white/20">✦ In-House Churn</span>
               <span class="text-[11px] font-bold text-white/90">-12°C Serving Velvet</span>
             </div>
             <div class="z-10">
-              <div class="text-xl font-display font-black text-white">Artisanal Gelato &amp; Sorbet</div>
-              <div class="text-xs text-white/80 font-medium mt-1">Smoked chocolate, roasted hazelnut &amp; caramelized croissant</div>
+              <div class="text-2xl font-display font-black text-white">Small-Batch Gelato Scoop</div>
+              <div class="text-xs text-white/90 font-medium mt-1">Smoked chocolate, roasted Sicilian hazelnut &amp; caramelized croissant</div>
             </div>
           </div>
         </div>
@@ -798,7 +873,7 @@
   </section>
 
   <!-- D2C COFFEE ROASTERY SHOP -->
-  <section class="py-24 px-6 md:px-12 max-w-7xl mx-auto" id="d2cShop">
+  <section class="py-24 px-6 md:px-12 max-w-7xl mx-auto scroll-reveal" id="d2cShop">
     <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
       <div>
         <span class="text-xs font-black uppercase tracking-[0.25em] text-[#7C3AED]">D2C Roastery Releases</span>
@@ -817,7 +892,7 @@
 
   <!-- CHEF SECTION: SCROLL-DRAWN TIMELINE -->
   <section class="chef" id="chef" aria-labelledby="chef-title">
-    <div class="chef-grid" data-slot="chef">
+    <div class="chef-grid scroll-reveal" data-slot="chef">
       <div>
         <h2 id="chef-title">From pie shop to purple latte.</h2>
         <p class="lead">Chef Vanshika Bhatia built Gram Street as a compact, beverage-first counter, and she keeps building focused culinary destinations.</p>
@@ -833,7 +908,7 @@
   <!-- SPACE: SPECULAR CHROME HEADING THAT SWEEPS REFLECTIONS ON POINTER MOVE -->
   <section class="space" id="space" data-slot="space" aria-labelledby="space-title">
     <h2 class="chrome-text" id="space-title">Lilac glass. Chrome accents. A tiny room by design.</h2>
-    <div class="space-grid">
+    <div class="space-grid scroll-reveal">
       <p>A glass front painted lilac, chrome cutting through the pastel interior, and a design philosophy drawn from contemporary Asian specialty bars. Bhatia deliberately avoided turning it into a remote workstation: there is just enough room to savor an espresso, and that is the entire point.</p>
       <p>Behind the drinks sit curated sandos on ciabatta and Japanese milk bread, such as the eggplant parm and jerk chicken, alongside the blueberry brioche and flaky K-Drama puff pastry.</p>
     </div>
@@ -841,7 +916,7 @@
 
   <!-- CITIES & RADAR ORBIT CONSTELLATION -->
   <section class="cities" id="cities" aria-labelledby="cities-title">
-    <div class="cities-grid">
+    <div class="cities-grid scroll-reveal">
       <div>
         <h2 id="cities-title">A movement, city by city.</h2>
         <p>Gram Street began in Gurugram across DLF Phase 1, Golf Course Road and Sector 56. Mumbai, Bengaluru, Hyderabad and Jaipur are the planned next destinations, with Dubai, Singapore and London thereafter.</p>
@@ -875,7 +950,7 @@
 
   <!-- ALL 3 LOCATIONS & CELEBRATED STEAMED WINDOW (SCRATCH TO REVEAL) -->
   <section class="visit" id="destinations" aria-labelledby="visit-title">
-    <div class="max-w-7xl mx-auto space-y-10">
+    <div class="max-w-7xl mx-auto space-y-10 scroll-reveal">
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <span class="text-xs font-black uppercase tracking-[0.25em] text-[#7C3AED]">Interactive Destination Explorer</span>
@@ -999,7 +1074,7 @@
       sub: 'Signature Dark Roast • 250G',
       notes: 'Dark Cocoa, Roasted Hazelnut & Molasses',
       price: 580,
-      image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=85'
+      image: 'https://images.unsplash.com/photo-1511537190424-bbbab87ac5eb?auto=format&fit=crop&w=800&q=85'
     },
     {
       id: 'commute-single-origin',
@@ -1015,7 +1090,23 @@
       sub: 'Coorg Anaerobic • Medium Roast • 250G',
       notes: 'Wild Blueberry, Lavender & Dark Cacao',
       price: 690,
-      image: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=800&q=85'
+      image: 'https://images.unsplash.com/photo-1646954256973-f7fd9ce626b1?auto=format&fit=crop&w=800&q=85'
+    },
+    {
+      id: 'uji-ceremonial-matcha',
+      name: 'Kyoto Ceremonial Uji Matcha',
+      sub: 'First Harvest Tencha • 30G Tin',
+      notes: 'Sweet Umami, Jade Micro-Foam & Steamed Oat Finish',
+      price: 890,
+      image: 'https://images.unsplash.com/photo-1515823064-d6e0c04616a7?auto=format&fit=crop&w=800&q=85'
+    },
+    {
+      id: 'smoked-chocolate-gelato',
+      name: 'Smoked Chocolate Dark Gelato',
+      sub: 'Small-Batch Hand-Churned • 500ML',
+      notes: '72% Single-Origin Cacao, Oak-Smoked Cream & Maldon Salt',
+      price: 480,
+      image: 'https://images.unsplash.com/photo-1575031745961-1ed57f800a4c?auto=format&fit=crop&w=800&q=85'
     }
   ];
 
@@ -1388,7 +1479,7 @@
       const isSub = !!subMode[p.id];
       const finalPrice = isSub ? Math.round(p.price * 0.85) : p.price;
       return `
-        <div class="d2c-card p-7 flex flex-col justify-between space-y-5">
+        <div class="d2c-card tilt-card scroll-reveal p-7 flex flex-col justify-between space-y-5">
           <div>
             <div class="relative h-64 rounded-2xl overflow-hidden mb-5 bg-black/10">
               <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
@@ -1418,6 +1509,8 @@
         </div>
       `;
     }).join('');
+    if (typeof window.initTiltPhysics === 'function') window.initTiltPhysics();
+    if (typeof window.initScrollReveal === 'function') window.initScrollReveal();
   }
 
   window.setSubMode = function(id, isSub) {
@@ -1739,26 +1832,54 @@
     } catch(e) {}
   };
 
-  // 6. Interactive 3D Card Tilt on Product & Drink Cards
-  function initCoffeeCardTilt() {
-    const cards = document.querySelectorAll('.product-card, .chapter, .visit-window');
+  // 6. Interactive 3D Card Tilt with Specular Mouse Sheen + Staggered Scroll Reveal
+  function initTiltPhysics() {
+    const cards = document.querySelectorAll('.tilt-card, .d2c-card, .chapter, .visit-window, #orbit, .craft-interactive-card');
     cards.forEach(card => {
+      if (card.dataset.tiltBound) return;
+      card.dataset.tiltBound = 'true';
       card.addEventListener('mousemove', e => {
         const rect = card.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        const rotX = ((centerY - y) / centerY * 6).toFixed(2);
-        const rotY = ((x - centerX) / centerX * 6).toFixed(2);
-        card.style.transform = `perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-6px) scale3d(1.02, 1.02, 1.02)`;
+        const cx = rect.width / 2;
+        const cy = rect.height / 2;
+        const dx = (x - cx) / cx;
+        const dy = (y - cy) / cy;
+        card.style.transform = `perspective(1000px) rotateX(${-dy * 7}deg) rotateY(${dx * 7}deg) scale3d(1.02, 1.02, 1.02)`;
+        card.style.setProperty('--mouse-x', `${(x / rect.width) * 100}%`);
+        card.style.setProperty('--mouse-y', `${(y / rect.height) * 100}%`);
       });
       card.addEventListener('mouseleave', () => {
-        card.style.transform = '';
+        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
       });
     });
   }
-  setTimeout(initCoffeeCardTilt, 500);
+
+  function initScrollReveal() {
+    if (!('IntersectionObserver' in window)) {
+      document.querySelectorAll('.scroll-reveal').forEach(el => el.classList.add('in-view'));
+      return;
+    }
+    const observer = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+  }
+
+  window.initTiltPhysics = initTiltPhysics;
+  window.initScrollReveal = initScrollReveal;
+
+  setTimeout(() => {
+    initTiltPhysics();
+    initScrollReveal();
+  }, 300);
 })();
 </script>
 </body>

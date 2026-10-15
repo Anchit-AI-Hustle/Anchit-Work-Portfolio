@@ -130,6 +130,78 @@
       left: 200%;
     }
 
+    /* Luxury Film Grain Cinematic Overlay */
+    .film-grain {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 99999;
+      opacity: 0.028;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* 3D Card Tilt with Specular Mouse Sheen */
+    .tilt-card {
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform;
+      overflow: hidden;
+    }
+    .tilt-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.25) 0%, transparent 60%);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 20;
+    }
+    .tilt-card:hover::after {
+      opacity: 1;
+    }
+
+    /* Conic Border Beam Animation */
+    @property --beam-angle {
+      syntax: '<angle>';
+      inherits: false;
+      initial-value: 0deg;
+    }
+    .conic-beam {
+      position: relative;
+    }
+    .conic-beam::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: inherit;
+      padding: 2px;
+      background: conic-gradient(from var(--beam-angle, 0deg), transparent 70%, #C59A45 88%, #CD2653 95%, transparent 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      animation: spinBeam 6s linear infinite;
+    }
+    @keyframes spinBeam {
+      to { --beam-angle: 360deg; }
+    }
+
+    /* Staggered Scroll Reveal Transitions */
+    .scroll-reveal {
+      opacity: 0;
+      transform: translateY(24px) scale(0.98);
+      transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .scroll-reveal.in-view {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
     /* Pinned Haute Boucherie Stage */
     .deli-stage-wrap {
       height: 320vh;
@@ -300,6 +372,9 @@
 </head>
 <body class="linen-texture selection:bg-[#CD2653] selection:text-white">
 
+  <!-- Luxury Film Grain Cinematic Overlay -->
+  <div class="film-grain" aria-hidden="true"></div>
+
   <!-- ================= TOP FRESH DISPATCH ANNOUNCEMENT ================= -->
   <div class="fixed top-0 left-0 right-0 z-50 bg-[#4A0E17] text-[#FFF9F4] text-[11px] sm:text-xs font-medium tracking-wider py-2 px-4 border-b border-[#C59A45]/30">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
@@ -431,7 +506,7 @@
         <div class="loupe-container shadow-2xl border-2 border-[#C59A45]/40 bg-black" id="heroLoupeContainer">
           <img
             id="heroLoupeImg"
-            src="https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=1200&q=85"
+            src="https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=1200&q=85"
             alt="Deli Chic Prime Artisanal Cuts"
             class="w-full h-[470px] object-cover transition-opacity duration-300"
           />
@@ -504,7 +579,7 @@
             </div>
           </div>
           <div class="lg:col-span-5 hidden lg:block">
-            <img src="https://i1.wp.com/mh.delichic.co.in/wp-content/uploads/2020/09/Chicken-Breast-Antibiotic-Free-scaled.jpg?resize=600%2C600&ssl=1" alt="Chicken Breast" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
+            <img src="https://images.unsplash.com/photo-1604503468506-a8da13d82791?auto=format&fit=crop&w=800&q=85" alt="Clean Hand-Trimmed Antibiotic-Free Chicken Breast" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
           </div>
         </div>
       </div>
@@ -524,7 +599,7 @@
             </div>
           </div>
           <div class="lg:col-span-5 hidden lg:block">
-            <img src="https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=600&q=85" alt="Charcuterie" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
+            <img src="https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=800&q=85" alt="Prime Wood-Smoked Charcuterie and Ribs" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
           </div>
         </div>
       </div>
@@ -544,7 +619,7 @@
             </div>
           </div>
           <div class="lg:col-span-5 hidden lg:block">
-            <img src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=85" alt="Marinades" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
+            <img src="https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=800&q=85" alt="Royal Awadhi Shahi Saffron Marinade" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
           </div>
         </div>
       </div>
@@ -559,7 +634,7 @@
   </section>
 
   <!-- ================= THE GOURMET LARDER CATALOGUE ================= -->
-  <section class="py-24 px-6 md:px-10 max-w-7xl mx-auto" id="larder">
+  <section class="py-24 px-6 md:px-10 max-w-7xl mx-auto scroll-reveal" id="larder">
     <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
       <div>
         <span class="text-xs font-bold uppercase tracking-[0.25em] text-[#CD2653] font-luxury">Gourmet Selection</span>
@@ -603,7 +678,7 @@
   </section>
 
   <!-- ================= DELHI NCR DELIVERY HUBS & REFRIGERATED DISPATCH NETWORK ================= -->
-  <section class="py-20 px-6 md:px-10 bg-[#4A0E17] text-[#FFF9F4] border-y border-[#C59A45]/30 relative overflow-hidden" id="hubs">
+  <section class="py-20 px-6 md:px-10 bg-[#4A0E17] text-[#FFF9F4] border-y border-[#C59A45]/30 relative overflow-hidden scroll-reveal" id="hubs">
     <div class="max-w-7xl mx-auto space-y-12">
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
@@ -687,7 +762,7 @@
   </section>
 
   <!-- ================= OUR NEW DELHI HERITAGE & CONCIERGE ================= -->
-  <section class="py-24 px-6 md:px-10 max-w-7xl mx-auto" id="heritage">
+  <section class="py-24 px-6 md:px-10 max-w-7xl mx-auto scroll-reveal" id="heritage">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
       <!-- Left Narrative -->
       <div class="lg:col-span-6 space-y-6">
@@ -721,7 +796,7 @@
       <div class="lg:col-span-6">
         <div class="rounded-3xl overflow-hidden shadow-2xl border-2 border-[#C59A45]/30 relative h-[460px]">
           <img
-            src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=85"
+            src="https://images.unsplash.com/photo-1602470520998-f4a52199a3d6?auto=format&fit=crop&w=1200&q=85"
             alt="Artisanal Butcher Preparation"
             class="w-full h-full object-cover"
           />
@@ -961,25 +1036,25 @@
         title: 'Prime Wood-Smoked Charcuterie',
         desc: 'Cured with Tellicherry black peppercorns and cold beechwood smoke.',
         badge: 'Master Carver 2.5x Loupe Active',
-        image: 'https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=1200&q=85'
+        image: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=1200&q=85'
       },
       poultry: {
         title: '100% Antibiotic Residue-Free Breast',
         desc: 'Examine cellular firmness and natural pink marbling. Zero deep-freeze cellular collapse.',
         badge: 'Lab-Tested 100% Residue-Free',
-        image: 'https://i1.wp.com/mh.delichic.co.in/wp-content/uploads/2020/09/Chicken-Breast-Antibiotic-Free-scaled.jpg?resize=800%2C800&ssl=1'
+        image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?auto=format&fit=crop&w=1200&q=85'
       },
       marinade: {
         title: 'Lucknowi Shahi Saffron Marinade',
         desc: 'Infused with Awadhi mace, roasted gram flour, hung curd and royal saffron threads.',
         badge: 'Chef Master Marinade Inspection',
-        image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=85'
+        image: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=1200&q=85'
       },
       momos: {
         title: 'Handcrafted Coastal Prawn Dim Sum',
         desc: 'Delicate translucent pleated casing filled with whole juicy sea tiger prawns.',
         badge: 'Artisanal Dim Sum Inspection',
-        image: 'https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?auto=format&fit=crop&w=1200&q=85'
+        image: 'https://images.unsplash.com/photo-1543198432-a20fa3055570?auto=format&fit=crop&w=1200&q=85'
       }
     };
 
@@ -999,7 +1074,7 @@
 
       grid.innerHTML = filtered.map(p => {
         return `
-          <div class="deli-card knife-glint overflow-hidden flex flex-col justify-between group">
+          <div class="deli-card tilt-card scroll-reveal knife-glint overflow-hidden flex flex-col justify-between group">
             <div>
               <div class="relative h-52 overflow-hidden bg-[#FAF4ED]">
                 <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -1028,25 +1103,47 @@
         `;
       }).join('');
       initCardTilt();
+      initScrollReveal();
     }
 
     function initCardTilt() {
-      const cards = document.querySelectorAll('.deli-card');
+      const cards = document.querySelectorAll('.deli-card, .tilt-card, .loupe-container');
       cards.forEach(card => {
+        if (card.dataset.tiltBound) return;
+        card.dataset.tiltBound = 'true';
         card.addEventListener('mousemove', e => {
           const rect = card.getBoundingClientRect();
           const x = e.clientX - rect.left;
           const y = e.clientY - rect.top;
-          const centerX = rect.width / 2;
-          const centerY = rect.height / 2;
-          const rotX = ((centerY - y) / centerY * 6).toFixed(2);
-          const rotY = ((x - centerX) / centerX * 6).toFixed(2);
-          card.style.transform = `perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-8px) scale3d(1.02, 1.02, 1.02)`;
+          const cx = rect.width / 2;
+          const cy = rect.height / 2;
+          const dx = (x - cx) / cx;
+          const dy = (y - cy) / cy;
+          card.style.transform = `perspective(1000px) rotateX(${-dy * 6}deg) rotateY(${dx * 6}deg) translateY(-6px) scale3d(1.02, 1.02, 1.02)`;
+          card.style.setProperty('--mouse-x', `${(x / rect.width) * 100}%`);
+          card.style.setProperty('--mouse-y', `${(y / rect.height) * 100}%`);
         });
         card.addEventListener('mouseleave', () => {
-          card.style.transform = '';
+          card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0) scale3d(1, 1, 1)';
         });
       });
+    }
+
+    function initScrollReveal() {
+      if (!('IntersectionObserver' in window)) {
+        document.querySelectorAll('.scroll-reveal').forEach(el => el.classList.add('in-view'));
+        return;
+      }
+      const observer = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+            obs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12 });
+
+      document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
     }
 
     function filterCategory(cat) {
@@ -1435,6 +1532,10 @@
 
     renderDeliProducts();
     updateBasketUI();
+    setTimeout(() => {
+      initCardTilt();
+      initScrollReveal();
+    }, 200);
   </script>
 </body>
 </html>
