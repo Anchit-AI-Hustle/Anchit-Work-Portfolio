@@ -23,11 +23,29 @@
 <!-- Lenis Smooth Momentum Scrolling -->
 <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
 
+<!-- Three.js WebGL 3D Engine -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
 <style>
   html.lenis, html.lenis body { height: auto; }
   .lenis.lenis-smooth { scroll-behavior: auto !important; }
   .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
   .lenis.lenis-stopped { overflow: hidden; }
+
+  @keyframes soundBarPulse {
+    0%, 100% { height: 4px; }
+    50% { height: 16px; }
+  }
+  .audio-bar {
+    width: 2.5px;
+    background: currentColor;
+    border-radius: 1px;
+    transition: height 0.2s ease;
+  }
+  .audio-bar-active:nth-child(1) { animation: soundBarPulse 0.8s ease-in-out infinite; }
+  .audio-bar-active:nth-child(2) { animation: soundBarPulse 1.1s ease-in-out infinite 0.15s; }
+  .audio-bar-active:nth-child(3) { animation: soundBarPulse 0.9s ease-in-out infinite 0.3s; }
+  .audio-bar-active:nth-child(4) { animation: soundBarPulse 1.2s ease-in-out infinite 0.45s; }
 
   @property --beam-angle {
     syntax: '<angle>';
@@ -641,9 +659,14 @@
     <a href="#space">The Space</a>
     <a href="#cities">Network</a>
     <a href="#destinations">Locations (3)</a>
-    <!-- 5D Audio Toggle Button -->
-    <button id="audioBtn" onclick="toggleAudio()" class="ml-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-[var(--border-light)] text-[var(--obsidian)] flex items-center gap-1.5 bg-white/80 hover:bg-white transition-all shadow-xs">
-      <span id="audioDot" class="w-2 h-2 rounded-full bg-[var(--bronze)]"></span>
+    <!-- 5D Audio Toggle Button with 4-Bar Equalizer -->
+    <button id="audioBtn" onclick="toggleAudio()" aria-label="Toggle 5D Spatial Ambient Soundscape" class="ml-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-[var(--border-light)] text-[var(--obsidian)] flex items-center gap-2 bg-white/85 hover:bg-white transition-all shadow-xs">
+      <div id="audioBars" class="flex items-end gap-[2px] h-3.5 w-3 text-[var(--bronze)]">
+        <span class="audio-bar h-1"></span>
+        <span class="audio-bar h-2"></span>
+        <span class="audio-bar h-1.5"></span>
+        <span class="audio-bar h-2.5"></span>
+      </div>
       <span id="audioLabel" class="hidden sm:inline">5D Audio</span>
     </button>
     <!-- Roastery Bag Trigger -->
@@ -706,7 +729,7 @@
 
       <!-- Right Column: Hero Visual Showcase Card with Interactive Barista Station -->
       <div class="hero-visual-wrap">
-        <!-- Interactive Roast Lot Selector -->
+        <!-- Interactive Roast Lot Selector + 3D WebGL Orbit Mode -->
         <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-white/95 border border-[var(--border-light)] mb-3 text-[10px] font-bold uppercase tracking-wider overflow-x-auto shadow-sm">
           <button onclick="setHeroLot('nagaland')" id="heroLot-nagaland" class="py-1.5 px-3 rounded-xl bg-[var(--obsidian)] text-[#FAF8F5] shadow transition-all whitespace-nowrap">
             ● 18.5g Nagaland Honey
@@ -717,16 +740,22 @@
           <button onclick="setHeroLot('matcha')" id="heroLot-matcha" class="py-1.5 px-3 rounded-xl text-[var(--text-muted)] hover:text-[var(--obsidian)] transition-all whitespace-nowrap">
             Uji Tencha Matcha
           </button>
+          <button onclick="toggle3DBeanMode()" id="hero3DModeBtn" class="py-1.5 px-3 rounded-xl border border-[var(--bronze)]/50 text-[var(--bronze)] font-black hover:bg-[var(--bronze)] hover:text-white transition-all whitespace-nowrap flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-[var(--bronze)] animate-pulse"></span>
+            <span>3D Bean Orbit</span>
+          </button>
         </div>
 
-        <div class="hero-showcase-card border-beam" id="heroCard">
+        <div class="hero-showcase-card border-beam cursor-grab active:cursor-grabbing" id="heroCard">
           <img
             id="heroShowcaseImg"
             src="https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?auto=format&fit=crop&w=1200&q=85"
             alt="Gram Street Coffee Bottomless Naked Portafilter Espresso Extraction"
-            class="hero-showcase-img"
+            class="hero-showcase-img transition-opacity duration-500"
           />
           <canvas id="heroSteamCanvas" class="hero-steam-canvas"></canvas>
+          <canvas id="hero3DCanvas" class="absolute inset-0 w-full h-full pointer-events-none opacity-0 transition-opacity duration-500 z-10"></canvas>
+          <div id="orbitHint" class="hidden absolute top-4 left-4 z-30 px-3 py-1 rounded-full bg-black/75 text-[#FAF8F5] text-[10px] font-black tracking-widest uppercase border border-[var(--bronze)]/50 backdrop-blur-md">↻ Drag to Orbit 3D Bean</div>
           
           <div class="hero-floating-badge" id="heroLotBadge">
             <span class="text-amber-400">●</span> 18.5g Nagaland Lot
@@ -1626,50 +1655,129 @@
     window.initScratchWindow();
   }
 
-  /* 8. 5D Spatial Web Audio Synthesizer */
+  /* 8. 5D Spatial Web Audio Synthesizer & Tactile Haptic Acoustics */
+  window.playHapticClick = function(freq = 750, dur = 0.03) {
+    try {
+      if (navigator.vibrate) navigator.vibrate(6);
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      if (!window._hapticCtx) window._hapticCtx = new AudioContext();
+      if (window._hapticCtx.state === 'suspended') window._hapticCtx.resume();
+      
+      const ctx = window._hapticCtx;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(120, ctx.currentTime + dur);
+      gain.gain.setValueAtTime(0.06, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + dur);
+    } catch(e) {}
+  };
+
+  let audioOsc1 = null, audioOsc2 = null, audioSub = null, audioGain = null;
+
   window.toggleAudio = function() {
+    window.playHapticClick(900, 0.04);
     if (!audioCtx) {
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       audioCtx = new AudioContext();
     }
     if (audioCtx.state === 'suspended') audioCtx.resume();
 
+    const bars = document.querySelectorAll('#audioBars .audio-bar');
+
     if (!isPlayingAudio) {
+      // 5D Spatial Ambient Soundscape: Harmonic A2/E3 Warm Roasted Chord + Low-Passed Steam Texture
+      const now = audioCtx.currentTime;
+
+      // Master Gain
+      audioGain = audioCtx.createGain();
+      audioGain.gain.setValueAtTime(0.01, now);
+      audioGain.gain.linearRampToValueAtTime(0.14, now + 1.2);
+      audioGain.connect(audioCtx.destination);
+
+      // Warm Tone Filter (320Hz warm acoustic cut)
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 340;
+      filter.connect(audioGain);
+
+      // Osc 1: A2 (110 Hz) Triangle Wave (Warm Roasted Foundation)
+      audioOsc1 = audioCtx.createOscillator();
+      audioOsc1.type = 'triangle';
+      audioOsc1.frequency.setValueAtTime(110, now);
+      audioOsc1.connect(filter);
+      audioOsc1.start();
+
+      // Osc 2: E3 (164.81 Hz) Sine Wave (Pure Fifth Harmonic Resonance)
+      audioOsc2 = audioCtx.createOscillator();
+      audioOsc2.type = 'sine';
+      audioOsc2.frequency.setValueAtTime(164.81, now);
+      const osc2Gain = audioCtx.createGain();
+      osc2Gain.gain.value = 0.45;
+      audioOsc2.connect(osc2Gain);
+      osc2Gain.connect(filter);
+      audioOsc2.start();
+
+      // Osc Sub: 55 Hz Sine Wave (Sub-Bass Body)
+      audioSub = audioCtx.createOscillator();
+      audioSub.type = 'sine';
+      audioSub.frequency.setValueAtTime(55, now);
+      const subGain = audioCtx.createGain();
+      subGain.gain.value = 0.3;
+      audioSub.connect(subGain);
+      subGain.connect(filter);
+      audioSub.start();
+
+      // Ambient Cafe Steam Noise Bed
       const bufferSize = 2 * audioCtx.sampleRate;
       const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
       const output = noiseBuffer.getChannelData(0);
       let lastOut = 0.0;
       for (let i = 0; i < bufferSize; i++) {
         const white = Math.random() * 2 - 1;
-        output[i] = (lastOut + 0.02 * white) / 1.02;
+        output[i] = (lastOut + 0.018 * white) / 1.018;
         lastOut = output[i];
-        output[i] *= 0.12;
+        output[i] *= 0.045;
       }
-      const whiteNoise = audioCtx.createBufferSource();
-      whiteNoise.buffer = noiseBuffer;
-      whiteNoise.loop = true;
-
-      const filter = audioCtx.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.value = 350;
-
-      const gain = audioCtx.createGain();
-      gain.gain.value = 0.18;
-
-      whiteNoise.connect(filter);
-      filter.connect(gain);
-      gain.connect(audioCtx.destination);
-      whiteNoise.start(0);
+      const noiseNode = audioCtx.createBufferSource();
+      noiseNode.buffer = noiseBuffer;
+      noiseNode.loop = true;
+      const noiseFilter = audioCtx.createBiquadFilter();
+      noiseFilter.type = 'bandpass';
+      noiseFilter.frequency.value = 520;
+      noiseFilter.Q.value = 1.2;
+      noiseNode.connect(noiseFilter);
+      noiseFilter.connect(audioGain);
+      noiseNode.start();
 
       isPlayingAudio = true;
-      document.getElementById('audioDot').className = 'w-2 h-2 rounded-full bg-emerald-400 animate-ping';
-      document.getElementById('audioLabel').textContent = '5D Audio: On';
+      bars.forEach(b => b.classList.add('audio-bar-active'));
+      const label = document.getElementById('audioLabel');
+      if (label) label.textContent = '5D Audio: On';
+      const btn = document.getElementById('audioBtn');
+      if (btn) btn.classList.add('border-[var(--bronze)]', 'bg-[var(--canvas-warm)]');
     } else {
-      if (audioCtx) audioCtx.close();
-      audioCtx = null;
+      if (audioGain && audioCtx) {
+        audioGain.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+        setTimeout(() => {
+          if (audioCtx) {
+            audioCtx.close();
+            audioCtx = null;
+          }
+        }, 450);
+      }
       isPlayingAudio = false;
-      document.getElementById('audioDot').className = 'w-2 h-2 rounded-full bg-slate-400';
-      document.getElementById('audioLabel').textContent = '5D Audio';
+      bars.forEach(b => b.classList.remove('audio-bar-active'));
+      const label = document.getElementById('audioLabel');
+      if (label) label.textContent = '5D Audio';
+      const btn = document.getElementById('audioBtn');
+      if (btn) btn.classList.remove('border-[var(--bronze)]', 'bg-[var(--canvas-warm)]');
     }
   };
 
@@ -2294,6 +2402,301 @@
       requestAnimationFrame(raf);
     }
     requestAnimationFrame(raf);
+  }
+
+  /* 12. Three.js Procedural 3D Coffee Bean & Aroma WebGL Scene */
+  let is3DMode = false;
+  let beanMesh = null;
+  let aromaPoints = null;
+  let microBeans = [];
+
+  function initThreeDScene() {
+    const canvas = document.getElementById('hero3DCanvas');
+    if (!canvas || typeof THREE === 'undefined') return;
+
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance' });
+    } catch(e) {
+      console.warn('WebGL not supported:', e);
+      return;
+    }
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(canvas.clientWidth || 500, canvas.clientHeight || 480);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(40, (canvas.clientWidth || 500) / (canvas.clientHeight || 480), 0.1, 100);
+    camera.position.set(0, 0, 5.2);
+
+    // Warm Ambient + Dual Studio Rim Lighting
+    const ambientLight = new THREE.AmbientLight(0xffeedd, 0.9);
+    scene.add(ambientLight);
+
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.4);
+    keyLight.position.set(4, 5, 4);
+    scene.add(keyLight);
+
+    const rimLight = new THREE.DirectionalLight(0xe5b263, 1.8);
+    rimLight.position.set(-4, -3, -2);
+    scene.add(rimLight);
+
+    const topFill = new THREE.PointLight(0xc88a4b, 1.2, 10);
+    topFill.position.set(0, 3, 2);
+    scene.add(topFill);
+
+    // Procedural Coffee Bean Geometry: Parametric deformation of sphere
+    function createCoffeeBeanGeometry(scale = 1.0) {
+      const geom = new THREE.SphereGeometry(1.25 * scale, 48, 48);
+      const pos = geom.attributes.position;
+      const v = new THREE.Vector3();
+
+      for (let i = 0; i < pos.count; i++) {
+        v.fromBufferAttribute(pos, i);
+        // Oblong bean silhouette
+        v.y *= 1.38;
+        v.z *= 0.82;
+        // Taper bean ends
+        const taper = 1.0 - 0.14 * (v.y * v.y);
+        v.x *= Math.max(taper, 0.45);
+        // Center crease indentation on the front face (z > 0)
+        const creaseCurve = 0.12 * Math.sin(v.y * 1.6);
+        const distFromCrease = Math.abs(v.x - creaseCurve);
+        if (v.z > 0 && distFromCrease < 0.42) {
+          const depth = (0.42 - distFromCrease) * 1.65;
+          v.z = Math.max(v.z - depth, -0.15);
+        }
+        pos.setXYZ(i, v.x, v.y, v.z);
+      }
+      geom.computeVertexNormals();
+      return geom;
+    }
+
+    // Material: Obsidian Roasted Mocha with Honey Specular Glaze
+    const beanMat = new THREE.MeshStandardMaterial({
+      color: 0x24140d,
+      roughness: 0.32,
+      metalness: 0.15
+    });
+
+    beanMesh = new THREE.Mesh(createCoffeeBeanGeometry(1.0), beanMat);
+    beanMesh.rotation.z = 0.18;
+    scene.add(beanMesh);
+
+    // Darker Roasted Crease Seam Detail
+    const seamGeom = new THREE.CylinderGeometry(0.04, 0.04, 2.6, 16);
+    const seamMat = new THREE.MeshBasicMaterial({ color: 0x0a0503 });
+    const seam = new THREE.Mesh(seamGeom, seamMat);
+    seam.position.set(0, 0, 0.05);
+    seam.rotation.z = 0.08;
+    beanMesh.add(seam);
+
+    // 7 Orbiting Micro-Beans
+    const microMat = new THREE.MeshStandardMaterial({
+      color: 0x2e1d16,
+      roughness: 0.4,
+      metalness: 0.1
+    });
+    for (let i = 0; i < 7; i++) {
+      const mb = new THREE.Mesh(createCoffeeBeanGeometry(0.2 + (i % 3) * 0.06), microMat);
+      const angle = (i / 7) * Math.PI * 2;
+      const radius = 2.4 + (i % 2) * 0.5;
+      mb.position.set(Math.cos(angle) * radius, (Math.random() - 0.5) * 1.8, Math.sin(angle) * radius);
+      mb.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
+      mb.userData = { angle, radius, speed: 0.008 + (i % 4) * 0.004, yBase: mb.position.y };
+      scene.add(mb);
+      microBeans.push(mb);
+    }
+
+    // Rising Golden Aroma Particles (55 points)
+    const particleCount = 55;
+    const particleGeom = new THREE.BufferGeometry();
+    const particlePositions = new Float32Array(particleCount * 3);
+    const particleSpeeds = new Float32Array(particleCount);
+
+    for (let i = 0; i < particleCount; i++) {
+      particlePositions[i * 3] = (Math.random() - 0.5) * 2.2;
+      particlePositions[i * 3 + 1] = -1.8 + Math.random() * 3.6;
+      particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 2.2;
+      particleSpeeds[i] = 0.012 + Math.random() * 0.018;
+    }
+    particleGeom.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+
+    const particleMat = new THREE.PointsMaterial({
+      color: 0xe5b263,
+      size: 0.065,
+      transparent: true,
+      opacity: 0.75,
+      blending: THREE.AdditiveBlending
+    });
+    aromaPoints = new THREE.Points(particleGeom, particleMat);
+    scene.add(aromaPoints);
+
+    // Interactive Drag Orbit Controls
+    let isDragging = false;
+    let prevMouseX = 0, prevMouseY = 0;
+    let targetRotY = 0.4, targetRotX = 0.2;
+    let currRotY = 0.4, currRotX = 0.2;
+
+    const card = document.getElementById('heroCard');
+    if (card) {
+      card.addEventListener('pointerdown', (e) => {
+        if (!is3DMode) return;
+        isDragging = true;
+        prevMouseX = e.clientX;
+        prevMouseY = e.clientY;
+        window.playHapticClick(820, 0.02);
+      });
+
+      window.addEventListener('pointermove', (e) => {
+        if (!isDragging || !is3DMode) return;
+        const dx = e.clientX - prevMouseX;
+        const dy = e.clientY - prevMouseY;
+        prevMouseX = e.clientX;
+        prevMouseY = e.clientY;
+        targetRotY += dx * 0.012;
+        targetRotX += dy * 0.012;
+      });
+
+      window.addEventListener('pointerup', () => { isDragging = false; });
+    }
+
+    // Animation Render Loop
+    let clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+      const time = clock.getElapsedTime();
+
+      if (beanMesh) {
+        if (!isDragging) {
+          targetRotY += 0.007;
+          targetRotX = Math.sin(time * 0.6) * 0.15;
+        }
+        currRotY += (targetRotY - currRotY) * 0.08;
+        currRotX += (targetRotX - currRotX) * 0.08;
+        beanMesh.rotation.y = currRotY;
+        beanMesh.rotation.x = currRotX;
+        beanMesh.position.y = Math.sin(time * 1.5) * 0.08;
+      }
+
+      // Orbit micro-beans
+      microBeans.forEach((mb) => {
+        mb.userData.angle += mb.userData.speed;
+        mb.position.x = Math.cos(mb.userData.angle) * mb.userData.radius;
+        mb.position.z = Math.sin(mb.userData.angle) * mb.userData.radius;
+        mb.position.y = mb.userData.yBase + Math.sin(time * 2 + mb.userData.radius) * 0.18;
+        mb.rotation.x += 0.01;
+        mb.rotation.y += 0.015;
+      });
+
+      // Animate rising aroma particles
+      if (aromaPoints) {
+        const positions = aromaPoints.geometry.attributes.position.array;
+        for (let i = 0; i < particleCount; i++) {
+          positions[i * 3 + 1] += particleSpeeds[i];
+          positions[i * 3] += Math.sin(time * 2 + i) * 0.003;
+          if (positions[i * 3 + 1] > 2.0) {
+            positions[i * 3 + 1] = -1.8;
+            positions[i * 3] = (Math.random() - 0.5) * 2.0;
+            positions[i * 3 + 2] = (Math.random() - 0.5) * 2.0;
+          }
+        }
+        aromaPoints.geometry.attributes.position.needsUpdate = true;
+      }
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Resize Handler
+    function handleResize() {
+      const w = canvas.parentElement ? canvas.parentElement.clientWidth : 500;
+      const h = canvas.parentElement ? canvas.parentElement.clientHeight : 480;
+      renderer.setSize(w, h);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', handleResize);
+    setTimeout(handleResize, 100);
+  }
+
+  window.toggle3DBeanMode = function() {
+    window.playHapticClick(850, 0.035);
+    is3DMode = !is3DMode;
+    const canvas = document.getElementById('hero3DCanvas');
+    const img = document.getElementById('heroShowcaseImg');
+    const steam = document.getElementById('heroSteamCanvas');
+    const hint = document.getElementById('orbitHint');
+    const btn = document.getElementById('hero3DModeBtn');
+
+    if (is3DMode) {
+      if (canvas) {
+        canvas.style.opacity = '1';
+        canvas.style.pointerEvents = 'auto';
+      }
+      if (img) img.style.opacity = '0.05';
+      if (steam) steam.style.opacity = '0.2';
+      if (hint) hint.classList.remove('hidden');
+      if (btn) {
+        btn.classList.add('bg-[var(--bronze)]', 'text-[#FAF8F5]');
+        btn.innerHTML = '<span class="w-2 h-2 rounded-full bg-white animate-ping"></span><span>3D Orbit Active</span>';
+      }
+    } else {
+      if (canvas) {
+        canvas.style.opacity = '0';
+        canvas.style.pointerEvents = 'none';
+      }
+      if (img) img.style.opacity = '1';
+      if (steam) steam.style.opacity = '1';
+      if (hint) hint.classList.add('hidden');
+      if (btn) {
+        btn.classList.remove('bg-[var(--bronze)]', 'text-[#FAF8F5]');
+        btn.innerHTML = '<span class="w-2 h-2 rounded-full bg-[var(--bronze)] animate-pulse"></span><span>3D Bean Orbit</span>';
+      }
+    }
+  };
+
+  /* 13. 4D Scroll Velocity Dynamic Pressure Gauge Engine */
+  (function init4DScrollEngine() {
+    let lastScrollY = window.scrollY;
+    let lastTime = performance.now();
+    let scrollVelocity = 0;
+    let currentSurge = 0;
+    const needle = document.getElementById('heroGaugeNeedle');
+    const pVal = document.getElementById('heroPressureVal');
+
+    window.addEventListener('scroll', () => {
+      const now = performance.now();
+      const dt = Math.max(now - lastTime, 16);
+      const dy = Math.abs(window.scrollY - lastScrollY);
+      const vel = Math.min((dy / dt) * 12, 16);
+      scrollVelocity = Math.max(scrollVelocity, vel);
+      lastScrollY = window.scrollY;
+      lastTime = now;
+    }, { passive: true });
+
+    function velocityLoop() {
+      currentSurge += (scrollVelocity * 2.8 - currentSurge) * 0.14;
+      scrollVelocity *= 0.88;
+
+      if (!isPullingShot && needle) {
+        needle.style.transform = `rotate(${46 + currentSurge}deg)`;
+        if (pVal && currentSurge > 0.8) {
+          pVal.textContent = (9.2 + currentSurge * 0.12).toFixed(1) + ' BAR';
+        } else if (pVal && !isPullingShot && pVal.textContent.includes('BAR') && !pVal.textContent.includes('Locked')) {
+          pVal.textContent = '9.2 BAR';
+        }
+      }
+      requestAnimationFrame(velocityLoop);
+    }
+    velocityLoop();
+  })();
+
+  // Initialize Three.js scene
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initThreeDScene);
+  } else {
+    initThreeDScene();
   }
 })();
 </script>
