@@ -169,6 +169,158 @@
     backdrop-filter: blur(14px);
     border-b: 1px solid rgba(43, 22, 80, 0.15);
   }
+  /* ── THE COUNTER ───────────────────────────────────────────────────────
+     The drawn bar in the hero. Everything animates on transform or opacity,
+     nothing is promoted at rest, and the whole thing is one <svg> so it costs
+     no request. The cycle is 14s: lock the portafilter, pull the shot, fill
+     the cup, let it steam, reset. */
+  .counter-scene {
+    position: absolute;
+    right: clamp(-30px, -1vw, 10px);
+    /* Clear of the consent bar and the hero's lower padding. The counter is
+       the point of the drawing — the copy calls it a lilac glass-fronted
+       counter — so it must not be the part that falls off the bottom. */
+    bottom: clamp(78px, 11vh, 128px);
+    width: auto;
+    pointer-events: none;
+    z-index: 1;
+    filter: drop-shadow(0 24px 48px rgba(43, 22, 80, .18));
+  }
+  .counter-scene svg {
+    display: block;
+    height: clamp(300px, 54vh, 560px);
+    width: auto;
+  }
+
+  /* the hero text sits above the scene and keeps its own column */
+  .hero-inner { position: relative; z-index: 2; }
+  @media (min-width: 1100px) { .hero-inner { max-width: 54%; } }
+
+  /* pendants breathe */
+  .cs-bulb {
+    transform-origin: center;
+    animation: csGlow 5.5s ease-in-out infinite;
+    animation-delay: var(--d, 0s);
+  }
+  .cs-cone {
+    animation: csCone 5.5s ease-in-out infinite;
+    animation-delay: var(--d, 0s);
+  }
+  @keyframes csGlow {
+    0%, 100% { opacity: .82; }
+    50%      { opacity: 1; }
+  }
+  @keyframes csCone {
+    0%, 100% { opacity: .55; }
+    50%      { opacity: .85; }
+  }
+
+  /* dust drifting through the light */
+  .cs-motes circle {
+    animation: csMote 9s linear infinite;
+    animation-delay: var(--d, 0s);
+    opacity: 0;
+  }
+  @keyframes csMote {
+    0%   { opacity: 0;   transform: translateY(6px); }
+    18%  { opacity: .75; }
+    82%  { opacity: .55; }
+    100% { opacity: 0;   transform: translateY(-46px); }
+  }
+
+  /* the gauge needle kicks when the pump runs */
+  .cs-needle {
+    transform-origin: 248px 336px;
+    animation: csNeedle 14s ease-in-out infinite;
+  }
+  @keyframes csNeedle {
+    0%, 14%   { transform: rotate(-52deg); }
+    22%, 56%  { transform: rotate(46deg); }
+    64%, 100% { transform: rotate(-52deg); }
+  }
+
+  /* portafilter locks in, then comes out again */
+  .cs-portafilter {
+    transform-origin: 320px 444px;
+    animation: csLock 14s ease-in-out infinite;
+  }
+  @keyframes csLock {
+    0%, 6%    { transform: translate(14px, 10px) rotate(9deg); opacity: .85; }
+    14%, 70%  { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+    80%, 100% { transform: translate(14px, 10px) rotate(9deg); opacity: .85; }
+  }
+
+  /* the shot itself */
+  .cs-pour path {
+    transform-origin: 50% 0;
+    animation: csPour 14s ease-in-out infinite;
+  }
+  @keyframes csPour {
+    0%, 20%   { transform: scaleY(0); opacity: 0; }
+    26%, 52%  { transform: scaleY(1); opacity: 1; }
+    58%, 100% { transform: scaleY(0); opacity: 0; }
+  }
+
+  /* and the cup filling under it */
+  .cs-fill {
+    transform-origin: 50% 100%;
+    animation: csFill 14s ease-in-out infinite;
+  }
+  @keyframes csFill {
+    0%, 22%   { transform: scaleY(0); }
+    54%       { transform: scaleY(1); }
+    76%       { transform: scaleY(1); }
+    88%, 100% { transform: scaleY(0); }
+  }
+
+  /* steam, once there is something to steam from */
+  .cs-steam path {
+    fill: none;
+    stroke: #FFFFFF;
+    stroke-width: 3;
+    stroke-linecap: round;
+    opacity: 0;
+    animation: csSteam 4.2s ease-in-out infinite;
+    animation-delay: var(--d, 0s);
+  }
+  @keyframes csSteam {
+    0%   { opacity: 0;   transform: translateY(6px)  scaleX(.9); }
+    30%  { opacity: .55; }
+    70%  { opacity: .32; }
+    100% { opacity: 0;   transform: translateY(-26px) scaleX(1.15); }
+  }
+
+  /* a slow sweep of light across the glass front */
+  .cs-sheen {
+    animation: csSheen 9s ease-in-out infinite;
+  }
+  @keyframes csSheen {
+    0%, 100% { transform: translateX(0);    opacity: 0; }
+    12%      { opacity: .18; }
+    50%      { transform: translateX(380px); opacity: .10; }
+    70%      { opacity: 0; }
+  }
+
+  /* On a phone the scene sits behind the copy, quieter, so the headline owns
+     the screen. It is scenery, never competition for the text. */
+  @media (max-width: 900px) {
+    .counter-scene { right: -14%; bottom: clamp(40px, 7vh, 90px); opacity: .30; }
+    .counter-scene svg { height: clamp(220px, 34vh, 340px); }
+    .hero-inner { max-width: 100%; }
+  }
+
+  html[data-motion="off"] .counter-scene * { animation: none !important; }
+  @media (prefers-reduced-motion: reduce) {
+    .cs-bulb, .cs-cone, .cs-motes circle, .cs-needle, .cs-portafilter,
+    .cs-pour path, .cs-fill, .cs-steam path, .cs-sheen {
+      animation: none !important;
+    }
+    /* leave the scene in its finished state: shot pulled, cup full */
+    .cs-fill { transform: scaleY(1); }
+    .cs-pour path { opacity: 0; }
+    .cs-motes circle { opacity: .5; }
+  }
+
   .wordmark { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.2rem; letter-spacing: -0.03em; text-decoration: none; }
   .wordmark-badge {
     width: 32px;
@@ -586,6 +738,153 @@
 <!-- HERO SECTION WITH LIQUID CHROME WEBGL SHADER -->
 <section class="hero" id="top" data-bm-head-scope aria-labelledby="hero-title">
   <canvas id="fx" aria-hidden="true"></canvas>
+  <!-- ═══════════════ THE COUNTER ═══════════════
+       A drawn Gram Street bar rather than an abstract field: the lilac
+       glass-fronted counter the copy describes, the machine on top of it,
+       and a shot being pulled. Flat vector in the brand palette, animated on
+       transform and opacity only, and it loops on a ~14s cycle:
+       portafilter locked → shot pulls → cup fills → steam rises → reset.
+       Inline SVG so it is crisp at any size, costs no request, and needs no
+       photography. -->
+  <div class="counter-scene" aria-hidden="true">
+    <svg viewBox="0 0 640 620" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax meet">
+      <defs>
+        <linearGradient id="csGlass" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#E7DCFB" stop-opacity=".95"/>
+          <stop offset="1" stop-color="#C2A9F2" stop-opacity=".85"/>
+        </linearGradient>
+        <linearGradient id="csChrome" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#FBF9FF"/>
+          <stop offset=".35" stop-color="#C9BEDC"/>
+          <stop offset=".55" stop-color="#F4EFFC"/>
+          <stop offset="1" stop-color="#9E8FBA"/>
+        </linearGradient>
+        <linearGradient id="csTop" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#3B2160"/>
+          <stop offset=".5" stop-color="#52346F"/>
+          <stop offset="1" stop-color="#2B1650"/>
+        </linearGradient>
+        <radialGradient id="csLamp" cx=".5" cy="0" r="1">
+          <stop offset="0" stop-color="#FFE9B8" stop-opacity=".55"/>
+          <stop offset="1" stop-color="#FFE9B8" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="csCrema" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#C98A4B"/>
+          <stop offset=".45" stop-color="#8A4F23"/>
+          <stop offset="1" stop-color="#4A2713"/>
+        </linearGradient>
+        <clipPath id="csCupClip"><path d="M292 470h56v34a28 28 0 0 1-56 0z"/></clipPath>
+      </defs>
+
+      <!-- back wall shelf and jars -->
+      <g class="cs-shelf">
+        <rect x="150" y="214" width="420" height="7" rx="3.5" fill="#2B1650" opacity=".22"/>
+        <g opacity=".65">
+          <rect x="186" y="168" width="38" height="46" rx="7" fill="#2B1650" opacity=".30"/>
+          <rect x="238" y="156" width="30" height="58" rx="6" fill="#2B1650" opacity=".22"/>
+          <rect x="282" y="176" width="42" height="38" rx="7" fill="#2B1650" opacity=".26"/>
+          <rect x="470" y="164" width="34" height="50" rx="6" fill="#2B1650" opacity=".24"/>
+          <rect x="516" y="180" width="30" height="34" rx="6" fill="#2B1650" opacity=".18"/>
+        </g>
+      </g>
+
+      <!-- three pendants over the bar -->
+      <g class="cs-pendants">
+        <g class="cs-pendant" style="--d:0s">
+          <path d="M210 0v96" stroke="#2B1650" stroke-opacity=".45" stroke-width="2"/>
+          <path d="M186 96h48l-10 26h-28z" fill="#2B1650" opacity=".78"/>
+          <ellipse class="cs-bulb" cx="210" cy="124" rx="7" ry="6" fill="#FFE2A6"/>
+          <path d="M210 126 L146 300 h128 z" fill="url(#csLamp)" class="cs-cone"/>
+        </g>
+        <g class="cs-pendant" style="--d:-2.6s">
+          <path d="M330 0v120" stroke="#2B1650" stroke-opacity=".45" stroke-width="2"/>
+          <path d="M306 120h48l-10 26h-28z" fill="#2B1650" opacity=".78"/>
+          <ellipse class="cs-bulb" cx="330" cy="148" rx="7" ry="6" fill="#FFE2A6"/>
+          <path d="M330 150 L266 318 h128 z" fill="url(#csLamp)" class="cs-cone"/>
+        </g>
+        <g class="cs-pendant" style="--d:-5.1s">
+          <path d="M450 0v104" stroke="#2B1650" stroke-opacity=".45" stroke-width="2"/>
+          <path d="M426 104h48l-10 26h-28z" fill="#2B1650" opacity=".78"/>
+          <ellipse class="cs-bulb" cx="450" cy="132" rx="7" ry="6" fill="#FFE2A6"/>
+          <path d="M450 134 L386 304 h128 z" fill="url(#csLamp)" class="cs-cone"/>
+        </g>
+      </g>
+
+      <!-- dust in the light -->
+      <g class="cs-motes">
+        <circle cx="196" cy="250" r="2.4" fill="#FFF4DA" style="--d:0s"/>
+        <circle cx="248" cy="286" r="1.8" fill="#FFF4DA" style="--d:-3.4s"/>
+        <circle cx="312" cy="262" r="2.1" fill="#FFF4DA" style="--d:-6.1s"/>
+        <circle cx="366" cy="292" r="1.6" fill="#FFF4DA" style="--d:-1.8s"/>
+        <circle cx="436" cy="258" r="2.2" fill="#FFF4DA" style="--d:-4.7s"/>
+        <circle cx="486" cy="286" r="1.7" fill="#FFF4DA" style="--d:-7.3s"/>
+      </g>
+
+      <!-- the espresso machine -->
+      <g class="cs-machine">
+        <rect x="178" y="300" width="286" height="118" rx="14" fill="url(#csChrome)"/>
+        <rect x="178" y="300" width="286" height="118" rx="14" fill="#2B1650" opacity=".07"/>
+        <rect x="196" y="316" width="104" height="40" rx="8" fill="#2B1650" opacity=".70"/>
+        <circle class="cs-gauge" cx="248" cy="336" r="13" fill="#F1E9FF"/>
+        <path class="cs-needle" d="M248 336v-9" stroke="#2B1650" stroke-width="2.4" stroke-linecap="round"/>
+        <rect x="324" y="318" width="120" height="10" rx="5" fill="#2B1650" opacity=".30"/>
+        <rect x="324" y="338" width="86" height="10" rx="5" fill="#2B1650" opacity=".18"/>
+        <!-- group head + portafilter -->
+        <rect x="300" y="418" width="44" height="22" rx="5" fill="#8E7FAE"/>
+        <g class="cs-portafilter">
+          <rect x="296" y="438" width="52" height="12" rx="4" fill="#B9ACD4"/>
+          <rect x="392" y="440" width="54" height="9" rx="4.5" fill="#2B1650" opacity=".65"/>
+          <path d="M344 444h50" stroke="#B9ACD4" stroke-width="7" stroke-linecap="round"/>
+        </g>
+        <!-- steam wand -->
+        <path d="M470 330c18 10 20 38 6 56" stroke="#9E8FBA" stroke-width="5" stroke-linecap="round"/>
+      </g>
+
+      <!-- the shot -->
+      <g class="cs-pour">
+        <path d="M316 452v26" stroke="url(#csCrema)" stroke-width="3.4" stroke-linecap="round"/>
+        <path d="M326 452v26" stroke="url(#csCrema)" stroke-width="3.4" stroke-linecap="round" opacity=".75"/>
+      </g>
+
+      <!-- cup on the drip tray -->
+      <g class="cs-cup">
+        <path d="M292 470h56v34a28 28 0 0 1-56 0z" fill="#FBF7FF"/>
+        <g clip-path="url(#csCupClip)">
+          <rect class="cs-fill" x="290" y="470" width="60" height="38" fill="url(#csCrema)"/>
+        </g>
+        <path d="M292 470h56v34a28 28 0 0 1-56 0z" fill="none" stroke="#CDBEE8" stroke-width="2"/>
+        <path d="M348 478c14 0 14 18 0 18" stroke="#CDBEE8" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <ellipse cx="320" cy="470" rx="28" ry="5" fill="#FFFFFF" opacity=".85"/>
+      </g>
+
+      <!-- steam off the cup -->
+      <g class="cs-steam">
+        <path d="M306 452c-7-13 7-19 0-32" style="--d:0s"/>
+        <path d="M320 448c-7-15 7-21 0-35" style="--d:-1.9s"/>
+        <path d="M334 452c-7-13 7-19 0-32" style="--d:-3.6s"/>
+      </g>
+
+      <!-- counter: dark top, lilac glass front -->
+      <g class="cs-counter">
+        <rect x="96" y="508" width="470" height="18" rx="4" fill="url(#csTop)"/>
+        <rect x="104" y="526" width="454" height="88" rx="6" fill="url(#csGlass)"/>
+        <rect x="104" y="526" width="454" height="88" rx="6" fill="none" stroke="#FFFFFF" stroke-opacity=".55" stroke-width="2"/>
+        <path d="M150 530v80M232 530v80M314 530v80M396 530v80M478 530v80"
+              stroke="#FFFFFF" stroke-opacity=".30" stroke-width="1.5"/>
+        <!-- gelato pans behind the glass -->
+        <g opacity=".85">
+          <rect x="120" y="552" width="56" height="26" rx="8" fill="#FFD7E8"/>
+          <rect x="190" y="552" width="56" height="26" rx="8" fill="#CFE3AE"/>
+          <rect x="260" y="552" width="56" height="26" rx="8" fill="#E6D2B6"/>
+          <rect x="330" y="552" width="56" height="26" rx="8" fill="#FFD7E8"/>
+          <rect x="400" y="552" width="56" height="26" rx="8" fill="#CFE3AE"/>
+        </g>
+        <!-- a sweep of light across the glass -->
+        <rect class="cs-sheen" x="104" y="526" width="80" height="88" fill="#FFFFFF" opacity=".16"/>
+      </g>
+    </svg>
+  </div>
+
   <div class="hero-inner">
     <h1 id="hero-title">
       <span class="w"><span style="--i:0">The</span></span>
@@ -713,7 +1012,7 @@
 </section>
 
   <!-- ================= SPECIALTY ROASTERY & EXTRACTION CRAFT ================= -->
-<section class="py-24 px-6 md:px-12 max-w-7xl mx-auto" id="roasteryCraft" data-bm="lean">
+<section class="py-24 px-6 md:px-12 max-w-7xl mx-auto" id="roasteryCraft">
   <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
     <div>
       <span class="text-xs font-black uppercase tracking-[0.25em] text-[#7C3AED]">The Sensory Extraction & Roastery Bar</span>
@@ -946,7 +1245,7 @@
 </section>
 
 <!-- D2C COFFEE ROASTERY SHOP -->
-<section class="py-24 px-6 md:px-12 max-w-7xl mx-auto scroll-reveal" id="d2cShop" data-bm="lean">
+<section class="py-24 px-6 md:px-12 max-w-7xl mx-auto scroll-reveal" id="d2cShop">
   <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
     <div>
       <span class="text-xs font-black uppercase tracking-[0.25em] text-[#7C3AED]">D2C Roastery Releases</span>
@@ -965,7 +1264,7 @@
 
 <!-- CHEF SECTION: SCROLL-DRAWN TIMELINE -->
 <span id="story" aria-hidden="true"></span>
-<section class="chef" id="chef" data-bm="lean" aria-labelledby="chef-title">
+<section class="chef" id="chef" aria-labelledby="chef-title">
   <div class="chef-grid scroll-reveal" data-slot="chef">
     <div>
       <h2 id="chef-title">From pie shop to purple latte.</h2>
@@ -980,7 +1279,7 @@
 </section>
 
 <!-- SPACE: SPECULAR CHROME HEADING THAT SWEEPS REFLECTIONS ON POINTER MOVE -->
-<section class="space" id="space" data-bm="lean" data-slot="space" aria-labelledby="space-title">
+<section class="space" id="space" data-slot="space" aria-labelledby="space-title">
   <h2 class="chrome-text" id="space-title">Lilac glass. Chrome accents. A tiny room by design.</h2>
   <div class="space-grid scroll-reveal">
     <p>A glass front painted lilac, chrome cutting through the pastel interior, and a design philosophy drawn from contemporary Asian specialty bars. Bhatia deliberately avoided turning it into a remote workstation: there is just enough room to savor an espresso, and that is the entire point.</p>
@@ -989,7 +1288,7 @@
 </section>
 
 <!-- CITIES & RADAR ORBIT CONSTELLATION -->
-<section class="cities" id="cities" data-bm="lean" aria-labelledby="cities-title">
+<section class="cities" id="cities" aria-labelledby="cities-title">
   <div class="cities-grid scroll-reveal">
     <div>
       <h2 id="cities-title">A movement, city by city.</h2>
@@ -1023,7 +1322,7 @@
 </section>
 
 <!-- ALL 3 LOCATIONS & CELEBRATED STEAMED WINDOW (SCRATCH TO REVEAL) -->
-<section class="visit" id="destinations" data-bm="lean" aria-labelledby="visit-title">
+<section class="visit" id="destinations" aria-labelledby="visit-title">
   <div class="max-w-7xl mx-auto space-y-10 scroll-reveal">
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
       <div>
@@ -1316,11 +1615,16 @@
       "vec3 col=mix(lilac,mid,smoothstep(0.25,0.85,h));",
       "float band2=0.5+0.5*sin(h*14.0+1.5-u_t*0.3);",
       // the fold of the pour, strongest where the swirl turns over
-            // Same ramp as the sister site: the headline owns the left third.
+      // Same ramp as the sister site: the headline owns the left third, so
+      // the field stays quiet under the type and carries weight in the open.
+      // The ramp came from the pass that made this shader the hero; the
+      // amplitude comes from the pass that replaced it with a drawn counter.
+      // They are separable — keep the ramp, keep the ambient level — because
+      // the shader is now room light behind a drawing, not the drawing.
       "float side=mix(0.38,1.0,smoothstep(-0.30,0.45,p.x));",
-      "col=mix(col,flav,smoothstep(0.52,0.99,band2)*0.46*side);",
+      "col=mix(col,flav,smoothstep(0.70,0.99,band2)*0.14*side);",
       // crema breaking white at the crest
-      "col=mix(col,white,shine*0.55*side);",
+      "col=mix(col,white,shine*0.22*side);",
       "gl_FragColor=vec4(col,1.0);}"
     ].join("\n");
 

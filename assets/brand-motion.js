@@ -121,79 +121,10 @@
     });
   }
 
-  /* 2 ─ Scroll-velocity lean, the "4D" one ---------------------------------- */
-  // Fast scroll leans and squashes the section slightly; stopping settles it.
-  // This is the effect people read as "expensive", and it is nearly free:
-  // one rAF loop writing two composited properties on a handful of elements.
-  function velocity(gsap) {
-    if (reduced) return;
-    // Opt-in only. A skew on a section containing a sticky stage breaks the
-    // pin, and both pages pin their centrepiece, so no blanket fallback.
-    var targets = pick('[data-bm="lean"]');
-    if (!targets.length) return;
-
-    var last = window.scrollY, vel = 0, raf = 0, idle = 0, running = false;
-
-    function frame() {
-      if (!running) return;
-      var y = window.scrollY;
-      var dv = y - last;
-      last = y;
-      vel += (dv - vel) * 0.18;             // smooth the raw delta
-      var clamped = Math.max(-70, Math.min(70, vel));
-
-      if (Math.abs(clamped) < 0.05) {
-        if (++idle > 30) { stop(); }        // settle, then stop paying for it
-      } else { idle = 0; }
-
-      var skew = clamped * 0.055;           // degrees
-      var squash = 1 - Math.min(Math.abs(clamped) * 0.0009, 0.045);
-
-      for (var i = 0; i < targets.length; i++) {
-        var el = targets[i];
-        if (!el.dataset.bmVisible) continue;
-        el.style.transform = 'skewY(' + skew.toFixed(3) + 'deg) scaleY(' + squash.toFixed(4) + ')';
-      }
-      raf = requestAnimationFrame(frame);
-    }
-
-    function start() {
-      if (running || document.hidden) return;
-      running = true; idle = 0; last = window.scrollY;
-      targets.forEach(function (el) { if (el.dataset.bmVisible) el.style.willChange = 'transform'; });
-      raf = requestAnimationFrame(frame);
-    }
-    function stop() {
-      running = false;
-      cancelAnimationFrame(raf);
-      targets.forEach(function (el) {
-        el.style.transform = '';
-        el.style.willChange = '';
-      });
-    }
-
-    // Only lean what is actually on screen.
-    if (typeof IntersectionObserver !== 'undefined') {
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
-          if (e.isIntersecting) e.target.dataset.bmVisible = '1';
-          else {
-            delete e.target.dataset.bmVisible;
-            e.target.style.transform = '';
-            e.target.style.willChange = '';
-          }
-        });
-      }, { rootMargin: '10% 0px' });
-      targets.forEach(function (t) { io.observe(t); });
-    } else {
-      targets.forEach(function (t) { t.dataset.bmVisible = '1'; });
-    }
-
-    window.addEventListener('scroll', start, { passive: true });
-    document.addEventListener('visibilitychange', function () {
-      document.hidden ? stop() : start();
-    });
-  }
+  /* 2 ─ (removed) Scroll-velocity lean.
+     Sections used to skew and squash with scroll speed. On a real page it does
+     not read as craft, it reads as the page being rendered wrong, so it is
+     gone rather than tuned. */
 
   /* 3 ─ Magnetic, tilting CTAs ---------------------------------------------- */
   function magnetic(gsap) {
@@ -254,7 +185,6 @@
     if (window.ScrollTrigger) gsap.registerPlugin(window.ScrollTrigger);
 
     try { headlines(gsap); } catch (e) {}
-    try { velocity(gsap); } catch (e) {}
     try { magnetic(gsap); } catch (e) {}
     try { depth(gsap); } catch (e) {}
   });
