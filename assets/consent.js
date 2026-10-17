@@ -45,7 +45,7 @@
     bar.setAttribute('aria-label', 'Cookies and analytics');
     bar.innerHTML =
       '<div class="cb-inner">' +
-        '<p class="cb-text">This site keeps one cookie to remember your sidebar, which needs no permission. ' +
+        '<p class="cb-text">This site stores a couple of display preferences, which need no permission. ' +
         'May I also load <strong>privacy-friendly analytics</strong> (no cookies, no tracking across sites) ' +
         'to see which pages get read? <a href="/privacy">Privacy Policy</a>.</p>' +
         '<div class="cb-actions">' +
