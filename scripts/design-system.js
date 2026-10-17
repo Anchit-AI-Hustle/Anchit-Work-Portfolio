@@ -34,7 +34,7 @@ const PAGES = [
 ];
 
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+  const b = await chromium.launch();
   const results = [];
   const check = (n, ok, d) => results.push([ok ? 'PASS' : 'FAIL', n, d]);
   const allSizes = new Set();

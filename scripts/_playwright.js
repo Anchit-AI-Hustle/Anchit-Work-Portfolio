@@ -13,15 +13,24 @@
  *      devDependency now), falling back to that global path so the suites keep
  *      working in a container where node_modules has not been installed.
  *
- *   2. WHICH BROWSER. A Playwright from npm expects the exact browser build it
- *      shipped with. An image that pre-installs a different build — this one
- *      pins PLAYWRIGHT_BROWSERS_PATH at an older chromium — satisfies the
- *      suites that pass an explicit executablePath and breaks every suite that
- *      just calls launch(). So launch() is wrapped: when the caller gives no
- *      executablePath and Playwright's own build is absent, fall back to
- *      whatever chromium the image does have. In CI there is no pre-installed
- *      browser, `npx playwright install chromium` provides the matching one,
- *      and this wrapper stays out of the way.
+ *   2. WHICH BROWSER. Ten of the suites also hardcoded the binary:
+ *
+ *        chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/…' })
+ *
+ *      That is the same bug one layer down, and it is the one that actually
+ *      turned CI red: resolving the library is no use while the suite still
+ *      points at a chrome-linux directory only this image has. The suites now
+ *      call launch() with no path and this module decides, in order:
+ *
+ *        a. Playwright's own build, if it is installed. Always the best match.
+ *        b. whatever chromium the image has, if PLAYWRIGHT_BROWSERS_PATH
+ *           points at one (that is this container).
+ *        c. nothing, and Playwright reports its own missing-browser error.
+ *
+ *      An executablePath a caller passes still wins, unless the file is not
+ *      there — then it is dropped rather than thrown, because a stale absolute
+ *      path is exactly what this module exists to survive. In CI,
+ *      `npx playwright install chromium` provides (a) and the rest is unused.
  */
 const fs = require('node:fs');
 const path = require('node:path');
@@ -56,18 +65,26 @@ function preinstalledChromium() {
 
 const FALLBACK = preinstalledChromium();
 
+/** Playwright's own browser build, if it was ever installed. */
+function ownChromium() {
+  try {
+    const p = playwright.chromium.executablePath();
+    return p && fs.existsSync(p) ? p : null;
+  } catch (_) {
+    return null;
+  }
+}
+
 const chromium = Object.create(playwright.chromium);
 chromium.launch = function launch(options) {
   const opts = Object.assign({}, options);
-  if (!opts.executablePath && FALLBACK) {
-    // Only step in when Playwright's own build is missing; otherwise let it
-    // use the browser it shipped with, which is always the better match.
-    try {
-      const own = playwright.chromium.executablePath();
-      if (!own || !fs.existsSync(own)) opts.executablePath = FALLBACK;
-    } catch (_) {
-      opts.executablePath = FALLBACK;
-    }
+  // A path that no longer exists is worse than no path: it is the failure this
+  // module was written for. Drop it and choose again.
+  if (opts.executablePath && !fs.existsSync(opts.executablePath)) {
+    delete opts.executablePath;
+  }
+  if (!opts.executablePath && !ownChromium() && FALLBACK) {
+    opts.executablePath = FALLBACK;
   }
   return playwright.chromium.launch(opts);
 };

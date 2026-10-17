@@ -26,7 +26,7 @@ const isShown = (p) => p.evaluate(() => {
 });
 
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+  const b = await chromium.launch();
 
   // ── a brand-new visitor ──────────────────────────────────────────────────
   const ctx = await b.newContext({ viewport: { width: 1280, height: 900 } });

@@ -19,7 +19,7 @@ const { chromium } = require('./_playwright.js');
 const PAGES = process.argv.slice(2).length?process.argv.slice(2):
   ['index.html','agent.html','jobhunt.html','lifecycle-os.html','hotel.html','marketing-101.html','lifecycle-os-ads.html'];
 (async () => {
-  const b = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+  const b = await chromium.launch();
   console.log('page'.padEnd(26)+'variants'.padStart(9)+'adjSame'.padStart(9)+'maxAtOnce'.padStart(11)+'  allShown');
   for (const page of PAGES) {
     const p = await (await b.newContext({ viewport:{width:1440,height:900} })).newPage();

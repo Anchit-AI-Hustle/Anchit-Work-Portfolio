@@ -55,9 +55,11 @@ jobs:
       # The suites below are the ones that actually catch layout and content
       # regressions. Until now none of them could run here: every browser suite
       # opened Playwright from an absolute path inside one particular container
-      # (/opt/node22/...), so CI was limited to greps and a build. Playwright is
-      # a devDependency now and scripts/_playwright.js resolves it properly, so
-      # these finally run on every pull request.
+      # (/opt/node22/...) and most of them launched a hardcoded chrome binary
+      # from that same image, so CI was limited to greps and a build. Playwright
+      # is a devDependency now, the suites pass no executablePath, and
+      # scripts/_playwright.js picks the library and the browser, so these
+      # finally run on every pull request.
       - name: Install Chromium for the browser suites
         run: npx playwright install --with-deps chromium
 
@@ -78,6 +80,7 @@ jobs:
           npm run test:sw
           npm run test:chatblank
           npm run test:sidebar
+          npm run test:course
 
       - name: Layout suites
         run: |
