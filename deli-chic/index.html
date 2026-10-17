@@ -310,7 +310,7 @@
     /* Fixed Header Solid Contrast */
     header.deli-site-header {
       position: fixed !important;
-      top: 32px !important;
+      top: var(--deli-bar-h, 32px) !important;
       left: 0 !important;
       right: 0 !important;
       z-index: 50 !important;
@@ -391,9 +391,9 @@
   <div class="film-grain" aria-hidden="true"></div>
 
   <!-- ================= TOP FRESH DISPATCH ANNOUNCEMENT ================= -->
-  <div class="fixed top-0 left-0 right-0 z-50 bg-[#4A0E17] text-[#FFF9F4] text-[11px] sm:text-xs font-medium tracking-wider py-2 px-4 border-b border-[#C59A45]/30">
+  <div id="deliAnnounceBar" class="fixed top-0 left-0 right-0 z-50 bg-[#4A0E17] text-[#FFF9F4] text-[11px] sm:text-xs font-medium tracking-wider py-2 px-4 border-b border-[#C59A45]/30">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
-      <div class="flex items-center gap-2 mx-auto sm:mx-0">
+      <div class="flex flex-wrap items-center justify-center sm:justify-start gap-x-2 gap-y-0.5 mx-auto sm:mx-0 text-center sm:text-left">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
         <span class="font-bold">ALL 4 DELHI NCR HUBS OPERATIONAL:</span>
         <span class="text-white/90">Slot 1 (10 AM–1 PM) &amp; Slot 2 (5 PM–8 PM) • Free Express Cold-Chain on ₹999+</span>
@@ -1579,6 +1579,31 @@
       initScrollReveal();
     }, 200);
   </script>
+<script>
+  /* The header is fixed under a fixed announcement bar. The bar's height is not
+     a constant: at 320px it wraps to three lines (67px), and the hardcoded
+     32px offset meant the header sat on top of it and cut the delivery-slot
+     line in half. Measure it and publish the number as a custom property.
+     The property goes on <html>, not :root-via-JS on every frame — it is
+     written only when the value actually changes, because a custom property
+     on the root invalidates the computed style of every element on the page. */
+  (function () {
+    var bar = document.getElementById('deliAnnounceBar');
+    if (!bar) return;
+    var last = -1;
+    function sync() {
+      var h = Math.round(bar.getBoundingClientRect().height);
+      if (h === last || !h) return;
+      last = h;
+      document.documentElement.style.setProperty('--deli-bar-h', h + 'px');
+    }
+    sync();
+    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(sync).observe(bar);
+    else window.addEventListener('resize', sync);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(sync);
+    window.addEventListener('load', sync);
+  })();
+</script>
 <script src="/assets/vendor/gsap.min.js"></script>
 <script src="/assets/vendor/ScrollTrigger.min.js"></script>
 <script src="/assets/brand-motion.js" defer></script>

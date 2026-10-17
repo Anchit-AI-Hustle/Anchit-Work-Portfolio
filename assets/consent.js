@@ -46,8 +46,9 @@
     bar.innerHTML =
       '<div class="cb-inner">' +
         '<p class="cb-text">This site stores a couple of display preferences, which need no permission. ' +
-        'May I also load <strong>privacy-friendly analytics</strong> (no cookies, no tracking across sites) ' +
-        'to see which pages get read? <a href="/privacy">Privacy Policy</a>.</p>' +
+        'May I also load <strong>privacy-friendly analytics</strong>' +
+        '<span class="cb-long"> (no cookies, no tracking across sites)</span>' +
+        ' to see which pages get read? <a href="/privacy">Privacy Policy</a>.</p>' +
         '<div class="cb-actions">' +
           '<button type="button" class="cb-btn" data-consent="denied">No thanks</button>' +
           '<button type="button" class="cb-btn cb-primary" data-consent="granted">Allow analytics</button>' +
@@ -79,7 +80,13 @@
       '#consentBar .cb-btn:focus-visible{outline:2px solid #FF6940;outline-offset:3px}' +
       '@media (prefers-reduced-motion: reduce){#consentBar{transition:none}}' +
       '@media (max-width:560px){#consentBar .cb-actions{width:100%}' +
-        '#consentBar .cb-btn{flex:1}}';
+        '#consentBar .cb-btn{flex:1}' +
+        /* On a 320x626 screen the full paragraph ate a third of the page. */
+        '#consentBar{padding:11px 14px calc(11px + env(safe-area-inset-bottom,0px))}' +
+        '#consentBar .cb-inner{gap:10px}' +
+        '#consentBar .cb-text{font-size:12.5px;line-height:1.45;flex-basis:100%}' +
+        '#consentBar .cb-text .cb-long{display:none}' +
+        '#consentBar .cb-btn{padding:9px 12px;font-size:12.5px}}';
 
     document.head.appendChild(css);
     document.body.appendChild(bar);

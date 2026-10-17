@@ -193,6 +193,68 @@
   .nav a:hover { background: rgba(255, 255, 255, 0.65); }
   @media (max-width: 640px) { .nav .opt { display: none; } }
 
+  /* ── Mobile header ──────────────────────────────────────────────────────
+     The inline nav measures 700px. On a 320px phone it simply ran off the
+     side of the screen, and the wordmark wrapped onto three lines, which made
+     the fixed header 105px tall — taller than the hero's 90px top padding, so
+     the headline was buried behind it. Below 900px the links become a sheet
+     behind a toggle, the wordmark stays on one line, and the header goes back
+     to a single row. */
+  .nav-links { display: contents; }
+  .nav-toggle { display: none; }
+
+  @media (max-width: 900px) {
+    .site-head { padding: 6px var(--pad); gap: 6px; }
+    .wordmark { font-size: 1rem; gap: 8px; min-width: 0; }
+    .wordmark span { white-space: nowrap; }
+    .wordmark-badge { width: 28px; height: 28px; border-radius: 8px; flex: 0 0 auto; }
+
+    .nav-toggle {
+      order: -1;
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 38px; height: 38px; flex: 0 0 auto;
+      border-radius: 11px; border: 1px solid rgba(43, 22, 80, .18);
+      background: rgba(255, 255, 255, .6); cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav-toggle-bars { display: block; width: 16px; }
+    .nav-toggle-bars i {
+      display: block; height: 2px; border-radius: 2px;
+      background: var(--grape); margin: 3px 0;
+      transition: transform .22s ease, opacity .22s ease;
+    }
+    .nav-toggle[aria-expanded="true"] .nav-toggle-bars i:nth-child(1) { transform: translateY(5px) rotate(45deg); }
+    .nav-toggle[aria-expanded="true"] .nav-toggle-bars i:nth-child(2) { opacity: 0; }
+    .nav-toggle[aria-expanded="true"] .nav-toggle-bars i:nth-child(3) { transform: translateY(-5px) rotate(-45deg); }
+
+    .nav { gap: 6px; margin-left: auto; }
+    .nav-links {
+      display: none;
+      position: fixed; top: 52px; left: 8px; right: 8px;
+      flex-direction: column; gap: 2px; padding: 8px;
+      background: #CFBCF8;
+      -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+      border: 1px solid rgba(43, 22, 80, .14);
+      border-radius: 16px;
+      box-shadow: 0 18px 40px rgba(43, 22, 80, .22);
+      max-height: calc(100svh - 70px); overflow-y: auto;
+    }
+    .nav-links.is-open { display: flex; }
+    .nav-links a { padding: 11px 14px; border-radius: 10px; font-size: 0.95rem; }
+
+    /* The header is one row again, so the hero only needs to clear ~52px —
+       but keep headroom for the notch and a wrapped line. */
+    .hero { padding-top: clamp(76px, 14vh, 110px); }
+  }
+
+  /* Under ~430px the toggle, the wordmark and two action buttons cannot all
+     fit, and nowrap meant the wordmark slid under the buttons reading
+     "Gram Street Cof". The badge is the logo, so the text steps aside. */
+  @media (max-width: 430px) {
+    .wordmark span { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { .nav-toggle-bars i { transition: none; } }
+
   /* hero */
   .hero {
     position: relative;
@@ -489,14 +551,20 @@
     <div class="wordmark-badge">GS</div>
     <span>Gram Street Coffee</span>
   </a>
+  <button class="nav-toggle" id="navToggle" type="button"
+          aria-expanded="false" aria-controls="navLinks" aria-label="Open menu">
+    <span class="nav-toggle-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+  </button>
   <nav class="nav" aria-label="Main Navigation">
-    <a href="#chapters">Flavours</a>
-    <a href="#roasteryCraft">Craft &amp; Roastery</a>
-    <a href="#d2cShop">D2C Roasts</a>
-    <a href="#story">Story</a>
-    <a href="#space">The Space</a>
-    <a href="#cities">Network</a>
-    <a href="#destinations">Locations (3)</a>
+    <div class="nav-links" id="navLinks">
+      <a href="#chapters">Flavours</a>
+      <a href="#roasteryCraft">Craft &amp; Roastery</a>
+      <a href="#d2cShop">D2C Roasts</a>
+      <a href="#story">Story</a>
+      <a href="#space">The Space</a>
+      <a href="#cities">Network</a>
+      <a href="#destinations">Locations (3)</a>
+    </div>
     <!-- 5D Audio Toggle Button -->
     <button id="audioBtn" onclick="toggleAudio()" class="ml-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-[#2B1650]/40 text-[#2B1650] flex items-center gap-1.5 bg-white/70 hover:bg-white transition-all">
       <span id="audioDot" class="w-2 h-2 rounded-full bg-slate-400"></span>
@@ -1893,6 +1961,41 @@
     initScrollReveal();
   }, 300);
 })();
+</script>
+<script>
+  /* Mobile menu. Closes on choosing a link, on Escape, and on an outside tap,
+     because a fixed sheet that stays open over the page is worse than no menu. */
+  (function () {
+    var t = document.getElementById('navToggle');
+    var panel = document.getElementById('navLinks');
+    if (!t || !panel) return;
+    function setOpen(on) {
+      panel.classList.toggle('is-open', on);
+      t.setAttribute('aria-expanded', String(on));
+      t.setAttribute('aria-label', on ? 'Close menu' : 'Open menu');
+    }
+    t.addEventListener('click', function (e) {
+      e.stopPropagation();
+      setOpen(!panel.classList.contains('is-open'));
+    });
+    panel.addEventListener('click', function (e) {
+      if (e.target.closest('a')) setOpen(false);
+    });
+    document.addEventListener('click', function (e) {
+      if (!panel.classList.contains('is-open')) return;
+      if (panel.contains(e.target) || t.contains(e.target)) return;
+      setOpen(false);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') setOpen(false);
+    });
+    // Leaving the mobile range with the sheet open would strand it on desktop.
+    if (window.matchMedia) {
+      window.matchMedia('(min-width: 901px)').addEventListener('change', function (m) {
+        if (m.matches) setOpen(false);
+      });
+    }
+  })();
 </script>
 <script src="/assets/vendor/gsap.min.js"></script>
 <script src="/assets/vendor/ScrollTrigger.min.js"></script>
