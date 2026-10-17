@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Page not found — Anchit Tandon</title>
+<meta name="description" content="That page does not exist on anchit-tandon.com. Here are the places worth going instead.">
+<meta name="robots" content="noindex,follow">
+<link rel="icon" href="/icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/assets/legal.css">
+<style>
+  .code {
+    font-family: var(--font-mono); font-size: 13px; letter-spacing: .18em;
+    color: var(--primary); margin-bottom: 14px;
+  }
+  .asked {
+    font-family: var(--font-mono); font-size: 13px; color: var(--ink-dim);
+    background: var(--bg-deep); border: 1px solid var(--rule);
+    border-radius: var(--r-sm); padding: 9px 12px; margin: 0 0 26px;
+    word-break: break-all; display: none;
+  }
+  .asked[data-shown="1"] { display: block; }
+  .routes { display: grid; gap: 10px; margin: 26px 0 0; }
+  @media (min-width: 620px) { .routes { grid-template-columns: 1fr 1fr; } }
+  .route {
+    display: block; text-decoration: none; padding: 14px 16px;
+    background: var(--bg-elev); border: 1px solid var(--rule);
+    border-radius: var(--r-md);
+    transition: transform .18s ease, border-color .18s ease;
+  }
+  .route:hover { transform: translateY(-2px); border-color: var(--primary); }
+  .route b { display: block; color: var(--ink); font-size: 15px; margin-bottom: 2px; font-weight: 600; }
+  .route span { color: var(--ink-dim); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="mark" href="/">← Anchit Tandon</a>
+    <nav>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+      <a href="/#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="code">ERROR 404</div>
+  <h1>That page isn't here.</h1>
+  <p class="lede">Either it moved, or the link that sent you here was wrong. Nothing is broken on your end.</p>
+  <p class="asked" id="asked"></p>
+
+  <div class="routes">
+    <a class="route" href="/"><b>Home</b><span>The portfolio, from the top</span></a>
+    <a class="route" href="/#projects"><b>Projects</b><span>Parwah and the independent builds</span></a>
+    <a class="route" href="/#experience"><b>Experience</b><span>Vahdam, Times Internet, and before</span></a>
+    <a class="route" href="/freelancer"><b>Freelance</b><span>What I take on, and how to start</span></a>
+    <a class="route" href="/marketing-101"><b>Marketing 101</b><span>A working course, free to use</span></a>
+    <a class="route" href="/#contact"><b>Contact</b><span>WhatsApp, email or a 30-minute call</span></a>
+  </div>
+
+  <div class="actions">
+    <a class="btn primary" href="/">Take me home</a>
+    <a class="btn" href="/#contact">Tell me the link was broken</a>
+  </div>
+
+  <p class="foot">Anchit Tandon · Delhi, India · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></p>
+</main>
+
+<script>
+  // Show the path that missed, so a broken link is easy to report back.
+  (function () {
+    try {
+      var el = document.getElementById('asked');
+      var p = window.location.pathname;
+      if (!el || !p || p === '/') return;
+      el.textContent = 'You asked for: ' + p;
+      el.setAttribute('data-shown', '1');
+    } catch (e) { /* the page is useful without this */ }
+  })();
+</script>
+
+</body>
+</html>

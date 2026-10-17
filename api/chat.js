@@ -113,11 +113,60 @@ function classifyUpstream(status, detail) {
   return 'upstream_' + status;
 }
 
+// ---------------------------------------------------------------------------
+// Per-IP rate limit.
+//
+// This endpoint is public, unauthenticated, and every POST spends money with an
+// LLM provider. Before this, the only limiting here was translating a provider's
+// own 429 back to the caller — which means the bill is already incurred by the
+// time anything pushes back. A script could sit on it all night.
+//
+// HONEST LIMITATION: serverless instances do not share memory, so this caps a
+// caller per warm instance, not globally. It stops casual hammering and a loose
+// script; it is not a defence against a distributed flood. A shared store
+// (Vercel KV / Upstash) is what that would need, and is worth adding if this
+// ever gets real traffic.
+const RL_WINDOW_MS = 60_000;
+const RL_MAX = 12;               // generous for a human; a script notices fast
+const RL_MAX_KEYS = 5_000;       // bound the map so it cannot grow without end
+const rlHits = new Map();
+
+function clientKey(req) {
+  const fwd = req.headers['x-forwarded-for'];
+  const ip = (Array.isArray(fwd) ? fwd[0] : (fwd || '')).split(',')[0].trim();
+  return ip || req.headers['x-real-ip'] || req.socket?.remoteAddress || 'unknown';
+}
+
+function rateLimited(req) {
+  const key = clientKey(req);
+  const now = Date.now();
+  const hits = (rlHits.get(key) || []).filter((t) => now - t < RL_WINDOW_MS);
+  hits.push(now);
+  rlHits.set(key, hits);
+
+  if (rlHits.size > RL_MAX_KEYS) {
+    for (const [k, v] of rlHits) {
+      if (!v.length || now - v[v.length - 1] > RL_WINDOW_MS) rlHits.delete(k);
+      if (rlHits.size <= RL_MAX_KEYS) break;
+    }
+  }
+  return hits.length > RL_MAX;
+}
+
 async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
+
+  // Applied to POST only: GET is the cheap diagnostic and costs nothing.
+  if (req.method === 'POST' && rateLimited(req)) {
+    res.setHeader('Retry-After', '60');
+    return res.status(429).json({
+      error: 'rate_limited',
+      reply: "That's a lot of questions at once — give me a minute and try again.",
+    });
+  }
 
   // Which engines are live. Mirrors /api/tts?debug=1 so both are checkable the
   // same way after a deploy.

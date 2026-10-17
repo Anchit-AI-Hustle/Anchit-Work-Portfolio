@@ -72,6 +72,9 @@ const assets = [
   'auth-demo.html',
   'hotel.html',
   'manifest.json',
+  'privacy.html',
+  'terms.html',
+  '404.html',
   'sw.js',
   'robots.txt',
   'sitemap.xml',
@@ -198,6 +201,36 @@ async function collectHtmlFiles(dir) {
 // nested React app is built. Every first-party HTML entry point therefore gets:
 //   1) app-level navigation and dependencies; and
 //   2) project-level paths, guide packs, copyable prompts and local progress.
+const CONSENT_MARKER = 'data-consent-runtime';
+const CONSENT_TAG =
+  `  <script defer src="/assets/consent.js" ${CONSENT_MARKER}="runtime"></script>`;
+
+// Consent is not a widget, it is a legal control, so it cannot be opt-in per
+// page: a page that forgets the tag is a page that silently loads analytics
+// without asking. Every HTML file in the output gets it, exactly once.
+//
+// This is a separate pass from injectSharedExperience() on purpose. That one is
+// switched off deliberately (see the note where it would be called) because the
+// Skill Map and Playbook widgets it injects were taken off the site.
+async function injectConsent() {
+  const htmlFiles = await collectHtmlFiles(WWW);
+  let injected = 0;
+  let skipped = 0;
+
+  for (const file of htmlFiles) {
+    const before = await readFile(file, 'utf8');
+    if (before.includes(CONSENT_MARKER)) { skipped++; continue; }
+    if (!/<\/head>/i.test(before)) {
+      console.warn(`[build-www] consent: skip HTML without </head>: ${file}`);
+      skipped++;
+      continue;
+    }
+    await writeFile(file, before.replace(/<\/head>/i, `${CONSENT_TAG}\n</head>`), 'utf8');
+    injected++;
+  }
+  console.log(`[build-www] consent: injected into ${injected} page(s)${skipped ? `; skipped ${skipped}` : ''}`);
+}
+
 async function injectSharedExperience() {
   const htmlFiles = await collectHtmlFiles(WWW);
   let skillMapInjected = 0;
@@ -252,6 +285,7 @@ async function main() {
   await patchHowToCardRoute();
   await buildHowTo();
   await stampServiceWorker();
+  await injectConsent();
   // Gamified App Skill Map / Project Playbooks widgets removed from the site —
   // they read as unfinished progress shells on a portfolio. The runtimes still
   // exist under assets/ but are no longer injected into any page.
