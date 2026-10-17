@@ -42,7 +42,7 @@
     color: var(--grape);
     background: var(--lilac);
     -webkit-text-size-adjust: 100%;
-    overflow-x: hidden;
+    overflow-x: clip; /* not hidden: that makes body a scroll container and breaks sticky */
   }
   h1, h2, h3, h4 { margin: 0; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
   p { margin: 0; }
@@ -493,6 +493,7 @@
     <a href="#chapters">Flavours</a>
     <a href="#roasteryCraft">Craft &amp; Roastery</a>
     <a href="#d2cShop">D2C Roasts</a>
+    <a href="#story">Story</a>
     <a href="#space">The Space</a>
     <a href="#cities">Network</a>
     <a href="#destinations">Locations (3)</a>
@@ -891,6 +892,7 @@
   </section>
 
   <!-- CHEF SECTION: SCROLL-DRAWN TIMELINE -->
+  <span id="story" aria-hidden="true"></span>
   <section class="chef" id="chef" aria-labelledby="chef-title">
     <div class="chef-grid scroll-reveal" data-slot="chef">
       <div>
@@ -1059,8 +1061,7 @@
   <p class="mt-2 text-xs opacity-80">© 2026 Gram Street Coffee. DLF Phase 1, Golf Course Road &amp; Sector 56, Gurugram.</p>
 </footer>
 
-<!-- SCRIPTS: GSAP + SHADERS + PINNED STAGE + AUDIO + SCRATCH -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<!-- SCRIPTS: SHADER HERO + PINNED STAGE + AUDIO + SCRATCH -->
 <script>
 (function () {
   "use strict";
@@ -1210,18 +1211,19 @@
     var fsSrc = [
       "precision mediump float;",
       "uniform vec2 u_res;uniform float u_t;uniform vec2 u_m;",
-      "float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);}",
+      // Hoskins hash12: no sin(). The sin-based hash this replaced ran ~80
+      // times per pixel and held the hero at 16fps.
+      "float hash(vec2 p){vec3 q=fract(vec3(p.xyx)*0.1031);q+=dot(q,q.yzx+33.33);return fract((q.x+q.y)*q.z);}",
       "float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);",
       "return mix(mix(hash(i),hash(i+vec2(1.0,0.0)),f.x),mix(hash(i+vec2(0.0,1.0)),hash(i+vec2(1.0,1.0)),f.x),f.y);}",
-      "float fbm(vec2 p){float v=0.0,a=0.5;for(int i=0;i<4;i++){v+=a*noise(p);p=p*2.02+vec2(3.1,1.7);a*=0.5;}return v;}",
+      "float fbm(vec2 p){float v=0.0,a=0.5;for(int i=0;i<3;i++){v+=a*noise(p);p=p*2.02+vec2(3.1,1.7);a*=0.5;}return v;}",
       "void main(){",
       "vec2 p=(gl_FragCoord.xy-0.5*u_res)/u_res.y;",
       "float t=u_t*0.22;",
       "vec2 q=vec2(fbm(p*1.5+t),fbm(p*1.5-t+4.0));",
       "vec2 m=(u_m-0.5)*vec2(u_res.x/u_res.y,1.0);",
       "float d=length(p-m);",
-      "vec2 r=vec2(fbm(p*1.7+q*2.0+t*1.4),fbm(p*1.7+q*2.0-t*0.8));",
-      "float h=fbm(p*2.0+r*2.6);",
+      "float h=fbm(p*1.9+q*2.4+vec2(t*0.6,-t*0.35));",
       "h+=0.28*exp(-d*2.6)*sin(d*18.0-u_t*2.2);",
       "float band=0.5+0.5*sin(h*11.0+u_t*0.5);",
       "float shine=pow(band,5.0);",
@@ -1259,7 +1261,9 @@
     var mx = 0.7, my = 0.55, tx = 0.7, ty = 0.55, t0 = performance.now(), running = false, visible = true;
 
     function resize() {
-      var scale = Math.min(window.devicePixelRatio || 1, 1.5) * 0.7;
+      // Backing store well under CSS size: the field is a soft gradient with no
+      // edges to keep, so it upscales invisibly, and fragment cost is per pixel.
+      var scale = Math.min(window.devicePixelRatio || 1, 1.5) * 0.45;
       var w = Math.max(2, Math.round(canvas.clientWidth * scale)), h = Math.max(2, Math.round(canvas.clientHeight * scale));
       if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; gl.viewport(0, 0, w, h); }
     }
@@ -1270,7 +1274,15 @@
       gl.uniform2f(uM, mx, my);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     }
-    function loop(now) { if (!running) return; draw(now); requestAnimationFrame(loop); }
+    // The chrome drifts slowly and the pointer easing is its own lerp, so a
+    // 30fps ceiling is indistinguishable here and halves the fragment work.
+    // rAF still drives it, so the browser keeps control of when we paint.
+    var MIN_DT = 1000 / 30, lastDraw = 0;
+    function loop(now) {
+      if (!running) return;
+      if (now - lastDraw >= MIN_DT) { lastDraw = now; draw(now); }
+      requestAnimationFrame(loop);
+    }
     function start() { if (running || !visible || document.hidden) return; running = true; requestAnimationFrame(loop); }
     function stop() { running = false; }
 
