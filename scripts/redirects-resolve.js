@@ -98,7 +98,7 @@ const CANONICAL = {
 };
 
 (async () => {
-  const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+  const { chromium } = require('./_playwright.js');
   const { listen } = await import(path.join(ROOT, 'scripts/vercel-emu.mjs'));
   const { server, port } = await listen();
   const BASE = `http://127.0.0.1:${port}`;

@@ -9,7 +9,7 @@
 //
 // Run against a served build:  node scripts/design-system.js
 // MUT=1 injects off-scale values; every check must fail.
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+const { chromium } = require('./_playwright.js');
 
 const MUT = process.env.MUT === '1';
 const TYPE = [11, 12, 14, 16, 20, 25, 31, 39, 49, 61, 76, 88];

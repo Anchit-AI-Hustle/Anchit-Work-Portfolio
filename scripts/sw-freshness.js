@@ -12,7 +12,7 @@
 // it, then restores. The mutation changes the INPUT — a hand-written cache
 // name and a cache-first branch that never refetches — rather than flipping
 // the assertions, so a check that passes under it is not measuring anything.
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+const { chromium } = require('./_playwright.js');
 const MUT = process.env.MUT === '1';
 const BASE = 'http://127.0.0.1:8099';
 const results = [];

@@ -52,6 +52,38 @@ jobs:
       - name: Verify sitemap manifest
         run: npm run test:sitemap
 
+      # The suites below are the ones that actually catch layout and content
+      # regressions. Until now none of them could run here: every browser suite
+      # opened Playwright from an absolute path inside one particular container
+      # (/opt/node22/...), so CI was limited to greps and a build. Playwright is
+      # a devDependency now and scripts/_playwright.js resolves it properly, so
+      # these finally run on every pull request.
+      - name: Install Chromium for the browser suites
+        run: npx playwright install --with-deps chromium
+
+      - name: Serve the built tree
+        run: |
+          npx --yes serve -l 8099 www > /tmp/serve.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -sf -o /dev/null http://localhost:8099/ && break
+            sleep 1
+          done
+          curl -sf -o /dev/null http://localhost:8099/ || { echo "static server never came up"; cat /tmp/serve.log; exit 1; }
+
+      - name: Structural suites
+        run: |
+          npm run test:nogithub
+          npm run test:links
+          npm run test:routes
+          npm run test:sw
+          npm run test:chatblank
+          npm run test:sidebar
+
+      - name: Layout suites
+        run: |
+          npm run test:design
+          npm run test:mobile
+
       - name: Verify canonical app routes
         run: |
           test -f www/how-to/index.html

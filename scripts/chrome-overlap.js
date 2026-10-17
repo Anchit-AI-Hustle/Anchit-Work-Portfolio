@@ -28,7 +28,7 @@
 // Run against a served build:  node scripts/chrome-overlap.js
 // MUT=1 pins the chrome back to a fixed corner with no placement, which is the
 // pre-fix behaviour; pages with content in that corner must fail.
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+const { chromium } = require('./_playwright.js');
 const BASE = process.env.BASE || 'http://127.0.0.1:8099';
 const MUT = process.env.MUT === '1';
 

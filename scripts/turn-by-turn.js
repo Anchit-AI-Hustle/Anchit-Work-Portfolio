@@ -15,7 +15,7 @@
 //              is its own visible pattern.
 //
 // Run it against a served build:  node scripts/turn-by-turn.js
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+const { chromium } = require('./_playwright.js');
 const PAGES = process.argv.slice(2).length?process.argv.slice(2):
   ['index.html','agent.html','jobhunt.html','lifecycle-os.html','hotel.html','marketing-101.html','lifecycle-os-ads.html'];
 (async () => {

@@ -22,7 +22,7 @@
 //   MUT=no_park node scripts/motionfix.js      # expect a FAIL
 //   MUT=smooth_scroll node scripts/motionfix.js # expect a FAIL
 //   MUT=no_drift_fix node scripts/motionfix.js  # see the caveat on check 7
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+const { chromium } = require('./_playwright.js');
 const MUT = process.env.MUT || '';
 const BASE = process.env.BASE || 'http://127.0.0.1:8099';
 

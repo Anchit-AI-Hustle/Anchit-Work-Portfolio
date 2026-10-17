@@ -11,7 +11,7 @@
 //
 // Run against a served build:  node scripts/chat-nudge.js
 // MUT=1 removes the seen-flag guard; the returning-visitor check must fail.
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+const { chromium } = require('./_playwright.js');
 
 const MUT = process.env.MUT === '1';
 const URL = 'http://127.0.0.1:8099/index.html';

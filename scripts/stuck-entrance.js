@@ -18,7 +18,7 @@
 //
 // Run against a served build:  node scripts/stuck-entrance.js
 // MUT=1 re-parks the section on the generic runtime; every check must fail.
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+const { chromium } = require('./_playwright.js');
 
 const MUT = process.env.MUT === '1';
 const PAGES = ['index.html', 'agent.html', 'lifecycle-os.html', 'marketing-101.html'];
