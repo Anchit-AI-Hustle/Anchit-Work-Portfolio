@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "npx --yes serve@latest -l ${PORT:-5173} .",
     "dev:built": "npm run build && npx --yes serve@latest -l ${PORT:-5173} www",
-    "build": "node scripts/build-www.mjs && node scripts/copy-ayushi.mjs",
+    "build": "node scripts/build-tailwind.mjs && node scripts/build-www.mjs && node scripts/copy-ayushi.mjs",
     "preview": "npx --yes serve@latest -l 4173 www",
     "tts:serve": "cd tts-server && .venv/bin/uvicorn app:app --host 127.0.0.1 --port 8000",
     "sarvam:check": "node scripts/sarvam-check.mjs",
@@ -40,7 +40,8 @@
     "test:sidebar": "node scripts/sidebar-collapse.js",
     "test:overlap": "node scripts/chrome-overlap.js",
     "test:auth": "node scripts/auth-google.js",
-    "test:storage": "node scripts/storage-local.js"
+    "test:storage": "node scripts/storage-local.js",
+    "build:tailwind": "node scripts/build-tailwind.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.0",
@@ -58,6 +59,7 @@
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^8.4.0",
+    "tailwindcss": "^3.4.19",
     "yarn": "^1.22.22"
   },
   "engines": {
