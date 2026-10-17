@@ -21,6 +21,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
+    /* Someone who has asked their system for less motion gets the page, not
+       the performance: decoration stops, the scroll-driven layout still works,
+       and nothing is left mid-transition or invisible. */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+      }
+      #deliAtmosphereCanvas { display: none; }
+      .deli-card, .tilt-card, .loupe-container { transform: none !important; }
+      .reveal, .scroll-reveal, [data-reveal] { opacity: 1 !important; transform: none !important; }
+    }
+
     :root {
       --chic-crimson: #CD2653;
       --chic-crimson-dark: #8C1434;
@@ -42,7 +57,7 @@
       font-family: var(--font-sans);
       background-color: var(--chic-linen);
       color: var(--chic-charcoal);
-      overflow-x: hidden;
+      overflow-x: clip; /* not hidden: that makes body a scroll container and breaks sticky */
       margin: 0;
       padding: 0;
     }
@@ -1106,7 +1121,11 @@
       initScrollReveal();
     }
 
+    const prefersReducedMotion = window.matchMedia
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     function initCardTilt() {
+      if (prefersReducedMotion) return;
       const cards = document.querySelectorAll('.deli-card, .tilt-card, .loupe-container');
       cards.forEach(card => {
         if (card.dataset.tiltBound) return;
@@ -1174,6 +1193,7 @@
 
     // 3. Atmospheric Culinary Motion Canvas with Pointer Interaction
     (function initAtmosphere() {
+      if (prefersReducedMotion) return;
       const canvas = document.getElementById('deliAtmosphereCanvas');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
@@ -1223,9 +1243,31 @@
           ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
           ctx.fill();
         });
+        if (running) requestAnimationFrame(render);
+      }
+
+      // The canvas is absolutely positioned inside its section, so it scrolls
+      // away while the loop keeps paying for it. Park it when it is off screen
+      // or the tab is hidden, and restart on the way back.
+      var running = false;
+      function start() {
+        if (running || document.hidden || !onScreen) return;
+        running = true;
         requestAnimationFrame(render);
       }
-      render();
+      function stop() { running = false; }
+      var onScreen = true;
+      if (typeof IntersectionObserver !== 'undefined') {
+        onScreen = false;
+        new IntersectionObserver(function (entries) {
+          onScreen = entries[0].isIntersecting;
+          onScreen ? start() : stop();
+        }).observe(canvas);
+      }
+      document.addEventListener('visibilitychange', function () {
+        document.hidden ? stop() : start();
+      });
+      start();
     })();
 
     // 4. Pinned Haute Boucherie Stage Transitions
