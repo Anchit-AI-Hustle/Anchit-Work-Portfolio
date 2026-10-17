@@ -79,6 +79,29 @@
       '#consentBar .cb-primary:hover{color:#1a0d06}' +
       '#consentBar .cb-btn:focus-visible{outline:2px solid #FF6940;outline-offset:3px}' +
       '@media (prefers-reduced-motion: reduce){#consentBar{transition:none}}' +
+      /* The bar is fixed to the bottom, and so is the site's floating chrome
+         (the chat return button, the motion and home controls). They shared
+         the same band: measured on the home page, the chat button occupies
+         22-82px from the bottom and this bar occupies 0-73px, so the bar's
+         z-index simply buried it. Lift them clear for as long as the bar is
+         up, rather than covering a control the visitor may want. */
+      /* And the page itself makes room, rather than having its last lines sit
+         underneath the bar. A bottom overlay that hides content is still
+         hiding content; reserving the space is the honest version, and it
+         costs nothing once the bar is dismissed. */
+      'html[data-consent-open="1"] body{' +
+        'padding-bottom:calc(var(--consent-h, 0px) + 8px)}' +
+      'html[data-consent-open="1"] #chatReturnBtn,' +
+      'html[data-consent-open="1"] #cinHome,' +
+      'html[data-consent-open="1"] #cinMotion,' +
+      'html[data-consent-open="1"] [data-floating-control]{' +
+        'transform:translateY(calc(-1 * var(--consent-h, 0px)));' +
+        'transition:transform .32s cubic-bezier(.22,1,.36,1)}' +
+      '@media (prefers-reduced-motion: reduce){' +
+        'html[data-consent-open="1"] #chatReturnBtn,' +
+        'html[data-consent-open="1"] #cinHome,' +
+        'html[data-consent-open="1"] #cinMotion,' +
+        'html[data-consent-open="1"] [data-floating-control]{transition:none}}' +
       '@media (max-width:560px){#consentBar .cb-actions{width:100%}' +
         '#consentBar .cb-btn{flex:1}' +
         /* On a 320x626 screen the full paragraph ate a third of the page. */
@@ -92,9 +115,27 @@
     document.body.appendChild(bar);
 
     // Next frame, so the entrance transition has a start value to animate from.
+    function markOpen() {
+      var h = Math.ceil(bar.getBoundingClientRect().height);
+      // Written only when it changes: a custom property on the root
+      // invalidates the computed style of every element on the page.
+      if (String(h) + 'px' !== document.documentElement.style.getPropertyValue('--consent-h')) {
+        document.documentElement.style.setProperty('--consent-h', h + 'px');
+      }
+      document.documentElement.setAttribute('data-consent-open', '1');
+    }
+    function markClosed() {
+      document.documentElement.removeAttribute('data-consent-open');
+      document.documentElement.style.removeProperty('--consent-h');
+    }
+
     requestAnimationFrame(function () {
-      requestAnimationFrame(function () { bar.setAttribute('data-in', '1'); });
+      requestAnimationFrame(function () {
+        bar.setAttribute('data-in', '1');
+        markOpen();
+      });
     });
+    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(markOpen).observe(bar);
 
     bar.addEventListener('click', function (e) {
       var btn = e.target.closest('[data-consent]');
@@ -103,6 +144,7 @@
       write(choice);
       if (choice === 'granted') loadAnalytics();
       bar.setAttribute('data-in', '0');
+      markClosed();
       setTimeout(function () { bar.remove(); }, 340);
     });
 
@@ -111,6 +153,7 @@
       if (e.key !== 'Escape') return;
       write('denied');
       bar.setAttribute('data-in', '0');
+      markClosed();
       setTimeout(function () { bar.remove(); }, 340);
     });
 

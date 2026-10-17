@@ -56,11 +56,6 @@ const WWW = path.join(ROOT, 'www');
 const MUT = process.env.MUT || '';
 const NET = process.env.NET === '1';
 
-// Every other browser suite here launches this binary explicitly rather than
-// letting Playwright search its default install, which is not declared in
-// package.json. Match them.
-const CHROME = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
-
 const results = [];
 const check = (n, ok, d) => results.push([ok ? 'PASS' : 'FAIL', n, d]);
 
@@ -98,7 +93,7 @@ const CANONICAL = {
 };
 
 (async () => {
-  const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+  const { chromium } = require('./_playwright.js');
   const { listen } = await import(path.join(ROOT, 'scripts/vercel-emu.mjs'));
   const { server, port } = await listen();
   const BASE = `http://127.0.0.1:${port}`;
@@ -117,7 +112,7 @@ const CANONICAL = {
   const isPage = new Set(routes);
   const normalise = (p) => toRoute(p.replace(/\/+$/, '') || '/') || '/';
 
-  const browser = await chromium.launch({ executablePath: CHROME });
+  const browser = await chromium.launch();
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   // Nothing off-site is fetched while crawling: irrelevant to routing, and it
   // makes the suite depend on someone else's uptime.

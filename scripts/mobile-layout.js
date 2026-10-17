@@ -21,7 +21,7 @@
 // MUT=label restores the squeezed pills — the clipping check must fail.
 // A single mutant would leave the other checks unverified, and a check nothing
 // can break is a check that passes everything.
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+const { chromium } = require('./_playwright.js');
 
 const BASE = process.env.BASE || 'http://127.0.0.1:8099';
 // The narrow end of the range that actually reaches the site, plus the width
@@ -104,7 +104,7 @@ const MEASURE = (vw) => {
 };
 
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+  const b = await chromium.launch();
   const results = [];
   const check = (n, ok, d) => results.push([ok ? 'PASS' : 'FAIL', n, d]);
 

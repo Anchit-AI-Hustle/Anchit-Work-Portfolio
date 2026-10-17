@@ -17,7 +17,7 @@
 //     - it still works when IndexedDB is unavailable
 //
 // Run against a served build:  node scripts/storage-local.js
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+const { chromium } = require('./_playwright.js');
 const BASE = process.env.BASE || 'http://127.0.0.1:8099';
 
 const results = [];

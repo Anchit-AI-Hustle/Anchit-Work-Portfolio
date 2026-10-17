@@ -11,7 +11,7 @@
 // Run against a served build:  node scripts/build-cards.js
 // MUT=1 relaxes the thresholds to what the old layout produced; every check
 // must then fail, or the check is not measuring what it claims.
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+const { chromium } = require('./_playwright.js');
 
 const MUT = process.env.MUT === '1';
 const TOL = 2;                    // px; sub-pixel rounding across 13 cards
@@ -36,7 +36,7 @@ const MUTANT_CSS = `
 `;
 
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+  const b = await chromium.launch();
   const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
   const p = await ctx.newPage();
   const results = [];

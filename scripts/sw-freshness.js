@@ -12,7 +12,7 @@
 // it, then restores. The mutation changes the INPUT — a hand-written cache
 // name and a cache-first branch that never refetches — rather than flipping
 // the assertions, so a check that passes under it is not measuring anything.
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+const { chromium } = require('./_playwright.js');
 const MUT = process.env.MUT === '1';
 const BASE = 'http://127.0.0.1:8099';
 const results = [];
@@ -57,7 +57,7 @@ self.addEventListener('fetch', (e) => {
     /const fresh = fetch\(req\)/.test(sw) ? 'fetch runs on every asset hit' : 'cache hit short-circuits, nothing refetches');
 
   // 3. End to end: a visitor holding a PREVIOUS cache must end up on current bytes.
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+  const b = await chromium.launch();
   const ctx = await b.newContext({ viewport: { width: 1280, height: 800 }, serviceWorkers: 'allow' });
   const p = await ctx.newPage();
   await p.goto(BASE + '/index.html', { waitUntil: 'load', timeout: 30000 });

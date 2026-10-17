@@ -23,7 +23,7 @@
 // must fail. It does not reproduce the navigation half - the synthetic click
 // still reaches the toggle - so the navigate-away assertion has its own
 // mutation: NAVMUT=1 makes the tap move the page, and that check must go red.
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+const { chromium } = require('./_playwright.js');
 const BASE = process.env.BASE || 'http://127.0.0.1:8099';
 const MUT = process.env.MUT === '1';
 const PHONE = { width: 390, height: 844 };

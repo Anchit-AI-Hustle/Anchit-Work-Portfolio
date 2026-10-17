@@ -9,7 +9,7 @@
 //
 // Run against a served build:  node scripts/design-system.js
 // MUT=1 injects off-scale values; every check must fail.
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+const { chromium } = require('./_playwright.js');
 
 const MUT = process.env.MUT === '1';
 const TYPE = [11, 12, 14, 16, 20, 25, 31, 39, 49, 61, 76, 88];
@@ -34,7 +34,7 @@ const PAGES = [
 ];
 
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+  const b = await chromium.launch();
   const results = [];
   const check = (n, ok, d) => results.push([ok ? 'PASS' : 'FAIL', n, d]);
   const allSizes = new Set();

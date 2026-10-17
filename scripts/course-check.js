@@ -7,7 +7,7 @@
 //
 // Run against a served build:  node scripts/course-check.js
 // MUT=1 breaks the shared engine; every check must fail.
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+const { chromium } = require('./_playwright.js');
 const MUT = process.env.MUT === '1';
 
 const PAGES = [
@@ -16,7 +16,7 @@ const PAGES = [
 ];
 
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+  const b = await chromium.launch();
   const results = [];
   const check = (n, ok, d) => results.push([ok ? 'PASS' : 'FAIL', n, d]);
 
