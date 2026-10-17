@@ -1191,76 +1191,142 @@
       }
     }
 
-    // 3. Atmospheric Culinary Motion Canvas with Pointer Interaction
-    (function initAtmosphere() {
+    // 3. Hero marbling.
+    //
+    // This was a field of drifting dots: pretty, and it said nothing about a
+    // boucherie. What a butcher actually sells is the marbling in a cut, so
+    // that is what the hero draws - crimson and gold veins threading through
+    // linen, turning slowly, with a cold bloom for "Chilled, Never Frozen".
+    //
+    // Same technique as the sister site's hero (domain-warped fBm, sin-free
+    // hash, small backing store), because that one measured 60fps. The veins
+    // come from ridged noise: abs() of the field, inverted, so the bands are
+    // thin lines instead of soft blobs.
+    (function initMarbling() {
       if (prefersReducedMotion) return;
       const canvas = document.getElementById('deliAtmosphereCanvas');
       if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      let w = canvas.width = window.innerWidth;
-      let h = canvas.height = window.innerHeight;
-      let mx = w / 2, my = h / 2;
 
-      window.addEventListener('resize', () => {
-        w = canvas.width = window.innerWidth;
-        h = canvas.height = window.innerHeight;
-      });
+      let gl = null;
+      try {
+        gl = canvas.getContext('webgl', { antialias: false, alpha: true, powerPreference: 'low-power' });
+      } catch (e) {}
+      if (!gl) return;   // the hero reads perfectly well without it
 
-      window.addEventListener('pointermove', (e) => {
-        mx = e.clientX;
-        my = e.clientY;
-      });
+      var VS = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.0,1.0);}';
+      var FS = [
+        'precision mediump float;',
+        'uniform vec2 u_res;uniform float u_t;uniform vec2 u_m;',
+        'float hash(vec2 p){vec3 q=fract(vec3(p.xyx)*0.1031);q+=dot(q,q.yzx+33.33);return fract((q.x+q.y)*q.z);}',
+        'float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);',
+        'return mix(mix(hash(i),hash(i+vec2(1.0,0.0)),f.x),mix(hash(i+vec2(0.0,1.0)),hash(i+vec2(1.0,1.0)),f.x),f.y);}',
+        'float fbm(vec2 p){float v=0.0,a=0.5;for(int i=0;i<3;i++){v+=a*noise(p);p=p*2.03+vec2(2.7,1.3);a*=0.5;}return v;}',
+        'void main(){',
+        'vec2 p=(gl_FragCoord.xy-0.5*u_res)/u_res.y;',
+        'float t=u_t*0.035;',
+        'vec2 q=vec2(fbm(p*1.3+t),fbm(p*1.3-t+7.0));',
+        'float h=fbm(p*2.2+q*1.9+vec2(t*0.5,-t*0.3));',
+        'float vein=1.0-abs(h*2.0-1.0);',
+        'vein=pow(vein,3.4);',
+        'float fine=pow(1.0-abs(fbm(p*5.1+q*2.2)*2.0-1.0),6.0);',
+        'vec2 m=(u_m-0.5)*vec2(u_res.x/u_res.y,1.0);',
+        'float chill=exp(-length(p-m)*3.1)*0.5;',
+        'vec3 linen=vec3(0.992,0.984,0.969);',
+        'vec3 crimson=vec3(0.804,0.149,0.325);',
+        'vec3 gold=vec3(0.773,0.604,0.271);',
+        'vec3 col=linen;',
+        'col=mix(col,crimson,vein*0.30);',
+        'col=mix(col,gold,fine*0.22);',
+        'col=mix(col,vec3(0.91,0.95,0.98),chill*0.5);',
+        'gl_FragColor=vec4(col,1.0);}'
+      ].join('\n');
 
-      const particles = Array.from({ length: 54 }, () => ({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        r: Math.random() * 3.2 + 1,
-        vy: -(Math.random() * 0.45 + 0.15),
-        vx: (Math.random() - 0.5) * 0.3,
-        a: Math.random() * 0.55 + 0.2,
-        color: Math.random() > 0.4 ? 'rgba(197, 154, 69,' : 'rgba(205, 38, 83,'
-      }));
-
-      function render() {
-        ctx.clearRect(0, 0, w, h);
-        particles.forEach(p => {
-          const dx = mx - p.x;
-          const dy = my - p.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 140) {
-            p.x -= (dx / dist) * 0.8;
-            p.y -= (dy / dist) * 0.8;
-          }
-
-          p.y += p.vy;
-          p.x += p.vx;
-          if (p.y < -10) p.y = h + 10;
-          if (p.x < -10) p.x = w + 10;
-          if (p.x > w + 10) p.x = -10;
-
-          ctx.fillStyle = `${p.color}${p.a})`;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-          ctx.fill();
-        });
-        if (running) requestAnimationFrame(render);
+      function compile(type, src) {
+        var sh = gl.createShader(type);
+        gl.shaderSource(sh, src); gl.compileShader(sh);
+        return gl.getShaderParameter(sh, gl.COMPILE_STATUS) ? sh : null;
       }
+      var vs = compile(gl.VERTEX_SHADER, VS), fs = compile(gl.FRAGMENT_SHADER, FS);
+      if (!vs || !fs) return;
+      var prog = gl.createProgram();
+      gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
+      gl.useProgram(prog);
 
-      // The canvas is absolutely positioned inside its section, so it scrolls
-      // away while the loop keeps paying for it. Park it when it is off screen
-      // or the tab is hidden, and restart on the way back.
-      var running = false;
+      var buf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+      var loc = gl.getAttribLocation(prog, 'p');
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+      var uRes = gl.getUniformLocation(prog, 'u_res');
+      var uT = gl.getUniformLocation(prog, 'u_t');
+      var uM = gl.getUniformLocation(prog, 'u_m');
+
+      var mx = 0.5, my = 0.45, tx = 0.5, ty = 0.45;
+      var t0 = performance.now();
+      var running = false, onScreen = true, raf = 0, lastDraw = 0;
+      var MIN_DT = 1000 / 30;
+
+      function resize() {
+        // Deliberately small. This page has less frame budget than its sister,
+        // and a soft field has no edges to preserve, so it upscales invisibly.
+        var scale = Math.min(window.devicePixelRatio || 1, 1.5) * 0.38;
+        // Measure the parent, not the canvas. The canvas is absolute inset-0
+        // with no intrinsic size, so clientWidth reads 0 and the backing store
+        // collapsed to 2x2 — the shader ran, into nothing anyone could see.
+        // The particle code this replaced sized from window for the same reason.
+        var host = canvas.parentElement;
+        var r = host ? host.getBoundingClientRect() : null;
+        // Clamp to the viewport. The canvas is absolute inset-0 inside a
+        // section that is 4207px tall, so sizing from the parent rendered a
+        // 486x4207 backing store — two million fragments, and 2.6fps. Nobody
+        // can see more than a screenful of it at once.
+        var cw = Math.min((r && r.width) ? r.width : window.innerWidth, window.innerWidth);
+        var ch = Math.min((r && r.height) ? r.height : window.innerHeight, window.innerHeight);
+        var w = Math.max(2, Math.round(cw * scale));
+        var h = Math.max(2, Math.round(ch * scale));
+        if (canvas.width !== w || canvas.height !== h) {
+          canvas.width = w; canvas.height = h; gl.viewport(0, 0, w, h);
+        }
+      }
+      function draw(now) {
+        mx += (tx - mx) * 0.06; my += (ty - my) * 0.06;
+        gl.uniform2f(uRes, canvas.width, canvas.height);
+        gl.uniform1f(uT, (now - t0) / 1000);
+        gl.uniform2f(uM, mx, my);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+      }
+      function loop(now) {
+        if (!running) return;
+        if (now - lastDraw >= MIN_DT) { lastDraw = now; draw(now); }
+        raf = requestAnimationFrame(loop);
+      }
       function start() {
         if (running || document.hidden || !onScreen) return;
-        running = true;
-        requestAnimationFrame(render);
+        running = true; raf = requestAnimationFrame(loop);
       }
-      function stop() { running = false; }
-      var onScreen = true;
+      function stop() { running = false; cancelAnimationFrame(raf); }
+
+      canvas.style.width = '100%'; canvas.style.height = '100%';
+      resize(); draw(performance.now());
+      // Observe the PARENT. Observing the canvas while resize() touches the
+      // canvas is a feedback loop, and it cost this page 2.3fps.
+      if (typeof ResizeObserver !== 'undefined' && canvas.parentElement) {
+        new ResizeObserver(function () { resize(); draw(performance.now()); })
+          .observe(canvas.parentElement);
+      } else {
+        window.addEventListener('resize', function () { resize(); draw(performance.now()); });
+      }
+      window.addEventListener('pointermove', function (e) {
+        tx = e.clientX / window.innerWidth;
+        ty = 1 - (e.clientY / window.innerHeight);
+      }, { passive: true });
+
       if (typeof IntersectionObserver !== 'undefined') {
         onScreen = false;
-        new IntersectionObserver(function (entries) {
-          onScreen = entries[0].isIntersecting;
+        new IntersectionObserver(function (en) {
+          onScreen = en[0].isIntersecting;
           onScreen ? start() : stop();
         }).observe(canvas);
       }
