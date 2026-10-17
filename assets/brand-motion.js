@@ -1,10 +1,12 @@
 /* Brand motion layer — Gram Street Coffee and Deli Chic.
  *
- * Four effects, all of them meant to be NOTICED:
+ * Three effects, all of them meant to be NOTICED:
  *   1. headlines arrive word by word, tipped back in 3D
- *   2. sections lean with scroll velocity and settle when you stop  (the "4D" one)
- *   3. CTAs are magnetic and tilt toward the cursor
- *   4. marked layers drift at their own depth as you scroll
+ *   2. CTAs are magnetic and tilt toward the cursor
+ *   3. marked layers drift at their own depth as you scroll
+ *
+ * There was a fourth — sections leaning and squashing with scroll velocity —
+ * and it is gone. See the note where it used to live, below.
  *
  * Self-hosted GSAP + ScrollTrigger from /assets/vendor — no CDN, and the same
  * copies the rest of the site uses.
@@ -121,12 +123,12 @@
     });
   }
 
-  /* 2 ─ (removed) Scroll-velocity lean.
+  /* (removed) Scroll-velocity lean.
      Sections used to skew and squash with scroll speed. On a real page it does
      not read as craft, it reads as the page being rendered wrong, so it is
      gone rather than tuned. */
 
-  /* 3 ─ Magnetic, tilting CTAs ---------------------------------------------- */
+  /* 2 ─ Magnetic, tilting CTAs ---------------------------------------------- */
   function magnetic(gsap) {
     if (reduced) return;
     if (window.matchMedia && window.matchMedia('(hover: none)').matches) return;
@@ -159,7 +161,7 @@
     });
   }
 
-  /* 4 ─ Depth drift ---------------------------------------------------------- */
+  /* 3 ─ Depth drift ---------------------------------------------------------- */
   function depth(gsap) {
     if (reduced) return;
     var layers = pick('[data-bm-depth]');

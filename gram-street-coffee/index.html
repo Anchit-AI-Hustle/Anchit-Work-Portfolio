@@ -176,7 +176,7 @@
      the cup, let it steam, reset. */
   .counter-scene {
     position: absolute;
-    right: clamp(-30px, -1vw, 10px);
+    right: clamp(-48px, -2.5vw, 0px);
     /* Clear of the consent bar and the hero's lower padding. The counter is
        the point of the drawing — the copy calls it a lilac glass-fronted
        counter — so it must not be the part that falls off the bottom. */
@@ -184,11 +184,14 @@
     width: auto;
     pointer-events: none;
     z-index: 1;
-    filter: drop-shadow(0 24px 48px rgba(43, 22, 80, .18));
+    /* No CSS filter here. A drop-shadow over a subtree that animates every
+       frame re-rasterises the whole scene every frame — it cost 13fps once
+       the scene grew. The counter casts its own shadow inside the SVG, on
+       the floor where a shadow belongs, for nothing. */
   }
   .counter-scene svg {
     display: block;
-    height: clamp(300px, 54vh, 560px);
+    height: clamp(340px, 66vh, 700px);
     width: auto;
   }
 
@@ -750,8 +753,9 @@
     <svg viewBox="0 0 640 620" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax meet">
       <defs>
         <linearGradient id="csGlass" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#E7DCFB" stop-opacity=".95"/>
-          <stop offset="1" stop-color="#C2A9F2" stop-opacity=".85"/>
+          <stop offset="0" stop-color="#F8F4FF" stop-opacity="1"/>
+          <stop offset=".58" stop-color="#CBB4F2" stop-opacity=".98"/>
+          <stop offset="1" stop-color="#9F86D8" stop-opacity=".96"/>
         </linearGradient>
         <linearGradient id="csChrome" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stop-color="#FBF9FF"/>
@@ -765,26 +769,46 @@
           <stop offset="1" stop-color="#2B1650"/>
         </linearGradient>
         <radialGradient id="csLamp" cx=".5" cy="0" r="1">
-          <stop offset="0" stop-color="#FFE9B8" stop-opacity=".55"/>
+          <stop offset="0" stop-color="#FFE4A8" stop-opacity=".78"/>
           <stop offset="1" stop-color="#FFE9B8" stop-opacity="0"/>
         </radialGradient>
         <linearGradient id="csCrema" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#C98A4B"/>
-          <stop offset=".45" stop-color="#8A4F23"/>
-          <stop offset="1" stop-color="#4A2713"/>
+          <stop offset="0" stop-color="#D59A58"/>
+          <stop offset=".40" stop-color="#7E4418"/>
+          <stop offset="1" stop-color="#36190A"/>
+        </linearGradient>
+        <linearGradient id="csStream" x1="0" y1="453" x2="0" y2="480" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#5C3214"/>
+          <stop offset=".5" stop-color="#3B1D0B"/>
+          <stop offset="1" stop-color="#2A1407"/>
         </linearGradient>
         <clipPath id="csCupClip"><path d="M292 470h56v34a28 28 0 0 1-56 0z"/></clipPath>
       </defs>
 
+      <!-- the wall behind the bar: a darker panel so the chrome, the glass
+           and the light cones all have something to read against -->
+      <g class="cs-wall">
+        <rect x="88" y="118" width="486" height="404" rx="18" fill="#2B1650" opacity=".13"/>
+        <rect x="88" y="118" width="486" height="404" rx="18" fill="none"
+              stroke="#2B1650" stroke-opacity=".10" stroke-width="2"/>
+        <!-- tiling, drawn as light grout rather than dark lines -->
+        <path d="M88 210h486M88 302h486M88 394h486" stroke="#FFFFFF" stroke-opacity=".10" stroke-width="2"/>
+        <path d="M170 118v404M252 118v404M416 118v404M498 118v404"
+              stroke="#FFFFFF" stroke-opacity=".07" stroke-width="2"/>
+      </g>
+
       <!-- back wall shelf and jars -->
       <g class="cs-shelf">
-        <rect x="150" y="214" width="420" height="7" rx="3.5" fill="#2B1650" opacity=".22"/>
-        <g opacity=".65">
-          <rect x="186" y="168" width="38" height="46" rx="7" fill="#2B1650" opacity=".30"/>
-          <rect x="238" y="156" width="30" height="58" rx="6" fill="#2B1650" opacity=".22"/>
-          <rect x="282" y="176" width="42" height="38" rx="7" fill="#2B1650" opacity=".26"/>
-          <rect x="470" y="164" width="34" height="50" rx="6" fill="#2B1650" opacity=".24"/>
-          <rect x="516" y="180" width="30" height="34" rx="6" fill="#2B1650" opacity=".18"/>
+        <rect x="150" y="214" width="420" height="8" rx="4" fill="#2B1650" opacity=".38"/>
+        <g>
+          <rect x="186" y="168" width="38" height="46" rx="7" fill="#2B1650" opacity=".46"/>
+          <rect x="238" y="156" width="30" height="58" rx="6" fill="#2B1650" opacity=".36"/>
+          <rect x="282" y="176" width="42" height="38" rx="7" fill="#2B1650" opacity=".42"/>
+          <rect x="470" y="164" width="34" height="50" rx="6" fill="#2B1650" opacity=".40"/>
+          <rect x="516" y="180" width="30" height="34" rx="6" fill="#2B1650" opacity=".30"/>
+          <!-- lids, so they read as jars and not as blocks -->
+          <path d="M186 168h38M238 156h30M282 176h42M470 164h34M516 180h30"
+                stroke="#F0E6FF" stroke-opacity=".55" stroke-width="4" stroke-linecap="round"/>
         </g>
       </g>
 
@@ -833,8 +857,10 @@
         <rect x="300" y="418" width="44" height="22" rx="5" fill="#8E7FAE"/>
         <g class="cs-portafilter">
           <rect x="296" y="438" width="52" height="12" rx="4" fill="#B9ACD4"/>
-          <rect x="392" y="440" width="54" height="9" rx="4.5" fill="#2B1650" opacity=".65"/>
-          <path d="M344 444h50" stroke="#B9ACD4" stroke-width="7" stroke-linecap="round"/>
+          <rect x="372" y="440" width="46" height="9" rx="4.5" fill="#2B1650" opacity=".70"/>
+          <path d="M344 444h30" stroke="#B9ACD4" stroke-width="7" stroke-linecap="round"/>
+          <!-- the two spouts the shot actually comes out of -->
+          <path d="M313 450v4M329 450v4" stroke="#8E7FAE" stroke-width="5" stroke-linecap="round"/>
         </g>
         <!-- steam wand -->
         <path d="M470 330c18 10 20 38 6 56" stroke="#9E8FBA" stroke-width="5" stroke-linecap="round"/>
@@ -842,8 +868,8 @@
 
       <!-- the shot -->
       <g class="cs-pour">
-        <path d="M316 452v26" stroke="url(#csCrema)" stroke-width="3.4" stroke-linecap="round"/>
-        <path d="M326 452v26" stroke="url(#csCrema)" stroke-width="3.4" stroke-linecap="round" opacity=".75"/>
+        <path d="M313 453v27" stroke="url(#csStream)" stroke-width="5" stroke-linecap="round"/>
+        <path d="M329 453v27" stroke="url(#csStream)" stroke-width="4.2" stroke-linecap="round" opacity=".85"/>
       </g>
 
       <!-- cup on the drip tray -->
@@ -859,20 +885,22 @@
 
       <!-- steam off the cup -->
       <g class="cs-steam">
-        <path d="M306 452c-7-13 7-19 0-32" style="--d:0s"/>
-        <path d="M320 448c-7-15 7-21 0-35" style="--d:-1.9s"/>
-        <path d="M334 452c-7-13 7-19 0-32" style="--d:-3.6s"/>
+        <path d="M306 466c-7-13 7-19 0-32" style="--d:0s"/>
+        <path d="M320 464c-7-15 7-21 0-35" style="--d:-1.9s"/>
+        <path d="M334 466c-7-13 7-19 0-32" style="--d:-3.6s"/>
       </g>
 
       <!-- counter: dark top, lilac glass front -->
       <g class="cs-counter">
-        <rect x="96" y="508" width="470" height="18" rx="4" fill="url(#csTop)"/>
+        <ellipse cx="330" cy="616" rx="250" ry="12" fill="#2B1650" opacity=".16"/>
+        <rect x="96" y="506" width="470" height="20" rx="5" fill="url(#csTop)"/>
+        <rect x="96" y="506" width="470" height="6" rx="3" fill="#FFFFFF" opacity=".16"/>
         <rect x="104" y="526" width="454" height="88" rx="6" fill="url(#csGlass)"/>
-        <rect x="104" y="526" width="454" height="88" rx="6" fill="none" stroke="#FFFFFF" stroke-opacity=".55" stroke-width="2"/>
+        <rect x="104" y="526" width="454" height="88" rx="6" fill="none" stroke="#FFFFFF" stroke-opacity=".80" stroke-width="2.5"/>
         <path d="M150 530v80M232 530v80M314 530v80M396 530v80M478 530v80"
               stroke="#FFFFFF" stroke-opacity=".30" stroke-width="1.5"/>
         <!-- gelato pans behind the glass -->
-        <g opacity=".85">
+        <g opacity="1">
           <rect x="120" y="552" width="56" height="26" rx="8" fill="#FFD7E8"/>
           <rect x="190" y="552" width="56" height="26" rx="8" fill="#CFE3AE"/>
           <rect x="260" y="552" width="56" height="26" rx="8" fill="#E6D2B6"/>
