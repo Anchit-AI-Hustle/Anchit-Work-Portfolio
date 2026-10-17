@@ -1236,7 +1236,8 @@
         'float fbm(vec2 p){float v=0.0,a=0.5;for(int i=0;i<3;i++){v+=a*noise(p);p=p*2.03+vec2(2.7,1.3);a*=0.5;}return v;}',
         'void main(){',
         'vec2 p=(gl_FragCoord.xy-0.5*u_res)/u_res.y;',
-        'float t=u_t*0.035;',
+        'p.x-=u_t*0.07;',
+        'float t=u_t*0.22;',
         'vec2 q=vec2(fbm(p*1.3+t),fbm(p*1.3-t+7.0));',
         'float h=fbm(p*2.2+q*1.9+vec2(t*0.5,-t*0.3));',
         'float vein=1.0-abs(h*2.0-1.0);',
@@ -1247,9 +1248,22 @@
         'vec3 linen=vec3(0.992,0.984,0.969);',
         'vec3 crimson=vec3(0.804,0.149,0.325);',
         'vec3 gold=vec3(0.773,0.604,0.271);',
+        // Strength ramps left to right: the headline sits on the left, so the
+        // marbling stays quiet under the type and carries its full weight in
+        // the open space. Being bold everywhere washed the serif out; being
+        // quiet everywhere made a still image.
+        'float side=mix(0.35,1.0,smoothstep(-0.30,0.45,p.x));',
+        // Contrast, not coverage. A wide crimson wash at low alpha cannot swing
+        // far from linen, so the field barely changed as it moved — 1.8% over
+        // four seconds, which is a still image. Thin, DEEP veins carry high
+        // local contrast on a clean ground: they read as marbling rather than
+        // as a tint, and they are visible when they travel.
+        'float core=pow(vein,5.0);',
+        'vec3 burgundy=vec3(0.290,0.055,0.090);',
         'vec3 col=linen;',
-        'col=mix(col,crimson,vein*0.10);',
-        'col=mix(col,gold,fine*0.09);',
+        'col=mix(col,crimson,vein*0.13*side);',
+        'col=mix(col,burgundy,core*0.62*side);',
+        'col=mix(col,gold,fine*0.17*side);',
         'col=mix(col,vec3(0.91,0.95,0.98),chill*0.30);',
         'gl_FragColor=vec4(col,1.0);}'
       ].join('\n');
