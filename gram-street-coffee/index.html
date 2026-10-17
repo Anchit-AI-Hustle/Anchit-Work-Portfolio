@@ -1615,9 +1615,16 @@
       "vec3 col=mix(lilac,mid,smoothstep(0.25,0.85,h));",
       "float band2=0.5+0.5*sin(h*14.0+1.5-u_t*0.3);",
       // the fold of the pour, strongest where the swirl turns over
-      "col=mix(col,flav,smoothstep(0.70,0.99,band2)*0.14);",
+      // Same ramp as the sister site: the headline owns the left third, so
+      // the field stays quiet under the type and carries weight in the open.
+      // The ramp came from the pass that made this shader the hero; the
+      // amplitude comes from the pass that replaced it with a drawn counter.
+      // They are separable — keep the ramp, keep the ambient level — because
+      // the shader is now room light behind a drawing, not the drawing.
+      "float side=mix(0.38,1.0,smoothstep(-0.30,0.45,p.x));",
+      "col=mix(col,flav,smoothstep(0.70,0.99,band2)*0.14*side);",
       // crema breaking white at the crest
-      "col=mix(col,white,shine*0.22);",
+      "col=mix(col,white,shine*0.22*side);",
       "gl_FragColor=vec4(col,1.0);}"
     ].join("\n");
 
