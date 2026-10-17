@@ -19,10 +19,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Playfair+Display:ital,wght@1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
 
 <!-- Tailwind CSS -->
-<script src="https://cdn.tailwindcss.com"></script>
+<!-- Tailwind, compiled and self-hosted (scripts/build-tailwind.mjs).
+     The CDN build shipped a ~300KB JIT compiler, scanned the DOM at
+     runtime and left the page unstyled until it finished — and Tailwind
+     itself warns in the console not to use it in production. -->
+<link rel="stylesheet" href="/assets/tw-gram-street.css">
 
 <style>
-  :root {
+:root {
     --lilac: #CDB8F7;
     --lilac-soft: #F1E9FF;
     --grape: #2B1650;
@@ -547,586 +551,586 @@
 
 <!-- Top Pinned Bar -->
 <header class="site-head">
-  <a class="wordmark" href="#top" aria-label="Gram Street Coffee">
-    <div class="wordmark-badge">GS</div>
-    <span>Gram Street Coffee</span>
-  </a>
-  <button class="nav-toggle" id="navToggle" type="button"
+<a class="wordmark" href="#top" aria-label="Gram Street Coffee">
+  <div class="wordmark-badge">GS</div>
+  <span>Gram Street Coffee</span>
+</a>
+<button class="nav-toggle" id="navToggle" type="button"
           aria-expanded="false" aria-controls="navLinks" aria-label="Open menu">
-    <span class="nav-toggle-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+  <span class="nav-toggle-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+</button>
+<nav class="nav" aria-label="Main Navigation">
+  <div class="nav-links" id="navLinks">
+    <a href="#chapters">Flavours</a>
+    <a href="#roasteryCraft">Craft &amp; Roastery</a>
+    <a href="#d2cShop">D2C Roasts</a>
+    <a href="#story">Story</a>
+    <a href="#space">The Space</a>
+    <a href="#cities">Network</a>
+    <a href="#destinations">Locations (3)</a>
+  </div>
+  <!-- 5D Audio Toggle Button -->
+  <button id="audioBtn" onclick="toggleAudio()" class="ml-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-[#2B1650]/40 text-[#2B1650] flex items-center gap-1.5 bg-white/70 hover:bg-white transition-all">
+    <span id="audioDot" class="w-2 h-2 rounded-full bg-slate-400"></span>
+    <span id="audioLabel" class="hidden sm:inline">5D Audio</span>
   </button>
-  <nav class="nav" aria-label="Main Navigation">
-    <div class="nav-links" id="navLinks">
-      <a href="#chapters">Flavours</a>
-      <a href="#roasteryCraft">Craft &amp; Roastery</a>
-      <a href="#d2cShop">D2C Roasts</a>
-      <a href="#story">Story</a>
-      <a href="#space">The Space</a>
-      <a href="#cities">Network</a>
-      <a href="#destinations">Locations (3)</a>
-    </div>
-    <!-- 5D Audio Toggle Button -->
-    <button id="audioBtn" onclick="toggleAudio()" class="ml-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-[#2B1650]/40 text-[#2B1650] flex items-center gap-1.5 bg-white/70 hover:bg-white transition-all">
-      <span id="audioDot" class="w-2 h-2 rounded-full bg-slate-400"></span>
-      <span id="audioLabel" class="hidden sm:inline">5D Audio</span>
-    </button>
-    <!-- Roastery Bag Trigger -->
-    <button onclick="toggleCart(true)" class="ml-2 px-4 py-1.5 rounded-full bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-wider hover:bg-[#4C1D95] transition-all flex items-center gap-1.5 shadow">
-      <span>Bag</span>
-      <span class="px-1.5 py-0.2 bg-white/30 rounded-full text-[10px]" id="cartCount">1</span>
-    </button>
-  </nav>
+  <!-- Roastery Bag Trigger -->
+  <button onclick="toggleCart(true)" class="ml-2 px-4 py-1.5 rounded-full bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-wider hover:bg-[#4C1D95] transition-all flex items-center gap-1.5 shadow">
+    <span>Bag</span>
+    <span class="px-1.5 py-0.2 bg-white/30 rounded-full text-[10px]" id="cartCount">1</span>
+  </button>
+</nav>
 </header>
 
 <main id="main">
-  <!-- HERO SECTION WITH LIQUID CHROME WEBGL SHADER -->
-  <section class="hero" id="top" data-bm-head-scope aria-labelledby="hero-title">
-    <canvas id="fx" aria-hidden="true"></canvas>
-    <div class="hero-inner">
-      <h1 id="hero-title">
-        <span class="w"><span style="--i:0">The</span></span>
-        <span class="w"><span style="--i:1">global</span></span>
-        <span class="w"><span style="--i:2">coffee,</span></span>
-        <span class="w"><span style="--i:3">matcha</span></span>
-        <span class="w"><span style="--i:4">and</span></span>
-        <span class="w"><span style="--i:5">gelato</span></span>
-        <span class="w"><span style="--i:6">movement,</span></span>
-        <span class="w"><span style="--i:7">now</span></span>
-        <span class="w"><span style="--i:8">in</span></span>
-        <span class="w"><span style="--i:9">India.</span></span>
-      </h1>
-      <p class="lede">
-        Specialty in-house roasts, ceremonial Japanese Uji matcha and traditional small-batch gelato, from a lilac glass-fronted counter in Gurugram.
+<!-- HERO SECTION WITH LIQUID CHROME WEBGL SHADER -->
+<section class="hero" id="top" data-bm-head-scope aria-labelledby="hero-title">
+  <canvas id="fx" aria-hidden="true"></canvas>
+  <div class="hero-inner">
+    <h1 id="hero-title">
+      <span class="w"><span style="--i:0">The</span></span>
+      <span class="w"><span style="--i:1">global</span></span>
+      <span class="w"><span style="--i:2">coffee,</span></span>
+      <span class="w"><span style="--i:3">matcha</span></span>
+      <span class="w"><span style="--i:4">and</span></span>
+      <span class="w"><span style="--i:5">gelato</span></span>
+      <span class="w"><span style="--i:6">movement,</span></span>
+      <span class="w"><span style="--i:7">now</span></span>
+      <span class="w"><span style="--i:8">in</span></span>
+      <span class="w"><span style="--i:9">India.</span></span>
+    </h1>
+    <p class="lede">
+      Specialty in-house roasts, ceremonial Japanese Uji matcha and traditional small-batch gelato, from a lilac glass-fronted counter in Gurugram.
       </p>
-      <div class="cta-row">
-        <a class="btn btn-primary" href="#chapters">Explore the Counter</a>
-        <a class="btn btn-chrome" href="#d2cShop">Shop Fresh Roasts (₹)</a>
-        <a class="btn btn-primary" href="#destinations">Visit Bar &amp; Wipe Glass ↗</a>
-      </div>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="#chapters">Explore the Counter</a>
+      <a class="btn btn-chrome" href="#d2cShop">Shop Fresh Roasts (₹)</a>
+      <a class="btn btn-primary" href="#destinations">Visit Bar &amp; Wipe Glass ↗</a>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- MARQUEE TICKER -->
-  <div class="marquee" aria-label="Signature drinks, gelato flavours and food">
-    <div class="track">
-      <ul>
-        <li>Gram Latte</li><li>Croissant Gelato Latte</li><li>Dubai Cappuccino</li><li>Twisted Cold Coffee</li><li>G Street Matcha</li><li>Smoked chocolate gelato</li><li>Chocolate hazelnut gelato</li><li>Peppermint Mocha</li><li>Eggplant parm sando</li><li>Jerk chicken sando</li><li>K-Drama puff</li>
-      </ul>
-      <ul aria-hidden="true">
-        <li>Gram Latte</li><li>Croissant Gelato Latte</li><li>Dubai Cappuccino</li><li>Twisted Cold Coffee</li><li>G Street Matcha</li><li>Smoked chocolate gelato</li><li>Chocolate hazelnut gelato</li><li>Peppermint Mocha</li><li>Eggplant parm sando</li><li>Jerk chicken sando</li><li>K-Drama puff</li>
-      </ul>
+<!-- MARQUEE TICKER -->
+<div class="marquee" aria-label="Signature drinks, gelato flavours and food">
+  <div class="track">
+    <ul>
+      <li>Gram Latte</li><li>Croissant Gelato Latte</li><li>Dubai Cappuccino</li><li>Twisted Cold Coffee</li><li>G Street Matcha</li><li>Smoked chocolate gelato</li><li>Chocolate hazelnut gelato</li><li>Peppermint Mocha</li><li>Eggplant parm sando</li><li>Jerk chicken sando</li><li>K-Drama puff</li>
+    </ul>
+    <ul aria-hidden="true">
+      <li>Gram Latte</li><li>Croissant Gelato Latte</li><li>Dubai Cappuccino</li><li>Twisted Cold Coffee</li><li>G Street Matcha</li><li>Smoked chocolate gelato</li><li>Chocolate hazelnut gelato</li><li>Peppermint Mocha</li><li>Eggplant parm sando</li><li>Jerk chicken sando</li><li>K-Drama puff</li>
+    </ul>
+  </div>
+</div>
+
+<!-- CHAPTERS: 320vh SCROLL STAGE WITH ROTATING CONIC-GRADIENT CHROME ORB -->
+<section id="chapters" aria-label="Coffee, matcha and gelato">
+  <div class="stage">
+    <!-- Chapter 1: Coffee -->
+    <article class="chapter" data-slot="coffee" style="--bg:#CDB8F7">
+      <div class="ch-grid">
+        <div class="ch-body">
+          <h2 class="ch-title">Coffee</h2>
+          <p class="ch-lead">Roasted in-house, with micro-lots from Indian regions including Nagaland and Karnataka.</p>
+          <ul class="ch-list">
+            <li><strong>Gram Latte</strong><span>The iconic purple latte, crafted with natural blueberry reduction and lavender foam.</span></li>
+            <li><strong>Dubai Cappuccino</strong><span>Velvety cappuccino layered with Sicilian pistachio butter crema and knafeh dust.</span></li>
+            <li><strong>Twisted Cold Coffee</strong><span>Blended with house coffee gelato and topped with frozen espresso cubes that intensify as they melt.</span></li>
+          </ul>
+        </div>
+        <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white rounded-3xl shadow-2xl transition-transform duration-700 hover:scale-[1.02]" style="background: linear-gradient(180deg, rgba(43,22,80,0.2) 0%, rgba(43,22,80,0.85) 100%), url('https://images.unsplash.com/photo-1646954256973-f7fd9ce626b1?auto=format&fit=crop&w=1200&q=85') center/cover;">
+          <div class="flex items-center justify-between z-10">
+            <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-black uppercase tracking-wider text-[#F1E9FF] border border-white/20">✦ Iconic Cult Favorite</span>
+            <span class="text-[11px] font-bold text-white/90">9-Bar Extraction</span>
+          </div>
+          <div class="z-10">
+            <div class="text-2xl font-display font-black text-white">Signature Purple Gram Latte</div>
+            <div class="text-xs text-white/90 font-medium mt-1">Nagaland Arabica &bull; Layered wild blueberry lavender foam &amp; double ristretto</div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Chapter 2: Matcha -->
+    <article class="chapter" data-slot="matcha" style="--bg:#CFE3AE">
+      <div class="ch-grid">
+        <div class="ch-body">
+          <h2 class="ch-title">Matcha</h2>
+          <p class="ch-lead">Ceremonial first-harvest Tencha stone-ground in Kyoto, whisked into silky jade micro-foam.</p>
+          <ul class="ch-list">
+            <li><strong>G Street Matcha</strong><span>Cold ceremonial Uji matcha poured over fresh tender coconut water. Crisp and floral.</span></li>
+            <li><strong>Equal Billing</strong><span>Coffee, matcha and gelato-led drinks sit side by side on our bar, none of them an afterthought.</span></li>
+            <li><strong>100-Prong Aeration</strong><span>Whisked fresh at 78°C using traditional Japanese bamboo chasen for rich umami notes.</span></li>
+          </ul>
+        </div>
+        <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white rounded-3xl shadow-2xl transition-transform duration-700 hover:scale-[1.02]" style="background: linear-gradient(180deg, rgba(43,22,80,0.15) 0%, rgba(20,45,15,0.88) 100%), url('https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=1200&q=85') center/cover;">
+          <div class="flex items-center justify-between z-10">
+            <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-black uppercase tracking-wider text-emerald-200 border border-white/20">✦ Ceremonial Uji Tencha</span>
+            <span class="text-[11px] font-bold text-white/90">100-Prong Bamboo Chasen</span>
+          </div>
+          <div class="z-10">
+            <div class="text-2xl font-display font-black text-white">Jade Micro-Foam Ceremony</div>
+            <div class="text-xs text-white/90 font-medium mt-1">Kyoto first harvest &bull; Whisked fresh at 78°C for rich sweet umami finish</div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Chapter 3: Gelato -->
+    <article class="chapter" data-slot="gelato" style="--bg:#FFD7E8">
+      <div class="ch-grid">
+        <div class="ch-body">
+          <h2 class="ch-title">Gelato</h2>
+          <p class="ch-lead">Small-batch Italian-style gelato churned in-house, scooped into specialty drinks and desserts.</p>
+          <ul class="ch-list">
+            <li><strong>Croissant Gelato Latte</strong><span>Sweet and salty double shot poured hot over house caramel croissant gelato.</span></li>
+            <li><strong>The Flavours</strong><span>Smoked chocolate, roasted hazelnut and caramelized croissant, plus tart frozen yoghurt.</span></li>
+            <li><strong>Lighter Sorbets</strong><span>Refreshing fruit sorbets and clean sugar-free options sweetened naturally with erythritol.</span></li>
+          </ul>
+        </div>
+        <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white rounded-3xl shadow-2xl transition-transform duration-700 hover:scale-[1.02]" style="background: linear-gradient(180deg, rgba(43,22,80,0.15) 0%, rgba(65,15,45,0.88) 100%), url('https://images.unsplash.com/photo-1575031745961-1ed57f800a4c?auto=format&fit=crop&w=1200&q=85') center/cover;">
+          <div class="flex items-center justify-between z-10">
+            <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-black uppercase tracking-wider text-pink-200 border border-white/20">✦ In-House Churn</span>
+            <span class="text-[11px] font-bold text-white/90">-12°C Serving Velvet</span>
+          </div>
+          <div class="z-10">
+            <div class="text-2xl font-display font-black text-white">Small-Batch Gelato Scoop</div>
+            <div class="text-xs text-white/90 font-medium mt-1">Smoked chocolate, roasted Sicilian hazelnut &amp; caramelized croissant</div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Rotating 3D Conic Gradient Chrome Orb -->
+    <div class="orb" aria-hidden="true"></div>
+
+    <!-- Chapter Navigation Progress Bar -->
+    <nav class="ch-nav" aria-label="Chapters">
+      <button type="button" aria-current="true">01. Coffee</button>
+      <button type="button">02. Matcha</button>
+      <button type="button">03. Gelato</button>
+    </nav>
+  </div>
+</section>
+
+  <!-- ================= SPECIALTY ROASTERY & EXTRACTION CRAFT ================= -->
+<section class="py-24 px-6 md:px-12 max-w-7xl mx-auto" id="roasteryCraft" data-bm="lean">
+  <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+    <div>
+      <span class="text-xs font-black uppercase tracking-[0.25em] text-[#7C3AED]">The Sensory Extraction & Roastery Bar</span>
+      <h2 class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight mt-2 text-[#2B1650]">
+        The Roastery &amp; Craft.
+        </h2>
+      <p class="mt-3 text-base text-[#534168] max-w-2xl font-semibold leading-relaxed">
+        Step behind our lilac glass counter in DLF Phase 1, Gurugram. Explore our precision 9-bar bottomless espresso extraction telemetry, velvety microfoam emulsion chemistry, and single-origin roast spectrums.
+        </p>
+    </div>
+    <!-- Mode Switcher Tabs -->
+    <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-[#2B1650]/20 shadow-sm text-xs font-black uppercase tracking-wider overflow-x-auto">
+      <button onclick="switchCraftTab('extraction')" id="craftTab-extraction" class="py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow whitespace-nowrap">
+        1. 9-Bar Extraction
+        </button>
+      <button onclick="switchCraftTab('microfoam')" id="craftTab-microfoam" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650] whitespace-nowrap">
+        2. Microfoam Pour
+        </button>
+      <button onclick="switchCraftTab('roast')" id="craftTab-roast" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650] whitespace-nowrap">
+        3. Roast Spectrum
+        </button>
     </div>
   </div>
 
-  <!-- CHAPTERS: 320vh SCROLL STAGE WITH ROTATING CONIC-GRADIENT CHROME ORB -->
-  <section id="chapters" aria-label="Coffee, matcha and gelato">
-    <div class="stage">
-      <!-- Chapter 1: Coffee -->
-      <article class="chapter" data-slot="coffee" style="--bg:#CDB8F7">
-        <div class="ch-grid">
-          <div class="ch-body">
-            <h2 class="ch-title">Coffee</h2>
-            <p class="ch-lead">Roasted in-house, with micro-lots from Indian regions including Nagaland and Karnataka.</p>
-            <ul class="ch-list">
-              <li><strong>Gram Latte</strong><span>The iconic purple latte, crafted with natural blueberry reduction and lavender foam.</span></li>
-              <li><strong>Dubai Cappuccino</strong><span>Velvety cappuccino layered with Sicilian pistachio butter crema and knafeh dust.</span></li>
-              <li><strong>Twisted Cold Coffee</strong><span>Blended with house coffee gelato and topped with frozen espresso cubes that intensify as they melt.</span></li>
-            </ul>
-          </div>
-          <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white rounded-3xl shadow-2xl transition-transform duration-700 hover:scale-[1.02]" style="background: linear-gradient(180deg, rgba(43,22,80,0.2) 0%, rgba(43,22,80,0.85) 100%), url('https://images.unsplash.com/photo-1646954256973-f7fd9ce626b1?auto=format&fit=crop&w=1200&q=85') center/cover;">
-            <div class="flex items-center justify-between z-10">
-              <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-black uppercase tracking-wider text-[#F1E9FF] border border-white/20">✦ Iconic Cult Favorite</span>
-              <span class="text-[11px] font-bold text-white/90">9-Bar Extraction</span>
-            </div>
-            <div class="z-10">
-              <div class="text-2xl font-display font-black text-white">Signature Purple Gram Latte</div>
-              <div class="text-xs text-white/90 font-medium mt-1">Nagaland Arabica &bull; Layered wild blueberry lavender foam &amp; double ristretto</div>
-            </div>
-          </div>
-        </div>
-      </article>
-
-      <!-- Chapter 2: Matcha -->
-      <article class="chapter" data-slot="matcha" style="--bg:#CFE3AE">
-        <div class="ch-grid">
-          <div class="ch-body">
-            <h2 class="ch-title">Matcha</h2>
-            <p class="ch-lead">Ceremonial first-harvest Tencha stone-ground in Kyoto, whisked into silky jade micro-foam.</p>
-            <ul class="ch-list">
-              <li><strong>G Street Matcha</strong><span>Cold ceremonial Uji matcha poured over fresh tender coconut water. Crisp and floral.</span></li>
-              <li><strong>Equal Billing</strong><span>Coffee, matcha and gelato-led drinks sit side by side on our bar, none of them an afterthought.</span></li>
-              <li><strong>100-Prong Aeration</strong><span>Whisked fresh at 78°C using traditional Japanese bamboo chasen for rich umami notes.</span></li>
-            </ul>
-          </div>
-          <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white rounded-3xl shadow-2xl transition-transform duration-700 hover:scale-[1.02]" style="background: linear-gradient(180deg, rgba(43,22,80,0.15) 0%, rgba(20,45,15,0.88) 100%), url('https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=1200&q=85') center/cover;">
-            <div class="flex items-center justify-between z-10">
-              <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-black uppercase tracking-wider text-emerald-200 border border-white/20">✦ Ceremonial Uji Tencha</span>
-              <span class="text-[11px] font-bold text-white/90">100-Prong Bamboo Chasen</span>
-            </div>
-            <div class="z-10">
-              <div class="text-2xl font-display font-black text-white">Jade Micro-Foam Ceremony</div>
-              <div class="text-xs text-white/90 font-medium mt-1">Kyoto first harvest &bull; Whisked fresh at 78°C for rich sweet umami finish</div>
-            </div>
-          </div>
-        </div>
-      </article>
-
-      <!-- Chapter 3: Gelato -->
-      <article class="chapter" data-slot="gelato" style="--bg:#FFD7E8">
-        <div class="ch-grid">
-          <div class="ch-body">
-            <h2 class="ch-title">Gelato</h2>
-            <p class="ch-lead">Small-batch Italian-style gelato churned in-house, scooped into specialty drinks and desserts.</p>
-            <ul class="ch-list">
-              <li><strong>Croissant Gelato Latte</strong><span>Sweet and salty double shot poured hot over house caramel croissant gelato.</span></li>
-              <li><strong>The Flavours</strong><span>Smoked chocolate, roasted hazelnut and caramelized croissant, plus tart frozen yoghurt.</span></li>
-              <li><strong>Lighter Sorbets</strong><span>Refreshing fruit sorbets and clean sugar-free options sweetened naturally with erythritol.</span></li>
-            </ul>
-          </div>
-          <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white rounded-3xl shadow-2xl transition-transform duration-700 hover:scale-[1.02]" style="background: linear-gradient(180deg, rgba(43,22,80,0.15) 0%, rgba(65,15,45,0.88) 100%), url('https://images.unsplash.com/photo-1575031745961-1ed57f800a4c?auto=format&fit=crop&w=1200&q=85') center/cover;">
-            <div class="flex items-center justify-between z-10">
-              <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-black uppercase tracking-wider text-pink-200 border border-white/20">✦ In-House Churn</span>
-              <span class="text-[11px] font-bold text-white/90">-12°C Serving Velvet</span>
-            </div>
-            <div class="z-10">
-              <div class="text-2xl font-display font-black text-white">Small-Batch Gelato Scoop</div>
-              <div class="text-xs text-white/90 font-medium mt-1">Smoked chocolate, roasted Sicilian hazelnut &amp; caramelized croissant</div>
-            </div>
-          </div>
-        </div>
-      </article>
-
-      <!-- Rotating 3D Conic Gradient Chrome Orb -->
-      <div class="orb" aria-hidden="true"></div>
-
-      <!-- Chapter Navigation Progress Bar -->
-      <nav class="ch-nav" aria-label="Chapters">
-        <button type="button" aria-current="true">01. Coffee</button>
-        <button type="button">02. Matcha</button>
-        <button type="button">03. Gelato</button>
-      </nav>
-    </div>
-  </section>
-
-    <!-- ================= SPECIALTY ROASTERY & EXTRACTION CRAFT ================= -->
-  <section class="py-24 px-6 md:px-12 max-w-7xl mx-auto" id="roasteryCraft" data-bm="lean">
-    <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-      <div>
-        <span class="text-xs font-black uppercase tracking-[0.25em] text-[#7C3AED]">The Sensory Extraction & Roastery Bar</span>
-        <h2 class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight mt-2 text-[#2B1650]">
-          The Roastery &amp; Craft.
-        </h2>
-        <p class="mt-3 text-base text-[#534168] max-w-2xl font-semibold leading-relaxed">
-          Step behind our lilac glass counter in DLF Phase 1, Gurugram. Explore our precision 9-bar bottomless espresso extraction telemetry, velvety microfoam emulsion chemistry, and single-origin roast spectrums.
-        </p>
+  <!-- Panel 1: 9-Bar Bottomless Naked Portafilter Extraction Telemetry -->
+  <div id="craftPanel-extraction" class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
+    <!-- Left Controls & Telemetry -->
+    <div class="lg:col-span-6 space-y-6">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-black uppercase tracking-wider">
+        <span>● Bottomless Naked Portafilter • 58mm E61 Grouphead</span>
       </div>
-      <!-- Mode Switcher Tabs -->
-      <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-[#2B1650]/20 shadow-sm text-xs font-black uppercase tracking-wider overflow-x-auto">
-        <button onclick="switchCraftTab('extraction')" id="craftTab-extraction" class="py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow whitespace-nowrap">
-          1. 9-Bar Extraction
-        </button>
-        <button onclick="switchCraftTab('microfoam')" id="craftTab-microfoam" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650] whitespace-nowrap">
-          2. Microfoam Pour
-        </button>
-        <button onclick="switchCraftTab('roast')" id="craftTab-roast" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650] whitespace-nowrap">
-          3. Roast Spectrum
-        </button>
-      </div>
-    </div>
-
-    <!-- Panel 1: 9-Bar Bottomless Naked Portafilter Extraction Telemetry -->
-    <div id="craftPanel-extraction" class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
-      <!-- Left Controls & Telemetry -->
-      <div class="lg:col-span-6 space-y-6">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-black uppercase tracking-wider">
-          <span>● Bottomless Naked Portafilter • 58mm E61 Grouphead</span>
-        </div>
-        <h3 class="text-3xl sm:text-4xl font-display font-black text-[#2B1650] uppercase tracking-tight">
-          Syrupy Golden Extraction.
+      <h3 class="text-3xl sm:text-4xl font-display font-black text-[#2B1650] uppercase tracking-tight">
+        Syrupy Golden Extraction.
         </h3>
-        <p class="text-sm sm:text-base text-[#534168] font-medium leading-relaxed">
-          Freshly ground Nagaland Arabica micro-lot dosed at 18.5 grams. Dual streams coalesce into a syrupy, golden-amber flow, yielding a tiger-striped crema with natural wild blueberry and cacao notes.
+      <p class="text-sm sm:text-base text-[#534168] font-medium leading-relaxed">
+        Freshly ground Nagaland Arabica micro-lot dosed at 18.5 grams. Dual streams coalesce into a syrupy, golden-amber flow, yielding a tiger-striped crema with natural wild blueberry and cacao notes.
         </p>
 
-        <!-- Real Telemetry Grid -->
-        <div class="grid grid-cols-3 gap-3 pt-2">
-          <div class="bg-[#F8F5FF] p-3 rounded-2xl border border-[#2B1650]/10 text-center">
-            <div class="text-[10px] uppercase tracking-wider text-[#7C3AED] font-black">Grouphead</div>
-            <div id="craftPressureVal" class="text-xl font-display font-black text-[#2B1650]">9.2 BAR</div>
-          </div>
-          <div class="bg-[#F8F5FF] p-3 rounded-2xl border border-[#2B1650]/10 text-center">
-            <div class="text-[10px] uppercase tracking-wider text-[#7C3AED] font-black">Extraction Time</div>
-            <div id="craftTimeVal" class="text-xl font-display font-black text-[#2B1650]">27.4s</div>
-          </div>
-          <div class="bg-[#F8F5FF] p-3 rounded-2xl border border-[#2B1650]/10 text-center">
-            <div class="text-[10px] uppercase tracking-wider text-[#7C3AED] font-black">Liquid Yield</div>
-            <div id="craftYieldVal" class="text-xl font-display font-black text-[#2B1650]">36.8g</div>
-          </div>
+      <!-- Real Telemetry Grid -->
+      <div class="grid grid-cols-3 gap-3 pt-2">
+        <div class="bg-[#F8F5FF] p-3 rounded-2xl border border-[#2B1650]/10 text-center">
+          <div class="text-[10px] uppercase tracking-wider text-[#7C3AED] font-black">Grouphead</div>
+          <div id="craftPressureVal" class="text-xl font-display font-black text-[#2B1650]">9.2 BAR</div>
         </div>
-
-        <div class="flex flex-wrap items-center gap-4 pt-2">
-          <button id="craftRunBtn" onclick="runCraftCalibration()" class="btn btn-primary shadow-lg shadow-[#2B1650]/20 flex items-center gap-2">
-            <span>☕ Calibrate 9-Bar Extraction</span>
-          </button>
-          <span class="text-xs text-[#534168] font-bold">1:2 Ratio • 93.5°C Boiler PID</span>
+        <div class="bg-[#F8F5FF] p-3 rounded-2xl border border-[#2B1650]/10 text-center">
+          <div class="text-[10px] uppercase tracking-wider text-[#7C3AED] font-black">Extraction Time</div>
+          <div id="craftTimeVal" class="text-xl font-display font-black text-[#2B1650]">27.4s</div>
         </div>
-
-        <div class="pt-4 border-t border-[#2B1650]/10 grid grid-cols-3 gap-4 text-center">
-          <div>
-            <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">Dry Dose</div>
-            <div class="text-lg font-black text-[#2B1650]">18.5g</div>
-          </div>
-          <div>
-            <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">TDS Purity</div>
-            <div class="text-lg font-black text-[#2B1650]">9.8%</div>
-          </div>
-          <div>
-            <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">Flow Rate</div>
-            <div class="text-lg font-black text-[#2B1650]">1.34 g/s</div>
-          </div>
+        <div class="bg-[#F8F5FF] p-3 rounded-2xl border border-[#2B1650]/10 text-center">
+          <div class="text-[10px] uppercase tracking-wider text-[#7C3AED] font-black">Liquid Yield</div>
+          <div id="craftYieldVal" class="text-xl font-display font-black text-[#2B1650]">36.8g</div>
         </div>
       </div>
 
-      <!-- Right Visual Canvas: Macro Photography with Subtle Steam Canvas Overlay -->
-      <div class="lg:col-span-6 relative rounded-2xl overflow-hidden border-2 border-[#2B1650]/15 shadow-2xl min-h-[380px] bg-slate-900 group">
-        <img id="craftExtractionImg" src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=1200&q=85" alt="Espresso extraction from bottomless portafilter" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 min-h-[380px]" />
-        <!-- Floating Steam Mist Canvas -->
-        <canvas id="coffeeSteamCanvas" class="absolute inset-0 pointer-events-none z-10"></canvas>
-        <div class="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/20 text-white flex items-center justify-between z-20 text-xs font-bold">
-          <span>📍 DLF Phase 1 Flagship Bar</span>
-          <span class="text-amber-400">Tiger-Striped Crema Active</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Panel 2: Microfoam Pour Studio -->
-    <div id="craftPanel-microfoam" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
-      <!-- Left Controls -->
-      <div class="lg:col-span-6 space-y-6">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black uppercase tracking-wider">
-          <span>● Silky Microfoam Emulsion • 65°C Sweet Spot</span>
-        </div>
-        <h3 class="text-3xl sm:text-4xl font-display font-black text-[#2B1650] uppercase tracking-tight">
-          Microfoam Chemistry.
-        </h3>
-        <p class="text-sm sm:text-base text-[#534168] font-medium leading-relaxed">
-          Aerating whole or oat milk to exactly 65°C converts complex sugars into natural sweetness without scalding whey proteins. Poured at a steady 12ml/second to produce mirror-gloss latte art.
-        </p>
-
-        <!-- Pattern Selector -->
-        <div class="space-y-2">
-          <span class="text-xs uppercase tracking-widest text-[#7C3AED] font-black">Select Pour Pattern</span>
-          <div class="flex flex-wrap gap-2">
-            <button onclick="setCraftPattern('rosetta')" id="craftPat-rosetta" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#2B1650] text-[#F1E9FF] shadow transition-all">
-              🌿 Rosetta
-            </button>
-            <button onclick="setCraftPattern('tulip')" id="craftPat-tulip" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#F8F5FF] text-[#534168] border border-[#2B1650]/20 hover:text-[#2B1650] transition-all">
-              🌷 Stacked Tulip
-            </button>
-            <button onclick="setCraftPattern('heart')" id="craftPat-heart" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#F8F5FF] text-[#534168] border border-[#2B1650]/20 hover:text-[#2B1650] transition-all">
-              🤍 Blooming Heart
-            </button>
-          </div>
-        </div>
-
-        <div class="pt-4 border-t border-[#2B1650]/10 grid grid-cols-3 gap-4 text-center">
-          <div>
-            <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">Texture</div>
-            <div class="text-lg font-black text-[#2B1650]">0.2mm Velvet</div>
-          </div>
-          <div>
-            <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">Aeration</div>
-            <div class="text-lg font-black text-[#2B1650]">100% Gloss</div>
-          </div>
-          <div>
-            <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">Steam Temp</div>
-            <div class="text-lg font-black text-[#2B1650]">65.0°C</div>
-          </div>
-        </div>
+      <div class="flex flex-wrap items-center gap-4 pt-2">
+        <button id="craftRunBtn" onclick="runCraftCalibration()" class="btn btn-primary shadow-lg shadow-[#2B1650]/20 flex items-center gap-2">
+          <span>Calibrate 9-Bar Extraction</span>
+        </button>
+        <span class="text-xs text-[#534168] font-bold">1:2 Ratio • 93.5°C Boiler PID</span>
       </div>
 
-      <!-- Right Photo Display -->
-      <div class="lg:col-span-6 relative rounded-2xl overflow-hidden border-2 border-[#2B1650]/15 shadow-2xl min-h-[380px] bg-slate-900 group">
-        <img id="craftLatteImg" src="https://images.unsplash.com/photo-1534778101976-62847782c213?auto=format&fit=crop&w=1200&q=85" alt="Handcrafted latte art pouring" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 min-h-[380px]" />
-        <div class="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/20 text-white flex items-center justify-between z-20 text-xs font-bold">
-          <span id="craftLatteCaption">🌿 Classic 8-Leaf Rosetta Pattern</span>
-          <span class="text-emerald-400">Microfoam Sweet Spot</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Panel 3: Origin Roast Profile & Sensory Wheel -->
-    <div id="craftPanel-roast" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
-      <!-- Left Origin Profile Details -->
-      <div class="lg:col-span-6 space-y-6">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-black uppercase tracking-wider">
-          <span>● Single-Origin Indian Terroir • Giesen W6A Roaster</span>
-        </div>
-        <h3 id="craftRoastName" class="text-3xl sm:text-4xl font-display font-black text-[#2B1650] uppercase tracking-tight">
-          Nagaland Arabica.
-        </h3>
-        <p id="craftRoastDesc" class="text-sm sm:text-base text-[#534168] font-medium leading-relaxed">
-          Grown under dense wild canopies at 1,450 meters elevation in Kiphire, Nagaland. Lightly roasted to preserve floral jasmine aromatics, peach sweetness, and delicate bergamot finish.
-        </p>
-
-        <!-- Roast Slider -->
-        <div class="space-y-3 pt-2">
-          <div class="flex justify-between text-xs font-black uppercase tracking-wider text-[#2B1650]">
-            <span>Light Cinnamon (196°C)</span>
-            <span>Medium City+ (218°C)</span>
-            <span>Dark French (235°C)</span>
-          </div>
-          <input type="range" min="1" max="3" value="1" id="craftRoastSlider" oninput="changeCraftRoastProfile(this.value)" class="w-full accent-[#7C3AED] cursor-pointer h-2 bg-slate-200 rounded-lg" />
-        </div>
-
-        <!-- Flavor Notes Pills -->
-        <div class="space-y-2 pt-2">
-          <span class="text-xs uppercase tracking-widest text-[#7C3AED] font-black">Cupping Flavor Notes</span>
-          <div id="craftRoastNotes" class="flex flex-wrap gap-2">
-            <span class="px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold">Wild Jasmine</span>
-            <span class="px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold">White Peach</span>
-            <span class="px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold">Bergamot Citrus</span>
-            <span class="px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold">Raw Honey</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right Sensory Radar Graphic -->
-      <div class="lg:col-span-6 flex flex-col items-center justify-center p-8 bg-gradient-to-b from-[#F8F5FF] to-[#EAE0FC] rounded-2xl border border-[#2B1650]/15 shadow-inner">
-        <div class="w-full max-w-sm space-y-4">
-          <div class="space-y-1">
-            <div class="flex justify-between text-xs font-bold text-[#2B1650]">
-              <span>Acidity &amp; Brightness</span>
-              <span id="craftAcidityVal">9.4 / 10</span>
-            </div>
-            <div class="h-2 rounded-full bg-white overflow-hidden shadow-inner">
-              <div id="craftAcidityBar" class="h-full bg-[#7C3AED] rounded-full transition-all duration-500" style="width: 94%;"></div>
-            </div>
-          </div>
-          <div class="space-y-1">
-            <div class="flex justify-between text-xs font-bold text-[#2B1650]">
-              <span>Body &amp; Mouthfeel</span>
-              <span id="craftBodyVal">6.5 / 10</span>
-            </div>
-            <div class="h-2 rounded-full bg-white overflow-hidden shadow-inner">
-              <div id="craftBodyBar" class="h-full bg-amber-500 rounded-full transition-all duration-500" style="width: 65%;"></div>
-            </div>
-          </div>
-          <div class="space-y-1">
-            <div class="flex justify-between text-xs font-bold text-[#2B1650]">
-              <span>Sweetness</span>
-              <span id="craftSweetnessVal">8.8 / 10</span>
-            </div>
-            <div class="h-2 rounded-full bg-white overflow-hidden shadow-inner">
-              <div id="craftSweetnessBar" class="h-full bg-pink-500 rounded-full transition-all duration-500" style="width: 88%;"></div>
-            </div>
-          </div>
-          <div class="space-y-1">
-            <div class="flex justify-between text-xs font-bold text-[#2B1650]">
-              <span>Roast Development Time</span>
-              <span id="craftRoastTimeVal">1:45 min (14.2% DTR)</span>
-            </div>
-            <div class="h-2 rounded-full bg-white overflow-hidden shadow-inner">
-              <div id="craftRoastTimeBar" class="h-full bg-[#2B1650] rounded-full transition-all duration-500" style="width: 72%;"></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-6 flex items-center gap-3">
-          <button onclick="playCraftBeanCrackle()" class="px-4 py-2 rounded-full bg-white border border-[#2B1650]/20 text-[#2B1650] text-xs font-bold uppercase tracking-wider hover:bg-[#F8F5FF] transition-all flex items-center gap-2 shadow-sm">
-            <span>🔥 Hear First Crack (Audio)</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- D2C COFFEE ROASTERY SHOP -->
-  <section class="py-24 px-6 md:px-12 max-w-7xl mx-auto scroll-reveal" id="d2cShop" data-bm="lean">
-    <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-      <div>
-        <span class="text-xs font-black uppercase tracking-[0.25em] text-[#7C3AED]">D2C Roastery Releases</span>
-        <h2 class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight mt-2 text-[#2B1650]">
-          Roasted to Order.
-        </h2>
-      </div>
-      <div class="text-xs uppercase tracking-[0.2em] text-[#7C3AED] font-black bg-white px-5 py-3 rounded-full border border-[#7C3AED]/30 shadow-sm">
-        ✦ Subscribe &amp; Save 15% • Shipped Across India
-      </div>
-    </div>
-
-    <!-- 3 Core D2C Products Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="productGridContainer"></div>
-  </section>
-
-  <!-- CHEF SECTION: SCROLL-DRAWN TIMELINE -->
-  <span id="story" aria-hidden="true"></span>
-  <section class="chef" id="chef" data-bm="lean" aria-labelledby="chef-title">
-    <div class="chef-grid scroll-reveal" data-slot="chef">
-      <div>
-        <h2 id="chef-title">From pie shop to purple latte.</h2>
-        <p class="lead">Chef Vanshika Bhatia built Gram Street as a compact, beverage-first counter, and she keeps building focused culinary destinations.</p>
-      </div>
-      <ol class="timeline" id="timeline">
-        <li><b>2021</b><em>Petite Pie Shop.</em> A pie-led kitchen that became a local culinary sensation.</li>
-        <li><b>2022</b><em>OMO.</em> An ingredient-forward plant-based kitchen launched with Bright Hospitality.</li>
-        <li><b>Now</b><em>Gram Street Coffee.</em> Specialty coffee, ceremonial matcha and small-batch gelato in a room made for conversation.</li>
-      </ol>
-    </div>
-  </section>
-
-  <!-- SPACE: SPECULAR CHROME HEADING THAT SWEEPS REFLECTIONS ON POINTER MOVE -->
-  <section class="space" id="space" data-bm="lean" data-slot="space" aria-labelledby="space-title">
-    <h2 class="chrome-text" id="space-title">Lilac glass. Chrome accents. A tiny room by design.</h2>
-    <div class="space-grid scroll-reveal">
-      <p>A glass front painted lilac, chrome cutting through the pastel interior, and a design philosophy drawn from contemporary Asian specialty bars. Bhatia deliberately avoided turning it into a remote workstation: there is just enough room to savor an espresso, and that is the entire point.</p>
-      <p>Behind the drinks sit curated sandos on ciabatta and Japanese milk bread, such as the eggplant parm and jerk chicken, alongside the blueberry brioche and flaky K-Drama puff pastry.</p>
-    </div>
-  </section>
-
-  <!-- CITIES & RADAR ORBIT CONSTELLATION -->
-  <section class="cities" id="cities" data-bm="lean" aria-labelledby="cities-title">
-    <div class="cities-grid scroll-reveal">
-      <div>
-        <h2 id="cities-title">A movement, city by city.</h2>
-        <p>Gram Street began in Gurugram across DLF Phase 1, Golf Course Road and Sector 56. Mumbai, Bengaluru, Hyderabad and Jaipur are the planned next destinations, with Dubai, Singapore and London thereafter.</p>
-        <div class="legend"><span>Inner ring: next across India.</span><span>Outer ring: international expansion.</span></div>
-      </div>
-      <svg id="orbit" viewBox="0 0 640 640" role="img" aria-label="Gurugram at the centre. Planned next: Mumbai, Bengaluru, Hyderabad and Jaipur. Then Dubai, Singapore and London.">
-        <circle class="pulse" cx="320" cy="320" r="10" style="--k:0"/>
-        <circle class="pulse" cx="320" cy="320" r="10" style="--k:1"/>
-        <circle class="pulse" cx="320" cy="320" r="10" style="--k:2"/>
-        <circle class="ring ring-1" cx="320" cy="320" r="120"/>
-        <circle class="ring ring-2" cx="320" cy="320" r="235"/>
-        <circle class="hub" cx="320" cy="320" r="12"/>
-        <text class="city hubtxt" x="320" y="372" text-anchor="middle" style="--d:0">Gurugram</text>
-        <circle class="dot" cx="235.2" cy="235.2" r="9" style="--d:0"/>
-        <text class="city" x="219" y="231" text-anchor="end" style="--d:0">Jaipur</text>
-        <circle class="dot" cx="404.8" cy="235.2" r="9" style="--d:150"/>
-        <text class="city" x="421" y="231" text-anchor="start" style="--d:150">Hyderabad</text>
-        <circle class="dot" cx="235.2" cy="404.8" r="9" style="--d:300"/>
-        <text class="city" x="219" y="415" text-anchor="end" style="--d:300">Mumbai</text>
-        <circle class="dot" cx="404.8" cy="404.8" r="9" style="--d:450"/>
-        <text class="city" x="421" y="415" text-anchor="start" style="--d:450">Bengaluru</text>
-        <circle class="dot-far" cx="320" cy="85" r="9" style="--d:700"/>
-        <text class="city" x="320" y="60" text-anchor="middle" style="--d:700">London</text>
-        <circle class="dot-far" cx="523.5" cy="437.5" r="9" style="--d:850"/>
-        <text class="city" x="523.5" y="486" text-anchor="middle" style="--d:850">Dubai</text>
-        <circle class="dot-far" cx="116.5" cy="437.5" r="9" style="--d:1000"/>
-        <text class="city" x="116.5" y="486" text-anchor="middle" style="--d:1000">Singapore</text>
-      </svg>
-    </div>
-  </section>
-
-  <!-- ALL 3 LOCATIONS & CELEBRATED STEAMED WINDOW (SCRATCH TO REVEAL) -->
-  <section class="visit" id="destinations" data-bm="lean" aria-labelledby="visit-title">
-    <div class="max-w-7xl mx-auto space-y-10 scroll-reveal">
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div class="pt-4 border-t border-[#2B1650]/10 grid grid-cols-3 gap-4 text-center">
         <div>
-          <span class="text-xs font-black uppercase tracking-[0.25em] text-[#7C3AED]">Interactive Destination Explorer</span>
-          <h2 id="visit-title" class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight text-[#2B1650] mt-2">
-            Find the Counter.
-          </h2>
+          <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">Dry Dose</div>
+          <div class="text-lg font-black text-[#2B1650]">18.5g</div>
         </div>
-        <!-- 3 Location Buttons -->
-        <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-[#2B1650]/20 shadow-sm text-xs font-black uppercase tracking-wider overflow-x-auto">
-          <button id="locTab-phase1" onclick="switchLocation('phase1')" class="py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow">
-            1. DLF Phase 1 Flagship
-          </button>
-          <button id="locTab-gcr" onclick="switchLocation('gcr')" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650]">
-            2. Golf Course Road
-          </button>
-          <button id="locTab-sec56" onclick="switchLocation('sec56')" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650]">
-            3. Sector 56 Hub
-          </button>
+        <div>
+          <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">TDS Purity</div>
+          <div class="text-lg font-black text-[#2B1650]">9.8%</div>
+        </div>
+        <div>
+          <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">Flow Rate</div>
+          <div class="text-lg font-black text-[#2B1650]">1.34 g/s</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Visual Canvas: Macro Photography with Subtle Steam Canvas Overlay -->
+    <div class="lg:col-span-6 relative rounded-2xl overflow-hidden border-2 border-[#2B1650]/15 shadow-2xl min-h-[380px] bg-slate-900 group">
+      <img id="craftExtractionImg" src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=1200&q=85" alt="Espresso extraction from bottomless portafilter" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 min-h-[380px]" />
+      <!-- Floating Steam Mist Canvas -->
+      <canvas id="coffeeSteamCanvas" class="absolute inset-0 pointer-events-none z-10"></canvas>
+      <div class="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/20 text-white flex items-center justify-between z-20 text-xs font-bold">
+        <span>DLF Phase 1 Flagship Bar</span>
+        <span class="text-amber-400">Tiger-Striped Crema Active</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel 2: Microfoam Pour Studio -->
+  <div id="craftPanel-microfoam" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
+    <!-- Left Controls -->
+    <div class="lg:col-span-6 space-y-6">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black uppercase tracking-wider">
+        <span>● Silky Microfoam Emulsion • 65°C Sweet Spot</span>
+      </div>
+      <h3 class="text-3xl sm:text-4xl font-display font-black text-[#2B1650] uppercase tracking-tight">
+        Microfoam Chemistry.
+        </h3>
+      <p class="text-sm sm:text-base text-[#534168] font-medium leading-relaxed">
+        Aerating whole or oat milk to exactly 65°C converts complex sugars into natural sweetness without scalding whey proteins. Poured at a steady 12ml/second to produce mirror-gloss latte art.
+        </p>
+
+      <!-- Pattern Selector -->
+      <div class="space-y-2">
+        <span class="text-xs uppercase tracking-widest text-[#7C3AED] font-black">Select Pour Pattern</span>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="setCraftPattern('rosetta')" id="craftPat-rosetta" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#2B1650] text-[#F1E9FF] shadow transition-all">
+            Rosetta
+            </button>
+          <button onclick="setCraftPattern('tulip')" id="craftPat-tulip" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#F8F5FF] text-[#534168] border border-[#2B1650]/20 hover:text-[#2B1650] transition-all">
+            Stacked Tulip
+            </button>
+          <button onclick="setCraftPattern('heart')" id="craftPat-heart" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#F8F5FF] text-[#534168] border border-[#2B1650]/20 hover:text-[#2B1650] transition-all">
+            Blooming Heart
+            </button>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-        <!-- Store Info -->
-        <div class="lg:col-span-5 space-y-6 text-left">
-          <div id="locBadge" class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold uppercase">
-            <span>● Flagship Roastery &amp; Café • Open 8:30 AM – 10:30 PM</span>
+      <div class="pt-4 border-t border-[#2B1650]/10 grid grid-cols-3 gap-4 text-center">
+        <div>
+          <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">Texture</div>
+          <div class="text-lg font-black text-[#2B1650]">0.2mm Velvet</div>
+        </div>
+        <div>
+          <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">Aeration</div>
+          <div class="text-lg font-black text-[#2B1650]">100% Gloss</div>
+        </div>
+        <div>
+          <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">Steam Temp</div>
+          <div class="text-lg font-black text-[#2B1650]">65.0°C</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Photo Display -->
+    <div class="lg:col-span-6 relative rounded-2xl overflow-hidden border-2 border-[#2B1650]/15 shadow-2xl min-h-[380px] bg-slate-900 group">
+      <img id="craftLatteImg" src="https://images.unsplash.com/photo-1534778101976-62847782c213?auto=format&fit=crop&w=1200&q=85" alt="Handcrafted latte art pouring" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 min-h-[380px]" />
+      <div class="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/20 text-white flex items-center justify-between z-20 text-xs font-bold">
+        <span id="craftLatteCaption">Classic 8-Leaf Rosetta Pattern</span>
+        <span class="text-emerald-400">Microfoam Sweet Spot</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel 3: Origin Roast Profile & Sensory Wheel -->
+  <div id="craftPanel-roast" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
+    <!-- Left Origin Profile Details -->
+    <div class="lg:col-span-6 space-y-6">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-black uppercase tracking-wider">
+        <span>● Single-Origin Indian Terroir • Giesen W6A Roaster</span>
+      </div>
+      <h3 id="craftRoastName" class="text-3xl sm:text-4xl font-display font-black text-[#2B1650] uppercase tracking-tight">
+        Nagaland Arabica.
+        </h3>
+      <p id="craftRoastDesc" class="text-sm sm:text-base text-[#534168] font-medium leading-relaxed">
+        Grown under dense wild canopies at 1,450 meters elevation in Kiphire, Nagaland. Lightly roasted to preserve floral jasmine aromatics, peach sweetness, and delicate bergamot finish.
+        </p>
+
+      <!-- Roast Slider -->
+      <div class="space-y-3 pt-2">
+        <div class="flex justify-between text-xs font-black uppercase tracking-wider text-[#2B1650]">
+          <span>Light Cinnamon (196°C)</span>
+          <span>Medium City+ (218°C)</span>
+          <span>Dark French (235°C)</span>
+        </div>
+        <input type="range" min="1" max="3" value="1" id="craftRoastSlider" oninput="changeCraftRoastProfile(this.value)" class="w-full accent-[#7C3AED] cursor-pointer h-2 bg-slate-200 rounded-lg" />
+      </div>
+
+      <!-- Flavor Notes Pills -->
+      <div class="space-y-2 pt-2">
+        <span class="text-xs uppercase tracking-widest text-[#7C3AED] font-black">Cupping Flavor Notes</span>
+        <div id="craftRoastNotes" class="flex flex-wrap gap-2">
+          <span class="px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold">Wild Jasmine</span>
+          <span class="px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold">White Peach</span>
+          <span class="px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold">Bergamot Citrus</span>
+          <span class="px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold">Raw Honey</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Sensory Radar Graphic -->
+    <div class="lg:col-span-6 flex flex-col items-center justify-center p-8 bg-gradient-to-b from-[#F8F5FF] to-[#EAE0FC] rounded-2xl border border-[#2B1650]/15 shadow-inner">
+      <div class="w-full max-w-sm space-y-4">
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs font-bold text-[#2B1650]">
+            <span>Acidity &amp; Brightness</span>
+            <span id="craftAcidityVal">9.4 / 10</span>
           </div>
-          <h3 id="locTitle" class="text-3xl sm:text-4xl font-display font-black uppercase tracking-tight text-[#2B1650]">
-            16 Arjun Marg Flagship.
+          <div class="h-2 rounded-full bg-white overflow-hidden shadow-inner">
+            <div id="craftAcidityBar" class="h-full bg-[#7C3AED] rounded-full transition-all duration-500" style="width: 94%;"></div>
+          </div>
+        </div>
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs font-bold text-[#2B1650]">
+            <span>Body &amp; Mouthfeel</span>
+            <span id="craftBodyVal">6.5 / 10</span>
+          </div>
+          <div class="h-2 rounded-full bg-white overflow-hidden shadow-inner">
+            <div id="craftBodyBar" class="h-full bg-amber-500 rounded-full transition-all duration-500" style="width: 65%;"></div>
+          </div>
+        </div>
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs font-bold text-[#2B1650]">
+            <span>Sweetness</span>
+            <span id="craftSweetnessVal">8.8 / 10</span>
+          </div>
+          <div class="h-2 rounded-full bg-white overflow-hidden shadow-inner">
+            <div id="craftSweetnessBar" class="h-full bg-pink-500 rounded-full transition-all duration-500" style="width: 88%;"></div>
+          </div>
+        </div>
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs font-bold text-[#2B1650]">
+            <span>Roast Development Time</span>
+            <span id="craftRoastTimeVal">1:45 min (14.2% DTR)</span>
+          </div>
+          <div class="h-2 rounded-full bg-white overflow-hidden shadow-inner">
+            <div id="craftRoastTimeBar" class="h-full bg-[#2B1650] rounded-full transition-all duration-500" style="width: 72%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 flex items-center gap-3">
+        <button onclick="playCraftBeanCrackle()" class="px-4 py-2 rounded-full bg-white border border-[#2B1650]/20 text-[#2B1650] text-xs font-bold uppercase tracking-wider hover:bg-[#F8F5FF] transition-all flex items-center gap-2 shadow-sm">
+          <span>Hear First Crack (Audio)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- D2C COFFEE ROASTERY SHOP -->
+<section class="py-24 px-6 md:px-12 max-w-7xl mx-auto scroll-reveal" id="d2cShop" data-bm="lean">
+  <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+    <div>
+      <span class="text-xs font-black uppercase tracking-[0.25em] text-[#7C3AED]">D2C Roastery Releases</span>
+      <h2 class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight mt-2 text-[#2B1650]">
+        Roasted to Order.
+        </h2>
+    </div>
+    <div class="text-xs uppercase tracking-[0.2em] text-[#7C3AED] font-black bg-white px-5 py-3 rounded-full border border-[#7C3AED]/30 shadow-sm">
+      ✦ Subscribe &amp; Save 15% • Shipped Across India
+      </div>
+  </div>
+
+  <!-- 3 Core D2C Products Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="productGridContainer"></div>
+</section>
+
+<!-- CHEF SECTION: SCROLL-DRAWN TIMELINE -->
+<span id="story" aria-hidden="true"></span>
+<section class="chef" id="chef" data-bm="lean" aria-labelledby="chef-title">
+  <div class="chef-grid scroll-reveal" data-slot="chef">
+    <div>
+      <h2 id="chef-title">From pie shop to purple latte.</h2>
+      <p class="lead">Chef Vanshika Bhatia built Gram Street as a compact, beverage-first counter, and she keeps building focused culinary destinations.</p>
+    </div>
+    <ol class="timeline" id="timeline">
+      <li><b>2021</b><em>Petite Pie Shop.</em> A pie-led kitchen that became a local culinary sensation.</li>
+      <li><b>2022</b><em>OMO.</em> An ingredient-forward plant-based kitchen launched with Bright Hospitality.</li>
+      <li><b>Now</b><em>Gram Street Coffee.</em> Specialty coffee, ceremonial matcha and small-batch gelato in a room made for conversation.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- SPACE: SPECULAR CHROME HEADING THAT SWEEPS REFLECTIONS ON POINTER MOVE -->
+<section class="space" id="space" data-bm="lean" data-slot="space" aria-labelledby="space-title">
+  <h2 class="chrome-text" id="space-title">Lilac glass. Chrome accents. A tiny room by design.</h2>
+  <div class="space-grid scroll-reveal">
+    <p>A glass front painted lilac, chrome cutting through the pastel interior, and a design philosophy drawn from contemporary Asian specialty bars. Bhatia deliberately avoided turning it into a remote workstation: there is just enough room to savor an espresso, and that is the entire point.</p>
+    <p>Behind the drinks sit curated sandos on ciabatta and Japanese milk bread, such as the eggplant parm and jerk chicken, alongside the blueberry brioche and flaky K-Drama puff pastry.</p>
+  </div>
+</section>
+
+<!-- CITIES & RADAR ORBIT CONSTELLATION -->
+<section class="cities" id="cities" data-bm="lean" aria-labelledby="cities-title">
+  <div class="cities-grid scroll-reveal">
+    <div>
+      <h2 id="cities-title">A movement, city by city.</h2>
+      <p>Gram Street began in Gurugram across DLF Phase 1, Golf Course Road and Sector 56. Mumbai, Bengaluru, Hyderabad and Jaipur are the planned next destinations, with Dubai, Singapore and London thereafter.</p>
+      <div class="legend"><span>Inner ring: next across India.</span><span>Outer ring: international expansion.</span></div>
+    </div>
+    <svg id="orbit" viewBox="0 0 640 640" role="img" aria-label="Gurugram at the centre. Planned next: Mumbai, Bengaluru, Hyderabad and Jaipur. Then Dubai, Singapore and London.">
+      <circle class="pulse" cx="320" cy="320" r="10" style="--k:0"/>
+      <circle class="pulse" cx="320" cy="320" r="10" style="--k:1"/>
+      <circle class="pulse" cx="320" cy="320" r="10" style="--k:2"/>
+      <circle class="ring ring-1" cx="320" cy="320" r="120"/>
+      <circle class="ring ring-2" cx="320" cy="320" r="235"/>
+      <circle class="hub" cx="320" cy="320" r="12"/>
+      <text class="city hubtxt" x="320" y="372" text-anchor="middle" style="--d:0">Gurugram</text>
+      <circle class="dot" cx="235.2" cy="235.2" r="9" style="--d:0"/>
+      <text class="city" x="219" y="231" text-anchor="end" style="--d:0">Jaipur</text>
+      <circle class="dot" cx="404.8" cy="235.2" r="9" style="--d:150"/>
+      <text class="city" x="421" y="231" text-anchor="start" style="--d:150">Hyderabad</text>
+      <circle class="dot" cx="235.2" cy="404.8" r="9" style="--d:300"/>
+      <text class="city" x="219" y="415" text-anchor="end" style="--d:300">Mumbai</text>
+      <circle class="dot" cx="404.8" cy="404.8" r="9" style="--d:450"/>
+      <text class="city" x="421" y="415" text-anchor="start" style="--d:450">Bengaluru</text>
+      <circle class="dot-far" cx="320" cy="85" r="9" style="--d:700"/>
+      <text class="city" x="320" y="60" text-anchor="middle" style="--d:700">London</text>
+      <circle class="dot-far" cx="523.5" cy="437.5" r="9" style="--d:850"/>
+      <text class="city" x="523.5" y="486" text-anchor="middle" style="--d:850">Dubai</text>
+      <circle class="dot-far" cx="116.5" cy="437.5" r="9" style="--d:1000"/>
+      <text class="city" x="116.5" y="486" text-anchor="middle" style="--d:1000">Singapore</text>
+    </svg>
+  </div>
+</section>
+
+<!-- ALL 3 LOCATIONS & CELEBRATED STEAMED WINDOW (SCRATCH TO REVEAL) -->
+<section class="visit" id="destinations" data-bm="lean" aria-labelledby="visit-title">
+  <div class="max-w-7xl mx-auto space-y-10 scroll-reveal">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div>
+        <span class="text-xs font-black uppercase tracking-[0.25em] text-[#7C3AED]">Interactive Destination Explorer</span>
+        <h2 id="visit-title" class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight text-[#2B1650] mt-2">
+          Find the Counter.
+          </h2>
+      </div>
+      <!-- 3 Location Buttons -->
+      <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-[#2B1650]/20 shadow-sm text-xs font-black uppercase tracking-wider overflow-x-auto">
+        <button id="locTab-phase1" onclick="switchLocation('phase1')" class="py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow">
+          1. DLF Phase 1 Flagship
+          </button>
+        <button id="locTab-gcr" onclick="switchLocation('gcr')" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650]">
+          2. Golf Course Road
+          </button>
+        <button id="locTab-sec56" onclick="switchLocation('sec56')" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650]">
+          3. Sector 56 Hub
+          </button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <!-- Store Info -->
+      <div class="lg:col-span-5 space-y-6 text-left">
+        <div id="locBadge" class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold uppercase">
+          <span>● Flagship Roastery &amp; Café • Open 8:30 AM – 10:30 PM</span>
+        </div>
+        <h3 id="locTitle" class="text-3xl sm:text-4xl font-display font-black uppercase tracking-tight text-[#2B1650]">
+          16 Arjun Marg Flagship.
           </h3>
-          <p id="locDesc" class="text-base font-semibold text-[#534168] leading-relaxed">
-            A compact 10-seater lilac room with polished chrome counters. In-house micro-roasting, ceremonial Uji matcha, and traditional small-batch gelato bar.
+        <p id="locDesc" class="text-base font-semibold text-[#534168] leading-relaxed">
+          A compact 10-seater lilac room with polished chrome counters. In-house micro-roasting, ceremonial Uji matcha, and traditional small-batch gelato bar.
           </p>
 
-          <div class="d2c-card p-6 space-y-3">
-            <div class="flex justify-between items-center pb-2 border-b border-[#2B1650]/15">
-              <span id="locArea" class="font-display font-black text-sm text-[#7C3AED] uppercase">DLF Phase 1, Sector 26A</span>
-              <span id="locHours" class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-800 font-black text-[10px]">Open 8:30 AM – 10:30 PM</span>
-            </div>
-            <p id="locAddress" class="font-bold text-sm text-[#2B1650]">Block F, 16 Arjun Marg, DLF Phase 1, Sector 26A, Gurugram 122002</p>
-            <div class="text-xs font-semibold text-[#534168]">
-              📞 Call: <a id="locPhone" href="tel:+918130056889" class="font-bold text-[#7C3AED] underline">+91 81300 56889</a>
-            </div>
-            <div class="pt-2 flex flex-wrap gap-3">
-              <a id="locDirectionsBtn" href="https://www.google.com/maps/search/?api=1&query=Gram+Street+Coffee+DLF+Phase+1+Gurugram" target="_blank" rel="noreferrer" class="px-5 py-2.5 rounded-full bg-[#2B1650] text-[#F1E9FF] font-bold text-xs uppercase tracking-wider hover:bg-[#3D2272] transition-all shadow-md">
-                Get Directions ↗
+        <div class="d2c-card p-6 space-y-3">
+          <div class="flex justify-between items-center pb-2 border-b border-[#2B1650]/15">
+            <span id="locArea" class="font-display font-black text-sm text-[#7C3AED] uppercase">DLF Phase 1, Sector 26A</span>
+            <span id="locHours" class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-800 font-black text-[10px]">Open 8:30 AM – 10:30 PM</span>
+          </div>
+          <p id="locAddress" class="font-bold text-sm text-[#2B1650]">Block F, 16 Arjun Marg, DLF Phase 1, Sector 26A, Gurugram 122002</p>
+          <div class="text-xs font-semibold text-[#534168]">
+            Call: <a id="locPhone" href="tel:+918130056889" class="font-bold text-[#7C3AED] underline">+91 81300 56889</a>
+          </div>
+          <div class="pt-2 flex flex-wrap gap-3">
+            <a id="locDirectionsBtn" href="https://www.google.com/maps/search/?api=1&query=Gram+Street+Coffee+DLF+Phase+1+Gurugram" target="_blank" rel="noreferrer" class="px-5 py-2.5 rounded-full bg-[#2B1650] text-[#F1E9FF] font-bold text-xs uppercase tracking-wider hover:bg-[#3D2272] transition-all shadow-md">
+              Get Directions ↗
               </a>
-              <a id="locZomatoBtn" href="https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon" target="_blank" rel="noreferrer" class="px-5 py-2.5 rounded-full border border-[#2B1650]/40 font-bold text-xs uppercase tracking-wider hover:bg-[#2B1650]/10 transition-all text-[#2B1650]">
-                Order on Zomato ↗
+            <a id="locZomatoBtn" href="https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon" target="_blank" rel="noreferrer" class="px-5 py-2.5 rounded-full border border-[#2B1650]/40 font-bold text-xs uppercase tracking-wider hover:bg-[#2B1650]/10 transition-all text-[#2B1650]">
+              Order on Zomato ↗
               </a>
-            </div>
           </div>
         </div>
+      </div>
 
-        <!-- Wipe-to-See Steamed Window -->
-        <div class="lg:col-span-7">
-          <div id="scratchContainer">
-            <img
+      <!-- Wipe-to-See Steamed Window -->
+      <div class="lg:col-span-7">
+        <div id="scratchContainer">
+          <img
               id="scratchBgImage"
               src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200&q=85"
               alt="Gram Street Coffee Flagship Interior"
               class="w-full h-full object-cover transition-opacity duration-500"
             />
-            <div id="scratchCaption" class="absolute bottom-6 left-6 z-10 pointer-events-none bg-black/85 backdrop-blur-md px-4 py-2 rounded-full border border-white/30 text-xs text-white font-bold uppercase tracking-widest">
-              📍 16 Arjun Marg Flagship Bar
+          <div id="scratchCaption" class="absolute bottom-6 left-6 z-10 pointer-events-none bg-black/85 backdrop-blur-md px-4 py-2 rounded-full border border-white/30 text-xs text-white font-bold uppercase tracking-widest">
+            16 Arjun Marg Flagship Bar
             </div>
 
-            <canvas id="scratchCanvas" class="absolute inset-0 z-20 w-full h-full"></canvas>
+          <canvas id="scratchCanvas" class="absolute inset-0 z-20 w-full h-full"></canvas>
 
-            <button onclick="initScratchWindow()" class="absolute top-4 right-4 z-30 px-4 py-2 rounded-full bg-black/80 text-[#CDB8F7] border border-white/30 text-[11px] font-black uppercase tracking-wider hover:bg-[#7C3AED] hover:text-white transition-all shadow-md">
-              Reset Steamed Layer
+          <button onclick="initScratchWindow()" class="absolute top-4 right-4 z-30 px-4 py-2 rounded-full bg-black/80 text-[#CDB8F7] border border-white/30 text-[11px] font-black uppercase tracking-wider hover:bg-[#7C3AED] hover:text-white transition-all shadow-md">
+            Reset Steamed Layer
             </button>
-          </div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 </main>
 
 <!-- SLIDE-OVER ROASTERY BAG DRAWER -->
 <div id="cartModal" class="fixed inset-0 z-50 hidden">
-  <div onclick="toggleCart(false)" class="absolute inset-0 bg-black/75 backdrop-blur-sm"></div>
-  <div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-[#2B1650]/35 p-8 flex flex-col justify-between shadow-2xl text-[#2B1650]">
-    <div>
-      <div class="flex items-center justify-between border-b border-[#2B1650]/20 pb-5">
-        <h3 class="text-xl font-display font-black uppercase tracking-tight text-[#2B1650]">Your Roastery Bag</h3>
-        <button onclick="toggleCart(false)" class="text-xs uppercase tracking-widest text-[#7C3AED] font-black hover:underline">Close ✕</button>
-      </div>
-      <div id="cartItemsList" class="mt-6 space-y-4 max-h-[60vh] overflow-y-auto pr-1"></div>
+<div onclick="toggleCart(false)" class="absolute inset-0 bg-black/75 backdrop-blur-sm"></div>
+<div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-[#2B1650]/35 p-8 flex flex-col justify-between shadow-2xl text-[#2B1650]">
+  <div>
+    <div class="flex items-center justify-between border-b border-[#2B1650]/20 pb-5">
+      <h3 class="text-xl font-display font-black uppercase tracking-tight text-[#2B1650]">Your Roastery Bag</h3>
+      <button onclick="toggleCart(false)" class="text-xs uppercase tracking-widest text-[#7C3AED] font-black hover:underline">Close ✕</button>
     </div>
-
-    <div class="border-t border-[#2B1650]/20 pt-6 space-y-4">
-      <div class="flex justify-between text-sm">
-        <span class="font-bold uppercase tracking-wider text-[#534168]">Subtotal</span>
-        <span id="cartTotalPrice" class="text-2xl font-display font-black text-[#7C3AED]">₹580</span>
-      </div>
-      <button onclick="checkoutBag()" class="w-full py-4 rounded-full bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-[0.2em] hover:bg-[#3D2272] transition-all shadow-lg">
-        Proceed to Roast &amp; Dispatch (₹) →
-      </button>
-    </div>
+    <div id="cartItemsList" class="mt-6 space-y-4 max-h-[60vh] overflow-y-auto pr-1"></div>
   </div>
+
+  <div class="border-t border-[#2B1650]/20 pt-6 space-y-4">
+    <div class="flex justify-between text-sm">
+      <span class="font-bold uppercase tracking-wider text-[#534168]">Subtotal</span>
+      <span id="cartTotalPrice" class="text-2xl font-display font-black text-[#7C3AED]">₹580</span>
+    </div>
+    <button onclick="checkoutBag()" class="w-full py-4 rounded-full bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-[0.2em] hover:bg-[#3D2272] transition-all shadow-lg">
+      Proceed to Roast &amp; Dispatch (₹) →
+      </button>
+  </div>
+</div>
 </div>
 
 <footer>
-  <p>Follow Instagram: <a href="https://www.instagram.com/gramstreetcoffee/" target="_blank" rel="noopener">@gramstreetcoffee</a> • Zomato: <a href="https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon" target="_blank" rel="noopener">Gram Street Gurugram</a> • Call: <a href="tel:+918130056889">+91 81300 56889</a></p>
-  <p class="mt-2 text-xs opacity-80">© 2026 Gram Street Coffee. DLF Phase 1, Golf Course Road &amp; Sector 56, Gurugram.</p>
+<p>Follow Instagram: <a href="https://www.instagram.com/gramstreetcoffee/" target="_blank" rel="noopener">@gramstreetcoffee</a> • Zomato: <a href="https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon" target="_blank" rel="noopener">Gram Street Gurugram</a> • Call: <a href="tel:+918130056889">+91 81300 56889</a></p>
+<p class="mt-2 text-xs opacity-80">© 2026 Gram Street Coffee. DLF Phase 1, Golf Course Road &amp; Sector 56, Gurugram.</p>
 </footer>
 
 <!-- SCRIPTS: SHADER HERO + PINNED STAGE + AUDIO + SCRATCH -->
@@ -1192,7 +1196,7 @@
       directions: 'https://www.google.com/maps/search/?api=1&query=Gram+Street+Coffee+DLF+Phase+1+Gurugram',
       zomato: 'https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon',
       image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200&q=85',
-      caption: '📍 16 Arjun Marg Flagship Bar'
+      caption: '16 Arjun Marg Flagship Bar'
     },
     gcr: {
       tabId: 'locTab-gcr',
@@ -1206,7 +1210,7 @@
       directions: 'https://www.google.com/maps/search/?api=1&query=Gram+Street+Coffee+DLF+Summit+Plaza+Golf+Course+Road+Gurgaon',
       zomato: 'https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon',
       image: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1200&q=85',
-      caption: '📍 DLF Summit Plaza (Sector 53)'
+      caption: 'DLF Summit Plaza (Sector 53)'
     },
     sec56: {
       tabId: 'locTab-sec56',
@@ -1220,7 +1224,7 @@
       directions: 'https://www.google.com/maps/search/?api=1&query=Gram+Street+Coffee+Jalvayu+Towers+Sector+56+Gurugram',
       zomato: 'https://www.swiggy.com/city/gurgaon/gram-street-coffee-arjun-marg-jalvayu-towers-rest1462852',
       image: 'https://images.unsplash.com/photo-1442512595331-e89e73853f31?auto=format&fit=crop&w=1200&q=85',
-      caption: '📍 Jalvayu Towers Express Hub'
+      caption: 'Jalvayu Towers Express Hub'
     }
   };
 
@@ -1312,9 +1316,9 @@
       "vec3 col=mix(lilac,mid,smoothstep(0.25,0.85,h));",
       "float band2=0.5+0.5*sin(h*14.0+1.5-u_t*0.3);",
       // the fold of the pour, strongest where the swirl turns over
-      "col=mix(col,flav,smoothstep(0.40,0.96,band2)*0.72);",
+      "col=mix(col,flav,smoothstep(0.62,0.99,band2)*0.30);",
       // crema breaking white at the crest
-      "col=mix(col,white,shine*0.9);",
+      "col=mix(col,white,shine*0.42);",
       "gl_FragColor=vec4(col,1.0);}"
     ].join("\n");
 
@@ -1483,7 +1487,7 @@
     scratchCtx.font = '800 13px Bricolage Grotesque, sans-serif';
     scratchCtx.textAlign = 'center';
     const loc = LOCATIONS[activeLocation];
-    scratchCtx.fillText(`✦ WIPE / TOUCH GLASS TO REVEAL ${loc.caption.replace('📍 ', '').toUpperCase()} ✦`, scratchCanvas.width / 2, scratchCanvas.height / 2);
+    scratchCtx.fillText(`✦ WIPE / TOUCH GLASS TO REVEAL ${loc.caption.replace('', '').toUpperCase()} ✦`, scratchCanvas.width / 2, scratchCanvas.height / 2);
   };
 
   function wipeScratchAt(clientX, clientY) {
@@ -1572,34 +1576,34 @@
       const finalPrice = isSub ? Math.round(p.price * 0.85) : p.price;
       return `
         <div class="d2c-card tilt-card scroll-reveal p-7 flex flex-col justify-between space-y-5">
-          <div>
-            <div class="relative h-64 rounded-2xl overflow-hidden mb-5 bg-black/10">
-              <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
-              <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-[#2B1650] text-[#F1E9FF]">
-                ${p.sub}
+        <div>
+          <div class="relative h-64 rounded-2xl overflow-hidden mb-5 bg-black/10">
+            <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
+            <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-[#2B1650] text-[#F1E9FF]">
+              ${p.sub}
               </span>
-            </div>
-            <div class="flex justify-between items-start gap-2 mb-2">
-              <h3 class="text-2xl font-black uppercase tracking-tight text-[#2B1650]">${p.name}</h3>
-              <span class="text-2xl font-black text-[#7C3AED]">₹${finalPrice}</span>
-            </div>
-            <p class="text-xs font-semibold text-[#534168] mb-5 leading-relaxed">${p.notes}</p>
-
-            <div class="grid grid-cols-2 gap-2 p-1.5 rounded-xl bg-[#F5EFFF] border border-[#7C3AED]/25 text-[11px] font-black uppercase tracking-wider mb-2">
-              <button onclick="window.setSubMode('${p.id}', false)" class="py-2.5 rounded-lg transition-all ${!isSub ? 'bg-[#7C3AED] text-white shadow-sm' : 'text-[#534168]'}">
-                One-Time (₹${p.price})
-              </button>
-              <button onclick="window.setSubMode('${p.id}', true)" class="py-2.5 rounded-lg transition-all ${isSub ? 'bg-[#7C3AED] text-white shadow-sm' : 'text-[#534168]'}">
-                Subscribe (-15%)
-              </button>
-            </div>
           </div>
+          <div class="flex justify-between items-start gap-2 mb-2">
+            <h3 class="text-2xl font-black uppercase tracking-tight text-[#2B1650]">${p.name}</h3>
+            <span class="text-2xl font-black text-[#7C3AED]">₹${finalPrice}</span>
+          </div>
+          <p class="text-xs font-semibold text-[#534168] mb-5 leading-relaxed">${p.notes}</p>
 
-          <button onclick="window.addToCart('${p.id}')" class="w-full py-4 rounded-xl bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-[0.2em] hover:bg-[#3D2272] transition-all shadow-md">
-            ${isSub ? 'Subscribe & Save 15%' : 'Add to Roastery Bag'}
-          </button>
+          <div class="grid grid-cols-2 gap-2 p-1.5 rounded-xl bg-[#F5EFFF] border border-[#7C3AED]/25 text-[11px] font-black uppercase tracking-wider mb-2">
+            <button onclick="window.setSubMode('${p.id}', false)" class="py-2.5 rounded-lg transition-all ${!isSub ? 'bg-[#7C3AED] text-white shadow-sm' : 'text-[#534168]'}">
+              One-Time (₹${p.price})
+              </button>
+            <button onclick="window.setSubMode('${p.id}', true)" class="py-2.5 rounded-lg transition-all ${isSub ? 'bg-[#7C3AED] text-white shadow-sm' : 'text-[#534168]'}">
+              Subscribe (-15%)
+              </button>
+          </div>
         </div>
-      `;
+
+        <button onclick="window.addToCart('${p.id}')" class="w-full py-4 rounded-xl bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-[0.2em] hover:bg-[#3D2272] transition-all shadow-md">
+          ${isSub ? 'Subscribe & Save 15%' : 'Add to Roastery Bag'}
+          </button>
+      </div>
+    `;
     }).join('');
     if (typeof window.initTiltPhysics === 'function') window.initTiltPhysics();
     if (typeof window.initScrollReveal === 'function') window.initScrollReveal();
@@ -1632,16 +1636,16 @@
     if (list) {
       list.innerHTML = cart.map((item, idx) => `
         <div class="flex items-center justify-between p-4 rounded-2xl bg-[#F5EFFF] border border-[#7C3AED]/25">
-          <div>
-            <div class="font-bold uppercase text-sm text-[#2B1650]">${item.name}</div>
-            <div class="text-[11px] text-[#7C3AED] uppercase tracking-wider font-black">${item.isSub ? 'Monthly Roast Subscription (-15%)' : 'Fresh Single Bag'} • Qty: ${item.qty}</div>
-          </div>
-          <div class="flex items-center gap-3">
-            <span class="font-black text-[#7C3AED]">₹${item.price * item.qty}</span>
-            <button onclick="window.removeCartItem(${idx})" class="text-xs text-rose-600 font-bold hover:scale-110">✕</button>
-          </div>
+        <div>
+          <div class="font-bold uppercase text-sm text-[#2B1650]">${item.name}</div>
+          <div class="text-[11px] text-[#7C3AED] uppercase tracking-wider font-black">${item.isSub ? 'Monthly Roast Subscription (-15%)' : 'Fresh Single Bag'} • Qty: ${item.qty}</div>
         </div>
-      `).join('');
+        <div class="flex items-center gap-3">
+          <span class="font-black text-[#7C3AED]">₹${item.price * item.qty}</span>
+          <button onclick="window.removeCartItem(${idx})" class="text-xs text-rose-600 font-bold hover:scale-110">✕</button>
+        </div>
+      </div>
+    `).join('');
     }
   }
 
@@ -1705,7 +1709,7 @@
 
     if (btn) {
       btn.disabled = true;
-      btn.innerHTML = '<span>⚙️ Calibrating E61 Grouphead...</span>';
+      btn.innerHTML = '<span>Calibrating E61 Grouphead...</span>';
     }
 
     try {
@@ -1803,15 +1807,15 @@
   const PATTERNS = {
     rosetta: {
       img: 'https://images.unsplash.com/photo-1534778101976-62847782c213?auto=format&fit=crop&w=1200&q=85',
-      caption: '🌿 Classic 8-Leaf Rosetta Pattern'
+      caption: 'Classic 8-Leaf Rosetta Pattern'
     },
     tulip: {
       img: 'https://images.unsplash.com/photo-1517256064527-09c73fc73e38?auto=format&fit=crop&w=1200&q=85',
-      caption: '🌷 4-Tier Stacked Tulip Microfoam'
+      caption: '4-Tier Stacked Tulip Microfoam'
     },
     heart: {
       img: 'https://images.unsplash.com/photo-1509785307050-d4066910ec1e?auto=format&fit=crop&w=1200&q=85',
-      caption: '🤍 Blooming Symmetrical Heart'
+      caption: 'Blooming Symmetrical Heart'
     }
   };
 
@@ -1975,7 +1979,7 @@
 })();
 </script>
 <script>
-  /* Mobile menu. Closes on choosing a link, on Escape, and on an outside tap,
+/* Mobile menu. Closes on choosing a link, on Escape, and on an outside tap,
      because a fixed sheet that stays open over the page is worse than no menu. */
   (function () {
     var t = document.getElementById('navToggle');

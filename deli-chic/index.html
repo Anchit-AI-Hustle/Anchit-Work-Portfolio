@@ -1,27 +1,31 @@
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Deli Chic — Food For Thought | Haute Boucherie &amp; Artisanal Larder</title>
-  <meta name="description" content="Artisanal cuts, 100% antibiotic residue-free poultry, handcrafted charcuterie, gourmet dim sum, and chef-curated marinades. Chilled 0°C–4°C delivery across Delhi NCR." />
-  <link rel="canonical" href="https://anchit-tandon.com/deli-chic" />
-  <meta property="og:title" content="Deli Chic — Food For Thought | Haute Boucherie &amp; Artisanal Larder" />
-  <meta property="og:description" content="Artisanal cuts, antibiotic-free poultry, handcrafted charcuterie, and chilled gourmet delicacies. New Delhi." />
-  <meta property="og:url" content="https://anchit-tandon.com/deli-chic" />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://i1.wp.com/mh.delichic.co.in/wp-content/uploads/2020/09/Chicken-Breast-Antibiotic-Free-scaled.jpg" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deli Chic — Food For Thought | Haute Boucherie &amp; Artisanal Larder</title>
+<meta name="description" content="Artisanal cuts, 100% antibiotic residue-free poultry, handcrafted charcuterie, gourmet dim sum, and chef-curated marinades. Chilled 0°C–4°C delivery across Delhi NCR." />
+<link rel="canonical" href="https://anchit-tandon.com/deli-chic" />
+<meta property="og:title" content="Deli Chic — Food For Thought | Haute Boucherie &amp; Artisanal Larder" />
+<meta property="og:description" content="Artisanal cuts, antibiotic-free poultry, handcrafted charcuterie, and chilled gourmet delicacies. New Delhi." />
+<meta property="og:url" content="https://anchit-tandon.com/deli-chic" />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="https://i1.wp.com/mh.delichic.co.in/wp-content/uploads/2020/09/Chicken-Breast-Antibiotic-Free-scaled.jpg" />
 
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
+<!-- Tailwind CSS -->
+<!-- Tailwind, compiled and self-hosted (scripts/build-tailwind.mjs).
+     The CDN build shipped a ~300KB JIT compiler, scanned the DOM at
+     runtime and left the page unstyled until it finished — and Tailwind
+     itself warns in the console not to use it in production. -->
+<link rel="stylesheet" href="/assets/tw-deli-chic.css">
 
-  <!-- Google Fonts: Playfair Display, Cinzel, Plus Jakarta Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- Google Fonts: Playfair Display, Cinzel, Plus Jakarta Sans -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <style>
-    /* Someone who has asked their system for less motion gets the page, not
+<style>
+  /* Someone who has asked their system for less motion gets the page, not
        the performance: decoration stops, the scroll-driven layout still works,
        and nothing is left mid-transition or invisible. */
     @media (prefers-reduced-motion: reduce) {
@@ -331,6 +335,15 @@
     .deli-nav-link:hover {
       color: #CD2653 !important;
     }
+    /* The nav row and the WhatsApp pill were meeting at exactly 0px — not
+       overlapping, but touching, which reads as a layout accident. Give the
+       nav its own breathing room and tighten the tracking a little so the
+       whole row still fits comfortably at 1280. */
+    header.deli-site-header nav { margin-right: 2.25rem !important; }
+    @media (max-width: 1400px) {
+      .deli-nav-link { letter-spacing: 0.12em !important; font-size: 0.74rem !important; }
+      header.deli-site-header nav { gap: 1.35rem !important; margin-right: 1.75rem !important; }
+    }
 
     /* Editorial Cards */
     .deli-card {
@@ -387,542 +400,542 @@
 </head>
 <body class="linen-texture selection:bg-[#CD2653] selection:text-white">
 
-  <!-- Luxury Film Grain Cinematic Overlay -->
-  <div class="film-grain" aria-hidden="true"></div>
+<!-- Luxury Film Grain Cinematic Overlay -->
+<div class="film-grain" aria-hidden="true"></div>
 
-  <!-- ================= TOP FRESH DISPATCH ANNOUNCEMENT ================= -->
-  <div id="deliAnnounceBar" class="fixed top-0 left-0 right-0 z-50 bg-[#4A0E17] text-[#FFF9F4] text-[11px] sm:text-xs font-medium tracking-wider py-2 px-4 border-b border-[#C59A45]/30">
-    <div class="max-w-7xl mx-auto flex items-center justify-between">
-      <div class="flex flex-wrap items-center justify-center sm:justify-start gap-x-2 gap-y-0.5 mx-auto sm:mx-0 text-center sm:text-left">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span class="font-bold">ALL 4 DELHI NCR HUBS OPERATIONAL:</span>
-        <span class="text-white/90">Slot 1 (10 AM–1 PM) &amp; Slot 2 (5 PM–8 PM) • Free Express Cold-Chain on ₹999+</span>
-      </div>
-      <div class="hidden md:flex items-center gap-5 text-[11px] text-[#F7EFE6]">
-        <span>✦ Use Code <strong class="text-[#FFA517] underline tracking-widest font-black">WoW20</strong> (20% OFF)</span>
-        <span>•</span>
-        <span>Sodexo Accepted</span>
-        <span>•</span>
-        <a href="tel:+919810002023" class="hover:text-white transition-colors">📞 +91 98100 02023</a>
-      </div>
+<!-- ================= TOP FRESH DISPATCH ANNOUNCEMENT ================= -->
+<div id="deliAnnounceBar" class="fixed top-0 left-0 right-0 z-50 bg-[#4A0E17] text-[#FFF9F4] text-[11px] sm:text-xs font-medium tracking-wider py-2 px-4 border-b border-[#C59A45]/30">
+  <div class="max-w-7xl mx-auto flex items-center justify-between">
+    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-x-2 gap-y-0.5 mx-auto sm:mx-0 text-center sm:text-left">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      <span class="font-bold">ALL 4 DELHI NCR HUBS OPERATIONAL:</span>
+      <span class="text-white/90">Slot 1 (10 AM–1 PM) &amp; Slot 2 (5 PM–8 PM) • Free Express Cold-Chain on ₹999+</span>
+    </div>
+    <div class="hidden md:flex items-center gap-5 text-[11px] text-[#F7EFE6]">
+      <span>✦ Use Code <strong class="text-[#FFA517] underline tracking-widest font-black">WoW20</strong> (20% OFF)</span>
+      <span>•</span>
+      <span>Sodexo Accepted</span>
+      <span>•</span>
+      <a href="tel:+919810002023" class="hover:text-white transition-colors">+91 98100 02023</a>
     </div>
   </div>
+</div>
 
-  <!-- ================= EDITORIAL HAUTE BOUCHERIE HEADER ================= -->
-  <header class="deli-site-header transition-all">
-    <div class="max-w-7xl mx-auto px-6 md:px-10 h-20 flex items-center justify-between">
-      <!-- Brand Logo / Wordmark -->
-      <a href="#" class="flex items-center gap-3.5 group">
-        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#CD2653] to-[#4A0E17] flex items-center justify-center text-white font-luxury font-black text-base shadow-md transition-transform group-hover:scale-105 border border-[#C59A45]/40">
-          DC
+<!-- ================= EDITORIAL HAUTE BOUCHERIE HEADER ================= -->
+<header class="deli-site-header transition-all">
+  <div class="max-w-7xl mx-auto px-6 md:px-10 h-20 flex items-center justify-between">
+    <!-- Brand Logo / Wordmark -->
+    <a href="#" class="flex items-center gap-3.5 group">
+      <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#CD2653] to-[#4A0E17] flex items-center justify-center text-white font-luxury font-black text-base shadow-md transition-transform group-hover:scale-105 border border-[#C59A45]/40">
+        DC
         </div>
-        <div>
-          <span class="block text-2xl font-serif-chic font-black tracking-tight text-[#4A0E17] leading-none">Deli Chic</span>
-          <span class="block text-[9px] tracking-[0.3em] uppercase font-bold text-[#CD2653] mt-1 font-luxury">Food For Thought</span>
-        </div>
+      <div>
+        <span class="block text-2xl font-serif-chic font-black tracking-tight text-[#4A0E17] leading-none">Deli Chic</span>
+        <span class="block text-[9px] tracking-[0.3em] uppercase font-bold text-[#CD2653] mt-1 font-luxury">Food For Thought</span>
+      </div>
+    </a>
+
+    <!-- Navigation Links -->
+    <nav class="hidden lg:flex items-center gap-7 text-xs font-bold uppercase tracking-[0.2em]">
+      <a href="#larder" class="deli-nav-link whitespace-nowrap">The Larder</a>
+      <a href="#masterCarver" class="deli-nav-link whitespace-nowrap">Master Carver Loupe</a>
+      <a href="#boucherieExperience" class="deli-nav-link whitespace-nowrap">Haute Standards</a>
+      <a href="#hubs" class="deli-nav-link whitespace-nowrap">NCR Hubs (4)</a>
+      <a href="#heritage" class="deli-nav-link whitespace-nowrap">Our Story</a>
+    </nav>
+
+    <!-- Action Controls -->
+    <div class="flex items-center gap-3">
+      <!-- WhatsApp Direct Concierge -->
+      <a href="https://wa.link/bk4b8e" target="_blank" rel="noreferrer" class="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full border border-emerald-600/30 text-emerald-800 text-xs font-bold uppercase tracking-wider hover:bg-emerald-50 transition-all bg-emerald-50/50">
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span>WhatsApp Concierge</span>
       </a>
 
-      <!-- Navigation Links -->
-      <nav class="hidden lg:flex items-center gap-7 text-xs font-bold uppercase tracking-[0.2em]">
-        <a href="#larder" class="deli-nav-link">The Larder</a>
-        <a href="#masterCarver" class="deli-nav-link">Master Carver Loupe</a>
-        <a href="#boucherieExperience" class="deli-nav-link">Haute Standards</a>
-        <a href="#hubs" class="deli-nav-link">NCR Hubs (4)</a>
-        <a href="#heritage" class="deli-nav-link">Our Story</a>
-      </nav>
-
-      <!-- Action Controls -->
-      <div class="flex items-center gap-3">
-        <!-- WhatsApp Direct Concierge -->
-        <a href="https://wa.link/bk4b8e" target="_blank" rel="noreferrer" class="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full border border-emerald-600/30 text-emerald-800 text-xs font-bold uppercase tracking-wider hover:bg-emerald-50 transition-all bg-emerald-50/50">
-          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span>WhatsApp Concierge</span>
-        </a>
-
-        <!-- Basket Trigger -->
-        <button onclick="toggleBasket(true)" class="px-5 py-2.5 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#8C1434] transition-all shadow-md shadow-[#CD2653]/30 flex items-center gap-2">
-          <span>Basket</span>
-          <span class="px-2 py-0.5 bg-white/25 rounded-full text-[10px] font-black" id="basketCount">1</span>
-        </button>
-      </div>
+      <!-- Basket Trigger -->
+      <button onclick="toggleBasket(true)" class="px-5 py-2.5 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#8C1434] transition-all shadow-md shadow-[#CD2653]/30 flex items-center gap-2">
+        <span>Basket</span>
+        <span class="px-2 py-0.5 bg-white/25 rounded-full text-[10px] font-black" id="basketCount">1</span>
+      </button>
     </div>
-  </header>
+  </div>
+</header>
 
-  <!-- ================= HERO SECTION: CULINARY SHOWCASE WITH LIVE ATMOSPHERIC CANVAS ================= -->
-  <section class="relative pt-36 pb-20 md:pt-42 md:pb-28 px-6 md:px-10 max-w-7xl mx-auto overflow-hidden">
-    <!-- Atmospheric Culinary Steam & Golden Particle Canvas -->
-    <canvas id="deliAtmosphereCanvas" class="absolute inset-0 pointer-events-none z-10"></canvas>
+<!-- ================= HERO SECTION: CULINARY SHOWCASE WITH LIVE ATMOSPHERIC CANVAS ================= -->
+<section class="relative pt-36 pb-20 md:pt-42 md:pb-28 px-6 md:px-10 max-w-7xl mx-auto overflow-hidden">
+  <!-- Atmospheric Culinary Steam & Golden Particle Canvas -->
+  <canvas id="deliAtmosphereCanvas" class="absolute inset-0 pointer-events-none z-10"></canvas>
 
-    <div class="relative z-20 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-      <!-- Left Editorial Storytelling -->
-      <div class="lg:col-span-7 space-y-7 text-center lg:text-left">
-        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#F7EFE6] border border-[#CD2653]/25 text-[#CD2653] text-xs font-bold tracking-[0.2em] uppercase shadow-sm">
-          <span>Haute Boucherie • Est. New Delhi</span>
-          <span>✦</span>
-          <span>100% Antibiotic Residue-Free</span>
-        </div>
+  <div class="relative z-20 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+    <!-- Left Editorial Storytelling -->
+    <div class="lg:col-span-7 space-y-7 text-center lg:text-left">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#F7EFE6] border border-[#CD2653]/25 text-[#CD2653] text-xs font-bold tracking-[0.2em] uppercase shadow-sm">
+        <span>Haute Boucherie • Est. New Delhi</span>
+        <span>✦</span>
+        <span>100% Antibiotic Residue-Free</span>
+      </div>
 
-        <h1 class="text-5xl sm:text-6xl xl:text-7xl font-serif-chic font-bold tracking-tight leading-[1.02] text-[#4A0E17]">
-          Pure Artisanal Cuts,
+      <h1 class="text-5xl sm:text-6xl xl:text-7xl font-serif-chic font-bold tracking-tight leading-[1.02] text-[#4A0E17]">
+        Pure Artisanal Cuts,
           <span class="block italic font-normal text-[#CD2653] pt-1">
-            Chilled, Never Frozen.
+          Chilled, Never Frozen.
           </span>
-        </h1>
+      </h1>
 
-        <p class="text-base sm:text-lg text-[#524842] max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
-          From farm-tender poultry and wood-smoked charcuterie to handcrafted prawn dim sum and Lucknowi marinades. Vacuum-sealed at peak freshness and dispatched in strict 0°C–4°C temperature-controlled cold-chain across all 4 Delhi NCR delivery hubs.
+      <p class="text-base sm:text-lg text-[#524842] max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
+        From farm-tender poultry and wood-smoked charcuterie to handcrafted prawn dim sum and Lucknowi marinades. Vacuum-sealed at peak freshness and dispatched in strict 0°C–4°C temperature-controlled cold-chain across all 4 Delhi NCR delivery hubs.
         </p>
 
-        <!-- CTAs with Specular Damascus Knife-Glint -->
-        <div class="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-4">
-          <a href="#larder" class="knife-glint px-8 py-4 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#8C1434] transition-all shadow-xl shadow-[#CD2653]/25 hover:scale-105 duration-200">
-            Explore Fresh Larder (₹)
+      <!-- CTAs with Specular Damascus Knife-Glint -->
+      <div class="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-4">
+        <a href="#larder" class="knife-glint px-8 py-4 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#8C1434] transition-all shadow-xl shadow-[#CD2653]/25 hover:scale-105 duration-200">
+          Explore Fresh Larder (₹)
           </a>
-          <a href="https://wa.link/bk4b8e" target="_blank" rel="noreferrer" class="knife-glint px-7 py-4 rounded-full bg-white border border-[#4A0E17]/40 text-[#4A0E17] font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#F7EFE6] transition-all shadow-sm hover:scale-105 duration-200">
-            Quick WhatsApp Order ↗
+        <a href="https://wa.link/bk4b8e" target="_blank" rel="noreferrer" class="knife-glint px-7 py-4 rounded-full bg-white border border-[#4A0E17]/40 text-[#4A0E17] font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#F7EFE6] transition-all shadow-sm hover:scale-105 duration-200">
+          Quick WhatsApp Order ↗
           </a>
-        </div>
-
-        <!-- Telemetry Attributes -->
-        <div class="pt-6 grid grid-cols-3 gap-6 border-t border-[#4A0E17]/15 max-w-lg mx-auto lg:mx-0 text-left">
-          <div>
-            <div class="text-3xl font-serif-chic font-bold text-[#4A0E17]">0°C–4°C</div>
-            <div class="text-[11px] uppercase tracking-wider font-bold text-[#CD2653]">Strict Cold Chain</div>
-          </div>
-          <div>
-            <div class="text-3xl font-serif-chic font-bold text-[#4A0E17]">12 Hours</div>
-            <div class="text-[11px] uppercase tracking-wider font-bold text-[#CD2653]">Farm to Door</div>
-          </div>
-          <div>
-            <div class="text-3xl font-serif-chic font-bold text-[#4A0E17]">100%</div>
-            <div class="text-[11px] uppercase tracking-wider font-bold text-[#CD2653]">Antibiotic-Free</div>
-          </div>
-        </div>
       </div>
 
-      <!-- Right Master Carver's Interactive Loupe Feature -->
-      <div class="lg:col-span-5 relative" id="masterCarver">
-        <!-- Interactive Cut Tabs for Loupe -->
-        <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-white/80 border border-[#CD2653]/20 mb-3 text-[10px] font-bold uppercase tracking-wider overflow-x-auto">
-          <button onclick="setLoupeCut('charcuterie')" id="loupeTab-charcuterie" class="py-1.5 px-3 rounded-xl bg-[#CD2653] text-white transition-all whitespace-nowrap">
-            Charcuterie
-          </button>
-          <button onclick="setLoupeCut('poultry')" id="loupeTab-poultry" class="py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap">
-            Fresh Breast
-          </button>
-          <button onclick="setLoupeCut('marinade')" id="loupeTab-marinade" class="py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap">
-            Lucknowi Cut
-          </button>
-          <button onclick="setLoupeCut('momos')" id="loupeTab-momos" class="py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap">
-            Prawn Dim Sum
-          </button>
+      <!-- Telemetry Attributes -->
+      <div class="pt-6 grid grid-cols-3 gap-6 border-t border-[#4A0E17]/15 max-w-lg mx-auto lg:mx-0 text-left">
+        <div>
+          <div class="text-3xl font-serif-chic font-bold text-[#4A0E17]">0°C–4°C</div>
+          <div class="text-[11px] uppercase tracking-wider font-bold text-[#CD2653]">Strict Cold Chain</div>
         </div>
+        <div>
+          <div class="text-3xl font-serif-chic font-bold text-[#4A0E17]">12 Hours</div>
+          <div class="text-[11px] uppercase tracking-wider font-bold text-[#CD2653]">Farm to Door</div>
+        </div>
+        <div>
+          <div class="text-3xl font-serif-chic font-bold text-[#4A0E17]">100%</div>
+          <div class="text-[11px] uppercase tracking-wider font-bold text-[#CD2653]">Antibiotic-Free</div>
+        </div>
+      </div>
+    </div>
 
-        <div class="loupe-container shadow-2xl border-2 border-[#C59A45]/40 bg-black" id="heroLoupeContainer">
-          <img
+    <!-- Right Master Carver's Interactive Loupe Feature -->
+    <div class="lg:col-span-5 relative" id="masterCarver">
+      <!-- Interactive Cut Tabs for Loupe -->
+      <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-white/80 border border-[#CD2653]/20 mb-3 text-[10px] font-bold uppercase tracking-wider overflow-x-auto">
+        <button onclick="setLoupeCut('charcuterie')" id="loupeTab-charcuterie" class="py-1.5 px-3 rounded-xl bg-[#CD2653] text-white transition-all whitespace-nowrap">
+          Charcuterie
+          </button>
+        <button onclick="setLoupeCut('poultry')" id="loupeTab-poultry" class="py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap">
+          Fresh Breast
+          </button>
+        <button onclick="setLoupeCut('marinade')" id="loupeTab-marinade" class="py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap">
+          Lucknowi Cut
+          </button>
+        <button onclick="setLoupeCut('momos')" id="loupeTab-momos" class="py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap">
+          Prawn Dim Sum
+          </button>
+      </div>
+
+      <div class="loupe-container shadow-2xl border-2 border-[#C59A45]/40 bg-black" id="heroLoupeContainer">
+        <img
             id="heroLoupeImg"
             src="https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=1200&q=85"
             alt="Deli Chic Prime Artisanal Cuts"
             class="w-full h-[470px] object-cover transition-opacity duration-300"
           />
-          <div id="heroLoupeGlass" class="loupe-glass"></div>
+        <div id="heroLoupeGlass" class="loupe-glass"></div>
 
-          <!-- Overlay Quality Inspection Badge -->
-          <div class="absolute bottom-5 left-5 right-5 p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-[#CD2653]/20 shadow-lg text-left flex items-center justify-between">
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-                <span id="loupeBadgeText" class="text-[11px] font-bold uppercase tracking-wider text-emerald-800">Master Carver 2.5x Loupe Active</span>
-              </div>
-              <h4 id="loupeTitleText" class="text-base font-serif-chic font-bold text-[#4A0E17] mt-0.5">Prime Wood-Smoked Charcuterie</h4>
-              <p id="loupeDescText" class="text-[11px] text-[#6B625B]">Move cursor or drag finger across cut to inspect curing grain &amp; cellular density.</p>
+        <!-- Overlay Quality Inspection Badge -->
+        <div class="absolute bottom-5 left-5 right-5 p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-[#CD2653]/20 shadow-lg text-left flex items-center justify-between">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+              <span id="loupeBadgeText" class="text-[11px] font-bold uppercase tracking-wider text-emerald-800">Master Carver 2.5x Loupe Active</span>
             </div>
-            <div class="text-right">
-              <span class="text-xs font-luxury font-bold text-[#C59A45]" id="liveTempSensor">2.4°C</span>
-              <span class="block text-[9px] uppercase tracking-widest text-[#6B625B]">Chilled</span>
-            </div>
+            <h4 id="loupeTitleText" class="text-base font-serif-chic font-bold text-[#4A0E17] mt-0.5">Prime Wood-Smoked Charcuterie</h4>
+            <p id="loupeDescText" class="text-[11px] text-[#6B625B]">Move cursor or drag finger across cut to inspect curing grain &amp; cellular density.</p>
+          </div>
+          <div class="text-right">
+            <span class="text-xs font-luxury font-bold text-[#C59A45]" id="liveTempSensor">2.4°C</span>
+            <span class="block text-[9px] uppercase tracking-widest text-[#6B625B]">Chilled</span>
           </div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- ================= MARQUEE TICKER TAPE ================= -->
-  <div class="deli-ticker" aria-label="Brand offerings ticker">
-    <div class="deli-track">
-      <ul>
-        <li>Antibiotic Residue-Free Poultry</li>
-        <li>Chicken Cheese &amp; Jalapeño Sausages</li>
-        <li>Handcrafted Prawn Momos</li>
-        <li>Lucknowi Chicken Marinades</li>
-        <li>Golden Smoked Franks</li>
-        <li>Single-Origin Mutton Patties</li>
-        <li>Artisanal Belgian Truffles</li>
-        <li>Fresh Basa Fillets</li>
-      </ul>
-      <ul aria-hidden="true">
-        <li>Antibiotic Residue-Free Poultry</li>
-        <li>Chicken Cheese &amp; Jalapeño Sausages</li>
-        <li>Handcrafted Prawn Momos</li>
-        <li>Lucknowi Chicken Marinades</li>
-        <li>Golden Smoked Franks</li>
-        <li>Single-Origin Mutton Patties</li>
-        <li>Artisanal Belgian Truffles</li>
-        <li>Fresh Basa Fillets</li>
-      </ul>
+<!-- ================= MARQUEE TICKER TAPE ================= -->
+<div class="deli-ticker" aria-label="Brand offerings ticker">
+  <div class="deli-track">
+    <ul>
+      <li>Antibiotic Residue-Free Poultry</li>
+      <li>Chicken Cheese &amp; Jalapeño Sausages</li>
+      <li>Handcrafted Prawn Momos</li>
+      <li>Lucknowi Chicken Marinades</li>
+      <li>Golden Smoked Franks</li>
+      <li>Single-Origin Mutton Patties</li>
+      <li>Artisanal Belgian Truffles</li>
+      <li>Fresh Basa Fillets</li>
+    </ul>
+    <ul aria-hidden="true">
+      <li>Antibiotic Residue-Free Poultry</li>
+      <li>Chicken Cheese &amp; Jalapeño Sausages</li>
+      <li>Handcrafted Prawn Momos</li>
+      <li>Lucknowi Chicken Marinades</li>
+      <li>Golden Smoked Franks</li>
+      <li>Single-Origin Mutton Patties</li>
+      <li>Artisanal Belgian Truffles</li>
+      <li>Fresh Basa Fillets</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ================= PINNED HAUTE BOUCHERIE SCROLL STAGE ================= -->
+<section class="deli-stage-wrap" id="boucherieExperience">
+  <div class="deli-stage" id="deliStage">
+    <!-- Rotating Brass & Crimson Guilloche Seal (Placed behind chapters) -->
+    <div class="deli-seal" id="deliSeal"></div>
+
+    <!-- Chapter 1: Poultry -->
+    <div class="deli-chapter-item" id="deliCh1">
+      <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center text-white relative z-10">
+        <div class="lg:col-span-7 space-y-5">
+          <span class="inline-block text-xs uppercase font-luxury font-bold text-[#FFA517] tracking-[0.25em] bg-[#180609]/60 px-3.5 py-1.5 rounded-full border border-[#FFA517]/30">Chapter 01 • The Primal Standard</span>
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-serif-chic font-bold leading-tight text-white drop-shadow">100% Antibiotic Residue-Free.</h2>
+          <p class="text-base sm:text-lg text-[#F7EFE6] max-w-xl font-medium leading-relaxed">
+            Every bird is nurtured on pure vegetarian grain feed with clean mountain water. Never fed prophylactic antibiotics, synthetic growth hormones, or chemical plumping agents.
+            </p>
+          <div class="grid grid-cols-2 gap-4 pt-3 border-t border-white/20 text-xs font-bold uppercase tracking-wider text-[#FFA517]">
+            <div>✓ Lab-Tested Residue Purity</div>
+            <div>✓ Ozonated Clean Processing</div>
+          </div>
+        </div>
+        <div class="lg:col-span-5 hidden lg:block">
+          <img src="https://images.unsplash.com/photo-1604503468506-a8da13d82791?auto=format&fit=crop&w=800&q=85" alt="Clean Hand-Trimmed Antibiotic-Free Chicken Breast" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Chapter 2: Charcuterie -->
+    <div class="deli-chapter-item" id="deliCh2">
+      <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center text-white relative z-10">
+        <div class="lg:col-span-7 space-y-5">
+          <span class="inline-block text-xs uppercase font-luxury font-bold text-[#FFA517] tracking-[0.25em] bg-[#180609]/60 px-3.5 py-1.5 rounded-full border border-[#FFA517]/30">Chapter 02 • European Atelier</span>
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-serif-chic font-bold leading-tight text-white drop-shadow">Wood-Smoked Charcuterie.</h2>
+          <p class="text-base sm:text-lg text-[#F7EFE6] max-w-xl font-medium leading-relaxed">
+            Bavarian frankfurters, streaky bacon strips, and cracked Tellicherry black pepper salamis smoked naturally over German beechwood shavings.
+            </p>
+          <div class="grid grid-cols-2 gap-4 pt-3 border-t border-white/20 text-xs font-bold uppercase tracking-wider text-[#FFA517]">
+            <div>✓ Real German Beechwood</div>
+            <div>✓ Aged Natural Curing</div>
+          </div>
+        </div>
+        <div class="lg:col-span-5 hidden lg:block">
+          <img src="https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=800&q=85" alt="Prime Wood-Smoked Charcuterie and Ribs" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Chapter 3: Marinades & Dim Sum -->
+    <div class="deli-chapter-item" id="deliCh3">
+      <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center text-white relative z-10">
+        <div class="lg:col-span-7 space-y-5">
+          <span class="inline-block text-xs uppercase font-luxury font-bold text-[#FFA517] tracking-[0.25em] bg-[#180609]/60 px-3.5 py-1.5 rounded-full border border-[#FFA517]/30">Chapter 03 • Shahi Marinades</span>
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-serif-chic font-bold leading-tight text-white drop-shadow">Royal Awadhi Alchemy.</h2>
+          <p class="text-base sm:text-lg text-[#F7EFE6] max-w-xl font-medium leading-relaxed">
+            Tender chicken steeped in royal saffron, roasted gram flour, hung curd and Awadhi mace. Alongside translucent dim sum filled with whole tiger prawns.
+            </p>
+          <div class="grid grid-cols-2 gap-4 pt-3 border-t border-white/20 text-xs font-bold uppercase tracking-wider text-[#FFA517]">
+            <div>✓ Royal Saffron &amp; Mace</div>
+            <div>✓ Whole Tiger Prawn Momos</div>
+          </div>
+        </div>
+        <div class="lg:col-span-5 hidden lg:block">
+          <img src="https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=800&q=85" alt="Royal Awadhi Shahi Saffron Marinade" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Chapter Navigation Progress Bar -->
+    <nav class="deli-stage-nav" aria-label="Haute Boucherie Chapters">
+      <button type="button" onclick="jumpDeliChapter(0)" id="deliNav0" class="deli-stage-btn active">01. Antibiotic-Free</button>
+      <button type="button" onclick="jumpDeliChapter(1)" id="deliNav1" class="deli-stage-btn">02. Charcuterie</button>
+      <button type="button" onclick="jumpDeliChapter(2)" id="deliNav2" class="deli-stage-btn">03. Shahi Marinades</button>
+    </nav>
+  </div>
+</section>
+
+<!-- ================= THE GOURMET LARDER CATALOGUE ================= -->
+<section class="py-24 px-6 md:px-10 max-w-7xl mx-auto scroll-reveal" id="larder">
+  <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+    <div>
+      <span class="text-xs font-bold uppercase tracking-[0.25em] text-[#CD2653] font-luxury">Gourmet Selection</span>
+      <h2 class="text-4xl md:text-5xl font-serif-chic font-bold tracking-tight text-[#4A0E17] mt-2">
+        The Artisanal Larder.
+        </h2>
+    </div>
+
+    <!-- Promocode Indicator Pill -->
+    <div class="knife-glint px-5 py-2.5 rounded-full bg-[#FFF5F7] border border-[#CD2653]/30 text-[#CD2653] text-xs font-bold tracking-wider flex items-center gap-2 shadow-sm">
+      <span>Promo Code:</span>
+      <span class="font-luxury font-bold text-sm text-[#4A0E17] bg-white px-2 py-0.5 rounded border border-[#CD2653]/20">WoW20</span>
+      <span>• 20% OFF Above ₹999</span>
     </div>
   </div>
 
-  <!-- ================= PINNED HAUTE BOUCHERIE SCROLL STAGE ================= -->
-  <section class="deli-stage-wrap" id="boucherieExperience">
-    <div class="deli-stage" id="deliStage">
-      <!-- Rotating Brass & Crimson Guilloche Seal (Placed behind chapters) -->
-      <div class="deli-seal" id="deliSeal"></div>
+  <!-- Category Filter Tabs -->
+  <div class="flex items-center gap-2.5 overflow-x-auto pb-4 mb-10 text-xs font-bold uppercase tracking-wider scrollbar-none" id="categoryTabs">
+    <button onclick="filterCategory('all')" id="tab-all" class="cat-pill px-5 py-2.5 rounded-full bg-[#CD2653] text-white shadow-sm transition-all whitespace-nowrap">
+      All Larder (12)
+      </button>
+    <button onclick="filterCategory('poultry')" id="tab-poultry" class="cat-pill px-5 py-2.5 rounded-full bg-white text-[#524842] border border-[#CD2653]/20 hover:border-[#CD2653] transition-all whitespace-nowrap">
+      Fresh Poultry (3)
+      </button>
+    <button onclick="filterCategory('charcuterie')" id="tab-charcuterie" class="cat-pill px-5 py-2.5 rounded-full bg-white text-[#524842] border border-[#CD2653]/20 hover:border-[#CD2653] transition-all whitespace-nowrap">
+      Cold Cuts &amp; Sausages (4)
+      </button>
+    <button onclick="filterCategory('ready-to-cook')" id="tab-ready-to-cook" class="cat-pill px-5 py-2.5 rounded-full bg-white text-[#524842] border border-[#CD2653]/20 hover:border-[#CD2653] transition-all whitespace-nowrap">
+      Heat &amp; Eat / Marinades (3)
+      </button>
+    <button onclick="filterCategory('momos')" id="tab-momos" class="cat-pill px-5 py-2.5 rounded-full bg-white text-[#524842] border border-[#CD2653]/20 hover:border-[#CD2653] transition-all whitespace-nowrap">
+      Gourmet Dim Sum (1)
+      </button>
+    <button onclick="filterCategory('sweet')" id="tab-sweet" class="cat-pill px-5 py-2.5 rounded-full bg-white text-[#524842] border border-[#CD2653]/20 hover:border-[#CD2653] transition-all whitespace-nowrap">
+      Sugary Delights (1)
+      </button>
+  </div>
 
-      <!-- Chapter 1: Poultry -->
-      <div class="deli-chapter-item" id="deliCh1">
-        <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center text-white relative z-10">
-          <div class="lg:col-span-7 space-y-5">
-            <span class="inline-block text-xs uppercase font-luxury font-bold text-[#FFA517] tracking-[0.25em] bg-[#180609]/60 px-3.5 py-1.5 rounded-full border border-[#FFA517]/30">Chapter 01 • The Primal Standard</span>
-            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-serif-chic font-bold leading-tight text-white drop-shadow">100% Antibiotic Residue-Free.</h2>
-            <p class="text-base sm:text-lg text-[#F7EFE6] max-w-xl font-medium leading-relaxed">
-              Every bird is nurtured on pure vegetarian grain feed with clean mountain water. Never fed prophylactic antibiotics, synthetic growth hormones, or chemical plumping agents.
-            </p>
-            <div class="grid grid-cols-2 gap-4 pt-3 border-t border-white/20 text-xs font-bold uppercase tracking-wider text-[#FFA517]">
-              <div>✓ Lab-Tested Residue Purity</div>
-              <div>✓ Ozonated Clean Processing</div>
-            </div>
-          </div>
-          <div class="lg:col-span-5 hidden lg:block">
-            <img src="https://images.unsplash.com/photo-1604503468506-a8da13d82791?auto=format&fit=crop&w=800&q=85" alt="Clean Hand-Trimmed Antibiotic-Free Chicken Breast" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
-          </div>
-        </div>
-      </div>
+  <!-- Products Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-7" id="productGrid"></div>
+</section>
 
-      <!-- Chapter 2: Charcuterie -->
-      <div class="deli-chapter-item" id="deliCh2">
-        <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center text-white relative z-10">
-          <div class="lg:col-span-7 space-y-5">
-            <span class="inline-block text-xs uppercase font-luxury font-bold text-[#FFA517] tracking-[0.25em] bg-[#180609]/60 px-3.5 py-1.5 rounded-full border border-[#FFA517]/30">Chapter 02 • European Atelier</span>
-            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-serif-chic font-bold leading-tight text-white drop-shadow">Wood-Smoked Charcuterie.</h2>
-            <p class="text-base sm:text-lg text-[#F7EFE6] max-w-xl font-medium leading-relaxed">
-              Bavarian frankfurters, streaky bacon strips, and cracked Tellicherry black pepper salamis smoked naturally over German beechwood shavings.
-            </p>
-            <div class="grid grid-cols-2 gap-4 pt-3 border-t border-white/20 text-xs font-bold uppercase tracking-wider text-[#FFA517]">
-              <div>✓ Real German Beechwood</div>
-              <div>✓ Aged Natural Curing</div>
-            </div>
-          </div>
-          <div class="lg:col-span-5 hidden lg:block">
-            <img src="https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=800&q=85" alt="Prime Wood-Smoked Charcuterie and Ribs" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
-          </div>
-        </div>
-      </div>
-
-      <!-- Chapter 3: Marinades & Dim Sum -->
-      <div class="deli-chapter-item" id="deliCh3">
-        <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center text-white relative z-10">
-          <div class="lg:col-span-7 space-y-5">
-            <span class="inline-block text-xs uppercase font-luxury font-bold text-[#FFA517] tracking-[0.25em] bg-[#180609]/60 px-3.5 py-1.5 rounded-full border border-[#FFA517]/30">Chapter 03 • Shahi Marinades</span>
-            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-serif-chic font-bold leading-tight text-white drop-shadow">Royal Awadhi Alchemy.</h2>
-            <p class="text-base sm:text-lg text-[#F7EFE6] max-w-xl font-medium leading-relaxed">
-              Tender chicken steeped in royal saffron, roasted gram flour, hung curd and Awadhi mace. Alongside translucent dim sum filled with whole tiger prawns.
-            </p>
-            <div class="grid grid-cols-2 gap-4 pt-3 border-t border-white/20 text-xs font-bold uppercase tracking-wider text-[#FFA517]">
-              <div>✓ Royal Saffron &amp; Mace</div>
-              <div>✓ Whole Tiger Prawn Momos</div>
-            </div>
-          </div>
-          <div class="lg:col-span-5 hidden lg:block">
-            <img src="https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=800&q=85" alt="Royal Awadhi Shahi Saffron Marinade" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
-          </div>
-        </div>
-      </div>
-
-      <!-- Chapter Navigation Progress Bar -->
-      <nav class="deli-stage-nav" aria-label="Haute Boucherie Chapters">
-        <button type="button" onclick="jumpDeliChapter(0)" id="deliNav0" class="deli-stage-btn active">01. Antibiotic-Free</button>
-        <button type="button" onclick="jumpDeliChapter(1)" id="deliNav1" class="deli-stage-btn">02. Charcuterie</button>
-        <button type="button" onclick="jumpDeliChapter(2)" id="deliNav2" class="deli-stage-btn">03. Shahi Marinades</button>
-      </nav>
-    </div>
-  </section>
-
-  <!-- ================= THE GOURMET LARDER CATALOGUE ================= -->
-  <section class="py-24 px-6 md:px-10 max-w-7xl mx-auto scroll-reveal" id="larder">
-    <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+<!-- ================= DELHI NCR DELIVERY HUBS & REFRIGERATED DISPATCH NETWORK ================= -->
+<section class="py-20 px-6 md:px-10 bg-[#4A0E17] text-[#FFF9F4] border-y border-[#C59A45]/30 relative overflow-hidden scroll-reveal" id="hubs">
+  <div class="max-w-7xl mx-auto space-y-12">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
       <div>
-        <span class="text-xs font-bold uppercase tracking-[0.25em] text-[#CD2653] font-luxury">Gourmet Selection</span>
-        <h2 class="text-4xl md:text-5xl font-serif-chic font-bold tracking-tight text-[#4A0E17] mt-2">
-          The Artisanal Larder.
-        </h2>
-      </div>
-
-      <!-- Promocode Indicator Pill -->
-      <div class="knife-glint px-5 py-2.5 rounded-full bg-[#FFF5F7] border border-[#CD2653]/30 text-[#CD2653] text-xs font-bold tracking-wider flex items-center gap-2 shadow-sm">
-        <span>🏷️ Promo Code:</span>
-        <span class="font-luxury font-bold text-sm text-[#4A0E17] bg-white px-2 py-0.5 rounded border border-[#CD2653]/20">WoW20</span>
-        <span>• 20% OFF Above ₹999</span>
-      </div>
-    </div>
-
-    <!-- Category Filter Tabs -->
-    <div class="flex items-center gap-2.5 overflow-x-auto pb-4 mb-10 text-xs font-bold uppercase tracking-wider scrollbar-none" id="categoryTabs">
-      <button onclick="filterCategory('all')" id="tab-all" class="cat-pill px-5 py-2.5 rounded-full bg-[#CD2653] text-white shadow-sm transition-all whitespace-nowrap">
-        All Larder (12)
-      </button>
-      <button onclick="filterCategory('poultry')" id="tab-poultry" class="cat-pill px-5 py-2.5 rounded-full bg-white text-[#524842] border border-[#CD2653]/20 hover:border-[#CD2653] transition-all whitespace-nowrap">
-        Fresh Poultry (3)
-      </button>
-      <button onclick="filterCategory('charcuterie')" id="tab-charcuterie" class="cat-pill px-5 py-2.5 rounded-full bg-white text-[#524842] border border-[#CD2653]/20 hover:border-[#CD2653] transition-all whitespace-nowrap">
-        Cold Cuts &amp; Sausages (4)
-      </button>
-      <button onclick="filterCategory('ready-to-cook')" id="tab-ready-to-cook" class="cat-pill px-5 py-2.5 rounded-full bg-white text-[#524842] border border-[#CD2653]/20 hover:border-[#CD2653] transition-all whitespace-nowrap">
-        Heat &amp; Eat / Marinades (3)
-      </button>
-      <button onclick="filterCategory('momos')" id="tab-momos" class="cat-pill px-5 py-2.5 rounded-full bg-white text-[#524842] border border-[#CD2653]/20 hover:border-[#CD2653] transition-all whitespace-nowrap">
-        Gourmet Dim Sum (1)
-      </button>
-      <button onclick="filterCategory('sweet')" id="tab-sweet" class="cat-pill px-5 py-2.5 rounded-full bg-white text-[#524842] border border-[#CD2653]/20 hover:border-[#CD2653] transition-all whitespace-nowrap">
-        Sugary Delights (1)
-      </button>
-    </div>
-
-    <!-- Products Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-7" id="productGrid"></div>
-  </section>
-
-  <!-- ================= DELHI NCR DELIVERY HUBS & REFRIGERATED DISPATCH NETWORK ================= -->
-  <section class="py-20 px-6 md:px-10 bg-[#4A0E17] text-[#FFF9F4] border-y border-[#C59A45]/30 relative overflow-hidden scroll-reveal" id="hubs">
-    <div class="max-w-7xl mx-auto space-y-12">
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#CD2653]/30 border border-[#C59A45]/40 text-[#FFA517] text-xs font-bold uppercase tracking-wider mb-3">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Temperature-Controlled Cold-Chain</span>
-          </div>
-          <h2 class="text-4xl md:text-5xl font-serif-chic font-bold tracking-tight text-white">
-            Delhi NCR Refrigerated Dispatch.
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#CD2653]/30 border border-[#C59A45]/40 text-[#FFA517] text-xs font-bold uppercase tracking-wider mb-3">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Temperature-Controlled Cold-Chain</span>
+        </div>
+        <h2 class="text-4xl md:text-5xl font-serif-chic font-bold tracking-tight text-white">
+          Delhi NCR Refrigerated Dispatch.
           </h2>
+      </div>
+      <div class="text-right text-xs text-[#F7EFE6]/80 font-medium">
+        <div>Slot 1: <strong class="text-white font-bold">10:00 AM – 1:00 PM</strong></div>
+        <div>Slot 2: <strong class="text-white font-bold">5:00 PM – 8:00 PM</strong></div>
+      </div>
+    </div>
+
+    <!-- 4 Hub Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Hub 1: South & Central Delhi -->
+      <div class="knife-glint p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-[#C59A45]/60 transition-all space-y-3">
+        <div class="flex items-center justify-between text-xs">
+          <span class="font-luxury font-bold text-[#FFA517] uppercase">Hub 01</span>
+          <span class="px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-300 font-bold text-[10px]">Active Slot</span>
         </div>
-        <div class="text-right text-xs text-[#F7EFE6]/80 font-medium">
-          <div>Slot 1: <strong class="text-white font-bold">10:00 AM – 1:00 PM</strong></div>
-          <div>Slot 2: <strong class="text-white font-bold">5:00 PM – 8:00 PM</strong></div>
-        </div>
+        <h3 class="text-xl font-serif-chic font-bold text-white">South &amp; Central Delhi</h3>
+        <p class="text-xs text-[#F7EFE6]/80 leading-relaxed">
+          Chanakyapuri, Greater Kailash (GK 1 &amp; 2), Vasant Kunj, Defence Colony, Hauz Khas, Jor Bagh, New Friends Colony.
+          </p>
+        <div class="pt-2 text-[11px] font-bold text-[#FFA517]">
+          ✦ 12-Hour Morning &amp; Evening Dispatch
+          </div>
       </div>
 
-      <!-- 4 Hub Cards Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Hub 1: South & Central Delhi -->
-        <div class="knife-glint p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-[#C59A45]/60 transition-all space-y-3">
-          <div class="flex items-center justify-between text-xs">
-            <span class="font-luxury font-bold text-[#FFA517] uppercase">Hub 01</span>
-            <span class="px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-300 font-bold text-[10px]">Active Slot</span>
-          </div>
-          <h3 class="text-xl font-serif-chic font-bold text-white">South &amp; Central Delhi</h3>
-          <p class="text-xs text-[#F7EFE6]/80 leading-relaxed">
-            Chanakyapuri, Greater Kailash (GK 1 &amp; 2), Vasant Kunj, Defence Colony, Hauz Khas, Jor Bagh, New Friends Colony.
-          </p>
-          <div class="pt-2 text-[11px] font-bold text-[#FFA517]">
-            ✦ 12-Hour Morning &amp; Evening Dispatch
-          </div>
+      <!-- Hub 2: Gurugram & Golf Course Road -->
+      <div class="knife-glint p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-[#C59A45]/60 transition-all space-y-3">
+        <div class="flex items-center justify-between text-xs">
+          <span class="font-luxury font-bold text-[#FFA517] uppercase">Hub 02</span>
+          <span class="px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-300 font-bold text-[10px]">Active Slot</span>
         </div>
-
-        <!-- Hub 2: Gurugram & Golf Course Road -->
-        <div class="knife-glint p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-[#C59A45]/60 transition-all space-y-3">
-          <div class="flex items-center justify-between text-xs">
-            <span class="font-luxury font-bold text-[#FFA517] uppercase">Hub 02</span>
-            <span class="px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-300 font-bold text-[10px]">Active Slot</span>
-          </div>
-          <h3 class="text-xl font-serif-chic font-bold text-white">Gurugram &amp; GCR</h3>
-          <p class="text-xs text-[#F7EFE6]/80 leading-relaxed">
-            DLF Phase 1 to 5, Cyber City, Golf Course Road, Golf Course Extension, Sector 53/54, Sohna Road.
+        <h3 class="text-xl font-serif-chic font-bold text-white">Gurugram &amp; GCR</h3>
+        <p class="text-xs text-[#F7EFE6]/80 leading-relaxed">
+          DLF Phase 1 to 5, Cyber City, Golf Course Road, Golf Course Extension, Sector 53/54, Sohna Road.
           </p>
-          <div class="pt-2 text-[11px] font-bold text-[#FFA517]">
-            ✦ Hyper-Local Cold Vans
+        <div class="pt-2 text-[11px] font-bold text-[#FFA517]">
+          ✦ Hyper-Local Cold Vans
           </div>
+      </div>
+
+      <!-- Hub 3: West & North Delhi -->
+      <div class="knife-glint p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-[#C59A45]/60 transition-all space-y-3">
+        <div class="flex items-center justify-between text-xs">
+          <span class="font-luxury font-bold text-[#FFA517] uppercase">Hub 03</span>
+          <span class="px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-300 font-bold text-[10px]">Active Slot</span>
         </div>
-
-        <!-- Hub 3: West & North Delhi -->
-        <div class="knife-glint p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-[#C59A45]/60 transition-all space-y-3">
-          <div class="flex items-center justify-between text-xs">
-            <span class="font-luxury font-bold text-[#FFA517] uppercase">Hub 03</span>
-            <span class="px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-300 font-bold text-[10px]">Active Slot</span>
-          </div>
-          <h3 class="text-xl font-serif-chic font-bold text-white">West &amp; North Delhi</h3>
-          <p class="text-xs text-[#F7EFE6]/80 leading-relaxed">
-            Punjabi Bagh, Rajouri Garden, Civil Lines, Model Town, Paschim Vihar, Patel Nagar.
+        <h3 class="text-xl font-serif-chic font-bold text-white">West &amp; North Delhi</h3>
+        <p class="text-xs text-[#F7EFE6]/80 leading-relaxed">
+          Punjabi Bagh, Rajouri Garden, Civil Lines, Model Town, Paschim Vihar, Patel Nagar.
           </p>
-          <div class="pt-2 text-[11px] font-bold text-[#FFA517]">
-            ✦ Insulated Multi-Barrier Packs
+        <div class="pt-2 text-[11px] font-bold text-[#FFA517]">
+          ✦ Insulated Multi-Barrier Packs
           </div>
+      </div>
+
+      <!-- Hub 4: Noida & Expressway -->
+      <div class="knife-glint p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-[#C59A45]/60 transition-all space-y-3">
+        <div class="flex items-center justify-between text-xs">
+          <span class="font-luxury font-bold text-[#FFA517] uppercase">Hub 04</span>
+          <span class="px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-300 font-bold text-[10px]">Active Slot</span>
         </div>
-
-        <!-- Hub 4: Noida & Expressway -->
-        <div class="knife-glint p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-[#C59A45]/60 transition-all space-y-3">
-          <div class="flex items-center justify-between text-xs">
-            <span class="font-luxury font-bold text-[#FFA517] uppercase">Hub 04</span>
-            <span class="px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-300 font-bold text-[10px]">Active Slot</span>
-          </div>
-          <h3 class="text-xl font-serif-chic font-bold text-white">Noida &amp; Expressway</h3>
-          <p class="text-xs text-[#F7EFE6]/80 leading-relaxed">
-            Sector 15 to Sector 137, Expressway corridors, Greater Noida West &amp; Alpha commercial hubs.
+        <h3 class="text-xl font-serif-chic font-bold text-white">Noida &amp; Expressway</h3>
+        <p class="text-xs text-[#F7EFE6]/80 leading-relaxed">
+          Sector 15 to Sector 137, Expressway corridors, Greater Noida West &amp; Alpha commercial hubs.
           </p>
-          <div class="pt-2 text-[11px] font-bold text-[#FFA517]">
-            ✦ Express Afternoon &amp; Dusk Slots
+        <div class="pt-2 text-[11px] font-bold text-[#FFA517]">
+          ✦ Express Afternoon &amp; Dusk Slots
           </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= OUR NEW DELHI HERITAGE & CONCIERGE ================= -->
+<section class="py-24 px-6 md:px-10 max-w-7xl mx-auto scroll-reveal" id="heritage">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+    <!-- Left Narrative -->
+    <div class="lg:col-span-6 space-y-6">
+      <span class="text-xs font-bold uppercase tracking-[0.25em] text-[#CD2653] font-luxury">Food For Thought</span>
+      <h2 class="text-4xl md:text-5xl font-serif-chic font-bold tracking-tight text-[#4A0E17]">
+        Curated for the Discerning Table.
+        </h2>
+      <p class="text-base text-[#524842] leading-relaxed font-medium">
+        Deli Chic was born in New Delhi with a simple thesis: the meat and charcuterie that reaches your dining table should possess the same uncompromising artisanal integrity as fine European boucheries.
+        </p>
+      <p class="text-sm text-[#6B625B] leading-relaxed">
+        From German-style beechwood smoked frankfurters to tender Coorg-spiced chicken breast and slow-simmered Lucknowi marinades, every offering is cut, cured, and vacuum-sealed by master culinary butchers.
+        </p>
+
+      <!-- Concierge Box -->
+      <div class="deli-card p-6 space-y-4 border-l-4 border-l-[#CD2653]" id="contact">
+        <div class="flex justify-between items-center pb-2 border-b border-[#CD2653]/15">
+          <span class="font-luxury font-bold text-xs text-[#CD2653] uppercase">New Delhi Central Boucherie</span>
+          <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">Open Daily</span>
+        </div>
+        <div class="text-xs space-y-1.5 text-[#524842]">
+          <p><strong>Direct Hotline:</strong> <a href="tel:+919810002023" class="text-[#CD2653] underline font-bold">+91 98100 02023</a></p>
+          <p><strong>WhatsApp Concierge:</strong> <a href="https://wa.link/bk4b8e" target="_blank" class="text-emerald-700 underline font-bold">wa.link/bk4b8e</a></p>
+          <p><strong>Delivery Slots:</strong> 10:00 AM – 1:00 PM &amp; 5:00 PM – 8:00 PM</p>
+          <p><strong>Payment Modes:</strong> Sodexo, UPI, Debit/Credit Cards &amp; Net Banking</p>
         </div>
       </div>
     </div>
-  </section>
 
-  <!-- ================= OUR NEW DELHI HERITAGE & CONCIERGE ================= -->
-  <section class="py-24 px-6 md:px-10 max-w-7xl mx-auto scroll-reveal" id="heritage">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-      <!-- Left Narrative -->
-      <div class="lg:col-span-6 space-y-6">
-        <span class="text-xs font-bold uppercase tracking-[0.25em] text-[#CD2653] font-luxury">Food For Thought</span>
-        <h2 class="text-4xl md:text-5xl font-serif-chic font-bold tracking-tight text-[#4A0E17]">
-          Curated for the Discerning Table.
-        </h2>
-        <p class="text-base text-[#524842] leading-relaxed font-medium">
-          Deli Chic was born in New Delhi with a simple thesis: the meat and charcuterie that reaches your dining table should possess the same uncompromising artisanal integrity as fine European boucheries.
-        </p>
-        <p class="text-sm text-[#6B625B] leading-relaxed">
-          From German-style beechwood smoked frankfurters to tender Coorg-spiced chicken breast and slow-simmered Lucknowi marinades, every offering is cut, cured, and vacuum-sealed by master culinary butchers.
-        </p>
-
-        <!-- Concierge Box -->
-        <div class="deli-card p-6 space-y-4 border-l-4 border-l-[#CD2653]" id="contact">
-          <div class="flex justify-between items-center pb-2 border-b border-[#CD2653]/15">
-            <span class="font-luxury font-bold text-xs text-[#CD2653] uppercase">New Delhi Central Boucherie</span>
-            <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">Open Daily</span>
-          </div>
-          <div class="text-xs space-y-1.5 text-[#524842]">
-            <p><strong>Direct Hotline:</strong> <a href="tel:+919810002023" class="text-[#CD2653] underline font-bold">+91 98100 02023</a></p>
-            <p><strong>WhatsApp Concierge:</strong> <a href="https://wa.link/bk4b8e" target="_blank" class="text-emerald-700 underline font-bold">wa.link/bk4b8e</a></p>
-            <p><strong>Delivery Slots:</strong> 10:00 AM – 1:00 PM &amp; 5:00 PM – 8:00 PM</p>
-            <p><strong>Payment Modes:</strong> Sodexo, UPI, Debit/Credit Cards &amp; Net Banking</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right Visual Vignette -->
-      <div class="lg:col-span-6">
-        <div class="rounded-3xl overflow-hidden shadow-2xl border-2 border-[#C59A45]/30 relative h-[460px]">
-          <img
+    <!-- Right Visual Vignette -->
+    <div class="lg:col-span-6">
+      <div class="rounded-3xl overflow-hidden shadow-2xl border-2 border-[#C59A45]/30 relative h-[460px]">
+        <img
             src="https://images.unsplash.com/photo-1602470520998-f4a52199a3d6?auto=format&fit=crop&w=1200&q=85"
             alt="Artisanal Butcher Preparation"
             class="w-full h-full object-cover"
           />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-8">
-            <div class="text-white space-y-1">
-              <span class="text-[10px] font-luxury font-bold uppercase tracking-widest text-[#FFA517]">✦ Artisanal Craft</span>
-              <h4 class="text-2xl font-serif-chic font-bold">Hand-Cut by Master Butchers</h4>
-              <p class="text-xs text-white/80">Every portion weighed, trimmed, and inspected prior to vacuum packaging.</p>
-            </div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-8">
+          <div class="text-white space-y-1">
+            <span class="text-[10px] font-luxury font-bold uppercase tracking-widest text-[#FFA517]">✦ Artisanal Craft</span>
+            <h4 class="text-2xl font-serif-chic font-bold">Hand-Cut by Master Butchers</h4>
+            <p class="text-xs text-white/80">Every portion weighed, trimmed, and inspected prior to vacuum packaging.</p>
           </div>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= FOOTER ================= -->
-  <footer class="border-t border-[#CD2653]/15 py-12 px-6 md:px-10 text-center sm:text-left bg-white">
-    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-xs text-[#6B625B]">
-      <div>
-        <strong class="font-serif-chic font-bold text-base block text-[#4A0E17]">Deli Chic — Food For Thought</strong>
-        <span>© 2026 Deli Chic. All Rights Reserved. New Delhi &amp; NCR Haute Boucherie.</span>
-      </div>
-      <div class="flex gap-6 uppercase tracking-widest font-luxury font-bold text-[11px]">
-        <a href="https://delichic.co.in/" target="_blank" class="hover:text-[#CD2653] transition-colors">Official Portal</a>
-        <a href="https://mh.delichic.co.in/shop/" target="_blank" class="hover:text-[#CD2653] transition-colors">Catalogue</a>
-        <a href="tel:+919810002023" class="hover:text-[#CD2653] transition-colors">+91 98100 02023</a>
-      </div>
-    </div>
-  </footer>
-
-  <!-- ================= SLIDE-OVER BASKET DRAWER ================= -->
-  <div id="basketModal" class="fixed inset-0 z-50 hidden">
-    <div onclick="toggleBasket(false)" class="absolute inset-0 bg-black/75 backdrop-blur-sm"></div>
-    <div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-[#CD2653]/25 p-8 flex flex-col justify-between shadow-2xl text-[#1C1917]">
-      <div>
-        <!-- Drawer Header -->
-        <div class="flex items-center justify-between border-b border-[#CD2653]/15 pb-4">
-          <div>
-            <span class="text-[10px] font-luxury font-bold uppercase tracking-widest text-[#CD2653]">Haute Boucherie</span>
-            <h3 class="text-xl font-serif-chic font-bold text-[#4A0E17]">Your Artisanal Basket</h3>
-          </div>
-          <button onclick="toggleBasket(false)" class="text-xs uppercase tracking-widest text-[#CD2653] font-bold hover:underline">Close ✕</button>
-        </div>
-
-        <!-- Free Delivery Threshold Meter -->
-        <div class="mt-4 p-3.5 rounded-2xl bg-[#FFF5F7] border border-[#CD2653]/20">
-          <div class="flex justify-between text-xs font-bold mb-1.5">
-            <span id="shippingText" class="text-[#CD2653]">Add ₹799 for FREE Delivery</span>
-            <span id="shippingProgressVal" class="text-[#4A0E17]">₹200 / ₹999</span>
-          </div>
-          <div class="w-full h-2 rounded-full bg-[#F3D7DF] overflow-hidden">
-            <div id="shippingProgressBar" class="h-full bg-[#CD2653] transition-all duration-300" style="width: 20%;"></div>
-          </div>
-        </div>
-
-        <!-- Items Container -->
-        <div id="basketItemsList" class="mt-5 space-y-3.5 max-h-[46vh] overflow-y-auto pr-1"></div>
-      </div>
-
-      <!-- Drawer Footer & Checkout -->
-      <div class="border-t border-[#CD2653]/15 pt-5 space-y-4">
-        <!-- Delivery Slot Selector -->
-        <div>
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-[#6B625B] mb-1.5">Select NCR Delivery Slot:</label>
-          <div class="grid grid-cols-2 gap-2 text-xs">
-            <button onclick="setSlot('Morning (10 AM–1 PM)')" id="slot-morning" class="slot-btn py-2 px-3 rounded-xl border border-[#CD2653] bg-[#CD2653] text-white font-bold transition-all">
-              10 AM – 1 PM
-            </button>
-            <button onclick="setSlot('Evening (5 PM–8 PM)')" id="slot-evening" class="slot-btn py-2 px-3 rounded-xl border border-[#CD2653]/30 bg-white text-[#524842] font-bold transition-all">
-              5 PM – 8 PM
-            </button>
-          </div>
-        </div>
-
-        <!-- Promo Code Input -->
-        <div class="flex gap-2">
-          <input type="text" id="promoInput" placeholder="Enter Code (e.g. WoW20)" class="w-full px-4 py-2 rounded-xl border border-[#CD2653]/30 text-xs uppercase font-luxury font-bold focus:outline-none focus:border-[#CD2653]" />
-          <button onclick="applyPromo()" class="px-5 py-2 rounded-xl bg-[#4A0E17] text-white font-bold text-xs uppercase hover:bg-[#2F090F] transition-all">
-            Apply
-          </button>
-        </div>
-        <div id="promoNotice" class="text-[11px] text-emerald-700 font-bold hidden">
-          ✓ Code WoW20 Applied! 20% Discount Activated.
-        </div>
-
-        <!-- Calculations -->
-        <div class="space-y-1.5 text-xs text-[#524842]">
-          <div class="flex justify-between">
-            <span>Subtotal</span>
-            <span id="subtotalPrice" class="font-bold text-sm">₹200</span>
-          </div>
-          <div class="flex justify-between text-emerald-700 font-bold" id="discountRow" style="display: none;">
-            <span>Discount (WoW20)</span>
-            <span id="discountPrice">-₹40</span>
-          </div>
-          <div class="flex justify-between text-base font-serif-chic font-bold text-[#4A0E17] pt-2 border-t border-[#CD2653]/10">
-            <span>Total Value</span>
-            <span id="finalTotalPrice" class="text-xl text-[#CD2653]">₹200</span>
-          </div>
-        </div>
-
-        <button onclick="dispatchToWhatsApp()" class="knife-glint w-full py-4 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#8C1434] transition-all shadow-lg shadow-[#CD2653]/30 flex items-center justify-center gap-2">
-          <span>Dispatch via WhatsApp Concierge ↗</span>
-        </button>
       </div>
     </div>
   </div>
+</section>
 
-  <!-- ================= SCRIPTS: ATMOSPHERE CANVAS + LOUPE + PINNED STAGE ================= -->
-  <script>
-    // 1. Authentic Real Deli Chic Catalogue Data
+<!-- ================= FOOTER ================= -->
+<footer class="border-t border-[#CD2653]/15 py-12 px-6 md:px-10 text-center sm:text-left bg-white">
+  <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-xs text-[#6B625B]">
+    <div>
+      <strong class="font-serif-chic font-bold text-base block text-[#4A0E17]">Deli Chic — Food For Thought</strong>
+      <span>© 2026 Deli Chic. All Rights Reserved. New Delhi &amp; NCR Haute Boucherie.</span>
+    </div>
+    <div class="flex gap-6 uppercase tracking-widest font-luxury font-bold text-[11px]">
+      <a href="https://delichic.co.in/" target="_blank" class="hover:text-[#CD2653] transition-colors">Official Portal</a>
+      <a href="https://mh.delichic.co.in/shop/" target="_blank" class="hover:text-[#CD2653] transition-colors">Catalogue</a>
+      <a href="tel:+919810002023" class="hover:text-[#CD2653] transition-colors">+91 98100 02023</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ================= SLIDE-OVER BASKET DRAWER ================= -->
+<div id="basketModal" class="fixed inset-0 z-50 hidden">
+  <div onclick="toggleBasket(false)" class="absolute inset-0 bg-black/75 backdrop-blur-sm"></div>
+  <div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-[#CD2653]/25 p-8 flex flex-col justify-between shadow-2xl text-[#1C1917]">
+    <div>
+      <!-- Drawer Header -->
+      <div class="flex items-center justify-between border-b border-[#CD2653]/15 pb-4">
+        <div>
+          <span class="text-[10px] font-luxury font-bold uppercase tracking-widest text-[#CD2653]">Haute Boucherie</span>
+          <h3 class="text-xl font-serif-chic font-bold text-[#4A0E17]">Your Artisanal Basket</h3>
+        </div>
+        <button onclick="toggleBasket(false)" class="text-xs uppercase tracking-widest text-[#CD2653] font-bold hover:underline">Close ✕</button>
+      </div>
+
+      <!-- Free Delivery Threshold Meter -->
+      <div class="mt-4 p-3.5 rounded-2xl bg-[#FFF5F7] border border-[#CD2653]/20">
+        <div class="flex justify-between text-xs font-bold mb-1.5">
+          <span id="shippingText" class="text-[#CD2653]">Add ₹799 for FREE Delivery</span>
+          <span id="shippingProgressVal" class="text-[#4A0E17]">₹200 / ₹999</span>
+        </div>
+        <div class="w-full h-2 rounded-full bg-[#F3D7DF] overflow-hidden">
+          <div id="shippingProgressBar" class="h-full bg-[#CD2653] transition-all duration-300" style="width: 20%;"></div>
+        </div>
+      </div>
+
+      <!-- Items Container -->
+      <div id="basketItemsList" class="mt-5 space-y-3.5 max-h-[46vh] overflow-y-auto pr-1"></div>
+    </div>
+
+    <!-- Drawer Footer & Checkout -->
+    <div class="border-t border-[#CD2653]/15 pt-5 space-y-4">
+      <!-- Delivery Slot Selector -->
+      <div>
+        <label class="block text-[11px] font-bold uppercase tracking-wider text-[#6B625B] mb-1.5">Select NCR Delivery Slot:</label>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="setSlot('Morning (10 AM–1 PM)')" id="slot-morning" class="slot-btn py-2 px-3 rounded-xl border border-[#CD2653] bg-[#CD2653] text-white font-bold transition-all">
+            10 AM – 1 PM
+            </button>
+          <button onclick="setSlot('Evening (5 PM–8 PM)')" id="slot-evening" class="slot-btn py-2 px-3 rounded-xl border border-[#CD2653]/30 bg-white text-[#524842] font-bold transition-all">
+            5 PM – 8 PM
+            </button>
+        </div>
+      </div>
+
+      <!-- Promo Code Input -->
+      <div class="flex gap-2">
+        <input type="text" id="promoInput" placeholder="Enter Code (e.g. WoW20)" class="w-full px-4 py-2 rounded-xl border border-[#CD2653]/30 text-xs uppercase font-luxury font-bold focus:outline-none focus:border-[#CD2653]" />
+        <button onclick="applyPromo()" class="px-5 py-2 rounded-xl bg-[#4A0E17] text-white font-bold text-xs uppercase hover:bg-[#2F090F] transition-all">
+          Apply
+          </button>
+      </div>
+      <div id="promoNotice" class="text-[11px] text-emerald-700 font-bold hidden">
+        ✓ Code WoW20 Applied! 20% Discount Activated.
+        </div>
+
+      <!-- Calculations -->
+      <div class="space-y-1.5 text-xs text-[#524842]">
+        <div class="flex justify-between">
+          <span>Subtotal</span>
+          <span id="subtotalPrice" class="font-bold text-sm">₹200</span>
+        </div>
+        <div class="flex justify-between text-emerald-700 font-bold" id="discountRow" style="display: none;">
+          <span>Discount (WoW20)</span>
+          <span id="discountPrice">-₹40</span>
+        </div>
+        <div class="flex justify-between text-base font-serif-chic font-bold text-[#4A0E17] pt-2 border-t border-[#CD2653]/10">
+          <span>Total Value</span>
+          <span id="finalTotalPrice" class="text-xl text-[#CD2653]">₹200</span>
+        </div>
+      </div>
+
+      <button onclick="dispatchToWhatsApp()" class="knife-glint w-full py-4 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#8C1434] transition-all shadow-lg shadow-[#CD2653]/30 flex items-center justify-center gap-2">
+        <span>Dispatch via WhatsApp Concierge ↗</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SCRIPTS: ATMOSPHERE CANVAS + LOUPE + PINNED STAGE ================= -->
+<script>
+  // 1. Authentic Real Deli Chic Catalogue Data
     const DELI_PRODUCTS = [
       {
         id: 'chk-breast-500',
@@ -1090,32 +1103,32 @@
       grid.innerHTML = filtered.map(p => {
         return `
           <div class="deli-card tilt-card scroll-reveal knife-glint overflow-hidden flex flex-col justify-between group">
-            <div>
-              <div class="relative h-52 overflow-hidden bg-[#FAF4ED]">
-                <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-[9px] font-luxury font-bold uppercase tracking-wider bg-[#4A0E17] text-white shadow-sm">
-                  ${p.tag}
+          <div>
+            <div class="relative h-52 overflow-hidden bg-[#FAF4ED]">
+              <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-[9px] font-luxury font-bold uppercase tracking-wider bg-[#4A0E17] text-white shadow-sm">
+                ${p.tag}
                 </span>
-                <span class="absolute bottom-3 right-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/95 text-[#4A0E17] shadow-sm">
-                  ${p.weight}
+              <span class="absolute bottom-3 right-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/95 text-[#4A0E17] shadow-sm">
+                ${p.weight}
                 </span>
-              </div>
-              <div class="p-6 space-y-2">
-                <div class="flex justify-between items-start gap-2">
-                  <h3 class="text-lg font-serif-chic font-bold text-[#4A0E17] leading-snug">${p.name}</h3>
-                  <span class="text-xl font-serif-chic font-bold text-[#CD2653] whitespace-nowrap">₹${p.price}</span>
-                </div>
-                <p class="text-xs font-medium text-[#6B625B] leading-relaxed">${p.notes}</p>
-              </div>
             </div>
-
-            <div class="p-6 pt-0">
-              <button onclick="addToBasket('${p.id}')" class="w-full py-3 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#8C1434] transition-all shadow-md shadow-[#CD2653]/25 flex items-center justify-center gap-2">
-                <span>+ Add to Basket</span>
-              </button>
+            <div class="p-6 space-y-2">
+              <div class="flex justify-between items-start gap-2">
+                <h3 class="text-lg font-serif-chic font-bold text-[#4A0E17] leading-snug">${p.name}</h3>
+                <span class="text-xl font-serif-chic font-bold text-[#CD2653] whitespace-nowrap">₹${p.price}</span>
+              </div>
+              <p class="text-xs font-medium text-[#6B625B] leading-relaxed">${p.notes}</p>
             </div>
           </div>
-        `;
+
+          <div class="p-6 pt-0">
+            <button onclick="addToBasket('${p.id}')" class="w-full py-3 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#8C1434] transition-all shadow-md shadow-[#CD2653]/25 flex items-center justify-center gap-2">
+              <span>+ Add to Basket</span>
+            </button>
+          </div>
+        </div>
+      `;
       }).join('');
       initCardTilt();
       initScrollReveal();
@@ -1227,7 +1240,7 @@
         'vec2 q=vec2(fbm(p*1.3+t),fbm(p*1.3-t+7.0));',
         'float h=fbm(p*2.2+q*1.9+vec2(t*0.5,-t*0.3));',
         'float vein=1.0-abs(h*2.0-1.0);',
-        'vein=pow(vein,3.4);',
+        'vein=pow(vein,5.0);',
         'float fine=pow(1.0-abs(fbm(p*5.1+q*2.2)*2.0-1.0),6.0);',
         'vec2 m=(u_m-0.5)*vec2(u_res.x/u_res.y,1.0);',
         'float chill=exp(-length(p-m)*3.1)*0.5;',
@@ -1235,9 +1248,9 @@
         'vec3 crimson=vec3(0.804,0.149,0.325);',
         'vec3 gold=vec3(0.773,0.604,0.271);',
         'vec3 col=linen;',
-        'col=mix(col,crimson,vein*0.30);',
-        'col=mix(col,gold,fine*0.22);',
-        'col=mix(col,vec3(0.91,0.95,0.98),chill*0.5);',
+        'col=mix(col,crimson,vein*0.10);',
+        'col=mix(col,gold,fine*0.09);',
+        'col=mix(col,vec3(0.91,0.95,0.98),chill*0.30);',
         'gl_FragColor=vec4(col,1.0);}'
       ].join('\n');
 
@@ -1553,7 +1566,7 @@
       if (subtotal >= 999) {
         progressBar.style.width = '100%';
         progressBar.className = 'h-full bg-emerald-500 transition-all duration-300';
-        shippingText.textContent = '🎉 FREE Express NCR Shipping Unlocked!';
+        shippingText.textContent = 'FREE Express NCR Shipping Unlocked!';
         progressVal.textContent = 'Qualified';
       } else {
         const pct = Math.min(100, Math.round((subtotal / 999) * 100));
@@ -1581,29 +1594,29 @@
       if (basket.length === 0) {
         list.innerHTML = `
           <div class="py-12 text-center text-[#6B625B]">
-            <p class="font-serif-chic text-lg font-bold text-[#4A0E17]">Your basket is empty</p>
-            <p class="text-xs mt-1">Explore our cold cuts, poultry &amp; dim sum above.</p>
-          </div>
-        `;
+          <p class="font-serif-chic text-lg font-bold text-[#4A0E17]">Your basket is empty</p>
+          <p class="text-xs mt-1">Explore our cold cuts, poultry &amp; dim sum above.</p>
+        </div>
+      `;
         return;
       }
 
       list.innerHTML = basket.map((item, idx) => `
         <div class="p-4 rounded-2xl bg-[#FFF9FA] border border-[#CD2653]/15 flex items-center justify-between">
-          <div>
-            <h4 class="font-bold text-sm text-[#4A0E17]">${item.name}</h4>
-            <span class="text-[11px] text-[#CD2653] font-bold block">${item.weight} • ₹${item.price} each</span>
-          </div>
-          <div class="flex items-center gap-3">
-            <div class="flex items-center border border-[#CD2653]/30 rounded-lg overflow-hidden bg-white text-xs font-bold">
-              <button onclick="changeQty(${idx}, -1)" class="px-2 py-1 hover:bg-[#FFF0F3] text-[#4A0E17]">-</button>
-              <span class="px-2.5 py-1 text-[#CD2653]">${item.qty}</span>
-              <button onclick="changeQty(${idx}, 1)" class="px-2 py-1 hover:bg-[#FFF0F3] text-[#4A0E17]">+</button>
-            </div>
-            <span class="font-serif-chic font-bold text-[#4A0E17] text-sm min-w-[50px] text-right">₹${item.price * item.qty}</span>
-          </div>
+        <div>
+          <h4 class="font-bold text-sm text-[#4A0E17]">${item.name}</h4>
+          <span class="text-[11px] text-[#CD2653] font-bold block">${item.weight} • ₹${item.price} each</span>
         </div>
-      `).join('');
+        <div class="flex items-center gap-3">
+          <div class="flex items-center border border-[#CD2653]/30 rounded-lg overflow-hidden bg-white text-xs font-bold">
+            <button onclick="changeQty(${idx}, -1)" class="px-2 py-1 hover:bg-[#FFF0F3] text-[#4A0E17]">-</button>
+            <span class="px-2.5 py-1 text-[#CD2653]">${item.qty}</span>
+            <button onclick="changeQty(${idx}, 1)" class="px-2 py-1 hover:bg-[#FFF0F3] text-[#4A0E17]">+</button>
+          </div>
+          <span class="font-serif-chic font-bold text-[#4A0E17] text-sm min-w-[50px] text-right">₹${item.price * item.qty}</span>
+        </div>
+      </div>
+    `).join('');
     }
 
     function toggleBasket(open) {
@@ -1646,7 +1659,7 @@
     }, 200);
   </script>
 <script>
-  /* The header is fixed under a fixed announcement bar. The bar's height is not
+/* The header is fixed under a fixed announcement bar. The bar's height is not
      a constant: at 320px it wraps to three lines (67px), and the hardcoded
      32px offset meant the header sat on top of it and cut the delivery-slot
      line in half. Measure it and publish the number as a custom property.
