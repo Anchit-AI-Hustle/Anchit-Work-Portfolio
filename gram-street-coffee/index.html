@@ -653,17 +653,69 @@
   .timeline.is-done li,
   .timeline.is-done .tl-mark { will-change: auto; }
 
-  /* the chapter that has not finished */
+  /* the chapter that has not finished — marked, not animated: the cycle
+     below is what moves, and two competing loops on one medallion is noise */
   .tl-mark.is-now::after {
     content: ""; position: absolute; inset: -5px;
     border-radius: 50%; border: 2px solid var(--grape);
+    opacity: .30; pointer-events: none;
+  }
+
+  /* ── THE ONGOING CYCLE ─────────────────────────────────────────────────
+     Arriving once and stopping made this a reveal, not a timeline. It runs
+     now: the rail fills to the first stop, holds while that chapter is the
+     one being read, advances to the second, then the third, then starts
+     over. 13.8s, 4.6s a chapter.
+
+     The three hold positions are not thirds — the entries are different
+     heights, and on a phone they are very different heights — so the script
+     measures each medallion's centre and writes it as --p1/--p2/--p3. The
+     keyframes read those, which is why the fill lands ON a stop at every
+     width instead of near one. */
+  .timeline::after {
+    content: ""; position: absolute; left: 25px; top: 10px; bottom: 10px; width: 3px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, var(--berry), var(--accent));
+    transform-origin: top; transform: scaleY(0); opacity: 0;
+    pointer-events: none;
+  }
+  .timeline.is-live.is-cycling::after { animation: tlFill 13.8s cubic-bezier(.45,0,.2,1) infinite; }
+  @keyframes tlFill {
+    0%       { transform: scaleY(0);                 opacity: 0; }
+    5%       { transform: scaleY(var(--p1, .10));    opacity: .9; }
+    30%      { transform: scaleY(var(--p1, .10));    opacity: .9; }
+    40%      { transform: scaleY(var(--p2, .55));    opacity: .9; }
+    63%      { transform: scaleY(var(--p2, .55));    opacity: .9; }
+    73%      { transform: scaleY(var(--p3, 1));      opacity: .9; }
+    94%      { transform: scaleY(var(--p3, 1));      opacity: .9; }
+    100%     { transform: scaleY(var(--p3, 1));      opacity: 0; }
+  }
+
+  /* each stop takes its turn as the fill reaches it */
+  .timeline.is-live.is-cycling .tl-mark {
+    animation: tlStep 13.8s ease-in-out infinite;
+    animation-delay: calc(var(--i, 0) * 4.6s);
+  }
+  @keyframes tlStep {
+    0%        { transform: scale(1); }
+    5%        { transform: scale(1.17); }
+    12%       { transform: scale(1.10); }
+    27%       { transform: scale(1.10); }
+    33%       { transform: scale(1); }
+    100%      { transform: scale(1); }
+  }
+  .tl-mark::before {
+    content: ""; position: absolute; inset: -8px;
+    border-radius: 50%; border: 2px solid var(--accent);
     opacity: 0; pointer-events: none;
   }
-  /* runs only while the timeline is actually on screen */
-  .timeline.is-live .tl-mark.is-now::after { animation: tlPulse 3s cubic-bezier(.2,.6,.3,1) infinite; }
-  @keyframes tlPulse {
-    0%   { transform: scale(.82); opacity: .55; }
-    70%  { transform: scale(1.30); opacity: 0; }
+  .timeline.is-live.is-cycling .tl-mark::before {
+    animation: tlRing 13.8s ease-out infinite;
+    animation-delay: calc(var(--i, 0) * 4.6s);
+  }
+  @keyframes tlRing {
+    0%   { transform: scale(.78); opacity: .65; }
+    16%  { transform: scale(1.30); opacity: 0; }
     100% { transform: scale(1.30); opacity: 0; }
   }
 
@@ -706,8 +758,12 @@
     .timeline.is-armed .tl-mark,
     .chef-chart.is-armed .cc-unit,
     .chef-chart.is-armed .cc-base { opacity: 1; transform: none; transition: none; }
-    .timeline.is-live .tl-mark.is-now::after,
+    .timeline.is-live.is-cycling::after,
+    .timeline.is-live.is-cycling .tl-mark,
+    .timeline.is-live.is-cycling .tl-mark::before,
     .chef-chart.is-live .cc-steam { animation: none; }
+    /* leave the rail drawn to the end rather than empty */
+    .timeline::after { transform: scaleY(1); opacity: .55; }
     /* leave the live chapter marked, just not moving */
     .tl-mark.is-now::after { opacity: .45; }
   }
@@ -1954,12 +2010,43 @@
       }, { threshold: 0.05 }).observe(el);
     }
 
+    // Where each medallion sits on the rail, as a fraction of the rail's
+    // length. The entries are different heights and far more different on a
+    // phone, so thirds would land the fill between stops. Writing only on a
+    // change matters: this runs from a ResizeObserver on the same element.
+    function measureStops(tl) {
+      var railTop = 10, railBottom = 10;
+      var h = tl.clientHeight - railTop - railBottom;
+      if (h <= 0) return;
+      var top = tl.getBoundingClientRect().top;
+      var marks = tl.querySelectorAll(".tl-mark");
+      for (var i = 0; i < marks.length; i++) {
+        var r = marks[i].getBoundingClientRect();
+        var centre = (r.top + r.height / 2) - top - railTop;
+        var frac = Math.max(0.02, Math.min(1, centre / h)).toFixed(4);
+        var name = "--p" + (i + 1);
+        if (tl.style.getPropertyValue(name).trim() !== frac) tl.style.setProperty(name, frac);
+      }
+    }
+
     if (tl) show(tl, function () {
       tl.style.setProperty("--draw", "1");
       tl.classList.add("is-drawn");
-      // drop the compositor hint once the last medallion has landed
-      setTimeout(function () { tl.classList.add("is-done"); }, 2200);
+      setTimeout(function () {
+        // drop the compositor hint once the last medallion has landed, and
+        // only then start the loop: the arrival should finish before the
+        // timeline starts running.
+        tl.classList.add("is-done");
+        if (!reduce) { measureStops(tl); tl.classList.add("is-cycling"); }
+      }, 2200);
     });
+
+    if (tl && !reduce && typeof ResizeObserver !== "undefined") {
+      // Safe against the feedback loop this codebase has hit before: the
+      // properties written here drive an absolutely positioned ::after via
+      // scaleY, so nothing written back changes the observed element's size.
+      new ResizeObserver(function () { measureStops(tl); }).observe(tl);
+    }
     if (chart) show(chart, function () { chart.classList.add("is-drawn"); });
     if (orbit) show(orbit, function () { orbit.classList.add("in"); });
 
