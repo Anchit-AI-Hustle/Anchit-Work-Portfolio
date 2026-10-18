@@ -11,7 +11,7 @@
 <meta property="og:description" content="In-house specialty roasts, ceremonial Uji matcha, and small-batch gelato. DLF Phase 1, Golf Course Road & Sector 56, Gurugram.">
 <meta property="og:url" content="https://anchit-tandon.com/gram-street-coffee" />
 <meta property="og:type" content="website" />
-<meta property="og:image" content="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1200&q=85">
+<meta property="og:image" content="/assets/brand/u-1501339847302-ac426a4a7cbb-1200.jpg">
 
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23CDB8F7'/%3E%3Ccircle cx='32' cy='32' r='14' fill='%232B1650'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -719,32 +719,25 @@
     100% { transform: scale(1.30); opacity: 0; }
   }
 
-  /* ── THREE COUNTERS ────────────────────────────────────────────────────
+  /* ── THREE VENTURES, PHOTOGRAPHED ─────────────────────────────────────
      The left column was a heading and a paragraph and nothing else, which on
-     a phone makes the whole section a wall of type. Three drawn counters, one
-     per venture, in the three chapter colours. No words, no numbers, no claim
-     about size — the timeline below carries the facts. */
-  .chef-chart { margin-top: 34px; width: min(100%, 560px); }
-  .chef-chart svg { display: block; width: 100%; height: auto; overflow: visible; }
-  .cc-unit { transform-origin: 50% 100%; }
-  .chef-chart.is-armed .cc-unit { opacity: 0; transform: translateY(10px) scaleY(.6); }
-  .chef-chart.is-armed .cc-unit {
+     a phone makes the whole section a wall of type. One photo per venture,
+     in the order the timeline tells them, each capped by its chapter colour
+     so the row and the rail read as the same three chapters.
+
+     These are photographs rather than drawings because the rest of the page
+     is photography. No numbers and no size claim: the timeline carries the
+     facts. */
+  .chef-chart { margin-top: 34px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: min(100%, 560px); }
+  .cc-shot { position: relative; margin: 0; border-radius: 14px; overflow: hidden; background: var(--lilac-soft); box-shadow: 0 10px 24px rgba(43, 22, 80, .16); }
+  .cc-shot::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 5px; background: var(--era, var(--lilac)); z-index: 2; }
+  .cc-shot img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+  .chef-chart.is-armed .cc-shot { opacity: 0; transform: translateY(14px) scale(.96); }
+  .chef-chart.is-armed .cc-shot {
     transition: opacity .6s ease, transform .7s cubic-bezier(.22,1.3,.4,1);
     transition-delay: calc(var(--i, 0) * .17s + .26s);
   }
-  .chef-chart.is-armed.is-drawn .cc-unit { opacity: 1; transform: none; }
-  .cc-base { transform-origin: left center; }
-  .chef-chart.is-armed .cc-base { transform: scaleX(0); transition: transform 1s cubic-bezier(.3,.7,.2,1); }
-  .chef-chart.is-armed.is-drawn .cc-base { transform: none; }
-  /* steam only off the last one, and only while it is on screen */
-  .cc-steam { opacity: 0; }
-  .chef-chart.is-live .cc-steam { animation: ccSteam 4s ease-in-out infinite; animation-delay: var(--d, 0s); }
-  @keyframes ccSteam {
-    0%   { opacity: 0;   transform: translateY(4px)  scaleX(.9); }
-    35%  { opacity: .65; }
-    75%  { opacity: .30; }
-    100% { opacity: 0;   transform: translateY(-16px) scaleX(1.1); }
-  }
+  .chef-chart.is-armed.is-drawn .cc-shot { opacity: 1; transform: none; }
 
   @media (max-width: 480px) {
     .timeline { padding-left: 58px; }
@@ -756,12 +749,10 @@
   @media (prefers-reduced-motion: reduce) {
     .timeline.is-armed li,
     .timeline.is-armed .tl-mark,
-    .chef-chart.is-armed .cc-unit,
-    .chef-chart.is-armed .cc-base { opacity: 1; transform: none; transition: none; }
+    .chef-chart.is-armed .cc-shot { opacity: 1; transform: none; transition: none; }
     .timeline.is-live.is-cycling::after,
     .timeline.is-live.is-cycling .tl-mark,
-    .timeline.is-live.is-cycling .tl-mark::before,
-    .chef-chart.is-live .cc-steam { animation: none; }
+    .timeline.is-live.is-cycling .tl-mark::before { animation: none; }
     /* leave the rail drawn to the end rather than empty */
     .timeline::after { transform: scaleY(1); opacity: .55; }
     /* leave the live chapter marked, just not moving */
@@ -1115,7 +1106,7 @@
             <li><strong>Twisted Cold Coffee</strong><span>Blended with house coffee gelato and topped with frozen espresso cubes that intensify as they melt.</span></li>
           </ul>
         </div>
-        <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white rounded-3xl shadow-2xl transition-transform duration-700 hover:scale-[1.02]" style="background: linear-gradient(180deg, rgba(43,22,80,0.2) 0%, rgba(43,22,80,0.85) 100%), url('https://images.unsplash.com/photo-1646954256973-f7fd9ce626b1?auto=format&fit=crop&w=1200&q=85') center/cover;">
+        <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white rounded-3xl shadow-2xl transition-transform duration-700 hover:scale-[1.02]" style="background: linear-gradient(180deg, rgba(43,22,80,0.2) 0%, rgba(43,22,80,0.85) 100%), url('/assets/brand/u-1646954256973-f7fd9ce626b1-1200.jpg') center/cover;">
           <div class="flex items-center justify-between z-10">
             <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-black uppercase tracking-wider text-[#F1E9FF] border border-white/20">✦ Iconic Cult Favorite</span>
             <span class="text-[11px] font-bold text-white/90">9-Bar Extraction</span>
@@ -1140,7 +1131,7 @@
             <li><strong>100-Prong Aeration</strong><span>Whisked fresh at 78°C using traditional Japanese bamboo chasen for rich umami notes.</span></li>
           </ul>
         </div>
-        <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white rounded-3xl shadow-2xl transition-transform duration-700 hover:scale-[1.02]" style="background: linear-gradient(180deg, rgba(43,22,80,0.15) 0%, rgba(20,45,15,0.88) 100%), url('https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=1200&q=85') center/cover;">
+        <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white rounded-3xl shadow-2xl transition-transform duration-700 hover:scale-[1.02]" style="background: linear-gradient(180deg, rgba(43,22,80,0.15) 0%, rgba(20,45,15,0.88) 100%), url('/assets/brand/u-1536256263959-770b48d82b0a-1200.jpg') center/cover;">
           <div class="flex items-center justify-between z-10">
             <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-black uppercase tracking-wider text-emerald-200 border border-white/20">✦ Ceremonial Uji Tencha</span>
             <span class="text-[11px] font-bold text-white/90">100-Prong Bamboo Chasen</span>
@@ -1165,7 +1156,7 @@
             <li><strong>Lighter Sorbets</strong><span>Refreshing fruit sorbets and clean sugar-free options sweetened naturally with erythritol.</span></li>
           </ul>
         </div>
-        <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white rounded-3xl shadow-2xl transition-transform duration-700 hover:scale-[1.02]" style="background: linear-gradient(180deg, rgba(43,22,80,0.15) 0%, rgba(65,15,45,0.88) 100%), url('https://images.unsplash.com/photo-1575031745961-1ed57f800a4c?auto=format&fit=crop&w=1200&q=85') center/cover;">
+        <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white rounded-3xl shadow-2xl transition-transform duration-700 hover:scale-[1.02]" style="background: linear-gradient(180deg, rgba(43,22,80,0.15) 0%, rgba(65,15,45,0.88) 100%), url('/assets/brand/u-1575031745961-1ed57f800a4c-1200.jpg') center/cover;">
           <div class="flex items-center justify-between z-10">
             <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-black uppercase tracking-wider text-pink-200 border border-white/20">✦ In-House Churn</span>
             <span class="text-[11px] font-bold text-white/90">-12°C Serving Velvet</span>
@@ -1271,7 +1262,7 @@
 
     <!-- Right Visual Canvas: Macro Photography with Subtle Steam Canvas Overlay -->
     <div class="lg:col-span-6 relative rounded-2xl overflow-hidden border-2 border-[#2B1650]/15 shadow-2xl min-h-[380px] bg-slate-900 group">
-      <img id="craftExtractionImg" src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=1200&q=85" alt="Espresso extraction from bottomless portafilter" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 min-h-[380px]" />
+      <img id="craftExtractionImg" src="/assets/brand/u-1514432324607-a09d9b4aefdd-1200.jpg" alt="Espresso extraction from bottomless portafilter" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 min-h-[380px]" />
       <!-- Floating Steam Mist Canvas -->
       <canvas id="coffeeSteamCanvas" class="absolute inset-0 pointer-events-none z-10"></canvas>
       <div class="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/20 text-white flex items-center justify-between z-20 text-xs font-bold">
@@ -1329,7 +1320,7 @@
 
     <!-- Right Photo Display -->
     <div class="lg:col-span-6 relative rounded-2xl overflow-hidden border-2 border-[#2B1650]/15 shadow-2xl min-h-[380px] bg-slate-900 group">
-      <img id="craftLatteImg" src="https://images.unsplash.com/photo-1534778101976-62847782c213?auto=format&fit=crop&w=1200&q=85" alt="Handcrafted latte art pouring" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 min-h-[380px]" />
+      <img id="craftLatteImg" src="/assets/brand/u-1534778101976-62847782c213-1200.jpg" alt="Handcrafted latte art pouring" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 min-h-[380px]" />
       <div class="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/20 text-white flex items-center justify-between z-20 text-xs font-bold">
         <span id="craftLatteCaption">Classic 8-Leaf Rosetta Pattern</span>
         <span class="text-emerald-400">Microfoam Sweet Spot</span>
@@ -1449,39 +1440,22 @@
       <h2 id="chef-title">From pie shop to purple latte.</h2>
       <p class="lead">Chef Vanshika Bhatia built Gram Street as a compact, beverage-first counter, and she keeps building focused culinary destinations.</p>
 
-      <!-- Three counters, one per venture, in the three chapter colours. The
-           shapes are identical in width on purpose: this is a motif, not a
-           chart of anything, and nothing here should imply a size claim. -->
-      <div class="chef-chart" id="chefChart" aria-hidden="true">
-        <svg viewBox="0 0 420 150" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <g class="cc-unit" style="--i:0">
-            <rect x="18" y="74" width="96" height="48" rx="8" fill="#FFD7E8"/>
-            <rect x="18" y="74" width="96" height="10" rx="5" fill="#2B1650" opacity=".78"/>
-            <path d="M34 112h64" stroke="#2B1650" stroke-opacity=".22" stroke-width="3" stroke-linecap="round"/>
-            <path d="M46 74a20 20 0 0 1 40 0z" fill="#2B1650" opacity=".55"/>
-            <path d="M66 58v16M53 63l13 11M79 63 66 74" stroke="#FFD7E8" stroke-opacity=".75" stroke-width="2" stroke-linecap="round"/>
-            <path d="M42 74h48" stroke="#2B1650" stroke-opacity=".55" stroke-width="3" stroke-linecap="round"/>
-          </g>
-          <g class="cc-unit" style="--i:1">
-            <rect x="162" y="74" width="96" height="48" rx="8" fill="#CFE3AE"/>
-            <rect x="162" y="74" width="96" height="10" rx="5" fill="#2B1650" opacity=".78"/>
-            <path d="M178 112h64" stroke="#2B1650" stroke-opacity=".22" stroke-width="3" stroke-linecap="round"/>
-            <path d="M210 72V50" stroke="#2B1650" stroke-opacity=".55" stroke-width="3" stroke-linecap="round"/>
-            <path d="M210 58c-14 0-18-12-18-12s16-2 18 12zM210 62c13 0 17-11 17-11s-15-2-17 11z" fill="#2B1650" opacity=".55"/>
-          </g>
-          <g class="cc-unit" style="--i:2">
-            <rect x="306" y="74" width="96" height="48" rx="8" fill="#CDB8F7"/>
-            <rect x="306" y="74" width="96" height="10" rx="5" fill="#2B1650" opacity=".78"/>
-            <path d="M322 112h64" stroke="#2B1650" stroke-opacity=".22" stroke-width="3" stroke-linecap="round"/>
-            <path d="M340 50h28v12a14 14 0 0 1-28 0z" fill="#2B1650" opacity=".55"/>
-            <path d="M368 54c8 0 8 10 0 10" stroke="#2B1650" stroke-opacity=".55" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <g stroke="#2B1650" stroke-opacity=".5" stroke-width="3" stroke-linecap="round" fill="none">
-              <path class="cc-steam" d="M347 42c-5-8 5-12 0-20" style="--d:0s"/>
-              <path class="cc-steam" d="M361 42c-5-8 5-12 0-20" style="--d:-2s"/>
-            </g>
-          </g>
-          <path class="cc-base" d="M10 126h400" stroke="#2B1650" stroke-opacity=".30" stroke-width="3" stroke-linecap="round"/>
-        </svg>
+      <!-- One photograph per venture, in the order the timeline tells them.
+           Real images rather than drawings: the rest of this page is
+           photography and the drawing was the odd one out. Each was checked
+           by eye before it went in — two candidates were rejected for
+           carrying another business's branding, which on a page about this
+           brand would read as its own. -->
+      <div class="chef-chart" id="chefChart">
+        <figure class="cc-shot" style="--i:0; --era:#FFD7E8">
+          <img src="/assets/brand/story-gs-1-pie.jpg" alt="Meringue-topped tarts on a pastry counter" loading="lazy" decoding="async" width="900" height="675">
+        </figure>
+        <figure class="cc-shot" style="--i:1; --era:#CFE3AE">
+          <img src="/assets/brand/story-gs-2-plant.jpg" alt="Vegetables and herbs prepped on a stainless kitchen counter" loading="lazy" decoding="async" width="900" height="455">
+        </figure>
+        <figure class="cc-shot" style="--i:2; --era:#CDB8F7">
+          <img src="/assets/brand/u-1534778101976-62847782c213-1200.jpg" alt="Latte art poured at the counter" loading="lazy" decoding="async" width="1200" height="800">
+        </figure>
       </div>
     </div>
     <ol class="timeline" id="timeline">
@@ -1627,7 +1601,7 @@
         <div id="scratchContainer">
           <img
               id="scratchBgImage"
-              src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200&q=85"
+              src="/assets/brand/u-1554118811-1e0d58224f24-1200.jpg"
               alt="Gram Street Coffee Flagship Interior"
               class="w-full h-full object-cover transition-opacity duration-500"
             />
@@ -1690,7 +1664,7 @@
       sub: 'Signature Dark Roast • 250G',
       notes: 'Dark Cocoa, Roasted Hazelnut & Molasses',
       price: 580,
-      image: 'https://images.unsplash.com/photo-1511537190424-bbbab87ac5eb?auto=format&fit=crop&w=800&q=85'
+      image: '/assets/brand/u-1511537190424-bbbab87ac5eb-800.jpg'
     },
     {
       id: 'commute-single-origin',
@@ -1698,7 +1672,7 @@
       sub: 'Nagaland Lot • Light Roast • 250G',
       notes: 'Jasmine Florals, Bergamot Orange & Stone Fruit',
       price: 640,
-      image: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=800&q=85'
+      image: '/assets/brand/u-1559056199-641a0ac8b55e-800.jpg'
     },
     {
       id: 'midnight-berry-lot',
@@ -1706,7 +1680,7 @@
       sub: 'Coorg Anaerobic • Medium Roast • 250G',
       notes: 'Wild Blueberry, Lavender & Dark Cacao',
       price: 690,
-      image: 'https://images.unsplash.com/photo-1646954256973-f7fd9ce626b1?auto=format&fit=crop&w=800&q=85'
+      image: '/assets/brand/u-1646954256973-f7fd9ce626b1-800.jpg'
     },
     {
       id: 'uji-ceremonial-matcha',
@@ -1714,7 +1688,7 @@
       sub: 'First Harvest Tencha • 30G Tin',
       notes: 'Sweet Umami, Jade Micro-Foam & Steamed Oat Finish',
       price: 890,
-      image: 'https://images.unsplash.com/photo-1515823064-d6e0c04616a7?auto=format&fit=crop&w=800&q=85'
+      image: '/assets/brand/u-1515823064-d6e0c04616a7-800.jpg'
     },
     {
       id: 'smoked-chocolate-gelato',
@@ -1722,7 +1696,7 @@
       sub: 'Small-Batch Hand-Churned • 500ML',
       notes: '72% Single-Origin Cacao, Oak-Smoked Cream & Maldon Salt',
       price: 480,
-      image: 'https://images.unsplash.com/photo-1575031745961-1ed57f800a4c?auto=format&fit=crop&w=800&q=85'
+      image: '/assets/brand/u-1575031745961-1ed57f800a4c-800.jpg'
     }
   ];
 
@@ -1738,7 +1712,7 @@
       phone: '+91 81300 56889',
       directions: 'https://www.google.com/maps/search/?api=1&query=Gram+Street+Coffee+DLF+Phase+1+Gurugram',
       zomato: 'https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon',
-      image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200&q=85',
+      image: '/assets/brand/u-1554118811-1e0d58224f24-1200.jpg',
       caption: '16 Arjun Marg Flagship Bar'
     },
     gcr: {
@@ -1752,7 +1726,7 @@
       phone: '+91 81300 56889',
       directions: 'https://www.google.com/maps/search/?api=1&query=Gram+Street+Coffee+DLF+Summit+Plaza+Golf+Course+Road+Gurgaon',
       zomato: 'https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon',
-      image: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1200&q=85',
+      image: '/assets/brand/u-1501339847302-ac426a4a7cbb-1200.jpg',
       caption: 'DLF Summit Plaza (Sector 53)'
     },
     sec56: {
@@ -1766,7 +1740,7 @@
       phone: '+91 81300 56889',
       directions: 'https://www.google.com/maps/search/?api=1&query=Gram+Street+Coffee+Jalvayu+Towers+Sector+56+Gurugram',
       zomato: 'https://www.swiggy.com/city/gurgaon/gram-street-coffee-arjun-marg-jalvayu-towers-rest1462852',
-      image: 'https://images.unsplash.com/photo-1442512595331-e89e73853f31?auto=format&fit=crop&w=1200&q=85',
+      image: '/assets/brand/u-1442512595331-e89e73853f31-1200.jpg',
       caption: 'Jalvayu Towers Express Hub'
     }
   };
@@ -2418,15 +2392,15 @@
   // 4. Pattern Selector
   const PATTERNS = {
     rosetta: {
-      img: 'https://images.unsplash.com/photo-1534778101976-62847782c213?auto=format&fit=crop&w=1200&q=85',
+      img: '/assets/brand/u-1534778101976-62847782c213-1200.jpg',
       caption: 'Classic 8-Leaf Rosetta Pattern'
     },
     tulip: {
-      img: 'https://images.unsplash.com/photo-1517256064527-09c73fc73e38?auto=format&fit=crop&w=1200&q=85',
+      img: '/assets/brand/u-1517256064527-09c73fc73e38-1200.jpg',
       caption: '4-Tier Stacked Tulip Microfoam'
     },
     heart: {
-      img: 'https://images.unsplash.com/photo-1509785307050-d4066910ec1e?auto=format&fit=crop&w=1200&q=85',
+      img: '/assets/brand/u-1509785307050-d4066910ec1e-1200.jpg',
       caption: 'Blooming Symmetrical Heart'
     }
   };
