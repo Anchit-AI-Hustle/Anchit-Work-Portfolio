@@ -396,6 +396,119 @@
     ::-webkit-scrollbar-track { background: var(--chic-linen); }
     ::-webkit-scrollbar-thumb { background: #D9A5B3; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--chic-crimson); }
+
+  /* ── THE BENCH: a process rail ─────────────────────────────────────────
+     Gram Street's Story got a timeline that runs; this is the same idea on
+     the page that earns it. Deli Chic has no dated milestones anywhere in
+     its copy, and inventing years for a real business is not on, so the
+     sequence here is the one the page already describes: "cut, cured, and
+     vacuum-sealed by master culinary butchers", and "every portion weighed,
+     trimmed, and inspected prior to vacuum packaging". Four stops, every
+     word of them traceable to this page.
+
+     Horizontal on a desk, vertical on a phone, and it cycles: the rail fills
+     to a stop, holds while that step is the one being read, then advances.
+     transform and opacity only; nothing promoted at rest; the loop runs only
+     while the section is on screen. */
+  .bench { position: relative; margin-top: 44px; }
+  .bench-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 26px; }
+  .bench-rail { position: absolute; border-radius: 3px; background: rgba(74, 14, 23, .14); }
+  .bench-fill { position: absolute; border-radius: 3px; background: linear-gradient(90deg, #CD2653, #C59A45); opacity: 0; }
+
+  @media (min-width: 860px) {
+    .bench-steps { grid-template-columns: repeat(4, 1fr); gap: 22px; }
+    .bench-rail, .bench-fill { left: 0; right: 0; top: 26px; height: 4px; }
+    .bench-fill { transform-origin: left center; transform: scaleX(0); }
+    .bench.is-live.is-cycling .bench-fill { animation: benchFillX 17.2s cubic-bezier(.45,0,.2,1) infinite; }
+  }
+  @media (max-width: 859px) {
+    .bench-steps { padding-left: 62px; }
+    .bench-rail, .bench-fill { left: 25px; top: 8px; bottom: 8px; width: 4px; }
+    .bench-fill { transform-origin: top center; transform: scaleY(0); }
+    .bench.is-live.is-cycling .bench-fill { animation: benchFillY 17.2s cubic-bezier(.45,0,.2,1) infinite; }
+  }
+
+  @keyframes benchFillX {
+    0%   { transform: scaleX(0);                opacity: 0; }
+    4%   { transform: scaleX(var(--p1, .12));   opacity: .95; }
+    23%  { transform: scaleX(var(--p1, .12));   opacity: .95; }
+    31%  { transform: scaleX(var(--p2, .37));   opacity: .95; }
+    48%  { transform: scaleX(var(--p2, .37));   opacity: .95; }
+    56%  { transform: scaleX(var(--p3, .62));   opacity: .95; }
+    73%  { transform: scaleX(var(--p3, .62));   opacity: .95; }
+    81%  { transform: scaleX(var(--p4, 1));     opacity: .95; }
+    96%  { transform: scaleX(var(--p4, 1));     opacity: .95; }
+    100% { transform: scaleX(var(--p4, 1));     opacity: 0; }
+  }
+  @keyframes benchFillY {
+    0%   { transform: scaleY(0);                opacity: 0; }
+    4%   { transform: scaleY(var(--p1, .12));   opacity: .95; }
+    23%  { transform: scaleY(var(--p1, .12));   opacity: .95; }
+    31%  { transform: scaleY(var(--p2, .37));   opacity: .95; }
+    48%  { transform: scaleY(var(--p2, .37));   opacity: .95; }
+    56%  { transform: scaleY(var(--p3, .62));   opacity: .95; }
+    73%  { transform: scaleY(var(--p3, .62));   opacity: .95; }
+    81%  { transform: scaleY(var(--p4, 1));     opacity: .95; }
+    96%  { transform: scaleY(var(--p4, 1));     opacity: .95; }
+    100% { transform: scaleY(var(--p4, 1));     opacity: 0; }
+  }
+
+  .bench-step { position: relative; }
+  .bench-mark {
+    width: 54px; height: 54px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: #FFF9F4; border: 2px solid rgba(197, 154, 69, .55);
+    box-shadow: 0 8px 18px rgba(74, 14, 23, .16);
+    position: relative; z-index: 2;
+  }
+  .bench-mark svg { display: block; width: 26px; height: 26px; }
+  @media (max-width: 859px) {
+    .bench-mark { position: absolute; left: -62px; top: -2px; }
+  }
+  .bench-step h4 { margin: 14px 0 4px; font-size: 1.05rem; letter-spacing: -0.01em; color: #4A0E17; }
+  @media (max-width: 859px) { .bench-step h4 { margin-top: 0; } }
+  .bench-step p { font-size: .83rem; line-height: 1.5; color: #6B625B; }
+
+  .bench.is-armed .bench-step { opacity: 0; transform: translateY(14px); }
+  .bench.is-armed .bench-step {
+    transition: opacity .6s ease, transform .66s cubic-bezier(.16,1,.3,1);
+    transition-delay: calc(var(--i, 0) * .14s + .16s);
+  }
+  .bench.is-armed.is-drawn .bench-step { opacity: 1; transform: none; }
+
+  .bench.is-live.is-cycling .bench-mark {
+    animation: benchStep 17.2s ease-in-out infinite;
+    animation-delay: calc(var(--i, 0) * 4.3s);
+  }
+  @keyframes benchStep {
+    0%   { transform: scale(1); }
+    4%   { transform: scale(1.16); }
+    10%  { transform: scale(1.09); }
+    21%  { transform: scale(1.09); }
+    25%  { transform: scale(1); }
+    100% { transform: scale(1); }
+  }
+  .bench-mark::before {
+    content: ""; position: absolute; inset: -8px; border-radius: 50%;
+    border: 2px solid #CD2653; opacity: 0; pointer-events: none;
+  }
+  .bench.is-live.is-cycling .bench-mark::before {
+    animation: benchRing 17.2s ease-out infinite;
+    animation-delay: calc(var(--i, 0) * 4.3s);
+  }
+  @keyframes benchRing {
+    0%   { transform: scale(.78); opacity: .7; }
+    12%  { transform: scale(1.32); opacity: 0; }
+    100% { transform: scale(1.32); opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bench.is-armed .bench-step { opacity: 1; transform: none; transition: none; }
+    .bench.is-live.is-cycling .bench-fill,
+    .bench.is-live.is-cycling .bench-mark,
+    .bench.is-live.is-cycling .bench-mark::before { animation: none; }
+    .bench-fill { opacity: .6; transform: none; }
+  }
   </style>
 </head>
 <body class="linen-texture selection:bg-[#CD2653] selection:text-white">
@@ -534,7 +647,7 @@
       <div class="loupe-container shadow-2xl border-2 border-[#C59A45]/40 bg-black" id="heroLoupeContainer">
         <img
             id="heroLoupeImg"
-            src="https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=1200&q=85"
+            src="/assets/brand/u-1529193591184-b1d58069ecdd-1200.jpg"
             alt="Deli Chic Prime Artisanal Cuts"
             class="w-full h-[470px] object-cover transition-opacity duration-300"
           />
@@ -607,7 +720,7 @@
           </div>
         </div>
         <div class="lg:col-span-5 hidden lg:block">
-          <img src="https://images.unsplash.com/photo-1604503468506-a8da13d82791?auto=format&fit=crop&w=800&q=85" alt="Clean Hand-Trimmed Antibiotic-Free Chicken Breast" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
+          <img src="/assets/brand/u-1604503468506-a8da13d82791-800.jpg" alt="Clean Hand-Trimmed Antibiotic-Free Chicken Breast" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
         </div>
       </div>
     </div>
@@ -627,7 +740,7 @@
           </div>
         </div>
         <div class="lg:col-span-5 hidden lg:block">
-          <img src="https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=800&q=85" alt="Prime Wood-Smoked Charcuterie and Ribs" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
+          <img src="/assets/brand/u-1529193591184-b1d58069ecdd-800.jpg" alt="Prime Wood-Smoked Charcuterie and Ribs" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
         </div>
       </div>
     </div>
@@ -647,7 +760,7 @@
           </div>
         </div>
         <div class="lg:col-span-5 hidden lg:block">
-          <img src="https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=800&q=85" alt="Royal Awadhi Shahi Saffron Marinade" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
+          <img src="/assets/brand/u-1599488615731-7e5c2823ff28-800.jpg" alt="Royal Awadhi Shahi Saffron Marinade" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
         </div>
       </div>
     </div>
@@ -824,7 +937,7 @@
     <div class="lg:col-span-6">
       <div class="rounded-3xl overflow-hidden shadow-2xl border-2 border-[#C59A45]/30 relative h-[460px]">
         <img
-            src="https://images.unsplash.com/photo-1602470520998-f4a52199a3d6?auto=format&fit=crop&w=1200&q=85"
+            src="/assets/brand/u-1602470520998-f4a52199a3d6-1200.jpg"
             alt="Artisanal Butcher Preparation"
             class="w-full h-full object-cover"
           />
@@ -838,6 +951,47 @@
       </div>
     </div>
   </div>
+
+      <!-- The bench. Four steps, and every word of them is this page's own:
+           "cut, cured, and vacuum-sealed by master culinary butchers" and
+           "every portion weighed, trimmed, and inspected prior to vacuum
+           packaging". Deli Chic states no dates anywhere, so this is a
+           process rather than a chronology — inventing years for a real
+           business is not something this page should do. -->
+      <div class="bench" id="bench">
+        <span class="bench-rail" aria-hidden="true"></span>
+        <span class="bench-fill" aria-hidden="true"></span>
+        <ol class="bench-steps">
+        <li class="bench-step" style="--i:0">
+          <span class="bench-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 4l9.5 11.5M19 4L9.5 15.5" stroke="#4A0E17" stroke-width="2" stroke-linecap="round"/><circle cx="7.5" cy="19" r="2.6" stroke="#CD2653" stroke-width="2"/><circle cx="16.5" cy="19" r="2.6" stroke="#CD2653" stroke-width="2"/></svg>
+          </span>
+          <h4 class="font-serif-chic font-bold">Cut</h4>
+          <p>Hand-cut by master culinary butchers.</p>
+        </li>
+        <li class="bench-step" style="--i:1">
+          <span class="bench-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 18c2-1.6 2-4.4 0-6M8.5 18c2-1.6 2-4.4 0-6M13 18c2-1.6 2-4.4 0-6" stroke="#CD2653" stroke-width="2" stroke-linecap="round" fill="none"/><path d="M3 21h18" stroke="#4A0E17" stroke-width="2" stroke-linecap="round"/><path d="M16.5 10.5h4.2v6a2.1 2.1 0 0 1-4.2 0z" fill="#4A0E17"/></svg>
+          </span>
+          <h4 class="font-serif-chic font-bold">Cured</h4>
+          <p>Beechwood smoked, or rested in a Lucknowi marinade.</p>
+        </li>
+        <li class="bench-step" style="--i:2">
+          <span class="bench-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3v16M6 19h12" stroke="#4A0E17" stroke-width="2" stroke-linecap="round"/><path d="M4 7h16" stroke="#4A0E17" stroke-width="2" stroke-linecap="round"/><path d="M4 7l-2.3 5a2.6 2.6 0 0 0 4.6 0zM20 7l-2.3 5a2.6 2.6 0 0 0 4.6 0z" fill="none" stroke="#CD2653" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          </span>
+          <h4 class="font-serif-chic font-bold">Inspected</h4>
+          <p>Every portion weighed, trimmed and inspected.</p>
+        </li>
+        <li class="bench-step" style="--i:3">
+          <span class="bench-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3.5" y="6.5" width="17" height="12" rx="2.5" stroke="#4A0E17" stroke-width="2"/><path d="M3.5 10.5h17" stroke="#4A0E17" stroke-width="2"/><path d="M8.6 15.2a4 4 0 0 1 6.8 0" stroke="#CD2653" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+          </span>
+          <h4 class="font-serif-chic font-bold">Sealed</h4>
+          <p>Vacuum-sealed before it leaves the boucherie.</p>
+        </li>
+        </ol>
+      </div>
 </section>
 
 <!-- ================= FOOTER ================= -->
@@ -1025,7 +1179,7 @@
         price: 220,
         tag: 'Tender Bone-In',
         notes: 'Skinless tender leg cuts, washed in ozonated water and vacuum packed.',
-        image: 'https://images.unsplash.com/photo-1587593810167-a84920ea0781?auto=format&fit=crop&w=450&q=85'
+        image: '/assets/brand/u-1587593810167-a84920ea0781-450.jpg'
       },
       {
         id: 'chk-keema-500',
@@ -1045,7 +1199,7 @@
         price: 290,
         tag: 'Bavarian Recipe',
         notes: 'Plump natural smoked frankfurter sausages, ideal for gourmet hot dogs.',
-        image: 'https://images.unsplash.com/photo-1541529086526-db283c563270?auto=format&fit=crop&w=450&q=85'
+        image: '/assets/brand/u-1541529086526-db283c563270-450.jpg'
       },
       {
         id: 'caramel-truffle',
@@ -1064,25 +1218,25 @@
         title: 'Prime Wood-Smoked Charcuterie',
         desc: 'Cured with Tellicherry black peppercorns and cold beechwood smoke.',
         badge: 'Master Carver 2.5x Loupe Active',
-        image: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=1200&q=85'
+        image: '/assets/brand/u-1529193591184-b1d58069ecdd-1200.jpg'
       },
       poultry: {
         title: '100% Antibiotic Residue-Free Breast',
         desc: 'Examine cellular firmness and natural pink marbling. Zero deep-freeze cellular collapse.',
         badge: 'Lab-Tested 100% Residue-Free',
-        image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?auto=format&fit=crop&w=1200&q=85'
+        image: '/assets/brand/u-1604503468506-a8da13d82791-1200.jpg'
       },
       marinade: {
         title: 'Lucknowi Shahi Saffron Marinade',
         desc: 'Infused with Awadhi mace, roasted gram flour, hung curd and royal saffron threads.',
         badge: 'Chef Master Marinade Inspection',
-        image: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=1200&q=85'
+        image: '/assets/brand/u-1599488615731-7e5c2823ff28-1200.jpg'
       },
       momos: {
         title: 'Handcrafted Coastal Prawn Dim Sum',
         desc: 'Delicate translucent pleated casing filled with whole juicy sea tiger prawns.',
         badge: 'Artisanal Dim Sum Inspection',
-        image: 'https://images.unsplash.com/photo-1543198432-a20fa3055570?auto=format&fit=crop&w=1200&q=85'
+        image: '/assets/brand/u-1543198432-a20fa3055570-1200.jpg'
       }
     };
 
@@ -1136,6 +1290,66 @@
 
     const prefersReducedMotion = window.matchMedia
       && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+
+    /* The bench: measure where each stop sits on the rail, then run it.
+       Same approach as the Story timeline on the sister site, and for the
+       same reason — the four steps are not evenly spaced once the copy
+       wraps differently at each width, so thirds-and-quarters would land
+       the fill between stops instead of on them. */
+    (function bench() {
+      var el = document.getElementById('bench');
+      if (!el) return;
+      var fill = el.querySelector('.bench-fill');
+      var marks = el.querySelectorAll('.bench-mark');
+      if (!fill || !marks.length) return;
+
+      function horizontal() { return window.matchMedia('(min-width: 860px)').matches; }
+
+      function measure() {
+        var r = el.getBoundingClientRect();
+        var span = horizontal() ? r.width : r.height;
+        if (span <= 0) return;
+        for (var i = 0; i < marks.length; i++) {
+          var m = marks[i].getBoundingClientRect();
+          var centre = horizontal()
+            ? (m.left + m.width / 2) - r.left
+            : (m.top + m.height / 2) - r.top - 8;
+          var frac = Math.max(0.02, Math.min(1, centre / span)).toFixed(4);
+          var name = '--p' + (i + 1);
+          if (el.style.getPropertyValue(name).trim() !== frac) el.style.setProperty(name, frac);
+        }
+      }
+
+      if (!prefersReducedMotion) el.classList.add('is-armed');
+
+      if ('IntersectionObserver' in window) {
+        var once = new IntersectionObserver(function (en) {
+          if (!en[0].isIntersecting) return;
+          el.classList.add('is-drawn');
+          once.disconnect();
+          setTimeout(function () {
+            if (prefersReducedMotion) return;
+            measure();
+            el.classList.add('is-cycling');
+          }, 1200);
+        }, { threshold: 0.25 });
+        once.observe(el);
+
+        // ambient loop runs only while the bench is on screen
+        new IntersectionObserver(function (en) {
+          el.classList.toggle('is-live', en[0].isIntersecting);
+        }, { threshold: 0.05 }).observe(el);
+      } else {
+        el.classList.remove('is-armed');
+        el.classList.add('is-drawn', 'is-live', 'is-cycling');
+      }
+
+      // Writes custom properties that drive an absolutely positioned bar via
+      // scale, so nothing written back changes the observed element's size.
+      if (typeof ResizeObserver !== 'undefined') new ResizeObserver(measure).observe(el);
+      window.addEventListener('resize', measure, { passive: true });
+    })();
 
     function initCardTilt() {
       if (prefersReducedMotion) return;
