@@ -610,12 +610,107 @@
   .chef-grid { display: grid; gap: 40px; }
   .chef h2, .space h2, .cities h2, .visit h2 { font-size: clamp(2.2rem, 5.5vw, 4.2rem); max-width: 16ch; }
   .chef p.lead { margin-top: 18px; max-width: 42ch; font-size: 1.2rem; font-weight: 600; line-height: 1.4; }
-  .timeline { --draw: 1; position: relative; list-style: none; margin: 0; padding: 0 0 0 30px; display: grid; gap: 32px; }
-  .timeline::before { content: ""; position: absolute; left: 7px; top: 8px; bottom: 8px; width: 3px; background: var(--chrome); transform-origin: top; transform: scaleY(var(--draw)); transition: transform 1.6s cubic-bezier(0.3, 0.7, 0.2, 1); }
-  .timeline li { position: relative; }
-  .timeline li::before { content: ""; position: absolute; left: -30px; top: 6px; width: 17px; height: 17px; border-radius: 50%; background: var(--grape); }
+  /* ── THE TIMELINE ──────────────────────────────────────────────────────
+     Three ventures. The rail already drew itself, but the stops on it were
+     flat identical dots and every entry arrived at once, so the only motion
+     in the whole section was a 3px chrome line on lilac — which reads as
+     nothing. Each stop is a drawn medallion now, it lands as the rail
+     reaches it, and its entry follows. The current chapter keeps a slow
+     pulse because it is the only one still happening.
+     transform and opacity only, and nothing is promoted at rest. */
+  .timeline { --draw: 1; position: relative; list-style: none; margin: 0; padding: 0 0 0 68px; display: grid; gap: 34px; }
+  .timeline::before { content: ""; position: absolute; left: 25px; top: 10px; bottom: 10px; width: 3px; background: var(--chrome); transform-origin: top; transform: scaleY(var(--draw)); transition: transform 1.6s cubic-bezier(0.3, 0.7, 0.2, 1); }
+  .timeline li { position: relative; opacity: 1; }
   .timeline b { display: block; font-size: 1.5rem; letter-spacing: -0.02em; }
   .timeline em { font-style: normal; font-weight: 600; }
+
+  /* the drawn stop */
+  .tl-mark {
+    position: absolute; left: -68px; top: -5px;
+    width: 54px; height: 54px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--era, var(--lilac));
+    box-shadow: 0 0 0 4px var(--lilac-soft), 0 8px 18px rgba(43, 22, 80, .20);
+  }
+  .tl-mark svg { display: block; width: 28px; height: 28px; }
+
+  /* armed only when the script says so, so a no-JS page is simply finished */
+  .timeline.is-armed li { opacity: 0; transform: translateX(18px); }
+  .timeline.is-armed .tl-mark { transform: scale(0); }
+  .timeline.is-armed li,
+  .timeline.is-armed .tl-mark { will-change: transform, opacity; }
+  .timeline.is-armed li {
+    transition: opacity .62s cubic-bezier(.16,1,.3,1), transform .62s cubic-bezier(.16,1,.3,1);
+    transition-delay: calc(var(--i, 0) * .22s + .20s);
+  }
+  .timeline.is-armed .tl-mark {
+    /* a shorthand would reset the delay the markup sets inline — see CLAUDE.md */
+    transition: transform .66s cubic-bezier(.22,1.45,.42,1);
+  }
+  .timeline.is-armed.is-drawn li { opacity: 1; transform: none; }
+  .timeline.is-armed.is-drawn .tl-mark { transform: scale(1); }
+  /* let go of the compositor hint once everything has landed */
+  .timeline.is-done li,
+  .timeline.is-done .tl-mark { will-change: auto; }
+
+  /* the chapter that has not finished */
+  .tl-mark.is-now::after {
+    content: ""; position: absolute; inset: -5px;
+    border-radius: 50%; border: 2px solid var(--grape);
+    opacity: 0; pointer-events: none;
+  }
+  /* runs only while the timeline is actually on screen */
+  .timeline.is-live .tl-mark.is-now::after { animation: tlPulse 3s cubic-bezier(.2,.6,.3,1) infinite; }
+  @keyframes tlPulse {
+    0%   { transform: scale(.82); opacity: .55; }
+    70%  { transform: scale(1.30); opacity: 0; }
+    100% { transform: scale(1.30); opacity: 0; }
+  }
+
+  /* ── THREE COUNTERS ────────────────────────────────────────────────────
+     The left column was a heading and a paragraph and nothing else, which on
+     a phone makes the whole section a wall of type. Three drawn counters, one
+     per venture, in the three chapter colours. No words, no numbers, no claim
+     about size — the timeline below carries the facts. */
+  .chef-chart { margin-top: 34px; width: min(100%, 560px); }
+  .chef-chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .cc-unit { transform-origin: 50% 100%; }
+  .chef-chart.is-armed .cc-unit { opacity: 0; transform: translateY(10px) scaleY(.6); }
+  .chef-chart.is-armed .cc-unit {
+    transition: opacity .6s ease, transform .7s cubic-bezier(.22,1.3,.4,1);
+    transition-delay: calc(var(--i, 0) * .17s + .26s);
+  }
+  .chef-chart.is-armed.is-drawn .cc-unit { opacity: 1; transform: none; }
+  .cc-base { transform-origin: left center; }
+  .chef-chart.is-armed .cc-base { transform: scaleX(0); transition: transform 1s cubic-bezier(.3,.7,.2,1); }
+  .chef-chart.is-armed.is-drawn .cc-base { transform: none; }
+  /* steam only off the last one, and only while it is on screen */
+  .cc-steam { opacity: 0; }
+  .chef-chart.is-live .cc-steam { animation: ccSteam 4s ease-in-out infinite; animation-delay: var(--d, 0s); }
+  @keyframes ccSteam {
+    0%   { opacity: 0;   transform: translateY(4px)  scaleX(.9); }
+    35%  { opacity: .65; }
+    75%  { opacity: .30; }
+    100% { opacity: 0;   transform: translateY(-16px) scaleX(1.1); }
+  }
+
+  @media (max-width: 480px) {
+    .timeline { padding-left: 58px; }
+    .timeline::before { left: 21px; }
+    .tl-mark { left: -58px; width: 46px; height: 46px; }
+    .tl-mark svg { width: 24px; height: 24px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .timeline.is-armed li,
+    .timeline.is-armed .tl-mark,
+    .chef-chart.is-armed .cc-unit,
+    .chef-chart.is-armed .cc-base { opacity: 1; transform: none; transition: none; }
+    .timeline.is-live .tl-mark.is-now::after,
+    .chef-chart.is-live .cc-steam { animation: none; }
+    /* leave the live chapter marked, just not moving */
+    .tl-mark.is-now::after { opacity: .45; }
+  }
   @media (min-width: 900px) { .chef-grid { grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; } }
 
   /* space: SPECULAR CHROME TEXT THAT CATCHES LIGHT ON POINTER MOVE */
@@ -1297,11 +1392,76 @@
     <div>
       <h2 id="chef-title">From pie shop to purple latte.</h2>
       <p class="lead">Chef Vanshika Bhatia built Gram Street as a compact, beverage-first counter, and she keeps building focused culinary destinations.</p>
+
+      <!-- Three counters, one per venture, in the three chapter colours. The
+           shapes are identical in width on purpose: this is a motif, not a
+           chart of anything, and nothing here should imply a size claim. -->
+      <div class="chef-chart" id="chefChart" aria-hidden="true">
+        <svg viewBox="0 0 420 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="cc-unit" style="--i:0">
+            <rect x="18" y="74" width="96" height="48" rx="8" fill="#FFD7E8"/>
+            <rect x="18" y="74" width="96" height="10" rx="5" fill="#2B1650" opacity=".78"/>
+            <path d="M34 112h64" stroke="#2B1650" stroke-opacity=".22" stroke-width="3" stroke-linecap="round"/>
+            <path d="M46 74a20 20 0 0 1 40 0z" fill="#2B1650" opacity=".55"/>
+            <path d="M66 58v16M53 63l13 11M79 63 66 74" stroke="#FFD7E8" stroke-opacity=".75" stroke-width="2" stroke-linecap="round"/>
+            <path d="M42 74h48" stroke="#2B1650" stroke-opacity=".55" stroke-width="3" stroke-linecap="round"/>
+          </g>
+          <g class="cc-unit" style="--i:1">
+            <rect x="162" y="74" width="96" height="48" rx="8" fill="#CFE3AE"/>
+            <rect x="162" y="74" width="96" height="10" rx="5" fill="#2B1650" opacity=".78"/>
+            <path d="M178 112h64" stroke="#2B1650" stroke-opacity=".22" stroke-width="3" stroke-linecap="round"/>
+            <path d="M210 72V50" stroke="#2B1650" stroke-opacity=".55" stroke-width="3" stroke-linecap="round"/>
+            <path d="M210 58c-14 0-18-12-18-12s16-2 18 12zM210 62c13 0 17-11 17-11s-15-2-17 11z" fill="#2B1650" opacity=".55"/>
+          </g>
+          <g class="cc-unit" style="--i:2">
+            <rect x="306" y="74" width="96" height="48" rx="8" fill="#CDB8F7"/>
+            <rect x="306" y="74" width="96" height="10" rx="5" fill="#2B1650" opacity=".78"/>
+            <path d="M322 112h64" stroke="#2B1650" stroke-opacity=".22" stroke-width="3" stroke-linecap="round"/>
+            <path d="M340 50h28v12a14 14 0 0 1-28 0z" fill="#2B1650" opacity=".55"/>
+            <path d="M368 54c8 0 8 10 0 10" stroke="#2B1650" stroke-opacity=".55" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <g stroke="#2B1650" stroke-opacity=".5" stroke-width="3" stroke-linecap="round" fill="none">
+              <path class="cc-steam" d="M347 42c-5-8 5-12 0-20" style="--d:0s"/>
+              <path class="cc-steam" d="M361 42c-5-8 5-12 0-20" style="--d:-2s"/>
+            </g>
+          </g>
+          <path class="cc-base" d="M10 126h400" stroke="#2B1650" stroke-opacity=".30" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
     </div>
     <ol class="timeline" id="timeline">
-      <li><b>2021</b><em>Petite Pie Shop.</em> A pie-led kitchen that became a local culinary sensation.</li>
-      <li><b>2022</b><em>OMO.</em> An ingredient-forward plant-based kitchen launched with Bright Hospitality.</li>
-      <li><b>Now</b><em>Gram Street Coffee.</em> Specialty coffee, ceremonial matcha and small-batch gelato in a room made for conversation.</li>
+      <li style="--i:0">
+        <span class="tl-mark" style="--era:#FFD7E8; transition-delay:.34s" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 13a9 9 0 0 1 18 0z" fill="#2B1650"/>
+            <path d="M2 13h20" stroke="#2B1650" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M12 4.6V13M7.2 7.1 12 13M16.8 7.1 12 13" stroke="#FFD7E8" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M4 16.5h16a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z" fill="#2B1650" opacity=".45"/>
+          </svg>
+        </span>
+        <b>2021</b><em>Petite Pie Shop.</em> A pie-led kitchen that became a local culinary sensation.
+      </li>
+      <li style="--i:1">
+        <span class="tl-mark" style="--era:#CFE3AE; transition-delay:.72s" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 21V9" stroke="#2B1650" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M12 12C12 7 8 4 3 4c0 5 4 8 9 8z" fill="#2B1650"/>
+            <path d="M12 14c0-5 4-8 9-8 0 5-4 8-9 8z" fill="#2B1650" opacity=".62"/>
+          </svg>
+        </span>
+        <b>2022</b><em>OMO.</em> An ingredient-forward plant-based kitchen launched with Bright Hospitality.
+      </li>
+      <li style="--i:2">
+        <span class="tl-mark is-now" style="--era:#CDB8F7; transition-delay:1.1s" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 8h13v7a6.5 6.5 0 0 1-13 0z" fill="#2B1650"/>
+            <path d="M6 10.6h9v4.4a4.5 4.5 0 0 1-9 0z" fill="#CDB8F7" opacity=".55"/>
+            <path d="M17 10h1.6a2.9 2.9 0 0 1 0 5.8H17" stroke="#2B1650" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+            <path d="M3 21.4h15" stroke="#2B1650" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M8.5 5.6c-1.6-2 1.6-2.8 0-4.6M13 5.6c-1.6-2 1.6-2.8 0-4.6" stroke="#2B1650" stroke-width="1.8" stroke-linecap="round" opacity=".7"/>
+          </svg>
+        </span>
+        <b>Now</b><em>Gram Street Coffee.</em> Specialty coffee, ceremonial matcha and small-batch gelato in a room made for conversation.
+      </li>
     </ol>
   </div>
 </section>
@@ -1765,15 +1925,46 @@
   /* 4. Timeline Line Drawing & Orbit Reveal */
   (function reveals() {
     var tl = document.getElementById("timeline");
+    var chart = document.getElementById("chefChart");
     var orbit = document.getElementById("orbit");
-    if (!reduce) { if (tl) tl.style.setProperty("--draw", "0"); if (orbit) orbit.classList.add("armed"); }
+
+    // Arm from script, never from the stylesheet: a page with no JS, or one
+    // where this throws, is then simply the finished state rather than three
+    // invisible list items. The rail is the same bet the old code made.
+    if (!reduce) {
+      if (tl) { tl.style.setProperty("--draw", "0"); tl.classList.add("is-armed"); }
+      if (chart) chart.classList.add("is-armed");
+      if (orbit) orbit.classList.add("armed");
+    }
+
     function show(el, fn) {
       if (!el || typeof IntersectionObserver === "undefined") { if (fn) fn(); return; }
       var io = new IntersectionObserver(function (en) { if (en[0].isIntersecting) { fn(); io.disconnect(); } }, { threshold: 0.3 });
       io.observe(el);
     }
-    if (tl) show(tl, function () { tl.style.setProperty("--draw", "1"); });
+
+    // The "now" pulse and the steam are ambient loops, so they run only while
+    // their section is on screen — the house rule is that nothing decorative
+    // animates off screen.
+    function live(el) {
+      if (!el) return;
+      if (typeof IntersectionObserver === "undefined") { el.classList.add("is-live"); return; }
+      new IntersectionObserver(function (en) {
+        el.classList.toggle("is-live", en[0].isIntersecting);
+      }, { threshold: 0.05 }).observe(el);
+    }
+
+    if (tl) show(tl, function () {
+      tl.style.setProperty("--draw", "1");
+      tl.classList.add("is-drawn");
+      // drop the compositor hint once the last medallion has landed
+      setTimeout(function () { tl.classList.add("is-done"); }, 2200);
+    });
+    if (chart) show(chart, function () { chart.classList.add("is-drawn"); });
     if (orbit) show(orbit, function () { orbit.classList.add("in"); });
+
+    live(tl);
+    live(chart);
   })();
 
   /* 5. Chrome heading catches the light where pointer moves */
