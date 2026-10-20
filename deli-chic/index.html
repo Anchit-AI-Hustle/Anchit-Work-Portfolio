@@ -311,10 +311,16 @@
       box-shadow: 0 4px 20px rgba(255, 165, 23, 0.35);
     }
 
+    /* One pinned line. The announcement strip is in flow directly beneath it,
+       so it scrolls away; without this offset the fixed header covers it
+       completely and the delivery slots are never read. Measured: the strip
+       hit-tested as hidden behind the header's own inner row. */
+    #deliAnnounceBar { margin-top: 58px; }
+
     /* Fixed Header Solid Contrast */
     header.deli-site-header {
       position: fixed !important;
-      top: var(--deli-bar-h, 32px) !important;
+      top: 0 !important;   /* one pinned line: the announce strip scrolls away */
       left: 0 !important;
       right: 0 !important;
       z-index: 50 !important;
@@ -583,14 +589,14 @@
 <div class="film-grain" aria-hidden="true"></div>
 
 <!-- ================= TOP FRESH DISPATCH ANNOUNCEMENT ================= -->
-<div id="deliAnnounceBar" class="fixed top-0 left-0 right-0 z-50 bg-[#4A0E17] text-[#FFF9F4] text-[11px] sm:text-xs font-medium tracking-wider py-2 px-4 border-b border-[#C59A45]/30">
-  <div class="max-w-7xl mx-auto flex items-center justify-between">
-    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-x-2 gap-y-0.5 mx-auto sm:mx-0 text-center sm:text-left">
-      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-      <span class="font-bold">ALL 4 DELHI NCR HUBS OPERATIONAL:</span>
-      <span class="text-white/90">Slot 1 (10 AM–1 PM) &amp; Slot 2 (5 PM–8 PM) • Free Express Cold-Chain on ₹999+</span>
+<div id="deliAnnounceBar" class="relative z-40 bg-[#4A0E17] text-[#FFF9F4] text-[11px] sm:text-xs font-medium tracking-wider py-1.5 px-4 border-b border-[#C59A45]/30">
+  <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+    <div class="flex items-center gap-x-2 min-w-0 whitespace-nowrap">
+      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+      <span class="font-bold shrink-0">All 4 NCR hubs open</span>
+      <span class="text-white/80 truncate hidden sm:inline">Slot 1 (10 AM–1 PM) &amp; Slot 2 (5 PM–8 PM) • Free express cold-chain on ₹999+</span>
     </div>
-    <div class="hidden md:flex items-center gap-5 text-[11px] text-[#F7EFE6]">
+    <div class="hidden md:flex items-center gap-5 text-[11px] text-[#F7EFE6] whitespace-nowrap shrink-0">
       <span>✦ Use Code <strong class="text-[#FFA517] underline tracking-widest font-black">WoW20</strong> (20% OFF)</span>
       <span>•</span>
       <span>Sodexo Accepted</span>
@@ -602,20 +608,18 @@
 
 <!-- ================= EDITORIAL HAUTE BOUCHERIE HEADER ================= -->
 <header class="deli-site-header transition-all">
-  <div class="max-w-7xl mx-auto px-6 md:px-10 h-20 flex items-center justify-between">
+  <div class="max-w-7xl mx-auto px-6 md:px-10 h-14 flex items-center justify-between gap-4">
     <!-- Brand Logo / Wordmark -->
-    <a href="#" class="flex items-center gap-3.5 group">
-      <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#CD2653] to-[#4A0E17] flex items-center justify-center text-white font-luxury font-black text-base shadow-md transition-transform group-hover:scale-105 border border-[#C59A45]/40">
+    <a href="#" class="flex items-center gap-2.5 group shrink-0 whitespace-nowrap">
+      <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-[#CD2653] to-[#4A0E17] flex items-center justify-center text-white font-luxury font-black text-[11px] shadow-sm transition-transform group-hover:scale-105 border border-[#C59A45]/40 shrink-0">
         DC
         </div>
-      <div>
-        <span class="block text-2xl font-serif-chic font-black tracking-tight text-[#4A0E17] leading-none">Deli Chic</span>
-        <span class="block text-[9px] tracking-[0.3em] uppercase font-bold text-[#CD2653] mt-1 font-luxury">Food For Thought</span>
-      </div>
+      <span class="text-xl font-serif-chic font-black tracking-tight text-[#4A0E17] leading-none">Deli Chic</span>
+      <span class="hidden 2xl:inline text-[9px] tracking-[0.26em] uppercase font-bold text-[#CD2653] font-luxury border-l border-[#C59A45]/40 pl-2.5 ml-0.5">Food For Thought</span>
     </a>
 
     <!-- Navigation Links -->
-    <nav class="hidden lg:flex items-center gap-7 text-xs font-bold uppercase tracking-[0.2em]">
+    <nav class="hidden lg:flex items-center gap-4 xl:gap-6 text-xs font-bold uppercase tracking-[0.14em] xl:tracking-[0.2em] min-w-0 overflow-hidden">
       <a href="#larder" class="deli-nav-link whitespace-nowrap">The Larder</a>
       <a href="#masterCarver" class="deli-nav-link whitespace-nowrap">Master Carver Loupe</a>
       <a href="#boucherieExperience" class="deli-nav-link whitespace-nowrap">Haute Standards</a>
@@ -624,15 +628,15 @@
     </nav>
 
     <!-- Action Controls -->
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-2.5 shrink-0">
       <!-- WhatsApp Direct Concierge -->
-      <a href="https://wa.link/bk4b8e" target="_blank" rel="noreferrer" class="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full border border-emerald-600/30 text-emerald-800 text-xs font-bold uppercase tracking-wider hover:bg-emerald-50 transition-all bg-emerald-50/50">
+      <a href="https://wa.link/bk4b8e" target="_blank" rel="noreferrer" class="hidden xl:inline-flex items-center gap-2 px-3.5 py-2 rounded-full border border-emerald-600/30 text-emerald-800 text-xs font-bold uppercase tracking-wider hover:bg-emerald-50 transition-all bg-emerald-50/50">
         <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
         <span>WhatsApp Concierge</span>
       </a>
 
       <!-- Basket Trigger -->
-      <button onclick="toggleBasket(true)" class="px-5 py-2.5 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#8C1434] transition-all shadow-md shadow-[#CD2653]/30 flex items-center gap-2">
+      <button onclick="toggleBasket(true)" class="px-4 py-2 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#8C1434] transition-all shadow-md shadow-[#CD2653]/30 flex items-center gap-2 shrink-0 whitespace-nowrap">
         <span>Basket</span>
         <span class="px-2 py-0.5 bg-white/25 rounded-full text-[10px] font-black" id="basketCount">1</span>
       </button>
@@ -641,7 +645,7 @@
 </header>
 
 <!-- ================= HERO SECTION: CULINARY SHOWCASE WITH LIVE ATMOSPHERIC CANVAS ================= -->
-<section class="relative pt-36 pb-20 md:pt-42 md:pb-28 px-6 md:px-10 max-w-7xl mx-auto overflow-hidden">
+<section class="relative pt-10 pb-20 md:pt-14 md:pb-28 px-6 md:px-10 max-w-7xl mx-auto overflow-hidden">
   <!-- Atmospheric Culinary Steam & Golden Particle Canvas -->
   <canvas id="deliAtmosphereCanvas" class="absolute inset-0 pointer-events-none z-10"></canvas>
 
@@ -2121,29 +2125,10 @@
     }, 200);
   </script>
 <script>
-/* The header is fixed under a fixed announcement bar. The bar's height is not
-     a constant: at 320px it wraps to three lines (67px), and the hardcoded
-     32px offset meant the header sat on top of it and cut the delivery-slot
-     line in half. Measure it and publish the number as a custom property.
-     The property goes on <html>, not :root-via-JS on every frame — it is
-     written only when the value actually changes, because a custom property
-     on the root invalidates the computed style of every element on the page. */
-  (function () {
-    var bar = document.getElementById('deliAnnounceBar');
-    if (!bar) return;
-    var last = -1;
-    function sync() {
-      var h = Math.round(bar.getBoundingClientRect().height);
-      if (h === last || !h) return;
-      last = h;
-      document.documentElement.style.setProperty('--deli-bar-h', h + 'px');
-    }
-    sync();
-    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(sync).observe(bar);
-    else window.addEventListener('resize', sync);
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(sync);
-    window.addEventListener('load', sync);
-  })();
+/* The announcement strip is no longer pinned, so there is nothing to offset
+     the header beneath and nothing to measure. The script that published
+     --deli-bar-h is gone with it: a custom property written to <html> earns
+     its keep only while something reads it. */
 </script>
 <script src="/assets/vendor/gsap.min.js"></script>
 <script src="/assets/vendor/ScrollTrigger.min.js"></script>
