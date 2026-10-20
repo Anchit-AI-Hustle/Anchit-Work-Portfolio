@@ -610,6 +610,83 @@
   .chef-grid { display: grid; gap: 40px; }
   .chef h2, .space h2, .cities h2, .visit h2 { font-size: clamp(2.2rem, 5.5vw, 4.2rem); max-width: 16ch; }
   .chef p.lead { margin-top: 18px; max-width: 42ch; font-size: 1.2rem; font-weight: 600; line-height: 1.4; }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+  /* ══ THE WALK-IN ══════════════════════════════════════════════════════
+     A section you move THROUGH rather than look at. Five stages, driven by
+     scroll position, on a real 3D stage: street, the door, the room, the
+     counter, the shot. The copy already promises "a tiny room by design" and
+     "just enough room to savor an espresso" - this is that walk, taken.
+
+     How it works: the section is tall, its inner frame is sticky, and one
+     scroll-progress number (0 to 1) is written to the SECTION element each
+     frame. Never to :root - a custom property there invalidates the computed
+     style of every element on the page, which this repo has paid for before.
+     The script then places each layer in Z from that number, so the layers
+     genuinely pass the camera instead of merely scaling.
+
+     transform and opacity only. will-change goes on while the walk is on
+     screen and comes off when it leaves. */
+  .walk { position: relative; background: var(--grape); }
+  .walk-rail { height: 460vh; }
+  .walk-frame {
+    position: sticky; top: 0; height: 100vh; overflow: hidden;
+    perspective: 1100px; perspective-origin: 50% 46%;
+    background:
+      radial-gradient(120% 90% at 50% 18%, #4A2C78 0%, #2B1650 58%, #1B0E36 100%);
+  }
+  .walk-stage { position: absolute; inset: 0; transform-style: preserve-3d; }
+  .walk-layer {
+    position: absolute; left: 50%; top: 50%;
+    width: min(92vw, 1180px);
+    transform-origin: 50% 50%;
+    will-change: transform, opacity;
+  }
+  .walk.is-past .walk-layer, .walk.is-before .walk-layer { will-change: auto; }
+  .walk-layer svg, .walk-layer img { display: block; width: 100%; height: auto; }
+  .walk-layer img { border-radius: 10px; }
+
+  /* the words that ride the walk */
+  .walk-cap {
+    position: absolute; left: 0; right: 0; bottom: clamp(74px, 12vh, 132px);
+    text-align: center; color: #F1E9FF; padding: 0 var(--pad);
+    pointer-events: none; will-change: opacity, transform;
+  }
+  .walk-cap b { display: block; font-size: clamp(1.9rem, 5.2vw, 3.4rem); letter-spacing: -0.03em; line-height: 1; }
+  .walk-cap span { display: block; margin-top: 10px; font-size: clamp(.95rem, 2.1vw, 1.12rem); font-weight: 600; opacity: .82; max-width: 34ch; margin-inline: auto; }
+  .walk-step {
+    position: absolute; top: clamp(74px, 11vh, 120px); left: 0; right: 0;
+    text-align: center; color: #CDB8F7; font-size: .72rem;
+    letter-spacing: .32em; text-transform: uppercase; font-weight: 800;
+    pointer-events: none;
+  }
+
+  /* a hint that this one is scrolled through, shown only at the start */
+  .walk-hint {
+    position: absolute; left: 0; right: 0; bottom: 26px; text-align: center;
+    color: #CDB8F7; font-size: .7rem; letter-spacing: .26em; text-transform: uppercase;
+    font-weight: 800; pointer-events: none; will-change: opacity;
+  }
+  .walk-hint i { display: block; width: 1px; height: 26px; margin: 8px auto 0; background: currentColor; opacity: .5; }
+
+  @media (max-width: 760px) {
+    .walk-rail { height: 380vh; }
+    .walk-frame { perspective: 760px; }
+    .walk-layer { width: 108vw; }
+  }
+
+  /* No JS, or motion turned down: the walk becomes one composed frame
+     rather than a stack of invisible layers. */
+  .walk:not(.is-armed) .walk-rail { height: 100vh; }
+  .walk:not(.is-armed) .walk-layer { opacity: 1; transform: translate(-50%, -50%); }
+  .walk:not(.is-armed) .walk-layer[data-z0="1400"],
+  .walk:not(.is-armed) .walk-layer[data-z0="1150"] { opacity: 0; }
+  @media (prefers-reduced-motion: reduce) {
+    .walk-rail { height: 100vh !important; }
+    .walk-layer, .walk-cap, .walk-hint { transition: none !important; }
+  }
+
   /* ── THE TIMELINE ──────────────────────────────────────────────────────
      Three ventures. The rail already drew itself, but the stops on it were
      flat identical dots and every entry arrived at once, so the only motion
@@ -1090,6 +1167,102 @@
     </ul>
   </div>
 </div>
+
+
+<!-- ══ THE WALK-IN ══ a section you move through. Layers are placed in Z from
+     scroll position, so they pass the camera rather than just scaling. -->
+<section class="walk" id="walkin" aria-labelledby="walk-title">
+  <h2 id="walk-title" class="sr-only">Walk into Gram Street</h2>
+  <div class="walk-rail">
+    <div class="walk-frame">
+      <div class="walk-stage" aria-hidden="true">
+
+        <!-- 1. the street: the far side of the road -->
+        <div class="walk-layer" data-z0="-900" data-z1="2400" data-in="0" data-out="0.30">
+          <svg viewBox="0 0 1180 620" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="60" y="92" width="1060" height="470" rx="16" fill="#5B3A8C" opacity=".55"/>
+            <rect x="60" y="92" width="1060" height="58" rx="12" fill="#2B1650" opacity=".85"/>
+            <text x="590" y="132" text-anchor="middle" fill="#F1E9FF" font-family="Bricolage Grotesque, sans-serif" font-size="30" font-weight="800" letter-spacing="6">GRAM STREET</text>
+            <path d="M120 150h940l-34 58H154z" fill="#CDB8F7" opacity=".55"/>
+            <rect x="170" y="238" width="360" height="248" rx="10" fill="#F6EEFF" opacity=".22"/>
+            <rect x="620" y="238" width="360" height="248" rx="10" fill="#F6EEFF" opacity=".22"/>
+            <rect x="534" y="268" width="80" height="218" rx="8" fill="#2B1650" opacity=".60"/>
+            <circle cx="602" cy="382" r="5" fill="#FFE2A6"/>
+          </svg>
+        </div>
+
+        <!-- 2. the window, with the room showing through it -->
+        <div class="walk-layer" data-z0="-1500" data-z1="1750" data-in="0.06" data-out="0.42" style="width:min(62vw,760px)">
+          <img src="/assets/brand/u-1646954256973-f7fd9ce626b1-1200.jpg" alt="" loading="lazy" decoding="async" width="1200" height="800">
+        </div>
+
+        <!-- 3. the room: pendants and the back shelf -->
+        <div class="walk-layer" data-z0="-2300" data-z1="1150" data-in="0.26" data-out="0.70">
+          <svg viewBox="0 0 1180 620" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="40" y="40" width="1100" height="520" rx="18" fill="#2B1650" opacity=".34"/>
+            <path d="M40 220h1100M40 360h1100" stroke="#FFFFFF" stroke-opacity=".08" stroke-width="2"/>
+            <g>
+              <path d="M300 0v96M590 0v124M880 0v104" stroke="#CDB8F7" stroke-opacity=".5" stroke-width="2"/>
+              <path d="M274 96h52l-11 26h-30zM564 124h52l-11 26h-30zM854 104h52l-11 26h-30z" fill="#2B1650" opacity=".85"/>
+              <ellipse cx="300" cy="126" rx="8" ry="7" fill="#FFE2A6"/><ellipse cx="590" cy="154" rx="8" ry="7" fill="#FFE2A6"/><ellipse cx="880" cy="134" rx="8" ry="7" fill="#FFE2A6"/>
+              <path d="M300 128 220 330h160zM590 156 510 352h160zM880 136 800 332h160z" fill="#FFE9B8" opacity=".16"/>
+            </g>
+            <rect x="250" y="300" width="680" height="9" rx="4" fill="#2B1650" opacity=".5"/>
+            <g opacity=".6">
+              <rect x="300" y="248" width="46" height="52" rx="8" fill="#2B1650"/>
+              <rect x="368" y="236" width="38" height="64" rx="7" fill="#2B1650"/>
+              <rect x="776" y="244" width="42" height="56" rx="7" fill="#2B1650"/>
+            </g>
+          </svg>
+        </div>
+
+        <!-- 4. the counter -->
+        <div class="walk-layer" data-z0="-3100" data-z1="620" data-in="0.46" data-out="0.90">
+          <svg viewBox="0 0 1180 620" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="wkGlass" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#F8F4FF"/><stop offset=".58" stop-color="#CBB4F2"/><stop offset="1" stop-color="#9F86D8"/>
+              </linearGradient>
+              <linearGradient id="wkChrome" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#FBF9FF"/><stop offset=".35" stop-color="#C9BEDC"/><stop offset=".55" stop-color="#F4EFFC"/><stop offset="1" stop-color="#9E8FBA"/>
+              </linearGradient>
+            </defs>
+            <rect x="300" y="150" width="580" height="190" rx="18" fill="url(#wkChrome)"/>
+            <rect x="330" y="178" width="170" height="62" rx="10" fill="#2B1650" opacity=".70"/>
+            <circle cx="415" cy="209" r="20" fill="#F1E9FF"/>
+            <path d="M415 209v-13" stroke="#2B1650" stroke-width="3.4" stroke-linecap="round"/>
+            <rect x="540" y="182" width="200" height="14" rx="7" fill="#2B1650" opacity=".3"/>
+            <rect x="540" y="214" width="140" height="14" rx="7" fill="#2B1650" opacity=".18"/>
+            <rect x="150" y="372" width="880" height="26" rx="6" fill="#3B2160"/>
+            <rect x="150" y="372" width="880" height="8" rx="4" fill="#FFFFFF" opacity=".16"/>
+            <rect x="166" y="398" width="848" height="150" rx="8" fill="url(#wkGlass)"/>
+            <rect x="166" y="398" width="848" height="150" rx="8" fill="none" stroke="#FFFFFF" stroke-opacity=".8" stroke-width="3"/>
+            <g>
+              <rect x="212" y="446" width="104" height="48" rx="12" fill="#FFD7E8"/>
+              <rect x="348" y="446" width="104" height="48" rx="12" fill="#CFE3AE"/>
+              <rect x="484" y="446" width="104" height="48" rx="12" fill="#E6D2B6"/>
+              <rect x="620" y="446" width="104" height="48" rx="12" fill="#FFD7E8"/>
+              <rect x="756" y="446" width="104" height="48" rx="12" fill="#CFE3AE"/>
+            </g>
+          </svg>
+        </div>
+
+        <!-- 5. the shot, in your hand -->
+        <div class="walk-layer" data-z0="-3600" data-z1="300" data-in="0.74" data-out="1.06" style="width:min(48vw,560px)">
+          <img src="/assets/brand/u-1534778101976-62847782c213-1200.jpg" alt="" loading="lazy" decoding="async" width="1200" height="800">
+        </div>
+
+      </div>
+
+      <div class="walk-step" id="walkStep">01 / On Gram Street</div>
+      <div class="walk-cap" id="walkCap">
+        <b>A lilac front on a Gurugram street.</b>
+        <span>Specialty coffee, ceremonial matcha and small-batch gelato. Keep scrolling and come inside.</span>
+      </div>
+      <div class="walk-hint" id="walkHint">Scroll<i></i></div>
+    </div>
+  </div>
+</section>
 
 <!-- CHAPTERS: 320vh SCROLL STAGE WITH ROTATING CONIC-GRADIENT CHROME ORB -->
 <section id="chapters" aria-label="Coffee, matcha and gelato">
@@ -1950,6 +2123,97 @@
       });
     });
     update();
+  })();
+
+
+  /* The walk-in: place every layer in Z from scroll progress.
+     One rAF-coalesced handler, transform and opacity only, and the progress
+     number lives on the SECTION, never on :root. */
+  (function walkIn() {
+    var sec = document.getElementById('walkin');
+    if (!sec) return;
+    var rail = sec.querySelector('.walk-rail');
+    var frame = sec.querySelector('.walk-frame');
+    var layers = [].slice.call(sec.querySelectorAll('.walk-layer'));
+    var cap = document.getElementById('walkCap');
+    var step = document.getElementById('walkStep');
+    var hint = document.getElementById('walkHint');
+    if (!rail || !frame || !layers.length) return;
+    if (reduce) return;              // the stylesheet already holds the composed frame
+
+    sec.classList.add('is-armed');
+
+    var STEPS = [
+      [0.00, '01 / On Gram Street', 'A lilac front on a Gurugram street.', 'Specialty coffee, ceremonial matcha and small-batch gelato. Keep scrolling and come inside.'],
+      [0.24, '02 / Through the glass', 'Chrome cutting through pastel.', 'A glass front painted lilac, and a room drawn from contemporary Asian specialty bars.'],
+      [0.48, '03 / The room', 'A tiny room by design.', 'Not a workstation. Just enough room to savour an espresso, and that is the entire point.'],
+      [0.70, '04 / At the counter', 'The lilac glass-fronted counter.', 'Gelato pans behind the glass, the machine on top, three pendants over the bar.'],
+      [0.88, '05 / The shot', 'Pulled, poured, handed over.', 'In-house roasts, Uji matcha, small-batch gelato. This is the whole walk, in one cup.']
+    ];
+    var at = -1;
+
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+
+    function place(p) {
+      for (var i = 0; i < layers.length; i++) {
+        var L = layers[i];
+        var z0 = +L.dataset.z0, z1 = +L.dataset.z1;
+        var inP = +L.dataset.in, outP = +L.dataset.out;
+        var t = clamp01((p - inP) / (outP - inP));
+        var z = lerp(z0, z1, t);
+        // Fade in as it arrives, out as it passes the camera. A layer whose
+        // window opens at 0 has nothing to arrive from, so it starts already
+        // lit: otherwise landing at the top of the walk is a blank screen.
+        var fin = inP <= 0 ? 1 : clamp01(t / 0.16);
+        var o = Math.min(fin, clamp01((1 - t) / 0.20));
+        L.style.opacity = o.toFixed(3);
+        L.style.transform = 'translate(-50%, -50%) translateZ(' + z.toFixed(1) + 'px)';
+      }
+      if (hint) hint.style.opacity = (1 - clamp01(p / 0.08)).toFixed(3);
+
+      var k = 0;
+      for (var j = 0; j < STEPS.length; j++) if (p >= STEPS[j][0]) k = j;
+      if (k !== at) {
+        at = k;
+        if (step) step.textContent = STEPS[k][1];
+        if (cap) {
+          cap.style.opacity = '0';
+          cap.style.transform = 'translateY(10px)';
+          var S = STEPS[k];
+          setTimeout(function () {
+            cap.innerHTML = '<b>' + S[2] + '</b><span>' + S[3] + '</span>';
+            cap.style.opacity = '1';
+            cap.style.transform = 'none';
+          }, 160);
+        }
+      }
+    }
+    if (cap) cap.style.transition = 'opacity .34s ease, transform .34s cubic-bezier(.16,1,.3,1)';
+
+    var ticking = false;
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () {
+        ticking = false;
+        var r = rail.getBoundingClientRect();
+        var span = r.height - frame.offsetHeight;
+        var p = span > 0 ? clamp01(-r.top / span) : 0;
+        sec.style.setProperty('--p', p.toFixed(4));
+        place(p);
+      });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+
+    // drop the compositor hint while the walk is off screen
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (en) {
+        sec.classList.toggle('is-past', !en[0].isIntersecting);
+      }, { threshold: 0 }).observe(sec);
+    }
+    onScroll();
   })();
 
   /* 4. Timeline Line Drawing & Orbit Reveal */
