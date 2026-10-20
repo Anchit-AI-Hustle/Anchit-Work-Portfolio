@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
+<script>if(location.hash==='#project-lifecycle')location.replace('/lifecycle-os');</script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Anchit Tandon — Building Parwah | Product &amp; Growth</title>
@@ -3289,7 +3290,7 @@
       "name": "What has Anchit Tandon built?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Anchit has built AI-powered side products including D2C-LifeCycle-OS (a retention and lifecycle marketing engine), Mailer Studio (AI HTML email generation), The Third Eye AI video avatar, an all-in-one landing page agent, a How-To Engine, Hey Yaara, MusicGenAI, AI TeleSuite and LifeEngine. At Times Internet he scaled Assisted Sales 5x to Rs 80L MRR and grew ET Markets to Rs 3Cr+ incremental ARR."
+        "text": "Anchit has built AI-powered side products including Lifecycle OS (a retention and lifecycle marketing engine), Mailer Studio (AI HTML email generation), The Third Eye AI video avatar, an all-in-one landing page agent, a How-To Engine, Hey Yaara, MusicGenAI, AI TeleSuite and LifeEngine. At Times Internet he scaled Assisted Sales 5x to Rs 80L MRR and grew ET Markets to Rs 3Cr+ incremental ARR."
       }
     },
     {
@@ -3310,10 +3311,10 @@
     },
     {
       "@type": "Question",
-      "name": "What is D2C-LifeCycle-OS?",
+      "name": "What is Lifecycle OS?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "D2C-LifeCycle-OS is a brand-agnostic customer lifecycle and retention operating system Anchit built. You enter a D2C brand URL and it designs customer segments, email flows and a campaign calendar, benchmarks the category, and generates HTML mailers, powered by a multi-provider LLM cascade with a deterministic fallback."
+        "text": "Lifecycle OS is a brand-agnostic customer lifecycle and retention operating system Anchit built. You enter a D2C brand URL and it designs customer segments, email flows and a campaign calendar, benchmarks the category, and generates HTML mailers, powered by a multi-provider LLM cascade with a deterministic fallback."
       }
     }
   ]
@@ -4915,7 +4916,7 @@
 
         <!-- Card — D2C-LifeCycle-OS (generalised, any-brand lifecycle OS) -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span class="bento-index">03</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>D2C Marketing Automation</span><span class="status" data-tag="live">Live</span></div>
+          <div class="build-tag"><span class="bento-index">03</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>D2C Marketing Automation</span><span class="status" data-tag="demo">Demo</span></div>
           <h3><em>LifeCycle-OS</em></h3>
           <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Designing a brand’s whole retention lifecycle before you write a campaign.</span></p>
           <p>A customer-lifecycle &amp; retention suite I built independently. Enter <em>any</em> brand or URL and it reads the industry, benchmarks the competitive set, then designs the whole lifecycle live.</p>
@@ -4926,7 +4927,7 @@
           <div class="build-stack"><span class="build-chip">Vercel Serverless</span><span class="build-chip">LLM cascade</span></div>
           <div class="build-actions">
             <a class="btn primary" href="/lifecycle-os">Case Study<span class="build-launch" aria-hidden="true">→</span></a>
-            <a class="btn" href="https://lifecycle-os.anchit-tandon.com/" target="_blank" rel="noopener">Open live ↗</a>
+            <a class="btn" href="/lifecycle-os-plan">Open demo ↗</a>
           </div>
         </div>
 
@@ -5775,99 +5776,10 @@
   })();
   </script>
 
-  <!-- PROJECT: D2C-LIFECYCLE-OS (generalised, any-brand) -->
-  <section class="view" id="view-project-lifecycle">
-    <div class="container">
-      <a class="back-link" href="#projects" data-view="projects">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        All side projects
-      </a>
-      <div class="project-hero reveal">
-        <div class="eyebrow">D2C Marketing Automation · Industry Benchmarks · Live AI Demo</div>
-        <h1 class="display-lg">D2C-<em>LifeCycle-OS</em></h1>
-        <p class="quote">"Enter any brand — get its industry read and a ready-to-ship lifecycle plan in seconds."</p>
-        <div class="project-meta">
-          <div><span class="label">Role</span><span>Architect · Builder</span></div>
-          <div><span class="label">Status</span><span>Demo · any-brand walkthrough</span></div>
-          <div><span class="label">Stack</span><span>Vercel Functions · Multi-provider LLM cascade · Deterministic fallback</span></div>
-        </div>
-        <div class="project-cta">
-          <!-- The primary action leads to the PRODUCT. It used to lead to
-               /lifecycle-os, which is this site's own walkthrough of it, so the
-               most prominent button on the page never reached the live app. The
-               two walkthroughs keep their buttons beside it, labelled as such.
-               The product now builds and deploys from its own project, which
-               is what the live link above points at. Where that project lives
-               is recorded in data/projects.json, which is not shipped: naming
-               it here would put it in View Source, because HTML comments reach
-               the browser. -->
-          <a href="https://lifecycle-os.anchit-tandon.com/" class="btn primary" target="_blank" rel="noopener">Open Lifecycle OS ↗</a>
-          <a href="/lifecycle-os" class="btn">Feature walkthrough ↗</a>
-          <a href="/d2c-lifecycle-os" class="btn">Any-brand demo ↗</a>
-        </div>
-      </div>
-
-      <div class="project-section reveal">
-        <div class="eyebrow">The pitch</div>
-        <h2>What it is</h2>
-        <p>A plug-and-play, brand-agnostic lifecycle engine for <em>any</em> D2C brand. You enter a brand name or URL; it infers the category, benchmarks the competitive set the way a SimilarWeb / SEMrush market profile would — traffic mix, channel split, typical AOV and repeat-rate bands, seasonality — and then designs the whole lifecycle live: audience segments, a 30-day campaign calendar, an on-brand sample mailer, retention automations and target KPIs. No login, no proprietary data required — it runs entirely on industry-standard baselines for the brand's peer set.</p>
-      </div>
-
-      <div class="project-section reveal">
-        <div class="eyebrow">Origin</div>
-        <h2>Why I built it</h2>
-        <p>Most D2C teams start every lifecycle plan from a blank page and a gut feel for "what good looks like" in their category. I wanted to compress that: type a brand, and instantly see where it likely sits versus its industry — then get a concrete, ESP-ready plan grounded in those benchmarks rather than guesses. It's the generalised, any-brand expression of how I think about retention: read the data, benchmark the market, then let the plan write itself.</p>
-      </div>
-
-      <div class="project-section reveal">
-        <div class="eyebrow">Problem it solves</div>
-        <h2>What's broken without it</h2>
-        <ul>
-          <li><strong>No baseline.</strong> Teams plan lifecycle campaigns without knowing their category's typical channel split, AOV or repeat-rate. The engine seeds every plan from industry-standard bands for the brand's peer set.</li>
-          <li><strong>Blank-page planning.</strong> A 30-day calendar normally starts empty. Here it arrives segment- and cadence-aware, tuned to the inferred industry's seasonality.</li>
-          <li><strong>Mailer cold start.</strong> Every send begins from scratch. The demo hands you an on-brand sample mailer inferred from the brand's positioning.</li>
-          <li><strong>Vendor lock to see value.</strong> Most tools need account access and real data before they show anything. This returns a usable plan from just a brand name.</li>
-        </ul>
-      </div>
-
-      <div class="project-section reveal">
-        <div class="eyebrow">Under the hood</div>
-        <h2>How it's built</h2>
-        <p>A single Vercel serverless engine that turns a brand name into an industry-benchmarked lifecycle plan, with a deterministic fallback so the demo never fails to respond.</p>
-        <ul>
-          <li><strong>Industry-benchmark layer.</strong> The entered brand is mapped to a category and a competitive set, then profiled against competitive-intelligence-style baselines (traffic sources, channel mix, AOV and repeat-purchase bands, seasonality) — the way SimilarWeb / SEMrush characterise a market. Where a live data provider is keyed it uses it; otherwise it derives the bands from an LLM-backed industry model.</li>
-          <li><strong>Free multi-provider LLM cascade.</strong> The plan generator routes across free LLM providers (Groq → Cerebras → Gemini → OpenRouter), demoting on quota/auth failures so one outage never takes the demo down.</li>
-          <li><strong>Deterministic fallback.</strong> If every provider is unavailable, a template planner still returns a coherent, ESP-ready plan — segments, calendar, mailer and KPIs — so the demo always shows something usable.</li>
-          <li><strong>Brand-agnostic by design.</strong> Nothing is hard-coded to a single brand or dataset; the same engine works for any D2C name you type, drawing only on public/industry-standard signals.</li>
-        </ul>
-      </div>
-
-      <div class="project-section reveal">
-        <div class="eyebrow">The suite</div>
-        <h2>Every module, live</h2>
-        <p>LifeCycle-OS is not one page — it is a suite. Each module below is a working tool you can open right now, and each one reads from the same locked strategy, so a decision made in Smart Brain shows up in the calendar, the mailers, the ads and the creative briefs without being re-entered.</p>
-        <div class="mod-grid reveal-stagger" id="lifecycleModGrid"></div>
-      </div>
-
-      <div class="project-section reveal">
-        <div class="eyebrow">The parts that hold it together</div>
-        <h2>One source of truth, four times over</h2>
-        <p>Sixteen modules only feel like one product because four small files refuse to let them disagree. They are the most reusable thing in the codebase, and each exists because the alternative had already gone wrong.</p>
-        <ul>
-          <li><strong><code>region-context.js</code></strong> — one active region, shared by every page. Region selection had been built on 17 of 66 pages in six different ways, none of them sharing state, so choosing UK in one place left another showing whatever its default was.</li>
-          <li><strong><code>brand-context.js</code></strong> — one active brand, driving tokens, fonts, title and favicon everywhere at once, so every page re-skins without knowing the file exists.</li>
-          <li><strong><code>brand-catalog.js</code></strong> — one catalogue resolver. Pages used to read the shipped product file directly, which meant any other workspace was quietly shown the first tenant's products as if they were its own.</li>
-          <li><strong><code>analysis-registry.js</code></strong> — one place that says which analysis lives where. Seven surfaces had each decided for themselves, and several analysed the same thing; nothing stated the intended arrangement, so every drift stayed invisible until two pages were opened side by side.</li>
-        </ul>
-      </div>
-
-      <div class="project-section reveal">
-        <div class="eyebrow">What I'd build next</div>
-        <h2>The roadmap in my head</h2>
-        <p>Deeper live competitive-intelligence integrations (paid SimilarWeb / SEMrush pulls behind a key), category-specific benchmark libraries, a one-click export of the whole plan to popular ESPs, and a "compare two brands" mode that diffs their likely lifecycle posture side by side.</p>
-      </div>
-    </div>
-  </section>
+  <!-- PROJECT: LIFECYCLE OS — no view here any more. This was one of three
+       overlapping pages about the product; its case study now lives on the
+       canonical page, /lifecycle-os, and #project-lifecycle redirects there
+       (see the alias at the top of switchView and the one in <head>). -->
 
   <!-- PROJECT: ALL-IN-ONE LP AGENT -->
   <section class="view" id="view-project-agentlp">
@@ -6179,11 +6091,6 @@
         '<p>' + m[2] + '</p>' +
         '<span class="open">Open ' + (ext ? '\u2197' : '\u2192') + '</span></a>';
     }
-    // The LifeCycle-OS case study lists the suite's own modules. Same data,
-    // filtered — not a second copy that can drift out of step.
-    const lc = document.getElementById('lifecycleModGrid');
-    if (lc) lc.innerHTML = MODULES.filter(function (m) { return m[0] === 'LifeCycle-OS'; }).map(card).join('');
-
     // Side Hustle view: one tab per suite, each tab showing only that suite's
     // modules, so the projects above read first and either suite can be used
     // on its own. Suites come from MODULES in order, so a new suite gets a tab.
@@ -6236,7 +6143,7 @@
     });
   })();
 
-  const ALL_VIEWS = ['home','about','now','chat','experience','projects','resume','contact','project-parwah','project-disasters','project-lifecycle','project-agentlp','project-jobfit','project-music','project-thirdeye','project-yaara','project-mailer','project-telesuite','project-lifeengine'];
+  const ALL_VIEWS = ['home','about','now','chat','experience','projects','resume','contact','project-parwah','project-disasters','project-agentlp','project-jobfit','project-music','project-thirdeye','project-yaara','project-mailer','project-telesuite','project-lifeengine'];
   let audioModeEnabled = false; // true once user has clicked Play — gates page narration
   window.chatVoiceMuted = false; // chat replies speak aloud by default; mute toggle flips this
   // Browsers block speech before the first gesture — track it so the load-time
@@ -6526,6 +6433,9 @@
   const navLinks = document.querySelectorAll('[data-view]');
 
   function switchView(viewName, anchorId) {
+    // The Lifecycle OS case study moved to its canonical page. Old links,
+    // chat answers and shared /#project-lifecycle URLs all still land.
+    if (viewName === 'project-lifecycle') { location.assign('/lifecycle-os'); return; }
     if (viewName === 'schedule') { if (window.openScheduleModal) window.openScheduleModal(); return; }
     // Chat is a floating overlay available on every page — open it maximised
     // instead of navigating to a separate page.
@@ -6658,7 +6568,7 @@
 	      response: "This portfolio is my hobby product: a living, interactive OS-style profile instead of a static resume page. The home view gives the quick positioning, Work Experience explains the Vahdam and Times Internet story, Projects opens Parwah and my independent builds, Resume opens the PDF in a new tab, and Contact gives the fastest ways to reach me. The chat is meant to guide each page, answer specific questions in my voice, and keep narration controls available from the bottom tile.",
 	      nextChips: ["Start the tour","Show me your work","Tell me about Vahdam","How do I reach you?"] },
 	    { keywords: ['side','project','projects','build','builds','weekend','personal','ship','github','vercel'],
-	      response: "My side builds come from curiosity and the inability to stop at surface level. My portfolio itself is a hobby build. MusicGenAI is my passion project because music matters to me personally. The broader set includes Hey Yaara, MusicGenAI, The Third Eye, Mailer Architect, AI TeleSuite, LifeEngine, the All-in-One LP Agent, JobHunt, and D2C-LifeCycle-OS. <a data-nav='projects'>See them all →</a>",
+	      response: "My side builds come from curiosity and the inability to stop at surface level. My portfolio itself is a hobby build. MusicGenAI is my passion project because music matters to me personally. The broader set includes Hey Yaara, MusicGenAI, The Third Eye, Mailer Architect, AI TeleSuite, LifeEngine, the All-in-One LP Agent, JobHunt, and Lifecycle OS. <a data-nav='projects'>See them all →</a>",
 	      nextChips: ["Tell me about Hey Yaara","Tell me about Jarvis","Tell me about MusicGenAI","Why build on weekends?"] },
     { keywords: ['hey yaara','yaara','elderly','companion'],
       response: "Hey Yaara is an AI-powered voice companion designed specifically for elderly users to combat loneliness and assist with daily queries through a simple voice-first interface. I designed and built this PWA from scratch to remove all screen-based friction — users simply tap one button to talk and one to stop. Everything from transcription to speech response is handled entirely by voice. <a data-nav='project-yaara'>Full deep dive →</a>",
@@ -6674,16 +6584,16 @@
       nextChips: ["Open LifeEngine page","Tell me about Times Health+","Tell me about other builds","How do I reach you?"] },
     { keywords: ['lp agent','agent lp','all-in-one agent','all in one agent','landing page agent','narrator','recommendation engine','conversational commerce'],
       response: "The All-in-One LP Agent is a D2C marketing landing page with one embedded AI agent doing four jobs: it narrates the page aloud the moment you land, holds a two-way voice conversation when you tap Talk, answers typed questions in chat, and runs a 'help me choose' recommendation flow — all grounded in the page's own content. It's the landing page behaving like a salesperson instead of a monologue. <a data-nav='project-agentlp'>Full deep dive →</a>",
-      nextChips: ["Open LP Agent page","Tell me about D2C-LifeCycle-OS","Tell me about Hey Yaara","How do I reach you?"] },
+      nextChips: ["Open LP Agent page","Tell me about Lifecycle OS","Tell me about Hey Yaara","How do I reach you?"] },
     { keywords: ['jobhunt','job hunt','job search','jobfit','job fit','job agent','job board','linkedin','indeed','glassdoor','upwork','n8n','job posting'],
       response: "JobHunt is my no-code AI job-search agent, built in n8n. One click searches LinkedIn, Indeed, Glassdoor and Upwork at once, checks your existing Google Sheet so you never see a duplicate, formats every result (title, company, link, source), and appends only the new roles automatically. Re-run anytime — around 50+ fresh listings a run. It cut my own search from ~20 hours a week down to ~2. You get the importable workflow, a 20–30 min setup guide, and a support group. <a href='/jobhunt'>Open JobHunt →</a>",
       nextChips: ["Open JobHunt","Show me your other builds","Tell me about Lifecycle OS","How do I reach you?"] },
     { keywords: ['d2c lifecycle os','d2c-lifecycle-os','lifecycle os startup','universal lifecycle','plug and play','marketing automation','lifecycle startup','brand agnostic'],
-      response: "D2C-LifeCycle-OS is my plug-and-play, brand-agnostic lifecycle engine for any D2C brand. You enter a brand name or URL and it reads the category, benchmarks the competitive set the way a SimilarWeb / SEMrush market profile would — traffic mix, channel split, AOV and repeat-rate bands, seasonality — then designs the whole lifecycle live: audience segments, a campaign calendar, an on-brand sample mailer, retention automations and target KPIs. It runs on a free multi-provider LLM cascade with a deterministic fallback, so the demo always returns a usable plan grounded in industry-standard baselines — no login or proprietary data required. <a href='/d2c-lifecycle-os'>Open the live demo →</a>",
-      nextChips: ["Open D2C-LifeCycle-OS","Tell me about Lifecycle OS","Show me your other builds","How do I reach you?"] },
+      response: "Lifecycle OS is my plug-and-play, brand-agnostic lifecycle engine for any D2C brand. You enter a brand name or URL and it reads the category, benchmarks the competitive set the way a SimilarWeb / SEMrush market profile would — traffic mix, channel split, AOV and repeat-rate bands, seasonality — then designs the whole lifecycle live: audience segments, a campaign calendar, an on-brand sample mailer, retention automations and target KPIs. It runs on a free multi-provider LLM cascade with a deterministic fallback, so the demo always returns a usable plan grounded in industry-standard baselines — no login or proprietary data required. <a href='/lifecycle-os'>See the demo and case study →</a>",
+      nextChips: ["Open Lifecycle OS","Tell me about Lifecycle OS","Show me your other builds","How do I reach you?"] },
     { keywords: ['video avatar','talking head','avatar','talk to you','on camera','3d agent','digital twin','face','d-id','talking avatar'],
       response: "The AI Video Avatar is a photoreal, talking-head version of me: ask anything and my AI answers on camera in my own cloned voice. It's built on a D-ID talking-head engine driven from my portrait, my chatbot for the answers, and my TTS cascade for the voice — with mic input where the browser supports it. If the video engine isn't keyed it degrades gracefully to portrait + spoken reply, so it always responds. <a href='/agent'>Talk to my avatar →</a>",
-      nextChips: ["Talk to my avatar","Show me your other builds","Tell me about D2C-LifeCycle-OS","How do I reach you?"] },
+      nextChips: ["Talk to my avatar","Show me your other builds","Tell me about Lifecycle OS","How do I reach you?"] },
     { keywords: ['jarvis','ai os','operating system','vision','dream project','most attached'],
       response: "Jarvis is a proactive, context-aware AI operating system designed to act as an intelligent agent across multiple devices and workflows, rather than a simple conversational chatbot. I initiated this project to build a truly integrated AI workspace that understands context across apps and files. It's a long-term vision that I'm building step-by-step, and it is the side build I'm most passionate about.",
       nextChips: ["Why build on weekends?","Tell me about Hey Yaara","Your AI stack?","Show me your day job"] },
@@ -6781,15 +6691,15 @@
 	    projects: {
 	      kicker: 'Projects',
 	      title: 'What I build when curiosity wins',
-	      copy: 'This page ranks my most important builds, including D2C-LifeCycle-OS, MusicGenAI, this portfolio, The Third Eye, and more.',
+	      copy: 'This page ranks my most important builds, including Lifecycle OS, MusicGenAI, this portfolio, The Third Eye, and more.',
 	      coach: ['Each card explains the problem, stack, and implementation detail.', 'Portfolio is now in the top five because it is an active hobby build and interactive product surface.', 'Use chat to open any project deep dive or compare stacks.'],
 	      actions: [
 	        ['MusicGenAI', 'project-music'],
-	        ['D2C-LifeCycle-OS', 'project-lifecycle'],
+	        ['Lifecycle OS', 'project-lifecycle'],
 	        ['Portfolio build', 'query:Tell me about this portfolio build'],
 	        ['Narrate page', 'narrate']
 	      ],
-	      chips: ['Tell me about MusicGenAI','Tell me about D2C-LifeCycle-OS','What did you use to build these?','Which project matters most?']
+	      chips: ['Tell me about MusicGenAI','Tell me about Lifecycle OS','What did you use to build these?','Which project matters most?']
 	    },
 	    resume: {
 	      kicker: 'Resume',
@@ -6824,7 +6734,6 @@
 	    'project-lifeengine': ['LifeEngine', 'Personalized health engine', ['Turns generic wellness advice into daily routines.', 'Login-gated, privacy-conscious personalization flow.', 'Ask how its personalisation engine works.']],
 	    'project-thirdeye': ['The Third Eye', 'Agent-orchestrated AI OS', ['Explores agent workflows and multi-step task orchestration.', 'Built around AI operating-system style interactions.', 'Ask what the long-term AI OS vision is.']],
 	    'project-mailer': ['Mailer Architect', 'Universal mailer generator', ['Detects the context and writes send-ready HTML mailers for anything — brands, schools, offices, events, reminders, nonprofits.', 'Multi-LLM cascade with a deterministic fallback that always returns designed HTML.', 'Try the built-in Mailer Studio right on the page.']],
-	    'project-lifecycle': ['D2C-LifeCycle-OS', 'Brand-agnostic lifecycle engine', ['Enter any D2C brand and get an industry-benchmarked lifecycle plan.', 'Benchmarks the competitive set the way SimilarWeb / SEMrush profile a market.', 'Ask how the industry-standard baselines drive the plan.']],
 	    'project-agentlp': ['All-in-One LP Agent', 'Conversational landing page agent', ['One agent: audio narration, two-way voice, chat and recommendations.', 'Built for a live D2C funnel, grounded in the page content.', 'Ask how it changes landing page conversion.']],
 	    'project-jobfit': ['JobFit Agent', 'AI application assistant', ['Analyzes a job posting link against a base resume and portfolio.', 'Drafts a tailored resume, cover letter and optional hosted resume or portfolio site.', 'Includes free templates, theme, animation, domain and DOCX/PDF/TXT export choices.']]
 	  };
@@ -12698,7 +12607,7 @@
   var AGENTS = [
     { name:'Ask Me Anything', online:true, desc:"Ask me anything about my work, metrics and background — I answer in real time. <a href='#chat' data-nav='chat'>Open chat</a>" },
     { name:'AI Video Avatar', online:true, key:'avatar', desc:"I answer on camera in my own voice. <a href='/agent'>Talk to my avatar</a>" },
-    { name:'D2C-LifeCycle-OS', online:true, desc:"Plug in any D2C brand and I design its full lifecycle — segments, calendar, mailers, retention, KPIs. <a href='/d2c-lifecycle-os'>Open demo</a>" },
+    { name:'Lifecycle OS', online:true, desc:"Plug in any D2C brand and I design its full lifecycle — segments, calendar, mailers, retention, KPIs. <a href='/lifecycle-os'>Open demo</a>" },
     { name:'JobHunt', online:true, desc:"Live job search across free boards with direct apply links. <a href='/jobhunt'>Open JobHunt</a>" },
     { name:'Voice', online:true, key:'voice', desc:"Narration and spoken replies across the site." },
   ];

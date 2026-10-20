@@ -106,10 +106,10 @@
         apps: [
           {
             id: 'd2c-lifecycle-os',
-            title: 'D2C LifeCycle OS',
-            description: 'The universal entry point for brand benchmarking and lifecycle strategy.',
-            path: '/d2c-lifecycle-os',
-            aliases: ['/d2c-lifecycle-os.html'],
+            title: 'Full Lifecycle Plan',
+            description: 'The one-shot Lifecycle OS engine: brand benchmark, lifecycle blueprint, segments and KPIs.',
+            path: '/lifecycle-os-plan',
+            aliases: ['/lifecycle-os-plan.html', '/d2c-lifecycle-os', '/d2c-lifecycle-os.html'],
             role: 'Dashboard',
             capabilities: ['Brand and category benchmark', 'Lifecycle blueprint', 'Segment strategy', 'KPI plan']
           },

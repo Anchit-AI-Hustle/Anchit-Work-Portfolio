@@ -46,7 +46,7 @@ const assets = [
   // shells over assets/growth-school.{css,js} and the shared content file, so
   // the pair cannot drift; see the note at the top of growth-school-content.js.
   'growth-school.html',
-  'd2c-lifecycle-os.html',
+  'lifecycle-os-plan.html',
   'lifecycle-os.html',
   'lifecycle-os-studio.html',
   'lifecycle-os-analysis.html',
