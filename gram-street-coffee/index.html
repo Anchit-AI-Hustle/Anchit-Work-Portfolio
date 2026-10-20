@@ -2151,6 +2151,7 @@
       [0.88, '05 / The shot', 'Pulled, poured, handed over.', 'In-house roasts, Uji matcha, small-batch gelato. This is the whole walk, in one cup.']
     ];
     var at = -1;
+    var capT = 0;   // the pending caption swap: a fast scroll must not land stale text
 
     function lerp(a, b, t) { return a + (b - a) * t; }
     function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
@@ -2178,10 +2179,16 @@
         at = k;
         if (step) step.textContent = STEPS[k][1];
         if (cap) {
+          // Cancel the swap already in flight. Without this, crossing two
+          // stage boundaries inside 160ms queues two timeouts and the later
+          // one to FIRE wins, which can be the earlier stage: the words then
+          // stop matching the scene. Measured: step read "03 / The room"
+          // while the headline still read stage 2.
+          clearTimeout(capT);
           cap.style.opacity = '0';
           cap.style.transform = 'translateY(10px)';
           var S = STEPS[k];
-          setTimeout(function () {
+          capT = setTimeout(function () {
             cap.innerHTML = '<b>' + S[2] + '</b><span>' + S[3] + '</span>';
             cap.style.opacity = '1';
             cap.style.transform = 'none';

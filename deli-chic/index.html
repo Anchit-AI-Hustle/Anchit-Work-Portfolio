@@ -509,6 +509,72 @@
     .bench.is-live.is-cycling .bench-mark::before { animation: none; }
     .bench-fill { opacity: .6; transform: none; }
   }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+  /* ══ THE BOUCHERIE WALK ═══════════════════════════════════════════════
+     The sister site's walk-in, in a boucherie. Same mechanism, different
+     room: the section is tall, its inner frame is sticky, and one scroll
+     progress number drives every layer's position in Z, so the layers pass
+     the camera rather than scaling in place.
+
+     Five stages, and all five are this page's own process: "cut, cured, and
+     vacuum-sealed by master culinary butchers", "every portion weighed,
+     trimmed, and inspected prior to vacuum packaging". Nothing here claims
+     anything the copy does not already say.
+
+     Progress is written to the SECTION, never to :root. transform and opacity
+     only. Sticky holds because body is overflow-x: clip, not hidden. */
+  .bwalk { position: relative; background: #2A0810; }
+  .bwalk-rail { height: 460vh; }
+  .bwalk-frame {
+    position: sticky; top: 0; height: 100vh; overflow: hidden;
+    perspective: 1100px; perspective-origin: 50% 46%;
+    background: radial-gradient(120% 90% at 50% 16%, #6A1324 0%, #4A0E17 56%, #240609 100%);
+  }
+  .bwalk-stage { position: absolute; inset: 0; transform-style: preserve-3d; }
+  .bwalk-layer {
+    position: absolute; left: 50%; top: 50%;
+    width: min(92vw, 1180px);
+    transform-origin: 50% 50%;
+    will-change: transform, opacity;
+  }
+  .bwalk.is-past .bwalk-layer { will-change: auto; }
+  .bwalk-layer svg, .bwalk-layer img { display: block; width: 100%; height: auto; }
+  .bwalk-layer img { border-radius: 10px; }
+
+  .bwalk-cap {
+    position: absolute; left: 0; right: 0; bottom: clamp(74px, 12vh, 132px);
+    text-align: center; color: #FFF9F4; padding: 0 24px;
+    pointer-events: none; will-change: opacity, transform;
+  }
+  .bwalk-cap b { display: block; font-family: var(--font-serif-chic, Georgia, serif); font-size: clamp(1.85rem, 5vw, 3.3rem); letter-spacing: -0.02em; line-height: 1.04; }
+  .bwalk-cap span { display: block; margin-top: 10px; font-size: clamp(.95rem, 2.1vw, 1.1rem); font-weight: 500; opacity: .84; max-width: 36ch; margin-inline: auto; }
+  .bwalk-step {
+    position: absolute; top: clamp(74px, 11vh, 120px); left: 0; right: 0;
+    text-align: center; color: #C59A45; font-size: .72rem;
+    letter-spacing: .32em; text-transform: uppercase; font-weight: 800;
+    pointer-events: none;
+  }
+  .bwalk-hint {
+    position: absolute; left: 0; right: 0; bottom: 26px; text-align: center;
+    color: #C59A45; font-size: .7rem; letter-spacing: .26em; text-transform: uppercase;
+    font-weight: 800; pointer-events: none; will-change: opacity;
+  }
+  .bwalk-hint i { display: block; width: 1px; height: 26px; margin: 8px auto 0; background: currentColor; opacity: .5; }
+
+  @media (max-width: 760px) {
+    .bwalk-rail { height: 380vh; }
+    .bwalk-frame { perspective: 760px; }
+    .bwalk-layer { width: 108vw; }
+  }
+
+  .bwalk:not(.is-armed) .bwalk-rail { height: 100vh; }
+  .bwalk:not(.is-armed) .bwalk-layer { opacity: 1; transform: translate(-50%, -50%); }
+  @media (prefers-reduced-motion: reduce) {
+    .bwalk-rail { height: 100vh !important; }
+    .bwalk-layer, .bwalk-cap, .bwalk-hint { transition: none !important; }
+  }
   </style>
 </head>
 <body class="linen-texture selection:bg-[#CD2653] selection:text-white">
@@ -775,6 +841,93 @@
 </section>
 
 <!-- ================= THE GOURMET LARDER CATALOGUE ================= -->
+
+<!-- ══ THE BOUCHERIE WALK ══ the sister site's walk-in, in a butcher's room.
+     Every stage is this page's own stated process. -->
+<section class="bwalk" id="bwalkin" aria-labelledby="bwalk-title">
+  <h2 id="bwalk-title" class="sr-only">Inside the boucherie</h2>
+  <div class="bwalk-rail">
+    <div class="bwalk-frame">
+      <div class="bwalk-stage" aria-hidden="true">
+
+        <!-- 1. the cold room -->
+        <div class="bwalk-layer" data-z0="-900" data-z1="2400" data-in="0" data-out="0.30">
+          <svg viewBox="0 0 1180 620" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="70" y="60" width="1040" height="500" rx="14" fill="#C59A45" opacity=".10"/>
+            <rect x="70" y="60" width="1040" height="500" rx="14" fill="none" stroke="#C59A45" stroke-opacity=".32" stroke-width="2"/>
+            <path d="M110 128h960" stroke="#C59A45" stroke-opacity=".5" stroke-width="5" stroke-linecap="round"/>
+            <g stroke="#C59A45" stroke-opacity=".40" stroke-width="3" fill="none">
+              <path d="M240 128v54M400 128v44M560 128v62M720 128v48M880 128v56"/>
+            </g>
+            <g fill="#8E1526" opacity=".72">
+              <rect x="214" y="182" width="52" height="150" rx="24"/>
+              <rect x="374" y="172" width="52" height="168" rx="24"/>
+              <rect x="534" y="190" width="52" height="138" rx="24"/>
+              <rect x="694" y="176" width="52" height="160" rx="24"/>
+              <rect x="854" y="184" width="52" height="146" rx="24"/>
+            </g>
+            <path d="M110 470h960" stroke="#C59A45" stroke-opacity=".22" stroke-width="3"/>
+            <text x="590" y="524" text-anchor="middle" fill="#C59A45" fill-opacity=".62" font-size="22" font-weight="700" letter-spacing="7">COLD ROOM</text>
+          </svg>
+        </div>
+
+        <!-- 2. what hangs there, photographed -->
+        <div class="bwalk-layer" data-z0="-1500" data-z1="1750" data-in="0.06" data-out="0.42" style="width:min(60vw,720px)">
+          <img src="/assets/brand/u-1529193591184-b1d58069ecdd-1200.jpg" alt="" loading="lazy" decoding="async" width="1200" height="800">
+        </div>
+
+        <!-- 3. the block -->
+        <div class="bwalk-layer" data-z0="-2300" data-z1="1150" data-in="0.26" data-out="0.70">
+          <svg viewBox="0 0 1180 620" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="180" y="300" width="820" height="54" rx="8" fill="#E8D7BC"/>
+            <rect x="180" y="300" width="820" height="12" rx="6" fill="#FFFFFF" opacity=".42"/>
+            <rect x="214" y="354" width="752" height="150" rx="6" fill="#C9AE8A"/>
+            <path d="M300 354v150M430 354v150M560 354v150M690 354v150M820 354v150" stroke="#8A714E" stroke-opacity=".45" stroke-width="3"/>
+            <rect x="214" y="504" width="752" height="20" rx="6" fill="#4A0E17" opacity=".5"/>
+            <g>
+              <path d="M500 268h180l-14 32H514z" fill="#8E1526" opacity=".85"/>
+              <path d="M520 248h140l-10 20H530z" fill="#C0263F" opacity=".7"/>
+            </g>
+            <text x="590" y="576" text-anchor="middle" fill="#C59A45" fill-opacity=".55" font-size="20" font-weight="700" letter-spacing="7">THE BLOCK</text>
+          </svg>
+        </div>
+
+        <!-- 4. the cut and the seal -->
+        <div class="bwalk-layer" data-z0="-3100" data-z1="620" data-in="0.46" data-out="0.90">
+          <svg viewBox="0 0 1180 620" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g>
+              <path d="M330 150 L720 262 L706 300 L316 188 Z" fill="#E6E2EC"/>
+              <path d="M330 150 L720 262 L714 282 L324 170 Z" fill="#FFFFFF" opacity=".55"/>
+              <rect x="700" y="268" width="170" height="30" rx="14" transform="rotate(16 700 268)" fill="#2A0810"/>
+            </g>
+            <g>
+              <rect x="300" y="360" width="580" height="170" rx="14" fill="#F3EDE4" opacity=".92"/>
+              <rect x="300" y="360" width="580" height="170" rx="14" fill="none" stroke="#C59A45" stroke-opacity=".55" stroke-width="3"/>
+              <rect x="348" y="396" width="484" height="98" rx="10" fill="#A8162B" opacity=".78"/>
+              <path d="M348 414h484M348 440h484M348 466h484" stroke="#FFFFFF" stroke-opacity=".16" stroke-width="3"/>
+              <path d="M300 446h580" stroke="#C59A45" stroke-opacity=".40" stroke-width="2" stroke-dasharray="10 10"/>
+            </g>
+            <text x="590" y="576" text-anchor="middle" fill="#C59A45" fill-opacity=".55" font-size="20" font-weight="700" letter-spacing="7">CUT · WEIGHED · SEALED</text>
+          </svg>
+        </div>
+
+        <!-- 5. at your door -->
+        <div class="bwalk-layer" data-z0="-3600" data-z1="300" data-in="0.74" data-out="1.06" style="width:min(46vw,540px)">
+          <img src="/assets/brand/u-1604503468506-a8da13d82791-1200.jpg" alt="" loading="lazy" decoding="async" width="1200" height="800">
+        </div>
+
+      </div>
+
+      <div class="bwalk-step" id="bwalkStep">01 / The cold room</div>
+      <div class="bwalk-cap" id="bwalkCap">
+        <b>A boucherie, not a counter.</b>
+        <span>Artisanal integrity of a fine European boucherie, brought to the Indian dining table. Keep scrolling.</span>
+      </div>
+      <div class="bwalk-hint" id="bwalkHint">Scroll<i></i></div>
+    </div>
+  </div>
+</section>
+
 <section class="py-24 px-6 md:px-10 max-w-7xl mx-auto scroll-reveal" id="larder">
   <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
     <div>
@@ -1291,6 +1444,87 @@
     const prefersReducedMotion = window.matchMedia
       && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+
+
+    /* The boucherie walk: same mechanism as the sister site's walk-in. */
+    (function boucherieWalk() {
+      var sec = document.getElementById('bwalkin');
+      if (!sec) return;
+      var rail = sec.querySelector('.bwalk-rail');
+      var frame = sec.querySelector('.bwalk-frame');
+      var layers = [].slice.call(sec.querySelectorAll('.bwalk-layer'));
+      var cap = document.getElementById('bwalkCap');
+      var step = document.getElementById('bwalkStep');
+      var hint = document.getElementById('bwalkHint');
+      if (!rail || !frame || !layers.length) return;
+      if (prefersReducedMotion) return;   // stylesheet already holds the still frame
+
+      sec.classList.add('is-armed');
+
+      var STEPS = [
+        [0.00, '01 / The cold room', 'A boucherie, not a counter.', 'The artisanal integrity of a fine European boucherie, brought to the Indian dining table.'],
+        [0.24, '02 / What hangs there', 'Wood-smoked charcuterie.', 'German-style beechwood smoked frankfurters, and ribs rested over smoke.'],
+        [0.48, '03 / The block', 'Hand-cut by master butchers.', 'Coorg-spiced chicken breast, Lucknowi marinades, every cut taken by hand.'],
+        [0.70, '04 / Cut, weighed, sealed', 'Weighed, trimmed, inspected.', 'Every portion checked before it is vacuum-sealed, and nothing leaves before it passes.'],
+        [0.88, '05 / At your door', 'Cold-chain to your table.', 'Two delivery windows a day across Delhi NCR, sealed exactly as it left the boucherie.']
+      ];
+      var at = -1;
+      var capT = 0;   // the pending caption swap: a fast scroll must not land stale text
+      function lerp(a, b, t) { return a + (b - a) * t; }
+      function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+
+      function place(p) {
+        for (var i = 0; i < layers.length; i++) {
+          var L = layers[i];
+          var t = clamp01((p - (+L.dataset.in)) / ((+L.dataset.out) - (+L.dataset.in)));
+          var z = lerp(+L.dataset.z0, +L.dataset.z1, t);
+          // a layer whose window opens at 0 starts lit, or the walk opens blank
+          var fin = (+L.dataset.in) <= 0 ? 1 : clamp01(t / 0.16);
+          L.style.opacity = Math.min(fin, clamp01((1 - t) / 0.20)).toFixed(3);
+          L.style.transform = 'translate(-50%, -50%) translateZ(' + z.toFixed(1) + 'px)';
+        }
+        if (hint) hint.style.opacity = (1 - clamp01(p / 0.08)).toFixed(3);
+        var k = 0;
+        for (var j = 0; j < STEPS.length; j++) if (p >= STEPS[j][0]) k = j;
+        if (k !== at) {
+          at = k;
+          if (step) step.textContent = STEPS[k][1];
+          if (cap) {
+            // Cancel the swap already in flight; see the sister site's note.
+            clearTimeout(capT);
+            cap.style.opacity = '0'; cap.style.transform = 'translateY(10px)';
+            var S = STEPS[k];
+            capT = setTimeout(function () {
+              cap.innerHTML = '<b>' + S[2] + '</b><span>' + S[3] + '</span>';
+              cap.style.opacity = '1'; cap.style.transform = 'none';
+            }, 160);
+          }
+        }
+      }
+      if (cap) cap.style.transition = 'opacity .34s ease, transform .34s cubic-bezier(.16,1,.3,1)';
+
+      var ticking = false;
+      function onScroll() {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(function () {
+          ticking = false;
+          var r = rail.getBoundingClientRect();
+          var span = r.height - frame.offsetHeight;
+          var p = span > 0 ? clamp01(-r.top / span) : 0;
+          sec.style.setProperty('--p', p.toFixed(4));
+          place(p);
+        });
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll);
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (en) {
+          sec.classList.toggle('is-past', !en[0].isIntersecting);
+        }, { threshold: 0 }).observe(sec);
+      }
+      onScroll();
+    })();
 
     /* The bench: measure where each stop sits on the rail, then run it.
        Same approach as the Story timeline on the sister site, and for the
