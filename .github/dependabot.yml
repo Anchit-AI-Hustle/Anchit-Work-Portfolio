@@ -4,6 +4,13 @@ updates:
     directory: "/"
     schedule: { interval: "weekly" }
     open-pull-requests-limit: 5
+    ignore:
+      # Tailwind v4 is a migration, not a bump: it removed the CLI binary the
+      # build runs (npx tailwindcss), plus tailwind.config.js and --content.
+      # #197 took it in as a routine update and every production deploy failed.
+      # Upgrade on purpose, with scripts/build-tailwind.mjs ported, not here.
+      - dependency-name: "tailwindcss"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule: { interval: "monthly" }
