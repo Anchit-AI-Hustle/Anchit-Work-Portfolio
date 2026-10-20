@@ -29,7 +29,7 @@ Everything is in `index.html`, organized in three contiguous sections:
 
 1. **`<style>`** (line numbers in this file go stale fast — grep instead) — Design tokens live in `:root[data-theme="dark"]` and `:root[data-theme="light"]`. The whole palette (champagne accent `#c9a96e`, ink/bg/rule scales) and typography (Fraunces serif / JetBrains Mono / Inter) is driven by CSS variables on `:root`; the theme toggle just flips `data-theme`. Layout is a two-column CSS grid (`.app`) with a collapsible sidebar (`--sidebar-w` ↔ `--sidebar-w-collapsed`).
 
-2. **`<body>` markup** — A left sidebar (`<aside class="sidebar">`, items carrying `data-view`) plus one `<section class="view" id="view-{name}">` per view. Only the view with `.active` is visible. The live list is `ALL_VIEWS` in the script — currently `home`, `about`, `now`, `chat`, `experience`, `projects`, `resume`, `contact` and eleven `project-*` detail views. **Read `ALL_VIEWS` rather than trusting this sentence**; anything not in that array is rejected by `switchView`.
+2. **`<body>` markup** — A left sidebar (`<aside class="sidebar">`, items carrying `data-view`) plus one `<section class="view" id="view-{name}">` per view. Only the view with `.active` is visible. The live list is `ALL_VIEWS` in the script — currently `home`, `about`, `now`, `chat`, `experience`, `projects`, `resume`, `contact` and ten `project-*` detail views (the Lifecycle OS one moved to its canonical page, `/lifecycle-os`; `#project-lifecycle` redirects there). **Read `ALL_VIEWS` rather than trusting this sentence**; anything not in that array is rejected by `switchView`.
 
    Navigation is wired by attribute, not by class: `navLinks` is
    `querySelectorAll('[data-view]')`, so any element anywhere that carries a

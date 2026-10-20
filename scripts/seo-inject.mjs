@@ -49,7 +49,14 @@ function sitemapWithExtras(xml, extras = []) {
   return xml.replace('</urlset>', `${urls}\n</urlset>`);
 }
 
-function buildBlock(page, domain) {
+// The branded 1200x630 share card. It replaced /AnchitTandon-AppLogo.png as the
+// default: that is a ~1.5MB square app icon, so every share of a page without
+// its own image rendered a cropped logo, slowly.
+const DEFAULT_OG = '/assets/og/og-default.png';
+const DEFAULT_OG_META = { 'image:width': '1200', 'image:height': '630', 'image:alt': 'Anchit Tandon — Product & D2C Growth' };
+const FAVICON = '<link rel="icon" href="/icons/favicon.svg" type="image/svg+xml" />';
+
+function buildBlock(page, domain, { needsFavicon = false } = {}) {
   const L = [START, '<!-- Managed by scripts/seo-inject.mjs — edit seo.config.json, not here. -->'];
   if (page.description) L.push(`<meta name="description" content="${esc(page.description)}" />`);
   if (page.canonical) L.push(`<link rel="canonical" href="${esc(page.canonical)}" />`);
@@ -59,8 +66,10 @@ function buildBlock(page, domain) {
 
   const og = Object.assign(
     { title: page.title, description: page.description, type: 'website', url: page.canonical,
-      image: `${domain}/AnchitTandon-AppLogo.png`, site_name: 'Anchit Tandon', locale: 'en_US' },
+      image: `${domain}${DEFAULT_OG}`, site_name: 'Anchit Tandon', locale: 'en_US' },
     page.og || {});
+  if (og.image === `${domain}${DEFAULT_OG}`) for (const [k, v] of Object.entries(DEFAULT_OG_META)) if (!og[k]) og[k] = v;
+  if (needsFavicon) L.push(FAVICON);
   for (const [k, v] of Object.entries(og)) if (v) L.push(`<meta property="og:${k}" content="${esc(v)}" />`);
 
   const tw = Object.assign(
@@ -120,7 +129,11 @@ async function applyPage(page, domain) {
     }
   }
   // 2) strip previously-managed tags, then append fresh block
-  head = stripManaged(head).replace(/\s+$/,'') + '\n' + buildBlock(page, domain) + '\n';
+  // A favicon only where the page has none of its own — several pages carry a
+  // bespoke one (a data: URI) that must not be replaced.
+  const stripped = stripManaged(head);
+  const needsFavicon = !/<link[^>]+rel=["'][^"']*\bicon\b/i.test(stripped);
+  head = stripped.replace(/\s+$/,'') + '\n' + buildBlock(page, domain, { needsFavicon }) + '\n';
 
   const out = html.slice(0, headOpenEnd) + head + html.slice(he);
   if (out !== html) { await writeFile(abs, out, 'utf8'); console.log(`[seo] injected: ${page.file}`); }
