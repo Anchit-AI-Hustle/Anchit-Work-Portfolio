@@ -3523,9 +3523,13 @@ function bindNotes(){
    just reading chapter 01 pulled in ~1.3MB of YouTube scripts nobody asked
    for. The poster is now a true facade — nothing leaves the page until the
    play button is pressed, and that press starts the video. */
+// A YouTube video id is 11 characters of [A-Za-z0-9_-]; anything else is not
+// put into a URL.
+function videoId(fr){ var v = fr.getAttribute('data-vid') || ''; return /^[A-Za-z0-9_-]{11}$/.test(v) ? v : null; }
 function mountVideo(fr){
-  if(fr.__mounted) return; fr.__mounted = 1;
-  var vid = fr.getAttribute('data-vid');
+  if(fr.__mounted) return;
+  var vid = videoId(fr); if(!vid) return;
+  fr.__mounted = 1;
   var f = document.createElement('iframe');
   f.src = 'https://www.youtube-nocookie.com/embed/'+vid+'?rel=0&modestbranding=1&autoplay=1';
   f.setAttribute('allow','accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture; fullscreen');
@@ -3542,7 +3546,7 @@ function bindVideos(){
       var cap = fr.querySelector('.vf-cap');
       if(cap) cap.textContent = 'Opens on YouTube \u2014 in-page playback needs the hosted version';
       btn.addEventListener('click', function(){
-        window.open('https://www.youtube.com/watch?v='+fr.getAttribute('data-vid'),'_blank','noopener'); });
+        var vid = videoId(fr); if(vid) window.open('https://www.youtube.com/watch?v='+vid,'_blank','noopener'); });
       return;
     }
     btn.addEventListener('click', function(){ mountVideo(fr); });

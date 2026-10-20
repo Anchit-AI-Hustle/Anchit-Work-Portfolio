@@ -33,8 +33,14 @@ const decode = (s) => String(s || '')
 // A local URL must point at a file that is actually in www/.
 const localFile = (url, page) => {
   if (/^data:/.test(url)) return true;
-  let p = url.startsWith(DOMAIN) ? url.slice(DOMAIN.length) : url;
-  if (/^https?:/.test(p)) return null;                         // third-party host: not ours to check
+  let p = url;
+  if (/^https?:/i.test(url)) {
+    // Compare the parsed origin, not a prefix: "https://anchit-tandon.com.evil.com"
+    // starts with the domain too.
+    let u; try { u = new URL(url); } catch { return false; }
+    if (u.origin !== DOMAIN) return null;                      // third-party host: not ours to check
+    p = u.pathname;
+  }
   p = p.split(/[?#]/)[0];
   const abs = p.startsWith('/') ? path.join(WWW, p) : path.join(path.dirname(page), p);
   return fs.existsSync(abs);
