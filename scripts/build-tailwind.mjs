@@ -21,6 +21,7 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { writeFile, mkdir, readFile, unlink } from 'node:fs/promises';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -34,7 +35,37 @@ const PAGES = [
 
 const ENTRY = '@tailwind base;\n@tailwind components;\n@tailwind utilities;\n';
 
+/*
+ * PINNED TO TAILWIND 3 ON PURPOSE. Do not let a dependabot bump take this to 4
+ * without migrating first. Two things break at the major boundary:
+ *
+ *   1. The CLI moved out of `tailwindcss` into `@tailwindcss/cli`, so
+ *      `npx tailwindcss` has no binary and npm answers "could not determine
+ *      executable to run" — which says nothing about Tailwind at all.
+ *   2. ENTRY above is v3 syntax. v4 wants `@import "tailwindcss"` and its
+ *      config in CSS rather than a JS file.
+ *
+ * On 2026-10-20 PR #197 bumped 3.4.19 to 4.3.3 and every production deploy
+ * after it failed, including two that carried unrelated work. The check below
+ * turns that into a sentence someone can act on.
+ */
+async function assertCliPresent() {
+  const bin = join(ROOT, 'node_modules', '.bin', 'tailwindcss');
+  if (existsSync(bin)) return;
+  const installed = (() => {
+    try { return JSON.parse(readFileSync(join(ROOT, 'node_modules/tailwindcss/package.json'), 'utf8')).version; }
+    catch { return 'not installed'; }
+  })();
+  throw new Error(
+    'the Tailwind CLI is missing (tailwindcss ' + installed + ' is installed).\n' +
+    '  Tailwind 4 moved the CLI to @tailwindcss/cli and changed the entry syntax,\n' +
+    '  so this build needs tailwindcss 3.x until it is migrated. Pin it back in\n' +
+    '  package.json, or do the v4 migration deliberately.'
+  );
+}
+
 async function main() {
+  await assertCliPresent();
   await mkdir(join(ROOT, 'assets'), { recursive: true });
   const entry = join(ROOT, '.tw-entry.css');
   await writeFile(entry, ENTRY, 'utf8');
