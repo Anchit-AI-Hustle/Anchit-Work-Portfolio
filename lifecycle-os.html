@@ -69,6 +69,7 @@
   .badge{ font-family:var(--font-mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; padding:4px 9px; border-radius:99px; border:1px solid var(--rule-strong); color:var(--ink-mute); }
   .badge.live{ border-color:var(--accent); color:var(--accent); }
   .badge.soon{ border-color:var(--gold); color:var(--gold); }
+  .badge.demo{ border-color:var(--gold); color:var(--gold); }
   .tool .go{ font-family:var(--font-mono); font-size:12px; color:var(--primary); }
   .tool.disabled{ opacity:.72; cursor:default; }
   .tool.disabled:hover{ transform:none; border-color:var(--rule); box-shadow:none; }
@@ -82,6 +83,55 @@
   footer{ border-top:1px solid var(--rule); margin-top:clamp(40px,7vw,72px); padding:26px 0 12px; color:var(--ink-mute); font-size:13px; text-align:center; }
   footer a{ color:var(--ink-dim); border-bottom:1px solid var(--rule); text-decoration:none; }
   .theme-toggle{ background:transparent; border:1px solid var(--rule-strong); color:var(--ink-dim); border-radius:99px; padding:7px 12px; font-family:var(--font-mono); font-size:11px; cursor:pointer; }
+
+  /* ── The canonical page: demo, one result, case study, questions ──────── */
+  h2.sec{ font-family:var(--font-display); font-weight:600; font-size:clamp(26px,4vw,38px); line-height:1.1; letter-spacing:-.015em; margin:clamp(44px,8vw,80px) 0 10px; }
+  .sec-lede{ color:var(--ink-dim); max-width:68ch; margin-bottom:22px; }
+  .cta-row{ display:flex; flex-wrap:wrap; gap:10px; margin:0 0 26px; }
+  .cta{ display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:11px 20px; border-radius:10px; font-weight:500; font-size:15px; text-decoration:none; border:1px solid var(--rule-strong); color:var(--ink); background:var(--bg-elev); transition:border-color .2s, background-color .2s; }
+  .cta:hover{ border-color:var(--primary); }
+  .cta.primary{ background:var(--primary); border-color:var(--primary); color:#14110A; }
+  .cta.primary:hover{ background:var(--primary-deep); border-color:var(--primary-deep); }
+  .cta:focus-visible, .faq summary:focus-visible{ outline:2px solid var(--primary); outline-offset:3px; }
+  .walk{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; counter-reset:walk; }
+  @media (max-width:900px){ .walk{ grid-template-columns:1fr; } }
+  .walk figure{ background:var(--bg-elev); border:1px solid var(--rule); border-radius:16px; overflow:hidden; display:flex; flex-direction:column; }
+  .walk a.shot{ display:block; aspect-ratio:1200/713; background:var(--bg-deep); border-bottom:1px solid var(--rule); overflow:hidden; }
+  .walk img{ display:block; width:100%; height:100%; object-fit:cover; object-position:top left; }
+  .walk figcaption{ padding:16px 18px 18px; font-size:14px; color:var(--ink-dim); }
+  .walk figcaption b{ display:block; font-family:var(--font-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--primary); margin-bottom:6px; font-weight:500; }
+  .walk figcaption strong{ color:var(--ink); font-weight:600; }
+  .walk-note{ font-size:12.5px; color:var(--ink-mute); margin-top:12px; }
+
+  .result{ position:relative; display:grid; grid-template-columns:auto 1fr; gap:clamp(18px,4vw,40px); align-items:center; background:var(--bg-elev); border:1px solid var(--rule-strong); border-left:3px solid var(--gold); border-radius:16px; padding:clamp(20px,4vw,32px); }
+  @media (max-width:640px){ .result{ grid-template-columns:1fr; } }
+  .result-fig{ font-family:var(--font-display); font-weight:600; font-size:clamp(40px,8vw,64px); line-height:1; letter-spacing:-.02em; white-space:nowrap; }
+  .result-fig .arrow{ color:var(--ink-mute); font-weight:400; margin:0 .12em; }
+  .result-fig .to{ color:var(--primary); }
+  .result-metric{ font-family:var(--font-mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-dim); margin-top:10px; }
+  .result-body p{ color:var(--ink-dim); max-width:60ch; }
+  .result-flag{ display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--gold); border:1px dashed var(--gold); border-radius:99px; padding:4px 11px; margin-bottom:12px; }
+  .result-note{ font-size:13px; color:var(--ink-mute); margin-top:10px; }
+  .sr{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+
+  .case{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+  @media (max-width:820px){ .case{ grid-template-columns:1fr; } }
+  .case section{ background:var(--bg-elev); border:1px solid var(--rule); border-radius:16px; padding:20px 22px; }
+  .case section.wide{ grid-column:1/-1; }
+  .case h3{ font-family:var(--font-display); font-size:20px; font-weight:600; margin-bottom:8px; }
+  .case .k{ font-family:var(--font-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--primary); margin-bottom:6px; }
+  .case p, .case li{ font-size:14.5px; color:var(--ink-dim); }
+  .case ul{ padding-left:18px; display:grid; gap:8px; margin-top:6px; }
+  .case strong{ color:var(--ink); font-weight:600; }
+  .case code{ font-family:var(--font-mono); font-size:12.5px; color:var(--ink); }
+
+  .faq details{ border-top:1px solid var(--rule); }
+  .faq details:last-child{ border-bottom:1px solid var(--rule); }
+  .faq summary{ cursor:pointer; list-style:none; padding:16px 0; font-weight:500; display:flex; justify-content:space-between; gap:16px; }
+  .faq summary::-webkit-details-marker{ display:none; }
+  .faq summary::after{ content:'+'; color:var(--primary); font-family:var(--font-mono); }
+  .faq details[open] summary::after{ content:'–'; }
+  .faq details p{ color:var(--ink-dim); padding:0 0 18px; max-width:72ch; }
 
   /* Brand picker (mounted by lifecycle-os-kit.js): same rules as the kit CSS */
   .brandpick{ margin-bottom:14px; }
@@ -102,22 +152,25 @@
 <!-- cinematic:end -->
 <!-- seo:auto:start -->
 <!-- Managed by scripts/seo-inject.mjs — edit seo.config.json, not here. -->
-<meta name="description" content="Lifecycle OS — a brand-agnostic, AI-led D2C growth operating system: data analysis, a marketing calendar, a mailer studio, competitive intelligence and a smart-brain autopilot, in one loop." />
+<meta name="description" content="Lifecycle OS: a brand-agnostic, AI-led D2C growth operating system. Live app, a walkthrough of every module, an example result and the case study." />
 <link rel="canonical" href="https://anchit-tandon.com/lifecycle-os" />
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
 <meta name="keywords" content="LifeCycle OS, customer lifecycle operating system, retention operating system, lifecycle and retention hub, unified lifecycle workflow, analytics planning segmentation calendar, mailers flows KPIs platform, AI lifecycle marketing suite, customer lifecycle management tool, D2C retention OS umbrella, end to end lifecycle marketing, Anchit Tandon" />
 <meta name="author" content="Anchit Tandon" />
 <meta property="og:title" content="Lifecycle OS — an AI-led D2C growth operating system" />
-<meta property="og:description" content="A brand-agnostic, AI-led D2C growth OS: data analysis, marketing calendar, mailer studio, competitive intelligence and a smart-brain autopilot, in one loop." />
+<meta property="og:description" content="Lifecycle OS: a brand-agnostic, AI-led D2C growth operating system. Live app, a walkthrough of every module, an example result and the case study." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://anchit-tandon.com/lifecycle-os" />
-<meta property="og:image" content="https://anchit-tandon.com/AnchitTandon-AppLogo.png" />
+<meta property="og:image" content="https://anchit-tandon.com/assets/og/og-default.png" />
 <meta property="og:site_name" content="Anchit Tandon" />
 <meta property="og:locale" content="en_US" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Anchit Tandon — Product &amp; D2C Growth" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Lifecycle OS — an AI-led D2C growth operating system" />
-<meta name="twitter:description" content="Data analysis, marketing calendar, mailer studio, competitive intelligence and a smart-brain autopilot, in one loop. Brand-agnostic." />
-<meta name="twitter:image" content="https://anchit-tandon.com/AnchitTandon-AppLogo.png" />
+<meta name="twitter:description" content="Lifecycle OS: a brand-agnostic, AI-led D2C growth operating system. Live app, a walkthrough of every module, an example result and the case study." />
+<meta name="twitter:image" content="https://anchit-tandon.com/assets/og/og-default.png" />
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -171,6 +224,62 @@
   }
 }
 </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is Lifecycle OS?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Lifecycle OS is a plug-and-play, brand-agnostic AI lifecycle marketing operating system built by Anchit Tandon. You enter a D2C brand and it designs the whole retention funnel — audience segments, a campaign calendar, sample mailers, retention flows and KPIs — all AI-generated."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I use Lifecycle OS?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Try the walkthrough modules on this page, which need no account, or open the live app at lifecycle-os.anchit-tandon.com. The Full lifecycle plan module takes a brand name and optional website and returns the whole plan in one pass. The engine benchmarks the category, builds segments and lifecycle stages, drafts a week-by-week calendar and an on-brand mailer, wires retention automations and sets target KPIs. You can export the full plan as JSON."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is Lifecycle OS specific to one brand?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No — it is subject-agnostic. It ships loaded with anchit-tandon.com as a demo (marketing a résumé like a D2C product), but you can point it at any consumer brand and the same engine adapts positioning, audiences, calendar and voice."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does the AI benchmark a brand's industry?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It reads the subject's category and comparable set and starts every plan from real baseline response-rate and retention bands — the way SimilarWeb or SEMrush profile a market — rather than guessing, then generates the segments and flows on top of those benchmarks."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does the generated lifecycle plan include?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Each plan includes an industry read and benchmarks, a data-analysis view (segmentation model, best send window, cohort retention, cross-sell affinity), audience segments, lifecycle stages, a campaign calendar, a strategy-locked on-brand mailer with scored variants, retention automations, a Smart Brain autopilot loop, guardrails and target KPIs."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is Lifecycle OS free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. The walkthrough modules and the Full lifecycle plan are free on Anchit Tandon's portfolio site with no signup. The live app opens without an account, but reading a brand's site and keeping your work need a Google sign-in."
+      }
+    }
+  ]
+}
+</script>
 <!-- seo:auto:end -->
 </head>
 <body>
@@ -196,11 +305,66 @@
          both themes; the link is --ink rather than --primary because the brand
          orange on a light ground does not clear AA at body size. -->
     <p class="lc-product-note" style="max-width:70ch;margin:-14px 0 30px;padding:13px 16px;border:1px solid var(--rule);border-radius:10px;background:var(--bg-elev);font-size:14.5px;line-height:1.6;color:var(--ink-dim)">
-      This page is a walkthrough. The product itself is
+      This page is the walkthrough and the case study. The product itself is
       <a href="https://lifecycle-os.anchit-tandon.com/" target="_blank" rel="noopener"
          style="color:var(--ink);text-decoration:underline;text-underline-offset:3px;font-weight:600">Lifecycle OS<span aria-hidden="true"> ↗</span></a>
       &mdash; a multi-tenant brand marketing platform you sign in to and onboard your own brand into.
     </p>
+
+    <!-- ONE PAGE FOR ONE PRODUCT.
+         A portfolio review found three overlapping pages about Lifecycle OS:
+         this one, /d2c-lifecycle-os (the same engine under another name) and
+         the #project-lifecycle case study inside the portfolio shell. This is
+         the canonical one. /d2c-lifecycle-os now 308s here (vercel.json) and
+         its engine lives on as the "Full lifecycle plan" module; the case study
+         was merged in below and #project-lifecycle redirects here. -->
+
+    <h2 class="sec" id="demo">See it working</h2>
+    <p class="sec-lede">Three steps of the loop on a sample brand. Every screen below is a module you can open and run right now; the numbers in them are an industry-benchmark sample, not a client&rsquo;s data.</p>
+    <div class="cta-row">
+      <a class="cta primary" href="https://lifecycle-os.anchit-tandon.com/" target="_blank" rel="noopener">Open the live app <span aria-hidden="true">↗</span></a>
+      <a class="cta" href="/lifecycle-os-plan">Run the full plan on any brand <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="walk">
+      <figure>
+        <a class="shot" href="/lifecycle-os-analysis" aria-label="Open Data Analysis">
+          <picture>
+            <source type="image/avif" srcset="/assets/lifecycle-os/analyse-640.avif 640w, /assets/lifecycle-os/analyse-1200.avif 1200w" sizes="(max-width:900px) 100vw, 360px">
+            <source type="image/webp" srcset="/assets/lifecycle-os/analyse-640.webp 640w, /assets/lifecycle-os/analyse-1200.webp 1200w" sizes="(max-width:900px) 100vw, 360px">
+            <img src="/assets/lifecycle-os/analyse-640.webp" width="1200" height="713" loading="lazy" decoding="async" alt="Data Analysis module: total sales, orders, returning-customer rate and the signals that need attention, for a benchmark sample brand.">
+          </picture>
+        </a>
+        <figcaption><b>01 · Analyse</b><strong>Read the data.</strong> Sales, returning-customer rate and the signals that need attention — discount reliance, seasonality, concentration.</figcaption>
+      </figure>
+      <figure>
+        <a class="shot" href="/lifecycle-os-calendar" aria-label="Open Marketing Calendar">
+          <picture>
+            <source type="image/avif" srcset="/assets/lifecycle-os/plan-640.avif 640w, /assets/lifecycle-os/plan-1200.avif 1200w" sizes="(max-width:900px) 100vw, 360px">
+            <source type="image/webp" srcset="/assets/lifecycle-os/plan-640.webp 640w, /assets/lifecycle-os/plan-1200.webp 1200w" sizes="(max-width:900px) 100vw, 360px">
+            <img src="/assets/lifecycle-os/plan-640.webp" width="1200" height="713" loading="lazy" decoding="async" alt="Marketing Calendar module: a 90-day plan of 52 emails across segments, with mailers, ad sets, landing pages and social posts.">
+          </picture>
+        </a>
+        <figcaption><b>02 · Plan</b><strong>Plan the calendar.</strong> A segment- and cadence-aware 90-day plan: every send says which market, which segment and why.</figcaption>
+      </figure>
+      <figure>
+        <a class="shot" href="/lifecycle-os-studio" aria-label="Open Mailer Studio">
+          <picture>
+            <source type="image/avif" srcset="/assets/lifecycle-os/generate-640.avif 640w, /assets/lifecycle-os/generate-1200.avif 1200w" sizes="(max-width:900px) 100vw, 360px">
+            <source type="image/webp" srcset="/assets/lifecycle-os/generate-640.webp 640w, /assets/lifecycle-os/generate-1200.webp 1200w" sizes="(max-width:900px) 100vw, 360px">
+            <img src="/assets/lifecycle-os/generate-640.webp" width="1200" height="713" loading="lazy" decoding="async" alt="Mailer Studio module: pick a D2C brand, write a one-line brief and generate on-brand HTML email variants.">
+          </picture>
+        </a>
+        <figcaption><b>03 · Generate</b><strong>Generate the mailers.</strong> A one-line brief in, three designed, on-brand, quality-scored HTML variants out.</figcaption>
+      </figure>
+    </div>
+
+    <h2 class="sec" id="result">One result</h2>
+    <!-- Rendered from LOS_RESULT in the script at the bottom of this page —
+         the only place the figure lives. Swap that one object for a measured
+         result and set illustrative:false; the flag and note then disappear. -->
+    <div class="result" id="losResult"><noscript><p class="result-note">An illustrative example result appears here with JavaScript on. There is no measured result to publish yet.</p></noscript></div>
+
+    <div class="sectitle" style="margin-top:clamp(44px,8vw,80px)">Try every module · pick a subject</div>
 
     <div class="subject">
       <span class="lbl">Subject</span>
@@ -229,6 +393,66 @@
       <div class="step"><div class="n">03 · Prebuild</div><div class="st">Draft</div><p>On-brand mailer variants pre-generated per send.</p></div>
       <div class="step"><div class="n">04 · Review</div><div class="st">Approve</div><p>Human-in-the-loop; every variant quality-scored.</p></div>
       <div class="step"><div class="n">05 · Ship</div><div class="st">Measure</div><p>KPIs close the loop and feed the next cycle.</p></div>
+    </div>
+
+    <h2 class="sec" id="case-study">The case study</h2>
+    <p class="sec-lede">Enter any brand &mdash; get its industry read and a ready-to-ship lifecycle plan in seconds.</p>
+    <div class="case">
+      <section>
+        <div class="k">The pitch</div>
+        <h3>What it is</h3>
+        <p>A plug-and-play, brand-agnostic lifecycle engine for <em>any</em> D2C brand. You enter a brand name or URL; it infers the category, benchmarks the competitive set the way a SimilarWeb / SEMrush market profile would — traffic mix, channel split, typical AOV and repeat-rate bands, seasonality — and then designs the whole lifecycle live: audience segments, a 30-day campaign calendar, an on-brand sample mailer, retention automations and target KPIs.</p>
+      </section>
+      <section>
+        <div class="k">Origin</div>
+        <h3>Why I built it</h3>
+        <p>Most D2C teams start every lifecycle plan from a blank page and a gut feel for &ldquo;what good looks like&rdquo; in their category. I wanted to compress that: type a brand, and instantly see where it likely sits versus its industry — then get a concrete, ESP-ready plan grounded in those benchmarks rather than guesses. It&rsquo;s the generalised, any-brand expression of how I think about retention: read the data, benchmark the market, then let the plan write itself.</p>
+      </section>
+      <section>
+        <div class="k">Problem it solves</div>
+        <h3>What&rsquo;s broken without it</h3>
+        <ul>
+          <li><strong>No baseline.</strong> Teams plan lifecycle campaigns without knowing their category&rsquo;s typical channel split, AOV or repeat-rate. The engine seeds every plan from industry-standard bands for the brand&rsquo;s peer set.</li>
+          <li><strong>Blank-page planning.</strong> A 30-day calendar normally starts empty. Here it arrives segment- and cadence-aware, tuned to the inferred industry&rsquo;s seasonality.</li>
+          <li><strong>Mailer cold start.</strong> Every send begins from scratch. The demo hands you an on-brand sample mailer inferred from the brand&rsquo;s positioning.</li>
+          <li><strong>Vendor lock to see value.</strong> Most tools need account access and real data before they show anything. This returns a usable plan from just a brand name.</li>
+        </ul>
+      </section>
+      <section>
+        <div class="k">Under the hood</div>
+        <h3>How it&rsquo;s built</h3>
+        <ul>
+          <li><strong>Industry-benchmark layer.</strong> The brand is mapped to a category and a competitive set, then profiled against competitive-intelligence-style baselines. Where a live data provider is keyed it uses it; otherwise it derives the bands from an LLM-backed industry model.</li>
+          <li><strong>Free multi-provider LLM cascade.</strong> The plan generator routes across free LLM providers (Groq → Cerebras → Gemini → OpenRouter), demoting on quota/auth failures so one outage never takes the demo down.</li>
+          <li><strong>Deterministic fallback.</strong> If every provider is unavailable, a template planner still returns a coherent, ESP-ready plan, so the demo always shows something usable.</li>
+        </ul>
+      </section>
+      <section class="wide">
+        <div class="k">The parts that hold it together</div>
+        <h3>One source of truth, four times over</h3>
+        <p>Sixteen modules only feel like one product because four small files refuse to let them disagree.</p>
+        <ul>
+          <li><strong><code>region-context.js</code></strong> — one active region, shared by every page. Region selection had been built on 17 of 66 pages in six different ways, none of them sharing state.</li>
+          <li><strong><code>brand-context.js</code></strong> — one active brand, driving tokens, fonts, title and favicon everywhere at once.</li>
+          <li><strong><code>brand-catalog.js</code></strong> — one catalogue resolver, so no workspace is quietly shown another tenant&rsquo;s products.</li>
+          <li><strong><code>analysis-registry.js</code></strong> — one place that says which analysis lives where, so two surfaces cannot each decide for themselves.</li>
+        </ul>
+      </section>
+      <section class="wide">
+        <div class="k">What I&rsquo;d build next</div>
+        <h3>The roadmap in my head</h3>
+        <p>Deeper live competitive-intelligence integrations (paid SimilarWeb / SEMrush pulls behind a key), category-specific benchmark libraries, a one-click export of the whole plan to popular ESPs, and a &ldquo;compare two brands&rdquo; mode that diffs their likely lifecycle posture side by side.</p>
+      </section>
+    </div>
+
+    <h2 class="sec" id="questions">Questions</h2>
+    <div class="faq">
+      <details><summary>What is Lifecycle OS?</summary><p>Lifecycle OS is a plug-and-play, brand-agnostic AI lifecycle marketing operating system built by Anchit Tandon. You enter a D2C brand and it designs the whole retention funnel — audience segments, a campaign calendar, sample mailers, retention flows and KPIs — all AI-generated.</p></details>
+      <details><summary>How do I use Lifecycle OS?</summary><p>Try the walkthrough modules on this page, which need no account, or open the live app at lifecycle-os.anchit-tandon.com. The Full lifecycle plan module takes a brand name and optional website and returns the whole plan in one pass. The engine benchmarks the category, builds segments and lifecycle stages, drafts a week-by-week calendar and an on-brand mailer, wires retention automations and sets target KPIs. You can export the full plan as JSON.</p></details>
+      <details><summary>Is Lifecycle OS specific to one brand?</summary><p>No — it is subject-agnostic. It ships loaded with anchit-tandon.com as a demo (marketing a résumé like a D2C product), but you can point it at any consumer brand and the same engine adapts positioning, audiences, calendar and voice.</p></details>
+      <details><summary>How does the AI benchmark a brand&#x27;s industry?</summary><p>It reads the subject&#x27;s category and comparable set and starts every plan from real baseline response-rate and retention bands — the way SimilarWeb or SEMrush profile a market — rather than guessing, then generates the segments and flows on top of those benchmarks.</p></details>
+      <details><summary>What does the generated lifecycle plan include?</summary><p>Each plan includes an industry read and benchmarks, a data-analysis view (segmentation model, best send window, cohort retention, cross-sell affinity), audience segments, lifecycle stages, a campaign calendar, a strategy-locked on-brand mailer with scored variants, retention automations, a Smart Brain autopilot loop, guardrails and target KPIs.</p></details>
+      <details><summary>Is Lifecycle OS free?</summary><p>Yes. The walkthrough modules and the Full lifecycle plan are free on Anchit Tandon&#x27;s portfolio site with no signup. The live app opens without an account, but reading a brand&#x27;s site and keeping your work need a Google sign-in.</p></details>
     </div>
 
     <footer>
@@ -272,17 +496,45 @@
     { ic:'🧩', name:'Frameworks', desc:'Classic growth frameworks (AARRR, RFM, JTBD, Hook) applied concretely to the subject.', href:'/lifecycle-os-frameworks' },
     { ic:'🔍', name:'Growth Audit', desc:'A prioritised lifecycle audit — where the leaks are and the concrete fix for each.', href:'/lifecycle-os-audit' },
     { ic:'💬', name:'Ask the Brand Brain', desc:'Ask a lifecycle / growth question about the subject and get a grounded answer.', href:'/lifecycle-os-ask' },
-    { ic:'🎯', name:'Full lifecycle plan', desc:'The end-to-end one-shot: segments, calendar, mailer, retention flows and KPIs in one pass.', href:'/d2c-lifecycle-os' },
+    { ic:'🎯', name:'Full lifecycle plan', desc:'The end-to-end one-shot: segments, calendar, mailer, retention flows and KPIs in one pass.', href:'/lifecycle-os-plan' },
     { ic:'🔌', name:'Connectors', desc:'Where a store + ESP plugs in (Shopify, Klaviyo, ESP) — off by default, no data required.', href:'/lifecycle-os-connectors' },
   ];
   function card(t){
     var el=document.createElement('a');
     el.className='tool'; el.href=t.href; el.target='_blank'; el.rel='noopener';
     el.innerHTML='<div class="ic">'+t.ic+'</div><h3>'+t.name+'</h3><p>'+t.desc+'</p>'
-      +'<div class="row"><span class="badge live">Live</span><span class="go">Open ↗</span></div>';
+      +'<div class="row"><span class="badge demo">Demo</span><span class="go">Open ↗</span></div>';
     return el;
   }
   CORE.forEach(function(t){ $('coreGrid').appendChild(card(t)); });
+
+  // ── THE RESULT ────────────────────────────────────────────────────────
+  // The one figure on this page, and the only place it lives. There is no
+  // measured result to publish yet, so this is an ILLUSTRATIVE example and
+  // the page says so in two places while `illustrative` is true. To publish a
+  // real one: replace these values with the measured figures, name the source
+  // in `context`, and set illustrative:false.
+  var LOS_RESULT = {
+    illustrative: true,
+    metric: 'Repeat-purchase rate',
+    before: '18%',
+    after: '23%',
+    window: 'in 90 days',
+    context: 'A mid-size D2C skincare brand moving from one-off campaigns to the replenishment and win-back flows Lifecycle OS plans, sent on its cadence-aware calendar.',
+    note: 'Illustrative example, not a measured result. It will be replaced with a measured one.'
+  };
+  (function renderResult(r, host){
+    if (!host) return;
+    var esc = function(t){ return String(t).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+    host.innerHTML =
+      '<div>' + (r.illustrative ? '<div class="result-flag">Illustrative example</div>' : '')
+      + '<div class="result-fig">' + esc(r.before) + '<span class="arrow" aria-hidden="true">→</span><span class="sr">to</span><span class="to">' + esc(r.after) + '</span></div>'
+      + '<div class="result-metric">' + esc(r.metric) + ' · ' + esc(r.window) + '</div></div>'
+      + '<div class="result-body">'
+      + '<p>' + esc(r.context) + '</p>'
+      + (r.illustrative ? '<p class="result-note">' + esc(r.note) + '</p>' : '')
+      + '</div>';
+  })(LOS_RESULT, $('losResult'));
   CHAN.forEach(function(t){ $('chanGrid').appendChild(card(t)); });
   INTEL.forEach(function(t){ $('intelGrid').appendChild(card(t)); });
 

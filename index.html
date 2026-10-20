@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
+<script>if(location.hash==='#project-lifecycle')location.replace('/lifecycle-os');</script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Anchit Tandon — Building Parwah | Product &amp; Growth</title>
@@ -1258,6 +1259,48 @@
      than moving one line, so nothing else in the hero can collide either. */
   @media (max-width: 820px) { .cine-stage { padding-bottom: 104px; } }
 
+  /* Freelance offer bar — sits between the fixed top bar and the boot stage.
+     Its height is fixed per breakpoint rather than left to the content, because
+     the stage below subtracts it: --offer-above is everything above the stage
+     on first paint, so the whole boot sequence still fits in one screen, and
+     --offer-top is where the stage pins once the bar has scrolled away (just
+     under the top bar instead of under the bar that is no longer there). */
+  #view-home { --offer-h: 64px; --offer-top: calc(44px + var(--safe-top)); --offer-above: calc(var(--offer-top) + var(--offer-h)); }
+  @media (max-width: 820px) { #view-home { --offer-top: calc(58px + var(--safe-top)); --offer-above: var(--offer-h); } }
+  @media (max-width: 640px) { #view-home { --offer-h: 92px; } }
+  .home-offer {
+    height: var(--offer-h); margin-top: var(--offer-top);
+    background: var(--bg-elev); border-bottom: 1px solid var(--rule);
+    position: relative; z-index: 3;
+  }
+  @media (max-width: 820px) { .home-offer { margin-top: 0; } }
+  .home-offer-inner {
+    height: 100%; max-width: var(--max-w); margin: 0 auto; padding: 0 var(--gutter);
+    display: flex; align-items: center; justify-content: space-between; gap: 20px;
+  }
+  .home-offer-text { margin: 0; min-width: 0; display: flex; align-items: center; gap: 16px; color: var(--ink-dim); font-size: 14px; line-height: 1.4; }
+  .home-offer-text strong { color: var(--ink); font-weight: 600; }
+  .home-offer-tag {
+    flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--primary);
+  }
+  .home-offer-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+  .home-offer-cta { flex: 0 0 auto; white-space: nowrap; padding: 10px 18px; }
+  .home-offer-short { display: none; }
+  @media (max-width: 1180px) { .home-offer-text .home-offer-long { display: none; } .home-offer-text .home-offer-short { display: inline; } }
+  @media (max-width: 640px) {
+    .home-offer-inner { gap: 12px; padding: 0 16px; }
+    .home-offer-text { flex-direction: column; align-items: flex-start; gap: 5px; font-size: 13px; line-height: 1.35; }
+    .home-offer-tag { font-size: 10px; }
+    .home-offer-long { display: none; }
+    .home-offer-short { display: inline; }
+    .home-offer-what strong { font-weight: 500; }
+    .home-offer-cta { padding: 10px 14px; font-size: 13px; }
+  }
+  /* The boot stage gives up exactly the room the bar takes. */
+  .home-offer + .cine .cine-stage { top: var(--offer-top); height: calc(100vh - var(--offer-above)); height: calc(100svh - var(--offer-above)); }
+  @media (max-width: 820px) { .home-offer + .cine .cine-stage { top: var(--offer-top); height: calc(100svh - var(--offer-top) - var(--offer-h)); } }
+
   /* Brand mark + the HUD that assembles around it. */
   .cine-mark { position: relative; width: clamp(190px, 34vh, 330px); aspect-ratio: 1; flex: none; }
   .cine-mark img {
@@ -1852,6 +1895,12 @@
     flex: 0 1 auto; min-width: 0;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
+  /* At tablet widths the rail shows three narrow cards and the two buttons
+     did not fit at full padding ("Case Stud", "Open Live Pr"). */
+  @media (max-width: 1100px) {
+    .build-card .build-actions { gap: 6px; }
+    .build-card .build-actions .btn { padding: 10px 10px; font-size: 12.5px; gap: 5px; }
+  }
 
   /* The through-line section. Scoped entirely to .thesis-* so it cannot reach
      into the card layout below it. */
@@ -1943,6 +1992,10 @@
      Only the status belongs on the right; the rest hug the left together. */
   .build-tag > span:not(.status) { flex: 0 0 auto; }
   .build-tag > span:nth-last-child(2):not(.status) { margin-right: auto; }
+  /* ...except the eyebrow text itself, which has to be the part that gives.
+     With flex 0 0 auto on it the ellipsis rule above could never fire, so a
+     long eyebrow pushed the status chip out past the card edge. */
+  .build-tag > span:nth-last-child(2):not(.status):not(.bento-index):not(.bento-eyebrow-dot) { flex: 0 1 auto; min-width: 0; }
   .build-tag .status { color: var(--accent); display: inline-flex; align-items: center; gap: 6px; }
   .build-tag .status::before {
     content: ''; width: 6px; height: 6px; background: var(--accent);
@@ -3086,22 +3139,25 @@
   <script defer src="/assets/cinematic.js"></script>
 <!-- seo:auto:start -->
 <!-- Managed by scripts/seo-inject.mjs — edit seo.config.json, not here. -->
-<meta name="description" content="Anchit Tandon is building Parwah, a family care product for India with parents at the centre. Previously product and D2C growth at VAHDAM India and Times Internet." />
+<meta name="description" content="Anchit Tandon is building Parwah, family care for India with parents at the centre. Previously product and D2C growth at VAHDAM India and Times Internet." />
 <link rel="canonical" href="https://anchit-tandon.com/" />
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
 <meta name="keywords" content="Anchit Tandon, Parwah family care, Parwah India, family care app India, product builder, product and growth consulting, VAHDAM India alumni, Times Internet product manager" />
 <meta name="author" content="Anchit Tandon" />
 <meta property="og:title" content="Anchit Tandon — Building Parwah | Product &amp; Growth" />
-<meta property="og:description" content="Anchit Tandon is building Parwah, a family care product for India with parents at the centre. Previously product and D2C growth at VAHDAM India and Times Internet." />
+<meta property="og:description" content="Anchit Tandon is building Parwah, family care for India with parents at the centre. Previously product and D2C growth at VAHDAM India and Times Internet." />
 <meta property="og:type" content="profile" />
 <meta property="og:url" content="https://anchit-tandon.com/" />
-<meta property="og:image" content="https://anchit-tandon.com/AnchitTandon-AppLogo.png" />
+<meta property="og:image" content="https://anchit-tandon.com/assets/og/og-default.png" />
 <meta property="og:site_name" content="Anchit Tandon" />
 <meta property="og:locale" content="en_US" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Anchit Tandon — Product &amp; D2C Growth" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Anchit Tandon — Building Parwah | Product &amp; Growth" />
-<meta name="twitter:description" content="Anchit Tandon is building Parwah, a family care product for India with parents at the centre. Previously product and D2C growth at VAHDAM India and Times Internet." />
-<meta name="twitter:image" content="https://anchit-tandon.com/AnchitTandon-AppLogo.png" />
+<meta name="twitter:description" content="Anchit Tandon is building Parwah, family care for India with parents at the centre. Previously product and D2C growth at VAHDAM India and Times Internet." />
+<meta name="twitter:image" content="https://anchit-tandon.com/assets/og/og-default.png" />
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -3237,7 +3293,7 @@
       "name": "What has Anchit Tandon built?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Anchit has built AI-powered side products including D2C-LifeCycle-OS (a retention and lifecycle marketing engine), Mailer Studio (AI HTML email generation), The Third Eye AI video avatar, an all-in-one landing page agent, a How-To Engine, Hey Yaara, MusicGenAI, AI TeleSuite and LifeEngine. At Times Internet he scaled Assisted Sales 5x to Rs 80L MRR and grew ET Markets to Rs 3Cr+ incremental ARR."
+        "text": "Anchit has built AI-powered side products including Lifecycle OS (a retention and lifecycle marketing engine), Mailer Studio (AI HTML email generation), The Third Eye AI video avatar, an all-in-one landing page agent, a How-To Engine, Hey Yaara, MusicGenAI, AI TeleSuite and LifeEngine. At Times Internet he scaled Assisted Sales 5x to Rs 80L MRR and grew ET Markets to Rs 3Cr+ incremental ARR."
       }
     },
     {
@@ -3258,10 +3314,10 @@
     },
     {
       "@type": "Question",
-      "name": "What is D2C-LifeCycle-OS?",
+      "name": "What is Lifecycle OS?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "D2C-LifeCycle-OS is a brand-agnostic customer lifecycle and retention operating system Anchit built. You enter a D2C brand URL and it designs customer segments, email flows and a campaign calendar, benchmarks the category, and generates HTML mailers, powered by a multi-provider LLM cascade with a deterministic fallback."
+        "text": "Lifecycle OS is a brand-agnostic customer lifecycle and retention operating system Anchit built. You enter a D2C brand URL and it designs customer segments, email flows and a campaign calendar, benchmarks the category, and generates HTML mailers, powered by a multi-provider LLM cascade with a deterministic fallback."
       }
     }
   ]
@@ -3977,6 +4033,24 @@
 
   <!-- HOME -->
   <section class="view active" id="view-home">
+    <!-- The freelance offer, in the first screen. A portfolio review found the
+         only mention of it on this page was the ticker, a full screen and a
+         half below the boot sequence — so a visitor deciding whether to hire
+         had to scroll past the whole hero to learn that they could. This is
+         outside #cineHero on purpose: that stage is aria-hidden and is not
+         rendered at all for reduced-motion visitors, and the offer has to
+         reach both. It says three things only: what, for whom, how to ask.
+         Every word is from freelancer.html. -->
+    <aside class="home-offer" aria-label="Freelance work">
+      <div class="home-offer-inner">
+        <p class="home-offer-text">
+          <span class="home-offer-tag"><span class="home-offer-dot" aria-hidden="true"></span>Available for freelance</span>
+          <span class="home-offer-what"><strong class="home-offer-long">AI workflows, websites that convert and fractional product &amp; growth</strong><strong class="home-offer-short">Product &amp; growth, AI workflows and websites</strong> <span class="home-offer-for">for founders and D2C teams.</span></span>
+        </p>
+        <a class="btn primary home-offer-cta" href="mailto:anchit.tandon@gmail.com?subject=Let%E2%80%99s%20discuss%20a%20project&amp;body=Hi%20Anchit%2C%0A%0AI%E2%80%99m%20working%20on%3A%20%0AThe%20problem%20I%20need%20help%20with%3A%20%0AThe%20outcome%20I%E2%80%99m%20looking%20for%3A%20%0AIdeal%20timeline%3A%20%0A"><span class="home-offer-long">Discuss your project</span><span class="home-offer-short">Let&rsquo;s talk</span> <span aria-hidden="true">&rarr;</span></a>
+      </div>
+    </aside>
+
     <!-- ═══ CINEMATIC BOOT SEQUENCE ═══
          The brand mark assembles, the name types itself in, the four pillars
          from the mark morph through one another, then the whole stage scales
@@ -4784,6 +4858,10 @@
         <div class="eyebrow">Current project + independent builds</div>
         <h1 class="display-lg">Projects</h1>
         <p class="lede" style="margin-top: 16px;">Parwah is my main project. The other products are independent builds across AI, growth, music and consumer experiences.</p>
+        <!-- One line that says what each tag on the cards below promises, and
+             the rule used to pick it: if a stranger cannot use it right now
+             without an account, it is not Live. -->
+        <p class="tag-legend"><span><span class="status" data-tag="live">Live</span>a public product anyone can use now</span><span><span class="status" data-tag="demo">Demo</span>runs on sample data or a demo route</span><span><span class="status" data-tag="private">Private tool</span>needs a sign-in, or is internal</span></p>
 
         <!-- The through-line, stated. An audit of these builds found the same
              idea running through most of them and noted it was nowhere on the
@@ -4807,7 +4885,7 @@
 
         <!-- Card — Parwah. Current work, so it leads the grid. -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span class="bento-index">01</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Family Care &middot; India</span><span class="status">Building</span></div>
+          <div class="build-tag"><span class="bento-index">01</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Family Care &middot; India</span><span class="status" data-tag="private">Private tool</span></div>
           <h3><em>Parwah</em> &#2346;&#2352;&#2357;&#2366;&#2361;</h3>
           <p class="build-purpose"><span class="bp-label">What it&rsquo;s for</span><span class="bp-text">Knowing your parents are okay, from a thousand kilometres away.</span></p>
           <p>One app for the whole family, with your parents at the centre &mdash; daily check-in, SOS, book anything for them, send money safely, gift with dignity. Reassurance, never surveillance.</p>
@@ -4818,13 +4896,13 @@
           <div class="build-stack"><span class="build-chip">Senior-first UX</span><span class="build-chip">Consent model</span><span class="build-chip">WhatsApp-first</span><span class="build-chip">Installable</span></div>
           <div class="build-actions">
             <a class="btn primary" href="#project-parwah" data-view="project-parwah">Case Study<span class="build-launch" aria-hidden="true">&rarr;</span></a>
-            <a class="btn" href="https://parwah-hq.anchit-tandon.com/" target="_blank" rel="noopener">Open Live Project &#8599;</a>
+            <a class="btn" href="https://parwah-hq.anchit-tandon.com/" target="_blank" rel="noopener">Open website &#8599;</a>
           </div>
         </div>
 
         <!-- Card — Predict Natural Disasters. The newest build; labelled as such. -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span class="bento-index">02</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Latest build &middot; Forecasting</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">02</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Latest build &middot; Forecasting</span><span class="status" data-tag="live">Live</span></div>
           <h3>Predict <em>Natural Disasters</em></h3>
           <p class="build-purpose"><span class="bp-label">What it&rsquo;s for</span><span class="bp-text">Seeing what is coming — and checking whether the forecast was right.</span></p>
           <p>A global outlook across 195 countries: a live event map, authority-sourced official warnings kept separate from models, and thirty-day forecasts by hazard.</p>
@@ -4835,13 +4913,13 @@
           <div class="build-stack"><span class="build-chip">Leaflet</span><span class="build-chip">Esri imagery</span><span class="build-chip">Serverless API</span><span class="build-chip">60s refresh</span></div>
           <div class="build-actions">
             <a class="btn primary" href="#project-disasters" data-view="project-disasters">Case Study<span class="build-launch" aria-hidden="true">&rarr;</span></a>
-            <a class="btn" href="https://predict-natural-disasters.anchit-tandon.com/" target="_blank" rel="noopener">Open Live Project &#8599;</a>
+            <a class="btn" href="https://predict-natural-disasters.anchit-tandon.com/" target="_blank" rel="noopener">Open live &#8599;</a>
           </div>
         </div>
 
         <!-- Card — D2C-LifeCycle-OS (generalised, any-brand lifecycle OS) -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span class="bento-index">03</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>D2C Marketing Automation</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">03</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>D2C Marketing Automation</span><span class="status" data-tag="demo">Demo</span></div>
           <h3><em>LifeCycle-OS</em></h3>
           <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Designing a brand’s whole retention lifecycle before you write a campaign.</span></p>
           <p>A customer-lifecycle &amp; retention suite I built independently. Enter <em>any</em> brand or URL and it reads the industry, benchmarks the competitive set, then designs the whole lifecycle live.</p>
@@ -4851,14 +4929,14 @@
           </ul>
           <div class="build-stack"><span class="build-chip">Vercel Serverless</span><span class="build-chip">LLM cascade</span></div>
           <div class="build-actions">
-            <a class="btn primary" href="#project-lifecycle" data-view="project-lifecycle">Case Study<span class="build-launch" aria-hidden="true">→</span></a>
-            <a class="btn" href="/lifecycle-os">Open Live Project ↗</a>
+            <a class="btn primary" href="/lifecycle-os">Case Study<span class="build-launch" aria-hidden="true">→</span></a>
+            <a class="btn" href="/lifecycle-os-plan">Open demo ↗</a>
           </div>
         </div>
 
         <!-- Featured first: The Third Eye -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span class="bento-index">04</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Operating System</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">04</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Operating System</span><span class="status" data-tag="private">Private tool</span></div>
           <h3>The Third <em>Eye</em></h3>
           <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Running the day from one assistant that remembers your context.</span></p>
           <p>An agent-orchestrated personal AI operating system — memory-backed chat, tasks and multi-phase automation in one place.</p>
@@ -4869,13 +4947,13 @@
           <div class="build-stack"><span class="build-chip">Next.js</span><span class="build-chip">FastAPI</span><span class="build-chip">Postgres/pgvector</span><span class="build-chip">Gemini</span></div>
           <div class="build-actions">
             <a class="btn primary" href="#project-thirdeye" data-view="project-thirdeye">Case Study<span class="build-launch" aria-hidden="true">↗</span></a>
-            <a class="btn" href="https://the-third-eye.anchit-tandon.com/" target="_blank" rel="noopener">Open Live Project ↗</a>
+            <a class="btn" href="https://the-third-eye.anchit-tandon.com/" target="_blank" rel="noopener">Sign in ↗</a>
           </div>
         </div>
 
         <!-- Card 7 -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span class="bento-index">05</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Tooling · Marketing</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">05</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Tooling · Marketing</span><span class="status" data-tag="private">Private tool</span></div>
           <h3>Mailer <em>Architect</em></h3>
           <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Getting a send-ready HTML email out of a one-line brief.</span></p>
           <p>Turns a brief into a production-ready HTML email via a multi-LLM cascade with automatic failover.</p>
@@ -4886,13 +4964,13 @@
           <div class="build-stack"><span class="build-chip">Vercel Functions</span><span class="build-chip">OpenAI</span><span class="build-chip">Anthropic</span><span class="build-chip">Gemini</span><span class="build-chip">xAI</span><span class="build-chip">Groq</span><span class="build-chip">Cerebras</span></div>
           <div class="build-actions">
             <a class="btn primary" href="#project-mailer" data-view="project-mailer">Case Study<span class="build-launch" aria-hidden="true">↗</span></a>
-            <a class="btn" href="https://marketing-mailers-html-architect.anchit-tandon.com/" target="_blank" rel="noopener">Open Live Project ↗</a>
+            <a class="btn" href="https://marketing-mailers-html-architect.anchit-tandon.com/" target="_blank" rel="noopener">Sign in ↗</a>
           </div>
         </div>
 
         <!-- Featured widget — How-To Engine (agentic multi-model how-to guides) -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span class="bento-index">06</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Agentic How-To Engine</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">06</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Agentic How-To Engine</span><span class="status" data-tag="live">Live</span></div>
           <h3>The <em>How-To Engine</em></h3>
           <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Turning any “how do I…” question into a guide you can actually follow.</span></p>
           <p>Ask how to do literally anything. A cascade of frontier models answers in parallel, the best three get synthesised into one calm, ADHD-friendly step-by-step guide — rendered as a 3D flow you can watch step by step.</p>
@@ -4908,7 +4986,7 @@
 
         <!-- Card 8 -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span class="bento-index">07</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Workflow · Sales</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">07</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Workflow · Sales</span><span class="status" data-tag="private">Private tool</span></div>
           <h3>AI <em>TeleSuite</em></h3>
           <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Coaching a sales call while it is still happening.</span></p>
           <p>Real-time transcription, pitch scoring and conversion assist — the consumer take on the telesuite I shipped at ET.</p>
@@ -4919,13 +4997,13 @@
           <div class="build-stack"><span class="build-chip">Speech transcription</span><span class="build-chip">LLM scoring</span></div>
           <div class="build-actions">
             <a class="btn primary" href="#project-telesuite" data-view="project-telesuite">Case Study<span class="build-launch" aria-hidden="true">↗</span></a>
-            <a class="btn" href="https://ai-tele-suite.vercel.app/" target="_blank" rel="noopener">Open Live Project ↗</a>
+            <a class="btn" href="https://ai-tele-suite.anchit-tandon.com/" target="_blank" rel="noopener">Sign in ↗</a>
           </div>
         </div>
 
         <!-- Card — JobHunt (AI Job Search Agent) -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span class="bento-index">08</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Job Hunting</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">08</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Job Hunting</span><span class="status" data-tag="private">Private tool</span></div>
           <h3>Job<em>Hunt</em></h3>
           <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Finding real, current openings without a spreadsheet or an API key.</span></p>
           <p>A free, live job-search tool. Sign in with Google, type a role, and it pulls real, current openings from free public job boards — Remotive, RemoteOK, Arbeitnow and The Muse — with direct apply links. No spreadsheet, no setup, no API key.</p>
@@ -4936,13 +5014,13 @@
           <div class="build-stack"><span class="build-chip">Vercel Serverless</span><span class="build-chip">Supabase</span><span class="build-chip">Google sign-in</span></div>
           <div class="build-actions">
             <a class="btn primary" href="#project-jobfit" data-view="project-jobfit">Case Study<span class="build-launch" aria-hidden="true">↗</span></a>
-            <a class="btn" href="/jobhunt">Open Live Project ↗</a>
+            <a class="btn" href="/jobhunt">Sign in ↗</a>
           </div>
         </div>
 
         <!-- Card — All-in-One LP Agent -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span class="bento-index">09</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Conversational Commerce</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">09</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Conversational Commerce</span><span class="status" data-tag="demo">Demo</span></div>
           <h3>All-in-One <em>LP Agent</em></h3>
           <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Letting a landing page talk, listen and recommend, not just sit there.</span></p>
           <p>A marketing landing page with one embedded agent doing four jobs — auto-playing audio narration, two-way voice conversation, text chat and a "help me choose" recommendation engine — built for a live D2C funnel.</p>
@@ -4954,13 +5032,13 @@
           <div class="build-actions">
             <a class="btn primary" href="#project-agentlp" data-view="project-agentlp">Case Study<span class="build-launch" aria-hidden="true">↗</span></a>
           
-            <a class="btn" href="https://vahdam-lifecycle-os.anchit-tandon.com/lp/best" target="_blank" rel="noopener">Open Live Project &#8599;</a>
+            <a class="btn" href="https://vahdam-lifecycle-os.anchit-tandon.com/lp/best" target="_blank" rel="noopener">Open demo &#8599;</a>
           </div>
         </div>
 
         <!-- Card — AI Video Avatar (photoreal talking agent) -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span class="bento-index">10</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Avatar · Conversational</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">10</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Avatar · Conversational</span><span class="status" data-tag="demo">Demo</span></div>
           <h3>AI <em>Video Avatar</em></h3>
           <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Answering questions on camera, in my own voice, when I can’t be there.</span></p>
           <p>A photoreal talking-head version of me. Ask anything — my AI answers on camera in my own cloned voice, with a graceful voice-only fallback when the video engine isn't keyed.</p>
@@ -4976,7 +5054,7 @@
 
         <!-- Card 6 -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span class="bento-index">11</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Voice · Consumer</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">11</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Voice · Consumer</span><span class="status" data-tag="demo">Demo</span></div>
           <h3>Hey <em>Yaara</em></h3>
           <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Giving someone who finds apps intimidating a single button to talk to.</span></p>
           <p>A voice-first AI companion for the elderly — one button to talk, one to stop. Built for people who find apps intimidating.</p>
@@ -4987,13 +5065,13 @@
           <div class="build-stack"><span class="build-chip">PWA</span><span class="build-chip">Speech input</span><span class="build-chip">LLM</span></div>
           <div class="build-actions">
             <a class="btn primary" href="#project-yaara" data-view="project-yaara">Case Study<span class="build-launch" aria-hidden="true">↗</span></a>
-            <a class="btn" href="https://hey-yaara.anchit-tandon.com/" target="_blank" rel="noopener">Open Live Project ↗</a>
+            <a class="btn" href="https://hey-yaara.anchit-tandon.com/" target="_blank" rel="noopener">Open demo ↗</a>
           </div>
         </div>
 
         <!-- Card 9 -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span class="bento-index">12</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Wellness · Personalised</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">12</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>AI Wellness · Personalised</span><span class="status" data-tag="private">Private tool</span></div>
           <h3><em>LifeEngine</em></h3>
           <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Turning generic health advice into a daily plan tied to your goals.</span></p>
           <p>AI wellness planning that turns generic health advice into a daily plan tied to your goals.</p>
@@ -5004,13 +5082,13 @@
           <div class="build-stack"><span class="build-chip">Auth-gated web</span><span class="build-chip">AI planning</span></div>
           <div class="build-actions">
             <a class="btn primary" href="#project-lifeengine" data-view="project-lifeengine">Case Study<span class="build-launch" aria-hidden="true">↗</span></a>
-            <a class="btn" href="https://th-life-engine.vercel.app/" target="_blank" rel="noopener">Open Live Project ↗</a>
+            <a class="btn" href="https://th-life-engine.anchit-tandon.com/" target="_blank" rel="noopener">Sign in ↗</a>
           </div>
         </div>
 
         <!-- Card 2 -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span class="bento-index">13</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Generative AI · Music</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">13</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Generative AI · Music</span><span class="status" data-tag="demo">Demo</span></div>
           <h3>Music<em>GenAI</em></h3>
           <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Turning a written prompt into a finished, produced song.</span></p>
           <p>Type a prompt, get a full song — lyrics, vocals and production. A hobby build exploring how far text-to-music can go.</p>
@@ -5021,13 +5099,13 @@
           <div class="build-stack"><span class="build-chip">Vite</span><span class="build-chip">React</span><span class="build-chip">TypeScript</span><span class="build-chip">Supabase</span><span class="build-chip">Python</span></div>
           <div class="build-actions">
             <a class="btn primary" href="#project-music" data-view="project-music">Case Study<span class="build-launch" aria-hidden="true">↗</span></a>
-            <a class="btn" href="https://music-gen-ai-blue.vercel.app/" target="_blank" rel="noopener">Open Live Project ↗</a>
+            <a class="btn" href="https://music-gen-ai.anchit-tandon.com/" target="_blank" rel="noopener">Open demo ↗</a>
           </div>
         </div>
 
         <!-- Card 3 -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span class="bento-index">14</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Portfolio OS · Voice UI</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">14</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Portfolio OS · Voice UI</span><span class="status" data-tag="live">Live</span></div>
           <h3>Interactive <em>Portfolio</em></h3>
           <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Showing what I build by making the portfolio itself one of them.</span></p>
           <p>This portfolio is also a hobby product: guided navigation, voice narration, chat, resume handling, mobile PWA branding and responsive OS-style UI.</p>
@@ -5038,7 +5116,7 @@
           <div class="build-stack"><span class="build-chip">Vanilla JS</span><span class="build-chip">PWA</span><span class="build-chip">TTS</span></div>
           <div class="build-actions">
             <a class="btn primary" href="#home" data-view="home">Explore<span class="build-launch" aria-hidden="true">↗</span></a>
-            <a class="btn" href="./" target="_blank" rel="noopener">Open Live Project ↗</a>
+            <a class="btn" href="./" target="_blank" rel="noopener">Open live ↗</a>
           </div>
         </div>
 
@@ -5047,7 +5125,7 @@
              rather than as its own sidebar entry: it is a thing that was built,
              like everything else in this grid, not a section of the site. -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span class="bento-index">15</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Marketing Course</span><span class="status">Live</span></div>
+          <div class="build-tag"><span class="bento-index">15</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Marketing Course</span><span class="status" data-tag="live">Live</span></div>
           <h3>Marketing <em>101</em></h3>
           <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Learning modern marketing by practising it, not reading about it.</span></p>
           <p>A working course in modern marketing for people who have to produce results, not pass a module. Twelve chapters in one page, every idea practised where you read it.</p>
@@ -5096,7 +5174,7 @@
         <p class="quote">&ldquo;Apni family ki parwah karein.&rdquo;</p>
         <div class="project-meta">
           <div><span class="label">Role</span><span>Building it solo</span></div>
-          <div><span class="label">Status</span><span>Live website &middot; India</span></div>
+          <div><span class="label">Status</span><span>Private tool &middot; live website, app behind sign-in</span></div>
           <div><span class="label">Surface</span><span>Working website for families</span></div>
         </div>
         <div class="project-cta">
@@ -5235,11 +5313,11 @@
         <p class="quote">"An AI voice companion for elderly. Talk, listen, and never feel alone."</p>
         <div class="project-meta">
           <div><span class="label">Role</span><span>Founder · Designer · Engineer</span></div>
-          <div><span class="label">Status</span><span>Live</span></div>
+          <div><span class="label">Status</span><span>Demo &middot; opens on a sample profile</span></div>
           <div><span class="label">Stack</span><span>React · PWA · LLM Voice</span></div>
         </div>
         <div class="project-cta">
-          <a href="https://hey-yaara.anchit-tandon.com/" target="_blank" rel="noopener" class="btn primary">Open live app ↗</a>
+          <a href="https://hey-yaara.anchit-tandon.com/" target="_blank" rel="noopener" class="btn primary">Open the demo ↗</a>
         </div>
       </div>
 
@@ -5295,11 +5373,11 @@
         <p class="quote">"Type a prompt, get a song — with verified lyrics, generated vocals, and the whole pipeline in your hands."</p>
         <div class="project-meta">
           <div><span class="label">Role</span><span>Founder · Full-stack engineer</span></div>
-          <div><span class="label">Status</span><span>Live</span></div>
+          <div><span class="label">Status</span><span>Demo &middot; a hobby build</span></div>
           <div><span class="label">Stack</span><span>Vite · React · TS · Supabase · Python</span></div>
         </div>
         <div class="project-cta">
-          <a href="https://music-gen-ai-blue.vercel.app/" target="_blank" rel="noopener" class="btn primary">Open live app ↗</a>
+          <a href="https://music-gen-ai.anchit-tandon.com/" target="_blank" rel="noopener" class="btn primary">Open the demo ↗</a>
         </div>
       </div>
 
@@ -5341,8 +5419,8 @@
       </div>
 
       <div class="iframe-wrap reveal">
-        <div class="iframe-bar"><div class="dots"><span></span><span></span><span></span></div>music-gen-ai-blue.vercel.app</div>
-        <iframe src="https://music-gen-ai-blue.vercel.app/" loading="lazy" title="MusicGenAI live preview"></iframe>
+        <div class="iframe-bar"><div class="dots"><span></span><span></span><span></span></div>music-gen-ai.anchit-tandon.com</div>
+        <iframe src="https://music-gen-ai.anchit-tandon.com/" loading="lazy" title="MusicGenAI live preview"></iframe>
       </div>
     </div>
   </section>
@@ -5360,11 +5438,11 @@
         <p class="quote">"The same telesuite playbook I shipped at ET — packaged for solo operators and small teams."</p>
         <div class="project-meta">
           <div><span class="label">Role</span><span>Founder · Designer · Engineer</span></div>
-          <div><span class="label">Status</span><span>Live</span></div>
+          <div><span class="label">Status</span><span>Private tool &middot; PIN sign-in</span></div>
           <div><span class="label">Stack</span><span>LLMs · Real-time transcription</span></div>
         </div>
         <div class="project-cta">
-          <a href="https://ai-tele-suite.vercel.app/" target="_blank" rel="noopener" class="btn primary">Open live app ↗</a>
+          <a href="https://ai-tele-suite.anchit-tandon.com/" target="_blank" rel="noopener" class="btn primary">Open the app (sign-in) ↗</a>
         </div>
       </div>
 
@@ -5400,8 +5478,8 @@
       </div>
 
       <div class="iframe-wrap reveal">
-        <div class="iframe-bar"><div class="dots"><span></span><span></span><span></span></div>ai-tele-suite.vercel.app</div>
-        <iframe src="https://ai-tele-suite.vercel.app/" loading="lazy" title="AI TeleSuite live preview"></iframe>
+        <div class="iframe-bar"><div class="dots"><span></span><span></span><span></span></div>ai-tele-suite.anchit-tandon.com</div>
+        <iframe src="https://ai-tele-suite.anchit-tandon.com/" loading="lazy" title="AI TeleSuite live preview"></iframe>
       </div>
     </div>
   </section>
@@ -5419,11 +5497,11 @@
         <p class="quote">"Personalised health booster — AI that turns generic wellness advice into a daily plan tied to your goals."</p>
         <div class="project-meta">
           <div><span class="label">Role</span><span>PM · Designer · Builder</span></div>
-          <div><span class="label">Status</span><span>Live · Login-gated</span></div>
+          <div><span class="label">Status</span><span>Private tool · login-gated</span></div>
           <div><span class="label">Stack</span><span>AI Planning · Web</span></div>
         </div>
         <div class="project-cta">
-          <a href="https://th-life-engine.vercel.app/" target="_blank" rel="noopener" class="btn primary">Open live app ↗</a>
+          <a href="https://th-life-engine.anchit-tandon.com/" target="_blank" rel="noopener" class="btn primary">Open the app (sign-in) ↗</a>
         </div>
       </div>
 
@@ -5459,8 +5537,8 @@
       </div>
 
       <div class="iframe-wrap reveal">
-        <div class="iframe-bar"><div class="dots"><span></span><span></span><span></span></div>th-life-engine.vercel.app</div>
-        <iframe src="https://th-life-engine.vercel.app/" loading="lazy" title="LifeEngine live preview"></iframe>
+        <div class="iframe-bar"><div class="dots"><span></span><span></span><span></span></div>th-life-engine.anchit-tandon.com</div>
+        <iframe src="https://th-life-engine.anchit-tandon.com/" loading="lazy" title="LifeEngine live preview"></iframe>
       </div>
     </div>
   </section>
@@ -5478,11 +5556,11 @@
         <p class="quote">"A personal operating system, run by agents — Jarvis on the inside, calm UI on the outside."</p>
         <div class="project-meta">
           <div><span class="label">Role</span><span>Architect · Builder</span></div>
-          <div><span class="label">Status</span><span>Live · Self-hosted</span></div>
+          <div><span class="label">Status</span><span>Private tool · sign-in required</span></div>
           <div><span class="label">Stack</span><span>Next.js 14 · NextAuth · Supabase + pgvector · 7-LLM Cascade · Gemini Vision · PWA</span></div>
         </div>
         <div class="project-cta">
-          <a href="https://the-third-eye.anchit-tandon.com/" target="_blank" rel="noopener" class="btn primary">Open live app ↗</a>
+          <a href="https://the-third-eye.anchit-tandon.com/" target="_blank" rel="noopener" class="btn primary">Open the app (sign-in) ↗</a>
         </div>
       </div>
 
@@ -5553,7 +5631,7 @@
         <p class="quote">"Brief in. Production-grade HTML email out — for any brand, school, office, event, or reminder."</p>
         <div class="project-meta">
           <div><span class="label">Role</span><span>Architect · Builder</span></div>
-          <div><span class="label">Status</span><span>Live · universal mailer engine</span></div>
+          <div><span class="label">Status</span><span>Private tool · sign-up required</span></div>
           <div><span class="label">Stack</span><span>Vercel Functions · OpenAI · Anthropic · Gemini · xAI · Groq · Cerebras</span></div>
         </div>
         <div class="project-cta">
@@ -5701,99 +5779,10 @@
   })();
   </script>
 
-  <!-- PROJECT: D2C-LIFECYCLE-OS (generalised, any-brand) -->
-  <section class="view" id="view-project-lifecycle">
-    <div class="container">
-      <a class="back-link" href="#projects" data-view="projects">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        All side projects
-      </a>
-      <div class="project-hero reveal">
-        <div class="eyebrow">D2C Marketing Automation · Industry Benchmarks · Live AI Demo</div>
-        <h1 class="display-lg">D2C-<em>LifeCycle-OS</em></h1>
-        <p class="quote">"Enter any brand — get its industry read and a ready-to-ship lifecycle plan in seconds."</p>
-        <div class="project-meta">
-          <div><span class="label">Role</span><span>Architect · Builder</span></div>
-          <div><span class="label">Status</span><span>Live · Any-brand demo</span></div>
-          <div><span class="label">Stack</span><span>Vercel Functions · Multi-provider LLM cascade · Deterministic fallback</span></div>
-        </div>
-        <div class="project-cta">
-          <!-- The primary action leads to the PRODUCT. It used to lead to
-               /lifecycle-os, which is this site's own walkthrough of it, so the
-               most prominent button on the page never reached the live app. The
-               two walkthroughs keep their buttons beside it, labelled as such.
-               The product now builds and deploys from its own project, which
-               is what the live link above points at. Where that project lives
-               is recorded in data/projects.json, which is not shipped: naming
-               it here would put it in View Source, because HTML comments reach
-               the browser. -->
-          <a href="https://lifecycle-os.anchit-tandon.com/" class="btn primary" target="_blank" rel="noopener">Open Lifecycle OS ↗</a>
-          <a href="/lifecycle-os" class="btn">Feature walkthrough ↗</a>
-          <a href="/d2c-lifecycle-os" class="btn">Any-brand demo ↗</a>
-        </div>
-      </div>
-
-      <div class="project-section reveal">
-        <div class="eyebrow">The pitch</div>
-        <h2>What it is</h2>
-        <p>A plug-and-play, brand-agnostic lifecycle engine for <em>any</em> D2C brand. You enter a brand name or URL; it infers the category, benchmarks the competitive set the way a SimilarWeb / SEMrush market profile would — traffic mix, channel split, typical AOV and repeat-rate bands, seasonality — and then designs the whole lifecycle live: audience segments, a 30-day campaign calendar, an on-brand sample mailer, retention automations and target KPIs. No login, no proprietary data required — it runs entirely on industry-standard baselines for the brand's peer set.</p>
-      </div>
-
-      <div class="project-section reveal">
-        <div class="eyebrow">Origin</div>
-        <h2>Why I built it</h2>
-        <p>Most D2C teams start every lifecycle plan from a blank page and a gut feel for "what good looks like" in their category. I wanted to compress that: type a brand, and instantly see where it likely sits versus its industry — then get a concrete, ESP-ready plan grounded in those benchmarks rather than guesses. It's the generalised, any-brand expression of how I think about retention: read the data, benchmark the market, then let the plan write itself.</p>
-      </div>
-
-      <div class="project-section reveal">
-        <div class="eyebrow">Problem it solves</div>
-        <h2>What's broken without it</h2>
-        <ul>
-          <li><strong>No baseline.</strong> Teams plan lifecycle campaigns without knowing their category's typical channel split, AOV or repeat-rate. The engine seeds every plan from industry-standard bands for the brand's peer set.</li>
-          <li><strong>Blank-page planning.</strong> A 30-day calendar normally starts empty. Here it arrives segment- and cadence-aware, tuned to the inferred industry's seasonality.</li>
-          <li><strong>Mailer cold start.</strong> Every send begins from scratch. The demo hands you an on-brand sample mailer inferred from the brand's positioning.</li>
-          <li><strong>Vendor lock to see value.</strong> Most tools need account access and real data before they show anything. This returns a usable plan from just a brand name.</li>
-        </ul>
-      </div>
-
-      <div class="project-section reveal">
-        <div class="eyebrow">Under the hood</div>
-        <h2>How it's built</h2>
-        <p>A single Vercel serverless engine that turns a brand name into an industry-benchmarked lifecycle plan, with a deterministic fallback so the demo never fails to respond.</p>
-        <ul>
-          <li><strong>Industry-benchmark layer.</strong> The entered brand is mapped to a category and a competitive set, then profiled against competitive-intelligence-style baselines (traffic sources, channel mix, AOV and repeat-purchase bands, seasonality) — the way SimilarWeb / SEMrush characterise a market. Where a live data provider is keyed it uses it; otherwise it derives the bands from an LLM-backed industry model.</li>
-          <li><strong>Free multi-provider LLM cascade.</strong> The plan generator routes across free LLM providers (Groq → Cerebras → Gemini → OpenRouter), demoting on quota/auth failures so one outage never takes the demo down.</li>
-          <li><strong>Deterministic fallback.</strong> If every provider is unavailable, a template planner still returns a coherent, ESP-ready plan — segments, calendar, mailer and KPIs — so the demo always shows something usable.</li>
-          <li><strong>Brand-agnostic by design.</strong> Nothing is hard-coded to a single brand or dataset; the same engine works for any D2C name you type, drawing only on public/industry-standard signals.</li>
-        </ul>
-      </div>
-
-      <div class="project-section reveal">
-        <div class="eyebrow">The suite</div>
-        <h2>Every module, live</h2>
-        <p>LifeCycle-OS is not one page — it is a suite. Each module below is a working tool you can open right now, and each one reads from the same locked strategy, so a decision made in Smart Brain shows up in the calendar, the mailers, the ads and the creative briefs without being re-entered.</p>
-        <div class="mod-grid reveal-stagger" id="lifecycleModGrid"></div>
-      </div>
-
-      <div class="project-section reveal">
-        <div class="eyebrow">The parts that hold it together</div>
-        <h2>One source of truth, four times over</h2>
-        <p>Sixteen modules only feel like one product because four small files refuse to let them disagree. They are the most reusable thing in the codebase, and each exists because the alternative had already gone wrong.</p>
-        <ul>
-          <li><strong><code>region-context.js</code></strong> — one active region, shared by every page. Region selection had been built on 17 of 66 pages in six different ways, none of them sharing state, so choosing UK in one place left another showing whatever its default was.</li>
-          <li><strong><code>brand-context.js</code></strong> — one active brand, driving tokens, fonts, title and favicon everywhere at once, so every page re-skins without knowing the file exists.</li>
-          <li><strong><code>brand-catalog.js</code></strong> — one catalogue resolver. Pages used to read the shipped product file directly, which meant any other workspace was quietly shown the first tenant's products as if they were its own.</li>
-          <li><strong><code>analysis-registry.js</code></strong> — one place that says which analysis lives where. Seven surfaces had each decided for themselves, and several analysed the same thing; nothing stated the intended arrangement, so every drift stayed invisible until two pages were opened side by side.</li>
-        </ul>
-      </div>
-
-      <div class="project-section reveal">
-        <div class="eyebrow">What I'd build next</div>
-        <h2>The roadmap in my head</h2>
-        <p>Deeper live competitive-intelligence integrations (paid SimilarWeb / SEMrush pulls behind a key), category-specific benchmark libraries, a one-click export of the whole plan to popular ESPs, and a "compare two brands" mode that diffs their likely lifecycle posture side by side.</p>
-      </div>
-    </div>
-  </section>
+  <!-- PROJECT: LIFECYCLE OS — no view here any more. This was one of three
+       overlapping pages about the product; its case study now lives on the
+       canonical page, /lifecycle-os, and #project-lifecycle redirects there
+       (see the alias at the top of switchView and the one in <head>). -->
 
   <!-- PROJECT: ALL-IN-ONE LP AGENT -->
   <section class="view" id="view-project-agentlp">
@@ -5808,11 +5797,11 @@
         <p class="quote">"A landing page that talks, listens, chats and recommends — one agent doing the work of a salesperson on the page."</p>
         <div class="project-meta">
           <div><span class="label">Role</span><span>Architect · Builder</span></div>
-          <div><span class="label">Status</span><span>Built for a live D2C funnel</span></div>
+          <div><span class="label">Status</span><span>Demo · built for a live D2C funnel</span></div>
           <div><span class="label">What it does</span><span>Narration · Voice · Chat · Recommendations</span></div>
         </div>
         <div class="project-cta">
-          <a href="https://vahdam-lifecycle-os.anchit-tandon.com/lp/best" class="btn primary" target="_blank" rel="noopener">Open live project &#8599;</a>
+          <a href="https://vahdam-lifecycle-os.anchit-tandon.com/lp/best" class="btn primary" target="_blank" rel="noopener">Open the demo &#8599;</a>
         </div>
       </div>
 
@@ -5860,11 +5849,11 @@
         <p class="quote">"A role goes in; real, current openings from several free job boards come out — live, on request."</p>
         <div class="project-meta">
           <div><span class="label">Role</span><span>Product · Builder</span></div>
-          <div><span class="label">Status</span><span>Live · Free to use</span></div>
+          <div><span class="label">Status</span><span>Private tool · Google sign-in, free to use</span></div>
           <div><span class="label">What it does</span><span>Google sign-in · aggregates free public job boards · de-duplicated openings with apply links</span></div>
         </div>
         <div class="build-actions" style="margin-top:20px;">
-          <a class="btn primary" href="/jobhunt">Open Live Project<span class="build-launch" aria-hidden="true">↗</span></a>
+          <a class="btn primary" href="/jobhunt">Open the app (sign-in)<span class="build-launch" aria-hidden="true">↗</span></a>
         </div>
       </div>
 
@@ -6105,11 +6094,6 @@
         '<p>' + m[2] + '</p>' +
         '<span class="open">Open ' + (ext ? '\u2197' : '\u2192') + '</span></a>';
     }
-    // The LifeCycle-OS case study lists the suite's own modules. Same data,
-    // filtered — not a second copy that can drift out of step.
-    const lc = document.getElementById('lifecycleModGrid');
-    if (lc) lc.innerHTML = MODULES.filter(function (m) { return m[0] === 'LifeCycle-OS'; }).map(card).join('');
-
     // Side Hustle view: one tab per suite, each tab showing only that suite's
     // modules, so the projects above read first and either suite can be used
     // on its own. Suites come from MODULES in order, so a new suite gets a tab.
@@ -6162,7 +6146,7 @@
     });
   })();
 
-  const ALL_VIEWS = ['home','about','now','chat','experience','projects','resume','contact','project-parwah','project-disasters','project-lifecycle','project-agentlp','project-jobfit','project-music','project-thirdeye','project-yaara','project-mailer','project-telesuite','project-lifeengine'];
+  const ALL_VIEWS = ['home','about','now','chat','experience','projects','resume','contact','project-parwah','project-disasters','project-agentlp','project-jobfit','project-music','project-thirdeye','project-yaara','project-mailer','project-telesuite','project-lifeengine'];
   let audioModeEnabled = false; // true once user has clicked Play — gates page narration
   window.chatVoiceMuted = false; // chat replies speak aloud by default; mute toggle flips this
   // Browsers block speech before the first gesture — track it so the load-time
@@ -6452,6 +6436,9 @@
   const navLinks = document.querySelectorAll('[data-view]');
 
   function switchView(viewName, anchorId) {
+    // The Lifecycle OS case study moved to its canonical page. Old links,
+    // chat answers and shared /#project-lifecycle URLs all still land.
+    if (viewName === 'project-lifecycle') { location.assign('/lifecycle-os'); return; }
     if (viewName === 'schedule') { if (window.openScheduleModal) window.openScheduleModal(); return; }
     // Chat is a floating overlay available on every page — open it maximised
     // instead of navigating to a separate page.
@@ -6584,7 +6571,7 @@
 	      response: "This portfolio is my hobby product: a living, interactive OS-style profile instead of a static resume page. The home view gives the quick positioning, Work Experience explains the Vahdam and Times Internet story, Projects opens Parwah and my independent builds, Resume opens the PDF in a new tab, and Contact gives the fastest ways to reach me. The chat is meant to guide each page, answer specific questions in my voice, and keep narration controls available from the bottom tile.",
 	      nextChips: ["Start the tour","Show me your work","Tell me about Vahdam","How do I reach you?"] },
 	    { keywords: ['side','project','projects','build','builds','weekend','personal','ship','github','vercel'],
-	      response: "My side builds come from curiosity and the inability to stop at surface level. My portfolio itself is a hobby build. MusicGenAI is my passion project because music matters to me personally. The broader set includes Hey Yaara, MusicGenAI, The Third Eye, Mailer Architect, AI TeleSuite, LifeEngine, the All-in-One LP Agent, JobHunt, and D2C-LifeCycle-OS. <a data-nav='projects'>See them all →</a>",
+	      response: "My side builds come from curiosity and the inability to stop at surface level. My portfolio itself is a hobby build. MusicGenAI is my passion project because music matters to me personally. The broader set includes Hey Yaara, MusicGenAI, The Third Eye, Mailer Architect, AI TeleSuite, LifeEngine, the All-in-One LP Agent, JobHunt, and Lifecycle OS. <a data-nav='projects'>See them all →</a>",
 	      nextChips: ["Tell me about Hey Yaara","Tell me about Jarvis","Tell me about MusicGenAI","Why build on weekends?"] },
     { keywords: ['hey yaara','yaara','elderly','companion'],
       response: "Hey Yaara is an AI-powered voice companion designed specifically for elderly users to combat loneliness and assist with daily queries through a simple voice-first interface. I designed and built this PWA from scratch to remove all screen-based friction — users simply tap one button to talk and one to stop. Everything from transcription to speech response is handled entirely by voice. <a data-nav='project-yaara'>Full deep dive →</a>",
@@ -6600,16 +6587,16 @@
       nextChips: ["Open LifeEngine page","Tell me about Times Health+","Tell me about other builds","How do I reach you?"] },
     { keywords: ['lp agent','agent lp','all-in-one agent','all in one agent','landing page agent','narrator','recommendation engine','conversational commerce'],
       response: "The All-in-One LP Agent is a D2C marketing landing page with one embedded AI agent doing four jobs: it narrates the page aloud the moment you land, holds a two-way voice conversation when you tap Talk, answers typed questions in chat, and runs a 'help me choose' recommendation flow — all grounded in the page's own content. It's the landing page behaving like a salesperson instead of a monologue. <a data-nav='project-agentlp'>Full deep dive →</a>",
-      nextChips: ["Open LP Agent page","Tell me about D2C-LifeCycle-OS","Tell me about Hey Yaara","How do I reach you?"] },
+      nextChips: ["Open LP Agent page","Tell me about Lifecycle OS","Tell me about Hey Yaara","How do I reach you?"] },
     { keywords: ['jobhunt','job hunt','job search','jobfit','job fit','job agent','job board','linkedin','indeed','glassdoor','upwork','n8n','job posting'],
       response: "JobHunt is my no-code AI job-search agent, built in n8n. One click searches LinkedIn, Indeed, Glassdoor and Upwork at once, checks your existing Google Sheet so you never see a duplicate, formats every result (title, company, link, source), and appends only the new roles automatically. Re-run anytime — around 50+ fresh listings a run. It cut my own search from ~20 hours a week down to ~2. You get the importable workflow, a 20–30 min setup guide, and a support group. <a href='/jobhunt'>Open JobHunt →</a>",
       nextChips: ["Open JobHunt","Show me your other builds","Tell me about Lifecycle OS","How do I reach you?"] },
     { keywords: ['d2c lifecycle os','d2c-lifecycle-os','lifecycle os startup','universal lifecycle','plug and play','marketing automation','lifecycle startup','brand agnostic'],
-      response: "D2C-LifeCycle-OS is my plug-and-play, brand-agnostic lifecycle engine for any D2C brand. You enter a brand name or URL and it reads the category, benchmarks the competitive set the way a SimilarWeb / SEMrush market profile would — traffic mix, channel split, AOV and repeat-rate bands, seasonality — then designs the whole lifecycle live: audience segments, a campaign calendar, an on-brand sample mailer, retention automations and target KPIs. It runs on a free multi-provider LLM cascade with a deterministic fallback, so the demo always returns a usable plan grounded in industry-standard baselines — no login or proprietary data required. <a href='/d2c-lifecycle-os'>Open the live demo →</a>",
-      nextChips: ["Open D2C-LifeCycle-OS","Tell me about Lifecycle OS","Show me your other builds","How do I reach you?"] },
+      response: "Lifecycle OS is my plug-and-play, brand-agnostic lifecycle engine for any D2C brand. You enter a brand name or URL and it reads the category, benchmarks the competitive set the way a SimilarWeb / SEMrush market profile would — traffic mix, channel split, AOV and repeat-rate bands, seasonality — then designs the whole lifecycle live: audience segments, a campaign calendar, an on-brand sample mailer, retention automations and target KPIs. It runs on a free multi-provider LLM cascade with a deterministic fallback, so the demo always returns a usable plan grounded in industry-standard baselines — no login or proprietary data required. <a href='/lifecycle-os'>See the demo and case study →</a>",
+      nextChips: ["Open Lifecycle OS","Tell me about Lifecycle OS","Show me your other builds","How do I reach you?"] },
     { keywords: ['video avatar','talking head','avatar','talk to you','on camera','3d agent','digital twin','face','d-id','talking avatar'],
       response: "The AI Video Avatar is a photoreal, talking-head version of me: ask anything and my AI answers on camera in my own cloned voice. It's built on a D-ID talking-head engine driven from my portrait, my chatbot for the answers, and my TTS cascade for the voice — with mic input where the browser supports it. If the video engine isn't keyed it degrades gracefully to portrait + spoken reply, so it always responds. <a href='/agent'>Talk to my avatar →</a>",
-      nextChips: ["Talk to my avatar","Show me your other builds","Tell me about D2C-LifeCycle-OS","How do I reach you?"] },
+      nextChips: ["Talk to my avatar","Show me your other builds","Tell me about Lifecycle OS","How do I reach you?"] },
     { keywords: ['jarvis','ai os','operating system','vision','dream project','most attached'],
       response: "Jarvis is a proactive, context-aware AI operating system designed to act as an intelligent agent across multiple devices and workflows, rather than a simple conversational chatbot. I initiated this project to build a truly integrated AI workspace that understands context across apps and files. It's a long-term vision that I'm building step-by-step, and it is the side build I'm most passionate about.",
       nextChips: ["Why build on weekends?","Tell me about Hey Yaara","Your AI stack?","Show me your day job"] },
@@ -6707,15 +6694,15 @@
 	    projects: {
 	      kicker: 'Projects',
 	      title: 'What I build when curiosity wins',
-	      copy: 'This page ranks my most important builds, including D2C-LifeCycle-OS, MusicGenAI, this portfolio, The Third Eye, and more.',
+	      copy: 'This page ranks my most important builds, including Lifecycle OS, MusicGenAI, this portfolio, The Third Eye, and more.',
 	      coach: ['Each card explains the problem, stack, and implementation detail.', 'Portfolio is now in the top five because it is an active hobby build and interactive product surface.', 'Use chat to open any project deep dive or compare stacks.'],
 	      actions: [
 	        ['MusicGenAI', 'project-music'],
-	        ['D2C-LifeCycle-OS', 'project-lifecycle'],
+	        ['Lifecycle OS', 'query:Tell me about Lifecycle OS'],
 	        ['Portfolio build', 'query:Tell me about this portfolio build'],
 	        ['Narrate page', 'narrate']
 	      ],
-	      chips: ['Tell me about MusicGenAI','Tell me about D2C-LifeCycle-OS','What did you use to build these?','Which project matters most?']
+	      chips: ['Tell me about MusicGenAI','Tell me about Lifecycle OS','What did you use to build these?','Which project matters most?']
 	    },
 	    resume: {
 	      kicker: 'Resume',
@@ -6750,7 +6737,6 @@
 	    'project-lifeengine': ['LifeEngine', 'Personalized health engine', ['Turns generic wellness advice into daily routines.', 'Login-gated, privacy-conscious personalization flow.', 'Ask how its personalisation engine works.']],
 	    'project-thirdeye': ['The Third Eye', 'Agent-orchestrated AI OS', ['Explores agent workflows and multi-step task orchestration.', 'Built around AI operating-system style interactions.', 'Ask what the long-term AI OS vision is.']],
 	    'project-mailer': ['Mailer Architect', 'Universal mailer generator', ['Detects the context and writes send-ready HTML mailers for anything — brands, schools, offices, events, reminders, nonprofits.', 'Multi-LLM cascade with a deterministic fallback that always returns designed HTML.', 'Try the built-in Mailer Studio right on the page.']],
-	    'project-lifecycle': ['D2C-LifeCycle-OS', 'Brand-agnostic lifecycle engine', ['Enter any D2C brand and get an industry-benchmarked lifecycle plan.', 'Benchmarks the competitive set the way SimilarWeb / SEMrush profile a market.', 'Ask how the industry-standard baselines drive the plan.']],
 	    'project-agentlp': ['All-in-One LP Agent', 'Conversational landing page agent', ['One agent: audio narration, two-way voice, chat and recommendations.', 'Built for a live D2C funnel, grounded in the page content.', 'Ask how it changes landing page conversion.']],
 	    'project-jobfit': ['JobFit Agent', 'AI application assistant', ['Analyzes a job posting link against a base resume and portfolio.', 'Drafts a tailored resume, cover letter and optional hosted resume or portfolio site.', 'Includes free templates, theme, animation, domain and DOCX/PDF/TXT export choices.']]
 	  };
@@ -9986,6 +9972,35 @@
     content: ''; width: 6px; height: 6px; border-radius: 50%;
     background: var(--accent); animation: live 2s ease-in-out infinite;
   }
+  /* Honest tags. Only Live pulses: a pulsing dot says "running now, open it",
+     which is exactly the claim Demo and Private tool do not make. */
+  .build-tag .status[data-tag="demo"],
+  .build-tag .status[data-tag="private"],
+  .tag-legend .status[data-tag="demo"],
+  .tag-legend .status[data-tag="private"] { animation: none !important; }
+  .build-tag .status[data-tag="demo"], .tag-legend .status[data-tag="demo"] {
+    color: var(--ink) !important; background: transparent !important; border-color: var(--rule-strong) !important;
+  }
+  .build-tag .status[data-tag="demo"]::before, .tag-legend .status[data-tag="demo"]::before {
+    background: transparent; box-shadow: inset 0 0 0 1.5px var(--accent); animation: none;
+  }
+  .build-tag .status[data-tag="private"], .tag-legend .status[data-tag="private"] {
+    color: var(--ink-dim) !important; background: var(--bg-deep) !important; border: 1px dashed var(--rule-strong) !important;
+  }
+  .build-tag .status[data-tag="private"]::before, .tag-legend .status[data-tag="private"]::before {
+    background: var(--ink-dim); border-radius: 1px; animation: none;
+  }
+  .tag-legend {
+    margin-top: 18px; font-size: 14px; line-height: 1.7; color: var(--ink-dim);
+    display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center;
+  }
+  .tag-legend > span { display: inline-flex; align-items: center; gap: 8px; }
+  .tag-legend .status {
+    display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft);
+    border: 1px solid transparent; border-radius: 999px; padding: 2px 10px;
+  }
+  .tag-legend .status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
   @media (min-width: 1100px) {
     .builds-grid { grid-template-columns: repeat(3, 1fr) !important; }
     .builds-grid .build-card:first-child { grid-column: span 2; }
@@ -12595,7 +12610,7 @@
   var AGENTS = [
     { name:'Ask Me Anything', online:true, desc:"Ask me anything about my work, metrics and background — I answer in real time. <a href='#chat' data-nav='chat'>Open chat</a>" },
     { name:'AI Video Avatar', online:true, key:'avatar', desc:"I answer on camera in my own voice. <a href='/agent'>Talk to my avatar</a>" },
-    { name:'D2C-LifeCycle-OS', online:true, desc:"Plug in any D2C brand and I design its full lifecycle — segments, calendar, mailers, retention, KPIs. <a href='/d2c-lifecycle-os'>Open demo</a>" },
+    { name:'Lifecycle OS', online:true, desc:"Plug in any D2C brand and I design its full lifecycle — segments, calendar, mailers, retention, KPIs. <a href='/lifecycle-os'>Open demo</a>" },
     { name:'JobHunt', online:true, desc:"Live job search across free boards with direct apply links. <a href='/jobhunt'>Open JobHunt</a>" },
     { name:'Voice', online:true, key:'voice', desc:"Narration and spoken replies across the site." },
   ];

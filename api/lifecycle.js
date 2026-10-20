@@ -127,7 +127,7 @@ async function generate(prompt) {
   if (KEYS.cerebras()) providers.push(() => tryModels('cerebras', (m) => oaiChat('https://api.cerebras.ai/v1/chat/completions', KEYS.cerebras(), m, prompt, true)));
   const gk = KEYS.gemini();
   if (gk) providers.push(() => tryModels('gemini', (m) => geminiGen(gk, m, prompt)));
-  if (KEYS.openrouter()) providers.push(() => tryModels('openrouter', (m) => oaiChat('https://openrouter.ai/api/v1/chat/completions', KEYS.openrouter(), m, prompt, false, { 'HTTP-Referer': 'https://anchit-tandon.com/d2c-lifecycle-os', 'X-Title': 'D2C-LifeCycle-OS' })));
+  if (KEYS.openrouter()) providers.push(() => tryModels('openrouter', (m) => oaiChat('https://openrouter.ai/api/v1/chat/completions', KEYS.openrouter(), m, prompt, false, { 'HTTP-Referer': 'https://anchit-tandon.com/lifecycle-os-plan', 'X-Title': 'D2C-LifeCycle-OS' })));
   // Why the failures are collected rather than swallowed: a silent `catch`
   // here is what made a fully dead cascade look identical to "no key set" —
   // both produced the deterministic template with nothing to explain it.

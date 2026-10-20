@@ -142,7 +142,7 @@ window.LOS = (function () {
     ask:       { ic: '💬', nm: 'Ask the Brand Brain', href: '/lifecycle-os-ask' },
     music:     { ic: '🎵', nm: 'Sonic Branding', href: '/lifecycle-os-music' },
     audit:     { ic: '🔍', nm: 'Growth Audit', href: '/lifecycle-os-audit' },
-    plan:      { ic: '📋', nm: 'Full lifecycle plan', href: '/d2c-lifecycle-os' },
+    plan:      { ic: '📋', nm: 'Full lifecycle plan', href: '/lifecycle-os-plan' },
     connectors:{ ic: '🔌', nm: 'Connectors', href: '/lifecycle-os-connectors' },
   };
   var NEXT = {

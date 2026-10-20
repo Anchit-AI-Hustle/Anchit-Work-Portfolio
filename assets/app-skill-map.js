@@ -92,7 +92,7 @@
             id: 'life-engine',
             title: 'LifeEngine',
             description: 'A personalized wellness planner that turns goals into a practical daily routine.',
-            path: 'https://th-life-engine.vercel.app/',
+            path: 'https://th-life-engine.anchit-tandon.com/',
             external: true,
             capabilities: ['Goal context', 'Daily planning', 'Check-ins', 'Adaptive wellness guidance']
           }
@@ -106,10 +106,10 @@
         apps: [
           {
             id: 'd2c-lifecycle-os',
-            title: 'D2C LifeCycle OS',
-            description: 'The universal entry point for brand benchmarking and lifecycle strategy.',
-            path: '/d2c-lifecycle-os',
-            aliases: ['/d2c-lifecycle-os.html'],
+            title: 'Full Lifecycle Plan',
+            description: 'The one-shot Lifecycle OS engine: brand benchmark, lifecycle blueprint, segments and KPIs.',
+            path: '/lifecycle-os-plan',
+            aliases: ['/lifecycle-os-plan.html', '/d2c-lifecycle-os', '/d2c-lifecycle-os.html'],
             role: 'Dashboard',
             capabilities: ['Brand and category benchmark', 'Lifecycle blueprint', 'Segment strategy', 'KPI plan']
           },
@@ -287,7 +287,7 @@
             id: 'musicgenai',
             title: 'MusicGenAI',
             description: 'A prompt-to-song pipeline covering lyrics, vocals and generation history.',
-            path: 'https://music-gen-ai-blue.vercel.app/',
+            path: 'https://music-gen-ai.anchit-tandon.com/',
             external: true,
             capabilities: ['Prompt parsing', 'Lyric generation', 'Vocal synthesis', 'Generation history']
           }
@@ -321,7 +321,7 @@
             id: 'ai-telesuite',
             title: 'AI TeleSuite',
             description: 'Real-time transcription, pitch scoring and conversion assistance.',
-            path: 'https://ai-tele-suite.vercel.app/',
+            path: 'https://ai-tele-suite.anchit-tandon.com/',
             external: true,
             capabilities: ['Live transcription', 'Pitch scoring', 'Objection hints', 'Post-call feedback']
           },
