@@ -65,9 +65,12 @@
     'the-third-eye.anchit-tandon.com': 'third-eye',
     'personal-ai-os.anchit-tandon.com': 'task-tracker',
     'personal-ai-assistant-anchit.vercel.app': 'task-tracker',
+    'th-life-engine.anchit-tandon.com': 'life-engine',
     'th-life-engine.vercel.app': 'life-engine',
     'marketing-mailers-html-architect.anchit-tandon.com': 'mailer-architect',
+    'music-gen-ai.anchit-tandon.com': 'musicgenai',
     'music-gen-ai-blue.vercel.app': 'musicgenai',
+    'ai-tele-suite.anchit-tandon.com': 'ai-telesuite',
     'ai-tele-suite.vercel.app': 'ai-telesuite',
     'hey-yaara.anchit-tandon.com': 'hey-yaara',
     'hey-yaara.vercel.app': 'hey-yaara'

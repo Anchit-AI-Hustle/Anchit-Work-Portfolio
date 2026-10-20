@@ -81,7 +81,7 @@ const MUTATIONS = {
 const OWN_APPS = {
   'The-Third-Eye': 'https://the-third-eye.anchit-tandon.com/',
   'lifecycle-os': 'https://lifecycle-os.anchit-tandon.com/',
-  'AI-TeleSuite': 'https://ai-tele-suite.vercel.app/',
+  'AI-TeleSuite': 'https://ai-tele-suite.anchit-tandon.com/',
 };
 
 // One identity, one spelling. Bug 2 was a second spelling of the same profile.

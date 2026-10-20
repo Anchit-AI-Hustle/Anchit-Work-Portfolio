@@ -92,7 +92,7 @@
             id: 'life-engine',
             title: 'LifeEngine',
             description: 'A personalized wellness planner that turns goals into a practical daily routine.',
-            path: 'https://th-life-engine.vercel.app/',
+            path: 'https://th-life-engine.anchit-tandon.com/',
             external: true,
             capabilities: ['Goal context', 'Daily planning', 'Check-ins', 'Adaptive wellness guidance']
           }
@@ -287,7 +287,7 @@
             id: 'musicgenai',
             title: 'MusicGenAI',
             description: 'A prompt-to-song pipeline covering lyrics, vocals and generation history.',
-            path: 'https://music-gen-ai-blue.vercel.app/',
+            path: 'https://music-gen-ai.anchit-tandon.com/',
             external: true,
             capabilities: ['Prompt parsing', 'Lyric generation', 'Vocal synthesis', 'Generation history']
           }
@@ -321,7 +321,7 @@
             id: 'ai-telesuite',
             title: 'AI TeleSuite',
             description: 'Real-time transcription, pitch scoring and conversion assistance.',
-            path: 'https://ai-tele-suite.vercel.app/',
+            path: 'https://ai-tele-suite.anchit-tandon.com/',
             external: true,
             capabilities: ['Live transcription', 'Pitch scoring', 'Objection hints', 'Post-call feedback']
           },

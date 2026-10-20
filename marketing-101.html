@@ -16,7 +16,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231B1C3A'/%3E%3Cpath d='M6 16h4l2-6 3 12 3-9 2 3h6' stroke='%23E8447C' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700..800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
    THE SIGNAL DESK — design tokens
@@ -73,7 +73,7 @@ button{font:inherit;cursor:pointer}
 .brand-dot{margin-top:5px}
 .brand-dot{width:11px;height:11px;border-radius:50%;background:var(--signal);
   box-shadow:0 0 0 4px rgba(255,105,64,.22);flex:none}
-.brand-txt{min-width:0}
+.brand-txt{min-width:0;font:inherit;letter-spacing:normal;line-height:inherit}
 .brand-name{display:block;font-family:var(--display);font-size:1.02rem;font-weight:800;letter-spacing:-.02em;color:#fff;line-height:1.15}
 .brand-sub{display:block;font-family:var(--mono);font-size:.55rem;letter-spacing:.15em;color:var(--quiet);text-transform:uppercase;margin-top:4px;line-height:1.3}
 .master{margin-top:4px}
@@ -132,8 +132,8 @@ button{font:inherit;cursor:pointer}
 /* ---------- HERO ---------- */
 .hero{padding:64px 0 30px;position:relative}
 .eyebrow{font-family:var(--mono);font-size:.63rem;letter-spacing:.2em;color:var(--signal);margin-bottom:20px}
-.hero h1{font-size:clamp(2.5rem,6.4vw,4.35rem);line-height:.96;letter-spacing:-.038em}
-.hero h1 em{font-style:normal;color:var(--signal)}
+.hero .hero-title{font-size:clamp(2.5rem,6.4vw,4.35rem);line-height:.96;letter-spacing:-.038em}
+.hero .hero-title em{font-style:normal;color:var(--signal)}
 .hero-lede{font-size:1.18rem;color:var(--ink);margin:22px 0 0;max-width:44ch}
 .hero-strip{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
 .pill{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
@@ -151,17 +151,15 @@ button{font:inherit;cursor:pointer}
 .sec-head{display:flex;align-items:center;gap:12px;margin:46px 0 14px}
 .sec-head .n{font-family:var(--mono);font-size:.63rem;letter-spacing:.14em;color:var(--quiet);white-space:nowrap}
 .sec-head .l{flex:1;height:1px;background:var(--line)}
-h2.big{font-size:clamp(1.6rem,3.4vw,2.15rem);letter-spacing:-.03em;margin:0 0 10px}
 h3.mid{font-size:1.22rem;letter-spacing:-.02em;margin:0 0 8px}
 p{margin:0 0 14px}
-.lede{font-size:1.06rem;color:var(--ink)}
 .muted{color:var(--quiet)}
 .small{font-size:.92rem}
 
 /* ---------- CHAPTER HEADER ---------- */
 .ch-head{padding:52px 0 8px}
 .ch-num{font-family:var(--mono);font-size:.66rem;letter-spacing:.2em;color:var(--signal);margin-bottom:14px}
-.ch-head h1{font-size:clamp(2.05rem,5vw,3.1rem);letter-spacing:-.035em;line-height:1.02}
+.ch-head h2{font-size:clamp(2.05rem,5vw,3.1rem);letter-spacing:-.035em;line-height:1.02}
 .ch-lede{font-size:1.14rem;color:var(--ink);margin-top:16px;max-width:46ch}
 .ch-goals{display:grid;gap:9px;margin:24px 0 6px;padding:18px 20px;background:var(--card);
   border:1px solid var(--line);border-left:3px solid var(--flare);border-radius:0 var(--r-m) var(--r-m) 0}
@@ -263,11 +261,6 @@ canvas{width:100%;display:block;border-radius:10px;background:rgba(255,255,255,.
 .serp-desc{font-size:13px;color:#4d5156;line-height:1.45}
 .serp .cut{color:#9aa0a6}
 
-/* chips */
-.chips{display:flex;flex-wrap:wrap;gap:7px}
-.chip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:99px;
-  padding:5px 11px;font-family:var(--mono);font-size:.6rem;letter-spacing:.06em;color:var(--quiet)}
-.chip.on{background:var(--flare);color:var(--ink);border-color:var(--flare);font-weight:700}
 
 /* ---------- QUIZ ---------- */
 .quiz{background:var(--card);border:1px solid var(--line);border-radius:var(--r-l);padding:26px 28px;margin:24px 0;box-shadow:var(--shadow)}
@@ -328,7 +321,7 @@ canvas{width:100%;display:block;border-radius:10px;background:rgba(255,255,255,.
 
 /* ---------- CERTIFICATE ---------- */
 .cert{background:var(--card);color:#fff;border-radius:var(--r-l);padding:44px 40px;text-align:center;margin:26px 0}
-.cert h2{font-size:2.1rem;color:#fff;letter-spacing:-.03em}
+.cert h3{font-size:2.1rem;color:#fff;letter-spacing:-.03em}
 .cert .big-num{font-family:var(--display);font-size:4.4rem;font-weight:800;color:var(--flare);line-height:1;margin:14px 0 4px}
 .cert p{color:var(--quiet);max-width:46ch;margin:12px auto}
 .cert-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:28px}
@@ -363,9 +356,12 @@ canvas{width:100%;display:block;border-radius:10px;background:rgba(255,255,255,.
 @media (max-width:860px){
   body{font-size:17px}
   .app{grid-template-columns:1fr}
-  .desk{position:fixed;inset:0 auto 0 0;width:280px;z-index:80;transform:translateX(-101%);
-    transition:transform .28s cubic-bezier(.2,.8,.2,1);height:100vh}
-  .desk.open{transform:none;box-shadow:0 0 60px rgba(0,0,0,.4)}
+  /* translate, not transform: assets/cinematic.js makes .app a stagger scope
+     and its `.cin-stagger.cin-in>*{transform:none}` was holding this drawer
+     open over the lesson on every phone. The separate property composes. */
+  .desk{position:fixed;inset:0 auto 0 0;width:280px;z-index:80;translate:-101% 0;
+    transition:translate .28s cubic-bezier(.2,.8,.2,1);height:100vh}
+  .desk.open{translate:none;box-shadow:0 0 60px rgba(0,0,0,.4)}
   .scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:70;opacity:0;pointer-events:none;transition:.25s}
   .scrim.on{opacity:1;pointer-events:auto}
   .lab-grid{grid-template-columns:1fr}
@@ -402,8 +398,8 @@ canvas{width:100%;display:block;border-radius:10px;background:rgba(255,255,255,.
 .chapter[data-c="11"],.strip[data-c="11"],.dg-wrap[data-c="11"]{--ch:#12907A;--ch-a:#12907A1a;--ch-b:#12907A33}
 
 .ch-num{color:var(--ch)}
-.ch-head h1{position:relative}
-.ch-head h1:after{content:"";display:block;width:64px;height:5px;border-radius:3px;
+.ch-head h2{position:relative}
+.ch-head h2:after{content:"";display:block;width:64px;height:5px;border-radius:3px;
   background:var(--ch);margin-top:14px;transform-origin:left;animation:growW .7s var(--ease) both}
 @keyframes growW{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 .ch-goals{border-left-color:var(--ch)}
@@ -416,11 +412,7 @@ canvas{width:100%;display:block;border-radius:10px;background:rgba(255,255,255,.
 .strip.on .strip-name{color:#fff}
 .strip:hover:not(.on){background:rgba(255,255,255,.05)}
 .lab{border-top:3px solid var(--ch)}
-.lab-tag{color:var(--ch)}
-.quiz-head .qz-n,.act-tag{color:var(--ch)}
-.chip.on{background:var(--ch);border-color:var(--ch)}
 .lesson:hover{border-color:var(--ch-b)}
-.lesson-num{color:var(--ch)}
 .chnav a:hover,.chnav button:hover{border-color:var(--ch);color:var(--ch)}
 .notes:focus{border-color:var(--ch);box-shadow:0 0 0 3px var(--ch-a)}
 
@@ -428,8 +420,6 @@ canvas{width:100%;display:block;border-radius:10px;background:rgba(255,255,255,.
 :root{--ease:cubic-bezier(.22,1,.36,1)}
 .reveal{opacity:0;transform:translateY(22px)}
 .reveal.in{opacity:1;transform:none;transition:opacity .62s var(--ease),transform .62s var(--ease)}
-.reveal.d1.in{transition-delay:.07s}.reveal.d2.in{transition-delay:.14s}
-.reveal.d3.in{transition-delay:.21s}.reveal.d4.in{transition-delay:.28s}
 
 #scrollbar{position:fixed;top:0;left:0;height:3px;width:0;z-index:80;
   background:linear-gradient(90deg,var(--ch),var(--flare));transition:width .12s linear;
@@ -455,8 +445,6 @@ canvas{width:100%;display:block;border-radius:10px;background:rgba(255,255,255,.
 @keyframes popIn{0%{transform:scale(.96)}55%{transform:scale(1.025)}100%{transform:scale(1)}}
 @keyframes shake{0%,100%{transform:translateX(0)}22%{transform:translateX(-7px)}
   46%{transform:translateX(6px)}72%{transform:translateX(-3px)}}
-.explain{animation:slideDown .38s var(--ease) both}
-@keyframes slideDown{from{opacity:0;transform:translateY(-7px)}to{opacity:1;transform:none}}
 
 .check input:checked+span{animation:tick .34s var(--ease)}
 @keyframes tick{0%{transform:scale(1)}45%{transform:scale(1.16)}100%{transform:scale(1)}}
@@ -465,8 +453,6 @@ canvas{width:100%;display:block;border-radius:10px;background:rgba(255,255,255,.
 .lesson.read{box-shadow:inset 4px 0 0 var(--flare)}
 
 .ro-v{transition:color .25s}
-.ro-v.bump{animation:bump .34s var(--ease)}
-@keyframes bump{0%{transform:scale(1)}42%{transform:scale(1.09)}100%{transform:scale(1)}}
 
 .wave path{stroke-dasharray:1400;stroke-dashoffset:1400;animation:draw 2.6s var(--ease) .25s forwards}
 @keyframes draw{to{stroke-dashoffset:0}}
@@ -540,8 +526,6 @@ canvas{width:100%;display:block;border-radius:10px;background:rgba(255,255,255,.
 .dg.in .dg-curve{animation:draw 1.5s var(--ease) both}
 .dg-curve.alt{stroke:var(--signal);opacity:.65;stroke-dasharray:1300}
 .dg-area{fill:var(--ch);opacity:.11}
-.dg-spoke{stroke:var(--ch);stroke-width:1.5;stroke-dasharray:4 4;opacity:.6}
-.dg.in .dg-spoke{animation:march 1.4s linear infinite}
 .dg-gate{fill:var(--ch-a);stroke:var(--ch);stroke-width:1.8}
 .dg-tick{stroke:var(--ch);stroke-width:1.5;stroke-dasharray:3 3;opacity:.55}
 .dg-gantt{fill:var(--ch);opacity:.85;transform-box:fill-box;transform-origin:left}
@@ -670,8 +654,8 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
   body.printing .sheet{display:block;font-family:var(--body);color:#000;padding:0}
   .sheet header{border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:18px}
   .sheet header span{font-family:var(--mono);font-size:8pt;letter-spacing:.14em;text-transform:uppercase}
-  .sheet h1{font-family:var(--display);font-size:20pt;margin:6px 0 0;letter-spacing:-.02em}
-  .sheet h2{font-family:var(--mono);font-size:8pt;letter-spacing:.16em;text-transform:uppercase;
+  .sheet .sheet-title{font-family:var(--display);font-size:20pt;margin:6px 0 0;letter-spacing:-.02em}
+  .sheet h3{font-family:var(--mono);font-size:8pt;letter-spacing:.16em;text-transform:uppercase;
     margin:16px 0 7px;border-bottom:1px solid #999;padding-bottom:4px}
   .sheet section{break-inside:avoid}
   .sheet ul,.sheet ol{margin:0;padding-left:17px}
@@ -719,7 +703,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
   <div class="desk-head">
     <div class="brandmark">
       <span class="brand-dot"></span>
-      <span class="brand-txt"><span class="brand-name">The Signal Desk</span><span class="brand-sub">Marketing · Growth · Brand</span></span>
+      <h1 class="brand-txt"><span class="brand-name">The Signal Desk</span> <span class="brand-sub">Marketing · Growth · Brand</span></h1>
     </div>
     <div class="master">
       <div class="master-row">
@@ -834,7 +818,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
   
 <header class="hero">
   <p class="eyebrow">Marketing · Brand · Search · Social · Paid · Growth</p>
-  <h1>The<br><em>Signal Desk</em></h1>
+  <p class="hero-title dsp">The<br><em>Signal Desk</em></p>
   <p class="hero-lede">A working course in modern marketing for people who have to produce results, not just pass a module. Twelve chapters, one integrated depth, everything practised in the page.</p>
   <div class="hero-strip">
     <span class="pill"><b>12</b> chapters</span>
@@ -857,7 +841,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
 </header>
   <div class="ch-head reveal">
     <p class="ch-num">CHAPTER 00</p>
-    <h1>How this studio works</h1>
+    <h2>How this studio works</h2>
     <p class="ch-lede">Ten minutes here saves ten hours later. This page explains the three layers inside every lesson, the desk on the left, and how to use the labs without breaking anything.</p>
     <div class="ch-goals"><span class="mono">By the end of this chapter</span><ul><li>Read a lesson in three layers instead of one flat block</li><li>Use the desk to see exactly what is done and what is left</li><li>Know which parts are reading, which are practice, and which are proof</li></ul></div>
   </div>
@@ -1008,7 +992,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
   
   <div class="ch-head reveal">
     <p class="ch-num">CHAPTER 01</p>
-    <h1>How growth actually works</h1>
+    <h2>How growth actually works</h2>
     <p class="ch-lede">Before channels, before creative, before budget: the shape of the system. Funnels leak, loops compound, and knowing which one you are operating decides everything that follows.</p>
     <div class="ch-goals"><span class="mono">By the end of this chapter</span><ul><li>Describe a business as a set of loops rather than a single funnel</li><li>Pick a north-star metric that cannot be gamed</li><li>Recognise the difference between a growth problem and a product problem</li></ul></div>
   </div>
@@ -1031,7 +1015,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
 <div class="sec-head"><span class="n">WATCH</span><span class="l"></span></div>
 <div class="video reveal">
   <div class="video-frame" data-vid="hyYCn_kAngI">
-    <img class="vf-poster" src="https://i.ytimg.com/vi/hyYCn_kAngI/hqdefault.jpg" alt="" loading="lazy">
+    <picture><source type="image/webp" srcset="https://i.ytimg.com/vi_webp/hyYCn_kAngI/hqdefault.webp"><img class="vf-poster" src="https://i.ytimg.com/vi/hyYCn_kAngI/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async"></picture>
     <button class="vf-play" aria-label="Play: How to Get Your First Customers"><span class="vf-btn"></span></button>
     <span class="vf-cap">Click to play · loads from YouTube only when you ask</span>
   </div>
@@ -1213,7 +1197,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
   
   <div class="ch-head reveal">
     <p class="ch-num">CHAPTER 02</p>
-    <h1>The audience you are actually talking to</h1>
+    <h2>The audience you are actually talking to</h2>
     <p class="ch-lede">Every weak campaign in history was aimed at 'everyone'. This chapter is about narrowing until the message gets uncomfortably specific — because that is the point at which it starts working.</p>
     <div class="ch-goals"><span class="mono">By the end of this chapter</span><ul><li>Write an ICP tight enough to disqualify people</li><li>Run five useful customer conversations without leading the witness</li><li>Segment on behaviour and need, not demographics alone</li></ul></div>
   </div>
@@ -1236,7 +1220,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
 <div class="sec-head"><span class="n">WATCH</span><span class="l"></span></div>
 <div class="video reveal">
   <div class="video-frame" data-vid="z1iF1c8w5Lg">
-    <img class="vf-poster" src="https://i.ytimg.com/vi/z1iF1c8w5Lg/hqdefault.jpg" alt="" loading="lazy">
+    <picture><source type="image/webp" srcset="https://i.ytimg.com/vi_webp/z1iF1c8w5Lg/hqdefault.webp"><img class="vf-poster" src="https://i.ytimg.com/vi/z1iF1c8w5Lg/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async"></picture>
     <button class="vf-play" aria-label="Play: How to Talk to Users"><span class="vf-btn"></span></button>
     <span class="vf-cap">Click to play · loads from YouTube only when you ask</span>
   </div>
@@ -1420,7 +1404,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
   
   <div class="ch-head reveal">
     <p class="ch-num">CHAPTER 03</p>
-    <h1>Positioning and brand</h1>
+    <h2>Positioning and brand</h2>
     <p class="ch-lede">Positioning decides what the product gets compared to. Brand decides what people feel when they see it. Get the first wrong and the second cannot rescue it.</p>
     <div class="ch-goals"><span class="mono">By the end of this chapter</span><ul><li>Assemble a positioning statement from competitive alternatives upward</li><li>Separate brand strategy from visual identity without dismissing either</li><li>Write a purpose that survives contact with a pricing page</li></ul></div>
   </div>
@@ -1443,7 +1427,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
 <div class="sec-head"><span class="n">WATCH</span><span class="l"></span></div>
 <div class="video reveal">
   <div class="video-frame" data-vid="hdjlCLb9Hl8">
-    <img class="vf-poster" src="https://i.ytimg.com/vi/hdjlCLb9Hl8/hqdefault.jpg" alt="" loading="lazy">
+    <picture><source type="image/webp" srcset="https://i.ytimg.com/vi_webp/hdjlCLb9Hl8/hqdefault.webp"><img class="vf-poster" src="https://i.ytimg.com/vi/hdjlCLb9Hl8/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async"></picture>
     <button class="vf-play" aria-label="Play: How to nail your product positioning"><span class="vf-btn"></span></button>
     <span class="vf-cap">Click to play · loads from YouTube only when you ask</span>
   </div>
@@ -1628,7 +1612,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
   
   <div class="ch-head reveal">
     <p class="ch-num">CHAPTER 04</p>
-    <h1>Messaging and creative</h1>
+    <h2>Messaging and creative</h2>
     <p class="ch-lede">Positioning decides what to say. Messaging decides how to say it so a distracted human understands in three seconds and keeps reading.</p>
     <div class="ch-goals"><span class="mono">By the end of this chapter</span><ul><li>Build a message hierarchy from one claim down to proof</li><li>Write hooks that earn the second line instead of describing the product</li><li>Judge creative by mechanism, not by taste</li></ul></div>
   </div>
@@ -1651,7 +1635,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
 <div class="sec-head"><span class="n">WATCH</span><span class="l"></span></div>
 <div class="video reveal">
   <div class="video-frame" data-vid="u4ZoJKF_VuA">
-    <img class="vf-poster" src="https://i.ytimg.com/vi/u4ZoJKF_VuA/hqdefault.jpg" alt="" loading="lazy">
+    <picture><source type="image/webp" srcset="https://i.ytimg.com/vi_webp/u4ZoJKF_VuA/hqdefault.webp"><img class="vf-poster" src="https://i.ytimg.com/vi/u4ZoJKF_VuA/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async"></picture>
     <button class="vf-play" aria-label="Play: How great leaders inspire action"><span class="vf-btn"></span></button>
     <span class="vf-cap">Click to play · loads from YouTube only when you ask</span>
   </div>
@@ -1831,7 +1815,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
   
   <div class="ch-head reveal">
     <p class="ch-num">CHAPTER 05</p>
-    <h1>Search: SEO and AI answers</h1>
+    <h2>Search: SEO and AI answers</h2>
     <p class="ch-lede">Search is the only channel where demand already exists and someone is actively asking. This chapter covers how discovery works now — classic ranking plus answer engines — without the folklore.</p>
     <div class="ch-goals"><span class="mono">By the end of this chapter</span><ul><li>Classify keywords by intent before writing anything</li><li>Run a technical audit that finds the issues that actually cost traffic</li><li>Structure content so it can be cited by answer engines as well as ranked</li></ul></div>
   </div>
@@ -1854,7 +1838,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
 <div class="sec-head"><span class="n">WATCH</span><span class="l"></span></div>
 <div class="video reveal">
   <div class="video-frame" data-vid="xsVTqzratPs">
-    <img class="vf-poster" src="https://i.ytimg.com/vi/xsVTqzratPs/hqdefault.jpg" alt="" loading="lazy">
+    <picture><source type="image/webp" srcset="https://i.ytimg.com/vi_webp/xsVTqzratPs/hqdefault.webp"><img class="vf-poster" src="https://i.ytimg.com/vi/xsVTqzratPs/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async"></picture>
     <button class="vf-play" aria-label="Play: Complete SEO Course for Beginners"><span class="vf-btn"></span></button>
     <span class="vf-cap">Click to play · loads from YouTube only when you ask</span>
   </div>
@@ -2043,7 +2027,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
   
   <div class="ch-head reveal">
     <p class="ch-num">CHAPTER 06</p>
-    <h1>The content engine</h1>
+    <h2>The content engine</h2>
     <p class="ch-lede">Content stops being a cost centre the moment it becomes a system: clusters instead of posts, a production line instead of inspiration, distribution planned before the first word.</p>
     <div class="ch-goals"><span class="mono">By the end of this chapter</span><ul><li>Design a topic cluster that ranks as a group rather than as scattered pages</li><li>Run an editorial process that survives a busy month</li><li>Get more distribution out of each piece than it took to make</li></ul></div>
   </div>
@@ -2066,7 +2050,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
 <div class="sec-head"><span class="n">WATCH</span><span class="l"></span></div>
 <div class="video reveal">
   <div class="video-frame" data-vid="x5hH_lt8Guw">
-    <img class="vf-poster" src="https://i.ytimg.com/vi/x5hH_lt8Guw/hqdefault.jpg" alt="" loading="lazy">
+    <picture><source type="image/webp" srcset="https://i.ytimg.com/vi_webp/x5hH_lt8Guw/hqdefault.webp"><img class="vf-poster" src="https://i.ytimg.com/vi/x5hH_lt8Guw/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async"></picture>
     <button class="vf-play" aria-label="Play: How to use Ahrefs to improve SEO"><span class="vf-btn"></span></button>
     <span class="vf-cap">Click to play · loads from YouTube only when you ask</span>
   </div>
@@ -2256,7 +2240,7 @@ Preference centres</textarea></div>
   
   <div class="ch-head reveal">
     <p class="ch-num">CHAPTER 07</p>
-    <h1>Social media systems</h1>
+    <h2>Social media systems</h2>
     <p class="ch-lede">Social rewards consistency and format fluency far more than it rewards creativity. This chapter is about building a system that produces posts whether or not anyone feels inspired.</p>
     <div class="ch-goals"><span class="mono">By the end of this chapter</span><ul><li>Explain what each platform's ranking actually optimises for</li><li>Run a weekly cadence without burning out or going quiet</li><li>Judge social performance on the metrics that connect to the business</li></ul></div>
   </div>
@@ -2279,7 +2263,7 @@ Preference centres</textarea></div>
 <div class="sec-head"><span class="n">WATCH</span><span class="l"></span></div>
 <div class="video reveal">
   <div class="video-frame" data-vid="z1iF1c8w5Lg">
-    <img class="vf-poster" src="https://i.ytimg.com/vi/z1iF1c8w5Lg/hqdefault.jpg" alt="" loading="lazy">
+    <picture><source type="image/webp" srcset="https://i.ytimg.com/vi_webp/z1iF1c8w5Lg/hqdefault.webp"><img class="vf-poster" src="https://i.ytimg.com/vi/z1iF1c8w5Lg/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async"></picture>
     <button class="vf-play" aria-label="Play: How to Talk to Users"><span class="vf-btn"></span></button>
     <span class="vf-cap">Click to play · loads from YouTube only when you ask</span>
   </div>
@@ -2459,7 +2443,7 @@ Preference centres</textarea></div>
   
   <div class="ch-head reveal">
     <p class="ch-num">CHAPTER 08</p>
-    <h1>Paid media and the money math</h1>
+    <h2>Paid media and the money math</h2>
     <p class="ch-lede">Paid media is arithmetic wearing a creative costume. If the unit economics do not work at small spend, scale makes the loss bigger, not better.</p>
     <div class="ch-goals"><span class="mono">By the end of this chapter</span><ul><li>Calculate CAC, ROAS, contribution margin and break-even ROAS from first principles</li><li>Structure an account so learning is not destroyed by fragmentation</li><li>Test creative in a way that produces conclusions rather than opinions</li></ul></div>
   </div>
@@ -2482,7 +2466,7 @@ Preference centres</textarea></div>
 <div class="sec-head"><span class="n">WATCH</span><span class="l"></span></div>
 <div class="video reveal">
   <div class="video-frame" data-vid="-Y-RQtYLpHM">
-    <img class="vf-poster" src="https://i.ytimg.com/vi/-Y-RQtYLpHM/hqdefault.jpg" alt="" loading="lazy">
+    <picture><source type="image/webp" srcset="https://i.ytimg.com/vi_webp/-Y-RQtYLpHM/hqdefault.webp"><img class="vf-poster" src="https://i.ytimg.com/vi/-Y-RQtYLpHM/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async"></picture>
     <button class="vf-play" aria-label="Play: Google Analytics 4 tutorial for beginners"><span class="vf-btn"></span></button>
     <span class="vf-cap">Click to play · loads from YouTube only when you ask</span>
   </div>
@@ -2665,7 +2649,7 @@ Preference centres</textarea></div>
   
   <div class="ch-head reveal">
     <p class="ch-num">CHAPTER 09</p>
-    <h1>Lifecycle, email and retention</h1>
+    <h2>Lifecycle, email and retention</h2>
     <p class="ch-lede">Acquisition gets the attention and lifecycle gets the margin. Owned channels are the only place where reach cannot be repriced by someone else.</p>
     <div class="ch-goals"><span class="mono">By the end of this chapter</span><ul><li>Design the core automated flows in the right order of value</li><li>Segment a list so relevance rises and unsubscribes fall</li><li>Protect deliverability before it becomes an emergency</li></ul></div>
   </div>
@@ -2688,7 +2672,7 @@ Preference centres</textarea></div>
 <div class="sec-head"><span class="n">WATCH</span><span class="l"></span></div>
 <div class="video reveal">
   <div class="video-frame" data-vid="hyYCn_kAngI">
-    <img class="vf-poster" src="https://i.ytimg.com/vi/hyYCn_kAngI/hqdefault.jpg" alt="" loading="lazy">
+    <picture><source type="image/webp" srcset="https://i.ytimg.com/vi_webp/hyYCn_kAngI/hqdefault.webp"><img class="vf-poster" src="https://i.ytimg.com/vi/hyYCn_kAngI/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async"></picture>
     <button class="vf-play" aria-label="Play: How to Get Your First Customers"><span class="vf-btn"></span></button>
     <span class="vf-cap">Click to play · loads from YouTube only when you ask</span>
   </div>
@@ -2868,7 +2852,7 @@ Preference centres</textarea></div>
   
   <div class="ch-head reveal">
     <p class="ch-num">CHAPTER 10</p>
-    <h1>Analytics, experiments and truth</h1>
+    <h2>Analytics, experiments and truth</h2>
     <p class="ch-lede">Measurement is where marketing either becomes accountable or becomes theatre. This chapter is about building a measurement layer that can be trusted enough to make decisions with.</p>
     <div class="ch-goals"><span class="mono">By the end of this chapter</span><ul><li>Design an event schema before implementing anything</li><li>Read an experiment result without fooling yourself</li><li>Build a dashboard that answers questions instead of displaying numbers</li></ul></div>
   </div>
@@ -2891,7 +2875,7 @@ Preference centres</textarea></div>
 <div class="sec-head"><span class="n">WATCH</span><span class="l"></span></div>
 <div class="video reveal">
   <div class="video-frame" data-vid="-Y-RQtYLpHM">
-    <img class="vf-poster" src="https://i.ytimg.com/vi/-Y-RQtYLpHM/hqdefault.jpg" alt="" loading="lazy">
+    <picture><source type="image/webp" srcset="https://i.ytimg.com/vi_webp/-Y-RQtYLpHM/hqdefault.webp"><img class="vf-poster" src="https://i.ytimg.com/vi/-Y-RQtYLpHM/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async"></picture>
     <button class="vf-play" aria-label="Play: Google Analytics 4 tutorial for beginners"><span class="vf-btn"></span></button>
     <span class="vf-cap">Click to play · loads from YouTube only when you ask</span>
   </div>
@@ -3077,7 +3061,7 @@ Preference centres</textarea></div>
   
   <div class="ch-head reveal">
     <p class="ch-num">CHAPTER 11</p>
-    <h1>Capstone: the ninety-day plan</h1>
+    <h2>Capstone: the ninety-day plan</h2>
     <p class="ch-lede">Everything above becomes useful only when it turns into a sequence someone can execute on Monday. This chapter builds that sequence, and the operating rhythm that keeps it alive.</p>
     <div class="ch-goals"><span class="mono">By the end of this chapter</span><ul><li>Allocate budget and effort across channels with a stated rationale</li><li>Run a weekly and monthly rhythm that catches problems early</li><li>Present work to people who do not care about marketing craft</li></ul></div>
   </div>
@@ -3100,7 +3084,7 @@ Preference centres</textarea></div>
 <div class="sec-head"><span class="n">WATCH</span><span class="l"></span></div>
 <div class="video reveal">
   <div class="video-frame" data-vid="hdjlCLb9Hl8">
-    <img class="vf-poster" src="https://i.ytimg.com/vi/hdjlCLb9Hl8/hqdefault.jpg" alt="" loading="lazy">
+    <picture><source type="image/webp" srcset="https://i.ytimg.com/vi_webp/hdjlCLb9Hl8/hqdefault.webp"><img class="vf-poster" src="https://i.ytimg.com/vi/hdjlCLb9Hl8/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async"></picture>
     <button class="vf-play" aria-label="Play: How to nail your product positioning"><span class="vf-btn"></span></button>
     <span class="vf-cap">Click to play · loads from YouTube only when you ask</span>
   </div>
@@ -3287,7 +3271,7 @@ Preference centres</textarea></div>
 <div class="cert">
   <span class="mono" style="color:var(--flare)">Progress across all twelve chapters</span>
   <div class="big-num"><span id="certPct">0</span>%</div>
-  <h2>Course completion</h2>
+  <h3>Course completion</h3>
   <p>Completion measures coverage, not competence. The artefacts from the twelve field tasks are the actual record — an ICP, a positioning canvas, a cluster map, a unit-economics model, a tracking plan and a ninety-day plan.</p>
   <div class="cert-grid">
     <div class="cert-cell"><b id="certCh">0</b><span class="mono">Chapters complete</span></div>
@@ -3301,7 +3285,7 @@ Preference centres</textarea></div>
 <section class="chapter hide" id="ch-library" data-title="Library and glossary" data-num="LIB">
   <div class="ch-head">
     <p class="ch-num">REFERENCE</p>
-    <h1>Library and glossary</h1>
+    <h2>Library and glossary</h2>
     <p class="ch-lede">Everything referenced across the twelve chapters, in one place: free tools and the vocabulary in plain language.</p>
   </div>
   <div class="sec-head"><span class="n">REVIEW DECK</span><span class="l"></span></div>
@@ -3530,35 +3514,36 @@ function bindNotes(){
   });
 }
 
-/* ---------- video: real in-page embeds, loaded when the chapter opens ---------- */
-var VIDEO_IO = null;
+/* ---------- video: real in-page embeds, loaded when the reader presses play ---------- */
+/* The poster has always said "loads from YouTube only when you ask", but the
+   player used to mount as soon as a frame came within 420px of the viewport:
+   just reading chapter 01 pulled in ~1.3MB of YouTube scripts nobody asked
+   for. The poster is now a true facade — nothing leaves the page until the
+   play button is pressed, and that press starts the video. */
 function mountVideo(fr){
   if(fr.__mounted) return; fr.__mounted = 1;
   var vid = fr.getAttribute('data-vid');
-  if(location.protocol === 'file:'){
-    var btn = fr.querySelector('.vf-play'), cap = fr.querySelector('.vf-cap');
-    if(cap) cap.textContent = 'Opens on YouTube \u2014 in-page playback needs the hosted version';
-    if(btn && !btn.__b){ btn.__b = 1; btn.addEventListener('click', function(){
-      window.open('https://www.youtube.com/watch?v='+vid,'_blank','noopener'); }); }
-    return;
-  }
   var f = document.createElement('iframe');
-  f.src = 'https://www.youtube-nocookie.com/embed/'+vid+'?rel=0&modestbranding=1';
+  f.src = 'https://www.youtube-nocookie.com/embed/'+vid+'?rel=0&modestbranding=1&autoplay=1';
   f.setAttribute('allow','accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture; fullscreen');
   f.setAttribute('allowfullscreen','');
   f.setAttribute('referrerpolicy','strict-origin-when-cross-origin');
-  f.setAttribute('loading','lazy');
   f.setAttribute('title','Course video');
   fr.innerHTML = ''; fr.appendChild(f);
 }
 function bindVideos(){
-  if(!('IntersectionObserver' in window)){ $$('.video-frame').forEach(mountVideo); return; }
-  if(!VIDEO_IO){
-    VIDEO_IO = new IntersectionObserver(function(es){
-      es.forEach(function(e){ if(e.isIntersecting){ mountVideo(e.target); VIDEO_IO.unobserve(e.target); } });
-    }, {rootMargin:'420px 0px'});
-  }
-  $$('.video-frame').forEach(function(fr){ if(!fr.__mounted) VIDEO_IO.observe(fr); });
+  $$('.video-frame').forEach(function(fr){
+    if(fr.__bound) return; fr.__bound = 1;
+    var btn = fr.querySelector('.vf-play'); if(!btn) return;
+    if(location.protocol === 'file:'){
+      var cap = fr.querySelector('.vf-cap');
+      if(cap) cap.textContent = 'Opens on YouTube \u2014 in-page playback needs the hosted version';
+      btn.addEventListener('click', function(){
+        window.open('https://www.youtube.com/watch?v='+fr.getAttribute('data-vid'),'_blank','noopener'); });
+      return;
+    }
+    btn.addEventListener('click', function(){ mountVideo(fr); });
+  });
 }
 
 /* ---------- motion: scroll reveal, diagram play-in, progress bar ---------- */
@@ -4762,15 +4747,15 @@ function buildSheet(sec){
   box.id = 'printSheet'; box.className = 'sheet';
   var num = sec.getAttribute('data-num'), title = sec.getAttribute('data-title');
   var h = '<header><span>' + (window.__TITLE__ || '') + '</span>' +
-          '<h1>' + num + ' · ' + title + '</h1></header>';
+          '<h2 class="sheet-title">' + num + ' · ' + title + '</h2></header>';
   var goals = sec.querySelectorAll('.ch-goals li');
   goals = Array.prototype.slice.call(goals);
   if(goals.length){
-    h += '<section><h2>By the end of this chapter</h2><ul>';
+    h += '<section><h3>By the end of this chapter</h3><ul>';
     goals.forEach(function(g){ h += '<li>' + g.textContent.trim() + '</li>'; });
     h += '</ul></section>';
   }
-  h += '<section><h2>The lessons, one line each</h2><ol>';
+  h += '<section><h3>The lessons, one line each</h3><ol>';
   Array.prototype.slice.call(sec.querySelectorAll('.lesson')).forEach(function(ls){
     var t = ls.querySelector('.lesson-top h3'), sig = ls.querySelector('.st-signal p');
     h += '<li><b>' + (t ? t.textContent.trim() : '') + '</b><br>' +
@@ -4779,7 +4764,7 @@ function buildSheet(sec){
   h += '</ol></section>';
   var ros = sec.querySelectorAll('.ro-row .formula');
   if(ros.length){
-    h += '<section><h2>The arithmetic</h2><ul class="mono">';
+    h += '<section><h3>The arithmetic</h3><ul class="mono">';
     var seen = {};
     Array.prototype.slice.call(ros).forEach(function(f){
       var k = f.closest('.ro-k');
@@ -4792,13 +4777,13 @@ function buildSheet(sec){
   }
   var steps = sec.querySelectorAll('.activity ul.check label');
   if(steps.length){
-    h += '<section><h2>Field task</h2><ul class="boxes">';
+    h += '<section><h3>Field task</h3><ul class="boxes">';
     Array.prototype.slice.call(steps).forEach(function(s){ h += '<li>' + s.textContent.trim() + '</li>'; });
     h += '</ul></section>';
   }
   var note = sec.querySelector('.notes textarea, textarea.notes');
   if(note && typeof note.value === 'string' && note.value.trim()){
-    h += '<section><h2>Your notes</h2><p>' + note.value.trim().replace(/</g,'&lt;') + '</p></section>';
+    h += '<section><h3>Your notes</h3><p>' + note.value.trim().replace(/</g,'&lt;') + '</p></section>';
   }
   h += '<footer>Chapter ' + num + ' · print-out from ' + (window.__TITLE__ || '') + '</footer>';
   box.innerHTML = h;

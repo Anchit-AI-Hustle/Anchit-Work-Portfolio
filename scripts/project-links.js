@@ -55,6 +55,13 @@ const RELINK = {
   // visitor. The card uses the custom domain; this stops the walled form being
   // used by mistake later, which is the failure this whole table exists for.
   'vahdam-lifecycle-os.vercel.app': ['walled', 'vahdam-lifecycle-os.anchit-tandon.com'],
+  // Added 2026-10-20. These three were the last projects linked by their
+  // *.vercel.app address. Each custom subdomain was checked before the switch
+  // and serves byte-identical HTML to the old host, so the links moved there;
+  // a .vercel.app link is one alias reassignment away from pointing elsewhere.
+  'ai-tele-suite.vercel.app': ['vercel-host', 'ai-tele-suite.anchit-tandon.com'],
+  'th-life-engine.vercel.app': ['vercel-host', 'th-life-engine.anchit-tandon.com'],
+  'music-gen-ai-blue.vercel.app': ['vercel-host', 'music-gen-ai.anchit-tandon.com'],
 };
 
 const results = [];
@@ -123,25 +130,64 @@ const home = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const cards = home.match(/<div class="build-card[\s\S]*?\n        <\/div>/g) || [];
 const liveNoLink = [];
 for (const c of cards) {
-  const status = (c.match(/class="status">([^<]*)</) || [])[1] || '';
-  if (!/live/i.test(status)) continue;                 // "Building" promises nothing yet
+  const status = (c.match(/class="status"[^>]*>([^<]*)</) || [])[1] || '';
+  // Live and Demo both promise something a visitor can open; Private tool
+  // still links its sign-in, but does not promise to let a stranger in.
+  if (!/^(live|demo)$/i.test(status)) continue;
   const title = textOf((c.match(/<h3>([\s\S]*?)<\/h3>/) || [])[1] || '?').trim();
   const hrefs = [...c.matchAll(/<a[^>]*href="([^"]+)"/g)].map((m) => m[1]);
   // A '#view' link is in-site navigation to the write-up, not the product.
   if (!hrefs.some((h) => !h.startsWith('#'))) liveNoLink.push(title);
 }
-check('every card marked Live can actually be opened',
+check('every card marked Live or Demo can actually be opened',
   liveNoLink.length === 0,
   liveNoLink.length ? liveNoLink.join(', ') + ' -> case study only'
                     : cards.length + ' cards, every Live one has a link');
 
-// 2. Every build tile on the freelance page opens a real product.
+// 3. Every card carries exactly one honest tag, and it agrees with the manifest.
+//
+//    A portfolio review found all fifteen cards marked LIVE, including ones that
+//    open on a PIN screen and ones that only run on sample data. The tags are
+//    now Live (a public product anyone can use now), Demo (sample data or a demo
+//    route) and Private tool (sign-in or internal), decided from each project's
+//    actual link. This holds the vocabulary and stops the card and
+//    data/projects.json from drifting apart again.
+{
+  const TAGS = { live: 'Live', demo: 'Demo', private: 'Private tool' };
+  const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/projects.json'), 'utf8')).projects;
+  const bad = [];
+  cards.forEach((c, i) => {
+    const title = textOf((c.match(/<h3>([\s\S]*?)<\/h3>/) || [])[1] || '?').trim();
+    const tags = [...c.matchAll(/<span class="status" data-tag="(\w+)">([^<]*)<\/span>/g)];
+    const all = (c.match(/class="status/g) || []).length;
+    if (tags.length !== 1 || all !== 1) { bad.push(title + ': ' + all + ' status chips'); return; }
+    const [, key, label] = tags[0];
+    if (TAGS[key] !== label) { bad.push(title + ': data-tag="' + key + '" reads "' + label + '"'); return; }
+    if (/^live$/i.test(label) && /Open the demo|sign-in\)/.test(c)) bad.push(title + ': Live card labels its link as a demo or sign-in');
+    if (!/^live$/i.test(label) && />Open live/i.test(c)) bad.push(title + ': ' + label + ' card says "Open live"');
+    const m = manifest[i];
+    if (m && m.status !== label) bad.push(title + ': card "' + label + '" vs manifest ' + m.id + ' "' + m.status + '"');
+  });
+  check('every card has one honest tag matching the manifest',
+    bad.length === 0 && cards.length === manifest.length,
+    bad.length ? bad.join(' | ') : cards.length + ' cards: ' + Object.values(TAGS).map((t) =>
+      cards.filter((c) => c.includes('>' + t + '</span>')).length + ' ' + t).join(', '));
+  const legendLine = (home.match(/<p class="tag-legend">[\s\S]*?<\/p>/) || [''])[0];
+  const legend = Object.entries(TAGS).every(([k, t]) => legendLine.includes('data-tag="' + k + '">' + t + '</span>'));
+  check('the projects view explains the three tags', legend, legend ? 'legend present' : 'tag-legend line missing');
+}
+
+// 4. Every build tile on the freelance page opens a real product.
 const fl = fs.readFileSync(path.join(ROOT, 'freelancer.html'), 'utf8');
 const tiles = [...fl.matchAll(/<article class="buildtile">([\s\S]*?)<\/article>/g)].map((m) => {
   const name = (m[1].match(/<h4>([^<]+)<\/h4>/) || [])[1] || '?';
   const href = (m[1].match(/<a[^>]*href="([^"]*)"/) || [])[1] || '';
   return { name, href };
 });
+check('every build tile carries one honest tag',
+  [...fl.matchAll(/<article class="buildtile">([\s\S]*?)<\/article>/g)].every((m) =>
+    (m[1].match(/<span class="tiletag" data-tag="(live|demo|private)">(Live|Demo|Private tool)<\/span>/g) || []).length === 1),
+  'freelancer.html');
 check('every build tile has a link at all', tiles.length === 4 && tiles.every((t) => t.href),
   tiles.length + ' tiles');
 const notLive = tiles.filter((t) => !/^https:\/\//.test(t.href));
