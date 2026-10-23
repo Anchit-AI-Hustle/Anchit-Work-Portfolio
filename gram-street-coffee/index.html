@@ -89,9 +89,12 @@
     position: relative;
     transform-style: preserve-3d;
     transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-    will-change: transform;
     overflow: hidden;
   }
+  /* The tilt is pointer-driven, so the layer is only worth holding while a
+     pointer is on the card. Promoting every card for the whole visit costs
+     memory on all of them to help whichever one gets hovered. */
+  .tilt-card:hover, .tilt-card:focus-within { will-change: transform; }
   .tilt-card::after {
     content: '';
     position: absolute;
@@ -635,7 +638,9 @@
     transform-origin: 50% 50%;
     will-change: transform, opacity;
   }
-  .walk.is-past .walk-layer, .walk.is-before .walk-layer { will-change: auto; }
+  .walk.is-past .walk-layer, .walk.is-before .walk-layer,
+  .walk.is-past .walk-cap, .walk.is-before .walk-cap,
+  .walk.is-past .walk-hint, .walk.is-before .walk-hint { will-change: auto; }
   .walk-layer svg, .walk-layer img { display: block; width: 100%; height: auto; }
   .walk-layer img { border-radius: 10px; }
 
@@ -1203,7 +1208,7 @@
 
         <!-- 2. the window, with the room showing through it -->
         <div class="walk-layer" data-z0="-1500" data-z1="1750" data-in="0.06" data-out="0.42" style="width:min(62vw,760px)">
-          <img src="/assets/brand/u-1646954256973-f7fd9ce626b1-1200.jpg" alt="" loading="lazy" decoding="async" width="1200" height="800">
+          <img src="/assets/brand/u-1646954256973-f7fd9ce626b1-800.jpg" alt="" loading="lazy" decoding="async" width="800" height="1200">
         </div>
 
         <!-- 3. the room: pendants and the back shelf -->
@@ -1259,7 +1264,7 @@
 
         <!-- 5. the shot, in your hand -->
         <div class="walk-layer" data-z0="-3600" data-z1="300" data-in="0.74" data-out="1.06" style="width:min(48vw,560px)">
-          <img src="/assets/brand/u-1534778101976-62847782c213-1200.jpg" alt="" loading="lazy" decoding="async" width="1200" height="800">
+          <img src="/assets/brand/u-1534778101976-62847782c213-1200.jpg" alt="" loading="lazy" decoding="async" width="1200" height="1799">
         </div>
 
       </div>
@@ -1445,7 +1450,7 @@
 
     <!-- Right Visual Canvas: Macro Photography with Subtle Steam Canvas Overlay -->
     <div class="lg:col-span-6 relative rounded-2xl overflow-hidden border-2 border-[#2B1650]/15 shadow-2xl min-h-[380px] bg-slate-900 group">
-      <img id="craftExtractionImg" src="/assets/brand/u-1514432324607-a09d9b4aefdd-1200.jpg" alt="Espresso extraction from bottomless portafilter" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 min-h-[380px]" />
+      <img id="craftExtractionImg" src="/assets/brand/u-1514432324607-a09d9b4aefdd-1200.jpg" loading="lazy" decoding="async" alt="Espresso extraction from bottomless portafilter" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 min-h-[380px]" />
       <!-- Floating Steam Mist Canvas -->
       <canvas id="coffeeSteamCanvas" class="absolute inset-0 pointer-events-none z-10"></canvas>
       <div class="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/20 text-white flex items-center justify-between z-20 text-xs font-bold">
@@ -1503,7 +1508,7 @@
 
     <!-- Right Photo Display -->
     <div class="lg:col-span-6 relative rounded-2xl overflow-hidden border-2 border-[#2B1650]/15 shadow-2xl min-h-[380px] bg-slate-900 group">
-      <img id="craftLatteImg" src="/assets/brand/u-1534778101976-62847782c213-1200.jpg" alt="Handcrafted latte art pouring" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 min-h-[380px]" />
+      <img id="craftLatteImg" src="/assets/brand/u-1534778101976-62847782c213-1200.jpg" loading="lazy" decoding="async" alt="Handcrafted latte art pouring" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 min-h-[380px]" />
       <div class="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/20 text-white flex items-center justify-between z-20 text-xs font-bold">
         <span id="craftLatteCaption">Classic 8-Leaf Rosetta Pattern</span>
         <span class="text-emerald-400">Microfoam Sweet Spot</span>
@@ -1637,7 +1642,7 @@
           <img src="/assets/brand/story-gs-2-plant.jpg" alt="Vegetables and herbs prepped on a stainless kitchen counter" loading="lazy" decoding="async" width="900" height="455">
         </figure>
         <figure class="cc-shot" style="--i:2; --era:#CDB8F7">
-          <img src="/assets/brand/u-1534778101976-62847782c213-1200.jpg" alt="Latte art poured at the counter" loading="lazy" decoding="async" width="1200" height="800">
+          <img src="/assets/brand/u-1534778101976-62847782c213-1200.jpg" alt="Latte art poured at the counter" loading="lazy" decoding="async" width="1200" height="1799">
         </figure>
       </div>
     </div>
@@ -1785,6 +1790,8 @@
           <img
               id="scratchBgImage"
               src="/assets/brand/u-1554118811-1e0d58224f24-1200.jpg"
+              loading="lazy"
+              decoding="async"
               alt="Gram Street Coffee Flagship Interior"
               class="w-full h-full object-cover transition-opacity duration-500"
             />
@@ -2445,7 +2452,7 @@
         <div class="d2c-card tilt-card scroll-reveal p-7 flex flex-col justify-between space-y-5">
         <div>
           <div class="relative h-64 rounded-2xl overflow-hidden mb-5 bg-black/10">
-            <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
+            <img src="${p.image}" alt="${p.name}" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
             <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-[#2B1650] text-[#F1E9FF]">
               ${p.sub}
               </span>

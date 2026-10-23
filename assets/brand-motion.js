@@ -61,7 +61,11 @@
       var inner = document.createElement('span');
       inner.className = 'bm-wi';
       inner.style.display = 'inline-block';
-      inner.style.willChange = 'transform, opacity';
+      // NOT promoted here. Splitting happens for every heading on the page at
+      // once, while most of them are still far below the fold - setting
+      // will-change at split time left dozens of words holding a compositor
+      // layer each, for minutes, waiting for a scroll that may never come.
+      // It goes on in play(), one heading at a time, and comes off again.
       inner.textContent = word;
       outer.appendChild(inner);
       el.appendChild(outer);
@@ -94,6 +98,7 @@
       gsap.set(words, { yPercent: 115, rotateX: -78, opacity: 0 });
 
       var play = function () {
+        words.forEach(function (w) { w.style.willChange = 'transform, opacity'; });
         gsap.to(words, {
           yPercent: 0, rotateX: 0, opacity: 1,
           duration: 0.95, ease: 'power3.out', stagger: 0.045,
