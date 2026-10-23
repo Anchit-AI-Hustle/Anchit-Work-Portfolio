@@ -1825,6 +1825,13 @@
 
   <!-- Step 1 of the order: what is in the bag -->
   <div id="bagFoot" class="border-t border-[#2B1650]/20 pt-6 space-y-4">
+    <!-- Shown only when a recent order is still in storage. The bag is never
+         empty on this page (it ships with a sample in it), so the restored
+         order needs a way back that does not depend on an empty bag. -->
+    <button type="button" id="ordLast" onclick="viewLastOrder()" class="hidden w-full text-left px-4 py-2.5 rounded-xl bg-[#F5EFFF] border border-[#7C3AED]/30 hover:border-[#7C3AED] transition-all">
+      <span class="block text-[10px] font-black uppercase tracking-[0.16em] text-[#7C3AED]">Your last order</span>
+      <span class="block text-sm font-black text-[#2B1650]" id="ordLastRef">—</span>
+    </button>
     <div class="flex justify-between text-sm">
       <span class="font-bold uppercase tracking-wider text-[#534168]">Subtotal</span>
       <span id="cartTotalPrice" class="text-2xl font-display font-black text-[#7C3AED]">₹580</span>
@@ -2720,6 +2727,33 @@
 
   var form = document.getElementById('bagCheckout');
   if (form) form.addEventListener('submit', submitOrder);
+
+  // Storing the order was only half of surviving a reload: the reference and
+  // the handoff lived in the DOM, so a refresh before sending stranded an
+  // order that was still sitting in storage. The most recent one from the last
+  // two hours is put back on the confirmation step, where Copy and the
+  // WhatsApp link work exactly as they did. Adding anything new leaves it.
+  function restoreOrder() {
+    var last = null;
+    try { last = (JSON.parse(localStorage.getItem(ORDER_KEY) || '[]'))[0] || null; } catch (e) { return; }
+    if (!last || !last.ref) return;
+    if (Date.now() - Date.parse(last.placedAt || 0) > 2 * 60 * 60 * 1000) return;
+    lastOrder = last;
+    var ref = document.getElementById('ordRef');
+    var sum = document.getElementById('ordSummary');
+    var wa = document.getElementById('ordWa');
+    if (ref) ref.textContent = last.ref;
+    if (sum) sum.textContent = last.items.reduce(function (n, i) { return n + i.qty; }, 0) +
+      ' item(s) · ₹' + last.total + ' · to ' + last.name + ' on ' + last.phone +
+      '. The roastery confirms on WhatsApp before it roasts.';
+    if (wa) wa.href = 'https://api.whatsapp.com/send?phone=' + WA_NUMBER + '&text=' + encodeURIComponent(orderText(last));
+    var chip = document.getElementById('ordLast');
+    var chipRef = document.getElementById('ordLastRef');
+    if (chipRef) chipRef.textContent = last.ref;
+    if (chip) chip.classList.remove('hidden');
+  }
+  window.viewLastOrder = function () { if (lastOrder) step('done'); };
+  restoreOrder();
 
   // Kept for anything still calling the old name.
   window.checkoutBag = window.startCheckout;

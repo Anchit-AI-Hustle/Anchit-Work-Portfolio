@@ -1224,6 +1224,13 @@
 
     <!-- Drawer Footer & Checkout -->
     <div id="dcBagFoot" class="border-t border-[#CD2653]/15 pt-5 space-y-4">
+      <!-- Shown only when a recent order is still in storage. The basket is
+           never empty on this page (it ships with a sample in it), so the
+           restored order needs a way back that does not depend on that. -->
+      <button type="button" id="dcLast" onclick="viewLastDeliOrder()" class="hidden w-full text-left px-4 py-2.5 rounded-xl bg-[#FFF3F6] border border-[#CD2653]/30 hover:border-[#CD2653] transition-all">
+        <span class="block text-[10px] font-bold uppercase tracking-[0.16em] text-[#CD2653]">Your last order</span>
+        <span class="block text-sm font-bold text-[#4A0E17]" id="dcLastRef">—</span>
+      </button>
       <!-- Delivery Slot Selector -->
       <div>
         <label class="block text-[11px] font-bold uppercase tracking-wider text-[#6B625B] mb-1.5">Select NCR Delivery Slot:</label>
@@ -1306,7 +1313,7 @@
         <a id="dcWa" href="#" target="_blank" rel="noopener" class="flex-1 text-center py-3.5 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-[0.16em] hover:bg-[#8C1434] transition-all">Send it on WhatsApp ↗</a>
         <button type="button" onclick="copyDeliOrder()" id="dcCopy" class="px-5 py-3.5 rounded-full border border-[#CD2653]/30 text-[#4A0E17] font-bold text-xs uppercase tracking-[0.16em] hover:bg-[#FFF3F6] transition-all">Copy</button>
       </div>
-      <p class="text-[10px] leading-relaxed text-[#6B625B]">If WhatsApp does not open, the whole order is on the clipboard — the concierge is on <a class="underline font-bold" href="tel:+919810002023">+91 98100 02023</a>.</p>
+      <p class="text-[10px] leading-relaxed text-[#6B625B]">If WhatsApp does not open, press Copy to put the whole order on the clipboard — the concierge is on <a class="underline font-bold" href="tel:+919810002023">+91 98100 02023</a>.</p>
       <button type="button" onclick="backToBasket()" class="w-full py-3 rounded-full border border-[#CD2653]/25 text-[#6B625B] font-bold text-[11px] uppercase tracking-[0.16em] hover:bg-[#FFF3F6] transition-all">Start another basket</button>
     </div>
   </div>
@@ -2045,6 +2052,10 @@
         basket.push({ id: p.id, name: p.name, weight: p.weight, price: p.price, qty: 1 });
       }
       updateBasketUI();
+      // A new basket is not the old order: without this the drawer reopens on
+      // the previous confirmation, hiding what was just added and leaving a
+      // spent reference and its WhatsApp payload live on the screen.
+      dcStep('bag');
       toggleBasket(true);
     }
 
@@ -2298,6 +2309,31 @@
 
     const dcForm = document.getElementById('dcCheckout');
     if (dcForm) dcForm.addEventListener('submit', placeDeliOrder);
+
+    // Storing the order was only half of surviving a reload: the reference and
+    // the handoff lived in the DOM, so a refresh before sending stranded an
+    // order that was still sitting in storage. The most recent one from the
+    // last two hours is put back on the confirmation step, where Copy and the
+    // WhatsApp link work exactly as they did. Adding anything new leaves it.
+    function restoreDeliOrder() {
+      let last = null;
+      try { last = (JSON.parse(localStorage.getItem(DC_ORDER_KEY) || '[]'))[0] || null; } catch (e) { return; }
+      if (!last || !last.ref) return;
+      if (Date.now() - Date.parse(last.placedAt || 0) > 2 * 60 * 60 * 1000) return;
+      dcLastOrder = last;
+      const ref = document.getElementById('dcRef');
+      const sum = document.getElementById('dcSummary');
+      const wa = document.getElementById('dcWa');
+      if (ref) ref.textContent = last.ref;
+      if (sum) sum.textContent = `${last.items.reduce((n, i) => n + i.qty, 0)} item(s) · ₹${last.total} · ${last.slot} · to ${last.name} on ${last.phone}.`;
+      if (wa) wa.href = `https://api.whatsapp.com/send?phone=919810002023&text=${encodeURIComponent(dcOrderText(last))}`;
+      const chip = document.getElementById('dcLast');
+      const chipRef = document.getElementById('dcLastRef');
+      if (chipRef) chipRef.textContent = last.ref;
+      if (chip) chip.classList.remove('hidden');
+    }
+    function viewLastDeliOrder() { if (dcLastOrder) dcStep('done'); }
+    restoreDeliOrder();
 
     
 
