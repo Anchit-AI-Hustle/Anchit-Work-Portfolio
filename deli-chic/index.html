@@ -1196,7 +1196,7 @@
 <!-- ================= SLIDE-OVER BASKET DRAWER ================= -->
 <div id="basketModal" class="fixed inset-0 z-50 hidden">
   <div onclick="toggleBasket(false)" class="absolute inset-0 bg-black/75 backdrop-blur-sm"></div>
-  <div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-[#CD2653]/25 p-8 flex flex-col justify-between shadow-2xl text-[#1C1917]">
+  <div id="dcPanel" class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-[#CD2653]/25 p-8 flex flex-col justify-between overflow-y-auto shadow-2xl text-[#1C1917]">
     <div>
       <!-- Drawer Header -->
       <div class="flex items-center justify-between border-b border-[#CD2653]/15 pb-4">
@@ -1219,11 +1219,11 @@
       </div>
 
       <!-- Items Container -->
-      <div id="basketItemsList" class="mt-5 space-y-3.5 max-h-[46vh] overflow-y-auto pr-1"></div>
+      <div id="dcBagBody"><div id="basketItemsList" class="mt-5 space-y-3.5 max-h-[46vh] overflow-y-auto pr-1"></div></div>
     </div>
 
     <!-- Drawer Footer & Checkout -->
-    <div class="border-t border-[#CD2653]/15 pt-5 space-y-4">
+    <div id="dcBagFoot" class="border-t border-[#CD2653]/15 pt-5 space-y-4">
       <!-- Delivery Slot Selector -->
       <div>
         <label class="block text-[11px] font-bold uppercase tracking-wider text-[#6B625B] mb-1.5">Select NCR Delivery Slot:</label>
@@ -1264,9 +1264,50 @@
         </div>
       </div>
 
-      <button onclick="dispatchToWhatsApp()" class="knife-glint w-full py-4 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#8C1434] transition-all shadow-lg shadow-[#CD2653]/30 flex items-center justify-center gap-2">
+      <button onclick="startDeliCheckout()" class="knife-glint w-full py-4 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#8C1434] transition-all shadow-lg shadow-[#CD2653]/30 flex items-center justify-center gap-2">
         <span>Dispatch via WhatsApp Concierge ↗</span>
       </button>
+    </div>
+
+    <!-- Step 2: who the cuts are for. The concierge was being handed a list
+         of meat with no name, no number and no address on it. -->
+    <form id="dcCheckout" class="hidden border-t border-[#CD2653]/15 pt-5 space-y-3" novalidate>
+      <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-[#CD2653]">Cold-chain dispatch · your details</p>
+      <label class="block">
+        <span class="block text-[11px] font-bold uppercase tracking-wider text-[#6B625B] mb-1">Name</span>
+        <input id="dcName" autocomplete="name" class="w-full px-4 py-2.5 rounded-xl border border-[#CD2653]/30 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#CD2653]/40">
+      </label>
+      <label class="block">
+        <span class="block text-[11px] font-bold uppercase tracking-wider text-[#6B625B] mb-1">Mobile</span>
+        <input id="dcPhone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="98100 02023" class="w-full px-4 py-2.5 rounded-xl border border-[#CD2653]/30 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#CD2653]/40">
+      </label>
+      <label class="block">
+        <span class="block text-[11px] font-bold uppercase tracking-wider text-[#6B625B] mb-1">Delivery address <span class="font-semibold normal-case tracking-normal opacity-70">(Delhi NCR)</span></span>
+        <textarea id="dcAddr" autocomplete="street-address" rows="2" class="w-full px-4 py-2.5 rounded-xl border border-[#CD2653]/30 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#CD2653]/40"></textarea>
+      </label>
+      <label class="block">
+        <span class="block text-[11px] font-bold uppercase tracking-wider text-[#6B625B] mb-1">Cutting or marinade notes <span class="font-semibold normal-case tracking-normal opacity-70">(optional)</span></span>
+        <input id="dcNote" class="w-full px-4 py-2.5 rounded-xl border border-[#CD2653]/30 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#CD2653]/40">
+      </label>
+      <p id="dcError" role="alert" class="hidden text-xs font-bold text-rose-700"></p>
+      <div class="flex items-center gap-2 pt-1">
+        <button type="button" onclick="backToBasket()" class="px-5 py-3.5 rounded-full border border-[#CD2653]/30 text-[#4A0E17] font-bold text-xs uppercase tracking-[0.16em] hover:bg-[#FFF3F6] transition-all">← Basket</button>
+        <button type="submit" class="flex-1 py-3.5 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#8C1434] transition-all shadow-lg shadow-[#CD2653]/30">Place the order</button>
+      </div>
+      <p class="text-[10px] leading-relaxed text-[#6B625B]">No card is taken here. The concierge confirms the cuts and sends a payment link before anything leaves the cold room.</p>
+    </form>
+
+    <!-- Step 3: placed, with a reference the concierge can be held to -->
+    <div id="dcDone" class="hidden border-t border-[#CD2653]/15 pt-5 space-y-3">
+      <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-[#CD2653]">Order placed</p>
+      <p class="text-3xl font-serif-chic font-bold text-[#4A0E17]" id="dcRef">DC-0000</p>
+      <p class="text-xs font-semibold text-[#524842] leading-relaxed" id="dcSummary"></p>
+      <div class="flex items-center gap-2 pt-1">
+        <a id="dcWa" href="#" target="_blank" rel="noopener" class="flex-1 text-center py-3.5 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-[0.16em] hover:bg-[#8C1434] transition-all">Send it on WhatsApp ↗</a>
+        <button type="button" onclick="copyDeliOrder()" id="dcCopy" class="px-5 py-3.5 rounded-full border border-[#CD2653]/30 text-[#4A0E17] font-bold text-xs uppercase tracking-[0.16em] hover:bg-[#FFF3F6] transition-all">Copy</button>
+      </div>
+      <p class="text-[10px] leading-relaxed text-[#6B625B]">If WhatsApp does not open, the whole order is on the clipboard — the concierge is on <a class="underline font-bold" href="tel:+919810002023">+91 98100 02023</a>.</p>
+      <button type="button" onclick="backToBasket()" class="w-full py-3 rounded-full border border-[#CD2653]/25 text-[#6B625B] font-bold text-[11px] uppercase tracking-[0.16em] hover:bg-[#FFF3F6] transition-all">Start another basket</button>
     </div>
   </div>
 </div>
@@ -2116,31 +2157,147 @@
       document.getElementById('basketModal').classList.toggle('hidden', !open);
     }
 
-    function dispatchToWhatsApp() {
-      if (basket.length === 0) {
-        alert('Your basket is empty!');
-        return;
+    /* ---- placing the order ----------------------------------------------
+       The message this used to build was a good one, but it was addressed
+       from nobody: no name, no number, no address. It also fired
+       window.open() straight from a click handler and assumed it worked - a
+       blocked popup left the person looking at an unchanged drawer with no
+       idea whether they had ordered anything.
+
+       An order now carries who it is for, gets a reference, is kept on the
+       device, and shows that reference on the page BEFORE WhatsApp is
+       reached for - so the handoff can fail and the order still exists. */
+    const DC_ORDER_KEY = 'deli-chic-orders';
+    let dcLastOrder = null;
+
+    function dcStep(which) {
+      const map = { bag: 'dcBagFoot', checkout: 'dcCheckout', done: 'dcDone' };
+      Object.keys(map).forEach((k) => {
+        const el = document.getElementById(map[k]);
+        if (el) el.classList.toggle('hidden', k !== which);
+      });
+      const body = document.getElementById('dcBagBody');
+      if (body) body.classList.toggle('hidden', which !== 'bag');
+      // With the basket hidden, justify-between leaves a column of white
+      // above the step; the later steps sit under the header instead.
+      const panel = document.getElementById('dcPanel');
+      if (panel) {
+        panel.classList.toggle('justify-between', which === 'bag');
+        panel.classList.toggle('justify-start', which !== 'bag');
+        panel.classList.toggle('gap-5', which !== 'bag');
       }
+    }
+
+    function dcMobile(raw) {
+      let d = String(raw || '').replace(/[^\d]/g, '');
+      if (d.length === 12 && d.startsWith('91')) d = d.slice(2);
+      if (d.length === 11 && d.startsWith('0')) d = d.slice(1);
+      return /^[6-9]\d{9}$/.test(d) ? d : null;
+    }
+
+    function dcFail(msg, el) {
+      const box = document.getElementById('dcError');
+      if (box) { box.textContent = msg; box.classList.remove('hidden'); }
+      if (el) { el.setAttribute('aria-invalid', 'true'); el.focus(); }
+      return false;
+    }
+
+    function dcReference() {
+      const t = Date.now().toString(36).toUpperCase().slice(-4);
+      let r = Math.floor(Math.random() * 1296).toString(36).toUpperCase();
+      while (r.length < 2) r = '0' + r;
+      return `DC-${t}-${r}`;
+    }
+
+    function dcOrderText(o) {
+      const lines = [`*Deli Chic order ${o.ref}*`, '---------------------------------'];
+      o.items.forEach((i, n) => lines.push(`${n + 1}. ${i.name} (${i.weight}) x ${i.qty} = ₹${i.price * i.qty}`));
+      lines.push('---------------------------------', `Subtotal: ₹${o.subtotal}`);
+      if (o.discount > 0) lines.push(`Promo WoW20 (-20%): -₹${o.discount}`);
+      lines.push(`*Total: ₹${o.total}*`, `Slot: ${o.slot}`, '', `${o.name} - ${o.phone}`, o.address);
+      if (o.note) lines.push(`Notes: ${o.note}`);
+      lines.push('', 'Please confirm availability and send the payment link.');
+      return lines.join('\n');
+    }
+
+    function startDeliCheckout() {
+      if (basket.length === 0) { dcStep('bag'); return; }
+      dcStep('checkout');
+      const n = document.getElementById('dcName');
+      if (n) n.focus();
+    }
+
+    function backToBasket() {
+      const box = document.getElementById('dcError');
+      if (box) box.classList.add('hidden');
+      dcStep('bag');
+    }
+
+    function copyDeliOrder() {
+      if (!dcLastOrder) return;
+      const btn = document.getElementById('dcCopy');
+      const done = (ok) => { if (btn) { btn.textContent = ok ? 'Copied' : 'Copy failed'; setTimeout(() => { btn.textContent = 'Copy'; }, 1600); } };
+      try {
+        navigator.clipboard.writeText(dcOrderText(dcLastOrder)).then(() => done(true), () => done(false));
+      } catch (e) { done(false); }
+    }
+
+    function placeDeliOrder(ev) {
+      if (ev) ev.preventDefault();
+      const box = document.getElementById('dcError');
+      if (box) box.classList.add('hidden');
+      ['dcName', 'dcPhone', 'dcAddr'].forEach((id) => {
+        const el = document.getElementById(id); if (el) el.removeAttribute('aria-invalid');
+      });
+
+      if (basket.length === 0) return dcFail('Your basket is empty.', null);
+      const nameEl = document.getElementById('dcName');
+      const phoneEl = document.getElementById('dcPhone');
+      const addrEl = document.getElementById('dcAddr');
+      const name = (nameEl.value || '').trim();
+      const phone = dcMobile(phoneEl.value);
+      const address = (addrEl.value || '').trim();
+      if (name.length < 2) return dcFail('Please tell us who the order is for.', nameEl);
+      if (!phone) return dcFail('A mobile number is 10 digits and starts with 6, 7, 8 or 9.', phoneEl);
+      if (address.length < 10) return dcFail('We need an address in Delhi NCR for the cold-chain run.', addrEl);
 
       const subtotal = basket.reduce((s, i) => s + i.price * i.qty, 0);
       const discount = (isPromoApplied && subtotal >= 999) ? Math.round(subtotal * 0.20) : 0;
-      const total = subtotal - discount;
+      const order = {
+        ref: dcReference(),
+        placedAt: new Date().toISOString(),
+        name, address,
+        phone: `+91 ${phone.slice(0, 5)} ${phone.slice(5)}`,
+        note: (document.getElementById('dcNote').value || '').trim(),
+        slot: selectedSlot,
+        items: basket.map((i) => ({ name: i.name, weight: i.weight, qty: i.qty, price: i.price })),
+        subtotal, discount, total: subtotal - discount
+      };
 
-      let msg = `*Deli Chic Artisanal Order Request*\n`;
-      msg += `---------------------------------\n`;
-      basket.forEach((item, i) => {
-        msg += `${i + 1}. ${item.name} (${item.weight}) x ${item.qty} = ₹${item.price * item.qty}\n`;
-      });
-      msg += `---------------------------------\n`;
-      msg += `Subtotal: ₹${subtotal}\n`;
-      if (discount > 0) msg += `Promo WoW20 (-20%): -₹${discount}\n`;
-      msg += `*Total Order Value: ₹${total}*\n`;
-      msg += `Preferred Slot: ${selectedSlot}\n`;
-      msg += `Location: Delhi NCR\n\nPlease confirm availability and payment link.`;
+      try {
+        const all = JSON.parse(localStorage.getItem(DC_ORDER_KEY) || '[]');
+        all.unshift(order);
+        localStorage.setItem(DC_ORDER_KEY, JSON.stringify(all.slice(0, 20)));
+      } catch (e) { /* private window or storage full: the order still stands */ }
 
-      const encoded = encodeURIComponent(msg);
-      window.open(`https://api.whatsapp.com/send?phone=919810002023&text=${encoded}`, '_blank');
+      dcLastOrder = order;
+      document.getElementById('dcRef').textContent = order.ref;
+      document.getElementById('dcSummary').textContent =
+        `${order.items.reduce((n, i) => n + i.qty, 0)} item(s) · ₹${order.total} · ${order.slot} · to ${order.name} on ${order.phone}.`;
+      const wa = document.getElementById('dcWa');
+      if (wa) wa.href = `https://api.whatsapp.com/send?phone=919810002023&text=${encodeURIComponent(dcOrderText(order))}`;
+
+      basket.length = 0;
+      updateBasketUI();
+      dcStep('done');
+      return false;
     }
+
+    // Kept for anything still calling the old name.
+    function dispatchToWhatsApp() { startDeliCheckout(); }
+
+    const dcForm = document.getElementById('dcCheckout');
+    if (dcForm) dcForm.addEventListener('submit', placeDeliOrder);
 
     
 
