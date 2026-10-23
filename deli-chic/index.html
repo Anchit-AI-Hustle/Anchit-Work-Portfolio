@@ -158,9 +158,11 @@
       position: relative;
       transform-style: preserve-3d;
       transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-      will-change: transform;
       overflow: hidden;
     }
+    /* The tilt is pointer-driven, so the layer is only worth holding while a
+       pointer is on the card, not for the whole visit on every card. */
+    .tilt-card:hover, .tilt-card:focus-within { will-change: transform; }
     .tilt-card::after {
       content: '';
       position: absolute;
@@ -537,7 +539,11 @@
     transform-origin: 50% 50%;
     will-change: transform, opacity;
   }
-  .bwalk.is-past .bwalk-layer { will-change: auto; }
+  /* is-past is set whenever the section is off screen, in either direction,
+     so this releases the caption and the hint with the layers. */
+  .bwalk.is-past .bwalk-layer,
+  .bwalk.is-past .bwalk-cap,
+  .bwalk.is-past .bwalk-hint { will-change: auto; }
   .bwalk-layer svg, .bwalk-layer img { display: block; width: 100%; height: auto; }
   .bwalk-layer img { border-radius: 10px; }
 
@@ -630,7 +636,13 @@
     </a>
 
     <!-- Navigation Links -->
-    <nav class="hidden lg:flex items-center gap-4 xl:gap-6 text-xs font-bold uppercase tracking-[0.14em] xl:tracking-[0.2em] min-w-0 overflow-hidden">
+    <!-- No overflow-hidden here. With it, a nav a few pixels too wide did not
+         announce itself - it silently ate the tail of the last link, so "Our
+         Story" rendered as "OUR" at 1440px while the DOM text, the box width
+         and scrollWidth all still said the whole phrase was there. The gap is
+         a notch tighter instead, which buys back more room than the overflow
+         was hiding. -->
+    <nav class="hidden lg:flex items-center gap-4 xl:gap-5 text-xs font-bold uppercase tracking-[0.14em] xl:tracking-[0.18em] min-w-0">
       <a href="#larder" class="deli-nav-link whitespace-nowrap">The Larder</a>
       <a href="#masterCarver" class="deli-nav-link whitespace-nowrap">Master Carver Loupe</a>
       <a href="#boucherieExperience" class="deli-nav-link whitespace-nowrap">Haute Standards</a>
@@ -729,6 +741,8 @@
         <img
             id="heroLoupeImg"
             src="/assets/brand/u-1529193591184-b1d58069ecdd-1200.jpg"
+            fetchpriority="high"
+            decoding="async"
             alt="Deli Chic Prime Artisanal Cuts"
             class="w-full h-[470px] object-cover transition-opacity duration-300"
           />
@@ -801,7 +815,7 @@
           </div>
         </div>
         <div class="lg:col-span-5 hidden lg:block">
-          <img src="/assets/brand/u-1604503468506-a8da13d82791-800.jpg" alt="Clean Hand-Trimmed Antibiotic-Free Chicken Breast" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
+          <img src="/assets/brand/u-1604503468506-a8da13d82791-800.jpg" decoding="async" alt="Clean Hand-Trimmed Antibiotic-Free Chicken Breast" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
         </div>
       </div>
     </div>
@@ -821,7 +835,7 @@
           </div>
         </div>
         <div class="lg:col-span-5 hidden lg:block">
-          <img src="/assets/brand/u-1529193591184-b1d58069ecdd-800.jpg" alt="Prime Wood-Smoked Charcuterie and Ribs" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
+          <img src="/assets/brand/u-1529193591184-b1d58069ecdd-800.jpg" loading="lazy" decoding="async" alt="Prime Wood-Smoked Charcuterie and Ribs" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
         </div>
       </div>
     </div>
@@ -841,7 +855,7 @@
           </div>
         </div>
         <div class="lg:col-span-5 hidden lg:block">
-          <img src="/assets/brand/u-1599488615731-7e5c2823ff28-800.jpg" alt="Royal Awadhi Shahi Saffron Marinade" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
+          <img src="/assets/brand/u-1599488615731-7e5c2823ff28-800.jpg" loading="lazy" decoding="async" alt="Royal Awadhi Shahi Saffron Marinade" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
         </div>
       </div>
     </div>
@@ -888,7 +902,7 @@
 
         <!-- 2. what hangs there, photographed -->
         <div class="bwalk-layer" data-z0="-1500" data-z1="1750" data-in="0.06" data-out="0.42" style="width:min(60vw,720px)">
-          <img src="/assets/brand/u-1529193591184-b1d58069ecdd-1200.jpg" alt="" loading="lazy" decoding="async" width="1200" height="800">
+          <img src="/assets/brand/u-1529193591184-b1d58069ecdd-800.jpg" alt="" loading="lazy" decoding="async" width="800" height="1067">
         </div>
 
         <!-- 3. the block -->
@@ -928,7 +942,7 @@
 
         <!-- 5. at your door -->
         <div class="bwalk-layer" data-z0="-3600" data-z1="300" data-in="0.74" data-out="1.06" style="width:min(46vw,540px)">
-          <img src="/assets/brand/u-1604503468506-a8da13d82791-1200.jpg" alt="" loading="lazy" decoding="async" width="1200" height="800">
+          <img src="/assets/brand/u-1604503468506-a8da13d82791-800.jpg" alt="" loading="lazy" decoding="async" width="800" height="1200">
         </div>
 
       </div>
@@ -1106,6 +1120,8 @@
       <div class="rounded-3xl overflow-hidden shadow-2xl border-2 border-[#C59A45]/30 relative h-[460px]">
         <img
             src="/assets/brand/u-1602470520998-f4a52199a3d6-1200.jpg"
+            loading="lazy"
+            decoding="async"
             alt="Artisanal Butcher Preparation"
             class="w-full h-full object-cover"
           />
@@ -1427,7 +1443,7 @@
           <div class="deli-card tilt-card scroll-reveal knife-glint overflow-hidden flex flex-col justify-between group">
           <div>
             <div class="relative h-52 overflow-hidden bg-[#FAF4ED]">
-              <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              <img src="${p.image}" alt="${p.name}" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
               <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-[9px] font-luxury font-bold uppercase tracking-wider bg-[#4A0E17] text-white shadow-sm">
                 ${p.tag}
                 </span>
