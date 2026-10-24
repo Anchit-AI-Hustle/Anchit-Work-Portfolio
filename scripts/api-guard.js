@@ -32,7 +32,9 @@ console.log('api guard');
 is('our own origin is allowed, and echoed back rather than *', call(OURS, '1.1.1.1'), PASSES);
 is('a subdomain of ours is allowed', call('https://ai-tele-suite.anchit-tandon.com', '1.1.1.2'),
    { stopped: false, code: 0, acao: 'https://ai-tele-suite.anchit-tandon.com', err: null });
-is('a Vercel preview of ours is allowed', originAllowed('https://anchit-work-portfolio-git-x.vercel.app'), true);
+is('a Vercel preview of OURS is allowed', originAllowed('https://anchit-work-portfolio-git-x-anchit-ai-hustle.vercel.app'), true);
+is("someone else's vercel.app deployment is NOT", originAllowed('https://evil-project-abc123-someone-else.vercel.app'), false);
+is('a bare vercel.app is not', originAllowed('https://vercel.app'), false);
 is('no Origin at all is allowed: that is a script, not a page', call(undefined, '1.1.1.3'),
    { stopped: false, code: 0, acao: null, err: null });
 is('another site is refused', call('https://not-anchits-site.example', '1.1.1.4'),
@@ -55,6 +57,33 @@ is('another route is unaffected by that one', call(OURS, '9.9.9.9', 'POST', 'rl2
 for (let i = 0; i < 6; i++) call(OURS, '7.7.7.7', 'GET', 'rlget', 6);
 is('a GET is counted too', call(OURS, '7.7.7.7', 'GET', 'rlget', 6),
    { stopped: true, code: 429, acao: OURS, err: 'rate_limited' });
+
+// A handler can be invoked directly by a test harness, with no headers at all.
+// Reading req.headers.origin on one of those threw and took test:auth down.
+is('a request with no headers object does not throw', (() => {
+  const res = { code: 0, headers: {}, body: null, setHeader() {}, status(c) { this.code = c; return this; }, json(b) { this.body = b; return this; }, end() { return this; } };
+  try { guard({ method: 'POST', socket: {} }, res, { route: 'noheaders', max: 6 }); return 'no throw'; }
+  catch (e) { return 'threw: ' + e.message; }
+})(), 'no throw');
+
+// A handler invoked directly, with no address, is not a caller over the
+// network - the repo's own e2e suites call handlers that way.
+is('a call with no client address is never limited', (() => {
+  const { rateLimited } = require('../api/_guard.js');
+  const req = { headers: {}, socket: {} };
+  for (let i = 0; i < 50; i++) rateLimited(req, 'direct', 3);
+  return rateLimited(req, 'direct', 3);
+})(), false);
+
+// The bucket must not grow while it refuses: a flood was making each later
+// refusal more expensive than the last.
+is('a flood does not grow its own bucket', (() => {
+  const { rateLimited } = require('../api/_guard.js');
+  const req = { headers: { 'x-forwarded-for': '6.6.6.6' }, socket: {} };
+  for (let i = 0; i < 500; i++) rateLimited(req, 'flood', 5);
+  // 5 recorded and no more, however long the flood runs
+  return rateLimited(req, 'flood', 5);
+})(), true);
 
 console.log(`\n  ${pass}/${pass + fail} passed`);
 process.exit(fail ? 1 : 0);

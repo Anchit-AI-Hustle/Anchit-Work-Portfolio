@@ -159,7 +159,7 @@ async function handler(req, res) {
   // is stop another SITE embedding this endpoint in a browser. That half comes
   // from the shared allow-list, so this route and the six that just gained
   // both halves agree on who is allowed to call them.
-  const origin = req.headers.origin;
+  const origin = (req.headers || {}).origin;
   const okOrigin = originAllowed(origin);
   if (okOrigin && origin) res.setHeader('Access-Control-Allow-Origin', origin);
   res.setHeader('Vary', 'Origin');

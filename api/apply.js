@@ -165,7 +165,7 @@ function parseKit(text) {
 
 async function handler(req, res) {
   // No wildcard: another site should not be able to call this from a browser.
-  const origin = req.headers.origin;
+  const origin = (req.headers || {}).origin;
   const okOrigin = originAllowed(origin);
   if (okOrigin && origin) res.setHeader('Access-Control-Allow-Origin', origin);
   res.setHeader('Vary', 'Origin');
