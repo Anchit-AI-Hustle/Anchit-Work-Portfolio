@@ -13,6 +13,7 @@
 
 // Model ids live in _models.js as a chain per provider, not one pinned id here.
 // Every id this file used to hardcode has since been retired by its provider.
+const { originAllowed } = require('./_guard.js');
 const { tryModels, httpError, KEYS } = require('./_models.js');
 
 function haveAnyProvider() {
@@ -163,10 +164,15 @@ function parseKit(text) {
 }
 
 async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // No wildcard: another site should not be able to call this from a browser.
+  const origin = req.headers.origin;
+  const okOrigin = originAllowed(origin);
+  if (okOrigin && origin) res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method === 'OPTIONS') return res.status(okOrigin ? 200 : 403).end();
+  if (!okOrigin) return res.status(403).json({ error: 'origin_not_allowed' });
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
   // Env-driven only — no hardcoded project. Set SUPABASE_URL + SUPABASE_ANON_KEY

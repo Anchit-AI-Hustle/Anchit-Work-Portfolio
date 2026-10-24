@@ -15,6 +15,7 @@
 
 // Big boards (no free listings API) — covered by Adzuna inline + deep-link
 // searches on the page. Free boards have direct keyless APIs.
+const { originAllowed } = require('./_guard.js');
 const BIG_BOARDS = ['LinkedIn', 'Indeed', 'Glassdoor', 'Upwork'];
 const FREE_BOARDS = ['Remotive', 'RemoteOK', 'Arbeitnow', 'The Muse'];
 const ALL_BOARDS = BIG_BOARDS.concat(FREE_BOARDS);
@@ -170,10 +171,15 @@ async function verifySupabase(token, url, anonKey) {
 }
 
 async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // No wildcard: another site should not be able to call this from a browser.
+  const origin = req.headers.origin;
+  const okOrigin = originAllowed(origin);
+  if (okOrigin && origin) res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method === 'OPTIONS') return res.status(okOrigin ? 200 : 403).end();
+  if (!okOrigin) return res.status(403).json({ error: 'origin_not_allowed' });
 
   // Env-driven only — no hardcoded project. Set SUPABASE_URL + SUPABASE_ANON_KEY
   // to a project you own to gate behind Google sign-in; leave unset to run open.

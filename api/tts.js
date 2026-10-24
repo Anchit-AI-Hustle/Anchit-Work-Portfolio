@@ -32,6 +32,7 @@
 
 // Signals "this provider is spent — move to the next one".
 const { KEYS } = require('./_models.js');
+const { guard } = require('./_guard.js');
 
 function isQuota(status) { return status === 429 || status === 402 || status === 403; }
 
@@ -299,10 +300,9 @@ function configured() {
 }
 
 async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.status(200).end();
+  // CORS, the preflight and the per-IP limit, all in api/_guard.js so the
+  // routes that spend money cannot drift apart again.
+  if (guard(req, res, { route: 'tts', max: 20, methods: 'GET, POST, OPTIONS' })) return;
 
   // Diagnostic: report which providers are wired, in cascade order.
   if (req.method === 'GET') {

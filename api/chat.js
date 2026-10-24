@@ -86,6 +86,7 @@ STYLE & CONTACT
 // Timing-safe comparison, since a plain === on a secret leaks its prefix through
 // response timing to anyone willing to measure.
 const { freeGenerate, KEYS } = require('./_models.js');
+const { originAllowed } = require('./_guard.js');
 
 function isOperator(req) {
   const expected = (process.env.CHAT_DEBUG_TOKEN || '').trim();
@@ -154,10 +155,18 @@ function rateLimited(req) {
 }
 
 async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // The per-IP counter below already caps the bill here; what it could not do
+  // is stop another SITE embedding this endpoint in a browser. That half comes
+  // from the shared allow-list, so this route and the six that just gained
+  // both halves agree on who is allowed to call them.
+  const origin = req.headers.origin;
+  const okOrigin = originAllowed(origin);
+  if (okOrigin && origin) res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method === 'OPTIONS') return res.status(okOrigin ? 200 : 403).end();
+  if (!okOrigin) return res.status(403).json({ error: 'origin_not_allowed' });
 
   // Applied to POST only: GET is the cheap diagnostic and costs nothing.
   if (req.method === 'POST' && rateLimited(req)) {
