@@ -91,6 +91,8 @@ const CANONICAL = {
   Email: /mailto:([^"'?\s]+)/g,
   Phone: /tel:(\+?[0-9]+)/g,
 };
+// Pages that speak as another business, not as me. See the identity check.
+const SHOP_ROUTE = /^\/(deli-chic|gram-street-coffee)(?:\/|$)/;
 
 (async () => {
   const { chromium } = require('./_playwright.js');
@@ -186,9 +188,16 @@ const CANONICAL = {
       return [...text.matchAll(/.{0,40}\b(?:git\s?hub|repositor(?:y|ies)|repos)\b.{0,40}/gi)].map((m) => m[0].trim());
     })) ghText.push({ route, quote });
 
+    // The brand shops are other businesses, built for them: their numbers are
+    // the shop's concierge and the roastery, wired into their own WhatsApp
+    // order flows. Comparing those against my phone read three businesses as
+    // three spellings of one identity. Each shop is held to one spelling of
+    // its OWN details instead, so a shop that drifts still fails.
+    const shop = (route.match(SHOP_ROUTE) || [])[1];
     for (const [name, re] of Object.entries(CANONICAL)) {
+      const key = shop ? `${name} (${shop})` : name;
       for (const m of content.matchAll(new RegExp(re.source, 'g'))) {
-        (identity[name] ||= new Map()).set(m[1], (identity[name].get(m[1]) || new Set()).add(route));
+        (identity[key] ||= new Map()).set(m[1], (identity[key].get(m[1]) || new Set()).add(route));
       }
     }
 
