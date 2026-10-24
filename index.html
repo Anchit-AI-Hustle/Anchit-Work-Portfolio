@@ -12538,6 +12538,12 @@
     text-transform:uppercase; cursor:pointer; user-select:none; box-shadow:0 8px 26px rgba(0,0,0,.4);
     transition:border-color .2s, color .2s, opacity .3s; }
   #jarvisPill:hover{ border-color:var(--primary,#FF6940); }
+  /* While the consent bar is up the pill would sit underneath it at bottom:16,
+     visible behind the bar's edge and unclickable. Lifting it clear (what the
+     chat button gets) parks it on the boot hero's text instead. The bar holds
+     focus and asks for one answer first, so the pill steps out until then and
+     returns to its own spot after. */
+  html[data-consent-open="1"] #jarvisPill{ opacity:0; visibility:hidden; pointer-events:none; }
   #jarvisPill .jdot{ width:9px; height:9px; border-radius:50%; background:var(--ink-mute,#6B655C); transition:background .3s, box-shadow .3s; }
   #jarvisPill[data-state="listening"] .jdot{ background:var(--accent,#2EE5AC); box-shadow:0 0 10px var(--accent,#2EE5AC); animation:jpulse 1.6s ease-in-out infinite; }
   #jarvisPill[data-state="active"] .jdot,#jarvisPill[data-state="active"]{ }

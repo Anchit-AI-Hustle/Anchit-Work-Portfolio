@@ -51,6 +51,16 @@ const check = (name, ok, detail) => results.push([ok ? 'PASS' : 'FAIL', name, de
       await page.goto(BASE + route + '.html', { waitUntil: 'networkidle', timeout: 25000 });
     } catch { /* a slow module still renders; the measurement below is what matters */ }
     await page.waitForTimeout(2600);
+    // A fixed timer is not enough on the heavy index page under load: the
+    // banner can open late, and the bar and everything it lifts are on 320ms
+    // transitions. Measured mid-flight, the chat button read as sitting on
+    // "No thanks"; settled, it is 16px clear. Wait for the bar to be in, then
+    // for those transitions to finish.
+    await page.waitForFunction(() => {
+      const bar = document.getElementById('consentBar');
+      return !bar || bar.getAttribute('data-in') === '1';
+    }, null, { timeout: 10000 }).catch(() => {});
+    await page.waitForTimeout(450);
 
     // The mutant pins the chrome back to a fixed corner with no placement.
     // It is applied again after the consent answer, because the placer
@@ -94,8 +104,16 @@ const check = (name, ok, detail) => results.push([ok ? 'PASS' : 'FAIL', name, de
           out.push(((f.id || f.className) + '').slice(0, 22) + ' is off-screen');
           continue;
         }
-        const under = document.elementsFromPoint(Math.round(r.left + r.width / 2), Math.round(r.top + r.height / 2))
-          .filter((e) => e !== f && !f.contains(e));
+        const stack = document.elementsFromPoint(Math.round(r.left + r.width / 2), Math.round(r.top + r.height / 2));
+        // The other direction: a control BURIED under the consent bar cannot be
+        // reached at all. The home page's voice pill and chat button both sat
+        // there on a first visit, and a check that only asks what the chrome
+        // covers read that as clear.
+        if (stack[0] && stack[0] !== f && !f.contains(stack[0]) && stack[0].closest('#consentBar')) {
+          out.push(((f.id || f.className) + '').slice(0, 22) + ' is under the consent bar');
+          continue;
+        }
+        const under = stack.filter((e) => e !== f && !f.contains(e));
         const leaf = under.find((e) => e.children.length === 0 && (e.textContent || '').trim().length > 6);
         if (leaf) out.push(((f.id || f.className) + '').slice(0, 22) + ' over "' + leaf.textContent.trim().slice(0, 26) + '"');
       }

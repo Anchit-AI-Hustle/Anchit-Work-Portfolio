@@ -438,7 +438,13 @@
              '[data-no-motion],[aria-live],[role="alert"],[contenteditable="true"]';
 
   function skip(el) {
-    return el.matches(SKIP) || el.closest('[data-no-motion],[aria-live]') !== null;
+    if (el.matches(SKIP) || el.closest('[data-no-motion],[aria-live]') !== null) return true;
+    // Fixed chrome is not a block arriving in the page's sequence. The home
+    // page's chat button was tagged .cin-v4 here, and when the runtime bails
+    // under load, html.cin-bail sets transform:none !important on every .cin:
+    // that wiped out the lift consent.js gives it, and the button sat under
+    // the consent bar, unreachable, on a first visit.
+    return getComputedStyle(el).position === 'fixed';
   }
 
   // Sub-linear steps: 20 cards land across ~0.6s, not ~1.5s, and no two share
