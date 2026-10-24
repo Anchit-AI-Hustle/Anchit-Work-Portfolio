@@ -86,6 +86,7 @@ const assets = [
   'cyber',
   'gram-street-coffee',
   'deli-chic',
+  'pw-study',
 ];
 
 // Stamp the service worker's cache name from the content it will serve.
