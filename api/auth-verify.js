@@ -169,7 +169,7 @@ async function verify(idToken) {
 
 module.exports = async (req, res) => {
   // An auth endpoint answering every origin is the last one that should.
-  const origin = req.headers.origin;
+  const origin = (req.headers || {}).origin;
   const okOrigin = originAllowed(origin);
   if (okOrigin && origin) res.setHeader('Access-Control-Allow-Origin', origin);
   res.setHeader('Vary', 'Origin');

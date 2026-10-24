@@ -8,6 +8,7 @@
 // defaults to anchit-tandon.com (a candidate-funnel analytics view). Deterministic
 // so it always returns a full dashboard with no key. No Vahdam / tea / coffee.
 
+const { originAllowed } = require('./_guard.js');
 function isAnchit(brand, url) {
   const s = ((brand || '') + ' ' + (url || '')).toLowerCase();
   return /anchit/.test(s.replace(/\s+/g, '-'));
@@ -92,7 +93,7 @@ function brandAnalysis(brand, category) {
 
 async function handler(req, res) {
   // No wildcard: another site should not be able to call this from a browser.
-  const origin = req.headers.origin;
+  const origin = (req.headers || {}).origin;
   const okOrigin = originAllowed(origin);
   if (okOrigin && origin) res.setHeader('Access-Control-Allow-Origin', origin);
   res.setHeader('Vary', 'Origin');
