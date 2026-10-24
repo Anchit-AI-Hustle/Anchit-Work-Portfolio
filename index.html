@@ -612,10 +612,12 @@
      inflates every card on first paint — 640px produced a 686px row against a
      real 428px card, which is what read as "too long" before any of them had
      been scrolled into view. Note it sizes the CONTENT box, so it is the
-     measured card height minus its 44px of vertical padding — setting the
+     measured card height minus its 48px of vertical padding — setting the
      border-box height here re-adds the padding and inflates the row by 48px.
+     The real card is 500px at 1440: one title, "Predict Natural Disasters",
+     sets on two lines and the row takes the tallest card.
      scripts/build-cards.js asserts the two agree. */
-  .build-card   { contain-intrinsic-size: auto 420px; }
+  .build-card   { contain-intrinsic-size: auto 452px; }
   /* The sign-off is ~4,800px down. Laying it out during the hero's assembly —
      the busiest 900ms of the page — buys nothing, because nobody can see it
      for another four screens. */
@@ -2064,6 +2066,24 @@
     overflow: hidden;
     min-height: calc(1.45em * 2);
   }
+  /* Two lines is a budget for a 360px card, and the rail only gives cards 360px
+     from about 1385px up: the basis is clamp(260px, 26vw, 360px). Below that
+     the same sentence needs three lines, then four, and with a fixed two it
+     was ellipsised on most cards on every tablet and most laptops (9 of 15 at
+     1280px, all 15 at 820px). The budget follows the card's own width, not the
+     viewport's, because the motion-off grid sizes cards differently again.
+     Every card in a row shares a width, so the row still lines up. The
+     widths are the card's CONTENT box, which is what a container query
+     measures: a 360px card is 310px inside its padding and border. Measured
+     at every width from 320px to 1920px: two lines fit from 308px up, and at
+     304px the longest sentence was already cut. */
+  .build-card { container-type: inline-size; }
+  @container (max-width: 307px) {
+    .bp-text { -webkit-line-clamp: 3; min-height: calc(1.45em * 3); }
+  }
+  @container (max-width: 251px) {
+    .bp-text { -webkit-line-clamp: 4; min-height: calc(1.45em * 4); }
+  }
   /* Hero type, on the scale. These were Tailwind's text-6xl / text-2xl /
      text-lg — 60 / 24 / 18px, a different ratio from ours, which is how the
      page ended up with two competing scales. */
@@ -2148,7 +2168,6 @@
 
   @media (max-width: 560px) {
     /* Phones read one card at a time — give the copy more room, keep it equal. */
-    .bp-text { -webkit-line-clamp: 4; }   /* the clamp lives on the sentence now */
     .build-card > p:not(.build-purpose) { -webkit-line-clamp: 4; min-height: calc(1.55em * 4); }
   }
 
@@ -4904,7 +4923,7 @@
         <div class="build-card tilt-card">
           <div class="build-tag"><span class="bento-index">02</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Latest build &middot; Forecasting</span><span class="status" data-tag="live">Live</span></div>
           <h3>Predict <em>Natural Disasters</em></h3>
-          <p class="build-purpose"><span class="bp-label">What it&rsquo;s for</span><span class="bp-text">Seeing what is coming — and checking whether the forecast was right.</span></p>
+          <p class="build-purpose"><span class="bp-label">What it&rsquo;s for</span><span class="bp-text">Seeing what is coming, then checking whether the forecast held.</span></p>
           <p>A global outlook across 195 countries: a live event map, authority-sourced official warnings kept separate from models, and thirty-day forecasts by hazard.</p>
           <ul class="build-details">
             <li>The Forecast Verification Center grades its own forecasts against what happened &mdash; timing, geography, mechanism, severity, official data.</li>
@@ -4921,7 +4940,7 @@
         <div class="build-card tilt-card">
           <div class="build-tag"><span class="bento-index">03</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>D2C Marketing Automation</span><span class="status" data-tag="demo">Demo</span></div>
           <h3><em>LifeCycle-OS</em></h3>
-          <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Designing a brand’s whole retention lifecycle before you write a campaign.</span></p>
+          <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Designing a brand’s retention lifecycle before writing a campaign.</span></p>
           <p>A customer-lifecycle &amp; retention suite I built independently. Enter <em>any</em> brand or URL and it reads the industry, benchmarks the competitive set, then designs the whole lifecycle live.</p>
           <ul class="build-details">
             <li>Pulls competitive-intelligence-style benchmarks (traffic mix, channel split, AOV and repeat-rate bands, seasonality) for the entered brand's category — the way SimilarWeb / SEMrush profile a market — so every plan starts from real industry baselines.</li>
