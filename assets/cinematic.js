@@ -142,7 +142,16 @@
   // reads as free - the trap that made the first version of this sit happily on
   // top of a control it had just been asked to avoid.
   function occupiedFor(el, x, y) {
-    var hit = document.elementFromPoint(x, y);
+    // Look THROUGH the consent bar, not at it. Its band is accounted for by
+    // reservedBottom(); while it slides out after an answer it is still there
+    // to be hit, and what matters is what it is about to uncover. Counting the
+    // bar parked the toggle a row up for good; ignoring the hit instead read
+    // every spot behind the bar as free and dropped the toggle onto content.
+    var hits = document.elementsFromPoint(x, y);
+    var hit = null;
+    for (var i = 0; i < hits.length; i++) {
+      if (!(hits[i].closest && hits[i].closest('#consentBar'))) { hit = hits[i]; break; }
+    }
     if (!hit || hit === el || el.contains(hit)) return false;
     if (hit.closest && hit.closest('a, button, input, select, textarea, [role="button"], [onclick]')) return true;
     // Text counts too, not only controls. The first version asked whether the

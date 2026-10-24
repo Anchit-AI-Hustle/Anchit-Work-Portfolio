@@ -52,7 +52,11 @@ const check = (name, ok, detail) => results.push([ok ? 'PASS' : 'FAIL', name, de
     } catch { /* a slow module still renders; the measurement below is what matters */ }
     await page.waitForTimeout(2600);
 
-    if (MUT) {
+    // The mutant pins the chrome back to a fixed corner with no placement.
+    // It is applied again after the consent answer, because the placer
+    // re-runs then and would otherwise quietly undo it.
+    const pin = async () => {
+      if (!MUT) return;
       await page.evaluate(() => {
         for (const id of ['cinMotion', 'cinHome']) {
           const el = document.getElementById(id);
@@ -60,7 +64,8 @@ const check = (name, ok, detail) => results.push([ok ? 'PASS' : 'FAIL', name, de
         }
       });
       await page.waitForTimeout(250);
-    }
+    };
+    await pin();
 
     const measure = () => page.evaluate(() => {
       const vis = (el) => {
@@ -109,6 +114,7 @@ const check = (name, ok, detail) => results.push([ok ? 'PASS' : 'FAIL', name, de
       // forever on the chip intercepting it instead of reporting the overlap.
       await declined.evaluate((b) => b.click());
       await page.waitForTimeout(900);
+      await pin();
       closed = (await measure()).map((h) => h + ' (after consent)');
     }
     const hits = open.concat(closed);

@@ -195,7 +195,9 @@ const SHOP_ROUTE = /^\/(deli-chic|gram-street-coffee)(?:\/|$)/;
     // its OWN details instead, so a shop that drifts still fails.
     const shop = (route.match(SHOP_ROUTE) || [])[1];
     for (const [name, re] of Object.entries(CANONICAL)) {
-      const key = shop ? `${name} (${shop})` : name;
+      // Phone only: a LinkedIn or email link on a shop page would be mine, and
+      // has to match the rest of the site.
+      const key = shop && name === 'Phone' ? `${name} (${shop})` : name;
       for (const m of content.matchAll(new RegExp(re.source, 'g'))) {
         (identity[key] ||= new Map()).set(m[1], (identity[key].get(m[1]) || new Set()).add(route));
       }

@@ -2071,8 +2071,9 @@
      the same sentence needs three lines, then four, and with a fixed two it
      was ellipsised on most cards on every tablet and most laptops (9 of 15 at
      1280px, all 15 at 820px). The budget follows the card's own width, not the
-     viewport's, because the motion-off grid sizes cards differently again.
-     Every card in a row shares a width, so the row still lines up. The
+     viewport's, because the motion-off grid sizes cards differently again
+     (there the first card spans two columns, so its budget can differ from
+     its neighbour's; on the rail every card shares one width). The
      widths are the card's CONTENT box, which is what a container query
      measures: a 360px card is 310px inside its padding and border. Measured
      at every width from 320px to 1920px: two lines fit from 308px up, and at

@@ -117,6 +117,10 @@
 
     // Next frame, so the entrance transition has a start value to animate from.
     function markOpen() {
+      // The ResizeObserver below fires once more when the bar is removed, at
+      // height 0. Without this it wrote data-consent-open="1" back onto a page
+      // that had just answered, and the state said open from then on.
+      if (bar.getAttribute('data-in') !== '1' || !bar.isConnected) return;
       var h = Math.ceil(bar.getBoundingClientRect().height);
       // Written only when it changes: a custom property on the root
       // invalidates the computed style of every element on the page.
