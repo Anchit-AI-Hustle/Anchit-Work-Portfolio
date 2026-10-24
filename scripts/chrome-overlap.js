@@ -104,7 +104,10 @@ const check = (name, ok, detail) => results.push([ok ? 'PASS' : 'FAIL', name, de
     const declined = await page.$('#consentBar [data-consent="denied"]');
     let closed = [];
     if (declined) {
-      await declined.click();
+      // From inside the page, not with the mouse: under MUT=1 the chrome is
+      // pinned back on top of this very button, and a real click would wait
+      // forever on the chip intercepting it instead of reporting the overlap.
+      await declined.evaluate((b) => b.click());
       await page.waitForTimeout(900);
       closed = (await measure()).map((h) => h + ' (after consent)');
     }
