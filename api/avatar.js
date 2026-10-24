@@ -22,6 +22,7 @@
 //                        inside the D-ID dashboard first); else a default voice
 //   DID_VOICE_ID       Microsoft voice id fallback (default en-US-GuyNeural)
 
+const { guard } = require('./_guard.js');
 const { KEYS } = require('./_models.js');
 
 const DID_BASE = 'https://api.d-id.com';
@@ -123,10 +124,8 @@ async function viaSelfHosted(text) {
 }
 
 async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.status(200).end();
+  // Spends like the others and had no limit either.
+  if (guard(req, res, { route: 'avatar', max: 10, methods: 'GET, POST, OPTIONS' })) return;
 
   const auth = authHeader();
   const selfHosted = !!(process.env.AVATAR_API_URL || '').trim();

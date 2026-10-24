@@ -38,6 +38,7 @@
 // Read at CALL time, not module load. Read once at load, a cold start that
 // happens before the env is populated freezes an empty value for the life of
 // the instance - and an empty value used to mean "skip the audience check".
+const { originAllowed } = require('./_guard.js');
 const clientId = () => process.env.GOOGLE_CLIENT_ID || process.env.GOOGLE_OAUTH_CLIENT_ID || '';
 
 // Google's signing keys rotate. Cache them, but briefly - a key that has been
@@ -167,10 +168,15 @@ async function verify(idToken) {
 }
 
 module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // An auth endpoint answering every origin is the last one that should.
+  const origin = req.headers.origin;
+  const okOrigin = originAllowed(origin);
+  if (okOrigin && origin) res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Headers', 'content-type');
   res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-  if (req.method === 'OPTIONS') return res.status(204).end();
+  if (req.method === 'OPTIONS') return res.status(okOrigin ? 204 : 403).end();
+  if (!okOrigin) return res.status(403).json({ error: 'origin_not_allowed' });
 
   // A health check that reveals whether it is configured, and nothing else.
   // The client ID is public by design; it still is not echoed here, because a

@@ -13,6 +13,7 @@
 // (3600s) rather than the "no key" one (86400s), so the key IS present and the
 // call itself was failing — almost certainly this pinned model id. Trying
 // several turns a wrong id into a slower success instead of a silent downgrade.
+const { guard } = require('./_guard.js');
 const MODELS = [
   process.env.STEP_VIDEO_MODEL,
   'claude-sonnet-5',
@@ -53,10 +54,9 @@ function extractVideoId(text) {
 }
 
 async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.status(200).end();
+  // CORS, the preflight and the per-IP limit, all in api/_guard.js so the
+  // routes that spend money cannot drift apart again.
+  if (guard(req, res, { route: 'step-video', max: 6, methods: 'GET, POST, OPTIONS' })) return;
 
   let q = '';
   if (req.method === 'GET') q = (req.query && req.query.q) || '';

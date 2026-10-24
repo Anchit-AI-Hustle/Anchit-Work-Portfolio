@@ -24,6 +24,7 @@ const key = () => process.env.ANTHROPIC_API_KEY;
 // one. Trying several and reporting which answered means a wrong id degrades
 // to a slower success instead of an invisible placeholder.
 const { freeGenerate, KEYS } = require('./_models.js');
+const { guard } = require('./_guard.js');
 
 const MODELS = [
   process.env.CASCADE_MODEL,
@@ -166,10 +167,9 @@ module.exports = handler;
 module.exports._test = { shape, SYSTEM };
 
 async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.status(200).end();
+  // CORS, the preflight and the per-IP limit, all in api/_guard.js so the
+  // routes that spend money cannot drift apart again.
+  if (guard(req, res, { route: 'cascade', max: 6, methods: 'GET, POST, OPTIONS' })) return;
 
   // GET is a diagnostic: is the key present, and which model actually answers?
   // Booleans and model names only — never a key. This exists because the same

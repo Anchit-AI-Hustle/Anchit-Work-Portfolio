@@ -30,6 +30,7 @@
 // Sonnet by default for warmer, more natural answers; override with CLAUDE_MODEL
 // (e.g. claude-haiku-4-5-20251001 for the lowest voice latency).
 const { KEYS } = require('./_models.js');
+const { guard } = require('./_guard.js');
 
 const MODEL = process.env.CLAUDE_MODEL || 'claude-sonnet-4-6';
 const XTTS_URL = (process.env.XTTS_PACKET_URL || process.env.XTTS_API_URL || '').replace(/\/$/, '');
@@ -163,10 +164,9 @@ function parseAnthropicSse(raw) {
 // ---------- Handler ----------
 
 async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.status(200).end();
+  // CORS, the preflight and the per-IP limit, all in api/_guard.js so the
+  // routes that spend money cannot drift apart again.
+  if (guard(req, res, { route: 'chat-stream', max: 12, methods: 'POST, OPTIONS' })) return;
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
   const apiKey = process.env.ANTHROPIC_API_KEY;

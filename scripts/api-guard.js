@@ -1,0 +1,60 @@
+// What api/_guard.js lets through, and what it turns away.
+//
+// These run with nothing installed and no network: the guard is pure, which
+// is the point — the thing standing between the API keys and the open
+// internet should be checkable without deploying it first.
+const { guard, originAllowed } = require('../api/_guard.js');
+
+let pass = 0, fail = 0;
+function is(label, got, want) {
+  const ok = JSON.stringify(got) === JSON.stringify(want);
+  ok ? pass++ : fail++;
+  console.log(`  ${ok ? 'PASS' : 'FAIL'}  ${label}${ok ? '' : `\n        got  ${JSON.stringify(got)}\n        want ${JSON.stringify(want)}`}`);
+}
+
+function call(origin, ip, method = 'POST', route = 't', max = 6) {
+  const res = {
+    code: 0, headers: {}, body: null,
+    setHeader(k, v) { this.headers[k.toLowerCase()] = v; },
+    status(c) { this.code = c; return this; },
+    json(b) { this.body = b; return this; },
+    end() { return this; },
+  };
+  const req = { method, headers: { origin, 'x-forwarded-for': ip }, socket: {} };
+  const stopped = guard(req, res, { route, max, methods: 'POST, OPTIONS' });
+  return { stopped, code: res.code, acao: res.headers['access-control-allow-origin'] || null, err: (res.body || {}).error || null };
+}
+
+const OURS = 'https://anchit-tandon.com';
+const PASSES = { stopped: false, code: 0, acao: OURS, err: null };
+
+console.log('api guard');
+is('our own origin is allowed, and echoed back rather than *', call(OURS, '1.1.1.1'), PASSES);
+is('a subdomain of ours is allowed', call('https://ai-tele-suite.anchit-tandon.com', '1.1.1.2'),
+   { stopped: false, code: 0, acao: 'https://ai-tele-suite.anchit-tandon.com', err: null });
+is('a Vercel preview of ours is allowed', originAllowed('https://anchit-work-portfolio-git-x.vercel.app'), true);
+is('no Origin at all is allowed: that is a script, not a page', call(undefined, '1.1.1.3'),
+   { stopped: false, code: 0, acao: null, err: null });
+is('another site is refused', call('https://not-anchits-site.example', '1.1.1.4'),
+   { stopped: true, code: 403, acao: null, err: 'origin_not_allowed' });
+is('a host that merely STARTS with ours is refused', call('https://anchit-tandon.com.evil.com', '1.1.1.5'),
+   { stopped: true, code: 403, acao: null, err: 'origin_not_allowed' });
+is('an unparseable Origin is refused', originAllowed('garbage'), false);
+is('our preflight answers 200', call(OURS, '1.1.1.6', 'OPTIONS'), { stopped: true, code: 200, acao: OURS, err: null });
+is('a foreign preflight answers 403', call('https://evil.example', '1.1.1.7', 'OPTIONS'),
+   { stopped: true, code: 403, acao: null, err: null });
+
+let last;
+for (let i = 0; i < 6; i++) last = call(OURS, '9.9.9.9', 'POST', 'rl', 6);
+is('the 6th call within the minute still passes', last, PASSES);
+is('the 7th is refused with 429', call(OURS, '9.9.9.9', 'POST', 'rl', 6),
+   { stopped: true, code: 429, acao: OURS, err: 'rate_limited' });
+is('another caller is unaffected by that one', call(OURS, '8.8.8.8', 'POST', 'rl', 6), PASSES);
+is('another route is unaffected by that one', call(OURS, '9.9.9.9', 'POST', 'rl2', 6), PASSES);
+// GET is not exempt: /api/step-video takes its query from the query string.
+for (let i = 0; i < 6; i++) call(OURS, '7.7.7.7', 'GET', 'rlget', 6);
+is('a GET is counted too', call(OURS, '7.7.7.7', 'GET', 'rlget', 6),
+   { stopped: true, code: 429, acao: OURS, err: 'rate_limited' });
+
+console.log(`\n  ${pass}/${pass + fail} passed`);
+process.exit(fail ? 1 : 0);
