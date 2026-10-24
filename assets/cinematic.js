@@ -1049,33 +1049,61 @@
   }
 
   // ── custom cursor ─────────────────────────────────────────────────────
+  //
+  // Composited only, and idle when the pointer is. This used to tween width,
+  // height, background-color and border-color between the dot and the ring -
+  // four properties DESIGN.md rules out, re-rasterised on every frame of every
+  // hover - and its follow loop ran requestAnimationFrame forever, whether or
+  // not the mouse had moved, in a background tab included.
+  //
+  // Now the element is always ring-sized and the dot is the same circle at
+  // scale(.19). The fill and the ring are two layers that swap on opacity, and
+  // the loop starts on pointermove and stops once it has caught up.
   function initCursor() {
     if (motionOff || !matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     if (document.getElementById('cinCursor')) return;
+    var DOT = 8 / 42;
+    var ease = 'cubic-bezier(.16,1,.3,1)';
     var dot = document.createElement('div');
     dot.id = 'cinCursor';
     dot.setAttribute('aria-hidden', 'true');
     dot.style.cssText = 'position:fixed;left:0;top:0;z-index:2147482000;pointer-events:none;' +
-      'width:8px;height:8px;border-radius:50%;background:currentColor;color:#EAEAEA;' +
-      'mix-blend-mode:difference;transform:translate3d(-100px,-100px,0) translate(-50%,-50%);' +
-      'transition:width .28s cubic-bezier(.16,1,.3,1),height .28s cubic-bezier(.16,1,.3,1),' +
-      'background-color .28s ease,border-color .28s ease;border:1px solid transparent';
+      'width:42px;height:42px;margin:-21px 0 0 -21px;mix-blend-mode:difference;' +
+      'transform:translate3d(-100px,-100px,0)';
+    var core = document.createElement('div');
+    core.style.cssText = 'position:relative;width:100%;height:100%;' +
+      'transform:scale(' + DOT + ');transition:transform .26s ' + ease;
+    var fill = document.createElement('div');
+    fill.style.cssText = 'position:absolute;inset:0;border-radius:50%;background:#EAEAEA;' +
+      'transition:opacity .26s ease';
+    var ring = document.createElement('div');
+    ring.style.cssText = 'position:absolute;inset:0;border-radius:50%;border:1px solid #EAEAEA;' +
+      'opacity:0;transition:opacity .26s ease';
+    core.appendChild(fill); core.appendChild(ring); dot.appendChild(core);
     document.body.appendChild(dot);
 
-    var tx = -100, ty = -100, cx = -100, cy = -100;
-    addEventListener('pointermove', function (e) { tx = e.clientX; ty = e.clientY; }, { passive: true });
-    (function loop() {
+    var tx = -100, ty = -100, cx = -100, cy = -100, raf = 0;
+    function loop() {
       cx += (tx - cx) * 0.22; cy += (ty - cy) * 0.22;         // trails slightly: weight
-      dot.style.transform = 'translate3d(' + cx.toFixed(1) + 'px,' + cy.toFixed(1) + 'px,0) translate(-50%,-50%)';
-      requestAnimationFrame(loop);
-    })();
+      if (Math.abs(tx - cx) < 0.1 && Math.abs(ty - cy) < 0.1) { cx = tx; cy = ty; raf = 0; }
+      else raf = requestAnimationFrame(loop);
+      dot.style.transform = 'translate3d(' + cx.toFixed(1) + 'px,' + cy.toFixed(1) + 'px,0)';
+    }
+    addEventListener('pointermove', function (e) {
+      tx = e.clientX; ty = e.clientY;
+      if (!raf) raf = requestAnimationFrame(loop);
+    }, { passive: true });
 
+    var wasInteractive = false;
     addEventListener('pointerover', function (e) {
       var t = e.target;
-      var interactive = t && t.closest && t.closest('a,button,[role="button"],input,select,textarea,[data-cursor]');
-      dot.style.width = dot.style.height = interactive ? '42px' : '8px';
-      dot.style.background = interactive ? 'transparent' : '#EAEAEA';
-      dot.style.borderColor = interactive ? '#EAEAEA' : 'transparent';
+      var interactive = !!(t && t.closest && t.closest('a,button,[role="button"],input,select,textarea,[data-cursor]'));
+      if (interactive === wasInteractive) return;
+      wasInteractive = interactive;
+      core.style.transform = 'scale(' + (interactive ? 1 : DOT) + ')';
+      fill.style.opacity = interactive ? '0' : '1';
+      ring.style.opacity = interactive ? '1' : '0';
     }, { passive: true });
   }
 
