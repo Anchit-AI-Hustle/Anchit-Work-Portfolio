@@ -33,10 +33,12 @@ const BASE = process.env.BASE || 'http://127.0.0.1:8099';
 const MUT = process.env.MUT === '1';
 
 // The Lifecycle OS modules are the pages that exposed this: they are dense, and
-// they render late. Plus the hub and the portfolio itself.
+// they render late. Plus the hub and the portfolio itself, and the two pages
+// where the home chip is top-anchored and the consent bar once lifted it away.
 const PAGES = ['/lifecycle-os', '/lifecycle-os-calendar', '/lifecycle-os-cohorts',
   '/lifecycle-os-brain', '/lifecycle-os-playbook', '/lifecycle-os-frameworks',
-  '/lifecycle-os-social', '/lifecycle-os-analysis', '/growth-school', '/index'];
+  '/lifecycle-os-social', '/lifecycle-os-analysis', '/growth-school', '/index',
+  '/marketing-101', '/task-tracker'];
 
 const results = [];
 const check = (name, ok, detail) => results.push([ok ? 'PASS' : 'FAIL', name, detail]);
@@ -60,17 +62,33 @@ const check = (name, ok, detail) => results.push([ok ? 'PASS' : 'FAIL', name, de
       await page.waitForTimeout(250);
     }
 
-    const hits = await page.evaluate(() => {
+    const measure = () => page.evaluate(() => {
       const vis = (el) => {
         const c = getComputedStyle(el), b = el.getBoundingClientRect();
         return c.display !== 'none' && c.visibility !== 'hidden' && +c.opacity > 0.01 && b.width > 2 && b.height > 2;
       };
+      // The consent bar is not floating chrome. It is a dialog that is meant to
+      // be in the way until it is answered, and the page reserves room for it
+      // (body padding-bottom) so nothing is hidden for good. What it must not
+      // do is push the real chrome onto content, which is what this measures
+      // while it is up.
       const chrome = [...document.querySelectorAll('body *')]
         .filter((e) => getComputedStyle(e).position === 'fixed' && vis(e))
+        .filter((e) => !e.closest('#consentBar'))
+        // cinCursor is the pointer: it sits wherever the mouse is, which after
+        // the click below is on top of whatever was clicked.
+        .filter((e) => e.id !== 'cinCursor')
         .filter((e) => { const r = e.getBoundingClientRect(); return r.height <= 300 && r.width >= 40; });
       const out = [];
       for (const f of chrome) {
         const r = f.getBoundingClientRect();
+        // Off-screen is its own failure: a control nobody can reach. The home
+        // chip used to be lifted out of the top of the viewport by the consent
+        // bar, and a centre point above y=0 hits nothing, so it read as clear.
+        if (r.bottom <= 0 || r.top >= innerHeight || r.right <= 0 || r.left >= innerWidth) {
+          out.push(((f.id || f.className) + '').slice(0, 22) + ' is off-screen');
+          continue;
+        }
         const under = document.elementsFromPoint(Math.round(r.left + r.width / 2), Math.round(r.top + r.height / 2))
           .filter((e) => e !== f && !f.contains(e));
         const leaf = under.find((e) => e.children.length === 0 && (e.textContent || '').trim().length > 6);
@@ -79,8 +97,21 @@ const check = (name, ok, detail) => results.push([ok ? 'PASS' : 'FAIL', name, de
       return out;
     });
 
+    // First visit: the consent bar is up and the chrome has to clear it.
+    const open = await measure();
+    // Then answered. The bar goes away, the band it reserved is free again, and
+    // the chrome has to come back down without landing on anything.
+    const declined = await page.$('#consentBar [data-consent="denied"]');
+    let closed = [];
+    if (declined) {
+      await declined.click();
+      await page.waitForTimeout(900);
+      closed = (await measure()).map((h) => h + ' (after consent)');
+    }
+    const hits = open.concat(closed);
+
     check(`${route}: floating chrome covers no content`, hits.length === 0,
-      hits.length ? hits.join(' | ') : 'clear');
+      hits.length ? hits.join(' | ') : (declined ? 'clear, with the consent bar up and after it' : 'clear'));
     await page.close();
   }
 

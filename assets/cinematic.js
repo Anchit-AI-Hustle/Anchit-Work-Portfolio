@@ -75,6 +75,7 @@
     addEventListener('resize', function () {
       clearTimeout(bt); bt = setTimeout(function () { place(btn); }, 180);
     });
+    onReservedChange(function () { place(btn); });
   }
 
   // A way back to the main portfolio, on every page that does not already have
@@ -127,6 +128,7 @@
     addEventListener('resize', function () {
       clearTimeout(rt); rt = setTimeout(function () { placeHome(a); }, 180);
     });
+    onReservedChange(function () { placeHome(a); });
   }
 
   // Bottom-left is only the FIRST choice. This runtime is added to pages it did
@@ -154,6 +156,31 @@
     // floating over a container's padding is fine; over a sentence is not.
     var leaf = hit.children && hit.children.length === 0;
     return !!(leaf && (hit.textContent || '').trim().length > 4);
+  }
+
+  // THE CONSENT BAR RESERVES THE BOTTOM BAND, AND THE PLACER HAS TO KNOW.
+  //
+  // consent.js used to lift these two controls itself, with a transform equal
+  // to the bar's height. place() never knew: it tested spots BEHIND the bar,
+  // found the bar's own buttons there, climbed to bottom:50 - and then the
+  // 127px lift landed the toggle on the heading of the Frameworks module.
+  // The same lift hit the home chip while it was TOP-anchored and pushed it
+  // off the top of the screen, so a first-time visitor on the marketing course
+  // and the task tracker had no route home until they answered the banner.
+  //
+  // So the placer owns the whole job: the band the bar reserves is subtracted
+  // before any spot is tested, and both controls are placed again whenever the
+  // bar opens, changes height or goes away.
+  function reservedBottom() {
+    if (root.getAttribute('data-consent-open') !== '1') return 0;
+    return Math.ceil(parseFloat(root.style.getPropertyValue('--consent-h')) || 0);
+  }
+  function onReservedChange(fn) {
+    if (typeof MutationObserver === 'undefined') return;
+    var t;
+    new MutationObserver(function () {
+      clearTimeout(t); t = setTimeout(fn, 60);
+    }).observe(root, { attributes: true, attributeFilter: ['data-consent-open', 'style'] });
   }
 
   // The home chip is TOP-anchored, so place() - which reasons in `bottom` - was
@@ -213,6 +240,7 @@
     function choose() {
       var r = btn.getBoundingClientRect();
       var pad = 14, w = r.width || 92, h = r.height || 26;
+      var floor = pad + reservedBottom();
       // Four candidates was enough while this only avoided CONTROLS. Now that it
       // avoids text as well, a dense page - the Frameworks module is one - can
       // have all four taken, and the old code then gave up and sat on whatever
@@ -221,7 +249,7 @@
       // a case that almost never happens.
       var spots = [];
       for (var row = 0; row < 6; row++) {
-        var bb = pad + row * (h + 10);
+        var bb = floor + row * (h + 10);
         spots.push({ l: pad, b: bb });                      // left column, climbing
         spots.push({ l: innerWidth - w - pad, b: bb });     // right column, climbing
       }
@@ -240,7 +268,7 @@
       // Every candidate is taken: sit above the last one rather than on a control.
       btn.style.left = 'auto';
       btn.style.right = pad + 'px';
-      btn.style.bottom = (pad + (h + 10) * 2) + 'px';
+      btn.style.bottom = (floor + (h + 10) * 2) + 'px';
     }
   }
   function injectChrome() { injectToggle(); injectHomeLink(); }
