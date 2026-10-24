@@ -88,8 +88,16 @@
     <tr><td><code>anchit-chat-mode</code>, <code>anchit-chat-audio</code>, <code>anchit-tts-local</code>, <code>jarvis-voice</code></td><td>Your chat and voice settings</td></tr>
     <tr><td><code>anchit-chat-feedback</code></td><td>Any thumbs up or down you gave a chat reply</td></tr>
     <tr><td><code>cookie-consent</code></td><td>Your answer to the consent banner, so it is not shown again</td></tr>
+    <tr><td><code>gram-street-orders</code>, <code>deli-chic-orders</code></td><td><strong>Orders you place on the two demo shop pages, including the name, mobile number, delivery address and any note you typed</strong> &mdash; so your order reference survives a reload. Up to the last 20.</td></tr>
   </table>
   <p>Clearing site data in your browser removes all of it.</p>
+  <p><strong>About those two order keys, because they are the only ones here that hold contact details.</strong>
+  Gram Street Coffee and Deli Chic are demonstration storefronts on this site. If you fill in their
+  order form, what you typed is written to your own browser so the page can show you the reference
+  again. It is not sent anywhere by the page and this site has no server that can read it: the only
+  way it reaches the shop is if <em>you</em> press the WhatsApp button, which opens a message you can
+  read before sending. If you would rather it were not kept, clear site data for this site, or use
+  the form on a private window.</p>
 
   <h2>The chatbot and voice features</h2>
   <p>The chat on this site is answered by a large language model. When you send a message, <strong>the text of that message and the recent messages in the same conversation</strong> are sent to this site's own serverless function, which forwards them to an AI provider (Anthropic, and where that is unavailable, Google, Groq, Cerebras or OpenRouter) purely to generate the reply. If you use the spoken replies, the reply text is sent to a text-to-speech provider.</p>
