@@ -28,6 +28,8 @@
 // MUT=race removes the learner guard on the delayed reply; the chat check must
 // fail. MUT=label restores "Behind batch pace"; the consistency check must
 // fail. MUT=dash plants an em dash; the dash check must fail.
+// MUT=auditnav and MUT=protonav remove the cross-links from the audit section
+// and from the prototype's intro; the matching navigation check must fail.
 const { chromium } = require('./_playwright.js');
 const vercel = require('../vercel.json');
 const BASE = process.env.BASE || 'http://127.0.0.1:8099';
@@ -50,7 +52,9 @@ const CSP = (() => {
 function mutate(src) {
   if (MUT === 'race') return src.replace('if(P[cur]===p) addMsg', 'addMsg');
   if (MUT === 'label') return src.replace("k:'Lectures not done'", "k:'Behind batch pace'");
-  if (MUT === 'dash') return src.replace('</body>', '<p>one — two</p></body>');
+  if (MUT === 'dash') return src.replace('</body>', '<p>one \u2014 two</p></body>');
+  if (MUT === 'auditnav') return src.replace(/<div class="hero-ctas" style="margin-top:6px"><a class="btn btn-outline sm" href="#top">.*?<\/div>/, '');
+  if (MUT === 'protonav') return src.replace(/<div class="xlinks">.*?<\/div>/, '');
   return src;
 }
 
@@ -82,7 +86,7 @@ async function open(browser, vp, path) {
 const dashes = (frame) => frame.evaluate(() => {
   const c = document.body.cloneNode(true);
   c.querySelectorAll('script,style,noscript').forEach((n) => n.remove());
-  return (document.title + '\n' + c.textContent + '\n' + document.body.innerText).match(/.{0,30}[–—].{0,30}/g) || [];
+  return (document.title + '\n' + c.textContent + '\n' + document.body.innerText).match(/.{0,30}[\u2013\u2014].{0,30}/g) || [];
 });
 const hScroll = (page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 
@@ -208,11 +212,57 @@ async function prototype(browser, vp) {
   await ctx.close();
 }
 
+// The case study, its live audit and the prototype are three ways in. Whichever
+// one a visitor lands on, the other two must be on screen without scrolling,
+// and following each must land where it says.
+const ENTRY = {
+  study: { path: '/pw-study', to: { audit: 'a[href="#audit"]', proto: 'a[href="/pw-study/prototype"]' } },
+  audit: { path: '/pw-study#audit', to: { study: '#audit a[href="#top"]', proto: '#audit a[href="/pw-study/prototype"]' } },
+  proto: { path: '/pw-study/prototype', to: { study: '.xlinks a[href="/pw-study"]', audit: '.xlinks a[href="/pw-study#audit"]' } },
+};
+const LANDS = {
+  study: async (page) => (new URL(page.url())).pathname === '/pw-study' && page.$eval('.hero h1', (h) => { const r = h.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight; }),
+  audit: async (page) => (new URL(page.url())).pathname === '/pw-study' && page.$eval('#au-h', (h) => { const r = h.getBoundingClientRect(); return r.top >= 0 && r.top < innerHeight; }),
+  proto: async (page) => (new URL(page.url())).pathname === '/pw-study/prototype' && !!(await page.$('#e-tier')),
+};
+
+async function crossNav(browser, vp) {
+  for (const [from, spec] of Object.entries(ENTRY)) {
+    for (const [to, sel] of Object.entries(spec.to)) {
+      const L = `[${vp.name}] nav ${from} -> ${to}`;
+      const { ctx, page } = await open(browser, vp, spec.path);
+      await page.waitForTimeout(400);
+      // Visible and inside the first screen: the first match that is, if any.
+      const link = await page.evaluateHandle((s) => [...document.querySelectorAll(s)].find((a) => {
+        const r = a.getBoundingClientRect(); const cs = getComputedStyle(a);
+        return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && r.top >= 0 && r.bottom <= innerHeight
+          && r.left >= 0 && r.right <= innerWidth;
+      }) || null, sel);
+      const el = link.asElement();
+      check(`${L}: link on screen without scrolling`, !!el, el ? norm(await el.innerText()) : 'no visible ' + sel);
+      if (el) {
+        await Promise.all([page.waitForLoadState('domcontentloaded'), el.click()]);
+        await page.waitForTimeout(700);
+        const ok = await LANDS[to](page);
+        check(`${L}: following it lands there`, ok, page.url());
+      }
+      await ctx.close();
+    }
+  }
+  // Inside the case study's iframe the prototype's intro, links included, stays
+  // hidden: the visitor is already on the case study.
+  const { ctx, page } = await open(browser, vp, '/pw-study/prototype?embed=1');
+  const shown = await page.$eval('.xlinks', (x) => x.getBoundingClientRect().height > 0).catch(() => false);
+  check(`[${vp.name}] nav: embedded prototype does not repeat the links`, !shown, 'visible=' + shown);
+  await ctx.close();
+}
+
 (async () => {
   const browser = await chromium.launch();
   for (const vp of VIEWPORTS) {
     await caseStudy(browser, vp);
     await prototype(browser, vp);
+    await crossNav(browser, vp);
   }
   for (const [s, n, d] of results) console.log('  ' + s + '  ' + n.padEnd(70) + (d || ''));
   const pass = results.filter((r) => r[0] === 'PASS').length;
