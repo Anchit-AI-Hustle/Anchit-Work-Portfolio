@@ -86,7 +86,14 @@
       box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), inset 0 0 25px rgba(255, 255, 255, 0.5);
       background-repeat: no-repeat;
       z-index: 30;
-      transform: translate(-50%, -50%);
+      /* Anchored and moved by transform. It used to be moved by writing
+         left/top on each pointer sample, which forces layout while the glass
+         is being dragged across the cut — the one moment the effect has to
+         stay smooth. The background-position write stays: that offset IS the
+         magnification, and it is confined to this 170px circle. */
+      top: 0;
+      left: 0;
+      transform: translate3d(var(--lx, 0px), var(--ly, 0px), 0) translate(-50%, -50%);
     }
 
     /* Loupe Reticle */
@@ -99,18 +106,6 @@
         linear-gradient(to right, transparent 49%, rgba(197, 154, 69, 0.6) 50%, transparent 51%),
         linear-gradient(to bottom, transparent 49%, rgba(197, 154, 69, 0.6) 50%, transparent 51%);
       pointer-events: none;
-    }
-
-    /* Gold Foil Sheen on Heading */
-    .gold-foil-text {
-      background: var(--gold-foil);
-      background-size: 200% auto;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: goldShimmer 8s linear infinite;
-    }
-    @keyframes goldShimmer {
-      to { background-position: 200% center; }
     }
 
     /* Damascus Knife Specular Glint */
@@ -176,32 +171,6 @@
     }
     .tilt-card:hover::after {
       opacity: 1;
-    }
-
-    /* Conic Border Beam Animation */
-    @property --beam-angle {
-      syntax: '<angle>';
-      inherits: false;
-      initial-value: 0deg;
-    }
-    .conic-beam {
-      position: relative;
-    }
-    .conic-beam::before {
-      content: '';
-      position: absolute;
-      inset: -2px;
-      border-radius: inherit;
-      padding: 2px;
-      background: conic-gradient(from var(--beam-angle, 0deg), transparent 70%, #C59A45 88%, #CD2653 95%, transparent 100%);
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      pointer-events: none;
-      animation: spinBeam 6s linear infinite;
-    }
-    @keyframes spinBeam {
-      to { --beam-angle: 360deg; }
     }
 
     /* Staggered Scroll Reveal Transitions */
@@ -372,6 +341,10 @@
       animation: deliMarquee 38s linear infinite;
     }
     .deli-ticker:hover .deli-track { animation-play-state: paused; }
+    /* and it does not keep running for the length of the page once it is
+       behind you — the house rule is that nothing decorative animates off
+       screen. Paused, not removed, so it resumes rather than restarts. */
+    .deli-ticker:not(.is-live) .deli-track { animation-play-state: paused; }
     .deli-track ul { display: flex; margin: 0; padding: 0; list-style: none; }
     .deli-track li {
       display: flex;
@@ -1664,6 +1637,16 @@
       window.addEventListener('resize', measure, { passive: true });
     })();
 
+    // The ticker is an ambient loop like the bench, and gets the same gate.
+    (function tickerLive() {
+      var t = document.querySelector('.deli-ticker');
+      if (!t) return;
+      if (!('IntersectionObserver' in window)) { t.classList.add('is-live'); return; }
+      new IntersectionObserver(function (en) {
+        t.classList.toggle('is-live', en[0].isIntersecting);
+      }, { threshold: 0.05 }).observe(t);
+    })();
+
     function initCardTilt() {
       if (prefersReducedMotion) return;
       const cards = document.querySelectorAll('.deli-card, .tilt-card, .loupe-container');
@@ -1995,6 +1978,8 @@
       const tempSensor = document.getElementById('liveTempSensor');
       if (!container || !glass || !img) return;
 
+      let px = 0, py = 0, loupeRaf = 0, loupeHalf = 0;
+
       const zoom = 2.5;
 
       // Subtle dynamic fluctuation of temperature sensor for ultra-realism
@@ -2015,22 +2000,30 @@
         glass.style.display = 'none';
       });
 
+      // Store the pointer and do every read and write in the frame. Both the
+      // rect and the glass size are layout reads; done per sample they were
+      // forcing a reflow at pointer rate, during the one interaction that has
+      // to stay smooth.
       function updateLoupe(clientX, clientY) {
-        const rect = container.getBoundingClientRect();
-        let x = clientX - rect.left;
-        let y = clientY - rect.top;
-
-        if (x < 0) x = 0;
-        if (x > rect.width) x = rect.width;
-        if (y < 0) y = 0;
-        if (y > rect.height) y = rect.height;
-
-        glass.style.left = `${x}px`;
-        glass.style.top = `${y}px`;
-        glass.style.backgroundPosition = `-${x * zoom - glass.offsetWidth / 2}px -${y * zoom - glass.offsetHeight / 2}px`;
+        px = clientX; py = clientY;
+        if (!loupeRaf) loupeRaf = requestAnimationFrame(drawLoupe);
       }
 
-      container.addEventListener('mousemove', (e) => updateLoupe(e.clientX, e.clientY));
+      function drawLoupe() {
+        loupeRaf = 0;
+        const rect = container.getBoundingClientRect();
+        if (!loupeHalf) loupeHalf = (glass.offsetWidth || 170) / 2;
+
+        const x = Math.max(0, Math.min(rect.width, px - rect.left));
+        const y = Math.max(0, Math.min(rect.height, py - rect.top));
+
+        glass.style.setProperty('--lx', `${x}px`);
+        glass.style.setProperty('--ly', `${y}px`);
+        glass.style.backgroundPosition =
+          `-${x * zoom - loupeHalf}px -${y * zoom - loupeHalf}px`;
+      }
+
+      container.addEventListener('mousemove', (e) => updateLoupe(e.clientX, e.clientY), { passive: true });
       container.addEventListener('touchmove', (e) => {
         if (e.touches && e.touches[0]) {
           glass.style.display = 'block';
@@ -2351,7 +2344,6 @@
      its keep only while something reads it. */
 </script>
 <script src="/assets/vendor/gsap.min.js"></script>
-<script src="/assets/vendor/ScrollTrigger.min.js"></script>
 <script src="/assets/brand-motion.js" defer></script>
 </body>
 </html>

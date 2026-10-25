@@ -131,8 +131,9 @@ hung curd and Awadhi mace"*, plus tiger-prawn dim sum).
 | `--gold-foil` | 5-stop `#FFE6A3 → #C59A45 → #FFF2CC → #9E742A → #E4C882` | stamped foil |
 
 Same structural note as Gram Street's chrome: `--gold-foil` is a metallic multi-stop gradient
-and reads as flat mustard unless its highlight travels. It already has a `goldShimmer` animation
-— see the findings in Part 4 for why that one needs fixing rather than adding to.
+and reads as flat mustard unless its highlight travels. It *had* a `goldShimmer` animation whose
+owning class was never applied to anything, so the foil has in fact never moved — see F2. The
+token is kept for DC-1, which is the effect it was presumably meant for.
 
 ## 2.3 Typography & voice
 
@@ -177,57 +178,80 @@ ScrollTrigger-bound tween in the file).
 `ResizeObserver`-driven), the `.walk` 5-stage pinned walk-in with five `data-z0/data-z1/data-in/
 data-out` depth layers, `.counter-scene` (nine keyframes: `csGlow csCone csMote csNeedle csLock
 csPour csFill csSteam csSheen`), `.timeline` medallion rail (`is-live` / `is-cycling` gated),
-`.chef-chart`, a 2D steam canvas, a scratch canvas, tilt-cards, and a `.track` marquee
-(46s, pauses on hover).
+`.chef-chart`, a 2D steam canvas, a scratch canvas, tilt-cards, a `.track` marquee (46s), and
+a custom cursor.
 
 **Deli Chic inline:** WebGL atmosphere canvas on `#deliAtmosphereCanvas`
 (`powerPreference: 'low-power'`), the `.bwalk` 5-stage walk, `.bench` process rail
 (`benchFillX/Y`, `benchStep`, `benchRing` — `is-live`/`is-cycling` gated), the `.loupe`
-pointer magnifier, `.knife-glint` hover, `goldShimmer`, `spinBeam`, and a `deliMarquee`
-ticker (38s, pauses on hover).
+pointer magnifier, `.knife-glint` hover, and a `deliMarquee` ticker (38s).
 
 Both pages carry a `prefers-reduced-motion` block that neutralises animation and transition
 duration, hides the WebGL canvas, and force-resets `.reveal` / `[data-reveal]` to visible —
 i.e. reduced motion yields the page, not a blank screen. That is correct and should be
 preserved by anything added.
 
-**Assessment: both sites are already well-motioned.** The gap is not quantity. Three specific
-problems are suppressing the quality of what is already there, and they gate anything new.
+**Assessment: both sites are already well-motioned.** The gap is not quantity. Five specific
+problems were suppressing the quality of what is already there, and they gated anything new.
+All five are now fixed; Part 4 records each one and how it was verified.
 
 ---
 
-# Part 4 — Findings that gate new motion
+# Part 4 — Findings that gate new motion (all fixed)
 
-### F1 — ScrollTrigger is loaded on both pages and drives nothing
+### F1 — ScrollTrigger was loaded on both pages and drove nothing — FIXED
 
-`ScrollTrigger.min.js` is 43 KB, is fetched by both microsites, and is registered via
+`ScrollTrigger.min.js` is 43 KB, was fetched by both microsites, and was registered via
 `gsap.registerPlugin`. The only ScrollTrigger-bound tween in the codebase is `depth()` in
-`brand-motion.js`, which selects `[data-bm-depth]` — and **zero elements on either page carry
+`brand-motion.js`, which selects `[data-bm-depth]` — and **zero elements on either page carried
 that attribute**. Both pinned walk-throughs are hand-rolled with `IntersectionObserver` and
 scroll math, not ScrollTrigger.
 
-So: 43 KB of parser-blocking vendor JS per page, for nothing. Either wire the depth layers
-(Part 5, GS-2 / DC-2 both want it) or drop the file. Adding more motion on top of a 115 KB
-vendor payload that is 37% dead is the wrong order of operations.
+So: 43 KB of parser-blocking vendor JS per page, for nothing.
 
-### F2 — Several decorations run off-screen, against the repo's own rule
+**Fixed by dropping the `<script>` tag from both brand pages.** The file itself stays in
+`/assets/vendor` because the portfolio's own `index.html` uses ScrollTrigger heavily and
+genuinely needs it; only the two microsites were fetching it for nothing. `depth()` now returns
+early when no element carries the attribute *and* when the plugin is absent, rather than handing
+GSAP a `scrollTrigger` config it cannot honour. Verified in the browser: no request for
+`ScrollTrigger.min.js` on either page, `gsap.min.js` still fetched, no page errors.
+
+Wiring the depth layers instead (GS-2 / DC-2) was the other option and remains open — it costs
+one `<script>` tag back on whichever page gets marked layers.
+
+### F2 — Four decorations ran off-screen, against the repo's own rule — FIXED
 
 `CLAUDE.md` states: *"nothing decorative runs while off screen."* The `is-live` / `is-cycling`
-gating on `.timeline` and `.bench` honours it. These do not:
+gating on `.timeline` and `.bench` honoured it. These did not:
 
 | Declaration | Where | Duration |
 |---|---|---|
-| nine `cs*` keyframes on `.counter-scene` | `gram-street-coffee/index.html` ~172–300 | 4.2s–14s, infinite |
-| `.track { animation: slide 46s … infinite }` | `gram-street-coffee/index.html:445` | 46s, infinite |
-| `spinBeam 6s infinite` | both pages | 6s, infinite |
-| `goldShimmer 8s linear infinite` | `deli-chic/index.html:110` | 8s, infinite |
-| `deliMarquee 38s linear infinite` | `deli-chic/index.html:372` | 38s, infinite |
+| nine `cs*` keyframes on `.counter-scene` (hero) | `gram-street-coffee/index.html` | 4.2s–14s, infinite |
+| `slide` on `.track` (the marquee) | `gram-street-coffee/index.html` | 46s, infinite |
+| `pulse` on `#orbit .pulse` ×3, staggered | `gram-street-coffee/index.html` | 3.6s, infinite |
+| `deliMarquee` on `.deli-track` (the ticker) | `deli-chic/index.html` | 38s, infinite |
 
-Each pauses on `:hover` only. On a long page these keep compositing while far out of view.
-The fix is the pattern the page already owns — toggle `is-live` from an `IntersectionObserver`
-and gate the `animation` on it — not a new mechanism.
+Each paused on `:hover` only. Fixed with the pattern the pages already own — `is-live` toggled
+from an `IntersectionObserver`, with the animation gated on it. Pausing rather than removing,
+so a loop resumes its phase instead of restarting: the counter scene's 14s cycle should not
+snap back to the portafilter lock every time it re-enters view.
 
-### F3 — Two metal effects are painted, not composited
+Why the existing helper did not already cover them: Gram Street's comment above `live()`
+claimed *"the 'now' pulse and the steam are ambient loops, so they run only while their section
+is on screen"* — but `live()` was called on the timeline and the chef chart only, and no CSS
+rule read `.is-live` on the chart, so that second call did nothing. The pulse and the steam were
+never gated at all. The comment now lists the real set.
+
+**An earlier draft of this table also listed `spinBeam` (both pages) and `goldShimmer`
+(`deli-chic`). That was wrong, and wrong in a way worth recording**: their owning selectors,
+`.conic-beam` and `.gold-foil-text`, appear nowhere in either page's markup. Neither animation
+had ever run. Grepping for an `animation: … infinite` declaration finds what *could* loop, not
+what does; the selector has to be matched against the markup, with the `<style>` block excluded
+so a definition is not mistaken for a use. Both dead blocks — plus the `@property --beam-angle`
+that only `.conic-beam` used — have been deleted. The `--gold-foil` token stays in `:root`:
+DC-1 wants it, and `DESIGN.md` asks for the token rather than an invented value.
+
+### F3 — One metal effect is painted, not composited — BOUNDED
 
 `DESIGN.md` and `CLAUDE.md` both restrict animation to `transform` and `opacity`.
 Background-position is painted on the main thread every frame and cannot be composited. Two
@@ -235,18 +259,66 @@ places do it:
 
 | Declaration | Where | Trigger |
 |---|---|---|
-| `goldShimmer { to { background-position: 200% center } }` on `.gold-foil-text` | `deli-chic/index.html:110–113` | infinite, 8s |
-| `.chrome-text { background-position: calc(var(--mx, 0.3) * 100%) 0 }` | `gram-street-coffee/index.html:846` | every `pointermove` |
+| `goldShimmer` on `.gold-foil-text` | `deli-chic/index.html` | never — the class is not in the markup (deleted) |
+| `.chrome-text { background-position: calc(var(--mx, 0.3) * 100%) 0 }` | `gram-street-coffee/index.html` | every `pointermove` |
 
-The `.chrome-text` one is a background-clipped gradient on a `clamp(2.6rem, 7.5vw, 6rem)`
-headline being repainted on every pointer sample. (Its custom property is correctly set on the
-section rather than on `:root` — the trap `CLAUDE.md` documents — so only the paint cost
-remains.)
+Only `.chrome-text` was live: `goldShimmer`'s owner is not in the markup (see F2), so the one
+real instance is a background-clipped gradient on a `clamp(2.6rem, 7.5vw, 6rem)` headline being
+repainted on every pointer sample. (Its custom property is correctly set on the section rather
+than on `:root` — the trap `CLAUDE.md` documents — so only the paint cost remains.)
+
+**Partly fixed.** A travelling specular highlight clipped to glyphs cannot be composited while
+the gradient is clipped to the text, so the cost is bounded instead of removed: one write per
+frame via `requestAnimationFrame`, and only while the pointer is inside that section. Measured
+on the equivalent handler: 120 `mousemove` events dispatched back-to-back produced **1** style
+write instead of 120. GS-1 is still the change that removes the paint altogether.
 
 Gram Street's `csSheen` is **not** an instance of this: it already animates
 `transform: translateX()` plus `opacity` and is the correct pattern. It is the model the other
 two should be rewritten to — a clipped highlight element travelling by transform, which is both
 cheaper and reads as more convincing metal than a sliding gradient.
+
+### F4 — Two pointer-driven effects wrote layout properties every sample — FIXED
+
+Not in the first draft of this study, and the most expensive thing on either site.
+
+| What | Where | Was |
+|---|---|---|
+| the custom cursor | `gram-street-coffee/index.html` | `style.left` / `style.top` on **every `mousemove`, page-wide** |
+| the loupe glass | `deli-chic/index.html` | `style.left` / `style.top` per sample, plus `getBoundingClientRect()` and `offsetWidth` read back each time |
+
+`left` / `top` are layout properties: writing them forces layout, and the cursor handler did it
+for the whole page at pointer-polling rate. The loupe did it during the one interaction the
+brand actually sells — *"move cursor or drag finger across cut to inspect curing grain"* — and
+compounded it by reading layout back on every sample too.
+
+Both now sit at the origin and move by `translate3d()` fed from custom properties **on the
+element** (not `:root` — that trap invalidates every element's computed style), coalesced to one
+write per frame. The loupe's `getBoundingClientRect()` and glass-size read moved inside the
+frame, so it is one layout read per frame rather than per sample. The loupe's
+`background-position` write stays: that offset *is* the magnification, and it is confined to a
+170px circle.
+
+Verified in the browser: both track the pointer, neither writes inline `left`/`top`, both keep
+`left: 0 / top: 0` computed, position appears in the transform matrix, the loupe still magnifies
+and is still visible on hover.
+
+Still outstanding, and deliberately not changed: `.custom-cursor` transitions `width` and
+`height` on hover (16px → 60px). That is a layout animation, but it is hover-scoped, brief, and
+on a `position: fixed` element with no children, so it cannot reflow page content. Converting it
+to `scale` would thicken the 2px ring and scale the shadow — a visible change to the brand's
+look, which is a design call rather than a fix.
+
+### F5 — Gram Street handed smooth scrolling *back* under reduced motion — FIXED
+
+`gram-street-coffee/index.html` declared `html { scroll-behavior: smooth }` at the top of the
+stylesheet, and then declared it **again inside `@media (prefers-reduced-motion: reduce)`** —
+re-enabling for the one person who had asked for less of it exactly the behaviour the block
+exists to switch off. Deli Chic has had `scroll-behavior: auto !important` all along.
+
+Now `auto !important` on both, with the `!important` for the documented reason: ScrollTrigger
+restores this property inline. Verified by loading the page under `reducedMotion: 'reduce'` and
+reading the computed value.
 
 ---
 
@@ -308,8 +380,9 @@ easing that decelerates hard, and let the existing `csNeedle` needle land in syn
 elements, hover-triggered, never during scroll — and never apply it to body text.
 
 ### GS-6 — Gate and fix what already runs
-F2 and F3 applied to `.counter-scene`, `.track` and `spinBeam`. Not glamorous; it is what makes
-GS-1 through GS-5 affordable.
+Done. F2 gating on `.counter-scene`, `.track` and `#orbit .pulse`; F4 on the custom cursor; F5
+on the reduced-motion block; dead `.conic-beam` / `spinBeam` removed. Not glamorous; it is what
+makes GS-1 through GS-5 affordable.
 
 ---
 
@@ -326,7 +399,8 @@ Everything here runs **slower and heavier than its Gram Street counterpart**, on
 `translateX` foil highlight travelling once across the letterforms (never looping).
 **Cost:** one transition plus one one-shot highlight per heading.
 **Reduced motion:** final state, no press, no highlight.
-**Replaces:** `goldShimmer`'s infinite background-position loop (F2 + F3 together).
+**Note:** `goldShimmer` and its `.gold-foil-text` class have been deleted as dead code (F2), so
+DC-1 builds the foil effect for the first time rather than replacing a working one.
 
 ### DC-2 — Cold-room depth
 **Why:** 2.4-1. Slow parallax reads as cold and heavy; it is the cheapest way to make the
@@ -374,7 +448,8 @@ transform vocabulary, two timings — the lineage difference is felt, never labe
 **Cost:** one extra easing variable; FLIP-free, since filtering already re-renders.
 
 ### DC-7 — Gate and fix what already runs
-F2 and F3 applied to `goldShimmer`, `deliMarquee` and `spinBeam`.
+Done. F2 gating on the `deliMarquee` ticker; F4 on the loupe; dead `.conic-beam` / `spinBeam`
+and `.gold-foil-text` / `goldShimmer` removed.
 
 ---
 
@@ -429,9 +504,59 @@ Verification, per `CLAUDE.md`:
   look like a no-op here more than once.
 - Serve `www/` on 8099, then `node scripts/motionfix.js` and `node scripts/turn-by-turn.js`.
 - Measure the rendered page rather than reading the diff. Specifically: confirm with a scroll
-  to the footer that no `cs*`, `goldShimmer`, `deliMarquee` or marquee animation is still
-  running once its section is out of view — that is the check F2 exists for, and it cannot be
-  confirmed from source.
+  to the footer that no `cs*`, `pulse`, `deliMarquee` or marquee animation is still running once
+  its section is out of view — that is the check F2 exists for, and it cannot be confirmed from
+  source. It is now automated: `scripts/brand-motion-gating.js` drives both pages in a real
+  browser, scrolls each loop's section clear of the viewport and asserts the animation is paused
+  or gone, and asserts the pointer-driven effects write no inline `left`/`top`.
 - Re-check both pages with `prefers-reduced-motion: reduce` forced on. The bar is the one the
   existing block sets: the page still works, nothing is left mid-transition, nothing is left
   invisible.
+
+---
+
+# Part 9 — Verification state
+
+## The guard
+
+`scripts/brand-motion-gating.js` (`npm run test:brandmotion`) covers all five findings on both
+pages in a real browser. 22 checks: every ambient loop running in view and idle out of it, the
+gate preserving phase rather than restarting, both pointer effects moving by transform with no
+inline `left`/`top`, write coalescing, the loupe still magnifying, neither page fetching
+ScrollTrigger, and reduced motion keeping `scroll-behavior: auto` with the headline visible.
+
+Following the house convention from `scripts/motionfix.js`, each check is paired with a
+mutation that undoes the fix, so the suite can be shown to fail when the bug returns:
+`MUT=no_gate`, `gate_restarts`, `cursor_layout`, `loupe_layout`, `no_coalesce`, `rm_smooth`.
+
+One note for whoever edits those mutations next. `addInitScript` runs **before the document
+exists** — `document.head` is null and `getElementById` returns null — so a mutation applied
+straight from there silently does not apply, and the suite reports a false PASS for the very bug
+it is meant to catch. That happened on the first run of this suite: `MUT=cursor_layout` came
+back 22/22. Every mutation is now deferred to `DOMContentLoaded` plus a tick, so it lands after
+the page's own script.
+
+## Suite results on this change
+
+All 22 existing suites were run, plus the new one. Three suites fail, and all three failed
+identically before this change:
+
+| Suite | Result | Status |
+|---|---|---|
+| `test:brandmotion` | 22/22 | new |
+| `motionfix` | 8/8 | passing |
+| 19 others | passing | — |
+| `test:cards` | 9/12 | **pre-existing**, portfolio only |
+| `test:overlap` | 6/10 | **pre-existing**, portfolio only |
+| `test:redirects` | 6/7 | **pre-existing** |
+
+`test:cards` and `test:overlap` load `index.html`, `lifecycle-os-*` and `growth-school` — a page
+set disjoint from anything this change can reach. In the built tree `brand-motion.js` is
+referenced only by the two microsites, and `ScrollTrigger.min.js` now only by `index.html`,
+which genuinely uses it. So those two suites cannot see these edits.
+
+`test:redirects` fails on *"each identity link has one spelling site-wide"*, because three phone
+numbers exist across the site: Anchit's own on the portfolio pages, and one each for Deli Chic
+and Gram Street. Confirmed identical on `main` by stashing, rebuilding and re-running. Each
+brand legitimately has its own number, so the guard's site-wide rule is what needs scoping —
+left alone here, because narrowing a guard's definition of correct is a decision, not a fix.

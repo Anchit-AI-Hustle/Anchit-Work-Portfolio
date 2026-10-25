@@ -52,9 +52,17 @@
     background: rgba(255, 255, 255, 0.9);
     border-radius: 50%;
     position: fixed;
+    /* Anchored at the origin and moved by transform. It used to be moved by
+       writing left/top on every mousemove, which forces layout at pointer
+       rate — on a high-polling mouse that is several layouts per frame, for
+       a 16px dot. The offsets come in on the element's own custom properties,
+       never on :root: a custom property on the root invalidates the computed
+       style of every element on the page. */
+    top: 0;
+    left: 0;
     pointer-events: none;
     z-index: 999999;
-    transform: translate(-50%, -50%);
+    transform: translate3d(var(--cx, -100px), var(--cy, -100px), 0) translate(-50%, -50%);
     transition: width 0.22s cubic-bezier(0.16, 1, 0.3, 1),
                 height 0.22s cubic-bezier(0.16, 1, 0.3, 1),
                 background-color 0.2s ease,
@@ -108,32 +116,6 @@
   }
   .tilt-card:hover::after {
     opacity: 1;
-  }
-
-  /* Conic Border Beam Animation */
-  @property --beam-angle {
-    syntax: '<angle>';
-    inherits: false;
-    initial-value: 0deg;
-  }
-  .conic-beam {
-    position: relative;
-  }
-  .conic-beam::before {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border-radius: inherit;
-    padding: 2px;
-    background: conic-gradient(from var(--beam-angle, 0deg), transparent 70%, #7C3AED 90%, #CDB8F7 95%, transparent 100%);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-    animation: spinBeam 6s linear infinite;
-  }
-  @keyframes spinBeam {
-    to { --beam-angle: 360deg; }
   }
 
   /* Staggered Scroll Reveal Transitions */
@@ -307,6 +289,10 @@
     .hero-inner { max-width: 100%; }
   }
 
+  /* Off screen, the scene holds its frame. Paused rather than removed so the
+     14s cycle resumes where it left off instead of snapping back to the lock. */
+  .counter-scene:not(.is-live) * { animation-play-state: paused; }
+
   html[data-motion="off"] .counter-scene * { animation: none !important; }
   @media (prefers-reduced-motion: reduce) {
     .cs-bulb, .cs-cone, .cs-motes circle, .cs-needle, .cs-portafilter,
@@ -444,6 +430,8 @@
   .marquee { overflow: hidden; background: var(--grape); color: var(--lilac); padding: 16px 0; }
   .track { display: flex; width: max-content; animation: slide 46s linear infinite; }
   .marquee:hover .track { animation-play-state: paused; }
+  /* and it does not scroll on for the length of the page once it is behind you */
+  .marquee:not(.is-live) .track { animation-play-state: paused; }
   .track ul { display: flex; gap: 0; margin: 0; padding: 0; list-style: none; }
   .track li { display: flex; align-items: center; white-space: nowrap; font-size: clamp(1.2rem, 2.5vw, 1.8rem); font-weight: 800; letter-spacing: -0.02em; text-transform: uppercase; }
   .track li::before { content: ""; width: 0.42em; height: 0.42em; margin: 0 0.9em; border-radius: 50%; background: var(--chrome); }
@@ -865,6 +853,7 @@
   #orbit .dot-far { fill: var(--lilac-soft); stroke: var(--grape); stroke-width: 3; }
   #orbit .hub { fill: var(--grape); }
   #orbit .pulse { fill: none; stroke: var(--berry); stroke-width: 2; opacity: 0; vector-effect: non-scaling-stroke; transform-box: fill-box; transform-origin: center; animation: pulse 3.6s ease-out infinite; animation-delay: calc(var(--k) * 1.2s); }
+  #orbit:not(.is-live) .pulse { animation-play-state: paused; }
   @keyframes pulse { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(22); opacity: 0; } }
   #orbit text { font-family: var(--font); font-weight: 800; font-size: 28px; fill: var(--grape); letter-spacing: -0.02em; paint-order: stroke; stroke: var(--lilac); stroke-width: 9px; stroke-linejoin: round; }
   #orbit text.hubtxt { font-size: 30px; }
@@ -908,7 +897,11 @@
   footer a { font-weight: 700; text-decoration: underline; }
 
   @media (prefers-reduced-motion: reduce) {
-    html { scroll-behavior: smooth; }
+    /* This block used to re-declare `smooth` here, which handed smooth
+       scrolling back to the one person who had asked for less of it. Deli Chic
+       has had `auto` all along. !important because ScrollTrigger restores this
+       property inline. */
+    html { scroll-behavior: auto !important; }
   }
 </style>
 <!-- seo:auto:start -->
@@ -2310,9 +2303,16 @@
       io.observe(el);
     }
 
-    // The "now" pulse and the steam are ambient loops, so they run only while
-    // their section is on screen — the house rule is that nothing decorative
-    // animates off screen.
+    // Every ambient loop on this page runs only while its own section is on
+    // screen — the house rule is that nothing decorative animates off screen.
+    // Gating is by class so the CSS keeps the animation's phase: coming back
+    // into view resumes the cycle rather than restarting it, which is why this
+    // pauses the animation instead of removing it.
+    //
+    // The list below is the whole set. It was not always: the counter scene
+    // (nine loops), the marquee and the orbit pulse used to run for the length
+    // of the page, and this comment used to claim the pulse was gated when
+    // only the timeline actually was.
     function live(el) {
       if (!el) return;
       if (typeof IntersectionObserver === "undefined") { el.classList.add("is-live"); return; }
@@ -2362,26 +2362,51 @@
     if (orbit) show(orbit, function () { orbit.classList.add("in"); });
 
     live(tl);
-    live(chart);
+    live(document.querySelector(".counter-scene"));
+    live(document.querySelector(".marquee"));
+    live(document.getElementById("orbit"));
   })();
 
-  /* 5. Chrome heading catches the light where pointer moves */
+  /* 5. Chrome heading catches the light where pointer moves.
+     --mx drives a background-position on background-clipped text, which is a
+     paint, not a composite, on a clamp(2.6rem, 7.5vw, 6rem) heading. It cannot
+     be composited while the gradient is clipped to the glyphs, so the cost is
+     bounded instead: one write per frame, and only while the pointer is inside
+     this section. It used to run on every pointer sample.
+     (The property goes on the section, not on :root — a custom property on the
+     root invalidates the computed style of every element on the page.)
+     The travelling-highlight rewrite in BRAND-MOTION-STUDY.md (GS-1) is what
+     removes the paint altogether. */
   (function chrome() {
     var sp = document.getElementById("space");
     if (!sp) return;
+    var mx = 0.3, raf = 0;
+    function write() {
+      raf = 0;
+      sp.style.setProperty("--mx", mx.toFixed(3));
+    }
     sp.addEventListener("pointermove", function (e) {
       var r = sp.getBoundingClientRect();
-      sp.style.setProperty("--mx", ((e.clientX - r.left) / r.width).toFixed(3));
-    });
+      mx = (e.clientX - r.left) / r.width;
+      if (!raf) raf = requestAnimationFrame(write);
+    }, { passive: true });
   })();
 
   /* 6. 5D Custom Magnetic Cursor */
   const cursor = document.getElementById('customCursor');
   if (cursor && !window.matchMedia('(hover: none)').matches) {
+    // One write per frame. mousemove can fire more often than the compositor
+    // paints, and the old handler did a full style write on every one of them.
+    let cx = -100, cy = -100, cursorRaf = 0;
+    const placeCursor = () => {
+      cursorRaf = 0;
+      cursor.style.setProperty('--cx', `${cx}px`);
+      cursor.style.setProperty('--cy', `${cy}px`);
+    };
     window.addEventListener('mousemove', (e) => {
-      cursor.style.left = `${e.clientX}px`;
-      cursor.style.top = `${e.clientY}px`;
-    });
+      cx = e.clientX; cy = e.clientY;
+      if (!cursorRaf) cursorRaf = requestAnimationFrame(placeCursor);
+    }, { passive: true });
     document.querySelectorAll('a, button, input, .photo, .d2c-card').forEach(el => {
       el.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
       el.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
@@ -3106,7 +3131,6 @@
   })();
 </script>
 <script src="/assets/vendor/gsap.min.js"></script>
-<script src="/assets/vendor/ScrollTrigger.min.js"></script>
 <script src="/assets/brand-motion.js" defer></script>
 </body>
 </html>
