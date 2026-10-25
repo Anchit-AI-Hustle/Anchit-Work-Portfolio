@@ -218,7 +218,6 @@ async function newPage(b, opts) {
       await p.evaluate((s) => document.querySelector(s)
         .scrollIntoView({ block: 'center', behavior: 'instant' }), ph.scope);
       await p.waitForTimeout(600);
-      const back = await p.evaluate(probe, { sel: ph.sel, pseudo: ph.pseudo });
       // A gate that removes the animation reports animationName "none" while
       // out of view; a gate that pauses keeps the name throughout. Pausing is
       // what preserves the cycle's phase.
