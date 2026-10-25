@@ -104,7 +104,8 @@ footer h3{color:#fff}
   .g5{grid-template-columns:repeat(5,1fr)}
   .proto{grid-template-columns:1.2fr .8fr}
 }
-@media (max-width:699px){.nav .cta{display:none}}
+.cta-sm{display:none}
+@media (max-width:699px){.cta-lg{display:none}.cta-sm{display:inline}.nav .wrap{gap:10px}}
 </style>
 </head>
 <body>
@@ -116,7 +117,7 @@ footer h3{color:#fff}
     <div class="links" id="links">
       <a href="#audit">Audit</a><a href="#upgrades">Upgrades</a><a href="#revamps">Revamps</a><a href="#questions">Six questions</a><a href="#prototype">Prototype</a><a href="#me">Why me</a>
     </div>
-    <a class="btn btn-primary sm cta" href="/amar-ujala/prototype">Open prototype</a>
+    <a class="btn btn-primary sm cta" href="/amar-ujala/prototype"><span class="cta-lg">Open prototype</span><span class="cta-sm">Prototype</span></a>
   </div>
 </nav>
 
@@ -162,6 +163,7 @@ footer h3{color:#fff}
         <tr><td><b>Amar Ujala news app + education section</b></td><td>All readers</td><td>1 crore+ Android downloads (per 24 Oct audit).</td><td>Education is a news feed, not a student journey; the section loads main content in 13.4 s on mobile against Google's 2.5 s standard (Lighthouse, 24 Oct).</td></tr>
       </tbody></table></div>
     <p class="callout amber" style="margin-top:20px"><b>Root cause:</b> every programme meets the family once a year and then forgets it. There is no shared student ID, no single consent and no record that carries over from the olympiad to result day to admission.</p>
+    <div class="hero-ctas" style="margin-top:20px"><a class="btn btn-primary" href="/amar-ujala/prototype">Open the prototype</a><a class="btn btn-outline" href="#top">Read the full study</a></div>
   </div>
 </section>
 

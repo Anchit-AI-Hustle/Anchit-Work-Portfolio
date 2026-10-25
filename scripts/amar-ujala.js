@@ -22,7 +22,9 @@
 // MUT=dash plants an em dash in the study; the dash check must fail.
 // MUT=count puts the 2025 pass count back into the prototype; the pinned
 // count and the cross-page base case must fail. MUT=lang makes the Hindi
-// toggle do nothing; the translation check must fail.
+// toggle do nothing; the translation check must fail. MUT=xnav drops the
+// prototype's audit link and hides the study's prototype button on phones;
+// the cross-navigation checks must fail.
 const { chromium } = require('./_playwright.js');
 const vercel = require('../vercel.json');
 const BASE = process.env.BASE || 'http://127.0.0.1:8099';
@@ -46,6 +48,8 @@ function mutate(path, src) {
   if (MUT === 'dash' && path.endsWith('/study')) return src.replace('</body>', '<p>one — two</p></body>');
   if (MUT === 'count' && path.endsWith('/prototype')) return src.split('1998317').join('2109000');
   if (MUT === 'lang' && path.endsWith('/prototype')) return src.replace('</body>', '<script>document.addEventListener("click",function(e){if(e.target.closest("button[lang]"))e.stopImmediatePropagation();},true);</script></body>');
+  if (MUT === 'xnav' && path.endsWith('/prototype')) return src.split('/amar-ujala/study#audit').join('/amar-ujala/study');
+  if (MUT === 'xnav' && path.endsWith('/study')) return src.replace('</head>', '<style>@media (max-width:699px){.nav .cta{display:none}}</style></head>');
   return src;
 }
 
@@ -162,6 +166,51 @@ async function prototype(browser, vp) {
   await ctx.close();
 }
 
+// The three places people are sent, the study, its audit and the prototype,
+// each show a link to the other two without scrolling, at every width and in
+// both prototype languages. Hiding a link on phones counts as missing it: the
+// study's "Open prototype" button used to be display:none below 700px.
+const STUDY = 'a[href="#top"], a[href="/amar-ujala/study"]';
+const AUDIT = 'a[href="#audit"], a[href="/amar-ujala/study#audit"]';
+const PROTO = 'a[href^="/amar-ujala/prototype"]';
+const inView = (page, sel) => page.$$eval(sel, (as) => as.some((a) => {
+  const r = a.getBoundingClientRect();
+  return r.width > 0 && r.height > 0 && r.top >= 0 && r.bottom <= innerHeight &&
+    getComputedStyle(a).visibility !== 'hidden';
+}));
+const auditTop = (page) => page.evaluate(() => Math.round(document.getElementById('audit').getBoundingClientRect().top));
+
+async function crossNav(browser, vp) {
+  const L = `[${vp.name}] cross-navigation`;
+
+  let { ctx, page } = await open(browser, vp, '/amar-ujala/study');
+  check(`${L}: study shows the audit and the prototype`,
+    (await inView(page, AUDIT)) && (await inView(page, PROTO)), '');
+  await ctx.close();
+
+  ({ ctx, page } = await open(browser, vp, '/amar-ujala/study#audit'));
+  await page.waitForTimeout(300);
+  const top = await auditTop(page);
+  check(`${L}: the audit opens in view and shows the study and the prototype`,
+    top >= 0 && top < 160 && (await inView(page, STUDY)) && (await inView(page, PROTO)), `#audit at ${top}px`);
+  await ctx.close();
+
+  ({ ctx, page } = await open(browser, vp, '/amar-ujala/prototype'));
+  for (const lang of ['en', 'hi']) {
+    if (lang === 'hi') { await page.click('button[lang="hi"]'); await page.waitForTimeout(250); }
+    check(`${L}: prototype (${lang}) shows the study and the audit`,
+      (await inView(page, 'a[href="/amar-ujala/study"]')) && (await inView(page, 'a[href="/amar-ujala/study#audit"]')), '');
+  }
+  const link = (await page.$$('a[href="/amar-ujala/study#audit"]'))[0];
+  if (link) {
+    await Promise.all([page.waitForURL(/\/amar-ujala\/study#audit$/), link.click()]);
+    await page.waitForTimeout(300);
+  }
+  const landed = link ? await auditTop(page) : NaN;
+  check(`${L}: the prototype's audit link lands on the audit`, landed >= 0 && landed < 160, link ? `#audit at ${landed}px` : 'no link');
+  await ctx.close();
+}
+
 // The prototype's revenue tab, base scenario, year-one total in crore.
 async function readProtoBase(page) {
   await page.click('#tab-revenue');
@@ -176,6 +225,7 @@ async function readProtoBase(page) {
   for (const vp of VIEWPORTS) {
     await study(browser, vp);
     await prototype(browser, vp);
+    await crossNav(browser, vp);
   }
   await browser.close();
 
