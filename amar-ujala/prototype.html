@@ -199,6 +199,8 @@ body{background:var(--ak-bg);color:var(--ak-ink);font-family:var(--ak-font);line
     { id: "yes", label: { en: "Yes", hi: "हाँ" } },
     { id: "no", label: { en: "No, under 18", hi: "नहीं, 18 से कम" } }
   ];
+  // The radio groups the change handler accepts, each with its allowed ids.
+  var CHIP_GROUPS = { stream: STREAMS, interest: INTERESTS, budget: BUDGETS, income: INCOMES, reach: REACHES, adult: ADULT_OPTIONS };
   var DISTRICTS = [
     { en: "Kanpur Nagar", hi: "कानपुर नगर" },
     { en: "Lucknow", hi: "लखनऊ" },
@@ -1327,9 +1329,14 @@ body{background:var(--ak-bg);color:var(--ak-ink);font-family:var(--ak-font);line
   root.addEventListener("change", function (e) {
     var el = e.target;
     if (el.hasAttribute("data-chip")) {
+      // Only a known group, and only one of that group's own option ids, ever
+      // reaches state: a value read back from the page is never trusted.
       var name = el.getAttribute("data-chip");
-      if (name === "adult") { S.adult = el.value; resetConsent(); render(); }
-      else S[name] = el.value;
+      var group = CHIP_GROUPS[name];
+      var opt = group && find(group, function (o) { return o.id === el.value; });
+      if (!opt) return;
+      if (name === "adult") { S.adult = opt.id; resetConsent(); render(); }
+      else S[name] = opt.id;
       return;
     }
     var act = el.getAttribute("data-act");
