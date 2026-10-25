@@ -358,13 +358,13 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
       </div>
       <div class="card">
         <h3>2 · What we do about it</h3>
-        <p class="small muted" style="margin-top:4px">Sorted by fees at stake, highest first. Click a column header to re-sort, or a row for detail.</p>
+        <p class="small muted" style="margin-top:4px">Sorted by expected fees won back, highest first. Click a column header to re-sort, or a row for detail.</p>
         <div class="tbl-wrap" style="margin-top:10px"><table id="segtbl"><thead><tr>
           <th><button data-k="seg">Group</button></th>
           <th><button data-k="action">Action this week</button></th>
           <th class="num"><button data-k="n">Learners</button></th>
           <th class="num"><button data-k="avgRisk">Avg risk</button></th>
-          <th class="num"><button data-k="value">Fees at stake (₹)</button></th>
+          <th class="num"><button data-k="value">Fees won back (₹)</button></th>
         </tr></thead><tbody></tbody></table></div>
         <div class="detail" id="seg-detail" aria-live="polite"></div>
       </div>
@@ -465,7 +465,7 @@ var clamp = function(v,a,b){return Math.max(a,Math.min(b,v));};
 /* ---------- Engine: transparent rules (illustrative weights) ---------- */
 function score(s){
   var f = [
-    {k:'Behind batch pace', v:(100-s.lec)*0.40, max:40},
+    {k:'Lectures not done', v:(100-s.lec)*0.40, max:40},
     {k:'Low test scores',   v:(100-s.test)*0.25, max:25},
     {k:'Inactivity',        v:Math.min(s.idle,14)/14*30, max:30},
     {k:'No doubts asked',   v:s.doubt===0?8:0, max:8},
@@ -598,7 +598,7 @@ function answer(k,label){
   if(k==='backlog') txt = behind>0 ? 'Tum batch se '+behind+' lectures peeche ho. Tension mat lo: sirf high-weightage wale pehle karenge, '+Math.ceil(behind/2)+' din mein cover ho jayega.' : 'Koi backlog nahi! Tum batch pace se aage ho. Ab practice pe focus karte hain.';
   else if(k==='today') txt = res.tier==='High' ? 'Aaj sirf 2 cheezein: 1 backlog lecture (45 min) aur 10-question DPP. Chhota target, pakka result.' : res.tier==='Medium' ? 'Aaj 1 lecture + apne weakest chapter ka DPP. Doubts ho to Ask AI pe daal do.' : 'Aaj ka lecture + Sunday test ki prep. Streak '+s.streak+' din ka hai, todna mat!';
   else txt = 'Results ke din main tumhara personal report banaunga. Abhi ke data se best next step: '+p.next.title+'. Pehle is saal ka plan strong karte hain.';
-  setTimeout(function(){ addMsg('ai',txt); },250);
+  setTimeout(function(){ if(P[cur]===p) addMsg('ai',txt); },250);
 }
 
 /* ---------- Weekly Pulse (Parent or Self) ---------- */
@@ -688,7 +688,7 @@ function buildConsole(){
     [N.toLocaleString('en-IN'),'Paid learners in this demo cohort'],
     [Math.round(hi.length/N*100)+'%','Drifting this week (high risk)'],
     [(hi.length+me.length).toLocaleString('en-IN'),'Get a rescue action this week'],
-    [INR(stake),'Fees at stake in this cohort']
+    [INR(stake),'Expected fees won back in this cohort']
   ].map(function(k){return '<div class="kpi"><b>'+k[0]+'</b><span>'+k[1]+'</span></div>';}).join('');
   var mix=[['High',hi.length,'h'],['Medium',me.length,'m'],['Low',lo.length,'l']].sort(function(a,b){return b[1]-a[1];});
   el('riskbars').innerHTML=mix.map(function(m){var p=m[1]/N*100;return '<div class="chartbar"><span>'+m[0]+' risk</span><span class="bar"><i class="'+m[2]+'" style="width:'+p.toFixed(1)+'%"></i></span><span style="text-align:right;font-variant-numeric:tabular-nums">'+p.toFixed(1)+'%</span></div>';}).join('');
