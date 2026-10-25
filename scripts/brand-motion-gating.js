@@ -333,5 +333,5 @@ async function newPage(b, opts) {
   results.forEach((r) => console.log('  ' + (r.ok ? 'PASS' : 'FAIL') + '  ' + r.name.padEnd(56) + r.detail));
   if (MUT) console.log('  (a good mutation should make at least one of these FAIL)');
   await b.close();
-  process.exit(0);
+  process.exit(pass === results.length ? 0 : 1);
 })();
