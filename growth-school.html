@@ -51,6 +51,7 @@
     kicker: 'Free course · no account',
     title: 'Growth <em>School</em>',
     railSub: 'Social, search, brand and growth — in short chapters, with the arithmetic shown and simulators you can push around.',
+    home: { href: '/', label: 'Anchit Tandon' },
     tracks: GS_CONTENT.baseTracks(),
   }, document.getElementById('app'));
 </script>
@@ -66,6 +67,12 @@
      home instead: the drawer could be opened and not closed, which on a phone
      is the whole screen. A full-width top bar takes BOTH top corners, so the
      only honest fix is to leave the top strip alone.
+
+     Shown only while the chapter rail is hidden (900px and under, drawer
+     closed). Wherever the rail is on screen, bottom-left is inside its list,
+     so the chip always covered a chapter link; there the route home is the
+     rail's own .gs-home link (the `home` option above), and
+     growth-school.css hides this one.
 
      data-floating-control is what lifts it clear of the consent bar while
      that is up: cinematic.js does that for the chip it places, and this one
