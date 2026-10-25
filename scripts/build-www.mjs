@@ -171,10 +171,12 @@ async function buildHowTo() {
     return;
   }
   try {
-    if (!existsSync(join(engine, 'node_modules'))) {
-      console.log('[build-www] how-to: installing deps…');
-      execSync('npm install --no-audit --no-fund --loglevel=error', { cwd: engine, stdio: 'inherit' });
-    }
+    // Always install from the lockfile. This used to run only when
+    // node_modules was missing, but Vercel restores node_modules from its
+    // build cache, so a lockfile change (the vite 5 -> 6 security bump) never
+    // reached the deploy: production kept building with the cached vite 5.
+    console.log('[build-www] how-to: installing deps from lockfile…');
+    execSync('npm ci --no-audit --no-fund --loglevel=error', { cwd: engine, stdio: 'inherit' });
     console.log(`[build-www] how-to: building for ${HOW_TO_PATH}…`);
     execSync('npm run build', { cwd: engine, stdio: 'inherit' });
     const dist = join(engine, 'dist');
