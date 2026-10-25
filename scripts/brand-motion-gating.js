@@ -218,7 +218,6 @@ async function newPage(b, opts) {
       await p.evaluate((s) => document.querySelector(s)
         .scrollIntoView({ block: 'center', behavior: 'instant' }), ph.scope);
       await p.waitForTimeout(600);
-      const back = await p.evaluate(probe, { sel: ph.sel, pseudo: ph.pseudo });
       // A gate that removes the animation reports animationName "none" while
       // out of view; a gate that pauses keeps the name throughout. Pausing is
       // what preserves the cycle's phase.
@@ -333,5 +332,5 @@ async function newPage(b, opts) {
   results.forEach((r) => console.log('  ' + (r.ok ? 'PASS' : 'FAIL') + '  ' + r.name.padEnd(56) + r.detail));
   if (MUT) console.log('  (a good mutation should make at least one of these FAIL)');
   await b.close();
-  process.exit(0);
+  process.exit(pass === results.length ? 0 : 1);
 })();
