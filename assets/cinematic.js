@@ -75,6 +75,7 @@
     addEventListener('resize', function () {
       clearTimeout(bt); bt = setTimeout(function () { place(btn); }, 180);
     });
+    onReservedChange(function () { place(btn); });
   }
 
   // A way back to the main portfolio, on every page that does not already have
@@ -127,6 +128,7 @@
     addEventListener('resize', function () {
       clearTimeout(rt); rt = setTimeout(function () { placeHome(a); }, 180);
     });
+    onReservedChange(function () { placeHome(a); });
   }
 
   // Bottom-left is only the FIRST choice. This runtime is added to pages it did
@@ -140,7 +142,16 @@
   // reads as free - the trap that made the first version of this sit happily on
   // top of a control it had just been asked to avoid.
   function occupiedFor(el, x, y) {
-    var hit = document.elementFromPoint(x, y);
+    // Look THROUGH the consent bar, not at it. Its band is accounted for by
+    // reservedBottom(); while it slides out after an answer it is still there
+    // to be hit, and what matters is what it is about to uncover. Counting the
+    // bar parked the toggle a row up for good; ignoring the hit instead read
+    // every spot behind the bar as free and dropped the toggle onto content.
+    var hits = document.elementsFromPoint(x, y);
+    var hit = null;
+    for (var i = 0; i < hits.length; i++) {
+      if (!(hits[i].closest && hits[i].closest('#consentBar'))) { hit = hits[i]; break; }
+    }
     if (!hit || hit === el || el.contains(hit)) return false;
     if (hit.closest && hit.closest('a, button, input, select, textarea, [role="button"], [onclick]')) return true;
     // Text counts too, not only controls. The first version asked whether the
@@ -154,6 +165,31 @@
     // floating over a container's padding is fine; over a sentence is not.
     var leaf = hit.children && hit.children.length === 0;
     return !!(leaf && (hit.textContent || '').trim().length > 4);
+  }
+
+  // THE CONSENT BAR RESERVES THE BOTTOM BAND, AND THE PLACER HAS TO KNOW.
+  //
+  // consent.js used to lift these two controls itself, with a transform equal
+  // to the bar's height. place() never knew: it tested spots BEHIND the bar,
+  // found the bar's own buttons there, climbed to bottom:50 - and then the
+  // 127px lift landed the toggle on the heading of the Frameworks module.
+  // The same lift hit the home chip while it was TOP-anchored and pushed it
+  // off the top of the screen, so a first-time visitor on the marketing course
+  // and the task tracker had no route home until they answered the banner.
+  //
+  // So the placer owns the whole job: the band the bar reserves is subtracted
+  // before any spot is tested, and both controls are placed again whenever the
+  // bar opens, changes height or goes away.
+  function reservedBottom() {
+    if (root.getAttribute('data-consent-open') !== '1') return 0;
+    return Math.ceil(parseFloat(root.style.getPropertyValue('--consent-h')) || 0);
+  }
+  function onReservedChange(fn) {
+    if (typeof MutationObserver === 'undefined') return;
+    var t;
+    new MutationObserver(function () {
+      clearTimeout(t); t = setTimeout(fn, 60);
+    }).observe(root, { attributes: true, attributeFilter: ['data-consent-open', 'style'] });
   }
 
   // The home chip is TOP-anchored, so place() - which reasons in `bottom` - was
@@ -213,6 +249,7 @@
     function choose() {
       var r = btn.getBoundingClientRect();
       var pad = 14, w = r.width || 92, h = r.height || 26;
+      var floor = pad + reservedBottom();
       // Four candidates was enough while this only avoided CONTROLS. Now that it
       // avoids text as well, a dense page - the Frameworks module is one - can
       // have all four taken, and the old code then gave up and sat on whatever
@@ -221,7 +258,7 @@
       // a case that almost never happens.
       var spots = [];
       for (var row = 0; row < 6; row++) {
-        var bb = pad + row * (h + 10);
+        var bb = floor + row * (h + 10);
         spots.push({ l: pad, b: bb });                      // left column, climbing
         spots.push({ l: innerWidth - w - pad, b: bb });     // right column, climbing
       }
@@ -240,7 +277,7 @@
       // Every candidate is taken: sit above the last one rather than on a control.
       btn.style.left = 'auto';
       btn.style.right = pad + 'px';
-      btn.style.bottom = (pad + (h + 10) * 2) + 'px';
+      btn.style.bottom = (floor + (h + 10) * 2) + 'px';
     }
   }
   function injectChrome() { injectToggle(); injectHomeLink(); }
@@ -401,7 +438,13 @@
              '[data-no-motion],[aria-live],[role="alert"],[contenteditable="true"]';
 
   function skip(el) {
-    return el.matches(SKIP) || el.closest('[data-no-motion],[aria-live]') !== null;
+    if (el.matches(SKIP) || el.closest('[data-no-motion],[aria-live]') !== null) return true;
+    // Fixed chrome is not a block arriving in the page's sequence. The home
+    // page's chat button was tagged .cin-v4 here, and when the runtime bails
+    // under load, html.cin-bail sets transform:none !important on every .cin:
+    // that wiped out the lift consent.js gives it, and the button sat under
+    // the consent bar, unreachable, on a first visit.
+    return getComputedStyle(el).position === 'fixed';
   }
 
   // Sub-linear steps: 20 cards land across ~0.6s, not ~1.5s, and no two share
@@ -1021,33 +1064,61 @@
   }
 
   // ── custom cursor ─────────────────────────────────────────────────────
+  //
+  // Composited only, and idle when the pointer is. This used to tween width,
+  // height, background-color and border-color between the dot and the ring -
+  // four properties DESIGN.md rules out, re-rasterised on every frame of every
+  // hover - and its follow loop ran requestAnimationFrame forever, whether or
+  // not the mouse had moved, in a background tab included.
+  //
+  // Now the element is always ring-sized and the dot is the same circle at
+  // scale(.19). The fill and the ring are two layers that swap on opacity, and
+  // the loop starts on pointermove and stops once it has caught up.
   function initCursor() {
     if (motionOff || !matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     if (document.getElementById('cinCursor')) return;
+    var DOT = 8 / 42;
+    var ease = 'cubic-bezier(.16,1,.3,1)';
     var dot = document.createElement('div');
     dot.id = 'cinCursor';
     dot.setAttribute('aria-hidden', 'true');
     dot.style.cssText = 'position:fixed;left:0;top:0;z-index:2147482000;pointer-events:none;' +
-      'width:8px;height:8px;border-radius:50%;background:currentColor;color:#EAEAEA;' +
-      'mix-blend-mode:difference;transform:translate3d(-100px,-100px,0) translate(-50%,-50%);' +
-      'transition:width .28s cubic-bezier(.16,1,.3,1),height .28s cubic-bezier(.16,1,.3,1),' +
-      'background-color .28s ease,border-color .28s ease;border:1px solid transparent';
+      'width:42px;height:42px;margin:-21px 0 0 -21px;mix-blend-mode:difference;' +
+      'transform:translate3d(-100px,-100px,0)';
+    var core = document.createElement('div');
+    core.style.cssText = 'position:relative;width:100%;height:100%;' +
+      'transform:scale(' + DOT + ');transition:transform .26s ' + ease;
+    var fill = document.createElement('div');
+    fill.style.cssText = 'position:absolute;inset:0;border-radius:50%;background:#EAEAEA;' +
+      'transition:opacity .26s ease';
+    var ring = document.createElement('div');
+    ring.style.cssText = 'position:absolute;inset:0;border-radius:50%;border:1px solid #EAEAEA;' +
+      'opacity:0;transition:opacity .26s ease';
+    core.appendChild(fill); core.appendChild(ring); dot.appendChild(core);
     document.body.appendChild(dot);
 
-    var tx = -100, ty = -100, cx = -100, cy = -100;
-    addEventListener('pointermove', function (e) { tx = e.clientX; ty = e.clientY; }, { passive: true });
-    (function loop() {
+    var tx = -100, ty = -100, cx = -100, cy = -100, raf = 0;
+    function loop() {
       cx += (tx - cx) * 0.22; cy += (ty - cy) * 0.22;         // trails slightly: weight
-      dot.style.transform = 'translate3d(' + cx.toFixed(1) + 'px,' + cy.toFixed(1) + 'px,0) translate(-50%,-50%)';
-      requestAnimationFrame(loop);
-    })();
+      if (Math.abs(tx - cx) < 0.1 && Math.abs(ty - cy) < 0.1) { cx = tx; cy = ty; raf = 0; }
+      else raf = requestAnimationFrame(loop);
+      dot.style.transform = 'translate3d(' + cx.toFixed(1) + 'px,' + cy.toFixed(1) + 'px,0)';
+    }
+    addEventListener('pointermove', function (e) {
+      tx = e.clientX; ty = e.clientY;
+      if (!raf) raf = requestAnimationFrame(loop);
+    }, { passive: true });
 
+    var wasInteractive = false;
     addEventListener('pointerover', function (e) {
       var t = e.target;
-      var interactive = t && t.closest && t.closest('a,button,[role="button"],input,select,textarea,[data-cursor]');
-      dot.style.width = dot.style.height = interactive ? '42px' : '8px';
-      dot.style.background = interactive ? 'transparent' : '#EAEAEA';
-      dot.style.borderColor = interactive ? '#EAEAEA' : 'transparent';
+      var interactive = !!(t && t.closest && t.closest('a,button,[role="button"],input,select,textarea,[data-cursor]'));
+      if (interactive === wasInteractive) return;
+      wasInteractive = interactive;
+      core.style.transform = 'scale(' + (interactive ? 1 : DOT) + ')';
+      fill.style.opacity = interactive ? '0' : '1';
+      ring.style.opacity = interactive ? '1' : '0';
     }, { passive: true });
   }
 

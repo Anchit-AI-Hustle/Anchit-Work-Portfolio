@@ -59,7 +59,10 @@ function preinstalledChromium() {
   const candidates = dirs
     .filter((d) => /^chromium-\d+$/.test(d))
     .sort((a, b) => Number(b.split('-')[1]) - Number(a.split('-')[1]))
-    .map((d) => path.join(root, d, 'chrome-linux', 'chrome'));
+    // Newer builds unpack to chrome-linux64, older ones to chrome-linux. Looking
+    // in only the old one found nothing, so every suite fell through to (c) and
+    // died asking for `npx playwright install` with a browser sitting right there.
+    .flatMap((d) => ['chrome-linux64', 'chrome-linux'].map((sub) => path.join(root, d, sub, 'chrome')));
   return candidates.find((p) => fs.existsSync(p)) || null;
 }
 
