@@ -21,7 +21,8 @@
 // Run against a served build:  node scripts/amar-ujala.js
 // MUT=dash plants an em dash in the study; the dash check must fail.
 // MUT=count puts the 2025 pass count back into the prototype; the pinned
-// count and the cross-page base case must fail.
+// count and the cross-page base case must fail. MUT=lang makes the Hindi
+// toggle do nothing; the translation check must fail.
 const { chromium } = require('./_playwright.js');
 const vercel = require('../vercel.json');
 const BASE = process.env.BASE || 'http://127.0.0.1:8099';
@@ -44,6 +45,7 @@ const CSP = (() => {
 function mutate(path, src) {
   if (MUT === 'dash' && path.endsWith('/study')) return src.replace('</body>', '<p>one — two</p></body>');
   if (MUT === 'count' && path.endsWith('/prototype')) return src.split('1998317').join('2109000');
+  if (MUT === 'lang' && path.endsWith('/prototype')) return src.replace('</body>', '<script>document.addEventListener("click",function(e){if(e.target.closest("button[lang]"))e.stopImmediatePropagation();},true);</script></body>');
   return src;
 }
 
@@ -131,9 +133,20 @@ async function prototype(browser, vp) {
     await page.waitForTimeout(250);
     return true;
   };
+  // Compared on one translated element, before and after. Any Devanagari on
+  // the page proves nothing: the English page already shows it in the title
+  // and in the "हिंदी" button label, so a dead toggle used to pass.
+  const leadOf = () => page.evaluate(() => ({
+    lead: (document.querySelector('.ak-lead') || {}).textContent || '',
+    lang: document.documentElement.lang,
+  }));
+  const en = await leadOf();
   const hasHi = await toggle('hi');
-  const devanagari = hasHi && /[ऀ-ॿ]{3,}/.test(await page.evaluate(() => document.body.innerText));
-  check(`${L}: Hindi toggle switches the page to Devanagari`, devanagari, hasHi ? '' : 'no button[lang="hi"]');
+  const hi = await leadOf();
+  const switched = hasHi && hi.lang === 'hi' && hi.lead !== en.lead &&
+    /[ऀ-ॿ]{3,}/.test(hi.lead) && !/[ऀ-ॿ]/.test(en.lead);
+  check(`${L}: Hindi toggle translates the page`, switched,
+    hasHi ? `lang ${en.lang} -> ${hi.lang}; lead "${en.lead.slice(0, 24)}" -> "${hi.lead.slice(0, 24)}"` : 'no button[lang="hi"]');
   const overHi = await hScroll(page);
   check(`${L}: no horizontal page scroll in Hindi`, overHi <= 0, overHi + 'px');
   await toggle('en');
