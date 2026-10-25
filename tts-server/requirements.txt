@@ -1,5 +1,17 @@
-fastapi
-uvicorn
-TTS
-pydantic
-python-multipart
+# Pinned so installs are reproducible and vulnerability scanners can match
+# exact versions. Verified together on Python 3.11: XTTS-v2 loads, and
+# /api/tts, /api/tts-packet and /ws/tts all return audio.
+fastapi==0.162.0
+# [standard] brings the WebSocket library /ws/tts needs; bare uvicorn rejects
+# the upgrade with "No supported WebSocket library detected".
+uvicorn[standard]==0.54.0
+# Maintained fork of Coqui TTS (the original `TTS` package stopped at 0.22.0
+# and caps Python at <3.12). Same `from TTS.api import TTS` import.
+coqui-tts==0.28.0
+# coqui-tts no longer installs PyTorch itself. On a CPU-only host, add
+# --extra-index-url https://download.pytorch.org/whl/cpu to skip the CUDA wheels.
+torch==2.14.1
+torchaudio==2.11.0
+torchcodec==0.17.0
+pydantic==2.14.1
+python-multipart==0.0.32
