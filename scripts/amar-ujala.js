@@ -123,9 +123,6 @@ async function prototype(browser, vp) {
   const { ctx, page, bag, status } = await open(browser, vp, '/amar-ujala/prototype');
   check(`${L}: HTTP 200`, status === 200, status);
 
-  const src = await page.content();
-  check(`${L}: uses the 2026 pass count`, src.includes('1998317') || src.includes('19,98,317'), '');
-
   // Both languages render, and the toggle actually switches the page.
   const toggle = async (lang) => {
     const b = await page.$(`button[lang="${lang}"]`);
@@ -141,7 +138,12 @@ async function prototype(browser, vp) {
   check(`${L}: no horizontal page scroll in Hindi`, overHi <= 0, overHi + 'px');
   await toggle('en');
 
-  if (vp.width === 1440) protoBase = await readProtoBase(page);
+  // The model's own input, not the page copy: the copy quotes 19,98,317 in
+  // more than one place, so a stale preset could hide behind it.
+  const base = await readProtoBase(page);
+  const passed = await page.inputValue('#rev-passed');
+  check(`${L}: revenue model starts from the 2026 pass count`, passed === '1998317', passed);
+  if (vp.width === 1440) protoBase = base;
 
   await common(L, page, bag);
   await ctx.close();
@@ -149,13 +151,11 @@ async function prototype(browser, vp) {
 
 // The prototype's revenue tab, base scenario, year-one total in crore.
 async function readProtoBase(page) {
-  const tab = await page.$('[data-tab="revenue"], #tab-revenue, button:has-text("Revenue")');
-  if (tab) { await tab.click(); await page.waitForTimeout(300); }
-  const base = await page.$('[data-scenario="base"], button:has-text("Base")');
-  if (base) { await base.click(); await page.waitForTimeout(300); }
-  const txt = norm(await page.evaluate(() => document.body.innerText));
-  const m = /₹\s*([\d.]+)\s*crore/i.exec(txt);
-  return m ? parseFloat(m[1]) : NaN;
+  await page.click('#tab-revenue');
+  await page.waitForSelector('#scen-base');
+  await page.click('#scen-base');
+  await page.waitForTimeout(300);
+  return crore(norm(await page.textContent('[data-testid="ak-total"]')));
 }
 
 (async () => {
