@@ -167,9 +167,17 @@
   }
 
   /* 3 ─ Depth drift ---------------------------------------------------------- */
+  // The only ScrollTrigger-bound tween in this file, and opt-in: it moves the
+  // elements carrying [data-bm-depth] and nothing else. No page currently marks
+  // any, so neither brand page loads ScrollTrigger (43 KB) any more — both were
+  // fetching and registering the plugin for a tween with no targets. Marking a
+  // layer means adding the plugin's <script> back to that page; without it this
+  // returns instead of handing GSAP a scrollTrigger config it cannot honour.
   function depth(gsap) {
     if (reduced) return;
     var layers = pick('[data-bm-depth]');
+    if (!layers.length) return;
+    if (!window.ScrollTrigger) return;
     layers.forEach(function (el) {
       var amt = parseFloat(el.getAttribute('data-bm-depth')) || 12;
       gsap.fromTo(el,
