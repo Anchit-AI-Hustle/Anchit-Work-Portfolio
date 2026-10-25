@@ -434,6 +434,7 @@ body{background:var(--ak-bg);color:var(--ak-ink);font-family:var(--ak-font);line
     en: {
       notice: "<b>Concept prototype</b> by Anchit Tandon. Independent, not affiliated with or endorsed by Amar Ujala. Colleges and enquiries are fictional demo data; nothing is stored or sent.",
       backStudy: "← Back to the Amar Ujala study",
+      audit: "Read the audit",
       portfolio: "Anchit Tandon portfolio",
       navLabel: "Site",
       badge: "Concept prototype",
@@ -620,6 +621,7 @@ body{background:var(--ak-bg);color:var(--ak-ink);font-family:var(--ak-font);line
     hi: {
       notice: "<b>कॉन्सेप्ट प्रोटोटाइप</b>, अंचित टंडन द्वारा। स्वतंत्र प्रस्ताव, अमर उजाला से संबद्ध या समर्थित नहीं। कॉलेज और पूछताछ काल्पनिक डेमो डेटा हैं; कुछ भी सहेजा या भेजा नहीं जाता।",
       backStudy: "← अमर उजाला अध्ययन पर वापस",
+      audit: "ऑडिट पढ़ें",
       portfolio: "अंचित टंडन पोर्टफोलियो",
       navLabel: "साइट",
       badge: "कॉन्सेप्ट प्रोटोटाइप",
@@ -1194,7 +1196,7 @@ body{background:var(--ak-bg);color:var(--ak-ink);font-family:var(--ak-font);line
   }
 
   function siteNav(t) {
-    return '<nav class="ak-nav" aria-label="' + esc(t.navLabel) + '"><a href="/amar-ujala/study" target="_top">' + esc(t.backStudy) + '</a><a href="/" target="_top">' + esc(t.portfolio) + "</a></nav>";
+    return '<nav class="ak-nav" aria-label="' + esc(t.navLabel) + '"><a href="/amar-ujala/study" target="_top">' + esc(t.backStudy) + '</a><a href="/amar-ujala/study#audit" target="_top">' + esc(t.audit) + '</a><a href="/" target="_top">' + esc(t.portfolio) + "</a></nav>";
   }
 
   function render() {
