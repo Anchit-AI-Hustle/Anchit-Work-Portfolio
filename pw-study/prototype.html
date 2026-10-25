@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agla Kadam Prototype | PW Study by Anchit Tandon</title>
+<meta name="description" content="Working prototype of Agla Kadam, an AI continuity layer concept for PhysicsWallah, by Anchit Tandon. Synthetic data.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light">
+<link rel="canonical" href="https://anchit-tandon.com/pw-study/prototype">
+<link rel="icon" href="/icons/favicon.svg">
+<meta property="og:image" content="https://anchit-tandon.com/assets/og/og-default.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reddit+Sans:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap">
+<style>
+/* Brand tokens extracted from pw.live computed styles (Oct 2026). See "Brand schema" tab. */
+:root{
+  --primary:#5A4BDA; --primary-50:#F1EFFF; --primary-700:#4436B8;
+  --ink:#1B2124; --heading:#27272A; --body:#3D3D3D; --muted:#757575;
+  --page:#F8F8F8; --surface:#FFFFFF; --border:#D9DCE1; --border-soft:#EFEFEF;
+  --success:#1B7938; --success-bg:#DFF1E4; --orange:#FB6514; --orange-ink:#B94A0B;
+  --premium-bg:#FFF6E5; --premium-ink:#8A5A00; --danger:#E31B4D; --danger-ink:#B3123A; --danger-bg:#FDE8EE;
+  --warn-bg:#FFF1E8;
+  --r-btn:6px; --r-tag:4px; --r-panel:12px; --r-card:16px; --r-pill:9999px;
+  --sh-light:0 1px 8px #00000014; --sh-card:0 4px 16px rgba(27,33,36,.06);
+  --hero:linear-gradient(270deg,#EEF9FF,#F9EEFF 37%,#F8F8FF 70%,#F1F5FF);
+  --font:'Reddit Sans','Noto Sans Devanagari',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--font);color:var(--body);background:var(--page);font-size:16px;line-height:24px;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3,h4{color:var(--heading);margin:0;font-weight:700}
+h1{font-size:28px;line-height:36px} h2{font-size:22px;line-height:30px} h3{font-size:18px;line-height:26px;font-weight:600}
+p{margin:0}
+button{font-family:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--primary);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1280px;margin:0 auto;padding:0 16px}
+.concept{background:var(--ink);color:#F1EFFF;font-size:13px;line-height:18px;padding:8px 16px;text-align:center}
+.concept b{color:#fff}
+header.top{background:var(--surface);border-bottom:1px solid var(--border)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:12px;padding-bottom:12px;flex-wrap:wrap}
+.brandmark{display:flex;align-items:center;gap:10px}
+.brandmark .dot{width:36px;height:36px;border-radius:10px;background:var(--primary);color:#fff;display:grid;place-items:center;font-weight:700;font-size:15px}
+.brandmark small{display:block;color:var(--muted);font-size:12px;line-height:16px;font-weight:500}
+.brandmark strong{color:var(--heading);font-size:17px}
+.tabs{display:flex;gap:4px;background:var(--page);border:1px solid var(--border);border-radius:var(--r-pill);padding:4px;overflow-x:auto;max-width:100%;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{border:0;background:transparent;color:var(--body);padding:8px 14px;border-radius:var(--r-pill);font-size:14px;font-weight:600;white-space:nowrap;min-height:40px}
+.tab[aria-selected="true"]{background:var(--primary);color:#fff}
+.hero{background:var(--hero);border-bottom:1px solid var(--border-soft)}
+.hero .wrap{padding-top:24px;padding-bottom:24px;display:grid;gap:8px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--primary)}
+.hero p.lede{max-width:780px;color:var(--body)}
+.hero .accent{color:var(--primary)}
+main .wrap{padding-top:24px;padding-bottom:48px}
+.panel{display:none}.panel.on{display:block}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);padding:20px}
+.card.soft{background:var(--primary-50);border-color:transparent}
+.grid{display:grid;gap:16px}
+.grid>*{min-width:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:var(--r-btn);font-weight:600;font-size:15px;min-height:48px;padding:12px 24px;border:1px solid transparent;text-decoration:none}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-700)}
+.btn-dark{background:var(--ink);color:#fff}
+.btn-soft{background:var(--primary-50);color:var(--primary)}
+.btn-outline{background:#fff;color:var(--ink);border-color:var(--border)}
+.btn.sm{min-height:40px;padding:8px 14px;font-size:14px}
+.tag{display:inline-block;font-size:12px;line-height:16px;font-weight:600;padding:4px 8px;border-radius:var(--r-tag)}
+.tag.lang{background:var(--page);border:1px solid #B7B7B7;color:var(--body)}
+.tag.ok{background:var(--success-bg);color:var(--success)}
+.tag.warn{background:var(--warn-bg);color:var(--orange-ink)}
+.tag.bad{background:var(--danger-bg);color:var(--danger-ink)}
+.tag.pri{background:var(--primary-50);color:var(--primary)}
+.tag.prem{background:var(--premium-bg);color:var(--premium-ink)}
+.muted{color:var(--muted)} .small{font-size:13px;line-height:18px}
+.label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+/* Student tab */
+.student-layout{display:grid;gap:24px;grid-template-columns:1fr}
+.persona-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.chip{border:1px solid var(--border);background:#fff;color:var(--ink);border-radius:var(--r-pill);padding:8px 14px;font-size:14px;font-weight:600;min-height:44px}
+.chip[aria-pressed="true"]{background:var(--primary-50);border-color:var(--primary);color:var(--primary)}
+.phone{background:#fff;border:1px solid var(--border);border-radius:28px;overflow:hidden;max-width:420px;width:100%;margin:0 auto;box-shadow:var(--sh-card)}
+.phone-top{background:var(--primary);color:#fff;padding:16px}
+.phone-top small{opacity:.85;font-size:12px}
+.phone-body{padding:16px;display:grid;gap:12px;background:var(--page)}
+.ring{display:flex;align-items:center;gap:14px}
+.ring svg{flex:none}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:#fff;border:1px solid var(--border);border-radius:var(--r-panel);padding:10px;text-align:center}
+.stat b{display:block;color:var(--heading);font-size:18px}
+.stat span{font-size:12px;color:var(--muted)}
+.nudge{background:#fff;border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:var(--r-panel);padding:12px}
+.nudge.high{border-left-color:var(--danger)} .nudge.med{border-left-color:var(--orange)} .nudge.low{border-left-color:var(--success)}
+.plan li{margin:4px 0}
+.plan{margin:8px 0 0;padding-left:20px}
+.batch{background:#fff;border:1px solid var(--border);border-radius:var(--r-card);overflow:hidden}
+.batch .banner{background:linear-gradient(120deg,#2A1F8F,#5A4BDA 60%,#8B7FF0);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.batch .banner small{font-size:12px;opacity:.9}
+.batch .inner{padding:14px 16px;display:grid;gap:8px}
+.batch .cat{color:var(--orange);font-weight:600}
+.price{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.price b{font-size:18px;color:var(--heading)} .price s{color:var(--muted);font-size:14px} .price .off{color:var(--success);font-weight:600}
+.chat{display:grid;gap:8px}
+.bubble{max-width:88%;padding:10px 12px;border-radius:14px;font-size:14px;line-height:20px}
+.bubble.ai{background:#fff;border:1px solid var(--border);justify-self:start;border-bottom-left-radius:4px}
+.bubble.me{background:var(--primary);color:#fff;justify-self:end;border-bottom-right-radius:4px}
+.quick{display:flex;gap:6px;flex-wrap:wrap}
+.quick button{border:1px solid var(--primary);color:var(--primary);background:#fff;border-radius:var(--r-pill);padding:6px 12px;font-size:13px;font-weight:600;min-height:36px}
+.sim .field{display:grid;gap:4px;margin-bottom:14px}
+.sim .field label{display:flex;justify-content:space-between;font-size:14px;font-weight:600;color:var(--heading)}
+.sim input[type=range]{width:100%;accent-color:var(--primary);min-height:28px}
+.engine-out{display:grid;gap:10px}
+.factor{display:grid;grid-template-columns:150px 1fr 44px;gap:8px;align-items:center;font-size:13px}
+.bar{height:8px;background:var(--border-soft);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--primary)}
+.why{font-size:13px;line-height:19px}
+/* WhatsApp */
+.wa{max-width:440px;margin:0 auto;border-radius:20px;overflow:hidden;border:1px solid var(--border);background:#fff}
+.wa-head{background:#075E54;color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px}
+.wa-head .av{width:36px;height:36px;border-radius:50%;background:var(--primary);display:grid;place-items:center;font-weight:700}
+.wa-body{background:#ECE5DD;padding:16px;display:grid;gap:10px;min-height:420px}
+.wa-msg{background:#fff;border-radius:10px;padding:10px 12px;font-size:14px;line-height:21px;max-width:92%;box-shadow:0 1px 1px #0000001a;white-space:pre-line}
+.wa-msg.me{background:#DCF8C6;justify-self:end}
+.wa-time{display:block;text-align:right;font-size:11px;color:#667781;margin-top:4px}
+.wa-btns{display:grid;gap:6px}
+.wa-btns span{background:#fff;color:#027EB5;text-align:center;border-radius:8px;padding:9px;font-size:14px;font-weight:600}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:var(--r-pill);padding:3px;background:#fff}
+.seg button{border:0;background:transparent;padding:6px 14px;border-radius:var(--r-pill);font-weight:600;font-size:14px;color:var(--body);min-height:36px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+/* Console */
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.kpi{background:#fff;border:1px solid var(--border);border-radius:var(--r-panel);padding:14px}
+.kpi b{display:block;font-size:24px;line-height:30px;color:var(--heading)}
+.kpi span{font-size:13px;color:var(--muted)}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--r-panel);background:#fff}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:640px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border-soft);vertical-align:top}
+th{background:var(--page);color:var(--heading);font-weight:600;font-size:13px;white-space:nowrap}
+th button{all:unset;cursor:pointer;display:inline-flex;gap:4px;align-items:center}
+th button:focus-visible{outline:3px solid var(--primary)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:0}
+.calc .row{display:grid;grid-template-columns:1fr 120px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-soft)}
+.calc .row:last-child{border-bottom:0}
+.calc input{width:100%;font:inherit;font-size:15px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r-btn);text-align:right;min-height:40px}
+.calc input:focus{border-color:var(--primary);outline:none;box-shadow:0 0 0 3px var(--primary-50)}
+.calc label{font-size:14px;color:var(--heading);font-weight:500}
+.calc label small{display:block;color:var(--muted);font-weight:400;font-size:12px;line-height:16px}
+.formula{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:18px;background:var(--page);border:1px solid var(--border-soft);border-radius:8px;padding:8px 10px;color:var(--ink);overflow-wrap:anywhere}
+.lever{display:grid;gap:6px;padding:12px 0;border-bottom:1px solid var(--border-soft)}
+.lever:last-child{border-bottom:0}
+.lever-head{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.lever-head b{color:var(--heading)}
+.bigtotal{font-size:32px;line-height:38px;color:var(--primary);font-weight:700}
+.chartbar{display:grid;grid-template-columns:110px 1fr 70px;gap:8px;align-items:center;font-size:13px;margin:6px 0}
+.chartbar .bar{height:14px}
+.chartbar .bar i.h{background:var(--danger)} .chartbar .bar i.m{background:var(--orange)} .chartbar .bar i.l{background:var(--success)}
+.flow{display:grid;gap:10px}
+.flow .step{display:grid;grid-template-columns:32px 1fr;gap:10px;align-items:start}
+.flow .n{width:32px;height:32px;border-radius:50%;background:var(--primary);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px}
+/* Brand schema */
+.swatches{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.sw{border:1px solid var(--border);border-radius:var(--r-panel);overflow:hidden;background:#fff}
+.sw i{display:block;height:56px}
+.sw div{padding:8px 10px;font-size:12px;line-height:17px}
+.sw div b{display:block;color:var(--heading);font-size:13px}
+tr.pick{cursor:pointer}
+tr.pick:hover td{background:#FAF9FF}
+tr.pick.sel td{background:var(--primary-50)}
+tr.pick:focus-visible{outline:3px solid var(--primary);outline-offset:-3px}
+.howto{display:grid;gap:12px;grid-template-columns:1fr;margin-bottom:16px}
+.howto .card{padding:16px}
+.howto b.n{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;font-size:14px;margin-right:8px}
+.aud{width:100%;border-collapse:collapse;font-size:14px;min-width:0}
+.aud th,.aud td{padding:8px 10px;border-bottom:1px solid var(--border-soft);text-align:left;vertical-align:top}
+.aud tr.on td{background:var(--primary-50)}
+.channel{border-radius:var(--r-panel);padding:12px 14px;font-size:14px;line-height:20px}
+.channel.parent{background:var(--success-bg);color:#14532D}
+.channel.self{background:var(--primary-50);color:var(--ink)}
+.toggle{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--heading);margin-top:8px;cursor:pointer}
+.toggle input{width:20px;height:20px;accent-color:var(--primary)}
+.detail{margin-top:12px}
+.detail table{min-width:520px}
+@media (min-width:760px){.howto{grid-template-columns:repeat(3,1fr)}}
+footer{border-top:1px solid var(--border);background:#fff}
+footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19px;color:var(--muted)}
+@media (min-width:760px){
+  h1{font-size:34px;line-height:44px}
+  .kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .two{grid-template-columns:1fr 1fr}
+}
+@media (min-width:1080px){
+  h1{font-size:40px;line-height:50px}
+  .student-layout{grid-template-columns:minmax(360px,420px) 1fr}
+  .console-grid{grid-template-columns:1.35fr 1fr}
+  .three{grid-template-columns:repeat(3,1fr)}
+}
+@media (prefers-reduced-motion:no-preference){.bar i{transition:width .35s ease}}
+</style>
+<style>html.embed .concept,html.embed .hero,html.embed footer{display:none}</style>
+<script>if(/[?&]embed=1/.test(location.search))document.documentElement.classList.add("embed");</script>
+</head>
+<body>
+<div class="concept" role="note"><b>Concept prototype</b> by Anchit Tandon. Not an official PW product and not affiliated with PhysicsWallah. Learner data is synthetic; AI replies are simulated with transparent rules.</div>
+<header class="top">
+  <div class="wrap">
+    <a class="brandmark" href="/pw-study" style="text-decoration:none" target="_top"><div class="dot" aria-hidden="true">AK</div><div><strong>Agla Kadam</strong><small>Back to the PW case study</small></div></a>
+    <nav class="tabs" role="tablist" aria-label="Prototype views">
+      <button class="tab" role="tab" id="t-student" aria-controls="p-student" aria-selected="true">Student app</button>
+      <button class="tab" role="tab" id="t-parent" aria-controls="p-parent" aria-selected="false" tabindex="-1">Weekly Pulse</button>
+      <button class="tab" role="tab" id="t-console" aria-controls="p-console" aria-selected="false" tabindex="-1">Growth console</button>
+      <button class="tab" role="tab" id="t-brand" aria-controls="p-brand" aria-selected="false" tabindex="-1">Brand schema</button>
+    </nav>
+  </div>
+</header>
+<section class="hero">
+  <div class="wrap">
+    <span class="eyebrow">AI for the second sale</span>
+    <h1>Every paid learner, <span class="accent">kept on track</span> and brought back for their next batch.</h1>
+    <p class="lede">PW already runs Tracker 360, Prep Meter, the Parent App, mentorship and AI that wins the first sale. Agla Kadam is the layer that connects them for every learner: read those signals to spot silent drop-off early, rescue it with the AI Mentor, a human mentor or a Weekly Pulse to the right person, then make results day a personal next step: the right batch, plan or Vidyapeeth seat.</p>
+  </div>
+</section>
+
+<main>
+<div class="wrap">
+
+<!-- STUDENT -->
+<section class="panel on" id="p-student" role="tabpanel" aria-labelledby="t-student">
+  <div class="persona-row" role="group" aria-label="Choose a learner">
+    <button class="chip" data-p="0" aria-pressed="true">Riya - Class 11, JEE</button>
+    <button class="chip" data-p="1" aria-pressed="false">Aman - NEET dropper</button>
+    <button class="chip" data-p="2" aria-pressed="false">Meena - Class 10, UP Board</button>
+    <button class="chip" data-p="3" aria-pressed="false">Kabir - UPSC, 24</button>
+  </div>
+  <div class="student-layout">
+    <div class="phone" aria-label="Student app preview">
+      <div class="phone-top">
+        <small id="s-batch">Arjuna JEE 2028</small>
+        <h2 style="color:#fff;margin-top:2px" id="s-hello">Namaste Riya</h2>
+      </div>
+      <div class="phone-body">
+        <div class="card" style="padding:14px">
+          <div class="ring">
+            <svg width="72" height="72" viewBox="0 0 72 72" role="img" aria-labelledby="ringT"><title id="ringT">On-track score</title>
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#EFEFEF" stroke-width="8"/>
+              <circle id="ringArc" cx="36" cy="36" r="30" fill="none" stroke="#5A4BDA" stroke-width="8" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="124" transform="rotate(-90 36 36)"/>
+              <text x="36" y="41" text-anchor="middle" font-family="Reddit Sans, sans-serif" font-size="17" font-weight="700" fill="#27272A" id="ringTxt">34</text>
+            </svg>
+            <div><p class="label">This week's on-track score</p><p id="s-status" style="font-weight:600;color:var(--heading)">Needs a push this week</p><p class="small muted" id="s-sub">6 lectures behind batch pace</p></div>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="stat"><b id="st-lec">38%</b><span>Lectures done</span></div>
+          <div class="stat"><b id="st-test">45%</b><span>Test avg</span></div>
+          <div class="stat"><b id="st-streak">0</b><span>Day streak</span></div>
+        </div>
+        <div class="nudge" id="s-nudge"><p class="label" id="s-nudge-label">AI Mentor plan</p><p id="s-nudge-title" style="font-weight:600;color:var(--heading)"></p><ul class="plan small" id="s-plan"></ul></div>
+        <div class="card" style="padding:14px">
+          <p class="label" style="margin-bottom:8px">Ask your AI Mentor <span class="tag pri" style="margin-left:4px">Simulated</span></p>
+          <div class="chat" id="chat" aria-live="polite"></div>
+          <div class="quick" style="margin-top:10px" id="quick"></div>
+        </div>
+        <p class="label" style="margin-top:4px">Your agla kadam (next step)</p>
+        <div class="batch" id="s-next"></div>
+      </div>
+    </div>
+
+    <div class="grid" style="align-content:start">
+      <div class="card sim">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+          <h3>Signal simulator</h3><span class="tag pri">Drag to see the engine react</span>
+        </div>
+        <div class="field"><label for="in-lec">Lecture completion vs batch pace <span id="v-lec"></span></label><input type="range" id="in-lec" min="0" max="100"></div>
+        <div class="field"><label for="in-test">Test average <span id="v-test"></span></label><input type="range" id="in-test" min="0" max="100"></div>
+        <div class="field"><label for="in-idle">Days since last study session <span id="v-idle"></span></label><input type="range" id="in-idle" min="0" max="21"></div>
+        <div class="field"><label for="in-doubt">Doubts asked this week <span id="v-doubt"></span></label><input type="range" id="in-doubt" min="0" max="15"></div>
+        <div class="field"><label for="in-streak">Study streak (days) <span id="v-streak"></span></label><input type="range" id="in-streak" min="0" max="30"></div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <h3>Engine output</h3><span id="e-tier" class="tag"></span>
+        </div>
+        <div class="engine-out" style="margin-top:12px">
+          <p><span class="label">Drop-off risk</span><br><b id="e-risk" style="font-size:28px;line-height:34px;color:var(--heading)"></b><span class="muted"> / 100</span></p>
+          <div id="e-factors"></div>
+          <p class="why" id="e-why"></p>
+          <div class="flow" id="e-actions"></div>
+          <p class="small muted">Rule weights are illustrative. In production the signals come from data PW already collects (Tracker 360 and Prep Meter progress, lecture watch, DPP and test data, Ask AI doubts), scored by a model trained on PW batch history and checked against a holdout group.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PARENT -->
+<section class="panel" id="p-parent" role="tabpanel" aria-labelledby="t-parent" hidden>
+  <div class="grid two">
+    <div class="grid" style="align-content:start">
+      <div class="card">
+        <h2>Weekly Pulse on WhatsApp</h2>
+        <p style="margin-top:8px">The PW Parent App already shows attendance, lecture, DPP and test stats, but a parent has to open it. Weekly Pulse pushes a plain-language summary on WhatsApp and links into the app. <b>Who receives it depends on the learner's age.</b></p>
+        <div style="overflow-x:auto;margin-top:12px"><table class="aud" id="aud-tbl">
+          <thead><tr><th>Learner</th><th>Examples</th><th>Weekly report goes to</th></tr></thead>
+          <tbody>
+            <tr data-a="minor"><td><b>Under 18</b></td><td>K-12, Class 11-12, boards</td><td><b>Parent Pulse</b>: parent, with consent taken at purchase (DPDP Act 2023 needs it for under-18s)</td></tr>
+            <tr data-a="young"><td><b>18-21</b></td><td>JEE/NEET droppers, early college</td><td><b>Self Pulse</b>: learner. Parent gets a copy only if the learner opts in</td></tr>
+            <tr data-a="adult"><td><b>Adult aspirant</b></td><td>UPSC, govt exams, CA, NEET PG, skills</td><td><b>Self Pulse</b> + study-circle and mentor check-in. No parent channel</td></tr>
+          </tbody></table></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center">
+          <span class="label">Learner</span>
+          <div class="seg" role="group" aria-label="Learner" id="pp-learner">
+            <button data-p="0" aria-pressed="true">Riya, 16</button><button data-p="1" aria-pressed="false">Aman, 19</button><button data-p="2" aria-pressed="false">Meena, 15</button><button data-p="3" aria-pressed="false">Kabir, 24</button>
+          </div>
+          <span class="label">Language</span>
+          <div class="seg" role="group" aria-label="Language" id="pp-lang">
+            <button data-l="en" aria-pressed="true">English</button><button data-l="hi" aria-pressed="false">हिंदी</button>
+          </div>
+        </div>
+      </div>
+      <div class="card soft">
+        <h3>Guardrails built in</h3>
+        <ul class="plan">
+          <li>The learner always sees exactly what is shared, and with whom.</li>
+          <li>One report a week, max one alert in between. No fear or rank-shaming language.</li>
+          <li>High-risk cases go to a human mentor call, never only to a bot.</li>
+          <li>Offers appear only at natural moments (results, batch end), never inside a risk alert.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="grid" style="align-content:start">
+      <div class="channel" id="pp-channel" aria-live="polite"></div>
+      <div class="wa" aria-label="WhatsApp preview">
+        <div class="wa-head"><div class="av" aria-hidden="true">PW</div><div><b id="wa-title">PW Parent Pulse</b><br><small style="opacity:.85">Verified business account (concept)</small></div></div>
+        <div class="wa-body" id="wa-body" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONSOLE -->
+<section class="panel" id="p-console" role="tabpanel" aria-labelledby="t-console" hidden>
+  <div style="display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:12px">
+    <div><h2>Growth console</h2><p class="small" style="max-width:720px">The screen PW's retention team would open every Monday: who is drifting, what action each group gets, and what that is worth. Uses a made-up cohort of 5,000 paid learners so it runs without PW data.</p></div>
+    <button class="btn btn-outline sm" id="reseed">Generate a new cohort</button>
+  </div>
+  <div class="howto" aria-label="How to read this screen">
+    <div class="card soft"><p><b class="n">1</b><b>Who is drifting</b></p><p class="small" style="margin-top:6px">Every paid learner gets a weekly risk score from their study signals (lecture pace, tests, inactivity, doubts, streak).</p></div>
+    <div class="card soft"><p><b class="n">2</b><b>What we do about it</b></p><p class="small" style="margin-top:6px">Learners are grouped by the action they get. Click any row to see who is in it and how the ₹ is worked out.</p></div>
+    <div class="card soft"><p><b class="n">3</b><b>What it is worth for PW</b></p><p class="small" style="margin-top:6px">A what-if calculator on PW's real FY26 numbers. Change any assumption and the total updates.</p></div>
+  </div>
+  <div class="kpis" id="kpis"></div>
+  <div class="grid console-grid" style="margin-top:16px">
+    <div class="grid" style="align-content:start">
+      <div class="card">
+        <h3>1 · Who is drifting this week</h3>
+        <p class="small muted" style="margin-top:4px">Share of the cohort in each risk tier. High = 60+ risk score, Medium = 35-59, Low = under 35.</p>
+        <div id="riskbars" style="margin-top:10px"></div>
+      </div>
+      <div class="card">
+        <h3>2 · What we do about it</h3>
+        <p class="small muted" style="margin-top:4px">Sorted by expected fees won back, highest first. Click a column header to re-sort, or a row for detail.</p>
+        <div class="tbl-wrap" style="margin-top:10px"><table id="segtbl"><thead><tr>
+          <th><button data-k="seg">Group</button></th>
+          <th><button data-k="action">Action this week</button></th>
+          <th class="num"><button data-k="n">Learners</button></th>
+          <th class="num"><button data-k="avgRisk">Avg risk</button></th>
+          <th class="num"><button data-k="value">Fees won back (₹)</button></th>
+        </tr></thead><tbody></tbody></table></div>
+        <div class="detail" id="seg-detail" aria-live="polite"></div>
+      </div>
+      <div class="card">
+        <h3>How to prove it (first 90 days)</h3>
+        <div class="flow" style="margin-top:10px">
+          <div class="step"><span class="n">1</span><div><b>Pick 2 categories</b><p class="small">Class 11 JEE and NEET dropper: high next-batch value, clear calendar.</p></div></div>
+          <div class="step"><span class="n">2</span><div><b>90/10 holdout</b><p class="small">10% of learners get today's experience. Measure the gap, not the absolute number.</p></div></div>
+          <div class="step"><span class="n">3</span><div><b>Primary metric</b><p class="small">Next-cycle enrolment within 30 days of batch end or results day.</p></div></div>
+          <div class="step"><span class="n">4</span><div><b>Guardrails</b><p class="small">Notification opt-outs, refund rate, app rating, parent complaints.</p></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card calc" style="align-self:start">
+      <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center"><h3>3 · What it is worth for PW</h3><span class="tag warn">Assumptions: edit me</span></div>
+      <p class="small muted" style="margin:6px 0 10px">Scales the idea to all of PW. Base figures are PW's FY26 disclosures (Q4 FY26 shareholder letter); uplift rates are my assumptions to be tested.</p>
+      <div class="row"><label for="m-u">Online paying users<small>FY26 disclosed: 4.87M</small></label><input id="m-u" type="number" step="10000" value="4870000"></div>
+      <div class="row"><label for="m-acpu">Online ACPU (₹)<small>FY26 disclosed: ₹4,104</small></label><input id="m-acpu" type="number" value="4104"></div>
+      <div class="row"><label for="m-elig">Learners with a next batch (%)<small>Assumption: non-final-year learners</small></label><input id="m-elig" type="number" step="1" min="0" max="100" value="50"></div>
+      <div class="row"><label for="m-ren">Re-enrolment uplift (pp)<small>Assumption, tested vs holdout</small></label><input id="m-ren" type="number" step="0.5" min="0" value="4"></div>
+      <div class="row"><label for="m-prem">Already on premium plans<small>FY26 disclosed: 960k premium enrolments, incl. Curious Jr Power Batch</small></label><input id="m-prem" type="number" step="10000" min="0" value="960000"></div>
+      <div class="row"><label for="m-upg">Plan upgrade uplift (pp)<small>Assumption: Infinity / Pro</small></label><input id="m-upg" type="number" step="0.5" min="0" value="1.5"></div>
+      <div class="row"><label for="m-delta">Upgrade price gap (₹)<small>Assumption</small></label><input id="m-delta" type="number" step="100" value="3000"></div>
+      <div class="row"><label for="m-city">Learners in centre cities (%)<small>Assumption</small></label><input id="m-city" type="number" step="1" min="0" max="100" value="35"></div>
+      <div class="row"><label for="m-off">Of those, move to Vidyapeeth (%)<small>Assumption</small></label><input id="m-off" type="number" step="0.1" min="0" value="0.5"></div>
+      <div class="row"><label for="m-arpu">Offline ARPU (₹)<small>FY26 disclosed: ₹36,625</small></label><input id="m-arpu" type="number" value="36625"></div>
+      <div class="row"><label for="m-fx">₹ per US$<small>Mid-market, 25 Oct 2026</small></label><input id="m-fx" type="number" step="0.1" value="95.1"></div>
+      <div id="levers" style="margin-top:8px"></div>
+      <div style="border-top:2px solid var(--primary-50);padding-top:12px;margin-top:4px">
+        <p class="label">Annual incremental collections</p>
+        <p class="bigtotal" id="m-total"></p>
+        <p class="small" id="m-total-sub"></p>
+        <div class="formula" id="m-total-f" style="margin-top:8px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BRAND -->
+<section class="panel" id="p-brand" role="tabpanel" aria-labelledby="t-brand" hidden>
+  <div class="grid">
+    <div class="card">
+      <h2>PW brand context schema</h2>
+      <p style="margin-top:8px">Extracted from computed styles on pw.live (homepage, NEET Class 12 listing, a batch detail page) on 25 Oct 2026 with a headless browser. This prototype uses only these tokens. The PW logo is deliberately not reproduced.</p>
+    </div>
+    <div><h3 style="margin-bottom:10px">Colour tokens</h3><div class="swatches" id="swatches"></div></div>
+    <div class="grid two">
+      <div class="card">
+        <h3>Type</h3>
+        <ul class="plan small">
+          <li><b>Reddit Sans</b> only, weights 400/500/600/700 (Noto Sans Devanagari added here for Hindi).</li>
+          <li>h1 40/50 700 · h2 32/48 700 · card title 20 600 · body 16/24 400 · label 12 500.</li>
+          <li>Buttons 16px: 400 in header, 600 for primary actions.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Shape and depth</h3>
+        <ul class="plan small">
+          <li>Buttons 6px radius, 48-56px tall. Tags 4px. Panels 8-12px. Batch cards 16px with 1px #D9DCE1 border, no shadow. Pills 9999px.</li>
+          <li>Shadows: light 0 1px 8px #00000014; detail cards 0 4px 16px rgba(27,33,36,.06).</li>
+          <li>Hero gradient: 270deg #EEF9FF → #F9EEFF → #F8F8FF → #F1F5FF.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Batch card anatomy</h3>
+        <ol class="plan small">
+          <li>Banner with faculty art and plan strip ("Infinity, Pro").</li>
+          <li>Orange category label (e.g. "Dropper") + language pill ("HINGLISH").</li>
+          <li>Title 20/600, audience line, start and end dates.</li>
+          <li>Price 18/700, struck MRP, green "% OFF"; dark "Buy Now" + outline chevron.</li>
+        </ol>
+      </div>
+      <div class="card">
+        <h3>Voice</h3>
+        <ul class="plan small">
+          <li>Warm, aspirational, numbers-led ("Join 15 Million students", "24*7 Doubt Support").</li>
+          <li>English UI; Hindi carries the brand in names: Arjuna, Lakshya, Yakeen, Vidyapeeth, Pathshala.</li>
+          <li>Teachers are "Sir"; batches are labelled HINGLISH; emoji rare.</li>
+          <li>Agla Kadam follows this: Hindi product name, plain English UI, Hinglish only inside student chat.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+</main>
+<footer><div class="wrap">Sources: PW Q4 FY26 shareholder letter (FY26 users, ACPU, ARPU, AI metrics), PW Q1 FY27 earnings call transcript (NSE filing, Aug 2026), pw.live and PW app listings checked 25 Oct 2026. Full analysis: <a href="/pw-study" target="_top">anchit-tandon.com/pw-study</a>. Batch prices shown in the student view are illustrative. Concept work by Anchit Tandon - anchit.tandon@gmail.com.</div></footer>
+
+<script>
+(function(){
+'use strict';
+var INR = function(n){return '₹' + Math.round(n).toLocaleString('en-IN');};
+var CR = function(n){return '₹' + (n/1e7).toLocaleString('en-IN',{maximumFractionDigits:1,minimumFractionDigits:1}) + ' cr';};
+var USDM = function(n,fx){return '$' + (n/fx/1e6).toLocaleString('en-US',{maximumFractionDigits:2,minimumFractionDigits:2}) + 'M';};
+var clamp = function(v,a,b){return Math.max(a,Math.min(b,v));};
+
+/* ---------- Engine: transparent rules (illustrative weights) ---------- */
+function score(s){
+  var f = [
+    {k:'Lectures not done', v:(100-s.lec)*0.40, max:40},
+    {k:'Low test scores',   v:(100-s.test)*0.25, max:25},
+    {k:'Inactivity',        v:Math.min(s.idle,14)/14*30, max:30},
+    {k:'No doubts asked',   v:s.doubt===0?8:0, max:8},
+    {k:'Streak (protective)', v:-Math.min(s.streak,14)/14*10, max:10}
+  ];
+  var r = Math.round(clamp(f.reduce(function(a,x){return a+x.v;},0),0,100));
+  var tier = r>=60?'High':r>=35?'Medium':'Low';
+  return {risk:r,tier:tier,factors:f};
+}
+function aud(p){ return p.age<18?'minor':(p.age<=21?'young':'adult'); }
+function actions(s,res,p){
+  var a=[], g=aud(p);
+  var pulse = g==='minor' ? {t:'Parent Pulse alert',d:'To the consented parent: calm, specific, one thing they can do.'}
+            : g==='young' ? {t:'Self Pulse alert',d:'Sent to '+p.name+'. Parent gets a copy only if '+p.name+' opted in.'}
+            : {t:'Self Pulse + study-circle check-in',d:'Adult learner: no parent channel. Peers and a mentor keep the streak going.'};
+  if(res.tier==='High'){
+    a.push({t:'Human mentor call within 24 hours',d:'Bot-first is wrong here: a real mentor rebuilds the plan with the learner.'});
+    a.push({t:'7-day catch-up plan in the app',d:'Backlog cut to the highest-weight chapters only.'});
+    a.push(pulse);
+  } else if(res.tier==='Medium'){
+    a.push({t:'AI Mentor catch-up plan',d:'Three backlog lectures plus one short DPP, scheduled around '+(g==='adult'?'work or coaching hours':'school hours')+'.'});
+    a.push({t:g==='minor'?'Weekly Parent Pulse report':'Weekly Self Pulse report',d:'Progress and the plan, no alarm.'});
+  } else {
+    a.push({t:'Protect the streak',d:'Light-touch praise, no extra pings.'});
+    if(s.test>=70 && s.lec>=75){ a.push({t:p.offline?'Offer a free Vidyapeeth trial class':'Offer Infinity Pro upgrade',d:p.offline?('Strong, engaged learner in '+p.city+', a centre city.'):'High engagement and scores: ready for the premium plan.'}); }
+    else a.push({t:'Results-day next step queued',d:'Personalised next batch shown on results day.'});
+  }
+  return a;
+}
+
+/* ---------- Personas (synthetic) ---------- */
+var P = [
+  {name:'Riya',full:'Riya Sharma',age:16,batch:'Arjuna JEE 2028 (Class 11)',city:'Jaipur',offline:true,lang:'HINGLISH',
+   s:{lec:38,test:45,idle:9,doubt:0,streak:0},
+   next:{cat:'Class 12',title:'Lakshya JEE 2028',aud:'For JEE Aspirants',date:'Starts on 5 Apr, 2027',price:4199,mrp:8000,plan:'Infinity, Pro',why:'Continues Arjuna with the same faculty. Your weak chapters (Rotational Motion, Chemical Bonding) are scheduled first.'}},
+  {name:'Aman',full:'Aman Verma',age:19,batch:'Yakeen NEET 2027 (Dropper)',city:'Patna',offline:true,lang:'HINGLISH',
+   s:{lec:82,test:74,idle:0,doubt:6,streak:12},
+   next:{cat:'Dropper',title:'Yakeen NEET 2027 - Infinity Pro',aud:'For NEET Aspirants',date:'Upgrade applies to your current batch',price:3999,mrp:9000,plan:'Infinity Pro',why:'Top 15% of your batch on tests. Infinity Pro adds mentor sessions and the full test series for the final 6 months.'}},
+  {name:'Meena',full:'Meena Kumari',age:15,batch:'Udaan UP Board 2027 (Class 10, Hindi medium)',city:'Lucknow',offline:true,lang:'HINDI',
+   s:{lec:66,test:58,idle:3,doubt:0,streak:2},
+   next:{cat:'Class 11',title:'Arjuna NEET 2029 (Hindi medium)',aud:'For NEET Aspirants',date:'Starts on 10 Apr, 2027',price:3499,mrp:7000,plan:'Infinity, Pro',why:'Your Science scores are your strongest. Early Class 11 start keeps your board-to-NEET momentum.'}},
+  {name:'Kabir',full:'Kabir Singh',age:24,batch:'UPSC Prelims + Mains 2027',city:'Delhi',offline:false,lang:'HINGLISH',
+   s:{lec:55,test:60,idle:5,doubt:1,streak:1},
+   next:{cat:'UPSC',title:'Prelims Test Series 2027 + Mains Answer Writing',aud:'For UPSC Aspirants',date:'Starts on 1 Feb, 2027',price:2999,mrp:6000,plan:'Infinity',why:'Polity is your strongest area; the series targets Economy and Environment, your weakest. Mains answers graded by AI Grader.'}}
+];
+var cur = 0, simState = JSON.parse(JSON.stringify(P[0].s));
+
+/* ---------- Tabs ---------- */
+var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+function selectTab(t){
+  tabs.forEach(function(x){
+    var on = x===t; x.setAttribute('aria-selected',on); x.tabIndex = on?0:-1;
+    var p = document.getElementById(x.getAttribute('aria-controls'));
+    p.hidden = !on; p.classList.toggle('on',on);
+  });
+}
+tabs.forEach(function(t,i){
+  t.addEventListener('click',function(){selectTab(t);});
+  t.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();var n=tabs[(i+(e.key==='ArrowRight'?1:tabs.length-1))%tabs.length];selectTab(n);n.focus();}
+  });
+});
+
+/* ---------- Student view ---------- */
+var ids = ['lec','test','idle','doubt','streak'];
+function el(id){return document.getElementById(id);}
+function setSliders(){ ids.forEach(function(k){ el('in-'+k).value = simState[k]; }); }
+function renderStudent(){
+  var p = P[cur], s = simState, res = score(s);
+  ids.forEach(function(k){ el('v-'+k).textContent = k==='lec'||k==='test' ? s[k]+'%' : s[k]; });
+  el('s-batch').textContent = p.batch;
+  el('s-hello').textContent = 'Namaste ' + p.name;
+  var onTrack = 100 - res.risk;
+  el('ringTxt').textContent = onTrack;
+  el('ringArc').setAttribute('stroke-dashoffset', (188.5*(1-onTrack/100)).toFixed(1));
+  el('ringArc').setAttribute('stroke', res.tier==='High'?'#E31B4D':res.tier==='Medium'?'#FB6514':'#1B7938');
+  var behind = Math.max(0, Math.round((75 - s.lec)/6));
+  el('s-status').textContent = res.tier==='High'?'Needs a push this week':res.tier==='Medium'?'Slightly off pace':'On track, keep going';
+  el('s-sub').textContent = behind>0 ? behind+' lectures behind batch pace' : 'Ahead of batch pace';
+  el('st-lec').textContent = s.lec+'%'; el('st-test').textContent = s.test+'%'; el('st-streak').textContent = s.streak;
+  var n = el('s-nudge'); n.className = 'nudge ' + (res.tier==='High'?'high':res.tier==='Medium'?'med':'low');
+  var plan;
+  if(res.tier==='High'){ el('s-nudge-title').textContent='Your 7-day comeback plan'; plan=['Day 1-2: 2 backlog lectures (highest weightage first)','Day 3: 20-min DPP, solutions unlocked instantly','Day 4-6: 2 more lectures + doubt session','Day 7: mini-test to reset your score','Mentor call booked: tomorrow, 6:30 pm']; }
+  else if(res.tier==='Medium'){ el('s-nudge-title').textContent='Catch up in 3 sessions'; plan=['Session 1: '+(behind||1)+' backlog lecture'+((behind||1)>1?'s':''),'Session 2: 15-question DPP on your weakest chapter','Session 3: ask at least 2 doubts on Ask AI']; }
+  else { el('s-nudge-title').textContent='Great week. Keep the streak alive'; plan=['Next: Sunday full-length test','Bonus: 1 advanced problem set unlocked']; }
+  el('s-plan').innerHTML = plan.map(function(x){return '<li>'+x+'</li>';}).join('');
+  var nx = p.next, off = Math.round((1-nx.price/nx.mrp)*100);
+  var offlineLine = (p.offline && res.tier==='Low' && s.test>=70 && s.lec>=75) ? '<button class="btn btn-soft sm" type="button" style="width:100%">Book a free Vidyapeeth trial class in '+p.city+'</button>' : '';
+  el('s-next').innerHTML =
+    '<div class="banner"><div><small>Multiple plans inside: <b>'+nx.plan+'</b></small><div style="font-weight:700;font-size:16px;margin-top:2px">Recommended for '+p.name+'</div></div><span class="tag" style="background:#ffffff26;color:#fff">'+(res.tier==='High'?'Shown after catch-up':'Results-day offer')+'</span></div>'+
+    '<div class="inner"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="cat">'+nx.cat+'</span><span class="tag lang">'+p.lang+'</span></div>'+
+    '<h3 style="font-size:20px;line-height:26px">'+nx.title+'</h3>'+
+    '<p class="small">'+nx.aud+' · '+nx.date+'</p>'+
+    '<p class="small" style="background:var(--primary-50);padding:8px 10px;border-radius:8px;color:var(--ink)"><b>Why this:</b> '+nx.why+'</p>'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><div class="price"><b>'+INR(nx.price)+'</b><s>'+INR(nx.mrp)+'</s><span class="off">'+off+'% OFF</span></div>'+
+    '<button class="btn btn-dark sm" type="button"'+(res.tier==='High'?' disabled aria-disabled="true" style="opacity:.5;cursor:not-allowed"':'')+'>'+(res.tier==='High'?'Unlocks after catch-up':'Continue')+'</button></div>'+
+    offlineLine + '<p class="small muted">Illustrative price, not a PW quote.</p></div>';
+  // engine card
+  el('e-risk').textContent = res.risk;
+  var tg = el('e-tier'); tg.textContent = res.tier+' risk'; tg.className='tag '+(res.tier==='High'?'bad':res.tier==='Medium'?'warn':'ok');
+  el('e-factors').innerHTML = res.factors.map(function(f){
+    var w = Math.round(Math.abs(f.v)/f.max*100);
+    return '<div class="factor"><span>'+f.k+'</span><span class="bar" aria-hidden="true"><i style="width:'+w+'%;background:'+(f.v<0?'#1B7938':'#5A4BDA')+'"></i></span><span style="text-align:right;font-variant-numeric:tabular-nums">'+(f.v<0?'':'+')+f.v.toFixed(1)+'</span></div>';
+  }).join('');
+  var top = res.factors.slice().sort(function(a,b){return b.v-a.v;})[0];
+  el('e-why').innerHTML = '<b>Why:</b> biggest driver is "'+top.k.toLowerCase()+'" ('+(top.v>0?'+':'')+top.v.toFixed(1)+' pts). Risk = sum of factors, capped 0-100. Tiers: High 60+, Medium 35-59, Low under 35.';
+  el('e-actions').innerHTML = actions(s,res,p).map(function(a,i){return '<div class="step"><span class="n">'+(i+1)+'</span><div><b>'+a.t+'</b><p class="small">'+a.d+'</p></div></div>';}).join('');
+  renderChatChips();
+}
+ids.forEach(function(k){ el('in-'+k).addEventListener('input',function(e){ simState[k]=+e.target.value; renderStudent(); }); });
+Array.prototype.forEach.call(document.querySelectorAll('.persona-row .chip'),function(b){
+  b.addEventListener('click',function(){
+    cur=+b.dataset.p; simState=JSON.parse(JSON.stringify(P[cur].s));
+    Array.prototype.forEach.call(document.querySelectorAll('.persona-row .chip'),function(x){x.setAttribute('aria-pressed',x===b);});
+    setSliders(); el('chat').innerHTML=''; greet(); renderStudent();
+  });
+});
+
+/* ---------- AI Mentor chat (simulated, data-grounded) ---------- */
+function greet(){ addMsg('ai','Hi '+P[cur].name+'! Main tumhara AI Mentor hoon. Puchho, aaj kya plan karein?'); }
+function addMsg(who,txt){ var d=document.createElement('div'); d.className='bubble '+(who==='ai'?'ai':'me'); d.textContent=txt; el('chat').appendChild(d); var c=el('chat'); while(c.children.length>6) c.removeChild(c.firstChild); }
+function renderChatChips(){
+  var q=[['backlog','Mera backlog kitna hai?'],['today','Aaj kya padhun?'],['next','Next year ka plan?']];
+  el('quick').innerHTML = q.map(function(x){return '<button type="button" data-q="'+x[0]+'">'+x[1]+'</button>';}).join('');
+  Array.prototype.forEach.call(el('quick').querySelectorAll('button'),function(b){ b.addEventListener('click',function(){ answer(b.dataset.q,b.textContent); }); });
+}
+function answer(k,label){
+  var s=simState,res=score(s),p=P[cur],behind=Math.max(0,Math.round((75-s.lec)/6)),txt;
+  addMsg('me',label);
+  if(k==='backlog') txt = behind>0 ? 'Tum batch se '+behind+' lectures peeche ho. Tension mat lo: sirf high-weightage wale pehle karenge, '+Math.ceil(behind/2)+' din mein cover ho jayega.' : 'Koi backlog nahi! Tum batch pace se aage ho. Ab practice pe focus karte hain.';
+  else if(k==='today') txt = res.tier==='High' ? 'Aaj sirf 2 cheezein: 1 backlog lecture (45 min) aur 10-question DPP. Chhota target, pakka result.' : res.tier==='Medium' ? 'Aaj 1 lecture + apne weakest chapter ka DPP. Doubts ho to Ask AI pe daal do.' : 'Aaj ka lecture + Sunday test ki prep. Streak '+s.streak+' din ka hai, todna mat!';
+  else txt = 'Results ke din main tumhara personal report banaunga. Abhi ke data se best next step: '+p.next.title+'. Pehle is saal ka plan strong karte hain.';
+  setTimeout(function(){ if(P[cur]===p) addMsg('ai',txt); },250);
+}
+
+/* ---------- Weekly Pulse (Parent or Self) ---------- */
+var ppP=0, ppL='en', ppShare=false;
+function renderParent(){
+  var p=P[ppP], s=p.s, res=score(s), behind=Math.max(0,Math.round((75-s.lec)/6)), g=aud(p);
+  var toParent = g==='minor' || (g==='young' && ppShare);
+  Array.prototype.forEach.call(document.querySelectorAll('#aud-tbl tbody tr'),function(tr){tr.classList.toggle('on',tr.dataset.a===g);});
+  var ch=el('pp-channel');
+  ch.className='channel '+(toParent?'parent':'self');
+  if(g==='minor') ch.innerHTML='<b>Parent Pulse.</b> '+p.name+' is '+p.age+', so the report goes to the parent who gave consent at purchase. '+p.name+' can see every report too.';
+  else if(g==='young') ch.innerHTML='<b>'+(ppShare?'Self Pulse + parent copy.':'Self Pulse.')+'</b> '+p.name+' is '+p.age+', so the report goes to '+p.name+'. A parent copy is sent only if '+p.name+' opts in.'+
+    '<label class="toggle"><input type="checkbox" id="pp-share"'+(ppShare?' checked':'')+'> '+p.name+' chose to share with a parent</label>';
+  else ch.innerHTML='<b>Self Pulse.</b> '+p.name+' is '+p.age+' and preparing for an adult exam, so there is no parent channel. The report goes to '+p.name+', with a study-circle check-in.';
+  var sh=el('pp-share'); if(sh) sh.addEventListener('change',function(){ppShare=sh.checked;renderParent();});
+  el('wa-title').textContent = toParent?'PW Parent Pulse':'PW Study Pulse';
+  var hiMode = ppL==='hi', en, hi, mentor=toParent?(hiMode?'PW Parent App में देखें':'Open in PW Parent App'):(hiMode?'मेंटर से बात करें':'Talk to a mentor');
+  if(toParent){
+    if(res.tier==='High'){
+      en = 'Namaste! Weekly update for '+p.full+' ('+p.batch+')\n\nThis week: '+s.lec+'% of lectures done vs batch pace, test average '+s.test+'%. '+p.name+' has not studied on the app for '+s.idle+' days.\n\nWhat we are doing: a PW mentor will call '+p.name+' tomorrow at 6:30 pm and a 7-day catch-up plan is ready in the app.\n\nOne thing you can do: ask '+p.name+' to show you the plan tonight. 10 minutes of your interest helps more than any reminder.';
+      hi = 'नमस्ते! '+p.full+' की साप्ताहिक रिपोर्ट\n\nइस हफ्ते: बैच की गति के मुकाबले '+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%. '+p.name+' ने '+s.idle+' दिन से ऐप पर पढ़ाई नहीं की है.\n\nहम क्या कर रहे हैं: कल शाम 6:30 बजे PW मेंटर '+p.name+' को कॉल करेंगे और ऐप में 7 दिन का कैच-अप प्लान तैयार है.\n\nआप क्या कर सकते हैं: आज रात '+p.name+' से प्लान दिखाने को कहें. आपकी 10 मिनट की रुचि किसी भी रिमाइंडर से ज़्यादा असर करती है.';
+    } else if(res.tier==='Medium'){
+      en = 'Namaste! Weekly update for '+p.full+' ('+p.batch+')\n\nThis week: '+s.lec+'% of lectures done, test average '+s.test+'%, '+s.streak+'-day study streak. '+(behind>0?p.name+' is '+behind+' lectures behind pace.':'')+'\n\nPlan: 3 short catch-up sessions are scheduled this week by the AI Mentor.\n\nYou will get the next update on Sunday.';
+      hi = 'नमस्ते! '+p.full+' की साप्ताहिक रिपोर्ट\n\nइस हफ्ते: '+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%, लगातार '+s.streak+' दिन पढ़ाई. '+(behind>0?p.name+' बैच से '+behind+' लेक्चर पीछे है.':'')+'\n\nप्लान: AI मेंटर ने इस हफ्ते 3 छोटे कैच-अप सेशन तय किए हैं.\n\nअगली रिपोर्ट रविवार को आएगी.';
+    } else {
+      en = 'Namaste! Weekly update for '+p.full+' ('+p.batch+')\n\nGreat week: '+s.lec+'% of lectures done, test average '+s.test+'%, '+s.streak+'-day study streak. '+p.name+' is in the top 15% of the batch on tests this month.\n\nNext: Sunday full-length test. We will share the result with you.';
+      hi = 'नमस्ते! '+p.full+' की साप्ताहिक रिपोर्ट\n\nशानदार हफ्ता: '+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%, लगातार '+s.streak+' दिन पढ़ाई. इस महीने टेस्ट में '+p.name+' बैच के टॉप 15% में है.\n\nआगे: रविवार को फुल-लेंथ टेस्ट. नतीजा हम आपको भेजेंगे.';
+    }
+  } else {
+    var circle = g==='adult';
+    if(res.tier==='High'){
+      en = 'Hi '+p.name+', your week at a glance\n\n'+s.lec+'% of lectures done vs batch pace, test average '+s.test+'%, '+s.idle+' days since your last session.\n\nYour mentor will call tomorrow at 6:30 pm. A 7-day comeback plan is ready in the app: start with just one lecture today.';
+      hi = 'Hi '+p.name+', आपका हफ्ता एक नज़र में\n\nबैच की गति के मुकाबले '+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%, आखिरी सेशन '+s.idle+' दिन पहले.\n\nकल शाम 6:30 बजे आपके मेंटर कॉल करेंगे. ऐप में 7 दिन का कमबैक प्लान तैयार है: आज सिर्फ एक लेक्चर से शुरू करें.';
+    } else if(res.tier==='Medium'){
+      en = 'Hi '+p.name+', your week at a glance\n\n'+s.lec+'% of lectures done, test average '+s.test+'%, '+s.streak+'-day streak.'+(behind>0?' You are '+behind+' lectures behind pace.':'')+'\n\nYour AI Mentor has planned 3 short catch-up sessions this week.'+(circle?' Your study circle checks in on Thursday.':'');
+      hi = 'Hi '+p.name+', आपका हफ्ता एक नज़र में\n\n'+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%, लगातार '+s.streak+' दिन.'+(behind>0?' आप बैच से '+behind+' लेक्चर पीछे हैं.':'')+'\n\nAI मेंटर ने इस हफ्ते 3 छोटे कैच-अप सेशन तय किए हैं.'+(circle?' गुरुवार को आपका स्टडी सर्कल चेक-इन करेगा.':'');
+    } else {
+      en = 'Hi '+p.name+', great week!\n\n'+s.lec+'% of lectures done, test average '+s.test+'%, '+s.streak+'-day streak. You are in the top 15% of your batch on tests this month.\n\nNext: Sunday full-length test.';
+      hi = 'Hi '+p.name+', शानदार हफ्ता!\n\n'+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%, लगातार '+s.streak+' दिन. इस महीने टेस्ट में आप बैच के टॉप 15% में हैं.\n\nआगे: रविवार को फुल-लेंथ टेस्ट.';
+    }
+  }
+  var who = toParent?p.name+'\'s':'Your', whoHi = toParent?p.name+' का':'आपका';
+  var resultsEn = 'Results-day message (sent at batch end)\n\n'+who+' year in numbers is ready. Based on the hardest and strongest chapters, the recommended next step is '+p.next.title+'.'+(p.offline?' A free trial class is also available at the PW Vidyapeeth centre in '+p.city+'.':'');
+  var resultsHi = 'रिज़ल्ट के दिन का मैसेज (बैच खत्म होने पर)\n\n'+whoHi+' पूरे साल का रिपोर्ट कार्ड तैयार है. सबसे कठिन और सबसे मज़बूत चैप्टर के आधार पर अगला सुझाया गया कदम: '+p.next.title+'.'+(p.offline?' '+p.city+' के PW विद्यापीठ सेंटर में फ्री ट्रायल क्लास भी उपलब्ध है.':'');
+  el('wa-body').innerHTML =
+    '<div class="wa-msg" lang="'+(hiMode?'hi':'en')+'">'+esc(hiMode?hi:en)+'<span class="wa-time">Sun 7:00 pm</span></div>'+
+    '<div class="wa-btns"><span>'+(hiMode?'प्लान देखें':'See the plan')+'</span><span>'+mentor+'</span></div>'+
+    '<div class="wa-msg" style="border:1px dashed #9AA0A6" lang="'+(hiMode?'hi':'en')+'">'+esc(hiMode?resultsHi:resultsEn)+'<span class="wa-time">Results day</span></div>';
+}
+function esc(t){var d=document.createElement('div');d.textContent=t;return d.innerHTML;}
+function bindSeg(id,fn){ var g=el(id); Array.prototype.forEach.call(g.querySelectorAll('button'),function(b){ b.addEventListener('click',function(){ Array.prototype.forEach.call(g.querySelectorAll('button'),function(x){x.setAttribute('aria-pressed',x===b);}); fn(b); renderParent(); }); }); }
+bindSeg('pp-learner',function(b){ppP=+b.dataset.p;ppShare=false;});
+bindSeg('pp-lang',function(b){ppL=b.dataset.l;});
+
+/* ---------- Console: synthetic cohort ---------- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+var seed=2026, sortKey='value', sortDir=-1, rows=[], selSeg=null;
+function gen(){
+  var rnd=mulberry32(seed), N=5000, L=[];
+  for(var i=0;i<N;i++){
+    var eng=Math.pow(rnd(),0.55); // latent engagement, skewed towards engaged payers
+    var s={lec:Math.round(clamp(eng*100+(rnd()-0.5)*30,0,100)), test:Math.round(clamp(30+eng*55+(rnd()-0.5)*30,0,100)), idle:Math.round(clamp((1-eng)*16*rnd()*1.6,0,21)), doubt:rnd()<0.3+eng*0.5?Math.round(1+rnd()*8*eng):0, streak:Math.round(clamp(eng*20*rnd()*1.5,0,30))};
+    var r=score(s); r.s=s; r.id='L'+String(10001+i); var a=rnd(); r.age=a<0.55?Math.floor(13+rnd()*5):(a<0.8?Math.floor(18+rnd()*4):Math.floor(22+rnd()*8));
+    r.centre=rnd()<0.35; r.nextBatch=rnd()<0.5; L.push(r);
+  }
+  return L;
+}
+function buildConsole(){
+  var L=gen(), N=L.length, A=4104, ARPU=36625;
+  var nb=function(x){return x.nextBatch;};
+  var hi=L.filter(function(x){return x.tier==='High';}), me=L.filter(function(x){return x.tier==='Medium';}), lo=L.filter(function(x){return x.tier==='Low';});
+  var top=lo.filter(function(x){return x.s.test>=70&&x.s.lec>=75&&x.nextBatch;});
+  var avg=function(a){return a.length?Math.round(a.reduce(function(t,x){return t+x.risk;},0)/a.length):0;};
+  var mk=function(seg,action,list,gap,price,why){return {seg:seg,action:action,list:list,n:list.length,avgRisk:avg(list),gap:gap,price:price,why:why};};
+  rows=[
+    mk('High risk, under 18','Mentor call + 7-day plan + Parent Pulse alert',hi.filter(function(x){return x.nextBatch&&x.age<18;}),0.30,A,'Drifting school students who have a next batch. Their parent pays, so the parent is told.'),
+    mk('High risk, 18+','Mentor call + 7-day plan + Self Pulse',hi.filter(function(x){return x.nextBatch&&x.age>=18;}),0.30,A,'Drifting adult learners with a next batch. The report goes to them, not a parent.'),
+    mk('Medium risk','AI Mentor catch-up + weekly Pulse (parent if under 18)',me.filter(nb),0.15,A,'Slightly off pace. The AI Mentor can usually fix this without a human.'),
+    mk('On track, top scorer, centre city','Free Vidyapeeth trial class',top.filter(function(x){return x.centre;}),0.02,ARPU-A,'Strong, engaged online learners near a PW centre: the best offline leads PW has.'),
+    mk('On track, top scorer, no centre','Infinity Pro upgrade on results day',top.filter(function(x){return !x.centre;}),0.05,3000,'Strong learners far from a centre: offer the premium plan instead.'),
+    mk('On track, others','Next batch card on results day',lo.filter(function(x){return x.nextBatch&&!(x.s.test>=70&&x.s.lec>=75);}),0.05,A,'Doing fine. Just make the next batch easy to choose when results land.'),
+    mk('Final year, any risk','Help with results only, no selling',L.filter(function(x){return !x.nextBatch;}),0,0,'No next batch to sell. Rescue still runs, because results drive word of mouth.')
+  ];
+  rows.forEach(function(r){ r.value=Math.round(r.n*r.gap*r.price); });
+  var stake=rows.reduce(function(t,r){return t+r.value;},0);
+  el('kpis').innerHTML=[
+    [N.toLocaleString('en-IN'),'Paid learners in this demo cohort'],
+    [Math.round(hi.length/N*100)+'%','Drifting this week (high risk)'],
+    [(hi.length+me.length).toLocaleString('en-IN'),'Get a rescue action this week'],
+    [INR(stake),'Expected fees won back in this cohort']
+  ].map(function(k){return '<div class="kpi"><b>'+k[0]+'</b><span>'+k[1]+'</span></div>';}).join('');
+  var mix=[['High',hi.length,'h'],['Medium',me.length,'m'],['Low',lo.length,'l']].sort(function(a,b){return b[1]-a[1];});
+  el('riskbars').innerHTML=mix.map(function(m){var p=m[1]/N*100;return '<div class="chartbar"><span>'+m[0]+' risk</span><span class="bar"><i class="'+m[2]+'" style="width:'+p.toFixed(1)+'%"></i></span><span style="text-align:right;font-variant-numeric:tabular-nums">'+p.toFixed(1)+'%</span></div>';}).join('');
+  if(!selSeg || !rows.some(function(r){return r.seg===selSeg;})) selSeg=rows.slice().sort(function(a,b){return b.value-a.value;})[0].seg;
+  renderTable();
+}
+function renderTable(){
+  var r=rows.slice().sort(function(a,b){var x=a[sortKey],y=b[sortKey];return (typeof x==='string'?x.localeCompare(y):x-y)*sortDir;});
+  var tb=el('segtbl').querySelector('tbody');
+  tb.innerHTML=r.map(function(x){return '<tr class="pick'+(x.seg===selSeg?' sel':'')+'" tabindex="0" data-seg="'+x.seg+'" aria-selected="'+(x.seg===selSeg)+'"><td><b>'+x.seg+'</b></td><td>'+x.action+'</td><td class="num">'+x.n.toLocaleString('en-IN')+'</td><td class="num">'+x.avgRisk+'</td><td class="num">'+INR(x.value)+'</td></tr>';}).join('');
+  Array.prototype.forEach.call(tb.querySelectorAll('tr'),function(tr){
+    var go=function(){selSeg=tr.dataset.seg;renderTable();};
+    tr.addEventListener('click',go);
+    tr.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go();var n=el('segtbl').querySelector('tr.sel');if(n)n.focus();}});
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('#segtbl th'),function(th){var b=th.querySelector('button');var on=b.dataset.k===sortKey;th.setAttribute('aria-sort',on?(sortDir<0?'descending':'ascending'):'none');b.textContent=b.textContent.replace(/ [▼▲]$/,'')+(on?(sortDir<0?' ▼':' ▲'):'');});
+  renderDetail();
+}
+function renderDetail(){
+  var x=rows.filter(function(r){return r.seg===selSeg;})[0]; if(!x){el('seg-detail').innerHTML='';return;}
+  var sample=x.list.slice().sort(function(a,b){return b.risk-a.risk;}).slice(0,5);
+  var calc = x.price>0 ? x.n.toLocaleString('en-IN')+' learners × '+Math.round(x.gap*100)+'% we expect the action to win back × '+INR(x.price)+' each = <b>'+INR(x.value)+'</b>' : 'No next batch, so nothing to sell: ₹0. The action protects results and reputation.';
+  var priceNote = x.price===4104?'₹4,104 = PW online fee per learner (FY26).':x.price===3000?'₹3,000 = assumed price gap to Infinity Pro.':x.price>0?'₹32,521 = offline ARPU ₹36,625 minus the ₹4,104 online fee already paid (FY26).':'';
+  el('seg-detail').innerHTML='<div class="card soft" style="padding:14px"><p class="label">Selected group</p><h3 style="margin-top:2px">'+x.seg+'</h3><p class="small" style="margin-top:4px">'+x.why+'</p>'+
+    '<div class="formula" style="margin-top:8px">'+calc+'</div><p class="small muted" style="margin-top:6px">'+priceNote+(x.gap?' The '+Math.round(x.gap*100)+'% win-back rate is my assumption, to be measured against a holdout.':'')+'</p>'+
+    (sample.length?'<p class="label" style="margin-top:12px">Highest-risk learners in this group (synthetic)</p><div class="tbl-wrap" style="margin-top:6px"><table><thead><tr><th>Learner</th><th class="num">Age</th><th class="num">Lectures</th><th class="num">Test avg</th><th class="num">Days idle</th><th class="num">Risk</th></tr></thead><tbody>'+
+    sample.map(function(l){return '<tr><td>'+l.id+'</td><td class="num">'+l.age+'</td><td class="num">'+l.s.lec+'%</td><td class="num">'+l.s.test+'%</td><td class="num">'+l.s.idle+'</td><td class="num">'+l.risk+'</td></tr>';}).join('')+'</tbody></table></div>':'')+'</div>';
+}
+Array.prototype.forEach.call(document.querySelectorAll('#segtbl th button'),function(b){b.addEventListener('click',function(){var k=b.dataset.k;if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=-1;}renderTable();});});
+el('reseed').addEventListener('click',function(){seed=Math.floor(Math.random()*1e9);buildConsole();});
+
+/* ---------- Impact model (live formulas) ---------- */
+var mids=['u','acpu','elig','ren','prem','upg','delta','city','off','arpu','fx'];
+function renderModel(){
+  var v={}; mids.forEach(function(k){var x=parseFloat(el('m-'+k).value); v[k]=isFinite(x)&&x>0?x:0;}); ['elig','city'].forEach(function(k){v[k]=Math.min(v[k],100);}); var bad=v.fx<1; if(bad){v.fx=95.1;}
+  var net=Math.max(v.arpu-v.acpu,0), base=Math.max(v.u-v.prem,0); var l1=v.u*(v.elig/100)*(v.ren/100)*v.acpu, l2=base*(v.upg/100)*v.delta, l3=v.u*(v.city/100)*(v.off/100)*net, t=l1+l2+l3, fx=v.fx;
+  var L=[
+    ['Re-enrolment into next batch',l1,'U × eligible% × uplift × ACPU = '+v.u.toLocaleString('en-IN')+' × '+v.elig+'% × '+v.ren+'% × '+INR(v.acpu)],
+    ['Online to Vidyapeeth upgrade',l3,'U × centre-city% × conversion% × (offline ARPU − ACPU) = '+v.u.toLocaleString('en-IN')+' × '+v.city+'% × '+v.off+'% × '+INR(net)],
+    ['Plan upgrade (Infinity / Pro)',l2,'(U − premium) × uplift × price gap = '+base.toLocaleString('en-IN')+' × '+v.upg+'% × '+INR(v.delta)]
+  ].sort(function(a,b){return b[1]-a[1];});
+  el('levers').innerHTML=L.map(function(x){return '<div class="lever"><div class="lever-head"><b>'+x[0]+'</b><span><b>'+CR(x[1])+'</b> <span class="muted">('+USDM(x[1],fx)+')</span></span></div><div class="formula">'+x[2]+'</div></div>';}).join('');
+  el('m-total').textContent=CR(t)+'  ·  '+USDM(t,fx);
+  el('m-total-sub').textContent='≈ '+(t/3900e7*100).toFixed(1)+'% of FY26 revenue (₹3,900 cr). These are collections, recognised over the batch, at near-zero marginal cost because content, faculty and seats already exist.'+(bad?' FX below 1 ignored; using ₹95.1.':'');
+  el('m-total-f').textContent='Total = '+CR(l1)+' + '+CR(l3)+' + '+CR(l2);
+}
+mids.forEach(function(k){el('m-'+k).addEventListener('input',renderModel);});
+
+/* ---------- Brand swatches ---------- */
+var SW=[['--primary','#5A4BDA','Buttons, accents, active tabs','High'],['--primary-50','#F1EFFF','Soft buttons, section tints','High'],['Ink / dark CTA','#1B2124','Buy Now, Login','High'],['Heading','#27272A','h2/h4','High'],['Body','#3D3D3D','Card meta','High'],['Muted','#757575','Struck MRP, secondary','High'],['Page tint','#F8F8F8','Section backgrounds','High'],['Border','#D9DCE1','Cards, pills','High'],['Success','#1B7938','% OFF, Recommended','High'],['Success bg','#DFF1E4','Discount chip','High'],['Orange','#FB6514','Category label','High'],['Premium tint','#FFF6E5','Infinity Pro plan','Med'],['--secondary-color','#E31B4D','Declared, not rendered','Med']];
+el('swatches').innerHTML=SW.map(function(s){return '<div class="sw"><i style="background:'+s[1]+'"></i><div><b>'+s[0]+'</b>'+s[1]+'<br><span class="muted">'+s[2]+' · '+s[3]+'</span></div></div>';}).join('');
+
+/* ---------- Init ---------- */
+setSliders(); greet(); renderStudent(); renderParent(); buildConsole(); renderModel();
+})();
+</script>
+</body>
+</html>

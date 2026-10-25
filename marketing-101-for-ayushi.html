@@ -65,6 +65,16 @@ button{font:inherit;cursor:pointer}
 .brand-txt{min-width:0}
 .brand-name{display:block;font-family:var(--display);font-size:1.02rem;font-weight:800;letter-spacing:-.02em;color:#fff;line-height:1.15}
 .brand-sub{display:block;font-family:var(--mono);font-size:.55rem;letter-spacing:.15em;color:#8E8AA8;text-transform:uppercase;margin-top:4px;line-height:1.3}
+/* Route home. Whenever the desk is on screen - beside the lesson, or as the open
+   drawer - it lives here, in the desk's own header. Only when the desk is hidden
+   does the fixed #cinHome chip at the foot of the page do the job. Exactly one
+   shows: a fixed chip over the desk always covered a chapter strip or Library.
+   Same 860px breakpoint as the drawer. */
+.desk-home{display:inline-block;margin-bottom:14px;padding:4px 10px;border:1px solid rgba(255,255,255,.16);
+  border-radius:99px;font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;
+  color:#CFCADF;text-decoration:none;line-height:1.4}
+.desk-home:hover{color:#fff;border-color:var(--signal)}
+#cinHome{display:none}
 .master{margin-top:4px}
 .master-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
 .master-label{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;color:#8E8AA8}
@@ -351,6 +361,10 @@ canvas{width:100%;display:block;border-radius:10px;background:rgba(255,255,255,.
 }
 @media (max-width:860px){
   body{font-size:17px}
+  .desk-home{display:none}
+  #cinHome{display:block}
+  .desk.open .desk-home{display:inline-block}
+  body:has(.desk.open) #cinHome{display:none}
   .app{grid-template-columns:1fr}
   .desk{position:fixed;inset:0 auto 0 0;width:280px;z-index:80;transform:translateX(-101%);
     transition:transform .28s cubic-bezier(.2,.8,.2,1);height:100vh}
@@ -831,6 +845,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
 
 <aside class="desk" id="desk">
   <div class="desk-head">
+    <a class="desk-home" href="/" title="Back to the main portfolio">&#8592; Anchit Tandon</a>
     <div class="brandmark">
       <span class="brand-dot"></span>
       <span class="brand-txt"><span class="brand-name">Ayushi❤️’s Growth Studio</span><span class="brand-sub">Written by Anchit</span></span>
@@ -5229,8 +5244,18 @@ else boot();
      label, and won on z-index. Tapping to collapse the chapter list navigated
      home instead: the drawer could be opened and not closed, which on a phone
      is the whole screen. A full-width top bar takes BOTH top corners, so the
-     only honest fix is to leave the top strip alone. -->
-<a id="cinHome" href="/" title="Back to the main portfolio"
+     only honest fix is to leave the top strip alone.
+
+     Shown only while the desk is hidden (860px and under, drawer closed).
+     Wherever the desk is on screen, bottom-left is inside its column of
+     chapter strips and the Library button, so the chip always covered one;
+     there the route home is the desk's own .desk-home link, and the
+     stylesheet above hides this one.
+
+     data-floating-control is what lifts it clear of the consent bar while
+     that is up: cinematic.js does that for the chip it places, and this one
+     is not placed by anything. -->
+<a id="cinHome" href="/" title="Back to the main portfolio" data-floating-control
    style="position:fixed;left:14px;bottom:14px;z-index:2147483000;font:500 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em;text-transform:uppercase;padding:7px 11px;border-radius:99px;text-decoration:none;color:#B3A996;background:#16130F;border:1px solid rgba(255,247,232,.16);opacity:.78">&#8592; Anchit Tandon</a>
 </body>
 </html>

@@ -229,7 +229,7 @@ const MUTANT_CSS = `
   const clipped = m.clipped.map((o, i) => (o > 1 ? `${m.titles[i]} (+${o}px)` : null)).filter(Boolean);
   check('no card’s purpose line is truncated',
     clipped.length === 0,
-    clipped.length ? 'ellipsised on: ' + clipped.join(', ') : 'all 13 fit in full');
+    clipped.length ? 'ellipsised on: ' + clipped.join(', ') : `all ${m.count} fit in full`);
 
   const sliced = m.sliced.map((b, i) => (b.length ? m.titles[i] + ': ' + b[0] : null)).filter(Boolean);
   check('no clamped text is cut through the middle of a line',

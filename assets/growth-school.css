@@ -67,6 +67,27 @@ a:hover { text-decoration: underline; }
 }
 .gs-rail-sub { color: var(--gs-dim); font-size: var(--gs-fs-sm); margin-top: var(--gs-2); }
 
+/* Route home. Whenever the rail is on screen - beside the lesson, or as the open
+   drawer - it lives in the rail's header, in normal flow. Only when the rail is
+   hidden does the page's fixed #cinHome chip do the job. Exactly one shows: a
+   fixed chip over the chapter list always covered some chapter link, so a click
+   meant for the chapter went home. Same 900px breakpoint as the shell. */
+.gs-home {
+  display: inline-block; margin-bottom: var(--gs-4);
+  padding: var(--gs-1) var(--gs-3); border: 1px solid var(--gs-rule-strong); border-radius: var(--gs-r-pill);
+  font-family: var(--gs-font-mono); font-size: var(--gs-fs-micro); line-height: 1.4;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--gs-dim);
+  transition: color .2s, border-color .2s;
+}
+.gs-home:hover { color: var(--gs-ink); border-color: var(--gs-primary); text-decoration: none; }
+#cinHome { display: none; }
+@media (max-width: 900px) {
+  .gs-home { display: none; }
+  #cinHome { display: block; }
+  .gs-rail.open .gs-home { display: inline-block; }
+  body:has(.gs-rail.open) #cinHome { display: none; }
+}
+
 /* Progress: the single most useful thing on screen when a session gets
    interrupted, so it is always visible and always exact. */
 .gs-progress { margin: var(--gs-6) 0; }

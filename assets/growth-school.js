@@ -142,6 +142,11 @@
     // ── rail ───────────────────────────────────────────────────────────────
     function renderRail() {
       rail.innerHTML = '';
+      // Opt-in route out, as an ordinary link at the head of the rail. The page
+      // that asks for it also keeps a fixed chip for when the rail is hidden;
+      // over the rail that chip sat on a chapter link, so a click meant for the
+      // chapter went home. The CSS shows exactly one of the two.
+      if (COURSE.home) rail.appendChild(h('a', { class: 'gs-home', href: COURSE.home.href }, '← ' + COURSE.home.label));
       rail.appendChild(h('div', { class: 'gs-kicker' }, COURSE.kicker));
       rail.appendChild(h('div', { class: 'gs-brand', html: COURSE.title }));
       if (COURSE.railSub) rail.appendChild(h('p', { class: 'gs-rail-sub', html: COURSE.railSub }));

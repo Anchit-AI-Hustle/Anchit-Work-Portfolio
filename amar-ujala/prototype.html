@@ -1,0 +1,1430 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aage Kya: Concept Prototype | Anchit Tandon</title>
+<meta name="description" content="Concept prototype by Anchit Tandon, in English and Hindi: a free admission plan on UP Board result day, paid for by colleges per consented enquiry.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light">
+<link rel="canonical" href="https://anchit-tandon.com/amar-ujala/prototype">
+<link rel="icon" href="/icons/favicon.svg">
+<meta property="og:title" content="Aage Kya: Concept Prototype | Anchit Tandon">
+<meta property="og:description" content="A free Hindi admission plan on UP Board result day, paid for by colleges per consented enquiry. Independent concept prototype with fictional demo data.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://anchit-tandon.com/assets/og/og-default.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap">
+<style>
+/* Aage Kya concept prototype: a light, print-like theme. */
+:root{
+  --ak-bg:#f7f4ee; --ak-surface:#ffffff; --ak-muted-surface:#f1ede4;
+  --ak-ink:#1c1917; --ak-ink-2:#44403c; --ak-ink-3:#6b645c; --ak-line:#e2dccf;
+  --ak-brand:#0f5c4d; --ak-brand-2:#0b4a3e; --ak-brand-soft:#e3f1ec; --ak-brand-line:#bfdcd2;
+  --ak-amber:#b45309; --ak-amber-soft:#fdf1dc; --ak-amber-line:#f3d7a6; --ak-amber-ink:#8a3f06; --ak-amber-ink-2:#7c3a06;
+  --ak-red:#b42318; --ak-red-soft:#fdecea; --ak-red-line:#f5c2bd; --ak-red-ink:#7a1b13;
+  --ak-blue:#1d4ed8; --ak-mine:#f0f9f5; --ak-notice-ink:#f1ede4;
+  --ak-font:"Noto Sans Devanagari","Mukta","Nirmala UI","Mangal",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--ak-bg);color:var(--ak-ink);font-family:var(--ak-font);line-height:1.6;font-size:16px;-webkit-font-smoothing:antialiased}
+.ak-notice{background:var(--ak-ink);color:var(--ak-notice-ink);font-size:0.82rem;line-height:1.45;padding:0.5rem 1rem;text-align:center}
+.ak-notice b{color:#fff}
+.ak-page{min-height:100vh;background:var(--ak-bg);color:var(--ak-ink)}
+.ak-wrap{max-width:1120px;margin:0 auto;padding:1.25rem 1rem 3rem}
+.ak-page a{color:var(--ak-brand)}
+.ak-page a:focus-visible,.ak-page button:focus-visible,.ak-page input:focus-visible,.ak-page select:focus-visible,.ak-notice a:focus-visible{outline:3px solid var(--ak-blue);outline-offset:2px}
+.ak-nav{display:flex;flex-wrap:wrap;gap:0.4rem 1rem;align-items:center;font-size:0.88rem;margin-bottom:0.75rem}
+.ak-nav a{font-weight:600;text-decoration:none;color:var(--ak-brand-2);min-height:32px;display:inline-flex;align-items:center}
+.ak-nav a:hover{text-decoration:underline}
+.ak-topbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0.75rem;margin-bottom:1rem}
+.ak-tags{display:flex;flex-wrap:wrap;gap:0.4rem}
+.ak-tag{display:inline-flex;align-items:center;gap:0.3rem;padding:0.2rem 0.6rem;border-radius:999px;font-size:0.78rem;font-weight:600;background:var(--ak-muted-surface);color:var(--ak-ink-2);border:1px solid var(--ak-line)}
+.ak-tag-brand{background:var(--ak-brand-soft);color:var(--ak-brand-2);border-color:var(--ak-brand-line)}
+.ak-tag-amber{background:var(--ak-amber-soft);color:var(--ak-amber-ink);border-color:var(--ak-amber-line)}
+.ak-tag-red{background:var(--ak-red-soft);color:var(--ak-red);border-color:var(--ak-red-line)}
+.ak-tag-white{background:#fff;color:var(--ak-brand-2)}
+.ak-lang{display:inline-flex;border:1px solid var(--ak-line);border-radius:999px;background:var(--ak-surface);padding:3px}
+.ak-lang button{border:0;background:transparent;color:var(--ak-ink-2);font:inherit;font-size:0.88rem;font-weight:600;padding:0.3rem 0.85rem;border-radius:999px;cursor:pointer;min-height:36px}
+.ak-lang button[aria-pressed="true"]{background:var(--ak-brand);color:#fff}
+.ak-hero h1{font-size:clamp(1.75rem,4.5vw,2.6rem);line-height:1.2;margin:0.25rem 0 0.5rem;letter-spacing:-0.01em}
+.ak-hero .ak-lead{font-size:clamp(1rem,2.2vw,1.15rem);color:var(--ak-ink-2);max-width:62ch;margin:0 0 1rem}
+.ak-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.75rem;margin:1rem 0 1.25rem}
+.ak-kpi{background:var(--ak-surface);border:1px solid var(--ak-line);border-radius:14px;padding:0.85rem 1rem;min-width:0}
+.ak-kpi-value{font-size:1.5rem;font-weight:800;color:var(--ak-brand-2);line-height:1.2}
+.ak-kpi-label{font-size:0.88rem;color:var(--ak-ink-2)}
+.ak-kpi-src{font-size:0.74rem;color:var(--ak-ink-3);margin-top:0.25rem}
+.ak-tabs{display:flex;gap:0.4rem;overflow-x:auto;padding-bottom:0.25rem;margin-bottom:1rem;scrollbar-width:thin}
+.ak-tab{flex:0 0 auto;border:1px solid var(--ak-line);background:var(--ak-surface);color:var(--ak-ink-2);font:inherit;font-weight:600;font-size:0.92rem;padding:0.5rem 0.95rem;border-radius:10px;cursor:pointer;min-height:44px}
+.ak-tab[aria-selected="true"],.ak-tab[aria-pressed="true"]{background:var(--ak-ink);color:#fff;border-color:var(--ak-ink)}
+.ak-card{background:var(--ak-surface);border:1px solid var(--ak-line);border-radius:16px;padding:1.1rem;min-width:0}
+.ak-card + .ak-card{margin-top:0.85rem}
+.ak-card h2{font-size:1.25rem;margin:0 0 0.5rem;line-height:1.3}
+.ak-card h3{font-size:1.02rem;margin:0 0 0.35rem;line-height:1.35}
+.ak-muted{color:var(--ak-ink-3);font-size:0.88rem}
+.ak-split{display:grid;grid-template-columns:minmax(0,440px) minmax(0,1fr);gap:1rem;align-items:start}
+.ak-phone{background:var(--ak-surface);border:1px solid var(--ak-line);border-radius:24px;padding:1rem;box-shadow:0 10px 30px rgba(28,25,23,0.08);min-width:0}
+.ak-phone-bar{display:flex;justify-content:space-between;align-items:center;gap:0.5rem;font-size:0.78rem;color:var(--ak-ink-3);margin-bottom:0.75rem}
+.ak-steps{display:flex;gap:0.3rem;margin-bottom:0.9rem}
+.ak-steps span{flex:1;height:5px;border-radius:99px;background:var(--ak-line)}
+.ak-steps span.on{background:var(--ak-brand)}
+.ak-result{border-radius:14px;background:linear-gradient(135deg,#0f5c4d,#134e4a);color:#fff;padding:1rem}
+.ak-result h2{font-size:0.85rem;font-weight:400;opacity:0.9;margin:0}
+.ak-result .ak-big{font-size:2rem;font-weight:800;line-height:1.1}
+.ak-step-h{font-size:1.15rem;margin:0 0 0.25rem;outline:none;line-height:1.35}
+.ak-field{margin:0 0 0.9rem;border:0;padding:0;min-width:0}
+.ak-field > legend,.ak-field > label{display:block;font-weight:700;font-size:0.95rem;margin-bottom:0.4rem;padding:0}
+.ak-chips{display:flex;flex-wrap:wrap;gap:0.4rem}
+.ak-chip{position:relative}
+.ak-chip input{position:absolute;opacity:0;width:1px;height:1px}
+.ak-chip span{display:inline-flex;align-items:center;min-height:40px;padding:0.35rem 0.8rem;border:1px solid var(--ak-line);border-radius:10px;background:var(--ak-surface);font-size:0.9rem;cursor:pointer}
+.ak-chip input:checked + span{border-color:var(--ak-brand);background:var(--ak-brand-soft);color:var(--ak-brand-2);font-weight:700}
+.ak-chip input:focus-visible + span{outline:3px solid var(--ak-blue);outline-offset:2px}
+.ak-input,.ak-select{width:100%;min-width:0;min-height:44px;font:inherit;font-size:0.95rem;padding:0.5rem 0.7rem;border:1px solid var(--ak-line);border-radius:10px;background:var(--ak-surface);color:var(--ak-ink)}
+.ak-range{width:100%;accent-color:var(--ak-brand)}
+.ak-btn{display:inline-flex;align-items:center;justify-content:center;gap:0.4rem;min-height:46px;padding:0.55rem 1.1rem;border-radius:12px;border:1px solid var(--ak-brand);background:var(--ak-brand);color:#fff;font:inherit;font-weight:700;font-size:0.98rem;line-height:1.35;cursor:pointer;text-decoration:none;text-align:center}
+.ak-page a.ak-btn{color:#fff}
+.ak-btn:hover{background:var(--ak-brand-2)}
+.ak-btn:disabled{opacity:0.5;cursor:not-allowed}
+.ak-btn-ghost{background:var(--ak-surface);color:var(--ak-brand-2)}
+.ak-btn-ghost:hover{background:var(--ak-brand-soft)}
+.ak-btn-block{width:100%}
+.ak-grow{flex:1}
+.ak-row{display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center}
+.ak-row.nowrap{flex-wrap:nowrap}
+.ak-list{list-style:none;margin:0;padding:0;display:grid;gap:0.6rem}
+.ak-item{border:1px solid var(--ak-line);border-radius:12px;padding:0.75rem 0.85rem;background:var(--ak-surface);min-width:0}
+.ak-item-head{display:flex;justify-content:space-between;gap:0.5rem;align-items:flex-start;flex-wrap:wrap}
+.ak-item p{margin:0.25rem 0 0;font-size:0.9rem;color:var(--ak-ink-2)}
+.ak-item ul{margin:0.35rem 0 0;padding-left:1.1rem;font-size:0.9rem}
+.ak-section-title{font-size:0.8rem;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--ak-ink-3);margin:1.1rem 0 0.5rem}
+.ak-alert{border-radius:12px;padding:0.7rem 0.85rem;font-size:0.9rem;margin-top:0.5rem}
+.ak-alert-red{background:var(--ak-red-soft);color:var(--ak-red-ink);border:1px solid var(--ak-red-line)}
+.ak-alert-green{background:var(--ak-brand-soft);color:var(--ak-brand-2);border:1px solid var(--ak-brand-line)}
+.ak-alert-amber{background:var(--ak-amber-soft);color:var(--ak-amber-ink-2);border:1px solid var(--ak-amber-line)}
+.ak-alert-neutral{background:var(--ak-muted-surface);color:var(--ak-ink-2);border:1px solid var(--ak-line)}
+.ak-check{display:flex;gap:0.55rem;align-items:flex-start;font-size:0.92rem;cursor:pointer}
+.ak-check input{width:20px;height:20px;margin-top:0.15rem;accent-color:var(--ak-brand);flex:0 0 auto}
+.ak-explain{display:grid;gap:0.75rem;min-width:0}
+.ak-explain .ak-card{margin:0}
+.ak-why{margin:0;padding-left:0;list-style:none;display:grid;gap:0.7rem}
+.ak-why li{border-left:3px solid var(--ak-line);padding-left:0.7rem}
+.ak-why li.on{border-left-color:var(--ak-brand)}
+.ak-why li div{font-size:0.92rem;color:var(--ak-ink-2)}
+.ak-grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0.85rem}
+.ak-grid-2 > *{min-width:0}
+.ak-table-wrap{overflow-x:auto;border:1px solid var(--ak-line);border-radius:12px}
+.ak-table{width:100%;border-collapse:collapse;font-size:0.9rem;background:var(--ak-surface)}
+.ak-table th,.ak-table td{text-align:left;padding:0.6rem 0.75rem;border-bottom:1px solid var(--ak-line);vertical-align:top}
+.ak-table th{background:var(--ak-muted-surface);font-size:0.8rem;color:var(--ak-ink-2)}
+.ak-table tr:last-child td{border-bottom:0}
+.ak-table tr.mine{background:var(--ak-mine)}
+.ak-num{font-variant-numeric:tabular-nums}
+.ak-total-box{background:var(--ak-brand-soft);border-color:var(--ak-brand-line)}
+.ak-total-box .ak-muted{color:var(--ak-brand-2)}
+.ak-total{font-size:2rem;font-weight:800;color:var(--ak-brand-2);line-height:1.15}
+.ak-plain-list{margin:0;padding-left:1.1rem}
+.ak-timeline{list-style:none;margin:1rem 0 0;padding:0;display:grid;gap:0}
+.ak-timeline > li{position:relative;padding:0 0 1rem 1.6rem;border-left:2px solid var(--ak-line);margin-left:0.5rem}
+.ak-timeline > li:last-child{border-left-color:transparent;padding-bottom:0}
+.ak-timeline > li::before{content:"";position:absolute;left:-8px;top:0.3rem;width:14px;height:14px;border-radius:50%;background:var(--ak-surface);border:3px solid var(--ak-brand)}
+.ak-timeline > li.new::before{background:var(--ak-amber);border-color:var(--ak-amber)}
+.ak-timeline .ak-desc{color:var(--ak-ink-2);font-size:0.9rem}
+.ak-when{font-size:0.8rem;font-weight:800;color:var(--ak-brand-2);letter-spacing:0.02em}
+.ak-footer{margin-top:1.5rem;font-size:0.8rem;color:var(--ak-ink-3)}
+.ak-footer ol{padding-left:1.2rem}
+.ak-footer li{margin-bottom:0.3rem;overflow-wrap:anywhere}
+.ak-footer .ak-nav{margin:1rem 0 0}
+.ak-sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+/* Entrance on tab or step change: transform and opacity only, nothing left on at rest. */
+.ak-enter{animation:ak-in 0.22s ease-out both}
+@keyframes ak-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.ak-enter{animation:none}}
+@media (max-width:900px){.ak-split{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:640px){
+  .ak-wrap{padding:1rem 1rem 2.5rem}
+  .ak-grid-2{grid-template-columns:minmax(0,1fr)}
+  .ak-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ak-kpi-value{font-size:1.25rem}
+  .ak-phone{border-radius:18px;padding:0.85rem}
+  .ak-table.ak-stack thead{display:none}
+  .ak-table.ak-stack,.ak-table.ak-stack tbody,.ak-table.ak-stack tr,.ak-table.ak-stack td{display:block;width:100%}
+  .ak-table.ak-stack tr{border-bottom:1px solid var(--ak-line);padding:0.4rem 0}
+  .ak-table.ak-stack td{border-bottom:0;padding:0.25rem 0.75rem}
+  .ak-table.ak-stack td[data-label]::before{content:attr(data-label);display:block;font-size:0.72rem;font-weight:700;color:var(--ak-ink-3)}
+}
+</style>
+</head>
+<body>
+<div class="ak-notice" role="note" id="ak-notice"><b>Concept prototype</b> by Anchit Tandon. Independent, not affiliated with or endorsed by Amar Ujala. Colleges and enquiries are fictional demo data; nothing is stored or sent.</div>
+<div class="ak-page" id="ak-root"><div class="ak-wrap"><p>Loading the prototype. It needs JavaScript. <a href="/amar-ujala/study">Read the study</a> or go to the <a href="/">portfolio</a>.</p></div></div>
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Data (colleges and enquiries are fictional) ---------- */
+  var STREAMS = [
+    { id: "pcm", label: { en: "Science (Maths)", hi: "विज्ञान (गणित)" } },
+    { id: "pcb", label: { en: "Science (Biology)", hi: "विज्ञान (जीव विज्ञान)" } },
+    { id: "commerce", label: { en: "Commerce", hi: "वाणिज्य" } },
+    { id: "arts", label: { en: "Arts (Humanities)", hi: "कला (मानविकी)" } }
+  ];
+  var INTERESTS = [
+    { id: "tech", label: { en: "Engineering and technology", hi: "इंजीनियरिंग और तकनीक" } },
+    { id: "health", label: { en: "Medicine and health", hi: "चिकित्सा और स्वास्थ्य" } },
+    { id: "teach", label: { en: "Teaching", hi: "शिक्षण" } },
+    { id: "business", label: { en: "Business and accounts", hi: "व्यापार और लेखा" } },
+    { id: "govt", label: { en: "Government jobs and defence", hi: "सरकारी नौकरी और रक्षा सेवा" } },
+    { id: "unsure", label: { en: "Not sure yet", hi: "अभी तय नहीं" } }
+  ];
+  var BUDGETS = [
+    { id: "low", label: { en: "Up to ₹25,000 a year", hi: "₹25,000 सालाना तक" }, max: 25000 },
+    { id: "mid", label: { en: "₹25,000 to ₹1 lakh a year", hi: "₹25,000 से ₹1 लाख सालाना" }, max: 100000 },
+    { id: "high", label: { en: "More than ₹1 lakh a year", hi: "₹1 लाख सालाना से अधिक" }, max: Infinity }
+  ];
+  var INCOMES = [
+    { id: "upto2", label: { en: "Up to ₹2 lakh", hi: "₹2 लाख तक" } },
+    { id: "upto25", label: { en: "₹2 lakh to ₹2.5 lakh", hi: "₹2 लाख से ₹2.5 लाख" } },
+    { id: "upto45", label: { en: "₹2.5 lakh to ₹4.5 lakh", hi: "₹2.5 लाख से ₹4.5 लाख" } },
+    { id: "above45", label: { en: "More than ₹4.5 lakh", hi: "₹4.5 लाख से अधिक" } },
+    { id: "skip", label: { en: "Prefer not to say", hi: "नहीं बताना चाहते" } }
+  ];
+  var REACHES = [
+    { id: "district", label: { en: "In my district", hi: "अपने जिले में" } },
+    { id: "state", label: { en: "Anywhere in UP", hi: "यूपी में कहीं भी" } }
+  ];
+  var ADULT_OPTIONS = [
+    { id: "yes", label: { en: "Yes", hi: "हाँ" } },
+    { id: "no", label: { en: "No, under 18", hi: "नहीं, 18 से कम" } }
+  ];
+  // The radio groups the change handler accepts, each with its allowed ids.
+  var CHIP_GROUPS = { stream: STREAMS, interest: INTERESTS, budget: BUDGETS, income: INCOMES, reach: REACHES, adult: ADULT_OPTIONS };
+  var DISTRICTS = [
+    { en: "Kanpur Nagar", hi: "कानपुर नगर" },
+    { en: "Lucknow", hi: "लखनऊ" },
+    { en: "Varanasi", hi: "वाराणसी" },
+    { en: "Prayagraj", hi: "प्रयागराज" },
+    { en: "Agra", hi: "आगरा" },
+    { en: "Meerut", hi: "मेरठ" },
+    { en: "Bareilly", hi: "बरेली" },
+    { en: "Gorakhpur", hi: "गोरखपुर" }
+  ];
+  var ALL = ["pcm", "pcb", "commerce", "arts"];
+
+  var COURSES = [
+    { id: "btech", streams: ["pcm"], interests: ["tech"], name: { en: "B.Tech / B.E.", hi: "बी.टेक / बी.ई." },
+      what: { en: "Engineering degree. State seats in UP are filled through counselling based on JEE Main.", hi: "इंजीनियरिंग डिग्री। यूपी में राज्य की सीटें JEE Main के आधार पर काउंसलिंग से भरी जाती हैं।" },
+      years: { en: "4 years", hi: "4 वर्ष" }, exams: ["jee"] },
+    { id: "bca", streams: ["pcm", "commerce"], interests: ["tech", "business", "unsure"], name: { en: "BCA", hi: "बीसीए" },
+      what: { en: "Computer applications degree. Leads to software and IT jobs; many colleges admit on Class 12 marks.", hi: "कंप्यूटर एप्लीकेशन की डिग्री। सॉफ्टवेयर और आईटी नौकरियों का रास्ता; कई कॉलेज कक्षा 12 के अंकों पर प्रवेश देते हैं।" },
+      years: { en: "3 to 4 years", hi: "3 से 4 वर्ष" }, exams: ["cuet"] },
+    { id: "bsc_pcm", streams: ["pcm"], interests: ["tech", "teach", "govt", "unsure"], name: { en: "B.Sc. (Maths, Physics, Computer Science)", hi: "बी.एससी. (गणित, भौतिकी, कंप्यूटर विज्ञान)" },
+      what: { en: "Science degree. Opens teaching, research, data jobs and most government exams.", hi: "विज्ञान की डिग्री। शिक्षण, शोध, डेटा से जुड़ी नौकरियों और ज़्यादातर सरकारी परीक्षाओं का रास्ता खोलती है।" },
+      years: { en: "3 to 4 years", hi: "3 से 4 वर्ष" }, exams: ["cuet"] },
+    { id: "mbbs", streams: ["pcb"], interests: ["health"], name: { en: "MBBS / BDS / BAMS", hi: "एमबीबीएस / बीडीएस / बीएएमएस" },
+      what: { en: "Medical degrees. Admission everywhere in India is through NEET (UG).", hi: "चिकित्सा की डिग्रियाँ। पूरे भारत में प्रवेश NEET (UG) से होता है।" },
+      years: { en: "5 to 5.5 years", hi: "5 से 5.5 वर्ष" }, exams: ["neet"] },
+    { id: "bpharm", streams: ["pcm", "pcb"], interests: ["health"], name: { en: "B.Pharm", hi: "बी.फार्मा" },
+      what: { en: "Pharmacy degree. Leads to hospital, industry and drug-store licences. Check each college's admission notice.", hi: "फार्मेसी की डिग्री। अस्पताल, उद्योग और दवा दुकान के लाइसेंस का रास्ता। हर कॉलेज की प्रवेश सूचना ज़रूर देखें।" },
+      years: { en: "4 years", hi: "4 वर्ष" }, exams: [] },
+    { id: "bsc_bio", streams: ["pcb"], interests: ["health", "teach", "govt", "unsure"], name: { en: "B.Sc. (Biology group)", hi: "बी.एससी. (जीव विज्ञान समूह)" },
+      what: { en: "Science degree with zoology, botany or chemistry. Leads to labs, teaching and government exams.", hi: "प्राणी विज्ञान, वनस्पति विज्ञान या रसायन के साथ विज्ञान की डिग्री। लैब, शिक्षण और सरकारी परीक्षाओं का रास्ता।" },
+      years: { en: "3 to 4 years", hi: "3 से 4 वर्ष" }, exams: ["cuet"] },
+    { id: "bcom", streams: ["commerce", "arts"], interests: ["business", "govt", "unsure"], name: { en: "B.Com", hi: "बी.कॉम" },
+      what: { en: "Commerce degree. Leads to accounts, banking, tax and business jobs.", hi: "वाणिज्य की डिग्री। लेखा, बैंकिंग, टैक्स और व्यापार की नौकरियों का रास्ता।" },
+      years: { en: "3 to 4 years", hi: "3 से 4 वर्ष" }, exams: ["cuet"] },
+    { id: "ca", streams: ALL, interests: ["business"], name: { en: "Chartered Accountancy (CA Foundation)", hi: "चार्टर्ड अकाउंटेंसी (CA फाउंडेशन)" },
+      what: { en: "Professional course run by ICAI. Can be done alongside a B.Com.", hi: "ICAI का प्रोफेशनल कोर्स। बी.कॉम के साथ-साथ भी किया जा सकता है।" },
+      years: { en: "About 4 to 5 years", hi: "लगभग 4 से 5 वर्ष" }, exams: ["ca"] },
+    { id: "bba", streams: ALL, interests: ["business", "unsure"], name: { en: "BBA", hi: "बीबीए" },
+      what: { en: "Business management degree. Leads to sales, operations and an MBA later.", hi: "व्यापार प्रबंधन की डिग्री। बिक्री, संचालन और आगे एमबीए का रास्ता।" },
+      years: { en: "3 to 4 years", hi: "3 से 4 वर्ष" }, exams: ["cuet"] },
+    { id: "ba", streams: ALL, interests: ["govt", "teach", "unsure"], name: { en: "B.A.", hi: "बी.ए." },
+      what: { en: "Arts degree. The most common base for UPSC, state PSC, SSC and teaching exams.", hi: "कला की डिग्री। यूपीएससी, राज्य लोक सेवा आयोग, एसएससी और शिक्षक परीक्षाओं का सबसे आम आधार।" },
+      years: { en: "3 to 4 years", hi: "3 से 4 वर्ष" }, exams: ["cuet"] },
+    { id: "itep", streams: ALL, interests: ["teach"], name: { en: "Integrated B.A./B.Sc. B.Ed. (ITEP)", hi: "इंटीग्रेटेड बी.ए./बी.एससी. बी.एड. (ITEP)" },
+      what: { en: "Four-year teacher education degree straight after Class 12.", hi: "कक्षा 12 के तुरंत बाद चार वर्ष की शिक्षक शिक्षा डिग्री।" },
+      years: { en: "4 years", hi: "4 वर्ष" }, exams: ["ncet"] },
+    { id: "law", streams: ALL, interests: ["govt", "business"], name: { en: "B.A. LL.B. (5-year law)", hi: "बी.ए. एलएल.बी. (5 वर्षीय कानून)" },
+      what: { en: "Law degree after Class 12. National law universities admit through CLAT; many state colleges admit on their own test or merit.", hi: "कक्षा 12 के बाद कानून की डिग्री। राष्ट्रीय विधि विश्वविद्यालय CLAT से प्रवेश देते हैं; कई राज्य कॉलेज अपनी परीक्षा या मेरिट से।" },
+      years: { en: "5 years", hi: "5 वर्ष" }, exams: ["clat"] },
+    { id: "nda", streams: ALL, interests: ["govt"], name: { en: "NDA (Army, Navy, Air Force)", hi: "एनडीए (थल सेना, नौसेना, वायु सेना)" },
+      what: { en: "Officer training after Class 12. The Army wing is open to all streams; Navy and Air Force need Physics, Chemistry and Maths.", hi: "कक्षा 12 के बाद अधिकारी प्रशिक्षण। थल सेना सभी संकायों के लिए खुली है; नौसेना और वायु सेना के लिए भौतिकी, रसायन और गणित ज़रूरी हैं।" },
+      years: { en: "3 years of training", hi: "3 वर्ष का प्रशिक्षण" }, exams: ["nda"] }
+  ];
+
+  var EXAMS = {
+    cuet: { name: { en: "CUET (UG)", hi: "CUET (UG)" }, by: { en: "National Testing Agency", hi: "राष्ट्रीय परीक्षा एजेंसी (NTA)" }, url: "https://cuet.nta.nic.in/",
+      window: { en: "Usually registration in February to March, exam in May to June.", hi: "आमतौर पर पंजीकरण फरवरी से मार्च, परीक्षा मई से जून।" }, open: false,
+      thisYear: { en: "If you registered, the exam is still ahead. If not, state universities and many colleges admit on Class 12 merit: apply to them now.", hi: "अगर पंजीकरण किया है तो परीक्षा अभी बाकी है। नहीं किया तो राज्य विश्वविद्यालय और कई कॉलेज कक्षा 12 की मेरिट पर प्रवेश देते हैं: अभी वहाँ आवेदन करें।" } },
+    jee: { name: { en: "JEE Main", hi: "JEE Main" }, by: { en: "National Testing Agency", hi: "राष्ट्रीय परीक्षा एजेंसी (NTA)" }, url: "https://jeemain.nta.nic.in/",
+      window: { en: "Two sessions, usually January and April.", hi: "दो सत्र, आमतौर पर जनवरी और अप्रैल।" }, open: false,
+      thisYear: { en: "Closed for this year. If you have a JEE Main score, watch the UP state counselling (UPTAC) notice; otherwise plan for next January.", hi: "इस वर्ष के लिए बंद। JEE Main स्कोर है तो यूपी राज्य काउंसलिंग (UPTAC) की सूचना देखें; नहीं तो अगली जनवरी की तैयारी करें।" } },
+    neet: { name: { en: "NEET (UG)", hi: "NEET (UG)" }, by: { en: "National Testing Agency", hi: "राष्ट्रीय परीक्षा एजेंसी (NTA)" }, url: "https://neet.nta.nic.in/",
+      window: { en: "Usually one exam in early May, registration in February to March.", hi: "आमतौर पर मई की शुरुआत में एक परीक्षा, पंजीकरण फरवरी से मार्च।" }, open: false,
+      thisYear: { en: "Registration has usually closed by result day. If you registered, the exam is days away; if not, plan for next year.", hi: "रिजल्ट के दिन तक पंजीकरण आमतौर पर बंद हो चुका होता है। पंजीकरण किया है तो परीक्षा कुछ ही दिन दूर है; नहीं तो अगले वर्ष की योजना बनाएँ।" } },
+    clat: { name: { en: "CLAT", hi: "CLAT" }, by: { en: "Consortium of National Law Universities", hi: "राष्ट्रीय विधि विश्वविद्यालयों का संघ" }, url: "https://consortiumofnlus.ac.in/",
+      window: { en: "Usually held in December for admission the following year.", hi: "आमतौर पर दिसंबर में, अगले वर्ष के प्रवेश के लिए।" }, open: false,
+      thisYear: { en: "Closed for this year. State law colleges may still admit on their own test or merit.", hi: "इस वर्ष के लिए बंद। राज्य के लॉ कॉलेज अपनी परीक्षा या मेरिट से अभी भी प्रवेश दे सकते हैं।" } },
+    ncet: { name: { en: "NCET (for ITEP)", hi: "NCET (ITEP के लिए)" }, by: { en: "National Testing Agency", hi: "राष्ट्रीय परीक्षा एजेंसी (NTA)" }, url: "https://nta.ac.in/",
+      window: { en: "Dates vary each year: check the NTA notice.", hi: "तिथियाँ हर वर्ष बदलती हैं: NTA की सूचना देखें।" }, open: false,
+      thisYear: { en: "Registration has often closed by result day: check the NTA notice today.", hi: "रिजल्ट के दिन तक पंजीकरण अक्सर बंद हो चुका होता है: आज ही NTA की सूचना देखें।" } },
+    nda: { name: { en: "NDA and NA exam", hi: "एनडीए और एनए परीक्षा" }, by: { en: "UPSC", hi: "संघ लोक सेवा आयोग (UPSC)" }, url: "https://upsc.gov.in/",
+      window: { en: "Twice a year, usually April and September.", hi: "वर्ष में दो बार, आमतौर पर अप्रैल और सितंबर।" }, open: true,
+      thisYear: { en: "Still possible: the second exam of the year (NDA II) usually opens for applications in May to June.", hi: "अभी संभव: वर्ष की दूसरी परीक्षा (NDA II) के आवेदन आमतौर पर मई से जून में खुलते हैं।" } },
+    ca: { name: { en: "CA Foundation", hi: "CA फाउंडेशन" }, by: { en: "ICAI", hi: "भारतीय चार्टर्ड अकाउंटेंट्स संस्थान (ICAI)" }, url: "https://www.icai.org/",
+      window: { en: "Held more than once a year; register with ICAI first.", hi: "वर्ष में एक से अधिक बार; पहले ICAI में पंजीकरण करें।" }, open: true,
+      thisYear: { en: "Still possible: register with ICAI now for a later attempt.", hi: "अभी संभव: बाद के प्रयास के लिए अभी ICAI में पंजीकरण करें।" } }
+  };
+
+  var SCHOLARSHIPS = [
+    { id: "up_postmatric", name: { en: "UP post-matric scholarship", hi: "यूपी पोस्ट-मैट्रिक छात्रवृत्ति" },
+      rule: { en: "For UP residents. Family income below ₹2 lakh a year (General, OBC, minority) or below ₹2.5 lakh (SC, ST).", hi: "यूपी के निवासियों के लिए। परिवार की सालाना आय ₹2 लाख से कम (सामान्य, ओबीसी, अल्पसंख्यक) या ₹2.5 लाख से कम (एससी, एसटी)।" },
+      url: "https://scholarship.up.gov.in/",
+      fits: function (income) { return income === "upto2" || income === "upto25" || income === "skip"; } },
+    { id: "csss", name: { en: "Central Sector Scheme of Scholarships (National Scholarship Portal)", hi: "केंद्रीय क्षेत्र छात्रवृत्ति योजना (राष्ट्रीय छात्रवृत्ति पोर्टल)" },
+      rule: { en: "For students whose Class 12 marks are above the 80th percentile of their board's pass list in their stream, with family income up to ₹4.5 lakh, in a regular course. Published guides list ₹10,000 to ₹12,000 a year at graduation level, depending on the course.", hi: "उन छात्रों के लिए जिनके कक्षा 12 के अंक बोर्ड में अपने संकाय के उत्तीर्ण छात्रों के 80वें पर्सेंटाइल से ऊपर हों, परिवार की आय ₹4.5 लाख तक हो, और कोर्स नियमित हो। प्रकाशित गाइड के अनुसार स्नातक स्तर पर कोर्स के हिसाब से ₹10,000 से ₹12,000 सालाना।" },
+      url: "https://scholarships.gov.in/",
+      // The 80th-percentile cut-off is published per board and stream each year;
+      // 75% is a conservative screen so the hint is not shown to clear misses.
+      fits: function (income, marks) { return income !== "above45" && marks >= 75; } }
+  ];
+
+  // Fictional colleges, the same set placed in whichever district is chosen.
+  // "paying" marks colleges that pay per enquiry; it never changes the order.
+  var DEMO_COLLEGES = [
+    { id: "c1", name: { en: "Ganga Valley Degree College", hi: "गंगा वैली डिग्री कॉलेज" }, kind: { en: "Government-aided", hi: "सरकारी सहायता प्राप्त" },
+      courses: ["ba", "bcom", "bsc_pcm", "bsc_bio"], fee: 9000, km: 4, recognition: { en: "Affiliated to the state university", hi: "राज्य विश्वविद्यालय से संबद्ध" }, paying: false },
+    { id: "c2", name: { en: "Prerna Institute of Technology", hi: "प्रेरणा इंस्टीट्यूट ऑफ टेक्नोलॉजी" }, kind: { en: "Private", hi: "निजी" },
+      courses: ["btech", "bca", "bba", "bpharm"], fee: 92000, km: 11, recognition: { en: "AICTE approved, affiliated to the state technical university", hi: "AICTE से अनुमोदित, राज्य तकनीकी विश्वविद्यालय से संबद्ध" }, paying: true },
+    { id: "c3", name: { en: "Navjyoti Mahavidyalaya", hi: "नवज्योति महाविद्यालय" }, kind: { en: "Private", hi: "निजी" },
+      courses: ["ba", "bcom", "bba", "bca", "itep"], fee: 24000, km: 7, recognition: { en: "Affiliated to the state university; ITEP recognised by NCTE", hi: "राज्य विश्वविद्यालय से संबद्ध; ITEP को NCTE से मान्यता प्राप्त" }, paying: true },
+    { id: "c4", name: { en: "Abhyudaya Institute of Health Sciences", hi: "अभ्युदय इंस्टीट्यूट ऑफ हेल्थ साइंसेज" }, kind: { en: "Private", hi: "निजी" },
+      courses: ["bpharm", "bsc_bio"], fee: 140000, km: 18, recognition: { en: "Pharmacy Council of India approved", hi: "फार्मेसी काउंसिल ऑफ इंडिया से अनुमोदित" }, paying: true },
+    { id: "c5", name: { en: "Sankalp Law College", hi: "संकल्प लॉ कॉलेज" }, kind: { en: "Private", hi: "निजी" },
+      courses: ["law", "ba", "bba"], fee: 55000, km: 9, recognition: { en: "Bar Council of India approved", hi: "बार काउंसिल ऑफ इंडिया से अनुमोदित" }, paying: false },
+    { id: "c6", name: { en: "Rajkiya Mahavidyalaya (Government College)", hi: "राजकीय महाविद्यालय" }, kind: { en: "Government", hi: "सरकारी" },
+      courses: ["ba", "bsc_pcm", "bsc_bio", "bcom"], fee: 4500, km: 26, recognition: { en: "Affiliated to the state university", hi: "राज्य विश्वविद्यालय से संबद्ध" }, paying: false }
+  ];
+
+  // UGC "List of Fake Universities" as of February 2026: all 32 entries.
+  var UGC_FAKE = [
+    { name: "Christ New Testament Deemed University", place: "Guntur", state: "Andhra Pradesh" },
+    { name: "Bible Open University of India", place: "Visakhapatnam", state: "Andhra Pradesh" },
+    { name: "Indian Institute of Alternative Medicine", place: "Itanagar", state: "Arunachal Pradesh" },
+    { name: "Mountain Institute of Management and Technology", place: "New Delhi", state: "Delhi" },
+    { name: "World Peace of United Nations University", place: "New Delhi", state: "Delhi" },
+    { name: "Institute of Management and Engineering", place: "Delhi", state: "Delhi" },
+    { name: "National Institute of Management Solution", place: "Delhi", state: "Delhi" },
+    { name: "All India Institute of Public and Physical Health Sciences", place: "Delhi", state: "Delhi" },
+    { name: "Commercial University", place: "Delhi", state: "Delhi" },
+    { name: "United Nations University", place: "Delhi", state: "Delhi" },
+    { name: "Vocational University", place: "Delhi", state: "Delhi" },
+    { name: "ADR-Centric Juridical University", place: "New Delhi", state: "Delhi" },
+    { name: "Indian Institute of Science and Engineering", place: "New Delhi", state: "Delhi" },
+    { name: "Viswakarma Open University for Self-Employment", place: "Delhi", state: "Delhi" },
+    { name: "Adhyatmik Vishwavidyalaya", place: "Delhi", state: "Delhi" },
+    { name: "Magic and Art University", place: "Faridabad", state: "Haryana" },
+    { name: "Daksha University", place: "Ranchi", state: "Jharkhand" },
+    { name: "Global Human Peace University", place: "Bengaluru", state: "Karnataka" },
+    { name: "Sarva Bharatiya Shiksha Peeth", place: "Tumkur", state: "Karnataka" },
+    { name: "International Islamic University of Prophetic Medicine", place: "Kozhikode", state: "Kerala" },
+    { name: "St. John's University", place: "Kishanattam", state: "Kerala" },
+    { name: "Raja Arabic University", place: "Nagpur", state: "Maharashtra" },
+    { name: "National Backward Krushi Vidyapeeth", place: "Solapur", state: "Maharashtra" },
+    { name: "Usha Latchumanan College of Education", place: "Thirukkanur", state: "Puducherry" },
+    { name: "Sree Bodhi Academy of Higher Education", place: "Puducherry", state: "Puducherry" },
+    { name: "Rajeev Gandhi Institute of Technology and Management", place: "Bhiwadi", state: "Rajasthan" },
+    { name: "Gandhi Hindi Vidyapith", place: "Prayagraj", state: "Uttar Pradesh", hi: "गांधी हिंदी विद्यापीठ" },
+    { name: "Netaji Subhash Chandra Bose University (Open University)", place: "Aligarh", state: "Uttar Pradesh", hi: "नेताजी सुभाष चंद्र बोस विश्वविद्यालय" },
+    { name: "Bhartiya Shiksha Parishad", place: "Lucknow", state: "Uttar Pradesh", hi: "भारतीय शिक्षा परिषद" },
+    { name: "Mahamaya Technical University", place: "Noida", state: "Uttar Pradesh", hi: "महामाया टेक्निकल यूनिवर्सिटी" },
+    { name: "Indian Institute of Alternative Medicine", place: "Kolkata", state: "West Bengal" },
+    { name: "Institute of Alternative Medicine and Research", place: "Kolkata", state: "West Bengal" }
+  ];
+
+  var GENERIC = {};
+  ["university", "universities", "vishwavidyalaya", "college", "institute", "institution", "open", "national", "india", "indian",
+   "of", "and", "the", "for", "deemed", "academy", "education", "higher", "technical", "technology", "management", "school",
+   "विश्वविद्यालय", "यूनिवर्सिटी", "कॉलेज", "महाविद्यालय", "संस्थान", "भारतीय", "राष्ट्रीय"].forEach(function (w) { GENERIC[w] = true; });
+
+  function normaliseName(s) {
+    return s.toLowerCase()
+      .replace(/&/g, " and ")
+      .replace(/[^\p{L}\p{M}\p{N}\s]/gu, " ")
+      .replace(/\bvidyapeeth\b/g, "vidyapith")
+      .replace(/\bbharatiya\b/g, "bhartiya")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+  function distinctive(s) {
+    return normaliseName(s).split(" ").filter(function (w) { return w.length > 1 && !GENERIC[w]; });
+  }
+  // A match needs the whole listed name inside the query, or a query whose
+  // distinctive words (at least two, ignoring words like "university") all
+  // appear in one listed name. Typing "university" alone never matches.
+  function findFakeUniversity(query) {
+    var q = normaliseName(query);
+    var qWords = distinctive(query);
+    if (q.length < 4) return null;
+    for (var i = 0; i < UGC_FAKE.length; i++) {
+      var u = UGC_FAKE[i];
+      var names = [u.name, u.hi].filter(Boolean);
+      for (var j = 0; j < names.length; j++) {
+        var n = normaliseName(names[j]);
+        if (q.indexOf(n) !== -1) return u;
+        var nWords = distinctive(names[j]);
+        if (qWords.length >= 2 && qWords.every(function (w) { return nWords.indexOf(w) !== -1; })) return u;
+      }
+    }
+    return null;
+  }
+
+  var SOURCES = {
+    upBoard2026: "https://organiser.org/2026/04/23/349882/bharat/up-board-10th12th-results-2026-out-over-43-lakh-students-appeared-know-the-toppers/",
+    upBoard2026Allen: "https://news.allen.in/up-board-class-10-12-result-2026-announced/",
+    aishe: "https://news.careers360.com/up-has-highest-number-of-colleges-in-country-followed-maharashtra-karnataka-aishe-report",
+    tam2025: "https://www.storyboard18.com/advertising/education-sector-leads-print-advertising-with-17-percent-share-in-jan-sep-2025-tam-85352.htm",
+    auno: "https://amarujalaolympiad.com/",
+    amc: "https://foundation.amarujala.com/atul-maheshwari-chhatravritti-amc",
+    stressFree: "https://www.inma.org/blogs/ideas/post.cfm/amar-ujala-supports-students-beyond-tests-with-stress-free-exam-programme",
+    results: "https://results.amarujala.com/",
+    ugcFake: "https://www.ugc.gov.in/universitydetails/HEIs_Violating_Regulations?tab=fakeuni",
+    upScholarship: "https://scholarship.up.gov.in/",
+    nsp: "https://scholarships.gov.in/"
+  };
+
+  var SOURCE_LIST = [
+    { label: "UP Board results 2026: 24,86,072 appeared in Class 12, 19,98,317 passed (80.38%) (Organiser)", url: SOURCES.upBoard2026 },
+    { label: "UP Board Class 10 and 12 result 2026 announced (ALLEN)", url: SOURCES.upBoard2026Allen },
+    { label: "AISHE 2021-22: UP has the most colleges (Careers360 / PTI)", url: SOURCES.aishe },
+    { label: "TAM AdEx Jan to Sep 2025: education 17% of print ad space (Storyboard18)", url: SOURCES.tam2025 },
+    { label: "Amar Ujala National Olympiad (AUNO)", url: SOURCES.auno },
+    { label: "UGC list of fake universities (Feb 2026)", url: SOURCES.ugcFake },
+    { label: "UP scholarship portal", url: SOURCES.upScholarship },
+    { label: "National Scholarship Portal", url: SOURCES.nsp }
+  ];
+
+  /* ---------- Constants ---------- */
+  var DEMO_OTP = "2468";
+  var PARTNER_ID = "c2";
+  var TABS = ["student", "college", "revenue", "platform"];
+  var STORAGE_KEY = "aage-kya-lang";
+  // UP Board 2026, Class 12: 24,86,072 appeared, 19,98,317 passed (80.38%).
+  var PASSED_2026 = 1998317;
+  var PERCENT_FIELDS = ["reachPct", "completePct", "coveragePct", "consentPct", "paidPct", "counselPct"];
+  var PRESETS = {
+    low: { passed: PASSED_2026, reachPct: 3, completePct: 40, coveragePct: 25, consentPct: 15, perStudent: 2, paidPct: 60, price: 150, bundles: 25, bundlePrice: 75000, counselPct: 0.5, counselPrice: 299 },
+    base: { passed: PASSED_2026, reachPct: 8, completePct: 55, coveragePct: 40, consentPct: 25, perStudent: 2.5, paidPct: 70, price: 250, bundles: 60, bundlePrice: 120000, counselPct: 1, counselPrice: 299 },
+    high: { passed: PASSED_2026, reachPct: 15, completePct: 65, coveragePct: 70, consentPct: 35, perStudent: 3, paidPct: 80, price: 400, bundles: 150, bundlePrice: 200000, counselPct: 2, counselPrice: 299 }
+  };
+
+  var BASE_ENQUIRIES = [
+    { id: "e1", when: { en: "Today, 10:42", hi: "आज, 10:42" }, who: "R*** K***", district: { en: "Kanpur Nagar", hi: "कानपुर नगर" }, profile: { en: "Science (Maths), 70 to 80%", hi: "विज्ञान (गणित), 70 से 80%" }, course: { en: "B.Tech", hi: "बी.टेक" } },
+    { id: "e2", when: { en: "Today, 09:15", hi: "आज, 09:15" }, who: "S*** Y***", district: { en: "Kanpur Dehat", hi: "कानपुर देहात" }, profile: { en: "Commerce, 60 to 70%", hi: "वाणिज्य, 60 से 70%" }, course: { en: "BBA", hi: "बीबीए" } },
+    { id: "e3", when: { en: "Yesterday, 18:30", hi: "कल, 18:30" }, who: "A*** P***", district: { en: "Unnao", hi: "उन्नाव" }, profile: { en: "Science (Biology), 80 to 90%", hi: "विज्ञान (जीव विज्ञान), 80 से 90%" }, course: { en: "B.Pharm", hi: "बी.फार्मा" } },
+    { id: "e4", when: { en: "Yesterday, 12:05", hi: "कल, 12:05" }, who: "M*** S***", district: { en: "Kanpur Nagar", hi: "कानपुर नगर" }, profile: { en: "Science (Maths), 60 to 70%", hi: "विज्ञान (गणित), 60 से 70%" }, course: { en: "BCA", hi: "बीसीए" } }
+  ];
+  var INITIAL_STATUSES = { e1: "new", e2: "called", e3: "visit", e4: "new", you: "new" };
+
+  /* ---------- Copy ---------- */
+  var COPY = {
+    en: {
+      notice: "<b>Concept prototype</b> by Anchit Tandon. Independent, not affiliated with or endorsed by Amar Ujala. Colleges and enquiries are fictional demo data; nothing is stored or sent.",
+      backStudy: "← Back to the Amar Ujala study",
+      portfolio: "Anchit Tandon portfolio",
+      navLabel: "Site",
+      badge: "Concept prototype",
+      independent: "Independent pitch, not affiliated with Amar Ujala",
+      demoData: "Demo data: colleges and enquiries are fictional",
+      title: "Aage Kya? (आगे क्या?)",
+      lead: "On result day about 20 lakh UP Board Class 12 students pass, and each family asks the same question: what next? Aage Kya answers it in Hindi, on the results page they already open, and turns the answer into consented admission enquiries that colleges pay for.",
+      planLink: "Strategy, roadmap and the 6 questions",
+      kpiLabel: "Key numbers",
+      tabsLabel: "Prototype sections",
+      kpis: [
+        { v: "24.86 lakh", l: "sat UP Board Class 12 in 2026; 80.38% passed", s: "UPMSP result, April 2026" },
+        { v: "8,375", l: "colleges in UP, the most of any state", s: "AISHE 2021-22" },
+        { v: "17%", l: "of India's print ad space bought by education, the largest sector", s: "TAM AdEx, Jan to Sep 2025" },
+        { v: "32", l: "fake universities on the UGC list, 4 of them in UP", s: "UGC list, checked Oct 2026" }
+      ],
+      tabs: { student: "1. Student demo", college: "2. College dashboard", revenue: "3. Revenue model", platform: "4. One platform" },
+      phoneTitle: "results page",
+      stepNames: ["Result", "Questions", "Your plan", "Consent", "Done"],
+      resultTitle: "UP Board Class 12 result (demo)",
+      resultName: "Demo student",
+      passed: "Passed",
+      resultCta: "Aage kya? See your plan in 2 minutes",
+      resultNote: "Free. No login. Nothing is shared without consent.",
+      qTitle: "Seven quick answers",
+      qStream: "Your Class 12 stream",
+      qMarks: "Your percentage",
+      qInterest: "What interests you most?",
+      qBudget: "Fees your family can manage",
+      qIncome: "Family income a year (only to check scholarship eligibility)",
+      qReach: "Where do you want to study?",
+      qDistrict: "Home district",
+      next: "Show my plan",
+      back: "Back",
+      planFor: function (d) { return "Your plan for " + d + " and nearby"; },
+      coursesTitle: "Courses that fit you",
+      examsTitle: "Entrance exams: what you can still do",
+      stillOpen: "Still possible this year",
+      nextYear: "Mostly closed by result day",
+      examsNote: "Typical windows only. Always confirm dates on the official site.",
+      official: "Official site",
+      scholarTitle: "Scholarships you may qualify for",
+      scholarNote: "Rules change every year. Confirm on the official portal before you apply.",
+      scholarNone: "Ask each college about its own merit scholarship before paying fees.",
+      collegesTitle: "Colleges that fit (demo)",
+      collegesNote: "Order is by fit to your answers only. Colleges marked \"Paying partner\" pay for enquiries; payment never moves a college up the list.",
+      paying: "Paying partner",
+      fee: "Fee a year",
+      distance: function (km) { return km + " km from district headquarters"; },
+      ask: "Ask this college to call us",
+      askFor: function (name) { return "Ask " + name + " to call us"; },
+      noColleges: "No demo college fits these answers. Try a higher budget or \"Anywhere in UP\".",
+      neetNote: "MBBS and BDS seats are allotted only through NEET counselling, so no college is listed for them here.",
+      checkTitle: "Is this institution genuine? Check any name",
+      checkPlaceholder: "Type a college or university name",
+      checkBtn: "Check",
+      checkFake: function (name) { return "Warning: \"" + name + "\" is on the UGC list of fake universities (February 2026). Its degrees are not valid. Do not pay any fee."; },
+      checkOk: "Not found on the UGC fake-university list. That alone does not prove recognition: also check UGC, AICTE or the state university's affiliation list.",
+      checkShort: "Type at least two distinctive words of the name, for example \"Bhartiya Shiksha Parishad\".",
+      checkSource: "Source: UGC list of fake universities, February 2026: 32 in India, 4 in UP and 12 in Delhi.",
+      toConsent: function (n) { return "Continue with " + n + " college" + (n === 1 ? "" : "s"); },
+      pickOne: "Tick at least one college to get a call, or just save the plan.",
+      saveOnly: "Just save my plan",
+      consentTitle: "Consent",
+      adultQ: "Is the student 18 or older?",
+      consentAdult: "The student gives consent with their own mobile number.",
+      consentMinor: "A parent or guardian must give consent before any college sees the details. In the real product the parent's identity and age are also verified (for example through DigiLocker), as India's data protection rules require.",
+      shares: "What the colleges will see",
+      sharesList: ["Student's first name", "The mobile number below", "Stream and a marks band (for example 70 to 80%)", "District, and the course matched to each college"],
+      notShared: "Never shared: exact marks, family income, roll number",
+      goesTo: "Goes to",
+      studentName: "Student's first name",
+      phoneParent: "Parent's or guardian's mobile number",
+      phoneStudent: "Student's mobile number",
+      phoneHelp: "A 10-digit number starting with 6, 7, 8 or 9",
+      sendOtp: "Send OTP",
+      otpSent: function (otp) { return "Demo only: no SMS is sent. Use OTP " + otp + "."; },
+      otpLabel: "OTP",
+      verify: "Verify",
+      otpWrong: "That OTP does not match.",
+      otpOk: "Number verified.",
+      agreeParent: "I am the parent or guardian. I agree to share these details with the colleges listed above, only for admission calls. I can withdraw this at any time.",
+      agreeAdult: "I am the student and I am 18 or older. I agree to share these details with the colleges listed above, only for admission calls. I can withdraw this at any time.",
+      share: "Share and request calls",
+      doneTitle: "Done. Colleges will call within 48 hours.",
+      doneLead: function (n) { return "Your details went to " + n + " college" + (n === 1 ? "" : "s") + ". Each one has agreed to call within 48 hours, not to resell the number and to delete it if you withdraw."; },
+      savedTitle: "Plan saved. No college will call.",
+      savedLead: "You can come back to it, share it with family on WhatsApp, or request calls later.",
+      doneProfile: "The plan is saved to one student profile: the same profile could later hold olympiad results and scholarship forms.",
+      withdraw: "Withdraw consent",
+      withdrawn: "Consent withdrawn. In the real product, colleges get a deletion request at once.",
+      startOver: "Start over",
+      seeDashboard: "See it on the college dashboard",
+      whyTitle: "What is happening, and why",
+      why: [
+        { h: "1. The highest-intent moment", p: "The result page is where families already come, in Hindi, on a phone. Today it ends at the marksheet. Aage Kya starts there, with no cost of finding users." },
+        { h: "2. A few quick answers, not a long form", p: "Stream, marks, interest, budget, income band, distance and district are enough to narrow courses, exams, scholarships and colleges. No caste or exact income is asked." },
+        { h: "3. Useful before it is commercial", p: "Exam guidance, scholarship matching and the fake-university check are free and never sponsored. That is what earns trust for the paid part." },
+        { h: "4. The right person consents", p: "An adult student consents for themselves. For a student under 18, India's data protection law needs verifiable consent from a parent, so the OTP goes to the parent." },
+        { h: "5. Colleges pay for consented enquiries", p: "Not for clicks, ranking or data dumps. Each enquiry is one family that asked for a call, with consent on record." }
+      ],
+      collegeTitle: "Prerna Institute of Technology (fictional), admissions desk",
+      collegeLead: "What a paying college sees. Every enquiry is consented, verified and limited to the fields the family agreed to share.",
+      kpiEnq: "Enquiries this week",
+      kpiConsent: "With recorded consent",
+      kpiCalled: "Called so far",
+      kpiBill: function (price) { return "Billed this week at " + price + " each"; },
+      thWhen: "When", thWho: "Student", thDistrict: "District", thProfile: "Stream and marks", thCourse: "Course", thConsent: "Consent", thStatus: "Status",
+      consentBadge: "OTP consent",
+      status: { "new": "New", called: "Called", visit: "Campus visit", admitted: "Admitted", no: "Not interested" },
+      yours: "Just now",
+      yoursHint: "Complete the student demo and tick Prerna Institute of Technology to see your own enquiry arrive here.",
+      rulesTitle: "Rules every paying college accepts",
+      rules: [
+        "Passes a recognition check (UGC, AICTE or state affiliation) by the product team before going live; paying never affects it.",
+        "Calls within 48 hours; slow responders are paused.",
+        "No resale or sharing of numbers; deletion on withdrawal.",
+        "Two upheld complaints and the college is removed for the season."
+      ],
+      bundleTitle: "Admission-season bundle, sold by the existing ad desk",
+      bundle: [
+        "District-edition print ads in the \"Aage Kya\" admission series",
+        "A full college profile and the \"Paying partner\" label; the order stays by fit only",
+        "Enquiries billed separately, per consented enquiry, with a monthly report"
+      ],
+      priceNote: "Price per enquiry is the biggest unknown. No public benchmark exists, so the first test with the ad desk is what colleges will pay.",
+      revTitle: "Year-one revenue from one season of UP Board Class 12 only",
+      revLead: "Every figure is an editable assumption except the pass count. Choose a scenario, then change any number.",
+      scenLabel: "Scenario",
+      scen: { low: "Low", base: "Base", high: "High", custom: "Custom" },
+      inPassed: "UP Board Class 12 passed (2026)",
+      inReach: "Open Aage Kya from the result (%)",
+      inComplete: "Finish the plan (%)",
+      inCoverage: "Live in districts with college listings (%)",
+      inConsent: "Request calls with consent (%)",
+      inPer: "Colleges chosen per family",
+      inPaid: "Enquiries that go to paying colleges (%)",
+      inPrice: "Price per enquiry (₹)",
+      inBundles: "Colleges buying the season bundle",
+      inBundlePrice: "Bundle price (₹)",
+      inCounsel: "Paid 1-to-1 counselling call (% of plans)",
+      inCounselPrice: "Counselling price (₹)",
+      funnel: "Funnel",
+      fPlans: "Plans finished",
+      fFamilies: "Families requesting calls",
+      fEnquiries: "Enquiries billed",
+      rEnq: "Enquiry revenue",
+      rBundle: "Bundle revenue",
+      rCounsel: "Counselling revenue",
+      rTotal: "Year-one revenue on these assumptions",
+      notForecast: "An illustration, not a forecast. Excludes CBSE students, the Class 10 stream choice and the five other states where Amar Ujala publishes.",
+      whySmall: "Why start this small",
+      whySmallText: "Year one is a wedge: it proves the price per enquiry and the consent rate in pilot zones, before the same profile is extended to Class 10 results, more districts and other states.",
+      mustBeTrue: "What has to be true",
+      mustList: [
+        "The results page can carry a prominent Aage Kya entry on result day.",
+        "Colleges will pay per consented enquiry, at a price the ad desk tests before launch.",
+        "Families will consent by OTP; if consent rates are low, the model shrinks to print bundles and profiles only."
+      ],
+      platTitle: "One student, one profile: the programmes Amar Ujala already runs",
+      platLead: "The brief asks to bring existing programmes onto one platform. Today they sit on separate sites. Aage Kya is the missing last step, and the shared profile is the platform.",
+      journey: [
+        { when: "Class 1 to 10 (homepage says 3 to 12)", h: "Amar Ujala National Olympiad (AUNO)", p: "School-level olympiad with an AI report on 50+ metrics for each student.", url: SOURCES.auno },
+        { when: "Class 9 to 12", h: "Atul Maheshwari Chhatravritti", p: "Amar Ujala Foundation's merit-cum-means scholarship exam.", url: SOURCES.amc },
+        { when: "Board exam season", h: "Tanav Mukt Pariksha (stress-free exam) workshops", p: "School sessions with psychologists and officers, reported by INMA as 55 sessions across 10 zones.", url: SOURCES.stressFree },
+        { when: "Result day", h: "results.amarujala.com", p: "Where students and parents check board results.", url: SOURCES.results },
+        { when: "After Class 12", h: "Aage Kya: plan, scholarships, verified colleges", p: "The new step that turns the result into an admission decision and revenue.", url: "" }
+      ],
+      runsToday: "Running now",
+      isNew: "New",
+      sourceFor: function (name) { return "Source: " + name; },
+      gainsTitle: "What each side gets from one profile",
+      gains: [
+        { who: "Student", what: "Enters details once; the plan, olympiad results and scholarship forms stay in one place." },
+        { who: "Parent", what: "One consent switch for every programme, and a clear record of who has their child's data." },
+        { who: "School", what: "One dashboard for olympiad, workshops and where their Class 12 students went next." },
+        { who: "Amar Ujala", what: "One consented audience across programmes, a year-round relationship instead of one-off events, and a new product for the ad desk to sell." }
+      ],
+      gainsWho: "Who",
+      gainsWhat: "What they get",
+      footer: "Independent concept prototype for a job application. Not affiliated with or endorsed by Amar Ujala. No data is stored or sent.",
+      sourcesTitle: "Sources"
+    },
+    hi: {
+      notice: "<b>कॉन्सेप्ट प्रोटोटाइप</b>, अंचित टंडन द्वारा। स्वतंत्र प्रस्ताव, अमर उजाला से संबद्ध या समर्थित नहीं। कॉलेज और पूछताछ काल्पनिक डेमो डेटा हैं; कुछ भी सहेजा या भेजा नहीं जाता।",
+      backStudy: "← अमर उजाला अध्ययन पर वापस",
+      portfolio: "अंचित टंडन पोर्टफोलियो",
+      navLabel: "साइट",
+      badge: "कॉन्सेप्ट प्रोटोटाइप",
+      independent: "स्वतंत्र प्रस्ताव, अमर उजाला से संबद्ध नहीं",
+      demoData: "डेमो डेटा: कॉलेज और पूछताछ काल्पनिक हैं",
+      title: "आगे क्या? (Aage Kya?)",
+      lead: "रिजल्ट के दिन यूपी बोर्ड कक्षा 12 के लगभग 20 लाख छात्र पास होते हैं, और हर परिवार एक ही सवाल पूछता है: आगे क्या? \"आगे क्या\" इसका जवाब हिंदी में, उसी रिजल्ट पेज पर देता है जिसे वे पहले से खोलते हैं, और इस जवाब को सहमति वाली प्रवेश पूछताछ में बदलता है, जिसके लिए कॉलेज भुगतान करते हैं।",
+      planLink: "रणनीति, रोडमैप और 6 सवाल",
+      kpiLabel: "मुख्य आँकड़े",
+      tabsLabel: "प्रोटोटाइप के हिस्से",
+      kpis: [
+        { v: "24.86 लाख", l: "छात्र 2026 में यूपी बोर्ड कक्षा 12 की परीक्षा में बैठे; 80.38% पास", s: "यूपी बोर्ड परिणाम, अप्रैल 2026" },
+        { v: "8,375", l: "कॉलेज यूपी में, किसी भी राज्य से अधिक", s: "AISHE 2021-22" },
+        { v: "17%", l: "भारत के प्रिंट विज्ञापन स्थान में शिक्षा क्षेत्र का हिस्सा, सबसे बड़ा क्षेत्र", s: "TAM AdEx, जनवरी से सितंबर 2025" },
+        { v: "32", l: "फर्जी विश्वविद्यालय यूजीसी की सूची में, इनमें से 4 यूपी में", s: "यूजीसी सूची, अक्टूबर 2026 में जाँची" }
+      ],
+      tabs: { student: "1. छात्र डेमो", college: "2. कॉलेज डैशबोर्ड", revenue: "3. आय मॉडल", platform: "4. एक प्लेटफॉर्म" },
+      phoneTitle: "रिजल्ट पेज",
+      stepNames: ["रिजल्ट", "सवाल", "आपकी योजना", "सहमति", "पूरा"],
+      resultTitle: "यूपी बोर्ड कक्षा 12 परिणाम (डेमो)",
+      resultName: "डेमो छात्र",
+      passed: "उत्तीर्ण",
+      resultCta: "आगे क्या? 2 मिनट में अपनी योजना देखें",
+      resultNote: "मुफ्त। लॉगिन नहीं। सहमति के बिना कुछ भी साझा नहीं होता।",
+      qTitle: "सात आसान सवाल",
+      qStream: "कक्षा 12 में आपका संकाय (स्ट्रीम)",
+      qMarks: "आपका प्रतिशत",
+      qInterest: "आपकी सबसे ज़्यादा रुचि किसमें है?",
+      qBudget: "परिवार कितनी फीस दे सकता है",
+      qIncome: "परिवार की सालाना आय (केवल छात्रवृत्ति की पात्रता देखने के लिए)",
+      qReach: "आप कहाँ पढ़ना चाहते हैं?",
+      qDistrict: "गृह जिला",
+      next: "मेरी योजना दिखाएँ",
+      back: "पीछे",
+      planFor: function (d) { return d + " और आसपास के लिए आपकी योजना"; },
+      coursesTitle: "आपके लिए उपयुक्त कोर्स",
+      examsTitle: "प्रवेश परीक्षाएँ: अभी क्या कर सकते हैं",
+      stillOpen: "इस वर्ष अभी संभव",
+      nextYear: "रिजल्ट तक ज़्यादातर बंद",
+      examsNote: "केवल सामान्य समय दिया गया है। तिथियाँ हमेशा आधिकारिक वेबसाइट पर जाँचें।",
+      official: "आधिकारिक वेबसाइट",
+      scholarTitle: "छात्रवृत्तियाँ जिनके लिए आप पात्र हो सकते हैं",
+      scholarNote: "नियम हर वर्ष बदलते हैं। आवेदन से पहले आधिकारिक पोर्टल पर जाँचें।",
+      scholarNone: "फीस देने से पहले हर कॉलेज से उसकी अपनी मेरिट छात्रवृत्ति के बारे में पूछें।",
+      collegesTitle: "उपयुक्त कॉलेज (डेमो)",
+      collegesNote: "क्रम केवल आपके जवाबों से मेल के आधार पर है। \"भुगतान करने वाला पार्टनर\" लिखे कॉलेज पूछताछ के लिए भुगतान करते हैं; भुगतान से कोई कॉलेज सूची में ऊपर नहीं आता।",
+      paying: "भुगतान करने वाला पार्टनर",
+      fee: "सालाना फीस",
+      distance: function (km) { return "जिला मुख्यालय से " + km + " किमी"; },
+      ask: "यह कॉलेज हमें कॉल करे",
+      askFor: function (name) { return name + " हमें कॉल करे"; },
+      noColleges: "इन जवाबों पर कोई डेमो कॉलेज उपयुक्त नहीं है। अधिक बजट या \"यूपी में कहीं भी\" चुनकर देखें।",
+      neetNote: "एमबीबीएस और बीडीएस की सीटें केवल NEET काउंसलिंग से मिलती हैं, इसलिए उनके लिए यहाँ कोई कॉलेज नहीं दिखाया गया है।",
+      checkTitle: "क्या यह संस्थान असली है? कोई भी नाम जाँचें",
+      checkPlaceholder: "कॉलेज या विश्वविद्यालय का नाम लिखें",
+      checkBtn: "जाँचें",
+      checkFake: function (name) { return "चेतावनी: \"" + name + "\" यूजीसी की फर्जी विश्वविद्यालयों की सूची (फरवरी 2026) में है। इसकी डिग्री मान्य नहीं है। कोई फीस न दें।"; },
+      checkOk: "यूजीसी की फर्जी विश्वविद्यालयों की सूची में नहीं मिला। केवल इससे मान्यता साबित नहीं होती: यूजीसी, AICTE या राज्य विश्वविद्यालय की संबद्धता सूची भी देखें।",
+      checkShort: "नाम के कम से कम दो खास शब्द लिखें, जैसे \"भारतीय शिक्षा परिषद\"।",
+      checkSource: "स्रोत: यूजीसी की फर्जी विश्वविद्यालयों की सूची, फरवरी 2026: भारत में 32, जिनमें 4 यूपी में और 12 दिल्ली में।",
+      toConsent: function (n) { return n + " कॉलेज के साथ आगे बढ़ें"; },
+      pickOne: "कॉल पाने के लिए कम से कम एक कॉलेज चुनें, या केवल योजना सहेजें।",
+      saveOnly: "केवल मेरी योजना सहेजें",
+      consentTitle: "सहमति",
+      adultQ: "क्या छात्र की उम्र 18 वर्ष या उससे अधिक है?",
+      consentAdult: "छात्र अपने मोबाइल नंबर से खुद सहमति देता/देती है।",
+      consentMinor: "किसी भी कॉलेज को जानकारी दिखने से पहले माता-पिता या अभिभावक की सहमति ज़रूरी है। असली प्रोडक्ट में अभिभावक की पहचान और उम्र की भी पुष्टि होती है (जैसे डिजिलॉकर से), जैसा भारत के डेटा संरक्षण नियम माँगते हैं।",
+      shares: "कॉलेज क्या देखेंगे",
+      sharesList: ["छात्र का पहला नाम", "नीचे दिया गया मोबाइल नंबर", "संकाय और अंकों का दायरा (जैसे 70 से 80%)", "जिला, और हर कॉलेज से मेल खाता कोर्स"],
+      notShared: "कभी साझा नहीं होगा: सटीक अंक, परिवार की आय, रोल नंबर",
+      goesTo: "किसे जाएगी",
+      studentName: "छात्र का पहला नाम",
+      phoneParent: "माता-पिता या अभिभावक का मोबाइल नंबर",
+      phoneStudent: "छात्र का मोबाइल नंबर",
+      phoneHelp: "10 अंकों का नंबर, जो 6, 7, 8 या 9 से शुरू हो",
+      sendOtp: "OTP भेजें",
+      otpSent: function (otp) { return "केवल डेमो: कोई SMS नहीं भेजा जाता। OTP " + otp + " डालें।"; },
+      otpLabel: "OTP",
+      verify: "पुष्टि करें",
+      otpWrong: "यह OTP मेल नहीं खाता।",
+      otpOk: "नंबर सत्यापित हुआ।",
+      agreeParent: "मैं माता-पिता या अभिभावक हूँ। मैं ये जानकारी ऊपर दिए कॉलेजों के साथ, केवल प्रवेश से जुड़ी कॉल के लिए, साझा करने की सहमति देता/देती हूँ। मैं इसे कभी भी वापस ले सकता/सकती हूँ।",
+      agreeAdult: "मैं छात्र हूँ और मेरी उम्र 18 वर्ष या उससे अधिक है। मैं ये जानकारी ऊपर दिए कॉलेजों के साथ, केवल प्रवेश से जुड़ी कॉल के लिए, साझा करने की सहमति देता/देती हूँ। मैं इसे कभी भी वापस ले सकता/सकती हूँ।",
+      share: "साझा करें और कॉल माँगें",
+      doneTitle: "हो गया। कॉलेज 48 घंटे में कॉल करेंगे।",
+      doneLead: function (n) { return "आपकी जानकारी " + n + " कॉलेज को भेजी गई। हर कॉलेज ने 48 घंटे में कॉल करने, नंबर आगे न बेचने और सहमति वापस लेने पर उसे मिटाने का वादा किया है।"; },
+      savedTitle: "योजना सहेज ली गई। कोई कॉलेज कॉल नहीं करेगा।",
+      savedLead: "आप इसे बाद में देख सकते हैं, परिवार के साथ व्हाट्सऐप पर साझा कर सकते हैं, या बाद में कॉल माँग सकते हैं।",
+      doneProfile: "योजना एक छात्र प्रोफाइल में सहेजी गई है: आगे इसी प्रोफाइल में ओलंपियाड के परिणाम और छात्रवृत्ति के फॉर्म भी रह सकते हैं।",
+      withdraw: "सहमति वापस लें",
+      withdrawn: "सहमति वापस ले ली गई। असली प्रोडक्ट में कॉलेजों को तुरंत डेटा मिटाने का अनुरोध जाता है।",
+      startOver: "फिर से शुरू करें",
+      seeDashboard: "कॉलेज डैशबोर्ड पर देखें",
+      whyTitle: "क्या हो रहा है, और क्यों",
+      why: [
+        { h: "1. सबसे ज़्यादा ज़रूरत का पल", p: "रिजल्ट पेज पर परिवार पहले से आते हैं, हिंदी में, फोन पर। आज यह मार्कशीट पर खत्म हो जाता है। \"आगे क्या\" वहीं से शुरू होता है, और उपयोगकर्ता जुटाने का कोई खर्च नहीं।" },
+        { h: "2. लंबा फॉर्म नहीं, कुछ आसान सवाल", p: "संकाय, अंक, रुचि, बजट, आय का दायरा, दूरी और जिला, इतने से कोर्स, परीक्षाएँ, छात्रवृत्तियाँ और कॉलेज छँट जाते हैं। जाति या सटीक आय नहीं पूछी जाती।" },
+        { h: "3. पहले उपयोगी, फिर व्यावसायिक", p: "परीक्षाओं की जानकारी, छात्रवृत्ति की पात्रता और फर्जी विश्वविद्यालय की जाँच मुफ्त है और कभी प्रायोजित नहीं होती। यही सशुल्क हिस्से के लिए भरोसा बनाता है।" },
+        { h: "4. सही व्यक्ति सहमति देता है", p: "18 वर्ष या उससे अधिक का छात्र खुद सहमति देता है। 18 से कम उम्र के छात्र के लिए भारत का डेटा संरक्षण कानून अभिभावक की सत्यापित सहमति माँगता है, इसलिए OTP अभिभावक को जाता है।" },
+        { h: "5. कॉलेज सहमति वाली पूछताछ के लिए भुगतान करते हैं", p: "क्लिक, रैंकिंग या डेटा के ढेर के लिए नहीं। हर पूछताछ एक ऐसा परिवार है जिसने कॉल माँगी, और उसकी सहमति दर्ज है।" }
+      ],
+      collegeTitle: "प्रेरणा इंस्टीट्यूट ऑफ टेक्नोलॉजी (काल्पनिक), प्रवेश डेस्क",
+      collegeLead: "भुगतान करने वाला कॉलेज क्या देखता है। हर पूछताछ सहमति वाली और सत्यापित है, और उतनी ही जानकारी तक सीमित है जितनी साझा करने की सहमति परिवार ने दी।",
+      kpiEnq: "इस सप्ताह की पूछताछ",
+      kpiConsent: "दर्ज सहमति के साथ",
+      kpiCalled: "अब तक कॉल की गईं",
+      kpiBill: function (price) { return "इस सप्ताह का बिल, " + price + " प्रति पूछताछ"; },
+      thWhen: "कब", thWho: "छात्र", thDistrict: "जिला", thProfile: "संकाय और अंक", thCourse: "कोर्स", thConsent: "सहमति", thStatus: "स्थिति",
+      consentBadge: "OTP सहमति",
+      status: { "new": "नई", called: "कॉल हुई", visit: "कैंपस विज़िट", admitted: "प्रवेश हुआ", no: "रुचि नहीं" },
+      yours: "अभी",
+      yoursHint: "छात्र डेमो पूरा करें और प्रेरणा इंस्टीट्यूट ऑफ टेक्नोलॉजी चुनें, तो आपकी अपनी पूछताछ यहाँ दिखेगी।",
+      rulesTitle: "हर भुगतान करने वाला कॉलेज ये नियम मानता है",
+      rules: [
+        "लाइव होने से पहले प्रोडक्ट टीम द्वारा मान्यता की जाँच (यूजीसी, AICTE या राज्य संबद्धता); भुगतान का इस पर कोई असर नहीं।",
+        "48 घंटे में कॉल करनी होगी; देर करने वाले कॉलेज रोक दिए जाते हैं।",
+        "नंबर बेचना या आगे देना मना है; सहमति वापस लेने पर डेटा मिटाना होगा।",
+        "दो सही पाई गई शिकायतों पर कॉलेज पूरे सीज़न के लिए हटा दिया जाता है।"
+      ],
+      bundleTitle: "प्रवेश सीज़न का पैकेज, मौजूदा विज्ञापन डेस्क के ज़रिए",
+      bundle: [
+        "\"आगे क्या\" प्रवेश शृंखला में जिला संस्करणों के प्रिंट विज्ञापन",
+        "कॉलेज की पूरी प्रोफाइल और \"भुगतान करने वाला पार्टनर\" लेबल; क्रम केवल उपयुक्तता से",
+        "पूछताछ का बिल अलग से, प्रति सहमति वाली पूछताछ, मासिक रिपोर्ट के साथ"
+      ],
+      priceNote: "प्रति पूछताछ कीमत सबसे बड़ा अनजाना पहलू है। कोई सार्वजनिक मानक नहीं है, इसलिए विज्ञापन डेस्क के साथ पहला परीक्षण यही होगा कि कॉलेज कितना देंगे।",
+      revTitle: "केवल यूपी बोर्ड कक्षा 12 के एक सीज़न से पहले साल की आय",
+      revLead: "पास छात्रों की संख्या के अलावा हर आँकड़ा बदला जा सकने वाला अनुमान है। कोई परिदृश्य चुनें, फिर कोई भी संख्या बदलें।",
+      scenLabel: "परिदृश्य",
+      scen: { low: "कम", base: "आधार", high: "अधिक", custom: "बदला हुआ" },
+      inPassed: "यूपी बोर्ड कक्षा 12 में पास (2026)",
+      inReach: "रिजल्ट से \"आगे क्या\" खोलने वाले (%)",
+      inComplete: "योजना पूरी करने वाले (%)",
+      inCoverage: "कॉलेज सूची वाले जिलों में रहने वाले (%)",
+      inConsent: "सहमति के साथ कॉल माँगने वाले (%)",
+      inPer: "हर परिवार द्वारा चुने गए कॉलेज",
+      inPaid: "भुगतान करने वाले कॉलेजों को जाने वाली पूछताछ (%)",
+      inPrice: "प्रति पूछताछ कीमत (₹)",
+      inBundles: "सीज़न पैकेज खरीदने वाले कॉलेज",
+      inBundlePrice: "पैकेज की कीमत (₹)",
+      inCounsel: "सशुल्क व्यक्तिगत काउंसलिंग कॉल (% योजनाओं का)",
+      inCounselPrice: "काउंसलिंग की कीमत (₹)",
+      funnel: "फनल",
+      fPlans: "पूरी हुई योजनाएँ",
+      fFamilies: "कॉल माँगने वाले परिवार",
+      fEnquiries: "बिल हुई पूछताछ",
+      rEnq: "पूछताछ से आय",
+      rBundle: "पैकेज से आय",
+      rCounsel: "काउंसलिंग से आय",
+      rTotal: "इन अनुमानों पर पहले साल की आय",
+      notForecast: "यह एक उदाहरण है, पूर्वानुमान नहीं। इसमें सीबीएसई छात्र, कक्षा 10 के बाद संकाय का चुनाव और वे पाँच अन्य राज्य शामिल नहीं हैं जहाँ अमर उजाला छपता है।",
+      whySmall: "इतनी छोटी शुरुआत क्यों",
+      whySmallText: "पहला साल एक शुरुआती कदम है: यह पायलट ज़ोन में प्रति पूछताछ कीमत और सहमति की दर साबित करता है, उसके बाद यही प्रोफाइल कक्षा 10 के रिजल्ट, और जिलों और दूसरे राज्यों तक बढ़ती है।",
+      mustBeTrue: "क्या सच होना चाहिए",
+      mustList: [
+        "रिजल्ट के दिन रिजल्ट पेज पर \"आगे क्या\" का प्रमुख शुरुआती बिंदु दिखाया जा सके।",
+        "कॉलेज सहमति वाली हर पूछताछ के लिए भुगतान करें, उस कीमत पर जिसे विज्ञापन डेस्क लॉन्च से पहले परखे।",
+        "परिवार OTP से सहमति दें; सहमति की दर कम हो तो मॉडल केवल प्रिंट पैकेज और प्रोफाइल तक सिमट जाएगा।"
+      ],
+      platTitle: "एक छात्र, एक प्रोफाइल: अमर उजाला के पहले से चल रहे कार्यक्रम",
+      platLead: "भर्ती की सूचना कहती है कि मौजूदा कार्यक्रमों को एक प्लेटफॉर्म पर लाना है। आज वे अलग-अलग वेबसाइटों पर हैं। \"आगे क्या\" छूटा हुआ आखिरी कदम है, और साझा प्रोफाइल ही प्लेटफॉर्म है।",
+      journey: [
+        { when: "कक्षा 1 से 10 (होमपेज पर 3 से 12)", h: "अमर उजाला नेशनल ओलंपियाड (AUNO)", p: "हर छात्र के लिए 50+ पैमानों पर एआई रिपोर्ट वाला स्कूल-स्तरीय ओलंपियाड।", url: SOURCES.auno },
+        { when: "कक्षा 9 से 12", h: "अतुल माहेश्वरी छात्रवृत्ति", p: "अमर उजाला फाउंडेशन की मेरिट और आर्थिक ज़रूरत पर आधारित छात्रवृत्ति परीक्षा।", url: SOURCES.amc },
+        { when: "बोर्ड परीक्षा का समय", h: "तनावमुक्त परीक्षा कार्यशालाएँ", p: "मनोवैज्ञानिकों और अधिकारियों के साथ स्कूल सत्र; INMA के अनुसार 10 ज़ोन में 55 सत्र।", url: SOURCES.stressFree },
+        { when: "रिजल्ट का दिन", h: "results.amarujala.com", p: "जहाँ छात्र और अभिभावक बोर्ड परिणाम देखते हैं।", url: SOURCES.results },
+        { when: "कक्षा 12 के बाद", h: "आगे क्या: योजना, छात्रवृत्तियाँ, सत्यापित कॉलेज", p: "नया कदम, जो रिजल्ट को प्रवेश के फैसले और आय में बदलता है।", url: "" }
+      ],
+      runsToday: "अभी जारी",
+      isNew: "नया",
+      sourceFor: function (name) { return "स्रोत: " + name; },
+      gainsTitle: "एक प्रोफाइल से हर पक्ष को क्या मिलता है",
+      gains: [
+        { who: "छात्र", what: "जानकारी एक बार भरनी होती है; योजना, ओलंपियाड के परिणाम और छात्रवृत्ति के फॉर्म एक ही जगह रहते हैं।" },
+        { who: "अभिभावक", what: "हर कार्यक्रम के लिए एक ही सहमति का बटन, और साफ रिकॉर्ड कि बच्चे का डेटा किसके पास है।" },
+        { who: "स्कूल", what: "ओलंपियाड, कार्यशालाओं और कक्षा 12 के बाद छात्र कहाँ गए, सबके लिए एक डैशबोर्ड।" },
+        { who: "अमर उजाला", what: "सभी कार्यक्रमों में सहमति वाला एक ही दर्शक वर्ग, एक बार के आयोजनों की जगह साल भर का रिश्ता, और विज्ञापन डेस्क के लिए बेचने को एक नया प्रोडक्ट।" }
+      ],
+      gainsWho: "कौन",
+      gainsWhat: "उन्हें क्या मिलता है",
+      footer: "नौकरी के आवेदन के लिए स्वतंत्र कॉन्सेप्ट प्रोटोटाइप। अमर उजाला से संबद्ध या समर्थित नहीं। कोई डेटा सहेजा या भेजा नहीं जाता।",
+      sourcesTitle: "स्रोत"
+    }
+  };
+
+  /* ---------- Helpers ---------- */
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function find(arr, fn) { for (var i = 0; i < arr.length; i++) if (fn(arr[i])) return arr[i]; return undefined; }
+  function inr(n) { return "₹" + Math.round(n).toLocaleString("en-IN"); }
+  function marksBand(m, lang) {
+    var lo = Math.max(30, Math.floor(m / 10) * 10);
+    var hi = Math.min(100, lo + 10);
+    return lang === "en" ? lo + " to " + hi + "%" : lo + " से " + hi + "%";
+  }
+  function money(n, lang) {
+    var v;
+    if (n >= 10000000) {
+      v = (n / 10000000).toLocaleString("en-IN", { maximumFractionDigits: 2 });
+      return lang === "en" ? "₹" + v + " crore" : "₹" + v + " करोड़";
+    }
+    v = (n / 100000).toLocaleString("en-IN", { maximumFractionDigits: 1 });
+    return lang === "en" ? "₹" + v + " lakh" : "₹" + v + " लाख";
+  }
+  function isLang(v) { return v === "en" || v === "hi"; }
+  function saveLang(l) { try { window.localStorage.setItem(STORAGE_KEY, l); } catch (e) { /* storage blocked */ } }
+  function copyObj(o) { var r = {}; for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) r[k] = o[k]; return r; }
+  var EXT = ' target="_blank" rel="noreferrer"';
+
+  /* ---------- State ---------- */
+  function initialLang() {
+    try {
+      var fromUrl = new URLSearchParams(window.location.search).get("lang");
+      if (isLang(fromUrl)) { saveLang(fromUrl); return fromUrl; }
+    } catch (e) { /* fall through */ }
+    try {
+      var saved = window.localStorage.getItem(STORAGE_KEY);
+      if (isLang(saved)) return saved;
+    } catch (e) { /* storage blocked */ }
+    return "en";
+  }
+
+  var S = {
+    lang: initialLang(),
+    tab: "student",
+    step: 0,
+    stream: "pcm", marks: 72, interest: "tech", budget: "mid", income: "upto45", reach: "district", districtIdx: 0,
+    chosen: [],
+    checkText: "", checkResult: "", checkMatch: "",
+    adult: "", studentName: "", phone: "",
+    otpSent: false, otp: "", otpState: "", agree: false,
+    savedOnly: false, withdrawn: false,
+    statuses: copyObj(INITIAL_STATUSES),
+    scenario: "base",
+    rev: copyObj(PRESETS.base)
+  };
+
+  function resetConsent() { S.otpSent = false; S.otp = ""; S.otpState = ""; S.agree = false; }
+  function reset() {
+    S.step = 0; S.chosen = []; S.adult = ""; S.studentName = ""; S.phone = "";
+    resetConsent(); S.savedOnly = false; S.withdrawn = false; S.checkText = ""; S.checkResult = "";
+    S.statuses = copyObj(INITIAL_STATUSES);
+  }
+
+  function computePlan() {
+    var courses = COURSES.filter(function (c) { return c.streams.indexOf(S.stream) !== -1 && c.interests.indexOf(S.interest) !== -1; });
+    if (courses.length === 0) courses = COURSES.filter(function (c) { return c.streams.indexOf(S.stream) !== -1 && c.interests.indexOf("unsure") !== -1; });
+    courses = courses.slice(0, 4);
+    var courseIds = {};
+    courses.forEach(function (c) { courseIds[c.id] = true; });
+    var examIds = [];
+    courses.forEach(function (c) { c.exams.forEach(function (e) { if (examIds.indexOf(e) === -1) examIds.push(e); }); });
+    var scholarships = SCHOLARSHIPS.filter(function (s) { return s.fits(S.income, S.marks); });
+    var budgetMax = (find(BUDGETS, function (b) { return b.id === S.budget; }) || { max: Infinity }).max;
+    // One list, ordered by fit only. Paying status is a label, never a boost.
+    var colleges = DEMO_COLLEGES.map(function (c) {
+      return { c: c, match: c.courses.filter(function (id) { return courseIds[id]; }).length };
+    }).filter(function (x) {
+      return x.match > 0 && x.c.fee <= budgetMax && (S.reach === "state" || x.c.km <= 15);
+    }).sort(function (a, b) {
+      return (b.match - a.match) || (a.c.fee - b.c.fee) || (a.c.km - b.c.km);
+    }).map(function (x) { return x.c; });
+    // Drop ticks for colleges that are no longer in the plan.
+    var visible = colleges.map(function (c) { return c.id; });
+    S.chosen = S.chosen.filter(function (id) { return visible.indexOf(id) !== -1; });
+    return { courses: courses, examIds: examIds, scholarships: scholarships, colleges: colleges, hasMbbs: !!courseIds.mbbs };
+  }
+
+  function computeRevenue(rev) {
+    var plans = rev.passed * (rev.reachPct / 100) * (rev.completePct / 100);
+    var families = plans * (rev.coveragePct / 100) * (rev.consentPct / 100);
+    var enquiries = families * rev.perStudent * (rev.paidPct / 100);
+    var enqRev = enquiries * rev.price;
+    var bundleRev = rev.bundles * rev.bundlePrice;
+    var counselRev = plans * (rev.counselPct / 100) * rev.counselPrice;
+    return { plans: plans, families: families, enquiries: enquiries, enqRev: enqRev, bundleRev: bundleRev, counselRev: counselRev, total: enqRev + bundleRev + counselRev };
+  }
+
+  /* ---------- Rendering ---------- */
+  var root = document.getElementById("ak-root");
+  var notice = document.getElementById("ak-notice");
+  var lastStep = 0, lastTab = S.tab, firstRender = true;
+
+  function pick(b) { return b[S.lang]; }
+
+  function chips(name, options, value) {
+    return '<div class="ak-chips">' + options.map(function (o) {
+      var id = "r-" + name + "-" + o.id;
+      return '<label class="ak-chip" for="' + id + '"><input type="radio" id="' + id + '" name="' + name + '" value="' + o.id + '" data-chip="' + name + '"' +
+        (value === o.id ? " checked" : "") + '><span>' + esc(pick(o.label)) + "</span></label>";
+    }).join("") + "</div>";
+  }
+
+  function courseFor(plan, c) { return find(plan.courses, function (x) { return c.courses.indexOf(x.id) !== -1; }); }
+
+  function collegeCard(t, c) {
+    var name = pick(c.name);
+    var names = c.courses.map(function (id) { return find(COURSES, function (x) { return x.id === id; }); })
+      .filter(Boolean).map(function (x) { return pick(x.name); }).join(", ");
+    return '<li class="ak-item"><div class="ak-item-head"><strong>' + esc(name) + '</strong><span class="ak-row" style="gap:0.3rem">' +
+      (c.paying ? '<span class="ak-tag ak-tag-amber">' + esc(t.paying) + "</span>" : "") +
+      '<span class="ak-tag">' + esc(pick(c.kind)) + "</span></span></div>" +
+      "<p>✓ " + esc(pick(c.recognition)) + "</p>" +
+      "<p>" + esc(t.fee) + ': <strong class="ak-num">' + inr(c.fee) + "</strong> · " + esc(t.distance(c.km)) + "</p>" +
+      "<p>" + esc(names) + "</p>" +
+      '<label class="ak-check" style="margin-top:0.5rem"><input type="checkbox" id="col-' + c.id + '" data-act="college" data-id="' + c.id + '"' +
+      (S.chosen.indexOf(c.id) !== -1 ? " checked" : "") + ' aria-label="' + esc(t.askFor(name)) + '"><span aria-hidden="true">' + esc(t.ask) + "</span></label></li>";
+  }
+
+  function stepTitle(text) { return '<h2 class="ak-step-h" id="ak-step-h" tabindex="-1">' + esc(text) + "</h2>"; }
+
+  function renderStudent(t, plan) {
+    var step = S.step;
+    var h = "";
+    var stream = find(STREAMS, function (s) { return s.id === S.stream; });
+    var chosenColleges = plan.colleges.filter(function (c) { return S.chosen.indexOf(c.id) !== -1; });
+    h += '<section id="panel-student" role="tabpanel" aria-labelledby="tab-student" class="ak-split">';
+    h += '<div class="ak-phone' + (S._animStep ? " ak-enter" : "") + '">';
+    h += '<div class="ak-phone-bar"><span>' + esc(t.phoneTitle) + "</span><span>" + (step + 1) + " / 5 · " + esc(t.stepNames[step]) + "</span></div>";
+    h += '<div class="ak-steps" aria-hidden="true">' + [0, 1, 2, 3, 4].map(function (i) { return '<span class="' + (i <= step ? "on" : "") + '"></span>'; }).join("") + "</div>";
+
+    if (step === 0) {
+      h += '<div><div class="ak-result"><h2>' + esc(t.resultTitle) + '</h2><div style="font-weight:700;margin-top:0.25rem">' + esc(t.resultName) + "</div>" +
+        '<div class="ak-row" style="justify-content:space-between;margin-top:0.5rem"><span class="ak-big ak-num">' + S.marks + '%</span><span class="ak-tag ak-tag-white">' + esc(t.passed) + "</span></div></div>" +
+        '<button type="button" class="ak-btn ak-btn-block" style="margin-top:0.9rem" data-act="goStep" data-step="1">' + esc(t.resultCta) + "</button>" +
+        '<p class="ak-muted" style="margin-top:0.5rem">' + esc(t.resultNote) + "</p></div>";
+    }
+
+    if (step === 1) {
+      h += '<form data-form="questions">' + stepTitle(t.qTitle) +
+        '<fieldset class="ak-field" style="margin-top:0.6rem"><legend>' + esc(t.qStream) + "</legend>" + chips("stream", STREAMS, S.stream) + "</fieldset>" +
+        '<div class="ak-field"><label for="ak-marks">' + esc(t.qMarks) + ': <span class="ak-num" id="ak-marks-val">' + S.marks + '%</span></label>' +
+        '<input id="ak-marks" class="ak-range" type="range" min="33" max="100" value="' + S.marks + '" data-act="marks"></div>' +
+        '<fieldset class="ak-field"><legend>' + esc(t.qInterest) + "</legend>" + chips("interest", INTERESTS, S.interest) + "</fieldset>" +
+        '<fieldset class="ak-field"><legend>' + esc(t.qBudget) + "</legend>" + chips("budget", BUDGETS, S.budget) + "</fieldset>" +
+        '<fieldset class="ak-field"><legend>' + esc(t.qIncome) + "</legend>" + chips("income", INCOMES, S.income) + "</fieldset>" +
+        '<fieldset class="ak-field"><legend>' + esc(t.qReach) + "</legend>" + chips("reach", REACHES, S.reach) + "</fieldset>" +
+        '<div class="ak-field"><label for="ak-district">' + esc(t.qDistrict) + '</label><select id="ak-district" class="ak-select" data-act="district">' +
+        DISTRICTS.map(function (d, i) { return '<option value="' + i + '"' + (i === S.districtIdx ? " selected" : "") + ">" + esc(pick(d)) + "</option>"; }).join("") +
+        "</select></div>" +
+        '<div class="ak-row"><button type="button" class="ak-btn ak-btn-ghost" data-act="goStep" data-step="0">' + esc(t.back) + '</button>' +
+        '<button type="submit" class="ak-btn ak-grow">' + esc(t.next) + "</button></div></form>";
+    }
+
+    if (step === 2) {
+      var interest = find(INTERESTS, function (i) { return i.id === S.interest; });
+      h += "<div>" + stepTitle(t.planFor(pick(DISTRICTS[S.districtIdx]))) +
+        '<p class="ak-muted" style="margin:0">' + esc(pick(stream.label)) + " · " + S.marks + "% · " + esc(pick(interest.label)) + "</p>";
+      h += '<h3 class="ak-section-title">' + esc(t.coursesTitle) + '</h3><ul class="ak-list" data-testid="ak-courses">' +
+        plan.courses.map(function (c) {
+          return '<li class="ak-item"><div class="ak-item-head"><strong>' + esc(pick(c.name)) + '</strong><span class="ak-tag">' + esc(pick(c.years)) + "</span></div><p>" + esc(pick(c.what)) + "</p></li>";
+        }).join("") + "</ul>";
+      if (plan.examIds.length > 0) {
+        h += '<h3 class="ak-section-title">' + esc(t.examsTitle) + '</h3><ul class="ak-list" data-testid="ak-exams">' +
+          plan.examIds.map(function (id) {
+            var ex = EXAMS[id];
+            var exName = pick(ex.name);
+            return '<li class="ak-item"><div class="ak-item-head"><strong>' + esc(exName) + '</strong><span class="ak-tag ' + (ex.open ? "ak-tag-brand" : "ak-tag-red") + '">' +
+              esc(ex.open ? t.stillOpen : t.nextYear) + '</span></div><p style="font-weight:600;color:var(--ak-ink)">' + esc(pick(ex.thisYear)) + "</p>" +
+              "<p>" + esc(pick(ex.by)) + ". " + esc(pick(ex.window)) + ' <a href="' + ex.url + '"' + EXT + ' aria-label="' + esc(t.official + ": " + exName) + '">' + esc(t.official) + " ↗</a></p></li>";
+          }).join("") + '</ul><p class="ak-muted">' + esc(t.examsNote) + "</p>";
+      }
+      h += '<h3 class="ak-section-title">' + esc(t.scholarTitle) + "</h3>";
+      if (plan.scholarships.length > 0) {
+        h += '<ul class="ak-list" data-testid="ak-scholarships">' + plan.scholarships.map(function (s) {
+          var sName = pick(s.name);
+          return '<li class="ak-item"><strong>' + esc(sName) + "</strong><p>" + esc(pick(s.rule)) + '</p><p><a href="' + s.url + '"' + EXT + ' aria-label="' + esc(t.official + ": " + sName) + '">' + esc(t.official) + " ↗</a></p></li>";
+        }).join("") + "</ul>";
+      } else {
+        h += '<p class="ak-muted" data-testid="ak-scholarships">' + esc(t.scholarNone) + "</p>";
+      }
+      h += '<p class="ak-muted">' + esc(t.scholarNote) + "</p>";
+      h += '<h3 class="ak-section-title">' + esc(t.collegesTitle) + '</h3><p class="ak-muted" style="margin-top:0">' + esc(t.collegesNote) + "</p>";
+      if (plan.hasMbbs) h += '<div class="ak-alert ak-alert-amber">' + esc(t.neetNote) + "</div>";
+      h += '<ul class="ak-list" data-testid="ak-colleges" style="margin-top:0.5rem">' + plan.colleges.map(function (c) { return collegeCard(t, c); }).join("") + "</ul>";
+      if (plan.colleges.length === 0) h += '<div class="ak-alert ak-alert-amber">' + esc(t.noColleges) + "</div>";
+
+      h += '<h3 class="ak-section-title">' + esc(t.checkTitle) + "</h3>" +
+        '<form class="ak-row nowrap" data-form="check"><label for="ak-check" class="ak-sr">' + esc(t.checkPlaceholder) + "</label>" +
+        '<input id="ak-check" class="ak-input" placeholder="' + esc(t.checkPlaceholder) + '" value="' + esc(S.checkText) + '" data-act="checkText">' +
+        '<button type="submit" class="ak-btn ak-btn-ghost" id="ak-check-btn">' + esc(t.checkBtn) + "</button></form>" +
+        '<div aria-live="polite" id="ak-check-live">' + checkResultHtml(t) + "</div>" +
+        '<p class="ak-muted"><a href="' + SOURCES.ugcFake + '"' + EXT + ">" + esc(t.checkSource) + "</a></p>";
+
+      var n = chosenColleges.length;
+      h += '<div class="ak-row" style="margin-top:0.75rem"><button type="button" class="ak-btn ak-btn-ghost" data-act="goStep" data-step="1">' + esc(t.back) + "</button>" +
+        '<button type="button" class="ak-btn ak-grow" data-act="toConsent"' + (n === 0 ? ' disabled aria-describedby="ak-pick-one"' : "") + ">" + esc(t.toConsent(n)) + "</button></div>";
+      if (n === 0) h += '<p class="ak-muted" id="ak-pick-one">' + esc(t.pickOne) + "</p>";
+      h += '<button type="button" class="ak-btn ak-btn-ghost ak-btn-block" style="margin-top:0.5rem" data-act="saveOnly">' + esc(t.saveOnly) + "</button></div>";
+    }
+
+    if (step === 3) {
+      var phoneValid = /^[6-9]\d{9}$/.test(S.phone);
+      h += '<form data-form="consent">' + stepTitle(t.consentTitle) +
+        '<fieldset class="ak-field" style="margin-top:0.5rem"><legend>' + esc(t.adultQ) + "</legend>" + chips("adult", ADULT_OPTIONS, S.adult) + "</fieldset>";
+      if (S.adult) {
+        h += '<p class="ak-muted" style="margin-top:0">' + esc(S.adult === "yes" ? t.consentAdult : t.consentMinor) + "</p>" +
+          '<div class="ak-item" style="margin-bottom:0.75rem"><strong>' + esc(t.shares) + "</strong><ul>" +
+          t.sharesList.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ul>" +
+          '<p style="font-weight:600">' + esc(t.notShared) + '</p><p style="font-weight:600;margin-top:0.5rem">' + esc(t.goesTo) + ':</p>' +
+          '<ul style="margin-top:0.2rem" data-testid="ak-goes-to">' + chosenColleges.map(function (c) {
+            var course = courseFor(plan, c);
+            return "<li>" + esc(pick(c.name)) + ": " + (course ? esc(pick(course.name)) : "-") + "</li>";
+          }).join("") + "</ul></div>" +
+          '<div class="ak-field"><label for="ak-name">' + esc(t.studentName) + '</label><input id="ak-name" class="ak-input" maxlength="30" value="' + esc(S.studentName) + '" data-act="name"></div>' +
+          '<div class="ak-field"><label for="ak-phone">' + esc(S.adult === "yes" ? t.phoneStudent : t.phoneParent) + "</label>" +
+          '<input id="ak-phone" class="ak-input" inputmode="numeric" autocomplete="tel" maxlength="10" value="' + esc(S.phone) + '" aria-describedby="ak-phone-help" data-act="phone">' +
+          '<div id="ak-phone-help" class="ak-muted">' + esc(t.phoneHelp) + "</div></div>";
+        if (!S.otpSent) {
+          h += '<button type="button" class="ak-btn ak-btn-ghost ak-btn-block" data-act="sendOtp"' + (phoneValid ? "" : " disabled") + ">" + esc(t.sendOtp) + "</button>";
+        } else {
+          h += '<div class="ak-alert ak-alert-amber" data-testid="ak-otp-hint">' + esc(t.otpSent(DEMO_OTP)) + "</div>" +
+            '<div class="ak-field" style="margin-top:0.6rem"><label for="ak-otp">' + esc(t.otpLabel) + "</label>" +
+            '<div class="ak-row nowrap"><input id="ak-otp" class="ak-input" inputmode="numeric" maxlength="4" value="' + esc(S.otp) + '" data-act="otp">' +
+            '<button type="button" class="ak-btn ak-btn-ghost" id="ak-verify" data-act="verify">' + esc(t.verify) + "</button></div>" +
+            '<div aria-live="polite">' +
+            (S.otpState === "ok" ? '<div class="ak-alert ak-alert-green">' + esc(t.otpOk) + "</div>" : "") +
+            (S.otpState === "wrong" ? '<div class="ak-alert ak-alert-red">' + esc(t.otpWrong) + "</div>" : "") +
+            "</div></div>";
+        }
+        h += '<label class="ak-check" style="margin:0.75rem 0"><input type="checkbox" id="ak-agree" data-act="agree"' + (S.agree ? " checked" : "") + (S.otpState !== "ok" ? " disabled" : "") + ">" +
+          "<span>" + esc(S.adult === "yes" ? t.agreeAdult : t.agreeParent) + "</span></label>";
+      }
+      h += '<div class="ak-row"><button type="button" class="ak-btn ak-btn-ghost" data-act="consentBack">' + esc(t.back) + "</button>" +
+        '<button type="submit" class="ak-btn ak-grow"' + (S.otpState === "ok" && S.agree ? "" : " disabled") + ">" + esc(t.share) + "</button></div></form>";
+    }
+
+    if (step === 4) {
+      h += "<div>";
+      if (S.savedOnly) {
+        h += stepTitle(t.savedTitle) + "<p>" + esc(t.savedLead) + '</p><p class="ak-muted">' + esc(t.doneProfile) + "</p>";
+      } else if (!S.withdrawn) {
+        h += stepTitle(t.doneTitle) + "<p>" + esc(t.doneLead(chosenColleges.length)) + '</p><p class="ak-muted">' + esc(t.doneProfile) + "</p>" +
+          '<div class="ak-row"><button type="button" class="ak-btn" data-act="seeDashboard">' + esc(t.seeDashboard) + "</button>" +
+          '<button type="button" class="ak-btn ak-btn-ghost" data-act="withdraw">' + esc(t.withdraw) + "</button></div>";
+      } else {
+        h += '<div class="ak-alert ak-alert-amber" style="margin-top:0" role="status">' + esc(t.withdrawn) + "</div>";
+      }
+      h += '<button type="button" class="ak-btn ak-btn-ghost ak-btn-block" style="margin-top:0.75rem" data-act="startOver">' + esc(t.startOver) + "</button></div>";
+    }
+    h += "</div>";
+
+    h += '<aside class="ak-explain" aria-label="' + esc(t.whyTitle) + '"><div class="ak-card"><h2>' + esc(t.whyTitle) + '</h2><ol class="ak-why">' +
+      t.why.map(function (w, i) { return '<li class="' + (i === step ? "on" : "") + '"><strong>' + esc(w.h) + "</strong><div>" + esc(w.p) + "</div></li>"; }).join("") +
+      "</ol></div></aside></section>";
+    return h;
+  }
+
+  function checkResultHtml(t) {
+    if (S.checkResult === "fake") return '<div class="ak-alert ak-alert-red" data-testid="ak-check-result">' + esc(t.checkFake(S.checkMatch)) + "</div>";
+    if (S.checkResult === "ok") return '<div class="ak-alert ak-alert-neutral" data-testid="ak-check-result">' + esc(t.checkOk) + "</div>";
+    if (S.checkResult === "short") return '<div class="ak-alert ak-alert-neutral" data-testid="ak-check-result">' + esc(t.checkShort) + "</div>";
+    return "";
+  }
+
+  function enquiryList(t, plan) {
+    var chosenColleges = plan.colleges.filter(function (c) { return S.chosen.indexOf(c.id) !== -1; });
+    var shared = S.step === 4 && !S.savedOnly && !S.withdrawn;
+    var partner = find(chosenColleges, function (c) { return c.id === PARTNER_ID; });
+    var sentToPartner = shared && !!partner;
+    var list = [];
+    if (sentToPartner) {
+      var stream = find(STREAMS, function (s) { return s.id === S.stream; });
+      var nm = S.studentName.trim();
+      var course = courseFor(plan, partner);
+      list.push({
+        id: "you", when: { en: t.yours, hi: t.yours },
+        who: nm ? nm.slice(0, 1).toUpperCase() + "***" : "D***",
+        district: DISTRICTS[S.districtIdx],
+        profile: { en: stream.label.en + ", " + marksBand(S.marks, "en"), hi: stream.label.hi + ", " + marksBand(S.marks, "hi") },
+        course: course ? course.name : { en: "-", hi: "-" },
+        mine: true
+      });
+    }
+    return { list: list.concat(BASE_ENQUIRIES), sentToPartner: sentToPartner };
+  }
+
+  function renderCollege(t, plan) {
+    var e = enquiryList(t, plan);
+    var enquiries = e.list;
+    var called = enquiries.filter(function (x) { return (S.statuses[x.id] || "new") !== "new"; }).length;
+    var statusKeys = ["new", "called", "visit", "admitted", "no"];
+    var h = '<section id="panel-college" role="tabpanel" aria-labelledby="tab-college"' + (S._animTab ? ' class="ak-enter"' : "") + '><div class="ak-card"><h2>' + esc(t.collegeTitle) + "</h2>" +
+      '<p class="ak-muted" style="margin-top:0">' + esc(t.collegeLead) + "</p>" +
+      '<div class="ak-kpis" style="margin:0.75rem 0" data-testid="ak-college-kpis">' +
+      '<div class="ak-kpi"><div class="ak-kpi-value ak-num" data-testid="ak-enq-count">' + enquiries.length + '</div><div class="ak-kpi-label">' + esc(t.kpiEnq) + "</div></div>" +
+      '<div class="ak-kpi"><div class="ak-kpi-value">100%</div><div class="ak-kpi-label">' + esc(t.kpiConsent) + "</div></div>" +
+      '<div class="ak-kpi"><div class="ak-kpi-value ak-num">' + called + " / " + enquiries.length + '</div><div class="ak-kpi-label">' + esc(t.kpiCalled) + "</div></div>" +
+      '<div class="ak-kpi"><div class="ak-kpi-value ak-num">' + inr(enquiries.length * S.rev.price) + '</div><div class="ak-kpi-label">' + esc(t.kpiBill(inr(S.rev.price))) + "</div></div></div>" +
+      '<div class="ak-table-wrap"><table class="ak-table ak-stack" role="table"><thead role="rowgroup"><tr role="row">' +
+      [t.thWhen, t.thWho, t.thDistrict, t.thProfile, t.thCourse, t.thConsent, t.thStatus].map(function (x) { return '<th role="columnheader">' + esc(x) + "</th>"; }).join("") +
+      '</tr></thead><tbody role="rowgroup">' +
+      enquiries.map(function (q) {
+        var st = S.statuses[q.id] || "new";
+        return '<tr role="row"' + (q.mine ? ' class="mine" data-testid="ak-my-enquiry"' : "") + ">" +
+          '<td role="cell" data-label="' + esc(t.thWhen) + '">' + esc(pick(q.when)) + "</td>" +
+          '<td role="cell" data-label="' + esc(t.thWho) + '">' + esc(q.who) + "</td>" +
+          '<td role="cell" data-label="' + esc(t.thDistrict) + '">' + esc(pick(q.district)) + "</td>" +
+          '<td role="cell" data-label="' + esc(t.thProfile) + '">' + esc(pick(q.profile)) + "</td>" +
+          '<td role="cell" data-label="' + esc(t.thCourse) + '">' + esc(pick(q.course)) + "</td>" +
+          '<td role="cell" data-label="' + esc(t.thConsent) + '"><span class="ak-tag ak-tag-brand">✓ ' + esc(t.consentBadge) + "</span></td>" +
+          '<td role="cell" data-label="' + esc(t.thStatus) + '"><select class="ak-select" id="st-' + q.id + '" data-act="status" data-id="' + q.id + '" aria-label="' + esc(t.thStatus + ": " + q.who) + '">' +
+          statusKeys.map(function (s) { return '<option value="' + s + '"' + (s === st ? " selected" : "") + ">" + esc(t.status[s]) + "</option>"; }).join("") +
+          "</select></td></tr>";
+      }).join("") + "</tbody></table></div>" +
+      (e.sentToPartner ? "" : '<p class="ak-muted">' + esc(t.yoursHint) + "</p>") + "</div>" +
+      '<div class="ak-grid-2" style="margin-top:0.85rem"><div class="ak-card"><h3>' + esc(t.rulesTitle) + '</h3><ul class="ak-plain-list">' +
+      t.rules.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul></div>" +
+      '<div class="ak-card" style="margin-top:0"><h3>' + esc(t.bundleTitle) + '</h3><ul class="ak-plain-list">' +
+      t.bundle.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + '</ul><div class="ak-alert ak-alert-amber">' + esc(t.priceNote) + "</div></div></div></section>";
+    return h;
+  }
+
+  var REV_FIELDS = [
+    ["passed", "inPassed", 1000], ["reachPct", "inReach", 1], ["completePct", "inComplete", 1], ["coveragePct", "inCoverage", 5],
+    ["consentPct", "inConsent", 1], ["perStudent", "inPer", 0.5], ["paidPct", "inPaid", 5], ["price", "inPrice", 10],
+    ["bundles", "inBundles", 5], ["bundlePrice", "inBundlePrice", 5000], ["counselPct", "inCounsel", 0.5], ["counselPrice", "inCounselPrice", 10]
+  ];
+
+  function revOutputs(t) {
+    var r = computeRevenue(S.rev);
+    return '<div class="ak-item"><strong>' + esc(t.funnel) + "</strong>" +
+      "<p>" + esc(t.fPlans) + ': <strong class="ak-num" data-testid="ak-plans">' + Math.round(r.plans).toLocaleString("en-IN") + "</strong></p>" +
+      "<p>" + esc(t.fFamilies) + ': <strong class="ak-num" data-testid="ak-families">' + Math.round(r.families).toLocaleString("en-IN") + "</strong></p>" +
+      "<p>" + esc(t.fEnquiries) + ': <strong class="ak-num" data-testid="ak-enquiries">' + Math.round(r.enquiries).toLocaleString("en-IN") + "</strong></p></div>" +
+      '<div class="ak-item" style="margin-top:0.6rem">' +
+      "<p>" + esc(t.rEnq) + ': <strong class="ak-num" data-testid="ak-enq-rev">' + money(r.enqRev, S.lang) + "</strong></p>" +
+      "<p>" + esc(t.rBundle) + ': <strong class="ak-num" data-testid="ak-bundle-rev">' + money(r.bundleRev, S.lang) + "</strong></p>" +
+      "<p>" + esc(t.rCounsel) + ': <strong class="ak-num" data-testid="ak-counsel-rev">' + money(r.counselRev, S.lang) + "</strong></p></div>" +
+      '<div class="ak-item ak-total-box" style="margin-top:0.6rem"><div class="ak-muted">' + esc(t.rTotal) + '</div><div class="ak-total ak-num" data-testid="ak-total">' + money(r.total, S.lang) + "</div></div>" +
+      '<p class="ak-muted">' + esc(t.notForecast) + "</p>";
+  }
+
+  function scenarioButtons(t) {
+    return ["low", "base", "high"].map(function (s) {
+      return '<button type="button" class="ak-tab" id="scen-' + s + '" data-act="preset" data-scen="' + s + '" aria-pressed="' + (S.scenario === s) + '">' + esc(t.scen[s]) + "</button>";
+    }).join("") + (S.scenario === "custom" ? '<span class="ak-tag">' + esc(t.scen.custom) + "</span>" : "");
+  }
+
+  function renderRevenue(t) {
+    return '<section id="panel-revenue" role="tabpanel" aria-labelledby="tab-revenue"' + (S._animTab ? ' class="ak-enter"' : "") + '><div class="ak-card"><h2>' + esc(t.revTitle) + "</h2>" +
+      '<p class="ak-muted" style="margin-top:0">' + esc(t.revLead) + "</p>" +
+      '<div class="ak-row" role="group" aria-label="' + esc(t.scenLabel) + '" style="margin-bottom:0.85rem" id="ak-scen">' + scenarioButtons(t) + "</div>" +
+      '<div class="ak-grid-2"><div class="ak-grid-2" style="align-content:start">' +
+      REV_FIELDS.map(function (f) {
+        var k = f[0];
+        return '<div class="ak-field" style="margin:0"><label for="rev-' + k + '" style="font-size:0.85rem">' + esc(t[f[1]]) + "</label>" +
+          '<input id="rev-' + k + '" class="ak-input ak-num" type="number" min="0"' + (PERCENT_FIELDS.indexOf(k) !== -1 ? ' max="100"' : "") +
+          ' step="' + f[2] + '" value="' + S.rev[k] + '" data-act="rev" data-k="' + k + '"></div>';
+      }).join("") + '</div><div id="ak-rev-out">' + revOutputs(t) + "</div></div></div>" +
+      '<div class="ak-grid-2" style="margin-top:0.85rem"><div class="ak-card" style="margin:0"><h3>' + esc(t.whySmall) + '</h3><p style="margin:0">' + esc(t.whySmallText) + "</p></div>" +
+      '<div class="ak-card" style="margin:0"><h3>' + esc(t.mustBeTrue) + '</h3><ol class="ak-plain-list" style="padding-left:1.2rem">' +
+      t.mustList.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ol></div></div></section>";
+  }
+
+  function renderPlatform(t) {
+    return '<section id="panel-platform" role="tabpanel" aria-labelledby="tab-platform"' + (S._animTab ? ' class="ak-enter"' : "") + '><div class="ak-card"><h2>' + esc(t.platTitle) + "</h2>" +
+      '<p class="ak-muted" style="margin-top:0">' + esc(t.platLead) + '</p><ol class="ak-timeline">' +
+      t.journey.map(function (j) {
+        return '<li class="' + (j.url ? "" : "new") + '"><div class="ak-when">' + esc(j.when) + '</div><div class="ak-row" style="gap:0.4rem"><strong>' + esc(j.h) + "</strong>" +
+          '<span class="ak-tag ' + (j.url ? "" : "ak-tag-amber") + '">' + esc(j.url ? t.runsToday : t.isNew) + "</span></div>" +
+          '<div class="ak-desc">' + esc(j.p) + " " + (j.url ? '<a href="' + j.url + '"' + EXT + ' aria-label="' + esc(t.sourceFor(j.h)) + '">↗</a>' : "") + "</div></li>";
+      }).join("") + "</ol></div>" +
+      '<div class="ak-card"><h3>' + esc(t.gainsTitle) + '</h3><div class="ak-table-wrap"><table class="ak-table ak-stack" role="table"><thead role="rowgroup"><tr role="row">' +
+      '<th role="columnheader">' + esc(t.gainsWho) + '</th><th role="columnheader">' + esc(t.gainsWhat) + '</th></tr></thead><tbody role="rowgroup">' +
+      t.gains.map(function (g) {
+        return '<tr role="row"><td role="cell" data-label="' + esc(t.gainsWho) + '"><strong>' + esc(g.who) + '</strong></td><td role="cell" data-label="' + esc(t.gainsWhat) + '">' + esc(g.what) + "</td></tr>";
+      }).join("") + "</tbody></table></div></div></section>";
+  }
+
+  function siteNav(t) {
+    return '<nav class="ak-nav" aria-label="' + esc(t.navLabel) + '"><a href="/amar-ujala/study" target="_top">' + esc(t.backStudy) + '</a><a href="/" target="_top">' + esc(t.portfolio) + "</a></nav>";
+  }
+
+  function render() {
+    var t = COPY[S.lang];
+    var plan = computePlan();
+    // Capture focus so a re-render does not drop the reader's place.
+    var active = document.activeElement;
+    var focusId = active && active.id && root.contains(active) ? active.id : "";
+    var selStart = null, selEnd = null;
+    try { if (focusId && typeof active.selectionStart === "number") { selStart = active.selectionStart; selEnd = active.selectionEnd; } } catch (e) { /* not a text field */ }
+
+    S._animTab = !firstRender && S.tab !== lastTab;
+    S._animStep = !firstRender && (S.step !== lastStep || S._animTab);
+
+    document.documentElement.lang = S.lang;
+    notice.innerHTML = t.notice;
+
+    var h = '<div class="ak-wrap">' + siteNav(t) +
+      '<div class="ak-topbar"><div class="ak-tags"><span class="ak-tag ak-tag-brand">' + esc(t.badge) + '</span><span class="ak-tag ak-tag-amber">' + esc(t.independent) + "</span></div>" +
+      '<div role="group" aria-label="Language / भाषा" class="ak-lang"><button type="button" lang="en" id="lang-en" data-act="lang" data-lang="en" aria-pressed="' + (S.lang === "en") + '">English</button>' +
+      '<button type="button" lang="hi" id="lang-hi" data-act="lang" data-lang="hi" aria-pressed="' + (S.lang === "hi") + '">हिंदी</button></div></div>' +
+      '<header class="ak-hero"><h1>' + esc(t.title) + '</h1><p class="ak-lead">' + esc(t.lead) + "</p>" +
+      '<div class="ak-row"><a class="ak-btn" href="/amar-ujala/study" target="_top">' + esc(t.planLink) + ' →</a><span class="ak-tag">' + esc(t.demoData) + "</span></div></header>" +
+      '<section class="ak-kpis" aria-label="' + esc(t.kpiLabel) + '">' +
+      t.kpis.map(function (k) { return '<div class="ak-kpi"><div class="ak-kpi-value">' + esc(k.v) + '</div><div class="ak-kpi-label">' + esc(k.l) + '</div><div class="ak-kpi-src">' + esc(k.s) + "</div></div>"; }).join("") +
+      "</section>" +
+      '<div class="ak-tabs" role="tablist" aria-label="' + esc(t.tabsLabel) + '">' +
+      TABS.map(function (id) {
+        var sel = S.tab === id;
+        return '<button type="button" role="tab" id="tab-' + id + '" aria-selected="' + sel + '"' + (sel ? ' aria-controls="panel-' + id + '"' : "") +
+          ' tabindex="' + (sel ? 0 : -1) + '" class="ak-tab" data-act="tab" data-tab="' + id + '">' + esc(t.tabs[id]) + "</button>";
+      }).join("") + "</div>";
+
+    if (S.tab === "student") h += renderStudent(t, plan);
+    else if (S.tab === "college") h += renderCollege(t, plan);
+    else if (S.tab === "revenue") h += renderRevenue(t);
+    else h += renderPlatform(t);
+
+    h += '<footer class="ak-footer"><p>' + esc(t.footer) + "</p><strong>" + esc(t.sourcesTitle) + "</strong><ol>" +
+      SOURCE_LIST.map(function (s) { return '<li><a href="' + s.url + '"' + EXT + ">" + esc(s.label) + "</a></li>"; }).join("") +
+      "</ol>" + siteNav(t) + "</footer></div>";
+
+    root.innerHTML = h;
+
+    var stepChanged = S.step !== lastStep;
+    if (!firstRender && stepChanged && S.tab === "student") {
+      // Move focus to the new step's heading so keyboard and screen-reader
+      // users land on the new content.
+      var head = document.getElementById("ak-step-h");
+      if (head) head.focus({ preventScroll: false });
+    } else if (focusId) {
+      var el = document.getElementById(focusId);
+      if (el) {
+        el.focus({ preventScroll: true });
+        if (selStart !== null) { try { el.setSelectionRange(selStart, selEnd); } catch (e) { /* ignore */ } }
+      }
+    }
+    lastStep = S.step;
+    lastTab = S.tab;
+    firstRender = false;
+  }
+
+  /* ---------- Actions ---------- */
+  function setLang(next) {
+    S.lang = next;
+    saveLang(next);
+    try {
+      var url = new URL(window.location.href);
+      if (url.searchParams.has("lang")) {
+        url.searchParams.set("lang", next);
+        window.history.replaceState(window.history.state, "", url);
+      }
+    } catch (e) { /* history unavailable */ }
+    render();
+  }
+
+  function runCheck() {
+    var hit = findFakeUniversity(S.checkText);
+    if (hit) {
+      S.checkMatch = (S.lang === "hi" && hit.hi ? hit.hi : hit.name) + ", " + hit.place + " (" + hit.state + ")";
+      S.checkResult = "fake";
+    } else {
+      var words = S.checkText.trim().split(/\s+/).filter(function (w) { return w.length > 1; });
+      S.checkResult = words.length < 2 ? "short" : "ok";
+    }
+    var live = document.getElementById("ak-check-live");
+    if (live) live.innerHTML = checkResultHtml(COPY[S.lang]);
+  }
+
+  function updateRevenueOutputs() {
+    var t = COPY[S.lang];
+    var out = document.getElementById("ak-rev-out");
+    if (out) out.innerHTML = revOutputs(t);
+    var sc = document.getElementById("ak-scen");
+    if (sc) {
+      // Keep the scenario buttons in place (focus stays put); only sync state.
+      ["low", "base", "high"].forEach(function (s) {
+        var b = document.getElementById("scen-" + s);
+        if (b) b.setAttribute("aria-pressed", String(S.scenario === s));
+      });
+      var tag = sc.querySelector(".ak-tag");
+      if (S.scenario === "custom" && !tag) { tag = document.createElement("span"); tag.className = "ak-tag"; tag.textContent = t.scen.custom; sc.appendChild(tag); }
+      if (S.scenario !== "custom" && tag) tag.remove();
+    }
+  }
+
+  root.addEventListener("click", function (e) {
+    var el = e.target.closest("[data-act]");
+    if (!el || !root.contains(el)) return;
+    var act = el.getAttribute("data-act");
+    switch (act) {
+      case "lang": setLang(el.getAttribute("data-lang")); break;
+      case "tab": S.tab = el.getAttribute("data-tab"); render(); break;
+      case "goStep": S.step = Number(el.getAttribute("data-step")); render(); break;
+      case "toConsent": S.savedOnly = false; resetConsent(); S.step = 3; render(); break;
+      case "saveOnly": S.savedOnly = true; S.step = 4; render(); break;
+      case "consentBack": resetConsent(); S.step = 2; render(); break;
+      case "sendOtp": S.otpSent = true; render(); break;
+      case "verify": S.otpState = S.otp === DEMO_OTP ? "ok" : "wrong"; render(); break;
+      case "seeDashboard": S.tab = "college"; render(); break;
+      case "withdraw": S.withdrawn = true; render(); break;
+      case "startOver": reset(); render(); break;
+      case "preset": {
+        var s = el.getAttribute("data-scen");
+        S.scenario = s; S.rev = copyObj(PRESETS[s]);
+        render();
+        break;
+      }
+    }
+  });
+
+  root.addEventListener("change", function (e) {
+    var el = e.target;
+    if (el.hasAttribute("data-chip")) {
+      // Only a known group, and only one of that group's own option ids, ever
+      // reaches state: a value read back from the page is never trusted.
+      var name = el.getAttribute("data-chip");
+      var group = CHIP_GROUPS[name];
+      var opt = group && find(group, function (o) { return o.id === el.value; });
+      if (!opt) return;
+      if (name === "adult") { S.adult = opt.id; resetConsent(); render(); }
+      else S[name] = opt.id;
+      return;
+    }
+    var act = el.getAttribute("data-act");
+    if (act === "district") S.districtIdx = Number(el.value);
+    else if (act === "college") {
+      var id = el.getAttribute("data-id");
+      var i = S.chosen.indexOf(id);
+      if (i === -1) S.chosen.push(id); else S.chosen.splice(i, 1);
+      // Any change to who receives the details voids an earlier consent.
+      S.agree = false;
+      render();
+    } else if (act === "agree") { S.agree = el.checked; render(); }
+    else if (act === "status") { S.statuses[el.getAttribute("data-id")] = el.value; render(); }
+  });
+
+  root.addEventListener("input", function (e) {
+    var el = e.target;
+    var act = el.getAttribute("data-act");
+    if (act === "marks") {
+      S.marks = Number(el.value);
+      var v = document.getElementById("ak-marks-val");
+      if (v) v.textContent = S.marks + "%";
+    } else if (act === "checkText") {
+      S.checkText = el.value; S.checkResult = "";
+      var live = document.getElementById("ak-check-live");
+      if (live) live.innerHTML = "";
+    } else if (act === "name") {
+      S.studentName = el.value;
+    } else if (act === "phone") {
+      S.phone = el.value.replace(/\D/g, "");
+      resetConsent();
+      render();
+    } else if (act === "otp") {
+      S.otp = el.value.replace(/\D/g, "");
+      S.otpState = ""; S.agree = false;
+      render();
+    } else if (act === "rev") {
+      var k = el.getAttribute("data-k");
+      var n = Number(el.value);
+      if (!isFinite(n) || n < 0) n = 0;
+      if (PERCENT_FIELDS.indexOf(k) !== -1) n = Math.min(100, n);
+      S.scenario = "custom";
+      S.rev[k] = n;
+      // Mirror a controlled input: write back only when the number differs.
+      if (el.value === "" || Number(el.value) !== n) el.value = String(n);
+      updateRevenueOutputs();
+    }
+  });
+
+  root.addEventListener("keydown", function (e) {
+    var el = e.target;
+    if (el.getAttribute && el.getAttribute("role") === "tab") {
+      var i = TABS.indexOf(S.tab), next = -1;
+      if (e.key === "ArrowRight") next = (i + 1) % TABS.length;
+      if (e.key === "ArrowLeft") next = (i - 1 + TABS.length) % TABS.length;
+      if (e.key === "Home") next = 0;
+      if (e.key === "End") next = TABS.length - 1;
+      if (next < 0) return;
+      e.preventDefault();
+      S.tab = TABS[next];
+      render();
+      var tb = document.getElementById("tab-" + TABS[next]);
+      if (tb) tb.focus();
+      return;
+    }
+    if (el.id === "ak-otp" && e.key === "Enter") {
+      e.preventDefault();
+      S.otpState = S.otp === DEMO_OTP ? "ok" : "wrong";
+      render();
+    }
+  });
+
+  root.addEventListener("submit", function (e) {
+    var form = e.target.getAttribute("data-form");
+    if (!form) return;
+    e.preventDefault();
+    if (form === "questions") { S.step = 2; render(); }
+    else if (form === "check") runCheck();
+    else if (form === "consent") { if (S.otpState === "ok" && S.agree) { S.step = 4; render(); } }
+  });
+
+  // Keep other open tabs in step with a language change made elsewhere.
+  window.addEventListener("storage", function (e) {
+    if (e.key === STORAGE_KEY && isLang(e.newValue) && e.newValue !== S.lang) { S.lang = e.newValue; render(); }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
