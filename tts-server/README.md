@@ -4,7 +4,11 @@ This service generates narration with XTTS-v2 using `audio/anchit.m4a` as the re
 
 ## Local Setup
 
-Use Python 3.10 or 3.11. Python 3.14 is not currently a safe target for Coqui TTS.
+Use Python 3.11 (the pinned set in `requirements.txt` is verified there). It uses
+`coqui-tts`, the maintained fork of Coqui TTS, which supports Python 3.10–3.14;
+the original `TTS` package stopped at 0.22.0 and cannot install above 3.11.
+`requirements.txt` pins PyTorch too: on a CPU-only machine add
+`--extra-index-url https://download.pytorch.org/whl/cpu` to the `pip install`.
 
 ```bash
 brew install ffmpeg python@3.11

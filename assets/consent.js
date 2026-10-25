@@ -84,7 +84,12 @@
          the same band: measured on the home page, the chat button occupies
          22-82px from the bottom and this bar occupies 0-73px, so the bar's
          z-index simply buried it. Lift them clear for as long as the bar is
-         up, rather than covering a control the visitor may want. */
+         up, rather than covering a control the visitor may want.
+         Not #cinHome or #cinMotion by id: cinematic.js places the copies it
+         injects itself, and reads --consent-h to do it. Lifting them here as
+         well moved the toggle onto content it had just avoided, and pushed
+         the home chip off the top of the screen whenever it was top-anchored.
+         A page that hand-writes its own chip marks it data-floating-control. */
       /* And the page itself makes room, rather than having its last lines sit
          underneath the bar. A bottom overlay that hides content is still
          hiding content; reserving the space is the honest version, and it
@@ -92,15 +97,11 @@
       'html[data-consent-open="1"] body{' +
         'padding-bottom:calc(var(--consent-h, 0px) + 8px)}' +
       'html[data-consent-open="1"] #chatReturnBtn,' +
-      'html[data-consent-open="1"] #cinHome,' +
-      'html[data-consent-open="1"] #cinMotion,' +
       'html[data-consent-open="1"] [data-floating-control]{' +
         'transform:translateY(calc(-1 * var(--consent-h, 0px)));' +
         'transition:transform .32s cubic-bezier(.22,1,.36,1)}' +
       '@media (prefers-reduced-motion: reduce){' +
         'html[data-consent-open="1"] #chatReturnBtn,' +
-        'html[data-consent-open="1"] #cinHome,' +
-        'html[data-consent-open="1"] #cinMotion,' +
         'html[data-consent-open="1"] [data-floating-control]{transition:none}}' +
       '@media (max-width:560px){#consentBar .cb-actions{width:100%}' +
         '#consentBar .cb-btn{flex:1}' +
@@ -116,6 +117,10 @@
 
     // Next frame, so the entrance transition has a start value to animate from.
     function markOpen() {
+      // The ResizeObserver below fires once more when the bar is removed, at
+      // height 0. Without this it wrote data-consent-open="1" back onto a page
+      // that had just answered, and the state said open from then on.
+      if (bar.getAttribute('data-in') !== '1' || !bar.isConnected) return;
       var h = Math.ceil(bar.getBoundingClientRect().height);
       // Written only when it changes: a custom property on the root
       // invalidates the computed style of every element on the page.

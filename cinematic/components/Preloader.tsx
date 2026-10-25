@@ -21,9 +21,11 @@ export default function Preloader() {
     const id = setInterval(() => {
       frame++;
       const settled = Math.floor(frame / 1.6);
+      // Capture the index: React may run the updater after `line++` below.
+      const current = line;
       setRows((prev) => {
         const next = [...prev];
-        next[line] = LINES[line]
+        next[current] = LINES[current]
           .split('')
           .map((ch, i) => (ch === ' ' ? ' ' : i < settled ? ch : GLYPHS[(Math.random() * GLYPHS.length) | 0]))
           .join('');

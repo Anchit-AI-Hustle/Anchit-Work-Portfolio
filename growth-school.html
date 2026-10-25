@@ -72,8 +72,12 @@
      closed). Wherever the rail is on screen, bottom-left is inside its list,
      so the chip always covered a chapter link; there the route home is the
      rail's own .gs-home link (the `home` option above), and
-     growth-school.css hides this one. -->
-<a id="cinHome" href="/" title="Back to the main portfolio"
+     growth-school.css hides this one.
+
+     data-floating-control is what lifts it clear of the consent bar while
+     that is up: cinematic.js does that for the chip it places, and this one
+     is not placed by anything. -->
+<a id="cinHome" href="/" title="Back to the main portfolio" data-floating-control
    style="position:fixed;left:14px;bottom:14px;z-index:2147483000;font:500 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em;text-transform:uppercase;padding:7px 11px;border-radius:99px;text-decoration:none;color:#B3A996;background:#16130F;border:1px solid rgba(255,247,232,.16);opacity:.78">&#8592; Anchit Tandon</a>
 </body>
 </html>
