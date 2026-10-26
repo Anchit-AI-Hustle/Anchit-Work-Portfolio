@@ -66,15 +66,15 @@ button{font:inherit;cursor:pointer}
 .brand-name{display:block;font-family:var(--display);font-size:1.02rem;font-weight:800;letter-spacing:-.02em;color:#fff;line-height:1.15}
 .brand-sub{display:block;font-family:var(--mono);font-size:.55rem;letter-spacing:.15em;color:#8E8AA8;text-transform:uppercase;margin-top:4px;line-height:1.3}
 /* Route home. Whenever the desk is on screen - beside the lesson, or as the open
-   drawer - it lives here, in the desk's own header. Only when the desk is hidden
-   does the fixed #cinHome chip at the foot of the page do the job. Exactly one
-   shows: a fixed chip over the desk always covered a chapter strip or Library.
-   Same 860px breakpoint as the drawer. */
+   drawer - it lives here, in the desk's own header. When the desk is hidden
+   (860px and under, drawer closed) it is the .tb-home button in the top bar,
+   in the flow of the page. It used to be a fixed chip in the bottom-left
+   corner, and on a phone that corner is always over a lesson as you scroll. */
 .desk-home{display:inline-block;margin-bottom:14px;padding:4px 10px;border:1px solid rgba(255,255,255,.16);
   border-radius:99px;font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;
   color:#CFCADF;text-decoration:none;line-height:1.4}
 .desk-home:hover{color:#fff;border-color:var(--signal)}
-#cinHome{display:none}
+.tb-home{display:none;text-decoration:none;color:var(--ink)}
 .master{margin-top:4px}
 .master-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
 .master-label{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;color:#8E8AA8}
@@ -126,11 +126,11 @@ button{font:inherit;cursor:pointer}
   display:inline-flex;align-items:center;gap:6px}
 .tb-btn:hover{border-color:var(--ink);}
 .tb-btn.live{background:var(--ink);color:#fff;border-color:var(--ink)}
-.wrap{padding:0 34px 90px;width:100%;max-width:860px;margin:0 auto}
+.wrap{padding:0 34px 90px;width:100%;max-width:860px;margin:0 auto;overflow-x:clip}
 
 /* ---------- HERO ---------- */
 .hero{padding:64px 0 30px;position:relative}
-.eyebrow{font-family:var(--mono);font-size:.63rem;letter-spacing:.2em;color:var(--signal);margin-bottom:20px}
+.eyebrow{font-family:var(--mono);font-size:.63rem;letter-spacing:.2em;color:var(--signal-text);margin-bottom:20px}
 .hero h1{font-size:clamp(2.5rem,6.4vw,4.35rem);line-height:.96;letter-spacing:-.038em}
 .hero h1 em{font-style:normal;color:var(--signal)}
 .hero-lede{font-size:1.18rem;color:#3A3B5C;margin:22px 0 0;max-width:44ch}
@@ -185,7 +185,7 @@ p{margin:0 0 14px}
 .st-play{background:#FAFBFB}
 .st-edge{background:#FDF9F4}
 .stratum p:last-child{margin-bottom:0}
-.steps{margin:0;padding:0;list-style:none;display:grid;gap:9px;counter-reset:s}
+.steps{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:minmax(0,1fr);gap:9px;counter-reset:s}
 .steps li{position:relative;padding-left:30px;font-size:1rem;counter-increment:s}
 .steps li:before{content:counter(s,decimal-leading-zero);position:absolute;left:0;top:.16em;
   font-family:var(--mono);font-size:.62rem;color:var(--depth);font-weight:700}
@@ -194,7 +194,7 @@ p{margin:0 0 14px}
 .bullets li:before{content:"";position:absolute;left:2px;top:.66em;width:7px;height:7px;
   border:1.5px solid var(--depth);border-radius:50%}
 .kv{font-family:var(--mono);font-size:.82rem;background:#F1EFEA;border:1px solid var(--line);
-  border-radius:5px;padding:1px 6px;white-space:nowrap;text-transform:none;letter-spacing:0}
+  border-radius:5px;padding:1px 6px;white-space:normal;overflow-wrap:anywhere;-webkit-box-decoration-break:clone;box-decoration-break:clone;text-transform:none;letter-spacing:0}
 
 /* love-note (personalised build only) */
 .note{margin:18px 0 0;padding:18px 22px;border-radius:var(--r-m);
@@ -219,7 +219,7 @@ p{margin:0 0 14px}
   font-family:var(--mono);font-size:.56rem;letter-spacing:.11em;text-transform:uppercase;color:#CFCADF;text-align:left}
 .video-meta{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;margin-top:10px;font-size:.92rem;color:var(--quiet)}
 .video-meta b{color:var(--ink);font-family:var(--display);font-weight:700;font-size:1rem;letter-spacing:-.015em}
-.video-meta a{color:var(--depth)}
+.video-meta a{color:var(--depth-text)}
 
 /* ---------- LAB / SIMULATION ---------- */
 .lab{background:var(--ink);color:#EDEAF6;border-radius:var(--r-l);padding:26px 28px;margin:24px 0;border:1px solid var(--ink-deep)}
@@ -249,7 +249,7 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bac
 .ro-k{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:#8E8AA8}
 .ro-v{font-family:var(--display);font-size:1.12rem;font-weight:800;color:#fff}
 .ro-v.good{color:#5BD99C} .ro-v.bad{color:#FF8FA3} .ro-v.warn{color:var(--flare)}
-.formula{display:block;font-family:var(--mono);font-size:.63rem;color:#7B7694;letter-spacing:.02em;margin-top:4px;text-transform:none;line-height:1.4}
+.formula{display:block;font-family:var(--mono);font-size:.63rem;color:#A39EB9;letter-spacing:.02em;margin-top:4px;text-transform:none;line-height:1.4}
 .ro-k{max-width:62%;color:#A6A2BE}   /* 4.9:1 on the lab ground; was 4.34 */
 .lab-note{margin-top:16px;padding:13px 16px;background:rgba(255,182,39,.10);border:1px solid rgba(255,182,39,.30);
   border-radius:10px;font-size:.94rem;color:#F0DCC0}
@@ -298,8 +298,8 @@ canvas{width:100%;display:block;border-radius:10px;background:rgba(255,255,255,.
 .activity{border:1px solid var(--line);border-left:3px solid var(--depth);border-radius:0 var(--r-l) var(--r-l) 0;
   background:var(--card);padding:24px 28px;margin:24px 0}
 .act-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:12px}
-.act-head .mono{color:var(--depth)}
-.act-cost{font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;color:var(--ok);
+.act-head .mono{color:var(--depth-text)}
+.act-cost{font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;color:var(--ok-text);
   border:1px solid #BFE3D2;background:#F0F9F5;border-radius:99px;padding:4px 10px}
 .check{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:9px}
 .check li{display:flex;gap:11px;align-items:flex-start;font-size:1rem}
@@ -362,9 +362,8 @@ canvas{width:100%;display:block;border-radius:10px;background:rgba(255,255,255,.
 @media (max-width:860px){
   body{font-size:17px}
   .desk-home{display:none}
-  #cinHome{display:block}
+  .tb-home{display:inline-flex;align-items:center}
   .desk.open .desk-home{display:inline-block}
-  body:has(.desk.open) #cinHome{display:none}
   .app{grid-template-columns:1fr}
   .desk{position:fixed;inset:0 auto 0 0;width:280px;z-index:80;transform:translateX(-101%);
     transition:transform .28s cubic-bezier(.2,.8,.2,1);height:100vh}
@@ -391,6 +390,12 @@ canvas{width:100%;display:block;border-radius:10px;background:rgba(255,255,255,.
 
 /* ══════════════════ CHAPTER COLOUR CODING ══════════════════ */
 :root{--ch:var(--signal);--ch-a:rgba(232,68,124,.10);--ch-b:rgba(232,68,124,.22)}
+/* Text-safe twins. The accents are tuned for fills, bars and dots; as small type
+   on paper several measured 2.8-4.1:1. Mixed 60/40 with ink, every one of the
+   twelve clears 4.9:1 on paper, card and rule. Declared on the same elements
+   as --ch so var(--ch) resolves per chapter, not once at the root. */
+:root,.chapter,.strip,.dg-wrap{--ch-ink:color-mix(in srgb,var(--ch) 60%,var(--ink))}
+:root{--ok-text:color-mix(in srgb,var(--ok) 60%,var(--ink))}
 .chapter[data-c="0"],.strip[data-c="0"],.dg-wrap[data-c="0"]{--ch:#6E5BD0;--ch-a:#6E5BD01a;--ch-b:#6E5BD033}
 .chapter[data-c="1"],.strip[data-c="1"],.dg-wrap[data-c="1"]{--ch:#E8447C;--ch-a:#E8447C1a;--ch-b:#E8447C33}
 .chapter[data-c="2"],.strip[data-c="2"],.dg-wrap[data-c="2"]{--ch:#1B9099;--ch-a:#1B90991a;--ch-b:#1B909933}
@@ -404,14 +409,14 @@ canvas{width:100%;display:block;border-radius:10px;background:rgba(255,255,255,.
 .chapter[data-c="10"],.strip[data-c="10"],.dg-wrap[data-c="10"]{--ch:#D33F68;--ch-a:#D33F681a;--ch-b:#D33F6833}
 .chapter[data-c="11"],.strip[data-c="11"],.dg-wrap[data-c="11"]{--ch:#12907A;--ch-a:#12907A1a;--ch-b:#12907A33}
 
-.ch-num{color:var(--ch)}
+.ch-num{color:var(--ch-ink)}
 .ch-head h1{position:relative}
 .ch-head h1:after{content:"";display:block;width:64px;height:5px;border-radius:3px;
   background:var(--ch);margin-top:14px;transform-origin:left;animation:growW .7s var(--ease) both}
 @keyframes growW{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 .ch-goals{border-left-color:var(--ch)}
 .ch-goals li:before{color:var(--ch)}
-.sec-head .n{color:var(--ch)}
+.sec-head .n{color:var(--ch-ink)}
 .sec-head .l{background:linear-gradient(90deg,var(--ch-b),transparent)}
 .strip .fader i{background:linear-gradient(180deg,var(--ch),var(--flare))}
 .strip.on{background:linear-gradient(90deg,var(--ch-a),rgba(255,255,255,.02));
@@ -623,7 +628,7 @@ canvas{width:100%;display:block;border-radius:10px;background:rgba(255,255,255,.
 abbr.gl{text-decoration:none;border-bottom:1.5px dotted var(--ch);cursor:help;position:relative;
   outline:none}
 abbr.gl:after{content:attr(data-def);position:absolute;left:50%;bottom:calc(100% + 11px);
-  transform:translateX(-50%) translateY(5px);width:min(300px,74vw);padding:12px 14px;
+  transform:translateX(calc(-50% + var(--gl-x,0px))) translateY(5px);width:min(300px,74vw);padding:12px 14px;
   background:var(--ink);color:#EDEAF4;font-family:var(--body);font-size:.86rem;line-height:1.5;
   border-radius:10px;box-shadow:0 14px 34px rgba(18,19,43,.34);opacity:0;pointer-events:none;
   transition:.18s var(--ease);z-index:40;text-align:left;letter-spacing:0}
@@ -632,6 +637,7 @@ abbr.gl:before{content:"";position:absolute;left:50%;bottom:calc(100% + 5px);
   opacity:0;transition:.18s var(--ease);z-index:41}
 abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:before{
   opacity:1;transform:translateX(-50%) translateY(0)}
+abbr.gl:hover:after,abbr.gl:focus:after{transform:translateX(calc(-50% + var(--gl-x,0px))) translateY(0)}
 
 /* ══════════════════ LAB TOUR ══════════════════ */
 .tour{margin:4px 0 20px}
@@ -735,50 +741,6 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
    A page that genuinely supports dark is left alone, so shipping this is the
    fix; `color-scheme` below is what tells the browser we mean it. */
 :root{color-scheme:light dark}
-@media (prefers-color-scheme: dark){
-  :root{
-    --ink:#ECE9F5;          /* body text, now light on dark            */
-    --ink-soft:#C9C4DC;
-    --ink-deep:#FFFFFF;
-    --sheet:#101126;        /* page ground                             */
-    --card:#191B33;         /* raised surfaces: lessons, quiz, activity */
-    --quiet:#A29DB8;        /* 5.9:1 on --card                          */
-    --line:#2E3052;
-    --line-soft:#242641;
-    --signal:#FF6E9C;       /* lifted from #E8447C for contrast on dark */
-    --flare:#FFC24D;
-    --depth:#4FC3C9;
-    --ok:#4FD18F;
-    --warn:#FF8A4C;
-  }
-  body{background:var(--sheet)}
-  .lesson,.quiz,.activity,.card,.notes,.rv,.dg-txt,.gterm,.tool{
-    background:var(--card);border-color:var(--line)}
-  .desk{background:#0B0C1C;border-right-color:var(--line)}
-  .topbar{background:rgba(16,17,38,.82);border-bottom-color:var(--line)}
-  .tb-btn,.desk-btn,.btn,.dg-b{background:var(--card);border-color:var(--line);color:var(--ink)}
-  .tb-btn:hover,.desk-btn:hover,.btn:hover,.dg-b:hover{border-color:var(--ch);color:var(--ch)}
-  .opt{background:var(--card);border-color:var(--line);color:var(--ink)}
-  .opt:hover:not(.locked){background:#20223E}
-  .explain{background:#1C1E38}
-  .ch-goals,.dg-scroll{background:linear-gradient(160deg,var(--card),var(--ch-a))}
-  .dg-n rect{fill:var(--card);stroke:var(--ch)}
-  .dg-t,.dg-t2{fill:var(--ink)}
-  .dg-s,.dg-s2,.dg-l{fill:var(--quiet)}
-  .dg-out{fill:#1C1E38}
-  .dg-n.mut rect{fill:#1C1E38;stroke:var(--line)}
-  .dg-n.mut .dg-t{fill:var(--quiet)}
-  .dg-n.bad rect{fill:#3A1E28;stroke:#FF7A93}
-  .dg-n.bad .dg-t{fill:#FFB3C2}
-  .dg-axis{stroke:var(--line)}
-  .video-frame{background:#0B0C1C}
-  abbr.gl:after{background:#0B0C1C;color:#ECE9F5}
-  .skip-link{background:var(--flare);color:#12100e}
-  /* the labs were already dark; keep them distinct from the new page ground */
-  .lab{background:#0D0E20;border-color:var(--line)}
-  .sheet{color:#000}   /* print output stays on white paper */
-}
-
 /* ══════════════════ CONTRAST CORRECTIONS ══════════════════
    The stratum tags are 9px uppercase mono, so WCAG wants 4.5:1 from them, not
    the 3:1 large text gets. The display accents were tuned to be seen, not read
@@ -795,20 +757,10 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
 .st-edge .st-tag{color:var(--flare-text)}
 .ch-lede{color:var(--ink-soft)}
 
-@media (prefers-color-scheme: dark){
-  :root{
-    --signal-text:#FF9AB9;
-    --depth-text:#6FD3D9;
-    --flare-text:#FFCF6B;
-  }
-  /* The three strata keep tinted grounds in light mode; in dark they have to
-     follow the card or the buttons sitting on them end up light-on-light. */
-  .stratum,.st-signal,.st-play,.st-edge{background:var(--card)}
-  .st-play{background:#161832}
-  .st-edge{background:#1B1D36}
-  .lesson.read{box-shadow:inset 4px 0 0 var(--flare)}
-}
-
+/* Light only, on every device: the page declares color-scheme: light and these
+   are its tokens. It used to carry two prefers-color-scheme: dark blocks as
+   well; this line re-pinned --ink and --sheet but not --card or --line, so a
+   phone in dark mode drew plum text on navy cards at 1.02:1. */
 :root{ --ink:#2A1733; --ink-soft:#3D2249; --ink-deep:#1C0F24; --signal:#D6336C; --sheet:#F6F1F1; }
 .note{background:linear-gradient(180deg,#FFF1F5,#FFF9FA);border-color:#F3C6D8}
 .hero h1 em{color:var(--signal)}
@@ -951,6 +903,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
   <div class="main">
     <div class="topbar">
       <button class="tb-btn menu-btn" id="menuBtn">☰ Chapters</button>
+      <a class="tb-btn tb-home" href="/" title="Back to the main portfolio">&#8592; Home</a>
       <span class="crumb" id="crumb"></span>
       <button class="tb-btn" id="timerBtn"><span class="timer-val" id="timerVal">00:00</span> <span id="timerLbl">Start block</span></button>
       <button class="tb-btn" id="timerReset">Reset</button>
@@ -3806,7 +3759,6 @@ function mountVideo(fr){
   var f = document.createElement('iframe');
   f.src = 'https://www.youtube-nocookie.com/embed/'+vid+'?rel=0&modestbranding=1';
   f.setAttribute('allow','accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture; fullscreen');
-  f.setAttribute('allowfullscreen','');
   f.setAttribute('referrerpolicy','strict-origin-when-cross-origin');
   f.setAttribute('loading','lazy');
   f.setAttribute('title','Course video');
@@ -4913,6 +4865,22 @@ function bindDiagrams(){
   });
 }
 
+/* ─────────── glossary tips stay on screen ───────────
+   Each tip is centred on its term and up to 300px wide, so a term near either
+   edge of a phone put half the tip off screen. As a tip opens, slide it back
+   inside a 12px margin through --gl-x on that abbr (not :root), leaving the
+   arrow on the term. */
+function placeTip(e){
+  var a = e.target && e.target.closest && e.target.closest('abbr.gl'); if(!a) return;
+  var w = parseFloat(getComputedStyle(a,'::after').width) || 0; if(!w) return;
+  var r = a.getBoundingClientRect(), vw = document.documentElement.clientWidth;
+  var left = r.left + r.width/2 - w/2;
+  var shift = Math.min(Math.max(left, 12), vw - 12 - w) - left;
+  a.style.setProperty('--gl-x', Math.round(shift) + 'px');
+}
+document.addEventListener('pointerover', placeTip);
+document.addEventListener('focusin', placeTip);
+
 /* ─────────────── 2. glossary: link the first use of each term ─────────────── */
 var GL = window.__GLOSSARY__ || {};
 var GL_KEYS = Object.keys(GL).sort(function(a,b){ return b.length - a.length; });
@@ -5233,29 +5201,5 @@ if(document.readyState === 'loading') document.addEventListener('DOMContentLoade
 else boot();
 })();
 </script>
-<!-- Route back to the main portfolio. Added inline because this page does not
-     load assets/cinematic.js, which injects this on every page that does.
-
-     BOTTOM-left, not top-left. cinematic.js places its copy by asking what is
-     already in a corner and moving if the spot is taken; this hand-written one
-     had no such logic and sat at a fixed top:14/left:14 with z-index
-     2147483000. The "Chapters / Hide chapters" drawer button is a full-width
-     sticky bar at top 0, height 50 - so the chip landed inside it, over the
-     label, and won on z-index. Tapping to collapse the chapter list navigated
-     home instead: the drawer could be opened and not closed, which on a phone
-     is the whole screen. A full-width top bar takes BOTH top corners, so the
-     only honest fix is to leave the top strip alone.
-
-     Shown only while the desk is hidden (860px and under, drawer closed).
-     Wherever the desk is on screen, bottom-left is inside its column of
-     chapter strips and the Library button, so the chip always covered one;
-     there the route home is the desk's own .desk-home link, and the
-     stylesheet above hides this one.
-
-     data-floating-control is what lifts it clear of the consent bar while
-     that is up: cinematic.js does that for the chip it places, and this one
-     is not placed by anything. -->
-<a id="cinHome" href="/" title="Back to the main portfolio" data-floating-control
-   style="position:fixed;left:14px;bottom:14px;z-index:2147483000;font:500 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em;text-transform:uppercase;padding:7px 11px;border-radius:99px;text-decoration:none;color:#B3A996;background:#16130F;border:1px solid rgba(255,247,232,.16);opacity:.78">&#8592; Anchit Tandon</a>
 </body>
 </html>
