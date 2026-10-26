@@ -1,0 +1,56 @@
+/* Couture motion for Ayushi's pages, layered on ayushi.css.
+   3D  depth: cards drape in like fabric off a rail, KPI tiles turn like swatches.
+   4D  depth + time: stitch lines sewing in (runway page transitions are in
+       runway.css, which the Growth Studio and course load too),
+       the cover drifting back as the hero scrolls away.
+   5D  depth + time + the visitor: satin tilt and sheen under the pointer.
+   Rules (DESIGN.md / CLAUDE.md): transform and opacity only, no will-change at
+   rest, nothing decorative runs off screen, and every bit of it is off under
+   prefers-reduced-motion, where the pages render exactly as before. */
+
+@media (prefers-reduced-motion:no-preference){
+  /* 3D · drape. Blocks hang from their top edge and fall into place. Only
+     blocks shorter than the viewport get it (couture.js adds .c-drape): a
+     tall wrapper held off in 3D would read as a blank screen. */
+  .js .a-reveal.c-drape:not(.on){transform:perspective(1100px) rotateX(-14deg) translateY(28px)}
+  .js .a-reveal.c-drape{transform-origin:50% 0;transition:opacity .85s var(--a-ease),transform 1.05s cubic-bezier(.16,1,.3,1)}
+
+  /* 3D · swatches. KPI tiles turn in on their left edge, one after another;
+     the stagger is set inline by couture.js because a transition shorthand
+     resets transition-delay. */
+  .js .a-reveal .a-tile{transform-origin:0 50%;transition:opacity .6s var(--a-ease),transform .9s cubic-bezier(.16,1,.3,1)}
+  .js .a-reveal:not(.on) .a-tile{opacity:0;transform:perspective(900px) rotateY(-70deg)}
+
+  /* 4D · stitching. The rule before each eyebrow sews itself in. */
+  .js .a-eyebrow:before{background:repeating-linear-gradient(90deg,currentColor 0 5px,transparent 5px 8px);transform-origin:0 50%;transition:transform .9s .15s cubic-bezier(.65,0,.35,1)}
+  .js .a-reveal:not(.on) .a-eyebrow:before,.js .s-hero .a-eyebrow:before,.js .hero .a-eyebrow:before{transform:scaleX(0)}
+  .js.c-sewn .s-hero .a-eyebrow:before,.js.c-sewn .hero .a-eyebrow:before{transform:none}
+}
+
+/* 5D · satin. Fine pointers only; on touch nothing tilts. The rotation uses the
+   individual `rotate` property, so it composes with the hover lift and with
+   any transform the reveal leaves behind instead of fighting them. */
+@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+  :has(> .c-tilt){perspective:1200px}
+  .c-tilt{position:relative;overflow:clip;isolation:isolate;rotate:var(--c-rot,0 0 1 0deg);transition:rotate .6s cubic-bezier(.16,1,.3,1),transform .25s,box-shadow .25s,border-color .25s,opacity .85s var(--a-ease)}
+  .c-tilt.c-live{transition:rotate .1s linear,transform .25s,box-shadow .25s,border-color .25s,opacity .85s var(--a-ease);will-change:rotate}
+  .c-tilt::after{content:"";position:absolute;inset:-60%;z-index:3;pointer-events:none;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,255,255,.55),rgba(255,255,255,0) 34%);
+    translate:var(--c-sx,0) var(--c-sy,0);opacity:0;transition:opacity .35s}
+  .c-tilt.c-live::after{opacity:1}
+
+  /* The cover: the whole spread tilts, the monogram letters drift at two
+     depths. .cover clips its children, so depth is faked with translate
+     rather than preserve-3d, which overflow would flatten anyway. */
+  .hero:has(.cover){perspective:1400px}
+  .cover{rotate:var(--c-rot,0 0 1 0deg);transition:rotate .7s cubic-bezier(.16,1,.3,1)}
+  .cover.c-live{transition:rotate .12s linear;will-change:rotate}
+  .cover .mono span{translate:var(--c-dx,0) var(--c-dy,0);transition:translate .7s cubic-bezier(.16,1,.3,1)}
+  .cover.c-live .mono span{transition:translate .12s linear}
+}
+
+/* 4D · the cover drifts back as the hero leaves; any pointer, scroll-linked.
+   Set per element by couture.js while the hero is on screen, never on :root. */
+@media (prefers-reduced-motion:no-preference){
+  .cover{translate:0 var(--c-drift,0);scale:var(--c-scale,1)}
+}

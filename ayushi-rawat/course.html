@@ -2,6 +2,10 @@
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8" />
+<!-- Opt in to the runway page transition before anything else parses. In
+     runway.css alone, this heavy page sometimes painted before the sheet
+     applied and Chrome skipped the transition (about 1 in 4 arrivals). -->
+<style>@view-transition{navigation:auto}</style>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>A course for Ayushi❤️ — building a brand, from the question to the number</title>
 <link rel="icon" type="image/svg+xml" href="../icons/favicon.svg" />
@@ -9,6 +13,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/growth-school.css" />
+<link rel="stylesheet" href="/ayushi-rawat/runway.css"><link rel="stylesheet" href="/ayushi-rawat/tabs.css">
 <!-- seo:auto:start -->
 <!-- Managed by scripts/seo-inject.mjs — edit seo.config.json, not here. -->
 <meta name="description" content="A written course on social, search, brand and growth, built around one real question: can I start a D2C brand, and what would it cost?" />
@@ -32,6 +37,7 @@
 <!-- seo:auto:end -->
 </head>
 <body>
+<nav class="ar-tabs" aria-label="Ayushi’s pages"><span class="ar-k">Ayushi</span><a href="/ayushi-rawat">Portfolio</a><a href="/ayushi-rawat/case-studies">Case studies</a><a href="/ayushi-rawat/resume">Resume</a><a href="/marketing-101-for-ayushi#growth">Growth Studio</a><a href="/ayushi-rawat/course" aria-current="page">Brand course</a><a href="/ayushi-rawat-auto-job-applier">Job agent</a></nav><script>/* keep the current tab in view on narrow screens */(function(n){var a=n&&n.querySelector("[aria-current]");if(a&&n.scrollWidth>n.clientWidth)n.scrollLeft=a.offsetLeft-(n.clientWidth-a.offsetWidth)/2;})(document.currentScript.previousElementSibling)</script>
 <div id="app"></div>
 
 <script src="../assets/growth-school-content.js"></script>

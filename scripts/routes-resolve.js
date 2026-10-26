@@ -125,23 +125,31 @@ check('Ayushi❤️’s Growth Studio is in the build',
 
 // ── Discoverability, both directions ──────────────────────────────────────
 // The rule: marketing-101 is the course people are meant to find, and
-// marketing-101-for-ayushi is reachable only by someone who already has the
-// link. Right now that is true by accident — nothing stops a future card, nav
-// item or sitemap entry from quietly exposing it. This makes it a rule.
+// marketing-101-for-ayushi is linked ONLY from Ayushi's own pages
+// (/ayushi-rawat/** and her job agent), never from any page of mine, and is
+// never advertised in an index file. Until Oct 2026 the rule was "reachable
+// only by someone who already has the link"; Anchit chose to give her pages
+// to-and-fro navigation with it (her tab bar and a footer link), so the
+// boundary moved from "no page" to "no page that isn't hers".
 {
   const HIDDEN = 'marketing-101-for-ayushi';
   const PUBLIC = 'marketing-101';
 
   const pages = fs.readdirSync(WWW).filter((f) => f.endsWith('.html'));
-  const linkRe = new RegExp('(?:href|src)="[^"]*' + HIDDEN + '[^"]*"', 'g');
-  const linkedFrom = pages.filter((p) => {
-    if (p === HIDDEN + '.html') return false;              // its own og:url is not an entry point
-    return linkRe.test(fs.readFileSync(path.join(WWW, p), 'utf8'));
-  });
+  // Every built page, subdirectories included: the old top-level-only scan
+  // could not see /ayushi-rawat/*, and a global regex reused across files with
+  // .test() carries lastIndex from one file to the next and can miss a link.
+  const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
+    d.isDirectory() ? walk(path.join(dir, d.name)) : d.name.endsWith('.html') ? [path.relative(WWW, path.join(dir, d.name))] : []);
+  const allPages = walk(WWW);
+  const linkRe = new RegExp('(?:href|src)="[^"]*' + HIDDEN + '[^"]*"');
+  const HERS = (p) => p.startsWith('ayushi-rawat' + path.sep) || p === 'ayushi-rawat-auto-job-applier.html';
+  const linkedFrom = allPages.filter((p) => p !== HIDDEN + '.html' && linkRe.test(fs.readFileSync(path.join(WWW, p), 'utf8')));
   if (MUT) linkedFrom.push('mutant.html');
-  check('the private course is linked from no page',
-    linkedFrom.length === 0,
-    linkedFrom.length ? 'linked from: ' + linkedFrom.join(', ') : `checked ${pages.length} built pages`);
+  const strangers = linkedFrom.filter((p) => !HERS(p));
+  check("the private course is linked only from Ayushi's own pages",
+    strangers.length === 0,
+    strangers.length ? 'linked from: ' + strangers.join(', ') : `checked ${allPages.length} built pages; hers that link it: ${linkedFrom.length}`);
 
   const advertisers = ['sitemap.xml', 'llms.txt', 'robots.txt'].filter((f) => {
     const p = path.join(WWW, f);
@@ -167,8 +175,9 @@ check('Ayushi❤️’s Growth Studio is in the build',
     hasNoindex ? 'meta robots noindex present in the page' : 'NO noindex meta — it would be indexable');
 
   // The other half of the rule: the public one must stay findable.
-  // MUT drops index.html from the search, standing in for the card being removed.
-  const entryPoints = pages.filter((p) => (MUT && p === 'index.html') ? false :
+  // MUT drops every page that links it (the home card and, since #188, the 404
+  // page), standing in for the course losing its entry points.
+  const entryPoints = pages.filter((p) => (MUT && ['index.html', '404.html'].includes(p)) ? false :
     new RegExp('href="/' + PUBLIC + '"').test(fs.readFileSync(path.join(WWW, p), 'utf8')));
   check('the public course still has an entry point',
     entryPoints.length > 0,
@@ -181,7 +190,7 @@ console.log(`\n${results.length - failed}/${results.length} passed`);
 if (MUT) {
   // Named explicitly rather than counted, so adding a check cannot silently
   // change what the mutation is claimed to prove.
-  const TOUCHED = /rewrite resolves|Growth Studio is in the build|linked from no page|named in no index file|carries its noindex|has an entry point/;
+  const TOUCHED = /rewrite resolves|Growth Studio is in the build|linked only from Ayushi's own pages|named in no index file|carries its noindex|has an entry point/;
   const target = results.filter((r) => TOUCHED.test(r[1]));
   const wrong = target.filter((r) => r[0] === 'PASS').map((r) => r[1])
     .concat(results.filter((r) => !TOUCHED.test(r[1]) && r[0] === 'FAIL').map((r) => r[1] + ' (broke unexpectedly)'));

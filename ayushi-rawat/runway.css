@@ -1,0 +1,15 @@
+/* Runway page transitions between Ayushi's pages, the Growth Studio and her
+   course: one page walks off, the next walks on. Cross-document view
+   transitions need BOTH pages to opt in, so every page in that set loads this
+   file. Browsers without the feature simply navigate. transform/opacity only;
+   off entirely under prefers-reduced-motion. */
+@view-transition{navigation:auto}
+.a-nav{view-transition-name:a-nav}
+@media (prefers-reduced-motion:no-preference){
+  ::view-transition-old(root){animation:c-walk-off .38s cubic-bezier(.55,0,.85,.25) both}
+  ::view-transition-new(root){animation:c-walk-on .6s cubic-bezier(.16,1,.3,1) both}
+}
+@keyframes c-walk-off{to{opacity:0;transform:perspective(1400px) translateZ(-120px) rotateY(5deg)}}
+@keyframes c-walk-on{from{opacity:0;transform:perspective(1400px) translate3d(0,44px,80px) rotateX(-5deg)}}
+@media (prefers-reduced-motion:reduce){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}
+
