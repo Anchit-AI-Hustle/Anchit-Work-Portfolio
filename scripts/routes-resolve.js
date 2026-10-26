@@ -101,6 +101,16 @@ check('Ayushi❤️’s Growth Studio is in the build',
   ayushi,
   ayushi ? 'present' : 'MISSING — it is uncommitted again, or dropped from the manifest');
 
+// ── Function budget ────────────────────────────────────────────────────────
+// The Hobby plan refuses a deployment with more than 12 serverless functions
+// (error exceeded_serverless_functions_per_deployment). Adding a 13th file to
+// api/ failed a preview build that every local check had passed. Helpers
+// that start with "_" are not functions; put shared code there.
+{
+  const fns = fs.readdirSync(path.join(ROOT, 'api')).filter((f) => /\.(js|mjs|cjs|ts)$/.test(f) && !f.startsWith('_'));
+  check('api/ stays within the 12-function deployment limit', fns.length <= 12, fns.length + ' functions');
+}
+
 // ── Discoverability, both directions ──────────────────────────────────────
 // The rule: marketing-101 is the course people are meant to find, and
 // marketing-101-for-ayushi is reachable only by someone who already has the

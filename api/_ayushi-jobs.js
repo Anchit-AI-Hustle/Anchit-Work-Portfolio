@@ -1,7 +1,12 @@
-// /api/ayushi-jobs — the search half of Ayushi's job agent.
+// The search half of Ayushi's job agent, served by /api/jobhunt.
 //
-//   GET /api/ayushi-jobs            → ranked openings for her target roles
-//   GET /api/ayushi-jobs?extra=gh:acme,lv:foo,ab:bar   → also search those boards
+//   GET /api/jobhunt?agent=ayushi                       → ranked openings for her target roles
+//   GET /api/jobhunt?agent=ayushi&extra=gh:acme,lv:foo  → also search those boards
+//
+// It is a module, not its own function: the Hobby plan allows 12 serverless
+// functions per deployment and api/ already has 12. Files starting with "_"
+// are not deployed as functions, so this rides inside jobhunt.js, which is the
+// same job (finding openings) for a different person.
 //
 // WHY NOT /api/jobhunt
 //   jobhunt searches remote-first boards (Remotive, RemoteOK, Arbeitnow, The
@@ -20,7 +25,9 @@
 // It submits nothing. Applying is done by her, from the page, on the employer's
 // own form — see the note at the top of ayushi-rawat/auto-job-applier.html.
 const { guard } = require('./_guard.js');
-const { _test: jobhunt } = require('./jobhunt.js');
+// Required lazily: jobhunt.js requires this file, so a top-level require here
+// would be circular. By the time a request arrives both are fully loaded.
+const jobhunt = () => require('./jobhunt.js')._test;
 
 // Boards checked on 2026-10-26 to be live and to list India-based openings.
 const BOARDS = [
@@ -118,7 +125,7 @@ const ATS = { gh: greenhouse, lv: lever, ab: ashby };
 // The remote boards jobhunt already knows. Only Remotive takes a query; the
 // others return their whole feed, which the title filter below narrows.
 async function remoteBoards() {
-  const parts = await Promise.all(Object.values(jobhunt.FETCHERS).map((f) => f('marketing').catch(() => [])));
+  const parts = await Promise.all(Object.values(jobhunt().FETCHERS).map((f) => f('marketing').catch(() => [])));
   return parts.flat().map((x) => job({ ...x, remote: REMOTE.test(x.location || '') }));
 }
 

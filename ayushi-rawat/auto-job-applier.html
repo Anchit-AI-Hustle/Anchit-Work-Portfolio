@@ -201,8 +201,23 @@ Target roles: CRM & Lifecycle Marketing Manager, Marketing Operations Manager, G
 
   // ── State (localStorage; every access guarded, the page works without it) ──
   const blank = () => ({ profile: PROFILE, autoScore: 70, extra: '', jobs: {}, lastRun: 0 });
+  // Stored and imported state go through the same check: one bad file must not
+  // brick the page on every later load.
+  const isObj = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
+  function sane(d) {
+    if (!isObj(d) || !isObj(d.jobs)) return null;
+    const jobs = {};
+    for (const [id, j] of Object.entries(d.jobs)) if (isObj(j) && typeof j.title === 'string') jobs[id] = j;
+    return Object.assign(blank(), {
+      profile: typeof d.profile === 'string' && d.profile.trim() ? d.profile : PROFILE,
+      autoScore: Number.isFinite(+d.autoScore) ? +d.autoScore : 70,
+      extra: typeof d.extra === 'string' ? d.extra : '',
+      lastRun: Number.isFinite(+d.lastRun) ? +d.lastRun : 0,
+      jobs,
+    });
+  }
   let S = blank();
-  try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(blank(), JSON.parse(raw)); } catch (e) {}
+  try { const raw = localStorage.getItem(KEY); if (raw) S = sane(JSON.parse(raw)) || blank(); } catch (e) {}
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('Could not save in this browser. Export a backup.'); } };
 
   const $ = (s) => document.querySelector(s);
@@ -220,14 +235,20 @@ Target roles: CRM & Lifecycle Marketing Manager, Marketing Operations Manager, G
     btn.disabled = true; btn.textContent = 'Searching…';
     $('#runMeta').textContent = 'Scanning company job boards…';
     try {
-      const q = S.extra ? '?extra=' + encodeURIComponent(S.extra) : '';
-      const r = await fetch('/api/ayushi-jobs' + q, { headers: { accept: 'application/json' } });
+      const q = S.extra ? '&extra=' + encodeURIComponent(S.extra) : '';
+      const r = await fetch('/api/jobhunt?agent=ayushi' + q, { headers: { accept: 'application/json' } });
       if (!r.ok) throw new Error(r.status === 429 ? 'Too many runs in a minute. Try again shortly.' : 'Search failed (' + r.status + ').');
       const d = await r.json();
       let fresh = 0, auto = 0;
+      const live = new Set((d.results || []).map((j) => j.id));
+      // A posting that no longer comes back has most likely closed. Anything she
+      // has not acted on yet is marked, kept out of the queue, and revived if it returns.
+      for (const j of Object.values(S.jobs)) {
+        if (['new', 'shortlist', 'kit'].includes(j.status)) j.gone = !live.has(j.id);
+      }
       for (const j of d.results || []) {
         const prev = S.jobs[j.id];
-        if (prev) { Object.assign(prev, { score: j.score, reasons: j.reasons, posted: j.posted, where: j.where }); continue; }
+        if (prev) { Object.assign(prev, { score: j.score, reasons: j.reasons, posted: j.posted, where: j.where, gone: false }); continue; }
         const status = S.autoScore && j.score >= S.autoScore ? 'shortlist' : 'new';
         if (status === 'shortlist') auto++;
         S.jobs[j.id] = Object.assign({}, j, { status, firstSeen: Date.now(), isNew: true });
@@ -249,14 +270,16 @@ Target roles: CRM & Lifecycle Marketing Manager, Marketing Operations Manager, G
 
   // ── Kits: tailored resume + cover letter from /api/apply ──
   const PLACEHOLDER = /x{3,}|\[[^\]]{2,40}\]|@email\.com|your\s+name|lorem ipsum|\{\{/i;
+  const numbers = (s) => (String(s).match(/\d[\d,]*(?:\.\d+)?/g) || []).map((n) => n.replace(/,(?=\d{2,3}\b)/g, '').replace(/[,.]+$/, ''));
   function checkKit(kit) {
     const all = [kit.resume, kit.coverLetter].join('\n');
     const warns = [];
     if (PLACEHOLDER.test(all)) warns.push('Contains placeholder text (like XXXX or [Company]). Fix it before sending.');
     if (!/ayushirawat960@gmail\.com/i.test(kit.resume || '')) warns.push('Her email is missing from the resume header.');
-    const nums = (all.match(/\b\d[\d,]*\+?%?/g) || []).filter((n) => !/^(19|20)\d\d$/.test(n));
-    const known = S.profile;
-    const unknown = [...new Set(nums.filter((n) => !known.includes(n.replace(/\+$/, ''))))].slice(0, 6);
+    // Whole numbers compared as values ("2,000" = "2000"; "4.5" stays 4.5), so a
+    // digit inside her phone number does not vouch for an invented "9 markets".
+    const known = new Set(numbers(S.profile).concat([String(new Date().getFullYear())]));
+    const unknown = [...new Set(numbers(all).filter((n) => !known.has(n)))].slice(0, 6);
     if (unknown.length) warns.push('Numbers not in her profile: ' + unknown.join(', ') + '. Check they are true.');
     return warns;
   }
@@ -274,7 +297,7 @@ Target roles: CRM & Lifecycle Marketing Manager, Marketing Operations Manager, G
     return j;
   }
   async function prepareShortlist() {
-    const queue = Object.values(S.jobs).filter((j) => j.status === 'shortlist' && !j.kit).sort((a, b) => b.score - a.score).slice(0, 5);
+    const queue = Object.values(S.jobs).filter((j) => j.status === 'shortlist' && !j.kit && !j.gone).sort((a, b) => b.score - a.score).slice(0, 5);
     if (!queue.length) return toast('Nothing to prepare: shortlist some matches first.');
     const btn = $('#prepBtn'); btn.disabled = true;
     let done = 0;
@@ -307,16 +330,21 @@ Target roles: CRM & Lifecycle Marketing Manager, Marketing Operations Manager, G
     window.open(safeUrl(j.link), '_blank', 'noopener');
     j.awaitingConfirm = true; save(); render();
   }
-  async function showKit(id) {
+  async function showKit(id, rewrite) {
     const j = S.jobs[id]; if (!j) return;
     const dlg = $('#kitDlg');
     $('#kitCo').textContent = j.company + ' · ' + place(j.location);
     $('#kitTitle').textContent = j.title;
     const body = $('#kitBody');
-    if (!j.kit) {
+    if (!j.kit || rewrite) {
+      const old = j.kit;
       body.innerHTML = '<p class="a-muted">Writing a tailored resume and cover letter from her profile…</p>';
-      dlg.showModal();
-      try { await makeKit(j); render(); } catch (e) { body.innerHTML = '<p class="warn">' + esc(e.message) + '</p>'; return; }
+      if (!dlg.open) dlg.showModal();
+      try { await makeKit(j); render(); }
+      catch (e) {
+        if (!old) { body.innerHTML = '<p class="warn">' + esc(e.message) + '</p>'; return; }
+        toast(e.message + ' The previous kit is kept.');
+      }
     } else if (!dlg.open) dlg.showModal();
     const k = j.kit;
     body.innerHTML =
@@ -336,7 +364,7 @@ Target roles: CRM & Lifecycle Marketing Manager, Marketing Operations Manager, G
     const replies = all.filter((j) => ['interview', 'offer'].includes(j.status)).length;
     const rate = applied.length ? Math.round((replies / applied.length) * 100) + '%' : '—';
     $('#stats').innerHTML = [
-      [all.filter((j) => j.status === 'new').length, 'New matches'], [by('shortlist') + by('kit'), 'Queued to apply'],
+      [all.filter((j) => j.status === 'new' && !j.gone).length, 'New matches'], [all.filter((j) => ['shortlist', 'kit'].includes(j.status) && !j.gone).length, 'Queued to apply'],
       [week, 'Applied this week'], [by('interview'), 'Interviewing'], [rate, 'Response rate'],
     ].map(([v, l]) => '<div class="a-tile"><b>' + esc(v) + '</b><small>' + esc(l) + '</small></div>').join('');
   }
@@ -347,7 +375,7 @@ Target roles: CRM & Lifecycle Marketing Manager, Marketing Operations Manager, G
     else acts = '<span class="state">' + esc(STAGE_NAME[j.status] || j.status) + '</span><button class="a-btn small" data-act="kit" data-id="' + esc(j.id) + '">' + (j.kit ? 'View kit' : 'Write kit') + '</button>';
     acts += '<a class="a-btn small" href="' + esc(safeUrl(j.link)) + '" target="_blank" rel="noopener">View posting</a>';
     return '<article class="a-card job' + (j.isNew ? ' is-new' : '') + '"><div class="ring" style="--p:' + (+j.score || 0) + '" aria-label="Fit score ' + esc(j.score) + ' out of 100"><span>' + esc(j.score) + '</span></div>' +
-      '<div><h3>' + esc(j.title) + '</h3><p class="co">' + esc(j.company) + ' · ' + esc(place(j.location) || 'Location not listed') + (j.posted ? ' · ' + esc(fmtDate(j.posted)) : '') + (due ? ' · <span class="due">Follow-up due</span>' : '') + '</p>' +
+      '<div><h3>' + esc(j.title) + '</h3><p class="co">' + esc(j.company) + ' · ' + esc(place(j.location) || 'Location not listed') + (j.posted ? ' · ' + esc(fmtDate(j.posted)) : '') + (due ? ' · <span class="due">Follow-up due</span>' : '') + (j.gone ? ' · <span class="due">No longer listed</span>' : '') + '</p>' +
       '<div class="why">' + (j.reasons || []).map((r) => '<span>' + esc(r) + '</span>').join('') + '</div></div>' +
       '<div class="acts">' + acts + '</div></article>';
   }
@@ -400,7 +428,7 @@ Target roles: CRM & Lifecycle Marketing Manager, Marketing Operations Manager, G
     if (act === 'shortlist') setStatus(id, 'shortlist');
     else if (act === 'pass') setStatus(id, 'passed');
     else if (act === 'kit') showKit(id);
-    else if (act === 'rekit') { delete j.kit; showKit(id); }
+    else if (act === 'rekit') showKit(id, true);
     else if (act === 'apply') { if ($('#kitDlg').open) $('#kitDlg').close(); openApply(id); }
     else if (act === 'applied') { j.awaitingConfirm = false; setStatus(id, 'applied'); toast('Marked applied. Follow-up reminder in 7 days.'); }
     else if (act === 'notyet') { j.awaitingConfirm = false; save(); render(); }
@@ -426,12 +454,14 @@ Target roles: CRM & Lifecycle Marketing Manager, Marketing Operations Manager, G
   $('#exportJson').addEventListener('click', () => download('ayushi-job-agent.json', 'application/json', JSON.stringify(S, null, 2)));
   $('#exportCsv').addEventListener('click', () => {
     const cols = ['status', 'score', 'title', 'company', 'location', 'link', 'appliedAt'];
-    const rows = Object.values(S.jobs).map((j) => cols.map((c) => '"' + String(c === 'appliedAt' && j[c] ? new Date(j[c]).toISOString().slice(0, 10) : (j[c] == null ? '' : j[c])).replace(/"/g, '""') + '"').join(','));
+    // Titles come from public boards; a leading = + - @ would run as a formula in Excel or Sheets.
+    const cell = (v) => { const s = String(v == null ? '' : v); return '"' + (/^[=+\-@\t\r]/.test(s) ? "'" + s : s).replace(/"/g, '""') + '"'; };
+    const rows = Object.values(S.jobs).map((j) => cols.map((c) => cell(c === 'appliedAt' && j[c] ? new Date(j[c]).toISOString().slice(0, 10) : j[c])).join(','));
     download('ayushi-applications.csv', 'text/csv', [cols.join(',')].concat(rows).join('\n'));
   });
   $('#importJson').addEventListener('change', async (e) => {
     const f = e.target.files[0]; if (!f) return;
-    try { const d = JSON.parse(await f.text()); if (!d || typeof d.jobs !== 'object') throw 0; S = Object.assign(blank(), d); save(); render(); toast('Backup imported'); }
+    try { const d = sane(JSON.parse(await f.text())); if (!d) throw 0; S = d; save(); render(); $('#pText').value = S.profile; toast('Backup imported'); }
     catch (err) { toast('That file is not an agent backup.'); }
     e.target.value = '';
   });

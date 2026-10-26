@@ -171,6 +171,9 @@ async function verifySupabase(token, url, anonKey) {
 }
 
 async function handler(req, res) {
+  // Ayushi's job agent shares this function (see api/_ayushi-jobs.js for why).
+  if (/[?&]agent=ayushi(?:&|$)/.test(req.url || '')) return require('./_ayushi-jobs.js')(req, res);
+
   // No wildcard: another site should not be able to call this from a browser.
   const origin = (req.headers || {}).origin;
   const okOrigin = originAllowed(origin);
