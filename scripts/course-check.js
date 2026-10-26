@@ -12,7 +12,7 @@ const MUT = process.env.MUT === '1';
 
 const PAGES = [
   ['public course', 'growth-school.html'],
-  ['Ayushi❤️ course', 'ayushi/course.html'],
+  ['Ayushi❤️ course', 'ayushi-rawat/course.html'],
 ];
 
 (async () => {
@@ -293,7 +293,7 @@ const PAGES = [
   // The personalisation, and the promise about what her version does not say.
   {
     const p = await (await b.newContext()).newPage();
-    await p.goto('http://127.0.0.1:8099/ayushi/course.html', { waitUntil: 'load', timeout: 25000 });
+    await p.goto('http://127.0.0.1:8099/ayushi-rawat/course.html', { waitUntil: 'load', timeout: 25000 });
     await p.waitForTimeout(700);
     const t = await p.evaluate(async () => {
       let all = '';

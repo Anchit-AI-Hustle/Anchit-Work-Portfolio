@@ -93,6 +93,9 @@ const CANONICAL = {
 };
 // Pages that speak as another business, not as me. See the identity check.
 const SHOP_ROUTE = /^\/(deli-chic|gram-street-coffee)(?:\/|$)/;
+// Pages that speak as another PERSON. Ayushi's portfolio carries her own email
+// and phone; they are held to one spelling of her details, not compared with mine.
+const PERSON_ROUTE = /^\/(ayushi)(?:-rawat)?(?:\/|$)/;
 
 (async () => {
   const { chromium } = require('./_playwright.js');
@@ -197,7 +200,9 @@ const SHOP_ROUTE = /^\/(deli-chic|gram-street-coffee)(?:\/|$)/;
     for (const [name, re] of Object.entries(CANONICAL)) {
       // Phone only: a LinkedIn or email link on a shop page would be mine, and
       // has to match the rest of the site.
-      const key = shop && name === 'Phone' ? `${name} (${shop})` : name;
+      const person = (route.match(PERSON_ROUTE) || [])[1];
+      const key = shop && name === 'Phone' ? `${name} (${shop})`
+        : person && (name === 'Email' || name === 'Phone') ? `${name} (${person})` : name;
       for (const m of content.matchAll(new RegExp(re.source, 'g'))) {
         (identity[key] ||= new Map()).set(m[1], (identity[key].get(m[1]) || new Set()).add(route));
       }

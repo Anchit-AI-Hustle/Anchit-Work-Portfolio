@@ -31,7 +31,7 @@ const PHONE = { width: 390, height: 844 };
 // page -> how its left menu and its collapse control are found.
 const PAGES = [
   { url: '/growth-school.html',            menu: '.gs-rail',  toggle: '.gs-menu-btn', openClass: 'open' },
-  { url: '/ayushi/course.html',            menu: '.gs-rail',  toggle: '.gs-menu-btn', openClass: 'open' },
+  { url: '/ayushi-rawat/course.html',            menu: '.gs-rail',  toggle: '.gs-menu-btn', openClass: 'open' },
   { url: '/index.html',                    menu: '.sidebar',  toggle: '.sidebar-toggle' },
 ];
 
