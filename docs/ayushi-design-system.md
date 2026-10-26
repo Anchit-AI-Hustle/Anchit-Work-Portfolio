@@ -49,3 +49,31 @@ Type: `--a-display` DM Serif Display · `--a-body` and `--a-caps` Plus Jakarta S
 - Hero portrait: drop her photo at `ayushi-rawat/assets/ayushi-portrait.webp`
   and follow the note in `ayushi-rawat/index.html`. Until then the raspberry
   AR cover stands in.
+
+## Brand case studies (`/ayushi-rawat/studies/*`)
+
+Each study is one page in `ayushi-rawat/studies/`, styled by `ayushi-rawat/study.css`
+on top of the tokens above. The hub at `/ayushi-rawat/case-studies` lists them
+first and keeps her delivered work below as the track record.
+
+Every study follows the same order, so a recruiter can compare them:
+hero with the independence note → the short version → what the brand runs today
+(sourced facts) → where the value leaks → "How might we" → three plays (trigger,
+channels, offer, stop rule, sample copy) → measurement with a holdout → 90-day
+rollout → riskiest assumptions → why she can run this → sources → next study.
+
+Rules:
+
+- **Independent and labelled.** Each page carries the note that it is not
+  affiliated with, commissioned by or reviewed by the brand.
+- **Every brand figure has a numbered, dated source** that was opened and read.
+  Arithmetic on published figures is labelled as hers. What could not be found
+  is listed under "Not public, so not used".
+- **No results are claimed.** Plays are proposals; metrics are decision rules,
+  not forecasts. Sample copy sits in `.s-phone` mocks marked as written for
+  the study, and its numbers are illustrative.
+- **"Why she can run this" uses only her resume.** Grep `resume.html` before
+  adding a claim.
+- Message mocks use the `--s-device*` and `--s-bubble*` properties on `.s-phone`;
+  on phones, `.s-table` rows stack into labelled cards from each cell's
+  `data-label`.

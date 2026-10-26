@@ -1,0 +1,63 @@
+/* Brand case-study pages (/ayushi-rawat/studies/*). Built on ayushi.css tokens. */
+.s-hero{padding-top:clamp(116px,13vw,168px);background:radial-gradient(circle at 86% 14%,rgba(194,24,91,.10),transparent 36%)}
+.s-crumb{display:flex;gap:8px;align-items:center;margin:0 0 22px;font:600 13px/1.4 var(--a-body);color:var(--a-dim)}
+.s-crumb a{color:var(--a-accent-ink);box-shadow:inset 0 -1px 0 var(--a-accent-soft)}
+.s-hero .a-display{font-size:clamp(44px,6.6vw,104px);max-width:1180px}
+.s-meta{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:30px;padding-top:22px;border-top:1px solid var(--a-rule)}
+.s-meta div{display:grid;gap:4px}
+.s-meta b{font:600 15px/1.3 var(--a-body)}
+.s-short{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.s-short .a-card h3{margin:10px 0 8px;font:400 26px/1.15 var(--a-display)}
+.s-short .a-card p{margin:0;color:var(--a-dim)}
+.s-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.s-fact{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;padding:18px 20px;border:1px solid var(--a-rule);border-radius:var(--a-r-m);background:var(--a-surface)}
+.s-fact b{font:400 30px/1 var(--a-display);color:var(--a-accent-ink);min-width:88px}
+.s-fact p{margin:0;font-size:15px;line-height:1.55;color:var(--a-ink)}
+.s-fact sup a,.s-src{font:700 11px var(--a-caps);color:var(--a-gold)}
+.s-leaks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.s-leak{padding:22px;border-radius:var(--a-r-m);background:var(--a-surface);border:1px solid var(--a-rule);border-left:4px solid var(--a-accent);box-shadow:var(--a-shadow)}
+.s-leak h3{margin:8px 0 8px;font:400 23px/1.2 var(--a-display)}
+.s-leak p{margin:0 0 8px;color:var(--a-dim);font-size:15px}
+.s-leak .ev{font-size:13px;color:var(--a-mute)}
+.s-table{width:100%;border-collapse:separate;border-spacing:0;background:var(--a-surface);border:1px solid var(--a-rule);border-radius:var(--a-r-m);overflow:hidden;box-shadow:var(--a-shadow);font-size:15px}
+.s-table th,.s-table td{padding:14px 16px;text-align:left;vertical-align:top;border-bottom:1px solid var(--a-rule)}
+.s-table th{font:700 11px/1.4 var(--a-caps);letter-spacing:.1em;text-transform:uppercase;color:var(--a-gold);background:var(--a-surface-2)}
+.s-table tr:last-child td{border-bottom:0}
+.s-table td:first-child{font-weight:700;color:var(--a-ink)}
+.s-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.s-plays{display:grid;gap:16px}
+.s-play{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(260px,.9fr);gap:clamp(18px,3vw,40px);align-items:center;padding:clamp(20px,3vw,32px);border:1px solid var(--a-rule);border-radius:var(--a-r-l);background:var(--a-surface);box-shadow:var(--a-shadow)}
+.s-play h3{margin:8px 0 12px;font:400 clamp(26px,2.6vw,34px)/1.12 var(--a-display)}
+.s-play dl{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;margin:16px 0 0;font-size:15px}
+.s-play dt{font:700 11px/1.9 var(--a-caps);letter-spacing:.1em;text-transform:uppercase;color:var(--a-gold)}
+.s-play dd{margin:0;color:var(--a-dim)}
+/* Message mocks: the copywriting, shown the way a customer would see it */
+.s-phone{--s-device:#1d1923;--s-device-2:#15121a;--s-bubble:#fff;--s-bubble-wa:#dcf8c6;display:grid;gap:10px;padding:18px;border-radius:26px;background:linear-gradient(160deg,var(--s-device),var(--s-device-2));box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.s-msg{padding:12px 14px;border-radius:16px;background:var(--s-bubble);color:var(--a-ink);font-size:14px;line-height:1.45}
+.s-msg small{display:flex;justify-content:space-between;margin-bottom:4px;font:700 11px/1.3 var(--a-caps);letter-spacing:.04em;color:var(--a-dim)}
+.s-msg b{display:block;margin-bottom:2px}
+.s-msg.wa{background:var(--s-bubble-wa)}
+.s-chan{font:700 10px/1 var(--a-caps);letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.78);text-align:center}
+.s-kpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.s-kpi .a-card h3{margin:6px 0 10px;font:400 22px/1.2 var(--a-display)}
+.s-kpi ul{margin:0;padding-left:18px;color:var(--a-dim);font-size:15px}
+.s-kpi .north{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px 18px;align-items:baseline;border-color:var(--a-accent);background:var(--a-band)}
+.s-kpi .north b{font:400 clamp(24px,2.6vw,34px)/1.1 var(--a-display)}
+.s-plan{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.s-plan h3{margin:6px 0 12px;font:400 26px/1.1 var(--a-display)}
+.s-risk td:nth-child(2){color:var(--a-dim)}
+.s-why{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(20px,5vw,72px);align-items:start}
+.s-sources ol{margin:0;padding-left:22px;display:grid;gap:8px;font-size:14px;color:var(--a-dim)}
+.s-sources a{color:var(--a-accent-ink);overflow-wrap:anywhere;box-shadow:inset 0 -1px 0 var(--a-accent-soft)}
+.s-next{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.s-next a{display:grid;gap:6px}
+.s-next b{font:400 24px/1.2 var(--a-display)}
+.s-next small{color:var(--a-dim)}
+@media(max-width:900px){.s-short,.s-facts,.s-leaks,.s-kpi,.s-plan,.s-why,.s-next,.s-play{grid-template-columns:1fr}.s-kpi .north{grid-column:auto}}
+.a-section .a-h2{font-size:clamp(34px,4.4vw,64px);max-width:1100px}
+@media(max-width:560px){.s-fact{grid-template-columns:1fr}.s-fact b{min-width:0}
+.s-table thead{display:none}.s-table,.s-table tbody,.s-table tr,.s-table td{display:block}
+.s-table tr{padding:16px 18px;border-bottom:1px solid var(--a-rule)}.s-table tr:last-child{border-bottom:0}
+.s-table td{padding:3px 0;border:0}
+.s-table td[data-label]:not(:first-child):before{content:attr(data-label);display:block;margin-top:8px;font:700 10px/1.6 var(--a-caps);letter-spacing:.1em;text-transform:uppercase;color:var(--a-gold)}
+.s-table td:first-child{font:400 21px/1.2 var(--a-display)}}
