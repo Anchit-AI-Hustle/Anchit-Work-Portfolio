@@ -30,6 +30,10 @@
 // fail. MUT=dash plants an em dash; the dash check must fail.
 // MUT=auditnav and MUT=protonav remove the cross-links from the audit section
 // and from the prototype's intro; the matching navigation check must fail.
+// MUT=costdrift changes one running-cost input in the calculator; the check
+// that the case study's net figure matches the calculator must fail.
+// MUT=bigcall promises every high-risk learner a call within 24 hours again;
+// the escalation check must fail.
 const { chromium } = require('./_playwright.js');
 const vercel = require('../vercel.json');
 const BASE = process.env.BASE || 'http://127.0.0.1:8099';
@@ -55,6 +59,9 @@ function mutate(src) {
   if (MUT === 'dash') return src.replace('</body>', '<p>one \u2014 two</p></body>');
   if (MUT === 'auditnav') return src.replace(/<div class="hero-ctas" style="margin-top:6px"><a class="btn btn-outline sm" href="#top">.*?<\/div>/, '');
   if (MUT === 'protonav') return src.replace(/<div class="xlinks">.*?<\/div>/, '');
+  if (MUT === 'costdrift') return src.replace('id="m-wa" type="number" step="0.001" min="0" value="0.115"', 'id="m-wa" type="number" step="0.001" min="0" value="1.15"');
+  if (MUT === 'bigcall') return src.replace("t:'7-day AI comeback plan'", "t:'Human mentor call within 24 hours'")
+    .replace("What we are doing: a 7-day catch-up plan is ready in the app.", "What we are doing: a PW mentor will call tomorrow at 6:30 pm.");
   return src;
 }
 
@@ -127,6 +134,26 @@ async function caseStudy(browser, vp) {
 
   const over = await hScroll(page);
   check(`${L}: no horizontal page scroll`, over <= 0, over + 'px');
+
+  const range = await page.$$eval('#im-range tbody tr', (rs) => rs.map((r) => [...r.cells].map((c) => c.innerText.trim())));
+  const row = (label) => (range.find((r) => r[0].startsWith(label)) || []).slice(1);
+  check(`${L}: sizing shows low, base and high`, row('Extra collections').join() === '42.6,85.3,127.9', JSON.stringify(row('Extra collections')));
+  check(`${L}: sizing is net of running costs`, row('Net of running costs').join() === '36.5,79.1,121.8', JSON.stringify(row('Net of running costs')));
+  const costTotal = await page.$eval('#im-cost tr.hl td:last-child', (c) => c.innerText.trim()).catch(() => '');
+  // The figures are the point of these tables: none may sit past the edge of
+  // the table's own box, where a phone would have to scroll sideways to see it.
+  const hidden = await page.$$eval('#im-range td.num, #im-cost td.num', (cs) => cs.filter((c) => {
+    const box = c.closest('.tbl').getBoundingClientRect(); const r = c.getBoundingClientRect();
+    return r.right > box.right + 1 || r.left < box.left - 1;
+  }).map((c) => c.innerText.trim()));
+  check(`${L}: every sizing figure is visible without scrolling the table`, hidden.length === 0, hidden.slice(0, 6).join(' | '));
+  check(`${L}: running costs are itemised`, costTotal === '6.15', costTotal);
+  const voices = await page.$$eval('#voices figure', (fs) => fs.map((f) => [f.querySelector('blockquote').innerText, f.querySelector('figcaption').innerText]));
+  check(`${L}: at least six dated, rated user quotes`,
+    voices.length >= 6 && voices.every(([q, c]) => /^".+"$/.test(q.trim()) && /\d★ · \d{1,2} [A-Z][a-z]{2} \d{4}$/.test(c.trim())), voices.length + ' quotes');
+  const body = await page.evaluate(() => document.body.textContent);
+  const unverified = ['30 of 330', 'mainly for new enrollments', 'monthly mentor sessions'].filter((q) => body.includes(q));
+  check(`${L}: no quote that could not be verified`, unverified.length === 0, unverified.join(' | '));
   const d = await dashes(page);
   check(`${L}: no em/en dash`, d.length === 0, d.join(' | '));
   await page.waitForTimeout(300);
@@ -148,6 +175,13 @@ async function prototype(browser, vp) {
   }
   check(`${L}: Riya High, Aman Low, Meena Medium, Kabir Medium`,
     Object.keys(tiers).every((i) => got[i] === tiers[i]), JSON.stringify(got));
+
+  // High risk gets the AI plan first and a person only if it fails: a call for
+  // every high-risk learner is more mentor time than PW has.
+  await page.click('.persona-row .chip[data-p="0"]');
+  const steps = await page.$$eval('#e-actions .step b', (b) => b.map((x) => x.textContent.trim()));
+  check(`${L}: high risk escalates to a mentor, never calls everyone`,
+    steps[0] === '7-day AI comeback plan' && steps.some((t) => /^Mentor call on day 8/.test(t)) && !steps.some((t) => /24 hours/.test(t)), JSON.stringify(steps));
 
   // The card and the engine must not disagree about pace. A learner the card
   // calls ahead must not have an engine factor that says they are behind.
@@ -181,8 +215,20 @@ async function prototype(browser, vp) {
     kabir === 'PW Study Pulse' && amanBefore === 'PW Study Pulse' && amanAfter === 'PW Parent Pulse',
     `Kabir=${kabir} Aman=${amanBefore} -> ${amanAfter}`);
 
+  // Riya's high-risk Pulse, in both languages, states the escalation and never
+  // promises a call tomorrow: that is a promise PW's mentors cannot keep at scale.
+  await page.click('#pp-learner button[data-p="0"]');
+  const pulse = {};
+  for (const l of ['en', 'hi']) { await page.click(`#pp-lang button[data-l="${l}"]`); pulse[l] = norm(await page.textContent('#wa-body')); }
+  await page.click('#pp-lang button[data-l="en"]');
+  check(`${L}: Pulse escalates to a mentor after a week, in English and Hindi`,
+    /still behind after a week, a PW mentor will call/.test(pulse.en) && /एक हफ्ते बाद भी/.test(pulse.hi)
+      && !/tomorrow|6:30/.test(pulse.en) && !/कल शाम|6:30/.test(pulse.hi), pulse.en.slice(0, 120));
+
   const total = norm(await page.textContent('#m-total'));
   check(`${L}: impact total ₹85.3 cr · $8.97M`, total === '₹85.3 cr · $8.97M', total);
+  const netTxt = norm(await page.textContent('#m-net'));
+  check(`${L}: net of running costs ₹79.1 cr · $8.32M`, netTxt === '₹79.1 cr · $8.32M', netTxt);
 
   await page.click('#t-console');
   const head = norm(await page.textContent('#segtbl th:last-child'));
@@ -257,8 +303,26 @@ async function crossNav(browser, vp) {
   await ctx.close();
 }
 
+// The case study quotes the calculator's result. Read both and compare, so the
+// page can never claim a number the calculator does not produce.
+async function consistency(browser) {
+  const vp = VIEWPORTS[2];
+  const a = await open(browser, vp, '/pw-study');
+  const study = await a.page.$$eval('#im-range tbody tr', (rs) => {
+    const r = rs.find((x) => x.cells[0].innerText.trim().startsWith('Net of running costs'));
+    return r ? r.cells[2].innerText.trim() : '';
+  });
+  await a.ctx.close();
+  const b = await open(browser, vp, '/pw-study/prototype');
+  await b.page.click('#t-console');
+  const calc = (norm(await b.page.textContent('#m-net')).match(/₹(-?[\d.]+) cr/) || [])[1] || '';
+  await b.ctx.close();
+  check('case study net base matches the prototype calculator', study !== '' && study === calc, `case study ${study} vs calculator ${calc}`);
+}
+
 (async () => {
   const browser = await chromium.launch();
+  await consistency(browser);
   for (const vp of VIEWPORTS) {
     await caseStudy(browser, vp);
     await prototype(browser, vp);

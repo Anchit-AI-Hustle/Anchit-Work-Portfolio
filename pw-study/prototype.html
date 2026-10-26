@@ -306,7 +306,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
           <tbody>
             <tr data-a="minor"><td><b>Under 18</b></td><td>K-12, Class 11-12, boards</td><td><b>Parent Pulse</b>: parent, with consent taken at purchase (DPDP Act 2023 needs it for under-18s)</td></tr>
             <tr data-a="young"><td><b>18-21</b></td><td>JEE/NEET droppers, early college</td><td><b>Self Pulse</b>: learner. Parent gets a copy only if the learner opts in</td></tr>
-            <tr data-a="adult"><td><b>Adult aspirant</b></td><td>UPSC, govt exams, CA, NEET PG, skills</td><td><b>Self Pulse</b> + study-circle and mentor check-in. No parent channel</td></tr>
+            <tr data-a="adult"><td><b>Adult aspirant</b></td><td>UPSC, govt exams, CA, NEET PG, skills</td><td><b>Self Pulse</b> + study-circle check-in. No parent channel</td></tr>
           </tbody></table></div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center">
           <span class="label">Learner</span>
@@ -324,7 +324,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
         <ul class="plan">
           <li>The learner always sees exactly what is shared, and with whom.</li>
           <li>One report a week, max one alert in between. No fear or rank-shaming language.</li>
-          <li>High-risk cases go to a human mentor call, never only to a bot.</li>
+          <li>High-risk learners still behind after the 7-day plan get a human mentor call, never only a bot.</li>
           <li>Offers appear only at natural moments (results, batch end), never inside a risk alert.</li>
         </ul>
       </div>
@@ -395,11 +395,24 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
       <div class="row"><label for="m-arpu">Offline ARPU (₹)<small>FY26 disclosed: ₹36,625</small></label><input id="m-arpu" type="number" value="36625"></div>
       <div class="row"><label for="m-fx">₹ per US$<small>Mid-market, 25 Oct 2026</small></label><input id="m-fx" type="number" step="0.1" value="95.1"></div>
       <div id="levers" style="margin-top:8px"></div>
+      <p class="label" style="margin-top:14px">Running costs a year</p>
+      <div class="row"><label for="m-opt">Opted in to the Weekly Pulse (%)<small>Assumption</small></label><input id="m-opt" type="number" step="5" min="0" max="100" value="50"></div>
+      <div class="row"><label for="m-risk">At risk in a given week (%)<small>Assumption: the demo cohort shows 38%; sets AI Mentor plans</small></label><input id="m-risk" type="number" step="1" min="0" max="100" value="35"></div>
+      <div class="row"><label for="m-wa">WhatsApp utility message (₹)<small>Meta India rate, from 1 Oct 2026</small></label><input id="m-wa" type="number" step="0.001" min="0" value="0.115"></div>
+      <div class="row"><label for="m-mk">WhatsApp marketing message (₹)<small>Meta India rate, from 1 Oct 2026</small></label><input id="m-mk" type="number" step="0.0001" min="0" value="0.8631"></div>
+      <div class="row"><label for="m-hi">High risk, any learner (%)<small>Assumption: the demo cohort shows 13.1%</small></label><input id="m-hi" type="number" step="0.5" min="0" max="100" value="13"></div>
+      <div class="row"><label for="m-esc">Still high risk after the 7-day plan (%)<small>Assumption: one mentor call each, once a year</small></label><input id="m-esc" type="number" step="5" min="0" max="100" value="40"></div>
+      <div class="row"><label for="m-call">15-minute mentor call (₹)<small>Assumption</small></label><input id="m-call" type="number" step="10" min="0" value="150"></div>
+      <div class="row"><label for="m-ai">AI Mentor plan (₹ each, 4 a year)<small>Assumption</small></label><input id="m-ai" type="number" step="0.5" min="0" value="1"></div>
+      <div id="costs" style="margin-top:8px"></div>
       <div style="border-top:2px solid var(--primary-50);padding-top:12px;margin-top:4px">
         <p class="label">Annual incremental collections</p>
         <p class="bigtotal" id="m-total"></p>
         <p class="small" id="m-total-sub"></p>
         <div class="formula" id="m-total-f" style="margin-top:8px"></div>
+        <p class="label" style="margin-top:14px">Net of running costs</p>
+        <p class="bigtotal" id="m-net"></p>
+        <p class="small" id="m-net-sub"></p>
       </div>
     </div>
   </div>
@@ -482,10 +495,10 @@ function actions(s,res,p){
   var a=[], g=aud(p);
   var pulse = g==='minor' ? {t:'Parent Pulse alert',d:'To the consented parent: calm, specific, one thing they can do.'}
             : g==='young' ? {t:'Self Pulse alert',d:'Sent to '+p.name+'. Parent gets a copy only if '+p.name+' opted in.'}
-            : {t:'Self Pulse + study-circle check-in',d:'Adult learner: no parent channel. Peers and a mentor keep the streak going.'};
+            : {t:'Self Pulse + study-circle check-in',d:'Adult learner: no parent channel. Peers keep the streak going; a mentor steps in only at high risk.'};
   if(res.tier==='High'){
-    a.push({t:'Human mentor call within 24 hours',d:'Bot-first is wrong here: a real mentor rebuilds the plan with the learner.'});
-    a.push({t:'7-day catch-up plan in the app',d:'Backlog cut to the highest-weight chapters only.'});
+    a.push({t:'7-day AI comeback plan',d:'Backlog cut to the highest-weight chapters, scheduled by the AI Mentor.'});
+    a.push({t:'Mentor call on day 8 if still high risk',d:'If the plan has not worked in a week, a real mentor rebuilds it with the learner. Calls are capped to what PW\'s mentors can take.'});
     a.push(pulse);
   } else if(res.tier==='Medium'){
     a.push({t:'AI Mentor catch-up plan',d:'Three backlog lectures plus one short DPP, scheduled around '+(g==='adult'?'work or coaching hours':'school hours')+'.'});
@@ -550,7 +563,7 @@ function renderStudent(){
   el('st-lec').textContent = s.lec+'%'; el('st-test').textContent = s.test+'%'; el('st-streak').textContent = s.streak;
   var n = el('s-nudge'); n.className = 'nudge ' + (res.tier==='High'?'high':res.tier==='Medium'?'med':'low');
   var plan;
-  if(res.tier==='High'){ el('s-nudge-title').textContent='Your 7-day comeback plan'; plan=['Day 1-2: 2 backlog lectures (highest weightage first)','Day 3: 20-min DPP, solutions unlocked instantly','Day 4-6: 2 more lectures + doubt session','Day 7: mini-test to reset your score','Mentor call booked: tomorrow, 6:30 pm']; }
+  if(res.tier==='High'){ el('s-nudge-title').textContent='Your 7-day comeback plan'; plan=['Day 1-2: 2 backlog lectures (highest weightage first)','Day 3: 20-min DPP, solutions unlocked instantly','Day 4-6: 2 more lectures + doubt session','Day 7: mini-test to reset your score','Day 8: a mentor calls if you are still behind']; }
   else if(res.tier==='Medium'){ el('s-nudge-title').textContent='Catch up in 3 sessions'; plan=['Session 1: '+(behind||1)+' backlog lecture'+((behind||1)>1?'s':''),'Session 2: 15-question DPP on your weakest chapter','Session 3: ask at least 2 doubts on Ask AI']; }
   else { el('s-nudge-title').textContent='Great week. Keep the streak alive'; plan=['Next: Sunday full-length test','Bonus: 1 advanced problem set unlocked']; }
   el('s-plan').innerHTML = plan.map(function(x){return '<li>'+x+'</li>';}).join('');
@@ -617,11 +630,11 @@ function renderParent(){
   else ch.innerHTML='<b>Self Pulse.</b> '+p.name+' is '+p.age+' and preparing for an adult exam, so there is no parent channel. The report goes to '+p.name+', with a study-circle check-in.';
   var sh=el('pp-share'); if(sh) sh.addEventListener('change',function(){ppShare=sh.checked;renderParent();});
   el('wa-title').textContent = toParent?'PW Parent Pulse':'PW Study Pulse';
-  var hiMode = ppL==='hi', en, hi, mentor=toParent?(hiMode?'PW Parent App में देखें':'Open in PW Parent App'):(hiMode?'मेंटर से बात करें':'Talk to a mentor');
+  var hiMode = ppL==='hi', en, hi, mentor=toParent?(hiMode?'PW Parent App में देखें':'Open in PW Parent App'):(hiMode?'AI मेंटर से बात करें':'Talk to the AI Mentor');
   if(toParent){
     if(res.tier==='High'){
-      en = 'Namaste! Weekly update for '+p.full+' ('+p.batch+')\n\nThis week: '+s.lec+'% of lectures done vs batch pace, test average '+s.test+'%. '+p.name+' has not studied on the app for '+s.idle+' days.\n\nWhat we are doing: a PW mentor will call '+p.name+' tomorrow at 6:30 pm and a 7-day catch-up plan is ready in the app.\n\nOne thing you can do: ask '+p.name+' to show you the plan tonight. 10 minutes of your interest helps more than any reminder.';
-      hi = 'नमस्ते! '+p.full+' की साप्ताहिक रिपोर्ट\n\nइस हफ्ते: बैच की गति के मुकाबले '+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%. '+p.name+' ने '+s.idle+' दिन से ऐप पर पढ़ाई नहीं की है.\n\nहम क्या कर रहे हैं: कल शाम 6:30 बजे PW मेंटर '+p.name+' को कॉल करेंगे और ऐप में 7 दिन का कैच-अप प्लान तैयार है.\n\nआप क्या कर सकते हैं: आज रात '+p.name+' से प्लान दिखाने को कहें. आपकी 10 मिनट की रुचि किसी भी रिमाइंडर से ज़्यादा असर करती है.';
+      en = 'Namaste! Weekly update for '+p.full+' ('+p.batch+')\n\nThis week: '+s.lec+'% of lectures done vs batch pace, test average '+s.test+'%. '+p.name+' has not studied on the app for '+s.idle+' days.\n\nWhat we are doing: a 7-day catch-up plan is ready in the app. If '+p.name+' is still behind after a week, a PW mentor will call.\n\nOne thing you can do: ask '+p.name+' to show you the plan tonight. 10 minutes of your interest helps more than any reminder.';
+      hi = 'नमस्ते! '+p.full+' की साप्ताहिक रिपोर्ट\n\nइस हफ्ते: बैच की गति के मुकाबले '+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%. '+p.name+' ने '+s.idle+' दिन से ऐप पर पढ़ाई नहीं की है.\n\nहम क्या कर रहे हैं: ऐप में 7 दिन का कैच-अप प्लान तैयार है. अगर एक हफ्ते बाद भी '+p.name+' पीछे रहे, तो PW मेंटर कॉल करेंगे.\n\nआप क्या कर सकते हैं: आज रात '+p.name+' से प्लान दिखाने को कहें. आपकी 10 मिनट की रुचि किसी भी रिमाइंडर से ज़्यादा असर करती है.';
     } else if(res.tier==='Medium'){
       en = 'Namaste! Weekly update for '+p.full+' ('+p.batch+')\n\nThis week: '+s.lec+'% of lectures done, test average '+s.test+'%, '+s.streak+'-day study streak. '+(behind>0?p.name+' is '+behind+' lectures behind pace.':'')+'\n\nPlan: 3 short catch-up sessions are scheduled this week by the AI Mentor.\n\nYou will get the next update on Sunday.';
       hi = 'नमस्ते! '+p.full+' की साप्ताहिक रिपोर्ट\n\nइस हफ्ते: '+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%, लगातार '+s.streak+' दिन पढ़ाई. '+(behind>0?p.name+' बैच से '+behind+' लेक्चर पीछे है.':'')+'\n\nप्लान: AI मेंटर ने इस हफ्ते 3 छोटे कैच-अप सेशन तय किए हैं.\n\nअगली रिपोर्ट रविवार को आएगी.';
@@ -632,8 +645,8 @@ function renderParent(){
   } else {
     var circle = g==='adult';
     if(res.tier==='High'){
-      en = 'Hi '+p.name+', your week at a glance\n\n'+s.lec+'% of lectures done vs batch pace, test average '+s.test+'%, '+s.idle+' days since your last session.\n\nYour mentor will call tomorrow at 6:30 pm. A 7-day comeback plan is ready in the app: start with just one lecture today.';
-      hi = 'Hi '+p.name+', आपका हफ्ता एक नज़र में\n\nबैच की गति के मुकाबले '+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%, आखिरी सेशन '+s.idle+' दिन पहले.\n\nकल शाम 6:30 बजे आपके मेंटर कॉल करेंगे. ऐप में 7 दिन का कमबैक प्लान तैयार है: आज सिर्फ एक लेक्चर से शुरू करें.';
+      en = 'Hi '+p.name+', your week at a glance\n\n'+s.lec+'% of lectures done vs batch pace, test average '+s.test+'%, '+s.idle+' days since your last session.\n\nA 7-day comeback plan is ready in the app: start with just one lecture today. If you are still behind after a week, a mentor will call.';
+      hi = 'Hi '+p.name+', आपका हफ्ता एक नज़र में\n\nबैच की गति के मुकाबले '+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%, आखिरी सेशन '+s.idle+' दिन पहले.\n\nऐप में 7 दिन का कमबैक प्लान तैयार है: आज सिर्फ एक लेक्चर से शुरू करें. अगर एक हफ्ते बाद भी आप पीछे रहे, तो आपके मेंटर कॉल करेंगे.';
     } else if(res.tier==='Medium'){
       en = 'Hi '+p.name+', your week at a glance\n\n'+s.lec+'% of lectures done, test average '+s.test+'%, '+s.streak+'-day streak.'+(behind>0?' You are '+behind+' lectures behind pace.':'')+'\n\nYour AI Mentor has planned 3 short catch-up sessions this week.'+(circle?' Your study circle checks in on Thursday.':'');
       hi = 'Hi '+p.name+', आपका हफ्ता एक नज़र में\n\n'+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%, लगातार '+s.streak+' दिन.'+(behind>0?' आप बैच से '+behind+' लेक्चर पीछे हैं.':'')+'\n\nAI मेंटर ने इस हफ्ते 3 छोटे कैच-अप सेशन तय किए हैं.'+(circle?' गुरुवार को आपका स्टडी सर्कल चेक-इन करेगा.':'');
@@ -676,8 +689,8 @@ function buildConsole(){
   var avg=function(a){return a.length?Math.round(a.reduce(function(t,x){return t+x.risk;},0)/a.length):0;};
   var mk=function(seg,action,list,gap,price,why){return {seg:seg,action:action,list:list,n:list.length,avgRisk:avg(list),gap:gap,price:price,why:why};};
   rows=[
-    mk('High risk, under 18','Mentor call + 7-day plan + Parent Pulse alert',hi.filter(function(x){return x.nextBatch&&x.age<18;}),0.30,A,'Drifting school students who have a next batch. Their parent pays, so the parent is told.'),
-    mk('High risk, 18+','Mentor call + 7-day plan + Self Pulse',hi.filter(function(x){return x.nextBatch&&x.age>=18;}),0.30,A,'Drifting adult learners with a next batch. The report goes to them, not a parent.'),
+    mk('High risk, under 18','7-day AI plan, mentor call if not back on track + Parent Pulse alert',hi.filter(function(x){return x.nextBatch&&x.age<18;}),0.30,A,'Drifting school students who have a next batch. Their parent pays, so the parent is told.'),
+    mk('High risk, 18+','7-day AI plan, mentor call if not back on track + Self Pulse',hi.filter(function(x){return x.nextBatch&&x.age>=18;}),0.30,A,'Drifting adult learners with a next batch. The report goes to them, not a parent.'),
     mk('Medium risk','AI Mentor catch-up + weekly Pulse (parent if under 18)',me.filter(nb),0.15,A,'Slightly off pace. The AI Mentor can usually fix this without a human.'),
     mk('On track, top scorer, centre city','Free Vidyapeeth trial class',top.filter(function(x){return x.centre;}),0.02,ARPU-A,'Strong, engaged online learners near a PW centre: the best offline leads PW has.'),
     mk('On track, top scorer, no centre','Infinity Pro upgrade on results day',top.filter(function(x){return !x.centre;}),0.05,3000,'Strong learners far from a centre: offer the premium plan instead.'),
@@ -723,9 +736,9 @@ Array.prototype.forEach.call(document.querySelectorAll('#segtbl th button'),func
 el('reseed').addEventListener('click',function(){seed=Math.floor(Math.random()*1e9);buildConsole();});
 
 /* ---------- Impact model (live formulas) ---------- */
-var mids=['u','acpu','elig','ren','prem','upg','delta','city','off','arpu','fx'];
+var mids=['u','acpu','elig','ren','prem','upg','delta','city','off','arpu','fx','opt','risk','wa','mk','hi','esc','call','ai'];
 function renderModel(){
-  var v={}; mids.forEach(function(k){var x=parseFloat(el('m-'+k).value); v[k]=isFinite(x)&&x>0?x:0;}); ['elig','city'].forEach(function(k){v[k]=Math.min(v[k],100);}); var bad=v.fx<1; if(bad){v.fx=95.1;}
+  var v={}; mids.forEach(function(k){var x=parseFloat(el('m-'+k).value); v[k]=isFinite(x)&&x>0?x:0;}); ['elig','city','opt','risk','hi','esc'].forEach(function(k){v[k]=Math.min(v[k],100);}); var bad=v.fx<1; if(bad){v.fx=95.1;}
   var net=Math.max(v.arpu-v.acpu,0), base=Math.max(v.u-v.prem,0); var l1=v.u*(v.elig/100)*(v.ren/100)*v.acpu, l2=base*(v.upg/100)*v.delta, l3=v.u*(v.city/100)*(v.off/100)*net, t=l1+l2+l3, fx=v.fx;
   var L=[
     ['Re-enrolment into next batch',l1,'U × eligible% × uplift × ACPU = '+v.u.toLocaleString('en-IN')+' × '+v.elig+'% × '+v.ren+'% × '+INR(v.acpu)],
@@ -734,7 +747,20 @@ function renderModel(){
   ].sort(function(a,b){return b[1]-a[1];});
   el('levers').innerHTML=L.map(function(x){return '<div class="lever"><div class="lever-head"><b>'+x[0]+'</b><span><b>'+CR(x[1])+'</b> <span class="muted">('+USDM(x[1],fx)+')</span></span></div><div class="formula">'+x[2]+'</div></div>';}).join('');
   el('m-total').textContent=CR(t)+'  ·  '+USDM(t,fx);
-  el('m-total-sub').textContent='≈ '+(t/3900e7*100).toFixed(1)+'% of FY26 revenue (₹3,900 cr). These are collections, recognised over the batch, at near-zero marginal cost because content, faculty and seats already exist.'+(bad?' FX below 1 ignored; using ₹95.1.':'');
+  el('m-total-sub').textContent='≈ '+(t/3900e7*100).toFixed(1)+'% of FY26 revenue (₹3,900 cr). These are collections, recognised over the batch.'+(bad?' FX below 1 ignored; using ₹95.1.':'');
+  // Running costs: the Pulse goes every week to everyone who opted in.
+  var msgs=v.u*(v.opt/100)*52, cwa=msgs*v.wa, offers=v.u*(v.elig/100), cmk=offers*v.mk;
+  var calls=v.u*(v.hi/100)*(v.esc/100), ccall=calls*v.call, plans=v.u*(v.risk/100)*4, cai=plans*v.ai, cost=cwa+cmk+ccall+cai, netv=t-cost;
+  var C=[
+    ['Weekly Pulse on WhatsApp',cwa,'U × opted-in% × 52 weeks × utility rate = '+Math.round(msgs).toLocaleString('en-IN')+' messages × ₹'+v.wa],
+    ['Next-step offers',cmk,'U × eligible% × marketing rate = '+Math.round(offers).toLocaleString('en-IN')+' messages × ₹'+v.mk],
+    ['Mentor calls (escalations only)',ccall,'U × high-risk% × not recovered% × call cost = '+Math.round(calls).toLocaleString('en-IN')+' calls × '+INR(v.call)],
+    ['AI Mentor plans',cai,'U × at-risk% × 4 a year × plan cost = '+Math.round(plans).toLocaleString('en-IN')+' plans × ₹'+v.ai]
+  ].sort(function(a,b){return b[1]-a[1];});
+  el('costs').innerHTML=C.map(function(x){return '<div class="lever"><div class="lever-head"><b>'+x[0]+'</b><span><b>'+CR(x[1])+'</b></span></div><div class="formula">'+x[2]+'</div></div>';}).join('');
+  el('m-net').textContent=(netv<0?'−':'')+CR(Math.abs(netv))+'  ·  '+(netv<0?'−':'')+USDM(Math.abs(netv),fx);
+  var hrs=calls*0.25/52;
+  el('m-net-sub').textContent='Running costs '+CR(cost)+' a year'+(cost>0?'; return of '+(t/cost).toFixed(1)+'x on them':'')+'. Mentor calls need about '+Math.round(hrs).toLocaleString('en-IN')+' hours a week, roughly '+Math.round(hrs/40)+' full-time mentors. Build cost and the cost of serving the extra learners are not included.';
   el('m-total-f').textContent='Total = '+CR(l1)+' + '+CR(l3)+' + '+CR(l2);
 }
 mids.forEach(function(k){el('m-'+k).addEventListener('input',renderModel);});

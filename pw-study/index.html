@@ -78,6 +78,11 @@ section.block:nth-of-type(even){background:#fff}
 @media (max-width:420px){.kpi b{font-size:24px;line-height:30px}.g2m .card{padding:14px}}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);padding:20px}
 .card.soft{background:var(--primary-50);border-color:transparent}
+.voices-head{display:grid;gap:6px;margin-bottom:12px;max-width:860px}
+.voices{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.voice{margin:0;padding:16px;display:grid;gap:10px;align-content:space-between}
+.voice blockquote{margin:0;color:var(--heading);font-size:15px;line-height:23px}
+.voice figcaption{font-size:13px;line-height:18px;color:var(--muted)}
 .card.dark{background:var(--ink);border-color:var(--ink);color:#D5D9E0}
 .card.dark h3,.card.dark b{color:#fff}
 .kpi b{display:block;font-size:30px;line-height:36px;color:var(--heading);font-weight:700}
@@ -118,6 +123,8 @@ tr:last-child td{border-bottom:0}
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 tr.hl td{background:var(--primary-50)}
 .t-wide{min-width:760px} .t-mid{min-width:600px}
+/* The sizing tables carry the numbers that matter: they fit the screen instead of scrolling. */
+@media (max-width:699px){.t-fit th,.t-fit td{padding:10px 8px}}
 /* filters */
 .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .chip{border:1px solid var(--border);background:#fff;color:var(--ink);border-radius:var(--r-pill);padding:8px 14px;font-size:14px;font-weight:600;min-height:40px;font-family:inherit;cursor:pointer}
@@ -193,7 +200,7 @@ footer h3{color:#fff}
       <div class="card"><h3>1 · Two engines</h3><p class="small" style="margin-top:6px">Half of FY26 revenue is online at ₹4,104 per learner a year; offline earns ₹36,625 per student, about 9x more.</p></div>
       <div class="card"><h3>2 · Strong AI, aimed at sale one</h3><p class="small" style="margin-top:6px">Lead routing lifts revenue per lead ~10%; voice bots cut counselling cost ~75%; Ask AI and AI Guru answer doubts at scale.</p></div>
       <div class="card"><h3>3 · Retention tools exist, but scattered</h3><p class="small" style="margin-top:6px">Tracker 360, Prep Meter, the Parent App and 1:1 mentorship are live, but split across plans and apps, and mostly pull-based.</p></div>
-      <div class="card soft"><h3>4 · The bet</h3><p class="small" style="margin-top:6px">Agla Kadam: one layer that reads those signals for every learner, acts by risk and age, and personalises the next batch. My estimate: about ₹85.3 cr ($8.97M) a year.</p></div>
+      <div class="card soft"><h3>4 · The bet</h3><p class="small" style="margin-top:6px">Agla Kadam: one layer that reads those signals for every learner, acts by risk and age, and personalises the next batch. My estimate: ₹85 cr a year in extra collections, about ₹79 cr ($8.3M) after running costs, in a ₹36-122 cr range.</p></div>
     </div>
   </div>
 </section>
@@ -295,17 +302,17 @@ footer h3{color:#fff}
       <tbody>
         <tr data-s="live"><td><b>AI doubt solving</b></td><td><span class="tag live">Live</span></td><td>"24*7 Doubt Resolution powered by Ask AI Feature"; Ask AI 3.05M+ doubts at 91% satisfaction; AI Guru 99.45M+ queries.</td><td>Batch pages; Q4 FY26 letter</td></tr>
         <tr data-s="live"><td><b>AI counselling and lead AI</b></td><td><span class="tag live">Live</span></td><td>Voice bots handle 6,000+ calls a day at ~75% lower cost; smart lead routing gives "~10% higher revenue per lead"; a lead model processed 2+ crore leads.</td><td>Q4 FY26 letter</td></tr>
-        <tr data-s="live"><td><b>Study planner with on-track status</b></td><td><span class="tag live">Live</span></td><td>Tracker 360, "a PW study planner": "30 of 330 done · ends 9 Feb 2027 · 1 day behind schedule"; streaks; "Miss a day and the plan rebalances".</td><td>tracker360.pw.live; included in plans such as NEET 360</td></tr>
+        <tr data-s="live"><td><b>Study planner with on-track status</b></td><td><span class="tag live">Live</span></td><td>Tracker 360, "a PW study planner": shows tasks done against the plan, an end date and how many days the learner is "behind schedule"; streaks; "Miss a day and the plan rebalances around what is left".</td><td>tracker360.pw.live; included in plans such as NEET 360</td></tr>
         <tr data-s="live"><td><b>Chapter preparation tracker</b></td><td><span class="tag live">Live</span></td><td>Prep Meter (Backlog Killer): "Track your chapter-wise preparation level and get personalized roadmap".</td><td>Infinity plan inclusions</td></tr>
         <tr data-s="live"><td><b>Parent visibility</b></td><td><span class="tag live">Live</span></td><td>PW Parent App: "View their attendance, lecture, DPP, and test stats on the student dashboard"; 10L+ downloads, 4.0 rating; parent login at spd.pw.live.</td><td>Google Play com.pw.parent; App Store</td></tr>
-        <tr data-s="live"><td><b>Human mentorship</b></td><td><span class="tag live">Live</span></td><td>Infinity Pro "1:1 Mentorship": "Two 30-minute monthly mentor sessions with PW alumni"; Infinity "Topper Mentorship Program"; Prerna wellbeing teleconsultation.</td><td>Batch pages; Prerna page</td></tr>
+        <tr data-s="live"><td><b>Human mentorship</b></td><td><span class="tag live">Live</span></td><td>Infinity Pro "1:1 Mentorship": "Two 30-minute monthly sessions with PW alumni for career and strategy guidance"; Infinity "Topper Mentorship Program"; Prerna wellbeing teleconsultation.</td><td>Batch pages; Prerna page</td></tr>
         <tr data-s="live"><td><b>AI Mentor</b></td><td><span class="tag live">Live</span></td><td>0.52M+ users served (also available to non-PW students). Not visible on public web pages.</td><td>Q4 FY26 letter</td></tr>
         <tr data-s="part"><td><b>Continuation into next year</b></td><td><span class="tag part">Partial</span></td><td>Combo batches (e.g. Arjuna NEET 2026 + Lakshya NEET 2027); "Free Upcoming Versions"; Vishwas Diwas early buyers "automatically upgraded". CuriousJr only: "preview next year's course offerings and unlock early-enrollment benefits".</td><td>Batch pages; PW news; CuriousJr Play listing</td></tr>
         <tr data-s="part"><td><b>Online to offline</b></td><td><span class="tag part">Partial</span></td><td>Online batches mention "Exam guidance at our PW Offline centers"; Vidyapeeth counselling bookable through the app. No Vidyapeeth trial or demo class found.</td><td>Batch pages; Vidyapeeth Utsav page</td></tr>
         <tr data-s="none"><td><b>Weekly progress report to the learner</b></td><td><span class="tag none">Not found</span></td><td>Only test-performance reports and dashboards; no weekly summary pushed to the learner.</td><td>Searched site, store listings, filings</td></tr>
         <tr data-s="none"><td><b>WhatsApp updates to parents</b></td><td><span class="tag none">Not found</span></td><td>Parent data lives in the app; a parent has to open it. No push digest found.</td><td>Searched site, store listings</td></tr>
         <tr data-s="none"><td><b>Personalised next-batch recommendation on results day (main app)</b></td><td><span class="tag none">Not found</span></td><td>Next-year preview exists in CuriousJr only.</td><td>Searched site, store listings, filings</td></tr>
-        <tr data-s="none"><td><b>Renewal offer for existing online students</b></td><td><span class="tag none">Not found</span></td><td>Vidyapeeth offer FAQ: "The offer is mainly for new enrollments. Existing students may contact their respective centers".</td><td>Vidyapeeth offers page</td></tr>
+        <tr data-s="none"><td><b>Renewal offer for existing online students</b></td><td><span class="tag none">Not found</span></td><td>No renewal or loyalty price for existing online learners on batch pages, offer pages or store listings; the offers found were for new bookings, such as Vidyapeeth Utsav 2026 scholarships.</td><td>Batch and offer pages; Vidyapeeth Utsav page</td></tr>
         <tr data-s="none"><td><b>One layer connecting risk signals to actions</b></td><td><span class="tag none">Not found</span></td><td>Each tool sits in its own plan or app; no public evidence of a cross-plan drift signal that triggers mentor, parent or next-step actions.</td><td>Internal systems not visible publicly</td></tr>
       </tbody></table></div>
     <p class="small muted" style="margin-top:10px">Sorted Live → Partial → Not found. "Not found" means not publicly documented; logged-in experiences, push notifications and internal tools could differ.</p>
@@ -316,6 +323,17 @@ footer h3{color:#fff}
 <section class="block" id="gaps" aria-labelledby="gap-h">
   <div class="wrap">
     <div class="sec-head"><span class="num">05 · Shortcomings</span><h2 id="gap-h">Five places the model leaks revenue</h2></div>
+    <div class="voices-head"><h3>In learners' and parents' own words</h3>
+      <p class="small muted">I read 1,425 public reviews of the PW app and the PW Parent App (680 and 677 on Google Play, 68 on the App Store), collected 26 Oct 2026; the PW app ones are from 2026, the Parent App ones from Feb 2024 on. About half the PW app reviews are 5★ praise for the teaching; of the 270 rated 1-3★, 214 are about bugs or support. In the Parent App, 105 of 677 Google Play reviews (15.5%) mention reports, progress, attendance or results, and 61 of those (58%) rate it 1-3★, mostly because the data is missing, wrong or too thin; most of those are from 2024. Quoted verbatim; names left out.</p></div>
+    <div class="grid voices" id="voices">
+      <figure class="card voice"><blockquote>"It should have overall insights as well, like monthly and overall, and also option to check previous weeks or custom range data."</blockquote><figcaption>Parent App, App Store · 1★ · 3 Aug 2026</figcaption></figure>
+      <figure class="card voice"><blockquote>"the test records and my ward’s attendance are not showing on the portal yet."</blockquote><figcaption>Parent App, Google Play · 1★ · 17 Sep 2026</figcaption></figure>
+      <figure class="card voice"><blockquote>"my child is improving day by day. But your guidance and counseling can play a significant role to make the future of young ones."</blockquote><figcaption>Parent App, Google Play · 5★ · 16 Jul 2026</figcaption></figure>
+      <figure class="card voice"><blockquote>"I paid a hefty amount for the Shreshth 2.0 Infinity batch, yet it expired and I lost access to the content I purchased."</blockquote><figcaption>PW app, Google Play · 1★ · 9 Jul 2026</figcaption></figure>
+      <figure class="card voice"><blockquote>"Please add an option to hide expired batches from seeing while navigating through the 'my batches' section."</blockquote><figcaption>PW app, Google Play · 4★ · 22 Jul 2026</figcaption></figure>
+      <figure class="card voice"><blockquote>"there is mentioned that 1 to 1 mentorship but when we purchase the batch,then there is only paid no mentorship."</blockquote><figcaption>PW app, Google Play · 2★ · 5 Aug 2026</figcaption></figure>
+    </div>
+    <p class="small muted" style="margin:10px 0 20px">What this says: many parents want a pushed, periodic summary and do not trust the one they have to go and find; the end of a batch currently feels like a loss, not a next step; and mentorship promises have to be ones PW can keep, which is why human calls here are capped.</p>
     <div class="tbl"><table class="t-wide">
       <thead><tr><th style="width:22%">Shortcoming</th><th style="width:48%">Evidence</th><th style="width:30%">So what</th></tr></thead>
       <tbody>
@@ -353,7 +371,7 @@ footer h3{color:#fff}
     <div class="sec-head"><span class="num">07 · The bet</span><h2 id="bet-h">Agla Kadam ("next step"): a continuity layer on top of what PW already runs</h2><p>No new learning content, faculty or capex. It connects the signals PW already collects to actions PW already knows how to take, for every learner on every plan.</p></div>
     <div class="grid g3">
       <div class="card mod"><span class="k">01 · PULSE</span><h3 style="margin-top:4px">Spot drift early</h3><p class="small" style="margin-top:6px">A weekly drop-off risk score for every paid learner, read from Tracker 360 and Prep Meter progress, lecture pace, tests, inactivity and doubts. Every score shows its reasons.</p></div>
-      <div class="card mod o"><span class="k">02 · RESCUE</span><h3 style="margin-top:4px">Act by risk and age</h3><p class="small" style="margin-top:6px">High risk: human mentor call and a 7-day plan. Medium: AI Mentor catch-up. Plus a Weekly Pulse on WhatsApp that goes to the parent for under-18s and to the learner for adults, linking into the Parent App.</p></div>
+      <div class="card mod o"><span class="k">02 · RESCUE</span><h3 style="margin-top:4px">Act by risk and age</h3><p class="small" style="margin-top:6px">High risk: a 7-day AI comeback plan first; a human mentor calls only if the learner is still high risk after those 7 days, about 30 full-time mentors' worth of calls across PW. Medium: AI Mentor catch-up. Plus a Weekly Pulse on WhatsApp that goes to the parent for under-18s and to the learner for adults, linking into the Parent App.</p></div>
       <div class="card dark"><span class="k" style="font-size:12px;font-weight:700;letter-spacing:.06em;color:#B9B1FF">03 · NEXT STEP</span><h3 style="margin-top:4px">Personalise results day</h3><p class="small" style="margin-top:6px">A personal year report and the right next batch, plan upgrade or Vidyapeeth trial, timed to results and Vishwas Diwas. CuriousJr's next-year preview, extended to the main app. Offers only when on track.</p></div>
     </div>
     <div class="grid g2" style="margin-top:20px">
@@ -387,25 +405,41 @@ footer h3{color:#fff}
 <!-- IMPACT -->
 <section class="block" id="impact" aria-labelledby="im-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">09 · Sizing the prize</span><h2 id="im-h">My estimate: about ₹85 cr a year from learners PW already has</h2></div>
+    <div class="sec-head"><span class="num">09 · Sizing the prize</span><h2 id="im-h">My estimate: about ₹79 cr a year after costs, from learners PW already has</h2>
+      <p>A range, not a point: every uplift below is an assumption until a holdout proves it, so each is shown at half and one and a half times my base case. Running costs are priced from Meta's published WhatsApp rates and labelled estimates for the rest.</p></div>
     <div class="grid split">
-      <div class="tbl"><table class="t-mid">
-        <thead><tr><th>Lever</th><th>Formula (FY26 base)</th><th class="num">₹ cr</th><th class="num">US$</th></tr></thead>
+      <div class="tbl"><table class="t-fit" id="im-range">
+        <thead><tr><th>Lever (FY26 base)</th><th class="num">Low</th><th class="num">Base</th><th class="num">High</th></tr></thead>
         <tbody>
-          <tr><td>Re-enrolment into next batch</td><td>4.87M × 50% eligible × 4pp × ₹4,104</td><td class="num">40.0</td><td class="num">4.20M</td></tr>
-          <tr><td>Online to Vidyapeeth</td><td>4.87M × 35% in centre cities × 0.5% × ₹32,521 net of online fee</td><td class="num">27.7</td><td class="num">2.91M</td></tr>
-          <tr><td>Plan upgrade (Infinity, Infinity Pro)</td><td>(4.87M − 0.96M on premium) × 1.5pp × ₹3,000 gap</td><td class="num">17.6</td><td class="num">1.85M</td></tr>
-          <tr class="hl"><td><b>Total</b></td><td>≈ 2.2% of FY26 revenue</td><td class="num"><b>85.3</b></td><td class="num"><b>8.97M</b></td></tr>
+          <tr><td>Re-enrolment into next batch<br><span class="small muted">4.87M × 50% eligible × +2 / 4 / 6pp × ₹4,104</span></td><td class="num">20.0</td><td class="num">40.0</td><td class="num">60.0</td></tr>
+          <tr><td>Online to Vidyapeeth<br><span class="small muted">4.87M × 35% in centre cities × 0.25 / 0.5 / 0.75% × ₹32,521 net of online fee</span></td><td class="num">13.9</td><td class="num">27.7</td><td class="num">41.6</td></tr>
+          <tr><td>Plan upgrade (Infinity, Infinity Pro)<br><span class="small muted">(4.87M − 0.96M on premium) × +0.75 / 1.5 / 2.25pp × ₹3,000 gap</span></td><td class="num">8.8</td><td class="num">17.6</td><td class="num">26.4</td></tr>
+          <tr class="hl"><td><b>Extra collections</b> <span class="small muted">(₹ cr a year)</span></td><td class="num"><b>42.6</b></td><td class="num"><b>85.3</b></td><td class="num"><b>127.9</b></td></tr>
+          <tr><td>Less running costs<br><span class="small muted">WhatsApp Pulse and offers, mentor calls, AI Mentor plans; held at base</span></td><td class="num">−6.15</td><td class="num">−6.15</td><td class="num">−6.15</td></tr>
+          <tr class="hl"><td><b>Net of running costs</b> <span class="small muted">(₹ cr a year)</span></td><td class="num"><b>36.5</b></td><td class="num"><b>79.1</b></td><td class="num"><b>121.8</b></td></tr>
+          <tr><td>Net in US$ at ₹95.1</td><td class="num">3.84M</td><td class="num">8.32M</td><td class="num">12.81M</td></tr>
         </tbody></table></div>
       <div class="card soft">
         <h3>Read this honestly</h3>
         <ul class="small" style="margin-top:6px">
           <li><b>PW-disclosed:</b> 4.87M online payers, ₹4,104 ACPU, ₹36,625 offline ARPU, 960k premium enrolments.</li>
-          <li><b>My assumptions</b>, to be proven against a holdout: 50% have a next batch, +4pp re-enrolment, +1.5pp upgrades at a ₹3,000 price gap, 35% in centre cities, 0.5% move offline. I also treat the 960k premium enrolments (Curious Jr Power Batch, Infinity, Infinity Pro) as learners already on premium, which is an approximation.</li>
-          <li>These are collections, recognised over the batch. Every input is editable in the prototype's growth console.</li>
+          <li><b>Where each base uplift comes from.</b> Re-enrolment +4pp: my onboarding experiments at ET lifted subscriber retention 10%; on an assumed 40% renewal base that is 4pp. Upgrades +1.5pp is about 58,700 learners, 6% on top of PW's 960k premium enrolments; for scale, Vishwas Diwas 2026 sold 35k Infinity Pro plans in three weeks, so treat this as a stretch, not a floor. Vidyapeeth 0.5% is about 8,500 students, 1.8% of FY26 offline enrolments.</li>
+          <li><b>My other assumptions</b>, to be proven against a holdout: 50% have a next batch, 35% live in centre cities, and the 960k premium enrolments (Curious Jr Power Batch, Infinity, Infinity Pro) are learners already on premium, which is an approximation.</li>
+          <li>These are collections, recognised over the batch, net only of the programme's own running costs: build cost and the cost of serving the extra learners are not included. Figures are rounded; totals use unrounded values. Every input is editable in the prototype's growth console.</li>
         </ul>
       </div>
     </div>
+    <h3 style="margin-top:24px">What it costs to run, and who makes the calls</h3>
+    <div class="tbl" style="margin-top:10px"><table class="t-fit" id="im-cost">
+      <thead><tr><th style="width:26%">Cost</th><th style="width:52%">Volume and rate</th><th class="num" style="width:22%">₹ cr a year</th></tr></thead>
+      <tbody>
+        <tr><td><b>Weekly Pulse on WhatsApp</b></td><td>4.87M × 50% opted in × 52 weeks = 126.6M messages × ₹0.115 utility rate</td><td class="num">1.46</td></tr>
+        <tr><td><b>Next-step offers</b></td><td>One per learner with a next batch: 2.4M messages × ₹0.8631 marketing rate</td><td class="num">0.21</td></tr>
+        <tr><td><b>Human mentor calls</b></td><td>Only learners still high risk after the 7-day AI plan, final-year learners included: 4.87M × 13% high risk × 40% not recovered = 253,000 calls × ₹150 for a 15-minute call. One call per drift episode, one episode per learner a year</td><td class="num">3.80</td></tr>
+        <tr><td><b>AI Mentor plans</b></td><td>4.87M × 35% at risk × 4 plans a year × ₹1 per plan</td><td class="num">0.68</td></tr>
+        <tr class="hl"><td><b>Total running cost</b></td><td>Return on running cost: about 14x at base, 7x at low</td><td class="num"><b>6.15</b></td></tr>
+      </tbody></table></div>
+    <p class="small muted" style="margin-top:8px">WhatsApp rates are Meta's INR list rates for India, effective 1 Oct 2026. I price the Pulse as a utility message and offers as marketing; Meta decides the category, and if it bills the Pulse as marketing (₹0.8631) the Pulse costs ₹10.9 cr and the base net falls to ₹69.7 cr. Mentor cost, AI cost, opt-in, risk shares and recovery rate are my estimates. 253,000 calls of 15 minutes is about 1,220 mentor-hours a week of talk time, roughly 30 full-time mentors and more at exam peaks, drawn from PW's existing alumni mentor pool; if capacity runs short, calls go first to the learners with the most fees at stake and everyone else stays with the AI Mentor.</p>
   </div>
 </section>
 
@@ -434,6 +468,7 @@ footer h3{color:#fff}
       <thead><tr><th>Assumption</th><th>Why it could be wrong</th><th>Cheapest test</th></tr></thead>
       <tbody>
         <tr class="hl"><td><b>Drift is predictable early</b></td><td>Learners may drop off suddenly, close to exams</td><td>Backtest last year's data before building anything</td></tr>
+        <tr class="hl"><td><b>The signals are accurate</b></td><td>Parent App reviews report watch time and DPPs not updating: "It shows, 6 minutes of lectures progress when actually I did 2+ hours" (Google Play, 23 Sep 2024)</td><td>Reconcile one week of Tracker 360 and Parent App data with server logs; send no Pulse on a signal that fails</td></tr>
         <tr><td><b>People act on nudges</b></td><td>WhatsApp fatigue; reports get ignored</td><td>2-week Pulse pilot with opted-in parents and learners</td></tr>
         <tr><td><b>Offers do not feel pushy</b></td><td>An education brand loses trust fast</td><td>Copy test with complaint and opt-out guardrails</td></tr>
         <tr><td><b>Lift is incremental</b></td><td>Renewal may happen anyway via Vishwas Diwas and marketing</td><td>Keep a 10% holdout for every action</td></tr>
