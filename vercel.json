@@ -4,6 +4,28 @@
   "outputDirectory": "www",
   "redirects": [
     {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www\\.ayushi-rawat\\.app"
+        }
+      ],
+      "destination": "https://ayushi-rawat.app/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "ayushi-rawat\\.app"
+        }
+      ],
+      "destination": "/ayushi-rawat",
+      "permanent": false
+    },
+    {
       "source": "/amar-ujala",
       "destination": "/amar-ujala/study",
       "permanent": false
@@ -25,12 +47,22 @@
     },
     {
       "source": "/Ayushi",
-      "destination": "/ayushi",
+      "destination": "/ayushi-rawat",
       "permanent": true
     },
     {
       "source": "/Ayushi/:path*",
-      "destination": "/ayushi/:path*",
+      "destination": "/ayushi-rawat/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/ayushi",
+      "destination": "/ayushi-rawat",
+      "permanent": true
+    },
+    {
+      "source": "/ayushi/:path*",
+      "destination": "/ayushi-rawat/:path*",
       "permanent": true
     },
     {
@@ -112,12 +144,50 @@
       "destination": "/icons/favicon.svg"
     },
     {
-      "source": "/ayushi",
-      "destination": "/ayushi/index.html"
+      "source": "/ayushi-rawat",
+      "destination": "/ayushi-rawat/index.html"
     },
     {
-      "source": "/ayushi/resume",
-      "destination": "/ayushi/resume.html"
+      "source": "/ayushi-rawat/resume",
+      "destination": "/ayushi-rawat/resume.html"
+    },
+    {
+      "source": "/ayushi-rawat/case-studies",
+      "destination": "/ayushi-rawat/case-studies.html"
+    },
+    {
+      "source": "/ayushi-rawat/auto-job-applier",
+      "destination": "/ayushi-rawat/auto-job-applier.html"
+    },
+    {
+      "source": "/resume",
+      "has": [
+        {
+          "type": "host",
+          "value": "ayushi-rawat\\.app"
+        }
+      ],
+      "destination": "/ayushi-rawat/resume.html"
+    },
+    {
+      "source": "/case-studies",
+      "has": [
+        {
+          "type": "host",
+          "value": "ayushi-rawat\\.app"
+        }
+      ],
+      "destination": "/ayushi-rawat/case-studies.html"
+    },
+    {
+      "source": "/auto-job-applier",
+      "has": [
+        {
+          "type": "host",
+          "value": "ayushi-rawat\\.app"
+        }
+      ],
+      "destination": "/ayushi-rawat/auto-job-applier.html"
     },
     {
       "source": "/how-to/api/:fn*",
@@ -140,8 +210,8 @@
       "destination": "/growth-school.html"
     },
     {
-      "source": "/ayushi/course",
-      "destination": "/ayushi/course.html"
+      "source": "/ayushi-rawat/course",
+      "destination": "/ayushi-rawat/course.html"
     },
     {
       "source": "/marketing-101-for-ayushi",

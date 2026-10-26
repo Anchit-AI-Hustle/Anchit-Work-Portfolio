@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d0b0c">
+<title>Ayushi — Job Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=IBM+Plex+Mono:wght@500;600&family=Manrope:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/ayushi-rawat/ayushi.css">
+<script>document.documentElement.classList.add('js')</script>
+<!--
+  HOW "AUTO-APPLY" WORKS HERE, AND WHY IT STOPS SHORT OF CLICKING SUBMIT
+  The agent searches, ranks, shortlists, writes a tailored resume and cover
+  letter for each role, queues them, copies the letter and opens the
+  employer's own form. Ayushi presses submit.
+  LinkedIn, Naukri and Indeed prohibit automated applications and suspend
+  accounts that send them; employer forms need answers only she can give
+  (notice period, current CTC, screening questions); and an application that
+  goes out unread with a model's mistake in it costs more than it gains.
+  Everything is kept in this browser (localStorage). Nothing is stored on a
+  server; Export makes a backup.
+-->
+<style>
+.top{padding-top:clamp(110px,12vw,150px);padding-bottom:28px;background:radial-gradient(circle at 85% 10%,rgba(200,16,46,.16),transparent 34%)}
+.top .a-display{font-size:clamp(48px,7vw,104px)}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:28px}
+.run .meta{font:500 11px/1.5 var(--a-mono);letter-spacing:.06em;color:var(--a-dim)}
+.honest{margin-top:22px;max-width:860px}
+.stats{margin-top:28px;grid-template-columns:repeat(5,minmax(0,1fr))}
+.tabs{position:sticky;top:72px;z-index:20;display:flex;gap:6px;flex-wrap:wrap;padding:10px var(--a-gutter);background:rgba(13,11,12,.92);backdrop-filter:blur(6px);border-block:1px solid var(--a-rule)}
+.tabs button{min-height:40px;padding:8px 16px;border:1px solid var(--a-rule-2);border-radius:99px;background:transparent;color:var(--a-dim);font:600 11px/1 var(--a-mono);letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--a-ink);color:var(--a-bg);border-color:var(--a-ink)}
+.tabs button b{margin-left:6px;color:var(--a-rouge)}
+.tabs button[aria-selected="true"] b{color:var(--a-rouge-deep)}
+.panel{padding:28px var(--a-gutter) 80px}
+.panel[hidden]{display:none}
+.filters{display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin-bottom:20px}
+.filters .a-field{min-width:150px}
+.list{display:grid;gap:12px}
+.job{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:18px;align-items:start;padding:20px}
+.ring{--p:0;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--a-rouge) calc(var(--p)*1%),var(--a-surface-2) 0);font:500 20px/1 var(--a-display);font-variation-settings:"opsz" 14}
+.ring span{display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:var(--a-surface)}
+.job h3{margin:0;font:500 22px/1.25 var(--a-display)}
+.job .co{margin:6px 0 10px;font:500 11px/1.5 var(--a-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--a-champagne)}
+.job .why{display:flex;flex-wrap:wrap;gap:6px}
+.job .why span{font-size:12px;padding:4px 9px;border-radius:99px;background:var(--a-surface-2);color:var(--a-dim)}
+.job .acts{display:flex;flex-direction:column;gap:8px;align-items:stretch;min-width:150px}
+.job .state{font:600 10px/1 var(--a-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--a-rouge)}
+.job .due{color:var(--a-champagne)}
+.job.is-new{border-color:rgba(240,67,92,.45)}
+.empty{padding:40px;text-align:center;color:var(--a-dim);border:1px dashed var(--a-rule-2);border-radius:var(--a-r-l)}
+.board{display:grid;grid-template-columns:repeat(5,minmax(220px,1fr));gap:12px;overflow-x:auto;padding-bottom:8px}
+@media(max-width:700px){.board{grid-template-columns:1fr;overflow:visible}.tabs{flex-wrap:nowrap;overflow-x:auto}.tabs button{flex:none}}
+.col{min-width:0}
+.col h3{display:flex;justify-content:space-between;margin:0 0 10px;font:600 11px/1 var(--a-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--a-dim)}
+.col .mini{padding:14px;margin-bottom:10px;border:1px solid var(--a-rule);border-radius:var(--a-r-m);background:var(--a-surface)}
+.mini b{display:block;font:500 17px/1.25 var(--a-display)}
+.mini small{display:block;margin:4px 0 10px;color:var(--a-dim);font-size:12px}
+.mini .row{display:flex;flex-wrap:wrap;gap:6px}
+.profile{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,.7fr);gap:16px}
+.profile .a-card{display:grid;gap:16px;align-content:start}
+.links-out{display:grid;gap:8px}
+.links-out a{display:flex;justify-content:space-between;padding:12px 14px;border:1px solid var(--a-rule-2);border-radius:var(--a-r-s);font-size:14px}
+.links-out a:hover{border-color:var(--a-rouge)}
+dialog{width:min(860px,94vw);max-height:90vh;padding:0;border:1px solid var(--a-rule-2);border-radius:var(--a-r-l);background:var(--a-surface);color:var(--a-ink)}
+dialog::backdrop{background:rgba(0,0,0,.7)}
+.dlg{display:grid;gap:16px;padding:26px}
+.dlg header{display:flex;justify-content:space-between;gap:16px;align-items:start}
+.dlg h2{margin:0;font:500 28px/1.15 var(--a-display)}
+.dlg pre{margin:0;max-height:38vh;overflow:auto;white-space:pre-wrap;font:400 14px/1.6 var(--a-body);padding:16px;border-radius:var(--a-r-m);background:#0a0809;border:1px solid var(--a-rule)}
+.warn{padding:12px 14px;border-radius:var(--a-r-s);background:var(--a-rouge-soft);color:#ffd5db;font-size:14px}
+.ok{padding:12px 14px;border-radius:var(--a-r-s);background:rgba(217,183,121,.12);color:var(--a-champagne);font-size:14px}
+.toast{position:fixed;left:50%;bottom:24px;z-index:90;transform:translateX(-50%);padding:12px 18px;border-radius:99px;background:var(--a-ink);color:var(--a-bg);font:600 13px/1.3 var(--a-body);box-shadow:0 18px 50px rgba(0,0,0,.5);max-width:92vw}
+.toast[hidden]{display:none}
+.confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px;padding:12px;border-radius:var(--a-r-s);background:var(--a-surface-2);font-size:14px}
+@media(max-width:1000px){.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.profile{grid-template-columns:1fr}}
+@media(max-width:700px){.job{grid-template-columns:52px minmax(0,1fr)}.job .acts{grid-column:1/-1;flex-direction:row;flex-wrap:wrap;min-width:0}.job .acts .a-btn{flex:1 1 auto}.ring{width:52px;height:52px;font-size:17px}.ring span{width:42px;height:42px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.tabs{top:64px}}
+</style>
+<!-- seo:auto:start -->
+<!-- Managed by scripts/seo-inject.mjs — edit seo.config.json, not here. -->
+<meta name="description" content="The private job search agent for Ayushi Rawat: ranked CRM and growth marketing openings in India, tailored application kits and an application tracker." />
+<link rel="canonical" href="https://anchit-tandon.com/ayushi-rawat/auto-job-applier" />
+<meta name="robots" content="noindex,nofollow" />
+<meta name="author" content="Anchit Tandon" />
+<link rel="icon" href="/icons/favicon.svg" type="image/svg+xml" />
+<meta property="og:title" content="Ayushi — Job Agent" />
+<meta property="og:description" content="The private job search agent for Ayushi Rawat: ranked CRM and growth marketing openings in India, tailored application kits and an application tracker." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://anchit-tandon.com/ayushi-rawat/auto-job-applier" />
+<meta property="og:image" content="https://anchit-tandon.com/assets/og/og-default.png" />
+<meta property="og:site_name" content="Anchit Tandon" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Anchit Tandon — Product &amp; D2C Growth" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Ayushi — Job Agent" />
+<meta name="twitter:description" content="The private job search agent for Ayushi Rawat: ranked CRM and growth marketing openings in India, tailored application kits and an application tracker." />
+<meta name="twitter:image" content="https://anchit-tandon.com/assets/og/og-default.png" />
+<!-- seo:auto:end -->
+</head>
+<body>
+<a class="a-skip" href="#main">Skip to content</a>
+<nav class="a-nav" aria-label="Ayushi Rawat"><a class="a-brand" href="/ayushi-rawat" aria-label="Ayushi Rawat, home"><span class="a-seal">AR</span><span class="a-wordmark">Ayushi Rawat<small>Job agent</small></span></a><div class="a-links"><a class="a-opt" href="/ayushi-rawat">Portfolio</a><a class="a-opt" href="/ayushi-rawat/case-studies">Case studies</a><a class="a-cta" href="/ayushi-rawat/resume">Resume</a></div></nav>
+<main id="main">
+<section class="a-section top">
+  <p class="a-eyebrow">Private · job search agent</p>
+  <h1 class="a-display">The job hunt, <em>on autopilot.</em></h1>
+  <p class="a-lede">It searches company job boards that hire in India, ranks every opening against her profile, shortlists the strongest, writes a tailored resume and cover letter for each, and queues them up. She reviews, opens and submits.</p>
+  <div class="run">
+    <button class="a-btn power" id="runBtn" type="button">Run the agent</button>
+    <button class="a-btn" id="prepBtn" type="button">Prepare kits for shortlist</button>
+    <span class="meta" id="runMeta" aria-live="polite">Not run yet</span>
+  </div>
+  <div class="a-note honest"><b>How applying works</b><span>The agent does the searching, ranking and writing. It never presses submit. Job sites ban accounts that apply by bot, employer forms ask things only she can answer, and every application deserves a read before it goes. Her data stays in this browser; use Export for a backup.</span></div>
+  <div class="a-tiles stats" id="stats" aria-label="Pipeline numbers"></div>
+</section>
+
+<div class="tabs" role="tablist" aria-label="Agent views">
+  <button role="tab" id="t-matches" aria-controls="p-matches" aria-selected="true" type="button">Matches<b id="n-matches"></b></button>
+  <button role="tab" id="t-pipeline" aria-controls="p-pipeline" aria-selected="false" type="button">Pipeline<b id="n-pipeline"></b></button>
+  <button role="tab" id="t-profile" aria-controls="p-profile" aria-selected="false" type="button">Profile</button>
+</div>
+
+<section class="panel" id="p-matches" role="tabpanel" aria-labelledby="t-matches">
+  <div class="filters">
+    <div class="a-field"><label for="fScore">Minimum fit</label><select class="a-select" id="fScore"><option value="0">Any</option><option value="50">50+</option><option value="60" selected>60+</option><option value="70">70+</option></select></div>
+    <div class="a-field"><label for="fWhere">Location</label><select class="a-select" id="fWhere"><option value="">Anywhere she can work</option><option value="ncr">Delhi NCR</option><option value="india">India</option><option value="remote">Remote</option></select></div>
+    <div class="a-field" style="flex:1;min-width:200px"><label for="fText">Search titles</label><input class="a-input" id="fText" type="search" placeholder="CRM, lifecycle, growth…"></div>
+    <label class="a-chip" style="cursor:pointer;min-height:44px"><input type="checkbox" id="fHide" checked style="margin-right:8px;accent-color:var(--a-rouge-deep)">Hide passed</label>
+  </div>
+  <div class="list" id="matches"></div>
+</section>
+
+<section class="panel" id="p-pipeline" role="tabpanel" aria-labelledby="t-pipeline" hidden>
+  <div class="board" id="board"></div>
+</section>
+
+<section class="panel" id="p-profile" role="tabpanel" aria-labelledby="t-profile" hidden>
+  <div class="profile">
+    <div class="a-card">
+      <div class="a-field"><label for="pText">Profile the kits are written from (only facts in here are used)</label><textarea class="a-textarea" id="pText" style="min-height:340px"></textarea></div>
+      <div class="a-actions" style="margin-top:0"><button class="a-btn power small" id="saveProfile" type="button">Save profile</button><button class="a-btn small" id="resetProfile" type="button">Reset to resume</button></div>
+    </div>
+    <div class="a-card">
+      <div class="a-field"><label for="sAuto">Auto-shortlist at fit score</label><select class="a-select" id="sAuto"><option value="0">Off</option><option value="65">65+</option><option value="70">70+</option><option value="75">75+</option></select></div>
+      <div class="a-field"><label for="sExtra">Extra company boards (gh:slug, lv:slug, ab:slug)</label><input class="a-input" id="sExtra" placeholder="gh:razorpaysoftwareprivatelimited, lv:swiggy"></div>
+      <div class="a-field"><label>Also search on job sites</label><div class="links-out" id="outLinks"></div></div>
+      <div class="a-field"><label>Backup</label><div class="a-actions" style="margin-top:0"><button class="a-btn small" id="exportJson" type="button">Export JSON</button><button class="a-btn small" id="exportCsv" type="button">Export CSV</button><label class="a-btn small" for="importJson" style="cursor:pointer">Import</label><input id="importJson" type="file" accept="application/json" hidden></div></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<dialog id="kitDlg" aria-labelledby="kitTitle">
+  <div class="dlg">
+    <header><div><p class="a-label" id="kitCo"></p><h2 id="kitTitle">Application kit</h2></div><button class="a-btn small" type="button" data-close>Close</button></header>
+    <div id="kitBody"></div>
+  </div>
+</dialog>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(() => {
+  const KEY = 'ayushi-agent-v1';
+  const PROFILE = `Ayushi Rawat — Digital Marketing | Growth | CRM & Brand Strategy
+New Delhi, India · +91 96009 98830 · ayushirawat960@gmail.com · anchit-tandon.com/ayushi-rawat
+
+Summary: Digital marketing and CRM professional with 4+ years of experience across campaign execution, social media growth, Salesforce operations, analytics and stakeholder enablement.
+
+Marketing Executive, SPN Propservices LLP — Jan 2025 to Present, Agra, India
+- Supported 10+ digital and offline marketing campaigns, contributing to a 20% increase in qualified property leads.
+- Managed social media calendars and improved engagement and reach by 30% within six months.
+- Conducted market and competitor analysis that supported a 15% improvement in conversions.
+- Created conversion-focused marketing collateral for sales teams.
+
+Education Outreach Intern, Muskurahat Foundation — Apr 2025 to Jun 2025
+- Executed outreach campaigns supporting education for underprivileged children.
+- Created social media content and visuals highlighting impact initiatives.
+- Supported volunteer events, donor drives and awareness campaigns.
+
+Senior Executive, VOIS - Vodafone Intelligent Solutions — Aug 2021 to Dec 2024, Pune, India
+- Configured Salesforce Sales and Service Cloud workflows and automation.
+- Built and maintained 50+ reports and dashboards for business decision-making.
+- Resolved 2,000+ user tickets and supported UAT for 100+ user stories.
+- Trained 200+ users and new hires, reducing onboarding time by 20%.
+- Supported Oracle CPQ updates across 150+ data tables and 20+ contracts.
+- Improved process efficiency by 25% through stakeholder-led workflow changes.
+- Received Star of the Month twice.
+
+Skills: Digital Marketing, Social Media Strategy, Content Strategy, Campaign Management, SEO, SEM, Brand Storytelling, Copywriting, Market Research, Salesforce Sales Cloud, Salesforce Service Cloud, Tableau, Reporting & Dashboards, UAT, Performance Tracking, Stakeholder Management.
+
+Education: B.Tech, Electronics and Communication Engineering, Vellore Institute of Technology, 2021. CGPA 8.58. PR and Marketing Head for the Riviera cultural festival.
+
+Target roles: CRM & Lifecycle Marketing Manager, Marketing Operations Manager, Growth Marketing Manager, Digital Marketing Manager. Based in New Delhi; open to Delhi NCR, other Indian cities and remote.`;
+
+  const STAGES = [
+    ['shortlist', 'Shortlisted'], ['kit', 'Kit ready'], ['applied', 'Applied'], ['interview', 'Interviewing'], ['offer', 'Offer'],
+  ];
+  const STAGE_NAME = Object.fromEntries(STAGES.concat([['new', 'New'], ['passed', 'Passed'], ['closed', 'Closed']]));
+  const DAY = 864e5;
+
+  // ── State (localStorage; every access guarded, the page works without it) ──
+  const blank = () => ({ profile: PROFILE, autoScore: 70, extra: '', jobs: {}, lastRun: 0 });
+  let S = blank();
+  try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(blank(), JSON.parse(raw)); } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('Could not save in this browser. Export a backup.'); } };
+
+  const $ = (s) => document.querySelector(s);
+  const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const safeUrl = (u) => (/^https:\/\//i.test(u || '') ? u : '#');
+  // Some postings list a dozen cities; show three and count the rest.
+  const place = (s) => { const p = String(s || '').split(' · ').filter(Boolean); return p.length > 3 ? p.slice(0, 3).join(' · ') + ' +' + (p.length - 3) + ' more' : p.join(' · '); };
+  const fmtDate = (t) => (t ? new Date(t).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '');
+  let toastT;
+  function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3800); }
+
+  // ── Agent: search + rank + merge + auto-shortlist ──
+  async function runAgent(silent) {
+    const btn = $('#runBtn');
+    btn.disabled = true; btn.textContent = 'Searching…';
+    $('#runMeta').textContent = 'Scanning company job boards…';
+    try {
+      const q = S.extra ? '?extra=' + encodeURIComponent(S.extra) : '';
+      const r = await fetch('/api/ayushi-jobs' + q, { headers: { accept: 'application/json' } });
+      if (!r.ok) throw new Error(r.status === 429 ? 'Too many runs in a minute. Try again shortly.' : 'Search failed (' + r.status + ').');
+      const d = await r.json();
+      let fresh = 0, auto = 0;
+      for (const j of d.results || []) {
+        const prev = S.jobs[j.id];
+        if (prev) { Object.assign(prev, { score: j.score, reasons: j.reasons, posted: j.posted, where: j.where }); continue; }
+        const status = S.autoScore && j.score >= S.autoScore ? 'shortlist' : 'new';
+        if (status === 'shortlist') auto++;
+        S.jobs[j.id] = Object.assign({}, j, { status, firstSeen: Date.now(), isNew: true });
+        fresh++;
+      }
+      S.lastRun = Date.now();
+      save();
+      const failed = (d.sources || []).filter((s) => !s.ok).length;
+      $('#runMeta').textContent = `Scanned ${d.scanned} openings · ${d.count} fit her profile · ${fresh} new` + (auto ? ` · ${auto} auto-shortlisted` : '') + (failed ? ` · ${failed} board(s) unreachable` : '');
+      if (!silent) toast(fresh ? `${fresh} new matches found` : 'No new matches since the last run');
+    } catch (e) {
+      $('#runMeta').textContent = String(e.message || e);
+      if (!silent) toast(String(e.message || e));
+    } finally {
+      btn.disabled = false; btn.textContent = 'Run the agent';
+      render();
+    }
+  }
+
+  // ── Kits: tailored resume + cover letter from /api/apply ──
+  const PLACEHOLDER = /x{3,}|\[[^\]]{2,40}\]|@email\.com|your\s+name|lorem ipsum|\{\{/i;
+  function checkKit(kit) {
+    const all = [kit.resume, kit.coverLetter].join('\n');
+    const warns = [];
+    if (PLACEHOLDER.test(all)) warns.push('Contains placeholder text (like XXXX or [Company]). Fix it before sending.');
+    if (!/ayushirawat960@gmail\.com/i.test(kit.resume || '')) warns.push('Her email is missing from the resume header.');
+    const nums = (all.match(/\b\d[\d,]*\+?%?/g) || []).filter((n) => !/^(19|20)\d\d$/.test(n));
+    const known = S.profile;
+    const unknown = [...new Set(nums.filter((n) => !known.includes(n.replace(/\+$/, ''))))].slice(0, 6);
+    if (unknown.length) warns.push('Numbers not in her profile: ' + unknown.join(', ') + '. Check they are true.');
+    return warns;
+  }
+  async function makeKit(j) {
+    const r = await fetch('/api/apply', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ resume: S.profile, job: { title: j.title, company: j.company, location: j.location, description: j.description || '', link: j.link } }),
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error === 'rate_limited' ? 'The writing engine is busy. Try again in a minute.' : 'Kit failed (' + (d.error || r.status) + ').');
+    j.kit = { resume: d.resume, coverLetter: d.coverLetter, fit: d.fit, at: Date.now() };
+    j.kit.warnings = checkKit(j.kit);
+    if (['new', 'shortlist'].includes(j.status)) j.status = 'kit';
+    save();
+    return j;
+  }
+  async function prepareShortlist() {
+    const queue = Object.values(S.jobs).filter((j) => j.status === 'shortlist' && !j.kit).sort((a, b) => b.score - a.score).slice(0, 5);
+    if (!queue.length) return toast('Nothing to prepare: shortlist some matches first.');
+    const btn = $('#prepBtn'); btn.disabled = true;
+    let done = 0;
+    for (const j of queue) {
+      btn.textContent = `Writing ${done + 1} of ${queue.length}…`;
+      try { await makeKit(j); done++; } catch (e) { toast(e.message); break; }
+      render();
+      await new Promise((s) => setTimeout(s, 1500));
+    }
+    btn.disabled = false; btn.textContent = 'Prepare kits for shortlist';
+    toast(`${done} kit${done === 1 ? '' : 's'} ready to review in Pipeline`);
+  }
+
+  // ── Actions ──
+  function setStatus(id, status) {
+    const j = S.jobs[id]; if (!j) return;
+    j.status = status; j.isNew = false;
+    if (status === 'applied') { j.appliedAt = Date.now(); j.followUp = Date.now() + 7 * DAY; }
+    save(); render();
+  }
+  async function copy(text) {
+    try { await navigator.clipboard.writeText(text); return true; } catch (e) { return false; }
+  }
+  async function openApply(id) {
+    const j = S.jobs[id]; if (!j) return;
+    if (j.kit && j.kit.coverLetter) {
+      const ok = await copy(j.kit.coverLetter);
+      toast(ok ? 'Cover letter copied. Paste it into the form.' : 'Opened the form. Copy the letter from the kit.');
+    }
+    window.open(safeUrl(j.link), '_blank', 'noopener');
+    j.awaitingConfirm = true; save(); render();
+  }
+  async function showKit(id) {
+    const j = S.jobs[id]; if (!j) return;
+    const dlg = $('#kitDlg');
+    $('#kitCo').textContent = j.company + ' · ' + place(j.location);
+    $('#kitTitle').textContent = j.title;
+    const body = $('#kitBody');
+    if (!j.kit) {
+      body.innerHTML = '<p class="a-muted">Writing a tailored resume and cover letter from her profile…</p>';
+      dlg.showModal();
+      try { await makeKit(j); render(); } catch (e) { body.innerHTML = '<p class="warn">' + esc(e.message) + '</p>'; return; }
+    } else if (!dlg.open) dlg.showModal();
+    const k = j.kit;
+    body.innerHTML =
+      (k.warnings && k.warnings.length ? k.warnings.map((w) => '<p class="warn">' + esc(w) + '</p>').join('') : '<p class="ok">No placeholders or unknown numbers found. Still read it once before sending.</p>') +
+      (k.fit ? '<p class="a-muted" style="margin:0">' + esc(k.fit) + '</p>' : '') +
+      '<div><p class="a-label">Cover letter</p><pre id="kitLetter">' + esc(k.coverLetter) + '</pre></div>' +
+      '<div><p class="a-label">Tailored resume</p><pre id="kitResume">' + esc(k.resume) + '</pre></div>' +
+      '<div class="a-actions" style="margin-top:0"><button class="a-btn power small" data-act="apply" data-id="' + esc(id) + '">Copy letter &amp; open form</button><button class="a-btn small" data-copy="kitLetter">Copy letter</button><button class="a-btn small" data-copy="kitResume">Copy resume</button><button class="a-btn small" data-act="rekit" data-id="' + esc(id) + '">Rewrite</button></div>';
+  }
+
+  // ── Render ──
+  function stats() {
+    const all = Object.values(S.jobs);
+    const by = (s) => all.filter((j) => j.status === s).length;
+    const applied = all.filter((j) => j.appliedAt);
+    const week = applied.filter((j) => Date.now() - j.appliedAt < 7 * DAY).length;
+    const replies = all.filter((j) => ['interview', 'offer'].includes(j.status)).length;
+    const rate = applied.length ? Math.round((replies / applied.length) * 100) + '%' : '—';
+    $('#stats').innerHTML = [
+      [all.filter((j) => j.status === 'new').length, 'New matches'], [by('shortlist') + by('kit'), 'Queued to apply'],
+      [week, 'Applied this week'], [by('interview'), 'Interviewing'], [rate, 'Response rate'],
+    ].map(([v, l]) => '<div class="a-tile"><b>' + esc(v) + '</b><small>' + esc(l) + '</small></div>').join('');
+  }
+  function jobCard(j) {
+    const due = j.status === 'applied' && j.followUp && j.followUp <= Date.now();
+    let acts = '';
+    if (j.status === 'new') acts = '<button class="a-btn power small" data-act="shortlist" data-id="' + esc(j.id) + '">Shortlist</button><button class="a-btn small" data-act="pass" data-id="' + esc(j.id) + '">Pass</button>';
+    else acts = '<span class="state">' + esc(STAGE_NAME[j.status] || j.status) + '</span><button class="a-btn small" data-act="kit" data-id="' + esc(j.id) + '">' + (j.kit ? 'View kit' : 'Write kit') + '</button>';
+    acts += '<a class="a-btn small" href="' + esc(safeUrl(j.link)) + '" target="_blank" rel="noopener">View posting</a>';
+    return '<article class="a-card job' + (j.isNew ? ' is-new' : '') + '"><div class="ring" style="--p:' + (+j.score || 0) + '" aria-label="Fit score ' + esc(j.score) + ' out of 100"><span>' + esc(j.score) + '</span></div>' +
+      '<div><h3>' + esc(j.title) + '</h3><p class="co">' + esc(j.company) + ' · ' + esc(place(j.location) || 'Location not listed') + (j.posted ? ' · ' + esc(fmtDate(j.posted)) : '') + (due ? ' · <span class="due">Follow-up due</span>' : '') + '</p>' +
+      '<div class="why">' + (j.reasons || []).map((r) => '<span>' + esc(r) + '</span>').join('') + '</div></div>' +
+      '<div class="acts">' + acts + '</div></article>';
+  }
+  function renderMatches() {
+    const min = +$('#fScore').value, where = $('#fWhere').value, q = $('#fText').value.trim().toLowerCase(), hide = $('#fHide').checked;
+    const list = Object.values(S.jobs)
+      .filter((j) => j.score >= min && (!where || j.where === where) && (!q || j.title.toLowerCase().includes(q)))
+      .filter((j) => !hide || !['passed', 'closed'].includes(j.status))
+      .sort((a, b) => (b.isNew - a.isNew) || (b.score - a.score));
+    $('#n-matches').textContent = list.length || '';
+    $('#matches').innerHTML = list.length ? list.slice(0, 120).map(jobCard).join('')
+      : '<div class="empty">' + (S.lastRun ? 'No matches at this filter. Lower the minimum fit or run the agent again.' : 'Press <b>Run the agent</b> to search company job boards for her.') + '</div>';
+  }
+  function renderBoard() {
+    const all = Object.values(S.jobs);
+    $('#n-pipeline').textContent = all.filter((j) => STAGES.some(([s]) => s === j.status)).length || '';
+    $('#board').innerHTML = STAGES.map(([s, name]) => {
+      const items = all.filter((j) => j.status === s).sort((a, b) => b.score - a.score);
+      return '<div class="col"><h3><span>' + esc(name) + '</span><span>' + items.length + '</span></h3>' + (items.map((j) => {
+        const due = s === 'applied' && j.followUp && j.followUp <= Date.now();
+        let row = '';
+        if (s === 'shortlist') row = '<button class="a-btn power small" data-act="kit" data-id="' + esc(j.id) + '">Write kit</button><button class="a-btn small" data-act="pass" data-id="' + esc(j.id) + '">Pass</button>';
+        if (s === 'kit') row = '<button class="a-btn power small" data-act="apply" data-id="' + esc(j.id) + '">Apply</button><button class="a-btn small" data-act="kit" data-id="' + esc(j.id) + '">Kit</button>';
+        if (s === 'applied') row = '<button class="a-btn small" data-act="interview" data-id="' + esc(j.id) + '">Got interview</button><button class="a-btn small" data-act="closed" data-id="' + esc(j.id) + '">Closed</button>';
+        if (s === 'interview') row = '<button class="a-btn small" data-act="offer" data-id="' + esc(j.id) + '">Offer</button><button class="a-btn small" data-act="closed" data-id="' + esc(j.id) + '">Closed</button>';
+        const confirm = j.awaitingConfirm ? '<div class="confirm">Submitted on their site?<button class="a-btn power small" data-act="applied" data-id="' + esc(j.id) + '">Yes, mark applied</button><button class="a-btn small" data-act="notyet" data-id="' + esc(j.id) + '">Not yet</button></div>' : '';
+        return '<div class="mini"><b>' + esc(j.title) + '</b><small>' + esc(j.company) + ' · fit ' + esc(j.score) + (j.appliedAt ? ' · applied ' + esc(fmtDate(j.appliedAt)) : '') + (due ? ' · <span class="due" style="color:var(--a-champagne)">follow up</span>' : '') + '</small><div class="row">' + row + '</div>' + confirm + '</div>';
+      }).join('') || '<p class="a-muted" style="font-size:13px">Empty</p>') + '</div>';
+    }).join('');
+  }
+  function renderLinks() {
+    const role = 'CRM Marketing Manager';
+    const links = [
+      ['LinkedIn · Delhi NCR', 'https://www.linkedin.com/jobs/search/?keywords=' + encodeURIComponent(role) + '&location=' + encodeURIComponent('Delhi, India')],
+      ['Naukri · Delhi NCR', 'https://www.naukri.com/crm-marketing-manager-jobs-in-delhi-ncr'],
+      ['Indeed India · Delhi', 'https://in.indeed.com/jobs?q=' + encodeURIComponent(role) + '&l=Delhi'],
+    ];
+    $('#outLinks').innerHTML = links.map(([n, u]) => '<a href="' + esc(u) + '" target="_blank" rel="noopener"><span>' + esc(n) + '</span><span aria-hidden="true">↗</span></a>').join('');
+  }
+  function render() { stats(); renderMatches(); renderBoard(); }
+
+  // ── Wiring ──
+  document.addEventListener('click', async (e) => {
+    const b = e.target.closest('[data-act],[data-copy],[data-close]');
+    if (!b) return;
+    if (b.hasAttribute('data-close')) return $('#kitDlg').close();
+    if (b.dataset.copy) { const ok = await copy($('#' + b.dataset.copy).textContent); return toast(ok ? 'Copied' : 'Copy blocked by the browser; select the text instead.'); }
+    const id = b.dataset.id, act = b.dataset.act, j = S.jobs[id];
+    if (!j) return;
+    if (act === 'shortlist') setStatus(id, 'shortlist');
+    else if (act === 'pass') setStatus(id, 'passed');
+    else if (act === 'kit') showKit(id);
+    else if (act === 'rekit') { delete j.kit; showKit(id); }
+    else if (act === 'apply') { if ($('#kitDlg').open) $('#kitDlg').close(); openApply(id); }
+    else if (act === 'applied') { j.awaitingConfirm = false; setStatus(id, 'applied'); toast('Marked applied. Follow-up reminder in 7 days.'); }
+    else if (act === 'notyet') { j.awaitingConfirm = false; save(); render(); }
+    else if (['interview', 'offer', 'closed'].includes(act)) setStatus(id, act);
+  });
+  const tabs = ['matches', 'pipeline', 'profile'];
+  tabs.forEach((t) => $('#t-' + t).addEventListener('click', () => {
+    tabs.forEach((o) => { $('#t-' + o).setAttribute('aria-selected', String(o === t)); $('#p-' + o).hidden = o !== t; });
+    if (t !== 'matches') Object.values(S.jobs).forEach((j) => { j.isNew = false; });
+  }));
+  ['#fScore', '#fWhere', '#fHide'].forEach((s) => $(s).addEventListener('change', renderMatches));
+  $('#fText').addEventListener('input', renderMatches);
+  $('#runBtn').addEventListener('click', () => runAgent(false));
+  $('#prepBtn').addEventListener('click', prepareShortlist);
+  $('#pText').value = S.profile;
+  $('#sAuto').value = String(S.autoScore);
+  $('#sExtra').value = S.extra;
+  $('#saveProfile').addEventListener('click', () => { S.profile = $('#pText').value.trim() || PROFILE; save(); toast('Profile saved. New kits will use it.'); });
+  $('#resetProfile').addEventListener('click', () => { S.profile = PROFILE; $('#pText').value = PROFILE; save(); toast('Profile reset to her resume'); });
+  $('#sAuto').addEventListener('change', () => { S.autoScore = +$('#sAuto').value; save(); });
+  $('#sExtra').addEventListener('change', () => { S.extra = $('#sExtra').value.trim(); save(); });
+  const download = (name, type, body) => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([body], { type })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); };
+  $('#exportJson').addEventListener('click', () => download('ayushi-job-agent.json', 'application/json', JSON.stringify(S, null, 2)));
+  $('#exportCsv').addEventListener('click', () => {
+    const cols = ['status', 'score', 'title', 'company', 'location', 'link', 'appliedAt'];
+    const rows = Object.values(S.jobs).map((j) => cols.map((c) => '"' + String(c === 'appliedAt' && j[c] ? new Date(j[c]).toISOString().slice(0, 10) : (j[c] == null ? '' : j[c])).replace(/"/g, '""') + '"').join(','));
+    download('ayushi-applications.csv', 'text/csv', [cols.join(',')].concat(rows).join('\n'));
+  });
+  $('#importJson').addEventListener('change', async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    try { const d = JSON.parse(await f.text()); if (!d || typeof d.jobs !== 'object') throw 0; S = Object.assign(blank(), d); save(); render(); toast('Backup imported'); }
+    catch (err) { toast('That file is not an agent backup.'); }
+    e.target.value = '';
+  });
+
+  renderLinks();
+  render();
+  // The agent part: it searches by itself when the page opens and the last run is old.
+  if (Date.now() - S.lastRun > 12 * 3600e3) runAgent(true);
+  else $('#runMeta').textContent = 'Last run ' + new Date(S.lastRun).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+})();
+</script>
+<script src="/ayushi-rawat/ayushi.js" defer></script>
+</body>
+</html>

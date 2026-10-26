@@ -59,8 +59,18 @@ function expand(destination, match, names) {
   return out;
 }
 
-function firstMatch(rules, pathname) {
+// `has` conditions. Only `host` is used in this project: a rule carrying it
+// fires for that hostname alone, exactly as Vercel applies it (the value is a
+// regular expression matched against the whole host, port excluded). Any other
+// condition type is unknown here, so its rule never fires rather than firing
+// for every request.
+function conditionsMet(rule, host) {
+  return (rule.has || []).every((c) => c.type === 'host' && new RegExp('^(?:' + c.value + ')$', 'i').test(host));
+}
+
+function firstMatch(rules, pathname, host = '') {
   for (const r of rules) {
+    if (!conditionsMet(r, host)) continue;
     const m = pathname.match(r.re);
     if (m) return { rule: r, destination: expand(r.destination, m, r.names) };
   }
@@ -84,9 +94,10 @@ export function createServer() {
 
   return http.createServer((req, res) => {
     const url = new URL(req.url, 'http://localhost');
+    const host = String((req.headers || {}).host || '').replace(/:\d+$/, '');
     let pathname = url.pathname;
     const send = (code, headers, body) => { res.writeHead(code, headers); res.end(body); };
-    const location = (to, code) => send(code, { Location: to + url.search }, '');
+    const location = (to, code) => send(code, { Location: to + (to.includes('?') ? '' : url.search) }, '');
 
     // trailingSlash:false — /foo/ is not the canonical form of /foo.
     if (cfg.trailingSlash === false && pathname.length > 1 && pathname.endsWith('/')) {
@@ -100,7 +111,7 @@ export function createServer() {
     }
 
     // 1. redirects — a real Location response, exactly as Vercel answers.
-    const rd = firstMatch(redirects, pathname);
+    const rd = firstMatch(redirects, pathname, host);
     if (rd) return location(rd.destination, rd.rule.permanent === false ? 307 : 308);
 
     // 2. the file itself, if one exists at this path
@@ -110,7 +121,7 @@ export function createServer() {
     //    production; the test only needs to know the rule fired, so the status
     //    line says so rather than pretending to serve someone else's site.
     if (!file) {
-      const rw = firstMatch(rewrites, pathname);
+      const rw = firstMatch(rewrites, pathname, host);
       if (rw) {
         if (/^https?:/.test(rw.destination)) {
           return send(203, { 'content-type': 'text/plain', 'x-proxied-to': rw.destination },

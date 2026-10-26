@@ -30,7 +30,7 @@ if(printButton)printButton.addEventListener('click',()=>window.print());
 
 // Download the production-ready resume PDF.
 const downloadButton=document.querySelector('[data-download-resume]');
-if(downloadButton)downloadButton.addEventListener('click',()=>{const a=document.createElement('a');a.href='./assets/Ayushi_Rawat_Resume.pdf';a.download='Ayushi_Rawat_Resume.pdf';document.body.appendChild(a);a.click();a.remove();});
+if(downloadButton)downloadButton.addEventListener('click',()=>{const a=document.createElement('a');a.href='/ayushi-rawat/assets/Ayushi_Rawat_Resume.pdf';a.download='Ayushi_Rawat_Resume.pdf';document.body.appendChild(a);a.click();a.remove();});
 
 // Lightweight 3D particle field: rotating XYZ points projected to 2D canvas.
 const canvas=document.querySelector('#scene');
@@ -40,7 +40,7 @@ if(canvas&&!reduced){
   const points=Array.from({length:115},()=>({x:(Math.random()-.5)*900,y:(Math.random()-.5)*700,z:(Math.random()-.5)*900,s:.45+Math.random()*1.6,p:Math.random()*Math.PI*2}));
   const resize=()=>{dpr=Math.min(1.7,window.devicePixelRatio||1);width=innerWidth;height=innerHeight;canvas.width=width*dpr;canvas.height=height*dpr;canvas.style.width=`${width}px`;canvas.style.height=`${height}px`;ctx.setTransform(dpr,0,0,dpr,0,0);};
   resize();window.addEventListener('resize',resize,{passive:true});window.addEventListener('pointermove',e=>{mouseX=(e.clientX/width-.5);mouseY=(e.clientY/height-.5);},{passive:true});
-  const draw=t=>{ctx.clearRect(0,0,width,height);const time=t*.00018;const cx=width*.55,cy=height*.46;const fov=650;for(const pt of points){let x=pt.x,y=pt.y,z=pt.z;const ay=time+mouseX*.28,ax=time*.52-mouseY*.2;let x1=x*Math.cos(ay)-z*Math.sin(ay),z1=x*Math.sin(ay)+z*Math.cos(ay);let y1=y*Math.cos(ax)-z1*Math.sin(ax),z2=y*Math.sin(ax)+z1*Math.cos(ax);z2+=900;const scale=fov/z2;const sx=cx+x1*scale,sy=cy+y1*scale;const alpha=Math.max(0,Math.min(.7,(1-z2/1800)*.75));ctx.beginPath();ctx.fillStyle=`rgba(255,187,79,${alpha})`;ctx.arc(sx,sy,pt.s*scale*2.2,0,Math.PI*2);ctx.fill();}
-    ctx.save();ctx.translate(cx,cy);ctx.rotate(time*.55);ctx.strokeStyle='rgba(215,164,65,.11)';ctx.lineWidth=1;for(let i=0;i<3;i++){ctx.beginPath();ctx.ellipse(0,0,Math.min(width,height)*(.25+i*.08),Math.min(width,height)*(.12+i*.04),i*.55,0,Math.PI*2);ctx.stroke();}ctx.restore();raf=requestAnimationFrame(draw);};
+  const draw=t=>{ctx.clearRect(0,0,width,height);const time=t*.00018;const cx=width*.55,cy=height*.46;const fov=650;for(const pt of points){let x=pt.x,y=pt.y,z=pt.z;const ay=time+mouseX*.28,ax=time*.52-mouseY*.2;let x1=x*Math.cos(ay)-z*Math.sin(ay),z1=x*Math.sin(ay)+z*Math.cos(ay);let y1=y*Math.cos(ax)-z1*Math.sin(ax),z2=y*Math.sin(ax)+z1*Math.cos(ax);z2+=900;const scale=fov/z2;const sx=cx+x1*scale,sy=cy+y1*scale;const alpha=Math.max(0,Math.min(.7,(1-z2/1800)*.75));ctx.beginPath();ctx.fillStyle=`rgba(240,67,92,${alpha*.8})`;ctx.arc(sx,sy,pt.s*scale*2.2,0,Math.PI*2);ctx.fill();}
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(time*.55);ctx.strokeStyle='rgba(217,183,121,.12)';ctx.lineWidth=1;for(let i=0;i<3;i++){ctx.beginPath();ctx.ellipse(0,0,Math.min(width,height)*(.25+i*.08),Math.min(width,height)*(.12+i*.04),i*.55,0,Math.PI*2);ctx.stroke();}ctx.restore();raf=requestAnimationFrame(draw);};
   raf=requestAnimationFrame(draw);document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAnimationFrame(raf);else raf=requestAnimationFrame(draw);});
 }

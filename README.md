@@ -296,7 +296,7 @@ Both halves are enforced, because each caught something the other could not:
   the chatbot's `'github'` *matching keyword*, which is never rendered, from
   reading as a visible mention.
 
-The link check is what found `/ayushi/course` — it renders
+The link check is what found `/ayushi-rawat/course` — it renders
 `assets/growth-school-content.js`, the same content file as `/growth-school`, so
 a fix that looks like one page is two. Four of that file's chapters reached the
 removed constants through the `GS_CONTENT.repos` map by lowercase key rather

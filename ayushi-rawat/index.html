@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d0b0c">
+<title>Ayushi Rawat — Digital Marketing, CRM &amp; Growth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=IBM+Plex+Mono:wght@500;600&family=Manrope:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/ayushi-rawat/ayushi.css">
+<script>document.documentElement.classList.add('js')</script>
+<style>
+.hero{min-height:100vh;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:clamp(32px,6vw,96px);align-items:center;padding-top:clamp(110px,12vw,150px);background:radial-gradient(circle at 78% 30%,rgba(200,16,46,.16),transparent 34%),radial-gradient(circle at 10% 80%,rgba(217,183,121,.07),transparent 30%)}
+.status{display:inline-flex;align-items:center;gap:10px;margin-bottom:26px;padding:9px 14px;border:1px solid var(--a-rule-2);border-radius:99px;font:500 10px/1.3 var(--a-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--a-dim)}
+.status i{width:8px;height:8px;border-radius:50%;background:var(--a-rouge);box-shadow:0 0 0 4px var(--a-rouge-soft);flex:none}
+.hero .a-display{font-size:clamp(64px,10.4vw,168px)}
+.hero .tagline{margin:18px 0 0;font:italic 500 clamp(24px,2.6vw,38px)/1.2 var(--a-display);color:var(--a-blush)}
+.cover{position:relative;margin:0;border-radius:var(--a-r-l);overflow:hidden;border:1px solid var(--a-rule-2);background:#0a0809;aspect-ratio:.78;box-shadow:0 40px 100px rgba(0,0,0,.55)}
+.cover img{width:100%;height:100%;object-fit:cover;object-position:center 26%;filter:saturate(.95) contrast(1.05)}
+.cover:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,11,12,.55),transparent 22%,transparent 58%,rgba(13,11,12,.92))}
+.cover .mast{position:absolute;z-index:2;top:18px;left:24px;right:20px;display:flex;justify-content:space-between;align-items:flex-start}
+.cover .mast b{font:600 42px/1 var(--a-display);letter-spacing:.02em}
+.cover .mast span{font:500 9px/1.6 var(--a-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--a-champagne);text-align:right}
+.cover figcaption{position:absolute;z-index:2;left:24px;right:20px;bottom:20px}
+.cover figcaption b{display:block;font:italic 500 clamp(22px,2.2vw,30px)/1.15 var(--a-display)}
+.cover figcaption small{display:block;margin-top:8px;font:500 9px/1.5 var(--a-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--a-dim)}
+.cover .mono{display:none}
+.cover.no-photo img{display:none}
+.cover.no-photo{background:radial-gradient(circle at 70% 30%,rgba(200,16,46,.35),transparent 55%),linear-gradient(160deg,#1f1a1c,#0a0809)}
+.cover.no-photo .mono{position:absolute;inset:0;display:grid;place-items:center;grid-auto-flow:column;align-content:center;justify-content:center;font:italic 500 clamp(150px,19vw,280px)/.8 var(--a-display);letter-spacing:-.06em;color:var(--a-ink)}
+.cover.no-photo .mono span:last-child{color:var(--a-blush);margin-left:-.12em}
+.cover.no-photo .mast b{visibility:hidden}
+.cover .bar{position:absolute;z-index:2;left:0;top:0;bottom:0;width:6px;background:var(--a-rouge-deep)}
+.impact{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:clamp(16px,3vw,40px);align-items:stretch}
+.impact .a-card h3{margin:0 0 22px;font:500 11px/1.4 var(--a-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--a-dim)}
+.impact .a-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+.spread{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(32px,7vw,110px);align-items:end}
+.spread p{font-size:clamp(17px,1.4vw,19px);line-height:1.8}
+.spread .a-quote{font-size:clamp(30px,3.8vw,54px);line-height:1.1;font-style:normal;color:var(--a-paper-ink);border-color:var(--a-rouge-deep)}
+.spread .a-quote em{font-style:italic;color:var(--a-rouge-ink)}
+.traits{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:clamp(40px,5vw,64px);border-top:1px solid var(--a-paper-rule)}
+.traits div{padding:20px 20px 4px 0}
+.traits b{display:block;font:500 clamp(28px,3vw,40px)/1 var(--a-display);font-variation-settings:"opsz" 14;color:var(--a-rouge-ink)}
+.traits small{display:block;margin-top:10px;font:500 10px/1.5 var(--a-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--a-paper-dim)}
+.jobs{display:grid;gap:14px}
+.job{display:grid;grid-template-columns:150px minmax(0,1fr);gap:clamp(20px,4vw,56px)}
+.job .when{font:500 11px/1.6 var(--a-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--a-champagne)}
+.job .when small{display:block;color:var(--a-mute)}
+.job .a-h3{font-size:clamp(28px,3.4vw,48px)}
+.job .role{margin:8px 0 14px;font:600 11px/1.4 var(--a-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--a-rouge)}
+.job p{margin:0;color:var(--a-dim);max-width:760px}
+.job .a-chips{margin-top:20px}
+.cases{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.cases a{display:flex;flex-direction:column;align-items:flex-start;gap:12px;min-height:190px}
+.cases a b{font:500 26px/1.15 var(--a-display)}
+.cases a small{margin-top:auto;color:var(--a-dim);font-size:13px}
+.skills{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.skills h3{margin:0 0 18px}
+.edu{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-top:clamp(40px,5vw,64px);padding-top:32px;border-top:1px solid var(--a-rule)}
+.edu strong{font:500 clamp(48px,6vw,80px)/1 var(--a-display);font-variation-settings:"opsz" 14;color:var(--a-champagne)}
+.close{min-height:78vh;display:flex;flex-direction:column;justify-content:center;background:radial-gradient(circle at 85% 50%,rgba(200,16,46,.18),transparent 34%)}
+.close .meta{display:flex;gap:12px 28px;flex-wrap:wrap;margin-top:40px;padding-top:24px;border-top:1px solid var(--a-rule);color:var(--a-dim);font-size:14px}
+.close .meta a{color:var(--a-ink);box-shadow:inset 0 -1px 0 var(--a-rouge);overflow-wrap:anywhere}
+@media(max-width:1000px){.cases,.skills{grid-template-columns:repeat(2,minmax(0,1fr))}.traits{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:860px){.hero,.impact,.spread{grid-template-columns:1fr}.hero{min-height:auto}.cover{max-width:460px;width:100%;margin-inline:auto}.job{grid-template-columns:1fr;gap:12px}}
+@media(max-width:560px){.cases,.skills{grid-template-columns:1fr}.hero .a-display{font-size:clamp(56px,16.5vw,84px)}}
+</style>
+<!-- seo:auto:start -->
+<!-- Managed by scripts/seo-inject.mjs — edit seo.config.json, not here. -->
+<meta name="description" content="Ayushi Rawat is a digital marketing, CRM, Salesforce and growth professional. Her experience, the work she has done and her resume." />
+<link rel="canonical" href="https://anchit-tandon.com/ayushi-rawat" />
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+<meta name="author" content="Anchit Tandon" />
+<link rel="icon" href="/icons/favicon.svg" type="image/svg+xml" />
+<meta property="og:title" content="Ayushi Rawat — Digital Marketing, CRM &amp; Growth" />
+<meta property="og:description" content="Ayushi Rawat is a digital marketing, CRM, Salesforce and growth professional. Her experience, the work she has done and her resume." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://anchit-tandon.com/ayushi-rawat" />
+<meta property="og:image" content="https://anchit-tandon.com/assets/og/og-default.png" />
+<meta property="og:site_name" content="Anchit Tandon" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Anchit Tandon — Product &amp; D2C Growth" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Ayushi Rawat — Digital Marketing, CRM &amp; Growth" />
+<meta name="twitter:description" content="Ayushi Rawat is a digital marketing, CRM, Salesforce and growth professional. Her experience, the work she has done and her resume." />
+<meta name="twitter:image" content="https://anchit-tandon.com/assets/og/og-default.png" />
+<!-- seo:auto:end -->
+</head>
+<body>
+<a class="a-skip" href="#main">Skip to content</a>
+<nav class="a-nav" aria-label="Ayushi Rawat"><a class="a-brand" href="/ayushi-rawat" aria-label="Ayushi Rawat, home"><span class="a-seal">AR</span><span class="a-wordmark">Ayushi Rawat<small>Marketing · CRM · Growth</small></span></a><div class="a-links"><a class="a-opt" href="#about">About</a><a class="a-opt" href="#experience">Work</a><a href="/ayushi-rawat/case-studies">Case studies</a><a class="a-opt" href="#skills">Skills</a><a class="a-cta" href="/ayushi-rawat/resume">Resume</a></div></nav>
+<main id="main">
+
+<section class="a-section hero" id="top">
+  <div>
+    <div class="status"><i></i>Open to CRM, lifecycle &amp; growth marketing roles</div>
+    <p class="a-eyebrow">Digital marketing · CRM · Growth</p>
+    <h1 class="a-display">Ayushi <em>Rawat.</em></h1>
+    <p class="tagline">Creativity gets attention. Systems create growth.</p>
+    <p class="a-lede">A digital marketer with an operator’s mindset. She has managed social calendars and supported campaigns in property, and built Salesforce workflows and <b>50+ dashboards</b> in enterprise. She brings the creative side and the CRM side to the same desk.</p>
+    <div class="a-actions"><a class="a-btn power" href="/ayushi-rawat/case-studies">Read case studies</a><a class="a-btn" href="/ayushi-rawat/resume">View resume</a></div>
+  </div>
+  <figure class="cover no-photo">
+    <span class="bar" aria-hidden="true"></span>
+    <div class="mast"><b>AR</b><span>Digital marketing<br>CRM · Growth</span></div>
+    <!-- Her portrait goes here: <img src="/ayushi-rawat/assets/ayushi-portrait.webp" alt="Portrait of Ayushi Rawat" width="460" height="590">
+         and drop "no-photo" from the figure. The previous hero file was corrupt (it rendered black). -->
+    <div class="mono" aria-hidden="true"><span>A</span><span>R</span></div>
+    <figcaption><b>The marketer who reads the dashboard.</b><small>New Delhi, India · 4+ years</small></figcaption>
+  </figure>
+</section>
+
+<section class="a-section deep" id="impact" aria-labelledby="impact-h">
+  <div class="a-head a-reveal"><div><p class="a-eyebrow">01 — Impact</p><h2 class="a-h2" id="impact-h">Measured, <em>not claimed.</em></h2></div><p>Her record, shown the way she would present a quarterly review: one scale, real figures, labelled directly.</p></div>
+  <div class="impact">
+    <div class="a-card a-reveal">
+      <h3>Reported improvement, %</h3>
+      <div class="a-bars" role="list">
+        <div class="a-bar" role="listitem"><span>Social engagement &amp; reach</span><i style="--v:100%"></i><b>30%</b></div>
+        <div class="a-bar" role="listitem"><span>Process efficiency</span><i style="--v:83.3%"></i><b>25%</b></div>
+        <div class="a-bar" role="listitem"><span>Qualified property leads</span><i style="--v:66.7%"></i><b>20%</b></div>
+        <div class="a-bar" role="listitem"><span>Onboarding time cut</span><i style="--v:66.7%"></i><b>20%</b></div>
+        <div class="a-bar" role="listitem"><span>Conversions</span><i style="--v:50%"></i><b>15%</b></div>
+      </div>
+      <p class="a-source">Source: Ayushi’s resume. Engagement, leads and conversions at SPN Propservices; efficiency and onboarding at VOIS.</p>
+    </div>
+    <div class="a-tiles a-reveal">
+      <div class="a-tile"><b>50+</b><small>Reports &amp; dashboards built</small></div>
+      <div class="a-tile"><b>2,000+</b><small>User tickets resolved</small></div>
+      <div class="a-tile"><b>200+</b><small>Users &amp; new hires trained</small></div>
+      <div class="a-tile"><b>10+</b><small>Campaigns supported</small></div>
+    </div>
+  </div>
+</section>
+
+<section class="a-section a-paper" id="about" aria-labelledby="about-h">
+  <p class="a-eyebrow a-reveal">02 — About</p>
+  <div class="spread">
+    <div class="a-reveal"><h2 class="a-h2" id="about-h">Brand voice <em>and</em> back office.</h2><p>Ayushi bridges brand communication and operational intelligence. Her background spans campaign execution, social growth, Salesforce administration, reporting and process optimisation.</p><p>She works best where audience insight becomes clear campaigns, measurable workflows and stronger business outcomes.</p></div>
+    <blockquote class="a-quote a-reveal">A digital marketer with an <em>operator’s mindset.</em></blockquote>
+  </div>
+  <div class="traits a-reveal">
+    <div><b>×2</b><small>Star of the Month at VOIS</small></div>
+    <div><b>Head</b><small>PR &amp; Marketing, Riviera at VIT</small></div>
+    <div><b>4+ yrs</b><small>Marketing, CRM &amp; analytics</small></div>
+    <div><b>8.58</b><small>CGPA, B.Tech ECE</small></div>
+  </div>
+</section>
+
+<section class="a-section" id="experience" aria-labelledby="exp-h">
+  <div class="a-head a-reveal"><div><p class="a-eyebrow">03 — Experience</p><h2 class="a-h2" id="exp-h">Selected <em>impact.</em></h2></div></div>
+  <div class="jobs">
+    <article class="a-card job a-reveal"><div class="when">2025 — Present<small>Agra, India</small></div><div><h3 class="a-h3">SPN Propservices LLP</h3><p class="role">Marketing Executive</p><p>Supports integrated digital and offline campaigns, manages social media calendars, and produces market research and conversion-focused collateral for sales.</p><div class="a-chips"><span class="a-chip gold">10+ campaigns</span><span class="a-chip gold">+20% qualified leads</span><span class="a-chip gold">+30% engagement</span><span class="a-chip gold">+15% conversions</span></div></div></article>
+    <article class="a-card job a-reveal"><div class="when">2021 — 2024<small>Pune, India</small></div><div><h3 class="a-h3">VOIS — Vodafone Intelligent Solutions</h3><p class="role">Senior Executive</p><p>Combined Salesforce administration, reporting, UAT and stakeholder operations to improve adoption and decision quality.</p><div class="a-chips"><span class="a-chip gold">50+ dashboards</span><span class="a-chip gold">2,000+ tickets</span><span class="a-chip gold">200+ users trained</span><span class="a-chip gold">+25% efficiency</span></div></div></article>
+    <article class="a-card job a-reveal"><div class="when">2025<small>Internship</small></div><div><h3 class="a-h3">Muskurahat Foundation</h3><p class="role">Education Outreach Intern</p><p>Created social content and community campaigns supporting education access and volunteer participation.</p><div class="a-chips"><span class="a-chip">Outreach campaigns</span><span class="a-chip">Donor drives</span><span class="a-chip">Social content</span><span class="a-chip">Community events</span></div></div></article>
+  </div>
+</section>
+
+<section class="a-section deep" id="case-studies" aria-labelledby="cs-h">
+  <div class="a-head a-reveal"><div><p class="a-eyebrow">04 — Case studies</p><h2 class="a-h2" id="cs-h">Give her the number. <em>She’ll own it.</em></h2></div><p>Six case studies for her best-fit role, CRM &amp; Lifecycle Marketing Manager. Four are delivered work. Two are strategy cases showing how she would run the job.</p></div>
+  <div class="cases">
+    <a class="a-card lift a-reveal" href="/ayushi-rawat/case-studies#property-lead-engine"><span class="a-chip rouge">Delivered</span><b>More of the right leads</b><small>SPN Propservices · +20% qualified leads</small></a>
+    <a class="a-card lift a-reveal" href="/ayushi-rawat/case-studies#salesforce-decision-system"><span class="a-chip rouge">Delivered</span><b>Salesforce as a decision system</b><small>VOIS · 50+ dashboards</small></a>
+    <a class="a-card lift a-reveal" href="/ayushi-rawat/case-studies#crm-adoption"><span class="a-chip rouge">Delivered</span><b>Getting a CRM actually used</b><small>VOIS · 200+ trained, −20% onboarding time</small></a>
+    <a class="a-card lift a-reveal" href="/ayushi-rawat/case-studies#purpose-led-outreach"><span class="a-chip rouge">Delivered</span><b>Purpose with a plan</b><small>Muskurahat Foundation · outreach</small></a>
+    <a class="a-card lift a-reveal" href="/ayushi-rawat/case-studies#lead-to-site-visit"><span class="a-chip gold">Strategy case</span><b>Lead to site visit</b><small>A CRM lifecycle for real estate</small></a>
+    <a class="a-card lift a-reveal" href="/ayushi-rawat/case-studies#first-90-days"><span class="a-chip gold">Strategy case</span><b>The first 90 days</b><small>Her plan for a CRM &amp; lifecycle role</small></a>
+  </div>
+  <div class="a-actions a-reveal"><a class="a-btn power" href="/ayushi-rawat/case-studies">Read all case studies</a></div>
+</section>
+
+<section class="a-section" id="skills" aria-labelledby="skills-h">
+  <div class="a-head a-reveal"><div><p class="a-eyebrow">05 — Capabilities</p><h2 class="a-h2" id="skills-h">Marketing <em>operating system.</em></h2></div></div>
+  <div class="skills">
+    <div class="a-card a-reveal"><h3 class="a-h3">Marketing</h3><div class="a-chips"><span class="a-chip">Digital marketing</span><span class="a-chip">Social media strategy</span><span class="a-chip">Content strategy</span><span class="a-chip">Campaign management</span><span class="a-chip">SEO</span><span class="a-chip">SEM</span><span class="a-chip">Brand storytelling</span><span class="a-chip">Copywriting</span><span class="a-chip">Market research</span></div></div>
+    <div class="a-card a-reveal"><h3 class="a-h3">CRM &amp; analytics</h3><div class="a-chips"><span class="a-chip">Salesforce Sales Cloud</span><span class="a-chip">Salesforce Service Cloud</span><span class="a-chip">Tableau</span><span class="a-chip">Reporting &amp; dashboards</span><span class="a-chip">UAT</span><span class="a-chip">Performance tracking</span><span class="a-chip">Oracle CPQ</span></div></div>
+    <div class="a-card a-reveal"><h3 class="a-h3">Leadership</h3><div class="a-chips"><span class="a-chip">Stakeholder management</span><span class="a-chip">Training &amp; enablement</span><span class="a-chip">Process optimisation</span><span class="a-chip">PR &amp; Marketing Head, Riviera</span></div></div>
+  </div>
+  <div class="edu a-reveal"><div><p class="a-label">Foundation</p><h3 class="a-h3">Vellore Institute of Technology</h3><p class="a-muted" style="margin:8px 0 0">B.Tech, Electronics &amp; Communication · CGPA 8.58 · PR &amp; Marketing Head, Riviera</p></div><strong>2021</strong></div>
+</section>
+
+<section class="a-section close">
+  <p class="a-eyebrow">06 — Next step</p>
+  <h2 class="a-display">Put her on <em>the number.</em></h2>
+  <div class="a-actions"><a class="a-btn power" href="/ayushi-rawat/resume">Open resume</a><a class="a-btn" href="/ayushi-rawat/case-studies">Case studies</a></div>
+  <div class="meta"><span>New Delhi, India</span><a href="mailto:ayushirawat960@gmail.com">ayushirawat960@gmail.com</a></div>
+</section>
+</main>
+<script src="/ayushi-rawat/ayushi.js" defer></script>
+</body>
+</html>

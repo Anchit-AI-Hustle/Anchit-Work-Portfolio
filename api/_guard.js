@@ -27,7 +27,9 @@
 // and a loose script; a distributed flood needs a shared store (Vercel KV or
 // Upstash). Worth adding if this ever takes real traffic.
 
-const ALLOW_SUFFIX = ['anchit-tandon.com'];
+// ayushi-rawat.app is Ayushi's own domain, aliased to this project; her job agent
+// calls /api/ayushi-jobs and /api/apply from it.
+const ALLOW_SUFFIX = ['anchit-tandon.com', 'ayushi-rawat.app'];
 const VERCEL_TEAM_HOST = 'anchit-ai-hustle.vercel.app';
 const ALLOW_EXACT = ['http://localhost:3000', 'http://localhost:8099', 'http://127.0.0.1:8099'];
 
