@@ -1,0 +1,17 @@
+/* One tab bar across the pages built for Ayushi, shown on the private ones:
+   the Growth Studio, her brand course and the job agent. Her recruiter-facing
+   pages keep their own nav and carry a single footer link to the Growth Studio
+   instead. Self-contained: these pages use three different stylesheets, so the
+   bar brings its own tokens (Ivory & Raspberry values, see
+   docs/ayushi-design-system.md) rather than borrowing any page's. */
+.ar-tabs{--t-ink:#1a1720;--t-dim:#5b5462;--t-acc:#c2185b;--t-bg:#fffcf8;--t-rule:#ece4da;
+  position:relative;z-index:45;display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;padding:8px 16px;background:var(--t-bg);border-bottom:1px solid var(--t-rule);
+  font:600 13px/1.2 "Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:0}
+.ar-tabs::-webkit-scrollbar{display:none}
+.ar-tabs .ar-k{flex:none;margin-right:6px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--t-dim)}
+.ar-tabs a{flex:none;padding:8px 12px;border-radius:99px;color:var(--t-dim);text-decoration:none;white-space:nowrap;transition:background .2s,color .2s}
+.ar-tabs a:hover{color:var(--t-ink);background:rgba(194,24,91,.08)}
+.ar-tabs a[aria-current]{color:#fff;background:var(--t-acc)}
+.ar-tabs a:focus-visible{outline:2px solid var(--t-acc);outline-offset:2px}
+@media print{.ar-tabs{display:none}}

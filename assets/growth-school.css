@@ -12,7 +12,10 @@
 
 :root {
   --gs-bg: #0F0D0A; --gs-elev: #1A1814; --gs-deep: #060503;
-  --gs-ink: #FBF5EC; --gs-dim: #A39E94; --gs-mute: #5A554E;
+  /* --gs-mute carries small type (chapter numbers, "Progress saves on this
+     device", section labels): #5A554E read 2.4-2.6:1 on bg/elev. #8A847A is
+     4.8:1+ on both and still sits below --gs-dim. */
+  --gs-ink: #FBF5EC; --gs-dim: #A39E94; --gs-mute: #8A847A;
   --gs-rule: #2A261F; --gs-rule-strong: #3D3830;
   --gs-primary: #FF6940; --gs-primary-deep: #FF4D1F;
   --gs-primary-soft: rgba(255,105,64,.12);

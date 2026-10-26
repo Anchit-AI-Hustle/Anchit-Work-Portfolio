@@ -2,10 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<!-- Opt in to the runway page transition before anything else parses. In
+     runway.css alone, this heavy page sometimes painted before the sheet
+     applied and Chrome skipped the transition (about 1 in 4 arrivals). -->
+<style>@view-transition{navigation:auto}</style>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ayushi❤️’s Growth Studio</title>
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#2A1733">
+<link rel="stylesheet" href="/ayushi-rawat/runway.css"><link rel="stylesheet" href="/ayushi-rawat/tabs.css">
 <meta name="googlebot" content="noindex, nofollow">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232A1733'/%3E%3Cpath d='M6 16h4l2-6 3 12 3-9 2 3h6' stroke='%23D6336C' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -901,6 +906,7 @@ abbr.gl:hover:after,abbr.gl:focus:after{transform:translateX(calc(-50% + var(--g
   </div>
 </aside>
   <div class="main">
+    <nav class="ar-tabs" aria-label="Ayushi’s pages"><span class="ar-k">Ayushi</span><a href="/ayushi-rawat">Portfolio</a><a href="/ayushi-rawat/case-studies">Case studies</a><a href="/ayushi-rawat/resume">Resume</a><a href="/marketing-101-for-ayushi#growth" aria-current="page">Growth Studio</a><a href="/ayushi-rawat/course">Brand course</a><a href="/ayushi-rawat-auto-job-applier">Job agent</a></nav><script>/* keep the current tab in view on narrow screens */(function(n){var a=n&&n.querySelector("[aria-current]");if(a&&n.scrollWidth>n.clientWidth)n.scrollLeft=a.offsetLeft-(n.clientWidth-a.offsetWidth)/2;})(document.currentScript.previousElementSibling)</script>
     <div class="topbar">
       <button class="tb-btn menu-btn" id="menuBtn">☰ Chapters</button>
       <a class="tb-btn tb-home" href="/" title="Back to the main portfolio">&#8592; Home</a>
