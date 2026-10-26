@@ -4,28 +4,6 @@
   "outputDirectory": "www",
   "redirects": [
     {
-      "source": "/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "www\\.ayushi-rawat\\.app"
-        }
-      ],
-      "destination": "https://ayushi-rawat.app/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "host",
-          "value": "ayushi-rawat\\.app"
-        }
-      ],
-      "destination": "/ayushi-rawat",
-      "permanent": false
-    },
-    {
       "source": "/amar-ujala",
       "destination": "/amar-ujala/study",
       "permanent": false
@@ -63,6 +41,11 @@
     {
       "source": "/ayushi/:path*",
       "destination": "/ayushi-rawat/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/ayushi-rawat/auto-job-applier",
+      "destination": "/ayushi-rawat-auto-job-applier",
       "permanent": true
     },
     {
@@ -156,37 +139,7 @@
       "destination": "/ayushi-rawat/case-studies.html"
     },
     {
-      "source": "/ayushi-rawat/auto-job-applier",
-      "destination": "/ayushi-rawat/auto-job-applier.html"
-    },
-    {
-      "source": "/resume",
-      "has": [
-        {
-          "type": "host",
-          "value": "ayushi-rawat\\.app"
-        }
-      ],
-      "destination": "/ayushi-rawat/resume.html"
-    },
-    {
-      "source": "/case-studies",
-      "has": [
-        {
-          "type": "host",
-          "value": "ayushi-rawat\\.app"
-        }
-      ],
-      "destination": "/ayushi-rawat/case-studies.html"
-    },
-    {
-      "source": "/auto-job-applier",
-      "has": [
-        {
-          "type": "host",
-          "value": "ayushi-rawat\\.app"
-        }
-      ],
+      "source": "/ayushi-rawat-auto-job-applier",
       "destination": "/ayushi-rawat/auto-job-applier.html"
     },
     {

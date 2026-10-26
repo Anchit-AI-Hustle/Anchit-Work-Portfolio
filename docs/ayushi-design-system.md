@@ -1,6 +1,6 @@
 # Ayushi Rawat — "Power Editorial" design system
 
-Applies to everything under `/ayushi-rawat` (and `ayushi-rawat.app`). It is deliberately
+Applies to everything under `/ayushi-rawat`, plus the job agent at `/ayushi-rawat-auto-job-applier`. It is deliberately
 **not** the black/orange/gold system in `DESIGN.md`, which is Anchit's personal
 brand. Ayushi's pages carry her own identity.
 
@@ -39,4 +39,4 @@ Type: `--a-display` Bodoni Moda · `--a-body` Manrope · `--a-mono` IBM Plex Mon
 - Every number shown must come from her resume; data visuals state their source.
 - Strategy content is labelled as a plan wherever it appears.
 - Motion: `transform` and `opacity` only; everything is visible with reduced motion or no JS.
-- Links use absolute `/ayushi-rawat/…` paths so pages work on both domains.
+- Links use absolute `/ayushi-rawat/…` paths.
