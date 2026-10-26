@@ -1,46 +1,47 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d0b0c">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#fffcf8">
 <title>Ayushi Rawat — Case Studies</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=IBM+Plex+Mono:wght@500;600&family=Manrope:wght@300..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@400..800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/ayushi-rawat/ayushi.css">
 <script>document.documentElement.classList.add('js')</script>
 <style>
-.hero{padding-top:clamp(120px,14vw,180px);background:radial-gradient(circle at 82% 18%,rgba(200,16,46,.17),transparent 32%)}
+.hero{padding-top:clamp(120px,14vw,180px);background:radial-gradient(circle at 85% 15%,rgba(194,24,91,.10),transparent 36%)}
 .fit{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:14px;margin-top:clamp(40px,5vw,64px)}
 .fit .a-h3{margin:10px 0 18px}
 .fit .a-list{margin-top:6px}
 .fit .a-list b{color:var(--a-ink);font-weight:600}
 .traits{display:grid;gap:0}
-.trait{display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-top:1px solid var(--a-rule);font-size:14px;color:#d2c9c0}
-.trait span:last-child{font:500 10px/1.5 var(--a-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--a-champagne);text-align:right}
-.style-line{margin:10px 0 16px;font:500 clamp(24px,2.4vw,32px)/1.2 var(--a-display)}.style-line em{color:var(--a-blush)}
+.trait{display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-top:1px solid var(--a-rule);font-size:15px;color:var(--a-ink)}
+.trait span:last-child{font:700 12px/1.5 var(--a-caps);letter-spacing:.04em;color:var(--a-accent-ink);text-align:right}
+.style-line{margin:10px 0 16px;font:400 clamp(24px,2.4vw,32px)/1.2 var(--a-display)}.style-line em{color:var(--a-accent)}
 .index{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
+.fit{margin-top:clamp(28px,4vw,48px)}
 .index a{display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:20px}
-.index a b{font:500 22px/1.2 var(--a-display)}.index a small{color:var(--a-dim);font-size:13px}
+.index a b{font:400 23px/1.2 var(--a-display)}.index a small{color:var(--a-dim);font-size:13px}
 .case{border-top:1px solid var(--a-rule);scroll-margin-top:72px}
-.case:nth-of-type(even){background:#080607}
-.case-head{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px 20px;font:500 10px/1.5 var(--a-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--a-champagne)}
+.case:nth-of-type(even){background:var(--a-surface-2)}
+.case-head{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px 20px;font:700 12px/1.5 var(--a-caps);letter-spacing:.1em;text-transform:uppercase;color:var(--a-gold)}
 .case .a-h2{margin:22px 0 14px;max-width:1120px;font-size:clamp(38px,5.4vw,82px)}
-.case .role{margin:0;font:600 11px/1.4 var(--a-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--a-rouge)}
+.case .role{margin:0;font:700 12px/1.4 var(--a-caps);letter-spacing:.1em;text-transform:uppercase;color:var(--a-accent)}
 .case .a-tiles{margin-top:clamp(28px,4vw,44px)}
 .body{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:30px 6vw;margin-top:clamp(36px,5vw,56px)}
-.block h3{margin:0 0 14px;font:600 11px/1.4 var(--a-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--a-rouge)}
-.block p{margin:0 0 12px;line-height:1.75;color:#d2c9c0}
+.block h3{margin:0 0 14px;font:700 12px/1.4 var(--a-caps);letter-spacing:.12em;text-transform:uppercase;color:var(--a-accent)}
+.block p{margin:0 0 12px;line-height:1.75;color:var(--a-dim)}
 .wide{grid-column:1/-1}
 .journey{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
-.stage{display:flex;flex-direction:column;gap:10px;padding:18px 16px;border:1px solid var(--a-rule);border-radius:var(--a-r-m);background:var(--a-surface);position:relative}
-.stage:before{content:"";position:absolute;left:16px;right:16px;top:0;height:3px;background:linear-gradient(90deg,var(--a-rouge-deep),var(--a-rouge));opacity:calc(.35 + var(--i)*.13)}
-.stage .a-label{color:var(--a-rouge)}.stage b{font:500 23px/1.1 var(--a-display)}.stage p{margin:0;font-size:13px;line-height:1.55;color:var(--a-dim)}
-.stage em{margin-top:auto;padding-top:10px;border-top:1px solid var(--a-rule);font:500 9px/1.5 var(--a-mono);font-style:normal;letter-spacing:.08em;text-transform:uppercase;color:var(--a-champagne)}
+.stage{display:flex;flex-direction:column;gap:10px;padding:20px 16px 18px;border:1px solid var(--a-rule);border-radius:var(--a-r-m);background:var(--a-surface);box-shadow:var(--a-shadow);position:relative;overflow:hidden}
+.stage:before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--a-accent);opacity:calc(.3 + var(--i)*.14)}
+.stage .a-label{color:var(--a-accent)}.stage b{font:400 24px/1.1 var(--a-display)}.stage p{margin:0;font-size:13px;line-height:1.55;color:var(--a-dim)}
+.stage em{margin-top:auto;padding-top:10px;border-top:1px solid var(--a-rule);font:700 11px/1.5 var(--a-caps);font-style:normal;letter-spacing:.04em;color:var(--a-gold)}
 .phases{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-.phase h4{margin:8px 0 14px;font:500 30px/1 var(--a-display)}
+.phase h4{margin:8px 0 14px;font:400 32px/1 var(--a-display)}
 .phase .a-list li{font-size:14px}
-.phase .why{margin:14px 0 0;padding-top:12px;border-top:1px solid var(--a-rule);font-size:13px;line-height:1.6;color:var(--a-champagne)}
+.phase .why{margin:14px 0 0;padding-top:12px;border-top:1px solid var(--a-rule);font-size:14px;line-height:1.6;font-weight:600;color:var(--a-accent-ink)}
 .case .a-chips{margin-top:clamp(28px,4vw,40px)}
-.end{min-height:70vh;display:flex;flex-direction:column;justify-content:center;background:radial-gradient(circle at 85% 50%,rgba(200,16,46,.18),transparent 34%)}
+.end{min-height:64vh;display:flex;flex-direction:column;justify-content:center;background:radial-gradient(circle at 85% 50%,rgba(194,24,91,.12),transparent 36%),var(--a-band)}
 .end .a-source{max-width:720px;margin-top:36px}
 @media(max-width:1100px){.journey{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:860px){.fit,.body,.phases{grid-template-columns:1fr}.index{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -77,6 +78,16 @@
   <p class="a-eyebrow">Case studies · Ayushi Rawat</p>
   <h1 class="a-display">Give her the number. <em>She’ll own it.</em></h1>
   <p class="a-lede">Six case studies built for one role. Four are work Ayushi has delivered, told with the figures from her record. Two are strategy cases: how she would run the job she is going after, built on what she has already done.</p>
+  <p class="a-label" style="margin:34px 0 0">6 case studies · tap one to jump to it</p>
+  <div class="index" aria-label="All six case studies">
+    <a class="a-card lift" href="#property-lead-engine"><span class="a-chip rouge">Delivered</span><b>More of the right leads</b><small>SPN Propservices · campaigns sales could close</small></a>
+    <a class="a-card lift" href="#salesforce-decision-system"><span class="a-chip rouge">Delivered</span><b>Salesforce as a decision system</b><small>VOIS · automation and 50+ dashboards</small></a>
+    <a class="a-card lift" href="#crm-adoption"><span class="a-chip rouge">Delivered</span><b>Getting a CRM actually used</b><small>VOIS · 2,000+ tickets, 200+ people trained</small></a>
+    <a class="a-card lift" href="#purpose-led-outreach"><span class="a-chip rouge">Delivered</span><b>Purpose with a plan</b><small>Muskurahat Foundation · outreach for education</small></a>
+    <a class="a-card lift" href="#lead-to-site-visit"><span class="a-chip gold">Strategy case</span><b>Lead to site visit</b><small>A CRM lifecycle for real estate</small></a>
+    <a class="a-card lift" href="#first-90-days"><span class="a-chip gold">Strategy case</span><b>The first 90 days</b><small>Her plan for a CRM &amp; lifecycle role</small></a>
+  </div>
+
 
   <div class="fit">
     <div class="a-card a-reveal">
@@ -103,14 +114,7 @@
     </div>
   </div>
 
-  <div class="index" aria-label="All case studies">
-    <a class="a-card lift" href="#property-lead-engine"><span class="a-chip rouge">Delivered</span><b>More of the right leads</b><small>SPN Propservices · campaigns sales could close</small></a>
-    <a class="a-card lift" href="#salesforce-decision-system"><span class="a-chip rouge">Delivered</span><b>Salesforce as a decision system</b><small>VOIS · automation and 50+ dashboards</small></a>
-    <a class="a-card lift" href="#crm-adoption"><span class="a-chip rouge">Delivered</span><b>Getting a CRM actually used</b><small>VOIS · 2,000+ tickets, 200+ people trained</small></a>
-    <a class="a-card lift" href="#purpose-led-outreach"><span class="a-chip rouge">Delivered</span><b>Purpose with a plan</b><small>Muskurahat Foundation · outreach for education</small></a>
-    <a class="a-card lift" href="#lead-to-site-visit"><span class="a-chip gold">Strategy case</span><b>Lead to site visit</b><small>A CRM lifecycle for real estate</small></a>
-    <a class="a-card lift" href="#first-90-days"><span class="a-chip gold">Strategy case</span><b>The first 90 days</b><small>Her plan for a CRM &amp; lifecycle role</small></a>
-  </div>
+</div>
 </section>
 
 <article class="a-section case" id="property-lead-engine">

@@ -215,7 +215,13 @@ async function handler(req, res) {
     sources.push({ board: kind + ':' + slug, ok: !r.error, count: r.jobs ? r.jobs.length : 0, error: r.error || null });
     return r.jobs || [];
   }));
-  tasks.push(remoteBoards().then((jobs) => { sources.push({ board: 'remote-boards', ok: true, count: jobs.length, error: null }); return jobs; }));
+  // jobhunt's fetchers turn every failure into an empty list, so an empty
+  // result is the only signal an outage leaves. Their feeds are never empty
+  // when they are up (RemoteOK and Arbeitnow return whole boards).
+  tasks.push(remoteBoards().then((jobs) => {
+    sources.push({ board: 'remote-boards', ok: jobs.length > 0, count: jobs.length, error: jobs.length ? null : 'unreachable' });
+    return jobs;
+  }));
 
   const all = (await Promise.all(tasks)).flat();
   const results = rank(all, Date.now()).slice(0, 80);

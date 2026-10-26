@@ -32,8 +32,7 @@ console.log('api guard');
 is('our own origin is allowed, and echoed back rather than *', call(OURS, '1.1.1.1'), PASSES);
 is('a subdomain of ours is allowed', call('https://ai-tele-suite.anchit-tandon.com', '1.1.1.2'),
    { stopped: false, code: 0, acao: 'https://ai-tele-suite.anchit-tandon.com', err: null });
-is("Ayushi's domain is allowed", originAllowed('https://ayushi-rawat.app'), true);
-is('a lookalike of her domain is not', originAllowed('https://ayushi-rawat.app.evil.example'), false);
+is('a domain we do not own is refused, even one named for this site', originAllowed('https://ayushi-rawat.app'), false);
 is('a Vercel preview of OURS is allowed', originAllowed('https://anchit-work-portfolio-git-x-anchit-ai-hustle.vercel.app'), true);
 is("someone else's vercel.app deployment is NOT", originAllowed('https://evil-project-abc123-someone-else.vercel.app'), false);
 is('a bare vercel.app is not', originAllowed('https://vercel.app'), false);
