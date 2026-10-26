@@ -89,6 +89,15 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
 .q{display:grid;gap:12px}
 .q h3 .n{color:var(--brand);margin-right:6px}
 .proto{display:grid;gap:16px;align-items:start}
+.lead-in{margin-bottom:12px}
+details.more>summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:10px;min-height:48px;padding:12px 18px;border:1px solid var(--line);border-radius:var(--r-btn);background:#fff;font-weight:600;font-size:15px;color:var(--ink)}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::after{content:"+";color:var(--brand);font-weight:700;font-size:18px;line-height:1}
+details.more[open]>summary{margin-bottom:16px}
+details.more[open]>summary::after{content:"\2212"}
+.steps{display:grid;gap:16px;counter-reset:step}
+.steps .card h3 .tag{display:block;width:max-content;margin-bottom:8px}
+.one{margin-top:4px}
 footer{background:var(--ink);color:#d6d3d1}
 footer .wrap{padding-top:32px;padding-bottom:40px;display:grid;gap:16px;font-size:14px;line-height:22px}
 footer a{color:#a7f3d0}
@@ -115,7 +124,7 @@ footer h3{color:#fff}
   <div class="wrap">
     <a class="mark" href="#top"><i aria-hidden="true">AT</i><span><b>Amar Ujala Study</b><small>by Anchit Tandon</small></span></a>
     <div class="links" id="links">
-      <a href="#audit">Audit</a><a href="#upgrades">Upgrades</a><a href="#revamps">Revamps</a><a href="#questions">Six questions</a><a href="#prototype">Prototype</a><a href="#me">Why me</a>
+      <a href="#audit">Audit</a><a href="#upgrades">Upgrades</a><a href="#revamps">Revamps</a><a href="#questions">Six questions</a><a href="#research">Families</a><a href="#plan">First 90 days</a><a href="#prototype">Prototype</a><a href="#me">Why me</a>
     </div>
     <a class="btn btn-primary sm cta" href="/amar-ujala/prototype"><span class="cta-lg">Open prototype</span><span class="cta-sm">Prototype</span></a>
   </div>
@@ -125,6 +134,7 @@ footer h3{color:#fff}
   <div class="wrap">
     <span class="eyebrow">Amar Ujala Education · product case study · October 2026</span>
     <h1>Amar Ujala already owns every piece. <span class="accent">Join them up on result day.</span></h1>
+    <p class="callout one" id="one-thing"><b>If Amar Ujala does one thing:</b> put an "Aage kya?" button under every board result, deep-linked into Disha Edge with stream and marks pre-filled. It needs no new platform, and it starts the student profile on the day families already come to Amar Ujala.</p>
     <p class="lede">Amar Ujala already owns every piece an education platform needs: an olympiad for Classes 1 to 10, a scholarship exam, results pages, Disha Stars counselling and a news app. But each runs as a separate, one-time event that forgets the family afterwards. The fix is one consented student profile that carries a child from the olympiad to result day to admission, with result day as the first revenue moment.</p>
     <div class="hero-ctas">
       <a class="btn btn-primary" href="/amar-ujala/prototype">Open the working prototype</a>
@@ -169,7 +179,9 @@ footer h3{color:#fff}
 
 <section class="block" id="upgrades" aria-labelledby="up-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">02 · First 90 days</span><h2 id="up-h">Seven immediate upgrades</h2><p>None needs a new platform. Ranked by impact per week of effort.</p></div>
+    <div class="sec-head"><span class="num">02 · Quick wins</span><h2 id="up-h">Seven immediate upgrades</h2><p>None needs a new platform. Ranked by impact per week of effort.</p></div>
+    <p class="lead-in">Start with the first three: the "Aage kya?" button into Disha Edge, a refreshed results page, and olympiad reports kept in a parent login.</p>
+    <details class="more"><summary>Show all seven upgrades, with evidence</summary>
     <div class="tbl"><table class="t-wide">
       <thead><tr><th style="width:4%">#</th><th style="width:30%">Upgrade</th><th style="width:36%">Why (what I found)</th><th style="width:30%">Market standard it meets</th></tr></thead>
       <tbody>
@@ -177,16 +189,19 @@ footer h3{color:#fff}
         <tr><td>2</td><td><b>Refresh results.amarujala.com</b></td><td>Title says "Government Jobs 2025", first links are 2024 results; layout shift 0.12.</td><td>Google Core Web Vitals: content in 2.5 s, layout shift 0.1 or less.</td></tr>
         <tr><td>3</td><td><b>Keep olympiad reports permanently in a parent login</b></td><td>Reports disappear about 15 days after results; the 50+ metric AI report is the most valuable thing AUNO makes.</td><td>SOF and Indian Talent Olympiad keep performance history and run apps.</td></tr>
         <tr><td>4</td><td><b>Separate, specific consent for calls, SMS and WhatsApp; verify a parent for under-18s</b></td><td>Consent to contact is folded into olympiad terms 7.1, and all olympiad users are minors.</td><td>DPDP Act s.6 (free, specific, informed consent); DPDP Rule 10 verifiable parental consent, in force 13 May 2027.</td></tr>
-        <tr><td>5</td><td><b>Patch the olympiad server and slim the Foundation site</b></td><td>End-of-life PHP 7.4 and OpenSSL 1.1.1 on a site taking payments; Foundation home page 72 MB (24 Oct audit).</td><td>OWASP Secure Headers, supported versions only; Core Web Vitals.</td></tr>
+        <tr><td>5</td><td><b>Security and speed review of the olympiad and Foundation sites</b></td><td>The olympiad site takes payments, and I found server issues worth fixing first; details shared privately, not on a public page. Foundation home page 72 MB (24 Oct audit).</td><td>OWASP Secure Headers, supported versions only; Core Web Vitals.</td></tr>
         <tr><td>6</td><td><b>Hindi interface for AUNO and Disha Edge</b></td><td>Core readers are Hindi-first; key journeys are served in English.</td><td>Hindi-first is the audience norm Amar Ujala's own print sets.</td></tr>
         <tr><td>7</td><td><b>Capture every workshop and award attendee with a QR sign-up</b></td><td>Tanav Mukt Pariksha (55 sessions) and topper events leave no record.</td><td>Event-to-CRM capture is standard for any lead-generating event business.</td></tr>
       </tbody></table></div>
+    </details>
   </div>
 </section>
 
 <section class="block" id="revamps" aria-labelledby="rv-h">
   <div class="wrap">
     <div class="sec-head"><span class="num">03 · 6 to 24 months</span><h2 id="rv-h">Seven long-term revamps</h2><p>These deliver the brief's "bring our existing programs together on one platform" and "take the vertical into new areas".</p></div>
+    <p class="lead-in">The spine is revamp 1, one student ID, parent login and consent; revamp 2, result-day admissions, is the first thing it earns from.</p>
+    <details class="more"><summary>Show all seven revamps, with the standard each meets</summary>
     <div class="tbl"><table class="t-wide">
       <thead><tr><th style="width:4%">#</th><th style="width:36%">Revamp</th><th style="width:30%">Why</th><th style="width:30%">Market standard</th></tr></thead>
       <tbody>
@@ -198,6 +213,7 @@ footer h3{color:#fff}
         <tr><td>6</td><td><b>Consent and parent-verification layer</b> shared by every product</td><td>Most users are minors; children's data rules apply from 13 May 2027.</td><td>DPDP Rule 10; no behavioural tracking or targeted ads to children (DPDP Act s.9).</td></tr>
         <tr><td>7</td><td><b>Performance budget for every education page</b></td><td>188 requests and 9 to 13 s to main content on mobile.</td><td>Core Web Vitals at the 75th percentile; ad slots inside a fixed budget.</td></tr>
       </tbody></table></div>
+    </details>
     <p class="callout" style="margin-top:20px">One profile turns five one-off events into a relationship from Class 1 to college, and gives the ad desk one consented audience.</p>
   </div>
 </section>
@@ -238,6 +254,8 @@ footer h3{color:#fff}
           <li><b>Parents: small amounts, proven.</b> They already pay ₹125 to 250 per olympiad. A ₹299 counselling call is a test, not a pillar; the plan itself stays free.</li>
           <li><b>Schools:</b> pay indirectly by collecting olympiad fees; a paid school dashboard is a season-two test.</li>
           <li><b>Year-one base case, updated to 2026 passers:</b> about ₹1.13 crore (about $119K): ₹38.5 lakh from 15,387 consented enquiries at ₹250, ₹72 lakh from 60 college season bundles at ₹1.2 lakh, ₹2.63 lakh from counselling calls. Every rate after the pass count is an assumption to test; the unknown that matters is the price per enquiry.</li>
+          <li id="funnel"><b>How the base case is built:</b> 19,98,317 passers; 8% open Aage Kya from the result and 55% finish it: 87,926 plans. 40% live where colleges are listed, and 25% of those ask for a call with consent: 8,793 families. 2.5 colleges each, 70% of them paying: 15,387 paid enquiries.</li>
+          <li id="year3"><b>Year three, if year one proves the rates:</b> the same Class 12 season at the prototype's high settings (15% open it, 35% consent, ₹400 per enquiry, 150 bundles at ₹2 lakh) is about ₹7.70 crore (about $810K). That is before the Class 10 stream choice and the five other states, which are not counted. The low case is about ₹21 lakh, which is why the pilot's stop line sits there.</li>
         </ul></div>
       <div class="card q soft"><h3><span class="n">6.</span>What is the real problem not solved right now?</h3>
         <p class="small"><b>A Hindi-medium family has no neutral, trusted place that turns a child's results into a safe next decision, with the parent involved.</b> So the biggest spending decision of a child's education is made on agents, ads and guesswork, and the cost of a wrong call is a lost year or fees paid to an unrecognised institute.</p>
@@ -246,9 +264,64 @@ footer h3{color:#fff}
   </div>
 </section>
 
+<section class="block" id="research" aria-labelledby="rs-h">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">05 · What families face</span><h2 id="rs-h">The family behind the numbers, from published research</h2><p>These are published surveys, official data and court and police reporting, not my own interviews. I have not spoken to these families yet; that is the first thing in my 90 days.</p></div>
+    <blockquote class="callout amber" style="margin:0 0 16px">"When I was in Class 12, all we could see were ads of LPU on TV, radio and billboards. When I decided to join a private university, it was the first option that came to my mind."<br><span class="small muted">A former student from Uttar Pradesh on how he chose a university, <a href="https://theprint.in/india/education/from-tiny-b-school-to-35000-student-university-lpu-the-education-empire-built-on-an-ad-blitz/3056080/" rel="noopener">ThePrint</a>, 29 Sep 2026.</span></blockquote>
+    <div class="grid g2">
+      <div class="card"><h3>Who they ask</h3><ul class="small">
+        <li>Only 9.36% of 4,968 low-income students in Classes 9 to 12, across 25 states, had ever had career guidance. Family (30%) and teachers (13%) were the top influences (UNICEF YuWaah and iDreamCareer, Bharat Career Aspiration Report 2024, via <a href="https://www.theweek.in/wire-updates/national/2024/07/18/del88-unicef-education-report.html" rel="noopener">PTI</a>).</li>
+        <li>UP's own counselling pilot put 31 counsellors in front of 14,700 Class 10 and 12 students in five districts (<a href="https://www.outlookindia.com/national/uttar-pradesh-students-to-receive-in-person-counselling-on-college-choices-and-career-paths-news-338543" rel="noopener">Outlook</a>, Dec 2023).</li></ul></div>
+      <div class="card"><h3>Where they drop off</h3><ul class="small">
+        <li>UDISE data cited for that pilot: nearly 18% drop out between Class 10 and 11, and around 30% between Class 12 and an undergraduate course, the exact moment Aage Kya serves.</li>
+        <li>Nationally, 32.6% of rural 18-year-olds are not enrolled in any education, against 3.9% at 14 (<a href="https://asercentre.org/wp-content/uploads/2022/12/ASER-2023_Main-findings-1.pdf" rel="noopener">ASER 2023</a>).</li></ul></div>
+      <div class="card"><h3>The phone is shared, and Hindi comes first</h3><ul class="small">
+        <li>In rural Hathras, 89.2% of 14 to 18 year olds have a smartphone at home, but only 26.5% of those who can use one own it, and 11.2% of girls (<a href="https://asercentre.org/wp-content/uploads/2022/12/26_Uttar-Pradesh_Hathras.pdf" rel="noopener">ASER 2023, Hathras</a>). Varanasi reads 91.5% and 20.4% (<a href="https://asercentre.org/wp-content/uploads/2022/12/27_Uttar-Pradesh_Varanasi.pdf" rel="noopener">ASER 2023, Varanasi</a>).</li>
+        <li>870 million of India's internet users, 98% of them, have accessed the internet in Indian languages, and UP is among the bottom three states for internet use, at 46% (<a href="https://www.iamai.in/sites/default/files/research/Kantar_%20IAMAI%20report_2024_.pdf" rel="noopener">IAMAI and Kantar, Internet in India 2024</a>).</li></ul></div>
+      <div class="card"><h3>What a wrong call costs</h3><ul class="small">
+        <li>UP filed more fee-refund complaints against universities than any other state: 827 in five academic years, with about ₹4.96 crore refunded (UGC Fee Nivaran Cell, via <a href="https://zeenews.india.com/hindi/career/education/fees-related-complaints-against-private-universities-increased-ugc-refund-rs-25-crore/2588470" rel="noopener">Zee News</a>, Jan 2025).</li>
+        <li>In Lucknow, a fake admission consultancy lured families "with promises of management-quota seats"; one parent lost ₹45 lakh (<a href="https://news.careers360.com/mbbs-admission-scam-two-held-lucknow-rs-1-crore-fraud-over-fake-seats-neet-qualified-students-engineering-hind-medical-college" rel="noopener">PTI</a>, Nov 2025).</li>
+        <li>The Supreme Court took note of a fake medical college in Etah run from "an old, dilapidated structure" in a field, and asked regulators to warn the public to verify institutions first (<a href="https://www.livelaw.in/top-stories/supreme-court-takes-note-of-fake-medical-college-in-up-operating-from-farmhouse-with-illiterate-tea-seller-as-chairman-554145" rel="noopener">LiveLaw</a>, Oct 2026).</li></ul></div>
+    </div>
+    <p class="callout" style="margin-top:16px"><b>What this changes in the product:</b> the parent's phone is the channel, Hindi is the default, and a free verification check is worth more to a family than another list of colleges.</p>
+  </div>
+</section>
+
+<section class="block" id="plan" aria-labelledby="pl-h">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">06 · How I would run it</span><h2 id="pl-h">How I would know it works, and my first 90 days</h2><p>One number to steer by, a pilot with a stop line written down before launch, and the two internal questions I would settle first.</p></div>
+    <div class="grid g3">
+      <div class="card soft" data-k="north-star"><h3>The one number</h3><p class="small"><b>Consented enquiries that colleges confirm became admissions, each season.</b> It is what colleges pay for and what families came for. Clicks and leads can grow while families are served badly; admissions cannot.</p></div>
+      <div class="card"><h3>Early signals</h3><ul class="small">
+        <li><b>Start:</b> share of passers who open Aage Kya from the result (base case 8%).</li>
+        <li><b>Finish:</b> share who complete the plan (55%).</li>
+        <li><b>Consent:</b> share of families with a listed college who ask for a call by OTP (25%).</li>
+        <li><b>Renewal:</b> share of season-bundle colleges that buy again next season.</li></ul></div>
+      <div class="card"><h3>Guardrails</h3><ul class="small">
+        <li>Payment never changes the order families see, checked every season.</li>
+        <li>Complaints and consent withdrawals per 1,000 enquiries, reviewed weekly in season.</li>
+        <li>The results page shows its main content in 2.5 s on a mid-range phone.</li></ul></div>
+    </div>
+    <p class="callout" style="margin-top:16px" data-k="pilot"><b>Pilot:</b> UP Board result day 2027, in the districts where colleges sign up first. Continue only if the pilot beats the prototype's low case on all three of 3% opening Aage Kya, 15% consent and ₹150 per enquiry. Below that, stop selling enquiries and keep the free button and the print bundles.</p>
+
+    <h3 style="margin-top:32px">My first 90 days</h3>
+    <div class="grid g3 steps" style="margin-top:12px">
+      <div class="card" data-k="day"><h3><span class="tag">Days 1 to 30</span>Listen and set the baseline</h3><p class="small">Sit with the Disha Stars counsellors, the ad desk and the olympiad team. Get last result day's traffic and exits for results.amarujala.com. Call 20 families who used Disha Stars after a result, and hear the decision in their words.</p></div>
+      <div class="card" data-k="day"><h3><span class="tag">Days 31 to 60</span>Ship what needs no platform</h3><p class="small">Upgrades 1 to 3: the "Aage kya?" button into Disha Edge, the results page refresh, and olympiad reports kept in a parent login. Start the consent and parent-verification design with legal, since DPDP Rule 10 applies from 13 May 2027.</p></div>
+      <div class="card" data-k="day"><h3><span class="tag">Days 61 to 90</span>Price it before building it</h3><p class="small">Take the per-enquiry offer to 10 colleges through the ad desk and get written intent at a price. Agree the verification and ranking rules with the ad desk in writing. Fix the 2027 pilot districts and the stop line above.</p></div>
+    </div>
+
+    <h3 style="margin-top:32px">Two tensions I would settle first</h3>
+    <div class="grid g2" style="margin-top:12px">
+      <div class="card" data-k="tension"><h3>Print revenue</h3><p class="small">Colleges might move money from print into cheaper per-enquiry spend. So enquiries are sold only inside the admission-season bundle, which already includes district-edition print ads, and I would track print renewals of pilot colleges against every other college.</p></div>
+      <div class="card" data-k="tension"><h3>The ad desk and verification</h3><p class="small">The ad desk is paid on sales; which colleges are verified, and the order families see, must not be. The product team owns the verified list and the ranking rules, written down before launch. The ad desk sells the bundle and the "Paying partner" label, never rank, and the order is audited every season.</p></div>
+    </div>
+  </div>
+</section>
+
 <section class="block" id="prototype" aria-labelledby="pr-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">05 · Working prototype</span><h2 id="pr-h">Try Aage Kya: the result-day plan, the college view and the revenue model</h2><p>In English and Hindi. Colleges and enquiries are fictional demo data; nothing is stored or sent.</p></div>
+    <div class="sec-head"><span class="num">07 · Working prototype</span><h2 id="pr-h">Try Aage Kya: the result-day plan, the college view and the revenue model</h2><p>In English and Hindi. Colleges and enquiries are fictional demo data; nothing is stored or sent.</p></div>
     <div class="proto">
       <div class="card">
         <h3>What you can try</h3>
@@ -270,7 +343,7 @@ footer h3{color:#fff}
 
 <section class="block" id="me" aria-labelledby="me-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">06 · Why me</span><h2 id="me-h">I have run this playbook on a paid subscription product</h2><p>Times Internet, June 2022 to April 2026: Associate PM, then PM, then Senior PM.</p></div>
+    <div class="sec-head"><span class="num">08 · Why me</span><h2 id="me-h">I have run this playbook on a paid subscription product</h2><p>Times Internet, June 2022 to April 2026: Associate PM, then PM, then Senior PM.</p></div>
     <div class="grid g3">
       <div class="card kpi"><span class="tag">Revenue · Assisted Sales</span><b style="margin-top:8px">₹15L to ₹80L</b><small style="font-size:14px;line-height:21px">Monthly ET assisted-sales revenue through funnel redesign; 400%+ ROI in six months on ET Prime's assisted-conversion funnel.</small></div>
       <div class="card kpi"><span class="tag">AI Automation</span><b style="margin-top:8px">AI TeleSuite</b><small style="font-size:14px;line-height:21px">Built call transcription, quality scoring and pitch assist; qualified leads from about 30 to 150+ a day.</small></div>
@@ -297,6 +370,7 @@ footer h3{color:#fff}
       <li><a href="https://www.storyboard18.com/advertising/education-sector-leads-print-advertising-with-17-percent-share-in-jan-sep-2025-tam-85352.htm" rel="noopener">TAM AdEx Jan to Sep 2025 (Storyboard18)</a></li>
       <li><a href="https://entrackr.com/fintrackr/collegedekho-posts-rs-151-cr-loss-in-fy25-revenue-remains-flat-11081103" rel="noopener">CollegeDekho FY25 (Entrackr)</a></li>
       <li><a href="https://www.ugc.gov.in/universitydetails/HEIs_Violating_Regulations?tab=fakeuni" rel="noopener">UGC fake universities</a>, <a href="https://news.careers360.com/up-has-highest-number-of-colleges-in-country-followed-maharashtra-karnataka-aishe-report" rel="noopener">AISHE UP colleges (Careers360)</a></li>
+      <li>Research on families (section 05): ASER 2023 national findings and the Hathras and Varanasi district reports, IAMAI and Kantar Internet in India 2024, UNICEF YuWaah and iDreamCareer 2024, UGC Fee Nivaran Cell figures, PTI, Outlook, ThePrint and LiveLaw reports; each is linked where it is used, opened 26 Oct 2026</li>
       <li>USD/INR ₹95.04 from open.er-api.com, 24 Oct 2026</li>
     </ul>
     <p>Independent case study by Anchit Tandon. Not affiliated with or endorsed by Amar Ujala. "Amar Ujala", "Disha Stars", "AUNO" and other product names belong to their owners and are used only to describe their public products. Revenue rates after the pass count are assumptions, labelled as such.</p>

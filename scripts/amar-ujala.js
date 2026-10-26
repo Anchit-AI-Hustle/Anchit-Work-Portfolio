@@ -24,7 +24,8 @@
 // count and the cross-page base case must fail. MUT=lang makes the Hindi
 // toggle do nothing; the translation check must fail. MUT=xnav drops the
 // prototype's audit link and hides the study's prototype button on phones;
-// the cross-navigation checks must fail.
+// the cross-navigation checks must fail. MUT=year3 raises the prototype's high
+// bundle price; the study's year-three figure must stop matching.
 const { chromium } = require('./_playwright.js');
 const vercel = require('../vercel.json');
 const BASE = process.env.BASE || 'http://127.0.0.1:8099';
@@ -48,6 +49,7 @@ function mutate(path, src) {
   if (MUT === 'dash' && path.endsWith('/study')) return src.replace('</body>', '<p>one — two</p></body>');
   if (MUT === 'count' && path.endsWith('/prototype')) return src.split('1998317').join('2109000');
   if (MUT === 'lang' && path.endsWith('/prototype')) return src.replace('</body>', '<script>document.addEventListener("click",function(e){if(e.target.closest("button[lang]"))e.stopImmediatePropagation();},true);</script></body>');
+  if (MUT === 'year3' && path.endsWith('/prototype')) return src.replace('bundles: 150, bundlePrice: 200000', 'bundles: 150, bundlePrice: 300000');
   if (MUT === 'xnav' && path.endsWith('/prototype')) return src.split('/amar-ujala/study#audit').join('/amar-ujala/study');
   if (MUT === 'xnav' && path.endsWith('/study')) return src.replace('</head>', '<style>@media (max-width:699px){.nav .cta{display:none}}</style></head>');
   return src;
@@ -211,6 +213,56 @@ async function crossNav(browser, vp) {
   await ctx.close();
 }
 
+// What a hiring manager reads first: one recommendation on the first screen,
+// how success is measured and when to stop, the first 90 days, the two internal
+// tensions, the revenue maths behind the base case, published research on the
+// families, and no security detail about Amar Ujala's servers in public.
+let studyYear3 = NaN, protoHigh = NaN;
+async function submission(browser, vp) {
+  const L = `[${vp.name}] /amar-ujala/study submission`;
+  const { ctx, page } = await open(browser, vp, '/amar-ujala/study');
+  const one = await page.evaluate(() => {
+    const el = document.querySelector('#top #one-thing');
+    return el ? Math.round(el.getBoundingClientRect().bottom) : null;
+  });
+  check(`${L}: one recommendation sits on the first screen`, one !== null && one <= vp.height, `bottom ${one}px of ${vp.height}`);
+  const text = norm(await page.evaluate(() => document.body.textContent));
+  const leak = text.match(/.{0,30}\b(PHP|OpenSSL)\b.{0,30}/);
+  check(`${L}: no server or security detail in public`, !leak, leak ? leak[0] : '');
+  for (const id of ['upgrades', 'revamps']) {
+    const d = await page.$eval(`#${id}`, (s) => {
+      const det = s.querySelector('details');
+      return det ? { open: det.open, rows: det.querySelectorAll('tbody tr').length } : null;
+    });
+    check(`${L}: #${id} table is collapsed with all seven rows`, !!d && !d.open && d.rows === 7, JSON.stringify(d));
+  }
+  const plan = await page.evaluate(() => ({
+    north: !!document.querySelector('#plan [data-k="north-star"]'),
+    pilot: (document.querySelector('#plan [data-k="pilot"]') || {}).textContent || '',
+    days: document.querySelectorAll('#plan [data-k="day"]').length,
+    tensions: document.querySelectorAll('#plan [data-k="tension"]').length,
+  }));
+  check(`${L}: #plan has the one number, a pilot stop line, three 30-day steps and two tensions`,
+    plan.north && /3%/.test(plan.pilot) && /15%/.test(plan.pilot) && /₹150/.test(plan.pilot) && plan.days === 3 && plan.tensions === 2,
+    JSON.stringify({ ...plan, pilot: plan.pilot.slice(0, 60) }));
+  const funnel = norm(await page.textContent('#funnel'));
+  check(`${L}: the base case shows its funnel`, ['19,98,317', '87,926', '8,793', '15,387'].every((n) => funnel.includes(n)), funnel.slice(0, 80));
+  studyYear3 = crore(norm(await page.textContent('#year3')));
+  const sources = await page.$$eval('#research a[href^="http"]', (as) => as.length);
+  check(`${L}: published research on families, with sources`, sources >= 5, sources);
+  await ctx.close();
+}
+
+// The prototype's revenue tab, high scenario, year-one total in crore.
+async function readProtoHigh(browser) {
+  const { ctx, page } = await open(browser, VIEWPORTS[2], '/amar-ujala/prototype');
+  await page.click('#tab-revenue');
+  await page.click('#scen-high');
+  await page.waitForTimeout(300);
+  protoHigh = crore(norm(await page.textContent('[data-testid="ak-total"]')));
+  await ctx.close();
+}
+
 // The prototype's revenue tab, base scenario, year-one total in crore.
 async function readProtoBase(page) {
   await page.click('#tab-revenue');
@@ -226,8 +278,14 @@ async function readProtoBase(page) {
     await study(browser, vp);
     await prototype(browser, vp);
     await crossNav(browser, vp);
+    await submission(browser, vp);
   }
+  await readProtoHigh(browser);
   await browser.close();
+
+  check('the study\'s year-three figure is the prototype\'s high scenario',
+    Number.isFinite(studyYear3) && Number.isFinite(protoHigh) && Math.abs(studyYear3 - protoHigh) < 0.05,
+    `study ₹${studyYear3} crore, prototype high ₹${protoHigh} crore`);
 
   check('study and prototype quote the same year-one base case',
     Number.isFinite(studyBase) && Number.isFinite(protoBase) && Math.abs(studyBase - protoBase) < 0.005,
