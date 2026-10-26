@@ -250,6 +250,23 @@ async function submission(browser, vp) {
   studyYear3 = crore(norm(await page.textContent('#year3')));
   const sources = await page.$$eval('#research a[href^="http"]', (as) => as.length);
   check(`${L}: published research on families, with sources`, sources >= 5, sources);
+  const research = await page.$eval('#research', (s) => ({
+    shown: [...s.querySelectorAll('.card')].filter((c) => !c.closest('details')).length,
+    folded: s.querySelectorAll('details:not([open]) .card').length,
+  }));
+  check(`${L}: research shows two findings and folds the rest`, research.shown === 2 && research.folded === 2, JSON.stringify(research));
+
+  // The role asks for 4 to 5 years and prefers an edtech background; the
+  // section that answers "why me" has to answer both, in view.
+  const me = norm(await page.innerText('#me'));
+  check(`${L}: why me states the years and the edtech work`,
+    /4\+ years in product/.test(me) && /EveryYear/.test(me) && /early years/i.test(me) &&
+    (await page.$$('#me a[href="https://edu-ai.anchit-tandon.com/"]')).length > 0, me.slice(0, 80));
+  check(`${L}: revamps name the early years in view`, /early years/i.test(norm(await page.innerText('#revamps .lead-in'))), '');
+  // Calls to families are a step before the study goes to the company, not a
+  // promise on the public page.
+  const calls = text.match(/.{0,30}(Call 20 families|have not spoken to these families).{0,30}/);
+  check(`${L}: no promise of family calls on the page`, !calls, calls ? calls[0] : '');
   await ctx.close();
 }
 
