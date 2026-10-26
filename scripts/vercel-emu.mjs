@@ -127,7 +127,11 @@ export function createServer() {
           return send(203, { 'content-type': 'text/plain', 'x-proxied-to': rw.destination },
             'external rewrite -> ' + rw.destination);
         }
-        file = diskFor(rw.destination);
+        // With cleanUrls on, Vercel does not serve a rewrite whose destination
+        // ends in .html: /ayushi-rawat-auto-job-applier -> /ayushi-rawat/auto-
+        // job-applier.html returned 404 in production while this emulator
+        // served it. Model that, so the suites fail where production does.
+        file = cfg.cleanUrls && /\.html$/.test(rw.destination) ? null : diskFor(rw.destination);
       }
     }
 

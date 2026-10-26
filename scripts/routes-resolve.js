@@ -58,6 +58,18 @@ check('every vercel.json rewrite resolves to a built file',
   missing.length === 0,
   missing.length ? missing.join(', ') : `${(vercel.rewrites || []).length} rewrites, all resolve`);
 
+// With cleanUrls on, Vercel will not serve a rewrite destination ending in
+// .html. Such a rewrite only "works" when its source is itself a file on disk
+// (served before rewrites run), which makes the rule redundant. One whose
+// source is not a file is a 404 in production, while the emulator and the
+// check above both pass it: that is how /ayushi-rawat-auto-job-applier
+// shipped broken.
+if (vercel.cleanUrls) {
+  const dead = (vercel.rewrites || []).filter((r) => /\.html$/.test(r.destination) && !r.source.includes(':') && !resolves(r.source)).map((r) => `${r.source} -> ${r.destination}`);
+  check('no rewrite relies on an .html destination under cleanUrls', dead.length === 0,
+    dead.length ? dead.join(', ') + ' (404 in production: serve the page as a file instead)' : 'every .html destination is served from disk anyway');
+}
+
 // The manifest is the other half: a page listed there but absent from www/
 // means the build silently skipped it.
 const manifest = fs.readFileSync(path.join(ROOT, 'scripts/build-www.mjs'), 'utf8');
