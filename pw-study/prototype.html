@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Agla Kadam Prototype | PW Study by Anchit Tandon</title>
-<meta name="description" content="Working prototype of Agla Kadam, an AI continuity layer concept for PhysicsWallah, by Anchit Tandon. Synthetic data.">
+<title>Learner Retention Engine Prototype | Anchit Tandon, PM Application</title>
+<meta name="description" content="Working prototype of the Learner Retention Engine, an AI retention system proposed for PhysicsWallah in a PM application by Anchit Tandon. Synthetic data.">
 <meta name="robots" content="noindex, nofollow">
 <meta name="color-scheme" content="light">
 <link rel="canonical" href="https://anchit-tandon.com/pw-study/prototype">
@@ -66,6 +66,17 @@ main .wrap{padding-top:24px;padding-bottom:48px}
 .btn-outline{background:#fff;color:var(--ink);border-color:var(--border)}
 .btn.sm{min-height:40px;padding:8px 14px;font-size:14px}
 .xlinks{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+.feats{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px}
+.feats a{display:inline-flex;align-items:center;min-height:36px;padding:6px 12px;border-radius:var(--r-pill);background:#fff;border:1px solid var(--border);color:var(--ink);font-size:13px;font-weight:600;text-decoration:none}
+.feats a:hover{border-color:var(--primary);color:var(--primary)}
+.feats a b{color:var(--primary);margin-right:6px}
+.dl-bar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;font-size:13px;line-height:18px;color:var(--muted);padding:12px 0;margin-bottom:12px;border-bottom:1px solid var(--border)}
+.dl-tabs{display:flex;flex-wrap:wrap;gap:6px}
+.dl-tabs a{display:inline-flex;align-items:center;min-height:32px;padding:4px 10px;border-radius:var(--r-pill);color:var(--body);font-weight:600;text-decoration:none;border:1px solid var(--border);background:#fff}
+.dl-tabs a[aria-current="true"]{background:var(--primary-50);border-color:var(--primary);color:var(--primary)}
+.anchor{display:block;height:0}
+.onscreen{font-size:13px;line-height:19px;color:var(--muted);margin:0 0 12px}
+.onscreen b{color:var(--heading)}
 .tag{display:inline-block;font-size:12px;line-height:16px;font-weight:600;padding:4px 8px;border-radius:var(--r-tag)}
 .tag.lang{background:var(--page);border:1px solid #B7B7B7;color:var(--body)}
 .tag.ok{background:var(--success-bg);color:var(--success)}
@@ -198,36 +209,40 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
 }
 @media (prefers-reduced-motion:no-preference){.bar i{transition:width .35s ease}}
 </style>
-<style>html.embed .concept,html.embed .hero,html.embed footer{display:none}</style>
+<style>html.embed .concept,html.embed .hero,html.embed footer,html.embed .dl-bar{display:none}</style>
 <script>if(/[?&]embed=1/.test(location.search))document.documentElement.classList.add("embed");</script>
 </head>
 <body>
 <div class="concept" role="note"><b>Concept prototype</b> by Anchit Tandon. Not an official PW product and not affiliated with PhysicsWallah. Learner data is synthetic; AI replies are simulated with transparent rules.</div>
 <header class="top">
   <div class="wrap">
-    <a class="brandmark" href="/pw-study" style="text-decoration:none" target="_top"><div class="dot" aria-hidden="true">AK</div><div><strong>Agla Kadam</strong><small>Back to the PW case study</small></div></a>
+    <a class="brandmark" href="/pw-study" style="text-decoration:none" target="_top"><div class="dot" aria-hidden="true">RE</div><div><strong>Learner Retention Engine</strong><small>Back to the PW case study</small></div></a>
     <nav class="tabs" role="tablist" aria-label="Prototype views">
       <button class="tab" role="tab" id="t-student" aria-controls="p-student" aria-selected="true">Student app</button>
       <button class="tab" role="tab" id="t-parent" aria-controls="p-parent" aria-selected="false" tabindex="-1">Weekly Pulse</button>
-      <button class="tab" role="tab" id="t-console" aria-controls="p-console" aria-selected="false" tabindex="-1">Growth console</button>
+      <button class="tab" role="tab" id="t-console" aria-controls="p-console" aria-selected="false" tabindex="-1">Growth Console</button>
       <button class="tab" role="tab" id="t-brand" aria-controls="p-brand" aria-selected="false" tabindex="-1">Brand schema</button>
     </nav>
   </div>
 </header>
 <section class="hero">
   <div class="wrap">
-    <span class="eyebrow">AI for the second sale</span>
+    <span class="eyebrow">Proposed system · Learner Retention Engine</span>
     <h1>Every paid learner, <span class="accent">kept on track</span> and brought back for their next batch.</h1>
-    <p class="lede">PW already runs Tracker 360, Prep Meter, the Parent App, mentorship and AI that wins the first sale. Agla Kadam is the layer that connects them for every learner: read those signals to spot silent drop-off early, rescue it with the AI Mentor, a human mentor or a Weekly Pulse to the right person, then make results day a personal next step: the right batch, plan or Vidyapeeth seat.</p>
+    <p class="lede">PW already runs Tracker 360, Prep Meter, the Parent App, mentorship and AI that wins the first sale. The Learner Retention Engine connects them for every learner: spot silent drop-off early, rescue it, and make results day a personal next step.</p>
     <div class="xlinks"><a class="btn btn-outline sm" href="/pw-study" target="_top">Back to the case study</a><a class="btn btn-soft sm" href="/pw-study#audit" target="_top">See the live platform audit</a></div>
+    <nav class="feats" aria-label="The five features"><span class="label">Five features, all working here:</span><a href="#drift"><b>1</b>Drift Score</a><a href="#plan"><b>2</b>Comeback Plan</a><a href="#pulse"><b>3</b>Weekly Pulse</a><a href="#next"><b>4</b>Results-Day Next Step</a><a href="#console"><b>5</b>Growth Console</a></nav>
+    <p class="small muted">Part of Anchit Tandon's Product Manager application to PW. Step-by-step review: <a href="/pw-study#walkthrough" target="_top">anchit-tandon.com/pw-study#walkthrough</a></p>
   </div>
 </section>
 
 <main>
 <div class="wrap">
+<div class="dl-bar" id="dl-bar"><span>Concept prototype by Anchit Tandon · synthetic data · not affiliated with PhysicsWallah</span><nav class="dl-tabs" aria-label="Prototype screens"><a href="#student">Student app</a><a href="#pulse">Weekly Pulse</a><a href="#console">Growth Console</a><a href="#brand">Brand schema</a></nav></div>
 
 <!-- STUDENT -->
 <section class="panel on" id="p-student" role="tabpanel" aria-labelledby="t-student">
+  <p class="onscreen" id="student">On this screen: <b>Drift Score</b> (engine output), <b>Comeback Plan</b> (the plan in the phone) and <b>Results-Day Next Step</b> (bottom of the phone).</p>
   <div class="persona-row" role="group" aria-label="Choose a learner">
     <button class="chip" data-p="0" aria-pressed="true">Riya - Class 11, JEE</button>
     <button class="chip" data-p="1" aria-pressed="false">Aman - NEET dropper</button>
@@ -256,13 +271,13 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
           <div class="stat"><b id="st-test">45%</b><span>Test avg</span></div>
           <div class="stat"><b id="st-streak">0</b><span>Day streak</span></div>
         </div>
-        <div class="nudge" id="s-nudge"><p class="label" id="s-nudge-label">AI Mentor plan</p><p id="s-nudge-title" style="font-weight:600;color:var(--heading)"></p><ul class="plan small" id="s-plan"></ul></div>
+        <div class="nudge" id="s-nudge"><span id="plan" class="anchor"></span><p class="label" id="s-nudge-label">AI Mentor plan</p><p id="s-nudge-title" style="font-weight:600;color:var(--heading)"></p><ul class="plan small" id="s-plan"></ul></div>
         <div class="card" style="padding:14px">
           <p class="label" style="margin-bottom:8px">Ask your AI Mentor <span class="tag pri" style="margin-left:4px">Simulated</span></p>
           <div class="chat" id="chat" aria-live="polite"></div>
           <div class="quick" style="margin-top:10px" id="quick"></div>
         </div>
-        <p class="label" style="margin-top:4px">Your agla kadam (next step)</p>
+        <p class="label" style="margin-top:4px" id="next">Your next step</p>
         <div class="batch" id="s-next"></div>
       </div>
     </div>
@@ -278,9 +293,9 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
         <div class="field"><label for="in-doubt">Doubts asked this week <span id="v-doubt"></span></label><input type="range" id="in-doubt" min="0" max="15"></div>
         <div class="field"><label for="in-streak">Study streak (days) <span id="v-streak"></span></label><input type="range" id="in-streak" min="0" max="30"></div>
       </div>
-      <div class="card">
+      <div class="card" id="drift">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
-          <h3>Engine output</h3><span id="e-tier" class="tag"></span>
+          <h3>Drift Score: engine output</h3><span id="e-tier" class="tag"></span>
         </div>
         <div class="engine-out" style="margin-top:12px">
           <p><span class="label">Drop-off risk</span><br><b id="e-risk" style="font-size:28px;line-height:34px;color:var(--heading)"></b><span class="muted"> / 100</span></p>
@@ -299,7 +314,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
   <div class="grid two">
     <div class="grid" style="align-content:start">
       <div class="card">
-        <h2>Weekly Pulse on WhatsApp</h2>
+        <h2 id="pulse">Weekly Pulse on WhatsApp</h2>
         <p style="margin-top:8px">The PW Parent App already shows attendance, lecture, DPP and test stats, but a parent has to open it. Weekly Pulse pushes a plain-language summary on WhatsApp and links into the app. <b>Who receives it depends on the learner's age.</b></p>
         <div style="overflow-x:auto;margin-top:12px"><table class="aud" id="aud-tbl">
           <thead><tr><th>Learner</th><th>Examples</th><th>Weekly report goes to</th></tr></thead>
@@ -342,7 +357,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
 <!-- CONSOLE -->
 <section class="panel" id="p-console" role="tabpanel" aria-labelledby="t-console" hidden>
   <div style="display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:12px">
-    <div><h2>Growth console</h2><p class="small" style="max-width:720px">The screen PW's retention team would open every Monday: who is drifting, what action each group gets, and what that is worth. Uses a made-up cohort of 5,000 paid learners so it runs without PW data.</p></div>
+    <div><h2 id="console">Growth Console</h2><p class="small" style="max-width:720px">The screen PW's retention team would open every Monday: who is drifting, what action each group gets, and what that is worth. Uses a made-up cohort of 5,000 paid learners so it runs without PW data.</p></div>
     <button class="btn btn-outline sm" id="reseed">Generate a new cohort</button>
   </div>
   <div class="howto" aria-label="How to read this screen">
@@ -422,7 +437,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
 <section class="panel" id="p-brand" role="tabpanel" aria-labelledby="t-brand" hidden>
   <div class="grid">
     <div class="card">
-      <h2>PW brand context schema</h2>
+      <h2 id="brand">PW brand context schema</h2>
       <p style="margin-top:8px">Extracted from computed styles on pw.live (homepage, NEET Class 12 listing, a batch detail page) on 25 Oct 2026 with a headless browser. This prototype uses only these tokens. The PW logo is deliberately not reproduced.</p>
     </div>
     <div><h3 style="margin-bottom:10px">Colour tokens</h3><div class="swatches" id="swatches"></div></div>
@@ -458,7 +473,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
           <li>Warm, aspirational, numbers-led ("Join 15 Million students", "24*7 Doubt Support").</li>
           <li>English UI; Hindi carries the brand in names: Arjuna, Lakshya, Yakeen, Vidyapeeth, Pathshala.</li>
           <li>Teachers are "Sir"; batches are labelled HINGLISH; emoji rare.</li>
-          <li>Agla Kadam follows this: Hindi product name, plain English UI, Hinglish only inside student chat.</li>
+          <li>This concept keeps plain English feature names and UI, with Hinglish only inside student chat.</li>
         </ul>
       </div>
     </div>
@@ -530,17 +545,38 @@ var cur = 0, simState = JSON.parse(JSON.stringify(P[0].s));
 
 /* ---------- Tabs ---------- */
 var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
-function selectTab(t){
+/* Deep links: /pw-study/prototype#student, #drift, #plan, #next, #pulse, #console, #brand */
+var HASH = {student:'t-student', drift:'t-student', plan:'t-student', next:'t-student', pulse:'t-parent', console:'t-console', brand:'t-brand'};
+var NAME = {'t-student':'student','t-parent':'pulse','t-console':'console','t-brand':'brand'};
+var EMBED = document.documentElement.classList.contains('embed');
+function selectTab(t, write){
   tabs.forEach(function(x){
     var on = x===t; x.setAttribute('aria-selected',on); x.tabIndex = on?0:-1;
     var p = document.getElementById(x.getAttribute('aria-controls'));
     p.hidden = !on; p.classList.toggle('on',on);
   });
+  Array.prototype.forEach.call(document.querySelectorAll('.dl-tabs a'),function(a){
+    if(a.getAttribute('href')==='#'+NAME[t.id]) a.setAttribute('aria-current','true'); else a.removeAttribute('aria-current');
+  });
+  if(write && !EMBED && history.replaceState) history.replaceState(null,'','#'+NAME[t.id]);
+}
+// A whole-tab link lands on the bar above the panels, so the visitor still
+// sees the concept notice and the other tabs; a feature link lands on it.
+function fromHash(scroll, focus){
+  var h = location.hash.slice(1).toLowerCase(), id = HASH[h];
+  if(!id) return;
+  selectTab(document.getElementById(id));
+  var target = document.getElementById(h);
+  if(scroll){
+    var at = NAME[id]===h ? document.getElementById('dl-bar') : target;
+    window.scrollTo(0, Math.max(0, at.getBoundingClientRect().top + window.pageYOffset - 12));
+  }
+  if(focus){ if(!target.hasAttribute('tabindex')) target.setAttribute('tabindex','-1'); target.focus({preventScroll:true}); }
 }
 tabs.forEach(function(t,i){
-  t.addEventListener('click',function(){selectTab(t);});
+  t.addEventListener('click',function(){selectTab(t,true);});
   t.addEventListener('keydown',function(e){
-    if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();var n=tabs[(i+(e.key==='ArrowRight'?1:tabs.length-1))%tabs.length];selectTab(n);n.focus();}
+    if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();var n=tabs[(i+(e.key==='ArrowRight'?1:tabs.length-1))%tabs.length];selectTab(n,true);n.focus();}
   });
 });
 
@@ -656,8 +692,9 @@ function renderParent(){
     }
   }
   var who = toParent?p.name+'\'s':'Your', whoHi = toParent?p.name+' का':'आपका';
-  var resultsEn = 'Results-day message (sent at batch end)\n\n'+who+' year in numbers is ready. Based on the hardest and strongest chapters, the recommended next step is '+p.next.title+'.'+(p.offline?' A free trial class is also available at the PW Vidyapeeth centre in '+p.city+'.':'');
-  var resultsHi = 'रिज़ल्ट के दिन का मैसेज (बैच खत्म होने पर)\n\n'+whoHi+' पूरे साल का रिपोर्ट कार्ड तैयार है. सबसे कठिन और सबसे मज़बूत चैप्टर के आधार पर अगला सुझाया गया कदम: '+p.next.title+'.'+(p.offline?' '+p.city+' के PW विद्यापीठ सेंटर में फ्री ट्रायल क्लास भी उपलब्ध है.':'');
+  var strong = p.offline && res.tier==='Low' && s.test>=70 && s.lec>=75, held = res.tier==='High';
+  var resultsEn = 'Results-day message (sent at batch end)\n\n'+who+' year in numbers is ready. Based on the hardest and strongest chapters, the recommended next step is '+p.next.title+(held?', shown once the catch-up plan is done':'')+'.'+(strong?' A free trial class is also available at the PW Vidyapeeth centre in '+p.city+'.':'');
+  var resultsHi = 'रिज़ल्ट के दिन का मैसेज (बैच खत्म होने पर)\n\n'+whoHi+' पूरे साल का रिपोर्ट कार्ड तैयार है. सबसे कठिन और सबसे मज़बूत चैप्टर के आधार पर अगला सुझाया गया कदम: '+p.next.title+(held?', कैच-अप प्लान पूरा होने के बाद':'')+'.'+(strong?' '+p.city+' के PW विद्यापीठ सेंटर में फ्री ट्रायल क्लास भी उपलब्ध है.':'');
   el('wa-body').innerHTML =
     '<div class="wa-msg" lang="'+(hiMode?'hi':'en')+'">'+esc(hiMode?hi:en)+'<span class="wa-time">Sun 7:00 pm</span></div>'+
     '<div class="wa-btns"><span>'+(hiMode?'प्लान देखें':'See the plan')+'</span><span>'+mentor+'</span></div>'+
@@ -771,6 +808,14 @@ el('swatches').innerHTML=SW.map(function(s){return '<div class="sw"><i style="ba
 
 /* ---------- Init ---------- */
 setSliders(); greet(); renderStudent(); renderParent(); buildConsole(); renderModel();
+selectTab(tabs[0]);
+fromHash(true);
+// The browser's own jump to the fragment runs after this script; land again once it has.
+window.addEventListener('load',function(){setTimeout(function(){fromHash(true);},0);});
+window.addEventListener('hashchange',function(){fromHash(true,true);});
+Array.prototype.forEach.call(document.querySelectorAll('.feats a'),function(a){
+  a.addEventListener('click',function(e){e.preventDefault(); if(history.replaceState) history.replaceState(null,'',a.getAttribute('href')); fromHash(true,true);});
+});
 })();
 </script>
 </body>
