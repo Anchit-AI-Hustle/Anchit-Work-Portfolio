@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PW Study: AI for the Second Sale | Anchit Tandon</title>
-<meta name="description" content="Independent case study by Anchit Tandon: how PhysicsWallah makes money, a live platform audit, AI ideation and a working retention prototype.">
+<title>Product Manager Application: Learner Retention Engine for PW | Anchit Tandon</title>
+<meta name="description" content="Product Manager application by Anchit Tandon: a PhysicsWallah platform audit and the Learner Retention Engine, an AI retention system with a working prototype.">
 <meta name="robots" content="noindex, nofollow">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#5A4BDA">
-<meta property="og:title" content="PW Study: AI for the Second Sale">
-<meta property="og:description" content="Independent case study by Anchit Tandon: PW's business, a live platform audit, AI ideation and a working prototype.">
+<meta property="og:title" content="Product Manager Application: a Learner Retention Engine for PW">
+<meta property="og:description" content="Product Manager application by Anchit Tandon: a PhysicsWallah platform audit and the Learner Retention Engine, with a working prototype and a walkthrough.">
 <meta property="og:type" content="article">
 <link rel="canonical" href="https://anchit-tandon.com/pw-study">
 <link rel="icon" href="/icons/favicon.svg">
@@ -140,6 +140,23 @@ tr.hl td{background:var(--primary-50)}
 .shots figure{margin:0;background:#fff;border:1px solid var(--border);border-radius:var(--r-card);padding:10px}
 .shots img{width:100%;height:auto;display:block;border-radius:10px}
 .shots figcaption{font-size:13px;color:var(--muted);margin-top:6px}
+/* proposed system + recruiter walkthrough */
+.feat{display:grid;gap:12px;grid-template-columns:1fr}
+.feat .step{align-content:start}
+.feat .step b{font-size:19px;line-height:25px}
+.feat .step p{font-size:14px;line-height:21px}
+.feat .for{font-size:13px;line-height:18px;color:var(--muted)}
+.feat .try{font-size:14px;font-weight:600;margin-top:6px}
+.walk{list-style:none;padding:0;display:grid;gap:10px}
+.walk li{background:#fff;border:1px solid var(--border);border-radius:var(--r-card);padding:14px 16px;display:grid;grid-template-columns:32px minmax(0,1fr);gap:4px 14px;align-items:start}
+.walk .wn{grid-row:1 / span 3;width:32px;height:32px;border-radius:50%;background:var(--primary);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px}
+.walk .wt{font-weight:600;color:var(--heading)}
+.walk .wt small{font-weight:500;color:var(--muted);font-size:13px}
+.walk .wu{display:flex;gap:8px 12px;align-items:center;flex-wrap:wrap}
+.walk .wu a{font-size:14px;line-height:20px;font-weight:600;overflow-wrap:anywhere}
+.copy{border:1px solid var(--border);background:#fff;color:var(--ink);border-radius:var(--r-btn);padding:6px 12px;min-height:36px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer}
+.copy:hover{border-color:var(--primary);color:var(--primary)}
+.share{display:flex;gap:10px 16px;align-items:center;flex-wrap:wrap;margin-top:16px}
 /* plan */
 .timeline{display:grid;gap:12px}
 footer{background:var(--ink);color:#C9CDD3}
@@ -151,6 +168,7 @@ footer h3{color:#fff}
   .g2{grid-template-columns:1fr 1fr} .g3{grid-template-columns:repeat(3,1fr)}
   .flow{grid-template-columns:repeat(5,1fr)}
   .shots{grid-template-columns:repeat(3,1fr)}
+  .feat{grid-template-columns:repeat(2,1fr)}
 }
 @media (min-width:1080px){
   h1{font-size:48px;line-height:58px}
@@ -159,6 +177,7 @@ footer h3{color:#fff}
   .g4{grid-template-columns:repeat(4,1fr)}
   .split{grid-template-columns:1.1fr .9fr}
   .proto-frame{display:block}
+  .feat{grid-template-columns:repeat(5,1fr)}
   .shots.mob-only{display:none}
 }
 @media (max-width:699px){.nav .cta{display:none}}
@@ -172,7 +191,7 @@ footer h3{color:#fff}
   <div class="wrap">
     <a class="mark" href="#top"><i aria-hidden="true">AT</i><span><b>PW Study</b><small>by Anchit Tandon</small></span></a>
     <div class="links" id="links">
-      <a href="#business">Business</a><a href="#engine">Engine</a><a href="#growth">Growth</a><a href="#audit">Live audit</a><a href="#gaps">Gaps</a><a href="#ideas">Ideation</a><a href="#bet">The bet</a><a href="#prototype">Prototype</a><a href="#impact">Impact</a><a href="#plan">Plan</a><a href="#risks">Risks</a><a href="#me">Why me</a>
+      <a href="#system">The system</a><a href="#walkthrough">Walkthrough</a><a href="#business">Business</a><a href="#engine">Engine</a><a href="#growth">Growth</a><a href="#audit">Live audit</a><a href="#gaps">Gaps</a><a href="#ideas">Ideation</a><a href="#bet">The bet</a><a href="#prototype">Prototype</a><a href="#impact">Impact</a><a href="#plan">Plan</a><a href="#risks">Risks</a><a href="#me">Why me</a>
     </div>
     <a class="btn btn-primary sm cta" href="/pw-study/prototype">Open prototype</a>
   </div>
@@ -180,18 +199,51 @@ footer h3{color:#fff}
 
 <header class="hero" id="top">
   <div class="wrap">
-    <span class="eyebrow">PhysicsWallah · product case study · October 2026</span>
+    <span class="eyebrow">Product Manager application · PhysicsWallah · October 2026</span>
     <h1>AI already wins PW's first sale. <span class="accent">Let it win the second.</span></h1>
-    <p class="lede">How PW makes money, what is live on its platforms today, where revenue leaks, and one AI bet that keeps every paid learner on track and brings them back for their next batch, with a working prototype built in PW's design system.</p>
+    <p class="lede">My application for a Product Manager role at PW, shown as work instead of a cover letter: how PW makes money, what is live on its platforms, where revenue leaks, and the system I would build, the <b>Learner Retention Engine</b>, with a working prototype in PW's design system.</p>
     <div class="hero-ctas">
       <a class="btn btn-primary" href="/pw-study/prototype">Open the working prototype</a>
       <a class="btn btn-outline" href="#audit">See the live platform audit</a>
+      <a class="btn btn-soft" href="#walkthrough">Recruiter walkthrough</a>
     </div>
     <p class="meta">Sources: PW Q4 FY26 shareholder letter, Q1 FY27 earnings call (NSE filing), pw.live and PW's app-store listings, checked 25 Oct 2026. ₹95.1 per US$ (mid-market, 25 Oct 2026).</p>
   </div>
 </header>
 
 <main>
+<!-- PROPOSED SYSTEM -->
+<section class="block" id="system" aria-labelledby="sys-h">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">The proposed system</span><h2 id="sys-h">Learner Retention Engine: five features on top of what PW already runs</h2><p>It reads the study signals PW already collects, spots silent drop-off early, rescues it, and turns results day into the next enrolment. No new content, faculty or capex. Every feature below works in the prototype, and each link opens that exact screen.</p></div>
+    <div class="feat">
+      <div class="step"><span class="n">Feature 1</span><b>Drift Score</b><p>A weekly drop-off risk score for every paid learner, from lecture pace, tests, inactivity and doubts. Every score shows its reasons.</p><span class="for">For: PW's retention team</span><a class="try" href="/pw-study/prototype#student">Try it in the student app</a></div>
+      <div class="step"><span class="n">Feature 2</span><b>Comeback Plan</b><p>High risk: a 7-day AI Mentor plan first, and a human mentor call on day 8 only if the learner is still high risk. Medium risk: an AI catch-up plan.</p><span class="for">For: the learner</span><a class="try" href="/pw-study/prototype#student">See Riya's plan</a></div>
+      <div class="step"><span class="n">Feature 3</span><b>Weekly Pulse</b><p>A plain-language WhatsApp summary each week, sent to the parent for under-18s and to the learner for adults, linking into the Parent App.</p><span class="for">For: the parent or the learner</span><a class="try" href="/pw-study/prototype#pulse">Open the Weekly Pulse</a></div>
+      <div class="step"><span class="n">Feature 4</span><b>Results-Day Next Step</b><p>A personal year report and the right next batch, plan upgrade or Vidyapeeth trial class. Offers appear only when the learner is on track.</p><span class="for">For: the learner and parent</span><a class="try" href="/pw-study/prototype#next">See the next step</a></div>
+      <div class="step dark"><span class="n">Feature 5</span><b>Growth Console</b><p>The Monday screen for PW's retention team: learners grouped by action, what each group is expected to win back, and the running cost.</p><span class="for" style="color:#B9B1FF">For: PW's growth and retention team</span><a class="try" href="/pw-study/prototype#console" style="color:#D9D3FF">Open the console</a></div>
+    </div>
+    <p class="callout" style="margin-top:20px">My estimate: <b>₹85 cr a year</b> in extra collections, about <b>₹79 cr ($8.3M) after ₹6.15 cr of running costs</b>, in a ₹36-122 cr range, from learners PW already has. <a href="#impact">See the sizing</a></p>
+  </div>
+</section>
+
+<!-- RECRUITER WALKTHROUGH -->
+<section class="block" id="walkthrough" aria-labelledby="walk-h">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">For recruiters and hiring managers</span><h2 id="walk-h">Review this application in 7 steps, about 8 minutes</h2><p>Each step is a complete link that opens the right screen, so any step can be shared on its own.</p></div>
+    <ol class="walk" id="walk">
+      <li><span class="wn" aria-hidden="true">1</span><span class="wt">The proposed system <small>· 1 min</small></span><span class="small">The five features and what they are worth.</span><span class="wu"><a href="/pw-study#system">https://anchit-tandon.com/pw-study#system</a></span></li>
+      <li><span class="wn" aria-hidden="true">2</span><span class="wt">Student app: Drift Score, Comeback Plan, Results-Day Next Step <small>· 2 min</small></span><span class="small">Pick a learner and drag the study signals; the risk, plan and next batch change with them.</span><span class="wu"><a href="/pw-study/prototype#student">https://anchit-tandon.com/pw-study/prototype#student</a></span></li>
+      <li><span class="wn" aria-hidden="true">3</span><span class="wt">Weekly Pulse <small>· 1 min</small></span><span class="small">Switch between Riya (16) and Kabir (24) to see who receives it, in English or Hindi.</span><span class="wu"><a href="/pw-study/prototype#pulse">https://anchit-tandon.com/pw-study/prototype#pulse</a></span></li>
+      <li><span class="wn" aria-hidden="true">4</span><span class="wt">Growth Console <small>· 1 min</small></span><span class="small">Learners grouped by action, with the fees each group wins back and a live calculator.</span><span class="wu"><a href="/pw-study/prototype#console">https://anchit-tandon.com/pw-study/prototype#console</a></span></li>
+      <li><span class="wn" aria-hidden="true">5</span><span class="wt">The evidence: live platform audit <small>· 1 min</small></span><span class="small">What is live on pw.live and PW's apps today, and what is missing.</span><span class="wu"><a href="/pw-study#audit">https://anchit-tandon.com/pw-study#audit</a></span></li>
+      <li><span class="wn" aria-hidden="true">6</span><span class="wt">Sizing and running costs <small>· 1 min</small></span><span class="small">Low, base and high cases, net of WhatsApp, mentor and AI costs.</span><span class="wu"><a href="/pw-study#impact">https://anchit-tandon.com/pw-study#impact</a></span></li>
+      <li><span class="wn" aria-hidden="true">7</span><span class="wt">Why me <small>· 1 min</small></span><span class="small">Where I have run this playbook before, and how to reach me.</span><span class="wu"><a href="/pw-study#me">https://anchit-tandon.com/pw-study#me</a></span></li>
+    </ol>
+    <div class="share"><button class="btn btn-primary sm" type="button" id="copy-walk">Copy all 7 links</button><span class="small">Or share one link for the whole review: <a href="/pw-study#walkthrough">https://anchit-tandon.com/pw-study#walkthrough</a></span><span class="small muted" id="copy-msg" role="status" aria-live="polite"></span></div>
+  </div>
+</section>
+
 <!-- TLDR -->
 <section class="block" aria-labelledby="tldr-h">
   <div class="wrap">
@@ -200,7 +252,7 @@ footer h3{color:#fff}
       <div class="card"><h3>1 · Two engines</h3><p class="small" style="margin-top:6px">Half of FY26 revenue is online at ₹4,104 per learner a year; offline earns ₹36,625 per student, about 9x more.</p></div>
       <div class="card"><h3>2 · Strong AI, aimed at sale one</h3><p class="small" style="margin-top:6px">Lead routing lifts revenue per lead ~10%; voice bots cut counselling cost ~75%; Ask AI and AI Guru answer doubts at scale.</p></div>
       <div class="card"><h3>3 · Retention tools exist, but scattered</h3><p class="small" style="margin-top:6px">Tracker 360, Prep Meter, the Parent App and 1:1 mentorship are live, but split across plans and apps, and mostly pull-based.</p></div>
-      <div class="card soft"><h3>4 · The bet</h3><p class="small" style="margin-top:6px">Agla Kadam: one layer that reads those signals for every learner, acts by risk and age, and personalises the next batch. My estimate: ₹85 cr a year in extra collections, about ₹79 cr ($8.3M) after running costs, in a ₹36-122 cr range.</p></div>
+      <div class="card soft"><h3>4 · The bet</h3><p class="small" style="margin-top:6px">The Learner Retention Engine: one layer that reads those signals for every learner, acts by risk and age, and personalises the next batch. My estimate: ₹85 cr a year in extra collections, about ₹79 cr ($8.3M) after running costs, in a ₹36-122 cr range.</p></div>
     </div>
   </div>
 </section>
@@ -353,7 +405,7 @@ footer h3{color:#fff}
     <div class="tbl"><table class="t-wide">
       <thead><tr><th>AI bet</th><th>What it does</th><th>Revenue lever</th><th>Builds on</th><th>Impact</th><th>Effort</th></tr></thead>
       <tbody>
-        <tr class="hl"><td><b>Agla Kadam continuity layer</b></td><td>Risk → rescue → next batch, plan or seat</td><td>Renewal, upgrade</td><td>Tracker 360, Prep Meter, AI Mentor</td><td>High</td><td>Med</td></tr>
+        <tr class="hl"><td><b>Learner Retention Engine</b></td><td>Risk → rescue → next batch, plan or seat</td><td>Renewal, upgrade</td><td>Tracker 360, Prep Meter, AI Mentor</td><td>High</td><td>Med</td></tr>
         <tr><td>AI tutor as a paid tier</td><td>Socratic 1:1 add-on</td><td>New AI revenue</td><td>PW's own beta</td><td>High</td><td>In build</td></tr>
         <tr class="hl"><td>Results-day AI report + next step</td><td>Personal year report and recommended batch</td><td>Renewal</td><td>CuriousJr next-year preview</td><td>High</td><td>Low</td></tr>
         <tr class="hl"><td>Weekly Pulse on WhatsApp</td><td>Push digest to parent (under 18) or learner</td><td>Renewal, trust</td><td>PW Parent App data</td><td>Med</td><td>Low</td></tr>
@@ -368,11 +420,11 @@ footer h3{color:#fff}
 <!-- BET -->
 <section class="block" id="bet" aria-labelledby="bet-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">07 · The bet</span><h2 id="bet-h">Agla Kadam ("next step"): a continuity layer on top of what PW already runs</h2><p>No new learning content, faculty or capex. It connects the signals PW already collects to actions PW already knows how to take, for every learner on every plan.</p></div>
+    <div class="sec-head"><span class="num">07 · The bet</span><h2 id="bet-h">The Learner Retention Engine: one layer on top of what PW already runs</h2><p>No new learning content, faculty or capex. It connects the signals PW already collects to actions PW already knows how to take, for every learner on every plan. Five features: Drift Score, Comeback Plan, Weekly Pulse, Results-Day Next Step, and the Growth Console for PW's team.</p></div>
     <div class="grid g3">
-      <div class="card mod"><span class="k">01 · PULSE</span><h3 style="margin-top:4px">Spot drift early</h3><p class="small" style="margin-top:6px">A weekly drop-off risk score for every paid learner, read from Tracker 360 and Prep Meter progress, lecture pace, tests, inactivity and doubts. Every score shows its reasons.</p></div>
-      <div class="card mod o"><span class="k">02 · RESCUE</span><h3 style="margin-top:4px">Act by risk and age</h3><p class="small" style="margin-top:6px">High risk: a 7-day AI comeback plan first; a human mentor calls only if the learner is still high risk after those 7 days, about 30 full-time mentors' worth of calls across PW. Medium: AI Mentor catch-up. Plus a Weekly Pulse on WhatsApp that goes to the parent for under-18s and to the learner for adults, linking into the Parent App.</p></div>
-      <div class="card dark"><span class="k" style="font-size:12px;font-weight:700;letter-spacing:.06em;color:#B9B1FF">03 · NEXT STEP</span><h3 style="margin-top:4px">Personalise results day</h3><p class="small" style="margin-top:6px">A personal year report and the right next batch, plan upgrade or Vidyapeeth trial, timed to results and Vishwas Diwas. CuriousJr's next-year preview, extended to the main app. Offers only when on track.</p></div>
+      <div class="card mod"><span class="k">01 · DRIFT SCORE</span><h3 style="margin-top:4px">Spot drift early</h3><p class="small" style="margin-top:6px">A weekly drop-off risk score for every paid learner, read from Tracker 360 and Prep Meter progress, lecture pace, tests, inactivity and doubts. Every score shows its reasons.</p></div>
+      <div class="card mod o"><span class="k">02 · COMEBACK PLAN + WEEKLY PULSE</span><h3 style="margin-top:4px">Act by risk and age</h3><p class="small" style="margin-top:6px">High risk: a 7-day AI comeback plan first; a human mentor calls only if the learner is still high risk after those 7 days, about 30 full-time mentors' worth of calls across PW. Medium: AI Mentor catch-up. Plus a Weekly Pulse on WhatsApp that goes to the parent for under-18s and to the learner for adults, linking into the Parent App.</p></div>
+      <div class="card dark"><span class="k" style="font-size:12px;font-weight:700;letter-spacing:.06em;color:#B9B1FF">03 · RESULTS-DAY NEXT STEP</span><h3 style="margin-top:4px">Personalise results day</h3><p class="small" style="margin-top:6px">A personal year report and the right next batch, plan upgrade or Vidyapeeth trial, timed to results and Vishwas Diwas. CuriousJr's next-year preview, extended to the main app. Offers only when on track.</p></div>
     </div>
     <div class="grid g2" style="margin-top:20px">
       <div class="card"><h3>Reuses (already live)</h3><ul class="reuse small" style="margin-top:6px"><li>Tracker 360 and Prep Meter progress signals</li><li>AI Mentor, Ask AI and 1:1 mentors as the rescue channels</li><li>PW Parent App as the place a parent lands</li><li>Infinity and Infinity Pro plans; 353 centres</li><li>Lead AI and voice bots for follow-up calls</li></ul></div>
@@ -391,9 +443,9 @@ footer h3{color:#fff}
 <!-- PROTOTYPE -->
 <section class="block" id="prototype" aria-labelledby="pr-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">08 · Working prototype</span><h2 id="pr-h">Try it: student app, Weekly Pulse and the growth console</h2><p>Four sample learners (Riya 16, Aman 19, Meena 15, Kabir 24), drag the study signals and watch the risk, plan, channel and next step change. The console groups a 5,000-learner synthetic cohort by action and shows the ₹ maths behind each group.</p>
+    <div class="sec-head"><span class="num">08 · Working prototype</span><h2 id="pr-h">Try it: all five features, working</h2><p>Four sample learners (Riya 16, Aman 19, Meena 15, Kabir 24), drag the study signals and watch the risk, plan, channel and next step change. The console groups a 5,000-learner synthetic cohort by action and shows the ₹ maths behind each group.</p>
       <div class="hero-ctas" style="margin-top:6px"><a class="btn btn-primary" href="/pw-study/prototype">Open full screen</a></div></div>
-    <iframe class="proto-frame" src="/pw-study/prototype?embed=1" title="Agla Kadam working prototype" loading="lazy"></iframe>
+    <iframe class="proto-frame" src="/pw-study/prototype?embed=1" title="Learner Retention Engine working prototype" loading="lazy"></iframe>
     <div class="shots mob-only">
       <figure><img src="/pw-study/img/student.png" alt="Prototype student app: on-track score, 7-day comeback plan, AI Mentor chat and recommended next batch" loading="lazy" width="1872" height="1947"><figcaption>Student app: a plan, not a warning</figcaption></figure>
       <figure><img src="/pw-study/img/pulse.png" alt="Weekly Pulse WhatsApp preview sent to a parent of a 16-year-old" loading="lazy" width="660" height="1094"><figcaption>Weekly Pulse to the right person</figcaption></figure>
@@ -482,14 +534,14 @@ footer h3{color:#fff}
 <!-- WHY ME -->
 <section class="block" id="me" aria-labelledby="me-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">12 · Why me</span><h2 id="me-h">I have run this playbook on a paid subscription product</h2><p>Times Internet, June 2022 to April 2026: Associate PM → PM → Senior PM.</p></div>
+    <div class="sec-head"><span class="num">12 · Why me for this role</span><h2 id="me-h">I have run this playbook on a paid subscription product</h2><p>Times Internet, June 2022 to April 2026: Associate PM → PM → Senior PM.</p></div>
     <div class="grid g3">
       <div class="card kpi"><span class="tag pri">Revenue · Assisted Sales</span><b style="margin-top:8px">₹15L → ₹80L</b><small style="font-size:14px;line-height:21px">Monthly ET assisted-sales revenue through funnel redesign; 400%+ ROI in six months on ET Prime's assisted-conversion funnel.</small></div>
       <div class="card kpi"><span class="tag pri">AI Automation</span><b style="margin-top:8px">AI TeleSuite</b><small style="font-size:14px;line-height:21px">Built call transcription, quality scoring and pitch assist; qualified leads from about 30 to 150+ a day.</small></div>
       <div class="card kpi"><span class="tag pri">Retention · Engagement</span><b style="margin-top:8px">+10% · +27%</b><small style="font-size:14px;line-height:21px">Subscriber retention through onboarding experiments; ET Markets engagement, ₹3 cr+ incremental yearly revenue.</small></div>
     </div>
     <p class="callout" style="margin-top:20px">Engineer turned PM (B.Tech CSE, VIT). I prototype with AI myself, as with this case study and its working prototype, so ideas reach users and data faster.</p>
-    <div class="hero-ctas" style="margin-top:16px"><a class="btn btn-primary" href="mailto:anchit.tandon@gmail.com?subject=PW%20case%20study">Email Anchit</a><a class="btn btn-outline" href="https://www.linkedin.com/in/anchit-tandon" rel="noopener">LinkedIn</a><a class="btn btn-outline" href="/freelancer">Profile</a></div>
+    <div class="hero-ctas" style="margin-top:16px"><a class="btn btn-primary" href="mailto:anchit.tandon@gmail.com?subject=PW%20Product%20Manager%20application">Email Anchit</a><a class="btn btn-outline" href="https://www.linkedin.com/in/anchit-tandon" rel="noopener">LinkedIn</a><a class="btn btn-outline" href="/freelancer">Profile</a></div>
   </div>
 </section>
 </main>
@@ -523,6 +575,22 @@ footer h3{color:#fff}
   if('IntersectionObserver' in window){
     var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&map[e.target.id]){Array.prototype.forEach.call(links,function(a){a.classList.remove('on');});map[e.target.id].classList.add('on');}});},{rootMargin:'-40% 0px -55% 0px'});
     Object.keys(map).forEach(function(id){var s=document.getElementById(id);if(s)io.observe(s);});
+  }
+  // Recruiter walkthrough: copy every step as full links
+  var cb=document.getElementById('copy-walk'), msg=document.getElementById('copy-msg');
+  if(cb){cb.addEventListener('click',function(){
+    var lines=['Anchit Tandon, Product Manager application to PW: review in 7 steps (about 8 minutes)'];
+    Array.prototype.forEach.call(document.querySelectorAll('#walk li'),function(li,i){
+      lines.push((i+1)+'. '+li.querySelector('.wt').firstChild.textContent.trim()+': '+li.querySelector('.wu a').textContent.trim());
+    });
+    var txt=lines.join('\n');
+    var done=function(ok){msg.textContent=ok?'Copied. Paste it into an email or chat.':'Copy did not work here; select the links above instead.';};
+    if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(txt).then(function(){done(true);},function(){done(fallback(txt));});}
+    else done(fallback(txt));
+  });}
+  function fallback(t){
+    var ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();var ok=false;try{ok=document.execCommand('copy');}catch(e){}document.body.removeChild(ta);return ok;
   }
 })();
 </script>

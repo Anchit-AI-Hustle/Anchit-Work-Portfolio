@@ -34,6 +34,11 @@
 // that the case study's net figure matches the calculator must fail.
 // MUT=bigcall promises every high-risk learner a call within 24 hours again;
 // the escalation check must fail.
+// MUT=oldname puts the Hindi working name back; the feature-name check must
+// fail. MUT=deeplink stops the prototype reading its hash on load; the
+// walkthrough landing checks must fail. MUT=walkurl points one walkthrough
+// link somewhere other than the URL it shows; the walkthrough URL check must
+// fail.
 const { chromium } = require('./_playwright.js');
 const vercel = require('../vercel.json');
 const BASE = process.env.BASE || 'http://127.0.0.1:8099';
@@ -62,6 +67,9 @@ function mutate(src) {
   if (MUT === 'costdrift') return src.replace('id="m-wa" type="number" step="0.001" min="0" value="0.115"', 'id="m-wa" type="number" step="0.001" min="0" value="1.15"');
   if (MUT === 'bigcall') return src.replace("t:'7-day AI comeback plan'", "t:'Human mentor call within 24 hours'")
     .replace("What we are doing: a 7-day catch-up plan is ready in the app.", "What we are doing: a PW mentor will call tomorrow at 6:30 pm.");
+  if (MUT === 'oldname') return src.replace('<strong>Learner Retention Engine</strong>', '<strong>Agla Kadam</strong>');
+  if (MUT === 'deeplink') return src.replace('fromHash(true);\nwindow.addEventListener', 'window.addEventListener');
+  if (MUT === 'walkurl') return src.replace('<a href="/pw-study/prototype#pulse">https://', '<a href="/pw-study/prototype#console">https://');
   return src;
 }
 
@@ -72,13 +80,21 @@ const norm = (s) => (s || '').replace(/\s+/g, ' ').trim();
 async function open(browser, vp, path) {
   const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
   const bag = { errors: [], failed: [] };
+  let closed = false;
+  ctx.on('close', () => { closed = true; });
   await ctx.route('**/*', async (route) => {
-    const res = await route.fetch();
-    const headers = { ...res.headers() };
-    if (!(headers['content-type'] || '').includes('text/html')) return route.fulfill({ response: res });
-    headers['content-security-policy'] = CSP;
-    const body = new URL(route.request().url()).pathname.startsWith('/pw-study') ? mutate(await res.text()) : await res.text();
-    return route.fulfill({ response: res, headers, body });
+    try {
+      const res = await route.fetch();
+      const headers = { ...res.headers() };
+      if (!(headers['content-type'] || '').includes('text/html')) return await route.fulfill({ response: res });
+      headers['content-security-policy'] = CSP;
+      const body = new URL(route.request().url()).pathname.startsWith('/pw-study') ? mutate(await res.text()) : await res.text();
+      return await route.fulfill({ response: res, headers, body });
+    } catch (e) {
+      // A lazy image still in flight when a check closes its context is not a
+      // page failure; anything else is.
+      if (!closed && !/disposed|has been closed|Target closed/i.test(e.message)) throw e;
+    }
   });
   const page = await ctx.newPage();
   page.on('console', (m) => { if (m.type() === 'error') bag.errors.push(m.text()); });
@@ -97,10 +113,84 @@ const dashes = (frame) => frame.evaluate(() => {
 });
 const hScroll = (page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 
+const FEATURES = ['Drift Score', 'Comeback Plan', 'Weekly Pulse', 'Results-Day Next Step', 'Growth Console'];
+
+// One clear English name everywhere: page source, title and description.
+async function names(page, L) {
+  const html = await page.content();
+  const old = html.match(/.{0,30}(agla|kadam).{0,30}/gi) || [];
+  const title = await page.title();
+  check(`${L}: feature named "Learner Retention Engine", no Hindi working name`, old.length === 0 && /Learner Retention Engine/.test(title), old.join(' | ') || title);
+}
+
+// Where each shared link must land: a case study section heading on screen,
+// or the prototype tab it names, selected and on screen.
+const PROTO_TAB = { student: 't-student', pulse: 't-parent', console: 't-console', next: 't-student' };
+async function landed(page, href) {
+  const u = new URL(href, BASE);
+  const h = u.hash.slice(1);
+  if (u.pathname === '/pw-study') {
+    return page.evaluate((id) => {
+      const s = document.getElementById(id); const hd = s && s.querySelector('h2');
+      if (!hd) return false; const r = hd.getBoundingClientRect(); return r.top >= 0 && r.top < innerHeight;
+    }, h);
+  }
+  if (u.pathname !== '/pw-study/prototype' || !PROTO_TAB[h]) return false;
+  return page.evaluate(([tab, h]) => {
+    const t = document.getElementById(tab);
+    const target = document.getElementById(h);
+    const r = target.getBoundingClientRect();
+    return t.getAttribute('aria-selected') === 'true' && r.top >= 0 && r.top < innerHeight;
+  }, [PROTO_TAB[h], h]);
+}
+
+// The recruiter walkthrough: every step shows a complete URL, links to exactly
+// that URL, and opening it cold lands on the right screen. "Copy all" copies
+// the same full links.
+async function walkthrough(browser, vp) {
+  const L = `[${vp.name}] walkthrough`;
+  const { ctx, page } = await open(browser, vp, '/pw-study#walkthrough');
+  const steps = await page.$$eval('#walk li .wu a', (as) => as.map((a) => [a.getAttribute('href'), a.textContent.trim()]));
+  steps.push(await page.$eval('.share a', (a) => [a.getAttribute('href'), a.textContent.trim()]));
+  const bad = steps.filter(([href, txt]) => {
+    if (!txt.startsWith('https://anchit-tandon.com/')) return true;
+    const u = new URL(txt); return u.pathname + u.hash !== href;
+  });
+  check(`${L}: 7 steps plus a share link, each a full URL matching its link`, steps.length === 8 && bad.length === 0, bad.map((b) => b.join(' -> ')).join(' | ') || steps.length);
+
+  await ctx.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: BASE });
+  await page.click('#copy-walk');
+  await page.waitForTimeout(300);
+  const clip = await page.evaluate(() => navigator.clipboard.readText()).catch((e) => 'ERR ' + e.message);
+  const lines = clip.split('\n');
+  const urls = lines.slice(1).map((l) => (l.match(/https:\/\/\S+$/) || [''])[0]);
+  check(`${L}: "Copy all" copies the 7 full links in order`,
+    lines.length === 8 && urls.join() === steps.slice(0, 7).map((s) => s[1]).join(), clip.replace(/\n/g, ' | ').slice(0, 160));
+  await ctx.close();
+
+  for (const [href] of steps) {
+    const o = await open(browser, vp, href);
+    await o.page.waitForTimeout(500);
+    const ok = await landed(o.page, href);
+    check(`${L}: ${href} opens on the right screen`, ok === true, o.page.url());
+    await o.ctx.close();
+  }
+}
+
 async function caseStudy(browser, vp) {
   const L = `[${vp.name}] /pw-study`;
   const { ctx, page, bag, status } = await open(browser, vp, '/pw-study');
   check(`${L}: HTTP 200`, status === 200, status);
+  await names(page, L);
+
+  // The proposed system is the first thing after the hero, by its feature names.
+  const sys = await page.evaluate(() => ({
+    first: (document.querySelector('main > section') || {}).id,
+    h2: (document.querySelector('#sys-h') || {}).textContent || '',
+    feats: [...document.querySelectorAll('#system .feat .step b')].map((b) => b.textContent.trim()),
+  }));
+  check(`${L}: proposed system opens the page, five named features`,
+    sys.first === 'system' && /Learner Retention Engine/.test(sys.h2) && sys.feats.join() === FEATURES.join(), JSON.stringify(sys));
 
   await page.click('.filters .chip[data-f="none"]');
   const rows = await page.$$eval('#audit-tbl tbody tr', (rs) => rs.filter((r) => r.offsetParent !== null).length);
@@ -166,6 +256,15 @@ async function prototype(browser, vp) {
   const L = `[${vp.name}] /pw-study/prototype`;
   const { ctx, page, bag, status } = await open(browser, vp, '/pw-study/prototype');
   check(`${L}: HTTP 200`, status === 200, status);
+  await names(page, L);
+
+  // The hero's feature links switch tabs; a tab click writes its own link.
+  await page.click('.feats a[href="#console"]');
+  const viaFeat = await page.getAttribute('#t-console', 'aria-selected');
+  await page.click('#t-parent');
+  const hashNow = await page.evaluate(() => location.hash);
+  await page.click('#t-student');
+  check(`${L}: feature links switch tabs and each tab has its own link`, viaFeat === 'true' && hashNow === '#pulse', `console=${viaFeat} hash=${hashNow}`);
 
   const tiers = { 0: 'High risk', 1: 'Low risk', 2: 'Medium risk', 3: 'Medium risk' };
   const got = {};
@@ -327,6 +426,7 @@ async function consistency(browser) {
     await caseStudy(browser, vp);
     await prototype(browser, vp);
     await crossNav(browser, vp);
+    await walkthrough(browser, vp);
   }
   for (const [s, n, d] of results) console.log('  ' + s + '  ' + n.padEnd(70) + (d || ''));
   const pass = results.filter((r) => r[0] === 'PASS').length;
