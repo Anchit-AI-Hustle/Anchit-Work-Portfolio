@@ -70,6 +70,11 @@ main .wrap{padding-top:24px;padding-bottom:48px}
 .feats a{display:inline-flex;align-items:center;min-height:36px;padding:6px 12px;border-radius:var(--r-pill);background:#fff;border:1px solid var(--border);color:var(--ink);font-size:13px;font-weight:600;text-decoration:none}
 .feats a:hover{border-color:var(--primary);color:var(--primary)}
 .feats a b{color:var(--primary);margin-right:6px}
+.dl-bar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;font-size:13px;line-height:18px;color:var(--muted);padding:12px 0;margin-bottom:12px;border-bottom:1px solid var(--border)}
+.dl-tabs{display:flex;flex-wrap:wrap;gap:6px}
+.dl-tabs a{display:inline-flex;align-items:center;min-height:32px;padding:4px 10px;border-radius:var(--r-pill);color:var(--body);font-weight:600;text-decoration:none;border:1px solid var(--border);background:#fff}
+.dl-tabs a[aria-current="true"]{background:var(--primary-50);border-color:var(--primary);color:var(--primary)}
+.anchor{display:block;height:0}
 .onscreen{font-size:13px;line-height:19px;color:var(--muted);margin:0 0 12px}
 .onscreen b{color:var(--heading)}
 .tag{display:inline-block;font-size:12px;line-height:16px;font-weight:600;padding:4px 8px;border-radius:var(--r-tag)}
@@ -204,7 +209,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
 }
 @media (prefers-reduced-motion:no-preference){.bar i{transition:width .35s ease}}
 </style>
-<style>html.embed .concept,html.embed .hero,html.embed footer{display:none}</style>
+<style>html.embed .concept,html.embed .hero,html.embed footer,html.embed .dl-bar{display:none}</style>
 <script>if(/[?&]embed=1/.test(location.search))document.documentElement.classList.add("embed");</script>
 </head>
 <body>
@@ -226,13 +231,14 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
     <h1>Every paid learner, <span class="accent">kept on track</span> and brought back for their next batch.</h1>
     <p class="lede">PW already runs Tracker 360, Prep Meter, the Parent App, mentorship and AI that wins the first sale. The Learner Retention Engine connects them for every learner: spot silent drop-off early, rescue it, and make results day a personal next step.</p>
     <div class="xlinks"><a class="btn btn-outline sm" href="/pw-study" target="_top">Back to the case study</a><a class="btn btn-soft sm" href="/pw-study#audit" target="_top">See the live platform audit</a></div>
-    <div class="feats" aria-label="The five features"><span class="label">Five features, all working here:</span><a href="#student"><b>1</b>Drift Score</a><a href="#student"><b>2</b>Comeback Plan</a><a href="#pulse"><b>3</b>Weekly Pulse</a><a href="#next"><b>4</b>Results-Day Next Step</a><a href="#console"><b>5</b>Growth Console</a></div>
+    <nav class="feats" aria-label="The five features"><span class="label">Five features, all working here:</span><a href="#drift"><b>1</b>Drift Score</a><a href="#plan"><b>2</b>Comeback Plan</a><a href="#pulse"><b>3</b>Weekly Pulse</a><a href="#next"><b>4</b>Results-Day Next Step</a><a href="#console"><b>5</b>Growth Console</a></nav>
     <p class="small muted">Part of Anchit Tandon's Product Manager application to PW. Step-by-step review: <a href="/pw-study#walkthrough" target="_top">anchit-tandon.com/pw-study#walkthrough</a></p>
   </div>
 </section>
 
 <main>
 <div class="wrap">
+<div class="dl-bar" id="dl-bar"><span>Concept prototype by Anchit Tandon · synthetic data · not affiliated with PhysicsWallah</span><nav class="dl-tabs" aria-label="Prototype screens"><a href="#student">Student app</a><a href="#pulse">Weekly Pulse</a><a href="#console">Growth Console</a><a href="#brand">Brand schema</a></nav></div>
 
 <!-- STUDENT -->
 <section class="panel on" id="p-student" role="tabpanel" aria-labelledby="t-student">
@@ -265,7 +271,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
           <div class="stat"><b id="st-test">45%</b><span>Test avg</span></div>
           <div class="stat"><b id="st-streak">0</b><span>Day streak</span></div>
         </div>
-        <div class="nudge" id="s-nudge"><p class="label" id="s-nudge-label">AI Mentor plan</p><p id="s-nudge-title" style="font-weight:600;color:var(--heading)"></p><ul class="plan small" id="s-plan"></ul></div>
+        <div class="nudge" id="s-nudge"><span id="plan" class="anchor"></span><p class="label" id="s-nudge-label">AI Mentor plan</p><p id="s-nudge-title" style="font-weight:600;color:var(--heading)"></p><ul class="plan small" id="s-plan"></ul></div>
         <div class="card" style="padding:14px">
           <p class="label" style="margin-bottom:8px">Ask your AI Mentor <span class="tag pri" style="margin-left:4px">Simulated</span></p>
           <div class="chat" id="chat" aria-live="polite"></div>
@@ -287,7 +293,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
         <div class="field"><label for="in-doubt">Doubts asked this week <span id="v-doubt"></span></label><input type="range" id="in-doubt" min="0" max="15"></div>
         <div class="field"><label for="in-streak">Study streak (days) <span id="v-streak"></span></label><input type="range" id="in-streak" min="0" max="30"></div>
       </div>
-      <div class="card">
+      <div class="card" id="drift">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
           <h3>Drift Score: engine output</h3><span id="e-tier" class="tag"></span>
         </div>
@@ -539,30 +545,38 @@ var cur = 0, simState = JSON.parse(JSON.stringify(P[0].s));
 
 /* ---------- Tabs ---------- */
 var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
-function selectTab(t){
+/* Deep links: /pw-study/prototype#student, #drift, #plan, #next, #pulse, #console, #brand */
+var HASH = {student:'t-student', drift:'t-student', plan:'t-student', next:'t-student', pulse:'t-parent', console:'t-console', brand:'t-brand'};
+var NAME = {'t-student':'student','t-parent':'pulse','t-console':'console','t-brand':'brand'};
+var EMBED = document.documentElement.classList.contains('embed');
+function selectTab(t, write){
   tabs.forEach(function(x){
     var on = x===t; x.setAttribute('aria-selected',on); x.tabIndex = on?0:-1;
     var p = document.getElementById(x.getAttribute('aria-controls'));
     p.hidden = !on; p.classList.toggle('on',on);
   });
+  Array.prototype.forEach.call(document.querySelectorAll('.dl-tabs a'),function(a){
+    if(a.getAttribute('href')==='#'+NAME[t.id]) a.setAttribute('aria-current','true'); else a.removeAttribute('aria-current');
+  });
+  if(write && !EMBED && history.replaceState) history.replaceState(null,'','#'+NAME[t.id]);
 }
-/* Deep links: /pw-study/prototype#student, #pulse, #console, #brand, #next */
-var HASH = {student:'t-student', pulse:'t-parent', console:'t-console', brand:'t-brand', next:'t-student'};
-var NAME = {'t-student':'student','t-parent':'pulse','t-console':'console','t-brand':'brand'};
-var EMBED = document.documentElement.classList.contains('embed');
-function fromHash(scroll){
+// A whole-tab link lands on the bar above the panels, so the visitor still
+// sees the concept notice and the other tabs; a feature link lands on it.
+function fromHash(scroll, focus){
   var h = location.hash.slice(1).toLowerCase(), id = HASH[h];
   if(!id) return;
   selectTab(document.getElementById(id));
+  var target = document.getElementById(h);
   if(scroll){
-    var target = document.getElementById(h);
-    window.scrollTo(0, Math.max(0, target.getBoundingClientRect().top + window.pageYOffset - 12));
+    var at = NAME[id]===h ? document.getElementById('dl-bar') : target;
+    window.scrollTo(0, Math.max(0, at.getBoundingClientRect().top + window.pageYOffset - 12));
   }
+  if(focus){ if(!target.hasAttribute('tabindex')) target.setAttribute('tabindex','-1'); target.focus({preventScroll:true}); }
 }
 tabs.forEach(function(t,i){
-  t.addEventListener('click',function(){selectTab(t); if(!EMBED && history.replaceState) history.replaceState(null,'','#'+NAME[t.id]);});
+  t.addEventListener('click',function(){selectTab(t,true);});
   t.addEventListener('keydown',function(e){
-    if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();var n=tabs[(i+(e.key==='ArrowRight'?1:tabs.length-1))%tabs.length];selectTab(n);n.focus();}
+    if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();var n=tabs[(i+(e.key==='ArrowRight'?1:tabs.length-1))%tabs.length];selectTab(n,true);n.focus();}
   });
 });
 
@@ -678,8 +692,9 @@ function renderParent(){
     }
   }
   var who = toParent?p.name+'\'s':'Your', whoHi = toParent?p.name+' का':'आपका';
-  var resultsEn = 'Results-day message (sent at batch end)\n\n'+who+' year in numbers is ready. Based on the hardest and strongest chapters, the recommended next step is '+p.next.title+'.'+(p.offline?' A free trial class is also available at the PW Vidyapeeth centre in '+p.city+'.':'');
-  var resultsHi = 'रिज़ल्ट के दिन का मैसेज (बैच खत्म होने पर)\n\n'+whoHi+' पूरे साल का रिपोर्ट कार्ड तैयार है. सबसे कठिन और सबसे मज़बूत चैप्टर के आधार पर अगला सुझाया गया कदम: '+p.next.title+'.'+(p.offline?' '+p.city+' के PW विद्यापीठ सेंटर में फ्री ट्रायल क्लास भी उपलब्ध है.':'');
+  var strong = p.offline && res.tier==='Low' && s.test>=70 && s.lec>=75, held = res.tier==='High';
+  var resultsEn = 'Results-day message (sent at batch end)\n\n'+who+' year in numbers is ready. Based on the hardest and strongest chapters, the recommended next step is '+p.next.title+(held?', shown once the catch-up plan is done':'')+'.'+(strong?' A free trial class is also available at the PW Vidyapeeth centre in '+p.city+'.':'');
+  var resultsHi = 'रिज़ल्ट के दिन का मैसेज (बैच खत्म होने पर)\n\n'+whoHi+' पूरे साल का रिपोर्ट कार्ड तैयार है. सबसे कठिन और सबसे मज़बूत चैप्टर के आधार पर अगला सुझाया गया कदम: '+p.next.title+(held?', कैच-अप प्लान पूरा होने के बाद':'')+'.'+(strong?' '+p.city+' के PW विद्यापीठ सेंटर में फ्री ट्रायल क्लास भी उपलब्ध है.':'');
   el('wa-body').innerHTML =
     '<div class="wa-msg" lang="'+(hiMode?'hi':'en')+'">'+esc(hiMode?hi:en)+'<span class="wa-time">Sun 7:00 pm</span></div>'+
     '<div class="wa-btns"><span>'+(hiMode?'प्लान देखें':'See the plan')+'</span><span>'+mentor+'</span></div>'+
@@ -793,10 +808,13 @@ el('swatches').innerHTML=SW.map(function(s){return '<div class="sw"><i style="ba
 
 /* ---------- Init ---------- */
 setSliders(); greet(); renderStudent(); renderParent(); buildConsole(); renderModel();
+selectTab(tabs[0]);
 fromHash(true);
-window.addEventListener('hashchange',function(){fromHash(true);});
+// The browser's own jump to the fragment runs after this script; land again once it has.
+window.addEventListener('load',function(){setTimeout(function(){fromHash(true);},0);});
+window.addEventListener('hashchange',function(){fromHash(true,true);});
 Array.prototype.forEach.call(document.querySelectorAll('.feats a'),function(a){
-  a.addEventListener('click',function(e){e.preventDefault(); if(history.replaceState) history.replaceState(null,'',a.getAttribute('href')); fromHash(true);});
+  a.addEventListener('click',function(e){e.preventDefault(); if(history.replaceState) history.replaceState(null,'',a.getAttribute('href')); fromHash(true,true);});
 });
 })();
 </script>

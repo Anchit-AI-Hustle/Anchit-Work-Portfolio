@@ -34,6 +34,8 @@
 // that the case study's net figure matches the calculator must fail.
 // MUT=bigcall promises every high-risk learner a call within 24 hours again;
 // the escalation check must fail.
+// MUT=offer sends the Vidyapeeth trial to every learner in a centre city again;
+// the results-day check must fail.
 // MUT=oldname puts the Hindi working name back; the feature-name check must
 // fail. MUT=deeplink stops the prototype reading its hash on load; the
 // walkthrough landing checks must fail. MUT=walkurl points one walkthrough
@@ -68,7 +70,8 @@ function mutate(src) {
   if (MUT === 'bigcall') return src.replace("t:'7-day AI comeback plan'", "t:'Human mentor call within 24 hours'")
     .replace("What we are doing: a 7-day catch-up plan is ready in the app.", "What we are doing: a PW mentor will call tomorrow at 6:30 pm.");
   if (MUT === 'oldname') return src.replace('<strong>Learner Retention Engine</strong>', '<strong>Agla Kadam</strong>');
-  if (MUT === 'deeplink') return src.replace('fromHash(true);\nwindow.addEventListener', 'window.addEventListener');
+  if (MUT === 'deeplink') return src.replace('function fromHash(scroll, focus){', 'function fromHash(scroll, focus){ if(!focus) return;');
+  if (MUT === 'offer') return src.replace("var strong = p.offline && res.tier==='Low' && s.test>=70 && s.lec>=75", 'var strong = p.offline');
   if (MUT === 'walkurl') return src.replace('<a href="/pw-study/prototype#pulse">https://', '<a href="/pw-study/prototype#console">https://');
   return src;
 }
@@ -125,7 +128,7 @@ async function names(page, L) {
 
 // Where each shared link must land: a case study section heading on screen,
 // or the prototype tab it names, selected and on screen.
-const PROTO_TAB = { student: 't-student', pulse: 't-parent', console: 't-console', next: 't-student' };
+const PROTO_TAB = { student: 't-student', drift: 't-student', plan: 't-student', next: 't-student', pulse: 't-parent', console: 't-console', brand: 't-brand' };
 async function landed(page, href) {
   const u = new URL(href, BASE);
   const h = u.hash.slice(1);
@@ -140,7 +143,10 @@ async function landed(page, href) {
     const t = document.getElementById(tab);
     const target = document.getElementById(h);
     const r = target.getBoundingClientRect();
-    return t.getAttribute('aria-selected') === 'true' && r.top >= 0 && r.top < innerHeight;
+    // A whole-tab link must also keep the concept notice bar on screen.
+    const bar = document.getElementById('dl-bar').getBoundingClientRect();
+    const whole = t.getAttribute('aria-controls') === 'p-' + ({ pulse: 'parent' }[h] || h);
+    return t.getAttribute('aria-selected') === 'true' && r.top >= 0 && r.top < innerHeight && (!whole || (bar.top >= 0 && bar.top < innerHeight));
   }, [PROTO_TAB[h], h]);
 }
 
@@ -152,6 +158,7 @@ async function walkthrough(browser, vp) {
   const { ctx, page } = await open(browser, vp, '/pw-study#walkthrough');
   const steps = await page.$$eval('#walk li .wu a', (as) => as.map((a) => [a.getAttribute('href'), a.textContent.trim()]));
   steps.push(await page.$eval('.share a', (a) => [a.getAttribute('href'), a.textContent.trim()]));
+  const tries = await page.$$eval('#system a.try', (as) => as.map((a) => a.getAttribute('href')));
   const bad = steps.filter(([href, txt]) => {
     if (!txt.startsWith('https://anchit-tandon.com/')) return true;
     const u = new URL(txt); return u.pathname + u.hash !== href;
@@ -168,7 +175,7 @@ async function walkthrough(browser, vp) {
     lines.length === 8 && urls.join() === steps.slice(0, 7).map((s) => s[1]).join(), clip.replace(/\n/g, ' | ').slice(0, 160));
   await ctx.close();
 
-  for (const [href] of steps) {
+  for (const href of [...steps.map((s) => s[0]), ...tries, '/pw-study/prototype#brand']) {
     const o = await open(browser, vp, href);
     await o.page.waitForTimeout(500);
     const ok = await landed(o.page, href);
@@ -320,6 +327,10 @@ async function prototype(browser, vp) {
   const pulse = {};
   for (const l of ['en', 'hi']) { await page.click(`#pp-lang button[data-l="${l}"]`); pulse[l] = norm(await page.textContent('#wa-body')); }
   await page.click('#pp-lang button[data-l="en"]');
+  // Riya is high risk: results day holds the next batch back and offers no
+  // Vidyapeeth trial, which only strong learners in centre cities get.
+  check(`${L}: results-day Pulse holds offers back at high risk`,
+    /shown once the catch-up plan is done/.test(pulse.en) && !/trial class/.test(pulse.en) && !/ट्रायल/.test(pulse.hi), pulse.en.slice(-200));
   check(`${L}: Pulse escalates to a mentor after a week, in English and Hindi`,
     /still behind after a week, a PW mentor will call/.test(pulse.en) && /एक हफ्ते बाद भी/.test(pulse.hi)
       && !/tomorrow|6:30/.test(pulse.en) && !/कल शाम|6:30/.test(pulse.hi), pulse.en.slice(0, 120));
