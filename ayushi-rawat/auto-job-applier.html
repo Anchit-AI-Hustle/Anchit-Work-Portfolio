@@ -258,7 +258,7 @@ Target roles: CRM & Lifecycle Marketing Manager, Marketing Operations Manager, G
       S.lastRun = Date.now();
       save();
       const failed = (d.sources || []).filter((s) => !s.ok).length;
-      $('#runMeta').textContent = `Scanned ${d.scanned} openings · ${d.count} fit her profile · ${fresh} new` + (auto ? ` · ${auto} auto-shortlisted` : '') + (failed ? ` · ${failed} board(s) unreachable` : '');
+      $('#runMeta').textContent = `Scanned ${d.scanned ?? 0} openings · ${d.count ?? 0} fit her profile · ${fresh} new` + (auto ? ` · ${auto} auto-shortlisted` : '') + (failed ? ` · ${failed} board(s) unreachable` : '');
       if (!silent) toast(fresh ? `${fresh} new matches found` : 'No new matches since the last run');
     } catch (e) {
       $('#runMeta').textContent = String(e.message || e);
@@ -383,7 +383,7 @@ Target roles: CRM & Lifecycle Marketing Manager, Marketing Operations Manager, G
   function renderMatches() {
     const min = +$('#fScore').value, where = $('#fWhere').value, q = $('#fText').value.trim().toLowerCase(), hide = $('#fHide').checked;
     const list = Object.values(S.jobs)
-      .filter((j) => j.score >= min && (!where || j.where === where) && (!q || j.title.toLowerCase().includes(q)))
+      .filter((j) => j.score >= min && (!where || j.where === where) && (!q || q.split(',').map((t) => t.trim()).filter(Boolean).some((t) => j.title.toLowerCase().includes(t))))
       .filter((j) => !hide || !['passed', 'closed'].includes(j.status))
       .sort((a, b) => (b.isNew - a.isNew) || (b.score - a.score));
     $('#n-matches').textContent = list.length || '';
