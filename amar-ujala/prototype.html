@@ -257,7 +257,7 @@ body{background:var(--ak-bg);color:var(--ak-ink);font-family:var(--ak-font);line
 
   var EXAMS = {
     cuet: { name: { en: "CUET (UG)", hi: "CUET (UG)" }, by: { en: "National Testing Agency", hi: "राष्ट्रीय परीक्षा एजेंसी (NTA)" }, url: "https://cuet.nta.nic.in/",
-      window: { en: "Usually registration in February to March, exam in May to June.", hi: "आमतौर पर पंजीकरण फरवरी से मार्च, परीक्षा मई से जून।" }, open: false,
+      window: { en: "Usually registration in February to March, exam in May to June.", hi: "आमतौर पर पंजीकरण फरवरी से मार्च, परीक्षा मई से जून।" }, open: true,
       thisYear: { en: "If you registered, the exam is still ahead. If not, state universities and many colleges admit on Class 12 merit: apply to them now.", hi: "अगर पंजीकरण किया है तो परीक्षा अभी बाकी है। नहीं किया तो राज्य विश्वविद्यालय और कई कॉलेज कक्षा 12 की मेरिट पर प्रवेश देते हैं: अभी वहाँ आवेदन करें।" } },
     jee: { name: { en: "JEE Main", hi: "JEE Main" }, by: { en: "National Testing Agency", hi: "राष्ट्रीय परीक्षा एजेंसी (NTA)" }, url: "https://jeemain.nta.nic.in/",
       window: { en: "Two sessions, usually January and April.", hi: "दो सत्र, आमतौर पर जनवरी और अप्रैल।" }, open: false,
@@ -442,11 +442,12 @@ body{background:var(--ak-bg);color:var(--ak-ink);font-family:var(--ak-font);line
       demoData: "Demo data: colleges and enquiries are fictional",
       title: "Aage Kya? (आगे क्या?)",
       lead: "On result day about 20 lakh UP Board Class 12 students pass, and each family asks the same question: what next? Aage Kya answers it in Hindi, on the results page they already open, and turns the answer into consented admission enquiries that colleges pay for.",
+      startDemo: "Try the student experience (2 min)",
       planLink: "Strategy, roadmap and the 6 questions",
       kpiLabel: "Key numbers",
       tabsLabel: "Prototype sections",
       kpis: [
-        { v: "24.86 lakh", l: "sat UP Board Class 12 in 2026; 80.38% passed", s: "UPMSP result, April 2026" },
+        { v: "19.98 lakh", l: "passed UP Board Class 12 in 2026 (80.38% of appeared)", s: "UPMSP result, April 2026" },
         { v: "8,375", l: "colleges in UP, the most of any state", s: "AISHE 2021-22" },
         { v: "17%", l: "of India's print ad space bought by education, the largest sector", s: "TAM AdEx, Jan to Sep 2025" },
         { v: "32", l: "fake universities on the UGC list, 4 of them in UP", s: "UGC list, checked Oct 2026" }
@@ -629,11 +630,12 @@ body{background:var(--ak-bg);color:var(--ak-ink);font-family:var(--ak-font);line
       demoData: "डेमो डेटा: कॉलेज और पूछताछ काल्पनिक हैं",
       title: "आगे क्या? (Aage Kya?)",
       lead: "रिजल्ट के दिन यूपी बोर्ड कक्षा 12 के लगभग 20 लाख छात्र पास होते हैं, और हर परिवार एक ही सवाल पूछता है: आगे क्या? \"आगे क्या\" इसका जवाब हिंदी में, उसी रिजल्ट पेज पर देता है जिसे वे पहले से खोलते हैं, और इस जवाब को सहमति वाली प्रवेश पूछताछ में बदलता है, जिसके लिए कॉलेज भुगतान करते हैं।",
+      startDemo: "छात्र अनुभव देखें (2 मिनट)",
       planLink: "रणनीति, रोडमैप और 6 सवाल",
       kpiLabel: "मुख्य आँकड़े",
       tabsLabel: "प्रोटोटाइप के हिस्से",
       kpis: [
-        { v: "24.86 लाख", l: "छात्र 2026 में यूपी बोर्ड कक्षा 12 की परीक्षा में बैठे; 80.38% पास", s: "यूपी बोर्ड परिणाम, अप्रैल 2026" },
+        { v: "19.98 लाख", l: "छात्र 2026 में यूपी बोर्ड कक्षा 12 पास हुए (80.38%)", s: "यूपी बोर्ड परिणाम, अप्रैल 2026" },
         { v: "8,375", l: "कॉलेज यूपी में, किसी भी राज्य से अधिक", s: "AISHE 2021-22" },
         { v: "17%", l: "भारत के प्रिंट विज्ञापन स्थान में शिक्षा क्षेत्र का हिस्सा, सबसे बड़ा क्षेत्र", s: "TAM AdEx, जनवरी से सितंबर 2025" },
         { v: "32", l: "फर्जी विश्वविद्यालय यूजीसी की सूची में, इनमें से 4 यूपी में", s: "यूजीसी सूची, अक्टूबर 2026 में जाँची" }
@@ -851,7 +853,7 @@ body{background:var(--ak-bg);color:var(--ak-ink);font-family:var(--ak-font);line
     lang: initialLang(),
     tab: "student",
     step: 0,
-    stream: "pcm", marks: 72, interest: "tech", budget: "mid", income: "upto45", reach: "district", districtIdx: 0,
+    stream: "pcm", marks: 72, interest: "tech", budget: "mid", income: "upto2", reach: "district", districtIdx: 0,
     chosen: [],
     checkText: "", checkResult: "", checkMatch: "",
     adult: "", studentName: "", phone: "",
@@ -1219,7 +1221,8 @@ body{background:var(--ak-bg);color:var(--ak-ink);font-family:var(--ak-font);line
       '<div role="group" aria-label="Language / भाषा" class="ak-lang"><button type="button" lang="en" id="lang-en" data-act="lang" data-lang="en" aria-pressed="' + (S.lang === "en") + '">English</button>' +
       '<button type="button" lang="hi" id="lang-hi" data-act="lang" data-lang="hi" aria-pressed="' + (S.lang === "hi") + '">हिंदी</button></div></div>' +
       '<header class="ak-hero"><h1>' + esc(t.title) + '</h1><p class="ak-lead">' + esc(t.lead) + "</p>" +
-      '<div class="ak-row"><a class="ak-btn" href="/amar-ujala/study" target="_top">' + esc(t.planLink) + ' →</a><span class="ak-tag">' + esc(t.demoData) + "</span></div></header>" +
+      '<div class="ak-row"><button type="button" class="ak-btn" data-act="goStep" data-step="0">' + esc(t.startDemo) + '</button>' +
+      '<a class="ak-btn ak-btn-ghost" href="/amar-ujala/study" target="_top">' + esc(t.planLink) + ' →</a><span class="ak-tag">' + esc(t.demoData) + "</span></div></header>" +
       '<section class="ak-kpis" aria-label="' + esc(t.kpiLabel) + '">' +
       t.kpis.map(function (k) { return '<div class="ak-kpi"><div class="ak-kpi-value">' + esc(k.v) + '</div><div class="ak-kpi-label">' + esc(k.l) + '</div><div class="ak-kpi-src">' + esc(k.s) + "</div></div>"; }).join("") +
       "</section>" +
