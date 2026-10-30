@@ -113,7 +113,7 @@ window.LOS = (function () {
     return {
       anchit: false, name: name, handle: name.toLowerCase().replace(/[^a-z0-9]+/g, ''), url: u || (name.toLowerCase().replace(/[^a-z0-9]+/g, '') + '.com'),
       category: 'Direct-to-consumer', one: name + ' — a D2C brand built on repeat purchase, not just the first sale.',
-      wins: ['Category-leading repeat-purchase rate', 'Email/SMS driving 25–35% of revenue', 'A loyal, high-LTV core'],
+      wins: ['Built on repeat purchase', 'Owned channels: email, SMS and app', 'A loyal core worth keeping'],
       audiences: ['First-time buyers', 'Repeat / loyal', 'VIP / high-LTV', 'At-risk / lapsing'],
       cta: 'Shop now', mood: 'warm, premium, detail-led',
     };

@@ -13,7 +13,7 @@
   :root, :root[data-theme="dark"]{
     --serif:'Fraunces',Georgia,serif;
     --bg:#0F0D0A; --surface:#1A1814; --tile:#16130F; --bg-deep:#060503;
-    --ink:#FBF5EC; --head:#FBF5EC; --soft:#A39E94; --mute:#5A554E;
+    --ink:#FBF5EC; --head:#FBF5EC; --soft:#A39E94; --mute:#9A9388;
     --line:#2A261F; --line-strong:#3D3830; --chip:#14110D;
     --primary:#FF6940; --accent:#FF6940; --gold:#c9a96e; --mint:#2EE5AC;
     --cream:#160d07;
@@ -22,7 +22,7 @@
   }
   :root[data-theme="light"]{
     --bg:#FBF5EC; --surface:#FFFFFF; --tile:#F2EADC; --bg-deep:#F2EADC;
-    --ink:#161312; --head:#161312; --soft:#5A554E; --mute:#A39E94;
+    --ink:#161312; --head:#161312; --soft:#5A554E; --mute:#6E685F;
     --line:#E5DCC7; --line-strong:#C9BFA8; --chip:#F2EADC;
     --primary:#FF4D1F; --accent:#FF4D1F; --gold:#a8863f; --mint:#00B584;
     --cream:#FBF5EC;
@@ -250,7 +250,7 @@
         <h1>Data Analysis</h1>
         <p class="lede">The full D2C growth analytics workbench. Every widget drills into a detailed page with the complete data, a bigger chart, a growth read, and a CSV download. This is where all the analysis a D2C growth team needs gets done — shown on an <strong>industry-benchmark sample brand</strong> (synthetic, SimilarWeb / SEMrush-shaped data), so the whole mechanism works with zero proprietary data.</p>
       </div>
-      <div class="mkt" id="mktToggle" role="tablist" aria-label="Market">
+      <div class="mkt" id="mktToggle" role="group" aria-label="Market">
         <button data-mkt="US" class="on">🇺🇸 United States</button>
         <button data-mkt="UK">🇬🇧 United Kingdom</button>
         <button data-mkt="GLOBAL">🌍 Global</button>
@@ -258,7 +258,7 @@
       </div>
     </div>
 
-    <div class="mkt" id="anTabs" role="tablist" aria-label="Analysis section" style="margin:14px 0 4px;flex-wrap:wrap">
+    <div class="mkt" id="anTabs" role="group" aria-label="Analysis section" style="margin:14px 0 4px;flex-wrap:wrap">
       <button data-tab="control" class="on">Control Room</button>
       <button data-tab="acq">Acquisition · Ads + LP</button>
       <button data-tab="ret">Retention · Mailer + LP</button>
@@ -418,10 +418,10 @@
 
   // ── market metadata (all four regions are first-class) ───────────────────
   var MARKET_META = {
-    US:     { label:'United States', region:'us',     cur:'$', store:'sample-brand.com' },
-    UK:     { label:'United Kingdom', region:'uk',     cur:'£', store:'uk.sample-brand.com' },
-    GLOBAL: { label:'Global',         region:'global', cur:'$', store:'sample-brand.com/global' },
-    IN:     { label:'India',          region:'in',     cur:'₹', store:'in.sample-brand.com' }
+    US:     { label:'United States', region:'us',     cur:'$', store:'example.com' },
+    UK:     { label:'United Kingdom', region:'uk',     cur:'£', store:'uk.example.com' },
+    GLOBAL: { label:'Global',         region:'global', cur:'$', store:'example.com/global' },
+    IN:     { label:'India',          region:'in',     cur:'₹', store:'in.example.com' }
   };
   function meta(mk){ return MARKET_META[mk] || { label:mk, region:String(mk||'').toLowerCase(), cur:'$', store:'' }; }
   function mktLabel(mk){ return meta(mk||MKT).label; }
@@ -479,7 +479,7 @@
     var delta=ys[0]?((ys[lastI]-ys[0])/ys[0]):0;
     var deltaBadge='<text x="'+pad+'" y="11" font-size="10" font-weight="700" fill="'+(delta>=0?'var(--c1)':'#f0916f')+'">'+(delta>=0?'▲ +':'▼ ')+Math.round(delta*100)+'% first to last</text>';
     var yTitle=opts.yLabel?'<text x="12" y="'+(padT+ih/2).toFixed(1)+'" transform="rotate(-90 12 '+(padT+ih/2).toFixed(1)+')" text-anchor="middle" font-size="9" fill="var(--soft)">'+esc(opts.yLabel)+'</text>':'';
-    return '<svg viewBox="0 0 '+W+' '+H+'" role="img">'+grid+meanLine+
+    return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Chart">'+grid+meanLine+
       '<path d="'+area+'" fill="var(--c1)" opacity="0.10"/>'+
       '<path d="'+dpath+'" fill="none" stroke="var(--c1)" stroke-width="2.2" stroke-linejoin="round"/>'+dots+peakDot+lastDot+lbls+deltaBadge+yTitle+'</svg>';
   }
@@ -493,7 +493,7 @@
         '<rect x="'+pad+'" y="'+(y+3)+'" width="'+bw.toFixed(1)+'" height="'+(rowH-9)+'" rx="3" fill="'+col+'" data-tip="'+escA(d.label+'\n'+(d.disp!=null?d.disp:d.v))+'" style="cursor:pointer"/>'+
         '<text x="'+(pad+bw+6)+'" y="'+(y+rowH/2+3)+'" font-size="10.5" fill="var(--soft)">'+esc(d.disp)+'</text>';
     }).join('');
-    return '<svg viewBox="0 0 '+W+' '+H+'" role="img">'+rows+'</svg>';
+    return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Chart">'+rows+'</svg>';
   }
   function stackedBars(items, opts){
     opts=opts||{}; var W=opts.w||560, H=opts.h||200, padT=16, padB=28, pad=44, padR=8;
@@ -510,7 +510,7 @@
              (i%Math.ceil(items.length/8)===0||i===items.length-1?'<text x="'+(x+bw/2).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle" font-size="9" fill="var(--soft)">'+esc(d.label)+'</text>':'');
     }).join('');
     var yTitle=opts.yLabel?'<text x="12" y="'+(padT+ih/2).toFixed(1)+'" transform="rotate(-90 12 '+(padT+ih/2).toFixed(1)+')" text-anchor="middle" font-size="9" fill="var(--soft)">'+esc(opts.yLabel)+'</text>':'';
-    return '<svg viewBox="0 0 '+W+' '+H+'" role="img">'+grid+out+yTitle+'</svg>';
+    return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Chart">'+grid+out+yTitle+'</svg>';
   }
   function donut(items, opts){
     opts=opts||{}; var S=opts.s||150, r=54, cx=S/2, cy=S/2, C=2*Math.PI*r;
@@ -519,7 +519,7 @@
       var frac=d.v/total, len=frac*C, seg='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+PAL[i%PAL.length]+'" stroke-width="20" stroke-dasharray="'+len.toFixed(2)+' '+(C-len).toFixed(2)+'" stroke-dashoffset="'+(-off).toFixed(2)+'" transform="rotate(-90 '+cx+' '+cy+')" data-tip="'+escA(d.label+'\n'+money(d.v)+' ('+(frac*100).toFixed(1)+'%)')+'" style="cursor:pointer"/>';
       off+=len; return seg;
     }).join('');
-    return '<svg viewBox="0 0 '+S+' '+S+'" width="'+S+'" role="img">'+segs+
+    return '<svg viewBox="0 0 '+S+' '+S+'" width="'+S+'" role="img" aria-label="Chart">'+segs+
       '<text x="'+cx+'" y="'+(cy-2)+'" text-anchor="middle" font-size="17" font-family="Fraunces,Georgia,serif" fill="var(--head)">'+money(total)+'</text>'+
       '<text x="'+cx+'" y="'+(cy+15)+'" text-anchor="middle" font-size="9" fill="var(--soft)">TOTAL</text></svg>';
   }
@@ -659,7 +659,7 @@
         (i%Math.ceil(items.length/8)===0||i===lastI?'<text x="'+(x+bw/2).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle" font-size="9" fill="var(--soft)">'+esc(dd.label)+'</text>':'');
     }).join('');
     var yTitle=opts.yLabel?'<text x="12" y="'+(padT+ih/2).toFixed(1)+'" transform="rotate(-90 12 '+(padT+ih/2).toFixed(1)+')" text-anchor="middle" font-size="9" fill="var(--soft)">'+esc(opts.yLabel)+'</text>':'';
-    return '<svg viewBox="0 0 '+W+' '+H+'" role="img">'+grid+meanLine+out+yTitle+'</svg>';
+    return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Chart">'+grid+meanLine+out+yTitle+'</svg>';
   }
   function cohortHeat(cohorts, cols){
     if(!cohorts||!cohorts.length) return '<div class="empty">No cohort data.</div>';
@@ -871,7 +871,7 @@
       document.querySelectorAll('#tvwrap .tv-tile').forEach(function(t){ t.addEventListener('click',function(){
         if(t.classList.contains('dis')) return;
         var v=t.getAttribute('data-view');
-        document.querySelectorAll('#tvwrap .tv-tile').forEach(function(x){ x.classList.toggle('on', x===t); });
+        document.querySelectorAll('#tvwrap .tv-tile').forEach(function(x){ x.setAttribute('aria-pressed', String(x.classList.toggle('on', x===t))); });
         var cw=document.getElementById('tvchart'); if(cw) cw.innerHTML=tvChart(m, metric, v);
       }); });
     }
@@ -904,12 +904,12 @@
 
   function marketHasData(mk){ var m=A.markets[mk]; return !!(m && Object.keys(m).length && (m.summary || (m.monthly && m.monthly.length))); }
   function renderMarket(){ renderKPIs(); renderSignals(); renderGrid(); renderFootnote(); }
-  function setMarket(mk){ MKT=mk; document.querySelectorAll('#mktToggle button').forEach(function(b){ b.classList.toggle('on', b.dataset.mkt===mk); }); renderMarket(); closeDetail(); }
+  function setMarket(mk){ MKT=mk; document.querySelectorAll('#mktToggle button').forEach(function(b){ b.setAttribute('aria-pressed', String(b.classList.toggle('on', b.dataset.mkt===mk))); }); renderMarket(); closeDetail(); }
 
   document.querySelectorAll('#mktToggle button').forEach(function(b){ b.addEventListener('click',function(){ setMarket(b.dataset.mkt); }); });
   document.querySelectorAll('#anTabs button').forEach(function(b){ b.addEventListener('click',function(){
     ACTIVE_TAB=b.dataset.tab;
-    document.querySelectorAll('#anTabs button').forEach(function(x){ x.classList.toggle('on', x===b); });
+    document.querySelectorAll('#anTabs button').forEach(function(x){ x.setAttribute('aria-pressed', String(x.classList.toggle('on', x===b))); });
     closeDetail(); renderGrid(); window.scrollTo(0,0);
   }); });
 
@@ -924,7 +924,7 @@
 
   function boot(){
     if(!marketHasData(MKT)){ var k=Object.keys(A.markets).filter(marketHasData); if(k.length) MKT=k[0]; }
-    document.querySelectorAll('#mktToggle button').forEach(function(b){ b.classList.toggle('on', b.dataset.mkt===MKT); });
+    document.querySelectorAll('#mktToggle button').forEach(function(b){ b.setAttribute('aria-pressed', String(b.classList.toggle('on', b.dataset.mkt===MKT))); });
     renderMarket();
     var hash=(location.hash||'').replace('#',''); if(hash && WIDGETS.find(function(w){return w.id===hash;})) openDetail(hash);
   }

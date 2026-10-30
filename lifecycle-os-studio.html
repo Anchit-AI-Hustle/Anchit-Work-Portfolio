@@ -13,7 +13,7 @@
 <style>
   :root, :root[data-theme="dark"]{
     --bg:#0F0D0A; --bg-elev:#1A1814; --bg-deep:#060503;
-    --ink:#FBF5EC; --ink-dim:#A39E94; --ink-mute:#5A554E;
+    --ink:#FBF5EC; --ink-dim:#A39E94; --ink-mute:#9A9388;
     --rule:#2A261F; --rule-strong:#3D3830;
     --primary:#FF6940; --primary-deep:#FF4D1F; --primary-soft:rgba(255,105,64,.12);
     --accent:#2EE5AC; --gold:#c9a96e;
@@ -21,7 +21,7 @@
   }
   :root[data-theme="light"]{
     --bg:#FBF5EC; --bg-elev:#FFFFFF; --bg-deep:#F2EADC;
-    --ink:#161312; --ink-dim:#5A554E; --ink-mute:#A39E94;
+    --ink:#161312; --ink-dim:#5A554E; --ink-mute:#6E685F;
     --rule:#E5DCC7; --rule-strong:#C9BFA8;
     --primary:#FF4D1F; --primary-deep:#D63B12; --accent:#00B584; --gold:#a8863f;
   }
@@ -188,8 +188,8 @@
 
     <div class="form">
       <div class="frow">
-        <div style="flex:1;min-width:180px"><label class="fl">Brand</label><input id="brand" type="text" placeholder="e.g. Glossier" value="Glossier" autocomplete="off"></div>
-        <div style="flex:0 1 220px"><label class="fl">Website (optional)</label><input id="url" type="text" placeholder="glossier.com" value="glossier.com" autocomplete="off"></div>
+        <div style="flex:1;min-width:180px"><label class="fl">Brand</label><input id="brand" aria-label="Brand name" type="text" placeholder="e.g. Glossier" value="Glossier" autocomplete="off"></div>
+        <div style="flex:0 1 220px"><label class="fl">Website (optional)</label><input id="url" aria-label="Website (optional)" type="text" placeholder="glossier.com" value="glossier.com" autocomplete="off"></div>
       </div>
       <div style="margin-bottom:10px"><label class="fl">Campaign brief</label><textarea id="brief" placeholder="e.g. A welcome email for first-time buyers - lead with the brand’s own promise."></textarea></div>
       <div class="frow">
@@ -235,7 +235,7 @@
       var en=ho.entry;
       // The Calendar plans a generic sample D2C brand — set the subject to match
       // so /api/mailer uses the brand branch (not the personal Anchit branch).
-      $('brand').value='Sample Brand'; $('url').value='sample-brand.com';
+      $('brand').value='Sample Brand'; $('url').value='example.com';
       $('brief').value='Build the "'+(en.subject_hint||'')+'" email — '+String(en.archetype||'').replace(/-/g,' ')+' for the '+(en.segment||'')+' segment'+(en.market?(' ('+en.market+' market)'):'')+(en.hero_product?(', hero product '+en.hero_product):'')+(en.feedback?('. Requested changes: '+en.feedback):'')+'.';
       if(en.segment) $('segment').value=en.segment;
       if(en.hero_product) $('offer').value=en.hero_product;

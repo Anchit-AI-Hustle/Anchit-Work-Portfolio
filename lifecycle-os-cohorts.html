@@ -100,7 +100,7 @@
     <div class="eyebrow"><span class="dot"></span>Lifecycle OS · Cohort Builder</div>
     <h1><span class="grad">Cohort Builder</span></h1>
     <p class="lede">Behavioural cohort definitions - the rule that defines each cohort, its share of the base, and the recommended play. Pick a ready-made D2C brand below, or type any brand.</p>
-    <div class="subject"><span class="lbl">Subject</span><input id="brand" type="text"><input id="url" type="text" style="flex:0 1 220px"><button id="go">Build cohorts</button></div>
+    <div class="subject"><span class="lbl">Subject</span><input id="brand" aria-label="Brand name" type="text"><input id="url" aria-label="Website (optional)" type="text" style="flex:0 1 220px"><button id="go">Build cohorts</button></div>
     <div class="loading" id="loading"><span class="spinner"></span><span>Defining cohorts…</span></div>
     <div id="out" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="font-family:var(--font-display);font-size:clamp(19px,3vw,24px);font-weight:600" id="hd"></div><span class="badge" id="bdg"></span></div>
@@ -120,7 +120,7 @@
       if(!d||!d.segments) throw 0;
       $('hd').textContent=(d.brand||'Subject')+' — cohorts'; LOS.badge($('bdg'),d.source);
       $('cos').innerHTML=(d.segments||[]).map(function(s){
-        var rule=d.source==='anchit'?('intent≥'+s.r+' · fit-signal≥'+s.f+' · value-tier '+s.m):('R≥'+s.r+' · F≥'+s.f+' · M≥'+s.m);
+        var rule=d.source==='anchit'?('intent≥'+s.r+' · fit-signal≥'+s.f+' · value-tier '+s.m):('RFM score R'+s.r+' · F'+s.f+' · M'+s.m+' (1–5)');
         return '<div class="co"><span class="sz">'+esc(s.pct)+'%</span><div class="nm">'+esc(s.name)+'</div><div class="rule">WHERE '+esc(rule)+'</div><div class="play">'+esc(s.note||'')+'</div></div>';
       }).join('');
       $('out').style.display='block';

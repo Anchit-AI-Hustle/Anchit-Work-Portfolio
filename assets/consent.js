@@ -68,7 +68,7 @@
         'align-items:center;flex-wrap:wrap}' +
       '#consentBar .cb-text{margin:0;flex:1 1 340px;font-size:13.5px;line-height:1.55;color:#A39E94}' +
       '#consentBar .cb-text strong{color:#FBF5EC;font-weight:600}' +
-      '#consentBar .cb-text a{color:#FF6940}' +
+      '#consentBar .cb-text a{color:#FF6940;text-decoration:underline;text-underline-offset:2px}' +
       '#consentBar .cb-actions{display:flex;gap:10px;flex:0 0 auto}' +
       '#consentBar .cb-btn{font:inherit;font-size:13px;font-weight:600;cursor:pointer;' +
         'padding:10px 16px;border-radius:12px;border:1px solid #3D3830;' +
@@ -96,6 +96,10 @@
          costs nothing once the bar is dismissed. */
       'html[data-consent-open="1"] body{' +
         'padding-bottom:calc(var(--consent-h, 0px) + 8px)}' +
+      /* A drawer that fills the screen is not the body: its last control (a
+         checkout button) sat under the bar. Drawers opt in to the same room. */
+      'html[data-consent-open="1"] [data-consent-pad]{' +
+        'padding-bottom:calc(var(--consent-h, 0px) + 24px)}' +
       'html[data-consent-open="1"] #chatReturnBtn,' +
       'html[data-consent-open="1"] [data-floating-control]{' +
         'transform:translateY(calc(-1 * var(--consent-h, 0px)));' +

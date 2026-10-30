@@ -574,6 +574,8 @@
 <!-- seo:auto:end -->
 </head>
 <body class="linen-texture selection:bg-[#CD2653] selection:text-white">
+<div class="concept-bar" role="note" style="position:relative;z-index:60;padding:8px 16px;text-align:center;font:600 12px/1.45 system-ui,-apple-system,sans-serif;letter-spacing:.02em;background:#111;color:#f5f0e8">Concept storefront by <a href="/" style="color:inherit;text-decoration:underline;text-underline-offset:2px">Anchit Tandon</a> &mdash; not affiliated with Deli Chic. Nothing here places a real order.</div>
+
 
 <!-- Luxury Film Grain Cinematic Overlay -->
 <div class="film-grain" aria-hidden="true"></div>
@@ -634,7 +636,7 @@
       <!-- Basket Trigger -->
       <button onclick="toggleBasket(true)" class="px-4 py-2 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#8C1434] transition-all shadow-md shadow-[#CD2653]/30 flex items-center gap-2 shrink-0 whitespace-nowrap">
         <span>Basket</span>
-        <span class="px-2 py-0.5 bg-white/25 rounded-full text-[10px] font-black" id="basketCount">1</span>
+        <span class="px-2 py-0.5 bg-white/25 rounded-full text-[10px] font-black" id="basketCount">0</span>
       </button>
     </div>
   </div>
@@ -1156,10 +1158,10 @@
   <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-xs text-[#6B625B]">
     <div>
       <strong class="font-serif-chic font-bold text-base block text-[#4A0E17]">Deli Chic — Food For Thought</strong>
-      <span>© 2026 Deli Chic. All Rights Reserved. New Delhi &amp; NCR Haute Boucherie.</span>
+      <span>Concept site by Anchit Tandon. Deli Chic and its marks belong to their owner.</span>
     </div>
     <div class="flex gap-6 uppercase tracking-widest font-luxury font-bold text-[11px]">
-      <a href="https://delichic.co.in/" target="_blank" rel="noopener" class="hover:text-[#CD2653] transition-colors">Official Portal</a>
+      <a href="https://delichic.co.in/" target="_blank" rel="noopener" class="hover:text-[#CD2653] transition-colors">The real Deli Chic &#8599;</a>
       <a href="https://mh.delichic.co.in/shop/" target="_blank" rel="noopener" class="hover:text-[#CD2653] transition-colors">Catalogue</a>
       <a href="tel:+919810002023" class="hover:text-[#CD2653] transition-colors">+91 98100 02023</a>
     </div>
@@ -1169,7 +1171,7 @@
 <!-- ================= SLIDE-OVER BASKET DRAWER ================= -->
 <div id="basketModal" class="fixed inset-0 z-50 hidden">
   <div onclick="toggleBasket(false)" class="absolute inset-0 bg-black/75 backdrop-blur-sm"></div>
-  <div id="dcPanel" class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-[#CD2653]/25 p-8 flex flex-col justify-between overflow-y-auto shadow-2xl text-[#1C1917]">
+  <div id="dcPanel" data-consent-pad class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-[#CD2653]/25 p-8 flex flex-col justify-between overflow-y-auto shadow-2xl text-[#1C1917]">
     <div>
       <!-- Drawer Header -->
       <div class="flex items-center justify-between border-b border-[#CD2653]/15 pb-4">
@@ -1272,14 +1274,14 @@
       <p id="dcError" role="alert" class="hidden text-xs font-bold text-rose-700"></p>
       <div class="flex items-center gap-2 pt-1">
         <button type="button" onclick="backToBasket()" class="px-5 py-3.5 rounded-full border border-[#CD2653]/30 text-[#4A0E17] font-bold text-xs uppercase tracking-[0.16em] hover:bg-[#FFF3F6] transition-all">← Basket</button>
-        <button type="submit" class="flex-1 py-3.5 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#8C1434] transition-all shadow-lg shadow-[#CD2653]/30">Place the order</button>
+        <button type="submit" class="flex-1 py-3.5 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#8C1434] transition-all shadow-lg shadow-[#CD2653]/30">Preview the order (demo)</button>
       </div>
-      <p class="text-[10px] leading-relaxed text-[#6B625B]">No card is taken here. The concierge confirms the cuts and sends a payment link before anything leaves the cold room.</p>
+      <p class="text-[10px] leading-relaxed text-[#6B625B]">This is a concept build: no card is taken and nothing is sent to Deli Chic. The WhatsApp button only drafts the message for you to read.</p>
     </form>
 
     <!-- Step 3: placed, with a reference the concierge can be held to -->
     <div id="dcDone" class="hidden border-t border-[#CD2653]/15 pt-5 space-y-3">
-      <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-[#CD2653]">Order placed</p>
+      <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-[#CD2653]">Demo order previewed</p>
       <p class="text-3xl font-serif-chic font-bold text-[#4A0E17]" id="dcRef">DC-0000</p>
       <p class="text-xs font-semibold text-[#524842] leading-relaxed" id="dcSummary"></p>
       <div class="flex items-center gap-2 pt-1">
@@ -1446,9 +1448,7 @@
     };
 
     let currentFilter = 'all';
-    let basket = [
-      { id: 'chk-breast-500', name: 'Chicken Breast Antibiotic-Free', weight: '500 gm', price: 199, qty: 1 }
-    ];
+    let basket = [];
     let isPromoApplied = false;
     let selectedSlot = 'Morning (10 AM–1 PM)';
 
@@ -2214,7 +2214,7 @@
     }
 
     function dcOrderText(o) {
-      const lines = [`*Deli Chic order ${o.ref}*`, '---------------------------------'];
+      const lines = ['DEMO from anchit-tandon.com, not a real order', `*Deli Chic order ${o.ref}*`, '---------------------------------'];
       o.items.forEach((i, n) => lines.push(`${n + 1}. ${i.name} (${i.weight}) x ${i.qty} = ₹${i.price * i.qty}`));
       lines.push('---------------------------------', `Subtotal: ₹${o.subtotal}`);
       if (o.discount > 0) lines.push(`Promo WoW20 (-20%): -₹${o.discount}`);
@@ -2289,7 +2289,7 @@
       document.getElementById('dcSummary').textContent =
         `${order.items.reduce((n, i) => n + i.qty, 0)} item(s) · ₹${order.total} · ${order.slot} · to ${order.name} on ${order.phone}.`;
       const wa = document.getElementById('dcWa');
-      if (wa) wa.href = `https://api.whatsapp.com/send?phone=919810002023&text=${encodeURIComponent(dcOrderText(order))}`;
+      if (wa) wa.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(dcOrderText(order))}`;
 
       basket.length = 0;
       updateBasketUI();
@@ -2319,7 +2319,7 @@
       const wa = document.getElementById('dcWa');
       if (ref) ref.textContent = last.ref;
       if (sum) sum.textContent = `${last.items.reduce((n, i) => n + i.qty, 0)} item(s) · ₹${last.total} · ${last.slot} · to ${last.name} on ${last.phone}.`;
-      if (wa) wa.href = `https://api.whatsapp.com/send?phone=919810002023&text=${encodeURIComponent(dcOrderText(last))}`;
+      if (wa) wa.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(dcOrderText(last))}`;
       const chip = document.getElementById('dcLast');
       const chipRef = document.getElementById('dcLastRef');
       if (chipRef) chipRef.textContent = last.ref;

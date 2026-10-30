@@ -13,7 +13,7 @@
   /* anchit-tandon.com champagne palette (dark default + light) */
   :root, :root[data-theme="dark"]{
     --bg:#0F0D0A; --bg-elev:#1A1814; --bg-deep:#060503;
-    --ink:#FBF5EC; --ink-dim:#A39E94; --ink-mute:#5A554E;
+    --ink:#FBF5EC; --ink-dim:#A39E94; --ink-mute:#9A9388;
     --rule:#2A261F; --rule-strong:#3D3830;
     --primary:#FF6940; --primary-deep:#FF4D1F; --primary-soft:rgba(255,105,64,.12);
     --accent:#2EE5AC; --accent-soft:rgba(46,229,172,.10); --gold:#c9a96e;
@@ -21,7 +21,7 @@
   }
   :root[data-theme="light"]{
     --bg:#FBF5EC; --bg-elev:#FFFFFF; --bg-deep:#F2EADC;
-    --ink:#161312; --ink-dim:#5A554E; --ink-mute:#A39E94;
+    --ink:#161312; --ink-dim:#5A554E; --ink-mute:#6E685F;
     --rule:#E5DCC7; --rule-strong:#C9BFA8;
     --primary:#FF4D1F; --primary-deep:#D63B12; --primary-soft:rgba(255,77,31,.10);
     --accent:#00B584; --accent-soft:rgba(0,181,132,.10); --gold:#a8863f;
@@ -250,7 +250,7 @@
       "name": "Is Lifecycle OS specific to one brand?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "No — it is subject-agnostic. It ships loaded with anchit-tandon.com as a demo (marketing a résumé like a D2C product), but you can point it at any consumer brand and the same engine adapts positioning, audiences, calendar and voice."
+        "text": "No — it is subject-agnostic. It opens on real D2C brands as ready-made subjects, and you can point it at any consumer brand; the same engine adapts positioning, audiences, calendar and voice."
       }
     },
     {
@@ -368,9 +368,9 @@
 
     <div class="subject">
       <span class="lbl">Subject</span>
-      <input id="brand" type="text" placeholder="Brand - e.g. Glossier" value="Glossier" autocomplete="off" />
-      <input id="url" type="text" placeholder="Website (optional) - e.g. glossier.com" value="glossier.com" autocomplete="off" style="flex:0 1 240px;" />
-      <span class="hint">The subject flows into every tool below. Pick a ready-made brand above, or type any brand.</span>
+      <input id="brand" aria-label="Brand name" type="text" placeholder="Brand - e.g. Glossier" value="Glossier" autocomplete="off" />
+      <input id="url" aria-label="Website (optional)" type="text" placeholder="Website (optional) - e.g. glossier.com" value="glossier.com" autocomplete="off" style="flex:0 1 240px;" />
+      <span class="hint">Most tools below open on this subject. Pick a ready-made brand above, or type any brand.</span>
     </div>
 
     <!-- CORE PIPELINE -->
@@ -413,7 +413,7 @@
         <h3>What&rsquo;s broken without it</h3>
         <ul>
           <li><strong>No baseline.</strong> Teams plan lifecycle campaigns without knowing their category&rsquo;s typical channel split, AOV or repeat-rate. The engine seeds every plan from industry-standard bands for the brand&rsquo;s peer set.</li>
-          <li><strong>Blank-page planning.</strong> A 30-day calendar normally starts empty. Here it arrives segment- and cadence-aware, tuned to the inferred industry&rsquo;s seasonality.</li>
+          <li><strong>Blank-page planning.</strong> A 90-day calendar normally starts empty. Here it arrives segment- and cadence-aware, tuned to the inferred industry&rsquo;s seasonality.</li>
           <li><strong>Mailer cold start.</strong> Every send begins from scratch. The demo hands you an on-brand sample mailer inferred from the brand&rsquo;s positioning.</li>
           <li><strong>Vendor lock to see value.</strong> Most tools need account access and real data before they show anything. This returns a usable plan from just a brand name.</li>
         </ul>
@@ -430,7 +430,7 @@
       <section class="wide">
         <div class="k">The parts that hold it together</div>
         <h3>One source of truth, four times over</h3>
-        <p>Sixteen modules only feel like one product because four small files refuse to let them disagree.</p>
+        <p>In the full app at <a href="https://lifecycle-os.anchit-tandon.com/">lifecycle-os.anchit-tandon.com</a> (the free modules on this page are a lighter cut of it), sixteen modules only feel like one product because four small files refuse to let them disagree.</p>
         <ul>
           <li><strong><code>region-context.js</code></strong> — one active region, shared by every page. Region selection had been built on 17 of 66 pages in six different ways, none of them sharing state.</li>
           <li><strong><code>brand-context.js</code></strong> — one active brand, driving tokens, fonts, title and favicon everywhere at once.</li>
@@ -449,7 +449,7 @@
     <div class="faq">
       <details><summary>What is Lifecycle OS?</summary><p>Lifecycle OS is a plug-and-play, brand-agnostic AI lifecycle marketing operating system built by Anchit Tandon. You enter a D2C brand and it designs the whole retention funnel — audience segments, a campaign calendar, sample mailers, retention flows and KPIs — all AI-generated.</p></details>
       <details><summary>How do I use Lifecycle OS?</summary><p>Try the walkthrough modules on this page, which need no account, or open the live app at lifecycle-os.anchit-tandon.com. The Full lifecycle plan module takes a brand name and optional website and returns the whole plan in one pass. The engine benchmarks the category, builds segments and lifecycle stages, drafts a week-by-week calendar and an on-brand mailer, wires retention automations and sets target KPIs. You can export the full plan as JSON.</p></details>
-      <details><summary>Is Lifecycle OS specific to one brand?</summary><p>No — it is subject-agnostic. It ships loaded with anchit-tandon.com as a demo (marketing a résumé like a D2C product), but you can point it at any consumer brand and the same engine adapts positioning, audiences, calendar and voice.</p></details>
+      <details><summary>Is Lifecycle OS specific to one brand?</summary><p>No — it is subject-agnostic. It opens on real D2C brands as ready-made subjects, and you can point it at any consumer brand; the same engine adapts positioning, audiences, calendar and voice.</p></details>
       <details><summary>How does the AI benchmark a brand&#x27;s industry?</summary><p>It reads the subject&#x27;s category and comparable set and starts every plan from real baseline response-rate and retention bands — the way SimilarWeb or SEMrush profile a market — rather than guessing, then generates the segments and flows on top of those benchmarks.</p></details>
       <details><summary>What does the generated lifecycle plan include?</summary><p>Each plan includes an industry read and benchmarks, a data-analysis view (segmentation model, best send window, cohort retention, cross-sell affinity), audience segments, lifecycle stages, a campaign calendar, a strategy-locked on-brand mailer with scored variants, retention automations, a Smart Brain autopilot loop, guardrails and target KPIs.</p></details>
       <details><summary>Is Lifecycle OS free?</summary><p>Yes. The walkthrough modules and the Full lifecycle plan are free on Anchit Tandon&#x27;s portfolio site with no signup. The live app opens without an account, but reading a brand&#x27;s site and keeping your work need a Google sign-in.</p></details>
@@ -479,7 +479,7 @@
   var CORE=[
     { ic:'📊', name:'Data Analysis', desc:'RFM segments, cohort retention, send-time and cross-sell affinity — benchmarked to the subject’s industry.', href:'/lifecycle-os-analysis' },
     { ic:'👥', name:'Cohort Builder', desc:'Behavioural cohort definitions — the rule for each, its share of the base, and the play to run.', href:'/lifecycle-os-cohorts' },
-    { ic:'🗓️', name:'Marketing Calendar', desc:'A 30-day, segment- and cadence-aware send calendar with seasonality and guardrails.', href:'/lifecycle-os-calendar' },
+    { ic:'🗓️', name:'Marketing Calendar', desc:'A 90-day, segment- and cadence-aware send calendar with seasonality and guardrails.', href:'/lifecycle-os-calendar' },
     { ic:'✉️', name:'Mailer Studio', desc:'Turn a brief into a designed, on-brand HTML mailer — multiple quality-scored variants per send.', href:'/lifecycle-os-studio' },
   ];
   var CHAN=[

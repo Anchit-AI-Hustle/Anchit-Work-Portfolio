@@ -2255,6 +2255,12 @@
   }
   .iframe-wrap iframe { width: 100%; height: 600px; border: 0; background: #FFF; display: block; }
   @media (max-width: 720px) { .iframe-wrap iframe { height: 460px; } }
+  /* Apps that refuse to be framed (X-Frame-Options: DENY) get a link panel instead of a blank box. */
+  .iframe-out { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 10px; min-height: 220px; padding: 32px; text-decoration: none; color: var(--ink); }
+  .iframe-out-k { font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-dim); }
+  .iframe-out-t { font-family: var(--font-display); font-size: clamp(18px, 2.4vw, 24px); line-height: 1.3; max-width: 34ch; }
+  .iframe-out-cta { color: var(--primary); font-weight: 600; }
+  .iframe-out:hover .iframe-out-cta, .iframe-out:focus-visible .iframe-out-cta { text-decoration: underline; text-underline-offset: 3px; }
 
   /* ============ UNIVERSAL MAILER STUDIO ============ */
   .mailer-studio {
@@ -2395,6 +2401,10 @@
     font-family: var(--font-mono); font-size: 11px; color: var(--ink-dim);
     letter-spacing: 0.08em; text-transform: uppercase;
   }
+  /* The voice pill and chat button float over the last screen; keep the
+     copyright and footer links clear of them. */
+  footer { padding-bottom: calc(72px + var(--safe-bottom)); }
+  @media (max-width: 820px) { footer { padding-bottom: calc(150px + var(--safe-bottom)); } }
   footer a { color: var(--ink-dim); transition: color 0.2s; }
   footer a:hover { color: var(--primary); }
   footer .footer-links { display: flex; gap: 24px; flex-wrap: wrap; row-gap: 10px; }
@@ -3721,7 +3731,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       <span class="sidebar-label morph-label"><span class="ml-default">Chat</span><span class="ml-hover" aria-hidden="true">Ask me anything</span></span>
     </a>
-    <a class="sidebar-item" href="assets/resume.pdf" target="_blank" rel="noopener" aria-label="My Resume (PDF, opens in a new tab)">
+    <a class="sidebar-item" href="/assets/resume.pdf" target="_blank" rel="noopener" aria-label="My Resume (PDF, opens in a new tab)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
       <span class="sidebar-label morph-label"><span class="ml-default">My Resume</span><span class="ml-hover" aria-hidden="true">Open the PDF</span></span>
     </a>
@@ -3756,7 +3766,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           <span>Email</span>
         </a>
-        <a class="sidebar-subitem" href="assets/resume.pdf" target="_blank" rel="noopener" data-c="resume">
+        <a class="sidebar-subitem" href="/assets/resume.pdf" target="_blank" rel="noopener" data-c="resume">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           <span>Resume</span>
         </a>
@@ -3893,7 +3903,7 @@
         <svg class="tb-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5A2.5 2.5 0 1 1 0 3.5a2.5 2.5 0 0 1 4.98 0zM.25 8h4.5v12H.25zM8.5 8h4.3v1.64h.06c.6-1.1 2.06-2.26 4.24-2.26 4.53 0 5.37 2.98 5.37 6.86V20h-4.5v-5.9c0-1.4-.03-3.2-1.95-3.2-1.95 0-2.25 1.52-2.25 3.1V20H8.5z"/></svg>
         <span class="tb-label">LinkedIn</span>
       </a>
-      <a href="assets/resume.pdf" target="_blank" rel="noopener" class="top-bar-link" data-channel="resume" aria-label="View Resume" title="View Resume">
+      <a href="/assets/resume.pdf" target="_blank" rel="noopener" class="top-bar-link" data-channel="resume" aria-label="View Resume" title="View Resume">
         <svg class="tb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <span class="tb-label">Resume</span>
       </a>
@@ -4095,10 +4105,10 @@
         <h2 class="cine-name" id="cineName">Anchit Tandon</h2>
 
         <div class="cine-roles" id="cineRoles">
-          <div class="cine-role">Visionary</div>
-          <div class="cine-role">Innovative Creator</div>
-          <div class="cine-role">Game Changer</div>
-          <div class="cine-role">Achiever</div>
+          <div class="cine-role">Product Management</div>
+          <div class="cine-role">D2C Growth</div>
+          <div class="cine-role">AI Builds</div>
+          <div class="cine-role">Building Parwah</div>
         </div>
 
         <div class="cine-boot" id="cineBoot">
@@ -4162,7 +4172,7 @@
               <span class="hr-cue" aria-hidden="true">hold to see the human</span>
             </div>
             <div>
-              <div class="eyebrow has-dot mb-2 text-xs opacity-80"><span class="live-dot"></span>Live · Building Parwah</div>
+              <div class="eyebrow has-dot mb-2 text-xs opacity-80"><span class="live-dot"></span>Now · Building Parwah</div>
             </div>
             <h1 class="hero-name tracking-tight m-0 leading-none">
               <span class="greeting text-[var(--ink-dim)] narrate-span" data-n-idx="0">Hey, I'm </span><span class="firstline text-[var(--ink)] narrate-span" data-n-idx="0">Anchit</span> <span class="secondline text-[var(--ink)]"><span class="narrate-span" data-n-idx="0">Tandon.</span></span>
@@ -4217,7 +4227,7 @@
           <span class="dc-corner dc-bl" aria-hidden="true"></span><span class="dc-corner dc-br" aria-hidden="true"></span>
           <div class="dc-head">
             <span class="dc-stamp" aria-hidden="true">ti/id-03</span>
-            <span class="dc-badge">Y2023 &ndash; Y2026 // shipped</span>
+            <span class="dc-badge">Y2022 &ndash; Y2026 // shipped</span>
           </div>
           <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-2">Previously</div>
           <h2 class="text-xl font-bold mb-1 text-[var(--ink)]">Times Internet</h2>
@@ -4410,7 +4420,7 @@
           </div>
           <div class="nav-card-arrow">&rarr;</div>
         </a>
-        <a class="nav-card" href="assets/resume.pdf" target="_blank" rel="noopener">
+        <a class="nav-card" href="/assets/resume.pdf" target="_blank" rel="noopener">
           <div class="nav-card-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
           </div>
@@ -4444,7 +4454,7 @@
         <div class="signoff-links">
           <a href="https://www.linkedin.com/in/anchit-tandon" target="_blank" rel="noopener">LinkedIn</a>
           <a href="mailto:anchit.tandon@gmail.com">Email</a>
-          <a href="assets/resume.pdf" target="_blank" rel="noopener">Resume</a>
+          <a href="/assets/resume.pdf" target="_blank" rel="noopener">Resume</a>
         </div>
       </div>
     </div>
@@ -4720,7 +4730,7 @@
           <div class="work-num">00</div>
           <div class="work-content">
             <h3>D2C <em>Growth</em></h3>
-            <p>I worked on D2C growth across the US, UK, and global markets. The customer lifecycle &amp; retention OS I helped build is the clearest expression of how I already read this problem — a retention workflow that threads analytics, planning, segmentation, and mailer generation into a single loop. I don't call it my biggest win; I call it proof of the approach — an early, working piece of the larger vision I'm building toward. In the first 1.5–2 months, I also helped increase UK marketing revenue; rating improvements are a supporting outcome, not the headline.</p>
+            <p>I worked on D2C growth across the US, UK, and global markets. I helped build a customer lifecycle &amp; retention OS that threads analytics, planning, segmentation and mailer generation into a single loop. In my first two months I also helped lift UK marketing revenue.</p>
             <div class="tags"><span class="tag">D2C Growth</span><span class="tag">Lifecycle OS</span><span class="tag">CRM · Klaviyo</span><span class="tag">WebEngage</span><span class="tag">US · UK · Global</span></div>
             <div class="work-impact-bar"><div class="work-impact-row"><span class="work-impact-chip gold">Lifecycle &amp; retention OS</span><span class="work-impact-chip gold">UK marketing revenue increased</span><span class="work-impact-chip gold">Apr–Sep 2026</span></div></div>
             <div style="margin-top: 16px;">
@@ -4744,7 +4754,7 @@
           <div class="work-num">01</div>
           <div class="work-content">
             <h3>Times Internet <em>Half Marathon</em></h3>
-            <p>Building a 0→1 consumer product — owning discovery, registration, acquisition funnels, and on-ground runner insights for a first-time consumer IP.</p>
+            <p>Built a 0→1 consumer product — owning discovery, registration, acquisition funnels, and on-ground runner insights for a first-time consumer IP.</p>
             <div class="tags"><span class="tag">0→1</span><span class="tag">Consumer Event</span><span class="tag">Funnel Design</span><span class="tag">Acquisition</span></div>
             <div class="work-impact-bar"><div class="work-impact-row"><span class="work-impact-chip">Zero to Live</span><span class="work-impact-chip">Consumer IP</span></div></div>
             <div style="margin-top: 16px;">
@@ -4961,12 +4971,12 @@
           <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Running the day from one assistant that remembers your context.</span></p>
           <p>An agent-orchestrated personal AI operating system — memory-backed chat, tasks and multi-phase automation in one place.</p>
           <ul class="build-details">
-            <li>Built with Next.js, FastAPI, Postgres/pgvector and Gemini-backed agent orchestration.</li>
+            <li>Built with Next.js, NextAuth, Supabase/pgvector and Gemini-backed agent orchestration.</li>
             <li>Implemented personas, RAG memory, tasks, tools, voice control and multi-agent reasoning modes.</li>
           </ul>
-          <div class="build-stack"><span class="build-chip">Next.js</span><span class="build-chip">FastAPI</span><span class="build-chip">Postgres/pgvector</span><span class="build-chip">Gemini</span></div>
+          <div class="build-stack"><span class="build-chip">Next.js</span><span class="build-chip">NextAuth</span><span class="build-chip">Supabase/pgvector</span><span class="build-chip">Gemini</span></div>
           <div class="build-actions">
-            <a class="btn primary" href="#project-thirdeye" data-view="project-thirdeye">Case Study<span class="build-launch" aria-hidden="true">↗</span></a>
+            <a class="btn primary" href="#project-thirdeye" data-view="project-thirdeye">Case Study<span class="build-launch" aria-hidden="true">&rarr;</span></a>
             <a class="btn" href="https://the-third-eye.anchit-tandon.com/" target="_blank" rel="noopener">Sign in ↗</a>
           </div>
         </div>
@@ -4983,7 +4993,7 @@
           </ul>
           <div class="build-stack"><span class="build-chip">Vercel Functions</span><span class="build-chip">OpenAI</span><span class="build-chip">Anthropic</span><span class="build-chip">Gemini</span><span class="build-chip">xAI</span><span class="build-chip">Groq</span><span class="build-chip">Cerebras</span></div>
           <div class="build-actions">
-            <a class="btn primary" href="#project-mailer" data-view="project-mailer">Case Study<span class="build-launch" aria-hidden="true">↗</span></a>
+            <a class="btn primary" href="#project-mailer" data-view="project-mailer">Case Study<span class="build-launch" aria-hidden="true">&rarr;</span></a>
             <a class="btn" href="https://marketing-mailers-html-architect.anchit-tandon.com/" target="_blank" rel="noopener">Sign in ↗</a>
           </div>
         </div>
@@ -5016,7 +5026,7 @@
           </ul>
           <div class="build-stack"><span class="build-chip">Speech transcription</span><span class="build-chip">LLM scoring</span></div>
           <div class="build-actions">
-            <a class="btn primary" href="#project-telesuite" data-view="project-telesuite">Case Study<span class="build-launch" aria-hidden="true">↗</span></a>
+            <a class="btn primary" href="#project-telesuite" data-view="project-telesuite">Case Study<span class="build-launch" aria-hidden="true">&rarr;</span></a>
             <a class="btn" href="https://ai-tele-suite.anchit-tandon.com/" target="_blank" rel="noopener">Sign in ↗</a>
           </div>
         </div>
@@ -5033,7 +5043,7 @@
           </ul>
           <div class="build-stack"><span class="build-chip">Vercel Serverless</span><span class="build-chip">Supabase</span><span class="build-chip">Google sign-in</span></div>
           <div class="build-actions">
-            <a class="btn primary" href="#project-jobfit" data-view="project-jobfit">Case Study<span class="build-launch" aria-hidden="true">↗</span></a>
+            <a class="btn primary" href="#project-jobfit" data-view="project-jobfit">Case Study<span class="build-launch" aria-hidden="true">&rarr;</span></a>
             <a class="btn" href="/jobhunt">Sign in ↗</a>
           </div>
         </div>
@@ -5050,7 +5060,7 @@
           </ul>
           <div class="build-stack"><span class="build-chip">Narration</span><span class="build-chip">Tap-to-talk</span><span class="build-chip">Chat</span></div>
           <div class="build-actions">
-            <a class="btn primary" href="#project-agentlp" data-view="project-agentlp">Case Study<span class="build-launch" aria-hidden="true">↗</span></a>
+            <a class="btn primary" href="#project-agentlp" data-view="project-agentlp">Case Study<span class="build-launch" aria-hidden="true">&rarr;</span></a>
           
             <a class="btn" href="https://vahdam-lifecycle-os.anchit-tandon.com/lp/best" target="_blank" rel="noopener">Open demo &#8599;</a>
           </div>
@@ -5084,7 +5094,7 @@
           </ul>
           <div class="build-stack"><span class="build-chip">PWA</span><span class="build-chip">Speech input</span><span class="build-chip">LLM</span></div>
           <div class="build-actions">
-            <a class="btn primary" href="#project-yaara" data-view="project-yaara">Case Study<span class="build-launch" aria-hidden="true">↗</span></a>
+            <a class="btn primary" href="#project-yaara" data-view="project-yaara">Case Study<span class="build-launch" aria-hidden="true">&rarr;</span></a>
             <a class="btn" href="https://hey-yaara.anchit-tandon.com/" target="_blank" rel="noopener">Open demo ↗</a>
           </div>
         </div>
@@ -5101,7 +5111,7 @@
           </ul>
           <div class="build-stack"><span class="build-chip">Auth-gated web</span><span class="build-chip">AI planning</span></div>
           <div class="build-actions">
-            <a class="btn primary" href="#project-lifeengine" data-view="project-lifeengine">Case Study<span class="build-launch" aria-hidden="true">↗</span></a>
+            <a class="btn primary" href="#project-lifeengine" data-view="project-lifeengine">Case Study<span class="build-launch" aria-hidden="true">&rarr;</span></a>
             <a class="btn" href="https://th-life-engine.anchit-tandon.com/" target="_blank" rel="noopener">Sign in ↗</a>
           </div>
         </div>
@@ -5118,7 +5128,7 @@
           </ul>
           <div class="build-stack"><span class="build-chip">Vite</span><span class="build-chip">React</span><span class="build-chip">TypeScript</span><span class="build-chip">Supabase</span><span class="build-chip">Python</span></div>
           <div class="build-actions">
-            <a class="btn primary" href="#project-music" data-view="project-music">Case Study<span class="build-launch" aria-hidden="true">↗</span></a>
+            <a class="btn primary" href="#project-music" data-view="project-music">Case Study<span class="build-launch" aria-hidden="true">&rarr;</span></a>
             <a class="btn" href="https://music-gen-ai.anchit-tandon.com/" target="_blank" rel="noopener">Open demo ↗</a>
           </div>
         </div>
@@ -5171,7 +5181,7 @@
       <div class="section-head reveal" style="margin-top:64px">
         <div class="eyebrow">Inside the suites · every module, individually</div>
         <h2 class="display-md">Each build, on its own</h2>
-        <p class="lede" style="margin-top:12px">Five of these builds are suites rather than single tools, and every module inside them stands on its own. Pick a suite to see its features.</p>
+        <p class="lede" style="margin-top:12px">Five of my builds are suites rather than single tools, and every module inside them stands on its own. Pick a suite to see its features.</p>
       </div>
       <div class="suite-features reveal">
         <div class="suite-tabs" role="tablist" aria-label="Features by suite" id="suiteTabs" data-no-motion></div>
@@ -5325,12 +5335,12 @@
     <div class="container">
       <a class="back-link" href="#projects" data-view="projects">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        All side projects
+        All projects
       </a>
       <div class="project-hero reveal">
         <div class="eyebrow">AI Voice · Consumer · PWA</div>
         <h1 class="display-lg">Hey <em>Yaara</em></h1>
-        <p class="quote">"An AI voice companion for elderly. Talk, listen, and never feel alone."</p>
+        <p class="quote">"An AI voice companion for the elderly. Talk, listen, and never feel alone."</p>
         <div class="project-meta">
           <div><span class="label">Role</span><span>Founder · Designer · Engineer</span></div>
           <div><span class="label">Status</span><span>Demo &middot; opens on a sample profile</span></div>
@@ -5385,7 +5395,7 @@
     <div class="container">
       <a class="back-link" href="#projects" data-view="projects">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        All side projects
+        All projects
       </a>
       <div class="project-hero reveal">
         <div class="eyebrow">Generative AI · Music · Full-stack</div>
@@ -5450,7 +5460,7 @@
     <div class="container">
       <a class="back-link" href="#projects" data-view="projects">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        All side projects
+        All projects
       </a>
       <div class="project-hero reveal">
         <div class="eyebrow">AI Workflow · Sales Ops</div>
@@ -5509,7 +5519,7 @@
     <div class="container">
       <a class="back-link" href="#projects" data-view="projects">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        All side projects
+        All projects
       </a>
       <div class="project-hero reveal">
         <div class="eyebrow">AI Wellness · Personalised planning</div>
@@ -5558,7 +5568,7 @@
 
       <div class="iframe-wrap reveal">
         <div class="iframe-bar"><div class="dots"><span></span><span></span><span></span></div>th-life-engine.anchit-tandon.com</div>
-        <iframe src="https://th-life-engine.anchit-tandon.com/" loading="lazy" title="LifeEngine live preview"></iframe>
+        <a class="iframe-out" href="https://th-life-engine.anchit-tandon.com/" target="_blank" rel="noopener"><span class="iframe-out-k">Opens in a new tab</span><span class="iframe-out-t">LifeEngine can&rsquo;t be embedded here &mdash; it signs you in on its own site.</span><span class="iframe-out-cta">Open LifeEngine &#8599;</span></a>
       </div>
     </div>
   </section>
@@ -5568,7 +5578,7 @@
     <div class="container">
       <a class="back-link" href="#projects" data-view="projects">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        All side projects
+        All projects
       </a>
       <div class="project-hero reveal">
         <div class="eyebrow">AI Operating System · Agent-orchestrated</div>
@@ -5633,7 +5643,7 @@
 
       <div class="iframe-wrap reveal">
         <div class="iframe-bar"><div class="dots"><span></span><span></span><span></span></div>the-third-eye.anchit-tandon.com</div>
-        <iframe src="https://the-third-eye.anchit-tandon.com/" loading="lazy" title="The Third Eye live preview"></iframe>
+        <a class="iframe-out" href="https://the-third-eye.anchit-tandon.com/" target="_blank" rel="noopener"><span class="iframe-out-k">Opens in a new tab</span><span class="iframe-out-t">The Third Eye can&rsquo;t be embedded here &mdash; it signs you in on its own site.</span><span class="iframe-out-cta">Open The Third Eye &#8599;</span></a>
       </div>
     </div>
   </section>
@@ -5643,7 +5653,7 @@
     <div class="container">
       <a class="back-link" href="#projects" data-view="projects">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        All side projects
+        All projects
       </a>
       <div class="project-hero reveal">
         <div class="eyebrow">AI Tooling · Universal mailer · Multi-LLM cascade</div>
@@ -5809,7 +5819,7 @@
     <div class="container">
       <a class="back-link" href="#projects" data-view="projects">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        All side projects
+        All projects
       </a>
       <div class="project-hero reveal">
         <div class="eyebrow">Conversational Commerce · Narration + Voice + Chat + Recommendations · Live Funnel</div>
@@ -5861,7 +5871,7 @@
     <div class="container">
       <a class="back-link" href="#projects" data-view="projects">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        All side projects
+        All projects
       </a>
       <div class="project-hero reveal">
         <div class="eyebrow">AI Careers · Free public job boards · Remotive · RemoteOK · Arbeitnow · The Muse</div>
@@ -5927,11 +5937,11 @@
         <div class="iframe-bar">
           <div class="dots"><span></span><span></span><span></span></div>
           <span>Anchit_Tandon_Resume.pdf</span>
-          <a href="assets/resume.pdf" target="_blank" rel="noopener" style="margin-left:auto; color:var(--primary); font-weight:500; text-decoration:none;">Open PDF ↗</a>
+          <a href="/assets/resume.pdf" target="_blank" rel="noopener" style="margin-left:auto; color:var(--primary); font-weight:500; text-decoration:none;">Open PDF ↗</a>
         </div>
         <div style="padding:32px; text-align:center; color:var(--ink-dim);">
           <p style="margin-bottom:18px;">Open the resume in a separate tab for the clean PDF view.</p>
-          <a class="btn" href="assets/resume.pdf" target="_blank" rel="noopener">Open Resume PDF ↗</a>
+          <a class="btn" href="/assets/resume.pdf" target="_blank" rel="noopener">Open Resume PDF ↗</a>
         </div>
       </div>
     </div>
@@ -5975,7 +5985,7 @@
           <span class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
           <div class="contact-card-text"><div class="label">Email</div><div class="value">anchit<em>.</em>tandon<em>@</em>gmail.com</div></div>
         </a>
-        <a href="assets/resume.pdf" target="_blank" rel="noopener" data-c="resume" class="contact-card">
+        <a href="/assets/resume.pdf" target="_blank" rel="noopener" data-c="resume" class="contact-card">
           <span class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
           <div class="contact-card-text"><div class="label">Resume</div><div class="value">Open the <em>PDF</em></div></div>
         </a>
@@ -6030,7 +6040,7 @@
     <a href="#schedule" data-schedule>Set up a 30-Mins Google Meet</a>
     <a href="sms:+919873945238">SMS</a>
     <a href="mailto:anchit.tandon@gmail.com">Email</a>
-    <a href="assets/resume.pdf" target="_blank" rel="noopener">Resume</a>
+    <a href="/assets/resume.pdf" target="_blank" rel="noopener">Resume</a>
     <a href="/privacy">Privacy</a>
     <a href="/terms">Terms</a>
   </div>
@@ -6434,8 +6444,8 @@
   const sidebar = document.getElementById('sidebar');
   const sidebarBackdrop = document.getElementById('sidebarBackdrop');
   const sidebarToggle = document.getElementById('sidebarToggle');
-  function openSidebar() { sidebar.classList.add('open'); sidebarBackdrop.classList.add('visible'); if(sidebarToggle) sidebarToggle.setAttribute('aria-expanded','true'); }
-  function closeSidebar() { sidebar.classList.remove('open'); sidebarBackdrop.classList.remove('visible'); if(sidebarToggle) sidebarToggle.setAttribute('aria-expanded','false'); }
+  function openSidebar() { document.body.classList.add('sidebar-open'); sidebar.classList.add('open'); sidebarBackdrop.classList.add('visible'); if(sidebarToggle) sidebarToggle.setAttribute('aria-expanded','true'); }
+  function closeSidebar() { document.body.classList.remove('sidebar-open'); sidebar.classList.remove('open'); sidebarBackdrop.classList.remove('visible'); if(sidebarToggle) sidebarToggle.setAttribute('aria-expanded','false'); }
   // The hamburger now TOGGLES based on current state (expand ⇄ collapse),
   // on every viewport — fixes the bug where tapping ☰ while open did nothing.
   function toggleSidebar() {
@@ -6566,6 +6576,9 @@
     { keywords: ['who','about','tell me about you','yourself','background','bio','introduce','what do you do','describe'],
       response: "I'm Anchit Tandon. Right now I'm building Parwah — one app for family care in India, with parents at the centre — and I'm open to freelance and consulting work alongside it. Before this I was AGM, Product Management, D2C Growth at Vahdam India across the US, UK and global markets, from April to September 2026, and before that at Times Internet, moving from APM to Senior PM. I started as a backend engineer, moved to product because I wanted to understand the <em>why</em> behind what we build, and I keep going deep until I understand the real system underneath a problem. <a data-nav='experience'>Full story →</a>",
       nextChips: ["Your biggest career win?","Why switch to product?","Tell me about your side builds","Hardest problem right now?"] },
+    { keywords: ['parwah','family care','parents','right now','working now','building now','what are you building','main project'],
+      response: "Right now I'm building <a data-nav='project-parwah'>Parwah</a> — one app for the whole family, with your parents at the centre: daily check-in, SOS, book anything for them, send money safely, gift with dignity. Reassurance, never surveillance. The <a href='https://parwah-hq.anchit-tandon.com/' target='_blank' rel='noopener'>website is live</a>, and I take on freelance and consulting work alongside it.",
+      nextChips: ["Show me your work","Tell me about your side builds","Can I hire you freelance?","How do I reach you?"] },
     { keywords: ['role','title','current','doing now','job','vahdam','work now','position'],
       response: "I was AGM, Product Management and D2C Growth at Vahdam India from April to September 2026. I worked across the US, UK and global markets on growth and lifecycle initiatives, including an operating workflow linking analytics, segmentation, planning and mailers. Parwah is my main project now.",
       nextChips: ["What's hardest at Vahdam?","Tell me about Times Internet","Show me your work","How do I reach you?"] },
@@ -6645,7 +6658,7 @@
       response: "You're already on the best version of my portfolio — the full story lives right here. My <a data-nav='experience'>work history</a> walks through Vahdam and Times Internet, and <a data-nav='projects'>side projects</a> covers everything I've built on the side. For the formal version, my full profile is on LinkedIn (linkedin.com/in/anchit-tandon) and my <a href='assets/resume.pdf' target='_blank' rel='noopener'>résumé opens as a PDF here</a>.",
       nextChips: ["Open the Work view","Show me your builds","Tell me about your experience","How do I reach you?"] },
     { keywords: ['location','where','based','delhi','india','remote','hybrid','relocate'],
-      response: "Delhi, India. IST timezone. I am open to strong roles and collaborations. The right fit means interesting problems, measurable outcomes, and people who value depth, experimentation and fast execution.",
+      response: "Delhi, India, IST, working remotely. I'm building Parwah and take on select freelance and consulting work, and I'm open to strong roles and collaborations. The right fit means interesting problems, measurable outcomes, and people who value depth, experimentation and fast execution.",
       nextChips: ["How do I reach you?","Show me your work","What are you building now?","What role are you looking for?"] },
     { keywords: ['looking for','seeking','ideal role','what role','hiring','open to','opportunities','available'],
       response: "Yes, I take select product and growth consulting projects alongside building Parwah. I can help with product strategy, customer journeys, retention and useful AI workflows. <a href='/freelancer'>Here is my consulting work.</a>",
@@ -8048,9 +8061,9 @@
     const progress  = document.getElementById('anpProgress');
 
     const NARRATIONS = {
-      home:       "Hey, I'm Anchit Tandon. An engineer who learned to love the funnel. Right now I'm A.G.M. for Product Management and D to C Growth at Vah-dahm India, across the U.S., U.K. and global markets. Before that, four years at Times Internet. I scaled assisted sales five times, from fifteen lakh to eighty lakh rupees a month. I rebuilt E.T. Markets across iOS, Android and web into three crore plus of new annual revenue. I build systems, then measure them.",
+      home:       "Hey, I'm Anchit Tandon. An engineer who learned to love the funnel. Right now I'm building Par-wah, one app for family care in India, with parents at the centre, and I take on freelance and consulting work alongside it. Before that I was A.G.M. for Product Management and D to C Growth at Vah-dahm India, and before that, four years at Times Internet. I scaled assisted sales five times, from fifteen lakh to eighty lakh rupees a month. I rebuilt E.T. Markets across iOS, Android and web into three crore plus of new annual revenue. I build systems, then measure them.",
       about:      "I started as a backend engineer. Live sports commentary, e-commerce, consumer apps — the kind of code that touches a million people over a weekend. Then I moved to product, and what I really fell for was the funnel. It tells you the unfiltered truth about every decision you make. So now I think in systems and ship in experiments. B Tech in Computer Science from V.I.T., and I still build things end to end myself, most weekends.",
-      now:        "At Vah-dahm India I'm A.G.M. for Product Management and D to C Growth. I joined on the twentieth of April, twenty twenty six. I own product performance, C.R.M. experimentation, conversion and revenue, all at once. The piece I care most about is the lifecycle and retention O.S. I'm building — analytics, planning, segmentation and mailer generation, threaded into one loop. We've also lifted U.K. marketing revenue. The hard part isn't finding opportunities. It's knowing which ones compound.",
+      now:        "Right now I'm building Par-wah: one app for the whole family, with your parents at the centre. Daily check-in, S.O.S., booking anything for them, sending money safely. Reassurance, never surveillance. The website is live. Before this, from April to September twenty twenty six, I was A.G.M. for Product Management and D to C Growth at Vah-dahm India, where I helped build a lifecycle and retention O.S. and lift U.K. marketing revenue.",
       chat:       "This is the part where you get to interrogate me. Ask about Vah-dahm, or Times Internet, or the numbers behind any of it. Ask why I left engineering for product, or what I'm building on weekends. The guide answers in my voice, using everything on this site. And if it doesn't know something, it will say so and point you straight at me.",
       experience: "Five years, one fairly clear arc. Backend engineer at Tuple Technologies and City Mall, then Times Internet from twenty twenty two to twenty twenty six — A.P.M. to P.M. to Senior P.M. I scaled assisted sales five times, from fifteen lakh to eighty lakh rupees in monthly recurring revenue, in eight to ten months. I rebuilt E.T. Markets for three crore plus in new annual revenue. And I took the Delhi Half Marathon from zero to one — fifteen thousand runners.",
       projects:   "I build on evenings and weekends because I can't sit still. They're all A.I. first, all consumer. LifeCycle O.S. is the big one — type in any D to C brand and it benchmarks the category, then designs the entire lifecycle live. The Third Eye is a personal A.I. operating system. Music Gen A.I. writes whole songs from a prompt. Job Hunt pulls live openings from four job boards. This portfolio counts too.",
@@ -9194,6 +9207,7 @@
   }
   /* Pointless on the chat surface itself. */
   body.view-chat .chat-nudge, body.chat-guide-open .chat-nudge { display: none !important; }
+  body.sidebar-open .chat-nudge, body.sidebar-open #jarvisPill, body.sidebar-open .chat-return { visibility: hidden; pointer-events: none; }
   @media (max-width: 560px) { .chat-nudge { bottom: 104px; right: 12px; } }
   @media (prefers-reduced-motion: reduce) {
     .chat-nudge { transition: none; transform: none; }
@@ -10346,7 +10360,7 @@
 </div>
 
 <div class="chat-return" id="chatReturnBtn" role="group" aria-label="Chat with Anchit">
-  <button class="chat-return-main" type="button" data-chat-open>
+  <button class="chat-return-main" type="button" data-chat-open aria-label="Chat with me">
     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     <span class="chat-return-copy">
       <span class="chat-return-title">Chat with me</span>
@@ -10519,6 +10533,8 @@
       if (e.target.closest('[data-chat-open], .chat-return, .sidebar-item[data-view="chat"]')) dismiss();
     }, true);
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') dismiss(); });
+    // On a phone it sits over a sixth of the screen; scrolling on is an answer too.
+    window.addEventListener('scroll', () => { if (shown && window.innerWidth <= 560 && window.scrollY > window.innerHeight) dismiss(); }, { passive: true });
 
     // Wait for the boot sequence. #cineHero carries .cine while it is playing
     // and the class is removed when it exits; if it never runs (motion off,
@@ -12815,7 +12831,9 @@
     var ric = window.requestIdleCallback || function(f){ return setTimeout(f, 1200); };
     ric(bootListener, { timeout: 4000 });
   }
-  if (saved() === 'off'){ setState('off','Tap to enable'); }
+  // Only re-arm for someone who switched it on themselves: starting the
+  // listener unprompted made browsers ask a first-time visitor for the mic.
+  if (saved() !== 'on'){ setState('off','Tap to enable'); }
   else {
     wantOn = true; setState('listening','Starting…');
     if (document.readyState === 'complete') setTimeout(armListener, 1200);

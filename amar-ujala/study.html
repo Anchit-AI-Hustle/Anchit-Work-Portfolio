@@ -80,6 +80,8 @@ section.block:nth-of-type(even){background:#fff}
 .callout{background:#fff;border-left:5px solid var(--brand);border-radius:var(--r-panel);padding:16px 20px;font-size:17px;line-height:27px;color:var(--ink)}
 .callout.amber{border-left-color:var(--amber)}
 .tbl{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r-panel);background:#fff}
+/* On a phone the right-hand columns start off screen; say so. */
+@media(max-width:600px){.tbl.is-wide::before{content:'Swipe sideways for every column \2192';display:block;position:sticky;left:0;padding:8px 12px;font-size:12px;font-weight:600;color:#5b6170;border-bottom:1px solid var(--line)}}
 table{border-collapse:collapse;width:100%;font-size:14px;line-height:20px}
 th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--soft);vertical-align:top}
 th{background:var(--soft);color:var(--ink);font-weight:600;font-size:13px}
@@ -348,10 +350,10 @@ footer h3{color:#fff}
 <section class="block" id="me" aria-labelledby="me-h">
   <div class="wrap">
     <div class="sec-head"><span class="num">08 · Why me</span><h2 id="me-h">I have built education products, and run this growth playbook at scale</h2><p>4+ years in product: Times Internet, June 2022 to April 2026 (Associate PM, then PM, then Senior PM), then Vahdam India, April to September 2026 (AGM, Product Management and D2C Growth). 6+ years in tech since April 2020.</p></div>
-    <div class="card soft" style="margin-bottom:16px"><span class="tag">Edtech · built by me</span><h3 style="margin-top:8px">EveryYear, my AI school workspace</h3><p class="small">A year-by-year plan and skill graph for a child from the early years (home learning, then Nursery to UKG on the government's Aadharshila 2024 framework) to Class 12, across 59 board-years. Aage Kya, the prototype in this study, is its result-day product.</p><div class="hero-ctas" style="margin-top:12px"><a class="btn btn-outline sm" href="https://edu-ai.anchit-tandon.com/" rel="noopener">Open EveryYear</a></div></div>
+    <div class="card soft" style="margin-bottom:16px"><span class="tag">Edtech · built by me</span><h3 style="margin-top:8px"><a href="https://edu-ai.anchit-tandon.com/" target="_blank" rel="noopener">EveryYear, my AI school workspace &#8599;</a></h3><p class="small">A year-by-year plan and skill graph for a child from the early years (home learning, then Nursery to UKG on the government's Aadharshila 2024 framework) to Class 12, across 59 board-years. Aage Kya, the prototype in this study, is its result-day product.</p><div class="hero-ctas" style="margin-top:12px"><a class="btn btn-outline sm" href="https://edu-ai.anchit-tandon.com/" rel="noopener">Open EveryYear</a></div></div>
     <div class="grid g3">
       <div class="card kpi"><span class="tag">Revenue · Assisted Sales</span><b style="margin-top:8px">₹15L to ₹80L</b><small style="font-size:14px;line-height:21px">Monthly ET assisted-sales revenue through funnel redesign; 400%+ ROI in six months on ET Prime's assisted-conversion funnel.</small></div>
-      <div class="card kpi"><span class="tag">AI Automation</span><b style="margin-top:8px">AI TeleSuite</b><small style="font-size:14px;line-height:21px">Built call transcription, quality scoring and pitch assist; qualified leads from about 30 to 150+ a day.</small></div>
+      <div class="card kpi"><span class="tag">AI Automation</span><b style="margin-top:8px">AI TeleSuite</b><small style="font-size:14px;line-height:21px">Built call transcription, quality scoring and pitch assist behind scaling Assisted Sales 5×, from ₹15L to ₹80L MRR.</small></div>
       <div class="card kpi"><span class="tag">Retention · Engagement</span><b style="margin-top:8px">+10% · +27%</b><small style="font-size:14px;line-height:21px">Subscriber retention through onboarding experiments; ET Markets engagement, ₹3 cr+ incremental yearly revenue.</small></div>
     </div>
     <p class="callout" style="margin-top:20px">Engineer turned PM (B.Tech CSE, VIT). I prototype with AI myself, as with this case study and its working prototype, so ideas reach users and data faster.</p>
@@ -394,6 +396,12 @@ footer h3{color:#fff}
     Object.keys(map).forEach(function(id){var s=document.getElementById(id);if(s)io.observe(s);});
   }
 })();
+</script>
+<script>
+// Wide tables scroll sideways: make them reachable by keyboard and flag the
+// ones that overflow so the phone layout can show a cue.
+(function(){function mark(){document.querySelectorAll('.tbl').forEach(function(t){var w=t.scrollWidth>t.clientWidth+2;t.classList.toggle('is-wide',w);if(w){t.tabIndex=0;t.setAttribute('role','region');if(!t.hasAttribute('aria-label'))t.setAttribute('aria-label','Table, scrolls sideways');}});}
+if(document.readyState!=='loading')mark();else document.addEventListener('DOMContentLoaded',mark);window.addEventListener('resize',mark,{passive:true});})();
 </script>
 </body>
 </html>

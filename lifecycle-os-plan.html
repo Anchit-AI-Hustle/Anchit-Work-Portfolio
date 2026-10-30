@@ -13,7 +13,7 @@
 <style>
   :root{
     --bg:#0F0D0A; --bg-elev:#16130F; --bg-deep:#0A0806;
-    --ink:#FBF5EC; --ink-dim:#B3A996; --ink-mute:#6B655C;
+    --ink:#FBF5EC; --ink-dim:#B3A996; --ink-mute:#9A9388;
     --primary:#FF6940; --primary-deep:#FF4D1F; --primary-soft:rgba(255,105,64,.12);
     --accent:#2EE5AC; --gold:#FFB736;
     --rule:rgba(255,247,232,.12); --rule-strong:rgba(255,247,232,.22);
@@ -320,20 +320,16 @@
          keeps only what nothing else on the site does — the one-shot engine. -->
     <div class="eyebrow"><span class="dot"></span>Lifecycle OS · module</div>
     <h1><span class="grad">Full lifecycle plan</span></h1>
-    <p class="lede">The end-to-end one-shot: <strong>segments, calendar, mailer, retention flows and KPIs in one pass</strong>. It opens on anchit-tandon.com — a résumé marketed with a D2C growth approach — and runs on any brand you type. <a href="/lifecycle-os" style="color:var(--ink);text-decoration:underline;text-underline-offset:3px">What Lifecycle OS is, and what it has done&nbsp;→</a></p>
+    <p class="lede">The end-to-end one-shot: <strong>segments, calendar, mailer, retention flows and KPIs in one pass</strong>. It opens on a real D2C brand and runs on any brand you type. <a href="/lifecycle-os" style="color:var(--ink);text-decoration:underline;text-underline-offset:3px">What Lifecycle OS is&nbsp;→</a></p>
 
     <!-- LIVE DEMO -->
     <div class="demo">
-      <h2>The default subject: anchit-tandon.com</h2>
-      <div class="sub">Loaded with me by default — a résumé marketed with a D2C growth approach to land a better role. The plan drafts live; edit the field to run it on any brand.</div>
+      <h2>Pick a brand, get the whole plan</h2>
+      <div class="sub">It opens on the brand you last used in Lifecycle OS. The plan drafts live; edit the field to run it on any brand.</div>
       <div class="row">
-        <input id="brand" type="text" placeholder="Brand or person — defaults to Anchit Tandon" autocomplete="off" />
-        <input id="url" type="text" placeholder="Website (optional) — e.g. anchit-tandon.com" autocomplete="off" style="flex:0 1 260px;" />
+        <input id="brand" type="text" placeholder="Brand name" aria-label="Brand name" autocomplete="off" />
+        <input id="url" type="text" placeholder="Website (optional)" aria-label="Website (optional)" autocomplete="off" style="flex:0 1 260px;" />
         <button class="btn" id="go">Generate plan</button>
-      </div>
-      <div class="chips">
-        <span class="lbl">Subject:</span>
-        <button class="chip" data-b="Anchit Tandon" data-u="anchit-tandon.com">↺ Anchit Tandon (default)</button>
       </div>
       <div class="loading" id="loading"><span class="spinner"></span><span id="loadingText">Designing the growth plan…</span></div>
       <div class="err" id="err"></div>
@@ -398,6 +394,7 @@
     </footer>
   </div>
 
+<script src="/lifecycle-os-kit.js"></script>
 <script>
 (function(){
   'use strict';
@@ -525,7 +522,7 @@
 
   function run(noScroll){
     var brand=brandEl.value.trim(), url=urlEl.value.trim();
-    if(!brand && !url){ brand='Anchit Tandon'; url='anchit-tandon.com'; brandEl.value=brand; urlEl.value=url; }
+    if(!brand && !url){ var d=LOS.subject(); brand=d.brand; url=d.url||''; brandEl.value=brand; urlEl.value=url; }
     errEl.style.display='none'; resEl.style.display='none';
     goEl.disabled=true; loadEl.classList.add('on'); pv=0; loadTxt.textContent=phrases[0];
     timer=setInterval(function(){ pv=(pv+1)%phrases.length; loadTxt.textContent=phrases[pv]; }, 1400);
@@ -679,9 +676,9 @@
     el.innerHTML=out; el.style.display='block';
   }
 
-  // Default subject: anchit-tandon.com — preload and draft the plan on open,
-  // without scrolling past the hero.
-  brandEl.value='Anchit Tandon'; urlEl.value='anchit-tandon.com';
+  // Open on the shared Lifecycle OS subject and draft the plan, without
+  // scrolling past the hero.
+  var subj=LOS.subject(); brandEl.value=subj.brand; urlEl.value=subj.url||'';
   run(true);
 })();
 </script>
