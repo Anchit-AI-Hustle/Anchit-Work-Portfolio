@@ -393,15 +393,20 @@
     '@keyframes cinSheen{from{transform:translate3d(-130%,0,0) skewX(-14deg);opacity:0}' +
       '18%{opacity:1}to{transform:translate3d(130%,0,0) skewX(-14deg);opacity:0}}',
     '.cin-sheen{position:relative}',
+    // The layer itself never moves and clips; the light that crosses it is
+    // its ::before. Translating the layer meant every sheen in flight sat up
+    // to 130% outside its panel, and a page scrolled sideways while a grid of
+    // panels arrived at once (lifecycle-os-analysis: 2,637px at 1440).
     '.cin-sheen>.cin-sheen-l{position:absolute;inset:0;z-index:4;pointer-events:none;' +
-      'border-radius:inherit;opacity:0;background:linear-gradient(100deg,transparent 40%,' +
-      'rgba(255,183,54,.16) 50%,transparent 60%)}',
+      'border-radius:inherit;overflow:hidden}',
+    '.cin-sheen>.cin-sheen-l::before{content:"";position:absolute;inset:0;opacity:0;' +
+      'background:linear-gradient(100deg,transparent 40%,rgba(255,183,54,.16) 50%,transparent 60%)}',
     // backwards, not both: with `both` every sheen stayed parked at its end
     // keyframe, 130% to the right of its panel. Invisible at opacity 0, but
     // still in the layout, so any page whose body does not clip overflow
     // (marketing-101, lifecycle-os-analysis) scrolled sideways on every phone.
     // Back at rest the layer is inset:0 and opacity 0 — the same look.
-    '.cin-sheen.cin-in>.cin-sheen-l,.cin-in .cin-sheen>.cin-sheen-l' +
+    '.cin-sheen.cin-in>.cin-sheen-l::before,.cin-in .cin-sheen>.cin-sheen-l::before' +
       '{animation:cinSheen 1.15s cubic-bezier(.16,1,.3,1) .16s 1 backwards}',
 
     // A specular highlight that tracks the pointer across a panel. --mx/--my

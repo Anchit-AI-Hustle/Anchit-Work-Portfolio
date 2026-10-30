@@ -13,7 +13,7 @@ brew install gh
 gh auth login
 
 # One-shot: clean clone outside iCloud + copy your edits + push + enable auto-sync
-bash "/Users/anchittandon/Library/Mobile Documents/com~apple~CloudDocs/ANCHIT'S AI HUSTLE/Anchit-Work-Portfolio/scripts/setup-git-and-sync.sh"
+bash "$HOME/Library/Mobile Documents/com~apple~CloudDocs/ANCHIT'S AI HUSTLE/Anchit-Work-Portfolio/scripts/setup-git-and-sync.sh"
 ```
 
 That script:

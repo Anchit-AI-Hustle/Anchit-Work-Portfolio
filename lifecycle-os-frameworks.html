@@ -101,7 +101,7 @@
     <div class="eyebrow"><span class="dot"></span>Lifecycle OS · Frameworks</div>
     <h1><span class="grad">Frameworks</span></h1>
     <p class="lede">The classic growth frameworks - applied <em>concretely</em> to the subject, not in the abstract. Pick a ready-made D2C brand below, or type any brand.</p>
-    <div class="subject"><span class="lbl">Subject</span><input id="brand" type="text"><input id="url" type="text" style="flex:0 1 220px"><button id="go">Apply frameworks</button></div>
+    <div class="subject"><span class="lbl">Subject</span><input id="brand" aria-label="Brand name" type="text"><input id="url" aria-label="Website (optional)" type="text" style="flex:0 1 220px"><button id="go">Apply frameworks</button></div>
     <div id="out" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="font-family:var(--font-display);font-size:clamp(19px,3vw,24px);font-weight:600" id="hd"></div><span class="badge" id="bdg"></span></div>
       <div class="sectitle">Frameworks applied</div><div class="grid" id="fws"></div>
@@ -124,6 +124,8 @@
     return [
       {nm:'AARRR (Pirate funnel)',sub:'Applied to '+f.name,steps:[['Acquisition','Popup + paid social capturing email/SMS with a first-order offer.'],['Activation','Welcome flow → first order within 7 days.'],['Retention','Replenishment + cross-sell at the consumption cycle; win-back at 60–90d.'],['Referral','Post-delivery review request routes happy buyers to referral.'],['Revenue','VIP tier + subscription for the top '+A[2]+'.']]},
       {nm:'RFM',sub:'Segmenting the base',steps:[['Recency','Days since last order → drives win-back timing.'],['Frequency','Order count → separates one-timers from loyal.'],['Monetary','Spend → isolates VIP / high-LTV for concierge touches.']]},
+      {nm:'Jobs-to-be-Done',sub:'What a customer "hires" '+f.name+' for',steps:[['Job','"'+f.one+'"'],['Proof','"'+f.wins[0]+'; '+(f.wins[1]||f.wins[0])+'."'],['Anxiety to kill','"Will it be worth it, and will I get it again easily?" → reviews, guarantees and one-tap reorder answer it.']]},
+      {nm:'Bullseye',sub:'Picking the channel that moves the needle',steps:[['Outer ring','Brainstorm every channel: paid social, search, creators, PR, marketplaces, email/SMS, referrals.'],['Middle ring','Run small, cheap tests on the three most plausible for '+(f.audiences[0]||'first-time buyers').toLowerCase()+'.'],['Inner ring','Double down on the one that wins on CAC and repeat rate; park the rest.']]},
       {nm:'Hook model',sub:'Building the habit',steps:[['Trigger','Timely email/SMS at the reorder moment.'],['Action','One-tap reorder / replenish.'],['Reward','Loyalty perk or surprise gift at milestones.'],['Investment','Saved preferences make the next order easier.']]},
     ];
   }

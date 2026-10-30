@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Residence — a hotel, unveiled</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="icon" href="/icons/favicon.svg">
 
 <!-- ═══════════════════════════════════════════════════════════════════════
@@ -16,7 +19,7 @@
      Written to work BEFORE the clips exist. Every section ships a CSS
      performance of its own move, and swaps to video the moment its file appears
      in assets/hotel/ — checked per section, so one clip landing doesn't depend
-     on the others. Prompts and file names: GOOGLE-FLOW-HOTEL.md
+     on the others. Each clip has a CSS stand-in.
      ═══════════════════════════════════════════════════════════════════════ -->
 
 <style>
@@ -259,9 +262,9 @@
 
 <header class="lede">
   <div>
-    <p class="eyebrow">Google Flow · six clips · golden hour</p>
+    <p class="eyebrow">Scroll-driven · six scenes · golden hour</p>
     <h1>The Residence</h1>
-    <p class="sub">A film you scroll. The cloth comes off the building at your pace — then the camera keeps moving, and doesn't stop until the water closes over it.</p>
+    <p class="sub">A story you scroll. The cloth comes off the building at your pace — then the scenes keep moving, and don't stop until the water closes over them.</p>
     <p class="cue">Scroll to lift</p>
   </div>
 </header>
@@ -319,7 +322,7 @@
       <div class="caption">
         <p class="eyebrow">The bar</p>
         <h2>Amber, backlit, in rows.</h2>
-        <p>The camera tracks the rack, then keeps going until the lounge opens out behind it.</p>
+        <p>The view tracks the rack, then keeps going until the lounge opens out behind it.</p>
       </div>
     </div>
   </div>
@@ -381,7 +384,7 @@
 </section>
 
 <footer>
-  <p>Six clips, generated in Google Flow. Prompts, file names and encoding settings: GOOGLE-FLOW-HOTEL.md</p>
+  <p>Six scenes, each drawn in CSS and built to swap in a video clip the moment one is added.</p>
   <p style="margin-top:10px;"><a href="/">← Anchit Tandon</a></p>
 </footer>
 
@@ -422,7 +425,7 @@
   // stage only switches to video after 'loadedmetadata' actually fires. Until
   // then the CSS fallback is what's on screen, which is why the page works with
   // no clips at all.
-  // The clips are not in the repo yet (assets/hotel/ does not exist), so every
+  // The clips are not published yet (assets/hotel/ does not exist), so every
   // visitor fired six 404s before falling back. The fallback is correct and the
   // page is designed to work without them — but there is no reason to ask six
   // times. Probe the first clip; if it is not there, none of them are, so skip

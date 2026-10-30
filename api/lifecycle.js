@@ -1,4 +1,4 @@
-// /api/lifecycle — D2C-LifeCycle-OS demo engine.
+// /api/lifecycle — Lifecycle OS demo engine.
 //
 //   POST /api/lifecycle  → { plan, source }
 //
@@ -128,7 +128,7 @@ async function generate(prompt) {
   if (KEYS.cerebras()) providers.push(() => tryModels('cerebras', (m) => oaiChat('https://api.cerebras.ai/v1/chat/completions', KEYS.cerebras(), m, prompt, true)));
   const gk = KEYS.gemini();
   if (gk) providers.push(() => tryModels('gemini', (m) => geminiGen(gk, m, prompt)));
-  if (KEYS.openrouter()) providers.push(() => tryModels('openrouter', (m) => oaiChat('https://openrouter.ai/api/v1/chat/completions', KEYS.openrouter(), m, prompt, false, { 'HTTP-Referer': 'https://anchit-tandon.com/lifecycle-os-plan', 'X-Title': 'D2C-LifeCycle-OS' })));
+  if (KEYS.openrouter()) providers.push(() => tryModels('openrouter', (m) => oaiChat('https://openrouter.ai/api/v1/chat/completions', KEYS.openrouter(), m, prompt, false, { 'HTTP-Referer': 'https://anchit-tandon.com/lifecycle-os-plan', 'X-Title': 'Lifecycle OS' })));
   // Why the failures are collected rather than swallowed: a silent `catch`
   // here is what made a fully dead cascade look identical to "no key set" —
   // both produced the deterministic template with nothing to explain it.
@@ -237,7 +237,7 @@ function normalizeSmartBrain(b) {
 }
 
 function buildPrompt(brand, url, category, profileText, benchmarkContext) {
-  return `You are D2C-LifeCycle-OS, an AI that designs plug-and-play lifecycle marketing automation for any direct-to-consumer brand — grounded in INDUSTRY-STANDARD benchmarks for the brand's category, the way competitor-discovery platforms like SimilarWeb and SEMrush profile a market.
+  return `You are Lifecycle OS, an AI that designs plug-and-play lifecycle marketing automation for any direct-to-consumer brand — grounded in INDUSTRY-STANDARD benchmarks for the brand's category, the way competitor-discovery platforms like SimilarWeb and SEMrush profile a market.
 
 First infer the brand's category and its peer/competitor set (3-6 comparable D2C brands in the same industry and price tier). Then establish industry-standard benchmarks for that peer set — traffic mix / channel split, typical AOV band, repeat-purchase / retention rate band, email revenue share, and seasonality. Use these baselines to ground the entire lifecycle plan. Be specific to the brand and its category — no generic filler. Use realistic, quantified targets that reflect the industry standard.
 

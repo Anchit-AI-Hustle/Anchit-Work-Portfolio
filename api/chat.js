@@ -92,8 +92,7 @@ function isOperator(req) {
   const expected = (process.env.CHAT_DEBUG_TOKEN || '').trim();
   if (!expected) return false;                       // unset → nobody, not everybody
   const given = (
-    req.headers['x-debug-token'] ||
-    (/[?&]token=([^&]+)/.exec(req.url || '') || [])[1] ||
+    req.headers['x-debug-token'] ||                  // header only: a query-string token ends up in logs
     ''
   ).toString().trim();
   if (given.length !== expected.length) return false;
@@ -167,6 +166,10 @@ async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(okOrigin ? 200 : 403).end();
   if (!okOrigin) return res.status(403).json({ error: 'origin_not_allowed' });
+  // Browsers always send Origin on a POST; one that crossed the network
+  // without it is a script using this as a free model proxy.
+  const fwd = (req.headers || {})['x-forwarded-for'];
+  if (req.method === 'POST' && !origin && fwd) return res.status(403).json({ error: 'origin_required' });
 
   // Applied to POST only: GET is the cheap diagnostic and costs nothing.
   if (req.method === 'POST' && rateLimited(req)) {
@@ -181,6 +184,8 @@ async function handler(req, res) {
   // same way after a deploy.
   if (req.method === 'GET') {
     res.setHeader('Cache-Control', 'no-store');
+    // Which providers hold a key is the operator's business, not a stranger's.
+    if (!isOperator(req)) return res.status(200).json({ ok: true });
     const out = {
       order: ['google-agent', 'claude'],
       configured: {
@@ -279,7 +284,7 @@ async function handler(req, res) {
 
   if (!apiKey) {
     try { return await viaFree(); }
-    catch (e) { return res.status(502).json({ error: 'upstream', reason: String(e.message).slice(0, 200) }); }
+    catch (e) { console.error('chat: upstream', String(e.message).slice(0, 200)); return res.status(502).json({ error: 'upstream' }); }
   }
 
   try {
@@ -327,7 +332,8 @@ async function handler(req, res) {
     if (anyFree) {
       try { return await viaFree(); } catch { /* report the original failure */ }
     }
-    return res.status(502).json({ error: 'fetch_failed', message: String(e).slice(0, 200) });
+    console.error('chat: fetch_failed', String(e).slice(0, 200));
+    return res.status(502).json({ error: 'fetch_failed' });
   }
 }
 

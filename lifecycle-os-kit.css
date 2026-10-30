@@ -1,21 +1,21 @@
 /* Lifecycle OS · shared tool-page kit — anchit-tandon.com champagne palette */
 :root, :root[data-theme="dark"]{
   --bg:#0F0D0A; --bg-elev:#1A1814; --bg-deep:#060503;
-  --ink:#FBF5EC; --ink-dim:#A39E94; --ink-mute:#5A554E;
+  --ink:#FBF5EC; --ink-dim:#A39E94; --ink-mute:#9A9388;
   --rule:#2A261F; --rule-strong:#3D3830;
   --primary:#FF6940; --primary-deep:#FF4D1F; --primary-soft:rgba(255,105,64,.12);
-  --accent:#2EE5AC; --gold:#c9a96e;
+  --accent:#c9a96e; --gold:#c9a96e;
   --font-display:'Fraunces',ui-serif,serif; --font-body:'Inter',ui-sans-serif,system-ui,sans-serif; --font-mono:'JetBrains Mono',ui-monospace,monospace;
 }
 :root[data-theme="light"]{
   --bg:#FBF5EC; --bg-elev:#FFFFFF; --bg-deep:#F2EADC;
-  --ink:#161312; --ink-dim:#5A554E; --ink-mute:#A39E94;
+  --ink:#161312; --ink-dim:#5A554E; --ink-mute:#6E685F;
   --rule:#E5DCC7; --rule-strong:#C9BFA8;
-  --primary:#FF4D1F; --primary-deep:#D63B12; --accent:#00B584; --gold:#a8863f;
+  --primary:#FF4D1F; --primary-deep:#D63B12; --accent:#8a6d2f; --gold:#a8863f;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-body{ background:var(--bg); color:var(--ink); font-family:var(--font-body); line-height:1.6; -webkit-font-smoothing:antialiased; overflow-x:hidden; min-height:100vh; }
+html{-webkit-text-size-adjust:100%}
+body{ background:var(--bg); color:var(--ink); font-family:var(--font-body); line-height:1.6; -webkit-font-smoothing:antialiased; overflow-x:clip; min-height:100vh; }
 body::before{ content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
   background:radial-gradient(44% 38% at 14% 8%, rgba(255,105,64,.12), transparent 60%), radial-gradient(40% 36% at 88% 16%, rgba(201,169,110,.12), transparent 62%); }
 .wrap{ position:relative; z-index:1; max-width:1120px; margin:0 auto; padding:clamp(20px,4vw,44px); }
@@ -99,7 +99,7 @@ svg.chart{ width:100%; height:auto; display:block; }
 .applybtn{ margin-top:12px; background:var(--primary); color:#1a0d06; border:none; border-radius:10px; padding:11px 20px; font-family:var(--font-mono); font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; cursor:pointer; }
 .applybtn:hover{ box-shadow:0 8px 22px rgba(255,105,64,.3); }
 .ctxnote{ font-size:12px; color:var(--ink-mute); margin-top:8px; }
-.ctxcard{ background:var(--accent-soft,rgba(46,229,172,.08)); border:1px solid var(--accent); border-radius:12px; padding:14px 16px; margin-top:12px; }
+.ctxcard{ background:var(--accent-soft,rgba(201,169,110,.08)); border:1px solid var(--accent); border-radius:12px; padding:14px 16px; margin-top:12px; }
 .ctxcard .k{ font-family:var(--font-mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); margin-bottom:6px; }
 .ctxcard p{ font-size:13.5px; color:var(--ink); }
 

@@ -83,7 +83,7 @@
     document.querySelectorAll('[data-anchit-signin]').forEach(function (el) {
       var p = el.querySelector('.anchit-auth-msg') || document.createElement('p');
       p.className = 'anchit-auth-msg';
-      p.style.cssText = 'margin:8px 0 0;font:500 12px/1.4 system-ui,sans-serif;color:#b3261e';
+      p.style.cssText = 'margin:8px 0 0;font:600 12px/1.4 system-ui,sans-serif;color:inherit';
       p.textContent = msg;
       if (!p.parentNode) el.appendChild(p);
     });

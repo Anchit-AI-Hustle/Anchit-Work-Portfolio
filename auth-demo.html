@@ -54,11 +54,11 @@
 
   <div class="card">
     <h2 style="margin-top:0;font-size:19px">Add it to any project</h2>
-    <pre>&lt;script src="https://anchit-tandon.com/assets/anchit-auth.js"
+    <pre tabindex="0">&lt;script src="https://anchit-tandon.com/assets/anchit-auth.js"
         data-client-id="YOUR_GOOGLE_CLIENT_ID"&gt;&lt;/script&gt;
 &lt;div data-anchit-signin&gt;&lt;/div&gt;</pre>
     <p>Then read the user anywhere:</p>
-    <pre>AnchitAuth.onChange(user =&gt; {
+    <pre tabindex="0">AnchitAuth.onChange(user =&gt; {
   if (user) console.log(user.email, user.name);
 });
 

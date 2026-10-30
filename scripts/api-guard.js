@@ -36,7 +36,11 @@ is('a domain we do not own is refused, even one named for this site', originAllo
 is('a Vercel preview of OURS is allowed', originAllowed('https://anchit-work-portfolio-git-x-anchit-ai-hustle.vercel.app'), true);
 is("someone else's vercel.app deployment is NOT", originAllowed('https://evil-project-abc123-someone-else.vercel.app'), false);
 is('a bare vercel.app is not', originAllowed('https://vercel.app'), false);
-is('no Origin at all is allowed: that is a script, not a page', call(undefined, '1.1.1.3'),
+is('a GET with no Origin is allowed: browsers omit it on same-origin GETs', call(undefined, '1.1.1.3', 'GET'),
+   { stopped: false, code: 0, acao: null, err: null });
+is('a POST with no Origin from the network is refused: browsers always send one', call(undefined, '1.1.1.8'),
+   { stopped: true, code: 403, acao: null, err: 'origin_required' });
+is('a POST with no Origin and no address (a direct handler call) still runs', call(undefined, undefined),
    { stopped: false, code: 0, acao: null, err: null });
 is('another site is refused', call('https://not-anchits-site.example', '1.1.1.4'),
    { stopped: true, code: 403, acao: null, err: 'origin_not_allowed' });
@@ -122,13 +126,21 @@ is('a flood does not grow its own bucket', (() => {
   is('apply still fetches a public one', asked, ['http://93.184.216.34/cv']);
   globalThis.fetch = realFetch;
 
-  const run = async (ip) => {
+  // /api/apply now goes through guard(), like the other paid routes, so it
+  // refuses an origin-less POST that arrived over the network before it gets
+  // as far as counting. Both halves are checked.
+  const run = async (ip, origin) => {
+    const headers = { 'x-forwarded-for': ip };
+    if (origin) headers.origin = origin;
     const res = { code: 0, body: null, setHeader() {}, status(c) { this.code = c; return this; }, json(b) { this.body = b; return this; }, end() { return this; } };
-    await apply({ method: 'POST', headers: { 'x-forwarded-for': ip }, socket: {}, body: {} }, res);
+    await apply({ method: 'POST', headers, socket: {}, body: {} }, res);
     return res.code;
   };
+  is('apply refuses a POST with no Origin from a real address', await run('5.5.5.5'), 403);
+
+  const ORIGIN = 'https://anchit-tandon.com';
   const codes = [];
-  for (let i = 0; i < 5; i++) codes.push(await run('5.5.5.5'));
+  for (let i = 0; i < 5; i++) codes.push(await run('5.5.5.6', ORIGIN));
   is('apply is rate-limited: the 5th call in a minute is refused', codes[4], 429);
   is('apply serves the first four', codes.slice(0, 4).every((c) => c !== 429), true);
 

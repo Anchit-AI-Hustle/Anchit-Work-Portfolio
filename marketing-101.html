@@ -110,11 +110,13 @@ button{font:inherit;cursor:pointer}
 /* ---------- MAIN ---------- */
 .main{min-width:0;display:flex;flex-direction:column}
 .topbar{
-  position:sticky;top:0;z-index:40;background:rgba(244,242,238,.86);backdrop-filter:blur(14px);
+  position:sticky;top:0;z-index:40;background:rgba(15,13,10,.88);backdrop-filter:blur(14px);
   border-bottom:1px solid var(--line);padding:11px 34px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
 }
 .crumb{font-family:var(--mono);font-size:.62rem;letter-spacing:.13em;color:var(--quiet);flex:1;min-width:120px}
 .crumb b{color:var(--ink)}
+/* At phone width the floating home chip sits where the crumb is. */
+@media(max-width:480px){.crumb{display:none}}
 .tb-btn{background:var(--card);border:1px solid var(--line);border-radius:99px;padding:6px 13px;
   font-family:var(--mono);font-size:.6rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink);
   display:inline-flex;align-items:center;gap:6px}
@@ -850,7 +852,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
   </div>
   <div class="sec-head reveal"><span class="n">THE SHAPE OF IT</span><span class="l"></span></div><div class="reveal">
 <figure class="dg-wrap">
-  <div class="dg-scroll">
+  <div class="dg-scroll" tabindex="0" role="region" aria-label="Diagram, scrolls sideways">
   <svg class="dg" viewBox="0 0 900 350" role="img" aria-label="Every chapter runs the same four moves. Reading alone never moves the fader." data-dg="orientation">
     <defs>
       <marker id="ah-orientation" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
@@ -1001,7 +1003,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
   </div>
   <div class="sec-head reveal"><span class="n">THE SHAPE OF IT</span><span class="l"></span></div><div class="reveal">
 <figure class="dg-wrap">
-  <div class="dg-scroll">
+  <div class="dg-scroll" tabindex="0" role="region" aria-label="Diagram, scrolls sideways">
   <svg class="dg" viewBox="0 0 900 368" role="img" aria-label="Same effort, two shapes. The funnel spends to fill the top; the loop is refilled by its own output." data-dg="growth">
     <defs>
       <marker id="ah-growth" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
@@ -1020,7 +1022,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
   <div class="video-frame" data-vid="hyYCn_kAngI">
     <picture><source type="image/webp" srcset="https://i.ytimg.com/vi_webp/hyYCn_kAngI/hqdefault.webp"><img class="vf-poster" src="https://i.ytimg.com/vi/hyYCn_kAngI/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async"></picture>
     <button class="vf-play" aria-label="Play: How to Get Your First Customers"><span class="vf-btn"></span></button>
-    <span class="vf-cap">Click to play · loads from YouTube only when you ask</span>
+    <span class="vf-cap">Click to play · plays from YouTube only when you click</span>
   </div>
   <div class="video-meta">
     <b>How to Get Your First Customers</b><span>Y Combinator — Gustaf Alströmer (former Head of Growth, Airbnb)</span>
@@ -1206,7 +1208,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
   </div>
   <div class="sec-head reveal"><span class="n">THE SHAPE OF IT</span><span class="l"></span></div><div class="reveal">
 <figure class="dg-wrap">
-  <div class="dg-scroll">
+  <div class="dg-scroll" tabindex="0" role="region" aria-label="Diagram, scrolls sideways">
   <svg class="dg" viewBox="0 0 900 300" role="img" aria-label="Score every candidate segment on the same five weighted criteria, then commit to the top one." data-dg="audience">
     <defs>
       <marker id="ah-audience" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
@@ -1225,7 +1227,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
   <div class="video-frame" data-vid="z1iF1c8w5Lg">
     <picture><source type="image/webp" srcset="https://i.ytimg.com/vi_webp/z1iF1c8w5Lg/hqdefault.webp"><img class="vf-poster" src="https://i.ytimg.com/vi/z1iF1c8w5Lg/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async"></picture>
     <button class="vf-play" aria-label="Play: How to Talk to Users"><span class="vf-btn"></span></button>
-    <span class="vf-cap">Click to play · loads from YouTube only when you ask</span>
+    <span class="vf-cap">Click to play · plays from YouTube only when you click</span>
   </div>
   <div class="video-meta">
     <b>How to Talk to Users</b><span>Y Combinator — Startup School</span>
@@ -1413,7 +1415,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
   </div>
   <div class="sec-head reveal"><span class="n">THE SHAPE OF IT</span><span class="l"></span></div><div class="reveal">
 <figure class="dg-wrap">
-  <div class="dg-scroll">
+  <div class="dg-scroll" tabindex="0" role="region" aria-label="Diagram, scrolls sideways">
   <svg class="dg" viewBox="0 0 900 350" role="img" aria-label="April Dunford's five components in order. Skip one and the statement below cannot be written honestly." data-dg="positioning">
     <defs>
       <marker id="ah-positioning" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
@@ -1432,7 +1434,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
   <div class="video-frame" data-vid="hdjlCLb9Hl8">
     <picture><source type="image/webp" srcset="https://i.ytimg.com/vi_webp/hdjlCLb9Hl8/hqdefault.webp"><img class="vf-poster" src="https://i.ytimg.com/vi/hdjlCLb9Hl8/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async"></picture>
     <button class="vf-play" aria-label="Play: How to nail your product positioning"><span class="vf-btn"></span></button>
-    <span class="vf-cap">Click to play · loads from YouTube only when you ask</span>
+    <span class="vf-cap">Click to play · plays from YouTube only when you click</span>
   </div>
   <div class="video-meta">
     <b>How to nail your product positioning</b><span>Lenny's Podcast — April Dunford, author of <i>Obviously Awesome</i></span>
@@ -1621,7 +1623,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
   </div>
   <div class="sec-head reveal"><span class="n">THE SHAPE OF IT</span><span class="l"></span></div><div class="reveal">
 <figure class="dg-wrap">
-  <div class="dg-scroll">
+  <div class="dg-scroll" tabindex="0" role="region" aria-label="Diagram, scrolls sideways">
   <svg class="dg" viewBox="0 0 900 355" role="img" aria-label="One claim, three proofs, unlimited expressions — and every expression scored on six structural dimensions." data-dg="message">
     <defs>
       <marker id="ah-message" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
@@ -1640,7 +1642,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
   <div class="video-frame" data-vid="u4ZoJKF_VuA">
     <picture><source type="image/webp" srcset="https://i.ytimg.com/vi_webp/u4ZoJKF_VuA/hqdefault.webp"><img class="vf-poster" src="https://i.ytimg.com/vi/u4ZoJKF_VuA/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async"></picture>
     <button class="vf-play" aria-label="Play: How great leaders inspire action"><span class="vf-btn"></span></button>
-    <span class="vf-cap">Click to play · loads from YouTube only when you ask</span>
+    <span class="vf-cap">Click to play · plays from YouTube only when you click</span>
   </div>
   <div class="video-meta">
     <b>How great leaders inspire action</b><span>TEDx — Simon Sinek</span>
@@ -1824,7 +1826,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
   </div>
   <div class="sec-head reveal"><span class="n">THE SHAPE OF IT</span><span class="l"></span></div><div class="reveal">
 <figure class="dg-wrap">
-  <div class="dg-scroll">
+  <div class="dg-scroll" tabindex="0" role="region" aria-label="Diagram, scrolls sideways">
   <svg class="dg" viewBox="0 0 900 420" role="img" aria-label="Match the page type to the intent, then earn the two different surfaces the same crawl produces." data-dg="search">
     <defs>
       <marker id="ah-search" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
@@ -1843,7 +1845,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
   <div class="video-frame" data-vid="xsVTqzratPs">
     <picture><source type="image/webp" srcset="https://i.ytimg.com/vi_webp/xsVTqzratPs/hqdefault.webp"><img class="vf-poster" src="https://i.ytimg.com/vi/xsVTqzratPs/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async"></picture>
     <button class="vf-play" aria-label="Play: Complete SEO Course for Beginners"><span class="vf-btn"></span></button>
-    <span class="vf-cap">Click to play · loads from YouTube only when you ask</span>
+    <span class="vf-cap">Click to play · plays from YouTube only when you click</span>
   </div>
   <div class="video-meta">
     <b>Complete SEO Course for Beginners</b><span>Ahrefs — Sam Oh</span>
@@ -2036,7 +2038,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
   </div>
   <div class="sec-head reveal"><span class="n">THE SHAPE OF IT</span><span class="l"></span></div><div class="reveal">
 <figure class="dg-wrap">
-  <div class="dg-scroll">
+  <div class="dg-scroll" tabindex="0" role="region" aria-label="Diagram, scrolls sideways">
   <svg class="dg" viewBox="0 0 900 345" role="img" aria-label="Capture language, build one deep pillar, atomise it, distribute, measure, then bank the winners as templates." data-dg="content">
     <defs>
       <marker id="ah-content" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
@@ -2055,7 +2057,7 @@ abbr.gl:hover:after,abbr.gl:focus:after,abbr.gl:hover:before,abbr.gl:focus:befor
   <div class="video-frame" data-vid="x5hH_lt8Guw">
     <picture><source type="image/webp" srcset="https://i.ytimg.com/vi_webp/x5hH_lt8Guw/hqdefault.webp"><img class="vf-poster" src="https://i.ytimg.com/vi/x5hH_lt8Guw/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async"></picture>
     <button class="vf-play" aria-label="Play: How to use Ahrefs to improve SEO"><span class="vf-btn"></span></button>
-    <span class="vf-cap">Click to play · loads from YouTube only when you ask</span>
+    <span class="vf-cap">Click to play · plays from YouTube only when you click</span>
   </div>
   <div class="video-meta">
     <b>How to use Ahrefs to improve SEO</b><span>Ahrefs — official tutorial</span>
@@ -2249,7 +2251,7 @@ Preference centres</textarea></div>
   </div>
   <div class="sec-head reveal"><span class="n">THE SHAPE OF IT</span><span class="l"></span></div><div class="reveal">
 <figure class="dg-wrap">
-  <div class="dg-scroll">
+  <div class="dg-scroll" tabindex="0" role="region" aria-label="Diagram, scrolls sideways">
   <svg class="dg" viewBox="0 0 900 390" role="img" aria-label="Volume has a knee. Past it, the system that reads signal and banks templates beats the system that posts more." data-dg="social">
     <defs>
       <marker id="ah-social" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
@@ -2268,7 +2270,7 @@ Preference centres</textarea></div>
   <div class="video-frame" data-vid="z1iF1c8w5Lg">
     <picture><source type="image/webp" srcset="https://i.ytimg.com/vi_webp/z1iF1c8w5Lg/hqdefault.webp"><img class="vf-poster" src="https://i.ytimg.com/vi/z1iF1c8w5Lg/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async"></picture>
     <button class="vf-play" aria-label="Play: How to Talk to Users"><span class="vf-btn"></span></button>
-    <span class="vf-cap">Click to play · loads from YouTube only when you ask</span>
+    <span class="vf-cap">Click to play · plays from YouTube only when you click</span>
   </div>
   <div class="video-meta">
     <b>How to Talk to Users</b><span>Y Combinator — Startup School</span>
@@ -2452,7 +2454,7 @@ Preference centres</textarea></div>
   </div>
   <div class="sec-head reveal"><span class="n">THE SHAPE OF IT</span><span class="l"></span></div><div class="reveal">
 <figure class="dg-wrap">
-  <div class="dg-scroll">
+  <div class="dg-scroll" tabindex="0" role="region" aria-label="Diagram, scrolls sideways">
   <svg class="dg" viewBox="0 0 900 450" role="img" aria-label="Six inputs produce one gate. Below break-even ROAS, more spend buys a bigger loss." data-dg="paid">
     <defs>
       <marker id="ah-paid" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
@@ -2471,7 +2473,7 @@ Preference centres</textarea></div>
   <div class="video-frame" data-vid="-Y-RQtYLpHM">
     <picture><source type="image/webp" srcset="https://i.ytimg.com/vi_webp/-Y-RQtYLpHM/hqdefault.webp"><img class="vf-poster" src="https://i.ytimg.com/vi/-Y-RQtYLpHM/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async"></picture>
     <button class="vf-play" aria-label="Play: Google Analytics 4 tutorial for beginners"><span class="vf-btn"></span></button>
-    <span class="vf-cap">Click to play · loads from YouTube only when you ask</span>
+    <span class="vf-cap">Click to play · plays from YouTube only when you click</span>
   </div>
   <div class="video-meta">
     <b>Google Analytics 4 tutorial for beginners</b><span>Analytics Mania</span>
@@ -2658,7 +2660,7 @@ Preference centres</textarea></div>
   </div>
   <div class="sec-head reveal"><span class="n">THE SHAPE OF IT</span><span class="l"></span></div><div class="reveal">
 <figure class="dg-wrap">
-  <div class="dg-scroll">
+  <div class="dg-scroll" tabindex="0" role="region" aria-label="Diagram, scrolls sideways">
   <svg class="dg" viewBox="0 0 900 420" role="img" aria-label="Six stages, six flows. The gap between the two curves is the entire return on lifecycle work." data-dg="lifecycle">
     <defs>
       <marker id="ah-lifecycle" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
@@ -2677,7 +2679,7 @@ Preference centres</textarea></div>
   <div class="video-frame" data-vid="hyYCn_kAngI">
     <picture><source type="image/webp" srcset="https://i.ytimg.com/vi_webp/hyYCn_kAngI/hqdefault.webp"><img class="vf-poster" src="https://i.ytimg.com/vi/hyYCn_kAngI/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async"></picture>
     <button class="vf-play" aria-label="Play: How to Get Your First Customers"><span class="vf-btn"></span></button>
-    <span class="vf-cap">Click to play · loads from YouTube only when you ask</span>
+    <span class="vf-cap">Click to play · plays from YouTube only when you click</span>
   </div>
   <div class="video-meta">
     <b>How to Get Your First Customers</b><span>Y Combinator — Gustaf Alströmer</span>
@@ -2861,7 +2863,7 @@ Preference centres</textarea></div>
   </div>
   <div class="sec-head reveal"><span class="n">THE SHAPE OF IT</span><span class="l"></span></div><div class="reveal">
 <figure class="dg-wrap">
-  <div class="dg-scroll">
+  <div class="dg-scroll" tabindex="0" role="region" aria-label="Diagram, scrolls sideways">
   <svg class="dg" viewBox="0 0 900 500" role="img" aria-label="The decision tree runs before the test, not after. Power first, p-value second." data-dg="analytics">
     <defs>
       <marker id="ah-analytics" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
@@ -2880,7 +2882,7 @@ Preference centres</textarea></div>
   <div class="video-frame" data-vid="-Y-RQtYLpHM">
     <picture><source type="image/webp" srcset="https://i.ytimg.com/vi_webp/-Y-RQtYLpHM/hqdefault.webp"><img class="vf-poster" src="https://i.ytimg.com/vi/-Y-RQtYLpHM/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async"></picture>
     <button class="vf-play" aria-label="Play: Google Analytics 4 tutorial for beginners"><span class="vf-btn"></span></button>
-    <span class="vf-cap">Click to play · loads from YouTube only when you ask</span>
+    <span class="vf-cap">Click to play · plays from YouTube only when you click</span>
   </div>
   <div class="video-meta">
     <b>Google Analytics 4 tutorial for beginners</b><span>Analytics Mania</span>
@@ -3070,7 +3072,7 @@ Preference centres</textarea></div>
   </div>
   <div class="sec-head reveal"><span class="n">THE SHAPE OF IT</span><span class="l"></span></div><div class="reveal">
 <figure class="dg-wrap">
-  <div class="dg-scroll">
+  <div class="dg-scroll" tabindex="0" role="region" aria-label="Diagram, scrolls sideways">
   <svg class="dg" viewBox="0 0 900 470" role="img" aria-label="The plan is a shape, not a wish list: three phases, six tracks, and a fixed split of the budget." data-dg="capstone">
     <defs>
       <marker id="ah-capstone" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
@@ -3089,7 +3091,7 @@ Preference centres</textarea></div>
   <div class="video-frame" data-vid="hdjlCLb9Hl8">
     <picture><source type="image/webp" srcset="https://i.ytimg.com/vi_webp/hdjlCLb9Hl8/hqdefault.webp"><img class="vf-poster" src="https://i.ytimg.com/vi/hdjlCLb9Hl8/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async"></picture>
     <button class="vf-play" aria-label="Play: How to nail your product positioning"><span class="vf-btn"></span></button>
-    <span class="vf-cap">Click to play · loads from YouTube only when you ask</span>
+    <span class="vf-cap">Click to play · plays from YouTube only when you click</span>
   </div>
   <div class="video-meta">
     <b>How to nail your product positioning</b><span>Lenny's Podcast — April Dunford</span>
@@ -3318,16 +3320,18 @@ window.__GLOSSARY__ = {"AARRR": "Acquisition, activation, retention, referral, r
 (function(){
 'use strict';
 
-/* ---------- storage shim: window.storage if present, memory otherwise ---------- */
+/* ---------- storage shim: window.storage if present, else localStorage, else memory ---------- */
 var MEM = {};
 var STORE = {
   async get(k){
     try{ if(window.storage){ var r = await window.storage.get(k); return r? r.value : null; } }catch(e){}
+    try{ var l = localStorage.getItem(k); if(l!==null) return l; }catch(e){}
     try{ var v = MEM[k]; return v===undefined? null : v; }catch(e){ return null; }
   },
   async set(k,v){
     MEM[k]=v;
-    try{ if(window.storage){ await window.storage.set(k,v); } }catch(e){}
+    try{ if(window.storage){ await window.storage.set(k,v); return; } }catch(e){}
+    try{ localStorage.setItem(k,v); }catch(e){}
   }
 };
 
@@ -3518,7 +3522,7 @@ function bindNotes(){
 }
 
 /* ---------- video: real in-page embeds, loaded when the reader presses play ---------- */
-/* The poster has always said "loads from YouTube only when you ask", but the
+/* The poster has always said "plays from YouTube only when you click", but the
    player used to mount as soon as a frame came within 420px of the viewport:
    just reading chapter 01 pulled in ~1.3MB of YouTube scripts nobody asked
    for. The poster is now a true facade — nothing leaves the page until the
@@ -4826,8 +4830,7 @@ else boot();
 
 <!-- ============================================================
      Brought into the portfolio's motion system.
-     This page was live at /marketing-101 but its source was not in this repo
-     and not in any git history — it had no version control at all. It is here
+     This page was live at /marketing-101 but its source had no version control at all. It is here
      now so it can be maintained, and so it gets the same arrival choreography,
      surface treatment and Motion toggle as every other page on the site.
      ============================================================ -->

@@ -13,7 +13,7 @@
 
 // Model ids live in _models.js as a chain per provider, not one pinned id here.
 // Every id this file used to hardcode has since been retired by its provider.
-const { originAllowed, rateLimited, publicHttpUrl } = require('./_guard.js');
+const { originAllowed, guard, publicHttpUrl } = require('./_guard.js');
 const { tryModels, httpError, KEYS } = require('./_models.js');
 
 function haveAnyProvider() {
@@ -52,8 +52,9 @@ function stripTagBlocks(html, tag) {
 }
 
 // Fetch a portfolio/CV URL and reduce it to readable text. The URL is the
-// caller's, so it must point at the public internet (publicHttpUrl), a
-// redirect is not followed (it could point anywhere), and at most 1 MB is read.
+// caller's, so it must point at the public internet (publicHttpUrl, shared with
+// the other routes), a redirect is not followed (it could point anywhere), and
+// at most 1 MB is read.
 const MAX_PROFILE_BYTES = 1_000_000;
 async function fetchProfileFromUrl(url) {
   try {
@@ -190,10 +191,8 @@ async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
   // Each call spends up to 4,096 generated tokens and may fetch a page, and
   // with the sign-in gate unset it is open to anyone: cap it per caller.
-  if (rateLimited(req, 'apply', 4)) {
-    res.setHeader('Retry-After', '60');
-    return res.status(429).json({ error: 'rate_limited', message: 'Too many requests. Try again in a minute.' });
-  }
+  // guard() sends its own 429 with Retry-After, as on the other paid routes.
+  if (guard(req, res, { route: 'apply', max: 4 })) return;
 
   // Env-driven only — no hardcoded project. Set SUPABASE_URL + SUPABASE_ANON_KEY
   // to a project you own to gate behind Google sign-in; leave unset to run open.
@@ -223,9 +222,12 @@ async function handler(req, res) {
     }
     // Every configured provider failed. If it was rate limits, say so.
     const rateLimited = /429/.test(out.detail || '');
-    return res.status(rateLimited ? 429 : 502).json({ error: rateLimited ? 'rate_limited' : 'engine_error', detail: (out.detail || '').slice(0, 300) });
+    // Upstream text names providers and models; it stays in the function log.
+    console.error('apply: engine_error', (out.detail || '').slice(0, 300));
+    return res.status(rateLimited ? 429 : 502).json({ error: rateLimited ? 'rate_limited' : 'engine_error' });
   } catch (e) {
-    return res.status(502).json({ error: 'fetch_failed', message: String(e).slice(0, 200) });
+    console.error('apply: fetch_failed', String(e).slice(0, 200));
+    return res.status(502).json({ error: 'fetch_failed' });
   }
 }
 

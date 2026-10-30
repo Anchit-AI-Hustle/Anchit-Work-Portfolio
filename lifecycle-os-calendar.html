@@ -13,13 +13,13 @@
      opacity modifiers (bg-gold/20 etc.) resolve via rgb(var(--x)/<alpha-value>). */
   :root, :root[data-theme="dark"]{
     --bg-rgb:15 13 10; --surface-rgb:26 24 20; --card-rgb:26 24 20;
-    --ink-rgb:251 245 236; --ink-dim-rgb:163 158 148; --ink-mute-rgb:90 85 78;
+    --ink-rgb:251 245 236; --ink-dim-rgb:163 158 148; --ink-mute-rgb:154 147 136;
     --primary-rgb:255 105 64; --accent-rgb:46 229 172; --gold-rgb:201 169 110; --cream-rgb:22 13 7;
     --chip-rgb:20 17 13; --line-rgb:201 169 110;
   }
   :root[data-theme="light"]{
     --bg-rgb:251 245 236; --surface-rgb:255 255 255; --card-rgb:242 234 220;
-    --ink-rgb:22 19 18; --ink-dim-rgb:90 85 78; --ink-mute-rgb:163 158 148;
+    --ink-rgb:22 19 18; --ink-dim-rgb:90 85 78; --ink-mute-rgb:110 104 95;
     --primary-rgb:255 77 31; --accent-rgb:0 181 132; --gold-rgb:168 134 63; --cream-rgb:251 245 236;
     --chip-rgb:242 234 220; --line-rgb:168 134 63;
   }
@@ -262,7 +262,7 @@
       </div>
       <div>
         <div class="label">Send capacity / market / week</div>
-        <input id="capInput" type="number" min="2" max="10" value="4" class="mt-2 w-16 px-2 py-1.5 text-sm bg-bg-card border border-gold/20 rounded text-ink">
+        <input id="capInput" aria-label="Send capacity per market per week" type="number" min="2" max="10" value="4" class="mt-2 w-16 px-2 py-1.5 text-sm bg-bg-card border border-gold/20 rounded text-ink">
       </div>
       <div class="flex-1"></div>
       <button id="btnGenerate" class="text-[11px] uppercase tracking-wider font-semibold px-4 py-2 rounded bg-gold text-cream hover:opacity-90">⚡ Generate plan</button>
@@ -285,7 +285,7 @@
         <span class="flex items-center gap-1" id="assetLegend">Assets: <b class="text-gold font-semibold">M</b> mailer, <b class="text-gold font-semibold">A</b> ads, <b class="text-gold font-semibold">L</b> landing page, <b class="text-gold font-semibold">S</b> social</span>
       </div>
     </div>
-    <div class="overflow-x-auto -mx-1 px-1"><div id="calendarGrid" class="grid grid-cols-7 gap-2 min-w-[640px] sm:min-w-0"></div></div>
+    <div class="overflow-x-auto -mx-1 px-1" tabindex="0" role="region" aria-label="Calendar grid"><div id="calendarGrid" class="grid grid-cols-7 gap-2 min-w-[640px] sm:min-w-0"></div></div>
   </section>
 
   <!-- Table view -->
@@ -419,8 +419,12 @@ const ARCH = [
   { a:'launch-announcement',    ct:'launch',    segs:['Champions','Loyal'] },
   { a:'seasonal-gifting',       ct:'promo',     segs:['Champions','Loyal','New'] },
 ];
-const FESTIVALS = { '1-1':'New Year','2-14':"Valentine's",'3-8':'Spring Launch','5-11':"Mother's Day",'6-15':"Father's Day",'7-4':'Summer Sale','8-15':'Mid-Season Sale','9-1':'Back to School','10-10':'Autumn Edit','11-28':'Black Friday','12-1':'Cyber Monday','12-15':'Holiday Gifting' };
-function festivalFor(ds){ const p=ds.split('-'); return FESTIVALS[(+p[1])+'-'+(+p[2])] || null; }
+const FESTIVALS = { '1-1':'New Year','2-14':"Valentine's",'3-8':'Spring Launch','7-4':'Summer Sale','8-15':'Mid-Season Sale','9-1':'Back to School','10-10':'Autumn Edit','12-15':'Holiday Gifting' };
+// Moving dates are computed for the year being planned, not fixed to one year.
+function nthDow(y,m,dow,n){ const d=new Date(y,m-1,1); return 1+((dow-d.getDay()+7)%7)+(n-1)*7; }
+function movingFests(y){ const bf=nthDow(y,11,4,4)+1, cm=new Date(y,10,bf+3); const o={};
+  o['5-'+nthDow(y,5,0,2)]="Mother's Day"; o['6-'+nthDow(y,6,0,3)]="Father's Day"; o['11-'+bf]='Black Friday'; o[(cm.getMonth()+1)+'-'+cm.getDate()]='Cyber Monday'; return o; }
+function festivalFor(ds){ const p=ds.split('-'), k=(+p[1])+'-'+(+p[2]); return movingFests(+p[0])[k] || FESTIVALS[k] || null; }
 function subjectHint(arch, hero, seg, fest){
   const H = hero.title;
   const map = {
@@ -566,7 +570,7 @@ function renderCalendar() {
     const festival = entriesForDay.find((p) => p.festival)?.festival;
     const inPlan = day >= start && day < new Date(start.getTime() + STATE.days * 86400000);
     cells.push(`
-      <div class="day ${festival ? 'festival' : ''} ${!inPlan ? 'opacity-40' : ''}" data-date="${ds}">
+      <div class="day ${festival ? 'festival' : ''} ${!inPlan ? 'opacity-75' : ''}" data-date="${ds}">
         <div class="flex items-start justify-between">
           <div class="day-num">${day.getUTCDate()}</div>
           <div class="text-[9px] text-ink-mute">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][day.getUTCDay()]}</div>
@@ -646,7 +650,7 @@ function renderTable(filter = '') {
 function openMailerById(id) { const entry = STATE.plan.find((p) => p.id === id); if (entry) openMailer(entry, STATE.plan.filter((p)=>p.date===entry.date)); }
 
 // ── Client-side mailer pipeline (replaces /api/calendar?action=trigger-mailer) ──
-function subjectUrl(){ return 'https://sample-brand.com'; }
+function subjectUrl(){ return 'https://example.com'; }
 function imageBrief(entry, style){
   return style.charAt(0).toUpperCase()+style.slice(1)+' hero for a '+String(entry.archetype).replace(/-/g,' ')+' email — feature "'+entry.hero_product+'" for the '+entry.segment+' segment ('+marketName(entry.market)+'). Warm champagne + charcoal palette, generous negative space, premium editorial lighting, no text baked in. 1200×1500, mobile-first crop safe.'+(entry.feedback?(' Reviewer changes to honour: '+entry.feedback):'');
 }

@@ -26,10 +26,25 @@ const key = () => process.env.ANTHROPIC_API_KEY;
 const { freeGenerate, KEYS } = require('./_models.js');
 const { guard } = require('./_guard.js');
 
+// What a public caller may see of a provider failure: the status, never the
+// provider's own text (it can name billing state, models and limits).
+function upstreamLabel(e) {
+  const m = /\b([45]\d\d)\b/.exec(String(e && e.message));
+  return m ? 'upstream ' + m[1] : 'upstream error';
+}
+
+function isOperator(req) {
+  const expected = (process.env.CHAT_DEBUG_TOKEN || '').trim();
+  const given = String((req.headers || {})['x-debug-token'] || '').trim();
+  if (!expected || given.length !== expected.length) return false;
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ given.charCodeAt(i);
+  return diff === 0;
+}
+
 const MODELS = [
   process.env.CASCADE_MODEL,
   'claude-sonnet-5',
-  'claude-opus-5',
   'claude-sonnet-4-6',
   'claude-haiku-4-5-20251001',
 ].filter(Boolean);
@@ -187,6 +202,8 @@ async function handler(req, res) {
         models: MODELS,
       });
     }
+    // The live probe spends a real generation, so only the operator gets it.
+    if (!isOperator(req)) return res.status(200).json({ configured: true, anthropic: true, free, freeProviders: freeNames });
     const c = new AbortController(); const t = setTimeout(() => c.abort(), 20000);
     const tried = [];
     try {
@@ -224,7 +241,7 @@ async function handler(req, res) {
         res.setHeader('Cache-Control', 'no-store');
         return res.status(200).json({ guide, answers: [...attempts, answer], top: [answer] });
       } catch (e) {
-        attempts.push({ model, rank: attempts.length + 1, ok: false, latencyMs: Date.now() - t0, error: String(e.message).slice(0, 160) });
+        attempts.push({ model, rank: attempts.length + 1, ok: false, latencyMs: Date.now() - t0, error: upstreamLabel(e) });
       }
     }
     // ── Anthropic could not answer. Fall through to the free providers. ──
@@ -248,7 +265,7 @@ async function handler(req, res) {
         res.setHeader('Cache-Control', 'no-store');
         return res.status(200).json({ guide, answers: [...attempts, answer], top: [answer] });
       } catch (e) {
-        attempts.push({ model: 'free-cascade', rank: attempts.length + 1, ok: false, latencyMs: Date.now() - t0, error: String(e.message).slice(0, 220) });
+        attempts.push({ model: 'free-cascade', rank: attempts.length + 1, ok: false, latencyMs: Date.now() - t0, error: upstreamLabel(e) });
       }
     }
 

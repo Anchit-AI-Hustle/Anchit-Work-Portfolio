@@ -123,7 +123,7 @@
     <div class="eyebrow"><span class="dot"></span>Lifecycle OS · Ads Studio</div>
     <h1><span class="grad">Ads Studio</span></h1>
     <p class="lede">A full ad-copy matrix - headlines × primary text × CTAs across platforms - generated from the subject, with industry-benchmark targets to test against. Pick a ready-made D2C brand below, or type any brand.</p>
-    <div class="subject"><span class="lbl">Subject</span><input id="brand" type="text"><input id="url" type="text" style="flex:0 1 220px"><button id="go">Generate ad matrix</button></div>
+    <div class="subject"><span class="lbl">Subject</span><input id="brand" aria-label="Brand name" type="text"><input id="url" aria-label="Website (optional)" type="text" style="flex:0 1 220px"><button id="go">Generate ad matrix</button></div>
     <div id="out" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="font-family:var(--font-display);font-size:clamp(19px,3vw,24px);font-weight:600" id="hd"></div><span class="badge" id="bdg"></span></div>
       <div class="sectitle">Benchmark targets to test against</div><div class="kpis" id="kpi"></div>
@@ -295,7 +295,10 @@
 
   function run(){
     var f=LOS.facts($('brand').value.trim(),$('url').value.trim());
-    $('hd').textContent=f.name+' — ads account'; LOS.badge($('bdg'),f.anchit?'anchit':'template');
+    $('hd').textContent=f.name+' — simulated ads account'; LOS.badge($('bdg'),f.anchit?'anchit':'template');
+    // Real brand names sit next to these numbers, so say plainly what they are.
+    var sim=$('simNote'); if(!sim){ sim=document.createElement('p'); sim.id='simNote'; sim.style.cssText='margin:6px 0 0;font-size:13px;color:var(--ink-dim)'; $('hd').insertAdjacentElement('afterend',sim); }
+    sim.textContent='Illustrative numbers generated from category benchmarks — not '+f.name+'\u2019s data. No real account is connected.';
     var ben = f.anchit ? [['CTR target','1.2–2.0%'],['Reply/apply rate','8–15%'],['CPL target','under ₹2k'],['Onsite→offer','20–30%']] : [['CTR target','1.5–3.0%'],['ROAS target','2.5×+'],['CPA target','≤ category AOV'],['First-order conv.','2–4%']];
     $('kpi').innerHTML=ben.map(function(x){return '<div class="kpi"><div class="m">'+esc(x[0])+'</div><div class="v">'+esc(x[1])+'</div></div>';}).join('');
     ACCOUNT={ f:f, camps:buildAccount(f) }; PATH=[];
