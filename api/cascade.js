@@ -190,6 +190,9 @@ async function handler(req, res) {
   // Booleans and model names only — never a key. This exists because the same
   // class of failure hid here for months behind a silent fallback.
   if (req.method === 'GET') {
+    // Which keys exist and which models answer is the operator's business; a
+    // stranger learns only that the route is up.
+    if (!isOperator(req)) return res.status(200).json({ ok: true });
     // Which providers hold a usable key. Reported by NAME ONLY - this is the
     // view that would have shown, months ago, that Gemini's key was present
     // all along under a spelling nothing read.
@@ -202,8 +205,6 @@ async function handler(req, res) {
         models: MODELS,
       });
     }
-    // The live probe spends a real generation, so only the operator gets it.
-    if (!isOperator(req)) return res.status(200).json({ configured: true, anthropic: true, free, freeProviders: freeNames });
     const c = new AbortController(); const t = setTimeout(() => c.abort(), 20000);
     const tried = [];
     try {
