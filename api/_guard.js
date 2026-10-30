@@ -130,4 +130,46 @@ function guard(req, res, { route, max, methods = 'POST, OPTIONS' }) {
   return false;
 }
 
-module.exports = { guard, originAllowed, rateLimited, clientKey };
+// Outbound guard for the one route that fetches a URL the caller chose
+// (/api/apply reads a portfolio page). Without it the function would fetch
+// anything it can reach - loopback, the private network, cloud metadata - on
+// behalf of anyone. A URL passes only if it is http(s), carries no
+// credentials, and every address its host resolves to is public.
+//
+// HONEST LIMITATION: the address is checked, then fetched, so a host that
+// changes its DNS answer between the two (rebinding) can still slip through.
+// Callers also refuse redirects, which closes the easier version of that.
+const net = require('net');
+const dns = require('dns').promises;
+
+function privateAddress(ip) {
+  if (net.isIPv4(ip)) {
+    const [a, b] = ip.split('.').map(Number);
+    return a === 0 || a === 10 || a === 127 || a >= 224 ||
+      (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) ||
+      (a === 192 && b === 168) || (a === 100 && b >= 64 && b <= 127);
+  }
+  if (net.isIPv6(ip)) {
+    const s = ip.toLowerCase();
+    const mapped = s.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
+    if (mapped) return privateAddress(mapped[1]);
+    return s === '::' || s === '::1' || /^(fc|fd|fe[89ab])/.test(s) || /^::ffff:/.test(s);
+  }
+  return true;                                   // not an address at all: refuse
+}
+
+async function publicHttpUrl(raw, lookup = dns.lookup) {
+  let u;
+  try { u = new URL(raw); } catch { return false; }
+  if (u.protocol !== 'https:' && u.protocol !== 'http:') return false;
+  if (u.username || u.password) return false;
+  const host = u.hostname.replace(/^\[|\]$/g, '').toLowerCase();
+  if (!host || host === 'localhost' || /\.(localhost|local|internal)$/.test(host)) return false;
+  if (net.isIP(host)) return !privateAddress(host);
+  try {
+    const addrs = await lookup(host, { all: true });
+    return addrs.length > 0 && addrs.every((a) => !privateAddress(a.address));
+  } catch { return false; }
+}
+
+module.exports = { guard, originAllowed, rateLimited, clientKey, publicHttpUrl };

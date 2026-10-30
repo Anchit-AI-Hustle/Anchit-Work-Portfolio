@@ -260,7 +260,7 @@ async function submission(browser, vp) {
   // section that answers "why me" has to answer both, in view.
   const me = norm(await page.innerText('#me'));
   check(`${L}: why me states the years and the edtech work`,
-    /4\+ years in product/.test(me) && /EveryYear/.test(me) && /early years/i.test(me) &&
+    /4\+ years in product/.test(me) && /Edu\s?AI/.test(me) && /early years/i.test(me) &&
     (await page.$$('#me a[href="https://edu-ai.anchit-tandon.com/"]')).length > 0, me.slice(0, 80));
   check(`${L}: revamps name the early years in view`, /early years/i.test(norm(await page.innerText('#revamps .lead-in'))), '');
   // Calls to families are a step before the study goes to the company, not a

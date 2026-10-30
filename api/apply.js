@@ -13,9 +13,7 @@
 
 // Model ids live in _models.js as a chain per provider, not one pinned id here.
 // Every id this file used to hardcode has since been retired by its provider.
-const { originAllowed, guard } = require('./_guard.js');
-const dns = require('dns').promises;
-const net = require('net');
+const { originAllowed, guard, publicHttpUrl } = require('./_guard.js');
 const { tryModels, httpError, KEYS } = require('./_models.js');
 
 function haveAnyProvider() {
@@ -53,43 +51,30 @@ function stripTagBlocks(html, tag) {
   }
 }
 
-// The URL is the caller's, so this server must not be steerable into its own
-// network: https only, no IP literals or internal names, every resolved
-// address public, and no redirects (a redirect could point anywhere).
-function privateAddr(ip) {
-  if (net.isIPv4(ip)) {
-    const [a, b] = ip.split('.').map(Number);
-    return a === 10 || a === 127 || a === 0 || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31)
-      || (a === 192 && b === 168) || (a === 100 && b >= 64 && b <= 127) || a >= 224;
-  }
-  const x = ip.toLowerCase();
-  if (x.startsWith('::ffff:')) return privateAddr(x.slice(7));
-  return x === '::1' || x === '::' || /^f[cd]/.test(x) || /^fe[89ab]/.test(x);
-}
-async function publicHttpsUrl(raw) {
-  let u; try { u = new URL(raw); } catch { return null; }
-  if (u.protocol !== 'https:' || u.username || u.password || (u.port && u.port !== '443')) return null;
-  const host = u.hostname.replace(/^\[|\]$/g, '');
-  if (net.isIP(host) || !host.includes('.') || /\.(local|internal|localhost)$/i.test(host)) return null;
+// Fetch a portfolio/CV URL and reduce it to readable text. The URL is the
+// caller's, so it must point at the public internet (publicHttpUrl, shared with
+// the other routes), a redirect is not followed (it could point anywhere), and
+// at most 1 MB is read.
+const MAX_PROFILE_BYTES = 1_000_000;
+async function fetchProfileFromUrl(url) {
   try {
-    const addrs = await dns.lookup(host, { all: true });
-    if (!addrs.length || addrs.some((a) => privateAddr(a.address))) return null;
-  } catch { return null; }
-  return u.toString();
-}
-
-// Fetch a portfolio/CV URL and reduce it to readable text.
-async function fetchProfileFromUrl(raw) {
-  try {
-    const url = await publicHttpsUrl(raw);
-    if (!url) return '';
+    if (!(await publicHttpUrl(url))) return '';
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 12000);
     const r = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (JobHunt apply)' }, signal: ctrl.signal, redirect: 'manual' });
+    if (!r.ok || !r.body) { clearTimeout(t); return ''; }
+    const reader = r.body.getReader();
+    const chunks = [];
+    let size = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.length;
+      if (size > MAX_PROFILE_BYTES) { await reader.cancel(); break; }
+      chunks.push(value);
+    }
     clearTimeout(t);
-    if (!r.ok) return '';
-    if (!/text\/html|text\/plain/i.test(r.headers.get('content-type') || '')) return '';
-    let html = await r.text();
+    let html = Buffer.concat(chunks).toString('utf8');
     // Strip script/style blocks with a plain scan, then remove remaining tags.
     html = stripTagBlocks(stripTagBlocks(html, 'script'), 'style');
     // Decode a minimal entity set; ampersand LAST to avoid double-unescaping.
@@ -204,7 +189,9 @@ async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(okOrigin ? 200 : 403).end();
   if (!okOrigin) return res.status(403).json({ error: 'origin_not_allowed' });
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
-  // Every call spends a model generation; same per-IP cap as the other paid routes.
+  // Each call spends up to 4,096 generated tokens and may fetch a page, and
+  // with the sign-in gate unset it is open to anyone: cap it per caller.
+  // guard() sends its own 429 with Retry-After, as on the other paid routes.
   if (guard(req, res, { route: 'apply', max: 4 })) return;
 
   // Env-driven only — no hardcoded project. Set SUPABASE_URL + SUPABASE_ANON_KEY
@@ -246,4 +233,4 @@ async function handler(req, res) {
 
 module.exports = handler;
 module.exports.config = { runtime: 'nodejs', maxDuration: 30 };
-module.exports._test = { generate, parseKit, stripTagBlocks };
+module.exports._test = { generate, parseKit, stripTagBlocks, fetchProfileFromUrl };
