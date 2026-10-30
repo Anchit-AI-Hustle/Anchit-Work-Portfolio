@@ -86,5 +86,52 @@ is('a flood does not grow its own bucket', (() => {
   return rateLimited(req, 'flood', 5);
 })(), true);
 
-console.log(`\n  ${pass}/${pass + fail} passed`);
-process.exit(fail ? 1 : 0);
+// /api/apply fetched any URL a caller sent, from inside the function, and ran
+// open with no rate limit. These pin both halves of the fix. DNS is injected,
+// so nothing here touches the network.
+(async () => {
+  const { publicHttpUrl } = require('../api/_guard.js');
+  const resolvesTo = (ip) => async () => [{ address: ip, family: ip.includes(':') ? 6 : 4 }];
+  const pub = resolvesTo('93.184.216.34');
+  const cases = [
+    ['a public https page is fetchable', 'https://example.com/cv', pub, true],
+    ['loopback is not', 'http://127.0.0.1/', pub, false],
+    ['cloud metadata is not', 'http://169.254.169.254/latest/meta-data/', pub, false],
+    ['a private range is not', 'http://10.1.2.3/', pub, false],
+    ['localhost by name is not', 'http://localhost:3000/', pub, false],
+    ['IPv6 loopback is not', 'http://[::1]/', pub, false],
+    ['IPv4 mapped into IPv6 is not', 'http://[::ffff:127.0.0.1]/', pub, false],
+    ['a decimal-encoded loopback is not', 'http://2130706433/', pub, false],
+    ['a public name that resolves to a private address is not', 'https://sneaky.example/', resolvesTo('192.168.1.5'), false],
+    ['a file: URL is not', 'file:///etc/passwd', pub, false],
+    ['credentials in the URL are not', 'https://user:pw@example.com/', pub, false],
+    ['a name that does not resolve is not', 'https://nope.invalid/', async () => { throw new Error('ENOTFOUND'); }, false],
+  ];
+  for (const [label, url, lookup, want] of cases) is(label, await publicHttpUrl(url, lookup), want);
+
+  const apply = require('../api/apply.js');
+  // An empty result proves nothing on its own: from a sandbox the metadata
+  // address simply fails to connect. What matters is that no request is made.
+  const realFetch = globalThis.fetch;
+  const asked = [];
+  globalThis.fetch = async (u) => { asked.push(String(u)); return new Response('<p>cv</p>'); };
+  await apply._test.fetchProfileFromUrl('http://169.254.169.254/latest/meta-data/');
+  await apply._test.fetchProfileFromUrl('http://127.0.0.1:8080/');
+  is('apply never requests an internal URL', asked, []);
+  await apply._test.fetchProfileFromUrl('http://93.184.216.34/cv');
+  is('apply still fetches a public one', asked, ['http://93.184.216.34/cv']);
+  globalThis.fetch = realFetch;
+
+  const run = async (ip) => {
+    const res = { code: 0, body: null, setHeader() {}, status(c) { this.code = c; return this; }, json(b) { this.body = b; return this; }, end() { return this; } };
+    await apply({ method: 'POST', headers: { 'x-forwarded-for': ip }, socket: {}, body: {} }, res);
+    return res.code;
+  };
+  const codes = [];
+  for (let i = 0; i < 5; i++) codes.push(await run('5.5.5.5'));
+  is('apply is rate-limited: the 5th call in a minute is refused', codes[4], 429);
+  is('apply serves the first four', codes.slice(0, 4).every((c) => c !== 429), true);
+
+  console.log(`\n  ${pass}/${pass + fail} passed`);
+  process.exit(fail ? 1 : 0);
+})();

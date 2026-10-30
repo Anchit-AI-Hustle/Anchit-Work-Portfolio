@@ -3,6 +3,10 @@ on:
   push: { branches: [main] }
   pull_request: {}
 
+# CI only reads the code and runs tests; it never pushes, comments or releases.
+permissions:
+  contents: read
+
 jobs:
   smoke:
     runs-on: ubuntu-latest
