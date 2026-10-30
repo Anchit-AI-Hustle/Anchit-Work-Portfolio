@@ -13,7 +13,7 @@
 
 // Model ids live in _models.js as a chain per provider, not one pinned id here.
 // Every id this file used to hardcode has since been retired by its provider.
-const { originAllowed } = require('./_guard.js');
+const { originAllowed, rateLimited, publicHttpUrl } = require('./_guard.js');
 const { tryModels, httpError, KEYS } = require('./_models.js');
 
 function haveAnyProvider() {
@@ -51,15 +51,29 @@ function stripTagBlocks(html, tag) {
   }
 }
 
-// Fetch a portfolio/CV URL and reduce it to readable text.
+// Fetch a portfolio/CV URL and reduce it to readable text. The URL is the
+// caller's, so it must point at the public internet (publicHttpUrl), a
+// redirect is not followed (it could point anywhere), and at most 1 MB is read.
+const MAX_PROFILE_BYTES = 1_000_000;
 async function fetchProfileFromUrl(url) {
   try {
+    if (!(await publicHttpUrl(url))) return '';
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 12000);
-    const r = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (JobHunt apply)' }, signal: ctrl.signal });
+    const r = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (JobHunt apply)' }, signal: ctrl.signal, redirect: 'manual' });
+    if (!r.ok || !r.body) { clearTimeout(t); return ''; }
+    const reader = r.body.getReader();
+    const chunks = [];
+    let size = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.length;
+      if (size > MAX_PROFILE_BYTES) { await reader.cancel(); break; }
+      chunks.push(value);
+    }
     clearTimeout(t);
-    if (!r.ok) return '';
-    let html = await r.text();
+    let html = Buffer.concat(chunks).toString('utf8');
     // Strip script/style blocks with a plain scan, then remove remaining tags.
     html = stripTagBlocks(stripTagBlocks(html, 'script'), 'style');
     // Decode a minimal entity set; ampersand LAST to avoid double-unescaping.
@@ -174,6 +188,12 @@ async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(okOrigin ? 200 : 403).end();
   if (!okOrigin) return res.status(403).json({ error: 'origin_not_allowed' });
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+  // Each call spends up to 4,096 generated tokens and may fetch a page, and
+  // with the sign-in gate unset it is open to anyone: cap it per caller.
+  if (rateLimited(req, 'apply', 4)) {
+    res.setHeader('Retry-After', '60');
+    return res.status(429).json({ error: 'rate_limited', message: 'Too many requests. Try again in a minute.' });
+  }
 
   // Env-driven only — no hardcoded project. Set SUPABASE_URL + SUPABASE_ANON_KEY
   // to a project you own to gate behind Google sign-in; leave unset to run open.
@@ -211,4 +231,4 @@ async function handler(req, res) {
 
 module.exports = handler;
 module.exports.config = { runtime: 'nodejs', maxDuration: 30 };
-module.exports._test = { generate, parseKit, stripTagBlocks };
+module.exports._test = { generate, parseKit, stripTagBlocks, fetchProfileFromUrl };
