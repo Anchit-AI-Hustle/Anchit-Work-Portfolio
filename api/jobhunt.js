@@ -40,7 +40,7 @@ function clean(j) {
     title: String(j.title || '').slice(0, 200).trim(),
     company: String(j.company || '').slice(0, 160).trim(),
     location: String(j.location || '').slice(0, 160).trim(),
-    link: String(j.link || '').slice(0, 600).trim(),
+    link: /^https?:\/\//i.test(String(j.link || '').trim()) ? String(j.link).slice(0, 600).trim() : '',
     source: String(j.source || '').slice(0, 40),
   };
 }
@@ -229,7 +229,8 @@ async function handler(req, res) {
     res.setHeader('Cache-Control', 'no-store');
     return res.status(200).json({ results, count: results.length, role, location, boards });
   } catch (e) {
-    return res.status(502).json({ error: 'fetch_failed', message: String(e).slice(0, 200) });
+    console.error('jobhunt: fetch_failed', String(e).slice(0, 200));
+    return res.status(502).json({ error: 'fetch_failed' });
   }
 }
 

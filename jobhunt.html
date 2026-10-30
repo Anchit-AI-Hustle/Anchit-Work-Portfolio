@@ -184,13 +184,13 @@
 <!-- cinematic:end -->
 <!-- seo:auto:start -->
 <!-- Managed by scripts/seo-inject.mjs — edit seo.config.json, not here. -->
-<meta name="description" content="A free live AI job-search agent. Sign in with Google to pull real, current openings from public job boards, with direct apply links and tailored resumes." />
+<meta name="description" content="A free live AI job-search agent. No sign-in needed: pull real, current openings from public job boards, with direct apply links and tailored resumes." />
 <link rel="canonical" href="https://anchit-tandon.com/jobhunt" />
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
 <meta name="keywords" content="JobHunt, AI job search assistant, AI job application assistant, live job-search agent, AI resume and cover letter generator, free job search tool, public job board aggregator, tailored resume AI, AI job search agent, product manager job search, job search automation tool, AI career assistant, Anchit Tandon" />
 <meta name="author" content="Anchit Tandon" />
 <meta property="og:title" content="JobHunt — a live AI job-search agent" />
-<meta property="og:description" content="Free. Sign in with Google and pull real, current openings from free public job boards — with direct apply links and AI-tailored resumes." />
+<meta property="og:description" content="Free, no sign-in. Pull real, current openings from free public job boards — with direct apply links and AI-tailored resumes." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://anchit-tandon.com/jobhunt" />
 <meta property="og:image" content="https://anchit-tandon.com/assets/og/og-default.png" />
@@ -201,7 +201,7 @@
 <meta property="og:image:alt" content="Anchit Tandon — Product &amp; D2C Growth" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="JobHunt — a live AI job-search agent" />
-<meta name="twitter:description" content="Free. Sign in with Google and pull real, current job openings from public boards, with direct apply links and AI-tailored resumes." />
+<meta name="twitter:description" content="Free, no sign-in. Pull real, current job openings from public boards, with direct apply links and AI-tailored resumes." />
 <meta name="twitter:image" content="https://anchit-tandon.com/assets/og/og-default.png" />
 <script type="application/ld+json">
 {
@@ -233,7 +233,7 @@
   "applicationCategory": "BusinessApplication",
   "operatingSystem": "Web browser",
   "browserRequirements": "Requires JavaScript. Runs in any modern browser.",
-  "description": "A free live AI job-search agent. Sign in with Google to pull real, current openings from free public job boards, with direct apply links and AI-tailored resumes and cover letters.",
+  "description": "A free live AI job-search agent. No sign-in needed: pull real, current openings from free public job boards, with direct apply links and AI-tailored resumes and cover letters.",
   "image": "https://anchit-tandon.com/AnchitTandon-AppLogo.png",
   "featureList": [
     "Live openings from public job boards",
@@ -269,7 +269,7 @@
 
   <div class="eyebrow">Side hustle · Live AI agent · Free to use</div>
   <h1>JobHunt — <em>a live job-search agent</em>.</h1>
-  <p class="lede">Sign in with Google and search. It pulls real, current openings from free job boards, gives you one-click searches on LinkedIn, Indeed, Glassdoor &amp; Upwork, and can write a resume + cover letter tailored to any role — free, no API key, no setup.</p>
+  <p class="lede">Type a role and search. It pulls real, current openings from free job boards, gives you one-click searches on LinkedIn, Indeed, Glassdoor &amp; Upwork, and can write a resume + cover letter tailored to any role — free, no sign-in, no setup.</p>
 
   <!-- ============ GATE PANEL ============ -->
   <div class="panel" id="gate">
@@ -340,7 +340,7 @@
             <label class="chip"><input type="checkbox" value="Arbeitnow" checked><span>Arbeitnow</span></label>
             <label class="chip"><input type="checkbox" value="The Muse" checked><span>The Muse</span></label>
           </div>
-          <div class="microcopy" style="margin-top:10px;">LinkedIn, Indeed, Glassdoor &amp; Upwork open as one-click live searches (and return inline results when Adzuna is enabled). The rest return listings inline.</div>
+          <div class="microcopy" style="margin-top:10px;">LinkedIn, Indeed, Glassdoor &amp; Upwork open as one-click live searches. The rest return listings inline.</div>
         </div>
         <div class="go-row">
           <button class="btn primary" id="jh-go" type="submit">Search jobs →</button>
@@ -385,7 +385,7 @@
   </div>
 
   <p class="disclaimer">
-    JobHunt is a live demo — it aggregates real, current openings from free public job boards (Remotive, RemoteOK, Arbeitnow, The Muse), gated behind Google sign-in and free to use.
+    JobHunt is a live demo — it aggregates real, current openings from free public job boards (Remotive, RemoteOK, Arbeitnow, The Muse), free to use with no sign-in.
     Listings come straight from those boards at search time, so availability and details can change — always confirm on the original posting before applying.
   </p>
 
@@ -600,6 +600,8 @@
     var head = '<div class="results-head"><h2>Openings for “'+esc(data.role)+'”'+(data.location?(' · '+esc(data.location)):'')+'</h2>'+
       '<span class="count">'+list.length+' found · live</span></div>';
     var cards = list.map(function(j, i){
+      // Links come from third-party feeds: only http(s) is a link.
+      if (!/^https?:\/\//i.test(String(j.link||''))) j.link = '#';
       var metaBits = [];
       if (j.company) metaBits.push('<b>'+esc(j.company)+'</b>');
       if (j.location) metaBits.push(esc(j.location));
@@ -713,12 +715,14 @@
 
   // Minimal Markdown -> HTML for the generated resume/cover letter.
   function mdToHtml(md){
-    function esc(s){ return String(s).replace(/[&<>]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }); }
+    // Quotes too: the output lands inside href="…", and the model's text is
+    // shaped by third-party job postings it has read.
+    function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
     function inline(s){
       s = esc(s);
       s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
       s = s.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>');
-      s = s.replace(/\[([^\]]+)\]\((https?:[^)]+)\)/g, '<a href="$2">$1</a>');
+      s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s"'&]+)\)/g, '<a href="$2" rel="noopener nofollow">$1</a>');
       return s;
     }
     var lines = String(md || '').replace(/\r/g, '').split('\n');

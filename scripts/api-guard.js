@@ -36,7 +36,11 @@ is('a domain we do not own is refused, even one named for this site', originAllo
 is('a Vercel preview of OURS is allowed', originAllowed('https://anchit-work-portfolio-git-x-anchit-ai-hustle.vercel.app'), true);
 is("someone else's vercel.app deployment is NOT", originAllowed('https://evil-project-abc123-someone-else.vercel.app'), false);
 is('a bare vercel.app is not', originAllowed('https://vercel.app'), false);
-is('no Origin at all is allowed: that is a script, not a page', call(undefined, '1.1.1.3'),
+is('a GET with no Origin is allowed: browsers omit it on same-origin GETs', call(undefined, '1.1.1.3', 'GET'),
+   { stopped: false, code: 0, acao: null, err: null });
+is('a POST with no Origin from the network is refused: browsers always send one', call(undefined, '1.1.1.8'),
+   { stopped: true, code: 403, acao: null, err: 'origin_required' });
+is('a POST with no Origin and no address (a direct handler call) still runs', call(undefined, undefined),
    { stopped: false, code: 0, acao: null, err: null });
 is('another site is refused', call('https://not-anchits-site.example', '1.1.1.4'),
    { stopped: true, code: 403, acao: null, err: 'origin_not_allowed' });

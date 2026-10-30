@@ -15,8 +15,9 @@
 //   The origin list stops a BROWSER on someone else's site calling these.
 //   It does nothing to curl: CORS is enforced by browsers, and a request with
 //   no Origin header is indistinguishable from a server-to-server call. The
-//   repo's own scripts/ suites are exactly that, which is why a missing
-//   Origin is allowed rather than refused.
+//   repo's own scripts/ suites are exactly that. A missing Origin is allowed
+//   on a GET (browsers omit it on same-origin GETs) but refused on a POST
+//   that came over the network: see guard() below.
 //
 //   The rate limit is what actually caps the bill, because it does not care
 //   who is asking. It is the real defence here.
@@ -107,6 +108,15 @@ function guard(req, res, { route, max, methods = 'POST, OPTIONS' }) {
 
   if (!ok) {
     res.status(403).json({ error: 'origin_not_allowed' });
+    return true;
+  }
+  // A browser always sends Origin on a POST, same-origin included, so a POST
+  // that crossed the network without one is a script. Refusing it does not
+  // stop a determined caller (Origin is forgeable outside a browser), but it
+  // stops every copy-pasted curl from spending the owner's keys. Handlers
+  // invoked directly (no address, the repo's own suites) are unaffected.
+  if (req.method === 'POST' && !origin && clientKey(req) !== 'unknown') {
+    res.status(403).json({ error: 'origin_required' });
     return true;
   }
   // Every method but the preflight counts. GET is not automatically cheap:

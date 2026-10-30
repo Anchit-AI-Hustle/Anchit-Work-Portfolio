@@ -13,7 +13,9 @@
 
 // Model ids live in _models.js as a chain per provider, not one pinned id here.
 // Every id this file used to hardcode has since been retired by its provider.
-const { originAllowed } = require('./_guard.js');
+const { originAllowed, guard } = require('./_guard.js');
+const dns = require('dns').promises;
+const net = require('net');
 const { tryModels, httpError, KEYS } = require('./_models.js');
 
 function haveAnyProvider() {
@@ -51,14 +53,42 @@ function stripTagBlocks(html, tag) {
   }
 }
 
-// Fetch a portfolio/CV URL and reduce it to readable text.
-async function fetchProfileFromUrl(url) {
+// The URL is the caller's, so this server must not be steerable into its own
+// network: https only, no IP literals or internal names, every resolved
+// address public, and no redirects (a redirect could point anywhere).
+function privateAddr(ip) {
+  if (net.isIPv4(ip)) {
+    const [a, b] = ip.split('.').map(Number);
+    return a === 10 || a === 127 || a === 0 || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31)
+      || (a === 192 && b === 168) || (a === 100 && b >= 64 && b <= 127) || a >= 224;
+  }
+  const x = ip.toLowerCase();
+  if (x.startsWith('::ffff:')) return privateAddr(x.slice(7));
+  return x === '::1' || x === '::' || /^f[cd]/.test(x) || /^fe[89ab]/.test(x);
+}
+async function publicHttpsUrl(raw) {
+  let u; try { u = new URL(raw); } catch { return null; }
+  if (u.protocol !== 'https:' || u.username || u.password || (u.port && u.port !== '443')) return null;
+  const host = u.hostname.replace(/^\[|\]$/g, '');
+  if (net.isIP(host) || !host.includes('.') || /\.(local|internal|localhost)$/i.test(host)) return null;
   try {
+    const addrs = await dns.lookup(host, { all: true });
+    if (!addrs.length || addrs.some((a) => privateAddr(a.address))) return null;
+  } catch { return null; }
+  return u.toString();
+}
+
+// Fetch a portfolio/CV URL and reduce it to readable text.
+async function fetchProfileFromUrl(raw) {
+  try {
+    const url = await publicHttpsUrl(raw);
+    if (!url) return '';
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 12000);
-    const r = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (JobHunt apply)' }, signal: ctrl.signal });
+    const r = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (JobHunt apply)' }, signal: ctrl.signal, redirect: 'manual' });
     clearTimeout(t);
     if (!r.ok) return '';
+    if (!/text\/html|text\/plain/i.test(r.headers.get('content-type') || '')) return '';
     let html = await r.text();
     // Strip script/style blocks with a plain scan, then remove remaining tags.
     html = stripTagBlocks(stripTagBlocks(html, 'script'), 'style');
@@ -174,6 +204,8 @@ async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(okOrigin ? 200 : 403).end();
   if (!okOrigin) return res.status(403).json({ error: 'origin_not_allowed' });
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+  // Every call spends a model generation; same per-IP cap as the other paid routes.
+  if (guard(req, res, { route: 'apply', max: 4 })) return;
 
   // Env-driven only — no hardcoded project. Set SUPABASE_URL + SUPABASE_ANON_KEY
   // to a project you own to gate behind Google sign-in; leave unset to run open.
@@ -203,9 +235,12 @@ async function handler(req, res) {
     }
     // Every configured provider failed. If it was rate limits, say so.
     const rateLimited = /429/.test(out.detail || '');
-    return res.status(rateLimited ? 429 : 502).json({ error: rateLimited ? 'rate_limited' : 'engine_error', detail: (out.detail || '').slice(0, 300) });
+    // Upstream text names providers and models; it stays in the function log.
+    console.error('apply: engine_error', (out.detail || '').slice(0, 300));
+    return res.status(rateLimited ? 429 : 502).json({ error: rateLimited ? 'rate_limited' : 'engine_error' });
   } catch (e) {
-    return res.status(502).json({ error: 'fetch_failed', message: String(e).slice(0, 200) });
+    console.error('apply: fetch_failed', String(e).slice(0, 200));
+    return res.status(502).json({ error: 'fetch_failed' });
   }
 }
 
