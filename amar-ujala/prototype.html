@@ -1111,6 +1111,9 @@ body{background:var(--ak-bg);color:var(--ak-ink);font-family:var(--ak-font);line
     var statusKeys = ["new", "called", "visit", "admitted", "no"];
     var h = '<section id="panel-college" role="tabpanel" aria-labelledby="tab-college"' + (S._animTab ? ' class="ak-enter"' : "") + '><div class="ak-card"><h2>' + esc(t.collegeTitle) + "</h2>" +
       '<p class="ak-muted" style="margin-top:0">' + esc(t.collegeLead) + "</p>" +
+      '<div class="ak-alert ak-alert-neutral" style="margin:0.75rem 0;font-size:0.92rem;line-height:1.5">' +
+      '<strong>What this screen demonstrates:</strong> This is the College Admissions Portal. When a student completes their plan and the parent gives OTP consent, the college instantly receives this lead and pays <strong>₹250 per enquiry</strong>. Zero spam: colleges never get bulk data dumps, only students who actively opted in.' +
+      '</div>' +
       '<div class="ak-kpis" style="margin:0.75rem 0" data-testid="ak-college-kpis">' +
       '<div class="ak-kpi"><div class="ak-kpi-value ak-num" data-testid="ak-enq-count">' + enquiries.length + '</div><div class="ak-kpi-label">' + esc(t.kpiEnq) + "</div></div>" +
       '<div class="ak-kpi"><div class="ak-kpi-value">100%</div><div class="ak-kpi-label">' + esc(t.kpiConsent) + "</div></div>" +
@@ -1169,6 +1172,13 @@ body{background:var(--ak-bg);color:var(--ak-ink);font-family:var(--ak-font);line
   function renderRevenue(t) {
     return '<section id="panel-revenue" role="tabpanel" aria-labelledby="tab-revenue"' + (S._animTab ? ' class="ak-enter"' : "") + '><div class="ak-card"><h2>' + esc(t.revTitle) + "</h2>" +
       '<p class="ak-muted" style="margin-top:0">' + esc(t.revLead) + "</p>" +
+      '<div class="ak-alert ak-alert-neutral" style="margin:0.75rem 0 1rem;font-size:0.92rem;line-height:1.5">' +
+      '<strong>Understanding this model on a single read:</strong><br>' +
+      '• <strong>Who pays:</strong> Colleges pay ₹250 per verified lead (plus optional ₹1.2L season print bundles). Students pay ₹0.<br>' +
+      '• <strong>The Base Case:</strong> Starts with <strong>19.98 lakh passers</strong> → 8% open feature → 87.9k complete plans → 8.8k families consent → <strong>15,387 paid enquiries</strong>.<br>' +
+      '• <strong>Total Year 1: ₹1.13 crore</strong> (₹38.5L enquiries + ₹72L print bundles + ₹2.6L counselling).<br>' +
+      '• <strong>Scenarios:</strong> Low = <strong>₹21 lakh</strong> (pilot safety floor), Base = <strong>₹1.13 crore</strong>, High = <strong>₹7.70 crore</strong>.' +
+      '</div>' +
       '<div class="ak-row" role="group" aria-label="' + esc(t.scenLabel) + '" style="margin-bottom:0.85rem" id="ak-scen">' + scenarioButtons(t) + "</div>" +
       '<div class="ak-grid-2"><div class="ak-grid-2" style="align-content:start">' +
       REV_FIELDS.map(function (f) {
@@ -1184,7 +1194,11 @@ body{background:var(--ak-bg);color:var(--ak-ink);font-family:var(--ak-font);line
 
   function renderPlatform(t) {
     return '<section id="panel-platform" role="tabpanel" aria-labelledby="tab-platform"' + (S._animTab ? ' class="ak-enter"' : "") + '><div class="ak-card"><h2>' + esc(t.platTitle) + "</h2>" +
-      '<p class="ak-muted" style="margin-top:0">' + esc(t.platLead) + '</p><ol class="ak-timeline">' +
+      '<p class="ak-muted" style="margin-top:0">' + esc(t.platLead) + '</p>' +
+      '<div class="ak-alert ak-alert-neutral" style="margin:0.75rem 0;font-size:0.92rem;line-height:1.5">' +
+      '<strong>The Single Profile Concept:</strong> Amar Ujala already has massive student touchpoints across schools (AUNO Olympiad), scholarships, and exam centres. But they operate in silos and expire. Aage Kya introduces <strong>one consented student profile</strong> from Class 1 to college admission.' +
+      '</div>' +
+      '<ol class="ak-timeline">' +
       t.journey.map(function (j) {
         return '<li class="' + (j.url ? "" : "new") + '"><div class="ak-when">' + esc(j.when) + '</div><div class="ak-row" style="gap:0.4rem"><strong>' + esc(j.h) + "</strong>" +
           '<span class="ak-tag ' + (j.url ? "" : "ak-tag-amber") + '">' + esc(j.url ? t.runsToday : t.isNew) + "</span></div>" +
