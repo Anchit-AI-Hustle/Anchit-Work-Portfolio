@@ -10,13 +10,13 @@
 #   4. Installs a launchd agent that auto-syncs ~/Projects/awp every 10 min + at login
 #
 # Run once, on your Mac:
-#   bash "/Users/anchittandon/Library/Mobile Documents/com~apple~CloudDocs/ANCHIT'S AI HUSTLE/Anchit-Work-Portfolio/scripts/setup-git-and-sync.sh"
+#   bash "$HOME/Library/Mobile Documents/com~apple~CloudDocs/ANCHIT'S AI HUSTLE/Anchit-Work-Portfolio/scripts/setup-git-and-sync.sh"
 #
 # Prereq: GitHub CLI authenticated — `brew install gh && gh auth login` (HTTPS).
 #
 set -uo pipefail
 
-ICLOUD="/Users/anchittandon/Library/Mobile Documents/com~apple~CloudDocs/ANCHIT'S AI HUSTLE/Anchit-Work-Portfolio"
+ICLOUD="$HOME/Library/Mobile Documents/com~apple~CloudDocs/ANCHIT'S AI HUSTLE/Anchit-Work-Portfolio"
 DEST="$HOME/Projects/awp"
 REPO_URL="https://github.com/Anchit-AI-Hustle/Anchit-Work-Portfolio.git"
 PLIST="$HOME/Library/LaunchAgents/com.anchit.portfolio.autosync.plist"
