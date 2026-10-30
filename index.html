@@ -1887,6 +1887,10 @@
      on .build-actions too) makes flexbox share the slack between them, so the
      action row floated to a different height on every card. */
   .build-card .build-stack { margin-top: auto; align-content: flex-start; }
+  /* A title that wraps ("Predict Natural Disasters") used up the card's slack,
+     so the auto margin above had nothing to give and that card's action row
+     sat 32px lower. Every title reserves two lines. */
+  .build-card > h3 { min-height: 2lh; }
   .build-card .build-actions {
     min-height: 0; height: 58px; margin-top: 0;
     flex-wrap: nowrap; align-items: center;

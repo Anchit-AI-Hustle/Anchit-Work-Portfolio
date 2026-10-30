@@ -15,7 +15,7 @@
     --bg:#0F0D0A; --bg-elev:#16130F; --bg-deep:#0A0806;
     --ink:#FBF5EC; --ink-dim:#B3A996; --ink-mute:#9A9388;
     --primary:#FF6940; --primary-deep:#FF4D1F; --primary-soft:rgba(255,105,64,.12);
-    --accent:#2EE5AC; --gold:#FFB736;
+    --accent:#c9a96e; --gold:#FFB736;
     --rule:rgba(255,247,232,.12); --rule-strong:rgba(255,247,232,.22);
     --font-display:'Fraunces',ui-serif,serif; --font-sans:'Inter',ui-sans-serif,system-ui,sans-serif; --font-mono:'JetBrains Mono',ui-monospace,monospace;
   }
@@ -211,6 +211,18 @@
   /* How it works */
   footer{ border-top:1px solid var(--rule); padding:28px 0 10px; color:var(--ink-mute); font-size:13px; text-align:center; }
   footer a{ color:var(--ink-dim); text-decoration:none; border-bottom:1px solid var(--rule); }
+
+  /* The shared brand picker (lifecycle-os-kit.js), styled as in lifecycle-os-kit.css. */
+  .brandpick{ margin-bottom:14px; }
+  .brandpick .bp-head{ display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 12px; margin-bottom:8px; }
+  .brandpick .bp-lbl{ font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-dim); }
+  .brandpick .bp-note{ font-size:12px; color:var(--ink-mute); }
+  .brandpick .bp-row{ display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; scrollbar-width:thin; -webkit-overflow-scrolling:touch; }
+  .brandpick .bp-chip{ flex:none; display:inline-flex; flex-direction:column; align-items:flex-start; gap:2px; min-height:44px; padding:8px 14px; border-radius:12px; border:1px solid var(--rule-strong); background:var(--bg-deep); color:var(--ink); font-family:var(--font-sans); font-size:14px; cursor:pointer; transition:border-color .2s, background-color .2s; }
+  .brandpick .bp-chip .bp-ind{ font-family:var(--font-mono); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); }
+  .brandpick .bp-chip:hover{ border-color:var(--primary); }
+  .brandpick .bp-chip[aria-pressed="true"]{ border-color:var(--primary); background:var(--primary-soft); }
+  .brandpick .bp-chip:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
 </style>
 <!-- cinematic:start -->
 <link rel="stylesheet" href="/assets/cinematic.css">
