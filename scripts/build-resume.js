@@ -31,6 +31,9 @@ const sub = (left, dates) => new Paragraph({
 });
 const group = (t) => new Paragraph({ spacing: { before: 70, after: 20 }, keepNext: true, children: [run(t, { bold: true, size: 19, color: DIM })] });
 const bullet = (t) => new Paragraph({ numbering: { reference: 'dot', level: 0 }, spacing: { before: 0, after: 30, line: 264 }, children: [run(t)] });
+// A bullet that ends with a bold "Proof:" line, so each offer carries a number.
+const proofBullet = (t, proof) => new Paragraph({ numbering: { reference: 'dot', level: 0 }, spacing: { before: 0, after: 40, line: 264 },
+  children: [run(t + ' '), run('Proof: ', { bold: true, color: GOLD }), run(proof)] });
 const para = (children, o = {}) => new Paragraph({ spacing: { before: 0, after: o.after || 40, line: 264 }, children });
 
 const body = [
@@ -43,16 +46,16 @@ const body = [
   ] }),
 
   section('Profile'),
-  para([run('Engineer turned product leader across consumer platforms, subscriptions, sales operations and international ecommerce. I connect problem definition, customer journeys, AI-assisted development and experimentation to ship products that lift conversion, retention and operational efficiency. Currently building Parwah, a family care product for India, and available for freelance builds and fractional product and growth engagements.')]),
+  para([run('Engineer turned product leader across consumer platforms, subscriptions, sales operations and international ecommerce. I connect problem definition, customer journeys, AI-assisted development and experimentation to ship products that lift conversion, retention and operational efficiency. Currently building Parwah, a family-care app for Indian families looking after ageing parents, and available for freelance builds and fractional product and growth engagements.')]),
 
   section('Core capabilities'),
   para([run('Product\u00A0discovery\u00A0and\u00A0prioritisation  ·  Customer\u00A0journeys\u00A0and\u00A0conversion\u00A0funnels  ·  AI\u00A0workflows\u00A0and\u00A0internal\u00A0tools  ·  Web\u00A0MVPs  ·  Subscription\u00A0monetisation  ·  Lifecycle\u00A0and\u00A0retention  ·  Analytics\u00A0and\u00A0experimentation  ·  Cross\u2011functional\u00A0delivery')]),
 
   section('Professional experience'),
-  role('Parwah, family care for India', 'Sep 2026 to Present', { first: true }),
-  bullet('Designing and building one app for the whole family with parents at the centre: daily check-in, SOS, booking anything for them and sending money safely.'),
-  bullet('Built senior-first (big type, voice-first, three actions per screen) with consent as the product: every share is chosen by the parent, visible to them and revocable in one tap.'),
-  bullet('Working website live at parwah-hq.anchit-tandon.com, with a real person to talk to on WhatsApp.'),
+  role('Parwah, family-care app for India', 'Sep 2026 to Present', { first: true }),
+  bullet('Building a family-care app for Indian families looking after ageing parents, so siblings in different cities can share their parents’ care without anything slipping.'),
+  bullet('Treated care as a task problem, not a chat problem: every need moves from open to assigned, claimed and done, with one tap to say “I’m on it”, ending the family WhatsApp group’s “I thought you did”.'),
+  bullet('Made handing a task back normal: anyone can reopen a need with its full history kept, and every action checks that the right family member is making the change. Live at parwah-hq.anchit-tandon.com.'),
 
   role('Vahdam India', 'Apr 2026 to Sep 2026'),
   sub('AGM, Product Management and D2C Growth', 'US, UK and global markets'),
@@ -71,7 +74,7 @@ const body = [
   group('Consumer platforms and new product launches'),
   bullet('Led the ET Markets web and mobile-web revamp, lifting engagement by 27% and unlocking INR 3 crore+ in incremental annual revenue.'),
   bullet('Revamped the ET Markets Android and iOS apps, growing daily active users by 25% and average session duration by 15%.'),
-  bullet('Launched paid wellness subscriptions for Times Health Plus, and drove discovery, registration and acquisition journeys for the Times Internet Half Marathon.'),
+  bullet('Launched paid wellness subscriptions for Times Health Plus, and led discovery, registration and acquisition journeys for the inaugural Times Internet Delhi Half Marathon (18K+ runners).'),
 
   section('Earlier experience'),
   role('Citymall', 'Mar 2022 to Jun 2022', { first: true }),
@@ -84,18 +87,22 @@ const body = [
 
   section('Selected independent product builds'),
   para([run('AI-assisted development across personal products and prototypes, spanning product design, application workflows and integrations.', { color: DIM })], { after: 20 }),
-  role('Third Eye, personal AI assistant', 'the-third-eye.anchit-tandon.com', { first: true }),
-  bullet('Built a full-stack Next.js and Supabase assistant with tool calling, memory, tasks and Google integration, connecting personal context with actions it can take.'),
-  role('Lifecycle OS, marketing workflow application', 'lifecycle-os.anchit-tandon.com'),
-  bullet('Built a multi-brand workspace and campaign workflow that links planning, segmentation, content and dispatch in one pipeline.'),
-  role('The Passion Table, subscription and ordering product', 'In development'),
-  bullet('Built subscription, ordering and fulfilment workflows for a food-service concept, including a test-mode payment journey.'),
+  role('The Third Eye, personal AI operating system', 'the-third-eye.anchit-tandon.com', { first: true }),
+  bullet('One assistant across tasks, notes, goals, calendar and email that acts by voice and camera and checks a personal knowledge base before answering: 24 tools built plus 76 linked apps, four assistant modes and Razorpay credit packs. Web and Android/iPhone apps.'),
+  role('LifeCycle-OS, lifecycle marketing platform', 'lifecycle-os.anchit-tandon.com'),
+  bullet('Enter any brand and get a full lifecycle plan in seconds, then turn real customer data into on-brand mailers, ads and landing pages. Missing facts are marked “data required” instead of invented, and brand isolation is enforced in code and tested on every change.'),
+  role('The Passion Table, home-style food service', 'In development'),
+  bullet('Daily home-style meals from neighbourhood kitchens, with three ways to eat from one kitchen: a meal subscription you can pause or change, on-demand ordering with live tracking, or a reserved table.'),
 
   section('Engagement focus'),
-  bullet('AI workflows and internal tools: call review, knowledge assistants, reporting dashboards and scoped integrations with human review.'),
-  bullet('Conversion-focused websites: clear offer positioning, enquiry or purchase journeys, CRM integrations and full-funnel measurement.'),
-  bullet('Fractional product and growth: roadmap prioritisation, zero-to-one launches, conversion experiments and subscription or ecommerce retention.'),
-  bullet('Focused web MVPs: one core customer journey shipped end to end, with agreed acceptance criteria and a clean handover.'),
+  proofBullet('AI workflows and internal tools: call review, knowledge assistants, reporting dashboards and scoped integrations with human review.',
+    'AI TeleSuite helped scale assisted-sales revenue from INR 15 lakh to INR 80 lakh a month.'),
+  proofBullet('Conversion-focused websites: clear offer positioning, enquiry or purchase journeys, CRM integrations and full-funnel measurement.',
+    'The ET Markets web revamp lifted engagement 27% and unlocked INR 3 crore+ in incremental annual revenue.'),
+  proofBullet('Fractional product and growth: roadmap prioritisation, zero-to-one launches, conversion experiments and subscription or ecommerce retention.',
+    '400%+ ROI within six months on an assisted-conversion funnel; subscriber retention up 10%.'),
+  proofBullet('Focused web MVPs and journeys: one core customer journey shipped end to end, with agreed acceptance criteria and a clean handover.',
+    'Assisted Buying took qualified leads from about 30 to 150+ a day; the app revamp grew daily active users 25%.'),
 
   section('Education'),
   role('B.Tech, Computer Science and Engineering', '2016 to 2020', { first: true }),
