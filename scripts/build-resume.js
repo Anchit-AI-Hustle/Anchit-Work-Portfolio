@@ -51,34 +51,40 @@ const proofBullet = (t, proof) => new Paragraph({ numbering: { reference: 'dot',
 const para = (children, o = {}) => new Paragraph({ spacing: { before: 0, after: o.after || 40, line: 259 }, children });
 // One product per line: name and link on the heading row, what it does below.
 const product = (name, url, text, first) => [
-  new Paragraph({ spacing: { before: first ? 30 : 70, after: 10 }, keepNext: true,
+  new Paragraph({ spacing: { before: first ? 30 : 50, after: 0 }, keepNext: true,
     tabStops: [{ type: TabStopType.RIGHT, position: RIGHT }],
     children: [run(name, { bold: true, size: 20 }), run('\t' + url, { size: 18, color: DIM })] }),
   new Paragraph({ spacing: { before: 0, after: 20, line: 259 }, indent: { left: 0 }, children: rich(text, { size: 19 }) }),
 ];
 
+// A product that fits on one row: name and what it is, link (or a note) on the right.
+const mini = (name, what, url) => new Paragraph({ spacing: { before: 0, after: 8 },
+  tabStops: [{ type: TabStopType.RIGHT, position: RIGHT }],
+  children: [run(name, { bold: true, size: 19 }), run(', ' + what, { size: 19 }), run('\t' + url, { size: 17, color: DIM })] });
+
 // The band a recruiter reads first: the biggest numbers, each with what it measures.
 const STATS = [
-  ['5× revenue', '₹15L → ₹80L a month'],
+  ['5× revenue', '₹15L → ₹80L/mo in 4 months'],
   ['400%+ ROI', 'ET Prime, in 6 months'],
-  ['₹3Cr+ a year', 'ET Markets revamp'],
-  ['18K+ runners', 'Delhi Half Marathon'],
-  ['20 AI products', 'built in 5\u20116 months'],
+  ['New revenue stream', 'Half Marathon, 18K+ runners'],
+  ['20 products', 'built in 5\u20116 months'],
+  ['Books + music', '4 books, a new track daily'],
 ];
-const cellW = Math.floor(RIGHT / STATS.length);
+// Widths follow the text: the marathon headline is the longest.
+const COLS = [2100, 1650, 2450, 1750, RIGHT - 2100 - 1650 - 2450 - 1750];
 const none = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' };
 const band = new Table({
-  width: { size: cellW * STATS.length, type: WidthType.DXA },
-  columnWidths: STATS.map(() => cellW),
+  width: { size: RIGHT, type: WidthType.DXA },
+  columnWidths: COLS,
   borders: { top: none, bottom: none, left: none, right: none, insideHorizontal: none, insideVertical: { style: BorderStyle.SINGLE, size: 4, color: 'E5DCC7' } },
-  rows: [new TableRow({ children: STATS.map(([n, l]) => new TableCell({
-    width: { size: cellW, type: WidthType.DXA },
+  rows: [new TableRow({ children: STATS.map(([n, l], i) => new TableCell({
+    width: { size: COLS[i], type: WidthType.DXA },
     shading: { type: ShadingType.CLEAR, color: 'auto', fill: BAND },
     verticalAlign: VerticalAlign.CENTER,
-    margins: { top: 90, bottom: 90, left: 80, right: 80 },
+    margins: { top: 80, bottom: 80, left: 40, right: 40 },
     children: [
-      new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 10 }, children: [new TextRun({ text: n, font: FONT, size: 24, bold: true, color: GOLD })] }),
-      new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 0 }, children: [new TextRun({ text: l, font: FONT, size: 16, color: DIM })] }),
+      new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 10 }, children: [new TextRun({ text: n, font: FONT, size: 23, bold: true, color: GOLD })] }),
+      new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 0 }, children: [new TextRun({ text: l, font: FONT, size: 15, color: DIM })] }),
     ],
   })) })],
 });
@@ -99,7 +105,7 @@ const body = [
 
   section('Profile'),
   para(rich(HIRE
-    ? 'Engineer turned product leader. Close to **4 years at Times Internet** (APM to Senior PM) scaling subscriptions and assisted sales, then **AGM, Product Management and D2C Growth at Vahdam India** across the US, UK and global markets. In the last 5\u20116 months I have built **20 AI products** end to end, and since September 2026 I have been building full time, including **Parwah**, a family-care app for Indian families. I am looking for a role where product and AI meet: shaping the product and building it hands-on with customers.'
+    ? 'Engineer turned product leader. Close to **4 years at Times Internet** (APM to Senior PM) scaling subscriptions and assisted sales, then **AGM, Product Management and D2C Growth at Vahdam India** across the US, UK and global markets. In the last 5\u20116 months I have built **20 products** end to end, and since September 2026 I have been building full time, including **Parwah**, a family-care app for Indian families. I am looking for a role where product and AI meet: shaping the product and building it hands-on with customers.'
     : 'Engineer turned product leader across consumer platforms, subscriptions, sales operations and international ecommerce. I connect problem definition, customer journeys, AI-assisted development and experimentation to ship products that lift conversion, retention and operational efficiency. Currently building **Parwah**, a family-care app for Indian families looking after ageing parents, and available for freelance builds and fractional product and growth engagements.')),
 
   section('Skills'),
@@ -124,21 +130,24 @@ const body = [
   sub('Product Manager', 'Oct 2023 to Mar 2025'),
   sub('Associate Product Manager', 'Jun 2022 to Oct 2023'),
   group('Assisted conversion and subscriptions'),
-  bullet('Scaled Economic Times assisted-sales monthly revenue **5×, from INR 15 lakh to INR 80 lakh**, through funnel redesign and continuous experimentation; delivered **400%+ ROI within six months** on ET Prime’s structured assisted-conversion funnel.'),
+  bullet('Scaled Economic Times assisted-sales monthly revenue **5× within 4 months, from INR 15 lakh to INR 80 lakh**, through funnel redesign and continuous experimentation; delivered **400%+ ROI within six months** on ET Prime’s structured assisted-conversion funnel.'),
   bullet('Built **AI TeleSuite** for call transcription, quality scoring and pitch assistance, standardising conversion execution across high-intent traffic.'),
   bullet('Launched Assisted Buying, growing qualified leads from **about 30 to 150+ a day**; lifted subscriber retention by **10%** through onboarding and engagement experiments.'),
   group('Consumer platforms and new product launches'),
   bullet('Led the ET Markets web and mobile-web revamp, lifting engagement by **27%** and unlocking **INR 3 crore+** in incremental annual revenue.'),
   bullet('Revamped the ET Markets Android and iOS apps, growing daily active users by **25%** and average session duration by **15%**.'),
-  bullet('Launched paid wellness subscriptions for **Times Health+**, and led discovery, registration and acquisition journeys for the inaugural **Times Internet Delhi Half Marathon (18K+ runners)**.'),
+  bullet('Launched paid wellness subscriptions for **Times Health+**, and led discovery, registration and acquisition journeys for the inaugural **Times Internet Delhi Half Marathon (18K+ runners)**, setting up a **new revenue stream**.'),
 
   section('Earlier experience'),
   role('Tuple Technologies, Software Engineer', 'Apr 2020 to Mar 2022', { first: true }),
-  bullet('Built and scaled backend services for consumer-facing applications, and owned an early **live sports commentary product**, connecting product decisions with technical delivery.'),
+  bullet('Built backend services for consumer apps and owned an early **live sports commentary product**.'),
   role('Citymall, Software Engineer', 'Mar 2022 to Jun 2022'),
   bullet('Supported data pipelines and backend systems for consumer commerce platforms.'),
 
-  section(HIRE ? 'Selected products (from 20 built in 5\u20116 months)' : 'Selected independent product builds'),
+  section('Education'),
+  role('B.Tech, Computer Science and Engineering, Vellore Institute of Technology', '2016 to 2020', { first: true }),
+
+  section(HIRE ? 'All 20 products, built in 5\u20116 months' : 'Selected independent product builds'),
   ...product('LifeCycle-OS, lifecycle marketing platform', 'lifecycle-os.anchit-tandon.com',
     'Any brand in, a full lifecycle plan out in seconds, then on-brand mailers, ads and landing pages from real customer data. **Missing facts are marked “data required”, never invented**; brand isolation is tested on every change.', true),
   ...product('The Third Eye, personal AI operating system', 'the-third-eye.anchit-tandon.com',
@@ -152,6 +161,23 @@ const body = [
       'Pins any website in your room on a phone, turns a laptop webcam into head-tracked 3D, and **throws pages to a TV** with a pinch-and-swing gesture.'),
     ...product('Edu AI, a learning planner from birth to Class 12', 'edu-ai.anchit-tandon.com',
       'One skill map from age 0 to 18 across CBSE, ICSE/ISC, NIOS and state boards, with **JEE, NEET, CUET and UPSC** tracks branching off it.'),
+    ...product('ANCHOR, an AI techno artist', 'anchor.anchit-tandon.com',
+      'Releases **a new track every day at ₹0**, from brief to cover to release, fully automated. On Instagram **@anchor_at2803**.'),
+    ...product('Book publishing engine, 4 thrillers and kids’ drawing books', 'amazon.in/Anchit-Tandon/e/B0HL6RW348',
+      '**The Watermark Files**, a 4-book Indian thriller series under my name, and **Doodle Lane Studio** drawing books for kids 6 to 9, on Kindle, paperback and hardcover; a new drawing every day on Instagram **@ai_at2803**.'),
+    group('Also built'),
+    mini('Parwah', 'family care as tasks, not chats', 'parwah-hq.anchit-tandon.com'),
+    mini('AI TeleSuite', 'AI listens to every sales call so managers can coach', 'demo on request'),
+    mini('Hey Yaara', 'a Hinglish AI voice companion you call like a friend', 'hey-yaara.anchit-tandon.com'),
+    mini('Animind', 'reads a pet’s state from a 10-second recording', 'pet-mind.anchit-tandon.com'),
+    mini('TH+ LifeEngine', 'yoga and food plans as trackable data', 'th-life-engine.anchit-tandon.com'),
+    mini('Kolab', 'creators and the brands that pay them (prototype)', 'kolab.anchit-tandon.com'),
+    mini('Shoutout', 'gigs, collaborators and auditions for musicians', 'shoutout.anchit-tandon.com'),
+    mini('JobHunt', 'free AI agent that tailors a résumé to each real job', 'anchit-tandon.com/jobhunt'),
+    mini('Anchit LLM', 'my portfolio, answering questions in my own voice', 'anchit-tandon.com'),
+    mini('Markets Pro', 'trading research engine for 4 markets', 'being fixed'),
+    mini('MuseVibe Studio', 'a one-line idea into a full song', 'being fixed'),
+    mini('The Passion Table', 'home-style food from neighbourhood kitchens', 'being fixed'),
   ] : []),
 
   ...(HIRE ? [] : [
@@ -166,8 +192,6 @@ const body = [
       'Assisted Buying took qualified leads from **about 30 to 150+ a day**; the app revamp grew daily active users **25%**.'),
   ]),
 
-  section('Education'),
-  role('B.Tech, Computer Science and Engineering, Vellore Institute of Technology', '2016 to 2020', { first: true }),
 ];
 
 const doc = new Document({
