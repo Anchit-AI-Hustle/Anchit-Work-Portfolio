@@ -10687,7 +10687,10 @@
         // Built as nodes: the recording's URL never passes through HTML.
         const bub = document.createElement('div'); bub.className = 'msg-bubble';
         const lab = document.createElement('strong'); lab.textContent = 'Audio message';
-        const au = document.createElement('audio'); au.controls = true; au.src = url;
+        // Only the object URL the browser just minted for this file is played.
+        const safeUrl = /^blob:/.test(url) ? url : null;
+        if (!safeUrl) return;
+        const au = document.createElement('audio'); au.controls = true; au.src = safeUrl;
         bub.append(lab, document.createElement('br'), au); w.appendChild(bub);
         body.appendChild(w);
         body.scrollTop = body.scrollHeight;

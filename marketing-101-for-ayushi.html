@@ -3755,9 +3755,11 @@ function bindNotes(){
 var VIDEO_IO = null;
 function mountVideo(fr){
   if(fr.__mounted) return; fr.__mounted = 1;
-  var vid = fr.getAttribute('data-vid');
-  // Only a YouTube video id ever goes into the player URL.
-  if(!/^[A-Za-z0-9_-]{6,20}$/.test(vid || '')) return;
+  // Only a YouTube video id ever goes into the player URL (the same guard
+  // marketing-101.html uses).
+  var raw = fr.getAttribute('data-vid') || '';
+  var vid = /^[A-Za-z0-9_-]{11}$/.test(raw) ? raw : null;
+  if(!vid) return;
   if(location.protocol === 'file:'){
     var btn = fr.querySelector('.vf-play'), cap = fr.querySelector('.vf-cap');
     if(cap) cap.textContent = 'Opens on YouTube, in-page playback needs the hosted version';
