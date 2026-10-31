@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Anchit Tandon — Resume</title>
+<!--
+  Source of truth for assets/resume.pdf and the .docx beside it.
+  Both were hand-made binaries before this, last touched 17 Oct, which is why
+  they still ended the career at Vahdam and listed four side builds. Edit this
+  file and run `npm run resume` to regenerate both.
+
+  Every factual line here is traceable to the site: the experience view in
+  index.html for roles, dates and metrics, and the projects deck for the builds.
+-->
+<style>
+  @page { size: A4; margin: 11mm 13mm; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: Carlito, "DejaVu Sans", Arial, sans-serif;
+    font-size: 9.5pt; line-height: 1.4; color: #1b1917; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  a { color: #b8431f; text-decoration: none; }
+
+  /* ---- header ---- */
+  .name { font-family: Caladea, "DejaVu Serif", Georgia, serif;
+          font-size: 23pt; font-weight: 700; letter-spacing: -.015em; margin: 0; color: #121010; }
+  .role { font-size: 10.4pt; color: #FF6940; font-weight: 700; margin: 2px 0 5px;
+          letter-spacing: .005em; }
+  .contact { font-size: 8.7pt; color: #4a443e; }
+  .contact span { white-space: nowrap; }
+  .sep { color: #c3bcb2; padding: 0 3px; }
+  .rule { height: 2px; background: #FF6940; margin: 7px 0 11px; }
+
+  /* ---- sections ---- */
+  h2 { font-size: 8.7pt; letter-spacing: .02em; text-transform: uppercase;
+       color: #FF6940; margin: 10px 0 5px; font-weight: 700;
+       border-bottom: .6pt solid #e4ded4; padding-bottom: 3px; }
+  p { margin: 0 0 5px; }
+
+  .job { margin-bottom: 7px; break-inside: avoid; }
+  .job-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .job-title { font-weight: 700; font-size: 10pt; color: #121010; }
+  .job-org { font-weight: 700; color: #121010; }
+  .job-when { font-size: 8.5pt; color: #6b645b; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .job-sub { font-size: 8.8pt; color: #6b645b; margin-bottom: 3px; }
+
+  ul { margin: 3px 0 0; padding-left: 14px; }
+  li { margin-bottom: 2.4px; }
+  li::marker { color: #FF6940; }
+
+  .stint { margin: 4px 0 0; }
+  .stint-head { font-weight: 700; font-size: 9.3pt; color: #27231f; }
+  .stint-head .when { font-weight: 400; color: #6b645b; font-size: 8.4pt; }
+
+  b, strong { color: #121010; }
+  .metric { font-weight: 700; color: #121010; }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
+  .builds li { margin-bottom: 2.4px; }
+  .builds .nm { font-weight: 700; color: #121010; }
+
+  .caps { font-size: 9.2pt; color: #35302b; }
+  .dash { color: #b9b2a8; }
+  .foot { margin-top: 10px; font-size: 8.2pt; color: #8a8278; border-top: .6pt solid #e4ded4; padding-top: 5px; }
+</style>
+</head>
+<body>
+
+<div class="name">Anchit Tandon</div>
+<div class="role">Product &amp; D2C Growth &middot; Building Parwah</div>
+<div class="contact">
+  <span>Delhi, India</span><span class="sep"> | </span><span>+91 98739 45238</span><span class="sep"> | </span><span>anchit.tandon@gmail.com</span><span class="sep"> | </span><span><a href="https://anchit-tandon.com">anchit-tandon.com</a></span><span class="sep"> | </span><span><a href="https://linkedin.com/in/anchit-tandon">linkedin.com/in/anchit-tandon</a></span>
+</div>
+<div class="rule"></div>
+
+<p>Engineer turned product leader, five years across consumer platforms, subscriptions, assisted sales and
+international D2C. I scaled an assisted-sales channel 5&times; to <span class="metric">&#8377;80L MRR</span>, rebuilt ET Markets into
+<span class="metric">&#8377;3Cr+ incremental ARR</span>, and launched a consumer IP from zero for 15,000+ participants. Now building
+Parwah solo, and open to freelance and fractional product and growth work alongside it.</p>
+
+<h2>Core capabilities</h2>
+<p class="caps">Growth funnels and conversion optimisation &middot; Subscriptions and monetisation &middot; Lifecycle and retention
+&middot; A/B testing and experimentation &middot; Consumer product, web and mobile &middot; AI workflows and LLM integration
+&middot; Analytics and instrumentation &middot; Backend engineering (Node, Python)</p>
+
+<h2>Experience</h2>
+
+<div class="job">
+  <div class="job-head">
+    <div><span class="job-title">Founder and Product Lead</span>, <span class="job-org">Parwah</span></div>
+    <div class="job-when">Sep 2026 &ndash; Present</div>
+  </div>
+  <div class="job-sub">Family care for India &middot; solo build &middot; live at parwah-hq.anchit-tandon.com</div>
+  <ul>
+    <li>Building one app for family care with parents at the centre, owning product, design, the build and the consent model that decides what the product will and will not do.</li>
+    <li>Consent is the product: every share is chosen by the parent, visible to them and revocable in one tap. Built senior-first, with large type, voice-first interaction and three actions per screen.</li>
+    <li>Live as a website for families and improving against real use. Taking freelance and consulting work alongside it.</li>
+  </ul>
+</div>
+
+<div class="job">
+  <div class="job-head">
+    <div><span class="job-title">AGM, Product Management and D2C Growth</span>, <span class="job-org">Vahdam India</span></div>
+    <div class="job-when">Apr 2026 &ndash; Sep 2026</div>
+  </div>
+  <div class="job-sub">US, UK and global markets &middot; premium D2C tea, shipping to 100+ countries</div>
+  <ul>
+    <li>Owned D2C growth across the US, UK and global markets, covering customer experience, product performance and revenue.</li>
+    <li>Helped build a customer lifecycle and retention OS threading analytics, planning, segmentation and mailer generation into a single loop.</li>
+    <li>Ran product and CRM experimentation through Klaviyo and WebEngage; lifted UK marketing revenue within the first two months.</li>
+  </ul>
+</div>
+
+<div class="job">
+  <div class="job-head">
+    <div><span class="job-title">APM &rarr; PM &rarr; Senior Product Manager</span>, <span class="job-org">Times Internet</span></div>
+    <div class="job-when">Jun 2022 &ndash; Apr 2026</div>
+  </div>
+
+  <div class="stint">
+    <div class="stint-head">Times Internet Delhi Half Marathon <span class="when">&middot; Senior PM, Apr 2025 &ndash; Apr 2026</span></div>
+    <ul>
+      <li>Launched a first-time consumer IP from <span class="metric">0&rarr;1</span> for <span class="metric">15,000+ participants</span> at Dhyan Chand National Stadium, owning discovery, registration and acquisition funnels end to end across tech, marketing and on-ground.</li>
+    </ul>
+  </div>
+
+  <div class="stint">
+    <div class="stint-head">Assisted Sales, ET Prime <span class="when">&middot; PM &rarr; Senior PM, 2024 &ndash; Apr 2026</span></div>
+    <ul>
+      <li>Scaled assisted-sales monthly revenue <span class="metric">5&times;, from &#8377;15L to &#8377;80L MRR</span>, through funnel redesign and continuous A/B experimentation; <span class="metric">400%+ ROI within six months</span>. Times Internet Team Award, 2025.</li>
+      <li>Built AI TeleSuite for live call transcription, quality scoring and pitch assistance, making conversion consistent across high-intent traffic.</li>
+    </ul>
+  </div>
+
+  <div class="stint">
+    <div class="stint-head">Times Health+ subscriptions <span class="when">&middot; PM, 2024 &ndash; 2025</span></div>
+    <ul>
+      <li>Launched paid wellness subscriptions from scratch: freemium-to-paid journeys, pricing experiments and retention-led monetisation, opening a new revenue line.</li>
+    </ul>
+  </div>
+
+  <div class="stint">
+    <div class="stint-head">ET Markets rebuild <span class="when">&middot; APM &rarr; PM, 2022 &ndash; 2024</span></div>
+    <ul>
+      <li>Led the ET Markets web and mWeb revamp: <span class="metric">+27% engagement</span> and <span class="metric">&#8377;3Cr+ incremental annual revenue</span>.</li>
+      <li>Revamped the Android and iOS apps: <span class="metric">+25% DAU</span>, <span class="metric">+15% average session duration</span>, and <span class="metric">+19% screen views</span> from new discovery and decision-support features.</li>
+    </ul>
+  </div>
+
+  <div class="stint">
+    <div class="stint-head">Assisted Buying, Economic Times <span class="when">&middot; APM, 2022 &ndash; 2023</span></div>
+    <ul>
+      <li>Introduced assisted-buying surfaces for high-intent users, lifting qualified leads from <span class="metric">~30 to 150+ per day</span>; A/B experimentation across onboarding and engagement improved subscriber retention by <span class="metric">10%</span>.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="job">
+  <div class="job-head">
+    <div><span class="job-title">Software Engineer</span>, <span class="job-org">Citymall</span></div>
+    <div class="job-when">Mar 2022 &ndash; Jun 2022</div>
+  </div>
+  <ul><li>Backend systems and data pipelines for consumer commerce platforms.</li></ul>
+</div>
+
+<div class="job">
+  <div class="job-head">
+    <div><span class="job-title">Software Engineer and Product Owner</span>, <span class="job-org">Tuple Technologies</span></div>
+    <div class="job-when">Apr 2020 &ndash; Mar 2022</div>
+  </div>
+  <ul><li>Built and scaled backend services for consumer-facing applications; owned an early live sports commentary product as Product Owner, connecting product decisions to technical delivery.</li></ul>
+</div>
+
+<h2>Independent product builds &middot; live</h2>
+<ul class="builds two">
+  <li><span class="nm">LifeCycle-OS</span><span class="dash"> &middot; </span>benchmarks any brand's category and generates a complete, ready-to-run lifecycle marketing plan.</li>
+  <li><span class="nm">The Third Eye</span><span class="dash"> &middot; </span>a personal AI OS with memory, tools and voice across tasks, notes, calendar and email.</li>
+  <li><span class="nm">Parwah</span><span class="dash"> &middot; </span>replaces chaotic family WhatsApp threads with clear ownership of every parent-care task.</li>
+  <li><span class="nm">LoosenUp</span><span class="dash"> &middot; </span>two-minute stress relief showing a before and after calm score, with SOS on every screen.</li>
+  <li><span class="nm">Predict Natural Disasters</span><span class="dash"> &middot; </span>a live global hazard map on 8 official sources that grades its own forecasts against what happened.</li>
+  <li><span class="nm">Edu AI</span><span class="dash"> &middot; </span>an AI-first learning planner from birth to Class 12, with JEE, NEET and study-abroad tracks.</li>
+  <li><span class="nm">AI TeleSuite</span><span class="dash"> &middot; </span>call transcription, AI pitch scoring and coaching for sales teams.</li>
+  <li><span class="nm">Hey Yaara</span><span class="dash"> &middot; </span>a Hinglish AI voice companion you can call and talk to.</li>
+  <li><span class="nm">Animind</span><span class="dash"> &middot; </span>reads animal behaviour from short audio and video clips.</li>
+  <li><span class="nm">Airpane</span><span class="dash"> &middot; </span>an AR browser that floats any website in your room, no headset needed.</li>
+  <li><span class="nm">TH+ LifeEngine</span><span class="dash"> &middot; </span>personalised yoga and food plans drafted by one AI and checked by another.</li>
+  <li><span class="nm">Markets Pro</span><span class="dash"> &middot; </span>a trading research engine for 4 markets with real costs built in, paper trading only.</li>
+  <li><span class="nm">MusicGenAI</span><span class="dash"> &middot; </span>type a prompt, get a full song with vocals.</li>
+  <li><span class="nm">Kolab</span><span class="dash"> &middot; </span>a creator and brand platform with social login and an analytics dashboard.</li>
+  <li><span class="nm">Shoutout</span><span class="dash"> &middot; </span>one platform where indie musicians find gigs, collaborators and auditions.</li>
+  <li><span class="nm">ANCHOR</span><span class="dash"> &middot; </span>a robot that releases a new techno track on YouTube every day, at zero cost.</li>
+  <li><span class="nm">JobHunt</span><span class="dash"> &middot; </span>an AI agent that runs the job search for you.</li>
+</ul>
+
+<h2>Education</h2>
+<div class="job-head">
+  <div><span class="job-title">B.Tech, Computer Science and Engineering</span><span class="dash"> &middot; </span>Vellore Institute of Technology, Vellore</div>
+  <div class="job-when">2016 &ndash; 2020</div>
+</div>
+
+<div class="foot">Every build above is live and linked at anchit-tandon.com, each with a case study.</div>
+
+</body>
+</html>
