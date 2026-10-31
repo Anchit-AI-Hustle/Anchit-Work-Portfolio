@@ -3321,6 +3321,7 @@ window.__GLOSSARY__ = {"AARRR": "Acquisition, activation, retention, referral, r
 'use strict';
 
 /* ---------- storage shim: window.storage if present, else localStorage, else memory ---------- */
+function escH(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 var MEM = {};
 var STORE = {
   async get(k){
@@ -3614,7 +3615,7 @@ function show(id, push){
   sec.classList.remove('hide');
   $$('.strip').forEach(function(el){ el.classList.toggle('on', el.getAttribute('data-ch')===id); });
   var t = sec.getAttribute('data-title'), n = sec.getAttribute('data-num');
-  var cr = $('#crumb'); if(cr) cr.innerHTML = 'Chapter '+n+' &nbsp;/&nbsp; <b>'+t+'</b>';
+  var cr = $('#crumb'); if(cr) cr.innerHTML = 'Chapter '+escH(n)+' &nbsp;/&nbsp; <b>'+escH(t)+'</b>';
   document.title = n+' · '+t+', '+(window.__TITLE__||'The Signal Desk');
   try{ if(push!==false && location.hash !== '#'+id) history.replaceState(null,'','#'+id); }catch(e){}
   CUR = id;
@@ -4329,6 +4330,7 @@ function $$(s,r){ return Array.prototype.slice.call((r||document).querySelectorA
 var RM = (window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : {matches:false});
 
 /* ─────────────── 1. diagram: expand, zoom, and a text alternative ─────────────── */
+function escH(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 function dgText(svg){
   var out = [], last = null, seen = {}, notes = {};
   var all = $$('*', svg);
@@ -4359,10 +4361,11 @@ function dgText(svg){
   }
   var h = '<dl class="dgx">';
   out.forEach(function(o){
-    if(o.k === 'head') h += '<dt class="dgx-h">' + o.a + '</dt>';
-    else if(o.k === 'node') h += '<dd class="dgx-n"><b>' + o.a + '</b>' + (o.b ? ', ' + o.b : '') + '</dd>';
-    else if(o.k === 'item') h += '<dd class="dgx-i"><b>' + o.a + '</b>' + (o.b ? ', ' + o.b : '') + '</dd>';
-    else h += '<dd class="dgx-note">' + o.a + '</dd>';
+    var a = escH(o.a), b = escH(o.b);
+    if(o.k === 'head') h += '<dt class="dgx-h">' + a + '</dt>';
+    else if(o.k === 'node') h += '<dd class="dgx-n"><b>' + a + '</b>' + (b ? ', ' + b : '') + '</dd>';
+    else if(o.k === 'item') h += '<dd class="dgx-i"><b>' + a + '</b>' + (b ? ', ' + b : '') + '</dd>';
+    else h += '<dd class="dgx-note">' + a + '</dd>';
   });
   return h + '</dl>';
 }
@@ -4696,11 +4699,11 @@ function paintDeck(){
       var opts = q.querySelectorAll('.opt');
       var ans = opts[ansI] ? opts[ansI].textContent.trim() : '';
       var why = q.querySelector('.why');
-      cards.push('<div class="rv" data-ch="'+ch+'" data-qi="'+qi+'">' +
-        '<span class="rv-src">CHAPTER ' + num + ' · ' + title + '</span>' +
-        '<p class="rv-q">' + text + '</p>' +
-        '<div class="rv-back hide"><p class="rv-a"><b>' + ans + '</b></p>' +
-        '<p class="rv-w">' + (why ? why.textContent.replace(/^Why/, '').trim() : '') + '</p></div>' +
+      cards.push('<div class="rv" data-ch="'+escH(ch)+'" data-qi="'+escH(qi)+'">' +
+        '<span class="rv-src">CHAPTER ' + escH(num) + ' · ' + escH(title) + '</span>' +
+        '<p class="rv-q">' + escH(text) + '</p>' +
+        '<div class="rv-back hide"><p class="rv-a"><b>' + escH(ans) + '</b></p>' +
+        '<p class="rv-w">' + escH(why ? why.textContent.replace(/^Why/, '').trim() : '') + '</p></div>' +
         '<span class="rv-acts"><button class="btn ghost rv-flip">Show answer</button>' +
         '<button class="btn ghost rv-got">I have got this</button></span></div>');
     });
@@ -4757,20 +4760,20 @@ function buildSheet(sec){
   var box = document.createElement('div');
   box.id = 'printSheet'; box.className = 'sheet';
   var num = sec.getAttribute('data-num'), title = sec.getAttribute('data-title');
-  var h = '<header><span>' + (window.__TITLE__ || '') + '</span>' +
-          '<h2 class="sheet-title">' + num + ' · ' + title + '</h2></header>';
+  var h = '<header><span>' + escH(window.__TITLE__ || '') + '</span>' +
+          '<h2 class="sheet-title">' + escH(num) + ' · ' + escH(title) + '</h2></header>';
   var goals = sec.querySelectorAll('.ch-goals li');
   goals = Array.prototype.slice.call(goals);
   if(goals.length){
     h += '<section><h3>By the end of this chapter</h3><ul>';
-    goals.forEach(function(g){ h += '<li>' + g.textContent.trim() + '</li>'; });
+    goals.forEach(function(g){ h += '<li>' + escH(g.textContent.trim()) + '</li>'; });
     h += '</ul></section>';
   }
   h += '<section><h3>The lessons, one line each</h3><ol>';
   Array.prototype.slice.call(sec.querySelectorAll('.lesson')).forEach(function(ls){
     var t = ls.querySelector('.lesson-top h3'), sig = ls.querySelector('.st-signal p');
-    h += '<li><b>' + (t ? t.textContent.trim() : '') + '</b><br>' +
-         (sig ? firstSentence(sig.textContent) : '') + '</li>';
+    h += '<li><b>' + escH(t ? t.textContent.trim() : '') + '</b><br>' +
+         escH(sig ? firstSentence(sig.textContent) : '') + '</li>';
   });
   h += '</ol></section>';
   var ros = sec.querySelectorAll('.ro-row .formula');
@@ -4782,21 +4785,21 @@ function buildSheet(sec){
       var lbl = (k && k.childNodes[0] && k.childNodes[0].textContent) ? k.childNodes[0].textContent.trim() : '';
       if(!lbl) return;
       var line = lbl + ' = ' + f.textContent.trim();
-      if(!seen[line]){ seen[line] = 1; h += '<li>' + line + '</li>'; }
+      if(!seen[line]){ seen[line] = 1; h += '<li>' + escH(line) + '</li>'; }
     });
     h += '</ul></section>';
   }
   var steps = sec.querySelectorAll('.activity ul.check label');
   if(steps.length){
     h += '<section><h3>Field task</h3><ul class="boxes">';
-    Array.prototype.slice.call(steps).forEach(function(s){ h += '<li>' + s.textContent.trim() + '</li>'; });
+    Array.prototype.slice.call(steps).forEach(function(s){ h += '<li>' + escH(s.textContent.trim()) + '</li>'; });
     h += '</ul></section>';
   }
   var note = sec.querySelector('.notes textarea, textarea.notes');
   if(note && typeof note.value === 'string' && note.value.trim()){
-    h += '<section><h3>Your notes</h3><p>' + note.value.trim().replace(/</g,'&lt;') + '</p></section>';
+    h += '<section><h3>Your notes</h3><p>' + escH(note.value.trim()) + '</p></section>';
   }
-  h += '<footer>Chapter ' + num + ' · print-out from ' + (window.__TITLE__ || '') + '</footer>';
+  h += '<footer>Chapter ' + escH(num) + ' · print-out from ' + escH(window.__TITLE__ || '') + '</footer>';
   box.innerHTML = h;
   document.body.appendChild(box);
 }

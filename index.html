@@ -10684,7 +10684,11 @@
       if (body) {
         const w = document.createElement('div');
         w.className = 'msg user audio-msg';
-        w.innerHTML = '<div class="msg-bubble"><strong>Audio message</strong><br><audio controls src="'+url+'"></audio></div>';
+        // Built as nodes: the recording's URL never passes through HTML.
+        const bub = document.createElement('div'); bub.className = 'msg-bubble';
+        const lab = document.createElement('strong'); lab.textContent = 'Audio message';
+        const au = document.createElement('audio'); au.controls = true; au.src = url;
+        bub.append(lab, document.createElement('br'), au); w.appendChild(bub);
         body.appendChild(w);
         body.scrollTop = body.scrollHeight;
       }
