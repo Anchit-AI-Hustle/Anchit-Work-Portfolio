@@ -54,7 +54,9 @@ const product = (name, url, text, first) => [
   new Paragraph({ spacing: { before: first ? 30 : 50, after: 0 }, keepNext: true,
     tabStops: [{ type: TabStopType.RIGHT, position: RIGHT }],
     children: [run(name, { bold: true, size: 20 }), run('\t' + url, { size: 18, color: DIM })] }),
-  new Paragraph({ spacing: { before: 0, after: 20, line: 259 }, indent: { left: 0 }, children: rich(text, { size: 19 }) }),
+  new Paragraph({ spacing: { before: 0, after: 20, line: 259 }, indent: { left: 0 }, children: Array.isArray(text)
+    ? [run('Need: ', { bold: true, size: 19, color: GOLD }), ...rich(text[0] + ' ', { size: 19 }), run('How it helps: ', { bold: true, size: 19, color: GOLD }), ...rich(text[1], { size: 19 })]
+    : rich(text, { size: 19 }) }),
 ];
 
 // A product that fits on one row: name and what it is, link (or a note) on the right.
@@ -139,45 +141,53 @@ const body = [
   bullet('Launched paid wellness subscriptions for **Times Health+**, and led discovery, registration and acquisition journeys for the inaugural **Times Internet Delhi Half Marathon (18K+ runners)**, setting up a **new revenue stream**.'),
 
   section('Earlier experience'),
-  role('Tuple Technologies, Software Engineer', 'Apr 2020 to Mar 2022', { first: true }),
-  bullet('Built backend services for consumer apps and owned an early **live sports commentary product**.'),
-  role('Citymall, Software Engineer', 'Mar 2022 to Jun 2022'),
+  role('Citymall, Software Engineer', 'Mar 2022 to Jun 2022', { first: true }),
   bullet('Supported data pipelines and backend systems for consumer commerce platforms.'),
+  role('Tuple Technologies, Software Engineer', 'Apr 2020 to Mar 2022'),
+  bullet('Built backend services for consumer apps and owned an early **live sports commentary product**.'),
 
   section('Education'),
   role('B.Tech, Computer Science and Engineering, Vellore Institute of Technology', '2016 to 2020', { first: true }),
 
   section(HIRE ? 'All 20 products, built in 5\u20116 months' : 'Selected independent product builds'),
-  ...product('LifeCycle-OS, lifecycle marketing platform', 'lifecycle-os.anchit-tandon.com',
-    'Any brand in, a full lifecycle plan out in seconds, then on-brand mailers, ads and landing pages from real customer data. **Missing facts are marked “data required”, never invented**; brand isolation is tested on every change.', true),
-  ...product('The Third Eye, personal AI operating system', 'the-third-eye.anchit-tandon.com',
-    'One assistant across tasks, notes, goals, calendar and email, by voice and camera: **24 tools plus 76 linked apps**, four assistant modes and Razorpay credit packs, on web, Android and iPhone.'),
-  ...product('Predict Natural Disasters, live global hazard map', 'predict-natural-disasters.anchit-tandon.com',
-    'One map across **8 official data sources** (USGS, NASA, GDACS, NOAA and more). **Every forecast states its evidence and is graded afterwards**, and uncovered regions say “not covered”, never “all clear”.'),
-  ...product('LoosenUp, stress relief for your worst 2 minutes', 'loosenup.anchit-tandon.com',
-    'A 2-minute guided break with a before-and-after **Calm gain**; an SOS on every screen (Tele-MANAS 14416, a trusted contact, 112); no account needed, and it works offline.'),
+  ...product('LifeCycle-OS, lifecycle marketing platform', 'lifecycle-os.anchit-tandon.com', [
+    'D2C growth teams must ship emails, ads and landing pages for every cohort, every week, and AI makes up facts.',
+    'any brand in, a full lifecycle plan and on-brand content out in seconds, with missing facts marked **“data required”, never invented**.'], true),
+  ...product('The Third Eye, personal AI operating system', 'the-third-eye.anchit-tandon.com', [
+    'tasks, notes, email and calendar live in separate apps, and no assistant sees all of it.',
+    'one assistant, by voice and camera, plans, remembers and acts across them with **24 tools and 76 linked apps**, on web, Android and iPhone.']),
+  ...product('Predict Natural Disasters, live global hazard map', 'predict-natural-disasters.anchit-tandon.com', [
+    'newsrooms, NGOs and operations teams need one trustworthy view when disaster strikes.',
+    'one map across **8 official sources** (USGS, NASA, GDACS, NOAA and more); every forecast shows its evidence and is **graded afterwards**.']),
+  ...product('LoosenUp, stress relief for your worst 2 minutes', 'loosenup.anchit-tandon.com', [
+    'relief in the tense moment, not a 20-minute programme with a sign-up.',
+    'a **2-minute** guided break with a before-and-after Calm gain, no account, works offline, and an SOS on every screen (Tele-MANAS 14416, 112).']),
   ...(HIRE ? [
-    ...product('Airpane, an AR browser with no headset or app', 'airpane.anchit-tandon.com',
-      'Pins any website in your room on a phone, turns a laptop webcam into head-tracked 3D, and **throws pages to a TV** with a pinch-and-swing gesture.'),
-    ...product('Edu AI, a learning planner from birth to Class 12', 'edu-ai.anchit-tandon.com',
-      'One skill map from age 0 to 18 across CBSE, ICSE/ISC, NIOS and state boards, with **JEE, NEET, CUET and UPSC** tracks branching off it.'),
-    ...product('ANCHOR, an AI techno artist', 'anchor.anchit-tandon.com',
-      'Releases **a new track every day at ₹0**, from brief to cover to release, fully automated. On Instagram **@anchor_at2803**.'),
-    ...product('Book publishing engine, 4 thrillers and kids’ drawing books', 'amazon.in/Anchit-Tandon/e/B0HL6RW348',
-      '**The Watermark Files**, a 4-book Indian thriller series under my name, and **Doodle Lane Studio** drawing books for kids 6 to 9, on Kindle, paperback and hardcover; a new drawing every day on Instagram **@ai_at2803**.'),
+    ...product('Edu AI, a learning planner from birth to Class 12', 'edu-ai.anchit-tandon.com', [
+      'parents want one plan for their child’s learning, but every app starts from zero.',
+      'one skill map from age 0 to 18 across CBSE, ICSE, NIOS and state boards, branching into **JEE, NEET, CUET and UPSC**.']),
+    ...product('Airpane, an AR browser with no headset or app', 'airpane.anchit-tandon.com', [
+      'AR without a headset most people will never buy.',
+      'pins any website in your room with a phone, turns a laptop webcam into head-tracked 3D, and **throws pages to a TV** with a gesture.']),
+    ...product('ANCHOR, an AI techno artist', 'anchor.anchit-tandon.com', [
+      'artists grow by releasing consistently, and most cannot keep it up.',
+      'a robot that releases **a new track every day at ₹0**, with quality checks built in. Instagram **@anchor_at2803**.']),
+    ...product('Book publishing engine, 4 thrillers and kids’ drawing books', 'amazon.in/Anchit-Tandon/e/B0HL6RW348', [
+      'can one person with AI run a real publishing business?',
+      'a quality-gated engine behind **The Watermark Files** (4 thrillers) and **Doodle Lane Studio** drawing books; Instagram **@ai_at2803**.']),
     group('Also built'),
-    mini('Parwah', 'family care as tasks, not chats', 'parwah-hq.anchit-tandon.com'),
-    mini('AI TeleSuite', 'AI listens to every sales call so managers can coach', 'demo on request'),
-    mini('Hey Yaara', 'a Hinglish AI voice companion you call like a friend', 'hey-yaara.anchit-tandon.com'),
-    mini('Animind', 'reads a pet’s state from a 10-second recording', 'pet-mind.anchit-tandon.com'),
-    mini('TH+ LifeEngine', 'yoga and food plans as trackable data', 'th-life-engine.anchit-tandon.com'),
-    mini('Kolab', 'creators and the brands that pay them (prototype)', 'kolab.anchit-tandon.com'),
-    mini('Shoutout', 'gigs, collaborators and auditions for musicians', 'shoutout.anchit-tandon.com'),
-    mini('JobHunt', 'free AI agent that tailors a résumé to each real job', 'anchit-tandon.com/jobhunt'),
-    mini('Anchit LLM', 'my portfolio, answering questions in my own voice', 'anchit-tandon.com'),
-    mini('Markets Pro', 'trading research engine for 4 markets', 'being fixed'),
-    mini('MuseVibe Studio', 'a one-line idea into a full song', 'being fixed'),
-    mini('The Passion Table', 'home-style food from neighbourhood kitchens', 'being fixed'),
+    mini('Parwah', 'siblings share a parent’s care as tasks, so nothing slips', 'parwah-hq.anchit-tandon.com'),
+    mini('AI TeleSuite', 'AI scores every sales call so managers can coach', 'demo on request'),
+    mini('Hey Yaara', 'a Hinglish voice friend to talk to, any time', 'hey-yaara.anchit-tandon.com'),
+    mini('Animind', 'tells pet owners from a 10-second clip when to worry', 'pet-mind.anchit-tandon.com'),
+    mini('TH+ LifeEngine', 'yoga and food plans you can follow, log and adjust', 'th-life-engine.anchit-tandon.com'),
+    mini('Kolab', 'creators run their business, brands find verified creators', 'kolab.anchit-tandon.com'),
+    mini('Shoutout', 'musicians find gigs and collaborators, and get paid', 'shoutout.anchit-tandon.com'),
+    mini('JobHunt', 'tailors a résumé to each real job, never exaggerating', 'anchit-tandon.com/jobhunt'),
+    mini('Anchit LLM', 'recruiters question my work instead of reading a PDF', 'anchit-tandon.com'),
+    mini('Markets Pro', 'retail investors test strategies on honest numbers', 'being fixed'),
+    mini('MuseVibe Studio', 'turns how a song should feel into a full song', 'being fixed'),
+    mini('The Passion Table', 'daily home-style food, so nobody has to cook', 'being fixed'),
   ] : []),
 
   ...(HIRE ? [] : [
