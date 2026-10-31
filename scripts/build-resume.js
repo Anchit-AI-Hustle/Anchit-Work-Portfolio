@@ -59,11 +59,11 @@ const product = (name, url, text, first) => [
 
 // The band a recruiter reads first: the biggest numbers, each with what it measures.
 const STATS = [
-  ['₹15L → ₹80L', 'monthly assisted-sales revenue'],
-  ['400%+', 'ROI within six months'],
-  ['₹3Cr+', 'new annual revenue, ET Markets'],
-  ['18K+', 'runners, Delhi Half Marathon'],
-  ['20', 'products built in 5\u20116 months'],
+  ['5× revenue', '₹15L → ₹80L a month'],
+  ['400%+ ROI', 'ET Prime, in 6 months'],
+  ['₹3Cr+ a year', 'ET Markets revamp'],
+  ['18K+ runners', 'Delhi Half Marathon'],
+  ['20 AI products', 'built in 5\u20116 months'],
 ];
 const cellW = Math.floor(RIGHT / STATS.length);
 const none = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' };
@@ -77,7 +77,7 @@ const band = new Table({
     verticalAlign: VerticalAlign.CENTER,
     margins: { top: 90, bottom: 90, left: 80, right: 80 },
     children: [
-      new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 10 }, children: [new TextRun({ text: n, font: FONT, size: 27, bold: true, color: GOLD })] }),
+      new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 10 }, children: [new TextRun({ text: n, font: FONT, size: 24, bold: true, color: GOLD })] }),
       new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 0 }, children: [new TextRun({ text: l, font: FONT, size: 16, color: DIM })] }),
     ],
   })) })],
