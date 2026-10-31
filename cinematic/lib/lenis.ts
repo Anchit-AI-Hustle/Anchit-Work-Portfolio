@@ -12,7 +12,7 @@ let lenis: Lenis | null = null;
  * This is the part that is usually got wrong: running Lenis on its own
  * requestAnimationFrame AND ScrollTrigger on another means two loops disagree
  * about what "now" is, and every scroll-triggered animation lands a frame late
- * — which reads as the jerkiness Lenis was added to remove. So Lenis is ticked
+ *, which reads as the jerkiness Lenis was added to remove. So Lenis is ticked
  * BY gsap.ticker, and ScrollTrigger is told to update on every Lenis scroll.
  */
 export function initLenis() {

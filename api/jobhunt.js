@@ -1,11 +1,11 @@
-// /api/jobhunt — a gated live job-search agent, powered by free public job APIs.
+// /api/jobhunt, a gated live job-search agent, powered by free public job APIs.
 //
 //   GET  /api/jobhunt  → { supabaseUrl, supabaseAnonKey, gated, engineReady }
 //   POST /api/jobhunt  → aggregates real openings from free, keyless job boards
 //
 // Access is gated behind Google sign-in (via Supabase): every POST must carry a
 // valid Supabase session token. The search itself pulls live openings from free,
-// no-key public job APIs (Remotive, RemoteOK, Arbeitnow, The Muse) — so it's
+// no-key public job APIs (Remotive, RemoteOK, Arbeitnow, The Muse), so it's
 // genuinely free, has no API-key or per-minute rate-limit to hit, and always
 // returns real results with direct apply links.
 //
@@ -13,7 +13,7 @@
 //   SUPABASE_URL        public project URL
 //   SUPABASE_ANON_KEY   public anon key (safe in browser)
 
-// Big boards (no free listings API) — covered by Adzuna inline + deep-link
+// Big boards (no free listings API), covered by Adzuna inline + deep-link
 // searches on the page. Free boards have direct keyless APIs.
 const { originAllowed } = require('./_guard.js');
 const BIG_BOARDS = ['LinkedIn', 'Indeed', 'Glassdoor', 'Upwork'];
@@ -184,7 +184,7 @@ async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(okOrigin ? 200 : 403).end();
   if (!okOrigin) return res.status(403).json({ error: 'origin_not_allowed' });
 
-  // Env-driven only — no hardcoded project. Set SUPABASE_URL + SUPABASE_ANON_KEY
+  // Env-driven only, no hardcoded project. Set SUPABASE_URL + SUPABASE_ANON_KEY
   // to a project you own to gate behind Google sign-in; leave unset to run open.
   const supabaseUrl = (process.env.SUPABASE_URL || '').trim();
   const supabaseAnonKey = (process.env.SUPABASE_ANON_KEY || '').trim();
@@ -192,7 +192,7 @@ async function handler(req, res) {
 
   if (req.method === 'GET') {
     res.setHeader('Cache-Control', 'no-store');
-    // Free public APIs, no key needed — the engine is always ready.
+    // Free public APIs, no key needed, the engine is always ready.
     return res.status(200).json({ supabaseUrl: supabaseUrl || null, supabaseAnonKey: supabaseAnonKey || null, gated, engineReady: true, boards: ALL_BOARDS });
   }
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });

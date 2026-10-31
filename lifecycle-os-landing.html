@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Landing Page Studio — AI Landing Page Generator | Lifecycle OS</title>
+<title>Landing Page Studio | AI Landing Page Generator | Lifecycle OS</title>
 <link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -15,13 +15,13 @@
   <script defer src="/assets/cinematic.js"></script>
 <!-- cinematic:end -->
 <!-- seo:auto:start -->
-<!-- Managed by scripts/seo-inject.mjs — edit seo.config.json, not here. -->
+<!-- Managed by scripts/seo-inject.mjs, edit seo.config.json, not here. -->
 <meta name="description" content="Landing Page Studio: generate an on-brand, conversion-shaped landing page from a positioning brief, with a live preview and downloadable HTML." />
 <link rel="canonical" href="https://anchit-tandon.com/lifecycle-os-landing" />
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
 <meta name="keywords" content="AI landing page generator, landing page builder AI, D2C landing page generator, conversion landing page AI, generate landing page from brief, on-brand landing page AI, downloadable HTML landing page, Landing Page Studio, live preview landing page, Lifecycle OS, Anchit Tandon" />
 <meta name="author" content="Anchit Tandon" />
-<meta property="og:title" content="Landing Page Studio — AI Landing Page Generator" />
+<meta property="og:title" content="Landing Page Studio | AI Landing Page Generator" />
 <meta property="og:description" content="Generate an on-brand, conversion-shaped landing page from a positioning brief, with a live preview and downloadable HTML. Part of the Lifecycle OS." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://anchit-tandon.com/lifecycle-os-landing" />
@@ -30,9 +30,9 @@
 <meta property="og:locale" content="en_US" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Anchit Tandon — Product &amp; D2C Growth" />
+<meta property="og:image:alt" content="Anchit Tandon, Product &amp; D2C Growth" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Landing Page Studio — AI Landing Page Generator" />
+<meta name="twitter:title" content="Landing Page Studio | AI Landing Page Generator" />
 <meta name="twitter:description" content="Generate an on-brand, conversion-shaped landing page from a positioning brief, with a live preview and downloadable HTML. Part of the Lifecycle OS." />
 <meta name="twitter:image" content="https://anchit-tandon.com/assets/og/og-default.png" />
 <script type="application/ld+json">
@@ -66,7 +66,7 @@
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "@id": "https://anchit-tandon.com/lifecycle-os-landing#app",
-  "name": "Landing Page Studio — Lifecycle OS",
+  "name": "Landing Page Studio | Lifecycle OS",
   "url": "https://anchit-tandon.com/lifecycle-os-landing",
   "applicationCategory": "BusinessApplication",
   "applicationSubCategory": "Landing Page Builder",
@@ -110,7 +110,7 @@
       <div class="preview"><iframe id="frame" title="Landing page preview" sandbox=""></iframe></div>
     </div>
     <div id="extras" style="margin-top:8px"></div>
-    <footer>Landing Page Studio · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>. Generated from the subject's positioning — no proprietary data.</footer>
+    <footer>Landing Page Studio · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>. Generated from the subject's positioning, no proprietary data.</footer>
   </div>
 <script src="/lifecycle-os-kit.js"></script>
 <script>
@@ -121,7 +121,7 @@
   var P={ bg:'#fbf7ef', card:'#fff', ink:'#1a1714', dim:'#5a554e', rule:'#e7ddca', primary:'#c9a96e', deep:'#a8863f', dark:'#17130e' };
   function buildLanding(p){
     var m=p.mailer||{}, hero=m.hero||{};
-    var headline=hero.headline||p.positioning||(p.brand+' — built for growth');
+    var headline=hero.headline||p.positioning||(p.brand+', built for growth');
     var sub=hero.subhead||p.positioning||'';
     var cta=(m.cta&&m.cta.label)||'Get started';
     var feats=(p.stages||[]).slice(0,3).map(function(st){ return '<div style="flex:1;min-width:200px;background:'+P.card+';border:1px solid '+P.rule+';border-radius:14px;padding:22px"><div style="font-family:monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:'+P.deep+';margin-bottom:8px">'+esc(st.stage)+'</div><div style="font-family:Georgia,serif;font-size:18px;font-weight:bold;color:'+P.ink+';margin-bottom:6px">'+esc(st.goal)+'</div><div style="font-family:Arial,sans-serif;font-size:13.5px;line-height:1.6;color:'+P.dim+'">'+esc(st.campaign)+'</div></div>'; }).join('');
@@ -149,9 +149,9 @@
     LOS.post('/api/lifecycle',{brand:$('brand').value.trim(),url:$('url').value.trim()}).then(function(r){
       var p=r.plan; if(!p) throw new Error('failed');
       lastBrand=p.brand||'landing'; lastHtml=buildLanding(p);
-      $('hd').textContent=(p.brand||'Subject')+' — landing page'; LOS.badge($('bdg'),r.source);
+      $('hd').textContent=(p.brand||'Subject')+': landing page'; LOS.badge($('bdg'),r.source);
       $('frame').srcdoc=lastHtml; $('out').style.display='block';
-    }).catch(function(){ $('err').textContent='Could not generate the page — try again in a moment.'; $('err').style.display='block'; })
+    }).catch(function(){ $('err').textContent='Could not generate the page, try again in a moment.'; $('err').style.display='block'; })
     .then(function(){ $('loading').classList.remove('on'); });
   }
   run();

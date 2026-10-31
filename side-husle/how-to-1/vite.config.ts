@@ -29,7 +29,7 @@ export default defineConfig({
   build: {
     target: 'es2020',
     // Source maps for `vite build --mode development`, never for the deploy:
-    // the production map was 4.27 MB — three times the app itself — mirrored
+    // the production map was 4.27 MB, three times the app itself, mirrored
     // into www/ and served publicly on every release.
     sourcemap: false,
     rollupOptions: {

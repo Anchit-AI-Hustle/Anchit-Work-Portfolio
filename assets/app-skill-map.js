@@ -16,7 +16,7 @@
   var MAP = {
     version: 1,
     title: 'Anchit App Skill Map',
-    subtitle: 'Every app, capability and dependency — connected to one shared intelligence layer.',
+    subtitle: 'Every app, capability and dependency, connected to one shared intelligence layer.',
     brain: {
       id: 'anchit-intelligence',
       title: 'Anchit Intelligence',
@@ -674,7 +674,7 @@
 
     if (next && !query) {
       recommendation.hidden = false;
-      recommendation.innerHTML = '<span><strong>Suggested next:</strong> ' + escapeHtml(next.app.title) + ' — ' + escapeHtml(next.app.description) + '</span><button type="button" data-asm-open="' + escapeHtml(next.app.id) + '">Open ' + icon('arrow') + '</button>';
+      recommendation.innerHTML = '<span><strong>Suggested next:</strong> ' + escapeHtml(next.app.title) + ', ' + escapeHtml(next.app.description) + '</span><button type="button" data-asm-open="' + escapeHtml(next.app.id) + '">Open ' + icon('arrow') + '</button>';
     } else {
       recommendation.hidden = true;
       recommendation.innerHTML = '';

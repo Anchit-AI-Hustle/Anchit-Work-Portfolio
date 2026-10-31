@@ -2,14 +2,14 @@
 //
 // THE BUG THIS CATCHES
 //   /marketing-101-for-ayushi returned 404 in production. The page had been
-//   live for months but was NEVER COMMITTED — it was pushed straight from a
+//   live for months but was NEVER COMMITTED, it was pushed straight from a
 //   working tree with `vercel --prod`. Two production deployments carry
 //   gitDirty:1 and a claude@local author, on commits (fef8c6c, 0aae37d) that
 //   exist nowhere in this repository.
 //
 //   A git-based deploy rebuilds www/ from the repo alone, so every one of them
-//   silently deleted the page. It had already happened once — there is a commit
-//   titled "restore /marketing-101-for-ayushi" — and it happened again the next
+//   silently deleted the page. It had already happened once, there is a commit
+//   titled "restore /marketing-101-for-ayushi", and it happened again the next
 //   time main was merged. Nothing checked, so nothing noticed until someone
 //   opened the URL.
 //
@@ -30,7 +30,7 @@ const results = [];
 const check = (n, ok, d) => results.push([ok ? 'PASS' : 'FAIL', n, d]);
 
 if (!fs.existsSync(WWW)) {
-  console.log('  FAIL  www/ does not exist — run `npm run build` first');
+  console.log('  FAIL  www/ does not exist, run `npm run build` first');
   process.exit(1);
 }
 
@@ -40,7 +40,7 @@ const vercel = JSON.parse(fs.readFileSync(path.join(ROOT, 'vercel.json'), 'utf8'
 // does (cleanUrls), or it is a directory with an index.html.
 function resolves(dest) {
   if (/^https?:/.test(dest)) return true;              // proxied elsewhere, not ours to serve
-  if (dest.includes(':')) return true;                 // parameterised — checked by its prefix below
+  if (dest.includes(':')) return true;                 // parameterised, checked by its prefix below
   const p = path.join(WWW, dest.replace(/^\//, ''));
   if (fs.existsSync(p) && fs.statSync(p).isFile()) return true;
   if (fs.existsSync(p + '.html')) return true;
@@ -84,7 +84,7 @@ check('every page in the build manifest reaches www/',
 //
 // Redirects count as resolved: /how-to-2 is in the sitemap and is NOT built,
 // because vercel.json redirects it to /how-to. Checking only `rewrites` reports
-// that as broken — it returns 200 in production. Follow redirects first.
+// that as broken, it returns 200 in production. Follow redirects first.
 {
   const sm = fs.readFileSync(path.join(ROOT, 'sitemap.xml'), 'utf8');
   const paths = [...sm.matchAll(/<loc>([^<]+)<\/loc>/g)]
@@ -104,14 +104,14 @@ check('every page in the build manifest reaches www/',
     dead.length ? dead.join(', ') : `${paths.length} URLs, all reachable`);
 }
 
-// The page this check was written for, by name — it has vanished twice.
+// The page this check was written for, by name, it has vanished twice.
 // MUT looks for a name the build never produces, standing in for the file
 // going missing from the manifest again.
 const ayushiFile = MUT ? 'marketing-101-for-ayushi.GONE.html' : 'marketing-101-for-ayushi.html';
 const ayushi = fs.existsSync(path.join(WWW, ayushiFile));
 check('Ayushi❤️’s Growth Studio is in the build',
   ayushi,
-  ayushi ? 'present' : 'MISSING — it is uncommitted again, or dropped from the manifest');
+  ayushi ? 'present' : 'MISSING, it is uncommitted again, or dropped from the manifest');
 
 // ── Function budget ────────────────────────────────────────────────────────
 // The Hobby plan refuses a deployment with more than 12 serverless functions
@@ -154,7 +154,7 @@ check('Ayushi❤️’s Growth Studio is in the build',
   const advertisers = ['sitemap.xml', 'llms.txt', 'robots.txt'].filter((f) => {
     const p = path.join(WWW, f);
     if (!fs.existsSync(p)) return false;
-    // MUT publishes the path in the sitemap — the exact regression this forbids.
+    // MUT publishes the path in the sitemap, the exact regression this forbids.
     const body = fs.readFileSync(p, 'utf8') + (MUT && f === 'sitemap.xml' ? `<loc>/${HIDDEN}</loc>` : '');
     return body.includes(HIDDEN);
   });
@@ -172,7 +172,7 @@ check('Ayushi❤️’s Growth Studio is in the build',
   const hasNoindex = /name="robots"[^>]*noindex/i.test(html);
   check('the private course still carries its noindex',
     hasNoindex,
-    hasNoindex ? 'meta robots noindex present in the page' : 'NO noindex meta — it would be indexable');
+    hasNoindex ? 'meta robots noindex present in the page' : 'NO noindex meta, it would be indexable');
 
   // The other half of the rule: the public one must stay findable.
   // MUT drops every page that links it (the home card and, since #188, the 404
@@ -198,7 +198,7 @@ if (MUT) {
     console.log(`MUT: all ${target.length} checks it touches failed, and the other ${results.length - target.length} still pass`);
     process.exit(0);
   }
-  console.log('MUT: wrong outcome — ' + wrong.join('; '));
+  console.log('MUT: wrong outcome, ' + wrong.join('; '));
   process.exit(1);
 }
 process.exit(failed ? 1 : 0);

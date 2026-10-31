@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #
-# autosync.sh — auto-commit & push all portfolio changes to GitHub.
+# autosync.sh, auto-commit & push all portfolio changes to GitHub.
 #
 # Safe to run repeatedly (from launchd, cron, or by hand). It does nothing
 # when there are no changes, and pulls --rebase before pushing so it never
 # clobbers commits made elsewhere. Requires your GitHub credential to be
-# cached on this Mac (see SYNC-SETUP.md — one-time step).
+# cached on this Mac (see SYNC-SETUP.md, one-time step).
 #
 set -uo pipefail
 

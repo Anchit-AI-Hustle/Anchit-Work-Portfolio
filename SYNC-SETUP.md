@@ -1,4 +1,4 @@
-# Fix git for good + auto-sync — one command
+# Fix git for good + auto-sync, one command
 
 **Root cause of every git error you've hit:** the repo lives in iCloud Drive, which
 truncates git's pack files (`pack ... far too short to be a packfile`). Repairing it
@@ -22,7 +22,7 @@ That script:
 3. Commits + pushes → Vercel auto-deploys.
 4. Installs a `launchd` agent that auto-syncs `~/Projects/awp` every 10 min and at login.
 
-**From now on, work in `~/Projects/awp`** — not the iCloud folder. (Keep the iCloud
+**From now on, work in `~/Projects/awp`**, not the iCloud folder. (Keep the iCloud
 copy for reference if you like; just never run `git` in it.)
 
 ---
@@ -41,10 +41,10 @@ launchctl unload ~/Library/LaunchAgents/com.anchit.portfolio.autosync.plist
 launchctl load   ~/Library/LaunchAgents/com.anchit.portfolio.autosync.plist
 ```
 
-## After deploy — turn on the live features (Vercel → Settings → Environment Variables)
+## After deploy, turn on the live features (Vercel → Settings → Environment Variables)
 
 - **LLM chat:** `ANTHROPIC_API_KEY` (uses `api/chat.js`; falls back to offline bot if unset).
-- **Cloned-voice Listen:** one of —
+- **Cloned-voice Listen:** one of,
   - ElevenLabs (your voice, free tier): `ELEVENLABS_API_KEY` + `ELEVENLABS_VOICE_ID`
   - HuggingFace (free, generic voice): `HF_TOKEN` + `HF_TTS_MODEL`
   - Self-hosted XTTS (your literal voice): `XTTS_API_URL`
@@ -55,4 +55,4 @@ launchctl load   ~/Library/LaunchAgents/com.anchit.portfolio.autosync.plist
   so only source like `index.html` is committed.
 - The agent only commits when there are real changes and rebases before pushing.
 - Alternative workers remain in `scripts/`: `autosync.sh` (pure git) and
-  `claude-sync.sh` (Claude CLI) — point the plist at whichever you prefer.
+  `claude-sync.sh` (Claude CLI), point the plist at whichever you prefer.

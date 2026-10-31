@@ -75,7 +75,7 @@ elevenlabs → cartesia → fish → huggingface → xtts → sarvam → browser
 ```
 
 Every clone-capable provider is tried before Sarvam, because Sarvam's API has no
-voice cloning — its `speaker` is a closed enum of stock voices — and a stock
+voice cloning, its `speaker` is a closed enum of stock voices, and a stock
 voice reading first-person copy is the wrong answer. See `SARVAM.md`.
 
 The HF path waits once for a cold endpoint to warm up (HTTP 503 +

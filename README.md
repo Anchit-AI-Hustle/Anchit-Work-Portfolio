@@ -1,4 +1,4 @@
-# Anchit Tandon — Portfolio
+# Anchit Tandon, Portfolio
 
 Personal portfolio for **Anchit Tandon**, AGM - Product Management, D2C Growth - US, UK and Global at Vahdam India.
 Ships as **web (any device + TV)**, **installable PWA**, **native iOS + Android** via Capacitor, and an AI-powered portfolio assistant.
@@ -17,7 +17,7 @@ Ships as **web (any device + TV)**, **installable PWA**, **native iOS + Android*
 ├── assets/app-skill-map.css           # Shared visual app skill-tree UI
 ├── assets/project-playbooks.js        # Project paths, guide library and prompt generator
 ├── assets/project-playbooks.css       # Shared project-tree and guide-library UI
-├── marketing-101.html                 # The Signal Desk — marketing course, served at /marketing-101, linked from Side Hustle
+├── marketing-101.html                 # The Signal Desk, marketing course, served at /marketing-101, linked from Side Hustle
 ├── assets/cinematic.js                # Shared motion runtime: arrival queue, entrances, surface treatments
 ├── side-husle/how-to-1/               # React/R3F How-To Engine, served at /how-to
 ├── lifecycle-os-*.html                # First-party lifecycle intelligence and execution apps
@@ -35,7 +35,7 @@ Ships as **web (any device + TV)**, **installable PWA**, **native iOS + Android*
 ├── vercel.json                        # Vercel static-host config and app routes
 ├── STREAMING_VOICE_ARCHITECTURE.md    # Anchit LLM + cloned-voice streaming design
 ├── VOICE.md                           # Which provider speaks, and how to wire the clone
-├── DESIGN.md                          # Palette, type, motion rules — the styling source of truth
+├── DESIGN.md                          # Palette, type, motion rules, the styling source of truth
 ├── DEPLOY.md                          # Web + native deploy walkthroughs
 └── README.md
 ```
@@ -44,8 +44,8 @@ The main portfolio remains a static `index.html` with embedded CSS + JS, backed 
 
 ## Design system
 
-- **Palette:** Black, orange and gold on restrained dark neutral surfaces (`#0F0D0A` ground, `#FF6940` primary, `#c9a96e` / `#FFB736` accents). Glare/glow is intentionally reduced for readability. Teal is legacy — see the migration note in [`DESIGN.md`](./DESIGN.md), and do not add more of it.
-- **Type:** Fraunces (display, variable axes — uses `SOFT` + `WONK`), Inter (body), JetBrains Mono (labels).
+- **Palette:** Black, orange and gold on restrained dark neutral surfaces (`#0F0D0A` ground, `#FF6940` primary, `#c9a96e` / `#FFB736` accents). Glare/glow is intentionally reduced for readability. Teal is legacy, see the migration note in [`DESIGN.md`](./DESIGN.md), and do not add more of it.
+- **Type:** Fraunces (display, variable axes, uses `SOFT` + `WONK`), Inter (body), JetBrains Mono (labels).
 - **Layout:** Strong minimal hero, dashboard-style cards, long-form readable sections, section-paneled content. IntersectionObserver-driven scroll reveals.
 - **Responsive:** Phone → tablet → laptop → 4K TV. Container scales up to 1920px on TV-class screens; type fluids via `clamp()`.
 - **Full rules:** [`DESIGN.md`](./DESIGN.md) is the source of truth. Read it before writing styles; add a token there before inventing a value.
@@ -54,8 +54,8 @@ The main portfolio remains a static `index.html` with embedded CSS + JS, backed 
 
 `DESIGN.md` named three font families and a spacing scale but never a **size**
 scale, so sizes drifted with nothing to catch them. An audit of one home-page
-viewport found **11 distinct font sizes** — 9, 11, 12, 14, 15, 16, 18, 19, 20,
-24, 60 — and **170 off-scale paddings and gaps** on the main layout blocks.
+viewport found **11 distinct font sizes**, 9, 11, 12, 14, 15, 16, 18, 19, 20,
+24, 60, and **170 off-scale paddings and gaps** on the main layout blocks.
 15-against-16 and 18/19/20 are not hierarchy; nothing sat between 24 and 60 at
 all.
 
@@ -66,7 +66,7 @@ all named steps; 4 off-scale spacing values left, all sub-3px hairlines.
 Two traps worth knowing:
 
 - **Framework size utilities bypass the scale.** The hero used Tailwind's
-  `text-lg` / `text-2xl` / `text-6xl` — 18 / 24 / 60px, answering to Tailwind's
+  `text-lg` / `text-2xl` / `text-6xl`, 18 / 24 / 60px, answering to Tailwind's
   ratio rather than ours. The rule that bans framework *palette* utilities
   applies to sizes too.
 - **9px mono labels.** Six rules sat below `DESIGN.md`'s own 10–12px floor.
@@ -84,7 +84,7 @@ of its own probe, and each is worth remembering before trusting a number:
    scored against nothing.
 3. **A decorative gradient counted as a backdrop.** After fixing (2), the 3px
    `radial-gradient` bullet dot in `.build-details` became the "background" for
-   the body copy beside it — 1.39:1 on text that is fine. Only *filling*
+   the body copy beside it, 1.39:1 on text that is fine. Only *filling*
    gradients are backdrops.
 
 ## The two reveal runtimes
@@ -94,11 +94,11 @@ reveal system. CLAUDE.md already warns that a change to arrival behaviour
 usually has to be made twice. The sharper rule, learned the hard way:
 
 **A section with a bespoke reveal must opt out of both**, with `data-no-motion`
-on the section — the shared opt-out honoured by `cinematic.js`'s `skip()` and by
+on the section, the shared opt-out honoured by `cinematic.js`'s `skip()` and by
 the inline system's `AUTO_SKIP`. `#currentWork` had its own pinned timeline and
 was *also* claimed by `cinematic.js`, which gave `.cw-body` a `cin-v3` entrance
 that never completed. Parked at `rotateY(26deg)` under the stage's
-`perspective: 1400px`, every child projected to a different height — the four
+`perspective: 1400px`, every child projected to a different height, the four
 skill items rendered at 24.9 / 20.9 / 28.9 / 23.9px and the panel read as
 skewed.
 
@@ -107,8 +107,8 @@ element carrying `.cin-vN`, but the rule that clears them was scoped to
 `.cin`:
 
 ```css
-.cin.cin-in.cin-v1, … {transform:none}     /* before — misses .cin-stagger */
-.cin-in.cin-v1, …     {transform:none}     /* after  — whichever class carries it */
+.cin.cin-in.cin-v1, … {transform:none}     /* before, misses .cin-stagger */
+.cin-in.cin-v1, …     {transform:none}     /* after , whichever class carries it */
 ```
 
 So every `.cin-stagger` element that had been given a variant stayed at its
@@ -160,7 +160,7 @@ Every app capability now becomes a project node. The project layer automatically
 
 The Guide Library is searchable by app, project, department, outcome, model and guide type. Visitors can save guides, customize goal/context/inputs/constraints/output fields, copy the generated result, and build a structured prompt from any project. Prompts follow a portable five-part contract: **Role · Context · Task · Constraints · Output Format**.
 
-The implementation lives in `assets/project-playbooks.js` and `assets/project-playbooks.css`. It reads the App Skill Map at runtime, so every current capability—and every future app capability added to the registry—automatically receives a project path and guide pack.
+The implementation lives in `assets/project-playbooks.js` and `assets/project-playbooks.css`. It reads the App Skill Map at runtime, so every current capability, and every future app capability added to the registry, automatically receives a project path and guide pack.
 
 Keyboard access: **Cmd/Ctrl + Shift + K** toggles Project Playbooks. Full architecture, APIs and separately deployed app adoption instructions live in [`docs/PROJECT_SKILLTREE_GUIDES.md`](./docs/PROJECT_SKILLTREE_GUIDES.md).
 
@@ -174,7 +174,7 @@ Keyboard access: **Cmd/Ctrl + Shift + K** toggles Project Playbooks. Full archit
 ## LLM provider cascade
 
 `api/apply.js`, `api/lifecycle.js` and `api/mailer.js` fall back through the
-free providers — Groq → Cerebras → Gemini → OpenRouter — before giving up to a
+free providers, Groq → Cerebras → Gemini → OpenRouter, before giving up to a
 deterministic template. Each one used to pin a single model id, and by August
 2026 every one of those ids was dead:
 
@@ -185,19 +185,19 @@ deterministic template. Each one used to pin a single model id, and by August
 | Gemini | `gemini-2.0-flash` | 2026-06-01 (shut down) | `gemini-3.6-flash` |
 
 So the entire free cascade 404'd, and because each caller swallowed the error
-(`catch (e) { /* next provider */ }`) it fell silently into the template — the
+(`catch (e) { /* next provider */ }`) it fell silently into the template, the
 response looked the same whether a key was missing or every provider was dead.
 That is the "the AI provider is unavailable" class of failure.
 
 Model ids now live in one place, **`api/_models.js`**, as a *chain* per provider
 rather than a single id (the rule `api/cascade.js` already used for Anthropic):
 
-- Newest id first, previous generation next, the retired id last — kept, not
+- Newest id first, previous generation next, the retired id last, kept, not
   deleted, because it is still correct on a committed-spend contract where the
   deprecation does not apply.
 - A **404** (or a 400 naming the model) advances the chain, so the next
   retirement self-heals at the cost of one round-trip.
-- A **401/403/429/5xx** does *not* advance it — a bad key or an outage fails
+- A **401/403/429/5xx** does *not* advance it, a bad key or an outage fails
   identically for every id, so burning the chain only adds latency.
 - `*_MODEL` env vars still work and are tried first, so a model can be forced
   from the dashboard without a deploy.
@@ -228,16 +228,16 @@ built site and assert on what a visitor would actually see. Serve `www/` first
 (`npm run dev:built`, or any static server on port 8099), then:
 
 ```bash
-node scripts/motionfix.js        # motion regressions — 8 checks
+node scripts/motionfix.js        # motion regressions, 8 checks
 node scripts/turn-by-turn.js     # blocks arrive one at a time, entrances differ
-npm run test:providers           # LLM cascade survives a retired model id — 6 checks
-npm run test:cascade             # the REAL handlers, driven end-to-end — 9 checks
-npm run test:cards               # cards equal + the page explains itself — 12 checks
-npm run test:entrance            # nothing parked at an unfinished 3D entrance — 8 checks
-npm run test:design              # DESIGN.md's scales, enforced on the rendered page — 4 checks
+npm run test:providers           # LLM cascade survives a retired model id, 6 checks
+npm run test:cascade             # the REAL handlers, driven end-to-end, 9 checks
+npm run test:cards               # cards equal + the page explains itself, 12 checks
+npm run test:entrance            # nothing parked at an unfinished 3D entrance, 8 checks
+npm run test:design              # DESIGN.md's scales, enforced on the rendered page, 4 checks
 ```
 
-`npm run test:redirects` needs **no** server — it starts its own, because the
+`npm run test:redirects` needs **no** server, it starts its own, because the
 question it asks cannot be answered by `npx serve`. `serve` knows nothing about
 `vercel.json`, so every redirect, rewrite and cleanUrls hop it performs is
 invented by the dev server; a link resolved against it proves nothing about
@@ -245,14 +245,14 @@ production. `scripts/vercel-emu.mjs` reads `vercel.json` and applies the same
 four rules Vercel does, in order, and the suite drives a browser against that:
 
 ```bash
-npm run test:redirects           # every link on every page lands somewhere — 7 checks
+npm run test:redirects           # every link on every page lands somewhere, 7 checks
 NET=1 npm run test:redirects     # also verifies off-site destinations over the network
 ```
 
 Links are read out of the **rendered DOM**, so anything a page injects at runtime
 is checked too, and nav targets are actually clicked rather than pattern-matched.
 Fragments are validated in a second pass, against the page they actually **land
-on** rather than the page containing the link — `/#projects`, `/ayushi#experience`
+on** rather than the page containing the link, `/#projects`, `/ayushi#experience`
 and `./#skills` are all used here, and `./#skills` points from `ayushi/resume` at
 an id that lives in `ayushi/index`. Checking those against the containing page
 passes every one of them, so a typo in `/#projets` would resolve 200 and never be
@@ -260,14 +260,14 @@ looked at. 30 of the site's 114 fragment links are cross-page.
 It found two live bugs that `routes-resolve.js` structurally cannot see, because
 neither is a missing file:
 
-- The freelancer page's "Third Eye — View project" card pointed at
+- The freelancer page's "Third Eye, View project" card pointed at
   `github.com/Anchit-AI-Hustle/The-Third-Eye`, a **private** repository. It
   rendered GitHub's 404 for every visitor while looking correct to the author,
   who can see the repo. `index.html` had always linked that project to its live
   app; only this card pointed at the source.
 - `index.html`'s sign-off linked `/in/anchittandon`. Every other LinkedIn
-  reference — including the JSON-LD `sameAs` that search engines read as the
-  canonical profile — uses `/in/anchit-tandon`.
+  reference, including the JSON-LD `sameAs` that search engines read as the
+  canonical profile, uses `/in/anchit-tandon`.
 
 ### No page sends a visitor to GitHub
 
@@ -278,11 +278,11 @@ the portfolio.
 
 Both halves are enforced, because each caught something the other could not:
 
-- **The links.** Every `github.com` href on every page, whoever owns it — our own
+- **The links.** Every `github.com` href on every page, whoever owns it, our own
   repositories and third-party ones alike.
 - **GitHub, or a repository, in rendered copy.** A link's own label can name
   GitHub after the href is fixed (`Explore the implementation on GitHub`), and a
-  repository can be named in plain text with no link at all — `index.html`
+  repository can be named in plain text with no link at all, `index.html`
   listed **51** of them under "The workshop". Checking only for the word
   "GitHub" is not enough either: the growth-school teaching copy said *"in the
   lifecycle-os repository"* twice, naming one without ever saying GitHub, and
@@ -296,11 +296,11 @@ Both halves are enforced, because each caught something the other could not:
   the chatbot's `'github'` *matching keyword*, which is never rendered, from
   reading as a visible mention.
 
-The link check is what found `/ayushi-rawat/course` — it renders
+The link check is what found `/ayushi-rawat/course`, it renders
 `assets/growth-school-content.js`, the same content file as `/growth-school`, so
 a fix that looks like one page is two. Four of that file's chapters reached the
 removed constants through the `GS_CONTENT.repos` map by lowercase key rather
-than by `REPO_*` name, and the renderer does `if (c.repos)` — which is truthy
+than by `REPO_*` name, and the renderer does `if (c.repos)`, which is truthy
 for `[]`, so a chapter left with no references has to lose the key entirely or
 it renders a "Read the real thing" heading over nothing.
 
@@ -309,14 +309,14 @@ the built bytes instead: a comment in a served `.js` or `.css` ships to the
 browser too. `growth-school.js` and `growth-school.css` both cited "the
 lifecycle-os repo" in their header comments, and an `index.html` comment carried
 `Anchit-AI-Hustle/lifecycle-os` outright. It matches a repository *name* rather
-than the word — a real slug carries a hyphen or underscore, which separates
+than the word, a real slug carries a hyphen or underscore, which separates
 "lifecycle-os repo" from the internal notes that say "the repo" or "this repo"
 and name nothing.
 
 Each of its seven checks is paired with a mutation that reintroduces the bug it
 guards, and each must break only its own check. The mutation is injected into the
 **served DOM before any link is collected**, so each mode drives the same
-discovery and validation path a real regression would — a mutation appended to
+discovery and validation path a real regression would, a mutation appended to
 the results afterwards would still report success with the detector deleted,
 which is the failure mode this design avoids:
 
@@ -332,7 +332,7 @@ MUT=two_handles  npm run test:redirects   # one identity, two spellings
 ```
 
 `provider-chain.js` needs no server; it stubs the network. It is also fully
-mutation-covered — `MUT=1 npm run test:providers` must report every check
+mutation-covered, `MUT=1 npm run test:providers` must report every check
 failing.
 
 `cascade-e2e.js` goes a level further: it calls the **real exported handlers**
@@ -344,7 +344,7 @@ and each must break only the checks it targets while the rest keep passing:
 
 ```bash
 MUT=ids      npm run test:cascade   # one pinned retired id per provider (the shipped bug)
-MUT=classify npm run test:cascade   # isModelMiss always true — chain burnt on any error
+MUT=classify npm run test:cascade   # isModelMiss always true, chain burnt on any error
 ```
 
 Two modes rather than one because a single blanket mutation cannot break both
@@ -365,12 +365,12 @@ MUT=smooth_scroll node scripts/motionfix.js   # expect a FAIL
 ```
 
 One check is honest about its limits: `early scroll is never thrown back` has
-**not** been shown to fail on demand — the fault is timing-dependent enough that
+**not** been shown to fail on demand, the fault is timing-dependent enough that
 a fixed set of start times cannot be relied on to provoke it. Its header says so.
 Treat it as a guard against a regression that reproduces, not as proof of one
 that does not.
 
-## Native apps — iOS + Android via Capacitor
+## Native apps, iOS + Android via Capacitor
 
 > The `android/` and `ios/` folders are already scaffolded and committed.
 > You only need to install deps + `pod install` on a Mac to build the iOS app.
@@ -413,12 +413,12 @@ npx cap open ios         # opens Xcode
 
 In Xcode:
 1. Select the **App** target → Signing & Capabilities → set your **Team** (needs Apple Developer account, $99/yr)
-2. Bundle ID is preset to `com.anchittandon.portfolio` — change in `capacitor.config.json` if needed
+2. Bundle ID is preset to `com.anchittandon.portfolio`, change in `capacitor.config.json` if needed
 3. Bump version + build number under General → Identity
 4. **Product → Archive** → upload to App Store Connect
 5. Submit for review at [appstoreconnect.apple.com](https://appstoreconnect.apple.com)
 
-**⚠️ Apple Review caveat:** Apple often rejects portfolio sites wrapped as apps under Guideline **4.2 — Minimum Functionality**. To strengthen the case:
+**⚠️ Apple Review caveat:** Apple often rejects portfolio sites wrapped as apps under Guideline **4.2, Minimum Functionality**. To strengthen the case:
 - The PWA layer adds offline mode + share target + app shortcuts ✓
 - Consider adding native features before submitting: push notifications, Siri shortcuts, share extensions, or a "contact me" haptic
 - Write a clear App Review note explaining how it differs from the website (e.g. offline access, native share, home-screen presence)
@@ -431,7 +431,7 @@ npx cap open android     # opens Android Studio
 
 In Android Studio:
 1. Wait for Gradle sync
-2. **Build → Generate Signed Bundle / APK** → create a keystore (save it safely — you need it for every future update)
+2. **Build → Generate Signed Bundle / APK** → create a keystore (save it safely, you need it for every future update)
 3. Sign with your keystore → produces a `.aab` file
 4. Upload to [play.google.com/console](https://play.google.com/console) (needs Google Play account, $25 one-time)
 5. Fill out store listing → submit for review
@@ -444,8 +444,8 @@ Google's review is faster and more lenient than Apple's. PWA-style wrappers are 
 |----------|----------|------|
 | iOS | macOS + Xcode + Apple Developer | $99/yr |
 | Android | Android Studio (any OS) + Google Play Console | $25 one-time |
-| App icons | Already generated in `icons/` | — |
-| Splash screen | `icons/splash-2048x2732.png` (regenerate at higher resolution if needed) | — |
+| App icons | Already generated in `icons/` |, |
+| Splash screen | `icons/splash-2048x2732.png` (regenerate at higher resolution if needed) |, |
 
 ## Web deploy (Vercel)
 
@@ -457,10 +457,10 @@ vercel
 
 ## Project links
 
-- **MusicGenAI** — [github](https://github.com/anchittandon-create/MusicGenAI) · [live](https://music-gen-ai.anchit-tandon.com/)
-- **Hey Yaara** — [github](https://github.com/anchittandon-create/hey-yaara) · [live](https://hey-yaara.vercel.app/)
-- **AI TeleSuite** — [github](https://github.com/anchittandon-create/AI-TeleSuite) · [live](https://ai-tele-suite.anchit-tandon.com/)
-- **TH+ LifeEngine** — [github](https://github.com/anchittandon-create/TH-LifeEngine) · [live](https://th-life-engine.anchit-tandon.com/)
+- **MusicGenAI**, [github](https://github.com/anchittandon-create/MusicGenAI) · [live](https://music-gen-ai.anchit-tandon.com/)
+- **Hey Yaara**, [github](https://github.com/anchittandon-create/hey-yaara) · [live](https://hey-yaara.vercel.app/)
+- **AI TeleSuite**, [github](https://github.com/anchittandon-create/AI-TeleSuite) · [live](https://ai-tele-suite.anchit-tandon.com/)
+- **TH+ LifeEngine**, [github](https://github.com/anchittandon-create/TH-LifeEngine) · [live](https://th-life-engine.anchit-tandon.com/)
 
 ## Contact
 

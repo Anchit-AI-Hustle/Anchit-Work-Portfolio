@@ -85,7 +85,7 @@ jobs:
           PENDING=$(sed -n 's/.*· \([0-9]*\) project(s) live with no card yet: /\1 /p' sync.log)
           if [ -n "$PENDING" ]; then
             TITLE="Side Hustle: projects live with no card"
-            BODY=$(printf 'The daily sync found live projects that are not on the grid.\n\n```\n%s\n```\n\nEach needs a hand-written card. The sync deliberately does not write the copy — every factual string on this site has to be traceable, and generated marketing prose is not.\n\nNo repository name or github.com link may appear in the card (enforced by `scripts/no-github.js`). Link the live custom domain: a `*.vercel.app` URL on a protected project shows a login wall to everyone except the owner.' "$(cat sync.log)")
+            BODY=$(printf 'The daily sync found live projects that are not on the grid.\n\n```\n%s\n```\n\nEach needs a hand-written card. The sync deliberately does not write the copy, every factual string on this site has to be traceable, and generated marketing prose is not.\n\nNo repository name or github.com link may appear in the card (enforced by `scripts/no-github.js`). Link the live custom domain: a `*.vercel.app` URL on a protected project shows a login wall to everyone except the owner.' "$(cat sync.log)")
             EXISTING=$(gh issue list --state open --search "$TITLE in:title" --json number --jq '.[0].number' 2>/dev/null || true)
             if [ -n "$EXISTING" ]; then
               gh issue comment "$EXISTING" --body "$BODY" || true

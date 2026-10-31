@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Ask the Brand Brain — Growth Q&amp;A | Lifecycle OS</title>
+<title>Ask the Brand Brain | Growth Q&amp;A | Lifecycle OS</title>
 <link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -14,13 +14,13 @@
   <script defer src="/assets/cinematic.js"></script>
 <!-- cinematic:end -->
 <!-- seo:auto:start -->
-<!-- Managed by scripts/seo-inject.mjs — edit seo.config.json, not here. -->
-<meta name="description" content="Ask the Brand Brain — a Q&amp;A that answers lifecycle and growth questions about the subject from generated brand facts. Part of the Lifecycle OS." />
+<!-- Managed by scripts/seo-inject.mjs, edit seo.config.json, not here. -->
+<meta name="description" content="Ask the Brand Brain, a Q&amp;A that answers lifecycle and growth questions about the subject from generated brand facts. Part of the Lifecycle OS." />
 <link rel="canonical" href="https://anchit-tandon.com/lifecycle-os-ask" />
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
 <meta name="keywords" content="Ask the Brand Brain, brand Q&amp;A AI, growth question answering AI, lifecycle Q&amp;A tool, brand facts AI, D2C brand knowledge assistant, ask brand questions AI, marketing Q&amp;A assistant, brand brain chatbot, Lifecycle OS, Anchit Tandon" />
 <meta name="author" content="Anchit Tandon" />
-<meta property="og:title" content="Ask the Brand Brain — Growth Q&amp;A" />
+<meta property="og:title" content="Ask the Brand Brain | Growth Q&amp;A" />
 <meta property="og:description" content="A Q&amp;A that answers lifecycle and growth questions about the subject from generated brand facts. Part of the Lifecycle OS." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://anchit-tandon.com/lifecycle-os-ask" />
@@ -29,9 +29,9 @@
 <meta property="og:locale" content="en_US" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Anchit Tandon — Product &amp; D2C Growth" />
+<meta property="og:image:alt" content="Anchit Tandon, Product &amp; D2C Growth" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Ask the Brand Brain — Growth Q&amp;A" />
+<meta name="twitter:title" content="Ask the Brand Brain | Growth Q&amp;A" />
 <meta name="twitter:description" content="A Q&amp;A that answers lifecycle and growth questions about the subject from generated brand facts. Part of the Lifecycle OS." />
 <meta name="twitter:image" content="https://anchit-tandon.com/assets/og/og-default.png" />
 <script type="application/ld+json">
@@ -65,7 +65,7 @@
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "@id": "https://anchit-tandon.com/lifecycle-os-ask#app",
-  "name": "Ask the Brand Brain — Lifecycle OS",
+  "name": "Ask the Brand Brain | Lifecycle OS",
   "url": "https://anchit-tandon.com/lifecycle-os-ask",
   "applicationCategory": "BusinessApplication",
   "applicationSubCategory": "Knowledge Assistant",
@@ -100,7 +100,7 @@
     <h1><span class="grad">Ask the Brand Brain</span></h1>
     <p class="lede">Ask a lifecycle / growth question about the subject and get a grounded answer. Pick a ready-made D2C brand below, or type any brand.</p>
     <div class="subject"><span class="lbl">Subject</span><input id="brand" aria-label="Brand name" type="text"><input id="url" aria-label="Website (optional)" type="text" style="flex:0 1 220px"><button id="go">Load</button></div>
-    <div class="askrow"><input id="q" type="text" placeholder="Ask anything — e.g. Where should growth focus first?"><button class="applybtn" id="ask" style="margin:0">Ask</button></div>
+    <div class="askrow"><input id="q" type="text" placeholder="Ask anything, e.g. Where should growth focus first?"><button class="applybtn" id="ask" style="margin:0">Ask</button></div>
     <div id="chips"></div>
     <div id="hd" style="font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);margin:8px 0 12px"></div>
     <div id="ans"></div>
@@ -115,10 +115,10 @@
   var PRESETS=['Where should growth focus first?','What are the highest-intent audiences?','What is the fastest win?','Which channel matters most?','What is the retention play?'];
   function answer(qq){
     var q=qq.toLowerCase();
-    if(/focus|first|start|priorit/.test(q)) return 'Start where intent is highest: '+F.audiences[0]+'. '+(F.anchit?'Warm-network outreach converts ~3× cold — sequence that cohort first, then the closest role fit.':'Win the first→second purchase (the LTV inflection) before spending more on acquisition.');
+    if(/focus|first|start|priorit/.test(q)) return 'Start where intent is highest: '+F.audiences[0]+'. '+(F.anchit?'Warm-network outreach converts ~3× cold, sequence that cohort first, then the closest role fit.':'Win the first→second purchase (the LTV inflection) before spending more on acquisition.');
     if(/audience|segment|who|target/.test(q)) return 'Primary audiences: '+F.audiences.join(', ')+'. '+F.audiences[0]+' is highest-intent and should lead.';
     if(/win|fast|quick|leverage/.test(q)) return 'Fastest win: '+F.wins[0]+' as the headline proof, paired with '+(F.anchit?'a personalised, referral-led outreach sequence.':'a welcome + first-order flow with a clear incentive.');
-    if(/channel|where|platform/.test(q)) return (F.anchit?'Email + warm intros beat cold channels for senior roles; LinkedIn for reach, referrals for conversion.':'Owned channels (email/SMS) drive 25–35% of D2C revenue — that is the compounding channel; paid handles acquisition.');
+    if(/channel|where|platform/.test(q)) return (F.anchit?'Email + warm intros beat cold channels for senior roles; LinkedIn for reach, referrals for conversion.':'Owned channels (email/SMS) drive 25–35% of D2C revenue, that is the compounding channel; paid handles acquisition.');
     if(/reten|churn|loyal|repeat/.test(q)) return (F.anchit?'Retention here = staying top-of-mind with the network: a quarterly value-add nurture and fast, tailored follow-ups after every touch.':'Protect the second purchase with a replenishment/cross-sell flow at the consumption cycle, and a win-back series at 60–90 days.');
     return 'For '+F.name+': '+F.one+' The move is to lead with '+F.wins[0]+' and route effort to '+F.audiences[0]+'. Ask about focus, audiences, channels or retention for specifics.';
   }

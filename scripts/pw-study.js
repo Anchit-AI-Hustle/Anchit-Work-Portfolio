@@ -63,7 +63,7 @@ const CSP = (() => {
 function mutate(src) {
   if (MUT === 'race') return src.replace('if(P[cur]===p) addMsg', 'addMsg');
   if (MUT === 'label') return src.replace("k:'Lectures not done'", "k:'Behind batch pace'");
-  if (MUT === 'dash') return src.replace('</body>', '<p>one \u2014 two</p></body>');
+  if (MUT === 'dash') return src.replace('</body>', '<p>one, two</p></body>');
   if (MUT === 'auditnav') return src.replace(/<div class="hero-ctas" style="margin-top:6px"><a class="btn btn-outline sm" href="#top">.*?<\/div>/, '');
   if (MUT === 'protonav') return src.replace(/<div class="xlinks">.*?<\/div>/, '');
   if (MUT === 'costdrift') return src.replace('id="m-wa" type="number" step="0.001" min="0" value="0.115"', 'id="m-wa" type="number" step="0.001" min="0" value="1.15"');

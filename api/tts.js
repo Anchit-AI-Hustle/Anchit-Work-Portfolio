@@ -1,9 +1,9 @@
-// /api/tts — cloned-voice narration with a free-tier CASCADE.
+// /api/tts, cloned-voice narration with a free-tier CASCADE.
 //
 // Tries hosted free-tier voice providers in order, burning each one's free
 // allowance before moving on. If every provider is unconfigured or spent, it
 // returns 503 and the browser falls back to the device's Indian-English voice
-// — so narration always works.
+//, so narration always works.
 //
 //   POST /api/tts            { text }            → audio bytes (audio/*)
 //   GET  /api/tts?debug=1                        → which providers are configured
@@ -13,7 +13,7 @@
 // provider that can only offer a stock voice. A stock voice reading "I" is a
 // worse answer than a slow clone, and a far worse one than the device voice.
 //
-// Order (edit PROVIDERS below to reorder) — clone-capable first:
+// Order (edit PROVIDERS below to reorder), clone-capable first:
 //   1) ElevenLabs   ELEVENLABS_API_KEY + ELEVENLABS_VOICE_ID   [ELEVENLABS_MODEL]
 //   2) Cartesia     CARTESIA_API_KEY   + CARTESIA_VOICE_ID     [CARTESIA_MODEL]
 //   3) Fish Audio   FISH_API_KEY       + FISH_VOICE_ID         [FISH_MODEL]
@@ -23,14 +23,14 @@
 //   6) Sarvam AI    SARVAM_API_KEY     [SARVAM_LANG|SARVAM_VOICE|SARVAM_MODEL]
 //
 // Sarvam is last on purpose. Its `speaker` parameter is a closed enum of stock
-// voices — the API has no cloned-voice id to pass (see viaSarvam below) — so it
+// voices, the API has no cloned-voice id to pass (see viaSarvam below), so it
 // is the always-works safety net for Indic/code-mixed copy, never the clone.
 //
 // Each provider is SKIPPED when unconfigured; a rate-limit / out-of-credits
 // response (429 / 402 / 403) moves the cascade to the next provider instead of
 // failing, so free tiers are chained for maximum free usage.
 
-// Signals "this provider is spent — move to the next one".
+// Signals "this provider is spent, move to the next one".
 const { KEYS } = require('./_models.js');
 const { guard } = require('./_guard.js');
 
@@ -43,7 +43,7 @@ async function fetchTO(url, opts, ms) {
   finally { clearTimeout(t); }
 }
 
-// 1) ElevenLabs — instant voice clone of your sample. Free tier ~10k chars/mo.
+// 1) ElevenLabs, instant voice clone of your sample. Free tier ~10k chars/mo.
 async function viaElevenLabs(text) {
   const key = KEYS.elevenlabs(), voice = KEYS.elevenlabsVoice();
   if (!key || !voice) return null;
@@ -58,7 +58,7 @@ async function viaElevenLabs(text) {
   return { type: 'audio/mpeg', buf: Buffer.from(await r.arrayBuffer()) };
 }
 
-// 2) Cartesia — Sonic voice cloning. Free credits on signup.
+// 2) Cartesia, Sonic voice cloning. Free credits on signup.
 async function viaCartesia(text) {
   const key = process.env.CARTESIA_API_KEY, voice = process.env.CARTESIA_VOICE_ID;
   if (!key || !voice) return null;
@@ -83,7 +83,7 @@ async function viaCartesia(text) {
   return { type: r.headers.get('content-type') || 'audio/mpeg', buf: Buffer.from(await r.arrayBuffer()) };
 }
 
-// 3) Fish Audio — S2 voice cloning. Free developer tier (s2.1-pro-free).
+// 3) Fish Audio, S2 voice cloning. Free developer tier (s2.1-pro-free).
 async function viaFish(text) {
   const key = process.env.FISH_API_KEY, voice = process.env.FISH_VOICE_ID;
   if (!key || !voice) return null;
@@ -103,7 +103,7 @@ async function viaFish(text) {
   return { type: r.headers.get('content-type') || 'audio/mpeg', buf: Buffer.from(await r.arrayBuffer()) };
 }
 
-// 4) Hugging Face — your own voice model (Inference Endpoint or public model).
+// 4) Hugging Face, your own voice model (Inference Endpoint or public model).
 // Handles the "model is loading" 503 by waiting once for it to warm up.
 async function viaHuggingFace(text) {
   const token = process.env.HF_TOKEN;
@@ -130,7 +130,7 @@ async function viaHuggingFace(text) {
   return null;
 }
 
-// 5) Self-hosted XTTS — your literal voice (audio/anchit.m4a), free forever.
+// 5) Self-hosted XTTS, your literal voice (audio/anchit.m4a), free forever.
 // The last provider that is actually YOU. See tts-server/.
 async function viaXTTS(text) {
   const url = (process.env.XTTS_API_URL || process.env.LOCAL_XTTS_API_URL || '').replace(/\/$/, '');
@@ -139,21 +139,21 @@ async function viaXTTS(text) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'audio/*' },
     body: JSON.stringify({ text }),
-  }, 60000); // XTTS on free CPU can be slow — give it room
+  }, 60000); // XTTS on free CPU can be slow, give it room
   if (!r.ok) return null;
   return { type: r.headers.get('content-type') || 'audio/wav', buf: Buffer.from(await r.arrayBuffer()) };
 }
 
-// 6) Sarvam AI — native Indian-language voices (English-IN, Hindi, Tamil, Telugu,
+// 6) Sarvam AI, native Indian-language voices (English-IN, Hindi, Tamil, Telugu,
 // Kannada, Malayalam, +more). The right engine for Indic and code-mixed copy.
 //
 // NOT A CLONE. Sarvam's voice cloning is a Sarvam Studio (browser) feature; the
 // public REST API's `speaker` is a closed enum of stock voices, with no field
 // for a cloned-voice id. Verified against Sarvam's own OpenAPI-generated SDKs
-// (sarvamai@1.1.7 / sarvamai 0.1.28) — neither exposes any cloning endpoint.
+// (sarvamai@1.1.7 / sarvamai 0.1.28), neither exposes any cloning endpoint.
 // So this provider speaks Anchit's words in someone else's voice, which is why
 // it runs only after every clone-capable provider has been tried. The default
-// speaker is male to at least match the first-person copy — the previous
+// speaker is male to at least match the first-person copy, the previous
 // default, `anushka`, is a female voice.
 //
 // If Sarvam ever ships cloned-voice ids, set SARVAM_VOICE=<that id>: an unknown
@@ -168,7 +168,7 @@ const SARVAM_SPEAKERS = {
     'gokul', 'vijay', 'shruti', 'suhani', 'mohit', 'kavitha', 'rehan', 'soham', 'rupali']),
   'bulbul:v2': new Set(['anushka', 'manisha', 'vidya', 'arya', 'abhilash', 'karun', 'hitesh']),
 };
-// Male defaults — the copy is written in Anchit's first person.
+// Male defaults, the copy is written in Anchit's first person.
 const SARVAM_DEFAULT_SPEAKER = { 'bulbul:v3': 'shubh', 'bulbul:v2': 'abhilash' };
 // The non-streaming endpoint returns base64 in `audios[]`, encoded per this codec.
 const SARVAM_MIME = {
@@ -183,7 +183,7 @@ const SARVAM_RATES = new Set(['8000', '16000', '22050', '24000']);
 const SARVAM_RATES_V3 = new Set([...SARVAM_RATES, '32000', '44100', '48000']);
 
 // Every SARVAM_* value is typed by hand into a Vercel dashboard, and an
-// out-of-range one comes back as a 400 — which this cascade reads as "provider
+// out-of-range one comes back as a 400, which this cascade reads as "provider
 // down" and silently skips. So each is range-checked and falls back to a
 // working default instead of costing us the provider.
 function envNum(name, min, max, fallback) {
@@ -196,7 +196,7 @@ function envIn(name, allowed, fallback) {
 }
 
 // Resolved separately from the request so GET /api/tts can show exactly what
-// would be sent — a typo'd SARVAM_LANG is then visible there rather than only
+// would be sent, a typo'd SARVAM_LANG is then visible there rather than only
 // as an unexplained absence of Sarvam audio.
 // Stock names are documented as lowercase, so one typed with capitals is
 // corrected. Anything unrecognised keeps its exact case: a cloned-voice id would
@@ -209,12 +209,12 @@ function sarvamSpeaker(raw, model) {
 }
 
 // `override` lets a caller audition a voice against the live key without
-// redeploying — POST /api/tts { text, speaker }. Env stays the default.
+// redeploying, POST /api/tts { text, speaker }. Env stays the default.
 function sarvamConfig(override) {
   const model = SARVAM_SPEAKERS[process.env.SARVAM_MODEL] ? process.env.SARVAM_MODEL : 'bulbul:v3';
   const v3 = model === 'bulbul:v3';
   const codec = envIn('SARVAM_CODEC', new Set(Object.keys(SARVAM_MIME)), 'wav');
-  // Speaker is deliberately NOT corrected here — viaSarvam sends it and retries,
+  // Speaker is deliberately NOT corrected here, viaSarvam sends it and retries,
   // so a future cloned-voice id gets a real attempt instead of being discarded.
   const speaker = sarvamSpeaker(override || process.env.SARVAM_VOICE, model);
   return {
@@ -234,7 +234,7 @@ async function viaSarvam(text, opts) {
   if (!key) return null;
   const c = sarvamConfig(opts && opts.speaker);
 
-  // v3 takes 2500 chars, v2 only 1500 — truncating to the wrong one either
+  // v3 takes 2500 chars, v2 only 1500, truncating to the wrong one either
   // clips good audio or 400s the request.
   const body = {
     text: text.slice(0, c.limit),
@@ -269,7 +269,7 @@ async function viaSarvam(text, opts) {
   const b64 = j && Array.isArray(j.audios) && j.audios[0];
   if (!b64) return null;
   // `used` may differ from what was asked for, if the retry fired. Reporting it
-  // is what makes auditioning honest — otherwise a rejected voice is
+  // is what makes auditioning honest, otherwise a rejected voice is
   // indistinguishable from an accepted one.
   return { type: c.mime, buf: Buffer.from(b64, 'base64'), speaker: used };
 }
@@ -283,7 +283,7 @@ const PROVIDERS = [
   { name: 'fish',        clone: true,  run: viaFish },
   { name: 'huggingface', clone: true,  run: viaHuggingFace },
   { name: 'xtts',        clone: true,  run: viaXTTS },
-  { name: 'sarvam',      clone: false, run: viaSarvam },   // stock voice — see viaSarvam
+  { name: 'sarvam',      clone: false, run: viaSarvam },   // stock voice, see viaSarvam
 ];
 
 // Which providers have their credentials set (no secrets exposed).
@@ -327,7 +327,7 @@ async function handler(req, res) {
         // has to use the SAME resolver the provider uses, not the canonical
         // variable name: with ELEVEN_LABS_API_KEY set and no voice id, checking
         // process.env.ELEVENLABS_API_KEY saw both names absent, concluded the
-        // provider was untouched, and suppressed the warning — so /api/tts
+        // provider was untouched, and suppressed the warning, so /api/tts
         // reported neither a configured provider nor the missing credential.
         // That is the "my key did not work" confusion this block exists to
         // prevent, produced by the block itself.
@@ -341,7 +341,7 @@ async function handler(req, res) {
         const out = {};
         for (const [name, vars] of Object.entries(need)) {
           const absent = vars.filter(([, set]) => !set).map(([v]) => v);
-          // Only report a partially-configured provider — an untouched one is
+          // Only report a partially-configured provider, an untouched one is
           // not a problem, it is simply not in use.
           if (absent.length && absent.length < vars.length) out[name] = absent;
         }
@@ -354,7 +354,7 @@ async function handler(req, res) {
           model: s.model, speaker: s.speaker, language: s.lang, codec: s.codec,
           pace: s.pace, sampleRate: s.rate,
           knownSpeaker: s.knownSpeaker,   // false → retried with the model default
-          clonedVoice: false,             // preset speakers only — see viaSarvam
+          clonedVoice: false,             // preset speakers only, see viaSarvam
         };
       })(),
     });
@@ -374,17 +374,17 @@ async function handler(req, res) {
 
   // ── cloned voice only ───────────────────────────────────────────────────
   // This site speaks in the first person as Anchit. A stock voice reading those
-  // words is not a lesser version of the feature — it is a stranger claiming to
+  // words is not a lesser version of the feature, it is a stranger claiming to
   // be him, which is worse than silence. So non-cloning providers are skipped
   // unless someone deliberately opts in with VOICE_ALLOW_STOCK=true.
   //
   // Sarvam is the live example: it is configured and works, but its REST API
   // only offers preset speakers (cloning is Studio-only), so it was answering
-  // in "shubh" — a voice that is not Anchit's.
+  // in "shubh", a voice that is not Anchit's.
   const allowStock = String(process.env.VOICE_ALLOW_STOCK || '').toLowerCase() === 'true';
   const usable = PROVIDERS.filter((p) => p.clone || allowStock || opts.speaker);
   // An explicit ?speaker= is an audition request, so it may reach a stock
-  // provider — that is a deliberate act by whoever sent it, not the site
+  // provider, that is a deliberate act by whoever sent it, not the site
   // silently substituting a voice.
 
   for (const provider of usable) {
@@ -395,7 +395,7 @@ async function handler(req, res) {
         res.setHeader('Cache-Control', 'no-store');
         res.setHeader('X-Voice-Provider', provider.name);
         res.setHeader('X-Voice-Clone', provider.clone ? 'true' : 'false');
-        // Which voice actually produced this audio — not necessarily the one
+        // Which voice actually produced this audio, not necessarily the one
         // asked for, if it was rejected and the retry fired.
         if (out.speaker) res.setHeader('X-Voice-Speaker', out.speaker);
         return res.status(200).send(out.buf);

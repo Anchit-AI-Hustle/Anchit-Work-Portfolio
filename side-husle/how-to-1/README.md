@@ -1,13 +1,13 @@
 # How-To Engine
 
-An ADHD-friendly, 3D interactive learning engine that explains **any** humanly-doable task — from *switching on a phone* to *swimming breaststroke* or *solving a quadratic* — as a visual, step-by-step guide. Multiple frontier AIs answer in parallel; the best three are fused by a consensus evaluator into one branchable master guide, and every step gets an animated clip from a text-to-video pipeline.
+An ADHD-friendly, 3D interactive learning engine that explains **any** humanly-doable task, from *switching on a phone* to *swimming breaststroke* or *solving a quadratic*, as a visual, step-by-step guide. Multiple frontier AIs answer in parallel; the best three are fused by a consensus evaluator into one branchable master guide, and every step gets an animated clip from a text-to-video pipeline.
 
 > Source lives at `anchit-work-portfolio/side-husle/how-to-1`. It is a **standalone Vite app** because the portfolio shell itself is intentionally framework-free. The portfolio build emits it at **`/how-to-2`**.
 
 ## Experience flow
-1. **Intro / explainer** — a cinematic 3D hero card explains what the engine does.
+1. **Intro / explainer**, a cinematic 3D hero card explains what the engine does.
 2. **Click "Enter the engine"** → a **spinning tornado** WebGL loader.
-3. **Ask anything** — the dual-state prompt bar + auto-suggestion chips.
+3. **Ask anything**, the dual-state prompt bar + auto-suggestion chips.
 4. The **agentic cascade** runs → progress track, live model strip, a dynamic
    flow diagram, and step cards each with an animated video.
 
@@ -19,7 +19,7 @@ Browser ──POST /api/cascade { task }──▶ AgentCascadeService (server)
                                           3. SYNTHESIZE→ evaluator merges → MasterGuide
 Browser ──POST /api/text-to-video──────▶ Runway / Luma / Sora wrapper (server)
 ```
-Provider API keys live **only** in the serverless functions — never in the browser.
+Provider API keys live **only** in the serverless functions, never in the browser.
 
 ## Key files
 | File | Role |
@@ -57,7 +57,7 @@ deterministic offline guide + animated placeholders.
 ## Notes
 - Claude (`claude-opus-4-8`, adaptive thinking) is the top-ranked node and the
   consensus evaluator, via `@anthropic-ai/sdk`. Other providers are simple
-  `fetch` adapters — swap in each vendor's official SDK if preferred.
+  `fetch` adapters, swap in each vendor's official SDK if preferred.
 - The text-to-video endpoint ships as a working mock (animated gradient posters);
   uncomment the Runway/Luma block and set a key to produce real clips.
 - Ranking in `providers.ts` is benchmark-driven and fully config-swappable.

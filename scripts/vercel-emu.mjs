@@ -8,10 +8,10 @@
 //
 //   This module reads vercel.json and applies the same four rules Vercel does,
 //   in the same order:
-//     1. redirects[]  — answered with 308/307 and a Location header
-//     2. rewrites[]   — answered with the destination's body, URL unchanged
-//     3. cleanUrls    — /foo serves foo.html, and /foo.html redirects to /foo
-//     4. trailingSlash:false — /foo/ redirects to /foo
+//     1. redirects[] , answered with 308/307 and a Location header
+//     2. rewrites[]  , answered with the destination's body, URL unchanged
+//     3. cleanUrls   , /foo serves foo.html, and /foo.html redirects to /foo
+//     4. trailingSlash:false, /foo/ redirects to /foo
 //
 //   Used by scripts/redirects-resolve.js. Exported so the test can start it on
 //   an ephemeral port rather than depending on a server someone remembered to
@@ -99,25 +99,25 @@ export function createServer() {
     const send = (code, headers, body) => { res.writeHead(code, headers); res.end(body); };
     const location = (to, code) => send(code, { Location: to + (to.includes('?') ? '' : url.search) }, '');
 
-    // trailingSlash:false — /foo/ is not the canonical form of /foo.
+    // trailingSlash:false, /foo/ is not the canonical form of /foo.
     if (cfg.trailingSlash === false && pathname.length > 1 && pathname.endsWith('/')) {
       return location(pathname.replace(/\/+$/, ''), 308);
     }
 
-    // cleanUrls — the .html form redirects to the extensionless one.
+    // cleanUrls, the .html form redirects to the extensionless one.
     if (cfg.cleanUrls && pathname.endsWith('.html')) {
       const clean = pathname.slice(0, -'.html'.length).replace(/\/index$/, '') || '/';
       if (diskFor(clean)) return location(clean, 308);
     }
 
-    // 1. redirects — a real Location response, exactly as Vercel answers.
+    // 1. redirects, a real Location response, exactly as Vercel answers.
     const rd = firstMatch(redirects, pathname, host);
     if (rd) return location(rd.destination, rd.rule.permanent === false ? 307 : 308);
 
     // 2. the file itself, if one exists at this path
     let file = diskFor(pathname);
 
-    // 3. rewrites — same URL, different body. External ones are proxied in
+    // 3. rewrites, same URL, different body. External ones are proxied in
     //    production; the test only needs to know the rule fired, so the status
     //    line says so rather than pretending to serve someone else's site.
     if (!file) {

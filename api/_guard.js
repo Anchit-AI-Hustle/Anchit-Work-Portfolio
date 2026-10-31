@@ -9,7 +9,7 @@
 //   in 25 seconds. That makes this site a free, public proxy for the API keys
 //   behind it, and the bill is the owner's.
 //
-// WHAT EACH HALF ACTUALLY STOPS — they are not the same thing, and neither is
+// WHAT EACH HALF ACTUALLY STOPS, they are not the same thing, and neither is
 // a substitute for the other:
 //
 //   The origin list stops a BROWSER on someone else's site calling these.

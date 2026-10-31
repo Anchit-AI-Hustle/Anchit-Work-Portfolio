@@ -1,12 +1,12 @@
 // ============================================================================
-// PromptOptimizer — dual-state prompt component
+// PromptOptimizer, dual-state prompt component
 //   • EMPTY STATE  : a "Surprise me" CTA that generates a random creative prompt
 //                    + auto-suggestion chips spanning trivial → expert tasks.
 //   • OPTIMIZE     : takes the user's rough input and crafts the BEST possible
 //                    prompt from it, then HIDES the raw entry and shows only the
 //                    optimized prompt (they can revert to edit the original).
 //                    The guide is built from the optimized prompt; the on-screen
-//                    title stays a clean, short label — never the raw text or the
+//                    title stays a clean, short label, never the raw text or the
 //                    verbose optimized paragraph.
 // ============================================================================
 
@@ -35,7 +35,7 @@ function deriveLabel(raw: string): string {
 
 // Turn a rough ask into a gold-standard, self-contained prompt. It USES the
 // user's input (via the derived core) but does not simply echo their raw words
-// back — it reframes into a complete instruction. (For a fully agentic rewrite,
+// back, it reframes into a complete instruction. (For a fully agentic rewrite,
 // POST to /api/cascade with an "optimize" mode; this deterministic version keeps
 // the component instant and offline-safe.)
 function optimize(raw: string): string {
@@ -44,7 +44,7 @@ function optimize(raw: string): string {
   return (
     `Act as a world-class instructional designer. Produce a complete, do-it-right guide to ${lc}. ` +
     `Assume the reader has never done this and is easily overwhelmed: break it into the smallest possible, ` +
-    `can't-fail steps — one concrete action per step. Call out the single place people most often slip, ` +
+    `can't-fail steps, one concrete action per step. Call out the single place people most often slip, ` +
     `note any decision forks ("if X, do Y"), say what to prepare first, and finish with a quick way to ` +
     `confirm it worked. Keep every step short, plain, and jargon-free.`
   );
@@ -84,7 +84,7 @@ export default function PromptOptimizer({ onSubmit, busy }: Props) {
           </div>
           <p className="opt-text">{optimized}</p>
           <div className="opt-foot">
-            <span className="opt-note">Crafted from your ask — this is what builds your guide.</span>
+            <span className="opt-note">Crafted from your ask, this is what builds your guide.</span>
             <button type="button" className="btn primary" onClick={build} disabled={busy}>
               {busy ? 'Thinking…' : 'Build my guide →'}
             </button>
@@ -96,13 +96,13 @@ export default function PromptOptimizer({ onSubmit, busy }: Props) {
             value={value}
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) build(); }}
-            placeholder="What do you want to learn to do? Anything — from switching on a phone to swimming breaststroke."
+            placeholder="What do you want to learn to do? Anything, from switching on a phone to swimming breaststroke."
             rows={3}
             aria-label="Describe the task you want to learn"
           />
 
           <div className="prompt-actions">
-            {/* Single button that swaps label by state — no AnimatePresence
+            {/* Single button that swaps label by state, no AnimatePresence
                 wait-mode (its exit-complete can stall and drop the next button). */}
             {!filled ? (
               <button type="button" className="btn ghost" onClick={() => setValue(randomPrompt())}>
@@ -121,7 +121,7 @@ export default function PromptOptimizer({ onSubmit, busy }: Props) {
         </div>
       )}
 
-      {/* Auto-suggestions — always visible so there is never a blank canvas. */}
+      {/* Auto-suggestions, always visible so there is never a blank canvas. */}
       <div className="chips" role="list" aria-label="Suggestions">
         {chips.map((c) => (
           <button

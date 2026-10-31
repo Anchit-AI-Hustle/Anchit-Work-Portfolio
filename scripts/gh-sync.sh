@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# gh-sync.sh — auto-commit & push portfolio changes using the GitHub CLI (gh).
+# gh-sync.sh, auto-commit & push portfolio changes using the GitHub CLI (gh).
 #
 # Targets the NON-iCloud working repo (~/Projects/awp) so it never touches an
 # iCloud-corrupted .git. Auth comes from `gh` (run `gh auth login` once). Because

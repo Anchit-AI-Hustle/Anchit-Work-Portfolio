@@ -4,8 +4,8 @@
 // The fault: descriptions ran 91-507 characters across 13 cards. The rail is a
 // flexbox so the cards stretched to match the tallest, which meant one card set
 // the height, the rest carried a void, and on a laptop the row overshot the
-// viewport and was clipped mid-card. Shortening the copy alone does not hold —
-// the next long paragraph re-breaks it — so each field has a fixed line budget
+// viewport and was clipped mid-card. Shortening the copy alone does not hold,
+// the next long paragraph re-breaks it, so each field has a fixed line budget
 // and this measures the rendered result rather than the source.
 //
 // Run against a served build:  node scripts/build-cards.js
@@ -17,7 +17,7 @@ const MUT = process.env.MUT === '1';
 const TOL = 2;                    // px; sub-pixel rounding across 13 cards
 
 // The mutation puts the ACTUAL pre-fix layout back, rather than tightening a
-// tolerance — a stricter threshold against a spread of exactly 0 still passes
+// tolerance, a stricter threshold against a spread of exactly 0 still passes
 // and proves nothing. Each line here is one of the faults that was measured:
 // an oversized placeholder, unclamped copy, two competing auto margins, and a
 // wrapping action row.
@@ -47,7 +47,7 @@ const MUTANT_CSS = `
     results.push([ok ? 'PASS' : 'FAIL', name, detail, covered]);
 
   await p.goto('http://127.0.0.1:8099/index.html', { waitUntil: 'load', timeout: 25000 });
-  // Assigning location.hash does NOT activate the view — switchView is wired to
+  // Assigning location.hash does NOT activate the view, switchView is wired to
   // clicks on [data-view]. Setting the hash alone left #view-projects at
   // display:none, so every card measured 0x0 and the whole suite passed on
   // nothing. Drive it the way a visitor does.
@@ -83,7 +83,7 @@ const MUTANT_CSS = `
   const visible = await p.evaluate(() =>
     getComputedStyle(document.querySelector('#view-projects')).display !== 'none' &&
     document.querySelector('.builds-grid .build-card').getBoundingClientRect().height > 0);
-  if (!visible) { console.log('  FAIL  the projects view never rendered — measurements would be meaningless'); process.exit(1); }
+  if (!visible) { console.log('  FAIL  the projects view never rendered, measurements would be meaningless'); process.exit(1); }
 
   // .build-card carries content-visibility:auto with contain-intrinsic-size,
   // so a card parked outside the rail's visible window is NOT laid out and
@@ -128,7 +128,7 @@ const MUTANT_CSS = `
       count: cards.length,
       heights: cards.map((c) => Math.round(c.getBoundingClientRect().height)),
       widths: cards.map((c) => Math.round(c.getBoundingClientRect().width)),
-      // Offset of the actions row from the card's own top — the thing that reads
+      // Offset of the actions row from the card's own top, the thing that reads
       // as "misaligned" when it differs card to card.
       actionTop: cards.map((c) => {
         const a = c.querySelector('.build-actions');
@@ -136,7 +136,7 @@ const MUTANT_CSS = `
       }),
       purpose: cards.map((c) => {
         const el = c.querySelector('.build-purpose');
-        // Rendered, not merely present — textContent is still returned for a
+        // Rendered, not merely present, textContent is still returned for a
         // display:none node, so reading it alone proves nothing.
         if (!el || el.getBoundingClientRect().height === 0) return '';
         return (el.textContent || '').replace(/\s+/g, ' ').trim();
@@ -146,13 +146,13 @@ const MUTANT_CSS = `
       titles: cards.map((c) => (c.querySelector('h3')?.textContent || '').replace(/\s+/g, ' ').trim()),
       // Any clamped box whose visible height is not a whole multiple of its own
       // line-height is rendering a half-cut row of text.
-      // The purpose line is the one field that must never be truncated — a
+      // The purpose line is the one field that must never be truncated, a
       // half-shown explanation is worse than none, and the clamp will happily
       // ellipsis it if the sentence is a few characters too long.
       clipped: cards.map((c) => {
         const el = c.querySelector('.bp-text');
         // A missing or hidden purpose line is the worst possible truncation,
-        // not a pass — 0px of overflow on a 0px box is not "it fits".
+        // not a pass, 0px of overflow on a 0px box is not "it fits".
         if (!el || el.getBoundingClientRect().height === 0) return 999;
         return Math.max(0, el.scrollHeight - el.clientHeight);
       }),
@@ -203,7 +203,7 @@ const MUTANT_CSS = `
     missing.length ? 'missing on: ' + missing.join(', ') : `all ${m.purpose.length} carry a purpose line`);
 
   // The purpose lines should read as one consistent field, not 13 different
-  // lengths — that inconsistency is what made the old copy feel unsynchronised.
+  // lengths, that inconsistency is what made the old copy feel unsynchronised.
   const lens = m.purpose.map((t) => t.length);
   check('the purpose lines are a consistent length',
     span(lens) <= 45,
@@ -236,7 +236,7 @@ const MUTANT_CSS = `
     sliced.length === 0,
     sliced.length ? sliced.slice(0, 3).join(' | ') : 'every clamped box is a whole number of lines');
 
-  // Back to home, then scroll the hero tile into view — it sits below the
+  // Back to home, then scroll the hero tile into view, it sits below the
   // cinematic boot sequence, so measuring it at scroll 0 measures an element
   // that has not been reached yet, not one that is broken.
   await p.click('.sidebar-item[data-view="home"]');
@@ -250,8 +250,8 @@ const MUTANT_CSS = `
     spill.length === 0,
     spill.length ? spill.join(', ') : 'none');
 
-  // The homepage has to answer the same question the cards do — what problem
-  // is this solving — and it must not be truncated or hidden.
+  // The homepage has to answer the same question the cards do, what problem
+  // is this solving, and it must not be truncated or hidden.
   const home = await p.evaluate(() => {
     const el = document.querySelector('.hero-problem');
     if (!el) return { present: false };
@@ -287,7 +287,7 @@ const MUTANT_CSS = `
         `(${results.length - cov.length} content assertions are not CSS-breakable and are excluded)`);
       process.exit(0);
     }
-    console.log('MUT: still passing — ' + cov.filter((r) => r[0] === 'PASS').map((r) => r[1]).join('; '));
+    console.log('MUT: still passing, ' + cov.filter((r) => r[0] === 'PASS').map((r) => r[1]).join('; '));
     process.exit(1);
   }
   process.exit(failed ? 1 : 0);

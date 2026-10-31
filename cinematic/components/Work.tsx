@@ -6,20 +6,20 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 const BUILDS = [
   { n: '01', title: 'MusicGenAI', role: 'Generative audio',
-    blurb: 'Prompt to a finished track — lyrics, vocals, production. Every stage exposed, so a drifting vocal can be debugged instead of re-rolled.',
+    blurb: 'Prompt to a finished track, lyrics, vocals, production. Every stage exposed, so a drifting vocal can be debugged instead of re-rolled.',
     stack: ['Next.js', 'Python', 'Supabase', 'Audio DSP'], year: '2026' },
   { n: '02', title: 'Hey-Yaara', role: 'Voice-first companion',
-    blurb: 'An AI companion for elderly users. One button to talk, one to stop. Voice first, not screen first — built for people apps intimidate.',
+    blurb: 'An AI companion for elderly users. One button to talk, one to stop. Voice first, not screen first, built for people apps intimidate.',
     stack: ['PWA', 'Web Speech', 'LLM', 'Accessibility'], year: '2025' },
   { n: '03', title: 'AI_TeleSuite', role: 'Sales intelligence',
-    blurb: 'Real-time transcription, pitch scoring and conversion assist — the ET Prime playbook packaged for solo operators.',
+    blurb: 'Real-time transcription, pitch scoring and conversion assist, the ET Prime playbook packaged for solo operators.',
     stack: ['GraphQL', 'Whisper', 'LLM', 'Realtime'], year: '2025' },
 ];
 
 /**
  * PHASE 1: all Tailwind transition-* / duration-* / ease-* classes deleted.
  * PHASE 2: every state change is GSAP, so hover and scroll share one engine
- * and one ticker — a CSS transition running beside a GSAP tween on the same
+ * and one ticker, a CSS transition running beside a GSAP tween on the same
  * property is the classic source of fighting animations.
  */
 export default function Work() {
@@ -38,7 +38,7 @@ export default function Work() {
           scrollTrigger: { trigger: card, start: 'top 90%', once: true },
         });
 
-        // Parallax delay — the numeral lags the card, so the row has depth
+        // Parallax delay, the numeral lags the card, so the row has depth
         // instead of arriving as one flat slab.
         gsap.to(card.querySelector('[data-num]'), {
           yPercent: -55,
@@ -60,7 +60,7 @@ export default function Work() {
   return (
     <section ref={root} className="px-6 py-32 md:px-10" id="work">
       <h2 className="mb-16 font-mono text-[11px] uppercase tracking-[0.3em] text-ash">
-        The Work — selected systems
+        The Work, selected systems
       </h2>
 
       <ul className="border-t border-edge">

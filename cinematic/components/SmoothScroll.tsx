@@ -5,7 +5,7 @@ import { initLenis, destroyLenis } from '@/lib/lenis';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 /**
- * Wraps the app. Honours prefers-reduced-motion by simply not starting Lenis —
+ * Wraps the app. Honours prefers-reduced-motion by simply not starting Lenis,
  * hijacking scroll for someone who asked the OS for less motion is the one
  * place this aesthetic should yield.
  */

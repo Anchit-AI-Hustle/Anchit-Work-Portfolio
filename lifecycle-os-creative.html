@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Creative Gallery — AI Creative Concepts | Lifecycle OS</title>
+<title>Creative Gallery | AI Creative Concepts | Lifecycle OS</title>
 <link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -14,13 +14,13 @@
   <script defer src="/assets/cinematic.js"></script>
 <!-- cinematic:end -->
 <!-- seo:auto:start -->
-<!-- Managed by scripts/seo-inject.mjs — edit seo.config.json, not here. -->
-<meta name="description" content="Creative Gallery — on-brand creative concepts (ad, banner, social tile, email hero) generated from the subject. Part of the Lifecycle OS." />
+<!-- Managed by scripts/seo-inject.mjs, edit seo.config.json, not here. -->
+<meta name="description" content="Creative Gallery, on-brand creative concepts (ad, banner, social tile, email hero) generated from the subject. Part of the Lifecycle OS." />
 <link rel="canonical" href="https://anchit-tandon.com/lifecycle-os-creative" />
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
 <meta name="keywords" content="Creative Gallery AI, AI ad creative generator, banner creative AI, social tile generator, email hero creative, on-brand creative concepts, D2C creative studio, marketing creative AI, ad concept generator, Lifecycle OS, Anchit Tandon" />
 <meta name="author" content="Anchit Tandon" />
-<meta property="og:title" content="Creative Gallery — AI Creative Concepts" />
+<meta property="og:title" content="Creative Gallery | AI Creative Concepts" />
 <meta property="og:description" content="On-brand creative concepts (ad, banner, social tile, email hero) generated from the subject. Part of the Lifecycle OS." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://anchit-tandon.com/lifecycle-os-creative" />
@@ -29,9 +29,9 @@
 <meta property="og:locale" content="en_US" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Anchit Tandon — Product &amp; D2C Growth" />
+<meta property="og:image:alt" content="Anchit Tandon, Product &amp; D2C Growth" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Creative Gallery — AI Creative Concepts" />
+<meta name="twitter:title" content="Creative Gallery | AI Creative Concepts" />
 <meta name="twitter:description" content="On-brand creative concepts (ad, banner, social tile, email hero) generated from the subject. Part of the Lifecycle OS." />
 <meta name="twitter:image" content="https://anchit-tandon.com/assets/og/og-default.png" />
 <script type="application/ld+json">
@@ -65,7 +65,7 @@
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "@id": "https://anchit-tandon.com/lifecycle-os-creative#app",
-  "name": "Creative Gallery — Lifecycle OS",
+  "name": "Creative Gallery | Lifecycle OS",
   "url": "https://anchit-tandon.com/lifecycle-os-creative",
   "applicationCategory": "BusinessApplication",
   "applicationSubCategory": "Creative Generation",
@@ -117,11 +117,11 @@
   function run(){
     var f=LOS.facts($('brand').value.trim(),$('url').value.trim());
     var extra=LOS.extraBrief();
-    $('hd').textContent=f.name+' — creative concepts'; LOS.badge($('bdg'),f.anchit?'anchit':'template');
+    $('hd').textContent=f.name+': creative concepts'; LOS.badge($('bdg'),f.anchit?'anchit':'template');
     var concepts=[
       {fmt:'Hero banner · 16:9',kick:f.category,hl:f.anchit?'I grow brands. Starting with mine.':f.name+', made for you.',cta:f.cta},
       {fmt:'Square ad · 1:1',kick:'Proof',hl:f.wins[0],cta:'See more'},
-      {fmt:'Social tile · 4:5',kick:f.name,hl:f.one.split('—')[0],cta:f.cta},
+      {fmt:'Social tile · 4:5',kick:f.name,hl:f.one.split('-')[0],cta:f.cta},
       {fmt:'Email hero',kick:'Welcome',hl:extra?extra.slice(0,60):f.wins[2],cta:f.cta},
     ];
     $('gal').innerHTML=concepts.map(function(c,i){return '<div class="creative"><div class="cv" style="background:'+G[i%G.length]+'"><div class="kick">'+esc(c.kick)+'</div><div class="hl">'+esc(c.hl)+'</div><span class="cta">'+esc(c.cta)+'</span></div><div class="cmeta">◆ '+esc(c.fmt)+' · on-brand palette</div></div>';}).join('');

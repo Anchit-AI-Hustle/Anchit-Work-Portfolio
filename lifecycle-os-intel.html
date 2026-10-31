@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Competitive Intelligence — D2C Benchmarks | Lifecycle OS</title>
+<title>Competitive Intelligence | D2C Benchmarks | Lifecycle OS</title>
 <link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -14,13 +14,13 @@
   <script defer src="/assets/cinematic.js"></script>
 <!-- cinematic:end -->
 <!-- seo:auto:start -->
-<!-- Managed by scripts/seo-inject.mjs — edit seo.config.json, not here. -->
-<meta name="description" content="Competitive Intelligence: profile the peer set the way SimilarWeb / SEMrush would — category, comparable brands and industry-standard benchmark bands." />
+<!-- Managed by scripts/seo-inject.mjs, edit seo.config.json, not here. -->
+<meta name="description" content="Competitive Intelligence: profile the peer set the way SimilarWeb / SEMrush would, category, comparable brands and industry-standard benchmark bands." />
 <link rel="canonical" href="https://anchit-tandon.com/lifecycle-os-intel" />
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
 <meta name="keywords" content="Competitive Intelligence AI, market benchmarks D2C, competitor analysis tool, D2C market intelligence, brand benchmarking AI, category insights D2C, market research AI tool, competitor benchmarking ecommerce, AI market intel D2C, Lifecycle OS, Anchit Tandon" />
 <meta name="author" content="Anchit Tandon" />
-<meta property="og:title" content="Competitive Intelligence — D2C Benchmarks" />
+<meta property="og:title" content="Competitive Intelligence | D2C Benchmarks" />
 <meta property="og:description" content="Profile the peer set the way SimilarWeb / SEMrush would: category, comparable brands, and industry-standard benchmark bands. Part of the Lifecycle OS." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://anchit-tandon.com/lifecycle-os-intel" />
@@ -29,9 +29,9 @@
 <meta property="og:locale" content="en_US" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Anchit Tandon — Product &amp; D2C Growth" />
+<meta property="og:image:alt" content="Anchit Tandon, Product &amp; D2C Growth" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Competitive Intelligence — D2C Benchmarks" />
+<meta name="twitter:title" content="Competitive Intelligence | D2C Benchmarks" />
 <meta name="twitter:description" content="Profile the peer set the way SimilarWeb / SEMrush would: category, comparable brands, and benchmark bands. Part of the Lifecycle OS." />
 <meta name="twitter:image" content="https://anchit-tandon.com/assets/og/og-default.png" />
 <script type="application/ld+json">
@@ -65,7 +65,7 @@
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "@id": "https://anchit-tandon.com/lifecycle-os-intel#app",
-  "name": "Competitive Intelligence — Lifecycle OS",
+  "name": "Competitive Intelligence | Lifecycle OS",
   "url": "https://anchit-tandon.com/lifecycle-os-intel",
   "applicationCategory": "BusinessApplication",
   "applicationSubCategory": "Market Intelligence",
@@ -121,14 +121,14 @@
     $('err').style.display='none'; $('out').style.display='none'; $('loading').classList.add('on');
     LOS.post('/api/lifecycle',{brand:$('brand').value.trim(),url:$('url').value.trim()}).then(function(r){
       var p=r.plan, ind=(p&&p.industry)||{}; if(!p) throw new Error('failed');
-      $('hd').textContent=(p.brand||'Subject')+' — market profile'; LOS.badge($('bdg'),r.source);
+      $('hd').textContent=(p.brand||'Subject')+': market profile'; LOS.badge($('bdg'),r.source);
       var mb=''; if(ind.category) mb+='<div class="k"><span>Category</span></div><div class="t" style="margin-bottom:10px">'+esc(ind.category)+'</div>';
       if(ind.competitors&&ind.competitors.length) mb+='<div class="k"><span>Comparable brands</span></div><div class="tags">'+ind.competitors.map(function(c){return '<span>'+esc(c)+'</span>';}).join('')+'</div>';
-      $('meta').innerHTML=mb||'<p style="color:var(--ink-mute)">—</p>';
-      $('bench').innerHTML=(ind.benchmarks||[]).map(function(b){return '<div class="kpi"><div class="m">'+esc(b.metric)+(b.note?' — '+esc(b.note):'')+'</div><div class="v">'+esc(b.value)+'</div></div>';}).join('');
+      $('meta').innerHTML=mb||'<p style="color:var(--ink-mute)">-</p>';
+      $('bench').innerHTML=(ind.benchmarks||[]).map(function(b){return '<div class="kpi"><div class="m">'+esc(b.metric)+(b.note?', '+esc(b.note):'')+'</div><div class="v">'+esc(b.value)+'</div></div>';}).join('');
       $('pos').textContent=p.positioning||'';
       $('out').style.display='block';
-    }).catch(function(){ $('err').textContent='Could not profile the market — try again in a moment.'; $('err').style.display='block'; })
+    }).catch(function(){ $('err').textContent='Could not profile the market, try again in a moment.'; $('err').style.display='block'; })
     .then(function(){ $('loading').classList.remove('on'); });
   }
   run();

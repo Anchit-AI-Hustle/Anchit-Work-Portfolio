@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>AI Video Avatar of Anchit Tandon — Talk on Camera</title>
+<title>AI Video Avatar of Anchit Tandon | Talk on Camera</title>
 <meta name="theme-color" content="#0F0D0A" />
 <link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -96,13 +96,13 @@
   <script defer src="/assets/cinematic.js"></script>
 <!-- cinematic:end -->
 <!-- seo:auto:start -->
-<!-- Managed by scripts/seo-inject.mjs — edit seo.config.json, not here. -->
-<meta name="description" content="A photoreal AI video avatar of Anchit Tandon. Ask anything and he answers on camera, in his own cloned voice — powered by D-ID and a TTS cascade." />
+<!-- Managed by scripts/seo-inject.mjs, edit seo.config.json, not here. -->
+<meta name="description" content="A photoreal AI video avatar of Anchit Tandon. Ask anything and he answers on camera, in his own cloned voice, powered by D-ID and a TTS cascade." />
 <link rel="canonical" href="https://anchit-tandon.com/agent" />
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
 <meta name="keywords" content="Talk to Anchit AI avatar, photoreal AI video avatar, AI avatar cloned voice on camera, D-ID AI avatar demo, interactive AI clone chatbot, voice cloning, text-to-speech AI avatar, conversational AI video agent, personal AI clone Anchit Tandon, ask my AI avatar questions, AI talking head demo, product manager AI portfolio, Anchit Tandon" />
 <meta name="author" content="Anchit Tandon" />
-<meta property="og:title" content="AI Video Avatar of Anchit Tandon — Talk on Camera" />
+<meta property="og:title" content="AI Video Avatar of Anchit Tandon | Talk on Camera" />
 <meta property="og:description" content="A photoreal AI video avatar of Anchit Tandon. Ask anything and he answers on camera, in his own cloned voice." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://anchit-tandon.com/agent" />
@@ -111,9 +111,9 @@
 <meta property="og:locale" content="en_US" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Anchit Tandon — Product &amp; D2C Growth" />
+<meta property="og:image:alt" content="Anchit Tandon, Product &amp; D2C Growth" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="AI Video Avatar of Anchit Tandon — Talk on Camera" />
+<meta name="twitter:title" content="AI Video Avatar of Anchit Tandon | Talk on Camera" />
 <meta name="twitter:description" content="A photoreal AI video avatar that answers on camera in Anchit Tandon's own cloned voice. Ask anything." />
 <meta name="twitter:image" content="https://anchit-tandon.com/assets/og/og-default.png" />
 <script type="application/ld+json">
@@ -141,7 +141,7 @@
   "@context": "https://schema.org",
   "@type": "WebApplication",
   "@id": "https://anchit-tandon.com/agent#app",
-  "name": "Talk to Anchit — AI Video Avatar",
+  "name": "Talk to Anchit | AI Video Avatar",
   "url": "https://anchit-tandon.com/agent",
   "applicationCategory": "CommunicationApplication",
   "operatingSystem": "Web browser",
@@ -214,7 +214,7 @@
       "name": "Is the AI video avatar free to use?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, it is a free interactive experiment on Anchit Tandon's portfolio site — no signup or API key required."
+        "text": "Yes, it is a free interactive experiment on Anchit Tandon's portfolio site, no signup or API key required."
       }
     }
   ]
@@ -229,7 +229,7 @@
       <span style="font-family:var(--font-mono);font-size:12px;color:var(--ink-mute);letter-spacing:.06em;">AI video avatar</span>
     </div>
 
-    <div class="eyebrow"><span class="dot"></span>Talk to me — on camera</div>
+    <div class="eyebrow"><span class="dot"></span>Talk to me, on camera</div>
     <h1>Ask Anchit anything</h1>
     <p class="sub">A photoreal AI avatar of me answers in my own voice. Type or tap the mic.</p>
 
@@ -278,7 +278,7 @@
     avatarConfigured = !!(j && j.configured);
     // Tell the visitor plainly which mode they are in, so voice-only never
     // reads as "the page is broken". No deploy/config details are exposed.
-    if(!avatarConfigured){ noteEl.textContent='Voice mode — Anchit answers aloud over his portrait. On-camera video is switched on when the avatar engine is available.'; }
+    if(!avatarConfigured){ noteEl.textContent='Voice mode, Anchit answers aloud over his portrait. On-camera video is switched on when the avatar engine is available.'; }
   }).catch(function(){});
 
   document.querySelectorAll('.chip').forEach(function(c){ c.addEventListener('click', function(){ qEl.value=c.textContent; ask(); }); });
@@ -321,7 +321,7 @@
         replyEl.textContent=reply; replyEl.classList.add('show');
         return speak(reply);            // resolves only when playback ENDS
       })
-      .catch(function(){ setStatus('Something went wrong — please try again.'); })
+      .catch(function(){ setStatus('Something went wrong, please try again.'); })
       // busy is released after playback finishes, not when it starts, so a new
       // question can't interrupt the current answer mid-sentence.
       .then(function(){ busy=false; askEl.disabled=false; });

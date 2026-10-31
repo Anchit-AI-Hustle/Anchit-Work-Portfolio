@@ -5,7 +5,7 @@ import { motion, useMotionValue, useSpring } from 'framer-motion';
 
 /**
  * White dot replacing the pointer. It SNAPS to the centre of a project link or
- * a footer social — magnetic in the true sense, not merely enlarged: the target
+ * a footer social, magnetic in the true sense, not merely enlarged: the target
  * pulls the cursor, so the interface feels like it has mass.
  */
 export default function Cursor() {

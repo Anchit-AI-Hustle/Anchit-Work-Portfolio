@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * elevenlabs-clone — create an ElevenLabs instant voice clone from your own
+ * elevenlabs-clone, create an ElevenLabs instant voice clone from your own
  * recording in this repo, and print the resulting voice_id.
  *
  * The API key is read from the ELEVENLABS_API_KEY environment variable and is
@@ -13,14 +13,14 @@
  *
  * It clones the voice, proves the clone can actually speak, and with --push
  * writes both variables into Vercel for you (requires `vercel login` + `link`).
- * Without --push, set these two by hand and redeploy — api/tts.js tries
+ * Without --push, set these two by hand and redeploy, api/tts.js tries
  * ElevenLabs first in its cascade:
  *   ELEVENLABS_API_KEY = <your key>
  *   ELEVENLABS_VOICE_ID = <the voice_id printed below>
  *
  * Note: instant voice cloning requires an ElevenLabs plan that includes IVC
  * (Starter or above). On the free tier the API returns 401/403 with a
- * can_not_use_instant_voice_cloning message — upgrade, then re-run.
+ * can_not_use_instant_voice_cloning message, upgrade, then re-run.
  */
 import { readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
@@ -68,7 +68,7 @@ if (!voiceId) { console.error(`✗ No voice_id in response:\n${text}`); process.
 console.log('\n✓ Voice clone created.');
 console.log(`  ELEVENLABS_VOICE_ID = ${voiceId}`);
 
-// Prove the clone actually speaks before anyone wires it into the site — a
+// Prove the clone actually speaks before anyone wires it into the site, a
 // created voice is not the same as a working one (quota and plan limits only
 // surface at synthesis time).
 console.log('\n→ Verifying the clone by synthesizing a test line…');
@@ -86,7 +86,7 @@ if (probe.ok) {
   const audio = Buffer.from(await probe.arrayBuffer());
   const out = 'audio/clone-test.mp3';
   await writeFile(out, audio);
-  console.log(`✓ Clone speaks — ${(audio.length / 1024).toFixed(0)} KB written to ${out}.`);
+  console.log(`✓ Clone speaks, ${(audio.length / 1024).toFixed(0)} KB written to ${out}.`);
   console.log('  Play it to confirm it sounds like you before wiring it up.');
 } else {
   const why = await probe.text();
@@ -126,11 +126,11 @@ if (process.argv.includes('--push')) {
   } else {
     console.error('\n✗ Could not write to Vercel. Are you logged in and linked?');
     console.error('    npx vercel login && npx vercel link');
-    console.error(`  Or set them by hand — ELEVENLABS_VOICE_ID = ${voiceId}`);
+    console.error(`  Or set them by hand, ELEVENLABS_VOICE_ID = ${voiceId}`);
     process.exit(1);
   }
 } else {
   console.log('\nNext: add ELEVENLABS_API_KEY and the ELEVENLABS_VOICE_ID above to your');
-  console.log('Vercel env vars and redeploy — or re-run this with --push to do both');
+  console.log('Vercel env vars and redeploy, or re-run this with --push to do both');
   console.log('automatically. Verify with:  curl -s https://anchit-tandon.com/api/tts');
 }

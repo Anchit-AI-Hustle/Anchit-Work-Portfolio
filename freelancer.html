@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Anchit Tandon — Freelance Product, AI &amp; Growth Builder</title>
+<title>Anchit Tandon | Freelance Product, AI &amp; Growth Builder</title>
 <meta name="theme-color" content="#0F0D0A"><link rel="icon" href="/icons/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
@@ -33,7 +33,7 @@ body{background-image:linear-gradient(rgba(255,105,64,.025) 1px,transparent 1px)
    Added on top of the page's existing reveal system rather than replacing it.
 
    TRANSFORM AND OPACITY ONLY, and no library. The obvious move was to load
-   assets/cinematic.js, which every other page uses — but that pulls GSAP,
+   assets/cinematic.js, which every other page uses, but that pulls GSAP,
    ScrollTrigger and Lenis, and those three were measured at 1,572ms of
    index.html's 1,600ms boot blocking. This page currently renders a flat 17ms
    frame with zero long tasks, so importing that stack would import the lag.
@@ -123,7 +123,7 @@ html.js-motion .button, html.js-motion .step { transition: transform .32s cubic-
 html.js-motion .button:hover { transform: translate3d(0,-3px,0) }
 
 /* The hero must never be left invisible by a motion layer. If an animation
-   never runs — a stalled paint, an unsupported property — this puts the
+   never runs, a stalled paint, an unsupported property, this puts the
    content back. The site has shipped a blank hero twice for exactly this. */
 html:not(.js-motion) .hero h1 > *, html:not(.js-motion) .hero .intro,
 html:not(.js-motion) .hero .actions { opacity:1; transform:none; animation:none }
@@ -280,12 +280,12 @@ html:not(.js-motion) .chat-dots span { animation: none; opacity: .6 }
 <!-- social preview: this page had no og:image, so every share of it
      rendered as a bare link with no card. -->
 <!-- seo:auto:start -->
-<!-- Managed by scripts/seo-inject.mjs — edit seo.config.json, not here. -->
+<!-- Managed by scripts/seo-inject.mjs, edit seo.config.json, not here. -->
 <meta name="description" content="Work with Anchit Tandon on useful AI workflows, conversion-focused websites, web MVPs and fractional product and growth. Engineering foundations." />
 <link rel="canonical" href="https://anchit-tandon.com/freelancer" />
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
 <meta name="author" content="Anchit Tandon" />
-<meta property="og:title" content="Anchit Tandon — Product, AI &amp; Growth Builder" />
+<meta property="og:title" content="Anchit Tandon | Product, AI &amp; Growth Builder" />
 <meta property="og:description" content="Good ideas. Useful products. Measurable growth. Freelance builds and fractional product &amp; growth for founders and teams." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://anchit-tandon.com/freelancer" />
@@ -294,9 +294,9 @@ html:not(.js-motion) .chat-dots span { animation: none; opacity: .6 }
 <meta property="og:locale" content="en_US" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Anchit Tandon — Product &amp; D2C Growth" />
+<meta property="og:image:alt" content="Anchit Tandon, Product &amp; D2C Growth" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Anchit Tandon — Freelance Product, AI &amp; Growth Builder" />
+<meta name="twitter:title" content="Anchit Tandon | Freelance Product, AI &amp; Growth Builder" />
 <meta name="twitter:description" content="Work with Anchit Tandon on useful AI workflows, conversion-focused websites, web MVPs and fractional product and growth. Engineering foundations." />
 <meta name="twitter:image" content="https://anchit-tandon.com/assets/og/og-default.png" />
 <!-- seo:auto:end -->
@@ -310,7 +310,7 @@ html:not(.js-motion) .chat-dots span { animation: none; opacity: .6 }
 <div class="wrap"><section class="hero" aria-labelledby="hero-title"><div><h1 id="hero-title"><span>Good ideas.</span><em>Useful products.</em><span class="growth">Measurable growth.</span></h1><p class="intro"><strong>I’m Anchit, a technical product and growth builder.</strong> I help businesses turn complex problems into useful AI workflows, web products and better customer journeys.</p><div class="actions"><a href="#contact" class="button">Discuss your project <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M3 12h17m-7-7 7 7-7 7"/></svg></a><a class="textlink" href="#work">Explore my work</a></div></div><div class="process" aria-label="Explore my approach"><svg class="orbits" viewBox="0 0 620 600" aria-hidden="true"><ellipse cx="310" cy="290" rx="300" ry="170"/><ellipse cx="310" cy="290" rx="230" ry="265"/><path d="M30 290h560M310 10v560"/><circle cx="310" cy="25" r="5"/><circle cx="575" cy="370" r="5"/><circle cx="88" cy="429" r="5"/></svg><div class="step-panels"><button class="step" type="button" data-step="0" aria-pressed="true" aria-controls="approach-detail"><span>01</span><b>Understand</b><small>Find the real problem</small><svg viewBox="0 0 145 115" aria-hidden="true"><path d="M5 81 30 68 52 35 76 57 100 16 133 34"/><path d="M5 92 30 79 52 46 76 68 100 27 133 45"/><path d="M5 103 30 90 52 57 76 79 100 38 133 56"/></svg></button><button class="step" type="button" data-step="1" aria-pressed="false" aria-controls="approach-detail"><span>02</span><b>Build</b><small>Create the useful solution</small><svg viewBox="0 0 145 115" aria-hidden="true"><path d="m8 34 60-24 60 24-60 24ZM8 57l60 24 60-24M8 80l60 24 60-24M8 34v46M68 58v46M128 34v46"/></svg></button><button class="step" type="button" data-step="2" aria-pressed="false" aria-controls="approach-detail"><span>03</span><b>Grow</b><small>Measure what changes</small><svg viewBox="0 0 145 115" aria-hidden="true"><path d="M13 106V75h17v31ZM49 106V53h17v53ZM85 106V28h17v78ZM121 106V8h17v98"/></svg></button></div><p id="approach-detail" class="approach-detail" aria-live="polite">Understand / Define the problem, the people and the outcome.</p></div></section><div class="brands" aria-label="Professional experience"><span class="label">Experience across</span><span class="wordmark">Times Internet</span><span class="wordmark">ET Markets</span><span class="wordmark">ET Prime</span><span class="wordmark">Vahdam</span></div></div>
 <section id="work" class="wrap section work" aria-labelledby="work-title"><span class="label kicker">Selected work</span><div class="sectionhead"><h2 id="work-title">Work with a<br>business purpose.</h2><p>Work I was paid to do, and things I built on my own</p></div><div class="workgrid">
 <article><div class="art revenue"><span class="label">Selling ET Prime over the phone</span><div><strong class="bigmetric">₹15L <span>→</span> ₹80L</strong><p class="metriclabel" style="color:var(--paper)">What the phone sales team brought in each month, after I rebuilt the way they sold</p></div><span class="label">My work at ET Prime · Times Internet</span></div><h3>ET Prime · Getting readers to subscribe</h3><span class="label">Professional work / Times Internet</span><p>I connected product journeys, assisted sales and experimentation to help turn high-intent readers into paying subscribers.</p><details class="case"><summary>Read case study<span class="sr-only">: ET Prime</span></summary><div class="case-body"><h4>The problem</h4><p>Plenty of readers were interested in paying, but there was no clear path from that first enquiry to an actual subscription.</p><h4>My contribution</h4><p>I rebuilt the journey from enquiry to sale, gave the phone team a clear order to work in, and kept testing what to change next.</p><h4>The outcome</h4><p>Assisted-sales monthly revenue grew from ₹15 lakh to ₹80 lakh. The ET Prime assisted-conversion funnel delivered 400%+ ROI within six months. These are results from my work at Times Internet.</p><h4>What this brings to your project</h4><p>I look at the whole picture: what you are selling, what it is like to buy it, and the people doing the following up.</p></div></details></article>
-<article><div class="art workflow"><span class="label">Making sense of sales calls</span><ol class="workflow-list"><li><svg aria-hidden="true" viewBox="0 0 64 64"><path d="M15 7l10 14-7 7c5 10 11 16 20 21l8-7 12 10c-3 10-10 10-16 7C22 50 10 36 6 21 3 13 8 8 15 7Z"/></svg>Call</li><li class="connector" aria-hidden="true">→</li><li><svg aria-hidden="true" viewBox="0 0 64 64"><path d="M13 5h27l12 13v41H13ZM40 5v14h12M22 29h20M22 39h20M22 49h14"/></svg>Transcript</li><li class="connector" aria-hidden="true">→</li><li><svg aria-hidden="true" viewBox="0 0 64 64"><circle cx="32" cy="32" r="26"/><path d="m19 33 9 9 19-21"/></svg>Review</li></ol><span class="label">AI TeleSuite</span></div><h3>AI TeleSuite · Reviewing sales calls</h3><span class="label">Professional work / Times Internet</span><p>I built a tool that writes up every sales call, scores how it went and suggests what to say next — so a manager can review calls without sitting through all of them.</p><details class="case"><summary>Read case study<span class="sr-only">: AI TeleSuite</span></summary><div class="case-body"><h4>The problem</h4><p>Sales calls are full of useful information, but nobody has time to listen to all of them.</p><h4>My contribution</h4><p>It writes up the call, scores it against what the team agreed good looks like, and suggests what to say next. A manager can read a call in a minute instead of listening to the whole thing.</p><h4>The useful pattern</h4><p>Start with one job, and agree up front what a good call sounds like. Keep the write-up readable, keep a person checking it, and make sure it leads to something the team actually does next.</p><p><a href="https://ai-tele-suite.anchit-tandon.com/" target="_blank" rel="noopener">Open the app (sign-in)</a></p></div></details></article>
+<article><div class="art workflow"><span class="label">Making sense of sales calls</span><ol class="workflow-list"><li><svg aria-hidden="true" viewBox="0 0 64 64"><path d="M15 7l10 14-7 7c5 10 11 16 20 21l8-7 12 10c-3 10-10 10-16 7C22 50 10 36 6 21 3 13 8 8 15 7Z"/></svg>Call</li><li class="connector" aria-hidden="true">→</li><li><svg aria-hidden="true" viewBox="0 0 64 64"><path d="M13 5h27l12 13v41H13ZM40 5v14h12M22 29h20M22 39h20M22 49h14"/></svg>Transcript</li><li class="connector" aria-hidden="true">→</li><li><svg aria-hidden="true" viewBox="0 0 64 64"><circle cx="32" cy="32" r="26"/><path d="m19 33 9 9 19-21"/></svg>Review</li></ol><span class="label">AI TeleSuite</span></div><h3>AI TeleSuite · Reviewing sales calls</h3><span class="label">Professional work / Times Internet</span><p>I built a tool that writes up every sales call, scores how it went and suggests what to say next, so a manager can review calls without sitting through all of them.</p><details class="case"><summary>Read case study<span class="sr-only">: AI TeleSuite</span></summary><div class="case-body"><h4>The problem</h4><p>Sales calls are full of useful information, but nobody has time to listen to all of them.</p><h4>My contribution</h4><p>It writes up the call, scores it against what the team agreed good looks like, and suggests what to say next. A manager can read a call in a minute instead of listening to the whole thing.</p><h4>The useful pattern</h4><p>Start with one job, and agree up front what a good call sounds like. Keep the write-up readable, keep a person checking it, and make sure it leads to something the team actually does next.</p><p><a href="https://ai-tele-suite.anchit-tandon.com/" target="_blank" rel="noopener">Open the app (sign-in)</a></p></div></details></article>
 </div><div class="morework">
 <article class="caseband">
 <div class="art markets">
@@ -331,7 +331,7 @@ html:not(.js-motion) .chat-dots span { animation: none; opacity: .6 }
 <div class="caseband-copy">
 <h3>ET Markets &#183; A clearer experience on web and mobile</h3>
 <span class="label">Professional work / Times Internet</span>
-<p>I led the web and mobile-web revamp of ET Markets and worked on its Android and iOS apps &#8212; deciding what to build first, making the numbers easier to find and act on, and measuring what actually changed.</p>
+<p>I led the web and mobile-web revamp of ET Markets and worked on its Android and iOS apps, deciding what to build first, making the numbers easier to find and act on, and measuring what actually changed.</p>
 <details class="case"><summary>Read case study<span class="sr-only">: ET Markets</span></summary>
 <div class="case-body">
 <h4>What changed on web</h4><p>Engagement improved by 27% and the revamp unlocked &#8377;3 crore+ in incremental annual revenue.</p>
@@ -494,7 +494,7 @@ window.addEventListener('scroll',()=>{if(!scrollScheduled){scrollScheduled=true;
     var line = (why === 'not_configured')
       ? 'My AI is not switched on at the moment.'
       : (why === 'overloaded' || why === 'rate_limited')
-        ? 'My AI is busy right now \u2014 give it a minute, or skip it.'
+        ? 'My AI is busy right now, give it a minute, or skip it.'
         : 'I cannot get to my AI just now.';
     return line + ' Either way, message me directly: WhatsApp +91 98739 45238, or anchit.tandon@gmail.com.';
   }
@@ -520,7 +520,7 @@ window.addEventListener('scroll',()=>{if(!scrollScheduled){scrollScheduled=true;
     fab.setAttribute('aria-expanded', 'true');
     if (!greeted) {
       greeted = true;
-      bubble('Hey — I\u2019m Anchit. Ask me about the work, how I build, or whether I\u2019m the right fit for what you need.', 'bot');
+      bubble('Hey, I\u2019m Anchit. Ask me about the work, how I build, or whether I\u2019m the right fit for what you need.', 'bot');
     }
     setTimeout(function () { input.focus(); }, 60);
   }

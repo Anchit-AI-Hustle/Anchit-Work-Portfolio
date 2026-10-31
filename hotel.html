@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>The Residence — a hotel, unveiled</title>
+<title>The Residence | a hotel, unveiled</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -18,7 +18,7 @@
 
      Written to work BEFORE the clips exist. Every section ships a CSS
      performance of its own move, and swaps to video the moment its file appears
-     in assets/hotel/ — checked per section, so one clip landing doesn't depend
+     in assets/hotel/, checked per section, so one clip landing doesn't depend
      on the others. Each clip has a CSS stand-in.
      ═══════════════════════════════════════════════════════════════════════ -->
 
@@ -128,7 +128,7 @@
     border-bottom: none;
     box-shadow: 0 0 90px rgba(232,165,82,0.14);
   }
-  /* Window grid — lit from within, warmer toward the bottom. */
+  /* Window grid, lit from within, warmer toward the bottom. */
   .building::before {
     content: ''; position: absolute; inset: 12% 8% 0;
     background-image:
@@ -214,12 +214,12 @@
   footer a { color: var(--amber); text-decoration: none; }
   footer a:hover { text-decoration: underline; }
 
-  /* Progress rail — the scrub made visible. */
+  /* Progress rail, the scrub made visible. */
   #rail { position: fixed; left: 0; top: 0; height: 2px; width: 100%; z-index: 20; background: transparent; }
   #rail i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--amber-deep), var(--amber)); }
 
   /* Reduced motion: no scrubbing, no sticky stages. Each scene becomes a still
-     with its caption — the page still tells the story, it just doesn't move. */
+     with its caption, the page still tells the story, it just doesn't move. */
   @media (prefers-reduced-motion: reduce) {
     .scene-track, .scene-track.short { height: auto; }
     .stage { position: static; height: 78vh; }
@@ -235,12 +235,12 @@
 <!-- social preview: this page had no og:image, so every share of it
      rendered as a bare link with no card. -->
 <!-- seo:auto:start -->
-<!-- Managed by scripts/seo-inject.mjs — edit seo.config.json, not here. -->
+<!-- Managed by scripts/seo-inject.mjs, edit seo.config.json, not here. -->
 <meta name="description" content="A scroll-scrubbed film of a modern five-star hotel: the cloth lifts off the building as you scroll, then the camera moves inside to the lobby and pool." />
 <link rel="canonical" href="https://anchit-tandon.com/hotel" />
 <meta name="robots" content="noindex" />
 <meta name="author" content="Anchit Tandon" />
-<meta property="og:title" content="The Residence — a hotel, unveiled" />
+<meta property="og:title" content="The Residence | a hotel, unveiled" />
 <meta property="og:description" content="A scroll-scrubbed film of a modern five-star hotel: the cloth lifts off the building as you scroll, then the camera moves inside to the lobby and pool." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://anchit-tandon.com/hotel" />
@@ -249,9 +249,9 @@
 <meta property="og:locale" content="en_US" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Anchit Tandon — Product &amp; D2C Growth" />
+<meta property="og:image:alt" content="Anchit Tandon, Product &amp; D2C Growth" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="The Residence — a hotel, unveiled" />
+<meta name="twitter:title" content="The Residence | a hotel, unveiled" />
 <meta name="twitter:description" content="A scroll-scrubbed film of a modern five-star hotel: the cloth lifts off the building as you scroll, then the camera moves inside to the lobby and pool." />
 <meta name="twitter:image" content="https://anchit-tandon.com/assets/og/og-default.png" />
 <!-- seo:auto:end -->
@@ -264,12 +264,12 @@
   <div>
     <p class="eyebrow">Scroll-driven · six scenes · golden hour</p>
     <h1>The Residence</h1>
-    <p class="sub">A story you scroll. The cloth comes off the building at your pace — then the scenes keep moving, and don't stop until the water closes over them.</p>
+    <p class="sub">A story you scroll. The cloth comes off the building at your pace, then the scenes keep moving, and don't stop until the water closes over them.</p>
     <p class="cue">Scroll to lift</p>
   </div>
 </header>
 
-<!-- ═══ 1A — the drape lifts. The hero mechanic. ═══ -->
+<!-- ═══ 1A, the drape lifts. The hero mechanic. ═══ -->
 <section class="scene" id="scene-drape" data-clip="assets/hotel/1a-drape.mp4" data-scrub="1">
   <div class="scene-track">
     <div class="stage">
@@ -292,7 +292,7 @@
   </div>
 </section>
 
-<!-- ═══ 1B — inside ═══ -->
+<!-- ═══ 1B, inside ═══ -->
 <section class="scene" id="scene-lobby" data-clip="assets/hotel/1b-lobby.mp4">
   <div class="scene-track short">
     <div class="stage">
@@ -310,7 +310,7 @@
   </div>
 </section>
 
-<!-- ═══ 2 — the bar ═══ -->
+<!-- ═══ 2, the bar ═══ -->
 <section class="scene" id="scene-bar" data-clip="assets/hotel/2-bar.mp4">
   <div class="scene-track short">
     <div class="stage">
@@ -328,7 +328,7 @@
   </div>
 </section>
 
-<!-- ═══ 3 — the gym ═══ -->
+<!-- ═══ 3, the gym ═══ -->
 <section class="scene" id="scene-gym" data-clip="assets/hotel/3-gym.mp4">
   <div class="scene-track short">
     <div class="stage">
@@ -346,7 +346,7 @@
   </div>
 </section>
 
-<!-- ═══ 4 — dining ═══ -->
+<!-- ═══ 4, dining ═══ -->
 <section class="scene" id="scene-dining" data-clip="assets/hotel/4-dining.mp4">
   <div class="scene-track short">
     <div class="stage">
@@ -358,13 +358,13 @@
       <div class="caption">
         <p class="eyebrow">Dining</p>
         <h2>One table, then all of them.</h2>
-        <p>Gold rim, ivory linen, marigold — and the room arriving around it as the camera lifts.</p>
+        <p>Gold rim, ivory linen, marigold, and the room arriving around it as the camera lifts.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══ 5 — the pool, scrubbed down and back up ═══ -->
+<!-- ═══ 5, the pool, scrubbed down and back up ═══ -->
 <section class="scene" id="scene-pool" data-clip="assets/hotel/5-pool.mp4" data-scrub="1">
   <div class="scene-track">
     <div class="stage">
@@ -427,11 +427,11 @@
   // no clips at all.
   // The clips are not published yet (assets/hotel/ does not exist), so every
   // visitor fired six 404s before falling back. The fallback is correct and the
-  // page is designed to work without them — but there is no reason to ask six
+  // page is designed to work without them, but there is no reason to ask six
   // times. Probe the first clip; if it is not there, none of them are, so skip
   // the rest and stay on the CSS fallback silently.
   // Setting every src in one synchronous pass meant all six requests were in
-  // flight before the first error could fire — the flag never had a chance.
+  // flight before the first error could fire, the flag never had a chance.
   // So load the FIRST clip alone; the rest are wired only once it succeeds.
   function wire(s, i) {
     if (!s.src || reduced) return;
@@ -477,7 +477,7 @@
     scenes.forEach(function (s) { s.visible = true; });
   }
 
-  if (reduced) return;   // stills only — nothing below this line should run
+  if (reduced) return;   // stills only, nothing below this line should run
 
   // ── The scrub ───────────────────────────────────────────────────────────
   // Scroll events fire far more often than frames render, and seeking a video
@@ -500,7 +500,7 @@
       if (!s.visible) return;
       var p = progressOf(s.track);
 
-      // Drive the CSS fallback whether or not the video exists — it is the
+      // Drive the CSS fallback whether or not the video exists, it is the
       // same 0→1 signal, so both perform the identical move.
       s.vars.forEach(function (n) { n.style.setProperty('--p', p.toFixed(4)); });
 

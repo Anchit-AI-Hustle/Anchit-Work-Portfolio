@@ -23,7 +23,7 @@
 //   reported in `sources`, never fatal.
 //
 // It submits nothing. Applying is done by her, from the page, on the employer's
-// own form — see the note at the top of ayushi-rawat/auto-job-applier.html.
+// own form, see the note at the top of ayushi-rawat/auto-job-applier.html.
 const { guard } = require('./_guard.js');
 // Required lazily: jobhunt.js requires this file, so a top-level require here
 // would be circular. By the time a request arrives both are fully loaded.

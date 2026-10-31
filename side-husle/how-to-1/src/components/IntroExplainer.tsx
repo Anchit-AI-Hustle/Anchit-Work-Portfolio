@@ -29,16 +29,16 @@ export default function IntroExplainer({ onEnter }: { onEnter: () => void }) {
         initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
       >
         <span className="eyebrow">The How-To Engine</span>
-        <h1>Learn to do <em>anything</em> — one tiny, can’t-fail step at a time.</h1>
+        <h1>Learn to do <em>anything</em>, one tiny, can’t-fail step at a time.</h1>
         <p className="lede">
-          Ask how to do <strong>anything a human can do</strong> — from switching on a phone to swimming breaststroke to
+          Ask how to do <strong>anything a human can do</strong>, from switching on a phone to swimming breaststroke to
           solving a quadratic. Several frontier models answer <strong>in parallel</strong>; the strongest three are fused
-          into one calm, visual, step-by-step guide you can actually follow — colour-coded, branchable, with a short
+          into one calm, visual, step-by-step guide you can actually follow, colour-coded, branchable, with a short
           animated scene for every step.
         </p>
         <ul className="intro-points">
           <li>🧠 Multi-model consensus, not one opinion</li>
-          <li>🎯 Built for overwhelmed brains — zero walls of text</li>
+          <li>🎯 Built for overwhelmed brains, zero walls of text</li>
           <li>🗺️ A live flow map you can click through</li>
           <li>🎬 An animated scene per step</li>
         </ul>

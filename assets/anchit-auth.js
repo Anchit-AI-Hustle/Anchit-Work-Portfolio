@@ -1,4 +1,4 @@
-/* anchit-auth.js — Google sign-in for every project, in one script tag.
+/* anchit-auth.js, Google sign-in for every project, in one script tag.
  *
  * WHY
  *   Sign-in broke in all eight apps on the same day, because all eight leaned

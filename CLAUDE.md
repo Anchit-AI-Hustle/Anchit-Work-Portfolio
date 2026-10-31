@@ -16,7 +16,7 @@ revisions of this file said otherwise and it was wrong.
 
 ## Commands
 
-- **Build**: `npm run build` → `scripts/build-www.mjs` + `scripts/copy-ayushi.mjs`, emitting `www/`. **Always rebuild before testing** — the suites drive `www/`, not the source, and a stale `www/` has more than once made a fix look like it did nothing.
+- **Build**: `npm run build` → `scripts/build-www.mjs` + `scripts/copy-ayushi.mjs`, emitting `www/`. **Always rebuild before testing**, the suites drive `www/`, not the source, and a stale `www/` has more than once made a fix look like it did nothing.
 - **Run locally**: `npm run dev` for a fast source preview, `npm run dev:built` to build and serve the real `www/` tree. Anything touching routing, the How-To Engine or the shared injected systems must be checked against the built tree.
 - **Test**: serve `www/` on port 8099, then `node scripts/motionfix.js` and `node scripts/turn-by-turn.js`. See the Testing section of `README.md`, including which check is a guard rather than a proof.
 - **Deploy**: pushes to `main` deploy automatically. `vercel --prod` from the repo root also works.
@@ -27,23 +27,23 @@ The chatbot is wired to a real Claude-backed `/api/chat.js` serverless function 
 
 Everything is in `index.html`, organized in three contiguous sections:
 
-1. **`<style>`** (line numbers in this file go stale fast — grep instead) — Design tokens live in `:root[data-theme="dark"]` and `:root[data-theme="light"]`. The whole palette (champagne accent `#c9a96e`, ink/bg/rule scales) and typography (Fraunces serif / JetBrains Mono / Inter) is driven by CSS variables on `:root`; the theme toggle just flips `data-theme`. Layout is a two-column CSS grid (`.app`) with a collapsible sidebar (`--sidebar-w` ↔ `--sidebar-w-collapsed`).
+1. **`<style>`** (line numbers in this file go stale fast, grep instead), Design tokens live in `:root[data-theme="dark"]` and `:root[data-theme="light"]`. The whole palette (champagne accent `#c9a96e`, ink/bg/rule scales) and typography (Fraunces serif / JetBrains Mono / Inter) is driven by CSS variables on `:root`; the theme toggle just flips `data-theme`. Layout is a two-column CSS grid (`.app`) with a collapsible sidebar (`--sidebar-w` ↔ `--sidebar-w-collapsed`).
 
-2. **`<body>` markup** — A left sidebar (`<aside class="sidebar">`, items carrying `data-view`) plus one `<section class="view" id="view-{name}">` per view. Only the view with `.active` is visible. The live list is `ALL_VIEWS` in the script — currently `home`, `about`, `now`, `chat`, `experience`, `projects`, `resume`, `contact` and ten `project-*` detail views (the Lifecycle OS one moved to its canonical page, `/lifecycle-os`; `#project-lifecycle` redirects there). **Read `ALL_VIEWS` rather than trusting this sentence**; anything not in that array is rejected by `switchView`.
+2. **`<body>` markup**, A left sidebar (`<aside class="sidebar">`, items carrying `data-view`) plus one `<section class="view" id="view-{name}">` per view. Only the view with `.active` is visible. The live list is `ALL_VIEWS` in the script, currently `home`, `about`, `now`, `chat`, `experience`, `projects`, `resume`, `contact` and ten `project-*` detail views (the Lifecycle OS one moved to its canonical page, `/lifecycle-os`; `#project-lifecycle` redirects there). **Read `ALL_VIEWS` rather than trusting this sentence**; anything not in that array is rejected by `switchView`.
 
    Navigation is wired by attribute, not by class: `navLinks` is
    `querySelectorAll('[data-view]')`, so any element anywhere that carries a
    `data-view` gets click routing and active-state sync for free.
 
-3. **`<script>`** — Three concerns:
+3. **`<script>`**, Three concerns:
    - **View router** (`switchView`): toggles `.active` on nav items + panels, syncs `location.hash`, handles the nested "Side projects" parent-child highlighting, and is also reachable via `[data-go]` buttons inside panels and via inline `<a data-nav="...">` links rendered by the chatbot.
    - **Theme + sidebar persistence**: `localStorage` keys `anchit-theme` and `anchit-sidebar`.
-   - **Chatbot**: The `KB` array is the entire knowledge base — each entry has `keywords[]`, an HTML `response` (often containing `data-nav` links into other views), and a `nextChips[]` array of context-aware follow-up suggestions. `findMatch(text)` does case-insensitive keyword overlap scoring against `KB`. `handleMessage` first calls `llmReply()` (POST `/api/chat`, with short `chatHistory` for context); if Claude returns a reply it renders that, otherwise it falls back to `findMatch`/`KB` and renders the matched response with that entry's `nextChips`. So the `KB` array is now the **offline fallback** layer, not the only brain — it still ships in the single HTML file and works with no network.
+   - **Chatbot**: The `KB` array is the entire knowledge base, each entry has `keywords[]`, an HTML `response` (often containing `data-nav` links into other views), and a `nextChips[]` array of context-aware follow-up suggestions. `findMatch(text)` does case-insensitive keyword overlap scoring against `KB`. `handleMessage` first calls `llmReply()` (POST `/api/chat`, with short `chatHistory` for context); if Claude returns a reply it renders that, otherwise it falls back to `findMatch`/`KB` and renders the matched response with that entry's `nextChips`. So the `KB` array is now the **offline fallback** layer, not the only brain, it still ships in the single HTML file and works with no network.
 
 ### Adding content
 
 - **New view/panel**: add a `.nav-item` with a unique `data-view`, add the matching `<section class="panel" id="panel-{view}">`, and append the view name to the `ALL_VIEWS` array in the script (line ~828). Anything not in `ALL_VIEWS` is rejected by `switchView`.
-- **New chatbot answer**: append to the `KB` array. Order matters when keywords overlap — earlier entries win on ties. Use `<a data-nav="viewName">` inside `response` to deep-link into a panel; the click handler on `[data-go]` / `data-nav` calls `switchView`.
+- **New chatbot answer**: append to the `KB` array. Order matters when keywords overlap, earlier entries win on ties. Use `<a data-nav="viewName">` inside `response` to deep-link into a panel; the click handler on `[data-go]` / `data-nav` calls `switchView`.
 - **New project detail page**: follow the `project-*` panel pattern and add a `.nav-sub-item` under the "Side projects" nav block. The router already knows to keep the parent "Side projects" nav highlighted while a `project-*` view is active.
 
 ### Upgrading the chatbot to Claude
@@ -52,17 +52,17 @@ The serverless function pattern is documented in `DEPLOY.md` (`api/chat.js` + sw
 
 ## Conventions
 
-- Single-file constraint is intentional — keep it that way unless explicitly asked. New CSS goes in the existing `<style>` block, new JS in the existing `<script>` block.
+- Single-file constraint is intentional, keep it that way unless explicitly asked. New CSS goes in the existing `<style>` block, new JS in the existing `<script>` block.
 - Editorial tone: copy is first-person ("I'm building…"), warm, specific with numbers. Match that voice when editing copy or chatbot responses.
-- All theming flows through CSS variables — never hardcode colors in component styles.
-- **Never link a viewer to GitHub, and never name a repository in viewer-facing copy.** No `github.com` href on any page — ours or third-party — and no repo name, owner/repo string, or the words "GitHub", "repository" or "repos" in rendered text (copy saying "in the lifecycle-os repository" names one without ever saying GitHub). That holds in **comments too** — a header comment in a served `.js`/`.css` ships to the browser. Link the project's own live app instead; `OWN_APPS` in `scripts/redirects-resolve.js` maps the three that have one. `npm run test:redirects` enforces both halves (`MUT=github_link`, `MUT=github_text`). Note that `assets/growth-school-content.js` renders on **two** pages, `/growth-school` and `/ayushi-rawat/course`.
+- All theming flows through CSS variables, never hardcode colors in component styles.
+- **Never link a viewer to GitHub, and never name a repository in viewer-facing copy.** No `github.com` href on any page, ours or third-party, and no repo name, owner/repo string, or the words "GitHub", "repository" or "repos" in rendered text (copy saying "in the lifecycle-os repository" names one without ever saying GitHub). That holds in **comments too**, a header comment in a served `.js`/`.css` ships to the browser. Link the project's own live app instead; `OWN_APPS` in `scripts/redirects-resolve.js` maps the three that have one. `npm run test:redirects` enforces both halves (`MUT=github_link`, `MUT=github_text`). Note that `assets/growth-school-content.js` renders on **two** pages, `/growth-school` and `/ayushi-rawat/course`.
 - **Follow the design system in `DESIGN.md` for all styling.** It is the machine-readable source of truth for the palette (black / orange / gold), typography, spacing, radius, components, motion and focus states. Read it before writing styles; add a token there before inventing a value. Never use framework palette utilities (`gray-500`, `blue-600`, …) for brand surfaces.
 
 ## Motion
 
 `assets/cinematic.js` is one runtime loaded by every page; `index.html` also has
 its own older inline reveal system. **Both exist, and a change to arrival
-behaviour usually has to be made twice** — they have had the same bug
+behaviour usually has to be made twice**, they have had the same bug
 independently more than once.
 
 The rules are in `DESIGN.md`. The short version: animate `transform` and
@@ -100,7 +100,7 @@ recognises the shape rather than rediscovering it.
 ### Verify against the built tree
 
 The suites drive `www/`. Run `npm run build` before testing, and prefer
-measuring the rendered page over reading the diff — several bugs here looked
+measuring the rendered page over reading the diff, several bugs here looked
 correct in source and wrong on screen.
 
 ## Borrowing from reference sites
@@ -112,7 +112,7 @@ the structure of a card; never the words inside it.
 This is not a style preference. It shipped a fabricated credential: AIESEC
 appeared in the "Work done at" row on the live site because it was lifted from
 chandan.dev's own project list while porting his layout. It is one of HIS
-projects. Three more of his strings came across the same way — his badge copy
+projects. Three more of his strings came across the same way, his badge copy
 ("At the moment // Y2026"), two of his four skill bullets ("0→1 products",
 "Go to market") and his nav label ("Say hi").
 
@@ -127,5 +127,5 @@ The rule, concretely:
   work cards, the experience timeline), grep for it in `index.html` first. Zero
   prior mentions means it is not Anchit's.
 - When porting a component, replace its copy with wording drawn from Anchit's
-  own vocabulary — the file already contains it. "Product Management" appears
+  own vocabulary, the file already contains it. "Product Management" appears
   28 times, "D2C Growth" 21, "US, UK & global markets" 16.

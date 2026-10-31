@@ -2,7 +2,7 @@
 // Runs the Agentic Cascade server-side so provider API keys never reach the
 // browser. Uses the Web Request/Response handler shape via a NAMED method
 // export (`POST`), which Vercel serves as a fetch-style function on the Node
-// runtime — a `export default (req,res)` would be treated as legacy Node.
+// runtime, a `export default (req,res)` would be treated as legacy Node.
 
 import { AgentCascadeService } from '../src/services/AgentCascadeService';
 

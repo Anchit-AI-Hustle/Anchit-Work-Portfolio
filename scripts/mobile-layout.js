@@ -5,8 +5,8 @@
 //
 // The cause is worth remembering, because the fix for it was already written.
 // `.hero-id` is a flex row holding the portrait, the eyebrow and the <h1>. A
-// comment beside it describes this exact defect — "the portrait took 202px …
-// leaving 61px display type to set in a 227px column" — and the grid that fixes
+// comment beside it describes this exact defect, "the portrait took 202px …
+// leaving 61px display type to set in a 227px column", and the grid that fixes
 // it, giving the name a full-width row of its own. That grid lived inside
 // `@media (min-width: 768px)`, which is the one place the defect barely showed.
 // Below 768px the flex row survived, and the NARROWER the screen the worse it
@@ -17,8 +17,8 @@
 // rule that was verified at the width where it was least needed.
 //
 // Run against a served build:  node scripts/mobile-layout.js
-// MUT=hero  restores the flex row      — the headline checks must fail.
-// MUT=label restores the squeezed pills — the clipping check must fail.
+// MUT=hero  restores the flex row     , the headline checks must fail.
+// MUT=label restores the squeezed pills, the clipping check must fail.
 // A single mutant would leave the other checks unverified, and a check nothing
 // can break is a check that passes everything.
 const { chromium } = require('./_playwright.js');
@@ -56,7 +56,7 @@ const MEASURE = (vw) => {
   const out = { overflow: [], clipped: [], hero: null };
   // Stops BELOW body on purpose. `html, body { overflow-x: clip }` is the
   // page's last-resort guard against a sideways shift, not a decision that a
-  // particular row scrolls — counting it excluded every element on the page and
+  // particular row scrolls, counting it excluded every element on the page and
   // left this check unable to fail at all.
   const clipsOrScrolls = (el) => {
     for (let n = el; n && n !== document.body; n = n.parentElement) {
@@ -81,7 +81,7 @@ const MEASURE = (vw) => {
     // Text laid out wider than the box drawing it, with no way to reach it and
     // no sign that anything is missing. `text-overflow: ellipsis` is excluded:
     // that is truncation the reader can SEE, which is a choice. A hard clip is
-    // not — it is how "WhatsApp" became "W".
+    // not, it is how "WhatsApp" became "W".
     const truncatesVisibly = cs.textOverflow === 'ellipsis' && cs.whiteSpace === 'nowrap';
     if (hasOwnText && el.scrollWidth - el.clientWidth > 2
         && /hidden|clip/.test(cs.overflowX) && !truncatesVisibly) {
@@ -156,14 +156,14 @@ const MEASURE = (vw) => {
 
   if (MUT) {
     // Each mutant names the checks it is supposed to break. Demanding that ALL
-    // of them fail would be dishonest — a hero-layout mutation cannot break a
+    // of them fail would be dishonest, a hero-layout mutation cannot break a
     // top-bar label, and pretending otherwise hides which check is really
     // covered.
     const target = results.filter((r) => MUTANTS[MUT].breaks.test(r[1]));
     const wrong = target.filter((r) => r[0] === 'PASS').map((r) => r[1]);
-    if (!target.length) { console.log(`MUT=${MUT}: matched no checks — the mutant and the checks have drifted apart`); process.exit(1); }
+    if (!target.length) { console.log(`MUT=${MUT}: matched no checks, the mutant and the checks have drifted apart`); process.exit(1); }
     if (!wrong.length) { console.log(`MUT=${MUT}: all ${target.length} check(s) it targets failed, as they must`); process.exit(0); }
-    console.log(`MUT=${MUT}: still passing — ` + wrong.join('; '));
+    console.log(`MUT=${MUT}: still passing, ` + wrong.join('; '));
     process.exit(1);
   }
   process.exit(failed ? 1 : 0);

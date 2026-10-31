@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#fffcf8">
-<title>Ayushi — Job Agent</title>
+<title>Ayushi | Job Agent</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@400..800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/ayushi-rawat/ayushi.css"><link rel="stylesheet" href="/ayushi-rawat/runway.css"><link rel="stylesheet" href="/ayushi-rawat/tabs.css">
@@ -76,13 +76,13 @@ dialog::backdrop{background:rgba(26,23,32,.45);backdrop-filter:blur(3px)}
 @media(max-width:700px){.job{grid-template-columns:52px minmax(0,1fr)}.job .acts{grid-column:1/-1;flex-direction:row;flex-wrap:wrap;min-width:0}.job .acts .a-btn{flex:1 1 auto}.ring{width:52px;height:52px;font-size:17px}.ring span{width:42px;height:42px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.tabs{top:64px}}
 </style>
 <!-- seo:auto:start -->
-<!-- Managed by scripts/seo-inject.mjs — edit seo.config.json, not here. -->
+<!-- Managed by scripts/seo-inject.mjs, edit seo.config.json, not here. -->
 <meta name="description" content="The private job search agent for Ayushi Rawat: ranked CRM and growth marketing openings in India, tailored application kits and an application tracker." />
 <link rel="canonical" href="https://anchit-tandon.com/ayushi-rawat-auto-job-applier" />
 <meta name="robots" content="noindex,nofollow" />
 <meta name="author" content="Anchit Tandon" />
 <link rel="icon" href="/icons/favicon.svg" type="image/svg+xml" />
-<meta property="og:title" content="Ayushi — Job Agent" />
+<meta property="og:title" content="Ayushi | Job Agent" />
 <meta property="og:description" content="The private job search agent for Ayushi Rawat: ranked CRM and growth marketing openings in India, tailored application kits and an application tracker." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://anchit-tandon.com/ayushi-rawat-auto-job-applier" />
@@ -91,9 +91,9 @@ dialog::backdrop{background:rgba(26,23,32,.45);backdrop-filter:blur(3px)}
 <meta property="og:locale" content="en_US" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Anchit Tandon — Product &amp; D2C Growth" />
+<meta property="og:image:alt" content="Anchit Tandon, Product &amp; D2C Growth" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Ayushi — Job Agent" />
+<meta name="twitter:title" content="Ayushi | Job Agent" />
 <meta name="twitter:description" content="The private job search agent for Ayushi Rawat: ranked CRM and growth marketing openings in India, tailored application kits and an application tracker." />
 <meta name="twitter:image" content="https://anchit-tandon.com/assets/og/og-default.png" />
 <!-- seo:auto:end -->
@@ -163,23 +163,23 @@ dialog::backdrop{background:rgba(26,23,32,.45);backdrop-filter:blur(3px)}
 <script>
 (() => {
   const KEY = 'ayushi-agent-v1';
-  const PROFILE = `Ayushi Rawat — Digital Marketing | Growth | CRM & Brand Strategy
+  const PROFILE = `Ayushi Rawat, Digital Marketing | Growth | CRM & Brand Strategy
 New Delhi, India · +91 96009 98830 · ayushirawat960@gmail.com · anchit-tandon.com/ayushi-rawat
 
 Summary: Digital marketing and CRM professional with 4+ years of experience across campaign execution, social media growth, Salesforce operations, analytics and stakeholder enablement.
 
-Marketing Executive, SPN Propservices LLP — Jan 2025 to Present, Agra, India
+Marketing Executive, SPN Propservices LLP, Jan 2025 to Present, Agra, India
 - Supported 10+ digital and offline marketing campaigns, contributing to a 20% increase in qualified property leads.
 - Managed social media calendars and improved engagement and reach by 30% within six months.
 - Conducted market and competitor analysis that supported a 15% improvement in conversions.
 - Created conversion-focused marketing collateral for sales teams.
 
-Education Outreach Intern, Muskurahat Foundation — Apr 2025 to Jun 2025
+Education Outreach Intern, Muskurahat Foundation, Apr 2025 to Jun 2025
 - Executed outreach campaigns supporting education for underprivileged children.
 - Created social media content and visuals highlighting impact initiatives.
 - Supported volunteer events, donor drives and awareness campaigns.
 
-Senior Executive, VOIS - Vodafone Intelligent Solutions — Aug 2021 to Dec 2024, Pune, India
+Senior Executive, VOIS - Vodafone Intelligent Solutions, Aug 2021 to Dec 2024, Pune, India
 - Configured Salesforce Sales and Service Cloud workflows and automation.
 - Built and maintained 50+ reports and dashboards for business decision-making.
 - Resolved 2,000+ user tickets and supported UAT for 100+ user stories.
@@ -363,7 +363,7 @@ Target roles: CRM & Lifecycle Marketing Manager, Marketing Operations Manager, G
     const applied = all.filter((j) => j.appliedAt);
     const week = applied.filter((j) => Date.now() - j.appliedAt < 7 * DAY).length;
     const replies = all.filter((j) => ['interview', 'offer'].includes(j.status)).length;
-    const rate = applied.length ? Math.round((replies / applied.length) * 100) + '%' : '—';
+    const rate = applied.length ? Math.round((replies / applied.length) * 100) + '%' : '-';
     $('#stats').innerHTML = [
       [all.filter((j) => j.status === 'new' && !j.gone).length, 'New matches'], [all.filter((j) => ['shortlist', 'kit'].includes(j.status) && !j.gone).length, 'Queued to apply'],
       [week, 'Applied this week'], [by('interview'), 'Interviewing'], [rate, 'Response rate'],

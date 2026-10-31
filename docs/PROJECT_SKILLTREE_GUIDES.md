@@ -4,8 +4,8 @@ The portfolio now applies a second shared layer beneath the App Skill Map: every
 
 The design combines two useful product patterns without cloning either source:
 
-1. **Visual skill-tree navigation** — ordered project nodes, prerequisites, progress states, current-app context and direct navigation.
-2. **Curated guide and prompt discovery** — searchable categories, model and type filters, copy-ready templates, customization fields, saved guides and a prompt generator.
+1. **Visual skill-tree navigation**, ordered project nodes, prerequisites, progress states, current-app context and direct navigation.
+2. **Curated guide and prompt discovery**, searchable categories, model and type filters, copy-ready templates, customization fields, saved guides and a prompt generator.
 
 No third-party prompts, gated content, tracking code, reference-page tokens or access credentials are stored in the repository or build output.
 
@@ -28,10 +28,10 @@ Every generated HTML application receives:
 
 The four automatically generated playbooks are:
 
-1. **Quickstart Guide** — outcome, prerequisites, execution path, failure modes and completion checklist.
-2. **Operator Mega-Prompt** — role, context, task, constraints and output format.
-3. **Evidence Audit Prompt** — independent recomputation, PASS/FAIL checks, anomalies and remediation.
-4. **9.5/10 Improvement Loop** — transparent scoring, revision, re-scoring and change log without score inflation.
+1. **Quickstart Guide**, outcome, prerequisites, execution path, failure modes and completion checklist.
+2. **Operator Mega-Prompt**, role, context, task, constraints and output format.
+3. **Evidence Audit Prompt**, independent recomputation, PASS/FAIL checks, anomalies and remediation.
+4. **9.5/10 Improvement Loop**, transparent scoring, revision, re-scoring and change log without score inflation.
 
 Because the catalog is generated from the App Skill Map, every current capability becomes a project automatically. A future app receives project nodes and guide packs as soon as it is registered in `assets/app-skill-map.js`.
 

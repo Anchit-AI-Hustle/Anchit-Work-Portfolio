@@ -28,7 +28,7 @@ const SUBJECTS = [
 const FRAMINGS = [
   'Explain how to {s} like I have never done it before.',
   'Teach me to {s} in tiny, can\'t-fail steps.',
-  'I get overwhelmed easily — walk me through how to {s}.',
+  'I get overwhelmed easily, walk me through how to {s}.',
   'Break down how to {s} with a visual, step-by-step guide.',
   'Show me the foolproof way to {s}.',
 ];

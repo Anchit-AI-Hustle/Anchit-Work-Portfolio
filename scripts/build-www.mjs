@@ -38,11 +38,11 @@ const assets = [
   // (two production deploys carry gitDirty:1 and a claude@local author, on
   // commits fef8c6c and 0aae37d that exist nowhere in this repository). Every
   // git-based deploy rebuilds www/ from the repo alone, so each one silently
-  // deleted it — once before, hence a commit literally titled "restore
+  // deleted it, once before, hence a commit literally titled "restore
   // /marketing-101-for-ayushi", and again when #147 merged. Committing it is
   // what actually ends that cycle.
   'marketing-101-for-ayushi.html',
-  // Growth School — the public course and Ayushi❤️'s version. Both are thin
+  // Growth School, the public course and Ayushi❤️'s version. Both are thin
   // shells over assets/growth-school.{css,js} and the shared content file, so
   // the pair cannot drift; see the note at the top of growth-school-content.js.
   'growth-school.html',
@@ -95,7 +95,7 @@ const assets = [
 // sw.js is cache-first for same-origin assets, so a stale cache name freezes
 // every script and stylesheet on the site for anyone who has visited before.
 // The constant carried a hand-written date and the instruction "bump this
-// string on every deploy" — it was last bumped on 2026-08-17 and drifted a
+// string on every deploy", it was last bumped on 2026-08-17 and drifted a
 // month behind, which shipped new HTML against August's JavaScript to every
 // returning visitor.
 //
@@ -125,7 +125,7 @@ async function stampServiceWorker() {
   const src = await readFile(swPath, 'utf8');
   const next = src.replace(/^const CACHE = '[^']*';$/m, `const CACHE = 'anchit-portfolio-${stamp}';`);
   if (next === src) {
-    console.warn('[build-www] sw.js: CACHE constant not found — cache version NOT stamped');
+    console.warn('[build-www] sw.js: CACHE constant not found, cache version NOT stamped');
     return;
   }
   await writeFile(swPath, next);
@@ -162,7 +162,7 @@ async function patchHowToCardRoute() {
 // Build the How-To Engine (standalone Vite + React app under
 // side-husle/how-to-1) and mirror its dist into www/how-to so it ships at
 // /how-to on the main static deployment. The route is driven by HOW_TO_ROUTE
-// above — /how-to-1 and /how-to-2 survive only as redirects in vercel.json for
+// above, /how-to-1 and /how-to-2 survive only as redirects in vercel.json for
 // links that were shared before the route settled.
 // Wrapped so a failure here never takes down the rest of the portfolio.
 async function buildHowTo() {
@@ -290,7 +290,7 @@ async function main() {
   await buildHowTo();
   await stampServiceWorker();
   await injectConsent();
-  // Gamified App Skill Map / Project Playbooks widgets removed from the site —
+  // Gamified App Skill Map / Project Playbooks widgets removed from the site,
   // they read as unfinished progress shells on a portfolio. The runtimes still
   // exist under assets/ but are no longer injected into any page.
   //

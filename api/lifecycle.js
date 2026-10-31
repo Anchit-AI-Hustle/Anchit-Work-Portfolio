@@ -1,4 +1,4 @@
-// /api/lifecycle — Lifecycle OS demo engine.
+// /api/lifecycle, Lifecycle OS demo engine.
 //
 //   POST /api/lifecycle  → { plan, source }
 //
@@ -6,7 +6,7 @@
 // plug-and-play, brand-agnostic AI-led D2C marketing-automation plan: an
 // industry read (category, peer/competitor set and industry-standard
 // benchmarks), positioning, segments, lifecycle stages, a campaign calendar, a
-// sample mailer, retention flows and KPIs — grounded in industry baselines for
+// sample mailer, retention flows and KPIs, grounded in industry baselines for
 // the entered brand's category rather than any single brand's proprietary data.
 //
 // The industry read is sourced from a competitive-intelligence layer the way
@@ -17,14 +17,15 @@
 // returns a usable plan.
 //
 // Env (all optional):
-//   LLM cascade — GROQ_API_KEY, CEREBRAS_API_KEY, GEMINI_API_KEY (+casings),
+//   LLM cascade, GROQ_API_KEY, CEREBRAS_API_KEY, GEMINI_API_KEY (+casings),
 //     OPENROUTER_API_KEY, and *_MODEL overrides.
-//   Competitive intelligence — SIMILARWEB_API_KEY, SEMRUSH_API_KEY (both
+//   Competitive intelligence, SIMILARWEB_API_KEY, SEMRUSH_API_KEY (both
 //     optional; used only to enrich the industry read when present).
 
 // Model ids live in _models.js as a chain per provider, not one pinned id here.
 // Every id this file used to hardcode has since been retired by its provider.
 const { tryModels, httpError, KEYS } = require('./_models.js');
+const { dedashResponse } = require('./_nodash.js');
 const { guard } = require('./_guard.js');
 
 function haveAnyProvider() {
@@ -130,7 +131,7 @@ async function generate(prompt) {
   if (gk) providers.push(() => tryModels('gemini', (m) => geminiGen(gk, m, prompt)));
   if (KEYS.openrouter()) providers.push(() => tryModels('openrouter', (m) => oaiChat('https://openrouter.ai/api/v1/chat/completions', KEYS.openrouter(), m, prompt, false, { 'HTTP-Referer': 'https://anchit-tandon.com/lifecycle-os-plan', 'X-Title': 'Lifecycle OS' })));
   // Why the failures are collected rather than swallowed: a silent `catch`
-  // here is what made a fully dead cascade look identical to "no key set" —
+  // here is what made a fully dead cascade look identical to "no key set",
   // both produced the deterministic template with nothing to explain it.
   const errs = [];
   for (const run of providers) {
@@ -162,7 +163,7 @@ function str(x, n) { return String(x == null ? '' : x).slice(0, n || 400); }
 
 // Mailer shape follows the Smart-Brain "think → lock → execute" model: a single
 // locked theme, a strategy-driven hero + structured sections, and one primary
-// CTA — so the content is coherent, not a random blob. The UI renders it as a
+// CTA, so the content is coherent, not a random blob. The UI renders it as a
 // designed HTML email (Mailer-Architect visual quality), falling back to `body`.
 function normalizeMailer(m) {
   if (!m || typeof m !== 'object') return null;
@@ -214,7 +215,7 @@ function normalize(o) {
 }
 
 // Data-Analysis stage (RFM segmentation model, cohort retention, best send-time
-// heatmap, cross-sell affinity) — the analytical layer of the original OS.
+// heatmap, cross-sell affinity), the analytical layer of the original OS.
 function normalizeAnalysis(a) {
   if (!a || typeof a !== 'object') return null;
   const st = a.sendTime && typeof a.sendTime === 'object' ? a.sendTime : {};
@@ -237,9 +238,9 @@ function normalizeSmartBrain(b) {
 }
 
 function buildPrompt(brand, url, category, profileText, benchmarkContext) {
-  return `You are Lifecycle OS, an AI that designs plug-and-play lifecycle marketing automation for any direct-to-consumer brand — grounded in INDUSTRY-STANDARD benchmarks for the brand's category, the way competitor-discovery platforms like SimilarWeb and SEMrush profile a market.
+  return `You are Lifecycle OS, an AI that designs plug-and-play lifecycle marketing automation for any direct-to-consumer brand, grounded in INDUSTRY-STANDARD benchmarks for the brand's category, the way competitor-discovery platforms like SimilarWeb and SEMrush profile a market.
 
-First infer the brand's category and its peer/competitor set (3-6 comparable D2C brands in the same industry and price tier). Then establish industry-standard benchmarks for that peer set — traffic mix / channel split, typical AOV band, repeat-purchase / retention rate band, email revenue share, and seasonality. Use these baselines to ground the entire lifecycle plan. Be specific to the brand and its category — no generic filler. Use realistic, quantified targets that reflect the industry standard.
+First infer the brand's category and its peer/competitor set (3-6 comparable D2C brands in the same industry and price tier). Then establish industry-standard benchmarks for that peer set, traffic mix / channel split, typical AOV band, repeat-purchase / retention rate band, email revenue share, and seasonality. Use these baselines to ground the entire lifecycle plan. Be specific to the brand and its category, no generic filler. Use realistic, quantified targets that reflect the industry standard.
 
 BRAND: ${brand}
 ${category ? 'CATEGORY: ' + category : ''}
@@ -260,7 +261,7 @@ Return ONLY a JSON object (no markdown fences, no commentary) with EXACTLY this 
   "stages": [{"stage": string (e.g. Acquisition, Welcome, Activation, Nurture, Win-back, VIP), "goal": string, "channels": [string], "campaign": string (one concrete campaign idea)}]  (5-6 stages),
   "calendar": [{"week": string (e.g. "Week 1"), "theme": string, "cadence": string (per-segment send cadence guard, e.g. "≤3 sends/segment"), "sends": [string]}]  (4-6 weeks),
   "analysis": {  // Data-Analysis stage
-    "model": string (segmentation model, e.g. "RFM — 9 behavioural segments"),
+    "model": string (segmentation model, e.g. "RFM, 9 behavioural segments"),
     "cohortNote": string (one cohort-retention insight for this category),
     "sendTime": {"window": string (best send window, e.g. "Tue & Thu, 10am-12pm"), "note": string},
     "crossSell": [string]  (3-6 cross-sell / affinity ideas)
@@ -306,7 +307,7 @@ function templatePlan(brand, category) {
     positioning: `${b} wins on repeat purchase, not just the first sale. Benchmarked against its ${cat} peer set, lifecycle marketing turns one-time buyers into a predictable, high-LTV base through timely, segmented, on-brand touches.`,
     segments: [
       { name: 'First-time buyers', description: 'Placed exactly one order; highest churn risk in the first 30 days.', size: '~35% of list' },
-      { name: 'Repeat / loyal', description: '2+ orders, buys on cadence — protect and reward.', size: '~18% of list' },
+      { name: 'Repeat / loyal', description: '2+ orders, buys on cadence, protect and reward.', size: '~18% of list' },
       { name: 'VIP / high-LTV', description: 'Top 5% by spend; deserve early access and concierge touches.', size: '~5% of list' },
       { name: 'At-risk / lapsing', description: 'No purchase in 60–90 days; needs a win-back nudge.', size: '~22% of list' },
       { name: 'Browsers / no purchase', description: 'Engaged with email/site but never converted.', size: '~20% of list' },
@@ -326,7 +327,7 @@ function templatePlan(brand, category) {
       { week: 'Week 4', theme: 'Retention & replenishment', cadence: '≤2 sends/segment · VIP +1', sends: ['Replenishment reminder', 'VIP early access', 'Win-back for 60-day lapsers'] },
     ],
     analysis: {
-      model: 'RFM — 9 behavioural segments (recency × frequency × monetary)',
+      model: 'RFM, 9 behavioural segments (recency × frequency × monetary)',
       cohortNote: `New-buyer cohorts in ${cat} typically retain 20–30% into a second order; the 30–60 day replenishment window is the LTV inflection point to target.`,
       sendTime: { window: 'Tue & Thu, 10am–12pm local', note: 'Category-typical peak open/click window; SMS best late-afternoon.' },
       crossSell: ['Bestseller bundles', 'Replenishment kits', 'Complementary category', 'Gifting sets', 'Subscription upgrade'],
@@ -334,23 +335,23 @@ function templatePlan(brand, category) {
     mailer: {
       theme: 'Welcome & first order: story → hero products → first-order nudge',
       subject: `A little something to start your ${b} journey`,
-      preview: 'Your welcome gift is inside — plus where to begin.',
+      preview: 'Your welcome gift is inside, plus where to begin.',
       hero: {
         kicker: 'Welcome',
         headline: `Welcome to ${b}.`,
-        subhead: `We build for people who care about the details — and you'll feel it from the first order.`,
+        subhead: `We build for people who care about the details, and you'll feel it from the first order.`,
       },
       sections: [
-        { title: 'Here’s 10% to start', body: 'Use code WELCOME10 at checkout — consider it a thank-you for giving us a try.' },
-        { title: 'Not sure where to begin?', body: 'Our bestsellers are loved for a reason. Start there, and reply to this email anytime — a real human reads every one.' },
+        { title: 'Here’s 10% to start', body: 'Use code WELCOME10 at checkout, consider it a thank-you for giving us a try.' },
+        { title: 'Not sure where to begin?', body: 'Our bestsellers are loved for a reason. Start there, and reply to this email anytime, a real human reads every one.' },
       ],
       cta: { label: 'Shop bestsellers', note: 'Free returns, and we read every reply.' },
       signoff: `Team ${b}`,
-      body: `Hi there,\n\nWelcome to ${b}. Here's 10% to get started: WELCOME10. Not sure where to begin? Start with our bestsellers, and reply anytime.\n\n— Team ${b}`,
+      body: `Hi there,\n\nWelcome to ${b}. Here's 10% to get started: WELCOME10. Not sure where to begin? Start with our bestsellers, and reply anytime.\n\nTeam ${b}`,
       variants: [
-        { label: 'A · Story-led', type: 'text', angle: `Opens on the ${b} origin story, then the welcome offer — builds brand affinity first.`, score: { strategy: 90, copy: 88, density: 80, divergence: 72, overall: 88 } },
-        { label: 'B · Offer-led', type: 'text', angle: 'Leads with WELCOME10 and bestsellers — highest first-order conversion for deal-seekers.', score: { strategy: 86, copy: 82, density: 78, divergence: 80 } },
-        { label: 'C · Hero-image', type: 'image', angle: 'Full-bleed hero product image + one-line promise and CTA — for visual-first mobile readers.', score: { strategy: 84, copy: 80, density: 86, divergence: 85 } },
+        { label: 'A · Story-led', type: 'text', angle: `Opens on the ${b} origin story, then the welcome offer, builds brand affinity first.`, score: { strategy: 90, copy: 88, density: 80, divergence: 72, overall: 88 } },
+        { label: 'B · Offer-led', type: 'text', angle: 'Leads with WELCOME10 and bestsellers, highest first-order conversion for deal-seekers.', score: { strategy: 86, copy: 82, density: 78, divergence: 80 } },
+        { label: 'C · Hero-image', type: 'image', angle: 'Full-bleed hero product image + one-line promise and CTA, for visual-first mobile readers.', score: { strategy: 84, copy: 80, density: 86, divergence: 85 } },
       ],
     },
     retention: [
@@ -403,7 +404,7 @@ function anchitPlan() {
   return {
     brand: 'Anchit Tandon',
     industry: {
-      category: 'Product & Growth leadership — personal-brand / candidate marketing',
+      category: 'Product & Growth leadership, personal-brand / candidate marketing',
       competitors: [
         'Senior PMs in D2C growth',
         'Growth leads at consumer startups',
@@ -418,13 +419,13 @@ function anchitPlan() {
         { metric: 'Focused search cycle', value: '6–10 weeks', note: 'Funnel-driven search, not spray-and-pray.' },
       ],
     },
-    positioning: 'Market Anchit Tandon like a high-LTV product: an engineer who learned to love the funnel, now a Product & Growth leader with compounding, quantified wins — 5× MRR on Assisted Sales (₹15L → ₹80L), ₹3Cr+ incremental ARR from the ET Markets revamp, and D2C growth across US, UK and global markets. The "buy" is a senior Product/Growth role; anchit-tandon.com is the always-on landing page and the job search is the funnel.',
+    positioning: 'Market Anchit Tandon like a high-LTV product: an engineer who learned to love the funnel, now a Product & Growth leader with compounding, quantified wins, 5× MRR on Assisted Sales (₹15L → ₹80L), ₹3Cr+ incremental ARR from the ET Markets revamp, and D2C growth across US, UK and global markets. The "buy" is a senior Product/Growth role; anchit-tandon.com is the always-on landing page and the job search is the funnel.',
     segments: [
       { name: 'High-growth D2C brands', description: 'Scaling consumer brands that need retention, LTV and lifecycle leadership.', size: 'Primary target' },
       { name: 'Media & subscription businesses', description: 'Where the Times Internet subscription and growth wins map one-to-one.', size: 'Warm fit' },
       { name: 'Seed–Series B startups', description: 'Founders who need a builder-operator across product, growth and revenue.', size: 'High upside' },
       { name: 'Product & growth recruiters', description: 'Specialist recruiters placing senior product and growth talent.', size: 'Amplifiers' },
-      { name: 'Warm network / referrals', description: 'Ex-colleagues and peers — the highest-conversion channel.', size: 'Highest intent' },
+      { name: 'Warm network / referrals', description: 'Ex-colleagues and peers, the highest-conversion channel.', size: 'Highest intent' },
     ],
     stages: [
       { stage: 'Awareness', goal: 'Get on the radar of the right teams', channels: ['Portfolio', 'LinkedIn', 'Referrals'], campaign: 'Keep anchit-tandon.com as the always-on landing page; ship a weekly growth-teardown post to stay top-of-feed.' },
@@ -435,38 +436,38 @@ function anchitPlan() {
       { stage: 'Onboard', goal: 'Start compounding from week one', channels: ['30-60-90 plan'], campaign: 'Send a 30-60-90 growth plan before day one to anchor the mandate.' },
     ],
     calendar: [
-      { week: 'Week 1', theme: 'Set up the funnel', cadence: 'Foundation — no cold outreach yet', sends: ['Refresh anchit-tandon.com', 'Target-list of 25 companies', 'Growth-teardown post #1'] },
+      { week: 'Week 1', theme: 'Set up the funnel', cadence: 'Foundation, no cold outreach yet', sends: ['Refresh anchit-tandon.com', 'Target-list of 25 companies', 'Growth-teardown post #1'] },
       { week: 'Week 2', theme: 'Warm outreach', cadence: '≤5 personalised touches/day', sends: ['Referral asks (10)', 'Personalised recruiter DMs', 'Growth-teardown post #2'] },
       { week: 'Week 3', theme: 'Direct outreach', cadence: '≤8 touches/day · 1 follow-up max', sends: ['Role-tailored one-pagers', 'Hiring-manager cold emails', 'Follow-up on Week-1 opens'] },
-      { week: 'Week 4', theme: 'Interview & nurture', cadence: 'Reactive — reply within 24h', sends: ['Interview prep case studies', 'Same-day thank-you follow-ups', 'Win-back on no-replies'] },
+      { week: 'Week 4', theme: 'Interview & nurture', cadence: 'Reactive, reply within 24h', sends: ['Interview prep case studies', 'Same-day thank-you follow-ups', 'Win-back on no-replies'] },
     ],
     analysis: {
-      model: 'Candidate funnel model — 5 employer segments scored by fit × intent',
+      model: 'Candidate funnel model, 5 employer segments scored by fit × intent',
       cohortNote: 'Warm-referral cohort converts ~3× cold outreach to first interview; prioritise the network cohort first, then media/subscription (closest role fit).',
       sendTime: { window: 'Tue–Thu, 8–10am local', note: 'Highest open/reply window for senior recruiter and hiring-manager outreach.' },
       crossSell: ['Product leadership', 'Growth / lifecycle', 'Revenue & monetisation', 'AI-product / automation', '0→1 & 1→n scaling'],
     },
     mailer: {
       theme: 'Proof-led intro: compounding wins → clickable résumé → 20-minute conversation',
-      subject: 'Anchit Tandon — Product & Growth leader who ships compounding wins',
-      preview: '5× MRR, ₹3Cr+ ARR, D2C growth across US/UK/global — and a portfolio you can click.',
+      subject: 'Anchit Tandon, Product & Growth leader who ships compounding wins',
+      preview: '5× MRR, ₹3Cr+ ARR, D2C growth across US/UK/global, and a portfolio you can click.',
       hero: {
         kicker: 'Product & D2C Growth',
         headline: 'I market myself the way I’d grow a high-LTV brand.',
-        subhead: 'An engineer who learned to love the funnel — now leading product and growth with quantified, compounding wins.',
+        subhead: 'An engineer who learned to love the funnel, now leading product and growth with quantified, compounding wins.',
       },
       sections: [
         { title: 'Wins that compound', body: 'Scaled Assisted Sales 5× to ₹80L MRR. Added ₹3Cr+ incremental ARR from the ET Markets revamp. Now driving D2C growth across US, UK and global markets.' },
-        { title: 'A résumé you can click', body: 'anchit-tandon.com is an interactive portfolio — a chat clone that answers as me, a talking AI avatar, and live demos I built end-to-end (including this one).' },
+        { title: 'A résumé you can click', body: 'anchit-tandon.com is an interactive portfolio, a chat clone that answers as me, a talking AI avatar, and live demos I built end-to-end (including this one).' },
         { title: 'What I’m looking for', body: 'A senior Product or Growth role with a real mandate to build compounding systems. If that’s open on your team, let’s talk.' },
       ],
-      cta: { label: 'Open anchit-tandon.com', note: 'Or just reply — 20 minutes is all I’m asking.' },
+      cta: { label: 'Open anchit-tandon.com', note: 'Or just reply, 20 minutes is all I’m asking.' },
       signoff: 'Anchit Tandon · anchit-tandon.com',
-      body: 'Hi there,\n\nI\'m Anchit — an engineer who learned to love the funnel, now leading Product & D2C Growth. I scaled Assisted Sales 5× to ₹80L MRR, added ₹3Cr+ ARR from the ET Markets revamp, and now drive D2C growth across US, UK and global markets. My portfolio, anchit-tandon.com, is an interactive résumé. If you\'re hiring for a senior Product or Growth role, I\'d love 20 minutes.\n\n— Anchit Tandon\nanchit-tandon.com',
+      body: 'Hi there,\n\nI\'m Anchit, an engineer who learned to love the funnel, now leading Product & D2C Growth. I scaled Assisted Sales 5× to ₹80L MRR, added ₹3Cr+ ARR from the ET Markets revamp, and now drive D2C growth across US, UK and global markets. My portfolio, anchit-tandon.com, is an interactive résumé. If you\'re hiring for a senior Product or Growth role, I\'d love 20 minutes.\n\nAnchit Tandon\nanchit-tandon.com',
       variants: [
-        { label: 'A · Proof-led', type: 'text', angle: 'Leads with the three hardest numbers (5× MRR, ₹3Cr+ ARR, US/UK/global) — for data-driven hiring managers.', score: { strategy: 94, copy: 90, density: 88, divergence: 70, overall: 90 } },
-        { label: 'B · Referral-led', type: 'text', angle: 'Opens on the shared connection / warm intro, then one proof point — highest reply rate.', score: { strategy: 91, copy: 88, density: 82, divergence: 85 } },
-        { label: 'C · Role-fit-led', type: 'image', angle: 'Portrait + a one-glance stat card mapping my wins to the exact role — for visual-first recruiters.', score: { strategy: 88, copy: 84, density: 90, divergence: 88 } },
+        { label: 'A · Proof-led', type: 'text', angle: 'Leads with the three hardest numbers (5× MRR, ₹3Cr+ ARR, US/UK/global), for data-driven hiring managers.', score: { strategy: 94, copy: 90, density: 88, divergence: 70, overall: 90 } },
+        { label: 'B · Referral-led', type: 'text', angle: 'Opens on the shared connection / warm intro, then one proof point, highest reply rate.', score: { strategy: 91, copy: 88, density: 82, divergence: 85 } },
+        { label: 'C · Role-fit-led', type: 'image', angle: 'Portrait + a one-glance stat card mapping my wins to the exact role, for visual-first recruiters.', score: { strategy: 88, copy: 84, density: 90, divergence: 88 } },
       ],
     },
     retention: [
@@ -488,23 +489,24 @@ function anchitPlan() {
       horizon: '6–10 week rolling search',
       loop: [
         { step: 'Analyze', detail: 'Score the target list by fit × intent; refresh from new openings daily.' },
-        { step: 'Plan', detail: 'Sequence outreach by cohort — warm network first, then closest role fit.' },
+        { step: 'Plan', detail: 'Sequence outreach by cohort, warm network first, then closest role fit.' },
         { step: 'Prebuild', detail: 'Pre-draft the role-tailored one-pager and email variants before each send window.' },
         { step: 'Review', detail: 'Human-approve every message; quality-score each variant before it ships.' },
         { step: 'Approve', detail: 'Send the winning variant, log the outcome, and feed replies back into scoring.' },
       ],
-      note: 'A convergent daily loop over a rolling horizon — the same autopilot rhythm applied to a job search instead of a send calendar.',
+      note: 'A convergent daily loop over a rolling horizon, the same autopilot rhythm applied to a job search instead of a send calendar.',
     },
     guardrails: [
-      { rule: 'Personalisation required', detail: 'No message ships without one company- or role-specific proof point — never a mass blast.' },
+      { rule: 'Personalisation required', detail: 'No message ships without one company- or role-specific proof point, never a mass blast.' },
       { rule: 'Cadence cap', detail: 'One follow-up per contact max; progressive suppression once someone replies or declines.' },
-      { rule: 'Honest claims only', detail: 'Every metric is real and verifiable on anchit-tandon.com — no inflated numbers.' },
+      { rule: 'Honest claims only', detail: 'Every metric is real and verifiable on anchit-tandon.com, no inflated numbers.' },
       { rule: 'Tone lock', detail: 'Warm, specific, first-person; no buzzword filler or generic recruiter-speak.' },
     ],
   };
 }
 
 async function handler(req, res) {
+  dedashResponse(res);
   // CORS, the preflight and the per-IP limit, all in api/_guard.js so the
   // routes that spend money cannot drift apart again.
   if (guard(req, res, { route: 'lifecycle', max: 10, methods: 'POST, OPTIONS' })) return;
@@ -519,7 +521,7 @@ async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
 
   // Default demo subject: anchit-tandon.com. Empty input or any Anchit-matching
-  // brand/url returns the deterministic career-growth plan — always available,
+  // brand/url returns the deterministic career-growth plan, always available,
   // no LLM key required.
   if ((!brand && !url) || isAnchit(brand, url)) {
     return res.status(200).json({ plan: anchitPlan(), source: 'anchit' });

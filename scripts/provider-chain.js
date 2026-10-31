@@ -74,7 +74,7 @@ async function asyncChecks() {
     }
   })();
 
-  // 4. A bad key (401) must NOT burn the chain — every id would fail the same.
+  // 4. A bad key (401) must NOT burn the chain, every id would fail the same.
   await (async () => {
     const tried = [];
     const attempt = async (m) => {
@@ -95,7 +95,7 @@ async function asyncChecks() {
     }
   })();
 
-  // 5. When everything fails, the error names each id and why — the thing whose
+  // 5. When everything fails, the error names each id and why, the thing whose
   //    absence made "the AI provider is unavailable" undiagnosable.
   await (async () => {
     const attempt = async () => { throw Object.assign(new Error('http_404'), { status: 404, reason: 'model does not exist' }); };
@@ -121,7 +121,7 @@ async function asyncChecks() {
     try {
       const fake = { status: 404, ok: false, text: async () => 'model not found' };
       const err = MUT ? new Error('http_404') : await models.httpError(fake);
-      assert.strictEqual(err.status, 404, 'status lost — a dead id looks like a dead provider');
+      assert.strictEqual(err.status, 404, 'status lost, a dead id looks like a dead provider');
       assert.ok(models.isModelMiss(err), 'a 404 was not classified as a model miss');
       results.push(['PASS', 'httpError keeps the status so a dead id is distinguishable']);
     } catch (e) {
@@ -134,7 +134,7 @@ async function asyncChecks() {
   console.log(`\n${results.length - failed.length}/${results.length} passed`);
   if (MUT) {
     if (failed.length === results.length) { console.log('MUT: every check failed, as it must'); process.exit(0); }
-    console.log(`MUT: ${results.length - failed.length} check(s) still passed — they do not test what they claim`);
+    console.log(`MUT: ${results.length - failed.length} check(s) still passed, they do not test what they claim`);
     process.exit(1);
   }
   process.exit(failed.length ? 1 : 0);

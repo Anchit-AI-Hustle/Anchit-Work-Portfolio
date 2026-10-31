@@ -17,7 +17,7 @@ const ROOT = path.join(__dirname, '..');
 const WWW = path.join(ROOT, 'www');
 const DOMAIN = 'https://anchit-tandon.com';
 
-if (!fs.existsSync(WWW)) { console.error('www/ not found — run npm run build first'); process.exit(1); }
+if (!fs.existsSync(WWW)) { console.error('www/ not found, run npm run build first'); process.exit(1); }
 
 const walk = (d, o = []) => {
   for (const e of fs.readdirSync(d, { withFileTypes: true })) {

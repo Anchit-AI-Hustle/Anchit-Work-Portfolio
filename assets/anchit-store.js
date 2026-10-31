@@ -1,4 +1,4 @@
-/* anchit-store.js — per-user storage in the browser, for when there is no
+/* anchit-store.js, per-user storage in the browser, for when there is no
  * database to talk to.
  *
  * WHY

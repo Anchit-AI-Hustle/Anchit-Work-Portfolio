@@ -1,11 +1,11 @@
-/* Service worker — minimal offline cache for the portfolio shell.
+/* Service worker, minimal offline cache for the portfolio shell.
  *
  * The cache name is STAMPED BY THE BUILD, from a hash of every js/css/html/json
  * file it will serve (see stampServiceWorker in scripts/build-www.mjs). Do not
  * hand-edit it. It used to be a hand-written date with a comment saying "bump
  * this string on every deploy"; it was last bumped on 2026-08-17 and drifted a
  * month, which served August's JavaScript to every returning visitor while the
- * HTML updated underneath it — new markup running against old scripts. */
+ * HTML updated underneath it, new markup running against old scripts. */
 const CACHE = 'anchit-portfolio-dev';
 const SHELL = [
   '/',
@@ -15,14 +15,14 @@ const SHELL = [
   '/assets/task-tracker-shell.js',
   /* three.module.min.js is deliberately NOT precached. It is 670 KB, it is fetched
      lazily on idle and only on hardware that can keep the nebula, and half the
-     visitors never request it at all — precaching it spent that download on
+     visitors never request it at all, precaching it spent that download on
      every install. It still lands in the runtime cache the first time a page
      actually asks for it. */
   '/assets/vendor/gsap.min.js',
   '/assets/vendor/ScrollTrigger.min.js',
   /* The page renders the optimised WebP; the 1.5MB PNG it replaced is kept
      in the repo only for og:image, which social scrapers fetch server-side
-     and never from this cache — so precaching it cost 1.5MB per install
+     and never from this cache, so precaching it cost 1.5MB per install
      for a file no visitor loads. */
   '/assets/anchit-mark-220.webp',
   '/assets/logo-at-330.webp',

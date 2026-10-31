@@ -4,7 +4,7 @@
 // benchmark accuracy; the cascade fans out to the top N in parallel.
 //
 // Claude uses the official Anthropic SDK (@anthropic-ai/sdk). The others use
-// their REST endpoints via fetch so the file stays dependency-light — swap in
+// their REST endpoints via fetch so the file stays dependency-light, swap in
 // each vendor's official SDK if you prefer, the interface is identical.
 
 import Anthropic from '@anthropic-ai/sdk';
@@ -30,7 +30,7 @@ const anthropic: ModelProvider = {
     const client = new Anthropic({ apiKey: env('ANTHROPIC_API_KEY') });
     // Adaptive thinking is the current default for hard reasoning on 4.6+ models.
     // The pinned SDK's types predate the "adaptive" thinking mode (they only know
-    // "enabled"/"disabled"), so cast the value — the API accepts it at runtime.
+    // "enabled"/"disabled"), so cast the value, the API accepts it at runtime.
     const msg = await client.messages.create({
       model: 'claude-opus-5',
       max_tokens: 8000,
@@ -112,7 +112,7 @@ const grok: ModelProvider = {
 // Strong on tool use / real-work tasks (MCP Atlas 88.1, JobBench 54.7) and a 1M
 // context, so it is a good extra voice in the cascade. The Meta Model API is in
 // public preview and OpenAI-compatible in shape, but the exact base URL can move
-// during preview — so it is taken from META_API_URL rather than hardcoded here.
+// during preview, so it is taken from META_API_URL rather than hardcoded here.
 // Unset URL or key ⇒ the provider is simply disabled.
 const muse: ModelProvider = {
   id: 'muse-spark-1.1',

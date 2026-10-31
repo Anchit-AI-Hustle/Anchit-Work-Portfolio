@@ -1,7 +1,7 @@
 # The cloned voice
 
 The site speaks in the first person. A stock voice reading those words is not a
-lesser version of the feature — it is a stranger claiming to be Anchit. So
+lesser version of the feature, it is a stranger claiming to be Anchit. So
 `api/tts.js` refuses to answer in one: it skips every non-cloning provider
 unless somebody deliberately sets `VOICE_ALLOW_STOCK=true`.
 
@@ -25,8 +25,8 @@ At the time of writing it answers:
 ```
 
 Read that as: **no cloning provider has credentials.** The one provider that is
-wired, Sarvam, only exposes preset speakers through its REST API — cloning is
-Studio-only — so it would answer in "shubh", which is not Anchit. The server
+wired, Sarvam, only exposes preset speakers through its REST API, cloning is
+Studio-only, so it would answer in "shubh", which is not Anchit. The server
 correctly refuses, returns 503, and the browser falls back to its own device
 voice. That fallback is why the site currently speaks in a voice that is not his.
 
@@ -45,7 +45,7 @@ Set them in **Vercel → the project → Settings → Environment Variables**, f
 Production (and Preview if you want previews to speak), then redeploy so the
 functions pick them up.
 
-Never put these in the repo, in a commit, or in a chat message — they are
+Never put these in the repo, in a commit, or in a chat message, they are
 secrets, and `api/tts.js` only ever reads them from the environment.
 
 Cartesia, Fish and a self-hosted XTTS are wired as alternatives in the same
@@ -62,5 +62,5 @@ POST /api/tts            → responds with audio, and the headers say who spoke:
 ```
 
 Until `clonedVoiceReady` is true, the page sets `data-voice="stock"` on `<html>`
-and the audio controls carry a small "device voice" badge — the substitution
+and the audio controls carry a small "device voice" badge, the substitution
 stays visible instead of quietly passing itself off as him.

@@ -1,13 +1,13 @@
 // ============================================================================
-// AgentCascadeService — the Agentic Cascade Engine (SERVER-SIDE)
+// AgentCascadeService, the Agentic Cascade Engine (SERVER-SIDE)
 // ----------------------------------------------------------------------------
 // Pipeline:
-//   1) DISPATCH   — fan out the task to the top-N ranked models IN PARALLEL,
+//   1) DISPATCH  , fan out the task to the top-N ranked models IN PARALLEL,
 //                   each asked to return a strict-JSON MasterGuide.
-//   2) SCORE      — rank every successful answer by a structural quality score
+//   2) SCORE     , rank every successful answer by a structural quality score
 //                   (step granularity, branch coverage, badges, non-emptiness)
 //                   and keep the TOP 3.
-//   3) SYNTHESIZE — an evaluator node (the strongest available model) merges the
+//   3) SYNTHESIZE, an evaluator node (the strongest available model) merges the
 //                   top 3 into one multi-branch, de-duplicated, ADHD-friendly
 //                   master guide and reports a consensus score.
 //
@@ -110,7 +110,7 @@ export function normalizeGuide(g: Partial<MasterGuide> | null, task: string): Ma
     index: i + 1,
     title: (s.title || 'Step').trim(),
     detail: (s.detail || '').trim(),
-    // Coerce to a supported badge — a model may return e.g. "warning"/"caution",
+    // Coerce to a supported badge, a model may return e.g. "warning"/"caution",
     // which would otherwise crash the UI's BADGE[...] lookup.
     badge: VALID_BADGES.includes(s.badge as HowToStep['badge'])
       ? (s.badge as HowToStep['badge'])
@@ -226,7 +226,7 @@ export class AgentCascadeService {
       return { guide, answers: [], top: [] };
     }
 
-    // 1) DISPATCH — parallel fan-out to the ranked models.
+    // 1) DISPATCH, parallel fan-out to the ranked models.
     const sys = solverSystem();
     const answers: ModelAnswer[] = await pmap(this.providers, MAX_PARALLEL, async (p) => {
       const t0 = Date.now();
@@ -239,7 +239,7 @@ export class AgentCascadeService {
       }
     });
 
-    // 2) SCORE — keep the top 3 successful answers by structural quality.
+    // 2) SCORE, keep the top 3 successful answers by structural quality.
     const ranked = answers
       .filter((a) => a.ok && a.guide)
       .sort((a, b) => scoreGuide(b.guide) - scoreGuide(a.guide));
@@ -258,10 +258,10 @@ export class AgentCascadeService {
       return { guide, answers, top };
     }
 
-    // 3) SYNTHESIZE — evaluator merges the top 3 into the master guide.
+    // 3) SYNTHESIZE, evaluator merges the top 3 into the master guide.
     const evaluator = evaluatorProvider();
     const payload = top
-      .map((a, i) => `### Candidate ${i + 1} — ${a.model}\n${JSON.stringify(a.guide)}`)
+      .map((a, i) => `### Candidate ${i + 1}, ${a.model}\n${JSON.stringify(a.guide)}`)
       .join('\n\n');
     let synth: MasterGuide | undefined;
     try {
@@ -324,9 +324,9 @@ function offlineGuide(task: string): MasterGuide {
   const steps: HowToStep[] = [
     { id: 's1', index: 1, badge: 'start', title: 'Get set up', detail: `Gather everything you need to ${task}. Clear a calm space.`, videoPrompt: `A tidy desk prepared to ${task}, warm cinematic light` },
     { id: 's2', index: 2, badge: 'action', title: 'Do the first move', detail: 'Start with the single easiest action. Momentum beats perfection.', videoPrompt: `Close-up hands beginning to ${task}` },
-    { id: 's3', index: 3, badge: 'watch-out', title: 'Avoid the common trap', detail: 'Go slow here — this is where most people slip.', videoPrompt: 'A gentle warning highlight over the tricky part' },
+    { id: 's3', index: 3, badge: 'watch-out', title: 'Avoid the common trap', detail: 'Go slow here, this is where most people slip.', videoPrompt: 'A gentle warning highlight over the tricky part' },
     { id: 's4', index: 4, badge: 'checkpoint', title: 'Check your progress', detail: 'Pause and confirm it looks right before continuing.', videoPrompt: 'A checkmark glowing as progress is verified' },
-    { id: 's5', index: 5, badge: 'finish', title: 'Finish and celebrate', detail: `You did it — you now know how to ${task}.`, videoPrompt: 'Confetti and a satisfied smile, cinematic' },
+    { id: 's5', index: 5, badge: 'finish', title: 'Finish and celebrate', detail: `You did it, you now know how to ${task}.`, videoPrompt: 'Confetti and a satisfied smile, cinematic' },
   ];
   return {
     task, summary: `A calm, can't-fail path to ${task}.`, difficulty: 'moderate', estMinutes: 5,

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# set-vercel-env.sh — set the portfolio's API keys in Vercel and redeploy.
+# set-vercel-env.sh, set the portfolio's API keys in Vercel and redeploy.
 #
 # Run on your Mac, from the healthy repo:
 #   cd ~/Projects/awp && bash scripts/set-vercel-env.sh
@@ -19,7 +19,7 @@ ENVS=(production preview development)
 
 set_env() {
   local name="$1" val="$2"
-  [ -z "$val" ] && { echo "  · $name — skipped"; return; }
+  [ -z "$val" ] && { echo "  · $name, skipped"; return; }
   for e in "${ENVS[@]}"; do
     vercel env rm "$name" "$e" -y >/dev/null 2>&1 || true   # remove old value if present
     printf '%s' "$val" | vercel env add "$name" "$e" >/dev/null 2>&1 \
@@ -40,7 +40,7 @@ echo ""
 ask K "ANTHROPIC_API_KEY (sk-ant-...)";            set_env ANTHROPIC_API_KEY "$REPLY_VAL"
 
 echo ""
-echo "Voice (optional — set ElevenLabs OR HuggingFace, or skip both):"
+echo "Voice (optional, set ElevenLabs OR HuggingFace, or skip both):"
 ask K "ELEVENLABS_API_KEY";                        set_env ELEVENLABS_API_KEY "$REPLY_VAL"
 ask K "ELEVENLABS_VOICE_ID";                       set_env ELEVENLABS_VOICE_ID "$REPLY_VAL"
 ask K "HF_TOKEN";                                  set_env HF_TOKEN "$REPLY_VAL"
@@ -51,4 +51,4 @@ echo "▶ Redeploying to production so the new vars take effect…"
 vercel --prod
 
 echo ""
-echo "✅ Done. Check the chat — it now answers via Claude (falls back to the offline bot if the key is ever missing)."
+echo "✅ Done. Check the chat, it now answers via Claude (falls back to the offline bot if the key is ever missing)."

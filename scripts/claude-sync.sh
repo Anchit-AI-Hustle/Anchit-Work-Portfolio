@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# claude-sync.sh — auto-commit & push portfolio changes using the Claude CLI.
+# claude-sync.sh, auto-commit & push portfolio changes using the Claude CLI.
 #
 # When there are uncommitted changes it asks `claude` (Claude Code) to stage,
 # commit with a sensible message, and push to origin main. Because the Vercel
@@ -29,7 +29,7 @@ if [ -n "$CLAUDE_BIN" ]; then
   "$CLAUDE_BIN" -p "This git repo has uncommitted changes. Stage all changes, commit with one concise message summarising them, then push to origin $BRANCH. Do nothing else, and do not modify any files." \
     --dangerously-skip-permissions
 else
-  # Fallback: plain git (requires a cached credential — see SYNC-SETUP.md).
+  # Fallback: plain git (requires a cached credential, see SYNC-SETUP.md).
   git add -A || exit 1
   git commit -m "Auto-sync: $(date '+%Y-%m-%d %H:%M:%S %Z')" >/dev/null 2>&1
   git pull --rebase --autostash origin "$BRANCH" >/dev/null 2>&1 || true

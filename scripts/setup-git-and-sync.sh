@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# setup-git-and-sync.sh — ONE-SHOT: resolve the iCloud git corruption for good and
+# setup-git-and-sync.sh, ONE-SHOT: resolve the iCloud git corruption for good and
 # turn on permanent auto-sync.
 #
 # What it does:
@@ -12,7 +12,7 @@
 # Run once, on your Mac:
 #   bash "$HOME/Library/Mobile Documents/com~apple~CloudDocs/ANCHIT'S AI HUSTLE/Anchit-Work-Portfolio/scripts/setup-git-and-sync.sh"
 #
-# Prereq: GitHub CLI authenticated — `brew install gh && gh auth login` (HTTPS).
+# Prereq: GitHub CLI authenticated, `brew install gh && gh auth login` (HTTPS).
 #
 set -uo pipefail
 
@@ -71,4 +71,4 @@ echo ""
 echo "✅ Done."
 echo "   Working repo (use this from now on):  $DEST"
 echo "   Auto-sync: every 10 min + at login. Logs: /tmp/anchit-portfolio-autosync.*"
-echo "   Do NOT run git in the iCloud folder anymore — that's what was corrupting it."
+echo "   Do NOT run git in the iCloud folder anymore, that's what was corrupting it."

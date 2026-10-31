@@ -46,7 +46,7 @@ const CSP = (() => {
 })();
 
 function mutate(path, src) {
-  if (MUT === 'dash' && path.endsWith('/study')) return src.replace('</body>', '<p>one — two</p></body>');
+  if (MUT === 'dash' && path.endsWith('/study')) return src.replace('</body>', '<p>one, two</p></body>');
   if (MUT === 'count' && path.endsWith('/prototype')) return src.split('1998317').join('2109000');
   if (MUT === 'lang' && path.endsWith('/prototype')) return src.replace('</body>', '<script>document.addEventListener("click",function(e){if(e.target.closest("button[lang]"))e.stopImmediatePropagation();},true);</script></body>');
   if (MUT === 'year3' && path.endsWith('/prototype')) return src.replace('bundles: 150, bundlePrice: 200000', 'bundles: 150, bundlePrice: 300000');

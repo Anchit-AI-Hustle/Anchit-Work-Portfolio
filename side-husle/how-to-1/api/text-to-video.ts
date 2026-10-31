@@ -50,7 +50,7 @@ function mockPoster(seed: string): string {
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 function mockClip(seed: string): string {
-  // No real bytes in mock mode — the UI falls back to the animated poster.
+  // No real bytes in mock mode, the UI falls back to the animated poster.
   return mockPoster(seed);
 }
 

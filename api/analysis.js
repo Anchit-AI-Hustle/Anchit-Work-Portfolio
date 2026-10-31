@@ -1,14 +1,15 @@
-// /api/analysis — Lifecycle OS · Data Analysis engine.
+// /api/analysis, Lifecycle OS · Data Analysis engine.
 //
 //   POST /api/analysis  → { brand, industry, segments, cohorts, sendHeat, crossSell, kpis, source }
 //
 // The analytical layer of the OS: RFM-style segments, cohort-retention curves,
-// a send-time heatmap and cross-sell affinity — benchmarked to the subject's
+// a send-time heatmap and cross-sell affinity, benchmarked to the subject's
 // industry (synthetic / industry-standard, NOT proprietary data). Brand-agnostic;
 // defaults to anchit-tandon.com (a candidate-funnel analytics view). Deterministic
 // so it always returns a full dashboard with no key. No Vahdam / tea / coffee.
 
 const { originAllowed } = require('./_guard.js');
+const { dedashResponse } = require('./_nodash.js');
 function isAnchit(brand, url) {
   const s = ((brand || '') + ' ' + (url || '')).toLowerCase();
   return /anchit/.test(s.replace(/\s+/g, '-'));
@@ -18,13 +19,13 @@ function isAnchit(brand, url) {
 function anchitAnalysis() {
   return {
     brand: 'Anchit Tandon',
-    industry: 'Senior Product & Growth — candidate funnel',
+    industry: 'Senior Product & Growth, candidate funnel',
     segments: [
-      { name: 'Warm network / referrals', pct: 12, r: 5, f: 4, m: 5, note: 'Highest intent — converts ~3× cold.' },
+      { name: 'Warm network / referrals', pct: 12, r: 5, f: 4, m: 5, note: 'Highest intent, converts ~3× cold.' },
       { name: 'High-growth D2C brands', pct: 28, r: 4, f: 3, m: 5, note: 'Primary target; best role fit.' },
       { name: 'Media & subscription', pct: 22, r: 4, f: 3, m: 4, note: 'Times Internet wins map 1:1.' },
       { name: 'Seed–Series B startups', pct: 20, r: 3, f: 2, m: 4, note: 'High upside, builder-operator fit.' },
-      { name: 'Specialist recruiters', pct: 14, r: 3, f: 4, m: 3, note: 'Amplifiers — one intro, many roles.' },
+      { name: 'Specialist recruiters', pct: 14, r: 3, f: 4, m: 3, note: 'Amplifiers, one intro, many roles.' },
       { name: 'Cold inbound', pct: 4, r: 2, f: 1, m: 2, note: 'Lowest intent; nurture only.' },
     ],
     cohorts: [
@@ -61,7 +62,7 @@ function brandAnalysis(brand, category) {
     industry: cat === 'D2C' ? 'Direct-to-consumer (industry benchmarks)' : cat + ' (industry benchmarks)',
     segments: [
       { name: 'First-time buyers', pct: 35, r: 4, f: 1, m: 2, note: 'Highest churn risk in first 30 days.' },
-      { name: 'Repeat / loyal', pct: 18, r: 4, f: 4, m: 4, note: 'Buys on cadence — protect & reward.' },
+      { name: 'Repeat / loyal', pct: 18, r: 4, f: 4, m: 4, note: 'Buys on cadence, protect & reward.' },
       { name: 'VIP / high-LTV', pct: 5, r: 5, f: 5, m: 5, note: 'Top 5% by spend; concierge touches.' },
       { name: 'At-risk / lapsing', pct: 22, r: 2, f: 3, m: 3, note: 'No purchase in 60–90 days.' },
       { name: 'Browsers / no purchase', pct: 20, r: 3, f: 1, m: 1, note: 'Engaged but never converted.' },
@@ -92,6 +93,7 @@ function brandAnalysis(brand, category) {
 }
 
 async function handler(req, res) {
+  dedashResponse(res);
   // No wildcard: another site should not be able to call this from a browser.
   const origin = (req.headers || {}).origin;
   const okOrigin = originAllowed(origin);

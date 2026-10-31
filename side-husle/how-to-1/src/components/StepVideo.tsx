@@ -1,13 +1,13 @@
 // Per-step animated scene. Fully self-contained: it renders an on-theme
 // (black / orange / gold) animated visual built from CSS + the step's own
-// videoPrompt — no network, no serverless dependency, so it can never show a
+// videoPrompt, no network, no serverless dependency, so it can never show a
 // broken box or "preview unavailable". (A real text-to-video provider can be
 // swapped in later behind /api/text-to-video; until then this always works.)
 
 import { useEffect, useState } from 'react';
 import type { HowToStep } from '../types';
 
-// Warm, on-theme tint per badge — matches the flow diagram + step cards.
+// Warm, on-theme tint per badge, matches the flow diagram + step cards.
 const TINT: Record<HowToStep['badge'], string> = {
   start: '#FFB736', action: '#FF6940', 'watch-out': '#FF4D1F', checkpoint: '#c9a96e', finish: '#FF8A3D',
 };
@@ -60,7 +60,7 @@ export default function StepVideo({ step, task }: { step: HowToStep; task?: stri
           <iframe
             className="video-embed"
             src={`https://www.youtube-nocookie.com/embed/${vid.videoId}`}
-            title={`Tutorial — ${caption}`}
+            title={`Tutorial, ${caption}`}
             loading="lazy"
             allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen

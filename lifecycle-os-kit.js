@@ -98,7 +98,7 @@ window.LOS = (function () {
     if (anchit) return {
       anchit: true, name: 'Anchit Tandon', handle: 'anchittandon', url: 'anchit-tandon.com',
       category: 'Product & Growth leadership (personal brand)',
-      one: 'An engineer who learned to love the funnel — now a Product & Growth leader.',
+      one: 'An engineer who learned to love the funnel, now a Product & Growth leader.',
       wins: ['5× MRR on Assisted Sales (₹15L → ₹80L)', '₹3Cr+ incremental ARR from the ET Markets revamp', 'D2C growth across US, UK & global markets'],
       audiences: ['High-growth D2C brands', 'Media & subscription businesses', 'Seed–Series B startups', 'Product & growth recruiters'],
       cta: 'Open anchit-tandon.com', mood: 'confident, warm, precise',
@@ -112,7 +112,7 @@ window.LOS = (function () {
     var name = b || u.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
     return {
       anchit: false, name: name, handle: name.toLowerCase().replace(/[^a-z0-9]+/g, ''), url: u || (name.toLowerCase().replace(/[^a-z0-9]+/g, '') + '.com'),
-      category: 'Direct-to-consumer', one: name + ' — a D2C brand built on repeat purchase, not just the first sale.',
+      category: 'Direct-to-consumer', one: name + ', a D2C brand built on repeat purchase, not just the first sale.',
       wins: ['Built on repeat purchase', 'Owned channels: email, SMS and app', 'A loyal core worth keeping'],
       audiences: ['First-time buyers', 'Repeat / loyal', 'VIP / high-LTV', 'At-risk / lapsing'],
       cta: 'Shop now', mood: 'warm, premium, detail-led',
@@ -170,8 +170,8 @@ window.LOS = (function () {
     host.innerHTML =
       '<div class="sectitle">Take it further</div><div class="related">' + rel + '</div>'
       + '<div class="sectitle">Add your own context</div><div class="extras">'
-      + '<textarea id="losExtraText" placeholder="Add a brief, notes, positioning, or paste anything — it is folded into what this tool generates."></textarea>'
-      + '<label class="uploader"><input type="file" id="losFiles" multiple />＋ Attach files — any format (doc, pdf, txt, md, image, video, audio…)</label>'
+      + '<textarea id="losExtraText" placeholder="Add a brief, notes, positioning, or paste anything, it is folded into what this tool generates."></textarea>'
+      + '<label class="uploader"><input type="file" id="losFiles" multiple />＋ Attach files, any format (doc, pdf, txt, md, image, video, audio…)</label>'
       + '<div class="filelist" id="losFileList"></div>'
       + '<div class="ctxnote">Text and .txt / .md files are read and folded into the output. Other formats (pdf, docx, images, video, audio…) attach as named context.</div>'
       + '<button class="applybtn" id="losApply">Apply my context ↻</button></div>'

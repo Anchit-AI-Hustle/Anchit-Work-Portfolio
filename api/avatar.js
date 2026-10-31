@@ -1,4 +1,4 @@
-// /api/avatar — photoreal talking-head agent via D-ID (streaming-avatar route).
+// /api/avatar, photoreal talking-head agent via D-ID (streaming-avatar route).
 //
 //   POST /api/avatar  { text }  → { resultUrl }   (a rendered talking-head video)
 //   GET  /api/avatar             → { configured }  (is the avatar wired up?)
@@ -26,7 +26,7 @@ const { guard } = require('./_guard.js');
 const { KEYS } = require('./_models.js');
 
 const DID_BASE = 'https://api.d-id.com';
-// The source MUST be a clear, front-facing photo of a real face — talking-head
+// The source MUST be a clear, front-facing photo of a real face, talking-head
 // engines reject logos/posters ("no face detected"). AnchitTandon-AppLogo.png is
 // a branded poster (monogram + text + sunglasses), so it can never drive an
 // avatar; the portrait photo is used instead. For best results set
@@ -89,7 +89,7 @@ async function pollTalk(auth, id, deadline) {
 
 // ── Self-hosted / open-source avatar (tried FIRST when configured) ──────────
 // Lets the avatar run on an open-source audio-driven talking-head model instead
-// of a paid, credit-metered vendor — e.g. LongCat-Video-Avatar 1.5 (MIT, Meituan)
+// of a paid, credit-metered vendor, e.g. LongCat-Video-Avatar 1.5 (MIT, Meituan)
 // deployed behind a GPU endpoint (Replicate / Modal / RunPod / HF Inference
 // Endpoint). Those models are self-hosted only (no public inference API), so the
 // endpoint URL is taken from the environment rather than hardcoded to any vendor.

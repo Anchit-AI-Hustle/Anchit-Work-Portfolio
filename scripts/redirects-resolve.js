@@ -1,7 +1,7 @@
 // Every link on every page has to land somewhere real.
 //
 // THE BUGS THIS CATCHES
-//   1. The freelancer page's "Third Eye — View project" card pointed at
+//   1. The freelancer page's "Third Eye, View project" card pointed at
 //      github.com/Anchit-AI-Hustle/The-Third-Eye. That repository is PRIVATE,
 //      so the link rendered GitHub's 404 for every visitor while looking
 //      perfectly fine to the logged-in author, who sees the repo. index.html
@@ -11,13 +11,13 @@
 //      That is now the narrow case of a blanket rule: no page sends a visitor
 //      to GitHub at all, and no page names a repository. A private repo 404s,
 //      a public one shows source nobody asked to read, and either way the
-//      viewer has left the portfolio. The suite enforces both halves — the
+//      viewer has left the portfolio. The suite enforces both halves, the
 //      links, and the word itself in rendered copy, since "Explore the
 //      implementation on GitHub" was a link whose own LABEL gave it away.
 //
 //   2. index.html's sign-off linked /in/anchittandon. Every other LinkedIn
-//      reference on the site — both visible links and the JSON-LD sameAs that
-//      search engines read as the canonical profile — uses /in/anchit-tandon.
+//      reference on the site, both visible links and the JSON-LD sameAs that
+//      search engines read as the canonical profile, uses /in/anchit-tandon.
 //      The comment above that block even claims "every link here already
 //      exists elsewhere on the page". It did not.
 //
@@ -28,7 +28,7 @@
 // WHY A BROWSER
 //   Links are read out of the rendered DOM, not the source, so anything a page
 //   injects at runtime is checked too. And they are resolved against a server
-//   that applies vercel.json — `npx serve www` knows nothing about redirects,
+//   that applies vercel.json, `npx serve www` knows nothing about redirects,
 //   rewrites or cleanUrls, so resolving against it would prove nothing about
 //   production.
 //
@@ -36,7 +36,7 @@
 //   A fragment can point at another page: /#projects, /ayushi#experience and
 //   ./#skills are all used here, and ./#skills is a link from ayushi/resume to
 //   an id that lives in ayushi/index. Checking a fragment only against the page
-//   that CONTAINS the link silently passes every one of them — a typo in
+//   that CONTAINS the link silently passes every one of them, a typo in
 //   /#projets would resolve as a 200 and never be looked at. So the crawl
 //   records what each page can reach, and fragments are validated afterwards,
 //   against the page they actually land on.
@@ -46,7 +46,7 @@
 //   MUT=... injects one real defect into a served page; the check that covers
 //           it must fail. The mutation goes into the DOM BEFORE links are
 //           collected, so each mode drives the same discovery and validation
-//           path a real regression would — a mutation appended to the results
+//           path a real regression would, a mutation appended to the results
 //           afterwards would still pass with the detector deleted.
 const path = require('path');
 const fs = require('fs');
@@ -60,7 +60,7 @@ const results = [];
 const check = (n, ok, d) => results.push([ok ? 'PASS' : 'FAIL', n, d]);
 
 if (!fs.existsSync(WWW)) {
-  console.log('  FAIL  www/ does not exist — run `npm run build` first');
+  console.log('  FAIL  www/ does not exist, run `npm run build` first');
   process.exit(1);
 }
 
@@ -152,7 +152,7 @@ const PERSON_ROUTE = /^\/(ayushi)(?:-rawat)?(?:\/|$)/;
       await page.waitForTimeout(800);
     } catch (e) { dead.push(`${route} (load failed: ${e.message.slice(0, 60)})`); await page.close(); continue; }
 
-    // The defect goes in here — before a single link is read off the page.
+    // The defect goes in here, before a single link is read off the page.
     if (MUT && route === '/') {
       await page.evaluate((frag) => {
         const d = document.createElement('div');
@@ -179,8 +179,8 @@ const PERSON_ROUTE = /^\/(ayushi)(?:-rawat)?(?:\/|$)/;
     // Copy a viewer could read. innerText would miss every inactive SPA view
     // (index.html keeps 16 of its 17 panels hidden at any moment) and those
     // become visible on a nav click, so this walks textContent instead, with
-    // <script>/<style> stripped so the chatbot's 'github' MATCHING KEYWORD —
-    // which is never rendered — does not read as a visible mention.
+    // <script>/<style> stripped so the chatbot's 'github' MATCHING KEYWORD,
+    // which is never rendered, does not read as a visible mention.
     for (const quote of await page.evaluate(() => {
       const body = document.body.cloneNode(true);
       for (const el of body.querySelectorAll('script, style, template')) el.remove();
@@ -266,7 +266,7 @@ const PERSON_ROUTE = /^\/(ayushi)(?:-rawat)?(?:\/|$)/;
     await page.close();
   }
 
-  // Pass 2 — every fragment against the page it actually lands on.
+  // Pass 2, every fragment against the page it actually lands on.
   const orphanFrag = [];
   for (const f of pending) {
     const idx = reach.get(f.target);
@@ -304,7 +304,7 @@ const PERSON_ROUTE = /^\/(ayushi)(?:-rawat)?(?:\/|$)/;
 
   // The other half: a link's own LABEL can name GitHub even after the href is
   // fixed ("Explore the implementation on GitHub"), and a repository can be
-  // named in plain copy with no link at all — index.html listed 51 of them.
+  // named in plain copy with no link at all, index.html listed 51 of them.
   // innerText is what the viewer actually reads, so that is what is checked.
   {
     check('no page names GitHub or a repository',
@@ -314,7 +314,7 @@ const PERSON_ROUTE = /^\/(ayushi)(?:-rawat)?(?:\/|$)/;
   }
 
   // The rendered-copy scan above only sees what a viewer READS. It cannot see a
-  // comment in a served .js or .css, and two of those named a repository —
+  // comment in a served .js or .css, and two of those named a repository,
   // growth-school.js and growth-school.css both cited "the lifecycle-os repo",
   // and an index.html comment carried the owner/repo string outright. They ship
   // to the browser, so anyone who opens the file finds them. This reads the
@@ -364,7 +364,7 @@ const PERSON_ROUTE = /^\/(ayushi)(?:-rawat)?(?:\/|$)/;
 
   for (const [ok, n, d] of results) console.log(`  ${ok}  ${n.padEnd(46)} ${d}`);
   const failed = results.filter((r) => r[0] === 'FAIL').length;
-  console.log(`\n${results.length - failed}/${results.length} passed${NET ? ' (off-site destinations verified)' : ' (off-site not checked — rerun with NET=1)'}`);
+  console.log(`\n${results.length - failed}/${results.length} passed${NET ? ' (off-site destinations verified)' : ' (off-site not checked, rerun with NET=1)'}`);
 
   if (MUT) {
     const TOUCHED = {
@@ -381,7 +381,7 @@ const PERSON_ROUTE = /^\/(ayushi)(?:-rawat)?(?:\/|$)/;
       console.log(`MUT=${MUT}: the check it touches failed, and the other ${results.length - target.length} still pass`);
       process.exit(0);
     }
-    console.log('MUT: wrong outcome — ' + wrong.join('; '));
+    console.log('MUT: wrong outcome, ' + wrong.join('; '));
     process.exit(1);
   }
   process.exit(failed ? 1 : 0);

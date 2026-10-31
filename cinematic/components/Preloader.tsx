@@ -11,7 +11,7 @@ const LINES = [
 ];
 const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/\\<>[]{}#*·';
 
-/** Terminal-style init log that scrambles into place, then SNAPS out — no fade. */
+/** Terminal-style init log that scrambles into place, then SNAPS out, no fade. */
 export default function Preloader() {
   const el = useRef<HTMLDivElement>(null);
   const [rows, setRows] = useState<string[]>(LINES.map(() => ''));

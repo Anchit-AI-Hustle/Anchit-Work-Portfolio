@@ -359,7 +359,7 @@
 
     if (guide.type === 'Guide') {
       return [
-        '# ' + project.appTitle + ' — ' + project.title + ' Quickstart',
+        '# ' + project.appTitle + ', ' + project.title + ' Quickstart',
         '',
         '## Outcome',
         goal,
@@ -920,7 +920,7 @@
     if (selected) builderProjectId = selected.id;
     var profile = state.profile || {};
     var options = projects.map(function (project) {
-      return '<option value="' + escapeHtml(project.id) + '"' + (project.id === builderProjectId ? ' selected' : '') + '>' + escapeHtml(project.appTitle + ' — ' + project.title) + '</option>';
+      return '<option value="' + escapeHtml(project.id) + '"' + (project.id === builderProjectId ? ' selected' : '') + '>' + escapeHtml(project.appTitle + ', ' + project.title) + '</option>';
     }).join('');
     content.innerHTML = [
       '<div class="ppb-builder">',
@@ -982,7 +982,7 @@
     selectedGuideId = guideId;
     var profile = state.profile || {};
     drawer.innerHTML = [
-      '<div class="ppb-drawer-head"><div><span>' + escapeHtml(guide.type + ' · ' + guide.model) + '</span><h3>' + escapeHtml(guide.title) + '</h3><p>' + escapeHtml(project.appTitle + ' — ' + project.title) + '</p></div><button type="button" class="ppb-icon-button" data-ppb-drawer-close aria-label="Close guide customizer">' + icon('close') + '</button></div>',
+      '<div class="ppb-drawer-head"><div><span>' + escapeHtml(guide.type + ' · ' + guide.model) + '</span><h3>' + escapeHtml(guide.title) + '</h3><p>' + escapeHtml(project.appTitle + ', ' + project.title) + '</p></div><button type="button" class="ppb-icon-button" data-ppb-drawer-close aria-label="Close guide customizer">' + icon('close') + '</button></div>',
       '<form class="ppb-drawer-form" data-ppb-drawer-form>',
       '  <label><span>Goal</span><textarea name="goal" rows="2" placeholder="Define the exact outcome">' + escapeHtml(profile.goal || '') + '</textarea></label>',
       '  <label><span>Context</span><textarea name="context" rows="3" placeholder="Add business, audience, user or market context">' + escapeHtml(profile.context || '') + '</textarea></label>',
@@ -1059,7 +1059,7 @@
       showToast(guide.title + ' copied');
       dispatch('copy', { guideId: guide.id, projectId: project.id, appId: project.appId });
     }).catch(function () {
-      showToast('Copy failed — select the text manually');
+      showToast('Copy failed, select the text manually');
     });
   }
 
