@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Mailer Studio — AI HTML Email Generator | Lifecycle OS</title>
+<title>Mailer Studio | AI HTML Email Generator | Lifecycle OS</title>
 <meta name="theme-color" content="#0F0D0A" />
 <link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -95,13 +95,13 @@
   <script defer src="/assets/cinematic.js"></script>
 <!-- cinematic:end -->
 <!-- seo:auto:start -->
-<!-- Managed by scripts/seo-inject.mjs — edit seo.config.json, not here. -->
-<meta name="description" content="Mailer Studio — turn a brief into designed, on-brand, ready-to-send HTML email variants, each quality-scored. Part of the Lifecycle OS. Brand-agnostic." />
+<!-- Managed by scripts/seo-inject.mjs, edit seo.config.json, not here. -->
+<meta name="description" content="Mailer Studio, turn a brief into designed, on-brand, ready-to-send HTML email variants, each quality-scored. Part of the Lifecycle OS. Brand-agnostic." />
 <link rel="canonical" href="https://anchit-tandon.com/lifecycle-os-studio" />
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
 <meta name="keywords" content="Mailer Studio, AI HTML email generator, AI mailer builder, generate marketing emails AI, HTML email template generator, D2C email design AI, AI email creative studio, responsive HTML mailer AI, email content generator, Lifecycle OS, Anchit Tandon" />
 <meta name="author" content="Anchit Tandon" />
-<meta property="og:title" content="Mailer Studio — AI HTML Email Generator" />
+<meta property="og:title" content="Mailer Studio | AI HTML Email Generator" />
 <meta property="og:description" content="Turn a brief into designed, on-brand, ready-to-send HTML email variants, each quality-scored. Part of the Lifecycle OS." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://anchit-tandon.com/lifecycle-os-studio" />
@@ -110,9 +110,9 @@
 <meta property="og:locale" content="en_US" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Anchit Tandon — Product &amp; D2C Growth" />
+<meta property="og:image:alt" content="Anchit Tandon, Product &amp; D2C Growth" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Mailer Studio — AI HTML Email Generator" />
+<meta name="twitter:title" content="Mailer Studio | AI HTML Email Generator" />
 <meta name="twitter:description" content="Turn a brief into designed, on-brand, ready-to-send HTML email variants, each quality-scored. Part of the Lifecycle OS." />
 <meta name="twitter:image" content="https://anchit-tandon.com/assets/og/og-default.png" />
 <script type="application/ld+json">
@@ -213,7 +213,7 @@
 
     <div id="extras" style="margin-top:8px"></div>
     <footer>
-      Mailer Studio · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>. Brand-agnostic, no proprietary data — the demo always returns designed HTML.
+      Mailer Studio · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>. Brand-agnostic, no proprietary data, the demo always returns designed HTML.
     </footer>
   </div>
 
@@ -233,15 +233,15 @@
     var ho=JSON.parse(localStorage.getItem('lifecycle-os-studio-handoff')||'null');
     if(ho && ho.source==='calendar' && ho.entry && (Date.now()-(ho.ts||0) < 15*60*1000)){
       var en=ho.entry;
-      // The Calendar plans a generic sample D2C brand — set the subject to match
+      // The Calendar plans a generic sample D2C brand, set the subject to match
       // so /api/mailer uses the brand branch (not the personal Anchit branch).
       $('brand').value='Sample Brand'; $('url').value='example.com';
-      $('brief').value='Build the "'+(en.subject_hint||'')+'" email — '+String(en.archetype||'').replace(/-/g,' ')+' for the '+(en.segment||'')+' segment'+(en.market?(' ('+en.market+' market)'):'')+(en.hero_product?(', hero product '+en.hero_product):'')+(en.feedback?('. Requested changes: '+en.feedback):'')+'.';
+      $('brief').value='Build the "'+(en.subject_hint||'')+'" email, '+String(en.archetype||'').replace(/-/g,' ')+' for the '+(en.segment||'')+' segment'+(en.market?(' ('+en.market+' market)'):'')+(en.hero_product?(', hero product '+en.hero_product):'')+(en.feedback?('. Requested changes: '+en.feedback):'')+'.';
       if(en.segment) $('segment').value=en.segment;
       if(en.hero_product) $('offer').value=en.hero_product;
       var note=document.createElement('div');
       note.style.cssText='margin:-6px 0 18px 2px;font-family:var(--font-mono);font-size:12px;color:var(--accent)';
-      note.textContent='↳ Opened from the Marketing Calendar — '+(en.date||'')+' · '+(en.market||'')+' · '+(en.segment||'')+'. Brief prefilled below.';
+      note.textContent='↳ Opened from the Marketing Calendar, '+(en.date||'')+' · '+(en.market||'')+' · '+(en.segment||'')+'. Brief prefilled below.';
       var form=document.querySelector('.form'); if(form&&form.parentNode){ form.parentNode.insertBefore(note, form); }
       try{ localStorage.removeItem('lifecycle-os-studio-handoff'); }catch(_e){}
     }
@@ -263,12 +263,12 @@
     fetch('/api/mailer',{ method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify(payload) })
       .then(function(r){ return r.json(); })
       .then(function(d){ if(!d||!d.variants) throw new Error('failed'); lastData=d; render(d); })
-      .catch(function(){ $('err').textContent='Could not generate mailers just now — please try again in a moment.'; $('err').style.display='block'; })
+      .catch(function(){ $('err').textContent='Could not generate mailers just now, please try again in a moment.'; $('err').style.display='block'; })
       .then(function(){ clearInterval(timer); $('go').disabled=false; $('loading').classList.remove('on'); });
   }
 
   function render(d){
-    $('outTitle').textContent=(d.brand||'Your brand')+' — mailer variants';
+    $('outTitle').textContent=(d.brand||'Your brand')+': mailer variants';
     var badge=$('outBadge');
     if(d.source==='ai'){ badge.textContent='AI-generated'; badge.className='badge ai'; }
     else if(d.source==='anchit'){ badge.textContent='Marketing myself · anchit-tandon.com'; badge.className='badge ai'; }

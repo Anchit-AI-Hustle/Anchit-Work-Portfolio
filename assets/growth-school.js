@@ -1,4 +1,4 @@
-/* growth-school.js — one engine, two courses.
+/* growth-school.js, one engine, two courses.
  *
  * The general course (growth-school.html) and Ayushi❤️'s course
  * (ayushi-rawat/course.html) both load this file and pass their own COURSE object.
@@ -75,8 +75,8 @@
     const BLANK = () => ({ v: SCHEMA, done: {}, notes: {}, wrong: {}, exam: null, name: '' });
 
     // Hydrate by TYPE, not by merge. Object.assign copies an explicit null
-    // straight over the default, so a record containing {"notes":null} — which
-    // a hand-edited or half-written file easily produces — replaced the object
+    // straight over the default, so a record containing {"notes":null}, which
+    // a hand-edited or half-written file easily produces, replaced the object
     // with null and the first `S.notes[id]` read killed the whole page. The
     // page rendered nothing at all, and the try/catch around JSON.parse did not
     // help because the JSON was perfectly valid; it was the SHAPE that was wrong.
@@ -108,7 +108,7 @@
 
     const chapters = [];
     COURSE.tracks.forEach((t) => t.chapters.forEach((c) => chapters.push({ ...c, track: t.name })));
-    // Review and the assessment are destinations, not asides — if they live in
+    // Review and the assessment are destinations, not asides, if they live in
     // a corner of some chapter nobody meets them.
     const REVIEW_ID = '__review', EXAM_ID = '__exam';
     chapters.push({ id: REVIEW_ID, title: 'Review what you missed', track: 'Finish', synthetic: true });
@@ -164,7 +164,7 @@
       rail.__count = count;
 
       // Real chapters only. Review and the assessment are destinations, not
-      // lessons, and neither can be marked done — so counting them made the
+      // lessons, and neither can be marked done, so counting them made the
       // bar top out at 9 of 11 (82%). A progress bar that cannot reach the end
       // is worse than no progress bar: it reads as "you have missed something"
       // to someone who has in fact finished.
@@ -287,7 +287,7 @@
         ])));
     }
 
-    // The explanation shows for right AND wrong answers — a tick on its own
+    // The explanation shows for right AND wrong answers, a tick on its own
     // teaches nothing, and the reason is the part worth remembering.
     function quizEl(qs, chapterId) {
       const box = h('div', { class: 'gs-quiz' }, h('h3', { class: 'gs-h3', style: 'margin-top:0' }, 'Check yourself'));
@@ -302,8 +302,8 @@
         q.options.forEach((opt, oi) => {
           // Named from the chapter and the question index. It used to include
           // q.q.length, which is not an identity: two questions of equal length
-          // rendered on the same page — as they are on the review list, where
-          // each is its own quiz block and qi restarts at 0 — would share a
+          // rendered on the same page, as they are on the review list, where
+          // each is its own quiz block and qi restarts at 0, would share a
           // radio group and silently deselect each other.
           const input = h('input', { type: 'radio', name: COURSE.id + '-' + chapterId + '-q' + qi });
           const label = h('label', { class: 'gs-opt' }, [input, h('span', { html: opt })]);
@@ -341,7 +341,7 @@
     // Notes are per chapter, saved locally, and exportable as one Markdown file.
     function notesEl(c) {
       const ta = h('textarea', {
-        placeholder: 'What does this change about how you work? Write it in your own words — that is what makes it stick.',
+        placeholder: 'What does this change about how you work? Write it in your own words, that is what makes it stick.',
         'aria-label': 'Your notes for this chapter',
       });
       ta.value = S.notes[c.id] || '';
@@ -351,7 +351,7 @@
         // Tell the truth about whether the write succeeded. Claiming "saved"
         // while the quota is full is how someone loses an afternoon of notes.
         meta.textContent = w + (w === 1 ? ' word' : ' words') +
-          (saveOk ? ' · saved on this device' : ' · NOT SAVED — this browser refused to store it');
+          (saveOk ? ' · saved on this device' : ' · NOT SAVED, this browser refused to store it');
         meta.style.color = saveOk ? '' : 'var(--gs-primary)';
       };
       let t;
@@ -377,7 +377,7 @@
       setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 0);
     }
     function exportNotes() {
-      const lines = ['# ' + plain(COURSE.title) + ' — my notes', ''];
+      const lines = ['# ' + plain(COURSE.title) + ', my notes', ''];
       chapters.forEach((c, i) => {
         const n = (S.notes[c.id] || '').trim();
         if (!n) return;
@@ -387,7 +387,7 @@
       if (lines.length === 2) lines.push('_No notes yet._');
       download('course-notes.md', lines.join('\n'), 'text/markdown;charset=utf-8');
     }
-    // Progress is local by design — no account, nothing sent anywhere. The
+    // Progress is local by design, no account, nothing sent anywhere. The
     // honest answer to "so I lose it on a new laptop" is a file you control.
     function exportProgress() {
       download('course-progress.json', JSON.stringify({ course: COURSE.id, saved: new Date().toISOString(), state: S }, null, 2), 'application/json');
@@ -412,7 +412,7 @@
       // What does it actually cost to stand up a narrow-catalogue D2C brand?
       capital: {
         title: 'What capital would it take?',
-        blurb: 'Move the sliders. Every number below is arithmetic you can check by hand — nothing is hidden.',
+        blurb: 'Move the sliders. Every number below is arithmetic you can check by hand, nothing is hidden.',
         fields: [
           { k: 'skus', label: 'SKUs at launch', min: 10, max: 400, step: 10, val: 60, fmt: (v) => v },
           { k: 'depth', label: 'Units held per SKU', min: 3, max: 40, step: 1, val: 10, fmt: (v) => v },
@@ -449,10 +449,10 @@
             ],
             verdict: contribution <= 0
               ? '<strong>This does not work yet.</strong> Every order loses ' + money(-contribution) +
-                ' after the cost of getting it. No amount of capital fixes a negative contribution — it just buys more losses. Raise price, cut unit cost, or get the order cheaper.'
+                ' after the cost of getting it. No amount of capital fixes a negative contribution, it just buys more losses. Raise price, cut unit cost, or get the order cheaper.'
               : '<strong>Each order contributes ' + money(contribution) + '.</strong> You need roughly ' +
                 money(total) + ' to open with ' + v.skus + ' SKUs and survive ' + v.months +
-                ' months. Stock is ' + Math.round((stock / total) * 100) + '% of that — in a catalogue business it usually is, which is why narrow ranges start cheaper. At ' +
+                ' months. Stock is ' + Math.round((stock / total) * 100) + '% of that, in a catalogue business it usually is, which is why narrow ranges start cheaper. At ' +
                 v.orders + ' orders a month you are ' + (netMonthly >= 0
                   ? 'above water by ' + money(netMonthly) + ' a month, which returns the capital in about ' + Math.ceil(monthsToRecover) + ' months.'
                   : 'still short by ' + money(-netMonthly) + ' a month, so the capital never comes back at this run-rate.'),
@@ -520,7 +520,7 @@
               ? '<strong>Worth doing.</strong> Your site is stronger than this term is hard, so a good page has a real chance. Expect roughly ' + months + ' months before the traffic is steady.'
               : gap >= -30
                 ? '<strong>Reachable, slowly.</strong> You are behind the difficulty of this term by ' + (-gap) +
-                  ' points. It is winnable with genuinely better material, on about a ' + months + '-month horizon — not a quarter.'
+                  ' points. It is winnable with genuinely better material, on about a ' + months + '-month horizon, not a quarter.'
                 : '<strong>Not this one, not yet.</strong> The gap is ' + (-gap) +
                   ' points. Volume this big attracts sites far stronger than yours; the same effort spent on narrower terms you can actually win will return sooner.',
           };
@@ -582,7 +582,7 @@
       const wrap = h('div');
       const intro = h('div', { class: 'gs-exam-intro' }, [
         h('h3', { class: 'gs-h3', style: 'margin-top:0' }, 'Final assessment'),
-        h('div', { class: 'gs-p', html: 'Every question from the course, in one pass — <strong>' + pool.length +
+        h('div', { class: 'gs-p', html: 'Every question from the course, in one pass, <strong>' + pool.length +
           '</strong> of them. You need <strong>' + Math.round(PASS * 100) + '%</strong>. ' +
           'Nothing is timed and you can retake it; the point is to find the gaps, not to gate you.' }),
       ]);
@@ -622,8 +622,8 @@
             h('div', null, [h('div', { class: 'k' }, 'Result'), h('div', { class: 'v ' + (pct >= PASS ? 'ok' : 'warn') }, pct >= PASS ? 'Passed' : 'Not yet')]),
           ]));
           result.appendChild(h('div', { class: 'gs-p', html: pct >= PASS
-            ? 'Passed. The certificate is below — and the ' + missed.length + ' you missed have gone into your review list, because a pass is not the same as knowing all of it.'
-            : 'Not yet — you need ' + Math.round(PASS * pool.length) + ' of ' + pool.length + '. The ' + missed.length +
+            ? 'Passed. The certificate is below, and the ' + missed.length + ' you missed have gone into your review list, because a pass is not the same as knowing all of it.'
+            : 'Not yet, you need ' + Math.round(PASS * pool.length) + ' of ' + pool.length + '. The ' + missed.length +
               ' you missed are in your review list now. Work through those and come back; nothing is lost.' }));
           if (pct >= PASS) result.appendChild(certEl());
           result.scrollIntoView({ block: 'start', behavior: 'smooth' });
@@ -649,12 +649,12 @@
           'scored ' + ex.right + ' of ' + ex.total + ' (' + Math.round(ex.pct * 100) + '%)<br>' +
           // Real chapters only. `chapters` also holds the two synthetic
           // destinations (Review, Final assessment), so counting it told the
-          // holder they had completed 11 chapters of a 9-chapter course — an
+          // holder they had completed 11 chapters of a 9-chapter course, an
           // overstatement, on the one artefact whose whole value is being
           // accurate about what was done.
           when + '<br>' + chapters.filter((c) => !c.synthetic).length + ' chapters · ' + allQuestions().length + ' questions' }),
         h('div', { class: 'gs-p', style: 'margin-top:20px;font-size:14px' },
-          'This is a self-assessed record generated in your browser. It is honest about being that — it is not an accredited qualification, and nobody has verified it.'),
+          'This is a self-assessed record generated in your browser. It is honest about being that, it is not an accredited qualification, and nobody has verified it.'),
         nameIn,
         h('div', { class: 'gs-foot', style: 'justify-content:center;border:0;margin-top:8px' }, [
           h('button', { class: 'gs-btn', type: 'button', onclick: () => window.print() }, 'Print / save as PDF'),
@@ -726,7 +726,7 @@
       const markBtn = h('button', {
         class: 'gs-btn primary', type: 'button',
         onclick: () => { done[c.id] = 1; save(); renderRail(); if (current < chapters.length - 1) go(current + 1); else renderChapter(); },
-      }, done[c.id] ? 'Done ✓ — next chapter' : 'Mark done →');
+      }, done[c.id] ? 'Done ✓, next chapter' : 'Mark done →');
       const foot = h('div', { class: 'gs-foot' }, [markBtn]);
       if (current > 0) foot.appendChild(h('button', { class: 'gs-btn', type: 'button', onclick: () => go(current - 1) }, '← Back'));
       if (current < chapters.length - 1) foot.appendChild(h('button', { class: 'gs-btn', type: 'button', onclick: () => go(current + 1) }, 'Skip ahead →'));

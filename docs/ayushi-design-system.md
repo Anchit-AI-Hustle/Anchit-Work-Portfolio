@@ -1,4 +1,4 @@
-# Ayushi Rawat — "Ivory & Raspberry" design system
+# Ayushi Rawat, "Ivory & Raspberry" design system
 
 Applies to everything under `/ayushi-rawat`, plus the job agent at
 `/ayushi-rawat-auto-job-applier`. It is deliberately **not** the

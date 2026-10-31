@@ -39,7 +39,7 @@ const mutations = {
   },
   // disable the ambient governor at the source: it can never tag anything.
   // (An earlier attempt used a CSS override of `animation: revert`, which
-  // resolves to `none` — it did not restore anything, so the suite "passed"
+  // resolves to `none`, it did not restore anything, so the suite "passed"
   // under a mutation that had not actually mutated. Kill the class instead.)
   no_governor: () => {
     const t = DOMTokenList.prototype.toggle, a = DOMTokenList.prototype.add;
@@ -82,7 +82,7 @@ const mutations = {
   await p.route(/fonts\.(googleapis|gstatic)\.com/, r=>r.fulfill({status:200,contentType:'text/css',body:''}));
   if (MUT) {
     const src = mutations[MUT].toString();
-    // Inject after the document exists — addInitScript runs before <head>.
+    // Inject after the document exists, addInitScript runs before <head>.
     await p.addInitScript(`document.addEventListener('DOMContentLoaded',()=>{(${src})()})`);
   }
   const results = [];
@@ -204,12 +204,12 @@ const mutations = {
   // Sampled once per RENDERED frame: a backwards step between two painted
   // frames is something a person sees, whereas two scroll events inside one
   // frame are not. Repeated across the load window because the fault was
-  // intermittent — 4 to 7 runs in 14 before the fix, 0 in 26 after it.
+  // intermittent, 4 to 7 runs in 14 before the fix, 0 in 26 after it.
   //
   // CAVEAT, so nobody reads more into this check than it earns: unlike the
   // others here, it has NOT been shown to fail on demand. `MUT=no_drift_fix`
-  // stubs out the correction — verified to be installed, and the correction is
-  // verified to fire twice in a normal run — yet ten mutated passes did not
+  // stubs out the correction, verified to be installed, and the correction is
+  // verified to fire twice in a normal run, yet ten mutated passes did not
   // reproduce a visible jump. The fault is timing-dependent enough that a fixed
   // set of start times cannot be relied on to provoke it. Treat this as a guard
   // that will catch a regression which reproduces, not as proof of one that

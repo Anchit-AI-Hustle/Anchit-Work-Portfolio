@@ -1,7 +1,7 @@
 /* Cookie / analytics consent.
  *
  * What this actually gates. The site's one cookie (sb_collapsed) and its
- * localStorage keys are strictly functional — they remember choices the
+ * localStorage keys are strictly functional, they remember choices the
  * visitor made about the interface, carry no identifier and are exempt from
  * consent. The only thing that is NOT exempt is analytics, so that is the one
  * thing this banner controls: decline, and the script is never requested.

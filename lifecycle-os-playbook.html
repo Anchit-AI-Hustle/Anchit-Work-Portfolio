@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Retention Playbook — Lifecycle Plays &amp; Flows | Lifecycle OS</title>
+<title>Retention Playbook | Lifecycle Plays &amp; Flows | Lifecycle OS</title>
 <link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -14,13 +14,13 @@
   <script defer src="/assets/cinematic.js"></script>
 <!-- cinematic:end -->
 <!-- seo:auto:start -->
-<!-- Managed by scripts/seo-inject.mjs — edit seo.config.json, not here. -->
-<meta name="description" content="Retention Playbook — a library of lifecycle plays: triggers, automated flows and KPIs tuned to the subject's category. Part of the Lifecycle OS." />
+<!-- Managed by scripts/seo-inject.mjs, edit seo.config.json, not here. -->
+<meta name="description" content="Retention Playbook, a library of lifecycle plays: triggers, automated flows and KPIs tuned to the subject's category. Part of the Lifecycle OS." />
 <link rel="canonical" href="https://anchit-tandon.com/lifecycle-os-playbook" />
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
 <meta name="keywords" content="lifecycle strategy playbook, retention playbook templates, marketing playbook AI, lifecycle marketing templates, D2C retention playbook, growth playbook library, campaign strategy templates, lifecycle strategy framework, retention strategy guide, Lifecycle OS, Anchit Tandon" />
 <meta name="author" content="Anchit Tandon" />
-<meta property="og:title" content="Retention Playbook — Lifecycle Plays &amp; Flows" />
+<meta property="og:title" content="Retention Playbook | Lifecycle Plays &amp; Flows" />
 <meta property="og:description" content="A library of lifecycle plays: triggers, automated flows and KPIs tuned to the subject's category. Part of the Lifecycle OS." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://anchit-tandon.com/lifecycle-os-playbook" />
@@ -29,9 +29,9 @@
 <meta property="og:locale" content="en_US" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Anchit Tandon — Product &amp; D2C Growth" />
+<meta property="og:image:alt" content="Anchit Tandon, Product &amp; D2C Growth" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Retention Playbook — Lifecycle Plays &amp; Flows" />
+<meta name="twitter:title" content="Retention Playbook | Lifecycle Plays &amp; Flows" />
 <meta name="twitter:description" content="A library of lifecycle plays: triggers, automated flows and KPIs tuned to the subject's category. Part of the Lifecycle OS." />
 <meta name="twitter:image" content="https://anchit-tandon.com/assets/og/og-default.png" />
 <script type="application/ld+json">
@@ -65,7 +65,7 @@
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "@id": "https://anchit-tandon.com/lifecycle-os-playbook#app",
-  "name": "Retention Playbook — Lifecycle OS",
+  "name": "Retention Playbook | Lifecycle OS",
   "url": "https://anchit-tandon.com/lifecycle-os-playbook",
   "applicationCategory": "BusinessApplication",
   "applicationSubCategory": "Retention Marketing",
@@ -123,13 +123,13 @@
     $('err').style.display='none'; $('out').style.display='none'; $('loading').classList.add('on');
     LOS.post('/api/lifecycle',{brand:$('brand').value.trim(),url:$('url').value.trim()}).then(function(r){
       var p=r.plan; if(!p) throw new Error('failed');
-      $('hd').textContent=(p.brand||'Subject')+' — retention playbook'; LOS.badge($('bdg'),r.source);
+      $('hd').textContent=(p.brand||'Subject')+': retention playbook'; LOS.badge($('bdg'),r.source);
       $('ret').innerHTML=(p.retention||[]).map(function(x){return '<div class="lrow"><div class="w">'+esc(x.trigger)+'</div><div><div class="th" style="margin:0;font-weight:400;color:var(--ink-dim);font-size:14px">'+esc(x.flow)+'</div></div></div>';}).join('');
       $('stages').innerHTML=(p.stages||[]).map(function(x){var tg=(x.channels||[]).map(function(c){return '<span>'+esc(c)+'</span>';}).join('');return '<div class="card"><div class="k">'+esc(x.stage)+'</div><div class="t">'+esc(x.goal)+'</div><p>'+esc(x.campaign)+'</p><div class="tags">'+tg+'</div></div>';}).join('');
       $('seg').innerHTML=(p.segments||[]).map(function(x){return '<div class="card"><div class="k"><span>'+esc(x.name)+'</span><span class="sz">'+esc(x.size||'')+'</span></div><p>'+esc(x.description)+'</p></div>';}).join('');
       $('kpi').innerHTML=(p.kpis||[]).map(function(k){return '<div class="kpi"><div class="m">'+esc(k.metric)+'</div><div class="v">'+esc(k.target)+'</div></div>';}).join('');
       $('out').style.display='block';
-    }).catch(function(){ $('err').textContent='Could not load the playbook — try again in a moment.'; $('err').style.display='block'; })
+    }).catch(function(){ $('err').textContent='Could not load the playbook, try again in a moment.'; $('err').style.display='block'; })
     .then(function(){ $('loading').classList.remove('on'); });
   }
   run();

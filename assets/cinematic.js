@@ -1,4 +1,4 @@
-/* cinematic.js — the site's motion grammar, portable to any page.
+/* cinematic.js, the site's motion grammar, portable to any page.
  *
  * index.html carries this behaviour inline; every other page had none at all.
  * Rather than copy it 27 times, this is one self-contained file: it injects its
@@ -12,7 +12,7 @@
  *              ordered without the last card waiting on a linear pile-up
  *
  * FAIL-VISIBLE BY DESIGN. Everything here starts hidden, which is exactly how a
- * motion system turns into a blank page — that has bitten this site twice. So:
+ * motion system turns into a blank page, that has bitten this site twice. So:
  * elements are only hidden by JavaScript that has already decided to animate
  * them, a sweep re-checks on scroll and resize, and a hard deadline reveals
  * everything regardless. If any of it fails, the visitor sees the content.
@@ -36,7 +36,7 @@
   //
   // The Motion toggle only exists on the homepage, so one click there set
   // anchit-motion=off for the whole origin and left all 22 other pages
-  // permanently static with no way to undo it — verified: tagged=0, played=0,
+  // permanently static with no way to undo it, verified: tagged=0, played=0,
   // and no control anywhere on the page. A global switch needs a global way
   // back, so this injects a small one wherever the homepage's is absent.
   function injectToggle() {
@@ -45,7 +45,7 @@
     btn.id = 'cinMotion';
     btn.type = 'button';
     btn.setAttribute('aria-pressed', motionOff ? 'false' : 'true');
-    btn.title = motionOff ? 'Motion is off — click to turn it on' : 'Click to turn motion off';
+    btn.title = motionOff ? 'Motion is off, click to turn it on' : 'Click to turn motion off';
     btn.textContent = motionOff ? 'Motion: off' : 'Motion: on';
     btn.style.cssText = 'position:fixed;left:14px;bottom:14px;z-index:2147483000;' +
       'font:500 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em;' +
@@ -132,7 +132,7 @@
   }
 
   // Bottom-left is only the FIRST choice. This runtime is added to pages it did
-  // not design, and some of them already own that corner — on the marketing
+  // not design, and some of them already own that corner, on the marketing
   // course it landed on top of two chapter links and a Library button, which
   // the toggle then covered and made unreachable. So it asks what is already
   // there and moves if the spot is taken. Measured once, after layout, with
@@ -237,7 +237,7 @@
 
   function place(btn) {
     // The toggle has to be taken OUT of hit-testing while it looks, or
-    // elementFromPoint just returns the toggle and every corner reads as free —
+    // elementFromPoint just returns the toggle and every corner reads as free,
     // which is exactly how the first version of this decided the occupied
     // corner was fine and stayed there.
     function occupied(x, y) { return occupiedFor(btn, x, y); }
@@ -297,7 +297,7 @@
     '.cin-stagger>*{opacity:0;transform:translateY(18px);' +
       'transition:opacity .6s cubic-bezier(.16,1,.3,1),transform .6s cubic-bezier(.16,1,.3,1);' +
       'transition-delay:var(--cin-cd,0s)}',
-    // .cin-stagger.cin-in itself, not only its children — see the note below.
+    // .cin-stagger.cin-in itself, not only its children, see the note below.
     '.cin.cin-in,.cin-stagger.cin-in,.cin-stagger.cin-in>*{opacity:1;transform:none}',
 
     // Six distinct entrances, not one repeated. A page where every block does
@@ -315,7 +315,7 @@
     //
     // NOTHING HERE ROTATES.
     //
-    // Five of the six variants used to hinge, swing or roll — rotateX, rotateY,
+    // Five of the six variants used to hinge, swing or roll, rotateX, rotateY,
     // rotateZ. A rotation under a shared perspective is the one entrance that
     // cannot look straight while it plays: the far edge of the element is
     // foreshortened, so a panel arrives visibly crooked and its children each
@@ -328,7 +328,7 @@
     // rise then a glide then a depth arrival reads as choreography, where six
     // tilts read as one effect repeated. Every one is transform + opacity only,
     // so they stay on the compositor, and translateZ is kept because pure Z
-    // under perspective scales uniformly — it adds depth without skew.
+    // under perspective scales uniformly, it adds depth without skew.
     '.cin-v1{transform:translate3d(0,34px,0)}',                          // rise
     '.cin-v2{transform:translate3d(-52px,0,0)}',                         // glide in, left
     '.cin-v3{transform:translate3d(52px,0,0)}',                          // glide in, right
@@ -338,7 +338,7 @@
 
     // On a narrow screen there is no room to come in from the side. A block is
     // the full width of a phone, so holding it 58px to the left puts its first
-    // characters past the edge — which is what a card mid-reveal looked like at
+    // characters past the edge, which is what a card mid-reveal looked like at
     // 390px: "Building the lifecycle OS" reading as "uilding". The sideways
     // entrances become short ones, and the deep push-back eases off too,
     // because at this width it shrinks a block enough to read as a glitch
@@ -354,7 +354,7 @@
     // given a variant parked at its entrance transform FOREVER: the variant
     // rules above match any element carrying .cin-vN, but nothing here cleared
     // it unless the element also had .cin. That is why the sidebar sat at a
-    // permanent rotateX and .cw-body at a permanent rotateY — visible as a
+    // permanent rotateX and .cw-body at a permanent rotateY, visible as a
     // skewed panel whose children each projected to a different height under
     // the ancestor's perspective. Match on .cin-in plus the variant, whichever
     // container class carries it.
@@ -366,8 +366,8 @@
     // and word-level reveal for headings.
     //
     // Depth is a deeper scale + rise, not a blur. An animating `filter: blur()`
-    // cannot run on the compositor — the element is re-rasterised on every
-    // frame of the tween — and the resting state holds a render surface on
+    // cannot run on the compositor, the element is re-rasterised on every
+    // frame of the tween, and the resting state holds a render surface on
     // every card still waiting to arrive. A whole page of feature cards paid
     // that at once on the first scroll.
     '.cin-depth{opacity:0;transform:scale(.94) translateY(22px);' +
@@ -388,7 +388,7 @@
     // ── futurist layer, on every page rather than only the homepage ──
     // A holographic sheen crosses a block as it arrives. A block that only
     // fades in has no surface; a light travelling over it says the block is a
-    // panel catching a source somewhere off-frame. One pass, on arrival only —
+    // panel catching a source somewhere off-frame. One pass, on arrival only,
     // transform and opacity, so it is compositor work and costs no repaint.
     '@keyframes cinSheen{from{transform:translate3d(-130%,0,0) skewX(-14deg);opacity:0}' +
       '18%{opacity:1}to{transform:translate3d(130%,0,0) skewX(-14deg);opacity:0}}',
@@ -405,12 +405,12 @@
     // keyframe, 130% to the right of its panel. Invisible at opacity 0, but
     // still in the layout, so any page whose body does not clip overflow
     // (marketing-101, lifecycle-os-analysis) scrolled sideways on every phone.
-    // Back at rest the layer is inset:0 and opacity 0 — the same look.
+    // Back at rest the layer is inset:0 and opacity 0, the same look.
     '.cin-sheen.cin-in>.cin-sheen-l::before,.cin-in .cin-sheen>.cin-sheen-l::before' +
       '{animation:cinSheen 1.15s cubic-bezier(.16,1,.3,1) .16s 1 backwards}',
 
     // A specular highlight that tracks the pointer across a panel. --mx/--my
-    // are written on the ELEMENT, never on :root — a custom property on the
+    // are written on the ELEMENT, never on :root, a custom property on the
     // document root re-resolves the computed style of every element on the
     // page, once per pointer frame.
     '.cin-spec-host{position:relative}',
@@ -418,8 +418,8 @@
       'opacity:0;transition:opacity .35s ease;background:radial-gradient(220px circle at ' +
       'var(--mx,50%) var(--my,50%),rgba(255,183,54,.16),transparent 70%)}',
     '.cin-spec-host:hover>.cin-spec{opacity:1}',
-    // Not every page has panels. The tool pages are dense UI — their blocks are
-    // 30-70px headings, labels and rows — and a light sweeping across a 44px
+    // Not every page has panels. The tool pages are dense UI, their blocks are
+    // 30-70px headings, labels and rows, and a light sweeping across a 44px
     // label is noise rather than an effect. Those get an edge draw instead: a
     // hairline that wipes along the block's baseline as it arrives. Same
     // vocabulary, scaled to what is actually there, so no page is left with
@@ -436,7 +436,7 @@
   ].join('');
   (document.head || root).appendChild(css);
 
-  // Controls and fields are no longer excluded outright — they now ride in
+  // Controls and fields are no longer excluded outright, they now ride in
   // just behind the card they belong to (see enrich()). Only things that would
   // fight their own updates, or that animate themselves, stay out.
   var SKIP = 'canvas,svg,iframe,video,audio,' +
@@ -483,7 +483,7 @@
     var all = host.querySelectorAll('*');
     if (all.length > 6000) return;            // pathological DOM: leave it alone
 
-    // Pass 1 — anything holding two or more cards becomes a stagger scope, at
+    // Pass 1, anything holding two or more cards becomes a stagger scope, at
     // ANY depth. Walking only the direct children of known containers left
     // nested grids untouched: 78% of boxes across these pages had no beat.
     Array.prototype.forEach.call(all, function (el) {
@@ -502,14 +502,14 @@
       el.__cinGrid = 1; el.__cin = 1;
     });
 
-    // Pass 3 — structural blocks that are not card-like at all.
+    // Pass 3, structural blocks that are not card-like at all.
     //
     // Passes 1 and 2 only recognise grids and boxes (border, background or
     // shadow). That left whole pages untouched: hotel's six <section class=
     // "scene"> blocks scored 0/6, and the plain wrapper divs on the lifecycle
     // tool pages 0-50%. A block is a block whether or not it has a border, so
     // any section-sized container that nothing else has claimed now arrives on
-    // its own beat — which is what makes the page progressive rather than a
+    // its own beat, which is what makes the page progressive rather than a
     // few animated cards floating in a static layout.
     Array.prototype.forEach.call(
       host.querySelectorAll('section,article,main>div,.container>div,.wrap>div,.shell>div,.page>div'),
@@ -518,7 +518,7 @@
         var r = el.getBoundingClientRect();
         if (r.height < 60 || r.width < 120) return;
         // If something inside is already choreographed, let that carry the
-        // section — animating both would fade the same content twice.
+        // section, animating both would fade the same content twice.
         if (el.querySelector('.cin,.cin-stagger,.reveal,.reveal-stagger')) return;
         if (!(el.textContent || '').trim()) return;          // spacers and rules
         el.classList.add('cin');
@@ -526,7 +526,7 @@
       }
     );
 
-    // Pass 2 — every remaining card-like box arrives on its own.
+    // Pass 2, every remaining card-like box arrives on its own.
     Array.prototype.forEach.call(all, function (el) {
       if (covered(el)) return;
       if (skip(el)) return;
@@ -568,12 +568,12 @@
   // The gap is enforced across bursts, not just inside one.
   //
   // The first version called drain() straight from enqueue() whenever it was
-  // not already draining — and because each drain emptied the queue and cleared
+  // not already draining, and because each drain emptied the queue and cleared
   // the flag, a loop of enqueues found it idle every time and revealed each one
   // SYNCHRONOUSLY. Measured: thirteen blocks all landing at 309ms, which is the
   // burst the queue exists to prevent. Remembering when the last one played is
   // what makes the spacing real.
-  // ONE clock, shared with the inline reveal system in index.html — see the
+  // ONE clock, shared with the inline reveal system in index.html, see the
   // note there. Two queues each spacing only their own reveals is how blocks
   // still arrived in pairs while both gaps read 55ms.
   var clock = (window.__revealClock = window.__revealClock || { last: 0 });
@@ -587,9 +587,9 @@
 
   function gapFor() {
     var now = performance.now();
-    // Was 16 — the backlog valve. 16ms is one frame, so a
+    // Was 16, the backlog valve. 16ms is one frame, so a
     // drained backlog put two or three reveals inside the same 40ms window and
-    // the one-at-a-time property quietly stopped holding under load — which is
+    // the one-at-a-time property quietly stopped holding under load, which is
     // exactly when it matters most, because that is when several blocks are
     // waiting. 45ms still clears twenty blocks in under a second, and is wide
     // enough that two can never share a window.
@@ -624,7 +624,7 @@
     // A variant is for a BLOCK, never for a container the size of the page.
     //
     // These entrances hold their element off-screen in three dimensions until
-    // it plays — cin-v4 sits at translateZ(-420px). That is a nice arrival for
+    // it plays, cin-v4 sits at translateZ(-420px). That is a nice arrival for
     // a card and a catastrophe for a page wrapper: tag() had classed a site's
     // root .app element as a stagger scope, so the whole document was pushed
     // back in Z and rendered as an empty screen until its turn came. Caught on
@@ -640,7 +640,7 @@
     if (el.classList.contains('cin-stagger')) {
       // One child at a time, and far enough apart to see it.
       //
-      // step() is sub-linear — sqrt-based — which was written to stop a long
+      // step() is sub-linear, sqrt-based, which was written to stop a long
       // row pile-up. For six children it produces 62, 88, 107, 124, 139 and
       // 152ms: a spread of ninety milliseconds, which the eye reads as all of
       // them arriving together. That is why the elements inside a block never
@@ -657,7 +657,7 @@
         // …and set the delay itself, not only the variable it is read from.
         // `.cin-stagger>*` declares `transition-delay:var(--cin-cd)`, but any
         // child carrying its own `transition:` SHORTHAND resets delay back to
-        // zero — the shorthand sets every longhand it does not mention. The
+        // zero, the shorthand sets every longhand it does not mention. The
         // variable was landing correctly (0.000s, 0.120s, 0.240s…) while the
         // computed delay stayed 0 on most blocks, which is why the children
         // still arrived together. An inline delay outranks the shorthand.
@@ -710,7 +710,7 @@
   // ── horizontal rails ──────────────────────────────────────────────────
   // Mixed into the vertical flow, but only where the content earns it. An
   // analysis across the tool pages found almost nothing qualifies: they are
-  // forms and panels, not galleries. So this is a RULE rather than a list —
+  // forms and panels, not galleries. So this is a RULE rather than a list,
   // a row of five or more uniform cards costing real vertical height becomes
   // a side-scrolling rail, and anything else is left to scroll normally.
   function railify() {
@@ -732,7 +732,7 @@
         '-webkit-overflow-scrolling:touch;';
       grid.setAttribute('tabindex', '0');
       grid.setAttribute('role', 'region');
-      grid.setAttribute('aria-label', 'Scrollable card row — use arrow keys or swipe');
+      grid.setAttribute('aria-label', 'Scrollable card row, use arrow keys or swipe');
       kids.forEach(function (c) {
         c.style.cssText += ';scroll-snap-align:start;flex:0 0 clamp(240px,24vw,340px);';
       });
@@ -764,7 +764,7 @@
   // idea is that it steals the scroll and traps people; this version only takes
   // over while the rail is centred AND has somewhere left to go, and hands the
   // page straight back at either end, so a determined scroll always continues
-  // down. Desktop with a real wheel only — never on touch, where the native
+  // down. Desktop with a real wheel only, never on touch, where the native
   // swipe is already the right gesture.
   function pinRails() {
     if (motionOff || innerWidth < 900) return;
@@ -804,9 +804,9 @@
   // ── enrich: apply the richer vocabulary once blocks are tagged ─────────
   function enrich() {
     // (3) Controls and fields ride in behind their card rather than being
-    // excluded. They are never observed individually — a button that arrives
+    // excluded. They are never observed individually, a button that arrives
     // after its own card reads as lag, not choreography.
-    // Also reach cards owned by the inline reveal system on index.html —
+    // Also reach cards owned by the inline reveal system on index.html,
     // otherwise the flagship page is the one place with no controls choreography.
     document.querySelectorAll('.cin,.cin-stagger>*,.reveal,.reveal-stagger>*').forEach(function (card) {
       if (card.__enriched) return;
@@ -826,7 +826,7 @@
       if (r.height > 220 && r.width > 260) el.classList.add('cin-depth');
     });
 
-    // (2) Word-level reveal for headings — a sentence assembles rather than
+    // (2) Word-level reveal for headings, a sentence assembles rather than
     // fading as one slab. Split once, guarded so it never runs twice.
     document.querySelectorAll('h1,h2').forEach(function (h) {
       if (h.__split || h.closest('[data-no-motion]')) return;
@@ -847,7 +847,7 @@
     });
   }
 
-  // (2) Parallax — a slow counter-drift on large media so the page has depth.
+  // (2) Parallax, a slow counter-drift on large media so the page has depth.
   var parallax = [];
   function initParallax() {
     if (innerWidth < 720) return;                       // phones: no spare frames
@@ -876,11 +876,11 @@
   // ── Lenis: filmic scroll, ticked by GSAP ──────────────────────────────
   // Running Lenis on its own rAF while ScrollTrigger runs another means two
   // loops disagree about "now" and every scroll-triggered animation lands a
-  // frame late — the exact jerkiness Lenis is added to remove. So Lenis is
+  // frame late, the exact jerkiness Lenis is added to remove. So Lenis is
   // ticked BY gsap.ticker where GSAP exists, and ScrollTrigger updates on
   // every Lenis scroll.
   // Runs `fn` once the document has been at the same scroll offset for three
-  // consecutive frames — i.e. nothing is animating it any more. See initLenis
+  // consecutive frames, i.e. nothing is animating it any more. See initLenis
   // for why that is the test rather than "is a scroll event firing".
   window.__whenPageStill = function (fn) { whenPageStill(fn); };
   function whenPageStill(fn) {
@@ -904,7 +904,7 @@
     //
     // `window.__scrolling` is not a strict enough test for that: it is driven
     // by scroll EVENTS, which go quiet while the animation is still running.
-    // The document itself is the authority — three consecutive frames at the
+    // The document itself is the authority, three consecutive frames at the
     // same offset means nothing is moving it any more.
     // 1.05s was a full second of glide after every gesture: measured at 1,155ms
     // from one wheel notch to the page coming to rest on lifecycle-os.html,
@@ -921,7 +921,7 @@
 
     // Keep Lenis's idea of the scroll and the document's from drifting apart.
     //
-    // Lenis normally re-syncs itself when something else scrolls the page — it
+    // Lenis normally re-syncs itself when something else scrolls the page, it
     // listens for the scroll event and calls onNativeScroll. But it also sets
     // `preventNextNativeScrollEvent` after each of its own writes, so that it
     // does not treat its own output as somebody else's input. During the
@@ -929,7 +929,7 @@
     // visitor's real wheel scroll arrives, gets swallowed as "ours", and Lenis
     // carries on animating from a position the page left several frames ago.
     //
-    // The symptom was always the same size — exactly one wheel notch backwards,
+    // The symptom was always the same size, exactly one wheel notch backwards,
     // caught by sampling scrollY once per rendered frame and traced to
     // Lenis.setScroll writing 0.199px while the document sat at 200px.
     //
@@ -964,7 +964,7 @@
         //
         // The browser handled that notch itself (page -> 200) and Lenis also
         // counted it (target -> 200) while its own position was still 0, so it
-        // began tweening 0 -> 200 across a page that had already arrived — and
+        // began tweening 0 -> 200 across a page that had already arrived, and
         // its first written frame put the visitor back at the top.
         //
         // Assigning `animatedScroll` cannot fix it: Lenis's Animate object owns
@@ -1160,7 +1160,7 @@
     // event handled natively while Lenis is still being set up, then Lenis's
     // next frame writing its own position over the top of it. Deferring the
     // setup only widens the window in which that can happen. The fix is to
-    // close it — be the scroll engine before there is a scroll to hand over.
+    // close it, be the scroll engine before there is a scroll to hand over.
     //
     // whenPageStill still guards it, for anyone who manages to scroll first.
     whenPageStill(initLenis);
@@ -1169,7 +1169,7 @@
     // the frame budget the opening scroll was competing for.
     // The cursor rides up here, with enrich and railify, rather than in the
     // idle group below. It is the one effect a visitor sees before they do
-    // anything at all — it replaces their pointer — and it was arriving at
+    // anything at all, it replaces their pointer, and it was arriving at
     // 1150ms, which reads as the site booting rather than being alive. It costs
     // one element and one rAF loop, so it does not belong in the same bucket as
     // a full parallax scan.
@@ -1188,7 +1188,7 @@
     if ('MutationObserver' in window) {
       // Was: full rescan on EVERY mutation. On these app pages that fires
       // continuously, and each pass walks every element calling
-      // getComputedStyle — 81 long tasks and 4 FPS while scrolling. Now it
+      // getComputedStyle, 81 long tasks and 4 FPS while scrolling. Now it
       // only reacts to ADDED elements, and coalesces bursts into one pass.
       var moTimer = null;
       var mo = new MutationObserver(function (records) {
@@ -1209,7 +1209,7 @@
     }
     // Re-scan on demand, for pages that reveal whole regions by removing a
     // `display:none` class rather than by inserting nodes. The MutationObserver
-    // above only watches childList, and deliberately so — watching attributes
+    // above only watches childList, and deliberately so, watching attributes
     // across the whole document would fire on every class toggle this site
     // makes, including the one it sets on <body> during a scroll. A page that
     // knows it just revealed something can say so instead.

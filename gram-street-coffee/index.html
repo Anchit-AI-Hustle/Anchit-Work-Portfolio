@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Gram Street Coffee | D2C Roastery, Japanese Matcha &amp; Gelato — Gurugram</title>
+<title>Gram Street Coffee | D2C Roastery, Japanese Matcha &amp; Gelato | Gurugram</title>
 <meta name="theme-color" content="#CDB8F7">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23CDB8F7'/%3E%3Ccircle cx='32' cy='32' r='14' fill='%232B1650'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,7 +13,7 @@
 <!-- Tailwind CSS -->
 <!-- Tailwind, compiled and self-hosted (scripts/build-tailwind.mjs).
      The CDN build shipped a ~300KB JIT compiler, scanned the DOM at
-     runtime and left the page unstyled until it finished — and Tailwind
+     runtime and left the page unstyled until it finished, and Tailwind
      itself warns in the console not to use it in production. -->
 <link rel="stylesheet" href="/assets/tw-gram-street.css">
 
@@ -54,7 +54,7 @@
     position: fixed;
     /* Anchored at the origin and moved by transform. It used to be moved by
        writing left/top on every mousemove, which forces layout at pointer
-       rate — on a high-polling mouse that is several layouts per frame, for
+       rate, on a high-polling mouse that is several layouts per frame, for
        a 16px dot. The offsets come in on the element's own custom properties,
        never on :root: a custom property on the root invalidates the computed
        style of every element on the page. */
@@ -155,14 +155,14 @@
     position: absolute;
     right: clamp(-48px, -2.5vw, 0px);
     /* Clear of the consent bar and the hero's lower padding. The counter is
-       the point of the drawing — the copy calls it a lilac glass-fronted
-       counter — so it must not be the part that falls off the bottom. */
+       the point of the drawing, the copy calls it a lilac glass-fronted
+       counter, so it must not be the part that falls off the bottom. */
     bottom: clamp(78px, 11vh, 128px);
     width: auto;
     pointer-events: none;
     z-index: 1;
     /* No CSS filter here. A drop-shadow over a subtree that animates every
-       frame re-rasterises the whole scene every frame — it cost 13fps once
+       frame re-rasterises the whole scene every frame, it cost 13fps once
        the scene grew. The counter casts its own shadow inside the SVG, on
        the floor where a shadow belongs, for nothing. */
   }
@@ -336,7 +336,7 @@
   /* ── Mobile header ──────────────────────────────────────────────────────
      The inline nav measures 700px. On a 320px phone it simply ran off the
      side of the screen, and the wordmark wrapped onto three lines, which made
-     the fixed header 105px tall — taller than the hero's 90px top padding, so
+     the fixed header 105px tall, taller than the hero's 90px top padding, so
      the headline was buried behind it. Below 900px the links become a sheet
      behind a toggle, the wordmark stays on one line, and the header goes back
      to a single row. */
@@ -382,7 +382,7 @@
     .nav-links.is-open { display: flex; }
     .nav-links a { padding: 11px 14px; border-radius: 10px; font-size: 0.95rem; }
 
-    /* The header is one row again, so the hero only needs to clear ~52px —
+    /* The header is one row again, so the hero only needs to clear ~52px,
        but keep headroom for the notch and a wrapped line. */
     .hero { padding-top: clamp(76px, 14vh, 110px); }
   }
@@ -675,7 +675,7 @@
   /* ── THE TIMELINE ──────────────────────────────────────────────────────
      Three ventures. The rail already drew itself, but the stops on it were
      flat identical dots and every entry arrived at once, so the only motion
-     in the whole section was a 3px chrome line on lilac — which reads as
+     in the whole section was a 3px chrome line on lilac, which reads as
      nothing. Each stop is a drawn medallion now, it lands as the rail
      reaches it, and its entry follows. The current chapter keeps a slow
      pulse because it is the only one still happening.
@@ -706,7 +706,7 @@
     transition-delay: calc(var(--i, 0) * .22s + .20s);
   }
   .timeline.is-armed .tl-mark {
-    /* a shorthand would reset the delay the markup sets inline — see CLAUDE.md */
+    /* a shorthand would reset the delay the markup sets inline, see CLAUDE.md */
     transition: transform .66s cubic-bezier(.22,1.45,.42,1);
   }
   .timeline.is-armed.is-drawn li { opacity: 1; transform: none; }
@@ -715,7 +715,7 @@
   .timeline.is-done li,
   .timeline.is-done .tl-mark { will-change: auto; }
 
-  /* the chapter that has not finished — marked, not animated: the cycle
+  /* the chapter that has not finished, marked, not animated: the cycle
      below is what moves, and two competing loops on one medallion is noise */
   .tl-mark.is-now::after {
     content: ""; position: absolute; inset: -5px;
@@ -729,8 +729,8 @@
      one being read, advances to the second, then the third, then starts
      over. 13.8s, 4.6s a chapter.
 
-     The three hold positions are not thirds — the entries are different
-     heights, and on a phone they are very different heights — so the script
+     The three hold positions are not thirds, the entries are different
+     heights, and on a phone they are very different heights, so the script
      measures each medallion's centre and writes it as --p1/--p2/--p3. The
      keyframes read those, which is why the fill lands ON a stop at every
      width instead of near one. */
@@ -905,12 +905,12 @@
   }
 </style>
 <!-- seo:auto:start -->
-<!-- Managed by scripts/seo-inject.mjs — edit seo.config.json, not here. -->
+<!-- Managed by scripts/seo-inject.mjs, edit seo.config.json, not here. -->
 <meta name="description" content="In-house specialty roasts, ceremonial Uji matcha, and small-batch gelato. DLF Phase 1, Golf Course Road &amp; Sector 56, Gurugram." />
 <link rel="canonical" href="https://anchit-tandon.com/gram-street-coffee" />
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
 <meta name="author" content="Anchit Tandon" />
-<meta property="og:title" content="Gram Street Coffee | D2C Roastery, Japanese Matcha &amp; Gelato — Gurugram" />
+<meta property="og:title" content="Gram Street Coffee | D2C Roastery, Japanese Matcha &amp; Gelato | Gurugram" />
 <meta property="og:description" content="In-house specialty roasts, ceremonial Uji matcha, and small-batch gelato. DLF Phase 1, Golf Course Road &amp; Sector 56, Gurugram." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://anchit-tandon.com/gram-street-coffee" />
@@ -918,13 +918,13 @@
 <meta property="og:site_name" content="Anchit Tandon" />
 <meta property="og:locale" content="en_US" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Gram Street Coffee | D2C Roastery, Japanese Matcha &amp; Gelato — Gurugram" />
+<meta name="twitter:title" content="Gram Street Coffee | D2C Roastery, Japanese Matcha &amp; Gelato | Gurugram" />
 <meta name="twitter:description" content="In-house specialty roasts, ceremonial Uji matcha, and small-batch gelato. DLF Phase 1, Golf Course Road &amp; Sector 56, Gurugram." />
 <meta name="twitter:image" content="https://anchit-tandon.com/assets/brand/u-1501339847302-ac426a4a7cbb-1200.jpg" />
 <!-- seo:auto:end -->
 </head>
 <body>
-<div class="concept-bar" role="note" style="position:relative;z-index:60;padding:8px 16px;text-align:center;font:600 12px/1.45 system-ui,-apple-system,sans-serif;letter-spacing:.02em;background:#111;color:#f5f0e8">Concept storefront by <a href="/" style="color:inherit;text-decoration:underline;text-underline-offset:2px">Anchit Tandon</a> &mdash; not affiliated with Gram Street Coffee. Nothing here places a real order.</div>
+<div class="concept-bar" role="note" style="position:relative;z-index:60;padding:8px 16px;text-align:center;font:600 12px/1.45 system-ui,-apple-system,sans-serif;letter-spacing:.02em;background:#111;color:#f5f0e8">Concept storefront by <a href="/" style="color:inherit;text-decoration:underline;text-underline-offset:2px">Anchit Tandon</a>, not affiliated with Gram Street Coffee. Nothing here places a real order.</div>
 
 
 <!-- Luxury Film Grain Cinematic Overlay -->
@@ -1626,7 +1626,7 @@
       <!-- One photograph per venture, in the order the timeline tells them.
            Real images rather than drawings: the rest of this page is
            photography and the drawing was the odd one out. Each was checked
-           by eye before it went in — two candidates were rejected for
+           by eye before it went in, two candidates were rejected for
            carrying another business's branding, which on a page about this
            brand would read as its own. -->
       <div class="chef-chart" id="chefChart">
@@ -1825,7 +1825,7 @@
          order needs a way back that does not depend on an empty bag. -->
     <button type="button" id="ordLast" onclick="viewLastOrder()" class="hidden w-full text-left px-4 py-2.5 rounded-xl bg-[#F5EFFF] border border-[#7C3AED]/30 hover:border-[#7C3AED] transition-all">
       <span class="block text-[10px] font-black uppercase tracking-[0.16em] text-[#7C3AED]">Your last order</span>
-      <span class="block text-sm font-black text-[#2B1650]" id="ordLastRef">—</span>
+      <span class="block text-sm font-black text-[#2B1650]" id="ordLastRef">-</span>
     </button>
     <div class="flex justify-between text-sm">
       <span class="font-bold uppercase tracking-wider text-[#534168]">Subtotal</span>
@@ -2052,7 +2052,7 @@
       "float shine=pow(band,5.0);",
       // The ground stays the lilac of the glass-fronted counter. What folds
       // through it is the pour, and the pour changes flavour: crema, then Uji
-      // matcha, then gelato — the three things the headline actually names.
+      // matcha, then gelato, the three things the headline actually names.
       // A chrome blob said nothing about any of them.
       "vec3 lilac=vec3(0.80,0.72,0.97);",
       "vec3 mid=vec3(0.68,0.56,0.93);",
@@ -2071,7 +2071,7 @@
       // the field stays quiet under the type and carries weight in the open.
       // The ramp came from the pass that made this shader the hero; the
       // amplitude comes from the pass that replaced it with a drawn counter.
-      // They are separable — keep the ramp, keep the ambient level — because
+      // They are separable, keep the ramp, keep the ambient level, because
       // the shader is now room light behind a drawing, not the drawing.
       "float side=mix(0.38,1.0,smoothstep(-0.30,0.45,p.x));",
       "col=mix(col,flav,smoothstep(0.70,0.99,band2)*0.14*side);",
@@ -2306,7 +2306,7 @@
     }
 
     // Every ambient loop on this page runs only while its own section is on
-    // screen — the house rule is that nothing decorative animates off screen.
+    // screen, the house rule is that nothing decorative animates off screen.
     // Gating is by class so the CSS keeps the animation's phase: coming back
     // into view resumes the cycle rather than restarting it, which is why this
     // pauses the animation instead of removing it.
@@ -2375,7 +2375,7 @@
      be composited while the gradient is clipped to the glyphs, so the cost is
      bounded instead: one write per frame, and only while the pointer is inside
      this section. It used to run on every pointer sample.
-     (The property goes on the section, not on :root — a custom property on the
+     (The property goes on the section, not on :root, a custom property on the
      root invalidates the computed style of every element on the page.)
      The travelling-highlight rewrite in BRAND-MOTION-STUDY.md (GS-1) is what
      removes the paint altogether. */

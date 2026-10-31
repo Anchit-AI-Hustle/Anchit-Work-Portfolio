@@ -5,8 +5,8 @@
 //   - it appears every time, and becomes the thing returning visitors close
 //
 // It also must not interrupt the cinematic boot sequence. The intro popup that
-// used to live here was disabled for exactly that reason — it opened a blurred
-// scrim over the title sequence on every load — so "waits for the boot" is a
+// used to live here was disabled for exactly that reason, it opened a blurred
+// scrim over the title sequence on every load, so "waits for the boot" is a
 // requirement, not a nicety.
 //
 // Run against a served build:  node scripts/chat-nudge.js
@@ -46,7 +46,7 @@ const isShown = (p) => p.evaluate(() => {
   check('a new visitor is shown it', shown, shown ? 'visible after the boot' : 'never appeared');
 
   // The flag must be written on SHOW. Writing it on dismiss means anyone who
-  // ignores the nudge — most people — is shown it again on every visit.
+  // ignores the nudge, most people, is shown it again on every visit.
   const flag = await p.evaluate((k) => { try { return localStorage.getItem(k); } catch (e) { return null; } }, KEY);
   check('the flag is written when it is shown, not when it is dismissed',
     !!flag, flag ? 'flag present while still on screen' : 'no flag');
@@ -102,7 +102,7 @@ const isShown = (p) => p.evaluate(() => {
         (results.length - target.length) + ' still pass');
       process.exit(0);
     }
-    console.log('MUT: wrong outcome — ' + wrong.join('; '));
+    console.log('MUT: wrong outcome, ' + wrong.join('; '));
     process.exit(1);
   }
   process.exit(failed ? 1 : 0);

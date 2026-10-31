@@ -1,5 +1,5 @@
 // ============================================================================
-// HowToVisualCanvas — the main animated UI.
+// HowToVisualCanvas, the main animated UI.
 //   • A WebGL 3D backdrop (scroll/parallax-reactive) behind frosted-glass cards.
 //   • The PromptOptimizer (ask bar + suggestions).
 //   • On submit → cascade runs → a live model-cascade strip, then the guide
@@ -15,7 +15,7 @@ import * as THREE from 'three';
 
 import PromptOptimizer from './PromptOptimizer';
 // React Flow and its stylesheet are only needed once a guide exists, which is
-// after the cascade returns — so they are not part of the first load at all.
+// after the cascade returns, so they are not part of the first load at all.
 const FlowDiagram = lazy(() => import('./FlowDiagram'));
 import GuideDesk from './GuideDesk';
 import TornadoLoader from './TornadoLoader';
@@ -50,7 +50,7 @@ function Scene() {
   return (
     <Canvas className="bg-canvas" camera={{ position: [0, 0, 6], fov: 55 }} dpr={[1, 2]}>
       <color attach="background" args={["#0A0806"]} />
-      {/* Lit entirely by local lights — no external HDR environment fetch, so
+      {/* Lit entirely by local lights, no external HDR environment fetch, so
           the scene works fully offline / under a strict CSP. */}
       <ambientLight intensity={0.55} />
       <directionalLight position={[5, 6, 4]} intensity={1.3} color="#FFB736" />
@@ -71,7 +71,7 @@ export default function HowToVisualCanvas() {
   }, [guide]);
 
   // Selecting a step (via the flow diagram OR a card) makes it active AND
-  // scrolls its card into view — clicking any node in the flow map jumps you
+  // scrolls its card into view, clicking any node in the flow map jumps you
   // straight to that step.
   const selectStep = (id: string) => {
     setActiveId(id);
@@ -84,7 +84,7 @@ export default function HowToVisualCanvas() {
       <div className="bg-fixed"><Scene /></div>
 
       {/* The 3D tornado is the "search buffer" while the user's input is turned
-          into a guide — it stays up for as long as the cascade is running. */}
+          into a guide, it stays up for as long as the cascade is running. */}
       {loading && !guide && (
         <TornadoLoader label="Searching the model cascade…" sub="Fusing the best answers into your guide" />
       )}
@@ -94,7 +94,7 @@ export default function HowToVisualCanvas() {
 
         {error && <div className="banner error glass">⚠ {error}</div>}
 
-        {/* Live model-cascade strip — shows the parallel models + who made top 3 */}
+        {/* Live model-cascade strip, shows the parallel models + who made top 3 */}
         {result && result.answers.length > 0 && (
           <div className="cascade-strip glass">
             <span className="cascade-title">Model cascade</span>
@@ -156,7 +156,7 @@ export default function HowToVisualCanvas() {
               )}
 
               {/* The steps used to be a scrolling column of cards with the map
-                  pinned beside it — everything on screen at once, and the
+                  pinned beside it, everything on screen at once, and the
                   reader deciding where to look. The desk shows one step at a
                   time, with the rail carrying the sense of where you are. The
                   map is still here, below, as a map rather than as a sidebar. */}

@@ -1,9 +1,9 @@
 // ============================================================================
-// GuideDesk — the guide, rendered as a desk rather than as a feed.
+// GuideDesk, the guide, rendered as a desk rather than as a feed.
 //
 // The output used to be a scrolling column of cards with a flow map pinned
 // beside it: everything on screen at once, and the reader deciding where to
-// look. This is the same data in the structure the marketing course uses — a
+// look. This is the same data in the structure the marketing course uses, a
 // rail of steps on the left, one step at a time in a measured column on the
 // right, and a sticky bar that says where you are.
 //

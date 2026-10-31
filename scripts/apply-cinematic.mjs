@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// apply-cinematic.mjs — give every page the shared sequential-reveal motion.
+// apply-cinematic.mjs, give every page the shared sequential-reveal motion.
 //
 // Injects assets/cinematic.css + assets/cinematic.js into each page between
 // marker comments. Idempotent: re-running replaces the managed block rather
@@ -32,7 +32,7 @@ ${END}`;
 // hotel.html is excluded for a concrete reason, not a stylistic one: its
 // sections are scroll tracks containing `position: sticky` stages. A transform
 // on an ancestor makes that ancestor the containing block, which breaks sticky
-// — and the reveal animates exactly that. Its scenes already arrive one at a
+//, and the reveal animates exactly that. Its scenes already arrive one at a
 // time by construction, since each owns a full scroll track.
 const SKIP = new Set(['index.html', 'hotel.html']);
 
@@ -72,14 +72,14 @@ for (const file of pages) {
   const full = path.join(ROOT, file);
   let html = await readFile(full, 'utf8');
 
-  // Strip any previous managed block first — that is what makes this idempotent.
+  // Strip any previous managed block first, that is what makes this idempotent.
   const managed = new RegExp(`${START}[\\s\\S]*?${END}\\n?`, 'g');
   const withoutBlock = html.replace(managed, '');
 
   // The real </head> is the first one that is NOT inside a <script>. Several
   // pages build an export document as a JS string containing a whole HTML
   // skeleton, so a naive lastIndexOf lands inside a quoted string literal and
-  // injecting there produces an unterminated string — it broke jobhunt.html
+  // injecting there produces an unterminated string, it broke jobhunt.html
   // exactly that way.
   const close = findHeadClose(withoutBlock);
   if (close === -1) {

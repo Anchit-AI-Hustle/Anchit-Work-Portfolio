@@ -3,7 +3,7 @@
 // THE BUG THIS CATCHES
 //   Vercel's "Deployment Protection" can be set to all_except_custom_domains.
 //   Every *.vercel.app URL for that project then shows a Vercel LOGIN WALL to
-//   anyone who is not on the team — while it opens instantly for the owner,
+//   anyone who is not on the team, while it opens instantly for the owner,
 //   who is signed in. So the link looks fine to the one person checking it.
 //
 //   Three projects were set that way and linked by their walled host:

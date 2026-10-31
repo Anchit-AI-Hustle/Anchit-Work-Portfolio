@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * sarvam-audition — render the SAME line in every plausible Sarvam voice so you
+ * sarvam-audition, render the SAME line in every plausible Sarvam voice so you
  * can pick the one closest to Anchit in a single sitting.
  *
  * Why this exists: Sarvam's REST API cannot speak in a cloned voice. `speaker`
  * is a closed enum of stock voices (see scripts/sarvam-check.mjs and SARVAM.md),
  * so the best available outcome is choosing the nearest stock voice rather than
- * cloning. The site currently uses "shubh" simply because it is the default —
+ * cloning. The site currently uses "shubh" simply because it is the default,
  * not because anyone compared it against the alternatives.
  *
  * The key is read from SARVAM_API_KEY and is never printed, logged or written
@@ -29,7 +29,7 @@ if (!key) {
   process.exit(1);
 }
 
-// Male voices on bulbul:v3 — the plausible shortlist for a male speaker. --all
+// Male voices on bulbul:v3, the plausible shortlist for a male speaker. --all
 // renders every voice on the model if you want to hear the full set.
 const MALE = ['shubh', 'aditya', 'rahul', 'rohan', 'amit', 'dev', 'ratan', 'varun',
   'manan', 'sumit', 'kabir', 'aayan', 'ashutosh', 'advait', 'anand', 'tarun',

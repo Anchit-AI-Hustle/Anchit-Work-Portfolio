@@ -8,10 +8,10 @@ This is an interaction pattern, not a visual clone. The implementation is origin
 
 Every generated HTML application receives the same launcher and full-screen skill map. The map answers four questions immediately:
 
-1. **What apps exist?** — every first-party route and major standalone project is visible in one map.
-2. **How do they connect?** — apps are grouped into seven functional departments and show suggested prerequisites.
-3. **Where am I now?** — the current route is highlighted automatically.
-4. **What should I do next?** — the map recommends the next available app and persists started/completed states locally.
+1. **What apps exist?**, every first-party route and major standalone project is visible in one map.
+2. **How do they connect?**, apps are grouped into seven functional departments and show suggested prerequisites.
+3. **Where am I now?**, the current route is highlighted automatically.
+4. **What should I do next?**, the map recommends the next available app and persists started/completed states locally.
 
 The seven branches are:
 

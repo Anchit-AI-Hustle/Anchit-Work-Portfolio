@@ -1,10 +1,10 @@
-# Deploy guide — Anchit's Work
+# Deploy guide, Anchit's Work
 
 This guide gets your portfolio onto **github.com/anchittandon-create/Anchit-s-Work-Portfolio** and live on Vercel.
 
 ---
 
-## Step 1 — Push to GitHub
+## Step 1, Push to GitHub
 
 Open Terminal on your Mac (or Command Prompt on Windows) and navigate to the folder where these files are saved. Then run:
 
@@ -42,9 +42,9 @@ git push -u origin main
 
 ---
 
-## Step 2 — Deploy to Vercel
+## Step 2, Deploy to Vercel
 
-### Option A — Connect GitHub (recommended)
+### Option A, Connect GitHub (recommended)
 
 1. Go to **vercel.com/new**
 2. Sign in with GitHub
@@ -55,7 +55,7 @@ git push -u origin main
 
 Done. Every time you `git push` to main, Vercel auto-redeploys.
 
-### Option B — Vercel CLI (no GitHub connection needed)
+### Option B, Vercel CLI (no GitHub connection needed)
 
 ```bash
 npm i -g vercel
@@ -66,7 +66,7 @@ Follow the prompts. First run goes to a preview URL; run `vercel --prod` to push
 
 ---
 
-## Step 3 — Custom domain (optional)
+## Step 3, Custom domain (optional)
 
 Once live, in Vercel project settings → **Domains** → add `anchit.work` or whatever you own. Vercel walks you through the DNS records.
 
@@ -74,7 +74,7 @@ Once live, in Vercel project settings → **Domains** → add `anchit.work` or w
 
 ## Upgrading the chatbot to a real LLM
 
-The chatbot is currently a keyword-matched knowledge base — works offline, ships in one HTML file. To swap in Claude for actual conversational answers:
+The chatbot is currently a keyword-matched knowledge base, works offline, ships in one HTML file. To swap in Claude for actual conversational answers:
 
 ### 1. Create `api/chat.js` in the project root
 
@@ -148,8 +148,8 @@ Push, redeploy, you're live. Costs roughly $0.001 per chat with Haiku.
 
 ## Files in this repo
 
-- `index.html` — the whole site, single file
-- `README.md` — repo description for GitHub
-- `vercel.json` — Vercel routing + security headers
-- `.gitignore` — keeps env files and OS junk out of git
-- `DEPLOY.md` — this guide
+- `index.html`, the whole site, single file
+- `README.md`, repo description for GitHub
+- `vercel.json`, Vercel routing + security headers
+- `.gitignore`, keeps env files and OS junk out of git
+- `DEPLOY.md`, this guide

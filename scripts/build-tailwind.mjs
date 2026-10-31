@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 /**
- * build-tailwind — compile a real stylesheet for the brand pages.
+ * build-tailwind, compile a real stylesheet for the brand pages.
  *
  * WHY THIS EXISTS
  *   gram-street-coffee and deli-chic loaded Tailwind from cdn.tailwindcss.com.
  *   That ships a ~300KB JIT compiler to every visitor, scans the DOM at runtime,
- *   and paints the page unstyled until it finishes — and if the CDN is slow or
+ *   and paints the page unstyled until it finishes, and if the CDN is slow or
  *   blocked, the page has no layout at all. Deli Chic in particular collapses to
  *   unstyled HTML without it, because its layout is entirely utility classes.
  *   Tailwind's own console warning says not to use it in production.
  *
  *   The CLI produces the same utilities from the same classes, including
- *   arbitrary values like bg-[#4A0E17], plus preflight — which is what makes a
+ *   arbitrary values like bg-[#4A0E17], plus preflight, which is what makes a
  *   <button> inherit the page font instead of falling back to Arial.
  *
  * The scanner reads raw file text, so classes written inside JS template
@@ -41,7 +41,7 @@ const ENTRY = '@tailwind base;\n@tailwind components;\n@tailwind utilities;\n';
  *
  *   1. The CLI moved out of `tailwindcss` into `@tailwindcss/cli`, so
  *      `npx tailwindcss` has no binary and npm answers "could not determine
- *      executable to run" — which says nothing about Tailwind at all.
+ *      executable to run", which says nothing about Tailwind at all.
  *   2. ENTRY above is v3 syntax. v4 wants `@import "tailwindcss"` and its
  *      config in CSS rather than a JS file.
  *

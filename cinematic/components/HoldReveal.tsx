@@ -55,7 +55,7 @@ const fragment = /* glsl */ `
     vec3 future = mix(base, vec3(0.776, 1.0, 0.310), 0.55 * uProgress);
     vec3 col    = future + grid * (0.06 + 0.35 * uProgress);
 
-    // Chromatic split, only while held — the "pressure" read.
+    // Chromatic split, only while held, the "pressure" read.
     col.r += uProgress * 0.05 * sin(d * 18.0 - uTime);
     col.b += uProgress * 0.05 * cos(d * 18.0 + uTime);
 

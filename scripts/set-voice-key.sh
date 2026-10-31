@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# set-voice-key.sh — put your ElevenLabs key into Vercel without it ever leaking.
+# set-voice-key.sh, put your ElevenLabs key into Vercel without it ever leaking.
 #
 # WHY THIS SCRIPT EXISTS
 #   Typing a key into a chat window, a commit, or even a plain shell command is
@@ -54,7 +54,7 @@ printf 'Paste your ElevenLabs API key (input hidden, press Enter): ' >&2
 read -rs ELEVENLABS_API_KEY
 printf '\n' >&2
 
-[ -n "${ELEVENLABS_API_KEY:-}" ] || { echo "✗ Nothing entered — aborted."; exit 1; }
+[ -n "${ELEVENLABS_API_KEY:-}" ] || { echo "✗ Nothing entered, aborted."; exit 1; }
 # Validate shape WITHOUT printing the value.
 case "$ELEVENLABS_API_KEY" in
   sk_*) ;;
@@ -69,7 +69,7 @@ if [ "$DO_CLONE" = "1" ]; then
   # The key goes to the child process as an env var for this one command only.
   CLONE_OUT="$(ELEVENLABS_API_KEY="$ELEVENLABS_API_KEY" node scripts/elevenlabs-clone.mjs 2>&1)" || {
     echo "$CLONE_OUT" | grep -v 'sk_'   # never echo a line that could carry the key
-    echo "✗ Clone failed — see the message above. Env vars were NOT written."
+    echo "✗ Clone failed, see the message above. Env vars were NOT written."
     exit 1
   }
   VOICE_ID="$(printf '%s' "$CLONE_OUT" | sed -n 's/.*ELEVENLABS_VOICE_ID = \([A-Za-z0-9]*\).*/\1/p' | head -1)"

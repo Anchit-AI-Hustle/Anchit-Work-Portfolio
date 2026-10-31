@@ -10,7 +10,7 @@ const display = Inter({ subsets: ['latin'], variable: '--font-display', display:
 const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono', display: 'swap' });
 
 export const metadata: Metadata = {
-  title: 'Anchit Tandon — Product · Growth · AI',
+  title: 'Anchit Tandon, Product · Growth · AI',
   description: 'Building products. Scaling growth. Creating leverage.',
 };
 

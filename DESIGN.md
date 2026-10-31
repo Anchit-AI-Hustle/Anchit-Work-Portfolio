@@ -1,4 +1,4 @@
-# DESIGN.md — anchit-tandon.com
+# DESIGN.md, anchit-tandon.com
 
 Machine-readable brand + UI system for this repo. AI agents and contributors MUST
 follow these tokens for all styling. Never hardcode a colour that isn't here, and
@@ -18,7 +18,7 @@ corporate-blue, never playful-pastel.
 
 ## Tokens
 
-### Colour — dark (canonical theme)
+### Colour, dark (canonical theme)
 
 | Token | Value | Use |
 |---|---|---|
@@ -36,7 +36,7 @@ corporate-blue, never playful-pastel.
 | `--accent` | `#c9a96e` | Gold accent: highlights, `<em>`, craft details |
 | `--accent-warm` | `#FFB736` | Brighter gold for badges/glow |
 
-### Colour — semantic
+### Colour, semantic
 
 | Token | Value | Use |
 |---|---|---|
@@ -77,7 +77,7 @@ on the 60px the hero already used.
 | `--fs-display` | `61px` | Hero |
 
 **Pick a step; never invent one.** This scale exists because there wasn't one:
-an audit of a single home-page viewport found **11 distinct sizes** — 9, 11, 12,
+an audit of a single home-page viewport found **11 distinct sizes**, 9, 11, 12,
 14, 15, 16, 18, 19, 20, 24, 60. 15-against-16 and 18/19/20 are not hierarchy,
 they are near-identical steps that read as carelessness, and nothing sat between
 24 and 60 at all. It is 7 now, every one a named step.
@@ -87,13 +87,13 @@ Two specific traps that produced that spread:
 - **9px mono labels.** Six rules sat below this file's own 10–12px floor. They
   were the smallest type on the page and the hardest to read.
 - **Framework size utilities.** The hero used Tailwind's `text-lg` /
-  `text-2xl` / `text-6xl` — 18 / 24 / 60px, answering to Tailwind's ratio, not
+  `text-2xl` / `text-6xl`, 18 / 24 / 60px, answering to Tailwind's ratio, not
   ours. The same rule that bans framework *palette* utilities applies to sizes:
   use the token.
 
 ### Spacing scale (px)
 
-`4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 88` — as tokens `--sp-1` … `--sp-11`.
+`4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 88`, as tokens `--sp-1` … `--sp-11`.
 
 The same audit found **170 off-scale paddings and gaps** on the main layout
 blocks (22px, 18px, 7px …). It is 4 now.
@@ -130,8 +130,8 @@ Section padding uses `--gutter: clamp(20px, 3vw, 48px)`.
 ## Motion
 
 The rule that governs everything else: **animate `transform` and `opacity`, and
-nothing else.** Those two are composited. Anything else — `box-shadow`,
-`filter`, `background-position`, `top`, `height`, `clip-path`, `width` — is
+nothing else.** Those two are composited. Anything else, `box-shadow`,
+`filter`, `background-position`, `top`, `height`, `clip-path`, `width`, is
 re-rasterised on every frame of the tween, and this page has paid for each of
 them at least once. A homepage scroll went from 26ms a frame to 17ms almost
 entirely by obeying this.
@@ -139,7 +139,7 @@ entirely by obeying this.
 - Transitions 150–260ms, `ease` or `cubic-bezier(.16,1,.3,1)` for arrivals.
 - Hover lift is at most `translateY(-2px)`.
 - `will-change` is a claim on a compositor layer. Scope it to `:hover`/`:active`
-  or add it for the duration of an animation and take it off again — never
+  or add it for the duration of an animation and take it off again, never
   leave it on at rest.
 - Nothing decorative runs forever while off screen. The ambient governor in
   `assets/cinematic.js` gives an element its looping animation only while it is
@@ -154,7 +154,7 @@ them. Both are queues, not CSS delays on a burst: a delay staggers things that
 have already all started, a queue makes each one wait its turn.
 
 - Six entrance variants (`.cin-v1`–`.cin-v6` / `.reveal.rv-v1`–`rv-v6`), each
-  dimensional — its own `perspective()` and a real `translateZ`.
+  dimensional, its own `perspective()` and a real `translateZ`.
 - Assigned so no block matches the one before or after it. A plain 1..6 cycle is
   a pattern people see after two screens.
 - Never assigned to anything taller than the viewport. These entrances hold an
@@ -168,7 +168,7 @@ have already all started, a queue makes each one wait its turn.
 - Panels (≥90px tall) get a holographic sheen as they arrive.
 - Smaller blocks get a hairline wipe along the baseline instead. A light
   sweeping a 44px label is noise, not an effect.
-- Anything taller than 72% of the viewport gets neither — a sweep that big is a
+- Anything taller than 72% of the viewport gets neither, a sweep that big is a
   screen wipe.
 - Pointer specular tracks the cursor across a panel. `--mx`/`--my` are written
   on the **element**, never on `:root`: a custom property on the document root
@@ -178,7 +178,7 @@ have already all started, a queue makes each one wait its turn.
 ## Accessibility
 
 - Body text on `--bg` must meet WCAG AA (`--ink`/`--ink-dim` pass; `--ink-mute` is for non-essential text only).
-- Never use colour alone to convey state — pair with a label or icon.
+- Never use colour alone to convey state, pair with a label or icon.
 - All images need meaningful `alt`; decorative ones get `alt=""` or `aria-hidden`.
 
 ## Known inconsistency to migrate (do not copy)
@@ -191,7 +191,7 @@ not extended. Do not add new teal accents.
 
 Counted at the time of writing, so the next person knows the size of the job
 rather than guessing: `#2EE5AC` appears 4 times in `index.html` and across 11
-source files; `#00B584` across 5. Twelve files carry one or the other —
+source files; `#00B584` across 5. Twelve files carry one or the other,
 `index.html`, `agent.html`, `jobhunt.html`, `d2c-lifecycle-os.html`, six
 `lifecycle-os-*` pages, `lifecycle-os-kit.css`, `assets/app-skill-map.css` and
 `assets/project-playbooks.css`. The legacy golds are down to 7 occurrences in
@@ -204,5 +204,5 @@ source files; `#00B584` across 5. Twelve files carry one or the other —
    if something is genuinely missing.
 3. Never introduce raw hex values in component styles, and never use framework
    palette utilities (`gray-500`, `blue-600`, …) for brand surfaces.
-4. Match the surrounding file's conventions — this repo is intentionally
+4. Match the surrounding file's conventions, this repo is intentionally
    single-file per app, with styles in the existing `<style>` block.

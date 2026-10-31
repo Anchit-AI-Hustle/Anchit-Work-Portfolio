@@ -35,7 +35,7 @@ export default function Hero() {
   return (
     <section ref={root} className="relative flex min-h-[100svh] flex-col justify-between px-6 pb-10 pt-28 md:px-10">
       <div data-meta className="font-mono text-[10px] uppercase tracking-[0.22em] text-ash">
-        Planet Earth-616 &nbsp;|&nbsp; Y2026 — 12°58&apos;12N, 77°38&apos;27E
+        Planet Earth-616 &nbsp;|&nbsp; Y2026, 12°58&apos;12N, 77°38&apos;27E
       </div>
 
       <div className="flex flex-1 flex-col justify-center gap-12 md:flex-row md:items-center md:gap-16">
@@ -70,7 +70,7 @@ export default function Hero() {
       </div>
 
       <div className="flex items-end justify-between font-mono text-[10px] uppercase tracking-[0.22em] text-ash">
-        <span>Index — 001</span>
+        <span>Index, 001</span>
         <span className="hidden md:block">scroll</span>
       </div>
     </section>

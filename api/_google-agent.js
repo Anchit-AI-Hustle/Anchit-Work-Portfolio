@@ -1,9 +1,9 @@
-// Google Vertex AI Agent Builder — an optional, env-gated answer engine.
+// Google Vertex AI Agent Builder, an optional, env-gated answer engine.
 //
 // When configured, /api/chat asks YOUR Agent Builder app first, so answers come
 // from an agent you own and can ground on your own data store. Anything missing
 // or failing falls through to Claude, and then to the offline knowledge base in
-// index.html — the chat never breaks because this is unconfigured.
+// index.html, the chat never breaks because this is unconfigured.
 //
 // Two ways to point it at an agent:
 //
@@ -14,7 +14,7 @@
 //        GOOGLE_AGENT_SERVING  optional; default "default_serving_config"
 //      → POSTs to …/engines/{engine}/servingConfigs/{serving}:answer
 //
-//   2) GOOGLE_AGENT_URL — a full endpoint URL, used verbatim. Use this for any
+//   2) GOOGLE_AGENT_URL, a full endpoint URL, used verbatim. Use this for any
 //      other shape: Dialogflow CX :detectIntent, a deployed Reasoning Engine, or
 //      an ADK service. Set GOOGLE_AGENT_BODY_STYLE=raw to send {query, session}
 //      instead of the Discovery Engine body.
@@ -26,7 +26,7 @@
 //                               minted from it with the JWT-bearer flow and
 //                               cached until shortly before it expires.
 //
-// NOTE: this has not been exercised against a live Google project from here — no
+// NOTE: this has not been exercised against a live Google project from here, no
 // credentials exist in this environment. The request/response shapes follow the
 // documented Discovery Engine `:answer` contract. Configure it and the debug
 // endpoint (GET /api/chat) will report whether it is reachable.
@@ -78,7 +78,7 @@ async function accessToken() {
   try {
     const sig = crypto.createSign('RSA-SHA256').update(signingInput).sign(key);
     assertion = signingInput + '.' + b64url(sig);
-  } catch { return ''; }   // malformed key — stay silent, the caller falls through
+  } catch { return ''; }   // malformed key, stay silent, the caller falls through
 
   const r = await fetchTO(TOKEN_URL, {
     method: 'POST',

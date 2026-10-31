@@ -1,7 +1,7 @@
 // What api/_guard.js lets through, and what it turns away.
 //
 // These run with nothing installed and no network: the guard is pure, which
-// is the point — the thing standing between the API keys and the open
+// is the point, the thing standing between the API keys and the open
 // internet should be checkable without deploying it first.
 const { guard, originAllowed } = require('../api/_guard.js');
 

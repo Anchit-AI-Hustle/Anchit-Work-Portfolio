@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Marketing Calendar — AI Campaign Planner | Lifecycle OS</title>
+<title>Marketing Calendar | AI Campaign Planner | Lifecycle OS</title>
 <link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png">
 <meta name="theme-color" content="#FF6940">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-  /* Champagne palette — anchit-tandon.com Lifecycle OS. RGB triplets so Tailwind
+  /* Champagne palette, anchit-tandon.com Lifecycle OS. RGB triplets so Tailwind
      opacity modifiers (bg-gold/20 etc.) resolve via rgb(var(--x)/<alpha-value>). */
   :root, :root[data-theme="dark"]{
     --bg-rgb:15 13 10; --surface-rgb:26 24 20; --card-rgb:26 24 20;
@@ -111,13 +111,13 @@
   <script defer src="/assets/cinematic.js"></script>
 <!-- cinematic:end -->
 <!-- seo:auto:start -->
-<!-- Managed by scripts/seo-inject.mjs — edit seo.config.json, not here. -->
+<!-- Managed by scripts/seo-inject.mjs, edit seo.config.json, not here. -->
 <meta name="description" content="A 90-day marketing calendar: segment- and festival-aware email planning with a per-slot mailer pipeline (strategy → 4 variants → verify/approve)." />
 <link rel="canonical" href="https://anchit-tandon.com/lifecycle-os-calendar" />
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
 <meta name="keywords" content="Marketing Calendar AI, AI campaign planning calendar, marketing calendar generator, lifecycle campaign calendar, AI content calendar D2C, campaign scheduling AI, annual marketing calendar tool, D2C campaign calendar, plan campaigns with AI, Lifecycle OS, Anchit Tandon" />
 <meta name="author" content="Anchit Tandon" />
-<meta property="og:title" content="Marketing Calendar — AI Campaign Planner" />
+<meta property="og:title" content="Marketing Calendar | AI Campaign Planner" />
 <meta property="og:description" content="A 90-day, segment- and festival-aware marketing calendar with a per-slot mailer pipeline (strategy → 4 variants → verify/approve). Part of the Lifecycle OS." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://anchit-tandon.com/lifecycle-os-calendar" />
@@ -126,9 +126,9 @@
 <meta property="og:locale" content="en_US" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Anchit Tandon — Product &amp; D2C Growth" />
+<meta property="og:image:alt" content="Anchit Tandon, Product &amp; D2C Growth" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Marketing Calendar — AI Campaign Planner" />
+<meta name="twitter:title" content="Marketing Calendar | AI Campaign Planner" />
 <meta name="twitter:description" content="A 90-day, segment- and festival-aware marketing calendar with a per-slot mailer pipeline. Part of the Lifecycle OS." />
 <meta name="twitter:image" content="https://anchit-tandon.com/assets/og/og-default.png" />
 <script type="application/ld+json">
@@ -162,7 +162,7 @@
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "@id": "https://anchit-tandon.com/lifecycle-os-calendar#app",
-  "name": "Marketing Calendar — Lifecycle OS",
+  "name": "Marketing Calendar | Lifecycle OS",
   "url": "https://anchit-tandon.com/lifecycle-os-calendar",
   "applicationCategory": "BusinessApplication",
   "applicationSubCategory": "Campaign Planning",
@@ -310,7 +310,7 @@
   <div id="extras"></div>
 
   <footer style="border-top:1px solid rgb(var(--line-rgb) / 0.15);margin-top:40px;padding:24px 0 12px;color:rgb(var(--ink-mute-rgb));font-size:13px;text-align:center">
-    Marketing Calendar · part of the <a href="/lifecycle-os" style="color:rgb(var(--ink-dim-rgb));border-bottom:1px solid rgb(var(--line-rgb) / 0.3)">Lifecycle OS</a> by <a href="/#projects" style="color:rgb(var(--ink-dim-rgb));border-bottom:1px solid rgb(var(--line-rgb) / 0.3)">Anchit Tandon</a>. Sample-brand benchmark — no proprietary data; everything generated client-side.
+    Marketing Calendar · part of the <a href="/lifecycle-os" style="color:rgb(var(--ink-dim-rgb));border-bottom:1px solid rgb(var(--line-rgb) / 0.3)">Lifecycle OS</a> by <a href="/#projects" style="color:rgb(var(--ink-dim-rgb));border-bottom:1px solid rgb(var(--line-rgb) / 0.3)">Anchit Tandon</a>. Sample-brand benchmark, no proprietary data; everything generated client-side.
   </footer>
 
 </main>
@@ -384,7 +384,7 @@ function guessSegment(c) {
   if (c.orders_count >= 1) return 'Hibernating';
   return 'Lost';
 }
-// Generic D2C seed (no brand/tea/coffee) — an industry-benchmark sample brand.
+// Generic D2C seed (no brand/tea/coffee), an industry-benchmark sample brand.
 function seedAnalytics() {
   return {
     segments: [
@@ -432,7 +432,7 @@ function subjectHint(arch, hero, seg, fest){
     'storytelling-narrative': 'The story behind '+H,
     'product-education': 'How to get the most from '+H,
     'social-proof': 'Why '+seg.name+' keep reordering '+H,
-    'win-back-offer': 'We saved your spot — '+H+' inside',
+    'win-back-offer': 'We saved your spot, '+H+' inside',
     'launch-announcement': 'New: '+H+' just dropped',
     'seasonal-gifting': (fest? fest+': ' : 'Gifting season: ')+H+' picks',
   };
@@ -448,7 +448,7 @@ function analysisFor(seg, arch, hero, mk, fest){
     drivers: [
       { signal:'Segment', value:seg.name+' ('+seg.count.toLocaleString()+' subs)', implication:'sized from the RFM base' },
       { signal:'Best send hour', value:(({US:14,UK:9,Global:6,IN:4})[mk]||9)+':00 UTC', implication:marketName(mk)+' open-rate peak' },
-      { signal:'Hero', value:hero.title, implication:hero.category+' — reorder-cycle anchor' },
+      { signal:'Hero', value:hero.title, implication:hero.category+', reorder-cycle anchor' },
     ].concat(fest?[{ signal:'Festival', value:fest, implication:'seasonal demand lift' }]:[]),
     hypothesis: arch.ct==='winback' ? 'A timed offer reactivates lapsing buyers before they churn.' : 'On-format storytelling lifts CTR and second-order rate for this segment.',
     expected_impact: { metric: arch.ct==='winback'?'reactivation rate':'CTR / repeat rate', direction:'up' },
@@ -488,7 +488,7 @@ function buildPlan(cfg){
         if (arch.ct==='launch') assets.push('landing_page');
         if (arch.ct==='editorial') assets.push('social_post');
         // Stable id derived from the row's own fields (not a reset-on-regenerate
-        // counter), so a persisted approval only ever re-marks the same send —
+        // counter), so a persisted approval only ever re-marks the same send,
         // changing market/window/capacity yields different ids, no leak.
         const skey = ds+'|'+mk+'|'+seg.name+'|'+arch.a;
         keyCount[skey] = (keyCount[skey]||0)+1;
@@ -517,15 +517,15 @@ const ASSET_LABELS = { mailer:'mailer', meta_ad:'Meta ad', google_ad:'Google ad'
 function assetLetter(t) { if (t === 'mailer') return 'M'; if (t === 'landing_page') return 'L'; if (t === 'social_post') return 'S'; return 'A'; }
 function assetLetters(e) { const seen = []; (e.asset_types || []).forEach((t) => { const l = assetLetter(t); if (seen.indexOf(l) === -1) seen.push(l); }); return seen.join(''); }
 function assetNames(e) { return (e.asset_types || []).map((t) => ASSET_LABELS[t] || String(t).replace(/_/g, ' ')).join(', '); }
-function chipTooltip(e) { const assets = assetNames(e); return marketName(e.market) + ' market — ' + e.segment + ' customers — ' + String(e.archetype || '').replace(/-/g, ' ') + ' email on ' + humanDate(e.date) + (assets ? '. Assets: ' + assets : ''); }
+function chipTooltip(e) { const assets = assetNames(e); return marketName(e.market) + ' market, ' + e.segment + ' customers, ' + String(e.archetype || '').replace(/-/g, ' ') + ' email on ' + humanDate(e.date) + (assets ? '. Assets: ' + assets : ''); }
 function formatPlanSummary(data) {
   const markets = (data.markets || []).map(marketName);
   const marketText = markets.length > 1 ? markets.slice(0, -1).join(', ') + ' and ' + markets[markets.length - 1] : (markets[0] || 'all markets');
   const friendly = (k) => k.replace(/-/g, ' ');
   const dist = Object.entries((data.meta && data.meta.archetype_distribution) || {}).filter(([, v]) => v).sort((a, b) => b[1] - a[1]);
   let formatText = '';
-  if (dist.length === 1) formatText = ' — all in the ' + friendly(dist[0][0]) + ' format';
-  else if (dist.length > 1) formatText = ' — mostly ' + friendly(dist[0][0]) + ' (' + dist[0][1] + ') and ' + friendly(dist[1][0]) + ' (' + dist[1][1] + ') formats';
+  if (dist.length === 1) formatText = ', all in the ' + friendly(dist[0][0]) + ' format';
+  else if (dist.length > 1) formatText = ', mostly ' + friendly(dist[0][0]) + ' (' + dist[0][1] + ') and ' + friendly(dist[1][0]) + ' (' + dist[1][1] + ') formats';
   const n = data.total_sends_planned;
   const rows = data.plan || [];
   const hasAsset = (p, t) => Array.isArray(p.asset_types) && p.asset_types.indexOf(t) !== -1;
@@ -603,7 +603,7 @@ function analysisDetails(p){
   const conf = (a && a.confidence) ? a.confidence : (p.confidence!=null ? { score:p.confidence } : null);
   const confTxt = (conf && conf.score!=null) ? Math.round(conf.score*100)+'%'+(conf.label?' · '+conf.label:'') : '';
   const summary = (a && a.summary) || p.rationale || '';
-  if(!a && !summary) return '<span class="text-ink-mute">—</span>';
+  if(!a && !summary) return '<span class="text-ink-mute">-</span>';
   let body='';
   if(a){
     const drivers = (a.drivers||[]).map(function(dd){
@@ -638,10 +638,10 @@ function renderTable(filter = '') {
       <td><span class="seg-${p.segment.replace(/[^a-zA-Z]/g,'-')} font-semibold">${p.segment}</span><div class="text-[10px] text-ink-mute">${p.segment_size ? p.segment_size.toLocaleString() + ' subs' : ''}</div></td>
       <td><span class="pill ct-${p.content_type}">${p.content_type}</span></td>
       <td class="text-[12px]">${p.archetype}</td>
-      <td class="text-[12px]">${p.hero_product || p.hero_sku || '—'}</td>
+      <td class="text-[12px]">${p.hero_product || p.hero_sku || '-'}</td>
       <td class="text-[12px] max-w-[260px]">${p.subject_hint}</td>
       <td class="max-w-[260px]">${analysisDetails(p)}</td>
-      <td class="text-[11px]">${p.festival ? '★ ' + p.festival : '—'}</td>
+      <td class="text-[11px]">${p.festival ? '★ ' + p.festival : '-'}</td>
       <td>${APPROVED.has(p.id) ? '<span title="Approved" style="color:#7fd6a6;margin-right:6px;font-weight:700">✓</span>' : ''}<button onclick='openMailerById("${p.id}")' class="text-[10px] uppercase tracking-wider px-2 py-1 rounded bg-gold/20 text-gold hover:bg-gold hover:text-cream">${APPROVED.has(p.id) ? 'Review' : 'View / Build →'}</button></td>
     </tr>
   `).join('');
@@ -652,16 +652,16 @@ function openMailerById(id) { const entry = STATE.plan.find((p) => p.id === id);
 // ── Client-side mailer pipeline (replaces /api/calendar?action=trigger-mailer) ──
 function subjectUrl(){ return 'https://example.com'; }
 function imageBrief(entry, style){
-  return style.charAt(0).toUpperCase()+style.slice(1)+' hero for a '+String(entry.archetype).replace(/-/g,' ')+' email — feature "'+entry.hero_product+'" for the '+entry.segment+' segment ('+marketName(entry.market)+'). Warm champagne + charcoal palette, generous negative space, premium editorial lighting, no text baked in. 1200×1500, mobile-first crop safe.'+(entry.feedback?(' Reviewer changes to honour: '+entry.feedback):'');
+  return style.charAt(0).toUpperCase()+style.slice(1)+' hero for a '+String(entry.archetype).replace(/-/g,' ')+' email, feature "'+entry.hero_product+'" for the '+entry.segment+' segment ('+marketName(entry.market)+'). Warm champagne + charcoal palette, generous negative space, premium editorial lighting, no text baked in. 1200×1500, mobile-first crop safe.'+(entry.feedback?(' Reviewer changes to honour: '+entry.feedback):'');
 }
 function bodyCopy(entry){
   const H = entry.hero_product;
   const m = {
-    'ritual-journey': 'Here is a simple way to make '+H+' part of your everyday routine — small, consistent, and built around how you already live.',
-    'storytelling-narrative': 'Every '+H+' has a story. Here is ours — why we made it, and what makes it worth coming back to.',
+    'ritual-journey': 'Here is a simple way to make '+H+' part of your everyday routine, small, consistent, and built around how you already live.',
+    'storytelling-narrative': 'Every '+H+' has a story. Here is ours, why we made it, and what makes it worth coming back to.',
     'product-education': 'A quick guide to getting the most out of '+H+', from first use to your third reorder.',
-    'social-proof': 'People like you keep reordering '+H+'. Here is what they say — and why it might be your next staple.',
-    'win-back-offer': 'It has been a while. We kept your favourite, '+H+', ready — plus a little something to welcome you back.',
+    'social-proof': 'People like you keep reordering '+H+'. Here is what they say, and why it might be your next staple.',
+    'win-back-offer': 'It has been a while. We kept your favourite, '+H+', ready, plus a little something to welcome you back.',
     'launch-announcement': 'It is here. '+H+' just launched, and early access is open to you first.',
     'seasonal-gifting': (entry.festival?entry.festival+' is close. ':'Gifting season is close. ')+'Our '+H+' picks make it easy to give something that lands.',
   };
@@ -674,7 +674,7 @@ function emailHTML(entry, subj, withVisual){
   const acc='#FF6940', gold='#c9a96e', ink='#171717', paper='#FBF5EA';
   const cta = subjectUrl();
   const visual = withVisual
-    ? '<tr><td style="padding:0 32px"><div style="height:220px;border-radius:12px;background:linear-gradient(135deg,'+gold+'22,'+acc+'22);border:1px solid '+gold+'55;display:flex;align-items:center;justify-content:center;color:#8a7a5a;font:600 13px Inter,sans-serif">['+calEsc(entry.hero_product)+' — hero visual]</div></td></tr>'
+    ? '<tr><td style="padding:0 32px"><div style="height:220px;border-radius:12px;background:linear-gradient(135deg,'+gold+'22,'+acc+'22);border:1px solid '+gold+'55;display:flex;align-items:center;justify-content:center;color:#8a7a5a;font:600 13px Inter,sans-serif">['+calEsc(entry.hero_product)+', hero visual]</div></td></tr>'
     : '';
   return '<div style="margin:0;background:'+paper+';padding:24px 0;font-family:Inter,Helvetica,Arial,sans-serif">'+
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;border:1px solid '+gold+'33">'+
@@ -831,7 +831,7 @@ $('btnApprove').addEventListener('click', () => {
 });
 $('planSearch').addEventListener('input', (e) => renderTable(e.target.value));
 
-// CSV export (self-contained serialiser — no external CDN dependency).
+// CSV export (self-contained serialiser, no external CDN dependency).
 function toCSV(rows){
   const cols = ['date','send_hour_utc','market','segment','segment_size','content_type','archetype','hero_product','subject_hint','festival'];
   const esc = (v)=>{ v = v==null?'':String(v); return /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; };

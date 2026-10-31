@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { ReactNode } from 'react';
 
-/** Clip-path circle wipe between routes — the scene cut. */
+/** Clip-path circle wipe between routes, the scene cut. */
 export default function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   return (

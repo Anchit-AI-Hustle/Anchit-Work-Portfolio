@@ -1,4 +1,4 @@
-// Provider model chains — the single place a model id is written down.
+// Provider model chains, the single place a model id is written down.
 //
 // WHY THIS FILE EXISTS
 //   api/apply.js, api/lifecycle.js and api/mailer.js each pinned ONE hardcoded
@@ -12,7 +12,7 @@
 //   caller swallowed the error (`catch (e) { /* next provider */ }`) it failed
 //   silently into the deterministic template. Nothing in the response said a
 //   provider had 404'd, so the symptom users saw was only ever the generic
-//   "the AI provider is unavailable" — undiagnosable from the outside.
+//   "the AI provider is unavailable", undiagnosable from the outside.
 //
 //   api/cascade.js already learned this lesson for Anthropic and left a note
 //   saying so ("A chain, not a single id... a wrong id degrades to a slower
@@ -23,7 +23,7 @@
 // ORDERING
 //   Newest first, previous generation next, the retired id last. A chain that
 //   leads with the current model costs nothing while that model lives, and
-//   self-heals into the next one the day it is retired — at the price of a
+//   self-heals into the next one the day it is retired, at the price of a
 //   single wasted round-trip, which is why the dead ids are kept rather than
 //   deleted: they are still the right answer for anyone on a committed-spend
 //   contract where the deprecation does not apply.
@@ -39,7 +39,7 @@ const CHAINS = {
 };
 
 // Env override wins and is tried first, so a model can be forced from the
-// dashboard without a deploy — the reason the *_MODEL vars existed at all.
+// dashboard without a deploy, the reason the *_MODEL vars existed at all.
 // Read per call, not at module load: a warm function would otherwise hold a
 // stale value until the instance recycled.
 function chainFor(provider) {
@@ -63,8 +63,8 @@ function isModelMiss(err) {
 }
 
 // Run `attempt(model)` down the chain. Returns the first non-empty result and
-// the id that produced it. Throws an Error carrying `.attempts` — the reason
-// each id failed — so a caller can report why instead of going quiet.
+// the id that produced it. Throws an Error carrying `.attempts`, the reason
+// each id failed, so a caller can report why instead of going quiet.
 async function tryModels(provider, attempt) {
   const models = chainFor(provider);
   if (!models.length) throw Object.assign(new Error(provider + ': no model configured'), { attempts: [] });
@@ -78,14 +78,14 @@ async function tryModels(provider, attempt) {
       attempts.push(model + ':empty');
     } catch (e) {
       attempts.push(model + ':' + String((e && (e.reason || e.message)) || e).slice(0, 60));
-      if (!isModelMiss(e)) break;   // not a model problem — the rest will fail the same way
+      if (!isModelMiss(e)) break;   // not a model problem, the rest will fail the same way
     }
   }
   throw Object.assign(new Error(provider + ' failed: ' + attempts.join(' | ')), { attempts, provider });
 }
 
 // Turn a non-ok Response into an Error that carries enough to decide the above.
-// `http_404` alone — what these files threw before — cannot be told apart from
+// `http_404` alone, what these files threw before, cannot be told apart from
 // any other failure once it reaches the cascade.
 async function httpError(r) {
   let reason = '';

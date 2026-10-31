@@ -1,6 +1,6 @@
-// /api/step-video — find a REAL YouTube tutorial for a How-To step using Claude
+// /api/step-video, find a REAL YouTube tutorial for a How-To step using Claude
 // + web search, so the How-To Engine can embed actual footage inline (no YouTube
-// Data API key needed — it reuses ANTHROPIC_API_KEY).
+// Data API key needed, it reuses ANTHROPIC_API_KEY).
 //
 //   GET  /api/step-video?q=...   ->  { videoId?, embedUrl?, watchUrl }
 //   POST /api/step-video { q }   ->  same
@@ -11,7 +11,7 @@
 // A chain, not one id. This endpoint has been returning its link-only fallback
 // in production: the live response carried the "request failed" cache header
 // (3600s) rather than the "no key" one (86400s), so the key IS present and the
-// call itself was failing — almost certainly this pinned model id. Trying
+// call itself was failing, almost certainly this pinned model id. Trying
 // several turns a wrong id into a slower success instead of a silent downgrade.
 const { guard } = require('./_guard.js');
 const MODELS = [
@@ -78,7 +78,7 @@ async function handler(req, res) {
       catch { /* try the next id */ }
     }
     const videoId = extractVideoId(text);
-    // 86400 on a real answer, 3600 when every model failed — the difference is
+    // 86400 on a real answer, 3600 when every model failed, the difference is
     // how this endpoint's silent failure was diagnosed from the outside.
     res.setHeader('Cache-Control', videoId ? 'public, max-age=86400' : 'public, max-age=3600');
     return res.status(200).json(

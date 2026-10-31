@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Full Lifecycle Plan — one-shot D2C lifecycle engine | Lifecycle OS</title>
+<title>Full Lifecycle Plan | one-shot D2C lifecycle engine | Lifecycle OS</title>
 <meta name="theme-color" content="#0F0D0A" />
 <link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -160,7 +160,7 @@
   .mailer .mh .s{ font-weight:600; font-size:15px; }
   .mailer .mh .p{ font-size:12.5px; color:var(--ink-mute); margin-top:2px; }
   .mailer .mb{ padding:16px; font-size:14px; color:var(--ink-dim); white-space:pre-wrap; line-height:1.7; font-family:var(--font-sans); }
-  /* Designed mailer — Smart-Brain structure, Mailer-Architect visual quality */
+  /* Designed mailer, Smart-Brain structure, Mailer-Architect visual quality */
   .m-theme{ display:flex; align-items:center; gap:8px; padding:11px 16px; border-bottom:1px solid var(--rule);
     font-family:var(--font-mono); font-size:11px; color:var(--ink-mute); letter-spacing:.03em; background:rgba(255,255,255,.02); }
   .m-theme .lk{ color:var(--accent); }
@@ -230,13 +230,13 @@
   <script defer src="/assets/cinematic.js"></script>
 <!-- cinematic:end -->
 <!-- seo:auto:start -->
-<!-- Managed by scripts/seo-inject.mjs — edit seo.config.json, not here. -->
+<!-- Managed by scripts/seo-inject.mjs, edit seo.config.json, not here. -->
 <meta name="description" content="The Full lifecycle plan module of Lifecycle OS: enter any brand and get segments, a campaign calendar, a mailer, retention flows and KPIs in one pass." />
 <link rel="canonical" href="https://anchit-tandon.com/lifecycle-os-plan" />
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
 <meta name="keywords" content="D2C lifecycle marketing platform, AI retention platform for D2C brands, brand-agnostic lifecycle engine, lifecycle marketing automation, AI marketing calendar tool, customer segmentation AI tool, AI email marketing generator, D2C category benchmarking AI, retention marketing engine, D2C growth product manager, multi-provider LLM cascade tool, Anchit Tandon" />
 <meta name="author" content="Anchit Tandon" />
-<meta property="og:title" content="Full Lifecycle Plan — Lifecycle OS" />
+<meta property="og:title" content="Full Lifecycle Plan | Lifecycle OS" />
 <meta property="og:description" content="The Full lifecycle plan module of Lifecycle OS: enter any brand and get segments, a campaign calendar, a mailer, retention flows and KPIs in one pass." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://anchit-tandon.com/lifecycle-os-plan" />
@@ -245,9 +245,9 @@
 <meta property="og:locale" content="en_US" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Anchit Tandon — Product &amp; D2C Growth" />
+<meta property="og:image:alt" content="Anchit Tandon, Product &amp; D2C Growth" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Full Lifecycle Plan — Lifecycle OS" />
+<meta name="twitter:title" content="Full Lifecycle Plan | Lifecycle OS" />
 <meta name="twitter:description" content="The Full lifecycle plan module of Lifecycle OS: enter any brand and get segments, a campaign calendar, a mailer, retention flows and KPIs in one pass." />
 <meta name="twitter:image" content="https://anchit-tandon.com/assets/og/og-default.png" />
 <script type="application/ld+json">
@@ -329,7 +329,7 @@
          same product with its own name, pitch and "how it works". A portfolio
          review counted three overlapping pages about Lifecycle OS; the overview,
          demo, result and case study now live on /lifecycle-os alone, and this
-         keeps only what nothing else on the site does — the one-shot engine. -->
+         keeps only what nothing else on the site does, the one-shot engine. -->
     <div class="eyebrow"><span class="dot"></span>Lifecycle OS · module</div>
     <h1><span class="grad">Full lifecycle plan</span></h1>
     <p class="lede">The end-to-end one-shot: <strong>segments, calendar, mailer, retention flows and KPIs in one pass</strong>. It opens on a real D2C brand and runs on any brand you type. <a href="/lifecycle-os" style="color:var(--ink);text-decoration:underline;text-underline-offset:3px">What Lifecycle OS is&nbsp;→</a></p>
@@ -439,10 +439,10 @@
   /* ── Generated assets ──────────────────────────────────────────────────────
      The plan renders an on-page mailer preview, but a preview is not an asset.
      This produces REAL, send-ready files: designed, table-based, inline-styled
-     HTML emails (600px content width — the universal safe width for Outlook /
+     HTML emails (600px content width, the universal safe width for Outlook /
      Gmail / Apple Mail / Klaviyo), each downloadable. It asks /api/mailer for
      scored on-brand variants and, if that is unreachable, still builds a
-     send-ready file locally from the plan's own mailer — so an asset is ALWAYS
+     send-ready file locally from the plan's own mailer, so an asset is ALWAYS
      produced. Brand-agnostic: everything comes from the entered brand + plan. */
   function slug(s){ return String(s||'brand').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'brand'; }
 
@@ -519,12 +519,12 @@
       .then(function(d){
         var vs=(d&&d.variants||[]).filter(function(v){ return v&&v.html; });
         if(!vs.length) throw new Error('empty');
-        renderAssets(brand, vs, vs.length+' send-ready email'+(vs.length>1?'s':'')+' generated'+(d.source==='ai'?' · AI-written':' · template')+' — preview or download.');
+        renderAssets(brand, vs, vs.length+' send-ready email'+(vs.length>1?'s':'')+' generated'+(d.source==='ai'?' · AI-written':' · template')+', preview or download.');
       })
       .catch(function(){
         // Always produce an asset, even with no serverless engine reachable.
         renderAssets(brand, [{ label:'A · From this plan', subject:m.subject||'', preview:m.preview||'', html:localEmailHtml(brand,m) }],
-          'Built locally from this plan (the live engine was unreachable) — still send-ready.');
+          'Built locally from this plan (the live engine was unreachable), still send-ready.');
       })
       .then(function(){ btn.disabled=false; btn.textContent=orig; });
   });
@@ -546,13 +546,13 @@
         if(!res.ok || !res.j || !res.j.plan) throw new Error((res.j&&res.j.error)||'failed');
         render(res.j.plan, res.j.source, noScroll);
       })
-      .catch(function(){ errEl.textContent='Could not generate a plan just now — please try again in a moment.'; errEl.style.display='block'; })
+      .catch(function(){ errEl.textContent='Could not generate a plan just now, please try again in a moment.'; errEl.style.display='block'; })
       .then(function(){ clearInterval(timer); goEl.disabled=false; loadEl.classList.remove('on'); });
   }
 
   function render(p, source, noScroll){
     var isAnchit = source==='anchit';
-    $('rBrand').textContent = (p.brand||'Your brand') + (isAnchit ? ' — career growth plan' : ' — lifecycle plan');
+    $('rBrand').textContent = (p.brand||'Your brand') + (isAnchit ? ': career growth plan' : ': lifecycle plan');
     var badge=$('rBadge');
     if(isAnchit){ badge.textContent='Marketing myself · anchit-tandon.com'; badge.className='badge ai'; }
     else if(source==='ai+ci'){ badge.textContent='AI + live benchmarks'; badge.className='badge ai'; }
@@ -571,7 +571,7 @@
       $('rIndMeta').innerHTML = metaBits || '';
       $('rIndMeta').style.display = metaBits ? 'block' : 'none';
       $('rBench').innerHTML = benches.map(function(bm){
-        return '<div class="kpi"><div class="m">'+esc(bm.metric)+(bm.note?' — '+esc(bm.note):'')+'</div><div class="v">'+esc(bm.value)+'</div></div>';
+        return '<div class="kpi"><div class="m">'+esc(bm.metric)+(bm.note?', '+esc(bm.note):'')+'</div><div class="v">'+esc(bm.value)+'</div></div>';
       }).join('');
       $('rIndTitle').style.display=''; $('rIndustry').style.display='block';
     } else {
@@ -592,7 +592,7 @@
 
     $('rSeg').innerHTML = (p.segments||[]).map(function(s){
       return '<div class="card"><div class="k"><span>'+esc(s.name)+'</span><span class="sz">'+esc(s.size||'')+'</span></div><p>'+esc(s.description)+'</p></div>';
-    }).join('') || '<p style="color:var(--ink-mute)">—</p>';
+    }).join('') || '<p style="color:var(--ink-mute)">-</p>';
 
     $('rStages').innerHTML = (p.stages||[]).map(function(s){
       var tags=(s.channels||[]).map(function(c){ return '<span>'+esc(c)+'</span>'; }).join('');
@@ -632,7 +632,7 @@
         return '<div class="bstep"><div class="bn">0'+(i+1)+' · '+esc(s.step)+'</div>'+(s.detail?'<p>'+esc(s.detail)+'</p>':'')+'</div>';
       }).join('');
       $('rBrain').innerHTML = '<div class="brain">'+steps+'</div>'+
-        ((sb.horizon||sb.note)?'<div class="note" style="font-size:13px;color:var(--ink-dim)">'+(sb.horizon?'<b style="color:var(--ink)">'+esc(sb.horizon)+'</b> — ':'')+esc(sb.note||'')+'</div>':'');
+        ((sb.horizon||sb.note)?'<div class="note" style="font-size:13px;color:var(--ink-dim)">'+(sb.horizon?'<b style="color:var(--ink)">'+esc(sb.horizon)+'</b>, ':'')+esc(sb.note||'')+'</div>':'');
       $('rBrainTitle').style.display=''; $('rBrain').style.display='block';
     } else { $('rBrainTitle').style.display='none'; $('rBrain').style.display='none'; }
 
@@ -662,7 +662,7 @@
     var h=m.hero||{}, cta=m.cta||{}, secs=m.sections||[];
     var out='';
     out += '<div class="mh"><div class="s">'+esc(m.subject||'')+'</div><div class="p">'+esc(m.preview||'')+'</div></div>';
-    if(m.theme) out += '<div class="m-theme"><span class="lk">◆ Strategy locked</span> — <b>'+esc(m.theme)+'</b></div>';
+    if(m.theme) out += '<div class="m-theme"><span class="lk">◆ Strategy locked</span>, <b>'+esc(m.theme)+'</b></div>';
     out += '<div class="m-body">';
     if(h.kicker || h.headline || h.subhead){
       out += '<div class="m-hero">';

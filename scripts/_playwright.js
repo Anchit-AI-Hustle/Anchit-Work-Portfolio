@@ -28,7 +28,7 @@
  *        c. nothing, and Playwright reports its own missing-browser error.
  *
  *      An executablePath a caller passes still wins, unless the file is not
- *      there — then it is dropped rather than thrown, because a stale absolute
+ *      there, then it is dropped rather than thrown, because a stale absolute
  *      path is exactly what this module exists to survive. In CI,
  *      `npx playwright install chromium` provides (a) and the rest is unused.
  */

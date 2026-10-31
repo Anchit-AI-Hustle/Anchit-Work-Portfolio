@@ -10,7 +10,7 @@ export default {
         silver: '#EAEAEA',      // primary text
         ash: '#8A8A8A',         // secondary / metadata
         edge: 'rgba(234,234,234,0.10)',
-        signal: '#C6FF4F',      // the single accent — used sparingly, on purpose
+        signal: '#C6FF4F',      // the single accent, used sparingly, on purpose
       },
       fontFamily: {
         display: ['var(--font-display)', 'Inter', 'system-ui', 'sans-serif'],

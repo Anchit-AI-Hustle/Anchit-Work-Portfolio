@@ -1,4 +1,4 @@
-// /api/auth-verify — turn a Google ID token into a verified user. Free, and
+// /api/auth-verify, turn a Google ID token into a verified user. Free, and
 // with no database behind it.
 //
 // WHY THIS EXISTS

@@ -4,7 +4,7 @@
 // scale, so sizes drifted with nothing to catch them: one home-page viewport
 // rendered 11 distinct ones (9, 11, 12, 14, 15, 16, 18, 19, 20, 24, 60), and
 // the main layout blocks carried 170 off-scale paddings and gaps. Both are
-// tokens now, and this is what keeps them that way — a design system nothing
+// tokens now, and this is what keeps them that way, a design system nothing
 // checks is a document, not a system.
 //
 // Run against a served build:  node scripts/design-system.js
@@ -137,7 +137,7 @@ const PAGES = [
   const uniq = (a) => [...new Set(a)];
   check('every rendered font size is a step on the type scale',
     badType.length === 0,
-    badType.length ? uniq(badType).slice(0, 4).join(', ') : `${[...allSizes].sort((a, z) => a - z).join(', ')}px — all on scale`);
+    badType.length ? uniq(badType).slice(0, 4).join(', ') : `${[...allSizes].sort((a, z) => a - z).join(', ')}px, all on scale`);
 
   // Per view, not the union: home and projects are different compositions and
   // are entitled to different steps. The union was 12 and meant nothing.
@@ -160,11 +160,11 @@ const PAGES = [
 
   if (MUT) {
     // The contrast check is not touched by a size/padding mutation and should
-    // stay green — saying so beats pretending the mutation covers everything.
+    // stay green, saying so beats pretending the mutation covers everything.
     const target = results.filter((r) => !/contrast/.test(r[1]));
     const wrong = target.filter((r) => r[0] === 'PASS').map((r) => r[1]);
     if (!wrong.length) { console.log(`MUT: all ${target.length} scale checks failed, as they must (contrast is not size-breakable)`); process.exit(0); }
-    console.log('MUT: still passing — ' + wrong.join('; '));
+    console.log('MUT: still passing, ' + wrong.join('; '));
     process.exit(1);
   }
   process.exit(failed ? 1 : 0);

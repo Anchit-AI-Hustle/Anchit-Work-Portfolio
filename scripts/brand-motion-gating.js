@@ -1,7 +1,7 @@
 // Motion regression tests for the two brand microsites.
 //
 // Every check here is a bug that was actually shipped on these pages, and each
-// one is invisible in the diff — the source looked right in all five cases, and
+// one is invisible in the diff, the source looked right in all five cases, and
 // only the rendered page showed otherwise. That is why this suite drives a real
 // browser instead of grepping.
 //
@@ -43,7 +43,7 @@ const results = [];
 const chk = (name, ok, detail) => results.push({ name, ok: !!ok, detail: detail || '' });
 
 // Loops that must be running in view and idle out of it. `sel` is the element
-// that actually carries the animation — for the rails that is a pseudo-element,
+// that actually carries the animation, for the rails that is a pseudo-element,
 // which is why the probe takes one.
 const PAGES = [
   {
@@ -149,7 +149,7 @@ async function newPage(b, opts) {
   if (MUT && mutations[MUT]) {
     // addInitScript runs before the document exists: document.head is null and
     // getElementById returns null, so a mutation applied straight from here
-    // silently does not apply — and the suite then reports a false PASS for the
+    // silently does not apply, and the suite then reports a false PASS for the
     // bug it was meant to catch. Each mutation is deferred until after the
     // page's own script has run, so it really is undoing the fix.
     await p.addInitScript({
@@ -184,7 +184,7 @@ async function newPage(b, opts) {
     /* ---- 1. every ambient loop idles off screen ---- */
     for (const l of page.loops) {
       const exists = await p.evaluate((s) => !!document.querySelector(s), l.sel);
-      if (!exists) { chk(`${page.name}: ${l.label} idles off screen`, true, 'not in DOM — skipped'); continue; }
+      if (!exists) { chk(`${page.name}: ${l.label} idles off screen`, true, 'not in DOM, skipped'); continue; }
 
       await p.evaluate((s) => document.querySelector(s)
         .scrollIntoView({ block: 'center', behavior: 'instant' }), l.scope);
@@ -192,7 +192,7 @@ async function newPage(b, opts) {
       const on = await p.evaluate(probe, { sel: l.sel, pseudo: l.pseudo });
       const onVis = await p.evaluate(scopeInView, l.scope);
 
-      if (on.name === 'none') { chk(`${page.name}: ${l.label} idles off screen`, true, 'no animation on this element — skipped'); continue; }
+      if (on.name === 'none') { chk(`${page.name}: ${l.label} idles off screen`, true, 'no animation on this element, skipped'); continue; }
 
       await p.evaluate((s) => {
         const r = document.querySelector(s).getBoundingClientRect();
@@ -202,7 +202,7 @@ async function newPage(b, opts) {
       const off = await p.evaluate(probe, { sel: l.sel, pseudo: l.pseudo });
       const offVis = await p.evaluate(scopeInView, l.scope);
 
-      if (offVis) { chk(`${page.name}: ${l.label} idles off screen`, true, 'could not clear the viewport — skipped'); continue; }
+      if (offVis) { chk(`${page.name}: ${l.label} idles off screen`, true, 'could not clear the viewport, skipped'); continue; }
 
       // idle means either paused, or the gating selector dropped the animation
       const idle = off.play === 'paused' || off.name === 'none';
@@ -214,7 +214,7 @@ async function newPage(b, opts) {
     /* ---- 2. the gate preserves phase ---- */
     for (const ph of page.phase) {
       const exists = await p.evaluate((s) => !!document.querySelector(s), ph.sel);
-      if (!exists) { chk(`${page.name}: ${ph.label} gate resumes, not restarts`, true, 'not in DOM — skipped'); continue; }
+      if (!exists) { chk(`${page.name}: ${ph.label} gate resumes, not restarts`, true, 'not in DOM, skipped'); continue; }
       await p.evaluate((s) => document.querySelector(s)
         .scrollIntoView({ block: 'center', behavior: 'instant' }), ph.scope);
       await p.waitForTimeout(600);
@@ -229,7 +229,7 @@ async function newPage(b, opts) {
       const away = await p.evaluate(probe, { sel: ph.sel, pseudo: ph.pseudo });
       chk(`${page.name}: ${ph.label} gate resumes, not restarts`,
           away.name !== 'none' && away.play === 'paused',
-          away.name === 'none' ? 'animation removed off screen — returning restarts the cycle'
+          away.name === 'none' ? 'animation removed off screen, returning restarts the cycle'
                                : `held as ${away.name}, ${away.play}`);
     }
 
@@ -280,7 +280,7 @@ async function newPage(b, opts) {
     await p.goto(BASE + '/deli-chic/', { waitUntil: 'load' });
     await p.waitForTimeout(1200);
     const has = await p.evaluate(() => !!document.querySelector('.loupe-container'));
-    if (!has) chk('Deli Chic: loupe moves by transform, not left/top', true, 'loupe not on the page — skipped');
+    if (!has) chk('Deli Chic: loupe moves by transform, not left/top', true, 'loupe not on the page, skipped');
     else {
       await p.evaluate(() => document.querySelector('.loupe-container')
         .scrollIntoView({ block: 'center', behavior: 'instant' }));

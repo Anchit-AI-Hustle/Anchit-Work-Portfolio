@@ -1,14 +1,14 @@
-/* Brand motion layer — Gram Street Coffee and Deli Chic.
+/* Brand motion layer, Gram Street Coffee and Deli Chic.
  *
  * Three effects, all of them meant to be NOTICED:
  *   1. headlines arrive word by word, tipped back in 3D
  *   2. CTAs are magnetic and tilt toward the cursor
  *   3. marked layers drift at their own depth as you scroll
  *
- * There was a fourth — sections leaning and squashing with scroll velocity —
+ * There was a fourth, sections leaning and squashing with scroll velocity,
  * and it is gone. See the note where it used to live, below.
  *
- * Self-hosted GSAP + ScrollTrigger from /assets/vendor — no CDN, and the same
+ * Self-hosted GSAP + ScrollTrigger from /assets/vendor, no CDN, and the same
  * copies the rest of the site uses.
  *
  * House rules this obeys (CLAUDE.md earned each of them the hard way):
@@ -86,13 +86,13 @@
         return;
       }
 
-      // Perspective on the heading, not on :root — a custom property or a
+      // Perspective on the heading, not on :root, a custom property or a
       // transform on the root invalidates every element on the page.
       h.style.perspective = '700px';
 
       // Driven by IntersectionObserver rather than ScrollTrigger. A heading
       // already past its start point when ScrollTrigger was created kept the
-      // "from" state and never played — which left headings sitting tipped
+      // "from" state and never played, which left headings sitting tipped
       // back and invisible, i.e. worse than no animation at all. An observer
       // fires on what is on screen NOW and cannot get this wrong.
       gsap.set(words, { yPercent: 115, rotateX: -78, opacity: 0 });
@@ -169,7 +169,7 @@
   /* 3 ─ Depth drift ---------------------------------------------------------- */
   // The only ScrollTrigger-bound tween in this file, and opt-in: it moves the
   // elements carrying [data-bm-depth] and nothing else. No page currently marks
-  // any, so neither brand page loads ScrollTrigger (43 KB) any more — both were
+  // any, so neither brand page loads ScrollTrigger (43 KB) any more, both were
   // fetching and registering the plugin for a tween with no targets. Marking a
   // layer means adding the plugin's <script> back to that page; without it this
   // returns instead of handing GSAP a scrollTrigger config it cannot honour.

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * sarvam-check — get started with the Sarvam AI APIs, and prove the Sarvam leg
+ * sarvam-check, get started with the Sarvam AI APIs, and prove the Sarvam leg
  * of this repo's voice cascade actually works before it ships.
  *
  * The API key is read from SARVAM_API_KEY and is NEVER printed, logged, or
@@ -12,11 +12,11 @@
  *   SARVAM_API_KEY=sk_... node scripts/sarvam-check.mjs --speaker aditya
  *
  * It exercises three endpoints against api.sarvam.ai:
- *   1. GET  /text-to-speech   speakers — confirms the key is live
- *   2. POST /text-to-speech             — synthesizes with the EXACT body
+ *   1. GET  /text-to-speech   speakers, confirms the key is live
+ *   2. POST /text-to-speech            , synthesizes with the EXACT body
  *                                         api/tts.js sends, so this verifies
  *                                         production and not a lookalike
- *   3. POST /speech-to-text             — transcribes your own voice sample
+ *   3. POST /speech-to-text            , transcribes your own voice sample
  *
  * ── On cloning ──────────────────────────────────────────────────────────────
  * Sarvam's REST API cannot speak in your cloned voice. `speaker` is a closed
@@ -57,10 +57,10 @@ const API = 'https://api.sarvam.ai';
 const HEAD = { 'api-subscription-key': key, 'Content-Type': 'application/json' };
 
 const c = sarvamConfig();
-console.log(`→ Sarvam check — model=${c.model} speaker=${c.speaker} lang=${c.lang} codec=${c.codec} pace=${c.pace} rate=${c.rate}Hz\n`);
+console.log(`→ Sarvam check, model=${c.model} speaker=${c.speaker} lang=${c.lang} codec=${c.codec} pace=${c.pace} rate=${c.rate}Hz\n`);
 
 if (!c.knownSpeaker) {
-  console.log(`  ! "${c.speaker}" is not a known ${c.model} speaker. Sending it anyway —`);
+  console.log(`  ! "${c.speaker}" is not a known ${c.model} speaker. Sending it anyway,`);
   console.log(`    api/tts.js retries with "${SARVAM_DEFAULT_SPEAKER[c.model]}" if Sarvam rejects it.\n`);
 }
 
@@ -101,7 +101,7 @@ try {
       const audio = Buffer.from(b64, 'base64');
       const out = `audio/sarvam-test.${c.codec === 'linear16' ? 'wav' : c.codec}`;
       await writeFile(out, audio);
-      console.log(`✓ ${(audio.length / 1024).toFixed(0)} KB written to ${out} — play it.`);
+      console.log(`✓ ${(audio.length / 1024).toFixed(0)} KB written to ${out}, play it.`);
       console.log('  This is a Sarvam STOCK voice. It is not you.\n');
     }
   }
@@ -112,7 +112,7 @@ try {
 
 // ── 2. Speech to text ───────────────────────────────────────────────────────
 // Transcribe Anchit's own sample. The sync endpoint is documented for clips
-// under 30s and the sample is 30.7s, so trim it first — in pure JS, because
+// under 30s and the sample is 30.7s, so trim it first, in pure JS, because
 // requiring ffmpeg just to run a check is a bad trade.
 function sliceWav(buf, maxSeconds) {
   if (buf.length < 44 || buf.toString('ascii', 0, 4) !== 'RIFF' || buf.toString('ascii', 8, 12) !== 'WAVE') return null;
@@ -167,14 +167,14 @@ if (!existsSync(samplePath)) {
     const raw = await readFile(samplePath);
     const clip = sliceWav(raw, 20);
     const payload = clip ? clip.buf : raw;
-    if (clip) console.log(`  (trimmed to ${clip.seconds.toFixed(1)}s — the sync endpoint wants < 30s)`);
+    if (clip) console.log(`  (trimmed to ${clip.seconds.toFixed(1)}s, the sync endpoint wants < 30s)`);
 
     const form = new FormData();
     form.append('file', new Blob([payload], { type: 'audio/wav' }), 'anchit.wav');
     form.append('model', 'saarika:v2.5');
     form.append('language_code', 'unknown');   // let Sarvam detect it
 
-    // NOTE: no Content-Type here — FormData sets the multipart boundary itself.
+    // NOTE: no Content-Type here, FormData sets the multipart boundary itself.
     const r = await fetch(`${API}/speech-to-text`, {
       method: 'POST',
       headers: { 'api-subscription-key': key },
@@ -212,7 +212,7 @@ try {
   if (!r.ok) {
     const why = await r.text();
     console.log(`  – translate unavailable on this key (HTTP ${r.status}): ${why.slice(0, 200)}`);
-    console.log('    Not fatal — the portfolio does not depend on it.\n');
+    console.log('    Not fatal, the portfolio does not depend on it.\n');
   } else {
     const j = await r.json();
     console.log(`✓ hi-IN: "${(j.translated_text || '').slice(0, 200)}"\n`);
@@ -229,14 +229,14 @@ if (failures) {
   console.log('✓ Sarvam is wired correctly.');
 }
 console.log(`
-About your cloned voice — read this before wiring Sarvam up as "your" voice:
+About your cloned voice, read this before wiring Sarvam up as "your" voice:
 
   Sarvam's REST API CANNOT speak in your cloned voice. The 'speaker' parameter
   accepts only stock voices (${SARVAM_SPEAKERS['bulbul:v3'].size} on bulbul:v3, ${SARVAM_SPEAKERS['bulbul:v2'].size} on bulbul:v2) and the API
   has no cloned-voice id field at all. Cloning is a Sarvam Studio browser
   feature; the clone stays inside Studio.
 
-  So in api/tts.js, Sarvam runs LAST — after ElevenLabs, Cartesia, Fish,
+  So in api/tts.js, Sarvam runs LAST, after ElevenLabs, Cartesia, Fish,
   Hugging Face and your self-hosted XTTS, all of which can be genuinely you.
   Sarvam is the safety net and the Indic/code-mixed voice, not the clone.
 

@@ -3,7 +3,7 @@
 // scripts/provider-chain.js tests tryModels() directly, with its own stub in
 // place of the network call. That proves the helper is correct and proves
 // nothing about whether api/mailer.js, api/lifecycle.js and api/apply.js
-// actually USE it correctly — which is where the original bug lived. This file
+// actually USE it correctly, which is where the original bug lived. This file
 // calls each exported handler with a fake req/res and a stubbed global.fetch,
 // then asserts on the requests that were really made and the JSON that really
 // came back.
@@ -26,7 +26,7 @@ const path = require('path');
 const MUT = process.env.MUT || '';
 
 const results = [];
-// covered=false marks a check this mutation cannot break — it guards a
+// covered=false marks a check this mutation cannot break, it guards a
 // behaviour that does not depend on the model chain. Saying so beats pretending.
 function check(name, fn, breaks = 'ids') {
   try { fn(); results.push(['PASS', name, '', breaks]); }
@@ -34,7 +34,7 @@ function check(name, fn, breaks = 'ids') {
 }
 
 // THE MUTATION: put the pre-fix state back into the module the handlers really
-// require — one pinned, retired id per provider, and an httpError that loses
+// require, one pinned, retired id per provider, and an httpError that loses
 // the status so a dead id can no longer be told from a dead provider. This is
 // the actual bug, not a flipped assertion.
 const MODELS = require(path.join(__dirname, '..', 'api/_models.js'));
@@ -52,7 +52,7 @@ if (MUT === 'classify') {
   const Module = require('module');
   const p = require.resolve(path.join(__dirname, '..', 'api/_models.js'));
   const src = fs.readFileSync(p, 'utf8').replace('if (!isModelMiss(e)) break;', '/* mutated: never stop */');
-  if (src === fs.readFileSync(p, 'utf8')) throw new Error('classify mutation did not apply — the guard line moved');
+  if (src === fs.readFileSync(p, 'utf8')) throw new Error('classify mutation did not apply, the guard line moved');
   const m = new Module(p, null);
   m.filename = p; m.paths = Module._nodeModulePaths(path.dirname(p));
   m._compile(src, p);
@@ -91,7 +91,7 @@ function fakeRes() {
   return r;
 }
 function freshHandler(file) {
-  // Only the route's own cache — _models.js must stay the instance mutated
+  // Only the route's own cache, _models.js must stay the instance mutated
   // above, since that is what the route requires.
   delete require.cache[require.resolve(path.join(__dirname, '..', file))];
   return require(path.join(__dirname, '..', file));
@@ -230,7 +230,7 @@ function clearEnv() {
       console.log(`MUT=${MUT}: all ${target.length} check(s) it targets failed, and the other ${others.length} still pass`);
       process.exit(0);
     }
-    console.log('MUT: wrong outcome — ' + wrong.join('; '));
+    console.log('MUT: wrong outcome, ' + wrong.join('; '));
     process.exit(1);
   }
   process.exit(failed ? 1 : 0);

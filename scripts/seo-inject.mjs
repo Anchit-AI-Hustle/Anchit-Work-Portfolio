@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * seo-inject — apply the SEO/AEO manifest (seo.config.json) into each hosted
+ * seo-inject, apply the SEO/AEO manifest (seo.config.json) into each hosted
  * page's <head>, and emit robots.txt / sitemap.xml / llms.txt.
  *
  * Idempotent: everything this script manages lives between the markers
@@ -53,11 +53,11 @@ function sitemapWithExtras(xml, extras = []) {
 // default: that is a ~1.5MB square app icon, so every share of a page without
 // its own image rendered a cropped logo, slowly.
 const DEFAULT_OG = '/assets/og/og-default.png';
-const DEFAULT_OG_META = { 'image:width': '1200', 'image:height': '630', 'image:alt': 'Anchit Tandon — Product & D2C Growth' };
+const DEFAULT_OG_META = { 'image:width': '1200', 'image:height': '630', 'image:alt': 'Anchit Tandon, Product & D2C Growth' };
 const FAVICON = '<link rel="icon" href="/icons/favicon.svg" type="image/svg+xml" />';
 
 function buildBlock(page, domain, { needsFavicon = false } = {}) {
-  const L = [START, '<!-- Managed by scripts/seo-inject.mjs — edit seo.config.json, not here. -->'];
+  const L = [START, '<!-- Managed by scripts/seo-inject.mjs, edit seo.config.json, not here. -->'];
   if (page.description) L.push(`<meta name="description" content="${esc(page.description)}" />`);
   if (page.canonical) L.push(`<link rel="canonical" href="${esc(page.canonical)}" />`);
   L.push(`<meta name="robots" content="${esc(page.robots || 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1')}" />`);
@@ -129,7 +129,7 @@ async function applyPage(page, domain) {
     }
   }
   // 2) strip previously-managed tags, then append fresh block
-  // A favicon only where the page has none of its own — several pages carry a
+  // A favicon only where the page has none of its own, several pages carry a
   // bespoke one (a data: URI) that must not be replaced.
   const stripped = stripManaged(head);
   const needsFavicon = !/<link[^>]+rel=["'][^"']*\bicon\b/i.test(stripped);
@@ -154,6 +154,6 @@ async function main() {
     console.log('[seo] wrote sitemap.xml');
   }
   if (cfg.llmsTxt) { await writeFile(join(ROOT, 'llms.txt'), cfg.llmsTxt.trimEnd() + '\n'); console.log('[seo] wrote llms.txt'); }
-  console.log(`[seo] done — ${n} pages injected`);
+  console.log(`[seo] done, ${n} pages injected`);
 }
 main().catch((e) => { console.error(e); process.exit(1); });

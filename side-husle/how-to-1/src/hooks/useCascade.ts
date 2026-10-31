@@ -23,7 +23,7 @@ export function useCascade() {
       if (!r.ok) throw new Error(`Cascade failed (${r.status})`);
       const result = (await r.json()) as CascadeResult;
       // If the server had no provider keys (or all providers failed) it returns
-      // its OWN deterministic offlineGuide built from the raw `task` — which,
+      // its OWN deterministic offlineGuide built from the raw `task`, which,
       // for an optimized ask, is the long "Act as a world-class instructional
       // designer…" paragraph, so its summary/steps read wrong ("Gather
       // everything you need to Act as…"). Detect that and rebuild the whole
@@ -32,14 +32,14 @@ export function useCascade() {
       const serverOffline = models.length === 1 && models[0] === 'offline';
       if (serverOffline) {
         const rebuilt = offlineCascadeResult(title);
-        setState({ loading: false, result: rebuilt, error: 'No model produced a guide — showing a generic outline.', offline: true });
+        setState({ loading: false, result: rebuilt, error: 'No model produced a guide, showing a generic outline.', offline: true });
         return rebuilt;
       }
       if (result.guide) result.guide.task = title;   // real guide → keep the displayed title clean
       setState({ loading: false, result, error: null, offline: false });
       return result;
     } catch (e) {
-      // Still answer rather than showing a dead screen — but SAY SO. The old
+      // Still answer rather than showing a dead screen, but SAY SO. The old
       // version swallowed the reason and set error:null, so a completely
       // unreachable endpoint looked identical to a real guide. That is how
       // "Get set up / Do the first move / Avoid the common trap" reached

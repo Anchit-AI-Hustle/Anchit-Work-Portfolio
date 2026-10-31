@@ -1,9 +1,9 @@
-// /api/apply — auto-apply kit generator (tailored resume + cover letter).
+// /api/apply, auto-apply kit generator (tailored resume + cover letter).
 //
 //   POST /api/apply  → { resume, coverLetter, fit }
 //
 // Given the caller's profile (pasted resume text OR a portfolio URL) and a target
-// job, Gemini writes a tailored one-page resume and a cover letter — grounded in
+// job, Gemini writes a tailored one-page resume and a cover letter, grounded in
 // the profile, never inventing experience. Gated behind Google sign-in (Supabase).
 //
 // Env:
@@ -14,6 +14,7 @@
 // Model ids live in _models.js as a chain per provider, not one pinned id here.
 // Every id this file used to hardcode has since been retired by its provider.
 const { originAllowed, guard, publicHttpUrl } = require('./_guard.js');
+const { dedashResponse } = require('./_nodash.js');
 const { tryModels, httpError, KEYS } = require('./_models.js');
 
 function haveAnyProvider() {
@@ -33,7 +34,7 @@ async function verifySupabase(token, url, anonKey) {
   } catch (e) { return { ok: false }; }
 }
 
-// Remove <tag>…</tag> blocks (script/style) via a plain scan — no regex, so it
+// Remove <tag>…</tag> blocks (script/style) via a plain scan, no regex, so it
 // can't be fooled by odd closing tags the way a tag-filtering regexp can.
 function stripTagBlocks(html, tag) {
   const lower = html.toLowerCase();
@@ -44,7 +45,7 @@ function stripTagBlocks(html, tag) {
     if (open === -1) return out + html.slice(i);
     out += html.slice(i, open);
     const close = lower.indexOf(closeStr, open);
-    if (close === -1) return out;            // unterminated — drop the tail
+    if (close === -1) return out;            // unterminated, drop the tail
     const gt = lower.indexOf('>', close);
     if (gt === -1) return out;
     i = gt + 1;
@@ -89,7 +90,7 @@ async function fetchProfileFromUrl(url) {
 }
 
 function buildPrompt(profile, job) {
-  return `You are an expert career assistant. Using ONLY the candidate's real background below, write a tailored application for the target job. Never invent employers, titles, degrees, dates or metrics that aren't supported by the profile — rephrase and prioritise what's already there.
+  return `You are an expert career assistant. Using ONLY the candidate's real background below, write a tailored application for the target job. Never invent employers, titles, degrees, dates or metrics that aren't supported by the profile, rephrase and prioritise what's already there.
 
 === CANDIDATE PROFILE ===
 ${profile.slice(0, 8000)}
@@ -102,11 +103,11 @@ ${job.description ? 'Description: ' + String(job.description).slice(0, 2500) : '
 ${job.link ? 'Link: ' + job.link : ''}
 
 Produce:
-1. "resume" — a concise, one-page resume in clean Markdown, reordered and reworded to match this role (summary, key skills, most relevant experience with impact bullets, education).
-2. "coverLetter" — a specific, warm, 3–4 short paragraph cover letter addressed to the hiring team, connecting the candidate's real strengths to this exact role and company. No clichés, no invented facts.
-3. "fit" — 2–3 sentences on why the candidate fits and any honest gap to address.
+1. "resume", a concise, one-page resume in clean Markdown, reordered and reworded to match this role (summary, key skills, most relevant experience with impact bullets, education).
+2. "coverLetter", a specific, warm, 3–4 short paragraph cover letter addressed to the hiring team, connecting the candidate's real strengths to this exact role and company. No clichés, no invented facts.
+3. "fit", 2–3 sentences on why the candidate fits and any honest gap to address.
 
-OUTPUT FORMAT — return ONLY a JSON object, no markdown fences, no commentary:
+OUTPUT FORMAT, return ONLY a JSON object, no markdown fences, no commentary:
 {"resume": string, "coverLetter": string, "fit": string}`;
 }
 
@@ -155,7 +156,7 @@ async function generate(prompt) {
       const kit = parseKit(out);
       if (kit && (kit.resume || kit.coverLetter)) return { kit, model: p.n + '/' + model };
       errs.push(p.n + '/' + model + ':bad_output');
-      // Every model id in the chain answered but none parsed — report the
+      // Every model id in the chain answered but none parsed, report the
       // provider that got furthest rather than collapsing it to one word.
     } catch (e) { errs.push(String((e && e.message) || e).slice(0, 200)); }
   }
@@ -179,6 +180,7 @@ function parseKit(text) {
 }
 
 async function handler(req, res) {
+  dedashResponse(res);
   // No wildcard: another site should not be able to call this from a browser.
   const origin = (req.headers || {}).origin;
   const okOrigin = originAllowed(origin);
@@ -194,7 +196,7 @@ async function handler(req, res) {
   // guard() sends its own 429 with Retry-After, as on the other paid routes.
   if (guard(req, res, { route: 'apply', max: 4 })) return;
 
-  // Env-driven only — no hardcoded project. Set SUPABASE_URL + SUPABASE_ANON_KEY
+  // Env-driven only, no hardcoded project. Set SUPABASE_URL + SUPABASE_ANON_KEY
   // to a project you own to gate behind Google sign-in; leave unset to run open.
   const supabaseUrl = (process.env.SUPABASE_URL || '').trim();
   const supabaseAnonKey = (process.env.SUPABASE_ANON_KEY || '').trim();

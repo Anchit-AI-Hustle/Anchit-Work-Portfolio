@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Sonic Branding — AI Brand Melody &amp; Sound | Lifecycle OS</title>
+<title>Sonic Branding | AI Brand Melody &amp; Sound | Lifecycle OS</title>
 <link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -14,13 +14,13 @@
   <script defer src="/assets/cinematic.js"></script>
 <!-- cinematic:end -->
 <!-- seo:auto:start -->
-<!-- Managed by scripts/seo-inject.mjs — edit seo.config.json, not here. -->
+<!-- Managed by scripts/seo-inject.mjs, edit seo.config.json, not here. -->
 <meta name="description" content="Sonic Branding: generate and play a short brand melody plus a sonic-identity brief (mood, tempo, instrumentation, usage) for the subject." />
 <link rel="canonical" href="https://anchit-tandon.com/lifecycle-os-music" />
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
 <meta name="keywords" content="Sonic Branding AI, brand melody generator, sonic identity brief, AI brand sound, audio branding tool, brand jingle generator AI, sonic logo generator, music brand identity, brand sound design AI, Lifecycle OS, Anchit Tandon" />
 <meta name="author" content="Anchit Tandon" />
-<meta property="og:title" content="Sonic Branding — AI Brand Melody &amp; Sound" />
+<meta property="og:title" content="Sonic Branding | AI Brand Melody &amp; Sound" />
 <meta property="og:description" content="Generate and play a short brand melody plus a sonic-identity brief (mood, tempo, instrumentation, usage) for the subject. Part of the Lifecycle OS." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://anchit-tandon.com/lifecycle-os-music" />
@@ -29,9 +29,9 @@
 <meta property="og:locale" content="en_US" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Anchit Tandon — Product &amp; D2C Growth" />
+<meta property="og:image:alt" content="Anchit Tandon, Product &amp; D2C Growth" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Sonic Branding — AI Brand Melody &amp; Sound" />
+<meta name="twitter:title" content="Sonic Branding | AI Brand Melody &amp; Sound" />
 <meta name="twitter:description" content="Generate and play a short brand melody plus a sonic-identity brief for the subject. Part of the Lifecycle OS." />
 <meta name="twitter:image" content="https://anchit-tandon.com/assets/og/og-default.png" />
 <script type="application/ld+json">
@@ -65,7 +65,7 @@
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "@id": "https://anchit-tandon.com/lifecycle-os-music#app",
-  "name": "Sonic Branding — Lifecycle OS",
+  "name": "Sonic Branding | Lifecycle OS",
   "url": "https://anchit-tandon.com/lifecycle-os-music",
   "applicationCategory": "MultimediaApplication",
   "applicationSubCategory": "Audio Branding",
@@ -108,7 +108,7 @@
       <div class="sectitle">Sonic identity brief</div><div class="grid" id="brief"></div>
     </div>
     <div id="extras" style="margin-top:8px"></div>
-    <footer>Sonic Branding · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>. Audio is generated locally with the Web Audio API — no external service.</footer>
+    <footer>Sonic Branding · part of the <a href="/lifecycle-os">Lifecycle OS</a> by <a href="/#projects">Anchit Tandon</a>. Audio is generated locally with the Web Audio API, no external service.</footer>
   </div>
 <script src="/lifecycle-os-kit.js"></script>
 <script>
@@ -139,14 +139,14 @@
   $('playBtn').addEventListener('click',play);
   function run(){
     var f=LOS.facts($('brand').value.trim(),$('url').value.trim()); MEL=compose(f);
-    $('hd').textContent=f.name+' — sonic identity'; LOS.badge($('bdg'),f.anchit?'anchit':'template'); $('key').textContent=KEY;
+    $('hd').textContent=f.name+': sonic identity'; LOS.badge($('bdg'),f.anchit?'anchit':'template'); $('key').textContent=KEY;
     $('viz').innerHTML=Array.from({length:14}).map(function(){return '<i></i>';}).join('');
     var brief=[
       ['Mood', f.mood], ['Tempo & key', KEY],
       ['Instrumentation', f.anchit?'Warm triangle-synth lead, soft pad, light percussive tick':'Plucked lead, airy pad, gentle mallets'],
       ['Usage', 'Logo sting (2s), intro loop, hold music, video outro'],
       ['Feeling to leave', f.anchit?'Sharp, credible, human':'Premium, warm, trustworthy'],
-      ['Signature motif', 'A rising '+ (KEY.indexOf('major')>-1?'major':'minor') +' pentatonic run resolving up — press play above'],
+      ['Signature motif', 'A rising '+ (KEY.indexOf('major')>-1?'major':'minor') +' pentatonic run resolving up, press play above'],
     ];
     $('brief').innerHTML=brief.map(function(b){return '<div class="card"><div class="k">'+esc(b[0])+'</div><p style="color:var(--ink)">'+esc(b[1])+'</p></div>';}).join('');
     $('out').style.display='block';

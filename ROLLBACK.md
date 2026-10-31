@@ -17,7 +17,7 @@ and does not touch the repository.
 - filter to **Production**, pick the last known-good one
 - **⋯ → Promote to Production** (older UI: *Rollback*)
 
-The deployment list is the source of truth for what "last known good" means —
+The deployment list is the source of truth for what "last known good" means,
 each row shows the commit it came from. `main` is now ahead of what is live, so
 follow with option 2 or 3 to make the repository agree.
 
@@ -49,7 +49,7 @@ discard the rest of the release.
 `sw.js` caches same-origin assets, and its cache name is stamped by the build
 from a hash of the files it serves (`stampServiceWorker` in
 `scripts/build-www.mjs`). Rolling back changes those bytes, so the stamp changes
-too and returning visitors pick the older assets up on their next visit — assets
+too and returning visitors pick the older assets up on their next visit, assets
 are stale-while-revalidate, so the first load after a rollback may still show
 the newer build and the one after it will be correct.
 

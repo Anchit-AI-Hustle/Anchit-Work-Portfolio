@@ -9,7 +9,7 @@ export interface Prerequisite {
   note?: string;
 }
 
-/** A real failure and what to do about it — not a badge. */
+/** A real failure and what to do about it, not a badge. */
 export interface Pitfall {
   /** What goes wrong, in the words someone would use to search for it. */
   problem: string;
@@ -27,7 +27,7 @@ export interface Pitfall {
  *  them. Brevity is a property of PROSE. It is not a reason to withhold the
  *  command, the menu path, the value to type, or what to do when it fails.
  *
- *  So `detail` stays short — and the substance lives in the structured fields
+ *  So `detail` stays short, and the substance lives in the structured fields
  *  below, which render as scannable lists rather than paragraphs. */
 export interface HowToStep {
   id: string;
@@ -40,7 +40,7 @@ export interface HowToStep {
    *  people get stuck the moment reality differs from the guide. */
   why?: string;
   /** The exact things: commands, menu paths, values, button labels, settings.
-   *  Short lines, scannable — this is where a guide stops being a summary. */
+   *  Short lines, scannable, this is where a guide stops being a summary. */
   specifics?: string[];
   /** How you know this step worked, observably. Replaces a fabricated
    *  "…done, and you can tell that it worked" line the UI used to synthesise
@@ -52,7 +52,7 @@ export interface HowToStep {
   badge: 'start' | 'action' | 'watch-out' | 'checkpoint' | 'finish';
   /** Optional branch: alternative paths ("if X, do Y"). */
   branches?: { label: string; goToStepId: string }[];
-  /** Seconds the step typically takes — feeds progress + pacing. */
+  /** Seconds the step typically takes, feeds progress + pacing. */
   estSeconds?: number;
   /** Prompt used to generate an animated clip for this step. */
   videoPrompt?: string;
@@ -67,7 +67,7 @@ export interface MasterGuide {
   /** What to have ready before step 1. A guide that starts mid-task and only
    *  mentions the missing tool at step 4 has wasted the reader's setup. */
   prerequisites?: Prerequisite[];
-  /** How you know the whole task is done — the observable end state. */
+  /** How you know the whole task is done, the observable end state. */
   successCriteria?: string;
   steps: HowToStep[];
   /** Directed edges for the flow diagram (stepId -> stepId, with labels). */

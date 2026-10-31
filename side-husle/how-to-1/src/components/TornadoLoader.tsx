@@ -1,4 +1,4 @@
-// A spinning 3D "tornado" of instanced points — used as the transition loader
+// A spinning 3D "tornado" of instanced points, used as the transition loader
 // after the user clicks into the engine from the intro explainer.
 
 import { useEffect, useMemo, useRef } from 'react';
@@ -60,7 +60,7 @@ export default function TornadoLoader({ label = 'Spinning up your guide…', sub
   label?: string; sub?: string; onDone?: () => void; ms?: number;
 }) {
   // When onDone is provided it self-times (intro transition). When omitted it
-  // stays up for as long as it is mounted — used as the query "search buffer"
+  // stays up for as long as it is mounted, used as the query "search buffer"
   // while the user's input is being turned into a guide.
   useEffect(() => {
     if (!onDone) return;

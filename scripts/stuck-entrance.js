@@ -3,7 +3,7 @@
 // THE BUG THIS CATCHES
 //   #currentWork has its own bespoke pinned reveal. It was ALSO being claimed
 //   by assets/cinematic.js, which gave .cw-body a 'cin-v3' 3D entrance that
-//   never completed — leaving it at rotateY(~26deg) permanently. Under
+//   never completed, leaving it at rotateY(~26deg) permanently. Under
 //   .cw-stage's perspective:1400px that projects every child differently by
 //   position, so the four skill items rendered at four different heights and
 //   the panel read as skewed and broken.
@@ -88,7 +88,7 @@ const PROBE = `(() => {
     await p.goto('http://127.0.0.1:8099/index.html', { waitUntil: 'load', timeout: 25000 });
     await p.waitForTimeout(2000);
     // Re-break the ROOT cause, not just the opt-out. The fix was in
-    // cinematic.js — its transform-clearing rule was scoped to .cin, so a
+    // cinematic.js, its transform-clearing rule was scoped to .cin, so a
     // .cin-stagger element carrying a variant never cleared its entrance.
     // Removing data-no-motion alone no longer reproduces anything, because
     // the transform now clears correctly; this puts the old scoping back.
@@ -101,7 +101,7 @@ const PROBE = `(() => {
         '.cin-stagger.cin-in.cin-v6{transform:perspective(760px) translate3d(0,-30px,-150px) rotateX(-24deg)!important}' +
         '.cw-panel{opacity:0!important}' +
         // The skills were misaligned but still VISIBLE in the transform bug.
-        // Their invisibility was the other fault — the scrub-driven reveal —
+        // Their invisibility was the other fault, the scrub-driven reveal,
         // which is a JS change and cannot be injected as CSS, so it gets its
         // own mutation here rather than being left unexercised.
         '.cw-skills li{opacity:0!important}' });
@@ -164,7 +164,7 @@ const PROBE = `(() => {
   await b.close();
 
   if (MUT) {
-    // By name, not by position — this was results.slice(0, 5) and quietly
+    // By name, not by position, this was results.slice(0, 5) and quietly
     // pointed at the wrong set as soon as a check was added above it.
     // The no-rotation check reads the SOURCE, and the other pages were never
     // mis-wired, so neither is touched by a mutation of the rendered page.
@@ -176,7 +176,7 @@ const PROBE = `(() => {
       console.log(`MUT: all ${target.length} checks it targets failed, and the other ${results.length - target.length} still pass`);
       process.exit(0);
     }
-    console.log('MUT: wrong outcome — ' + wrong.join('; '));
+    console.log('MUT: wrong outcome, ' + wrong.join('; '));
     process.exit(1);
   }
   process.exit(failed ? 1 : 0);

@@ -3,14 +3,14 @@
 // Two properties, both of which have been broken by accident already:
 //
 //   maxAtOnce  how many blocks gained their revealed class inside a 40ms
-//              window. This must be 1. It was 13 twice — once because the
+//              window. This must be 1. It was 13 twice, once because the
 //              backlog valve flushed the whole queue at the patience limit,
 //              and once because the drain was re-entrant: each drain emptied
 //              the queue and cleared its own flag, so a loop of enqueues found
 //              it idle every time and revealed each one synchronously.
 //
 //   adjSame    how many blocks share an entrance with the block before them.
-//              This must be 0 — the variants exist so a page does not read as
+//              This must be 0, the variants exist so a page does not read as
 //              one animation repeated, and assigning them by a plain 1..6 cycle
 //              is its own visible pattern.
 //
@@ -45,8 +45,8 @@ const PAGES = process.argv.slice(2).length?process.argv.slice(2):
       for(let i=0;i<t.length;i++){ let n=1; for(let j=i+1;j<t.length && t[j]-t[i]<=40;j++) n++; if(n>mx)mx=n; }
       const vis=e=>{let n=e; while(n&&n!==document.body){ if(getComputedStyle(n).display==='none') return false; n=n.parentElement;} return true;};
       // Skip decorative aria-hidden layers. The cinematic boot stage (#cineHero)
-      // is tagged .cin-stagger and ENDS at opacity 0 by design — it scales away
-      // into the page — so counting it as "still hidden" reported a failure on
+      // is tagged .cin-stagger and ENDS at opacity 0 by design, it scales away
+      // into the page, so counting it as "still hidden" reported a failure on
       // index.html that was never a fault. Verified against the pre-change
       // baseline: the same element, the same 0, before any of this was touched.
       const decorative=e=>e.closest('[aria-hidden="true"]')!==null;
@@ -54,7 +54,7 @@ const PAGES = process.argv.slice(2).length?process.argv.slice(2):
       return { variants:new Set(vs).size, tagged:els.length, adj, mx, hidden };
     });
     console.log(page.padEnd(26)+String(r.variants+'/6').padStart(9)+String(r.adj).padStart(9)
-      +String(r.mx).padStart(11)+'  '+(r.hidden===0?'yes':'NO — '+r.hidden+' still hidden'));
+      +String(r.mx).padStart(11)+'  '+(r.hidden===0?'yes':'NO, '+r.hidden+' still hidden'));
     await p.close();
   }
   await b.close();

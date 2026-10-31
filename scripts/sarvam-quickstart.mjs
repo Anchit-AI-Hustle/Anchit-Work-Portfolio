@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-// sarvam-quickstart.mjs — prove out the Sarvam APIs end to end in one run.
+// sarvam-quickstart.mjs, prove out the Sarvam APIs end to end in one run.
 //
 // Does three things, in order, and keeps going if one fails:
-//   1. Text to Speech  — synthesises a line with Bulbul and writes a playable file
-//   2. Speech to Text  — transcribes your own recording with Saaras
-//   3. Translate       — round-trips a line into Hindi
+//   1. Text to Speech , synthesises a line with Bulbul and writes a playable file
+//   2. Speech to Text , transcribes your own recording with Saaras
+//   3. Translate      , round-trips a line into Hindi
 //
 // It reads the SAME resolved settings api/tts.js uses, so whatever this script
 // produces is exactly what the live site will produce.
@@ -14,16 +14,16 @@
 //   SARVAM_API_KEY=… node scripts/sarvam-quickstart.mjs --text "Custom line" --out /tmp/x.wav
 //   SARVAM_API_KEY=… node scripts/sarvam-quickstart.mjs --stt audio/anchit.m4a
 //
-// Get a key at https://dashboard.sarvam.ai — the dashboard shows its value ONCE,
+// Get a key at https://dashboard.sarvam.ai, the dashboard shows its value ONCE,
 // at creation. The key is read from the environment and never printed here.
 //
-// ON VOICE CLONING — read this before trying to wire your own voice in:
+// ON VOICE CLONING, read this before trying to wire your own voice in:
 // Sarvam's TTS `speaker` field is a closed enum of preset voices. There is no
 // custom-voice field, so a cloned voice cannot be addressed over this API.
 // Sarvam's cloning lives in Creative Studio (dashboard.sarvam.ai), is created by
 // recording ~10s live in the browser (no file upload), and the resulting voice
 // is reachable from Studio TTS and Dubbing only. Anchit's cloned voice therefore
-// runs on ElevenLabs — see scripts/elevenlabs-clone.mjs.
+// runs on ElevenLabs, see scripts/elevenlabs-clone.mjs.
 
 import { readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
@@ -68,7 +68,7 @@ async function explain(r) {
   const body = await r.text().catch(() => '');
   try {
     const e = JSON.parse(body).error;
-    if (e) return `${r.status} ${e.code || ''} — ${e.message || ''}`.trim();
+    if (e) return `${r.status} ${e.code || ''}, ${e.message || ''}`.trim();
   } catch {}
   return `${r.status} ${body.slice(0, 200)}`;
 }
@@ -80,7 +80,7 @@ async function tts() {
   const out = arg('out', path.join(ROOT, `sarvam-sample.${c.codec === 'linear16' ? 'wav' : c.codec}`));
 
   console.log(`\n① Text to Speech  ${dim(`${c.model} · ${c.speaker} · ${c.language} · ${c.codec}`)}`);
-  if (text.length > c.limit) console.log(dim(`   text is ${text.length} chars; ${c.model} caps at ${c.limit} — it will be truncated`));
+  if (text.length > c.limit) console.log(dim(`   text is ${text.length} chars; ${c.model} caps at ${c.limit}, it will be truncated`));
 
   const body = {
     text: text.slice(0, c.limit),
@@ -175,7 +175,7 @@ if (failed === 0) {
   console.log(ok('All calls succeeded. Set SARVAM_API_KEY in Vercel and /api/tts will use Sarvam.'));
   console.log(dim('  bash scripts/setup-env.sh   # then redeploy'));
 } else {
-  console.log(bad(`${failed} call(s) failed — see the error codes above.`));
+  console.log(bad(`${failed} call(s) failed, see the error codes above.`));
   console.log(dim('  invalid_api_key_error → wrong/rotated key · insufficient_quota_error → out of credits'));
 }
 console.log(dim('Cloned voice: not available over Sarvam\'s API (preset speakers only).'));

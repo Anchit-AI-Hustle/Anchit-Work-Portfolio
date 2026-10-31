@@ -2,7 +2,7 @@
 //
 // The two pages are thin shells over one engine and one content file, so the
 // thing worth checking is that the shared pieces really do render on both and
-// that the interactive parts respond — a course whose quiz does not answer or
+// that the interactive parts respond, a course whose quiz does not answer or
 // whose simulator does not recompute is a slide deck.
 //
 // Run against a served build:  node scripts/course-check.js
@@ -67,7 +67,7 @@ const PAGES = [
         if (!sim) continue;
         // Compare EVERY output, not just the first. The first slider on the
         // payback simulator is the acquisition cost and the first output is
-        // margin per order, which does not depend on it — so reading one cell
+        // margin per order, which does not depend on it, so reading one cell
         // reported "nothing recomputed" on a simulator that was working.
         const read = () => [...document.querySelectorAll('.gs-out .v')].map((e) => e.textContent).join('|');
         const before = read();
@@ -159,7 +159,7 @@ const PAGES = [
   // ── robustness ───────────────────────────────────────────────────────────
   // A stored record is untrusted input: it can be hand-edited, half-written, or
   // restored from an old export. {"notes":null} is valid JSON with the wrong
-  // SHAPE, and it used to take the entire page down — the try/catch around
+  // SHAPE, and it used to take the entire page down, the try/catch around
   // JSON.parse never fired, because parsing succeeded.
   {
     const SHAPES = [
@@ -192,7 +192,7 @@ const PAGES = [
 
   // Radio groups must be keyed on identity, not on content. Two questions of
   // equal length rendered together would otherwise share a group and deselect
-  // each other — which is exactly what the review list does.
+  // each other, which is exactly what the review list does.
   {
     const p = await (await b.newContext({ viewport: { width: 1280, height: 900 } })).newPage();
     await p.goto('http://127.0.0.1:8099/growth-school.html', { waitUntil: 'load', timeout: 25000 });
@@ -316,8 +316,8 @@ const PAGES = [
   console.log(`\n${results.length - failed}/${results.length} passed`);
   await b.close();
   if (MUT) {
-    // Content assertions — her name in the rail, the absence of a topic, the
-    // lack of an iframe — are not broken by removing rendered nodes, so
+    // Content assertions, her name in the rail, the absence of a topic, the
+    // lack of an iframe, are not broken by removing rendered nodes, so
     // claiming this mutation covers them would be false.
     // Removing rendered nodes cannot produce a page error or a horizontal
     // overflow, so those two are not covered by this mutation and saying
@@ -325,7 +325,7 @@ const PAGES = [
     const target = results.filter((r) => !/no page errors|nothing outside|no third-party|uses her name|throws nothing|overflows the phone/.test(r[1]));
     const wrong = target.filter((r) => r[0] === 'PASS').map((r) => r[1]);
     if (!wrong.length) { console.log(`MUT: all ${target.length} content checks failed, as they must`); process.exit(0); }
-    console.log('MUT: still passing — ' + wrong.join('; ')); process.exit(1);
+    console.log('MUT: still passing, ' + wrong.join('; ')); process.exit(1);
   }
   process.exit(failed ? 1 : 0);
 })();

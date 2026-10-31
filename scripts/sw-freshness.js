@@ -9,8 +9,8 @@
 //
 // Run against a served build:  node scripts/sw-freshness.js
 // MUT=1 writes the PRE-FIX worker into www/ and runs the same checks against
-// it, then restores. The mutation changes the INPUT — a hand-written cache
-// name and a cache-first branch that never refetches — rather than flipping
+// it, then restores. The mutation changes the INPUT, a hand-written cache
+// name and a cache-first branch that never refetches, rather than flipping
 // the assertions, so a check that passes under it is not measuring anything.
 const { chromium } = require('./_playwright.js');
 const MUT = process.env.MUT === '1';
@@ -44,7 +44,7 @@ self.addEventListener('fetch', (e) => {
   process.on('exit', restore);
   const sw = fs.readFileSync(SW_PATH, 'utf8');
 
-  // 1. The build stamped it — a hand-written date can drift, a content hash cannot.
+  // 1. The build stamped it, a hand-written date can drift, a content hash cannot.
   const m = sw.match(/const CACHE = '([^']+)'/);
   const name = m ? m[1] : '(none)';
   check('the cache name is stamped by the build, not by hand',

@@ -6,7 +6,7 @@ import ReactFlow, { Background, Controls, type Edge, type Node, type ReactFlowIn
 import 'reactflow/dist/style.css';
 import type { MasterGuide } from '../types';
 
-// Warm, on-theme palette (black / orange / gold) — every badge stays in family
+// Warm, on-theme palette (black / orange / gold), every badge stays in family
 // but is still distinguishable.
 const COLOR: Record<string, string> = {
   start: '#FFB736', action: '#FF6940', 'watch-out': '#FF4D1F', checkpoint: '#c9a96e', finish: '#FF8A3D',
@@ -40,7 +40,7 @@ export default function FlowDiagram({ guide, activeId, onSelect }: {
 
   // fitView only runs once on mount, so the map stays framed for whatever size
   // it had then. The stylesheet gives it a much shorter box on phones, which
-  // cropped the first and last nodes — re-fit whenever the box actually resizes.
+  // cropped the first and last nodes, re-fit whenever the box actually resizes.
   const wrap = useRef<HTMLDivElement>(null);
   const [rf, setRf] = useState<ReactFlowInstance | null>(null);
   useEffect(() => {
@@ -64,7 +64,7 @@ export default function FlowDiagram({ guide, activeId, onSelect }: {
       <ReactFlow
         nodes={nodes} edges={edges} fitView fitViewOptions={{ padding: 0.16 }}
         /* default minZoom is 0.5, which clamps fitView on a short phone-sized
-           box and crops the first/last nodes — let it zoom out far enough that
+           box and crops the first/last nodes, let it zoom out far enough that
            the whole flow always fits, however many steps the guide has. */
         minZoom={0.25}
         onInit={setRf} proOptions={{ hideAttribution: true }}

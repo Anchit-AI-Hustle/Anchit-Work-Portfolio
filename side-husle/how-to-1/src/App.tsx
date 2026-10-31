@@ -5,7 +5,7 @@ import { Suspense, lazy, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import IntroExplainer from './components/IntroExplainer';
 import TornadoLoader from './components/TornadoLoader';
-// The main canvas pulls in React Flow, the step cards and the cascade hook —
+// The main canvas pulls in React Flow, the step cards and the cascade hook,
 // none of which the intro screen needs. It is fetched while the tornado is
 // spinning, so the 2.2s loader IS the loading state and nobody waits twice.
 const HowToVisualCanvas = lazy(() => import('./components/HowToVisualCanvas'));
