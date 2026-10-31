@@ -70,7 +70,7 @@ const STATS = [
   ['400%+ ROI', 'ET Prime, in 6 months'],
   ['New revenue stream', 'Half Marathon, 18K+ runners'],
   ['20 products', 'built in 5\u20116 months'],
-  ['Books + music', '4 books, a new track daily'],
+  ['9 books, 62 tracks', '7.7K+ YouTube views'],
 ];
 // Widths follow the text: the marathon headline is the longest.
 const COLS = [2100, 1650, 2450, 1750, RIGHT - 2100 - 1650 - 2450 - 1750];
@@ -171,10 +171,10 @@ const body = [
       'pins any website in your room with a phone, turns a laptop webcam into head-tracked 3D, and **throws pages to a TV** with a gesture.']),
     ...product('ANCHOR, an AI techno artist', 'anchor.anchit-tandon.com', [
       'artists grow by releasing consistently, and most cannot keep it up.',
-      'a robot that releases **a new track every day at ₹0**, with quality checks built in. Instagram **@anchor_at2803**.']),
-    ...product('Book publishing engine, 4 thrillers and kids’ drawing books', 'amazon.in/Anchit-Tandon/e/B0HL6RW348', [
+      'a robot that releases a track a day at ₹0: **62 tracks since 4 Sep 2026** and **7.7K+ YouTube views**. YouTube **@ANCHOR_AT**, Instagram **@anchor_at2803**.']),
+    ...product('Book publishing engine, 9 books on Amazon', 'amazon.in/Anchit-Tandon/e/B0HL6RW348', [
       'can one person with AI run a real publishing business?',
-      'a quality-gated engine behind **The Watermark Files** (4 thrillers) and **Doodle Lane Studio** drawing books; Instagram **@ai_at2803**.']),
+      'a quality-gated engine behind **The Watermark Files** (4 thrillers) and **5 Doodle Lane** drawing books for kids; Instagram **@ai_at2803**.']),
     group('Also built'),
     mini('Parwah', 'siblings share a parent’s care as tasks, so nothing slips', 'parwah-hq.anchit-tandon.com'),
     mini('AI TeleSuite', 'AI scores every sales call so managers can coach', 'demo on request'),
