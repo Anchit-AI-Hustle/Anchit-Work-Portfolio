@@ -31,6 +31,9 @@ const sub = (left, dates) => new Paragraph({
 });
 const group = (t) => new Paragraph({ spacing: { before: 70, after: 20 }, keepNext: true, children: [run(t, { bold: true, size: 19, color: DIM })] });
 const bullet = (t) => new Paragraph({ numbering: { reference: 'dot', level: 0 }, spacing: { before: 0, after: 30, line: 264 }, children: [run(t)] });
+// A bullet that ends with a bold "Proof:" line, so each offer carries a number.
+const proofBullet = (t, proof) => new Paragraph({ numbering: { reference: 'dot', level: 0 }, spacing: { before: 0, after: 40, line: 264 },
+  children: [run(t + ' '), run('Proof: ', { bold: true, color: GOLD }), run(proof)] });
 const para = (children, o = {}) => new Paragraph({ spacing: { before: 0, after: o.after || 40, line: 264 }, children });
 
 const body = [
@@ -92,10 +95,14 @@ const body = [
   bullet('Built subscription, ordering and fulfilment workflows for a food-service concept, including a test-mode payment journey.'),
 
   section('Engagement focus'),
-  bullet('AI workflows and internal tools: call review, knowledge assistants, reporting dashboards and scoped integrations with human review.'),
-  bullet('Conversion-focused websites: clear offer positioning, enquiry or purchase journeys, CRM integrations and full-funnel measurement.'),
-  bullet('Fractional product and growth: roadmap prioritisation, zero-to-one launches, conversion experiments and subscription or ecommerce retention.'),
-  bullet('Focused web MVPs: one core customer journey shipped end to end, with agreed acceptance criteria and a clean handover.'),
+  proofBullet('AI workflows and internal tools: call review, knowledge assistants, reporting dashboards and scoped integrations with human review.',
+    'AI TeleSuite helped scale assisted-sales revenue from INR 15 lakh to INR 80 lakh a month.'),
+  proofBullet('Conversion-focused websites: clear offer positioning, enquiry or purchase journeys, CRM integrations and full-funnel measurement.',
+    'The ET Markets web revamp lifted engagement 27% and unlocked INR 3 crore+ in incremental annual revenue.'),
+  proofBullet('Fractional product and growth: roadmap prioritisation, zero-to-one launches, conversion experiments and subscription or ecommerce retention.',
+    '400%+ ROI within six months on an assisted-conversion funnel; subscriber retention up 10%.'),
+  proofBullet('Focused web MVPs and journeys: one core customer journey shipped end to end, with agreed acceptance criteria and a clean handover.',
+    'Assisted Buying took qualified leads from about 30 to 150+ a day; the app revamp grew daily active users 25%.'),
 
   section('Education'),
   role('B.Tech, Computer Science and Engineering', '2016 to 2020', { first: true }),
