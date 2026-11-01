@@ -96,8 +96,8 @@ const skills = (label, items) => para([run(label + ':  ', { bold: true }), run(i
 
 const body = [
   new Paragraph({ spacing: { after: 10 }, children: [new TextRun({ text: 'Anchit Tandon', font: FONT, size: 46, bold: true, color: INK })] }),
-  new Paragraph({ spacing: { after: 50 }, children: [new TextRun({ text: HIRE ? 'Product Lead & AI Builder' : 'Technical Product and Growth Builder', font: FONT, size: 24, color: GOLD, bold: true }),
-    run(HIRE ? '   ·   Product Management, D2C Growth, AI products' : '', { size: 20, color: DIM })] }),
+  new Paragraph({ spacing: { after: 50 }, children: [new TextRun({ text: HIRE ? 'Product & Growth Leader · AI Product Builder' : 'Technical Product and Growth Builder', font: FONT, size: 24, color: GOLD, bold: true }),
+    run(HIRE ? '' : '', { size: 20, color: DIM })] }),
   new Paragraph({ spacing: { after: 110 }, children: [
     run('Delhi, India  |  +91 9873945238  |  ', { size: 19, color: DIM }), link('anchit.tandon@gmail.com', 'mailto:anchit.tandon@gmail.com'),
     run('  |  ', { size: 19, color: DIM }), link('anchit-tandon.com', 'https://anchit-tandon.com/'),
