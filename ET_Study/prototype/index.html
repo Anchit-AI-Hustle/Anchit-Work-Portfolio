@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Member-first ET, My Stocks: Prototype | Anchit Tandon</title>
+<meta name="description" content="Prototype from the ET study by Anchit Tandon, My Stocks: a front page built around the stocks you hold. Fictional demo data.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#8f1d22">
+<meta property="og:title" content="Member-first ET, My Stocks: Prototype">
+<meta property="og:description" content="Prototype from the ET study by Anchit Tandon, My Stocks: a front page built around the stocks you hold. Fictional demo data.">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://anchit-tandon.com/ET_Study/prototype">
+<link rel="icon" href="/icons/favicon.svg">
+<meta property="og:image" content="https://anchit-tandon.com/assets/og/og-default.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/ET_Study/prototype/proto.css">
+</head>
+<body>
+<div class="notice" role="note"><b>Prototype</b> for an independent study by Anchit Tandon. Companies, stories, prices and the member are fictional demo data. Not affiliated with The Economic Times; nothing is stored or sent.</div>
+
+<header class="top">
+  <div class="wrap">
+    <div><p class="app-name">Member-first ET</p><small>The fixes from the study, working together</small></div>
+    <a class="btn btn-outline" href="/ET_Study/fixes">Back to the study</a>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Prototype pages">
+  <div class="wrap"><a class="tab" href="/ET_Study/prototype" aria-current="page">My Stocks</a><a class="tab" href="/ET_Study/prototype/hub">Member hub</a><a class="tab" href="/ET_Study/prototype/rules">Who sees what</a><a class="tab" href="/ET_Study/prototype/maths">Renewal maths</a></div>
+</nav>
+
+<main>
+<div class="wrap">
+
+<section class="panel" id="stocks">
+  <div class="head"><span class="fixref">Fixes F13 and F11 · problems P4, P6, P7, P8</span><h1 class="ph1">ET around what you own</h1><p class="small">Pick the stocks you hold. The front page becomes every story about them, each with a line on what it means for you, and a brief you can get each morning.</p></div>
+  <div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:10px">My holdings <span class="tag">demo companies</span></h3><div class="chips" id="holdings"></div></div>
+  <div class="grid stocks">
+    <div class="card"><h3>My feed <span class="tag r" id="feed-count">0 stories</span></h3><div id="feed"></div></div>
+    <div class="card soft"><h3>Morning brief, 7:30 AM</h3><p class="small muted" style="margin:4px 0 10px">On the app or WhatsApp, only if you opt in. A tap opens the story, not the home page.</p><ul class="brief" id="brief"></ul></div>
+  </div>
+</section>
+
+</div>
+</main>
+<div class="toast" id="toast" role="status" hidden></div>
+<script src="/ET_Study/prototype/proto.js" defer></script>
+</body>
+</html>

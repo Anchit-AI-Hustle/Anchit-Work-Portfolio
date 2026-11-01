@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Times Health Study: From One Class to a Habit | Anchit Tandon</title>
-<meta name="description" content="Independent, problem-first study of Times Health+ yoga, its diet plans and the Times Internet Half Marathon by Anchit Tandon: 8 problems, 14 fixes.">
+<title>Times Health Study: Why People Stop | Anchit Tandon</title>
+<meta name="description" content="Independent, problem-first study of Times Health+ yoga, its diet plans and the Times Internet Half Marathon by Anchit Tandon.">
 <meta name="robots" content="noindex, nofollow">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#0f6e66">
-<meta property="og:title" content="Times Health Study: from one class to a habit">
-<meta property="og:description" content="Problem-first study of Times Health+ yoga, diet plans and the Half Marathon series: a live audit, user needs, 8 ranked problems, 14 fixes and a working prototype.">
+<meta property="og:title" content="Times Health Study: Why People Stop">
+<meta property="og:description" content="Independent, problem-first study of Times Health+ yoga, its diet plans and the Times Internet Half Marathon by Anchit Tandon.">
 <meta property="og:type" content="article">
 <link rel="canonical" href="https://anchit-tandon.com/TimesHealth_Study">
 <link rel="icon" href="/icons/favicon.svg">
@@ -17,152 +17,20 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
-<style>
-/* A calm wellness palette. The Times Health+ logo and brand colours are
-   deliberately not used. */
-:root{
-  --bg:#f4f7f5; --surface:#ffffff; --soft:#e9efeb;
-  --ink:#14211e; --body:#36443f; --muted:#5d6b66; --line:#d8e2dd;
-  --brand:#0f6e66; --brand-2:#0b544e; --brand-soft:#e0f1ee;
-  --coral:#b4400b; --coral-soft:#fdece2; --amber:#9a5b00; --amber-soft:#fcf0d8; --blue:#1d4ed8;
-  --r-btn:10px; --r-tag:6px; --r-panel:14px; --r-card:18px; --r-pill:9999px;
-  --font:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
-}
-*{box-sizing:border-box}
-html{scroll-padding-top:72px}
-body{margin:0;font-family:var(--font);color:var(--body);background:var(--bg);font-size:16px;line-height:26px;-webkit-font-smoothing:antialiased;overflow-x:clip}
-h1,h2,h3{color:var(--ink);margin:0;font-weight:700;letter-spacing:-.015em}
-h1{font-size:32px;line-height:40px;font-weight:800} h2{font-size:26px;line-height:34px} h3{font-size:18px;line-height:26px;font-weight:700}
-p{margin:0} ul,ol{margin:0;padding-left:20px}
-li+li{margin-top:6px}
-a{color:var(--brand);text-underline-offset:3px}
-:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:4px}
-.wrap{max-width:1120px;margin:0 auto;padding:0 16px}
-.notice{background:var(--ink);color:#dfe8e4;font-size:13px;line-height:19px;padding:8px 16px;text-align:center}
-.notice b{color:#fff}
-.nav{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line)}
-.nav .wrap{display:flex;align-items:center;gap:16px;min-height:60px}
-.mark{display:flex;align-items:center;gap:10px;flex:none;text-decoration:none}
-.mark i{width:34px;height:34px;border-radius:10px;background:var(--brand);color:#fff;display:grid;place-items:center;font-style:normal;font-weight:700;font-size:14px}
-.mark b{color:var(--ink);font-size:15px;line-height:18px;display:block}
-.mark small{color:var(--muted);font-size:12px;line-height:14px;display:block}
-.links{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
-.links::-webkit-scrollbar{display:none}
-.links a{white-space:nowrap;text-decoration:none;color:var(--body);font-size:14px;font-weight:600;padding:8px 12px;border-radius:var(--r-pill)}
-.links a:hover,.links a.on{background:var(--brand-soft);color:var(--brand)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:var(--r-btn);font-weight:700;font-size:15px;min-height:48px;padding:12px 22px;border:1px solid transparent;text-decoration:none;font-family:inherit;cursor:pointer}
-.btn-primary{background:var(--brand);color:#fff}.btn-primary:hover{background:var(--brand-2)}
-.btn-outline{background:#fff;color:var(--ink);border-color:var(--line)}
-.btn.sm{min-height:40px;padding:8px 14px;font-size:14px}
-.hero{background:radial-gradient(120% 90% at 100% 0%,#fde9dc 0%,rgba(253,233,220,0) 55%),linear-gradient(180deg,#fff 0%,var(--bg) 100%);border-bottom:1px solid var(--line)}
-.hero .wrap{padding-top:40px;padding-bottom:40px;display:grid;gap:18px}
-.eyebrow{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--brand)}
-.hero h1 .accent{color:var(--brand)}
-.lede{font-size:18px;line-height:28px;max-width:820px}
-.hero-ctas{display:flex;gap:10px;flex-wrap:wrap}
-.meta{font-size:13px;color:var(--muted)}
-section.block{padding:48px 0;border-bottom:1px solid var(--line)}
-section.block:nth-of-type(even){background:#fff}
-.sec-head{display:grid;gap:8px;margin-bottom:24px;max-width:860px}
-.sec-head .num{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--brand);text-transform:uppercase}
-.grid{display:grid;gap:16px}
-.grid>*{min-width:0}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:20px}
-.card.soft{background:var(--brand-soft);border-color:transparent}
-.card h3+p{margin-top:6px}
-.kpi b{display:block;font-size:30px;line-height:36px;color:var(--ink);font-weight:800}
-.kpi b.pri{color:var(--brand)}
-.kpi span{display:block;font-weight:700;color:var(--ink);font-size:15px}
-.kpi small{display:block;color:var(--muted);font-size:13px;line-height:18px;margin-top:4px}
-.tag{display:inline-block;font-size:12px;line-height:16px;font-weight:700;padding:4px 8px;border-radius:var(--r-tag);white-space:nowrap;background:var(--brand-soft);color:var(--brand)}
-.tag.c{background:var(--coral-soft);color:var(--coral)} .tag.a{background:var(--amber-soft);color:var(--amber)}
-.small{font-size:14px;line-height:21px} .muted{color:var(--muted)}
-.callout{background:#fff;border-left:5px solid var(--brand);border-radius:var(--r-panel);padding:16px 20px;font-size:17px;line-height:27px;color:var(--ink)}
-.callout.coral{border-left-color:var(--coral)}
-.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r-panel);background:#fff}
-@media(max-width:600px){.tbl.is-wide::before{content:'Swipe sideways for every column \2192';display:block;position:sticky;left:0;padding:8px 12px;font-size:12px;font-weight:600;color:#56625e;border-bottom:1px solid var(--line)}}
-table{border-collapse:collapse;width:100%;font-size:14px;line-height:20px}
-th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--soft);vertical-align:top}
-th{background:var(--soft);color:var(--ink);font-weight:700;font-size:13px}
-tr:last-child td{border-bottom:0}
-td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.t-wide{min-width:760px} .t-mid{min-width:560px}
-.prob{display:grid;gap:10px;align-content:start;border-top:5px solid var(--coral)}
-.prob.med{border-top-color:var(--amber)}
-.ph{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.pn{font-weight:800;font-size:22px;color:var(--ink)}
-.sev{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:var(--r-tag);background:var(--coral-soft);color:var(--coral)}
-.prob.med .sev{background:var(--amber-soft);color:var(--amber)}
-.who{font-size:13px;line-height:19px;color:var(--muted)}
-.prob ul{font-size:14px;line-height:21px}
-.jump{font-size:14px;font-weight:700;justify-self:start;padding:6px 0}
-.need{display:grid;gap:8px;align-content:start}
-.need dl{margin:0;display:grid;gap:8px;font-size:14px;line-height:21px}
-.need dt{font-weight:700;color:var(--ink);font-size:13px;text-transform:uppercase;letter-spacing:.04em}
-.need dd{margin:0}
-.voices{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
-.voice{margin:0;padding:16px;display:grid;gap:10px;align-content:space-between}
-.voice blockquote{margin:0;color:var(--ink);font-size:15px;line-height:23px}
-.voice figcaption{font-size:13px;line-height:18px;color:var(--muted)}
-.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-.chip{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:var(--r-pill);padding:8px 14px;font-size:14px;font-weight:700;min-height:44px;font-family:inherit;cursor:pointer}
-.chip[aria-pressed="true"]{background:var(--brand-soft);border-color:var(--brand);color:var(--brand)}
-.fix-status{font-size:14px;color:var(--muted);margin-bottom:16px;min-height:21px}
-.fix-status button{border:0;background:none;color:var(--brand);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer;padding:0 4px}
-.fixes{grid-template-columns:1fr}
-.fix{display:grid;gap:8px;align-content:start}
-.fix[hidden]{display:none}
-.fh{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.fn{font-weight:800;color:var(--brand);font-size:14px}
-.fix p{font-size:14px;line-height:21px}
-.fix .k{font-weight:700;color:var(--ink)}
-.loop{display:grid;gap:10px;grid-template-columns:1fr 1fr}
-.loop .step{background:#fff;border:1px solid var(--line);border-radius:var(--r-card);padding:16px;display:grid;gap:4px}
-.loop .step .n{font-size:12px;font-weight:800;color:var(--coral);text-transform:uppercase;letter-spacing:.06em}
-.loop .step b{color:var(--ink);font-size:17px}
-.loop .step.on{background:var(--brand-soft);border-color:transparent}
-.steps .card h3 .tag{display:block;width:max-content;margin-bottom:8px}
-.proto{display:grid;gap:16px;align-items:start}
-.short{margin-top:4px}
-.short .card{display:grid;gap:10px;align-content:start}
-.short ul{font-size:15px;line-height:23px;color:var(--ink)}
-.short .tag{justify-self:start;font-size:13px}
-@media (min-width:900px){.short{grid-template-columns:repeat(3,1fr)}}
-footer{background:var(--ink);color:#cfdad5}
-footer .wrap{padding-top:32px;padding-bottom:40px;display:grid;gap:16px;font-size:14px;line-height:22px}
-footer a{color:#a7e4da;overflow-wrap:anywhere}
-footer h3{color:#fff}
-@media (min-width:700px){
-  h1{font-size:40px;line-height:50px} h2{font-size:30px;line-height:38px}
-  .g2{grid-template-columns:1fr 1fr} .g3{grid-template-columns:repeat(3,1fr)}
-  .fixes{grid-template-columns:1fr 1fr}
-  .loop{grid-template-columns:repeat(4,1fr)}
-}
-@media (min-width:1080px){
-  h1{font-size:48px;line-height:58px}
-  .hero .wrap{padding-top:56px;padding-bottom:56px}
-  section.block{padding:64px 0}
-  .g4{grid-template-columns:repeat(4,1fr)} .g5{grid-template-columns:repeat(5,1fr)}
-  .fixes{grid-template-columns:repeat(3,1fr)}
-  .proto{grid-template-columns:1.2fr .8fr}
-}
-.cta-sm{display:none}
-@media (max-width:699px){.cta-lg{display:none}.cta-sm{display:inline}.nav .wrap{gap:10px}}
-</style>
+<link rel="stylesheet" href="/TimesHealth_Study/study.css">
 </head>
 <body>
 <div class="notice" role="note"><b>Independent study</b> by Anchit Tandon, who worked on Times Health+ at Times Internet until April 2026. Uses public information only. Not affiliated with Times Internet or The Times of India.</div>
 
-<nav class="nav" aria-label="Sections">
+<nav class="nav" aria-label="Study pages">
   <div class="wrap">
-    <a class="mark" href="#top"><i aria-hidden="true">AT</i><span><b>Times Health Study</b><small>by Anchit Tandon</small></span></a>
+    <a class="mark" href="/TimesHealth_Study"><i aria-hidden="true">AT</i><span><b>Times Health Study</b><small>by Anchit Tandon</small></span></a>
     <div class="links" id="links">
-      <a href="#problems">Problems</a><a href="#fixes">Fixes</a><a href="#prototype">Prototype</a><a href="#needs">Users</a><a href="#audit">Evidence</a><a href="#measure">Plan</a><a href="#me">About me</a>
+      <a href="/TimesHealth_Study" aria-current="page">Overview</a><a href="/TimesHealth_Study/users">Users</a><a href="/TimesHealth_Study/problems">Problems</a><a href="/TimesHealth_Study/evidence">Evidence</a><a href="/TimesHealth_Study/fixes">Fixes</a><a href="/TimesHealth_Study/plan">Plan</a><a href="/TimesHealth_Study/about">About me</a><a href="/TimesHealth_Study/prototype">Prototype</a>
     </div>
     <a class="btn btn-primary sm" href="/TimesHealth_Study/prototype"><span class="cta-lg">Open prototype</span><span class="cta-sm">Prototype</span></a>
   </div>
 </nav>
-
 <header class="hero" id="top">
   <div class="wrap">
     <span class="eyebrow">Product study · November 2026</span>
@@ -185,7 +53,7 @@ footer h3{color:#fff}
     </div>
     <div class="hero-ctas">
       <a class="btn btn-primary" href="/TimesHealth_Study/prototype">Try the working prototype</a>
-      <a class="btn btn-outline" href="#problems">Read the 8 problems</a>
+      <a class="btn btn-outline" href="/TimesHealth_Study/problems">Read the 8 problems</a>
     </div>
     <p class="meta">Based on public pages, ticketing sites and press, checked on 1 Nov 2026. My test browser was in the US, so it was shown international prices.</p>
   </div>
@@ -204,185 +72,15 @@ footer h3{color:#fff}
     <p class="callout coral" style="margin-top:20px">The fix is one <b>habit loop</b> across all three: see the price, pick a time that fits your day, practise live or on catch-up, get a weekly check-in tied to your goal, and, for runners, a training plan that starts at registration and a next goal after the finish line. Fixes F1, F2, F4 and F5 need no new content.</p>
   </div>
 </section>
-
-<section class="block" id="today" aria-labelledby="today-h">
+<section class="block" id="pages" aria-labelledby="pg-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">01 · What Times Health runs today</span><h2 id="today-h">Three products, three funnels, one domain</h2><p>As a first-time visitor finds them on 1 Nov 2026.</p></div>
-    <div class="tbl"><table class="t-wide" id="map-tbl">
-      <thead><tr><th style="width:20%">Product</th><th style="width:42%">What it offers</th><th style="width:38%">What I noticed</th></tr></thead>
-      <tbody>
-        <tr><td><b>Times Health+ yoga</b><br><small class="muted">timeshealthplus.com/TH/plans, launched June 2025</small></td><td>Daily live yoga; weekly pranayama and meditation, a joint-health bootcamp and nutrition sessions led by teachers from The Yoga Institute; a monthly masterclass by Yogacharya Surakshit Goswami. Eight one-hour slots a day. WhatsApp reminders, an attendance tracker.</td><td>No price on the page. International plans, found in the page's data rather than shown to the visitor: ₹1,499 a month or ₹5,499 a year. The FAQ says plans are "quarterly &amp; yearly"; the page serves monthly and yearly. Three discount claims: 23%, 60% and 69%.</td></tr>
-        <tr><td><b>Times Health+ diet plans</b><br><small class="muted">/TH/diet-plans</small></td><td>Personalised diet coaching for 16+ conditions, including PCOS, type 2 diabetes, prediabetes, thyroid, fatty liver and hypertension. Four tiers from one month to a year, with weekly consultations and blood-work review at the top.</td><td>Prices not public. Yoga appears only as a "complimentary yoga offer". The same testimonial appears three times, under two spellings of one name.</td></tr>
-        <tr><td><b>Times Internet Half Marathon</b><br><small class="muted">a four-city series, hub on the same domain</small></td><td>Delhi, 29 Mar 2026 at Major Dhyan Chand National Stadium; Hyderabad, 25 Oct 2026; Bengaluru 20 Dec 2026; Mumbai 14 Feb 2027; Delhi again 28 Mar 2027. 3K to 21.1K. General ₹1,799 to ₹2,999; Premium Pass ₹5,500 to ₹9,999.</td><td>No link from any race page to a Times Health+ trial, training plan or post-race programme. The form already asks "First-time runner?". Entries are non-refundable and non-transferable, even if rescheduled.</td></tr>
-        <tr><td><b>Bundles</b></td><td>Three months of Times Health+ yoga comes free with a one-year ET Prime plan.</td><td>A warm audience arriving from a sister product; how it is onboarded cannot be seen without signing up.</td></tr>
-      </tbody></table></div>
+    <div class="sec-head"><span class="num">The study, page by page</span><h2 id="pg-h">Read it in any order</h2><p>Each page stands on its own. Start with the problems, or go straight to the fixes and the prototype.</p></div>
+    <div class="grid pages"><a class="card" href="/TimesHealth_Study/users"><b>Users</b><span class="small">What newcomers, busy members, people with a condition, runners and the business need.</span><span class="go">Open users &rarr;</span></a><a class="card" href="/TimesHealth_Study/problems"><b>Problems</b><span class="small">Eight problems ranked by severity, with the evidence and the closest public voices.</span><span class="go">Open problems &rarr;</span></a><a class="card" href="/TimesHealth_Study/evidence"><b>Evidence</b><span class="small">What Times Health runs today, a live audit of the landing page, and the competition.</span><span class="go">Open evidence &rarr;</span></a><a class="card" href="/TimesHealth_Study/fixes"><b>Fixes</b><span class="small">Fourteen fixes, each tied to the problems it solves, filterable by who it serves.</span><span class="go">Open fixes &rarr;</span></a><a class="card" href="/TimesHealth_Study/plan"><b>Plan</b><span class="small">The one number to steer by and the first 90 days, piloted on the Mumbai race.</span><span class="go">Open plan &rarr;</span></a><a class="card" href="/TimesHealth_Study/about"><b>About me</b><span class="small">Why I am placed to fix this: I launched its subscriptions and the first race.</span><span class="go">Open about me &rarr;</span></a><a class="card soft" href="/TimesHealth_Study/prototype"><b>Prototype</b><span class="small">The fixes working together: try it on a phone or a laptop.</span><span class="go">Open the prototype &rarr;</span></a></div>
   </div>
 </section>
-
-<section class="block" id="needs" aria-labelledby="nd-h">
-  <div class="wrap">
-    <div class="sec-head"><span class="num">02 · User needs</span><h2 id="nd-h">What each person is actually trying to do</h2><p>Five users, what they need, what they get today, and the gap. The problems in section 03 come from these gaps.</p></div>
-    <div class="grid g2 g5">
-      <div class="card need"><span class="tag">The newcomer</span><h3>"Is this for me, and what does it cost?"</h3><dl><dt>Needs</dt><dd>The price, the trial and the refund terms before giving a phone number; to know the class times fit their day.</dd><dt>Gets today</dt><dd>A long page with no price, then an OTP wall.</dd></dl></div>
-      <div class="card need"><span class="tag">The busy member</span><h3>"I missed today's slot. Now what?"</h3><dl><dt>Needs</dt><dd>A class that fits a changing day, a short catch-up when life intervenes, and a reason to come back after a missed week.</dd><dt>Gets today</dt><dd>Eight fixed slots and an attendance count.</dd></dl></div>
-      <div class="card need"><span class="tag">Managing a condition</span><h3>"Will this help my PCOS, sugar or BP?"</h3><dl><dt>Needs</dt><dd>One programme for their condition, yoga and food together, with a number that shows it is working.</dd><dt>Gets today</dt><dd>General yoga on one page; condition care in a separate product with no public price.</dd></dl></div>
-      <div class="card need"><span class="tag">The runner</span><h3>"Get me to the finish, safely, then what?"</h3><dl><dt>Needs</dt><dd>A plan from registration to race day, mobility and recovery, a fair policy if plans change, and a next goal.</dd><dt>Gets today</dt><dd>A ticket, articles, a medal, and a certificate eight days later.</dd></dl></div>
-      <div class="card need soft"><span class="tag c">The business</span><h3>"Turn reach into renewals."</h3><dl><dt>Needs</dt><dd>One identity across yoga, diet, races and the ET Prime bundle; members who still practise in week four.</dd><dt>Gets today</dt><dd>Three funnels and a race audience that leaves on race day.</dd></dl></div>
-    </div>
-  </div>
-</section>
-
-<section class="block" id="problems" aria-labelledby="pb-h">
-  <div class="wrap">
-    <div class="sec-head"><span class="num">03 · The problems</span><h2 id="pb-h">Eight problems, ranked by who they hurt and how much</h2><p>Each card names who feels it and the evidence, and links to the fixes that solve it.</p></div>
-    <div class="grid g2">
-      <article class="card prob" data-problem="P1" id="p1">
-        <div class="ph"><span class="pn">P1</span><span class="sev">High</span></div>
-        <h3>No price or terms before you hand over your number</h3>
-        <p class="who">Felt by: every prospect from TOI, ET or paid ads; the growth budget that paid for them.</p>
-        <ul><li>The landing page shows no rupee figure; plans appear only after "Step 1 of 3", a phone or email, and an OTP.</li><li>A "7-day risk-free trial with money back guarantee" is being tested, but there is no refund policy page; the terms link goes to the generic indiatimes terms.</li><li>A ₹1 trial "will begin automatically" as the full plan when the seven days end.</li></ul>
-        <a class="jump" href="#fixes" data-jump="P1">See the fixes for P1 &rarr;</a>
-      </article>
-      <article class="card prob" data-problem="P2" id="p2">
-        <div class="ph"><span class="pn">P2</span><span class="sev">High</span></div>
-        <h3>Miss the slot and the habit breaks</h3>
-        <p class="who">Felt by: working professionals, homemakers and shift workers, the people the page itself targets.</p>
-        <ul><li>Eight fixed one-hour batches; props needed (a mat, a belt, two blocks); no recorded or on-demand library mentioned.</li><li>Progress is attendance only: "track your attendance during the month".</li><li>The company's own testimonial names the failure: other plans "always stopped working after 10-15 days".</li></ul>
-        <a class="jump" href="#fixes" data-jump="P2">See the fixes for P2 &rarr;</a>
-      </article>
-      <article class="card prob" data-problem="P3" id="p3">
-        <div class="ph"><span class="pn">P3</span><span class="sev">High</span></div>
-        <h3>General yoga for people with specific conditions</h3>
-        <p class="who">Felt by: people with prediabetes, diabetes, hypertension or PCOS, the largest group with intent to pay.</p>
-        <ul><li>10.1 crore Indians with diabetes, 13.6 crore with prediabetes, 31.5 crore with hypertension (ICMR-INDIAB 2023); PCOS in about 1 in 10 women.</li><li>Condition care sits in a separate diet product with no public prices; yoga is bolted on as a free add-on.</li><li>Pregnancy, gut-health and fat-burning page variants exist in the site's code but cannot be found from the main page.</li></ul>
-        <a class="jump" href="#fixes" data-jump="P3">See the fixes for P3 &rarr;</a>
-      </article>
-      <article class="card prob" data-problem="P4" id="p4">
-        <div class="ph"><span class="pn">P4</span><span class="sev">High</span></div>
-        <h3>The first screen is slow and loads from 49 hosts, many of them trackers</h3>
-        <p class="who">Felt by: mobile visitors on mid-range phones; cost per acquisition.</p>
-        <ul><li>Lighthouse mobile performance 0/100, throttled to a mid-range phone: first paint 14.7 s, main content 24.4 s, layout shift 1.17. Unthrottled, Playwright saw main content at 4.6 s.</li><li>368 requests to 49 hosts, about 9.9 MB with autoplay video; two uncaught script errors.</li><li>The tag manager alone is 1.18 MB and blocks the main thread for 5.5 s.</li></ul>
-        <a class="jump" href="#fixes" data-jump="P4">See the fixes for P4 &rarr;</a>
-      </article>
-      <article class="card prob" data-problem="P5" id="p5">
-        <div class="ph"><span class="pn">P5</span><span class="sev">High</span></div>
-        <h3>No trust you can check from outside</h3>
-        <p class="who">Felt by: sceptical prospects; marketing, which has to do every sale on owned media.</p>
-        <ul><li>No app on either store; no independent reviews found on Trustpilot, Reddit, MouthShut or complaint sites.</li><li>Launch coverage is advertorial; the YouTube channel has 10.7K subscribers after about 18 months.</li><li>Claims such as "50,000+ successful transformations" and "28% reduction in sick days" carry no source.</li></ul>
-        <a class="jump" href="#fixes" data-jump="P5">See the fixes for P5 &rarr;</a>
-      </article>
-      <article class="card prob" data-problem="P6" id="p6">
-        <div class="ph"><span class="pn">P6</span><span class="sev">High</span></div>
-        <h3>The half marathon is a one-day peak with no bridge to the habit</h3>
-        <p class="who">Felt by: runners who need training and a next goal; the business, whose event audience does not become members.</p>
-        <ul><li>No link from the race hub or city pages to a Times Health+ trial, a training plan or a post-race programme.</li><li>The form already asks "First-time runner?", so the people who most need a plan are known at sign-up.</li><li>Training help is articles ("12 Weeks to Go"), not a plan; certificates arrive eight days after the race.</li></ul>
-        <a class="jump" href="#fixes" data-jump="P6">See the fixes for P6 &rarr;</a>
-      </article>
-      <article class="card prob med" data-problem="P7" id="p7">
-        <div class="ph"><span class="pn">P7</span><span class="sev">Medium</span></div>
-        <h3>Small errors, in a category that runs on trust</h3>
-        <p class="who">Felt by: careful readers, older users, corporate buyers.</p>
-        <ul><li>"PST" batch times that are not a conversion of the IST ones; an instructor's name spelt two ways; 230K and 221k followers for the same person.</li><li>Two support emails; WhatsApp support "24x7", "Daily" and "Monday to Saturday" on different pages; copyright 2025.</li></ul>
-        <a class="jump" href="#fixes" data-jump="P7">See the fixes for P7 &rarr;</a>
-      </article>
-      <article class="card prob med" data-problem="P8" id="p8">
-        <div class="ph"><span class="pn">P8</span><span class="sev">Medium</span></div>
-        <h3>Race-day friction and risk for runners</h3>
-        <p class="who">Felt by: registrants, first-timers and families most of all.</p>
-        <ul><li>"Non-refundable and non-transferable, even in case of rescheduling"; no category changes; tickets locked in one app.</li><li>Physio and photos only in a Premium Pass at three times the price.</li><li>In my tests headless Chrome got an error after 30 s twice on the race hub (one plain fetch worked, another took 141 s). Delhi in late March is hot; I could not retrieve race-day air quality, and the city's AQI that month ranged from "poor" to 123 after rain.</li></ul>
-        <a class="jump" href="#fixes" data-jump="P8">See the fixes for P8 &rarr;</a>
-      </article>
-    </div>
-  </div>
-</section>
-
-<section class="block" id="voices" aria-labelledby="vo-h">
-  <div class="wrap">
-    <div class="sec-head"><span class="num">04 · In people's own words</span><h2 id="vo-h">What the evidence sounds like</h2><p class="small muted">Times Health+ has no app and I found no independent reviews of it, which is itself problem P5. So the voices here are the closest public ones: the product's own published testimonial, runners and the wider category. Each is quoted verbatim from the linked source.</p></div>
-    <div class="grid voices">
-      <figure class="card voice"><blockquote>"I've tried many diet plans before, but they always stopped working after 10-15 days."</blockquote><figcaption>A customer testimonial published on <a href="https://timeshealthplus.com/TH/diet-plans" rel="noopener" target="_blank">Times Health+ diet plans</a>, read 1 Nov 2026 · P2</figcaption></figure>
-      <figure class="card voice"><blockquote>"Registrations are non-refundable and non-transferable"</blockquote><figcaption>Race FAQ, <a href="https://timeshealthplus.com/times-events/marathon/delhi/2026" rel="noopener" target="_blank">Times Internet Delhi Half Marathon 2026</a>, read 1 Nov 2026 · P8</figcaption></figure>
-      <figure class="card voice"><blockquote>"A ₹1 charge will be placed to activate your 7-day trial. After your trial ends, your chosen plan will begin automatically"</blockquote><figcaption>Trial terms in the content feed of <a href="https://timeshealthplus.com/TH/plans" rel="noopener" target="_blank">Times Health+ plans</a>, read 1 Nov 2026 · P1</figcaption></figure>
-      <figure class="card voice"><blockquote>"Your Marathon doesn't start at the starting line"</blockquote><figcaption>Headline, <a href="https://economictimes.indiatimes.com/news/india/12-weeks-to-go-your-marathon-doesnt-start-at-the-starting-line/articleshow/132759809.cms" rel="noopener" target="_blank">ET, 31 Jul 2026</a>: the right idea, published as an article rather than a plan · P6</figcaption></figure>
-    </div>
-    <p class="callout" style="margin-top:20px">The absence is the finding. Four searches found no independent reviews of a paid health product about 17 months after launch. That suggests a small paying base, or one whose conversation happens in private WhatsApp groups; either way, a prospect has nothing independent to go on.</p>
-  </div>
-</section>
-
-<section class="block" id="audit" aria-labelledby="au-h">
-  <div class="wrap">
-    <div class="sec-head"><span class="num">05 · Live audit</span><h2 id="au-h">What a first-time visitor's phone goes through</h2><p>Playwright at 390 px (iPhone 13 profile) and Lighthouse 12 mobile with simulated throttling, 1 Nov 2026, from a US-based test browser.</p></div>
-    <div class="tbl"><table class="t-wide" id="audit-tbl">
-      <thead><tr><th>Page</th><th class="num">Requests</th><th class="num">Hosts</th><th class="num">Load event</th><th class="num">Lighthouse</th><th>What a visitor sees</th></tr></thead>
-      <tbody>
-        <tr><td><b>Yoga landing</b> /TH/plans</td><td class="num">368 · ~9.9 MB</td><td class="num">49</td><td class="num">17.5 s</td><td class="num">0 · LCP 24.4 s · CLS 1.17</td><td>Logo, a headline, three benefits, a photo collage, "Begin My Wellness Journey". No price, no trial terms, no class times above the fold.</td></tr>
-        <tr><td><b>Sign-up</b></td><td class="num">n/a</td><td class="num">n/a</td><td class="num">n/a</td><td class="num">n/a</td><td>Full-screen "Step 1 of 3": enter email or mobile, then OTP, then plans.</td></tr>
-        <tr><td><b>Race hub</b> /times-events/marathon</td><td class="num">n/a</td><td class="num">n/a</td><td class="num">unreliable</td><td class="num">n/a</td><td>Headless Chrome: HTTP 502 after about 30 s, twice. Plain fetch: 200 once, 141 s another time.</td></tr>
-      </tbody></table></div>
-    <div class="grid g3" style="margin-top:20px">
-      <div class="card"><h3>What works</h3><p class="small">A credible partner in The Yoga Institute, named teachers, live human classes eight times a day, and a diet product that already covers the conditions people pay for.</p></div>
-      <div class="card"><h3>What hurts</h3><p class="small">The page loads from 49 hosts, including several ad pixels and two session recorders, and the tag manager blocks the main thread for 5.5 s. On a mid-range phone that is the difference between a trial and a bounce.</p></div>
-      <div class="card"><h3>What is missing</h3><p class="small">A price, a refund page, a catch-up option and any path between the three products. These cost little to add and are what the fixes below start with.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="block" id="compete" aria-labelledby="cp-h">
-  <div class="wrap">
-    <div class="sec-head"><span class="num">06 · Competition</span><h2 id="cp-h">Where Times Health+ wins, and where it loses</h2></div>
-    <div class="tbl"><table class="t-wide">
-      <thead><tr><th style="width:20%">Rival</th><th style="width:30%">Price</th><th style="width:50%">Better, or worse, than Times Health+</th></tr></thead>
-      <tbody>
-        <tr><td><b>cult.fit cultpass HOME</b></td><td>₹999 a month; ₹1,859 a year; 7-day free trial</td><td>Every price public with no login; apps on both stores; 1,200+ workouts any time. Less depth in classical yoga.</td></tr>
-        <tr><td><b>Habuild</b></td><td>14 days free, then paid plans</td><td>Live yoga with a large free funnel and a community claim of over a crore people. The direct rival for the same habit.</td></tr>
-        <tr><td><b>FITPASS</b></td><td>₹1,999 to ₹2,999 a month</td><td>Gyms, nutrition and video together; a different, pricier use case.</td></tr>
-        <tr><td><b>Ayush free live yoga</b></td><td>Free</td><td>Government sessions around Yoga Day set a free baseline for "live yoga".</td></tr>
-        <tr><td><b>Big races (Procam)</b></td><td>Entry fees vary</td><td>Delhi Half Marathon drew over 40,000 on 18 Oct 2026; Tata Mumbai Marathon 69,100. A crowded calendar for a new series.</td></tr>
-      </tbody></table></div>
-    <p class="callout" style="margin-top:20px">Times Health+ will not win on price or on the size of its library. It can win on <b>outcomes for a condition</b>, backed by The Yoga Institute and a diet team, and on the <b>race-to-habit path</b> no rival owns. Both need the pieces it already has joined up.</p>
-  </div>
-</section>
-
-<section class="block" id="fixes" aria-labelledby="fx-h">
-  <div class="wrap">
-    <div class="sec-head"><span class="num">07 · The fixes</span><h2 id="fx-h">Fourteen fixes, each tied to a problem</h2><p>Ordered by impact for the effort. Filter by who each one serves, or use the links on the problem cards. The prototype builds F1, F2, F3, F4, F5, F6, F10, F11 and F14.</p></div>
-    <div class="loop" aria-label="The habit loop the fixes build">
-      <div class="step"><span class="n">1 · See</span><b>Price and fit up front</b><span class="small">F1, F2, F7</span></div>
-      <div class="step"><span class="n">2 · Start</span><b>A slot that fits, or catch-up</b><span class="small">F3, F4</span></div>
-      <div class="step"><span class="n">3 · Stay</span><b>A weekly check-in on your goal</b><span class="small">F5, F6</span></div>
-      <div class="step on"><span class="n">4 · Next</span><b>Race, recover, next goal</b><span class="small">F10, F11, F13</span></div>
-    </div>
-    <div class="filters" role="group" aria-label="Show fixes for" style="margin-top:20px">
-      <button type="button" class="chip" data-filter="all" aria-pressed="true">All</button>
-      <button type="button" class="chip" data-filter="newcomer" aria-pressed="false">Newcomers</button>
-      <button type="button" class="chip" data-filter="member" aria-pressed="false">Members</button>
-      <button type="button" class="chip" data-filter="condition" aria-pressed="false">Managing a condition</button>
-      <button type="button" class="chip" data-filter="runner" aria-pressed="false">Runners</button>
-      <button type="button" class="chip" data-filter="business" aria-pressed="false">The business</button>
-    </div>
-    <p class="fix-status" aria-live="polite"><span data-fix-count>14 fixes shown</span></p>
-    <div class="grid fixes" id="fix-list">
-      <article class="card fix" data-fix="F1" data-solves="P1" data-who="newcomer business"><div class="fh"><span class="fn">F1</span><span class="tag">0 to 30 days</span><span class="tag c">Solves P1</span></div><h3>Price, trial and class times on the first screen</h3><p>Show both plans with the per-month price, the trial and the next eight class times before any sign-up. Ask for a phone number only to start the trial.</p><p><span class="k">Measure:</span> landing view to trial start.</p></article>
-      <article class="card fix" data-fix="F2" data-solves="P1 P7" data-who="newcomer business"><div class="fh"><span class="fn">F2</span><span class="tag">0 to 30 days</span><span class="tag c">Solves P1, P7</span></div><h3>One plain refund and trial page</h3><p>One page for the trial, the money-back promise, auto-renewal and cancelling. A reminder two days before a ₹1 trial becomes a full plan, with a one-tap cancel.</p><p><span class="k">Measure:</span> trial-to-paid, and refund requests per 100 conversions.</p></article>
-      <article class="card fix" data-fix="F3" data-solves="P2" data-who="member"><div class="fh"><span class="fn">F3</span><span class="tag">0 to 60 days</span><span class="tag c">Solves P2</span></div><h3>Catch-up for every live class</h3><p>Record each batch and offer the full class, plus a 20-minute "short version" for days with no time. Missing a slot stops being the end of the week.</p><p><span class="k">Measure:</span> share of practice sessions done on catch-up; weekly practice days.</p></article>
-      <article class="card fix" data-fix="F4" data-solves="P2" data-who="member newcomer"><div class="fh"><span class="fn">F4</span><span class="tag">0 to 60 days</span><span class="tag c">Solves P2</span></div><h3>A slot matcher at sign-up</h3><p>Ask when the person is free on weekdays and weekends, pick their default batch and a backup, and remind them at the right time. Moving a slot is one tap.</p><p><span class="k">Measure:</span> live attendance in weeks one to four.</p></article>
-      <article class="card fix" data-fix="F5" data-solves="P2" data-who="member business"><div class="fh"><span class="fn">F5</span><span class="tag">1 to 3 months</span><span class="tag c">Solves P2</span></div><h3>A habit loop, not an attendance count</h3><p>A streak with two grace days a week, a weekly check-in on sleep, energy and the person's own goal, and a rescue nudge after two missed sessions: a short catch-up, not a guilt message.</p><p><span class="k">Measure:</span> members practising three or more days in week four.</p></article>
-      <article class="card fix" data-fix="F6" data-solves="P3" data-who="condition business"><div class="fh"><span class="fn">F6</span><span class="tag a">1 to 3 months</span><span class="tag c">Solves P3</span></div><h3>Condition programmes: yoga and food together</h3><p>12-week tracks for prediabetes, blood pressure, PCOS and back pain: the right classes, the diet team, one public price, and one number tracked each week (fasting sugar, BP, cycle regularity or pain). Medical safety screening before starting.</p><p><span class="k">Measure:</span> programme completion and the share whose number moved.</p></article>
-      <article class="card fix" data-fix="F7" data-solves="P4" data-who="newcomer business"><div class="fh"><span class="fn">F7</span><span class="tag">0 to 30 days</span><span class="tag c">Solves P4</span></div><h3>A performance and tracker budget</h3><p>Under 1.5 MB on a phone, no autoplay video on mobile, tags loaded after the page is usable, and only the pixels a campaign is actually using. Fix the two script errors.</p><p><span class="k">Measure:</span> Core Web Vitals on real phones; cost per trial.</p></article>
-      <article class="card fix" data-fix="F8" data-solves="P5" data-who="newcomer business"><div class="fh"><span class="fn">F8</span><span class="tag a">1 to 3 months</span><span class="tag c">Solves P5</span></div><h3>Trust you can check</h3><p>Ask members for public reviews after their fourth week; publish outcome numbers with the method and the sample; replace unsourced claims. An installable app so practice is one tap away.</p><p><span class="k">Measure:</span> public review count and rating; installs.</p></article>
-      <article class="card fix" data-fix="F9" data-solves="P7" data-who="business newcomer"><div class="fh"><span class="fn">F9</span><span class="tag">0 to 30 days</span><span class="tag c">Solves P7</span></div><h3>One source of truth for the facts</h3><p>Class times, instructor names, support channels and hours, and plan names come from one place and appear the same everywhere. A pre-publish checklist for every page.</p><p><span class="k">Measure:</span> inconsistencies found in a monthly audit, target zero.</p></article>
-      <article class="card fix" data-fix="F10" data-solves="P6" data-who="runner business"><div class="fh"><span class="fn">F10</span><span class="tag a">1 to 3 months</span><span class="tag c">Solves P6</span></div><h3>Race to habit: a plan from the day you register</h3><p>Every registrant gets a free training plan for the weeks to race day, with yoga-for-runners mobility sessions from Times Health+. First-time runners get the gentler plan and a check-in each week.</p><p><span class="k">Measure:</span> registrants who start the plan; trial starts from the race.</p></article>
-      <article class="card fix" data-fix="F11" data-solves="P6 P8" data-who="runner business"><div class="fh"><span class="fn">F11</span><span class="tag a">1 to 3 months</span><span class="tag c">Solves P6, P8</span></div><h3>The day after: recovery and a next goal</h3><p>Results, photos and the certificate on race day; a 30-day recovery and mobility programme; the next city in the series as the next goal, with a returning-runner price.</p><p><span class="k">Measure:</span> finishers active 30 days later; repeat registrations.</p></article>
-      <article class="card fix" data-fix="F12" data-solves="P8" data-who="runner"><div class="fh"><span class="fn">F12</span><span class="tag">0 to 60 days</span><span class="tag c">Solves P8</span></div><h3>A fairer entry policy</h3><p>A transfer window until two weeks before the race, a move down a category, and deferral to the next city in the series if the race is rescheduled. Physio for every runner at the finish, not only Premium.</p><p><span class="k">Measure:</span> no-show rate; support tickets per 1,000 runners.</p></article>
-      <article class="card fix" data-fix="F13" data-solves="P6 P3" data-who="business member runner condition"><div class="fh"><span class="fn">F13</span><span class="tag a">3 to 6 months</span><span class="tag c">Solves P6, P3</span></div><h3>One Times Health identity</h3><p>One account across yoga, diet, races and the ET Prime bundle's three free months, so a runner can become a member and a member with a condition can join a programme without starting again.</p><p><span class="k">Measure:</span> people active in two or more Times Health products.</p></article>
-      <article class="card fix" data-fix="F14" data-solves="P8" data-who="runner"><div class="fh"><span class="fn">F14</span><span class="tag">0 to 60 days</span><span class="tag c">Solves P8</span></div><h3>Heat and air rules, published in advance</h3><p>Publish the heat and air-quality thresholds that would move a flag-off earlier or shorten a category, and send runners the forecast and hydration plan two days before.</p><p><span class="k">Measure:</span> medical incidents per 1,000 finishers.</p></article>
-    </div>
-  </div>
-</section>
-
 <section class="block" id="prototype" aria-labelledby="pr-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">08 · Working prototype</span><h2 id="pr-h">Try the habit loop: see, start, stay, run</h2><p>Built by me to show the fixes working together. Demo data only; nothing is stored or sent, and the prices are illustrative.</p></div>
+    <div class="sec-head"><span class="num">Working prototype</span><h2 id="pr-h">Try the habit loop: see, start, stay, run</h2><p>Built by me to show the fixes working together. Demo data only; nothing is stored or sent, and the prices are illustrative.</p></div>
     <div class="proto">
       <div class="card">
         <h3>What you can try</h3>
@@ -402,38 +100,7 @@ footer h3{color:#fff}
     </div>
   </div>
 </section>
-
-<section class="block" id="measure" aria-labelledby="ms-h">
-  <div class="wrap">
-    <div class="sec-head"><span class="num">09 · How I would know it works</span><h2 id="ms-h">One number to steer by, and the first 90 days</h2></div>
-    <div class="grid g3">
-      <div class="card soft"><h3>The one number</h3><p class="small"><b>Members who practise three or more days in their fourth week.</b> Renewal follows the habit, and the habit is decided in the first month. Trials can grow while week four stays empty; this number cannot.</p></div>
-      <div class="card"><h3>Early signals</h3><ul class="small"><li>Landing view to trial start (F1).</li><li>Share of practice done on catch-up (F3).</li><li>Race registrants who start the training plan (F10).</li><li>Condition-programme members whose number moved (F6).</li></ul></div>
-      <div class="card"><h3>Guardrails</h3><ul class="small"><li>Refund requests per 100 conversions.</li><li>Live-class attendance does not fall as catch-up grows.</li><li>No health claim without a published method.</li></ul></div>
-    </div>
-    <h3 style="margin-top:32px" id="plan">My first 90 days</h3>
-    <div class="grid g3 steps" style="margin-top:12px">
-      <div class="card"><h3><span class="tag">Days 1 to 30</span>Make it easy to say yes</h3><p class="small">F1 price and times up front, F2 one refund and trial page, F7 the performance budget, F9 the facts checklist. Baseline the week-four number for the last three monthly cohorts.</p></div>
-      <div class="card"><h3><span class="tag a">Days 31 to 60</span>Make it easy to stay</h3><p class="small">F3 catch-up for every class and F4 the slot matcher. Turn on the weekly check-in (F5) for half of new members, with the other half as a holdout.</p></div>
-      <div class="card"><h3><span class="tag c">Days 61 to 90</span>Join the products up</h3><p class="small">F10 for the Mumbai race on 14 Feb 2027, 15 weeks out: a training plan for every registrant, and a recovery programme after. Design the first condition track (F6) with the diet team and a medical reviewer.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="block" id="me" aria-labelledby="me-h">
-  <div class="wrap">
-    <div class="sec-head"><span class="num">10 · Why me</span><h2 id="me-h">I launched Times Health+ subscriptions and the first Half Marathon</h2><p>Times Internet, June 2022 to April 2026: Associate PM, then PM, then Senior PM, across ET Prime, ET Markets, Times Health+ and the Half Marathon. Then Vahdam India, April to September 2026 (AGM, Product Management and D2C Growth).</p></div>
-    <div class="grid g3">
-      <div class="card kpi"><span class="tag">0 to 1 · Events</span><b style="margin-top:8px">15,000+</b><small style="font-size:14px;line-height:21px">Participants at the inaugural Times Internet Delhi Half Marathon 2026, a new IP built end to end: tech, marketing and on-ground. (My launch figure; no public count has been published.)</small></div>
-      <div class="card kpi"><span class="tag">Subscriptions</span><b style="margin-top:8px">Times Health+</b><small style="font-size:14px;line-height:21px">Designed the free-to-paid subscription journeys and ran the pricing experiments for paid wellness content.</small></div>
-      <div class="card kpi"><span class="tag">Built by me</span><b style="margin-top:8px">LifeEngine</b><small style="font-size:14px;line-height:21px">An AI wellness planner with daily check-ins, my answer to one-size-fits-all wellness content, and the seed of fix F5.</small></div>
-    </div>
-    <p class="callout" style="margin-top:20px">From building its subscriptions, my view is that the hard part is not the classes, which are good. It is the first month, and the space between the three products. That is where every fix here is aimed.</p>
-    <div class="hero-ctas" style="margin-top:16px"><a class="btn btn-primary" href="mailto:anchit.tandon@gmail.com?subject=Times%20Health%20study">Email Anchit</a><a class="btn btn-outline" href="https://www.linkedin.com/in/anchit-tandon" rel="noopener" target="_blank">LinkedIn</a><a class="btn btn-outline" href="/ET_Study">ET study</a></div>
-  </div>
-</section>
 </main>
-
 <footer>
   <div class="wrap">
     <h3>Sources and method</h3>
@@ -454,47 +121,6 @@ footer h3{color:#fff}
     <p><a href="/">Back to the portfolio</a></p>
   </div>
 </footer>
-
-<script>
-(function(){
-  'use strict';
-  var links=document.querySelectorAll('#links a'), map={};
-  Array.prototype.forEach.call(links,function(a){map[a.getAttribute('href').slice(1)]=a;});
-  if('IntersectionObserver' in window){
-    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&map[e.target.id]){Array.prototype.forEach.call(links,function(a){a.classList.remove('on');});map[e.target.id].classList.add('on');}});},{rootMargin:'-40% 0px -55% 0px'});
-    Object.keys(map).forEach(function(id){var s=document.getElementById(id);if(s)io.observe(s);});
-  }
-  var fixes=[].slice.call(document.querySelectorAll('[data-solves]'));
-  var chips=[].slice.call(document.querySelectorAll('[data-filter]'));
-  var status=document.querySelector('.fix-status');
-  function label(n){return n+(n===1?' fix':' fixes');}
-  function show(test,msg,chip){
-    var n=0;
-    fixes.forEach(function(f){var on=test(f);f.hidden=!on;if(on)n++;});
-    chips.forEach(function(c){c.setAttribute('aria-pressed',String(c===chip));});
-    status.innerHTML='';
-    var s=document.createElement('span');s.setAttribute('data-fix-count','');s.textContent=msg(n);status.appendChild(s);
-    if(!chip){var b=document.createElement('button');b.type='button';b.textContent='Show all';b.addEventListener('click',function(){byWho('all');});status.appendChild(b);}
-  }
-  function byWho(w){
-    var chip=document.querySelector('[data-filter="'+w+'"]');
-    show(function(f){return w==='all'||f.dataset.who.split(/\s+/).indexOf(w)>-1;},function(n){return label(n)+' shown'+(w==='all'?'':' for '+chip.textContent.toLowerCase());},chip);
-  }
-  chips.forEach(function(c){c.addEventListener('click',function(){byWho(c.dataset.filter);});});
-  [].forEach.call(document.querySelectorAll('[data-jump]'),function(a){
-    a.addEventListener('click',function(e){
-      e.preventDefault();
-      var p=a.dataset.jump;
-      show(function(f){return f.dataset.solves.split(/\s+/).indexOf(p)>-1;},function(n){return label(n)+' shown that solve '+p;},null);
-      var t=document.getElementById('fixes');
-      if(t)t.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
-    });
-  });
-})();
-</script>
-<script>
-(function(){function mark(){document.querySelectorAll('.tbl').forEach(function(t){var w=t.scrollWidth>t.clientWidth+2;t.classList.toggle('is-wide',w);if(w){t.tabIndex=0;t.setAttribute('role','region');if(!t.hasAttribute('aria-label'))t.setAttribute('aria-label','Table, scrolls sideways');}});}
-if(document.readyState!=='loading')mark();else document.addEventListener('DOMContentLoaded',mark);window.addEventListener('resize',mark,{passive:true});})();
-</script>
+<script src="/TimesHealth_Study/study.js" defer></script>
 </body>
 </html>

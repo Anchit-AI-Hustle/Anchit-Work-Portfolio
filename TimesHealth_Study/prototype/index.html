@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Times Health Habit Loop, Start: Prototype | Anchit Tandon</title>
+<meta name="description" content="Prototype from the Times Health study by Anchit Tandon: see your programme, class times and price before any sign-up.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#0f6e66">
+<meta property="og:title" content="Times Health Habit Loop, Start: Prototype">
+<meta property="og:description" content="Prototype from the Times Health study by Anchit Tandon: see your programme, class times and price before any sign-up.">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://anchit-tandon.com/TimesHealth_Study/prototype">
+<link rel="icon" href="/icons/favicon.svg">
+<meta property="og:image" content="https://anchit-tandon.com/assets/og/og-default.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="/TimesHealth_Study/prototype/proto.css">
+</head>
+<body>
+<div class="notice" role="note"><b>Prototype</b> for an independent study by Anchit Tandon. Prices are illustrative, not Times Health+'s; class times are the published IST batches; everything else is demo data. Not affiliated with Times Internet; nothing is stored or sent. Not medical advice.</div>
+
+<header class="top">
+  <div class="wrap">
+    <div><p class="app-name">Times Health habit loop</p><small>See, start, stay, run: the study's fixes working together</small></div>
+    <a class="btn btn-outline" href="/TimesHealth_Study/fixes">Back to the study</a>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Prototype pages">
+  <div class="wrap"><a class="tab" href="/TimesHealth_Study/prototype" aria-current="page">Start</a><a class="tab" href="/TimesHealth_Study/prototype/week">My week</a><a class="tab" href="/TimesHealth_Study/prototype/race">Race plan</a><a class="tab" href="/TimesHealth_Study/prototype/business">Business view</a></div>
+</nav>
+
+<main>
+<div class="wrap">
+
+<section class="panel" id="start">
+  <div class="head"><span class="fixref">Fixes F1, F4 and F6 · problems P1, P2, P3</span><h1 class="ph1">Is this for me, and what does it cost?</h1><p class="small">Answer three questions. You see your programme, your class times and the price before anyone asks for your number.</p></div>
+  <div class="grid startg">
+    <div class="card">
+      <div class="q"><span>What is your main goal?</span><div class="chips" id="goals" role="group" aria-label="Main goal"></div></div>
+      <div class="q"><span>When are you usually free? Pick all that apply.</span><div class="chips" id="windows" role="group" aria-label="Free times"></div></div>
+      <div class="q"><span>How much yoga have you done?</span><div class="chips" id="levels" role="group" aria-label="Experience"></div></div>
+    </div>
+    <div class="card soft price" aria-live="polite">
+      <span class="tag g" id="prog-tag">Your programme</span>
+      <h3 id="prog-name"></h3>
+      <p class="small" id="prog-what"></p>
+      <div><p class="small" style="font-weight:700;color:var(--ink);margin-bottom:6px">Your live classes (IST)</p><div class="slots" id="slots"></div><p class="small muted" id="slot-note" style="margin-top:6px"></p></div>
+      <div id="plans"></div>
+      <p class="warn" id="safety"></p>
+      <button class="btn btn-primary" id="trial" type="button">Start my 7-day free trial</button>
+      <p class="small muted">Only now do we ask for your phone number. A reminder two days before the trial ends; cancel in one tap.</p>
+    </div>
+  </div>
+</section>
+
+</div>
+</main>
+<div class="toast" id="toast" role="status" hidden></div>
+<script src="/TimesHealth_Study/prototype/proto.js" defer></script>
+</body>
+</html>

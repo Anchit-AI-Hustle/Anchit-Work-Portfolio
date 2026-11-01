@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Member-first ET, Renewal Maths: Prototype | Anchit Tandon</title>
+<meta name="description" content="Prototype from the ET study by Anchit Tandon: what each point of ET Prime renewal is worth, with every input on a slider.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#8f1d22">
+<meta property="og:title" content="Member-first ET, Renewal Maths: Prototype">
+<meta property="og:description" content="Prototype from the ET study by Anchit Tandon: what each point of ET Prime renewal is worth, with every input on a slider.">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://anchit-tandon.com/ET_Study/prototype/maths">
+<link rel="icon" href="/icons/favicon.svg">
+<meta property="og:image" content="https://anchit-tandon.com/assets/og/og-default.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/ET_Study/prototype/proto.css">
+</head>
+<body>
+<div class="notice" role="note"><b>Prototype</b> for an independent study by Anchit Tandon. Companies, stories, prices and the member are fictional demo data. Not affiliated with The Economic Times; nothing is stored or sent.</div>
+
+<header class="top">
+  <div class="wrap">
+    <div><p class="app-name">Member-first ET</p><small>The fixes from the study, working together</small></div>
+    <a class="btn btn-outline" href="/ET_Study/fixes">Back to the study</a>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Prototype pages">
+  <div class="wrap"><a class="tab" href="/ET_Study/prototype">My Stocks</a><a class="tab" href="/ET_Study/prototype/hub">Member hub</a><a class="tab" href="/ET_Study/prototype/rules">Who sees what</a><a class="tab" href="/ET_Study/prototype/maths" aria-current="page">Renewal maths</a></div>
+</nav>
+
+<main>
+<div class="wrap">
+
+<section class="panel" id="maths">
+  <div class="head"><span class="fixref">The case for fixes F1 to F4 · problem P4</span><h1 class="ph1">What renewal is worth</h1><p class="small">Defaults are public numbers: about 1.75 lakh members (Crisil, June 2025) and the ₹2,699 web price. The realised price after bundles is lower; move the slider.</p></div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="slider"><label for="s-members">Paying members <output id="o-members"></output></label><input type="range" id="s-members" min="50000" max="500000" step="5000" value="175000"></div>
+      <div class="slider"><label for="s-price">Average price a year <output id="o-price"></output></label><input type="range" id="s-price" min="999" max="3999" step="50" value="2699"></div>
+      <div class="slider"><label for="s-lift">Renewal rate improvement <output id="o-lift"></output></label><input type="range" id="s-lift" min="0.5" max="10" step="0.5" value="1"></div>
+    </div>
+    <div class="card soft" style="display:grid;gap:8px;align-content:start">
+      <span class="small muted">Extra revenue a year</span>
+      <div class="big" data-testid="et-renewal-total" id="total"></div>
+      <p class="small" id="total-why"></p>
+      <p class="small muted">Before upgrades, and before the ad revenue members' extra visits bring. An illustration, not a forecast.</p>
+    </div>
+  </div>
+</section>
+
+</div>
+</main>
+<div class="toast" id="toast" role="status" hidden></div>
+<script src="/ET_Study/prototype/proto.js" defer></script>
+</body>
+</html>
