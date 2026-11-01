@@ -9,9 +9,9 @@
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#8f1d22">
 <meta property="og:title" content="ET Study: the newsroom earns trust, the product spends it">
-<meta property="og:description" content="Problem-first study of ET, ET Markets and ET Prime: a live audit, 1,600+ public reviews read, 8 ranked problems and 14 fixes.">
+<meta property="og:description" content="Problem-first study of ET, ET Markets and ET Prime: a live audit, 1,973 public reviews analysed, 8 ranked problems and 14 fixes.">
 <meta property="og:type" content="article">
-<link rel="canonical" href="https://anchit-tandon.com/ET-study">
+<link rel="canonical" href="https://anchit-tandon.com/ET_Study">
 <link rel="icon" href="/icons/favicon.svg">
 <meta property="og:image" content="https://anchit-tandon.com/assets/og/og-default.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -134,6 +134,11 @@ details.more[open]>summary::after{content:"\2212"}
 .need dl{margin:0;display:grid;gap:8px;font-size:14px;line-height:21px}
 .need dt{font-weight:700;color:var(--ink);font-size:13px;text-transform:uppercase;letter-spacing:.04em}
 .need dd{margin:0}
+.short{margin-top:4px}
+.short .card{display:grid;gap:10px;align-content:start}
+.short ul{font-size:15px;line-height:23px;color:var(--ink)}
+.short .tag{justify-self:start;font-size:13px}
+@media (min-width:900px){.short{grid-template-columns:repeat(3,1fr)}}
 footer{background:var(--ink);color:#d6cfc5}
 footer .wrap{padding-top:32px;padding-bottom:40px;display:grid;gap:16px;font-size:14px;line-height:22px}
 footer a{color:#f3c5bd;overflow-wrap:anywhere}
@@ -156,38 +161,52 @@ footer h3{color:#fff}
 </style>
 </head>
 <body>
-<div class="notice" role="note"><b>Independent study</b> by Anchit Tandon, Senior PM at Times Internet until April 2026 (ET Prime, ET Markets). Built from public information only: no internal data, no confidential numbers. Not affiliated with or endorsed by The Economic Times or Times Internet. Checked 1 Nov 2026.</div>
+<div class="notice" role="note"><b>Independent study</b> by Anchit Tandon, who worked on ET Prime and ET Markets at Times Internet until April 2026. Uses public information only; career figures are as published on my portfolio. Not affiliated with The Economic Times or Times Internet.</div>
 
 <nav class="nav" aria-label="Sections">
   <div class="wrap">
     <a class="mark" href="#top"><i aria-hidden="true">AT</i><span><b>ET Study</b><small>by Anchit Tandon</small></span></a>
     <div class="links" id="links">
-      <a href="#today">Today</a><a href="#needs">User needs</a><a href="#problems">Problems</a><a href="#voices">Voices</a><a href="#audit">Audit</a><a href="#root">Root causes</a><a href="#compete">Competition</a><a href="#fixes">Fixes</a><a href="#prototype">Prototype</a><a href="#measure">Measure</a><a href="#me">Why me</a>
+      <a href="#problems">Problems</a><a href="#fixes">Fixes</a><a href="#prototype">Prototype</a><a href="#needs">Users</a><a href="#audit">Evidence</a><a href="#measure">Plan</a><a href="#me">About me</a>
     </div>
-    <a class="btn btn-primary sm" href="/ET-study/prototype"><span class="cta-lg">Open prototype</span><span class="cta-sm">Prototype</span></a>
+    <a class="btn btn-primary sm" href="/ET_Study/prototype"><span class="cta-lg">Open prototype</span><span class="cta-sm">Prototype</span></a>
   </div>
 </nav>
 
 <header class="hero" id="top">
   <div class="wrap">
-    <span class="eyebrow">The Economic Times · ET Markets · ET Prime · problem-first product study · November 2026</span>
-    <h1>The newsroom earns the trust. <span class="accent">The product keeps spending it.</span></h1>
-    <p class="callout"><b>The one problem under all the others:</b> ET is built to sell the first subscription, not to keep the member. A person who has paid is still shown ads, upsell pop-ups and sales calls, can be locked out of what they bought, and has to email to get an invoice.</p>
-    <p class="lede">ET has a strong newsroom, 1.35 crore Android installs of its main app, and about 1.75 lakh ET Prime subscribers on the last public count. It also has half of Moneycontrol's audience, a rival charging a fraction of the price, and falling search traffic. This study sets out what each user needs, names eight problems readers, investors, members and the business face today with the evidence for each, ranks fourteen fixes against them, and ends in a working prototype of a member-first ET.</p>
-    <div class="hero-ctas">
-      <a class="btn btn-primary" href="/ET-study/prototype">Open the working prototype</a>
-      <a class="btn btn-outline" href="#problems">See the eight problems</a>
+    <span class="eyebrow">Product study · November 2026</span>
+    <h1>Why ET Prime members are unhappy, <span class="accent">and how to fix it</span></h1>
+    <div class="grid short">
+      <div class="card"><span class="tag">What it is</span><ul>
+        <li><b>The Economic Times:</b> business news, on the web and in an app.</li>
+        <li><b>ET Markets:</b> the stock market app and section.</li>
+        <li><b>ET Prime:</b> the paid membership, ₹2,699 for 12 months on the web.</li></ul></div>
+      <div class="card"><span class="tag">What goes wrong</span><ul>
+        <li>Paying members still get ads, pop-ups and sales calls.</li>
+        <li>Some are locked out, charged twice or cannot get an invoice.</li>
+        <li>Prices and offers contradict each other.</li>
+        <li>Pages are slow on phones, and Google sends fewer readers each year.</li></ul></div>
+      <div class="card soft"><span class="tag g">What I would do</span><ul>
+        <li>Never show ads, pop-ups or sales calls to someone who has paid.</li>
+        <li>Self-serve access, invoices and cancelling, in one or two taps.</li>
+        <li>One price list, one offer at a time.</li>
+        <li>A "My Stocks" front page built around what you own.</li></ul></div>
     </div>
-    <p class="meta">Everything here was opened by me between 28 Oct and 1 Nov 2026 from public pages, filings, app stores and press. The live audit ran from a US-based test browser, so ads and offers may differ slightly for a visitor in India.</p>
+    <div class="hero-ctas">
+      <a class="btn btn-primary" href="/ET_Study/prototype">Try the working prototype</a>
+      <a class="btn btn-outline" href="#problems">Read the 8 problems</a>
+    </div>
+    <p class="meta">Based on public pages, 1,973 app-store reviews, ratings filings and press, checked on 1 Nov 2026. The live tests ran from a US-based browser, so ads may differ slightly in India.</p>
   </div>
 </header>
 
 <main>
 <section class="block" aria-labelledby="tldr-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">In 60 seconds</span><h2 id="tldr-h">Where ET stands, in four numbers</h2></div>
+    <div class="sec-head"><span class="num">The key numbers</span><h2 id="tldr-h">Four numbers that explain the problem</h2></div>
     <div class="grid g2 g4">
-      <div class="card kpi"><span>ET Prime subscribers</span><b class="pri">~1.75 lakh</b><small>Crisil, June 2025, the last public count. Moneycontrol Pro announced 10 lakh+ paying subscribers in October 2024.</small></div>
+      <div class="card kpi"><span>ET Prime subscribers</span><b class="pri">~1.75 lakh</b><small>Crisil, June 2025, the last independent count. The plans page claims "10 Lakh+ members", which I could not reconcile. Moneycontrol Pro announced 10 lakh+ paying subscribers in October 2024.</small></div>
       <div class="card kpi"><span>Audience vs Moneycontrol</span><b>31.4M vs 63.8M</b><small>Unique visitors, Comscore February 2026; minutes 129.7M vs 546.3M.</small></div>
       <div class="card kpi"><span>Requests to load the mobile home page</span><b>1,364</b><small>From 285 hosts, before the load event fired at 25.5 s (my audit, 390 px, 1 Nov 2026).</small></div>
       <div class="card kpi"><span>Google search referrals to news sites</span><b>-40.2%</b><small>July 2025 to July 2026, Chartbeat; Discover -34.3%. Search was 38.8% of ET's referrals (Semrush estimate).</small></div>
@@ -203,7 +222,7 @@ footer h3{color:#fff}
       <thead><tr><th style="width:24%">Where you buy</th><th style="width:40%">What it costs</th><th style="width:36%">What I noticed</th></tr></thead>
       <tbody>
         <tr><td><b>ET Prime, web</b><br><small class="muted">buy.indiatimes.com/ET/plans</small></td><td>6+6 months ₹2,699 · 1+1 year ₹3,899 · 2+2 years ₹6,499. No monthly plan. All framed as "Save 50%" through bonus months.</td><td>FAQ: "we are not offering trial", "We do not have a refund policy", invoices by email to the care desk only.</td></tr>
-        <tr><td><b>ET Prime, App Store</b><br><small class="muted">ET app and ET Markets app</small></td><td>10 in-app Prime entries from ₹399 a month to ₹3,199 a year; 6+6 months at ₹2,599 in ET Markets.</td><td>The same 12 months costs ₹2,599 in one app and ₹2,699 on the web.</td></tr>
+        <tr><td><b>ET Prime, App Store</b><br><small class="muted">ET app and ET Markets app</small></td><td>10 in-app Prime entries in the ET app alone, from ₹399 a month to ₹3,199 a year; 6+6 months at ₹2,599 in ET Markets.</td><td>The same 12 months costs ₹2,599 in one app and ₹2,699 on the web.</td></tr>
         <tr><td><b>TOI+, web</b><br><small class="muted">buy.indiatimes.com/TOI/plans</small></td><td>1 year ₹2,699 · 3 years ₹5,999 · 5 years ₹7,999.</td><td>Lists ETPrime stories, ET ePaper and the ET market tools at the same ₹2,699; promises "95% less ads" where the ET paywall promises "90% less".</td></tr>
         <tr><td><b>Bundled extras</b></td><td>TOI subscription, Docubay, 3 months of Times Health+ yoga, Harvard Business Review content ("newly launched"), SEBI-registered analysts' trade ideas.</td><td>The TOI add-on is valued at ₹1,999 on the plans page and "worth Rs.799" on the paywall.</td></tr>
         <tr><td><b>Paid events</b></td><td>Masterclasses at ₹15,000 to ₹50,000 + GST, on the same plans page.</td><td>A ₹50,000 cross-sell sits beside a ₹2,699 checkout.</td></tr>
@@ -216,10 +235,10 @@ footer h3{color:#fff}
   <div class="wrap">
     <div class="sec-head"><span class="num">02 · User needs</span><h2 id="nd-h">What each person comes to ET to do</h2><p>Four users, what they need, what they get today, and the gap. The problems in section 03 come from these gaps.</p></div>
     <div class="grid g2 g4">
-      <div class="card need"><span class="tag">The reader</span><h3>"Tell me what matters, fast."</h3><dl><dt>Needs</dt><dd>The story on a phone in seconds, a notification that opens that story, and a short daily brief.</dd><dt>Gets today</dt><dd>A 25-second page with a blank ad slot above the headline, and notifications that open the home page.</dd></dl></div>
+      <div class="card need"><span class="tag">The reader</span><h3>"Tell me what matters, fast."</h3><dl><dt>Needs</dt><dd>The story on a phone in seconds, a notification that opens that story, and a short daily brief.</dd><dt>Gets today</dt><dd>A page that keeps loading for 25 s and 1,364 requests, with a blank ad slot above the headline, and notifications that open the home page.</dd></dl></div>
       <div class="card need"><span class="tag">The investor</span><h3>"What does this mean for my stocks?"</h3><dl><dt>Needs</dt><dd>News and analysis about what they own, prices they can trust, and tools that keep their data.</dd><dt>Gets today</dt><dd>A general markets feed; the portfolio tracker removed without an export.</dd></dl></div>
       <div class="card need"><span class="tag">The member</span><h3>"I paid. Let me read in peace."</h3><dl><dt>Needs</dt><dd>Access everywhere they sign in, few ads, no sales calls, an invoice and a cancel button they can find.</dd><dt>Gets today</dt><dd>Pop-ups for the plan they own, paywalls, calls, and an email to request an invoice.</dd></dl></div>
-      <div class="card need soft"><span class="tag">The business</span><h3>"Renewals, and reach we own."</h3><dl><dt>Needs</dt><dd>Members who renew because they use ET every week, and a daily audience that does not depend on Google.</dd><dt>Gets today</dt><dd>Revenue that is two-thirds advertising, and a funnel built around the first sale.</dd></dl></div>
+      <div class="card need soft"><span class="tag">The business</span><h3>"Renewals, and reach we own."</h3><dl><dt>Needs</dt><dd>Members who renew because they use ET every week, and a daily audience that does not depend on Google.</dd><dt>Gets today</dt><dd>A parent company, Times Internet, earning 65 to 70% of revenue from advertising, and a funnel built around the first sale.</dd></dl></div>
     </div>
   </div>
 </section>
@@ -253,7 +272,7 @@ footer h3{color:#fff}
         <div class="ph"><span class="pn">P4</span><span class="sev">High</span></div>
         <h3>Half the audience and a fraction of the subscribers of Moneycontrol</h3>
         <p class="who">Felt by: the business, in both ad and subscription revenue.</p>
-        <ul><li>About 1.75 lakh ET Prime subscribers against Moneycontrol Pro's 10 lakh+.</li><li>Moneycontrol Pro starts at ₹499 a year in-app; ET Prime is ₹2,399 to ₹3,199 a year in-app.</li><li>Advertising is 65 to 70% of Times Internet's revenue, and Crisil flags "continued weak operating profitability".</li></ul>
+        <ul><li>About 1.75 lakh ET Prime subscribers (Crisil, June 2025) against the 10 lakh+ Moneycontrol Pro announced in October 2024: different sources and dates, but a wide gap. ET's own "10 Lakh+ members" claim is not reconciled with Crisil's count.</li><li>Moneycontrol Pro starts at ₹499 a year in-app; ET Prime is ₹2,399 to ₹3,199 a year in-app.</li><li>Advertising is 65 to 70% of Times Internet's revenue, and Crisil flags "continued weak operating profitability".</li></ul>
         <a class="jump" href="#fixes" data-jump="P4">See the fixes for P4 &rarr;</a>
       </article>
       <article class="card prob high" data-problem="P5" id="p5">
@@ -267,7 +286,7 @@ footer h3{color:#fff}
         <div class="ph"><span class="pn">P6</span><span class="sev">High</span></div>
         <h3>The top of the funnel depends on Google, and Google is sending less</h3>
         <p class="who">Felt by: the business, the newsroom, every future subscriber.</p>
-        <ul><li>Google Search referrals to publishers fell 40.2% in a year; AI chatbots send 0.01% of traffic.</li><li>Semrush estimates ET's visits fell from 64.6M in July to 49.2M in September 2026.</li><li>Zerodha Pulse shows ET headlines free inside an investor's own trading app.</li></ul>
+        <ul><li>Google Search referrals to publishers fell 40.2% in a year; AI chatbots send 0.01% of traffic.</li><li>Semrush estimates ET's visits fell from 64.6M in July to 49.2M in September 2026.</li><li>Zerodha Pulse, a free aggregator from the broker, shows ET headlines alongside other publishers'.</li></ul>
         <a class="jump" href="#fixes" data-jump="P6">See the fixes for P6 &rarr;</a>
       </article>
       <article class="card prob high" data-problem="P7" id="p7">
@@ -290,7 +309,7 @@ footer h3{color:#fff}
 
 <section class="block" id="voices" aria-labelledby="vo-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">04 · In readers' own words</span><h2 id="vo-h">What members and investors are saying</h2><p class="small muted">I read 1,673 Google Play reviews (827 of the ET app, 846 of ET Markets) and 300 App Store reviews, newest first, and counted the themes in the 1 and 2 star ones from the last 12 months. Quoted verbatim, including typos; names left out.</p></div>
+    <div class="sec-head"><span class="num">04 · In readers' own words</span><h2 id="vo-h">What members and investors are saying</h2><p class="small muted">I analysed 1,973 reviews, 1,673 on Google Play (827 of the ET app, 846 of ET Markets) and 300 on the App Store, newest first, and keyword-counted the themes in the 1 and 2 star ones from the last 12 months. Quoted verbatim, including typos; names left out.</p></div>
     <div class="grid voices">
       <figure class="card voice"><blockquote>"Despite a 5 year paid subscription I continue to see ads in the articles. initially it was static images, now it is noisy distracting video ads."</blockquote><figcaption>ET app, <a href="https://play.google.com/store/apps/details?id=com.et.reader.activities&amp;reviewId=d75c3cc5-5f50-4836-be15-fa947f5c3670" rel="noopener" target="_blank">Google Play</a> · 2★ · 31 May 2026 · P1</figcaption></figure>
       <figure class="card voice"><blockquote>"Every time I want to read a so called Prime article it prompts to subscribe, even though I'm already a subscriber."</blockquote><figcaption>ET app, <a href="https://play.google.com/store/apps/details?id=com.et.reader.activities&amp;reviewId=5b4b2ba7-15a6-45cc-ad89-b4dc02c2ca81" rel="noopener" target="_blank">Google Play</a> · 1★ · 28 Oct 2026 · P1, P2</figcaption></figure>
@@ -321,7 +340,7 @@ footer h3{color:#fff}
     <div class="tbl"><table class="t-wide" id="audit-tbl">
       <thead><tr><th>Page</th><th class="num">Requests at load</th><th class="num">Hosts</th><th class="num">Load event</th><th class="num">Ad frames</th><th class="num">Lighthouse</th><th>Upsells seen</th></tr></thead>
       <tbody>
-        <tr><td><b>Home</b></td><td class="num">1,364</td><td class="num">285</td><td class="num">25.5 s</td><td class="num">14</td><td class="num">did not finish</td><td>Get Free Trial, Subscribe to ET Prime, Become a Member</td></tr>
+        <tr><td><b>Home</b></td><td class="num">1,364</td><td class="num">285</td><td class="num">25.5 s</td><td class="num">14</td><td class="num">20 (one run; re-run hung)</td><td>Get Free Trial, Subscribe to ET Prime, Become a Member</td></tr>
         <tr><td><b>Prime article</b></td><td class="num">1,103</td><td class="num">261</td><td class="num">18.7 s</td><td class="num">6</td><td class="num">35 · CLS 0.225</td><td>12 buttons in one paywall, a sticky bar, a Diwali Sale button</td></tr>
         <tr><td><b>ET Markets</b></td><td class="num">119, then 1,382 in 15 s</td><td class="num">281</td><td class="num">4.2 s</td><td class="num">11</td><td class="num">29 · LCP 7.7 s</td><td>Avail Diwali Sale!, Become a Member</td></tr>
         <tr><td><b>Prime home</b></td><td class="num">1,182</td><td class="num">253</td><td class="num">20.5 s</td><td class="num">8</td><td class="num">not run</td><td>Subscribe to ET Prime, Become a Member</td></tr>
@@ -337,10 +356,10 @@ footer h3{color:#fff}
 
 <section class="block" id="root" aria-labelledby="rt-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">06 · Root causes</span><h2 id="rt-h">Why the same problems keep coming back</h2><p>Eight problems, three causes. Fixing symptoms one by one has not stuck, because each cause sits between teams.</p></div>
+    <div class="sec-head"><span class="num">06 · Root causes</span><h2 id="rt-h">Why the same problems keep coming back</h2><p>Eight problems, three causes, as they look from the outside. Each cause sits between teams, which is why fixing symptoms one at a time rarely sticks.</p></div>
     <div class="grid g3 root">
-      <div class="card"><h3>Nobody owns "the member"</h3><p class="small">Ads, subscription, sales, the apps and TOI+ each optimise their own number. A member therefore shows up as ad inventory to one system, a lead to another and an expired entitlement to a third. P1, P2, P3.</p></div>
-      <div class="card"><h3>The first sale is measured, the second is not</h3><p class="small">Bonus-month bundles, callbacks and Diwali sales all aim at acquisition. Renewal, the thing that pays for it, has no visible owner: no value receipt, no self-serve invoice, a templated reply to every complaint. P1, P2, P4.</p></div>
+      <div class="card"><h3>No one visibly owns "the member"</h3><p class="small">From the outside, it looks as if ads, subscription, sales, the apps and TOI+ each optimise their own number. A member therefore shows up as ad inventory to one system, a lead to another and an expired entitlement to a third. P1, P2, P3.</p></div>
+      <div class="card"><h3>The first sale is visible, the second is not</h3><p class="small">Bonus-month bundles, callbacks and Diwali sales all aim at acquisition. Renewal, the thing that pays for it, has no visible owner: no value receipt, no self-serve invoice, a templated reply to every complaint. P1, P2, P4.</p></div>
       <div class="card"><h3>Reach is rented, not owned</h3><p class="small">Search brings readers in and ad-heavy pages monetise them once. With search falling, ET needs a daily reason to come back that it controls: a watchlist, a briefing, a notification that works. P5, P6, P7, P8.</p></div>
     </div>
   </div>
@@ -356,8 +375,8 @@ footer h3{color:#fff}
         <tr><td><b>Mint</b></td><td>₹349 a month to ₹2,949 a year; WSJ bundle ₹4,999</td><td>Has a monthly plan and a lighter tier (Mint Lite ₹1,499). ET's web checkout has neither.</td></tr>
         <tr><td><b>Business Standard</b></td><td>₹249 a month; ₹1,499 a year</td><td>Lower annual price, bundles NYT access.</td></tr>
         <tr><td><b>The Ken</b></td><td>₹5,999 a year in-app</td><td>Charges more for fewer, deeper stories; rated 4.78 on the App Store.</td></tr>
-        <tr><td><b>Screener.in, Tickertape</b></td><td>Free tiers; ₹2,999 to ₹4,999 premium</td><td>Own the investor tool use, the one ET Markets weakened by removing its portfolio tracker.</td></tr>
-        <tr><td><b>Zerodha Pulse, Finshots</b></td><td>Free</td><td>Carry ET's headlines, or a daily three-minute brief, inside the investor's own workflow.</td></tr>
+        <tr><td><b>Screener.in, Tickertape</b></td><td>Screener free; premium from ₹2,999 a year (Tickertape Pro) to ₹4,999 (Screener)</td><td>Own the investor tool use, the one ET Markets weakened by removing its portfolio tracker.</td></tr>
+        <tr><td><b>Zerodha Pulse, Finshots</b></td><td>Free</td><td>Carry ET's headlines free, or a daily three-minute brief, close to where investors already are.</td></tr>
       </tbody></table></div>
     <div class="grid g2" style="margin-top:20px">
       <div class="card soft"><h3>ET wins on</h3><ul class="small"><li>Newsroom depth and Prime long-form; the ET print edition and ePaper.</li><li>The widest bundle: HBR, TOI, Docubay, stock reports, SEBI-registered analysts.</li><li>A large app base: 1.35 crore ET and 53.8 lakh ET Markets installs on Google Play.</li></ul></div>
@@ -369,7 +388,7 @@ footer h3{color:#fff}
 
 <section class="block" id="fixes" aria-labelledby="fx-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">08 · The fixes</span><h2 id="fx-h">Fourteen fixes, each tied to a problem</h2><p>Ordered by impact for the effort, from things the current teams can ship in weeks to the bigger bets. Filter by who each one serves, or use the links on the problem cards.</p></div>
+    <div class="sec-head"><span class="num">08 · The fixes</span><h2 id="fx-h">Fourteen fixes, each tied to a problem</h2><p>Each fix names the problems it solves and how long it would take; the 90-day plan below sets the order. Filter by who each one serves, or use the links on the problem cards.</p></div>
     <div class="filters" role="group" aria-label="Show fixes for">
       <button type="button" class="chip" data-filter="all" aria-pressed="true">All</button>
       <button type="button" class="chip" data-filter="member" aria-pressed="false">Paying members</button>
@@ -379,20 +398,20 @@ footer h3{color:#fff}
     </div>
     <p class="fix-status" aria-live="polite"><span data-fix-count>14 fixes shown</span></p>
     <div class="grid fixes" id="fix-list">
-      <article class="card fix" data-fix="F1" data-solves="P1" data-who="member business"><div class="fh"><span class="fn">F1</span><span class="tag g">0 to 30 days</span><span class="tag">Solves P1</span></div><h3>A member is never sold to</h3><p>Every logged-in member is suppressed from upsell pop-ups, "Subscribe" buttons, sale banners and the sales dialer list. One flag, read by web, apps and the calling system.</p><p><span class="k">Why it is cheap:</span> about 1.75 lakh members against 3.14 crore monthly visitors is 0.6% of the audience. Even if members read five times as much, they are under 3% of page views.</p></article>
+      <article class="card fix" data-fix="F1" data-solves="P1" data-who="member business"><div class="fh"><span class="fn">F1</span><span class="tag g">0 to 30 days</span><span class="tag">Solves P1</span></div><h3>A member is never sold to</h3><p>Every logged-in member is suppressed from upsell pop-ups, "Subscribe" buttons, sale banners and the sales dialer list. One flag, read by web, apps and the calling system.</p><p><span class="k">Why it is cheap:</span> about 1.75 lakh members against 3.14 crore monthly visitors is 0.6% of the audience; even reading five times as much, under 3% of page views. On ET's own "10 lakh+" claim it is about 3% of visitors and roughly 16% of page views, still a minority.</p></article>
       <article class="card fix" data-fix="F2" data-solves="P1" data-who="member"><div class="fh"><span class="fn">F2</span><span class="tag g">0 to 60 days</span><span class="tag">Solves P1</span></div><h3>Keep the "90% less ads" promise, and measure it</h3><p>One ad layout for members: no pop-up, interstitial or video units, at most one native slot per article. Publish the rule in the FAQ and track ad impressions served to members as a number that should fall to the promise.</p><p><span class="k">Measure:</span> ad impressions per member page view, against non-members.</p></article>
-      <article class="card fix" data-fix="F3" data-solves="P2" data-who="member business"><div class="fh"><span class="fn">F3</span><span class="tag g">0 to 60 days</span><span class="tag">Solves P2</span></div><h3>"I paid, let me in" in one tap</h3><p>One entitlement record across the ET web, both apps, iOS, Android and TOI+. A "Restore my membership" button re-checks the payment and unlocks on the spot. Any paywall shown to an active member raises an alert.</p><p><span class="k">Measure:</span> paywalls shown to active members, target zero.</p></article>
+      <article class="card fix" data-fix="F3" data-solves="P2 P1" data-who="member business"><div class="fh"><span class="fn">F3</span><span class="tag g">0 to 60 days</span><span class="tag">Solves P2, P1</span></div><h3>"I paid, let me in" in one tap</h3><p>One entitlement record across the ET web, both apps, iOS, Android and TOI+. A "Restore my membership" button re-checks the payment and unlocks on the spot. Any paywall shown to an active member raises an alert.</p><p><span class="k">Measure:</span> paywalls shown to active members, target zero.</p></article>
       <article class="card fix" data-fix="F4" data-solves="P2" data-who="member business"><div class="fh"><span class="fn">F4</span><span class="tag g">0 to 60 days</span><span class="tag">Solves P2</span></div><h3>Self-serve billing that meets the e-mandate rules</h3><p>Download the GST invoice in My Subscriptions; cancel auto-renew in two taps in every app; a reminder seven days before renewal as well as the 24-hour pre-debit notice; automatic refund of a duplicate debit within 48 hours.</p><p><span class="k">Measure:</span> billing tickets per 1,000 members; days to invoice, target zero.</p></article>
       <article class="card fix" data-fix="F5" data-solves="P3" data-who="reader business"><div class="fh"><span class="fn">F5</span><span class="tag g">0 to 30 days</span><span class="tag">Solves P3</span></div><h3>One price book, one offer at a time</h3><p>Web, apps and TOI+ read one price list. Remove the "Get Free Trial" badge or launch a real trial; give each paywall one primary and one secondary button, not twelve; delete the expired 2023 coupon terms still served in the page.</p><p><span class="k">Measure:</span> paywall view to checkout start.</p></article>
       <article class="card fix" data-fix="F6" data-solves="P3 P4" data-who="reader business"><div class="fh"><span class="fn">F6</span><span class="tag a">1 to 3 months</span><span class="tag">Solves P3, P4</span></div><h3>Make ET Prime and TOI+ different products</h3><p>Today ₹2,699 buys either, and both list ETPrime stories and the market tools. Position TOI+ as the general-news membership and ET Prime as the investor's; offer the two together as a clearly priced bundle.</p><p><span class="k">Measure:</span> cannibalisation between the two storefronts.</p></article>
-      <article class="card fix" data-fix="F7" data-solves="P4 P3" data-who="investor business"><div class="fh"><span class="fn">F7</span><span class="tag a">1 to 3 months</span><span class="tag">Solves P4, P3</span></div><h3>A clear entry tier on the web</h3><p>A monthly plan and a lower-priced markets tier on the web, as Mint and Moneycontrol have, with the full Prime as the upgrade. Test it against today's 6+6 bundle in a few cities before rolling out.</p><p><span class="k">Measure:</span> new payers, and the share who upgrade within six months.</p></article>
+      <article class="card fix" data-fix="F7" data-solves="P4" data-who="investor business"><div class="fh"><span class="fn">F7</span><span class="tag a">1 to 3 months</span><span class="tag">Solves P4</span></div><h3>A clear entry tier on the web</h3><p>A monthly plan and a lower-priced markets tier on the web, as Mint and Moneycontrol have, with the full Prime as the upgrade. Built on F5's single price book, so it adds a step, not more offers, and tested against today's 6+6 bundle on randomly assigned new visitors before rolling out.</p><p><span class="k">Measure:</span> new payers, and the share who upgrade within six months.</p></article>
       <article class="card fix" data-fix="F8" data-solves="P1 P4" data-who="business member"><div class="fh"><span class="fn">F8</span><span class="tag a">1 to 3 months</span><span class="tag">Solves P1, P4</span></div><h3>Assisted sales by consent, not by volume</h3><p>Call only people who asked for a callback or showed real intent (several paywall hits, a started checkout). Never a member, never after "no", one number, set hours. AI call scoring checks every call against those rules.</p><p><span class="k">Measure:</span> revenue per call; complaints per 1,000 calls.</p></article>
       <article class="card fix" data-fix="F9" data-solves="P7" data-who="investor member"><div class="fh"><span class="fn">F9</span><span class="tag g">0 to 60 days</span><span class="tag">Solves P7</span></div><h3>Give investors their portfolio back</h3><p>Let anyone who used ET Portfolio download their holdings as a file, and import them into Portfolio X-ray or a watchlist. For the future, a written rule: 60 days' notice and an export before any tool is removed.</p><p><span class="k">Measure:</span> share of former users who re-import.</p></article>
       <article class="card fix" data-fix="F10" data-solves="P7 P8" data-who="investor reader"><div class="fh"><span class="fn">F10</span><span class="tag a">1 to 3 months</span><span class="tag">Solves P7, P8</span></div><h3>Release quality gates</h3><p>Staged rollouts with a crash-free gate (99.5% of sessions) before 100%; market data labelled with its time and source on every quote; old analyst calls shown with their date and outcome, or removed.</p><p><span class="k">Measure:</span> crash-free sessions per release.</p></article>
       <article class="card fix" data-fix="F11" data-solves="P8 P6" data-who="reader investor"><div class="fh"><span class="fn">F11</span><span class="tag g">0 to 30 days</span><span class="tag">Solves P8, P6</span></div><h3>Notifications that open the story</h3><p>Fix deep links so a tap lands on the article; cap volume per day by topic; honour unsubscribes everywhere; let readers pick topics and stocks. Refresh or retire the "Top Prime Articles" widget that shows 2023 stories.</p><p><span class="k">Measure:</span> notification open to article read rate.</p></article>
       <article class="card fix" data-fix="F12" data-solves="P5" data-who="reader business"><div class="fh"><span class="fn">F12</span><span class="tag a">1 to 3 months</span><span class="tag">Solves P5</span></div><h3>A performance budget for every page</h3><p>No reserved ad slot above the headline on phones; ad units below the first screen load as you scroll; a cap on requests and third-party hosts per page; the checkout under 2 MB.</p><p><span class="k">Measure:</span> Core Web Vitals at the 75th percentile on real phones, and ad revenue per session.</p></article>
       <article class="card fix" data-fix="F13" data-solves="P6 P4 P7" data-who="investor member business"><div class="fh"><span class="fn">F13</span><span class="tag">3 to 9 months</span><span class="tag">Solves P6, P4, P7</span></div><h3>My Stocks: ET around what you own</h3><p>A watchlist or imported portfolio becomes the front page: every ET story, result and analyst note about your stocks, with a two-line "what it means for you". A morning and closing brief on the app or WhatsApp. This is the daily reason to open ET that Google cannot take away, and the clearest reason to pay ₹2,699 over ₹499.</p><p><span class="k">Measure:</span> members active three or more days a week.</p></article>
-      <article class="card fix" data-fix="F14" data-solves="P6 P2 P4" data-who="member business"><div class="fh"><span class="fn">F14</span><span class="tag">3 to 9 months</span><span class="tag">Solves P6, P2, P4</span></div><h3>A value receipt and an answers layer</h3><p>A monthly note to each member: stories read, tools used, ads avoided, and what is coming. Plus "Ask ET", answers drawn only from ET's own reporting with links to the stories, so readers who now ask AI chatbots get ET's answer and a reason to sign in.</p><p><span class="k">Measure:</span> renewal rate of members who open the receipt; signed-in share of answer users.</p></article>
+      <article class="card fix" data-fix="F14" data-solves="P6 P4" data-who="member business"><div class="fh"><span class="fn">F14</span><span class="tag">3 to 9 months</span><span class="tag">Solves P6, P4</span></div><h3>A value receipt and an answers layer</h3><p>A monthly note to each member: stories read, tools used, ads avoided, and what is coming. Plus "Ask ET", answers drawn only from ET's own reporting with links to the stories, so readers who now ask AI chatbots get ET's answer and a reason to sign in.</p><p><span class="k">Measure:</span> renewal rate of members who open the receipt; signed-in share of answer users.</p></article>
     </div>
   </div>
 </section>
@@ -413,7 +432,7 @@ footer h3{color:#fff}
       <div class="card soft">
         <h3>Open it</h3>
         <p class="small" style="margin-top:6px">Works on a phone, a tablet and a laptop.</p>
-        <div class="hero-ctas" style="margin-top:14px"><a class="btn btn-primary" href="/ET-study/prototype">Open the prototype</a></div>
+        <div class="hero-ctas" style="margin-top:14px"><a class="btn btn-primary" href="/ET_Study/prototype">Open the prototype</a></div>
       </div>
     </div>
   </div>
@@ -427,12 +446,12 @@ footer h3{color:#fff}
       <div class="card"><h3>Early signals</h3><ul class="small"><li>Paywalls shown to active members: zero.</li><li>Billing and access tickets per 1,000 members.</li><li>Notification tap to article read.</li><li>Members with a watchlist or portfolio set up.</li></ul></div>
       <div class="card"><h3>Guardrails</h3><ul class="small"><li>Ad revenue per non-member session holds.</li><li>Sales complaints per 1,000 calls fall.</li><li>Core Web Vitals pass on the top 20 templates.</li></ul></div>
     </div>
-    <div class="card" style="margin-top:16px"><h3>What one point of renewal is worth</h3><p class="small" style="margin-top:6px">An illustration on public numbers, not a forecast: 1% of about 1.75 lakh members is 1,750 renewals; at the ₹2,699 web price that is about <b>₹47 lakh a year</b>, before any upgrade. Real prices after bundles and discounts will be lower; the direction holds.</p></div>
+    <div class="card" style="margin-top:16px"><h3>What one point of renewal is worth</h3><p class="small" style="margin-top:6px">An illustration on public numbers, not a forecast: if all of about 1.75 lakh members came up for renewal, one point would be 1,750 renewals; at the ₹2,699 web price, which includes GST, that is about <b>₹47 lakh a year</b>, before any upgrade. Multi-year plans renew less often, and the price after GST, bundles and discounts is lower, so read it as an upper bound; the direction holds.</p></div>
     <h3 style="margin-top:32px" id="plan">My first 90 days</h3>
     <div class="grid g3 steps" style="margin-top:12px">
       <div class="card"><h3><span class="tag g">Days 1 to 30</span>Stop the bleeding</h3><p class="small">Ship F1 (no selling to members), F5 (one offer at a time) and F11 (notification deep links). Put a number on paywalls shown to active members and on billing tickets, and report both weekly.</p></div>
-      <div class="card"><h3><span class="tag a">Days 31 to 60</span>Make paying painless</h3><p class="small">F3 (restore my membership), F4 (self-serve invoices and cancellation) and F9 (portfolio export). Agree the consent rules for assisted sales (F8) with the sales lead, in writing.</p></div>
-      <div class="card"><h3><span class="tag">Days 61 to 90</span>Test the bigger bets</h3><p class="small">A two-city test of a web entry tier (F7) against today's bundle, and a closed beta of My Stocks (F13) with 5,000 members, with a holdout group to prove the lift in weekly use.</p></div>
+      <div class="card"><h3><span class="tag a">Days 31 to 60</span>Make paying painless</h3><p class="small">F2 (the member ad layout), F3 (restore my membership), F4 (self-serve invoices and cancellation) and F9 (portfolio export). Agree the consent rules for assisted sales (F8) with the sales lead, in writing.</p></div>
+      <div class="card"><h3><span class="tag">Days 61 to 90</span>Test the bigger bets</h3><p class="small">A randomised test of a web entry tier (F7) against today's bundle, and a closed beta of My Stocks (F13) with 5,000 members, with a holdout group to prove the lift in weekly use.</p></div>
     </div>
   </div>
 </section>
@@ -442,8 +461,8 @@ footer h3{color:#fff}
     <div class="sec-head"><span class="num">11 · What could go wrong</span><h2 id="rk-h">The trade-offs, said out loud</h2></div>
     <div class="grid g3">
       <div class="card"><h3>Ad revenue from members</h3><p class="small">Fewer ads for members costs some inventory. On the public numbers members are under 3% of page views, and a renewal is worth more than the ads they would have seen. Measure it in the first month and decide on data.</p></div>
-      <div class="card"><h3>Fewer sales calls</h3><p class="small">Consent-based calling will lower volume. Revenue per call should rise, as it did when I rebuilt the assisted-sales funnel around intent. If revenue falls below the old line for two months, widen the intent rules, not the call list.</p></div>
-      <div class="card"><h3>A cheaper entry tier</h3><p class="small">It can pull full-price buyers down. That is why F7 starts as a city test with an upgrade path, and is judged on revenue per new payer after six months, not on sign-ups.</p></div>
+      <div class="card"><h3>Fewer sales calls</h3><p class="small">Consent-based calling will lower volume. Revenue per call should rise, because every call goes to someone who asked. If revenue falls below the old line for two months, widen the intent rules, not the call list.</p></div>
+      <div class="card"><h3>A cheaper entry tier</h3><p class="small">It can pull full-price buyers down. That is why F7 starts as a randomised test with an upgrade path, and is judged on revenue per new payer after six months, not on sign-ups.</p></div>
     </div>
   </div>
 </section>
@@ -456,7 +475,7 @@ footer h3{color:#fff}
       <div class="card kpi"><span class="tag">AI for sales</span><b style="margin-top:8px">AI TeleSuite</b><small style="font-size:14px;line-height:21px">Call transcription, quality scoring and pitch assist. The same scoring is how F8 would keep calls to consented, high-intent buyers.</small></div>
       <div class="card kpi"><span class="tag">Retention · ET Markets</span><b style="margin-top:8px">+10% · +27%</b><small style="font-size:14px;line-height:21px">Subscriber retention through onboarding experiments; ET Markets engagement, with ₹3 crore+ incremental yearly revenue.</small></div>
     </div>
-    <p class="callout" style="margin-top:20px">I scaled the calling channel, so I know the sales-call complaints in P1 from the inside. The answer is not fewer people on the phones, it is calling the right people: those who asked, and never those who already pay.</p>
+    <p class="callout" style="margin-top:20px">I scaled assisted sales, and it works best when it calls people who asked for a call. The answer to the sales-call complaints in P1 is not fewer people on the phones; it is calling the right people, and never those who already pay.</p>
     <div class="hero-ctas" style="margin-top:16px"><a class="btn btn-primary" href="mailto:anchit.tandon@gmail.com?subject=ET%20study">Email Anchit</a><a class="btn btn-outline" href="https://www.linkedin.com/in/anchit-tandon" rel="noopener" target="_blank">LinkedIn</a><a class="btn btn-outline" href="https://ai-tele-suite.anchit-tandon.com/" rel="noopener" target="_blank">Open AI TeleSuite</a><a class="btn btn-outline" href="/TimesHealth_Study">Times Health study</a></div>
   </div>
 </section>
@@ -465,7 +484,7 @@ footer h3{color:#fff}
 <footer>
   <div class="wrap">
     <h3>Sources and method</h3>
-    <p>All opened 28 Oct to 1 Nov 2026. Reviews pulled from Google Play (newest 300 overall, 1-star and 2-star per app, de-duplicated) and the App Store (newest 150 per app), and themed by keyword. Live audit by Playwright and Lighthouse from a US-based test browser.</p>
+    <p>All opened 1 Nov 2026. Reviews pulled from Google Play (newest 300 overall, 1-star and 2-star per app, de-duplicated) and the App Store (newest 150 per app), and themed by keyword. Live audit by Playwright and Lighthouse from a US-based test browser.</p>
     <ul>
       <li><a href="https://buy.indiatimes.com/ET/plans" rel="noopener" target="_blank">ET Prime plans and FAQ</a>; <a href="https://buy.indiatimes.com/TOI/plans" rel="noopener" target="_blank">TOI+ plans</a>; <a href="https://economictimes.indiatimes.com/prime/economy-and-policy/can-new-data-protection-law-guard-against-sbi-like-data-breaches/primearticleshow/135321441.cms" rel="noopener" target="_blank">the Prime article audited</a></li>
       <li><a href="https://play.google.com/store/apps/details?id=com.et.reader.activities" rel="noopener" target="_blank">ET app on Google Play</a>, <a href="https://play.google.com/store/apps/details?id=com.et.market" rel="noopener" target="_blank">ET Markets on Google Play</a>, <a href="https://apps.apple.com/in/app/the-economic-times/id474766725" rel="noopener" target="_blank">ET on the App Store</a>, <a href="https://apps.apple.com/in/app/et-markets-stock-market-news/id895812527" rel="noopener" target="_blank">ET Markets on the App Store</a></li>

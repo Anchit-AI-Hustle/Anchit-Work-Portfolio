@@ -11,7 +11,7 @@
 <meta property="og:title" content="Member-first ET: a working prototype">
 <meta property="og:description" content="My Stocks, a self-serve member hub, who-sees-what rules and renewal maths, built for the ET study. Fictional demo data.">
 <meta property="og:type" content="website">
-<link rel="canonical" href="https://anchit-tandon.com/ET-study/prototype">
+<link rel="canonical" href="https://anchit-tandon.com/ET_Study/prototype">
 <link rel="icon" href="/icons/favicon.svg">
 <meta property="og:image" content="https://anchit-tandon.com/assets/og/og-default.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -132,7 +132,7 @@ input[type=range]{width:100%;accent-color:var(--brand);min-height:32px}
 <header class="top">
   <div class="wrap">
     <div><h1>Member-first ET</h1><small>The fixes from the study, working together</small></div>
-    <a class="btn btn-outline" href="/ET-study#fixes">Back to the study</a>
+    <a class="btn btn-outline" href="/ET_Study#fixes">Back to the study</a>
   </div>
 </header>
 
@@ -163,7 +163,7 @@ input[type=range]{width:100%;accent-color:var(--brand);min-height:32px}
     <div class="card status">
       <h3>Your membership</h3>
       <div class="row"><span>Plan</span><b>ET Prime, 1+1 year</b></div>
-      <div class="row"><span>Bought on</span><b>App Store, 14 Jan 2025</b></div>
+      <div class="row"><span>Bought on</span><b>The website, 14 Jan 2025</b></div>
       <div class="row"><span>Status</span><b id="m-status">Active until 14 Jan 2027</b></div>
       <div class="row"><span>Auto-renew</span><b id="m-renew">On</b></div>
       <button class="btn btn-primary" id="restore" type="button">I paid, restore my access</button>
@@ -252,22 +252,22 @@ input[type=range]{width:100%;accent-color:var(--brand);min-height:32px}
 
   // ---------- My Stocks (fictional companies and stories) ----------
   var CO=[
-    {id:'kav',name:'Kaveri Power Grid',move:+2.4},
-    {id:'nar',name:'Narmada Fintech',move:-3.1},
-    {id:'sah',name:'Sahyadri Cement',move:+0.6},
-    {id:'gan',name:'Ganga Foods',move:-0.8},
-    {id:'kon',name:'Konkan Ports',move:+1.9},
-    {id:'dec',name:'Deccan Pharma',move:+4.2}
+    {id:'kav',name:'Zeltra Power Grid',move:+2.4},
+    {id:'nar',name:'Quillon Fintech',move:-3.1},
+    {id:'sah',name:'Brastone Cement',move:+0.6},
+    {id:'gan',name:'Ovino Foods',move:-0.8},
+    {id:'kon',name:'Harbora Ports',move:+1.9},
+    {id:'dec',name:'Velmora Pharma',move:+4.2}
   ];
   var STORIES=[
-    {co:'kav',t:'Kaveri Power Grid wins a 1,200 MW transmission order',m:'Adds about two years of order book. Execution risk sits in land acquisition; watch the next quarterly update.',k:'Prime',time:'7:05 AM'},
-    {co:'nar',t:'Regulator tightens rules on small unsecured loans',m:'Narmada Fintech earns most of its income from this segment; expect slower loan growth for two to three quarters.',k:'Analysis',time:'6:40 AM'},
-    {co:'sah',t:'Cement prices hold in the south despite monsoon lull',m:'Steady prices protect Sahyadri\'s margins; volumes are the variable to watch in December.',k:'News',time:'Yesterday'},
-    {co:'gan',t:'Ganga Foods raises prices on two staples by 4%',m:'Price rises offset input costs; the risk is volume loss to regional brands.',k:'News',time:'Yesterday'},
-    {co:'kon',t:'Konkan Ports traffic up 11% year on year in October',m:'Container growth is ahead of the sector; the stock already prices in some of it.',k:'Data',time:'8:10 AM'},
-    {co:'dec',t:'Deccan Pharma clears a US plant inspection with no observations',m:'Removes the main overhang on the stock; new launches from this plant can now proceed.',k:'Prime',time:'7:45 AM'},
-    {co:'kav',t:'Why transmission is the quiet winner of the power capex cycle',m:'The long read behind your Kaveri holding: who wins orders, and why margins differ.',k:'Prime',time:'Sunday'},
-    {co:'dec',t:'Analyst note: three pharma names to hold through 2027',m:'Deccan is one of the three; the note gives a range, not a target, and lists the risks.',k:'Prime',time:'Yesterday'}
+    {co:'kav',t:'Zeltra Power Grid wins a 1,200 MW transmission order',m:'Adds about two years of order book. Execution risk sits in land acquisition; watch the next quarterly update.',k:'Prime',time:'7:05 AM'},
+    {co:'nar',t:'Regulator tightens rules on small unsecured loans',m:'Quillon Fintech earns most of its income from this segment; expect slower loan growth for two to three quarters.',k:'Analysis',time:'6:40 AM'},
+    {co:'sah',t:'Cement prices hold in the south despite monsoon lull',m:'Steady prices protect Brastone\'s margins; volumes are the variable to watch in December.',k:'News',time:'Yesterday'},
+    {co:'gan',t:'Ovino Foods raises prices on two staples by 4%',m:'Price rises offset input costs; the risk is volume loss to regional brands.',k:'News',time:'Yesterday'},
+    {co:'kon',t:'Harbora Ports traffic up 11% year on year in October',m:'Container growth is ahead of the sector; the stock already prices in some of it.',k:'Data',time:'6:55 AM'},
+    {co:'dec',t:'Velmora Pharma clears a US plant inspection with no observations',m:'Removes the main overhang on the stock; new launches from this plant can now proceed.',k:'Prime',time:'7:20 AM'},
+    {co:'kav',t:'Why transmission is the quiet winner of the power capex cycle',m:'The long read behind your Zeltra holding: who wins orders, and why margins differ.',k:'Prime',time:'Sunday'},
+    {co:'dec',t:'Analyst note: how three pharma names look into 2027',m:'Velmora is one of the three; the note sets out scenarios, not a recommendation, and lists the risks.',k:'Prime',time:'Yesterday'}
   ];
   var held={kav:true,dec:true,nar:true};
   function renderStocks(){
@@ -282,7 +282,7 @@ input[type=range]{width:100%;accent-color:var(--brand);min-height:32px}
       var a=el('article',{'class':'story','data-story':s.co});
       var meta=el('div',{'class':'meta'});
       meta.appendChild(el('span',{'class':'tag'+(s.k==='Prime'?' r':'')},s.k));
-      meta.appendChild(el('span',null,c.name));
+      meta.appendChild(el('span',null,c.name+' (fictional)'));
       meta.appendChild(el('span',{'class':c.move>=0?'up':'down'},(c.move>=0?'+':'')+c.move.toFixed(1)+'% today'));
       meta.appendChild(el('span',null,s.time));
       a.appendChild(meta);a.appendChild(el('h3',null,s.t));
@@ -325,7 +325,7 @@ input[type=range]{width:100%;accent-color:var(--brand);min-height:32px}
   $('#confirm-yes').addEventListener('click',function(){renew=false;$('#confirm').hidden=true;renderTimeline();toast('Auto-renew is off. You keep access until 14 Jan 2027.');});
   $('#restore').addEventListener('click',function(){
     var b=this;b.disabled=true;var log=$('#restore-log');log.innerHTML='';
-    var steps=['Looking up payments on this account','Found ET Prime 1+1 year, bought on the App Store','Access restored on this device and the website'];
+    var steps=['Looking up payments on this account','Found ET Prime 1+1 year, bought on the website','Access restored on this device and the website'];
     steps.forEach(function(s,i){setTimeout(function(){log.appendChild(el('li',{'class':'ok'},s));if(i===steps.length-1){b.disabled=false;b.textContent='Access restored';}},300*(i+1));});
   });
   $('#invoice').addEventListener('click',function(){
@@ -360,7 +360,7 @@ input[type=range]{width:100%;accent-color:var(--brand);min-height:32px}
     for(var i=0;i<3;i++)body.appendChild(el('div',{'class':'txt'}));
     if(w.wall==='Full story'){for(var j=0;j<4;j++)body.appendChild(el('div',{'class':'txt'}));body.appendChild(el('div',{'class':'ad native','data-ph':'ad-native'},'One native slot'));for(var k=0;k<3;k++)body.appendChild(el('div',{'class':'txt'}));}
     else{var wl=el('div',{'class':'wall','data-ph':'wall'});wl.appendChild(el('span',null,cur==='lapsed'?'Welcome back. Your watchlist is still here.':'The full story is for ET Prime members.'));wl.appendChild(el('span',{'class':'b'},cur==='lapsed'?'Rejoin':'Become a member'));wl.appendChild(el('span',{'class':'b2'},'See plans'));body.appendChild(wl);}
-    var pop=$('#ph-pop');pop.hidden=!w.pop;pop.textContent=w.pop?'Buy 1 Year, Get 1 Year Free! You are already a member, but here is an offer anyway.':'';
+    var pop=$('#ph-pop');pop.hidden=!w.pop;pop.textContent=w.pop?'DIWALI SALE: Buy 1 Year, Get 1 Year Free!':'';
   }
   renderWho();
 
