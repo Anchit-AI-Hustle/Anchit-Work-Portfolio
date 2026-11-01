@@ -99,24 +99,25 @@ const body = [
   new Paragraph({ spacing: { after: 50 }, children: [new TextRun({ text: HIRE ? 'Product & Growth Leader · AI Product Builder' : 'Technical Product and Growth Builder', font: FONT, size: 24, color: GOLD, bold: true }),
     run(HIRE ? '' : '', { size: 20, color: DIM })] }),
   new Paragraph({ spacing: { after: 110 }, children: [
-    run('Delhi, India  |  +91 9873945238  |  ', { size: 19, color: DIM }), link('anchit.tandon@gmail.com', 'mailto:anchit.tandon@gmail.com'),
-    run('  |  ', { size: 19, color: DIM }), link('anchit-tandon.com', 'https://anchit-tandon.com/'),
-    run('  |  ', { size: 19, color: DIM }), link('linkedin.com/in/anchit-tandon', 'https://www.linkedin.com/in/anchit-tandon'),
+    run('Delhi, India · +91 98739 45238 · ', { size: 19, color: DIM }), link('anchit.tandon@gmail.com', 'mailto:anchit.tandon@gmail.com'),
+    run(' · ', { size: 19, color: DIM }), link('anchit-tandon.com', 'https://anchit-tandon.com/'),
+    run(' · ', { size: 19, color: DIM }), link('linkedin.com/in/anchit-tandon', 'https://www.linkedin.com/in/anchit-tandon'),
+    run(HIRE ? ' · Notice: 15 days' : '', { size: 19, color: DIM }),
   ] }),
   band,
 
   section('Profile'),
   para(rich(HIRE
-    ? 'Engineer turned product leader. Close to **4 years at Times Internet**, **promoted twice in under 3 years** (APM to Senior PM), scaling subscriptions and assisted sales, then **AGM, Product Management and D2C Growth at Vahdam India** across the US, UK and global markets. In the last 5\u20116 months I have built **20 products** end to end, and since September 2026 I have been building full time, including **Parwah**, a family-care app for Indian families. I am looking for a role where product and AI meet: shaping the product and building it hands-on with customers.'
+    ? 'Engineer turned product leader. Close to **4 years at Times Internet**, **promoted twice in under 3 years** (APM to Senior PM), scaling subscriptions and assisted sales, then **AGM, Product Management and D2C Growth at Vahdam India** across the US, UK and global markets. In the last 5\u20116 months I have built **20 products** end to end, and since September 2026 I have been building full time as **Founder of Parwah**, a family-care app for Indian families. I am looking for a role where product and AI meet: shaping the product and building it hands-on with customers.'
     : 'Engineer turned product leader across consumer platforms, subscriptions, sales operations and international ecommerce. I connect problem definition, customer journeys, AI-assisted development and experimentation to ship products that lift conversion, retention and operational efficiency. Currently building **Parwah**, a family-care app for Indian families looking after ageing parents, and available for freelance builds and fractional product and growth engagements.')),
 
   section('Skills'),
-  skills('Product', ['Discovery and prioritisation', 'Roadmaps', 'Experimentation', 'Subscription monetisation', 'Conversion funnels']),
+  skills('Product', ['Discovery', 'Roadmaps', 'Experimentation and A/B testing', 'Subscription monetisation', 'Conversion funnels']),
   skills('Growth', ['Lifecycle and retention', 'CRM (Klaviyo, WebEngage)', 'D2C growth', 'Analytics']),
   skills('AI and build', ['AI agents and workflows', 'Next.js', 'Supabase', 'Vercel', 'Android and iPhone apps', 'Cross-functional delivery']),
 
   section('Professional experience'),
-  role('Parwah, family-care app for India', 'Sep 2026 to Present', { first: true }),
+  role('Parwah · Founder, family-care app for India', 'Sep 2026 to Present', { first: true }),
   bullet('Building a family-care app for Indian families looking after ageing parents, so siblings in different cities can share their parents’ care without anything slipping.'),
   bullet('Treated care as **a task problem, not a chat problem**: every need moves from open to assigned, claimed and done, with one tap to say “I’m on it”, ending the family WhatsApp group’s “I thought you did”.'),
   bullet('Made handing a task back normal, with full history kept, and every action checks that the right family member is making the change. **Live at parwah-hq.anchit-tandon.com.**'),
@@ -131,12 +132,12 @@ const body = [
   sub('Senior Product Manager', 'Apr 2025 to Apr 2026'),
   sub('Product Manager', 'Oct 2023 to Mar 2025'),
   sub('Associate Product Manager', 'Jun 2022 to Oct 2023'),
-  group('Assisted conversion and subscriptions'),
-  bullet('Scaled Economic Times assisted-sales monthly revenue **5× within 4 months, from ₹15L to ₹80L**, through funnel redesign and continuous experimentation; delivered **400%+ ROI within six months** on ET Prime’s structured assisted-conversion funnel.'),
+  group('Assisted Sales, conversion and subscriptions (Economic Times, ET Prime)'),
+  bullet('Scaled Economic Times assisted-sales monthly revenue **5× within 4 months, from ₹15L to ₹80L**, through funnel redesign and continuous experimentation; delivered **400%+ ROI within six months** on ET Prime’s structured assisted-conversion funnel, winning the **Times Internet Team Award ’25**.'),
   bullet('Built **AI TeleSuite** for call transcription, quality scoring and pitch assistance, standardising conversion execution across high-intent traffic.'),
   bullet('Launched Assisted Buying, growing qualified leads from **about 30 to 150+ a day**; lifted subscriber retention by **10%** through onboarding and engagement experiments.'),
   group('Consumer platforms and new product launches'),
-  bullet('Led the ET Markets web and mobile-web revamp, lifting engagement by **27%** and unlocking **₹3Cr+** in incremental annual revenue.'),
+  bullet('Led the ET Markets web and mobile-web revamp, lifting engagement by **27%** and unlocking **₹3Cr+** in new annual revenue.'),
   bullet('Revamped the ET Markets Android and iOS apps, growing daily active users by **25%** and average session duration by **15%**.'),
   bullet('Launched paid wellness subscriptions for **Times Health+**, and led discovery, registration and acquisition journeys for the inaugural **Times Internet Delhi Half Marathon (18K+ runners)**, setting up a **new revenue stream**.'),
 
