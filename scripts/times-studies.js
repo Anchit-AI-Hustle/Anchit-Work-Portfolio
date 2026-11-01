@@ -160,7 +160,7 @@ async function protoET(browser, vp, pg) {
   await page.click('#cancel');
   const after1 = (await page.textContent('#m-renew')).trim();
   const confirmShown = await page.isVisible('#confirm');
-  await page.click('#confirm-yes');
+  if (confirmShown) await page.click('#confirm-yes');
   const after2 = (await page.textContent('#m-renew')).trim();
   check(`${L}: auto-renew turns off in exactly two taps`, after1 === 'On' && confirmShown && after2 === 'Off', `${after1} ${confirmShown} ${after2}`);
   check(`${L}: the reminder timeline drops the charge once cancelled`, !/charged/i.test(await page.textContent('#timeline')), '');
