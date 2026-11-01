@@ -150,31 +150,23 @@ const body = [
   role('B.Tech, Computer Science and Engineering, Vellore Institute of Technology', '2016 to 2020', { first: true }),
 
   section(HIRE ? 'All 20 products, built in 5\u20116 months' : 'Selected independent product builds'),
-  ...product('LifeCycle-OS, lifecycle marketing platform', 'lifecycle-os.anchit-tandon.com', [
-    'D2C growth teams must ship emails, ads and landing pages for every cohort, every week, and AI makes up facts.',
-    'any brand in, a full lifecycle plan and on-brand content out in seconds, with missing facts marked **“data required”, never invented**.'], true),
-  ...product('The Third Eye, personal AI operating system', 'the-third-eye.anchit-tandon.com', [
-    'tasks, notes, email and calendar live in separate apps, and no assistant sees all of it.',
-    'one assistant, by voice and camera, plans, remembers and acts across them with **24 tools and 76 linked apps**, on web, Android and iPhone.']),
-  ...product('Predict Natural Disasters, live global hazard map', 'predict-natural-disasters.anchit-tandon.com', [
-    'newsrooms, NGOs and operations teams need one trustworthy view when disaster strikes.',
-    'one map across **8 official sources** (USGS, NASA, GDACS, NOAA and more); every forecast shows its evidence and is **graded afterwards**.']),
-  ...product('LoosenUp, stress relief for your worst 2 minutes', 'loosenup.anchit-tandon.com', [
-    'relief in the tense moment, not a 20-minute programme with a sign-up.',
-    'a **2-minute** guided break with a before-and-after Calm gain, no account, works offline, and an SOS on every screen (Tele-MANAS 14416, 112).']),
+  ...product('LifeCycle-OS, lifecycle marketing platform', 'lifecycle-os.anchit-tandon.com', 
+    'For D2C growth teams shipping emails, ads and landing pages for every cohort, every week: any brand in, a full lifecycle plan and on-brand content out in seconds, with missing facts marked **“data required”, never invented**.', true),
+  ...product('The Third Eye, personal AI operating system', 'the-third-eye.anchit-tandon.com', 
+    'For people whose tasks, notes, email and calendar live in separate apps: one assistant, by voice and camera, that plans, remembers and acts across them with **24 tools and 76 linked apps**.'),
+  ...product('Predict Natural Disasters, live global hazard map', 'predict-natural-disasters.anchit-tandon.com', 
+    'For newsrooms, NGOs and operations teams who need one trustworthy view in a disaster: one map across **8 official sources**, where every forecast shows its evidence and is **graded afterwards**.'),
+  ...product('LoosenUp, stress relief for your worst 2 minutes', 'loosenup.anchit-tandon.com', 
+    'For the tense moment, not a 20-minute programme: a **2-minute** guided break with a before-and-after Calm gain, no account, works offline, and an SOS on every screen.'),
   ...(HIRE ? [
-    ...product('Edu AI, a learning planner from birth to Class 12', 'edu-ai.anchit-tandon.com', [
-      'parents want one plan for their child’s learning, but every app starts from zero.',
-      'one skill map from age 0 to 18 across CBSE, ICSE, NIOS and state boards, branching into **JEE, NEET, CUET and UPSC**.']),
-    ...product('Airpane, an AR browser with no headset or app', 'airpane.anchit-tandon.com', [
-      'AR without a headset most people will never buy.',
-      'pins any website in your room with a phone, turns a laptop webcam into head-tracked 3D, and **throws pages to a TV** with a gesture.']),
-    ...product('ANCHOR, an AI techno artist', 'anchor.anchit-tandon.com', [
-      'artists grow by releasing consistently, and most cannot keep it up.',
-      'a robot that releases a track a day at ₹0: **62 tracks since 4 Sep 2026** and **7.7K+ YouTube views**. YouTube **@ANCHOR_AT**, Instagram **@anchor_at2803**.']),
-    ...product('Book publishing engine, 9 books on Amazon', 'amazon.in/Anchit-Tandon/e/B0HL6RW348', [
-      'can one person with AI run a real publishing business?',
-      'a quality-gated engine behind **The Watermark Files** (4 thrillers) and **5 Doodle Lane** drawing books for kids; Instagram **@ai_at2803**.']),
+    ...product('Edu AI, a learning planner from birth to Class 12', 'edu-ai.anchit-tandon.com', 
+    'For parents whose child starts from zero in every app: one skill map from age 0 to 18 across CBSE, ICSE, NIOS and state boards, branching into **JEE, NEET, CUET and UPSC**.'),
+    ...product('Airpane, an AR browser with no headset or app', 'airpane.anchit-tandon.com', 
+    'AR without a headset: pins any website in your room with a phone, turns a laptop webcam into head-tracked 3D, and **throws pages to a TV** with a gesture.'),
+    ...product('ANCHOR, an AI techno artist', 'anchor.anchit-tandon.com', 
+    'Artists fail at consistency, so a robot releases a track a day at ₹0: **62 tracks since 4 Sep 2026** and **7.7K+ YouTube views**. YouTube **@ANCHOR_AT**, Instagram **@anchor_at2803**.'),
+    ...product('Book publishing engine, 9 books on Amazon', 'amazon.in/Anchit-Tandon/e/B0HL6RW348', 
+    'Can one person with AI run a real publishing business? A quality-gated engine behind **The Watermark Files** (4 thrillers) and **5 Doodle Lane** drawing books for kids; Instagram **@ai_at2803**.'),
     group('Also built'),
     mini('Parwah', 'siblings share a parent’s care as tasks, so nothing slips', 'parwah-hq.anchit-tandon.com'),
     mini('AI TeleSuite', 'AI scores every sales call so managers can coach', 'demo on request'),
