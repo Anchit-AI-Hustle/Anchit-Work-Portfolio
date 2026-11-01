@@ -107,12 +107,12 @@ const body = [
 
   section('Profile'),
   para(rich(HIRE
-    ? 'Engineer turned product leader. Close to **4 years at Times Internet** (APM to Senior PM) scaling subscriptions and assisted sales, then **AGM, Product Management and D2C Growth at Vahdam India** across the US, UK and global markets. In the last 5\u20116 months I have built **20 products** end to end, and since September 2026 I have been building full time, including **Parwah**, a family-care app for Indian families. I am looking for a role where product and AI meet: shaping the product and building it hands-on with customers.'
+    ? 'Engineer turned product leader. Close to **4 years at Times Internet**, **promoted twice in under 3 years** (APM to Senior PM), scaling subscriptions and assisted sales, then **AGM, Product Management and D2C Growth at Vahdam India** across the US, UK and global markets. In the last 5\u20116 months I have built **20 products** end to end, and since September 2026 I have been building full time, including **Parwah**, a family-care app for Indian families. I am looking for a role where product and AI meet: shaping the product and building it hands-on with customers.'
     : 'Engineer turned product leader across consumer platforms, subscriptions, sales operations and international ecommerce. I connect problem definition, customer journeys, AI-assisted development and experimentation to ship products that lift conversion, retention and operational efficiency. Currently building **Parwah**, a family-care app for Indian families looking after ageing parents, and available for freelance builds and fractional product and growth engagements.')),
 
   section('Skills'),
   skills('Product', ['Discovery and prioritisation', 'Roadmaps', 'Experimentation', 'Subscription monetisation', 'Conversion funnels']),
-  skills('Growth', ['Lifecycle and retention', 'CRM (Klaviyo, WebEngage)', 'D2C across US, UK and global markets', 'Analytics']),
+  skills('Growth', ['Lifecycle and retention', 'CRM (Klaviyo, WebEngage)', 'D2C growth', 'Analytics']),
   skills('AI and build', ['AI agents and workflows', 'Next.js', 'Supabase', 'Vercel', 'Android and iPhone apps', 'Cross-functional delivery']),
 
   section('Professional experience'),
@@ -122,7 +122,7 @@ const body = [
   bullet('Made handing a task back normal, with full history kept, and every action checks that the right family member is making the change. **Live at parwah-hq.anchit-tandon.com.**'),
 
   role('Vahdam India', 'Apr 2026 to Sep 2026'),
-  sub('AGM, Product Management and D2C Growth', 'US, UK and global markets'),
+  sub('AGM, Product Management and D2C Growth', ''),
   bullet('Led D2C product and growth across **US, UK and global markets**, covering customer experience, product performance and revenue optimisation.'),
   bullet('Ran product and CRM experiments, including lifecycle campaigns on **Klaviyo and WebEngage** and customer-rating improvement initiatives.'),
   bullet('Helped build a **customer lifecycle and retention OS** that links analytics, planning, segmentation and mailer generation in one loop, and helped **lift UK marketing revenue within the first two months**.'),
@@ -132,11 +132,11 @@ const body = [
   sub('Product Manager', 'Oct 2023 to Mar 2025'),
   sub('Associate Product Manager', 'Jun 2022 to Oct 2023'),
   group('Assisted conversion and subscriptions'),
-  bullet('Scaled Economic Times assisted-sales monthly revenue **5× within 4 months, from INR 15 lakh to INR 80 lakh**, through funnel redesign and continuous experimentation; delivered **400%+ ROI within six months** on ET Prime’s structured assisted-conversion funnel.'),
+  bullet('Scaled Economic Times assisted-sales monthly revenue **5× within 4 months, from ₹15L to ₹80L**, through funnel redesign and continuous experimentation; delivered **400%+ ROI within six months** on ET Prime’s structured assisted-conversion funnel.'),
   bullet('Built **AI TeleSuite** for call transcription, quality scoring and pitch assistance, standardising conversion execution across high-intent traffic.'),
   bullet('Launched Assisted Buying, growing qualified leads from **about 30 to 150+ a day**; lifted subscriber retention by **10%** through onboarding and engagement experiments.'),
   group('Consumer platforms and new product launches'),
-  bullet('Led the ET Markets web and mobile-web revamp, lifting engagement by **27%** and unlocking **INR 3 crore+** in incremental annual revenue.'),
+  bullet('Led the ET Markets web and mobile-web revamp, lifting engagement by **27%** and unlocking **₹3Cr+** in incremental annual revenue.'),
   bullet('Revamped the ET Markets Android and iOS apps, growing daily active users by **25%** and average session duration by **15%**.'),
   bullet('Launched paid wellness subscriptions for **Times Health+**, and led discovery, registration and acquisition journeys for the inaugural **Times Internet Delhi Half Marathon (18K+ runners)**, setting up a **new revenue stream**.'),
 
@@ -153,22 +153,21 @@ const body = [
   ...product('LifeCycle-OS, lifecycle marketing platform', 'lifecycle-os.anchit-tandon.com', 
     'For D2C growth teams shipping emails, ads and landing pages for every cohort, every week: any brand in, a full lifecycle plan and on-brand content out in seconds, with missing facts marked **“data required”, never invented**.', true),
   ...product('The Third Eye, personal AI operating system', 'the-third-eye.anchit-tandon.com', 
-    'For people whose tasks, notes, email and calendar live in separate apps: one assistant, by voice and camera, that plans, remembers and acts across them with **24 tools and 76 linked apps**.'),
+    'For people whose tasks, notes and goals live in separate apps: one assistant, by voice and camera, that plans, remembers and acts across their email, calendar and **76 linked apps**.'),
   ...product('Predict Natural Disasters, live global hazard map', 'predict-natural-disasters.anchit-tandon.com', 
     'For newsrooms, NGOs and operations teams who need one trustworthy view in a disaster: one map across **8 official sources**, where every forecast shows its evidence and is **graded afterwards**.'),
   ...product('LoosenUp, stress relief for your worst 2 minutes', 'loosenup.anchit-tandon.com', 
     'For the tense moment, not a 20-minute programme: a **2-minute** guided break with a before-and-after Calm gain, no account, works offline, and an SOS on every screen.'),
   ...(HIRE ? [
     ...product('Edu AI, a learning planner from birth to Class 12', 'edu-ai.anchit-tandon.com', 
-    'For parents whose child starts from zero in every app: one skill map from age 0 to 18 across CBSE, ICSE, NIOS and state boards, branching into **JEE, NEET, CUET and UPSC**.'),
+    'So a child’s learning carries over from app to app and year to year: one skill map from age 0 to 18 across CBSE, ICSE, NIOS and state boards, branching into **JEE, NEET, CUET and UPSC**.'),
     ...product('Airpane, an AR browser with no headset or app', 'airpane.anchit-tandon.com', 
     'AR without a headset: pins any website in your room with a phone, turns a laptop webcam into head-tracked 3D, and **throws pages to a TV** with a gesture.'),
     ...product('ANCHOR, an AI techno artist', 'anchor.anchit-tandon.com', 
     'Artists fail at consistency, so a robot releases a track a day at ₹0: **62 tracks since 4 Sep 2026** and **7.7K+ YouTube views**. YouTube **@ANCHOR_AT**, Instagram **@anchor_at2803**.'),
     ...product('Book publishing engine, 9 books on Amazon', 'amazon.in/Anchit-Tandon/e/B0HL6RW348', 
     'Can one person with AI run a real publishing business? A quality-gated engine behind **The Watermark Files** (4 thrillers) and **5 Doodle Lane** drawing books for kids; Instagram **@ai_at2803**.'),
-    group('Also built'),
-    mini('Parwah', 'siblings share a parent’s care as tasks, so nothing slips', 'parwah-hq.anchit-tandon.com'),
+    group('Also built (plus Parwah, above)'),
     mini('AI TeleSuite', 'AI scores every sales call so managers can coach', 'demo on request'),
     mini('Hey Yaara', 'a Hinglish voice friend to talk to, any time', 'hey-yaara.anchit-tandon.com'),
     mini('Animind', 'tells pet owners from a 10-second clip when to worry', 'pet-mind.anchit-tandon.com'),
@@ -185,9 +184,9 @@ const body = [
   ...(HIRE ? [] : [
     section('Engagement focus'),
     proofBullet('AI workflows and internal tools: call review, knowledge assistants, reporting dashboards and scoped integrations with human review.',
-      'AI TeleSuite helped scale assisted-sales revenue from **INR 15 lakh to INR 80 lakh a month**.'),
+      'AI TeleSuite helped scale assisted-sales revenue from **₹15L to ₹80L a month**.'),
     proofBullet('Conversion-focused websites: clear offer positioning, enquiry or purchase journeys, CRM integrations and full-funnel measurement.',
-      'The ET Markets web revamp lifted engagement **27%** and unlocked **INR 3 crore+** in incremental annual revenue.'),
+      'The ET Markets web revamp lifted engagement **27%** and unlocked **₹3Cr+** in incremental annual revenue.'),
     proofBullet('Fractional product and growth: roadmap prioritisation, zero-to-one launches, conversion experiments and subscription or ecommerce retention.',
       '**400%+ ROI** within six months on an assisted-conversion funnel; subscriber retention up **10%**.'),
     proofBullet('Focused web MVPs and journeys: one core customer journey shipped end to end, with agreed acceptance criteria and a clean handover.',
