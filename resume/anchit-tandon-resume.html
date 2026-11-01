@@ -40,8 +40,9 @@
   p { margin: 0 0 5px; }
 
   .job { margin-bottom: 7px; break-inside: avoid; }
+  .job + .job { border-top: .6pt solid #e8e2d8; padding-top: 7px; }
   .job-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
-  .job-title { font-weight: 700; font-size: 10pt; color: #121010; }
+  .job-title { font-weight: 700; font-size: 10.6pt; color: #121010; }
   .job-org { font-weight: 700; color: #121010; }
   .job-when { font-size: 8.5pt; color: #6b645b; white-space: nowrap; font-variant-numeric: tabular-nums; }
   .job-sub { font-size: 8.8pt; color: #6b645b; margin-bottom: 3px; }
@@ -50,7 +51,9 @@
   li { margin-bottom: 2.4px; }
   li::marker { color: #FF6940; }
 
-  .stint { margin: 4px 0 0; }
+  /* Indented behind a hairline so a stint reads as part of the employer above
+     it, not as a job of its own. */
+  .stint { margin: 4px 0 0 10px; padding-left: 9px; border-left: 1.6pt solid #f0d9cf; }
   .stint-head { font-weight: 700; font-size: 9.3pt; color: #27231f; }
   .stint-head .when { font-weight: 400; color: #6b645b; font-size: 8.4pt; }
 
@@ -61,6 +64,7 @@
   .builds li { margin-bottom: 2.4px; }
   .builds .nm { font-weight: 700; color: #121010; }
 
+  .subhead { font-size: 8.9pt; font-weight: 700; color: #3a342e; margin: 7px 0 3px; }
   .caps { font-size: 9.2pt; color: #35302b; }
   .dash { color: #b9b2a8; }
   .foot { margin-top: 10px; font-size: 8.2pt; color: #8a8278; border-top: .6pt solid #e4ded4; padding-top: 5px; }
@@ -89,13 +93,13 @@ Parwah solo, and open to freelance and fractional product and growth work alongs
 
 <div class="job">
   <div class="job-head">
-    <div><span class="job-title">Founder and Product Lead</span>, <span class="job-org">Parwah</span></div>
+    <div><span class="job-title">Parwah</span></div>
     <div class="job-when">Sep 2026 &ndash; Present</div>
   </div>
   <div class="job-sub">Family care for India &middot; solo build &middot; live at parwah-hq.anchit-tandon.com</div>
   <ul>
     <li>Building one app for family care with parents at the centre, owning product, design, the build and the consent model that decides what the product will and will not do.</li>
-    <li>Consent is the product: every share is chosen by the parent, visible to them and revocable in one tap. Built senior-first, with large type, voice-first interaction and three actions per screen.</li>
+    <li>Parents choose what they share. They can see everything that is shared and switch any of it off in one tap. Built for older users first: large type, voice input, three actions per screen.</li>
     <li>Live as a website for families and improving against real use. Taking freelance and consulting work alongside it.</li>
   </ul>
 </div>
@@ -173,25 +177,28 @@ Parwah solo, and open to freelance and fractional product and growth work alongs
   <ul><li>Built and scaled backend services for consumer-facing applications; owned an early live sports commentary product as Product Owner, connecting product decisions to technical delivery.</li></ul>
 </div>
 
-<h2>Independent product builds &middot; live</h2>
+<h2>Problems I went after, and built end to end</h2>
+<div class="subhead">Built for a business problem</div>
 <ul class="builds two">
   <li><span class="nm">LifeCycle-OS</span><span class="dash"> &middot; </span>benchmarks any brand's category and generates a complete, ready-to-run lifecycle marketing plan.</li>
   <li><span class="nm">The Third Eye</span><span class="dash"> &middot; </span>a personal AI OS with memory, tools and voice across tasks, notes, calendar and email.</li>
-  <li><span class="nm">Parwah</span><span class="dash"> &middot; </span>replaces chaotic family WhatsApp threads with clear ownership of every parent-care task.</li>
-  <li><span class="nm">LoosenUp</span><span class="dash"> &middot; </span>two-minute stress relief showing a before and after calm score, with SOS on every screen.</li>
-  <li><span class="nm">Predict Natural Disasters</span><span class="dash"> &middot; </span>a live global hazard map on 8 official sources that grades its own forecasts against what happened.</li>
-  <li><span class="nm">Edu AI</span><span class="dash"> &middot; </span>an AI-first learning planner from birth to Class 12, with JEE, NEET and study-abroad tracks.</li>
   <li><span class="nm">AI TeleSuite</span><span class="dash"> &middot; </span>call transcription, AI pitch scoring and coaching for sales teams.</li>
+  <li><span class="nm">Edu AI</span><span class="dash"> &middot; </span>an AI-first learning planner from birth to Class 12, with JEE, NEET and study-abroad tracks.</li>
+  <li><span class="nm">Markets Pro</span><span class="dash"> &middot; </span>a trading research engine for 4 markets with real costs built in, paper trading only.</li>
+  <li><span class="nm">JobHunt</span><span class="dash"> &middot; </span>an AI agent that runs the job search for you.</li>
+  <li><span class="nm">Kolab</span><span class="dash"> &middot; </span>a creator and brand platform with social login and an analytics dashboard.</li>
+  <li><span class="nm">Shoutout</span><span class="dash"> &middot; </span>one platform where indie musicians find gigs, collaborators and auditions.</li>
+</ul>
+<div class="subhead">Built out of curiosity</div>
+<ul class="builds two">
+  <li><span class="nm">Predict Natural Disasters</span><span class="dash"> &middot; </span>a live global hazard map on 8 official sources that grades its own forecasts against what happened.</li>
+  <li><span class="nm">LoosenUp</span><span class="dash"> &middot; </span>two-minute stress relief showing a before and after calm score, with SOS on every screen.</li>
   <li><span class="nm">Hey Yaara</span><span class="dash"> &middot; </span>a Hinglish AI voice companion you can call and talk to.</li>
   <li><span class="nm">Animind</span><span class="dash"> &middot; </span>reads animal behaviour from short audio and video clips.</li>
   <li><span class="nm">Airpane</span><span class="dash"> &middot; </span>an AR browser that floats any website in your room, no headset needed.</li>
   <li><span class="nm">TH+ LifeEngine</span><span class="dash"> &middot; </span>personalised yoga and food plans drafted by one AI and checked by another.</li>
-  <li><span class="nm">Markets Pro</span><span class="dash"> &middot; </span>a trading research engine for 4 markets with real costs built in, paper trading only.</li>
   <li><span class="nm">MusicGenAI</span><span class="dash"> &middot; </span>type a prompt, get a full song with vocals.</li>
-  <li><span class="nm">Kolab</span><span class="dash"> &middot; </span>a creator and brand platform with social login and an analytics dashboard.</li>
-  <li><span class="nm">Shoutout</span><span class="dash"> &middot; </span>one platform where indie musicians find gigs, collaborators and auditions.</li>
-  <li><span class="nm">ANCHOR</span><span class="dash"> &middot; </span>a robot that releases a new techno track on YouTube every day, at zero cost.</li>
-  <li><span class="nm">JobHunt</span><span class="dash"> &middot; </span>an AI agent that runs the job search for you.</li>
+  <li><span class="nm">ANCHOR</span><span class="dash"> &middot; </span>a robot that releases a new techno track every day, at zero cost.</li>
 </ul>
 
 <h2>Education</h2>
