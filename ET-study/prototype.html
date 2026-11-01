@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Member-first ET: Prototype | Anchit Tandon</title>
+<meta name="description" content="Working prototype from the ET study by Anchit Tandon: My Stocks, a self-serve member hub, the who-sees-what rules and the renewal maths. Demo data only.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#8f1d22">
+<meta property="og:title" content="Member-first ET: a working prototype">
+<meta property="og:description" content="My Stocks, a self-serve member hub, who-sees-what rules and renewal maths, built for the ET study. Fictional demo data.">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://anchit-tandon.com/ET-study/prototype">
+<link rel="icon" href="/icons/favicon.svg">
+<meta property="og:image" content="https://anchit-tandon.com/assets/og/og-default.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#faf6f0; --surface:#ffffff; --soft:#f2ece3;
+  --ink:#1a1714; --body:#3f3a34; --muted:#6a6259; --line:#e3dbcf;
+  --brand:#8f1d22; --brand-2:#6f151a; --brand-soft:#f8e9e6;
+  --amber:#a8510a; --amber-soft:#fcefdc; --green:#1f6b45; --green-soft:#e2f2e8; --red:#b42318; --blue:#1d4ed8;
+  --r-btn:8px; --r-tag:4px; --r-panel:12px; --r-card:16px; --r-pill:9999px;
+  --serif:'Source Serif 4',Georgia,serif;
+  --font:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--font);color:var(--body);background:var(--bg);font-size:16px;line-height:24px;-webkit-font-smoothing:antialiased;overflow-x:clip}
+h1,h2,h3{color:var(--ink);margin:0;letter-spacing:-.01em}
+h1{font-family:var(--serif);font-size:26px;line-height:32px} h2{font-family:var(--serif);font-size:22px;line-height:30px} h3{font-size:16px;line-height:22px}
+p{margin:0} ul{margin:0;padding-left:20px}
+a{color:var(--brand);text-underline-offset:3px}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:4px}
+.notice{background:var(--ink);color:#e8e2da;font-size:13px;line-height:19px;padding:8px 16px;text-align:center}
+.notice b{color:#fff}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+.top{background:#fff;border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;gap:12px;align-items:center;justify-content:space-between;padding-top:14px;padding-bottom:14px;flex-wrap:wrap}
+.top small{display:block;color:var(--muted);font-size:13px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:var(--r-btn);font-weight:600;font-size:15px;min-height:44px;padding:10px 18px;border:1px solid transparent;text-decoration:none;font-family:inherit;cursor:pointer;background:none}
+.btn-primary{background:var(--brand);color:#fff}.btn-primary:hover{background:var(--brand-2)}
+.btn-outline{background:#fff;color:var(--ink);border-color:var(--line)}
+.btn-ghost{color:var(--brand);padding-left:8px;padding-right:8px}
+.btn[disabled]{opacity:.55;cursor:default}
+.tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.tabs::-webkit-scrollbar{display:none}
+.tabs .wrap{display:flex;gap:6px;padding-top:8px;padding-bottom:8px}
+.tab{white-space:nowrap;border:1px solid var(--line);background:#fff;border-radius:var(--r-pill);padding:8px 14px;font:600 14px/20px var(--font);color:var(--ink);cursor:pointer;min-height:44px}
+.tab[aria-selected="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+main .wrap{padding-top:24px;padding-bottom:48px}
+.panel[hidden]{display:none}
+.panel>.head{display:grid;gap:6px;margin-bottom:18px;max-width:820px}
+.fixref{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--brand)}
+.grid{display:grid;gap:16px}
+.grid>*{min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:18px}
+.card.soft{background:var(--brand-soft);border-color:transparent}
+.small{font-size:14px;line-height:21px} .muted{color:var(--muted)}
+.tag{display:inline-block;font-size:12px;line-height:16px;font-weight:600;padding:3px 8px;border-radius:var(--r-tag);background:var(--soft);color:var(--muted);white-space:nowrap}
+.tag.g{background:var(--green-soft);color:var(--green)} .tag.r{background:var(--brand-soft);color:var(--brand)} .tag.a{background:var(--amber-soft);color:var(--amber)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:var(--r-pill);padding:8px 14px;font:600 14px/20px var(--font);min-height:44px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--brand-soft);border-color:var(--brand);color:var(--brand)}
+/* My Stocks */
+.story{display:grid;gap:6px;padding:14px 0;border-bottom:1px solid var(--soft)}
+.story:last-child{border-bottom:0}
+.story h3{font-family:var(--serif);font-size:18px;line-height:24px}
+.story .mean{background:var(--soft);border-radius:10px;padding:8px 12px;font-size:14px;line-height:20px;color:var(--ink)}
+.story .meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--muted)}
+.up{color:var(--green);font-weight:700} .down{color:var(--red);font-weight:700}
+.brief{display:grid;gap:8px}
+.brief li{font-size:14px;line-height:21px}
+.empty{padding:24px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:var(--r-card)}
+/* member hub */
+.status{display:grid;gap:10px}
+.status .row{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:14px}
+.status .row b{color:var(--ink)}
+.log{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:6px;font-size:14px}
+.log li{display:flex;gap:8px;align-items:flex-start}
+.log li::before{content:"";flex:none;width:10px;height:10px;border-radius:50%;background:var(--line);margin-top:6px}
+.log li.ok::before{background:var(--green)}
+.confirm{background:var(--amber-soft);border-radius:var(--r-panel);padding:12px 14px;display:grid;gap:10px;margin-top:10px}
+.confirm[hidden]{display:none}
+.timeline{list-style:none;padding:0;margin:0;display:grid;gap:0}
+.timeline li{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:10px 0;border-bottom:1px solid var(--soft);font-size:14px;line-height:20px}
+.timeline li:last-child{border-bottom:0}
+.timeline b{color:var(--ink)}
+.receipt{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.receipt div{background:var(--soft);border-radius:12px;padding:12px}
+.receipt b{display:block;font-family:var(--serif);font-size:26px;line-height:30px;color:var(--ink)}
+.receipt span{font-size:13px;color:var(--muted)}
+/* rules */
+.phone{border:10px solid var(--ink);border-radius:28px;background:#fff;max-width:320px;width:100%;margin:0 auto;overflow:hidden;position:relative;min-height:520px}
+.phone .bar{background:#fff;border-bottom:1px solid var(--line);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700;color:var(--ink)}
+.phone .bar .pill{border:1px solid var(--brand);color:var(--brand);border-radius:6px;padding:2px 8px;font-size:11px}
+.phone .body{padding:12px;display:grid;gap:10px}
+.phone .ad{background:repeating-linear-gradient(45deg,#f2ece3,#f2ece3 8px,#ebe3d7 8px,#ebe3d7 16px);border-radius:8px;display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.phone .ad.big{height:120px} .phone .ad.native{height:54px}
+.phone .hl{font-family:var(--serif);font-size:18px;line-height:23px;color:var(--ink);font-weight:700}
+.phone .txt{height:8px;background:var(--soft);border-radius:4px}
+.phone .wall{background:var(--brand-soft);border-radius:10px;padding:10px;font-size:12px;line-height:17px;color:var(--ink);display:grid;gap:6px}
+.phone .wall .b{background:var(--brand);color:#fff;border-radius:6px;text-align:center;padding:6px;font-weight:700}
+.phone .wall .b2{border:1px solid var(--brand);color:var(--brand);border-radius:6px;text-align:center;padding:5px;font-weight:700}
+.phone .pop{position:absolute;inset:44px 10px auto 10px;background:#fff;border:2px solid var(--brand);border-radius:12px;padding:12px;font-size:12px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+.phone .pop[hidden]{display:none}
+.rules th,.rules td{padding:10px 12px;border-bottom:1px solid var(--soft);text-align:left;vertical-align:top;font-size:14px;line-height:20px}
+.rules th{width:38%;color:var(--ink);font-weight:600;background:var(--soft)}
+.rules{border-collapse:collapse;width:100%;background:#fff;border:1px solid var(--line);border-radius:var(--r-panel);overflow:hidden}
+/* maths */
+.slider{display:grid;gap:6px;margin-bottom:16px}
+.slider label{display:flex;justify-content:space-between;gap:8px;font-weight:600;color:var(--ink);font-size:15px;flex-wrap:wrap}
+.slider output{font-variant-numeric:tabular-nums;color:var(--brand)}
+input[type=range]{width:100%;accent-color:var(--brand);min-height:32px}
+.big{font-family:var(--serif);font-size:40px;line-height:46px;color:var(--brand);font-weight:700}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:10px;padding:10px 16px;font-size:14px;z-index:30;max-width:calc(100% - 32px)}
+.toast[hidden]{display:none}
+@media (min-width:760px){
+  h1{font-size:32px;line-height:40px}
+  .g2{grid-template-columns:1fr 1fr}
+  .stocks{grid-template-columns:1.4fr .9fr}
+  .rulesg{grid-template-columns:340px minmax(0,1fr)}
+}
+@media (min-width:1080px){ .hub{grid-template-columns:1fr 1fr 1fr} }
+</style>
+</head>
+<body>
+<div class="notice" role="note"><b>Prototype</b> for an independent study by Anchit Tandon. Companies, stories, prices and the member are fictional demo data. Not affiliated with The Economic Times; nothing is stored or sent.</div>
+
+<header class="top">
+  <div class="wrap">
+    <div><h1>Member-first ET</h1><small>The fixes from the study, working together</small></div>
+    <a class="btn btn-outline" href="/ET-study#fixes">Back to the study</a>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Prototype views">
+  <div class="wrap" role="tablist">
+    <button class="tab" role="tab" id="tab-stocks" aria-controls="stocks" aria-selected="true">My Stocks</button>
+    <button class="tab" role="tab" id="tab-hub" aria-controls="hub" aria-selected="false">Member hub</button>
+    <button class="tab" role="tab" id="tab-rules" aria-controls="rules" aria-selected="false">Who sees what</button>
+    <button class="tab" role="tab" id="tab-maths" aria-controls="maths" aria-selected="false">Renewal maths</button>
+  </div>
+</nav>
+
+<main>
+<div class="wrap">
+
+<section class="panel" id="stocks" role="tabpanel" aria-labelledby="tab-stocks">
+  <div class="head"><span class="fixref">Fixes F13 and F11 · problems P4, P6, P7, P8</span><h2>ET around what you own</h2><p class="small">Pick the stocks you hold. The front page becomes every story about them, each with a line on what it means for you, and a brief you can get each morning.</p></div>
+  <div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:10px">My holdings <span class="tag">demo companies</span></h3><div class="chips" id="holdings"></div></div>
+  <div class="grid stocks">
+    <div class="card"><h3>My feed <span class="tag r" id="feed-count">0 stories</span></h3><div id="feed"></div></div>
+    <div class="card soft"><h3>Morning brief, 7:30 AM</h3><p class="small muted" style="margin:4px 0 10px">On the app or WhatsApp, only if you opt in. A tap opens the story, not the home page.</p><ul class="brief" id="brief"></ul></div>
+  </div>
+</section>
+
+<section class="panel" id="hub" role="tabpanel" aria-labelledby="tab-hub" hidden>
+  <div class="head"><span class="fixref">Fixes F3, F4 and F14 · problem P2</span><h2>Member hub: everything self-serve</h2><p class="small">The things members email the care desk for today, done in one or two taps.</p></div>
+  <div class="grid hub">
+    <div class="card status">
+      <h3>Your membership</h3>
+      <div class="row"><span>Plan</span><b>ET Prime, 1+1 year</b></div>
+      <div class="row"><span>Bought on</span><b>App Store, 14 Jan 2025</b></div>
+      <div class="row"><span>Status</span><b id="m-status">Active until 14 Jan 2027</b></div>
+      <div class="row"><span>Auto-renew</span><b id="m-renew">On</b></div>
+      <button class="btn btn-primary" id="restore" type="button">I paid, restore my access</button>
+      <ul class="log" id="restore-log" aria-live="polite"></ul>
+    </div>
+    <div class="card status">
+      <h3>Billing</h3>
+      <button class="btn btn-outline" id="invoice" type="button">Download GST invoice</button>
+      <button class="btn btn-outline" id="cancel" type="button">Turn off auto-renew</button>
+      <div class="confirm" id="confirm" hidden>
+        <p class="small"><b>Turn off auto-renew?</b> You keep full access until 14 Jan 2027. Nothing more will be charged.</p>
+        <div class="chips"><button class="btn btn-primary" id="confirm-yes" type="button">Yes, turn it off</button><button class="btn btn-outline" id="confirm-no" type="button">Keep it on</button></div>
+      </div>
+      <h3 style="margin-top:8px">Before you are charged</h3>
+      <ol class="timeline" id="timeline"></ol>
+    </div>
+    <div class="card status">
+      <h3>Your October, in numbers</h3>
+      <div class="receipt">
+        <div><b>38</b><span>Prime stories read</span></div>
+        <div><b>6 h</b><span>reading time</span></div>
+        <div><b>~210</b><span>ads you did not see</span></div>
+        <div><b>3</b><span>alerts on your stocks</span></div>
+      </div>
+      <p class="small muted">Sent on the 1st of each month, and seven days before renewal. "Ads you did not see" is an estimate against a non-member reading the same stories.</p>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="rules" role="tabpanel" aria-labelledby="tab-rules" hidden>
+  <div class="head"><span class="fixref">Fixes F1, F2, F5 and F8 · problems P1, P3</span><h2>Who sees what: one set of rules</h2><p class="small">Every system, the website, both apps and the sales dialer, reads the same rules for the same person. Pick who is reading.</p></div>
+  <div class="chips" id="who" role="group" aria-label="Who is reading" style="margin-bottom:16px"></div>
+  <div class="grid rulesg">
+    <div class="phone" aria-label="What this person sees on a Prime story" id="phone">
+      <div class="bar"><span>ET</span><span class="pill" id="ph-pill">Subscribe</span></div>
+      <div class="body" id="ph-body"></div>
+      <div class="pop" id="ph-pop" hidden></div>
+    </div>
+    <div><table class="rules" id="rules-tbl"><tbody></tbody></table><p class="small muted" style="margin-top:10px" id="rules-why"></p></div>
+  </div>
+</section>
+
+<section class="panel" id="maths" role="tabpanel" aria-labelledby="tab-maths" hidden>
+  <div class="head"><span class="fixref">The case for fixes F1 to F4 · problem P4</span><h2>What renewal is worth</h2><p class="small">Defaults are public numbers: about 1.75 lakh members (Crisil, June 2025) and the ₹2,699 web price. The realised price after bundles is lower; move the slider.</p></div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="slider"><label for="s-members">Paying members <output id="o-members"></output></label><input type="range" id="s-members" min="50000" max="500000" step="5000" value="175000"></div>
+      <div class="slider"><label for="s-price">Average price a year <output id="o-price"></output></label><input type="range" id="s-price" min="999" max="3999" step="50" value="2699"></div>
+      <div class="slider"><label for="s-lift">Renewal rate improvement <output id="o-lift"></output></label><input type="range" id="s-lift" min="0.5" max="10" step="0.5" value="1"></div>
+    </div>
+    <div class="card soft" style="display:grid;gap:8px;align-content:start">
+      <span class="small muted">Extra revenue a year</span>
+      <div class="big" data-testid="et-renewal-total" id="total"></div>
+      <p class="small" id="total-why"></p>
+      <p class="small muted">Before upgrades, and before the ad revenue members' extra visits bring. An illustration, not a forecast.</p>
+    </div>
+  </div>
+</section>
+
+</div>
+</main>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(function(){
+  'use strict';
+  function $(s){return document.querySelector(s);}
+  function el(tag,attrs,text){var n=document.createElement(tag);if(attrs)Object.keys(attrs).forEach(function(k){n.setAttribute(k,attrs[k]);});if(text!=null)n.textContent=text;return n;}
+  var toastT;
+  function toast(msg){var t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){t.hidden=true;},2600);}
+
+  // Tabs, with the hash as the deep link.
+  var tabs=[].slice.call(document.querySelectorAll('[role=tab]'));
+  function select(id,push){
+    tabs.forEach(function(t){var on=t.getAttribute('aria-controls')===id;t.setAttribute('aria-selected',String(on));t.tabIndex=on?0:-1;document.getElementById(t.getAttribute('aria-controls')).hidden=!on;});
+    if(push&&history.replaceState)history.replaceState(null,'','#'+id);
+  }
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){select(t.getAttribute('aria-controls'),true);});
+    t.addEventListener('keydown',function(e){var d=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;if(!d)return;var n=tabs[(i+d+tabs.length)%tabs.length];n.focus();n.click();});
+  });
+  function fromHash(){var h=(location.hash||'').slice(1);if(['stocks','hub','rules','maths'].indexOf(h)>-1)select(h,false);}
+  window.addEventListener('hashchange',fromHash);
+  var start=(location.hash||'').slice(1);
+  select(['stocks','hub','rules','maths'].indexOf(start)>-1?start:'stocks',false);
+
+  // ---------- My Stocks (fictional companies and stories) ----------
+  var CO=[
+    {id:'kav',name:'Kaveri Power Grid',move:+2.4},
+    {id:'nar',name:'Narmada Fintech',move:-3.1},
+    {id:'sah',name:'Sahyadri Cement',move:+0.6},
+    {id:'gan',name:'Ganga Foods',move:-0.8},
+    {id:'kon',name:'Konkan Ports',move:+1.9},
+    {id:'dec',name:'Deccan Pharma',move:+4.2}
+  ];
+  var STORIES=[
+    {co:'kav',t:'Kaveri Power Grid wins a 1,200 MW transmission order',m:'Adds about two years of order book. Execution risk sits in land acquisition; watch the next quarterly update.',k:'Prime',time:'7:05 AM'},
+    {co:'nar',t:'Regulator tightens rules on small unsecured loans',m:'Narmada Fintech earns most of its income from this segment; expect slower loan growth for two to three quarters.',k:'Analysis',time:'6:40 AM'},
+    {co:'sah',t:'Cement prices hold in the south despite monsoon lull',m:'Steady prices protect Sahyadri\'s margins; volumes are the variable to watch in December.',k:'News',time:'Yesterday'},
+    {co:'gan',t:'Ganga Foods raises prices on two staples by 4%',m:'Price rises offset input costs; the risk is volume loss to regional brands.',k:'News',time:'Yesterday'},
+    {co:'kon',t:'Konkan Ports traffic up 11% year on year in October',m:'Container growth is ahead of the sector; the stock already prices in some of it.',k:'Data',time:'8:10 AM'},
+    {co:'dec',t:'Deccan Pharma clears a US plant inspection with no observations',m:'Removes the main overhang on the stock; new launches from this plant can now proceed.',k:'Prime',time:'7:45 AM'},
+    {co:'kav',t:'Why transmission is the quiet winner of the power capex cycle',m:'The long read behind your Kaveri holding: who wins orders, and why margins differ.',k:'Prime',time:'Sunday'},
+    {co:'dec',t:'Analyst note: three pharma names to hold through 2027',m:'Deccan is one of the three; the note gives a range, not a target, and lists the risks.',k:'Prime',time:'Yesterday'}
+  ];
+  var held={kav:true,dec:true,nar:true};
+  function renderStocks(){
+    var h=$('#holdings');h.innerHTML='';
+    CO.forEach(function(c){var b=el('button',{type:'button','class':'chip','aria-pressed':String(!!held[c.id]),'data-co':c.id},c.name);b.addEventListener('click',function(){held[c.id]=!held[c.id];renderStocks();});h.appendChild(b);});
+    var feed=$('#feed');feed.innerHTML='';
+    var list=STORIES.filter(function(s){return held[s.co];});
+    $('#feed-count').textContent=list.length+(list.length===1?' story':' stories');
+    if(!list.length){feed.appendChild(el('div',{'class':'empty'},'Pick a holding to build your front page.'));}
+    list.forEach(function(s){
+      var c=CO.filter(function(x){return x.id===s.co;})[0];
+      var a=el('article',{'class':'story','data-story':s.co});
+      var meta=el('div',{'class':'meta'});
+      meta.appendChild(el('span',{'class':'tag'+(s.k==='Prime'?' r':'')},s.k));
+      meta.appendChild(el('span',null,c.name));
+      meta.appendChild(el('span',{'class':c.move>=0?'up':'down'},(c.move>=0?'+':'')+c.move.toFixed(1)+'% today'));
+      meta.appendChild(el('span',null,s.time));
+      a.appendChild(meta);a.appendChild(el('h3',null,s.t));
+      var m=el('p',{'class':'mean'});m.appendChild(el('b',null,'What it means for you: '));m.appendChild(document.createTextNode(s.m));a.appendChild(m);
+      feed.appendChild(a);
+    });
+    var br=$('#brief');br.innerHTML='';
+    var mine=CO.filter(function(c){return held[c.id];});
+    if(!mine.length){br.appendChild(el('li',null,'No holdings picked yet.'));return;}
+    var up=mine.filter(function(c){return c.move>=0;}).length;
+    br.appendChild(el('li',null,mine.length+' of your holdings moved: '+up+' up, '+(mine.length-up)+' down.'));
+    var big=mine.slice().sort(function(a,b){return Math.abs(b.move)-Math.abs(a.move);})[0];
+    br.appendChild(el('li',null,'Biggest move: '+big.name+', '+(big.move>=0?'+':'')+big.move.toFixed(1)+'%.'));
+    br.appendChild(el('li',null,list.length+' new '+(list.length===1?'story':'stories')+' about what you own, '+list.filter(function(s){return s.k==='Prime';}).length+' of them Prime.'));
+  }
+  renderStocks();
+
+  // ---------- Member hub ----------
+  var renew=true;
+  function renderTimeline(){
+    var t=$('#timeline');t.innerHTML='';
+    var rows=renew?[
+      ['7 Jan 2027','Reminder: renews in 7 days at ₹3,899. One tap to cancel.'],
+      ['13 Jan 2027','Pre-debit notice, at least 24 hours before, as RBI requires.'],
+      ['14 Jan 2027','Renewal charged; invoice in this hub the same minute.']
+    ]:[
+      ['14 Jan 2027','Access ends. No charge. Your reading history is kept for 12 months if you come back.']
+    ];
+    rows.forEach(function(r){var li=el('li');li.appendChild(el('b',null,r[0]));li.appendChild(el('span',null,r[1]));t.appendChild(li);});
+    $('#m-renew').textContent=renew?'On':'Off';
+    $('#m-status').textContent=renew?'Active until 14 Jan 2027':'Active until 14 Jan 2027, will not renew';
+    $('#cancel').textContent=renew?'Turn off auto-renew':'Turn auto-renew back on';
+  }
+  renderTimeline();
+  $('#cancel').addEventListener('click',function(){
+    if(renew){$('#confirm').hidden=false;$('#confirm-yes').focus();}
+    else{renew=true;renderTimeline();toast('Auto-renew is back on.');}
+  });
+  $('#confirm-no').addEventListener('click',function(){$('#confirm').hidden=true;});
+  $('#confirm-yes').addEventListener('click',function(){renew=false;$('#confirm').hidden=true;renderTimeline();toast('Auto-renew is off. You keep access until 14 Jan 2027.');});
+  $('#restore').addEventListener('click',function(){
+    var b=this;b.disabled=true;var log=$('#restore-log');log.innerHTML='';
+    var steps=['Looking up payments on this account','Found ET Prime 1+1 year, bought on the App Store','Access restored on this device and the website'];
+    steps.forEach(function(s,i){setTimeout(function(){log.appendChild(el('li',{'class':'ok'},s));if(i===steps.length-1){b.disabled=false;b.textContent='Access restored';}},300*(i+1));});
+  });
+  $('#invoice').addEventListener('click',function(){
+    var txt=['TAX INVOICE (DEMO, NOT A REAL INVOICE)','','Member: Demo Reader','Plan: ET Prime, 1+1 year','Date: 14 Jan 2025','Amount: Rs 3,304.24','GST 18%: Rs 594.76','Total: Rs 3,899.00','','Generated in the member hub prototype by Anchit Tandon.'].join('\n');
+    var url=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));
+    var a=el('a',{href:url,download:'et-prime-invoice-demo.txt'});document.body.appendChild(a);a.click();a.remove();
+    setTimeout(function(){URL.revokeObjectURL(url);},1000);
+    toast('Invoice downloaded. No email needed.');
+  });
+
+  // ---------- Who sees what ----------
+  var WHO={
+    newv:{label:'New visitor',ads:'Standard ad layout, nothing above the headline on phones',offer:'One offer on the paywall: one main button, one secondary',wall:'Preview, then the offer',call:'Never. No phone number yet.',notif:'Asked once, after the second story read',pill:'Subscribe',pop:false,ad:'big',why:'A first visit should earn the second, not push the sale.'},
+    reader:{label:'Registered reader',ads:'Standard ad layout',offer:'One offer, plus the free morning brief',wall:'Preview, then the offer',call:'Only if they ask for a callback',notif:'Topics they picked; at most 3 a day; each opens its story',pill:'Subscribe',pop:false,ad:'big',why:'Registered readers are the best leads, which is why they are called only when they ask.'},
+    member:{label:'Active member',ads:'Member layout: one native slot per story, no pop-ups or video',offer:'None. No sale banners, no "Subscribe" buttons, no pop-ups',wall:'Full story',call:'Never. Suppressed from every dialer list',notif:'Their stocks and topics; each opens its story',pill:'Member',pop:false,ad:'native',why:'The promise of "90% less ads" is kept by a rule, and paywalls shown to members are counted as defects.'},
+    lapsed:{label:'Lapsed member',ads:'Standard ad layout',offer:'One win-back offer with what they used most',wall:'Preview, then the win-back offer',call:'One call within 30 days, only if they opted in',notif:'Their stocks, weekly',pill:'Rejoin',pop:false,ad:'big',why:'A lapsed member knows the product; remind them of what they used, once.'},
+    asked:{label:'Asked for a call',ads:'Standard ad layout',offer:'One offer, matching what they asked about',wall:'Preview, then the offer',call:'Within 24 hours, from one number, 10 AM to 7 PM, never after a "no"',notif:'As a registered reader',pill:'Subscribe',pop:false,ad:'big',why:'Assisted sales works best on people who raised their hand. Scoring every call keeps it that way.'},
+    today:{label:'Member today (for contrast)',ads:'Full ad layout, including pop-ups and video',offer:'"Diwali Sale" banner, launch pop-up, Subscribe buttons',wall:'Sometimes asked to subscribe again',call:'Can still be called',notif:'Opens the home page',pill:'Diwali Sale!',pop:true,ad:'big',why:'What reviewers describe today: a member treated like a prospect (problem P1).'}
+  };
+  var cur='member';
+  function renderWho(){
+    var g=$('#who');g.innerHTML='';
+    Object.keys(WHO).forEach(function(k){var b=el('button',{type:'button','class':'chip','data-who':k,'aria-pressed':String(k===cur)},WHO[k].label);b.addEventListener('click',function(){cur=k;renderWho();});g.appendChild(b);});
+    var w=WHO[cur];
+    var tb=$('#rules-tbl tbody');tb.innerHTML='';
+    [['Ads','ads'],['Offers and upsells','offer'],['Prime story','wall'],['Sales call','call'],['Notifications','notif']].forEach(function(r){var tr=el('tr',{'data-rule':r[1]});tr.appendChild(el('th',{scope:'row'},r[0]));tr.appendChild(el('td',null,w[r[1]]));tb.appendChild(tr);});
+    $('#rules-why').textContent=w.why;
+    $('#ph-pill').textContent=w.pill;
+    var body=$('#ph-body');body.innerHTML='';
+    if(w.ad==='big')body.appendChild(el('div',{'class':'ad big','data-ph':'ad-top'},'Ad'));
+    body.appendChild(el('div',{'class':'hl'},'Why transmission is the quiet winner of the power capex cycle'));
+    for(var i=0;i<3;i++)body.appendChild(el('div',{'class':'txt'}));
+    if(w.wall==='Full story'){for(var j=0;j<4;j++)body.appendChild(el('div',{'class':'txt'}));body.appendChild(el('div',{'class':'ad native','data-ph':'ad-native'},'One native slot'));for(var k=0;k<3;k++)body.appendChild(el('div',{'class':'txt'}));}
+    else{var wl=el('div',{'class':'wall','data-ph':'wall'});wl.appendChild(el('span',null,cur==='lapsed'?'Welcome back. Your watchlist is still here.':'The full story is for ET Prime members.'));wl.appendChild(el('span',{'class':'b'},cur==='lapsed'?'Rejoin':'Become a member'));wl.appendChild(el('span',{'class':'b2'},'See plans'));body.appendChild(wl);}
+    var pop=$('#ph-pop');pop.hidden=!w.pop;pop.textContent=w.pop?'Buy 1 Year, Get 1 Year Free! You are already a member, but here is an offer anyway.':'';
+  }
+  renderWho();
+
+  // ---------- Renewal maths ----------
+  var inr=new Intl.NumberFormat('en-IN');
+  function lakh(n){return n>=1e7?'₹'+(n/1e7).toFixed(2)+' crore':'₹'+(n/1e5).toFixed(1)+' lakh';}
+  function maths(){
+    var m=+$('#s-members').value,p=+$('#s-price').value,l=+$('#s-lift').value;
+    $('#o-members').textContent=inr.format(m);
+    $('#o-price').textContent='₹'+inr.format(p);
+    $('#o-lift').textContent='+'+l+(l===1?' point':' points');
+    var extra=Math.round(m*l/100);
+    $('#total').textContent=lakh(extra*p);
+    $('#total-why').textContent=inr.format(extra)+' more members renewing × ₹'+inr.format(p)+' a year.';
+  }
+  ['#s-members','#s-price','#s-lift'].forEach(function(s){$(s).addEventListener('input',maths);});
+  maths();
+})();
+</script>
+</body>
+</html>
