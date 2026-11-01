@@ -179,7 +179,7 @@ input[type=range]{width:100%;accent-color:var(--brand);min-height:32px}
 </section>
 
 <section class="panel" id="race" role="tabpanel" aria-labelledby="tab-race" hidden>
-  <div class="head"><span class="fixref">Fixes F10, F11 and F14 · problems P7, P8</span><h2>From registration to race day, and after</h2><p class="small">Every registrant gets a plan the day they sign up, with yoga-for-runners mobility from Times Health+. The demo "today" is 1 Nov 2026; the race dates are the published ones.</p></div>
+  <div class="head"><span class="fixref">Fixes F10, F11 and F14 · problems P6, P8</span><h2>From registration to race day, and after</h2><p class="small">Every registrant gets a plan the day they sign up, with yoga-for-runners mobility from Times Health+. The demo "today" is 1 Nov 2026; the race dates are the published ones.</p></div>
   <div class="grid g2">
     <div class="card">
       <div class="q"><label for="city" style="font-weight:700;color:var(--ink)">Race</label><select id="city"></select></div>
@@ -193,10 +193,10 @@ input[type=range]{width:100%;accent-color:var(--brand);min-height:32px}
 </section>
 
 <section class="panel" id="biz" role="tabpanel" aria-labelledby="tab-biz" hidden>
-  <div class="head"><span class="fixref">Why the bridge matters · problem P7</span><h2>How many runners become members</h2><p class="small">Every rate below is an assumption to test, not a Times Health number. The runners-per-race default is my launch figure for Delhi 2026.</p></div>
+  <div class="head"><span class="fixref">Why the bridge matters · problem P6</span><h2>How many runners become members</h2><p class="small">Every rate below is an assumption to test, not a Times Health number. The runners-per-race default is my launch figure for Delhi 2026.</p></div>
   <div class="grid g2">
     <div class="card">
-      <div class="range"><label for="b-run">Runners per race <output id="ob-run"></output></label><input type="range" id="b-run" min="2000" max="40000" step="1000" value="15000"></div>
+      <div class="range"><label for="b-run">Runners per race (Delhi launch figure, assumed for every city) <output id="ob-run"></output></label><input type="range" id="b-run" min="2000" max="40000" step="1000" value="15000"></div>
       <div class="range"><label for="b-races">Races a year <output id="ob-races"></output></label><input type="range" id="b-races" min="1" max="6" step="1" value="4"></div>
       <div class="range"><label for="b-plan">Start the training plan <output id="ob-plan"></output></label><input type="range" id="b-plan" min="5" max="80" step="5" value="40"></div>
       <div class="range"><label for="b-trial">Plan users who start a trial <output id="ob-trial"></output></label><input type="range" id="b-trial" min="5" max="60" step="5" value="20"></div>
@@ -209,7 +209,7 @@ input[type=range]{width:100%;accent-color:var(--brand);min-height:32px}
       <p class="small" id="b-funnel"></p>
       <span class="small muted" style="margin-top:8px">Subscription revenue a year</span>
       <div class="big" style="font-size:30px;line-height:36px" id="b-rev"></div>
-      <p class="small muted">Today the bridge does not exist, so the comparison is against zero. The pilot in the study tests these rates on the Bengaluru race first.</p>
+      <p class="small muted">Repeat runners across cities count once per race, so the number of different people is lower. Today the bridge does not exist, so the comparison is against zero. The pilot in the study tests these rates on the Mumbai race first.</p>
     </div>
   </div>
 </section>
@@ -263,7 +263,7 @@ input[type=range]{width:100%;accent-color:var(--brand);min-height:32px}
   // The published IST batches.
   var SLOTS=[['5:15 AM','early'],['6:30 AM','early'],['8:00 AM','morning'],['9:00 AM','morning'],['4:45 PM','evening'],['6:00 PM','evening'],['7:30 PM','night'],['8:30 PM','night']];
   var GOALS=[
-    ['fit','Feel fitter','Daily yoga','Daily live yoga with The Yoga Institute teachers, a weekly pranayama class and a catch-up for every class.',null,'Stiffness'],
+    ['fit','Feel fitter','Daily yoga','Daily live yoga, a weekly pranayama class led by The Yoga Institute, and a catch-up for every class.',null,'Stiffness'],
     ['weight','Lose weight','Daily yoga + mindful eating','Daily yoga plus the nutrition and mindful-eating sessions, with a weekly weigh-in in your check-in.',null,'Cravings'],
     ['sugar','Prediabetes or sugar','12-week blood sugar programme','Classes chosen for blood sugar, the diet team every week, and fasting sugar tracked weekly.','Check with your doctor before starting, and keep taking any medicine you have been prescribed.','Fasting sugar (feel)'],
     ['bp','Blood pressure','12-week blood pressure programme','Gentle asana, breathing and relaxation, the diet team for salt and sleep, and home BP readings tracked weekly.','Check with your doctor first. Some inversions and breath-holds are left out for you.','Stress'],
@@ -271,8 +271,17 @@ input[type=range]{width:100%;accent-color:var(--brand);min-height:32px}
     ['back','Back pain','12-week back care programme','Mobility and core classes, a short daily routine, and pain levels tracked weekly.','If you have numbness, weakness or pain after an injury, see a doctor first.','Back pain'],
     ['run','Train for a race','Yoga for runners + race plan','Mobility and recovery classes alongside a running plan to race day. See the Race plan tab.',null,'Soreness']
   ];
-  var WIN=[['early','Early morning, 5 to 7'],['morning','Morning, 8 to 10'],['evening','Evening, 4:30 to 7'],['night','Night, 7:30 to 9:30']];
+  var WIN=[['early','Early morning, 5 to 7:30'],['morning','Morning, 8 to 10'],['evening','Evening, 4:30 to 7'],['night','Night, 7:30 to 9:30']];
   var LEV=[['new','New to yoga'],['some','Done some'],['regular','Practise regularly']];
+  var METRIC={
+    fit:{label:'Stiffness',min:1,max:5,step:1,val:3,unit:' / 5'},
+    weight:{label:'Weight',min:40,max:150,step:0.5,val:72,unit:' kg'},
+    sugar:{label:'Fasting sugar',min:70,max:250,step:1,val:112,unit:' mg/dL'},
+    bp:{label:'Home BP, systolic',min:90,max:190,step:1,val:134,unit:' mmHg'},
+    pcos:{label:'Cycle length',min:20,max:60,step:1,val:34,unit:' days'},
+    back:{label:'Back pain',min:0,max:10,step:1,val:5,unit:' / 10'},
+    run:{label:'Soreness',min:1,max:5,step:1,val:2,unit:' / 5'}
+  };
   var S={goal:{val:'fit'},win:{val:['evening']},lev:{val:'new'}};
   function g(){return GOALS.filter(function(x){return x[0]===S.goal.val;})[0];}
   function renderStart(){
@@ -294,7 +303,9 @@ input[type=range]{width:100%;accent-color:var(--brand);min-height:32px}
     plans.forEach(function(x){var d=el('div',{'class':'plan'+(x[3]?' best':''),'data-plan':x[0]});var l=el('div');l.appendChild(el('div',{'class':'small',style:'font-weight:700;color:var(--ink)'},x[0]));l.appendChild(el('div',{'class':'small muted'},x[2]));d.appendChild(l);d.appendChild(el('b',null,x[1]));p.appendChild(d);});
     p.appendChild(el('p',{'class':'small muted',style:'margin-top:6px'},'Illustrative prices for this prototype, shown before sign-up as fix F1 asks.'));
     var sf=$('#safety');sf.hidden=!goal[4];sf.textContent=goal[4]||'';
-    $('#goal-label').firstChild.nodeValue=goal[5]+' ';
+    var mt=METRIC[goal[0]], r=$('#r-goal');
+    $('#goal-label').firstChild.nodeValue=mt.label+' ';
+    if(r.dataset.goal!==goal[0]){r.min=mt.min;r.max=mt.max;r.step=mt.step;r.value=mt.val;r.dataset.goal=goal[0];}
     renderCheckin();
   }
   chips('#goals',GOALS.map(function(x){return [x[0],x[1]];}),S.goal,false,renderStart);
@@ -336,15 +347,17 @@ input[type=range]{width:100%;accent-color:var(--brand);min-height:32px}
   var WORDS=['','Poor','Low','OK','Good','Great'];
   function renderCheckin(){
     var s=+$('#r-sleep').value,e=+$('#r-energy').value,gl=+$('#r-goal').value;
-    $('#o-sleep').textContent=WORDS[s];$('#o-energy').textContent=WORDS[e];$('#o-goal').textContent=gl+' / 5';
+    var mt=METRIC[S.goal.val];
+    $('#o-sleep').textContent=WORDS[s];$('#o-energy').textContent=WORDS[e];$('#o-goal').textContent=gl+mt.unit;
     var low=s<=2||e<=2;
-    $('#checkin-out').textContent=low?'Low sleep or energy this week: next week\'s plan swaps one class for a restorative session and a short evening breathing practice.':'Next week keeps the same plan. Your trend chart updates every Sunday.';
+    var track=/^(weight|sugar|bp|pcos|back)$/.test(S.goal.val);
+    $('#checkin-out').textContent='Logged: '+mt.label+', '+gl+mt.unit+'. '+(low?'Low sleep or energy this week: next week\'s plan swaps one class for a restorative session and a short evening breathing practice.':'Next week keeps the same plan.')+(track?' Your diet coach sees this trend at your weekly consult.':' Your trend chart updates every Sunday.');
   }
   ['#r-sleep','#r-energy','#r-goal'].forEach(function(s){$(s).addEventListener('input',renderCheckin);});
 
   // ---------- 3. Race plan ----------
   var TODAY=Date.UTC(2026,10,1);
-  var RACES=[['blr','Bengaluru · Sun 20 Dec 2026',Date.UTC(2026,11,20),'Mumbai, 14 Feb 2027'],['mum','Mumbai · Sun 14 Feb 2027',Date.UTC(2027,1,14),'Delhi, 28 Mar 2027'],['del','Delhi · Sun 28 Mar 2027',Date.UTC(2027,2,28),'Bengaluru, December 2027']];
+  var RACES=[['blr','Bengaluru · Sun 20 Dec 2026',Date.UTC(2026,11,20),'the next city in the series'],['mum','Mumbai · Sun 14 Feb 2027',Date.UTC(2027,1,14),'the next city in the series'],['del','Delhi · Sun 28 Mar 2027',Date.UTC(2027,2,28),'the next city in the series']];
   var DIST=[['3','3K'],['5','5K'],['10','10K'],['21.1','21.1K']];
   var MIN={first:{'3':4,'5':6,'10':10,'21.1':14},exp:{'3':2,'5':4,'10':6,'21.1':10}};
   var R={city:{val:'mum'},dist:{val:'10'},first:{val:'yes'}};
@@ -357,8 +370,15 @@ input[type=range]{width:100%;accent-color:var(--brand);min-height:32px}
     var need=MIN[first?'first':'exp'][R.dist.val];
     $('#weeks-to').textContent=weeks;
     var w=$('#race-warn');
-    if(weeks<need){w.hidden=false;w.textContent='Safely building to '+R.dist.val+'K'+(first?' as a first-timer':'')+' takes about '+need+' weeks; you have '+weeks+'. Pick a shorter distance or a later race in the series. Entries can move to a later city under fix F12.';}
+    if(weeks<need){w.hidden=false;w.textContent='Safely building to '+R.dist.val+'K'+(first?' as a first-timer':'')+' takes about '+need+' weeks; you have '+weeks+'. Pick a shorter distance or a later race in the series. Under fix F12 you could move down a category or transfer your entry. The plan is held back until the runway is safe.';}
     else w.hidden=true;
+    if(weeks<need){
+      $('#race-sum').textContent='Plan held back: '+weeks+' weeks is not enough to build safely to this distance.';
+      var o=$('#plan');o.innerHTML='';
+      var h=el('li',{'data-week':'held'});h.appendChild(el('b',null,'Choose a shorter distance or a later race'));
+      h.appendChild(el('span',{'class':'sub'},'A safe plan builds gradually, about 10% more each week. Squeezing it raises the risk of injury, so the plan appears once the runway is long enough.'));
+      o.appendChild(h);return;
+    }
     var peak=km<=5?km:km===10?10:18;
     var base=first?Math.min(2,km):Math.min(4,km);
     var runs=first?3:4;

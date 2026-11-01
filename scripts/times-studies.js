@@ -219,6 +219,9 @@ async function protoTH(browser, vp, pg) {
   await page.click('#goals [data-v="sugar"]');
   const sugar = { name: await page.textContent('#prog-name'), safety: await page.isVisible('#safety'), slot: await page.$eval('#slots [data-slot]', (x) => x.dataset.slot) };
   check(`${L}: a condition gets its programme and a safety note`, /12-week/.test(sugar.name) && sugar.safety && sugar.slot === '8:00 AM', JSON.stringify(sugar));
+  // The weekly check-in tracks that condition's own number, in its own unit.
+  const unit = { goal: await page.$eval('#o-goal', (n) => n.textContent), out: await page.$eval('#checkin-out', (n) => n.textContent) };
+  check(`${L}: the check-in tracks fasting sugar in mg/dL`, /mg\/dL/.test(unit.goal) && /^Logged: Fasting sugar, \d+ mg\/dL/.test(unit.out), JSON.stringify(unit));
   await page.click('#goals [data-v="fit"]');
   check(`${L}: general fitness shows no medical note`, !(await page.isVisible('#safety')), '');
 
@@ -242,7 +245,12 @@ async function protoTH(browser, vp, pg) {
   check(`${L}: a long enough runway shows no warning`, !(await page.isVisible('#race-warn')), '');
   await page.selectOption('#city', 'blr');
   await page.click('#dist [data-v="21.1"]');
-  check(`${L}: a first-timer 21.1K in 7 weeks is warned`, (await page.isVisible('#race-warn')) && +(await page.textContent('[data-testid="th-weeks"]')) === 7, '');
+  const held = await page.$$eval('#plan li', (l) => l.map((x) => x.dataset.week));
+  check(`${L}: a first-timer 21.1K in 7 weeks is warned and gets no squeezed plan`, (await page.isVisible('#race-warn')) && +(await page.textContent('[data-testid="th-weeks"]')) === 7 && held.join() === 'held', held.join());
+  // A runway that is long enough never asks for a long run beyond the race.
+  await page.selectOption('#city', 'del');
+  const longs = await page.$$eval('#plan li .sub', (l) => l.map((x) => (/long run ([\d.]+) km/.exec(x.textContent) || [])[1]).filter(Boolean).map(Number));
+  check(`${L}: Delhi 21.1K long runs build up and never pass 18 km`, longs.length > 10 && Math.max(...longs) <= 18 && longs[0] < longs[longs.length - 3], longs.join(','));
 
   // Business view: the funnel multiplies out.
   await page.click('[role=tab][aria-controls="biz"]');
