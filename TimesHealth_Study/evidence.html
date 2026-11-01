@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Times Health Study: Offer, Audit, Rivals | Anchit Tandon</title>
+<meta name="description" content="Times Health study, evidence: what Times Health runs today, a live mobile audit, and how it compares with cult.fit and Habuild.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#0f6e66">
+<meta property="og:title" content="Times Health Study: Offer, Audit, Rivals">
+<meta property="og:description" content="Times Health study, evidence: what Times Health runs today, a live mobile audit, and how it compares with cult.fit and Habuild.">
+<meta property="og:type" content="article">
+<link rel="canonical" href="https://anchit-tandon.com/TimesHealth_Study/evidence">
+<link rel="icon" href="/icons/favicon.svg">
+<meta property="og:image" content="https://anchit-tandon.com/assets/og/og-default.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="/TimesHealth_Study/study.css">
+</head>
+<body>
+<div class="notice" role="note"><b>Independent study</b> by Anchit Tandon, who worked on Times Health+ at Times Internet until April 2026. Uses public information only. Not affiliated with Times Internet or The Times of India.</div>
+
+<nav class="nav" aria-label="Study pages">
+  <div class="wrap">
+    <a class="mark" href="/TimesHealth_Study"><i aria-hidden="true">AT</i><span><b>Times Health Study</b><small>by Anchit Tandon</small></span></a>
+    <div class="links" id="links">
+      <a href="/TimesHealth_Study">Overview</a><a href="/TimesHealth_Study/users">Users</a><a href="/TimesHealth_Study/problems">Problems</a><a href="/TimesHealth_Study/evidence" aria-current="page">Evidence</a><a href="/TimesHealth_Study/fixes">Fixes</a><a href="/TimesHealth_Study/plan">Plan</a><a href="/TimesHealth_Study/about">About me</a><a href="/TimesHealth_Study/prototype">Prototype</a>
+    </div>
+    <a class="btn btn-primary sm" href="/TimesHealth_Study/prototype"><span class="cta-lg">Open prototype</span><span class="cta-sm">Prototype</span></a>
+  </div>
+</nav>
+<div class="crumb"><div class="wrap"><a href="/TimesHealth_Study">Times Health Study</a><span aria-hidden="true">/</span><span>Evidence</span></div></div>
+<main>
+<section class="block" id="today" aria-labelledby="today-h">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">What Times Health runs today</span><h1 id="today-h" class="ph1">Three products, three funnels, one domain</h1><p>As a first-time visitor finds them on 1 Nov 2026.</p></div>
+    <div class="tbl"><table class="t-wide" id="map-tbl">
+      <thead><tr><th style="width:20%">Product</th><th style="width:42%">What it offers</th><th style="width:38%">What I noticed</th></tr></thead>
+      <tbody>
+        <tr><td><b>Times Health+ yoga</b><br><small class="muted">timeshealthplus.com/TH/plans, launched June 2025</small></td><td>Daily live yoga; weekly pranayama and meditation, a joint-health bootcamp and nutrition sessions led by teachers from The Yoga Institute; a monthly masterclass by Yogacharya Surakshit Goswami. Eight one-hour slots a day. WhatsApp reminders, an attendance tracker.</td><td>No price on the page. International plans, found in the page's data rather than shown to the visitor: ₹1,499 a month or ₹5,499 a year. The FAQ says plans are "quarterly &amp; yearly"; the page serves monthly and yearly. Three discount claims: 23%, 60% and 69%.</td></tr>
+        <tr><td><b>Times Health+ diet plans</b><br><small class="muted">/TH/diet-plans</small></td><td>Personalised diet coaching for 16+ conditions, including PCOS, type 2 diabetes, prediabetes, thyroid, fatty liver and hypertension. Four tiers from one month to a year, with weekly consultations and blood-work review at the top.</td><td>Prices not public. Yoga appears only as a "complimentary yoga offer". The same testimonial appears three times, under two spellings of one name.</td></tr>
+        <tr><td><b>Times Internet Half Marathon</b><br><small class="muted">a four-city series, hub on the same domain</small></td><td>Delhi, 29 Mar 2026 at Major Dhyan Chand National Stadium; Hyderabad, 25 Oct 2026; Bengaluru 20 Dec 2026; Mumbai 14 Feb 2027; Delhi again 28 Mar 2027. 3K to 21.1K. General ₹1,799 to ₹2,999; Premium Pass ₹5,500 to ₹9,999.</td><td>No link from any race page to a Times Health+ trial, training plan or post-race programme. The form already asks "First-time runner?". Entries are non-refundable and non-transferable, even if rescheduled.</td></tr>
+        <tr><td><b>Bundles</b></td><td>Three months of Times Health+ yoga comes free with a one-year ET Prime plan.</td><td>A warm audience arriving from a sister product; how it is onboarded cannot be seen without signing up.</td></tr>
+      </tbody></table></div>
+  </div>
+</section>
+<section class="block" id="audit" aria-labelledby="au-h">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">Live audit</span><h2 id="au-h">What a first-time visitor's phone goes through</h2><p>Playwright at 390 px (iPhone 13 profile) and Lighthouse 12 mobile with simulated throttling, 1 Nov 2026, from a US-based test browser.</p></div>
+    <div class="tbl"><table class="t-wide" id="audit-tbl">
+      <thead><tr><th>Page</th><th class="num">Requests</th><th class="num">Hosts</th><th class="num">Load event</th><th class="num">Lighthouse</th><th>What a visitor sees</th></tr></thead>
+      <tbody>
+        <tr><td><b>Yoga landing</b> /TH/plans</td><td class="num">368 · ~9.9 MB</td><td class="num">49</td><td class="num">17.5 s</td><td class="num">0 · LCP 24.4 s · CLS 1.17</td><td>Logo, a headline, three benefits, a photo collage, "Begin My Wellness Journey". No price, no trial terms, no class times above the fold.</td></tr>
+        <tr><td><b>Sign-up</b></td><td class="num">n/a</td><td class="num">n/a</td><td class="num">n/a</td><td class="num">n/a</td><td>Full-screen "Step 1 of 3": enter email or mobile, then OTP, then plans.</td></tr>
+        <tr><td><b>Race hub</b> /times-events/marathon</td><td class="num">n/a</td><td class="num">n/a</td><td class="num">unreliable</td><td class="num">n/a</td><td>Headless Chrome: HTTP 502 after about 30 s, twice. Plain fetch: 200 once, 141 s another time.</td></tr>
+      </tbody></table></div>
+    <div class="grid g3" style="margin-top:20px">
+      <div class="card"><h3>What works</h3><p class="small">A credible partner in The Yoga Institute, named teachers, live human classes eight times a day, and a diet product that already covers the conditions people pay for.</p></div>
+      <div class="card"><h3>What hurts</h3><p class="small">The page loads from 49 hosts, including several ad pixels and two session recorders, and the tag manager blocks the main thread for 5.5 s. On a mid-range phone that is the difference between a trial and a bounce.</p></div>
+      <div class="card"><h3>What is missing</h3><p class="small">A price, a refund page, a catch-up option and any path between the three products. These cost little to add and are what the <a href="/TimesHealth_Study/fixes">fixes</a> start with.</p></div>
+    </div>
+  </div>
+</section>
+<section class="block" id="compete" aria-labelledby="cp-h">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">Competition</span><h2 id="cp-h">Where Times Health+ wins, and where it loses</h2></div>
+    <div class="tbl"><table class="t-wide">
+      <thead><tr><th style="width:20%">Rival</th><th style="width:30%">Price</th><th style="width:50%">Better, or worse, than Times Health+</th></tr></thead>
+      <tbody>
+        <tr><td><b>cult.fit cultpass HOME</b></td><td>₹999 a month; ₹1,859 a year; 7-day free trial</td><td>Every price public with no login; apps on both stores; 1,200+ workouts any time. Less depth in classical yoga.</td></tr>
+        <tr><td><b>Habuild</b></td><td>14 days free, then paid plans</td><td>Live yoga with a large free funnel and a community claim of over a crore people. The direct rival for the same habit.</td></tr>
+        <tr><td><b>FITPASS</b></td><td>₹1,999 to ₹2,999 a month</td><td>Gyms, nutrition and video together; a different, pricier use case.</td></tr>
+        <tr><td><b>Ayush free live yoga</b></td><td>Free</td><td>Government sessions around Yoga Day set a free baseline for "live yoga".</td></tr>
+        <tr><td><b>Big races (Procam)</b></td><td>Entry fees vary</td><td>Delhi Half Marathon drew over 40,000 on 18 Oct 2026; Tata Mumbai Marathon 69,100. A crowded calendar for a new series.</td></tr>
+      </tbody></table></div>
+    <p class="callout" style="margin-top:20px">Times Health+ will not win on price or on the size of its library. It can win on <b>outcomes for a condition</b>, backed by The Yoga Institute and a diet team, and on the <b>race-to-habit path</b> no rival owns. Both need the pieces it already has joined up.</p>
+  </div>
+</section>
+<div class="wrap"><nav class="pager" aria-label="More pages"><a class="prev" href="/TimesHealth_Study/problems"><small>&larr; Previous</small>Problems</a><a class="next" href="/TimesHealth_Study/fixes"><small>Next &rarr;</small>Fixes</a></nav></div>
+</main>
+<footer>
+  <div class="wrap">
+    <h3>Sources and method</h3>
+    <p>All opened 1 Nov 2026. Live audit by Playwright and Lighthouse from a US-based test browser, which is served the international plans; I did not sign up, so nothing after step 1 was observed. Searches for independent reviews covered the app stores, Trustpilot, Reddit, MouthShut, consumer-complaint sites and Justdial.</p>
+    <ul>
+      <li><a href="https://timeshealthplus.com/TH/plans" rel="noopener" target="_blank">Times Health+ yoga plans</a>, <a href="https://timeshealthplus.com/TH/diet-plans" rel="noopener" target="_blank">diet plans</a>, <a href="https://timeshealthplus.com/TH/corporate-wellness" rel="noopener" target="_blank">corporate wellness</a></li>
+      <li><a href="https://www.mediainfoline.com/health/unlock-a-healthier-happier-you-with-timeshealth" rel="noopener" target="_blank">Times Health+ launch feature (MediaInfoline, Jun 2025)</a>; <a href="https://www.youtube.com/@TimesHealthPlus-TOI/about" rel="noopener" target="_blank">Times Health+ on YouTube</a></li>
+      <li><a href="https://timeshealthplus.com/times-events/marathon/delhi/2026" rel="noopener" target="_blank">Delhi Half Marathon 2026 page and FAQ</a>; <a href="https://ifinish.in/eventresult/result-Times%20Internet%20Delhi%20Half%20Marathon/iframe" rel="noopener" target="_blank">Delhi 2026 results (iFinish)</a></li>
+      <li><a href="https://economictimes.indiatimes.com/news/india/the-times-internet-half-marathon-why-running-is-becoming-indias-new-weekend-ritual/articleshow/132307432.cms" rel="noopener" target="_blank">The four-city series (ET, 10 Jul 2026)</a>; <a href="https://www.district.in/events/times-internet-half-marathon--bangalore-buy-tickets" rel="noopener" target="_blank">Bengaluru tickets and FAQ (District)</a></li>
+      <li><a href="https://www.cult.fit/live/cult-live-membership" rel="noopener" target="_blank">cultpass HOME prices</a>; <a href="https://habuild.in/online-yoga/free-online-yoga-classes" rel="noopener" target="_blank">Habuild</a>; <a href="https://fitpass.co.in/sweatiquette-faq/what-is-the-price-structure-of-fitpass-subscription" rel="noopener" target="_blank">FITPASS prices</a></li>
+      <li><a href="https://morungexpress.com/315-mn-indians-suffer-from-hypertension-101-mn-are-diabetic-icmr-study" rel="noopener" target="_blank">ICMR-INDIAB 2023 (report of the paper)</a>; <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9826643/" rel="noopener" target="_blank">PCOS prevalence in India, meta-analysis</a></li>
+      <li><a href="https://thesouthfirst.com/health/the-sedentary-india-half-of-adult-population-lack-adequate-physical-activity-says-lancet-study" rel="noopener" target="_blank">Physical inactivity in India, Lancet Global Health 2024 (report)</a></li>
+      <li><a href="https://businessofapps.com/data/health-fitness-app-benchmarks" rel="noopener" target="_blank">Health and fitness app retention benchmarks (Business of Apps)</a></li>
+      <li><a href="https://newsonair.gov.in/21st-delhi-half-marathon-underway-at-jawaharlal-nehru-stadium-with-over-40000-participants/" rel="noopener" target="_blank">Delhi Half Marathon, 40,000+ (News On Air)</a>; <a href="https://ianslive.in/mumbai-marathon-2026-to-feature-record-69100-participants--20260109142413" rel="noopener" target="_blank">Tata Mumbai Marathon 2026, 69,100 (IANS)</a></li>
+      <li><a href="https://buy.indiatimes.com/ET/plans" rel="noopener" target="_blank">ET Prime plans (three months of Times Health+ bundled)</a></li>
+    </ul>
+    <p>Independent study by Anchit Tandon. Not affiliated with or endorsed by Times Internet, The Times of India, Bennett, Coleman &amp; Co. or The Yoga Institute. Product, event and partner names belong to their owners and are used only to describe their public products. No confidential information was used; the only non-public figure, the Delhi participant count, is my own launch figure and is labelled as such. Indian prices for Times Health+ could not be seen without signing up, so the prices quoted are the international plans and the prototype's prices are illustrative.</p>
+    <p><a href="/">Back to the portfolio</a></p>
+  </div>
+</footer>
+<script src="/TimesHealth_Study/study.js" defer></script>
+</body>
+</html>

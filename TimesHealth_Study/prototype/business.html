@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Times Health Habit Loop, Business View: Prototype | Anchit Tandon</title>
+<meta name="description" content="Prototype from the Times Health study by Anchit Tandon: how many half marathon runners become paying members.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#0f6e66">
+<meta property="og:title" content="Times Health Habit Loop, Business View: Prototype">
+<meta property="og:description" content="Prototype from the Times Health study by Anchit Tandon: how many half marathon runners become paying members.">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://anchit-tandon.com/TimesHealth_Study/prototype/business">
+<link rel="icon" href="/icons/favicon.svg">
+<meta property="og:image" content="https://anchit-tandon.com/assets/og/og-default.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="/TimesHealth_Study/prototype/proto.css">
+</head>
+<body>
+<div class="notice" role="note"><b>Prototype</b> for an independent study by Anchit Tandon. Prices are illustrative, not Times Health+'s; class times are the published IST batches; everything else is demo data. Not affiliated with Times Internet; nothing is stored or sent. Not medical advice.</div>
+
+<header class="top">
+  <div class="wrap">
+    <div><p class="app-name">Times Health habit loop</p><small>See, start, stay, run: the study's fixes working together</small></div>
+    <a class="btn btn-outline" href="/TimesHealth_Study/fixes">Back to the study</a>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Prototype pages">
+  <div class="wrap"><a class="tab" href="/TimesHealth_Study/prototype">Start</a><a class="tab" href="/TimesHealth_Study/prototype/week">My week</a><a class="tab" href="/TimesHealth_Study/prototype/race">Race plan</a><a class="tab" href="/TimesHealth_Study/prototype/business" aria-current="page">Business view</a></div>
+</nav>
+
+<main>
+<div class="wrap">
+
+<section class="panel" id="biz">
+  <div class="head"><span class="fixref">Why the bridge matters · problem P6</span><h1 class="ph1">How many runners become members</h1><p class="small">Every rate below is an assumption to test, not a Times Health number. The runners-per-race default is my launch figure for Delhi 2026.</p></div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="range"><label for="b-run">Runners per race (Delhi launch figure, assumed for every city) <output id="ob-run"></output></label><input type="range" id="b-run" min="2000" max="40000" step="1000" value="15000"></div>
+      <div class="range"><label for="b-races">Races a year <output id="ob-races"></output></label><input type="range" id="b-races" min="1" max="6" step="1" value="4"></div>
+      <div class="range"><label for="b-plan">Start the training plan <output id="ob-plan"></output></label><input type="range" id="b-plan" min="5" max="80" step="5" value="40"></div>
+      <div class="range"><label for="b-trial">Plan users who start a trial <output id="ob-trial"></output></label><input type="range" id="b-trial" min="5" max="60" step="5" value="20"></div>
+      <div class="range"><label for="b-paid">Trials that become paid <output id="ob-paid"></output></label><input type="range" id="b-paid" min="5" max="60" step="5" value="25"></div>
+      <div class="range"><label for="b-price">Price a year (illustrative) <output id="ob-price"></output></label><input type="range" id="b-price" min="1999" max="9999" step="500" value="4999"></div>
+    </div>
+    <div class="card soft" style="display:grid;gap:8px;align-content:start">
+      <span class="small muted">New paying members a year, from races alone</span>
+      <div class="big" id="b-members" data-testid="th-members"></div>
+      <p class="small" id="b-funnel"></p>
+      <span class="small muted" style="margin-top:8px">Subscription revenue a year</span>
+      <div class="big" style="font-size:30px;line-height:36px" id="b-rev"></div>
+      <p class="small muted">Repeat runners across cities count once per race, so the number of different people is lower. Today the bridge does not exist, so the comparison is against zero. The pilot in the study tests these rates on the Mumbai race first.</p>
+    </div>
+  </div>
+</section>
+
+</div>
+</main>
+<div class="toast" id="toast" role="status" hidden></div>
+<script src="/TimesHealth_Study/prototype/proto.js" defer></script>
+</body>
+</html>
