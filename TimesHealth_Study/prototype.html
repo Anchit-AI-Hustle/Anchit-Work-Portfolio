@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Times Health Habit Loop: Prototype | Anchit Tandon</title>
+<meta name="description" content="Working prototype from the Times Health study by Anchit Tandon: price and class fit up front, a weekly habit loop, a race training plan and a business view.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#0f6e66">
+<meta property="og:title" content="Times Health habit loop: a working prototype">
+<meta property="og:description" content="See the price and your class times first, keep a weekly habit with catch-ups, and train from registration to race day. Demo data, illustrative prices.">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://anchit-tandon.com/TimesHealth_Study/prototype">
+<link rel="icon" href="/icons/favicon.svg">
+<meta property="og:image" content="https://anchit-tandon.com/assets/og/og-default.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  --bg:#f4f7f5; --surface:#ffffff; --soft:#e9efeb;
+  --ink:#14211e; --body:#36443f; --muted:#5d6b66; --line:#d8e2dd;
+  --brand:#0f6e66; --brand-2:#0b544e; --brand-soft:#e0f1ee;
+  --coral:#b4400b; --coral-soft:#fdece2; --amber:#9a5b00; --amber-soft:#fcf0d8; --red:#b42318; --blue:#1d4ed8;
+  --r-btn:10px; --r-tag:6px; --r-panel:14px; --r-card:18px; --r-pill:9999px;
+  --font:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--font);color:var(--body);background:var(--bg);font-size:16px;line-height:24px;-webkit-font-smoothing:antialiased;overflow-x:clip}
+h1,h2,h3{color:var(--ink);margin:0;letter-spacing:-.015em}
+h1{font-size:26px;line-height:32px;font-weight:800} h2{font-size:22px;line-height:30px} h3{font-size:16px;line-height:22px}
+p{margin:0} ul,ol{margin:0;padding-left:20px}
+a{color:var(--brand);text-underline-offset:3px}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:4px}
+.notice{background:var(--ink);color:#dfe8e4;font-size:13px;line-height:19px;padding:8px 16px;text-align:center}
+.notice b{color:#fff}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+.top{background:#fff;border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;gap:12px;align-items:center;justify-content:space-between;padding-top:14px;padding-bottom:14px;flex-wrap:wrap}
+.top small{display:block;color:var(--muted);font-size:13px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:var(--r-btn);font-weight:700;font-size:15px;min-height:44px;padding:10px 18px;border:1px solid transparent;text-decoration:none;font-family:inherit;cursor:pointer;background:none}
+.btn-primary{background:var(--brand);color:#fff}.btn-primary:hover{background:var(--brand-2)}
+.btn-outline{background:#fff;color:var(--ink);border-color:var(--line)}
+.tabs{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs .wrap{display:flex;gap:6px;padding-top:8px;padding-bottom:8px}
+.tab{white-space:nowrap;border:1px solid var(--line);background:#fff;border-radius:var(--r-pill);padding:8px 14px;font:700 14px/20px var(--font);color:var(--ink);cursor:pointer;min-height:44px}
+.tab[aria-selected="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+main .wrap{padding-top:24px;padding-bottom:48px}
+.panel[hidden]{display:none}
+.panel>.head{display:grid;gap:6px;margin-bottom:18px;max-width:820px}
+.fixref{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--coral)}
+.grid{display:grid;gap:16px}
+.grid>*{min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:18px}
+.card.soft{background:var(--brand-soft);border-color:transparent}
+.small{font-size:14px;line-height:21px} .muted{color:var(--muted)}
+.tag{display:inline-block;font-size:12px;line-height:16px;font-weight:700;padding:3px 8px;border-radius:var(--r-tag);background:var(--soft);color:var(--muted);white-space:nowrap}
+.tag.g{background:var(--brand-soft);color:var(--brand)} .tag.c{background:var(--coral-soft);color:var(--coral)} .tag.a{background:var(--amber-soft);color:var(--amber)}
+.q{display:grid;gap:8px;margin-bottom:16px}
+.q>span{font-weight:700;color:var(--ink);font-size:15px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:var(--r-pill);padding:8px 14px;font:700 14px/20px var(--font);min-height:44px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--brand-soft);border-color:var(--brand);color:var(--brand)}
+select{font:inherit;min-height:44px;border:1px solid var(--line);border-radius:var(--r-btn);padding:8px 12px;background:#fff;color:var(--ink);width:100%}
+.price{display:grid;gap:10px}
+.plan{border:1px solid var(--line);border-radius:var(--r-panel);padding:12px 14px;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.plan b{font-size:22px;color:var(--ink)}
+.plan.best{border-color:var(--brand);background:#fff}
+.slots{display:flex;gap:8px;flex-wrap:wrap}
+.slot{border-radius:10px;padding:6px 10px;font-weight:700;font-size:14px;background:var(--soft);color:var(--muted)}
+.slot.main{background:var(--brand);color:#fff} .slot.back{background:var(--brand-soft);color:var(--brand)}
+.warn{background:var(--amber-soft);color:#5c3900;border-radius:var(--r-panel);padding:10px 12px;font-size:14px;line-height:20px}
+.warn[hidden]{display:none}
+/* week */
+.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.day{border:1px solid var(--line);background:#fff;border-radius:12px;padding:8px 4px;display:grid;gap:4px;justify-items:center;cursor:pointer;font:inherit;min-height:84px}
+.day .d{font-size:12px;font-weight:700;color:var(--muted)}
+.day .s{font-size:11px;font-weight:700;line-height:14px;text-align:center}
+.day .i{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800}
+.day[data-state="live"] .i{background:var(--brand);color:#fff}
+.day[data-state="catchup"] .i{background:var(--brand-soft);color:var(--brand)}
+.day[data-state="missed"] .i{background:var(--coral-soft);color:var(--coral)}
+.day[data-state="planned"] .i{background:var(--soft);color:var(--muted)}
+.meter{height:12px;background:var(--soft);border-radius:99px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--brand);border-radius:99px;transition:width .3s ease}
+.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat div{background:var(--soft);border-radius:12px;padding:12px}
+.stat b{display:block;font-size:24px;line-height:28px;color:var(--ink)}
+.stat span{font-size:12px;color:var(--muted)}
+.nudge{background:var(--coral-soft);border-radius:var(--r-panel);padding:12px 14px;display:grid;gap:8px;color:#5a2106}
+.nudge[hidden]{display:none}
+.range{display:grid;gap:4px;margin-bottom:10px}
+.range label{display:flex;justify-content:space-between;font-weight:700;color:var(--ink);font-size:14px}
+input[type=range]{width:100%;accent-color:var(--brand);min-height:32px}
+/* race */
+.weeks{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.weeks li{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:grid;gap:2px;background:#fff}
+.weeks li.taper{background:var(--amber-soft);border-color:transparent}
+.weeks li.race{background:var(--brand);color:#fff;border-color:var(--brand)}
+.weeks li.race b{color:#fff}
+.weeks b{color:var(--ink)}
+.weeks .sub{font-size:13px;line-height:18px;color:var(--muted)}
+.weeks li.race .sub{color:#d9f0ec}
+.big{font-size:40px;line-height:46px;color:var(--brand);font-weight:800}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:10px;padding:10px 16px;font-size:14px;z-index:30;max-width:calc(100% - 32px)}
+.toast[hidden]{display:none}
+@media (min-width:760px){
+  h1{font-size:32px;line-height:40px}
+  .g2{grid-template-columns:1fr 1fr}
+  .startg{grid-template-columns:1.1fr .9fr}
+  .day{min-height:96px}
+}
+</style>
+</head>
+<body>
+<div class="notice" role="note"><b>Prototype</b> for an independent study by Anchit Tandon. Prices are illustrative, not Times Health+'s; class times are the published IST batches; everything else is demo data. Not affiliated with Times Internet; nothing is stored or sent. Not medical advice.</div>
+
+<header class="top">
+  <div class="wrap">
+    <div><h1>Times Health habit loop</h1><small>See, start, stay, run: the study's fixes working together</small></div>
+    <a class="btn btn-outline" href="/TimesHealth_Study#fixes">Back to the study</a>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Prototype views">
+  <div class="wrap" role="tablist">
+    <button class="tab" role="tab" id="tab-start" aria-controls="start" aria-selected="true">1 · Start</button>
+    <button class="tab" role="tab" id="tab-week" aria-controls="week" aria-selected="false">2 · My week</button>
+    <button class="tab" role="tab" id="tab-race" aria-controls="race" aria-selected="false">3 · Race plan</button>
+    <button class="tab" role="tab" id="tab-biz" aria-controls="biz" aria-selected="false">4 · Business view</button>
+  </div>
+</nav>
+
+<main>
+<div class="wrap">
+
+<section class="panel" id="start" role="tabpanel" aria-labelledby="tab-start">
+  <div class="head"><span class="fixref">Fixes F1, F4 and F6 · problems P1, P2, P3</span><h2>Is this for me, and what does it cost?</h2><p class="small">Answer three questions. You see your programme, your class times and the price before anyone asks for your number.</p></div>
+  <div class="grid startg">
+    <div class="card">
+      <div class="q"><span>What is your main goal?</span><div class="chips" id="goals" role="group" aria-label="Main goal"></div></div>
+      <div class="q"><span>When are you usually free? Pick all that apply.</span><div class="chips" id="windows" role="group" aria-label="Free times"></div></div>
+      <div class="q"><span>How much yoga have you done?</span><div class="chips" id="levels" role="group" aria-label="Experience"></div></div>
+    </div>
+    <div class="card soft price" aria-live="polite">
+      <span class="tag g" id="prog-tag">Your programme</span>
+      <h3 id="prog-name"></h3>
+      <p class="small" id="prog-what"></p>
+      <div><p class="small" style="font-weight:700;color:var(--ink);margin-bottom:6px">Your live classes (IST)</p><div class="slots" id="slots"></div><p class="small muted" id="slot-note" style="margin-top:6px"></p></div>
+      <div id="plans"></div>
+      <p class="warn" id="safety" hidden></p>
+      <button class="btn btn-primary" id="trial" type="button">Start my 7-day free trial</button>
+      <p class="small muted">Only now do we ask for your phone number. A reminder two days before the trial ends; cancel in one tap.</p>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="week" role="tabpanel" aria-labelledby="tab-week" hidden>
+  <div class="head"><span class="fixref">Fixes F3 and F5 · problem P2</span><h2>My week: a habit, not an attendance count</h2><p class="small">Tap a day to mark it done live, done on catch-up, or missed. Two grace days a week keep the streak alive; two misses in a row bring a short catch-up, not a guilt message.</p></div>
+  <div class="grid g2">
+    <div class="card" style="display:grid;gap:14px">
+      <div class="days" id="days"></div>
+      <div><div class="small" style="display:flex;justify-content:space-between;font-weight:700;color:var(--ink);margin-bottom:6px"><span>Days practised this week</span><span id="goal-txt"></span></div><div class="meter"><i id="meter"></i></div></div>
+      <div class="stat"><div><b id="st-days">0</b><span>days practised</span></div><div><b id="st-catch">0</b><span>on catch-up</span></div><div><b id="st-grace">2</b><span>grace days left</span></div></div>
+      <div class="nudge" id="nudge" hidden><b>Missed two days in a row. That is normal.</b><span class="small">Here is a 20-minute "short version" of today's class you can do whenever suits you. No streak lost.</span><button class="btn btn-primary" id="nudge-do" type="button">Do the 20-minute catch-up</button></div>
+      <p class="small" id="streak-txt" style="font-weight:700;color:var(--ink)"></p>
+    </div>
+    <div class="card">
+      <h3>Sunday check-in, 30 seconds</h3>
+      <p class="small muted" style="margin:4px 0 12px">Tied to your goal, so progress is more than showing up.</p>
+      <div class="range"><label for="r-sleep">Sleep <output id="o-sleep"></output></label><input type="range" id="r-sleep" min="1" max="5" value="3"></div>
+      <div class="range"><label for="r-energy">Energy <output id="o-energy"></output></label><input type="range" id="r-energy" min="1" max="5" value="3"></div>
+      <div class="range"><label for="r-goal" id="goal-label">Stiffness <output id="o-goal"></output></label><input type="range" id="r-goal" min="1" max="5" value="3"></div>
+      <p class="small" id="checkin-out" style="margin-top:8px"></p>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="race" role="tabpanel" aria-labelledby="tab-race" hidden>
+  <div class="head"><span class="fixref">Fixes F10, F11 and F14 · problems P7, P8</span><h2>From registration to race day, and after</h2><p class="small">Every registrant gets a plan the day they sign up, with yoga-for-runners mobility from Times Health+. The demo "today" is 1 Nov 2026; the race dates are the published ones.</p></div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="q"><label for="city" style="font-weight:700;color:var(--ink)">Race</label><select id="city"></select></div>
+      <div class="q"><span>Distance</span><div class="chips" id="dist" role="group" aria-label="Distance"></div></div>
+      <div class="q"><span>Is this your first race?</span><div class="chips" id="first" role="group" aria-label="First race"></div></div>
+      <p class="warn" id="race-warn" hidden></p>
+      <div class="card soft" style="display:grid;gap:6px"><span class="small muted">Weeks to race day</span><div class="big" id="weeks-to" data-testid="th-weeks"></div><p class="small" id="race-sum"></p></div>
+    </div>
+    <div class="card"><h3 style="margin-bottom:10px">Your plan, week by week</h3><ol class="weeks" id="plan"></ol></div>
+  </div>
+</section>
+
+<section class="panel" id="biz" role="tabpanel" aria-labelledby="tab-biz" hidden>
+  <div class="head"><span class="fixref">Why the bridge matters · problem P7</span><h2>How many runners become members</h2><p class="small">Every rate below is an assumption to test, not a Times Health number. The runners-per-race default is my launch figure for Delhi 2026.</p></div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="range"><label for="b-run">Runners per race <output id="ob-run"></output></label><input type="range" id="b-run" min="2000" max="40000" step="1000" value="15000"></div>
+      <div class="range"><label for="b-races">Races a year <output id="ob-races"></output></label><input type="range" id="b-races" min="1" max="6" step="1" value="4"></div>
+      <div class="range"><label for="b-plan">Start the training plan <output id="ob-plan"></output></label><input type="range" id="b-plan" min="5" max="80" step="5" value="40"></div>
+      <div class="range"><label for="b-trial">Plan users who start a trial <output id="ob-trial"></output></label><input type="range" id="b-trial" min="5" max="60" step="5" value="20"></div>
+      <div class="range"><label for="b-paid">Trials that become paid <output id="ob-paid"></output></label><input type="range" id="b-paid" min="5" max="60" step="5" value="25"></div>
+      <div class="range"><label for="b-price">Price a year (illustrative) <output id="ob-price"></output></label><input type="range" id="b-price" min="1999" max="9999" step="500" value="4999"></div>
+    </div>
+    <div class="card soft" style="display:grid;gap:8px;align-content:start">
+      <span class="small muted">New paying members a year, from races alone</span>
+      <div class="big" id="b-members" data-testid="th-members"></div>
+      <p class="small" id="b-funnel"></p>
+      <span class="small muted" style="margin-top:8px">Subscription revenue a year</span>
+      <div class="big" style="font-size:30px;line-height:36px" id="b-rev"></div>
+      <p class="small muted">Today the bridge does not exist, so the comparison is against zero. The pilot in the study tests these rates on the Bengaluru race first.</p>
+    </div>
+  </div>
+</section>
+
+</div>
+</main>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(function(){
+  'use strict';
+  function $(s){return document.querySelector(s);}
+  function el(tag,attrs,text){var n=document.createElement(tag);if(attrs)Object.keys(attrs).forEach(function(k){n.setAttribute(k,attrs[k]);});if(text!=null)n.textContent=text;return n;}
+  var toastT;function toast(m){var t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){t.hidden=true;},2600);}
+  var inr=new Intl.NumberFormat('en-IN');
+
+  var tabs=[].slice.call(document.querySelectorAll('[role=tab]'));
+  function select(id,push){
+    tabs.forEach(function(t){var on=t.getAttribute('aria-controls')===id;t.setAttribute('aria-selected',String(on));t.tabIndex=on?0:-1;document.getElementById(t.getAttribute('aria-controls')).hidden=!on;});
+    if(push&&history.replaceState)history.replaceState(null,'','#'+id);
+  }
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){select(t.getAttribute('aria-controls'),true);});
+    t.addEventListener('keydown',function(e){var d=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;if(!d)return;var n=tabs[(i+d+tabs.length)%tabs.length];n.focus();n.click();});
+  });
+  function fromHash(){var h=(location.hash||'').slice(1);if(['start','week','race','biz'].indexOf(h)>-1)select(h,false);}
+  window.addEventListener('hashchange',fromHash);
+  var start=(location.hash||'').slice(1);
+  select(['start','week','race','biz'].indexOf(start)>-1?start:'start',false);
+
+  // Single- or multi-select chip groups.
+  function chips(host,items,state,multi,onChange){
+    var h=$(host);
+    function draw(){
+      h.innerHTML='';
+      items.forEach(function(it){
+        var on=multi?state.val.indexOf(it[0])>-1:state.val===it[0];
+        var b=el('button',{type:'button','class':'chip','aria-pressed':String(on),'data-v':it[0]},it[1]);
+        b.addEventListener('click',function(){
+          if(multi){var i=state.val.indexOf(it[0]);if(i>-1)state.val.splice(i,1);else state.val.push(it[0]);}
+          else state.val=it[0];
+          draw();onChange();
+        });
+        h.appendChild(b);
+      });
+    }
+    draw();
+  }
+
+  // ---------- 1. Start ----------
+  // The published IST batches.
+  var SLOTS=[['5:15 AM','early'],['6:30 AM','early'],['8:00 AM','morning'],['9:00 AM','morning'],['4:45 PM','evening'],['6:00 PM','evening'],['7:30 PM','night'],['8:30 PM','night']];
+  var GOALS=[
+    ['fit','Feel fitter','Daily yoga','Daily live yoga with The Yoga Institute teachers, a weekly pranayama class and a catch-up for every class.',null,'Stiffness'],
+    ['weight','Lose weight','Daily yoga + mindful eating','Daily yoga plus the nutrition and mindful-eating sessions, with a weekly weigh-in in your check-in.',null,'Cravings'],
+    ['sugar','Prediabetes or sugar','12-week blood sugar programme','Classes chosen for blood sugar, the diet team every week, and fasting sugar tracked weekly.','Check with your doctor before starting, and keep taking any medicine you have been prescribed.','Fasting sugar (feel)'],
+    ['bp','Blood pressure','12-week blood pressure programme','Gentle asana, breathing and relaxation, the diet team for salt and sleep, and home BP readings tracked weekly.','Check with your doctor first. Some inversions and breath-holds are left out for you.','Stress'],
+    ['pcos','PCOS','12-week PCOS programme','Strength-building yoga, the diet team, and cycle regularity and energy tracked weekly.','Check with your doctor or gynaecologist before starting.','Energy'],
+    ['back','Back pain','12-week back care programme','Mobility and core classes, a short daily routine, and pain levels tracked weekly.','If you have numbness, weakness or pain after an injury, see a doctor first.','Back pain'],
+    ['run','Train for a race','Yoga for runners + race plan','Mobility and recovery classes alongside a running plan to race day. See the Race plan tab.',null,'Soreness']
+  ];
+  var WIN=[['early','Early morning, 5 to 7'],['morning','Morning, 8 to 10'],['evening','Evening, 4:30 to 7'],['night','Night, 7:30 to 9:30']];
+  var LEV=[['new','New to yoga'],['some','Done some'],['regular','Practise regularly']];
+  var S={goal:{val:'fit'},win:{val:['evening']},lev:{val:'new'}};
+  function g(){return GOALS.filter(function(x){return x[0]===S.goal.val;})[0];}
+  function renderStart(){
+    var goal=g(), track=/^12-week/.test(goal[2]);
+    $('#prog-name').textContent=goal[2];
+    $('#prog-what').textContent=goal[3]+(S.lev.val==='new'?' Your first two weeks use the beginner sequence.':'');
+    $('#prog-tag').textContent=track?'Condition programme':'Your programme';
+    var match=SLOTS.filter(function(s){return S.win.val.indexOf(s[1])>-1;});
+    var sl=$('#slots');sl.innerHTML='';
+    if(match.length){
+      match.forEach(function(s,i){sl.appendChild(el('span',{'class':'slot '+(i===0?'main':i===1?'back':''),'data-slot':s[0]},s[0]+(i===0?' · default':i===1?' · backup':'')));});
+      $('#slot-note').textContent='Reminders for your default slot; one tap moves you to the backup. Every class is also on catch-up.';
+    }else{
+      sl.appendChild(el('span',{'class':'slot','data-slot':'none'},'No live slot fits'));
+      $('#slot-note').textContent='None of the eight live batches fits these times, so your plan uses the 20-minute catch-up versions instead.';
+    }
+    var p=$('#plans');p.innerHTML='';
+    var plans=track?[['12 weeks, everything included','₹5,999','₹500 a week; diet team and classes',true]]:[['Yearly','₹4,999','about ₹417 a month',true],['Monthly','₹699','cancel any time',false]];
+    plans.forEach(function(x){var d=el('div',{'class':'plan'+(x[3]?' best':''),'data-plan':x[0]});var l=el('div');l.appendChild(el('div',{'class':'small',style:'font-weight:700;color:var(--ink)'},x[0]));l.appendChild(el('div',{'class':'small muted'},x[2]));d.appendChild(l);d.appendChild(el('b',null,x[1]));p.appendChild(d);});
+    p.appendChild(el('p',{'class':'small muted',style:'margin-top:6px'},'Illustrative prices for this prototype, shown before sign-up as fix F1 asks.'));
+    var sf=$('#safety');sf.hidden=!goal[4];sf.textContent=goal[4]||'';
+    $('#goal-label').firstChild.nodeValue=goal[5]+' ';
+    renderCheckin();
+  }
+  chips('#goals',GOALS.map(function(x){return [x[0],x[1]];}),S.goal,false,renderStart);
+  chips('#windows',WIN,S.win,true,renderStart);
+  chips('#levels',LEV,S.lev,false,renderStart);
+  $('#trial').addEventListener('click',function(){toast('Next step: your phone number and an OTP. Nothing is sent in this prototype.');});
+
+  // ---------- 2. My week ----------
+  var NAMES=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  var ORDER=['planned','live','catchup','missed'];
+  var LABEL={planned:'Planned',live:'Live',catchup:'Catch-up',missed:'Missed'};
+  var ICON={planned:'·',live:'✓',catchup:'↺',missed:'×'};
+  var week=['live','catchup','missed','planned','planned','planned','planned'];
+  var GRACE=2, TARGET=3;
+  function renderWeek(){
+    var d=$('#days');d.innerHTML='';
+    week.forEach(function(st,i){
+      var b=el('button',{type:'button','class':'day','data-day':String(i),'data-state':st,'aria-label':NAMES[i]+': '+LABEL[st]+'. Tap to change.'});
+      b.appendChild(el('span',{'class':'d'},NAMES[i]));b.appendChild(el('span',{'class':'i','aria-hidden':'true'},ICON[st]));b.appendChild(el('span',{'class':'s'},LABEL[st]));
+      b.addEventListener('click',function(){week[i]=ORDER[(ORDER.indexOf(st)+1)%ORDER.length];renderWeek();});
+      d.appendChild(b);
+    });
+    var done=week.filter(function(s){return s==='live'||s==='catchup';}).length;
+    var catchup=week.filter(function(s){return s==='catchup';}).length;
+    var missed=week.filter(function(s){return s==='missed';}).length;
+    var graceLeft=Math.max(0,GRACE-missed);
+    $('#st-days').textContent=done;$('#st-catch').textContent=catchup;$('#st-grace').textContent=graceLeft;
+    $('#meter').style.width=Math.min(100,Math.round(done/TARGET*100))+'%';
+    $('#goal-txt').textContent=done+' of '+TARGET+(done>=TARGET?', goal met':'');
+    var two=false;for(var i=1;i<week.length;i++){if(week[i]==='missed'&&week[i-1]==='missed')two=true;}
+    $('#nudge').hidden=!two;
+    $('#streak-txt').textContent=missed>GRACE?'More than two misses this week: the streak pauses, and next week starts fresh. No penalty.':'Streak alive: 6 weeks. '+(graceLeft===GRACE?'Both grace days unused.':graceLeft+' grace day'+(graceLeft===1?'':'s')+' left this week.');
+  }
+  $('#nudge-do').addEventListener('click',function(){
+    for(var i=week.length-1;i>0;i--){if(week[i]==='missed'&&week[i-1]==='missed'){week[i]='catchup';break;}}
+    renderWeek();toast('20-minute catch-up logged. Streak kept.');
+  });
+  renderWeek();
+  var WORDS=['','Poor','Low','OK','Good','Great'];
+  function renderCheckin(){
+    var s=+$('#r-sleep').value,e=+$('#r-energy').value,gl=+$('#r-goal').value;
+    $('#o-sleep').textContent=WORDS[s];$('#o-energy').textContent=WORDS[e];$('#o-goal').textContent=gl+' / 5';
+    var low=s<=2||e<=2;
+    $('#checkin-out').textContent=low?'Low sleep or energy this week: next week\'s plan swaps one class for a restorative session and a short evening breathing practice.':'Next week keeps the same plan. Your trend chart updates every Sunday.';
+  }
+  ['#r-sleep','#r-energy','#r-goal'].forEach(function(s){$(s).addEventListener('input',renderCheckin);});
+
+  // ---------- 3. Race plan ----------
+  var TODAY=Date.UTC(2026,10,1);
+  var RACES=[['blr','Bengaluru · Sun 20 Dec 2026',Date.UTC(2026,11,20),'Mumbai, 14 Feb 2027'],['mum','Mumbai · Sun 14 Feb 2027',Date.UTC(2027,1,14),'Delhi, 28 Mar 2027'],['del','Delhi · Sun 28 Mar 2027',Date.UTC(2027,2,28),'Bengaluru, December 2027']];
+  var DIST=[['3','3K'],['5','5K'],['10','10K'],['21.1','21.1K']];
+  var MIN={first:{'3':4,'5':6,'10':10,'21.1':14},exp:{'3':2,'5':4,'10':6,'21.1':10}};
+  var R={city:{val:'mum'},dist:{val:'10'},first:{val:'yes'}};
+  var city=$('#city');RACES.forEach(function(r){var o=el('option',{value:r[0]},r[1]);city.appendChild(o);});city.value=R.city.val;
+  city.addEventListener('change',function(){R.city.val=city.value;renderRace();});
+  function renderRace(){
+    var race=RACES.filter(function(r){return r[0]===R.city.val;})[0];
+    var weeks=Math.floor((race[2]-TODAY)/(7*864e5));
+    var km=parseFloat(R.dist.val), first=R.first.val==='yes';
+    var need=MIN[first?'first':'exp'][R.dist.val];
+    $('#weeks-to').textContent=weeks;
+    var w=$('#race-warn');
+    if(weeks<need){w.hidden=false;w.textContent='Safely building to '+R.dist.val+'K'+(first?' as a first-timer':'')+' takes about '+need+' weeks; you have '+weeks+'. Pick a shorter distance or a later race in the series. Entries can move to a later city under fix F12.';}
+    else w.hidden=true;
+    var peak=km<=5?km:km===10?10:18;
+    var base=first?Math.min(2,km):Math.min(4,km);
+    var runs=first?3:4;
+    $('#race-sum').textContent=runs+' runs and 2 yoga-for-runners sessions a week; longest run '+peak+' km, '+(weeks>1?'two weeks':'one week')+' before race day.';
+    var ol=$('#plan');ol.innerHTML='';
+    var build=Math.max(1,weeks-1);
+    for(var i=1;i<=weeks;i++){
+      var li=el('li',{'data-week':String(i)});
+      if(i===weeks){li.className='race';li.appendChild(el('b',null,'Week '+i+' · Race week'));li.appendChild(el('span',{'class':'sub'},'Two easy 20-minute runs, mobility on Friday, race on Sunday. Heat and air-quality update and hydration plan two days before (F14).'));}
+      else if(i===weeks-1&&weeks>3){li.className='taper';li.appendChild(el('b',null,'Week '+i+' · Taper'));li.appendChild(el('span',{'class':'sub'},'Volume down by a third. Long run '+Math.round(peak*0.6)+' km. Two yoga-for-runners sessions.'));}
+      else{var long=Math.round((base+(peak-base)*Math.min(1,i/Math.max(1,build-1)))*10)/10;li.appendChild(el('b',null,'Week '+i+(i%4===0?' · Easier week':'')));li.appendChild(el('span',{'class':'sub'},runs+' runs, long run '+(i%4===0?Math.round(long*0.75*10)/10:long)+' km; yoga for runners on Tuesday and Saturday'+(first&&i<=2?'; walk breaks are fine':'')+'.'));}
+      ol.appendChild(li);
+    }
+    var after=el('li',{'data-week':'after'});after.appendChild(el('b',null,'The day after · Recovery and a next goal'));after.appendChild(el('span',{'class':'sub'},'Results, photos and your certificate on race day. A 30-day recovery and mobility programme, then '+race[3]+' as your next goal (F11).'));ol.appendChild(after);
+  }
+  chips('#dist',DIST,R.dist,false,renderRace);
+  chips('#first',[['yes','Yes, my first'],['no','No']],R.first,false,renderRace);
+  renderRace();
+
+  // ---------- 4. Business view ----------
+  function lakh(n){return n>=1e7?'₹'+(n/1e7).toFixed(2)+' crore':'₹'+(n/1e5).toFixed(1)+' lakh';}
+  function biz(){
+    var run=+$('#b-run').value,races=+$('#b-races').value,plan=+$('#b-plan').value,trial=+$('#b-trial').value,paid=+$('#b-paid').value,price=+$('#b-price').value;
+    $('#ob-run').textContent=inr.format(run);$('#ob-races').textContent=races;$('#ob-plan').textContent=plan+'%';$('#ob-trial').textContent=trial+'%';$('#ob-paid').textContent=paid+'%';$('#ob-price').textContent='₹'+inr.format(price);
+    var all=run*races, p=Math.round(all*plan/100), t=Math.round(p*trial/100), m=Math.round(t*paid/100);
+    $('#b-members').textContent=inr.format(m);
+    $('#b-funnel').textContent=inr.format(all)+' runners → '+inr.format(p)+' start the plan → '+inr.format(t)+' start a trial → '+inr.format(m)+' pay.';
+    $('#b-rev').textContent=lakh(m*price);
+  }
+  ['#b-run','#b-races','#b-plan','#b-trial','#b-paid','#b-price'].forEach(function(s){$(s).addEventListener('input',biz);});
+  biz();
+  renderStart();
+})();
+</script>
+</body>
+</html>
