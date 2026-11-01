@@ -88,7 +88,7 @@ const assets = [
   'deli-chic',
   'pw-study',
   'amar-ujala',
-  'ET-study',
+  'ET_Study',
   'TimesHealth_Study',
 ];
 

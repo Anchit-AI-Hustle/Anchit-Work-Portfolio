@@ -1,4 +1,4 @@
-// The two Times Internet studies, /ET-study (The Economic Times, ET Markets,
+// The two Times Internet studies, /ET_Study (The Economic Times, ET Markets,
 // ET Prime) and /TimesHealth_Study (Times Health+, its yoga programme and the
 // Half Marathon), work at phone, tablet and desktop width under the site's
 // real CSP.
@@ -18,7 +18,7 @@
 //   or en dash, never the words GitHub or repository, and every user quote
 //   carries a dated, linked source.
 //
-//   The URLs the owner shared, /ET-study and /TimesHealth_Study, are the
+//   The URLs the owner shared, /ET_Study and /TimesHealth_Study, are the
 //   folder names, so Vercel serves them from disk. A rewrite to an .html
 //   destination would 404 under cleanUrls, so none is allowed for them.
 //
@@ -51,11 +51,11 @@ const VIEWPORTS = [
 ];
 
 const PROTOS = [
-  { key: 'et', path: '/ET-study/prototype', publicUrl: '/ET-study/prototype', study: '/ET-study' },
+  { key: 'et', path: '/ET_Study/prototype', publicUrl: '/ET_Study/prototype', study: '/ET_Study' },
   { key: 'th', path: '/TimesHealth_Study/prototype', publicUrl: '/TimesHealth_Study/prototype', study: '/TimesHealth_Study' },
 ];
 const PAGES = [
-  { key: 'et', path: '/ET-study', publicUrl: '/ET-study', minProblems: 6, minFixes: 8 },
+  { key: 'et', path: '/ET_Study', publicUrl: '/ET_Study', minProblems: 6, minFixes: 8 },
   { key: 'th', path: '/TimesHealth_Study', publicUrl: '/TimesHealth_Study', minProblems: 6, minFixes: 8 },
 ];
 
@@ -385,7 +385,7 @@ async function run(browser, vp, pg) {
 
 (async () => {
   // The owner's URLs are served straight from disk: folders named exactly
-  // /ET-study and /TimesHealth_Study. A vercel.json rewrite to an .html file
+  // /ET_Study and /TimesHealth_Study. A vercel.json rewrite to an .html file
   // 404s under cleanUrls (routes-resolve.js fails the build for one).
   for (const pg of [...PAGES, ...PROTOS]) {
     const isPage = PAGES.includes(pg);
@@ -394,6 +394,12 @@ async function run(browser, vp, pg) {
     check(`${pg.publicUrl} is a built file in www/, no rewrite needed`, ok, ok ? '' : 'missing for ' + url);
     const rw = (vercel.rewrites || []).filter((r) => r.source.toLowerCase().startsWith(pg.publicUrl.toLowerCase()));
     check(`${pg.publicUrl} has no vercel.json rewrite to break it`, rw.length === 0, rw.map((r) => r.source).join(','));
+  }
+  // The first URL shared was /ET-study; it now lives at /ET_Study, to match
+  // /TimesHealth_Study. Links already sent must still land.
+  for (const [from, to] of [['/ET-study', '/ET_Study'], ['/ET-study/prototype', '/ET_Study/prototype']]) {
+    const r = (vercel.redirects || []).find((x) => x.source === from);
+    check(`${from} redirects permanently to ${to}`, !!r && r.destination === to && r.permanent === true, r ? r.destination : 'missing');
   }
   const browser = await chromium.launch();
   for (const vp of VIEWPORTS) {
