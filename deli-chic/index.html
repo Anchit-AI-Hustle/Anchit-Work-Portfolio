@@ -174,12 +174,13 @@
     }
 
     /* Staggered Scroll Reveal Transitions */
-    .scroll-reveal {
+    /* Armed by script (html.js): no JS, or a script error, shows the content. */
+    .js .scroll-reveal {
       opacity: 0;
       transform: translateY(24px) scale(0.98);
       transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .scroll-reveal.in-view {
+    .js .scroll-reveal.in-view {
       opacity: 1;
       transform: translateY(0) scale(1);
     }
@@ -198,7 +199,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background-color 0.4s ease;
     }
     .deli-chapter-item {
       position: absolute;
@@ -211,7 +211,6 @@
       opacity: 0;
       pointer-events: none;
       will-change: opacity, transform;
-      transition: transform 0.4s ease;
       z-index: 2;
     }
     .deli-seal {
@@ -266,6 +265,46 @@
       background: rgba(255, 255, 255, 0.22);
       color: #FFFFFF;
     }
+    @media (max-width: 639px) {
+      /* Three pills at 0.78rem and 0.14em tracking were 15% wider than a
+         390px screen: the third ran off the edge. */
+      .deli-stage-nav { gap: 6px; left: 12px; right: 12px; }
+      .deli-stage-btn { padding: 0 6px; font-size: 0.62rem; letter-spacing: 0.06em; line-height: 1.15; text-align: center; }
+    }
+    html[data-consent-open="1"] .deli-stage-nav { bottom: calc(22px + var(--consent-h, 0px)); }
+    html[data-consent-open="1"] .bwalk-hint { bottom: calc(26px + var(--consent-h, 0px)); }
+    /* Anchor jumps land below the fixed header, not under it. */
+    [id] { scroll-margin-top: 72px; }
+    /* Sideways drags magnify, vertical ones scroll the page. */
+    .loupe-container { touch-action: pan-y; }
+
+    /* Below lg the header had no navigation at all, only Basket. */
+    .deli-menu-btn { display: none; }
+    @media (max-width: 1023px) {
+      .deli-menu-btn {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 40px; height: 40px; border-radius: 12px;
+        border: 1px solid rgba(205, 38, 83, 0.3); background: #FFFFFF; color: #4A0E17; cursor: pointer;
+      }
+      .deli-menu-btn i { display: block; width: 16px; height: 2px; background: currentColor; border-radius: 2px; position: relative; }
+      .deli-menu-btn i::before, .deli-menu-btn i::after { content: ""; position: absolute; left: 0; width: 16px; height: 2px; background: currentColor; border-radius: 2px; }
+      .deli-menu-btn i::before { top: -5px; }
+      .deli-menu-btn i::after { top: 5px; }
+      .deli-menu-panel {
+        position: absolute; left: 0; right: 0; top: 100%;
+        background: #FFFDF9; border-bottom: 2px solid rgba(205, 38, 83, 0.22);
+        box-shadow: 0 18px 30px rgba(74, 14, 23, 0.12);
+        padding: 8px 24px 16px; display: none;
+      }
+      .deli-menu-panel.is-open { display: block; }
+      .deli-menu-panel a {
+        display: block; padding: 13px 0; border-bottom: 1px solid rgba(205, 38, 83, 0.1);
+        color: #4A0E17; font-size: 0.8rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase;
+      }
+      .deli-menu-panel a:last-child { border-bottom: 0; color: #047857; }
+    }
+    @media (min-width: 1024px) { .deli-menu-panel { display: none !important; } }
+
     .deli-stage-btn.active {
       background: #FFA517;
       color: #4A0E17;
@@ -320,7 +359,9 @@
       border: 1px solid rgba(205, 38, 83, 0.16);
       border-radius: 26px;
       box-shadow: 0 14px 40px -10px rgba(74, 14, 23, 0.08);
-      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      /* Not `all`: the tilt writes transform on every mouse move, and easing
+         each of those writes over 350ms left the card trailing the cursor. */
+      transition: box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .deli-card:hover {
       transform: translateY(-6px);
@@ -522,16 +563,20 @@
 
   .bwalk-cap {
     position: absolute; left: 0; right: 0; bottom: clamp(74px, 12vh, 132px);
-    text-align: center; color: #FFF9F4; padding: 0 24px;
+    text-align: center; color: #FFF9F4; padding: 28px 24px 22px;
     pointer-events: none; will-change: opacity, transform;
+    /* The photo stages pass right behind the words; keep them readable. */
+    background: radial-gradient(60% 75% at 50% 55%, rgba(24, 6, 9, 0.6), rgba(24, 6, 9, 0) 72%);
+    text-shadow: 0 2px 14px rgba(24, 6, 9, 0.8), 0 1px 3px rgba(24, 6, 9, 0.6);
   }
-  .bwalk-cap b { display: block; font-family: var(--font-serif-chic, Georgia, serif); font-size: clamp(1.85rem, 5vw, 3.3rem); letter-spacing: -0.02em; line-height: 1.04; }
+  .bwalk-cap b { display: block; font-family: var(--font-serif); font-size: clamp(1.85rem, 5vw, 3.3rem); letter-spacing: -0.02em; line-height: 1.04; }
   .bwalk-cap span { display: block; margin-top: 10px; font-size: clamp(.95rem, 2.1vw, 1.1rem); font-weight: 500; opacity: .84; max-width: 36ch; margin-inline: auto; }
   .bwalk-step {
     position: absolute; top: clamp(74px, 11vh, 120px); left: 0; right: 0;
     text-align: center; color: #C59A45; font-size: .72rem;
     letter-spacing: .32em; text-transform: uppercase; font-weight: 800;
     pointer-events: none;
+    text-shadow: 0 1px 8px rgba(24, 6, 9, 0.9);
   }
   .bwalk-hint {
     position: absolute; left: 0; right: 0; bottom: 26px; text-align: center;
@@ -547,12 +592,16 @@
   }
 
   .bwalk:not(.is-armed) .bwalk-rail { height: 100vh; }
-  .bwalk:not(.is-armed) .bwalk-layer { opacity: 1; transform: translate(-50%, -50%); }
+  /* One composed frame, the cold room, not all five layers stacked. */
+  .bwalk:not(.is-armed) .bwalk-layer { opacity: 0; transform: translate(-50%, -50%); }
+  .bwalk:not(.is-armed) .bwalk-layer[data-in="0"] { opacity: 1; }
+  .bwalk:not(.is-armed) .bwalk-hint { display: none; }
   @media (prefers-reduced-motion: reduce) {
     .bwalk-rail { height: 100vh !important; }
     .bwalk-layer, .bwalk-cap, .bwalk-hint { transition: none !important; }
   }
   </style>
+<script>document.documentElement.classList.add('js');</script>
 <!-- seo:auto:start -->
 <!-- Managed by scripts/seo-inject.mjs, edit seo.config.json, not here. -->
 <meta name="description" content="Artisanal cuts, 100% antibiotic residue-free poultry, handcrafted charcuterie and gourmet dim sum. Chilled 0°C–4°C delivery across Delhi NCR." />
@@ -627,6 +676,7 @@
 
     <!-- Action Controls -->
     <div class="flex items-center gap-2.5 shrink-0">
+      <button type="button" class="deli-menu-btn" id="deliMenuBtn" aria-expanded="false" aria-controls="deliMenuPanel" aria-label="Open menu"><i aria-hidden="true"></i></button>
       <!-- WhatsApp Direct Concierge -->
       <a href="https://wa.link/bk4b8e" target="_blank" rel="noreferrer noopener" class="hidden xl:inline-flex items-center gap-2 px-3.5 py-2 rounded-full border border-emerald-600/30 text-emerald-800 text-xs font-bold uppercase tracking-wider hover:bg-emerald-50 transition-all bg-emerald-50/50">
         <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
@@ -640,6 +690,14 @@
       </button>
     </div>
   </div>
+  <nav class="deli-menu-panel" id="deliMenuPanel" aria-label="Sections">
+    <a href="#larder">The Larder</a>
+    <a href="#masterCarver">Master Carver Loupe</a>
+    <a href="#boucherieExperience">Haute Standards</a>
+    <a href="#hubs">NCR Hubs (4)</a>
+    <a href="#heritage">Our Story</a>
+    <a href="https://wa.link/bk4b8e" target="_blank" rel="noreferrer noopener">WhatsApp Concierge ↗</a>
+  </nav>
 </header>
 
 <!-- ================= HERO SECTION: CULINARY SHOWCASE WITH LIVE ATMOSPHERIC CANVAS ================= -->
@@ -698,16 +756,16 @@
     <div class="lg:col-span-5 relative" id="masterCarver">
       <!-- Interactive Cut Tabs for Loupe -->
       <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-white/80 border border-[#CD2653]/20 mb-3 text-[10px] font-bold uppercase tracking-wider overflow-x-auto">
-        <button onclick="setLoupeCut('charcuterie')" id="loupeTab-charcuterie" class="py-1.5 px-3 rounded-xl bg-[#CD2653] text-white transition-all whitespace-nowrap">
+        <button type="button" aria-pressed="true" onclick="setLoupeCut('charcuterie')" id="loupeTab-charcuterie" class="py-1.5 px-3 rounded-xl bg-[#CD2653] text-white transition-all whitespace-nowrap">
           Charcuterie
           </button>
-        <button onclick="setLoupeCut('poultry')" id="loupeTab-poultry" class="py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap">
+        <button type="button" aria-pressed="false" onclick="setLoupeCut('poultry')" id="loupeTab-poultry" class="py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap">
           Fresh Breast
           </button>
-        <button onclick="setLoupeCut('marinade')" id="loupeTab-marinade" class="py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap">
+        <button type="button" aria-pressed="false" onclick="setLoupeCut('marinade')" id="loupeTab-marinade" class="py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap">
           Lucknowi Cut
           </button>
-        <button onclick="setLoupeCut('momos')" id="loupeTab-momos" class="py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap">
+        <button type="button" aria-pressed="false" onclick="setLoupeCut('momos')" id="loupeTab-momos" class="py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap">
           Prawn Dim Sum
           </button>
       </div>
@@ -830,7 +888,7 @@
           </div>
         </div>
         <div class="lg:col-span-5 hidden lg:block">
-          <img src="/assets/brand/u-1599488615731-7e5c2823ff28-800.jpg" loading="lazy" decoding="async" alt="Royal Awadhi Shahi Saffron Marinade" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
+          <img src="/assets/brand/dc-lucknowi-marinade-800.jpg" loading="lazy" decoding="async" alt="Royal Awadhi Shahi Saffron Marinade" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
         </div>
       </div>
     </div>
@@ -951,22 +1009,22 @@
 
   <!-- Category Filter Tabs -->
   <div class="flex items-center gap-2.5 overflow-x-auto pb-4 mb-10 text-xs font-bold uppercase tracking-wider scrollbar-none" id="categoryTabs">
-    <button onclick="filterCategory('all')" id="tab-all" class="cat-pill px-5 py-2.5 rounded-full bg-[#CD2653] text-white shadow-sm transition-all whitespace-nowrap">
+    <button type="button" aria-pressed="true" onclick="filterCategory('all')" id="tab-all" class="cat-pill px-5 py-2.5 rounded-full bg-[#CD2653] text-white shadow-sm transition-all whitespace-nowrap">
       All Larder (12)
       </button>
-    <button onclick="filterCategory('poultry')" id="tab-poultry" class="cat-pill px-5 py-2.5 rounded-full bg-white text-[#524842] border border-[#CD2653]/20 hover:border-[#CD2653] transition-all whitespace-nowrap">
+    <button type="button" aria-pressed="false" onclick="filterCategory('poultry')" id="tab-poultry" class="cat-pill px-5 py-2.5 rounded-full bg-white text-[#524842] border border-[#CD2653]/20 hover:border-[#CD2653] transition-all whitespace-nowrap">
       Fresh Poultry (3)
       </button>
-    <button onclick="filterCategory('charcuterie')" id="tab-charcuterie" class="cat-pill px-5 py-2.5 rounded-full bg-white text-[#524842] border border-[#CD2653]/20 hover:border-[#CD2653] transition-all whitespace-nowrap">
+    <button type="button" aria-pressed="false" onclick="filterCategory('charcuterie')" id="tab-charcuterie" class="cat-pill px-5 py-2.5 rounded-full bg-white text-[#524842] border border-[#CD2653]/20 hover:border-[#CD2653] transition-all whitespace-nowrap">
       Cold Cuts &amp; Sausages (4)
       </button>
-    <button onclick="filterCategory('ready-to-cook')" id="tab-ready-to-cook" class="cat-pill px-5 py-2.5 rounded-full bg-white text-[#524842] border border-[#CD2653]/20 hover:border-[#CD2653] transition-all whitespace-nowrap">
+    <button type="button" aria-pressed="false" onclick="filterCategory('ready-to-cook')" id="tab-ready-to-cook" class="cat-pill px-5 py-2.5 rounded-full bg-white text-[#524842] border border-[#CD2653]/20 hover:border-[#CD2653] transition-all whitespace-nowrap">
       Heat &amp; Eat / Marinades (3)
       </button>
-    <button onclick="filterCategory('momos')" id="tab-momos" class="cat-pill px-5 py-2.5 rounded-full bg-white text-[#524842] border border-[#CD2653]/20 hover:border-[#CD2653] transition-all whitespace-nowrap">
+    <button type="button" aria-pressed="false" onclick="filterCategory('momos')" id="tab-momos" class="cat-pill px-5 py-2.5 rounded-full bg-white text-[#524842] border border-[#CD2653]/20 hover:border-[#CD2653] transition-all whitespace-nowrap">
       Gourmet Dim Sum (1)
       </button>
-    <button onclick="filterCategory('sweet')" id="tab-sweet" class="cat-pill px-5 py-2.5 rounded-full bg-white text-[#524842] border border-[#CD2653]/20 hover:border-[#CD2653] transition-all whitespace-nowrap">
+    <button type="button" aria-pressed="false" onclick="filterCategory('sweet')" id="tab-sweet" class="cat-pill px-5 py-2.5 rounded-full bg-white text-[#524842] border border-[#CD2653]/20 hover:border-[#CD2653] transition-all whitespace-nowrap">
       Sugary Delights (1)
       </button>
   </div>
@@ -1171,13 +1229,13 @@
 <!-- ================= SLIDE-OVER BASKET DRAWER ================= -->
 <div id="basketModal" class="fixed inset-0 z-50 hidden">
   <div onclick="toggleBasket(false)" class="absolute inset-0 bg-black/75 backdrop-blur-sm"></div>
-  <div id="dcPanel" data-consent-pad class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-[#CD2653]/25 p-8 flex flex-col justify-between overflow-y-auto shadow-2xl text-[#1C1917]">
+  <div id="dcPanel" data-consent-pad role="dialog" aria-modal="true" aria-labelledby="dcBagTitle" tabindex="-1" class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-[#CD2653]/25 p-8 flex flex-col justify-between overflow-y-auto shadow-2xl text-[#1C1917]">
     <div>
       <!-- Drawer Header -->
       <div class="flex items-center justify-between border-b border-[#CD2653]/15 pb-4">
         <div>
           <span class="text-[10px] font-luxury font-bold uppercase tracking-widest text-[#CD2653]">Haute Boucherie</span>
-          <h3 class="text-xl font-serif-chic font-bold text-[#4A0E17]">Your Artisanal Basket</h3>
+          <h3 id="dcBagTitle" class="text-xl font-serif-chic font-bold text-[#4A0E17]">Your Artisanal Basket</h3>
         </div>
         <button onclick="toggleBasket(false)" class="text-xs uppercase tracking-widest text-[#CD2653] font-bold hover:underline">Close ✕</button>
       </div>
@@ -1210,10 +1268,10 @@
       <div>
         <label class="block text-[11px] font-bold uppercase tracking-wider text-[#6B625B] mb-1.5">Select NCR Delivery Slot:</label>
         <div class="grid grid-cols-2 gap-2 text-xs">
-          <button onclick="setSlot('Morning (10 AM–1 PM)')" id="slot-morning" class="slot-btn py-2 px-3 rounded-xl border border-[#CD2653] bg-[#CD2653] text-white font-bold transition-all">
+          <button type="button" aria-pressed="true" onclick="setSlot('Morning (10 AM–1 PM)')" id="slot-morning" class="slot-btn py-2 px-3 rounded-xl border border-[#CD2653] bg-[#CD2653] text-white font-bold transition-all">
             10 AM – 1 PM
             </button>
-          <button onclick="setSlot('Evening (5 PM–8 PM)')" id="slot-evening" class="slot-btn py-2 px-3 rounded-xl border border-[#CD2653]/30 bg-white text-[#524842] font-bold transition-all">
+          <button type="button" aria-pressed="false" onclick="setSlot('Evening (5 PM–8 PM)')" id="slot-evening" class="slot-btn py-2 px-3 rounded-xl border border-[#CD2653]/30 bg-white text-[#524842] font-bold transition-all">
             5 PM – 8 PM
             </button>
         </div>
@@ -1221,6 +1279,7 @@
 
       <!-- Promo Code Input -->
       <div class="flex gap-2">
+        <label for="promoInput" class="sr-only">Promo code</label>
         <input type="text" id="promoInput" placeholder="Enter Code (e.g. WoW20)" class="w-full px-4 py-2 rounded-xl border border-[#CD2653]/30 text-xs uppercase font-luxury font-bold focus:outline-none focus:border-[#CD2653]" />
         <button onclick="applyPromo()" class="px-5 py-2 rounded-xl bg-[#4A0E17] text-white font-bold text-xs uppercase hover:bg-[#2F090F] transition-all">
           Apply
@@ -1437,7 +1496,7 @@
         title: 'Lucknowi Shahi Saffron Marinade',
         desc: 'Infused with Awadhi mace, roasted gram flour, hung curd and royal saffron threads.',
         badge: 'Chef Master Marinade Inspection',
-        image: '/assets/brand/u-1599488615731-7e5c2823ff28-1200.jpg'
+        image: '/assets/brand/dc-lucknowi-marinade-1200.jpg'
       },
       momos: {
         title: 'Handcrafted Coastal Prawn Dim Sum',
@@ -1649,7 +1708,9 @@
 
     function initCardTilt() {
       if (prefersReducedMotion) return;
-      const cards = document.querySelectorAll('.deli-card, .tilt-card, .loupe-container');
+      // Not the loupe: tilting it moved the rect the magnifier reads, so the
+      // reticle drifted off the spot under the pointer.
+      const cards = document.querySelectorAll('.deli-card, .tilt-card');
       cards.forEach(card => {
         if (card.dataset.tiltBound) return;
         card.dataset.tiltBound = 'true';
@@ -1666,31 +1727,43 @@
           card.style.setProperty('--mouse-y', `${(y / rect.height) * 100}%`);
         });
         card.addEventListener('mouseleave', () => {
-          card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0) scale3d(1, 1, 1)';
+          // Clear it: a permanent inline transform blocked .deli-card:hover's lift for good.
+          card.style.transform = '';
         });
       });
     }
 
+    // One observer, and a trigger any height can meet. The Larder is ~5,750px
+    // tall on a phone, so a 0.12 ratio needed a 690px-tall visible slice it
+    // can never show on a short screen: the whole shop stayed at opacity 0.
+    let revealObserver = null;
     function initScrollReveal() {
-      if (!('IntersectionObserver' in window)) {
-        document.querySelectorAll('.scroll-reveal').forEach(el => el.classList.add('in-view'));
+      const pending = document.querySelectorAll('.scroll-reveal:not(.in-view)');
+      if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+        pending.forEach(el => el.classList.add('in-view'));
         return;
       }
-      const observer = new IntersectionObserver((entries, obs) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('in-view');
-            obs.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.12 });
-
-      document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+      if (!revealObserver) {
+        revealObserver = new IntersectionObserver((entries, obs) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('in-view');
+              obs.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0, rootMargin: '0px 0px -8% 0px' });
+      }
+      pending.forEach(el => {
+        // Already scrolled past (reload mid-page, anchor jump): show it now.
+        if (el.getBoundingClientRect().bottom < 0) el.classList.add('in-view');
+        else revealObserver.observe(el);
+      });
     }
 
     function filterCategory(cat) {
       currentFilter = cat;
       document.querySelectorAll('.cat-pill').forEach(btn => {
+        btn.setAttribute('aria-pressed', String(btn.id === `tab-${cat}`));
         btn.classList.remove('bg-[#CD2653]', 'text-white', 'shadow-sm');
         btn.classList.add('bg-white', 'text-[#524842]');
       });
@@ -1903,29 +1976,37 @@
         const top = wrap.getBoundingClientRect().top;
         const p = Math.min(1, Math.max(0, -top / total()));
         const t = p * 3;
-        let r = 0, g = 0, b = 0;
-
+        // A handoff, not a crossfade: the outgoing chapter is fully gone at
+        // t = i + 1 before the next one begins to arrive. Fading both over the
+        // same window stacked two headlines and two paragraphs on top of each
+        // other at half opacity, unreadable for a tenth of the scroll.
+        const w = [];
+        let cur = 0;
         for (let i = 0; i < 3; i++) {
-          const a = i === 0 ? 1 : ss(i - 0.15, i + 0.15, t);
-          const z = i === 2 ? 1 : 1 - ss(i + 0.85, i + 1.15, t);
-          const w = a * z;
-          chs[i].style.opacity = w.toFixed(3);
-          chs[i].style.transform = `translateY(${((1 - w) * 30).toFixed(1)}px)`;
-          chs[i].style.pointerEvents = w > 0.5 ? 'auto' : 'none';
-
-          const btn = document.getElementById(`deliNav${i}`);
-          if (btn) {
-            if (w > 0.5) {
-              btn.classList.add('active');
-            } else {
-              btn.classList.remove('active');
-            }
-          }
-
-          r += colors[i][0] * w;
-          g += colors[i][1] * w;
-          b += colors[i][2] * w;
+          const a = i === 0 ? 1 : ss(i, i + 0.18, t);
+          const z = i === 2 ? 1 : 1 - ss(i + 0.82, i + 1, t);
+          w[i] = a * z;
+          if (w[i] > w[cur]) cur = i;
+          chs[i].style.opacity = w[i].toFixed(3);
+          chs[i].style.visibility = w[i] > 0.001 ? 'visible' : 'hidden';
+          chs[i].style.transform = `translateY(${((1 - w[i]) * 30).toFixed(1)}px)`;
+          chs[i].style.pointerEvents = w[i] > 0.5 ? 'auto' : 'none';
         }
+        // Exactly one button is lit at every position, including the instant
+        // between two chapters where both read zero (none was lit there).
+        for (let i = 0; i < 3; i++) {
+          const btn = document.getElementById(`deliNav${i}`);
+          if (!btn) continue;
+          btn.classList.toggle('active', i === cur);
+          btn.setAttribute('aria-current', i === cur ? 'true' : 'false');
+        }
+        // Colour blends on its own curve, so the seam never dips to black.
+        const col = colors[0].slice();
+        for (let j = 0; j < 2; j++) {
+          const m = ss(j + 0.82, j + 1.18, t);
+          for (let c = 0; c < 3; c++) col[c] += (colors[j + 1][c] - col[c]) * m;
+        }
+        const r = col[0], g = col[1], b = col[2];
 
         seal.style.setProperty('--rot', `${(p * 540).toFixed(1)}deg`);
         seal.style.setProperty('--s', `${(0.92 + 0.12 * Math.sin(p * Math.PI * 3)).toFixed(3)}`);
@@ -1953,6 +2034,7 @@
       const cut = LOUPE_CUTS[key];
       ['charcuterie', 'poultry', 'marinade', 'momos'].forEach(k => {
         const btn = document.getElementById(`loupeTab-${k}`);
+        btn.setAttribute('aria-pressed', String(k === key));
         if (k === key) {
           btn.className = 'py-1.5 px-3 rounded-xl bg-[#CD2653] text-white transition-all whitespace-nowrap';
         } else {
@@ -1982,23 +2064,45 @@
 
       const zoom = 2.5;
 
-      // Subtle dynamic fluctuation of temperature sensor for ultra-realism
-      setInterval(() => {
-        if (tempSensor) {
-          const val = (2.3 + Math.random() * 0.2).toFixed(1);
-          tempSensor.textContent = `${val}°C`;
-        }
-      }, 2500);
+      // The sensor reading flickers only while it can be seen; it used to tick
+      // every 2.5s for the whole visit, in background tabs too.
+      let tempTimer = 0, tempSeen = false;
+      function tempTick() {
+        if (!tempSensor) return;
+        tempSensor.textContent = `${(2.3 + Math.random() * 0.2).toFixed(1)}°C`;
+      }
+      function tempSync() {
+        const on = tempSeen && !document.hidden && !prefersReducedMotion;
+        if (on && !tempTimer) tempTimer = setInterval(tempTick, 2500);
+        if (!on && tempTimer) { clearInterval(tempTimer); tempTimer = 0; }
+      }
+      if (tempSensor && 'IntersectionObserver' in window) {
+        new IntersectionObserver(en => { tempSeen = en[0].isIntersecting; tempSync(); }).observe(tempSensor);
+        document.addEventListener('visibilitychange', tempSync);
+      }
 
-      container.addEventListener('mouseenter', () => {
+      // The image is object-fit: cover, so the picture is larger than the box
+      // and centred in it. Magnify THAT picture: sizing the glass from the box
+      // squashed the zoom and showed a spot away from the reticle.
+      let cover = null;
+      function measureCover() {
+        const cw = container.clientWidth, ch = container.clientHeight;
+        const nw = img.naturalWidth || cw, nh = img.naturalHeight || ch;
+        const s = Math.max(cw / nw, ch / nh);
+        const rw = nw * s, rh = nh * s;
+        cover = { w: rw, h: rh, ox: (cw - rw) / 2, oy: (ch - rh) / 2 };
+        glass.style.backgroundImage = `url('${img.currentSrc || img.src}')`;
+        glass.style.backgroundSize = `${rw * zoom}px ${rh * zoom}px`;
+      }
+      img.addEventListener('load', () => { if (glass.style.display === 'block') measureCover(); else cover = null; });
+      function showGlass() {
         glass.style.display = 'block';
-        glass.style.backgroundImage = `url('${img.src}')`;
-        glass.style.backgroundSize = `${img.width * zoom}px ${img.height * zoom}px`;
-      });
+        measureCover();
+      }
+      function hideGlass() { glass.style.display = 'none'; }
 
-      container.addEventListener('mouseleave', () => {
-        glass.style.display = 'none';
-      });
+      container.addEventListener('mouseenter', showGlass);
+      container.addEventListener('mouseleave', hideGlass);
 
       // Store the pointer and do every read and write in the frame. Both the
       // rect and the glass size are layout reads; done per sample they were
@@ -2017,22 +2121,31 @@
         const x = Math.max(0, Math.min(rect.width, px - rect.left));
         const y = Math.max(0, Math.min(rect.height, py - rect.top));
 
+        if (!cover) measureCover();
         glass.style.setProperty('--lx', `${x}px`);
         glass.style.setProperty('--ly', `${y}px`);
+        // Signed numbers, not "-" + value: a negative value produced "--12px",
+        // which is invalid and froze the zoom near the top-left edge.
         glass.style.backgroundPosition =
-          `-${x * zoom - loupeHalf}px -${y * zoom - loupeHalf}px`;
+          `${loupeHalf - (x - cover.ox) * zoom}px ${loupeHalf - (y - cover.oy) * zoom}px`;
       }
 
       container.addEventListener('mousemove', (e) => updateLoupe(e.clientX, e.clientY), { passive: true });
+      // Touch: passive, with touch-action: pan-y on the container. It used to
+      // preventDefault every touchmove on a full-width 470px hero image, so a
+      // thumb landing on it could not scroll the page, and with no touchend
+      // the glass stayed on screen after the finger lifted.
+      container.addEventListener('touchstart', (e) => {
+        if (!e.touches || !e.touches[0]) return;
+        showGlass();
+        updateLoupe(e.touches[0].clientX, e.touches[0].clientY);
+      }, { passive: true });
       container.addEventListener('touchmove', (e) => {
-        if (e.touches && e.touches[0]) {
-          glass.style.display = 'block';
-          glass.style.backgroundImage = `url('${img.src}')`;
-          glass.style.backgroundSize = `${img.width * zoom}px ${img.height * zoom}px`;
-          updateLoupe(e.touches[0].clientX, e.touches[0].clientY);
-          e.preventDefault();
-        }
-      }, { passive: false });
+        if (e.touches && e.touches[0]) updateLoupe(e.touches[0].clientX, e.touches[0].clientY);
+      }, { passive: true });
+      container.addEventListener('touchend', hideGlass, { passive: true });
+      container.addEventListener('touchcancel', hideGlass, { passive: true });
+      window.addEventListener('resize', () => { cover = null; });
     })();
 
     // 6. Basket Management
@@ -2064,7 +2177,10 @@
       selectedSlot = slotName;
       const mBtn = document.getElementById('slot-morning');
       const eBtn = document.getElementById('slot-evening');
-      if (slotName.includes('Morning') || slotName.includes('10 AM')) {
+      const morning = slotName.includes('Morning') || slotName.includes('10 AM');
+      mBtn.setAttribute('aria-pressed', String(morning));
+      eBtn.setAttribute('aria-pressed', String(!morning));
+      if (morning) {
         mBtn.className = 'slot-btn py-2 px-3 rounded-xl border border-[#CD2653] bg-[#CD2653] text-white font-bold transition-all';
         eBtn.className = 'slot-btn py-2 px-3 rounded-xl border border-[#CD2653]/30 bg-white text-[#524842] font-bold transition-all';
       } else {
@@ -2114,6 +2230,14 @@
         progressVal.textContent = `₹${subtotal} / ₹999`;
       }
 
+      // A code applied to a basket that has since dropped under ₹999 is spent:
+      // it used to stay armed (and its notice stay up), so the next ₹999+
+      // basket took 20% off without anyone re-entering it.
+      if (isPromoApplied && subtotal < 999) {
+        isPromoApplied = false;
+        document.getElementById('promoNotice').classList.add('hidden');
+      }
+
       // Discount calculation
       let discount = 0;
       if (isPromoApplied && subtotal >= 999) {
@@ -2147,9 +2271,9 @@
         </div>
         <div class="flex items-center gap-3">
           <div class="flex items-center border border-[#CD2653]/30 rounded-lg overflow-hidden bg-white text-xs font-bold">
-            <button onclick="changeQty(${idx}, -1)" class="px-2 py-1 hover:bg-[#FFF0F3] text-[#4A0E17]">-</button>
+            <button type="button" aria-label="Remove one ${item.name}" onclick="changeQty(${idx}, -1)" class="px-2 py-1 hover:bg-[#FFF0F3] text-[#4A0E17]">-</button>
             <span class="px-2.5 py-1 text-[#CD2653]">${item.qty}</span>
-            <button onclick="changeQty(${idx}, 1)" class="px-2 py-1 hover:bg-[#FFF0F3] text-[#4A0E17]">+</button>
+            <button type="button" aria-label="Add one more ${item.name}" onclick="changeQty(${idx}, 1)" class="px-2 py-1 hover:bg-[#FFF0F3] text-[#4A0E17]">+</button>
           </div>
           <span class="font-serif-chic font-bold text-[#4A0E17] text-sm min-w-[50px] text-right">₹${item.price * item.qty}</span>
         </div>
@@ -2157,9 +2281,27 @@
     `).join('');
     }
 
+    // A dialog: focus moves in, Escape closes, the page behind holds still,
+    // and focus goes back to whatever opened it.
+    let basketReturn = null;
     function toggleBasket(open) {
-      document.getElementById('basketModal').classList.toggle('hidden', !open);
+      const modal = document.getElementById('basketModal');
+      const wasOpen = !modal.classList.contains('hidden');
+      modal.classList.toggle('hidden', !open);
+      document.documentElement.style.overflow = open ? 'hidden' : '';
+      const panel = document.getElementById('dcPanel');
+      if (open && !wasOpen) {
+        basketReturn = document.activeElement;
+        if (panel) panel.focus({ preventScroll: true });
+      } else if (!open && wasOpen && basketReturn && basketReturn.focus) {
+        basketReturn.focus({ preventScroll: true });
+        basketReturn = null;
+      }
     }
+    document.addEventListener('keydown', (e) => {
+      const modal = document.getElementById('basketModal');
+      if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) toggleBasket(false);
+    });
 
     /* ---- placing the order ----------------------------------------------
        The message this used to build was a good one, but it was addressed
@@ -2342,6 +2484,45 @@
      the header beneath and nothing to measure. The script that published
      --deli-bar-h is gone with it: a custom property written to <html> earns
      its keep only while something reads it. */
+  /* The concept note sits in flow above a fixed header, so at the top of the
+     page it covered the header (Basket hit-tested as the note). Hold the
+     header just below the note while the note is on screen; once it scrolls
+     away the header is back at 0. Written to the header, never to :root. */
+  (function () {
+    var bar = document.querySelector('.concept-bar');
+    var head = document.querySelector('header.deli-site-header');
+    if (!bar || !head) return;
+    var last = -1, ticking = false;
+    function place() {
+      ticking = false;
+      var y = Math.max(0, Math.round(bar.getBoundingClientRect().bottom));
+      if (y !== last) { last = y; head.style.setProperty('top', y + 'px', 'important'); }
+    }
+    function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(place); } }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    place();
+  })();
+
+  /* Menu below lg, where the header used to carry no navigation at all.
+     Closes on a link, on Escape and on an outside tap. */
+  (function () {
+    var btn = document.getElementById('deliMenuBtn');
+    var panel = document.getElementById('deliMenuPanel');
+    if (!btn || !panel) return;
+    function setOpen(on) {
+      panel.classList.toggle('is-open', on);
+      btn.setAttribute('aria-expanded', String(on));
+      btn.setAttribute('aria-label', on ? 'Close menu' : 'Open menu');
+    }
+    btn.addEventListener('click', function (e) { e.stopPropagation(); setOpen(!panel.classList.contains('is-open')); });
+    panel.addEventListener('click', function (e) { if (e.target.closest('a')) setOpen(false); });
+    document.addEventListener('click', function (e) {
+      if (panel.classList.contains('is-open') && !panel.contains(e.target) && !btn.contains(e.target)) setOpen(false);
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setOpen(false); });
+    if (window.matchMedia) window.matchMedia('(min-width: 1024px)').addEventListener('change', function (m) { if (m.matches) setOpen(false); });
+  })();
 </script>
 <script src="/assets/vendor/gsap.min.js"></script>
 <script src="/assets/brand-motion.js" defer></script>
