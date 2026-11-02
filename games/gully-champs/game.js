@@ -104,9 +104,9 @@
   ];
   const BATTERS = ['Bunty', 'Pinky', 'Chotu'];
   const DIFF = {
-    chill: { label: 'Chill', zs: 1.0, speed: 0.84, swing: 0.44, perfect: 0.34, good: 0.72, fieldSpeed: 3.7, pCatch: 0.25, pStop: 0.4, target: [17, 21], patches: 3, mix: { fast: 2, slow: 4, full: 3, bouncer: 1, googly: 1 } },
-    serious: { label: 'Serious', zs: 0.75, speed: 1.0, swing: 0.37, perfect: 0.30, good: 0.62, fieldSpeed: 4.8, pCatch: 0.4, pStop: 0.58, target: [26, 32], patches: 4, mix: { fast: 3, slow: 3, full: 2, bouncer: 2, googly: 2 } },
-    legend: { label: 'Gully Legend', zs: 0.42, speed: 1.14, swing: 0.31, perfect: 0.26, good: 0.55, fieldSpeed: 5.9, pCatch: 0.58, pStop: 0.74, target: [36, 44], patches: 5, mix: { fast: 3, slow: 1, full: 1, bouncer: 3, googly: 3 } },
+    chill: { label: 'Chill', zs: 1.0, speed: 0.84, swing: 0.44, perfect: 0.34, good: 0.72, fieldSpeed: 3.7, pCatch: 0.16, pStop: 0.5, target: [17, 21], patches: 3, mix: { fast: 2, slow: 4, full: 3, bouncer: 1, googly: 1 } },
+    serious: { label: 'Serious', zs: 0.75, speed: 1.0, swing: 0.37, perfect: 0.30, good: 0.62, fieldSpeed: 4.8, pCatch: 0.26, pStop: 0.62, target: [26, 32], patches: 4, mix: { fast: 3, slow: 3, full: 2, bouncer: 2, googly: 2 } },
+    legend: { label: 'Gully Legend', zs: 0.42, speed: 1.14, swing: 0.31, perfect: 0.26, good: 0.55, fieldSpeed: 5.9, pCatch: 0.36, pStop: 0.74, target: [36, 44], patches: 5, mix: { fast: 3, slow: 1, full: 1, bouncer: 3, googly: 3 } },
   };
   const DELIV = {
     fast: { speed: 10.6, run: 3.4, tag: 'Fast', aim: [0.4, 0.95], xp: [1.9, 3.8] },
@@ -1270,7 +1270,7 @@
         pop('Dropped!', f.x, 2.3, '#FF8A3D', 15, 0.9);
       } else if (b.h <= 0.45) {
         f.tried = true;
-        const p = D.pStop * f.hands * (1 - clamp((spd - 9) / 24, 0, 0.5));
+        const p = D.pStop * f.hands * (1 - clamp((spd - 6) / 14, 0, 0.75));
         f.dive = 0.4;
         if (rnd() < p) { takeBall(f, false); SND.thock(6); G.catcher = f; return ''; }
         else if (rnd() < 0.5) say('Arre!', f, 1.0, 1.9);

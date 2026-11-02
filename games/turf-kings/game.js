@@ -1498,13 +1498,13 @@
     const Uext = V.portrait ? BH : BW, Vext = V.portrait ? BW : BH;
     const cover = Math.max(w / Uext, h / (Vext * TILT * 0.98));
     CAM.base = Math.max(base, cover); CAM.cover = cover;
-    CAM.ox = w / 2; CAM.oy = pen ? h * 0.6 : (V.portrait ? h * 0.58 : h * 0.5);
+    CAM.ox = w / 2; CAM.oy = pen ? h * 0.62 : (V.portrait ? h * 0.55 : h * 0.5);
     const key = w + 'x' + h + V.portrait + V.f;
     if (key !== layoutKey) { layoutKey = key; CAM.snap = true; }
   }
   function camStep(dt) {
     const b = S.ball; let tx, ty, zm = 1;
-    if (S.phase === 'penalties') { tx = HL - 105; ty = 0; }
+    if (S.phase === 'penalties') { tx = HL - 92; ty = 0; }
     else {
       tx = b.x + clamp(b.vx * 0.2, -90, 90); ty = b.y + clamp(b.vy * 0.2, -90, 90);
       if (S.phase === 'goal' && S.goalP) { tx = S.goalP.x * 0.6 + b.x * 0.4; ty = S.goalP.y * 0.6 + b.y * 0.4; zm = arc.reducedMotion ? 1.1 : 1.26; }
@@ -1701,7 +1701,7 @@
     g.globalAlpha = 1;
   }
 
-  function plate(g, x, y, w, h, r, fill) { rrPath(g, x, y, w, h, r); g.fillStyle = fill || 'rgba(15,13,10,.82)'; g.fill(); g.strokeStyle = 'rgba(251,245,236,.16)'; g.lineWidth = 1; g.stroke(); }
+  function plate(g, x, y, w, h, r, fill) { rrPath(g, x, y, w, h, r); g.fillStyle = fill || 'rgba(15,13,10,.9)'; g.fill(); g.strokeStyle = 'rgba(251,245,236,.16)'; g.lineWidth = 1; g.stroke(); }
   function drawScoreboard(g, w) {
     const th = S.teams[0], ta = S.teams[1];
     const sw = Math.min(w - 120, 270), x = w / 2 - sw / 2, y = 8, hh = 42;
@@ -1789,10 +1789,11 @@
   function drawPenaltyHud(g, w, h) {
     const pen = S.pen; if (!pen) return;
     // tally
-    const y = 60;
+    const y = 70;
     [0, 1].forEach((t) => {
       const row = pen.kicks[t], n = Math.max(5, row.length);
-      const total = n * 16, x0 = w / 2 - total / 2;
+      const total = n * 16, x0 = 44;
+      plate(g, 6, y - 12 + t * 18 - 3, total + 46, 22, 8, 'rgba(15,13,10,.7)');
       g.font = '700 10px ' + F_MONO; g.textAlign = 'right'; g.textBaseline = 'middle'; g.fillStyle = '#a39e94';
       g.fillText(S.teams[t].abbr, x0 - 6, y + t * 18);
       for (let i = 0; i < n; i++) {
