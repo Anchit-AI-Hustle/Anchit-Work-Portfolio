@@ -981,12 +981,12 @@
     g.fillText('MERIDIAN ARENA', BW / 2, topY(BW / 2) - 12);
     g.shadowBlur = 0;
     // sightscreen
-    const sx0 = BW * 0.42, sw = BW * 0.16, sy0 = BH - 78;
-    g.fillStyle = '#05070b'; g.fillRect(sx0 - 5, sy0 - 5, sw + 10, 80);
-    const sg = g.createLinearGradient(0, sy0, 0, sy0 + 70);
-    sg.addColorStop(0, '#fbfcfe'); sg.addColorStop(1, '#c9ced8');
-    g.fillStyle = sg; g.fillRect(sx0, sy0, sw, 70);
-    g.fillStyle = 'rgba(0,0,0,0.12)'; for (let i = 1; i < 6; i++) g.fillRect(sx0 + (sw / 6) * i, sy0, 1.5, 70);
+    const sx0 = BW * 0.44, sw = BW * 0.12, sy0 = BH - 44;
+    g.fillStyle = '#05070b'; g.fillRect(sx0 - 4, sy0 - 4, sw + 8, 46);
+    const sg = g.createLinearGradient(0, sy0, 0, sy0 + 40);
+    sg.addColorStop(0, '#d9dde6'); sg.addColorStop(1, '#a9b0bf');
+    g.fillStyle = sg; g.fillRect(sx0, sy0, sw, 38);
+    g.fillStyle = 'rgba(0,0,0,0.14)'; for (let i = 1; i < 5; i++) g.fillRect(sx0 + (sw / 5) * i, sy0, 1.5, 38);
     // towers
     for (const tx of TOWERS) {
       const x = tx * BW, base = topY(x) + 8;
@@ -1122,7 +1122,7 @@
     fg.addColorStop(0, 'rgba(4,10,8,0.5)'); fg.addColorStop(1, 'rgba(4,10,8,0)');
     ctx.fillStyle = fg; ctx.fillRect(0, cam.ropeY - 4, w, h * 0.5);
     // thirty-yard circle
-    ctx.strokeStyle = 'rgba(255,255,255,0.28)'; ctx.lineWidth = Math.max(1, cam.k0 * 0.03);
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = Math.max(1, cam.k0 * 0.03);
     ctx.setLineDash([cam.k0 * 0.5, cam.k0 * 0.35]);
     ctx.beginPath();
     for (let a = 0; a <= 72; a++) { const r = (a / 72) * TAU; proj(27.4 * Math.sin(r), 0, HALF + 27.4 * Math.cos(r)); if (a === 0) ctx.moveTo(PX, PY); else ctx.lineTo(PX, PY); }
@@ -1142,18 +1142,18 @@
       proj(rb * Math.sin(a1), 0, HALF + rb * Math.cos(a1)); const x1 = PX, y1 = PY;
       proj(rb * Math.sin(a0), 1.0, HALF + rb * Math.cos(a0)); const xt = PX, yt = PY;
       if (Math.max(x0, x1) < -20 || Math.min(x0, x1) > arc.w + 20) continue;
-      const bw = Math.hypot(x1 - x0, y1 - y0), bh = Math.hypot(xt - x0, yt - y0);
+      const bw = Math.hypot(x1 - x0, y1 - y0);
       if (bw < 3) continue;
       ctx.save();
-      ctx.transform((x1 - x0) / 200, (y1 - y0) / 200, (xt - x0) / 40, (yt - y0) / 40, x0, y0);
+      // local space: 200 x 40, origin at the top-left corner of the board, y pointing down
+      ctx.transform((x1 - x0) / 200, (y1 - y0) / 200, (x0 - xt) / 40, (y0 - yt) / 40, xt, yt);
       const flick = 0.92 + 0.08 * Math.sin(G.clock * 2.2 + i * 1.7);
-      ctx.fillStyle = ad[1]; ctx.globalAlpha = flick; ctx.fillRect(0, -40, 200, 40);
+      ctx.fillStyle = ad[1]; ctx.globalAlpha = flick; ctx.fillRect(0, 0, 200, 40);
       ctx.globalAlpha = 1;
-      ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.fillRect(0, -40, 200, 5);
+      ctx.fillStyle = 'rgba(255,255,255,0.14)'; ctx.fillRect(0, 0, 200, 5);
       ctx.fillStyle = ad[2]; ctx.font = '800 24px ' + FONT_UI; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText(ad[0], 100, -19, 188);
+      ctx.fillText(ad[0], 100, 21, 188);
       ctx.restore();
-      void bh;
     }
     // the rope
     ctx.strokeStyle = 'rgba(0,0,0,0.35)'; ctx.lineWidth = Math.max(2, cam.k0 * 0.07) + 1;
@@ -1439,7 +1439,7 @@
   /* ------------------------------------------------------------ ball, markers, effects in the batting view */
   function drawBall3D(ctx, x, y, z, big) {
     if (!proj(x, y, z)) return;
-    const r = Math.max(2.1, PK * 0.1) * (big || 1);
+    const r = Math.max(2.8, PK * 0.125) * (big || 1);
     // ground shadow
     if (y > 0.02) {
       const sx = PX, sy0 = PY; proj(x, 0, z);
@@ -1448,9 +1448,10 @@
       proj(x, y, z); void sx; void sy0;
     }
     const gr = ctx.createRadialGradient(PX, PY, r * 0.4, PX, PY, r * 3);
-    gr.addColorStop(0, 'rgba(255,255,255,0.45)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+    gr.addColorStop(0, 'rgba(255,255,255,0.55)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(PX, PY, r * 3, 0, TAU); ctx.fill();
     ctx.fillStyle = '#fffaf0'; ctx.beginPath(); ctx.arc(PX, PY, r, 0, TAU); ctx.fill();
+    ctx.strokeStyle = 'rgba(25,14,6,0.75)'; ctx.lineWidth = Math.max(1, r * 0.22); ctx.stroke();
     if (r > 3) {
       const a = G.clock * 24 * (G.D && G.D.pace ? 1 : 2.4);
       ctx.strokeStyle = '#d4432b'; ctx.lineWidth = Math.max(1, r * 0.16);
@@ -2097,7 +2098,7 @@
         fieldT: FS.t, over: G.over, won: G.won, score: G.finalScore,
       };
     };
-    window.__superover = { G, FS, RN, DIFFS, SWING_LAG, startSwing, FL: () => FL };
+    window.__superover = { G, FS, RN, DIFFS, SWING_LAG, startSwing, FL: () => FL, step: (dt) => { update(dt); arc.input.endFrame(); } };
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();

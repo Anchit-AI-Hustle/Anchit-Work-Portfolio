@@ -104,9 +104,9 @@
   ];
   const BATTERS = ['Bunty', 'Pinky', 'Chotu'];
   const DIFF = {
-    chill: { label: 'Chill', speed: 0.84, swing: 0.44, perfect: 0.34, good: 0.72, fieldSpeed: 3.7, pCatch: 0.36, pStop: 0.5, target: [17, 21], patches: 3, mix: { fast: 2, slow: 4, full: 3, bouncer: 1, googly: 1 } },
-    serious: { label: 'Serious', speed: 1.0, swing: 0.37, perfect: 0.30, good: 0.62, fieldSpeed: 4.8, pCatch: 0.54, pStop: 0.68, target: [26, 32], patches: 4, mix: { fast: 3, slow: 3, full: 2, bouncer: 2, googly: 2 } },
-    legend: { label: 'Gully Legend', speed: 1.14, swing: 0.31, perfect: 0.26, good: 0.55, fieldSpeed: 5.9, pCatch: 0.72, pStop: 0.82, target: [36, 44], patches: 5, mix: { fast: 3, slow: 1, full: 1, bouncer: 3, googly: 3 } },
+    chill: { label: 'Chill', speed: 0.84, swing: 0.44, perfect: 0.34, good: 0.72, fieldSpeed: 3.7, pCatch: 0.25, pStop: 0.4, target: [17, 21], patches: 3, mix: { fast: 2, slow: 4, full: 3, bouncer: 1, googly: 1 } },
+    serious: { label: 'Serious', speed: 1.0, swing: 0.37, perfect: 0.30, good: 0.62, fieldSpeed: 4.8, pCatch: 0.4, pStop: 0.58, target: [26, 32], patches: 4, mix: { fast: 3, slow: 3, full: 2, bouncer: 2, googly: 2 } },
+    legend: { label: 'Gully Legend', speed: 1.14, swing: 0.31, perfect: 0.26, good: 0.55, fieldSpeed: 5.9, pCatch: 0.58, pStop: 0.74, target: [36, 44], patches: 5, mix: { fast: 3, slow: 1, full: 1, bouncer: 3, googly: 3 } },
   };
   const DELIV = {
     fast: { speed: 10.6, run: 3.4, tag: 'Fast', aim: [0.4, 0.95], xp: [1.9, 3.8] },
@@ -623,8 +623,9 @@
     state: 'none', x: REL_X, h: 1.5, z: 0, vx: 0, vh: 0, vz: 0, bounces: 0, batted: false, spin: 0, awarded: '', wallHits: 0,
     googly: false, gf: 1, replan: false, restT: 0, thrown: null, hidden: false, trail: new Float32Array(30), trailN: 0, trailT: 0, stuckT: 0, kind: 'fast',
   };
+  const FZ = [-0.2, 1.05, -0.15, 0.95, 0];
   const mkF = (id, x, key, role) => ({
-    id, role, x, x0: x, z: role === 'bowler' ? 0 : (id % 2 ? 0.25 : -0.2), face: -1, walk: 0, phase: rnd() * 6, speed: 4.5, hands: 0.8 + rnd() * 0.2,
+    id, role, x, x0: x, z: FZ[id], face: -1, walk: 0, phase: rnd() * 6, speed: 4.5, hands: 0.8 + rnd() * 0.2,
     hasBall: false, tried: false, hold: 0, goal: x, armUp: 0, zone: [x - 5, x + 5], style: KID_STYLES[key], name: KID_NAMES[key], dive: 0, say: 0,
   });
   const FIELDERS = [mkF(0, FIELD_X0[0], 'f0', 'keeper'), mkF(1, FIELD_X0[1], 'f1', 'field'), mkF(2, FIELD_X0[2], 'f2', 'field'), mkF(3, FIELD_X0[3], 'f3', 'field'), mkF(4, BOWL_X + 3, 'bowl', 'bowler')];
@@ -891,7 +892,7 @@
     BAT.x = BAT_X; BAT.state = 'idle'; BAT.lastEnd = 0; BAT.out = false; BAT.z = 0;
     SW.on = false; SW.cd = 0; SW.t = 0;
     BALL.state = 'none'; BALL.hidden = true;
-    FIELDERS.forEach((f, i) => { f.x = f.x0; f.goal = f.x0; f.hasBall = false; f.tried = false; f.walk = 0; f.z = f.role === 'bowler' ? 0 : (i % 2 ? 0.25 : -0.2); });
+    FIELDERS.forEach((f, i) => { f.x = f.x0; f.goal = f.x0; f.hasBall = false; f.tried = false; f.walk = 0; f.z = FZ[i]; });
     BOWLER.x = BOWL_X + 3;
     BUBBLES.length = 0; POPS.length = 0;
     setPhase('intro', 2.1);
@@ -1139,9 +1140,10 @@
     if (abs(tau) <= 0.25) psi = side * (0.04 + rnd() * 0.1);
     else if (tau > 0) psi = side * (0.14 + (tau - 0.25) * 1.0);
     else psi = PI - side * (0.22 + (-tau - 0.25) * 0.95);
-    let speed = 6.2 + 13.2 * q + abs(b.vx) * 0.18;
+    let speed = 5 + 9.5 * q + abs(b.vx) * 0.12;
+    if (s.loft) speed *= 1.3;
     let theta;
-    if (s.loft) theta = (36 + (q - 0.5) * 8) * PI / 180;
+    if (s.loft) theta = (40 + (q - 0.5) * 8) * PI / 180;
     else if (s.ground) theta = (2 + rnd() * 3) * PI / 180;
     else theta = (15 + rnd() * 4) * PI / 180;
     if (b.h > 1.3 && s.ground) theta += 0.25;
@@ -1215,6 +1217,7 @@
       const dx = goal - f.x, step = f.speed * dt;
       if (abs(dx) > 0.06) { f.x += clamp(dx, -step, step); f.face = dx > 0 ? 1 : -1; f.walk = lerp(f.walk, 1, min(1, dt * 10)); f.phase += dt * (9 + f.speed); }
       else { f.walk = lerp(f.walk, 0, min(1, dt * 9)); }
+      if (f.role === 'bowler') { const tz = (G.phase === 'flight' || G.phase === 'live' || G.phase === 'dead') ? 1.55 : 0; f.z += clamp(tz - f.z, -2.5 * dt, 2.5 * dt); }
       if (f.armUp > 0) f.armUp -= dt;
       if (f.hold > 0) {
         f.hold -= dt;
@@ -1246,11 +1249,11 @@
       const f = FIELDERS[i];
       if (f.tried || f.hasBall) continue;
       const dx = abs(b.x - f.x), dz = abs(b.z - f.z);
-      if (dx > 0.62 || dz > 1.3) continue;
+      if (dx > 0.58 || dz > 1.05) continue;
       const spd = sqrt(b.vx * b.vx + b.vz * b.vz + b.vh * b.vh);
       if (b.bounces <= 1 && b.h > 0.22 && b.h < 2.4) {
         f.tried = true;
-        let p = D.pCatch * f.hands * (1 - dx / 1.4 * 0.4) * (1 - clamp((spd - 12) / 30, 0, 0.45)) * (b.bounces === 1 ? 0.86 : 1);
+        let p = D.pCatch * f.hands * (1 - dx / 1.4 * 0.4) * (1 - clamp((spd - 8) / 18, 0, 0.6)) * (b.bounces === 1 ? 0.86 : 1);
         if (b.h > 1.9) p *= 0.8;
         if (f.walk > 0.6) p *= 0.88;
         f.armUp = 0.55;
@@ -1261,7 +1264,7 @@
         pop('Dropped!', f.x, 2.3, '#FF8A3D', 15, 0.9);
       } else if (b.h < 0.5) {
         f.tried = true;
-        const p = D.pStop * f.hands * (1 - clamp((spd - 9) / 30, 0, 0.5));
+        const p = D.pStop * f.hands * (1 - clamp((spd - 9) / 24, 0, 0.5));
         f.dive = 0.4;
         if (rnd() < p) { takeBall(f, false); SND.thock(6); G.catcher = f; return ''; }
         else if (rnd() < 0.5) say('Arre!', f, 1.0, 1.9);
