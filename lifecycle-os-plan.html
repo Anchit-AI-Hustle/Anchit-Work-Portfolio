@@ -106,6 +106,8 @@
   .vscore .num{ font-family:var(--font-mono); font-size:11px; color:var(--ink-dim); width:30px; text-align:right; }
   .voverall{ display:inline-flex; align-items:baseline; gap:4px; font-family:var(--font-display); }
   .voverall b{ font-size:22px; color:var(--ink); font-weight:600; } .voverall span{ font-size:11px; color:var(--ink-mute); font-family:var(--font-mono); }
+  .dreq{ display:inline-block; font-family:var(--font-mono); font-size:.78em; letter-spacing:.02em; color:var(--gold); border:1px dashed var(--gold); border-radius:6px; padding:0 6px; white-space:nowrap; }
+  .bnote{ font-size:12.5px; color:var(--ink-mute); margin:-4px 0 12px; }
   .brain{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; align-items:stretch; }
   .bstep{ flex:1; min-width:150px; background:var(--bg-elev); border:1px solid var(--rule); border-radius:12px; padding:14px 16px; position:relative; }
   .bstep .bn{ font-family:var(--font-mono); font-size:10.5px; color:var(--primary); letter-spacing:.06em; text-transform:uppercase; margin-bottom:6px; }
@@ -362,6 +364,7 @@
 
       <div class="sectitle" id="rIndTitle" style="display:none;">Industry read &amp; benchmarks</div>
       <div id="rIndustry" style="display:none;">
+        <p class="bnote">Typical ranges for the category, not this brand's own data.</p>
         <div class="card" id="rIndMeta" style="margin-bottom:14px;"></div>
         <div class="kpis" id="rBench"></div>
       </div>
@@ -388,7 +391,7 @@
       <div id="rAssetStatus" class="a-status" aria-live="polite"></div>
       <div id="rAssets2" class="a-list"></div>
 
-      <div class="sectitle">Retention automations</div>
+      <div class="sectitle" id="rRetTitle">Retention automations</div>
       <div class="rows" id="rRet"></div>
 
       <div class="sectitle" id="rBrainTitle" style="display:none;">Smart Brain · autopilot loop</div>
@@ -413,10 +416,17 @@
   var $ = function(id){ return document.getElementById(id); };
   var brandEl=$('brand'), urlEl=$('url'), goEl=$('go'), loadEl=$('loading'), loadTxt=$('loadingText'), errEl=$('err'), resEl=$('result');
   var esc = function(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+  // Escape, then show each "[data required: x]" marker as a visible tag: a fact
+  // the engine does not have stays missing and says so, it is never invented.
+  var fx = function(s){ return esc(s).replace(/\[data required:\s*([^\]]{1,40})\]/gi, function(_, w){ return '<span class="dreq">data required: '+w.trim()+'</span>'; }); };
 
   document.querySelectorAll('.chip').forEach(function(c){
-    c.addEventListener('click', function(){ brandEl.value=c.getAttribute('data-b')||''; urlEl.value=c.getAttribute('data-u')||''; run(); });
+    c.addEventListener('click', function(){ brandEl.value=c.getAttribute('data-b')||''; urlEl.value=c.getAttribute('data-u')||''; urlEl.dataset.auto='1'; run(); });
   });
+  // A website filled in for one brand must not ride along when someone types
+  // another brand: clear it unless the person typed the website themselves.
+  brandEl.addEventListener('input', function(){ if(urlEl.dataset.auto==='1'){ urlEl.value=''; urlEl.dataset.auto=''; } });
+  urlEl.addEventListener('input', function(){ urlEl.dataset.auto=''; });
   goEl.addEventListener('click', run);
   brandEl.addEventListener('keydown', function(e){ if(e.key==='Enter') run(); });
   urlEl.addEventListener('keydown', function(e){ if(e.key==='Enter') run(); });
@@ -534,7 +544,7 @@
 
   function run(noScroll){
     var brand=brandEl.value.trim(), url=urlEl.value.trim();
-    if(!brand && !url){ var d=LOS.subject(); brand=d.brand; url=d.url||''; brandEl.value=brand; urlEl.value=url; }
+    if(!brand && !url){ var d=LOS.subject(); brand=d.brand; url=d.url||''; brandEl.value=brand; urlEl.value=url; urlEl.dataset.auto='1'; }
     errEl.style.display='none'; resEl.style.display='none';
     goEl.disabled=true; loadEl.classList.add('on'); pv=0; loadTxt.textContent=phrases[0];
     timer=setInterval(function(){ pv=(pv+1)%phrases.length; loadTxt.textContent=phrases[pv]; }, 1400);
@@ -558,7 +568,7 @@
     else if(source==='ai+ci'){ badge.textContent='AI + live benchmarks'; badge.className='badge ai'; }
     else if(source==='ai'){ badge.textContent='AI-generated'; badge.className='badge ai'; }
     else { badge.textContent='Sample plan'; badge.className='badge'; }
-    $('rPos').textContent = p.positioning || '';
+    $('rPos').innerHTML = fx(p.positioning || '');
 
     var ind = p.industry || {};
     var benches = ind.benchmarks || [];
@@ -621,14 +631,17 @@
       $('rVarTitle').style.display=''; $('rVariants').style.display='grid';
     } else { $('rVarTitle').style.display='none'; $('rVariants').style.display='none'; }
 
-    $('rRet').innerHTML = (p.retention||[]).map(function(r){
-      return '<div class="lrow"><div class="w">'+esc(r.trigger)+'</div><div><div class="th" style="margin:0;font-weight:400;color:var(--ink-dim);font-size:14px;">'+esc(r.flow)+'</div></div></div>';
+    var ret=(p.retention||[]).filter(function(r){ return r && String(r.trigger||'').trim() && String(r.flow||'').trim(); });
+    $('rRet').innerHTML = ret.map(function(r){
+      return '<div class="lrow"><div class="w">'+esc(r.trigger)+'</div><div><div class="th" style="margin:0;font-weight:400;color:var(--ink-dim);font-size:14px;">'+fx(r.flow)+'</div></div></div>';
     }).join('');
+    $('rRetTitle').style.display = ret.length ? '' : 'none'; $('rRet').style.display = ret.length ? '' : 'none';
 
     // Smart Brain · autopilot loop
     var sb = p.smartBrain;
-    if(sb && sb.loop && sb.loop.length){
-      var steps = sb.loop.map(function(s,i){
+    var loop = sb && sb.loop ? sb.loop.filter(function(s){ return s && String(s.step||'').trim() && String(s.step).charAt(0)!=='{'; }) : [];
+    if(loop.length){
+      var steps = loop.map(function(s,i){
         return '<div class="bstep"><div class="bn">0'+(i+1)+' · '+esc(s.step)+'</div>'+(s.detail?'<p>'+esc(s.detail)+'</p>':'')+'</div>';
       }).join('');
       $('rBrain').innerHTML = '<div class="brain">'+steps+'</div>'+
@@ -637,7 +650,7 @@
     } else { $('rBrainTitle').style.display='none'; $('rBrain').style.display='none'; }
 
     // Guardrails
-    var g = p.guardrails||[];
+    var g = (p.guardrails||[]).filter(function(x){ return x && String(x.rule||'').trim() && String(x.rule).charAt(0)!=='{'; });
     if(g.length){
       $('rGuards').innerHTML = g.map(function(x){
         return '<div class="card"><div class="k">'+esc(x.rule||'')+'</div>'+(x.detail?'<p>'+esc(x.detail)+'</p>':'')+'</div>';
@@ -661,26 +674,26 @@
     if(!m || (!m.subject && !m.body && !(m.hero&&m.hero.headline))){ el.style.display='none'; return; }
     var h=m.hero||{}, cta=m.cta||{}, secs=m.sections||[];
     var out='';
-    out += '<div class="mh"><div class="s">'+esc(m.subject||'')+'</div><div class="p">'+esc(m.preview||'')+'</div></div>';
+    out += '<div class="mh"><div class="s">'+fx(m.subject||'')+'</div><div class="p">'+fx(m.preview||'')+'</div></div>';
     if(m.theme) out += '<div class="m-theme"><span class="lk">◆ Strategy locked</span>, <b>'+esc(m.theme)+'</b></div>';
     out += '<div class="m-body">';
     if(h.kicker || h.headline || h.subhead){
       out += '<div class="m-hero">';
       out += '<div class="m-kicker"><span class="m-badge">'+esc(initial||'A')+'</span>'+esc(h.kicker||'')+'</div>';
-      if(h.headline) out += '<h4>'+esc(h.headline)+'</h4>';
-      if(h.subhead) out += '<div class="m-sub">'+esc(h.subhead)+'</div>';
+      if(h.headline) out += '<h4>'+fx(h.headline)+'</h4>';
+      if(h.subhead) out += '<div class="m-sub">'+fx(h.subhead)+'</div>';
       out += '</div>';
     }
     if(secs.length){
       out += '<div class="m-secs">'+secs.map(function(s){
-        return '<div class="m-sec"><div class="st">'+esc(s.title)+'</div><p>'+esc(s.body)+'</p></div>';
+        return '<div class="m-sec"><div class="st">'+fx(s.title)+'</div><p>'+fx(s.body)+'</p></div>';
       }).join('')+'</div>';
     } else if(m.body){
-      out += '<div class="mb">'+esc(m.body)+'</div>';
+      out += '<div class="mb">'+fx(m.body)+'</div>';
     }
     if(cta.label){
       out += '<div class="m-cta"><a href="#" onclick="return false;">'+esc(cta.label)+'</a>';
-      if(cta.note) out += '<div class="m-note">'+esc(cta.note)+'</div>';
+      if(cta.note) out += '<div class="m-note">'+fx(cta.note)+'</div>';
       out += '</div>';
     }
     if(m.signoff) out += '<div class="m-foot"><span class="dotm"></span>'+esc(m.signoff)+'</div>';
@@ -690,7 +703,7 @@
 
   // Open on the shared Lifecycle OS subject and draft the plan, without
   // scrolling past the hero.
-  var subj=LOS.subject(); brandEl.value=subj.brand; urlEl.value=subj.url||'';
+  var subj=LOS.subject(); brandEl.value=subj.brand; urlEl.value=subj.url||''; urlEl.dataset.auto='1';
   run(true);
 })();
 </script>
