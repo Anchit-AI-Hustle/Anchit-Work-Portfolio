@@ -1467,35 +1467,35 @@
       }
       if (w1 > 26) {
         c = pal.rumble[light];
-        poly(ctx, c, x1 - w1 - r1, y1 + 1, x1 - w1, y1 + 1, x2 - w2, y2, x2 - w2 - r2, y2);
-        poly(ctx, c, x1 + w1 + r1, y1 + 1, x1 + w1, y1 + 1, x2 + w2, y2, x2 + w2 + r2, y2);
-        poly(ctx, pal.road[light], x1 - w1, y1 + 1, x1 + w1, y1 + 1, x2 + w2, y2, x2 - w2, y2);
+        poly(ctx, c, x1 - w1 - r1, by, x1 - w1, by, x2 - w2, y2, x2 - w2 - r2, y2);
+        poly(ctx, c, x1 + w1 + r1, by, x1 + w1, by, x2 + w2, y2, x2 + w2 + r2, y2);
+        poly(ctx, pal.road[light], x1 - w1, by, x1 + w1, by, x2 + w2, y2, x2 - w2, y2);
         if (w1 > 40) {
           l1 = w1 / 40; l2 = w2 / 40;
           var e1 = w1 - w1 / 13, e2 = w2 - w2 / 13;
-          poly(ctx, pal.lane, x1 - e1 - l1, y1 + 1, x1 - e1 + l1, y1 + 1, x2 - e2 + l2, y2, x2 - e2 - l2, y2);
-          poly(ctx, pal.lane, x1 + e1 - l1, y1 + 1, x1 + e1 + l1, y1 + 1, x2 + e2 + l2, y2, x2 + e2 - l2, y2);
+          poly(ctx, pal.lane, x1 - e1 - l1, by, x1 - e1 + l1, by, x2 - e2 + l2, y2, x2 - e2 - l2, y2);
+          poly(ctx, pal.lane, x1 + e1 - l1, by, x1 + e1 + l1, by, x2 + e2 + l2, y2, x2 + e2 - l2, y2);
           if (light) {
             l1 = w1 / 34; l2 = w2 / 34;
             for (i = -1; i <= 1; i++) {
               var o1 = i * w1 * 0.5, o2 = i * w2 * 0.5;
-              poly(ctx, pal.lane, x1 + o1 - l1, y1 + 1, x1 + o1 + l1, y1 + 1, x2 + o2 + l2, y2, x2 + o2 - l2, y2);
+              poly(ctx, pal.lane, x1 + o1 - l1, by, x1 + o1 + l1, by, x2 + o2 + l2, y2, x2 + o2 - l2, y2);
             }
           }
           if (wet && seg.h7 < 0.5) {
             var cc = (seg.h7 * 41 % 1) * 1.5 - 0.75, hw = 0.08 + (seg.h7 * 17 % 1) * 0.12, ci = ((seg.h7 * 23 | 0) % 6) * 2 + (seg.h7 > 0.25 ? 1 : 0);
-            poly(ctx, SHEEN[ci], x1 + (cc - hw) * w1, y1 + 1, x1 + (cc + hw) * w1, y1 + 1, x2 + (cc + hw) * w2, y2, x2 + (cc - hw) * w2, y2);
+            poly(ctx, SHEEN[ci], x1 + (cc - hw) * w1, by, x1 + (cc + hw) * w1, by, x2 + (cc + hw) * w2, y2, x2 + (cc - hw) * w2, y2);
           }
           if (seg.i < 2) {
             // chequered start line
             for (i = 0; i < 8; i++) {
               var a0 = -1 + i * 0.25, a1 = a0 + 0.25;
-              poly(ctx, (i + seg.i) % 2 ? '#f4f0e6' : '#17181c', x1 + a0 * w1, y1 + 1, x1 + a1 * w1, y1 + 1, x2 + a1 * w2, y2, x2 + a0 * w2, y2);
+              poly(ctx, (i + seg.i) % 2 ? '#f4f0e6' : '#17181c', x1 + a0 * w1, by, x1 + a1 * w1, by, x2 + a1 * w2, y2, x2 + a0 * w2, y2);
             }
           }
         }
       } else {
-        poly(ctx, pal.road[light], x1 - w1 - r1, y1 + 1, x1 + w1 + r1, y1 + 1, x2 + w2 + r2, y2, x2 - w2 - r2, y2);
+        poly(ctx, pal.road[light], x1 - w1 - r1, by, x1 + w1 + r1, by, x2 + w2 + r2, y2, x2 - w2 - r2, y2);
       }
       maxy = ymax;
     }
@@ -1798,7 +1798,7 @@
 
     // start lights
     if (W.phase === 'countdown') {
-      var step = W.cd < 0.6 ? 0 : W.cd < 1.4 ? 1 : W.cd < 2.2 ? 2 : 3, lw = S(206), lh = S(64), lx = (w - lw) / 2, ly = Math.round(h * 0.3);
+      var step = W.cd < 0.6 ? 0 : W.cd < 1.4 ? 1 : W.cd < 2.2 ? 2 : 3, lw = S(206), lh = S(64), lx = (w - lw) / 2, ly = Math.round(h * 0.2);
       plate(ctx, lx, ly, lw, lh, 14);
       for (i = 0; i < 3; i++) {
         var on = step > i, lcx = lx + lw / 2 + (i - 1) * S(58), lcy = ly + lh / 2;
@@ -1810,7 +1810,7 @@
     } else if (W.goT > 0 && !W.attract) {
       var gl = W.goT / 0.9;
       ctx.globalAlpha = Math.min(1, gl * 1.5);
-      var lw2 = S(206), lh2 = S(64), lx2 = (w - lw2) / 2, ly2 = Math.round(h * 0.3);
+      var lw2 = S(206), lh2 = S(64), lx2 = (w - lw2) / 2, ly2 = Math.round(h * 0.2);
       plate(ctx, lx2, ly2, lw2, lh2, 14);
       for (i = 0; i < 3; i++) { var gx = lx2 + lw2 / 2 + (i - 1) * S(58); ctx.beginPath(); ctx.arc(gx, ly2 + lh2 / 2, S(20), 0, TAU); ctx.fillStyle = '#3dff8a'; ctx.fill(); glow(ctx, gx, ly2 + lh2 / 2, S(44), '#3dff8a', 0.7); }
       ctx.globalAlpha = 1;
@@ -1952,7 +1952,6 @@
       dropPlayerSprites();
       Wd = newWorld({ track: ch.track, mode: ch.mode, car: ch.car, color: ch.color, diff: ch.diff, auto: ch.auto, attract: false });
       warmWorld(Wd); engineStart();
-      a.toast('Get ready', PAL[ch.track].name, 1800);
     },
     update: function (dt) {
       if (!Wd) return;
