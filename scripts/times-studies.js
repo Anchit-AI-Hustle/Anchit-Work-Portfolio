@@ -60,7 +60,7 @@ const VIEWPORTS = [
   { name: '820', width: 820, height: 1180 },
   { name: '1440', width: 1440, height: 900 },
 ];
-const PAGES = ['', '/problems', '/users', '/gaps', '/ideas', '/fixes', '/plan', '/evidence', '/about'];
+const PAGES = ['', '/problems', '/users', '/gaps', '/ideas', '/fixes', '/plan', '/roadmap', '/evidence', '/about'];
 // Brand values measured from each brand's own public site on 2 Nov 2026.
 const BRANDS = [
   { dir: '/ET_Study', brand: '#d51131', fonts: ['Faustina', 'Montserrat'] },
@@ -89,6 +89,7 @@ function mutate(p, src) {
   if (MUT === 'ice' && p === '/TimesHealth_Study/ideas') return src.replace(/(<td class="num ice">)(\d+)(<\/td>)/, (m, a, n, b) => a + (+n + 1) + b);
   if (MUT === 'badid' && p === '/TimesHealth_Study') return src.replace('id="model"', 'id="working model"');
   if (MUT === 'brand' && p === '/ET_Study/plan') return src.replace(/<link rel="icon" href="[^"]*"[^>]*>/, '<link rel="icon" href="/icons/favicon.svg">').replace('</head>', '<style>body{--brand:#893f97}</style></head>');
+  if (MUT === 'roadmap' && p === '/TimesHealth_Study/roadmap') return src.replace('(T16)', '(T99)').replace(/<div class="card stage" data-stage="scale">/, '<div class="card stage" data-stage="scale" hidden>');
   if (MUT === 'ghost' && p === '/ET_Study/ideas') return src.replace('combines I2, I4, I11', 'combines I2, I4, I99');
   if (MUT === 'renewal' && p === '/ET_Study/model/maths') return src.replace('value="2699"', 'value="2999"');
   return src;
@@ -306,6 +307,27 @@ async function study(browser, vp, st) {
     }
     if (sub === '/evidence') check(`${L}: shows what a visitor sees, as captioned screenshots`, (await page.$$('#screens figure.shot img')).length >= 2 && (await page.$$('#screens figcaption')).length >= 2, '');
     if (sub === '/evidence') check(`${L}: has today's offer, the audit and the competition`, !!(await page.$('#today')) && !!(await page.$('#audit-tbl')) && !!(await page.$('#compete')), '');
+    if (sub === '/roadmap') {
+      // Every bet is carried through all six stages, each launch has a stop
+      // line, and every P, I, T and F it cites exists in the study.
+      const r = await page.evaluate(() => {
+        const bets = [...document.querySelectorAll('[data-rbet]')].map((b) => ({ stages: [...b.querySelectorAll('.stage')].map((x) => x.dataset.stage), gate: /Stop if:/.test(b.querySelector('.stage[data-stage="launch"]')?.textContent || ''), src: !!b.querySelector('.src a[href]') }));
+        const refs = [...new Set((document.querySelector('main').textContent.match(/\b[PITF]\d{1,2}\b/g) || []))];
+        return { bets, refs, glance: document.querySelectorAll('.glance tbody tr').length, phases: document.querySelectorAll('#timeline .card').length, shown: [...document.querySelectorAll('.stage')].filter((x) => !x.hidden && x.offsetParent).length };
+      });
+      const SIX = ['idea', 'build', 'launch', 'market', 'scale', 'upgrade'];
+      check(`${L}: three bets, each through all six stages in order, all shown`, r.bets.length === 3 && r.bets.every((b) => b.stages.join() === SIX.join()) && r.shown === 18, JSON.stringify(r.bets.map((b) => b.stages.length)) + ' shown ' + r.shown);
+      check(`${L}: every launch has a stop line, and every bet links its sources`, r.bets.every((b) => b.gate && b.src), '');
+      check(`${L}: a now, next and later timeline, and a six-row summary`, r.phases === 3 && r.glance === 6, `${r.phases} ${r.glance}`);
+      const known = new Set([...problemList, ...ideaIds, ...fixIds]);
+      const ghosts = r.refs.filter((x) => !known.has(x));
+      check(`${L}: every problem, idea and fix it cites exists in the study`, ghosts.length === 0 && r.refs.length > 10, ghosts.join(' ') || r.refs.length + ' refs');
+      await page.click('[data-stagefilter="market"]');
+      const vis = await page.$$eval('.stage', (n) => n.filter((x) => !x.hidden).map((x) => x.dataset.stage));
+      await page.click('[data-stagefilter="all"]');
+      const back = await page.$$eval('.stage', (n) => n.filter((x) => !x.hidden).length);
+      check(`${L}: the stage filter shows one stage across all three bets, and back`, vis.length === 3 && vis.every((x) => x === 'market') && back === 18, `${vis.join(',')} then ${back}`);
+    }
     if (sub === '/fixes') {
       await fixesPage(L, page, problemList);
       fixIds = await page.$$eval('[data-solves]', (n) => n.map((x) => x.dataset.fix));

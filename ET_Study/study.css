@@ -322,3 +322,34 @@ input[type=range]{margin-left:0;margin-right:0}
 /* Step labels: full-width bars of equal height, so the four lists line up. */
 .short .tag{justify-self:stretch;display:flex;align-items:center;padding:6px 10px;line-height:18px}
 @media (min-width:1080px){.short.four .tag{min-height:48px}}
+/* Wider container on large screens, so a ten-page nav keeps room to spare. */
+@media (min-width:1280px){.wrap{max-width:1200px}}
+/* Roadmap: each bet through six stages. */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px}
+.rbet{margin-top:28px;display:grid;gap:14px}
+.rbet header{display:grid;gap:6px}
+.rbet header .k{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--brand)}
+.rbet header h2{font-size:24px;line-height:32px}
+.life{display:grid;gap:12px;grid-template-columns:1fr}
+@media (min-width:760px){.life{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1080px){.life{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.stage{display:grid;gap:12px;align-content:start;border-top:4px solid var(--brand)}
+.stage .sh{display:flex;gap:10px;align-items:flex-start}
+.stage .sh b{display:block;color:var(--ink);font-size:16px;line-height:22px}
+.stage .sh small{display:block;color:var(--muted);font-size:13px;line-height:18px}
+.snum{flex:0 0 28px;height:28px;border-radius:50%;background:var(--brand);color:#fff;font-size:13px;font-weight:700;display:grid;place-items:center}
+.stage dl{margin:0;display:grid;gap:4px}
+.stage dt{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.stage dt:first-child{margin-top:0}
+.stage dd{margin:0;font-size:14px;line-height:21px;color:var(--body)}
+.stage dd ul{margin:0;padding-left:18px;display:grid;gap:4px}
+.roll,.phases{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.roll li{display:flex;gap:8px;align-items:flex-start;font-size:14px;line-height:21px}
+.rn{flex:0 0 20px;height:20px;border-radius:50%;background:var(--brand-soft);color:var(--brand);font-size:11px;font-weight:700;display:grid;place-items:center;margin-top:1px}
+.phases li{display:grid;gap:2px;padding:10px 12px;border-radius:10px;background:var(--soft);font-size:14px;line-height:21px}
+.phases li b{color:var(--ink)}
+.phases small{font-size:13px;line-height:19px;color:var(--muted)}
+.gate{margin:0;padding:10px 12px;border-radius:10px;background:var(--brand-soft);font-size:14px;line-height:21px;color:var(--ink)}
+.glance th[scope=row]{white-space:nowrap;color:var(--ink)}
+.glance td{font-size:14px;line-height:21px;min-width:200px}
+.stage[hidden],.glance tr[hidden]{display:none}
