@@ -25,7 +25,7 @@
 //
 //   The gap analysis and the ideas are checked as data, not prose: every
 //   ICE score is impact x confidence x ease as printed, the wall is sorted by
-//   it, every idea has exactly one dot on the impact/ease map in the right
+//   it, every idea is named once in the right impact and ease group, in the right
 //   cell, every big bet has a storyboard, a test and a stop line and names
 //   ideas that exist, and every "closed by" on the gap page names an idea or
 //   a fix that exists on its own page.
@@ -86,10 +86,12 @@ function mutate(p, src) {
   if (MUT === 'filter' && /\/fixes$/.test(p)) return src.replace('</body>', '<script>document.addEventListener("click",function(e){if(e.target.closest("[data-filter]"))e.stopImmediatePropagation();},true);</script></body>');
   if (MUT === 'quote' && p === '/TimesHealth_Study/problems') return src.replace(/(<figcaption[^>]*>)([\s\S]*?)(<\/figcaption>)/, (m, a, b, c) => a + b.replace(/\b\d{1,2} [A-Z][a-z]{2} 20\d\d\b|\b[A-Z][a-z]{2} 20\d\d\b|\b20\d\d\b/g, '') + c);
   if (MUT === 'nav' && p === '/TimesHealth_Study/plan') return src.replace(/<a href="\/TimesHealth_Study\/evidence">Evidence<\/a>/, '');
+  if (MUT === 'group' && p === '/ET_Study/ideas') return src.replace(/(<div class="card igroup later" data-group="later">.*?<ul>)/s, '$1<li data-idea="I1"><a href="#idea-I1">Member mode</a><span class="iscore">80</span></li>');
   if (MUT === 'ice' && p === '/TimesHealth_Study/ideas') return src.replace(/(<td class="num ice">)(\d+)(<\/td>)/, (m, a, n, b) => a + (+n + 1) + b);
   if (MUT === 'badid' && p === '/TimesHealth_Study') return src.replace('id="model"', 'id="working model"');
   if (MUT === 'brand' && p === '/ET_Study/plan') return src.replace(/<link rel="icon" href="[^"]*"[^>]*>/, '<link rel="icon" href="/icons/favicon.svg">').replace('</head>', '<style>body{--brand:#893f97}</style></head>');
   if (MUT === 'roadmap' && p === '/TimesHealth_Study/roadmap') return src.replace('(T16)', '(T99)').replace(/<div class="card stage" data-stage="scale">/, '<div class="card stage" data-stage="scale" hidden>');
+  if (MUT === 'seethrough' && p === '/ET_Study/ideas') return src.replace('</head>', '<style>.nav{background:rgba(255,255,255,.96)}</style></head>');
   if (MUT === 'ghost' && p === '/ET_Study/ideas') return src.replace('combines I2, I4, I11', 'combines I2, I4, I99');
   if (MUT === 'renewal' && p === '/ET_Study/model/maths') return src.replace('value="2699"', 'value="2999"');
   return src;
@@ -182,6 +184,9 @@ async function common(L, page, bag, status) {
     const foreign = brand.imgs.filter((p) => !p.startsWith(B.dir + '/'));
     check(`${L}: every image is from its own study`, foreign.length === 0, foreign.join(' '));
   }
+  // Sticky bars are solid, so page text never shows through them.
+  const seeThrough = await page.evaluate(() => [...document.querySelectorAll('body *')].filter((e) => getComputedStyle(e).position === 'sticky' && e.getBoundingClientRect().height > 30).filter((e) => { const m = getComputedStyle(e).backgroundColor.match(/rgba?\(([^)]+)\)/); const a = m ? m[1].split(',').map(Number) : []; return a.length === 4 && a[3] < 1; }).map((e) => e.className || e.tagName));
+  check(`${L}: sticky bars are solid, nothing shows through`, seeThrough.length === 0, seeThrough.join(' '));
   const notice = (await page.textContent('.notice')) || '';
   check(`${L}: states it is independent and not affiliated`, /independent/i.test(notice) && /not affiliated/i.test(notice), '');
   await page.waitForTimeout(200);
@@ -286,9 +291,9 @@ async function study(browser, vp, st) {
     if (sub === '/ideas') {
       const w = await page.evaluate(() => {
         const rows = [...document.querySelectorAll('#idea-tbl tbody tr')].map((tr) => ({ id: tr.dataset.idea, i: +tr.dataset.i, c: +tr.dataset.c, e: +tr.dataset.e, cells: [...tr.cells].map((c) => c.textContent.trim()) }));
-        const dots = [...document.querySelectorAll('#ice-map .dot')].map((d) => ({ ids: d.dataset.dot.split(' '), left: parseFloat(d.style.left), bottom: parseFloat(d.style.bottom) }));
+        const groups = [...document.querySelectorAll('#idea-groups [data-group]')].map((g) => ({ key: g.dataset.group, ids: [...g.querySelectorAll('li[data-idea]')].map((l) => l.dataset.idea), text: g.textContent }));
         const bets = [...document.querySelectorAll('[data-bet]')].map((b) => ({ id: b.id, steps: b.querySelectorAll('.storyboard li').length, boxes: b.querySelectorAll('.box').length, kill: (b.querySelector('[data-kill]') || {}).textContent || '', combines: ((b.querySelector('.k') || {}).textContent || '').match(/\b[IT]\d+\b/g) || [] }));
-        return { rows, dots, bets, hmw: document.querySelectorAll('#hmw li').length, rejected: document.querySelectorAll('[data-reject]').length };
+        return { rows, groups, bets, hmw: document.querySelectorAll('#hmw li').length, rejected: document.querySelectorAll('[data-reject]').length };
       });
       ideaIds = w.rows.map((x) => x.id);
       const badIce = w.rows.filter((x) => +x.cells[5] !== x.i * x.c * x.e || +x.cells[2] !== x.i || +x.cells[3] !== x.c || +x.cells[4] !== x.e);
@@ -296,10 +301,18 @@ async function study(browser, vp, st) {
       check(`${L}: at least fifteen ideas`, w.rows.length >= 15, w.rows.length);
       check(`${L}: every ICE is impact x confidence x ease as printed`, badIce.length === 0, badIce.map((x) => x.id).join(','));
       check(`${L}: the wall is sorted by ICE`, ices.every((v, k) => k === 0 || v <= ices[k - 1]), ices.join(','));
-      const dotIds = w.dots.flatMap((d) => d.ids);
-      check(`${L}: every idea has exactly one dot on the map`, dotIds.length === ideaIds.length && ideaIds.every((id) => dotIds.filter((x) => x === id).length === 1), dotIds.join(','));
-      const misplaced = w.dots.filter((d) => d.ids.some((id) => { const x = w.rows.find((r) => r.id === id); return Math.abs(d.left - (8 + (x.e - 1) * 21)) > 0.01 || Math.abs(d.bottom - (8 + (x.i - 1) * 21)) > 0.01; }));
-      check(`${L}: every dot sits at its idea's impact and ease`, misplaced.length === 0, misplaced.map((d) => d.ids.join('+')).join(','));
+      // Four plain groups instead of a chart of codes: every idea named once,
+      // in the group its own impact and ease put it in, best score first.
+      const groupIds = w.groups.flatMap((g) => g.ids);
+      check(`${L}: four idea groups name every idea exactly once`, w.groups.length === 4 && groupIds.length === ideaIds.length && ideaIds.every((id) => groupIds.filter((x) => x === id).length === 1), groupIds.join(','));
+      const RULE = { first: (x) => x.i >= 4 && x.e >= 4, effort: (x) => x.i >= 4 && x.e <= 3, extras: (x) => x.i <= 3 && x.e >= 4, later: (x) => x.i <= 3 && x.e <= 3 };
+      const wrong = w.groups.flatMap((g) => g.ids.filter((id) => !RULE[g.key](w.rows.find((r) => r.id === id))));
+      check(`${L}: every idea sits in the group its impact and ease give it`, wrong.length === 0, wrong.join(','));
+      const unsorted = w.groups.filter((g) => { const v = g.ids.map((id) => { const r = w.rows.find((x) => x.id === id); return r.i * r.c * r.e; }); return v.some((x, k) => k && x > v[k - 1]); });
+      check(`${L}: each group lists its best-scoring idea first`, unsorted.length === 0, unsorted.map((g) => g.key).join(','));
+      const names = await page.$$eval('#idea-groups li a', (as) => as.map((a) => a.textContent.trim()));
+      const badNames = names.filter((n) => n.length > 40 || /From a root cause|Borrowed from|From an asset/.test(n));
+      check(`${L}: the groups show short names, not bare codes or stray text`, w.groups.every((g) => !/\b[IT]\d+\b/.test(g.text)) && badNames.length === 0, badNames.join(' | '));
       check(`${L}: three big bets, each with four steps, four boxes and a stop line`, w.bets.length === 3 && w.bets.every((b) => b.steps === 4 && b.boxes === 4 && /^Stop if:/.test(b.kill.trim())), JSON.stringify(w.bets.map((b) => [b.steps, b.boxes])));
       const ghost = w.bets.flatMap((b) => b.combines).filter((id) => !ideaIds.includes(id));
       check(`${L}: every bet combines ideas that are on the wall`, ghost.length === 0 && w.bets.every((b) => b.combines.length >= 2), ghost.join(','));
