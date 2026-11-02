@@ -104,6 +104,48 @@ const assets = [
 // A hash rather than a timestamp: it changes when the bytes change and not
 // otherwise, so a rebuild that alters nothing does not throw away a warm cache
 // for every visitor. Nothing to remember, and it cannot drift again.
+// Fingerprint the study stylesheets and scripts in the pages that load them.
+//
+// sw.js answers same-origin assets from cache first and refreshes behind the
+// scenes, while pages always come from the network. On the first visit after
+// a deploy that pairs new markup with the previous stylesheet: the study
+// problem cards gained 96px source thumbnails whose rules lived only in the
+// new study.css, so returning visitors saw full-size screenshots burst out of
+// their cards until a second reload. A content hash in the URL makes the new
+// page ask for the new file, which no old cache can answer.
+const FINGERPRINT_DIRS = ['ET_Study', 'TimesHealth_Study'];
+async function fingerprintStudyAssets() {
+  const digest = new Map();
+  const hashOf = async (urlPath) => {
+    if (!digest.has(urlPath)) {
+      const file = join(WWW, urlPath);
+      digest.set(urlPath, existsSync(file) ? createHash('sha256').update(await readFile(file)).digest('hex').slice(0, 10) : null);
+    }
+    return digest.get(urlPath);
+  };
+  let pages = 0, refs = 0;
+  const walk = async (dir) => {
+    for (const e of await readdir(dir, { withFileTypes: true })) {
+      const full = join(dir, e.name);
+      if (e.isDirectory()) { await walk(full); continue; }
+      if (!e.name.endsWith('.html')) continue;
+      const src = await readFile(full, 'utf8');
+      const re = /(href|src)="(\/(?:ET_Study|TimesHealth_Study)\/[^"?#]+\.(?:css|js))"/g;
+      let out = '', last = 0, m;
+      while ((m = re.exec(src))) {
+        const h = await hashOf(m[2].slice(1));
+        if (!h) continue;
+        out += src.slice(last, m.index) + `${m[1]}="${m[2]}?v=${h}"`;
+        last = m.index + m[0].length;
+        refs++;
+      }
+      if (last) { await writeFile(full, out + src.slice(last)); pages++; }
+    }
+  };
+  for (const d of FINGERPRINT_DIRS) if (existsSync(join(WWW, d))) await walk(join(WWW, d));
+  console.log(`[build-www] fingerprinted ${refs} study asset links in ${pages} pages`);
+}
+
 async function stampServiceWorker() {
   const swPath = join(WWW, 'sw.js');
   if (!existsSync(swPath)) return;
@@ -290,6 +332,7 @@ async function main() {
 
   await patchHowToCardRoute();
   await buildHowTo();
+  await fingerprintStudyAssets();
   await stampServiceWorker();
   await injectConsent();
   // Gamified App Skill Map / Project Playbooks widgets removed from the site,

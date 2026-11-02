@@ -171,8 +171,9 @@ async function study(browser, vp, st) {
     const missing = want.filter((h) => !nav.some((n) => n.h === h));
     const cta = await page.$(`.nav a.btn[href="${st.base}/model"]`);
     check(`${L}: nav links every page, and the working model button is there`, missing.length === 0 && !!cta, missing.join(','));
-    const clipped = await page.evaluate(() => { const l = document.getElementById('links'); return l.scrollWidth - l.clientWidth; });
-    if (vp.width >= 1080) check(`${L}: the whole nav fits without scrolling on desktop`, clipped <= 0, clipped + 'px');
+    // Fits with room to spare, so a wider fallback font cannot push it into scrolling.
+    const slack = await page.evaluate(() => { const l = document.getElementById('links'); const a = [...l.children]; const used = a.reduce((t, x) => t + x.getBoundingClientRect().width, 0) + (a.length - 1) * parseFloat(getComputedStyle(l).columnGap); return Math.round(l.clientWidth - used); });
+    if (vp.width >= 1080) check(`${L}: the whole nav fits on desktop with 40px to spare`, slack >= 40, slack + 'px spare');
     const cur = nav.filter((n) => n.cur === 'page').map((n) => n.h);
     check(`${L}: nav marks this page as current`, cur.length === 1 && cur[0] === url, cur.join(','));
     // Every id is valid: no spaces, and unique on the page.
