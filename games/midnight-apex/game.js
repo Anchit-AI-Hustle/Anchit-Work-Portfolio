@@ -913,7 +913,7 @@
     }
     c.z = z;
   }
-  function gridSlot(slot) { return { dist: -(Math.floor(slot / 2) * 700 + 450), x: slot % 2 ? 0.36 : -0.36 }; }
+  function gridSlot(slot) { return { dist: -(Math.floor(slot / 2) * 820 + 450), x: slot % 2 ? 0.36 : -0.36 }; }
 
   function newWorld(cfg) {
     var T = getTrack(cfg.track), i, j, segs = T.segs;
@@ -983,6 +983,11 @@
       o = W.obst[j];
       if (o === c || o.ghost || (blocking && o === P)) continue;
       var dz = wrapD(o.dist - c.dist, L);
+      if (dz <= 60 && dz > -280) {
+        var sdx = o.x - c.x, asd = Math.abs(sdx);
+        if (asd < 0.46) avoid += (sdx > 0 ? -1 : (sdx < 0 ? 1 : (c.x > 0 ? -1 : 1))) * (1 - asd / 0.46) * 1.3;
+        continue;
+      }
       if (dz <= 60 || dz > 3600) continue;
       var dx = o.x - c.x, adx = Math.abs(dx);
       if (adx < 0.5) {
@@ -1623,13 +1628,13 @@
       ctx.save(); ctx.globalCompositeOperation = 'lighter';
       for (var i = 0; i < K.pipes.length; i++) {
         var ex = carX + K.pipes[i] * sc * Math.cos(P.lean), ey = carY - (156 - K.pipeY) * sc;
-        var fl = (0.75 + 0.5 * Math.sin(tm * 70 + i * 2.1) * Math.sin(tm * 43 + i)) * destW * (K.pipes.length > 2 ? 0.34 : 0.5);
-        var pr = K.pipeR * sc;
+        var fl = (0.8 + 0.45 * Math.sin(tm * 70 + i * 2.1) * Math.sin(tm * 43 + i)) * destW * (K.pipes.length > 2 ? 0.46 : 0.66);
+        var pr = K.pipeR * sc * 1.25;
         var gr = ctx.createLinearGradient(0, ey, 0, ey + fl);
         gr.addColorStop(0, 'rgba(255,255,255,.95)'); gr.addColorStop(0.18, 'rgba(150,200,255,.9)'); gr.addColorStop(0.6, 'rgba(40,110,255,.55)'); gr.addColorStop(1, 'rgba(20,60,255,0)');
         ctx.fillStyle = gr; ctx.beginPath(); ctx.moveTo(ex - pr * 0.8, ey); ctx.lineTo(ex + pr * 0.8, ey); ctx.lineTo(ex + pr * 0.35 + Math.sin(tm * 50 + i) * pr * 0.3, ey + fl); ctx.lineTo(ex - pr * 0.35, ey + fl); ctx.closePath(); ctx.fill();
         var gg = ctx.createRadialGradient(ex, ey, 0, ex, ey, pr * 3.4);
-        gg.addColorStop(0, 'rgba(160,210,255,.7)'); gg.addColorStop(1, 'rgba(40,100,255,0)');
+        gg.addColorStop(0, 'rgba(170,215,255,.85)'); gg.addColorStop(1, 'rgba(40,100,255,0)');
         ctx.fillStyle = gg; ctx.fillRect(ex - pr * 3.4, ey - pr * 3.4, pr * 6.8, pr * 6.8);
       }
       ctx.restore();

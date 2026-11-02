@@ -363,6 +363,7 @@
     const overIdx = Math.floor(G.balls / 6);
     const ramp = G.mode === 'nets' ? Math.min(1.2, 1 + 0.03 * overIdx) : 1;
     G.bowler = bw;
+    setField(overIdx, bw.pace);
     G.D = makeDelivery(bw, G.cfg, ramp, G.lastKind);
     G.lastKind = G.D.kind;
     G.runupDur = bw.pace ? 1.55 : 1.05;
@@ -550,15 +551,29 @@
     if (FN < MAXS) { SX[FN] = x; SY[FN] = Math.max(0, y); SZ[FN] = z; SB[FN] = nb; FN++; }
   }
 
-  function buildFielders(pace) {
+  // The captain sets a field for the over; it stays put for all six balls so a batter can learn the gaps.
+  function setField(over, pace) {
+    const key = over + (pace ? 'p' : 's');
+    if (G.fieldKey === key && G.fieldPos) return;
+    G.fieldKey = key;
     const lay = pace ? LAYOUT_PACE : LAYOUT_SPIN;
-    const cfg = G.cfg;
-    FL = lay.map((e, i) => {
-      const jx = i < 2 ? rr(-0.4, 0.4) : rr(-4, 4), jz = i < 2 ? rr(-0.4, 0.4) : rr(-4, 4);
-      let x = e[1] + jx, z = e[2] + jz;
+    G.fieldPos = lay.map((e, i) => {
+      let x = e[1], z = e[2];
+      if (i >= 2) {
+        const ang = rr(-0.4, 0.4), c = Math.cos(ang), s = Math.sin(ang);
+        const k = rr(0.88, 1.08);
+        const rx = (x * c + z * s) * k, rz = (-x * s + z * c) * k;
+        x = rx; z = rz;
+      } else { x += rr(-0.3, 0.3); z += rr(-0.3, 0.3); }
       const rad = hyp(x, z); if (rad > ROPE - 5) { x *= (ROPE - 5) / rad; z *= (ROPE - 5) / rad; }
-      return { role: e[0], x0: x, z0: z, tx: x, tz: z, sp: cfg.fspd * rr(0.95, 1.05), react: cfg.react + rr(0, 0.1), mv: 1, x, z, face: 0 };
+      return [e[0], x, z];
     });
+  }
+
+  function buildFielders(pace) {
+    setField(Math.floor(G.balls / 6), pace);
+    const cfg = G.cfg;
+    FL = G.fieldPos.map((e) => ({ role: e[0], x0: e[1], z0: e[2], tx: e[1], tz: e[2], sp: cfg.fspd * rr(0.95, 1.05), react: cfg.react + rr(0, 0.1), mv: 1, x: e[1], z: e[2], face: 0 }));
     FL.push({ role: 'Bowler', x0: 3.4, z0: 5, tx: 3.4, tz: 5, sp: cfg.fspd * 0.9, react: cfg.react + 0.3, mv: 1, x: 3.4, z: 5, face: 0 });
     FL[0].sp *= 0.9;
   }
@@ -1813,6 +1828,40 @@
     }
   }
 
+
+  function drawMini(ctx, Rw) {
+    if (G.view !== 'bat' || !G.fieldPos || G.phase === 'result') return;
+    const w = arc.w;
+    const R = w > 700 ? 52 : 42;
+    const cx = w - 10 - Rw / 2, cy = 116 + R + 4;
+    const sc = R / (ROPE + 2);
+    const X = (x) => cx + x * sc, Y = (z) => cy - z * sc;
+    ctx.fillStyle = 'rgba(10,9,7,0.7)'; ctx.beginPath(); ctx.arc(cx, cy, R + 4, 0, TAU); ctx.fill();
+    ctx.strokeStyle = 'rgba(201,169,110,0.4)'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.clip();
+    ctx.fillStyle = '#1f5a2c'; ctx.fillRect(cx - R, cy - R, 2 * R, 2 * R);
+    ctx.strokeStyle = 'rgba(255,255,255,0.22)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(cx, cy, 27.4 * sc, 0, TAU); ctx.stroke();
+    ctx.fillStyle = '#b79663'; ctx.fillRect(X(-1.5), Y(HALF), 3 * sc, PITCH * sc);
+    if (G.D && (G.phase === 'runup' || G.phase === 'delivery' || G.phase === 'shot')) {
+      const s = G.swing ? G.swing.s : shotFor(G.dir.dx, G.dir.dy, G.D);
+      const wedge = (ang, half, col) => {
+        ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(X(0), Y(-HALF));
+        for (let k = 0; k <= 4; k++) { const a = (ang - half + (2 * half * k) / 4) * D2R; ctx.lineTo(X(80 * Math.sin(a)), Y(-HALF + 80 * Math.cos(a))); }
+        ctx.closePath(); ctx.fill();
+      };
+      wedge(s.ang, 13, 'rgba(255,183,54,0.38)');
+      ctx.strokeStyle = 'rgba(255,183,54,0.9)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(X(0), Y(-HALF)); ctx.lineTo(X(80 * Math.sin(s.ang * D2R)), Y(-HALF + 80 * Math.cos(s.ang * D2R))); ctx.stroke();
+    }
+    for (const f of G.fieldPos) {
+      ctx.fillStyle = f[0] === 'Keeper' ? '#e2c230' : '#4aa3ff';
+      ctx.beginPath(); ctx.arc(X(f[1]), Y(f[2]), 2.6, 0, TAU); ctx.fill();
+    }
+    ctx.fillStyle = '#4aa3ff'; ctx.beginPath(); ctx.arc(X(3.4), Y(5), 2.6, 0, TAU); ctx.fill();
+    ctx.fillStyle = SHIRT_BAT; ctx.beginPath(); ctx.arc(X(0), Y(-HALF + 1), 3.2, 0, TAU); ctx.fill();
+    ctx.restore();
+    txt(ctx, 'FIELD', cx, cy + R + 14, 9, C.dim, 600, 'center', FONT_MONO);
+  }
+
   function drawHUD(ctx) {
     const w = arc.w, h = arc.h;
     const touch = arc.touchMode;
@@ -1848,11 +1897,12 @@
       } else txt(ctx, 'Run-up...', rx + 12, 62, 12, C.dim, 400);
       txt(ctx, short(G.batter.name) + ' ' + G.batter.runs + ' (' + G.batter.balls + ')', rx + 12, 97, 12, C.ink, 600);
     }
+    if (Rw > 90) drawMini(ctx, Rw);
     // commentary
     if (G.commentT > 0 && G.comment) {
       const a = clamp(G.commentT / 0.5, 0, 1);
       ctx.globalAlpha = a;
-      const cw = Math.min(w - 24, 460), cy = Math.max(124, h * 0.14 + 76);
+      const cw = Math.min(w - 24, 460), cy = w < 600 ? 222 : Math.max(124, h * 0.14 + 76);
       plate(ctx, (w - cw) / 2, cy, cw, 34, 10, 0.62);
       txt(ctx, G.comment, w / 2, cy + 22, 14, C.ink, 400, 'center', FONT_DISP);
       ctx.globalAlpha = 1;
