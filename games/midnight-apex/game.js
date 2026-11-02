@@ -1835,13 +1835,13 @@
     '.mx-stat .mx-name{grid-column:1/-1;font-family:var(--font-display);font-size:20px;letter-spacing:0;text-transform:none;color:var(--ink);line-height:1.1}' +
     '.mx-bar{height:6px;border-radius:3px;background:var(--rule);position:relative;overflow:hidden}.mx-bar i{position:absolute;inset:0 auto 0 0;background:var(--accent-warm);border-radius:3px}' +
     '.mx-blurb{grid-column:1/-1;font-family:var(--font-body);font-size:13px;letter-spacing:0;text-transform:none;color:var(--ink-dim);line-height:1.35}' +
-    '.mx-laps{display:flex;flex-wrap:wrap;gap:6px 18px;margin:0 0 12px;font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute)}' +
+    '.mx-laps{display:grid;grid-template-columns:repeat(3,auto);justify-content:start;gap:6px 18px;margin:0 0 12px;font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute)}' +
     '.mx-laps b{display:block;font-size:15px;color:var(--ink);font-weight:500;letter-spacing:0}' +
     '.mx-res{width:100%;border-collapse:collapse;margin:4px 0 12px;font-size:14px}.mx-res td{padding:7px 8px;border-bottom:1px solid var(--rule);color:var(--ink-dim)}' +
     '.mx-res tr.me td{background:var(--primary-soft);color:var(--ink)}.mx-res td:first-child{font-family:var(--font-mono);color:var(--accent);width:30px}' +
     '.mx-res small{display:block;font-size:11px;color:var(--ink-mute)}.mx-res td:last-child{text-align:right;font-family:var(--font-mono)}' +
     '.arc-seg[data-opt="color"] button::before{content:"";display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--sw);margin-right:7px;vertical-align:-1px;box-shadow:0 0 0 1px rgba(251,245,236,.4)}' +
-    '.arc-card:has(.mx-prev) .arc-actions{position:sticky;bottom:0;background:var(--bg-elev);padding:12px 0 2px;margin-top:8px;box-shadow:0 -14px 14px var(--bg-elev);z-index:2}' +
+    '.arc-card:has(.mx-prev){padding-bottom:0}.arc-card:has(.mx-prev) .arc-actions{position:sticky;bottom:0;background:var(--bg-elev);padding:12px 0 clamp(14px,3vw,22px);margin-top:8px;box-shadow:0 -14px 14px var(--bg-elev);z-index:2}' +
     '.arc-card:has(.mx-prev) p{font-size:14px;margin-bottom:10px}.arc-card:has(.mx-prev) h2{margin:4px 0 8px}' +
     '@media (pointer:fine){.arc-card:has(.mx-prev) .arc-seg button{min-height:34px;padding:0 12px;font-size:13px}.arc-card:has(.mx-prev) .arc-opts{gap:7px;margin-bottom:6px}}' +
     '@media (max-width:420px){.mx-prev{grid-template-columns:110px 1fr;gap:10px}.arc-stage .mx-prev canvas{width:110px;height:70px}}';
@@ -1877,7 +1877,7 @@
   function menuProps() {
     var bests = TRACK_ORDER.map(function (id) {
       var b = BESTS[id];
-      return '<span>' + ARC.esc(PAL[id].name) + '<b>' + (b && b.total != null ? fmtTime(b.total) : 'No time yet') + '</b>' + (b && b.lap != null ? '<small style="color:var(--ink-mute);font-size:11px">best lap ' + fmtTime(b.lap) + '</small>' : '') + '</span>';
+      return '<span>' + ARC.esc(PAL[id].name) + '<b>' + (b && b.total != null ? fmtTime(b.total) : '-:--.--') + '</b>' + (b && b.lap != null ? '<small style="color:var(--ink-mute);font-size:11px">best lap ' + fmtTime(b.lap) + '</small>' : '') + '</span>';
     }).join('');
     return {
       eyebrow: 'Street racing', title: 'Midnight <em>Apex</em>', noBest: true,
