@@ -64,7 +64,8 @@ const mutate = (src, f) => {
 // click: rewriting someone else's minified bundle to satisfy a copy rule would
 // be vandalism with no reader-facing effect. They are NOT exempt from 3 - a
 // repo name appearing inside a bundle would be this site leaking, not theirs.
-const VENDOR = /(^|\/)(assets\/vendor|how-to\/assets)\//;
+// movies/vendor holds hls.js and its Apache 2.0 licence, which must ship verbatim.
+const VENDOR = /(^|\/)(assets\/vendor|how-to\/assets|movies\/vendor)\//;
 const firstParty = files.filter((f) => !VENDOR.test(rel(f).replace(/\\/g, '/')));
 
 // 1. No github.com anywhere a visitor can click.

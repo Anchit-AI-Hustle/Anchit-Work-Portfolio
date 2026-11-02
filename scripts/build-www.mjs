@@ -93,6 +93,9 @@ const assets = [
   // Films page: /movies lists every playable film. Media (HLS segments,
   // MP4s, posters, VTT) ships as plain static files next to the page.
   'movies',
+  // Games: /games is the hub, /games/<slug> each game. Plain HTML, CSS and
+  // JavaScript on one shared shell (games/shared/arcade.js), no build step.
+  'games',
 ];
 
 // Stamp the service worker's cache name from the content it will serve.
