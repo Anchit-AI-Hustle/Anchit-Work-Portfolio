@@ -50,6 +50,15 @@
     // Only split plain text. A heading carrying markup keeps its markup.
     var text = el.textContent.replace(/\s+/g, ' ').trim();
     if (!text || el.children.length) return [];
+    // A heading painted with background-clip:text (a gradient or chrome fill)
+    // cannot be split: each word span gets its own transform, drops out of the
+    // parent's clip and inherits the transparent fill, so the whole heading
+    // vanished ("Lilac glass. Chrome accents." was a blank band). Leave it.
+    // Nor a visually hidden heading (.sr-only): there is nothing to watch,
+    // and its words would sit at opacity 0 forever in a 1px box.
+    if (el.classList.contains('sr-only') || el.offsetHeight <= 1) return [];
+    var cs = getComputedStyle(el);
+    if ((cs.webkitBackgroundClip || cs.backgroundClip) === 'text' || cs.backgroundClip === 'text') return [];
     el.dataset.split = '1';
     el.textContent = '';
     return text.split(' ').map(function (word) {
@@ -58,6 +67,12 @@
       outer.style.display = 'inline-block';
       outer.style.overflow = 'hidden';
       outer.style.verticalAlign = 'top';
+      // The mask is only needed while the word rises into it. Padding the
+      // box below the baseline (and pulling the line back up by the same
+      // amount) keeps descenders inside it: at line-height 1 a bare mask cut
+      // the tails off g, p and y for good ("Discerning", "Alchemy").
+      outer.style.paddingBottom = '0.16em';
+      outer.style.marginBottom = '-0.16em';
       var inner = document.createElement('span');
       inner.className = 'bm-wi';
       inner.style.display = 'inline-block';
@@ -98,13 +113,20 @@
       gsap.set(words, { yPercent: 115, rotateX: -78, opacity: 0 });
 
       var play = function () {
+        if (h.dataset.bmPlayed === '1') return;
+        h.dataset.bmPlayed = '1';
         words.forEach(function (w) { w.style.willChange = 'transform, opacity'; });
         gsap.to(words, {
           yPercent: 0, rotateX: 0, opacity: 1,
           duration: 0.95, ease: 'power3.out', stagger: 0.045,
           onComplete: function () {
             // Off at rest: a layer left promoted costs memory for nothing.
-            words.forEach(function (w) { w.style.willChange = ''; });
+            words.forEach(function (w) {
+              w.style.willChange = '';
+              // Release the mask once the word has landed, so nothing at rest
+              // is ever clipped, whatever the line-height.
+              if (w.parentNode) w.parentNode.style.overflow = '';
+            });
             h.style.perspective = '';
           }
         });
@@ -118,13 +140,17 @@
       }, { threshold: 0.15 });
       io.observe(h);
 
-      // Safety net: if nothing ever observes it (display quirks, print), make
-      // sure the words are never left in the hidden start state.
+      // Safety net: if the observer never reports a heading that IS on screen
+      // (display quirks), play it rather than leave it hidden. Only one that
+      // is on screen: this used to fire for every heading on the page, so
+      // everything below the fold had already played, unseen, three seconds
+      // after load, and the entrance was never once seen past the hero.
+      // bmPlayed was also never set, so the guard it read could not work.
       setTimeout(function () {
-        if (h.dataset.bmPlayed) return;
-        if (parseFloat(getComputedStyle(words[0]).opacity) < 0.05) { io.disconnect(); play(); }
+        if (h.dataset.bmPlayed === '1') return;
+        var r = h.getBoundingClientRect();
+        if (r.bottom > 0 && r.top < (window.innerHeight || 0)) { io.disconnect(); play(); }
       }, 3000);
-      h.dataset.bmPlayed = '';
     });
   }
 
@@ -148,9 +174,23 @@
       var qrx = gsap.quickTo(b, 'rotateX', { duration: 0.4, ease: 'power3.out' });
       var qry = gsap.quickTo(b, 'rotateY', { duration: 0.4, ease: 'power3.out' });
 
+      // GSAP now writes an inline transform on every pointer move. A CSS
+      // transition on transform (Tailwind's transition-all, mostly) eased each
+      // of those writes a second time, so the button trailed the cursor, and
+      // the inline transform silently cancelled the element's hover:scale-*.
+      // Keep the colour transitions, hand transform to GSAP alone, and play
+      // the hover scale through GSAP too.
+      var tp = getComputedStyle(b).transitionProperty || '';
+      if (/(^|,\s*)(all|transform)(\s*,|$)/.test(tp)) {
+        b.style.transitionProperty = 'color, background-color, border-color, box-shadow, opacity, filter';
+      }
+      var hs = /(?:^|\s)hover:scale-(\d+)(?:\s|$)/.exec(b.className && b.className.baseVal === undefined ? b.className : '');
+      var hoverScale = hs ? parseInt(hs[1], 10) / 100 : 1;
+
       b.addEventListener('pointerenter', function () {
         b.style.willChange = 'transform';
         gsap.set(b, { transformPerspective: 600, transformOrigin: 'center' });
+        if (hoverScale !== 1) gsap.to(b, { scale: hoverScale, duration: 0.2, ease: 'power2.out', overwrite: 'auto' });
       });
       b.addEventListener('pointermove', function (e) {
         var r = b.getBoundingClientRect();
@@ -161,6 +201,7 @@
       });
       b.addEventListener('pointerleave', function () {
         qx(0); qy(0); qrx(0); qry(0);
+        if (hoverScale !== 1) gsap.to(b, { scale: 1, duration: 0.25, ease: 'power2.out', overwrite: 'auto' });
         setTimeout(function () { b.style.willChange = ''; }, 420);
       });
     });
