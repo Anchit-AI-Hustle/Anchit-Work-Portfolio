@@ -226,7 +226,7 @@ footer h3{color:#fff}
   .idea-tbl tbody td:nth-child(5)::before{content:"Ease ";}
   .idea-tbl tbody td:nth-child(6)::before{content:"Score ";font-weight:600}
   .idea-tbl tbody td:nth-child(7){grid-column:2 / -1;font-size:13px;color:var(--muted)}
-  .idea-tbl tbody td:nth-child(7)::before{content:"Closes: ";font-weight:600}
+  .idea-tbl tbody td:nth-child(7)::before{content:"Helps at step: ";font-weight:600}
 }
 .bets-mini a.card{text-decoration:none;color:var(--body)}
 .bets-mini a.card:hover{border-color:var(--brand)}
@@ -344,3 +344,16 @@ input[type=range]{margin-left:0;margin-right:0}
 .igroup li a:hover{color:var(--brand);text-decoration:underline}
 .ibet{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--brand);background:var(--brand-soft);border-radius:var(--r-tag);padding:3px 6px;white-space:nowrap}
 .iscore{flex:0 0 auto;min-width:36px;text-align:right;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+
+/* Phone: tables as cards, so no column hides behind a sideways swipe. */
+@media (max-width:699px){
+  table.cards-sm,table.cards-sm tbody,table.cards-sm tr,table.cards-sm td{display:block;width:100%!important;min-width:0!important;max-width:100%}
+  table.cards-sm td{overflow-wrap:anywhere;white-space:normal}
+  table.cards-sm thead{display:none}
+  table.cards-sm tr{padding:14px 16px;border-top:1px solid var(--line)}
+  table.cards-sm tr:first-child{border-top:0}
+  table.cards-sm td{padding:3px 0;border:0;text-align:left}
+  table.cards-sm td:first-child{font-size:16px;margin-bottom:4px}
+  table.cards-sm td:not(:first-child)[data-label]::before{content:attr(data-label);display:block;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+  .tbl:has(table.cards-sm)::before{display:none!important}
+}

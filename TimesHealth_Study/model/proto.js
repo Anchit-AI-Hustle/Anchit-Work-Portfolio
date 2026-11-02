@@ -166,12 +166,12 @@
     var build=Math.max(1,weeks-1);
     for(var i=1;i<=weeks;i++){
       var li=el('li',{'data-week':String(i)});
-      if(i===weeks){li.className='race';li.appendChild(el('b',null,'Week '+i+' · Race week'));li.appendChild(el('span',{'class':'sub'},'Two easy 20-minute runs, mobility on Friday, race on Sunday. Heat and air-quality update and hydration plan two days before (F14).'));}
+      if(i===weeks){li.className='race';li.appendChild(el('b',null,'Week '+i+' · Race week'));li.appendChild(el('span',{'class':'sub'},'Two easy 20-minute runs, mobility on Friday, race on Sunday. Heat and air-quality update and hydration plan two days before (fix F14).'));}
       else if(i===weeks-1&&weeks>3){li.className='taper';li.appendChild(el('b',null,'Week '+i+' · Taper'));li.appendChild(el('span',{'class':'sub'},'Volume down by a third. Long run '+Math.round(peak*0.6)+' km. Two yoga-for-runners sessions.'));}
       else{var long=Math.round((base+(peak-base)*Math.min(1,i/Math.max(1,build-1)))*10)/10;li.appendChild(el('b',null,'Week '+i+(i%4===0?' · Easier week':'')));li.appendChild(el('span',{'class':'sub'},runs+' runs, long run '+(i%4===0?Math.round(long*0.75*10)/10:long)+' km; yoga for runners on Tuesday and Saturday'+(first&&i<=2?'; walk breaks are fine':'')+'.'));}
       ol.appendChild(li);
     }
-    var after=el('li',{'data-week':'after'});after.appendChild(el('b',null,'The day after · Recovery and a next goal'));after.appendChild(el('span',{'class':'sub'},'Results, photos and your certificate on race day. A 30-day recovery and mobility programme, then '+race[3]+' as your next goal (F11).'));ol.appendChild(after);
+    var after=el('li',{'data-week':'after'});after.appendChild(el('b',null,'The day after · Recovery and a next goal'));after.appendChild(el('span',{'class':'sub'},'Results, photos and your certificate on race day. A 30-day recovery and mobility programme, then '+race[3]+' as your next goal (fix F11).'));ol.appendChild(after);
   }
   chips('#dist',DIST,R.dist,false,renderRace);
   chips('#first',[['yes','Yes, my first'],['no','No']],R.first,false,renderRace);
