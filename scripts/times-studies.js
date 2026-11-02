@@ -90,6 +90,7 @@ function mutate(p, src) {
   if (MUT === 'badid' && p === '/TimesHealth_Study') return src.replace('id="model"', 'id="working model"');
   if (MUT === 'brand' && p === '/ET_Study/plan') return src.replace(/<link rel="icon" href="[^"]*"[^>]*>/, '<link rel="icon" href="/icons/favicon.svg">').replace('</head>', '<style>body{--brand:#893f97}</style></head>');
   if (MUT === 'roadmap' && p === '/TimesHealth_Study/roadmap') return src.replace('(T16)', '(T99)').replace(/<div class="card stage" data-stage="scale">/, '<div class="card stage" data-stage="scale" hidden>');
+  if (MUT === 'seethrough' && p === '/ET_Study/ideas') return src.replace('</head>', '<style>.nav{background:rgba(255,255,255,.96)}</style></head>');
   if (MUT === 'ghost' && p === '/ET_Study/ideas') return src.replace('combines I2, I4, I11', 'combines I2, I4, I99');
   if (MUT === 'renewal' && p === '/ET_Study/model/maths') return src.replace('value="2699"', 'value="2999"');
   return src;
@@ -182,6 +183,9 @@ async function common(L, page, bag, status) {
     const foreign = brand.imgs.filter((p) => !p.startsWith(B.dir + '/'));
     check(`${L}: every image is from its own study`, foreign.length === 0, foreign.join(' '));
   }
+  // Sticky bars are solid, so page text never shows through them.
+  const seeThrough = await page.evaluate(() => [...document.querySelectorAll('body *')].filter((e) => getComputedStyle(e).position === 'sticky' && e.getBoundingClientRect().height > 30).filter((e) => { const m = getComputedStyle(e).backgroundColor.match(/rgba?\(([^)]+)\)/); const a = m ? m[1].split(',').map(Number) : []; return a.length === 4 && a[3] < 1; }).map((e) => e.className || e.tagName));
+  check(`${L}: sticky bars are solid, nothing shows through`, seeThrough.length === 0, seeThrough.join(' '));
   const notice = (await page.textContent('.notice')) || '';
   check(`${L}: states it is independent and not affiliated`, /independent/i.test(notice) && /not affiliated/i.test(notice), '');
   await page.waitForTimeout(200);
