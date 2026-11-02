@@ -2469,7 +2469,12 @@
 
   window.initScratchWindow = function() {
     if (!scratchCanvas || !scratchCtx) return;
-    const rect = scratchCanvas.parentElement.getBoundingClientRect();
+    // Layout size, not getBoundingClientRect: the panel sits inside a
+    // scroll-reveal that starts at scale(0.98), so the rect read 2% narrow,
+    // the canvas was sized wrong, and the first resize after the reveal saw
+    // a "width change" and re-fogged the glass.
+    const host = scratchCanvas.parentElement;
+    const rect = { width: host.offsetWidth, height: host.offsetHeight };
     scratchCanvas.width = rect.width;
     scratchCanvas.height = rect.height;
     scratchCtx.globalCompositeOperation = 'source-over';
@@ -2526,7 +2531,7 @@
     // Only a WIDTH change re-fogs the glass. Mobile browsers fire resize as
     // their address bar slides in and out, which reset the wipe mid-scroll.
     window.addEventListener('resize', function () {
-      const w = scratchCanvas.parentElement.getBoundingClientRect().width;
+      const w = scratchCanvas.parentElement.offsetWidth;
       if (Math.abs(w - scratchW) > 1) window.initScratchWindow();
     });
     window.initScratchWindow();
