@@ -623,7 +623,6 @@
 <!-- seo:auto:end -->
 </head>
 <body class="linen-texture selection:bg-[#CD2653] selection:text-white">
-<div class="concept-bar" role="note" style="position:relative;z-index:60;padding:8px 16px;text-align:center;font:600 12px/1.45 system-ui,-apple-system,sans-serif;letter-spacing:.02em;background:#111;color:#f5f0e8">Concept storefront by <a href="/" style="color:inherit;text-decoration:underline;text-underline-offset:2px">Anchit Tandon</a>, not affiliated with Deli Chic. Nothing here places a real order.</div>
 
 
 <!-- Luxury Film Grain Cinematic Overlay -->
@@ -2494,25 +2493,6 @@
      the header beneath and nothing to measure. The script that published
      --deli-bar-h is gone with it: a custom property written to <html> earns
      its keep only while something reads it. */
-  /* The concept note sits in flow above a fixed header, so at the top of the
-     page it covered the header (Basket hit-tested as the note). Hold the
-     header just below the note while the note is on screen; once it scrolls
-     away the header is back at 0. Written to the header, never to :root. */
-  (function () {
-    var bar = document.querySelector('.concept-bar');
-    var head = document.querySelector('header.deli-site-header');
-    if (!bar || !head) return;
-    var last = -1, ticking = false;
-    function place() {
-      ticking = false;
-      var y = Math.max(0, Math.round(bar.getBoundingClientRect().bottom));
-      if (y !== last) { last = y; head.style.setProperty('top', y + 'px', 'important'); }
-    }
-    function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(place); } }
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    place();
-  })();
 
   /* Menu below lg, where the header used to carry no navigation at all.
      Closes on a link, on Escape and on an outside tap. */

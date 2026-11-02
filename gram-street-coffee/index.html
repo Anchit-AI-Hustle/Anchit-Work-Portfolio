@@ -949,7 +949,6 @@
 <!-- seo:auto:end -->
 </head>
 <body>
-<div class="concept-bar" role="note" style="position:relative;z-index:60;padding:8px 16px;text-align:center;font:600 12px/1.45 system-ui,-apple-system,sans-serif;letter-spacing:.02em;background:#111;color:#f5f0e8">Concept storefront by <a href="/" style="color:inherit;text-decoration:underline;text-underline-offset:2px">Anchit Tandon</a>, not affiliated with Gram Street Coffee. Nothing here places a real order.</div>
 
 
 <!-- Luxury Film Grain Cinematic Overlay -->
@@ -3243,25 +3242,6 @@
 })();
 </script>
 <script>
-  /* The concept note sits in flow above a fixed header, so at the top of the
-     page it covered the header (Basket hit-tested as the note). Hold the
-     header just below the note while the note is on screen; once it scrolls
-     away the header is back at 0. Written to the header, never to :root. */
-  (function () {
-    var bar = document.querySelector('.concept-bar');
-    var head = document.querySelector('.site-head');
-    if (!bar || !head) return;
-    var last = -1, ticking = false;
-    function place() {
-      ticking = false;
-      var y = Math.max(0, Math.round(bar.getBoundingClientRect().bottom));
-      if (y !== last) { last = y; head.style.setProperty('top', y + 'px', 'important'); }
-    }
-    function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(place); } }
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    place();
-  })();
 
 /* Mobile menu. Closes on choosing a link, on Escape, and on an outside tap,
      because a fixed sheet that stays open over the page is worse than no menu. */
