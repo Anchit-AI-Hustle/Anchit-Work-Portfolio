@@ -868,7 +868,6 @@
     if (best) best.goal = px;
     const dir = b.vx >= 0 ? 1 : -1;
     if (second) second.goal = clamp(px + dir * 3.5, second.zone[0] - 1, second.zone[1] + 1);
-    FIELDERS.forEach((f) => { f.tried = false; });
     b.replan = false;
   }
 
@@ -1162,8 +1161,8 @@
     if (lab === 'PERFECT' && rnd() < 0.5) say(pick(LINES.perfect), FIELDERS[3], 1.3, 1.9);
     setPhase('live');
     G.liveT = 0; G.lastBallRuns = 0; BAT.ran = 0;
+    FIELDERS.forEach((f) => { f.armUp = 0; f.tried = false; f.hasBall = false; });
     planFielding(b);
-    FIELDERS.forEach((f) => { f.armUp = 0; });
   }
 
   function updateBatter(dt) {
@@ -1263,6 +1262,7 @@
         if (b.h > 1.9) p *= 0.8;
         if (f.walk > 0.6) p *= 0.88;
         f.armUp = 0.55;
+        if (G.catchLog) G.catchLog.push([f.id, +p.toFixed(3), +b.h.toFixed(2), +dx.toFixed(2), +dz.toFixed(2), +spd.toFixed(1), b.bounces]);
         if (rnd() < p) { const kind = b.bounces === 0 ? 'caught' : 'tip'; takeBall(f, true); SND.caught(); G.catcher = f; return kind; }
         // dropped: it pops up and out
         SND.tink(); b.vx *= 0.35; b.vz += (rnd() - 0.5) * 2; b.vh = max(b.vh, 0) + 2.2; b.replan = true;

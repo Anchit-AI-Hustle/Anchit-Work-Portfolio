@@ -1434,6 +1434,7 @@
   /* ------------------------------------------------------------------ results, cup flow */
   function finishMatch() {
     if (S.demo) { startDemo(); return; }
+    S.say = null;
     const h = S.score[0], a = S.score[1];
     const cup = S.cfg.mode === 'cup';
     if (h === a && cup && !S.pen) { startPenalties(); return; }
@@ -1474,7 +1475,7 @@
   function diffSkill(d) { return d === 'easy' ? 0.3 : d === 'hard' ? 0.82 : 0.56; }
   function startCupMatch() {
     const ch = arc.choices;
-    newMatch({ home: CUP.team, away: CUP.opps[CUP.idx], minutes: ch.len || 2, skill: clamp(diffSkill(ch.diff) + CUP.idx * 0.07, 0.2, 0.96), mode: 'cup', matchNo: CUP.idx + 1, label: STAGES[CUP.idx] });
+    newMatch({ home: CUP.team, away: CUP.opps[CUP.idx], minutes: ch.len || 2, skill: clamp(diffSkill(ch.diff) + CUP.idx * 0.05, 0.2, 0.94), mode: 'cup', matchNo: CUP.idx + 1, label: STAGES[CUP.idx] });
     announceMatch();
   }
   function announceMatch() {

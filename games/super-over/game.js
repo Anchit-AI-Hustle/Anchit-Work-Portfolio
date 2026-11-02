@@ -35,7 +35,7 @@
   let arc = null;
 
   const PITCH = 20.12, HALF = 10.06, ROPE = 68, HITZ = 1.0, SWING_LAG = 0.14, SWING_DUR = 0.4;
-  const THROW_V = 32, THROW_REL = 0.35;
+  const THROW_V = 32, THROW_REL = 0.5;
   const FONT_UI = "'Inter', system-ui, -apple-system, sans-serif";
   const FONT_MONO = "'JetBrains Mono', ui-monospace, monospace";
   const FONT_DISP = "'Fraunces', Georgia, serif";
@@ -554,7 +554,7 @@
     const lay = pace ? LAYOUT_PACE : LAYOUT_SPIN;
     const cfg = G.cfg;
     FL = lay.map((e) => ({ role: e[0], x0: e[1], z0: e[2], tx: e[1], tz: e[2], sp: cfg.fspd * rr(0.95, 1.05), react: cfg.react + rr(0, 0.1), mv: 1, x: e[1], z: e[2], face: 0 }));
-    FL.push({ role: 'Bowler', x0: 2.6, z0: 4, tx: 2.6, tz: 4, sp: cfg.fspd * 0.95, react: cfg.react + 0.1, mv: 1, x: 2.6, z: 4, face: 0 });
+    FL.push({ role: 'Bowler', x0: 3.4, z0: 5, tx: 3.4, tz: 5, sp: cfg.fspd * 0.9, react: cfg.react + 0.3, mv: 1, x: 3.4, z: 5, face: 0 });
     FL[0].sp *= 0.9;
   }
 
@@ -608,6 +608,7 @@
         if (spd > 26) pc *= 0.7;
         if (SY[i] > 2.1) pc *= 0.9;
         if (best.f.role === 'Keeper' || best.f.role === 'Slip') pc *= 1.04;
+        if (best.f.role === 'Bowler') pc *= 0.85;
         pc = Math.min(pc, 0.985);
         FS.catchP = pc;
         if (rnd() < pc) { FS.fate = 'caught'; FS.tFate = t; FS.catcher = best.f; FS.cx = SX[i]; FS.cz = SZ[i]; FS.cy = SY[i]; }
@@ -658,7 +659,7 @@
     FS.label = hit.kind;
   }
 
-  const runDur = (n) => (n === 1 ? 2.9 : 2.4);
+  const runDur = (n) => (n === 1 ? 2.35 : 1.95);
   function endZ(n) { return n % 2 === 1 ? HALF : -HALF; }
   function arrivalAt(n) {
     if (FS.fate !== 'field') return 1e9;
@@ -672,7 +673,7 @@
     const n = RN.k + 1;
     const margin = arrivalAt(n) - (t + runDur(n));
     FS.runPrompt.margin = margin;
-    if (margin >= 0.5) return true;
+    if (margin >= 0.35) return true;
     if (RN.push > 0) { RN.push--; return true; }
     return false;
   }
@@ -1856,8 +1857,8 @@
     if (G.phase === 'field') {
       if (FS.runPrompt && FS.runPrompt.show && !FS.ended) {
         const m = FS.runPrompt.margin;
-        const col = m >= 0.5 ? '#7ddf8a' : m >= -0.15 ? C.warm : '#ff6a55';
-        const word = m >= 0.5 ? 'Safe, running anyway' : m >= -0.15 ? 'Risky, tap Run to push' : 'Very risky';
+        const col = m >= 0.35 ? '#7ddf8a' : m >= -0.15 ? C.warm : '#ff6a55';
+        const word = m >= 0.35 ? 'Safe, running anyway' : m >= -0.15 ? 'Risky, tap Run to push' : 'Very risky';
         ctx.globalAlpha = 0.96;
         plate(ctx, w / 2 - 120, by - 24, 240, 40, 12, 0.72);
         ctx.globalAlpha = 1;
