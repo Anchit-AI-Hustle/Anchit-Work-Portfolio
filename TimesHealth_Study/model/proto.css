@@ -1,10 +1,17 @@
+/* Palette and type follow Times Health+'s own public site, measured on
+   2 Nov 2026: purple #893F97 (buttons run to #6E1A7D), amber #E29500, deep
+   brown #2D1B1B text, and Poppins. Amber is too light for text on white, so
+   text uses a darker amber; #E29500 is kept for bars and borders. The Times
+   Health+ logo is deliberately not used: this is an independent study. */
 :root{
-  --bg:#f4f7f5; --surface:#ffffff; --soft:#e9efeb;
-  --ink:#14211e; --body:#36443f; --muted:#5d6b66; --line:#d8e2dd;
-  --brand:#0f6e66; --brand-2:#0b544e; --brand-soft:#e0f1ee;
-  --coral:#b4400b; --coral-soft:#fdece2; --amber:#9a5b00; --amber-soft:#fcf0d8; --red:#b42318; --blue:#1d4ed8;
+  --bg:#fbf8fb; --surface:#ffffff; --soft:#f6f0f7;
+  --ink:#2d1b1b; --body:#4a3d3d; --muted:#6b5e5e; --line:#e9dfea;
+  --brand:#893f97; --brand-2:#6e1a7d; --brand-soft:#f4eaf6; --amber-brand:#e29500;
+  --coral:#b4400b; --coral-soft:#fdece2; --amber:#8f5b00; --amber-soft:#fdf3df; --red:#c8102e; --blue:#893f97;
   --r-btn:10px; --r-tag:6px; --r-panel:14px; --r-card:18px; --r-pill:9999px;
-  --font:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --font:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --cb-bg:#2d1b1b; --cb-line:#4a3535; --cb-ink:#ffffff; --cb-muted:#d3c6c6; --cb-link:#e29500;
+  --cb-accent:#893f97; --cb-accent-2:#6e1a7d; --cb-on-accent:#ffffff; --cb-font:var(--font);
 }
 *{box-sizing:border-box}
 body{margin:0;font-family:var(--font);color:var(--body);background:var(--bg);font-size:16px;line-height:24px;-webkit-font-smoothing:antialiased;overflow-x:clip}
@@ -13,7 +20,7 @@ h1{font-size:26px;line-height:32px;font-weight:800} h2{font-size:22px;line-heigh
 p{margin:0} ul,ol{margin:0;padding-left:20px}
 a{color:var(--brand);text-underline-offset:3px}
 :focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:4px}
-.notice{background:var(--ink);color:#dfe8e4;font-size:13px;line-height:19px;padding:8px 16px;text-align:center}
+.notice{background:var(--ink);color:#ece3ed;font-size:13px;line-height:19px;padding:8px 16px;text-align:center}
 .notice b{color:#fff}
 .wrap{max-width:1120px;margin:0 auto;padding:0 16px}
 .top{background:#fff;border-bottom:1px solid var(--line)}
@@ -82,7 +89,7 @@ input[type=range]{width:100%;accent-color:var(--brand);min-height:32px}
 .weeks li.race b{color:#fff}
 .weeks b{color:var(--ink)}
 .weeks .sub{font-size:13px;line-height:18px;color:var(--muted)}
-.weeks li.race .sub{color:#d9f0ec}
+.weeks li.race .sub{color:#efe2f2}
 .big{font-size:40px;line-height:46px;color:var(--brand);font-weight:800}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:10px;padding:10px 16px;font-size:14px;z-index:30;max-width:calc(100% - 32px)}
 .toast[hidden]{display:none}
@@ -110,3 +117,13 @@ input[type=range]{margin-left:0;margin-right:0}
 /* Day strip: four a row when the card is narrow, so every label fits its button. */
 .card:has(>.days){container-type:inline-size}
 @container (max-width:440px){.days{grid-template-columns:repeat(4,minmax(0,1fr))}.day{min-height:84px}}
+
+/* Race plan: the Times Internet Half Marathon's own palette and type, measured
+   from its race pages on 2 Nov 2026: navy #0B1C6E, gold #F6C35E, red #EB193A
+   (deepened to #D4143A for small text), Sofia Sans. */
+body.race{--brand:#0b1c6e;--brand-2:#011c74;--brand-soft:#e6eef8;--soft:#f3f4f6;--line:#dfe3ee;--bg:#f7f8fb;--ink:#000c3f;--blue:#0b1c6e;--coral:#d4143a;--coral-soft:#fdeaee;
+  --font:'Sofia Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --cb-bg:#000c3f;--cb-line:#26326b;--cb-muted:#c9cfe6;--cb-link:#f6c35e;--cb-accent:#f6c35e;--cb-accent-2:#ffc048;--cb-on-accent:#0b1c6e}
+body.race h1{font-family:'Sofia Sans Extra Condensed','Sofia Sans',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.01em;font-size:34px;line-height:36px}
+body.race .note,body.race .notice{border-color:var(--line)}
+body.race .race-accent{color:#f6c35e}

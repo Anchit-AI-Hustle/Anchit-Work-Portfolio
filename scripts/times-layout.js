@@ -13,7 +13,7 @@ const SHOT = process.env.SHOT; // dir to write screenshots
 const W = (process.env.W || '390,820,1440').split(',').map(Number);
 const pages = [];
 for (const [b, m] of [['/ET_Study', ['', '/hub', '/rules', '/maths']], ['/TimesHealth_Study', ['', '/week', '/race', '/business']]]) {
-  for (const p of ['', '/users', '/problems', '/gaps', '/ideas', '/fixes', '/plan', '/evidence', '/about']) pages.push(b + p);
+  for (const p of ['', '/users', '/problems', '/gaps', '/ideas', '/fixes', '/plan', '/roadmap', '/evidence', '/about']) pages.push(b + p);
   for (const p of m) pages.push(b + '/model' + p);
 }
 (async () => {

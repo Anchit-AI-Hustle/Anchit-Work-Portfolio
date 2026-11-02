@@ -40,3 +40,13 @@
   if(document.readyState!=='loading')mark();else document.addEventListener('DOMContentLoaded',mark);
   window.addEventListener('resize',mark,{passive:true});
 })();
+// Roadmap: show one stage across all three bets, or every stage.
+(function(){
+  var chips=[].slice.call(document.querySelectorAll('[data-stagefilter]'));
+  if(!chips.length)return;
+  function show(k){
+    chips.forEach(function(c){var on=c.dataset.stagefilter===k;c.classList.toggle('on',on);c.setAttribute('aria-pressed',on?'true':'false');});
+    [].forEach.call(document.querySelectorAll('.stage[data-stage]'),function(s){s.hidden=!(k==='all'||s.dataset.stage===k);});
+  }
+  chips.forEach(function(c){c.addEventListener('click',function(){show(c.dataset.stagefilter);});});
+})();

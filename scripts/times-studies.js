@@ -60,7 +60,13 @@ const VIEWPORTS = [
   { name: '820', width: 820, height: 1180 },
   { name: '1440', width: 1440, height: 900 },
 ];
-const PAGES = ['', '/problems', '/users', '/gaps', '/ideas', '/fixes', '/plan', '/evidence', '/about'];
+const PAGES = ['', '/problems', '/users', '/gaps', '/ideas', '/fixes', '/plan', '/roadmap', '/evidence', '/about'];
+// Brand values measured from each brand's own public site on 2 Nov 2026.
+const BRANDS = [
+  { dir: '/ET_Study', brand: '#d51131', fonts: ['Faustina', 'Montserrat'] },
+  { dir: '/TimesHealth_Study', brand: '#893f97', fonts: ['Poppins'],
+    race: { brand: '#0b1c6e', fonts: ['Poppins', 'Sofia Sans', 'Sofia Sans Extra Condensed'] } },
+];
 const STUDIES = [
   { key: 'et', base: '/ET_Study', proto: ['', '/hub', '/rules', '/maths'] },
   { key: 'th', base: '/TimesHealth_Study', proto: ['', '/week', '/race', '/business'] },
@@ -82,6 +88,8 @@ function mutate(p, src) {
   if (MUT === 'nav' && p === '/TimesHealth_Study/plan') return src.replace(/<a href="\/TimesHealth_Study\/evidence">Evidence<\/a>/, '');
   if (MUT === 'ice' && p === '/TimesHealth_Study/ideas') return src.replace(/(<td class="num ice">)(\d+)(<\/td>)/, (m, a, n, b) => a + (+n + 1) + b);
   if (MUT === 'badid' && p === '/TimesHealth_Study') return src.replace('id="model"', 'id="working model"');
+  if (MUT === 'brand' && p === '/ET_Study/plan') return src.replace(/<link rel="icon" href="[^"]*"[^>]*>/, '<link rel="icon" href="/icons/favicon.svg">').replace('</head>', '<style>body{--brand:#893f97}</style></head>');
+  if (MUT === 'roadmap' && p === '/TimesHealth_Study/roadmap') return src.replace('(T16)', '(T99)').replace(/<div class="card stage" data-stage="scale">/, '<div class="card stage" data-stage="scale" hidden>');
   if (MUT === 'ghost' && p === '/ET_Study/ideas') return src.replace('combines I2, I4, I11', 'combines I2, I4, I99');
   if (MUT === 'renewal' && p === '/ET_Study/model/maths') return src.replace('value="2699"', 'value="2999"');
   return src;
@@ -147,6 +155,33 @@ async function common(L, page, bag, status) {
   check(`${L}: exactly one h1`, (await page.$$('h1')).length === 1, '');
   const unsafe = await page.$$eval('a[target="_blank"]', (as) => as.filter((a) => !/noopener/.test(a.rel)).map((a) => a.href));
   check(`${L}: every new-tab link has rel=noopener`, unsafe.length === 0, unsafe.join(' '));
+  // Each study wears its own brand only: its palette and type, its own favicon
+  // and share image, its own images, and nothing from the other study or the
+  // portfolio. Race plan is the Half Marathon's page, so it wears that brand.
+  const brand = await page.evaluate(async () => {
+    await document.fonts.ready;
+    const css = (n) => getComputedStyle(document.body).getPropertyValue(n).trim().toLowerCase();
+    return {
+      path: location.pathname, brand: css('--brand'),
+      fonts: [...new Set([...document.fonts].filter((x) => x.status === 'loaded').map((x) => x.family.replace(/"/g, '')))],
+      icon: document.querySelector('link[rel="icon"]')?.getAttribute('href') || '',
+      og: document.querySelector('meta[property="og:image"]')?.content || '',
+      theme: document.querySelector('meta[name="theme-color"]')?.content.toLowerCase() || '',
+      imgs: [...document.images].map((i) => new URL(i.src).pathname),
+    };
+  });
+  const B = BRANDS.find((b) => brand.path.startsWith(b.dir));
+  if (B) {
+    const race = /\/model\/race$/.test(brand.path), want = race ? B.race : B;
+    check(`${L}: wears its own brand colour (${want.brand})`, brand.brand === want.brand && brand.theme === want.brand, brand.brand + ' / theme ' + brand.theme);
+    const alien = brand.fonts.filter((x) => !want.fonts.includes(x));
+    check(`${L}: loads only its own brand fonts`, alien.length === 0 && brand.fonts.length > 0, brand.fonts.join(', '));
+    const icon = race ? `${B.dir}/img/favicon-race.svg` : `${B.dir}/img/favicon.svg`;
+    const og = `https://anchit-tandon.com${B.dir}/img/${race ? 'og-race' : 'og'}.png`;
+    check(`${L}: own favicon and share image, not the portfolio's`, brand.icon === icon && brand.og === og, brand.icon + ' ' + brand.og);
+    const foreign = brand.imgs.filter((p) => !p.startsWith(B.dir + '/'));
+    check(`${L}: every image is from its own study`, foreign.length === 0, foreign.join(' '));
+  }
   const notice = (await page.textContent('.notice')) || '';
   check(`${L}: states it is independent and not affiliated`, /independent/i.test(notice) && /not affiliated/i.test(notice), '');
   await page.waitForTimeout(200);
@@ -272,6 +307,27 @@ async function study(browser, vp, st) {
     }
     if (sub === '/evidence') check(`${L}: shows what a visitor sees, as captioned screenshots`, (await page.$$('#screens figure.shot img')).length >= 2 && (await page.$$('#screens figcaption')).length >= 2, '');
     if (sub === '/evidence') check(`${L}: has today's offer, the audit and the competition`, !!(await page.$('#today')) && !!(await page.$('#audit-tbl')) && !!(await page.$('#compete')), '');
+    if (sub === '/roadmap') {
+      // Every bet is carried through all six stages, each launch has a stop
+      // line, and every P, I, T and F it cites exists in the study.
+      const r = await page.evaluate(() => {
+        const bets = [...document.querySelectorAll('[data-rbet]')].map((b) => ({ stages: [...b.querySelectorAll('.stage')].map((x) => x.dataset.stage), gate: /Stop if:/.test(b.querySelector('.stage[data-stage="launch"]')?.textContent || ''), src: !!b.querySelector('.src a[href]') }));
+        const refs = [...new Set((document.querySelector('main').textContent.match(/\b[PITF]\d{1,2}\b/g) || []))];
+        return { bets, refs, glance: document.querySelectorAll('.glance tbody tr').length, phases: document.querySelectorAll('#timeline .card').length, shown: [...document.querySelectorAll('.stage')].filter((x) => !x.hidden && x.offsetParent).length };
+      });
+      const SIX = ['idea', 'build', 'launch', 'market', 'scale', 'upgrade'];
+      check(`${L}: three bets, each through all six stages in order, all shown`, r.bets.length === 3 && r.bets.every((b) => b.stages.join() === SIX.join()) && r.shown === 18, JSON.stringify(r.bets.map((b) => b.stages.length)) + ' shown ' + r.shown);
+      check(`${L}: every launch has a stop line, and every bet links its sources`, r.bets.every((b) => b.gate && b.src), '');
+      check(`${L}: a now, next and later timeline, and a six-row summary`, r.phases === 3 && r.glance === 6, `${r.phases} ${r.glance}`);
+      const known = new Set([...problemList, ...ideaIds, ...fixIds]);
+      const ghosts = r.refs.filter((x) => !known.has(x));
+      check(`${L}: every problem, idea and fix it cites exists in the study`, ghosts.length === 0 && r.refs.length > 10, ghosts.join(' ') || r.refs.length + ' refs');
+      await page.click('[data-stagefilter="market"]');
+      const vis = await page.$$eval('.stage', (n) => n.filter((x) => !x.hidden).map((x) => x.dataset.stage));
+      await page.click('[data-stagefilter="all"]');
+      const back = await page.$$eval('.stage', (n) => n.filter((x) => !x.hidden).length);
+      check(`${L}: the stage filter shows one stage across all three bets, and back`, vis.length === 3 && vis.every((x) => x === 'market') && back === 18, `${vis.join(',')} then ${back}`);
+    }
     if (sub === '/fixes') {
       await fixesPage(L, page, problemList);
       fixIds = await page.$$eval('[data-solves]', (n) => n.map((x) => x.dataset.fix));
@@ -487,6 +543,17 @@ async function protoTH(browser, vp) {
     check(`${from} redirects permanently to ${to}`, !!r && r.destination === to && r.permanent === true, r ? r.destination : 'missing');
   }
 
+  // Static brand isolation: no study ships the other study's colours, or the
+  // portfolio's orange, anywhere in its own files.
+  const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => e.isDirectory() ? walk(path.join(d, e.name)) : /\.(css|html|js)$/.test(e.name) ? [path.join(d, e.name)] : []);
+  const OWN = { ET_Study: ['#d51131', '#a80d27', '#ffe9e2'], TimesHealth_Study: ['#893f97', '#6e1a7d', '#f4eaf6', '#0b1c6e', '#f6c35e'] };
+  for (const [dir, mine] of Object.entries(OWN)) {
+    const theirs = Object.entries(OWN).filter(([d]) => d !== dir).flatMap(([, c]) => c).concat(['#ff6940', '#ff4d1f']);
+    const hits = walk(path.join(WWW, dir)).flatMap((file) => { const t = fs.readFileSync(file, 'utf8').toLowerCase(); return theirs.filter((c) => t.includes(c)).map((c) => path.relative(WWW, file) + ' ' + c); });
+    check(`${dir}: no other brand's colours in its files`, hits.length === 0, hits.slice(0, 4).join(' | '));
+    const own = walk(path.join(WWW, dir)).some((file) => fs.readFileSync(file, 'utf8').toLowerCase().includes(mine[0]));
+    check(`${dir}: its own brand colour is in use`, own, mine[0]);
+  }
   const browser = await chromium.launch();
   for (const vp of VIEWPORTS) {
     for (const st of STUDIES) await study(browser, vp, st);

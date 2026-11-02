@@ -1,11 +1,17 @@
+/* Palette and type follow The Economic Times' own public site, measured on
+   2 Nov 2026: ET Prime red #D51131, the peach band #FFE9E2, black and #4D4D4D
+   text, the markets green, Faustina headlines and Montserrat. The ET logo is
+   deliberately not used: this is an independent study, not an ET page. */
 :root{
-  --bg:#faf6f0; --surface:#ffffff; --soft:#f2ece3;
-  --ink:#1a1714; --body:#3f3a34; --muted:#6a6259; --line:#e3dbcf;
-  --brand:#8f1d22; --brand-2:#6f151a; --brand-soft:#f8e9e6;
-  --amber:#a8510a; --amber-soft:#fcefdc; --green:#1f6b45; --green-soft:#e2f2e8; --red:#b42318; --blue:#1d4ed8;
+  --bg:#fbfbfb; --surface:#ffffff; --soft:#fff3f0;
+  --ink:#121212; --body:#4d4d4d; --muted:#666666; --line:#e5e5e5;
+  --brand:#d51131; --brand-2:#a80d27; --brand-soft:#ffe9e2;
+  --amber:#a8510a; --amber-soft:#fcefdc; --green:#0b7f72; --green-soft:#e3f4f1; --red:#c8102e; --blue:#0277bd;
   --r-btn:8px; --r-tag:4px; --r-panel:12px; --r-card:16px; --r-pill:9999px;
-  --serif:'Source Serif 4',Georgia,serif;
-  --font:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --serif:'Faustina',Georgia,'Times New Roman',serif;
+  --font:'Montserrat',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --cb-bg:#121212; --cb-line:#333333; --cb-ink:#ffffff; --cb-muted:#b3b3b3; --cb-link:#ffe9e2;
+  --cb-accent:#d51131; --cb-accent-2:#a80d27; --cb-on-accent:#ffffff; --cb-font:var(--font);
 }
 *{box-sizing:border-box}
 body{margin:0;font-family:var(--font);color:var(--body);background:var(--bg);font-size:16px;line-height:24px;-webkit-font-smoothing:antialiased;overflow-x:clip}
@@ -14,7 +20,7 @@ h1{font-family:var(--serif);font-size:26px;line-height:32px} h2{font-family:var(
 p{margin:0} ul{margin:0;padding-left:20px}
 a{color:var(--brand);text-underline-offset:3px}
 :focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:4px}
-.notice{background:var(--ink);color:#e8e2da;font-size:13px;line-height:19px;padding:8px 16px;text-align:center}
+.notice{background:var(--ink);color:#e8e8e8;font-size:13px;line-height:19px;padding:8px 16px;text-align:center}
 .notice b{color:#fff}
 .wrap{max-width:1120px;margin:0 auto;padding:0 16px}
 .top{background:#fff;border-bottom:1px solid var(--line)}
@@ -77,7 +83,7 @@ main .wrap{padding-top:24px;padding-bottom:48px}
 .phone .bar{background:#fff;border-bottom:1px solid var(--line);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700;color:var(--ink)}
 .phone .bar .pill{border:1px solid var(--brand);color:var(--brand);border-radius:6px;padding:2px 8px;font-size:11px}
 .phone .body{padding:12px;display:grid;gap:10px}
-.phone .ad{background:repeating-linear-gradient(45deg,#f2ece3,#f2ece3 8px,#ebe3d7 8px,#ebe3d7 16px);border-radius:8px;display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.phone .ad{background:repeating-linear-gradient(45deg,#fff3f0,#fff3f0 8px,#f7dcd3 8px,#f7dcd3 16px);border-radius:8px;display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .phone .ad.big{height:120px} .phone .ad.native{height:54px}
 .phone .hl{font-family:var(--serif);font-size:18px;line-height:23px;color:var(--ink);font-weight:700}
 .phone .txt{height:8px;background:var(--soft);border-radius:4px}
