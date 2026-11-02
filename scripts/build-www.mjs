@@ -90,6 +90,9 @@ const assets = [
   'amar-ujala',
   'ET_Study',
   'TimesHealth_Study',
+  // Films page: /movies lists every playable film. Media (HLS segments,
+  // MP4s, posters, VTT) ships as plain static files next to the page.
+  'movies',
 ];
 
 // Stamp the service worker's cache name from the content it will serve.
