@@ -707,7 +707,7 @@
       horizon: '#8a2a84', rain: true
     },
     ghat: {
-      name: 'Ghat Pass', sub: 'Mountain switchbacks', sky: [0, '#02060f', 0.5, '#0b1f2c', 0.85, '#2a4a56', 1, '#4f747c'], fog: '#4a6c75', fogA: 0.96,
+      name: 'Ghat Pass', sub: 'Mountain switchbacks', sky: [0, '#02060f', 0.5, '#0b1f2c', 0.85, '#2a4a56', 1, '#4f747c'], fog: '#4a6c75', fogA: 0.88,
       ground: [['#142a1b', '#102316'], ['#2f3331', '#282c2a'], ['#3a3a35', '#33332e']],
       road: ['#3a3d41', '#33363a'], rumble: ['#d9d7c8', '#9c3d28'], lane: '#e9e2c4', moon: '#e6f0ff', moonAt: [0.62, 0.34, 1.1], stars: 130, fogH: 1.0,
       horizon: '#4f747c', mist: true, rail: { panel: '#8d969e', cap: '#d6dce0', post: '#2b2f33', h: 300 }
@@ -1537,10 +1537,10 @@
     ctx.restore();
 
     // atmosphere
-    var fk = T.id + '|' + hz + '|' + h;
+    var inTun = pseg.tun === 1, fk = T.id + '|' + hz + '|' + h + '|' + inTun;
     if (R.fogKey !== fk) {
-      var above = hz * 0.36, below = (h - hz) * pal.fogH * 0.9, span = above + below, A = pal.fogA, g = ctx.createLinearGradient(0, hz - above, 0, hz - above + span);
-      [[0, 0], [above / span * 0.6, 0.3 * A], [above / span, A], [(above + below * 0.03) / span, 0.88 * A], [(above + below * 0.07) / span, 0.5 * A], [(above + below * 0.14) / span, 0.22 * A], [(above + below * 0.28) / span, 0.07 * A], [(above + below * 0.5) / span, 0], [1, 0]].forEach(function (s) { g.addColorStop(s[0], rgba(pal.fog, s[1])); });
+      var above = hz * 0.36, below = (h - hz) * pal.fogH * 0.9, span = above + below, A = inTun ? 0.95 : pal.fogA, fc = inTun ? '#0b0a0e' : pal.fog, g = ctx.createLinearGradient(0, hz - above, 0, hz - above + span);
+      [[0, 0], [above / span * 0.6, 0.3 * A], [above / span, A], [(above + below * 0.03) / span, 0.88 * A], [(above + below * 0.07) / span, 0.5 * A], [(above + below * 0.14) / span, 0.22 * A], [(above + below * 0.28) / span, 0.07 * A], [(above + below * 0.5) / span, 0], [1, 0]].forEach(function (s) { g.addColorStop(s[0], rgba(fc, s[1])); });
       R.fogG = g; R.fogY0 = hz - above; R.fogSpan = span; R.fogKey = fk;
     }
     ctx.fillStyle = R.fogG; ctx.fillRect(0, R.fogY0, w, R.fogSpan);
