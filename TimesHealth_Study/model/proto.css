@@ -96,3 +96,17 @@ input[type=range]{width:100%;accent-color:var(--brand);min-height:32px}
 .app-name{margin:0;color:var(--ink);font-weight:800;font-size:26px;line-height:32px;letter-spacing:-.01em}
 @media (min-width:760px){.app-name{font-size:32px;line-height:40px}}
 .ph1{font-size:22px;line-height:30px;margin:0}
+
+/* Containment: nothing may stretch or spill out of its box. */
+img,svg,video{max-width:100%;height:auto}
+.grid>*,.g2>*,.g3>*,.g4>*{min-width:0}
+.card,.card *{overflow-wrap:break-word}
+.tag{white-space:normal;max-width:100%}
+h1,h2,h3{text-wrap:balance}
+p,li,figcaption{text-wrap:pretty}
+input[type=range]{margin-left:0;margin-right:0}
+/* Phone tabs: a 2x2 grid, every tab visible, no hidden sideways scroll. */
+@media (max-width:699px){.tabs{overflow:visible}.tabs .wrap{display:grid;grid-template-columns:1fr 1fr;gap:6px}.tab{justify-content:center;text-align:center;white-space:normal;padding:8px 10px}}
+/* Day strip: four a row when the card is narrow, so every label fits its button. */
+.card:has(>.days){container-type:inline-size}
+@container (max-width:440px){.days{grid-template-columns:repeat(4,minmax(0,1fr))}.day{min-height:84px}}

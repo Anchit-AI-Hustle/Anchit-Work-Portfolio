@@ -288,3 +288,24 @@ footer h3{color:#fff}
 .thumbs{display:flex;gap:8px;flex-wrap:wrap}
 .thumbs a{display:block;width:96px}
 .thumbs img{width:96px;height:auto;display:block;border-radius:8px;border:1px solid var(--line)}
+
+/* Containment: nothing may stretch or spill out of its box. */
+img,svg,video{max-width:100%;height:auto}
+.grid>*,.g2>*,.g3>*,.g4>*{min-width:0}
+.card,.card *{overflow-wrap:break-word}
+.tag{white-space:normal;max-width:100%}
+h1,h2,h3{text-wrap:balance}
+p,li,figcaption{text-wrap:pretty}
+input[type=range]{margin-left:0;margin-right:0}
+/* Quadrant names sit outside the plot, so no idea dot can land on one. */
+.ice-pad{padding-top:28px}
+.ice-map .q{padding:0}
+.ice-map .ql{position:absolute;font-size:12px;line-height:16px;white-space:nowrap}
+.ice-map .q.tl .ql,.ice-map .q.tr .ql{top:-24px}
+.ice-map .q.bl .ql,.ice-map .q.br .ql{bottom:-24px}
+.ice-map .q.tl .ql,.ice-map .q.bl .ql{left:0}
+.ice-map .q.tr .ql,.ice-map .q.br .ql{right:0}
+/* Step labels: full-width bars of equal height, so the four lists line up. */
+.short .tag{justify-self:stretch;display:flex;align-items:center;padding:6px 10px;line-height:18px}
+@media (min-width:1080px){.short.four .tag{min-height:48px}}
+.tuck{margin-left:-.14em}

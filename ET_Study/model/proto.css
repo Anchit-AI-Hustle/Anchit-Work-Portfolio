@@ -110,3 +110,14 @@ input[type=range]{width:100%;accent-color:var(--brand);min-height:32px}
 .ph1{font-size:22px;line-height:30px;margin:0}
 .app-name{font-family:var(--serif);font-weight:700}
 .ph1{font-family:var(--serif)}
+
+/* Containment: nothing may stretch or spill out of its box. */
+img,svg,video{max-width:100%;height:auto}
+.grid>*,.g2>*,.g3>*,.g4>*{min-width:0}
+.card,.card *{overflow-wrap:break-word}
+.tag{white-space:normal;max-width:100%}
+h1,h2,h3{text-wrap:balance}
+p,li,figcaption{text-wrap:pretty}
+input[type=range]{margin-left:0;margin-right:0}
+/* Phone tabs: a 2x2 grid, every tab visible, no hidden sideways scroll. */
+@media (max-width:699px){.tabs{overflow:visible}.tabs .wrap{display:grid;grid-template-columns:1fr 1fr;gap:6px}.tab{justify-content:center;text-align:center;white-space:normal;padding:8px 10px}}
