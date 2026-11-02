@@ -92,6 +92,7 @@ function mutate(p, src) {
   if (MUT === 'brand' && p === '/ET_Study/plan') return src.replace(/<link rel="icon" href="[^"]*"[^>]*>/, '<link rel="icon" href="/icons/favicon.svg">').replace('</head>', '<style>body{--brand:#893f97}</style></head>');
   if (MUT === 'roadmap' && p === '/TimesHealth_Study/roadmap') return src.replace('(T16)', '(T99)').replace(/<div class="card stage" data-stage="scale">/, '<div class="card stage" data-stage="scale" hidden>');
   if (MUT === 'seethrough' && p === '/ET_Study/ideas') return src.replace('</head>', '<style>.nav{background:rgba(255,255,255,.96)}</style></head>');
+  if (MUT === 'barecode' && p === '/TimesHealth_Study/plan') return src.replace('</main>', '<p>See (T1, F2).</p></main>');
   if (MUT === 'ghost' && p === '/ET_Study/ideas') return src.replace('combines I2, I4, I11', 'combines I2, I4, I99');
   if (MUT === 'renewal' && p === '/ET_Study/model/maths') return src.replace('value="2699"', 'value="2999"');
   return src;
@@ -150,6 +151,9 @@ async function common(L, page, bag, status) {
   check(`${L}: no link to GitHub`, (await page.$$('a[href*="github.com"]')).length === 0, '');
   const ppl = text.match(/.{0,25}\bpeople\b.{0,25}/gi) || [];
   check(`${L}: says users, not people`, ppl.length === 0, ppl.slice(0, 3).join(' | '));
+  // Codes never stand alone: "(I5, I14)" must say "(ideas I5 and I14)".
+  const bare = (await page.evaluate(() => { const b = document.body.cloneNode(true); b.querySelectorAll('footer,script,style').forEach((n) => n.remove()); return b.textContent; })).match(/\((?:[PITF]\d+)(?:, [PITF]\d+)*\)/g) || [];
+  check(`${L}: every code is labelled, never bare`, bare.length === 0, bare.slice(0, 4).join(' '));
   const jargon = text.match(/.{0,25}\b(Lighthouse|LCP|CLS|layout shift|main thread|tag manager|throttl\w*|holdout|cohorts?|entitlement|Core Web Vitals)\b.{0,25}/gi) || [];
   check(`${L}: no technical jargon`, jargon.length === 0, jargon.slice(0, 3).join(' | '));
   const over = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
