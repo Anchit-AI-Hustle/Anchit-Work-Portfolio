@@ -265,7 +265,7 @@
     const edge = () => {
       if (s.loft || D.yBat > 1.15) { kind = 'topedge'; al = rr(50, 74); v = rr(12, 22); phi = late ? side * rr(140, 178) : rr(-40, 40); }
       else if (!late) { kind = 'leading'; al = rr(28, 52); v = rr(11, 17); phi = rr(-45, 45) + side * 10; }
-      else { kind = 'edge'; al = rr(2, 20); v = rr(16, 26); phi = side * rr(150, 176); }
+      else { kind = 'edge'; al = rr(3, 22); v = rr(15, 25); phi = side > 0 ? rr(154, 178) : -rr(168, 179); }
     };
     if (s.id === 'defend') {
       if (q < 0.3) edge();
@@ -554,7 +554,7 @@
     const lay = pace ? LAYOUT_PACE : LAYOUT_SPIN;
     const cfg = G.cfg;
     FL = lay.map((e) => ({ role: e[0], x0: e[1], z0: e[2], tx: e[1], tz: e[2], sp: cfg.fspd * rr(0.95, 1.05), react: cfg.react + rr(0, 0.1), mv: 1, x: e[1], z: e[2], face: 0 }));
-    FL.push({ role: 'Bowler', x0: 1.8, z0: 3, tx: 1.8, tz: 3, sp: cfg.fspd * 0.95, react: cfg.react + 0.1, mv: 1, x: 1.8, z: 3, face: 0 });
+    FL.push({ role: 'Bowler', x0: 2.6, z0: 4, tx: 2.6, tz: 4, sp: cfg.fspd * 0.95, react: cfg.react + 0.1, mv: 1, x: 2.6, z: 4, face: 0 });
     FL[0].sp *= 0.9;
   }
 
@@ -577,31 +577,35 @@
   function planIntercept() {
     const cfg = G.cfg;
     const last = crossI >= 0 ? crossI : FN - 1;
-    let best = null;
+    let best = null, bestSpd = 0;
     for (let i = 0; i <= last && !best; i++) {
       const t = i * DTS, x = SX[i], y = SY[i], z = SZ[i], nb = SB[i];
       const air = nb === 0 && y > 0.3;
       const catchable = air && y <= 2.6;
       if (air && !catchable) continue;
+      const pv = Math.max(0, i - 1);
+      const spd = i > 0 ? hyp(x - SX[pv], y - SY[pv], z - SZ[pv]) / DTS : 20;
+      // a hard-hit ball is very hard to hold: the fielder must be almost on its line
+      const fast = spd >= 24 ? 0.55 : spd >= 15 ? 0.8 : 1;
       let bf = null, bs = -1e9;
       for (let j = 0; j < FL.length; j++) {
         const f = FL[j];
         const d = hyp(x - f.x0, z - f.z0);
         const mt = Math.max(0, t - f.react);
-        const reach = catchable ? (y < 0.9 ? 1.35 : 1.0) : 0.95;
+        const reach = (catchable ? (y < 0.9 ? 1.2 : 1.0) * fast : 0.95);
         const slack = f.sp * mt + reach - d;
         if (slack >= 0 && slack > bs) { bs = slack; bf = f; }
       }
-      if (bf) best = { i, f: bf, slack: bs, air: catchable };
+      if (bf) { best = { i, f: bf, slack: bs, air: catchable }; bestSpd = spd; }
     }
     FS.fate = 'field'; FS.dropped = false; FS.col = null; FS.catcher = null; FS.six = false;
     if (best) {
       const i = best.i, t = i * DTS;
       if (best.air) {
-        const prev = Math.max(0, i - 1);
-        const spd = hyp(SX[i] - SX[prev], SY[i] - SY[prev], SZ[i] - SZ[prev]) / DTS;
+        const spd = bestSpd;
         let pc = cfg.catchSk * (0.5 + 0.5 * clamp(best.slack / 1.6, 0, 1));
         if (spd > 18) pc *= 0.8;
+        if (spd > 26) pc *= 0.7;
         if (SY[i] > 2.1) pc *= 0.9;
         if (best.f.role === 'Keeper' || best.f.role === 'Slip') pc *= 1.04;
         pc = Math.min(pc, 0.985);
@@ -1896,8 +1900,11 @@
       for (const f of G.floats) {
         const u = f.t / f.life;
         proj(-0.45, 2.2, HITZ);
-        ctx.globalAlpha = 1 - u * u;
-        txt(ctx, f.text, w / 2 + (PX - w / 2) * 0.8, PY - 14 - u * 40, f.size, f.color, 800, 'center', FONT_MONO);
+        const fx = clamp(PX - w * 0.0, 80, w - 80), fy = PY - 24 - u * 44;
+        ctx.globalAlpha = clamp(1.4 - u * 1.4, 0, 1);
+        ctx.font = '800 ' + f.size + 'px ' + FONT_MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+        ctx.lineJoin = 'round'; ctx.strokeStyle = 'rgba(0,0,0,0.75)'; ctx.lineWidth = 5; ctx.strokeText(f.text, fx, fy);
+        ctx.fillStyle = f.color; ctx.fillText(f.text, fx, fy);
         ctx.globalAlpha = 1;
       }
     }

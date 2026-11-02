@@ -1232,13 +1232,13 @@
     const tx = CRATE_X + 0.25, th = 0.55;
     const dist = abs(f.x - tx);
     b.state = 'thrown';
-    b.thrown = { x0: f.x, h0: 1.15, x1: tx, h1: th, t: 0, dur: max(0.32, dist / (11.5 + (G.D === DIFF.legend ? 3 : 0))), arc: min(2.4, 0.4 + dist * 0.07) };
+    b.thrown = { x0: f.x, h0: 1.15, x1: tx, h1: th, t: 0, dur: max(0.4, dist / (9.5 + (G.D === DIFF.legend ? 3 : 0))), arc: min(2.4, 0.4 + dist * 0.07) };
     f.hasBall = false; f.armUp = 0.4;
     SND.swish();
   }
   function takeBall(f, caughtKind) {
     const b = BALL;
-    b.state = 'held'; f.hasBall = true; f.hold = caughtKind ? 0.5 : 0.32 + rnd() * 0.15; f.tried = true;
+    b.state = 'held'; f.hasBall = true; f.hold = caughtKind ? 0.5 : 0.4 + rnd() * 0.2; f.tried = true;
     b.vx = b.vz = b.vh = 0; b.x = f.x; b.h = 1.0; b.z = f.z;
     f.armUp = 0.5;
   }
@@ -1251,7 +1251,7 @@
       const dx = abs(b.x - f.x), dz = abs(b.z - f.z);
       if (dx > 0.58 || dz > 1.05) continue;
       const spd = sqrt(b.vx * b.vx + b.vz * b.vz + b.vh * b.vh);
-      if (b.bounces <= 1 && b.h > 0.22 && b.h < 2.4) {
+      if (b.bounces <= 1 && b.h > 0.45 && b.h < 2.4) {
         f.tried = true;
         let p = D.pCatch * f.hands * (1 - dx / 1.4 * 0.4) * (1 - clamp((spd - 8) / 18, 0, 0.6)) * (b.bounces === 1 ? 0.86 : 1);
         if (b.h > 1.9) p *= 0.8;
@@ -1262,7 +1262,7 @@
         SND.tink(); b.vx *= 0.35; b.vz += (rnd() - 0.5) * 2; b.vh = max(b.vh, 0) + 2.2; b.replan = true;
         if (rnd() < 0.6) say(pick(LINES.drop), f, 1.3, 1.9);
         pop('Dropped!', f.x, 2.3, '#FF8A3D', 15, 0.9);
-      } else if (b.h < 0.5) {
+      } else if (b.h <= 0.45) {
         f.tried = true;
         const p = D.pStop * f.hands * (1 - clamp((spd - 9) / 24, 0, 0.5));
         f.dive = 0.4;

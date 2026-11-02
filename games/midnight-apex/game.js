@@ -926,7 +926,7 @@
     };
     var hex = colorHex(cfg.color), P = mkRacer({ name: 'You', kind: cfg.car, hex: hex, isPlayer: true });
     P.nitro = 35; P.nitroOn = false; P.steerIn = 0; P.rpm = 0.2; P.gear = 1; P.xCam = 0; P.drift = 0; P.cleanT = 0; P.draft = 0; P.hitCd = 0; P.lean = 0; P.thr = 0; P.bestNm = 0;
-    P.lapT0 = 0; P.started = false; P.flameT = 0; P.wasOff = false; P.crashes = 0; P.nearMisses = 0;
+    P.lapT0 = 0; P.started = false; P.crashLog = { car: 0, obj: 0, wall: 0, edge: 0 }; P.flameT = 0; P.wasOff = false; P.crashes = 0; P.nearMisses = 0;
     W.P = P; W.racers.push(P);
     var attract = W.attract, withRivals = attract || W.mode === 'race';
     if (withRivals) {
@@ -1052,8 +1052,9 @@
       spawnP(0, W.pcx + side * W.pcw * 0.42, W.pcy - W.pcw * 0.1, Math.cos(a) * (140 + Math.random() * 360) * power, -Math.abs(Math.sin(a)) * (120 + Math.random() * 300) * power, 0.35 + Math.random() * 0.4, 2);
     }
   }
-  function crashFx(W, strength, side) {
+  function crashFx(W, strength, side, kind) {
     var P = W.P;
+    P.crashLog[kind || 'car']++;
     if (W.attract) { P.hitCd = 0.35; return; }
     P.cleanT = 0; P.hitCd = 0.35; P.crashes++;
     if (!ARC.reducedMotion) W.shake = Math.max(W.shake, 6 + strength * 12);
@@ -1152,7 +1153,7 @@
     var lim = 1.11;
     if ((seg.rail & 1) && P.x < -lim) { P.x = -lim; P.vx = Math.max(P.vx, 0); wallScrape(W, -1, dt); }
     else if ((seg.rail & 2) && P.x > lim) { P.x = lim; P.vx = Math.min(P.vx, 0); wallScrape(W, 1, dt); }
-    if (P.x < -2.75 || P.x > 2.75) { var sd = P.x < 0 ? -1 : 1; P.x = sd * 2.75; P.vx = 0; P.speed *= 0.8; if (P.hitCd <= 0) crashFx(W, 0.5, sd); }
+    if (P.x < -2.75 || P.x > 2.75) { var sd = P.x < 0 ? -1 : 1; P.x = sd * 2.75; P.vx = 0; P.speed *= 0.8; if (P.hitCd <= 0) crashFx(W, 0.5, sd, 'edge'); }
     // gravel
     if (offroad && P.speed > 2000) {
       P.cleanT = 0;
@@ -1181,7 +1182,7 @@
           else P.x = sp.off + (P.x >= sp.off ? 1 : -1) * (dd.hw + CAR_HALF + 0.03);
           var st = clamp(P.speed / BASE_MAX, 0.15, 1.1);
           P.speed = Math.min(P.speed * 0.4, BASE_MAX * 0.28); P.vx = 0; P.nitroOn = false;
-          crashFx(W, st, P.x > 0 ? 1 : -1);
+          crashFx(W, st, P.x > 0 ? 1 : -1, 'obj');
         }
       }
     }
@@ -1195,7 +1196,7 @@
         if (adx2 >= 0.34) continue;
         var rel = Math.abs(P.speed - o.speed), stt = clamp(rel / 8000, 0.1, 1);
         if (dz2 > 70 && P.speed >= o.speed - 300) {
-          P.dist = o.dist - 335; P.speed = Math.max(o.speed * 0.9, P.speed * 0.5);
+          P.dist += dz2 - 335; P.speed = Math.max(o.speed * 0.9, P.speed * 0.5);
           if (!o.isTraffic) o.speed = Math.min(o.speed * 1.0 + 300, o.vmax * 1.05);
         } else if (dz2 < -70) {
           o.speed = Math.max(0, o.speed * 0.92); P.speed = Math.min(P.speed * 1.02 + 200, top * 1.2);
@@ -1912,7 +1913,7 @@
       state: a.state, phase: W.attract ? 'attract' : W.phase, track: W.cfg.track, mode: W.mode, diff: W.cfg.diff, lap: clamp(P.lapIdx + 1, 1, LAPS), position: positionOf(W, P),
       speed: Math.round(P.speed * KMH), speedRaw: Math.round(P.speed), nitro: Math.round(P.nitro), nitroOn: P.nitroOn, playerX: +P.x.toFixed(3), distance: Math.round(P.dist),
       totalTime: +(P.finished ? P.finT : W.t).toFixed(2), lapTimes: P.lapTimes.map(function (t) { return +t.toFixed(2); }), bestLap: P.bestLap < Infinity ? +P.bestLap.toFixed(2) : null,
-      gear: P.gear, rpm: +P.rpm.toFixed(2), drift: +P.drift.toFixed(2), draft: +P.draft.toFixed(2), crashes: P.crashes, nearMisses: P.nearMisses, trackLen: W.T.L,
+      gear: P.gear, rpm: +P.rpm.toFixed(2), drift: +P.drift.toFixed(2), draft: +P.draft.toFixed(2), crashes: P.crashes, crashLog: P.crashLog, nearMisses: P.nearMisses, trackLen: W.T.L,
       rivals: W.rivals.map(function (r) { return { name: r.name, dist: Math.round(r.dist), x: +r.x.toFixed(2), speed: Math.round(r.speed * KMH), pos: positionOf(W, r), finished: r.finished }; }),
       traffic: W.traffic.length, results: W.results
     };
