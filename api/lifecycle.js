@@ -159,6 +159,45 @@ function parsePlan(text) {
 }
 
 function arr(x) { return Array.isArray(x) ? x : []; }
+
+// Models sometimes return a list item as a string instead of an object, and
+// that string is often the object itself as JSON text ('{"step":"Plan",...}').
+// The page then printed the raw JSON. Turn any such item back into an object:
+// JSON text is parsed; plain text "Key: detail" is split on the first colon.
+// A field that itself holds JSON text gets the same treatment.
+function lowerKeys(o) { const out = {}; Object.keys(o).forEach((k) => { out[k.toLowerCase()] = o[k]; }); return out; }
+function item(x, keyA, keyB) {
+  const fromText = (t) => {
+    t = String(t).trim();
+    if (/^\{[\s\S]*\}$/.test(t)) {
+      try { const o = JSON.parse(t); if (o && typeof o === 'object') return lowerKeys(o); } catch (e) { /* not JSON */ }
+    }
+    const m = t.match(/^([^:]{2,60}):\s*(.+)$/);
+    return m ? { [keyA]: m[1].trim(), [keyB]: m[2].trim() } : { [keyA]: t, [keyB]: '' };
+  };
+  if (typeof x === 'string') return fromText(x);
+  if (!x || typeof x !== 'object') return { [keyA]: '', [keyB]: '' };
+  const o = lowerKeys(x);
+  if (typeof o[keyA] === 'string' && /^\s*\{/.test(o[keyA])) {
+    const inner = fromText(o[keyA]);
+    return { [keyA]: inner[keyA] || '', [keyB]: inner[keyB] || o[keyB] || '' };
+  }
+  return o;
+}
+
+// Lifecycle OS promises that a fact it does not have stays missing and says
+// so. This route never sees the brand's own catalogue, so a price, an award,
+// a founding year, a rating or a customer count in the mailer can only be
+// invented: swap it for a marker the page renders as "data required".
+function scrubClaims(t) {
+  return String(t || '')
+    .replace(/\s*\(?\s*(?:normally|usually|was|regular(?:ly)?|reg\.?)\s+(?:[$₹€£]|Rs\.?\s?|INR\s?|USD\s?)\s?\d[\d,]*(?:\.\d+)?\s*\)?/gi, '')
+    .replace(/(?:[$₹€£]|\bRs\.?\s?|\bINR\s?|\bUSD\s?)\s?\d[\d,]*(?:\.\d+)?(?:\s?(?:-|–|to)\s?(?:[$₹€£])?\d[\d,]*(?:\.\d+)?)?/g, '[data required: price]')
+    .replace(/\b(?:multi-)?award[- ]winning\s+/gi, '')
+    .replace(/\b(founded|established|since)\s+(?:in\s+)?(?:19|20)\d{2}\b/gi, (m, w) => w + (/since/i.test(w) ? '' : ' in') + ' [data required: year]')
+    .replace(/\b(?:rated\s+)?\d(?:\.\d)?\s?(?:★|stars?|\/\s?5)(?=\W|$)/gi, '[data required: rating]')
+    .replace(/\b\d[\d,.]*\s?(?:k|K|L|lakh|M|million)?\+?\s+(?:happy\s+)?(?:customers|reviews|users)\b/g, '[data required: customer count]');
+}
 function str(x, n) { return String(x == null ? '' : x).slice(0, n || 400); }
 
 // Mailer shape follows the Smart-Brain "think → lock → execute" model: a single
@@ -172,13 +211,13 @@ function normalizeMailer(m) {
   const clampScore = (v) => { const n = Math.round(Number(v)); return Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : null; };
   return {
     theme: str(m.theme, 120),
-    subject: str(m.subject, 140),
-    preview: str(m.preview, 160),
-    hero: { kicker: str(h.kicker, 40), headline: str(h.headline, 140), subhead: str(h.subhead, 220) },
-    sections: arr(m.sections).slice(0, 4).map((s) => ({ title: str(s.title, 60), body: str(s.body, 340) })),
-    cta: { label: str(c.label, 40), note: str(c.note, 120) },
+    subject: scrubClaims(str(m.subject, 140)),
+    preview: scrubClaims(str(m.preview, 160)),
+    hero: { kicker: str(h.kicker, 40), headline: scrubClaims(str(h.headline, 140)), subhead: scrubClaims(str(h.subhead, 220)) },
+    sections: arr(m.sections).slice(0, 4).map((s) => item(s, 'title', 'body')).map((s) => ({ title: scrubClaims(str(s.title, 60)), body: scrubClaims(str(s.body, 340)) })),
+    cta: { label: str(c.label, 40), note: scrubClaims(str(c.note, 120)) },
     signoff: str(m.signoff, 80),
-    body: str(m.body, 1600),
+    body: scrubClaims(str(m.body, 1600)),
     // Mailer Studio: multiple variant concepts per send, each quality-scored
     // (strategy alignment · copy · content density · divergence · overall).
     variants: arr(m.variants).slice(0, 4).map((v) => {
@@ -207,10 +246,10 @@ function normalize(o) {
     calendar: arr(o.calendar).slice(0, 8).map((c) => ({ week: str(c.week, 24), theme: str(c.theme, 80), cadence: str(c.cadence, 60), sends: arr(c.sends).slice(0, 5).map((x) => str(x, 80)) })),
     analysis: normalizeAnalysis(o.analysis),
     mailer: normalizeMailer(o.mailer),
-    retention: arr(o.retention).slice(0, 6).map((r) => ({ trigger: str(r.trigger, 80), flow: str(r.flow, 280) })),
+    retention: arr(o.retention).map((r) => item(r, 'trigger', 'flow')).map((r) => ({ trigger: str(r.trigger, 80), flow: str(r.flow, 280) })).filter((r) => r.trigger.trim() && r.flow.trim()).slice(0, 6),
     kpis: arr(o.kpis).slice(0, 6).map((k) => ({ metric: str(k.metric, 60), target: str(k.target, 60) })),
     smartBrain: normalizeSmartBrain(o.smartBrain),
-    guardrails: arr(o.guardrails).slice(0, 8).map((g) => (typeof g === 'string' ? { rule: str(g, 60), detail: '' } : { rule: str(g.rule, 60), detail: str(g.detail, 180) })),
+    guardrails: arr(o.guardrails).map((g) => item(g, 'rule', 'detail')).map((g) => ({ rule: str(g.rule, 60), detail: str(g.detail, 180) })).filter((g) => g.rule.trim()).slice(0, 8),
   };
 }
 
@@ -232,7 +271,7 @@ function normalizeSmartBrain(b) {
   if (!b || typeof b !== 'object') return null;
   return {
     horizon: str(b.horizon, 60),
-    loop: arr(b.loop).slice(0, 6).map((s) => (typeof s === 'string' ? { step: str(s, 30), detail: '' } : { step: str(s.step, 30), detail: str(s.detail, 180) })),
+    loop: arr(b.loop).map((s) => item(s, 'step', 'detail')).map((s) => ({ step: str(s.step, 30), detail: str(s.detail, 180) })).filter((s) => s.step.trim()).slice(0, 6),
     note: str(b.note, 240),
   };
 }
@@ -241,6 +280,12 @@ function buildPrompt(brand, url, category, profileText, benchmarkContext) {
   return `You are Lifecycle OS, an AI that designs plug-and-play lifecycle marketing automation for any direct-to-consumer brand, grounded in INDUSTRY-STANDARD benchmarks for the brand's category, the way competitor-discovery platforms like SimilarWeb and SEMrush profile a market.
 
 First infer the brand's category and its peer/competitor set (3-6 comparable D2C brands in the same industry and price tier). Then establish industry-standard benchmarks for that peer set, traffic mix / channel split, typical AOV band, repeat-purchase / retention rate band, email revenue share, and seasonality. Use these baselines to ground the entire lifecycle plan. Be specific to the brand and its category, no generic filler. Use realistic, quantified targets that reflect the industry standard.
+
+FACT RULES (strict):
+- You have no access to this brand's catalogue. Never state its product names, prices, discount codes, founding year, awards, ratings, review counts, customer counts, or shipping and returns policies unless they appear in SITE CONTEXT below. Where the mailer needs one, write "[data required: <what>]", for example "[data required: hero product]" or "[data required: price]".
+- Benchmarks and KPIs are typical ranges for the CATEGORY, not this brand's own numbers. Phrase every benchmark value as a range.
+- Use the currency of the brand's home market for every money value: ₹ for an Indian brand, $ for a US brand, £ for a UK brand, € for a eurozone brand.
+- Every item in every array must be a JSON object exactly as shown, never a string and never JSON text inside a string.
 
 BRAND: ${brand}
 ${category ? 'CATEGORY: ' + category : ''}
@@ -342,15 +387,15 @@ function templatePlan(brand, category) {
         subhead: `We build for people who care about the details, and you'll feel it from the first order.`,
       },
       sections: [
-        { title: 'Here’s 10% to start', body: 'Use code WELCOME10 at checkout, consider it a thank-you for giving us a try.' },
-        { title: 'Not sure where to begin?', body: 'Our bestsellers are loved for a reason. Start there, and reply to this email anytime, a real human reads every one.' },
+        { title: 'Your welcome offer', body: 'Use [data required: welcome offer code] at checkout, a thank-you for giving us a try.' },
+        { title: 'Not sure where to begin?', body: 'Start with [data required: hero product], and reply to this email anytime.' },
       ],
-      cta: { label: 'Shop bestsellers', note: 'Free returns, and we read every reply.' },
+      cta: { label: 'Start shopping', note: 'Questions? Just reply to this email.' },
       signoff: `Team ${b}`,
-      body: `Hi there,\n\nWelcome to ${b}. Here's 10% to get started: WELCOME10. Not sure where to begin? Start with our bestsellers, and reply anytime.\n\nTeam ${b}`,
+      body: `Hi there,\n\nWelcome to ${b}. Your welcome offer: [data required: welcome offer code]. Not sure where to begin? Start with [data required: hero product], and reply anytime.\n\nTeam ${b}`,
       variants: [
         { label: 'A · Story-led', type: 'text', angle: `Opens on the ${b} origin story, then the welcome offer, builds brand affinity first.`, score: { strategy: 90, copy: 88, density: 80, divergence: 72, overall: 88 } },
-        { label: 'B · Offer-led', type: 'text', angle: 'Leads with WELCOME10 and bestsellers, highest first-order conversion for deal-seekers.', score: { strategy: 86, copy: 82, density: 78, divergence: 80 } },
+        { label: 'B · Offer-led', type: 'text', angle: 'Leads with the welcome offer and the hero product, highest first-order conversion for deal-seekers.', score: { strategy: 86, copy: 82, density: 78, divergence: 80 } },
         { label: 'C · Hero-image', type: 'image', angle: 'Full-bleed hero product image + one-line promise and CTA, for visual-first mobile readers.', score: { strategy: 84, copy: 80, density: 86, divergence: 85 } },
       ],
     },
