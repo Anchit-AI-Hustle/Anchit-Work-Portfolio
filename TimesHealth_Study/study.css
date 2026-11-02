@@ -174,19 +174,6 @@ footer h3{color:#fff}
 .funnel .stage .gap{font-size:14px;line-height:20px;color:var(--ink);background:var(--catch-soft);border-radius:10px;padding:8px 10px}
 .funnel .stage .fixby{font-size:13px;color:var(--muted)}
 @media (min-width:900px){.funnel{grid-template-columns:repeat(5,1fr)}}
-.ice-wrap{display:grid;gap:20px;align-items:start}
-@media (min-width:1000px){.ice-wrap{grid-template-columns:minmax(0,1fr) 420px}}
-.ice-map{position:relative;width:100%;max-width:440px;aspect-ratio:1/1;background:#fff;border:1px solid var(--line);border-radius:var(--r-card);margin:0 auto}
-.ice-map .q{position:absolute;width:50%;height:50%;display:flex;padding:10px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
-.ice-map .q.tl{left:0;top:0;align-items:flex-start;background:var(--catch-soft);border-top-left-radius:var(--r-card)}
-.ice-map .q.tr{right:0;top:0;justify-content:flex-end;background:var(--win-soft);border-top-right-radius:var(--r-card);color:var(--win)}
-.ice-map .q.bl{left:0;bottom:0;align-items:flex-end;border-bottom-left-radius:var(--r-card)}
-.ice-map .q.br{right:0;bottom:0;align-items:flex-end;justify-content:flex-end;border-bottom-right-radius:var(--r-card)}
-.ice-map .dot{position:absolute;transform:translate(-50%,50%);background:var(--brand);color:#fff;border-radius:var(--r-pill);font-size:11px;font-weight:700;line-height:14px;padding:3px 7px;white-space:nowrap;box-shadow:0 0 0 2px #fff}
-.ice-map .ax{position:absolute;font-size:12px;color:var(--muted);font-weight:600}
-.ice-map .ax.x{bottom:-24px;left:50%;transform:translateX(-50%)}
-.ice-map .ax.y{left:-10px;top:50%;transform:translate(-50%,-50%) rotate(-90deg);transform-origin:center}
-.ice-pad{padding:0 0 30px 26px}
 .idea-tbl td.ice{font-weight:700;color:var(--ink)}
 .lens{font-size:12px;color:var(--muted);display:block;margin-top:2px}
 .bet{display:grid;gap:14px;border-top:6px solid var(--brand);padding:22px}
@@ -217,8 +204,6 @@ footer h3{color:#fff}
 .bets-mini .k{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--brand);text-transform:uppercase}
 /* Idea wall: the map sits above a full-width table; on phones each idea is a
    card with its scores inline, so nothing hides off screen. */
-.ice-wrap{grid-template-columns:1fr !important}
-.ice-pad{max-width:480px}
 @media (max-width:699px){
   .idea-tbl.t-wide{min-width:0}
   .idea-tbl thead{display:none}
@@ -234,7 +219,6 @@ footer h3{color:#fff}
   .idea-tbl tbody td:nth-child(7){grid-column:2 / -1;font-size:13px;color:var(--muted)}
   .idea-tbl tbody td:nth-child(7)::before{content:"Closes: ";font-weight:600}
 }
-.ice-pad{order:-1}
 .bets-mini a.card{text-decoration:none;color:var(--body)}
 .bets-mini a.card:hover{border-color:var(--brand)}
 @media (min-width:700px){.nav .wrap{gap:12px}.links{gap:2px}.links a{padding:8px 7px}}
@@ -302,14 +286,6 @@ img,svg,video{max-width:100%;height:auto}
 h1,h2,h3{text-wrap:balance}
 p,li,figcaption{text-wrap:pretty}
 input[type=range]{margin-left:0;margin-right:0}
-/* Quadrant names sit outside the plot, so no idea dot can land on one. */
-.ice-pad{padding-top:28px}
-.ice-map .q{padding:0}
-.ice-map .ql{position:absolute;font-size:12px;line-height:16px;white-space:nowrap}
-.ice-map .q.tl .ql,.ice-map .q.tr .ql{top:-24px}
-.ice-map .q.bl .ql,.ice-map .q.br .ql{bottom:-24px}
-.ice-map .q.tl .ql,.ice-map .q.bl .ql{left:0}
-.ice-map .q.tr .ql,.ice-map .q.br .ql{right:0}
 /* Step labels: full-width bars of equal height, so the four lists line up. */
 .short .tag{justify-self:stretch;display:flex;align-items:center;padding:6px 10px;line-height:18px}
 @media (min-width:1080px){.short.four .tag{min-height:48px}}
@@ -345,3 +321,18 @@ input[type=range]{margin-left:0;margin-right:0}
 .glance th[scope=row]{white-space:nowrap;color:var(--ink)}
 .glance td{font-size:14px;line-height:21px;min-width:200px}
 .stage[hidden],.glance tr[hidden]{display:none}
+
+/* Idea groups: four plain groups instead of a chart of codes. */
+.ideas-wrap{display:grid;gap:24px}
+.igroups{display:grid;gap:12px;grid-template-columns:1fr}
+@media (min-width:760px){.igroups{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.igroup{display:grid;gap:4px;align-content:start;border-top:4px solid var(--line)}
+.igroup.first{border-top-color:var(--brand)} .igroup.effort{border-top-color:var(--brand-2)}
+.igroup h3{font-size:18px;line-height:24px}
+.igroup ul{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:2px}
+.igroup li{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line);font-size:15px;line-height:21px}
+.igroup li:first-child{border-top:0}
+.igroup li a{flex:1;min-width:0;color:var(--ink);text-decoration:none;font-weight:600}
+.igroup li a:hover{color:var(--brand);text-decoration:underline}
+.ibet{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--brand);background:var(--brand-soft);border-radius:var(--r-tag);padding:3px 6px;white-space:nowrap}
+.iscore{flex:0 0 auto;min-width:36px;text-align:right;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
