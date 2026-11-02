@@ -58,6 +58,12 @@ self.addEventListener('fetch', (e) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
+  // Films: never cache video. /movies/ serves HLS segments and MP4s (hundreds
+  // of MB); stale-while-revalidate would copy every segment into Cache
+  // Storage, and Cache.put rejects the 206 partial responses MP4 seeking
+  // produces. Let the browser handle these requests natively.
+  if (url.pathname.startsWith('/movies/')) return;
+
   // Network-first for HTML so updates ship fast
   if (req.mode === 'navigate' || req.destination === 'document') {
     e.respondWith(
