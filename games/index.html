@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Games | Anchit Tandon</title>
+  <meta name="description" content="Five browser games I built from scratch in plain JavaScript: a city sandbox, a night street racer, five-a-side football, stadium cricket and gully cricket.">
+  <link rel="canonical" href="https://anchit-tandon.com/games">
+  <meta name="theme-color" content="#0F0D0A">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Games | Anchit Tandon">
+  <meta property="og:description" content="Five browser games built from scratch in plain JavaScript. Play on a phone or a laptop, nothing to install.">
+  <meta property="og:url" content="https://anchit-tandon.com/games">
+  <meta property="og:image" content="https://anchit-tandon.com/games/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/icons/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Games by Anchit Tandon",
+    "url": "https://anchit-tandon.com/games",
+    "hasPart": [
+      { "@type": "VideoGame", "name": "Saffron City", "url": "https://anchit-tandon.com/games/saffron-city", "genre": "Open-world sandbox", "gamePlatform": "Web browser", "playMode": "SinglePlayer" },
+      { "@type": "VideoGame", "name": "Midnight Apex", "url": "https://anchit-tandon.com/games/midnight-apex", "genre": "Street racing", "gamePlatform": "Web browser", "playMode": "SinglePlayer" },
+      { "@type": "VideoGame", "name": "Turf Kings", "url": "https://anchit-tandon.com/games/turf-kings", "genre": "Arcade football", "gamePlatform": "Web browser", "playMode": "SinglePlayer" },
+      { "@type": "VideoGame", "name": "Super Over", "url": "https://anchit-tandon.com/games/super-over", "genre": "Stadium cricket", "gamePlatform": "Web browser", "playMode": "SinglePlayer" },
+      { "@type": "VideoGame", "name": "Gully Champs", "url": "https://anchit-tandon.com/games/gully-champs", "genre": "Gully cricket", "gamePlatform": "Web browser", "playMode": "SinglePlayer" }
+    ]
+  }
+  </script>
+  <style>
+    :root {
+      --bg: #0F0D0A;
+      --bg-elev: #1A1814;
+      --bg-deep: #060503;
+      --ink: #FBF5EC;
+      --ink-dim: #A39E94;
+      --ink-mute: #5A554E;
+      --rule: #2A261F;
+      --rule-strong: #3D3830;
+      --primary: #FF6940;
+      --primary-deep: #FF4D1F;
+      --primary-soft: rgba(255,105,64,.12);
+      --accent: #c9a96e;
+      --accent-warm: #FFB736;
+      --font-display: 'Fraunces', 'Times New Roman', serif;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --gutter: clamp(16px, 4vw, 48px);
+      --maxw: 1240px;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0; background: var(--bg); color: var(--ink);
+      font-family: var(--font-body); font-weight: 300; line-height: 1.6;
+      -webkit-font-smoothing: antialiased; overflow-x: clip;
+    }
+    a { color: inherit; }
+    :focus-visible { outline: 2px solid var(--accent-warm); outline-offset: 3px; }
+    .wrap { width: min(var(--maxw), 100% - 2 * var(--gutter)); margin-inline: auto; }
+    .mono { font-family: var(--font-mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-dim); }
+
+    header.site {
+      position: sticky; top: 0; z-index: 20; background: rgba(15,13,10,.9);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--rule);
+    }
+    header.site .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 60px; }
+    .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; min-height: 44px; }
+    .brand img { width: 34px; height: 34px; border-radius: 50%; display: block; }
+    .brand span { font-family: var(--font-display); font-size: 18px; font-weight: 500; letter-spacing: -.01em; }
+    .brand small { display: block; font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-dim); font-weight: 400; }
+    nav.top { display: flex; gap: 20px; font-size: 14px; }
+    nav.top a { text-decoration: none; color: var(--ink-dim); padding: 10px 0; }
+    nav.top a:hover { color: var(--ink); }
+    @media (max-width: 560px) { nav.top a.hide-sm { display: none; } }
+
+    .hero { padding: clamp(36px, 7vw, 88px) 0 clamp(24px, 4vw, 44px); }
+    .hero h1 {
+      font-family: var(--font-display); font-weight: 400; margin: 10px 0 14px;
+      font-size: clamp(39px, 7vw, 61px); line-height: 1; letter-spacing: -.02em;
+      font-variation-settings: "SOFT" 60, "WONK" 1;
+    }
+    .hero h1 em { font-style: italic; color: var(--accent); }
+    .hero p { max-width: 62ch; color: var(--ink-dim); font-size: clamp(16px, 1.6vw, 20px); margin: 0; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .chips span { font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; color: var(--ink-dim); border: 1px solid var(--rule-strong); border-radius: 999px; padding: 6px 12px; }
+
+    /* Featured game: the first card, wide */
+    .grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 20px; }
+    .game { grid-column: span 4; }
+    .game.feature { grid-column: span 12; }
+    @media (max-width: 1080px) { .game { grid-column: span 6; } }
+    @media (max-width: 680px) { .game, .game.feature { grid-column: span 12; } }
+
+    .card {
+      position: relative; height: 100%; display: flex; flex-direction: column; overflow: hidden;
+      background: var(--bg-elev); border: 1px solid var(--rule); border-radius: var(--radius);
+      transition: border-color .2s ease, transform .2s ease;
+    }
+    .card:hover { border-color: var(--rule-strong); transform: translateY(-2px); }
+    @media (prefers-reduced-motion: reduce) { .card, .card:hover { transition: none; transform: none; } }
+    .feature .card { display: grid; grid-template-columns: 1.35fr 1fr; }
+    @media (max-width: 860px) { .feature .card { grid-template-columns: 1fr; } }
+    .thumb { position: relative; display: block; aspect-ratio: 16 / 9; background: var(--bg-deep); overflow: hidden; }
+    .feature .thumb { aspect-ratio: auto; min-height: 320px; }
+    @media (max-width: 860px) { .feature .thumb { aspect-ratio: 16 / 9; min-height: 0; } }
+    .thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s ease; }
+    .card:hover .thumb img { transform: scale(1.03); }
+    @media (prefers-reduced-motion: reduce) { .thumb img, .card:hover .thumb img { transition: none; transform: none; } }
+    .thumb .genre {
+      position: absolute; left: 12px; top: 12px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em;
+      text-transform: uppercase; background: rgba(6,5,3,.78); color: var(--accent-warm); padding: 5px 9px; border-radius: 6px;
+    }
+    .body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+    .feature .body { padding: clamp(20px, 3vw, 36px); justify-content: center; }
+    .card h2 { font-family: var(--font-display); font-weight: 400; font-size: 25px; margin: 0; line-height: 1.1; letter-spacing: -.01em; }
+    .feature .card h2 { font-size: clamp(31px, 3.4vw, 39px); }
+    .card h2 a { text-decoration: none; }
+    .card h2 a::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+    .card p { margin: 0; color: var(--ink-dim); font-size: 16px; }
+    .feats { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 14px; color: var(--ink-dim); }
+    .feats li::before { content: "+ "; color: var(--accent); font-family: var(--font-mono); }
+    .meta { display: flex; flex-wrap: wrap; gap: 6px 16px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-dim); }
+    .meta b { color: var(--accent-warm); font-weight: 500; }
+    .row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: auto; padding-top: 6px; }
+    .btn {
+      position: relative; z-index: 2; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px;
+      border-radius: 999px; background: var(--primary); color: var(--bg); text-decoration: none; font-weight: 500; font-size: 15px;
+    }
+    .btn:hover { background: var(--primary-deep); }
+    .btn svg { width: 14px; height: 14px; fill: currentColor; }
+
+    section.how { padding: clamp(40px, 6vw, 72px) 0 0; }
+    .how .cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+    @media (max-width: 860px) { .how .cols { grid-template-columns: 1fr; } }
+    .how h2 { font-family: var(--font-display); font-weight: 400; font-size: clamp(25px, 3vw, 31px); margin: 0 0 18px; letter-spacing: -.01em; }
+    .how h3 { font-family: var(--font-display); font-weight: 500; font-size: 20px; margin: 8px 0 6px; }
+    .how p { color: var(--ink-dim); font-size: 15px; margin: 0; }
+    .how .cell { border-top: 1px solid var(--rule-strong); padding-top: 14px; }
+
+    footer.site { margin-top: clamp(48px, 8vw, 96px); border-top: 1px solid var(--rule); padding: 28px 0 calc(28px + env(safe-area-inset-bottom)); color: var(--ink-dim); font-size: 13px; }
+    footer.site .wrap { display: flex; flex-wrap: wrap; gap: 10px 28px; justify-content: space-between; }
+  </style>
+</head>
+<body>
+  <header class="site">
+    <div class="wrap">
+      <a class="brand" href="/" aria-label="Back to anchit-tandon.com">
+        <img src="/assets/anchit-mark-220.webp" alt="" width="34" height="34">
+        <span>Anchit Tandon<small>Games</small></span>
+      </a>
+      <nav class="top" aria-label="Page">
+        <a href="#games">Games</a>
+        <a href="#how">How they are made</a>
+        <a class="hide-sm" href="/">Portfolio</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero wrap">
+      <div class="mono">Games, made in code</div>
+      <h1>Pick a game. <em>Play it here.</em></h1>
+      <p>Five games I built from scratch in plain JavaScript and canvas: a city to roam, a night race, rooftop football and two kinds of cricket, from the floodlit stadium to the lane outside home. No downloads, no sign-in. They run in the browser on a phone or a laptop.</p>
+      <div class="chips" aria-label="Works with">
+        <span>Keyboard</span><span>Touch</span><span>Phone, tablet, desktop</span><span>Best scores saved on this device</span>
+      </div>
+    </section>
+
+    <section id="games" class="wrap" aria-label="Games">
+      <div class="grid">
+        <article class="game feature" data-slug="saffron-city" data-format="cash">
+          <div class="card">
+            <a class="thumb" href="/games/saffron-city" tabindex="-1" aria-hidden="true">
+              <img src="/games/saffron-city/poster.webp" alt="" width="1200" height="630" loading="eager" decoding="async">
+              <span class="genre">Open-world sandbox</span>
+            </a>
+            <div class="body">
+              <h2><a href="/games/saffron-city">Saffron City</a></h2>
+              <p>A coastal megacity at dusk, yours to roam on foot or behind the wheel of whatever is parked nearby. Run courier jobs, carry fares, race for cash and shake off the police when things get hot.</p>
+              <ul class="feats">
+                <li>Day to night cycle across a whole procedural city</li>
+                <li>Cars, autos, vans and scooters, each handling differently</li>
+                <li>Heat stars, pursuits and four kinds of street job</li>
+              </ul>
+              <div class="meta"><span>Your best <b data-best>none yet</b></span></div>
+              <div class="row"><a class="btn" href="/games/saffron-city"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg>Play Saffron City</a></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="game" data-slug="midnight-apex" data-format="time">
+          <div class="card">
+            <a class="thumb" href="/games/midnight-apex" tabindex="-1" aria-hidden="true">
+              <img src="/games/midnight-apex/poster.webp" alt="" width="1200" height="630" loading="lazy" decoding="async">
+              <span class="genre">Street racing</span>
+            </a>
+            <div class="body">
+              <h2><a href="/games/midnight-apex">Midnight Apex</a></h2>
+              <p>Three laps against five rivals on a harbour highway, a neon downtown and a misty mountain pass. Earn nitro from near misses and drafting.</p>
+              <div class="meta"><span>Best time <b data-best>none yet</b></span></div>
+              <div class="row"><a class="btn" href="/games/midnight-apex"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg>Play</a></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="game" data-slug="turf-kings" data-format="points">
+          <div class="card">
+            <a class="thumb" href="/games/turf-kings" tabindex="-1" aria-hidden="true">
+              <img src="/games/turf-kings/poster.webp" alt="" width="1200" height="630" loading="lazy" decoding="async">
+              <span class="genre">Arcade football</span>
+            </a>
+            <div class="body">
+              <h2><a href="/games/turf-kings">Turf Kings</a></h2>
+              <p>Five-a-side under floodlights on a rooftop cage pitch. Pass, sprint, slide and chip the keeper, then win a three-round cup.</p>
+              <div class="meta"><span>Your best <b data-best>none yet</b></span></div>
+              <div class="row"><a class="btn" href="/games/turf-kings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg>Play</a></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="game" data-slug="super-over" data-format="runs">
+          <div class="card">
+            <a class="thumb" href="/games/super-over" tabindex="-1" aria-hidden="true">
+              <img src="/games/super-over/poster.webp" alt="" width="1200" height="630" loading="lazy" decoding="async">
+              <span class="genre">Stadium cricket</span>
+            </a>
+            <div class="body">
+              <h2><a href="/games/super-over">Super Over</a></h2>
+              <p>Floodlights, a full stadium and six balls to chase the target. Read the length, pick your shot and time it.</p>
+              <div class="meta"><span>Your best <b data-best>none yet</b></span></div>
+              <div class="row"><a class="btn" href="/games/super-over"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg>Play</a></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="game" data-slug="gully-champs" data-format="runs">
+          <div class="card">
+            <a class="thumb" href="/games/gully-champs" tabindex="-1" aria-hidden="true">
+              <img src="/games/gully-champs/poster.webp" alt="" width="1200" height="630" loading="lazy" decoding="async">
+              <span class="genre">Gully cricket</span>
+            </a>
+            <div class="body">
+              <h2><a href="/games/gully-champs">Gully Champs</a></h2>
+              <p>A taped tennis ball, a crate for stumps and the house rules: one tip one hand, break a window and you are out.</p>
+              <div class="meta"><span>Your best <b data-best>none yet</b></span></div>
+              <div class="row"><a class="btn" href="/games/gully-champs"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg>Play</a></div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="how" class="how wrap">
+      <h2>How they are made</h2>
+      <div class="cols">
+        <div class="cell">
+          <div class="mono">No engine</div>
+          <h3>Plain JavaScript and canvas</h3>
+          <p>Every road, pitch, crowd and car is drawn in code at runtime. There are no image files, sprite sheets or game engines behind them, so each game loads in a moment.</p>
+        </div>
+        <div class="cell">
+          <div class="mono">One shell</div>
+          <h3>Shared controls and screens</h3>
+          <p>All five sit on one small shell that handles the keyboard, the on-screen stick and buttons, pausing, sound and saved scores, so a game only has to be a game.</p>
+        </div>
+        <div class="cell">
+          <div class="mono">Original</div>
+          <h3>Familiar genres, new worlds</h3>
+          <p>The genres are ones I grew up playing. The cities, teams, tracks and rules of the lane are my own inventions.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site">
+    <div class="wrap">
+      <div>Games by Anchit Tandon. Best scores stay in this browser and are never sent anywhere.</div>
+      <div><a href="/">anchit-tandon.com</a></div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var fmt = {
+        cash: function (v) { return '₹' + Math.round(v).toLocaleString('en-IN'); },
+        time: function (v) { var m = Math.floor(v / 60), s = v - m * 60; return m + ':' + (s < 10 ? '0' : '') + s.toFixed(2); },
+        runs: function (v) { return Math.round(v) + ' runs'; },
+        points: function (v) { return Math.round(v).toLocaleString('en-IN') + ' pts'; }
+      };
+      document.querySelectorAll('[data-slug]').forEach(function (el) {
+        var best = null;
+        try { best = JSON.parse(localStorage.getItem('arcade.best.' + el.getAttribute('data-slug')) || 'null'); } catch (e) { best = null; }
+        if (!best || typeof best.score !== 'number') return;
+        var f = fmt[el.getAttribute('data-format')] || String;
+        var out = el.querySelector('[data-best]');
+        if (out) out.textContent = f(best.score);
+      });
+    })();
+  </script>
+</body>
+</html>

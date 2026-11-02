@@ -97,6 +97,11 @@ jobs:
           npm run test:design
           npm run test:mobile
 
+      # Every game at /games is opened, started and played for a few seconds at
+      # phone, tablet and desktop size, through keyboard and touch controls.
+      - name: Games suite
+        run: npm run test:games
+
       - name: Verify canonical app routes
         run: |
           test -f www/how-to/index.html
