@@ -81,6 +81,7 @@ function mutate(p, src) {
   if (MUT === 'quote' && p === '/TimesHealth_Study/problems') return src.replace(/(<figcaption[^>]*>)([\s\S]*?)(<\/figcaption>)/, (m, a, b, c) => a + b.replace(/\b\d{1,2} [A-Z][a-z]{2} 20\d\d\b|\b[A-Z][a-z]{2} 20\d\d\b|\b20\d\d\b/g, '') + c);
   if (MUT === 'nav' && p === '/TimesHealth_Study/plan') return src.replace(/<a href="\/TimesHealth_Study\/evidence">Evidence<\/a>/, '');
   if (MUT === 'ice' && p === '/TimesHealth_Study/ideas') return src.replace(/(<td class="num ice">)(\d+)(<\/td>)/, (m, a, n, b) => a + (+n + 1) + b);
+  if (MUT === 'badid' && p === '/TimesHealth_Study') return src.replace('id="model"', 'id="working model"');
   if (MUT === 'ghost' && p === '/ET_Study/ideas') return src.replace('combines I2, I4, I11', 'combines I2, I4, I99');
   if (MUT === 'renewal' && p === '/ET_Study/model/maths') return src.replace('value="2699"', 'value="2999"');
   return src;
@@ -174,6 +175,9 @@ async function study(browser, vp, st) {
     if (vp.width >= 1080) check(`${L}: the whole nav fits without scrolling on desktop`, clipped <= 0, clipped + 'px');
     const cur = nav.filter((n) => n.cur === 'page').map((n) => n.h);
     check(`${L}: nav marks this page as current`, cur.length === 1 && cur[0] === url, cur.join(','));
+    // Every id is valid: no spaces, and unique on the page.
+    const badIds = await page.$$eval('[id]', (els) => { const seen = {}; return els.map((e) => e.id).filter((i) => /\s/.test(i) || (seen[i] = (seen[i] || 0) + 1) > 1); });
+    check(`${L}: every id is unique and has no spaces`, badIds.length === 0, badIds.join(','));
     // Screenshots: described, sized so the page does not jump, and shipped.
     const imgs = await page.$$eval('main img', (is) => is.map((i) => ({ src: new URL(i.src).pathname, alt: i.alt, w: i.getAttribute('width'), h: i.getAttribute('height') })));
     const badImg = imgs.filter((i) => !i.alt.trim() || !i.w || !i.h || !fs.existsSync(path.join(WWW, i.src)));
