@@ -35,7 +35,7 @@
   let arc = null;
 
   const PITCH = 20.12, HALF = 10.06, ROPE = 68, HITZ = 1.0, SWING_LAG = 0.14, SWING_DUR = 0.4;
-  const THROW_V = 32, THROW_REL = 0.35;
+  const THROW_V = 32, THROW_REL = 0.5;
   const FONT_UI = "'Inter', system-ui, -apple-system, sans-serif";
   const FONT_MONO = "'JetBrains Mono', ui-monospace, monospace";
   const FONT_DISP = "'Fraunces', Georgia, serif";
@@ -79,9 +79,9 @@
   const sayOf = (k) => pickOf(SAY[k]);
 
   const DIFFS = {
-    club: { label: 'Club', win: { p: 0.062, g: 0.128, m: 0.215 }, pace: [20.5, 23.5], spin: [13, 15.5], swing: 0.65, turn: 0.7, loose: 0.3, wide: 0.07, fspd: 6.2, react: 0.4, catchSk: 0.88, hint: true, target: { super: [14, 16], chase: [24, 30] } },
-    pro: { label: 'Pro', win: { p: 0.047, g: 0.102, m: 0.185 }, pace: [23.5, 26.5], spin: [14.5, 17], swing: 0.95, turn: 1.0, loose: 0.16, wide: 0.05, fspd: 7.2, react: 0.3, catchSk: 0.94, hint: false, target: { super: [17, 19], chase: [30, 37] } },
-    legend: { label: 'Legend', win: { p: 0.035, g: 0.078, m: 0.145 }, pace: [26.5, 30], spin: [16, 18.5], swing: 1.25, turn: 1.3, loose: 0.07, wide: 0.03, fspd: 8.2, react: 0.22, catchSk: 0.975, hint: false, target: { super: [20, 22], chase: [36, 44] } },
+    club: { label: 'Club', win: { p: 0.062, g: 0.128, m: 0.215 }, pace: [20.5, 23.5], spin: [13, 15.5], swing: 0.65, turn: 0.7, loose: 0.3, wide: 0.07, fspd: 5.8, react: 0.55, catchSk: 0.88, hint: true, target: { super: [14, 16], chase: [24, 30] } },
+    pro: { label: 'Pro', win: { p: 0.047, g: 0.102, m: 0.185 }, pace: [23.5, 26.5], spin: [14.5, 17], swing: 0.95, turn: 1.0, loose: 0.16, wide: 0.05, fspd: 6.6, react: 0.42, catchSk: 0.94, hint: false, target: { super: [17, 19], chase: [30, 37] } },
+    legend: { label: 'Legend', win: { p: 0.035, g: 0.078, m: 0.145 }, pace: [26.5, 30], spin: [16, 18.5], swing: 1.25, turn: 1.3, loose: 0.07, wide: 0.03, fspd: 7.6, react: 0.3, catchSk: 0.975, hint: false, target: { super: [20, 22], chase: [36, 44] } },
   };
 
   // [role, x, z] on the field (origin = middle of the pitch, +z toward the bowler, +x off side)
@@ -265,7 +265,7 @@
     const edge = () => {
       if (s.loft || D.yBat > 1.15) { kind = 'topedge'; al = rr(50, 74); v = rr(12, 22); phi = late ? side * rr(140, 178) : rr(-40, 40); }
       else if (!late) { kind = 'leading'; al = rr(28, 52); v = rr(11, 17); phi = rr(-45, 45) + side * 10; }
-      else { kind = 'edge'; al = rr(2, 20); v = rr(16, 26); phi = side * rr(150, 176); }
+      else { kind = 'edge'; al = rr(3, 22); v = rr(15, 25); phi = side > 0 ? rr(154, 178) : -rr(168, 179); }
     };
     if (s.id === 'defend') {
       if (q < 0.3) edge();
@@ -363,6 +363,7 @@
     const overIdx = Math.floor(G.balls / 6);
     const ramp = G.mode === 'nets' ? Math.min(1.2, 1 + 0.03 * overIdx) : 1;
     G.bowler = bw;
+    setField(overIdx, bw.pace);
     G.D = makeDelivery(bw, G.cfg, ramp, G.lastKind);
     G.lastKind = G.D.kind;
     G.runupDur = bw.pace ? 1.55 : 1.05;
@@ -550,11 +551,30 @@
     if (FN < MAXS) { SX[FN] = x; SY[FN] = Math.max(0, y); SZ[FN] = z; SB[FN] = nb; FN++; }
   }
 
-  function buildFielders(pace) {
+  // The captain sets a field for the over; it stays put for all six balls so a batter can learn the gaps.
+  function setField(over, pace) {
+    const key = over + (pace ? 'p' : 's');
+    if (G.fieldKey === key && G.fieldPos) return;
+    G.fieldKey = key;
     const lay = pace ? LAYOUT_PACE : LAYOUT_SPIN;
+    G.fieldPos = lay.map((e, i) => {
+      let x = e[1], z = e[2];
+      if (i >= 2) {
+        const ang = rr(-0.4, 0.4), c = Math.cos(ang), s = Math.sin(ang);
+        const k = rr(0.88, 1.08);
+        const rx = (x * c + z * s) * k, rz = (-x * s + z * c) * k;
+        x = rx; z = rz;
+      } else { x += rr(-0.3, 0.3); z += rr(-0.3, 0.3); }
+      const rad = hyp(x, z); if (rad > ROPE - 5) { x *= (ROPE - 5) / rad; z *= (ROPE - 5) / rad; }
+      return [e[0], x, z];
+    });
+  }
+
+  function buildFielders(pace) {
+    setField(Math.floor(G.balls / 6), pace);
     const cfg = G.cfg;
-    FL = lay.map((e) => ({ role: e[0], x0: e[1], z0: e[2], tx: e[1], tz: e[2], sp: cfg.fspd * rr(0.95, 1.05), react: cfg.react + rr(0, 0.1), mv: 1, x: e[1], z: e[2], face: 0 }));
-    FL.push({ role: 'Bowler', x0: 1.8, z0: 3, tx: 1.8, tz: 3, sp: cfg.fspd * 0.95, react: cfg.react + 0.1, mv: 1, x: 1.8, z: 3, face: 0 });
+    FL = G.fieldPos.map((e) => ({ role: e[0], x0: e[1], z0: e[2], tx: e[1], tz: e[2], sp: cfg.fspd * rr(0.95, 1.05), react: cfg.react + rr(0, 0.1), mv: 1, x: e[1], z: e[2], face: 0 }));
+    FL.push({ role: 'Bowler', x0: 3.4, z0: 5, tx: 3.4, tz: 5, sp: cfg.fspd * 0.9, react: cfg.react + 0.3, mv: 1, x: 3.4, z: 5, face: 0 });
     FL[0].sp *= 0.9;
   }
 
@@ -577,33 +597,38 @@
   function planIntercept() {
     const cfg = G.cfg;
     const last = crossI >= 0 ? crossI : FN - 1;
-    let best = null;
+    let best = null, bestSpd = 0;
     for (let i = 0; i <= last && !best; i++) {
       const t = i * DTS, x = SX[i], y = SY[i], z = SZ[i], nb = SB[i];
       const air = nb === 0 && y > 0.3;
       const catchable = air && y <= 2.6;
       if (air && !catchable) continue;
+      const pv = Math.max(0, i - 1);
+      const spd = i > 0 ? hyp(x - SX[pv], y - SY[pv], z - SZ[pv]) / DTS : 20;
+      // a hard-hit ball is very hard to hold: the fielder must be almost on its line
+      const fast = spd >= 24 ? 0.55 : spd >= 15 ? 0.8 : 1;
       let bf = null, bs = -1e9;
       for (let j = 0; j < FL.length; j++) {
         const f = FL[j];
         const d = hyp(x - f.x0, z - f.z0);
         const mt = Math.max(0, t - f.react);
-        const reach = catchable ? (y < 0.9 ? 1.35 : 1.0) : 0.95;
+        const reach = (catchable ? (y < 0.9 ? 1.2 : 1.0) * fast : (spd >= 24 ? 0.7 : 0.9));
         const slack = f.sp * mt + reach - d;
         if (slack >= 0 && slack > bs) { bs = slack; bf = f; }
       }
-      if (bf) best = { i, f: bf, slack: bs, air: catchable };
+      if (bf) { best = { i, f: bf, slack: bs, air: catchable }; bestSpd = spd; }
     }
     FS.fate = 'field'; FS.dropped = false; FS.col = null; FS.catcher = null; FS.six = false;
     if (best) {
       const i = best.i, t = i * DTS;
       if (best.air) {
-        const prev = Math.max(0, i - 1);
-        const spd = hyp(SX[i] - SX[prev], SY[i] - SY[prev], SZ[i] - SZ[prev]) / DTS;
+        const spd = bestSpd;
         let pc = cfg.catchSk * (0.5 + 0.5 * clamp(best.slack / 1.6, 0, 1));
         if (spd > 18) pc *= 0.8;
+        if (spd > 26) pc *= 0.7;
         if (SY[i] > 2.1) pc *= 0.9;
         if (best.f.role === 'Keeper' || best.f.role === 'Slip') pc *= 1.04;
+        if (best.f.role === 'Bowler') pc *= 0.85;
         pc = Math.min(pc, 0.985);
         FS.catchP = pc;
         if (rnd() < pc) { FS.fate = 'caught'; FS.tFate = t; FS.catcher = best.f; FS.cx = SX[i]; FS.cz = SZ[i]; FS.cy = SY[i]; }
@@ -654,7 +679,7 @@
     FS.label = hit.kind;
   }
 
-  const runDur = (n) => (n === 1 ? 2.9 : 2.4);
+  const runDur = (n) => (n === 1 ? 2.35 : 1.95);
   function endZ(n) { return n % 2 === 1 ? HALF : -HALF; }
   function arrivalAt(n) {
     if (FS.fate !== 'field') return 1e9;
@@ -668,7 +693,7 @@
     const n = RN.k + 1;
     const margin = arrivalAt(n) - (t + runDur(n));
     FS.runPrompt.margin = margin;
-    if (margin >= 0.5) return true;
+    if (margin >= 0.35) return true;
     if (RN.push > 0) { RN.push--; return true; }
     return false;
   }
@@ -981,12 +1006,12 @@
     g.fillText('MERIDIAN ARENA', BW / 2, topY(BW / 2) - 12);
     g.shadowBlur = 0;
     // sightscreen
-    const sx0 = BW * 0.42, sw = BW * 0.16, sy0 = BH - 78;
-    g.fillStyle = '#05070b'; g.fillRect(sx0 - 5, sy0 - 5, sw + 10, 80);
-    const sg = g.createLinearGradient(0, sy0, 0, sy0 + 70);
-    sg.addColorStop(0, '#fbfcfe'); sg.addColorStop(1, '#c9ced8');
-    g.fillStyle = sg; g.fillRect(sx0, sy0, sw, 70);
-    g.fillStyle = 'rgba(0,0,0,0.12)'; for (let i = 1; i < 6; i++) g.fillRect(sx0 + (sw / 6) * i, sy0, 1.5, 70);
+    const sx0 = BW * 0.44, sw = BW * 0.12, sy0 = BH - 44;
+    g.fillStyle = '#05070b'; g.fillRect(sx0 - 4, sy0 - 4, sw + 8, 46);
+    const sg = g.createLinearGradient(0, sy0, 0, sy0 + 40);
+    sg.addColorStop(0, '#d9dde6'); sg.addColorStop(1, '#a9b0bf');
+    g.fillStyle = sg; g.fillRect(sx0, sy0, sw, 38);
+    g.fillStyle = 'rgba(0,0,0,0.14)'; for (let i = 1; i < 5; i++) g.fillRect(sx0 + (sw / 5) * i, sy0, 1.5, 38);
     // towers
     for (const tx of TOWERS) {
       const x = tx * BW, base = topY(x) + 8;
@@ -1122,7 +1147,7 @@
     fg.addColorStop(0, 'rgba(4,10,8,0.5)'); fg.addColorStop(1, 'rgba(4,10,8,0)');
     ctx.fillStyle = fg; ctx.fillRect(0, cam.ropeY - 4, w, h * 0.5);
     // thirty-yard circle
-    ctx.strokeStyle = 'rgba(255,255,255,0.28)'; ctx.lineWidth = Math.max(1, cam.k0 * 0.03);
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = Math.max(1, cam.k0 * 0.03);
     ctx.setLineDash([cam.k0 * 0.5, cam.k0 * 0.35]);
     ctx.beginPath();
     for (let a = 0; a <= 72; a++) { const r = (a / 72) * TAU; proj(27.4 * Math.sin(r), 0, HALF + 27.4 * Math.cos(r)); if (a === 0) ctx.moveTo(PX, PY); else ctx.lineTo(PX, PY); }
@@ -1142,18 +1167,18 @@
       proj(rb * Math.sin(a1), 0, HALF + rb * Math.cos(a1)); const x1 = PX, y1 = PY;
       proj(rb * Math.sin(a0), 1.0, HALF + rb * Math.cos(a0)); const xt = PX, yt = PY;
       if (Math.max(x0, x1) < -20 || Math.min(x0, x1) > arc.w + 20) continue;
-      const bw = Math.hypot(x1 - x0, y1 - y0), bh = Math.hypot(xt - x0, yt - y0);
+      const bw = Math.hypot(x1 - x0, y1 - y0);
       if (bw < 3) continue;
       ctx.save();
-      ctx.transform((x1 - x0) / 200, (y1 - y0) / 200, (xt - x0) / 40, (yt - y0) / 40, x0, y0);
+      // local space: 200 x 40, origin at the top-left corner of the board, y pointing down
+      ctx.transform((x1 - x0) / 200, (y1 - y0) / 200, (x0 - xt) / 40, (y0 - yt) / 40, xt, yt);
       const flick = 0.92 + 0.08 * Math.sin(G.clock * 2.2 + i * 1.7);
-      ctx.fillStyle = ad[1]; ctx.globalAlpha = flick; ctx.fillRect(0, -40, 200, 40);
+      ctx.fillStyle = ad[1]; ctx.globalAlpha = flick; ctx.fillRect(0, 0, 200, 40);
       ctx.globalAlpha = 1;
-      ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.fillRect(0, -40, 200, 5);
+      ctx.fillStyle = 'rgba(255,255,255,0.14)'; ctx.fillRect(0, 0, 200, 5);
       ctx.fillStyle = ad[2]; ctx.font = '800 24px ' + FONT_UI; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText(ad[0], 100, -19, 188);
+      ctx.fillText(ad[0], 100, 21, 188);
       ctx.restore();
-      void bh;
     }
     // the rope
     ctx.strokeStyle = 'rgba(0,0,0,0.35)'; ctx.lineWidth = Math.max(2, cam.k0 * 0.07) + 1;
@@ -1439,7 +1464,7 @@
   /* ------------------------------------------------------------ ball, markers, effects in the batting view */
   function drawBall3D(ctx, x, y, z, big) {
     if (!proj(x, y, z)) return;
-    const r = Math.max(2.1, PK * 0.1) * (big || 1);
+    const r = Math.max(2.8, PK * 0.125) * (big || 1);
     // ground shadow
     if (y > 0.02) {
       const sx = PX, sy0 = PY; proj(x, 0, z);
@@ -1448,9 +1473,10 @@
       proj(x, y, z); void sx; void sy0;
     }
     const gr = ctx.createRadialGradient(PX, PY, r * 0.4, PX, PY, r * 3);
-    gr.addColorStop(0, 'rgba(255,255,255,0.45)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+    gr.addColorStop(0, 'rgba(255,255,255,0.55)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(PX, PY, r * 3, 0, TAU); ctx.fill();
     ctx.fillStyle = '#fffaf0'; ctx.beginPath(); ctx.arc(PX, PY, r, 0, TAU); ctx.fill();
+    ctx.strokeStyle = 'rgba(25,14,6,0.75)'; ctx.lineWidth = Math.max(1, r * 0.22); ctx.stroke();
     if (r > 3) {
       const a = G.clock * 24 * (G.D && G.D.pace ? 1 : 2.4);
       ctx.strokeStyle = '#d4432b'; ctx.lineWidth = Math.max(1, r * 0.16);
@@ -1802,6 +1828,40 @@
     }
   }
 
+
+  function drawMini(ctx, Rw) {
+    if (G.view !== 'bat' || !G.fieldPos || G.phase === 'result') return;
+    const w = arc.w;
+    const R = w > 700 ? 52 : 42;
+    const cx = w - 10 - Rw / 2, cy = 116 + R + 4;
+    const sc = R / (ROPE + 2);
+    const X = (x) => cx + x * sc, Y = (z) => cy - z * sc;
+    ctx.fillStyle = 'rgba(10,9,7,0.7)'; ctx.beginPath(); ctx.arc(cx, cy, R + 4, 0, TAU); ctx.fill();
+    ctx.strokeStyle = 'rgba(201,169,110,0.4)'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.clip();
+    ctx.fillStyle = '#1f5a2c'; ctx.fillRect(cx - R, cy - R, 2 * R, 2 * R);
+    ctx.strokeStyle = 'rgba(255,255,255,0.22)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(cx, cy, 27.4 * sc, 0, TAU); ctx.stroke();
+    ctx.fillStyle = '#b79663'; ctx.fillRect(X(-1.5), Y(HALF), 3 * sc, PITCH * sc);
+    if (G.D && (G.phase === 'runup' || G.phase === 'delivery' || G.phase === 'shot')) {
+      const s = G.swing ? G.swing.s : shotFor(G.dir.dx, G.dir.dy, G.D);
+      const wedge = (ang, half, col) => {
+        ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(X(0), Y(-HALF));
+        for (let k = 0; k <= 4; k++) { const a = (ang - half + (2 * half * k) / 4) * D2R; ctx.lineTo(X(80 * Math.sin(a)), Y(-HALF + 80 * Math.cos(a))); }
+        ctx.closePath(); ctx.fill();
+      };
+      wedge(s.ang, 13, 'rgba(255,183,54,0.38)');
+      ctx.strokeStyle = 'rgba(255,183,54,0.9)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(X(0), Y(-HALF)); ctx.lineTo(X(80 * Math.sin(s.ang * D2R)), Y(-HALF + 80 * Math.cos(s.ang * D2R))); ctx.stroke();
+    }
+    for (const f of G.fieldPos) {
+      ctx.fillStyle = f[0] === 'Keeper' ? '#e2c230' : '#4aa3ff';
+      ctx.beginPath(); ctx.arc(X(f[1]), Y(f[2]), 2.6, 0, TAU); ctx.fill();
+    }
+    ctx.fillStyle = '#4aa3ff'; ctx.beginPath(); ctx.arc(X(3.4), Y(5), 2.6, 0, TAU); ctx.fill();
+    ctx.fillStyle = SHIRT_BAT; ctx.beginPath(); ctx.arc(X(0), Y(-HALF + 1), 3.2, 0, TAU); ctx.fill();
+    ctx.restore();
+    txt(ctx, 'FIELD', cx, cy + R + 14, 9, C.dim, 600, 'center', FONT_MONO);
+  }
+
   function drawHUD(ctx) {
     const w = arc.w, h = arc.h;
     const touch = arc.touchMode;
@@ -1837,11 +1897,12 @@
       } else txt(ctx, 'Run-up...', rx + 12, 62, 12, C.dim, 400);
       txt(ctx, short(G.batter.name) + ' ' + G.batter.runs + ' (' + G.batter.balls + ')', rx + 12, 97, 12, C.ink, 600);
     }
+    if (Rw > 90) drawMini(ctx, Rw);
     // commentary
     if (G.commentT > 0 && G.comment) {
       const a = clamp(G.commentT / 0.5, 0, 1);
       ctx.globalAlpha = a;
-      const cw = Math.min(w - 24, 460), cy = Math.max(124, h * 0.14 + 76);
+      const cw = Math.min(w - 24, 460), cy = w < 600 ? 222 : Math.max(124, h * 0.14 + 76);
       plate(ctx, (w - cw) / 2, cy, cw, 34, 10, 0.62);
       txt(ctx, G.comment, w / 2, cy + 22, 14, C.ink, 400, 'center', FONT_DISP);
       ctx.globalAlpha = 1;
@@ -1851,8 +1912,8 @@
     if (G.phase === 'field') {
       if (FS.runPrompt && FS.runPrompt.show && !FS.ended) {
         const m = FS.runPrompt.margin;
-        const col = m >= 0.5 ? '#7ddf8a' : m >= -0.15 ? C.warm : '#ff6a55';
-        const word = m >= 0.5 ? 'Safe, running anyway' : m >= -0.15 ? 'Risky, tap Run to push' : 'Very risky';
+        const col = m >= 0.35 ? '#7ddf8a' : m >= -0.15 ? C.warm : '#ff6a55';
+        const word = m >= 0.35 ? 'Safe, running anyway' : m >= -0.15 ? 'Risky, tap Run to push' : 'Very risky';
         ctx.globalAlpha = 0.96;
         plate(ctx, w / 2 - 120, by - 24, 240, 40, 12, 0.72);
         ctx.globalAlpha = 1;
@@ -1895,8 +1956,11 @@
       for (const f of G.floats) {
         const u = f.t / f.life;
         proj(-0.45, 2.2, HITZ);
-        ctx.globalAlpha = 1 - u * u;
-        txt(ctx, f.text, w / 2 + (PX - w / 2) * 0.8, PY - 14 - u * 40, f.size, f.color, 800, 'center', FONT_MONO);
+        const fx = clamp(PX - w * 0.0, 80, w - 80), fy = PY - 24 - u * 44;
+        ctx.globalAlpha = clamp(1.4 - u * 1.4, 0, 1);
+        ctx.font = '800 ' + f.size + 'px ' + FONT_MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+        ctx.lineJoin = 'round'; ctx.strokeStyle = 'rgba(0,0,0,0.75)'; ctx.lineWidth = 5; ctx.strokeText(f.text, fx, fy);
+        ctx.fillStyle = f.color; ctx.fillText(f.text, fx, fy);
         ctx.globalAlpha = 1;
       }
     }
@@ -2097,7 +2161,7 @@
         fieldT: FS.t, over: G.over, won: G.won, score: G.finalScore,
       };
     };
-    window.__superover = { G, FS, RN, DIFFS, SWING_LAG, startSwing, FL: () => FL };
+    window.__superover = { G, FS, RN, DIFFS, SWING_LAG, startSwing, FL: () => FL, step: (dt) => { update(dt); arc.input.endFrame(); } };
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();

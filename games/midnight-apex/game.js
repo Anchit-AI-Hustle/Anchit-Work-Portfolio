@@ -707,7 +707,7 @@
       horizon: '#8a2a84', rain: true
     },
     ghat: {
-      name: 'Ghat Pass', sub: 'Mountain switchbacks', sky: [0, '#02060f', 0.5, '#0b1f2c', 0.85, '#2a4a56', 1, '#4f747c'], fog: '#4a6c75', fogA: 0.96,
+      name: 'Ghat Pass', sub: 'Mountain switchbacks', sky: [0, '#02060f', 0.5, '#0b1f2c', 0.85, '#2a4a56', 1, '#4f747c'], fog: '#4a6c75', fogA: 0.88,
       ground: [['#142a1b', '#102316'], ['#2f3331', '#282c2a'], ['#3a3a35', '#33332e']],
       road: ['#3a3d41', '#33363a'], rumble: ['#d9d7c8', '#9c3d28'], lane: '#e9e2c4', moon: '#e6f0ff', moonAt: [0.62, 0.34, 1.1], stars: 130, fogH: 1.0,
       horizon: '#4f747c', mist: true, rail: { panel: '#8d969e', cap: '#d6dce0', post: '#2b2f33', h: 300 }
@@ -913,7 +913,7 @@
     }
     c.z = z;
   }
-  function gridSlot(slot) { return { dist: -(Math.floor(slot / 2) * 700 + 450), x: slot % 2 ? 0.36 : -0.36 }; }
+  function gridSlot(slot) { return { dist: -(Math.floor(slot / 2) * 820 + 450), x: slot % 2 ? 0.36 : -0.36 }; }
 
   function newWorld(cfg) {
     var T = getTrack(cfg.track), i, j, segs = T.segs;
@@ -926,7 +926,7 @@
     };
     var hex = colorHex(cfg.color), P = mkRacer({ name: 'You', kind: cfg.car, hex: hex, isPlayer: true });
     P.nitro = 35; P.nitroOn = false; P.steerIn = 0; P.rpm = 0.2; P.gear = 1; P.xCam = 0; P.drift = 0; P.cleanT = 0; P.draft = 0; P.hitCd = 0; P.lean = 0; P.thr = 0; P.bestNm = 0;
-    P.lapT0 = 0; P.started = false; P.flameT = 0; P.wasOff = false; P.crashes = 0; P.nearMisses = 0;
+    P.lapT0 = 0; P.started = false; P.crashLog = { car: 0, obj: 0, wall: 0, edge: 0 }; P.flameT = 0; P.wasOff = false; P.crashes = 0; P.nearMisses = 0;
     W.P = P; W.racers.push(P);
     var attract = W.attract, withRivals = attract || W.mode === 'race';
     if (withRivals) {
@@ -983,6 +983,11 @@
       o = W.obst[j];
       if (o === c || o.ghost || (blocking && o === P)) continue;
       var dz = wrapD(o.dist - c.dist, L);
+      if (dz <= 60 && dz > -280) {
+        var sdx = o.x - c.x, asd = Math.abs(sdx);
+        if (asd < 0.46) avoid += (sdx > 0 ? -1 : (sdx < 0 ? 1 : (c.x > 0 ? -1 : 1))) * (1 - asd / 0.46) * 1.3;
+        continue;
+      }
       if (dz <= 60 || dz > 3600) continue;
       var dx = o.x - c.x, adx = Math.abs(dx);
       if (adx < 0.5) {
@@ -1052,8 +1057,9 @@
       spawnP(0, W.pcx + side * W.pcw * 0.42, W.pcy - W.pcw * 0.1, Math.cos(a) * (140 + Math.random() * 360) * power, -Math.abs(Math.sin(a)) * (120 + Math.random() * 300) * power, 0.35 + Math.random() * 0.4, 2);
     }
   }
-  function crashFx(W, strength, side) {
+  function crashFx(W, strength, side, kind) {
     var P = W.P;
+    P.crashLog[kind || 'car']++;
     if (W.attract) { P.hitCd = 0.35; return; }
     P.cleanT = 0; P.hitCd = 0.35; P.crashes++;
     if (!ARC.reducedMotion) W.shake = Math.max(W.shake, 6 + strength * 12);
@@ -1152,7 +1158,7 @@
     var lim = 1.11;
     if ((seg.rail & 1) && P.x < -lim) { P.x = -lim; P.vx = Math.max(P.vx, 0); wallScrape(W, -1, dt); }
     else if ((seg.rail & 2) && P.x > lim) { P.x = lim; P.vx = Math.min(P.vx, 0); wallScrape(W, 1, dt); }
-    if (P.x < -2.75 || P.x > 2.75) { var sd = P.x < 0 ? -1 : 1; P.x = sd * 2.75; P.vx = 0; P.speed *= 0.8; if (P.hitCd <= 0) crashFx(W, 0.5, sd); }
+    if (P.x < -2.75 || P.x > 2.75) { var sd = P.x < 0 ? -1 : 1; P.x = sd * 2.75; P.vx = 0; P.speed *= 0.8; if (P.hitCd <= 0) crashFx(W, 0.5, sd, 'edge'); }
     // gravel
     if (offroad && P.speed > 2000) {
       P.cleanT = 0;
@@ -1181,7 +1187,7 @@
           else P.x = sp.off + (P.x >= sp.off ? 1 : -1) * (dd.hw + CAR_HALF + 0.03);
           var st = clamp(P.speed / BASE_MAX, 0.15, 1.1);
           P.speed = Math.min(P.speed * 0.4, BASE_MAX * 0.28); P.vx = 0; P.nitroOn = false;
-          crashFx(W, st, P.x > 0 ? 1 : -1);
+          crashFx(W, st, P.x > 0 ? 1 : -1, 'obj');
         }
       }
     }
@@ -1195,7 +1201,7 @@
         if (adx2 >= 0.34) continue;
         var rel = Math.abs(P.speed - o.speed), stt = clamp(rel / 8000, 0.1, 1);
         if (dz2 > 70 && P.speed >= o.speed - 300) {
-          P.dist = o.dist - 335; P.speed = Math.max(o.speed * 0.9, P.speed * 0.5);
+          P.dist += dz2 - 335; P.speed = Math.max(o.speed * 0.9, P.speed * 0.5);
           if (!o.isTraffic) o.speed = Math.min(o.speed * 1.0 + 300, o.vmax * 1.05);
         } else if (dz2 < -70) {
           o.speed = Math.max(0, o.speed * 0.92); P.speed = Math.min(P.speed * 1.02 + 200, top * 1.2);
@@ -1536,10 +1542,10 @@
     ctx.restore();
 
     // atmosphere
-    var fk = T.id + '|' + hz + '|' + h;
+    var inTun = pseg.tun === 1, fk = T.id + '|' + hz + '|' + h + '|' + inTun;
     if (R.fogKey !== fk) {
-      var above = hz * 0.36, below = (h - hz) * pal.fogH * 0.9, span = above + below, A = pal.fogA, g = ctx.createLinearGradient(0, hz - above, 0, hz - above + span);
-      [[0, 0], [above / span * 0.6, 0.3 * A], [above / span, A], [(above + below * 0.03) / span, 0.88 * A], [(above + below * 0.07) / span, 0.5 * A], [(above + below * 0.14) / span, 0.22 * A], [(above + below * 0.28) / span, 0.07 * A], [(above + below * 0.5) / span, 0], [1, 0]].forEach(function (s) { g.addColorStop(s[0], rgba(pal.fog, s[1])); });
+      var above = hz * 0.36, below = (h - hz) * pal.fogH * 0.9, span = above + below, A = inTun ? 0.95 : pal.fogA, fc = inTun ? '#0b0a0e' : pal.fog, g = ctx.createLinearGradient(0, hz - above, 0, hz - above + span);
+      [[0, 0], [above / span * 0.6, 0.3 * A], [above / span, A], [(above + below * 0.03) / span, 0.88 * A], [(above + below * 0.07) / span, 0.5 * A], [(above + below * 0.14) / span, 0.22 * A], [(above + below * 0.28) / span, 0.07 * A], [(above + below * 0.5) / span, 0], [1, 0]].forEach(function (s) { g.addColorStop(s[0], rgba(fc, s[1])); });
       R.fogG = g; R.fogY0 = hz - above; R.fogSpan = span; R.fogKey = fk;
     }
     ctx.fillStyle = R.fogG; ctx.fillRect(0, R.fogY0, w, R.fogSpan);
@@ -1622,13 +1628,13 @@
       ctx.save(); ctx.globalCompositeOperation = 'lighter';
       for (var i = 0; i < K.pipes.length; i++) {
         var ex = carX + K.pipes[i] * sc * Math.cos(P.lean), ey = carY - (156 - K.pipeY) * sc;
-        var fl = (0.75 + 0.5 * Math.sin(tm * 70 + i * 2.1) * Math.sin(tm * 43 + i)) * destW * (K.pipes.length > 2 ? 0.34 : 0.5);
-        var pr = K.pipeR * sc;
+        var fl = (0.8 + 0.45 * Math.sin(tm * 70 + i * 2.1) * Math.sin(tm * 43 + i)) * destW * (K.pipes.length > 2 ? 0.46 : 0.66);
+        var pr = K.pipeR * sc * 1.25;
         var gr = ctx.createLinearGradient(0, ey, 0, ey + fl);
         gr.addColorStop(0, 'rgba(255,255,255,.95)'); gr.addColorStop(0.18, 'rgba(150,200,255,.9)'); gr.addColorStop(0.6, 'rgba(40,110,255,.55)'); gr.addColorStop(1, 'rgba(20,60,255,0)');
         ctx.fillStyle = gr; ctx.beginPath(); ctx.moveTo(ex - pr * 0.8, ey); ctx.lineTo(ex + pr * 0.8, ey); ctx.lineTo(ex + pr * 0.35 + Math.sin(tm * 50 + i) * pr * 0.3, ey + fl); ctx.lineTo(ex - pr * 0.35, ey + fl); ctx.closePath(); ctx.fill();
         var gg = ctx.createRadialGradient(ex, ey, 0, ex, ey, pr * 3.4);
-        gg.addColorStop(0, 'rgba(160,210,255,.7)'); gg.addColorStop(1, 'rgba(40,100,255,0)');
+        gg.addColorStop(0, 'rgba(170,215,255,.85)'); gg.addColorStop(1, 'rgba(40,100,255,0)');
         ctx.fillStyle = gg; ctx.fillRect(ex - pr * 3.4, ey - pr * 3.4, pr * 6.8, pr * 6.8);
       }
       ctx.restore();
@@ -1834,13 +1840,13 @@
     '.mx-stat .mx-name{grid-column:1/-1;font-family:var(--font-display);font-size:20px;letter-spacing:0;text-transform:none;color:var(--ink);line-height:1.1}' +
     '.mx-bar{height:6px;border-radius:3px;background:var(--rule);position:relative;overflow:hidden}.mx-bar i{position:absolute;inset:0 auto 0 0;background:var(--accent-warm);border-radius:3px}' +
     '.mx-blurb{grid-column:1/-1;font-family:var(--font-body);font-size:13px;letter-spacing:0;text-transform:none;color:var(--ink-dim);line-height:1.35}' +
-    '.mx-laps{display:flex;flex-wrap:wrap;gap:6px 18px;margin:0 0 12px;font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute)}' +
+    '.mx-laps{display:grid;grid-template-columns:repeat(3,auto);justify-content:start;gap:6px 18px;margin:0 0 12px;font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute)}' +
     '.mx-laps b{display:block;font-size:15px;color:var(--ink);font-weight:500;letter-spacing:0}' +
     '.mx-res{width:100%;border-collapse:collapse;margin:4px 0 12px;font-size:14px}.mx-res td{padding:7px 8px;border-bottom:1px solid var(--rule);color:var(--ink-dim)}' +
     '.mx-res tr.me td{background:var(--primary-soft);color:var(--ink)}.mx-res td:first-child{font-family:var(--font-mono);color:var(--accent);width:30px}' +
     '.mx-res small{display:block;font-size:11px;color:var(--ink-mute)}.mx-res td:last-child{text-align:right;font-family:var(--font-mono)}' +
     '.arc-seg[data-opt="color"] button::before{content:"";display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--sw);margin-right:7px;vertical-align:-1px;box-shadow:0 0 0 1px rgba(251,245,236,.4)}' +
-    '.arc-card:has(.mx-prev) .arc-actions{position:sticky;bottom:0;background:var(--bg-elev);padding:12px 0 2px;margin-top:8px;box-shadow:0 -14px 14px var(--bg-elev);z-index:2}' +
+    '.arc-card:has(.mx-prev){padding-bottom:0}.arc-card:has(.mx-prev) .arc-actions{position:sticky;bottom:0;background:var(--bg-elev);padding:12px 0 clamp(14px,3vw,22px);margin-top:8px;box-shadow:0 -14px 14px var(--bg-elev);z-index:2}' +
     '.arc-card:has(.mx-prev) p{font-size:14px;margin-bottom:10px}.arc-card:has(.mx-prev) h2{margin:4px 0 8px}' +
     '@media (pointer:fine){.arc-card:has(.mx-prev) .arc-seg button{min-height:34px;padding:0 12px;font-size:13px}.arc-card:has(.mx-prev) .arc-opts{gap:7px;margin-bottom:6px}}' +
     '@media (max-width:420px){.mx-prev{grid-template-columns:110px 1fr;gap:10px}.arc-stage .mx-prev canvas{width:110px;height:70px}}';
@@ -1876,7 +1882,7 @@
   function menuProps() {
     var bests = TRACK_ORDER.map(function (id) {
       var b = BESTS[id];
-      return '<span>' + ARC.esc(PAL[id].name) + '<b>' + (b && b.total != null ? fmtTime(b.total) : 'No time yet') + '</b>' + (b && b.lap != null ? '<small style="color:var(--ink-mute);font-size:11px">best lap ' + fmtTime(b.lap) + '</small>' : '') + '</span>';
+      return '<span>' + ARC.esc(PAL[id].name) + '<b>' + (b && b.total != null ? fmtTime(b.total) : '-:--.--') + '</b>' + (b && b.lap != null ? '<small style="color:var(--ink-mute);font-size:11px">best lap ' + fmtTime(b.lap) + '</small>' : '') + '</span>';
     }).join('');
     return {
       eyebrow: 'Street racing', title: 'Midnight <em>Apex</em>', noBest: true,
@@ -1912,7 +1918,7 @@
       state: a.state, phase: W.attract ? 'attract' : W.phase, track: W.cfg.track, mode: W.mode, diff: W.cfg.diff, lap: clamp(P.lapIdx + 1, 1, LAPS), position: positionOf(W, P),
       speed: Math.round(P.speed * KMH), speedRaw: Math.round(P.speed), nitro: Math.round(P.nitro), nitroOn: P.nitroOn, playerX: +P.x.toFixed(3), distance: Math.round(P.dist),
       totalTime: +(P.finished ? P.finT : W.t).toFixed(2), lapTimes: P.lapTimes.map(function (t) { return +t.toFixed(2); }), bestLap: P.bestLap < Infinity ? +P.bestLap.toFixed(2) : null,
-      gear: P.gear, rpm: +P.rpm.toFixed(2), drift: +P.drift.toFixed(2), draft: +P.draft.toFixed(2), crashes: P.crashes, nearMisses: P.nearMisses, trackLen: W.T.L,
+      gear: P.gear, rpm: +P.rpm.toFixed(2), drift: +P.drift.toFixed(2), draft: +P.draft.toFixed(2), crashes: P.crashes, crashLog: P.crashLog, nearMisses: P.nearMisses, trackLen: W.T.L,
       rivals: W.rivals.map(function (r) { return { name: r.name, dist: Math.round(r.dist), x: +r.x.toFixed(2), speed: Math.round(r.speed * KMH), pos: positionOf(W, r), finished: r.finished }; }),
       traffic: W.traffic.length, results: W.results
     };

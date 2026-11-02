@@ -449,7 +449,7 @@
     if (x0 > 700) return;
     const ya = y0 - 10, yb = y1 + 10;
     const g = c.createLinearGradient(0, 0, 580, 0);
-    g.addColorStop(0, '#0a3252'); g.addColorStop(0.7, '#1b6a8a'); g.addColorStop(1, '#37a6b6');
+    g.addColorStop(0, '#0e4468'); g.addColorStop(0.7, '#1f7a9c'); g.addColorStop(1, '#3fb0bf');
     c.fillStyle = g;
     c.beginPath(); c.moveTo(x0 - 4, ya);
     for (let y = ya; y <= yb; y += 8) c.lineTo(shore(y), y);
@@ -770,8 +770,8 @@
     c.fillStyle = '#2f6b4a'; for (const p of PARKS) c.fillRect(p[0], p[1], p[2], p[3]);
     c.fillStyle = '#8a96b0';
     const vt = YC[0] - YR[0].hw, vb = YC[NY - 1] + YR[NY - 1].hw, hl = XC[0] - XR[0].hw, hr = XC[NX - 1] + XR[NX - 1].hw;
-    for (const R of XR) { c.fillStyle = R.blvd ? '#c3cde0' : '#8d99b2'; c.fillRect(R.c - R.hw * 0.62, vt, R.hw * 1.24, vb - vt); }
-    for (const R of YR) { c.fillStyle = R.blvd ? '#c3cde0' : '#8d99b2'; c.fillRect(hl, R.c - R.hw * 0.62, hr - hl, R.hw * 1.24); }
+    for (const R of XR) { c.fillStyle = R.blvd ? '#c3cde0' : '#8d99b2'; c.fillRect(R.c - R.hw * 0.5, vt, R.hw, vb - vt); }
+    for (const R of YR) { c.fillStyle = R.blvd ? '#c3cde0' : '#8d99b2'; c.fillRect(hl, R.c - R.hw * 0.5, hr - hl, R.hw); }
   })();
 
   /* ---- light sprites */
@@ -1224,7 +1224,7 @@
     const ns = n + dir;
     if (ns >= 0 && ns < (isH ? NX : NY)) opts.push(['s', ai.cop ? 0.7 : 0.6]);
     const turns = [['l', isH ? -dir : dir], ['r', isH ? dir : -dir]];
-    for (const t of turns) { const nn = (isH ? j : i) + t[1]; if (nn >= 0 && nn < (isH ? NY : NX)) opts.push([t[0], 0.2]); }
+    for (const t of turns) { const nn = (isH ? j : i) + t[1]; if (nn >= 0 && nn < (isH ? NY : NX)) opts.push([t[0], 0.2, t[1]]); }
     let tot = 0; for (const o of opts) tot += o[1];
     let r = rr() * tot, ch = opts[0];
     for (const o of opts) { r -= o[1]; if (r <= 0) { ch = o; break; } }
@@ -1233,7 +1233,7 @@
       const pout = isH ? { x: along + dir * (hwc + 6), y: cin } : { x: cin, y: along + dir * (hwc + 6) };
       ai.wps = [pin, pout]; ai.node = n + dir;
     } else {
-      const d2 = ch[1], axis2 = isH ? 'v' : 'h', idx2 = isH ? i : j;
+      const d2 = ch[2], axis2 = isH ? 'v' : 'h', idx2 = isH ? i : j;
       const R2 = axis2 === 'h' ? YR[idx2] : XR[idx2];
       const lane2 = ch[0] === 'l' ? R2.lanes - 1 : 0;
       const cout = laneCoord(axis2, idx2, d2, lane2);
@@ -2084,7 +2084,7 @@
     G.banner = null; G.floaters.length = 0; G.stats = { jobs: 0, crashes: 0 }; G.hustleLeft = 600; G.warned = false; G.district = null; G.copDist = 1e9; G.copCd = 0;
     G.hour = 18.2; G.offers = []; G.prompt = ''; G.nearVeh = null;
     pl.hp = 100; pl.inv = 0; pl.veh = null; pl.vx = pl.vy = 0; pl.a = 0.3;
-    const s = SAFE[0]; pl.x = s.x; pl.y = s.y;
+    const s = SAFE[0]; pl.x = s.x + 30; pl.y = s.y + 6;
     G.fx = pl.x; G.fy = pl.y; G.camX = pl.x; G.camY = pl.y; G.lookX = G.lookY = 0; G.zoom = 1.3;
     starterCar(s);
     populate();
