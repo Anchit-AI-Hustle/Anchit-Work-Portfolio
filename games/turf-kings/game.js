@@ -361,7 +361,7 @@
       cfg, demo: !!cfg.demo, teams: [th, ta], kits: pickKits(th, ta),
       dir: [1, -1], half: 1, phase: 'kickoff', phaseT: 0, kickTeam: 0,
       matchT: 0, T: cfg.minutes * 60, score: [0, 0],
-      skill: [0.6, cfg.skill], kskill: [0.55, cfg.skill],
+      skill: [0.64, cfg.skill], kskill: [0.62, cfg.skill],
       ball: { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, owner: null, lastTouch: null, lastTeam: 0, spin: 0, tx: new Float32Array(8), ty: new Float32Array(8), tz: new Float32Array(8), tn: 0 },
       players: [], ents: [], ctrl: 1, switchLock: 0, charge: 0, charging: false,
       stats: { shots: [0, 0], sot: [0, 0], poss: [0, 0.001], fouls: [0, 0], saves: [0, 0] },
@@ -671,7 +671,7 @@
   function baseSpeed(p) {
     if (p.role === 'GK') return 176;
     let s = 150;
-    if (p.team === 1 || S.demo || p.i !== S.ctrl) s *= 0.9 + 0.14 * S.skill[p.team];
+    if (p.team === 1 || S.demo || p.i !== S.ctrl) s *= 0.86 + 0.2 * S.skill[p.team];
     if (S.ball.owner === p) s *= 0.94;
     return s;
   }
@@ -1120,10 +1120,10 @@
     if (p.aiT > 0) return;
     p.aiT = lerp(0.42, 0.16, sk) + rnd() * 0.12;
     // shoot
-    const range = 300 + 90 * sk;
-    if (dg < range) {
-      const blocked = laneMin(t, p.x, p.y, gx, 0, false) < 22;
-      const pS = (dg < 190 ? 0.78 : 0.38 + 0.3 * sk) * (blocked ? 0.3 : 1);
+    const range = 230 + 70 * sk;
+    if (dg < range && (p.hold > 0.55 || dg < 170)) {
+      const blocked = laneMin(t, p.x, p.y, gx, 0, false) < 24;
+      const pS = (dg < 170 ? 0.62 : 0.14 + 0.2 * sk) * (blocked ? 0.25 : 1);
       if (rnd() < pS) { aiShoot(p); return; }
     }
     // pass
@@ -1139,9 +1139,9 @@
     const gk = S.players[(1 - t) * 5];
     let ty = (gk.y > 0 ? -1 : 1) * (GH - 18) * (0.45 + rnd() * 0.55);
     if (rnd() < 0.18) ty = (rnd() - 0.5) * 70;
-    ty += (rnd() - 0.5) * (1 - sk) * 80;
+    ty += (rnd() - 0.5) * (1.15 - sk) * 76;
     const dx = gx - p.x, dy = ty - p.y;
-    shootAt(p, dx, dy, clamp(0.55 + 0.4 * sk * rnd() + 0.15, 0.35, 1), 0, (1 - sk) * 0.14);
+    shootAt(p, dx, dy, clamp(0.45 + 0.3 * sk * rnd() + 0.15 * rnd(), 0.35, 0.9), 0, (1.1 - sk) * 0.1);
   }
   function bestAIReceiver(p) {
     let best = null, bs = -1e9; const dir = S.dir[p.team];
