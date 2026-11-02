@@ -1,12 +1,17 @@
-/* A calm wellness palette. The Times Health+ logo and brand colours are
-   deliberately not used. */
+/* Palette and type follow Times Health+'s own public site, measured on
+   2 Nov 2026: purple #893F97 (buttons run to #6E1A7D), amber #E29500, deep
+   brown #2D1B1B text, and Poppins. Amber is too light for text on white, so
+   text uses a darker amber; #E29500 is kept for bars and borders. The Times
+   Health+ logo is deliberately not used: this is an independent study. */
 :root{
-  --bg:#f4f7f5; --surface:#ffffff; --soft:#e9efeb;
-  --ink:#14211e; --body:#36443f; --muted:#5d6b66; --line:#d8e2dd;
-  --brand:#0f6e66; --brand-2:#0b544e; --brand-soft:#e0f1ee;
-  --coral:#b4400b; --coral-soft:#fdece2; --amber:#9a5b00; --amber-soft:#fcf0d8; --blue:#1d4ed8;
+  --bg:#fbf8fb; --surface:#ffffff; --soft:#f6f0f7;
+  --ink:#2d1b1b; --body:#4a3d3d; --muted:#6b5e5e; --line:#e9dfea;
+  --brand:#893f97; --brand-2:#6e1a7d; --brand-soft:#f4eaf6; --amber-brand:#e29500;
+  --coral:#b4400b; --coral-soft:#fdece2; --amber:#8f5b00; --amber-soft:#fdf3df; --blue:#893f97;
   --r-btn:10px; --r-tag:6px; --r-panel:14px; --r-card:18px; --r-pill:9999px;
-  --font:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --font:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --cb-bg:#2d1b1b; --cb-line:#4a3535; --cb-ink:#ffffff; --cb-muted:#d3c6c6; --cb-link:#e29500;
+  --cb-accent:#893f97; --cb-accent-2:#6e1a7d; --cb-on-accent:#ffffff; --cb-font:var(--font);
 }
 *{box-sizing:border-box}
 html{scroll-padding-top:72px}
@@ -18,7 +23,7 @@ li+li{margin-top:6px}
 a{color:var(--brand);text-underline-offset:3px}
 :focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:4px}
 .wrap{max-width:1120px;margin:0 auto;padding:0 16px}
-.notice{background:var(--ink);color:#dfe8e4;font-size:13px;line-height:19px;padding:8px 16px;text-align:center}
+.notice{background:var(--ink);color:#ece3ed;font-size:13px;line-height:19px;padding:8px 16px;text-align:center}
 .notice b{color:#fff}
 .nav{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line)}
 .nav .wrap{display:flex;align-items:center;gap:16px;min-height:60px}
@@ -34,7 +39,7 @@ a{color:var(--brand);text-underline-offset:3px}
 .btn-primary{background:var(--brand);color:#fff}.btn-primary:hover{background:var(--brand-2)}
 .btn-outline{background:#fff;color:var(--ink);border-color:var(--line)}
 .btn.sm{min-height:40px;padding:8px 14px;font-size:14px}
-.hero{background:radial-gradient(120% 90% at 100% 0%,#fde9dc 0%,rgba(253,233,220,0) 55%),linear-gradient(180deg,#fff 0%,var(--bg) 100%);border-bottom:1px solid var(--line)}
+.hero{background:radial-gradient(120% 90% at 100% 0%,#f4eaf6 0%,rgba(244,234,246,0) 55%),linear-gradient(180deg,#fff 0%,var(--bg) 100%);border-bottom:1px solid var(--line)}
 .hero .wrap{padding-top:40px;padding-bottom:40px;display:grid;gap:18px}
 .eyebrow{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--brand)}
 .hero h1 .accent{color:var(--brand)}
@@ -60,7 +65,7 @@ section.block:nth-of-type(even){background:#fff}
 .callout{background:#fff;border-left:5px solid var(--brand);border-radius:var(--r-panel);padding:16px 20px;font-size:17px;line-height:27px;color:var(--ink)}
 .callout.coral{border-left-color:var(--coral)}
 .tbl{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r-panel);background:#fff}
-@media(max-width:600px){.tbl.is-wide::before{content:'Swipe sideways for every column \2192';display:block;position:sticky;left:0;padding:8px 12px;font-size:12px;font-weight:600;color:#56625e;border-bottom:1px solid var(--line)}}
+@media(max-width:600px){.tbl.is-wide::before{content:'Swipe sideways for every column \2192';display:block;position:sticky;left:0;padding:8px 12px;font-size:12px;font-weight:600;color:#5e5050;border-bottom:1px solid var(--line)}}
 table{border-collapse:collapse;width:100%;font-size:14px;line-height:20px}
 th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--soft);vertical-align:top}
 th{background:var(--soft);color:var(--ink);font-weight:700;font-size:13px}
@@ -108,9 +113,9 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
 .short ul{font-size:15px;line-height:23px;color:var(--ink)}
 .short .tag{justify-self:start;font-size:13px}
 @media (min-width:900px){.short{grid-template-columns:repeat(3,1fr)}}
-footer{background:var(--ink);color:#cfdad5}
+footer{background:var(--ink);color:#dccfdf}
 footer .wrap{padding-top:32px;padding-bottom:40px;display:grid;gap:16px;font-size:14px;line-height:22px}
-footer a{color:#a7e4da;overflow-wrap:anywhere}
+footer a{color:#d9b8e0;overflow-wrap:anywhere}
 footer h3{color:#fff}
 @media (min-width:700px){
   h1{font-size:40px;line-height:50px} h2{font-size:30px;line-height:38px}
@@ -157,9 +162,9 @@ footer h3{color:#fff}
 .loop+.legend{margin-top:20px}
 
 /* Gap analysis and ideas pages */
-:root{--win:#1f6b45;--win-soft:#e2f2e8;--catch:#9a5b00;--catch-soft:#fcf0d8;--skip:#56625e;--skip-soft:#eceeec}
+:root{--win:#1f6b45;--win-soft:#e2f2e8;--catch:#8f5b00;--catch-soft:#fdf3df;--skip:#5e5050;--skip-soft:#eee6ef}
 .tag.win{background:var(--win-soft);color:var(--win)} .tag.catch{background:var(--catch-soft);color:var(--catch)} .tag.skip{background:var(--skip-soft);color:var(--skip)}
-.insight{display:grid;gap:6px;background:var(--ink);color:#e9e4dc;border-radius:var(--r-card);padding:20px 22px;margin-bottom:24px}
+.insight{display:grid;gap:6px;background:var(--ink);color:#ece3ed;border-radius:var(--r-card);padding:20px 22px;margin-bottom:24px}
 .insight b{color:#fff;font-size:20px;line-height:28px}
 .insight span{font-size:15px;line-height:23px}
 .funnel{display:grid;gap:10px;grid-template-columns:1fr}

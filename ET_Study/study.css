@@ -1,13 +1,17 @@
-/* A newsprint palette for a business-news study. The Economic Times logo and
-   brand colours are deliberately not used. */
+/* Palette and type follow The Economic Times' own public site, measured on
+   2 Nov 2026: ET Prime red #D51131, the peach band #FFE9E2, black and #4D4D4D
+   text, the markets green, Faustina headlines and Montserrat. The ET logo is
+   deliberately not used: this is an independent study, not an ET page. */
 :root{
-  --bg:#faf6f0; --surface:#ffffff; --soft:#f2ece3;
-  --ink:#1a1714; --body:#3f3a34; --muted:#6a6259; --line:#e3dbcf;
-  --brand:#8f1d22; --brand-2:#6f151a; --brand-soft:#f8e9e6;
-  --amber:#a8510a; --amber-soft:#fcefdc; --green:#1f6b45; --green-soft:#e2f2e8; --blue:#1d4ed8;
+  --bg:#fbfbfb; --surface:#ffffff; --soft:#fff3f0;
+  --ink:#121212; --body:#4d4d4d; --muted:#666666; --line:#e5e5e5;
+  --brand:#d51131; --brand-2:#a80d27; --brand-soft:#ffe9e2;
+  --amber:#a8510a; --amber-soft:#fcefdc; --green:#0b7f72; --green-soft:#e3f4f1; --blue:#0277bd;
   --r-btn:8px; --r-tag:4px; --r-panel:12px; --r-card:16px; --r-pill:9999px;
-  --serif:'Source Serif 4',Georgia,'Times New Roman',serif;
-  --font:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --serif:'Faustina',Georgia,'Times New Roman',serif;
+  --font:'Montserrat',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --cb-bg:#121212; --cb-line:#333333; --cb-ink:#ffffff; --cb-muted:#b3b3b3; --cb-link:#ffe9e2;
+  --cb-accent:#d51131; --cb-accent-2:#a80d27; --cb-on-accent:#ffffff; --cb-font:var(--font);
 }
 *{box-sizing:border-box}
 html{scroll-padding-top:72px}
@@ -20,7 +24,7 @@ li+li{margin-top:6px}
 a{color:var(--brand);text-underline-offset:3px}
 :focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:4px}
 .wrap{max-width:1120px;margin:0 auto;padding:0 16px}
-.notice{background:var(--ink);color:#e8e2da;font-size:13px;line-height:19px;padding:8px 16px;text-align:center}
+.notice{background:var(--ink);color:#e8e8e8;font-size:13px;line-height:19px;padding:8px 16px;text-align:center}
 .notice b{color:#fff}
 .nav{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line)}
 .nav .wrap{display:flex;align-items:center;gap:16px;min-height:60px}
@@ -51,7 +55,7 @@ section.block:nth-of-type(even){background:#fff}
 .grid>*{min-width:0}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:20px}
 .card.soft{background:var(--brand-soft);border-color:transparent}
-.card.dark{background:var(--ink);border-color:var(--ink);color:#d9d2c8}
+.card.dark{background:var(--ink);border-color:var(--ink);color:#d6d6d6}
 .card.dark h3,.card.dark b{color:#fff}
 .card h3+p{margin-top:6px}
 .kpi b{display:block;font-size:30px;line-height:36px;color:var(--ink);font-weight:700;font-family:var(--serif)}
@@ -64,7 +68,7 @@ section.block:nth-of-type(even){background:#fff}
 .callout{background:#fff;border-left:5px solid var(--brand);border-radius:var(--r-panel);padding:16px 20px;font-size:17px;line-height:27px;color:var(--ink)}
 .callout.amber{border-left-color:var(--amber)}
 .tbl{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r-panel);background:#fff}
-@media(max-width:600px){.tbl.is-wide::before{content:'Swipe sideways for every column \2192';display:block;position:sticky;left:0;padding:8px 12px;font-size:12px;font-weight:600;color:#5b5650;border-bottom:1px solid var(--line)}}
+@media(max-width:600px){.tbl.is-wide::before{content:'Swipe sideways for every column \2192';display:block;position:sticky;left:0;padding:8px 12px;font-size:12px;font-weight:600;color:#555555;border-bottom:1px solid var(--line)}}
 table{border-collapse:collapse;width:100%;font-size:14px;line-height:20px}
 th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--soft);vertical-align:top}
 th{background:var(--soft);color:var(--ink);font-weight:600;font-size:13px}
@@ -74,7 +78,7 @@ tr.hl td{background:var(--brand-soft)}
 .t-wide{min-width:760px} .t-mid{min-width:560px}
 /* problems */
 .prob{display:grid;gap:10px;align-content:start;border-top:5px solid var(--brand)}
-.prob.high{border-top-color:var(--amber)} .prob.med{border-top-color:#8a8178}
+.prob.high{border-top-color:var(--amber)} .prob.med{border-top-color:#8c8c8c}
 .ph{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .pn{font-family:var(--serif);font-weight:700;font-size:22px;color:var(--ink)}
 .sev{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:var(--r-tag);background:var(--brand-soft);color:var(--brand)}
@@ -119,9 +123,9 @@ details.more[open]>summary::after{content:"\2212"}
 .short ul{font-size:15px;line-height:23px;color:var(--ink)}
 .short .tag{justify-self:start;font-size:13px}
 @media (min-width:900px){.short{grid-template-columns:repeat(3,1fr)}}
-footer{background:var(--ink);color:#d6cfc5}
+footer{background:var(--ink);color:#d0d0d0}
 footer .wrap{padding-top:32px;padding-bottom:40px;display:grid;gap:16px;font-size:14px;line-height:22px}
-footer a{color:#f3c5bd;overflow-wrap:anywhere}
+footer a{color:#f6c3c9;overflow-wrap:anywhere}
 footer h3{color:#fff}
 @media (min-width:700px){
   h1{font-size:40px;line-height:50px} h2{font-size:30px;line-height:38px}
@@ -167,9 +171,9 @@ footer h3{color:#fff}
 .loop+.legend{margin-top:20px}
 
 /* Gap analysis and ideas pages */
-:root{--win:#1f6b45;--win-soft:#e2f2e8;--catch:#9a5b00;--catch-soft:#fcf0d8;--skip:#56625e;--skip-soft:#eceeec}
+:root{--win:#0b7f72;--win-soft:#e3f4f1;--catch:#8f5b00;--catch-soft:#fdf3df;--skip:#555555;--skip-soft:#eeeeee}
 .tag.win{background:var(--win-soft);color:var(--win)} .tag.catch{background:var(--catch-soft);color:var(--catch)} .tag.skip{background:var(--skip-soft);color:var(--skip)}
-.insight{display:grid;gap:6px;background:var(--ink);color:#e9e4dc;border-radius:var(--r-card);padding:20px 22px;margin-bottom:24px}
+.insight{display:grid;gap:6px;background:var(--ink);color:#ececec;border-radius:var(--r-card);padding:20px 22px;margin-bottom:24px}
 .insight b{color:#fff;font-size:20px;line-height:28px}
 .insight span{font-size:15px;line-height:23px}
 .funnel{display:grid;gap:10px;grid-template-columns:1fr}

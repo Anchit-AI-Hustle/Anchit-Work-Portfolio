@@ -58,26 +58,26 @@
     var css = document.createElement('style');
     css.textContent =
       '#consentBar{position:fixed;left:0;right:0;bottom:0;z-index:2147483000;' +
-        'background:#1A1814;border-top:1px solid #3D3830;color:#FBF5EC;' +
-        'font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;' +
+        'background:var(--cb-bg,#1A1814);border-top:1px solid var(--cb-line,#3D3830);color:var(--cb-ink,#FBF5EC);' +
+        'font-family:var(--cb-font,Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif);' +
         'box-shadow:0 -8px 30px rgba(0,0,0,.45);' +
         'padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px));' +
         'transform:translateY(100%);transition:transform .32s cubic-bezier(.22,1,.36,1)}' +
       '#consentBar[data-in="1"]{transform:translateY(0)}' +
       '#consentBar .cb-inner{max-width:900px;margin:0 auto;display:flex;gap:16px;' +
         'align-items:center;flex-wrap:wrap}' +
-      '#consentBar .cb-text{margin:0;flex:1 1 340px;font-size:13.5px;line-height:1.55;color:#A39E94}' +
-      '#consentBar .cb-text strong{color:#FBF5EC;font-weight:600}' +
-      '#consentBar .cb-text a{color:#FF6940;text-decoration:underline;text-underline-offset:2px}' +
+      '#consentBar .cb-text{margin:0;flex:1 1 340px;font-size:13.5px;line-height:1.55;color:var(--cb-muted,#A39E94)}' +
+      '#consentBar .cb-text strong{color:var(--cb-ink,#FBF5EC);font-weight:600}' +
+      '#consentBar .cb-text a{color:var(--cb-link,#FF6940);text-decoration:underline;text-underline-offset:2px}' +
       '#consentBar .cb-actions{display:flex;gap:10px;flex:0 0 auto}' +
       '#consentBar .cb-btn{font:inherit;font-size:13px;font-weight:600;cursor:pointer;' +
-        'padding:10px 16px;border-radius:12px;border:1px solid #3D3830;' +
-        'background:transparent;color:#FBF5EC;transition:border-color .18s ease,color .18s ease}' +
-      '#consentBar .cb-btn:hover{border-color:#FF6940;color:#FF6940}' +
-      '#consentBar .cb-primary{background:linear-gradient(100deg,#FF6940,#FF4D1F);' +
-        'color:#1a0d06;border-color:transparent}' +
-      '#consentBar .cb-primary:hover{color:#1a0d06}' +
-      '#consentBar .cb-btn:focus-visible{outline:2px solid #FF6940;outline-offset:3px}' +
+        'padding:10px 16px;border-radius:12px;border:1px solid var(--cb-line,#3D3830);' +
+        'background:transparent;color:var(--cb-ink,#FBF5EC);transition:border-color .18s ease,color .18s ease}' +
+      '#consentBar .cb-btn:hover{border-color:var(--cb-link,#FF6940);color:var(--cb-link,#FF6940)}' +
+      '#consentBar .cb-primary{background:linear-gradient(100deg,var(--cb-accent,#FF6940),var(--cb-accent-2,#FF4D1F));' +
+        'color:var(--cb-on-accent,#1a0d06);border-color:transparent}' +
+      '#consentBar .cb-primary:hover{color:var(--cb-on-accent,#1a0d06)}' +
+      '#consentBar .cb-btn:focus-visible{outline:2px solid var(--cb-link,#FF6940);outline-offset:3px}' +
       '@media (prefers-reduced-motion: reduce){#consentBar{transition:none}}' +
       /* The bar is fixed to the bottom, and so is the site's floating chrome
          (the chat return button, the motion and home controls). They shared
