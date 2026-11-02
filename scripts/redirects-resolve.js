@@ -320,7 +320,15 @@ const PERSON_ROUTE = /^\/(ayushi)(?:-rawat)?(?:\/|$)/;
   // to the browser, so anyone who opens the file finds them. This reads the
   // built bytes instead of the DOM.
   {
-    const VENDOR = /\/assets\/vendor\/|\/how-to\/assets\//;   // third-party bundles' own error strings
+    // Third-party bundles carry their authors' own github.com addresses (error
+    // strings, licence notices), which name THEIR projects, not ours. The same
+    // three directories scripts/no-github.js exempts, for the same reason:
+    // movies/vendor holds hls.js and its Apache 2.0 licence, whose attribution
+    // notice cites a github.com address and must ship unaltered. Exempt from
+    // the third-party patterns only: this site's own owner/repo string inside
+    // a vendor file would still be this site leaking, so that is still checked.
+    const VENDOR = /\/(assets\/vendor|how-to\/assets|movies\/vendor)\//;
+    const OWN = /Anchit-AI-Hustle\/[\w.-]+/g;
     const named = [];
     const scan = (dir) => {
       for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -328,8 +336,11 @@ const PERSON_ROUTE = /^\/(ayushi)(?:-rawat)?(?:\/|$)/;
         if (e.isDirectory()) { scan(f); continue; }
         if (!/\.(html|js|css|json|txt|xml)$/.test(e.name)) continue;
         const rel = '/' + path.relative(WWW, f).split(path.sep).join('/');
-        if (VENDOR.test(rel)) continue;
         const body = fs.readFileSync(f, 'utf8');
+        if (VENDOR.test(rel)) {
+          for (const m of body.matchAll(OWN)) named.push(`${rel}: "${m[0]}"`);
+          continue;
+        }
         // A repository NAME, not the word. "the repo" and "this repo" are
         // internal notes about this codebase and name nothing; a real slug
         // carries a hyphen or an underscore ("lifecycle-os repo"), which is
