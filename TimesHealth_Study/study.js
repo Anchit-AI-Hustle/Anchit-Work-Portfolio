@@ -50,3 +50,17 @@
   }
   chips.forEach(function(c){c.addEventListener('click',function(){show(c.dataset.stagefilter);});});
 })();
+
+// Videos: nothing loads from YouTube until the reader presses play.
+(function(){
+  [].forEach.call(document.querySelectorAll('.vid-play'),function(b){
+    b.addEventListener('click',function(){
+      var f=document.createElement('iframe');
+      f.src='https://www.youtube-nocookie.com/embed/'+b.dataset.yt+'?autoplay=1&rel=0';
+      f.title=b.getAttribute('aria-label').replace(/^Play video: /,'');
+      f.allow='autoplay; encrypted-media; picture-in-picture';f.allowFullscreen=true;f.loading='lazy';
+      f.setAttribute('referrerpolicy','strict-origin-when-cross-origin');
+      b.parentNode.replaceChild(f,b);
+    });
+  });
+})();

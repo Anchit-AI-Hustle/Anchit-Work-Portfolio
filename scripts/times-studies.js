@@ -72,13 +72,17 @@ const STUDIES = [
   { key: 'th', base: '/TimesHealth_Study', proto: ['', '/week', '/race', '/business'] },
 ];
 
-const CSP = (() => {
+// The studies carry their own policy: the site-wide one, plus frames from
+// youtube-nocookie.com for the brands' videos. Tests run under exactly that.
+const cspFor = (source) => {
   for (const h of vercel.headers) {
-    if (h.source !== '/(.*)') continue;
+    if (h.source !== source) continue;
     for (const x of h.headers) if (x.key === 'Content-Security-Policy') return x.value;
   }
-  throw new Error('vercel.json has no site-wide Content-Security-Policy');
-})();
+  throw new Error('vercel.json has no Content-Security-Policy for ' + source);
+};
+const SITE_CSP = cspFor('/(.*)');
+const CSP = cspFor('/ET_Study/(.*)');
 
 function mutate(p, src) {
   if (MUT === 'dash' && p === '/ET_Study') return src.replace('</body>', '<p>one—two</p></body>');
@@ -93,6 +97,7 @@ function mutate(p, src) {
   if (MUT === 'roadmap' && p === '/TimesHealth_Study/roadmap') return src.replace('(T16)', '(T99)').replace(/<div class="card stage" data-stage="scale">/, '<div class="card stage" data-stage="scale" hidden>');
   if (MUT === 'seethrough' && p === '/ET_Study/ideas') return src.replace('</head>', '<style>.nav{background:rgba(255,255,255,.96)}</style></head>');
   if (MUT === 'barecode' && p === '/TimesHealth_Study/plan') return src.replace('</main>', '<p>See (T1, F2).</p></main>');
+  if (MUT === 'video' && p === '/TimesHealth_Study/evidence') return src.replace(/https:\/\/www\.youtube\.com\/watch\?v=/g, 'https://example.com/?v=');
   if (MUT === 'ghost' && p === '/ET_Study/ideas') return src.replace('combines I2, I4, I11', 'combines I2, I4, I99');
   if (MUT === 'renewal' && p === '/ET_Study/model/maths') return src.replace('value="2699"', 'value="2999"');
   return src;
@@ -111,6 +116,7 @@ const norm = (s) => (s || '').replace(/\s+/g, ' ').trim();
 async function context(browser, vp) {
   const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
   await ctx.route('**/*', async (route) => {
+    if (/^https:\/\/www\.youtube-nocookie\.com\//.test(route.request().url())) return route.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html><title>video</title>' });
     const res = await route.fetch();
     const headers = { ...res.headers() };
     const p = new URL(route.request().url()).pathname.replace(/\/$/, '') || '/';
@@ -323,6 +329,15 @@ async function study(browser, vp, st) {
       check(`${L}: at least five "how might we" questions and four rejected ideas`, w.hmw >= 5 && w.rejected >= 4, `${w.hmw} ${w.rejected}`);
     }
     if (sub === '/evidence') check(`${L}: shows what a visitor sees, as captioned screenshots`, (await page.$$('#screens figure.shot img')).length >= 2 && (await page.$$('#screens figcaption')).length >= 2, '');
+    if (sub === '/evidence') {
+      // The brands' own videos: local thumbnail, no YouTube request until play,
+      // then the privacy-enhanced player for that exact video.
+      const before = await page.$$eval('.vid', (vs) => vs.map((v) => ({ id: v.dataset.video, img: new URL(v.querySelector('img').src).pathname, link: !!v.querySelector('a[href^="https://www.youtube.com/watch?v=' + v.dataset.video + '"]'), frames: v.querySelectorAll('iframe').length })));
+      check(`${L}: shows the brand's own videos, each with a YouTube link and a local thumbnail`, before.length >= 1 && before.every((v) => v.link && v.img.startsWith(st.base + '/img/') && v.frames === 0), JSON.stringify(before));
+      await page.click('.vid-play');
+      const src = await page.$eval('.vid iframe', (f) => f.src).catch(() => '');
+      check(`${L}: pressing play loads that video from youtube-nocookie.com`, src.startsWith('https://www.youtube-nocookie.com/embed/' + before[0].id), src);
+    }
     if (sub === '/evidence') check(`${L}: has today's offer, the audit and the competition`, !!(await page.$('#today')) && !!(await page.$('#audit-tbl')) && !!(await page.$('#compete')), '');
     if (sub === '/roadmap') {
       // Every bet is carried through all six stages, each launch has a stop
@@ -571,6 +586,7 @@ async function protoTH(browser, vp) {
     const own = walk(path.join(WWW, dir)).some((file) => fs.readFileSync(file, 'utf8').toLowerCase().includes(mine[0]));
     check(`${dir}: its own brand colour is in use`, own, mine[0]);
   }
+  check('vercel.json: the studies may frame youtube-nocookie.com; the rest of the site may not', /frame-src 'self' https:\/\/www\.youtube-nocookie\.com;/.test(CSP) && /frame-src 'self';/.test(SITE_CSP) && ['/ET_Study', '/TimesHealth_Study/(.*)'].every((src) => cspFor(src) === CSP), '');
   const browser = await chromium.launch();
   for (const vp of VIEWPORTS) {
     for (const st of STUDIES) await study(browser, vp, st);
