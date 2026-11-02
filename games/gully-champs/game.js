@@ -33,7 +33,7 @@
   // h is height above the road, z is depth: +z is the far wall, -z is toward us.
   const END_X = -12, GATE_X = 30, ZW = 2.6, ZN = 2.6;
   const STOREY = 3.3;
-  const CRATE_X = -0.82, BAT_X = 0, HOME_SAFE = 0.95, CHALK_X = 4.7, BOWL_X = 6.7, REL_X = 6.2;
+  const CRATE_X = -0.82, BAT_X = 0, HOME_SAFE = 0.95, CHALK_X = 4.0, BOWL_X = 5.8, REL_X = 5.3;
   const BR = 0.085; // ball radius for physics
   const GRAV = 9.8;
   const X_MIN = -14.5, X_MAX = 35, RS = 60, WALL_H = 14.6, ZKR = RS * 0.28;
@@ -109,11 +109,11 @@
     legend: { label: 'Gully Legend', speed: 1.14, swing: 0.31, perfect: 0.26, good: 0.55, fieldSpeed: 5.9, pCatch: 0.72, pStop: 0.82, target: [36, 44], patches: 5, mix: { fast: 3, slow: 1, full: 1, bouncer: 3, googly: 3 } },
   };
   const DELIV = {
-    fast: { speed: 10.6, run: 3.4, tag: 'Fast', aim: [0.4, 0.95], xp: [2.2, 4.4] },
-    slow: { speed: 6.3, run: 1.2, tag: 'Slow', aim: [0.5, 1.15], xp: [1.5, 3.6] },
+    fast: { speed: 10.6, run: 3.4, tag: 'Fast', aim: [0.4, 0.95], xp: [1.9, 3.8] },
+    slow: { speed: 6.3, run: 1.2, tag: 'Slow', aim: [0.5, 1.15], xp: [1.3, 3.2] },
     full: { speed: 8.8, run: 2.2, tag: 'Full toss', aim: [0.65, 1.25] },
-    bouncer: { speed: 11.8, run: 3.4, tag: 'Bouncer', aim: [1.45, 1.8], xp: [3.6, 5.2] },
-    googly: { speed: 7.6, run: 1.8, tag: 'Googly', aim: [0.45, 1.0], xp: [1.8, 3.8] },
+    bouncer: { speed: 11.8, run: 3.4, tag: 'Bouncer', aim: [1.45, 1.8], xp: [3.0, 4.6] },
+    googly: { speed: 7.6, run: 1.8, tag: 'Googly', aim: [0.45, 1.0], xp: [1.5, 3.4] },
   };
 
   /* ------------------------------------------------------------ speech lines */
@@ -154,7 +154,7 @@
   const FONT_UI = "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif";
   const FONT_MONO = "'JetBrains Mono', ui-monospace, Menlo, monospace";
   const FONT_SERIF = "'Fraunces', Georgia, 'Times New Roman', serif";
-  const POLES = [-9, 6.5, 21, 33];
+  const POLES = [-9, 9.4, 21, 33];
   const WIRES = [{ h: 7.5, sag: 0.45 }, { h: 7.1, sag: 0.55 }, { h: 6.7, sag: 0.4 }];
   // Height of wire k at world x (parabola between poles). Used by the birds.
   const wireH = (k, x) => {
@@ -554,9 +554,6 @@
     [HOME_SAFE, CHALK_X].forEach((x) => { c.beginPath(); c.moveTo(wx(x), yz(ZW - 0.25)); c.lineTo(wx(x) + 2, yz(-ZN + 0.4)); c.stroke(); });
     c.lineWidth = 3; c.strokeStyle = 'rgba(255,255,255,.62)';
     c.strokeRect(wx(-1.35), yz(1.2), (HOME_SAFE + 1.35) * RS, 2.4 * ZKR);
-    c.beginPath(); c.arc(wx(CHALK_X) + 26, yz(0), 14, 0, TAU); c.stroke();
-    c.font = '700 13px ' + FONT_MONO; c.fillStyle = 'rgba(255,255,255,.7)'; c.textAlign = 'center';
-    c.fillText('RUN', wx(CHALK_X) + 26, yz(0) + 4);
     return cv;
   }
 
@@ -679,10 +676,10 @@
   /* ------------------------------------------------------------ view and camera */
   function computeView() {
     V.W = arc.w; V.H = arc.h; V.portrait = V.H > V.W * 1.05; V.halfW = V.W / 2;
-    if (V.portrait) { V.S = Math.min(V.W / 9.6, V.H / 16); V.baseY = V.H * (V.W > 600 ? 0.7 : 0.66); }
-    else { V.S = Math.min(V.W / 21, V.H / 13.4); V.baseY = V.H * 0.8; }
+    if (V.portrait) { V.S = Math.min(V.W / 7.7, V.H / 15); V.baseY = V.H * (V.W > 600 ? 0.72 : 0.68); }
+    else { V.S = Math.min(V.W / 18, V.H / 11); V.baseY = V.H * 0.8; }
     V.ZK = V.S * 0.28;
-    V.homeX = V.portrait ? (V.W / (2 * V.S) - 1.4) : 0.16 * V.W / V.S;
+    V.homeX = V.portrait ? (V.W / (2 * V.S) - 1.25) : 0.17 * V.W / V.S;
   }
   const sxOf = (x) => (x - cam.x) * V.S + V.halfW;
   const syOf = (h, z) => V.baseY - z * V.ZK - h * V.S + cam.yo;
@@ -731,7 +728,7 @@
     const n = G.D.patches, kinds = ['pot', 'crack', 'stones', 'pot', 'crack'];
     let guard = 0;
     while (G.patches.length < n && guard++ < 40) {
-      const x = rr(1.5, 5.9), w = rr(0.7, 1.1);
+      const x = rr(1.3, 4.8), w = rr(0.7, 1.0);
       if (G.patches.some((p) => abs(p.x - x) < (p.w + w) / 2 + 0.25)) continue;
       G.patches.push({ x, w, z: rr(-0.4, 0.4), kind: kinds[G.patches.length % kinds.length], seed: rnd() * 1000 });
     }
@@ -2193,11 +2190,11 @@
     }
     // trial chip
     if (G.trial && (G.phase === 'intro' || G.phase === 'ready' || G.phase === 'runup' || G.phase === 'flight' || G.phase === 'live')) {
-      const t = 'TRIAL BALL: DOES NOT COUNT';
+      const t = p ? 'TRIAL BALL' : 'TRIAL BALL: DOES NOT COUNT';
       c.font = '600 ' + sm + 'px ' + FONT_MONO; const w = c.measureText(t).width + 22;
-      const y = p ? pad + 100 : pad + 6;
-      plate(c, V.W / 2 - w / 2, p ? pad + 84 : y, w, 26);
-      c.fillStyle = '#FFE9B0'; c.textAlign = 'center'; c.fillText(t, V.W / 2, (p ? pad + 84 : y) + 17); c.textAlign = 'left';
+      const cx = p ? V.W - w / 2 - pad : V.W / 2, y = p ? pad + (G.mode === 'last' ? 52 : 64) : pad + 6;
+      plate(c, cx - w / 2, y, w, 26);
+      c.fillStyle = '#FFE9B0'; c.textAlign = 'center'; c.fillText(t, cx, y + 17); c.textAlign = 'left';
     }
   }
 

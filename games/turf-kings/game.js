@@ -1493,18 +1493,18 @@
     V.portrait = pen ? true : h > w * 0.98;
     V.f = pen ? 1 : (S ? S.dir[0] : 1);
     let base;
-    if (pen) base = Math.min(w / 260, h / (300 * TILT));
+    if (pen) base = Math.min(w / 340, h / (430 * TILT));
     else base = V.portrait ? w / 400 : w / 880;
     const Uext = V.portrait ? BH : BW, Vext = V.portrait ? BW : BH;
     const cover = Math.max(w / Uext, h / (Vext * TILT * 0.98));
     CAM.base = Math.max(base, cover); CAM.cover = cover;
-    CAM.ox = w / 2; CAM.oy = pen ? h * 0.55 : (V.portrait ? h * 0.58 : h * 0.5);
+    CAM.ox = w / 2; CAM.oy = pen ? h * 0.6 : (V.portrait ? h * 0.58 : h * 0.5);
     const key = w + 'x' + h + V.portrait + V.f;
     if (key !== layoutKey) { layoutKey = key; CAM.snap = true; }
   }
   function camStep(dt) {
     const b = S.ball; let tx, ty, zm = 1;
-    if (S.phase === 'penalties') { tx = HL - 125; ty = 0; }
+    if (S.phase === 'penalties') { tx = HL - 105; ty = 0; }
     else {
       tx = b.x + clamp(b.vx * 0.2, -90, 90); ty = b.y + clamp(b.vy * 0.2, -90, 90);
       if (S.phase === 'goal' && S.goalP) { tx = S.goalP.x * 0.6 + b.x * 0.4; ty = S.goalP.y * 0.6 + b.y * 0.4; zm = arc.reducedMotion ? 1.1 : 1.26; }
