@@ -79,9 +79,9 @@
   const sayOf = (k) => pickOf(SAY[k]);
 
   const DIFFS = {
-    club: { label: 'Club', win: { p: 0.062, g: 0.128, m: 0.215 }, pace: [20.5, 23.5], spin: [13, 15.5], swing: 0.65, turn: 0.7, loose: 0.3, wide: 0.07, fspd: 6.2, react: 0.4, catchSk: 0.88, hint: true, target: { super: [14, 16], chase: [24, 30] } },
-    pro: { label: 'Pro', win: { p: 0.047, g: 0.102, m: 0.185 }, pace: [23.5, 26.5], spin: [14.5, 17], swing: 0.95, turn: 1.0, loose: 0.16, wide: 0.05, fspd: 7.2, react: 0.3, catchSk: 0.94, hint: false, target: { super: [17, 19], chase: [30, 37] } },
-    legend: { label: 'Legend', win: { p: 0.035, g: 0.078, m: 0.145 }, pace: [26.5, 30], spin: [16, 18.5], swing: 1.25, turn: 1.3, loose: 0.07, wide: 0.03, fspd: 8.2, react: 0.22, catchSk: 0.975, hint: false, target: { super: [20, 22], chase: [36, 44] } },
+    club: { label: 'Club', win: { p: 0.062, g: 0.128, m: 0.215 }, pace: [20.5, 23.5], spin: [13, 15.5], swing: 0.65, turn: 0.7, loose: 0.3, wide: 0.07, fspd: 5.8, react: 0.55, catchSk: 0.88, hint: true, target: { super: [14, 16], chase: [24, 30] } },
+    pro: { label: 'Pro', win: { p: 0.047, g: 0.102, m: 0.185 }, pace: [23.5, 26.5], spin: [14.5, 17], swing: 0.95, turn: 1.0, loose: 0.16, wide: 0.05, fspd: 6.6, react: 0.42, catchSk: 0.94, hint: false, target: { super: [17, 19], chase: [30, 37] } },
+    legend: { label: 'Legend', win: { p: 0.035, g: 0.078, m: 0.145 }, pace: [26.5, 30], spin: [16, 18.5], swing: 1.25, turn: 1.3, loose: 0.07, wide: 0.03, fspd: 7.6, react: 0.3, catchSk: 0.975, hint: false, target: { super: [20, 22], chase: [36, 44] } },
   };
 
   // [role, x, z] on the field (origin = middle of the pitch, +z toward the bowler, +x off side)
@@ -553,7 +553,12 @@
   function buildFielders(pace) {
     const lay = pace ? LAYOUT_PACE : LAYOUT_SPIN;
     const cfg = G.cfg;
-    FL = lay.map((e) => ({ role: e[0], x0: e[1], z0: e[2], tx: e[1], tz: e[2], sp: cfg.fspd * rr(0.95, 1.05), react: cfg.react + rr(0, 0.1), mv: 1, x: e[1], z: e[2], face: 0 }));
+    FL = lay.map((e, i) => {
+      const jx = i < 2 ? rr(-0.4, 0.4) : rr(-4, 4), jz = i < 2 ? rr(-0.4, 0.4) : rr(-4, 4);
+      let x = e[1] + jx, z = e[2] + jz;
+      const rad = hyp(x, z); if (rad > ROPE - 5) { x *= (ROPE - 5) / rad; z *= (ROPE - 5) / rad; }
+      return { role: e[0], x0: x, z0: z, tx: x, tz: z, sp: cfg.fspd * rr(0.95, 1.05), react: cfg.react + rr(0, 0.1), mv: 1, x, z, face: 0 };
+    });
     FL.push({ role: 'Bowler', x0: 3.4, z0: 5, tx: 3.4, tz: 5, sp: cfg.fspd * 0.9, react: cfg.react + 0.3, mv: 1, x: 3.4, z: 5, face: 0 });
     FL[0].sp *= 0.9;
   }
@@ -592,7 +597,7 @@
         const f = FL[j];
         const d = hyp(x - f.x0, z - f.z0);
         const mt = Math.max(0, t - f.react);
-        const reach = (catchable ? (y < 0.9 ? 1.2 : 1.0) * fast : 0.95);
+        const reach = (catchable ? (y < 0.9 ? 1.2 : 1.0) * fast : (spd >= 24 ? 0.7 : 0.9));
         const slack = f.sp * mt + reach - d;
         if (slack >= 0 && slack > bs) { bs = slack; bf = f; }
       }
