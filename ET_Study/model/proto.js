@@ -5,9 +5,9 @@
   var toastT;
   function toast(msg){var t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){t.hidden=true;},2600);}
 
-  // Old one-page links (/prototype#hub) land on the page that tab became.
+  // Old one-page links (/model#hub) land on the page that tab became.
   var LEGACY={hub:'hub',rules:'rules',maths:'maths'}, h0=(location.hash||'').slice(1);
-  if(LEGACY[h0]&&/\/prototype\/?$/.test(location.pathname)){location.replace('/ET_Study/prototype/'+LEGACY[h0]);return;}
+  if(LEGACY[h0]&&/\/model\/?$/.test(location.pathname)){location.replace('/ET_Study/model/'+LEGACY[h0]);return;}
 
   // ---------- My Stocks (page: stocks)
   if(document.getElementById('stocks')){
@@ -91,7 +91,7 @@
     steps.forEach(function(s,i){setTimeout(function(){log.appendChild(el('li',{'class':'ok'},s));if(i===steps.length-1){b.disabled=false;b.textContent='Access restored';}},300*(i+1));});
   });
   $('#invoice').addEventListener('click',function(){
-    var txt=['TAX INVOICE (DEMO, NOT A REAL INVOICE)','','Member: Demo Reader','Plan: ET Prime, 1+1 year','Date: 14 Jan 2025','Amount: Rs 3,304.24','GST 18%: Rs 594.76','Total: Rs 3,899.00','','Generated in the member hub prototype by Anchit Tandon.'].join('\n');
+    var txt=['TAX INVOICE (DEMO, NOT A REAL INVOICE)','','Member: Demo Reader','Plan: ET Prime, 1+1 year','Date: 14 Jan 2025','Amount: Rs 3,304.24','GST 18%: Rs 594.76','Total: Rs 3,899.00','','Generated in the member hub working model by Anchit Tandon.'].join('\n');
     var url=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));
     var a=el('a',{href:url,download:'et-prime-invoice-demo.txt'});document.body.appendChild(a);a.click();a.remove();
     setTimeout(function(){URL.revokeObjectURL(url);},1000);
@@ -106,7 +106,7 @@
     reader:{label:'Registered reader',ads:'Standard ad layout',offer:'One offer, plus the free morning brief',wall:'Preview, then the offer',call:'Only if they ask for a callback',notif:'Topics they picked; at most 3 a day; each opens its story',pill:'Subscribe',pop:false,ad:'big',why:'Registered readers are the best leads, which is why they are called only when they ask.'},
     member:{label:'Active member',ads:'Member layout: one native slot per story, no pop-ups or video',offer:'None. No sale banners, no "Subscribe" buttons, no pop-ups',wall:'Full story',call:'Never. Suppressed from every dialer list',notif:'Their stocks and topics; each opens its story',pill:'Member',pop:false,ad:'native',why:'The promise of "90% less ads" is kept by a rule, and paywalls shown to members are counted as defects.'},
     lapsed:{label:'Lapsed member',ads:'Standard ad layout',offer:'One win-back offer with what they used most',wall:'Preview, then the win-back offer',call:'One call within 30 days, only if they opted in',notif:'Their stocks, weekly',pill:'Rejoin',pop:false,ad:'big',why:'A lapsed member knows the product; remind them of what they used, once.'},
-    asked:{label:'Asked for a call',ads:'Standard ad layout',offer:'One offer, matching what they asked about',wall:'Preview, then the offer',call:'Within 24 hours, from one number, 10 AM to 7 PM, never after a "no"',notif:'As a registered reader',pill:'Subscribe',pop:false,ad:'big',why:'Assisted sales works best on people who raised their hand. Scoring every call keeps it that way.'},
+    asked:{label:'Asked for a call',ads:'Standard ad layout',offer:'One offer, matching what they asked about',wall:'Preview, then the offer',call:'Within 24 hours, from one number, 10 AM to 7 PM, never after a "no"',notif:'As a registered reader',pill:'Subscribe',pop:false,ad:'big',why:'Assisted sales works best on users who raised their hand. Scoring every call keeps it that way.'},
     today:{label:'Member today (for contrast)',ads:'Full ad layout, including pop-ups and video',offer:'"Diwali Sale" banner, launch pop-up, Subscribe buttons',wall:'Sometimes asked to subscribe again',call:'Can still be called',notif:'Opens the home page',pill:'Diwali Sale!',pop:true,ad:'big',why:'What reviewers describe today: a member treated like a prospect (problem P1).'}
   };
   var cur='member';

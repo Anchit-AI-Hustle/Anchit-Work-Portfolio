@@ -5,9 +5,9 @@
   var toastT;function toast(m){var t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){t.hidden=true;},2600);}
   var inr=new Intl.NumberFormat('en-IN');
 
-  // Old one-page links (/prototype#hub) land on the page that tab became.
+  // Old one-page links (/model#hub) land on the page that tab became.
   var LEGACY={week:'week',race:'race',biz:'business'}, h0=(location.hash||'').slice(1);
-  if(LEGACY[h0]&&/\/prototype\/?$/.test(location.pathname)){location.replace('/TimesHealth_Study/prototype/'+LEGACY[h0]);return;}
+  if(LEGACY[h0]&&/\/model\/?$/.test(location.pathname)){location.replace('/TimesHealth_Study/model/'+LEGACY[h0]);return;}
 
   // Single- or multi-select chip groups.
   function chips(host,items,state,multi,onChange){
@@ -72,7 +72,7 @@
     var p=$('#plans');p.innerHTML='';
     var plans=track?[['12 weeks, everything included','₹5,999','₹500 a week; diet team and classes',true]]:[['Yearly','₹4,999','about ₹417 a month',true],['Monthly','₹699','cancel any time',false]];
     plans.forEach(function(x){var d=el('div',{'class':'plan'+(x[3]?' best':''),'data-plan':x[0]});var l=el('div');l.appendChild(el('div',{'class':'small',style:'font-weight:700;color:var(--ink)'},x[0]));l.appendChild(el('div',{'class':'small muted'},x[2]));d.appendChild(l);d.appendChild(el('b',null,x[1]));p.appendChild(d);});
-    p.appendChild(el('p',{'class':'small muted',style:'margin-top:6px'},'Illustrative prices for this prototype, shown before sign-up as fix F1 asks.'));
+    p.appendChild(el('p',{'class':'small muted',style:'margin-top:6px'},'Illustrative prices for this working model, shown before sign-up as fix F1 asks.'));
     var sf=$('#safety');sf.hidden=!goal[4];sf.textContent=goal[4]||'';
     try{localStorage.setItem('th-goal',goal[0]);}catch(e){}
   }
@@ -80,7 +80,7 @@
     chips('#goals',GOALS.map(function(x){return [x[0],x[1]];}),S.goal,false,renderStart);
     chips('#windows',WIN,S.win,true,renderStart);
     chips('#levels',LEV,S.lev,false,renderStart);
-    $('#trial').addEventListener('click',function(){toast('Next step: your phone number and an OTP. Nothing is sent in this prototype.');});
+    $('#trial').addEventListener('click',function(){toast('Next step: your phone number and an OTP. Nothing is sent in this working model.');});
     renderStart();
   }
 
@@ -178,7 +178,7 @@
   renderRace();
   }
 
-  // ---------- 4. Business view ----------
+  // ---------- 4. Business review ----------
   if(document.getElementById('biz')){
   function lakh(n){return n>=1e7?'₹'+(n/1e7).toFixed(2)+' crore':'₹'+(n/1e5).toFixed(1)+' lakh';}
   function biz(){

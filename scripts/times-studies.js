@@ -1,11 +1,11 @@
 // The two Times Internet studies, /ET_Study (The Economic Times, ET Markets,
 // ET Prime) and /TimesHealth_Study (Times Health+, its yoga and diet plans and
-// the Half Marathon), and their prototypes, at phone, tablet and desktop width
+// the Half Marathon), and their working models, at phone, tablet and desktop width
 // under the site's real CSP.
 //
 // SHAPE
-//   Each study is seven pages (overview, users, problems, evidence, fixes,
-//   plan, about) and each prototype four, one per tab. Every page carries the
+//   Each study is nine pages (overview, users, problems, gap analysis, ideas,
+//   fixes, plan, evidence, about) and each working model four, one per tab. Every page carries the
 //   same nav, so the nav is checked on every page: every link lands, the
 //   current page is marked, and nothing scrolls sideways.
 //
@@ -17,11 +17,22 @@
 //   exist, and no problem may be left without a fix. Problem cards link to the
 //   fixes page with #P3, which must narrow the list to that problem's fixes.
 //
-//   The prototypes are driven for real: the My Stocks feed follows holdings,
+//   The working models are driven for real: the My Stocks feed follows holdings,
 //   cancelling takes exactly two taps, members are never sold to, the Times
 //   Health price shows before sign-up, the goal chosen on Start is the one the
 //   week page tracks, the race plan is held back when the runway is too short,
-//   and the ET study quotes the prototype's own renewal maths.
+//   and the ET study quotes the working model's own renewal maths.
+//
+//   The gap analysis and the ideas are checked as data, not prose: every
+//   ICE score is impact x confidence x ease as printed, the wall is sorted by
+//   it, every idea has exactly one dot on the impact/ease map in the right
+//   cell, every big bet has a storyboard, a test and a stop line and names
+//   ideas that exist, and every "closed by" on the gap page names an idea or
+//   a fix that exists on its own page.
+//
+//   Plain language: the study is for a reader, not a performance engineer, so
+//   the jargon it used to carry (Lighthouse, LCP, layout shift, main thread,
+//   holdout, cohort, entitlement) must not come back on any page.
 //
 //   The owner's rules hold on every page: no em or en dash, never the words
 //   GitHub or repository, every user quote dated and linked.
@@ -32,7 +43,9 @@
 // strips the date from one Times Health quote; MUT=route looks for the ET
 // study under a lower-case URL; MUT=cancel makes cancelling one tap; MUT=member
 // shows members a pop-up; MUT=price hides the Times Health price; MUT=renewal
-// drifts the prototype's renewal maths; MUT=nav drops a page from one nav.
+// drifts the working model's renewal maths; MUT=nav drops a page from one nav;
+// MUT=ice misprints one ICE score; MUT=ghost makes a bet name an idea that is
+// not on the wall.
 // Each must turn the run red.
 const { chromium } = require('./_playwright.js');
 const vercel = require('../vercel.json');
@@ -47,7 +60,7 @@ const VIEWPORTS = [
   { name: '820', width: 820, height: 1180 },
   { name: '1440', width: 1440, height: 900 },
 ];
-const PAGES = ['', '/users', '/problems', '/evidence', '/fixes', '/plan', '/about'];
+const PAGES = ['', '/problems', '/users', '/gaps', '/ideas', '/fixes', '/plan', '/evidence', '/about'];
 const STUDIES = [
   { key: 'et', base: '/ET_Study', proto: ['', '/hub', '/rules', '/maths'] },
   { key: 'th', base: '/TimesHealth_Study', proto: ['', '/week', '/race', '/business'] },
@@ -67,13 +80,16 @@ function mutate(p, src) {
   if (MUT === 'filter' && /\/fixes$/.test(p)) return src.replace('</body>', '<script>document.addEventListener("click",function(e){if(e.target.closest("[data-filter]"))e.stopImmediatePropagation();},true);</script></body>');
   if (MUT === 'quote' && p === '/TimesHealth_Study/problems') return src.replace(/(<figcaption[^>]*>)([\s\S]*?)(<\/figcaption>)/, (m, a, b, c) => a + b.replace(/\b\d{1,2} [A-Z][a-z]{2} 20\d\d\b|\b[A-Z][a-z]{2} 20\d\d\b|\b20\d\d\b/g, '') + c);
   if (MUT === 'nav' && p === '/TimesHealth_Study/plan') return src.replace(/<a href="\/TimesHealth_Study\/evidence">Evidence<\/a>/, '');
-  if (MUT === 'renewal' && p === '/ET_Study/prototype/maths') return src.replace('value="2699"', 'value="2999"');
+  if (MUT === 'ice' && p === '/TimesHealth_Study/ideas') return src.replace(/(<td class="num ice">)(\d+)(<\/td>)/, (m, a, n, b) => a + (+n + 1) + b);
+  if (MUT === 'badid' && p === '/TimesHealth_Study') return src.replace('id="model"', 'id="working model"');
+  if (MUT === 'ghost' && p === '/ET_Study/ideas') return src.replace('combines I2, I4, I11', 'combines I2, I4, I99');
+  if (MUT === 'renewal' && p === '/ET_Study/model/maths') return src.replace('value="2699"', 'value="2999"');
   return src;
 }
 function mutateJs(p, src) {
-  if (MUT === 'cancel' && p === '/ET_Study/prototype/proto.js') return src.replace("if(renew){$('#confirm').hidden=false;$('#confirm-yes').focus();}", 'if(renew){renew=false;renderTimeline();}');
-  if (MUT === 'member' && p === '/ET_Study/prototype/proto.js') return src.replace("offer:'None. No sale banners", "pop:true,offer:'None. No sale banners").replace("pill:'Member',pop:false", "pill:'Member'");
-  if (MUT === 'price' && p === '/TimesHealth_Study/prototype/proto.js') return src.replace("d.appendChild(el('b',null,x[1]))", "d.appendChild(el('b',null,'Sign up to see'))");
+  if (MUT === 'cancel' && p === '/ET_Study/model/proto.js') return src.replace("if(renew){$('#confirm').hidden=false;$('#confirm-yes').focus();}", 'if(renew){renew=false;renderTimeline();}');
+  if (MUT === 'member' && p === '/ET_Study/model/proto.js') return src.replace("offer:'None. No sale banners", "pop:true,offer:'None. No sale banners").replace("pill:'Member',pop:false", "pill:'Member'");
+  if (MUT === 'price' && p === '/TimesHealth_Study/model/proto.js') return src.replace("d.appendChild(el('b',null,x[1]))", "d.appendChild(el('b',null,'Sign up to see'))");
   return src;
 }
 
@@ -122,6 +138,10 @@ async function common(L, page, bag, status) {
   const f = text.match(/.{0,30}\b(git\s?hub|repositor(?:y|ies)|repos?)\b.{0,30}/gi) || [];
   check(`${L}: never names GitHub or a repository`, f.length === 0, f.join(' | '));
   check(`${L}: no link to GitHub`, (await page.$$('a[href*="github.com"]')).length === 0, '');
+  const ppl = text.match(/.{0,25}\bpeople\b.{0,25}/gi) || [];
+  check(`${L}: says users, not people`, ppl.length === 0, ppl.slice(0, 3).join(' | '));
+  const jargon = text.match(/.{0,25}\b(Lighthouse|LCP|CLS|layout shift|main thread|tag manager|throttl\w*|holdout|cohorts?|entitlement|Core Web Vitals)\b.{0,25}/gi) || [];
+  check(`${L}: no technical jargon`, jargon.length === 0, jargon.slice(0, 3).join(' | '));
   const over = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   check(`${L}: no horizontal page scroll`, over <= 0, over + 'px');
   check(`${L}: exactly one h1`, (await page.$$('h1')).length === 1, '');
@@ -138,7 +158,7 @@ let studyRenewal = NaN, protoRenewal = NaN;
 
 async function study(browser, vp, st) {
   const ctx = await context(browser, vp);
-  let problemList = [];
+  let problemList = [], gapRefs = [], ideaIds = [], fixIds = [], overviewProblems = [];
   for (const sub of PAGES) {
     const url = st.base + sub;
     const L = `[${vp.name}] ${url}`;
@@ -147,24 +167,53 @@ async function study(browser, vp, st) {
 
     // The nav reaches every page and marks this one.
     const nav = await page.$$eval('#links a', (as) => as.map((a) => ({ h: a.getAttribute('href'), cur: a.getAttribute('aria-current') })));
-    const want = [...PAGES.map((p) => st.base + p), st.base + '/prototype'];
+    const want = PAGES.map((p) => st.base + p);
     const missing = want.filter((h) => !nav.some((n) => n.h === h));
-    check(`${L}: nav links every page and the prototype`, missing.length === 0, missing.join(','));
+    const cta = await page.$(`.nav a.btn[href="${st.base}/model"]`);
+    check(`${L}: nav links every page, and the working model button is there`, missing.length === 0 && !!cta, missing.join(','));
+    const clipped = await page.evaluate(() => { const l = document.getElementById('links'); return l.scrollWidth - l.clientWidth; });
+    if (vp.width >= 1080) check(`${L}: the whole nav fits without scrolling on desktop`, clipped <= 0, clipped + 'px');
     const cur = nav.filter((n) => n.cur === 'page').map((n) => n.h);
     check(`${L}: nav marks this page as current`, cur.length === 1 && cur[0] === url, cur.join(','));
+    // Every id is valid: no spaces, and unique on the page.
+    const badIds = await page.$$eval('[id]', (els) => { const seen = {}; return els.map((e) => e.id).filter((i) => /\s/.test(i) || (seen[i] = (seen[i] || 0) + 1) > 1); });
+    check(`${L}: every id is unique and has no spaces`, badIds.length === 0, badIds.join(','));
+    // Screenshots: described, sized so the page does not jump, and shipped.
+    const imgs = await page.$$eval('main img', (is) => is.map((i) => ({ src: new URL(i.src).pathname, alt: i.alt, w: i.getAttribute('width'), h: i.getAttribute('height') })));
+    const badImg = imgs.filter((i) => !i.alt.trim() || !i.w || !i.h || !fs.existsSync(path.join(WWW, i.src)));
+    check(`${L}: every screenshot has a description, a size and a file`, badImg.length === 0, badImg.map((i) => i.src).join(','));
+    // Every claim carries its source next to it.
+    const unsourced = await page.evaluate(() => {
+      const need = [...document.querySelectorAll('#problems .prob, section[aria-labelledby="tldr-h"] .kpi, #metrics-tbl tbody tr, .users .need, [data-bet]')];
+      return need.filter((n) => !n.querySelector('.src a[href]')).map((n) => n.dataset.problem || n.dataset.bet || n.dataset.metric || (n.querySelector('h3,span') || {}).textContent || n.className);
+    });
+    check(`${L}: every problem, metric, gap figure, user and bet shows its source`, unsourced.length === 0, unsourced.join(' | '));
     check(`${L}: footer lists at least 10 sources`, (await page.$$('footer a[href^="http"]')).length >= 10, '');
 
     if (sub === '') {
-      check(`${L}: opens with what it is, what goes wrong, what I would do`, (await page.$$('header .short .card')).length === 3, '');
+      const first = await page.$eval('main > section', (n) => n.id);
+      const plist = await page.$$eval('#top-problems .plist li', (l) => l.map((x) => x.dataset.p));
+      check(`${L}: the 8 problems come first, straight after the headline`, first === 'top-problems' && plist.length === 8, first + ' ' + plist.length);
+      overviewProblems = plist;
+      const steps = await page.$$eval('header .short .card .tag', (t) => t.map((x) => x.textContent.trim()));
+      check(`${L}: opens with the users: who, why they come, what they get, what is missing`, steps.length === 4 && /^1 · Who the users are/.test(steps[0]) && /^2 · Why they come/.test(steps[1]) && /^3 · What they get today/.test(steps[2]) && /^4 · What is missing/.test(steps[3]), steps.join(' | '));
       const cards = await page.$$eval('#pages a', (as) => as.map((a) => a.getAttribute('href')));
-      check(`${L}: page-by-page cards link every page`, PAGES.slice(1).every((p) => cards.includes(st.base + p)) && cards.includes(st.base + '/prototype'), cards.join(','));
+      const mini = await page.$$eval('#bets-mini a', (as) => as.map((a) => a.getAttribute('href')));
+      check(`${L}: shows the three big bets, each linking to its write-up`, mini.length === 3 && mini.every((h, k) => h === `${st.base}/ideas#bet-${k + 1}`), mini.join(','));
+      check(`${L}: page-by-page cards link every page`, PAGES.slice(1).every((p) => cards.includes(st.base + p)) && cards.includes(st.base + '/model'), cards.join(','));
     } else {
       check(`${L}: breadcrumb leads back to the overview`, !!(await page.$(`.crumb a[href="${st.base}"]`)), '');
       check(`${L}: previous and next links`, (await page.$$('.pager a')).length === 2, '');
     }
-    if (sub === '/users') check(`${L}: at least four users`, (await page.$$('.need')).length >= 4, '');
+    if (sub === '/users') {
+      const rows = await page.$$eval('.need', (c) => c.map((x) => [...x.querySelectorAll('dt')].map((d) => d.textContent.trim().replace(/^\d · /, ''))));
+      check(`${L}: four users, each in four rows: who, why and what they want, what they get, what is missing`, rows.length >= 4 && rows.every((r) => r.length === 4 && /^Who/.test(r[0]) && /^Why/.test(r[1]) && /^What they get/.test(r[2]) && /^What is missing/.test(r[3])), JSON.stringify(rows[0]));
+    }
     if (sub === '/problems') {
       problemList = await page.$$eval('[data-problem]', (n) => n.map((x) => x.dataset.problem));
+      const labelled = await page.$$eval('#problems .prob', (c) => c.every((x) => x.querySelector('h3') && x.querySelector('.plain') && x.querySelector('.hurts')));
+      check(`${L}: every problem has a label, a plain explanation and what it hurts`, labelled, '');
+      check(`${L}: the overview lists the same problems in the same order`, overviewProblems.join() === problemList.join(), overviewProblems.join());
       check(`${L}: at least six numbered problems, unique`, problemList.length >= 6 && new Set(problemList).size === problemList.length, problemList.join(','));
       const links = await page.$$eval('[data-problem] a.jump', (as) => as.map((a) => a.getAttribute('href')));
       check(`${L}: every problem links to its fixes`, problemList.every((p) => links.includes(`${st.base}/fixes#${p}`)), links.join(','));
@@ -176,14 +225,61 @@ async function study(browser, vp, st) {
       const bad = q.filter((x) => !x.q.trim() || !/\b20\d\d\b/.test(x.cap) || !x.link);
       check(`${L}: at least four quotes, each dated and linked`, q.length >= 4 && bad.length === 0, bad.map((x) => x.cap.slice(0, 50)).join(' | '));
     }
+    if (sub === '/gaps') {
+      const g = await page.evaluate(() => {
+        const txt = (sel) => [...document.querySelectorAll(sel)].map((n) => n.textContent);
+        return {
+          headline: !!document.querySelector('#headline b'),
+          metrics: [...document.querySelectorAll('#metrics-tbl tbody tr')].map((tr) => [...tr.cells].every((c) => c.textContent.trim())),
+          verdicts: [...document.querySelectorAll('#jobs-tbl tbody tr .tag')].map((t) => t.className.split(' ').pop()),
+          stages: [...document.querySelectorAll('.funnel [data-stage]')].map((s) => !!s.querySelector('.gap') && !!s.querySelector('.fixby')),
+          assets: document.querySelectorAll('#assets-tbl tbody tr').length,
+          refs: txt('.funnel .fixby, #jobs-tbl td:last-child, #assets-tbl td:last-child').join(' ').match(/\b[ITF]\d+\b/g) || [],
+        };
+      });
+      gapRefs = g.refs;
+      check(`${L}: leads with one headline insight`, g.headline, '');
+      check(`${L}: at least eight measured gaps, every cell filled`, g.metrics.length >= 8 && g.metrics.every(Boolean), g.metrics.length);
+      check(`${L}: six jobs, each with a verdict, at least one to win`, g.verdicts.length === 6 && g.verdicts.every((v) => ['win', 'catch', 'skip'].includes(v)) && g.verdicts.includes('win'), g.verdicts.join(','));
+      check(`${L}: five funnel stages, each with a gap and what closes it`, g.stages.length === 5 && g.stages.every(Boolean), g.stages.length);
+      check(`${L}: at least five unused assets`, g.assets >= 5, g.assets);
+    }
+    if (sub === '/ideas') {
+      const w = await page.evaluate(() => {
+        const rows = [...document.querySelectorAll('#idea-tbl tbody tr')].map((tr) => ({ id: tr.dataset.idea, i: +tr.dataset.i, c: +tr.dataset.c, e: +tr.dataset.e, cells: [...tr.cells].map((c) => c.textContent.trim()) }));
+        const dots = [...document.querySelectorAll('#ice-map .dot')].map((d) => ({ ids: d.dataset.dot.split(' '), left: parseFloat(d.style.left), bottom: parseFloat(d.style.bottom) }));
+        const bets = [...document.querySelectorAll('[data-bet]')].map((b) => ({ id: b.id, steps: b.querySelectorAll('.storyboard li').length, boxes: b.querySelectorAll('.box').length, kill: (b.querySelector('[data-kill]') || {}).textContent || '', combines: ((b.querySelector('.k') || {}).textContent || '').match(/\b[IT]\d+\b/g) || [] }));
+        return { rows, dots, bets, hmw: document.querySelectorAll('#hmw li').length, rejected: document.querySelectorAll('[data-reject]').length };
+      });
+      ideaIds = w.rows.map((x) => x.id);
+      const badIce = w.rows.filter((x) => +x.cells[5] !== x.i * x.c * x.e || +x.cells[2] !== x.i || +x.cells[3] !== x.c || +x.cells[4] !== x.e);
+      const ices = w.rows.map((x) => x.i * x.c * x.e);
+      check(`${L}: at least fifteen ideas`, w.rows.length >= 15, w.rows.length);
+      check(`${L}: every ICE is impact x confidence x ease as printed`, badIce.length === 0, badIce.map((x) => x.id).join(','));
+      check(`${L}: the wall is sorted by ICE`, ices.every((v, k) => k === 0 || v <= ices[k - 1]), ices.join(','));
+      const dotIds = w.dots.flatMap((d) => d.ids);
+      check(`${L}: every idea has exactly one dot on the map`, dotIds.length === ideaIds.length && ideaIds.every((id) => dotIds.filter((x) => x === id).length === 1), dotIds.join(','));
+      const misplaced = w.dots.filter((d) => d.ids.some((id) => { const x = w.rows.find((r) => r.id === id); return Math.abs(d.left - (8 + (x.e - 1) * 21)) > 0.01 || Math.abs(d.bottom - (8 + (x.i - 1) * 21)) > 0.01; }));
+      check(`${L}: every dot sits at its idea's impact and ease`, misplaced.length === 0, misplaced.map((d) => d.ids.join('+')).join(','));
+      check(`${L}: three big bets, each with four steps, four boxes and a stop line`, w.bets.length === 3 && w.bets.every((b) => b.steps === 4 && b.boxes === 4 && /^Stop if:/.test(b.kill.trim())), JSON.stringify(w.bets.map((b) => [b.steps, b.boxes])));
+      const ghost = w.bets.flatMap((b) => b.combines).filter((id) => !ideaIds.includes(id));
+      check(`${L}: every bet combines ideas that are on the wall`, ghost.length === 0 && w.bets.every((b) => b.combines.length >= 2), ghost.join(','));
+      check(`${L}: at least five "how might we" questions and four rejected ideas`, w.hmw >= 5 && w.rejected >= 4, `${w.hmw} ${w.rejected}`);
+    }
+    if (sub === '/evidence') check(`${L}: shows what a visitor sees, as captioned screenshots`, (await page.$$('#screens figure.shot img')).length >= 2 && (await page.$$('#screens figcaption')).length >= 2, '');
     if (sub === '/evidence') check(`${L}: has today's offer, the audit and the competition`, !!(await page.$('#today')) && !!(await page.$('#audit-tbl')) && !!(await page.$('#compete')), '');
-    if (sub === '/fixes') await fixesPage(L, page, problemList);
+    if (sub === '/fixes') {
+      await fixesPage(L, page, problemList);
+      fixIds = await page.$$eval('[data-solves]', (n) => n.map((x) => x.dataset.fix));
+    }
     if (sub === '/plan' && st.key === 'et') {
       const m = /about\s*₹\s*([\d.]+)\s*lakh a year/i.exec(norm(await page.textContent('#measure')));
       studyRenewal = m ? parseFloat(m[1]) : NaN;
     }
     await page.close();
   }
+  const dangling = gapRefs.filter((id) => !(id.startsWith('F') ? fixIds : ideaIds).includes(id));
+  check(`[${vp.name}] ${st.base}/gaps: every idea or fix it names exists`, gapRefs.length > 0 && dangling.length === 0, dangling.join(',') || gapRefs.length + ' references');
   // A link from a problem card lands with only that problem's fixes showing.
   const { page } = await open(ctx, `${st.base}/fixes#P2`);
   const p2 = await page.evaluate(() => [...document.querySelectorAll('[data-solves]')].every((n) => n.hidden === !n.dataset.solves.split(/\s+/).includes('P2')));
@@ -238,17 +334,17 @@ async function fixesPage(L, page, problemList) {
 
 async function protoNav(L, page, st, sub) {
   const tabs = await page.$$eval('.tabs a', (as) => as.map((a) => ({ h: a.getAttribute('href'), cur: a.getAttribute('aria-current') })));
-  const want = st.proto.map((p) => st.base + '/prototype' + p);
+  const want = st.proto.map((p) => st.base + '/model' + p);
   const cur = tabs.filter((t) => t.cur === 'page').map((t) => t.h).join();
-  check(`${L}: tabs link every prototype page and mark this one`, want.every((h) => tabs.some((t) => t.h === h)) && cur === st.base + '/prototype' + sub, JSON.stringify(tabs));
+  check(`${L}: tabs link every working model page and mark this one`, want.every((h) => tabs.some((t) => t.h === h)) && cur === st.base + '/model' + sub, JSON.stringify(tabs));
   check(`${L}: links back to the study`, (await page.$$(`a[href^="${st.base}/"]`)).length > 0, '');
 }
 
 async function protoET(browser, vp) {
   const st = STUDIES[0];
   const ctx = await context(browser, vp);
-  const P = (s) => `[${vp.name}] ${st.base}/prototype${s}`;
-  let o = await open(ctx, `${st.base}/prototype`);
+  const P = (s) => `[${vp.name}] ${st.base}/model${s}`;
+  let o = await open(ctx, `${st.base}/model`);
   let page = o.page;
   await protoNav(P(''), page, st, '');
   check(`${P('')}: says its data is fictional`, /fictional demo data/i.test(await page.textContent('.notice')), '');
@@ -265,7 +361,7 @@ async function protoET(browser, vp) {
   check(`${P('')}: no holdings shows an empty state`, (await page.$$('#feed .empty')).length === 1, '');
   await common(P(''), page, o.bag, o.status); await page.close();
 
-  o = await open(ctx, `${st.base}/prototype/hub`); page = o.page;
+  o = await open(ctx, `${st.base}/model/hub`); page = o.page;
   await protoNav(P('/hub'), page, st, '/hub');
   await page.click('#cancel');
   const a1 = norm(await page.textContent('#m-renew'));
@@ -280,7 +376,7 @@ async function protoET(browser, vp) {
   check(`${P('/hub')}: the invoice downloads without an email`, !!dl && /invoice/.test(dl.suggestedFilename()), dl ? dl.suggestedFilename() : 'none');
   await common(P('/hub'), page, o.bag, o.status); await page.close();
 
-  o = await open(ctx, `${st.base}/prototype/rules`); page = o.page;
+  o = await open(ctx, `${st.base}/model/rules`); page = o.page;
   await protoNav(P('/rules'), page, st, '/rules');
   await page.click('#who [data-who="member"]');
   const mem = await page.evaluate(() => ({
@@ -297,15 +393,15 @@ async function protoET(browser, vp) {
   check(`${P('/rules')}: someone who asked for a call gets one, with limits`, /24 hours/.test(await page.textContent('[data-rule="call"] td')), '');
   await common(P('/rules'), page, o.bag, o.status); await page.close();
 
-  o = await open(ctx, `${st.base}/prototype/maths`); page = o.page;
+  o = await open(ctx, `${st.base}/model/maths`); page = o.page;
   await protoNav(P('/maths'), page, st, '/maths');
   const m = /₹\s*([\d.]+)\s*lakh/.exec(await page.textContent('[data-testid="et-renewal-total"]'));
   protoRenewal = m ? parseFloat(m[1]) : NaN;
   await common(P('/maths'), page, o.bag, o.status); await page.close();
 
   // Links to the old one-page prototype land on the page that tab became.
-  o = await open(ctx, `${st.base}/prototype#hub`);
-  check(`${P('#hub')}: an old tab link lands on the member hub page`, /\/prototype\/hub$/.test(new URL(o.page.url()).pathname), o.page.url());
+  o = await open(ctx, `${st.base}/model#hub`);
+  check(`${P('#hub')}: an old tab link lands on the member hub page`, /\/model\/hub$/.test(new URL(o.page.url()).pathname), o.page.url());
   await o.page.close();
   await ctx.close();
 }
@@ -313,8 +409,8 @@ async function protoET(browser, vp) {
 async function protoTH(browser, vp) {
   const st = STUDIES[1];
   const ctx = await context(browser, vp);
-  const P = (s) => `[${vp.name}] ${st.base}/prototype${s}`;
-  let o = await open(ctx, `${st.base}/prototype`);
+  const P = (s) => `[${vp.name}] ${st.base}/model${s}`;
+  let o = await open(ctx, `${st.base}/model`);
   let page = o.page;
   await protoNav(P(''), page, st, '');
   const notice = (await page.textContent('.notice')) || '';
@@ -332,7 +428,7 @@ async function protoTH(browser, vp) {
   await common(P(''), page, o.bag, o.status); await page.close();
 
   // The goal picked on Start is the one the week page tracks, in its unit.
-  o = await open(ctx, `${st.base}/prototype/week`); page = o.page;
+  o = await open(ctx, `${st.base}/model/week`); page = o.page;
   await protoNav(P('/week'), page, st, '/week');
   const unit = { name: await page.textContent('#goal-name'), goal: await page.textContent('#o-goal'), out: await page.textContent('#checkin-out') };
   check(`${P('/week')}: tracks the goal chosen on Start, fasting sugar in mg/dL`, /sugar/i.test(unit.name) && /mg\/dL/.test(unit.goal) && /^Logged: Fasting sugar, \d+ mg\/dL/.test(unit.out), JSON.stringify(unit));
@@ -345,7 +441,7 @@ async function protoTH(browser, vp) {
   check(`${P('/week')}: two misses in a row bring a catch-up, which counts`, !n0 && n1 && c2 === c1 + 1 && !(await page.isVisible('#nudge')), `${n0} ${n1} ${c1}->${c2}`);
   await common(P('/week'), page, o.bag, o.status); await page.close();
 
-  o = await open(ctx, `${st.base}/prototype/race`); page = o.page;
+  o = await open(ctx, `${st.base}/model/race`); page = o.page;
   await protoNav(P('/race'), page, st, '/race');
   const wk = +(await page.textContent('[data-testid="th-weeks"]'));
   const rows = await page.$$eval('#plan li', (l) => l.map((x) => x.dataset.week));
@@ -359,14 +455,14 @@ async function protoTH(browser, vp) {
   check(`${P('/race')}: Delhi 21.1K long runs build up and never pass 18 km`, longs.length > 10 && Math.max(...longs) <= 18 && longs[0] < longs[longs.length - 3], longs.join(','));
   await common(P('/race'), page, o.bag, o.status); await page.close();
 
-  o = await open(ctx, `${st.base}/prototype/business`); page = o.page;
+  o = await open(ctx, `${st.base}/model/business`); page = o.page;
   await protoNav(P('/business'), page, st, '/business');
   const members = norm(await page.textContent('[data-testid="th-members"]')).replace(/,/g, '');
   check(`${P('/business')}: default funnel gives 1,200 members (15,000 x 4 x 40% x 20% x 25%)`, members === '1200', members);
   await common(P('/business'), page, o.bag, o.status); await page.close();
 
-  o = await open(ctx, `${st.base}/prototype#race`);
-  check(`${P('#race')}: an old tab link lands on the race plan page`, /\/prototype\/race$/.test(new URL(o.page.url()).pathname), o.page.url());
+  o = await open(ctx, `${st.base}/model#race`);
+  check(`${P('#race')}: an old tab link lands on the race plan page`, /\/model\/race$/.test(new URL(o.page.url()).pathname), o.page.url());
   await o.page.close();
   await ctx.close();
 }
@@ -376,13 +472,13 @@ async function protoTH(browser, vp) {
   // rewrite (a rewrite to an .html file 404s under cleanUrls).
   for (const st of STUDIES) {
     const dir = MUT === 'route' && st.key === 'et' ? st.base.toLowerCase() : st.base;
-    const files = [...PAGES.map((p) => (p ? dir + p + '.html' : dir + '/index.html')), ...st.proto.map((p) => dir + '/prototype' + (p ? p + '.html' : '/index.html'))];
+    const files = [...PAGES.map((p) => (p ? dir + p + '.html' : dir + '/index.html')), ...st.proto.map((p) => dir + '/model' + (p ? p + '.html' : '/index.html'))];
     const missing = files.filter((f) => !fs.existsSync(path.join(WWW, f)));
     check(`${st.base}: all ${files.length} pages are built files in www/`, missing.length === 0, missing.join(','));
     const rw = (vercel.rewrites || []).filter((r) => r.source.toLowerCase().startsWith(st.base.toLowerCase()));
     check(`${st.base}: no vercel.json rewrite to break it`, rw.length === 0, rw.map((r) => r.source).join(','));
   }
-  for (const [from, to] of [['/ET-study', '/ET_Study'], ['/ET-study/prototype', '/ET_Study/prototype']]) {
+  for (const [from, to] of [['/ET-study', '/ET_Study'], ['/ET-study/prototype', '/ET_Study/model'], ['/ET_Study/prototype', '/ET_Study/model'], ['/ET_Study/prototype/:path*', '/ET_Study/model/:path*'], ['/TimesHealth_Study/prototype', '/TimesHealth_Study/model'], ['/TimesHealth_Study/prototype/:path*', '/TimesHealth_Study/model/:path*']]) {
     const r = (vercel.redirects || []).find((x) => x.source === from);
     check(`${from} redirects permanently to ${to}`, !!r && r.destination === to && r.permanent === true, r ? r.destination : 'missing');
   }

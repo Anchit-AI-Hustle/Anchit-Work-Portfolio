@@ -26,16 +26,16 @@
   <div class="wrap">
     <a class="mark" href="/TimesHealth_Study"><i aria-hidden="true">AT</i><span><b>Times Health Study</b><small>by Anchit Tandon</small></span></a>
     <div class="links" id="links">
-      <a href="/TimesHealth_Study">Overview</a><a href="/TimesHealth_Study/users">Users</a><a href="/TimesHealth_Study/problems">Problems</a><a href="/TimesHealth_Study/evidence" aria-current="page">Evidence</a><a href="/TimesHealth_Study/fixes">Fixes</a><a href="/TimesHealth_Study/plan">Plan</a><a href="/TimesHealth_Study/about">About me</a><a href="/TimesHealth_Study/prototype">Prototype</a>
+      <a href="/TimesHealth_Study">Overview</a><a href="/TimesHealth_Study/users">Users</a><a href="/TimesHealth_Study/problems">Problems</a><a href="/TimesHealth_Study/gaps">Gap analysis</a><a href="/TimesHealth_Study/ideas">Ideas</a><a href="/TimesHealth_Study/fixes">Fixes</a><a href="/TimesHealth_Study/plan">Plan</a><a href="/TimesHealth_Study/evidence" aria-current="page">Evidence</a><a href="/TimesHealth_Study/about">About</a>
     </div>
-    <a class="btn btn-primary sm" href="/TimesHealth_Study/prototype"><span class="cta-lg">Open prototype</span><span class="cta-sm">Prototype</span></a>
+    <a class="btn btn-primary sm" href="/TimesHealth_Study/model"><span class="cta-lg">Open working model</span><span class="cta-sm">Working model</span></a>
   </div>
 </nav>
 <div class="crumb"><div class="wrap"><a href="/TimesHealth_Study">Times Health Study</a><span aria-hidden="true">/</span><span>Evidence</span></div></div>
 <main>
 <section class="block" id="today" aria-labelledby="today-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">What Times Health runs today</span><h1 id="today-h" class="ph1">Three products, three funnels, one domain</h1><p>As a first-time visitor finds them on 1 Nov 2026.</p></div>
+    <div class="sec-head"><span class="num">What Times Health runs today</span><h1 id="today-h" class="ph1">Three products, three funnels, one domain</h1><p>As seen on 1 Nov 2026.</p></div>
     <div class="tbl"><table class="t-wide" id="map-tbl">
       <thead><tr><th style="width:20%">Product</th><th style="width:42%">What it offers</th><th style="width:38%">What I noticed</th></tr></thead>
       <tbody>
@@ -48,19 +48,25 @@
 </section>
 <section class="block" id="audit" aria-labelledby="au-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">Live audit</span><h2 id="au-h">What a first-time visitor's phone goes through</h2><p>Playwright at 390 px (iPhone 13 profile) and Lighthouse 12 mobile with simulated throttling, 1 Nov 2026, from a US-based test browser.</p></div>
+    <div class="sec-head"><span class="num">Live audit</span><h2 id="au-h">What a first-time visitor's phone goes through</h2><p>Each page opened as a first-time visitor on a phone-sized screen, 1 Nov 2026, and scored with Google's page speed test set to a typical phone. Run from the US.</p></div>
     <div class="tbl"><table class="t-wide" id="audit-tbl">
-      <thead><tr><th>Page</th><th class="num">Requests</th><th class="num">Hosts</th><th class="num">Load event</th><th class="num">Lighthouse</th><th>What a visitor sees</th></tr></thead>
+      <thead><tr><th>Page</th><th class="num">Files downloaded</th><th class="num">Other sites contacted</th><th class="num">Fully loaded after</th><th class="num">Google speed score</th><th>What a visitor sees</th></tr></thead>
       <tbody>
-        <tr><td><b>Yoga landing</b> /TH/plans</td><td class="num">368 · ~9.9 MB</td><td class="num">49</td><td class="num">17.5 s</td><td class="num">0 · LCP 24.4 s · CLS 1.17</td><td>Logo, a headline, three benefits, a photo collage, "Begin My Wellness Journey". No price, no trial terms, no class times above the fold.</td></tr>
+        <tr><td><b>Yoga landing</b> /TH/plans</td><td class="num">368 · ~9.9 MB</td><td class="num">49</td><td class="num">17.5 s</td><td class="num">0 of 100; main content at 24.4 s, page jumps</td><td>Logo, a headline, three benefits, a photo collage, "Begin My Wellness Journey". No price, no trial terms, no class times above the fold.</td></tr>
         <tr><td><b>Sign-up</b></td><td class="num">n/a</td><td class="num">n/a</td><td class="num">n/a</td><td class="num">n/a</td><td>Full-screen "Step 1 of 3": enter email or mobile, then OTP, then plans.</td></tr>
         <tr><td><b>Race hub</b> /times-events/marathon</td><td class="num">n/a</td><td class="num">n/a</td><td class="num">unreliable</td><td class="num">n/a</td><td>Headless Chrome: HTTP 502 after about 30 s, twice. Plain fetch: 200 once, 141 s another time.</td></tr>
       </tbody></table></div>
     <div class="grid g3" style="margin-top:20px">
-      <div class="card"><h3>What works</h3><p class="small">A credible partner in The Yoga Institute, named teachers, live human classes eight times a day, and a diet product that already covers the conditions people pay for.</p></div>
-      <div class="card"><h3>What hurts</h3><p class="small">The page loads from 49 hosts, including several ad pixels and two session recorders, and the tag manager blocks the main thread for 5.5 s. On a mid-range phone that is the difference between a trial and a bounce.</p></div>
+      <div class="card"><h3>What works</h3><p class="small">A credible partner in The Yoga Institute, named teachers, live human classes eight times a day, and a diet product that already covers the conditions users pay for.</p></div>
+      <div class="card"><h3>What hurts</h3><p class="small">The page loads from 49 hosts, including several ad pixels and two session recorders, and one tracking script freezes the phone for 5.5 seconds. On a mid-range phone that is the difference between a trial and a bounce.</p></div>
       <div class="card"><h3>What is missing</h3><p class="small">A price, a refund page, a catch-up option and any path between the three products. These cost little to add and are what the <a href="/TimesHealth_Study/fixes">fixes</a> start with.</p></div>
     </div>
+  </div>
+</section>
+<section class="block" id="screens" aria-labelledby="sc-h">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">Screenshots</span><h2 id="sc-h">What a first-time visitor sees on a phone</h2><p class="small muted">Phone-sized screenshots, 1 Nov 2026, from a US-based browser. Red boxes are mine. </p></div>
+    <div class="shots"><figure class="shot" data-shot><a href="/TimesHealth_Study/img/th-landing.jpg"><img src="/TimesHealth_Study/img/th-landing.jpg" width="600" height="1298" loading="lazy" decoding="async" alt="The Times Health+ yoga page on a phone: headline, benefits and photos, with no price, and a Begin My Wellness Journey button"></a><figcaption><span class="tag">P1</span>The first screen: a headline, three benefits and member photos. No price, no class times and no trial terms. The one button leads to sign-up.</figcaption></figure><figure class="shot" data-shot><a href="/TimesHealth_Study/img/th-signup.jpg"><img src="/TimesHealth_Study/img/th-signup.jpg" width="600" height="769" loading="lazy" decoding="async" alt="The Times Health+ sign-up screen: Step 1 of 3, enter your email and confirm with a one-time code"></a><figcaption><span class="tag">P1</span>Tap the button and this appears: step 1 of 3, an email and a one-time code. The plans come after.</figcaption></figure></div>
   </div>
 </section>
 <section class="block" id="compete" aria-labelledby="cp-h">
@@ -70,7 +76,7 @@
       <thead><tr><th style="width:20%">Rival</th><th style="width:30%">Price</th><th style="width:50%">Better, or worse, than Times Health+</th></tr></thead>
       <tbody>
         <tr><td><b>cult.fit cultpass HOME</b></td><td>₹999 a month; ₹1,859 a year; 7-day free trial</td><td>Every price public with no login; apps on both stores; 1,200+ workouts any time. Less depth in classical yoga.</td></tr>
-        <tr><td><b>Habuild</b></td><td>14 days free, then paid plans</td><td>Live yoga with a large free funnel and a community claim of over a crore people. The direct rival for the same habit.</td></tr>
+        <tr><td><b>Habuild</b></td><td>14 days free, then paid plans</td><td>Live yoga with a large free funnel and a community claim of over a crore users. The direct rival for the same habit.</td></tr>
         <tr><td><b>FITPASS</b></td><td>₹1,999 to ₹2,999 a month</td><td>Gyms, nutrition and video together; a different, pricier use case.</td></tr>
         <tr><td><b>Ayush free live yoga</b></td><td>Free</td><td>Government sessions around Yoga Day set a free baseline for "live yoga".</td></tr>
         <tr><td><b>Big races (Procam)</b></td><td>Entry fees vary</td><td>Delhi Half Marathon drew over 40,000 on 18 Oct 2026; Tata Mumbai Marathon 69,100. A crowded calendar for a new series.</td></tr>
@@ -78,12 +84,12 @@
     <p class="callout" style="margin-top:20px">Times Health+ will not win on price or on the size of its library. It can win on <b>outcomes for a condition</b>, backed by The Yoga Institute and a diet team, and on the <b>race-to-habit path</b> no rival owns. Both need the pieces it already has joined up.</p>
   </div>
 </section>
-<div class="wrap"><nav class="pager" aria-label="More pages"><a class="prev" href="/TimesHealth_Study/problems"><small>&larr; Previous</small>Problems</a><a class="next" href="/TimesHealth_Study/fixes"><small>Next &rarr;</small>Fixes</a></nav></div>
+<div class="wrap"><nav class="pager" aria-label="More pages"><a class="prev" href="/TimesHealth_Study/plan"><small>&larr; Previous</small>Plan</a><a class="next" href="/TimesHealth_Study/about"><small>Next &rarr;</small>About</a></nav></div>
 </main>
 <footer>
   <div class="wrap">
     <h3>Sources and method</h3>
-    <p>All opened 1 Nov 2026. Live audit by Playwright and Lighthouse from a US-based test browser, which is served the international plans; I did not sign up, so nothing after step 1 was observed. Searches for independent reviews covered the app stores, Trustpilot, Reddit, MouthShut, consumer-complaint sites and Justdial.</p>
+    <p>All opened 1 Nov 2026. Live checks by an automated browser and Google's page speed test, run from a US-based test browser, which is served the international plans; I did not sign up, so nothing after step 1 was observed. Searches for independent reviews covered the app stores, Trustpilot, Reddit, MouthShut, consumer-complaint sites and Justdial.</p>
     <ul>
       <li><a href="https://timeshealthplus.com/TH/plans" rel="noopener" target="_blank">Times Health+ yoga plans</a>, <a href="https://timeshealthplus.com/TH/diet-plans" rel="noopener" target="_blank">diet plans</a>, <a href="https://timeshealthplus.com/TH/corporate-wellness" rel="noopener" target="_blank">corporate wellness</a></li>
       <li><a href="https://www.mediainfoline.com/health/unlock-a-healthier-happier-you-with-timeshealth" rel="noopener" target="_blank">Times Health+ launch feature (MediaInfoline, Jun 2025)</a>; <a href="https://www.youtube.com/@TimesHealthPlus-TOI/about" rel="noopener" target="_blank">Times Health+ on YouTube</a></li>
@@ -96,7 +102,7 @@
       <li><a href="https://newsonair.gov.in/21st-delhi-half-marathon-underway-at-jawaharlal-nehru-stadium-with-over-40000-participants/" rel="noopener" target="_blank">Delhi Half Marathon, 40,000+ (News On Air)</a>; <a href="https://ianslive.in/mumbai-marathon-2026-to-feature-record-69100-participants--20260109142413" rel="noopener" target="_blank">Tata Mumbai Marathon 2026, 69,100 (IANS)</a></li>
       <li><a href="https://buy.indiatimes.com/ET/plans" rel="noopener" target="_blank">ET Prime plans (three months of Times Health+ bundled)</a></li>
     </ul>
-    <p>Independent study by Anchit Tandon. Not affiliated with or endorsed by Times Internet, The Times of India, Bennett, Coleman &amp; Co. or The Yoga Institute. Product, event and partner names belong to their owners and are used only to describe their public products. No confidential information was used; the only non-public figure, the Delhi participant count, is my own launch figure and is labelled as such. Indian prices for Times Health+ could not be seen without signing up, so the prices quoted are the international plans and the prototype's prices are illustrative.</p>
+    <p>Independent study by Anchit Tandon. Not affiliated with or endorsed by Times Internet, The Times of India, Bennett, Coleman &amp; Co. or The Yoga Institute. Product, event and partner names belong to their owners and are used only to describe their public products. No confidential information was used; the only non-public figure, the Delhi participant count, is my own launch figure and is labelled as such. Indian prices for Times Health+ could not be seen without signing up, so the prices quoted are the international plans and the working model's prices are illustrative.</p>
     <p><a href="/">Back to the portfolio</a></p>
   </div>
 </footer>
