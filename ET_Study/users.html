@@ -26,22 +26,51 @@
   <div class="wrap">
     <a class="mark" href="/ET_Study"><i aria-hidden="true">AT</i><span><b>ET Study</b><small>by Anchit Tandon</small></span></a>
     <div class="links" id="links">
-      <a href="/ET_Study">Overview</a><a href="/ET_Study/users" aria-current="page">Users</a><a href="/ET_Study/problems">Problems</a><a href="/ET_Study/evidence">Evidence</a><a href="/ET_Study/fixes">Fixes</a><a href="/ET_Study/plan">Plan</a><a href="/ET_Study/about">About me</a><a href="/ET_Study/prototype">Prototype</a>
+      <a href="/ET_Study">Overview</a><a href="/ET_Study/users" aria-current="page">Users</a><a href="/ET_Study/problems">Problems</a><a href="/ET_Study/gaps">Gap analysis</a><a href="/ET_Study/ideas">Ideas</a><a href="/ET_Study/fixes">Fixes</a><a href="/ET_Study/plan">Plan</a><a href="/ET_Study/evidence">Evidence</a><a href="/ET_Study/about">About</a>
     </div>
-    <a class="btn btn-primary sm" href="/ET_Study/prototype"><span class="cta-lg">Open prototype</span><span class="cta-sm">Prototype</span></a>
+    <a class="btn btn-primary sm" href="/ET_Study/model"><span class="cta-lg">Open working model</span><span class="cta-sm">Working model</span></a>
   </div>
 </nav>
 <div class="crumb"><div class="wrap"><a href="/ET_Study">ET Study</a><span aria-hidden="true">/</span><span>Users</span></div></div>
 <main>
 <section class="block" id="needs" aria-labelledby="nd-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">User needs</span><h1 id="nd-h" class="ph1">What each person comes to ET to do</h1><p>Four users, what they need, what they get today, and the gap. The <a href="/ET_Study/problems">problems</a> come from these gaps.</p></div>
-    <div class="grid g2 g4">
-      <div class="card need"><span class="tag">The reader</span><h3>"Tell me what matters, fast."</h3><dl><dt>Needs</dt><dd>The story on a phone in seconds, a notification that opens that story, and a short daily brief.</dd><dt>Gets today</dt><dd>A page that keeps loading for 25 s and 1,364 requests, with a blank ad slot above the headline, and notifications that open the home page.</dd></dl></div>
-      <div class="card need"><span class="tag">The investor</span><h3>"What does this mean for my stocks?"</h3><dl><dt>Needs</dt><dd>News and analysis about what they own, prices they can trust, and tools that keep their data.</dd><dt>Gets today</dt><dd>A general markets feed; the portfolio tracker removed without an export.</dd></dl></div>
-      <div class="card need"><span class="tag">The member</span><h3>"I paid. Let me read in peace."</h3><dl><dt>Needs</dt><dd>Access everywhere they sign in, few ads, no sales calls, an invoice and a cancel button they can find.</dd><dt>Gets today</dt><dd>Pop-ups for the plan they own, paywalls, calls, and an email to request an invoice.</dd></dl></div>
-      <div class="card need soft"><span class="tag">The business</span><h3>"Renewals, and reach we own."</h3><dl><dt>Needs</dt><dd>Members who renew because they use ET every week, and a daily audience that does not depend on Google.</dd><dt>Gets today</dt><dd>A parent company, Times Internet, earning 65 to 70% of revenue from advertising, and a funnel built around the first sale.</dd></dl></div>
-    </div>
+    <div class="sec-head"><span class="num">Users</span><h1 id="nd-h" class="ph1">Who uses ET, what they want, what they get, and what is missing</h1></div>
+    <div class="grid users"><article class="card need" data-user>
+        <h3>The daily reader</h3>
+        <dl class="urow">
+          <div><dt>1 · Who they are</dt><dd>Professionals and students who read business news on a phone, often arriving from Google or a notification. Most do not pay.</dd></div>
+          <div><dt>2 · Why they come, and what they want</dt><dd>To know what matters in business and markets today, quickly, from a source they trust.</dd></div>
+          <div><dt>3 · What they get today</dt><dd>A page that keeps loading for 25 seconds, with an empty ad space above the first headline, and notifications that can open the home page instead of the story.</dd></div>
+          <div class="miss"><dt>4 · What is missing</dt><dd>A fast page, notifications that open the story, and a short daily brief worth coming back for.</dd></div>
+        </dl><p class="src" data-src><b>Sources:</b> <a href="/ET_Study/evidence#audit">My live audit, 1 Nov 2026</a> · <a href="https://play.google.com/store/apps/details?id=com.et.reader.activities&amp;reviewId=762bc07c-7c6d-49dc-b622-d068fd4cc84a" target="_blank" rel="noopener">Review: notification opens the home page</a></p>
+      </article><article class="card need" data-user>
+        <h3>The retail investor</h3>
+        <dl class="urow">
+          <div><dt>1 · Who they are</dt><dd>One of India's 13.1 crore investors, holding stocks or funds, checking ET Markets during market hours.</dd></div>
+          <div><dt>2 · Why they come, and what they want</dt><dd>To know what the news means for the stocks they own, with prices they can trust and tools that keep their data.</dd></div>
+          <div><dt>3 · What they get today</dt><dd>A general markets feed not linked to their holdings. The portfolio tracker was removed around June 2026, with no export according to reviewers, and some report prices that are not up to date.</dd></div>
+          <div class="miss"><dt>4 · What is missing</dt><dd>News explained for their own holdings, reliable prices, and an easy way to bring in their portfolio.</dd></div>
+        </dl><p class="src" data-src><b>Sources:</b> <a href="https://www.angelone.in/news/market-updates/nse-crosses-26-crore-trading-accounts-investor-base-expands-rapidly" target="_blank" rel="noopener">NSE unique investors, May 2026</a> · <a href="https://play.google.com/store/apps/details?id=com.et.market&amp;reviewId=0cc99f67-25ad-4f1a-8853-25fc0fcd234c" target="_blank" rel="noopener">Review: portfolio removed</a></p>
+      </article><article class="card need" data-user>
+        <h3>The paying member</h3>
+        <dl class="urow">
+          <div><dt>1 · Who they are</dt><dd>About 1.75 lakh ET Prime members on the last independent count (Crisil, June 2025), many on one- or two-year plans.</dd></div>
+          <div><dt>2 · Why they come, and what they want</dt><dd>Deep, original reporting and investor tools, without ads or interruptions, with billing that just works.</dd></div>
+          <div><dt>3 · What they get today</dt><dd>Ads and pop-ups for the plan they already own, sales calls, some lock-outs, and invoices only by emailing the care desk.</dd></div>
+          <div class="miss"><dt>4 · What is missing</dt><dd>An experience clearly better than the free one, and self-serve access, invoices and cancelling.</dd></div>
+        </dl><p class="src" data-src><b>Sources:</b> <a href="https://www.crisilratings.com/mnt/winshare/Ratings/RatingList/RatingDocs/TimesInternetLimited_June%2005_%202025_RR_369429.html" target="_blank" rel="noopener">Crisil rating report, June 2025</a> · <a href="https://play.google.com/store/apps/details?id=com.et.reader.activities" target="_blank" rel="noopener">ET app reviews, Google Play</a></p>
+      </article><article class="card need" data-user>
+        <h3>The team buyer</h3>
+        <dl class="urow">
+          <div><dt>1 · Who they are</dt><dd>Companies and colleges that buy ET Prime for a group, through the corporate and campus plans on the plans page.</dd></div>
+          <div><dt>2 · Why they come, and what they want</dt><dd>Business and sector intelligence for their teams, easy to buy, share and manage.</dd></div>
+          <div><dt>3 · What they get today</dt><dd>Group plans listed on the plans page and sold much like single plans.</dd></div>
+          <div class="miss"><dt>4 · What is missing</dt><dd>Seats, simple admin, and sector briefs made for teams.</dd></div>
+        </dl><p class="src" data-src><b>Sources:</b> <a href="https://buy.indiatimes.com/ET/plans" target="_blank" rel="noopener">ET Prime plans and FAQ</a></p>
+      </article></div>
+    <div class="card soft" style="margin-top:16px"><h3>What ET needs from these users</h3><p class="small" style="margin-top:6px">Members who renew because they use ET every week, investors who make ET part of their routine, and readers who come back on their own rather than through Google.</p></div>
+    <p class="callout" style="margin-top:16px"><a href="/ET_Study/problems">See the 8 problems this causes &rarr;</a></p>
   </div>
 </section>
 <div class="wrap"><nav class="pager" aria-label="More pages"><a class="prev" href="/ET_Study"><small>&larr; Previous</small>Overview</a><a class="next" href="/ET_Study/problems"><small>Next &rarr;</small>Problems</a></nav></div>
@@ -49,7 +78,7 @@
 <footer>
   <div class="wrap">
     <h3>Sources and method</h3>
-    <p>All opened 1 Nov 2026. Reviews pulled from Google Play (newest 300 overall, 1-star and 2-star per app, de-duplicated) and the App Store (newest 150 per app), and themed by keyword. Live audit by Playwright and Lighthouse from a US-based test browser.</p>
+    <p>All opened 1 Nov 2026. Reviews pulled from Google Play (newest 300 overall, 1-star and 2-star per app, de-duplicated) and the App Store (newest 150 per app), and themed by keyword. Live checks by an automated browser and Google's page speed test, run from a US-based test browser.</p>
     <ul>
       <li><a href="https://buy.indiatimes.com/ET/plans" rel="noopener" target="_blank">ET Prime plans and FAQ</a>; <a href="https://buy.indiatimes.com/TOI/plans" rel="noopener" target="_blank">TOI+ plans</a>; <a href="https://economictimes.indiatimes.com/prime/economy-and-policy/can-new-data-protection-law-guard-against-sbi-like-data-breaches/primearticleshow/135321441.cms" rel="noopener" target="_blank">the Prime article audited</a></li>
       <li><a href="https://play.google.com/store/apps/details?id=com.et.reader.activities" rel="noopener" target="_blank">ET app on Google Play</a>, <a href="https://play.google.com/store/apps/details?id=com.et.market" rel="noopener" target="_blank">ET Markets on Google Play</a>, <a href="https://apps.apple.com/in/app/the-economic-times/id474766725" rel="noopener" target="_blank">ET on the App Store</a>, <a href="https://apps.apple.com/in/app/et-markets-stock-market-news/id895812527" rel="noopener" target="_blank">ET Markets on the App Store</a></li>
