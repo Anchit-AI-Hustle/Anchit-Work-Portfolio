@@ -28,6 +28,15 @@ for (const [b, m] of [['/ET_Study', ['', '/hub', '/rules', '/maths']], ['/TimesH
       if (process.env.MUT === 'spill' && u === '/ET_Study/problems') await pg.addStyleTag({ content: 'img{max-width:none!important}.thumbs a,.thumbs img{width:auto!important}.grid>*{min-width:auto!important}' });
       await pg.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += 700) { window.scrollTo(0, y); await new Promise(r => setTimeout(r, 15)); } window.scrollTo(0, 0); });
       await pg.waitForTimeout(250);
+      // Worst case for the nav: the web font never arrives and the browser falls
+      // back to a wide system font. CI runners use DejaVu Sans; so do many Linux
+      // desktops. The links must still fit without scrolling.
+      if (w >= 1080 && !u.includes('/model')) {
+        const style = await pg.addStyleTag({ content: ".nav,.nav *{font-family:'DejaVu Sans',Verdana,sans-serif!important}" });
+        const over = await pg.evaluate(() => { const l = document.getElementById('links'); return l ? l.scrollWidth - l.clientWidth : 0; });
+        await style.evaluate((n) => n.remove());
+        if (over > 0) { total++; console.log(`\n[${w}] ${u}\n   nav overflows by ${over}px with a fallback font`); }
+      }
       const issues = await pg.evaluate(() => {
         const out = []; const name = (e) => e.tagName.toLowerCase() + (e.id ? '#' + e.id : '') + (e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\s+/).slice(0, 2).join('.') : '');
         const path = (e) => { const a = []; for (let x = e; x && x !== document.body && a.length < 4; x = x.parentElement) a.unshift(name(x)); return a.join(' > '); };
