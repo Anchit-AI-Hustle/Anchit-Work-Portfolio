@@ -120,13 +120,15 @@
 
   /* Staggered Scroll Reveal Transitions */
   /* Hidden only once script has run (html.js): without it, or if the main
-     script throws, the content is simply shown rather than left at opacity 0. */
-  .js .scroll-reveal {
+     script throws, the content is simply shown rather than left at opacity 0.
+     :where() keeps the old (0,1,0) weight, so card rules declared later
+     still own their own transitions and hover lift. */
+  :where(.js) .scroll-reveal {
     opacity: 0;
     transform: translateY(24px) scale(0.98);
     transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .js .scroll-reveal.in-view {
+  :where(.js) .scroll-reveal.in-view {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
@@ -917,7 +919,7 @@
     /* The script now reads the real preference; these are the CSS-driven
        motions it cannot reach: the marquee, the reveal and the hero rise. */
     .track { animation: none !important; }
-    .js .scroll-reveal { opacity: 1; transform: none; transition: none; }
+    :where(.js) .scroll-reveal { opacity: 1; transform: none; transition: none; }
     .w > span, .lede, .cta-row { animation: none !important; }
   }
   /* While the cookie bar is up it sits over anything pinned to the bottom of
@@ -2692,6 +2694,15 @@
   document.addEventListener('keydown', function (e) {
     const modal = document.getElementById('cartModal');
     if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) window.toggleCart(false);
+    // aria-modal promises the page behind is out of reach: keep Tab inside.
+    if (e.key === 'Tab' && modal && !modal.classList.contains('hidden')) {
+      const f = [...modal.querySelectorAll('a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+        .filter(el => !el.disabled && el.offsetParent !== null);
+      if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && (document.activeElement === last || !modal.contains(document.activeElement))) { e.preventDefault(); first.focus(); }
+    }
   });
 
   /* ---- placing the order -------------------------------------------------
@@ -2984,21 +2995,26 @@
 
     // Runs only while the canvas is on screen, its panel is showing and the
     // tab is visible. It used to draw 28 gradients a frame for the whole visit.
-    let steamOn = false, steamVisible = false;
+    // One loop at most: a hidden tab keeps its pending frame queued, so a
+    // restart on return must not queue a second one beside it.
+    let steamOn = false, steamVisible = false, steamRaf = 0;
+    function steamStop() { steamOn = false; if (steamRaf) { cancelAnimationFrame(steamRaf); steamRaf = 0; } }
     function steamStart() {
       if (steamOn || !steamVisible || document.hidden || reduce || !canvas.offsetWidth) return;
-      steamOn = true; requestAnimationFrame(renderSteam);
+      steamOn = true;
+      if (!steamRaf) steamRaf = requestAnimationFrame(renderSteam);
     }
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (en) {
         steamVisible = en[0].isIntersecting;
         if (steamVisible) { width = canvas.width = canvas.offsetWidth; height = canvas.height = canvas.offsetHeight; steamStart(); }
-        else steamOn = false;
+        else steamStop();
       }).observe(canvas);
     } else { steamVisible = true; }
-    document.addEventListener('visibilitychange', function () { if (document.hidden) steamOn = false; else steamStart(); });
+    document.addEventListener('visibilitychange', function () { if (document.hidden) steamStop(); else steamStart(); });
 
     function renderSteam() {
+      steamRaf = 0;
       if (!steamOn) return;
       if (!canvas.offsetWidth) { steamOn = false; return; }   // its tab was switched away
       ctx.clearRect(0, 0, width, height);
@@ -3021,9 +3037,8 @@
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         ctx.fill();
       });
-      requestAnimationFrame(renderSteam);
+      if (steamOn) steamRaf = requestAnimationFrame(renderSteam);
     }
-    window.__gsSteamStart = steamStart;
     steamStart();
   })();
 

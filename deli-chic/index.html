@@ -175,12 +175,12 @@
 
     /* Staggered Scroll Reveal Transitions */
     /* Armed by script (html.js): no JS, or a script error, shows the content. */
-    .js .scroll-reveal {
+    :where(.js) .scroll-reveal {
       opacity: 0;
       transform: translateY(24px) scale(0.98);
       transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .js .scroll-reveal.in-view {
+    :where(.js) .scroll-reveal.in-view {
       opacity: 1;
       transform: translateY(0) scale(1);
     }
@@ -361,7 +361,7 @@
       box-shadow: 0 14px 40px -10px rgba(74, 14, 23, 0.08);
       /* Not `all`: the tilt writes transform on every mouse move, and easing
          each of those writes over 350ms left the card trailing the cursor. */
-      transition: box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .deli-card:hover {
       transform: translateY(-6px);
@@ -648,7 +648,7 @@
 </div>
 
 <!-- ================= EDITORIAL HAUTE BOUCHERIE HEADER ================= -->
-<header class="deli-site-header transition-all">
+<header class="deli-site-header">
   <div class="max-w-7xl mx-auto px-6 md:px-10 h-14 flex items-center justify-between gap-4">
     <!-- Brand Logo / Wordmark -->
     <a href="#" class="flex items-center gap-2.5 group shrink-0 whitespace-nowrap">
@@ -2116,7 +2116,8 @@
       function drawLoupe() {
         loupeRaf = 0;
         const rect = container.getBoundingClientRect();
-        if (!loupeHalf) loupeHalf = (glass.offsetWidth || 170) / 2;
+        // clientWidth: the background is positioned in the padding box, inside the 3px border.
+        if (!loupeHalf) loupeHalf = (glass.clientWidth || 164) / 2;
 
         const x = Math.max(0, Math.min(rect.width, px - rect.left));
         const y = Math.max(0, Math.min(rect.height, py - rect.top));
@@ -2301,6 +2302,15 @@
     document.addEventListener('keydown', (e) => {
       const modal = document.getElementById('basketModal');
       if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) toggleBasket(false);
+    // aria-modal promises the page behind is out of reach: keep Tab inside.
+    if (e.key === 'Tab' && modal && !modal.classList.contains('hidden')) {
+      const f = [...modal.querySelectorAll('a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+        .filter(el => !el.disabled && el.offsetParent !== null);
+      if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && (document.activeElement === last || !modal.contains(document.activeElement))) { e.preventDefault(); first.focus(); }
+    }
     });
 
     /* ---- placing the order ----------------------------------------------
