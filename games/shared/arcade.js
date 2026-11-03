@@ -242,9 +242,13 @@
     /* sizing */
     const fit = () => {
       const r = stage.getBoundingClientRect();
+      const area = Math.max(1, r.width * r.height);
       // 2x on a tablet (820×1180) is a 1640×2360 canvas. Heavy games then drop
-      // under 15fps on a CI runner and on real phones. 1.5x is sharp enough.
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      // under 15fps. Cap at 1.5x, then keep the backing store under ~1.6M
+      // pixels so Gully Champs does not blit two ~3k-wide wall caches onto 3.4M px.
+      const MAX_PX = 1.6e6;
+      let dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      if (area * dpr * dpr > MAX_PX) dpr = Math.max(1, Math.sqrt(MAX_PX / area));
       arc.w = Math.max(1, Math.round(r.width)); arc.h = Math.max(1, Math.round(r.height)); arc.dpr = dpr;
       canvas.width = Math.round(arc.w * dpr); canvas.height = Math.round(arc.h * dpr);
       if (opts.resize) opts.resize(arc);

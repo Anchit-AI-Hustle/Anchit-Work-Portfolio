@@ -2305,7 +2305,9 @@
     arc = a;
     if (V.W !== a.w || V.H !== a.h || !V.S || V.sig !== a.w + 'x' + a.h) { computeView(); V.sig = a.w + 'x' + a.h; }
     ensureLayers();
-    c.imageSmoothingEnabled = true; c.imageSmoothingQuality = a.dpr > 1.25 ? 'low' : 'medium';
+    const heavy = a.w * a.h * (a.dpr || 1) * (a.dpr || 1) > 1.2e6;
+    c.imageSmoothingEnabled = !heavy;
+    if (!heavy) c.imageSmoothingQuality = a.dpr > 1.25 ? 'low' : 'medium';
     drawSky(c);
     c.save();
     const sh = arc.reducedMotion ? 0 : cam.shake;
