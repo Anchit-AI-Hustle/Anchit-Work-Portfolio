@@ -38,6 +38,13 @@ body.arcade button { font: inherit; color: inherit; }
 body.arcade :focus-visible { outline: 2px solid var(--accent-warm); outline-offset: 2px; }
 
 .arc-app { position: fixed; inset: 0; display: flex; flex-direction: column; height: 100vh; }
+/* The cookie bar is a fixed dialog with a z-index above the stage, so on a
+   phone it sat on the Play button. Shrink the stage to the space above the
+   bar for as long as the bar is open. --consent-h is set by the consent runtime. */
+html[data-consent-open="1"] body.arcade .arc-app {
+  bottom: var(--consent-h, 0px);
+  height: auto;
+}
 @supports (height: 100dvh) { .arc-app { height: 100dvh; } }
 
 .arc-bar {
