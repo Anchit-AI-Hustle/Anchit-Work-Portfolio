@@ -110,15 +110,24 @@ const norm = (s) => (s || '').replace(/\s+/g, ' ').trim();
 
 async function context(browser, vp) {
   const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
+  let closed = false;
+  ctx.on('close', () => { closed = true; });
   await ctx.route('**/*', async (route) => {
-    const res = await route.fetch();
-    const headers = { ...res.headers() };
-    const p = new URL(route.request().url()).pathname.replace(/\/$/, '') || '/';
-    const ct = headers['content-type'] || '';
-    if (ct.includes('javascript')) return route.fulfill({ response: res, headers, body: mutateJs(p, await res.text()) });
-    if (!ct.includes('text/html')) return route.fulfill({ response: res });
-    headers['content-security-policy'] = CSP;
-    return route.fulfill({ response: res, headers, body: mutate(p, await res.text()) });
+    try {
+      const res = await route.fetch();
+      const headers = { ...res.headers() };
+      const p = new URL(route.request().url()).pathname.replace(/\/$/, '') || '/';
+      const ct = headers['content-type'] || '';
+      if (ct.includes('javascript')) return await route.fulfill({ response: res, headers, body: mutateJs(p, await res.text()) });
+      if (!ct.includes('text/html')) return await route.fulfill({ response: res });
+      headers['content-security-policy'] = CSP;
+      return await route.fulfill({ response: res, headers, body: mutate(p, await res.text()) });
+    } catch (e) {
+      if (!route.request().url().startsWith(BASE) && /ENOTFOUND|EAI_AGAIN|ENETUNREACH/.test(e.message)) {
+        return await route.fulfill({ status: 200, contentType: 'text/css', body: '' }).catch(() => {});
+      }
+      if (!closed && !/disposed|has been closed|Target closed/i.test(e.message)) throw e;
+    }
   });
   return ctx;
 }

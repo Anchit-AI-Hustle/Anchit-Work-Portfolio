@@ -94,6 +94,9 @@ async function open(browser, vp, path) {
       const body = new URL(route.request().url()).pathname.startsWith('/pw-study') ? mutate(await res.text()) : await res.text();
       return await route.fulfill({ response: res, headers, body });
     } catch (e) {
+      if (!route.request().url().startsWith(BASE) && /ENOTFOUND|EAI_AGAIN|ENETUNREACH/.test(e.message)) {
+        return await route.fulfill({ status: 200, contentType: 'text/css', body: '' }).catch(() => {});
+      }
       // A lazy image still in flight when a check closes its context is not a
       // page failure; anything else is.
       if (!closed && !/disposed|has been closed|Target closed/i.test(e.message)) throw e;

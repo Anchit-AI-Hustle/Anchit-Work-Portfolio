@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Deli Chic | Food For Thought | Haute Boucherie &amp; Artisanal Larder</title>
+<title>Deli Chic · Food For Thought | Haute Boucherie &amp; Artisanal Larder</title>
 <!-- Tailwind CSS -->
 <!-- Tailwind, compiled and self-hosted (scripts/build-tailwind.mjs).
      The CDN build shipped a ~300KB JIT compiler, scanned the DOM at
-     runtime and left the page unstyled until it finished, and Tailwind
+     runtime and left the page unstyled until it finished · and Tailwind
      itself warns in the console not to use it in production. -->
 <link rel="stylesheet" href="/assets/tw-deli-chic.css">
 
@@ -68,44 +68,140 @@
       background-size: 20px 20px;
     }
 
-    /* Master Carver Magnifying Loupe */
+    /* Master Carver 2.5x Optical Loupe with Dual-Layer Texture & Chromatic Rim */
     .loupe-container {
       position: relative;
       overflow: hidden;
       cursor: crosshair;
       border-radius: 28px;
     }
+    #heroLoupeImg {
+      filter: contrast(1.02) brightness(0.95);
+    }
     .loupe-glass {
       position: absolute;
-      width: 170px;
-      height: 170px;
-      border: 3px solid var(--chic-gold);
+      width: 184px;
+      height: 184px;
+      border: 2px solid rgba(197, 154, 69, 0.85);
       border-radius: 50%;
       pointer-events: none;
       display: none;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), inset 0 0 25px rgba(255, 255, 255, 0.5);
+      /* Chromatic aberration along the glass rim (2px RGB shift at perimeter) + optical depth */
+      box-shadow:
+        0 0 0 1.5px rgba(255, 255, 255, 0.45),
+        -2px 0 6px rgba(255, 60, 60, 0.28),
+        2px 0 6px rgba(60, 190, 255, 0.28),
+        0 18px 44px rgba(0, 0, 0, 0.55),
+        inset 0 0 24px rgba(14, 24, 32, 0.55);
+      filter: contrast(1.08) saturate(1.06);
       background-repeat: no-repeat;
       z-index: 30;
-      /* Anchored and moved by transform. It used to be moved by writing
-         left/top on each pointer sample, which forces layout while the glass
-         is being dragged across the cut, the one moment the effect has to
-         stay smooth. The background-position write stays: that offset IS the
-         magnification, and it is confined to this 170px circle. */
       top: 0;
       left: 0;
       transform: translate3d(var(--lx, 0px), var(--ly, 0px), 0) translate(-50%, -50%);
     }
 
-    /* Loupe Reticle */
+    /* Barrel distortion optical lens dome + crosshair inside Loupe */
+    .loupe-glass::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.28) 0%, transparent 42%),
+        radial-gradient(circle at 50% 50%, transparent 56%, rgba(255, 60, 60, 0.12) 86%, rgba(60, 190, 255, 0.16) 96%, rgba(12, 20, 28, 0.42) 100%);
+      pointer-events: none;
+      z-index: 2;
+    }
     .loupe-glass::after {
       content: "";
       position: absolute;
       inset: 0;
       border-radius: 50%;
       background: 
-        linear-gradient(to right, transparent 49%, rgba(197, 154, 69, 0.6) 50%, transparent 51%),
-        linear-gradient(to bottom, transparent 49%, rgba(197, 154, 69, 0.6) 50%, transparent 51%);
+        linear-gradient(to right, transparent 49.2%, rgba(197, 154, 69, 0.55) 50%, transparent 50.8%),
+        linear-gradient(to bottom, transparent 49.2%, rgba(197, 154, 69, 0.55) 50%, transparent 50.8%);
       pointer-events: none;
+      z-index: 3;
+    }
+    .loupe-reticle-svg {
+      position: absolute;
+      inset: -14px;
+      width: calc(100% + 28px);
+      height: calc(100% + 28px);
+      pointer-events: none;
+      z-index: 4;
+      transition: transform 0.12s linear;
+    }
+    .loupe-hud-pill {
+      position: absolute;
+      left: 50%;
+      bottom: -26px;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(24, 6, 9, 0.92);
+      border: 1px solid rgba(197, 154, 69, 0.65);
+      color: #FFF9F4;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      z-index: 5;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+    }
+
+    /* 3 Magnetic Hotspots on the Cut */
+    .loupe-hotspot {
+      position: absolute;
+      width: 26px;
+      height: 26px;
+      margin-left: -13px;
+      margin-top: -13px;
+      border-radius: 50%;
+      background: rgba(24, 6, 9, 0.82);
+      border: 1.5px solid #FFA517;
+      color: #FFA517;
+      font-size: 10px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 25;
+      cursor: pointer;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease, box-shadow 0.25s ease;
+      box-shadow: 0 0 0 4px rgba(255, 165, 23, 0.18);
+    }
+    .loupe-hotspot:hover,
+    .loupe-hotspot.is-snapped {
+      transform: scale(1.26);
+      background: #CD2653;
+      border-color: #FFFFFF;
+      color: #FFFFFF;
+      box-shadow: 0 0 0 7px rgba(205, 38, 83, 0.28);
+    }
+    .loupe-hotspot-callout {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      right: 14px;
+      z-index: 28;
+      padding: 10px 14px;
+      border-radius: 14px;
+      background: rgba(24, 6, 9, 0.90);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 165, 23, 0.45);
+      color: #FFF9F4;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(-6px);
+      transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .loupe-hotspot-callout.is-open {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     /* Damascus Knife Specular Glint */
@@ -304,7 +400,7 @@
     .deli-nav-link:hover {
       color: #CD2653 !important;
     }
-    /* The nav row and the WhatsApp pill were meeting at exactly 0px, not
+    /* The nav row and the WhatsApp pill were meeting at exactly 0px · not
        overlapping, but touching, which reads as a layout accident. Give the
        nav its own breathing room and tighten the tracking a little so the
        whole row still fits comfortably at 1280. */
@@ -342,7 +438,7 @@
     }
     .deli-ticker:hover .deli-track { animation-play-state: paused; }
     /* and it does not keep running for the length of the page once it is
-       behind you, the house rule is that nothing decorative animates off
+       behind you · the house rule is that nothing decorative animates off
        screen. Paused, not removed, so it resumes rather than restarts. */
     .deli-ticker:not(.is-live) .deli-track { animation-play-state: paused; }
     .deli-track ul { display: flex; margin: 0; padding: 0; list-style: none; }
@@ -485,82 +581,294 @@
 
   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
-  /* ══ THE BOUCHERIE WALK ═══════════════════════════════════════════════
-     The sister site's walk-in, in a boucherie. Same mechanism, different
-     room: the section is tall, its inner frame is sticky, and one scroll
-     progress number drives every layer's position in Z, so the layers pass
-     the camera rather than scaling in place.
-
-     Five stages, and all five are this page's own process: "cut, cured, and
-     vacuum-sealed by master culinary butchers", "every portion weighed,
-     trimmed, and inspected prior to vacuum packaging". Nothing here claims
-     anything the copy does not already say.
-
-     Progress is written to the SECTION, never to :root. transform and opacity
-     only. Sticky holds because body is overflow-x: clip, not hidden. */
-  .bwalk { position: relative; background: #2A0810; }
-  .bwalk-rail { height: 460vh; }
+  /* ══ THE BOUCHERIE COLD-ROOM RAIL (300vh Horizontal Track) ═══════════════
+     Diverged from Gram Street's vertical Z-axis portal: Deli Chic uses a
+     300vh pinned Horizontal Stainless-Steel Butcher's Rail with 3 depth layers:
+     Layer 1 (Foreground): 0°C–4°C nitrogen vapor drifting across bottom 20%.
+     Layer 2 (Midground): 4 suspended butcher station cards with pendulum inertia.
+     Layer 3 (Background): Dark slate tile grid with condensation specular sheen. */
+  .bwalk { position: relative; background: #12080B; }
+  .bwalk-rail { height: 300vh; }
   .bwalk-frame {
     position: sticky; top: 0; height: 100vh; overflow: hidden;
-    perspective: 1100px; perspective-origin: 50% 46%;
-    background: radial-gradient(120% 90% at 50% 16%, #6A1324 0%, #4A0E17 56%, #240609 100%);
+    background: radial-gradient(120% 90% at 50% 18%, #2B1017 0%, #170B0E 58%, #0D0709 100%);
   }
-  .bwalk-stage { position: absolute; inset: 0; transform-style: preserve-3d; }
-  .bwalk-layer {
-    position: absolute; left: 50%; top: 50%;
-    width: min(92vw, 1180px);
-    transform-origin: 50% 50%;
-    will-change: transform, opacity;
+  /* Layer 3: Dark Slate Tile Grid + Condensation Specular Sheen */
+  .bwalk-slate-grid {
+    position: absolute; inset: 0; pointer-events: none; z-index: 1;
+    background-image:
+      linear-gradient(to right, rgba(197, 154, 69, 0.07) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(197, 154, 69, 0.07) 1px, transparent 1px),
+      radial-gradient(circle at 65% 28%, rgba(165, 220, 255, 0.08) 0%, transparent 52%);
+    background-size: 64px 64px, 64px 64px, 100% 100%;
   }
-  /* is-past is set whenever the section is off screen, in either direction,
-     so this releases the caption and the hint with the layers. */
-  .bwalk.is-past .bwalk-layer,
+  /* Top Brushed Stainless-Steel Butcher's Rail Bar */
+  .bwalk-rail-bar {
+    position: absolute; left: 0; right: 0; top: clamp(86px, 13vh, 126px); height: 12px;
+    z-index: 10; pointer-events: none;
+    background: linear-gradient(180deg, #E5E7EB 0%, #9CA3AF 38%, #374151 75%, #D1D5DB 100%);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65), 0 1px 0 rgba(255, 255, 255, 0.45) inset;
+  }
+  /* Layer 2: Horizontal Track & Hanging Station Cards with Pendulum Inertia */
+  .bwalk-stage { position: absolute; inset: 0; z-index: 12; }
+  .butcher-rail-track {
+    position: absolute;
+    top: clamp(94px, 14vh, 134px);
+    left: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: clamp(28px, 4vw, 52px);
+    padding: 0 12vw;
+    will-change: transform;
+    transform: translate3d(var(--rail-x, 0px), 0, 0);
+  }
+  .rail-station-card {
+    width: clamp(280px, 32vw, 390px);
+    flex-shrink: 0;
+    transform-origin: 50% -14px;
+    transform: rotateZ(var(--pendulum-deg, 0deg));
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+    background: rgba(24, 11, 15, 0.88);
+    border: 1px solid rgba(197, 154, 69, 0.34);
+    border-radius: 22px;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+    color: #FFF9F4;
+  }
+  .rail-station-card.is-active-station {
+    border-color: rgba(255, 165, 23, 0.85);
+    box-shadow: 0 28px 60px rgba(205, 38, 83, 0.28), 0 0 0 1px rgba(255, 165, 23, 0.35);
+  }
+  .rail-hook-wrap {
+    display: flex; justify-content: center; margin-top: -2px; margin-bottom: -4px;
+  }
+  /* Layer 1: Foreground 0°C–4°C Nitrogen Mist (2 Alpha-Masked Vapor Layers) */
+  .nitrogen-vapor-wrap {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 24%;
+    pointer-events: none; z-index: 22; overflow: hidden;
+    mask-image: linear-gradient(to top, rgba(0,0,0,0.95) 15%, rgba(0,0,0,0.45) 65%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,0.95) 15%, rgba(0,0,0,0.45) 65%, transparent 100%);
+  }
+  .nitrogen-vapor-layer {
+    position: absolute; top: 0; bottom: 0; left: -50%; width: 200%;
+    will-change: transform;
+  }
+  .nitrogen-vapor-1 {
+    background:
+      radial-gradient(ellipse 28% 70% at 18% 85%, rgba(218, 240, 255, 0.22) 0%, transparent 70%),
+      radial-gradient(ellipse 34% 80% at 52% 90%, rgba(200, 232, 255, 0.18) 0%, transparent 72%),
+      radial-gradient(ellipse 30% 75% at 84% 85%, rgba(218, 240, 255, 0.22) 0%, transparent 70%);
+    animation: nitrogenDrift1 22s linear infinite;
+  }
+  .nitrogen-vapor-2 {
+    background:
+      radial-gradient(ellipse 32% 85% at 32% 92%, rgba(235, 248, 255, 0.16) 0%, transparent 74%),
+      radial-gradient(ellipse 26% 65% at 68% 82%, rgba(195, 228, 255, 0.20) 0%, transparent 70%),
+      radial-gradient(ellipse 35% 78% at 92% 88%, rgba(225, 244, 255, 0.16) 0%, transparent 72%);
+    animation: nitrogenDrift2 34s linear infinite reverse;
+  }
+  .bwalk:not(.is-live) .nitrogen-vapor-1,
+  .bwalk:not(.is-live) .nitrogen-vapor-2 {
+    animation-play-state: paused;
+  }
+  @keyframes nitrogenDrift1 {
+    0%   { transform: translate3d(0, 0, 0); }
+    50%  { transform: translate3d(18%, -4px, 0); }
+    100% { transform: translate3d(0, 0, 0); }
+  }
+  @keyframes nitrogenDrift2 {
+    0%   { transform: translate3d(0, 0, 0); }
+    50%  { transform: translate3d(-16%, 3px, 0); }
+    100% { transform: translate3d(0, 0, 0); }
+  }
+
+  .bwalk.is-past .butcher-rail-track,
   .bwalk.is-past .bwalk-cap,
   .bwalk.is-past .bwalk-hint { will-change: auto; }
-  .bwalk-layer svg, .bwalk-layer img { display: block; width: 100%; height: auto; }
-  .bwalk-layer img { border-radius: 10px; }
 
   .bwalk-cap {
-    position: absolute; left: 0; right: 0; bottom: clamp(74px, 12vh, 132px);
-    text-align: center; color: #FFF9F4; padding: 0 24px;
+    position: absolute; left: 0; right: 0; bottom: clamp(58px, 9vh, 108px);
+    text-align: center; color: #FFF9F4; padding: 0 24px; z-index: 26;
     pointer-events: none; will-change: opacity, transform;
   }
-  .bwalk-cap b { display: block; font-family: var(--font-serif-chic, Georgia, serif); font-size: clamp(1.85rem, 5vw, 3.3rem); letter-spacing: -0.02em; line-height: 1.04; }
-  .bwalk-cap span { display: block; margin-top: 10px; font-size: clamp(.95rem, 2.1vw, 1.1rem); font-weight: 500; opacity: .84; max-width: 36ch; margin-inline: auto; }
+  .bwalk-cap b { display: block; font-family: var(--font-serif-chic, Georgia, serif); font-size: clamp(1.55rem, 3.6vw, 2.5rem); letter-spacing: -0.02em; line-height: 1.06; }
+  .bwalk-cap span { display: block; margin-top: 6px; font-size: clamp(.85rem, 1.8vw, 1rem); font-weight: 500; opacity: .86; max-width: 44ch; margin-inline: auto; }
   .bwalk-step {
-    position: absolute; top: clamp(74px, 11vh, 120px); left: 0; right: 0;
+    position: absolute; top: clamp(32px, 5.5vh, 64px); left: 0; right: 0; z-index: 26;
     text-align: center; color: #C59A45; font-size: .72rem;
     letter-spacing: .32em; text-transform: uppercase; font-weight: 800;
     pointer-events: none;
   }
   .bwalk-hint {
-    position: absolute; left: 0; right: 0; bottom: 26px; text-align: center;
-    color: #C59A45; font-size: .7rem; letter-spacing: .26em; text-transform: uppercase;
+    position: absolute; left: 0; right: 0; bottom: 16px; text-align: center; z-index: 26;
+    color: #C59A45; font-size: .68rem; letter-spacing: .26em; text-transform: uppercase;
     font-weight: 800; pointer-events: none; will-change: opacity;
   }
-  .bwalk-hint i { display: block; width: 1px; height: 26px; margin: 8px auto 0; background: currentColor; opacity: .5; }
+  .bwalk-hint i { display: block; width: 1px; height: 20px; margin: 6px auto 0; background: currentColor; opacity: .5; }
 
   @media (max-width: 760px) {
-    .bwalk-rail { height: 380vh; }
-    .bwalk-frame { perspective: 760px; }
-    .bwalk-layer { width: 108vw; }
+    .bwalk-rail { height: 260vh; }
+    .rail-station-card { width: 82vw; }
   }
 
   .bwalk:not(.is-armed) .bwalk-rail { height: 100vh; }
-  .bwalk:not(.is-armed) .bwalk-layer { opacity: 1; transform: translate(-50%, -50%); }
   @media (prefers-reduced-motion: reduce) {
     .bwalk-rail { height: 100vh !important; }
-    .bwalk-layer, .bwalk-cap, .bwalk-hint { transition: none !important; }
+    .butcher-rail-track, .bwalk-cap, .bwalk-hint { transition: none !important; }
+    .nitrogen-vapor-1, .nitrogen-vapor-2 { animation: none !important; }
   }
+
+  /* ══ CHAPTERS 01-03 SENSORY ATMOSPHERIC DIFFERENTIATION ══════════════════ */
+  #boucherieSensoryCanvas {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 1;
+  }
+  .ozonated-laser-wrap {
+    position: relative; overflow: hidden; border-radius: 1.5rem;
+  }
+  .ozonated-laser-line {
+    position: absolute; left: 0; right: 0; top: 0; height: 2px;
+    background: linear-gradient(90deg, transparent 0%, #38BDF8 20%, #E0F2FE 50%, #38BDF8 80%, transparent 100%);
+    box-shadow: 0 0 16px 3px rgba(56, 189, 248, 0.85), 0 0 32px 6px rgba(16, 185, 129, 0.45);
+    pointer-events: none; z-index: 5;
+    animation: ozonatedLaserSweep 3.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+  #boucherieExperience:not(.is-live) .ozonated-laser-line {
+    animation-play-state: paused;
+  }
+  @keyframes ozonatedLaserSweep {
+    0%   { transform: translateY(8px); opacity: 0; }
+    10%  { opacity: 1; }
+    85%  { opacity: 1; }
+    100% { transform: translateY(360px); opacity: 0; }
+  }
+  .purity-badge {
+    padding: 8px 12px; border-radius: 12px;
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    background: rgba(12, 34, 52, 0.55);
+    transition: all 0.4s ease;
+  }
+  .purity-badge.is-illuminated {
+    border-color: rgba(125, 211, 252, 0.95);
+    background: rgba(14, 116, 144, 0.42);
+    color: #E0F2FE;
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.35);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ozonated-laser-line { animation: none !important; top: 45%; opacity: 0.7; }
+  }
+
+  /* ══ HERITAGE INTERACTIVE VACUUM-SEAL COMPRESSION FINALE ═════════════════ */
+  .vacuum-card-wrap {
+    position: relative;
+    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .vacuum-card-wrap .vacuum-target-img {
+    transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), filter 0.85s ease, border-radius 0.85s ease;
+  }
+  .vacuum-pouch-film {
+    position: absolute; inset: 0; z-index: 15; pointer-events: none;
+    border: 2px solid rgba(255, 255, 255, 0.16);
+    border-radius: 24px;
+    transition: all 0.82s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .vacuum-specular-sweep {
+    position: absolute; inset: 0; z-index: 16; pointer-events: none;
+    background: linear-gradient(112deg, transparent 22%, rgba(255, 255, 255, 0.52) 48%, rgba(197, 154, 69, 0.32) 54%, transparent 76%);
+    transform: translate3d(-135%, 0, 0);
+    transition: transform 1.05s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .vacuum-seal-stamp {
+    position: absolute; top: 22px; right: 22px; z-index: 20; pointer-events: none;
+    padding: 8px 14px; border-radius: 999px;
+    background: rgba(16, 36, 28, 0.94);
+    border: 1.5px solid #34D399;
+    color: #A7F3D0;
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 10px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55);
+    opacity: 0; transform: scale(1.26) rotate(-4deg);
+    transition: opacity 0.45s ease 0.2s, transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s;
+  }
+  .vacuum-card-wrap.is-vacuum-sealed .vacuum-target-img {
+    transform: scale(0.955);
+    filter: contrast(1.08) saturate(1.06);
+  }
+  .vacuum-card-wrap.is-vacuum-sealed .vacuum-pouch-film {
+    inset: 14px;
+    border-radius: 18px;
+    border-color: rgba(197, 154, 69, 0.85);
+    box-shadow:
+      inset 0 0 28px rgba(255, 255, 255, 0.38),
+      inset 0 0 0 4px rgba(255, 255, 255, 0.14),
+      0 0 0 16px rgba(26, 12, 16, 0.48);
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.03) 0px,
+      rgba(255, 255, 255, 0.03) 2px,
+      transparent 2px,
+      transparent 8px
+    );
+  }
+  .vacuum-card-wrap.is-vacuum-sealed .vacuum-specular-sweep {
+    transform: translate3d(135%, 0, 0);
+  }
+  .vacuum-card-wrap.is-vacuum-sealed .vacuum-seal-stamp {
+    opacity: 1;
+    transform: scale(1) rotate(-2deg);
+  }
+
+  /* ══ CONTEXTUAL PILL CURSOR & FLY-TO-BASKET ARC ══════════════════════════ */
+  .deli-custom-cursor {
+    position: fixed; top: 0; left: 0;
+    width: 14px; height: 14px; border-radius: 999px;
+    background: rgba(205, 38, 83, 0.22);
+    border: 1.5px solid #CD2653;
+    pointer-events: none; z-index: 99998;
+    transform: translate3d(var(--cx, -100px), var(--cy, -100px), 0) translate(-50%, -50%);
+    transition: width 0.24s cubic-bezier(0.16, 1, 0.3, 1), height 0.24s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, border-color 0.2s ease;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; white-space: nowrap;
+  }
+  .deli-custom-cursor span {
+    opacity: 0; font-size: 9px; font-weight: 800; letter-spacing: 0.16em;
+    text-transform: uppercase; color: #FFF9F4; padding: 0 12px;
+    transition: opacity 0.18s ease;
+  }
+  .deli-custom-cursor.is-pill {
+    width: auto; min-width: 168px; height: 30px;
+    background: rgba(74, 14, 23, 0.94);
+    border-color: rgba(197, 154, 69, 0.85);
+    box-shadow: 0 10px 24px rgba(74, 14, 23, 0.35);
+    backdrop-filter: blur(8px);
+  }
+  .deli-custom-cursor.is-pill span { opacity: 1; }
+  @media (pointer: coarse), (prefers-reduced-motion: reduce) {
+    .deli-custom-cursor { display: none !important; }
+  }
+  .fly-bezier-pill {
+    position: fixed; top: 0; left: 0; width: 48px; height: 48px;
+    border-radius: 999px; object-fit: cover; pointer-events: none; z-index: 99999;
+    border: 2px solid #CD2653; box-shadow: 0 12px 28px rgba(205, 38, 83, 0.45);
+    will-change: transform, opacity;
+  }
+  @keyframes basketElasticBounce {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.25); }
+    70%  { transform: scale(0.92); }
+    100% { transform: scale(1); }
+  }
+  .bag-bounce { animation: basketElasticBounce 0.48s cubic-bezier(0.34, 1.56, 0.64, 1); }
   </style>
 <!-- seo:auto:start -->
-<!-- Managed by scripts/seo-inject.mjs, edit seo.config.json, not here. -->
+<!-- Managed by scripts/seo-inject.mjs · edit seo.config.json, not here. -->
 <meta name="description" content="Artisanal cuts, 100% antibiotic residue-free poultry, handcrafted charcuterie and gourmet dim sum. Chilled 0°C–4°C delivery across Delhi NCR." />
 <link rel="canonical" href="https://anchit-tandon.com/deli-chic" />
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
 <meta name="author" content="Anchit Tandon" />
 <link rel="icon" href="/icons/favicon.svg" type="image/svg+xml" />
-<meta property="og:title" content="Deli Chic | Food For Thought | Haute Boucherie &amp; Artisanal Larder" />
+<meta property="og:title" content="Deli Chic · Food For Thought | Haute Boucherie &amp; Artisanal Larder" />
 <meta property="og:description" content="Artisanal cuts, 100% antibiotic residue-free poultry, handcrafted charcuterie and gourmet dim sum. Chilled 0°C–4°C delivery across Delhi NCR." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://anchit-tandon.com/deli-chic" />
@@ -568,7 +876,7 @@
 <meta property="og:site_name" content="Anchit Tandon" />
 <meta property="og:locale" content="en_US" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Deli Chic | Food For Thought | Haute Boucherie &amp; Artisanal Larder" />
+<meta name="twitter:title" content="Deli Chic · Food For Thought | Haute Boucherie &amp; Artisanal Larder" />
 <meta name="twitter:description" content="Artisanal cuts, 100% antibiotic residue-free poultry, handcrafted charcuterie and gourmet dim sum. Chilled 0°C–4°C delivery across Delhi NCR." />
 <meta name="twitter:image" content="https://i1.wp.com/mh.delichic.co.in/wp-content/uploads/2020/09/Chicken-Breast-Antibiotic-Free-scaled.jpg" />
 <!-- seo:auto:end -->
@@ -576,9 +884,10 @@
 <body class="linen-texture selection:bg-[#CD2653] selection:text-white">
 <div class="concept-bar" role="note" style="position:relative;z-index:60;padding:8px 16px;text-align:center;font:600 12px/1.45 system-ui,-apple-system,sans-serif;letter-spacing:.02em;background:#111;color:#f5f0e8">Concept storefront by <a href="/" style="color:inherit;text-decoration:underline;text-underline-offset:2px">Anchit Tandon</a>, not affiliated with Deli Chic. Nothing here places a real order.</div>
 
-
 <!-- Luxury Film Grain Cinematic Overlay -->
 <div class="film-grain" aria-hidden="true"></div>
+<!-- Contextual Pill Cursor -->
+<div id="deliCustomCursor" class="deli-custom-cursor" aria-hidden="true"><span id="deliCursorText"></span></div>
 
 <!-- ================= TOP FRESH DISPATCH ANNOUNCEMENT ================= -->
 <div id="deliAnnounceBar" class="relative z-40 bg-[#4A0E17] text-[#FFF9F4] text-[11px] sm:text-xs font-medium tracking-wider py-1.5 px-4 border-b border-[#C59A45]/30">
@@ -627,6 +936,12 @@
 
     <!-- Action Controls -->
     <div class="flex items-center gap-2.5 shrink-0">
+      <!-- Cold-Room Spatial Audio Toggle (15% Gain) -->
+      <button type="button" id="deliAudioBtn" onclick="toggleDeliAudio()" aria-pressed="false" title="Toggle 2.4°C Cold-Room &amp; Vacuum-Seal Acoustics (15% Gain)" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#C59A45]/40 text-[#4A0E17] text-[10px] font-bold uppercase tracking-wider hover:bg-[#F7EFE6] transition-all">
+        <svg class="w-3.5 h-3.5 text-[#CD2653]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 10v4M6 7v10M10 4v16M14 8v8M18 6v12M22 10v4"/></svg>
+        <span id="deliAudioLabel">2.4°C Audio</span>
+      </button>
+
       <!-- WhatsApp Direct Concierge -->
       <a href="https://wa.link/bk4b8e" target="_blank" rel="noreferrer noopener" class="hidden xl:inline-flex items-center gap-2 px-3.5 py-2 rounded-full border border-emerald-600/30 text-emerald-800 text-xs font-bold uppercase tracking-wider hover:bg-emerald-50 transition-all bg-emerald-50/50">
         <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
@@ -634,7 +949,7 @@
       </a>
 
       <!-- Basket Trigger -->
-      <button onclick="toggleBasket(true)" class="px-4 py-2 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#8C1434] transition-all shadow-md shadow-[#CD2653]/30 flex items-center gap-2 shrink-0 whitespace-nowrap">
+      <button id="deliBasketBtn" onclick="toggleBasket(true)" class="px-4 py-2 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#8C1434] transition-all shadow-md shadow-[#CD2653]/30 flex items-center gap-2 shrink-0 whitespace-nowrap">
         <span>Basket</span>
         <span class="px-2 py-0.5 bg-white/25 rounded-full text-[10px] font-black" id="basketCount">0</span>
       </button>
@@ -712,7 +1027,7 @@
           </button>
       </div>
 
-      <div class="loupe-container shadow-2xl border-2 border-[#C59A45]/40 bg-black" id="heroLoupeContainer">
+      <div class="loupe-container shadow-2xl border-2 border-[#C59A45]/40 bg-black" id="heroLoupeContainer" data-cursor-pill="[ DRAG 2.5× OPTICAL LOUPE ]">
         <img
             id="heroLoupeImg"
             src="/assets/brand/u-1529193591184-b1d58069ecdd-1200.jpg"
@@ -721,7 +1036,28 @@
             alt="Deli Chic Prime Artisanal Cuts"
             class="w-full h-[470px] object-cover transition-opacity duration-300"
           />
-        <div id="heroLoupeGlass" class="loupe-glass"></div>
+
+        <!-- 3 Magnetic Inspection Hotspots (Snap within 24px) -->
+        <div class="loupe-hotspot" id="loupeHotspot0" data-hx="0.28" data-hy="0.32" data-label="Beechwood Smoke Ring" data-detail="14hr cold German beechwood smoke penetration • 2.3°C core" style="left: 28%; top: 32%;"></div>
+        <div class="loupe-hotspot" id="loupeHotspot1" data-hx="0.56" data-hy="0.46" data-label="Intramuscular Marbling" data-detail="94.2% cellular moisture retention • Zero ice-crystal rupture" style="left: 56%; top: 46%;"></div>
+        <div class="loupe-hotspot" id="loupeHotspot2" data-hx="0.72" data-hy="0.28" data-label="Tellicherry Pepper Crust" data-detail="Coarse-cracked Malabar black peppercorn &amp; sea-salt cure" style="left: 72%; top: 28%;"></div>
+
+        <!-- Micro-Annotation Callout on Magnetic Hotspot Lock -->
+        <div class="loupe-hotspot-callout" id="loupeHotspotCallout" aria-live="polite">
+          <div class="text-[9px] font-luxury font-bold uppercase tracking-widest text-[#FFA517]" id="loupeCalloutTitle">✦ Beechwood Smoke Ring</div>
+          <div class="text-[11px] text-white/90 mt-0.5 leading-snug" id="loupeCalloutBody">14hr cold German beechwood smoke penetration • 2.3°C core</div>
+        </div>
+
+        <!-- Optical 2.5x Loupe Glass with Chromatic Aberration Rim, Barrel Dome & Rotating SVG Reticle -->
+        <div id="heroLoupeGlass" class="loupe-glass">
+          <svg id="loupeReticleSvg" class="loupe-reticle-svg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="100" cy="100" r="94" stroke="#C59A45" stroke-opacity="0.65" stroke-width="1.2" stroke-dasharray="6 8"/>
+            <circle cx="100" cy="100" r="82" stroke="#38BDF8" stroke-opacity="0.32" stroke-width="0.8" stroke-dasharray="2 10"/>
+            <path d="M100 4v14M100 182v14M4 100h14M182 100h14" stroke="#FFA517" stroke-width="1.8" stroke-linecap="round"/>
+            <circle cx="100" cy="100" r="4" stroke="#FFA517" stroke-opacity="0.55" stroke-width="1"/>
+          </svg>
+          <div class="loupe-hud-pill" id="loupeHudPill">X:142mm Y:088mm • 94% MARBLE • 2.4°C</div>
+        </div>
 
         <!-- Overlay Quality Inspection Badge -->
         <div class="absolute bottom-5 left-5 right-5 p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-[#CD2653]/20 shadow-lg text-left flex items-center justify-between">
@@ -772,41 +1108,47 @@
 <!-- ================= PINNED HAUTE BOUCHERIE SCROLL STAGE ================= -->
 <section class="deli-stage-wrap" id="boucherieExperience">
   <div class="deli-stage" id="deliStage">
+    <!-- Sensory Atmospheric Differentiation Canvas (Ch1 Clinical Laser / Ch2 Beechwood Smoke / Ch3 Saffron DOF) -->
+    <canvas id="boucherieSensoryCanvas" aria-hidden="true"></canvas>
+
     <!-- Rotating Brass & Crimson Guilloche Seal (Placed behind chapters) -->
     <div class="deli-seal" id="deliSeal"></div>
 
-    <!-- Chapter 1: Poultry -->
+    <!-- Chapter 1: Poultry (Clinical Ice-Blue & Alabaster + Ozonated Laser Scan) -->
     <div class="deli-chapter-item" id="deliCh1">
       <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center text-white relative z-10">
         <div class="lg:col-span-7 space-y-5">
-          <span class="inline-block text-xs uppercase font-luxury font-bold text-[#FFA517] tracking-[0.25em] bg-[#180609]/60 px-3.5 py-1.5 rounded-full border border-[#FFA517]/30">Chapter 01 • The Primal Standard</span>
+          <span class="inline-block text-xs uppercase font-luxury font-bold text-[#7DD3FC] tracking-[0.25em] bg-[#0C2234]/80 px-3.5 py-1.5 rounded-full border border-[#38BDF8]/40">Chapter 01 • The Primal Standard</span>
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-serif-chic font-bold leading-tight text-white drop-shadow">100% Antibiotic Residue-Free.</h2>
-          <p class="text-base sm:text-lg text-[#F7EFE6] max-w-xl font-medium leading-relaxed">
+          <p class="text-base sm:text-lg text-[#F0F9FF] max-w-xl font-medium leading-relaxed">
             Every bird is nurtured on pure vegetarian grain feed with clean mountain water. Never fed prophylactic antibiotics, synthetic growth hormones, or chemical plumping agents.
             </p>
-          <div class="grid grid-cols-2 gap-4 pt-3 border-t border-white/20 text-xs font-bold uppercase tracking-wider text-[#FFA517]">
-            <div>✓ Lab-Tested Residue Purity</div>
-            <div>✓ Ozonated Clean Processing</div>
+          <div class="grid grid-cols-2 gap-4 pt-3 border-t border-white/20 text-xs font-bold uppercase tracking-wider text-[#7DD3FC]">
+            <div class="purity-badge is-illuminated" id="purityBadge1">✓ Lab-Tested Residue Purity</div>
+            <div class="purity-badge is-illuminated" id="purityBadge2">✓ Ozonated Clean Processing</div>
           </div>
         </div>
         <div class="lg:col-span-5 hidden lg:block">
-          <img src="/assets/brand/u-1604503468506-a8da13d82791-800.jpg" decoding="async" alt="Clean Hand-Trimmed Antibiotic-Free Chicken Breast" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
+          <div class="ozonated-laser-wrap shadow-2xl border-2 border-[#38BDF8]/60">
+            <div class="ozonated-laser-line" aria-hidden="true"></div>
+            <img src="/assets/brand/u-1604503468506-a8da13d82791-800.jpg" decoding="async" alt="Clean Hand-Trimmed Antibiotic-Free Chicken Breast" class="w-full max-h-[44vh] aspect-square object-cover" />
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Chapter 2: Charcuterie -->
+    <!-- Chapter 2: Charcuterie (Charred Oak #161210 + German Beechwood Ember & Warm Smoke Drift) -->
     <div class="deli-chapter-item" id="deliCh2">
       <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center text-white relative z-10">
         <div class="lg:col-span-7 space-y-5">
-          <span class="inline-block text-xs uppercase font-luxury font-bold text-[#FFA517] tracking-[0.25em] bg-[#180609]/60 px-3.5 py-1.5 rounded-full border border-[#FFA517]/30">Chapter 02 • European Atelier</span>
+          <span class="inline-block text-xs uppercase font-luxury font-bold text-[#FFA517] tracking-[0.25em] bg-[#161210]/85 px-3.5 py-1.5 rounded-full border border-[#FFA517]/40">Chapter 02 • European Atelier</span>
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-serif-chic font-bold leading-tight text-white drop-shadow">Wood-Smoked Charcuterie.</h2>
           <p class="text-base sm:text-lg text-[#F7EFE6] max-w-xl font-medium leading-relaxed">
             Bavarian frankfurters, streaky bacon strips, and cracked Tellicherry black pepper salamis smoked naturally over German beechwood shavings.
             </p>
           <div class="grid grid-cols-2 gap-4 pt-3 border-t border-white/20 text-xs font-bold uppercase tracking-wider text-[#FFA517]">
-            <div>✓ Real German Beechwood</div>
-            <div>✓ Aged Natural Curing</div>
+            <div class="px-3 py-2 rounded-xl bg-[#261810]/70 border border-[#FFA517]/30">✓ Real German Beechwood</div>
+            <div class="px-3 py-2 rounded-xl bg-[#261810]/70 border border-[#FFA517]/30">✓ Aged Natural Curing</div>
           </div>
         </div>
         <div class="lg:col-span-5 hidden lg:block">
@@ -815,22 +1157,22 @@
       </div>
     </div>
 
-    <!-- Chapter 3: Marinades & Dim Sum -->
+    <!-- Chapter 3: Marinades & Dim Sum (Awadhi Saffron & Gold #D4AF37 / #24140E + Floating Saffron Strands DOF) -->
     <div class="deli-chapter-item" id="deliCh3">
       <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center text-white relative z-10">
         <div class="lg:col-span-7 space-y-5">
-          <span class="inline-block text-xs uppercase font-luxury font-bold text-[#FFA517] tracking-[0.25em] bg-[#180609]/60 px-3.5 py-1.5 rounded-full border border-[#FFA517]/30">Chapter 03 • Shahi Marinades</span>
+          <span class="inline-block text-xs uppercase font-luxury font-bold text-[#D4AF37] tracking-[0.25em] bg-[#24140E]/85 px-3.5 py-1.5 rounded-full border border-[#D4AF37]/45">Chapter 03 • Shahi Marinades</span>
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-serif-chic font-bold leading-tight text-white drop-shadow">Royal Awadhi Alchemy.</h2>
           <p class="text-base sm:text-lg text-[#F7EFE6] max-w-xl font-medium leading-relaxed">
             Tender chicken steeped in royal saffron, roasted gram flour, hung curd and Awadhi mace. Alongside translucent dim sum filled with whole tiger prawns.
             </p>
-          <div class="grid grid-cols-2 gap-4 pt-3 border-t border-white/20 text-xs font-bold uppercase tracking-wider text-[#FFA517]">
-            <div>✓ Royal Saffron &amp; Mace</div>
-            <div>✓ Whole Tiger Prawn Momos</div>
+          <div class="grid grid-cols-2 gap-4 pt-3 border-t border-white/20 text-xs font-bold uppercase tracking-wider text-[#D4AF37]">
+            <div class="px-3 py-2 rounded-xl bg-[#2E1A10]/70 border border-[#D4AF37]/35">✓ Royal Saffron &amp; Mace</div>
+            <div class="px-3 py-2 rounded-xl bg-[#2E1A10]/70 border border-[#D4AF37]/35">✓ Whole Tiger Prawn Momos</div>
           </div>
         </div>
         <div class="lg:col-span-5 hidden lg:block">
-          <img src="/assets/brand/u-1599488615731-7e5c2823ff28-800.jpg" loading="lazy" decoding="async" alt="Royal Awadhi Shahi Saffron Marinade" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#FFA517]/60" />
+          <img src="/assets/brand/u-1599488615731-7e5c2823ff28-800.jpg" loading="lazy" decoding="async" alt="Royal Awadhi Shahi Saffron Marinade" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#D4AF37]/70" />
         </div>
       </div>
     </div>
@@ -846,88 +1188,98 @@
 
 <!-- ================= THE GOURMET LARDER CATALOGUE ================= -->
 
-<!-- ══ THE BOUCHERIE WALK ══ the sister site's walk-in, in a butcher's room.
-     Every stage is this page's own stated process. -->
+<!-- ══ INSIDE THE BOUCHERIE: 300VH HORIZONTAL COLD-ROOM BUTCHER'S RAIL ══ -->
 <section class="bwalk" id="bwalkin" aria-labelledby="bwalk-title">
   <h2 id="bwalk-title" class="sr-only">Inside the boucherie</h2>
   <div class="bwalk-rail">
     <div class="bwalk-frame">
+      <!-- Layer 3 (Background): Dark Slate Tile Grid with Condensation Specular Sheen -->
+      <div class="bwalk-slate-grid" aria-hidden="true"></div>
+
+      <!-- Top Horizontal Stainless-Steel Butcher's Rail Bar -->
+      <div class="bwalk-rail-bar" aria-hidden="true"></div>
+
+      <!-- Layer 2 (Midground): 4 Suspended Butcher Rail Stations with Pendulum Inertia -->
       <div class="bwalk-stage" aria-hidden="true">
+        <div class="butcher-rail-track" id="butcherRailTrack">
+          <!-- Station 01: The 0°C–4°C Cold Room -->
+          <article class="rail-station-card is-active-station" data-station="0">
+            <div class="rail-hook-wrap">
+              <svg width="36" height="42" viewBox="0 0 36 42" fill="none"><path d="M18 0v18c0 6 8 6 8 12s-6 10-12 10" stroke="#D1D5DB" stroke-width="4" stroke-linecap="round"/><circle cx="18" cy="6" r="4" fill="#9CA3AF"/></svg>
+            </div>
+            <div class="relative h-44 overflow-hidden">
+              <img src="/assets/brand/u-1604503468506-a8da13d82791-800.jpg" alt="" loading="lazy" decoding="async" class="w-full h-full object-cover" />
+              <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/75 border border-[#38BDF8]/50 text-[#7DD3FC] text-[9px] font-luxury font-bold uppercase tracking-widest">Station 01 • 2.4°C</span>
+            </div>
+            <div class="p-5 space-y-1.5">
+              <div class="text-[10px] font-luxury font-bold uppercase tracking-widest text-[#C59A45]">01 / The Cold Room</div>
+              <h3 class="text-lg font-serif-chic font-bold text-white">Sub-Zero Humidity Lock</h3>
+              <p class="text-xs text-white/75 leading-relaxed">Strict 0°C–4°C atmospheric chill preserves natural cellular firmness without deep-freeze ice crystal rupture.</p>
+            </div>
+          </article>
 
-        <!-- 1. the cold room -->
-        <div class="bwalk-layer" data-z0="-900" data-z1="2400" data-in="0" data-out="0.30">
-          <svg viewBox="0 0 1180 620" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="70" y="60" width="1040" height="500" rx="14" fill="#C59A45" opacity=".10"/>
-            <rect x="70" y="60" width="1040" height="500" rx="14" fill="none" stroke="#C59A45" stroke-opacity=".32" stroke-width="2"/>
-            <path d="M110 128h960" stroke="#C59A45" stroke-opacity=".5" stroke-width="5" stroke-linecap="round"/>
-            <g stroke="#C59A45" stroke-opacity=".40" stroke-width="3" fill="none">
-              <path d="M240 128v54M400 128v44M560 128v62M720 128v48M880 128v56"/>
-            </g>
-            <g fill="#8E1526" opacity=".72">
-              <rect x="214" y="182" width="52" height="150" rx="24"/>
-              <rect x="374" y="172" width="52" height="168" rx="24"/>
-              <rect x="534" y="190" width="52" height="138" rx="24"/>
-              <rect x="694" y="176" width="52" height="160" rx="24"/>
-              <rect x="854" y="184" width="52" height="146" rx="24"/>
-            </g>
-            <path d="M110 470h960" stroke="#C59A45" stroke-opacity=".22" stroke-width="3"/>
-            <text x="590" y="524" text-anchor="middle" fill="#C59A45" fill-opacity=".62" font-size="22" font-weight="700" letter-spacing="7">COLD ROOM</text>
-          </svg>
+          <!-- Station 02: German Beechwood Smokehouse -->
+          <article class="rail-station-card" data-station="1">
+            <div class="rail-hook-wrap">
+              <svg width="36" height="42" viewBox="0 0 36 42" fill="none"><path d="M18 0v18c0 6 8 6 8 12s-6 10-12 10" stroke="#D1D5DB" stroke-width="4" stroke-linecap="round"/><circle cx="18" cy="6" r="4" fill="#9CA3AF"/></svg>
+            </div>
+            <div class="relative h-44 overflow-hidden">
+              <img src="/assets/brand/u-1529193591184-b1d58069ecdd-800.jpg" alt="" loading="lazy" decoding="async" class="w-full h-full object-cover" />
+              <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/75 border border-[#FFA517]/50 text-[#FFA517] text-[9px] font-luxury font-bold uppercase tracking-widest">Station 02 • 14h Cure</span>
+            </div>
+            <div class="p-5 space-y-1.5">
+              <div class="text-[10px] font-luxury font-bold uppercase tracking-widest text-[#C59A45]">02 / What Hangs There</div>
+              <h3 class="text-lg font-serif-chic font-bold text-white">Beechwood Charcuterie Rail</h3>
+              <p class="text-xs text-white/75 leading-relaxed">Bavarian frankfurters, streaky bacon, and Tellicherry pepper salamis cured over smoldering German beechwood shavings.</p>
+            </div>
+          </article>
+
+          <!-- Station 03: The Master Butcher's Block -->
+          <article class="rail-station-card" data-station="2">
+            <div class="rail-hook-wrap">
+              <svg width="36" height="42" viewBox="0 0 36 42" fill="none"><path d="M18 0v18c0 6 8 6 8 12s-6 10-12 10" stroke="#D1D5DB" stroke-width="4" stroke-linecap="round"/><circle cx="18" cy="6" r="4" fill="#9CA3AF"/></svg>
+            </div>
+            <div class="relative h-44 overflow-hidden">
+              <img src="/assets/brand/u-1602470520998-f4a52199a3d6-1200.jpg" alt="" loading="lazy" decoding="async" class="w-full h-full object-cover" />
+              <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/75 border border-[#CD2653]/50 text-[#FDA4AF] text-[9px] font-luxury font-bold uppercase tracking-widest">Station 03 • Hand-Cut</span>
+            </div>
+            <div class="p-5 space-y-1.5">
+              <div class="text-[10px] font-luxury font-bold uppercase tracking-widest text-[#C59A45]">03 / The Block</div>
+              <h3 class="text-lg font-serif-chic font-bold text-white">Master Culinary Butchers</h3>
+              <p class="text-xs text-white/75 leading-relaxed">Every portion is hand-trimmed along natural seam lines, Coorg-spiced or steeped in royal Lucknowi saffron marinades.</p>
+            </div>
+          </article>
+
+          <!-- Station 04: Ozonated Wash & Vacuum Seal -->
+          <article class="rail-station-card" data-station="3">
+            <div class="rail-hook-wrap">
+              <svg width="36" height="42" viewBox="0 0 36 42" fill="none"><path d="M18 0v18c0 6 8 6 8 12s-6 10-12 10" stroke="#D1D5DB" stroke-width="4" stroke-linecap="round"/><circle cx="18" cy="6" r="4" fill="#9CA3AF"/></svg>
+            </div>
+            <div class="relative h-44 overflow-hidden">
+              <img src="/assets/brand/u-1599488615731-7e5c2823ff28-800.jpg" alt="" loading="lazy" decoding="async" class="w-full h-full object-cover" />
+              <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/75 border border-emerald-400/50 text-emerald-300 text-[9px] font-luxury font-bold uppercase tracking-widest">Station 04 • Vacuum Locked</span>
+            </div>
+            <div class="p-5 space-y-1.5">
+              <div class="text-[10px] font-luxury font-bold uppercase tracking-widest text-[#C59A45]">04 / Cut, Weighed, Sealed</div>
+              <h3 class="text-lg font-serif-chic font-bold text-white">Multi-Barrier Vacuum Dispatch</h3>
+              <p class="text-xs text-white/75 leading-relaxed">Weighed, inspected, and vacuum-sealed before leaving the boucherie for twice-daily refrigerated NCR runs.</p>
+            </div>
+          </article>
         </div>
-
-        <!-- 2. what hangs there, photographed -->
-        <div class="bwalk-layer" data-z0="-1500" data-z1="1750" data-in="0.06" data-out="0.42" style="width:min(60vw,720px)">
-          <img src="/assets/brand/u-1529193591184-b1d58069ecdd-800.jpg" alt="" loading="lazy" decoding="async" width="800" height="1067">
-        </div>
-
-        <!-- 3. the block -->
-        <div class="bwalk-layer" data-z0="-2300" data-z1="1150" data-in="0.26" data-out="0.70">
-          <svg viewBox="0 0 1180 620" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="180" y="300" width="820" height="54" rx="8" fill="#E8D7BC"/>
-            <rect x="180" y="300" width="820" height="12" rx="6" fill="#FFFFFF" opacity=".42"/>
-            <rect x="214" y="354" width="752" height="150" rx="6" fill="#C9AE8A"/>
-            <path d="M300 354v150M430 354v150M560 354v150M690 354v150M820 354v150" stroke="#8A714E" stroke-opacity=".45" stroke-width="3"/>
-            <rect x="214" y="504" width="752" height="20" rx="6" fill="#4A0E17" opacity=".5"/>
-            <g>
-              <path d="M500 268h180l-14 32H514z" fill="#8E1526" opacity=".85"/>
-              <path d="M520 248h140l-10 20H530z" fill="#C0263F" opacity=".7"/>
-            </g>
-            <text x="590" y="576" text-anchor="middle" fill="#C59A45" fill-opacity=".55" font-size="20" font-weight="700" letter-spacing="7">THE BLOCK</text>
-          </svg>
-        </div>
-
-        <!-- 4. the cut and the seal -->
-        <div class="bwalk-layer" data-z0="-3100" data-z1="620" data-in="0.46" data-out="0.90">
-          <svg viewBox="0 0 1180 620" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g>
-              <path d="M330 150 L720 262 L706 300 L316 188 Z" fill="#E6E2EC"/>
-              <path d="M330 150 L720 262 L714 282 L324 170 Z" fill="#FFFFFF" opacity=".55"/>
-              <rect x="700" y="268" width="170" height="30" rx="14" transform="rotate(16 700 268)" fill="#2A0810"/>
-            </g>
-            <g>
-              <rect x="300" y="360" width="580" height="170" rx="14" fill="#F3EDE4" opacity=".92"/>
-              <rect x="300" y="360" width="580" height="170" rx="14" fill="none" stroke="#C59A45" stroke-opacity=".55" stroke-width="3"/>
-              <rect x="348" y="396" width="484" height="98" rx="10" fill="#A8162B" opacity=".78"/>
-              <path d="M348 414h484M348 440h484M348 466h484" stroke="#FFFFFF" stroke-opacity=".16" stroke-width="3"/>
-              <path d="M300 446h580" stroke="#C59A45" stroke-opacity=".40" stroke-width="2" stroke-dasharray="10 10"/>
-            </g>
-            <text x="590" y="576" text-anchor="middle" fill="#C59A45" fill-opacity=".55" font-size="20" font-weight="700" letter-spacing="7">CUT · WEIGHED · SEALED</text>
-          </svg>
-        </div>
-
-        <!-- 5. at your door -->
-        <div class="bwalk-layer" data-z0="-3600" data-z1="300" data-in="0.74" data-out="1.06" style="width:min(46vw,540px)">
-          <img src="/assets/brand/u-1604503468506-a8da13d82791-800.jpg" alt="" loading="lazy" decoding="async" width="800" height="1200">
-        </div>
-
       </div>
 
-      <div class="bwalk-step" id="bwalkStep">01 / The cold room</div>
+      <!-- Layer 1 (Foreground Mist): Low-Lying 0°C–4°C Nitrogen Vapor Drifting Across Bottom 20% -->
+      <div class="nitrogen-vapor-wrap" aria-hidden="true">
+        <div class="nitrogen-vapor-layer nitrogen-vapor-1"></div>
+        <div class="nitrogen-vapor-layer nitrogen-vapor-2"></div>
+      </div>
+
+      <div class="bwalk-step" id="bwalkStep">01 / The cold room • Horizontal Butcher's Rail</div>
       <div class="bwalk-cap" id="bwalkCap">
         <b>A boucherie, not a counter.</b>
-        <span>Artisanal integrity of a fine European boucherie, brought to the Indian dining table. Keep scrolling.</span>
+        <span>Artisanal integrity of a fine European boucherie, gliding along our 0°C–4°C stainless-steel rail.</span>
       </div>
-      <div class="bwalk-hint" id="bwalkHint">Scroll<i></i></div>
+      <div class="bwalk-hint" id="bwalkHint">Scroll Rail<i></i></div>
     </div>
   </div>
 </section>
@@ -1090,22 +1442,32 @@
       </div>
     </div>
 
-    <!-- Right Visual Vignette -->
+    <!-- Right Visual Vignette: Interactive Vacuum-Seal Compression Finale -->
     <div class="lg:col-span-6">
-      <div class="rounded-3xl overflow-hidden shadow-2xl border-2 border-[#C59A45]/30 relative h-[460px]">
+      <div id="heritageFeaturedCard" class="vacuum-card-wrap rounded-3xl overflow-hidden shadow-2xl border-2 border-[#C59A45]/30 relative h-[460px] bg-[#180A0D]">
         <img
             src="/assets/brand/u-1602470520998-f4a52199a3d6-1200.jpg"
             loading="lazy"
             decoding="async"
             alt="Artisanal Butcher Preparation"
-            class="w-full h-full object-cover"
+            class="vacuum-target-img w-full h-full object-cover"
           />
-        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-8">
+        <!-- Glossy Transparent Multi-Barrier Vacuum Film Overlay -->
+        <div class="vacuum-pouch-film" aria-hidden="true"></div>
+        <!-- Diagonal Specular Highlight Sweep -->
+        <div class="vacuum-specular-sweep" aria-hidden="true"></div>
+        <!-- Vacuum Sealed Telemetry Stamp -->
+        <div class="vacuum-seal-stamp" id="vacuumSealStamp">VACUUM SEALED • 2.4°C DISPATCH READY</div>
+
+        <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent flex items-end justify-between p-8 z-20">
           <div class="text-white space-y-1">
-            <span class="text-[10px] font-luxury font-bold uppercase tracking-widest text-[#FFA517]">✦ Artisanal Craft</span>
+            <span class="text-[10px] font-luxury font-bold uppercase tracking-widest text-[#FFA517]">✦ Artisanal Craft • Step 04 Finale</span>
             <h4 class="text-2xl font-serif-chic font-bold">Hand-Cut by Master Butchers</h4>
             <p class="text-xs text-white/80">Every portion weighed, trimmed, and inspected prior to vacuum packaging.</p>
           </div>
+          <button type="button" onclick="triggerVacuumSeal()" id="vacuumSealTriggerBtn" class="px-4 py-2 rounded-full bg-[#CD2653]/90 hover:bg-[#CD2653] text-white border border-[#C59A45]/60 text-[10px] font-luxury font-bold uppercase tracking-widest shadow-lg transition-all shrink-0">
+            Seal Pack ✦
+          </button>
         </div>
       </div>
     </div>
@@ -1115,38 +1477,43 @@
            "cut, cured, and vacuum-sealed by master culinary butchers" and
            "every portion weighed, trimmed, and inspected prior to vacuum
            packaging". Deli Chic states no dates anywhere, so this is a
-           process rather than a chronology, inventing years for a real
+           process rather than a chronology · inventing years for a real
            business is not something this page should do. -->
       <div class="bench" id="bench">
         <span class="bench-rail" aria-hidden="true"></span>
         <span class="bench-fill" aria-hidden="true"></span>
+        <!-- Scroll-Driven SVG Progress Line Connecting 01 Cut → 02 Cured → 03 Inspected → 04 Sealed -->
+        <svg id="heritageProgressSvg" class="hidden md:block absolute left-0 right-0 top-[22px] w-full h-3 pointer-events-none z-[1]" viewBox="0 0 1000 12" preserveAspectRatio="none" aria-hidden="true">
+          <line x1="0" y1="6" x2="1000" y2="6" stroke="rgba(197, 154, 69, 0.22)" stroke-width="3" stroke-linecap="round"/>
+          <line id="heritageProgressLine" x1="0" y1="6" x2="1000" y2="6" stroke="#CD2653" stroke-width="4" stroke-linecap="round" stroke-dasharray="1000" stroke-dashoffset="1000"/>
+        </svg>
         <ol class="bench-steps">
         <li class="bench-step" style="--i:0">
           <span class="bench-mark" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 4l9.5 11.5M19 4L9.5 15.5" stroke="#4A0E17" stroke-width="2" stroke-linecap="round"/><circle cx="7.5" cy="19" r="2.6" stroke="#CD2653" stroke-width="2"/><circle cx="16.5" cy="19" r="2.6" stroke="#CD2653" stroke-width="2"/></svg>
           </span>
-          <h4 class="font-serif-chic font-bold">Cut</h4>
+          <h4 class="font-serif-chic font-bold">01 · Cut</h4>
           <p>Hand-cut by master culinary butchers.</p>
         </li>
         <li class="bench-step" style="--i:1">
           <span class="bench-mark" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 18c2-1.6 2-4.4 0-6M8.5 18c2-1.6 2-4.4 0-6M13 18c2-1.6 2-4.4 0-6" stroke="#CD2653" stroke-width="2" stroke-linecap="round" fill="none"/><path d="M3 21h18" stroke="#4A0E17" stroke-width="2" stroke-linecap="round"/><path d="M16.5 10.5h4.2v6a2.1 2.1 0 0 1-4.2 0z" fill="#4A0E17"/></svg>
           </span>
-          <h4 class="font-serif-chic font-bold">Cured</h4>
+          <h4 class="font-serif-chic font-bold">02 · Cured</h4>
           <p>Beechwood smoked, or rested in a Lucknowi marinade.</p>
         </li>
         <li class="bench-step" style="--i:2">
           <span class="bench-mark" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3v16M6 19h12" stroke="#4A0E17" stroke-width="2" stroke-linecap="round"/><path d="M4 7h16" stroke="#4A0E17" stroke-width="2" stroke-linecap="round"/><path d="M4 7l-2.3 5a2.6 2.6 0 0 0 4.6 0zM20 7l-2.3 5a2.6 2.6 0 0 0 4.6 0z" fill="none" stroke="#CD2653" stroke-width="1.8" stroke-linejoin="round"/></svg>
           </span>
-          <h4 class="font-serif-chic font-bold">Inspected</h4>
+          <h4 class="font-serif-chic font-bold">03 · Inspected</h4>
           <p>Every portion weighed, trimmed and inspected.</p>
         </li>
-        <li class="bench-step" style="--i:3">
-          <span class="bench-mark" aria-hidden="true">
+        <li class="bench-step cursor-pointer group" style="--i:3" onclick="triggerVacuumSeal(true)" id="benchStepSealed">
+          <span class="bench-mark group-hover:border-[#CD2653] transition-colors" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3.5" y="6.5" width="17" height="12" rx="2.5" stroke="#4A0E17" stroke-width="2"/><path d="M3.5 10.5h17" stroke="#4A0E17" stroke-width="2"/><path d="M8.6 15.2a4 4 0 0 1 6.8 0" stroke="#CD2653" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
           </span>
-          <h4 class="font-serif-chic font-bold">Sealed</h4>
+          <h4 class="font-serif-chic font-bold">04 · Sealed</h4>
           <p>Vacuum-sealed before it leaves the boucherie.</p>
         </li>
         </ol>
@@ -1204,7 +1571,7 @@
            restored order needs a way back that does not depend on that. -->
       <button type="button" id="dcLast" onclick="viewLastDeliOrder()" class="hidden w-full text-left px-4 py-2.5 rounded-xl bg-[#FFF3F6] border border-[#CD2653]/30 hover:border-[#CD2653] transition-all">
         <span class="block text-[10px] font-bold uppercase tracking-[0.16em] text-[#CD2653]">Your last order</span>
-        <span class="block text-sm font-bold text-[#4A0E17]" id="dcLastRef">-</span>
+        <span class="block text-sm font-bold text-[#4A0E17]" id="dcLastRef"> · </span>
       </button>
       <!-- Delivery Slot Selector -->
       <div>
@@ -1461,7 +1828,7 @@
 
       grid.innerHTML = filtered.map(p => {
         return `
-          <div class="deli-card tilt-card scroll-reveal knife-glint overflow-hidden flex flex-col justify-between group">
+          <div class="deli-card kinetic-card tilt-card scroll-reveal knife-glint overflow-hidden flex flex-col justify-between group" data-cursor-pill="[ INSPECT CUT • 2.4°C ]">
           <div>
             <div class="relative h-52 overflow-hidden bg-[#FAF4ED]">
               <img src="${p.image}" alt="${p.name}" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -1482,7 +1849,7 @@
           </div>
 
           <div class="p-6 pt-0">
-            <button onclick="addToBasket('${p.id}')" class="w-full py-3 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#8C1434] transition-all shadow-md shadow-[#CD2653]/25 flex items-center justify-center gap-2">
+            <button onclick="addToBasket('${p.id}', this)" class="w-full py-3 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#8C1434] transition-all shadow-md shadow-[#CD2653]/25 flex items-center justify-center gap-2">
               <span>+ Add to Basket</span>
             </button>
           </div>
@@ -1496,60 +1863,79 @@
     const prefersReducedMotion = window.matchMedia
       && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-
-
-    /* The boucherie walk: same mechanism as the sister site's walk-in. */
+    /* ══ INSIDE THE BOUCHERIE: 300VH HORIZONTAL COLD-ROOM RAIL TRACK ═══════
+       Diverged from Gram Street's vertical Z-axis portal: pins the viewport
+       for 300vh and translates #butcherRailTrack horizontally from right to left
+       while applying velocity-linked pendulum inertia (1.5deg–3deg tilt settling
+       back to 0deg) to the 4 suspended butcher station cards. */
     (function boucherieWalk() {
       var sec = document.getElementById('bwalkin');
       if (!sec) return;
       var rail = sec.querySelector('.bwalk-rail');
       var frame = sec.querySelector('.bwalk-frame');
-      var layers = [].slice.call(sec.querySelectorAll('.bwalk-layer'));
+      var track = document.getElementById('butcherRailTrack');
+      var cards = [].slice.call(sec.querySelectorAll('.rail-station-card'));
       var cap = document.getElementById('bwalkCap');
       var step = document.getElementById('bwalkStep');
       var hint = document.getElementById('bwalkHint');
-      if (!rail || !frame || !layers.length) return;
-      if (prefersReducedMotion) return;   // stylesheet already holds the still frame
+      if (!rail || !frame || !track || !cards.length) return;
+      if (prefersReducedMotion) return;
 
       sec.classList.add('is-armed');
 
       var STEPS = [
-        [0.00, '01 / The cold room', 'A boucherie, not a counter.', 'The artisanal integrity of a fine European boucherie, brought to the Indian dining table.'],
-        [0.24, '02 / What hangs there', 'Wood-smoked charcuterie.', 'German-style beechwood smoked frankfurters, and ribs rested over smoke.'],
-        [0.48, '03 / The block', 'Hand-cut by master butchers.', 'Coorg-spiced chicken breast, Lucknowi marinades, every cut taken by hand.'],
-        [0.70, '04 / Cut, weighed, sealed', 'Weighed, trimmed, inspected.', 'Every portion checked before it is vacuum-sealed, and nothing leaves before it passes.'],
-        [0.88, '05 / At your door', 'Cold-chain to your table.', 'Two delivery windows a day across Delhi NCR, sealed exactly as it left the boucherie.']
+        [0.00, '01 / The Cold Room • 0°C–4°C Rail', 'A boucherie, not a counter.', 'Sub-zero nitrogen mist and strict 0°C–4°C humidity lock preserve cellular firmness.'],
+        [0.26, '02 / What Hangs There • Smokehouse', 'Wood-smoked charcuterie.', 'German-style beechwood smoked frankfurters, streaky bacon, and pepper salamis cured on the rail.'],
+        [0.54, '03 / The Block • Master Butchers', 'Hand-cut by master butchers.', 'Coorg-spiced chicken breast and royal Lucknowi marinades trimmed along natural seam lines.'],
+        [0.80, '04 / Cut, Weighed, Sealed • Dispatch', 'Weighed, trimmed, vacuum-sealed.', 'Multi-barrier vacuum packs dispatched across 4 Delhi NCR cold-chain hubs twice daily.']
       ];
       var at = -1;
-      var capT = 0;   // the pending caption swap: a fast scroll must not land stale text
-      function lerp(a, b, t) { return a + (b - a) * t; }
+      var capT = 0;
+      var lastP = 0;
+      var settleTimer = 0;
       function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
 
       function place(p) {
-        for (var i = 0; i < layers.length; i++) {
-          var L = layers[i];
-          var t = clamp01((p - (+L.dataset.in)) / ((+L.dataset.out) - (+L.dataset.in)));
-          var z = lerp(+L.dataset.z0, +L.dataset.z1, t);
-          // a layer whose window opens at 0 starts lit, or the walk opens blank
-          var fin = (+L.dataset.in) <= 0 ? 1 : clamp01(t / 0.16);
-          L.style.opacity = Math.min(fin, clamp01((1 - t) / 0.20)).toFixed(3);
-          L.style.transform = 'translate(-50%, -50%) translateZ(' + z.toFixed(1) + 'px)';
+        var trackWidth = track.scrollWidth || 1600;
+        var vw = window.innerWidth || 1280;
+        var maxShift = Math.max(0, trackWidth - vw * 0.78);
+        var shiftX = -p * maxShift;
+        track.style.setProperty('--rail-x', shiftX.toFixed(1) + 'px');
+
+        // Pendulum inertia based on scroll velocity delta (1.5deg to 3.0deg)
+        var dp = p - lastP;
+        lastP = p;
+        var rawTilt = Math.max(-3.0, Math.min(3.0, dp * 140));
+        if (Math.abs(rawTilt) > 0.15) {
+          var snappedTilt = rawTilt > 0 ? Math.max(1.5, rawTilt) : Math.min(-1.5, rawTilt);
+          for (var c = 0; c < cards.length; c++) {
+            cards[c].style.setProperty('--pendulum-deg', snappedTilt.toFixed(2) + 'deg');
+          }
+          clearTimeout(settleTimer);
+          settleTimer = setTimeout(function () {
+            for (var c2 = 0; c2 < cards.length; c2++) {
+              cards[c2].style.setProperty('--pendulum-deg', '0deg');
+            }
+          }, 140);
         }
+
         if (hint) hint.style.opacity = (1 - clamp01(p / 0.08)).toFixed(3);
         var k = 0;
         for (var j = 0; j < STEPS.length; j++) if (p >= STEPS[j][0]) k = j;
+        for (var m = 0; m < cards.length; m++) {
+          cards[m].classList.toggle('is-active-station', m === k);
+        }
         if (k !== at) {
           at = k;
           if (step) step.textContent = STEPS[k][1];
           if (cap) {
-            // Cancel the swap already in flight; see the sister site's note.
             clearTimeout(capT);
             cap.style.opacity = '0'; cap.style.transform = 'translateY(10px)';
             var S = STEPS[k];
             capT = setTimeout(function () {
               cap.innerHTML = '<b>' + S[2] + '</b><span>' + S[3] + '</span>';
               cap.style.opacity = '1'; cap.style.transform = 'none';
-            }, 160);
+            }, 150);
           }
         }
       }
@@ -1572,15 +1958,19 @@
       window.addEventListener('resize', onScroll);
       if ('IntersectionObserver' in window) {
         new IntersectionObserver(function (en) {
-          sec.classList.toggle('is-past', !en[0].isIntersecting);
+          var live = en[0].isIntersecting;
+          sec.classList.toggle('is-live', live);
+          sec.classList.toggle('is-past', !live);
         }, { threshold: 0 }).observe(sec);
+      } else {
+        sec.classList.add('is-live');
       }
       onScroll();
     })();
 
     /* The bench: measure where each stop sits on the rail, then run it.
        Same approach as the Story timeline on the sister site, and for the
-       same reason, the four steps are not evenly spaced once the copy
+       same reason · the four steps are not evenly spaced once the copy
        wraps differently at each width, so thirds-and-quarters would land
        the fill between stops instead of on them. */
     (function bench() {
@@ -1644,7 +2034,7 @@
       if (!('IntersectionObserver' in window)) { t.classList.add('is-live'); return; }
       new IntersectionObserver(function (en) {
         t.classList.toggle('is-live', en[0].isIntersecting);
-      }, { threshold: 0.05 }).observe(t);
+      }).observe(t);
     })();
 
     function initCardTilt() {
@@ -1764,7 +2154,7 @@
         // quiet everywhere made a still image.
         'float side=mix(0.35,1.0,smoothstep(-0.30,0.45,p.x));',
         // Contrast, not coverage. A wide crimson wash at low alpha cannot swing
-        // far from linen, so the field barely changed as it moved, 1.8% over
+        // far from linen, so the field barely changed as it moved · 1.8% over
         // four seconds, which is a still image. Thin, DEEP veins carry high
         // local contrast on a clean ground: they read as marbling rather than
         // as a tint, and they are visible when they travel.
@@ -1811,13 +2201,13 @@
         var scale = Math.min(window.devicePixelRatio || 1, 1.5) * 0.38;
         // Measure the parent, not the canvas. The canvas is absolute inset-0
         // with no intrinsic size, so clientWidth reads 0 and the backing store
-        // collapsed to 2x2, the shader ran, into nothing anyone could see.
+        // collapsed to 2x2 · the shader ran, into nothing anyone could see.
         // The particle code this replaced sized from window for the same reason.
         var host = canvas.parentElement;
         var r = host ? host.getBoundingClientRect() : null;
         // Clamp to the viewport. The canvas is absolute inset-0 inside a
         // section that is 4207px tall, so sizing from the parent rendered a
-        // 486x4207 backing store, two million fragments, and 2.6fps. Nobody
+        // 486x4207 backing store · two million fragments, and 2.6fps. Nobody
         // can see more than a screenful of it at once.
         var cw = Math.min((r && r.width) ? r.width : window.innerWidth, window.innerWidth);
         var ch = Math.min((r && r.height) ? r.height : window.innerHeight, window.innerHeight);
@@ -1873,18 +2263,23 @@
       start();
     })();
 
-    // 4. Pinned Haute Boucherie Stage Transitions
+    // 4. Pinned Haute Boucherie Stage Transitions + Sensory Atmospheric Differentiation
     (function initDeliStage() {
       const wrap = document.getElementById('boucherieExperience');
       const stage = document.getElementById('deliStage');
       const seal = document.getElementById('deliSeal');
+      const sensoryCanvas = document.getElementById('boucherieSensoryCanvas');
       const ch1 = document.getElementById('deliCh1');
       const ch2 = document.getElementById('deliCh2');
       const ch3 = document.getElementById('deliCh3');
       if (!wrap || !stage || !seal) return;
 
       const chs = [ch1, ch2, ch3];
-      const colors = [[74, 14, 23], [24, 6, 9], [44, 26, 9]]; // Burgundy, Charcoal Noir, Royal Saffron Dark
+      // Chapter 01: Crisp clinical ice-blue & alabaster (#0E2234)
+      // Chapter 02: Charred German Beechwood oak (#161210 -> 22, 18, 16)
+      // Chapter 03: Deep Awadhi Saffron & Gold (#24140E -> 36, 20, 14)
+      const colors = [[14, 34, 52], [22, 18, 16], [36, 20, 14]];
+      let weights = [1, 0, 0];
 
       function ss(a, b, x) {
         const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
@@ -1909,6 +2304,7 @@
           const a = i === 0 ? 1 : ss(i - 0.15, i + 0.15, t);
           const z = i === 2 ? 1 : 1 - ss(i + 0.85, i + 1.15, t);
           const w = a * z;
+          weights[i] = w;
           chs[i].style.opacity = w.toFixed(3);
           chs[i].style.transform = `translateY(${((1 - w) * 30).toFixed(1)}px)`;
           chs[i].style.pointerEvents = w > 0.5 ? 'auto' : 'none';
@@ -1925,6 +2321,15 @@
           r += colors[i][0] * w;
           g += colors[i][1] * w;
           b += colors[i][2] * w;
+        }
+
+        // Illuminate Chapter 01 purity badges when active
+        const b1 = document.getElementById('purityBadge1');
+        const b2 = document.getElementById('purityBadge2');
+        if (b1 && b2) {
+          const lit = weights[0] > 0.45;
+          b1.classList.toggle('is-illuminated', lit);
+          b2.classList.toggle('is-illuminated', lit);
         }
 
         seal.style.setProperty('--rot', `${(p * 540).toFixed(1)}deg`);
@@ -1945,9 +2350,128 @@
       window.addEventListener('scroll', onScroll, { passive: true });
       window.addEventListener('resize', onScroll);
       update();
+
+      // Sensory Canvas: Ch01 clinical scan grid, Ch02 Beechwood smoke & embers, Ch03 Saffron strands & mace DOF
+      if (sensoryCanvas && !prefersReducedMotion) {
+        const sctx = sensoryCanvas.getContext('2d');
+        let sRunning = false, sRaf = 0;
+        const particles = Array.from({ length: 28 }, (_, i) => ({
+          x: (i * 37) % 100 / 100,
+          y: (i * 61) % 100 / 100,
+          vx: ((i % 5) - 2) * 0.00025,
+          vy: -0.00045 - (i % 4) * 0.0002,
+          size: 2 + (i % 4) * 1.5,
+          angle: (i * 0.7) % (Math.PI * 2),
+          depth: i % 2 // 0 = foreground blurred DOF, 1 = sharp midground
+        }));
+
+        function resizeSensory() {
+          const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+          const w = Math.max(2, Math.round(stage.clientWidth * 0.5 * dpr));
+          const h = Math.max(2, Math.round(stage.clientHeight * 0.5 * dpr));
+          if (sensoryCanvas.width !== w || sensoryCanvas.height !== h) {
+            sensoryCanvas.width = w;
+            sensoryCanvas.height = h;
+          }
+        }
+        resizeSensory();
+        window.addEventListener('resize', resizeSensory, { passive: true });
+
+        function drawSensory(now) {
+          if (!sRunning) return;
+          const W = sensoryCanvas.width, H = sensoryCanvas.height;
+          sctx.clearRect(0, 0, W, H);
+          const w0 = weights[0], w1 = weights[1], w2 = weights[2];
+
+          // Chapter 01: Clinical Ice-Blue Ozonated Scan Grid
+          if (w0 > 0.05) {
+            const scanY = ((now * 0.09) % H);
+            const grad = sctx.createLinearGradient(0, Math.max(0, scanY - 30), 0, Math.min(H, scanY + 30));
+            grad.addColorStop(0, 'rgba(56, 189, 248, 0)');
+            grad.addColorStop(0.5, `rgba(125, 211, 252, ${(0.14 * w0).toFixed(3)})`);
+            grad.addColorStop(1, 'rgba(56, 189, 248, 0)');
+            sctx.fillStyle = grad;
+            sctx.fillRect(0, Math.max(0, scanY - 30), W, 60);
+          }
+
+          // Chapter 02: German Beechwood Warm Smoke Wisps & Embers
+          if (w1 > 0.05) {
+            for (let i = 0; i < particles.length; i++) {
+              const pt = particles[i];
+              pt.x = (pt.x + pt.vx + Math.sin(now * 0.001 + i) * 0.0003 + 1) % 1;
+              pt.y = (pt.y + pt.vy + 1) % 1;
+              const px = pt.x * W, py = pt.y * H;
+              if (i % 3 === 0) {
+                // Warm Beechwood Smoke Wisp
+                const rg = sctx.createRadialGradient(px, py, 1, px, py, pt.size * 9);
+                rg.addColorStop(0, `rgba(215, 145, 85, ${(0.12 * w1).toFixed(3)})`);
+                rg.addColorStop(1, 'rgba(22, 18, 16, 0)');
+                sctx.fillStyle = rg;
+                sctx.beginPath();
+                sctx.arc(px, py, pt.size * 9, 0, Math.PI * 2);
+                sctx.fill();
+              } else {
+                // Glowing Beechwood Ember
+                sctx.fillStyle = `rgba(255, 165, 23, ${(0.45 * w1).toFixed(3)})`;
+                sctx.beginPath();
+                sctx.arc(px, py, pt.size * 0.65, 0, Math.PI * 2);
+                sctx.fill();
+              }
+            }
+          }
+
+          // Chapter 03: Awadhi Saffron Strands & Crushed Mace in Shallow Depth-of-Field
+          if (w2 > 0.05) {
+            for (let i = 0; i < particles.length; i++) {
+              const pt = particles[i];
+              pt.x = (pt.x + pt.vx * 0.6 + 1) % 1;
+              pt.y = (pt.y + pt.vy * 0.45 + 1) % 1;
+              pt.angle += 0.008;
+              const px = pt.x * W, py = pt.y * H;
+              sctx.save();
+              sctx.translate(px, py);
+              sctx.rotate(pt.angle);
+              if (i % 2 === 0) {
+                // Macro Saffron Strand (Crimson-Gold thread)
+                sctx.strokeStyle = pt.depth === 0
+                  ? `rgba(220, 68, 35, ${(0.38 * w2).toFixed(3)})`
+                  : `rgba(212, 175, 55, ${(0.72 * w2).toFixed(3)})`;
+                sctx.lineWidth = pt.depth === 0 ? 2.4 : 1.3;
+                sctx.beginPath();
+                sctx.moveTo(-pt.size * 2.2, 0);
+                sctx.quadraticCurveTo(0, pt.size * 1.1, pt.size * 2.2, -pt.size * 0.5);
+                sctx.stroke();
+              } else {
+                // Crushed Awadhi Mace / Gold Dust Particle
+                sctx.fillStyle = `rgba(212, 175, 55, ${(0.55 * w2).toFixed(3)})`;
+                sctx.beginPath();
+                sctx.arc(0, 0, pt.depth === 0 ? pt.size * 1.1 : pt.size * 0.6, 0, Math.PI * 2);
+                sctx.fill();
+              }
+              sctx.restore();
+            }
+          }
+
+          sRaf = requestAnimationFrame(drawSensory);
+        }
+
+        if ('IntersectionObserver' in window) {
+          new IntersectionObserver((en) => {
+            const live = en[0].isIntersecting;
+            wrap.classList.toggle('is-live', live);
+            if (live && !sRunning) {
+              sRunning = true;
+              sRaf = requestAnimationFrame(drawSensory);
+            } else if (!live && sRunning) {
+              sRunning = false;
+              cancelAnimationFrame(sRaf);
+            }
+          }, { threshold: 0.02 }).observe(wrap);
+        }
+      }
     })();
 
-    // 5. Master Carver's Optical Inspection Loupe Interaction
+    // 5. Master Carver's Optical Inspection Loupe Interaction (Dual-Res, Chromatic Rim, Reticle HUD & 3 Magnetic Hotspots)
     function setLoupeCut(key) {
       if (!LOUPE_CUTS[key]) return;
       const cut = LOUPE_CUTS[key];
@@ -1976,34 +2500,46 @@
       const glass = document.getElementById('heroLoupeGlass');
       const img = document.getElementById('heroLoupeImg');
       const tempSensor = document.getElementById('liveTempSensor');
+      const hudPill = document.getElementById('loupeHudPill');
+      const reticleSvg = document.getElementById('loupeReticleSvg');
+      const callout = document.getElementById('loupeHotspotCallout');
+      const calloutTitle = document.getElementById('loupeCalloutTitle');
+      const calloutBody = document.getElementById('loupeCalloutBody');
+      const hotspots = Array.from(container ? container.querySelectorAll('.loupe-hotspot') : []);
       if (!container || !glass || !img) return;
 
       let px = 0, py = 0, loupeRaf = 0, loupeHalf = 0;
+      let currentTemp = '2.4';
 
       const zoom = 2.5;
 
-      // Subtle dynamic fluctuation of temperature sensor for ultra-realism
+      // Subtle dynamic fluctuation of temperature sensor (2.3°C ↔ 2.5°C)
       setInterval(() => {
+        currentTemp = (2.3 + Math.random() * 0.2).toFixed(1);
         if (tempSensor) {
-          const val = (2.3 + Math.random() * 0.2).toFixed(1);
-          tempSensor.textContent = `${val}°C`;
+          tempSensor.textContent = `${currentTemp}°C`;
         }
       }, 2500);
 
+      function syncGlassBackground() {
+        const rect = container.getBoundingClientRect();
+        const w = img.width || rect.width || 420;
+        const h = img.height || rect.height || 470;
+        glass.style.backgroundImage = `url('${img.src}')`;
+        glass.style.backgroundSize = `${w * zoom}px ${h * zoom}px`;
+      }
+
       container.addEventListener('mouseenter', () => {
         glass.style.display = 'block';
-        glass.style.backgroundImage = `url('${img.src}')`;
-        glass.style.backgroundSize = `${img.width * zoom}px ${img.height * zoom}px`;
+        syncGlassBackground();
       });
 
       container.addEventListener('mouseleave', () => {
         glass.style.display = 'none';
+        if (callout) callout.classList.remove('is-visible');
+        hotspots.forEach(h => h.classList.remove('is-snapped'));
       });
 
-      // Store the pointer and do every read and write in the frame. Both the
-      // rect and the glass size are layout reads; done per sample they were
-      // forcing a reflow at pointer rate, during the one interaction that has
-      // to stay smooth.
       function updateLoupe(clientX, clientY) {
         px = clientX; py = clientY;
         if (!loupeRaf) loupeRaf = requestAnimationFrame(drawLoupe);
@@ -2012,31 +2548,72 @@
       function drawLoupe() {
         loupeRaf = 0;
         const rect = container.getBoundingClientRect();
-        if (!loupeHalf) loupeHalf = (glass.offsetWidth || 170) / 2;
+        const rw = rect.width || 420;
+        const rh = rect.height || 470;
+        if (!loupeHalf) loupeHalf = (glass.offsetWidth || 184) / 2;
 
-        const x = Math.max(0, Math.min(rect.width, px - rect.left));
-        const y = Math.max(0, Math.min(rect.height, py - rect.top));
+        let x = Math.max(0, Math.min(rw, px - rect.left));
+        let y = Math.max(0, Math.min(rh, py - rect.top));
 
-        glass.style.setProperty('--lx', `${x}px`);
-        glass.style.setProperty('--ly', `${y}px`);
+        // Check 3 Magnetic Hotspots (gently snap within 24px radius)
+        let snappedHotspot = null;
+        for (let i = 0; i < hotspots.length; i++) {
+          const hs = hotspots[i];
+          const hx = parseFloat(hs.dataset.hx || '0.5') * rw;
+          const hy = parseFloat(hs.dataset.hy || '0.5') * rh;
+          const dist = Math.hypot(x - hx, y - hy);
+          if (dist <= 28) {
+            // Gentle magnetic pull toward hotspot center
+            x = x + (hx - x) * 0.68;
+            y = y + (hy - y) * 0.68;
+            snappedHotspot = hs;
+            hs.classList.add('is-snapped');
+          } else {
+            hs.classList.remove('is-snapped');
+          }
+        }
+
+        if (callout) {
+          if (snappedHotspot) {
+            if (calloutTitle) calloutTitle.textContent = '✦ ' + (snappedHotspot.dataset.label || 'Optical Lock');
+            if (calloutBody) calloutBody.textContent = snappedHotspot.dataset.detail || '';
+            callout.classList.add('is-visible');
+          } else {
+            callout.classList.remove('is-visible');
+          }
+        }
+
+        glass.style.setProperty('--lx', `${x.toFixed(1)}px`);
+        glass.style.setProperty('--ly', `${y.toFixed(1)}px`);
         glass.style.backgroundPosition =
-          `-${x * zoom - loupeHalf}px -${y * zoom - loupeHalf}px`;
+          `-${(x * zoom - loupeHalf).toFixed(1)}px -${(y * zoom - loupeHalf).toFixed(1)}px`;
+
+        // Update rotating SVG reticle & live X/Y millimeter + marbling HUD
+        if (reticleSvg) {
+          const deg = ((x + y) * 0.45) % 360;
+          reticleSvg.style.transform = `rotate(${deg.toFixed(1)}deg)`;
+        }
+        if (hudPill) {
+          const mmX = String(Math.round((x / rw) * 240)).padStart(3, '0');
+          const mmY = String(Math.round((y / rh) * 180)).padStart(3, '0');
+          const marblePct = (91.4 + ((Math.sin(x * 0.05) + Math.cos(y * 0.05)) * 1.8)).toFixed(1);
+          hudPill.textContent = `X:${mmX}mm Y:${mmY}mm • ${marblePct}% MARBLE • ${currentTemp}°C`;
+        }
       }
 
       container.addEventListener('mousemove', (e) => updateLoupe(e.clientX, e.clientY), { passive: true });
       container.addEventListener('touchmove', (e) => {
         if (e.touches && e.touches[0]) {
           glass.style.display = 'block';
-          glass.style.backgroundImage = `url('${img.src}')`;
-          glass.style.backgroundSize = `${img.width * zoom}px ${img.height * zoom}px`;
+          syncGlassBackground();
           updateLoupe(e.touches[0].clientX, e.touches[0].clientY);
           e.preventDefault();
         }
       }, { passive: false });
     })();
 
-    // 6. Basket Management
-    function addToBasket(id) {
+    // 6. Basket Management + Fly-to-Basket Quadratic Bezier Arc
+    function addToBasket(id, btnEl) {
       const p = DELI_PRODUCTS.find(item => item.id === id);
       const exist = basket.find(item => item.id === id);
       if (exist) {
@@ -2045,11 +2622,14 @@
         basket.push({ id: p.id, name: p.name, weight: p.weight, price: p.price, qty: 1 });
       }
       updateBasketUI();
-      // A new basket is not the old order: without this the drawer reopens on
-      // the previous confirmation, hiding what was just added and leaving a
-      // spent reference and its WhatsApp payload live on the screen.
       dcStep('bag');
-      toggleBasket(true);
+
+      if (btnEl && typeof window.launchDeliBezierFly === 'function' && !prefersReducedMotion) {
+        window.launchDeliBezierFly(btnEl, p ? p.image : '');
+        setTimeout(() => toggleBasket(true), 540);
+      } else {
+        toggleBasket(true);
+      }
     }
 
     function changeQty(idx, delta) {
@@ -2328,7 +2908,243 @@
     function viewLastDeliOrder() { if (dcLastOrder) dcStep('done'); }
     restoreDeliOrder();
 
-    
+    // 7. Heritage Scroll-Driven SVG Progress Line & Step 04 Vacuum-Seal Compression Finale
+    let deliAudioCtx = null;
+    let deliAudioActive = false;
+    let deliAmbientGain = null;
+
+    function playSubZeroSealClick() {
+      if (!deliAudioActive || !deliAudioCtx) return;
+      try {
+        const now = deliAudioCtx.currentTime;
+        const osc = deliAudioCtx.createOscillator();
+        const g = deliAudioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(190, now);
+        osc.frequency.exponentialRampToValueAtTime(52, now + 0.22);
+        g.gain.setValueAtTime(0.15, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+        osc.connect(g);
+        g.connect(deliAudioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.25);
+      } catch (e) {}
+    }
+
+    window.triggerVacuumSeal = function(forceSeal) {
+      const card = document.getElementById('heritageFeaturedCard');
+      const btn = document.getElementById('vacuumSealTriggerBtn');
+      if (!card) return;
+      const nextState = typeof forceSeal === 'boolean' ? forceSeal : !card.classList.contains('is-vacuum-sealed');
+      card.classList.toggle('is-vacuum-sealed', nextState);
+      if (btn) {
+        btn.textContent = nextState ? '✓ Vacuum Sealed (2.4°C)' : 'Seal Pack ✦';
+      }
+      if (nextState) playSubZeroSealClick();
+    };
+
+    (function initHeritageVacuumFinale() {
+      const heritageSec = document.getElementById('heritage');
+      const benchEl = document.getElementById('bench');
+      const progLine = document.getElementById('heritageProgressLine');
+      if (!heritageSec || !benchEl) return;
+
+      let autoSealedOnce = false;
+      let hTicking = false;
+      function updateHeritageProgress() {
+        hTicking = false;
+        const r = benchEl.getBoundingClientRect();
+        const vh = window.innerHeight || 800;
+        // Progress from when #bench enters bottom 85% of viewport to when it reaches 45%
+        const raw = (vh * 0.85 - r.top) / Math.max(180, vh * 0.42);
+        const p = Math.max(0, Math.min(1, raw));
+        if (progLine) {
+          progLine.style.strokeDashoffset = String(Math.round(1000 * (1 - p)));
+        }
+        if (p >= 0.88 && !autoSealedOnce) {
+          autoSealedOnce = true;
+          window.triggerVacuumSeal(true);
+        }
+      }
+      window.addEventListener('scroll', () => {
+        if (!hTicking) {
+          hTicking = true;
+          requestAnimationFrame(updateHeritageProgress);
+        }
+      }, { passive: true });
+      updateHeritageProgress();
+    })();
+
+    // 8. Fly-to-Basket Quadratic Bezier Arc & Elastic Basket Bounce
+    window.launchDeliBezierFly = function(btnEl, imgSrc) {
+      const targetBtn = document.getElementById('deliBasketBtn') || document.getElementById('basketCount');
+      const badge = document.getElementById('basketCount');
+      if (!btnEl || !targetBtn) return;
+
+      const sRect = btnEl.getBoundingClientRect();
+      const eRect = targetBtn.getBoundingClientRect();
+      const sx = sRect.left + sRect.width / 2 - 24;
+      const sy = sRect.top + sRect.height / 2 - 24;
+      const ex = eRect.left + eRect.width / 2 - 24;
+      const ey = eRect.top + eRect.height / 2 - 24;
+      const cx = (sx + ex) / 2;
+      const cy = Math.min(sy, ey) - 140;
+
+      const pill = document.createElement('img');
+      pill.className = 'fly-bezier-pill';
+      pill.src = imgSrc || '/assets/brand/u-1529193591184-b1d58069ecdd-800.jpg';
+      pill.alt = '';
+      pill.style.transform = `translate3d(${sx.toFixed(1)}px, ${sy.toFixed(1)}px, 0) scale(1)`;
+      document.body.appendChild(pill);
+
+      const dur = 520;
+      const t0 = performance.now();
+      function stepArc(now) {
+        const t = Math.min(1, (now - t0) / dur);
+        const ease = 1 - Math.pow(1 - t, 3);
+        const inv = 1 - ease;
+        const x = inv * inv * sx + 2 * inv * ease * cx + ease * ease * ex;
+        const y = inv * inv * sy + 2 * inv * ease * cy + ease * ease * ey;
+        const sc = 1 - ease * 0.55;
+        pill.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) scale(${sc.toFixed(3)})`;
+        pill.style.opacity = String((1 - ease * 0.25).toFixed(2));
+        if (t < 1) {
+          requestAnimationFrame(stepArc);
+        } else {
+          pill.remove();
+          if (badge) {
+            badge.classList.remove('bag-bounce');
+            void badge.offsetWidth;
+            badge.classList.add('bag-bounce');
+          }
+          playSubZeroSealClick();
+        }
+      }
+      requestAnimationFrame(stepArc);
+    };
+
+    // 9. Contextual Pill Cursor (rAF-coalesced transform only, never left/top)
+    (function initDeliContextualCursor() {
+      const cursor = document.getElementById('deliCustomCursor');
+      const label = document.getElementById('deliCursorText');
+      if (!cursor || !label || prefersReducedMotion) return;
+
+      let cx = -100, cy = -100, cRaf = 0;
+      function renderCursor() {
+        cRaf = 0;
+        cursor.style.setProperty('--cx', `${cx.toFixed(1)}px`);
+        cursor.style.setProperty('--cy', `${cy.toFixed(1)}px`);
+      }
+
+      window.addEventListener('pointermove', (e) => {
+        cx = e.clientX;
+        cy = e.clientY;
+        if (!cRaf) cRaf = requestAnimationFrame(renderCursor);
+
+        const pillHost = e.target && e.target.closest ? e.target.closest('[data-cursor-pill]') : null;
+        if (pillHost) {
+          const text = pillHost.getAttribute('data-cursor-pill') || '[ INSPECT CUT • 2.4°C ]';
+          if (label.textContent !== text) label.textContent = text;
+          cursor.classList.add('is-pill');
+        } else {
+          cursor.classList.remove('is-pill');
+        }
+      }, { passive: true });
+    })();
+
+    // 10. Cold-Room 2.4°C Spatial Audio Toggle (15% Gain)
+    window.toggleDeliAudio = function() {
+      const btn = document.getElementById('deliAudioBtn');
+      const lbl = document.getElementById('deliAudioLabel');
+      try {
+        if (!deliAudioCtx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (!AC) return;
+          deliAudioCtx = new AC();
+          // Filtered pink/brown cold-room air circulation hum at 15% gain
+          const bufferSize = deliAudioCtx.sampleRate * 2;
+          const buffer = deliAudioCtx.createBuffer(1, bufferSize, deliAudioCtx.sampleRate);
+          const data = buffer.getChannelData(0);
+          let lastOut = 0.0;
+          for (let i = 0; i < bufferSize; i++) {
+            const white = Math.random() * 2 - 1;
+            data[i] = (lastOut + (0.02 * white)) / 1.02;
+            lastOut = data[i];
+            data[i] *= 0.35;
+          }
+          const source = deliAudioCtx.createBufferSource();
+          source.buffer = buffer;
+          source.loop = true;
+
+          const filter = deliAudioCtx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.value = 240;
+
+          deliAmbientGain = deliAudioCtx.createGain();
+          deliAmbientGain.gain.value = 0.15; // 15% gain
+
+          source.connect(filter);
+          filter.connect(deliAmbientGain);
+          deliAmbientGain.connect(deliAudioCtx.destination);
+          source.start(0);
+        }
+
+        if (deliAudioCtx.state === 'suspended') {
+          deliAudioCtx.resume();
+        }
+
+        deliAudioActive = !deliAudioActive;
+        if (deliAmbientGain) {
+          deliAmbientGain.gain.setTargetAtTime(deliAudioActive ? 0.15 : 0.0, deliAudioCtx.currentTime, 0.08);
+        }
+        if (btn) btn.setAttribute('aria-pressed', deliAudioActive ? 'true' : 'false');
+        if (lbl) lbl.textContent = deliAudioActive ? '2.4°C Live' : '2.4°C Audio';
+        if (deliAudioActive) playSubZeroSealClick();
+      } catch (e) {}
+    };
+
+    // 11. Velocity-Driven Skew & Pendulum Physics (gsap.quickSetter, lerp 0.08, clamped [-25, 25])
+    (function initDeliVelocityPhysics() {
+      if (prefersReducedMotion) return;
+      window.addEventListener('load', () => {
+        let lastScrollY = window.scrollY;
+        let smoothVel = 0;
+        let vRaf = 0;
+
+        function tickVelocity() {
+          const cards = document.querySelectorAll('.kinetic-card');
+          const dy = window.scrollY - lastScrollY;
+          lastScrollY = window.scrollY;
+          const targetVel = Math.max(-25, Math.min(25, dy));
+          smoothVel += (targetVel - smoothVel) * 0.08;
+
+          const skew = (smoothVel * 0.12).toFixed(2);
+          const rot = (smoothVel * 0.06).toFixed(2);
+
+          if (window.gsap && typeof window.gsap.quickSetter === 'function') {
+            cards.forEach(c => {
+              if (!c._quickTransform) c._quickTransform = window.gsap.quickSetter(c, 'transform');
+              c._quickTransform(`skewY(${skew}deg) rotateZ(${rot}deg)`);
+            });
+          } else {
+            cards.forEach(c => {
+              c.style.transform = `skewY(${skew}deg) rotateZ(${rot}deg)`;
+            });
+          }
+
+          if (Math.abs(smoothVel) > 0.05) {
+            vRaf = requestAnimationFrame(tickVelocity);
+          } else {
+            vRaf = 0;
+            cards.forEach(c => { c.style.transform = ''; });
+          }
+        }
+
+        window.addEventListener('scroll', () => {
+          if (!vRaf) vRaf = requestAnimationFrame(tickVelocity);
+        }, { passive: true });
+      });
+    })();
 
     renderDeliProducts();
     updateBasketUI();

@@ -62,14 +62,23 @@ const norm = (s) => (s || '').replace(/\s+/g, ' ').trim();
 async function open(browser, vp, path) {
   const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
   const bag = { errors: [], failed: [] };
+  let closed = false;
+  ctx.on('close', () => { closed = true; });
   await ctx.route('**/*', async (route) => {
-    const res = await route.fetch();
-    const headers = { ...res.headers() };
-    if (!(headers['content-type'] || '').includes('text/html')) return route.fulfill({ response: res });
-    headers['content-security-policy'] = CSP;
-    const p = new URL(route.request().url()).pathname;
-    const body = p.startsWith('/amar-ujala') ? mutate(p, await res.text()) : await res.text();
-    return route.fulfill({ response: res, headers, body });
+    try {
+      const res = await route.fetch();
+      const headers = { ...res.headers() };
+      if (!(headers['content-type'] || '').includes('text/html')) return await route.fulfill({ response: res });
+      headers['content-security-policy'] = CSP;
+      const p = new URL(route.request().url()).pathname;
+      const body = p.startsWith('/amar-ujala') ? mutate(p, await res.text()) : await res.text();
+      return await route.fulfill({ response: res, headers, body });
+    } catch (e) {
+      if (!route.request().url().startsWith(BASE) && /ENOTFOUND|EAI_AGAIN|ENETUNREACH/.test(e.message)) {
+        return await route.fulfill({ status: 200, contentType: 'text/css', body: '' }).catch(() => {});
+      }
+      if (!closed && !/disposed|has been closed|Target closed/i.test(e.message)) throw e;
+    }
   });
   const page = await ctx.newPage();
   page.on('console', (m) => { if (m.type() === 'error') bag.errors.push(m.text()); });

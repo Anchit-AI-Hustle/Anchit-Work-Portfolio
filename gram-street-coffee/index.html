@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Gram Street Coffee | D2C Roastery, Japanese Matcha &amp; Gelato | Gurugram</title>
+<title>Gram Street Coffee | D2C Roastery, Japanese Matcha &amp; Gelato · Gurugram</title>
 <meta name="theme-color" content="#CDB8F7">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23CDB8F7'/%3E%3Ccircle cx='32' cy='32' r='14' fill='%232B1650'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Playfair+Display:ital,wght@1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=JetBrains+Mono:wght@500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
 
 <!-- Tailwind CSS -->
 <!-- Tailwind, compiled and self-hosted (scripts/build-tailwind.mjs).
      The CDN build shipped a ~300KB JIT compiler, scanned the DOM at
-     runtime and left the page unstyled until it finished, and Tailwind
+     runtime and left the page unstyled until it finished · and Tailwind
      itself warns in the console not to use it in production. -->
 <link rel="stylesheet" href="/assets/tw-gram-street.css">
 
@@ -44,17 +44,17 @@
   p { margin: 0; }
   a { color: inherit; }
 
-  /* Custom 5D Magnetic Cursor */
+  /* Custom 5D Magnetic & Context-Aware Pill Cursor */
   .custom-cursor {
     width: 16px;
     height: 16px;
     border: 2px solid var(--accent);
     background: rgba(255, 255, 255, 0.9);
-    border-radius: 50%;
+    border-radius: 999px;
     position: fixed;
     /* Anchored at the origin and moved by transform. It used to be moved by
        writing left/top on every mousemove, which forces layout at pointer
-       rate, on a high-polling mouse that is several layouts per frame, for
+       rate · on a high-polling mouse that is several layouts per frame, for
        a 16px dot. The offsets come in on the element's own custom properties,
        never on :root: a custom property on the root invalidates the computed
        style of every element on the page. */
@@ -62,19 +62,49 @@
     left: 0;
     pointer-events: none;
     z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transform: translate3d(var(--cx, -100px), var(--cy, -100px), 0) translate(-50%, -50%);
     transition: width 0.22s cubic-bezier(0.16, 1, 0.3, 1),
                 height 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                padding 0.22s cubic-bezier(0.16, 1, 0.3, 1),
                 background-color 0.2s ease,
+                border-color 0.2s ease,
                 box-shadow 0.2s ease;
     box-shadow: 0 0 18px rgba(124, 58, 237, 0.5);
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .custom-cursor .cursor-pill-text {
+    opacity: 0;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    color: #F1E9FF;
+    text-transform: uppercase;
+    transition: opacity 0.18s ease;
+    pointer-events: none;
   }
   .custom-cursor.hovering {
-    width: 60px;
-    height: 60px;
+    width: 54px;
+    height: 54px;
     background-color: rgba(205, 184, 247, 0.35);
     border-color: #7C3AED;
     box-shadow: 0 0 35px rgba(124, 58, 237, 0.7);
+  }
+  .custom-cursor.is-pill {
+    width: auto;
+    height: 34px;
+    padding: 0 14px;
+    background-color: rgba(27, 14, 54, 0.94);
+    border: 1.5px solid #CDB8F7;
+    box-shadow: 0 10px 30px rgba(27, 14, 54, 0.55), 0 0 20px rgba(124, 58, 237, 0.65);
+    backdrop-filter: blur(8px);
+  }
+  .custom-cursor.is-pill .cursor-pill-text {
+    opacity: 1;
   }
   @media (hover: none) or (pointer: coarse) {
     .custom-cursor { display: none !important; }
@@ -155,14 +185,14 @@
     position: absolute;
     right: clamp(-48px, -2.5vw, 0px);
     /* Clear of the consent bar and the hero's lower padding. The counter is
-       the point of the drawing, the copy calls it a lilac glass-fronted
-       counter, so it must not be the part that falls off the bottom. */
+       the point of the drawing · the copy calls it a lilac glass-fronted
+       counter · so it must not be the part that falls off the bottom. */
     bottom: clamp(78px, 11vh, 128px);
     width: auto;
     pointer-events: none;
     z-index: 1;
     /* No CSS filter here. A drop-shadow over a subtree that animates every
-       frame re-rasterises the whole scene every frame, it cost 13fps once
+       frame re-rasterises the whole scene every frame · it cost 13fps once
        the scene grew. The counter casts its own shadow inside the SVG, on
        the floor where a shadow belongs, for nothing. */
   }
@@ -336,7 +366,7 @@
   /* ── Mobile header ──────────────────────────────────────────────────────
      The inline nav measures 700px. On a 320px phone it simply ran off the
      side of the screen, and the wordmark wrapped onto three lines, which made
-     the fixed header 105px tall, taller than the hero's 90px top padding, so
+     the fixed header 105px tall · taller than the hero's 90px top padding, so
      the headline was buried behind it. Below 900px the links become a sheet
      behind a toggle, the wordmark stays on one line, and the header goes back
      to a single row. */
@@ -382,8 +412,7 @@
     .nav-links.is-open { display: flex; }
     .nav-links a { padding: 11px 14px; border-radius: 10px; font-size: 0.95rem; }
 
-    /* The header is one row again, so the hero only needs to clear ~52px,
-       but keep headroom for the notch and a wrapped line. */
+    /* The header is one row again, so the hero only needs to clear ~52px · but keep headroom for the notch and a wrapped line. */
     .hero { padding-top: clamp(76px, 14vh, 110px); }
   }
 
@@ -517,6 +546,10 @@
 
   .is-scroll { height: 320vh; position: relative; }
   .is-scroll .stage {
+    --surface-tint: #2A1810;
+    --accent-glow: #6E44FF;
+    --ch-ink: #F8F4FF;
+    --ch-muted: rgba(248, 244, 255, 0.85);
     position: sticky;
     top: 0;
     height: 100vh;
@@ -525,6 +558,45 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    background-color: var(--surface-tint);
+    background-image: radial-gradient(circle at 68% 48%, var(--accent-glow) 0%, transparent 62%);
+    transition: background-color 0.12s linear;
+  }
+  .is-scroll .stage .ch-title,
+  .is-scroll .stage .ch-lead,
+  .is-scroll .stage .ch-list strong,
+  .is-scroll .stage .ch-nav button {
+    color: var(--ch-ink);
+    transition: color 0.25s ease;
+  }
+  .is-scroll .stage .ch-list span {
+    color: var(--ch-muted);
+    transition: color 0.25s ease;
+  }
+  .is-scroll .stage .ch-nav button {
+    border-bottom-color: rgba(255, 255, 255, 0.25);
+  }
+  .is-scroll .stage .ch-nav button::after {
+    background: var(--chrome);
+  }
+  #tenchaShimmerCanvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .gelato-frost-card {
+    border: 2px solid rgba(255, 255, 255, 0.78) !important;
+    box-shadow:
+      0 20px 50px rgba(28, 20, 18, 0.45),
+      inset 0 0 28px rgba(220, 242, 255, 0.42),
+      0 0 0 1px rgba(190, 230, 255, 0.5) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
   .is-scroll .chapter {
     position: absolute;
@@ -553,11 +625,11 @@
     -webkit-mask: radial-gradient(circle, transparent 0 58%, #000 59%);
     mask: radial-gradient(circle, transparent 0 58%, #000 59%);
     transform: scale(var(--s, 1));
-    opacity: 0.55;
+    opacity: 0.42;
     pointer-events: none;
-    box-shadow: 0 0 60px rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 70px var(--accent-glow);
   }
-  .is-scroll .chapter { z-index: 1; }
+  .is-scroll .chapter { z-index: 2; }
   @media (max-width: 699px) { .is-scroll .orb { display: none; } }
   .is-scroll .ch-nav {
     display: flex;
@@ -596,37 +668,82 @@
 
   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
-  /* ══ THE WALK-IN ══════════════════════════════════════════════════════
-     A section you move THROUGH rather than look at. Five stages, driven by
-     scroll position, on a real 3D stage: street, the door, the room, the
-     counter, the shot. The copy already promises "a tiny room by design" and
-     "just enough room to savor an espresso" - this is that walk, taken.
-
-     How it works: the section is tall, its inner frame is sticky, and one
-     scroll-progress number (0 to 1) is written to the SECTION element each
-     frame. Never to :root - a custom property there invalidates the computed
-     style of every element on the page, which this repo has paid for before.
-     The script then places each layer in Z from that number, so the layers
-     genuinely pass the camera instead of merely scaling.
-
-     transform and opacity only. will-change goes on while the walk is on
-     screen and comes off when it leaves. */
-  .walk { position: relative; background: var(--grape); }
-  .walk-rail { height: 460vh; }
+  /* ══ THE WALK-IN: 3-STAGE Z-AXIS ARCHITECTURAL PASS-THROUGH ══════════
+     Pinned for 250vh across 90 virtual camera frames:
+       Frames 01-30: The Lilac Streetfront on Arjun Marg (foreground glass
+                     cutout mask at z-index 30 with backdrop-filter: blur(6px)
+                     and mouse-parallax reflection sliding across the panes).
+       Frames 31-60: Crossing the Glass Threshold (facade scales from scale(1)
+                     to scale(4.5) so the doorframe passes past the viewport
+                     edges while a chrome specular flare sweeps the edge).
+       Frames 61-90: The 10-Seater Chrome Bar (docking directly at the brushed
+                     steel espresso counter). */
+  .walk { position: relative; background: #1B0E36; }
+  .walk-rail { height: 250vh; }
   .walk-frame {
-    position: sticky; top: 0; height: 100vh; overflow: hidden;
-    perspective: 1100px; perspective-origin: 50% 46%;
+    position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden;
+    perspective: 1100px; perspective-origin: 50% 48%;
     background:
-      radial-gradient(120% 90% at 50% 18%, #4A2C78 0%, #2B1650 58%, #1B0E36 100%);
+      radial-gradient(120% 90% at 50% 18%, #4A2C78 0%, #2B1650 58%, #120826 100%);
   }
   .walk-stage { position: absolute; inset: 0; transform-style: preserve-3d; }
   .walk-layer {
     position: absolute; left: 50%; top: 50%;
-    width: min(92vw, 1180px);
+    width: min(94vw, 1220px);
     transform-origin: 50% 50%;
     will-change: transform, opacity;
   }
+  /* Foreground Lilac Architectural Glass Facade Mask (Frames 01-60) */
+  .walk-facade-mask {
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    pointer-events: none;
+    transform-origin: 50% 54%;
+    will-change: transform, opacity;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .walk-facade-glass-pane {
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    background: linear-gradient(
+      115deg,
+      rgba(205, 184, 247, 0.24) 0%,
+      rgba(255, 255, 255, 0.36) calc(var(--glass-rx, 50%) - 12%),
+      rgba(205, 184, 247, 0.14) calc(var(--glass-rx, 50%) + 12%),
+      rgba(43, 22, 80, 0.42) 100%
+    );
+    /* Cut out the central doorway portal so the bar inside is crisp */
+    -webkit-mask-image: linear-gradient(#000, #000), radial-gradient(ellipse 190px 260px at 50% 56%, transparent 98%, #000 100%);
+    -webkit-mask-composite: xor;
+    mask-image: linear-gradient(#000, #000), radial-gradient(ellipse 190px 260px at 50% 56%, transparent 98%, #000 100%);
+    mask-composite: exclude;
+  }
+  .walk-chrome-flare {
+    position: absolute;
+    left: 50%;
+    top: 54%;
+    width: 420px;
+    height: 540px;
+    transform: translate(-50%, -50%) scale(1);
+    border-radius: 210px 210px 16px 16px;
+    border: 3px solid rgba(255, 255, 255, 0.9);
+    box-shadow:
+      0 0 38px rgba(255, 255, 255, 0.95),
+      0 0 80px rgba(196, 181, 253, 0.85),
+      inset 0 0 32px rgba(255, 255, 255, 0.75);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 32;
+    will-change: transform, opacity;
+  }
   .walk.is-past .walk-layer, .walk.is-before .walk-layer,
+  .walk.is-past .walk-facade-mask, .walk.is-before .walk-facade-mask,
+  .walk.is-past .walk-chrome-flare, .walk.is-before .walk-chrome-flare,
   .walk.is-past .walk-cap, .walk.is-before .walk-cap,
   .walk.is-past .walk-hint, .walk.is-before .walk-hint { will-change: auto; }
   .walk-layer svg, .walk-layer img { display: block; width: 100%; height: auto; }
@@ -634,48 +751,59 @@
 
   /* the words that ride the walk */
   .walk-cap {
-    position: absolute; left: 0; right: 0; bottom: clamp(74px, 12vh, 132px);
+    position: absolute; left: 0; right: 0; bottom: clamp(68px, 11vh, 122px);
     text-align: center; color: #F1E9FF; padding: 0 var(--pad);
     pointer-events: none; will-change: opacity, transform;
+    z-index: 35;
   }
-  .walk-cap b { display: block; font-size: clamp(1.9rem, 5.2vw, 3.4rem); letter-spacing: -0.03em; line-height: 1; }
-  .walk-cap span { display: block; margin-top: 10px; font-size: clamp(.95rem, 2.1vw, 1.12rem); font-weight: 600; opacity: .82; max-width: 34ch; margin-inline: auto; }
+  .walk-cap b { display: block; font-size: clamp(1.85rem, 4.8vw, 3.2rem); letter-spacing: -0.03em; line-height: 1.04; text-shadow: 0 8px 28px rgba(18, 8, 38, 0.85); }
+  .walk-cap span { display: block; margin-top: 10px; font-size: clamp(.95rem, 2vw, 1.1rem); font-weight: 600; opacity: .9; max-width: 40ch; margin-inline: auto; text-shadow: 0 4px 18px rgba(18, 8, 38, 0.9); }
   .walk-step {
-    position: absolute; top: clamp(74px, 11vh, 120px); left: 0; right: 0;
+    position: absolute; top: clamp(72px, 10vh, 110px); left: 0; right: 0;
+    display: flex; align-items: center; justify-content: center; gap: 14px;
     text-align: center; color: #CDB8F7; font-size: .72rem;
-    letter-spacing: .32em; text-transform: uppercase; font-weight: 800;
-    pointer-events: none;
+    letter-spacing: .28em; text-transform: uppercase; font-weight: 800;
+    pointer-events: none; z-index: 35;
+  }
+  .walk-frame-hud {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(27, 14, 54, 0.78);
+    border: 1px solid rgba(205, 184, 247, 0.35);
+    color: #F1E9FF;
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
   }
 
   /* a hint that this one is scrolled through, shown only at the start */
   .walk-hint {
-    position: absolute; left: 0; right: 0; bottom: 26px; text-align: center;
+    position: absolute; left: 0; right: 0; bottom: 22px; text-align: center;
     color: #CDB8F7; font-size: .7rem; letter-spacing: .26em; text-transform: uppercase;
-    font-weight: 800; pointer-events: none; will-change: opacity;
+    font-weight: 800; pointer-events: none; will-change: opacity; z-index: 35;
   }
-  .walk-hint i { display: block; width: 1px; height: 26px; margin: 8px auto 0; background: currentColor; opacity: .5; }
+  .walk-hint i { display: block; width: 1px; height: 24px; margin: 6px auto 0; background: currentColor; opacity: .5; }
 
   @media (max-width: 760px) {
-    .walk-rail { height: 380vh; }
+    .walk-rail { height: 250vh; }
     .walk-frame { perspective: 760px; }
-    .walk-layer { width: 108vw; }
+    .walk-layer { width: 106vw; }
   }
 
   /* No JS, or motion turned down: the walk becomes one composed frame
      rather than a stack of invisible layers. */
   .walk:not(.is-armed) .walk-rail { height: 100vh; }
   .walk:not(.is-armed) .walk-layer { opacity: 1; transform: translate(-50%, -50%); }
-  .walk:not(.is-armed) .walk-layer[data-z0="1400"],
-  .walk:not(.is-armed) .walk-layer[data-z0="1150"] { opacity: 0; }
+  .walk:not(.is-armed) .walk-facade-mask { display: none; }
   @media (prefers-reduced-motion: reduce) {
     .walk-rail { height: 100vh !important; }
-    .walk-layer, .walk-cap, .walk-hint { transition: none !important; }
+    .walk-layer, .walk-facade-mask, .walk-cap, .walk-hint { transition: none !important; }
   }
 
   /* ── THE TIMELINE ──────────────────────────────────────────────────────
      Three ventures. The rail already drew itself, but the stops on it were
      flat identical dots and every entry arrived at once, so the only motion
-     in the whole section was a 3px chrome line on lilac, which reads as
+     in the whole section was a 3px chrome line on lilac · which reads as
      nothing. Each stop is a drawn medallion now, it lands as the rail
      reaches it, and its entry follows. The current chapter keeps a slow
      pulse because it is the only one still happening.
@@ -706,7 +834,7 @@
     transition-delay: calc(var(--i, 0) * .22s + .20s);
   }
   .timeline.is-armed .tl-mark {
-    /* a shorthand would reset the delay the markup sets inline, see CLAUDE.md */
+    /* a shorthand would reset the delay the markup sets inline · see CLAUDE.md */
     transition: transform .66s cubic-bezier(.22,1.45,.42,1);
   }
   .timeline.is-armed.is-drawn li { opacity: 1; transform: none; }
@@ -715,7 +843,7 @@
   .timeline.is-done li,
   .timeline.is-done .tl-mark { will-change: auto; }
 
-  /* the chapter that has not finished, marked, not animated: the cycle
+  /* the chapter that has not finished · marked, not animated: the cycle
      below is what moves, and two competing loops on one medallion is noise */
   .tl-mark.is-now::after {
     content: ""; position: absolute; inset: -5px;
@@ -729,8 +857,8 @@
      one being read, advances to the second, then the third, then starts
      over. 13.8s, 4.6s a chapter.
 
-     The three hold positions are not thirds, the entries are different
-     heights, and on a phone they are very different heights, so the script
+     The three hold positions are not thirds · the entries are different
+     heights, and on a phone they are very different heights · so the script
      measures each medallion's centre and writes it as --p1/--p2/--p3. The
      keyframes read those, which is why the fill lands ON a stop at every
      width instead of near one. */
@@ -893,8 +1021,126 @@
     user-select: none;
   }
 
-  footer { padding: 32px var(--pad) 40px; background: var(--lilac); border-top: 2px solid; border-image: var(--chrome) 1; font-size: 0.95rem; }
+  footer { padding: 48px var(--pad) 40px; background: var(--grape); color: var(--lilac-soft); border-top: 2px solid; border-image: var(--chrome) 1; font-size: 0.95rem; }
   footer a { font-weight: 700; text-decoration: underline; }
+
+  .font-mono-code { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .font-serif-editorial { font-family: "Playfair Display", Georgia, serif; }
+  .eyebrow-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.75rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+  }
+  .eyebrow-label::before {
+    content: "";
+    display: inline-block;
+    width: 28px;
+    height: 2px;
+    background: var(--grape);
+    border-radius: 2px;
+  }
+  .italic-accent {
+    font-family: "Playfair Display", Georgia, serif;
+    font-style: italic;
+    font-weight: 600;
+    background: linear-gradient(135deg, #7C3AED 0%, #5E32CC 50%, #C026D3 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+  #gsAnnounceBar {
+    margin-top: 60px;
+    background: var(--grape);
+    color: var(--lilac-soft);
+    border-bottom: 1px solid rgba(205, 184, 247, 0.25);
+  }
+  @media (max-width: 900px) {
+    #gsAnnounceBar { margin-top: 50px; }
+  }
+
+  /* Buoyant Flavor Note Pills (gated by #roasteryCraft.is-live) */
+  .buoyant-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    animation: gsPillBuoyancy 3.4s ease-in-out infinite;
+    animation-delay: calc(var(--pi, 0) * 0.45s);
+    animation-play-state: paused;
+    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+  }
+  #roasteryCraft.is-live .buoyant-pill {
+    animation-play-state: running;
+  }
+  @keyframes gsPillBuoyancy {
+    0%, 100% { transform: translateY(0px); }
+    50%      { transform: translateY(-5px); }
+  }
+
+  /* Microfoam 100% Gloss Specular Shader Overlay */
+  .microfoam-gloss-sheen {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 15;
+    background:
+      radial-gradient(
+        circle 190px at var(--gloss-x, 50%) var(--gloss-y, 38%),
+        rgba(255, 255, 255, 0.58) 0%,
+        rgba(241, 233, 255, 0.22) 34%,
+        transparent 70%
+      ),
+      linear-gradient(
+        var(--gloss-angle, 125deg),
+        transparent 30%,
+        rgba(255, 255, 255, 0.28) 48%,
+        rgba(255, 255, 255, 0.04) 56%,
+        transparent 75%
+      );
+    mix-blend-mode: screen;
+  }
+
+  /* Fly-to-Bag Bezier Floating Pill */
+  .fly-bezier-pill {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 999px;
+    overflow: hidden;
+    border: 2.5px solid #CDB8F7;
+    background: #2B1650;
+    box-shadow: 0 14px 32px rgba(43, 22, 80, 0.55), 0 0 20px rgba(124, 58, 237, 0.7);
+    z-index: 999998;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #F1E9FF;
+    font-weight: 900;
+    font-size: 11px;
+    will-change: transform, opacity;
+  }
+  .fly-bezier-pill img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  @keyframes bagElasticBounce {
+    0%   { transform: scale(1); }
+    35%  { transform: scale(1.28); }
+    65%  { transform: scale(0.92); }
+    100% { transform: scale(1); }
+  }
+  .bag-bounce {
+    animation: bagElasticBounce 0.48s cubic-bezier(0.22, 1.5, 0.36, 1);
+  }
 
   @media (prefers-reduced-motion: reduce) {
     /* This block used to re-declare `smooth` here, which handed smooth
@@ -902,15 +1148,60 @@
        has had `auto` all along. !important because ScrollTrigger restores this
        property inline. */
     html { scroll-behavior: auto !important; }
+    .buoyant-pill { animation: none !important; }
   }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CafeOrCoffeeShop",
+  "name": "Gram Street Coffee",
+  "description": "Third-wave specialty coffee roastery, ceremonial Japanese Uji matcha bar, and artisanal small-batch gelato counter in Gurugram, founded by Chef Vanshika Bhatia.",
+  "url": "https://anchit-tandon.com/gram-street-coffee",
+  "telephone": "+91-81300-56889",
+  "email": "hello@gramstreetcoffee.com",
+  "foundingDate": "2023",
+  "founder": {
+    "@type": "Person",
+    "name": "Chef Vanshika Bhatia"
+  },
+  "servesCuisine": ["Specialty Coffee", "Ceremonial Japanese Matcha", "Artisanal Gelato", "Japanese Sandos", "Craft Viennoiserie"],
+  "priceRange": "₹₹",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Block F, 16 Arjun Marg, DLF Phase 1, Sector 26A",
+    "addressLocality": "Gurugram",
+    "addressRegion": "Haryana",
+    "postalCode": "122002",
+    "addressCountry": "IN"
+  },
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      "opens": "08:30",
+      "closes": "22:30"
+    },
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Saturday", "Sunday"],
+      "opens": "08:00",
+      "closes": "23:00"
+    }
+  ],
+  "sameAs": [
+    "https://www.instagram.com/gramstreetcoffee/",
+    "https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon"
+  ]
+}
+</script>
 <!-- seo:auto:start -->
-<!-- Managed by scripts/seo-inject.mjs, edit seo.config.json, not here. -->
+<!-- Managed by scripts/seo-inject.mjs · edit seo.config.json, not here. -->
 <meta name="description" content="In-house specialty roasts, ceremonial Uji matcha, and small-batch gelato. DLF Phase 1, Golf Course Road &amp; Sector 56, Gurugram." />
 <link rel="canonical" href="https://anchit-tandon.com/gram-street-coffee" />
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
 <meta name="author" content="Anchit Tandon" />
-<meta property="og:title" content="Gram Street Coffee | D2C Roastery, Japanese Matcha &amp; Gelato | Gurugram" />
+<meta property="og:title" content="Gram Street Coffee | D2C Roastery, Japanese Matcha &amp; Gelato · Gurugram" />
 <meta property="og:description" content="In-house specialty roasts, ceremonial Uji matcha, and small-batch gelato. DLF Phase 1, Golf Course Road &amp; Sector 56, Gurugram." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://anchit-tandon.com/gram-street-coffee" />
@@ -918,7 +1209,7 @@
 <meta property="og:site_name" content="Anchit Tandon" />
 <meta property="og:locale" content="en_US" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Gram Street Coffee | D2C Roastery, Japanese Matcha &amp; Gelato | Gurugram" />
+<meta name="twitter:title" content="Gram Street Coffee | D2C Roastery, Japanese Matcha &amp; Gelato · Gurugram" />
 <meta name="twitter:description" content="In-house specialty roasts, ceremonial Uji matcha, and small-batch gelato. DLF Phase 1, Golf Course Road &amp; Sector 56, Gurugram." />
 <meta name="twitter:image" content="https://anchit-tandon.com/assets/brand/u-1501339847302-ac426a4a7cbb-1200.jpg" />
 <!-- seo:auto:end -->
@@ -926,12 +1217,11 @@
 <body>
 <div class="concept-bar" role="note" style="position:relative;z-index:60;padding:8px 16px;text-align:center;font:600 12px/1.45 system-ui,-apple-system,sans-serif;letter-spacing:.02em;background:#111;color:#f5f0e8">Concept storefront by <a href="/" style="color:inherit;text-decoration:underline;text-underline-offset:2px">Anchit Tandon</a>, not affiliated with Gram Street Coffee. Nothing here places a real order.</div>
 
-
 <!-- Luxury Film Grain Cinematic Overlay -->
 <div class="film-grain" aria-hidden="true"></div>
 
 <!-- 5D Custom Magnetic Cursor -->
-<div class="custom-cursor" id="customCursor"></div>
+<div class="custom-cursor" id="customCursor"><span class="cursor-pill-text" id="cursorPillText"></span></div>
 
 <!-- Top Pinned Bar -->
 <header class="site-head">
@@ -946,25 +1236,44 @@
 <nav class="nav" aria-label="Main Navigation">
   <div class="nav-links" id="navLinks">
     <a href="#chapters">Flavours</a>
+    <a href="#barMenu">Today's Menu</a>
     <a href="#roasteryCraft">Craft &amp; Roastery</a>
-    <a href="#d2cShop">D2C Roasts</a>
-    <a href="#story">Story</a>
-    <a href="#space">The Space</a>
-    <a href="#cities">Network</a>
-    <a href="#destinations">Locations (3)</a>
+    <a href="#d2cShop">The Beans</a>
+    <a href="#story">Our Story</a>
+    <a href="#events">Cuppings</a>
+    <a href="#destinations">Find Us (3)</a>
   </div>
-  <!-- 5D Audio Toggle Button -->
-  <button id="audioBtn" onclick="toggleAudio()" aria-label="Toggle ambient audio" class="ml-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-[#2B1650]/40 text-[#2B1650] flex items-center gap-1.5 bg-white/70 hover:bg-white transition-all">
+  <!-- Spatial Audio Toggle Button (15% Gain 65°C Steam Wand Acoustics) -->
+  <button id="audioBtn" onclick="toggleAudio()" aria-label="Toggle ambient audio" title="Toggle 65°C Steam Wand &amp; Bar Acoustics (15% Gain)" class="ml-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-[#2B1650]/40 text-[#2B1650] flex items-center gap-1.5 bg-white/70 hover:bg-white transition-all">
     <span id="audioDot" class="w-2 h-2 rounded-full bg-slate-400"></span>
-    <span id="audioLabel" class="hidden sm:inline">5D Audio</span>
+    <svg class="w-3.5 h-3.5 text-[#2B1650]" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M2 6.5v3M5 4.5v7M8 2.5v11M11 5v6M14 6.5v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+    <span id="audioLabel" class="hidden sm:inline">65°C Audio</span>
   </button>
   <!-- Roastery Bag Trigger -->
-  <button onclick="toggleCart(true)" class="ml-2 px-4 py-1.5 rounded-full bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-wider hover:bg-[#4C1D95] transition-all flex items-center gap-1.5 shadow">
+  <button id="headerBagBtn" onclick="toggleCart(true)" class="ml-2 px-4 py-1.5 rounded-full bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-wider hover:bg-[#4C1D95] transition-all flex items-center gap-1.5 shadow">
     <span>Bag</span>
     <span class="px-1.5 py-0.2 bg-white/30 rounded-full text-[10px]" id="cartCount">0</span>
   </button>
 </nav>
 </header>
+
+<!-- Ultra-Thin Live Bar Hours & Sell-Out Info Strip -->
+<div id="gsAnnounceBar" class="relative z-30 text-[11px] sm:text-xs font-semibold tracking-wider py-2 px-4">
+  <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+    <div class="flex items-center gap-2 min-w-0 whitespace-nowrap">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+      <span class="font-mono-code font-bold text-[#CDB8F7] shrink-0">OPEN TODAY: 8:30 AM – 10:30 PM IST</span>
+      <span class="text-white/85 truncate hidden md:inline">• 3 Gurugram Bars (DLF Phase 1, Golf Course Rd &amp; Sector 56) • Small-batch croissants &amp; micro-lots often sell out by 2 PM</span>
+    </div>
+    <div class="hidden lg:flex items-center gap-4 text-[11px] text-[#F1E9FF] whitespace-nowrap shrink-0 font-mono-code">
+      <span>Featured Origin: <strong class="text-[#CDB8F7]">Nagaland Kiphire Lot (1,450m)</strong></span>
+      <span>•</span>
+      <a href="tel:+918130056889" class="hover:text-white underline">+91 81300 56889</a>
+    </div>
+  </div>
+</div>
 
 <main id="main">
 <!-- HERO SECTION WITH LIQUID CHROME WEBGL SHADER -->
@@ -1179,55 +1488,100 @@
 </div>
 
 
-<!-- ══ THE WALK-IN ══ a section you move through. Layers are placed in Z from
-     scroll position, so they pass the camera rather than just scaling. -->
+<!-- ══ THE WALK-IN ══ 3D Camera Z-Axis Architectural Pass-Through (250vh / 90 Frames) -->
 <section class="walk" id="walkin" aria-labelledby="walk-title">
   <h2 id="walk-title" class="sr-only">Walk into Gram Street</h2>
   <div class="walk-rail">
     <div class="walk-frame">
+      <!-- Foreground Lilac Architectural Glass Facade Mask (Frames 01–60, z-index: 30) -->
+      <div class="walk-facade-mask" id="walkFacadeMask" aria-hidden="true">
+        <div class="walk-facade-glass-pane" id="walkFacadeGlassPane"></div>
+        <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" class="w-full h-full relative z-10" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="lilacFacadeGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#351C63"/>
+              <stop offset="50%" stop-color="#4A2885"/>
+              <stop offset="100%" stop-color="#221042"/>
+            </linearGradient>
+            <linearGradient id="brushedChromeEdge" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#FFFFFF"/>
+              <stop offset="35%" stop-color="#C9BEDC"/>
+              <stop offset="65%" stop-color="#F4EFFC"/>
+              <stop offset="100%" stop-color="#7E6B9E"/>
+            </linearGradient>
+            <!-- Architectural Cutout Mask: Central Doorway & Side Mullion Panes -->
+            <mask id="facadeDoorCutout">
+              <rect width="1440" height="900" fill="white"/>
+              <!-- Central Brushed-Chrome Doorway Portal -->
+              <rect x="490" y="150" width="460" height="680" rx="22" fill="black"/>
+              <!-- Left Architectural Glass Window Pane -->
+              <rect x="130" y="210" width="290" height="440" rx="14" fill="black" fill-opacity="0.65"/>
+              <!-- Right Architectural Glass Window Pane -->
+              <rect x="1020" y="210" width="290" height="440" rx="14" fill="black" fill-opacity="0.65"/>
+            </mask>
+          </defs>
+          <!-- Outer Lilac Architectural Facade Wall with Cutout -->
+          <rect width="1440" height="900" fill="url(#lilacFacadeGrad)" mask="url(#facadeDoorCutout)"/>
+          <!-- Arjun Marg Fascia Header Signage -->
+          <rect x="110" y="68" width="1220" height="62" rx="10" fill="#1C0D38" stroke="#CDB8F7" stroke-opacity="0.4" stroke-width="2"/>
+          <text x="720" y="108" text-anchor="middle" fill="#F1E9FF" font-family="Bricolage Grotesque, sans-serif" font-size="26" font-weight="800" letter-spacing="9">16 ARJUN MARG • GRAM STREET COFFEE</text>
+          <!-- Brushed Chrome Doorframe & Window Mullions -->
+          <rect x="486" y="146" width="468" height="688" rx="24" stroke="url(#brushedChromeEdge)" stroke-width="9" fill="none"/>
+          <rect x="130" y="210" width="290" height="440" rx="14" stroke="url(#brushedChromeEdge)" stroke-width="5" fill="none"/>
+          <rect x="1020" y="210" width="290" height="440" rx="14" stroke="url(#brushedChromeEdge)" stroke-width="5" fill="none"/>
+          <!-- Vertical Brushed Steel Push Bar on Glass Door -->
+          <rect x="916" y="420" width="12" height="140" rx="6" fill="url(#brushedChromeEdge)"/>
+          <circle cx="922" cy="402" r="5" fill="#FFE2A6"/>
+        </svg>
+      </div>
+      <!-- Chrome Specular Flare Along Doorframe Edge (Frames 31–60) -->
+      <div class="walk-chrome-flare" id="walkChromeFlare" aria-hidden="true"></div>
+
       <div class="walk-stage" aria-hidden="true">
 
-        <!-- 1. the street: the far side of the road -->
-        <div class="walk-layer" data-z0="-900" data-z1="2400" data-in="0" data-out="0.30">
+        <!-- Stage 1 (Frames 01–30): Arjun Marg Lilac Streetfront Ambient -->
+        <div class="walk-layer" data-z0="-700" data-z1="2200" data-in="0" data-out="0.38">
           <svg viewBox="0 0 1180 620" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="60" y="92" width="1060" height="470" rx="16" fill="#5B3A8C" opacity=".55"/>
-            <rect x="60" y="92" width="1060" height="58" rx="12" fill="#2B1650" opacity=".85"/>
-            <text x="590" y="132" text-anchor="middle" fill="#F1E9FF" font-family="Bricolage Grotesque, sans-serif" font-size="30" font-weight="800" letter-spacing="6">GRAM STREET</text>
+            <rect x="60" y="92" width="1060" height="58" rx="12" fill="#2B1650" opacity=".88"/>
+            <text x="590" y="132" text-anchor="middle" fill="#F1E9FF" font-family="Bricolage Grotesque, sans-serif" font-size="28" font-weight="800" letter-spacing="6">ARJUN MARG • DLF PHASE 1</text>
             <path d="M120 150h940l-34 58H154z" fill="#CDB8F7" opacity=".55"/>
-            <rect x="170" y="238" width="360" height="248" rx="10" fill="#F6EEFF" opacity=".22"/>
-            <rect x="620" y="238" width="360" height="248" rx="10" fill="#F6EEFF" opacity=".22"/>
-            <rect x="534" y="268" width="80" height="218" rx="8" fill="#2B1650" opacity=".60"/>
-            <circle cx="602" cy="382" r="5" fill="#FFE2A6"/>
+            <rect x="170" y="238" width="320" height="248" rx="10" fill="#F6EEFF" opacity=".24"/>
+            <rect x="690" y="238" width="320" height="248" rx="10" fill="#F6EEFF" opacity=".24"/>
+            <!-- Warm Café Glow Through Threshold -->
+            <rect x="460" y="200" width="260" height="330" rx="12" fill="#FFE4A8" opacity=".22"/>
+            <circle cx="590" cy="240" r="14" fill="#FFE2A6" opacity=".8"/>
           </svg>
         </div>
 
-        <!-- 2. the window, with the room showing through it -->
-        <div class="walk-layer" data-z0="-1500" data-z1="1750" data-in="0.06" data-out="0.42" style="width:min(62vw,760px)">
+        <!-- Stage 2A (Frames 15–52): Glass Threshold & Signature Purple Gram Latte Glimpse -->
+        <div class="walk-layer" data-z0="-1450" data-z1="1700" data-in="0.08" data-out="0.52" style="width:min(60vw,740px)">
           <img src="/assets/brand/u-1646954256973-f7fd9ce626b1-800.jpg" alt="" loading="lazy" decoding="async" width="800" height="1200">
         </div>
 
-        <!-- 3. the room: pendants and the back shelf -->
-        <div class="walk-layer" data-z0="-2300" data-z1="1150" data-in="0.26" data-out="0.70">
+        <!-- Stage 2B (Frames 31–68): Crossing the Threshold · Pendant Cones & Back Roastery Shelf -->
+        <div class="walk-layer" data-z0="-2200" data-z1="1150" data-in="0.28" data-out="0.74">
           <svg viewBox="0 0 1180 620" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="40" y="40" width="1100" height="520" rx="18" fill="#2B1650" opacity=".34"/>
-            <path d="M40 220h1100M40 360h1100" stroke="#FFFFFF" stroke-opacity=".08" stroke-width="2"/>
+            <rect x="40" y="40" width="1100" height="520" rx="18" fill="#2B1650" opacity=".42"/>
+            <path d="M40 220h1100M40 360h1100" stroke="#FFFFFF" stroke-opacity=".10" stroke-width="2"/>
             <g>
-              <path d="M300 0v96M590 0v124M880 0v104" stroke="#CDB8F7" stroke-opacity=".5" stroke-width="2"/>
-              <path d="M274 96h52l-11 26h-30zM564 124h52l-11 26h-30zM854 104h52l-11 26h-30z" fill="#2B1650" opacity=".85"/>
+              <path d="M300 0v96M590 0v124M880 0v104" stroke="#CDB8F7" stroke-opacity=".6" stroke-width="2.5"/>
+              <path d="M274 96h52l-11 26h-30zM564 124h52l-11 26h-30zM854 104h52l-11 26h-30z" fill="#2B1650" opacity=".9"/>
               <ellipse cx="300" cy="126" rx="8" ry="7" fill="#FFE2A6"/><ellipse cx="590" cy="154" rx="8" ry="7" fill="#FFE2A6"/><ellipse cx="880" cy="134" rx="8" ry="7" fill="#FFE2A6"/>
-              <path d="M300 128 220 330h160zM590 156 510 352h160zM880 136 800 332h160z" fill="#FFE9B8" opacity=".16"/>
+              <path d="M300 128 210 340h180zM590 156 500 362h180zM880 136 790 342h180z" fill="#FFE9B8" opacity=".20"/>
             </g>
-            <rect x="250" y="300" width="680" height="9" rx="4" fill="#2B1650" opacity=".5"/>
-            <g opacity=".6">
-              <rect x="300" y="248" width="46" height="52" rx="8" fill="#2B1650"/>
-              <rect x="368" y="236" width="38" height="64" rx="7" fill="#2B1650"/>
-              <rect x="776" y="244" width="42" height="56" rx="7" fill="#2B1650"/>
+            <rect x="220" y="300" width="740" height="10" rx="5" fill="#CDB8F7" opacity=".45"/>
+            <g opacity=".75">
+              <rect x="280" y="244" width="48" height="56" rx="8" fill="#2B1650" stroke="#CDB8F7" stroke-width="1.5"/>
+              <rect x="352" y="232" width="40" height="68" rx="7" fill="#2B1650" stroke="#CDB8F7" stroke-width="1.5"/>
+              <rect x="780" y="240" width="44" height="60" rx="7" fill="#2B1650" stroke="#CDB8F7" stroke-width="1.5"/>
+              <rect x="842" y="250" width="38" height="50" rx="7" fill="#2B1650" stroke="#CDB8F7" stroke-width="1.5"/>
             </g>
           </svg>
         </div>
 
-        <!-- 4. the counter -->
-        <div class="walk-layer" data-z0="-3100" data-z1="620" data-in="0.46" data-out="0.90">
+        <!-- Stage 3A (Frames 50–88): Approaching the Brushed-Steel Espresso & Gelato Counter -->
+        <div class="walk-layer" data-z0="-2950" data-z1="640" data-in="0.46" data-out="0.92">
           <svg viewBox="0 0 1180 620" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="wkGlass" x1="0" y1="0" x2="0" y2="1">
@@ -1238,15 +1592,15 @@
               </linearGradient>
             </defs>
             <rect x="300" y="150" width="580" height="190" rx="18" fill="url(#wkChrome)"/>
-            <rect x="330" y="178" width="170" height="62" rx="10" fill="#2B1650" opacity=".70"/>
+            <rect x="330" y="178" width="170" height="62" rx="10" fill="#2B1650" opacity=".78"/>
             <circle cx="415" cy="209" r="20" fill="#F1E9FF"/>
-            <path d="M415 209v-13" stroke="#2B1650" stroke-width="3.4" stroke-linecap="round"/>
-            <rect x="540" y="182" width="200" height="14" rx="7" fill="#2B1650" opacity=".3"/>
-            <rect x="540" y="214" width="140" height="14" rx="7" fill="#2B1650" opacity=".18"/>
+            <path d="M415 209l10-9" stroke="#7C3AED" stroke-width="3.4" stroke-linecap="round"/>
+            <rect x="540" y="182" width="200" height="14" rx="7" fill="#2B1650" opacity=".35"/>
+            <rect x="540" y="214" width="140" height="14" rx="7" fill="#2B1650" opacity=".22"/>
             <rect x="150" y="372" width="880" height="26" rx="6" fill="#3B2160"/>
-            <rect x="150" y="372" width="880" height="8" rx="4" fill="#FFFFFF" opacity=".16"/>
+            <rect x="150" y="372" width="880" height="8" rx="4" fill="#FFFFFF" opacity=".22"/>
             <rect x="166" y="398" width="848" height="150" rx="8" fill="url(#wkGlass)"/>
-            <rect x="166" y="398" width="848" height="150" rx="8" fill="none" stroke="#FFFFFF" stroke-opacity=".8" stroke-width="3"/>
+            <rect x="166" y="398" width="848" height="150" rx="8" fill="none" stroke="#FFFFFF" stroke-opacity=".85" stroke-width="3"/>
             <g>
               <rect x="212" y="446" width="104" height="48" rx="12" fill="#FFD7E8"/>
               <rect x="348" y="446" width="104" height="48" rx="12" fill="#CFE3AE"/>
@@ -1257,26 +1611,104 @@
           </svg>
         </div>
 
-        <!-- 5. the shot, in your hand -->
-        <div class="walk-layer" data-z0="-3600" data-z1="300" data-in="0.74" data-out="1.06" style="width:min(48vw,560px)">
-          <img src="/assets/brand/u-1534778101976-62847782c213-1200.jpg" alt="" loading="lazy" decoding="async" width="1200" height="1799">
+        <!-- Stage 3B (Frames 61–90): Docking at the 10-Seater Brushed-Chrome Bar (Coffee / Matcha / Gelato Station) -->
+        <div class="walk-layer" data-z0="-3500" data-z1="220" data-in="0.64" data-out="1.08" style="width:min(82vw,960px)">
+          <svg viewBox="0 0 1120 600" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto drop-shadow-2xl">
+            <defs>
+              <linearGradient id="barSteel" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#E6DFF5"/>
+                <stop offset="28%" stop-color="#FFFFFF"/>
+                <stop offset="55%" stop-color="#BEB1D6"/>
+                <stop offset="82%" stop-color="#F7F4FF"/>
+                <stop offset="100%" stop-color="#9A89B8"/>
+              </linearGradient>
+              <linearGradient id="barBg" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#1E0E3A" stop-opacity="0.96"/>
+                <stop offset="100%" stop-color="#2E1759" stop-opacity="0.98"/>
+              </linearGradient>
+            </defs>
+            <rect x="20" y="20" width="1080" height="560" rx="28" fill="url(#barBg)" stroke="#CDB8F7" stroke-opacity="0.45" stroke-width="2.5"/>
+            <!-- Top Telemetry Strip inside Bar Dock -->
+            <rect x="56" y="48" width="1008" height="44" rx="12" fill="#120726" stroke="#FFFFFF" stroke-opacity="0.14"/>
+            <circle cx="84" cy="70" r="5" fill="#34D399"/>
+            <text x="102" y="75" fill="#F1E9FF" font-family="JetBrains Mono, monospace" font-size="13" font-weight="700" letter-spacing="2">10-SEATER BRUSHED-STEEL BAR • E61 9.2 BAR • UJI 78°C • GELATO -12°C</text>
+            <text x="1036" y="75" text-anchor="end" fill="#CDB8F7" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700">DOCKING INTO CHAPTERS ↓</text>
+
+            <!-- Station 01: Coffee (E61 Grouphead) -->
+            <g transform="translate(76, 126)">
+              <rect width="296" height="270" rx="18" fill="#2A1810" fill-opacity="0.78" stroke="#CDB8F7" stroke-opacity="0.35" stroke-width="1.5"/>
+              <text x="24" y="36" fill="#CDB8F7" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" letter-spacing="2">01 / ESPRESSO STATION</text>
+              <rect x="58" y="60" width="180" height="94" rx="12" fill="url(#barSteel)"/>
+              <circle cx="148" cy="106" r="22" fill="#2B1650"/>
+              <path d="M148 106l12-10" stroke="#34D399" stroke-width="3" stroke-linecap="round"/>
+              <rect x="122" y="154" width="52" height="18" rx="4" fill="#9A89B8"/>
+              <!-- Dual tiger-striped stream into lilac cup -->
+              <path d="M140 172v36M156 172v36" stroke="#D97706" stroke-width="4" stroke-linecap="round"/>
+              <path d="M116 206h64v26a26 26 0 0 1-64 0z" fill="#CDB8F7" stroke="#FFFFFF" stroke-width="2"/>
+              <text x="148" y="256" text-anchor="middle" fill="#F1E9FF" font-family="Bricolage Grotesque, sans-serif" font-size="15" font-weight="800">Gram Latte • 9.2 BAR</text>
+            </g>
+
+            <!-- Station 02: Matcha (100-Prong Chasen Whisk) -->
+            <g transform="translate(412, 126)">
+              <rect width="296" height="270" rx="18" fill="#1F4E3B" fill-opacity="0.72" stroke="#CFE3AE" stroke-opacity="0.45" stroke-width="1.5"/>
+              <text x="24" y="36" fill="#CFE3AE" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" letter-spacing="2">02 / KYOTO UJI STATION</text>
+              <!-- Matcha Chawan Bowl & Bamboo Chasen -->
+              <path d="M136 70h24l18 76h-60z" fill="#D9B88F" opacity="0.88"/>
+              <path d="M126 112h44M122 132h52" stroke="#8C6239" stroke-width="2.5"/>
+              <path d="M92 162h112v24a48 48 0 0 1-112 0z" fill="#233D2C" stroke="#CFE3AE" stroke-width="2"/>
+              <ellipse cx="148" cy="162" rx="54" ry="10" fill="#86EFAC" opacity="0.85"/>
+              <text x="148" y="256" text-anchor="middle" fill="#F1E9FF" font-family="Bricolage Grotesque, sans-serif" font-size="15" font-weight="800">G Street Matcha • 78°C</text>
+            </g>
+
+            <!-- Station 03: Gelato (-12°C Pozzetti Counter) -->
+            <g transform="translate(748, 126)">
+              <rect width="296" height="270" rx="18" fill="#1C1412" fill-opacity="0.78" stroke="#FFD7E8" stroke-opacity="0.45" stroke-width="1.5"/>
+              <text x="24" y="36" fill="#FFD7E8" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" letter-spacing="2">03 / POZZETTI GELATO</text>
+              <rect x="46" y="76" width="204" height="110" rx="14" fill="url(#barSteel)"/>
+              <circle cx="102" cy="130" r="32" fill="#5C3A21" stroke="#FFFFFF" stroke-width="3"/>
+              <circle cx="194" cy="130" r="32" fill="#F5D0A9" stroke="#FFFFFF" stroke-width="3"/>
+              <text x="148" y="256" text-anchor="middle" fill="#F1E9FF" font-family="Bricolage Grotesque, sans-serif" font-size="15" font-weight="800">Croissant Gelato • -12°C</text>
+            </g>
+
+            <!-- Continuous Brushed-Chrome Bar Counter & 10 Bar Stools Silhouette -->
+            <rect x="56" y="422" width="1008" height="32" rx="8" fill="url(#barSteel)"/>
+            <rect x="68" y="454" width="984" height="86" rx="10" fill="#9F86D8" fill-opacity="0.35" stroke="#FFFFFF" stroke-opacity="0.5" stroke-width="2"/>
+            <!-- 10 Chrome Bar Stools -->
+            <g fill="url(#barSteel)">
+              <rect x="105" y="476" width="46" height="12" rx="6"/><rect x="124" y="488" width="8" height="52"/>
+              <rect x="198" y="476" width="46" height="12" rx="6"/><rect x="217" y="488" width="8" height="52"/>
+              <rect x="291" y="476" width="46" height="12" rx="6"/><rect x="310" y="488" width="8" height="52"/>
+              <rect x="384" y="476" width="46" height="12" rx="6"/><rect x="403" y="488" width="8" height="52"/>
+              <rect x="477" y="476" width="46" height="12" rx="6"/><rect x="496" y="488" width="8" height="52"/>
+              <rect x="570" y="476" width="46" height="12" rx="6"/><rect x="589" y="488" width="8" height="52"/>
+              <rect x="663" y="476" width="46" height="12" rx="6"/><rect x="682" y="488" width="8" height="52"/>
+              <rect x="756" y="476" width="46" height="12" rx="6"/><rect x="775" y="488" width="8" height="52"/>
+              <rect x="849" y="476" width="46" height="12" rx="6"/><rect x="868" y="488" width="8" height="52"/>
+              <rect x="942" y="476" width="46" height="12" rx="6"/><rect x="961" y="488" width="8" height="52"/>
+            </g>
+          </svg>
         </div>
 
       </div>
 
-      <div class="walk-step" id="walkStep">01 / On Gram Street</div>
+      <div class="walk-step" id="walkStep">
+        <span id="walkStepLabel">01 / The Lilac Streetfront</span>
+        <span class="walk-frame-hud" id="walkFrameHud">FRAME 01 / 90</span>
+      </div>
       <div class="walk-cap" id="walkCap">
-        <b>A lilac front on a Gurugram street.</b>
-        <span>Specialty coffee, ceremonial matcha and small-batch gelato. Keep scrolling and come inside.</span>
+        <b>A lilac front on Arjun Marg.</b>
+        <span>Move your cursor across the lilac architectural glass or scroll to cross the threshold into our 10-seater brushed-chrome bar.</span>
       </div>
       <div class="walk-hint" id="walkHint">Scroll<i></i></div>
     </div>
   </div>
 </section>
 
-<!-- CHAPTERS: 320vh SCROLL STAGE WITH ROTATING CONIC-GRADIENT CHROME ORB -->
+<!-- CHAPTERS: 320vh SCROLL STAGE WITH LIQUID COLOR-BLEED & TENCHA PARTICLE SHIMMER -->
 <section id="chapters" aria-label="Coffee, matcha and gelato">
   <div class="stage">
+    <!-- High-Frequency Stone-Ground Tencha Particle Shimmer Canvas (Active on Matcha Chapter) -->
+    <canvas id="tenchaShimmerCanvas" aria-hidden="true"></canvas>
     <!-- Chapter 1: Coffee -->
     <article class="chapter" data-slot="coffee" style="--bg:#CDB8F7">
       <div class="ch-grid">
@@ -1289,21 +1721,21 @@
             <li><strong>Twisted Cold Coffee</strong><span>Blended with house coffee gelato and topped with frozen espresso cubes that intensify as they melt.</span></li>
           </ul>
         </div>
-        <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white rounded-3xl shadow-2xl transition-transform duration-700 hover:scale-[1.02]" style="background: linear-gradient(180deg, rgba(43,22,80,0.2) 0%, rgba(43,22,80,0.85) 100%), url('/assets/brand/u-1646954256973-f7fd9ce626b1-1200.jpg') center/cover;">
+        <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white rounded-3xl shadow-2xl transition-transform duration-700 hover:scale-[1.02]" style="background: linear-gradient(180deg, rgba(42,24,16,0.25) 0%, rgba(43,22,80,0.88) 100%), url('/assets/brand/u-1646954256973-f7fd9ce626b1-1200.jpg') center/cover;">
           <div class="flex items-center justify-between z-10">
             <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-black uppercase tracking-wider text-[#F1E9FF] border border-white/20">✦ Iconic Cult Favorite</span>
-            <span class="text-[11px] font-bold text-white/90">9-Bar Extraction</span>
+            <span class="text-[11px] font-bold text-white/90 font-mono-code">9.2 BAR • #6E44FF</span>
           </div>
           <div class="z-10">
             <div class="text-2xl font-display font-black text-white">Signature Purple Gram Latte</div>
-            <div class="text-xs text-white/90 font-medium mt-1">Nagaland Arabica &bull; Layered wild blueberry lavender foam &amp; double ristretto</div>
+            <div class="text-xs text-white/90 font-medium mt-1">Deep Espresso Umber &bull; Electric Lilac-Blueberry reduction &amp; double ristretto</div>
           </div>
         </div>
       </div>
     </article>
 
     <!-- Chapter 2: Matcha -->
-    <article class="chapter" data-slot="matcha" style="--bg:#CFE3AE">
+    <article class="chapter" data-slot="matcha" style="--bg:#D8E8D5">
       <div class="ch-grid">
         <div class="ch-body">
           <h2 class="ch-title">Matcha</h2>
@@ -1314,21 +1746,21 @@
             <li><strong>100-Prong Aeration</strong><span>Whisked fresh at 78°C using traditional Japanese bamboo chasen for rich umami notes.</span></li>
           </ul>
         </div>
-        <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white rounded-3xl shadow-2xl transition-transform duration-700 hover:scale-[1.02]" style="background: linear-gradient(180deg, rgba(43,22,80,0.15) 0%, rgba(20,45,15,0.88) 100%), url('/assets/brand/u-1536256263959-770b48d82b0a-1200.jpg') center/cover;">
+        <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white rounded-3xl shadow-2xl transition-transform duration-700 hover:scale-[1.02]" style="background: linear-gradient(180deg, rgba(31,78,59,0.22) 0%, rgba(20,45,25,0.9) 100%), url('/assets/brand/u-1536256263959-770b48d82b0a-1200.jpg') center/cover;">
           <div class="flex items-center justify-between z-10">
-            <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-black uppercase tracking-wider text-emerald-200 border border-white/20">✦ Ceremonial Uji Tencha</span>
-            <span class="text-[11px] font-bold text-white/90">100-Prong Bamboo Chasen</span>
+            <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-black uppercase tracking-wider text-emerald-200 border border-white/20">✦ Stone-Ground Kyoto Tencha</span>
+            <span class="text-[11px] font-bold text-white/90 font-mono-code">78°C • #1F4E3B</span>
           </div>
           <div class="z-10">
-            <div class="text-2xl font-display font-black text-white">Jade Micro-Foam Ceremony</div>
-            <div class="text-xs text-white/90 font-medium mt-1">Kyoto first harvest &bull; Whisked fresh at 78°C for rich sweet umami finish</div>
+            <div class="text-2xl font-display font-black text-white">G Street Matcha Ceremony</div>
+            <div class="text-xs text-white/90 font-medium mt-1">Kyoto Jade &amp; Bamboo Parchment &bull; 100-prong whisked first-harvest umami</div>
           </div>
         </div>
       </div>
     </article>
 
     <!-- Chapter 3: Gelato -->
-    <article class="chapter" data-slot="gelato" style="--bg:#FFD7E8">
+    <article class="chapter" data-slot="gelato" style="--bg:#F3DFC8">
       <div class="ch-grid">
         <div class="ch-body">
           <h2 class="ch-title">Gelato</h2>
@@ -1339,14 +1771,14 @@
             <li><strong>Lighter Sorbets</strong><span>Refreshing fruit sorbets and clean sugar-free options sweetened naturally with erythritol.</span></li>
           </ul>
         </div>
-        <div class="photo hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white rounded-3xl shadow-2xl transition-transform duration-700 hover:scale-[1.02]" style="background: linear-gradient(180deg, rgba(43,22,80,0.15) 0%, rgba(65,15,45,0.88) 100%), url('/assets/brand/u-1575031745961-1ed57f800a4c-1200.jpg') center/cover;">
-          <div class="flex items-center justify-between z-10">
-            <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-black uppercase tracking-wider text-pink-200 border border-white/20">✦ In-House Churn</span>
-            <span class="text-[11px] font-bold text-white/90">-12°C Serving Velvet</span>
+        <div class="photo gelato-frost-card hidden lg:flex flex-col justify-between p-6 relative overflow-hidden text-white rounded-3xl shadow-2xl transition-transform duration-700 hover:scale-[1.02]" style="background: linear-gradient(180deg, rgba(200,138,75,0.22) 0%, rgba(28,20,18,0.92) 100%), url('/assets/brand/u-1575031745961-1ed57f800a4c-1200.jpg') center/cover;">
+          <div class="flex items-center justify-between z-10 mt-6">
+            <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-black uppercase tracking-wider text-amber-200 border border-white/20">✦ Brioche Amber &amp; Smoked Cacao</span>
+            <span class="text-[11px] font-bold text-cyan-200 font-mono-code">-12°C FROSTED</span>
           </div>
           <div class="z-10">
-            <div class="text-2xl font-display font-black text-white">Small-Batch Gelato Scoop</div>
-            <div class="text-xs text-white/90 font-medium mt-1">Smoked chocolate, roasted Sicilian hazelnut &amp; caramelized croissant</div>
+            <div class="text-2xl font-display font-black text-white">Croissant Gelato Latte</div>
+            <div class="text-xs text-white/90 font-medium mt-1">Warm Brioche Amber (#C88A4B) &bull; Smoked Cacao (#1C1412) &amp; -12°C pozzetti churn</div>
           </div>
         </div>
       </div>
@@ -1364,11 +1796,206 @@
   </div>
 </section>
 
+<!-- ================= TODAY'S MENU: ON THE BAR RIGHT NOW ================= -->
+<section class="py-24 px-6 md:px-12 max-w-7xl mx-auto scroll-reveal" id="barMenu" aria-labelledby="bar-menu-title">
+  <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+    <div>
+      <span class="eyebrow-label">Today's Live Counter Menu</span>
+      <h2 id="bar-menu-title" class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight mt-3 text-[#2B1650]">
+        On the bar <span class="italic-accent normal-case">right now.</span>
+      </h2>
+      <p class="mt-3 text-base text-[#534168] max-w-2xl font-semibold leading-relaxed">
+        Pulled at 9 bars on our 58mm E61 grouphead, whisked to 78°C with a 100-prong bamboo chasen, and churned daily at -12°C behind our lilac glass counter.
+      </p>
+    </div>
+    <div class="font-mono-code text-xs uppercase tracking-wider text-[#2B1650] font-bold bg-[#F8F5FF] px-4 py-2.5 rounded-full border border-[#2B1650]/20 shadow-sm">
+      ● Live Bar Status: Pulling Nagaland Kiphire Lot (93.5°C)
+    </div>
+  </div>
+
+  <!-- 2-Column Editorial Menu Grid (Espresso & Matcha Left | Gelato, Sandos & Bakes Right) -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Left Column: Espresso, Pour-Over & Ceremonial Matcha -->
+    <div class="d2c-card p-7 sm:p-9 space-y-6">
+      <div class="flex items-center justify-between border-b-2 border-[#2B1650]/15 pb-4">
+        <div>
+          <span class="font-mono-code text-[11px] font-bold uppercase tracking-widest text-[#7C3AED]">Column 01 • Beverage Bar</span>
+          <h3 class="text-2xl font-display font-black uppercase tracking-tight text-[#2B1650] mt-0.5">Espresso, Filter &amp; Uji Matcha</h3>
+        </div>
+        <span class="px-3 py-1 rounded-full bg-[#F5EFFF] border border-[#7C3AED]/30 font-mono-code text-[11px] font-bold text-[#7C3AED]">Oat / Almond +₹60</span>
+      </div>
+
+      <div class="space-y-5">
+        <div class="pb-4 border-b border-[#2B1650]/10 flex items-start justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h4 class="font-serif-editorial font-bold text-lg text-[#2B1650]">Signature Purple Gram Latte</h4>
+              <span class="px-2 py-0.5 rounded-full bg-[#2B1650] text-[#F1E9FF] text-[9px] font-black uppercase tracking-wider">House Icon</span>
+            </div>
+            <p class="text-xs font-medium text-[#534168] mt-1">Double Nagaland ristretto, house wild blueberry reduction &amp; steamed lavender micro-foam.</p>
+          </div>
+          <div class="flex items-center gap-3 shrink-0">
+            <span class="font-mono-code font-bold text-base text-[#2B1650]">₹340</span>
+            <button onclick="window.addBarItemToCart('bar-gram-latte', 'Signature Purple Gram Latte', 340)" class="px-3 py-1.5 rounded-lg bg-[#F5EFFF] hover:bg-[#2B1650] text-[#2B1650] hover:text-white font-mono-code text-xs font-bold border border-[#2B1650]/20 transition-all">+ Add</button>
+          </div>
+        </div>
+
+        <div class="pb-4 border-b border-[#2B1650]/10 flex items-start justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h4 class="font-serif-editorial font-bold text-lg text-[#2B1650]">Dubai Pistachio Knafeh Cappuccino</h4>
+              <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[9px] font-black uppercase tracking-wider">Bestseller</span>
+            </div>
+            <p class="text-xs font-medium text-[#534168] mt-1">Velvety 9-bar espresso layered with roasted Sicilian pistachio butter crema &amp; toasted knafeh crumbs.</p>
+          </div>
+          <div class="flex items-center gap-3 shrink-0">
+            <span class="font-mono-code font-bold text-base text-[#2B1650]">₹380</span>
+            <button onclick="window.addBarItemToCart('bar-dubai-cap', 'Dubai Pistachio Knafeh Cappuccino', 380)" class="px-3 py-1.5 rounded-lg bg-[#F5EFFF] hover:bg-[#2B1650] text-[#2B1650] hover:text-white font-mono-code text-xs font-bold border border-[#2B1650]/20 transition-all">+ Add</button>
+          </div>
+        </div>
+
+        <div class="pb-4 border-b border-[#2B1650]/10 flex items-start justify-between gap-4">
+          <div>
+            <h4 class="font-serif-editorial font-bold text-lg text-[#2B1650]">Croissant Gelato Affogato Latte</h4>
+            <p class="text-xs font-medium text-[#534168] mt-1">Sweet-and-salty double espresso poured hot over house-churned caramelized croissant gelato.</p>
+          </div>
+          <div class="flex items-center gap-3 shrink-0">
+            <span class="font-mono-code font-bold text-base text-[#2B1650]">₹360</span>
+            <button onclick="window.addBarItemToCart('bar-croissant-latte', 'Croissant Gelato Affogato Latte', 360)" class="px-3 py-1.5 rounded-lg bg-[#F5EFFF] hover:bg-[#2B1650] text-[#2B1650] hover:text-white font-mono-code text-xs font-bold border border-[#2B1650]/20 transition-all">+ Add</button>
+          </div>
+        </div>
+
+        <div class="pb-4 border-b border-[#2B1650]/10 flex items-start justify-between gap-4">
+          <div>
+            <h4 class="font-serif-editorial font-bold text-lg text-[#2B1650]">Twisted Cold Coffee</h4>
+            <p class="text-xs font-medium text-[#534168] mt-1">Cold-brewed Chikmagalur Arabica blended with house coffee gelato &amp; frozen espresso cubes.</p>
+          </div>
+          <div class="flex items-center gap-3 shrink-0">
+            <span class="font-mono-code font-bold text-base text-[#2B1650]">₹320</span>
+            <button onclick="window.addBarItemToCart('bar-twisted-cold', 'Twisted Cold Coffee', 320)" class="px-3 py-1.5 rounded-lg bg-[#F5EFFF] hover:bg-[#2B1650] text-[#2B1650] hover:text-white font-mono-code text-xs font-bold border border-[#2B1650]/20 transition-all">+ Add</button>
+          </div>
+        </div>
+
+        <div class="pb-4 border-b border-[#2B1650]/10 flex items-start justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h4 class="font-serif-editorial font-bold text-lg text-[#2B1650]">G Street Coconut Uji Matcha</h4>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-[9px] font-black uppercase tracking-wider">Kyoto First Harvest</span>
+            </div>
+            <p class="text-xs font-medium text-[#534168] mt-1">100-prong bamboo whisked ceremonial Uji Tencha floated over chilled tender coconut water.</p>
+          </div>
+          <div class="flex items-center gap-3 shrink-0">
+            <span class="font-mono-code font-bold text-base text-[#2B1650]">₹350</span>
+            <button onclick="window.addBarItemToCart('bar-gstreet-matcha', 'G Street Coconut Uji Matcha', 350)" class="px-3 py-1.5 rounded-lg bg-[#F5EFFF] hover:bg-[#2B1650] text-[#2B1650] hover:text-white font-mono-code text-xs font-bold border border-[#2B1650]/20 transition-all">+ Add</button>
+          </div>
+        </div>
+
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h4 class="font-serif-editorial font-bold text-lg text-[#2B1650]">Peppermint Dark Cacao Mocha</h4>
+            <p class="text-xs font-medium text-[#534168] mt-1">72% single-origin South Indian dark cacao ganache, double espresso &amp; cool garden mint oil.</p>
+          </div>
+          <div class="flex items-center gap-3 shrink-0">
+            <span class="font-mono-code font-bold text-base text-[#2B1650]">₹340</span>
+            <button onclick="window.addBarItemToCart('bar-peppermint-mocha', 'Peppermint Dark Cacao Mocha', 340)" class="px-3 py-1.5 rounded-lg bg-[#F5EFFF] hover:bg-[#2B1650] text-[#2B1650] hover:text-white font-mono-code text-xs font-bold border border-[#2B1650]/20 transition-all">+ Add</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Small-Batch Gelato, Japanese Milk-Bread Sandos & Bakes -->
+    <div class="d2c-card p-7 sm:p-9 space-y-6">
+      <div class="flex items-center justify-between border-b-2 border-[#2B1650]/15 pb-4">
+        <div>
+          <span class="font-mono-code text-[11px] font-bold uppercase tracking-widest text-[#7C3AED]">Column 02 • Gelato &amp; Kitchen</span>
+          <h3 class="text-2xl font-display font-black uppercase tracking-tight text-[#2B1650] mt-0.5">Gelato, Sandos &amp; Viennoiserie</h3>
+        </div>
+        <span class="px-3 py-1 rounded-full bg-pink-100 border border-pink-300 font-mono-code text-[11px] font-bold text-pink-900">Baked Fresh 8 AM</span>
+      </div>
+
+      <div class="space-y-5">
+        <div class="pb-4 border-b border-[#2B1650]/10 flex items-start justify-between gap-4">
+          <div>
+            <h4 class="font-serif-editorial font-bold text-lg text-[#2B1650]">Smoked Chocolate &amp; Maldon Gelato</h4>
+            <p class="text-xs font-medium text-[#534168] mt-1">In-house churned 72% dark chocolate gelato infused with cold oakwood smoke &amp; sea salt flakes.</p>
+          </div>
+          <div class="flex items-center gap-3 shrink-0">
+            <span class="font-mono-code font-bold text-base text-[#2B1650]">₹260</span>
+            <button onclick="window.addBarItemToCart('bar-smoked-choc-scoop', 'Smoked Chocolate Gelato Scoop', 260)" class="px-3 py-1.5 rounded-lg bg-[#F5EFFF] hover:bg-[#2B1650] text-[#2B1650] hover:text-white font-mono-code text-xs font-bold border border-[#2B1650]/20 transition-all">+ Add</button>
+          </div>
+        </div>
+
+        <div class="pb-4 border-b border-[#2B1650]/10 flex items-start justify-between gap-4">
+          <div>
+            <h4 class="font-serif-editorial font-bold text-lg text-[#2B1650]">Roasted Sicilian Hazelnut Gelato</h4>
+            <p class="text-xs font-medium text-[#534168] mt-1">Slow-roasted Piedmont &amp; Sicilian hazelnuts folded into silky fior di latte base with praline crunch.</p>
+          </div>
+          <div class="flex items-center gap-3 shrink-0">
+            <span class="font-mono-code font-bold text-base text-[#2B1650]">₹280</span>
+            <button onclick="window.addBarItemToCart('bar-hazelnut-scoop', 'Roasted Sicilian Hazelnut Gelato', 280)" class="px-3 py-1.5 rounded-lg bg-[#F5EFFF] hover:bg-[#2B1650] text-[#2B1650] hover:text-white font-mono-code text-xs font-bold border border-[#2B1650]/20 transition-all">+ Add</button>
+          </div>
+        </div>
+
+        <div class="pb-4 border-b border-[#2B1650]/10 flex items-start justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h4 class="font-serif-editorial font-bold text-lg text-[#2B1650]">Eggplant Parm Milk-Bread Sando</h4>
+              <span class="px-2 py-0.5 rounded-full bg-purple-100 text-[#7C3AED] text-[9px] font-black uppercase tracking-wider">Chef Vanshika Special</span>
+            </div>
+            <p class="text-xs font-medium text-[#534168] mt-1">Crispy panko aubergine, slow-simmered San Marzano marinara, basil oil &amp; aged provolone on Japanese shokupan.</p>
+          </div>
+          <div class="flex items-center gap-3 shrink-0">
+            <span class="font-mono-code font-bold text-base text-[#2B1650]">₹420</span>
+            <button onclick="window.addBarItemToCart('bar-eggplant-sando', 'Eggplant Parm Milk-Bread Sando', 420)" class="px-3 py-1.5 rounded-lg bg-[#F5EFFF] hover:bg-[#2B1650] text-[#2B1650] hover:text-white font-mono-code text-xs font-bold border border-[#2B1650]/20 transition-all">+ Add</button>
+          </div>
+        </div>
+
+        <div class="pb-4 border-b border-[#2B1650]/10 flex items-start justify-between gap-4">
+          <div>
+            <h4 class="font-serif-editorial font-bold text-lg text-[#2B1650]">Charred Jerk Chicken Ciabatta Sando</h4>
+            <p class="text-xs font-medium text-[#534168] mt-1">Allspice &amp; scotch-bonnet glazed chicken thigh, pickled mango slaw &amp; lime aioli on crusty artisanal ciabatta.</p>
+          </div>
+          <div class="flex items-center gap-3 shrink-0">
+            <span class="font-mono-code font-bold text-base text-[#2B1650]">₹460</span>
+            <button onclick="window.addBarItemToCart('bar-jerk-sando', 'Charred Jerk Chicken Ciabatta Sando', 460)" class="px-3 py-1.5 rounded-lg bg-[#F5EFFF] hover:bg-[#2B1650] text-[#2B1650] hover:text-white font-mono-code text-xs font-bold border border-[#2B1650]/20 transition-all">+ Add</button>
+          </div>
+        </div>
+
+        <div class="pb-4 border-b border-[#2B1650]/10 flex items-start justify-between gap-4">
+          <div>
+            <h4 class="font-serif-editorial font-bold text-lg text-[#2B1650]">Flaky K-Drama Cream Puff</h4>
+            <p class="text-xs font-medium text-[#534168] mt-1">Choux-laminated pastry filled with Madagascar vanilla bean diplomate cream &amp; caramelized sugar crust.</p>
+          </div>
+          <div class="flex items-center gap-3 shrink-0">
+            <span class="font-mono-code font-bold text-base text-[#2B1650]">₹290</span>
+            <button onclick="window.addBarItemToCart('bar-kdrama-puff', 'Flaky K-Drama Cream Puff', 290)" class="px-3 py-1.5 rounded-lg bg-[#F5EFFF] hover:bg-[#2B1650] text-[#2B1650] hover:text-white font-mono-code text-xs font-bold border border-[#2B1650]/20 transition-all">+ Add</button>
+          </div>
+        </div>
+
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h4 class="font-serif-editorial font-bold text-lg text-[#2B1650]">Wild Blueberry Brioche Toast</h4>
+            <p class="text-xs font-medium text-[#534168] mt-1">Thick-cut house brioche griddled in cultured butter with warm blueberry compote &amp; whipped mascarpone.</p>
+          </div>
+          <div class="flex items-center gap-3 shrink-0">
+            <span class="font-mono-code font-bold text-base text-[#2B1650]">₹310</span>
+            <button onclick="window.addBarItemToCart('bar-blueberry-brioche', 'Wild Blueberry Brioche Toast', 310)" class="px-3 py-1.5 rounded-lg bg-[#F5EFFF] hover:bg-[#2B1650] text-[#2B1650] hover:text-white font-mono-code text-xs font-bold border border-[#2B1650]/20 transition-all">+ Add</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="text-center font-serif-editorial italic text-base text-[#2B1650]/85 mt-8">
+    “Menu rotates with seasons, harvests + partner farms across Nagaland, Chikmagalur, Coorg &amp; Kyoto.”
+  </p>
+</section>
+
   <!-- ================= SPECIALTY ROASTERY & EXTRACTION CRAFT ================= -->
 <section class="py-24 px-6 md:px-12 max-w-7xl mx-auto" id="roasteryCraft">
   <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
     <div>
-      <span class="text-xs font-black uppercase tracking-[0.25em] text-[#5B21B6]">The Sensory Extraction & Roastery Bar</span>
+      <span class="text-xs font-black uppercase tracking-[0.25em] text-[#7C3AED]">The Sensory Extraction & Roastery Bar</span>
       <h2 class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight mt-2 text-[#2B1650]">
         The Roastery &amp; Craft.
         </h2>
@@ -1390,72 +2017,104 @@
     </div>
   </div>
 
-  <!-- Panel 1: 9-Bar Bottomless Naked Portafilter Extraction Telemetry -->
+  <!-- Panel 1: 9-Bar Bottomless Naked Portafilter Extraction Telemetry (60-Frame Scrub) -->
   <div id="craftPanel-extraction" class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
     <!-- Left Controls & Telemetry -->
-    <div class="lg:col-span-6 space-y-6">
+    <div class="lg:col-span-6 space-y-5">
       <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-black uppercase tracking-wider">
         <span>● Bottomless Naked Portafilter • 58mm E61 Grouphead</span>
       </div>
       <h3 class="text-3xl sm:text-4xl font-display font-black text-[#2B1650] uppercase tracking-tight">
         Syrupy Golden Extraction.
-        </h3>
+      </h3>
       <p class="text-sm sm:text-base text-[#534168] font-medium leading-relaxed">
-        Freshly ground Nagaland Arabica micro-lot dosed at 18.5 grams. Dual streams coalesce into a syrupy, golden-amber flow, yielding a tiger-striped crema with natural wild blueberry and cacao notes.
-        </p>
+        Scrub the 60-frame extraction timeline or hold directly on the portafilter stage to pull a live shot from <strong class="text-[#2B1650]">0.0s pre-infusion</strong> to <strong class="text-[#2B1650]">27.4s tiger-striped crema</strong>.
+      </p>
 
-      <!-- Real Telemetry Grid -->
-      <div class="grid grid-cols-3 gap-3 pt-2">
+      <!-- Real Telemetry Grid (Driven Live by Frame Scrubber) -->
+      <div class="grid grid-cols-3 gap-3 pt-1">
         <div class="bg-[#F8F5FF] p-3 rounded-2xl border border-[#2B1650]/10 text-center">
           <div class="text-[10px] uppercase tracking-wider text-[#7C3AED] font-black">Grouphead</div>
-          <div id="craftPressureVal" class="text-xl font-display font-black text-[#2B1650]">9.2 BAR</div>
+          <div id="craftPressureVal" class="text-xl font-display font-black text-[#2B1650] font-mono-code">9.2 BAR</div>
         </div>
         <div class="bg-[#F8F5FF] p-3 rounded-2xl border border-[#2B1650]/10 text-center">
           <div class="text-[10px] uppercase tracking-wider text-[#7C3AED] font-black">Extraction Time</div>
-          <div id="craftTimeVal" class="text-xl font-display font-black text-[#2B1650]">27.4s</div>
+          <div id="craftTimeVal" class="text-xl font-display font-black text-[#2B1650] font-mono-code">27.4s</div>
         </div>
         <div class="bg-[#F8F5FF] p-3 rounded-2xl border border-[#2B1650]/10 text-center">
           <div class="text-[10px] uppercase tracking-wider text-[#7C3AED] font-black">Liquid Yield</div>
-          <div id="craftYieldVal" class="text-xl font-display font-black text-[#2B1650]">36.8g</div>
+          <div id="craftYieldVal" class="text-xl font-display font-black text-[#2B1650] font-mono-code">36.8g</div>
         </div>
       </div>
 
-      <div class="flex flex-wrap items-center gap-4 pt-2">
-        <button id="craftRunBtn" onclick="runCraftCalibration()" class="btn btn-primary shadow-lg shadow-[#2B1650]/20 flex items-center gap-2">
-          <span>Calibrate 9-Bar Extraction</span>
-        </button>
-        <span class="text-xs text-[#534168] font-bold">1:2 Ratio • 93.5°C Boiler PID</span>
+      <!-- Interactive 60-Frame Extraction Scrubber (0.0s to 27.4s) -->
+      <div class="p-4 rounded-2xl bg-[#F8F5FF] border border-[#2B1650]/15 space-y-2.5">
+        <div class="flex items-center justify-between text-[11px] font-mono-code font-bold">
+          <span class="text-[#2B1650] uppercase">60-Frame Shot Scrubber</span>
+          <span id="extractionPhaseBadge" class="px-2.5 py-0.5 rounded-full bg-[#2B1650] text-[#F1E9FF]">18.1s–27.4s • Tiger-Striped Crema</span>
+        </div>
+        <input
+          type="range"
+          id="extractionScrubber"
+          min="0"
+          max="27.4"
+          step="0.1"
+          value="27.4"
+          aria-label="Scrub espresso extraction timeline from 0.0 to 27.4 seconds"
+          oninput="window.scrubExtractionShot(parseFloat(this.value))"
+          class="w-full accent-[#7C3AED] cursor-ew-resize h-2 bg-[#E2D4FC] rounded-lg"
+        />
+        <div class="grid grid-cols-3 text-[10px] font-mono-code font-bold text-[#534168]">
+          <span>0.0–6.0s Pre-Infusion (3 BAR)</span>
+          <span class="text-center">6.1–18.0s Coalescence (9.2 BAR)</span>
+          <span class="text-right">18.1–27.4s Crema (36.8g)</span>
+        </div>
       </div>
 
-      <div class="pt-4 border-t border-[#2B1650]/10 grid grid-cols-3 gap-4 text-center">
+      <div class="flex flex-wrap items-center gap-4 pt-1">
+        <button id="craftRunBtn" onclick="runCraftCalibration()" class="btn btn-primary shadow-lg shadow-[#2B1650]/20 flex items-center gap-2">
+          <span>Pull Live 9-Bar Shot (0.0s → 27.4s)</span>
+        </button>
+        <span class="text-xs text-[#534168] font-bold font-mono-code">1:2 Ratio • 93.5°C Boiler PID</span>
+      </div>
+
+      <div class="pt-3 border-t border-[#2B1650]/10 grid grid-cols-3 gap-4 text-center">
         <div>
           <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">Dry Dose</div>
-          <div class="text-lg font-black text-[#2B1650]">18.5g</div>
+          <div class="text-lg font-black text-[#2B1650] font-mono-code">18.5g</div>
         </div>
         <div>
           <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">TDS Purity</div>
-          <div class="text-lg font-black text-[#2B1650]">9.8%</div>
+          <div id="craftTdsVal" class="text-lg font-black text-[#2B1650] font-mono-code">9.8%</div>
         </div>
         <div>
           <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">Flow Rate</div>
-          <div class="text-lg font-black text-[#2B1650]">1.34 g/s</div>
+          <div id="craftFlowVal" class="text-lg font-black text-[#2B1650] font-mono-code">1.34 g/s</div>
         </div>
       </div>
     </div>
 
-    <!-- Right Visual Canvas: Macro Photography with Subtle Steam Canvas Overlay -->
-    <div class="lg:col-span-6 relative rounded-2xl overflow-hidden border-2 border-[#2B1650]/15 shadow-2xl min-h-[380px] bg-slate-900 group">
-      <img id="craftExtractionImg" src="/assets/brand/u-1514432324607-a09d9b4aefdd-1200.jpg" loading="lazy" decoding="async" alt="Espresso extraction from bottomless portafilter" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 min-h-[380px]" />
+    <!-- Right Visual Canvas: 60-Frame Bottomless Naked Portafilter Sequence -->
+    <div id="extractionStageWrap" data-cursor-pill="[ HOLD TO PULL SHOT • 9.2 BAR ]" class="lg:col-span-6 relative rounded-2xl overflow-hidden border-2 border-[#2B1650]/15 shadow-2xl min-h-[410px] bg-[#140A24] group select-none">
+      <canvas id="extractionFrameCanvas" width="760" height="480" class="w-full h-full object-cover min-h-[410px] cursor-ew-resize block"></canvas>
       <!-- Floating Steam Mist Canvas -->
       <canvas id="coffeeSteamCanvas" class="absolute inset-0 pointer-events-none z-10"></canvas>
-      <div class="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/20 text-white flex items-center justify-between z-20 text-xs font-bold">
-        <span>DLF Phase 1 Flagship Bar</span>
-        <span class="text-amber-400">Tiger-Striped Crema Active</span>
+      <div class="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none z-20">
+        <span id="extractionFrameHud" class="px-3 py-1 rounded-full bg-black/75 backdrop-blur-md border border-white/20 text-[11px] font-mono-code font-bold text-[#CDB8F7]">
+          FRAME 60 / 60 • 27.4s
+        </span>
+        <span class="px-3 py-1 rounded-full bg-[#7C3AED]/85 backdrop-blur-md text-[10px] font-mono-code font-bold text-white uppercase tracking-wider">
+          Hold or Drag to Scrub Shot
+        </span>
+      </div>
+      <div class="absolute bottom-4 left-4 right-4 bg-black/70 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/20 text-white flex items-center justify-between z-20 text-xs font-bold pointer-events-none">
+        <span>58mm Naked Basket • 16 Arjun Marg</span>
+        <span id="extractionStatusText" class="text-amber-400 font-mono-code">Tiger-Striped Crema • 36.8g</span>
       </div>
     </div>
   </div>
 
-  <!-- Panel 2: Microfoam Pour Studio -->
+  <!-- Panel 2: Microfoam Pour Studio (Interactive Fluid Path + 100% Gloss Tilt Shader) -->
   <div id="craftPanel-microfoam" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
     <!-- Left Controls -->
     <div class="lg:col-span-6 space-y-6">
@@ -1464,131 +2123,220 @@
       </div>
       <h3 class="text-3xl sm:text-4xl font-display font-black text-[#2B1650] uppercase tracking-tight">
         Microfoam Chemistry.
-        </h3>
+      </h3>
       <p class="text-sm sm:text-base text-[#534168] font-medium leading-relaxed">
-        Aerating whole or oat milk to exactly 65°C converts complex sugars into natural sweetness without scalding whey proteins. Poured at a steady 12ml/second to produce mirror-gloss latte art.
-        </p>
+        Aerating whole or oat milk to <strong class="text-[#2B1650]">65.0°C</strong> converts lactose into natural sweetness without scalding whey proteins. Toggle the pour geometry below to watch the pitcher tip oscillate at <strong class="text-[#2B1650]">12ml/second</strong>, and move your cursor across the cup to inspect the <strong class="text-[#2B1650]">100% Gloss</strong> specular sheen.
+      </p>
 
       <!-- Pattern Selector -->
       <div class="space-y-2">
-        <span class="text-xs uppercase tracking-widest text-[#7C3AED] font-black">Select Pour Pattern</span>
+        <span class="text-xs uppercase tracking-widest text-[#7C3AED] font-black">Select Pour Pattern (12ml/s Pitcher Oscillation)</span>
         <div class="flex flex-wrap gap-2">
           <button onclick="setCraftPattern('rosetta')" id="craftPat-rosetta" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#2B1650] text-[#F1E9FF] shadow transition-all">
-            Rosetta
-            </button>
+            8-Leaf Rosetta
+          </button>
           <button onclick="setCraftPattern('tulip')" id="craftPat-tulip" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#F8F5FF] text-[#534168] border border-[#2B1650]/20 hover:text-[#2B1650] transition-all">
             Stacked Tulip
-            </button>
-          <button onclick="setCraftPattern('heart')" id="craftPat-heart" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#F8F5FF] text-[#534168] border border-[#2B1650]/20 hover:text-[#2B1650] transition-all">
-            Blooming Heart
-            </button>
+          </button>
+          <button onclick="setCraftPattern('swan')" id="craftPat-swan" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#F8F5FF] text-[#534168] border border-[#2B1650]/20 hover:text-[#2B1650] transition-all">
+            Barista Swan
+          </button>
         </div>
       </div>
 
       <div class="pt-4 border-t border-[#2B1650]/10 grid grid-cols-3 gap-4 text-center">
         <div>
           <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">Texture</div>
-          <div class="text-lg font-black text-[#2B1650]">0.2mm Velvet</div>
+          <div class="text-lg font-black text-[#2B1650] font-mono-code">0.2mm Velvet</div>
         </div>
         <div>
           <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">Aeration</div>
-          <div class="text-lg font-black text-[#2B1650]">100% Gloss</div>
+          <div id="microfoamGlossReadout" class="text-lg font-black text-[#2B1650] font-mono-code">100% Gloss</div>
         </div>
         <div>
           <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">Steam Temp</div>
-          <div class="text-lg font-black text-[#2B1650]">65.0°C</div>
+          <div class="text-lg font-black text-[#2B1650] font-mono-code">65.0°C</div>
         </div>
       </div>
     </div>
 
-    <!-- Right Photo Display -->
-    <div class="lg:col-span-6 relative rounded-2xl overflow-hidden border-2 border-[#2B1650]/15 shadow-2xl min-h-[380px] bg-slate-900 group">
-      <img id="craftLatteImg" src="/assets/brand/u-1534778101976-62847782c213-1200.jpg" loading="lazy" decoding="async" alt="Handcrafted latte art pouring" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 min-h-[380px]" />
-      <div class="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/20 text-white flex items-center justify-between z-20 text-xs font-bold">
+    <!-- Right Interactive Fluid Pour & Shader Gloss Display -->
+    <div id="microfoamStageWrap" class="lg:col-span-6 relative rounded-2xl overflow-hidden border-2 border-[#2B1650]/15 shadow-2xl min-h-[410px] bg-[#180D2B] flex items-center justify-center group select-none">
+      <!-- Dynamic SVG Fluid Pour Studio -->
+      <svg id="microfoamPourSvg" viewBox="0 0 520 400" class="w-full h-full max-h-[410px]" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="cremaCupGrad" cx="50%" cy="48%" r="52%">
+            <stop offset="0%" stop-color="#9C5726"/>
+            <stop offset="55%" stop-color="#6E3714"/>
+            <stop offset="88%" stop-color="#3E1C08"/>
+            <stop offset="100%" stop-color="#261004"/>
+          </radialGradient>
+          <linearGradient id="pitcherSteel" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#FFFFFF"/>
+            <stop offset="45%" stop-color="#C9BEDC"/>
+            <stop offset="100%" stop-color="#6D5B8E"/>
+          </linearGradient>
+          <filter id="foamSoftGlow" x="-15%" y="-15%" width="130%" height="130%">
+            <feGaussianBlur stdDeviation="2.2" result="blur"/>
+            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+          </filter>
+        </defs>
+        <!-- Brushed Steel Counter Backdrop -->
+        <rect width="520" height="400" fill="#180D2B"/>
+        <circle cx="260" cy="205" r="158" fill="#2B1650" opacity="0.45"/>
+        <!-- Ceramic Saucer & Cup Rim -->
+        <circle cx="260" cy="205" r="142" fill="#E6DCF7" opacity="0.18"/>
+        <path d="M388 188h34a18 18 0 0 1 0 36h-34" stroke="#F3ECFF" stroke-width="14" stroke-linecap="round"/>
+        <circle cx="260" cy="205" r="126" fill="url(#cremaCupGrad)" stroke="#F6F0FF" stroke-width="9"/>
+        <!-- Tiger-Stripe Crema Flecks -->
+        <ellipse cx="260" cy="205" rx="112" ry="112" stroke="#D97706" stroke-opacity="0.28" stroke-width="3" stroke-dasharray="14 22"/>
+
+        <!-- Fluid Microfoam Path (Animated via stroke-dashoffset) -->
+        <g filter="url(#foamSoftGlow)">
+          <path id="microfoamBaseWash" d="M260 135 C210 155, 205 245, 260 278 C315 245, 310 155, 260 135 Z" fill="#FFFDF9" fill-opacity="0.16"/>
+          <path id="microfoamPrimaryPath"
+                d="M260 282 C230 270, 290 258, 224 244 C296 232, 218 218, 298 204 C216 190, 300 176, 224 162 C292 150, 232 138, 260 124 C272 118, 260 105, 260 290"
+                stroke="#FFFDF9"
+                stroke-width="11"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                fill="none"/>
+          <path id="microfoamAccentPath"
+                d="M260 112 L260 292"
+                stroke="#F5EFFF"
+                stroke-width="4.5"
+                stroke-linecap="round"
+                fill="none"/>
+        </g>
+
+        <!-- Oscillating Stainless Pitcher Spout & 12ml/s Milk Stream -->
+        <g id="microfoamPitcherTip" style="transform-origin: 260px 64px;">
+          <path id="microfoamPourStream" d="M260 66 Q262 118 260 164" stroke="#FFFDF9" stroke-width="5.5" stroke-linecap="round" opacity="0.92"/>
+          <path d="M232 14 L288 14 L274 62 L260 72 L246 62 Z" fill="url(#pitcherSteel)" stroke="#FFFFFF" stroke-width="1.5"/>
+        </g>
+      </svg>
+
+      <!-- Shader-Based Glossy Specular Highlight (Reacts to Device Tilt & Cursor Angle) -->
+      <div class="microfoam-gloss-sheen" id="microfoamGlossLayer"></div>
+
+      <div class="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none z-20">
+        <span id="microfoamFlowHud" class="px-3 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/20 text-[11px] font-mono-code font-bold text-emerald-300">
+          FLOW: 12.0 ml/s • PITCHER Δ 3.4Hz
+        </span>
+        <span id="microfoamTiltHud" class="px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[10px] font-mono-code font-bold text-[#F1E9FF]">
+          SPECULAR TILT: 100% GLOSS
+        </span>
+      </div>
+
+      <div class="absolute bottom-4 left-4 right-4 bg-black/70 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/20 text-white flex items-center justify-between z-20 text-xs font-bold pointer-events-none">
         <span id="craftLatteCaption">Classic 8-Leaf Rosetta Pattern</span>
-        <span class="text-emerald-400">Microfoam Sweet Spot</span>
+        <button type="button" onclick="window.replayMicrofoamPour()" class="pointer-events-auto text-emerald-400 hover:underline font-mono-code">↻ Replay 12ml/s Pour</button>
       </div>
     </div>
   </div>
 
-  <!-- Panel 3: Origin Roast Profile & Sensory Wheel -->
+  <!-- Panel 3: Origin Roast Profile & Continuous Thermal Slider (196°C → 218°C → 235°C) -->
   <div id="craftPanel-roast" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
     <!-- Left Origin Profile Details -->
     <div class="lg:col-span-6 space-y-6">
       <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-black uppercase tracking-wider">
         <span>● Single-Origin Indian Terroir • Giesen W6A Roaster</span>
       </div>
-      <h3 id="craftRoastName" class="text-3xl sm:text-4xl font-display font-black text-[#2B1650] uppercase tracking-tight">
-        Nagaland Arabica.
+      <div class="flex flex-wrap items-baseline justify-between gap-2">
+        <h3 id="craftRoastName" class="text-3xl sm:text-4xl font-display font-black text-[#2B1650] uppercase tracking-tight">
+          Nagaland Arabica.
         </h3>
+        <span id="craftRoastTempBadge" class="px-3 py-1 rounded-full bg-[#2B1650] text-[#CDB8F7] font-mono-code text-xs font-bold">
+          196.0°C • Light Cinnamon
+        </span>
+      </div>
       <p id="craftRoastDesc" class="text-sm sm:text-base text-[#534168] font-medium leading-relaxed">
         Grown under dense wild canopies at 1,450 meters elevation in Kiphire, Nagaland. Lightly roasted to preserve floral jasmine aromatics, peach sweetness, and delicate bergamot finish.
-        </p>
+      </p>
 
-      <!-- Roast Slider -->
-      <div class="space-y-3 pt-2">
-        <div class="flex justify-between text-xs font-black uppercase tracking-wider text-[#2B1650]">
+      <!-- Continuous Thermal Roast Slider (196°C to 235°C) -->
+      <div class="space-y-3 pt-2 p-4 rounded-2xl bg-[#F8F5FF] border border-[#2B1650]/15">
+        <div class="flex justify-between text-[11px] font-mono-code font-bold uppercase tracking-wider text-[#2B1650]">
           <span>Light Cinnamon (196°C)</span>
           <span>Medium City+ (218°C)</span>
           <span>Dark French (235°C)</span>
         </div>
-        <input type="range" min="1" max="3" value="1" id="craftRoastSlider" oninput="changeCraftRoastProfile(this.value)" class="w-full accent-[#7C3AED] cursor-pointer h-2 bg-slate-200 rounded-lg" />
+        <input
+          type="range"
+          min="196"
+          max="235"
+          step="0.5"
+          value="196"
+          id="craftRoastSlider"
+          aria-label="Continuous thermal roast slider from 196 degrees to 235 degrees Celsius"
+          oninput="changeCraftRoastProfile(this.value)"
+          class="w-full accent-[#7C3AED] cursor-ew-resize h-2.5 bg-gradient-to-r from-amber-300 via-amber-700 to-stone-900 rounded-lg"
+        />
       </div>
 
-      <!-- Flavor Notes Pills -->
-      <div class="space-y-2 pt-2">
-        <span class="text-xs uppercase tracking-widest text-[#7C3AED] font-black">Cupping Flavor Notes</span>
-        <div id="craftRoastNotes" class="flex flex-wrap gap-2">
-          <span class="px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold">Wild Jasmine</span>
-          <span class="px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold">White Peach</span>
-          <span class="px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold">Bergamot Citrus</span>
-          <span class="px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold">Raw Honey</span>
+      <!-- Buoyant Flavor Notes Pills -->
+      <div class="space-y-2 pt-1">
+        <span class="text-xs uppercase tracking-widest text-[#7C3AED] font-black">Cupping Flavor Notes (Buoyant Thermal Matrix)</span>
+        <div id="craftRoastNotes" class="flex flex-wrap gap-2 pt-1">
+          <span class="buoyant-pill px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold" style="--bp-d:0s">Wild Jasmine</span>
+          <span class="buoyant-pill px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold" style="--bp-d:-0.8s">White Peach</span>
+          <span class="buoyant-pill px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold" style="--bp-d:-1.6s">Bergamot Citrus</span>
+          <span class="buoyant-pill px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold" style="--bp-d:-2.4s">Raw Honey</span>
         </div>
       </div>
     </div>
 
-    <!-- Right Sensory Radar Graphic -->
-    <div class="lg:col-span-6 flex flex-col items-center justify-center p-8 bg-gradient-to-b from-[#F8F5FF] to-[#EAE0FC] rounded-2xl border border-[#2B1650]/15 shadow-inner">
-      <div class="w-full max-w-sm space-y-4">
+    <!-- Right Bean Macro LUT Morph Canvas + Spring-Physics Sensory Bars -->
+    <div class="lg:col-span-6 flex flex-col items-center justify-center p-6 sm:p-8 bg-gradient-to-b from-[#F8F5FF] to-[#EAE0FC] rounded-2xl border border-[#2B1650]/15 shadow-inner">
+      <!-- 3-Stop Color LUT + Oil-Sheen Normal Map Coffee Bean Macro Canvas -->
+      <div class="w-full max-w-sm mb-5 relative rounded-2xl overflow-hidden border border-[#2B1650]/20 bg-[#160B28] shadow-md">
+        <canvas id="roastBeanCanvas" width="420" height="165" class="w-full h-[155px] block"></canvas>
+        <div class="absolute bottom-2 left-3 right-3 flex justify-between items-center text-[10px] font-mono-code font-bold text-[#F1E9FF]/90 pointer-events-none">
+          <span id="beanLutLabel">LUT: CINNAMON TERROIR</span>
+          <span id="beanOilLabel" class="text-amber-300">OIL SHEEN: 8%</span>
+        </div>
+      </div>
+
+      <div class="w-full max-w-sm space-y-3.5">
         <div class="space-y-1">
           <div class="flex justify-between text-xs font-bold text-[#2B1650]">
             <span>Acidity &amp; Brightness</span>
-            <span id="craftAcidityVal">9.4 / 10</span>
+            <span id="craftAcidityVal" class="font-mono-code">9.4 / 10</span>
           </div>
-          <div class="h-2 rounded-full bg-white overflow-hidden shadow-inner">
-            <div id="craftAcidityBar" class="h-full bg-[#7C3AED] rounded-full transition-all duration-500" style="width: 94%;"></div>
+          <div class="h-2.5 rounded-full bg-white overflow-hidden shadow-inner">
+            <div id="craftAcidityBar" class="h-full bg-[#7C3AED] rounded-full" style="width: 94%;"></div>
           </div>
         </div>
         <div class="space-y-1">
           <div class="flex justify-between text-xs font-bold text-[#2B1650]">
             <span>Body &amp; Mouthfeel</span>
-            <span id="craftBodyVal">6.5 / 10</span>
+            <span id="craftBodyVal" class="font-mono-code">6.5 / 10</span>
           </div>
-          <div class="h-2 rounded-full bg-white overflow-hidden shadow-inner">
-            <div id="craftBodyBar" class="h-full bg-amber-500 rounded-full transition-all duration-500" style="width: 65%;"></div>
+          <div class="h-2.5 rounded-full bg-white overflow-hidden shadow-inner">
+            <div id="craftBodyBar" class="h-full bg-amber-500 rounded-full" style="width: 65%;"></div>
           </div>
         </div>
         <div class="space-y-1">
           <div class="flex justify-between text-xs font-bold text-[#2B1650]">
             <span>Sweetness</span>
-            <span id="craftSweetnessVal">8.8 / 10</span>
+            <span id="craftSweetnessVal" class="font-mono-code">8.8 / 10</span>
           </div>
-          <div class="h-2 rounded-full bg-white overflow-hidden shadow-inner">
-            <div id="craftSweetnessBar" class="h-full bg-pink-500 rounded-full transition-all duration-500" style="width: 88%;"></div>
+          <div class="h-2.5 rounded-full bg-white overflow-hidden shadow-inner">
+            <div id="craftSweetnessBar" class="h-full bg-pink-500 rounded-full" style="width: 88%;"></div>
           </div>
         </div>
         <div class="space-y-1">
           <div class="flex justify-between text-xs font-bold text-[#2B1650]">
-            <span>Roast Development Time</span>
-            <span id="craftRoastTimeVal">1:45 min (14.2% DTR)</span>
+            <span>Roast Development Time (DTR)</span>
+            <span id="craftRoastTimeVal" class="font-mono-code">1:45 min (14.2% DTR)</span>
           </div>
-          <div class="h-2 rounded-full bg-white overflow-hidden shadow-inner">
-            <div id="craftRoastTimeBar" class="h-full bg-[#2B1650] rounded-full transition-all duration-500" style="width: 72%;"></div>
+          <div class="h-2.5 rounded-full bg-white overflow-hidden shadow-inner">
+            <div id="craftRoastTimeBar" class="h-full bg-[#2B1650] rounded-full" style="width: 72%;"></div>
           </div>
         </div>
       </div>
 
-      <div class="mt-6 flex items-center gap-3">
+      <div class="mt-5 flex items-center gap-3">
         <button onclick="playCraftBeanCrackle()" class="px-4 py-2 rounded-full bg-white border border-[#2B1650]/20 text-[#2B1650] text-xs font-bold uppercase tracking-wider hover:bg-[#F8F5FF] transition-all flex items-center gap-2 shadow-sm">
           <span>Hear First Crack (Audio)</span>
         </button>
@@ -1601,7 +2349,7 @@
 <section class="py-24 px-6 md:px-12 max-w-7xl mx-auto scroll-reveal" id="d2cShop">
   <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
     <div>
-      <span class="text-xs font-black uppercase tracking-[0.25em] text-[#5B21B6]">D2C Roastery Releases</span>
+      <span class="text-xs font-black uppercase tracking-[0.25em] text-[#7C3AED]">D2C Roastery Releases</span>
       <h2 class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight mt-2 text-[#2B1650]">
         Roasted to Order.
         </h2>
@@ -1626,7 +2374,7 @@
       <!-- One photograph per venture, in the order the timeline tells them.
            Real images rather than drawings: the rest of this page is
            photography and the drawing was the odd one out. Each was checked
-           by eye before it went in, two candidates were rejected for
+           by eye before it went in · two candidates were rejected for
            carrying another business's branding, which on a page about this
            brand would read as its own. -->
       <div class="chef-chart" id="chefChart">
@@ -1637,7 +2385,7 @@
           <img src="/assets/brand/story-gs-2-plant.jpg" alt="Vegetables and herbs prepped on a stainless kitchen counter" loading="lazy" decoding="async" width="900" height="455">
         </figure>
         <figure class="cc-shot" style="--i:2; --era:#CDB8F7">
-          <img src="/assets/brand/u-1534778101976-62847782c213-1200.jpg" alt="Latte art poured at the counter" loading="lazy" decoding="async" width="1200" height="1799">
+          <img src="/assets/brand/u-1646954256973-f7fd9ce626b1-1200.jpg" alt="Signature Purple Gram Latte poured at the lilac counter" loading="lazy" decoding="async" width="1200" height="1799">
         </figure>
       </div>
     </div>
@@ -1722,14 +2470,101 @@
   </div>
 </section>
 
+<!-- ================= CUPPING + EVENTS: COME LEARN WITH US ================= -->
+<section class="py-24 px-6 md:px-12 max-w-7xl mx-auto scroll-reveal" id="events" aria-labelledby="events-title">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+    <!-- Left Column: Intro + Inline Event List Subscription -->
+    <div class="lg:col-span-5 space-y-6">
+      <span class="eyebrow-label">Monthly Sensory Table</span>
+      <h2 id="events-title" class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight text-[#2B1650]">
+        Come learn <span class="italic-accent normal-case">with us.</span>
+      </h2>
+      <p class="text-base font-semibold text-[#534168] leading-relaxed">
+        Every Sunday morning before public service, we open our 16 Arjun Marg roastery bar for guided blind cuppings of Indian micro-lots, 9-bar E61 home espresso calibration, and traditional Kyoto bamboo chasen whisking sessions.
+      </p>
+      <div class="p-6 rounded-3xl bg-white/85 border border-[#2B1650]/15 shadow-lg space-y-4">
+        <div class="font-mono-code text-xs font-bold uppercase tracking-wider text-[#7C3AED]">
+          ✦ Priority Tasting &amp; Workshop Invites
+        </div>
+        <p class="text-xs font-medium text-[#534168]">
+          Seats are capped at 8 guests per table to keep the room intimate. Join the tasting list for early Friday RSVP links.
+        </p>
+        <form onsubmit="event.preventDefault(); document.getElementById('eventSubMsg').classList.remove('hidden'); this.reset();" class="flex flex-col sm:flex-row gap-2">
+          <input type="email" required placeholder="your@email.com" aria-label="Email for cupping event invites" class="flex-1 px-4 py-3 rounded-xl bg-[#F8F5FF] border border-[#2B1650]/20 text-xs font-semibold text-[#2B1650] focus:outline-none focus:border-[#7C3AED]" />
+          <button type="submit" class="px-5 py-3 rounded-xl bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-wider hover:bg-[#3D2272] transition-all shrink-0">
+            Join List →
+          </button>
+        </form>
+        <p id="eventSubMsg" class="hidden text-xs font-bold text-emerald-700">
+          ✓ You're on the sensory guestlist! Watch your inbox this Friday at 9 AM.
+        </p>
+      </div>
+    </div>
+
+    <!-- Right Column: 3 Upcoming Events Horizontal Cards -->
+    <div class="lg:col-span-7 space-y-5">
+      <div class="d2c-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div class="flex items-center gap-5">
+          <div class="w-20 h-20 rounded-2xl bg-[#2B1650] text-[#F1E9FF] flex flex-col items-center justify-center shrink-0 border border-[#CDB8F7]/40">
+            <span class="font-serif-editorial font-bold text-2xl leading-none">26</span>
+            <span class="font-mono-code text-[11px] uppercase tracking-widest text-[#CDB8F7] mt-1">OCT</span>
+          </div>
+          <div>
+            <span class="font-mono-code text-[10px] font-bold uppercase tracking-widest text-[#7C3AED]">Sunday • 09:00 AM IST • DLF Phase 1 Flagship</span>
+            <h3 class="text-xl font-serif-editorial font-bold text-[#2B1650] mt-0.5">Nagaland vs. Chikmagalur Harvest Cupping</h3>
+            <p class="text-xs font-medium text-[#534168] mt-1">Side-by-sideSCA protocol tasting of 5 washed and anaerobic Indian micro-lots roasted on our Giesen W6A.</p>
+          </div>
+        </div>
+        <button onclick="this.textContent='✓ Spot Reserved'; this.className='px-4 py-2.5 rounded-xl bg-emerald-700 text-white font-mono-code text-xs font-bold shrink-0';" class="px-4 py-2.5 rounded-xl bg-[#F5EFFF] hover:bg-[#7C3AED] text-[#7C3AED] hover:text-white border border-[#7C3AED]/30 font-mono-code text-xs font-bold transition-all shrink-0">
+          RSVP →
+        </button>
+      </div>
+
+      <div class="d2c-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div class="flex items-center gap-5">
+          <div class="w-20 h-20 rounded-2xl bg-[#2B1650] text-[#F1E9FF] flex flex-col items-center justify-center shrink-0 border border-[#CDB8F7]/40">
+            <span class="font-serif-editorial font-bold text-2xl leading-none">02</span>
+            <span class="font-mono-code text-[11px] uppercase tracking-widest text-[#CDB8F7] mt-1">NOV</span>
+          </div>
+          <div>
+            <span class="font-mono-code text-[10px] font-bold uppercase tracking-widest text-[#7C3AED]">Sunday • 09:30 AM IST • DLF Phase 1 Flagship</span>
+            <h3 class="text-xl font-serif-editorial font-bold text-[#2B1650] mt-0.5">Kyoto First-Harvest Uji Matcha &amp; Chasen Lab</h3>
+            <p class="text-xs font-medium text-[#534168] mt-1">Learn 78°C water tempering, 100-prong bamboo whisking geometry, and oat/coconut milk layering.</p>
+          </div>
+        </div>
+        <button onclick="this.textContent='✓ Spot Reserved'; this.className='px-4 py-2.5 rounded-xl bg-emerald-700 text-white font-mono-code text-xs font-bold shrink-0';" class="px-4 py-2.5 rounded-xl bg-[#F5EFFF] hover:bg-[#7C3AED] text-[#7C3AED] hover:text-white border border-[#7C3AED]/30 font-mono-code text-xs font-bold transition-all shrink-0">
+          RSVP →
+        </button>
+      </div>
+
+      <div class="d2c-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div class="flex items-center gap-5">
+          <div class="w-20 h-20 rounded-2xl bg-[#2B1650] text-[#F1E9FF] flex flex-col items-center justify-center shrink-0 border border-[#CDB8F7]/40">
+            <span class="font-serif-editorial font-bold text-2xl leading-none">09</span>
+            <span class="font-mono-code text-[11px] uppercase tracking-widest text-[#CDB8F7] mt-1">NOV</span>
+          </div>
+          <div>
+            <span class="font-mono-code text-[10px] font-bold uppercase tracking-widest text-[#7C3AED]">Sunday • 09:00 AM IST • Golf Course Road Bar</span>
+            <h3 class="text-xl font-serif-editorial font-bold text-[#2B1650] mt-0.5">Home Espresso Dial-In &amp; Microfoam Pouring</h3>
+            <p class="text-xs font-medium text-[#534168] mt-1">Hands-on 1:2 extraction ratio calibration, WDT distribution, and 65°C mirror-gloss rosetta pouring.</p>
+          </div>
+        </div>
+        <button onclick="this.textContent='✓ Spot Reserved'; this.className='px-4 py-2.5 rounded-xl bg-emerald-700 text-white font-mono-code text-xs font-bold shrink-0';" class="px-4 py-2.5 rounded-xl bg-[#F5EFFF] hover:bg-[#7C3AED] text-[#7C3AED] hover:text-white border border-[#7C3AED]/30 font-mono-code text-xs font-bold transition-all shrink-0">
+          RSVP →
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ALL 3 LOCATIONS & CELEBRATED STEAMED WINDOW (SCRATCH TO REVEAL) -->
 <section class="visit" id="destinations" aria-labelledby="visit-title">
   <div class="max-w-7xl mx-auto space-y-10 scroll-reveal">
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
       <div>
-        <span class="text-xs font-black uppercase tracking-[0.25em] text-[#5B21B6]">Interactive Destination Explorer</span>
+        <span class="eyebrow-label">Interactive Destination Explorer</span>
         <h2 id="visit-title" class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight text-[#2B1650] mt-2">
-          Find the Counter.
+          Find the <span class="italic-accent normal-case">Counter.</span>
           </h2>
       </div>
       <!-- 3 Location Buttons -->
@@ -1765,6 +2600,14 @@
             <span id="locHours" class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-800 font-black text-[10px]">Open 8:30 AM – 10:30 PM</span>
           </div>
           <p id="locAddress" class="font-bold text-sm text-[#2B1650]">Block F, 16 Arjun Marg, DLF Phase 1, Sector 26A, Gurugram 122002</p>
+
+          <!-- Weekly Hours Table & Sell-Out Notice -->
+          <div class="pt-2 pb-1 border-t border-[#2B1650]/10 text-xs space-y-1 font-mono-code text-[#2B1650]">
+            <div class="flex justify-between"><span>Mon – Fri (IST)</span><strong>08:30 AM – 10:30 PM</strong></div>
+            <div class="flex justify-between"><span>Sat – Sun (IST)</span><strong>08:00 AM – 11:00 PM</strong></div>
+            <p class="font-serif-editorial italic text-[#7C3AED] pt-1">“Small-batch croissants, K-Drama puffs &amp; single-origin micro-lots often sell out by 2 PM.”</p>
+          </div>
+
           <div class="text-xs font-semibold text-[#534168]">
             Call: <a id="locPhone" href="tel:+918130056889" class="font-bold text-[#7C3AED] underline">+91 81300 56889</a>
           </div>
@@ -1779,9 +2622,9 @@
         </div>
       </div>
 
-      <!-- Wipe-to-See Steamed Window -->
+      <!-- Wipe-to-See Steamed Window (Refractive Condensation Shader + 8s Dynamic Re-Fog) -->
       <div class="lg:col-span-7">
-        <div id="scratchContainer">
+        <div id="scratchContainer" data-cursor-pill="[ WIPE CONDENSATION ]">
           <img
               id="scratchBgImage"
               src="/assets/brand/u-1554118811-1e0d58224f24-1200.jpg"
@@ -1791,7 +2634,7 @@
               class="w-full h-full object-cover transition-opacity duration-500"
             />
           <div id="scratchCaption" class="absolute bottom-6 left-6 z-10 pointer-events-none bg-black/85 backdrop-blur-md px-4 py-2 rounded-full border border-white/30 text-xs text-white font-bold uppercase tracking-widest">
-            16 Arjun Marg Flagship Bar
+            16 Arjun Marg Flagship Bar • Refractive Glass
             </div>
 
           <canvas id="scratchCanvas" class="absolute inset-0 z-20 w-full h-full"></canvas>
@@ -1802,6 +2645,63 @@
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ================= NEWSLETTER: GET THE WEEKLY BREW ================= -->
+<section class="py-20 px-6 md:px-12 max-w-5xl mx-auto scroll-reveal" id="newsletter" aria-labelledby="newsletter-title">
+  <div class="d2c-card p-8 sm:p-14 text-center relative overflow-hidden">
+    <span class="eyebrow-label justify-center">Get The Weekly Brew</span>
+    <h2 id="newsletter-title" class="text-3xl sm:text-5xl font-display font-black uppercase tracking-tight text-[#2B1650] mt-3">
+      New coffees, <span class="italic-accent normal-case">every Friday.</span>
+    </h2>
+    <p class="mt-3 text-sm sm:text-base font-semibold text-[#534168] max-w-xl mx-auto">
+      Be first to claim 250g micro-lot releases from Nagaland and Coorg, seasonal gelato flavours, and Sunday cupping table seats.
+    </p>
+    <form onsubmit="event.preventDefault(); document.getElementById('newsSuccess').classList.remove('hidden'); this.reset();" class="mt-7 max-w-md mx-auto flex flex-col sm:flex-row gap-3">
+      <input type="email" required placeholder="Enter your email address" aria-label="Email address for weekly brew dispatches" class="flex-1 px-5 py-3.5 rounded-full bg-[#F8F5FF] border border-[#2B1650]/25 text-sm font-semibold text-[#2B1650] focus:outline-none focus:border-[#7C3AED]" />
+      <button type="submit" class="px-7 py-3.5 rounded-full bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-[0.2em] hover:bg-[#3D2272] transition-all shadow-lg shrink-0">
+        Subscribe →
+      </button>
+    </form>
+    <p id="newsSuccess" class="hidden mt-4 text-xs font-bold text-emerald-700">
+      ✓ Welcome to Gram Street Roastery Dispatches · your 15% first-bag code (GRAM15) is on its way.
+    </p>
+  </div>
+</section>
+
+<!-- ================= SOCIAL STRIP: FOLLOW THE BAR ================= -->
+<section class="py-12 px-6 md:px-12 max-w-7xl mx-auto scroll-reveal" aria-label="Follow the bar on Instagram">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+    <div class="flex items-center gap-3">
+      <span class="font-mono-code text-xs font-black uppercase tracking-[0.22em] text-[#2B1650]">FOLLOW THE BAR</span>
+      <span class="text-xs font-bold text-[#7C3AED]">@gramstreetcoffee</span>
+    </div>
+    <div class="flex items-center gap-4 text-xs font-bold">
+      <a href="https://www.instagram.com/gramstreetcoffee/" target="_blank" rel="noopener" class="px-4 py-2 rounded-full bg-white/80 border border-[#2B1650]/20 text-[#2B1650] hover:bg-[#2B1650] hover:text-white transition-all">Instagram ↗</a>
+      <a href="https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon" target="_blank" rel="noopener" class="px-4 py-2 rounded-full bg-white/80 border border-[#2B1650]/20 text-[#2B1650] hover:bg-[#2B1650] hover:text-white transition-all">Zomato ↗</a>
+      <a href="https://www.swiggy.com/city/gurgaon/gram-street-coffee-arjun-marg-jalvayu-towers-rest1462852" target="_blank" rel="noopener" class="px-4 py-2 rounded-full bg-white/80 border border-[#2B1650]/20 text-[#2B1650] hover:bg-[#2B1650] hover:text-white transition-all">Swiggy ↗</a>
+    </div>
+  </div>
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+    <a href="https://www.instagram.com/gramstreetcoffee/" target="_blank" rel="noopener" class="block rounded-xl overflow-hidden aspect-square border border-white/60 shadow-md group">
+      <img src="/assets/brand/u-1646954256973-f7fd9ce626b1-800.jpg" alt="Signature Purple Gram Latte" loading="lazy" class="w-full h-full object-cover transition-all duration-500 group-hover:scale-105 group-hover:saturate-75" />
+    </a>
+    <a href="https://www.instagram.com/gramstreetcoffee/" target="_blank" rel="noopener" class="block rounded-xl overflow-hidden aspect-square border border-white/60 shadow-md group">
+      <img src="/assets/brand/u-1536256263959-770b48d82b0a-1200.jpg" alt="Kyoto Uji Matcha Whisking" loading="lazy" class="w-full h-full object-cover transition-all duration-500 group-hover:scale-105 group-hover:saturate-75" />
+    </a>
+    <a href="https://www.instagram.com/gramstreetcoffee/" target="_blank" rel="noopener" class="block rounded-xl overflow-hidden aspect-square border border-white/60 shadow-md group">
+      <img src="/assets/brand/u-1575031745961-1ed57f800a4c-800.jpg" alt="Small-Batch Smoked Chocolate Gelato" loading="lazy" class="w-full h-full object-cover transition-all duration-500 group-hover:scale-105 group-hover:saturate-75" />
+    </a>
+    <a href="https://www.instagram.com/gramstreetcoffee/" target="_blank" rel="noopener" class="block rounded-xl overflow-hidden aspect-square border border-white/60 shadow-md group">
+      <img src="/assets/brand/u-1514432324607-a09d9b4aefdd-1200.jpg" alt="9-Bar Bottomless Espresso Extraction" loading="lazy" class="w-full h-full object-cover transition-all duration-500 group-hover:scale-105 group-hover:saturate-75" />
+    </a>
+    <a href="https://www.instagram.com/gramstreetcoffee/" target="_blank" rel="noopener" class="block rounded-xl overflow-hidden aspect-square border border-white/60 shadow-md group">
+      <img src="/assets/brand/u-1534778101976-62847782c213-1200.jpg" alt="8-Leaf Rosetta Microfoam Pour" loading="lazy" class="w-full h-full object-cover transition-all duration-500 group-hover:scale-105 group-hover:saturate-75" />
+    </a>
+    <a href="https://www.instagram.com/gramstreetcoffee/" target="_blank" rel="noopener" class="block rounded-xl overflow-hidden aspect-square border border-white/60 shadow-md group">
+      <img src="/assets/brand/u-1554118811-1e0d58224f24-1200.jpg" alt="Gram Street Coffee Lilac Counter" loading="lazy" class="w-full h-full object-cover transition-all duration-500 group-hover:scale-105 group-hover:saturate-75" />
+    </a>
   </div>
 </section>
 </main>
@@ -1879,9 +2779,27 @@
 </div>
 </div>
 
+<!-- ================= DEEP-GRAPE EDITORIAL FOOTER ================= -->
 <footer>
-<p>Follow Instagram: <a href="https://www.instagram.com/gramstreetcoffee/" target="_blank" rel="noopener">@gramstreetcoffee</a> • Zomato: <a href="https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon" target="_blank" rel="noopener">Gram Street Gurugram</a> • Call: <a href="tel:+918130056889">+91 81300 56889</a></p>
-<p class="mt-2 text-xs opacity-80">Concept site by Anchit Tandon. Gram Street Coffee and its marks belong to their owner.</p>
+  <div class="max-w-7xl mx-auto text-center space-y-6">
+    <div class="inline-flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-[#CDB8F7] text-[#2B1650] flex items-center justify-center font-black text-sm">GS</div>
+      <span class="text-2xl font-display font-black tracking-tight text-[#F1E9FF]">Gram Street Coffee</span>
+    </div>
+    <p class="font-serif-editorial italic text-lg text-[#CDB8F7] max-w-md mx-auto">
+      “Slow coffee, ceremonial matcha &amp; small-batch gelato · every day.”
+    </p>
+    <div class="flex flex-wrap items-center justify-center gap-4 text-xs font-bold uppercase tracking-widest text-[#F1E9FF]">
+      <a href="https://www.instagram.com/gramstreetcoffee/" target="_blank" rel="noopener" class="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-all no-underline">Instagram @gramstreetcoffee</a>
+      <a href="https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon" target="_blank" rel="noopener" class="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-all no-underline">Zomato Gurugram</a>
+      <a href="https://www.swiggy.com/city/gurgaon/gram-street-coffee-arjun-marg-jalvayu-towers-rest1462852" target="_blank" rel="noopener" class="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-all no-underline">Swiggy Express</a>
+      <a href="tel:+918130056889" class="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-all no-underline">+91 81300 56889</a>
+    </div>
+    <div class="pt-6 border-t border-white/15 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[#CDB8F7]/85 font-mono-code">
+      <div>16 Arjun Marg (DLF Phase 1) • DLF Summit Plaza (Sector 53) • Jalvayu Towers (Sector 56)</div>
+      <div>Open Daily 08:30 AM – 10:30 PM IST • Made in Gurugram • © 2026 Gram Street Coffee</div>
+    </div>
+  </div>
 </footer>
 
 <!-- SCRIPTS: SHADER HERO + PINNED STAGE + AUDIO + SCRATCH -->
@@ -2052,7 +2970,7 @@
       "float shine=pow(band,5.0);",
       // The ground stays the lilac of the glass-fronted counter. What folds
       // through it is the pour, and the pour changes flavour: crema, then Uji
-      // matcha, then gelato, the three things the headline actually names.
+      // matcha, then gelato · the three things the headline actually names.
       // A chrome blob said nothing about any of them.
       "vec3 lilac=vec3(0.80,0.72,0.97);",
       "vec3 mid=vec3(0.68,0.56,0.93);",
@@ -2071,7 +2989,7 @@
       // the field stays quiet under the type and carries weight in the open.
       // The ramp came from the pass that made this shader the hero; the
       // amplitude comes from the pass that replaced it with a drawn counter.
-      // They are separable, keep the ramp, keep the ambient level, because
+      // They are separable · keep the ramp, keep the ambient level · because
       // the shader is now room light behind a drawing, not the drawing.
       "float side=mix(0.38,1.0,smoothstep(-0.30,0.45,p.x));",
       "col=mix(col,flav,smoothstep(0.70,0.99,band2)*0.14*side);",
@@ -2143,21 +3061,90 @@
     }
   })();
 
-  /* 3. Chapters: scroll drives the crossfade, rotating chrome orb and stage background color */
+  /* 3. Chapters: scroll drives the crossfade, rotating chrome orb, liquid color-bleed custom properties & Tencha particle shimmer */
   (function chapters() {
     var sec = document.getElementById("chapters");
     if (!sec) return;
     var stage = sec.querySelector(".stage");
     var chs = [].slice.call(sec.querySelectorAll(".chapter"));
     var btns = [].slice.call(sec.querySelectorAll(".ch-nav button"));
-    var pal = [[205, 184, 247], [207, 227, 174], [255, 215, 232]];
+    var shimmerCanvas = document.getElementById("tenchaShimmerCanvas");
+    var shimmerCtx = shimmerCanvas ? shimmerCanvas.getContext("2d") : null;
+    // Ambient Surface Tints:
+    // 0: Coffee (Electric Lilac-Blueberry + Espresso Umber tint)
+    // 1: Matcha (Bamboo Parchment #D8E8D5 + Kyoto Jade #1F4E3B)
+    // 2: Gelato (Warm Brioche Amber #C88A4B / #F3DFC8 + Smoked Cacao #1C1412)
+    var pal = [[205, 184, 247], [216, 232, 213], [243, 223, 200]];
+    var glowPal = [
+      [110, 68, 255, 0.28],  // #6E44FF Electric Lilac-Blueberry glow
+      [31, 78, 59, 0.26],    // #1F4E3B Kyoto Jade glow
+      [200, 138, 75, 0.30]   // #C88A4B Warm Brioche Amber glow
+    ];
     sec.classList.add("is-scroll");
+    var matchaWeight = 0, chaptersVisible = false, shimmerRunning = false;
+    var tenchaMotes = [];
+    if (shimmerCanvas) {
+      for (var m = 0; m < 44; m++) {
+        tenchaMotes.push({
+          x: Math.random(),
+          y: Math.random(),
+          r: 0.9 + Math.random() * 2.1,
+          vx: (Math.random() - 0.5) * 0.0008,
+          vy: -0.0005 - Math.random() * 0.0012,
+          ph: Math.random() * Math.PI * 2
+        });
+      }
+    }
+    function resizeShimmer() {
+      if (!shimmerCanvas) return;
+      shimmerCanvas.width = Math.max(300, Math.round(shimmerCanvas.clientWidth * 0.75));
+      shimmerCanvas.height = Math.max(200, Math.round(shimmerCanvas.clientHeight * 0.75));
+    }
+    function renderShimmer(now) {
+      if (!shimmerRunning) return;
+      if (!chaptersVisible || matchaWeight < 0.05 || document.hidden) {
+        shimmerRunning = false;
+        return;
+      }
+      var cw = shimmerCanvas.width, ch = shimmerCanvas.height;
+      shimmerCtx.clearRect(0, 0, cw, ch);
+      for (var i = 0; i < tenchaMotes.length; i++) {
+        var pt = tenchaMotes[i];
+        pt.x = (pt.x + pt.vx + 1) % 1;
+        pt.y = (pt.y + pt.vy + 1) % 1;
+        var tw = 0.45 + 0.55 * Math.sin(now * 0.006 + pt.ph);
+        shimmerCtx.fillStyle = "rgba(31, 78, 59, " + (tw * 0.42 * matchaWeight).toFixed(3) + ")";
+        shimmerCtx.beginPath();
+        shimmerCtx.arc(pt.x * cw, pt.y * ch, pt.r, 0, Math.PI * 2);
+        shimmerCtx.fill();
+      }
+      requestAnimationFrame(renderShimmer);
+    }
+    function ensureShimmer() {
+      if (!shimmerRunning && chaptersVisible && matchaWeight >= 0.05 && !reduce && shimmerCtx) {
+        shimmerRunning = true;
+        requestAnimationFrame(renderShimmer);
+      }
+    }
+    if (shimmerCanvas) {
+      resizeShimmer();
+      window.addEventListener("resize", resizeShimmer);
+    }
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (en) {
+        chaptersVisible = en[0].isIntersecting;
+        ensureShimmer();
+      }, { threshold: 0.02 }).observe(sec);
+    } else {
+      chaptersVisible = true;
+    }
+
     function ss(a, b, x) { var t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); }
     function total() { return sec.offsetHeight - window.innerHeight; }
     function update() {
       var top = sec.getBoundingClientRect().top;
       var p = Math.min(1, Math.max(0, -top / total()));
-      var t = p * 3, w = [], r = 0, g = 0, b = 0;
+      var t = p * 3, w = [], r = 0, g = 0, b = 0, gr = 0, gg = 0, gb = 0, ga = 0;
       for (var i = 0; i < 3; i++) {
         var a = i === 0 ? 1 : ss(i - 0.12, i + 0.12, t);
         var z = i === 2 ? 1 : 1 - ss(i + 0.88, i + 1.12, t);
@@ -2166,12 +3153,21 @@
         chs[i].style.transform = "translateY(" + ((1 - w[i]) * 26).toFixed(1) + "px)";
         chs[i].style.pointerEvents = w[i] > 0.5 ? "auto" : "none";
         r += pal[i][0] * w[i]; g += pal[i][1] * w[i]; b += pal[i][2] * w[i];
+        gr += glowPal[i][0] * w[i]; gg += glowPal[i][1] * w[i]; gb += glowPal[i][2] * w[i]; ga += glowPal[i][3] * w[i];
         btns[i].style.setProperty("--f", Math.min(1, Math.max(0, t - i)).toFixed(3));
         btns[i].setAttribute("aria-current", w[i] > 0.5 ? "true" : "false");
       }
+      matchaWeight = w[1] || 0;
+      if (shimmerCanvas) shimmerCanvas.style.opacity = (matchaWeight * 0.95).toFixed(3);
+      ensureShimmer();
+
+      var surfaceRgb = "rgb(" + Math.round(r) + "," + Math.round(g) + "," + Math.round(b) + ")";
+      var glowRgba = "rgba(" + Math.round(gr) + "," + Math.round(gg) + "," + Math.round(gb) + "," + ga.toFixed(3) + ")";
       stage.style.setProperty("--rot", (p * 540).toFixed(1) + "deg");
       stage.style.setProperty("--s", (0.92 + 0.12 * Math.sin(p * Math.PI * 3)).toFixed(3));
-      stage.style.backgroundColor = "rgb(" + Math.round(r) + "," + Math.round(g) + "," + Math.round(b) + ")";
+      stage.style.setProperty("--surface-tint", surfaceRgb);
+      stage.style.setProperty("--accent-glow", glowRgba);
+      stage.style.backgroundColor = surfaceRgb;
     }
     var ticking = false;
     function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(function () { ticking = false; update(); }); } }
@@ -2187,7 +3183,7 @@
   })();
 
 
-  /* The walk-in: place every layer in Z from scroll progress.
+  /* The walk-in: 3-stage Z-axis architectural pass-through pinned for 250vh (Frames 01–90).
      One rAF-coalesced handler, transform and opacity only, and the progress
      number lives on the SECTION, never on :root. */
   (function walkIn() {
@@ -2196,6 +3192,10 @@
     var rail = sec.querySelector('.walk-rail');
     var frame = sec.querySelector('.walk-frame');
     var layers = [].slice.call(sec.querySelectorAll('.walk-layer'));
+    var facadeMask = document.getElementById('walkFacadeMask');
+    var chromeFlare = document.getElementById('walkChromeFlare');
+    var frameHud = document.getElementById('walkFrameHud');
+    var stepLabel = document.getElementById('walkStepLabel');
     var cap = document.getElementById('walkCap');
     var step = document.getElementById('walkStep');
     var hint = document.getElementById('walkHint');
@@ -2204,31 +3204,66 @@
 
     sec.classList.add('is-armed');
 
+    // Real-time mouse-parallax reflection sliding across the lilac glass facade panes
+    var refRaf = 0, refX = 35, refY = 30;
+    frame.addEventListener('pointermove', function (e) {
+      var rect = frame.getBoundingClientRect();
+      refX = ((e.clientX - rect.left) / Math.max(1, rect.width)) * 100;
+      refY = ((e.clientY - rect.top) / Math.max(1, rect.height)) * 100;
+      if (!refRaf && facadeMask) {
+        refRaf = requestAnimationFrame(function () {
+          refRaf = 0;
+          facadeMask.style.setProperty('--ref-x', refX.toFixed(1) + '%');
+          facadeMask.style.setProperty('--ref-y', refY.toFixed(1) + '%');
+        });
+      }
+    }, { passive: true });
+
     var STEPS = [
-      [0.00, '01 / On Gram Street', 'A lilac front on a Gurugram street.', 'Specialty coffee, ceremonial matcha and small-batch gelato. Keep scrolling and come inside.'],
-      [0.24, '02 / Through the glass', 'Chrome cutting through pastel.', 'A glass front painted lilac, and a room drawn from contemporary Asian specialty bars.'],
-      [0.48, '03 / The room', 'A tiny room by design.', 'Not a workstation. Just enough room to savour an espresso, and that is the entire point.'],
-      [0.70, '04 / At the counter', 'The lilac glass-fronted counter.', 'Gelato pans behind the glass, the machine on top, three pendants over the bar.'],
-      [0.88, '05 / The shot', 'Pulled, poured, handed over.', 'In-house roasts, Uji matcha, small-batch gelato. This is the whole walk, in one cup.']
+      [0.00, '01 / The Lilac Streetfront', 'Outside on 16 Arjun Marg.', 'Frames 01–30: Lilac architectural glass facade with live specular pane reflection. Scroll to push through the doorway.'],
+      [0.33, '02 / Crossing the Glass Threshold', 'Chrome specular flare across pastel.', 'Frames 31–60: Scaling through the brushed-steel doorframe as street acoustics give way to the espresso bar.'],
+      [0.67, '03 / The 10-Seater Chrome Bar', 'Docked at the brushed-steel counter.', 'Frames 61–90: E61 9.2-bar groupheads, 78°C Uji matcha chasen station and -12°C pozzetti gelato bar.']
     ];
     var at = -1;
-    var capT = 0;   // the pending caption swap: a fast scroll must not land stale text
+    var capT = 0;
 
     function lerp(a, b, t) { return a + (b - a) * t; }
     function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
 
     function place(p) {
+      // Update 90-frame telemetry counter
+      var frameNum = Math.max(1, Math.min(90, Math.round(1 + p * 89)));
+      if (frameHud) {
+        frameHud.textContent = 'FRAME ' + (frameNum < 10 ? '0' + frameNum : frameNum) + ' / 90';
+      }
+
+      // Stage 1 (0.00–0.33, Frames 01–30) & Stage 2 (0.33–0.67, Frames 31–60):
+      // Scale foreground lilac architectural glass mask from scale(1) to scale(4.5)
+      if (facadeMask) {
+        var maskProgress = clamp01((p - 0.18) / 0.48);
+        var maskScale = 1 + maskProgress * 3.5; // 1.0 -> 4.5
+        var maskOpacity = p < 0.48 ? 1 : clamp01(1 - (p - 0.48) / 0.18);
+        facadeMask.style.transform = 'scale(' + maskScale.toFixed(3) + ')';
+        facadeMask.style.opacity = maskOpacity.toFixed(3);
+      }
+
+      // Chrome specular flare peaks along the doorframe edge during Frames 31–60 (0.33–0.66)
+      if (chromeFlare) {
+        var flareBell = Math.sin(clamp01((p - 0.28) / 0.38) * Math.PI);
+        chromeFlare.style.opacity = (flareBell * 0.92).toFixed(3);
+        chromeFlare.style.transform = 'scale(' + (0.85 + flareBell * 0.45).toFixed(3) + ')';
+      }
+
       for (var i = 0; i < layers.length; i++) {
         var L = layers[i];
         var z0 = +L.dataset.z0, z1 = +L.dataset.z1;
         var inP = +L.dataset.in, outP = +L.dataset.out;
         var t = clamp01((p - inP) / (outP - inP));
         var z = lerp(z0, z1, t);
-        // Fade in as it arrives, out as it passes the camera. A layer whose
-        // window opens at 0 has nothing to arrive from, so it starts already
-        // lit: otherwise landing at the top of the walk is a blank screen.
         var fin = inP <= 0 ? 1 : clamp01(t / 0.16);
-        var o = Math.min(fin, clamp01((1 - t) / 0.20));
+        var o = i === layers.length - 1
+          ? fin // Final 10-seater bar stage stays docked at the end of the pass-through
+          : Math.min(fin, clamp01((1 - t) / 0.20));
         L.style.opacity = o.toFixed(3);
         L.style.transform = 'translate(-50%, -50%) translateZ(' + z.toFixed(1) + 'px)';
       }
@@ -2238,13 +3273,9 @@
       for (var j = 0; j < STEPS.length; j++) if (p >= STEPS[j][0]) k = j;
       if (k !== at) {
         at = k;
-        if (step) step.textContent = STEPS[k][1];
+        if (stepLabel) stepLabel.textContent = STEPS[k][1];
+        else if (step) step.textContent = STEPS[k][1];
         if (cap) {
-          // Cancel the swap already in flight. Without this, crossing two
-          // stage boundaries inside 160ms queues two timeouts and the later
-          // one to FIRE wins, which can be the earlier stage: the words then
-          // stop matching the scene. Measured: step read "03 / The room"
-          // while the headline still read stage 2.
           clearTimeout(capT);
           cap.style.opacity = '0';
           cap.style.transform = 'translateY(10px)';
@@ -2253,7 +3284,7 @@
             cap.innerHTML = '<b>' + S[2] + '</b><span>' + S[3] + '</span>';
             cap.style.opacity = '1';
             cap.style.transform = 'none';
-          }, 160);
+          }, 140);
         }
       }
     }
@@ -2275,7 +3306,6 @@
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll);
 
-    // drop the compositor hint while the walk is off screen
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (en) {
         sec.classList.toggle('is-past', !en[0].isIntersecting);
@@ -2290,9 +3320,6 @@
     var chart = document.getElementById("chefChart");
     var orbit = document.getElementById("orbit");
 
-    // Arm from script, never from the stylesheet: a page with no JS, or one
-    // where this throws, is then simply the finished state rather than three
-    // invisible list items. The rail is the same bet the old code made.
     if (!reduce) {
       if (tl) { tl.style.setProperty("--draw", "0"); tl.classList.add("is-armed"); }
       if (chart) chart.classList.add("is-armed");
@@ -2305,16 +3332,6 @@
       io.observe(el);
     }
 
-    // Every ambient loop on this page runs only while its own section is on
-    // screen, the house rule is that nothing decorative animates off screen.
-    // Gating is by class so the CSS keeps the animation's phase: coming back
-    // into view resumes the cycle rather than restarting it, which is why this
-    // pauses the animation instead of removing it.
-    //
-    // The list below is the whole set. It was not always: the counter scene
-    // (nine loops), the marquee and the orbit pulse used to run for the length
-    // of the page, and this comment used to claim the pulse was gated when
-    // only the timeline actually was.
     function live(el) {
       if (!el) return;
       if (typeof IntersectionObserver === "undefined") { el.classList.add("is-live"); return; }
@@ -2323,10 +3340,6 @@
       }, { threshold: 0.05 }).observe(el);
     }
 
-    // Where each medallion sits on the rail, as a fraction of the rail's
-    // length. The entries are different heights and far more different on a
-    // phone, so thirds would land the fill between stops. Writing only on a
-    // change matters: this runs from a ResizeObserver on the same element.
     function measureStops(tl) {
       var railTop = 10, railBottom = 10;
       var h = tl.clientHeight - railTop - railBottom;
@@ -2346,18 +3359,12 @@
       tl.style.setProperty("--draw", "1");
       tl.classList.add("is-drawn");
       setTimeout(function () {
-        // drop the compositor hint once the last medallion has landed, and
-        // only then start the loop: the arrival should finish before the
-        // timeline starts running.
         tl.classList.add("is-done");
         if (!reduce) { measureStops(tl); tl.classList.add("is-cycling"); }
       }, 2200);
     });
 
     if (tl && !reduce && typeof ResizeObserver !== "undefined") {
-      // Safe against the feedback loop this codebase has hit before: the
-      // properties written here drive an absolutely positioned ::after via
-      // scaleY, so nothing written back changes the observed element's size.
       new ResizeObserver(function () { measureStops(tl); }).observe(tl);
     }
     if (chart) show(chart, function () { chart.classList.add("is-drawn"); });
@@ -2367,18 +3374,11 @@
     live(document.querySelector(".counter-scene"));
     live(document.querySelector(".marquee"));
     live(document.getElementById("orbit"));
+    live(document.getElementById("roasteryCraft"));
+    live(document.getElementById("destinations"));
   })();
 
-  /* 5. Chrome heading catches the light where pointer moves.
-     --mx drives a background-position on background-clipped text, which is a
-     paint, not a composite, on a clamp(2.6rem, 7.5vw, 6rem) heading. It cannot
-     be composited while the gradient is clipped to the glyphs, so the cost is
-     bounded instead: one write per frame, and only while the pointer is inside
-     this section. It used to run on every pointer sample.
-     (The property goes on the section, not on :root, a custom property on the
-     root invalidates the computed style of every element on the page.)
-     The travelling-highlight rewrite in BRAND-MOTION-STUDY.md (GS-1) is what
-     removes the paint altogether. */
+  /* 5. Chrome heading catches the light where pointer moves. */
   (function chrome() {
     var sp = document.getElementById("space");
     if (!sp) return;
@@ -2394,11 +3394,10 @@
     }, { passive: true });
   })();
 
-  /* 6. 5D Custom Magnetic Cursor */
+  /* 6. 5D Custom Magnetic & Context-Aware Pill Cursor */
   const cursor = document.getElementById('customCursor');
+  const cursorPillText = document.getElementById('cursorPillText');
   if (cursor && !window.matchMedia('(hover: none)').matches) {
-    // One write per frame. mousemove can fire more often than the compositor
-    // paints, and the old handler did a full style write on every one of them.
     let cx = -100, cy = -100, cursorRaf = 0;
     const placeCursor = () => {
       cursorRaf = 0;
@@ -2413,46 +3412,179 @@
       el.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
       el.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
     });
+    document.querySelectorAll('[data-cursor-pill]').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        const label = el.getAttribute('data-cursor-pill') || '';
+        if (cursorPillText) cursorPillText.textContent = label;
+        cursor.classList.add('is-pill');
+      });
+      el.addEventListener('mouseleave', () => {
+        cursor.classList.remove('is-pill');
+      });
+    });
   }
 
-  /* 7. Celebrated Steamed Glass Scratch Window */
+  /* 7. Celebrated Steamed Glass Scratch Window (Refractive Water Droplets + 8s Dynamic Re-Fog) */
   const scratchCanvas = document.getElementById('scratchCanvas');
+  const scratchBgImg = document.getElementById('scratchBgImage');
+  const destSection = document.getElementById('destinations');
   let scratchCtx = null;
   if (scratchCanvas) scratchCtx = scratchCanvas.getContext('2d');
+
+  // Off-screen fog mask + refractive droplets + running edge micro-droplets
+  const fogDrops = [];
+  const runningDrops = [];
+  let lastWipeStamp = 0;
+  let refogLoopActive = false;
+
+  function seedRefractiveDroplets(w, h) {
+    fogDrops.length = 0;
+    const count = Math.min(75, Math.max(36, Math.round((w * h) / 4200)));
+    for (let i = 0; i < count; i++) {
+      fogDrops.push({
+        x: 16 + Math.random() * Math.max(40, w - 32),
+        y: 16 + Math.random() * Math.max(40, h - 32),
+        r: 2.5 + Math.random() * 5.2,
+        nx: (Math.random() - 0.5) * 28,
+        ny: -10 - Math.random() * 20
+      });
+    }
+  }
+
+  function paintFogBase(alpha, includePrompt) {
+    if (!scratchCanvas || !scratchCtx) return;
+    const w = scratchCanvas.width, h = scratchCanvas.height;
+    if (w <= 0 || h <= 0) return;
+    scratchCtx.save();
+    scratchCtx.globalCompositeOperation = 'source-over';
+    scratchCtx.globalAlpha = alpha;
+
+    const grad = scratchCtx.createLinearGradient(0, 0, w, h);
+    grad.addColorStop(0, 'rgba(43, 22, 80, 0.94)');
+    grad.addColorStop(0.55, 'rgba(68, 36, 136, 0.90)');
+    grad.addColorStop(1, 'rgba(94, 50, 204, 0.88)');
+    scratchCtx.fillStyle = grad;
+    scratchCtx.fillRect(0, 0, w, h);
+
+    // 2D normal-map optical refraction pass inside water droplets on the steamed pane
+    const canSampleImg = scratchBgImg && scratchBgImg.complete && scratchBgImg.naturalWidth > 0;
+    const sxScale = canSampleImg ? scratchBgImg.naturalWidth / w : 1;
+    const syScale = canSampleImg ? scratchBgImg.naturalHeight / h : 1;
+
+    for (let i = 0; i < fogDrops.length; i++) {
+      const d = fogDrops[i];
+      scratchCtx.save();
+      scratchCtx.beginPath();
+      scratchCtx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+      scratchCtx.clip();
+      if (canSampleImg) {
+        const sx = Math.max(0, Math.min(scratchBgImg.naturalWidth - 24, (d.x + d.nx) * sxScale));
+        const sy = Math.max(0, Math.min(scratchBgImg.naturalHeight - 24, (d.y + d.ny) * syScale));
+        try {
+          scratchCtx.drawImage(scratchBgImg, sx, sy, 28, 28, d.x - d.r, d.y - d.r, d.r * 2, d.r * 2);
+        } catch (err) {}
+      } else {
+        scratchCtx.fillStyle = 'rgba(235, 222, 255, 0.35)';
+        scratchCtx.fillRect(d.x - d.r, d.y - d.r, d.r * 2, d.r * 2);
+      }
+      // Specular highlight & bottom meniscus shadow
+      scratchCtx.strokeStyle = 'rgba(255, 255, 255, 0.58)';
+      scratchCtx.lineWidth = 1;
+      scratchCtx.stroke();
+      scratchCtx.fillStyle = 'rgba(255, 255, 255, 0.65)';
+      scratchCtx.beginPath();
+      scratchCtx.arc(d.x - d.r * 0.32, d.y - d.r * 0.32, Math.max(0.8, d.r * 0.28), 0, Math.PI * 2);
+      scratchCtx.fill();
+      scratchCtx.restore();
+    }
+
+    if (includePrompt) {
+      scratchCtx.fillStyle = '#CDB8F7';
+      scratchCtx.font = '800 13px Bricolage Grotesque, sans-serif';
+      scratchCtx.textAlign = 'center';
+      const loc = LOCATIONS[activeLocation];
+      scratchCtx.fillText(`✦ WIPE / TOUCH GLASS TO REVEAL ${loc.caption.toUpperCase()} ✦`, w / 2, h / 2);
+    }
+    scratchCtx.restore();
+  }
 
   window.initScratchWindow = function() {
     if (!scratchCanvas || !scratchCtx) return;
     const rect = scratchCanvas.parentElement.getBoundingClientRect();
-    scratchCanvas.width = rect.width;
-    scratchCanvas.height = rect.height;
-    scratchCtx.globalCompositeOperation = 'source-over';
-
-    const grad = scratchCtx.createLinearGradient(0, 0, scratchCanvas.width, scratchCanvas.height);
-    grad.addColorStop(0, 'rgba(43, 22, 80, 0.96)');
-    grad.addColorStop(1, 'rgba(94, 50, 204, 0.92)');
-    scratchCtx.fillStyle = grad;
-    scratchCtx.fillRect(0, 0, scratchCanvas.width, scratchCanvas.height);
-
-    scratchCtx.fillStyle = '#CDB8F7';
-    scratchCtx.font = '800 13px Bricolage Grotesque, sans-serif';
-    scratchCtx.textAlign = 'center';
-    const loc = LOCATIONS[activeLocation];
-    scratchCtx.fillText(`✦ WIPE / TOUCH GLASS TO REVEAL ${loc.caption.replace('', '').toUpperCase()} ✦`, scratchCanvas.width / 2, scratchCanvas.height / 2);
+    scratchCanvas.width = Math.max(10, Math.round(rect.width));
+    scratchCanvas.height = Math.max(10, Math.round(rect.height));
+    runningDrops.length = 0;
+    lastWipeStamp = 0;
+    seedRefractiveDroplets(scratchCanvas.width, scratchCanvas.height);
+    paintFogBase(1.0, true);
   };
+
+  function tickCondensationShader(now) {
+    if (!refogLoopActive) return;
+    const isVisible = !destSection || destSection.classList.contains('is-live');
+    const elapsedSinceWipe = now - lastWipeStamp;
+    if (!isVisible || document.hidden || (elapsedSinceWipe > 8400 && runningDrops.length === 0)) {
+      refogLoopActive = false;
+      return;
+    }
+    if (scratchCanvas && scratchCtx) {
+      // Gradually re-fog over 8 seconds behind the cursor trail (~0.011 alpha per frame after 450ms)
+      if (elapsedSinceWipe > 420 && elapsedSinceWipe <= 8400) {
+        paintFogBase(0.013, elapsedSinceWipe > 7200);
+      }
+      // Animate temporary micro-droplets running down the glass edge
+      for (let i = runningDrops.length - 1; i >= 0; i--) {
+        const rd = runningDrops[i];
+        rd.y += rd.vy;
+        rd.life -= 0.022;
+        if (rd.life <= 0 || rd.y > scratchCanvas.height) {
+          runningDrops.splice(i, 1);
+          continue;
+        }
+        scratchCtx.save();
+        scratchCtx.globalCompositeOperation = 'source-over';
+        scratchCtx.fillStyle = `rgba(241, 233, 255, ${(rd.life * 0.55).toFixed(3)})`;
+        scratchCtx.beginPath();
+        scratchCtx.arc(rd.x, rd.y, rd.r, 0, Math.PI * 2);
+        scratchCtx.fill();
+        scratchCtx.restore();
+      }
+    }
+    requestAnimationFrame(tickCondensationShader);
+  }
 
   function wipeScratchAt(clientX, clientY) {
     if (!scratchCanvas || !scratchCtx) return;
     const rect = scratchCanvas.getBoundingClientRect();
     const x = clientX - rect.left;
     const y = clientY - rect.top;
+    scratchCtx.save();
     scratchCtx.globalCompositeOperation = 'destination-out';
-    const brush = scratchCtx.createRadialGradient(x, y, 12, x, y, 90);
+    const brush = scratchCtx.createRadialGradient(x, y, 14, x, y, 86);
     brush.addColorStop(0, 'rgba(0,0,0,1)');
+    brush.addColorStop(0.65, 'rgba(0,0,0,0.82)');
     brush.addColorStop(1, 'rgba(0,0,0,0)');
     scratchCtx.fillStyle = brush;
     scratchCtx.beginPath();
-    scratchCtx.arc(x, y, 90, 0, Math.PI * 2);
+    scratchCtx.arc(x, y, 86, 0, Math.PI * 2);
     scratchCtx.fill();
+    scratchCtx.restore();
+
+    // Spawn micro-droplets running down from the lower rim of the wipe trail
+    if (runningDrops.length < 28 && Math.random() < 0.45) {
+      runningDrops.push({
+        x: x + (Math.random() - 0.5) * 52,
+        y: y + 18 + Math.random() * 24,
+        r: 1.6 + Math.random() * 2.2,
+        vy: 1.1 + Math.random() * 1.6,
+        life: 1.0
+      });
+    }
+    lastWipeStamp = performance.now();
+    if (!refogLoopActive && !reduce) {
+      refogLoopActive = true;
+      requestAnimationFrame(tickCondensationShader);
+    }
   }
 
   if (scratchCanvas) {
@@ -2470,7 +3602,7 @@
     window.initScratchWindow();
   }
 
-  /* 8. 5D Spatial Web Audio Synthesizer */
+  /* 8. Spatial Web Audio Synthesizer (15% Gain 65°C Steam Wand Hiss & Bar Acoustics) */
   window.toggleAudio = function() {
     if (!audioCtx) {
       const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -2485,39 +3617,92 @@
       let lastOut = 0.0;
       for (let i = 0; i < bufferSize; i++) {
         const white = Math.random() * 2 - 1;
-        output[i] = (lastOut + 0.02 * white) / 1.02;
-        lastOut = output[i];
-        output[i] *= 0.12;
+        // Mix warm room murmur with high-frequency 65°C steam wand micro-aeration hiss
+        lastOut = (lastOut + 0.04 * white) / 1.04;
+        output[i] = (lastOut * 0.65 + white * 0.18) * 0.15;
       }
       const whiteNoise = audioCtx.createBufferSource();
       whiteNoise.buffer = noiseBuffer;
       whiteNoise.loop = true;
 
-      const filter = audioCtx.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.value = 350;
+      const bandpass = audioCtx.createBiquadFilter();
+      bandpass.type = 'bandpass';
+      bandpass.frequency.value = 1150;
+      bandpass.Q.value = 0.7;
 
       const gain = audioCtx.createGain();
-      gain.gain.value = 0.18;
+      gain.gain.value = 0.15; // 15% tactile spatial audio gain
 
-      whiteNoise.connect(filter);
-      filter.connect(gain);
+      whiteNoise.connect(bandpass);
+      bandpass.connect(gain);
       gain.connect(audioCtx.destination);
       whiteNoise.start(0);
 
       isPlayingAudio = true;
       document.getElementById('audioDot').className = 'w-2 h-2 rounded-full bg-emerald-400 animate-ping';
-      document.getElementById('audioLabel').textContent = '5D Audio: On';
+      document.getElementById('audioLabel').textContent = '65°C Steam: On';
     } else {
       if (audioCtx) audioCtx.close();
       audioCtx = null;
       isPlayingAudio = false;
       document.getElementById('audioDot').className = 'w-2 h-2 rounded-full bg-slate-400';
-      document.getElementById('audioLabel').textContent = '5D Audio';
+      document.getElementById('audioLabel').textContent = '65°C Audio';
     }
   };
 
-  /* 9. D2C Products & Bag Drawer */
+  /* 9. D2C Products, Bezier Fly-to-Bag Arc & Bag Drawer */
+  window.launchBezierFlyToBag = function(sourceEl, imgSrc, fallbackLabel) {
+    const targetEl = document.getElementById('cartCount') || document.getElementById('headerBagBtn');
+    if (!targetEl || reduce) return Promise.resolve();
+    const startRect = sourceEl
+      ? sourceEl.getBoundingClientRect()
+      : { left: window.innerWidth * 0.5, top: window.innerHeight * 0.6, width: 48, height: 48 };
+    const endRect = targetEl.getBoundingClientRect();
+
+    const pill = document.createElement('div');
+    pill.className = 'fly-bezier-pill';
+    if (imgSrc) {
+      pill.style.backgroundImage = `url('${imgSrc}')`;
+    } else {
+      pill.textContent = fallbackLabel || 'GS';
+    }
+    document.body.appendChild(pill);
+
+    const p0x = startRect.left + startRect.width * 0.5 - 24;
+    const p0y = startRect.top + startRect.height * 0.5 - 24;
+    const p2x = endRect.left + endRect.width * 0.5 - 24;
+    const p2y = endRect.top + endRect.height * 0.5 - 24;
+    // Quadratic Bezier control point arcs high toward the top counter bar
+    const p1x = (p0x + p2x) * 0.5 + (p2x > p0x ? -90 : 90);
+    const p1y = Math.min(p0y, p2y) - 140;
+
+    return new Promise((resolve) => {
+      const dur = 560;
+      const t0 = performance.now();
+      function stepArc(now) {
+        const raw = Math.min(1, (now - t0) / dur);
+        const t = 1 - Math.pow(1 - raw, 3);
+        const inv = 1 - t;
+        const x = inv * inv * p0x + 2 * inv * t * p1x + t * t * p2x;
+        const y = inv * inv * p0y + 2 * inv * t * p1y + t * t * p2y;
+        const s = 1 - 0.52 * t;
+        pill.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) scale(${s.toFixed(3)})`;
+        if (raw < 1) {
+          requestAnimationFrame(stepArc);
+        } else {
+          pill.remove();
+          if (targetEl) {
+            targetEl.classList.remove('bag-bounce');
+            void targetEl.offsetWidth;
+            targetEl.classList.add('bag-bounce');
+          }
+          resolve();
+        }
+      }
+      requestAnimationFrame(stepArc);
+    });
+  };
+
   function renderProducts() {
     const grid = document.getElementById('productGridContainer');
     if (!grid) return;
@@ -2525,7 +3710,7 @@
       const isSub = !!subMode[p.id];
       const finalPrice = isSub ? Math.round(p.price * 0.85) : p.price;
       return `
-        <div class="d2c-card tilt-card scroll-reveal p-7 flex flex-col justify-between space-y-5">
+        <div class="d2c-card kinetic-card tilt-card scroll-reveal p-7 flex flex-col justify-between space-y-5">
         <div>
           <div class="relative h-64 rounded-2xl overflow-hidden mb-5 bg-black/10">
             <img src="${p.image}" alt="${p.name}" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
@@ -2549,7 +3734,7 @@
           </div>
         </div>
 
-        <button onclick="window.addToCart('${p.id}')" class="w-full py-4 rounded-xl bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-[0.2em] hover:bg-[#3D2272] transition-all shadow-md">
+        <button onclick="window.addToCart('${p.id}', this)" class="w-full py-4 rounded-xl bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-[0.2em] hover:bg-[#3D2272] transition-all shadow-md">
           ${isSub ? 'Subscribe & Save 15%' : 'Add to Roastery Bag'}
           </button>
       </div>
@@ -2557,6 +3742,7 @@
     }).join('');
     if (typeof window.initTiltPhysics === 'function') window.initTiltPhysics();
     if (typeof window.initScrollReveal === 'function') window.initScrollReveal();
+    if (typeof window.bindKineticCards === 'function') window.bindKineticCards();
   }
 
   window.setSubMode = function(id, isSub) {
@@ -2564,8 +3750,9 @@
     renderProducts();
   };
 
-  window.addToCart = function(pId) {
+  window.addToCart = function(pId, triggerBtn) {
     const product = PRODUCTS.find(p => p.id === pId);
+    if (!product) return;
     const isSub = !!subMode[pId];
     const price = isSub ? Math.round(product.price * 0.85) : product.price;
     const exist = cart.find(i => i.id === pId && i.isSub === isSub);
@@ -2573,7 +3760,22 @@
     else cart.push({ id: pId, name: product.name, price, qty: 1, isSub });
     updateCartUI();
     step('bag');
-    window.toggleCart(true);
+    const sourceEl = triggerBtn || (window.event && window.event.currentTarget) || null;
+    window.launchBezierFlyToBag(sourceEl, product.image, 'GS').then(() => {
+      window.toggleCart(true);
+    });
+  };
+
+  window.addBarItemToCart = function(id, name, price) {
+    const exist = cart.find(i => i.id === id);
+    if (exist) exist.qty += 1;
+    else cart.push({ id, name, price, qty: 1, isSub: false });
+    updateCartUI();
+    step('bag');
+    const sourceEl = (window.event && window.event.currentTarget) || null;
+    window.launchBezierFlyToBag(sourceEl, '/assets/brand/u-1646954256973-f7fd9ce626b1-800.jpg', 'BAR').then(() => {
+      window.toggleCart(true);
+    });
   };
 
   function updateCartUI() {
@@ -2621,6 +3823,7 @@
      on the channel it actually answers. No card is taken and the page never
      claims one was. ------------------------------------------------------ */
   var ORDER_KEY = 'gram-street-orders';
+  var WA_NUMBER = '918130056889';   // the number in the footer and on every location card
   var lastOrder = null;
 
   function step(which) {
@@ -2790,6 +3993,8 @@
 
 /* ================= SPECIALTY ROASTERY CRAFT ENGINE ================= */
 (function initRoasteryCraft() {
+  const craftSection = document.getElementById('roasteryCraft');
+
   // 1. Tab Switcher
   window.switchCraftTab = function(tab) {
     const tabs = ['extraction', 'microfoam', 'roast'];
@@ -2813,23 +4018,288 @@
         }
       }
     });
+    if (tab === 'microfoam' && typeof window.replayMicrofoamPour === 'function') {
+      window.replayMicrofoamPour();
+    }
+    if (tab === 'roast' && typeof window.drawRoastBeanMacro === 'function') {
+      window.drawRoastBeanMacro();
+    }
   };
 
-  // 2. Calibration Trigger
+  // 2. Panel 1: 60-Frame Bottomless Naked Portafilter Extraction Sequence (0.0s -> 27.4s)
+  const extCanvas = document.getElementById('extractionFrameCanvas');
+  const extCtx = extCanvas ? extCanvas.getContext('2d') : null;
+  const scrubber = document.getElementById('extractionScrubber');
+  let currentShotTime = 27.4;
   let isCalibrating = false;
+  let holdPullRaf = 0;
+
+  function computeShotTelemetry(sec) {
+    const t = Math.max(0, Math.min(27.4, sec));
+    const frameIdx = Math.max(1, Math.min(60, Math.round(1 + (t / 27.4) * 59)));
+    let pressure = 0, yieldG = 0, flowRate = 0, tds = 1.2, phase = '';
+    if (t <= 6.0) {
+      // 0.0s – 6.0s (Pre-infusion): Pressure climbs 0 to 3.0 BAR; dark beads nucleate on basket mesh
+      const p0 = t / 6.0;
+      pressure = p0 * 3.0;
+      yieldG = p0 * 1.6;
+      flowRate = p0 * 0.38;
+      tds = 1.8 + p0 * 2.4;
+      phase = '0.0s–6.0s • Pre-Infusion (' + pressure.toFixed(1) + ' BAR)';
+    } else if (t <= 18.0) {
+      // 6.1s – 18.0s (Coalescence): Pressure locks at 9.2 BAR; dual streams merge into central cone; 1.34 g/s
+      const p1 = (t - 6.0) / 12.0;
+      pressure = 3.0 + Math.min(1, p1 * 3.2) * 6.2;
+      yieldG = 1.6 + (t - 6.0) * 1.34;
+      flowRate = 1.34;
+      tds = 4.2 + p1 * 4.1;
+      phase = '6.1s–18.0s • Coalescence (9.2 BAR • 1.34 g/s)';
+    } else {
+      // 18.1s – 27.4s (Tiger-Striped Crema): Shot hits 36.8g yield and 9.8% TDS
+      const p2 = (t - 18.0) / 9.4;
+      pressure = 9.2 - p2 * 0.2;
+      yieldG = 17.68 + p2 * (36.8 - 17.68);
+      flowRate = 1.34 + p2 * 0.12;
+      tds = 8.3 + p2 * 1.5;
+      phase = '18.1s–27.4s • Tiger-Striped Crema';
+    }
+    return { t, frameIdx, pressure, yieldG, flowRate, tds, phase };
+  }
+
+  function renderExtractionFrame(state) {
+    if (!extCanvas || !extCtx) return;
+    const w = extCanvas.width, h = extCanvas.height;
+    extCtx.clearRect(0, 0, w, h);
+
+    // 1. Dark Espresso Bar Backdrop with subtle Lilac/Amber ambient glow
+    const bg = extCtx.createRadialGradient(w * 0.5, h * 0.36, 20, w * 0.5, h * 0.5, w * 0.65);
+    bg.addColorStop(0, '#2E184C');
+    bg.addColorStop(0.55, '#180B29');
+    bg.addColorStop(1, '#0D0618');
+    extCtx.fillStyle = bg;
+    extCtx.fillRect(0, 0, w, h);
+
+    // 2. Brushed-Chrome 58mm E61 Grouphead & Bottomless Portafilter Collar
+    const cx = w * 0.5;
+    const groupGrad = extCtx.createLinearGradient(cx - 170, 0, cx + 170, 0);
+    groupGrad.addColorStop(0, '#6E5D8E');
+    groupGrad.addColorStop(0.28, '#F6F0FF');
+    groupGrad.addColorStop(0.52, '#AE9EC9');
+    groupGrad.addColorStop(0.78, '#FFFFFF');
+    groupGrad.addColorStop(1, '#584775');
+
+    // Upper E61 Bell
+    extCtx.fillStyle = groupGrad;
+    extCtx.beginPath();
+    extCtx.roundRect(cx - 110, 18, 220, 44, 10);
+    extCtx.fill();
+
+    // Bottomless Portafilter Holder Ring + Handle
+    extCtx.fillStyle = '#24123E';
+    extCtx.fillRect(cx + 128, 66, 190, 22);
+    extCtx.fillStyle = groupGrad;
+    extCtx.beginPath();
+    extCtx.roundRect(cx - 138, 56, 276, 42, 14);
+    extCtx.fill();
+
+    // 3. Exposed 58mm Laser-Etched Naked Basket Mesh
+    const basketY = 98;
+    const basketGrad = extCtx.createRadialGradient(cx, basketY, 10, cx, basketY, 106);
+    basketGrad.addColorStop(0, '#3D2212');
+    basketGrad.addColorStop(0.75, '#7A563C');
+    basketGrad.addColorStop(1, '#C5B6DC');
+    extCtx.fillStyle = basketGrad;
+    extCtx.beginPath();
+    extCtx.ellipse(cx, basketY, 102, 22, 0, 0, Math.PI * 2);
+    extCtx.fill();
+
+    const t = state.t;
+    // 4. Phase-Driven Fluid Physics
+    if (t > 0.1) {
+      if (t <= 6.0) {
+        // Phase 1 (0.0s–6.0s): Dark espresso beads nucleating across basket mesh
+        const p0 = t / 6.0;
+        const beadCount = Math.floor(8 + p0 * 28);
+        for (let i = 0; i < beadCount; i++) {
+          const angle = (i * 2.39996) % (Math.PI * 2);
+          const dist = ((i * 17) % 78) * Math.sqrt(p0);
+          const bx = cx + Math.cos(angle) * dist;
+          const by = basketY + Math.sin(angle) * (dist * 0.18);
+          const br = 2.2 + ((i % 4) + 1) * p0 * 1.45;
+          extCtx.fillStyle = i % 3 === 0 ? '#D97706' : '#3B1808';
+          extCtx.beginPath();
+          extCtx.arc(bx, by + 2, br, 0, Math.PI * 2);
+          extCtx.fill();
+        }
+      } else {
+        // Phase 2 & 3 (6.1s–27.4s): Dual streams coalescing into syrupy golden-amber central cone
+        const coal = Math.min(1, (t - 6.0) / 5.2); // 0 -> dual streams, 1 -> single central cone
+        const tigerShift = t > 18.0 ? (t - 18.0) / 9.4 : 0;
+        const leftX = cx - (1 - coal) * 34;
+        const rightX = cx + (1 - coal) * 34;
+        const cupSurfaceY = 392 - (state.yieldG / 36.8) * 92;
+
+        // Draw syrupy streams
+        const streamGrad = extCtx.createLinearGradient(cx, basketY, cx, cupSurfaceY);
+        streamGrad.addColorStop(0, '#3C1A09');
+        streamGrad.addColorStop(0.45, '#9A4D18');
+        streamGrad.addColorStop(0.8, '#D9822B');
+        streamGrad.addColorStop(1, '#F5B041');
+
+        extCtx.strokeStyle = streamGrad;
+        extCtx.lineCap = 'round';
+
+        // Left & right coalescing into center
+        extCtx.lineWidth = 6.5 + coal * 4.5;
+        extCtx.beginPath();
+        extCtx.moveTo(leftX, basketY + 4);
+        extCtx.quadraticCurveTo(cx - (1 - coal) * 14, (basketY + cupSurfaceY) * 0.5, cx, cupSurfaceY);
+        extCtx.stroke();
+
+        if (coal < 0.96) {
+          extCtx.lineWidth = 6.0;
+          extCtx.beginPath();
+          extCtx.moveTo(rightX, basketY + 4);
+          extCtx.quadraticCurveTo(cx + (1 - coal) * 14, (basketY + cupSurfaceY) * 0.5, cx, cupSurfaceY);
+          extCtx.stroke();
+        }
+
+        // Tiger-striping ribbons along the central cone
+        extCtx.strokeStyle = `rgba(255, 214, 138, ${(0.35 + tigerShift * 0.5).toFixed(3)})`;
+        extCtx.lineWidth = 2.4;
+        extCtx.beginPath();
+        extCtx.moveTo(cx - 2, basketY + 12);
+        extCtx.bezierCurveTo(cx + Math.sin(t * 3) * 6, basketY + 90, cx - Math.cos(t * 3) * 6, cupSurfaceY - 50, cx, cupSurfaceY);
+        extCtx.stroke();
+      }
+    }
+
+    // 5. Fluted Espresso Shot Vessel & Rising Tiger-Striped Crema
+    const cupTop = 278, cupBottom = 412, cupHalfW = 88;
+    const fillRatio = Math.min(1, state.yieldG / 36.8);
+    const fillHeight = fillRatio * 108;
+    const liquidTopY = cupBottom - 10 - fillHeight;
+
+    if (fillRatio > 0.01) {
+      const liqGrad = extCtx.createLinearGradient(cx, liquidTopY, cx, cupBottom);
+      liqGrad.addColorStop(0, '#E59846');     // Golden tiger crema top
+      liqGrad.addColorStop(0.22, '#B85D19');  // Hazelnut emulsion
+      liqGrad.addColorStop(0.58, '#4A1F0A');  // Deep espresso body
+      liqGrad.addColorStop(1, '#240E04');
+      extCtx.fillStyle = liqGrad;
+      extCtx.beginPath();
+      extCtx.roundRect(cx - cupHalfW + 8, liquidTopY, (cupHalfW - 8) * 2, fillHeight + 10, [4, 4, 26, 26]);
+      extCtx.fill();
+
+      // Tiger-striped mottling on the crema crown
+      extCtx.fillStyle = '#FDE68A';
+      extCtx.beginPath();
+      extCtx.ellipse(cx, liquidTopY + 3, cupHalfW - 10, 7, 0, 0, Math.PI * 2);
+      extCtx.fill();
+
+      extCtx.strokeStyle = '#7C2D12';
+      extCtx.lineWidth = 2.2;
+      for (let s = -3; s <= 3; s++) {
+        extCtx.beginPath();
+        extCtx.moveTo(cx + s * 18 - 6, liquidTopY + 2);
+        extCtx.quadraticCurveTo(cx + s * 18, liquidTopY + 6, cx + s * 18 + 7, liquidTopY + 2);
+        extCtx.stroke();
+      }
+    }
+
+    // Glass Vessel Rim & Specular Wall
+    extCtx.strokeStyle = 'rgba(241, 233, 255, 0.55)';
+    extCtx.lineWidth = 3.5;
+    extCtx.beginPath();
+    extCtx.roundRect(cx - cupHalfW, cupTop, cupHalfW * 2, cupBottom - cupTop, [6, 6, 30, 30]);
+    extCtx.stroke();
+
+    // Volume Graduation Ticks on Shot Glass
+    extCtx.fillStyle = 'rgba(205, 184, 247, 0.65)';
+    extCtx.font = '700 10px JetBrains Mono, monospace';
+    extCtx.fillText('36.8g · ', cx + cupHalfW - 52, cupBottom - 114);
+    extCtx.fillText('18.5g · ', cx + cupHalfW - 52, cupBottom - 62);
+  }
+
+  window.scrubExtractionShot = function(sec) {
+    currentShotTime = Math.max(0, Math.min(27.4, Number(sec) || 0));
+    if (scrubber && Math.abs(parseFloat(scrubber.value) - currentShotTime) > 0.05) {
+      scrubber.value = currentShotTime.toFixed(1);
+    }
+    const st = computeShotTelemetry(currentShotTime);
+    const pVal = document.getElementById('craftPressureVal');
+    const tVal = document.getElementById('craftTimeVal');
+    const yVal = document.getElementById('craftYieldVal');
+    const tdsVal = document.getElementById('craftTdsVal');
+    const flowVal = document.getElementById('craftFlowVal');
+    const phaseBadge = document.getElementById('extractionPhaseBadge');
+    const frameHud = document.getElementById('extractionFrameHud');
+    const statusText = document.getElementById('extractionStatusText');
+
+    if (pVal) pVal.textContent = st.pressure.toFixed(1) + ' BAR';
+    if (tVal) tVal.textContent = st.t.toFixed(1) + 's';
+    if (yVal) yVal.textContent = st.yieldG.toFixed(1) + 'g';
+    if (tdsVal) tdsVal.textContent = st.tds.toFixed(1) + '%';
+    if (flowVal) flowVal.textContent = st.flowRate.toFixed(2) + ' g/s';
+    if (phaseBadge) phaseBadge.textContent = st.phase;
+    if (frameHud) {
+      const fStr = st.frameIdx < 10 ? '0' + st.frameIdx : String(st.frameIdx);
+      frameHud.textContent = `FRAME ${fStr} / 60 • ${st.t.toFixed(1)}s`;
+    }
+    if (statusText) {
+      statusText.textContent = `${st.pressure.toFixed(1)} BAR • ${st.yieldG.toFixed(1)}g Yield`;
+    }
+    renderExtractionFrame(st);
+  };
+
+  // Interactive Pointer Scrub & Hold-to-Pull on the Extraction Canvas
+  if (extCanvas) {
+    let isDraggingCanvas = false;
+    const scrubFromPointer = (clientX) => {
+      const rect = extCanvas.getBoundingClientRect();
+      const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / Math.max(1, rect.width)));
+      window.scrubExtractionShot(ratio * 27.4);
+    };
+    extCanvas.addEventListener('pointerdown', (e) => {
+      isDraggingCanvas = true;
+      if (holdPullRaf) cancelAnimationFrame(holdPullRaf);
+      // If user clicks & holds without dragging, pull the shot progressively from 0.0s -> 27.4s
+      const startX = e.clientX;
+      let moved = false;
+      const onMoveCheck = (mv) => {
+        if (Math.abs(mv.clientX - startX) > 6) moved = true;
+      };
+      window.addEventListener('pointermove', onMoveCheck, { passive: true });
+      if (currentShotTime >= 26.8) window.scrubExtractionShot(0);
+      const stepHold = () => {
+        if (!isDraggingCanvas || moved) {
+          window.removeEventListener('pointermove', onMoveCheck);
+          return;
+        }
+        if (currentShotTime < 27.4) {
+          window.scrubExtractionShot(currentShotTime + 0.28);
+          holdPullRaf = requestAnimationFrame(stepHold);
+        }
+      };
+      holdPullRaf = requestAnimationFrame(stepHold);
+    });
+    extCanvas.addEventListener('pointermove', (e) => {
+      if (isDraggingCanvas) scrubFromPointer(e.clientX);
+    }, { passive: true });
+    window.addEventListener('pointerup', () => {
+      isDraggingCanvas = false;
+      if (holdPullRaf) { cancelAnimationFrame(holdPullRaf); holdPullRaf = 0; }
+    });
+  }
+
   window.runCraftCalibration = function() {
     if (isCalibrating) return;
     isCalibrating = true;
     const btn = document.getElementById('craftRunBtn');
-    const pVal = document.getElementById('craftPressureVal');
-    const tVal = document.getElementById('craftTimeVal');
-    const yVal = document.getElementById('craftYieldVal');
-
     if (btn) {
       btn.disabled = true;
-      btn.innerHTML = '<span>Calibrating E61 Grouphead...</span>';
+      btn.innerHTML = '<span>Pulling 9.2 BAR Shot (60 Frames)...</span>';
     }
-
     try {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (AudioCtx) {
@@ -2838,9 +4308,9 @@
         const gain = ctx.createGain();
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(65, ctx.currentTime);
-        osc.frequency.linearRampToValueAtTime(85, ctx.currentTime + 1.8);
+        osc.frequency.linearRampToValueAtTime(88, ctx.currentTime + 1.8);
         gain.gain.setValueAtTime(0.01, ctx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.06, ctx.currentTime + 0.3);
+        gain.gain.linearRampToValueAtTime(0.05, ctx.currentTime + 0.3);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.0);
         osc.connect(gain);
         gain.connect(ctx.destination);
@@ -2849,42 +4319,43 @@
       }
     } catch(e) {}
 
-    let count = 0;
-    const timer = setInterval(() => {
-      count++;
-      if (pVal) pVal.textContent = (8.8 + Math.random() * 0.6).toFixed(1) + ' BAR';
-      if (tVal) tVal.textContent = (26.0 + count * 0.3).toFixed(1) + 's';
-      if (yVal) yVal.textContent = (35.0 + count * 0.4).toFixed(1) + 'g';
-      if (count >= 5) {
-        clearInterval(timer);
-        if (pVal) pVal.textContent = '9.2 BAR';
-        if (tVal) tVal.textContent = '27.4s';
-        if (yVal) yVal.textContent = '36.8g';
+    const t0 = performance.now();
+    const duration = 2100;
+    function stepCalibration(now) {
+      const p = Math.min(1, (now - t0) / duration);
+      window.scrubExtractionShot(p * 27.4);
+      if (p < 1) {
+        requestAnimationFrame(stepCalibration);
+      } else {
+        window.scrubExtractionShot(27.4);
         if (btn) {
           btn.disabled = false;
-          btn.innerHTML = '<span>✓ Calibration Locked (9.2 Bar • 36.8g)</span>';
+          btn.innerHTML = '<span>✓ Shot Locked (9.2 BAR • 27.4s • 36.8g)</span>';
         }
         isCalibrating = false;
       }
-    }, 200);
+    }
+    requestAnimationFrame(stepCalibration);
   };
 
-  // 3. Steam Canvas Particle System
+  window.scrubExtractionShot(27.4);
+
+  // 3. Steam Canvas Particle System (Gated by #roasteryCraft.is-live)
   (function initSteamParticles() {
     const canvas = document.getElementById('coffeeSteamCanvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    let width = canvas.width = canvas.offsetWidth;
-    let height = canvas.height = canvas.offsetHeight;
+    let width = canvas.width = canvas.offsetWidth || 400;
+    let height = canvas.height = canvas.offsetHeight || 380;
 
     window.addEventListener('resize', () => {
       if (!canvas) return;
-      width = canvas.width = canvas.offsetWidth;
-      height = canvas.height = canvas.offsetHeight;
+      width = canvas.width = canvas.offsetWidth || 400;
+      height = canvas.height = canvas.offsetHeight || 380;
     });
 
     const particles = [];
-    for (let i = 0; i < 28; i++) {
+    for (let i = 0; i < 24; i++) {
       particles.push({
         x: width * 0.5 + (Math.random() - 0.5) * 60,
         y: height * 0.7 + Math.random() * 60,
@@ -2895,7 +4366,13 @@
       });
     }
 
+    let steamRunning = false;
     function renderSteam() {
+      if (!steamRunning) return;
+      if (document.hidden || (craftSection && !craftSection.classList.contains('is-live'))) {
+        steamRunning = false;
+        return;
+      }
       ctx.clearRect(0, 0, width, height);
       particles.forEach(p => {
         p.x += p.vx;
@@ -2918,110 +4395,379 @@
       });
       requestAnimationFrame(renderSteam);
     }
-    renderSteam();
+    if ('IntersectionObserver' in window && craftSection) {
+      new IntersectionObserver((en) => {
+        if (en[0].isIntersecting && !steamRunning) {
+          steamRunning = true;
+          requestAnimationFrame(renderSteam);
+        }
+      }, { threshold: 0.05 }).observe(craftSection);
+    } else {
+      steamRunning = true;
+      requestAnimationFrame(renderSteam);
+    }
   })();
 
-  // 4. Pattern Selector
+  // 4. Panel 2: Microfoam Chemistry (SVG stroke-dashoffset Fluid Pour + 12ml/s Pitcher + 100% Gloss Shader Tilt)
   const PATTERNS = {
     rosetta: {
-      img: '/assets/brand/u-1534778101976-62847782c213-1200.jpg',
-      caption: 'Classic 8-Leaf Rosetta Pattern'
+      caption: 'Classic 8-Leaf Rosetta • 12.0 ml/s Oscillation',
+      freq: '3.4Hz',
+      baseWash: 'M260 128 C205 152, 202 248, 260 282 C318 248, 315 152, 260 128 Z',
+      primary: 'M260 282 C226 270, 294 258, 220 244 C298 232, 216 218, 300 204 C214 190, 302 176, 222 162 C294 150, 230 138, 260 122 C272 116, 260 105, 260 292',
+      accent: 'M260 108 L260 294'
     },
     tulip: {
-      img: '/assets/brand/u-1517256064527-09c73fc73e38-1200.jpg',
-      caption: '4-Tier Stacked Tulip Microfoam'
+      caption: '4-Tier Stacked Tulip Microfoam • 12.0 ml/s Pulse',
+      freq: '2.6Hz',
+      baseWash: 'M260 132 C202 162, 202 252, 260 284 C318 252, 318 162, 260 132 Z',
+      primary: 'M260 278 C212 268, 212 232, 260 244 C308 232, 308 268, 260 278 M260 236 C214 224, 214 192, 260 204 C306 192, 306 224, 260 236 M260 194 C220 182, 220 154, 260 166 C300 154, 300 182, 260 194 M260 154 C236 142, 236 120, 260 132 C284 120, 284 142, 260 154',
+      accent: 'M260 116 L260 286'
     },
-    heart: {
-      img: '/assets/brand/u-1509785307050-d4066910ec1e-1200.jpg',
-      caption: 'Blooming Symmetrical Heart'
+    swan: {
+      caption: 'Artisanal Barista Swan • 12.0 ml/s Graceful Draw',
+      freq: '4.1Hz',
+      baseWash: 'M260 140 C212 168, 214 250, 262 280 C308 252, 306 172, 260 140 Z',
+      primary: 'M252 268 C210 250, 206 196, 250 176 C212 166, 218 140, 254 146 C224 132, 236 116, 266 130 C278 164, 294 214, 268 254 C252 274, 232 246, 238 214 C244 184, 228 156, 246 140 C254 132, 266 136, 262 148',
+      accent: 'M238 214 C258 230, 278 228, 292 212'
     }
   };
+  PATTERNS.heart = PATTERNS.swan; // backwards-compatible alias
+
+  let activePattern = 'rosetta';
+  let pourAnimRaf = 0;
+
+  function animatePatternPour(patKey) {
+    const cfg = PATTERNS[patKey] || PATTERNS.rosetta;
+    const baseWash = document.getElementById('microfoamBaseWash');
+    const primary = document.getElementById('microfoamPrimaryPath');
+    const accent = document.getElementById('microfoamAccentPath');
+    const pitcher = document.getElementById('microfoamPitcherTip');
+    const cap = document.getElementById('craftLatteCaption');
+    const flowHud = document.getElementById('microfoamFlowHud');
+
+    if (cap) cap.textContent = cfg.caption;
+    if (flowHud) flowHud.textContent = `FLOW: 12.0 ml/s • PITCHER Δ ${cfg.freq}`;
+    if (baseWash) baseWash.setAttribute('d', cfg.baseWash);
+    if (primary) primary.setAttribute('d', cfg.primary);
+    if (accent) accent.setAttribute('d', cfg.accent);
+
+    if (!primary || !accent) return;
+    const len1 = primary.getTotalLength ? primary.getTotalLength() : 680;
+    const len2 = accent.getTotalLength ? accent.getTotalLength() : 200;
+
+    primary.style.strokeDasharray = String(len1);
+    primary.style.strokeDashoffset = String(len1);
+    accent.style.strokeDasharray = String(len2);
+    accent.style.strokeDashoffset = String(len2);
+
+    if (pourAnimRaf) cancelAnimationFrame(pourAnimRaf);
+    const t0 = performance.now();
+    const dur = 1450;
+    function stepPour(now) {
+      const p = Math.min(1, (now - t0) / dur);
+      const ease = 1 - Math.pow(1 - p, 3);
+      primary.style.strokeDashoffset = ((1 - ease) * len1).toFixed(1);
+      const cutP = Math.max(0, (p - 0.68) / 0.32);
+      accent.style.strokeDashoffset = ((1 - cutP) * len2).toFixed(1);
+
+      // Pitcher tip oscillates horizontally at 12ml/second while pouring
+      if (pitcher) {
+        if (p < 0.96) {
+          const oscX = Math.sin(now * 0.024) * 14 * (1 - p * 0.5);
+          const oscRot = Math.cos(now * 0.024) * 6;
+          pitcher.style.opacity = '1';
+          pitcher.style.transform = `translate(${oscX.toFixed(1)}px, ${(p * 12).toFixed(1)}px) rotate(${oscRot.toFixed(1)}deg)`;
+        } else {
+          pitcher.style.opacity = '0.35';
+          pitcher.style.transform = 'translate(0px, -8px) rotate(0deg)';
+        }
+      }
+      if (p < 1) {
+        pourAnimRaf = requestAnimationFrame(stepPour);
+      }
+    }
+    pourAnimRaf = requestAnimationFrame(stepPour);
+  }
 
   window.setCraftPattern = function(pat) {
     if (!PATTERNS[pat]) return;
-    ['rosetta', 'tulip', 'heart'].forEach(p => {
+    activePattern = pat === 'heart' ? 'swan' : pat;
+    ['rosetta', 'tulip', 'swan', 'heart'].forEach(p => {
       const btn = document.getElementById(`craftPat-${p}`);
       if (btn) {
-        if (p === pat) {
+        if (p === activePattern || (p === 'heart' && pat === 'heart')) {
           btn.className = "px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#2B1650] text-[#F1E9FF] shadow transition-all";
         } else {
           btn.className = "px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#F8F5FF] text-[#534168] border border-[#2B1650]/20 hover:text-[#2B1650] transition-all";
         }
       }
     });
-
-    const img = document.getElementById('craftLatteImg');
-    const cap = document.getElementById('craftLatteCaption');
-    if (img && cap) {
-      img.style.opacity = '0.3';
-      setTimeout(() => {
-        img.src = PATTERNS[pat].img;
-        cap.textContent = PATTERNS[pat].caption;
-        img.onload = () => { img.style.opacity = '1'; };
-      }, 120);
-    }
+    animatePatternPour(activePattern);
   };
 
-  // 5. Roast Profiles
-  const ROASTS = {
-    1: {
-      name: "Nagaland Arabica.",
-      desc: "Grown under dense wild canopies at 1,450m elevation in Kiphire, Nagaland. Lightly roasted (196°C) to preserve floral jasmine aromatics, white peach, and delicate bergamot finish.",
-      notes: ["Wild Jasmine", "White Peach", "Bergamot Citrus", "Raw Honey"],
-      acidity: "9.4 / 10", acidityW: "94%",
-      body: "6.5 / 10", bodyW: "65%",
-      sweetness: "8.8 / 10", sweetnessW: "88%",
-      dtr: "1:45 min (14.2% DTR)", dtrW: "72%"
-    },
-    2: {
-      name: "Karnataka Chikmagalur.",
-      desc: "Shade-grown at 1,200m in the Western Ghats. Medium City+ roast (218°C) highlighting velvety body, roasted hazelnuts, dark cocoa nibs, and warm panela caramel.",
-      notes: ["Dark Cocoa Nibs", "Roasted Hazelnut", "Raw Panela", "Brown Sugar"],
-      acidity: "7.2 / 10", acidityW: "72%",
-      body: "8.9 / 10", bodyW: "89%",
-      sweetness: "9.1 / 10", sweetnessW: "91%",
-      dtr: "2:20 min (18.5% DTR)", dtrW: "85%"
-    },
-    3: {
-      name: "Kerala Monsoon Malabar.",
-      desc: "Exposed to monsoon winds on the Malabar coast. Dark French roast (235°C) with low acidity, intense smoky chocolate, toasted cedarwood, and ultra-dense hazelnut crema.",
-      notes: ["Smoked Cacao", "Spiced Tobacco", "Toasted Oak", "Dense Crema"],
-      acidity: "4.1 / 10", acidityW: "41%",
-      body: "9.8 / 10", bodyW: "98%",
-      sweetness: "7.6 / 10", sweetnessW: "76%",
-      dtr: "3:05 min (22.8% DTR)", dtrW: "98%"
-    }
+  window.replayMicrofoamPour = function() {
+    animatePatternPour(activePattern);
   };
 
-  window.changeCraftRoastProfile = function(val) {
-    const data = ROASTS[val] || ROASTS[1];
+  // Shader-based glossy specular highlight (100% Gloss) reacting to cursor angle & device tilt
+  const microWrap = document.getElementById('microfoamStageWrap');
+  const glossLayer = document.getElementById('microfoamGlossLayer');
+  const tiltHud = document.getElementById('microfoamTiltHud');
+  if (microWrap && glossLayer) {
+    let glossRaf = 0, gx = 50, gy = 35, gAngle = 128;
+    const applyGloss = () => {
+      glossRaf = 0;
+      glossLayer.style.setProperty('--gloss-x', gx.toFixed(1) + '%');
+      glossLayer.style.setProperty('--gloss-y', gy.toFixed(1) + '%');
+      glossLayer.style.setProperty('--gloss-angle', gAngle.toFixed(1) + 'deg');
+      if (tiltHud) tiltHud.textContent = `SPECULAR TILT: ${Math.round(gAngle)}° • 100% GLOSS`;
+    };
+    microWrap.addEventListener('pointermove', (e) => {
+      const r = microWrap.getBoundingClientRect();
+      gx = ((e.clientX - r.left) / Math.max(1, r.width)) * 100;
+      gy = ((e.clientY - r.top) / Math.max(1, r.height)) * 100;
+      gAngle = 95 + (gx - 50) * 0.9 + (gy - 50) * 0.45;
+      if (!glossRaf) glossRaf = requestAnimationFrame(applyGloss);
+    }, { passive: true });
+    if (window.DeviceOrientationEvent) {
+      window.addEventListener('deviceorientation', (e) => {
+        if (e.gamma == null || e.beta == null) return;
+        gx = Math.max(10, Math.min(90, 50 + e.gamma * 1.2));
+        gy = Math.max(10, Math.min(90, 45 + (e.beta - 30) * 1.1));
+        gAngle = 110 + e.gamma * 1.5;
+        if (!glossRaf) glossRaf = requestAnimationFrame(applyGloss);
+      }, { passive: true });
+    }
+  }
+  animatePatternPour('rosetta');
+
+  // 5. Panel 3: Continuous Nagaland Arabica Roast Spectrum (196°C -> 218°C -> 235°C)
+  //    + 3-Stop Color LUT & Oil-Sheen Normal Map Bean Canvas
+  //    + Spring Physics Progress Bars (stiffness: 180, damping: 18)
+  const beanCanvas = document.getElementById('roastBeanCanvas');
+  const beanCtx = beanCanvas ? beanCanvas.getContext('2d') : null;
+  let currentRoastTemp = 196;
+
+  // Spring physics state (stiffness: 180, damping: 18) for the 4 sensory bars
+  const springBars = {
+    acidity:   { pos: 94, vel: 0, target: 94, el: document.getElementById('craftAcidityBar') },
+    body:      { pos: 65, vel: 0, target: 65, el: document.getElementById('craftBodyBar') },
+    sweetness: { pos: 88, vel: 0, target: 88, el: document.getElementById('craftSweetnessBar') },
+    dtr:       { pos: 72, vel: 0, target: 72, el: document.getElementById('craftRoastTimeBar') }
+  };
+  let springRaf = 0, lastSpringTime = 0;
+
+  function stepRoastSprings(now) {
+    const dt = Math.min(0.032, Math.max(0.008, (now - lastSpringTime) / 1000 || 0.016));
+    lastSpringTime = now;
+    const stiffness = 180;
+    const damping = 18;
+    let moving = false;
+
+    Object.keys(springBars).forEach((k) => {
+      const b = springBars[k];
+      const force = -stiffness * (b.pos - b.target) - damping * b.vel;
+      b.vel += force * dt;
+      b.pos += b.vel * dt;
+      if (Math.abs(b.pos - b.target) > 0.08 || Math.abs(b.vel) > 0.15) {
+        moving = true;
+      } else {
+        b.pos = b.target;
+        b.vel = 0;
+      }
+      if (b.el) {
+        b.el.style.width = Math.max(4, Math.min(100, b.pos)).toFixed(2) + '%';
+      }
+    });
+
+    if (moving) {
+      springRaf = requestAnimationFrame(stepRoastSprings);
+    } else {
+      springRaf = 0;
+    }
+  }
+
+  function lerpNum(a, b, t) { return a + (b - a) * t; }
+  function lerpRgb(c1, c2, t) {
+    return [
+      Math.round(lerpNum(c1[0], c2[0], t)),
+      Math.round(lerpNum(c1[1], c2[1], t)),
+      Math.round(lerpNum(c1[2], c2[2], t))
+    ];
+  }
+
+  window.drawRoastBeanMacro = function() {
+    if (!beanCanvas || !beanCtx) return;
+    const w = beanCanvas.width, h = beanCanvas.height;
+    beanCtx.clearRect(0, 0, w, h);
+
+    // Normalized thermal position u in [0, 1] across 196°C -> 235°C
+    const u = Math.max(0, Math.min(1, (currentRoastTemp - 196) / 39));
+    // 3-Stop Color LUT:
+    // Stop 0 (196°C Light Cinnamon): [184, 124, 72]
+    // Stop 1 (218°C Medium City+):   [110, 58, 28]
+    // Stop 2 (235°C Dark French):    [38, 20, 14]
+    const stop0 = [184, 124, 72];
+    const stop1 = [110, 58, 28];
+    const stop2 = [38, 20, 14];
+    const baseRgb = u < 0.564
+      ? lerpRgb(stop0, stop1, u / 0.564)
+      : lerpRgb(stop1, stop2, (u - 0.564) / 0.436);
+
+    // Surface oil-sheen normal-map intensity climbs sharply toward 235°C
+    const oilSheen = Math.pow(u, 1.65);
+
+    // Dark drum background with thermal glow
+    const drumBg = beanCtx.createRadialGradient(w * 0.5, h * 0.5, 10, w * 0.5, h * 0.5, w * 0.6);
+    drumBg.addColorStop(0, `rgba(${baseRgb[0]}, ${baseRgb[1]}, ${baseRgb[2]}, 0.35)`);
+    drumBg.addColorStop(1, '#120822');
+    beanCtx.fillStyle = drumBg;
+    beanCtx.fillRect(0, 0, w, h);
+
+    // Render 3 macro Arabica beans with 3-stop LUT shading & normal-map specular oil sheen
+    const beans = [
+      { x: w * 0.27, y: h * 0.50, rx: 46, ry: 31, rot: -0.28 },
+      { x: w * 0.52, y: h * 0.47, rx: 54, ry: 36, rot: 0.14 },
+      { x: w * 0.76, y: h * 0.52, rx: 44, ry: 30, rot: -0.18 }
+    ];
+
+    beans.forEach((b) => {
+      beanCtx.save();
+      beanCtx.translate(b.x, b.y);
+      beanCtx.rotate(b.rot);
+
+      // Bean volumetric gradient
+      const bGrad = beanCtx.createRadialGradient(-b.rx * 0.28, -b.ry * 0.32, 4, 0, 0, b.rx * 1.05);
+      bGrad.addColorStop(0, `rgb(${Math.min(255, baseRgb[0] + 45)}, ${Math.min(255, baseRgb[1] + 38)}, ${Math.min(255, baseRgb[2] + 32)})`);
+      bGrad.addColorStop(0.55, `rgb(${baseRgb[0]}, ${baseRgb[1]}, ${baseRgb[2]})`);
+      bGrad.addColorStop(1, `rgb(${Math.max(8, baseRgb[0] - 32)}, ${Math.max(5, baseRgb[1] - 24)}, ${Math.max(4, baseRgb[2] - 18)})`);
+
+      beanCtx.fillStyle = bGrad;
+      beanCtx.beginPath();
+      // Slight volumetric expansion as bean develops from 196°C to 235°C
+      const swell = 1 + u * 0.08;
+      beanCtx.ellipse(0, 0, b.rx * swell, b.ry * swell, 0, 0, Math.PI * 2);
+      beanCtx.fill();
+
+      // Normal-map oil-sheen specular highlight at 218°C -> 235°C
+      const specAlpha = 0.12 + oilSheen * 0.72;
+      const specGrad = beanCtx.createRadialGradient(-b.rx * 0.25, -b.ry * 0.35, 1, -b.rx * 0.15, -b.ry * 0.2, b.rx * 0.65);
+      specGrad.addColorStop(0, `rgba(255, 248, 235, ${specAlpha.toFixed(3)})`);
+      specGrad.addColorStop(0.4, `rgba(235, 200, 255, ${(specAlpha * 0.45).toFixed(3)})`);
+      specGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      beanCtx.fillStyle = specGrad;
+      beanCtx.beginPath();
+      beanCtx.ellipse(-b.rx * 0.12, -b.ry * 0.18, b.rx * 0.62, b.ry * 0.44, -0.15, 0, Math.PI * 2);
+      beanCtx.fill();
+
+      // Center chaff seam (silverskin darkens as temperature climbs)
+      beanCtx.strokeStyle = u < 0.5 ? '#E6C29F' : '#1E0D06';
+      beanCtx.lineWidth = 2.6;
+      beanCtx.beginPath();
+      beanCtx.moveTo(-b.rx * 0.78, 2);
+      beanCtx.bezierCurveTo(-b.rx * 0.25, -8, b.rx * 0.25, 8, b.rx * 0.78, -2);
+      beanCtx.stroke();
+
+      beanCtx.restore();
+    });
+  };
+
+  window.changeCraftRoastProfile = function(rawVal) {
+    let temp = parseFloat(rawVal);
+    // Support legacy 1, 2, 3 arguments as well as continuous 196..235°C slider values
+    if (temp === 1) temp = 196;
+    else if (temp === 2) temp = 218;
+    else if (temp === 3) temp = 235;
+    temp = Math.max(196, Math.min(235, isNaN(temp) ? 196 : temp));
+    currentRoastTemp = temp;
+
+    const slider = document.getElementById('craftRoastSlider');
+    if (slider && Math.abs(parseFloat(slider.value) - temp) > 0.4) {
+      slider.value = String(temp);
+    }
+
+    const u = (temp - 196) / 39; // 0.0 at 196°C -> 1.0 at 235°C
+    // Continuous interpolation of Acidity, Body, Sweetness, DTR
+    const acidityScore = lerpNum(9.4, 4.1, Math.pow(u, 1.15));
+    const bodyScore = lerpNum(6.5, 9.8, Math.pow(u, 0.85));
+    const sweetnessScore = u <= 0.56
+      ? lerpNum(8.8, 9.2, u / 0.56)
+      : lerpNum(9.2, 7.6, (u - 0.56) / 0.44);
+    const dtrPct = lerpNum(14.2, 22.8, u);
+    const dtrBarW = lerpNum(72, 98, u);
+
+    let zoneData;
+    if (temp < 209) {
+      zoneData = {
+        name: "Nagaland Arabica.",
+        badge: `${temp.toFixed(1)}°C • Light Cinnamon`,
+        lut: "LUT: CINNAMON TERROIR",
+        desc: "Grown under dense wild canopies at 1,450m elevation in Kiphire, Nagaland. Lightly roasted to preserve floral jasmine aromatics, white peach, and delicate bergamot finish.",
+        notes: ["Wild Jasmine", "White Peach", "Bergamot Citrus", "Raw Honey"],
+        pillClass: "bg-purple-100 text-[#7C3AED] border border-[#7C3AED]/25"
+      };
+    } else if (temp < 226) {
+      zoneData = {
+        name: "Karnataka Chikmagalur.",
+        badge: `${temp.toFixed(1)}°C • Medium City+`,
+        lut: "LUT: CITY+ CARAMELIZATION",
+        desc: "Shade-grown at 1,200m in the Western Ghats. Medium City+ roast balancing velvety body, roasted hazelnuts, dark cocoa nibs, and warm panela caramel.",
+        notes: ["Dark Cocoa Nibs", "Roasted Hazelnut", "Raw Panela", "Brown Sugar"],
+        pillClass: "bg-amber-100 text-amber-900 border border-amber-400/40"
+      };
+    } else {
+      zoneData = {
+        name: "Kerala Monsoon Malabar.",
+        badge: `${temp.toFixed(1)}°C • Dark French`,
+        lut: "LUT: DARK FRENCH PYROLYSIS",
+        desc: "Exposed to monsoon winds on the Malabar coast. High-temperature roast with low acidity, intense smoked cacao, toasted cedarwood, and surface oil sheen.",
+        notes: ["Smoked Cacao", "Spiced Tobacco", "Toasted Oak", "Dense Crema"],
+        pillClass: "bg-[#2B1650] text-[#F1E9FF] border border-[#CDB8F7]/40"
+      };
+    }
+
     const n = document.getElementById('craftRoastName');
     const d = document.getElementById('craftRoastDesc');
+    const badge = document.getElementById('craftRoastTempBadge');
+    const lutLbl = document.getElementById('beanLutLabel');
+    const oilLbl = document.getElementById('beanOilLabel');
     const notesEl = document.getElementById('craftRoastNotes');
-    if (n) n.textContent = data.name;
-    if (d) d.textContent = data.desc;
+
+    if (n) n.textContent = zoneData.name;
+    if (d) d.textContent = zoneData.desc;
+    if (badge) badge.textContent = zoneData.badge;
+    if (lutLbl) lutLbl.textContent = zoneData.lut;
+    if (oilLbl) oilLbl.textContent = `OIL SHEEN: ${Math.round(8 + Math.pow(u, 1.65) * 84)}%`;
+
     if (notesEl) {
-      notesEl.innerHTML = data.notes.map(note => `<span class="px-3.5 py-1.5 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-bold">${note}</span>`).join('');
+      notesEl.innerHTML = zoneData.notes.map((note, idx) =>
+        `<span class="buoyant-pill px-3.5 py-1.5 rounded-full ${zoneData.pillClass} text-xs font-bold transition-colors duration-300" style="--bp-d:${(-idx * 0.75).toFixed(2)}s">${note}</span>`
+      ).join('');
     }
+
     const aVal = document.getElementById('craftAcidityVal');
-    const aBar = document.getElementById('craftAcidityBar');
-    if (aVal) aVal.textContent = data.acidity;
-    if (aBar) aBar.style.width = data.acidityW;
-
     const bVal = document.getElementById('craftBodyVal');
-    const bBar = document.getElementById('craftBodyBar');
-    if (bVal) bVal.textContent = data.body;
-    if (bBar) bBar.style.width = data.bodyW;
-
     const sVal = document.getElementById('craftSweetnessVal');
-    const sBar = document.getElementById('craftSweetnessBar');
-    if (sVal) sVal.textContent = data.sweetness;
-    if (sBar) sBar.style.width = data.sweetnessW;
-
     const rVal = document.getElementById('craftRoastTimeVal');
-    const rBar = document.getElementById('craftRoastTimeBar');
-    if (rVal) rVal.textContent = data.dtr;
-    if (rBar) rBar.style.width = data.dtrW;
+    if (aVal) aVal.textContent = `${acidityScore.toFixed(1)} / 10`;
+    if (bVal) bVal.textContent = `${bodyScore.toFixed(1)} / 10`;
+    if (sVal) sVal.textContent = `${sweetnessScore.toFixed(1)} / 10`;
+    const mins = Math.floor(105 + u * 80);
+    const mm = Math.floor(mins / 60), ss = mins % 60;
+    if (rVal) rVal.textContent = `${mm}:${ss < 10 ? '0' + ss : ss} min (${dtrPct.toFixed(1)}% DTR)`;
+
+    // Update spring targets (stiffness: 180, damping: 18)
+    springBars.acidity.target = acidityScore * 10;
+    springBars.body.target = bodyScore * 10;
+    springBars.sweetness.target = sweetnessScore * 10;
+    springBars.dtr.target = dtrBarW;
+    if (!springRaf) {
+      lastSpringTime = performance.now();
+      springRaf = requestAnimationFrame(stepRoastSprings);
+    }
+
+    window.drawRoastBeanMacro();
   };
 
   window.playCraftBeanCrackle = function() {
@@ -3046,7 +4792,61 @@
     } catch(e) {}
   };
 
-  // 6. Interactive 3D Card Tilt with Specular Mouse Sheen + Staggered Scroll Reveal
+  window.drawRoastBeanMacro();
+
+  // 6. Velocity-Driven Skew & Pendulum Physics (gsap.quickSetter, lerp: 0.08, clamped [-25, 25])
+  let kineticItems = [];
+  window.bindKineticCards = function() {
+    const els = [].slice.call(document.querySelectorAll('.kinetic-card'));
+    kineticItems = els.map(el => ({
+      el,
+      setSkewY: window.gsap && window.gsap.quickSetter ? window.gsap.quickSetter(el, 'skewY', 'deg') : null,
+      setRotZ: window.gsap && window.gsap.quickSetter ? window.gsap.quickSetter(el, 'rotateZ', 'deg') : null
+    }));
+  };
+
+  (function initVelocitySkewPhysics() {
+    let lastScrollY = window.scrollY;
+    let smoothVel = 0;
+    let velRaf = 0;
+
+    function tickVelocity() {
+      const curY = window.scrollY;
+      const rawDelta = curY - lastScrollY;
+      lastScrollY = curY;
+      const clampedTarget = Math.max(-25, Math.min(25, rawDelta * 0.45));
+      smoothVel += (clampedTarget - smoothVel) * 0.08;
+
+      if (Math.abs(smoothVel) < 0.04 && Math.abs(rawDelta) === 0) {
+        smoothVel = 0;
+        velRaf = 0;
+      } else {
+        velRaf = requestAnimationFrame(tickVelocity);
+      }
+
+      const skewVal = +(smoothVel * 0.12).toFixed(3);
+      const rotVal = +(smoothVel * 0.06).toFixed(3);
+      for (let i = 0; i < kineticItems.length; i++) {
+        const item = kineticItems[i];
+        if (item.el.matches(':hover')) continue;
+        if (item.setSkewY && item.setRotZ) {
+          item.setSkewY(skewVal);
+          item.setRotZ(rotVal);
+        } else {
+          item.el.style.transform = skewVal === 0 ? '' : `skewY(${skewVal}deg) rotateZ(${rotVal}deg)`;
+        }
+      }
+    }
+
+    window.addEventListener('scroll', () => {
+      if (!velRaf) {
+        lastScrollY = window.scrollY;
+        velRaf = requestAnimationFrame(tickVelocity);
+      }
+    }, { passive: true });
+  })();
+
+  // 7. Interactive 3D Card Tilt with Specular Mouse Sheen + Staggered Scroll Reveal
   function initTiltPhysics() {
     const cards = document.querySelectorAll('.tilt-card, .d2c-card, .chapter, .visit-window, #orbit, .craft-interactive-card');
     cards.forEach(card => {
@@ -3093,7 +4893,8 @@
   setTimeout(() => {
     initTiltPhysics();
     initScrollReveal();
-  }, 300);
+    window.bindKineticCards();
+  }, 200);
 })();
 </script>
 <script>
