@@ -9234,7 +9234,8 @@
     border-bottom: 1px solid rgba(255, 190, 73, .42);
   }
   /* Pointless on the chat surface itself. */
-  body.view-chat .chat-nudge, body.chat-guide-open .chat-nudge { display: none !important; }
+  body.view-chat .chat-nudge, body.chat-guide-open .chat-nudge,
+  body:has(#view-projects.active) .chat-nudge { display: none !important; }
   body.sidebar-open .chat-nudge, body.sidebar-open #jarvisPill, body.sidebar-open .chat-return { visibility: hidden; pointer-events: none; }
   @media (max-width: 560px) { .chat-nudge { bottom: 104px; right: 12px; } }
   @media (prefers-reduced-motion: reduce) {
@@ -10560,6 +10561,9 @@
     document.addEventListener('click', (e) => {
       if (e.target.closest('[data-chat-open], .chat-return, .sidebar-item[data-view="chat"]')) dismiss();
     }, true);
+    document.addEventListener('viewChanged', (e) => {
+      if (e.detail === 'projects') dismiss();
+    });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') dismiss(); });
     // On a phone it sits over a sixth of the screen; scrolling on is an answer too.
     window.addEventListener('scroll', () => { if (shown && window.innerWidth <= 560 && window.scrollY > window.innerHeight) dismiss(); }, { passive: true });
@@ -13014,15 +13018,20 @@
 
   /* ---- Elite folio, Projects view --------------------------------------- */
   #view-projects .folio { max-width: var(--max-w); }
-  #view-projects.view { padding-top: var(--sp-4); }
-  #view-projects .folio-masthead { max-width: none; margin-bottom: var(--sp-3); }
-  #view-projects .folio-masthead .display-lg { font-size: var(--fs-h1) !important; line-height: 1.1 !important; }
-  #view-projects .folio-masthead .lede { font-size: var(--fs-body); max-width: 62ch; margin-top: var(--sp-2) !important; }
-  #view-projects .folio-masthead .eyebrow { margin-bottom: var(--sp-2); }
-  #view-projects .folio-masthead .tag-legend { margin-top: var(--sp-3); }
+  #view-projects.view { padding-top: var(--sp-3); padding-bottom: var(--sp-8); }
+  #view-projects .folio-masthead { max-width: none; margin-bottom: var(--sp-2); }
+  #view-projects .folio-masthead .display-lg { font-size: var(--fs-h1) !important; line-height: 1.1 !important; margin: 0; }
+  #view-projects .folio-masthead .lede {
+    font-size: var(--fs-body) !important; max-width: 62ch;
+    margin-top: var(--sp-2) !important; line-height: 1.45 !important;
+  }
+  #view-projects .folio-masthead .eyebrow { margin-bottom: var(--sp-1); }
+  #view-projects .folio-masthead .tag-legend {
+    margin-top: var(--sp-2); gap: var(--sp-2) var(--sp-5);
+  }
   #view-projects .folio-plate {
     display: flex; align-items: center; gap: var(--sp-4);
-    margin-bottom: var(--sp-5);
+    margin-bottom: var(--sp-2);
   }
   #view-projects .folio-vol,
   #view-projects .folio-kicker,
@@ -13035,10 +13044,6 @@
   #view-projects .folio-rule {
     flex: 1 1 auto; height: 1px; background: var(--rule-strong);
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent);
-  }
-  #view-projects .folio-preface .thesis-p:first-of-type::first-letter {
-    font-family: var(--font-display); font-size: var(--fs-h1); font-weight: 500;
-    color: var(--accent); float: left; line-height: .8; padding: 4px var(--sp-2) 0 0;
   }
   #view-projects .folio-toolbar {
     display: flex; align-items: center; gap: var(--sp-3);
@@ -13164,8 +13169,16 @@
   }
   /* Wider plates let a purpose line sit on one row. The shared min-height is
      1.45em while the card paragraph uses 1.55 line-height, so a one-line
-     sentence left a half-cut box. 2lh is exactly two of this element's lines. */
+     sentence left a half-cut box. 2lh is exactly two of this element's lines.
+     Narrower plates keep the shared container-query line budget, with the
+     min-height matching that budget so a 3-line clamp cannot sit in a 2lh box. */
   #view-projects .folio .bp-text { min-height: 2lh; }
+  @container (max-width: 307px) {
+    #view-projects .folio .bp-text { min-height: 3lh; }
+  }
+  @container (max-width: 251px) {
+    #view-projects .folio .bp-text { min-height: 4lh; }
+  }
   #view-projects .folio .tilt-card,
   #view-projects .folio .tilt-card:hover { transform: none !important; }
   #view-projects .folio .build-card:hover { transform: translateY(-2px) !important; }
@@ -13250,6 +13263,42 @@
     }
     #view-projects .folio-toc { display: none; }
   }
+  /* Phones otherwise give every .build-card four description lines, which
+     makes a folio plate taller than the stage. Keep the two-line budget so
+     the action row stays on the page. The masthead extras (legend, lede,
+     plate, eyebrow) are already on the cards or the opening preface. */
+  @media (max-width: 560px) {
+    #view-projects.view { padding-top: var(--sp-2); }
+    #view-projects .folio-masthead { margin-bottom: var(--sp-1); }
+    #view-projects .folio-plate,
+    #view-projects .folio-masthead .lede,
+    #view-projects .folio-masthead .tag-legend,
+    #view-projects .folio-masthead .eyebrow { display: none; }
+    #view-projects .folio .build-card { padding: var(--sp-4); }
+    #view-projects .folio-preface,
+    #view-projects .folio-colophon { padding: var(--sp-5); }
+    #view-projects .folio-preface { padding-top: var(--sp-5); }
+    /* The launcher parks on the left on small screens and sat on the
+       Case Study button. Chat stays in the sidebar. */
+    body:has(#view-projects.active) .chat-return { display: none !important; }
+    #view-projects .folio-stage {
+      max-height: calc(100dvh - var(--consent-h, 0px) - 9.5rem);
+    }
+    #view-projects .builds-grid[data-folio] > .build-card,
+    #view-projects .builds-grid[data-folio] > .folio-preface,
+    #view-projects .builds-grid[data-folio] > .folio-colophon {
+      max-height: 100%;
+      overflow-y: auto;
+    }
+    #view-projects .folio .build-card > p:not(.build-purpose) {
+      -webkit-line-clamp: 2;
+      min-height: calc(1.55em * 2);
+    }
+    #view-projects .folio .bp-text {
+      -webkit-line-clamp: 2;
+      min-height: 2lh;
+    }
+  }
   @media (prefers-reduced-motion: reduce) {
     #view-projects .folio-stage.folio-can-open,
     #view-projects .folio-stage.is-turning-next .folio-flip,
@@ -13311,6 +13360,11 @@
   var motionOff = document.documentElement.getAttribute('data-motion') === 'off';
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var turning = false;
+  var snapping = false;
+  var leafIndex = 0;
+  var resizeKeep = null;
+  var resizeTimer = 0;
+  var userScrollTimer = 0;
 
   if (countEl) countEl.textContent = cards.length + ' plates';
   cards.forEach(function (c) { c.classList.add('in'); });
@@ -13361,13 +13415,16 @@
   function scrollToPage(i, instant) {
     var n = pageCount();
     i = Math.max(0, Math.min(n - 1, i));
+    snapping = true;
+    leafIndex = i * perSpread();
     var target = Math.round(i * grid.clientWidth);
     try { grid.scrollTo({ left: target, behavior: instant ? 'auto' : 'smooth' }); }
     catch (e) { grid.scrollLeft = target; }
     setTimeout(function () {
       if (Math.abs(grid.scrollLeft - target) > 4) grid.scrollLeft = target;
+      snapping = false;
       sync();
-    }, instant ? 0 : 280);
+    }, instant ? 40 : 280);
   }
   function go(i) {
     if (motionOff) return;
@@ -13392,8 +13449,25 @@
   root.querySelectorAll('[data-folio-dir]').forEach(function (btn) {
     btn.addEventListener('click', function () { step(parseInt(btn.getAttribute('data-folio-dir'), 10)); });
   });
-  grid.addEventListener('scroll', function () { if (!turning) sync(); }, { passive: true });
-  addEventListener('resize', function () { buildToc(); sync(); }, { passive: true });
+  grid.addEventListener('scroll', function () {
+    if (turning || snapping) return;
+    sync();
+    clearTimeout(userScrollTimer);
+    userScrollTimer = setTimeout(function () {
+      if (snapping) return;
+      leafIndex = currentPage() * perSpread();
+    }, 80);
+  }, { passive: true });
+  addEventListener('resize', function () {
+    if (resizeKeep == null) resizeKeep = leafIndex;
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      var keep = resizeKeep;
+      resizeKeep = null;
+      buildToc();
+      scrollToPage(Math.floor(keep / perSpread()), true);
+    }, 80);
+  }, { passive: true });
   document.addEventListener('keydown', function (e) {
     if (!document.getElementById('view-projects') || !document.getElementById('view-projects').classList.contains('active')) return;
     if (e.target && /input|textarea|select/i.test(e.target.tagName)) return;

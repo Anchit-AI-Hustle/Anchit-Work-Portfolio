@@ -168,15 +168,16 @@ async function game(browser, vp, slug) {
   }
 
   await hold(page, vp, 4000);
-  let after = await page.evaluate(() => ({ state: window.__arcade.state, frame: window.__arcade.frame, time: window.__arcade.time, dbg: window.__arcade.debug ? window.__arcade.debug() : null }));
-  // Heavy games (gully-champs at tablet size) can land under 15fps on a CI
-  // runner. Drive another hold before judging a stall; MUT=stall still
-  // reports 0 extra frames.
-  if (after.frame - before.frame <= 60) {
-    await hold(page, vp, 4000);
-    after = await page.evaluate(() => ({ state: window.__arcade.state, frame: window.__arcade.frame, time: window.__arcade.time, dbg: window.__arcade.debug ? window.__arcade.debug() : null }));
-  }
-  check(`${tag} frames advance during play`, after.frame - before.frame > 24, `${after.frame - before.frame} frames`);
+  const after = await page.evaluate(() => ({ state: window.__arcade.state, frame: window.__arcade.frame, time: window.__arcade.time, dbg: window.__arcade.debug ? window.__arcade.debug() : null }));
+  // Prove the loop is alive, not that it holds 15fps. Gully Champs draws a
+  // full street of houses; on a 820×1180 tablet at deviceScaleFactor 2 the
+  // GitHub runner lands around 50–57 frames in this window, which used to
+  // fail a >60 bar while the game was still ticking. Sky Thread keeps its
+  // own round clock on debug().time, so arcade.time can move less than the
+  // wall clock even while frames are flowing. MUT=stall still yields 0.
+  const frames = after.frame - before.frame;
+  const elapsed = (after.time || 0) - (before.time || 0);
+  check(`${tag} frames advance during play`, frames > 20, `${frames} frames, ${elapsed.toFixed(2)}s`);
   check(`${tag} game state changes under input`, strip(after.dbg) !== strip(before.dbg), strip(after.dbg).slice(0, 140));
 
   if (after.state === 'play') {
