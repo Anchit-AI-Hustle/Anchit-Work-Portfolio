@@ -131,6 +131,8 @@ async function game(browser, vp, slug) {
   });
   check(`${tag} shell boots to its menu`, !!menu && menu.state === 'menu' && menu.panel, strip(menu));
   check(`${tag} menu card fits the screen`, !!menu && menu.fits);
+  const modes = await page.evaluate(() => Array.from(document.querySelectorAll('.arc-seg')).map((e) => e.getAttribute('data-opt')));
+  check(`${tag} menu offers a mode picker`, modes.includes('mode'), modes.join(','));
 
   const blank = await page.evaluate(() => {
     const c = document.querySelector('.arc-stage canvas');

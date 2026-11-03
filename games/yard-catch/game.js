@@ -16,24 +16,36 @@
   const GOOD = ['spice', 'tea', 'grain'];
 
   let arc;
+  const DIFF = {
+    easy: { spoil: 0.14, gap: 1.18, fall: 0.86 },
+    normal: { spoil: 0.22, gap: 1, fall: 1 },
+    hard: { spoil: 0.34, gap: 0.76, fall: 1.2 },
+  };
   const G = {
-    t: 0, score: 0, lives: 3, combo: 0, px: 0.5, items: [], parts: [],
+    t: 0, score: 0, lives: 3, maxLives: 3, combo: 0, px: 0.5, items: [], parts: [],
     next: 0.6, phase: 'run', attract: true, caught: 0, inv: 0,
+    mode: 'load', diff: 'normal', clock: 0,
   };
 
-  function reset(attract) {
-    G.t = 0; G.score = 0; G.lives = 3; G.combo = 0; G.px = 0.5;
-    G.items = []; G.parts = []; G.next = attract ? 0.4 : 0.7;
+  function reset(attract, ch) {
+    G.mode = (ch && ch.mode) || G.mode || 'load';
+    G.diff = (ch && ch.diff) || G.diff || 'normal';
+    G.D = DIFF[G.diff] || DIFF.normal;
+    G.t = 0; G.score = 0; G.combo = 0; G.px = 0.5;
+    G.maxLives = G.mode === 'clean' ? 1 : 3;
+    G.lives = G.maxLives;
+    G.clock = G.mode === 'shift' ? 75 : 0;
+    G.items = []; G.parts = []; G.next = attract ? 0.4 : 0.7 * G.D.gap;
     G.phase = 'run'; G.attract = !!attract; G.caught = 0; G.inv = 0;
   }
 
   function spawn() {
-    const spoil = rnd() < 0.22;
+    const spoil = rnd() < G.D.spoil;
     G.items.push({
-      x: 0.1 + rnd() * 0.8, y: -0.08, vy: 0.28 + rnd() * 0.18 + G.t * 0.012,
+      x: 0.1 + rnd() * 0.8, y: -0.08, vy: (0.28 + rnd() * 0.18 + G.t * 0.012) * G.D.fall,
       kind: spoil ? 'spoil' : GOOD[(rnd() * GOOD.length) | 0], w: 0.07, spoil,
     });
-    G.next = 0.55 + rnd() * 0.45 - min(0.28, G.t * 0.008);
+    G.next = (0.55 + rnd() * 0.45 - min(0.28, G.t * 0.008)) * G.D.gap;
   }
 
   function pop(x, y, col, n) {
@@ -43,19 +55,23 @@
     }
   }
 
+  function finish(why, html) {
+    if (G.phase === 'over') return;
+    G.phase = 'over';
+    arc.over({
+      eyebrow: why, title: why === 'Shift over' ? 'Shift <em>done</em>' : 'Yard <em>closed</em>',
+      score: Math.round(G.score), scoreLabel: 'Score',
+      html: html || ('<p>' + G.caught + ' sacks caught.</p>'),
+      again: 'Catch again',
+    });
+  }
+
   function miss() {
     if (G.phase === 'over' || G.inv > 0) return;
     G.lives--; G.combo = 0; G.inv = 0.9;
     arc.shake = 6; arc.sfx.tone(140, 0.14, { type: 'sawtooth', slide: 70, vol: 0.12 });
-    if (G.lives <= 0) {
-      G.phase = 'over';
-      arc.over({
-        eyebrow: 'Dropped the load', title: 'Yard <em>closed</em>',
-        score: Math.round(G.score), scoreLabel: 'Score',
-        html: '<p>' + G.caught + ' sacks caught before the pile went over.</p>',
-        again: 'Catch again',
-      });
-    } else arc.toast('Missed a sack', G.lives + ' left', 800);
+    if (G.lives <= 0) finish('Dropped the load', '<p>' + G.caught + ' sacks caught before the pile went over.</p>');
+    else arc.toast('Missed a sack', G.lives + ' left', 800);
   }
 
   function catchItem(o) {
@@ -64,15 +80,7 @@
       G.lives--; G.combo = 0; G.inv = 0.9;
       arc.toast('Spoiled', 'Skip those', 800);
       arc.sfx.tone(180, 0.12, { type: 'square', vol: 0.1 });
-      if (G.lives <= 0) {
-        G.phase = 'over';
-        arc.over({
-          eyebrow: 'Spoiled crate', title: 'Yard <em>closed</em>',
-          score: Math.round(G.score), scoreLabel: 'Score',
-          html: '<p>' + G.caught + ' good sacks before a spoiled one landed.</p>',
-          again: 'Catch again',
-        });
-      }
+      if (G.lives <= 0) finish('Spoiled crate', '<p>' + G.caught + ' good sacks before a spoiled one landed.</p>');
     } else {
       G.combo++; G.caught++; G.score += 12 * G.combo;
       pop(o.x * arc.w, groundY() - 24, o.kind === 'tea' ? GOLD : WARM, 8);
@@ -87,6 +95,10 @@
   function update(dt) {
     if (G.phase === 'over') return;
     G.t += dt; G.next -= dt; G.inv = max(0, G.inv - dt);
+    if (G.clock) {
+      G.clock -= dt;
+      if (G.clock <= 0) { G.clock = 0; finish('Shift over', '<p>' + G.caught + ' sacks in the shift.</p>'); return; }
+    }
     const inp = arc.input, ax = inp.axis(), p = inp.pointer;
     G.px = clamp(G.px + ax.x * dt * 1.8, 0.08, 0.92);
     if (p && p.seen && abs(ax.x) < 0.08) G.px = lerp(G.px, clamp(p.nx, 0.08, 0.92), 1 - Math.exp(-dt * 14));
@@ -176,9 +188,10 @@
     txt(c, 'SCORE', pad.left + 14, pad.top + 16, 10, GOLD, 600, 'left', F_MONO);
     txt(c, String(Math.round(G.score)), pad.left + 14, pad.top + 40, 24, INK, 500, 'left', F_DISP);
     plate(c, w / 2 - 70, pad.top, 140, 44, 12);
-    txt(c, 'x' + G.combo, w / 2, pad.top + 22, 18, G.combo >= 5 ? WARM : INK, 500, 'center', F_DISP);
+    const mid = G.clock ? (Math.max(0, G.clock | 0) + 's') : ('x' + G.combo);
+    txt(c, mid, w / 2, pad.top + 22, 18, (G.clock && G.clock < 10) || G.combo >= 5 ? WARM : INK, 500, 'center', F_DISP);
     let hx = w - pad.right - 18;
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < G.maxLives; i++) {
       c.fillStyle = i < G.lives ? PRIM : 'rgba(251,245,236,.15)';
       c.beginPath(); c.arc(hx - i * 18, pad.top + 22, 6, 0, TAU); c.fill();
     }
@@ -199,7 +212,7 @@
 
   function dbg() {
     return {
-      phase: G.phase, score: Math.round(G.score), lives: G.lives, combo: G.combo,
+      phase: G.phase, mode: G.mode, diff: G.diff, score: Math.round(G.score), lives: G.lives, combo: G.combo,
       px: +G.px.toFixed(3), items: G.items.length, caught: G.caught, attract: !!G.attract, t: +G.t.toFixed(2),
     };
   }
@@ -217,10 +230,18 @@
       eyebrow: 'Arcade catch',
       title: 'Yard <em>Catch</em>',
       html: '<p>Spice sacks drop from the warehouse loft. Slide the crate, catch the good ones, and let the spoiled green sacks hit the dirt. A miss or a spoiled catch costs a life.</p>',
+      options: [
+        { id: 'mode', label: 'Mode', value: 'load', choices: [{ v: 'load', label: 'Three lives' }, { v: 'shift', label: '75 seconds' }, { v: 'clean', label: 'Clean catch' }] },
+        { id: 'diff', label: 'Difficulty', value: 'normal', choices: [{ v: 'easy', label: 'Easy' }, { v: 'normal', label: 'Normal' }, { v: 'hard', label: 'Hard' }] },
+      ],
     },
     pauseHtml() { return '<div class="stat"><div>Score<b>' + Math.round(G.score) + '</b></div><div>Caught<b>' + G.caught + '</b></div></div>'; },
-    init(a) { arc = a; a.debug = dbg; reset(true); a.menu(); },
-    start(a) { arc = a; reset(false); arc.toast('Catch the sacks', 'Yard Catch', 1400); },
+    init(a) { arc = a; a.debug = dbg; G.D = DIFF.normal; reset(true); a.menu(); },
+    start(a, ch) {
+      arc = a; reset(false, ch);
+      const label = G.mode === 'shift' ? '75 seconds' : G.mode === 'clean' ? 'One life, skip the green' : 'Three lives';
+      arc.toast(label, 'Yard Catch', 1400);
+    },
     update, idle, render,
   });
 })();

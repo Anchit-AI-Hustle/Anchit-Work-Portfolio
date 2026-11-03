@@ -15,15 +15,27 @@
   const INK = '#FBF5EC', GOLD = '#c9a96e', WARM = '#FFB736', PRIM = '#FF6940';
 
   let arc;
+  const DIFF = {
+    easy: { spd: 230, dens: 1.18, fare: 0.4 },
+    normal: { spd: 280, dens: 1, fare: 0.27 },
+    hard: { spd: 350, dens: 0.76, fare: 0.16 },
+  };
   const G = {
-    t: 0, dist: 0, speed: 280, score: 0, lives: 3, lane: 1, laneT: 0, cool: 0,
+    t: 0, dist: 0, speed: 280, score: 0, lives: 3, maxLives: 3, lane: 1, laneT: 0, cool: 0,
     objs: [], parts: [], phase: 'run', attract: true, fares: 0,
+    mode: 'bazaar', diff: 'normal', clock: 0,
   };
 
-  function reset(attract) {
-    G.t = 0; G.dist = 0; G.speed = attract ? 180 : 280; G.score = 0; G.lives = 3;
+  function reset(attract, ch) {
+    G.mode = (ch && ch.mode) || G.mode || 'bazaar';
+    G.diff = (ch && ch.diff) || G.diff || 'normal';
+    G.D = DIFF[G.diff] || DIFF.normal;
+    const rush = G.mode === 'rush';
+    G.t = 0; G.dist = 0; G.speed = attract ? 180 : G.D.spd * (rush ? 1.18 : 1);
+    G.maxLives = rush ? 2 : 3; G.lives = G.maxLives; G.score = 0;
+    G.clock = G.mode === 'night' ? 90 : 0;
     G.lane = 1; G.laneT = 1; G.cool = 0; G.objs = []; G.parts = [];
-    G.phase = 'run'; G.attract = !!attract; G.fares = 0; G.next = attract ? 400 : 900;
+    G.phase = 'run'; G.attract = !!attract; G.fares = 0; G.next = attract ? 400 : 900 * G.D.dens * (rush ? 0.82 : 1);
   }
 
   function laneX(i) { return arc.w * (0.26 + i * 0.24); }
@@ -31,9 +43,11 @@
   function spawn() {
     const lane = (rnd() * 3) | 0;
     const roll = rnd();
-    const kind = roll < 0.55 ? 'cart' : roll < 0.82 ? 'fare' : 'pot';
+    const fare = (G.D || DIFF.normal).fare;
+    const kind = roll < fare ? 'fare' : roll < fare + 0.18 ? 'pot' : 'cart';
     G.objs.push({ kind, lane, y: -80, h: kind === 'fare' ? 36 : 44 });
-    G.next = G.dist + 420 + rnd() * 260 - min(160, G.dist * 0.02);
+    const dens = (G.D || DIFF.normal).dens * (G.mode === 'rush' ? 0.82 : 1);
+    G.next = G.dist + (420 + rnd() * 260 - min(160, G.dist * 0.02)) * dens;
   }
 
   function pop(x, y, col, n) {
@@ -43,24 +57,33 @@
     }
   }
 
+  function finish(why) {
+    if (G.phase === 'over') return;
+    G.phase = 'over';
+    arc.over({
+      eyebrow: why, title: why === 'Night over' ? 'Shift <em>done</em>' : 'Fare <em>cut</em>',
+      score: Math.round(G.score), scoreLabel: 'Score',
+      html: '<p>' + G.fares + ' fares and ' + Math.round(G.dist / 40) + ' metres through the bazaar.</p>',
+      again: 'Drive again',
+    });
+  }
+
   function hit() {
     G.lives--; G.cool = 0.9;
     arc.shake = 8; arc.sfx.tone(150, 0.16, { type: 'sawtooth', slide: 80, vol: 0.12 });
-    if (G.lives <= 0) {
-      G.phase = 'over';
-      arc.over({
-        eyebrow: 'Meter stopped', title: 'Fare <em>cut</em>',
-        score: Math.round(G.score), scoreLabel: 'Score',
-        html: '<p>' + G.fares + ' fares and ' + Math.round(G.dist / 40) + ' metres through the bazaar.</p>',
-        again: 'Drive again',
-      });
-    } else arc.toast('Watch the lane', G.lives + ' left', 800);
+    if (G.lives <= 0) finish('Meter stopped');
+    else arc.toast('Watch the lane', G.lives + ' left', 800);
   }
 
   function update(dt) {
     if (G.phase === 'over') return;
     G.t += dt; G.cool = max(0, G.cool - dt);
-    G.speed = min(560, 280 + G.dist * 0.014);
+    if (G.clock) {
+      G.clock -= dt;
+      if (G.clock <= 0) { G.clock = 0; finish('Night over'); return; }
+    }
+    const base = (G.D || DIFF.normal).spd * (G.mode === 'rush' ? 1.18 : 1);
+    G.speed = min(base + 280, base + G.dist * 0.014);
     G.dist += G.speed * dt; G.score += dt * 10;
     const inp = arc.input, ax = inp.axis(), p = inp.pointer;
     G.laneCool = max(0, (G.laneCool || 0) - dt);
@@ -174,9 +197,9 @@
     txt(c, 'SCORE', pad.left + 14, pad.top + 16, 10, GOLD, 600, 'left', F_MONO);
     txt(c, String(Math.round(G.score)), pad.left + 14, pad.top + 40, 24, INK, 500, 'left', F_DISP);
     plate(c, w / 2 - 70, pad.top, 140, 44, 12);
-    txt(c, Math.round(G.dist / 40) + ' m', w / 2, pad.top + 22, 18, INK, 500, 'center', F_DISP);
+    txt(c, G.clock ? (Math.max(0, G.clock | 0) + 's') : (Math.round(G.dist / 40) + ' m'), w / 2, pad.top + 22, 18, G.clock && G.clock < 10 ? PRIM : INK, 500, 'center', F_DISP);
     let hx = w - pad.right - 18;
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < G.maxLives; i++) {
       c.fillStyle = i < G.lives ? PRIM : 'rgba(251,245,236,.15)';
       c.beginPath(); c.arc(hx - i * 18, pad.top + 22, 6, 0, TAU); c.fill();
     }
@@ -197,7 +220,7 @@
 
   function dbg() {
     return {
-      phase: G.phase, score: Math.round(G.score), lives: G.lives, lane: G.lane,
+      phase: G.phase, mode: G.mode, diff: G.diff, score: Math.round(G.score), lives: G.lives, lane: G.lane,
       dist: Math.round(G.dist), fares: G.fares, objs: G.objs.length, attract: !!G.attract, t: +G.t.toFixed(2),
     };
   }
@@ -218,10 +241,18 @@
       eyebrow: 'Auto runner',
       title: 'Fare <em>Run</em>',
       html: '<p>Three lanes through a dusk bazaar. Nudge the auto left or right, pick up the standing fares, and keep the carts and clay pots off the bumper.</p>',
+      options: [
+        { id: 'mode', label: 'Mode', value: 'bazaar', choices: [{ v: 'bazaar', label: 'Bazaar run' }, { v: 'night', label: 'Night shift' }, { v: 'rush', label: 'Rush hour' }] },
+        { id: 'diff', label: 'Difficulty', value: 'normal', choices: [{ v: 'easy', label: 'Easy' }, { v: 'normal', label: 'Normal' }, { v: 'hard', label: 'Hard' }] },
+      ],
     },
     pauseHtml() { return '<div class="stat"><div>Score<b>' + Math.round(G.score) + '</b></div><div>Fares<b>' + G.fares + '</b></div></div>'; },
-    init(a) { arc = a; a.debug = dbg; reset(true); a.menu(); },
-    start(a) { arc = a; reset(false); arc.toast('Pick a lane', 'Fare Run', 1400); },
+    init(a) { arc = a; a.debug = dbg; G.D = DIFF.normal; reset(true); a.menu(); },
+    start(a, ch) {
+      arc = a; reset(false, ch);
+      const label = G.mode === 'night' ? 'Ninety seconds' : G.mode === 'rush' ? 'Rush hour' : 'Bazaar run';
+      arc.toast(label, 'Fare Run', 1400);
+    },
     update, idle, render,
   });
 })();

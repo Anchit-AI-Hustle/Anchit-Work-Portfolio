@@ -15,10 +15,15 @@
   const INK = '#FBF5EC', GOLD = '#c9a96e', WARM = '#FFB736', PRIM = '#FF6940';
 
   let arc;
+  const DIFF = {
+    easy: { time: 95, slide: 1.55 },
+    normal: { time: 75, slide: 1.8 },
+    hard: { time: 55, slide: 2.15 },
+  };
   const G = {
     t: 0, time: 75, score: 0, combo: 0, pocketed: 0, queen: false, phase: 'aim',
     pieces: [], striker: null, charge: 0, holding: false, aim: 0, sx: 0,
-    parts: [], attract: true, moving: 0,
+    parts: [], attract: true, moving: 0, mode: 'clock', diff: 'normal',
   };
 
   function mkPiece(x, y, kind) {
@@ -37,8 +42,11 @@
     G.sx = 0; G.aim = 0; G.charge = 0; G.holding = false; G.moving = 0;
   }
 
-  function reset(attract) {
-    G.t = 0; G.time = 75; G.score = 0; G.combo = 0; G.pocketed = 0; G.queen = false;
+  function reset(attract, ch) {
+    G.mode = (ch && ch.mode) || G.mode || 'clock';
+    G.diff = (ch && ch.diff) || G.diff || 'normal';
+    const D = DIFF[G.diff] || DIFF.normal;
+    G.t = 0; G.time = D.time; G.score = 0; G.combo = 0; G.pocketed = 0; G.queen = false;
     G.phase = 'aim'; G.parts.length = 0; G.attract = !!attract;
     layout();
   }
@@ -73,8 +81,8 @@
     if (p.in) return;
     p.in = true; p.vx = p.vy = 0;
     if (p.kind === 'striker') {
-      G.score = max(0, G.score - 20); G.combo = 0;
-      arc.toast('Foul', 'Striker in', 800);
+      if (G.mode !== 'practice') { G.score = max(0, G.score - 20); G.combo = 0; }
+      arc.toast(G.mode === 'practice' ? 'Try again' : 'Foul', 'Striker in', 800);
       arc.sfx.tone(160, 0.12, { type: 'sawtooth', vol: 0.1 });
       return;
     }
@@ -88,9 +96,11 @@
   }
 
   function finish(why) {
+    if (G.phase === 'over') return;
     G.phase = 'over';
+    const cleared = G.pieces.every((c) => c.kind === 'striker' || c.in);
     arc.over({
-      eyebrow: why || 'Clock', title: G.pocketed >= 8 ? 'Board <em>clear</em>' : 'Time',
+      eyebrow: why || 'Clock', title: cleared ? 'Board <em>clear</em>' : (G.mode === 'clock' ? 'Time' : 'Board <em>left</em>'),
       score: Math.round(G.score), scoreLabel: 'Points',
       html: '<p>' + G.pocketed + ' coins pocketed' + (G.queen ? ', queen down' : '') + '.</p>',
       again: 'Strike again',
@@ -117,7 +127,8 @@
     all.forEach((p) => {
       if (p.in) return;
       p.x += p.vx * dt; p.y += p.vy * dt;
-      p.vx *= Math.exp(-dt * 1.8); p.vy *= Math.exp(-dt * 1.8);
+      const slide = (DIFF[G.diff] || DIFF.normal).slide;
+      p.vx *= Math.exp(-dt * slide); p.vy *= Math.exp(-dt * slide);
       if (abs(p.x) > wall) { p.x = wall * Math.sign(p.x); p.vx *= -0.72; }
       if (abs(p.y) > wall) { p.y = wall * Math.sign(p.y); p.vy *= -0.72; }
       if (hypot(p.vx, p.vy) > 0.02) moving++;
@@ -163,8 +174,10 @@
   function update(dt) {
     G.t += dt;
     if (G.phase === 'over') return;
-    G.time -= dt;
-    if (G.time <= 0) { G.time = 0; finish('Clock'); return; }
+    if (G.mode === 'clock') {
+      G.time -= dt;
+      if (G.time <= 0) { G.time = 0; finish('Clock'); return; }
+    }
     if (G.phase === 'aim') readAim(dt);
     stepPhysics(dt);
     for (let i = G.parts.length - 1; i >= 0; i--) {
@@ -245,8 +258,9 @@
     plate(c, pad.left, pad.top, 150, 64, 12);
     txt(c, 'POINTS', pad.left + 14, pad.top + 16, 10, GOLD, 600, 'left', F_MONO);
     txt(c, String(Math.round(G.score)), pad.left + 14, pad.top + 40, 24, INK, 500, 'left', F_DISP);
-    plate(c, w / 2 - 50, pad.top, 100, 44, 12);
-    txt(c, Math.max(0, G.time | 0) + 's', w / 2, pad.top + 22, 20, G.time < 12 ? PRIM : INK, 500, 'center', F_DISP);
+    plate(c, w / 2 - 58, pad.top, 116, 44, 12);
+    const clock = G.mode === 'clock' ? (Math.max(0, G.time | 0) + 's') : (G.mode === 'practice' ? 'PRACTICE' : 'CLEAR');
+    txt(c, clock, w / 2, pad.top + 22, G.mode === 'clock' ? 20 : 12, G.mode === 'clock' && G.time < 12 ? PRIM : INK, 500, 'center', G.mode === 'clock' ? F_DISP : F_MONO);
     plate(c, w - pad.right - 132, pad.top, 132, 44, 12);
     txt(c, G.pocketed + ' pocketed', w - pad.right - 66, pad.top + 22, 12, WARM, 600, 'center', F_MONO);
   }
@@ -270,7 +284,7 @@
   function dbg() {
     const s = G.striker || { x: 0, y: 0, vx: 0 };
     return {
-      phase: G.phase, score: Math.round(G.score), time: +G.time.toFixed(2), pocketed: G.pocketed,
+      phase: G.phase, mode: G.mode, diff: G.diff, score: Math.round(G.score), time: +G.time.toFixed(2), pocketed: G.pocketed,
       sx: +G.sx.toFixed(3), aim: +G.aim.toFixed(3), charge: +G.charge.toFixed(3),
       vx: +s.vx.toFixed(2), moving: G.moving, attract: !!G.attract,
     };
@@ -291,11 +305,19 @@
     menu: {
       eyebrow: 'Carrom',
       title: 'Board <em>Strike</em>',
-      html: '<p>Nine coins and a queen on a wooden board. Aim the striker, hold to charge, release to send it. Pocket them all before the clock, and keep the striker itself out of the holes.</p>',
+      html: '<p>Nine coins and a queen on a wooden board. Aim the striker, hold to charge, release to send it. Pocket them all, and keep the striker itself out of the holes.</p>',
+      options: [
+        { id: 'mode', label: 'Mode', value: 'clock', choices: [{ v: 'clock', label: 'Against the clock' }, { v: 'clear', label: 'Clear the board' }, { v: 'practice', label: 'Practice' }] },
+        { id: 'diff', label: 'Difficulty', value: 'normal', choices: [{ v: 'easy', label: 'Easy' }, { v: 'normal', label: 'Normal' }, { v: 'hard', label: 'Hard' }] },
+      ],
     },
     pauseHtml() { return '<div class="stat"><div>Score<b>' + Math.round(G.score) + '</b></div><div>Pocketed<b>' + G.pocketed + '</b></div></div>'; },
     init(a) { arc = a; a.debug = dbg; reset(true); a.menu(); },
-    start(a) { arc = a; reset(false); arc.toast('Aim and charge', 'Board Strike', 1400); },
+    start(a, ch) {
+      arc = a; reset(false, ch);
+      const label = G.mode === 'clear' ? 'Clear the board' : G.mode === 'practice' ? 'Practice table' : ((DIFF[G.diff] || DIFF.normal).time + ' seconds');
+      arc.toast(label, 'Board Strike', 1400);
+    },
     update, idle, render,
   });
 })();

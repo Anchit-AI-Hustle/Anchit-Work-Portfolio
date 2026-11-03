@@ -15,19 +15,31 @@
   const INK = '#FBF5EC', GOLD = '#c9a96e', WARM = '#FFB736', PRIM = '#FF6940';
 
   let arc;
+  const DIFF = {
+    easy: { spd: 0.82, cap: 0.68 },
+    normal: { spd: 1, cap: 0.85 },
+    hard: { spd: 1.22, cap: 1.08 },
+  };
   const G = {
-    t: 0, score: 0, lives: 3, rally: 0, bestRally: 0, px: 0.5,
+    t: 0, score: 0, lives: 3, maxLives: 3, rally: 0, bestRally: 0, px: 0.5,
     ball: null, lamps: [], parts: [], phase: 'serve', attract: true,
+    mode: 'lives', diff: 'normal',
   };
 
   function serve() {
     const dir = rnd() > 0.5 ? 1 : -1;
-    G.ball = { x: 0.5, y: 0.55, vx: (0.22 + rnd() * 0.12) * dir, vy: -0.42 - rnd() * 0.08, r: 0.018 };
+    const spd = (G.D || DIFF.normal).spd;
+    G.ball = { x: 0.5, y: 0.55, vx: (0.22 + rnd() * 0.12) * dir * spd, vy: (-0.42 - rnd() * 0.08) * spd, r: 0.018 };
     G.phase = 'play';
   }
 
-  function reset(attract) {
-    G.t = 0; G.score = 0; G.lives = 3; G.rally = 0; G.bestRally = 0; G.px = 0.5;
+  function reset(attract, ch) {
+    G.mode = (ch && ch.mode) || G.mode || 'lives';
+    G.diff = (ch && ch.diff) || G.diff || 'normal';
+    G.D = DIFF[G.diff] || DIFF.normal;
+    G.t = 0; G.score = 0; G.rally = 0; G.bestRally = 0; G.px = 0.5;
+    G.maxLives = G.mode === 'survival' ? 1 : 3;
+    G.lives = G.maxLives;
     G.parts = []; G.attract = !!attract; G.phase = 'serve';
     G.lamps = [];
     for (let i = 0; i < 8; i++) G.lamps.push({ x: 0.14 + (i % 4) * 0.24, y: 0.16 + ((i / 4) | 0) * 0.12, on: true });
@@ -42,18 +54,22 @@
     }
   }
 
+  function endGame(why, title) {
+    if (G.phase === 'over') return;
+    G.phase = 'over';
+    arc.over({
+      eyebrow: why, title: title,
+      score: Math.round(G.score), scoreLabel: 'Score',
+      html: '<p>Best rally ' + G.bestRally + '. ' + (G.lamps.filter((l) => !l.on).length) + ' lamps out.</p>',
+      again: 'Serve again',
+    });
+  }
+
   function drop() {
     G.lives--; G.rally = 0;
     arc.shake = 7; arc.sfx.tone(140, 0.16, { type: 'sawtooth', slide: 70, vol: 0.12 });
-    if (G.lives <= 0) {
-      G.phase = 'over';
-      arc.over({
-        eyebrow: 'Rally broken', title: 'Cage <em>quiet</em>',
-        score: Math.round(G.score), scoreLabel: 'Score',
-        html: '<p>Best rally ' + G.bestRally + '. ' + (G.lamps.filter((l) => !l.on).length) + ' lamps out.</p>',
-        again: 'Serve again',
-      });
-    } else {
+    if (G.lives <= 0) endGame('Rally broken', 'Cage <em>quiet</em>');
+    else {
       arc.toast('Let it drop', G.lives + ' left', 800);
       G.phase = 'serve';
       G.ball.x = 0.5; G.ball.y = 0.5; G.ball.vx = 0; G.ball.vy = 0;
@@ -90,10 +106,11 @@
       const off = (b.x - G.px) / pw;
       b.vx += off * 0.35;
       b.vy = -abs(b.vy) * 1.03;
-      const sp = hypot(b.vx, b.vy), cap = 0.85;
+      const sp = hypot(b.vx, b.vy), cap = (G.D || DIFF.normal).cap;
       if (sp > cap) { b.vx *= cap / sp; b.vy *= cap / sp; }
       G.rally++; G.bestRally = max(G.bestRally, G.rally); G.score += 5 + G.rally;
       arc.sfx.tone(320 + G.rally * 20, 0.06, { type: 'triangle', vol: 0.1 });
+      if (G.mode === 'eleven' && G.rally >= 11) endGame('Game point', 'Cage <em>held</em>');
     } else if (b.y > 1.02) drop();
     for (let i = G.parts.length - 1; i >= 0; i--) {
       const q = G.parts[i]; q.life -= dt; q.x += q.vx * dt; q.y += q.vy * dt;
@@ -171,9 +188,9 @@
     txt(c, 'SCORE', pad.left + 14, pad.top + 16, 10, GOLD, 600, 'left', F_MONO);
     txt(c, String(Math.round(G.score)), pad.left + 14, pad.top + 40, 24, INK, 500, 'left', F_DISP);
     plate(c, w / 2 - 70, pad.top, 140, 44, 12);
-    txt(c, 'RALLY ' + G.rally, w / 2, pad.top + 22, 14, G.rally >= 6 ? WARM : INK, 600, 'center', F_MONO);
+    txt(c, G.mode === 'eleven' ? ('RALLY ' + G.rally + ' / 11') : ('RALLY ' + G.rally), w / 2, pad.top + 22, 13, G.rally >= 6 ? WARM : INK, 600, 'center', F_MONO);
     let hx = w - pad.right - 18;
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < G.maxLives; i++) {
       c.fillStyle = i < G.lives ? PRIM : 'rgba(251,245,236,.15)';
       c.beginPath(); c.arc(hx - i * 18, pad.top + 22, 6, 0, TAU); c.fill();
     }
@@ -197,7 +214,7 @@
   function dbg() {
     const b = G.ball || { x: 0, y: 0 };
     return {
-      phase: G.phase, score: Math.round(G.score), lives: G.lives, rally: G.rally,
+      phase: G.phase, mode: G.mode, diff: G.diff, score: Math.round(G.score), lives: G.lives, rally: G.rally,
       px: +G.px.toFixed(3), bx: +b.x.toFixed(3), by: +b.y.toFixed(3), attract: !!G.attract, t: +G.t.toFixed(2),
     };
   }
@@ -217,11 +234,19 @@
     menu: {
       eyebrow: 'Rooftop squash',
       title: 'Rally <em>Cage</em>',
-      html: '<p>A floodlit cage on the terrace. Keep the ball off the floor, grow the rally, and clip the hanging lamps for extra points. Three lives.</p>',
+      html: '<p>A floodlit cage on the terrace. Keep the ball off the floor, grow the rally, and clip the hanging lamps for extra points.</p>',
+      options: [
+        { id: 'mode', label: 'Mode', value: 'lives', choices: [{ v: 'lives', label: 'Three lives' }, { v: 'eleven', label: 'First to 11' }, { v: 'survival', label: 'One life' }] },
+        { id: 'diff', label: 'Difficulty', value: 'normal', choices: [{ v: 'easy', label: 'Easy' }, { v: 'normal', label: 'Normal' }, { v: 'hard', label: 'Hard' }] },
+      ],
     },
     pauseHtml() { return '<div class="stat"><div>Score<b>' + Math.round(G.score) + '</b></div><div>Rally<b>' + G.rally + '</b></div></div>'; },
-    init(a) { arc = a; a.debug = dbg; reset(true); a.menu(); },
-    start(a) { arc = a; reset(false); arc.toast('Serve when ready', 'Rally Cage', 1400); },
+    init(a) { arc = a; a.debug = dbg; G.D = DIFF.normal; reset(true); a.menu(); },
+    start(a, ch) {
+      arc = a; reset(false, ch);
+      const label = G.mode === 'eleven' ? 'First to 11' : G.mode === 'survival' ? 'One life' : 'Three lives';
+      arc.toast(label, 'Rally Cage', 1400);
+    },
     update, idle, render,
   });
 })();
