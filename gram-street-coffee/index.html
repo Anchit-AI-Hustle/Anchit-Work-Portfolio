@@ -16,6 +16,7 @@
      runtime and left the page unstyled until it finished, and Tailwind
      itself warns in the console not to use it in production. -->
 <link rel="stylesheet" href="/assets/tw-gram-street.css">
+<link rel="stylesheet" href="/assets/ty1.css">
 
 <style>
 :root {
@@ -622,21 +623,19 @@
   .walk-facade {
     position: absolute; inset: 0; z-index: 30; pointer-events: none;
     transform-origin: 50% 58%;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
     box-shadow: inset 0 0 0 1px rgba(244,239,252,.28);
   }
   .walk-facade svg { display: block; width: 100%; height: 100%; }
   .walk-reflect {
     position: absolute; inset: 0; pointer-events: none;
-    background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.28) 48%, transparent 58%);
-    mix-blend-mode: screen; opacity: .55;
+    background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,.22) 48%, transparent 66%);
+    opacity: .7;
   }
   .walk-flare {
     position: absolute; left: 50%; top: 42%; width: 18vw; height: 70vh;
     translate: -50% -50%;
-    background: linear-gradient(90deg, transparent, rgba(255,244,220,.85), rgba(205,184,247,.35), transparent);
-    filter: blur(8px); opacity: 0; pointer-events: none;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,244,220,.55) 42%, rgba(205,184,247,.28) 58%, transparent 100%);
+    opacity: 0; pointer-events: none;
   }
   .walk.is-past .walk-facade, .walk.is-past .walk-flare { will-change: auto; }
   .walk-frame {
@@ -960,9 +959,16 @@
   .pour-overlay path { fill: none; stroke: #F4EFE6; stroke-width: 2.6; stroke-linecap: round; }
   .pour-sheen {
     position: absolute; inset: 0; z-index: 4; pointer-events: none;
-    background: radial-gradient(120px 80px at var(--sx, 50%) var(--sy, 40%), rgba(255,255,255,.55), transparent 70%);
-    mix-blend-mode: screen;
+    background: radial-gradient(120px 80px at var(--sx, 50%) var(--sy, 40%), rgba(255,255,255,.35), transparent 70%);
   }
+  .ch-ambient, .ch-atmo { position: absolute; inset: 0; overflow: hidden; pointer-events: none; contain: strict; }
+  .ch-ambient span, .ch-atmo span {
+    position: absolute; border-radius: 50%; opacity: .45;
+    animation: moteDrift 9s linear infinite;
+    animation-play-state: paused;
+  }
+  .ch-ambient.is-live span, .ch-atmo.is-live span { animation-play-state: running; }
+  @keyframes moteDrift { to { translate: 12px -28px; } }
   .bean-morph {
     position: relative; width: 160px; height: 160px; margin: 0 auto 18px;
     border-radius: 50%; overflow: hidden;
@@ -984,10 +990,10 @@
   .note-pill:nth-child(4) { animation-delay: -2.1s; }
   @keyframes noteFloat { 50% { translate: 0 -6px; } }
   .ctx-pill {
-    position: fixed; top: 0; left: 0; z-index: 1000000; pointer-events: none;
+    position: fixed; z-index: 1000000; left: 0; top: 0; pointer-events: none;
     padding: 6px 10px; border-radius: 999px; font-size: 10px; font-weight: 800;
     letter-spacing: .14em; text-transform: uppercase; color: #F1E9FF; background: #2B1650;
-    opacity: 0; translate: 16px 18px;
+    translate: -100px -100px; opacity: 0;
   }
   .ctx-pill.on { opacity: 1; }
   #chapters .stage {
@@ -1090,6 +1096,7 @@
 </header>
 
 <main id="main">
+<div id="ty1Mount" data-brand="gram"></div>
 <!-- HERO SECTION WITH LIQUID CHROME WEBGL SHADER -->
 <section class="hero" id="top" data-bm-head-scope aria-labelledby="hero-title">
   <canvas id="fx" aria-hidden="true"></canvas>
@@ -2015,6 +2022,7 @@
     <p class="text-[11px] font-black uppercase tracking-[0.18em] text-[#7C3AED]">Demo order previewed</p>
     <p class="text-3xl font-display font-black tracking-tight text-[#2B1650]" id="ordRef">GS-0000</p>
     <p class="text-xs font-semibold text-[#534168] leading-relaxed" id="ordSummary"></p>
+    <p id="ordCopied" hidden class="text-xs font-black uppercase tracking-wider text-[#7C3AED]">Copied to clipboard</p>
     <div class="flex items-center gap-2 pt-1">
       <a id="ordWa" href="#" target="_blank" rel="noopener" class="flex-1 text-center py-3.5 rounded-full bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-[0.16em] hover:bg-[#3D2272] transition-all">Send it on WhatsApp ↗</a>
       <button type="button" onclick="copyOrder()" id="ordCopy" class="px-5 py-3.5 rounded-full border border-[#2B1650]/30 text-[#2B1650] font-black text-xs uppercase tracking-[0.16em] hover:bg-[#F5EFFF] transition-all">Copy</button>
@@ -2128,6 +2136,8 @@
   let activeLocation = 'phase1';
   let subMode = {};
   let cart = [];
+  try { cart = JSON.parse(localStorage.getItem('gram-street-bag') || '[]'); } catch (e) { cart = []; }
+  if (!Array.isArray(cart)) cart = [];
   let audioCtx = null;
   let isPlayingAudio = false;
 
@@ -2649,9 +2659,12 @@
   let fogBase = null;
   let fogRaf = 0;
 
+  var fogDrawn = 0;
   function paintFog(now) {
     fogRaf = 0;
     if (!fogBase || !scratchCtx) return;
+    if (now - fogDrawn < 32) { fogRaf = requestAnimationFrame(paintFog); return; }
+    fogDrawn = now;
     scratchCtx.globalCompositeOperation = 'source-over';
     scratchCtx.putImageData(fogBase, 0, 0);
     const live = [];
@@ -2818,7 +2831,8 @@
   };
 
   window.addToCart = function(pId) {
-    const product = PRODUCTS.find(p => p.id === pId);
+    const product = PRODUCTS.find(p => p.id === pId) || (window.TY1_EXTRAS || []).find(p => p.id === pId);
+    if (!product) return;
     const isSub = !!subMode[pId];
     const price = isSub ? Math.round(product.price * 0.85) : product.price;
     const exist = cart.find(i => i.id === pId && i.isSub === isSub);
@@ -2834,6 +2848,11 @@
     const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
     const countEl = document.getElementById('cartCount');
     if (countEl) countEl.textContent = count;
+    try { localStorage.setItem('gram-street-bag', JSON.stringify(cart)); } catch (e) {}
+    document.querySelectorAll('[data-ty1-qty]').forEach(function (el) {
+      var row = cart.find(function (i) { return i.id === el.getAttribute('data-ty1-qty'); });
+      el.textContent = row ? String(row.qty) : '0';
+    });
     const priceEl = document.getElementById('cartTotalPrice');
     if (priceEl) priceEl.textContent = `₹${total}`;
     const list = document.getElementById('cartItemsList');
@@ -3024,6 +3043,12 @@
       ' · to ' + order.name + ' on ' + order.phone + '. The roastery confirms on WhatsApp before it roasts.';
     var wa = document.getElementById('ordWa');
     if (wa) wa.href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(orderText(order));
+    try {
+      navigator.clipboard.writeText(orderText(order)).then(function () {
+        var note = document.getElementById('ordCopied');
+        if (note) note.hidden = false;
+      });
+    } catch (e) {}
 
     cart.length = 0;
     updateCartUI();
@@ -3214,12 +3239,9 @@
           p.r = 10 + Math.random() * 14;
           p.alpha = 0.12 + Math.random() * 0.18;
         }
-        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
-        g.addColorStop(0, `rgba(255, 255, 255, ${p.alpha})`);
-        g.addColorStop(1, 'rgba(255, 255, 255, 0)');
-        ctx.fillStyle = g;
+        ctx.fillStyle = 'rgba(255,255,255,' + p.alpha.toFixed(3) + ')';
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, Math.max(2, p.r * 0.35), 0, Math.PI * 2);
         ctx.fill();
       });
       if (steamOn) steamRaf = requestAnimationFrame(renderSteam);
@@ -3464,6 +3486,7 @@
   })();
 </script>
 <script src="/assets/vendor/gsap.min.js"></script>
+<script src="/assets/ty1-engine.js"></script>
 <script src="/assets/shop-elite.js"></script>
 <script src="/assets/brand-motion.js" defer></script>
 </body>
