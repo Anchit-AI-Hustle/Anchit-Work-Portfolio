@@ -6,11 +6,13 @@
   var fine = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
 
   function pillCursor(zones) {
     if (!fine) return;
     var pill = document.createElement('div');
     pill.className = 'ctx-pill';
+    pill.setAttribute('aria-hidden', 'true');
     document.body.appendChild(pill);
     var label = '', px = 0, py = 0, raf = 0;
     var roots = zones.map(function (z) { return [document.querySelector(z[0]), z[1]]; });
@@ -43,6 +45,7 @@
     var a = img.getBoundingClientRect();
     var b = badge.getBoundingClientRect();
     var ghost = img.cloneNode(true);
+    ghost.setAttribute('alt', '');
     ghost.style.cssText = 'position:fixed;z-index:1000001;width:48px;height:48px;object-fit:cover;border-radius:12px;pointer-events:none;left:0;top:0;margin:0;';
     document.body.appendChild(ghost);
     var x0 = a.left, y0 = a.top;
@@ -57,13 +60,16 @@
       var y = u * u * y0 + 2 * u * t * y1 + t * t * y2;
       ghost.style.translate = x.toFixed(1) + 'px ' + y.toFixed(1) + 'px';
       ghost.style.scale = (1 - t * 0.65).toFixed(3);
+      ghost.style.opacity = (1 - t * 0.15).toFixed(3);
       if (t < 1) requestAnimationFrame(frame);
       else {
         ghost.remove();
-        badge.animate(
-          [{ scale: '1' }, { scale: '1.25' }, { scale: '1' }],
-          { duration: 380, easing: 'cubic-bezier(.2,.8,.2,1)' }
-        );
+        if (badge.animate) {
+          badge.animate(
+            [{ scale: '1' }, { scale: '1.25' }, { scale: '1' }],
+            { duration: 380, easing: 'cubic-bezier(.2,.8,.2,1)' }
+          );
+        }
       }
     }
     requestAnimationFrame(frame);
@@ -123,7 +129,7 @@
       var box = host.parentElement;
       box.classList.add('shot-stage');
       var canvas = document.createElement('canvas');
-      canvas.className = 'shot-canvas';
+      canvas.className = 'shot-hud';
       canvas.setAttribute('aria-label', 'Bottomless portafilter extraction');
       box.appendChild(canvas);
       var board = document.createElement('div');
@@ -133,7 +139,7 @@
       box.appendChild(board);
       var scrub = board.querySelector('input');
       var ctx = canvas.getContext('2d');
-      var sizedW = 0, sizedH = 0;
+      var sizedW = 0, sizedH = 0, playing = false;
       function size() {
         var w = box.clientWidth, h = box.clientHeight || 380;
         if (w === sizedW && h === sizedH) return;
@@ -150,9 +156,11 @@
         var pEl = document.getElementById('craftPressureVal');
         var tEl = document.getElementById('craftTimeVal');
         var yEl = document.getElementById('craftYieldVal');
+        var dEl = document.getElementById('craftTdsVal');
         if (pEl) pEl.textContent = bar.toFixed(1) + ' BAR';
         if (tEl) tEl.textContent = sec.toFixed(1) + 's';
         if (yEl) yEl.textContent = grams.toFixed(1) + 'g';
+        if (dEl) dEl.textContent = tds ? tds.toFixed(1) + '%' : '0.0%';
         ctx.fillStyle = '#1A0E08';
         ctx.fillRect(0, 0, w, h);
         ctx.fillStyle = '#C9BEDC';
@@ -201,8 +209,46 @@
         ctx.font = '700 12px sans-serif';
         ctx.fillText(tds ? ('TDS ' + tds.toFixed(1) + '%') : 'Pre-infusion', 16, h - 16);
       }
-      function fromScrub() { draw(Number(scrub.value) / 10); }
+      function fromScrub() {
+        scrub.setAttribute('aria-valuenow', scrub.value);
+        draw(Number(scrub.value) / 10);
+      }
       scrub.addEventListener('input', fromScrub);
+      var dragging = false;
+      canvas.addEventListener('pointerdown', function (e) {
+        dragging = true;
+        canvas.setPointerCapture(e.pointerId);
+        var r = canvas.getBoundingClientRect();
+        scrub.value = String(Math.round(clamp((e.clientX - r.left) / r.width, 0, 1) * 274));
+        fromScrub();
+      });
+      canvas.addEventListener('pointermove', function (e) {
+        if (!dragging) return;
+        var r = canvas.getBoundingClientRect();
+        scrub.value = String(Math.round(clamp((e.clientX - r.left) / r.width, 0, 1) * 274));
+        fromScrub();
+      });
+      canvas.addEventListener('pointerup', function () { dragging = false; });
+      canvas.addEventListener('pointercancel', function () { dragging = false; });
+      function playShot() {
+        if (playing) return;
+        if (reduce) { scrub.value = '274'; fromScrub(); return; }
+        playing = true;
+        var t0 = performance.now();
+        function tick(now) {
+          var t = Math.min(1, (now - t0) / 2800);
+          scrub.value = String(Math.round(t * 274));
+          fromScrub();
+          if (t < 1) requestAnimationFrame(tick);
+          else playing = false;
+        }
+        requestAnimationFrame(tick);
+      }
+      var origCal = window.runCraftCalibration;
+      window.runCraftCalibration = function () {
+        playShot();
+        if (origCal) origCal();
+      };
       fromScrub();
       window.addEventListener('resize', fromScrub);
     })();
@@ -256,11 +302,20 @@
       var orig = window.changeCraftRoastProfile;
       if (!slider || !orig) return;
       slider.min = '196'; slider.max = '235'; slider.step = '0.1'; slider.value = '196';
+      slider.setAttribute('aria-valuemin', '196');
+      slider.setAttribute('aria-valuemax', '235');
       var panel = document.getElementById('craftPanel-roast');
-      var disc = document.createElement('div');
-      disc.className = 'bean-disc';
-      var bars = panel && panel.querySelector('.w-full.max-w-sm');
-      if (bars) bars.parentElement.insertBefore(disc, bars);
+      var disc = document.getElementById('craftBeanMorph') || document.createElement('div');
+      if (!disc.id) {
+        disc.id = 'craftBeanMorph';
+        disc.className = 'bean-morph';
+        disc.innerHTML = '<div class="bean-disc" id="craftBeanDisc"></div><div class="bean-oil" id="craftBeanOil"></div>';
+        var bars = panel && panel.querySelector('.w-full.max-w-sm');
+        if (bars) bars.parentElement.insertBefore(disc, bars);
+      }
+      var oil = document.getElementById('craftBeanOil');
+      var beanImg = document.getElementById('craftRoastImg');
+      var beanDisc = document.getElementById('craftBeanDisc') || disc;
       var state = { a: 94, b: 65, s: 88, d: 72, va: 0, vb: 0, vs: 0, vd: 0 };
       var target = { a: 94, b: 65, s: 88, d: 72 };
       var notes = [
@@ -289,10 +344,10 @@
         var u = clamp((temp - 196) / 39, 0, 1);
         var key = u < 0.34 ? 1 : u < 0.67 ? 2 : 3;
         orig(String(key));
-        var acidity = 9.4 + (4.1 - 9.4) * u;
-        var body = 6.5 + (9.8 - 6.5) * u;
-        var sweet = 8.8 + (7.6 - 8.8) * u;
-        var dtr = 14.2 + (22.8 - 14.2) * u;
+        var acidity = lerp(9.4, 4.1, u);
+        var body = lerp(6.5, 9.8, u);
+        var sweet = lerp(8.8, 7.6, u);
+        var dtr = lerp(14.2, 22.8, u);
         target.a = acidity / 10 * 100;
         target.b = body / 10 * 100;
         target.s = sweet / 10 * 100;
@@ -302,6 +357,7 @@
         set('craftBodyVal', body.toFixed(1) + ' / 10');
         set('craftSweetnessVal', sweet.toFixed(1) + ' / 10');
         set('craftRoastTimeVal', dtr.toFixed(1) + '% DTR');
+        slider.setAttribute('aria-valuenow', String(Math.round(temp)));
         var box = document.getElementById('craftRoastNotes');
         if (box) {
           box.innerHTML = notes[key - 1].map(function (n) {
@@ -309,8 +365,15 @@
           }).join('');
         }
         var hue = 28 - u * 22;
-        disc.style.background = 'radial-gradient(circle at 35% 30%, hsl(' + hue + ',45%,62%), hsl(' + (hue - 10) + ',40%,' + (38 - u * 22) + '%) 70%)';
-        disc.style.boxShadow = 'inset 0 0 ' + (8 + u * 18) + 'px rgba(255,220,140,' + (0.15 + u * 0.55) + ')';
+        disc.style.setProperty('--bean-u', u.toFixed(3));
+        if (oil) oil.style.opacity = (0.12 + u * 0.7).toFixed(3);
+        if (beanImg) {
+          beanImg.style.filter = 'sepia(' + (0.15 + u * 0.45).toFixed(2) + ') brightness(' + (1.08 - u * 0.38).toFixed(2) + ') contrast(' + (1.02 + u * 0.18).toFixed(2) + ') saturate(' + (0.9 + u * 0.35).toFixed(2) + ')';
+        }
+        if (beanDisc) {
+          beanDisc.style.background = 'radial-gradient(circle at 35% 30%, hsl(' + hue + ',45%,' + (62 - u * 18) + '%), hsl(' + (hue - 10) + ',40%,' + (38 - u * 22) + '%) 70%)';
+          beanDisc.style.boxShadow = 'inset 0 0 ' + (8 + u * 18) + 'px rgba(255,220,140,' + (0.15 + u * 0.55) + ')';
+        }
         requestAnimationFrame(spring);
       };
       window.changeCraftRoastProfile(196);
@@ -368,7 +431,7 @@
     }, true);
 
     pillCursor([
-      ['#craftPanel-extraction', 'Hold to pull shot · 9.2 bar'],
+      ['#craftPanel-extraction', 'Hold to pull shot · 9.2 BAR'],
       ['#scratchCanvas', 'Wipe condensation'],
       ['#productGridContainer', 'Add the roast']
     ]);
@@ -379,10 +442,19 @@
   if (document.getElementById('bwalkin')) {
     (function loupeHud() {
       var box = document.getElementById('heroLoupeContainer');
+      var glass = document.getElementById('heroLoupeGlass');
       var hud = document.getElementById('loupeHud');
       var read = document.getElementById('loupeReadout');
       var call = document.getElementById('loupeCall');
       if (!box || !hud) return;
+      if (!hud.querySelector('svg')) {
+        hud.insertAdjacentHTML('afterbegin',
+          '<svg class="loupe-reticle" viewBox="0 0 100 100" aria-hidden="true">' +
+          '<circle cx="50" cy="50" r="46" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="0.7"/>' +
+          '<circle cx="50" cy="50" r="38" fill="none" stroke="rgba(197,154,69,.7)" stroke-width="0.5" stroke-dasharray="3 4"/>' +
+          '<path d="M50 8v10M50 82v10M8 50h10M82 50h10" stroke="#FFE6A3" stroke-width="1.1"/>' +
+          '</svg>');
+      }
       var spots = [
         { x: 0.32, y: 0.42, name: 'Beechwood smoke ring' },
         { x: 0.58, y: 0.48, name: 'Intramuscular marbling' },
@@ -425,14 +497,21 @@
         ty = ((e.clientY - r.top) / boxH) * 100;
         pointing = true;
         if (hud.style.display !== 'block') hud.style.display = 'block';
+        if (glass) glass.classList.add('is-chromatic');
         if (!raf) raf = requestAnimationFrame(loop);
       }, { passive: true });
       box.addEventListener('pointerleave', function () {
         pointing = false;
         hud.style.display = 'none';
         if (call) call.classList.remove('on');
+        if (glass) glass.classList.remove('is-chromatic');
       });
       window.addEventListener('resize', measure);
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (en) {
+          box.classList.toggle('is-live', en[0].isIntersecting);
+        }).observe(box);
+      } else box.classList.add('is-live');
     })();
 
     (function atmo() {
@@ -451,6 +530,7 @@
       }
       stage.prepend(layer);
       var chapters = ['deliCh1', 'deliCh2', 'deliCh3'].map(function (id) { return document.getElementById(id); });
+      var names = ['primal', 'atelier', 'awadhi'];
       var shown = -1;
       function sync() {
         var best = 0, op = -1;
@@ -461,29 +541,89 @@
         if (best === shown) return;
         shown = best;
         layer.setAttribute('data-ch', String(best));
+        stage.dataset.atmo = names[best];
         scan.style.opacity = best === 0 ? '1' : '0';
       }
       if ('IntersectionObserver' in window) {
         new IntersectionObserver(function (en) {
-          layer.classList.toggle('is-live', en[0].isIntersecting && !document.hidden && !reduce);
+          var on = en[0].isIntersecting && !document.hidden && !reduce;
+          layer.classList.toggle('is-live', on);
+          stage.classList.toggle('is-live', en[0].isIntersecting);
           if (en[0].isIntersecting) sync();
         }).observe(stage);
-      }
+      } else stage.classList.add('is-live');
       window.addEventListener('scroll', sync, { passive: true });
       sync();
     })();
 
-    var cut = document.getElementById('heritageCut');
-    var bench = document.getElementById('bench');
-    if (cut && bench && 'IntersectionObserver' in window) {
+    (function heritage() {
+      var cut = document.getElementById('heritageCut');
+      var bench = document.getElementById('bench');
+      var heritage = document.getElementById('heritage');
+      if (!cut || !bench) return;
       var steps = bench.querySelectorAll('.bench-step');
-      var last = steps[steps.length - 1];
-      if (last) {
-        new IntersectionObserver(function (en) {
-          if (en[0].isIntersecting) cut.classList.add('is-sealed');
-        }, { threshold: 0.6 }).observe(last);
+      var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('class', 'bench-line');
+      svg.setAttribute('aria-hidden', 'true');
+      svg.innerHTML = '<path fill="none" stroke="#C59A45" stroke-width="3" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/>';
+      bench.appendChild(svg);
+      var path = svg.querySelector('path');
+
+      function layoutLine() {
+        var br = bench.getBoundingClientRect();
+        if (br.width < 8 || br.height < 8) return;
+        svg.setAttribute('viewBox', '0 0 ' + Math.round(br.width) + ' ' + Math.round(br.height));
+        svg.style.width = '100%';
+        svg.style.height = '100%';
+        var d = [];
+        for (var i = 0; i < steps.length; i++) {
+          var m = steps[i].querySelector('.bench-mark');
+          if (!m) continue;
+          var r = m.getBoundingClientRect();
+          var x = r.left + r.width / 2 - br.left;
+          var y = r.top + r.height / 2 - br.top;
+          d.push((i ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1));
+        }
+        if (d.length) path.setAttribute('d', d.join(' '));
       }
-    } else if (cut) cut.classList.add('is-sealed');
+
+      function onScroll() {
+        layoutLine();
+        var host = heritage || bench;
+        var r = host.getBoundingClientRect();
+        var span = r.height + window.innerHeight * 0.2;
+        var p = clamp((-r.top + window.innerHeight * 0.35) / span, 0, 1);
+        path.style.strokeDashoffset = String((1 - p) * 100);
+        var last = steps[steps.length - 1];
+        var lr = last && last.getBoundingClientRect();
+        var lastOn = !!(lr && lr.top < window.innerHeight * 0.9 && lr.bottom > 64);
+        if (lastOn || p > 0.72) cut.classList.add('is-sealed');
+        for (var i = 0; i < steps.length; i++) {
+          steps[i].classList.toggle('is-hot', p >= (i / (steps.length - 1 || 1)) - 0.04);
+        }
+      }
+
+      var ticking = false;
+      function request() {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(function () { ticking = false; onScroll(); });
+      }
+      window.addEventListener('scroll', request, { passive: true });
+      window.addEventListener('resize', request);
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (en) {
+          if (en[0].isIntersecting) request();
+        }, { threshold: 0.15 }).observe(bench);
+        var last = steps[steps.length - 1];
+        if (last) {
+          new IntersectionObserver(function (en) {
+            if (en[0].isIntersecting) cut.classList.add('is-sealed');
+          }, { threshold: 0.2 }).observe(last);
+        }
+      } else cut.classList.add('is-sealed');
+      onScroll();
+    })();
 
     document.addEventListener('click', function (e) {
       var btn = e.target.closest && e.target.closest('button');

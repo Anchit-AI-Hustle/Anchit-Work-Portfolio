@@ -623,6 +623,7 @@
   .walk-facade {
     position: absolute; inset: 0; z-index: 30; pointer-events: none;
     transform-origin: 50% 58%;
+    box-shadow: inset 0 0 0 1px rgba(244,239,252,.28);
   }
   .walk-facade svg { display: block; width: 100%; height: 100%; }
   .walk-reflect {
@@ -946,11 +947,16 @@
   html[data-consent-open="1"] .walk-hint { bottom: calc(26px + var(--consent-h, 0px)); }
   #scratchCanvas { touch-action: pan-y; }
 
-  .shot-board { margin-top: 14px; }
+  .shot-stage { position: relative; }
+  .shot-board {
+    position: absolute; left: 16px; right: 16px; bottom: 72px; z-index: 6;
+    color: #F1E9FF; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+    text-shadow: 0 1px 8px rgba(20,8,42,.8);
+  }
   .shot-board input[type="range"] { width: 100%; accent-color: #7C3AED; }
-  .shot-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; }
+  .shot-hud { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 5; cursor: ew-resize; touch-action: pan-y; }
   .pour-overlay { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; }
-  .pour-overlay path { fill: none; stroke: #F4EFE6; stroke-width: 3; stroke-linecap: round; }
+  .pour-overlay path { fill: none; stroke: #F4EFE6; stroke-width: 2.6; stroke-linecap: round; }
   .pour-sheen {
     position: absolute; inset: 0; z-index: 4; pointer-events: none;
     background: radial-gradient(120px 80px at var(--sx, 50%) var(--sy, 40%), rgba(255,255,255,.35), transparent 70%);
@@ -963,7 +969,21 @@
   }
   .ch-ambient.is-live span, .ch-atmo.is-live span { animation-play-state: running; }
   @keyframes moteDrift { to { translate: 12px -28px; } }
-  .bean-disc { width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 16px; }
+  .bean-morph {
+    position: relative; width: 160px; height: 160px; margin: 0 auto 18px;
+    border-radius: 50%; overflow: hidden;
+    box-shadow: 0 12px 28px rgba(43,22,80,.22);
+  }
+  .bean-morph img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+  .bean-disc {
+    position: absolute; inset: 0; width: auto; height: auto; margin: 0;
+    opacity: .4; mix-blend-mode: multiply; pointer-events: none;
+  }
+  .bean-oil {
+    position: absolute; inset: 0; border-radius: 50%; pointer-events: none; opacity: .12;
+    background: radial-gradient(circle at 32% 28%, rgba(255,236,190,.7), transparent 46%);
+    mix-blend-mode: screen;
+  }
   .note-pill { display: inline-block; animation: noteFloat 3.6s ease-in-out infinite; }
   .note-pill:nth-child(2) { animation-delay: -.6s; }
   .note-pill:nth-child(3) { animation-delay: -1.4s; }
@@ -976,10 +996,41 @@
     translate: -100px -100px; opacity: 0;
   }
   .ctx-pill.on { opacity: 1; }
-  #chapters .stage { --surface-tint: #2A1810; --accent-glow: rgba(110,68,255,.45); }
+  #chapters .stage {
+    --surface-tint: #2A1810;
+    --accent-glow: rgba(110,68,255,.45);
+    background: #2A1810;
+  }
+  #chapters .stage::before {
+    content: "";
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(70% 62% at 78% 40%, var(--accent-glow), transparent 64%),
+      radial-gradient(120% 90% at 50% 120%, var(--surface-tint), transparent 58%);
+    opacity: .55;
+  }
   #chapters .ch-ambient { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+  #chapters .stage[data-pillar="coffee"] .ch-title,
+  #chapters .stage[data-pillar="coffee"] .ch-list strong,
+  #chapters .stage[data-pillar="gelato"] .ch-title,
+  #chapters .stage[data-pillar="gelato"] .ch-list strong { color: #F1E9FF; }
+  #chapters .stage[data-pillar="coffee"] .ch-lead,
+  #chapters .stage[data-pillar="coffee"] .ch-list span,
+  #chapters .stage[data-pillar="gelato"] .ch-lead,
+  #chapters .stage[data-pillar="gelato"] .ch-list span { color: rgba(241,233,255,.82); }
+  #chapters .stage[data-pillar="coffee"] .ch-nav button,
+  #chapters .stage[data-pillar="gelato"] .ch-nav button { color: #F1E9FF; }
+  #chapters .stage[data-pillar="coffee"] .ch-nav button::after,
+  #chapters .stage[data-pillar="gelato"] .ch-nav button::after { background: #F1E9FF; }
+  #chapters .stage[data-pillar="matcha"] .ch-title,
+  #chapters .stage[data-pillar="matcha"] .ch-list strong { color: #1F4E3B; }
+  #chapters .stage[data-pillar="gelato"] .photo {
+    box-shadow: inset 0 0 0 1px rgba(210,230,245,.55), 0 16px 40px rgba(28,20,18,.35);
+  }
+  #scratchContainer { isolation: isolate; }
   @media (prefers-reduced-motion: reduce) {
     .note-pill, .walk-reflect { animation: none !important; }
+    .ch-ambient, .shot-hud { display: none; }
   }
 </style>
 <script>document.documentElement.classList.add('js');</script>
@@ -1373,7 +1424,7 @@
 
 <!-- CHAPTERS: 320vh SCROLL STAGE WITH ROTATING CONIC-GRADIENT CHROME ORB -->
 <section id="chapters" aria-label="Coffee, matcha and gelato">
-  <div class="stage">
+  <div class="stage" data-pillar="coffee">
     <!-- Chapter 1: Coffee -->
     <article class="chapter" data-slot="coffee" style="--bg:#CDB8F7">
       <div class="ch-grid">
@@ -1531,7 +1582,7 @@
         </div>
         <div>
           <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">TDS Purity</div>
-          <div class="text-lg font-black text-[#2B1650]">9.8%</div>
+          <div id="craftTdsVal" class="text-lg font-black text-[#2B1650]">9.8%</div>
         </div>
         <div>
           <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">Flow Rate</div>
@@ -1646,6 +1697,11 @@
 
     <!-- Right Sensory Radar Graphic -->
     <div class="lg:col-span-6 flex flex-col items-center justify-center p-8 bg-gradient-to-b from-[#F8F5FF] to-[#EAE0FC] rounded-2xl border border-[#2B1650]/15 shadow-inner">
+      <div class="bean-morph" id="craftBeanMorph">
+        <img id="craftRoastImg" src="/assets/brand/u-1442512595331-e89e73853f31-1200.jpg" alt="" width="160" height="160" class="w-full h-full object-cover rounded-full">
+        <div class="bean-disc" id="craftBeanDisc" aria-hidden="true"></div>
+        <div class="bean-oil" id="craftBeanOil" aria-hidden="true"></div>
+      </div>
       <div class="w-full max-w-sm space-y-4">
         <div class="space-y-1">
           <div class="flex justify-between text-xs font-bold text-[#2B1650]">
@@ -2254,7 +2310,10 @@
     var stage = sec.querySelector(".stage");
     var chs = [].slice.call(sec.querySelectorAll(".chapter"));
     var btns = [].slice.call(sec.querySelectorAll(".ch-nav button"));
-    var pal = [[205, 184, 247], [207, 227, 174], [255, 215, 232]];
+    var pal = [[42, 24, 16], [216, 232, 213], [28, 20, 18]];
+    var glows = ['rgba(110,68,255,.55)', 'rgba(31,78,59,.45)', 'rgba(200,138,75,.5)'];
+    var pillars = ['coffee', 'matcha', 'gelato'];
+    var tints = ['#2A1810', '#D8E8D5', '#1C1412'];
     sec.classList.add("is-scroll");
     function ss(a, b, x) { var t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); }
     function total() { return sec.offsetHeight - window.innerHeight; }
@@ -2291,6 +2350,9 @@
       var r = col[0], g = col[1], b = col[2];
       stage.style.setProperty("--rot", (p * 540).toFixed(1) + "deg");
       stage.style.setProperty("--s", (0.92 + 0.12 * Math.sin(p * Math.PI * 3)).toFixed(3));
+      stage.style.setProperty("--surface-tint", tints[cur]);
+      stage.style.setProperty("--accent-glow", glows[cur]);
+      stage.dataset.pillar = pillars[cur];
       stage.style.backgroundColor = "rgb(" + Math.round(r) + "," + Math.round(g) + "," + Math.round(b) + ")";
     }
     var ticking = false;
@@ -2625,6 +2687,21 @@
     }
     fogStamps.length = 0;
     for (let i = 0; i < live.length; i++) fogStamps.push(live[i]);
+    const photo = document.getElementById('scratchBgImage');
+    if (photo && photo.complete && photo.naturalWidth) {
+      for (let i = 0; i < live.length; i++) {
+        const s = live[i];
+        const age = (now - s.t) / 8000;
+        const dropY = s.y + age * 110;
+        scratchCtx.save();
+        scratchCtx.beginPath();
+        scratchCtx.ellipse(s.x + 6, dropY, 3.4, 7 + age * 6, 0, 0, Math.PI * 2);
+        scratchCtx.clip();
+        scratchCtx.globalAlpha = 0.85 * (1 - age);
+        scratchCtx.drawImage(photo, -5, 3, scratchCanvas.width, scratchCanvas.height);
+        scratchCtx.restore();
+      }
+    }
     if (live.length) fogRaf = requestAnimationFrame(paintFog);
   }
 
