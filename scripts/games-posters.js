@@ -9,7 +9,7 @@
 //   ONLY=turf-kings  limits it to one game.
 //
 // Writes games/<slug>/poster.png (og:image), games/<slug>/poster.webp (hub
-// card) and games/og.png (the hub's own preview, a contact sheet of all five).
+// card) and games/og.png (the hub's own preview, a contact sheet of every game).
 const path = require('path');
 const fs = require('fs');
 const sharp = require('sharp');
@@ -17,7 +17,7 @@ const { chromium } = require('./_playwright.js');
 
 const BASE = (process.env.BASE || 'http://127.0.0.1:8099').replace(/\/$/, '');
 const ROOT = path.join(__dirname, '..');
-const GAMES = ['saffron-city', 'midnight-apex', 'turf-kings', 'super-over', 'gully-champs'];
+const GAMES = ['saffron-city', 'midnight-apex', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'sky-thread', 'tiffin-dash'];
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // How long to play before the photo, and what to hold. Tuned per game so the
@@ -28,6 +28,9 @@ const PLAY = {
   'turf-kings': { ms: 4500, keys: ['ArrowUp', 'ArrowRight'], taps: [] },
   'super-over': { ms: 3600, keys: [], taps: [] },
   'gully-champs': { ms: 3200, keys: [], taps: [] },
+  'court-lights': { ms: 2800, keys: [], taps: ['Space'], tapAt: 700 },
+  'sky-thread': { ms: 3500, keys: ['ArrowUp', 'ArrowRight'], taps: ['Space'], tapAt: 500 },
+  'tiffin-dash': { ms: 2800, keys: ['ArrowUp'], taps: ['Space'], tapAt: 400 },
 };
 
 async function shoot(browser, slug) {
@@ -57,11 +60,10 @@ async function shoot(browser, slug) {
 
 async function sheet() {
   const W = 1200, H = 630;
-  // Feature poster large on the left, four small ones in a 2x2 grid on the right.
-  const big = await sharp(path.join(ROOT, 'games', GAMES[0], 'poster.png')).resize(600, 630, { fit: 'cover' }).toBuffer();
-  const small = await Promise.all(GAMES.slice(1).map((g) => sharp(path.join(ROOT, 'games', g, 'poster.png')).resize(300, 315, { fit: 'cover' }).toBuffer()));
-  const comp = [{ input: big, left: 0, top: 0 }];
-  small.forEach((b, i) => comp.push({ input: b, left: 600 + (i % 2) * 300, top: Math.floor(i / 2) * 315 }));
+  // Eight posters in a 4 by 2 grid.
+  const cellW = 300, cellH = 315;
+  const thumbs = await Promise.all(GAMES.map((g) => sharp(path.join(ROOT, 'games', g, 'poster.png')).resize(cellW, cellH, { fit: 'cover' }).toBuffer()));
+  const comp = thumbs.map((b, i) => ({ input: b, left: (i % 4) * cellW, top: Math.floor(i / 4) * cellH }));
   const label = Buffer.from(
     `<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">` +
     `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0.55" stop-color="#0F0D0A" stop-opacity="0"/><stop offset="1" stop-color="#0F0D0A" stop-opacity="0.92"/></linearGradient></defs>` +

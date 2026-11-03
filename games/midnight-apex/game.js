@@ -1364,11 +1364,11 @@
 
   function timeUp(W) {
     engineStop();
-    ARC.panel({
-      eyebrow: 'Out of time', title: 'Time <em>up</em>', html: '<p>Eight minutes on the clock and no chequered flag. Pull the nitro in the straights and keep it clean in the bends.</p>',
-      actions: [{ label: 'Try again', primary: true, on: ARC.start }, { label: 'Change settings', on: function () { ARC.menu(); } }]
+    ARC.over({
+      eyebrow: 'Out of time', title: 'Time <em>up</em>',
+      html: '<p>Eight minutes on the clock and no chequered flag. Pull the nitro in the straights and keep it clean in the bends.</p>',
+      again: 'Try again'
     });
-    ARC.state = 'over';
   }
 
   /* ----------------------------------------------------------- rendering */

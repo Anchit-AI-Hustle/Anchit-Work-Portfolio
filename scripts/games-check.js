@@ -17,7 +17,7 @@ const { chromium } = require('./_playwright.js');
 
 const BASE = (process.env.BASE || 'http://127.0.0.1:8099').replace(/\/$/, '');
 const MUT = process.env.MUT || '';
-const GAMES = ['saffron-city', 'midnight-apex', 'turf-kings', 'super-over', 'gully-champs'];
+const GAMES = ['saffron-city', 'midnight-apex', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'sky-thread', 'tiffin-dash'];
 const VIEWPORTS = [
   { name: 'phone 390', viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 },
   { name: 'tablet 820', viewport: { width: 820, height: 1180 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 },

@@ -206,6 +206,11 @@
       choices: {}, debug: null,
       clamp, lerp, rng, store, esc,
     };
+    // Shared safe zone so in-game HUD never sits under the stick and pads.
+    arc.hudPad = () => {
+      const touch = !!arc.touchMode;
+      return { top: 12, left: 12, right: 12, bottom: touch ? 188 : 52, touch };
+    };
 
     /* sizing */
     const fit = () => {
