@@ -122,8 +122,8 @@ body[data-world="oxblood"] .ty1-portal .ty1-sticky { background: var(--portal); 
 .ty1-show article { background: var(--surface); border-radius: 18px; padding: 18px; border: 1px solid rgba(255,255,255,.1); }
 
 .ty1-marquee { overflow: hidden; border-block: 1px solid rgba(255,255,255,.12); }
-.ty1-marquee .track { display: flex; gap: 32px; width: max-content; padding: 14px 0; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
-.ty1-marquee.in-view .track { animation: ty1marquee 28s linear infinite; }
+.ty1-marquee .track { display: flex; gap: 32px; width: max-content; padding: 14px 0; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; animation: ty1marquee 28s linear infinite; animation-play-state: paused; }
+.ty1-marquee.in-view .track { animation-play-state: running; }
 @keyframes ty1marquee { to { translate: -50% 0; } }
 
 .ty1-fan { position: relative; height: 420px; margin: 20px auto; perspective: 1200px; }
@@ -153,6 +153,9 @@ body[data-world="oxblood"] .ty1-portal .ty1-sticky { background: var(--portal); 
   .sleeve-card { position: relative; right: auto; top: auto; width: min(320px, 88vw); margin: 24px auto 0; translate: none; }
 }
 html.ty1-on .hero, html.ty1-on #walkin, html.ty1-on .marquee, html.ty1-on #bwalkin { display: none !important; }
+html.ty1-on .hero *, html.ty1-on #walkin *, html.ty1-on .marquee *, html.ty1-on #bwalkin * {
+  animation-play-state: paused !important;
+}
 @media (prefers-reduced-motion: reduce) {
   .ty1-marquee .track, .ty1-eq i { animation: none !important; }
 }
