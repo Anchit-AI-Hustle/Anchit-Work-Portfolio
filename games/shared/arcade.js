@@ -242,7 +242,9 @@
     /* sizing */
     const fit = () => {
       const r = stage.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      // 2x on a tablet (820×1180) is a 1640×2360 canvas. Heavy games then drop
+      // under 15fps on a CI runner and on real phones. 1.5x is sharp enough.
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       arc.w = Math.max(1, Math.round(r.width)); arc.h = Math.max(1, Math.round(r.height)); arc.dpr = dpr;
       canvas.width = Math.round(arc.w * dpr); canvas.height = Math.round(arc.h * dpr);
       if (opts.resize) opts.resize(arc);

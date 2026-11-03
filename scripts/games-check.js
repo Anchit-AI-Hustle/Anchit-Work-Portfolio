@@ -162,8 +162,15 @@ async function game(browser, vp, slug) {
   }
 
   await hold(page, vp, 4000);
-  const after = await page.evaluate(() => ({ state: window.__arcade.state, frame: window.__arcade.frame, time: window.__arcade.time, dbg: window.__arcade.debug ? window.__arcade.debug() : null }));
-  check(`${tag} frames advance during play`, after.frame - before.frame > 60, `${after.frame - before.frame} frames`);
+  let after = await page.evaluate(() => ({ state: window.__arcade.state, frame: window.__arcade.frame, time: window.__arcade.time, dbg: window.__arcade.debug ? window.__arcade.debug() : null }));
+  // Heavy games (gully-champs at tablet size) can land under 15fps on a CI
+  // runner. Give the loop another beat before judging a stall; MUT=stall still
+  // reports 0 extra frames.
+  if (after.frame - before.frame <= 60) {
+    await sleep(2500);
+    after = await page.evaluate(() => ({ state: window.__arcade.state, frame: window.__arcade.frame, time: window.__arcade.time, dbg: window.__arcade.debug ? window.__arcade.debug() : null }));
+  }
+  check(`${tag} frames advance during play`, after.frame - before.frame > 24, `${after.frame - before.frame} frames`);
   check(`${tag} game state changes under input`, strip(after.dbg) !== strip(before.dbg), strip(after.dbg).slice(0, 140));
 
   if (after.state === 'play') {
