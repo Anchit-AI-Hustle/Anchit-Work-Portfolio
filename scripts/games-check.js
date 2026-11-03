@@ -11,18 +11,22 @@
 //
 // Run against a served build:  node scripts/games-check.js
 //   BASE=http://127.0.0.1:8099 (default, the CI server)
+//   GAMES=gully-champs   one slug, or a comma list
+//   VP=tablet            substring of the viewport name (phone, tablet, desktop)
 //   MUT=stall  freezes requestAnimationFrame, so "the game advances" must fail.
 //   MUT=error  throws inside the first frame of play, so "no errors" must fail.
 const { chromium } = require('./_playwright.js');
 
 const BASE = (process.env.BASE || 'http://127.0.0.1:8099').replace(/\/$/, '');
 const MUT = process.env.MUT || '';
-const GAMES = ['saffron-city', 'midnight-apex', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'sky-thread', 'tiffin-dash'];
-const VIEWPORTS = [
+const ALL_GAMES = ['saffron-city', 'midnight-apex', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'sky-thread', 'tiffin-dash', 'board-strike', 'yard-catch', 'rally-cage', 'fare-run'];
+const GAMES = (process.env.GAMES || ALL_GAMES.join(',')).split(',').map((s) => s.trim()).filter(Boolean);
+const ALL_VIEWPORTS = [
   { name: 'phone 390', viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 },
   { name: 'tablet 820', viewport: { width: 820, height: 1180 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 },
   { name: 'desktop 1440', viewport: { width: 1440, height: 900 }, hasTouch: false, isMobile: false, deviceScaleFactor: 1 },
 ];
+const VIEWPORTS = ALL_VIEWPORTS.filter((vp) => !process.env.VP || vp.name.includes(process.env.VP));
 
 let pass = 0, fail = 0;
 const check = (label, ok, detail) => {
@@ -131,6 +135,8 @@ async function game(browser, vp, slug) {
   });
   check(`${tag} shell boots to its menu`, !!menu && menu.state === 'menu' && menu.panel, strip(menu));
   check(`${tag} menu card fits the screen`, !!menu && menu.fits);
+  const modes = await page.evaluate(() => Array.from(document.querySelectorAll('.arc-seg')).map((e) => e.getAttribute('data-opt')));
+  check(`${tag} menu offers a mode picker`, modes.includes('mode'), modes.join(','));
 
   const blank = await page.evaluate(() => {
     const c = document.querySelector('.arc-stage canvas');
@@ -149,6 +155,17 @@ async function game(browser, vp, slug) {
 
   const touchShown = await page.evaluate(() => { const t = document.querySelector('.arc-touch'); return !!t && getComputedStyle(t).display !== 'none'; });
   check(`${tag} touch controls ${vp.hasTouch ? 'shown' : 'hidden'}`, touchShown === vp.hasTouch);
+
+  if (!vp.hasTouch) {
+    const box = await page.locator('.arc-stage canvas').boundingBox();
+    if (box) {
+      await page.mouse.move(box.x + box.width * 0.4, box.y + box.height * 0.45);
+      await page.mouse.down();
+      await sleep(180);
+      await page.mouse.move(box.x + box.width * 0.62, box.y + box.height * 0.5);
+      await page.mouse.up();
+    }
+  }
 
   await hold(page, vp, 4000);
   const after = await page.evaluate(() => ({ state: window.__arcade.state, frame: window.__arcade.frame, time: window.__arcade.time, dbg: window.__arcade.debug ? window.__arcade.debug() : null }));

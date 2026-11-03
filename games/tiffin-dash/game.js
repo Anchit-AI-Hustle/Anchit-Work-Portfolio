@@ -16,21 +16,33 @@
   const SHOPS = ['Chai', 'Bakery', 'Books', 'Tailor', 'Florist', 'Barber', 'Jewels', 'Spices'];
 
   let arc;
+  const DIFF = {
+    easy: { spd: 230, gap: 1.2 },
+    normal: { spd: 270, gap: 1 },
+    hard: { spd: 340, gap: 0.78 },
+  };
   const G = {
-    t: 0, dist: 0, speed: 260, score: 0, lives: 3, hold: 0, combo: 0,
+    t: 0, dist: 0, speed: 260, score: 0, lives: 3, maxLives: 3, hold: 0, combo: 0,
     py: 0, pvy: 0, slide: 0, inv: 0, run: 0,
     objs: [], shops: [], lights: [], parts: [],
     phase: 'run', attract: true, next: 1400, nextShop: 0,
+    mode: 'street', diff: 'normal', clock: 0,
   };
 
   function groundY() { return arc.h * 0.78; }
   function worldX(x) { return x - G.dist + 130; }
 
-  function reset(attract) {
-    G.t = 0; G.dist = 0; G.speed = attract ? 180 : 270; G.score = 0; G.lives = 3; G.hold = 0; G.combo = 0;
+  function reset(attract, ch) {
+    G.mode = (ch && ch.mode) || G.mode || 'street';
+    G.diff = (ch && ch.diff) || G.diff || 'normal';
+    G.D = DIFF[G.diff] || DIFF.normal;
+    const rush = G.mode === 'rush';
+    G.t = 0; G.dist = 0; G.speed = attract ? 180 : G.D.spd * (rush ? 1.16 : 1);
+    G.maxLives = rush ? 1 : 3; G.lives = G.maxLives; G.score = 0; G.hold = 0; G.combo = 0;
+    G.clock = G.mode === 'shift' ? 90 : 0;
     G.py = 0; G.pvy = 0; G.slide = 0; G.inv = 0; G.run = 0;
     G.objs = []; G.shops = []; G.lights = []; G.parts = [];
-    G.phase = 'run'; G.attract = !!attract; G.next = attract ? 400 : 1500; G.nextShop = 0;
+    G.phase = 'run'; G.attract = !!attract; G.next = attract ? 400 : 1500 * G.D.gap * (rush ? 0.82 : 1); G.nextShop = 0;
     seedShops();
   }
 
@@ -52,7 +64,8 @@
     else if (roll < 0.76) G.objs.push({ kind: 'cloth', x, w: 90, h: 46, high: true });
     else if (roll < 0.9) G.objs.push({ kind: 'tiffin', x, w: 22, h: 18, item: true });
     else G.objs.push({ kind: 'door', x, w: 36, h: 70, door: true });
-    G.next = G.dist + 280 + rnd() * 220;
+    const gap = (G.D || DIFF.normal).gap * (G.mode === 'rush' ? 0.82 : 1);
+    G.next = G.dist + (280 + rnd() * 220) * gap;
   }
 
   function pop(x, y, col, n) {
@@ -62,19 +75,23 @@
     }
   }
 
+  function finish(why) {
+    if (G.phase === 'over') return;
+    G.phase = 'over';
+    arc.over({
+      eyebrow: why, title: why === 'Shift over' ? 'Shift <em>done</em>' : 'Tiffin <em>down</em>',
+      score: Math.round(G.score), scoreLabel: 'Score',
+      html: '<p>' + Math.round(G.dist / 40) + ' metres through the bazaar.</p>',
+      again: 'Run again',
+    });
+  }
+
   function hit() {
     if (G.inv > 0) return;
     G.lives--; G.inv = 1.2; G.combo = 0; G.hold = 0;
     arc.shake = 8; arc.sfx.tone(160, 0.16, { type: 'sawtooth', slide: 80, vol: 0.14 });
-    if (G.lives <= 0) {
-      G.phase = 'over';
-      arc.over({
-        eyebrow: 'Dropped the stack', title: 'Tiffin <em>down</em>',
-        score: Math.round(G.score), scoreLabel: 'Score',
-        html: '<p>' + Math.round(G.dist / 40) + ' metres through the bazaar.</p>',
-        again: 'Run again',
-      });
-    } else arc.toast('Watch the street', G.lives + ' left', 900);
+    if (G.lives <= 0) finish('Dropped the stack');
+    else arc.toast('Watch the street', G.lives + ' left', 900);
   }
 
   function collect(o) {
@@ -97,11 +114,18 @@
   function update(dt) {
     if (G.phase === 'over') return;
     G.t += dt; G.run += dt; G.inv = max(0, G.inv - dt); G.slide = max(0, G.slide - dt);
-    G.speed = min(520, 270 + G.dist * 0.012);
+    if (G.clock) {
+      G.clock -= dt;
+      if (G.clock <= 0) { G.clock = 0; finish('Shift over'); return; }
+    }
+    const base = (G.D || DIFF.normal).spd * (G.mode === 'rush' ? 1.16 : 1);
+    G.speed = min(base + 250, base + G.dist * 0.012);
     G.dist += G.speed * dt;
     G.score += dt * 8;
-    const jump = arc.input.hit('Space', 'ArrowUp', 'KeyW', 'KeyJ');
-    const slide = arc.input.down('ArrowDown', 'KeyS') || arc.input.hit('ArrowDown', 'KeyS');
+    const inp = arc.input;
+    const low = inp.pointer.ny > 0.78;
+    const jump = inp.hit('Space', 'KeyJ', 'Enter', 'ArrowUp', 'KeyW') || (inp.pointer.pressed && !low);
+    const slide = inp.down('ArrowDown', 'KeyS') || inp.hit('ArrowDown', 'KeyS') || (inp.pointer.down && low);
     if (jump && G.py <= 0.01) { G.pvy = 720; arc.sfx.tone(320, 0.06, { type: 'square', vol: 0.08 }); }
     if (slide && G.py <= 0.01) G.slide = 0.42;
     G.pvy -= 2100 * dt; G.py += G.pvy * dt;
@@ -233,9 +257,9 @@
     txt(c, 'SCORE', pad.left + 14, pad.top + 16, 10, GOLD, 600, 'left', F_MONO);
     txt(c, String(Math.round(G.score)), pad.left + 14, pad.top + 40, 24, INK, 500, 'left', F_DISP);
     plate(c, w / 2 - 70, pad.top, 140, 44, 12);
-    txt(c, Math.round(G.dist / 40) + ' m', w / 2, pad.top + 22, 18, INK, 500, 'center', F_DISP);
+    txt(c, G.clock ? (Math.max(0, G.clock | 0) + 's') : (Math.round(G.dist / 40) + ' m'), w / 2, pad.top + 22, 18, G.clock && G.clock < 10 ? PRIM : INK, 500, 'center', F_DISP);
     let hx = w - pad.right - 18;
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < G.maxLives; i++) {
       c.fillStyle = i < G.lives ? PRIM : 'rgba(251,245,236,.15)';
       c.beginPath(); c.arc(hx - i * 18, pad.top + 22, 6, 0, TAU); c.fill();
     }
@@ -256,7 +280,7 @@
 
   function dbg() {
     return {
-      phase: G.phase, dist: Math.round(G.dist), speed: Math.round(G.speed), score: Math.round(G.score),
+      phase: G.phase, mode: G.mode, diff: G.diff, dist: Math.round(G.dist), speed: Math.round(G.speed), score: Math.round(G.score),
       lives: G.lives, hold: G.hold, py: +G.py.toFixed(1), slide: +G.slide.toFixed(2),
       objs: G.objs.length, combo: G.combo, attract: !!G.attract,
     };
@@ -264,22 +288,32 @@
 
   A.create({
     slug: 'tiffin-dash', title: 'Tiffin Dash', genre: 'Arcade runner',
-    hint: 'Space jump   Down slide',
+    hint: 'Click or Space jump   Down or click low to slide',
+    touchHint: 'Jump pad for scooters, Slide pad for cloth lines',
     keys: [
       ['Space / Up / J', 'Jump the scooters and carts'],
       ['Down / S', 'Slide under hanging cloth'],
-      ['P', 'Pause'],
     ],
+    mouse: { cursor: 'pointer', keys: [['Click', 'Jump'], ['Click the lower street', 'Slide']] },
     touch: { stick: true, pads: [{ label: 'Jump', key: 'Space', big: true, hot: true }, { label: 'Slide', key: 'ArrowDown' }] },
+    touchKeys: [['Jump', 'Scooters and carts'], ['Slide', 'Hanging cloth']],
     formatScore: (v) => Math.round(v) + ' pts',
     menu: {
       eyebrow: 'Arcade runner',
       title: 'Tiffin <em>Dash</em>',
       html: '<p>A side-street dash with a stack of lunches. Jump the scooters, slide under the cloth lines, pick up tiffins and drop them at the marked doors.</p>',
+      options: [
+        { id: 'mode', label: 'Mode', value: 'street', choices: [{ v: 'street', label: 'Street run' }, { v: 'shift', label: 'Lunch shift' }, { v: 'rush', label: 'Rush hour' }] },
+        { id: 'diff', label: 'Difficulty', value: 'normal', choices: [{ v: 'easy', label: 'Easy' }, { v: 'normal', label: 'Normal' }, { v: 'hard', label: 'Hard' }] },
+      ],
     },
     pauseHtml() { return '<div class="stat"><div>Score<b>' + Math.round(G.score) + '</b></div><div>Distance<b>' + Math.round(G.dist / 40) + ' m</b></div></div>'; },
-    init(a) { arc = a; a.debug = dbg; reset(true); a.menu(); },
-    start(a) { arc = a; reset(false); arc.toast('Jump and slide', 'Tiffin Dash', 1400); },
+    init(a) { arc = a; a.debug = dbg; G.D = DIFF.normal; reset(true); a.menu(); },
+    start(a, ch) {
+      arc = a; reset(false, ch);
+      const label = G.mode === 'shift' ? 'Ninety seconds' : G.mode === 'rush' ? 'Rush hour' : 'Street run';
+      arc.toast(label, 'Tiffin Dash', 1400);
+    },
     update, idle, render,
   });
 })();

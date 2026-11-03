@@ -2305,7 +2305,9 @@
     arc = a;
     if (V.W !== a.w || V.H !== a.h || !V.S || V.sig !== a.w + 'x' + a.h) { computeView(); V.sig = a.w + 'x' + a.h; }
     ensureLayers();
-    c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'medium';
+    const heavy = a.w * a.h * (a.dpr || 1) * (a.dpr || 1) > 1.2e6;
+    c.imageSmoothingEnabled = !heavy;
+    if (!heavy) c.imageSmoothingQuality = a.dpr > 1.25 ? 'low' : 'medium';
     drawSky(c);
     c.save();
     const sh = arc.reducedMotion ? 0 : cam.shake;
@@ -2386,15 +2388,18 @@
     slug: 'gully-champs',
     title: 'Gully Champs',
     genre: 'Gully cricket',
-    hint: 'Space = bat    Up = loft    Down = ground    R = run',
+    hint: 'Click or Space to bat    Up loft    Down ground    R run',
+    touchHint: 'Bat pad as the ball arrives, stick for loft and placement, Run pad',
     keys: [
-      ['Space / tap', 'Bat: time it as the ball reaches you'],
+      ['Space / click', 'Bat: time it as the ball reaches you'],
       ['Up / W (hold)', 'Loft the shot'],
       ['Down / S (hold)', 'Keep it on the ground'],
       ['Left, Right / A, D', 'Placement bias: behind, or to the front'],
       ['R', 'Run between the crate and the chalk line'],
     ],
+    mouse: { cursor: 'pointer', keys: [['Click', 'Bat']] },
     touch: { stick: true, pads: [{ label: 'Bat', key: 'Space', big: true, hot: true }, { label: 'Run', key: 'KeyR' }, { label: 'Loft', key: 'ArrowUp' }, { label: 'Ground', key: 'ArrowDown' }] },
+    touchKeys: [['Bat', 'Time it as the ball arrives'], ['Loft / Ground pads', 'Height of the shot'], ['Run', 'Between the crate and the chalk']],
     gameKeys: ['KeyR'],
     formatScore: (v) => String(v),
     resize(a) { arc = a; computeView(); V.sig = a.w + 'x' + a.h; },

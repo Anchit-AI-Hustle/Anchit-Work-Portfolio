@@ -334,9 +334,27 @@
     });
     var list = document.getElementById('cinCartList');
     if (list && drawerStep === 'bag') {
-      list.innerHTML = cart.length ? cart.map(function (x) {
-        return '<div class="item"><span>' + x.qty + ' × ' + x.title + '</span><button type="button" class="cin-pill" data-drop="' + x.sku + '">Remove</button></div>';
-      }).join('') : '<p>Nothing in the briefing yet. Add an idea from the matrix.</p>';
+      list.textContent = '';
+      if (!cart.length) {
+        var empty = document.createElement('p');
+        empty.textContent = 'Nothing in the briefing yet. Add an idea from the matrix.';
+        list.appendChild(empty);
+      } else {
+        cart.forEach(function (x) {
+          var row = document.createElement('div');
+          row.className = 'item';
+          var span = document.createElement('span');
+          span.textContent = x.qty + ' × ' + x.title;
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'cin-pill';
+          btn.setAttribute('data-drop', x.sku);
+          btn.textContent = 'Remove';
+          row.appendChild(span);
+          row.appendChild(btn);
+          list.appendChild(row);
+        });
+      }
     }
     if (drawerStep === 'done') {
       var pre = document.getElementById('cinOrderPre');
