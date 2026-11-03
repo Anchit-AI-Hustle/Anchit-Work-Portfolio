@@ -10,7 +10,7 @@
      runtime and left the page unstyled until it finished, and Tailwind
      itself warns in the console not to use it in production. -->
 <link rel="stylesheet" href="/assets/tw-deli-chic.css">
-<link rel="stylesheet" href="/assets/ty1.css">
+<link rel="stylesheet" href="/assets/shop-cinema.css">
 
 <!-- Google Fonts: Playfair Display, Cinzel, Plus Jakarta Sans -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -542,15 +542,16 @@
      Progress is written to the SECTION, never to :root. transform and opacity
      only. Sticky holds because body is overflow-x: clip, not hidden. */
   .bwalk { position: relative; background: #1A242C; }
-  .bwalk-rail { height: 300vh; }
+  .bwalk-rail { height: 320vh; }
   .bwalk-frame {
     position: sticky; top: 0; height: 100vh; overflow: hidden;
+    perspective: 1100px;
     background:
       linear-gradient(180deg, rgba(255,255,255,.05), transparent 18%),
       repeating-linear-gradient(90deg, #1C2830 0 46px, #24323B 46px 48px),
       repeating-linear-gradient(#1C2830 0 46px, #24323B 46px 48px);
   }
-  .bwalk-stage { position: absolute; inset: 0; }
+  .bwalk-stage { position: absolute; inset: 0; transform-style: preserve-3d; }
   .rail-wire {
     position: absolute; left: 0; right: 0; top: 18%;
     height: 3px; background: linear-gradient(90deg, #8A97A2, #F2F4F6 40%, #8A97A2);
@@ -815,6 +816,12 @@
     <a href="#boucherieExperience">Haute Standards</a>
     <a href="#hubs">NCR Hubs (4)</a>
     <a href="#heritage">Our Story</a>
+    <a href="#bwalkin">Cold room</a>
+    <a href="#portal">Slicer portal</a>
+    <a href="#cuts">Cut matrix</a>
+    <a href="#vault">Curing vault</a>
+    <a href="#telemetry">Cold telemetry</a>
+    <a href="#concierge">Concierge</a>
     <a href="https://wa.link/bk4b8e" target="_blank" rel="noreferrer noopener">WhatsApp Concierge ↗</a>
   </nav>
 </header>
@@ -1040,6 +1047,7 @@
         <div class="rail-mist mist-a"></div>
         <div class="rail-mist mist-b"></div>
         <div class="bwalk-track" id="bwalkTrack">
+        <div class="b-plane" data-z0="-900">
         <article class="hang-card">
           <div class="hook"></div>
           <figure>
@@ -1057,6 +1065,8 @@
             <figcaption><strong>The cold room</strong>0°C–4°C. Cuts hang before they are weighed.</figcaption>
           </figure>
         </article>
+        </div>
+        <div class="b-plane" data-z0="-1500">
         <article class="hang-card">
           <div class="hook"></div>
           <figure>
@@ -1064,6 +1074,8 @@
             <figcaption><strong>Wood-smoked charcuterie</strong>German beechwood, rested over smoke.</figcaption>
           </figure>
         </article>
+        </div>
+        <div class="b-plane" data-z0="-2300">
         <article class="hang-card">
           <div class="hook"></div>
           <figure>
@@ -1071,6 +1083,8 @@
             <figcaption><strong>The block</strong>Hand-cut poultry, trimmed before it is sealed.</figcaption>
           </figure>
         </article>
+        </div>
+        <div class="b-plane" data-z0="-3100">
         <article class="hang-card">
           <div class="hook"></div>
           <figure>
@@ -1078,6 +1092,16 @@
             <figcaption><strong>Sealed for the door</strong>Vacuum-sealed, then the cold van.</figcaption>
           </figure>
         </article>
+        </div>
+        <div class="b-plane" data-z0="-3600">
+        <article class="hang-card">
+          <div class="hook"></div>
+          <figure>
+            <img src="/assets/brand/u-1541529086526-db283c563270-450.jpg" alt="" width="450" height="450">
+            <figcaption><strong>NCR dispatch</strong>Two windows a day. Code WoW20 on ₹999.</figcaption>
+          </figure>
+        </article>
+        </div>
         </div>
       </div>
 
@@ -1087,9 +1111,131 @@
         <span>Artisanal integrity of a fine European boucherie, brought to the Indian dining table. Keep scrolling.</span>
       </div>
       <div class="bwalk-hint" id="bwalkHint">Scroll<i></i></div>
+      <div class="walk-hud"><div class="track"><span id="walkProgressBar"></span></div><div id="walkProgressLabel">0% DEPTH</div></div>
+      <div class="player-card">
+        <div class="row"><span class="sc-kicker" style="color:#C59A45">Atelier air</span><button type="button" class="sc-pill" id="cinMute">🔊 LIVE</button></div>
+        <button type="button" class="sc-pill play" id="cinPlay">▶ ATELIER AMBIENCE</button>
+        <div class="eq" aria-hidden="true"><i class="eq-bar"></i><i class="eq-bar"></i><i class="eq-bar"></i><i class="eq-bar"></i><i class="eq-bar"></i><i class="eq-bar"></i><i class="eq-bar"></i><i class="eq-bar"></i><i class="eq-bar"></i><i class="eq-bar"></i><i class="eq-bar"></i><i class="eq-bar"></i></div>
+      </div>
     </div>
   </div>
 </section>
+
+<svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <filter id="freq-wave-filter"><feTurbulence type="fractalNoise" baseFrequency="0.012 0.08" numOctaves="2" result="noise"/><feDisplacementMap id="freq-disp-map" in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G"/></filter>
+</svg>
+<div class="shop-cin" data-shop="dc" data-scroll>
+  <section class="wave-block" aria-labelledby="wave-h">
+    <div class="sc-wrap">
+      <span class="sc-kicker">Prime cuts</span>
+      <h2 id="wave-h" data-wave-title>FUORI ORA</h2>
+      <p>Artisanal integrity of a fine European boucherie, brought to the Indian dining table. Antibiotic residue-free poultry, beechwood smoked charcuterie, chilled 0 C to 4 C.</p>
+    </div>
+  </section>
+  <section class="portal" id="portal" aria-label="Slicer portal">
+    <div class="portal-sticky">
+      <div class="portal-stage">
+        <div class="disc-3d" aria-hidden="true"><span class="disc-sheen"></span><span class="label">Deli Chic<br>0–4 C</span></div>
+        <div class="sleeve-card">
+          <img src="/assets/brand/u-1529193591184-b1d58069ecdd-800.jpg" width="800" height="1067" alt="Wood-smoked charcuterie" loading="lazy" decoding="async">
+          <div class="s-body">
+            <span class="badge">[ TRACKLIST / SPEC SHEET ]</span>
+            <h3>Chicken Black Pepper Salami</h3>
+            <button type="button" class="sc-pill" data-add-sku="chk-pepper-salami-250">+ RESERVE · ₹200</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="matrix" id="cuts" aria-labelledby="mx-h">
+    <div class="sc-wrap">
+      <span class="sc-kicker">The butcher's matrix</span>
+      <h2 id="mx-h" data-wave-title>THE LARDER</h2>
+      <div class="tabs" role="tablist">
+        <button type="button" class="sc-pill" data-tab="all" aria-pressed="true">ALL</button>
+        <button type="button" class="sc-pill" data-tab="poultry" aria-pressed="false">Poultry</button>
+        <button type="button" class="sc-pill" data-tab="charcuterie" aria-pressed="false">Charcuterie</button>
+        <button type="button" class="sc-pill" data-tab="ready-to-cook" aria-pressed="false">Heat &amp; eat</button>
+        <button type="button" class="sc-pill" data-tab="momos" aria-pressed="false">Dim sum</button>
+        <button type="button" class="sc-pill" data-tab="sweet" aria-pressed="false">Sweet</button>
+      </div>
+      <div class="track-grid">
+        <article class="track-cell" data-track data-cat="poultry"><span class="idx">01</span><h3>Chicken Breast Antibiotic-Free</h3><p class="note">Lean whole tender breast cuts, vacuum-sealed. Zero hormones.</p><div class="meta"><span>₹199 · 500 gm</span><span class="qty-row"><button type="button" class="qty" data-sub-sku="chk-breast-500">-</button><button type="button" class="qty" data-add-sku="chk-breast-500">+</button></span></div></article>
+        <article class="track-cell" data-track data-cat="charcuterie"><span class="idx">02</span><h3>Chicken Cheese &amp; Jalapeño Sausages</h3><p class="note">Filled with melted cheddar cubes and pickled green jalapeños.</p><div class="meta"><span>₹230 · 200 gm</span><span class="qty-row"><button type="button" class="qty" data-sub-sku="chk-cheese-jalapeno-200">-</button><button type="button" class="qty" data-add-sku="chk-cheese-jalapeno-200">+</button></span></div></article>
+        <article class="track-cell" data-track data-cat="charcuterie"><span class="idx">03</span><h3>Chicken Black Pepper Salami</h3><p class="note">Delicately sliced charcuterie cured with Tellicherry black pepper.</p><div class="meta"><span>₹200 · 250 gm</span><span class="qty-row"><button type="button" class="qty" data-sub-sku="chk-pepper-salami-250">-</button><button type="button" class="qty" data-add-sku="chk-pepper-salami-250">+</button></span></div></article>
+        <article class="track-cell" data-track data-cat="charcuterie"><span class="idx">04</span><h3>Artisanal Chicken Bacon Strips</h3><p class="note">Naturally smoked streaky strips. Pan-fry in 3 minutes to crisp golden.</p><div class="meta"><span>₹225 · 250 gm</span><span class="qty-row"><button type="button" class="qty" data-sub-sku="chk-bacon-250">-</button><button type="button" class="qty" data-add-sku="chk-bacon-250">+</button></span></div></article>
+        <article class="track-cell" data-track data-cat="ready-to-cook"><span class="idx">05</span><h3>Barbeque Chicken Wings Marinated</h3><p class="note">Coated in chef-crafted hickory barbecue reduction. Grill or air-fry.</p><div class="meta"><span>₹410 · 850 gm</span><span class="qty-row"><button type="button" class="qty" data-sub-sku="chk-bbq-wings-850">-</button><button type="button" class="qty" data-add-sku="chk-bbq-wings-850">+</button></span></div></article>
+        <article class="track-cell" data-track data-cat="ready-to-cook"><span class="idx">06</span><h3>Gourmet Chicken Burger Patty</h3><p class="note">Coarsely minced chicken spiced with thyme, rosemary and white pepper.</p><div class="meta"><span>₹260 · 280 gm</span><span class="qty-row"><button type="button" class="qty" data-sub-sku="chk-burger-patty-280">-</button><button type="button" class="qty" data-add-sku="chk-burger-patty-280">+</button></span></div></article>
+        <article class="track-cell" data-track data-cat="ready-to-cook"><span class="idx">07</span><h3>Chicken Lucknowi Marinade</h3><p class="note">Marinated in royal saffron, roasted gram flour, hung curd and mace.</p><div class="meta"><span>₹299 · 500 gm</span><span class="qty-row"><button type="button" class="qty" data-sub-sku="chk-lucknawi-500">-</button><button type="button" class="qty" data-add-sku="chk-lucknawi-500">+</button></span></div></article>
+        <article class="track-cell" data-track data-cat="momos"><span class="idx">08</span><h3>Handcrafted Prawn Momos (8 Pcs)</h3><p class="note">Whole coastal tiger prawns encased in delicate thin wheat dough.</p><div class="meta"><span>₹260 · 8 pieces</span><span class="qty-row"><button type="button" class="qty" data-sub-sku="prawn-momos-8pc">-</button><button type="button" class="qty" data-add-sku="prawn-momos-8pc">+</button></span></div></article>
+        <article class="track-cell" data-track data-cat="poultry"><span class="idx">09</span><h3>Chicken Drumsticks Antibiotic-Free</h3><p class="note">Skinless tender leg cuts, washed in ozonated water and vacuum packed.</p><div class="meta"><span>₹220 · 500 gm</span><span class="qty-row"><button type="button" class="qty" data-sub-sku="chk-drumsticks-500">-</button><button type="button" class="qty" data-add-sku="chk-drumsticks-500">+</button></span></div></article>
+        <article class="track-cell" data-track data-cat="poultry"><span class="idx">10</span><h3>Chicken Breast Keema</h3><p class="note">Triple-ground breast mince for melt-in-mouth kebabs and koftas.</p><div class="meta"><span>₹200 · 500 gm</span><span class="qty-row"><button type="button" class="qty" data-sub-sku="chk-keema-500">-</button><button type="button" class="qty" data-add-sku="chk-keema-500">+</button></span></div></article>
+        <article class="track-cell" data-track data-cat="charcuterie"><span class="idx">11</span><h3>Chicken Franks Golden Smoked</h3><p class="note">Plump natural smoked frankfurter sausages, ideal for gourmet hot dogs.</p><div class="meta"><span>₹290 · 350 gm</span><span class="qty-row"><button type="button" class="qty" data-sub-sku="chk-franks-350">-</button><button type="button" class="qty" data-add-sku="chk-franks-350">+</button></span></div></article>
+        <article class="track-cell" data-track data-cat="sweet"><span class="idx">12</span><h3>Caramel Chocolate Truffle</h3><p class="note">Salted butter caramel layered with 54% dark Belgian chocolate ganache.</p><div class="meta"><span>₹199 · Individual tub</span><span class="qty-row"><button type="button" class="qty" data-sub-sku="caramel-truffle">-</button><button type="button" class="qty" data-add-sku="caramel-truffle">+</button></span></div></article>
+      </div>
+      <div class="split-banner">
+        <div>
+          <span class="sc-kicker">Manifesto</span>
+          <h2>The cold-chain manifesto: 0 C to 4 C from the larder to your table.</h2>
+          <p>Four NCR hubs. Slot 1 10 AM to 1 PM. Slot 2 5 PM to 8 PM. Free express cold-chain on ₹999. Code WoW20 takes 20% off that threshold.</p>
+        </div>
+        <div class="specs">
+          <div><small>Cold room</small><b>0–4 C</b></div>
+          <div><small>Promo</small><b>WoW20 · 20%</b></div>
+          <button type="button" class="sc-pill" data-apply-wow20>APPLY CODE WoW20</button>
+        </div>
+      </div>
+      <div class="showcase">
+        <article class="show-card"><img src="https://i2.wp.com/mh.delichic.co.in/wp-content/uploads/2020/09/chicken-black-pepper-salami-scaled.jpg?resize=450%2C450&amp;ssl=1" width="450" height="450" alt="Chicken Black Pepper Salami" loading="lazy" decoding="async"><div class="body"><span class="sc-kicker">Charcuterie</span><h3>Black pepper salami</h3><button type="button" class="sc-pill" data-add-sku="chk-pepper-salami-250">[ + RESERVE BOX ]</button></div></article>
+        <article class="show-card"><img src="https://i1.wp.com/mh.delichic.co.in/wp-content/uploads/2020/11/Chicken-Bacon-1.png?resize=450%2C450&amp;ssl=1" width="450" height="450" alt="Artisanal Chicken Bacon Strips" loading="lazy" decoding="async"><div class="body"><span class="sc-kicker">Smoke</span><h3>Chicken bacon strips</h3><button type="button" class="sc-pill" data-add-sku="chk-bacon-250">[ + RESERVE BOX ]</button></div></article>
+        <article class="show-card"><img src="https://delichic.co.in/wp-content/uploads/2020/09/Chicken-Momos-450x450.png" width="450" height="450" alt="Handcrafted Prawn Momos" loading="lazy" decoding="async"><div class="body"><span class="sc-kicker">Dim sum</span><h3>Prawn momos</h3><button type="button" class="sc-pill" data-add-sku="prawn-momos-8pc">[ + RESERVE BOX ]</button></div></article>
+      </div>
+      <div class="marquee-wrap">
+        <div class="marquee-track"><span>Antibiotic Residue-Free Poultry</span><span>Chicken Cheese &amp; Jalapeño Sausages</span><span>Handcrafted Prawn Momos</span><span>Lucknowi Chicken Marinades</span><span>Golden Smoked Franks</span><span>Artisanal Belgian Truffles</span><span>Antibiotic Residue-Free Poultry</span><span>Chicken Cheese &amp; Jalapeño Sausages</span><span>Handcrafted Prawn Momos</span><span>Lucknowi Chicken Marinades</span><span>Golden Smoked Franks</span><span>Artisanal Belgian Truffles</span></div>
+        <div class="marquee-track rev" aria-hidden="true"><span>0–4 C</span><span>Beechwood smoke</span><span>Four NCR hubs</span><span>WoW20</span><span>10 AM–1 PM</span><span>5 PM–8 PM</span><span>0–4 C</span><span>Beechwood smoke</span><span>Four NCR hubs</span><span>WoW20</span><span>10 AM–1 PM</span><span>5 PM–8 PM</span></div>
+      </div>
+    </div>
+  </section>
+  <section class="fan-block" id="vault" aria-labelledby="fan-h">
+    <div class="sc-wrap">
+      <span class="sc-kicker">Ultime uscite</span>
+      <h2 id="fan-h" data-wave-title>THE VAULT</h2>
+      <div class="fan-stage">
+        <button type="button" class="fan-card" data-detail="Cuts hang on a steel rail between 0 C and 4 C before they are weighed."><img src="/assets/brand/u-1604503468506-a8da13d82791-800.jpg" width="800" height="1200" alt="" loading="lazy" decoding="async"><div class="body"><b>01 The 0–4 C cold room</b></div></button>
+        <button type="button" class="fan-card" data-detail="German-style beechwood smoked frankfurters, and ribs rested over smoke."><img src="/assets/brand/u-1529193591184-b1d58069ecdd-800.jpg" width="800" height="1067" alt="" loading="lazy" decoding="async"><div class="body"><b>02 Beechwood smoke</b></div></button>
+        <button type="button" class="fan-card" data-detail="Every portion weighed, trimmed and inspected before it is sealed."><img src="/assets/brand/u-1541529086526-db283c563270-450.jpg" width="450" height="450" alt="" loading="lazy" decoding="async"><div class="body"><b>03 The butcher's block</b></div></button>
+        <button type="button" class="fan-card" data-detail="Tender chicken steeped in royal saffron, roasted gram flour, hung curd and Awadhi mace."><img src="/assets/brand/dc-lucknowi-marinade-800.jpg" width="800" height="800" alt="" loading="lazy" decoding="async"><div class="body"><b>04 Lucknowi marinade</b></div></button>
+        <button type="button" class="fan-card" data-detail="Vacuum-sealed, then two delivery windows a day across Delhi NCR."><img src="/assets/brand/u-1587593810167-a84920ea0781-450.jpg" width="450" height="450" alt="" loading="lazy" decoding="async"><div class="body"><b>05 Cold-chain dispatch</b></div></button>
+      </div>
+      <div class="fan-nav"><button type="button" class="sc-pill" data-fan="prev">← PREV</button><button type="button" class="sc-pill" data-fan="next">NEXT →</button></div>
+      <p class="fan-readout" data-fan-readout></p>
+      <div class="blueprint" id="telemetry" aria-label="Cold-chain telemetry">
+        <div class="hub">DC</div>
+        <div class="node" data-pos="1" data-depth="1.2"><b>0–4 C</b>Cold room. Cuts hang before they are weighed.</div>
+        <div class="node" data-pos="2" data-depth="1.6"><b>BEECHWOOD</b>German-style smoke on frankfurters and ribs.</div>
+        <div class="node" data-pos="3" data-depth="2.0"><b>4 NCR HUBS</b>South Delhi, Gurugram, West Delhi, Noida. Two slots a day.</div>
+        <div class="node" data-pos="4" data-depth="1.4"><b>WoW20</b>20% off cold-cut orders above ₹999.</div>
+        <div class="node" data-pos="5" data-depth="2.2"><b>10–13 / 17–20</b>Morning and evening refrigerated dispatch.</div>
+        <div class="node" data-pos="6" data-depth="2.4"><b>+91 98100 02023</b>WhatsApp concierge on the number the larder answers.</div>
+      </div>
+    </div>
+  </section>
+  <section class="curtain-sec" id="concierge" aria-labelledby="kit-h">
+    <div class="sc-wrap">
+      <div class="curtain-frame">
+        <span class="sc-kicker">Concierge</span>
+        <h2 id="kit-h">Cold-chain across Delhi NCR.</h2>
+        <p>Vasant Kunj is one of four refrigerated dispatch hubs, not a storefront. Slot 1 10 AM to 1 PM. Slot 2 5 PM to 8 PM. Call +91 98100 02023. Concept site: bag a cut, preview the order, then send the draft yourself.</p>
+        <div class="tele-strip">
+          <div><small>Live local time</small><b id="cinClock">IST</b></div>
+          <div><small>Coordinates</small><b>Delhi NCR dispatch</b></div>
+          <div><small>Direct line</small><b><a href="https://wa.me/919810002023" rel="noopener" target="_blank">WhatsApp</a></b></div>
+          <div><small>Fulfilment</small><b>Basket, details, then the draft</b></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
 
 <section class="py-24 px-6 md:px-10 max-w-7xl mx-auto scroll-reveal" id="larder">
   <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
@@ -1449,7 +1595,7 @@
       <p id="dcCopied" hidden class="text-xs font-bold uppercase tracking-wider text-[#CD2653]">Copied to clipboard</p>
       <div class="flex items-center gap-2 pt-1">
         <a id="dcWa" href="#" target="_blank" rel="noopener" class="flex-1 text-center py-3.5 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-[0.16em] hover:bg-[#8C1434] transition-all">Send it on WhatsApp ↗</a>
-        <button type="button" onclick="copyDeliOrder()" id="dcCopy" class="px-5 py-3.5 rounded-full border border-[#CD2653]/30 text-[#4A0E17] font-bold text-xs uppercase tracking-[0.16em] hover:bg-[#FFF3F6] transition-all">Copy</button>
+        <button type="button" onclick="copyDeliOrder()" id="dcCopy" class="px-5 py-3.5 rounded-full border border-[#CD2653]/30 text-[#4A0E17] font-bold text-xs uppercase tracking-[0.16em] hover:bg-[#FFF3F6] transition-all">COPY ORDER TEXT</button>
       </div>
       <p class="text-[10px] leading-relaxed text-[#6B625B]">If WhatsApp does not open, press Copy to put the whole order on the clipboard, the concierge is on <a class="underline font-bold" href="tel:+919810002023">+91 98100 02023</a>.</p>
       <button type="button" onclick="backToBasket()" class="w-full py-3 rounded-full border border-[#CD2653]/25 text-[#6B625B] font-bold text-[11px] uppercase tracking-[0.16em] hover:bg-[#FFF3F6] transition-all">Start another basket</button>
@@ -1612,8 +1758,11 @@
 
     let currentFilter = 'all';
     let basket = [];
-    try { basket = JSON.parse(localStorage.getItem('deli-chic-basket') || '[]'); } catch (e) { basket = []; }
-    if (!Array.isArray(basket)) basket = [];
+    const DC_BASKET_KEY = 'deli-chic-basket';
+    try {
+      const storedBasket = JSON.parse(localStorage.getItem(DC_BASKET_KEY) || '[]');
+      if (Array.isArray(storedBasket)) basket = storedBasket;
+    } catch (e) { /* private window */ }
     let isPromoApplied = false;
     let selectedSlot = 'Morning (10 AM–1 PM)';
 
@@ -1667,6 +1816,7 @@
     (function boucherieWalk() {
       var sec = document.getElementById('bwalkin');
       if (!sec) return;
+      if (document.getElementById('walkProgressBar')) return;
       var rail = sec.querySelector('.bwalk-rail');
       var frame = sec.querySelector('.bwalk-frame');
       var track = document.getElementById('bwalkTrack');
@@ -2267,7 +2417,7 @@
 
     // 6. Basket Management
     function addToBasket(id) {
-      const p = DELI_PRODUCTS.find(item => item.id === id) || (window.TY1_EXTRAS || []).find(item => item.id === id);
+      const p = DELI_PRODUCTS.find(item => item.id === id);
       if (!p) return;
       const exist = basket.find(item => item.id === id);
       if (exist) {
@@ -2282,6 +2432,16 @@
       dcStep('bag');
       toggleBasket(true);
     }
+    window.addToBasket = addToBasket;
+
+    function removeBasketSku(id) {
+      const i = basket.findIndex(item => item.id === id);
+      if (i < 0) return;
+      basket[i].qty -= 1;
+      if (basket[i].qty <= 0) basket.splice(i, 1);
+      updateBasketUI();
+    }
+    window.removeBasketSku = removeBasketSku;
 
     function changeQty(idx, delta) {
       basket[idx].qty += delta;
@@ -2307,6 +2467,7 @@
       }
     }
 
+    window.applyPromo = applyPromo;
     function applyPromo() {
       const code = document.getElementById('promoInput').value.trim().toUpperCase();
       if (code === 'WOW20') {
@@ -2334,6 +2495,7 @@
         el.textContent = row ? String(row.qty) : '0';
       });
       document.getElementById('subtotalPrice').textContent = `₹${subtotal}`;
+      try { localStorage.setItem(DC_BASKET_KEY, JSON.stringify(basket)); } catch (e) { /* private window */ }
 
       // Free shipping calculation (₹999 threshold)
       const progressBar = document.getElementById('shippingProgressBar');
@@ -2511,10 +2673,26 @@
       dcStep('bag');
     }
 
+    function dcWaLink(text) {
+      return 'https://wa.me/919810002023?text=' + encodeURIComponent(text);
+    }
+
+    function flashCopyBanner(ok) {
+      const b = document.getElementById('copyBanner');
+      if (!b) return;
+      b.textContent = ok ? 'Copied to clipboard' : 'Copy the order text from the drawer';
+      b.classList.add('on');
+      clearTimeout(b._t);
+      b._t = setTimeout(() => { b.classList.remove('on'); }, 2400);
+    }
+
     function copyDeliOrder() {
       if (!dcLastOrder) return;
       const btn = document.getElementById('dcCopy');
-      const done = (ok) => { if (btn) { btn.textContent = ok ? 'Copied' : 'Copy failed'; setTimeout(() => { btn.textContent = 'Copy'; }, 1600); } };
+      const done = (ok) => {
+        flashCopyBanner(ok);
+        if (btn) { btn.textContent = ok ? 'Copied' : 'Copy failed'; setTimeout(() => { btn.textContent = 'COPY ORDER TEXT'; }, 1600); }
+      };
       try {
         navigator.clipboard.writeText(dcOrderText(dcLastOrder)).then(() => done(true), () => done(false));
       } catch (e) { done(false); }
@@ -2563,13 +2741,11 @@
       document.getElementById('dcSummary').textContent =
         `${order.items.reduce((n, i) => n + i.qty, 0)} item(s) · ₹${order.total} · ${order.slot} · to ${order.name} on ${order.phone}.`;
       const wa = document.getElementById('dcWa');
-      if (wa) wa.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(dcOrderText(order))}`;
+      const draft = dcOrderText(order);
+      if (wa) wa.href = dcWaLink(draft);
       try {
-        navigator.clipboard.writeText(dcOrderText(order)).then(function () {
-          var note = document.getElementById('dcCopied');
-          if (note) note.hidden = false;
-        });
-      } catch (e) {}
+        navigator.clipboard.writeText(draft).then(() => flashCopyBanner(true), () => flashCopyBanner(false));
+      } catch (e) { flashCopyBanner(false); }
 
       basket.length = 0;
       updateBasketUI();
@@ -2592,14 +2768,13 @@
       let last = null;
       try { last = (JSON.parse(localStorage.getItem(DC_ORDER_KEY) || '[]'))[0] || null; } catch (e) { return; }
       if (!last || !last.ref) return;
-      if (Date.now() - Date.parse(last.placedAt || 0) > 2 * 60 * 60 * 1000) return;
       dcLastOrder = last;
       const ref = document.getElementById('dcRef');
       const sum = document.getElementById('dcSummary');
       const wa = document.getElementById('dcWa');
       if (ref) ref.textContent = last.ref;
       if (sum) sum.textContent = `${last.items.reduce((n, i) => n + i.qty, 0)} item(s) · ₹${last.total} · ${last.slot} · to ${last.name} on ${last.phone}.`;
-      if (wa) wa.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(dcOrderText(last))}`;
+      if (wa) wa.href = dcWaLink(dcOrderText(last));
       const chip = document.getElementById('dcLast');
       const chipRef = document.getElementById('dcLastRef');
       if (chipRef) chipRef.textContent = last.ref;
@@ -2643,9 +2818,11 @@
     if (window.matchMedia) window.matchMedia('(min-width: 1024px)').addEventListener('change', function (m) { if (m.matches) setOpen(false); });
   })();
 </script>
+<div id="copyBanner" class="copy-banner" role="status">Copied to clipboard</div>
 <script src="/assets/vendor/gsap.min.js"></script>
 <script src="/assets/ty1-engine.js"></script>
 <script src="/assets/shop-elite.js"></script>
+<script src="/assets/shop-cinema.js"></script>
 <script src="/assets/brand-motion.js" defer></script>
 </body>
 </html>
