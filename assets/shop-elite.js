@@ -12,18 +12,16 @@
     var pill = document.createElement('div');
     pill.className = 'ctx-pill';
     document.body.appendChild(pill);
-    var label = '';
-    window.addEventListener('pointermove', function (e) {
-      pill.style.left = e.clientX + 'px';
-      pill.style.top = e.clientY + 'px';
+    var label = '', px = 0, py = 0, raf = 0;
+    var roots = zones.map(function (z) { return [document.querySelector(z[0]), z[1]]; });
+    function paint() {
+      raf = 0;
+      pill.style.translate = (px + 16) + 'px ' + (py + 18) + 'px';
+      var hit = document.elementFromPoint(px, py);
       var next = '';
-      for (var i = 0; i < zones.length; i++) {
-        var el = document.querySelector(zones[i][0]);
-        if (!el) continue;
-        var r = el.getBoundingClientRect();
-        if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
-          next = zones[i][1];
-          break;
+      if (hit) {
+        for (var i = 0; i < roots.length; i++) {
+          if (roots[i][0] && roots[i][0].contains(hit)) { next = roots[i][1]; break; }
         }
       }
       if (next !== label) {
@@ -31,6 +29,10 @@
         pill.textContent = next;
         pill.classList.toggle('on', !!next);
       }
+    }
+    window.addEventListener('pointermove', function (e) {
+      px = e.clientX; py = e.clientY;
+      if (!raf) raf = requestAnimationFrame(paint);
     }, { passive: true });
   }
 
@@ -70,15 +72,25 @@
   function kinetic(selector) {
     if (reduce) return;
     var lastY = window.scrollY, vel = 0, raf = 0;
+    var nodes = [];
+    var lastTilt = 0;
     function apply() {
       raf = 0;
       vel *= 0.82;
       var tilt = clamp(vel * 0.08, -3, 3);
-      var cards = document.querySelectorAll(selector);
-      for (var i = 0; i < cards.length; i++) cards[i].style.rotate = tilt.toFixed(2) + 'deg';
+      if (Math.abs(tilt - lastTilt) > 0.04) {
+        lastTilt = tilt;
+        var text = tilt.toFixed(2) + 'deg';
+        for (var i = 0; i < nodes.length; i++) nodes[i].style.rotate = text;
+      }
       if (Math.abs(vel) > 0.05) raf = requestAnimationFrame(apply);
+      else if (lastTilt !== 0) {
+        lastTilt = 0;
+        for (var j = 0; j < nodes.length; j++) nodes[j].style.rotate = '0deg';
+      }
     }
     window.addEventListener('scroll', function () {
+      if (!nodes.length) nodes = [].slice.call(document.querySelectorAll(selector));
       var y = window.scrollY;
       vel = clamp(y - lastY, -25, 25);
       lastY = y;
@@ -91,14 +103,17 @@
     var facade = document.getElementById('walkFacade');
     var reflect = document.getElementById('walkReflect');
     if (facade && reflect && fine) {
-      facade.addEventListener('pointermove', function () {});
+      var wx = 0, wraf = 0, walk = document.getElementById('walkin');
+      function moveReflect() {
+        wraf = 0;
+        reflect.style.translate = wx.toFixed(1) + '% 0';
+      }
       window.addEventListener('pointermove', function (e) {
-        var sec = document.getElementById('walkin');
-        if (!sec) return;
-        var r = sec.getBoundingClientRect();
-        if (e.clientY < r.top || e.clientY > r.bottom) return;
-        var x = ((e.clientX - r.left) / r.width) * 100;
-        reflect.style.translate = ((x - 50) * 0.35).toFixed(1) + '% 0';
+        if (!walk) return;
+        var r = walk.getBoundingClientRect();
+        if (e.clientY < r.top || e.clientY > r.bottom || r.width === 0) return;
+        wx = ((e.clientX - r.left) / r.width - 0.5) * 35;
+        if (!wraf) wraf = requestAnimationFrame(moveReflect);
       }, { passive: true });
     }
 
@@ -118,8 +133,11 @@
       box.appendChild(board);
       var scrub = board.querySelector('input');
       var ctx = canvas.getContext('2d');
+      var sizedW = 0, sizedH = 0;
       function size() {
         var w = box.clientWidth, h = box.clientHeight || 380;
+        if (w === sizedW && h === sizedH) return;
+        sizedW = w; sizedH = h;
         canvas.width = w; canvas.height = h;
       }
       function draw(sec) {
@@ -217,10 +235,18 @@
       if (orig) window.setCraftPattern = function (pat) { orig(pat); show(pat); };
       show('rosetta');
       if (fine) {
+        var sx = 50, sy = 40, sraf = 0;
+        function paintSheen() {
+          sraf = 0;
+          sheen.style.setProperty('--sx', sx.toFixed(1) + '%');
+          sheen.style.setProperty('--sy', sy.toFixed(1) + '%');
+        }
         box.addEventListener('pointermove', function (e) {
           var r = box.getBoundingClientRect();
-          sheen.style.setProperty('--sx', ((e.clientX - r.left) / r.width * 100).toFixed(1) + '%');
-          sheen.style.setProperty('--sy', ((e.clientY - r.top) / r.height * 100).toFixed(1) + '%');
+          if (!r.width) return;
+          sx = (e.clientX - r.left) / r.width * 100;
+          sy = (e.clientY - r.top) / r.height * 100;
+          if (!sraf) sraf = requestAnimationFrame(paintSheen);
         }, { passive: true });
       }
     })();
@@ -293,47 +319,45 @@
     (function chapters() {
       var stage = document.querySelector('#chapters .stage');
       if (!stage) return;
-      var canvas = document.createElement('canvas');
-      canvas.className = 'ch-ambient';
-      stage.prepend(canvas);
-      var ctx = canvas.getContext('2d');
-      var on = false, raf = 0, seen = false;
+      var layer = document.createElement('div');
+      layer.className = 'ch-ambient' + (reduce ? '' : ' is-live');
+      layer.setAttribute('aria-hidden', 'true');
+      var colors = ['#6E44FF', '#1F4E3B', '#C88A4B'];
+      for (var n = 0; n < 14; n++) {
+        var dot = document.createElement('span');
+        dot.style.cssText = 'left:' + ((n * 7) % 96) + '%;top:' + ((n * 13) % 80) + '%;width:' + (n % 3 + 2) + 'px;height:' + (n % 3 + 2) + 'px;background:' + colors[n % 3] + ';animation-delay:' + (-n * 0.6) + 's';
+        layer.appendChild(dot);
+      }
+      stage.prepend(layer);
       var themes = [
         ['#2A1810', 'rgba(110,68,255,.55)'],
         ['#D8E8D5', 'rgba(31,78,59,.45)'],
         ['#1C1412', 'rgba(200,138,75,.5)']
       ];
-      function current() {
-        var btns = stage.querySelectorAll('.ch-nav button');
-        for (var i = 0; i < btns.length; i++) if (btns[i].getAttribute('aria-current') === 'true') return i;
-        return 0;
+      var btns = stage.querySelectorAll('.ch-nav button');
+      var shown = -1;
+      function sync() {
+        var i = 0;
+        for (var k = 0; k < btns.length; k++) if (btns[k].getAttribute('aria-current') === 'true') i = k;
+        if (i === shown) return;
+        shown = i;
+        stage.style.setProperty('--surface-tint', themes[i][0]);
+        stage.style.setProperty('--accent-glow', themes[i][1]);
+        var dots = layer.children;
+        for (var d = 0; d < dots.length; d++) dots[d].style.background = colors[i];
       }
-      function draw(now) {
-        raf = 0;
-        if (!on) return;
-        var i = current();
-        var t = themes[i];
-        stage.style.setProperty('--surface-tint', t[0]);
-        stage.style.setProperty('--accent-glow', t[1]);
-        canvas.width = stage.clientWidth; canvas.height = stage.clientHeight;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        var n = i === 1 ? 40 : i === 2 ? 18 : 12;
-        for (var p = 0; p < n; p++) {
-          var x = (Math.sin(p * 12.3 + now / 900) * 0.5 + 0.5) * canvas.width;
-          var y = (Math.cos(p * 7.1 + now / 1100) * 0.5 + 0.5) * canvas.height;
-          ctx.fillStyle = i === 1 ? 'rgba(31,78,59,.35)' : i === 2 ? 'rgba(200,138,75,.35)' : 'rgba(110,68,255,.28)';
-          ctx.beginPath();
-          ctx.arc(x, y, i === 1 ? 1.2 : 2.4, 0, Math.PI * 2);
-          ctx.fill();
-        }
-        if (on) raf = requestAnimationFrame(draw);
-      }
-      function start() { if (on || reduce || !seen || document.hidden) return; on = true; raf = requestAnimationFrame(draw); }
-      function stop() { on = false; if (raf) cancelAnimationFrame(raf); }
       if ('IntersectionObserver' in window) {
-        new IntersectionObserver(function (en) { seen = en[0].isIntersecting; seen ? start() : stop(); }).observe(stage);
-      } else { seen = true; start(); }
-      document.addEventListener('visibilitychange', function () { document.hidden ? stop() : start(); });
+        new IntersectionObserver(function (en) {
+          var on = en[0].isIntersecting && !document.hidden && !reduce;
+          layer.classList.toggle('is-live', on);
+          if (on) sync();
+        }).observe(stage);
+      }
+      window.addEventListener('scroll', sync, { passive: true });
+      document.addEventListener('visibilitychange', function () {
+        layer.classList.toggle('is-live', !document.hidden && !reduce);
+      });
+      sync();
     })();
 
     document.addEventListener('click', function (e) {
@@ -364,104 +388,89 @@
         { x: 0.58, y: 0.48, name: 'Intramuscular marbling' },
         { x: 0.7, y: 0.3, name: 'Tellicherry pepper crust' }
       ];
-      var tx = 50, ty = 50, x = 50, y = 50, raf = 0, seen = false;
+      var tx = 50, ty = 50, x = 50, y = 50, raf = 0, pointing = false, boxW = 1, boxH = 1, lastRead = '';
       function loop() {
         raf = 0;
-        x += (tx - x) * 0.16;
-        y += (ty - y) * 0.16;
-        var r = box.getBoundingClientRect();
-        var px = x / 100 * r.width, py = y / 100 * r.height;
+        x += (tx - x) * 0.22;
+        y += (ty - y) * 0.22;
+        var px = x / 100 * boxW, py = y / 100 * boxH;
         var snap = null;
         for (var i = 0; i < spots.length; i++) {
-          var sx = spots[i].x * r.width, sy = spots[i].y * r.height;
+          var sx = spots[i].x * boxW, sy = spots[i].y * boxH;
           if (Math.hypot(px - sx, py - sy) < 24) snap = spots[i];
         }
         if (snap) { tx = snap.x * 100; ty = snap.y * 100; }
-        hud.style.left = x + '%';
-        hud.style.top = y + '%';
-        var mmX = (x / 100 * 86).toFixed(1);
-        var mmY = (y / 100 * 54).toFixed(1);
-        var marble = (18 + (x / 100) * 22).toFixed(0);
-        var cold = (2.3 + (y / 100) * 0.2).toFixed(1);
-        if (read) read.textContent = 'X ' + mmX + 'mm  Y ' + mmY + 'mm  ·  ' + marble + '% marbling  ·  ' + cold + '°C';
+        hud.style.translate = (px - 96).toFixed(1) + 'px ' + (py - 96).toFixed(1) + 'px';
+        var line = 'X ' + (x / 100 * 86).toFixed(1) + 'mm  Y ' + (y / 100 * 54).toFixed(1) + 'mm  ·  ' + (18 + x / 100 * 22).toFixed(0) + '% marbling  ·  ' + (2.3 + y / 100 * 0.2).toFixed(1) + '°C';
+        if (read && line !== lastRead) { lastRead = line; read.textContent = line; }
         if (call) {
-          call.classList.toggle('on', !!snap);
-          if (snap) {
+          var show = !!snap;
+          if (call.classList.contains('on') !== show) call.classList.toggle('on', show);
+          if (snap && call.textContent !== snap.name) {
             call.textContent = snap.name;
-            call.style.left = (snap.x * 100) + '%';
-            call.style.top = (snap.y * 100 + 8) + '%';
+            call.style.translate = (snap.x * boxW) + 'px ' + (snap.y * boxH + 28) + 'px';
           }
         }
-        if (seen) raf = requestAnimationFrame(loop);
+        var settled = Math.abs(tx - x) < 0.15 && Math.abs(ty - y) < 0.15;
+        if (pointing || !settled) raf = requestAnimationFrame(loop);
+      }
+      function measure() {
+        boxW = box.clientWidth || 1;
+        boxH = box.clientHeight || 1;
       }
       box.addEventListener('pointermove', function (e) {
         var r = box.getBoundingClientRect();
-        tx = ((e.clientX - r.left) / r.width) * 100;
-        ty = ((e.clientY - r.top) / r.height) * 100;
-        hud.style.display = 'block';
+        boxW = r.width || 1; boxH = r.height || 1;
+        tx = ((e.clientX - r.left) / boxW) * 100;
+        ty = ((e.clientY - r.top) / boxH) * 100;
+        pointing = true;
+        if (hud.style.display !== 'block') hud.style.display = 'block';
         if (!raf) raf = requestAnimationFrame(loop);
       }, { passive: true });
-      box.addEventListener('pointerleave', function () { hud.style.display = 'none'; if (call) call.classList.remove('on'); });
-      if ('IntersectionObserver' in window) {
-        new IntersectionObserver(function (en) { seen = en[0].isIntersecting; if (!seen && raf) { cancelAnimationFrame(raf); raf = 0; } }).observe(box);
-      } else seen = true;
+      box.addEventListener('pointerleave', function () {
+        pointing = false;
+        hud.style.display = 'none';
+        if (call) call.classList.remove('on');
+      });
+      window.addEventListener('resize', measure);
     })();
 
     (function atmo() {
       var stage = document.getElementById('deliStage');
       if (!stage) return;
-      var canvas = document.createElement('canvas');
-      canvas.className = 'ch-atmo';
-      stage.prepend(canvas);
-      var ctx = canvas.getContext('2d');
-      var on = false, raf = 0, seen = false, scan = 0;
-      function chapter() {
-        var ids = ['deliCh1', 'deliCh2', 'deliCh3'];
+      var layer = document.createElement('div');
+      layer.className = 'ch-atmo';
+      layer.setAttribute('aria-hidden', 'true');
+      var scan = document.createElement('span');
+      scan.className = 'scan';
+      layer.appendChild(scan);
+      for (var n = 0; n < 10; n++) {
+        var dot = document.createElement('span');
+        dot.style.cssText = 'left:' + (8 + (n * 9) % 84) + '%;top:' + (15 + (n * 17) % 70) + '%;width:' + (n % 2 ? 10 : 4) + 'px;height:' + (n % 2 ? 4 : 4) + 'px;background:' + (n % 2 ? '#D4AF37' : '#FFA03C') + ';animation-delay:' + (-n * 0.8) + 's';
+        layer.appendChild(dot);
+      }
+      stage.prepend(layer);
+      var chapters = ['deliCh1', 'deliCh2', 'deliCh3'].map(function (id) { return document.getElementById(id); });
+      var shown = -1;
+      function sync() {
         var best = 0, op = -1;
-        for (var i = 0; i < ids.length; i++) {
-          var el = document.getElementById(ids[i]);
-          var o = el ? parseFloat(el.style.opacity || '0') : 0;
+        for (var i = 0; i < chapters.length; i++) {
+          var o = chapters[i] ? parseFloat(chapters[i].style.opacity || '0') : 0;
           if (o > op) { op = o; best = i; }
         }
-        return best;
+        if (best === shown) return;
+        shown = best;
+        layer.setAttribute('data-ch', String(best));
+        scan.style.opacity = best === 0 ? '1' : '0';
       }
-      function draw(now) {
-        raf = 0;
-        if (!on) return;
-        var ch = chapter();
-        canvas.width = stage.clientWidth; canvas.height = stage.clientHeight;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        if (ch === 0) {
-          scan = (scan + 2) % canvas.height;
-          ctx.strokeStyle = 'rgba(180,230,255,.75)';
-          ctx.lineWidth = 1;
-          ctx.beginPath(); ctx.moveTo(0, scan); ctx.lineTo(canvas.width, scan); ctx.stroke();
-        } else if (ch === 1) {
-          for (var i = 0; i < 16; i++) {
-            var y = canvas.height - ((now / 30 + i * 40) % (canvas.height + 40));
-            ctx.fillStyle = 'rgba(255,160,60,.18)';
-            ctx.beginPath();
-            ctx.ellipse(canvas.width * (0.3 + (i % 5) * 0.1), y, 30, 14, 0, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        } else {
-          for (var s = 0; s < 22; s++) {
-            var x = (Math.sin(s + now / 1400) * 0.5 + 0.5) * canvas.width;
-            var y2 = (Math.cos(s * 1.7 + now / 1600) * 0.5 + 0.5) * canvas.height;
-            ctx.fillStyle = s % 2 ? 'rgba(212,175,55,.8)' : 'rgba(120,40,20,.7)';
-            ctx.beginPath();
-            ctx.ellipse(x, y2, s % 2 ? 6 : 2, s % 2 ? 1.5 : 2, s, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
-        if (on) raf = requestAnimationFrame(draw);
-      }
-      function start() { if (on || reduce || !seen || document.hidden) return; on = true; raf = requestAnimationFrame(draw); }
-      function stop() { on = false; if (raf) cancelAnimationFrame(raf); }
       if ('IntersectionObserver' in window) {
-        new IntersectionObserver(function (en) { seen = en[0].isIntersecting; seen ? start() : stop(); }).observe(stage);
-      } else { seen = true; start(); }
-      document.addEventListener('visibilitychange', function () { document.hidden ? stop() : start(); });
+        new IntersectionObserver(function (en) {
+          layer.classList.toggle('is-live', en[0].isIntersecting && !document.hidden && !reduce);
+          if (en[0].isIntersecting) sync();
+        }).observe(stage);
+      }
+      window.addEventListener('scroll', sync, { passive: true });
+      sync();
     })();
 
     var cut = document.getElementById('heritageCut');

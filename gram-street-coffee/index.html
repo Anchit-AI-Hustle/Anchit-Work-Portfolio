@@ -622,20 +622,18 @@
   .walk-facade {
     position: absolute; inset: 0; z-index: 30; pointer-events: none;
     transform-origin: 50% 58%;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
   }
   .walk-facade svg { display: block; width: 100%; height: 100%; }
   .walk-reflect {
     position: absolute; inset: 0; pointer-events: none;
-    background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.28) 48%, transparent 58%);
-    mix-blend-mode: screen; opacity: .55;
+    background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,.22) 48%, transparent 66%);
+    opacity: .7;
   }
   .walk-flare {
     position: absolute; left: 50%; top: 42%; width: 18vw; height: 70vh;
     translate: -50% -50%;
-    background: linear-gradient(90deg, transparent, rgba(255,244,220,.85), rgba(205,184,247,.35), transparent);
-    filter: blur(8px); opacity: 0; pointer-events: none;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,244,220,.55) 42%, rgba(205,184,247,.28) 58%, transparent 100%);
+    opacity: 0; pointer-events: none;
   }
   .walk.is-past .walk-facade, .walk.is-past .walk-flare { will-change: auto; }
   .walk-frame {
@@ -954,9 +952,16 @@
   .pour-overlay path { fill: none; stroke: #F4EFE6; stroke-width: 3; stroke-linecap: round; }
   .pour-sheen {
     position: absolute; inset: 0; z-index: 4; pointer-events: none;
-    background: radial-gradient(120px 80px at var(--sx, 50%) var(--sy, 40%), rgba(255,255,255,.55), transparent 70%);
-    mix-blend-mode: screen;
+    background: radial-gradient(120px 80px at var(--sx, 50%) var(--sy, 40%), rgba(255,255,255,.35), transparent 70%);
   }
+  .ch-ambient, .ch-atmo { position: absolute; inset: 0; overflow: hidden; pointer-events: none; contain: strict; }
+  .ch-ambient span, .ch-atmo span {
+    position: absolute; border-radius: 50%; opacity: .45;
+    animation: moteDrift 9s linear infinite;
+    animation-play-state: paused;
+  }
+  .ch-ambient.is-live span, .ch-atmo.is-live span { animation-play-state: running; }
+  @keyframes moteDrift { to { translate: 12px -28px; } }
   .bean-disc { width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 16px; }
   .note-pill { display: inline-block; animation: noteFloat 3.6s ease-in-out infinite; }
   .note-pill:nth-child(2) { animation-delay: -.6s; }
@@ -964,10 +969,10 @@
   .note-pill:nth-child(4) { animation-delay: -2.1s; }
   @keyframes noteFloat { 50% { translate: 0 -6px; } }
   .ctx-pill {
-    position: fixed; z-index: 1000000; pointer-events: none;
+    position: fixed; z-index: 1000000; left: 0; top: 0; pointer-events: none;
     padding: 6px 10px; border-radius: 999px; font-size: 10px; font-weight: 800;
     letter-spacing: .14em; text-transform: uppercase; color: #F1E9FF; background: #2B1650;
-    translate: 16px 18px; opacity: 0;
+    translate: -100px -100px; opacity: 0;
   }
   .ctx-pill.on { opacity: 1; }
   #chapters .stage { --surface-tint: #2A1810; --accent-glow: rgba(110,68,255,.45); }
@@ -2587,9 +2592,12 @@
   let fogBase = null;
   let fogRaf = 0;
 
+  var fogDrawn = 0;
   function paintFog(now) {
     fogRaf = 0;
     if (!fogBase || !scratchCtx) return;
+    if (now - fogDrawn < 32) { fogRaf = requestAnimationFrame(paintFog); return; }
+    fogDrawn = now;
     scratchCtx.globalCompositeOperation = 'source-over';
     scratchCtx.putImageData(fogBase, 0, 0);
     const live = [];
@@ -3137,12 +3145,9 @@
           p.r = 10 + Math.random() * 14;
           p.alpha = 0.12 + Math.random() * 0.18;
         }
-        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
-        g.addColorStop(0, `rgba(255, 255, 255, ${p.alpha})`);
-        g.addColorStop(1, 'rgba(255, 255, 255, 0)');
-        ctx.fillStyle = g;
+        ctx.fillStyle = 'rgba(255,255,255,' + p.alpha.toFixed(3) + ')';
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, Math.max(2, p.r * 0.35), 0, Math.PI * 2);
         ctx.fill();
       });
       if (steamOn) steamRaf = requestAnimationFrame(renderSteam);
