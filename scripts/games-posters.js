@@ -17,7 +17,7 @@ const { chromium } = require('./_playwright.js');
 
 const BASE = (process.env.BASE || 'http://127.0.0.1:8099').replace(/\/$/, '');
 const ROOT = path.join(__dirname, '..');
-const GAMES = ['saffron-city', 'midnight-apex', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'sky-thread', 'tiffin-dash'];
+const GAMES = ['saffron-city', 'midnight-apex', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'sky-thread', 'tiffin-dash', 'board-strike', 'yard-catch', 'rally-cage', 'fare-run'];
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // How long to play before the photo, and what to hold. Tuned per game so the
@@ -31,6 +31,10 @@ const PLAY = {
   'court-lights': { ms: 2800, keys: [], taps: ['Space'], tapAt: 700 },
   'sky-thread': { ms: 3500, keys: ['ArrowUp', 'ArrowRight'], taps: ['Space'], tapAt: 500 },
   'tiffin-dash': { ms: 2800, keys: ['ArrowUp'], taps: ['Space'], tapAt: 400 },
+  'board-strike': { ms: 2600, keys: ['ArrowRight'], taps: ['Space'], tapAt: 500 },
+  'yard-catch': { ms: 2800, keys: ['ArrowRight'], taps: [] },
+  'rally-cage': { ms: 2800, keys: ['ArrowRight'], taps: ['Space'], tapAt: 200 },
+  'fare-run': { ms: 2800, keys: ['ArrowRight'], taps: [] },
 };
 
 async function shoot(browser, slug) {
@@ -60,8 +64,8 @@ async function shoot(browser, slug) {
 
 async function sheet() {
   const W = 1200, H = 630;
-  // Eight posters in a 4 by 2 grid.
-  const cellW = 300, cellH = 315;
+  // Twelve posters in a 4 by 3 grid.
+  const cellW = 300, cellH = 210;
   const thumbs = await Promise.all(GAMES.map((g) => sharp(path.join(ROOT, 'games', g, 'poster.png')).resize(cellW, cellH, { fit: 'cover' }).toBuffer()));
   const comp = thumbs.map((b, i) => ({ input: b, left: (i % 4) * cellW, top: Math.floor(i / 4) * cellH }));
   const label = Buffer.from(
