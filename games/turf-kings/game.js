@@ -1762,7 +1762,7 @@
     const q = S.say, a = clamp(Math.min(q.age / 0.2, (q.life - q.age) / 0.4), 0, 1);
     g.save(); g.globalAlpha = a;
     g.font = 'italic 500 15px ' + F_DISP; const tw = g.measureText(q.text).width + 28;
-    const y = 86;
+    const y = 84;
     plate(g, w / 2 - tw / 2, y, tw, 28, 14, 'rgba(15,13,10,.78)');
     g.fillStyle = '#fbf5ec'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(q.text, w / 2, y + 14.5);
     g.restore();
@@ -1808,13 +1808,13 @@
       P(HL, pen.aimY, pen.aimH);
       g.strokeStyle = '#ffd23d'; g.lineWidth = 2; const r = Math.max(7, 6 * CAM.s);
       g.beginPath(); g.arc(PX, PY, r, 0, TAU); g.moveTo(PX - r * 1.6, PY); g.lineTo(PX - r * 0.5, PY); g.moveTo(PX + r * 1.6, PY); g.lineTo(PX + r * 0.5, PY); g.moveTo(PX, PY - r * 1.6); g.lineTo(PX, PY - r * 0.5); g.moveTo(PX, PY + r * 1.6); g.lineTo(PX, PY + r * 0.5); g.stroke();
-      const bw = 170, bx = w / 2 - bw / 2, by = h - (arc.touchMode ? 200 : 74);
+      const bw = 170, bx = w / 2 - bw / 2, by = h - (arc.touchMode ? (arc.hudPad ? arc.hudPad().bottom : 188) : 74);
       plate(g, bx - 6, by - 6, bw + 12, 32, 10, 'rgba(15,13,10,.78)');
       g.fillStyle = 'rgba(251,245,236,.15)'; rrPath(g, bx, by + 14, bw, 6, 3); g.fill();
       g.fillStyle = pen.charge > 0.92 ? '#ff4d1f' : '#ffb736'; rrPath(g, bx, by + 14, Math.max(2, bw * pen.charge), 6, 3); g.fill();
       g.font = '600 11px ' + F_MONO; g.fillStyle = '#fbf5ec'; g.textAlign = 'center'; g.fillText('AIM, THEN HOLD SHOOT', w / 2, by + 5);
     } else if (pen.stage === 'aim' && pen.team === 1 && !S.demo) {
-      const by = h - (arc.touchMode ? 200 : 74);
+      const by = h - (arc.touchMode ? (arc.hudPad ? arc.hudPad().bottom : 188) : 74);
       plate(g, w / 2 - 120, by - 6, 240, 32, 10, 'rgba(15,13,10,.78)');
       g.font = '600 11px ' + F_MONO; g.fillStyle = '#fbf5ec'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('KEEPER: LEFT, UP OR RIGHT TO DIVE', w / 2, by + 10);
     }
@@ -1932,6 +1932,10 @@
   arc = Arcade.create({
     slug: 'turf-kings', title: 'Turf Kings', genre: 'Arcade football',
     hint: 'WASD move | J pass | K shoot | L sprint | Q switch',
+    pauseHtml() {
+      if (!S) return '';
+      return '<div class="stat"><div>Score<b>' + S.score[0] + ' - ' + S.score[1] + '</b></div><div>Clock<b>' + matchClock() + '</b></div></div>';
+    },
     keys: [
       ['WASD / Arrows', 'Move'],
       ['L / Shift', 'Sprint (hold)'],

@@ -2052,7 +2052,7 @@
     }
     // district toast
     const d = districtAt(pl.x, pl.y);
-    if (G.district !== d) { const first = !G.district; G.district = d; if (!first || true) arc.toast(d.name, 'Entering', 1700); }
+    if (G.district !== d) { const first = !G.district; G.district = d; if (!first) arc.toast(d.name, 'Entering', 1700); }
     // prompt
     const t = arc.touchMode, key = t ? 'Tap Car' : 'Press F';
     G.prompt = '';
@@ -2631,7 +2631,7 @@
     // prompt
     if (G.prompt && !G.mapOpen) {
       c.font = '600 14px ' + F_UI;
-      const pw = c.measureText(G.prompt).width + 28, py = t ? h - 200 : h - pad - 30;
+      const pw = c.measureText(G.prompt).width + 28, py = t ? h - (arc.hudPad ? arc.hudPad().bottom : 188) - 18 : h - pad - 30;
       plate(c, w / 2 - pw / 2, py - 18, pw, 36, 18, 0.78);
       text(c, G.prompt, w / 2, py, '600 14px ' + F_UI, '#FFB736', 'center');
     }

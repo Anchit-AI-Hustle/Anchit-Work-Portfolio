@@ -35,7 +35,7 @@ body.arcade {
   -webkit-user-select: none; user-select: none;
 }
 body.arcade button { font: inherit; color: inherit; }
-body.arcade :focus-visible { outline: 2px solid var(--accent-warm); outline-offset: 2px; }
+body.arcade :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 .arc-app { position: fixed; inset: 0; display: flex; flex-direction: column; height: 100vh; }
 /* The cookie bar is a fixed dialog with a z-index above the stage, so on a
@@ -84,8 +84,9 @@ html[data-consent-open="1"] body.arcade .arc-app {
 .arc-panel[hidden] { display: none; }
 .arc-card {
   width: min(560px, 100%); max-height: 100%; overflow: auto; overscroll-behavior: contain;
+  display: flex; flex-direction: column;
   background: var(--bg-elev); border: 1px solid var(--rule-strong); border-radius: 16px;
-  padding: clamp(18px, 4vw, 30px); box-shadow: 0 30px 80px rgba(0,0,0,.55);
+  padding: clamp(18px, 4vw, 30px); box-shadow: 0 32px 64px rgba(0,0,0,.5);
   -webkit-user-select: text; user-select: text;
 }
 .arc-card .eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
@@ -109,22 +110,30 @@ html[data-consent-open="1"] body.arcade .arc-app {
   background: transparent; color: var(--ink-dim); cursor: pointer; font-size: 14px;
 }
 .arc-seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-.arc-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+.arc-actions {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  position: sticky; bottom: 0; z-index: 2; margin-top: auto;
+  background: var(--bg-elev); padding-top: 12px;
+  box-shadow: 0 -16px 16px var(--bg-elev);
+}
 .arc-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 20px;
   border-radius: 999px; border: 1px solid var(--rule-strong); background: transparent; color: var(--ink);
   cursor: pointer; font-size: 16px; font-weight: 500; text-decoration: none;
 }
 .arc-btn:hover { border-color: var(--ink-mute); }
-.arc-btn.primary { background: var(--primary); border-color: var(--primary); color: var(--bg); }
-.arc-btn.primary:hover { background: var(--primary-deep); border-color: var(--primary-deep); }
+.arc-btn.primary {
+  background: linear-gradient(100deg, var(--primary), var(--primary-deep));
+  border-color: transparent; color: #1a0d06;
+}
+.arc-btn.primary:hover { background: linear-gradient(100deg, var(--primary-deep), var(--primary)); border-color: transparent; }
 
 /* Toast: short in-game messages ("Mission complete", "Four!") */
 .arc-toast {
   position: absolute; left: 50%; top: 14%; transform: translate(-50%, 0); z-index: 3; pointer-events: none;
-  font-family: var(--font-display); font-size: clamp(25px, 5vw, 39px); color: var(--ink); text-align: center;
+  font-family: var(--font-display); font-size: clamp(20px, 4.2vw, 31px); color: var(--ink); text-align: center;
   text-shadow: 0 2px 18px rgba(0,0,0,.7); opacity: 0; transition: opacity .25s ease, transform .25s ease;
-  white-space: nowrap; max-width: 92%;
+  white-space: normal; text-wrap: balance; line-height: 1.15; padding: 0 16px; max-width: min(92%, 28ch);
 }
 .arc-toast small { display: block; font-family: var(--font-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent-warm); }
 .arc-toast.show { opacity: 1; transform: translate(-50%, -6px); }
@@ -137,7 +146,8 @@ html[data-consent-open="1"] body.arcade .arc-app {
 .arc-stick {
   position: absolute; left: max(18px, env(safe-area-inset-left)); bottom: max(18px, env(safe-area-inset-bottom));
   width: 132px; height: 132px; border-radius: 50%; pointer-events: auto; touch-action: none;
-  background: rgba(15,13,10,.42); border: 1px solid rgba(251,245,236,.22);
+  background: rgba(15,13,10,.55); border: 1px solid rgba(251,245,236,.28);
+  box-shadow: 0 12px 32px rgba(0,0,0,.4);
 }
 .arc-stick i {
   position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%;

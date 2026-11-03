@@ -1833,7 +1833,7 @@
     if (G.view !== 'bat' || !G.fieldPos || G.phase === 'result') return;
     const w = arc.w;
     const R = w > 700 ? 52 : 42;
-    const cx = w - 10 - Rw / 2, cy = 116 + R + 4;
+    const cx = w - 10 - Rw / 2, cy = 132 + R + 4;
     const sc = R / (ROPE + 2);
     const X = (x) => cx + x * sc, Y = (z) => cy - z * sc;
     ctx.fillStyle = 'rgba(10,9,7,0.7)'; ctx.beginPath(); ctx.arc(cx, cy, R + 4, 0, TAU); ctx.fill();
@@ -1867,7 +1867,7 @@
     const touch = arc.touchMode;
     const Lw = Math.min(244, w * 0.6), Rw = Math.min(176, w - Lw - 28);
     // score plate
-    plate(ctx, 10, 8, Lw, 100, 12);
+    plate(ctx, 10, 8, Lw, 118, 12);
     txt(ctx, (MODE_NAME[G.mode] + ' / ' + DIFFS[G.diff].label).toUpperCase(), 22, 25, 10, C.gold, 600, 'left', FONT_MONO);
     txt(ctx, G.runs + '/' + G.wkts, 22, 60, 34, C.ink, 500, 'left', FONT_DISP);
     const left = G.ballsTotal - G.balls;
@@ -1883,11 +1883,11 @@
       txt(ctx, 'Need ' + need + ' to win', 22, 80, 13, C.ink, 600);
       txt(ctx, 'RRR ' + rrr.toFixed(1), 10 + Lw - 14, 80, 12, rrr > 14 ? C.prim : C.warm, 600, 'right', FONT_MONO);
     }
-    drawChips(ctx, 14, 95, 8);
+    drawChips(ctx, 22, 108, 8);
     // bowler / batter plate
     if (Rw > 90) {
       const rx = w - 10 - Rw;
-      plate(ctx, rx, 8, Rw, 100, 12);
+      plate(ctx, rx, 8, Rw, 118, 12);
       const bw = G.bowler;
       txt(ctx, bw && bw.pace ? 'PACE' : 'SPIN', rx + 12, 25, 10, C.gold, 600, 'left', FONT_MONO);
       txt(ctx, bw ? short(bw.name) : '', rx + 12, 44, 14, C.ink, 700);
@@ -1908,7 +1908,7 @@
       ctx.globalAlpha = 1;
     }
     // bottom cues
-    const by = h - (touch ? 176 : 54);
+    const by = h - (touch ? (arc.hudPad ? arc.hudPad().bottom : 188) : 54);
     if (G.phase === 'field') {
       if (FS.runPrompt && FS.runPrompt.show && !FS.ended) {
         const m = FS.runPrompt.margin;

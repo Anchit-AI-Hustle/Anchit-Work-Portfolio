@@ -2394,7 +2394,7 @@
       ['Left, Right / A, D', 'Placement bias: behind, or to the front'],
       ['R', 'Run between the crate and the chalk line'],
     ],
-    touch: { stick: true, pads: [{ label: 'Bat', key: 'Space', big: true, hot: true }, { label: 'Run', key: 'KeyR' }, { label: 'Loft', key: 'ArrowUp' }] },
+    touch: { stick: true, pads: [{ label: 'Bat', key: 'Space', big: true, hot: true }, { label: 'Run', key: 'KeyR' }, { label: 'Loft', key: 'ArrowUp' }, { label: 'Ground', key: 'ArrowDown' }] },
     gameKeys: ['KeyR'],
     formatScore: (v) => String(v),
     resize(a) { arc = a; computeView(); V.sig = a.w + 'x' + a.h; },

@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Games | Anchit Tandon</title>
-  <meta name="description" content="Five browser games I built from scratch in plain JavaScript: a city sandbox, a night street racer, five-a-side football, stadium cricket and gully cricket.">
+  <meta name="description" content="Eight original browser games in plain JavaScript: a city sandbox, a night racer, rooftop football, cricket, basketball, kite fighting and a tiffin run.">
   <link rel="canonical" href="https://anchit-tandon.com/games">
   <meta name="theme-color" content="#0F0D0A">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Games | Anchit Tandon">
-  <meta property="og:description" content="Five browser games built from scratch in plain JavaScript. Play on a phone or a laptop, nothing to install.">
+  <meta property="og:description" content="Eight original browser games built from scratch in plain JavaScript. Play on a phone or a laptop, nothing to install.">
   <meta property="og:url" content="https://anchit-tandon.com/games">
   <meta property="og:image" content="https://anchit-tandon.com/games/og.png">
   <meta name="twitter:card" content="summary_large_image">
@@ -29,7 +29,10 @@
       { "@type": "VideoGame", "name": "Midnight Apex", "url": "https://anchit-tandon.com/games/midnight-apex", "genre": "Street racing", "gamePlatform": "Web browser", "playMode": "SinglePlayer" },
       { "@type": "VideoGame", "name": "Turf Kings", "url": "https://anchit-tandon.com/games/turf-kings", "genre": "Arcade football", "gamePlatform": "Web browser", "playMode": "SinglePlayer" },
       { "@type": "VideoGame", "name": "Super Over", "url": "https://anchit-tandon.com/games/super-over", "genre": "Stadium cricket", "gamePlatform": "Web browser", "playMode": "SinglePlayer" },
-      { "@type": "VideoGame", "name": "Gully Champs", "url": "https://anchit-tandon.com/games/gully-champs", "genre": "Gully cricket", "gamePlatform": "Web browser", "playMode": "SinglePlayer" }
+      { "@type": "VideoGame", "name": "Gully Champs", "url": "https://anchit-tandon.com/games/gully-champs", "genre": "Gully cricket", "gamePlatform": "Web browser", "playMode": "SinglePlayer" },
+      { "@type": "VideoGame", "name": "Court Lights", "url": "https://anchit-tandon.com/games/court-lights", "genre": "Street basketball", "gamePlatform": "Web browser", "playMode": "SinglePlayer" },
+      { "@type": "VideoGame", "name": "Sky Thread", "url": "https://anchit-tandon.com/games/sky-thread", "genre": "Kite fighting", "gamePlatform": "Web browser", "playMode": "SinglePlayer" },
+      { "@type": "VideoGame", "name": "Tiffin Dash", "url": "https://anchit-tandon.com/games/tiffin-dash", "genre": "Arcade runner", "gamePlatform": "Web browser", "playMode": "SinglePlayer" }
     ]
   }
   </script>
@@ -53,7 +56,7 @@
       --font-mono: 'JetBrains Mono', ui-monospace, monospace;
       --gutter: clamp(16px, 4vw, 48px);
       --maxw: 1240px;
-      --radius: 14px;
+      --radius: 16px;
     }
     * { box-sizing: border-box; }
     html { -webkit-text-size-adjust: 100%; }
@@ -63,7 +66,7 @@
       -webkit-font-smoothing: antialiased; overflow-x: clip;
     }
     a { color: inherit; }
-    :focus-visible { outline: 2px solid var(--accent-warm); outline-offset: 3px; }
+    :focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
     .wrap { width: min(var(--maxw), 100% - 2 * var(--gutter)); margin-inline: auto; }
     .mono { font-family: var(--font-mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-dim); }
 
@@ -90,12 +93,22 @@
     .hero h1 em { font-style: italic; color: var(--accent); }
     .hero p { max-width: 62ch; color: var(--ink-dim); font-size: clamp(16px, 1.6vw, 20px); margin: 0; }
     .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
-    .chips span { font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; color: var(--ink-dim); border: 1px solid var(--rule-strong); border-radius: 999px; padding: 6px 12px; }
+    .chips span, .filt button {
+      font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; color: var(--ink-dim);
+      border: 1px solid var(--rule-strong); border-radius: 999px; padding: 6px 12px; background: transparent;
+    }
 
-    /* Featured game: the first card, wide */
+    .toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 20px; }
+    .filt { display: flex; flex-wrap: wrap; gap: 8px; }
+    .filt button { cursor: pointer; min-height: 44px; color: var(--ink-dim); }
+    .filt button:hover { color: var(--ink); border-color: var(--ink-mute); }
+    .filt button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+    .count { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); }
+
     .grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 20px; }
     .game { grid-column: span 4; }
     .game.feature { grid-column: span 12; }
+    .game[hidden] { display: none; }
     @media (max-width: 1080px) { .game { grid-column: span 6; } }
     @media (max-width: 680px) { .game, .game.feature { grid-column: span 12; } }
 
@@ -103,8 +116,9 @@
       position: relative; height: 100%; display: flex; flex-direction: column; overflow: hidden;
       background: var(--bg-elev); border: 1px solid var(--rule); border-radius: var(--radius);
       transition: border-color .2s ease, transform .2s ease;
+      box-shadow: 0 12px 32px rgba(0,0,0,.4);
     }
-    .card:hover { border-color: var(--rule-strong); transform: translateY(-2px); }
+    .card:hover { border-color: var(--primary); transform: translateY(-2px); }
     @media (prefers-reduced-motion: reduce) { .card, .card:hover { transition: none; transform: none; } }
     .feature .card { display: grid; grid-template-columns: 1.35fr 1fr; }
     @media (max-width: 860px) { .feature .card { grid-template-columns: 1fr; } }
@@ -116,7 +130,21 @@
     @media (prefers-reduced-motion: reduce) { .thumb img, .card:hover .thumb img { transition: none; transform: none; } }
     .thumb .genre {
       position: absolute; left: 12px; top: 12px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em;
-      text-transform: uppercase; background: rgba(6,5,3,.78); color: var(--accent-warm); padding: 5px 9px; border-radius: 6px;
+      text-transform: uppercase; background: rgba(6,5,3,.78); color: var(--accent-warm); padding: 5px 9px; border-radius: 8px; z-index: 1;
+    }
+    .thumb .fresh {
+      position: absolute; right: 12px; top: 12px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em;
+      text-transform: uppercase; background: var(--accent-warm); color: #1a1206; padding: 5px 9px; border-radius: 8px; font-weight: 500; z-index: 1;
+    }
+    .thumb .play {
+      position: absolute; left: 14px; bottom: 14px; width: 46px; height: 46px; border-radius: 50%;
+      background: linear-gradient(100deg, var(--primary), var(--primary-deep));
+      display: grid; place-items: center; box-shadow: 0 6px 24px rgba(0,0,0,.5); z-index: 1;
+    }
+    .thumb .play svg { width: 18px; height: 18px; fill: #1a0d06; margin-left: 3px; }
+    .thumb .dur {
+      position: absolute; right: 12px; bottom: 16px; font-family: var(--font-mono); font-size: 12px;
+      background: rgba(0,0,0,.65); padding: 4px 8px; border-radius: 6px; z-index: 1;
     }
     .body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
     .feature .body { padding: clamp(20px, 3vw, 36px); justify-content: center; }
@@ -132,9 +160,10 @@
     .row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: auto; padding-top: 6px; }
     .btn {
       position: relative; z-index: 2; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px;
-      border-radius: 999px; background: var(--primary); color: var(--bg); text-decoration: none; font-weight: 500; font-size: 15px;
+      border-radius: 999px; background: linear-gradient(100deg, var(--primary), var(--primary-deep)); color: #1a0d06;
+      text-decoration: none; font-weight: 500; font-size: 15px;
     }
-    .btn:hover { background: var(--primary-deep); }
+    .btn:hover { background: linear-gradient(100deg, var(--primary-deep), var(--primary)); }
     .btn svg { width: 14px; height: 14px; fill: currentColor; }
 
     section.how { padding: clamp(40px, 6vw, 72px) 0 0; }
@@ -142,11 +171,15 @@
     @media (max-width: 860px) { .how .cols { grid-template-columns: 1fr; } }
     .how h2 { font-family: var(--font-display); font-weight: 400; font-size: clamp(25px, 3vw, 31px); margin: 0 0 18px; letter-spacing: -.01em; }
     .how h3 { font-family: var(--font-display); font-weight: 500; font-size: 20px; margin: 8px 0 6px; }
-    .how p { color: var(--ink-dim); font-size: 15px; margin: 0; }
+    .how p { color: var(--ink-dim); font-size: 16px; margin: 0; }
     .how .cell { border-top: 1px solid var(--rule-strong); padding-top: 14px; }
 
     footer.site { margin-top: clamp(48px, 8vw, 96px); border-top: 1px solid var(--rule); padding: 28px 0 calc(28px + env(safe-area-inset-bottom)); color: var(--ink-dim); font-size: 13px; }
     footer.site .wrap { display: flex; flex-wrap: wrap; gap: 10px 28px; justify-content: space-between; }
+    footer.site a { color: var(--ink-dim); }
+    /* Cookie bar is fixed over the page. Pad the document so the last cards
+       and the featured Play button stay reachable on a first visit. */
+    html[data-consent-open="1"] body { padding-bottom: var(--consent-h, 0px); }
   </style>
 </head>
 <body>
@@ -159,6 +192,7 @@
       <nav class="top" aria-label="Page">
         <a href="#games">Games</a>
         <a href="#how">How they are made</a>
+        <a class="hide-sm" href="/movies">Films</a>
         <a class="hide-sm" href="/">Portfolio</a>
       </nav>
     </div>
@@ -168,19 +202,31 @@
     <section class="hero wrap">
       <div class="mono">Games, made in code</div>
       <h1>Pick a game. <em>Play it here.</em></h1>
-      <p>Five games I built from scratch in plain JavaScript and canvas: a city to roam, a night race, rooftop football and two kinds of cricket, from the floodlit stadium to the lane outside home. No downloads, no sign-in. They run in the browser on a phone or a laptop.</p>
+      <p>Eight games I built from scratch in plain JavaScript and canvas: a city to roam, a night race, rooftop football, two kinds of cricket, a floodlit basketball cage, kite fighting at dusk and a tiffin run through the bazaar. No downloads, no sign-in. They run in the browser on a phone or a laptop.</p>
       <div class="chips" aria-label="Works with">
         <span>Keyboard</span><span>Touch</span><span>Phone, tablet, desktop</span><span>Best scores saved on this device</span>
       </div>
     </section>
 
     <section id="games" class="wrap" aria-label="Games">
+      <div class="toolbar">
+        <div class="filt" role="group" aria-label="Filter games">
+          <button type="button" data-filter="all" aria-pressed="true">All</button>
+          <button type="button" data-filter="city">City</button>
+          <button type="button" data-filter="racing">Racing</button>
+          <button type="button" data-filter="sports">Sports</button>
+          <button type="button" data-filter="arcade">Arcade</button>
+        </div>
+        <div class="count" data-count></div>
+      </div>
       <div class="grid">
-        <article class="game feature" data-slug="saffron-city" data-format="cash">
+        <article class="game feature" data-slug="saffron-city" data-format="cash" data-genre="city">
           <div class="card">
             <a class="thumb" href="/games/saffron-city" tabindex="-1" aria-hidden="true">
               <img src="/games/saffron-city/poster.webp" alt="" width="1200" height="630" loading="eager" decoding="async">
               <span class="genre">Open-world sandbox</span>
+              <span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+              <span class="dur">Free roam or 10 min</span>
             </a>
             <div class="body">
               <h2><a href="/games/saffron-city">Saffron City</a></h2>
@@ -196,11 +242,13 @@
           </div>
         </article>
 
-        <article class="game" data-slug="midnight-apex" data-format="time">
+        <article class="game" data-slug="midnight-apex" data-format="time" data-genre="racing">
           <div class="card">
             <a class="thumb" href="/games/midnight-apex" tabindex="-1" aria-hidden="true">
               <img src="/games/midnight-apex/poster.webp" alt="" width="1200" height="630" loading="lazy" decoding="async">
               <span class="genre">Street racing</span>
+              <span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+              <span class="dur">3 laps</span>
             </a>
             <div class="body">
               <h2><a href="/games/midnight-apex">Midnight Apex</a></h2>
@@ -211,11 +259,13 @@
           </div>
         </article>
 
-        <article class="game" data-slug="turf-kings" data-format="points">
+        <article class="game" data-slug="turf-kings" data-format="points" data-genre="sports">
           <div class="card">
             <a class="thumb" href="/games/turf-kings" tabindex="-1" aria-hidden="true">
               <img src="/games/turf-kings/poster.webp" alt="" width="1200" height="630" loading="lazy" decoding="async">
               <span class="genre">Arcade football</span>
+              <span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+              <span class="dur">2 to 6 min</span>
             </a>
             <div class="body">
               <h2><a href="/games/turf-kings">Turf Kings</a></h2>
@@ -226,11 +276,13 @@
           </div>
         </article>
 
-        <article class="game" data-slug="super-over" data-format="runs">
+        <article class="game" data-slug="super-over" data-format="runs" data-genre="sports">
           <div class="card">
             <a class="thumb" href="/games/super-over" tabindex="-1" aria-hidden="true">
               <img src="/games/super-over/poster.webp" alt="" width="1200" height="630" loading="lazy" decoding="async">
               <span class="genre">Stadium cricket</span>
+              <span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+              <span class="dur">6 balls</span>
             </a>
             <div class="body">
               <h2><a href="/games/super-over">Super Over</a></h2>
@@ -241,17 +293,73 @@
           </div>
         </article>
 
-        <article class="game" data-slug="gully-champs" data-format="runs">
+        <article class="game" data-slug="gully-champs" data-format="runs" data-genre="sports">
           <div class="card">
             <a class="thumb" href="/games/gully-champs" tabindex="-1" aria-hidden="true">
               <img src="/games/gully-champs/poster.webp" alt="" width="1200" height="630" loading="lazy" decoding="async">
               <span class="genre">Gully cricket</span>
+              <span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+              <span class="dur">3 overs</span>
             </a>
             <div class="body">
               <h2><a href="/games/gully-champs">Gully Champs</a></h2>
               <p>A taped tennis ball, a crate for stumps and the house rules: one tip one hand, break a window and you are out.</p>
               <div class="meta"><span>Your best <b data-best>none yet</b></span></div>
               <div class="row"><a class="btn" href="/games/gully-champs"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg>Play</a></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="game" data-slug="court-lights" data-format="points" data-genre="sports">
+          <div class="card">
+            <a class="thumb" href="/games/court-lights" tabindex="-1" aria-hidden="true">
+              <img src="/games/court-lights/poster.webp" alt="" width="1200" height="630" loading="lazy" decoding="async">
+              <span class="genre">Street basketball</span>
+              <span class="fresh">New</span>
+              <span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+              <span class="dur">60 sec</span>
+            </a>
+            <div class="body">
+              <h2><a href="/games/court-lights">Court Lights</a></h2>
+              <p>A rooftop cage at night. Charge the shot, pick your angle and string makes together before the buzzer.</p>
+              <div class="meta"><span>Your best <b data-best>none yet</b></span></div>
+              <div class="row"><a class="btn" href="/games/court-lights"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg>Play</a></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="game" data-slug="sky-thread" data-format="points" data-genre="arcade">
+          <div class="card">
+            <a class="thumb" href="/games/sky-thread" tabindex="-1" aria-hidden="true">
+              <img src="/games/sky-thread/poster.webp" alt="" width="1200" height="630" loading="lazy" decoding="async">
+              <span class="genre">Kite fighting</span>
+              <span class="fresh">New</span>
+              <span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+              <span class="dur">90 sec</span>
+            </a>
+            <div class="body">
+              <h2><a href="/games/sky-thread">Sky Thread</a></h2>
+              <p>Dusk over the terraces. Steer your kite through the wind, pull the string taut and cut a rival thread before yours is cut.</p>
+              <div class="meta"><span>Your best <b data-best>none yet</b></span></div>
+              <div class="row"><a class="btn" href="/games/sky-thread"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg>Play</a></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="game" data-slug="tiffin-dash" data-format="points" data-genre="arcade">
+          <div class="card">
+            <a class="thumb" href="/games/tiffin-dash" tabindex="-1" aria-hidden="true">
+              <img src="/games/tiffin-dash/poster.webp" alt="" width="1200" height="630" loading="lazy" decoding="async">
+              <span class="genre">Arcade runner</span>
+              <span class="fresh">New</span>
+              <span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+              <span class="dur">Endless</span>
+            </a>
+            <div class="body">
+              <h2><a href="/games/tiffin-dash">Tiffin Dash</a></h2>
+              <p>A side-street dash with a stack of tiffins. Jump the scooters, slide under the carts and get every lunch to the door before it goes cold.</p>
+              <div class="meta"><span>Your best <b data-best>none yet</b></span></div>
+              <div class="row"><a class="btn" href="/games/tiffin-dash"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg>Play</a></div>
             </div>
           </div>
         </article>
@@ -269,7 +377,7 @@
         <div class="cell">
           <div class="mono">One shell</div>
           <h3>Shared controls and screens</h3>
-          <p>All five sit on one small shell that handles the keyboard, the on-screen stick and buttons, pausing, sound and saved scores, so a game only has to be a game.</p>
+          <p>All of them sit on one small shell that handles the keyboard, the on-screen stick and buttons, pausing, sound and saved scores, so a game only has to be a game.</p>
         </div>
         <div class="cell">
           <div class="mono">Original</div>
@@ -283,7 +391,7 @@
   <footer class="site">
     <div class="wrap">
       <div>Games by Anchit Tandon. Best scores stay in this browser and are never sent anywhere.</div>
-      <div><a href="/">anchit-tandon.com</a></div>
+      <div><a href="/movies">Films</a> · <a href="/">anchit-tandon.com</a></div>
     </div>
   </footer>
 
@@ -295,13 +403,33 @@
         runs: function (v) { return Math.round(v) + ' runs'; },
         points: function (v) { return Math.round(v).toLocaleString('en-IN') + ' pts'; }
       };
-      document.querySelectorAll('[data-slug]').forEach(function (el) {
+      var cards = document.querySelectorAll('[data-slug]');
+      cards.forEach(function (el) {
         var best = null;
         try { best = JSON.parse(localStorage.getItem('arcade.best.' + el.getAttribute('data-slug')) || 'null'); } catch (e) { best = null; }
         if (!best || typeof best.score !== 'number') return;
         var f = fmt[el.getAttribute('data-format')] || String;
         var out = el.querySelector('[data-best]');
         if (out) out.textContent = f(best.score);
+      });
+      var count = document.querySelector('[data-count]');
+      var paint = function (n, total) {
+        if (!count) return;
+        count.textContent = n === total ? n + ' games' : n + ' of ' + total;
+      };
+      paint(cards.length, cards.length);
+      document.querySelectorAll('[data-filter]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var id = btn.getAttribute('data-filter');
+          document.querySelectorAll('[data-filter]').forEach(function (b) { b.setAttribute('aria-pressed', String(b === btn)); });
+          var shown = 0;
+          cards.forEach(function (el) {
+            var on = id === 'all' || el.getAttribute('data-genre') === id;
+            el.hidden = !on;
+            if (on) shown++;
+          });
+          paint(shown, cards.length);
+        });
       });
     })();
   </script>
