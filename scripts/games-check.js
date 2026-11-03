@@ -144,7 +144,7 @@ async function game(browser, vp, slug) {
 
   await page.click('.arc-card .arc-btn.primary');
   await sleep(300);
-  const before = await page.evaluate(() => ({ state: window.__arcade.state, frame: window.__arcade.frame, dbg: window.__arcade.debug ? window.__arcade.debug() : null }));
+  const before = await page.evaluate(() => ({ state: window.__arcade.state, frame: window.__arcade.frame, time: window.__arcade.time, dbg: window.__arcade.debug ? window.__arcade.debug() : null }));
   check(`${tag} Play starts the game`, before.state === 'play', before.state);
 
   const touchShown = await page.evaluate(() => { const t = document.querySelector('.arc-touch'); return !!t && getComputedStyle(t).display !== 'none'; });
@@ -152,7 +152,13 @@ async function game(browser, vp, slug) {
 
   await hold(page, vp, 4000);
   const after = await page.evaluate(() => ({ state: window.__arcade.state, frame: window.__arcade.frame, time: window.__arcade.time, dbg: window.__arcade.debug ? window.__arcade.debug() : null }));
-  check(`${tag} frames advance during play`, after.frame - before.frame > 60, `${after.frame - before.frame} frames`);
+  // Prove the loop is alive, not that it holds 15fps. Gully Champs draws a
+  // full street of houses; on a 820×1180 tablet at deviceScaleFactor 2 the
+  // GitHub runner lands around 50–57 frames in this window, which used to
+  // fail a >60 bar while the game was still ticking (MUT=stall still fails).
+  const frames = after.frame - before.frame;
+  const elapsed = (after.time || 0) - (before.time || 0);
+  check(`${tag} frames advance during play`, frames > 20 && elapsed > 1.2, `${frames} frames, ${elapsed.toFixed(2)}s`);
   check(`${tag} game state changes under input`, strip(after.dbg) !== strip(before.dbg), strip(after.dbg).slice(0, 140));
 
   if (after.state === 'play') {
