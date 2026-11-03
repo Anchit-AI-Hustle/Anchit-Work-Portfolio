@@ -16,9 +16,15 @@
   const COLS = ['#FF6940', '#FFB736', '#c9a96e', '#FBF5EC', '#e07a9a', '#7ec8e3'];
 
   let arc;
+  const DIFF = {
+    easy: { rivals: 3, ai: 0.72, spawn: 5.2 },
+    normal: { rivals: 4, ai: 0.95, spawn: 4 },
+    hard: { rivals: 5, ai: 1.22, spawn: 2.8 },
+  };
   const G = {
     t: 0, time: 90, score: 0, cuts: 0, alive: true, phase: 'fly',
     me: null, rivals: [], wind: { x: 0.4, y: 0.15 }, parts: [], roofs: [], attract: true,
+    mode: 'dusk', diff: 'normal',
   };
 
   function kite(col, x, y, ai) {
@@ -38,13 +44,17 @@
   }
   G.roofs = mkRoofs();
 
-  function resetWorld(attract) {
-    G.t = 0; G.time = 90; G.score = 0; G.cuts = 0; G.alive = true; G.phase = 'fly';
+  function resetWorld(attract, ch) {
+    G.mode = (ch && ch.mode) || G.mode || 'dusk';
+    G.diff = (ch && ch.diff) || G.diff || 'normal';
+    G.D = DIFF[G.diff] || DIFF.normal;
+    G.t = 0; G.time = G.mode === 'dusk' ? 90 : 0; G.score = 0; G.cuts = 0; G.alive = true; G.phase = 'fly';
     G.parts.length = 0; G.attract = !!attract;
     G.me = kite(PRIM, 0.5, 0.58, null);
     G.rivals = [];
-    const spots = [[0.16, 0.22], [0.84, 0.22], [0.18, 0.38], [0.82, 0.4]];
-    for (let i = 0; i < 4; i++) {
+    const spots = [[0.16, 0.22], [0.84, 0.22], [0.18, 0.38], [0.82, 0.4], [0.5, 0.16]];
+    const n = min(spots.length, G.D.rivals);
+    for (let i = 0; i < n; i++) {
       G.rivals.push(kite(COLS[(i + 1) % COLS.length], spots[i][0], spots[i][1], {
         tx: spots[i][0], ty: spots[i][1], wait: 1.2 + rnd() * 1.4,
       }));
@@ -100,9 +110,14 @@
   }
 
   function steerMe(dt) {
-    const ax = arc.input.axis();
-    const pull = arc.input.down('Space', 'KeyJ', 'ShiftLeft') ? 1 : 0;
+    const inp = arc.input, ax = inp.axis(), p = inp.pointer;
+    const pull = (inp.action() || inp.down('ShiftLeft', 'ShiftRight')) ? 1 : 0;
     G.me.pull = lerp(G.me.pull, pull, 1 - Math.exp(-dt * 8));
+    const keyed = abs(ax.x) > 0.08 || abs(ax.y) > 0.08;
+    if (!keyed && p && p.seen) {
+      G.me.vx += (p.nx - G.me.x) * dt * 2.6;
+      G.me.vy += (clamp(p.ny, 0.06, 0.72) - G.me.y) * dt * 2.6;
+    }
     G.me.vx += ax.x * dt * 1.6;
     G.me.vy += ax.y * dt * 1.6;
     G.me.vx += G.wind.x * dt * 0.35;
@@ -116,7 +131,8 @@
     const ai = k.ai;
     ai.wait -= dt;
     if (ai.wait <= 0) { ai.tx = 0.12 + rnd() * 0.76; ai.ty = 0.12 + rnd() * 0.55; ai.wait = 1.2 + rnd() * 2.2; }
-    k.vx += (ai.tx - k.x) * dt * 0.9; k.vy += (ai.ty - k.y) * dt * 0.9;
+    const aiMul = (G.D || DIFF.normal).ai;
+    k.vx += (ai.tx - k.x) * dt * 0.9 * aiMul; k.vy += (ai.ty - k.y) * dt * 0.9 * aiMul;
     k.vx += G.wind.x * dt * 0.25; k.vy += G.wind.y * dt * 0.2;
     k.vx *= Math.exp(-dt * 1.4); k.vy *= Math.exp(-dt * 1.4);
     k.x = clamp(k.x + k.vx * dt, 0.06, 0.94);
@@ -147,7 +163,7 @@
 
   function spawnRival() {
     const live = G.rivals.filter((r) => r.alive).length;
-    if (live >= 4) return;
+    if (live >= (G.D || DIFF.normal).rivals) return;
     G.rivals.push(kite(COLS[(rnd() * COLS.length) | 0], rnd() > 0.5 ? 0.08 : 0.92, 0.15 + rnd() * 0.4, {
       tx: 0.3 + rnd() * 0.4, ty: 0.25 + rnd() * 0.35, wait: 0.4,
     }));
@@ -164,7 +180,8 @@
   }
 
   function update(dt) {
-    G.t += dt; G.time -= dt;
+    G.t += dt;
+    if (G.mode === 'dusk') G.time -= dt;
     G.wind.x = 0.25 + 0.35 * sin(G.t * 0.35);
     G.wind.y = 0.08 + 0.12 * cos(G.t * 0.27);
     if (G.phase === 'over') return;
@@ -173,13 +190,15 @@
     stepKite(G.me, dt);
     G.rivals.forEach((r) => stepKite(r, dt));
     fights(dt);
-    if (G.t % 4 < dt + 0.02) spawnRival();
+    const spawnEvery = (G.D || DIFF.normal).spawn;
+    if (G.t % spawnEvery < dt + 0.02) spawnRival();
     for (let i = G.parts.length - 1; i >= 0; i--) {
       const p = G.parts[i]; p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 40 * dt;
       if (p.life <= 0) G.parts.splice(i, 1);
     }
-    if (!G.alive && G.me.cutT > 1.4) finish('Your thread');
-    else if (G.time <= 0) { G.time = 0; finish('Dusk'); }
+    if (!G.alive && G.me.cutT > 2.6) finish('Your thread');
+    else if (G.mode === 'dusk' && G.time <= 0) { G.time = 0; finish('Dusk'); }
+    else if (G.mode === 'hunt' && G.alive && G.cuts >= 6) finish('Sky cleared');
     G.score += dt * 2;
   }
 
@@ -261,8 +280,9 @@
     plate(c, pad.left, pad.top, 150, 64, 12);
     txt(c, 'CUTS', pad.left + 14, pad.top + 16, 10, GOLD, 600, 'left', F_MONO);
     txt(c, String(G.cuts), pad.left + 14, pad.top + 40, 26, INK, 500, 'left', F_DISP);
-    plate(c, w / 2 - 50, pad.top, 100, 44, 12);
-    txt(c, Math.max(0, G.time | 0) + 's', w / 2, pad.top + 22, 22, G.time < 12 ? PRIM : INK, 500, 'center', F_DISP);
+    plate(c, w / 2 - 58, pad.top, 116, 44, 12);
+    const mid = G.mode === 'dusk' ? (Math.max(0, G.time | 0) + 's') : G.mode === 'hunt' ? (G.cuts + ' / 6') : 'ENDLESS';
+    txt(c, mid, w / 2, pad.top + 22, G.mode === 'dusk' ? 22 : 14, G.mode === 'dusk' && G.time < 12 ? PRIM : INK, 500, 'center', G.mode === 'dusk' ? F_DISP : F_MONO);
     plate(c, w - pad.right - 132, pad.top, 132, 44, 12);
     txt(c, G.me.pull > 0.5 ? 'PULLING' : 'GLIDING', w - pad.right - 66, pad.top + 22, 12, G.me.pull > 0.5 ? WARM : INK, 600, 'center', F_MONO);
   }
@@ -283,7 +303,7 @@
   function dbg() {
     const m = G.me || { x: 0, y: 0, pull: 0, alive: false };
     return {
-      phase: G.phase, time: +G.time.toFixed(2), score: Math.round(G.score), cuts: G.cuts, alive: !!G.alive,
+      phase: G.phase, mode: G.mode, diff: G.diff, time: +G.time.toFixed(2), score: Math.round(G.score), cuts: G.cuts, alive: !!G.alive,
       x: +m.x.toFixed(3), y: +m.y.toFixed(3), pull: +m.pull.toFixed(2),
       rivals: G.rivals.filter((r) => r.alive).length, wind: +G.wind.x.toFixed(2), attract: !!G.attract,
     };
@@ -291,22 +311,32 @@
 
   A.create({
     slug: 'sky-thread', title: 'Sky Thread', genre: 'Kite fighting',
-    hint: 'Arrows steer   hold Space to pull and cut',
+    hint: 'Mouse or WASD steer   hold click or Space to pull and cut',
+    touchHint: 'Stick steers, hold Pull to cut',
     keys: [
       ['WASD / Arrows', 'Steer the kite'],
       ['Space / J (hold)', 'Pull the string to cut'],
-      ['P', 'Pause'],
     ],
+    mouse: { steer: 'xy', cursor: 'crosshair', keys: [['Move mouse', 'Steer toward the pointer'], ['Click / hold', 'Pull to cut']] },
     touch: { stick: true, pads: [{ label: 'Pull', key: 'Space', big: true, hot: true }] },
+    touchKeys: [['On-screen stick', 'Steer'], ['Pull (hold)', 'Cut a rival thread']],
     formatScore: (v) => Math.round(v) + ' pts',
     menu: {
       eyebrow: 'Kite fighting',
       title: 'Sky <em>Thread</em>',
       html: '<p>Dusk over the terraces. Steer into a rival line and hold Pull so your thread cuts theirs. If they are pulling harder, yours goes.</p>',
+      options: [
+        { id: 'mode', label: 'Mode', value: 'dusk', choices: [{ v: 'dusk', label: 'Until dusk' }, { v: 'hunt', label: 'Cut six' }, { v: 'endless', label: 'Endless sky' }] },
+        { id: 'diff', label: 'Difficulty', value: 'normal', choices: [{ v: 'easy', label: 'Easy' }, { v: 'normal', label: 'Normal' }, { v: 'hard', label: 'Hard' }] },
+      ],
     },
-    pauseHtml() { return '<div class="stat"><div>Cuts<b>' + G.cuts + '</b></div><div>Time<b>' + Math.max(0, G.time | 0) + 's</b></div></div>'; },
-    init(a) { arc = a; a.debug = dbg; resetWorld(true); a.menu(); },
-    start(a) { arc = a; resetWorld(false); arc.toast('Hold to cut', 'Sky Thread', 1400); },
+    pauseHtml() { return '<div class="stat"><div>Cuts<b>' + G.cuts + '</b></div>' + (G.mode === 'dusk' ? '<div>Time<b>' + Math.max(0, G.time | 0) + 's</b></div>' : '') + '</div>'; },
+    init(a) { arc = a; a.debug = dbg; G.D = DIFF.normal; resetWorld(true); a.menu(); },
+    start(a, ch) {
+      arc = a; resetWorld(false, ch);
+      const label = G.mode === 'hunt' ? 'Cut six threads' : G.mode === 'endless' ? 'Endless sky' : 'Until dusk';
+      arc.toast(label, 'Sky Thread', 1400);
+    },
     update, idle, render,
   });
 })();

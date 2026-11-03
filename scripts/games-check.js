@@ -17,7 +17,7 @@ const { chromium } = require('./_playwright.js');
 
 const BASE = (process.env.BASE || 'http://127.0.0.1:8099').replace(/\/$/, '');
 const MUT = process.env.MUT || '';
-const GAMES = ['saffron-city', 'midnight-apex', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'sky-thread', 'tiffin-dash'];
+const GAMES = ['saffron-city', 'midnight-apex', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'sky-thread', 'tiffin-dash', 'board-strike', 'yard-catch', 'rally-cage', 'fare-run'];
 const VIEWPORTS = [
   { name: 'phone 390', viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 },
   { name: 'tablet 820', viewport: { width: 820, height: 1180 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 },
@@ -131,6 +131,8 @@ async function game(browser, vp, slug) {
   });
   check(`${tag} shell boots to its menu`, !!menu && menu.state === 'menu' && menu.panel, strip(menu));
   check(`${tag} menu card fits the screen`, !!menu && menu.fits);
+  const modes = await page.evaluate(() => Array.from(document.querySelectorAll('.arc-seg')).map((e) => e.getAttribute('data-opt')));
+  check(`${tag} menu offers a mode picker`, modes.includes('mode'), modes.join(','));
 
   const blank = await page.evaluate(() => {
     const c = document.querySelector('.arc-stage canvas');
@@ -150,15 +152,27 @@ async function game(browser, vp, slug) {
   const touchShown = await page.evaluate(() => { const t = document.querySelector('.arc-touch'); return !!t && getComputedStyle(t).display !== 'none'; });
   check(`${tag} touch controls ${vp.hasTouch ? 'shown' : 'hidden'}`, touchShown === vp.hasTouch);
 
+  if (!vp.hasTouch) {
+    const box = await page.locator('.arc-stage canvas').boundingBox();
+    if (box) {
+      await page.mouse.move(box.x + box.width * 0.4, box.y + box.height * 0.45);
+      await page.mouse.down();
+      await sleep(180);
+      await page.mouse.move(box.x + box.width * 0.62, box.y + box.height * 0.5);
+      await page.mouse.up();
+    }
+  }
+
   await hold(page, vp, 4000);
-  const after = await page.evaluate(() => ({ state: window.__arcade.state, frame: window.__arcade.frame, time: window.__arcade.time, dbg: window.__arcade.debug ? window.__arcade.debug() : null }));
-  // Prove the loop is alive, not that it holds 15fps. Gully Champs on a
-  // 820x1180 tablet at deviceScaleFactor 2 lands around 50-57 frames here
-  // (used to fail a >60 bar). Sky Thread can leave play inside the hold, so
-  // do not require a long play-clock. MUT=stall still reports 0 frames.
-  const frames = after.frame - before.frame;
-  const elapsed = (after.time || 0) - (before.time || 0);
-  check(`${tag} frames advance during play`, frames > 20, `${frames} frames, ${elapsed.toFixed(2)}s`);
+  let after = await page.evaluate(() => ({ state: window.__arcade.state, frame: window.__arcade.frame, time: window.__arcade.time, dbg: window.__arcade.debug ? window.__arcade.debug() : null }));
+  // Heavy games (gully-champs at tablet size) can land under 15fps on a CI
+  // runner. Give the loop another beat before judging a stall; MUT=stall still
+  // reports 0 extra frames.
+  if (after.frame - before.frame <= 60) {
+    await sleep(2500);
+    after = await page.evaluate(() => ({ state: window.__arcade.state, frame: window.__arcade.frame, time: window.__arcade.time, dbg: window.__arcade.debug ? window.__arcade.debug() : null }));
+  }
+  check(`${tag} frames advance during play`, after.frame - before.frame > 24, `${after.frame - before.frame} frames`);
   check(`${tag} game state changes under input`, strip(after.dbg) !== strip(before.dbg), strip(after.dbg).slice(0, 140));
 
   if (after.state === 'play') {

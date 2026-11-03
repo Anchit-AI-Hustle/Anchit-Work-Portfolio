@@ -1085,8 +1085,12 @@
     } else {
       var kx = (inp.down('ArrowRight', 'KeyD') ? 1 : 0) - (inp.down('ArrowLeft', 'KeyA') ? 1 : 0), sx = kx;
       if (inp.stick.active) { sx = clamp(inp.stick.x * 1.35, -1, 1); if (Math.abs(sx) < 0.07) sx = 0; }
+      else if (!kx && inp.pointer && inp.pointer.seen) {
+        sx = clamp(inp.pointer.nx * 2 - 1, -1, 1);
+        if (Math.abs(sx) < 0.08) sx = 0;
+      }
       brake = inp.down('ArrowDown', 'KeyS');
-      gas = inp.down('ArrowUp', 'KeyW') || (W.cfg.auto === 'on' && !brake);
+      gas = inp.down('ArrowUp', 'KeyW') || inp.pointer.down || (W.cfg.auto === 'on' && !brake);
       nit = inp.down('ShiftLeft', 'ShiftRight', 'KeyN');
       P.steerIn += (sx - P.steerIn) * Math.min(1, dt * (Math.abs(sx) > 0.01 ? 11 : 15));
       steer = P.steerIn;
@@ -1936,9 +1940,12 @@
   };
   Arcade.create({
     slug: 'midnight-apex', title: 'Midnight Apex', genre: 'Street racing',
-    hint: 'Arrows or WASD to drive. Shift or N for nitro. Esc to pause.',
-    keys: [['Left Right / A D', 'Steer'], ['Up / W', 'Gas'], ['Down / S', 'Brake'], ['Shift / N (hold)', 'Nitro'], ['Esc / P', 'Pause']],
+    hint: 'WASD or mouse to steer. Hold click or Up for gas. Shift or N for nitro.',
+    touchHint: 'Stick steers, Gas and Brake pads, Nitro when you have it',
+    keys: [['Left Right / A D', 'Steer'], ['Up / W', 'Gas'], ['Down / S', 'Brake'], ['Shift / N (hold)', 'Nitro']],
+    mouse: { steer: 'x', cursor: 'none', keys: [['Move mouse', 'Steer'], ['Click / hold', 'Gas']] },
     touch: { stick: true, pads: [{ label: 'Gas', key: 'ArrowUp', hot: true, big: true }, { label: 'Brake', key: 'ArrowDown' }, { label: 'Nitro', key: 'KeyN' }] },
+    touchKeys: [['On-screen stick', 'Steer'], ['Gas', 'Accelerate'], ['Brake', 'Slow down'], ['Nitro', 'Boost']],
     formatScore: fmtTime,
     init: function (a) {
       ARC = a;
