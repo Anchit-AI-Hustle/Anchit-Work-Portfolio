@@ -618,7 +618,26 @@
      transform and opacity only. will-change goes on while the walk is on
      screen and comes off when it leaves. */
   .walk { position: relative; background: var(--grape); }
-  .walk-rail { height: 460vh; }
+  .walk-rail { height: 250vh; }
+  .walk-facade {
+    position: absolute; inset: 0; z-index: 30; pointer-events: none;
+    transform-origin: 50% 58%;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .walk-facade svg { display: block; width: 100%; height: 100%; }
+  .walk-reflect {
+    position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.28) 48%, transparent 58%);
+    mix-blend-mode: screen; opacity: .55;
+  }
+  .walk-flare {
+    position: absolute; left: 50%; top: 42%; width: 18vw; height: 70vh;
+    translate: -50% -50%;
+    background: linear-gradient(90deg, transparent, rgba(255,244,220,.85), rgba(205,184,247,.35), transparent);
+    filter: blur(8px); opacity: 0; pointer-events: none;
+  }
+  .walk.is-past .walk-facade, .walk.is-past .walk-flare { will-change: auto; }
   .walk-frame {
     position: sticky; top: 0; height: 100vh; overflow: hidden;
     perspective: 1100px; perspective-origin: 50% 46%;
@@ -668,7 +687,7 @@
   .walk-hint i { display: block; width: 1px; height: 26px; margin: 8px auto 0; background: currentColor; opacity: .5; }
 
   @media (max-width: 760px) {
-    .walk-rail { height: 380vh; }
+    .walk-rail { height: 220vh; }
     .walk-frame { perspective: 760px; }
     .walk-layer { width: 108vw; }
   }
@@ -927,6 +946,35 @@
   html[data-consent-open="1"] .is-scroll .ch-nav { bottom: calc(20px + var(--consent-h, 0px)); }
   html[data-consent-open="1"] .walk-hint { bottom: calc(26px + var(--consent-h, 0px)); }
   #scratchCanvas { touch-action: pan-y; }
+
+  .shot-board { margin-top: 14px; }
+  .shot-board input[type="range"] { width: 100%; accent-color: #7C3AED; }
+  .shot-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; }
+  .pour-overlay { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; }
+  .pour-overlay path { fill: none; stroke: #F4EFE6; stroke-width: 3; stroke-linecap: round; }
+  .pour-sheen {
+    position: absolute; inset: 0; z-index: 4; pointer-events: none;
+    background: radial-gradient(120px 80px at var(--sx, 50%) var(--sy, 40%), rgba(255,255,255,.55), transparent 70%);
+    mix-blend-mode: screen;
+  }
+  .bean-disc { width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 16px; }
+  .note-pill { display: inline-block; animation: noteFloat 3.6s ease-in-out infinite; }
+  .note-pill:nth-child(2) { animation-delay: -.6s; }
+  .note-pill:nth-child(3) { animation-delay: -1.4s; }
+  .note-pill:nth-child(4) { animation-delay: -2.1s; }
+  @keyframes noteFloat { 50% { translate: 0 -6px; } }
+  .ctx-pill {
+    position: fixed; z-index: 1000000; pointer-events: none;
+    padding: 6px 10px; border-radius: 999px; font-size: 10px; font-weight: 800;
+    letter-spacing: .14em; text-transform: uppercase; color: #F1E9FF; background: #2B1650;
+    translate: 16px 18px; opacity: 0;
+  }
+  .ctx-pill.on { opacity: 1; }
+  #chapters .stage { --surface-tint: #2A1810; --accent-glow: rgba(110,68,255,.45); }
+  #chapters .ch-ambient { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+  @media (prefers-reduced-motion: reduce) {
+    .note-pill, .walk-reflect { animation: none !important; }
+  }
 </style>
 <script>document.documentElement.classList.add('js');</script>
 <!-- seo:auto:start -->
@@ -1287,6 +1335,24 @@
         </div>
 
       </div>
+
+      <div class="walk-facade" id="walkFacade" aria-hidden="true">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+          <defs>
+            <mask id="gsDoor">
+              <rect width="100" height="100" fill="white"/>
+              <rect x="36" y="18" width="28" height="68" rx="0.6" fill="black"/>
+            </mask>
+          </defs>
+          <rect width="100" height="100" fill="rgba(205,184,247,0.34)" mask="url(#gsDoor)"/>
+          <g fill="none" stroke="#F4EFFC" stroke-width="0.45" opacity=".85">
+            <rect x="36" y="18" width="28" height="68"/>
+            <path d="M50 18v68M36 40h28M36 62h28"/>
+          </g>
+        </svg>
+        <div class="walk-reflect" id="walkReflect"></div>
+      </div>
+      <div class="walk-flare" id="walkFlare" aria-hidden="true"></div>
 
       <div class="walk-step" id="walkStep">01 / On Gram Street</div>
       <div class="walk-cap" id="walkCap">
@@ -2249,11 +2315,9 @@
     sec.classList.add('is-armed');
 
     var STEPS = [
-      [0.00, '01 / On Gram Street', 'A lilac front on a Gurugram street.', 'Specialty coffee, ceremonial matcha and small-batch gelato. Keep scrolling and come inside.'],
-      [0.24, '02 / Through the glass', 'Chrome cutting through pastel.', 'A glass front painted lilac, and a room drawn from contemporary Asian specialty bars.'],
-      [0.48, '03 / The room', 'A tiny room by design.', 'Not a workstation. Just enough room to savour an espresso, and that is the entire point.'],
-      [0.70, '04 / At the counter', 'The lilac glass-fronted counter.', 'Gelato pans behind the glass, the machine on top, three pendants over the bar.'],
-      [0.88, '05 / The shot', 'Pulled, poured, handed over.', 'In-house roasts, Uji matcha, small-batch gelato. This is the whole walk, in one cup.']
+      [0.00, '01 / The lilac streetfront', 'Outside on Arjun Marg.', 'A glass front painted lilac. Keep scrolling and the doorframe comes toward you.'],
+      [0.34, '02 / Through the glass', 'Chrome along the doorframe.', 'The facade passes the edges of the screen. Street light gives way to the bar.'],
+      [0.68, '03 / The chrome bar', 'Ten seats, brushed steel, the shot.', 'In-house roasts, ceremonial matcha and small-batch gelato, docked at the counter.']
     ];
     var at = -1;
     var capT = 0;   // the pending caption swap: a fast scroll must not land stale text
@@ -2275,6 +2339,18 @@
         var o = Math.min(fin, clamp01((1 - t) / 0.20));
         L.style.opacity = o.toFixed(3);
         L.style.transform = 'translate(-50%, -50%) translateZ(' + z.toFixed(1) + 'px)';
+      }
+      var facade = document.getElementById('walkFacade');
+      var flare = document.getElementById('walkFlare');
+      if (facade) {
+        var sc = p < 0.22 ? 1 : p < 0.68 ? 1 + ((p - 0.22) / 0.46) * 3.5 : 4.5;
+        var fo = p < 0.58 ? 1 : p < 0.8 ? 1 - (p - 0.58) / 0.22 : 0;
+        facade.style.scale = sc.toFixed(3);
+        facade.style.opacity = fo.toFixed(3);
+      }
+      if (flare) {
+        var fl = p < 0.34 ? 0 : p < 0.5 ? (p - 0.34) / 0.16 : p < 0.7 ? 1 - (p - 0.5) / 0.2 : 0;
+        flare.style.opacity = Math.max(0, fl).toFixed(3);
       }
       if (hint) hint.style.opacity = (1 - clamp01(p / 0.08)).toFixed(3);
 
@@ -2503,22 +2579,50 @@
       scratchCtx.fillText(txt, scratchCanvas.width / 2, scratchCanvas.height / 2 + (i - 0.5) * 22);
     });
     scratchW = rect.width;
+    try { fogBase = scratchCtx.getImageData(0, 0, scratchCanvas.width, scratchCanvas.height); } catch (e) { fogBase = null; }
+    fogStamps.length = 0;
   };
   let scratchW = 0;
+  const fogStamps = [];
+  let fogBase = null;
+  let fogRaf = 0;
+
+  function paintFog(now) {
+    fogRaf = 0;
+    if (!fogBase || !scratchCtx) return;
+    scratchCtx.globalCompositeOperation = 'source-over';
+    scratchCtx.putImageData(fogBase, 0, 0);
+    const live = [];
+    for (let i = 0; i < fogStamps.length; i++) {
+      const s = fogStamps[i];
+      const age = (now - s.t) / 8000;
+      if (age >= 1) continue;
+      live.push(s);
+      const hole = 1 - age;
+      scratchCtx.globalCompositeOperation = 'destination-out';
+      scratchCtx.fillStyle = 'rgba(0,0,0,' + hole.toFixed(3) + ')';
+      scratchCtx.beginPath();
+      scratchCtx.arc(s.x, s.y, 78, 0, Math.PI * 2);
+      scratchCtx.fill();
+      scratchCtx.globalCompositeOperation = 'source-over';
+      scratchCtx.fillStyle = 'rgba(232, 224, 255, ' + (0.45 * hole).toFixed(3) + ')';
+      scratchCtx.beginPath();
+      scratchCtx.ellipse(s.x + 6, s.y + age * 110, 2.5, 6 + age * 8, 0, 0, Math.PI * 2);
+      scratchCtx.fill();
+    }
+    fogStamps.length = 0;
+    for (let i = 0; i < live.length; i++) fogStamps.push(live[i]);
+    if (live.length) fogRaf = requestAnimationFrame(paintFog);
+  }
 
   function wipeScratchAt(clientX, clientY) {
     if (!scratchCanvas || !scratchCtx) return;
     const rect = scratchCanvas.getBoundingClientRect();
-    const x = clientX - rect.left;
-    const y = clientY - rect.top;
-    scratchCtx.globalCompositeOperation = 'destination-out';
-    const brush = scratchCtx.createRadialGradient(x, y, 12, x, y, 90);
-    brush.addColorStop(0, 'rgba(0,0,0,1)');
-    brush.addColorStop(1, 'rgba(0,0,0,0)');
-    scratchCtx.fillStyle = brush;
-    scratchCtx.beginPath();
-    scratchCtx.arc(x, y, 90, 0, Math.PI * 2);
-    scratchCtx.fill();
+    const x = ((clientX - rect.left) / rect.width) * scratchCanvas.width;
+    const y = ((clientY - rect.top) / rect.height) * scratchCanvas.height;
+    fogStamps.push({ x: x, y: y, t: performance.now() });
+    if (fogStamps.length > 80) fogStamps.shift();
+    if (!fogRaf) fogRaf = requestAnimationFrame(paintFog);
   }
 
   if (scratchCanvas) {
@@ -2561,11 +2665,11 @@
       whiteNoise.loop = true;
 
       const filter = audioCtx.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.value = 350;
+      filter.type = 'highpass';
+      filter.frequency.value = 1400;
 
       const gain = audioCtx.createGain();
-      gain.gain.value = 0.18;
+      gain.gain.value = 0.045;
 
       whiteNoise.connect(filter);
       filter.connect(gain);
@@ -3283,6 +3387,7 @@
   })();
 </script>
 <script src="/assets/vendor/gsap.min.js"></script>
+<script src="/assets/shop-elite.js"></script>
 <script src="/assets/brand-motion.js" defer></script>
 </body>
 </html>
