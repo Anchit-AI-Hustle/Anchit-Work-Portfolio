@@ -255,6 +255,9 @@ async function study(browser, vp, st) {
       const mini = await page.$$eval('#bets-mini a', (as) => as.map((a) => a.getAttribute('href')));
       check(`${L}: shows the three big bets, each linking to its write-up`, mini.length === 3 && mini.every((h, k) => h === `${st.base}/ideas#bet-${k + 1}`), mini.join(','));
       check(`${L}: page-by-page cards link every page`, PAGES.slice(1).every((p) => cards.includes(st.base + p)) && cards.includes(st.base + '/model'), cards.join(','));
+      const ovVids = await page.$$eval('main .vid', (vs) => vs.map((v) => ({ id: v.dataset.video, img: new URL(v.querySelector('img').src).pathname, link: !!v.querySelector('a[href^="https://www.youtube.com/watch?v=' + v.dataset.video + '"]') })));
+      check(`${L}: overview embeds the brand's own videos, each with a YouTube link and a local thumbnail`, ovVids.length >= 1 && ovVids.every((v) => v.link && v.img.startsWith(st.base + '/img/')), JSON.stringify(ovVids));
+      check(`${L}: walk-in reports depth on the progress bar and the label`, !!(await page.$('#walkProgressBar')) && /DEPTH/.test(await page.$eval('#walkProgressLabel', (n) => n.textContent || '')), '');
     } else {
       check(`${L}: breadcrumb leads back to the overview`, !!(await page.$(`.crumb a[href="${st.base}"]`)), '');
       check(`${L}: previous and next links`, (await page.$$('.pager a')).length === 2, '');
