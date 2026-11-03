@@ -152,13 +152,13 @@ async function game(browser, vp, slug) {
 
   await hold(page, vp, 4000);
   const after = await page.evaluate(() => ({ state: window.__arcade.state, frame: window.__arcade.frame, time: window.__arcade.time, dbg: window.__arcade.debug ? window.__arcade.debug() : null }));
-  // Prove the loop is alive, not that it holds 15fps. Gully Champs draws a
-  // full street of houses; on a 820×1180 tablet at deviceScaleFactor 2 the
-  // GitHub runner lands around 50–57 frames in this window, which used to
-  // fail a >60 bar while the game was still ticking (MUT=stall still fails).
+  // Prove the loop is alive, not that it holds 15fps. Gully Champs on a
+  // 820x1180 tablet at deviceScaleFactor 2 lands around 50-57 frames here
+  // (used to fail a >60 bar). Sky Thread can leave play inside the hold, so
+  // do not require a long play-clock. MUT=stall still reports 0 frames.
   const frames = after.frame - before.frame;
   const elapsed = (after.time || 0) - (before.time || 0);
-  check(`${tag} frames advance during play`, frames > 20 && elapsed > 1.2, `${frames} frames, ${elapsed.toFixed(2)}s`);
+  check(`${tag} frames advance during play`, frames > 20, `${frames} frames, ${elapsed.toFixed(2)}s`);
   check(`${tag} game state changes under input`, strip(after.dbg) !== strip(before.dbg), strip(after.dbg).slice(0, 140));
 
   if (after.state === 'play') {
