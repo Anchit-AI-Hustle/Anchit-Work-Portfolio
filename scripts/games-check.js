@@ -11,18 +11,22 @@
 //
 // Run against a served build:  node scripts/games-check.js
 //   BASE=http://127.0.0.1:8099 (default, the CI server)
+//   GAMES=gully-champs   one slug, or a comma list
+//   VP=tablet            substring of the viewport name (phone, tablet, desktop)
 //   MUT=stall  freezes requestAnimationFrame, so "the game advances" must fail.
 //   MUT=error  throws inside the first frame of play, so "no errors" must fail.
 const { chromium } = require('./_playwright.js');
 
 const BASE = (process.env.BASE || 'http://127.0.0.1:8099').replace(/\/$/, '');
 const MUT = process.env.MUT || '';
-const GAMES = ['saffron-city', 'midnight-apex', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'sky-thread', 'tiffin-dash', 'board-strike', 'yard-catch', 'rally-cage', 'fare-run'];
-const VIEWPORTS = [
+const ALL_GAMES = ['saffron-city', 'midnight-apex', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'sky-thread', 'tiffin-dash', 'board-strike', 'yard-catch', 'rally-cage', 'fare-run'];
+const GAMES = (process.env.GAMES || ALL_GAMES.join(',')).split(',').map((s) => s.trim()).filter(Boolean);
+const ALL_VIEWPORTS = [
   { name: 'phone 390', viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 },
   { name: 'tablet 820', viewport: { width: 820, height: 1180 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 },
   { name: 'desktop 1440', viewport: { width: 1440, height: 900 }, hasTouch: false, isMobile: false, deviceScaleFactor: 1 },
 ];
+const VIEWPORTS = ALL_VIEWPORTS.filter((vp) => !process.env.VP || vp.name.includes(process.env.VP));
 
 let pass = 0, fail = 0;
 const check = (label, ok, detail) => {
@@ -166,10 +170,10 @@ async function game(browser, vp, slug) {
   await hold(page, vp, 4000);
   let after = await page.evaluate(() => ({ state: window.__arcade.state, frame: window.__arcade.frame, time: window.__arcade.time, dbg: window.__arcade.debug ? window.__arcade.debug() : null }));
   // Heavy games (gully-champs at tablet size) can land under 15fps on a CI
-  // runner. Give the loop another beat before judging a stall; MUT=stall still
+  // runner. Drive another hold before judging a stall; MUT=stall still
   // reports 0 extra frames.
   if (after.frame - before.frame <= 60) {
-    await sleep(2500);
+    await hold(page, vp, 4000);
     after = await page.evaluate(() => ({ state: window.__arcade.state, frame: window.__arcade.frame, time: window.__arcade.time, dbg: window.__arcade.debug ? window.__arcade.debug() : null }));
   }
   check(`${tag} frames advance during play`, after.frame - before.frame > 24, `${after.frame - before.frame} frames`);
