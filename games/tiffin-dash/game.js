@@ -100,8 +100,10 @@
     G.speed = min(520, 270 + G.dist * 0.012);
     G.dist += G.speed * dt;
     G.score += dt * 8;
-    const jump = arc.input.hit('Space', 'ArrowUp', 'KeyW', 'KeyJ');
-    const slide = arc.input.down('ArrowDown', 'KeyS') || arc.input.hit('ArrowDown', 'KeyS');
+    const inp = arc.input;
+    const low = inp.pointer.ny > 0.78;
+    const jump = inp.hit('Space', 'KeyJ', 'Enter', 'ArrowUp', 'KeyW') || (inp.pointer.pressed && !low);
+    const slide = inp.down('ArrowDown', 'KeyS') || inp.hit('ArrowDown', 'KeyS') || (inp.pointer.down && low);
     if (jump && G.py <= 0.01) { G.pvy = 720; arc.sfx.tone(320, 0.06, { type: 'square', vol: 0.08 }); }
     if (slide && G.py <= 0.01) G.slide = 0.42;
     G.pvy -= 2100 * dt; G.py += G.pvy * dt;
@@ -264,13 +266,15 @@
 
   A.create({
     slug: 'tiffin-dash', title: 'Tiffin Dash', genre: 'Arcade runner',
-    hint: 'Space jump   Down slide',
+    hint: 'Click or Space jump   Down or click low to slide',
+    touchHint: 'Jump pad for scooters, Slide pad for cloth lines',
     keys: [
       ['Space / Up / J', 'Jump the scooters and carts'],
       ['Down / S', 'Slide under hanging cloth'],
-      ['P', 'Pause'],
     ],
+    mouse: { cursor: 'pointer', keys: [['Click', 'Jump'], ['Click the lower street', 'Slide']] },
     touch: { stick: true, pads: [{ label: 'Jump', key: 'Space', big: true, hot: true }, { label: 'Slide', key: 'ArrowDown' }] },
+    touchKeys: [['Jump', 'Scooters and carts'], ['Slide', 'Hanging cloth']],
     formatScore: (v) => Math.round(v) + ' pts',
     menu: {
       eyebrow: 'Arcade runner',

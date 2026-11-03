@@ -8,7 +8,8 @@
  *
  *   const arc = Arcade.create({
  *     slug: 'turf-kings', title: 'Turf Kings', genre: 'Arcade football',
- *     keys: [['WASD', 'Move'], ['J', 'Pass']],
+ *     keys: [['WASD / arrows', 'Move'], ['J / Space / click', 'Pass']],
+ *     mouse: { steer: 'x', keys: [['Move mouse', 'Aim'], ['Click / hold', 'Action']] },
  *     touch: { stick: true, pads: [{ label: 'Pass', key: 'KeyJ' }] },
  *     start(arc) {}, update(dt, arc) {}, render(ctx, arc) {}
  *   });
@@ -119,10 +120,13 @@
   }
 
   /* ---------------------------------------------------------------- input */
+  // Keyboard (WASD + arrows + Space), mouse (position + click) and the on-screen
+  // stick all write into the same axis / action so a game does not have to care
+  // which device the player brought.
   function Input(canvas) {
     const down = new Set(); const hit = new Set();
     const stick = { x: 0, y: 0, active: false };
-    const pointer = { x: 0, y: 0, down: false, pressed: false, released: false, id: null };
+    const pointer = { x: 0, y: 0, nx: 0.5, ny: 0.5, down: false, pressed: false, released: false, id: null, type: 'mouse', seen: false };
     const AXIS = { left: ['ArrowLeft', 'KeyA'], right: ['ArrowRight', 'KeyD'], up: ['ArrowUp', 'KeyW'], down: ['ArrowDown', 'KeyS'] };
     const any = (list) => list.some((k) => down.has(k));
     const api = {
@@ -130,25 +134,45 @@
       hit: (...codes) => codes.some((c) => hit.has(c)),
       press(code) { if (!down.has(code)) hit.add(code); down.add(code); },
       release(code) { down.delete(code); },
+      // Primary action: Space, J, Enter, or a click / tap on the canvas.
+      action() { return api.down('Space', 'KeyJ') || pointer.down; },
+      actionHit() { return api.hit('Space', 'KeyJ', 'Enter', 'NumpadEnter') || pointer.pressed; },
       axis() {
         let x = (any(AXIS.right) ? 1 : 0) - (any(AXIS.left) ? 1 : 0);
         let y = (any(AXIS.down) ? 1 : 0) - (any(AXIS.up) ? 1 : 0);
         if (stick.active) { x += stick.x; y += stick.y; }
+        const keyed = x !== 0 || y !== 0 || stick.active;
+        const ms = api.mouseSteer;
+        if (ms && pointer.seen && !keyed) {
+          const ax = pointer.nx * 2 - 1, ay = pointer.ny * 2 - 1;
+          if (ms === 'x' || ms === 'xy') x = Math.abs(ax) < 0.04 ? 0 : clamp(ax, -1, 1);
+          if (ms === 'y' || ms === 'xy') y = Math.abs(ay) < 0.04 ? 0 : clamp(ay, -1, 1);
+        }
         const m = Math.hypot(x, y);
         if (m > 1) { x /= m; y /= m; }
         return { x, y };
       },
-      stick, pointer,
+      stick, pointer, mouseSteer: false,
       clear() { down.clear(); hit.clear(); stick.x = stick.y = 0; stick.active = false; pointer.down = false; },
       endFrame() { hit.clear(); pointer.pressed = false; pointer.released = false; },
     };
-    const local = (e) => { const r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+    const local = (e) => {
+      const r = canvas.getBoundingClientRect();
+      const x = e.clientX - r.left, y = e.clientY - r.top;
+      return { x, y, nx: r.width ? x / r.width : 0.5, ny: r.height ? y / r.height : 0.5 };
+    };
+    const apply = (e, extra) => {
+      const p = local(e);
+      pointer.x = p.x; pointer.y = p.y; pointer.nx = p.nx; pointer.ny = p.ny;
+      pointer.type = e.pointerType || 'mouse'; pointer.seen = true;
+      if (extra) extra();
+    };
     canvas.addEventListener('pointerdown', (e) => {
-      const p = local(e); pointer.x = p.x; pointer.y = p.y; pointer.down = true; pointer.pressed = true; pointer.id = e.pointerId;
+      apply(e, () => { pointer.down = true; pointer.pressed = true; pointer.id = e.pointerId; });
       try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* synthetic event */ }
     });
-    canvas.addEventListener('pointermove', (e) => { const p = local(e); pointer.x = p.x; pointer.y = p.y; });
-    const up = (e) => { if (pointer.down) pointer.released = true; pointer.down = false; pointer.id = null; };
+    canvas.addEventListener('pointermove', (e) => apply(e));
+    const up = () => { if (pointer.down) pointer.released = true; pointer.down = false; pointer.id = null; };
     canvas.addEventListener('pointerup', up);
     canvas.addEventListener('pointercancel', up);
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -195,9 +219,12 @@
     const btnPause = app.querySelector('[data-arc="pause"]');
     const btnSound = app.querySelector('[data-arc="sound"]');
     const btnFull = app.querySelector('[data-arc="full"]');
-    hintEl.textContent = opts.hint || '';
-
     const input = Input(canvas);
+    const mouseOpts = opts.mouse === true ? {} : (opts.mouse || null);
+    if (mouseOpts) {
+      input.mouseSteer = mouseOpts.steer || false;
+      canvas.style.cursor = mouseOpts.cursor || 'crosshair';
+    }
     const sfx = Sfx();
 
     const arc = {
@@ -225,7 +252,11 @@
 
     /* touch */
     const isCoarse = window.matchMedia && matchMedia('(pointer: coarse)').matches;
-    const setTouch = (on) => { app.classList.toggle('touch', !!on); arc.touchMode = !!on; };
+    const paintHint = () => {
+      const h = arc.touchMode ? (opts.touchHint || 'Stick to move, pads to act') : (opts.hint || '');
+      hintEl.textContent = h;
+    };
+    const setTouch = (on) => { app.classList.toggle('touch', !!on); arc.touchMode = !!on; paintHint(); };
     setTouch(isCoarse);
     window.addEventListener('pointerdown', (e) => { if (e.pointerType === 'touch') setTouch(true); }, { passive: true });
     window.addEventListener('keydown', () => { if (arc.touchMode && !isCoarse) setTouch(false); });
@@ -308,7 +339,14 @@
 
     /* panels */
     const keysHtml = () => {
-      const k = opts.keys || [];
+      let k = (opts.keys || []).slice();
+      if (arc.touchMode) {
+        if (opts.touchKeys && opts.touchKeys.length) k = opts.touchKeys.slice();
+        else k.push(['On-screen stick and buttons', 'Move and act on a phone']);
+      } else if (mouseOpts && mouseOpts.keys && mouseOpts.keys.length) {
+        k = k.concat(mouseOpts.keys);
+      }
+      if (!k.some((r) => /pause/i.test(r[1] || '') || /^Esc/i.test(r[0] || ''))) k.push(['Esc / P', 'Pause']);
       if (!k.length) return '';
       return '<div class="arc-keys">' + k.map((r) => '<kbd>' + esc(r[0]) + '</kbd><span>' + esc(r[1]) + '</span>').join('') + '</div>';
     };

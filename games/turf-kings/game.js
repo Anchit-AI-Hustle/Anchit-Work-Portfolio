@@ -953,7 +953,7 @@
       else if (IN.down('KeyK')) S.charge = Math.min(1, S.charge + dt / 0.75);
       else { shootAt(p, ndx, ndy, S.charge, 0.62, S.charge > 0.93 ? 0.12 : 0.02); S.charging = false; S.charge = 0; }
     }
-    if (IN.hit('KeyJ', 'Space')) { if (owns) humanPass(p, false, hasDir, ndx, ndy); else standTackle(p, true); }
+    if (IN.hit('KeyJ', 'Space') || IN.pointer.pressed) { if (owns) humanPass(p, false, hasDir, ndx, ndy); else standTackle(p, true); }
     if (IN.hit('KeyU')) { if (owns) humanPass(p, true, hasDir, ndx, ndy); }
     if (IN.hit('KeyQ')) manualSwitch();
   }
@@ -1931,7 +1931,9 @@
 
   arc = Arcade.create({
     slug: 'turf-kings', title: 'Turf Kings', genre: 'Arcade football',
-    hint: 'WASD move | J pass | K shoot | L sprint | Q switch',
+    hint: 'WASD move  |  click or J pass  |  K shoot  |  L sprint',
+    touchHint: 'Stick to run, Shoot / Pass / Sprint pads',
+    mouse: { cursor: 'pointer', keys: [['Click', 'Pass or tackle']] },
     pauseHtml() {
       if (!S) return '';
       return '<div class="stat"><div>Score<b>' + S.score[0] + ' - ' + S.score[1] + '</b></div><div>Clock<b>' + matchClock() + '</b></div></div>';

@@ -181,10 +181,15 @@
   }
 
   function readAim(dt) {
-    const ax = arc.input.axis();
-    G.aimX = clamp(G.aimX + ax.x * dt * 1.7, -0.72, 0.72);
-    if (abs(ax.x) < 0.08) G.aimX *= Math.exp(-dt * 1.4);
-    const down = arc.input.down('Space', 'KeyJ');
+    const inp = arc.input, ax = inp.axis(), p = inp.pointer;
+    if (abs(ax.x) > 0.08) {
+      G.aimX = clamp(G.aimX + ax.x * dt * 1.7, -0.72, 0.72);
+    } else if (p && p.seen) {
+      G.aimX = lerp(G.aimX, (p.nx - 0.5) * 1.44, 1 - Math.exp(-dt * 10));
+    } else if (abs(ax.x) < 0.08) {
+      G.aimX *= Math.exp(-dt * 1.4);
+    }
+    const down = inp.action();
     if (G.phase === 'aim') {
       if (down) { G.holding = true; G.charge = min(1, G.charge + dt * 0.95); }
       else if (G.holding) shoot();
@@ -378,13 +383,15 @@
 
   A.create({
     slug: 'court-lights', title: 'Court Lights', genre: 'Street basketball',
-    hint: 'Left Right aim   hold Space to shoot',
+    hint: 'Mouse or arrows aim   hold click or Space to shoot',
+    touchHint: 'Stick aims, hold Shoot, release to fire',
     keys: [
-      ['Left / Right', 'Aim the shot'],
+      ['Left / Right / A D', 'Aim the shot'],
       ['Space / J (hold)', 'Charge, then release to shoot'],
-      ['P', 'Pause'],
     ],
+    mouse: { steer: 'x', cursor: 'crosshair', keys: [['Move mouse', 'Aim'], ['Click / hold', 'Charge, then release']] },
     touch: { stick: true, pads: [{ label: 'Shoot', key: 'Space', big: true, hot: true }] },
+    touchKeys: [['On-screen stick', 'Aim'], ['Shoot (hold)', 'Charge, then release']],
     formatScore: (v) => Math.round(v) + ' pts',
     menu: {
       eyebrow: 'Street basketball',

@@ -2700,6 +2700,8 @@
     slug: 'saffron-city', title: 'Saffron City', genre: 'Open-world sandbox',
     keys: [['WASD / arrows', 'Walk or drive'], ['Space', 'Handbrake (sprint on foot)'], ['Shift', 'Sprint on foot'], ['F', 'Get in or out of a car'], ['H', 'Horn'], ['M', 'City map']],
     touch: { stick: true, pads: [{ label: 'Car', key: 'KeyF' }, { label: 'Brake', key: 'Space', big: true, hot: true }, { label: 'Map', key: 'KeyM' }, { label: 'Horn', key: 'KeyH' }] },
+    touchKeys: [['On-screen stick', 'Walk or steer'], ['Car', 'Get in or out'], ['Brake', 'Handbrake'], ['Horn', 'Honk'], ['Map', 'Open the city map']],
+    touchHint: 'Stick to walk or steer, Car pad to get in, Brake, Horn, Map',
     gameKeys: ['KeyF', 'KeyH', 'KeyM', 'ShiftLeft', 'ShiftRight'],
     hint: 'WASD move   F car   Space handbrake   H horn   M map',
     formatScore: (v) => money(v),

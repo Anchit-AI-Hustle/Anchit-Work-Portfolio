@@ -100,9 +100,14 @@
   }
 
   function steerMe(dt) {
-    const ax = arc.input.axis();
-    const pull = arc.input.down('Space', 'KeyJ', 'ShiftLeft') ? 1 : 0;
+    const inp = arc.input, ax = inp.axis(), p = inp.pointer;
+    const pull = (inp.action() || inp.down('ShiftLeft', 'ShiftRight')) ? 1 : 0;
     G.me.pull = lerp(G.me.pull, pull, 1 - Math.exp(-dt * 8));
+    const keyed = abs(ax.x) > 0.08 || abs(ax.y) > 0.08;
+    if (!keyed && p && p.seen) {
+      G.me.vx += (p.nx - G.me.x) * dt * 2.6;
+      G.me.vy += (clamp(p.ny, 0.06, 0.72) - G.me.y) * dt * 2.6;
+    }
     G.me.vx += ax.x * dt * 1.6;
     G.me.vy += ax.y * dt * 1.6;
     G.me.vx += G.wind.x * dt * 0.35;
@@ -178,7 +183,7 @@
       const p = G.parts[i]; p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 40 * dt;
       if (p.life <= 0) G.parts.splice(i, 1);
     }
-    if (!G.alive && G.me.cutT > 1.4) finish('Your thread');
+    if (!G.alive && G.me.cutT > 2.6) finish('Your thread');
     else if (G.time <= 0) { G.time = 0; finish('Dusk'); }
     G.score += dt * 2;
   }
@@ -291,13 +296,15 @@
 
   A.create({
     slug: 'sky-thread', title: 'Sky Thread', genre: 'Kite fighting',
-    hint: 'Arrows steer   hold Space to pull and cut',
+    hint: 'Mouse or WASD steer   hold click or Space to pull and cut',
+    touchHint: 'Stick steers, hold Pull to cut',
     keys: [
       ['WASD / Arrows', 'Steer the kite'],
       ['Space / J (hold)', 'Pull the string to cut'],
-      ['P', 'Pause'],
     ],
+    mouse: { steer: 'xy', cursor: 'crosshair', keys: [['Move mouse', 'Steer toward the pointer'], ['Click / hold', 'Pull to cut']] },
     touch: { stick: true, pads: [{ label: 'Pull', key: 'Space', big: true, hot: true }] },
+    touchKeys: [['On-screen stick', 'Steer'], ['Pull (hold)', 'Cut a rival thread']],
     formatScore: (v) => Math.round(v) + ' pts',
     menu: {
       eyebrow: 'Kite fighting',

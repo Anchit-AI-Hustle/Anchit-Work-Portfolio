@@ -17,7 +17,7 @@ const { chromium } = require('./_playwright.js');
 
 const BASE = (process.env.BASE || 'http://127.0.0.1:8099').replace(/\/$/, '');
 const MUT = process.env.MUT || '';
-const GAMES = ['saffron-city', 'midnight-apex', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'sky-thread', 'tiffin-dash'];
+const GAMES = ['saffron-city', 'midnight-apex', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'sky-thread', 'tiffin-dash', 'board-strike', 'yard-catch', 'rally-cage', 'fare-run'];
 const VIEWPORTS = [
   { name: 'phone 390', viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 },
   { name: 'tablet 820', viewport: { width: 820, height: 1180 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 },
@@ -149,6 +149,17 @@ async function game(browser, vp, slug) {
 
   const touchShown = await page.evaluate(() => { const t = document.querySelector('.arc-touch'); return !!t && getComputedStyle(t).display !== 'none'; });
   check(`${tag} touch controls ${vp.hasTouch ? 'shown' : 'hidden'}`, touchShown === vp.hasTouch);
+
+  if (!vp.hasTouch) {
+    const box = await page.locator('.arc-stage canvas').boundingBox();
+    if (box) {
+      await page.mouse.move(box.x + box.width * 0.4, box.y + box.height * 0.45);
+      await page.mouse.down();
+      await sleep(180);
+      await page.mouse.move(box.x + box.width * 0.62, box.y + box.height * 0.5);
+      await page.mouse.up();
+    }
+  }
 
   await hold(page, vp, 4000);
   const after = await page.evaluate(() => ({ state: window.__arcade.state, frame: window.__arcade.frame, time: window.__arcade.time, dbg: window.__arcade.debug ? window.__arcade.debug() : null }));
