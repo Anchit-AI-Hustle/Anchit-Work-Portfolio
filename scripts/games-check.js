@@ -146,7 +146,7 @@ async function game(browser, vp, slug) {
 
   await page.click('.arc-card .arc-btn.primary');
   await sleep(300);
-  const before = await page.evaluate(() => ({ state: window.__arcade.state, frame: window.__arcade.frame, dbg: window.__arcade.debug ? window.__arcade.debug() : null }));
+  const before = await page.evaluate(() => ({ state: window.__arcade.state, frame: window.__arcade.frame, time: window.__arcade.time, dbg: window.__arcade.debug ? window.__arcade.debug() : null }));
   check(`${tag} Play starts the game`, before.state === 'play', before.state);
 
   const touchShown = await page.evaluate(() => { const t = document.querySelector('.arc-touch'); return !!t && getComputedStyle(t).display !== 'none'; });
