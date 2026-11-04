@@ -42,7 +42,8 @@
     G.lives = G.maxLives;
     G.parts = []; G.floats = []; G.trail = []; G.attract = !!attract; G.phase = 'serve'; G.flash = 0;
     G.lamps = [];
-    for (let i = 0; i < 8; i++) G.lamps.push({ x: 0.14 + (i % 4) * 0.24, y: 0.16 + ((i / 4) | 0) * 0.12, on: true });
+    // Lamps sit inside the green court, not in the sky strip above it.
+    for (let i = 0; i < 8; i++) G.lamps.push({ x: 0.18 + (i % 4) * 0.21, y: 0.28 + ((i / 4) | 0) * 0.14, on: true });
     serve();
     if (attract) G.phase = 'play';
   }
@@ -115,7 +116,8 @@
       floatTxt(0.5, 0.35, '+50 lamps', GOLD);
       arc.toast('Lamps back', '+50', 700);
     }
-    const pw = 0.14, py = bot;
+    // Half-width matches drawPaddle (0.26 of the screen).
+    const pw = 0.13, py = bot;
     if (b.y > py - 0.035 && b.y < py + 0.05 && abs(b.x - G.px) < pw && b.vy > 0) {
       b.y = py - 0.035;
       const off = (b.x - G.px) / pw;

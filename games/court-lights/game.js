@@ -207,8 +207,12 @@
     }
     const down = inp.action();
     if (G.phase === 'aim') {
-      if (down) { G.holding = true; G.charge = min(1, G.charge + dt * 0.95); }
-      else if (G.holding) shoot();
+      if (down) {
+        G.holding = true; G.charge = min(1, G.charge + dt * 0.95);
+        // Full charge fires even if the player keeps holding, so a long press
+        // cannot lock the shot. Overcharging leaves the gold band on purpose.
+        if (G.charge >= 1) shoot();
+      } else if (G.holding) shoot();
     }
   }
 

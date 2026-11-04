@@ -148,13 +148,13 @@
       floatScore(wx + 10, gy - 56, '+' + pts, WARM);
       if (G.combo >= 3) arc.toast('Hot stack x' + G.combo, '+' + pts, 700);
     } else if (o.door) {
-      if (G.hold > 0) {
-        const pts = 80 * G.hold; G.score += pts; G.hold = 0; G.combo++;
-        arc.sfx.tone(880, 0.12, { type: 'sine', vol: 0.14 });
-        arc.toast('Delivered', '+' + pts, 800);
-        pop(wx + 16, gy - 50, GOLD, 14);
-        floatScore(wx + 16, gy - 78, '+' + pts, GOLD);
-      }
+      // Empty doors stay put so a runner without tiffins is not blocked.
+      if (G.hold <= 0) return;
+      const pts = 80 * G.hold; G.score += pts; G.hold = 0; G.combo++;
+      arc.sfx.tone(880, 0.12, { type: 'sine', vol: 0.14 });
+      arc.toast('Delivered', '+' + pts, 800);
+      pop(wx + 16, gy - 50, GOLD, 14);
+      floatScore(wx + 16, gy - 78, '+' + pts, GOLD);
     }
     o.dead = true;
   }
