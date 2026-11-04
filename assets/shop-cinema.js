@@ -15,19 +15,20 @@
   var waveAmt = 0;
   var targetMouseX = 0, targetMouseY = 0, mouseX = 0, mouseY = 0;
 
-  var planes = [].slice.call(document.querySelectorAll('.walk-layer, .b-plane'));
-  var bar = document.getElementById('walkProgressBar');
-  var lab = document.getElementById('walkProgressLabel');
+  var planes = walk ? [].slice.call(walk.querySelectorAll('.walk-layer, .b-plane')) : [];
+  var bar = walk ? walk.querySelector('#walkProgressBar') : document.getElementById('walkProgressBar');
+  var lab = walk ? walk.querySelector('#walkProgressLabel') : document.getElementById('walkProgressLabel');
   var disp = document.getElementById('freq-disp-map');
   var chars = [];
-  var portal = document.querySelector('.portal');
-  var disc = document.querySelector('.disc-3d');
-  var sleeve = document.querySelector('.sleeve-card');
-  var curtain = document.querySelector('.curtain-frame');
-  var fanCards = [].slice.call(document.querySelectorAll('.fan-card'));
-  var fanRead = document.querySelector('[data-fan-readout]');
+  var portal = shop ? shop.querySelector('.portal') : document.querySelector('.portal');
+  var portalSticky = portal ? portal.querySelector('.portal-sticky') : null;
+  var disc = shop ? shop.querySelector('.disc-3d') : document.querySelector('.disc-3d');
+  var sleeve = shop ? shop.querySelector('.sleeve-card') : document.querySelector('.sleeve-card');
+  var curtain = shop ? shop.querySelector('.curtain-frame') : document.querySelector('.curtain-frame');
+  var fanCards = shop ? [].slice.call(shop.querySelectorAll('.fan-card')) : [];
+  var fanRead = shop ? shop.querySelector('[data-fan-readout]') : document.querySelector('[data-fan-readout]');
   var activeIndex = 2;
-  var nodes = [].slice.call(document.querySelectorAll('.node[data-depth]'));
+  var nodes = shop ? [].slice.call(shop.querySelectorAll('.node[data-depth]')) : [];
   var audio = null;
   var cap = document.getElementById('walkCap') || document.getElementById('bwalkCap');
   var step = document.getElementById('walkStep') || document.getElementById('bwalkStep');
@@ -56,7 +57,7 @@
     return clamp(-r.top / span, 0, 1);
   }
 
-  [].forEach.call(document.querySelectorAll('[data-wave-title]'), function (el) {
+  [].forEach.call((shop || document).querySelectorAll('[data-wave-title]'), function (el) {
     var text = el.textContent;
     el.textContent = '';
     for (var i = 0; i < text.length; i++) {
@@ -96,7 +97,7 @@
 
   function placeWalk(p) {
     if (!walk || !planes.length) return;
-    var zTravel = p * 3400;
+    var zTravel = 280 + p * 3400;
     var pct = Math.round(p * 100);
     if (bar) bar.style.width = pct + '%';
     if (lab) lab.textContent = pct + '% DEPTH';
@@ -111,20 +112,21 @@
       plane.style.transform = 'translate3d(calc(-50% + ' + px.toFixed(2) + 'px), calc(-50% + ' + py.toFixed(2) + 'px), ' + z.toFixed(1) + 'px) rotateX(' + (-mouseY * 2.5).toFixed(2) + 'deg) rotateY(' + (mouseX * 3.5).toFixed(2) + 'deg)';
       plane.style.zIndex = String(Math.round(z + 4000));
       var o = 1;
-      if (z > 180) o = clamp(1 - (z - 180) / 420, 0, 1);
-      if (z < -3200) o = clamp((z + 3600) / 400, 0, 1);
+      if (z > 120) o = clamp(1 - (z - 120) / 280, 0, 1);
+      if (z < -800) o = Math.min(o, clamp((z + 1050) / 250, 0, 1));
       plane.style.opacity = o.toFixed(3);
+      plane.style.visibility = o < 0.04 ? 'hidden' : 'visible';
     }
     var facade = document.getElementById('walkFacade');
     var flare = document.getElementById('walkFlare');
     if (facade) {
-      var sc = p < 0.22 ? 1 : p < 0.68 ? 1 + ((p - 0.22) / 0.46) * 3.5 : 4.5;
-      var fo = p < 0.58 ? 1 : p < 0.8 ? 1 - (p - 0.58) / 0.22 : 0;
+      var sc = p < 0.18 ? 1 : p < 0.56 ? 1 + ((p - 0.18) / 0.38) * 3.2 : 4.2;
+      var fo = p < 0.18 ? 1 : p < 0.42 ? 1 - (p - 0.18) / 0.24 : 0;
       facade.style.scale = sc.toFixed(3);
       facade.style.opacity = fo.toFixed(3);
     }
     if (flare) {
-      var fl = p < 0.34 ? 0 : p < 0.5 ? (p - 0.34) / 0.16 : p < 0.7 ? 1 - (p - 0.5) / 0.2 : 0;
+      var fl = p < 0.16 ? 0 : p < 0.28 ? (p - 0.16) / 0.12 : p < 0.42 ? 1 - (p - 0.28) / 0.14 : 0;
       flare.style.opacity = Math.max(0, fl).toFixed(3);
     }
     if (hint) hint.style.opacity = (1 - clamp(p / 0.08, 0, 1)).toFixed(3);
@@ -169,22 +171,25 @@
     var spin = clamp(p / 0.45, 0, 1);
     var rot = spin * 720;
     var sc = 0.68 + spin * 0.5;
-    var slide = clamp((p - 0.55) / 0.45, 0, 1);
+    var slide = clamp((p - 0.22) / 0.5, 0, 1);
     var x = -28 * slide;
     disc.style.transform = 'translate3d(' + x.toFixed(2) + '%, 0, 0) rotate(' + rot.toFixed(2) + 'deg) scale(' + sc.toFixed(3) + ')';
-    if (p > 0.38 && p < 0.72) document.body.setAttribute('data-world', worldName);
-    else document.body.removeAttribute('data-world');
+    if (portalSticky) {
+      if (p > 0.28 && p < 0.82) portalSticky.setAttribute('data-world', worldName);
+      else portalSticky.removeAttribute('data-world');
+    }
+    document.body.removeAttribute('data-world');
     if (sleeve) {
       sleeve.style.opacity = slide.toFixed(3);
       sleeve.style.transform = 'translate(' + (18 - 18 * slide).toFixed(2) + '%, -50%)';
-      sleeve.classList.toggle('is-on', slide > 0.55);
+      sleeve.classList.toggle('is-on', slide > 0.35);
     }
   }
 
   function placeCurtain() {
     if (!curtain) return;
     var r = curtain.getBoundingClientRect();
-    var p = clamp((window.innerHeight - r.top) / (window.innerHeight + r.height * 0.45), 0, 1);
+    var p = reduce ? 1 : clamp((window.innerHeight - r.top) / (window.innerHeight + r.height * 0.35), 0, 1);
     curtain.style.setProperty('--curtain', p.toFixed(3));
   }
 
@@ -193,7 +198,7 @@
       var offset = i - activeIndex;
       card.style.zIndex = String(20 - Math.abs(offset));
       card.style.opacity = String(Math.abs(offset) > 2 ? 0 : 1);
-      card.style.transform = 'translate3d(' + (offset * 195) + 'px, ' + (Math.abs(offset) * 28) + 'px, ' + (Math.abs(offset) * -90) + 'px) rotateZ(' + (offset * 8) + 'deg)';
+      card.style.transform = 'translate3d(' + (offset * 168) + 'px, calc(-50% + ' + (Math.abs(offset) * 12) + 'px), ' + (Math.abs(offset) * -80) + 'px) rotateZ(' + (offset * 7) + 'deg)';
       card.setAttribute('aria-current', i === activeIndex ? 'true' : 'false');
     });
     var on = fanCards[activeIndex];
@@ -231,6 +236,7 @@
     if (lab) lab.textContent = '0% DEPTH';
     if (bar) bar.style.width = '0%';
     placeFan();
+    placeCurtain();
   } else {
     placeFan();
     requestAnimationFrame(tick);
@@ -241,12 +247,12 @@
   fanCards.forEach(function (card, i) {
     card.addEventListener('click', function () { activeIndex = i; placeFan(); });
   });
-  var prev = document.querySelector('[data-fan="prev"]');
-  var next = document.querySelector('[data-fan="next"]');
+  var prev = shop ? shop.querySelector('[data-fan="prev"]') : document.querySelector('[data-fan="prev"]');
+  var next = shop ? shop.querySelector('[data-fan="next"]') : document.querySelector('[data-fan="next"]');
   if (prev) prev.addEventListener('click', function () { activeIndex = (activeIndex + fanCards.length - 1) % fanCards.length; placeFan(); });
   if (next) next.addEventListener('click', function () { activeIndex = (activeIndex + 1) % fanCards.length; placeFan(); });
 
-  [].forEach.call(document.querySelectorAll('.show-card'), function (card) {
+  [].forEach.call((shop || document).querySelectorAll('.show-card'), function (card) {
     card.addEventListener('pointermove', function (e) {
       if (reduce) return;
       var r = card.getBoundingClientRect();
@@ -257,8 +263,8 @@
     card.addEventListener('pointerleave', function () { card.style.transform = ''; });
   });
 
-  var tabs = [].slice.call(document.querySelectorAll('[data-tab]'));
-  var cells = [].slice.call(document.querySelectorAll('[data-track]'));
+  var tabs = shop ? [].slice.call(shop.querySelectorAll('[data-tab]')) : [];
+  var cells = shop ? [].slice.call(shop.querySelectorAll('[data-track]')) : [];
   tabs.forEach(function (tab) {
     tab.addEventListener('click', function () {
       var key = tab.getAttribute('data-tab');
