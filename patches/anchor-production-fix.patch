@@ -1,0 +1,389 @@
+From 166fe91a46014920bb9c502fe3d9dc956a3ac778 Mon Sep 17 00:00:00 2001
+From: Cursor Agent <cursoragent@cursor.com>
+Date: Tue, 3 Nov 2026 21:31:56 +0000
+Subject: [PATCH 1/2] Stop the daily drop hanging in lyriccheck, and hear the
+ whole catalogue.
+
+Whisper on the full mix with no timeout held 2026-11-02-5 for 102 minutes after
+the render finished, then killed the job. The same hang is running now on
+2026-11-03-3. Listen with VAD, a deadline, and a 180s cap so a stuck
+recogniser is a warning, not a missed day.
+
+Uniqueness only compared the newest 40 masters, so once the catalogue grew
+past that the original Suno records dropped out of the check. Compare all of
+them, and if a cap is set keep the newest and oldest halves.
+---
+ anchor/lyriccheck.py     | 72 ++++++++++++++++++++++++++++++++++++----
+ anchor/lyrics.py         | 37 +++++++++++++++------
+ anchor/unique.py         | 20 +++++++++--
+ tests/test_lyriccheck.py | 49 +++++++++++++++++++++++++++
+ tests/test_lyrics.py     | 30 +++++++++++++++++
+ tests/test_unique.py     | 13 ++++++++
+ 6 files changed, 201 insertions(+), 20 deletions(-)
+ create mode 100644 tests/test_unique.py
+
+diff --git a/anchor/lyriccheck.py b/anchor/lyriccheck.py
+index bfafe1d..0125677 100644
+--- a/anchor/lyriccheck.py
++++ b/anchor/lyriccheck.py
+@@ -12,13 +12,20 @@ take, which is then rendered again.
+ """
+ from __future__ import annotations
+ 
++import os
+ import re
+ import subprocess
+ import tempfile
++import time
++from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
+ from pathlib import Path
+ 
+ from .util import log
+ 
++# faster-whisper small, kept between takes of one song so take 2 does not reload the weights
++_MODELS: dict[str, object] = {}
++DEFAULT_TIMEOUT_S = 180.0
++
+ # Phrases a direction, tag or delivery note is made of; anything the arranger is told and the
+ # singer must never say. Built from the live directions (music.SECTION_DIRECTIONS and the brief's
+ # VOICE tables) plus the stock words of a lyric sheet.
+@@ -118,12 +125,42 @@ def sung_notes(heard: str, sheet: str | None, notes: list[str] | None = None) ->
+     return hits
+ 
+ 
++def timeout_s() -> float:
++    """Seconds this take may spend listening. Zero means skip: the make deadline is too close
++    to start a recogniser that cannot be killed mid-forward-pass.
++
++    2026-11-02-5 take 2 rendered in 10 min, then faster-whisper on the full mix with no
++    voice-activity filter never returned (kick-drum hallucination); the job was cancelled
++    102 minutes later. 2026-11-03-3 hung the same way for hours. A missing check is a
++    warning; a hung check is a missed day."""
++    configured = float(os.environ.get("ANCHOR_LYRIC_CHECK_TIMEOUT") or DEFAULT_TIMEOUT_S)
++    deadline = os.environ.get("ANCHOR_MAKE_DEADLINE")
++    if not deadline:
++        return configured
++    remain = float(deadline) - time.time()
++    if remain < 20:
++        return 0.0
++    return min(configured, max(15.0, remain - 30.0))
++
++
++def _model(model_size: str):
++    from faster_whisper import WhisperModel
++    if model_size not in _MODELS:
++        _MODELS[model_size] = WhisperModel(model_size, device="cpu", compute_type="int8")
++    return _MODELS[model_size]
++
++
+ def hear(audio: Path, title: str | None = None, model_size: str = "small") -> str | None:
+     """What the vocal says, as text (faster-whisper on CPU). None when the recogniser is not
+-    installed or fails, so a missing model never blocks a song; it is reported instead."""
++    installed, fails, or hits the time limit, so a missing or stuck model never blocks a song;
++    it is reported instead."""
++    limit = timeout_s()
++    if limit <= 0:
++        log("lyriccheck: skipped, the make deadline is too close")
++        return None
+     try:
+         import soundfile as sf
+-        from faster_whisper import WhisperModel
++        import faster_whisper  # noqa: F401  presence check: a missing wheel is "unavailable", not a hang
+     except Exception as exc:                          # noqa: BLE001
+         log(f"lyriccheck: recogniser unavailable ({str(exc)[:120]})")
+         return None
+@@ -131,14 +168,35 @@ def hear(audio: Path, title: str | None = None, model_size: str = "small") -> st
+         with tempfile.TemporaryDirectory() as tmp:
+             wav = Path(tmp) / "mono16k.wav"
+             subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(audio), "-ac", "1", "-ar", "16000", str(wav)],
+-                           check=True, capture_output=True)
++                           check=True, capture_output=True, timeout=60)
+             samples, _sr = sf.read(str(wav), dtype="float32")
+-        model = WhisperModel(model_size, device="cpu", compute_type="int8")
++        model = _model(model_size)
+         # no hint with the title: a prompt makes the recogniser spell the title right even when
+         # the singer says it wrong, and the pronunciation check below needs to hear what was sung
+-        segs, _info = model.transcribe(samples, language="en", vad_filter=False,
+-                                       condition_on_previous_text=False)
+-        return " ".join(s.text.strip() for s in segs)
++        # VAD on: this listens to the full mix, not an isolated vocal. Without it whisper treats
++        # three minutes of kick drums as speech and the generator never ends (see timeout_s).
++        # lyrics.heard_words still leaves VAD off: that path runs Demucs first.
++        def transcribe() -> str:
++            segs, _info = model.transcribe(
++                samples, language="en", vad_filter=True,
++                vad_parameters={"min_silence_duration_ms": 500, "speech_pad_ms": 400},
++                condition_on_previous_text=False, beam_size=1,
++                no_speech_threshold=0.6, compression_ratio_threshold=2.4)
++            parts, started = [], time.monotonic()
++            for s in segs:
++                if time.monotonic() - started > limit:
++                    break
++                if s.text.strip():
++                    parts.append(s.text.strip())
++            return " ".join(parts)
++
++        with ThreadPoolExecutor(max_workers=1) as pool:
++            fut = pool.submit(transcribe)
++            try:
++                return fut.result(timeout=limit)
++            except FuturesTimeout:
++                log(f"lyriccheck: transcription hit the {limit:.0f}s limit; treating as unchecked")
++                return None
+     except Exception as exc:                          # noqa: BLE001
+         log(f"lyriccheck: transcription failed ({str(exc)[:160]})")
+         return None
+diff --git a/anchor/lyrics.py b/anchor/lyrics.py
+index 927b550..ca80085 100644
+--- a/anchor/lyrics.py
++++ b/anchor/lyrics.py
+@@ -17,6 +17,8 @@ import os
+ import re
+ import subprocess
+ import sys
++import time
++from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
+ from pathlib import Path
+ 
+ import numpy as np
+@@ -55,20 +57,35 @@ def heard_words(audio: Path, title: str | None = None) -> list[tuple[str, float,
+     """(word, start, end) as sung, from faster-whisper. Empty when the model is unavailable.
+ 
+     No voice-activity filter: on a sung vocal it cut whole phrases out. The song's title is the
+-    likeliest sung phrase, so it is given as a hint (it was heard as "Super Slonchic Kurt")."""
++    likeliest sung phrase, so it is given as a hint (it was heard as "Super Slonchic Kurt").
++    A time limit still applies: without one, a take that Demucs could not isolate would let
++    whisper run on the full mix until the daily job died, the same hang as lyriccheck.hear."""
++    limit = float(os.environ.get("ANCHOR_LYRICS_TIMEOUT") or 300)
+     try:
+         from faster_whisper import WhisperModel
+         model = WhisperModel("small", device="cpu", compute_type="int8")
+         hint = {"hotwords": title, "initial_prompt": f"{title}."} if title else {}
+-        segs, _info = model.transcribe(str(audio), language="en", word_timestamps=True, vad_filter=False,
+-                                       condition_on_previous_text=False, beam_size=5, **hint)
+-        out = []
+-        for s in segs:
+-            for w in s.words or []:
+-                t = w.word.strip()
+-                if _norm(t) and w.probability >= MIN_WORD_PROB and w.end > w.start:
+-                    out.append((t, float(w.start), float(w.end)))
+-        return out
++
++        def transcribe():
++            segs, _info = model.transcribe(str(audio), language="en", word_timestamps=True, vad_filter=False,
++                                           condition_on_previous_text=False, beam_size=5, **hint)
++            out, started = [], time.monotonic()
++            for s in segs:
++                if time.monotonic() - started > limit:
++                    break
++                for w in s.words or []:
++                    t = w.word.strip()
++                    if _norm(t) and w.probability >= MIN_WORD_PROB and w.end > w.start:
++                        out.append((t, float(w.start), float(w.end)))
++            return out
++
++        with ThreadPoolExecutor(max_workers=1) as pool:
++            fut = pool.submit(transcribe)
++            try:
++                return fut.result(timeout=limit)
++            except FuturesTimeout:
++                log(f"lyrics: transcription hit the {limit:.0f}s limit")
++                return []
+     except Exception as exc:
+         log(f"lyrics: transcription unavailable ({str(exc)[:120]})")
+         return []
+diff --git a/anchor/unique.py b/anchor/unique.py
+index 3634697..32083d5 100644
+--- a/anchor/unique.py
++++ b/anchor/unique.py
+@@ -148,11 +148,25 @@ def sounds_alike(score: dict) -> bool:
+     return max(score["envelope"], score["sequence"]) >= SOUND_ALIKE
+ 
+ 
+-def released_prints(catalog_path: Path, work: Path, limit: int = 40) -> dict[str, dict]:
++def catalogue_window(drops: list, limit: int | None = None) -> list:
++    """Which released tracks uniqueness hears. Newest-first catalogue: a numeric cap used
++    to keep only the head, which dropped the original nine Suno records once forty later
++    drops existed. With a cap, keep the newest half and the oldest half."""
++    if limit is None or len(drops) <= limit:
++        return list(drops)
++    keep = max(1, limit // 2)
++    return list(drops[:keep]) + list(drops[-keep:])
++
++
++def released_prints(catalog_path: Path, work: Path, limit: int | None = None) -> dict[str, dict]:
+     """Prints of the released masters, cached as .npz. On the Mac the cache is shared across
+     builds (~/.cache/anchor/prints, or ANCHOR_PRINTS_CACHE), so each release is fetched once,
+     not once per song (2026-11-02: one blackholed GitHub download address held a song for
+-    20 minutes because the download had no timeout)."""
++    20 minutes because the download had no timeout).
++
++    The whole catalogue is compared. A cap of 40 newest (the previous default) dropped the
++    original nine Suno records once 40 later drops existed, so a new take could clone Then
++    Do It and still pass. Prints are cheap once cached; a missing file is skipped."""
+     from .audio import decode
+     shared = os.environ.get("ANCHOR_PRINTS_CACHE") or str(Path.home() / ".cache" / "anchor" / "prints")
+     if Path(shared).is_dir():
+@@ -160,7 +174,7 @@ def released_prints(catalog_path: Path, work: Path, limit: int = 40) -> dict[str
+     work.mkdir(parents=True, exist_ok=True)
+     out: dict[str, dict] = {}
+     try:
+-        drops = json.loads(Path(catalog_path).read_text()).get("drops", [])[:limit]
++        drops = catalogue_window(json.loads(Path(catalog_path).read_text()).get("drops", []), limit)
+     except (OSError, ValueError):
+         return out
+     for d in drops:
+diff --git a/tests/test_lyriccheck.py b/tests/test_lyriccheck.py
+index 9ee1aee..a836cd7 100644
+--- a/tests/test_lyriccheck.py
++++ b/tests/test_lyriccheck.py
+@@ -1,4 +1,6 @@
+ """A song sings its lyrics, never its production notes (Anchit, 2026-10-26)."""
++from pathlib import Path
++
+ import pytest
+ 
+ from anchor import lyriccheck
+@@ -151,3 +153,50 @@ def test_the_released_songs_that_sang_their_title_wrong_are_caught():
+     assert lyriccheck.misheard_title(HEARD_KINETIC_CARBON, "Kinetic Carbon") == ["kinetic"], "4 of 13 were 'kinected'"
+     assert lyriccheck.misheard_title(HEARD_COMMAND_VORTEX, "Command Vortex") == ["command", "vortex"]
+     assert lyriccheck.misheard_title(HEARD_PISTON_VOLTAGE, "Piston Voltage") == [], "sung right, plurals and all"
++
++
++def test_listening_is_skipped_when_the_make_deadline_is_close(monkeypatch, tmp_path):
++    """A hung recogniser is a missed day; skipping with 20 s left is a warning, not a red run."""
++    import time
++    monkeypatch.setenv("ANCHOR_MAKE_DEADLINE", str(time.time() + 5))
++    assert lyriccheck.timeout_s() == 0
++    assert lyriccheck.hear(tmp_path / "missing.wav") is None, "must not start ffmpeg with 5 s left"
++    monkeypatch.setenv("ANCHOR_MAKE_DEADLINE", str(time.time() + 3600))
++    monkeypatch.setenv("ANCHOR_LYRIC_CHECK_TIMEOUT", "180")
++    assert lyriccheck.timeout_s() == 180
++
++
++def test_listening_uses_vad_and_times_out_instead_of_hanging(monkeypatch, tmp_path):
++    """2026-11-02-5 take 2: whisper on the full mix with no VAD never returned (102 min)."""
++    import sys
++    import time
++    import types
++    import numpy as np
++
++    seen = {}
++
++    class Seg:
++        def __init__(self, text):
++            self.text = text
++
++    class Model:
++        def transcribe(self, samples, **k):
++            seen.update(k)
++            def gen():
++                while True:
++                    time.sleep(0.05)
++                    yield Seg("kick drum kick drum")
++            return gen(), None
++
++    monkeypatch.setenv("ANCHOR_LYRIC_CHECK_TIMEOUT", "0.25")
++    monkeypatch.setattr(lyriccheck, "_model", lambda size: Model())
++    monkeypatch.setattr(lyriccheck.subprocess, "run",
++                        lambda cmd, **k: Path(cmd[-1]).write_bytes(b"x"))
++    monkeypatch.setitem(sys.modules, "faster_whisper", types.SimpleNamespace())
++    monkeypatch.setitem(sys.modules, "soundfile", types.SimpleNamespace(
++        read=lambda *a, **k: (np.zeros(1600, dtype="float32"), 16000)))
++    started = time.monotonic()
++    assert lyriccheck.hear(tmp_path / "t.wav") is None
++    assert time.monotonic() - started < 2.5
++    assert seen["vad_filter"] is True
++    assert seen["condition_on_previous_text"] is False
+diff --git a/tests/test_lyrics.py b/tests/test_lyrics.py
+index 5c43269..88c5fc9 100644
+--- a/tests/test_lyrics.py
++++ b/tests/test_lyrics.py
+@@ -66,3 +66,33 @@ def test_the_title_is_the_transcription_hint(monkeypatch, tmp_path):
+     monkeypatch.setitem(sys.modules, "faster_whisper", types.SimpleNamespace(WhisperModel=Model))
+     assert L.heard_words(tmp_path / "v.wav", "Supersonic Current") == []
+     assert seen["hotwords"] == "Supersonic Current" and seen["vad_filter"] is False
++
++
++def test_caption_transcription_times_out_instead_of_hanging(monkeypatch, tmp_path):
++    """Same hang as lyriccheck, on the caption path, if Demucs cannot isolate the vocal."""
++    import sys
++    import time
++    import types
++    from anchor import lyrics as L
++
++    class Word:
++        def __init__(self):
++            self.word, self.probability, self.start, self.end = "x", 1.0, 0.0, 0.1
++
++    class Seg:
++        words = [Word()]
++
++    class Model:
++        def __init__(self, *a, **k): pass
++        def transcribe(self, audio, **k):
++            def gen():
++                while True:
++                    time.sleep(0.05)
++                    yield Seg()
++            return gen(), None
++
++    monkeypatch.setenv("ANCHOR_LYRICS_TIMEOUT", "0.25")
++    monkeypatch.setitem(sys.modules, "faster_whisper", types.SimpleNamespace(WhisperModel=Model))
++    started = time.monotonic()
++    assert L.heard_words(tmp_path / "v.wav", "Go") == []
++    assert time.monotonic() - started < 2.5
+diff --git a/tests/test_unique.py b/tests/test_unique.py
+new file mode 100644
+index 0000000..97a2f74
+--- /dev/null
++++ b/tests/test_unique.py
+@@ -0,0 +1,13 @@
++"""Uniqueness window: every released master is heard, not only the newest forty."""
++from anchor.unique import catalogue_window
++
++
++def test_uniqueness_keeps_the_oldest_releases_not_only_the_newest():
++    """68 drops, newest first: a cap of 40 newest used to drop Then Do It (2026-09-04)."""
++    drops = [{"id": f"n{i}"} for i in range(68)]          # n0 newest, n67 oldest
++    assert [d["id"] for d in catalogue_window(drops)][-1] == "n67"
++    capped = [d["id"] for d in catalogue_window(drops, 40)]
++    assert capped[0] == "n0" and capped[-1] == "n67"
++    assert "n0" in capped and "n67" in capped and "n33" not in capped
++    assert catalogue_window(drops[:10], 40) == drops[:10]
++    assert catalogue_window(drops) == drops
+-- 
+2.43.0
+
+
+From 292f86089ae9a8e7da6442fc152b53e754bb45d9 Mon Sep 17 00:00:00 2001
+From: Cursor Agent <cursoragent@cursor.com>
+Date: Tue, 3 Nov 2026 23:39:53 +0000
+Subject: [PATCH 2/2] Match the Instagram skip test to the loud not-connected
+ record.
+
+The unconnected Buffer account is still a successful run. The drop now
+keeps Buffer's reason on instagram.error so a week of missing Reels cannot
+hide again, which is what the slow suite was asserting against None.
+---
+ tests/test_release_v2.py | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/tests/test_release_v2.py b/tests/test_release_v2.py
+index c83d7b5..e42cb11 100644
+--- a/tests/test_release_v2.py
++++ b/tests/test_release_v2.py
+@@ -257,7 +257,9 @@ def test_an_unconnected_instagram_account_is_a_note_not_a_failed_run(tmp_path, m
+     assert [s["video_url"] for s in sent] == ["https://host/short.mp4"]
+     assert res["youtube"]["status"] == pipeline.NEEDS_YT and res["youtube"]["error"] is None
+     assert res["youtube_short"]["post_id"] == "p1" and res["post_id"] == "p1"
+-    assert res["instagram"] == {"status": "not connected", "error": None} and res["error"] is None
++    # the run still succeeds; the skip is loud on the drop so a week of missing Reels cannot hide
++    assert res["error"] is None and res["instagram"]["status"] == "not connected"
++    assert "no Instagram channel connected" in (res["instagram"]["error"] or "")
+ 
+ 
+ def test_a_mix_without_the_channel_credentials_waits_instead_of_failing(monkeypatch, tmp_path):
+-- 
+2.43.0
+
