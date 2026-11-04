@@ -1,0 +1,1891 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Amar Ujala Education Study: Audit, Ideas and a Working Prototype | Anchit Tandon</title>
+<meta name="description" content="An independent product study of the Amar Ujala education business: an audit, upgrades, the six venture questions and a working Hindi result-day prototype.">
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="https://anchit-tandon.com/amar-ujala-study">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Amar Ujala Education Study by Anchit Tandon">
+<meta property="og:description" content="Audit, upgrades, the six venture questions and a working Hindi result-day prototype. An independent concept, not affiliated with Amar Ujala.">
+<meta property="og:url" content="https://anchit-tandon.com/amar-ujala-study">
+<meta property="og:image" content="https://anchit-tandon.com/assets/og/og-default.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0F0D0A">
+<link rel="icon" href="/icons/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap">
+<style>
+/* Amar Ujala study. Tokens follow DESIGN.md exactly; component rules below use only these variables. */
+:root{
+  --bg:#0F0D0A;--bg-elev:#1A1814;--bg-deep:#060503;
+  --ink:#FBF5EC;--ink-dim:#A39E94;--ink-mute:#5A554E;
+  --rule:#2A261F;--rule-strong:#3D3830;
+  --primary:#FF6940;--primary-deep:#FF4D1F;--primary-soft:rgba(255,105,64,.12);
+  --accent:#c9a96e;--accent-warm:#FFB736;--accent-soft:rgba(201,169,110,.14);
+  --good:#FFB736;--warn:#FF8A3D;--danger:#FF4D1F;--danger-soft:rgba(255,77,31,.14);
+  --on-primary:#1a0d06;--bg-glass:rgba(15,13,10,.92);
+  --font-display:'Fraunces','Times New Roman',serif;
+  --font-body:'Inter','Noto Sans Devanagari',-apple-system,BlinkMacSystemFont,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,monospace;
+  --fs-micro:11px;--fs-label:12px;--fs-sm:14px;--fs-body:16px;--fs-lead:20px;--fs-h3:25px;--fs-h2:31px;--fs-h1:39px;--fs-display:61px;
+  --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:20px;--sp-6:24px;--sp-7:32px;--sp-8:40px;--sp-9:48px;--sp-10:64px;--sp-11:88px;
+  --gutter:clamp(20px,3vw,48px);
+  --r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:20px;--r-pill:99px;
+  --shadow-sm:0 2px 8px rgba(0,0,0,.3);--shadow-md:0 12px 32px rgba(0,0,0,.4);--shadow-lg:0 32px 64px rgba(0,0,0,.5);
+  --ease-arrive:cubic-bezier(.16,1,.3,1);
+  --wrap:1180px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{overflow-x:clip}
+html{scroll-padding-top:88px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:var(--fs-body);font-weight:400;line-height:1.6;-webkit-font-smoothing:antialiased}
+img,svg{max-width:100%}
+a{color:var(--primary);text-underline-offset:4px}
+a:hover{color:var(--primary-deep)}
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+h1,h2,h3{font-family:var(--font-display);font-weight:500;line-height:1.15;margin:0;color:var(--ink)}
+h1{font-size:var(--fs-display);letter-spacing:-.01em}
+h2{font-size:var(--fs-h1)}
+h3{font-size:var(--fs-lead);font-weight:600}
+p{margin:0}
+em{font-style:italic;color:var(--accent)}
+strong{font-weight:600}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 var(--gutter)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip{position:absolute;left:var(--sp-4);top:-64px;background:var(--primary);color:var(--on-primary);padding:var(--sp-2) var(--sp-4);border-radius:var(--r-md);z-index:50}
+.skip:focus{top:var(--sp-4)}
+
+/* Labels and badges */
+.eyebrow{font-family:var(--font-mono);font-size:var(--fs-label);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.badge{display:inline-flex;align-items:center;gap:var(--sp-2);font-family:var(--font-mono);font-size:var(--fs-micro);letter-spacing:.1em;text-transform:uppercase;padding:var(--sp-1) var(--sp-3);border-radius:var(--r-pill);background:var(--accent-soft);color:var(--accent);border:1px solid var(--rule-strong)}
+.badge.is-primary{background:var(--primary-soft);color:var(--primary)}
+.badge.is-danger{background:var(--danger-soft);color:var(--danger)}
+.muted{color:var(--ink-dim)}
+.small{font-size:var(--fs-sm)}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-2);font:500 var(--fs-sm)/1.2 var(--font-body);padding:var(--sp-3) var(--sp-5);border-radius:var(--r-md);border:1px solid transparent;cursor:pointer;text-decoration:none;transition:transform .2s var(--ease-arrive),opacity .2s ease;min-height:44px}
+.btn-primary{background:linear-gradient(100deg,var(--primary),var(--primary-deep));color:var(--on-primary)}
+.btn-primary:hover{transform:translateY(-1px);color:var(--on-primary)}
+.btn-ghost{background:transparent;color:var(--ink);border-color:var(--rule-strong)}
+.btn-ghost:hover{border-color:var(--primary);color:var(--ink)}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none}
+.btn-block{width:100%}
+
+/* Top bar */
+.top{position:sticky;top:0;z-index:20;background:var(--bg-glass);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--rule)}
+.top-in{display:flex;align-items:center;gap:var(--sp-5);min-height:64px}
+.brand{display:flex;align-items:center;gap:var(--sp-3);color:var(--ink);text-decoration:none;flex:none}
+.mono{display:grid;place-items:center;width:36px;height:36px;border-radius:var(--r-sm);border:1px solid var(--rule-strong);font-family:var(--font-display);font-size:var(--fs-body);color:var(--accent)}
+.brand-t{font-family:var(--font-mono);font-size:var(--fs-label);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim)}
+.toc{display:flex;gap:var(--sp-1);overflow-x:auto;scrollbar-width:none;margin-left:auto;padding:var(--sp-2) 0}
+.toc::-webkit-scrollbar{display:none}
+.toc a{flex:none;font-family:var(--font-mono);font-size:var(--fs-micro);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);text-decoration:none;padding:var(--sp-2) var(--sp-3);border-radius:var(--r-pill);border:1px solid transparent}
+.toc a:hover,.toc a.on{color:var(--ink);border-color:var(--rule-strong)}
+
+/* Hero */
+.hero{padding:var(--sp-11) 0 var(--sp-10)}
+.hero .badges{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin-bottom:var(--sp-6)}
+.hero h1{max-width:960px}
+.hero .lede{font-size:var(--fs-lead);font-weight:300;color:var(--ink-dim);max-width:820px;margin-top:var(--sp-6)}
+.hero .cta{display:flex;flex-wrap:wrap;gap:var(--sp-3);margin-top:var(--sp-7)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-4);margin-top:var(--sp-10)}
+.stat{background:var(--bg-elev);border:1px solid var(--rule);border-radius:var(--r-lg);padding:var(--sp-5)}
+.stat b{display:block;font-family:var(--font-display);font-size:var(--fs-h2);font-weight:500;color:var(--ink);line-height:1.1}
+.stat span{display:block;margin-top:var(--sp-2);font-size:var(--fs-sm);color:var(--ink-dim)}
+.stat small{display:block;margin-top:var(--sp-2);font-family:var(--font-mono);font-size:var(--fs-micro);letter-spacing:.06em;color:var(--ink-dim);text-transform:uppercase}
+
+/* Sections */
+.sec{padding:var(--sp-10) 0;border-top:1px solid var(--rule)}
+.sec-head{display:grid;grid-template-columns:120px 1fr;gap:var(--sp-6);margin-bottom:var(--sp-8)}
+.sec-num{font-family:var(--font-mono);font-size:var(--fs-label);letter-spacing:.12em;color:var(--primary);padding-top:var(--sp-3)}
+.sec-head .eyebrow{margin-bottom:var(--sp-3);display:block}
+.sec-head p{margin-top:var(--sp-4);color:var(--ink-dim);font-size:var(--fs-lead);font-weight:300;max-width:820px}
+.callout{margin-top:var(--sp-7);padding:var(--sp-6);border-radius:var(--r-lg);background:var(--primary-soft);border:1px solid var(--rule-strong)}
+.callout b{color:var(--ink)}
+.callout.gold{background:var(--accent-soft)}
+
+/* Grids and cards */
+.grid{display:grid;gap:var(--sp-4)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--bg-elev);border:1px solid var(--rule);border-radius:var(--r-lg);padding:var(--sp-6);box-shadow:var(--shadow-md)}
+.card:hover{border-color:var(--rule-strong)}
+.card h3{margin-bottom:var(--sp-2)}
+.card p+p{margin-top:var(--sp-2)}
+.card .meta{font-family:var(--font-mono);font-size:var(--fs-micro);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:var(--sp-3)}
+.card .gap{margin-top:var(--sp-4);padding-top:var(--sp-3);border-top:1px solid var(--rule);color:var(--warn);font-size:var(--fs-sm)}
+.card .gap b{font-family:var(--font-mono);font-size:var(--fs-micro);letter-spacing:.1em;text-transform:uppercase;margin-right:var(--sp-2)}
+.card ul{margin:var(--sp-3) 0 0;padding-left:var(--sp-5);color:var(--ink-dim);font-size:var(--fs-sm)}
+.card li+li{margin-top:var(--sp-2)}
+.qcard h3{font-size:var(--fs-h3)}
+.qcard .answer{font-size:var(--fs-body);color:var(--ink);margin-top:var(--sp-3)}
+.qcard .num{font-family:var(--font-mono);font-size:var(--fs-label);color:var(--primary);letter-spacing:.1em;display:block;margin-bottom:var(--sp-2)}
+.qcard.wide{grid-column:1/-1}
+
+/* Tables: stack into cards under 760px */
+.tbl{width:100%;border-collapse:separate;border-spacing:0;background:var(--bg-elev);border:1px solid var(--rule);border-radius:var(--r-lg);overflow:hidden;font-size:var(--fs-sm)}
+.tbl th{text-align:left;font-family:var(--font-mono);font-size:var(--fs-micro);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim);font-weight:500;padding:var(--sp-3) var(--sp-4);border-bottom:1px solid var(--rule-strong);background:var(--bg-deep)}
+.tbl td{padding:var(--sp-4);border-bottom:1px solid var(--rule);vertical-align:top;color:var(--ink-dim)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl td:first-child{color:var(--ink)}
+.tbl td b{color:var(--ink)}
+.tbl .n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbl tr.hl td{background:var(--accent-soft)}
+.tbl .fail{color:var(--warn)}
+
+/* Journey */
+.journey{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--sp-4);position:relative}
+.stage{position:relative;background:var(--bg-elev);border:1px solid var(--rule-strong);border-radius:var(--r-lg);padding:var(--sp-5)}
+.stage .meta{font-family:var(--font-mono);font-size:var(--fs-micro);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim)}
+.stage h3{font-size:var(--fs-body);margin:var(--sp-2) 0}
+.stage p{font-size:var(--fs-sm);color:var(--ink-dim)}
+.stage .keep{margin-top:var(--sp-3);font-family:var(--font-mono);font-size:var(--fs-micro);letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.stage.pay{border-color:var(--primary)}
+.stage:not(:last-child)::after{content:'';position:absolute;right:-12px;top:50%;width:8px;height:8px;border-top:1px solid var(--ink-mute);border-right:1px solid var(--ink-mute);transform:translateY(-50%) rotate(45deg)}
+.profile-band{margin-top:var(--sp-4);padding:var(--sp-5);border-radius:var(--r-lg);border:2px solid var(--primary);background:var(--primary-soft);text-align:center;font-family:var(--font-display);font-size:var(--fs-lead);color:var(--ink)}
+
+/* Steps list */
+.steps{counter-reset:s;display:grid;gap:var(--sp-4);grid-template-columns:repeat(4,1fr)}
+.steps li{list-style:none;counter-increment:s;background:var(--bg-elev);border:1px solid var(--rule);border-radius:var(--r-lg);padding:var(--sp-5)}
+.steps li::before{content:counter(s,decimal-leading-zero);display:block;font-family:var(--font-mono);font-size:var(--fs-label);color:var(--primary);margin-bottom:var(--sp-2)}
+.steps h3{font-size:var(--fs-body)}
+.steps p{font-size:var(--fs-sm);color:var(--ink-dim);margin-top:var(--sp-2)}
+ol.steps{padding:0;margin:0}
+
+/* Roadmap */
+.road{display:grid;gap:0;border-left:1px solid var(--rule-strong);margin-left:var(--sp-2)}
+.phase{position:relative;padding:0 0 var(--sp-7) var(--sp-7)}
+.phase::before{content:'';position:absolute;left:-6px;top:6px;width:11px;height:11px;border-radius:var(--r-pill);background:var(--bg);border:2px solid var(--primary)}
+.phase .when{font-family:var(--font-mono);font-size:var(--fs-label);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.phase h3{margin:var(--sp-1) 0 var(--sp-2)}
+.phase ul{margin:0;padding-left:var(--sp-5);color:var(--ink-dim);font-size:var(--fs-sm)}
+.phase .gate{display:inline-block;margin-top:var(--sp-3);font-size:var(--fs-sm);color:var(--ink);background:var(--primary-soft);border:1px solid var(--rule-strong);border-radius:var(--r-sm);padding:var(--sp-2) var(--sp-3)}
+
+.sources{columns:2;column-gap:var(--sp-8);font-size:var(--fs-sm);padding-left:var(--sp-5);color:var(--ink-dim)}
+.sources li{break-inside:avoid;margin-bottom:var(--sp-2)}
+.foot{border-top:1px solid var(--rule);padding:var(--sp-8) 0 var(--sp-10);color:var(--ink-dim);font-size:var(--fs-sm)}
+.foot a{color:var(--ink-dim)}
+
+/* Reveal: transform and opacity only, off under reduced motion and the site's Motion toggle */
+.js .rv{opacity:0;transform:translate3d(0,24px,0);transition:opacity .6s var(--ease-arrive),transform .6s var(--ease-arrive)}
+.js .rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.js .rv{opacity:1;transform:none;transition:none}*{scroll-behavior:auto!important}.btn,.card{transition:none!important}.btn:hover{transform:none!important}}
+html[data-motion="off"] .rv{opacity:1!important;transform:none!important;transition:none!important}
+html[data-motion="off"] .btn{transition:none!important}html[data-motion="off"] .btn:hover{transform:none!important}
+/* Prototype */
+.ak{background:var(--bg-elev);border:1px solid var(--rule-strong);border-radius:var(--r-xl);padding:var(--sp-6);box-shadow:var(--shadow-lg)}
+.ak[lang="hi"]{font-family:'Noto Sans Devanagari','Inter',sans-serif}
+.ak-bar{display:flex;flex-wrap:wrap;gap:var(--sp-3);align-items:center;justify-content:space-between}
+.ak-tabs{display:flex;gap:var(--sp-2);flex-wrap:wrap}
+.ak-tab,.ak-lang button{font:500 var(--fs-sm)/1.2 var(--font-body);color:var(--ink-dim);background:transparent;border:1px solid var(--rule-strong);border-radius:var(--r-pill);padding:var(--sp-2) var(--sp-4);cursor:pointer;min-height:40px}
+.ak[lang="hi"] .ak-tab{font-family:inherit}
+.ak-tab[aria-selected="true"]{color:var(--on-primary);background:linear-gradient(100deg,var(--primary),var(--primary-deep));border-color:transparent}
+.ak-lang{display:flex;border:1px solid var(--rule-strong);border-radius:var(--r-pill);padding:var(--sp-1)}
+.ak-lang button{border:none;min-height:32px;padding:var(--sp-1) var(--sp-3)}
+.ak-lang button[aria-pressed="true"]{background:var(--accent-soft);color:var(--ink)}
+.ak-demo{margin:var(--sp-4) 0 var(--sp-5);font-family:var(--font-mono);font-size:var(--fs-micro);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.ak-panel{outline:none}
+.ak-split{display:grid;grid-template-columns:minmax(0,440px) minmax(0,1fr);gap:var(--sp-7);align-items:start}
+.ak-phone{background:var(--bg-deep);border:1px solid var(--rule-strong);border-radius:var(--r-xl);padding:var(--sp-5);min-height:520px}
+.ak-phone-top{display:flex;justify-content:space-between;gap:var(--sp-3);font-family:var(--font-mono);font-size:var(--fs-micro);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);padding-bottom:var(--sp-3);border-bottom:1px solid var(--rule);margin-bottom:var(--sp-4)}
+.ak-progress{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--sp-1);margin-bottom:var(--sp-4)}
+.ak-progress i{display:block;height:4px;border-radius:var(--r-pill);background:var(--rule-strong)}
+.ak-progress i.on{background:var(--primary)}
+.ak h3{font-family:var(--font-display);font-size:var(--fs-lead);font-weight:500;margin:0 0 var(--sp-3);color:var(--ink);outline:none}
+.ak h4{font-family:var(--font-mono);font-size:var(--fs-micro);letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin:var(--sp-6) 0 var(--sp-3);font-weight:500}
+.ak p{font-size:var(--fs-sm)}
+.ak .ak-note{color:var(--ink-dim);font-size:var(--fs-label);margin-top:var(--sp-2)}
+.ak-result{border:1px solid var(--rule-strong);border-radius:var(--r-lg);padding:var(--sp-5);background:var(--bg-elev)}
+.ak-result .big{font-family:var(--font-display);font-size:var(--fs-h1);color:var(--ink);line-height:1.1;margin-top:var(--sp-2)}
+.ak-result .pass{display:inline-block;margin-top:var(--sp-2);font-family:var(--font-mono);font-size:var(--fs-micro);letter-spacing:.1em;text-transform:uppercase;color:var(--good);background:var(--accent-soft);border-radius:var(--r-pill);padding:var(--sp-1) var(--sp-3)}
+.ak fieldset{border:none;padding:0;margin:0 0 var(--sp-5)}
+.ak legend,.ak label.ak-lbl{display:block;font-size:var(--fs-sm);font-weight:500;color:var(--ink);margin-bottom:var(--sp-2)}
+.ak-chips{display:flex;flex-wrap:wrap;gap:var(--sp-2)}
+.ak-chip{position:relative}
+.ak-chip input{position:absolute;opacity:0;width:1px;height:1px}
+.ak-chip span{display:inline-block;font-size:var(--fs-label);padding:var(--sp-2) var(--sp-3);border-radius:var(--r-pill);border:1px solid var(--rule-strong);color:var(--ink-dim);cursor:pointer;min-height:36px;line-height:1.6}
+.ak-chip input:checked+span{border-color:var(--primary);color:var(--ink);background:var(--primary-soft)}
+.ak-chip input:focus-visible+span{outline:2px solid var(--primary);outline-offset:2px}
+.ak-input,.ak select{width:100%;font:400 var(--fs-body)/1.4 var(--font-body);color:var(--ink);background:var(--bg-deep);border:1px solid var(--rule-strong);border-radius:var(--r-md);padding:var(--sp-3);min-height:44px}
+.ak[lang="hi"] .ak-input,.ak[lang="hi"] select{font-family:inherit}
+.ak-input::placeholder{color:var(--ink-mute)}
+.ak-input:focus,.ak select:focus{border-color:var(--primary)}
+.ak-input:focus-visible,.ak select:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.ak-range{display:flex;gap:var(--sp-3);align-items:center}
+.ak-range input[type=range]{flex:1;accent-color:var(--primary)}
+.ak-range output{font-family:var(--font-mono);font-size:var(--fs-sm);color:var(--ink);min-width:48px;text-align:right}
+.ak-row{display:flex;gap:var(--sp-3);flex-wrap:wrap;margin-top:var(--sp-4)}
+.ak-row .btn{flex:1}
+.ak-list{list-style:none;padding:0;margin:0;display:grid;gap:var(--sp-3)}
+.ak-item{border:1px solid var(--rule);border-radius:var(--r-md);padding:var(--sp-4);background:var(--bg-elev)}
+.ak-item-head{display:flex;justify-content:space-between;gap:var(--sp-3);align-items:flex-start}
+.ak-item strong{color:var(--ink);font-size:var(--fs-sm)}
+.ak-item p{color:var(--ink-dim);font-size:var(--fs-label);margin-top:var(--sp-1)}
+.ak-tag{flex:none;font-family:var(--font-mono);font-size:var(--fs-micro);letter-spacing:.06em;text-transform:uppercase;padding:var(--sp-1) var(--sp-2);border-radius:var(--r-pill);background:var(--rule);color:var(--ink-dim)}
+.ak-tag.open{background:var(--accent-soft);color:var(--good)}
+.ak-tag.pay{background:var(--primary-soft);color:var(--primary)}
+.ak-tags{display:flex;gap:var(--sp-1);flex-wrap:wrap;justify-content:flex-end}
+.ak-check{display:flex;gap:var(--sp-2);align-items:flex-start;margin-top:var(--sp-3);font-size:var(--fs-label);color:var(--ink);cursor:pointer}
+.ak-check input{margin-top:var(--sp-1);accent-color:var(--primary);width:18px;height:18px;flex:none}
+.ak-alert{border-radius:var(--r-md);padding:var(--sp-3) var(--sp-4);font-size:var(--fs-label);margin-top:var(--sp-3);border:1px solid var(--rule-strong);color:var(--ink)}
+.ak-alert.red{background:var(--danger-soft);border-color:var(--danger)}
+.ak-alert.amber{background:var(--accent-soft)}
+.ak-alert.ok{background:var(--primary-soft)}
+.ak-form{display:flex;gap:var(--sp-2)}
+.ak-form .btn{flex:none}
+.ak-why{display:grid;gap:var(--sp-3)}
+.ak-why div{border-left:2px solid var(--primary);padding:var(--sp-1) 0 var(--sp-1) var(--sp-4)}
+.ak-why b{display:block;font-family:var(--font-display);font-size:var(--fs-body);font-weight:500;color:var(--ink)}
+.ak-why p{color:var(--ink-dim);margin-top:var(--sp-1)}
+.ak-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-3);margin:var(--sp-5) 0}
+.ak-kpi{background:var(--bg-deep);border:1px solid var(--rule);border-radius:var(--r-md);padding:var(--sp-4)}
+.ak-kpi b{display:block;font-family:var(--font-display);font-size:var(--fs-h3);font-weight:500;color:var(--ink)}
+.ak-kpi span{font-size:var(--fs-label);color:var(--ink-dim)}
+.ak-scroll{overflow-x:auto}
+.ak table{width:100%;border-collapse:collapse;font-size:var(--fs-label);min-width:640px}
+.ak th{text-align:left;font-family:var(--font-mono);font-size:var(--fs-micro);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);font-weight:500;padding:var(--sp-2) var(--sp-3);border-bottom:1px solid var(--rule-strong)}
+.ak td{padding:var(--sp-3);border-bottom:1px solid var(--rule);color:var(--ink-dim);vertical-align:middle}
+.ak tr.mine td{background:var(--primary-soft);color:var(--ink)}
+.ak td select{min-height:36px;padding:var(--sp-1) var(--sp-2);font-size:var(--fs-label)}
+.ak-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-5);margin-top:var(--sp-6)}
+.ak-cols ul{margin:0;padding-left:var(--sp-5);color:var(--ink-dim);font-size:var(--fs-sm)}
+.ak-cols li+li{margin-top:var(--sp-2)}
+.ak-scen{display:flex;gap:var(--sp-2);flex-wrap:wrap;margin:var(--sp-4) 0}
+.ak-scen button{font:500 var(--fs-label)/1.2 var(--font-body);padding:var(--sp-2) var(--sp-4);border-radius:var(--r-pill);border:1px solid var(--rule-strong);background:transparent;color:var(--ink-dim);cursor:pointer;min-height:36px}
+.ak[lang="hi"] .ak-scen button{font-family:inherit}
+.ak-scen button[aria-pressed="true"]{border-color:var(--primary);color:var(--ink);background:var(--primary-soft)}
+.ak-rev{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp-7);align-items:start}
+.ak-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-3)}
+.ak-fields label{display:block;font-size:var(--fs-label);color:var(--ink-dim);margin-bottom:var(--sp-1)}
+.ak-fields .ak-input{font-family:var(--font-mono);font-size:var(--fs-sm)}
+.ak-bars{display:grid;gap:var(--sp-3);margin-top:var(--sp-3)}
+.ak-bar-row{display:grid;grid-template-columns:1fr auto;gap:var(--sp-2);font-size:var(--fs-label);color:var(--ink-dim)}
+.ak-bar-row b{color:var(--ink);font-family:var(--font-mono);font-weight:500}
+.ak-track{grid-column:1/-1;height:8px;border-radius:var(--r-pill);background:var(--rule);overflow:hidden}
+.ak-fill{height:100%;border-radius:var(--r-pill);background:linear-gradient(100deg,var(--primary),var(--primary-deep));transform-origin:left center}
+.ak-money{margin-top:var(--sp-5);border-top:1px solid var(--rule);padding-top:var(--sp-4);display:grid;gap:var(--sp-2)}
+.ak-money div{display:flex;justify-content:space-between;gap:var(--sp-3);font-size:var(--fs-sm);color:var(--ink-dim)}
+.ak-money div b{font-family:var(--font-mono);font-weight:500;color:var(--ink)}
+.ak-total{margin-top:var(--sp-3);padding:var(--sp-4);border-radius:var(--r-md);background:var(--primary-soft);border:1px solid var(--rule-strong)}
+.ak-total b{display:block;font-family:var(--font-display);font-size:var(--fs-h2);font-weight:500;color:var(--ink);line-height:1.1;margin-top:var(--sp-1)}
+.ak-total span{font-size:var(--fs-label);color:var(--ink-dim)}
+.ak[lang="hi"] h4,.ak[lang="hi"] .ak-tag,.ak[lang="hi"] th,.ak[lang="hi"] .ak-phone-top,.ak[lang="hi"] .ak-result .pass,.ak[lang="hi"] ~ .x,#ak[lang="hi"] .ak-demo{font-family:'Noto Sans Devanagari','Inter',sans-serif;letter-spacing:0;text-transform:none}
+.ak-swipe{display:none}
+@media (max-width:980px){.ak-split,.ak-rev{grid-template-columns:1fr}.ak-kpis{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:700px){.ak-swipe{display:block}}
+@media (max-width:560px){.ak{padding:var(--sp-4);border-radius:var(--r-lg)}.ak-phone{padding:var(--sp-4);min-height:0}.ak-cols,.ak-fields{grid-template-columns:1fr}.ak-form{flex-direction:column}.ak-bar{align-items:stretch}.ak-tabs{width:100%}.ak-tab{flex:1 1 auto}}
+
+@media (max-width:1100px){.tbl .n{white-space:normal}.g4,.stats{grid-template-columns:repeat(2,1fr)}.journey{grid-template-columns:repeat(3,1fr)}.journey .stage::after{display:none}.steps{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:760px){
+  h1{font-size:var(--fs-h1)}h2{font-size:var(--fs-h2)}
+  .hero{padding:var(--sp-9) 0 var(--sp-8)}
+  .hero .lede,.sec-head p{font-size:var(--fs-body)}
+  .sec{padding:var(--sp-9) 0}
+  .sec-head{grid-template-columns:1fr;gap:var(--sp-2);margin-bottom:var(--sp-7)}
+  .sec-num{padding-top:0}
+  .g2,.g3,.g4,.journey,.steps{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr 1fr;gap:var(--sp-3)}
+  .stat{padding:var(--sp-4)}.stat b{font-size:var(--fs-h3)}
+  .brand-t{display:none}
+  .sources{columns:1}
+  .tbl,.tbl tbody,.tbl tr,.tbl td{display:block;width:100%}
+  .tbl thead{display:none}
+  .tbl{background:transparent;border:none;border-radius:0}
+  .tbl tr{background:var(--bg-elev);border:1px solid var(--rule);border-radius:var(--r-lg);margin-bottom:var(--sp-3);overflow:hidden}
+  .tbl td{border-bottom:1px solid var(--rule);padding:var(--sp-3) var(--sp-4)}
+  .tbl td::before{content:attr(data-l);display:block;font-family:var(--font-mono);font-size:var(--fs-micro);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:var(--sp-1)}
+  .tbl .n{text-align:left;white-space:normal}
+  .tbl.compact tr{display:grid;grid-template-columns:1fr 1fr}
+  .tbl.compact td:first-child{grid-column:1/-1}
+  .tbl tr.hl{background:var(--accent-soft)}
+  .card{padding:var(--sp-5)}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top-in">
+    <a class="brand" href="/" aria-label="Anchit Tandon, home"><span class="mono" aria-hidden="true">AT</span><span class="brand-t">Amar Ujala education study</span></a>
+    <nav class="toc" aria-label="On this page">
+      <a href="#today">Today</a>
+      <a href="#questions">6 questions</a>
+      <a href="#upgrades">Upgrades</a>
+      <a href="#idea">The idea</a>
+      <a href="#prototype">Prototype</a>
+      <a href="#roadmap">Roadmap</a>
+      <a href="#risks">Risks</a>
+      <a href="#sources">Sources</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+<section class="hero">
+  <div class="wrap">
+    <div class="badges rv">
+      <span class="badge is-primary">Product case study</span>
+      <span class="badge">Senior Product Manager, Education</span>
+      <span class="badge">Independent concept, not affiliated with Amar Ujala</span>
+    </div>
+    <h1 class="rv">Aage Kya? <em>One student profile</em> from the first olympiad to the college gate.</h1>
+    <p class="lede rv">An independent study of what Amar Ujala's education business runs today, what I would fix in the first 90 days, what I would rebuild after that, and a working prototype of the first new product: a free Hindi plan on board-result day, paid for by colleges through consented enquiries and admission-season bundles sold by the existing ad desk.</p>
+    <div class="cta rv">
+      <a class="btn btn-primary" href="#prototype">Try the working prototype</a>
+      <a class="btn btn-ghost" href="#questions">Read the six answers</a>
+    </div>
+    <div class="stats">
+      <div class="stat rv"><b>19.98 lakh</b><span>passed UP Board Class 12 in April 2026</span><small>Organiser, 23 Apr 2026</small></div>
+      <div class="stat rv"><b>23.52 lakh</b><span>passed Class 10 on the same result day</span><small>Organiser, 23 Apr 2026</small></div>
+      <div class="stat rv"><b>6</b><span>education assets, each on its own site, login and data</span><small>Audit, 24-25 Oct 2026</small></div>
+      <div class="stat rv"><b>&#8377;1.13 crore</b><span>year-one base case (about $119K); &#8377;38.5 lakh of it from enquiries</span><small>Assumptions to test</small></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="brief">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="sec-num">01</div>
+      <div><span class="eyebrow">The brief</span><h2>Three jobs in one line of a job description</h2>
+      <p>The role asks a Senior PM to "set the product direction, bring our existing programs together on one platform, and take the vertical into new areas", for schools, teachers, students and parents, from early school years to college admission.</p></div>
+    </div>
+    <div class="grid g3">
+      <article class="card rv"><div class="meta">Job 1</div><h3>Set the direction</h3><p class="muted">Decide what the education business is for: one-off events, or a relationship with each family that lasts from Class 1 to college.</p></article>
+      <article class="card rv"><div class="meta">Job 2</div><h3>One platform</h3><p class="muted">The olympiad, scholarship, workshops, results and counselling already exist. What is missing is one student record and one consent across them.</p></article>
+      <article class="card rv"><div class="meta">Job 3</div><h3>New areas</h3><p class="muted">Open the decision moments nobody serves well in Hindi: Class 10 stream choice and Class 12 admission, then teachers and year-round practice.</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="today">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="sec-num">02</div>
+      <div><span class="eyebrow">Audit &middot; what runs today</span><h2>Six live assets, each built on its own</h2>
+      <p>Each has real reach. None of them shares a student identity, a login or a consent with the others. Checked on 24 and 25 October 2026 from public pages.</p></div>
+    </div>
+    <div class="grid g3">
+      <article class="card rv"><div class="meta">Class 10 to adults, parents</div><h3>Disha Stars and Disha Edge</h3><p class="muted">Free one-on-one counselling by phone or in person. College discovery across 386 verified profiles (80 NIRF-ranked) and 78,429 institutions from official registers, with natural-language search. Free Board Exam Planner, Entrance Exam Planner and Career Reality Check.</p><p class="gap"><b>Gap</b>Nothing carries result-day traffic into it. English by default, with a Hindi toggle. No fake-university check.</p></article>
+      <article class="card rv"><div class="meta">Classes 1 to 10, via schools</div><h3>AUNO olympiad</h3><p class="muted">Seven subjects. &#8377;200 for one olympiad, &#8377;250 for two, &#8377;125 for Level 2. An AI report on 50+ metrics and two mock tests per student.</p><p class="gap"><b>Gap</b>Results stay on the dashboard for about 15 days. Contact by call, SMS and WhatsApp is implied by taking part, not asked for separately. The class range differs between the homepage (3 to 12) and the brochure (1 to 10).</p></article>
+      <article class="card rv"><div class="meta">Every board result</div><h3>results.amarujala.com</h3><p class="muted">Board results, exam alerts and government-job notices, in Hindi, on the page families already open.</p><p class="gap"><b>Gap</b>The page title still reads "Government Jobs 2025" and the first links are 2024 results. The visit ends at the marksheet.</p></article>
+      <article class="card rv"><div class="meta">Classes 9 to 12</div><h3>Atul Maheshwari Chhatravritti</h3><p class="muted">The Amar Ujala Foundation's scholarship exam.</p><p class="gap"><b>Gap</b>The scheme and the application sit on two domains with no shared login.</p></article>
+      <article class="card rv"><div class="meta">Board-exam season</div><h3>Tanav Mukt Pariksha and awards</h3><p class="muted">Stress-free exam workshops, 55 sessions across 10 zones, plus topper and school awards.</p><p class="gap"><b>Gap</b>Offline only. Attendees are not captured into any record.</p></article>
+      <article class="card rv"><div class="meta">All readers</div><h3>News app and education section</h3><p class="muted">The Amar Ujala app has 1 crore+ Android downloads. Education is a news section.</p><p class="gap"><b>Gap</b>A feed, not a student journey. Main content takes 13.4 s to appear on a phone in a lab test, against Google's 2.5 s standard.</p></article>
+    </div>
+    <div class="callout rv"><b>Root cause.</b> Every programme meets the family once a year and then forgets it. Amar Ujala sees the same child in Class 5, in Class 8, at the board exam and on result day, and keeps no record that connects them.</div>
+  </div>
+</section>
+
+<section class="sec" id="health">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="sec-num">03</div>
+      <div><span class="eyebrow">Audit &middot; measured on a phone</span><h2>The pages are slow where it matters most</h2>
+      <p>Lighthouse 12.6, mobile, median of three lab runs on 24 October 2026. Lab numbers, so real-user data from Search Console would be my first check after joining.</p></div>
+    </div>
+    <table class="tbl compact rv">
+      <thead><tr><th>Site</th><th class="n">Score / 100</th><th class="n">Main content shows</th><th class="n">Layout shift</th><th class="n">Page weight</th><th class="n">Requests</th></tr></thead>
+      <tbody>
+        <tr><td data-l="Site">Education section</td><td class="n" data-l="Score">32</td><td class="n fail" data-l="Main content">13.4 s, fails</td><td class="n" data-l="Layout shift">0.08, passes</td><td class="n" data-l="Weight">3.3 MB</td><td class="n" data-l="Requests">188</td></tr>
+        <tr><td data-l="Site">AUNO olympiad</td><td class="n" data-l="Score">46</td><td class="n fail" data-l="Main content">9.3 s, fails</td><td class="n" data-l="Layout shift">0.04, passes</td><td class="n" data-l="Weight">13 MB</td><td class="n" data-l="Requests">267</td></tr>
+        <tr><td data-l="Site">Foundation (scholarship)</td><td class="n" data-l="Score">64</td><td class="n fail" data-l="Main content">over 30 s, fails</td><td class="n" data-l="Layout shift">0, passes</td><td class="n" data-l="Weight">72 MB</td><td class="n" data-l="Requests">190</td></tr>
+        <tr><td data-l="Site">results.amarujala.com</td><td class="n" data-l="Score">68</td><td class="n fail" data-l="Main content">2.6 s, fails</td><td class="n fail" data-l="Layout shift">0.12, fails</td><td class="n" data-l="Weight">1.8 MB</td><td class="n" data-l="Requests">103</td></tr>
+        <tr class="hl"><td data-l="Site"><b>Google's "good" standard</b></td><td class="n" data-l="Score">-</td><td class="n" data-l="Main content"><b>2.5 s or less</b></td><td class="n" data-l="Layout shift"><b>0.1 or less</b></td><td class="n" data-l="Weight">-</td><td class="n" data-l="Requests">-</td></tr>
+      </tbody>
+    </table>
+    <p class="muted small rv" style="margin-top:var(--sp-4)">The Foundation home page downloads 72 MB, almost all of it uncompressed gallery photos. Deloitte research for Google found a 0.1 s faster mobile site lifted retail conversions by 8.4%.</p>
+  </div>
+</section>
+
+<section class="sec" id="questions">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="sec-num">04</div>
+      <div><span class="eyebrow">The six questions</span><h2>Who, what, how many, why better, who pays, and the real problem</h2></div>
+    </div>
+    <div class="grid g2">
+      <article class="card qcard rv"><span class="num">Q1</span><h3>Who will use it?</h3><p class="answer">Parents and students in UP's district towns, Hindi-first, on a phone, at the two result days that decide what comes next.</p><ul><li><b>Parents</b> pay the fees and, for under-18s, must give consent.</li><li><b>Students</b> at the Class 10 result (stream choice) and the Class 12 result (course and college). Younger children through the olympiad, via their school.</li><li><b>Schools and teachers</b> register olympiad students and want class-level reports.</li><li><b>Payers:</b> colleges and universities. UP has 8,375 colleges, the most of any state (AISHE 2021-22).</li></ul></article>
+      <article class="card qcard rv"><span class="num">Q2</span><h3>What do they use today?</h3><p class="answer">Relatives, a teacher, the local coaching centre, print admission ads and admission agents who are often paid by the colleges they recommend.</p><ul><li>Online: English-first aggregators such as Shiksha, CollegeDekho and Careers360.</li><li>Hindi news sites report admission news but give no personal plan.</li><li>Inside Amar Ujala: the result page, then nothing. Disha Stars only if the family already knows it exists.</li></ul></article>
+      <article class="card qcard rv"><span class="num">Q3</span><h3>How many face the problem?</h3><p class="answer">About 43.5 lakh families every April in UP alone, before counting CBSE students and the other states and union territories Amar Ujala publishes in.</p>
+        <table class="tbl compact" style="margin-top:var(--sp-4)"><thead><tr><th>UP Board, April 2026</th><th class="n">Appeared</th><th class="n">Passed</th></tr></thead><tbody>
+        <tr><td data-l="Cohort">Class 10</td><td class="n" data-l="Appeared">26,01,381</td><td class="n" data-l="Passed">23,52,181 (90.42%)</td></tr>
+        <tr><td data-l="Cohort">Class 12</td><td class="n" data-l="Appeared">24,86,072</td><td class="n" data-l="Passed">19,98,317 (80.38%)</td></tr></tbody></table>
+        <ul><li>Amar Ujala reaches 4.70 crore readers a day and 65+ million users a month online (Disha Stars' own figures).</li><li>The cost of a wrong choice is real: UGC lists 32 fake universities, 4 in UP and 12 in Delhi.</li></ul></article>
+      <article class="card qcard rv"><span class="num">Q4</span><h3>Why will this be better?</h3><p class="answer">Amar Ujala already holds the three things competitors pay for.</p><ul><li><b>The moment:</b> families already open the result on Amar Ujala, in Hindi. CollegeDekho spent &#8377;126 crore (about $13.3M) on advertising in FY25 to find these students.</li><li><b>The trust:</b> a newspaper since 1948, 22 editions across 179 districts, that can stand behind rules an aggregator cannot: a free fake-university check, payment never buys rank, verification by the product team and never the ad desk.</li><li><b>The buyers:</b> colleges already buy print from the ad desk, so year one needs no new sales team.</li><li><b>The data:</b> the olympiad history of a child from Class 1 makes the plan personal, not generic.</li></ul></article>
+      <article class="card qcard rv"><span class="num">Q5</span><h3>Will they pay?</h3><p class="answer">Colleges already do. Parents pay small amounts. The plan itself stays free.</p><ul><li><b>Colleges:</b> education bought 17% of India's print ad space in January to September 2025, the largest sector (TAM AdEx). Shiksha booked &#8377;44 crore (about $4.6M) of revenue in Q4 FY26 (January to March 2026) alone.</li><li><b>Parents:</b> already pay &#8377;125 to &#8377;250 per olympiad. A &#8377;299 priority counselling call is a test; standard Disha counselling stays free.</li><li><b>Schools:</b> collect olympiad fees today; a paid school dashboard is a season-two test.</li><li><b>Year one, base case:</b> about &#8377;1.13 crore from one season of UP Board Class 12: &#8377;38.5 lakh from consented enquiries, &#8377;72 lakh from season bundles and &#8377;2.65 lakh from priority calls. Part of the bundle money may shift from print the ad desk already sells, so enquiries are the truly new revenue. The number that matters most, the price per enquiry, is unknown and is the first thing to test. Change every assumption in the <a href="#prototype">revenue model</a>.</li></ul></article>
+      <article class="card qcard rv"><span class="num">Q6</span><h3>What is the real problem nobody has solved?</h3><p class="answer">A Hindi-medium family has no neutral, trusted place that turns a child's results into a safe next decision, with the parent involved.</p><ul><li>So the biggest spending decision of a child's education is made on agents, ads and guesswork, and a wrong call costs a year or fees paid to an unrecognised institute.</li><li>Inside Amar Ujala the same problem has another face: reports expire in 15 days, workshop attendees are never captured, and the result page ends at the marksheet.</li><li><b>The gap is not content. It is continuity and consent.</b></li></ul></article>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="upgrades">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="sec-num">05</div>
+      <div><span class="eyebrow">Immediate upgrades &middot; first 90 days</span><h2>Seven fixes that need no new platform</h2>
+      <p>Ranked by impact per week of effort. Each one is backed by what I found and the standard someone outside Amar Ujala already meets.</p></div>
+    </div>
+    <table class="tbl rv">
+      <thead><tr><th>#</th><th>Upgrade</th><th>Why: what I found</th><th>Market standard it meets</th></tr></thead>
+      <tbody>
+        <tr><td data-l="#">1</td><td data-l="Upgrade"><b>An "Aage kya?" button under every board result</b>, deep-linked into Disha Edge with stream and marks filled in</td><td data-l="Why">Lakhs of families land on the result and leave. Disha already has the planners and counsellors.</td><td data-l="Standard">Jagran Josh and Live Hindustan add next steps and alerts to result pages; Shiksha earns from the same moment.</td></tr>
+        <tr><td data-l="#">2</td><td data-l="Upgrade"><b>Refresh results.amarujala.com</b></td><td data-l="Why">Title says "Government Jobs 2025"; the first links are 2024 results; layout shift 0.12.</td><td data-l="Standard">Core Web Vitals: main content in 2.5 s, layout shift 0.1 or less.</td></tr>
+        <tr><td data-l="#">3</td><td data-l="Upgrade"><b>Keep olympiad reports permanently</b> in a parent login</td><td data-l="Why">Reports vanish about 15 days after results, yet the 50+ metric report is the most valuable thing AUNO makes.</td><td data-l="Standard">SOF and Indian Talent Olympiad keep performance history and run apps.</td></tr>
+        <tr><td data-l="#">4</td><td data-l="Upgrade"><b>Separate, specific consent</b> for calls, SMS and WhatsApp; verify a parent for under-18s</td><td data-l="Why">Contact permission is implied by taking part (terms 1.5 and 7.1), and every olympiad user is a minor.</td><td data-l="Standard">DPDP Act s.6 (free, specific, informed consent); DPDP Rule 10 verifiable parental consent, in force from 13 May 2027.</td></tr>
+        <tr><td data-l="#">5</td><td data-l="Upgrade"><b>Patch the olympiad server; slim the Foundation site</b></td><td data-l="Why">End-of-life PHP 7.4 and OpenSSL 1.1.1 on a site that takes payments; a 72 MB home page.</td><td data-l="Standard">OWASP Secure Headers and supported versions only; Core Web Vitals.</td></tr>
+        <tr><td data-l="#">6</td><td data-l="Upgrade"><b>Hindi by default</b> for AUNO and Disha Edge</td><td data-l="Why">Core readers are Hindi-first; AUNO has no Hindi interface and Disha defaults to English.</td><td data-l="Standard">Jagran Josh and Live Hindustan serve result and admission journeys in Hindi.</td></tr>
+        <tr><td data-l="#">7</td><td data-l="Upgrade"><b>A QR sign-up at every workshop and award</b></td><td data-l="Why">55 workshop sessions and every topper event leave no record.</td><td data-l="Standard">Event-to-CRM capture is how any event-led lead business keeps its audience.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="sec-head rv" style="margin-top:var(--sp-10)">
+      <div class="sec-num">06</div>
+      <div><span class="eyebrow">Long-term revamps &middot; 6 to 24 months</span><h2>Seven rebuilds that make it one platform</h2></div>
+    </div>
+    <table class="tbl rv">
+      <thead><tr><th>#</th><th>Revamp</th><th>Why</th><th>Market standard</th></tr></thead>
+      <tbody>
+        <tr><td data-l="#">1</td><td data-l="Revamp"><b>One student ID, one parent login, one consent</b> across AUNO, scholarship, workshops, results and Disha</td><td data-l="Why">Five sites and five registrations; families re-enter details every time.</td><td data-l="Standard">OAuth 2.0 and OpenID Connect; DigiLocker sign-in; WCAG 2.2 criterion 3.3.7 (no redundant entry).</td></tr>
+        <tr><td data-l="#">2</td><td data-l="Revamp"><b>Aage Kya:</b> a free Hindi plan on result day; colleges pay per consented enquiry, sold by the existing ad desk</td><td data-l="Why">Result-day traffic earns nothing for Disha today, while colleges already buy print.</td><td data-l="Standard">Shiksha and CollegeDekho earn mainly from colleges; here the audience is owned, not bought.</td></tr>
+        <tr><td data-l="#">3</td><td data-l="Revamp"><b>One school and teacher portal:</b> bulk upload, UPI and QR fees, class-level skill reports from olympiad data</td><td data-l="Why">Schools register separately per programme; Disha lists a For Schools page, but nothing spans the programmes or gives teachers class results.</td><td data-l="Standard">SOF and Unified Council school dashboards.</td></tr>
+        <tr><td data-l="#">4</td><td data-l="Revamp"><b>Year-round practice for Classes 1 to 10:</b> the olympiad report becomes a weekly plan mapped to the child's board syllabus</td><td data-l="Why">AUNO is a once-a-year test; the gap it finds is never closed.</td><td data-l="Standard">Board-mapped practice is what paid edtech sells. My EveryYear curriculum engine already maps 59 board-years to a skill graph to seed it.</td></tr>
+        <tr><td data-l="#">5</td><td data-l="Revamp"><b>Class 10 stream choice</b> on the same result day</td><td data-l="Why">23.52 lakh UP Class 10 passers in 2026 face the first big decision, unserved.</td><td data-l="Standard">The same machinery as Aage Kya, one season later.</td></tr>
+        <tr><td data-l="#">6</td><td data-l="Revamp"><b>A consent and parent-verification layer</b> every product shares</td><td data-l="Why">Most users are minors; children's data rules apply from 13 May 2027.</td><td data-l="Standard">DPDP Rule 10; no behavioural tracking or targeted ads to children (DPDP Act s.9).</td></tr>
+        <tr><td data-l="#">7</td><td data-l="Revamp"><b>A performance budget</b> for every education page</td><td data-l="Why">188 requests and 9 to 13 s to main content on a phone.</td><td data-l="Standard">Core Web Vitals at the 75th percentile, with ad slots inside a fixed budget.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="sec" id="idea">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="sec-num">07</div>
+      <div><span class="eyebrow">The idea</span><h2>Aage Kya: the result-day front door to Disha Stars</h2>
+      <p>Not a new business and not a new planner. It is the missing bridge from the result page, where families already are, to the counselling and college profiles Disha Stars already has, plus a paid enquiry layer the ad desk can sell.</p></div>
+    </div>
+    <ol class="steps">
+      <li class="rv"><h3>The result</h3><p>One button under the marksheet: "Aage kya? See your plan in 2 minutes."</p></li>
+      <li class="rv"><h3>Seven quick answers</h3><p>Stream, marks, interest, budget, income band, distance, district. No caste, no exact income.</p></li>
+      <li class="rv"><h3>The plan</h3><p>Courses that fit, exams still open, scholarships, verified colleges, and a fake-university check.</p></li>
+      <li class="rv"><h3>The call, with consent</h3><p>An adult student consents; for under-18s a verified parent does. Only then does a college call.</p></li>
+    </ol>
+
+    <h3 class="rv" style="margin:var(--sp-9) 0 var(--sp-5);font-size:var(--fs-h3)">One profile carries a child from Class 1 to college</h3>
+    <div class="journey">
+      <div class="stage rv"><div class="meta">Class 1 to 10</div><h3>AUNO olympiad</h3><p>Report kept, not deleted after 15 days.</p><div class="keep">Runs today</div></div>
+      <div class="stage rv"><div class="meta">Class 9 to 12</div><h3>Scholarship exam</h3><p>Merit record on the same profile.</p><div class="keep">Runs today</div></div>
+      <div class="stage rv"><div class="meta">Exam season</div><h3>Workshops</h3><p>Attendee saved by QR sign-up.</p><div class="keep">Runs today</div></div>
+      <div class="stage pay rv"><div class="meta">Class 10 and 12 result</div><h3>Aage Kya plan</h3><p>Free plan; colleges pay per consented enquiry.</p><div class="keep">New</div></div>
+      <div class="stage pay rv"><div class="meta">After the result</div><h3>Disha Stars</h3><p>Counselling, shortlist and admission support.</p><div class="keep">Runs today</div></div>
+    </div>
+    <div class="profile-band rv">One student ID &middot; one parent consent &middot; one record the family owns</div>
+
+    <div class="grid g3" style="margin-top:var(--sp-9)">
+      <article class="card rv"><div class="meta">Colleges</div><h3>Pay per consented enquiry</h3><p class="muted">Only families who asked for a call, with consent on record. Not clicks, not ranking, not data. The price is the first thing the ad desk tests.</p></article>
+      <article class="card rv"><div class="meta">The ad desk</div><h3>Sells a season bundle</h3><p class="muted">District print ads in an "Aage Kya" admission series plus a full college profile. No new sales team in year one.</p></article>
+      <article class="card rv"><div class="meta">Families</div><h3>Use it free</h3><p class="muted">Exam guidance, scholarships and the fake-university check are free and never sponsored. A &#8377;299 priority call is a test, not a pillar.</p></article>
+    </div>
+    <div class="callout gold rv"><b>A newspaper's rules, built into the product.</b> Payment never buys rank: the list is ordered by fit and a paying college gets a visible label, nothing more. Verification is done by the product team against UGC, AICTE and state lists, never by the ad desk. Colleges call within 48 hours, never resell a number and delete it on withdrawal; two upheld complaints and they are out for the season.</div>
+  </div>
+</section>
+
+<section class="sec" id="prototype">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="sec-num">08</div>
+      <div><span class="eyebrow">Working prototype &middot; English and Hindi</span><h2>Try it the way a family would, then see what a college sees</h2>
+      <p>Everything below runs in your browser. Course, exam and scholarship rules are public and linked to official portals; colleges and enquiries are fictional demo data. Nothing is stored or sent.</p></div>
+    </div>
+    <div class="ak" id="ak" lang="en">
+      <div class="ak-bar">
+        <div class="ak-tabs" role="tablist" aria-label="Prototype sections">
+          <button role="tab" id="tab-student" aria-controls="panel-student" aria-selected="true" class="ak-tab" data-tab="student"></button>
+          <button role="tab" id="tab-college" aria-controls="panel-college" aria-selected="false" tabindex="-1" class="ak-tab" data-tab="college"></button>
+          <button role="tab" id="tab-revenue" aria-controls="panel-revenue" aria-selected="false" tabindex="-1" class="ak-tab" data-tab="revenue"></button>
+        </div>
+        <div class="ak-lang" role="group" aria-label="Prototype language">
+          <button type="button" data-lang="en" aria-pressed="true">English</button>
+          <button type="button" data-lang="hi" aria-pressed="false" lang="hi">हिंदी</button>
+        </div>
+      </div>
+      <p class="ak-demo" id="ak-demo"></p>
+      <div role="tabpanel" id="panel-student" aria-labelledby="tab-student" class="ak-panel"></div>
+      <div role="tabpanel" id="panel-college" aria-labelledby="tab-college" class="ak-panel" hidden></div>
+      <div role="tabpanel" id="panel-revenue" aria-labelledby="tab-revenue" class="ak-panel" hidden></div>
+      <noscript><p class="callout">The prototype needs JavaScript. The analysis on this page works without it.</p></noscript>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="new-areas">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="sec-num">09</div>
+      <div><span class="eyebrow">New areas</span><h2>The order I would open them in</h2>
+      <p>Each builds on the same profile, so each costs less than the one before it.</p></div>
+    </div>
+    <table class="tbl rv">
+      <thead><tr><th>When</th><th>New area</th><th>Who</th><th>Why Amar Ujala can win</th><th>Who pays</th></tr></thead>
+      <tbody>
+        <tr><td data-l="When">2027 results</td><td data-l="New area"><b>Class 12 result to admission (Aage Kya)</b></td><td data-l="Who">Class 12 passers and parents</td><td data-l="Why">Owns the result moment and the college ad desk</td><td data-l="Who pays">Colleges</td></tr>
+        <tr><td data-l="When">2028 results</td><td data-l="New area"><b>Class 10 stream choice</b></td><td data-l="Who">23.52 lakh UP Class 10 passers</td><td data-l="Why">Same day, same page, a bigger cohort</td><td data-l="Who pays">Colleges and coaching institutes</td></tr>
+        <tr><td data-l="When">2028</td><td data-l="New area"><b>Five more boards</b>: Uttarakhand, Himachal Pradesh, Haryana, Punjab, Jammu and Kashmir</td><td data-l="Who">Their board cohorts</td><td data-l="Why">Same editions, same playbook</td><td data-l="Who pays">Colleges</td></tr>
+        <tr><td data-l="When">2028</td><td data-l="New area"><b>Teacher and school portal</b></td><td data-l="Who">Teachers and principals</td><td data-l="Why">The 50+ metric olympiad report exists per child; teachers get it by class</td><td data-l="Who pays">Schools, as a subscription test</td></tr>
+        <tr><td data-l="When">2028 to 2029</td><td data-l="New area"><b>Year-round practice for Classes 1 to 10</b>, early primary included</td><td data-l="Who">Parents of younger children</td><td data-l="Why">The olympiad gap becomes a weekly, board-mapped plan</td><td data-l="Who pays">Parents, as a freemium test</td></tr>
+        <tr><td data-l="When">Test</td><td data-l="New area"><b>Government-job and entrance guidance</b></td><td data-l="Who">Graduates and Class 12 passers</td><td data-l="Why">The results site already carries government-job traffic</td><td data-l="Who pays">Coaching partners</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="sec" id="roadmap">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="sec-num">10</div>
+      <div><span class="eyebrow">Roadmap</span><h2>Live for the 2027 UP Board results, with a gate at every step</h2>
+      <p>Dated against the next UP Board results, usually late April, assuming I start in December 2026. Every gate is go, shrink or stop.</p></div>
+    </div>
+    <div class="road">
+      <div class="phase rv"><div class="when">December 2026 &middot; month 1</div><h3>Listen, audit, ship the quick wins</h3><ul><li>Map every programme: users, data, owners, revenue.</li><li>Interview 20 parents, 10 college admission heads, 5 schools and the ad desk in two districts.</li><li>Patch the olympiad server, slim the Foundation site, start the legal review of children's data.</li></ul><span class="gate">Gate: leadership agrees on the result-day entry point and one shared profile</span></div>
+      <div class="phase rv"><div class="when">January to March 2027</div><h3>Build the minimum product</h3><ul><li>Aage Kya on the results page, wired into Disha Edge and its college profiles.</li><li>College listings for three pilot zones, verified against UGC, AICTE and state lists.</li><li>Age check, parent consent for under-18s, withdrawal; pricing test with the ad desk; sign 30 pilot colleges.</li></ul><span class="gate">Gate: 25+ colleges signed and verified, or launch with print bundles only</span></div>
+      <div class="phase rv"><div class="when">April 2027</div><h3>Get ready for result day</h3><ul><li>An "Aage Kya" print series in district editions, with a QR code to the plan.</li><li>Load-test the results page; legal sign-off on consent before the children's-data rules apply on 13 May 2027.</li></ul><span class="gate">Gate: consent flow signed off by legal</span></div>
+      <div class="phase rv"><div class="when">Late April to July 2027</div><h3>Launch on result day</h3><ul><li>Plan live statewide; listings and enquiries in the pilot zones.</li><li>Colleges billed per enquiry; season bundles sold; weekly metrics review.</li></ul><span class="gate">Gate: 5%+ of result visitors start a plan and 40%+ of them finish</span></div>
+      <div class="phase rv"><div class="when">August to December 2027</div><h3>Build season two</h3><ul><li>All UP zones, the Class 10 stream choice and five more boards outside UP.</li><li>Teacher portal pilot with olympiad schools.</li></ul><span class="gate">Gate: 60%+ of pilot colleges intend to renew; upheld complaints under 2%</span></div>
+      <div class="phase rv"><div class="when">2028</div><h3>One platform, all year</h3><ul><li>Olympiad, scholarship, workshops and Aage Kya on one profile, with one consent.</li><li>School dashboards and year-round practice tests.</li></ul><span class="gate">Goal: a year-round relationship with every family</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="measures">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="sec-num">11</div>
+      <div><span class="eyebrow">Measures and stop rules</span><h2>How I would measure it, and when I would stop</h2></div>
+    </div>
+    <div class="grid g2">
+      <table class="tbl rv">
+        <thead><tr><th>Type</th><th>Metric</th><th>Year-one target</th></tr></thead>
+        <tbody>
+          <tr><td data-l="Type">North star</td><td data-l="Metric">Families with one profile used in two or more programmes</td><td data-l="Target">Baseline in month 1</td></tr>
+          <tr><td data-l="Type">Result day</td><td data-l="Metric">Result visitors who start a plan, and finish it</td><td data-l="Target">5%+ start, 40%+ finish</td></tr>
+          <tr><td data-l="Type">Revenue</td><td data-l="Metric">Consented enquiries billed; bundles sold; renewal intent</td><td data-l="Target">30 colleges; 60%+ renew</td></tr>
+          <tr><td data-l="Type">Quality</td><td data-l="Metric">Enquiries called within 48 hours; enquiries that became admissions</td><td data-l="Target">Baseline in pilot</td></tr>
+          <tr><td data-l="Type">Speed</td><td data-l="Metric">Main content on education pages, field data at p75</td><td data-l="Target">2.5 s or less</td></tr>
+          <tr><td data-l="Type">Guardrails</td><td data-l="Metric">Upheld complaints; consent withdrawals; share of screens that are paid</td><td data-l="Target">Complaints under 2%</td></tr>
+        </tbody>
+      </table>
+      <div class="grid">
+        <article class="card rv"><div class="meta">Stop rule 1</div><h3>Fewer than 25 colleges will pay</h3><p class="muted">Run it free, funded by print bundles only.</p></article>
+        <article class="card rv"><div class="meta">Stop rule 2</div><h3>Under 2% of result visitors start a plan</h3><p class="muted">The entry point is wrong; fix it before anything else.</p></article>
+        <article class="card rv"><div class="meta">Stop rule 3</div><h3>Most families decline consent</h3><p class="muted">Enquiries are the wrong unit; move to bundles, profiles and counselling.</p></article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="risks">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="sec-num">12</div>
+      <div><span class="eyebrow">Risks</span><h2>What could go wrong, and how it is handled</h2></div>
+    </div>
+    <table class="tbl rv">
+      <thead><tr><th>Risk</th><th>How it is handled</th></tr></thead>
+      <tbody>
+        <tr><td data-l="Risk"><b>Children's data</b> (DPDP Act and Rules)</td><td data-l="Handled">Age check first; verified parent consent under 18; minimum fields; no behavioural tracking or targeted ads to children; legal review from month 1.</td></tr>
+        <tr><td data-l="Risk"><b>Paid listings erode trust</b></td><td data-l="Handled">Order by fit only; paying colleges labelled; verification by the product team, never the ad desk.</td></tr>
+        <tr><td data-l="Risk"><b>Enquiry fees eat into print spend</b></td><td data-l="Handled">Sell enquiries as an add-on to the print bundle; track each education advertiser's total spend.</td></tr>
+        <tr><td data-l="Risk"><b>Overlap with Disha Edge</b></td><td data-l="Handled">Aage Kya is the entry point into Disha, not a rival planner: one profile, one team, one roadmap.</td></tr>
+        <tr><td data-l="Risk"><b>Bad or outdated college data</b></td><td data-l="Handled">Start in three zones; a recognition check before a college goes live; families can report errors.</td></tr>
+        <tr><td data-l="Risk"><b>Revenue packed into April to July</b></td><td data-l="Handled">Class 10 stream choice, olympiad profiles and school subscriptions spread the year; bundles booked in advance.</td></tr>
+        <tr><td data-l="Risk"><b>Admission agents push back</b></td><td data-l="Handled">Agents can register as counsellors under the same rules, or stay outside the product.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="sec" id="ask">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="sec-num">13</div>
+      <div><span class="eyebrow">The ask</span><h2>What I would need in week one</h2>
+      <p>Four things that turn public numbers into real ones.</p></div>
+    </div>
+    <div class="grid g4">
+      <article class="card rv"><div class="meta">Traffic</div><h3>Results-site visits</h3><p class="muted">For the last two result days, by district and device.</p></article>
+      <article class="card rv"><div class="meta">Demand</div><h3>Disha volumes</h3><p class="muted">Counselling sessions, admissions and partner colleges.</p></article>
+      <article class="card rv"><div class="meta">Buyers</div><h3>Ad desk list</h3><p class="muted">Education advertisers and their season spend.</p></article>
+      <article class="card rv"><div class="meta">Compliance</div><h3>Legal, early</h3><p class="muted">A first conversation on children's data and consent.</p></article>
+    </div>
+    <div class="cta rv" style="display:flex;flex-wrap:wrap;gap:var(--sp-3);margin-top:var(--sp-8)">
+      <a class="btn btn-primary" href="/#contact">Talk to Anchit</a>
+      <a class="btn btn-ghost" href="#prototype">Back to the prototype</a>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="sources">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="sec-num">14</div>
+      <div><span class="eyebrow">Sources</span><h2>Where every number comes from</h2>
+      <p>Pages opened on 24 and 25 October 2026. Performance figures are my own Lighthouse lab runs on 24 October 2026.</p></div>
+    </div>
+    <ul class="sources rv">
+      <li><a href="https://www.dishastars.com/" rel="noopener" target="_blank">Disha Stars by Amar Ujala</a>: services, 386 profiles, 78,429 institutions, reach figures</li>
+      <li><a href="https://amarujalaolympiad.com/" rel="noopener" target="_blank">AUNO homepage</a>, <a href="https://amarujalaolympiad.com/page/terms-and-conditions" rel="noopener" target="_blank">terms</a> (1.4, 1.5, 7.1) and <a href="https://amarujalaolympiad.com/frontend/web/uploads/auno-brochure.pdf" rel="noopener" target="_blank">brochure</a></li>
+      <li><a href="https://results.amarujala.com/" rel="noopener" target="_blank">results.amarujala.com</a>: page title and first links</li>
+      <li><a href="https://foundation.amarujala.com/atul-maheshwari-chhatravritti-amc" rel="noopener" target="_blank">Atul Maheshwari Chhatravritti</a></li>
+      <li><a href="https://www.inma.org/blogs/ideas/post.cfm/amar-ujala-supports-students-beyond-tests-with-stress-free-exam-programme" rel="noopener" target="_blank">INMA on Tanav Mukt Pariksha</a></li>
+      <li><a href="https://organiser.org/2026/04/23/349882/bharat/up-board-10th12th-results-2026-out-over-43-lakh-students-appeared-know-the-toppers/" rel="noopener" target="_blank">UP Board 2026 result counts</a> and <a href="https://news.allen.in/up-board-class-10-12-result-2026-announced/" rel="noopener" target="_blank">pass rates</a></li>
+      <li><a href="https://www.scconline.com/blog/post/2025/11/14/meity-notified-digital-personal-data-protection-rules-2025/" rel="noopener" target="_blank">DPDP Rules 2025 commencement dates</a></li>
+      <li><a href="https://www.ugc.gov.in/universitydetails/HEIs_Violating_Regulations?tab=fakeuni" rel="noopener" target="_blank">UGC list of fake universities</a></li>
+      <li><a href="https://news.careers360.com/up-has-highest-number-of-colleges-in-country-followed-maharashtra-karnataka-aishe-report" rel="noopener" target="_blank">AISHE 2021-22: colleges by state</a></li>
+      <li><a href="https://www.storyboard18.com/advertising/education-sector-leads-print-advertising-with-17-percent-share-in-jan-sep-2025-tam-85352.htm" rel="noopener" target="_blank">TAM AdEx, January to September 2025</a></li>
+      <li><a href="https://entrackr.com/fintrackr/collegedekho-posts-rs-151-cr-loss-in-fy25-revenue-remains-flat-11081103" rel="noopener" target="_blank">CollegeDekho FY25 results</a></li>
+      <li><a href="https://www.multibagg.ai/market-pulse/articles/info-edge-q4fy26-billings-targets-cmrbt3rf03sryo70j62toa06p" rel="noopener" target="_blank">Info Edge Q4 FY26, Shiksha segment</a></li>
+      <li><a href="https://web.dev/articles/vitals" rel="noopener" target="_blank">Google Core Web Vitals</a></li>
+      <li>Exchange rate &#8377;95.04 per USD, open.er-api.com, 24 October 2026</li>
+    </ul>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p>An independent concept by Anchit Tandon for a job application. Not affiliated with or endorsed by Amar Ujala. Amar Ujala, AUNO and Disha Stars are named only to describe their public services. Revenue figures are editable assumptions, not forecasts.</p>
+    <p style="margin-top:var(--sp-3)"><a href="/">anchit-tandon.com</a></p>
+  </div>
+</footer>
+<script>
+(function () {
+// Data for the Aage Kya concept prototype. Course, exam and scholarship facts
+// are public and linked to official portals; rules change every year, so the
+// UI always says "confirm on the official site". Colleges and enquiries are
+// fictional demo data. The fake-university list is the UGC page "List of Fake
+// Universities" as of February 2026 (32 entries).
+const STREAMS = [
+    { id: "pcm", label: { en: "Science (Maths)", hi: "विज्ञान (गणित)" } },
+    { id: "pcb", label: { en: "Science (Biology)", hi: "विज्ञान (जीव विज्ञान)" } },
+    { id: "commerce", label: { en: "Commerce", hi: "वाणिज्य" } },
+    { id: "arts", label: { en: "Arts (Humanities)", hi: "कला (मानविकी)" } }
+];
+const INTERESTS = [
+    { id: "tech", label: { en: "Engineering and technology", hi: "इंजीनियरिंग और तकनीक" } },
+    { id: "health", label: { en: "Medicine and health", hi: "चिकित्सा और स्वास्थ्य" } },
+    { id: "teach", label: { en: "Teaching", hi: "शिक्षण" } },
+    { id: "business", label: { en: "Business and accounts", hi: "व्यापार और लेखा" } },
+    { id: "govt", label: { en: "Government jobs and defence", hi: "सरकारी नौकरी और रक्षा सेवा" } },
+    { id: "unsure", label: { en: "Not sure yet", hi: "अभी तय नहीं" } }
+];
+const BUDGETS = [
+    { id: "low", label: { en: "Up to ₹25,000 a year", hi: "₹25,000 सालाना तक" }, max: 25000 },
+    { id: "mid", label: { en: "₹25,000 to ₹1 lakh a year", hi: "₹25,000 से ₹1 लाख सालाना" }, max: 100000 },
+    { id: "high", label: { en: "More than ₹1 lakh a year", hi: "₹1 लाख सालाना से अधिक" }, max: Infinity }
+];
+const INCOMES = [
+    { id: "upto2", label: { en: "Up to ₹2 lakh", hi: "₹2 लाख तक" } },
+    { id: "upto25", label: { en: "₹2 lakh to ₹2.5 lakh", hi: "₹2 लाख से ₹2.5 लाख" } },
+    { id: "upto45", label: { en: "₹2.5 lakh to ₹4.5 lakh", hi: "₹2.5 लाख से ₹4.5 लाख" } },
+    { id: "above45", label: { en: "More than ₹4.5 lakh", hi: "₹4.5 लाख से अधिक" } },
+    { id: "skip", label: { en: "Prefer not to say", hi: "नहीं बताना चाहते" } }
+];
+const REACHES = [
+    { id: "district", label: { en: "In my district", hi: "अपने जिले में" } },
+    { id: "state", label: { en: "Anywhere in UP", hi: "यूपी में कहीं भी" } }
+];
+const DISTRICTS = [
+    { en: "Kanpur Nagar", hi: "कानपुर नगर" },
+    { en: "Lucknow", hi: "लखनऊ" },
+    { en: "Varanasi", hi: "वाराणसी" },
+    { en: "Prayagraj", hi: "प्रयागराज" },
+    { en: "Agra", hi: "आगरा" },
+    { en: "Meerut", hi: "मेरठ" },
+    { en: "Bareilly", hi: "बरेली" },
+    { en: "Gorakhpur", hi: "गोरखपुर" }
+];
+const ALL = ["pcm", "pcb", "commerce", "arts"];
+const COURSES = [
+    {
+        id: "btech",
+        streams: ["pcm"],
+        interests: ["tech"],
+        name: { en: "B.Tech / B.E.", hi: "बी.टेक / बी.ई." },
+        what: {
+            en: "Engineering degree. State seats in UP are filled through counselling based on JEE Main.",
+            hi: "इंजीनियरिंग डिग्री। यूपी में राज्य की सीटें JEE Main के आधार पर काउंसलिंग से भरी जाती हैं।"
+        },
+        years: { en: "4 years", hi: "4 वर्ष" },
+        exams: ["jee"]
+    },
+    {
+        id: "bca",
+        streams: ["pcm", "commerce"],
+        interests: ["tech", "business", "unsure"],
+        name: { en: "BCA", hi: "बीसीए" },
+        what: {
+            en: "Computer applications degree. Leads to software and IT jobs; many colleges admit on Class 12 marks.",
+            hi: "कंप्यूटर एप्लीकेशन की डिग्री। सॉफ्टवेयर और आईटी नौकरियों का रास्ता; कई कॉलेज कक्षा 12 के अंकों पर प्रवेश देते हैं।"
+        },
+        years: { en: "3 to 4 years", hi: "3 से 4 वर्ष" },
+        exams: ["cuet"]
+    },
+    {
+        id: "bsc_pcm",
+        streams: ["pcm"],
+        interests: ["tech", "teach", "govt", "unsure"],
+        name: { en: "B.Sc. (Maths, Physics, Computer Science)", hi: "बी.एससी. (गणित, भौतिकी, कंप्यूटर विज्ञान)" },
+        what: {
+            en: "Science degree. Opens teaching, research, data jobs and most government exams.",
+            hi: "विज्ञान की डिग्री। शिक्षण, शोध, डेटा से जुड़ी नौकरियों और ज़्यादातर सरकारी परीक्षाओं का रास्ता खोलती है।"
+        },
+        years: { en: "3 to 4 years", hi: "3 से 4 वर्ष" },
+        exams: ["cuet"]
+    },
+    {
+        id: "mbbs",
+        streams: ["pcb"],
+        interests: ["health"],
+        name: { en: "MBBS / BDS / BAMS", hi: "एमबीबीएस / बीडीएस / बीएएमएस" },
+        what: {
+            en: "Medical degrees. Admission everywhere in India is through NEET (UG).",
+            hi: "चिकित्सा की डिग्रियाँ। पूरे भारत में प्रवेश NEET (UG) से होता है।"
+        },
+        years: { en: "5 to 5.5 years", hi: "5 से 5.5 वर्ष" },
+        exams: ["neet"]
+    },
+    {
+        id: "bpharm",
+        streams: ["pcm", "pcb"],
+        interests: ["health"],
+        name: { en: "B.Pharm", hi: "बी.फार्मा" },
+        what: {
+            en: "Pharmacy degree. Leads to hospital, industry and drug-store licences. Check each college's admission notice.",
+            hi: "फार्मेसी की डिग्री। अस्पताल, उद्योग और दवा दुकान के लाइसेंस का रास्ता। हर कॉलेज की प्रवेश सूचना ज़रूर देखें।"
+        },
+        years: { en: "4 years", hi: "4 वर्ष" },
+        exams: []
+    },
+    {
+        id: "bsc_bio",
+        streams: ["pcb"],
+        interests: ["health", "teach", "govt", "unsure"],
+        name: { en: "B.Sc. (Biology group)", hi: "बी.एससी. (जीव विज्ञान समूह)" },
+        what: {
+            en: "Science degree with zoology, botany or chemistry. Leads to labs, teaching and government exams.",
+            hi: "प्राणी विज्ञान, वनस्पति विज्ञान या रसायन के साथ विज्ञान की डिग्री। लैब, शिक्षण और सरकारी परीक्षाओं का रास्ता।"
+        },
+        years: { en: "3 to 4 years", hi: "3 से 4 वर्ष" },
+        exams: ["cuet"]
+    },
+    {
+        id: "bcom",
+        streams: ["commerce", "arts"],
+        interests: ["business", "govt", "unsure"],
+        name: { en: "B.Com", hi: "बी.कॉम" },
+        what: {
+            en: "Commerce degree. Leads to accounts, banking, tax and business jobs.",
+            hi: "वाणिज्य की डिग्री। लेखा, बैंकिंग, टैक्स और व्यापार की नौकरियों का रास्ता।"
+        },
+        years: { en: "3 to 4 years", hi: "3 से 4 वर्ष" },
+        exams: ["cuet"]
+    },
+    {
+        id: "ca",
+        streams: ALL,
+        interests: ["business"],
+        name: { en: "Chartered Accountancy (CA Foundation)", hi: "चार्टर्ड अकाउंटेंसी (CA फाउंडेशन)" },
+        what: {
+            en: "Professional course run by ICAI. Can be done alongside a B.Com.",
+            hi: "ICAI का प्रोफेशनल कोर्स। बी.कॉम के साथ-साथ भी किया जा सकता है।"
+        },
+        years: { en: "About 4 to 5 years", hi: "लगभग 4 से 5 वर्ष" },
+        exams: ["ca"]
+    },
+    {
+        id: "bba",
+        streams: ALL,
+        interests: ["business", "unsure"],
+        name: { en: "BBA", hi: "बीबीए" },
+        what: {
+            en: "Business management degree. Leads to sales, operations and an MBA later.",
+            hi: "व्यापार प्रबंधन की डिग्री। बिक्री, संचालन और आगे एमबीए का रास्ता।"
+        },
+        years: { en: "3 to 4 years", hi: "3 से 4 वर्ष" },
+        exams: ["cuet"]
+    },
+    {
+        id: "ba",
+        streams: ALL,
+        interests: ["govt", "teach", "unsure"],
+        name: { en: "B.A.", hi: "बी.ए." },
+        what: {
+            en: "Arts degree. The most common base for UPSC, state PSC, SSC and teaching exams.",
+            hi: "कला की डिग्री। यूपीएससी, राज्य लोक सेवा आयोग, एसएससी और शिक्षक परीक्षाओं का सबसे आम आधार।"
+        },
+        years: { en: "3 to 4 years", hi: "3 से 4 वर्ष" },
+        exams: ["cuet"]
+    },
+    {
+        id: "itep",
+        streams: ALL,
+        interests: ["teach"],
+        name: { en: "Integrated B.A./B.Sc. B.Ed. (ITEP)", hi: "इंटीग्रेटेड बी.ए./बी.एससी. बी.एड. (ITEP)" },
+        what: {
+            en: "Four-year teacher education degree straight after Class 12.",
+            hi: "कक्षा 12 के तुरंत बाद चार वर्ष की शिक्षक शिक्षा डिग्री।"
+        },
+        years: { en: "4 years", hi: "4 वर्ष" },
+        exams: ["ncet"]
+    },
+    {
+        id: "law",
+        streams: ALL,
+        interests: ["govt", "business"],
+        name: { en: "B.A. LL.B. (5-year law)", hi: "बी.ए. एलएल.बी. (5 वर्षीय कानून)" },
+        what: {
+            en: "Law degree after Class 12. National law universities admit through CLAT; many state colleges admit on their own test or merit.",
+            hi: "कक्षा 12 के बाद कानून की डिग्री। राष्ट्रीय विधि विश्वविद्यालय CLAT से प्रवेश देते हैं; कई राज्य कॉलेज अपनी परीक्षा या मेरिट से।"
+        },
+        years: { en: "5 years", hi: "5 वर्ष" },
+        exams: ["clat"]
+    },
+    {
+        id: "nda",
+        streams: ALL,
+        interests: ["govt"],
+        name: { en: "NDA (Army, Navy, Air Force)", hi: "एनडीए (थल सेना, नौसेना, वायु सेना)" },
+        what: {
+            en: "Officer training after Class 12. The Army wing is open to all streams; Navy and Air Force need Physics, Chemistry and Maths.",
+            hi: "कक्षा 12 के बाद अधिकारी प्रशिक्षण। थल सेना सभी संकायों के लिए खुली है; नौसेना और वायु सेना के लिए भौतिकी, रसायन और गणित ज़रूरी हैं।"
+        },
+        years: { en: "3 years of training", hi: "3 वर्ष का प्रशिक्षण" },
+        exams: ["nda"]
+    }
+];
+const EXAMS = {
+    cuet: {
+        id: "cuet",
+        name: { en: "CUET (UG)", hi: "CUET (UG)" },
+        by: { en: "National Testing Agency", hi: "राष्ट्रीय परीक्षा एजेंसी (NTA)" },
+        url: "https://cuet.nta.nic.in/",
+        window: { en: "Usually registration in February to March, exam in May to June.", hi: "आमतौर पर पंजीकरण फरवरी से मार्च, परीक्षा मई से जून।" },
+        open: false,
+        thisYear: {
+            en: "If you registered, the exam is still ahead. If not, state universities and many colleges admit on Class 12 merit: apply to them now.",
+            hi: "अगर पंजीकरण किया है तो परीक्षा अभी बाकी है। नहीं किया तो राज्य विश्वविद्यालय और कई कॉलेज कक्षा 12 की मेरिट पर प्रवेश देते हैं: अभी वहाँ आवेदन करें।"
+        }
+    },
+    jee: {
+        id: "jee",
+        name: { en: "JEE Main", hi: "JEE Main" },
+        by: { en: "National Testing Agency", hi: "राष्ट्रीय परीक्षा एजेंसी (NTA)" },
+        url: "https://jeemain.nta.nic.in/",
+        window: { en: "Two sessions, usually January and April.", hi: "दो सत्र, आमतौर पर जनवरी और अप्रैल।" },
+        open: false,
+        thisYear: {
+            en: "Closed for this year. If you have a JEE Main score, watch the UP state counselling (UPTAC) notice; otherwise plan for next January.",
+            hi: "इस वर्ष के लिए बंद। JEE Main स्कोर है तो यूपी राज्य काउंसलिंग (UPTAC) की सूचना देखें; नहीं तो अगली जनवरी की तैयारी करें।"
+        }
+    },
+    neet: {
+        id: "neet",
+        name: { en: "NEET (UG)", hi: "NEET (UG)" },
+        by: { en: "National Testing Agency", hi: "राष्ट्रीय परीक्षा एजेंसी (NTA)" },
+        url: "https://neet.nta.nic.in/",
+        window: { en: "Usually one exam in early May, registration in February to March.", hi: "आमतौर पर मई की शुरुआत में एक परीक्षा, पंजीकरण फरवरी से मार्च।" },
+        open: false,
+        thisYear: {
+            en: "Registration has usually closed by result day. If you registered, the exam is days away; if not, plan for next year.",
+            hi: "रिजल्ट के दिन तक पंजीकरण आमतौर पर बंद हो चुका होता है। पंजीकरण किया है तो परीक्षा कुछ ही दिन दूर है; नहीं तो अगले वर्ष की योजना बनाएँ।"
+        }
+    },
+    clat: {
+        id: "clat",
+        name: { en: "CLAT", hi: "CLAT" },
+        by: { en: "Consortium of National Law Universities", hi: "राष्ट्रीय विधि विश्वविद्यालयों का संघ" },
+        url: "https://consortiumofnlus.ac.in/",
+        window: { en: "Usually held in December for admission the following year.", hi: "आमतौर पर दिसंबर में, अगले वर्ष के प्रवेश के लिए।" },
+        open: false,
+        thisYear: {
+            en: "Closed for this year. State law colleges may still admit on their own test or merit.",
+            hi: "इस वर्ष के लिए बंद। राज्य के लॉ कॉलेज अपनी परीक्षा या मेरिट से अभी भी प्रवेश दे सकते हैं।"
+        }
+    },
+    ncet: {
+        id: "ncet",
+        name: { en: "NCET (for ITEP)", hi: "NCET (ITEP के लिए)" },
+        by: { en: "National Testing Agency", hi: "राष्ट्रीय परीक्षा एजेंसी (NTA)" },
+        url: "https://nta.ac.in/",
+        window: { en: "Dates vary each year: check the NTA notice.", hi: "तिथियाँ हर वर्ष बदलती हैं: NTA की सूचना देखें।" },
+        open: false,
+        thisYear: {
+            en: "Registration has often closed by result day: check the NTA notice today.",
+            hi: "रिजल्ट के दिन तक पंजीकरण अक्सर बंद हो चुका होता है: आज ही NTA की सूचना देखें।"
+        }
+    },
+    nda: {
+        id: "nda",
+        name: { en: "NDA and NA exam", hi: "एनडीए और एनए परीक्षा" },
+        by: { en: "UPSC", hi: "संघ लोक सेवा आयोग (UPSC)" },
+        url: "https://upsc.gov.in/",
+        window: { en: "Twice a year, usually April and September.", hi: "वर्ष में दो बार, आमतौर पर अप्रैल और सितंबर।" },
+        open: true,
+        thisYear: {
+            en: "Still possible: the second exam of the year (NDA II) usually opens for applications in May to June.",
+            hi: "अभी संभव: वर्ष की दूसरी परीक्षा (NDA II) के आवेदन आमतौर पर मई से जून में खुलते हैं।"
+        }
+    },
+    ca: {
+        id: "ca",
+        name: { en: "CA Foundation", hi: "CA फाउंडेशन" },
+        by: { en: "ICAI", hi: "भारतीय चार्टर्ड अकाउंटेंट्स संस्थान (ICAI)" },
+        url: "https://www.icai.org/",
+        window: { en: "Held more than once a year; register with ICAI first.", hi: "वर्ष में एक से अधिक बार; पहले ICAI में पंजीकरण करें।" },
+        open: true,
+        thisYear: {
+            en: "Still possible: register with ICAI now for a later attempt.",
+            hi: "अभी संभव: बाद के प्रयास के लिए अभी ICAI में पंजीकरण करें।"
+        }
+    }
+};
+const SCHOLARSHIPS = [
+    {
+        id: "up_postmatric",
+        name: { en: "UP post-matric scholarship", hi: "यूपी पोस्ट-मैट्रिक छात्रवृत्ति" },
+        rule: {
+            en: "For UP residents. Family income below ₹2 lakh a year (General, OBC, minority) or below ₹2.5 lakh (SC, ST).",
+            hi: "यूपी के निवासियों के लिए। परिवार की सालाना आय ₹2 लाख से कम (सामान्य, ओबीसी, अल्पसंख्यक) या ₹2.5 लाख से कम (एससी, एसटी)।"
+        },
+        url: "https://scholarship.up.gov.in/",
+        fits: (income) => income === "upto2" || income === "upto25" || income === "skip"
+    },
+    {
+        id: "csss",
+        name: {
+            en: "Central Sector Scheme of Scholarships (National Scholarship Portal)",
+            hi: "केंद्रीय क्षेत्र छात्रवृत्ति योजना (राष्ट्रीय छात्रवृत्ति पोर्टल)"
+        },
+        rule: {
+            en: "For students whose Class 12 marks are above the 80th percentile of their board's pass list in their stream, with family income up to ₹4.5 lakh, in a regular course. Published guides list ₹10,000 to ₹12,000 a year at graduation level, depending on the course.",
+            hi: "उन छात्रों के लिए जिनके कक्षा 12 के अंक बोर्ड में अपने संकाय के उत्तीर्ण छात्रों के 80वें पर्सेंटाइल से ऊपर हों, परिवार की आय ₹4.5 लाख तक हो, और कोर्स नियमित हो। प्रकाशित गाइड के अनुसार स्नातक स्तर पर कोर्स के हिसाब से ₹10,000 से ₹12,000 सालाना।"
+        },
+        url: "https://scholarships.gov.in/",
+        // The 80th-percentile cut-off is published per board and stream each year;
+        // 75% is a conservative screen so the hint is not shown to clear misses.
+        fits: (income, marks) => income !== "above45" && marks >= 75
+    }
+];
+// Fictional colleges, the same set placed in whichever district is chosen.
+// "paying" marks colleges that pay per enquiry; it never changes the order.
+const DEMO_COLLEGES = [
+    {
+        id: "c1",
+        name: { en: "Ganga Valley Degree College", hi: "गंगा वैली डिग्री कॉलेज" },
+        kind: { en: "Government-aided", hi: "सरकारी सहायता प्राप्त" },
+        courses: ["ba", "bcom", "bsc_pcm", "bsc_bio"],
+        fee: 9000,
+        km: 4,
+        recognition: { en: "Affiliated to the state university", hi: "राज्य विश्वविद्यालय से संबद्ध" },
+        paying: false
+    },
+    {
+        id: "c2",
+        name: { en: "Prerna Institute of Technology", hi: "प्रेरणा इंस्टीट्यूट ऑफ टेक्नोलॉजी" },
+        kind: { en: "Private", hi: "निजी" },
+        courses: ["btech", "bca", "bba", "bpharm"],
+        fee: 92000,
+        km: 11,
+        recognition: { en: "AICTE approved, affiliated to the state technical university", hi: "AICTE से अनुमोदित, राज्य तकनीकी विश्वविद्यालय से संबद्ध" },
+        paying: true
+    },
+    {
+        id: "c3",
+        name: { en: "Navjyoti Mahavidyalaya", hi: "नवज्योति महाविद्यालय" },
+        kind: { en: "Private", hi: "निजी" },
+        courses: ["ba", "bcom", "bba", "bca", "itep"],
+        fee: 24000,
+        km: 7,
+        recognition: { en: "Affiliated to the state university; ITEP recognised by NCTE", hi: "राज्य विश्वविद्यालय से संबद्ध; ITEP को NCTE से मान्यता प्राप्त" },
+        paying: true
+    },
+    {
+        id: "c4",
+        name: { en: "Abhyudaya Institute of Health Sciences", hi: "अभ्युदय इंस्टीट्यूट ऑफ हेल्थ साइंसेज" },
+        kind: { en: "Private", hi: "निजी" },
+        courses: ["bpharm", "bsc_bio"],
+        fee: 140000,
+        km: 18,
+        recognition: { en: "Pharmacy Council of India approved", hi: "फार्मेसी काउंसिल ऑफ इंडिया से अनुमोदित" },
+        paying: true
+    },
+    {
+        id: "c5",
+        name: { en: "Sankalp Law College", hi: "संकल्प लॉ कॉलेज" },
+        kind: { en: "Private", hi: "निजी" },
+        courses: ["law", "ba", "bba"],
+        fee: 55000,
+        km: 9,
+        recognition: { en: "Bar Council of India approved", hi: "बार काउंसिल ऑफ इंडिया से अनुमोदित" },
+        paying: false
+    },
+    {
+        id: "c6",
+        name: { en: "Rajkiya Mahavidyalaya (Government College)", hi: "राजकीय महाविद्यालय" },
+        kind: { en: "Government", hi: "सरकारी" },
+        courses: ["ba", "bsc_pcm", "bsc_bio", "bcom"],
+        fee: 4500,
+        km: 26,
+        recognition: { en: "Affiliated to the state university", hi: "राज्य विश्वविद्यालय से संबद्ध" },
+        paying: false
+    }
+];
+// UGC "List of Fake Universities" as of February 2026: all 32 entries.
+// Optional Hindi spellings are added for the UP entries.
+const UGC_FAKE = [
+    { name: "Christ New Testament Deemed University", place: "Guntur", state: "Andhra Pradesh" },
+    { name: "Bible Open University of India", place: "Visakhapatnam", state: "Andhra Pradesh" },
+    { name: "Indian Institute of Alternative Medicine", place: "Itanagar", state: "Arunachal Pradesh" },
+    { name: "Mountain Institute of Management and Technology", place: "New Delhi", state: "Delhi" },
+    { name: "World Peace of United Nations University", place: "New Delhi", state: "Delhi" },
+    { name: "Institute of Management and Engineering", place: "Delhi", state: "Delhi" },
+    { name: "National Institute of Management Solution", place: "Delhi", state: "Delhi" },
+    { name: "All India Institute of Public and Physical Health Sciences", place: "Delhi", state: "Delhi" },
+    { name: "Commercial University", place: "Delhi", state: "Delhi" },
+    { name: "United Nations University", place: "Delhi", state: "Delhi" },
+    { name: "Vocational University", place: "Delhi", state: "Delhi" },
+    { name: "ADR-Centric Juridical University", place: "New Delhi", state: "Delhi" },
+    { name: "Indian Institute of Science and Engineering", place: "New Delhi", state: "Delhi" },
+    { name: "Viswakarma Open University for Self-Employment", place: "Delhi", state: "Delhi" },
+    { name: "Adhyatmik Vishwavidyalaya", place: "Delhi", state: "Delhi" },
+    { name: "Magic and Art University", place: "Faridabad", state: "Haryana" },
+    { name: "Daksha University", place: "Ranchi", state: "Jharkhand" },
+    { name: "Global Human Peace University", place: "Bengaluru", state: "Karnataka" },
+    { name: "Sarva Bharatiya Shiksha Peeth", place: "Tumkur", state: "Karnataka" },
+    { name: "International Islamic University of Prophetic Medicine", place: "Kozhikode", state: "Kerala" },
+    { name: "St. John's University", place: "Kishanattam", state: "Kerala" },
+    { name: "Raja Arabic University", place: "Nagpur", state: "Maharashtra" },
+    { name: "National Backward Krushi Vidyapeeth", place: "Solapur", state: "Maharashtra" },
+    { name: "Usha Latchumanan College of Education", place: "Thirukkanur", state: "Puducherry" },
+    { name: "Sree Bodhi Academy of Higher Education", place: "Puducherry", state: "Puducherry" },
+    { name: "Rajeev Gandhi Institute of Technology and Management", place: "Bhiwadi", state: "Rajasthan" },
+    { name: "Gandhi Hindi Vidyapith", place: "Prayagraj", state: "Uttar Pradesh", hi: "गांधी हिंदी विद्यापीठ" },
+    { name: "Netaji Subhash Chandra Bose University (Open University)", place: "Aligarh", state: "Uttar Pradesh", hi: "नेताजी सुभाष चंद्र बोस विश्वविद्यालय" },
+    { name: "Bhartiya Shiksha Parishad", place: "Lucknow", state: "Uttar Pradesh", hi: "भारतीय शिक्षा परिषद" },
+    { name: "Mahamaya Technical University", place: "Noida", state: "Uttar Pradesh", hi: "महामाया टेक्निकल यूनिवर्सिटी" },
+    { name: "Indian Institute of Alternative Medicine", place: "Kolkata", state: "West Bengal" },
+    { name: "Institute of Alternative Medicine and Research", place: "Kolkata", state: "West Bengal" }
+];
+const GENERIC = new Set([
+    "university", "universities", "vishwavidyalaya", "college", "institute", "institution", "open", "national", "india", "indian",
+    "of", "and", "the", "for", "deemed", "academy", "education", "higher", "technical", "technology", "management", "school",
+    "विश्वविद्यालय", "यूनिवर्सिटी", "कॉलेज", "महाविद्यालय", "संस्थान", "भारतीय", "राष्ट्रीय"
+]);
+const normaliseName = (s) => s
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^\p{L}\p{M}\p{N}\s]/gu, " ")
+    .replace(/\bvidyapeeth\b/g, "vidyapith")
+    .replace(/\bbharatiya\b/g, "bhartiya")
+    .replace(/\s+/g, " ")
+    .trim();
+const distinctive = (s) => normaliseName(s).split(" ").filter((w) => w.length > 1 && !GENERIC.has(w));
+// A match needs the whole listed name inside the query, or a query whose
+// distinctive words (at least two, ignoring words like "university") all
+// appear in one listed name. Typing "university" alone never matches.
+function findFakeUniversity(query) {
+    const q = normaliseName(query);
+    const qWords = distinctive(query);
+    if (q.length < 4)
+        return null;
+    for (const u of UGC_FAKE) {
+        for (const nm of [u.name, u.hi].filter((x) => Boolean(x))) {
+            const n = normaliseName(nm);
+            if (q.includes(n))
+                return u;
+            const nWords = distinctive(nm);
+            if (qWords.length >= 2 && qWords.every((w) => nWords.includes(w)))
+                return u;
+        }
+    }
+    return null;
+}
+const SOURCES = {
+    upBoard2025: "https://news.careers360.com/up-board-class-12th-result-2025-out-upmsp-edu-in-upresults-nic-in-81-15-percent-qualify-how-to-check-digilocker-scorecard/amp",
+    upBoardIans: "https://ianslive.in/up-board-results-declared-9011-pc-pass-in-high-school-8115-pc-in-intermediate--20250425132203",
+    upBoardReg: "https://results.amarujala.com/exam-alerts/up-board-exam-2025-27-4-lakh-candidates-registered-for-high-school-26-98-lakh-for-intermediate",
+    aishe: "https://news.careers360.com/up-has-highest-number-of-colleges-in-country-followed-maharashtra-karnataka-aishe-report",
+    tam2025: "https://www.storyboard18.com/advertising/education-sector-leads-print-advertising-with-17-percent-share-in-jan-sep-2025-tam-85352.htm",
+    auno: "https://amarujalaolympiad.com/",
+    amc: "https://foundation.amarujala.com/atul-maheshwari-chhatravritti-amc",
+    stressFree: "https://www.inma.org/blogs/ideas/post.cfm/amar-ujala-supports-students-beyond-tests-with-stress-free-exam-programme",
+    results: "https://results.amarujala.com/",
+    ugcFake: "https://www.ugc.gov.in/universitydetails/HEIs_Violating_Regulations?tab=fakeuni",
+    collegeDekhoFy25: "https://entrackr.com/fintrackr/collegedekho-posts-rs-151-cr-loss-in-fy25-revenue-remains-flat-11081103",
+    collegeDekhoFy24: "https://inc42.com/buzz/collegedekhos-loss-flat-at-inr-129-cr-in-fy24",
+    irs2019: "https://www.exchange4media.com/media-print-news/irs-2019-q4-top-publications-retain-lead-positions-104521.html",
+    dpdpRules: "https://www.amsshardul.com/wp-content/uploads/2025/11/Regulatory-Alert-Enforcement-of-DPDP-Act-and-Notification-of-DPDP-Rules.pdf",
+    dpdpChildren: "https://cyberpeace.org/resources/blogs/prohibition-of-behavioral-tracking-and-targeted-advertising-for-children-under-the-dpdp-act-2023",
+    upScholarship: "https://scholarship.up.gov.in/",
+    nsp: "https://scholarships.gov.in/"
+};
+const DEMO_OTP = "2468";
+const PARTNER_ID = "c2";
+const TABS = ["student", "college", "revenue", "platform"];
+const pick = (b, lang) => b[lang];
+const inr = (n) => `₹${Math.round(n).toLocaleString("en-IN")}`;
+const PERCENT_FIELDS = ["reachPct", "completePct", "coveragePct", "consentPct", "paidPct", "counselPct"];
+const PRESETS = {
+    low: { passed: 1998317, reachPct: 3, completePct: 40, coveragePct: 25, consentPct: 15, perStudent: 2, paidPct: 60, price: 150, bundles: 25, bundlePrice: 75000, counselPct: 0.5, counselPrice: 299 },
+    base: { passed: 1998317, reachPct: 8, completePct: 55, coveragePct: 40, consentPct: 25, perStudent: 2.5, paidPct: 70, price: 250, bundles: 60, bundlePrice: 120000, counselPct: 1, counselPrice: 299 },
+    high: { passed: 1998317, reachPct: 15, completePct: 65, coveragePct: 70, consentPct: 35, perStudent: 3, paidPct: 80, price: 400, bundles: 150, bundlePrice: 200000, counselPct: 2, counselPrice: 299 }
+};
+const BASE_ENQUIRIES = [
+    { id: "e1", when: { en: "Today, 10:42", hi: "आज, 10:42" }, who: "R*** K***", district: { en: "Kanpur Nagar", hi: "कानपुर नगर" }, profile: { en: "Science (Maths), 70 to 80%", hi: "विज्ञान (गणित), 70 से 80%" }, course: { en: "B.Tech", hi: "बी.टेक" } },
+    { id: "e2", when: { en: "Today, 09:15", hi: "आज, 09:15" }, who: "S*** Y***", district: { en: "Kanpur Dehat", hi: "कानपुर देहात" }, profile: { en: "Commerce, 60 to 70%", hi: "वाणिज्य, 60 से 70%" }, course: { en: "BBA", hi: "बीबीए" } },
+    { id: "e3", when: { en: "Yesterday, 18:30", hi: "कल, 18:30" }, who: "A*** P***", district: { en: "Unnao", hi: "उन्नाव" }, profile: { en: "Science (Biology), 80 to 90%", hi: "विज्ञान (जीव विज्ञान), 80 से 90%" }, course: { en: "B.Pharm", hi: "बी.फार्मा" } },
+    { id: "e4", when: { en: "Yesterday, 12:05", hi: "कल, 12:05" }, who: "M*** S***", district: { en: "Kanpur Nagar", hi: "कानपुर नगर" }, profile: { en: "Science (Maths), 60 to 70%", hi: "विज्ञान (गणित), 60 से 70%" }, course: { en: "BCA", hi: "बीसीए" } }
+];
+const INITIAL_STATUSES = { e1: "new", e2: "called", e3: "visit", e4: "new", you: "new" };
+const COPY = {
+    en: {
+        badge: "Concept prototype",
+        independent: "Independent pitch, not affiliated with Amar Ujala",
+        demoData: "Demo data: colleges and enquiries are fictional",
+        title: "Aage Kya? (आगे क्या?)",
+        lead: "On result day about 20 lakh UP Board Class 12 students pass, and each family asks the same question: what next? Aage Kya answers it in Hindi, on the results page they already open, and turns the answer into consented admission enquiries that colleges pay for.",
+        planLink: "Strategy, roadmap and the 6 questions",
+        kpiLabel: "Key numbers",
+        tabsLabel: "Prototype sections",
+        
+        tabs: { student: "1. Student demo", college: "2. College dashboard", revenue: "3. Revenue model", platform: "4. One platform" },
+        phoneTitle: "results page",
+        stepNames: ["Result", "Questions", "Your plan", "Consent", "Done"],
+        resultTitle: "UP Board Class 12 result (demo)",
+        resultName: "Demo student",
+        passed: "Passed",
+        resultCta: "Aage kya? See your plan in 2 minutes",
+        resultNote: "Free. No login. Nothing is shared without consent.",
+        qTitle: "Seven quick answers",
+        qStream: "Your Class 12 stream",
+        qMarks: "Your percentage",
+        qInterest: "What interests you most?",
+        qBudget: "Fees your family can manage",
+        qIncome: "Family income a year (only to check scholarship eligibility)",
+        qReach: "Where do you want to study?",
+        qDistrict: "Home district",
+        next: "Show my plan",
+        back: "Back",
+        planFor: (district) => `Your plan for ${district} and nearby`,
+        coursesTitle: "Courses that fit you",
+        examsTitle: "Entrance exams: what you can still do",
+        stillOpen: "Still possible this year",
+        nextYear: "Mostly closed by result day",
+        examsNote: "Typical windows only. Always confirm dates on the official site.",
+        official: "Official site",
+        scholarTitle: "Scholarships you may qualify for",
+        scholarNote: "Rules change every year. Confirm on the official portal before you apply.",
+        scholarNone: "Ask each college about its own merit scholarship before paying fees.",
+        collegesTitle: "Colleges that fit (demo)",
+        collegesNote: "Order is by fit to your answers only. Colleges marked \"Paying partner\" pay for enquiries; payment never moves a college up the list.",
+        paying: "Paying partner",
+        fee: "Fee a year",
+        distance: (km) => `${km} km from district headquarters`,
+        ask: "Ask this college to call us",
+        askFor: (name) => `Ask ${name} to call us`,
+        noColleges: "No demo college fits these answers. Try a higher budget or \"Anywhere in UP\".",
+        neetNote: "MBBS and BDS seats are allotted only through NEET counselling, so no college is listed for them here.",
+        checkTitle: "Is this institution genuine? Check any name",
+        checkPlaceholder: "Type a college or university name",
+        checkBtn: "Check",
+        checkFake: (name) => `Warning: "${name}" is on the UGC list of fake universities (February 2026). Its degrees are not valid. Do not pay any fee.`,
+        checkOk: "Not found on the UGC fake-university list. That alone does not prove recognition: also check UGC, AICTE or the state university's affiliation list.",
+        checkShort: "Type at least two distinctive words of the name, for example \"Bhartiya Shiksha Parishad\".",
+        checkSource: "Source: UGC list of fake universities, February 2026: 32 in India, 4 in UP and 12 in Delhi.",
+        toConsent: (n) => `Continue with ${n} college${n === 1 ? "" : "s"}`,
+        pickOne: "Tick at least one college to get a call, or just save the plan.",
+        saveOnly: "Just save my plan",
+        consentTitle: "Consent",
+        adultQ: "Is the student 18 or older?",
+        yes: "Yes",
+        no: "No, under 18",
+        consentAdult: "The student gives consent with their own mobile number.",
+        consentMinor: "A parent or guardian must give consent before any college sees the details. In the real product the parent's identity and age are also verified (for example through DigiLocker), as India's data protection rules require.",
+        shares: "What the colleges will see",
+        sharesList: ["Student's first name", "The mobile number below", "Stream and a marks band (for example 70 to 80%)", "District, and the course matched to each college"],
+        notShared: "Never shared: exact marks, family income, roll number",
+        goesTo: "Goes to",
+        studentName: "Student's first name",
+        phoneParent: "Parent's or guardian's mobile number",
+        phoneStudent: "Student's mobile number",
+        phoneHelp: "A 10-digit number starting with 6, 7, 8 or 9",
+        sendOtp: "Send OTP",
+        otpSent: (otp) => `Demo only: no SMS is sent. Use OTP ${otp}.`,
+        otpLabel: "OTP",
+        verify: "Verify",
+        otpWrong: "That OTP does not match.",
+        otpOk: "Number verified.",
+        agreeParent: "I am the parent or guardian. I agree to share these details with the colleges listed above, only for admission calls. I can withdraw this at any time.",
+        agreeAdult: "I am the student and I am 18 or older. I agree to share these details with the colleges listed above, only for admission calls. I can withdraw this at any time.",
+        share: "Share and request calls",
+        doneTitle: "Done. Colleges will call within 48 hours.",
+        doneLead: (n) => `Your details went to ${n} college${n === 1 ? "" : "s"}. Each one has agreed to call within 48 hours, not to resell the number and to delete it if you withdraw.`,
+        savedTitle: "Plan saved. No college will call.",
+        savedLead: "You can come back to it, share it with family on WhatsApp, or request calls later.",
+        doneProfile: "The plan is saved to one student profile: the same profile could later hold olympiad results and scholarship forms.",
+        withdraw: "Withdraw consent",
+        withdrawn: "Consent withdrawn. In the real product, colleges get a deletion request at once.",
+        startOver: "Start over",
+        seeDashboard: "See it on the college dashboard",
+        whyTitle: "What is happening, and why",
+        why: [
+            { h: "1. The highest-intent moment", p: "The result page is where families already come, in Hindi, on a phone. Today it ends at the marksheet. Aage Kya starts there, with no cost of finding users." },
+            { h: "2. A few quick answers, not a long form", p: "Stream, marks, interest, budget, income band, distance and district are enough to narrow courses, exams, scholarships and colleges. No caste or exact income is asked." },
+            { h: "3. Useful before it is commercial", p: "Exam guidance, scholarship matching and the fake-university check are free and never sponsored. That is what earns trust for the paid part." },
+            { h: "4. The right person consents", p: "An adult student consents for themselves. For a student under 18, India's data protection law needs verifiable consent from a parent, so the OTP goes to the parent." },
+            { h: "5. Colleges pay for consented enquiries", p: "Not for clicks, ranking or data dumps. Each enquiry is one family that asked for a call, with consent on record." }
+        ],
+        collegeTitle: "Prerna Institute of Technology (fictional), admissions desk",
+        collegeLead: "What a paying college sees. Every enquiry is consented, verified and limited to the fields the family agreed to share.",
+        kpiEnq: "Enquiries this week",
+        kpiConsent: "With recorded consent",
+        kpiCalled: "Called so far",
+        kpiBill: (price) => `Billed this week at ${price} each`,
+        thWhen: "When",
+        thWho: "Student",
+        thDistrict: "District",
+        thProfile: "Stream and marks",
+        thCourse: "Course",
+        thConsent: "Consent",
+        thStatus: "Status",
+        consentBadge: "OTP consent",
+        status: { new: "New", called: "Called", visit: "Campus visit", admitted: "Admitted", no: "Not interested" },
+        yours: "Just now",
+        yoursHint: "Complete the student demo and tick Prerna Institute of Technology to see your own enquiry arrive here.",
+        rulesTitle: "Rules every paying college accepts",
+        rules: [
+            "Passes a recognition check (UGC, AICTE or state affiliation) by the product team before going live; paying never affects it.",
+            "Calls within 48 hours; slow responders are paused.",
+            "No resale or sharing of numbers; deletion on withdrawal.",
+            "Two upheld complaints and the college is removed for the season."
+        ],
+        bundleTitle: "Admission-season bundle, sold by the existing ad desk",
+        bundle: [
+            "District-edition print ads in the \"Aage Kya\" admission series",
+            "A full college profile and the \"Paying partner\" label; the order stays by fit only",
+            "Enquiries billed separately, per consented enquiry, with a monthly report"
+        ],
+        priceNote: "Price per enquiry is the biggest unknown. No public benchmark exists, so the first test with the ad desk is what colleges will pay.",
+        revTitle: "Year-one revenue from one season of UP Board Class 12 only",
+        revLead: "Every figure is an editable assumption except the pass count. Choose a scenario, then change any number.",
+        scenLabel: "Scenario",
+        scen: { low: "Low", base: "Base", high: "High", custom: "Custom" },
+        inPassed: "UP Board Class 12 passed (2026)",
+        inReach: "Open Aage Kya from the result (%)",
+        inComplete: "Finish the plan (%)",
+        inCoverage: "Live in districts with college listings (%)",
+        inConsent: "Request calls with consent (%)",
+        inPer: "Colleges chosen per family",
+        inPaid: "Enquiries that go to paying colleges (%)",
+        inPrice: "Price per enquiry (₹)",
+        inBundles: "Colleges buying the season bundle",
+        inBundlePrice: "Bundle price (₹)",
+        inCounsel: "Paid 1-to-1 counselling call (% of plans)",
+        inCounselPrice: "Counselling price (₹)",
+        funnel: "Funnel",
+        fPlans: "Plans finished",
+        fFamilies: "Families requesting calls",
+        fEnquiries: "Enquiries billed",
+        rEnq: "Enquiry revenue",
+        rBundle: "Bundle revenue",
+        rCounsel: "Counselling revenue",
+        rTotal: "Year-one revenue on these assumptions",
+        notForecast: "An illustration, not a forecast. Excludes CBSE students, the Class 10 stream choice and the five other states where Amar Ujala publishes.",
+        whySmall: "Why start this small",
+        whySmallText: "Year one is a wedge: it proves the price per enquiry and the consent rate in pilot zones, before the same profile is extended to Class 10 results, more districts and other states.",
+        mustBeTrue: "What has to be true",
+        mustList: [
+            "The results page can carry a prominent Aage Kya entry on result day.",
+            "Colleges will pay per consented enquiry, at a price the ad desk tests before launch.",
+            "Families will consent by OTP; if consent rates are low, the model shrinks to print bundles and profiles only."
+        ],
+        platTitle: "One student, one profile: the programmes Amar Ujala already runs",
+        platLead: "The brief asks to bring existing programmes onto one platform. Today they sit on separate sites. Aage Kya is the missing last step, and the shared profile is the platform.",
+        
+        runsToday: "Running now",
+        isNew: "New",
+        sourceFor: (name) => `Source: ${name}`,
+        gainsTitle: "What each side gets from one profile",
+        
+        gainsWho: "Who",
+        gainsWhat: "What they get",
+        footer: "Independent concept prototype for a job application. Not affiliated with or endorsed by Amar Ujala. No data is stored or sent.",
+        sourcesTitle: "Sources"
+    },
+    hi: {
+        badge: "कॉन्सेप्ट प्रोटोटाइप",
+        independent: "स्वतंत्र प्रस्ताव, अमर उजाला से संबद्ध नहीं",
+        demoData: "डेमो डेटा: कॉलेज और पूछताछ काल्पनिक हैं",
+        title: "आगे क्या? (Aage Kya?)",
+        lead: "रिजल्ट के दिन यूपी बोर्ड कक्षा 12 के लगभग 20 लाख छात्र पास होते हैं, और हर परिवार एक ही सवाल पूछता है: आगे क्या? \"आगे क्या\" इसका जवाब हिंदी में, उसी रिजल्ट पेज पर देता है जिसे वे पहले से खोलते हैं, और इस जवाब को सहमति वाली प्रवेश पूछताछ में बदलता है, जिसके लिए कॉलेज भुगतान करते हैं।",
+        planLink: "रणनीति, रोडमैप और 6 सवाल",
+        kpiLabel: "मुख्य आँकड़े",
+        tabsLabel: "प्रोटोटाइप के हिस्से",
+        
+        tabs: { student: "1. छात्र डेमो", college: "2. कॉलेज डैशबोर्ड", revenue: "3. आय मॉडल", platform: "4. एक प्लेटफॉर्म" },
+        phoneTitle: "रिजल्ट पेज",
+        stepNames: ["रिजल्ट", "सवाल", "आपकी योजना", "सहमति", "पूरा"],
+        resultTitle: "यूपी बोर्ड कक्षा 12 परिणाम (डेमो)",
+        resultName: "डेमो छात्र",
+        passed: "उत्तीर्ण",
+        resultCta: "आगे क्या? 2 मिनट में अपनी योजना देखें",
+        resultNote: "मुफ्त। लॉगिन नहीं। सहमति के बिना कुछ भी साझा नहीं होता।",
+        qTitle: "सात आसान सवाल",
+        qStream: "कक्षा 12 में आपका संकाय (स्ट्रीम)",
+        qMarks: "आपका प्रतिशत",
+        qInterest: "आपकी सबसे ज़्यादा रुचि किसमें है?",
+        qBudget: "परिवार कितनी फीस दे सकता है",
+        qIncome: "परिवार की सालाना आय (केवल छात्रवृत्ति की पात्रता देखने के लिए)",
+        qReach: "आप कहाँ पढ़ना चाहते हैं?",
+        qDistrict: "गृह जिला",
+        next: "मेरी योजना दिखाएँ",
+        back: "पीछे",
+        planFor: (district) => `${district} और आसपास के लिए आपकी योजना`,
+        coursesTitle: "आपके लिए उपयुक्त कोर्स",
+        examsTitle: "प्रवेश परीक्षाएँ: अभी क्या कर सकते हैं",
+        stillOpen: "इस वर्ष अभी संभव",
+        nextYear: "रिजल्ट तक ज़्यादातर बंद",
+        examsNote: "केवल सामान्य समय दिया गया है। तिथियाँ हमेशा आधिकारिक वेबसाइट पर जाँचें।",
+        official: "आधिकारिक वेबसाइट",
+        scholarTitle: "छात्रवृत्तियाँ जिनके लिए आप पात्र हो सकते हैं",
+        scholarNote: "नियम हर वर्ष बदलते हैं। आवेदन से पहले आधिकारिक पोर्टल पर जाँचें।",
+        scholarNone: "फीस देने से पहले हर कॉलेज से उसकी अपनी मेरिट छात्रवृत्ति के बारे में पूछें।",
+        collegesTitle: "उपयुक्त कॉलेज (डेमो)",
+        collegesNote: "क्रम केवल आपके जवाबों से मेल के आधार पर है। \"भुगतान करने वाला पार्टनर\" लिखे कॉलेज पूछताछ के लिए भुगतान करते हैं; भुगतान से कोई कॉलेज सूची में ऊपर नहीं आता।",
+        paying: "भुगतान करने वाला पार्टनर",
+        fee: "सालाना फीस",
+        distance: (km) => `जिला मुख्यालय से ${km} किमी`,
+        ask: "यह कॉलेज हमें कॉल करे",
+        askFor: (name) => `${name} हमें कॉल करे`,
+        noColleges: "इन जवाबों पर कोई डेमो कॉलेज उपयुक्त नहीं है। अधिक बजट या \"यूपी में कहीं भी\" चुनकर देखें।",
+        neetNote: "एमबीबीएस और बीडीएस की सीटें केवल NEET काउंसलिंग से मिलती हैं, इसलिए उनके लिए यहाँ कोई कॉलेज नहीं दिखाया गया है।",
+        checkTitle: "क्या यह संस्थान असली है? कोई भी नाम जाँचें",
+        checkPlaceholder: "कॉलेज या विश्वविद्यालय का नाम लिखें",
+        checkBtn: "जाँचें",
+        checkFake: (name) => `चेतावनी: "${name}" यूजीसी की फर्जी विश्वविद्यालयों की सूची (फरवरी 2026) में है। इसकी डिग्री मान्य नहीं है। कोई फीस न दें।`,
+        checkOk: "यूजीसी की फर्जी विश्वविद्यालयों की सूची में नहीं मिला। केवल इससे मान्यता साबित नहीं होती: यूजीसी, AICTE या राज्य विश्वविद्यालय की संबद्धता सूची भी देखें।",
+        checkShort: "नाम के कम से कम दो खास शब्द लिखें, जैसे \"भारतीय शिक्षा परिषद\"।",
+        checkSource: "स्रोत: यूजीसी की फर्जी विश्वविद्यालयों की सूची, फरवरी 2026: भारत में 32, जिनमें 4 यूपी में और 12 दिल्ली में।",
+        toConsent: (n) => `${n} कॉलेज के साथ आगे बढ़ें`,
+        pickOne: "कॉल पाने के लिए कम से कम एक कॉलेज चुनें, या केवल योजना सहेजें।",
+        saveOnly: "केवल मेरी योजना सहेजें",
+        consentTitle: "सहमति",
+        adultQ: "क्या छात्र की उम्र 18 वर्ष या उससे अधिक है?",
+        yes: "हाँ",
+        no: "नहीं, 18 से कम",
+        consentAdult: "छात्र अपने मोबाइल नंबर से खुद सहमति देता/देती है।",
+        consentMinor: "किसी भी कॉलेज को जानकारी दिखने से पहले माता-पिता या अभिभावक की सहमति ज़रूरी है। असली प्रोडक्ट में अभिभावक की पहचान और उम्र की भी पुष्टि होती है (जैसे डिजिलॉकर से), जैसा भारत के डेटा संरक्षण नियम माँगते हैं।",
+        shares: "कॉलेज क्या देखेंगे",
+        sharesList: ["छात्र का पहला नाम", "नीचे दिया गया मोबाइल नंबर", "संकाय और अंकों का दायरा (जैसे 70 से 80%)", "जिला, और हर कॉलेज से मेल खाता कोर्स"],
+        notShared: "कभी साझा नहीं होगा: सटीक अंक, परिवार की आय, रोल नंबर",
+        goesTo: "किसे जाएगी",
+        studentName: "छात्र का पहला नाम",
+        phoneParent: "माता-पिता या अभिभावक का मोबाइल नंबर",
+        phoneStudent: "छात्र का मोबाइल नंबर",
+        phoneHelp: "10 अंकों का नंबर, जो 6, 7, 8 या 9 से शुरू हो",
+        sendOtp: "OTP भेजें",
+        otpSent: (otp) => `केवल डेमो: कोई SMS नहीं भेजा जाता। OTP ${otp} डालें।`,
+        otpLabel: "OTP",
+        verify: "पुष्टि करें",
+        otpWrong: "यह OTP मेल नहीं खाता।",
+        otpOk: "नंबर सत्यापित हुआ।",
+        agreeParent: "मैं माता-पिता या अभिभावक हूँ। मैं ये जानकारी ऊपर दिए कॉलेजों के साथ, केवल प्रवेश से जुड़ी कॉल के लिए, साझा करने की सहमति देता/देती हूँ। मैं इसे कभी भी वापस ले सकता/सकती हूँ।",
+        agreeAdult: "मैं छात्र हूँ और मेरी उम्र 18 वर्ष या उससे अधिक है। मैं ये जानकारी ऊपर दिए कॉलेजों के साथ, केवल प्रवेश से जुड़ी कॉल के लिए, साझा करने की सहमति देता/देती हूँ। मैं इसे कभी भी वापस ले सकता/सकती हूँ।",
+        share: "साझा करें और कॉल माँगें",
+        doneTitle: "हो गया। कॉलेज 48 घंटे में कॉल करेंगे।",
+        doneLead: (n) => `आपकी जानकारी ${n} कॉलेज को भेजी गई। हर कॉलेज ने 48 घंटे में कॉल करने, नंबर आगे न बेचने और सहमति वापस लेने पर उसे मिटाने का वादा किया है।`,
+        savedTitle: "योजना सहेज ली गई। कोई कॉलेज कॉल नहीं करेगा।",
+        savedLead: "आप इसे बाद में देख सकते हैं, परिवार के साथ व्हाट्सऐप पर साझा कर सकते हैं, या बाद में कॉल माँग सकते हैं।",
+        doneProfile: "योजना एक छात्र प्रोफाइल में सहेजी गई है: आगे इसी प्रोफाइल में ओलंपियाड के परिणाम और छात्रवृत्ति के फॉर्म भी रह सकते हैं।",
+        withdraw: "सहमति वापस लें",
+        withdrawn: "सहमति वापस ले ली गई। असली प्रोडक्ट में कॉलेजों को तुरंत डेटा मिटाने का अनुरोध जाता है।",
+        startOver: "फिर से शुरू करें",
+        seeDashboard: "कॉलेज डैशबोर्ड पर देखें",
+        whyTitle: "क्या हो रहा है, और क्यों",
+        why: [
+            { h: "1. सबसे ज़्यादा ज़रूरत का पल", p: "रिजल्ट पेज पर परिवार पहले से आते हैं, हिंदी में, फोन पर। आज यह मार्कशीट पर खत्म हो जाता है। \"आगे क्या\" वहीं से शुरू होता है, और उपयोगकर्ता जुटाने का कोई खर्च नहीं।" },
+            { h: "2. लंबा फॉर्म नहीं, कुछ आसान सवाल", p: "संकाय, अंक, रुचि, बजट, आय का दायरा, दूरी और जिला, इतने से कोर्स, परीक्षाएँ, छात्रवृत्तियाँ और कॉलेज छँट जाते हैं। जाति या सटीक आय नहीं पूछी जाती।" },
+            { h: "3. पहले उपयोगी, फिर व्यावसायिक", p: "परीक्षाओं की जानकारी, छात्रवृत्ति की पात्रता और फर्जी विश्वविद्यालय की जाँच मुफ्त है और कभी प्रायोजित नहीं होती। यही सशुल्क हिस्से के लिए भरोसा बनाता है।" },
+            { h: "4. सही व्यक्ति सहमति देता है", p: "18 वर्ष या उससे अधिक का छात्र खुद सहमति देता है। 18 से कम उम्र के छात्र के लिए भारत का डेटा संरक्षण कानून अभिभावक की सत्यापित सहमति माँगता है, इसलिए OTP अभिभावक को जाता है।" },
+            { h: "5. कॉलेज सहमति वाली पूछताछ के लिए भुगतान करते हैं", p: "क्लिक, रैंकिंग या डेटा के ढेर के लिए नहीं। हर पूछताछ एक ऐसा परिवार है जिसने कॉल माँगी, और उसकी सहमति दर्ज है।" }
+        ],
+        collegeTitle: "प्रेरणा इंस्टीट्यूट ऑफ टेक्नोलॉजी (काल्पनिक), प्रवेश डेस्क",
+        collegeLead: "भुगतान करने वाला कॉलेज क्या देखता है। हर पूछताछ सहमति वाली और सत्यापित है, और उतनी ही जानकारी तक सीमित है जितनी साझा करने की सहमति परिवार ने दी।",
+        kpiEnq: "इस सप्ताह की पूछताछ",
+        kpiConsent: "दर्ज सहमति के साथ",
+        kpiCalled: "अब तक कॉल की गईं",
+        kpiBill: (price) => `इस सप्ताह का बिल, ${price} प्रति पूछताछ`,
+        thWhen: "कब",
+        thWho: "छात्र",
+        thDistrict: "जिला",
+        thProfile: "संकाय और अंक",
+        thCourse: "कोर्स",
+        thConsent: "सहमति",
+        thStatus: "स्थिति",
+        consentBadge: "OTP सहमति",
+        status: { new: "नई", called: "कॉल हुई", visit: "कैंपस विज़िट", admitted: "प्रवेश हुआ", no: "रुचि नहीं" },
+        yours: "अभी",
+        yoursHint: "छात्र डेमो पूरा करें और प्रेरणा इंस्टीट्यूट ऑफ टेक्नोलॉजी चुनें, तो आपकी अपनी पूछताछ यहाँ दिखेगी।",
+        rulesTitle: "हर भुगतान करने वाला कॉलेज ये नियम मानता है",
+        rules: [
+            "लाइव होने से पहले प्रोडक्ट टीम द्वारा मान्यता की जाँच (यूजीसी, AICTE या राज्य संबद्धता); भुगतान का इस पर कोई असर नहीं।",
+            "48 घंटे में कॉल करनी होगी; देर करने वाले कॉलेज रोक दिए जाते हैं।",
+            "नंबर बेचना या आगे देना मना है; सहमति वापस लेने पर डेटा मिटाना होगा।",
+            "दो सही पाई गई शिकायतों पर कॉलेज पूरे सीज़न के लिए हटा दिया जाता है।"
+        ],
+        bundleTitle: "प्रवेश सीज़न का पैकेज, मौजूदा विज्ञापन डेस्क के ज़रिए",
+        bundle: [
+            "\"आगे क्या\" प्रवेश शृंखला में जिला संस्करणों के प्रिंट विज्ञापन",
+            "कॉलेज की पूरी प्रोफाइल और \"भुगतान करने वाला पार्टनर\" लेबल; क्रम केवल उपयुक्तता से",
+            "पूछताछ का बिल अलग से, प्रति सहमति वाली पूछताछ, मासिक रिपोर्ट के साथ"
+        ],
+        priceNote: "प्रति पूछताछ कीमत सबसे बड़ा अनजाना पहलू है। कोई सार्वजनिक मानक नहीं है, इसलिए विज्ञापन डेस्क के साथ पहला परीक्षण यही होगा कि कॉलेज कितना देंगे।",
+        revTitle: "केवल यूपी बोर्ड कक्षा 12 के एक सीज़न से पहले साल की आय",
+        revLead: "पास छात्रों की संख्या के अलावा हर आँकड़ा बदला जा सकने वाला अनुमान है। कोई परिदृश्य चुनें, फिर कोई भी संख्या बदलें।",
+        scenLabel: "परिदृश्य",
+        scen: { low: "कम", base: "आधार", high: "अधिक", custom: "बदला हुआ" },
+        inPassed: "यूपी बोर्ड कक्षा 12 में पास (2026)",
+        inReach: "रिजल्ट से \"आगे क्या\" खोलने वाले (%)",
+        inComplete: "योजना पूरी करने वाले (%)",
+        inCoverage: "कॉलेज सूची वाले जिलों में रहने वाले (%)",
+        inConsent: "सहमति के साथ कॉल माँगने वाले (%)",
+        inPer: "हर परिवार द्वारा चुने गए कॉलेज",
+        inPaid: "भुगतान करने वाले कॉलेजों को जाने वाली पूछताछ (%)",
+        inPrice: "प्रति पूछताछ कीमत (₹)",
+        inBundles: "सीज़न पैकेज खरीदने वाले कॉलेज",
+        inBundlePrice: "पैकेज की कीमत (₹)",
+        inCounsel: "सशुल्क व्यक्तिगत काउंसलिंग कॉल (% योजनाओं का)",
+        inCounselPrice: "काउंसलिंग की कीमत (₹)",
+        funnel: "फनल",
+        fPlans: "पूरी हुई योजनाएँ",
+        fFamilies: "कॉल माँगने वाले परिवार",
+        fEnquiries: "बिल हुई पूछताछ",
+        rEnq: "पूछताछ से आय",
+        rBundle: "पैकेज से आय",
+        rCounsel: "काउंसलिंग से आय",
+        rTotal: "इन अनुमानों पर पहले साल की आय",
+        notForecast: "यह एक उदाहरण है, पूर्वानुमान नहीं। इसमें सीबीएसई छात्र, कक्षा 10 के बाद संकाय का चुनाव और वे पाँच अन्य राज्य शामिल नहीं हैं जहाँ अमर उजाला छपता है।",
+        whySmall: "इतनी छोटी शुरुआत क्यों",
+        whySmallText: "पहला साल एक शुरुआती कदम है: यह पायलट ज़ोन में प्रति पूछताछ कीमत और सहमति की दर साबित करता है, उसके बाद यही प्रोफाइल कक्षा 10 के रिजल्ट, और जिलों और दूसरे राज्यों तक बढ़ती है।",
+        mustBeTrue: "क्या सच होना चाहिए",
+        mustList: [
+            "रिजल्ट के दिन रिजल्ट पेज पर \"आगे क्या\" का प्रमुख शुरुआती बिंदु दिखाया जा सके।",
+            "कॉलेज सहमति वाली हर पूछताछ के लिए भुगतान करें, उस कीमत पर जिसे विज्ञापन डेस्क लॉन्च से पहले परखे।",
+            "परिवार OTP से सहमति दें; सहमति की दर कम हो तो मॉडल केवल प्रिंट पैकेज और प्रोफाइल तक सिमट जाएगा।"
+        ],
+        platTitle: "एक छात्र, एक प्रोफाइल: अमर उजाला के पहले से चल रहे कार्यक्रम",
+        platLead: "भर्ती की सूचना कहती है कि मौजूदा कार्यक्रमों को एक प्लेटफॉर्म पर लाना है। आज वे अलग-अलग वेबसाइटों पर हैं। \"आगे क्या\" छूटा हुआ आखिरी कदम है, और साझा प्रोफाइल ही प्लेटफॉर्म है।",
+        
+        runsToday: "अभी जारी",
+        isNew: "नया",
+        sourceFor: (name) => `स्रोत: ${name}`,
+        gainsTitle: "एक प्रोफाइल से हर पक्ष को क्या मिलता है",
+        
+        gainsWho: "कौन",
+        gainsWhat: "उन्हें क्या मिलता है",
+        footer: "नौकरी के आवेदन के लिए स्वतंत्र कॉन्सेप्ट प्रोटोटाइप। अमर उजाला से संबद्ध या समर्थित नहीं। कोई डेटा सहेजा या भेजा नहीं जाता।",
+        sourcesTitle: "स्रोत"
+    }
+};
+function marksBand(m, lang) {
+    const lo = Math.max(30, Math.floor(m / 10) * 10);
+    const hi = Math.min(100, lo + 10);
+    return lang === "en" ? `${lo} to ${hi}%` : `${lo} से ${hi}%`;
+}
+function money(n, lang) {
+    if (n >= 10000000) {
+        const v = (n / 10000000).toLocaleString("en-IN", { maximumFractionDigits: 2 });
+        return lang === "en" ? `₹${v} crore` : `₹${v} करोड़`;
+    }
+    const v = (n / 100000).toLocaleString("en-IN", { maximumFractionDigits: 1 });
+    return lang === "en" ? `₹${v} lakh` : `₹${v} लाख`;
+}
+const ADULT_OPTIONS = [
+    { id: "yes", label: { en: "Yes", hi: "हाँ" } },
+    { id: "no", label: { en: "No, under 18", hi: "नहीं, 18 से कम" } }
+];
+
+
+  // ---------- Aage Kya prototype: vanilla port of the concept app ----------
+  var USD = 95.04; // INR per USD, open.er-api.com, 24 Oct 2026
+  var root = document.getElementById('ak');
+  if (!root) return;
+  var S = {
+    lang: 'en', tab: 'student', step: 0,
+    stream: 'pcm', marks: 72, interest: 'tech', budget: 'mid', income: 'upto45', reach: 'district', districtIdx: 0,
+    chosen: [], checkText: '', checkResult: '', checkMatch: '',
+    adult: '', studentName: '', phone: '', otpSent: false, otp: '', otpState: '', agree: false,
+    savedOnly: false, withdrawn: false,
+    statuses: Object.assign({}, INITIAL_STATUSES),
+    scenario: 'base', rev: Object.assign({}, PRESETS.base)
+  };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var T = function () { return COPY[S.lang]; };
+  var P = function (b) { return b ? b[S.lang] : ''; };
+  var $ = function (sel, el) { return (el || root).querySelector(sel); };
+  var $$ = function (sel, el) { return Array.prototype.slice.call((el || root).querySelectorAll(sel)); };
+
+  function plan() {
+    var budgetMax = (BUDGETS.find(function (b) { return b.id === S.budget; }) || {}).max;
+    if (budgetMax == null) budgetMax = Infinity;
+    var courses = COURSES.filter(function (c) { return c.streams.indexOf(S.stream) > -1 && c.interests.indexOf(S.interest) > -1; });
+    if (!courses.length) courses = COURSES.filter(function (c) { return c.streams.indexOf(S.stream) > -1 && c.interests.indexOf('unsure') > -1; });
+    courses = courses.slice(0, 4);
+    var ids = {}; courses.forEach(function (c) { ids[c.id] = 1; });
+    var examIds = [];
+    courses.forEach(function (c) { c.exams.forEach(function (e) { if (examIds.indexOf(e) < 0) examIds.push(e); }); });
+    var scholarships = SCHOLARSHIPS.filter(function (s) { return s.fits(S.income, S.marks); });
+    // One list, ordered by fit only. Paying status is a label, never a boost.
+    var colleges = DEMO_COLLEGES.map(function (c) { return { c: c, match: c.courses.filter(function (id) { return ids[id]; }).length }; })
+      .filter(function (x) { return x.match > 0 && x.c.fee <= budgetMax && (S.reach === 'state' || x.c.km <= 15); })
+      .sort(function (a, b) { return b.match - a.match || a.c.fee - b.c.fee || a.c.km - b.c.km; })
+      .map(function (x) { return x.c; });
+    return { courses: courses, examIds: examIds, scholarships: scholarships, colleges: colleges, hasMbbs: !!ids.mbbs };
+  }
+  function courseFor(c, pl) { return pl.courses.find(function (x) { return c.courses.indexOf(x.id) > -1; }); }
+  function chosenColleges(pl) { return pl.colleges.filter(function (c) { return S.chosen.indexOf(c.id) > -1; }); }
+  function shared() { return S.step === 4 && !S.savedOnly && !S.withdrawn; }
+  function resetConsent() { S.otpSent = false; S.otp = ''; S.otpState = ''; S.agree = false; }
+
+  var KIND = function (s) { var n = normaliseName(s); if (/\b(college|mahavidyalaya)\b|कॉलेज|महाविद्यालय/.test(n)) return 'college'; if (/\b(university|vishwavidyalaya|vidyapith)\b|विश्वविद्यालय|यूनिवर्सिटी/.test(n)) return 'university'; return ''; };
+  // Exact: the whole listed name is in the query, or the same distinctive words and no clash of type
+  // (college vs university). Similar: every distinctive word typed appears in a listed name. A
+  // similar hit is a caution, never a verdict, so a real "St John's College" is not called fake.
+  function checkName(query) {
+    var q = normaliseName(query), qw = distinctive(query);
+    if (q.length < 4) return null;
+    var similar = null;
+    for (var i = 0; i < UGC_FAKE.length; i++) {
+      var u = UGC_FAKE[i], names = [u.name, u.hi].filter(Boolean);
+      for (var j = 0; j < names.length; j++) {
+        var n = normaliseName(names[j]), nw = distinctive(names[j]);
+        if (q.indexOf(n) > -1) return { kind: 'exact', u: u };
+        var same = qw.length >= 2 && qw.length === nw.length && qw.every(function (w) { return nw.indexOf(w) > -1; });
+        var kq = KIND(query), kn = KIND(names[j]);
+        if (same && (!kq || !kn || kq === kn)) return { kind: 'exact', u: u };
+        if (!similar && qw.length >= 2 && qw.every(function (w) { return nw.indexOf(w) > -1; })) similar = { kind: 'similar', u: u };
+      }
+    }
+    return similar;
+  }
+  function hitName(u) { return (S.lang === 'hi' && u.hi ? u.hi : u.name) + ', ' + u.place + ' (' + u.state + ')'; }
+  function chips(name, options, value) {
+    return '<div class="ak-chips">' + options.map(function (o) {
+      return '<label class="ak-chip"><input type="radio" name="' + name + '" value="' + esc(o.id) + '"' + (value === o.id ? ' checked' : '') + '><span>' + esc(P(o.label)) + '</span></label>';
+    }).join('') + '</div>';
+  }
+
+  // ---------- chrome: tabs, language ----------
+  function renderChrome() {
+    var t = T();
+    root.setAttribute('lang', S.lang);
+    $$('.ak-tab').forEach(function (b) {
+      var id = b.getAttribute('data-tab');
+      b.textContent = t.tabs[id].replace(/^\d\.\s*/, '');
+      var on = id === S.tab;
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+      b.tabIndex = on ? 0 : -1;
+      document.getElementById('panel-' + id).hidden = !on;
+    });
+    $$('.ak-lang button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-lang') === S.lang ? 'true' : 'false'); });
+    $('#ak-demo').textContent = t.demoData;
+  }
+  function renderAll() { renderChrome(); renderStudent(false); renderCollege(); renderRevenue(); }
+
+  // ---------- student ----------
+  function renderStudent(focus) {
+    var t = T(), pl = plan(), panel = document.getElementById('panel-student');
+    var district = DISTRICTS[S.districtIdx];
+    var body = '';
+    if (S.step === 0) {
+      body = '<h3 tabindex="-1">' + esc(t.resultTitle) + '</h3>' +
+        '<div class="ak-result"><p class="muted">' + esc(t.resultName) + ' &middot; ' + esc(P(district)) + '</p><div class="big">' + S.marks + '%</div><span class="pass">' + esc(t.passed) + '</span></div>' +
+        '<button type="button" class="btn btn-primary btn-block" data-act="go1" style="margin-top:var(--sp-5)">' + esc(t.resultCta) + '</button>' +
+        '<p class="ak-note">' + esc(t.resultNote) + '</p>';
+    } else if (S.step === 1) {
+      body = '<h3 tabindex="-1">' + esc(t.qTitle) + '</h3><form data-form="q">' +
+        '<fieldset><legend>' + esc(t.qStream) + '</legend>' + chips('stream', STREAMS, S.stream) + '</fieldset>' +
+        '<fieldset><legend id="ak-marks-l">' + esc(t.qMarks) + '</legend><div class="ak-range"><input type="range" min="33" max="100" step="1" value="' + S.marks + '" name="marks" aria-labelledby="ak-marks-l"><output id="ak-marks-o">' + S.marks + '%</output></div></fieldset>' +
+        '<fieldset><legend>' + esc(t.qInterest) + '</legend>' + chips('interest', INTERESTS, S.interest) + '</fieldset>' +
+        '<fieldset><legend>' + esc(t.qBudget) + '</legend>' + chips('budget', BUDGETS, S.budget) + '</fieldset>' +
+        '<fieldset><legend>' + esc(t.qIncome) + '</legend>' + chips('income', INCOMES, S.income) + '</fieldset>' +
+        '<fieldset><legend>' + esc(t.qReach) + '</legend>' + chips('reach', REACHES, S.reach) + '</fieldset>' +
+        '<label class="ak-lbl" for="ak-district">' + esc(t.qDistrict) + '</label><select id="ak-district" name="district">' +
+        DISTRICTS.map(function (d, i) { return '<option value="' + i + '"' + (i === S.districtIdx ? ' selected' : '') + '>' + esc(P(d)) + '</option>'; }).join('') + '</select>' +
+        '<div class="ak-row"><button type="button" class="btn btn-ghost" data-act="go0">' + esc(t.back) + '</button><button type="submit" class="btn btn-primary">' + esc(t.next) + '</button></div></form>';
+    } else if (S.step === 2) {
+      var ch = chosenColleges(pl);
+      body = '<h3 tabindex="-1">' + esc(t.planFor(P(district))) + '</h3>' +
+        '<h4>' + esc(t.coursesTitle) + '</h4><ul class="ak-list" data-testid="courses">' + pl.courses.map(function (c) {
+          return '<li class="ak-item"><div class="ak-item-head"><strong>' + esc(P(c.name)) + '</strong><span class="ak-tag">' + esc(P(c.years)) + '</span></div><p>' + esc(P(c.what)) + '</p></li>';
+        }).join('') + '</ul>' +
+        '<h4>' + esc(t.examsTitle) + '</h4><ul class="ak-list" data-testid="exams">' + pl.examIds.map(function (id) {
+          var e = EXAMS[id]; if (!e) return '';
+          return '<li class="ak-item"><div class="ak-item-head"><strong>' + esc(P(e.name)) + '</strong><span class="ak-tag' + (e.open ? ' open' : '') + '">' + esc(e.open ? t.stillOpen : t.nextYear) + '</span></div><p>' + esc(P(e.thisYear)) + '</p><p>' + esc(P(e.window)) + ' <a href="' + esc(e.url) + '" target="_blank" rel="noopener">' + esc(t.official) + '</a></p></li>';
+        }).join('') + '</ul><p class="ak-note">' + esc(t.examsNote) + '</p>' +
+        '<h4>' + esc(t.scholarTitle) + '</h4>' + (pl.scholarships.length ? '<ul class="ak-list" data-testid="scholarships">' + pl.scholarships.map(function (s) {
+          return '<li class="ak-item"><strong>' + esc(P(s.name)) + '</strong><p>' + esc(P(s.rule)) + ' <a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(t.official) + '</a></p></li>';
+        }).join('') + '</ul>' : '<p class="ak-note" data-testid="scholarships">' + esc(t.scholarNone) + '</p>') + '<p class="ak-note">' + esc(t.scholarNote) + '</p>' +
+        '<h4>' + esc(t.collegesTitle) + '</h4><p class="ak-note">' + esc(t.collegesNote) + '</p>' +
+        (pl.hasMbbs ? '<div class="ak-alert amber">' + esc(t.neetNote) + '</div>' : '') +
+        '<ul class="ak-list" data-testid="colleges" style="margin-top:var(--sp-3)">' + pl.colleges.map(function (c) {
+          var name = P(c.name);
+          return '<li class="ak-item"><div class="ak-item-head"><strong>' + esc(name) + '</strong><span class="ak-tags">' + (c.paying ? '<span class="ak-tag pay">' + esc(t.paying) + '</span>' : '') + '<span class="ak-tag">' + esc(P(c.kind)) + '</span></span></div>' +
+            '<p>' + esc(P(c.recognition)) + '</p><p>' + esc(t.fee) + ': <b>' + inr(c.fee) + '</b> &middot; ' + esc(t.distance(c.km)) + '</p>' +
+            '<label class="ak-check"><input type="checkbox" data-college="' + esc(c.id) + '"' + (S.chosen.indexOf(c.id) > -1 ? ' checked' : '') + ' aria-label="' + esc(t.askFor(name)) + '"><span aria-hidden="true">' + esc(t.ask) + '</span></label></li>';
+        }).join('') + '</ul>' + (pl.colleges.length ? '' : '<div class="ak-alert amber">' + esc(t.noColleges) + '</div>') +
+        '<h4>' + esc(t.checkTitle) + '</h4><form class="ak-form" data-form="check"><label class="sr" for="ak-check">' + esc(t.checkPlaceholder) + '</label><input id="ak-check" class="ak-input" autocomplete="off" placeholder="' + esc(t.checkPlaceholder) + '" value="' + esc(S.checkText) + '"><button type="submit" class="btn btn-ghost">' + esc(t.checkBtn) + '</button></form>' +
+        '<div aria-live="polite" id="ak-check-out">' + checkOut() + '</div><p class="ak-note"><a href="' + esc(SOURCES.ugcFake) + '" target="_blank" rel="noopener">' + esc(t.checkSource) + '</a></p>' +
+        '<div class="ak-row"><button type="button" class="btn btn-ghost" data-act="go1">' + esc(t.back) + '</button><button type="button" class="btn btn-primary" data-act="go3" id="ak-go3"' + (ch.length ? '' : ' disabled aria-describedby="ak-pick-one"') + '>' + esc(t.toConsent(ch.length)) + '</button></div>' +
+        '<p class="ak-note" id="ak-pick-one"' + (ch.length ? ' hidden' : '') + '>' + esc(t.pickOne) + '</p>' +
+        '<button type="button" class="btn btn-ghost btn-block" data-act="save" style="margin-top:var(--sp-3)">' + esc(t.saveOnly) + '</button>';
+    } else if (S.step === 3) {
+      body = '<form data-form="consent"><h3 tabindex="-1">' + esc(t.consentTitle) + '</h3><fieldset><legend>' + esc(t.adultQ) + '</legend>' + chips('adult', ADULT_OPTIONS, S.adult) + '</fieldset><div id="ak-consent-body">' + consentBody(pl) + '</div>' +
+        '<div class="ak-row"><button type="button" class="btn btn-ghost" data-act="go2">' + esc(t.back) + '</button></div></form>';
+    } else {
+      var n = chosenColleges(pl).length;
+      var wt = S.lang === 'hi' ? 'सहमति वापस ली गई। कोई कॉलेज कॉल नहीं करेगा।' : 'Consent withdrawn. No college will call.';
+      body = '<h3 tabindex="-1">' + esc(S.withdrawn ? wt : S.savedOnly ? t.savedTitle : t.doneTitle) + '</h3>' + (S.withdrawn ? '' : '<p class="muted">' + esc(S.savedOnly ? t.savedLead : t.doneLead(n)) + '</p>') +
+        '<div class="ak-alert ok">' + esc(t.doneProfile) + '</div>' +
+        (S.withdrawn ? '<div class="ak-alert amber" role="status">' + esc(t.withdrawn) + '</div>' : '') +
+        '<div class="ak-row">' + (!S.savedOnly && !S.withdrawn ? '<button type="button" class="btn btn-ghost" data-act="withdraw">' + esc(t.withdraw) + '</button>' : '') +
+        (shared() && chosenColleges(pl).some(function (c) { return c.id === PARTNER_ID; }) ? '<button type="button" class="btn btn-primary" data-act="dash">' + esc(t.seeDashboard) + '</button>' : '') + '</div>' +
+        '<button type="button" class="btn btn-ghost btn-block" data-act="reset" style="margin-top:var(--sp-3)">' + esc(t.startOver) + '</button>';
+    }
+    var progress = '<div class="ak-progress" aria-hidden="true">' + [0, 1, 2, 3, 4].map(function (i) { return '<i' + (i <= S.step ? ' class="on"' : '') + '></i>'; }).join('') + '</div>';
+    var why = '<div><h4 style="margin-top:0">' + esc(t.whyTitle) + '</h4><div class="ak-why">' + t.why.map(function (w) { return '<div><b>' + esc(w.h) + '</b><p>' + esc(w.p) + '</p></div>'; }).join('') + '</div></div>';
+    panel.innerHTML = '<div class="ak-split"><div class="ak-phone"><div class="ak-phone-top"><span>' + (S.lang === 'hi' ? 'कॉन्सेप्ट' : 'Concept') + ' &middot; ' + esc(t.phoneTitle) + '</span><span>' + (S.step + 1) + ' / 5 &middot; ' + esc(t.stepNames[S.step]) + '</span></div>' + progress + body + '</div>' + why + '</div>';
+    if (focus) { var h = $('h3', panel); if (h) h.focus(); }
+  }
+  function checkOut() {
+    var t = T();
+    if (S.checkResult === 'fake') return '<div class="ak-alert red" data-testid="check-result">' + esc(t.checkFake(hitName(S.checkHit))) + '</div>';
+    if (S.checkResult === 'similar') return '<div class="ak-alert amber" data-testid="check-result">' + esc(S.lang === 'hi' ? 'सावधान: मिलता-जुलता नाम यूजीसी की फर्जी विश्वविद्यालयों की सूची में है: "' + hitName(S.checkHit) + '"। फीस देने से पहले पूरा नाम और उसकी मान्यता यूजीसी, AICTE या राज्य विश्वविद्यालय की सूची में जाँचें।' : 'Careful: a similar name is on the UGC list of fake universities: "' + hitName(S.checkHit) + '". Check the exact name and its recognition with UGC, AICTE or the state university before paying any fee.') + '</div>';
+    if (S.checkResult === 'ok') return '<div class="ak-alert" data-testid="check-result">' + esc(t.checkOk) + '</div>';
+    if (S.checkResult === 'short') return '<div class="ak-alert" data-testid="check-result">' + esc(t.checkShort) + '</div>';
+    return '';
+  }
+  function consentBody(pl) {
+    var t = T();
+    if (!S.adult) return '';
+    var ch = chosenColleges(pl), phoneValid = /^[6-9]\d{9}$/.test(S.phone);
+    return '<p class="muted">' + esc(S.adult === 'yes' ? t.consentAdult : t.consentMinor) + '</p>' +
+      '<div class="ak-item" style="margin:var(--sp-4) 0"><strong>' + esc(t.shares) + '</strong><ul class="small muted" style="margin:var(--sp-2) 0 0;padding-left:var(--sp-5)">' + t.sharesList.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul>' +
+      '<p style="margin-top:var(--sp-3);color:var(--ink)">' + esc(t.notShared) + '</p><p style="margin-top:var(--sp-3);color:var(--ink)">' + esc(t.goesTo) + ':</p><ul class="small muted" data-testid="goes-to" style="margin:var(--sp-1) 0 0;padding-left:var(--sp-5)">' +
+      ch.map(function (c) { var co = courseFor(c, pl); return '<li>' + esc(P(c.name)) + ': ' + esc(co ? P(co.name) : '-') + '</li>'; }).join('') + '</ul></div>' +
+      '<label class="ak-lbl" for="ak-name">' + esc(t.studentName) + '</label><input id="ak-name" class="ak-input" autocomplete="off" value="' + esc(S.studentName) + '">' +
+      '<label class="ak-lbl" for="ak-phone" style="margin-top:var(--sp-4)">' + esc(S.adult === 'yes' ? t.phoneStudent : t.phoneParent) + '</label>' +
+      '<div class="ak-form"><input id="ak-phone" class="ak-input" inputmode="numeric" maxlength="10" autocomplete="off" aria-describedby="ak-phone-h" value="' + esc(S.phone) + '"><button type="button" class="btn btn-ghost" data-act="otp" id="ak-otp-btn"' + (phoneValid ? '' : ' disabled') + '>' + esc(t.sendOtp) + '</button></div><p class="ak-note" id="ak-phone-h">' + esc(t.phoneHelp) + '</p>' +
+      (S.otpSent ? '<div class="ak-alert amber" role="status">' + esc(t.otpSent(DEMO_OTP)) + '</div><label class="ak-lbl" for="ak-otp" style="margin-top:var(--sp-4)">' + esc(t.otpLabel) + '</label><div class="ak-form"><input id="ak-otp" class="ak-input" inputmode="numeric" maxlength="4" autocomplete="one-time-code" value="' + esc(S.otp) + '"><button type="button" class="btn btn-ghost" data-act="verify">' + esc(t.verify) + '</button></div>' : '') +
+      '<div aria-live="polite">' + (S.otpState === 'ok' ? '<div class="ak-alert ok">' + esc(t.otpOk) + '</div>' : S.otpState === 'wrong' ? '<div class="ak-alert red">' + esc(t.otpWrong) + '</div>' : '') + '</div>' +
+      '<label class="ak-check"><input type="checkbox" id="ak-agree"' + (S.agree ? ' checked' : '') + (S.otpState === 'ok' ? '' : ' disabled') + '><span>' + esc(S.adult === 'yes' ? t.agreeAdult : t.agreeParent) + '</span></label>' +
+      '<button type="submit" class="btn btn-primary btn-block" id="ak-share" style="margin-top:var(--sp-4)"' + (S.otpState === 'ok' && S.agree ? '' : ' disabled') + '>' + esc(t.share) + '</button>';
+  }
+
+  // ---------- college dashboard ----------
+  function enquiries() {
+    var t = T(), pl = plan(), list = BASE_ENQUIRIES.slice();
+    var partner = chosenColleges(pl).find(function (c) { return c.id === PARTNER_ID; });
+    if (shared() && partner) {
+      var sl = STREAMS.find(function (s) { return s.id === S.stream; }).label, co = courseFor(partner, pl);
+      list.unshift({ id: 'you', mine: true, when: { en: t.yours, hi: t.yours }, who: S.studentName.trim() ? S.studentName.trim().slice(0, 1).toUpperCase() + '***' : 'D***',
+        district: DISTRICTS[S.districtIdx], profile: { en: sl.en + ', ' + marksBand(S.marks, 'en'), hi: sl.hi + ', ' + marksBand(S.marks, 'hi') }, course: co ? co.name : { en: '-', hi: '-' } });
+    }
+    return list;
+  }
+  function collegeKpis(list) {
+    var t = T(), price = S.rev.price;
+    var called = list.filter(function (e) { return (S.statuses[e.id] || 'new') !== 'new'; }).length;
+    return '<div class="ak-kpi"><b>' + list.length + '</b><span>' + esc(t.kpiEnq) + '</span></div><div class="ak-kpi"><b>' + list.length + '</b><span>' + esc(t.kpiConsent) + '</span></div>' +
+      '<div class="ak-kpi"><b>' + called + '</b><span>' + esc(t.kpiCalled) + '</span></div><div class="ak-kpi"><b>' + inr(list.length * price) + '</b><span>' + esc(t.kpiBill(inr(price))) + '</span></div>';
+  }
+  function renderCollege() {
+    var t = T(), list = enquiries(), panel = document.getElementById('panel-college');
+    var statuses = Object.keys(t.status);
+    panel.innerHTML = '<h3>' + esc(t.collegeTitle) + '</h3><p class="muted">' + esc(t.collegeLead) + '</p>' +
+      '<div class="ak-kpis" id="ak-kpis">' + collegeKpis(list) + '</div>' +
+      (list.some(function (e) { return e.mine; }) ? '' : '<div class="ak-alert amber">' + esc(t.yoursHint) + '</div>') +
+      '<p class="ak-note ak-swipe">' + (S.lang === 'hi' ? 'हर कॉलम देखने के लिए टेबल को बगल में खिसकाएँ।' : 'Swipe the table sideways to see every column.') + '</p><div class="ak-scroll" style="margin-top:var(--sp-4)"><table data-testid="enquiries"><thead><tr><th>' + esc(t.thWhen) + '</th><th>' + esc(t.thWho) + '</th><th>' + esc(t.thDistrict) + '</th><th>' + esc(t.thProfile) + '</th><th>' + esc(t.thCourse) + '</th><th>' + esc(t.thConsent) + '</th><th>' + esc(t.thStatus) + '</th></tr></thead><tbody>' +
+      list.map(function (e) {
+        return '<tr' + (e.mine ? ' class="mine"' : '') + '><td>' + esc(P(e.when)) + '</td><td>' + esc(e.who) + '</td><td>' + esc(P(e.district)) + '</td><td>' + esc(P(e.profile)) + '</td><td>' + esc(P(e.course)) + '</td><td><span class="ak-tag open">' + esc(t.consentBadge) + '</span></td>' +
+          '<td><label class="sr" for="st-' + e.id + '">' + esc(t.thStatus) + '</label><select id="st-' + e.id + '" data-status="' + e.id + '">' + statuses.map(function (k) { return '<option value="' + k + '"' + ((S.statuses[e.id] || 'new') === k ? ' selected' : '') + '>' + esc(t.status[k]) + '</option>'; }).join('') + '</select></td></tr>';
+      }).join('') + '</tbody></table></div>' +
+      '<div class="ak-cols"><div><h4>' + esc(t.rulesTitle) + '</h4><ul>' + t.rules.map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '</ul></div><div><h4>' + esc(t.bundleTitle) + '</h4><ul>' + t.bundle.map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '</ul><div class="ak-alert amber">' + esc(t.priceNote) + '</div></div></div>';
+  }
+
+  // ---------- revenue model ----------
+  var PCT = ['reachPct', 'completePct', 'coveragePct', 'consentPct', 'paidPct', 'counselPct'];
+  function calc(r) {
+    var plans = r.passed * (r.reachPct / 100) * (r.completePct / 100);
+    var families = plans * (r.coveragePct / 100) * (r.consentPct / 100);
+    var enq = families * r.perStudent * (r.paidPct / 100);
+    var enqRev = enq * r.price, bundleRev = r.bundles * r.bundlePrice, counselRev = plans * (r.counselPct / 100) * r.counselPrice;
+    return { plans: plans, families: families, enquiries: enq, enqRev: enqRev, bundleRev: bundleRev, counselRev: counselRev, total: enqRev + bundleRev + counselRev };
+  }
+  function revOut() {
+    var t = T(), r = calc(S.rev), max = Math.max(r.plans, r.families, r.enquiries, 1);
+    var bar = function (label, v) { return '<div class="ak-bar-row"><span>' + esc(label) + '</span><b>' + Math.round(v).toLocaleString('en-IN') + '</b><div class="ak-track"><div class="ak-fill" style="transform:scaleX(' + Math.min(1, v / max).toFixed(4) + ')"></div></div></div>'; };
+    var usd = r.total / USD;
+    return '<h4 style="margin-top:0">' + esc(t.funnel) + '</h4><div class="ak-bars">' + bar(t.fPlans, r.plans) + bar(t.fFamilies, r.families) + bar(t.fEnquiries, r.enquiries) + '</div>' +
+      '<div class="ak-money"><div><span>' + esc(t.rEnq) + '</span><b>' + money(r.enqRev, S.lang) + '</b></div><div><span>' + esc(t.rBundle) + '</span><b>' + money(r.bundleRev, S.lang) + '</b></div><div><span>' + esc(t.rCounsel) + '</span><b>' + money(r.counselRev, S.lang) + '</b></div></div>' +
+      '<div class="ak-total" data-testid="rev-total"><span>' + esc(t.rTotal) + '</span><b>' + money(r.total, S.lang) + '</b><span>' + (S.lang === 'hi' ? 'लगभग $' : 'About $') + Math.round(usd).toLocaleString('en-US') + (S.lang === 'hi' ? ', ₹95.04 प्रति डॉलर (24 अक्टूबर 2026)' : ' at ₹95.04 per USD (24 Oct 2026)') + '</span></div>' +
+      '<p class="ak-note">' + esc(t.notForecast) + '</p>';
+  }
+  function renderRevenue() {
+    var t = T(), panel = document.getElementById('panel-revenue');
+    var fields = [['passed', t.inPassed, 1000], ['reachPct', t.inReach, 1], ['completePct', t.inComplete, 1], ['coveragePct', t.inCoverage, 5], ['consentPct', t.inConsent, 1], ['perStudent', t.inPer, 0.5], ['paidPct', t.inPaid, 5], ['price', t.inPrice, 10], ['bundles', t.inBundles, 5], ['bundlePrice', t.inBundlePrice, 5000], ['counselPct', t.inCounsel, 0.5], ['counselPrice', t.inCounselPrice, 10]];
+    panel.innerHTML = '<h3>' + esc(t.revTitle) + '</h3><p class="muted">' + esc(S.lang === 'hi' ? 'पास होने वालों की संख्या 2026 का असली आँकड़ा है; बाकी हर संख्या एक अनुमान है। कोई परिदृश्य चुनें, फिर कोई भी संख्या बदलें।' : 'The pass count is the real 2026 figure; every other number is an assumption. Choose a scenario, then change any number.') + '</p>' +
+      '<div class="ak-scen" role="group" aria-label="' + esc(t.scenLabel) + '">' + ['low', 'base', 'high', 'custom'].map(function (s) {
+        return '<button type="button" data-scen="' + s + '" aria-pressed="' + (S.scenario === s ? 'true' : 'false') + '"' + (s === 'custom' && S.scenario !== 'custom' ? ' disabled' : '') + '>' + esc(t.scen[s]) + '</button>';
+      }).join('') + '</div>' +
+      '<div class="ak-rev"><div class="ak-fields">' + fields.map(function (f) {
+        return '<div><label for="rv-' + f[0] + '">' + esc(f[1]) + '</label><input class="ak-input" type="number" min="0"' + (PCT.indexOf(f[0]) > -1 ? ' max="100"' : '') + ' step="' + f[2] + '" id="rv-' + f[0] + '" data-rev="' + f[0] + '" value="' + S.rev[f[0]] + '"></div>';
+      }).join('') + '</div><div id="ak-rev-out" aria-live="polite">' + revOut() + '</div></div>' +
+      '<div class="ak-cols"><div><h4>' + esc(t.whySmall) + '</h4><p class="muted">' + esc(t.whySmallText) + '</p></div><div><h4>' + esc(t.mustBeTrue) + '</h4><ul>' + t.mustList.map(function (m) { return '<li>' + esc(m) + '</li>'; }).join('') + '</ul></div></div>';
+  }
+
+  // ---------- events ----------
+  function go(step) { S.step = step; renderStudent(true); if (step === 4 || step === 0) renderCollege(); }
+  root.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b || !root.contains(b)) return;
+    if (b.hasAttribute('data-lang')) { S.lang = b.getAttribute('data-lang'); renderAll(); return; }
+    if (b.hasAttribute('data-tab')) { setTab(b.getAttribute('data-tab'), false); return; }
+    if (b.hasAttribute('data-scen')) { var s = b.getAttribute('data-scen'); if (s !== 'custom') { S.scenario = s; S.rev = Object.assign({}, PRESETS[s]); renderRevenue(); renderCollegeKpis(); var fb = $('[data-scen="' + s + '"]'); if (fb) fb.focus(); } return; }
+    var a = b.getAttribute('data-act'); if (!a) return;
+    if (a === 'go0') go(0); else if (a === 'go1') go(1); else if (a === 'go2') go(2);
+    else if (a === 'go3') { S.savedOnly = false; resetConsent(); go(3); }
+    else if (a === 'save') { S.savedOnly = true; go(4); }
+    else if (a === 'otp') { S.otpSent = true; S.otp = ''; S.otpState = ''; S.agree = false; rerenderConsent('ak-otp'); }
+    else if (a === 'verify') { S.otpState = S.otp === DEMO_OTP ? 'ok' : 'wrong'; rerenderConsent(S.otpState === 'ok' ? 'ak-agree' : 'ak-otp'); }
+    else if (a === 'withdraw') { S.withdrawn = true; renderStudent(true); renderCollege(); }
+    else if (a === 'dash') setTab('college', true);
+    else if (a === 'reset') { S.step = 0; S.chosen = []; S.adult = ''; S.studentName = ''; S.phone = ''; resetConsent(); S.savedOnly = false; S.withdrawn = false; S.checkText = ''; S.checkResult = ''; S.statuses = Object.assign({}, INITIAL_STATUSES); renderStudent(true); renderCollege(); }
+  });
+  function rerenderConsent(focusId) {
+    var box = document.getElementById('ak-consent-body'); if (!box) return;
+    box.innerHTML = consentBody(plan());
+    if (focusId) { var el = document.getElementById(focusId); if (el && !el.disabled) el.focus(); }
+  }
+  function renderCollegeKpis() { var k = document.getElementById('ak-kpis'); if (k) k.innerHTML = collegeKpis(enquiries()); }
+  root.addEventListener('change', function (e) {
+    var el = e.target;
+    if (el.type === 'radio') {
+      var n = el.name, v = el.value;
+      if (n === 'adult') { S.adult = v; resetConsent(); rerenderConsent(); return; }
+      S[n] = v; return;
+    }
+    if (el.name === 'district') { S.districtIdx = Number(el.value); return; }
+    if (el.hasAttribute('data-college')) {
+      var id = el.getAttribute('data-college');
+      S.chosen = el.checked ? S.chosen.concat(id) : S.chosen.filter(function (x) { return x !== id; });
+      S.agree = false;
+      var n2 = chosenColleges(plan()).length, btn = document.getElementById('ak-go3'), hint = document.getElementById('ak-pick-one');
+      if (btn) { btn.disabled = !n2; btn.textContent = T().toConsent(n2); if (n2) btn.removeAttribute('aria-describedby'); else btn.setAttribute('aria-describedby', 'ak-pick-one'); }
+      if (hint) hint.hidden = !!n2;
+      return;
+    }
+    if (el.id === 'ak-agree') { S.agree = el.checked; var sh = document.getElementById('ak-share'); if (sh) sh.disabled = !(S.otpState === 'ok' && S.agree); return; }
+    if (el.hasAttribute('data-rev')) { el.value = S.rev[el.getAttribute('data-rev')]; return; }
+    if (el.hasAttribute('data-status')) { S.statuses[el.getAttribute('data-status')] = el.value; renderCollegeKpis(); return; }
+  });
+  root.addEventListener('input', function (e) {
+    var el = e.target;
+    if (el.name === 'marks') { S.marks = Number(el.value); var o = document.getElementById('ak-marks-o'); if (o) o.textContent = S.marks + '%'; return; }
+    if (el.id === 'ak-check') { S.checkText = el.value; S.checkResult = ''; document.getElementById('ak-check-out').innerHTML = ''; return; }
+    if (el.id === 'ak-name') { S.studentName = el.value; return; }
+    if (el.id === 'ak-phone') {
+      el.value = el.value.replace(/\D/g, '').slice(0, 10); S.phone = el.value;
+      if (S.otpSent || S.otpState) { resetConsent(); rerenderConsent('ak-phone'); var p = document.getElementById('ak-phone'); if (p) { var l = p.value.length; p.setSelectionRange(l, l); } return; }
+      var ob = document.getElementById('ak-otp-btn'); if (ob) ob.disabled = !/^[6-9]\d{9}$/.test(S.phone); return;
+    }
+    if (el.id === 'ak-otp') { el.value = el.value.replace(/\D/g, '').slice(0, 4); S.otp = el.value; if (S.otpState) { S.otpState = ''; S.agree = false; rerenderConsent('ak-otp'); var oi = document.getElementById('ak-otp'); if (oi) { var ln = oi.value.length; oi.setSelectionRange(ln, ln); } } return; }
+    if (el.hasAttribute('data-rev')) {
+      var k = el.getAttribute('data-rev'), num = Number(el.value);
+      if (!isFinite(num) || num < 0) num = 0;
+      if (PCT.indexOf(k) > -1) num = Math.min(100, num);
+      if (k === 'perStudent') num = Math.min(10, num);
+      if (k === 'passed') num = Math.min(5000000, num);
+      S.rev[k] = num; S.scenario = 'custom';
+      $$('[data-scen]').forEach(function (b) { var s = b.getAttribute('data-scen'); b.setAttribute('aria-pressed', s === 'custom' ? 'true' : 'false'); if (s === 'custom') b.disabled = false; });
+      document.getElementById('ak-rev-out').innerHTML = revOut(); renderCollegeKpis();
+    }
+  });
+  root.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var f = e.target.getAttribute('data-form');
+    if (f === 'q') go(2);
+    else if (f === 'check') {
+      var hit = checkName(S.checkText);
+      if (hit) { S.checkHit = hit.u; S.checkResult = hit.kind === 'exact' ? 'fake' : 'similar'; }
+      else { var w = S.checkText.trim().split(/\s+/).filter(function (x) { return x.length > 1; }); S.checkResult = w.length < 2 ? 'short' : 'ok'; }
+      document.getElementById('ak-check-out').innerHTML = checkOut();
+    } else if (f === 'consent') { if (S.otpState === 'ok' && S.agree) { S.savedOnly = false; S.withdrawn = false; go(4); } }
+  });
+  function setTab(id, focusPanel) {
+    S.tab = id; renderChrome();
+    if (id === 'college') renderCollege();
+    var tb = document.getElementById('tab-' + id);
+    if (focusPanel) { root.scrollIntoView({ behavior: 'auto', block: 'start' }); tb.focus(); } else tb.focus();
+  }
+  $('.ak-tabs').addEventListener('keydown', function (e) {
+    var tabs = ['student', 'college', 'revenue'], i = tabs.indexOf(S.tab), nx = -1;
+    if (e.key === 'ArrowRight') nx = (i + 1) % 3; else if (e.key === 'ArrowLeft') nx = (i + 2) % 3; else if (e.key === 'Home') nx = 0; else if (e.key === 'End') nx = 2;
+    if (nx < 0) return; e.preventDefault(); setTab(tabs[nx], false);
+  });
+  renderAll();
+
+})();
+</script>
+<script>
+(function () {
+  var d = document.documentElement;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  try { if (localStorage.getItem('anchit-motion') === 'off') d.setAttribute('data-motion', 'off'); } catch (e) {}
+  var els = Array.prototype.slice.call(document.querySelectorAll('.rv'));
+  if (reduce || !('IntersectionObserver' in window)) { els.forEach(function (el) { el.classList.add('in'); }); }
+  else {
+    d.classList.add('js');
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+    els.forEach(function (el) {
+      // Never hold back anything taller than the viewport (DESIGN.md arrival rule).
+      if (el.getBoundingClientRect().height > window.innerHeight * 0.9) el.classList.add('in'); else io.observe(el);
+    });
+  }
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  var map = {}; links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
+  if ('IntersectionObserver' in window) {
+    var so = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        links.forEach(function (a) { a.classList.remove('on'); a.removeAttribute('aria-current'); });
+        var a = map[en.target.id]; if (a) { a.classList.add('on'); a.setAttribute('aria-current', 'true'); }
+      });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+    Object.keys(map).forEach(function (id) { var s = document.getElementById(id); if (s) so.observe(s); });
+    var hero = document.querySelector('.hero');
+    if (hero) new IntersectionObserver(function (en) { if (en[0].isIntersecting) links.forEach(function (a) { a.classList.remove('on'); a.removeAttribute('aria-current'); }); }, { threshold: 0.3 }).observe(hero);
+  }
+})();
+</script>
+</body>
+</html>

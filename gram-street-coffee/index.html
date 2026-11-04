@@ -1070,7 +1070,7 @@
     align-items: center;
     gap: 6px;
     animation: gsPillBuoyancy 3.4s ease-in-out infinite;
-    animation-delay: calc(var(--pi, 0) * 0.45s);
+    animation-delay: var(--bp-d, calc(var(--pi, 0) * 0.45s));
     animation-play-state: paused;
     transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
   }
@@ -3070,16 +3070,17 @@
     var btns = [].slice.call(sec.querySelectorAll(".ch-nav button"));
     var shimmerCanvas = document.getElementById("tenchaShimmerCanvas");
     var shimmerCtx = shimmerCanvas ? shimmerCanvas.getContext("2d") : null;
-    // Ambient Surface Tints:
-    // 0: Coffee (Electric Lilac-Blueberry + Espresso Umber tint)
-    // 1: Matcha (Bamboo Parchment #D8E8D5 + Kyoto Jade #1F4E3B)
-    // 2: Gelato (Warm Brioche Amber #C88A4B / #F3DFC8 + Smoked Cacao #1C1412)
-    var pal = [[205, 184, 247], [216, 232, 213], [243, 223, 200]];
+    // Ambient Surface Tints & Radial Glows:
+    // 0: Coffee (Deep Espresso Umber #2A1810 + Electric Lilac-Blueberry radial glow #6E44FF)
+    // 1: Matcha (Kyoto Jade #1F4E3B + Bamboo Parchment #D8E8D5 glow & stone-ground Tencha shimmer)
+    // 2: Gelato (Smoked Cacao #1C1412 + Warm Brioche Amber #C88A4B glow & -12°C frosted card border)
+    var pal = [[42, 24, 16], [31, 78, 59], [28, 20, 18]];
     var glowPal = [
-      [110, 68, 255, 0.28],  // #6E44FF Electric Lilac-Blueberry glow
-      [31, 78, 59, 0.26],    // #1F4E3B Kyoto Jade glow
-      [200, 138, 75, 0.30]   // #C88A4B Warm Brioche Amber glow
+      [110, 68, 255, 0.42],   // #6E44FF Electric Lilac-Blueberry glow
+      [216, 232, 213, 0.32],  // #D8E8D5 Bamboo Parchment glow
+      [200, 138, 75, 0.38]    // #C88A4B Warm Brioche Amber glow
     ];
+    var inkPal = [[248, 244, 255], [216, 232, 213], [243, 223, 200]];
     sec.classList.add("is-scroll");
     var matchaWeight = 0, chaptersVisible = false, shimmerRunning = false;
     var tenchaMotes = [];
@@ -3113,7 +3114,7 @@
         pt.x = (pt.x + pt.vx + 1) % 1;
         pt.y = (pt.y + pt.vy + 1) % 1;
         var tw = 0.45 + 0.55 * Math.sin(now * 0.006 + pt.ph);
-        shimmerCtx.fillStyle = "rgba(31, 78, 59, " + (tw * 0.42 * matchaWeight).toFixed(3) + ")";
+        shimmerCtx.fillStyle = "rgba(216, 232, 213, " + (tw * 0.52 * matchaWeight).toFixed(3) + ")";
         shimmerCtx.beginPath();
         shimmerCtx.arc(pt.x * cw, pt.y * ch, pt.r, 0, Math.PI * 2);
         shimmerCtx.fill();
@@ -3144,7 +3145,7 @@
     function update() {
       var top = sec.getBoundingClientRect().top;
       var p = Math.min(1, Math.max(0, -top / total()));
-      var t = p * 3, w = [], r = 0, g = 0, b = 0, gr = 0, gg = 0, gb = 0, ga = 0;
+      var t = p * 3, w = [], r = 0, g = 0, b = 0, gr = 0, gg = 0, gb = 0, ga = 0, ir = 0, ig = 0, ib = 0;
       for (var i = 0; i < 3; i++) {
         var a = i === 0 ? 1 : ss(i - 0.12, i + 0.12, t);
         var z = i === 2 ? 1 : 1 - ss(i + 0.88, i + 1.12, t);
@@ -3154,6 +3155,7 @@
         chs[i].style.pointerEvents = w[i] > 0.5 ? "auto" : "none";
         r += pal[i][0] * w[i]; g += pal[i][1] * w[i]; b += pal[i][2] * w[i];
         gr += glowPal[i][0] * w[i]; gg += glowPal[i][1] * w[i]; gb += glowPal[i][2] * w[i]; ga += glowPal[i][3] * w[i];
+        ir += inkPal[i][0] * w[i]; ig += inkPal[i][1] * w[i]; ib += inkPal[i][2] * w[i];
         btns[i].style.setProperty("--f", Math.min(1, Math.max(0, t - i)).toFixed(3));
         btns[i].setAttribute("aria-current", w[i] > 0.5 ? "true" : "false");
       }
@@ -3163,10 +3165,14 @@
 
       var surfaceRgb = "rgb(" + Math.round(r) + "," + Math.round(g) + "," + Math.round(b) + ")";
       var glowRgba = "rgba(" + Math.round(gr) + "," + Math.round(gg) + "," + Math.round(gb) + "," + ga.toFixed(3) + ")";
+      var inkRgb = "rgb(" + Math.round(ir) + "," + Math.round(ig) + "," + Math.round(ib) + ")";
+      var mutedRgba = "rgba(" + Math.round(ir) + "," + Math.round(ig) + "," + Math.round(ib) + ",0.84)";
       stage.style.setProperty("--rot", (p * 540).toFixed(1) + "deg");
       stage.style.setProperty("--s", (0.92 + 0.12 * Math.sin(p * Math.PI * 3)).toFixed(3));
       stage.style.setProperty("--surface-tint", surfaceRgb);
       stage.style.setProperty("--accent-glow", glowRgba);
+      stage.style.setProperty("--ch-ink", inkRgb);
+      stage.style.setProperty("--ch-muted", mutedRgba);
       stage.style.backgroundColor = surfaceRgb;
     }
     var ticking = false;

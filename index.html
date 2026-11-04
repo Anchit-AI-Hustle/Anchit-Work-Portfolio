@@ -5172,6 +5172,23 @@
             <a class="btn primary" href="/marketing-101">Open Marketing 101<span class="build-launch" aria-hidden="true">↗</span></a>
           </div>
         </div>
+
+        <!-- Card 16: The Playbook Library & 3D Interactive Ebooks -->
+        <div class="build-card tilt-card">
+          <div class="build-tag"><span class="bento-index">16</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Published Books &middot; 3D Web Reader</span><span class="status" data-tag="live">9 Books &middot; Live</span></div>
+          <h3>The <em>Playbook Library</em></h3>
+          <p class="build-purpose"><span class="bp-label">What it&rsquo;s for</span><span class="bp-text">Reading my 9 published books and operator playbooks as playable software, not static PDFs.</span></p>
+          <p>A scroll-scrubbed 3D edition vault and dual-page web reader where every chapter pairs editorial frameworks with live arithmetic simulators you can test on the page.</p>
+          <ul class="build-details">
+            <li>Built with a Z-axis hardcover slipcase portal, a 7-volume 3D edition fan arc, and a center-spine light-slit aperture transition.</li>
+            <li>Pairs margin annotations and page-riffle scrubbing with live CAC payback, retention cohort, and LLM cascade calculators.</li>
+          </ul>
+          <div class="build-stack"><span class="build-chip">9 Amazon Books</span><span class="build-chip">3D CSS/Canvas</span><span class="build-chip">Live Simulators</span><span class="build-chip">TTS Narration</span></div>
+          <div class="build-actions">
+            <a class="btn primary" href="#project-ebooks" data-view="project-ebooks">Crack the Spine<span class="build-launch" aria-hidden="true">&rarr;</span></a>
+            <a class="btn" href="/marketing-101">Read Marketing 101 &#8599;</a>
+          </div>
+        </div>
       </div>
 
 
@@ -5192,6 +5209,695 @@
         <div id="modGrid" data-no-motion></div>
       </div>
     </div>
+  </section>
+
+  <!-- PROJECT: THE PLAYBOOK LIBRARY & 3D INTERACTIVE EBOOKS -->
+  <section class="view" id="view-project-ebooks">
+    <div class="container">
+      <a class="back-link" href="#projects" data-view="projects">&larr; All projects</a>
+
+      <div class="project-hero reveal">
+        <div class="eyebrow">Published Books &middot; Interactive Ebook Engine &middot; 9 Volumes</div>
+        <h1 class="display-lg">The <em>Playbook Library</em></h1>
+        <p class="quote">&ldquo;Books shouldn&rsquo;t sit flat behind glass. Crack the spine, scrub the pages, and run the numbers inside the margin.&rdquo;</p>
+        <div class="project-meta">
+          <div><span class="label">Catalog</span><span>9 Published Amazon Books + Interactive Web Editions</span></div>
+          <div><span class="label">Choreography</span><span>Z-Axis Slipcase &rarr; 3D Fan Arc &rarr; Spine-Slit Reader</span></div>
+          <div><span class="label">Formats</span><span>Interactive Web OS &middot; Kindle &middot; EPUB &middot; Executive PDF</span></div>
+        </div>
+        <div class="project-cta">
+          <button type="button" class="btn primary" id="ebookCrackSpineBtn">Crack the Spine &rarr;</button>
+          <a href="/marketing-101" class="btn">Open Full Marketing 101 Course &#8599;</a>
+        </div>
+      </div>
+
+      <div class="ebook-portal-stage device-card" id="ebookPortalStage">
+        <span class="dc-corner tl" aria-hidden="true"></span>
+        <span class="dc-corner tr" aria-hidden="true"></span>
+        <span class="dc-corner bl" aria-hidden="true"></span>
+        <span class="dc-corner br" aria-hidden="true"></span>
+
+        <div class="ebook-portal-hud">
+          <span class="ebook-hud-pill">EDITION VAULT // 09 VOLUMES</span>
+          <span class="ebook-hud-pill" id="ebookStageReadout">STAGE 01 &middot; SLIPCASE UNBOXING</span>
+          <span class="ebook-hud-pill">SCROLL OR DRAG TO SCRUB 3D SPINE</span>
+        </div>
+
+        <div class="ebook-scrub-bar-wrap">
+          <label for="ebookPortalScrub" class="ebook-scrub-label">Z-AXIS PORTAL SCRUBBER</label>
+          <input type="range" id="ebookPortalScrub" min="0" max="100" value="18" aria-label="Scrub 3D Ebook Portal" />
+          <span class="ebook-scrub-val" id="ebookPortalScrubVal">18%</span>
+        </div>
+
+        <div class="ebook-3d-viewport" id="ebook3dViewport">
+          <div class="ebook-orbit-node" style="--ox:-260px;--oy:-84px;--oz:40px">
+            <span class="eo-k">01 // RETENTION &amp; LIFECYCLE</span>
+            <span class="eo-v">D2C Cohort &amp; Payback Math</span>
+          </div>
+          <div class="ebook-orbit-node" style="--ox:260px;--oy:-72px;--oz:60px">
+            <span class="eo-k">02 // AGENTIC AI SYSTEMS</span>
+            <span class="eo-v">Multi-LLM Cascades &amp; RAG</span>
+          </div>
+          <div class="ebook-orbit-node" style="--ox:-240px;--oy:88px;--oz:30px">
+            <span class="eo-k">03 // ASSISTED SALES OPS</span>
+            <span class="eo-v">&#8377;15L &rarr; &#8377;80L MRR Playbook</span>
+          </div>
+          <div class="ebook-orbit-node" style="--ox:248px;--oy:92px;--oz:50px">
+            <span class="eo-k">04 // VERIFIED OUTPUT</span>
+            <span class="eo-v">11 Live Chapter Simulators</span>
+          </div>
+
+          <div class="ebook-monolith" id="ebookMonolith">
+            <div class="ebook-spine-foil">ANCHIT TANDON &middot; OPERATOR MONOGRAPHS I&ndash;IX</div>
+            <div class="ebook-cover-face">
+              <div class="ebook-cover-spec"></div>
+              <div class="ebook-cover-top">MONOGRAPH EDITION &middot; VOL. I&ndash;IX</div>
+              <div class="ebook-cover-title" id="ebookActiveCoverTitle">The Operator&rsquo;s <em>Growth &amp; AI</em> Compendium</div>
+              <div class="ebook-cover-sub" id="ebookActiveCoverSub">Nine field manuals on retention economics, assisted-sales scaling, and multi-model AI products.</div>
+              <div class="ebook-cover-footer">
+                <span>FRAUNCES &times; INTER</span>
+                <span>PLAYABLE EDITION</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">02 &middot; Curved 3D Edition Fan &middot; Select a Volume</div>
+        <h2>Seven Featured Editions from the Vault</h2>
+        <p>Hover or tap any spine in the arc to pull the volume forward, inspect its core thesis, and load its interactive chapter spread into the dual-page reader below.</p>
+
+        <div class="ebook-fan-stage" id="ebookFanStage" role="listbox" aria-label="Published Ebook Volumes">
+          <button type="button" class="ebook-fan-card is-active" style="--fi:-3" data-vol="0">
+            <span class="efc-index">VOL 01</span>
+            <strong class="efc-title">Modern Marketing <em>101</em></strong>
+            <span class="efc-meta">12 Chapters &middot; 11 Simulators</span>
+          </button>
+          <button type="button" class="ebook-fan-card" style="--fi:-2" data-vol="1">
+            <span class="efc-index">VOL 02</span>
+            <strong class="efc-title">The <em>LifeCycle-OS</em> Manual</strong>
+            <span class="efc-meta">Retention &middot; RFM &amp; Payback</span>
+          </button>
+          <button type="button" class="ebook-fan-card" style="--fi:-1" data-vol="2">
+            <span class="efc-index">VOL 03</span>
+            <strong class="efc-title">Assisted Sales <em>at Scale</em></strong>
+            <span class="efc-meta">High-Intent Funnel Ops</span>
+          </button>
+          <button type="button" class="ebook-fan-card" style="--fi:0" data-vol="3">
+            <span class="efc-index">VOL 04</span>
+            <strong class="efc-title">Agentic <em>Cascade</em> Design</strong>
+            <span class="efc-meta">Multi-LLM Orchestration</span>
+          </button>
+          <button type="button" class="ebook-fan-card" style="--fi:1" data-vol="4">
+            <span class="efc-index">VOL 05</span>
+            <strong class="efc-title">D2C Unit <em>Arithmetic</em></strong>
+            <span class="efc-meta">Contribution Margin CM1&ndash;CM3</span>
+          </button>
+          <button type="button" class="ebook-fan-card" style="--fi:2" data-vol="5">
+            <span class="efc-index">VOL 06</span>
+            <strong class="efc-title">Senior-First <em>Product</em> UX</strong>
+            <span class="efc-meta">Consent &amp; Dignity by Design</span>
+          </button>
+          <button type="button" class="ebook-fan-card" style="--fi:3" data-vol="6">
+            <span class="efc-index">VOL 07</span>
+            <strong class="efc-title">Voice &amp; <em>Avatar</em> Commerce</strong>
+            <span class="efc-meta">Conversational Storefronts</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="ebook-reader-shell" id="ebookReaderShell" data-aperture="open">
+        <div class="ebook-slit-beam" aria-hidden="true"></div>
+
+        <div class="ebook-reader-topbar">
+          <div class="ert-left">
+            <span class="ert-badge" id="ereaderVolBadge">VOL 01 // CHAPTER 04</span>
+            <span class="ert-title" id="ereaderVolTitle">Modern Marketing 101 &middot; Payback &amp; Retention Physics</span>
+          </div>
+          <div class="ert-actions">
+            <button type="button" class="ebook-riffle-btn" id="ebookPrevCh" aria-label="Previous chapter">&larr; Prev</button>
+            <button type="button" class="ebook-riffle-btn" id="ebookNextCh" aria-label="Next chapter">Next &rarr;</button>
+          </div>
+        </div>
+
+        <div class="ebook-spread" id="ebookSpread">
+          <article class="ebook-page ebook-page-left">
+            <div class="ep-header">
+              <span id="epChapterNum">CHAPTER 04 OF 12</span>
+              <span id="epReadTime">6 MIN READ &middot; INTERACTIVE</span>
+            </div>
+            <h3 class="ep-heading" id="epHeading">Why Acquisition Breaks Without a 60-Day Payback Floor</h3>
+            <p class="ep-body" id="epParagraph1">Every rupee spent acquiring a customer is a short-term loan from your working capital. When contribution margin after marketing (CM2) turns negative on order one, retention isn&rsquo;t a nice-to-have CRM metric, it is the only mechanism that keeps growth solvent.</p>
+            <blockquote class="ep-margin-note" id="epMarginNote">
+              <strong>OPERATOR RULE // 04.2:</strong> Never scale paid acquisition on blended ROAS alone. Lock your 60-day cumulative gross margin return against first-order CAC before raising daily spend ceilings.
+            </blockquote>
+            <p class="ep-body" id="epParagraph2">Use the live cohort simulator on the facing page to scrub repeat rate and gross margin. Watch how a 6-point lift in Day-60 repeat rate compresses your payback window from 5.4 months down to 1.8 months.</p>
+            <div class="ep-footer">
+              <span>ANCHIT TANDON &middot; PLAYBOOK ARCHIVE</span>
+              <span id="epPageLeftNum">PAGE 42</span>
+            </div>
+          </article>
+
+          <div class="ebook-spine-gutter" aria-hidden="true"></div>
+
+          <aside class="ebook-page ebook-page-right">
+            <div class="ep-header">
+              <span>LIVE CHAPTER SIMULATOR</span>
+              <span id="epSimTag">ARITHMETIC ENGINE // ACTIVE</span>
+            </div>
+            <h4 class="ep-sim-title">Interactive Cohort &amp; CAC Payback Lab</h4>
+
+            <div class="ep-sim-controls">
+              <div class="ep-sim-row">
+                <div class="ep-sim-label-row">
+                  <span>First-Order AOV (&#8377;)</span>
+                  <strong id="simAovVal">&#8377;1,850</strong>
+                </div>
+                <input type="range" id="simAov" min="600" max="5000" step="50" value="1850" />
+              </div>
+
+              <div class="ep-sim-row">
+                <div class="ep-sim-label-row">
+                  <span>Paid CAC (&#8377;)</span>
+                  <strong id="simCacVal">&#8377;740</strong>
+                </div>
+                <input type="range" id="simCac" min="200" max="2400" step="20" value="740" />
+              </div>
+
+              <div class="ep-sim-row">
+                <div class="ep-sim-label-row">
+                  <span>60-Day Repeat Rate (%)</span>
+                  <strong id="simRepeatVal">34%</strong>
+                </div>
+                <input type="range" id="simRepeat" min="8" max="75" step="1" value="34" />
+              </div>
+            </div>
+
+            <div class="ep-sim-metrics">
+              <div class="ep-metric-box">
+                <span class="epm-k">60-DAY LTV : CAC</span>
+                <strong class="epm-v" id="simLtvCacOut">2.18&times;</strong>
+              </div>
+              <div class="ep-metric-box">
+                <span class="epm-k">PAYBACK WINDOW</span>
+                <strong class="epm-v" id="simPaybackOut">1.7 mos</strong>
+              </div>
+              <div class="ep-metric-box">
+                <span class="epm-k">COHORT VERDICT</span>
+                <strong class="epm-v" id="simVerdictOut">SCALE READY</strong>
+              </div>
+            </div>
+
+            <div class="ep-footer">
+              <span>SCRUB SLIDERS TO RECOMPUTE</span>
+              <span id="epPageRightNum">PAGE 43</span>
+            </div>
+          </aside>
+        </div>
+
+        <div class="ebook-riffle-bar">
+          <span class="erb-label">RIFFLE PAGES</span>
+          <input type="range" id="ebookRiffleRange" min="1" max="12" step="1" value="4" aria-label="Riffle through chapters 1 to 12" />
+          <span class="erb-val" id="ebookRiffleReadout">CH 04 / 12</span>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      .ebook-portal-stage {
+        position: relative;
+        margin-top: var(--sp-8);
+        padding: var(--sp-7);
+        border-radius: 16px;
+        background: radial-gradient(80% 90% at 50% 18%, rgba(255, 105, 64, 0.12), rgba(201, 169, 110, 0.05) 48%, var(--bg-deep) 100%);
+        border: 1px solid var(--rule-strong);
+        overflow: hidden;
+      }
+      .ebook-portal-hud,
+      .ebook-scrub-bar-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--sp-4);
+        flex-wrap: wrap;
+        font-family: var(--font-mono);
+        font-size: var(--fs-micro);
+        color: var(--ink-dim);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .ebook-scrub-bar-wrap {
+        margin-top: var(--sp-4);
+        padding: var(--sp-3) var(--sp-4);
+        background: rgba(26, 24, 20, 0.72);
+        border: 1px solid var(--rule);
+        border-radius: 8px;
+      }
+      .ebook-scrub-bar-wrap input[type="range"],
+      .ebook-riffle-bar input[type="range"],
+      .ep-sim-row input[type="range"] {
+        flex: 1;
+        accent-color: var(--primary);
+        cursor: pointer;
+      }
+      .ebook-3d-viewport {
+        position: relative;
+        height: 420px;
+        margin-top: var(--sp-6);
+        perspective: 1400px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .ebook-orbit-node {
+        position: absolute;
+        padding: var(--sp-3) var(--sp-4);
+        border-radius: 8px;
+        background: rgba(26, 24, 20, 0.86);
+        border: 1px solid var(--rule-strong);
+        transform: translate3d(calc(var(--ox) * var(--orbit-spread, 1)), calc(var(--oy) * var(--orbit-spread, 1)), var(--oz));
+        transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+        pointer-events: none;
+      }
+      .ebook-orbit-node .eo-k {
+        display: block;
+        font-family: var(--font-mono);
+        font-size: var(--fs-micro);
+        color: var(--accent);
+      }
+      .ebook-orbit-node .eo-v {
+        display: block;
+        margin-top: var(--sp-1);
+        font-family: var(--font-body);
+        font-size: var(--fs-label);
+        color: var(--ink);
+      }
+      .ebook-monolith {
+        position: relative;
+        width: 260px;
+        height: 348px;
+        transform-style: preserve-3d;
+        transform: translate3d(0, 0, var(--book-z, 0px)) rotateX(var(--book-rx, 14deg)) rotateY(var(--book-ry, -22deg)) scale3d(var(--book-scale, 1), var(--book-scale, 1), 1);
+        transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .ebook-cover-face {
+        position: absolute;
+        inset: 0;
+        padding: var(--sp-6);
+        border-radius: 4px 12px 12px 4px;
+        background: linear-gradient(145deg, #221E18 0%, #12100C 65%, #0A0907 100%);
+        border: 1px solid var(--accent);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        overflow: hidden;
+      }
+      .ebook-cover-spec {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(280px circle at var(--mx, 50%) var(--my, 35%), rgba(201, 169, 110, 0.28), transparent 68%);
+        pointer-events: none;
+      }
+      .ebook-spine-foil {
+        position: absolute;
+        left: -18px;
+        top: 0;
+        width: 18px;
+        height: 100%;
+        background: linear-gradient(180deg, #c9a96e 0%, #8f7240 50%, #c9a96e 100%);
+        color: #0F0D0A;
+        font-family: var(--font-mono);
+        font-size: var(--fs-micro);
+        writing-mode: vertical-rl;
+        text-align: center;
+        letter-spacing: 0.12em;
+        transform: rotateY(-90deg);
+        transform-origin: right center;
+      }
+      .ebook-cover-top,
+      .ebook-cover-footer {
+        font-family: var(--font-mono);
+        font-size: var(--fs-micro);
+        color: var(--accent);
+        letter-spacing: 0.08em;
+        display: flex;
+        justify-content: space-between;
+      }
+      .ebook-cover-title {
+        font-family: var(--font-display);
+        font-size: var(--fs-h3);
+        line-height: 1.15;
+        color: var(--ink);
+      }
+      .ebook-cover-title em {
+        color: var(--primary);
+        font-style: italic;
+      }
+      .ebook-cover-sub {
+        font-family: var(--font-body);
+        font-size: var(--fs-label);
+        line-height: 1.5;
+        color: var(--ink-dim);
+      }
+      .ebook-fan-stage {
+        position: relative;
+        min-height: 260px;
+        margin-top: var(--sp-8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        perspective: 1200px;
+        flex-wrap: wrap;
+        gap: var(--sp-3);
+      }
+      .ebook-fan-card {
+        width: 164px;
+        min-height: 212px;
+        padding: var(--sp-4);
+        border-radius: 10px;
+        background: var(--bg-elev);
+        border: 1px solid var(--rule-strong);
+        color: var(--ink);
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        cursor: pointer;
+        transform: translateY(calc(var(--fi-abs, 0) * 8px)) rotateZ(calc(var(--fi, 0) * 3.5deg));
+        transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s ease;
+      }
+      .ebook-fan-card:hover,
+      .ebook-fan-card.is-active {
+        border-color: var(--primary);
+        transform: translateY(-16px) rotateZ(0deg) scale(1.05);
+        z-index: 4;
+      }
+      .efc-index {
+        font-family: var(--font-mono);
+        font-size: var(--fs-micro);
+        color: var(--accent);
+      }
+      .efc-title {
+        font-family: var(--font-display);
+        font-size: var(--fs-lead);
+        line-height: 1.2;
+        color: var(--ink);
+      }
+      .efc-title em {
+        color: var(--primary);
+      }
+      .efc-meta {
+        font-family: var(--font-mono);
+        font-size: var(--fs-micro);
+        color: var(--ink-dim);
+      }
+      .ebook-reader-shell {
+        position: relative;
+        margin-top: var(--sp-9);
+        border-radius: 16px;
+        border: 1px solid var(--rule-strong);
+        background: var(--bg-elev);
+        overflow: hidden;
+      }
+      .ebook-slit-beam {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent 46%, rgba(255, 105, 64, 0.65) 50%, transparent 54%);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.35s ease;
+      }
+      .ebook-reader-shell.is-cracking .ebook-slit-beam {
+        opacity: 1;
+      }
+      .ebook-reader-topbar,
+      .ebook-riffle-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--sp-4);
+        padding: var(--sp-4) var(--sp-6);
+        border-bottom: 1px solid var(--rule);
+        background: var(--bg-deep);
+      }
+      .ebook-riffle-bar {
+        border-top: 1px solid var(--rule);
+        border-bottom: 0;
+      }
+      .ert-badge,
+      .erb-label,
+      .erb-val {
+        font-family: var(--font-mono);
+        font-size: var(--fs-micro);
+        color: var(--accent);
+        letter-spacing: 0.08em;
+      }
+      .ert-title {
+        margin-left: var(--sp-3);
+        font-family: var(--font-body);
+        font-size: var(--fs-sm);
+        color: var(--ink);
+      }
+      .ebook-riffle-btn {
+        padding: var(--sp-2) var(--sp-3);
+        border-radius: 6px;
+        border: 1px solid var(--rule-strong);
+        background: var(--bg-elev);
+        color: var(--ink);
+        font-family: var(--font-mono);
+        font-size: var(--fs-micro);
+        cursor: pointer;
+      }
+      .ebook-spread {
+        display: grid;
+        grid-template-columns: 1fr 2px 1fr;
+        min-height: 420px;
+      }
+      .ebook-spine-gutter {
+        background: linear-gradient(180deg, var(--rule-strong), var(--accent), var(--rule-strong));
+      }
+      .ebook-page {
+        padding: var(--sp-7);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: var(--sp-4);
+      }
+      .ep-header,
+      .ep-footer {
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--font-mono);
+        font-size: var(--fs-micro);
+        color: var(--ink-mute);
+        letter-spacing: 0.08em;
+      }
+      .ep-heading {
+        font-family: var(--font-display);
+        font-size: var(--fs-h3);
+        line-height: 1.2;
+        color: var(--ink);
+      }
+      .ep-body {
+        font-family: var(--font-body);
+        font-size: var(--fs-body);
+        line-height: 1.65;
+        color: var(--ink-dim);
+      }
+      .ep-margin-note {
+        margin: 0;
+        padding: var(--sp-4);
+        border-left: 2px solid var(--primary);
+        background: rgba(255, 105, 64, 0.07);
+        font-family: var(--font-mono);
+        font-size: var(--fs-label);
+        line-height: 1.55;
+        color: var(--ink);
+      }
+      .ep-sim-title {
+        font-family: var(--font-display);
+        font-size: var(--fs-lead);
+        color: var(--ink);
+        margin: 0;
+      }
+      .ep-sim-controls {
+        display: flex;
+        flex-direction: column;
+        gap: var(--sp-4);
+      }
+      .ep-sim-label-row {
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--font-mono);
+        font-size: var(--fs-label);
+        color: var(--ink-dim);
+        margin-bottom: var(--sp-1);
+      }
+      .ep-sim-metrics {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--sp-3);
+      }
+      .ep-metric-box {
+        padding: var(--sp-3);
+        border-radius: 8px;
+        background: var(--bg-deep);
+        border: 1px solid var(--rule);
+      }
+      .epm-k {
+        display: block;
+        font-family: var(--font-mono);
+        font-size: var(--fs-micro);
+        color: var(--ink-mute);
+      }
+      .epm-v {
+        display: block;
+        margin-top: var(--sp-1);
+        font-family: var(--font-display);
+        font-size: var(--fs-lead);
+        color: var(--primary);
+      }
+      @media (max-width: 900px) {
+        .ebook-spread {
+          grid-template-columns: 1fr;
+        }
+        .ebook-spine-gutter,
+        .ebook-orbit-node {
+          display: none;
+        }
+      }
+    </style>
+
+    <script>
+      (function initEbookAtelier() {
+        const stage = document.getElementById('ebookPortalStage');
+        const scrub = document.getElementById('ebookPortalScrub');
+        const scrubVal = document.getElementById('ebookPortalScrubVal');
+        const stageReadout = document.getElementById('ebookStageReadout');
+        const monolith = document.getElementById('ebookMonolith');
+        const readerShell = document.getElementById('ebookReaderShell');
+        const crackBtn = document.getElementById('ebookCrackSpineBtn');
+        if (!stage || !scrub || !monolith) return;
+
+        const VOLUMES = [
+          { badge: 'VOL 01 // CHAPTER 04', title: 'Modern Marketing <em>101</em>', plainTitle: 'Modern Marketing 101 · Payback & Retention Physics', sub: 'Twelve playable chapters on payback physics, creative hooks, and lifecycle compounding.', heading: 'Why Acquisition Breaks Without a 60-Day Payback Floor', rule: 'OPERATOR RULE // 04.2: Lock your 60-day cumulative gross margin return against first-order CAC before raising daily spend ceilings.' },
+          { badge: 'VOL 02 // CHAPTER 02', title: 'The <em>LifeCycle-OS</em> Manual', plainTitle: 'The LifeCycle-OS Manual · Cohort Architecture', sub: 'Designing a brand’s retention architecture before writing a single campaign.', heading: 'Mapping Champions, At-Risk, and Hibernating Cohorts Live', rule: 'OPERATOR RULE // 02.1: Replenishment flows must fire at 0.82x of median inter-purchase interval, never on a generic 30-day timer.' },
+          { badge: 'VOL 03 // CHAPTER 06', title: 'Assisted Sales <em>at Scale</em>', plainTitle: 'Assisted Sales at Scale · High-Intent Funnel Ops', sub: 'How we scaled high-intent assisted sales from ₹15L to ₹80L MRR with live pitch telemetry.', heading: 'Turning Every Solo Sales Call into a Coached Conversion Loop', rule: 'OPERATOR RULE // 06.4: Objection handling wins in the first 9 seconds after price disclosure.' },
+          { badge: 'VOL 04 // CHAPTER 03', title: 'Agentic <em>Cascade</em> Design', plainTitle: 'Agentic Cascade Design · Multi-LLM Orchestration', sub: 'Parallel frontier-model dispatch, structural scoring, and deterministic fallbacks.', heading: 'Eliminating Single-Provider Failure in Production AI Apps', rule: 'OPERATOR RULE // 03.1: Route latency-critical steps through sub-400ms providers while consensus evaluators merge top-3 outputs.' },
+          { badge: 'VOL 05 // CHAPTER 05', title: 'D2C Unit <em>Arithmetic</em>', plainTitle: 'D2C Unit Arithmetic · Contribution Margin CM1–CM3', sub: 'Contribution margin CM1, CM2, and CM3 modeled at SKU and cohort granularity.', heading: 'Discounting vs. Bundling: Protecting Contribution Margin', rule: 'OPERATOR RULE // 05.3: A 15% sitewide discount often erodes CM2 twice as fast as a threshold free-gift bundle.' },
+          { badge: 'VOL 06 // CHAPTER 01', title: 'Senior-First <em>Product</em> UX', plainTitle: 'Senior-First Product UX · Consent & Dignity', sub: 'Designing voice-first, consent-anchored consumer apps for ageing parents in India.', heading: 'Consent Is the Product, Never a Buried Toggle', rule: 'OPERATOR RULE // 01.1: Three actions per screen, big type, and revocable sharing in one tap.' },
+          { badge: 'VOL 07 // CHAPTER 08', title: 'Voice & <em>Avatar</em> Commerce', plainTitle: 'Voice & Avatar Commerce · Conversational Storefronts', sub: 'Combining narration, tap-to-talk voice, and guided picks in a single landing page widget.', heading: 'When Landing Pages Listen Instead of Just Sitting There', rule: 'OPERATOR RULE // 08.2: Always pair talking-head video synthesis with an instant voice-only fallback.' }
+        ];
+
+        function updatePortal(pct) {
+          const p = Math.max(0, Math.min(100, Number(pct))) / 100;
+          scrubVal.textContent = Math.round(p * 100) + '%';
+          const rx = (1 - p) * 18;
+          const ry = -24 + p * 24;
+          const scale = 1 + (p > 0.65 ? (p - 0.65) * 1.45 : p * 0.18);
+          const spread = 0.85 + p * 0.45;
+          stage.style.setProperty('--book-rx', rx.toFixed(2) + 'deg');
+          stage.style.setProperty('--book-ry', ry.toFixed(2) + 'deg');
+          stage.style.setProperty('--book-scale', scale.toFixed(3));
+          stage.style.setProperty('--orbit-spread', spread.toFixed(3));
+          stageReadout.textContent =
+            p < 0.35 ? 'STAGE 01 · SLIPCASE UNBOXING' :
+            p < 0.72 ? 'STAGE 02 · MANUSCRIPT SLEEVE DROP' :
+                       'STAGE 03 · Z-AXIS COVER PASS-THROUGH';
+        }
+
+        scrub.addEventListener('input', function (e) { updatePortal(e.target.value); });
+        updatePortal(18);
+
+        let rafPending = false;
+        stage.addEventListener('pointermove', function (e) {
+          if (rafPending) return;
+          rafPending = true;
+          requestAnimationFrame(function () {
+            rafPending = false;
+            const r = stage.getBoundingClientRect();
+            const x = ((e.clientX - r.left) / Math.max(1, r.width)) * 100;
+            const y = ((e.clientY - r.top) / Math.max(1, r.height)) * 100;
+            stage.style.setProperty('--mx', x.toFixed(1) + '%');
+            stage.style.setProperty('--my', y.toFixed(1) + '%');
+          });
+        });
+
+        const fanCards = stage.parentElement.querySelectorAll('.ebook-fan-card');
+        fanCards.forEach(function (card) {
+          const fi = Math.abs(Number(card.style.getPropertyValue('--fi') || 0));
+          card.style.setProperty('--fi-abs', String(fi));
+          card.addEventListener('click', function () {
+            fanCards.forEach(function (c) { c.classList.remove('is-active'); });
+            card.classList.add('is-active');
+            const v = VOLUMES[Number(card.dataset.vol) || 0];
+            if (!v) return;
+            document.getElementById('ebookActiveCoverTitle').innerHTML = v.title;
+            document.getElementById('ebookActiveCoverSub').textContent = v.sub;
+            document.getElementById('ereaderVolBadge').textContent = v.badge;
+            document.getElementById('ereaderVolTitle').textContent = v.plainTitle;
+            document.getElementById('epHeading').textContent = v.heading;
+            document.getElementById('epMarginNote').textContent = v.rule;
+            if (readerShell) {
+              readerShell.classList.add('is-cracking');
+              setTimeout(function () { readerShell.classList.remove('is-cracking'); }, 420);
+            }
+          });
+        });
+
+        if (crackBtn && readerShell) {
+          crackBtn.addEventListener('click', function () {
+            updatePortal(92);
+            scrub.value = '92';
+            readerShell.classList.add('is-cracking');
+            readerShell.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setTimeout(function () { readerShell.classList.remove('is-cracking'); }, 650);
+          });
+        }
+
+        const riffle = document.getElementById('ebookRiffleRange');
+        const riffleOut = document.getElementById('ebookRiffleReadout');
+        const prevBtn = document.getElementById('ebookPrevCh');
+        const nextBtn = document.getElementById('ebookNextCh');
+        function setChapter(ch) {
+          const c = Math.max(1, Math.min(12, Number(ch)));
+          if (riffle) riffle.value = String(c);
+          if (riffleOut) riffleOut.textContent = 'CH ' + String(c).padStart(2, '0') + ' / 12';
+          document.getElementById('epChapterNum').textContent = 'CHAPTER ' + String(c).padStart(2, '0') + ' OF 12';
+          document.getElementById('epPageLeftNum').textContent = 'PAGE ' + (c * 10 + 2);
+          document.getElementById('epPageRightNum').textContent = 'PAGE ' + (c * 10 + 3);
+        }
+        if (riffle) riffle.addEventListener('input', function (e) { setChapter(e.target.value); });
+        if (prevBtn) prevBtn.addEventListener('click', function () { setChapter(Number(riffle.value) - 1); });
+        if (nextBtn) nextBtn.addEventListener('click', function () { setChapter(Number(riffle.value) + 1); });
+
+        const simAov = document.getElementById('simAov');
+        const simCac = document.getElementById('simCac');
+        const simRepeat = document.getElementById('simRepeat');
+        function computeSim() {
+          if (!simAov || !simCac || !simRepeat) return;
+          const aov = Number(simAov.value);
+          const cac = Number(simCac.value);
+          const rep = Number(simRepeat.value) / 100;
+          document.getElementById('simAovVal').textContent = '₹' + aov.toLocaleString('en-IN');
+          document.getElementById('simCacVal').textContent = '₹' + cac.toLocaleString('en-IN');
+          document.getElementById('simRepeatVal').textContent = Math.round(rep * 100) + '%';
+          const grossMargin = 0.62;
+          const ltv60 = aov * grossMargin * (1 + rep * 1.45);
+          const ratio = ltv60 / Math.max(1, cac);
+          const paybackMos = Math.max(0.4, (cac / Math.max(1, ltv60)) * 3.8);
+          document.getElementById('simLtvCacOut').textContent = ratio.toFixed(2) + '×';
+          document.getElementById('simPaybackOut').textContent = paybackMos.toFixed(1) + ' mos';
+          document.getElementById('simVerdictOut').textContent =
+            ratio >= 2.0 ? 'SCALE READY' : ratio >= 1.35 ? 'HOLD SPEND' : 'FIX RETENTION';
+        }
+        [simAov, simCac, simRepeat].forEach(function (el) {
+          if (el) el.addEventListener('input', computeSim);
+        });
+        computeSim();
+      })();
+    </script>
   </section>
 
   <!-- PROJECT: PARWAH, the current build. Every factual line below is Parwah's
@@ -6180,7 +6886,7 @@
     });
   })();
 
-  const ALL_VIEWS = ['home','about','now','chat','experience','projects','resume','contact','project-parwah','project-disasters','project-agentlp','project-jobfit','project-music','project-thirdeye','project-yaara','project-mailer','project-telesuite','project-lifeengine'];
+  const ALL_VIEWS = ['home','about','now','chat','experience','projects','resume','contact','project-parwah','project-ebooks','project-disasters','project-agentlp','project-jobfit','project-music','project-thirdeye','project-yaara','project-mailer','project-telesuite','project-lifeengine'];
   let audioModeEnabled = false; // true once user has clicked Play, gates page narration
   window.chatVoiceMuted = false; // chat replies speak aloud by default; mute toggle flips this
   // Browsers block speech before the first gesture, track it so the load-time
