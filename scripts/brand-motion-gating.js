@@ -54,7 +54,7 @@ const PAGES = [
       { label: 'counter scene csMote',  sel: '.cs-motes circle', scope: '.counter-scene' },
       { label: 'counter scene csSheen', sel: '.cs-sheen',        scope: '.counter-scene' },
       { label: 'marquee slide',         sel: '.marquee .track',  scope: '.marquee' },
-      { label: 'corridor marquee',      sel: '.ty1-marquee .track', scope: '.ty1-marquee' },
+      { label: 'corridor marquee',      sel: '.shop-cin .marquee-track', scope: '.shop-cin .marquee-wrap' },
       { label: 'orbit pulse',           sel: '#orbit .pulse',    scope: '#orbit' },
       { label: 'timeline fill',         sel: '.timeline',        scope: '.timeline', pseudo: '::after' },
     ],
@@ -65,7 +65,7 @@ const PAGES = [
     name: 'Deli Chic', path: '/deli-chic/',
     loops: [
       { label: 'ticker deliMarquee', sel: '.deli-track', scope: '.deli-ticker' },
-      { label: 'corridor marquee', sel: '.ty1-marquee .track', scope: '.ty1-marquee' },
+      { label: 'corridor marquee', sel: '.shop-cin .marquee-track', scope: '.shop-cin .marquee-wrap' },
     ],
     phase: [{ label: 'ticker', sel: '.deli-track', scope: '.deli-ticker' }],
   },

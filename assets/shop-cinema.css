@@ -42,35 +42,32 @@
 }
 .shop-cin .sc-pill:focus-visible{outline:2px solid var(--sc-accent-2);outline-offset:2px}
 
-body[data-world="lilac"] .shop-cin,
-body[data-world="lilac"]{
-  --sc-bg:#5E32CC;
-  --sc-ink:#FFFFFF;
-  --sc-mute:rgba(255,255,255,.82);
+.portal-sticky[data-world="lilac"]{
   background-color:#5E32CC;
 }
-body[data-world="oxblood"] .shop-cin,
-body[data-world="oxblood"]{
-  --sc-bg:#8C1434;
-  --sc-ink:#FFFDF9;
-  --sc-mute:rgba(255,253,249,.82);
+.portal-sticky[data-world="oxblood"]{
   background-color:#8C1434;
 }
 
 .walk-hud{
-  position:absolute;left:16px;bottom:18px;z-index:6;width:min(220px,46vw);
+  position:absolute;left:16px;bottom:18px;z-index:9;width:min(220px,46vw);
   font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#F1E9FF;
+  text-shadow:0 1px 8px rgba(10,8,16,.85);
 }
 .bwalk .walk-hud{color:#FFF9F4}
 html[data-consent-open="1"] .walk-hud,
 html[data-consent-open="1"] .walk-hint,
 html[data-consent-open="1"] .bwalk-hint{bottom:calc(18px + var(--consent-h, 0px))}
+html[data-consent-open="1"] .walk-cap,
+html[data-consent-open="1"] .bwalk-cap{bottom:calc(clamp(74px, 12vh, 132px) + var(--consent-h, 0px))}
 .walk-hud .track{height:3px;background:rgba(255,255,255,.16);border-radius:99px;overflow:hidden;margin-bottom:8px}
 #walkProgressBar{display:block;height:100%;width:0;background:var(--sc-accent-2,#CDB8F7)}
 .bwalk #walkProgressBar{background:#C59A45}
+.walk-cap,.bwalk-cap,.walk-step,.bwalk-step{z-index:8}
+.walk .walk-step,.bwalk .bwalk-step{top:clamp(96px,13vh,140px)}
 
 .player-card{
-  position:absolute;right:16px;top:76px;z-index:7;width:min(280px,calc(100% - 32px));
+  position:absolute;right:16px;top:76px;z-index:5;width:min(280px,calc(100% - 32px));
   padding:14px;border-radius:18px;border:1px solid rgba(255,255,255,.18);
   background:rgba(18,8,16,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   color:#F6F3FF;
@@ -122,12 +119,13 @@ html[data-consent-open="1"] .bwalk-hint{bottom:calc(18px + var(--consent-h, 0px)
   padding:0;overflow:visible;transform-style:preserve-3d;
 }
 .bwalk.is-armed .b-plane{
-  position:absolute;left:50%;top:50%;width:min(86vw,560px);
-  transform:translate(-50%,-50%);
+  position:absolute;left:50%;top:50%;width:min(72vw,520px);max-height:68vh;
+  transform:translate(-50%,-50%);overflow:hidden;border-radius:18px;
 }
 .bwalk.is-armed .hang-card{flex:none;width:100%}
 .bwalk.is-armed .hang-card .hook{display:none}
-.b-plane .hang-card img,.b-plane .hang-card svg{height:auto;max-height:52vh;object-fit:cover}
+.bwalk.is-armed .hang-card figcaption{display:none}
+.b-plane .hang-card img,.b-plane .hang-card svg{height:auto;max-height:58vh;object-fit:cover}
 .bwalk.is-armed .rail-wire{display:none}
 
 .wave-block{padding:72px 0 48px;background:var(--sc-bg)}
@@ -139,7 +137,7 @@ html[data-consent-open="1"] .bwalk-hint{bottom:calc(18px + var(--consent-h, 0px)
 .wave-block p{max-width:42rem;color:var(--sc-mute);margin-top:18px;font-size:16px;line-height:26px}
 
 .portal{position:relative;height:290vh;background:var(--sc-bg)}
-.portal-sticky{position:sticky;top:0;height:100vh;overflow:hidden;background:var(--sc-bg)}
+.portal-sticky{position:sticky;top:0;height:100vh;overflow:hidden;background:var(--sc-bg);transition:background-color 280ms var(--sc-ease)}
 .portal-stage{position:absolute;inset:0;display:grid;place-items:center}
 .disc-3d{
   width:min(58vw,420px);aspect-ratio:1;border-radius:50%;position:relative;
@@ -225,15 +223,16 @@ html[data-consent-open="1"] .bwalk-hint{bottom:calc(18px + var(--consent-h, 0px)
 @keyframes scMarquee{to{transform:translateX(-50%)}}
 
 .fan-block{padding:72px 0;background:var(--sc-bg)}
-.fan-stage{position:relative;height:min(540px,70vh);margin:24px 0 16px;overflow:hidden}
+.fan-stage{position:relative;height:min(540px,70vh);margin:24px 0 16px;overflow:hidden;perspective:1200px}
 .fan-card{
-  position:absolute;left:50%;top:12%;width:min(240px,64vw);height:min(320px,52vh);
+  position:absolute;left:50%;top:54%;width:min(240px,64vw);height:min(320px,52vh);
   margin-left:calc(min(240px,64vw) / -2);padding:0;font:inherit;color:inherit;text-align:left;
   border-radius:18px;overflow:hidden;border:1px solid var(--sc-line);background:#1a1014;
   cursor:pointer;transition:transform 280ms var(--sc-ease), opacity 280ms var(--sc-ease);
 }
-.fan-card img{width:100%;height:68%;object-fit:cover;display:block}
-.fan-card .body{padding:10px 12px;font-size:13px}
+.fan-card img{width:100%;height:64%;object-fit:cover;display:block}
+.fan-card .body{padding:10px 12px;font-size:13px;line-height:1.3}
+.fan-card .body b{display:block}
 .fan-nav{display:flex;gap:8px;justify-content:center}
 .fan-readout{text-align:center;max-width:40rem;margin:12px auto 0;color:var(--sc-mute);font-size:14px;line-height:22px}
 
@@ -267,9 +266,11 @@ html[data-consent-open="1"] .bwalk-hint{bottom:calc(18px + var(--consent-h, 0px)
 .curtain-sec{padding:48px 0 96px;background:var(--sc-bg)}
 .curtain-frame{
   --curtain:0;
-  background:var(--sc-light);color:var(--sc-light-ink);
-  clip-path:inset(0 calc((1 - var(--curtain)) * 42%) 0 calc((1 - var(--curtain)) * 42%) round calc((1 - var(--curtain)) * 24px));
-  padding:clamp(24px,5vw,56px) 24px 24px;
+  position:relative;
+  background:var(--sc-light);
+  color:var(--sc-light-ink);
+  padding:clamp(24px,5vw,56px) clamp(20px,4vw,40px) 24px;
+  clip-path:inset(0 calc((1 - var(--curtain)) * 8%) 0 calc((1 - var(--curtain)) * 8%) round calc(8px + (1 - var(--curtain)) * 16px));
 }
 .curtain-frame h2{font-size:clamp(28px,5vw,48px);line-height:1.1;margin:8px 0 12px}
 .curtain-frame p{max-width:46rem;font-size:16px;line-height:26px}
@@ -293,11 +294,12 @@ html[data-consent-open="1"] .bwalk-hint{bottom:calc(18px + var(--consent-h, 0px)
 }
 
 @media (max-width:699px){
-  .player-card{top:auto;bottom:64px;right:12px;left:12px;width:auto}
+  .player-card{display:none}
   .walk-hud{bottom:12px}
+  .walk-cap,.bwalk-cap{bottom:clamp(88px,16vh,140px)}
   .sleeve-card{right:50%;transform:translate(50%,-50%)}
   .wave-block h2{font-size:clamp(2.4rem,16vw,3.6rem)}
-  html[data-consent-open="1"] .player-card{bottom:calc(64px + var(--consent-h, 0px))}
+  .fan-card{top:50%;height:min(280px,46vh)}
   .deli-site-header .hours-chip,
   .deli-site-header [data-apply-wow20]{display:none}
 }
