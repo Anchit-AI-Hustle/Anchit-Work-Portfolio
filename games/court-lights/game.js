@@ -134,7 +134,7 @@
     if (b.z > 7.22 && b.y > 2.7 && b.y < 4.05 && abs(b.x) < 0.95 && b.vz > 0) {
       b.z = 7.22; b.vz *= -0.38; b.vx *= 0.85; arc.sfx.tone(310, 0.05, { type: 'square', vol: 0.06 });
     }
-    // rim — gold charge band is required for a clean make (matches the HUD).
+    // rim: gold charge band is required for a clean make (matches the HUD).
     const dx = b.x - RIM.x, dz = b.z - RIM.z, d = hypot(dx, dz);
     if (!b.scored && b.y < RIM.y + 0.12 && b.y > RIM.y - 0.16) {
       if (d < RIM.r - 0.05 && b.vy < 0) {

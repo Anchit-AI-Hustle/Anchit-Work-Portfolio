@@ -118,7 +118,6 @@ async function context(browser, vp) {
   let closed = false;
   ctx.on('close', () => { closed = true; });
   await ctx.route('**/*', async (route) => {
-<<<<<<< HEAD
     try {
       const res = await route.fetch();
       const headers = { ...res.headers() };
@@ -134,17 +133,6 @@ async function context(browser, vp) {
       }
       if (!closed && !/disposed|has been closed|Target closed/i.test(e.message)) throw e;
     }
-=======
-    if (/^https:\/\/www\.youtube-nocookie\.com\//.test(route.request().url())) return route.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html><title>video</title>' });
-    const res = await route.fetch();
-    const headers = { ...res.headers() };
-    const p = new URL(route.request().url()).pathname.replace(/\/$/, '') || '/';
-    const ct = headers['content-type'] || '';
-    if (ct.includes('javascript')) return route.fulfill({ response: res, headers, body: mutateJs(p, await res.text()) });
-    if (!ct.includes('text/html')) return route.fulfill({ response: res });
-    headers['content-security-policy'] = CSP;
-    return route.fulfill({ response: res, headers, body: mutate(p, await res.text()) });
->>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
   });
   return ctx;
 }
