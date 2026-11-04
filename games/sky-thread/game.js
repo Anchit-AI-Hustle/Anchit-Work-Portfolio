@@ -202,7 +202,8 @@
     G.score += dt * 2;
   }
 
-  function idle(dt) {
+  function idle(dt, a) {
+    if (a && a.state === 'pause') return;
     G.t += dt; G.attract = true;
     if (!G.me) resetWorld(true);
     G.wind.x = 0.3 + 0.2 * sin(G.t * 0.4);

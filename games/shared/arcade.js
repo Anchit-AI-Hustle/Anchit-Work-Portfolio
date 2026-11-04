@@ -466,7 +466,7 @@
       last = now;
       try {
         if (arc.state === 'play') { arc.time += dt; if (opts.update) opts.update(dt, arc); }
-        else if (opts.idle) opts.idle(dt, arc);
+        else if (arc.state !== 'pause' && opts.idle) opts.idle(dt, arc);
         ctx.setTransform(arc.dpr, 0, 0, arc.dpr, 0, 0);
         if (opts.render) opts.render(ctx, arc);
       } catch (err) {

@@ -180,7 +180,8 @@ async function game(browser, vp, slug) {
   check(`${tag} frames advance during play`, frames > 20, `${frames} frames, ${elapsed.toFixed(2)}s`);
   check(`${tag} game state changes under input`, strip(after.dbg) !== strip(before.dbg), strip(after.dbg).slice(0, 140));
 
-  if (after.state === 'play') {
+  const ending = after.dbg && (after.dbg.alive === false || after.dbg.phase === 'cut' || after.dbg.phase === 'dead' || after.dbg.phase === 'over');
+  if (after.state === 'play' && !ending) {
     await page.keyboard.press('Escape');
     await sleep(150);
     const paused = await page.evaluate(() => window.__arcade.state);
