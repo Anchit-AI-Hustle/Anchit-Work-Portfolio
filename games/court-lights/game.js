@@ -72,14 +72,16 @@
   }
 
   function shoot() {
+    if (G.go > 0 && !G.attract) return;
     const c = clamp(G.charge, 0.12, 1);
     const b = G.ball;
     b.air = true; b.scored = false; b.flightT = 0;
+    b.shotCharge = c;
     b.vx = G.aimX * 3.6;
     b.vz = 4.05 + c * 5.35;
     b.vy = 6.15 + c * 6.4;
     b.spin = 10 + c * 8;
-    G.phase = 'flight'; G.attempts++; G.holding = false;
+    G.phase = 'flight'; G.attempts++; G.holding = false; G.charge = 0;
     arc.sfx.tone(220 + c * 80, 0.09, { type: 'triangle', vol: 0.12 });
     arc.sfx.noise(0.05, { freq: 900, vol: 0.06 });
   }
@@ -92,6 +94,7 @@
   }
 
   function scoreShot(kind) {
+    if (G.attract || !arc || arc.state !== 'play') return;
     const pts = 3 + G.combo;
     G.score += pts; G.makes++; G.combo++; G.streak = max(G.streak, G.combo);
     G.ball.scored = true; G.phase = 'net';
@@ -105,11 +108,14 @@
 
   function miss() {
     G.combo = 0; G.phase = 'miss';
-    arc.sfx.tone(140, 0.18, { type: 'sawtooth', slide: 70, vol: 0.1 });
+    if (!G.attract && arc && arc.state === 'play') {
+      arc.sfx.tone(140, 0.18, { type: 'sawtooth', slide: 70, vol: 0.1 });
+    }
     if (G.mode === 'sudden' && G.makes > 0) finish('Missed');
   }
 
   function finish(why) {
+    if (G.phase === 'over' || G.attract || !arc || arc.state !== 'play') return;
     G.phase = 'over';
     arc.over({
       eyebrow: why || 'Buzzer', title: G.score >= 21 ? 'Lights <em>out</em>' : 'Buzzer',
@@ -128,12 +134,22 @@
     if (b.z > 7.22 && b.y > 2.7 && b.y < 4.05 && abs(b.x) < 0.95 && b.vz > 0) {
       b.z = 7.22; b.vz *= -0.38; b.vx *= 0.85; arc.sfx.tone(310, 0.05, { type: 'square', vol: 0.06 });
     }
-    // rim
+    // rim — gold charge band is required for a clean make (matches the HUD).
     const dx = b.x - RIM.x, dz = b.z - RIM.z, d = hypot(dx, dz);
     if (!b.scored && b.y < RIM.y + 0.12 && b.y > RIM.y - 0.16) {
       if (d < RIM.r - 0.05 && b.vy < 0) {
-        scoreShot(d < 0.11 ? 'swish' : 'bank');
-        b.vx *= 0.2; b.vz *= 0.2; b.vy = min(b.vy, -0.4);
+        const ch = b.shotCharge == null ? 0.66 : b.shotCharge;
+        const sweet = ch >= SWEET[0] && ch <= SWEET[1];
+        if (sweet) {
+          scoreShot(d < 0.11 ? 'swish' : 'bank');
+          b.vx *= 0.2; b.vz *= 0.2; b.vy = min(b.vy, -0.4);
+        } else {
+          // Outside the gold band the rim rejects the ball.
+          const nx = dx / (d || 1), nz = dz / (d || 1);
+          b.vx += nx * 1.4; b.vz += nz * 1.4; b.vy = abs(b.vy) * 0.45;
+          b.x = RIM.x + nx * (RIM.r + 0.08); b.z = RIM.z + nz * (RIM.r + 0.08);
+          if (!G.attract) arc.sfx.tone(360, 0.05, { type: 'square', vol: 0.06 });
+        }
       } else if (d < RIM.r + 0.07 && d > RIM.r - 0.05) {
         const nx = dx / (d || 1), nz = dz / (d || 1);
         const vn = b.vx * nx + b.vz * nz;
@@ -216,12 +232,19 @@
     stepBall(dt); stepNet(dt); stepParts(dt);
   }
 
+  function attractReset() {
+    G.attract = true; G.score = 0; G.combo = 0; G.makes = 0; G.attempts = 0; G.streak = 0;
+    G.aimX = 0; G.charge = 0; G.holding = false; G.go = 0; G.phase = 'aim';
+    G.parts.length = 0; resetBall();
+  }
+
   function idle(dt) {
     G.t += dt; G.attract = true;
-    if (!G.ball) resetBall();
+    if (!G.ball || G.phase === 'over') attractReset();
     if (G.phase === 'aim') {
       G.aimX = sin(G.t * 0.7) * 0.35;
-      G.charge = 0.5 + 0.22 * sin(G.t * 1.3);
+      // Stay inside the gold band so attract demos look like real makes.
+      G.charge = 0.62 + 0.08 * sin(G.t * 1.3);
       if ((G.t % 2.6) > 2.35) shoot();
     }
     stepBall(dt); stepNet(dt); stepParts(dt);
@@ -389,20 +412,21 @@
       ['Left / Right / A D', 'Aim the shot'],
       ['Space / J (hold)', 'Charge, then release to shoot'],
     ],
-    mouse: { steer: 'x', cursor: 'crosshair', keys: [['Move mouse', 'Aim'], ['Click / hold', 'Charge, then release']] },
+    mouse: { cursor: 'crosshair', keys: [['Move mouse', 'Aim'], ['Click / hold', 'Charge, then release']] },
     touch: { stick: true, pads: [{ label: 'Shoot', key: 'Space', big: true, hot: true }] },
     touchKeys: [['On-screen stick', 'Aim'], ['Shoot (hold)', 'Charge, then release']],
     formatScore: (v) => Math.round(v) + ' pts',
     menu: {
       eyebrow: 'Street basketball',
       title: 'Court <em>Lights</em>',
-      html: '<p>A rooftop cage after dark. Hold shoot to charge, release in the gold band for a swish, and keep a streak going for extra points.</p>',
+      html: '<p>A rooftop cage after dark. Hold shoot to charge, release in the gold band for a make, and keep a streak going for extra points.</p>',
       options: [
         { id: 'mode', label: 'Mode', value: 'sixty', choices: [{ v: 'sixty', label: 'Sixty seconds' }, { v: 'twentyone', label: 'First to 21' }, { v: 'sudden', label: 'Make or miss' }] },
       ],
     },
     pauseHtml() { return '<div class="stat"><div>Score<b>' + G.score + '</b></div><div>Makes<b>' + G.makes + '/' + G.attempts + '</b></div></div>'; },
-    init(a) { arc = a; a.debug = dbg; a.menu(); },
+    onMenu(a) { arc = a; attractReset(); },
+    init(a) { arc = a; a.debug = dbg; attractReset(); a.menu(); },
     start(a, ch) { arc = a; newMatch(ch); },
     update, idle, render,
   });

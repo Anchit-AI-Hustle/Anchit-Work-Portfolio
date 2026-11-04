@@ -59,7 +59,7 @@
   }
 
   function finish(why) {
-    if (G.phase === 'over') return;
+    if (G.phase === 'over' || G.attract || !arc || arc.state !== 'play') return;
     G.phase = 'over';
     arc.over({
       eyebrow: why, title: why === 'Night over' ? 'Shift <em>done</em>' : 'Fare <em>cut</em>',
@@ -107,14 +107,17 @@
       if (o.y > arc.h + 40) { o.dead = true; return; }
       const ox = laneX(o.lane), oy = o.y;
       const px = laneX(G.laneT);
-      if (abs(o.lane - G.lane) > 0.2) return;
+      // Collide against the visible lane (lerped), not the discrete target, so a
+      // mid-slide auto is not punished in a lane it has not reached yet.
+      const laneVis = Math.round(G.laneT);
+      if (abs(o.lane - laneVis) > 0.2) return;
       if (oy > py - 50 && oy < py + 30 && abs(ox - px) < 36) {
         if (o.kind === 'fare') {
           G.fares++; G.score += 40; o.dead = true;
           pop(ox, oy, WARM, 10);
           arc.sfx.tone(660, 0.08, { type: 'sine', vol: 0.12 });
           arc.toast('Fare on', '+40', 600);
-        } else if (G.cool <= 0) {
+        } else if (G.cool <= 0 && abs(G.laneT - G.lane) < 0.18) {
           o.dead = true; hit();
         }
       }
@@ -265,6 +268,7 @@
       ],
     },
     pauseHtml() { return '<div class="stat"><div>Score<b>' + Math.round(G.score) + '</b></div><div>Fares<b>' + G.fares + '</b></div></div>'; },
+    onMenu(a) { arc = a; reset(true); },
     init(a) { arc = a; a.debug = dbg; G.D = DIFF.normal; reset(true); a.menu(); },
     start(a, ch) {
       arc = a; reset(false, ch);

@@ -62,6 +62,7 @@
     G.wind = { x: 0.35, y: 0.12 };
     G.grace = 2.8;
     G.cutCool = 0;
+    G.spawnT = attract ? 0 : 1.2;
   }
 
   function handOf() {
@@ -181,6 +182,7 @@
   }
 
   function finish(why) {
+    if (G.phase === 'over' || G.attract || !arc || arc.state !== 'play') return;
     G.phase = 'over';
     arc.over({
       eyebrow: why, title: G.cuts >= 6 ? 'Sky <em>cleared</em>' : 'Thread <em>cut</em>',
@@ -201,8 +203,9 @@
     stepKite(G.me, dt);
     G.rivals.forEach((r) => stepKite(r, dt));
     fights(dt);
+    G.spawnT = (G.spawnT || 0) + dt;
     const spawnEvery = (G.D || DIFF.normal).spawn;
-    if (G.t % spawnEvery < dt + 0.02) spawnRival();
+    if (G.spawnT >= spawnEvery) { G.spawnT = 0; spawnRival(); }
     for (let i = G.parts.length - 1; i >= 0; i--) {
       const p = G.parts[i]; p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 40 * dt;
       if (p.life <= 0) G.parts.splice(i, 1);
@@ -342,7 +345,7 @@
       ['WASD / Arrows', 'Steer the kite'],
       ['Space / J (hold)', 'Pull the string to cut'],
     ],
-    mouse: { steer: 'xy', cursor: 'crosshair', keys: [['Move mouse', 'Steer toward the pointer'], ['Click / hold', 'Pull to cut']] },
+    mouse: { cursor: 'crosshair', keys: [['Move mouse', 'Steer toward the pointer'], ['Click / hold', 'Pull to cut']] },
     touch: { stick: true, pads: [{ label: 'Pull', key: 'Space', big: true, hot: true }] },
     touchKeys: [['On-screen stick', 'Steer'], ['Pull (hold)', 'Cut a rival thread']],
     formatScore: (v) => Math.round(v) + ' pts',
@@ -356,6 +359,7 @@
       ],
     },
     pauseHtml() { return '<div class="stat"><div>Cuts<b>' + G.cuts + '</b></div>' + (G.mode === 'dusk' ? '<div>Time<b>' + Math.max(0, G.time | 0) + 's</b></div>' : '') + '</div>'; },
+    onMenu(a) { arc = a; resetWorld(true); },
     init(a) { arc = a; a.debug = dbg; G.D = DIFF.normal; resetWorld(true); a.menu(); },
     start(a, ch) {
       arc = a; resetWorld(false, ch);

@@ -55,7 +55,7 @@
   }
 
   function endGame(why, title) {
-    if (G.phase === 'over') return;
+    if (G.phase === 'over' || G.attract || !arc || arc.state !== 'play') return;
     G.phase = 'over';
     arc.over({
       eyebrow: why, title: title,
@@ -100,6 +100,11 @@
         b.vy = abs(b.vy) * 1.02; arc.sfx.tone(880, 0.1, { type: 'sine', vol: 0.12 });
       }
     });
+    if (G.lamps.length && G.lamps.every((l) => !l.on)) {
+      G.lamps.forEach((l) => { l.on = true; });
+      G.score += 50;
+      arc.toast('Lamps back', '+50', 700);
+    }
     const pw = 0.14, py = bot;
     if (b.y > py - 0.035 && b.y < py + 0.05 && abs(b.x - G.px) < pw && b.vy > 0) {
       b.y = py - 0.035;
@@ -110,7 +115,7 @@
       if (sp > cap) { b.vx *= cap / sp; b.vy *= cap / sp; }
       G.rally++; G.bestRally = max(G.bestRally, G.rally); G.score += 5 + G.rally;
       arc.sfx.tone(320 + G.rally * 20, 0.06, { type: 'triangle', vol: 0.1 });
-      if (G.mode === 'eleven' && G.rally >= 11) endGame('Game point', 'Cage <em>held</em>');
+      if (G.mode === 'eleven' && G.rally >= 11) endGame('Rally of 11', 'Cage <em>held</em>');
     } else if (b.y > 1.02) drop();
     for (let i = G.parts.length - 1; i >= 0; i--) {
       const q = G.parts[i]; q.life -= dt; q.x += q.vx * dt; q.y += q.vy * dt;
@@ -255,7 +260,7 @@
       ['Left / Right / A D', 'Slide the paddle'],
       ['Space / click', 'Serve'],
     ],
-    mouse: { steer: 'x', cursor: 'none', keys: [['Move mouse', 'The paddle follows'], ['Click', 'Serve']] },
+    mouse: { cursor: 'none', keys: [['Move mouse', 'The paddle follows'], ['Click', 'Serve']] },
     touch: { stick: true, pads: [{ label: 'Serve', key: 'Space', big: true, hot: true }] },
     touchKeys: [['On-screen stick', 'Slide the paddle'], ['Serve', 'Start the rally']],
     formatScore: (v) => Math.round(v) + ' pts',
@@ -264,15 +269,16 @@
       title: 'Rally <em>Cage</em>',
       html: '<p>A floodlit cage on the terrace. Keep the ball off the floor, grow the rally, and clip the hanging lamps for extra points.</p>',
       options: [
-        { id: 'mode', label: 'Mode', value: 'lives', choices: [{ v: 'lives', label: 'Three lives' }, { v: 'eleven', label: 'First to 11' }, { v: 'survival', label: 'One life' }] },
+        { id: 'mode', label: 'Mode', value: 'lives', choices: [{ v: 'lives', label: 'Three lives' }, { v: 'eleven', label: 'Rally of 11' }, { v: 'survival', label: 'One life' }] },
         { id: 'diff', label: 'Difficulty', value: 'normal', choices: [{ v: 'easy', label: 'Easy' }, { v: 'normal', label: 'Normal' }, { v: 'hard', label: 'Hard' }] },
       ],
     },
     pauseHtml() { return '<div class="stat"><div>Score<b>' + Math.round(G.score) + '</b></div><div>Rally<b>' + G.rally + '</b></div></div>'; },
+    onMenu(a) { arc = a; reset(true); },
     init(a) { arc = a; a.debug = dbg; G.D = DIFF.normal; reset(true); a.menu(); },
     start(a, ch) {
       arc = a; reset(false, ch);
-      const label = G.mode === 'eleven' ? 'First to 11' : G.mode === 'survival' ? 'One life' : 'Three lives';
+      const label = G.mode === 'eleven' ? 'Hold a rally of 11' : G.mode === 'survival' ? 'One life' : 'Three lives';
       arc.toast(label, 'Rally Cage', 1400);
     },
     update, idle, render,

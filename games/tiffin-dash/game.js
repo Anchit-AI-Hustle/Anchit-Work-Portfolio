@@ -80,7 +80,7 @@
   }
 
   function finish(why) {
-    if (G.phase === 'over') return;
+    if (G.phase === 'over' || G.attract || !arc || arc.state !== 'play') return;
     G.phase = 'over';
     arc.over({
       eyebrow: why, title: why === 'Shift over' ? 'Shift <em>done</em>' : 'Tiffin <em>down</em>',
@@ -302,7 +302,7 @@
       ['Down / S', 'Slide under hanging cloth'],
     ],
     mouse: { cursor: 'pointer', keys: [['Click', 'Jump'], ['Click the lower street', 'Slide']] },
-    touch: { stick: true, pads: [{ label: 'Jump', key: 'Space', big: true, hot: true }, { label: 'Slide', key: 'ArrowDown' }] },
+    touch: { stick: false, pads: [{ label: 'Jump', key: 'Space', big: true, hot: true }, { label: 'Slide', key: 'ArrowDown' }] },
     touchKeys: [['Jump', 'Scooters and carts'], ['Slide', 'Hanging cloth']],
     formatScore: (v) => Math.round(v) + ' pts',
     menu: {
@@ -315,7 +315,8 @@
       ],
     },
     pauseHtml() { return '<div class="stat"><div>Score<b>' + Math.round(G.score) + '</b></div><div>Distance<b>' + Math.round(G.dist / 40) + ' m</b></div></div>'; },
-    init(a) { arc = a; a.debug = dbg; G.D = DIFF.normal; reset(true); a.menu(); },
+    onMenu(a) { arc = a; reset(true); },
+    init(a) { arc = a; a.debug = dbg; G.D = DIFF.normal; reset(true); a.menu(); a.showStick && a.showStick(false); },
     start(a, ch) {
       arc = a; reset(false, ch);
       const label = G.mode === 'shift' ? 'Ninety seconds' : G.mode === 'rush' ? 'Rush hour' : 'Street run';

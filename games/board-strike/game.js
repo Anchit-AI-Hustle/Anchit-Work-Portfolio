@@ -96,7 +96,7 @@
   }
 
   function finish(why) {
-    if (G.phase === 'over') return;
+    if (G.phase === 'over' || G.attract || !arc || arc.state !== 'play') return;
     G.phase = 'over';
     const cleared = G.pieces.every((c) => c.kind === 'striker' || c.in);
     arc.over({
@@ -199,7 +199,7 @@
 
   function idle(dt) {
     G.attract = true; G.t += dt;
-    if (!G.striker) reset(true);
+    if (!G.striker || G.phase === 'over' || G.pieces.every((c) => c.kind === 'striker' || c.in)) reset(true);
     if (G.phase === 'aim' && (G.t % 2.4) > 2.15) {
       G.aim = sin(G.t) * 0.4; G.charge = 0.55 + 0.2 * sin(G.t * 2); shoot();
     }
@@ -337,7 +337,8 @@
       ['Left / Right / A D', 'Slide the striker and aim'],
       ['Space / J (hold)', 'Charge, then release to strike'],
     ],
-    mouse: { steer: 'x', cursor: 'crosshair', keys: [['Move mouse', 'Place and aim the striker'], ['Click / hold', 'Charge, then release']] },
+    mouse: { cursor: 'crosshair', keys: [['Move mouse', 'Place on the baseline and aim'], ['Click / hold', 'Charge, then release']] },
+    onMenu(a) { arc = a; reset(true); },
     touch: { stick: true, pads: [{ label: 'Strike', key: 'Space', big: true, hot: true }] },
     touchKeys: [['On-screen stick', 'Place and aim'], ['Strike (hold)', 'Charge, then release']],
     formatScore: (v) => Math.round(v) + ' pts',

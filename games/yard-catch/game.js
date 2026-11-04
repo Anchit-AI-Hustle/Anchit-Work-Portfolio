@@ -64,7 +64,7 @@
   }
 
   function finish(why, html) {
-    if (G.phase === 'over') return;
+    if (G.phase === 'over' || G.attract || !arc || arc.state !== 'play') return;
     G.phase = 'over';
     arc.over({
       eyebrow: why, title: why === 'Shift over' ? 'Shift <em>done</em>' : 'Yard <em>closed</em>',
@@ -257,7 +257,7 @@
     hint: 'Mouse or arrows move the crate   skip the green spoiled sacks',
     touchHint: 'Stick slides the crate, catch the brown sacks, skip the green',
     keys: [['Left / Right / A D', 'Slide the crate'], ['Mouse', 'The crate follows the pointer']],
-    mouse: { steer: 'x', cursor: 'none', keys: [['Move mouse', 'The crate follows']] },
+    mouse: { cursor: 'none', keys: [['Move mouse', 'The crate follows']] },
     touch: { stick: true, pads: [] },
     touchKeys: [['On-screen stick', 'Slide the crate']],
     formatScore: (v) => Math.round(v) + ' pts',
@@ -271,6 +271,7 @@
       ],
     },
     pauseHtml() { return '<div class="stat"><div>Score<b>' + Math.round(G.score) + '</b></div><div>Caught<b>' + G.caught + '</b></div></div>'; },
+    onMenu(a) { arc = a; reset(true); },
     init(a) { arc = a; a.debug = dbg; G.D = DIFF.normal; reset(true); a.menu(); },
     start(a, ch) {
       arc = a; reset(false, ch);

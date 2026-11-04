@@ -153,7 +153,13 @@
         return { x, y };
       },
       stick, pointer, mouseSteer: false,
-      clear() { down.clear(); hit.clear(); stick.x = stick.y = 0; stick.active = false; pointer.down = false; },
+      clear() {
+        down.clear(); hit.clear();
+        stick.x = stick.y = 0; stick.active = false;
+        pointer.down = false; pointer.pressed = false; pointer.released = false;
+        // Drop mouseSteer ghosts so pause/resume does not keep yanking the axis.
+        pointer.seen = false; pointer.nx = 0.5; pointer.ny = 0.5;
+      },
       endFrame() { hit.clear(); pointer.pressed = false; pointer.released = false; },
     };
     const local = (e) => {
@@ -468,6 +474,13 @@
         if (arc.state === 'play') { arc.time += dt; if (opts.update) opts.update(dt, arc); }
         else if (arc.state !== 'pause' && opts.idle) opts.idle(dt, arc);
         ctx.setTransform(arc.dpr, 0, 0, arc.dpr, 0, 0);
+        if (arc.shake > 0 && !reducedMotion) {
+          const s = arc.shake;
+          ctx.translate((Math.random() - 0.5) * s * 2, (Math.random() - 0.5) * s * 2);
+          arc.shake = Math.max(0, s - dt * 48);
+        } else {
+          arc.shake = 0;
+        }
         if (opts.render) opts.render(ctx, arc);
       } catch (err) {
         console.error(err);
