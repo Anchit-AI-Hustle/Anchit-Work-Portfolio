@@ -22,15 +22,15 @@
   };
   const G = {
     t: 0, score: 0, lives: 3, maxLives: 3, rally: 0, bestRally: 0, px: 0.5,
-    ball: null, lamps: [], parts: [], phase: 'serve', attract: true,
-    mode: 'lives', diff: 'normal',
+    ball: null, lamps: [], parts: [], floats: [], trail: [], phase: 'serve', attract: true,
+    mode: 'lives', diff: 'normal', flash: 0,
   };
 
   function serve() {
     const dir = rnd() > 0.5 ? 1 : -1;
     const spd = (G.D || DIFF.normal).spd;
     G.ball = { x: 0.5, y: 0.55, vx: (0.22 + rnd() * 0.12) * dir * spd, vy: (-0.42 - rnd() * 0.08) * spd, r: 0.018 };
-    G.phase = 'play';
+    G.phase = 'play'; G.trail = [];
   }
 
   function reset(attract, ch) {
@@ -40,7 +40,7 @@
     G.t = 0; G.score = 0; G.rally = 0; G.bestRally = 0; G.px = 0.5;
     G.maxLives = G.mode === 'survival' ? 1 : 3;
     G.lives = G.maxLives;
-    G.parts = []; G.attract = !!attract; G.phase = 'serve';
+    G.parts = []; G.floats = []; G.trail = []; G.attract = !!attract; G.phase = 'serve'; G.flash = 0;
     G.lamps = [];
     for (let i = 0; i < 8; i++) G.lamps.push({ x: 0.14 + (i % 4) * 0.24, y: 0.16 + ((i / 4) | 0) * 0.12, on: true });
     serve();
@@ -50,8 +50,12 @@
   function pop(x, y, col, n) {
     for (let i = 0; i < n; i++) {
       const a = rnd() * TAU, sp = 50 + rnd() * 140;
-      G.parts.push({ x: x * arc.w, y: y * arc.h, vx: cos(a) * sp, vy: sin(a) * sp, life: 0.4 + rnd() * 0.25, col });
+      G.parts.push({ x: x * arc.w, y: y * arc.h, vx: cos(a) * sp, vy: sin(a) * sp, life: 0.4 + rnd() * 0.25, col, r: 1.5 + rnd() * 2 });
     }
+  }
+
+  function floatTxt(x, y, text, col) {
+    G.floats.push({ x: x * arc.w, y: y * arc.h, text, col: col || WARM, life: 0.8 });
   }
 
   function endGame(why, title) {
@@ -66,19 +70,20 @@
   }
 
   function drop() {
-    G.lives--; G.rally = 0;
+    G.lives--; G.rally = 0; G.flash = 0.18;
     arc.shake = 7; arc.sfx.tone(140, 0.16, { type: 'sawtooth', slide: 70, vol: 0.12 });
     if (G.lives <= 0) endGame('Rally broken', 'Cage <em>quiet</em>');
     else {
       arc.toast('Let it drop', G.lives + ' left', 800);
       G.phase = 'serve';
       G.ball.x = 0.5; G.ball.y = 0.5; G.ball.vx = 0; G.ball.vy = 0;
+      G.trail = [];
     }
   }
 
   function update(dt) {
     if (G.phase === 'over') return;
-    G.t += dt;
+    G.t += dt; G.flash = max(0, G.flash - dt);
     const inp = arc.input, ax = inp.axis(), p = inp.pointer;
     G.px = clamp(G.px + ax.x * dt * 2.2, 0.1, 0.9);
     if (p && p.seen && abs(ax.x) < 0.08) G.px = lerp(G.px, clamp(p.nx, 0.1, 0.9), 1 - Math.exp(-dt * 16));
@@ -88,6 +93,8 @@
     }
     const b = G.ball;
     b.x += b.vx * dt; b.y += b.vy * dt;
+    G.trail.push({ x: b.x, y: b.y, life: 0.25 });
+    if (G.trail.length > 14) G.trail.shift();
     const pad = arc.hudPad ? arc.hudPad() : { top: 12, bottom: 52 };
     const top = (pad.top + 70) / arc.h + b.r, bot = 0.86, left = 0.06 + b.r, right = 0.94 - b.r;
     if (b.x < left) { b.x = left; b.vx = abs(b.vx); arc.sfx.tone(420, 0.04, { type: 'square', vol: 0.06 }); }
@@ -96,13 +103,16 @@
     G.lamps.forEach((l) => {
       if (!l.on) return;
       if (hypot(b.x - l.x, b.y - l.y) < 0.045) {
-        l.on = false; G.score += 30; pop(l.x, l.y, WARM, 10);
+        l.on = false; G.score += 30; pop(l.x, l.y, WARM, 12);
+        floatTxt(l.x, l.y, '+30', WARM);
         b.vy = abs(b.vy) * 1.02; arc.sfx.tone(880, 0.1, { type: 'sine', vol: 0.12 });
+        G.flash = 0.1;
       }
     });
     if (G.lamps.length && G.lamps.every((l) => !l.on)) {
       G.lamps.forEach((l) => { l.on = true; });
       G.score += 50;
+      floatTxt(0.5, 0.35, '+50 lamps', GOLD);
       arc.toast('Lamps back', '+50', 700);
     }
     const pw = 0.14, py = bot;
@@ -114,6 +124,8 @@
       const sp = hypot(b.vx, b.vy), cap = (G.D || DIFF.normal).cap;
       if (sp > cap) { b.vx *= cap / sp; b.vy *= cap / sp; }
       G.rally++; G.bestRally = max(G.bestRally, G.rally); G.score += 5 + G.rally;
+      floatTxt(b.x, b.y - 0.04, '+' + (5 + G.rally), PRIM);
+      pop(b.x, b.y, PRIM, 6);
       arc.sfx.tone(320 + G.rally * 20, 0.06, { type: 'triangle', vol: 0.1 });
       if (G.mode === 'eleven' && G.rally >= 11) endGame('Rally of 11', 'Cage <em>held</em>');
     } else if (b.y > 1.02) drop();
@@ -121,6 +133,12 @@
       const q = G.parts[i]; q.life -= dt; q.x += q.vx * dt; q.y += q.vy * dt;
       if (q.life <= 0) G.parts.splice(i, 1);
     }
+    for (let i = G.floats.length - 1; i >= 0; i--) {
+      const f = G.floats[i]; f.life -= dt; f.y -= 34 * dt;
+      if (f.life <= 0) G.floats.splice(i, 1);
+    }
+    G.trail.forEach((t) => { t.life -= dt; });
+    G.trail = G.trail.filter((t) => t.life > 0);
   }
 
   function idle(dt) {
@@ -152,67 +170,122 @@
     return { x: arc.w * 0.06, y: pad.top + 70, w: arc.w * 0.88, h: arc.h * 0.86 - (pad.top + 70) };
   }
 
+  function drawSkyline(c, w, h) {
+    const g = c.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, '#0e1020'); g.addColorStop(0.4, '#2a1a38'); g.addColorStop(0.7, '#4a2848'); g.addColorStop(1, '#1a120c');
+    c.fillStyle = g; c.fillRect(0, 0, w, h);
+    c.fillStyle = WARM; c.beginPath(); c.arc(w * 0.82, h * 0.1, 16, 0, TAU); c.fill();
+    c.fillStyle = 'rgba(255,183,54,.12)'; c.beginPath(); c.arc(w * 0.82, h * 0.1, 70, 0, TAU); c.fill();
+    // City blocks behind the cage.
+    for (let i = 0; i < 16; i++) {
+      const bx = i * (w / 15) - 10;
+      const bh = 40 + ((i * 37) % 80);
+      c.fillStyle = 'rgba(12,10,16,.85)';
+      c.fillRect(bx, h * 0.28 - bh * 0.35, w / 14 + 4, bh);
+      if (i % 2 === 0) {
+        c.fillStyle = 'rgba(255,183,54,.15)';
+        for (let r = 0; r < 3; r++) for (let col = 0; col < 2; col++) {
+          c.fillRect(bx + 6 + col * 10, h * 0.28 - bh * 0.35 + 8 + r * 12, 5, 6);
+        }
+      }
+    }
+  }
+
   function drawCourt(c) {
     const w = arc.w, h = arc.h;
-    const g = c.createLinearGradient(0, 0, 0, h);
-    g.addColorStop(0, '#14122a'); g.addColorStop(0.45, '#3a2450'); g.addColorStop(1, '#1a120c');
-    c.fillStyle = g; c.fillRect(0, 0, w, h);
-    c.fillStyle = WARM; c.beginPath(); c.arc(w * 0.78, h * 0.12, 14, 0, TAU); c.fill();
-    c.fillStyle = 'rgba(255,183,54,.1)'; c.beginPath(); c.arc(w * 0.78, h * 0.12, 60, 0, TAU); c.fill();
+    drawSkyline(c, w, h);
     const r = court();
-    // Cage mesh behind the court.
-    c.strokeStyle = 'rgba(251,245,236,.08)'; c.lineWidth = 1;
-    for (let i = 0; i < 14; i++) {
-      c.beginPath(); c.moveTo(r.x + i * r.w / 13, r.y - 40); c.lineTo(r.x + i * r.w / 13, r.y + r.h + 10); c.stroke();
+    // Cage posts.
+    c.fillStyle = '#2a2420';
+    [[r.x - 6, r.y - 30], [r.x + r.w + 2, r.y - 30], [r.x - 6, r.y + r.h - 10], [r.x + r.w + 2, r.y + r.h - 10]].forEach(([px, py]) => {
+      c.fillRect(px, py, 8, 40);
+      c.fillStyle = GOLD; c.fillRect(px + 1, py, 6, 3); c.fillStyle = '#2a2420';
+    });
+    // Cage mesh.
+    c.strokeStyle = 'rgba(251,245,236,.1)'; c.lineWidth = 1;
+    for (let i = 0; i < 16; i++) {
+      c.beginPath(); c.moveTo(r.x + i * r.w / 15, r.y - 36); c.lineTo(r.x + i * r.w / 15, r.y + r.h + 14); c.stroke();
     }
-    for (let i = 0; i < 10; i++) {
-      c.beginPath(); c.moveTo(r.x - 10, r.y + i * r.h / 9); c.lineTo(r.x + r.w + 10, r.y + i * r.h / 9); c.stroke();
+    for (let i = 0; i < 12; i++) {
+      c.beginPath(); c.moveTo(r.x - 14, r.y - 20 + i * (r.h + 40) / 11); c.lineTo(r.x + r.w + 14, r.y - 20 + i * (r.h + 40) / 11); c.stroke();
     }
+    // Floodlights.
+    [[r.x + 20, r.y - 28], [r.x + r.w - 20, r.y - 28]].forEach(([lx, ly]) => {
+      c.fillStyle = '#3a3228'; c.fillRect(lx - 10, ly - 8, 20, 8);
+      c.fillStyle = 'rgba(255,248,232,.7)'; c.beginPath(); c.moveTo(lx - 8, ly); c.lineTo(lx + 8, ly); c.lineTo(lx + 22, ly + 50); c.lineTo(lx - 22, ly + 50); c.closePath(); c.fill();
+      c.fillStyle = 'rgba(255,183,54,.08)'; c.beginPath(); c.moveTo(lx - 8, ly); c.lineTo(lx + 8, ly); c.lineTo(lx + 40, r.y + r.h); c.lineTo(lx - 40, r.y + r.h); c.closePath(); c.fill();
+    });
     const floor = c.createLinearGradient(r.x, r.y, r.x, r.y + r.h);
-    floor.addColorStop(0, '#355035'); floor.addColorStop(1, '#1e2a1e');
+    floor.addColorStop(0, '#3a5a3a'); floor.addColorStop(0.5, '#2a402a'); floor.addColorStop(1, '#1a281a');
     c.fillStyle = floor; rr(c, r.x, r.y, r.w, r.h, 10); c.fill();
-    c.strokeStyle = 'rgba(251,245,236,.4)'; c.lineWidth = 3; c.stroke();
-    c.strokeStyle = GOLD; c.globalAlpha = 0.35; c.lineWidth = 1.5;
+    // Court texture.
+    c.strokeStyle = 'rgba(15,13,10,.12)'; c.lineWidth = 1;
+    for (let i = 0; i < 8; i++) {
+      c.beginPath(); c.moveTo(r.x + 10, r.y + 12 + i * r.h / 8); c.lineTo(r.x + r.w - 10, r.y + 8 + i * r.h / 8); c.stroke();
+    }
+    c.strokeStyle = 'rgba(251,245,236,.45)'; c.lineWidth = 3; c.stroke();
+    c.strokeStyle = GOLD; c.globalAlpha = 0.4; c.lineWidth = 1.5;
     rr(c, r.x + 8, r.y + 8, r.w - 16, r.h - 16, 6); c.stroke(); c.globalAlpha = 1;
-    c.strokeStyle = 'rgba(251,245,236,.18)'; c.lineWidth = 1;
+    c.strokeStyle = 'rgba(251,245,236,.22)'; c.lineWidth = 1.5;
     c.beginPath(); c.moveTo(r.x, r.y + r.h * 0.5); c.lineTo(r.x + r.w, r.y + r.h * 0.5); c.stroke();
-    c.beginPath(); c.arc(r.x + r.w / 2, r.y + r.h * 0.5, min(40, r.w * 0.08), 0, TAU); c.stroke();
-    // Side boards.
-    c.fillStyle = 'rgba(42,32,28,.85)';
-    c.fillRect(r.x - 10, r.y, 10, r.h); c.fillRect(r.x + r.w, r.y, 10, r.h);
+    c.beginPath(); c.arc(r.x + r.w / 2, r.y + r.h * 0.5, min(44, r.w * 0.09), 0, TAU); c.stroke();
+    // Service boxes.
+    c.strokeRect(r.x + r.w * 0.2, r.y + r.h * 0.35, r.w * 0.6, r.h * 0.3);
+    c.fillStyle = 'rgba(42,32,28,.9)';
+    c.fillRect(r.x - 12, r.y, 12, r.h); c.fillRect(r.x + r.w, r.y, 12, r.h);
+    c.fillStyle = GOLD; c.globalAlpha = 0.35;
+    c.fillRect(r.x - 12, r.y, 12, 4); c.fillRect(r.x + r.w, r.y, 12, 4); c.globalAlpha = 1;
   }
 
   function drawLamps(c) {
     G.lamps.forEach((l) => {
       const x = l.x * arc.w, y = l.y * arc.h;
+      // Cord.
+      c.strokeStyle = 'rgba(251,245,236,.25)'; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(x, y - 28); c.lineTo(x, y - 8); c.stroke();
+      c.fillStyle = '#3a3228'; c.fillRect(x - 6, y - 10, 12, 5);
       if (!l.on) {
-        c.fillStyle = 'rgba(251,245,236,.08)'; c.beginPath(); c.arc(x, y, 5, 0, TAU); c.fill();
+        c.fillStyle = 'rgba(251,245,236,.1)'; c.beginPath(); c.arc(x, y, 5, 0, TAU); c.fill();
         return;
       }
-      c.fillStyle = 'rgba(255,183,54,.2)'; c.beginPath(); c.arc(x, y, 18, 0, TAU); c.fill();
-      c.fillStyle = WARM; c.beginPath(); c.arc(x, y, 6, 0, TAU); c.fill();
-      c.fillStyle = '#fff8e8'; c.beginPath(); c.arc(x - 1.5, y - 1.5, 2, 0, TAU); c.fill();
+      c.fillStyle = 'rgba(255,183,54,.22)'; c.beginPath(); c.arc(x, y, 20, 0, TAU); c.fill();
+      const bulb = c.createRadialGradient(x - 2, y - 2, 1, x, y, 7);
+      bulb.addColorStop(0, '#fff8e8'); bulb.addColorStop(1, WARM);
+      c.fillStyle = bulb; c.beginPath(); c.arc(x, y, 6.5, 0, TAU); c.fill();
     });
   }
 
   function drawPaddle(c) {
     const r = court();
-    const x = G.px * arc.w, y = r.y + r.h - 20, w = arc.w * 0.26;
-    c.fillStyle = 'rgba(0,0,0,.3)'; rr(c, x - w / 2 + 2, y + 4, w, 12, 6); c.fill();
-    const g = c.createLinearGradient(x, y, x, y + 14);
-    g.addColorStop(0, '#ff8a60'); g.addColorStop(1, '#c43a18');
-    c.fillStyle = g; rr(c, x - w / 2, y, w, 14, 7); c.fill();
-    c.fillStyle = GOLD; c.fillRect(x - w / 2 + 8, y + 4, w - 16, 3);
+    const x = G.px * arc.w, y = r.y + r.h - 22, w = arc.w * 0.26;
+    c.fillStyle = 'rgba(0,0,0,.35)'; c.beginPath(); c.ellipse(x, y + 16, w * 0.48, 6, 0, 0, TAU); c.fill();
+    // Racket face.
+    const g = c.createLinearGradient(x - w / 2, y, x + w / 2, y + 16);
+    g.addColorStop(0, '#ff9a72'); g.addColorStop(0.5, PRIM); g.addColorStop(1, '#a82810');
+    c.fillStyle = g; rr(c, x - w / 2, y, w, 16, 8); c.fill();
+    c.strokeStyle = GOLD; c.lineWidth = 2; c.stroke();
+    // Grip tape.
+    c.fillStyle = '#1a120c'; rr(c, x - 10, y + 4, 20, 8, 3); c.fill();
+    c.fillStyle = GOLD; c.fillRect(x - w / 2 + 10, y + 5, w - 20, 2);
+    // Sweet spot mark.
+    c.strokeStyle = 'rgba(251,245,236,.25)'; c.beginPath(); c.arc(x, y + 8, 5, 0, TAU); c.stroke();
   }
 
   function drawBall(c) {
     const b = G.ball; if (!b) return;
+    G.trail.forEach((t, i) => {
+      c.globalAlpha = clamp(t.life * 2, 0, 0.35);
+      c.fillStyle = INK;
+      c.beginPath(); c.arc(t.x * arc.w, t.y * arc.h, 3 + i * 0.15, 0, TAU); c.fill();
+      c.globalAlpha = 1;
+    });
     const x = b.x * arc.w, y = b.y * arc.h, r = max(7, b.r * arc.w);
-    c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.arc(x + 2, y + 3, r, 0, TAU); c.fill();
-    const g = c.createRadialGradient(x - r * 0.3, y - r * 0.3, 1, x, y, r);
-    g.addColorStop(0, '#fff8ee'); g.addColorStop(1, '#d8c8b0');
+    c.fillStyle = 'rgba(0,0,0,.3)'; c.beginPath(); c.arc(x + 2, y + 3, r, 0, TAU); c.fill();
+    const g = c.createRadialGradient(x - r * 0.35, y - r * 0.35, 1, x, y, r);
+    g.addColorStop(0, '#fffaf2'); g.addColorStop(0.55, '#e8d8c0'); g.addColorStop(1, '#b8a080');
     c.fillStyle = g; c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill();
-    c.strokeStyle = 'rgba(15,13,10,.35)'; c.stroke();
+    c.strokeStyle = 'rgba(15,13,10,.4)'; c.stroke();
+    c.strokeStyle = 'rgba(42,24,16,.35)'; c.beginPath(); c.arc(x, y, r * 0.55, 0.2, 2.4); c.stroke();
   }
 
   function drawHUD(c) {
@@ -239,8 +312,20 @@
     drawBall(c);
     G.parts.forEach((p) => {
       c.globalAlpha = clamp(p.life * 2.4, 0, 1); c.fillStyle = p.col;
-      c.beginPath(); c.arc(p.x, p.y, 2.4, 0, TAU); c.fill(); c.globalAlpha = 1;
+      c.beginPath(); c.arc(p.x, p.y, p.r || 2.4, 0, TAU); c.fill(); c.globalAlpha = 1;
     });
+    G.floats.forEach((f) => {
+      c.globalAlpha = clamp(f.life * 1.4, 0, 1);
+      txt(c, f.text, f.x, f.y, 15, f.col, 700, 'center', F_DISP);
+      c.globalAlpha = 1;
+    });
+    const vig = c.createRadialGradient(arc.w * 0.5, arc.h * 0.5, min(arc.w, arc.h) * 0.32, arc.w * 0.5, arc.h * 0.5, min(arc.w, arc.h) * 0.78);
+    vig.addColorStop(0, 'rgba(0,0,0,0)'); vig.addColorStop(1, 'rgba(8,6,4,.55)');
+    c.fillStyle = vig; c.fillRect(0, 0, arc.w, arc.h);
+    if (G.flash > 0) {
+      c.fillStyle = 'rgba(255,183,54,' + (G.flash * 0.3) + ')';
+      c.fillRect(0, 0, arc.w, arc.h);
+    }
     if (arc.state === 'play' && !G.attract) drawHUD(c);
   }
 

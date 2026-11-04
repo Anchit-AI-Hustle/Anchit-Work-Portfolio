@@ -391,6 +391,9 @@
       c.globalAlpha = 1;
     });
     drawBall(c);
+    const vig = c.createRadialGradient(w * 0.5, h * 0.45, min(w, h) * 0.28, w * 0.5, h * 0.5, min(w, h) * 0.78);
+    vig.addColorStop(0, 'rgba(0,0,0,0)'); vig.addColorStop(1, 'rgba(8,6,4,.5)');
+    c.fillStyle = vig; c.fillRect(0, 0, w, h);
     if (arc.state === 'play' && !G.attract) drawHUD(c);
   }
 
