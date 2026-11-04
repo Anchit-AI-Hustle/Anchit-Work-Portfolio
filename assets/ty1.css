@@ -1,0 +1,161 @@
+/* One scrollytelling system for the two shops. Motion is transform and opacity.
+   Continuous CSS loops run only while .in-view is set. */
+[data-ty1] {
+  --bg: #0A0810; --surface: #14101E; --ink: #F6F3FF; --accent: #B9A3F8; --accent-2: #A8E6CF;
+  --portal: #7F63C8; --paper: #F7F3EB; --paper-ink: #161120;
+  color: var(--ink);
+  background: var(--bg);
+  font-family: "Bricolage Grotesque", "Plus Jakarta Sans", system-ui, sans-serif;
+}
+[data-ty1="deli"] {
+  --bg: #0B0706; --surface: #160F0D; --ink: #F7F2EB; --accent: #C8281E; --accent-2: #D99B52;
+  --portal: #8E1B13; --paper: #F6F0E4; --paper-ink: #1A110E;
+}
+[data-ty1] a { color: inherit; }
+[data-ty1] h2, [data-ty1] h3 { margin: 0; }
+
+.ty1-wave {
+  margin: 0;
+  font-family: Syne, Impact, sans-serif;
+  font-weight: 800;
+  font-size: clamp(3.2rem, 11vw, 9rem);
+  line-height: 0.86;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.ty1-wave .char { display: inline-block; will-change: auto; }
+
+.ty1-walk { height: 320vh; position: relative; background: var(--bg); }
+.ty1-sticky {
+  position: sticky; top: 0; height: 100vh; overflow: hidden;
+  perspective: 1100px; perspective-origin: 50% 46%;
+}
+.ty1-stage { position: absolute; inset: 0; transform-style: preserve-3d; }
+.w-plane, .b-plane {
+  position: absolute; left: 50%; top: 46%;
+  width: min(86vw, 920px);
+  transform-style: preserve-3d;
+  color: var(--ink);
+}
+.w-plane .plane-card, .b-plane .plane-card {
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: 18px;
+  padding: clamp(18px, 3vw, 32px);
+  box-shadow: 0 30px 80px rgba(0,0,0,.45);
+}
+.plane-kicker { font-family: ui-monospace, monospace; letter-spacing: .18em; font-size: 12px; color: var(--accent-2); }
+.plane-card strong { display: block; font-family: Syne, sans-serif; font-size: clamp(1.6rem, 4vw, 2.6rem); letter-spacing: -0.03em; margin: 8px 0; }
+.ty1-walk:not(.is-armed) .w-plane[data-z0="-1500"],
+.ty1-walk:not(.is-armed) .w-plane[data-z0="-2300"],
+.ty1-walk:not(.is-armed) .w-plane[data-z0="-3100"],
+.ty1-walk:not(.is-armed) .w-plane[data-z0="-3600"],
+.ty1-walk:not(.is-armed) .b-plane[data-z0="-1500"],
+.ty1-walk:not(.is-armed) .b-plane[data-z0="-2300"],
+.ty1-walk:not(.is-armed) .b-plane[data-z0="-3100"],
+.ty1-walk:not(.is-armed) .b-plane[data-z0="-3600"] { display: none !important; }
+
+.ty1-hud { position: absolute; left: 20px; bottom: 22px; z-index: 5; width: min(240px, 46vw); }
+.ty1-hud .track { height: 3px; background: rgba(255,255,255,.2); border-radius: 99px; overflow: hidden; }
+.ty1-hud .track i { display: block; height: 100%; width: 0; background: var(--accent-2); }
+.ty1-hud b { display: block; margin-top: 6px; font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: .14em; }
+
+.ty1-audio {
+  position: absolute; right: 16px; bottom: 22px; z-index: 6; width: min(280px, 78vw);
+  padding: 14px 14px 12px; border-radius: 18px; color: var(--ink);
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  backdrop-filter: blur(16px);
+}
+.ty1-audio .row { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.ty1-audio button {
+  border: 0; border-radius: 999px; padding: 8px 12px; cursor: pointer;
+  font: 700 11px/1 ui-monospace, monospace; letter-spacing: .08em;
+  background: var(--ink); color: var(--bg);
+}
+.ty1-eq { display: flex; align-items: flex-end; gap: 3px; height: 28px; margin-top: 10px; }
+.ty1-eq i { flex: 1; height: 20%; background: var(--accent-2); border-radius: 2px; transform-origin: bottom; }
+
+.ty1-block { padding: clamp(48px, 8vw, 96px) clamp(18px, 5vw, 64px); }
+.ty1-portal { height: 290vh; position: relative; background: var(--bg); }
+.ty1-portal .ty1-sticky { background: radial-gradient(60% 50% at 50% 45%, color-mix(in srgb, var(--accent) 35%, transparent), var(--bg) 70%); }
+body[data-world="lilac"] .ty1-portal .ty1-sticky,
+body[data-world="oxblood"] .ty1-portal .ty1-sticky { background: var(--portal); }
+.disc-3d {
+  width: min(46vh, 420px); aspect-ratio: 1; border-radius: 50%; margin: 0 auto;
+  background:
+    radial-gradient(circle at 50% 50%, var(--surface) 0 18%, transparent 19%),
+    repeating-radial-gradient(circle at 50% 50%, rgba(255,255,255,.35) 0 1px, transparent 1px 7px),
+    conic-gradient(from 20deg, #fff, var(--accent), #111, var(--accent-2), #fff);
+  box-shadow: inset 0 0 0 10px rgba(0,0,0,.35), 0 30px 60px rgba(0,0,0,.35);
+}
+.sleeve-card {
+  position: absolute; right: 8%; top: 50%; width: min(320px, 42vw); aspect-ratio: 1;
+  background: var(--paper); color: var(--paper-ink); border-radius: 16px; padding: 22px;
+  translate: 40% -50%;
+}
+.sleeve-card .badge { font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: .14em; }
+.ty1-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  margin-top: 14px; padding: 12px 16px; border-radius: 999px; border: 0; cursor: pointer;
+  background: var(--paper-ink); color: var(--paper); font-weight: 800; letter-spacing: .06em; font-size: 12px;
+}
+
+.ty1-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 22px; }
+.ty1-tabs button, .ty1-navbtn {
+  border-radius: 999px; border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent);
+  background: transparent; color: inherit; padding: 8px 14px; cursor: pointer; font-weight: 700; font-size: 12px; letter-spacing: .08em;
+}
+.ty1-tabs button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.ty1-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.ty1-cell { background: var(--surface); border-radius: 16px; padding: 16px; border: 1px solid rgba(255,255,255,.08); }
+.ty1-cell .idx { font-family: ui-monospace, monospace; color: var(--accent-2); font-size: 12px; }
+.ty1-cell h3 { font-size: 1.15rem; margin: 6px 0; }
+.ty1-cell p { margin: 0; font-size: .92rem; opacity: .82; }
+.ty1-qty { display: inline-flex; gap: 8px; align-items: center; margin-top: 10px; }
+.ty1-qty button { width: 32px; height: 32px; border-radius: 50%; border: 0; cursor: pointer; font-weight: 800; }
+
+.ty1-split { display: grid; grid-template-columns: 1.2fr .8fr; gap: 24px; background: #120e18; color: #F6F3FF; border-radius: 28px; padding: clamp(22px, 4vw, 42px); }
+[data-ty1="deli"] .ty1-split { background: #140c0b; }
+.ty1-show { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 28px; }
+.ty1-show article { background: var(--surface); border-radius: 18px; padding: 18px; border: 1px solid rgba(255,255,255,.1); }
+
+.ty1-marquee { overflow: hidden; border-block: 1px solid rgba(255,255,255,.12); }
+.ty1-marquee .track { display: flex; gap: 32px; width: max-content; padding: 14px 0; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; animation: ty1marquee 28s linear infinite; animation-play-state: paused; }
+.ty1-marquee.in-view .track { animation-play-state: running; }
+@keyframes ty1marquee { to { translate: -50% 0; } }
+
+.ty1-fan { position: relative; height: 420px; margin: 20px auto; perspective: 1200px; }
+.ty1-fan article {
+  position: absolute; left: 50%; top: 40px; width: min(240px, 64vw); min-height: 280px;
+  margin-left: -120px; padding: 18px; border-radius: 16px; background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); cursor: pointer;
+}
+.ty1-readout { text-align: center; font-size: 1.15rem; }
+
+.ty1-blue { position: relative; min-height: 560px; border-radius: 20px; background-color: #0c0a12; background-image: linear-gradient(to right, rgba(255,255,255,.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,.06) 1px, transparent 1px); background-size: 36px 36px; }
+.ty1-hub { position: absolute; left: 50%; top: 46%; width: 92px; height: 92px; margin: -46px 0 0 -46px; border-radius: 50%; display: grid; place-items: center; font-family: Syne, sans-serif; font-weight: 800; background: var(--accent); color: #140e22; }
+.ty1-node { position: absolute; width: 180px; padding: 12px; border-radius: 12px; background: rgba(12,10,18,.88); border: 1px solid rgba(255,255,255,.14); font-size: 13px; }
+
+.ty1-curtain { min-height: 100vh; background: var(--bg); color: var(--paper-ink); }
+.ty1-curtain .sheet {
+  min-height: 88vh; margin: 6vh auto; width: min(1100px, 92vw); background: var(--paper); color: var(--paper-ink);
+  padding: clamp(24px, 5vw, 56px); border-radius: 24px;
+  clip-path: inset(0 calc((1 - var(--curtain, 0)) * 42%) 0 calc((1 - var(--curtain, 0)) * 42%) round calc((1 - var(--curtain, 0)) * 24px));
+}
+.ty1-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 28px; }
+.ty1-stats div { border-top: 1px solid rgba(20,17,32,.2); padding-top: 10px; font-size: 14px; }
+.ty1-stats b { display: block; font-family: ui-monospace, monospace; font-size: 12px; letter-spacing: .08em; margin-bottom: 4px; }
+
+@media (max-width: 860px) {
+  .ty1-grid, .ty1-show, .ty1-stats, .ty1-split { grid-template-columns: 1fr; }
+  .sleeve-card { position: relative; right: auto; top: auto; width: min(320px, 88vw); margin: 24px auto 0; translate: none; }
+}
+html.ty1-on .hero, html.ty1-on #walkin, html.ty1-on .marquee, html.ty1-on #bwalkin { display: none !important; }
+html.ty1-on .hero *, html.ty1-on #walkin *, html.ty1-on .marquee *, html.ty1-on #bwalkin * {
+  animation-play-state: paused !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ty1-marquee .track, .ty1-eq i { animation: none !important; }
+}

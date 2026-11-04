@@ -53,7 +53,8 @@ const PAGES = [
       { label: 'counter scene csSteam', sel: '.cs-steam path',   scope: '.counter-scene' },
       { label: 'counter scene csMote',  sel: '.cs-motes circle', scope: '.counter-scene' },
       { label: 'counter scene csSheen', sel: '.cs-sheen',        scope: '.counter-scene' },
-      { label: 'marquee slide',         sel: '.track',           scope: '.marquee' },
+      { label: 'marquee slide',         sel: '.marquee .track',  scope: '.marquee' },
+      { label: 'corridor marquee',      sel: '.shop-cin .marquee-track', scope: '.shop-cin .marquee-wrap' },
       { label: 'orbit pulse',           sel: '#orbit .pulse',    scope: '#orbit' },
       { label: 'timeline fill',         sel: '.timeline',        scope: '.timeline', pseudo: '::after' },
     ],
@@ -64,6 +65,7 @@ const PAGES = [
     name: 'Deli Chic', path: '/deli-chic/',
     loops: [
       { label: 'ticker deliMarquee', sel: '.deli-track', scope: '.deli-ticker' },
+      { label: 'corridor marquee', sel: '.shop-cin .marquee-track', scope: '.shop-cin .marquee-wrap' },
     ],
     phase: [{ label: 'ticker', sel: '.deli-track', scope: '.deli-ticker' }],
   },
@@ -84,6 +86,14 @@ function scopeInView(sel) {
   if (!el) return false;
   const r = el.getBoundingClientRect();
   return r.bottom > 0 && r.top < innerHeight;
+}
+function scopeHidden(sel) {
+  const el = document.querySelector(sel);
+  if (!el) return true;
+  const cs = getComputedStyle(el);
+  if (cs.display === 'none' || cs.visibility === 'hidden') return true;
+  const r = el.getBoundingClientRect();
+  return r.width === 0 && r.height === 0;
 }
 
 const mutations = {
@@ -185,6 +195,8 @@ async function newPage(b, opts) {
     for (const l of page.loops) {
       const exists = await p.evaluate((s) => !!document.querySelector(s), l.sel);
       if (!exists) { chk(`${page.name}: ${l.label} idles off screen`, true, 'not in DOM, skipped'); continue; }
+      const hidden = await p.evaluate(scopeHidden, l.scope);
+      if (hidden) { chk(`${page.name}: ${l.label} idles off screen`, true, 'hidden by corridor, skipped'); continue; }
 
       await p.evaluate((s) => document.querySelector(s)
         .scrollIntoView({ block: 'center', behavior: 'instant' }), l.scope);
@@ -215,6 +227,8 @@ async function newPage(b, opts) {
     for (const ph of page.phase) {
       const exists = await p.evaluate((s) => !!document.querySelector(s), ph.sel);
       if (!exists) { chk(`${page.name}: ${ph.label} gate resumes, not restarts`, true, 'not in DOM, skipped'); continue; }
+      const hiddenPh = await p.evaluate(scopeHidden, ph.scope);
+      if (hiddenPh) { chk(`${page.name}: ${ph.label} gate resumes, not restarts`, true, 'hidden by corridor, skipped'); continue; }
       await p.evaluate((s) => document.querySelector(s)
         .scrollIntoView({ block: 'center', behavior: 'instant' }), ph.scope);
       await p.waitForTimeout(600);

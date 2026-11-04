@@ -79,6 +79,7 @@ jobs:
       - name: Structural suites
         run: |
           npm run test:nogithub
+          npm run test:redirects
           npm run test:links
           npm run test:seo
           npm run test:nodash
@@ -96,6 +97,11 @@ jobs:
         run: |
           npm run test:design
           npm run test:mobile
+
+      # Every game at /games is opened, started and played for a few seconds at
+      # phone, tablet and desktop size, through keyboard and touch controls.
+      - name: Games suite
+        run: npm run test:games
 
       - name: Verify canonical app routes
         run: |

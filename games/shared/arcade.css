@@ -1,0 +1,175 @@
+/*
+ * Arcade shell, shared by every game under /games.
+ *
+ * The chrome (top bar, panels, buttons, touch controls) uses the site's own
+ * tokens from DESIGN.md. Colours inside the canvas are the game world (grass,
+ * asphalt, sky) and are drawn by each game; they are content, like the frames
+ * of a film, not interface.
+ */
+:root {
+  --bg: #0F0D0A;
+  --bg-elev: #1A1814;
+  --bg-deep: #060503;
+  --ink: #FBF5EC;
+  --ink-dim: #A39E94;
+  --ink-mute: #5A554E;
+  --rule: #2A261F;
+  --rule-strong: #3D3830;
+  --primary: #FF6940;
+  --primary-deep: #FF4D1F;
+  --primary-soft: rgba(255,105,64,.12);
+  --accent: #c9a96e;
+  --accent-warm: #FFB736;
+  --font-display: 'Fraunces', 'Times New Roman', serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --arc-bar-h: 52px;
+}
+* { box-sizing: border-box; }
+html, body.arcade { height: 100%; }
+body.arcade {
+  margin: 0; background: var(--bg-deep); color: var(--ink);
+  font-family: var(--font-body); font-weight: 400; line-height: 1.5;
+  -webkit-font-smoothing: antialiased; overflow: hidden;
+  overscroll-behavior: none; -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none; user-select: none;
+}
+body.arcade button { font: inherit; color: inherit; }
+body.arcade :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.arc-app { position: fixed; inset: 0; display: flex; flex-direction: column; height: 100vh; }
+/* The cookie bar is a fixed dialog with a z-index above the stage, so on a
+   phone it sat on the Play button. Shrink the stage to the space above the
+   bar for as long as the bar is open. --consent-h is set by the consent runtime. */
+html[data-consent-open="1"] body.arcade .arc-app {
+  bottom: var(--consent-h, 0px);
+  height: auto;
+}
+@supports (height: 100dvh) { .arc-app { height: 100dvh; } }
+
+.arc-bar {
+  flex: 0 0 auto; min-height: var(--arc-bar-h); display: flex; align-items: center; gap: 10px;
+  padding: 0 max(12px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left));
+  padding-top: env(safe-area-inset-top);
+  background: var(--bg); border-bottom: 1px solid var(--rule); position: relative; z-index: 5;
+}
+.arc-back {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 10px 0 4px;
+  color: var(--ink-dim); text-decoration: none; font-size: 14px; border-radius: 8px;
+}
+.arc-back:hover { color: var(--ink); }
+.arc-back svg { width: 18px; height: 18px; }
+.arc-title { flex: 1 1 auto; min-width: 0; display: flex; align-items: baseline; gap: 10px; }
+.arc-title b { font-family: var(--font-display); font-weight: 500; font-size: 20px; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.arc-title span { font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); white-space: nowrap; }
+@media (max-width: 520px) { .arc-title span { display: none; } .arc-title b { font-size: 18px; } }
+.arc-tools { display: flex; gap: 6px; }
+.arc-tool {
+  min-width: 44px; min-height: 44px; display: inline-grid; place-items: center; padding: 0 10px;
+  border-radius: 10px; border: 1px solid var(--rule-strong); background: transparent; cursor: pointer;
+  color: var(--ink-dim);
+}
+.arc-tool:hover { color: var(--ink); border-color: var(--ink-mute); }
+.arc-tool svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.arc-tool[aria-pressed="true"] { color: var(--accent-warm); }
+
+.arc-stage { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; touch-action: none; background: var(--bg-deep); }
+.arc-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* Panels: start, pause, game over, help */
+.arc-panel {
+  position: absolute; inset: 0; z-index: 4; display: grid; place-items: center; padding: 16px;
+  background: rgba(6,5,3,.66);
+}
+.arc-panel[hidden] { display: none; }
+.arc-card {
+  width: min(560px, 100%); max-height: 100%; overflow: auto; overscroll-behavior: contain;
+  display: flex; flex-direction: column;
+  background: var(--bg-elev); border: 1px solid var(--rule-strong); border-radius: 16px;
+  padding: clamp(18px, 4vw, 30px); box-shadow: 0 32px 64px rgba(0,0,0,.5);
+  -webkit-user-select: text; user-select: text;
+}
+.arc-card .eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.arc-card h1, .arc-card h2 { font-family: var(--font-display); font-weight: 400; letter-spacing: -.015em; line-height: 1.05; margin: 8px 0 10px; font-size: clamp(31px, 6vw, 39px); }
+.arc-card h1 em, .arc-card h2 em { font-style: italic; color: var(--accent); }
+.arc-card p { color: var(--ink-dim); margin: 0 0 12px; font-size: 16px; }
+.arc-card .stat { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 4px 0 14px; }
+.arc-card .stat div { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); }
+.arc-card .stat b { display: block; font-family: var(--font-display); font-size: 25px; letter-spacing: 0; text-transform: none; color: var(--ink); font-weight: 500; }
+.arc-card .new { color: var(--accent-warm); }
+.arc-keys { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 6px 0 16px; font-size: 14px; color: var(--ink-dim); }
+.arc-keys kbd {
+  font-family: var(--font-mono); font-size: 12px; color: var(--ink); background: var(--bg-deep);
+  border: 1px solid var(--rule-strong); border-radius: 6px; padding: 2px 7px; white-space: nowrap; justify-self: start;
+}
+.arc-opts { display: grid; gap: 10px; margin: 6px 0 16px; }
+.arc-opts .label { font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); }
+.arc-seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.arc-seg button {
+  min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--rule-strong);
+  background: transparent; color: var(--ink-dim); cursor: pointer; font-size: 14px;
+}
+.arc-seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.arc-actions {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  position: sticky; bottom: 0; z-index: 2; margin-top: auto;
+  background: var(--bg-elev); padding-top: 12px;
+  box-shadow: 0 -16px 16px var(--bg-elev);
+}
+.arc-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 20px;
+  border-radius: 999px; border: 1px solid var(--rule-strong); background: transparent; color: var(--ink);
+  cursor: pointer; font-size: 16px; font-weight: 500; text-decoration: none;
+}
+.arc-btn:hover { border-color: var(--ink-mute); }
+.arc-btn.primary {
+  background: linear-gradient(100deg, var(--primary), var(--primary-deep));
+  border-color: transparent; color: #1a0d06;
+}
+.arc-btn.primary:hover { background: linear-gradient(100deg, var(--primary-deep), var(--primary)); border-color: transparent; }
+
+/* Toast: short in-game messages ("Mission complete", "Four!") */
+.arc-toast {
+  position: absolute; left: 50%; top: 14%; transform: translate(-50%, 0); z-index: 3; pointer-events: none;
+  font-family: var(--font-display); font-size: clamp(20px, 4.2vw, 31px); color: var(--ink); text-align: center;
+  text-shadow: 0 2px 18px rgba(0,0,0,.7); opacity: 0; transition: opacity .25s ease, transform .25s ease;
+  white-space: normal; text-wrap: balance; line-height: 1.15; padding: 0 16px; max-width: min(92%, 28ch);
+}
+.arc-toast small { display: block; font-family: var(--font-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent-warm); }
+.arc-toast.show { opacity: 1; transform: translate(-50%, -6px); }
+@media (prefers-reduced-motion: reduce) { .arc-toast { transition: opacity .2s linear; transform: translate(-50%, 0) !important; } }
+
+/* Touch controls. Shown on coarse pointers, or as soon as a finger touches. */
+.arc-touch { position: absolute; inset: 0; z-index: 2; pointer-events: none; display: none; }
+.arc-app.touch .arc-touch { display: block; }
+.arc-app.panel-open .arc-touch, .arc-app.panel-open .arc-hint { display: none; }
+.arc-stick {
+  position: absolute; left: max(18px, env(safe-area-inset-left)); bottom: max(18px, env(safe-area-inset-bottom));
+  width: 132px; height: 132px; border-radius: 50%; pointer-events: auto; touch-action: none;
+  background: rgba(15,13,10,.55); border: 1px solid rgba(251,245,236,.28);
+  box-shadow: 0 12px 32px rgba(0,0,0,.4);
+}
+.arc-stick i {
+  position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%;
+  background: rgba(251,245,236,.28); border: 1px solid rgba(251,245,236,.45);
+}
+.arc-pads {
+  position: absolute; right: max(14px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom));
+  display: flex; flex-wrap: wrap-reverse; justify-content: flex-end; gap: 10px; max-width: 220px; pointer-events: none;
+}
+.arc-pad {
+  pointer-events: auto; touch-action: none; min-width: 64px; height: 64px; padding: 0 12px; border-radius: 32px;
+  background: rgba(15,13,10,.48); border: 1px solid rgba(251,245,236,.28); color: var(--ink);
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; cursor: pointer;
+}
+.arc-pad.big { min-width: 78px; height: 78px; border-radius: 39px; }
+.arc-pad.hot { background: rgba(255,105,64,.42); border-color: rgba(255,105,64,.8); }
+.arc-pad.on { background: rgba(251,245,236,.32); }
+.arc-hint {
+  position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: 1; pointer-events: none;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: rgba(251,245,236,.55);
+  white-space: nowrap;
+}
+.arc-app.touch .arc-hint { display: none; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }

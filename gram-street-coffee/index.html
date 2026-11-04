@@ -16,6 +16,7 @@
      runtime and left the page unstyled until it finished · and Tailwind
      itself warns in the console not to use it in production. -->
 <link rel="stylesheet" href="/assets/tw-gram-street.css">
+<link rel="stylesheet" href="/assets/shop-cinema.css">
 
 <style>
 :root {
@@ -149,12 +150,16 @@
   }
 
   /* Staggered Scroll Reveal Transitions */
-  .scroll-reveal {
+  /* Hidden only once script has run (html.js): without it, or if the main
+     script throws, the content is simply shown rather than left at opacity 0.
+     :where() keeps the old (0,1,0) weight, so card rules declared later
+     still own their own transitions and hover lift. */
+  :where(.js) .scroll-reveal {
     opacity: 0;
     transform: translateY(24px) scale(0.98);
     transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .scroll-reveal.in-view {
+  :where(.js) .scroll-reveal.in-view {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
@@ -174,7 +179,7 @@
     background: rgba(205, 184, 247, 0.88);
     -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
-    border-b: 1px solid rgba(43, 22, 80, 0.15);
+    border-bottom: 1px solid rgba(43, 22, 80, 0.15);
   }
   /* ── THE COUNTER ───────────────────────────────────────────────────────
      The drawn bar in the hero. Everything animates on transform or opacity,
@@ -448,8 +453,10 @@
   .cta-row { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 12px; animation: fadein 1s ease 1.5s both; }
   @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
 
-  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 28px; font: 700 1rem/1 var(--font); text-decoration: none; border-radius: 999px; border: 2px solid var(--grape); cursor: pointer; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
-  .btn:hover { transform: translateY(-2px); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 28px; font: 700 1rem/1 var(--font); text-decoration: none; border-radius: 999px; border: 2px solid var(--grape); cursor: pointer; transition: background-color .25s, color .25s, border-color .25s, box-shadow .25s, filter .25s, translate .25s; transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
+  /* `translate`, not `transform`: brand-motion's magnet owns transform on
+     .btn, and an inline transform silently cancelled this lift. */
+  .btn:hover { translate: 0 -2px; }
   .btn-primary { background: var(--grape); color: var(--lilac-soft); }
   .btn-primary:hover { background: #3d2272; box-shadow: 0 10px 25px rgba(43, 22, 80, 0.25); }
   .btn-chrome { background: var(--chrome); color: var(--grape); border-color: rgba(43, 22, 80, 0.4); }
@@ -668,6 +675,7 @@
 
   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
+<<<<<<< HEAD
   /* ══ THE WALK-IN: 3-STAGE Z-AXIS ARCHITECTURAL PASS-THROUGH ══════════
      Pinned for 250vh across 90 virtual camera frames:
        Frames 01-30: The Lilac Streetfront on Arjun Marg (foreground glass
@@ -680,6 +688,43 @@
                      steel espresso counter). */
   .walk { position: relative; background: #1B0E36; }
   .walk-rail { height: 250vh; }
+=======
+  /* ══ THE WALK-IN ══════════════════════════════════════════════════════
+     A section you move THROUGH rather than look at. Five stages, driven by
+     scroll position, on a real 3D stage: street, the door, the room, the
+     counter, the shot. The copy already promises "a tiny room by design" and
+     "just enough room to savor an espresso" - this is that walk, taken.
+
+     How it works: the section is tall, its inner frame is sticky, and one
+     scroll-progress number (0 to 1) is written to the SECTION element each
+     frame. Never to :root - a custom property there invalidates the computed
+     style of every element on the page, which this repo has paid for before.
+     The script then places each layer in Z from that number, so the layers
+     genuinely pass the camera instead of merely scaling.
+
+     transform and opacity only. will-change goes on while the walk is on
+     screen and comes off when it leaves. */
+  .walk { position: relative; background: var(--grape); }
+  .walk-rail { height: 320vh; }
+  .walk-facade {
+    position: absolute; inset: 0; z-index: 30; pointer-events: none;
+    transform-origin: 50% 58%;
+    box-shadow: inset 0 0 0 1px rgba(244,239,252,.28);
+  }
+  .walk-facade svg { display: block; width: 100%; height: 100%; }
+  .walk-reflect {
+    position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,.22) 48%, transparent 66%);
+    opacity: .7;
+  }
+  .walk-flare {
+    position: absolute; left: 50%; top: 42%; width: 18vw; height: 70vh;
+    translate: -50% -50%;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,244,220,.55) 42%, rgba(205,184,247,.28) 58%, transparent 100%);
+    opacity: 0; pointer-events: none;
+  }
+  .walk.is-past .walk-facade, .walk.is-past .walk-flare { will-change: auto; }
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
   .walk-frame {
     position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden;
     perspective: 1100px; perspective-origin: 50% 48%;
@@ -751,10 +796,21 @@
 
   /* the words that ride the walk */
   .walk-cap {
+<<<<<<< HEAD
     position: absolute; left: 0; right: 0; bottom: clamp(68px, 11vh, 122px);
     text-align: center; color: #F1E9FF; padding: 0 var(--pad);
     pointer-events: none; will-change: opacity, transform;
     z-index: 35;
+=======
+    position: absolute; left: 0; right: 0; bottom: clamp(74px, 12vh, 132px);
+    text-align: center; color: #F1E9FF; padding: 28px var(--pad) 22px;
+    pointer-events: none; will-change: opacity, transform;
+    /* Two of the five stages are photographs that pass right behind the
+       words. A soft grape pool plus a shadow keeps them readable over any
+       frame, instead of white type sitting on a white milk pour. */
+    background: radial-gradient(60% 75% at 50% 55%, rgba(27, 14, 54, 0.62), rgba(27, 14, 54, 0) 72%);
+    text-shadow: 0 2px 14px rgba(20, 8, 42, 0.75), 0 1px 3px rgba(20, 8, 42, 0.6);
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
   }
   .walk-cap b { display: block; font-size: clamp(1.85rem, 4.8vw, 3.2rem); letter-spacing: -0.03em; line-height: 1.04; text-shadow: 0 8px 28px rgba(18, 8, 38, 0.85); }
   .walk-cap span { display: block; margin-top: 10px; font-size: clamp(.95rem, 2vw, 1.1rem); font-weight: 600; opacity: .9; max-width: 40ch; margin-inline: auto; text-shadow: 0 4px 18px rgba(18, 8, 38, 0.9); }
@@ -762,6 +818,7 @@
     position: absolute; top: clamp(72px, 10vh, 110px); left: 0; right: 0;
     display: flex; align-items: center; justify-content: center; gap: 14px;
     text-align: center; color: #CDB8F7; font-size: .72rem;
+<<<<<<< HEAD
     letter-spacing: .28em; text-transform: uppercase; font-weight: 800;
     pointer-events: none; z-index: 35;
   }
@@ -774,6 +831,11 @@
     color: #F1E9FF;
     font-size: 0.68rem;
     letter-spacing: 0.16em;
+=======
+    letter-spacing: .32em; text-transform: uppercase; font-weight: 800;
+    pointer-events: none;
+    text-shadow: 0 1px 8px rgba(20, 8, 42, 0.85);
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
   }
 
   /* a hint that this one is scrolled through, shown only at the start */
@@ -785,7 +847,11 @@
   .walk-hint i { display: block; width: 1px; height: 24px; margin: 6px auto 0; background: currentColor; opacity: .5; }
 
   @media (max-width: 760px) {
+<<<<<<< HEAD
     .walk-rail { height: 250vh; }
+=======
+    .walk-rail { height: 220vh; }
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
     .walk-frame { perspective: 760px; }
     .walk-layer { width: 106vw; }
   }
@@ -793,8 +859,16 @@
   /* No JS, or motion turned down: the walk becomes one composed frame
      rather than a stack of invisible layers. */
   .walk:not(.is-armed) .walk-rail { height: 100vh; }
+<<<<<<< HEAD
   .walk:not(.is-armed) .walk-layer { opacity: 1; transform: translate(-50%, -50%); }
   .walk:not(.is-armed) .walk-facade-mask { display: none; }
+=======
+  /* One layer, the street, not all five stacked at the centre: the old
+     selectors named z values no layer carries, so every layer showed. */
+  .walk:not(.is-armed) .walk-layer { opacity: 0; transform: translate(-50%, -50%); }
+  .walk:not(.is-armed) .walk-layer[data-in="0"] { opacity: 1; }
+  .walk:not(.is-armed) .walk-hint { display: none; }
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
   @media (prefers-reduced-motion: reduce) {
     .walk-rail { height: 100vh !important; }
     .walk-layer, .walk-facade-mask, .walk-cap, .walk-hint { transition: none !important; }
@@ -1148,6 +1222,7 @@
        has had `auto` all along. !important because ScrollTrigger restores this
        property inline. */
     html { scroll-behavior: auto !important; }
+<<<<<<< HEAD
     .buoyant-pill { animation: none !important; }
   }
 </style>
@@ -1195,6 +1270,107 @@
   ]
 }
 </script>
+=======
+    /* The script now reads the real preference; these are the CSS-driven
+       motions it cannot reach: the marquee, the reveal and the hero rise. */
+    .track { animation: none !important; }
+    :where(.js) .scroll-reveal { opacity: 1; transform: none; transition: none; }
+    .w > span, .lede, .cta-row { animation: none !important; }
+  }
+  /* While the cookie bar is up it sits over anything pinned to the bottom of
+     a sticky stage. Lift those controls by its height. */
+  html[data-consent-open="1"] .is-scroll .ch-nav { bottom: calc(20px + var(--consent-h, 0px)); }
+  html[data-consent-open="1"] .walk-hint { bottom: calc(26px + var(--consent-h, 0px)); }
+  #scratchCanvas { touch-action: pan-y; }
+
+  .shot-stage { position: relative; }
+  .shot-board {
+    position: absolute; left: 16px; right: 16px; bottom: 72px; z-index: 6;
+    color: #F1E9FF; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+    text-shadow: 0 1px 8px rgba(20,8,42,.8);
+  }
+  .shot-board input[type="range"] { width: 100%; accent-color: #7C3AED; }
+  .shot-hud { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 5; cursor: ew-resize; touch-action: pan-y; }
+  .pour-overlay { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; }
+  .pour-overlay path { fill: none; stroke: #F4EFE6; stroke-width: 2.6; stroke-linecap: round; }
+  .pour-sheen {
+    position: absolute; inset: 0; z-index: 4; pointer-events: none;
+    background: radial-gradient(120px 80px at var(--sx, 50%) var(--sy, 40%), rgba(255,255,255,.35), transparent 70%);
+  }
+  .ch-ambient, .ch-atmo { position: absolute; inset: 0; overflow: hidden; pointer-events: none; contain: strict; }
+  .ch-ambient span, .ch-atmo span {
+    position: absolute; border-radius: 50%; opacity: .45;
+    animation: moteDrift 9s linear infinite;
+    animation-play-state: paused;
+  }
+  .ch-ambient.is-live span, .ch-atmo.is-live span { animation-play-state: running; }
+  @keyframes moteDrift { to { translate: 12px -28px; } }
+  .bean-morph {
+    position: relative; width: 160px; height: 160px; margin: 0 auto 18px;
+    border-radius: 50%; overflow: hidden;
+    box-shadow: 0 12px 28px rgba(43,22,80,.22);
+  }
+  .bean-morph img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+  .bean-disc {
+    position: absolute; inset: 0; width: auto; height: auto; margin: 0;
+    opacity: .4; mix-blend-mode: multiply; pointer-events: none;
+  }
+  .bean-oil {
+    position: absolute; inset: 0; border-radius: 50%; pointer-events: none; opacity: .12;
+    background: radial-gradient(circle at 32% 28%, rgba(255,236,190,.7), transparent 46%);
+    mix-blend-mode: screen;
+  }
+  .note-pill { display: inline-block; animation: noteFloat 3.6s ease-in-out infinite; }
+  .note-pill:nth-child(2) { animation-delay: -.6s; }
+  .note-pill:nth-child(3) { animation-delay: -1.4s; }
+  .note-pill:nth-child(4) { animation-delay: -2.1s; }
+  @keyframes noteFloat { 50% { translate: 0 -6px; } }
+  .ctx-pill {
+    position: fixed; z-index: 1000000; left: 0; top: 0; pointer-events: none;
+    padding: 6px 10px; border-radius: 999px; font-size: 10px; font-weight: 800;
+    letter-spacing: .14em; text-transform: uppercase; color: #F1E9FF; background: #2B1650;
+    translate: -100px -100px; opacity: 0;
+  }
+  .ctx-pill.on { opacity: 1; }
+  #chapters .stage {
+    --surface-tint: #2A1810;
+    --accent-glow: rgba(110,68,255,.45);
+    background: #2A1810;
+  }
+  #chapters .stage::before {
+    content: "";
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(70% 62% at 78% 40%, var(--accent-glow), transparent 64%),
+      radial-gradient(120% 90% at 50% 120%, var(--surface-tint), transparent 58%);
+    opacity: .55;
+  }
+  #chapters .ch-ambient { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+  #chapters .stage[data-pillar="coffee"] .ch-title,
+  #chapters .stage[data-pillar="coffee"] .ch-list strong,
+  #chapters .stage[data-pillar="gelato"] .ch-title,
+  #chapters .stage[data-pillar="gelato"] .ch-list strong { color: #F1E9FF; }
+  #chapters .stage[data-pillar="coffee"] .ch-lead,
+  #chapters .stage[data-pillar="coffee"] .ch-list span,
+  #chapters .stage[data-pillar="gelato"] .ch-lead,
+  #chapters .stage[data-pillar="gelato"] .ch-list span { color: rgba(241,233,255,.82); }
+  #chapters .stage[data-pillar="coffee"] .ch-nav button,
+  #chapters .stage[data-pillar="gelato"] .ch-nav button { color: #F1E9FF; }
+  #chapters .stage[data-pillar="coffee"] .ch-nav button::after,
+  #chapters .stage[data-pillar="gelato"] .ch-nav button::after { background: #F1E9FF; }
+  #chapters .stage[data-pillar="matcha"] .ch-title,
+  #chapters .stage[data-pillar="matcha"] .ch-list strong { color: #1F4E3B; }
+  #chapters .stage[data-pillar="gelato"] .photo {
+    box-shadow: inset 0 0 0 1px rgba(210,230,245,.55), 0 16px 40px rgba(28,20,18,.35);
+  }
+  #scratchContainer { isolation: isolate; }
+  @media (prefers-reduced-motion: reduce) {
+    .note-pill, .walk-reflect { animation: none !important; }
+    .ch-ambient, .shot-hud { display: none; }
+  }
+</style>
+<script>document.documentElement.classList.add('js');</script>
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
 <!-- seo:auto:start -->
 <!-- Managed by scripts/seo-inject.mjs · edit seo.config.json, not here. -->
 <meta name="description" content="In-house specialty roasts, ceremonial Uji matcha, and small-batch gelato. DLF Phase 1, Golf Course Road &amp; Sector 56, Gurugram." />
@@ -1215,7 +1391,6 @@
 <!-- seo:auto:end -->
 </head>
 <body>
-<div class="concept-bar" role="note" style="position:relative;z-index:60;padding:8px 16px;text-align:center;font:600 12px/1.45 system-ui,-apple-system,sans-serif;letter-spacing:.02em;background:#111;color:#f5f0e8">Concept storefront by <a href="/" style="color:inherit;text-decoration:underline;text-underline-offset:2px">Anchit Tandon</a>, not affiliated with Gram Street Coffee. Nothing here places a real order.</div>
 
 <!-- Luxury Film Grain Cinematic Overlay -->
 <div class="film-grain" aria-hidden="true"></div>
@@ -1238,6 +1413,7 @@
     <a href="#chapters">Flavours</a>
     <a href="#barMenu">Today's Menu</a>
     <a href="#roasteryCraft">Craft &amp; Roastery</a>
+<<<<<<< HEAD
     <a href="#d2cShop">The Beans</a>
     <a href="#story">Our Story</a>
     <a href="#events">Cuppings</a>
@@ -1245,6 +1421,23 @@
   </div>
   <!-- Spatial Audio Toggle Button (15% Gain 65°C Steam Wand Acoustics) -->
   <button id="audioBtn" onclick="toggleAudio()" aria-label="Toggle ambient audio" title="Toggle 65°C Steam Wand &amp; Bar Acoustics (15% Gain)" class="ml-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-[#2B1650]/40 text-[#2B1650] flex items-center gap-1.5 bg-white/70 hover:bg-white transition-all">
+=======
+    <a href="#d2cShop">D2C Roasts</a>
+    <a href="#story">Story</a>
+    <a href="#space">The Space</a>
+    <a href="#cities">Network</a>
+    <a href="#destinations">Locations (3)</a>
+    <a class="opt" href="#walkin">Corridor</a>
+    <a class="opt" href="#portal">Batch disc</a>
+    <a class="opt" href="#menu-matrix">Menu matrix</a>
+    <a class="opt" href="#drops">Drop deck</a>
+    <a class="opt" href="#telemetry">Telemetry</a>
+    <a class="opt" href="#visit">Visit</a>
+  </div>
+  <span id="shopHours" class="hours-chip">OPEN NOW</span>
+  <!-- 5D Audio Toggle Button -->
+  <button id="audioBtn" type="button" onclick="toggleAudio()" aria-label="Ambient audio" aria-pressed="false" class="ml-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-[#2B1650]/40 text-[#2B1650] flex items-center gap-1.5 bg-white/70 hover:bg-white transition-all">
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
     <span id="audioDot" class="w-2 h-2 rounded-full bg-slate-400"></span>
     <svg class="w-3.5 h-3.5 text-[#2B1650]" viewBox="0 0 16 16" fill="none" aria-hidden="true">
       <path d="M2 6.5v3M5 4.5v7M8 2.5v11M11 5v6M14 6.5v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
@@ -1691,24 +1884,173 @@
 
       </div>
 
+<<<<<<< HEAD
       <div class="walk-step" id="walkStep">
         <span id="walkStepLabel">01 / The Lilac Streetfront</span>
         <span class="walk-frame-hud" id="walkFrameHud">FRAME 01 / 90</span>
       </div>
+=======
+      <div class="walk-facade" id="walkFacade" aria-hidden="true">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+          <defs>
+            <mask id="gsDoor">
+              <rect width="100" height="100" fill="white"/>
+              <rect x="36" y="18" width="28" height="68" rx="0.6" fill="black"/>
+            </mask>
+          </defs>
+          <rect width="100" height="100" fill="rgba(205,184,247,0.34)" mask="url(#gsDoor)"/>
+          <g fill="none" stroke="#F4EFFC" stroke-width="0.45" opacity=".85">
+            <rect x="36" y="18" width="28" height="68"/>
+            <path d="M50 18v68M36 40h28M36 62h28"/>
+          </g>
+        </svg>
+        <div class="walk-reflect" id="walkReflect"></div>
+      </div>
+      <div class="walk-flare" id="walkFlare" aria-hidden="true"></div>
+
+      <div class="walk-step" id="walkStep">01 / On Gram Street</div>
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
       <div class="walk-cap" id="walkCap">
         <b>A lilac front on Arjun Marg.</b>
         <span>Move your cursor across the lilac architectural glass or scroll to cross the threshold into our 10-seater brushed-chrome bar.</span>
       </div>
       <div class="walk-hint" id="walkHint">Scroll<i></i></div>
+      <div class="walk-hud"><div class="track"><span id="walkProgressBar"></span></div><div id="walkProgressLabel">0% DEPTH</div></div>
+      <div class="player-card">
+        <div class="row"><span class="sc-kicker" style="color:#CDB8F7">Cafe air</span><button type="button" class="sc-pill" id="cinMute">🔊 LIVE</button></div>
+        <button type="button" class="sc-pill play" id="cinPlay">▶ CAFE SOUNDSCAPE</button>
+        <div class="eq" aria-hidden="true"><i class="eq-bar"></i><i class="eq-bar"></i><i class="eq-bar"></i><i class="eq-bar"></i><i class="eq-bar"></i><i class="eq-bar"></i><i class="eq-bar"></i><i class="eq-bar"></i><i class="eq-bar"></i><i class="eq-bar"></i><i class="eq-bar"></i><i class="eq-bar"></i></div>
+      </div>
     </div>
   </div>
 </section>
 
+<<<<<<< HEAD
 <!-- CHAPTERS: 320vh SCROLL STAGE WITH LIQUID COLOR-BLEED & TENCHA PARTICLE SHIMMER -->
 <section id="chapters" aria-label="Coffee, matcha and gelato">
   <div class="stage">
     <!-- High-Frequency Stone-Ground Tencha Particle Shimmer Canvas (Active on Matcha Chapter) -->
     <canvas id="tenchaShimmerCanvas" aria-hidden="true"></canvas>
+=======
+<svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <filter id="freq-wave-filter"><feTurbulence type="fractalNoise" baseFrequency="0.012 0.08" numOctaves="2" result="noise"/><feDisplacementMap id="freq-disp-map" in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G"/></filter>
+</svg>
+<div class="shop-cin" data-shop="gs" data-scroll>
+  <section class="wave-block" aria-labelledby="wave-h">
+    <div class="sc-wrap">
+      <span class="sc-kicker">Fresh churn</span>
+      <h2 id="wave-h" data-wave-title>FUORI ORA</h2>
+      <p>The global coffee, matcha and gelato movement, now in India. A compact 10-seater lilac room with polished chrome counters.</p>
+    </div>
+  </section>
+  <section class="portal" id="portal" aria-label="Batch disc">
+    <div class="portal-sticky">
+      <div class="portal-stage">
+        <div class="disc-3d" aria-hidden="true"><span class="disc-sheen"></span><span class="label">Gram Street<br>18.5g in</span></div>
+        <div class="sleeve-card">
+          <img src="/assets/brand/u-1515823064-d6e0c04616a7-800.jpg" width="800" height="800" alt="Kyoto Ceremonial Uji Matcha tin" loading="lazy" decoding="async">
+          <div class="s-body">
+            <span class="badge">[ TRACKLIST / SPEC SHEET ]</span>
+            <h3>Kyoto Ceremonial Uji Matcha</h3>
+            <button type="button" class="sc-pill" data-add-sku="uji-ceremonial-matcha">+ ADD TO BAG · ₹890</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="matrix" id="menu-matrix" aria-labelledby="mx-h">
+    <div class="sc-wrap">
+      <span class="sc-kicker">The menu matrix</span>
+      <h2 id="mx-h" data-wave-title>THE MENU</h2>
+      <div class="tabs" role="tablist">
+        <button type="button" class="sc-pill" data-tab="all" aria-pressed="true">ALL</button>
+        <button type="button" class="sc-pill" data-tab="roast" aria-pressed="false">Roasts</button>
+        <button type="button" class="sc-pill" data-tab="bar" aria-pressed="false">Bar</button>
+        <button type="button" class="sc-pill" data-tab="gelato" aria-pressed="false">Gelato</button>
+        <button type="button" class="sc-pill" data-tab="food" aria-pressed="false">Savoury</button>
+      </div>
+      <div class="track-grid">
+        <article class="track-cell" data-track data-cat="roast"><span class="idx">01</span><h3>Concrete House Blend</h3><p class="note">Dark cocoa, roasted hazelnut and molasses. Signature dark roast, 250g.</p><div class="meta"><span>₹580 · D2C</span><span class="qty-row"><button type="button" class="qty" data-sub-sku="concrete-blend">-</button><button type="button" class="qty" data-add-sku="concrete-blend">+</button></span></div></article>
+        <article class="track-cell" data-track data-cat="roast"><span class="idx">02</span><h3>Commute Single Origin</h3><p class="note">Nagaland lot, light roast. Jasmine florals, bergamot orange and stone fruit.</p><div class="meta"><span>₹640 · 250g</span><span class="qty-row"><button type="button" class="qty" data-sub-sku="commute-single-origin">-</button><button type="button" class="qty" data-add-sku="commute-single-origin">+</button></span></div></article>
+        <article class="track-cell" data-track data-cat="roast"><span class="idx">03</span><h3>Midnight Berry Micro-Lot</h3><p class="note">Coorg anaerobic. Wild blueberry, lavender and dark cacao.</p><div class="meta"><span>₹690 · 250g</span><span class="qty-row"><button type="button" class="qty" data-sub-sku="midnight-berry-lot">-</button><button type="button" class="qty" data-add-sku="midnight-berry-lot">+</button></span></div></article>
+        <article class="track-cell" data-track data-cat="bar"><span class="idx">04</span><h3>Kyoto Ceremonial Uji Matcha</h3><p class="note">First-harvest Tencha, stone-ground in Kyoto. Sweet umami and jade micro-foam.</p><div class="meta"><span>₹890 · 30g</span><span class="qty-row"><button type="button" class="qty" data-sub-sku="uji-ceremonial-matcha">-</button><button type="button" class="qty" data-add-sku="uji-ceremonial-matcha">+</button></span></div></article>
+        <article class="track-cell" data-track data-cat="gelato"><span class="idx">05</span><h3>Smoked Chocolate Dark Gelato</h3><p class="note">72% single-origin cacao, oak-smoked cream and Maldon salt. 500ml.</p><div class="meta"><span>₹480 · D2C</span><span class="qty-row"><button type="button" class="qty" data-sub-sku="smoked-chocolate-gelato">-</button><button type="button" class="qty" data-add-sku="smoked-chocolate-gelato">+</button></span></div></article>
+        <article class="track-cell" data-track data-cat="bar"><span class="idx">06</span><h3>Gram Latte</h3><p class="note">The iconic purple latte, crafted with natural blueberry reduction and lavender foam.</p><div class="meta"><span>At the bar</span><a class="qty" href="#destinations">→</a></div></article>
+        <article class="track-cell" data-track data-cat="bar"><span class="idx">07</span><h3>Dubai Cappuccino</h3><p class="note">Velvety cappuccino layered with Sicilian pistachio butter crema and knafeh dust.</p><div class="meta"><span>At the bar</span><a class="qty" href="#destinations">→</a></div></article>
+        <article class="track-cell" data-track data-cat="gelato"><span class="idx">08</span><h3>Croissant Gelato Latte</h3><p class="note">Sweet and salty double shot poured hot over house caramel croissant gelato.</p><div class="meta"><span>At the bar</span><a class="qty" href="#destinations">→</a></div></article>
+        <article class="track-cell" data-track data-cat="bar"><span class="idx">09</span><h3>Twisted Cold Coffee</h3><p class="note">Blended with house coffee gelato and topped with frozen espresso cubes.</p><div class="meta"><span>At the bar</span><a class="qty" href="#destinations">→</a></div></article>
+        <article class="track-cell" data-track data-cat="bar"><span class="idx">10</span><h3>G Street Matcha</h3><p class="note">Ceremonial Japanese Uji matcha, from the lilac glass-fronted counter.</p><div class="meta"><span>At the bar</span><a class="qty" href="#destinations">→</a></div></article>
+        <article class="track-cell" data-track data-cat="food"><span class="idx">11</span><h3>Eggplant parm sando</h3><p class="note">On the Gurugram counter board, next to jerk chicken and the K-Drama puff.</p><div class="meta"><span>At the bar</span><a class="qty" href="#destinations">→</a></div></article>
+        <article class="track-cell" data-track data-cat="food"><span class="idx">12</span><h3>Jerk chicken sando</h3><p class="note">On the same ticker as eggplant parm and peppermint mocha.</p><div class="meta"><span>At the bar</span><a class="qty" href="#destinations">→</a></div></article>
+      </div>
+      <div class="split-banner">
+        <div>
+          <span class="sc-kicker">Manifesto</span>
+          <h2>Ten seats. Nine bars. A lilac room by design.</h2>
+          <p>Gram Street began in Gurugram across DLF Phase 1, Golf Course Road and Sector 56. The site does not sell scale, it sells a threshold: you walk in.</p>
+        </div>
+        <div class="specs">
+          <div><small>Extraction</small><b>9.2 bar · 18.5g</b></div>
+          <div><small>Milk</small><b>65 C, 12ml/s</b></div>
+          <a class="sc-pill" href="#d2cShop">Shop fresh roasts</a>
+        </div>
+      </div>
+      <div class="showcase">
+        <article class="show-card"><img src="/assets/brand/u-1511537190424-bbbab87ac5eb-800.jpg" width="800" height="800" alt="Concrete House Blend" loading="lazy" decoding="async"><div class="body"><span class="sc-kicker">Roast</span><h3>Concrete House Blend</h3><button type="button" class="sc-pill" data-add-sku="concrete-blend">[ + ADD TO BAG ]</button></div></article>
+        <article class="show-card"><img src="/assets/brand/u-1515823064-d6e0c04616a7-800.jpg" width="800" height="800" alt="Kyoto Ceremonial Uji Matcha" loading="lazy" decoding="async"><div class="body"><span class="sc-kicker">Matcha</span><h3>Uji ceremonial tin</h3><button type="button" class="sc-pill" data-add-sku="uji-ceremonial-matcha">[ + ADD TO BAG ]</button></div></article>
+        <article class="show-card"><img src="/assets/brand/u-1575031745961-1ed57f800a4c-800.jpg" width="800" height="800" alt="Smoked Chocolate Dark Gelato" loading="lazy" decoding="async"><div class="body"><span class="sc-kicker">Gelato</span><h3>Smoked chocolate</h3><button type="button" class="sc-pill" data-add-sku="smoked-chocolate-gelato">[ + ADD TO BAG ]</button></div></article>
+      </div>
+      <div class="marquee-wrap">
+        <div class="marquee-track"><span>Gram Latte</span><span>Dubai Cappuccino</span><span>Croissant Gelato Latte</span><span>Twisted Cold Coffee</span><span>G Street Matcha</span><span>Smoked chocolate gelato</span><span>Gram Latte</span><span>Dubai Cappuccino</span><span>Croissant Gelato Latte</span><span>Twisted Cold Coffee</span><span>G Street Matcha</span><span>Smoked chocolate gelato</span></div>
+        <div class="marquee-track rev" aria-hidden="true"><span>DLF Phase 1</span><span>Golf Course Road</span><span>Sector 56</span><span>18.5g</span><span>9.2 bar</span><span>65 C</span><span>DLF Phase 1</span><span>Golf Course Road</span><span>Sector 56</span><span>18.5g</span><span>9.2 bar</span><span>65 C</span></div>
+      </div>
+    </div>
+  </section>
+  <section class="fan-block" id="drops" aria-labelledby="fan-h">
+    <div class="sc-wrap">
+      <span class="sc-kicker">Ultime uscite</span>
+      <h2 id="fan-h" data-wave-title>DROPS</h2>
+      <div class="fan-stage">
+        <button type="button" class="fan-card" data-detail="A compact 10-seater lilac room with polished chrome counters on 16 Arjun Marg, DLF Phase 1."><img src="/assets/brand/u-1554118811-1e0d58224f24-1200.jpg" width="1200" height="800" alt="" loading="lazy" decoding="async"><div class="body"><b>01 Arjun Marg flagship</b></div></button>
+        <button type="button" class="fan-card" data-detail="Freshly ground Nagaland Arabica dosed at 18.5 grams. Dual streams, tiger-striped crema, 9.2 bar."><img src="/assets/brand/u-1534778101976-62847782c213-1200.jpg" width="1200" height="1799" alt="" loading="lazy" decoding="async"><div class="body"><b>02 Nine-bar extraction</b></div></button>
+        <button type="button" class="fan-card" data-detail="Ceremonial first-harvest Tencha, stone-ground in Kyoto. Sweet umami, jade micro-foam."><img src="/assets/brand/u-1515823064-d6e0c04616a7-800.jpg" width="800" height="800" alt="" loading="lazy" decoding="async"><div class="body"><b>03 Uji matcha program</b></div></button>
+        <button type="button" class="fan-card" data-detail="Grown under dense wild canopies at 1,450 metres in Kiphire, Nagaland. Lightly roasted to keep jasmine and bergamot."><img src="/assets/brand/u-1559056199-641a0ac8b55e-800.jpg" width="800" height="800" alt="" loading="lazy" decoding="async"><div class="body"><b>04 Kiphire lot</b></div></button>
+        <button type="button" class="fan-card" data-detail="Gurugram first. Mumbai, Bengaluru, Hyderabad and Jaipur are the planned next destinations."><img src="/assets/brand/u-1501339847302-ac426a4a7cbb-1200.jpg" width="1200" height="800" alt="" loading="lazy" decoding="async"><div class="body"><b>05 City network</b></div></button>
+      </div>
+      <div class="fan-nav"><button type="button" class="sc-pill" data-fan="prev">← PREV</button><button type="button" class="sc-pill" data-fan="next">NEXT →</button></div>
+      <p class="fan-readout" data-fan-readout></p>
+      <div class="blueprint" id="telemetry" aria-label="Craft telemetry">
+        <div class="hub">GSC</div>
+        <div class="node" data-pos="1" data-depth="1.2"><b>9.2 BAR</b>Bottomless naked portafilter, 58mm E61 grouphead.</div>
+        <div class="node" data-pos="2" data-depth="1.6"><b>18.5g IN</b>Nagaland Arabica micro-lot, 36.8g liquid yield.</div>
+        <div class="node" data-pos="3" data-depth="2.0"><b>65 C MILK</b>Aerated to the sweet spot, poured at 12ml/second.</div>
+        <div class="node" data-pos="4" data-depth="1.4"><b>10 SEATS</b>A tiny room by design. Lilac glass, chrome accents.</div>
+        <div class="node" data-pos="5" data-depth="2.2"><b>1,450m</b>Kiphire, Nagaland. Wild canopy, light roast at 196 C.</div>
+        <div class="node" data-pos="6" data-depth="2.4"><b>93.5 C</b>Boiler PID on the 9-bar extraction.</div>
+      </div>
+    </div>
+  </section>
+  <section class="curtain-sec" id="visit" aria-labelledby="kit-h">
+    <div class="sc-wrap">
+      <div class="curtain-frame">
+        <span class="sc-kicker">Visit</span>
+        <h2 id="kit-h">16 Arjun Marg Flagship.</h2>
+        <p>Block F, 16 Arjun Marg, DLF Phase 1, Sector 26A, Gurugram 122002. Open 8:30 AM to 10:30 PM. Call +91 81300 56889. Concept site: bag a roast, preview the order, then send the draft yourself.</p>
+        <div class="tele-strip">
+          <div><small>Live local time</small><b id="cinClock">IST</b></div>
+          <div><small>Coordinates</small><b>DLF Phase 1, Gurugram</b></div>
+          <div><small>Direct line</small><b><a href="https://wa.me/918130056889" rel="noopener" target="_blank">WhatsApp</a></b></div>
+          <div><small>Fulfilment</small><b>Bag, details, then the draft</b></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- CHAPTERS: 320vh SCROLL STAGE WITH ROTATING CONIC-GRADIENT CHROME ORB -->
+<section id="chapters" aria-label="Coffee, matcha and gelato">
+  <div class="stage" data-pillar="coffee">
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
     <!-- Chapter 1: Coffee -->
     <article class="chapter" data-slot="coffee" style="--bg:#CDB8F7">
       <div class="ch-grid">
@@ -2005,13 +2347,13 @@
     </div>
     <!-- Mode Switcher Tabs -->
     <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-[#2B1650]/20 shadow-sm text-xs font-black uppercase tracking-wider overflow-x-auto">
-      <button onclick="switchCraftTab('extraction')" id="craftTab-extraction" class="py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow whitespace-nowrap">
+      <button type="button" aria-pressed="true" onclick="switchCraftTab('extraction')" id="craftTab-extraction" class="py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow whitespace-nowrap">
         1. 9-Bar Extraction
         </button>
-      <button onclick="switchCraftTab('microfoam')" id="craftTab-microfoam" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650] whitespace-nowrap">
+      <button type="button" aria-pressed="false" onclick="switchCraftTab('microfoam')" id="craftTab-microfoam" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650] whitespace-nowrap">
         2. Microfoam Pour
         </button>
-      <button onclick="switchCraftTab('roast')" id="craftTab-roast" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650] whitespace-nowrap">
+      <button type="button" aria-pressed="false" onclick="switchCraftTab('roast')" id="craftTab-roast" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650] whitespace-nowrap">
         3. Roast Spectrum
         </button>
     </div>
@@ -2085,7 +2427,11 @@
         </div>
         <div>
           <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">TDS Purity</div>
+<<<<<<< HEAD
           <div id="craftTdsVal" class="text-lg font-black text-[#2B1650] font-mono-code">9.8%</div>
+=======
+          <div id="craftTdsVal" class="text-lg font-black text-[#2B1650]">9.8%</div>
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
         </div>
         <div>
           <div class="text-xs uppercase tracking-wider text-[#7C3AED] font-bold">Flow Rate</div>
@@ -2132,6 +2478,7 @@
       <div class="space-y-2">
         <span class="text-xs uppercase tracking-widest text-[#7C3AED] font-black">Select Pour Pattern (12ml/s Pitcher Oscillation)</span>
         <div class="flex flex-wrap gap-2">
+<<<<<<< HEAD
           <button onclick="setCraftPattern('rosetta')" id="craftPat-rosetta" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#2B1650] text-[#F1E9FF] shadow transition-all">
             8-Leaf Rosetta
           </button>
@@ -2141,6 +2488,17 @@
           <button onclick="setCraftPattern('swan')" id="craftPat-swan" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#F8F5FF] text-[#534168] border border-[#2B1650]/20 hover:text-[#2B1650] transition-all">
             Barista Swan
           </button>
+=======
+          <button type="button" aria-pressed="true" onclick="setCraftPattern('rosetta')" id="craftPat-rosetta" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#2B1650] text-[#F1E9FF] shadow transition-all">
+            Rosetta
+            </button>
+          <button type="button" aria-pressed="false" onclick="setCraftPattern('tulip')" id="craftPat-tulip" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#F8F5FF] text-[#534168] border border-[#2B1650]/20 hover:text-[#2B1650] transition-all">
+            Stacked Tulip
+            </button>
+          <button type="button" aria-pressed="false" onclick="setCraftPattern('heart')" id="craftPat-heart" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#F8F5FF] text-[#534168] border border-[#2B1650]/20 hover:text-[#2B1650] transition-all">
+            Blooming Heart
+            </button>
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
         </div>
       </div>
 
@@ -2286,6 +2644,7 @@
       </div>
     </div>
 
+<<<<<<< HEAD
     <!-- Right Bean Macro LUT Morph Canvas + Spring-Physics Sensory Bars -->
     <div class="lg:col-span-6 flex flex-col items-center justify-center p-6 sm:p-8 bg-gradient-to-b from-[#F8F5FF] to-[#EAE0FC] rounded-2xl border border-[#2B1650]/15 shadow-inner">
       <!-- 3-Stop Color LUT + Oil-Sheen Normal Map Coffee Bean Macro Canvas -->
@@ -2298,6 +2657,16 @@
       </div>
 
       <div class="w-full max-w-sm space-y-3.5">
+=======
+    <!-- Right Sensory Radar Graphic -->
+    <div class="lg:col-span-6 flex flex-col items-center justify-center p-8 bg-gradient-to-b from-[#F8F5FF] to-[#EAE0FC] rounded-2xl border border-[#2B1650]/15 shadow-inner">
+      <div class="bean-morph" id="craftBeanMorph">
+        <img id="craftRoastImg" src="/assets/brand/u-1442512595331-e89e73853f31-1200.jpg" alt="" width="160" height="160" class="w-full h-full object-cover rounded-full">
+        <div class="bean-disc" id="craftBeanDisc" aria-hidden="true"></div>
+        <div class="bean-oil" id="craftBeanOil" aria-hidden="true"></div>
+      </div>
+      <div class="w-full max-w-sm space-y-4">
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
         <div class="space-y-1">
           <div class="flex justify-between text-xs font-bold text-[#2B1650]">
             <span>Acidity &amp; Brightness</span>
@@ -2569,13 +2938,13 @@
       </div>
       <!-- 3 Location Buttons -->
       <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-[#2B1650]/20 shadow-sm text-xs font-black uppercase tracking-wider overflow-x-auto">
-        <button id="locTab-phase1" onclick="switchLocation('phase1')" class="py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow">
+        <button type="button" aria-pressed="true" id="locTab-phase1" onclick="switchLocation('phase1')" class="py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow">
           1. DLF Phase 1 Flagship
           </button>
-        <button id="locTab-gcr" onclick="switchLocation('gcr')" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650]">
+        <button type="button" aria-pressed="false" id="locTab-gcr" onclick="switchLocation('gcr')" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650]">
           2. Golf Course Road
           </button>
-        <button id="locTab-sec56" onclick="switchLocation('sec56')" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650]">
+        <button type="button" aria-pressed="false" id="locTab-sec56" onclick="switchLocation('sec56')" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650]">
           3. Sector 56 Hub
           </button>
       </div>
@@ -2709,10 +3078,10 @@
 <!-- SLIDE-OVER ROASTERY BAG DRAWER -->
 <div id="cartModal" class="fixed inset-0 z-50 hidden">
 <div onclick="toggleCart(false)" class="absolute inset-0 bg-black/75 backdrop-blur-sm"></div>
-<div id="bagPanel" data-consent-pad class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-[#2B1650]/35 p-8 flex flex-col justify-between overflow-y-auto shadow-2xl text-[#2B1650]">
+<div id="bagPanel" data-consent-pad role="dialog" aria-modal="true" aria-labelledby="bagTitle" tabindex="-1" class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-[#2B1650]/35 p-8 flex flex-col justify-between overflow-y-auto shadow-2xl text-[#2B1650]">
   <div>
     <div class="flex items-center justify-between border-b border-[#2B1650]/20 pb-5">
-      <h3 class="text-xl font-display font-black uppercase tracking-tight text-[#2B1650]">Your Roastery Bag</h3>
+      <h3 id="bagTitle" class="text-xl font-display font-black uppercase tracking-tight text-[#2B1650]">Your Roastery Bag</h3>
       <button onclick="toggleCart(false)" class="text-xs uppercase tracking-widest text-[#7C3AED] font-black hover:underline">Close ✕</button>
     </div>
     <div id="bagBody"><div id="cartItemsList" class="mt-6 space-y-4 max-h-[60vh] overflow-y-auto pr-1"></div></div>
@@ -2769,9 +3138,10 @@
     <p class="text-[11px] font-black uppercase tracking-[0.18em] text-[#7C3AED]">Demo order previewed</p>
     <p class="text-3xl font-display font-black tracking-tight text-[#2B1650]" id="ordRef">GS-0000</p>
     <p class="text-xs font-semibold text-[#534168] leading-relaxed" id="ordSummary"></p>
+    <p id="ordCopied" hidden class="text-xs font-black uppercase tracking-wider text-[#7C3AED]">Copied to clipboard</p>
     <div class="flex items-center gap-2 pt-1">
       <a id="ordWa" href="#" target="_blank" rel="noopener" class="flex-1 text-center py-3.5 rounded-full bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-[0.16em] hover:bg-[#3D2272] transition-all">Send it on WhatsApp ↗</a>
-      <button type="button" onclick="copyOrder()" id="ordCopy" class="px-5 py-3.5 rounded-full border border-[#2B1650]/30 text-[#2B1650] font-black text-xs uppercase tracking-[0.16em] hover:bg-[#F5EFFF] transition-all">Copy</button>
+      <button type="button" onclick="copyOrder()" id="ordCopy" class="px-5 py-3.5 rounded-full border border-[#2B1650]/30 text-[#2B1650] font-black text-xs uppercase tracking-[0.16em] hover:bg-[#F5EFFF] transition-all">COPY ORDER TEXT</button>
     </div>
     <p class="text-[10px] leading-relaxed text-[#534168]">Or call the roastery on <a class="underline font-bold" href="tel:+918130056889">+91 81300 56889</a> and quote the reference.</p>
     <button type="button" onclick="backToBag()" class="w-full py-3 rounded-full border border-[#2B1650]/25 text-[#534168] font-black text-[11px] uppercase tracking-[0.16em] hover:bg-[#F5EFFF] transition-all">Start another bag</button>
@@ -2806,7 +3176,7 @@
 <script>
 (function () {
   "use strict";
-  var reduce = false;
+  var reduce = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 
   // 1. D2C Products Catalog
   const PRODUCTS = [
@@ -2900,6 +3270,11 @@
   let activeLocation = 'phase1';
   let subMode = {};
   let cart = [];
+  var BAG_KEY = 'gram-street-bag';
+  try {
+    var storedBag = JSON.parse(localStorage.getItem(BAG_KEY) || '[]');
+    if (Array.isArray(storedBag)) cart = storedBag;
+  } catch (e) { /* private window */ }
   let audioCtx = null;
   let isPlayingAudio = false;
 
@@ -2910,6 +3285,7 @@
 
     ['phase1', 'gcr', 'sec56'].forEach(k => {
       const btn = document.getElementById(LOCATIONS[k].tabId);
+      btn.setAttribute('aria-pressed', String(k === key));
       if (k === key) {
         btn.className = 'py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow';
       } else {
@@ -2927,13 +3303,16 @@
     document.getElementById('locPhone').href = `tel:${loc.phone.replace(/\s+/g, '')}`;
     document.getElementById('locDirectionsBtn').href = loc.directions;
     document.getElementById('locZomatoBtn').href = loc.zomato;
-    document.getElementById('scratchCaption').textContent = loc.caption;
+    document.getElementById('scratchCaption').textContent = String(loc.caption || '').replace(/^📍\s*/, '');
 
     const bgImg = document.getElementById('scratchBgImage');
     bgImg.style.opacity = '0';
     setTimeout(() => {
       bgImg.src = loc.image;
+      // One-shot: left attached, it fired again when the lazy photo first
+      // loaded on the way down the page and re-fogged a glass mid-wipe.
       bgImg.onload = () => {
+        bgImg.onload = null;
         bgImg.style.opacity = '1';
         initScratchWindow();
       };
@@ -3068,6 +3447,7 @@
     var stage = sec.querySelector(".stage");
     var chs = [].slice.call(sec.querySelectorAll(".chapter"));
     var btns = [].slice.call(sec.querySelectorAll(".ch-nav button"));
+<<<<<<< HEAD
     var shimmerCanvas = document.getElementById("tenchaShimmerCanvas");
     var shimmerCtx = shimmerCanvas ? shimmerCanvas.getContext("2d") : null;
     // Ambient Surface Tints & Radial Glows:
@@ -3081,6 +3461,12 @@
       [200, 138, 75, 0.38]    // #C88A4B Warm Brioche Amber glow
     ];
     var inkPal = [[248, 244, 255], [216, 232, 213], [243, 223, 200]];
+=======
+    var pal = [[42, 24, 16], [216, 232, 213], [28, 20, 18]];
+    var glows = ['rgba(110,68,255,.55)', 'rgba(31,78,59,.45)', 'rgba(200,138,75,.5)'];
+    var pillars = ['coffee', 'matcha', 'gelato'];
+    var tints = ['#2A1810', '#D8E8D5', '#1C1412'];
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
     sec.classList.add("is-scroll");
     var matchaWeight = 0, chaptersVisible = false, shimmerRunning = false;
     var tenchaMotes = [];
@@ -3145,20 +3531,34 @@
     function update() {
       var top = sec.getBoundingClientRect().top;
       var p = Math.min(1, Math.max(0, -top / total()));
+<<<<<<< HEAD
       var t = p * 3, w = [], r = 0, g = 0, b = 0, gr = 0, gg = 0, gb = 0, ga = 0, ir = 0, ig = 0, ib = 0;
+=======
+      var t = p * 3, w = [];
+      // A handoff, not a crossfade. The outgoing chapter is fully gone
+      // (t = i + 1) before the incoming one starts to arrive. Fading both over
+      // the same window stacked two headlines and two sets of copy in the same
+      // spot at half opacity, which read as a rendering fault, not a transition.
+      var cur = 0;
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
       for (var i = 0; i < 3; i++) {
-        var a = i === 0 ? 1 : ss(i - 0.12, i + 0.12, t);
-        var z = i === 2 ? 1 : 1 - ss(i + 0.88, i + 1.12, t);
+        var a = i === 0 ? 1 : ss(i, i + 0.18, t);
+        var z = i === 2 ? 1 : 1 - ss(i + 0.82, i + 1, t);
         w[i] = a * z;
+        if (w[i] > w[cur]) cur = i;
         chs[i].style.opacity = w[i].toFixed(3);
+        chs[i].style.visibility = w[i] > 0.001 ? "visible" : "hidden";
         chs[i].style.transform = "translateY(" + ((1 - w[i]) * 26).toFixed(1) + "px)";
         chs[i].style.pointerEvents = w[i] > 0.5 ? "auto" : "none";
+<<<<<<< HEAD
         r += pal[i][0] * w[i]; g += pal[i][1] * w[i]; b += pal[i][2] * w[i];
         gr += glowPal[i][0] * w[i]; gg += glowPal[i][1] * w[i]; gb += glowPal[i][2] * w[i]; ga += glowPal[i][3] * w[i];
         ir += inkPal[i][0] * w[i]; ig += inkPal[i][1] * w[i]; ib += inkPal[i][2] * w[i];
+=======
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
         btns[i].style.setProperty("--f", Math.min(1, Math.max(0, t - i)).toFixed(3));
-        btns[i].setAttribute("aria-current", w[i] > 0.5 ? "true" : "false");
       }
+<<<<<<< HEAD
       matchaWeight = w[1] || 0;
       if (shimmerCanvas) shimmerCanvas.style.opacity = (matchaWeight * 0.95).toFixed(3);
       ensureShimmer();
@@ -3174,6 +3574,25 @@
       stage.style.setProperty("--ch-ink", inkRgb);
       stage.style.setProperty("--ch-muted", mutedRgba);
       stage.style.backgroundColor = surfaceRgb;
+=======
+      // Exactly one chapter is current at every scroll position, including
+      // the instant between two where both are at zero.
+      for (var k = 0; k < 3; k++) btns[k].setAttribute("aria-current", k === cur ? "true" : "false");
+      // The colour keeps its own continuous blend across the seam: weighting
+      // it by the text opacities would dip to black where both read zero.
+      var col = pal[0].slice();
+      for (var j = 0; j < 2; j++) {
+        var m = ss(j + 0.82, j + 1.18, t);
+        for (var c = 0; c < 3; c++) col[c] += (pal[j + 1][c] - col[c]) * m;
+      }
+      var r = col[0], g = col[1], b = col[2];
+      stage.style.setProperty("--rot", (p * 540).toFixed(1) + "deg");
+      stage.style.setProperty("--s", (0.92 + 0.12 * Math.sin(p * Math.PI * 3)).toFixed(3));
+      stage.style.setProperty("--surface-tint", tints[cur]);
+      stage.style.setProperty("--accent-glow", glows[cur]);
+      stage.dataset.pillar = pillars[cur];
+      stage.style.backgroundColor = "rgb(" + Math.round(r) + "," + Math.round(g) + "," + Math.round(b) + ")";
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
     }
     var ticking = false;
     function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(function () { ticking = false; update(); }); } }
@@ -3195,6 +3614,7 @@
   (function walkIn() {
     var sec = document.getElementById('walkin');
     if (!sec) return;
+    if (document.getElementById('walkProgressBar')) return;
     var rail = sec.querySelector('.walk-rail');
     var frame = sec.querySelector('.walk-frame');
     var layers = [].slice.call(sec.querySelectorAll('.walk-layer'));
@@ -3226,9 +3646,15 @@
     }, { passive: true });
 
     var STEPS = [
+<<<<<<< HEAD
       [0.00, '01 / The Lilac Streetfront', 'Outside on 16 Arjun Marg.', 'Frames 01–30: Lilac architectural glass facade with live specular pane reflection. Scroll to push through the doorway.'],
       [0.33, '02 / Crossing the Glass Threshold', 'Chrome specular flare across pastel.', 'Frames 31–60: Scaling through the brushed-steel doorframe as street acoustics give way to the espresso bar.'],
       [0.67, '03 / The 10-Seater Chrome Bar', 'Docked at the brushed-steel counter.', 'Frames 61–90: E61 9.2-bar groupheads, 78°C Uji matcha chasen station and -12°C pozzetti gelato bar.']
+=======
+      [0.00, '01 / The lilac streetfront', 'Outside on Arjun Marg.', 'A glass front painted lilac. Keep scrolling and the doorframe comes toward you.'],
+      [0.34, '02 / Through the glass', 'Chrome along the doorframe.', 'The facade passes the edges of the screen. Street light gives way to the bar.'],
+      [0.68, '03 / The chrome bar', 'Ten seats, brushed steel, the shot.', 'In-house roasts, ceremonial matcha and small-batch gelato, docked at the counter.']
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
     ];
     var at = -1;
     var capT = 0;
@@ -3273,6 +3699,18 @@
         L.style.opacity = o.toFixed(3);
         L.style.transform = 'translate(-50%, -50%) translateZ(' + z.toFixed(1) + 'px)';
       }
+      var facade = document.getElementById('walkFacade');
+      var flare = document.getElementById('walkFlare');
+      if (facade) {
+        var sc = p < 0.22 ? 1 : p < 0.68 ? 1 + ((p - 0.22) / 0.46) * 3.5 : 4.5;
+        var fo = p < 0.58 ? 1 : p < 0.8 ? 1 - (p - 0.58) / 0.22 : 0;
+        facade.style.scale = sc.toFixed(3);
+        facade.style.opacity = fo.toFixed(3);
+      }
+      if (flare) {
+        var fl = p < 0.34 ? 0 : p < 0.5 ? (p - 0.34) / 0.16 : p < 0.7 ? 1 - (p - 0.5) / 0.2 : 0;
+        flare.style.opacity = Math.max(0, fl).toFixed(3);
+      }
       if (hint) hint.style.opacity = (1 - clamp01(p / 0.08)).toFixed(3);
 
       var k = 0;
@@ -3296,16 +3734,15 @@
     }
     if (cap) cap.style.transition = 'opacity .34s ease, transform .34s cubic-bezier(.16,1,.3,1)';
 
-    var ticking = false;
+    var ticking = false, onScreen = true;
     function onScroll() {
-      if (ticking) return;
+      if (ticking || !onScreen) return;
       ticking = true;
       requestAnimationFrame(function () {
         ticking = false;
         var r = rail.getBoundingClientRect();
         var span = r.height - frame.offsetHeight;
         var p = span > 0 ? clamp01(-r.top / span) : 0;
-        sec.style.setProperty('--p', p.toFixed(4));
         place(p);
       });
     }
@@ -3314,7 +3751,11 @@
 
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (en) {
-        sec.classList.toggle('is-past', !en[0].isIntersecting);
+        onScreen = en[0].isIntersecting;
+        sec.classList.toggle('is-past', !onScreen);
+        // One last placement on the way out, so a fast fling past the walk
+        // never leaves the layers parked mid-stage for the next arrival.
+        ticking = false; if (onScreen) onScroll(); else { onScreen = true; onScroll(); onScreen = false; }
       }, { threshold: 0 }).observe(sec);
     }
     onScroll();
@@ -3516,6 +3957,7 @@
 
   window.initScratchWindow = function() {
     if (!scratchCanvas || !scratchCtx) return;
+<<<<<<< HEAD
     const rect = scratchCanvas.parentElement.getBoundingClientRect();
     scratchCanvas.width = Math.max(10, Math.round(rect.width));
     scratchCanvas.height = Math.max(10, Math.round(rect.height));
@@ -3523,7 +3965,95 @@
     lastWipeStamp = 0;
     seedRefractiveDroplets(scratchCanvas.width, scratchCanvas.height);
     paintFogBase(1.0, true);
+=======
+    // Layout size, not getBoundingClientRect: the panel sits inside a
+    // scroll-reveal that starts at scale(0.98), so the rect read 2% narrow,
+    // the canvas was sized wrong, and the first resize after the reveal saw
+    // a "width change" and re-fogged the glass.
+    const host = scratchCanvas.parentElement;
+    const rect = { width: host.offsetWidth, height: host.offsetHeight };
+    scratchCanvas.width = rect.width;
+    scratchCanvas.height = rect.height;
+    scratchCtx.globalCompositeOperation = 'source-over';
+
+    const grad = scratchCtx.createLinearGradient(0, 0, scratchCanvas.width, scratchCanvas.height);
+    grad.addColorStop(0, 'rgba(43, 22, 80, 0.96)');
+    grad.addColorStop(1, 'rgba(94, 50, 204, 0.92)');
+    scratchCtx.fillStyle = grad;
+    scratchCtx.fillRect(0, 0, scratchCanvas.width, scratchCanvas.height);
+
+    scratchCtx.fillStyle = '#CDB8F7';
+    scratchCtx.textAlign = 'center';
+    scratchCtx.textBaseline = 'middle';
+    const loc = LOCATIONS[activeLocation];
+    // Two lines, each shrunk to fit: one 13px line ran off both edges of a
+    // phone-width panel ("...E / TOUCH GLASS TO REVEAL 16 ARJUN MARG FLAGSHIP B...").
+    const lines = ['✦ WIPE / TOUCH THE GLASS ✦', 'TO REVEAL ' + String(loc.caption || '').replace(/^📍\s*/, '').toUpperCase()];
+    const maxW = scratchCanvas.width - 40;
+    lines.forEach(function (txt, i) {
+      let size = 13;
+      scratchCtx.font = '800 ' + size + 'px Bricolage Grotesque, sans-serif';
+      while (size > 9 && scratchCtx.measureText(txt).width > maxW) {
+        size -= 1;
+        scratchCtx.font = '800 ' + size + 'px Bricolage Grotesque, sans-serif';
+      }
+      scratchCtx.fillText(txt, scratchCanvas.width / 2, scratchCanvas.height / 2 + (i - 0.5) * 22);
+    });
+    scratchW = rect.width;
+    try { fogBase = scratchCtx.getImageData(0, 0, scratchCanvas.width, scratchCanvas.height); } catch (e) { fogBase = null; }
+    fogStamps.length = 0;
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
   };
+  let scratchW = 0;
+  const fogStamps = [];
+  let fogBase = null;
+  let fogRaf = 0;
+
+  var fogDrawn = 0;
+  function paintFog(now) {
+    fogRaf = 0;
+    if (!fogBase || !scratchCtx) return;
+    if (now - fogDrawn < 32) { fogRaf = requestAnimationFrame(paintFog); return; }
+    fogDrawn = now;
+    scratchCtx.globalCompositeOperation = 'source-over';
+    scratchCtx.putImageData(fogBase, 0, 0);
+    const live = [];
+    for (let i = 0; i < fogStamps.length; i++) {
+      const s = fogStamps[i];
+      const age = (now - s.t) / 8000;
+      if (age >= 1) continue;
+      live.push(s);
+      const hole = 1 - age;
+      scratchCtx.globalCompositeOperation = 'destination-out';
+      scratchCtx.fillStyle = 'rgba(0,0,0,' + hole.toFixed(3) + ')';
+      scratchCtx.beginPath();
+      scratchCtx.arc(s.x, s.y, 78, 0, Math.PI * 2);
+      scratchCtx.fill();
+      scratchCtx.globalCompositeOperation = 'source-over';
+      scratchCtx.fillStyle = 'rgba(232, 224, 255, ' + (0.45 * hole).toFixed(3) + ')';
+      scratchCtx.beginPath();
+      scratchCtx.ellipse(s.x + 6, s.y + age * 110, 2.5, 6 + age * 8, 0, 0, Math.PI * 2);
+      scratchCtx.fill();
+    }
+    fogStamps.length = 0;
+    for (let i = 0; i < live.length; i++) fogStamps.push(live[i]);
+    const photo = document.getElementById('scratchBgImage');
+    if (photo && photo.complete && photo.naturalWidth) {
+      for (let i = 0; i < live.length; i++) {
+        const s = live[i];
+        const age = (now - s.t) / 8000;
+        const dropY = s.y + age * 110;
+        scratchCtx.save();
+        scratchCtx.beginPath();
+        scratchCtx.ellipse(s.x + 6, dropY, 3.4, 7 + age * 6, 0, 0, Math.PI * 2);
+        scratchCtx.clip();
+        scratchCtx.globalAlpha = 0.85 * (1 - age);
+        scratchCtx.drawImage(photo, -5, 3, scratchCanvas.width, scratchCanvas.height);
+        scratchCtx.restore();
+      }
+    }
+    if (live.length) fogRaf = requestAnimationFrame(paintFog);
+  }
 
   function tickCondensationShader(now) {
     if (!refogLoopActive) return;
@@ -3562,6 +4092,7 @@
   function wipeScratchAt(clientX, clientY) {
     if (!scratchCanvas || !scratchCtx) return;
     const rect = scratchCanvas.getBoundingClientRect();
+<<<<<<< HEAD
     const x = clientX - rect.left;
     const y = clientY - rect.top;
     scratchCtx.save();
@@ -3591,20 +4122,28 @@
       refogLoopActive = true;
       requestAnimationFrame(tickCondensationShader);
     }
+=======
+    const x = ((clientX - rect.left) / rect.width) * scratchCanvas.width;
+    const y = ((clientY - rect.top) / rect.height) * scratchCanvas.height;
+    fogStamps.push({ x: x, y: y, t: performance.now() });
+    if (fogStamps.length > 80) fogStamps.shift();
+    if (!fogRaf) fogRaf = requestAnimationFrame(paintFog);
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
   }
 
   if (scratchCanvas) {
-    scratchCanvas.addEventListener('mousemove', (e) => wipeScratchAt(e.clientX, e.clientY));
-    scratchCanvas.addEventListener('touchmove', (e) => {
-      if (e.touches && e.touches[0]) {
-        wipeScratchAt(e.touches[0].clientX, e.touches[0].clientY);
-        e.preventDefault();
-      }
-    }, { passive: false });
-    scratchCanvas.addEventListener('touchstart', (e) => {
-      if (e.touches && e.touches[0]) wipeScratchAt(e.touches[0].clientX, e.touches[0].clientY);
+    // Pointer events with touch-action: pan-y (in the stylesheet): a sideways
+    // finger wipes, an up-or-down one scrolls the page. The old touchmove
+    // handler called preventDefault, so a phone scrolling through this 480px
+    // panel was stuck wiping glass.
+    scratchCanvas.addEventListener('pointermove', (e) => wipeScratchAt(e.clientX, e.clientY));
+    scratchCanvas.addEventListener('pointerdown', (e) => wipeScratchAt(e.clientX, e.clientY));
+    // Only a WIDTH change re-fogs the glass. Mobile browsers fire resize as
+    // their address bar slides in and out, which reset the wipe mid-scroll.
+    window.addEventListener('resize', function () {
+      const w = scratchCanvas.parentElement.offsetWidth;
+      if (Math.abs(w - scratchW) > 1) window.initScratchWindow();
     });
-    window.addEventListener('resize', window.initScratchWindow);
     window.initScratchWindow();
   }
 
@@ -3631,6 +4170,7 @@
       whiteNoise.buffer = noiseBuffer;
       whiteNoise.loop = true;
 
+<<<<<<< HEAD
       const bandpass = audioCtx.createBiquadFilter();
       bandpass.type = 'bandpass';
       bandpass.frequency.value = 1150;
@@ -3638,6 +4178,14 @@
 
       const gain = audioCtx.createGain();
       gain.gain.value = 0.15; // 15% tactile spatial audio gain
+=======
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'highpass';
+      filter.frequency.value = 1400;
+
+      const gain = audioCtx.createGain();
+      gain.gain.value = 0.045;
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
 
       whiteNoise.connect(bandpass);
       bandpass.connect(gain);
@@ -3646,13 +4194,23 @@
 
       isPlayingAudio = true;
       document.getElementById('audioDot').className = 'w-2 h-2 rounded-full bg-emerald-400 animate-ping';
+<<<<<<< HEAD
       document.getElementById('audioLabel').textContent = '65°C Steam: On';
+=======
+      document.getElementById('audioLabel').textContent = '5D Audio: On';
+      document.getElementById('audioBtn').setAttribute('aria-pressed', 'true');
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
     } else {
       if (audioCtx) audioCtx.close();
       audioCtx = null;
       isPlayingAudio = false;
       document.getElementById('audioDot').className = 'w-2 h-2 rounded-full bg-slate-400';
+<<<<<<< HEAD
       document.getElementById('audioLabel').textContent = '65°C Audio';
+=======
+      document.getElementById('audioLabel').textContent = '5D Audio';
+      document.getElementById('audioBtn').setAttribute('aria-pressed', 'false');
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
     }
   };
 
@@ -3712,11 +4270,18 @@
   function renderProducts() {
     const grid = document.getElementById('productGridContainer');
     if (!grid) return;
+    // Re-rendering for a Subscribe / One-Time click must not send every card
+    // back to opacity 0 and fade the whole grid in again.
+    const shown = !!grid.querySelector('.scroll-reveal.in-view');
     grid.innerHTML = PRODUCTS.map(p => {
       const isSub = !!subMode[p.id];
       const finalPrice = isSub ? Math.round(p.price * 0.85) : p.price;
       return `
+<<<<<<< HEAD
         <div class="d2c-card kinetic-card tilt-card scroll-reveal p-7 flex flex-col justify-between space-y-5">
+=======
+        <div class="d2c-card tilt-card scroll-reveal${shown ? ' in-view' : ''} p-7 flex flex-col justify-between space-y-5">
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
         <div>
           <div class="relative h-64 rounded-2xl overflow-hidden mb-5 bg-black/10">
             <img src="${p.image}" alt="${p.name}" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
@@ -3731,10 +4296,10 @@
           <p class="text-xs font-semibold text-[#534168] mb-5 leading-relaxed">${p.notes}</p>
 
           <div class="grid grid-cols-2 gap-2 p-1.5 rounded-xl bg-[#F5EFFF] border border-[#7C3AED]/25 text-[11px] font-black uppercase tracking-wider mb-2">
-            <button onclick="window.setSubMode('${p.id}', false)" class="py-2.5 rounded-lg transition-all ${!isSub ? 'bg-[#7C3AED] text-white shadow-sm' : 'text-[#534168]'}">
+            <button type="button" aria-pressed="${!isSub}" onclick="window.setSubMode('${p.id}', false)" class="py-2.5 rounded-lg transition-all ${!isSub ? 'bg-[#7C3AED] text-white shadow-sm' : 'text-[#534168]'}">
               One-Time (₹${p.price})
               </button>
-            <button onclick="window.setSubMode('${p.id}', true)" class="py-2.5 rounded-lg transition-all ${isSub ? 'bg-[#7C3AED] text-white shadow-sm' : 'text-[#534168]'}">
+            <button type="button" aria-pressed="${isSub}" onclick="window.setSubMode('${p.id}', true)" class="py-2.5 rounded-lg transition-all ${isSub ? 'bg-[#7C3AED] text-white shadow-sm' : 'text-[#534168]'}">
               Subscribe (-15%)
               </button>
           </div>
@@ -3784,11 +4349,25 @@
     });
   };
 
+  window.removeCartSku = function(pId) {
+    var i = -1;
+    for (var n = cart.length - 1; n >= 0; n--) if (cart[n].id === pId) { i = n; break; }
+    if (i < 0) return;
+    cart[i].qty -= 1;
+    if (cart[i].qty <= 0) cart.splice(i, 1);
+    updateCartUI();
+  };
+
   function updateCartUI() {
     const count = cart.reduce((s, i) => s + i.qty, 0);
     const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
     const countEl = document.getElementById('cartCount');
     if (countEl) countEl.textContent = count;
+    try { localStorage.setItem('gram-street-bag', JSON.stringify(cart)); } catch (e) {}
+    document.querySelectorAll('[data-ty1-qty]').forEach(function (el) {
+      var row = cart.find(function (i) { return i.id === el.getAttribute('data-ty1-qty'); });
+      el.textContent = row ? String(row.qty) : '0';
+    });
     const priceEl = document.getElementById('cartTotalPrice');
     if (priceEl) priceEl.textContent = `₹${total}`;
     const list = document.getElementById('cartItemsList');
@@ -3806,6 +4385,7 @@
       </div>
     `).join('');
     }
+    try { localStorage.setItem(BAG_KEY, JSON.stringify(cart)); } catch (e) { /* private window */ }
   }
 
   window.removeCartItem = function(idx) {
@@ -3813,10 +4393,37 @@
     updateCartUI();
   };
 
+  // The bag behaves as a dialog: focus moves into it, Escape closes it, the
+  // page behind does not scroll, and focus returns to what opened it.
+  let bagReturn = null;
   window.toggleCart = function(open) {
     const modal = document.getElementById('cartModal');
-    if (modal) modal.classList.toggle('hidden', !open);
+    if (!modal) return;
+    const wasOpen = !modal.classList.contains('hidden');
+    modal.classList.toggle('hidden', !open);
+    document.documentElement.style.overflow = open ? 'hidden' : '';
+    const panel = document.getElementById('bagPanel');
+    if (open && !wasOpen) {
+      bagReturn = document.activeElement;
+      if (panel) panel.focus({ preventScroll: true });
+    } else if (!open && wasOpen && bagReturn && bagReturn.focus) {
+      bagReturn.focus({ preventScroll: true });
+      bagReturn = null;
+    }
   };
+  document.addEventListener('keydown', function (e) {
+    const modal = document.getElementById('cartModal');
+    if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) window.toggleCart(false);
+    // aria-modal promises the page behind is out of reach: keep Tab inside.
+    if (e.key === 'Tab' && modal && !modal.classList.contains('hidden')) {
+      const f = [...modal.querySelectorAll('a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+        .filter(el => !el.disabled && el.offsetParent !== null);
+      if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && (document.activeElement === last || !modal.contains(document.activeElement))) { e.preventDefault(); first.focus(); }
+    }
+  });
 
   /* ---- placing the order -------------------------------------------------
      What used to be here was an alert() that said "Order Confirmed!" and
@@ -3899,10 +4506,26 @@
     step('bag');
   };
 
+  function waLink(text) {
+    return 'https://wa.me/918130056889?text=' + encodeURIComponent(text);
+  }
+
+  function flashCopyBanner(ok) {
+    var b = document.getElementById('copyBanner');
+    if (!b) return;
+    b.textContent = ok ? 'Copied to clipboard' : 'Copy the order text from the drawer';
+    b.classList.add('on');
+    clearTimeout(b._t);
+    b._t = setTimeout(function () { b.classList.remove('on'); }, 2400);
+  }
+
   window.copyOrder = function () {
     if (!lastOrder) return;
     var btn = document.getElementById('ordCopy');
-    var done = function (ok) { if (btn) { btn.textContent = ok ? 'Copied' : 'Copy failed'; setTimeout(function () { btn.textContent = 'Copy'; }, 1600); } };
+    var done = function (ok) {
+      flashCopyBanner(ok);
+      if (btn) { btn.textContent = ok ? 'Copied' : 'Copy failed'; setTimeout(function () { btn.textContent = 'COPY ORDER TEXT'; }, 1600); }
+    };
     try {
       navigator.clipboard.writeText(orderText(lastOrder)).then(function () { done(true); }, function () { done(false); });
     } catch (e) { done(false); }
@@ -3952,7 +4575,11 @@
       order.items.reduce(function (n, i) { return n + i.qty; }, 0) + ' item(s) · ₹' + order.total +
       ' · to ' + order.name + ' on ' + order.phone + '. The roastery confirms on WhatsApp before it roasts.';
     var wa = document.getElementById('ordWa');
-    if (wa) wa.href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(orderText(order));
+    var draft = orderText(order);
+    if (wa) wa.href = waLink(draft);
+    try {
+      navigator.clipboard.writeText(draft).then(function () { flashCopyBanner(true); }, function () { flashCopyBanner(false); });
+    } catch (e) { flashCopyBanner(false); }
 
     cart.length = 0;
     updateCartUI();
@@ -3972,7 +4599,6 @@
     var last = null;
     try { last = (JSON.parse(localStorage.getItem(ORDER_KEY) || '[]'))[0] || null; } catch (e) { return; }
     if (!last || !last.ref) return;
-    if (Date.now() - Date.parse(last.placedAt || 0) > 2 * 60 * 60 * 1000) return;
     lastOrder = last;
     var ref = document.getElementById('ordRef');
     var sum = document.getElementById('ordSummary');
@@ -3981,7 +4607,7 @@
     if (sum) sum.textContent = last.items.reduce(function (n, i) { return n + i.qty; }, 0) +
       ' item(s) · ₹' + last.total + ' · to ' + last.name + ' on ' + last.phone +
       '. The roastery confirms on WhatsApp before it roasts.';
-    if (wa) wa.href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(orderText(last));
+    if (wa) wa.href = waLink(orderText(last));
     var chip = document.getElementById('ordLast');
     var chipRef = document.getElementById('ordLastRef');
     if (chipRef) chipRef.textContent = last.ref;
@@ -3999,8 +4625,13 @@
 
 /* ================= SPECIALTY ROASTERY CRAFT ENGINE ================= */
 (function initRoasteryCraft() {
+<<<<<<< HEAD
   const craftSection = document.getElementById('roasteryCraft');
 
+=======
+  // Its own scope: the page's main block declares `reduce` privately.
+  var reduce = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
   // 1. Tab Switcher
   window.switchCraftTab = function(tab) {
     const tabs = ['extraction', 'microfoam', 'roast'];
@@ -4017,6 +4648,7 @@
         }
       }
       if (btn) {
+        btn.setAttribute('aria-pressed', String(t === tab));
         if (t === tab) {
           btn.className = "py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow whitespace-nowrap";
         } else {
@@ -4309,7 +4941,7 @@
     try {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (AudioCtx) {
-        const ctx = new AudioCtx();
+        const ctx = fxCtx(AudioCtx);
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'sawtooth';
@@ -4372,6 +5004,7 @@
       });
     }
 
+<<<<<<< HEAD
     let steamRunning = false;
     function renderSteam() {
       if (!steamRunning) return;
@@ -4379,6 +5012,32 @@
         steamRunning = false;
         return;
       }
+=======
+    // Runs only while the canvas is on screen, its panel is showing and the
+    // tab is visible. It used to draw 28 gradients a frame for the whole visit.
+    // One loop at most: a hidden tab keeps its pending frame queued, so a
+    // restart on return must not queue a second one beside it.
+    let steamOn = false, steamVisible = false, steamRaf = 0;
+    function steamStop() { steamOn = false; if (steamRaf) { cancelAnimationFrame(steamRaf); steamRaf = 0; } }
+    function steamStart() {
+      if (steamOn || !steamVisible || document.hidden || reduce || !canvas.offsetWidth) return;
+      steamOn = true;
+      if (!steamRaf) steamRaf = requestAnimationFrame(renderSteam);
+    }
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (en) {
+        steamVisible = en[0].isIntersecting;
+        if (steamVisible) { width = canvas.width = canvas.offsetWidth; height = canvas.height = canvas.offsetHeight; steamStart(); }
+        else steamStop();
+      }).observe(canvas);
+    } else { steamVisible = true; }
+    document.addEventListener('visibilitychange', function () { if (document.hidden) steamStop(); else steamStart(); });
+
+    function renderSteam() {
+      steamRaf = 0;
+      if (!steamOn) return;
+      if (!canvas.offsetWidth) { steamOn = false; return; }   // its tab was switched away
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
       ctx.clearRect(0, 0, width, height);
       particles.forEach(p => {
         p.x += p.vx;
@@ -4391,16 +5050,14 @@
           p.r = 10 + Math.random() * 14;
           p.alpha = 0.12 + Math.random() * 0.18;
         }
-        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
-        g.addColorStop(0, `rgba(255, 255, 255, ${p.alpha})`);
-        g.addColorStop(1, 'rgba(255, 255, 255, 0)');
-        ctx.fillStyle = g;
+        ctx.fillStyle = 'rgba(255,255,255,' + p.alpha.toFixed(3) + ')';
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, Math.max(2, p.r * 0.35), 0, Math.PI * 2);
         ctx.fill();
       });
-      requestAnimationFrame(renderSteam);
+      if (steamOn) steamRaf = requestAnimationFrame(renderSteam);
     }
+<<<<<<< HEAD
     if ('IntersectionObserver' in window && craftSection) {
       new IntersectionObserver((en) => {
         if (en[0].isIntersecting && !steamRunning) {
@@ -4412,6 +5069,9 @@
       steamRunning = true;
       requestAnimationFrame(renderSteam);
     }
+=======
+    steamStart();
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
   })();
 
   // 4. Panel 2: Microfoam Chemistry (SVG stroke-dashoffset Fluid Pour + 12ml/s Pitcher + 100% Gloss Shader Tilt)
@@ -4502,7 +5162,12 @@
     ['rosetta', 'tulip', 'swan', 'heart'].forEach(p => {
       const btn = document.getElementById(`craftPat-${p}`);
       if (btn) {
+<<<<<<< HEAD
         if (p === activePattern || (p === 'heart' && pat === 'heart')) {
+=======
+        btn.setAttribute('aria-pressed', String(p === pat));
+        if (p === pat) {
+>>>>>>> e369ba88d2f542a9356d89b703a28d82c479b164
           btn.className = "px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#2B1650] text-[#F1E9FF] shadow transition-all";
         } else {
           btn.className = "px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#F8F5FF] text-[#534168] border border-[#2B1650]/20 hover:text-[#2B1650] transition-all";
@@ -4776,11 +5441,19 @@
     window.drawRoastBeanMacro();
   };
 
+  // Browsers cap live AudioContexts (Chrome warns past six) and each one holds
+  // an audio thread: a new context per click piled them up for good.
+  function fxCtx(AudioCtx) {
+    if (!window.__gsFxCtx || window.__gsFxCtx.state === 'closed') window.__gsFxCtx = new AudioCtx();
+    if (window.__gsFxCtx.state === 'suspended') window.__gsFxCtx.resume();
+    return window.__gsFxCtx;
+  }
+
   window.playCraftBeanCrackle = function() {
     try {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (!AudioCtx) return;
-      const ctx = new AudioCtx();
+      const ctx = fxCtx(AudioCtx);
       for (let i = 0; i < 6; i++) {
         setTimeout(() => {
           const osc = ctx.createOscillator();
@@ -4854,7 +5527,10 @@
 
   // 7. Interactive 3D Card Tilt with Specular Mouse Sheen + Staggered Scroll Reveal
   function initTiltPhysics() {
-    const cards = document.querySelectorAll('.tilt-card, .d2c-card, .chapter, .visit-window, #orbit, .craft-interactive-card');
+    // Not .chapter or #orbit: the chapter stage and the orbit write their own
+    // transforms, and a hover replaced the chapter's scroll position with a
+    // tilt that stayed until the next scroll.
+    const cards = document.querySelectorAll('.tilt-card, .d2c-card, .visit-window, .craft-interactive-card');
     cards.forEach(card => {
       if (card.dataset.tiltBound) return;
       card.dataset.tiltBound = 'true';
@@ -4871,26 +5547,39 @@
         card.style.setProperty('--mouse-y', `${(y / rect.height) * 100}%`);
       });
       card.addEventListener('mouseleave', () => {
-        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+        card.style.transform = '';
       });
     });
   }
 
+  // One observer for the page, and a trigger any element can meet. A ratio
+  // threshold (it was 0.12) can never be reached by a section taller than
+  // about eight viewports, which then stays at opacity 0 for good.
+  let revealObserver = null;
   function initScrollReveal() {
-    if (!('IntersectionObserver' in window)) {
-      document.querySelectorAll('.scroll-reveal').forEach(el => el.classList.add('in-view'));
+    const pending = document.querySelectorAll('.scroll-reveal:not(.in-view)');
+    // This script block has its own scope; read the preference here.
+    const lessMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    if (lessMotion || !('IntersectionObserver' in window)) {
+      pending.forEach(el => el.classList.add('in-view'));
       return;
     }
-    const observer = new IntersectionObserver((entries, obs) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('in-view');
-          obs.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.12 });
-
-    document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+    if (!revealObserver) {
+      revealObserver = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+            obs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0, rootMargin: '0px 0px -8% 0px' });
+    }
+    pending.forEach(el => {
+      // Already scrolled past (a reload mid-page, an anchor jump): the
+      // observer will never report it intersecting again, so show it now.
+      if (el.getBoundingClientRect().bottom < 0) el.classList.add('in-view');
+      else revealObserver.observe(el);
+    });
   }
 
   window.initTiltPhysics = initTiltPhysics;
@@ -4904,6 +5593,7 @@
 })();
 </script>
 <script>
+
 /* Mobile menu. Closes on choosing a link, on Escape, and on an outside tap,
      because a fixed sheet that stays open over the page is worse than no menu. */
   (function () {
@@ -4938,7 +5628,10 @@
     }
   })();
 </script>
+<div id="copyBanner" class="copy-banner" role="status">Copied to clipboard</div>
 <script src="/assets/vendor/gsap.min.js"></script>
+<script src="/assets/shop-elite.js"></script>
+<script src="/assets/shop-cinema.js"></script>
 <script src="/assets/brand-motion.js" defer></script>
 </body>
 </html>
