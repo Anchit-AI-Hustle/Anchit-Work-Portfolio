@@ -60,7 +60,8 @@
       }));
     }
     G.wind = { x: 0.35, y: 0.12 };
-    G.grace = 1.4;
+    G.grace = 2.8;
+    G.cutCool = 0;
   }
 
   function handOf() {
@@ -114,7 +115,9 @@
     const pull = (inp.action() || inp.down('ShiftLeft', 'ShiftRight')) ? 1 : 0;
     G.me.pull = lerp(G.me.pull, pull, 1 - Math.exp(-dt * 8));
     const keyed = abs(ax.x) > 0.08 || abs(ax.y) > 0.08;
-    if (!keyed && p && p.seen) {
+    // While holding pull, mouse only pulls. Steering stays on keys / stick so a
+    // click does not yank the kite into a rival line.
+    if (!keyed && !pull && p && p.seen) {
       G.me.vx += (p.nx - G.me.x) * dt * 2.6;
       G.me.vy += (clamp(p.ny, 0.06, 0.72) - G.me.y) * dt * 2.6;
     }
@@ -137,7 +140,10 @@
     k.vx *= Math.exp(-dt * 1.4); k.vy *= Math.exp(-dt * 1.4);
     k.x = clamp(k.x + k.vx * dt, 0.06, 0.94);
     k.y = clamp(k.y + k.vy * dt, 0.08, 0.7);
-    k.pull = lerp(k.pull, (hypot(k.x - G.me.x, k.y - G.me.y) < 0.18 ? 0.85 : 0.25), dt * 2);
+    const near = hypot(k.x - G.me.x, k.y - G.me.y) < 0.16;
+    // Rivals only yank hard after the player has had a real start.
+    const want = near && G.t > 4.5 ? 0.72 : 0.22;
+    k.pull = lerp(k.pull, want, dt * 1.6);
   }
 
   function stepKite(k, dt) {
@@ -150,14 +156,19 @@
   }
 
   function fights(dt) {
-    if (!G.me.alive || G.t < (G.grace || 0)) return;
+    if (!G.me.alive || G.t < (G.grace || 0) || G.cutCool > 0) return;
     G.rivals.forEach((r) => {
       if (!r.alive) return;
       const hit = threadHit(G.me, r);
       if (!hit) return;
       const mine = G.me.pull, theirs = r.pull;
-      if (mine > theirs + 0.12) cutKite(r, true);
-      else if (theirs > mine + 0.12) { cutKite(G.me, false); G.alive = false; G.phase = 'cut'; }
+      // You win any cross while pulling. You only lose if you are gliding and
+      // they are clearly yanking. Crossing with both gliding does nothing.
+      if (mine >= 0.45 && mine + 0.05 >= theirs) {
+        cutKite(r, true); G.cutCool = 0.55;
+      } else if (theirs >= 0.55 && mine < 0.35) {
+        cutKite(G.me, false); G.alive = false; G.phase = 'cut';
+      }
     });
   }
 
@@ -180,7 +191,7 @@
   }
 
   function update(dt) {
-    G.t += dt;
+    G.t += dt; G.cutCool = max(0, (G.cutCool || 0) - dt);
     if (G.mode === 'dusk') G.time -= dt;
     G.wind.x = 0.25 + 0.35 * sin(G.t * 0.35);
     G.wind.y = 0.08 + 0.12 * cos(G.t * 0.27);
@@ -233,22 +244,31 @@
 
   function drawSky(c, w, h) {
     const g = c.createLinearGradient(0, 0, 0, h);
-    g.addColorStop(0, '#1b1540'); g.addColorStop(0.4, '#c45b3a'); g.addColorStop(0.7, '#f0a05a'); g.addColorStop(1, '#2a1810');
+    g.addColorStop(0, '#1b1540'); g.addColorStop(0.35, '#c45b3a'); g.addColorStop(0.65, '#f0a05a'); g.addColorStop(1, '#2a1810');
     c.fillStyle = g; c.fillRect(0, 0, w, h);
-    c.fillStyle = '#FBF5EC'; c.beginPath(); c.arc(w * 0.82, h * 0.16, 22, 0, TAU); c.fill();
-    c.fillStyle = 'rgba(251,245,236,.14)'; c.beginPath(); c.arc(w * 0.82, h * 0.16, 90, 0, TAU); c.fill();
+    c.fillStyle = '#FBF5EC'; c.beginPath(); c.arc(w * 0.82, h * 0.14, 24, 0, TAU); c.fill();
+    c.fillStyle = 'rgba(251,245,236,.14)'; c.beginPath(); c.arc(w * 0.82, h * 0.14, 96, 0, TAU); c.fill();
+    // Soft dusk haze bands.
+    c.fillStyle = 'rgba(251,245,236,.05)';
+    for (let i = 0; i < 4; i++) {
+      const y = h * (0.2 + i * 0.1) + sin(G.t * 0.3 + i) * 6;
+      c.beginPath(); c.ellipse(w * (0.3 + i * 0.15), y, 90 + i * 20, 12, 0, 0, TAU); c.fill();
+    }
     const gy = h * 0.78;
     G.roofs.forEach((r) => {
       const x = ((r.x + G.t * 6) % 180) - 30;
       c.fillStyle = 'rgba(18,14,16,' + (0.55 + r.a * 0.4) + ')';
       c.fillRect(x, gy - r.h, r.w, r.h);
       c.fillStyle = 'rgba(42,32,28,.9)';
-      c.beginPath(); c.moveTo(x - 4, gy - r.h); c.lineTo(x + r.w * 0.5, gy - r.h - 10); c.lineTo(x + r.w + 4, gy - r.h); c.closePath(); c.fill();
-      c.fillStyle = 'rgba(255,183,54,.18)';
+      c.beginPath(); c.moveTo(x - 4, gy - r.h); c.lineTo(x + r.w * 0.5, gy - r.h - 12); c.lineTo(x + r.w + 4, gy - r.h); c.closePath(); c.fill();
+      c.fillStyle = 'rgba(255,183,54,.22)';
       c.fillRect(x + 6, gy - r.h + 10, 7, 9); c.fillRect(x + 18, gy - r.h + 10, 7, 9);
       if (r.tank) { c.fillStyle = '#5a4030'; c.fillRect(x + r.w * 0.62, gy - r.h - 16, 12, 12); }
+      c.strokeStyle = 'rgba(201,169,110,.2)'; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(x + r.w * 0.5, gy - r.h - 12); c.lineTo(x + r.w * 0.5, gy - r.h - 28); c.stroke();
     });
     c.fillStyle = '#120e10'; c.fillRect(0, gy, w, h - gy);
+    c.fillStyle = 'rgba(255,105,64,.08)'; c.fillRect(0, gy - 18, w, 18);
   }
 
   function drawKite(c, k, you) {
@@ -256,22 +276,26 @@
     const x = k.x * arc.w, y = k.y * arc.h;
     const ang = Math.atan2(k.vy, 0.4 + k.vx);
     c.save(); c.globalAlpha = k.alive ? 1 : clamp(1 - k.cutT / 2, 0, 1);
-    c.strokeStyle = you ? WARM : 'rgba(251,245,236,.35)'; c.lineWidth = you ? 1.6 : 1;
+    c.strokeStyle = you ? WARM : 'rgba(251,245,236,.4)'; c.lineWidth = you ? 2 : 1.2;
     const s = segs(k);
     c.beginPath(); c.moveTo(s[0].x, s[0].y); for (let i = 1; i < s.length; i++) c.lineTo(s[i].x, s[i].y); c.stroke();
     c.translate(x, y); c.rotate(ang * 0.4);
-    const ssz = you ? 16 : 13;
-    c.fillStyle = k.col;
-    c.beginPath(); c.moveTo(0, -ssz); c.lineTo(ssz * 0.7, 0); c.lineTo(0, ssz); c.lineTo(-ssz * 0.7, 0); c.closePath(); c.fill();
-    c.strokeStyle = 'rgba(15,13,10,.45)'; c.stroke();
-    c.strokeStyle = k.col; c.lineWidth = 2; c.beginPath();
+    const ssz = you ? 18 : 14;
+    const kg = c.createLinearGradient(-ssz, -ssz, ssz, ssz);
+    kg.addColorStop(0, k.col); kg.addColorStop(1, you ? '#c43a18' : '#4a3a50');
+    c.fillStyle = kg;
+    c.beginPath(); c.moveTo(0, -ssz); c.lineTo(ssz * 0.75, 0); c.lineTo(0, ssz); c.lineTo(-ssz * 0.75, 0); c.closePath(); c.fill();
+    c.strokeStyle = 'rgba(15,13,10,.5)'; c.stroke();
+    c.strokeStyle = 'rgba(251,245,236,.35)'; c.beginPath(); c.moveTo(0, -ssz); c.lineTo(0, ssz); c.moveTo(-ssz * 0.75, 0); c.lineTo(ssz * 0.75, 0); c.stroke();
+    c.strokeStyle = k.col; c.lineWidth = 2.2; c.beginPath();
     k.tail.forEach((p, i) => {
       const tx = (p.x - k.x) * arc.w, ty = (p.y - k.y) * arc.h + i * 3;
       i ? c.lineTo(tx, ty + ssz) : c.moveTo(0, ssz);
     });
     c.stroke();
-    if (k.pull > 0.5) {
-      c.strokeStyle = WARM; c.globalAlpha = 0.5; c.beginPath(); c.arc(0, 0, 22, 0, TAU); c.stroke();
+    if (k.pull > 0.45) {
+      c.strokeStyle = WARM; c.globalAlpha = 0.45 + k.pull * 0.3; c.lineWidth = 2;
+      c.beginPath(); c.arc(0, 0, 20 + k.pull * 8, 0, TAU); c.stroke();
     }
     c.restore();
   }
@@ -325,7 +349,7 @@
     menu: {
       eyebrow: 'Kite fighting',
       title: 'Sky <em>Thread</em>',
-      html: '<p>Dusk over the terraces. Steer into a rival line and hold Pull so your thread cuts theirs. If they are pulling harder, yours goes.</p>',
+      html: '<p>Dusk over the terraces. Steer into a rival line and hold Pull so your thread cuts theirs. Glide through a fight and a hard-pulling rival can cut you. Hold Pull to stay safe.</p>',
       options: [
         { id: 'mode', label: 'Mode', value: 'dusk', choices: [{ v: 'dusk', label: 'Until dusk' }, { v: 'hunt', label: 'Cut six' }, { v: 'endless', label: 'Endless sky' }] },
         { id: 'diff', label: 'Difficulty', value: 'normal', choices: [{ v: 'easy', label: 'Easy' }, { v: 'normal', label: 'Normal' }, { v: 'hard', label: 'Hard' }] },

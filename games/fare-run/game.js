@@ -16,9 +16,9 @@
 
   let arc;
   const DIFF = {
-    easy: { spd: 230, dens: 1.18, fare: 0.4 },
-    normal: { spd: 280, dens: 1, fare: 0.27 },
-    hard: { spd: 350, dens: 0.76, fare: 0.16 },
+    easy: { spd: 220, dens: 1.22, fare: 0.48 },
+    normal: { spd: 265, dens: 1.05, fare: 0.38 },
+    hard: { spd: 330, dens: 0.82, fare: 0.24 },
   };
   const G = {
     t: 0, dist: 0, speed: 280, score: 0, lives: 3, maxLives: 3, lane: 1, laneT: 0, cool: 0,
@@ -34,8 +34,9 @@
     G.t = 0; G.dist = 0; G.speed = attract ? 180 : G.D.spd * (rush ? 1.18 : 1);
     G.maxLives = rush ? 2 : 3; G.lives = G.maxLives; G.score = 0;
     G.clock = G.mode === 'night' ? 90 : 0;
-    G.lane = 1; G.laneT = 1; G.cool = 0; G.objs = []; G.parts = [];
-    G.phase = 'run'; G.attract = !!attract; G.fares = 0; G.next = attract ? 400 : 900 * G.D.dens * (rush ? 0.82 : 1);
+    G.lane = 1; G.laneT = 1; G.cool = attract ? 0 : 1.2; G.objs = []; G.parts = [];
+    G.phase = 'run'; G.attract = !!attract; G.fares = 0; G.next = attract ? 400 : 480 * G.D.dens * (rush ? 0.82 : 1);
+    if (!attract) G.objs.push({ kind: 'fare', lane: 1, y: -40, h: 36 });
   }
 
   function laneX(i) { return arc.w * (0.26 + i * 0.24); }
@@ -150,34 +151,49 @@
 
   function drawBg(c, w, h) {
     const g = c.createLinearGradient(0, 0, 0, h);
-    g.addColorStop(0, '#1c1630'); g.addColorStop(0.5, '#c45b38'); g.addColorStop(1, '#2a1810');
+    g.addColorStop(0, '#1a1430'); g.addColorStop(0.45, '#c45b38'); g.addColorStop(0.75, '#f0a05a'); g.addColorStop(1, '#2a1810');
     c.fillStyle = g; c.fillRect(0, 0, w, h);
-    c.fillStyle = WARM; c.beginPath(); c.arc(w * 0.78, h * 0.16, 16, 0, TAU); c.fill();
-    c.fillStyle = '#2a241c'; c.fillRect(w * 0.16, 0, w * 0.68, h);
-    c.fillStyle = 'rgba(255,183,54,.35)';
-    const dash = 28, off = (G.dist * 0.4) % (dash * 2);
+    c.fillStyle = '#FBF5EC'; c.beginPath(); c.arc(w * 0.78, h * 0.12, 18, 0, TAU); c.fill();
+    c.fillStyle = 'rgba(251,245,236,.12)'; c.beginPath(); c.arc(w * 0.78, h * 0.12, 64, 0, TAU); c.fill();
+    // Road with perspective feel.
+    c.fillStyle = '#242018';
+    c.beginPath(); c.moveTo(w * 0.2, 0); c.lineTo(w * 0.8, 0); c.lineTo(w * 0.92, h); c.lineTo(w * 0.08, h); c.closePath(); c.fill();
+    c.fillStyle = 'rgba(255,183,54,.4)';
+    const dash = 30, off = (G.dist * 0.45) % (dash * 2);
     for (let i = 0; i < 3; i++) {
       const x = laneX(i);
       for (let y = -off; y < h; y += dash * 2) c.fillRect(x - 2, y, 4, dash * 0.55);
     }
-    c.fillStyle = '#3a2a22';
+    c.strokeStyle = 'rgba(251,245,236,.12)'; c.lineWidth = 2;
+    c.beginPath(); c.moveTo(w * 0.38, 0); c.lineTo(w * 0.34, h); c.stroke();
+    c.beginPath(); c.moveTo(w * 0.62, 0); c.lineTo(w * 0.66, h); c.stroke();
     for (let i = 0; i < 8; i++) {
-      const y = ((i * 160 + G.dist * 0.3) % (h + 120)) - 60;
-      c.fillRect(8, y, 52, 90); c.fillRect(w - 60, y + 40, 52, 90);
+      const y = ((i * 160 + G.dist * 0.35) % (h + 120)) - 60;
+      c.fillStyle = '#2a1c18'; c.fillRect(4, y, 58, 96); c.fillRect(w - 62, y + 30, 58, 96);
+      c.fillStyle = i % 2 ? '#c45a3a' : GOLD; c.fillRect(2, y - 10, 62, 12); c.fillRect(w - 64, y + 20, 62, 12);
+      c.fillStyle = 'rgba(255,183,54,.2)'; c.fillRect(14, y + 24, 16, 20); c.fillRect(w - 48, y + 54, 16, 20);
     }
   }
 
   function drawObj(c, o) {
     const x = laneX(o.lane), y = o.y;
     if (o.kind === 'fare') {
-      c.fillStyle = '#3a2a22'; c.beginPath(); c.arc(x, y - 18, 7, 0, TAU); c.fill();
-      c.fillStyle = WARM; c.fillRect(x - 8, y - 10, 16, 22);
+      c.fillStyle = 'rgba(255,183,54,.2)'; c.beginPath(); c.arc(x, y - 8, 22, 0, TAU); c.fill();
+      c.fillStyle = '#3a2a22'; c.beginPath(); c.arc(x, y - 20, 8, 0, TAU); c.fill();
+      c.fillStyle = WARM; rr(c, x - 10, y - 12, 20, 26, 4); c.fill();
+      c.fillStyle = PRIM; c.fillRect(x - 10, y + 6, 20, 4);
+      c.fillStyle = GOLD; txt(c, '₹', x, y + 2, 11, GOLD, 700, 'center', F_MONO);
     } else if (o.kind === 'pot') {
-      c.fillStyle = PRIM; c.beginPath(); c.arc(x, y, 14, 0, TAU); c.fill();
-      c.fillStyle = GOLD; c.fillRect(x - 6, y - 16, 12, 6);
+      c.fillStyle = 'rgba(0,0,0,.2)'; c.beginPath(); c.arc(x + 1, y + 4, 15, 0, TAU); c.fill();
+      c.fillStyle = PRIM; c.beginPath(); c.arc(x, y, 15, 0, TAU); c.fill();
+      c.fillStyle = GOLD; c.fillRect(x - 7, y - 18, 14, 7);
+      c.fillStyle = 'rgba(251,245,236,.2)'; c.beginPath(); c.arc(x - 4, y - 4, 4, 0, TAU); c.fill();
     } else {
-      c.fillStyle = '#5a3a22'; rr(c, x - 22, y - 16, 44, 28, 4); c.fill();
-      c.fillStyle = '#1a1814'; c.beginPath(); c.arc(x - 12, y + 12, 6, 0, TAU); c.arc(x + 12, y + 12, 6, 0, TAU); c.fill();
+      c.fillStyle = 'rgba(0,0,0,.25)'; rr(c, x - 20, y - 10, 46, 30, 4); c.fill();
+      c.fillStyle = '#5a3a22'; rr(c, x - 24, y - 18, 48, 32, 5); c.fill();
+      c.fillStyle = '#c45a3a'; c.fillRect(x - 24, y - 18, 48, 8);
+      c.fillStyle = '#1a1814'; c.beginPath(); c.arc(x - 14, y + 14, 7, 0, TAU); c.arc(x + 14, y + 14, 7, 0, TAU); c.fill();
+      c.fillStyle = 'rgba(255,183,54,.35)'; c.fillRect(x - 8, y - 8, 16, 8);
     }
   }
 
@@ -185,10 +201,12 @@
     const x = laneX(G.laneT), y = arc.h * 0.72;
     const flash = G.cool > 0 && ((G.t * 16) | 0) % 2;
     if (flash) return;
-    c.fillStyle = '#1a1814'; rr(c, x - 22, y - 28, 44, 48, 8); c.fill();
-    c.fillStyle = PRIM; rr(c, x - 22, y - 8, 44, 16, 4); c.fill();
-    c.fillStyle = 'rgba(255,183,54,.45)'; c.fillRect(x - 14, y - 22, 28, 10);
-    c.fillStyle = '#c9a96e'; c.fillRect(x - 18, y + 16, 8, 6); c.fillRect(x + 10, y + 16, 8, 6);
+    c.fillStyle = 'rgba(0,0,0,.3)'; rr(c, x - 24, y - 20, 52, 52, 8); c.fill();
+    c.fillStyle = '#1a1814'; rr(c, x - 26, y - 32, 52, 56, 10); c.fill();
+    c.fillStyle = PRIM; rr(c, x - 26, y - 6, 52, 18, 5); c.fill();
+    c.fillStyle = 'rgba(255,183,54,.55)'; c.fillRect(x - 16, y - 26, 32, 12);
+    c.fillStyle = GOLD; c.fillRect(x - 20, y + 20, 10, 7); c.fillRect(x + 10, y + 20, 10, 7);
+    c.fillStyle = '#fff8e8'; c.beginPath(); c.arc(x - 14, y + 10, 3, 0, TAU); c.arc(x + 14, y + 10, 3, 0, TAU); c.fill();
   }
 
   function drawHUD(c) {

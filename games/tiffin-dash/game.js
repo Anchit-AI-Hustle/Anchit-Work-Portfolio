@@ -40,10 +40,14 @@
     G.t = 0; G.dist = 0; G.speed = attract ? 180 : G.D.spd * (rush ? 1.16 : 1);
     G.maxLives = rush ? 1 : 3; G.lives = G.maxLives; G.score = 0; G.hold = 0; G.combo = 0;
     G.clock = G.mode === 'shift' ? 90 : 0;
-    G.py = 0; G.pvy = 0; G.slide = 0; G.inv = 0; G.run = 0;
+    G.py = 0; G.pvy = 0; G.slide = 0; G.inv = attract ? 0 : 1.4; G.run = 0;
     G.objs = []; G.shops = []; G.lights = []; G.parts = [];
-    G.phase = 'run'; G.attract = !!attract; G.next = attract ? 400 : 1500 * G.D.gap * (rush ? 0.82 : 1); G.nextShop = 0;
+    G.phase = 'run'; G.attract = !!attract; G.next = attract ? 400 : 520 * G.D.gap * (rush ? 0.82 : 1); G.nextShop = 0;
     seedShops();
+    if (!attract) {
+      G.objs.push({ kind: 'tiffin', x: 420, w: 22, h: 18, item: true });
+      G.objs.push({ kind: 'door', x: 760, w: 36, h: 70, door: true });
+    }
   }
 
   function seedShops() {
@@ -178,26 +182,29 @@
 
   function drawBg(c, w, h) {
     const g = c.createLinearGradient(0, 0, 0, h);
-    g.addColorStop(0, '#1c1630'); g.addColorStop(0.5, '#c45b38'); g.addColorStop(1, '#2a1810');
+    g.addColorStop(0, '#1a1430'); g.addColorStop(0.45, '#c45b38'); g.addColorStop(0.72, '#f0a05a'); g.addColorStop(1, '#2a1810');
     c.fillStyle = g; c.fillRect(0, 0, w, h);
-    c.fillStyle = WARM; c.beginPath(); c.arc(w * 0.8, h * 0.18, 16, 0, TAU); c.fill();
+    c.fillStyle = '#FBF5EC'; c.beginPath(); c.arc(w * 0.8, h * 0.14, 18, 0, TAU); c.fill();
+    c.fillStyle = 'rgba(251,245,236,.12)'; c.beginPath(); c.arc(w * 0.8, h * 0.14, 70, 0, TAU); c.fill();
     const gy = groundY();
     const shift = G.dist * 0.4;
     G.shops.forEach((s, i) => {
       const x = ((s.x - shift) % (G.shops.length * 220) + G.shops.length * 220) % (G.shops.length * 220) - 40;
-      c.fillStyle = s.col; c.fillRect(x, gy - 110, s.w, 110);
-      c.fillStyle = s.awn; c.beginPath(); c.moveTo(x - 6, gy - 110); c.lineTo(x + s.w + 6, gy - 110); c.lineTo(x + s.w, gy - 88); c.lineTo(x, gy - 88); c.closePath(); c.fill();
-      c.fillStyle = 'rgba(255,183,54,.25)'; c.fillRect(x + 16, gy - 70, 28, 36); c.fillRect(x + 56, gy - 70, 22, 36);
-      txt(c, s.name.toUpperCase(), x + 12, gy - 118, 10, GOLD, 600, 'left', F_MONO);
+      c.fillStyle = 'rgba(0,0,0,.2)'; c.fillRect(x + 4, gy - 100, s.w, 100);
+      c.fillStyle = s.col; c.fillRect(x, gy - 118, s.w, 118);
+      c.fillStyle = s.awn; c.beginPath(); c.moveTo(x - 8, gy - 118); c.lineTo(x + s.w + 8, gy - 118); c.lineTo(x + s.w, gy - 94); c.lineTo(x, gy - 94); c.closePath(); c.fill();
+      c.fillStyle = 'rgba(255,183,54,.28)'; c.fillRect(x + 16, gy - 76, 28, 38); c.fillRect(x + 56, gy - 76, 22, 38);
+      c.fillStyle = '#1a120e'; c.fillRect(x + s.w * 0.55, gy - 48, 22, 48);
+      txt(c, s.name.toUpperCase(), x + 12, gy - 128, 10, GOLD, 600, 'left', F_MONO);
       if (i % 2 === 0) {
-        c.strokeStyle = 'rgba(255,183,54,.35)'; c.lineWidth = 1;
-        for (let k = 0; k < 6; k++) { c.beginPath(); c.arc(x + 12 + k * 22, gy - 124, 2.2, 0, TAU); c.fillStyle = WARM; c.fill(); }
+        for (let k = 0; k < 6; k++) { c.beginPath(); c.arc(x + 12 + k * 22, gy - 132, 2.4, 0, TAU); c.fillStyle = WARM; c.fill(); }
       }
     });
     c.fillStyle = '#2a241c'; c.fillRect(0, gy, w, h - gy);
+    c.fillStyle = 'rgba(0,0,0,.2)'; c.fillRect(0, gy, w, 6);
     c.fillStyle = '#3a3428';
     const stripe = 40;
-    for (let x = -((G.dist * 1.2) % stripe); x < w; x += stripe) c.fillRect(x, gy + 10, 22, 6);
+    for (let x = -((G.dist * 1.2) % stripe); x < w; x += stripe) c.fillRect(x, gy + 12, 22, 6);
   }
 
   function drawObj(c, o) {

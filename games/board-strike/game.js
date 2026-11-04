@@ -156,19 +156,30 @@
 
   function readAim(dt) {
     const inp = arc.input, p = inp.pointer, ax = inp.axis();
-    G.sx = clamp(G.sx + ax.x * dt * 1.4, -0.62, 0.62);
-    if (p && p.seen && abs(ax.x) < 0.08) {
+    const charging = G.holding || inp.action();
+    // Keys / stick slide the striker. Mouse only aims from the striker, so a
+    // click to charge does not yank the piece under the pointer.
+    if (!charging) {
+      G.sx = clamp(G.sx + ax.x * dt * 1.55, -0.62, 0.62);
+      if (p && p.seen && abs(ax.x) < 0.08 && !p.down) {
+        const w = fromPx(p.x, p.y);
+        if (w.y > 0.45) G.sx = clamp(w.x, -0.62, 0.62);
+      }
+    }
+    if (p && p.seen) {
       const w = fromPx(p.x, p.y);
-      G.sx = clamp(w.x, -0.62, 0.62);
-      G.aim = Math.atan2(w.x - G.striker.x, -(w.y - G.striker.y));
-      G.aim = clamp(G.aim, -1.15, 1.15);
+      G.aim = clamp(Math.atan2(w.x - G.sx, -(w.y - 0.72)), -1.15, 1.15);
     } else {
-      G.aim = clamp(G.aim + ax.x * dt * 1.8, -1.15, 1.15);
+      G.aim = clamp(G.aim + ax.x * dt * (charging ? 1.2 : 1.8), -1.15, 1.15);
     }
     G.striker.x = G.sx; G.striker.y = 0.72;
     const down = inp.action();
-    if (down) { G.holding = true; G.charge = min(1, G.charge + dt * 1.05); }
-    else if (G.holding) shoot();
+    if (down) {
+      G.holding = true; G.charge = min(1, G.charge + dt * 1.05);
+      // Full charge fires even if the player keeps holding, so a long press
+      // still sends the striker instead of locking the table.
+      if (G.charge >= 1) shoot();
+    } else if (G.holding) shoot();
   }
 
   function update(dt) {
@@ -209,44 +220,72 @@
   }
 
   function drawBoard(c) {
-    const b = boardRect();
-    c.fillStyle = '#2a1810';
-    rr(c, b.x - 18, b.y - 18, b.s + 36, b.s + 36, 18); c.fill();
-    c.fillStyle = '#c45a28';
-    rr(c, b.x, b.y, b.s, b.s, 10); c.fill();
-    c.fillStyle = '#d8b090';
-    rr(c, b.x + b.s * 0.06, b.y + b.s * 0.06, b.s * 0.88, b.s * 0.88, 6); c.fill();
-    c.strokeStyle = 'rgba(42,24,16,.45)'; c.lineWidth = 2;
-    c.strokeRect(b.x + b.s * 0.18, b.y + b.s * 0.18, b.s * 0.64, b.s * 0.64);
-    c.beginPath(); c.arc(b.x + b.s / 2, b.y + b.s / 2, b.s * 0.12, 0, TAU); c.stroke();
+    const b = boardRect(), s = b.s;
+    // Table shadow + frame with warm wood grain strips.
+    c.fillStyle = 'rgba(0,0,0,.35)';
+    rr(c, b.x - 10, b.y + 14, s + 36, s + 28, 20); c.fill();
+    const frame = c.createLinearGradient(b.x - 22, b.y - 22, b.x + s + 22, b.y + s + 22);
+    frame.addColorStop(0, '#3a2418'); frame.addColorStop(0.5, '#5a3420'); frame.addColorStop(1, '#2a1810');
+    c.fillStyle = frame;
+    rr(c, b.x - 22, b.y - 22, s + 44, s + 44, 20); c.fill();
+    c.strokeStyle = GOLD; c.lineWidth = 2; c.globalAlpha = 0.45;
+    rr(c, b.x - 14, b.y - 14, s + 28, s + 28, 14); c.stroke(); c.globalAlpha = 1;
+    const felt = c.createRadialGradient(b.x + s * 0.45, b.y + s * 0.4, s * 0.1, b.x + s * 0.5, b.y + s * 0.5, s * 0.7);
+    felt.addColorStop(0, '#e8c8a8'); felt.addColorStop(1, '#c9a07a');
+    c.fillStyle = felt;
+    rr(c, b.x, b.y, s, s, 10); c.fill();
+    // Baseline / strike corridor.
+    c.fillStyle = 'rgba(42,24,16,.12)';
+    c.fillRect(b.x + s * 0.12, b.y + s * 0.78, s * 0.76, s * 0.08);
+    c.strokeStyle = 'rgba(42,24,16,.5)'; c.lineWidth = 2;
+    c.strokeRect(b.x + s * 0.16, b.y + s * 0.16, s * 0.68, s * 0.68);
+    c.beginPath(); c.arc(b.x + s / 2, b.y + s / 2, s * 0.13, 0, TAU); c.stroke();
+    c.beginPath(); c.arc(b.x + s / 2, b.y + s / 2, s * 0.05, 0, TAU); c.stroke();
+    // Corner arrows into pockets.
+    c.strokeStyle = 'rgba(42,24,16,.35)'; c.lineWidth = 1.5;
+    [[0.14, 0.14], [0.86, 0.14], [0.14, 0.86], [0.86, 0.86]].forEach(([ux, uy]) => {
+      const px = b.x + s * ux, py = b.y + s * uy;
+      const dx = ux < 0.5 ? 1 : -1, dy = uy < 0.5 ? 1 : -1;
+      c.beginPath(); c.moveTo(px + dx * 28, py); c.lineTo(px + dx * 8, py); c.lineTo(px, py + dy * 8); c.lineTo(px, py + dy * 28); c.stroke();
+    });
     pockets().forEach((k) => {
       const p = toPx(k);
-      c.fillStyle = '#1a120c'; c.beginPath(); c.arc(p.x, p.y, b.s * 0.045, 0, TAU); c.fill();
-      c.strokeStyle = GOLD; c.lineWidth = 2; c.stroke();
+      c.fillStyle = 'rgba(0,0,0,.35)'; c.beginPath(); c.arc(p.x + 1, p.y + 2, s * 0.048, 0, TAU); c.fill();
+      c.fillStyle = '#120c08'; c.beginPath(); c.arc(p.x, p.y, s * 0.046, 0, TAU); c.fill();
+      c.strokeStyle = GOLD; c.lineWidth = 2.5; c.stroke();
+      c.strokeStyle = 'rgba(255,183,54,.25)'; c.lineWidth = 1;
+      c.beginPath(); c.arc(p.x, p.y, s * 0.06, 0, TAU); c.stroke();
     });
   }
 
   function drawPiece(c, p) {
     if (p.in) return;
     const q = toPx(p), r = p.r * q.u * 0.5;
-    c.beginPath(); c.arc(q.x, q.y, r, 0, TAU);
-    c.fillStyle = p.kind === 'striker' ? PRIM : p.kind === 'queen' ? WARM : p.kind === 'dark' ? '#3a2418' : INK;
-    c.fill();
-    c.strokeStyle = 'rgba(15,13,10,.4)'; c.lineWidth = 1; c.stroke();
-    if (p.kind === 'queen') { c.fillStyle = '#1a120c'; c.beginPath(); c.arc(q.x, q.y, r * 0.35, 0, TAU); c.fill(); }
+    c.fillStyle = 'rgba(0,0,0,.22)'; c.beginPath(); c.arc(q.x + 1.5, q.y + 2.5, r, 0, TAU); c.fill();
+    const g = c.createRadialGradient(q.x - r * 0.3, q.y - r * 0.35, 1, q.x, q.y, r);
+    if (p.kind === 'striker') { g.addColorStop(0, '#ff8a60'); g.addColorStop(1, '#c43a18'); }
+    else if (p.kind === 'queen') { g.addColorStop(0, '#ffe08a'); g.addColorStop(1, '#d48a20'); }
+    else if (p.kind === 'dark') { g.addColorStop(0, '#5a3a28'); g.addColorStop(1, '#2a1810'); }
+    else { g.addColorStop(0, '#fff8ee'); g.addColorStop(1, '#d8c8b0'); }
+    c.fillStyle = g; c.beginPath(); c.arc(q.x, q.y, r, 0, TAU); c.fill();
+    c.strokeStyle = 'rgba(15,13,10,.45)'; c.lineWidth = 1.2; c.stroke();
+    c.strokeStyle = 'rgba(251,245,236,.2)'; c.beginPath(); c.arc(q.x - r * 0.2, q.y - r * 0.25, r * 0.45, 0, TAU); c.stroke();
+    if (p.kind === 'queen') { c.fillStyle = '#1a120c'; c.beginPath(); c.arc(q.x, q.y, r * 0.32, 0, TAU); c.fill(); }
   }
 
   function drawAim(c) {
     if (G.phase !== 'aim' || !G.striker) return;
     const s = toPx(G.striker);
-    const len = 40 + G.charge * 90;
-    c.strokeStyle = 'rgba(255,183,54,' + (0.35 + G.charge * 0.5) + ')';
-    c.lineWidth = 2; c.setLineDash([6, 6]);
+    const len = 48 + G.charge * 110;
+    c.strokeStyle = 'rgba(255,183,54,' + (0.3 + G.charge * 0.55) + ')';
+    c.lineWidth = 2.5; c.setLineDash([5, 7]);
     c.beginPath(); c.moveTo(s.x, s.y);
     c.lineTo(s.x + sin(G.aim) * len, s.y - cos(G.aim) * len); c.stroke();
     c.setLineDash([]);
+    c.fillStyle = WARM; c.beginPath();
+    c.arc(s.x + sin(G.aim) * len, s.y - cos(G.aim) * len, 3.5, 0, TAU); c.fill();
     const pad = arc.hudPad ? arc.hudPad() : { bottom: 52 };
-    const bw = min(220, arc.w - 40), bx = arc.w / 2 - bw / 2, by = arc.h - pad.bottom - 22;
+    const bw = min(240, arc.w - 40), bx = arc.w / 2 - bw / 2, by = arc.h - pad.bottom - 22;
     plate(c, bx - 8, by - 10, bw + 16, 28, 10);
     c.fillStyle = 'rgba(251,245,236,.12)'; rr(c, bx, by, bw, 8, 4); c.fill();
     c.fillStyle = G.charge > 0.7 ? PRIM : WARM;

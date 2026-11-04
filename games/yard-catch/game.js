@@ -17,9 +17,9 @@
 
   let arc;
   const DIFF = {
-    easy: { spoil: 0.14, gap: 1.18, fall: 0.86 },
-    normal: { spoil: 0.22, gap: 1, fall: 1 },
-    hard: { spoil: 0.34, gap: 0.76, fall: 1.2 },
+    easy: { spoil: 0.12, gap: 1.28, fall: 0.78, catch: 78 },
+    normal: { spoil: 0.18, gap: 1.08, fall: 0.9, catch: 70 },
+    hard: { spoil: 0.28, gap: 0.84, fall: 1.12, catch: 60 },
   };
   const G = {
     t: 0, score: 0, lives: 3, maxLives: 3, combo: 0, px: 0.5, items: [], parts: [],
@@ -35,17 +35,25 @@
     G.maxLives = G.mode === 'clean' ? 1 : 3;
     G.lives = G.maxLives;
     G.clock = G.mode === 'shift' ? 75 : 0;
-    G.items = []; G.parts = []; G.next = attract ? 0.4 : 0.7 * G.D.gap;
-    G.phase = 'run'; G.attract = !!attract; G.caught = 0; G.inv = 0;
+    G.items = []; G.parts = []; G.next = attract ? 0.4 : 0.55 * G.D.gap;
+    G.phase = 'run'; G.attract = !!attract; G.caught = 0; G.inv = attract ? 0 : 1.6;
+    if (!attract) {
+      G.items.push({
+        x: G.px, y: -0.05, vy: 0.26 * G.D.fall,
+        kind: 'spice', w: 0.07, spoil: false,
+      });
+    }
   }
 
   function spawn() {
-    const spoil = rnd() < G.D.spoil;
+    const spoil = rnd() < G.D.spoil && G.t > 8 && G.caught >= 2;
+    // Early drops land near the crate so the first catches are readable.
+    const near = G.t < 10 ? clamp(G.px + (rnd() - 0.5) * 0.22, 0.12, 0.88) : (0.1 + rnd() * 0.8);
     G.items.push({
-      x: 0.1 + rnd() * 0.8, y: -0.08, vy: (0.28 + rnd() * 0.18 + G.t * 0.012) * G.D.fall,
+      x: near, y: -0.08, vy: (0.22 + rnd() * 0.14 + G.t * 0.008) * G.D.fall,
       kind: spoil ? 'spoil' : GOOD[(rnd() * GOOD.length) | 0], w: 0.07, spoil,
     });
-    G.next = (0.55 + rnd() * 0.45 - min(0.28, G.t * 0.008)) * G.D.gap;
+    G.next = (0.7 + rnd() * 0.5 - min(0.22, G.t * 0.006)) * G.D.gap;
   }
 
   function pop(x, y, col, n) {
@@ -68,7 +76,7 @@
 
   function miss() {
     if (G.phase === 'over' || G.inv > 0) return;
-    G.lives--; G.combo = 0; G.inv = 0.9;
+    G.lives--; G.combo = 0; G.inv = 1.15;
     arc.shake = 6; arc.sfx.tone(140, 0.14, { type: 'sawtooth', slide: 70, vol: 0.12 });
     if (G.lives <= 0) finish('Dropped the load', '<p>' + G.caught + ' sacks caught before the pile went over.</p>');
     else arc.toast('Missed a sack', G.lives + ' left', 800);
@@ -77,7 +85,7 @@
   function catchItem(o) {
     if (o.spoil) {
       if (G.phase === 'over' || G.inv > 0) { o.dead = true; return; }
-      G.lives--; G.combo = 0; G.inv = 0.9;
+      G.lives--; G.combo = 0; G.inv = 1.15;
       arc.toast('Spoiled', 'Skip those', 800);
       arc.sfx.tone(180, 0.12, { type: 'square', vol: 0.1 });
       if (G.lives <= 0) finish('Spoiled crate', '<p>' + G.caught + ' good sacks before a spoiled one landed.</p>');
@@ -100,18 +108,20 @@
       if (G.clock <= 0) { G.clock = 0; finish('Shift over', '<p>' + G.caught + ' sacks in the shift.</p>'); return; }
     }
     const inp = arc.input, ax = inp.axis(), p = inp.pointer;
-    G.px = clamp(G.px + ax.x * dt * 1.8, 0.08, 0.92);
-    if (p && p.seen && abs(ax.x) < 0.08) G.px = lerp(G.px, clamp(p.nx, 0.08, 0.92), 1 - Math.exp(-dt * 14));
+    G.px = clamp(G.px + ax.x * dt * 2.1, 0.08, 0.92);
+    if (p && p.seen && abs(ax.x) < 0.08) G.px = lerp(G.px, clamp(p.nx, 0.08, 0.92), 1 - Math.exp(-dt * 16));
     if (G.next <= 0) spawn();
     const gy = groundY();
-    const hx = G.px * arc.w, hw = 56;
+    const hx = G.px * arc.w, hw = G.D.catch || 70;
     G.items.forEach((o) => {
       if (o.dead) return;
       o.y += o.vy * dt;
       const x = o.x * arc.w, y = o.y * arc.h;
-      if (y > gy - 18 && y < gy + 12 && abs(x - hx) < hw) catchItem(o);
-      else if (y > arc.h + 20) {
-        if (!o.spoil) miss();
+      if (y > gy - 28 && y < gy + 18 && abs(x - hx) < hw) catchItem(o);
+      else if (y > gy + 36) {
+        // Only punish a miss when the sack was in reach. Far-lane drops are
+        // noise, not a failure.
+        if (!o.spoil && abs(o.x - G.px) < 0.32) miss();
         o.dead = true;
       }
     });
@@ -146,40 +156,65 @@
 
   function drawBg(c, w, h) {
     const g = c.createLinearGradient(0, 0, 0, h);
-    g.addColorStop(0, '#24182a'); g.addColorStop(0.55, '#c45b38'); g.addColorStop(1, '#2a1810');
+    g.addColorStop(0, '#1a1430'); g.addColorStop(0.45, '#c45b38'); g.addColorStop(0.72, '#f0a05a'); g.addColorStop(1, '#2a1810');
     c.fillStyle = g; c.fillRect(0, 0, w, h);
-    c.fillStyle = WARM; c.beginPath(); c.arc(w * 0.82, h * 0.16, 16, 0, TAU); c.fill();
+    c.fillStyle = '#FBF5EC'; c.beginPath(); c.arc(w * 0.82, h * 0.14, 20, 0, TAU); c.fill();
+    c.fillStyle = 'rgba(251,245,236,.12)'; c.beginPath(); c.arc(w * 0.82, h * 0.14, 70, 0, TAU); c.fill();
     const gy = groundY();
+    // Warehouse loft beam the sacks drop from.
+    c.fillStyle = '#1a1410'; c.fillRect(0, 18, w, 22);
+    c.fillStyle = '#3a2a22';
+    for (let x = 24; x < w; x += 90) {
+      c.fillRect(x, 40, 8, gy - 40);
+      c.fillStyle = 'rgba(255,183,54,.2)'; c.fillRect(x - 10, 48, 28, 6);
+      c.fillStyle = '#3a2a22';
+    }
+    for (let i = 0; i < 6; i++) {
+      const x = ((i * 200 - G.t * 10) % (w + 100)) - 50;
+      c.fillStyle = '#2a1c18'; c.fillRect(x, gy - 110, 88, 110);
+      c.fillStyle = i % 2 ? '#c45a3a' : GOLD; c.fillRect(x - 6, gy - 122, 100, 14);
+      c.fillStyle = 'rgba(255,183,54,.22)'; c.fillRect(x + 14, gy - 78, 22, 28); c.fillRect(x + 48, gy - 78, 18, 28);
+      c.fillStyle = '#1a120e'; c.fillRect(x + 34, gy - 48, 18, 48);
+    }
     c.fillStyle = '#2a241c'; c.fillRect(0, gy, w, h - gy);
     c.fillStyle = '#3a3428';
-    for (let x = 0; x < w; x += 36) c.fillRect(x, gy + 8, 18, 5);
-    c.fillStyle = '#4a2a22';
-    for (let i = 0; i < 7; i++) {
-      const x = ((i * 180 - G.t * 12) % (w + 80)) - 40;
-      c.fillRect(x, gy - 90, 70, 90);
-      c.fillStyle = i % 2 ? '#c45a3a' : GOLD; c.fillRect(x - 4, gy - 102, 78, 14);
-      c.fillStyle = '#4a2a22';
-    }
+    for (let x = 0; x < w; x += 40) c.fillRect(x, gy + 10, 22, 6);
+    c.fillStyle = 'rgba(0,0,0,.18)'; c.fillRect(0, gy, w, 4);
   }
 
   function drawItem(c, o) {
     const x = o.x * arc.w, y = o.y * arc.h;
+    c.fillStyle = 'rgba(0,0,0,.2)'; rr(c, x - 14, y + 8, 28, 8, 4); c.fill();
     if (o.spoil) {
-      c.fillStyle = '#5a6a3a'; rr(c, x - 16, y - 18, 32, 26, 4); c.fill();
-      c.fillStyle = '#8a3a2a'; c.fillRect(x - 10, y - 8, 20, 6);
+      c.fillStyle = '#4a5a30'; rr(c, x - 17, y - 20, 34, 30, 5); c.fill();
+      c.fillStyle = '#6a7a40'; c.fillRect(x - 12, y - 8, 24, 8);
+      c.fillStyle = '#8a3a2a'; c.fillRect(x - 8, y - 2, 16, 4);
+      c.strokeStyle = 'rgba(140,200,80,.45)'; c.strokeRect(x - 17, y - 20, 34, 30);
     } else {
-      c.fillStyle = o.kind === 'tea' ? '#4a2a18' : o.kind === 'spice' ? PRIM : '#c9a96e';
-      rr(c, x - 15, y - 20, 30, 28, 5); c.fill();
-      c.fillStyle = 'rgba(251,245,236,.25)'; c.fillRect(x - 8, y - 14, 16, 4);
+      const col = o.kind === 'tea' ? '#4a2a18' : o.kind === 'spice' ? PRIM : '#c9a96e';
+      c.fillStyle = col; rr(c, x - 16, y - 22, 32, 32, 6); c.fill();
+      c.fillStyle = 'rgba(251,245,236,.28)'; c.fillRect(x - 10, y - 16, 20, 5);
+      c.fillStyle = 'rgba(15,13,10,.25)'; c.fillRect(x - 16, y + 2, 32, 8);
+      c.strokeStyle = 'rgba(255,183,54,.35)'; c.lineWidth = 1; c.strokeRect(x - 16, y - 22, 32, 32);
     }
   }
 
   function drawHero(c) {
     const gy = groundY(), x = G.px * arc.w;
-    c.fillStyle = '#1a1814'; rr(c, x - 34, gy - 18, 68, 20, 6); c.fill();
-    c.fillStyle = PRIM; c.fillRect(x - 28, gy - 14, 56, 8);
-    c.fillStyle = '#3a2a22'; c.beginPath(); c.arc(x, gy - 32, 8, 0, TAU); c.fill();
-    c.fillStyle = '#1a1814'; c.fillRect(x - 10, gy - 26, 20, 12);
+    const flash = G.inv > 0 && ((G.t * 14) | 0) % 2;
+    if (flash) return;
+    c.fillStyle = 'rgba(0,0,0,.25)'; rr(c, x - 38, gy + 2, 76, 10, 4); c.fill();
+    c.fillStyle = '#1a1814'; rr(c, x - 40, gy - 22, 80, 26, 8); c.fill();
+    c.fillStyle = PRIM; c.fillRect(x - 32, gy - 16, 64, 10);
+    c.fillStyle = GOLD; c.fillRect(x - 28, gy - 6, 56, 3);
+    // Catcher silhouette.
+    c.fillStyle = '#3a2a22'; c.beginPath(); c.arc(x, gy - 40, 9, 0, TAU); c.fill();
+    c.fillStyle = '#1a1814'; c.fillRect(x - 11, gy - 34, 22, 16);
+    c.fillStyle = PRIM; c.fillRect(x - 11, gy - 22, 22, 5);
+    // Catch zone guide.
+    c.strokeStyle = 'rgba(255,105,64,.35)'; c.lineWidth = 1.5; c.setLineDash([4, 5]);
+    c.strokeRect(x - (G.D.catch || 70), gy - 30, (G.D.catch || 70) * 2, 36);
+    c.setLineDash([]);
   }
 
   function drawHUD(c) {
