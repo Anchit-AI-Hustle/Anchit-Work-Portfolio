@@ -443,6 +443,7 @@ const mmCv = newCv(MMS, MMS);
 
 
 /* ================================================================ three.js core: colour, geometry builder, materials */
+let LOD = 1;   // 1 full detail, 0 a lighter mesh for software rendering and weak phones
 const _tc = new THREE.Color();
 const LINC = {};
 // sRGB hex or css colour to linear floats (vertex colours are read as linear).
@@ -807,8 +808,8 @@ function treeG(g, t, out) {
       px = nx; pz = nz; py += hh;
     }
     const g1 = lin('#2f7a3a'), g2 = lin('#4aa047');
-    for (let f = 0; f < 9; f++) {
-      const a = t.rot + f * TAU / 9 + h1, ca = Math.cos(a), sa = Math.sin(a), L = 46 + (f % 3) * 5, wv = 5.5, nxv = -sa, nzv = ca;
+    for (let f = 0; f < (LOD ? 9 : 6); f++) {
+      const a = t.rot + f * TAU / (LOD ? 9 : 6) + h1, ca = Math.cos(a), sa = Math.sin(a), L = 46 + (f % 3) * 5, wv = 5.5, nxv = -sa, nzv = ca;
       const mx = px + ca * L * 0.5, mz = pz + sa * L * 0.5, ex = px + ca * L, ez = pz + sa * L, col = f % 2 ? g1 : g2;
       const up = [0, 1, 0];
       g.qh([px - nxv * 1.5, py, pz - nzv * 1.5, px + nxv * 1.5, py, pz + nzv * 1.5, mx + nxv * wv, py + 9, mz + nzv * wv, mx - nxv * wv, py + 9, mz - nzv * wv], up, col);
@@ -820,16 +821,19 @@ function treeG(g, t, out) {
     return;
   }
   const ht = R * 0.95, trunk = lin('#5a4128');
-  cylG(g, t.x, 0, t.y, Math.max(1.6, R * 0.1), Math.max(1.2, R * 0.065), ht, 6, trunk);
+  cylG(g, t.x, 0, t.y, Math.max(1.6, R * 0.1), Math.max(1.2, R * 0.065), ht, LOD ? 6 : 4, trunk);
   const ca = lin(t.c0), cb = lin(t.c2), cm = lin(t.c1);
-  blobG(g, t.x, ht + R * 0.5, t.y, R, R * 0.82, R, 7, 3, ca, cb, D0, { jit: 0.13, seed: (t.x * 7 + t.y) | 0 });
-  blobG(g, t.x + R * 0.6, ht + R * 0.18, t.y + R * 0.2, R * 0.7, R * 0.6, R * 0.7, 6, 2, ca, cm, D0, { jit: 0.14, seed: (t.x + t.y * 3) | 0 });
-  blobG(g, t.x - R * 0.55, ht + R * 0.28, t.y - R * 0.3, R * 0.66, R * 0.58, R * 0.66, 6, 2, ca, cm, D0, { jit: 0.14, seed: (t.x * 3 + t.y) | 0 });
+  if (LOD) {
+    blobG(g, t.x, ht + R * 0.5, t.y, R, R * 0.82, R, 7, 2, ca, cb, D0, { jit: 0.13, seed: (t.x * 7 + t.y) | 0 });
+    blobG(g, t.x + R * 0.6, ht + R * 0.18, t.y + R * 0.2, R * 0.7, R * 0.6, R * 0.7, 5, 2, ca, cm, D0, { jit: 0.14, seed: (t.x + t.y * 3) | 0 });
+  } else {
+    blobG(g, t.x, ht + R * 0.45, t.y, R, R * 0.85, R, 5, 2, ca, cb, D0, { jit: 0.12, seed: (t.x * 7 + t.y) | 0 });
+  }
 }
 
 function lampG(g, l, out) {
   const dx = -Math.cos(l.a), dz = -Math.sin(l.a), hd = Math.atan2(dz, dx), pole = lin('#4a4c50'), head = lin('#fff1c8');
-  cylG(g, l.x, 0, l.y, 1.5, 1.0, 74, 6, pole);
+  cylG(g, l.x, 0, l.y, 1.5, 1.0, 74, LOD ? 6 : 4, pole);
   boxR(g, l.x + dx * 9, 72.5, l.y + dz * 9, 20, 1.6, 1.6, hd, pole);
   boxR(g, l.x + dx * 18, 70.6, l.y + dz * 18, 10, 1.4, 4.4, hd, head, KEMIT);
   out.push([l.x + dx * 18, 70, l.y + dz * 18]);
@@ -976,9 +980,9 @@ function bldGeo(g, b, lampsOut) {
     if (b.w >= b.d) roofG(g, x0 - 2, z0 - 2, x1 + 2, z1 + 2, H, H + b.d * 0.18, 0, b.d / 2 + 2, roofC); else roofG(g, x0 - 2, z0 - 2, x1 + 2, z1 + 2, H, H + b.w * 0.18, b.w / 2 + 2, 0, roofC);
   } else {
     g.q([x0, H, z1, x1, H, z1, x1, H, z0, x0, H, z0], 0, 1, 0, roofC, null, D0);
-    const pc = mulc(wallC, 0.92), pw = 1.8, ph = 4;
-    boxG(g, x0, H, z1 - pw, x1, H + ph, z1, pc); boxG(g, x0, H, z0, x1, H + ph, z0 + pw, pc);
-    boxG(g, x0, H, z0 + pw, x0 + pw, H + ph, z1 - pw, pc); boxG(g, x1 - pw, H, z0 + pw, x1, H + ph, z1 - pw, pc);
+    const pc = mulc(wallC, 0.92), ph = 4;
+    g.q([x0, H, z1, x1, H, z1, x1, H + ph, z1, x0, H + ph, z1], 0, 0, 1, pc, null, D0); g.q([x1, H, z0, x0, H, z0, x0, H + ph, z0, x1, H + ph, z0], 0, 0, -1, pc, null, D0);
+    g.q([x1, H, z1, x1, H, z0, x1, H + ph, z0, x1, H + ph, z1], 1, 0, 0, pc, null, D0); g.q([x0, H, z0, x0, H, z1, x0, H + ph, z1, x0, H + ph, z0], -1, 0, 0, pc, null, D0);
     if (glass && b.w > 50 && b.d > 50) {
       const ins = Math.min(b.w, b.d) * 0.2, H2 = H * 0.1;
       wallsG(g, x0 + ins, z0 + ins, x1 - ins, z1 - ins, H, H + H2, tint(0.7), (s, len) => [1.6, len / Math.max(1, Math.round(len / 15)), 26, sd + s]);
@@ -987,7 +991,7 @@ function bldGeo(g, b, lampsOut) {
     }
     if (glass && b.beacon) { boxG(g, x0 + 4, roofY, z0 + 4, x0 + 5.4, roofY + 14, z0 + 5.4, lin('#6a6e74')); boxG(g, x0 + 3.6, roofY + 14, z0 + 3.6, x0 + 5.8, roofY + 16.2, z0 + 5.8, lin('#ff2a1a'), KEMIT); lampsOut.push([x0 + 4.7, roofY + 15, z0 + 4.7, 1]); }
   }
-  if (b.dec && !b.tiles) {
+  if (b.dec && !b.tiles && LOD) {
     for (const e of b.dec) {
       const px = x0 + e.px, pz = z0 + e.py;
       if (e.t === 'ac') boxG(g, px, roofY, pz, px + 9, roofY + 6, pz + 7, lin('#c8cbcf'));
@@ -1252,7 +1256,7 @@ function extG(g, pts, depth, bev, c, d) {
   const sh = new THREE.Shape(); sh.moveTo(pts[0], pts[1]);
   for (let i = 2; i < pts.length; i += 2) sh.lineTo(pts[i], pts[i + 1]);
   const dd = Math.max(0.1, depth - 2 * bev);
-  const geo = new THREE.ExtrudeGeometry(sh, { depth: dd, bevelEnabled: true, bevelThickness: bev, bevelSize: bev, bevelOffset: -bev, bevelSegments: 2, curveSegments: 1, steps: 1 });
+  const geo = new THREE.ExtrudeGeometry(sh, { depth: dd, bevelEnabled: true, bevelThickness: bev, bevelSize: bev, bevelOffset: -bev, bevelSegments: LOD ? 2 : 1, curveSegments: 1, steps: 1 });
   geo.translate(0, 0, -dd / 2);
   const p = geo.attributes.position, n = geo.attributes.normal, base = g.n;
   for (let i = 0; i < p.count; i++) g.v(p.getX(i), p.getY(i), p.getZ(i), n.getX(i), n.getY(i), n.getZ(i), c, 0, 0, d);
@@ -1364,7 +1368,7 @@ function modelRider() {
   return g;
 }
 function wheelG(r, w) {
-  const g = new GB(), seg = 12, tire = [0.025, 0.026, 0.03], hub = [0.5, 0.52, 0.56], spoke = [0.16, 0.16, 0.18];
+  const g = new GB(), seg = LOD ? 12 : 8, tire = [0.025, 0.026, 0.03], hub = [0.5, 0.52, 0.56], spoke = [0.16, 0.16, 0.18];
   for (let i = 0; i < seg; i++) {
     const a0 = i / seg * TAU, a1 = (i + 1) / seg * TAU, c0 = Math.cos(a0), s0 = Math.sin(a0), c1 = Math.cos(a1), s1 = Math.sin(a1), hw = w / 2;
     g.q([c1 * r, s1 * r, -hw, c0 * r, s0 * r, -hw, c0 * r, s0 * r, hw, c1 * r, s1 * r, hw], (c0 + c1) / 2, (s0 + s1) / 2, 0, tire, null, VD(4));
@@ -1429,8 +1433,8 @@ function buildDynamics(scene) {
   PEDS.legs = part((g) => { boxG(g, -1.1, -8.3, -1.0, 1.1, 0, 1.0, wh); boxG(g, -1.2, -8.9, -1.0, 1.8, -8.3, 1.0, [0.07, 0.065, 0.06]); }, 160);
   PEDS.torso = part((g) => { boxG(g, -1.7, 8.2, -2.7, 1.7, 15, 2.7, wh); }, 90);
   PEDS.arms = part((g) => { boxG(g, -0.8, -6.6, -0.8, 0.8, 0.6, 0.8, wh); }, 160);
-  PEDS.head = part((g) => { blobG(g, 0, 16.9, 0, 1.9, 2.1, 1.8, 7, 3, wh, wh); }, 90);
-  PEDS.hair = part((g) => { blobG(g, -0.25, 17.4, 0, 2.05, 1.9, 1.95, 7, 2, wh, wh, D0, { half: true }); }, 90);
+  PEDS.head = part((g) => { blobG(g, 0, 16.9, 0, 1.9, 2.1, 1.8, LOD ? 7 : 5, LOD ? 3 : 2, wh, wh); }, 90);
+  PEDS.hair = part((g) => { blobG(g, -0.25, 17.4, 0, 2.05, 1.9, 1.95, LOD ? 7 : 5, 2, wh, wh, D0, { half: true }); }, 90);
   PEDS.bag = part((g) => { boxG(g, -0.6, 8.6, 2.4, 1.4, 12.2, 5.4, wh); }, 90);
 
   // textures for light pools, cones, rings and beams
@@ -1537,10 +1541,24 @@ function applyTOD(h) {
 }
 
 /* ---- renderer, scene and the one-off pieces */
+// A software rasteriser (a CI browser, a phone with no GPU access) gets the lighter world from the start.
+function softwareGL() {
+  try {
+    const cv = document.createElement('canvas'), g = cv.getContext('webgl') || cv.getContext('experimental-webgl');
+    if (!g) return false;
+    const e = g.getExtension('WEBGL_debug_renderer_info'), name = e ? String(g.getParameter(e.UNMASKED_RENDERER_WEBGL)) : '';
+    const lose = g.getExtension('WEBGL_lose_context'); if (lose) lose.loseContext();
+    return /swiftshader|llvmpipe|softpipe|software|basic render/i.test(name);
+  } catch (err) { return false; }
+}
 function initGL(arc) {
   let renderer;
+  GL.soft = softwareGL();
+  LOD = GL.soft ? 0 : 1;
+  const m = /[?&]lod=(\d)/.exec(location.search); if (m) LOD = +m[1];
+  if (GL.soft) GL.q = 0;
   try {
-    renderer = new THREE.WebGLRenderer({ canvas: arc.canvas, antialias: true, powerPreference: 'high-performance' });
+    renderer = new THREE.WebGLRenderer({ canvas: arc.canvas, antialias: !GL.soft, powerPreference: 'high-performance' });
   } catch (e) { GL.fail = 'This game needs WebGL, which this browser did not give it.'; return; }
   GL.renderer = renderer;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -1595,7 +1613,7 @@ function resizeGL(arc) {
 function applyQuality() {
   const r = GL.renderer; if (!r) return;
   const q = GL.q;
-  GL.qMul = q >= 2 ? 1 : q === 1 ? 0.8 : 0.62;
+  GL.qMul = q >= 2 ? 1 : q === 1 ? 0.8 : (GL.soft ? 0.5 : 0.62);
   const size = q >= 2 ? (arcRef && Math.min(arcRef.w, arcRef.h) < 600 ? 1024 : 2048) : q === 1 ? 1024 : 512;
   r.shadowMap.enabled = q > 0;
   const sh = GL.key.shadow;
@@ -1617,7 +1635,7 @@ function chunkAt(tx, ty, make) {
   return c;
 }
 function streamChunks(fx, fy, budget) {
-  const RB2 = 1750, RV = 1480, cx = clamp(Math.floor(fx / TILE), 0, TN - 1), cy = clamp(Math.floor(fy / TILE), 0, TN - 1);
+  const RV = GL.q >= 2 ? 1480 : GL.q === 1 ? 1250 : (GL.soft ? 760 : 950), RB2 = RV + 280, cx = clamp(Math.floor(fx / TILE), 0, TN - 1), cy = clamp(Math.floor(fy / TILE), 0, TN - 1);
   let built = 0;
   const need = [];
   for (let ty = Math.max(0, cy - 4); ty <= Math.min(TN - 1, cy + 4); ty++) for (let tx = Math.max(0, cx - 4); tx <= Math.min(TN - 1, cx + 4); tx++) {

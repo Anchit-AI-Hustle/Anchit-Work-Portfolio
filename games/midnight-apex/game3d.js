@@ -1093,12 +1093,12 @@ function startLineTexture() {
 
 function waterNormal() {
   return canvasTex(256, 256, (g, w, h) => {
-    const img = g.createImageData(w, h), d = img.data;
-    const ht = (x, y) => Math.sin(x * 0.18) * Math.sin(y * 0.13) + 0.5 * Math.sin(x * 0.41 + y * 0.29) + 0.3 * Math.sin(x * 0.73 - y * 0.57);
+    const img = g.createImageData(w, h), d = img.data, r = rng(61), waves = [];
+    for (let i = 0; i < 12; i++) { const kx = ((r() * 9) | 0) - 4, ky = ((r() * 9) | 0) - 4; if (!kx && !ky) { i--; continue; } waves.push([kx, ky, r() * TAU, 1 / (1 + Math.hypot(kx, ky) * 0.55)]); }
+    const ht = (x, y) => { let s = 0; for (const q of waves) s += Math.sin(TAU * (q[0] * x + q[1] * y) / w + q[2]) * q[3]; return s; };
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
       const a = ht(x, y), dx = ht(x + 1, y) - a, dy = ht(x, y + 1) - a;
-      const nx = -dx * 2.4, ny = -dy * 2.4, nz = 1, l = Math.hypot(nx, ny, nz);
-      const i = (y * w + x) * 4;
+      const nx = -dx * 5, ny = -dy * 5, nz = 1, l = Math.hypot(nx, ny, nz), i = (y * w + x) * 4;
       d[i] = (nx / l * 0.5 + 0.5) * 255; d[i + 1] = (ny / l * 0.5 + 0.5) * 255; d[i + 2] = (nz / l * 0.5 + 0.5) * 255; d[i + 3] = 255;
     }
     g.putImageData(img, 0, 0);
@@ -1202,7 +1202,7 @@ function createFX(scene) {
 
 // The night sky as a picture on the inside of a big sphere: gradient, stars, moon, glow of the town.
 function skyTexture(P, id) {
-  return canvasTex(1024, 512, (g, w, h) => {
+  return canvasTex(2048, 1024, (g, w, h) => {
     const gr = g.createLinearGradient(0, 0, 0, h * 0.5);
     for (let i = 0; i < P.sky.length; i += 2) gr.addColorStop(P.sky[i], P.sky[i + 1]);
     g.fillStyle = gr; g.fillRect(0, 0, w, h * 0.5 + 1);
@@ -1210,17 +1210,17 @@ function skyTexture(P, id) {
     gb.addColorStop(0, P.fog); gb.addColorStop(0.5, P.fog); gb.addColorStop(1, '#05060a');
     g.fillStyle = gb; g.fillRect(0, h * 0.5, w, h * 0.5);
     const r = rng(23);
-    const ns = id === 'neon' ? 160 : 1100;
+    const ns = id === 'neon' ? 260 : 1900;
     for (let i = 0; i < ns; i++) {
       const y = Math.pow(r(), 0.8) * h * 0.46, x = r() * w, a = (0.25 + r() * 0.75) * (1 - y / (h * 0.5) * 0.8);
-      g.fillStyle = 'rgba(255,255,255,' + a + ')'; const s = r() < 0.12 ? 2 : 1; g.fillRect(x, y, s, s);
+      g.fillStyle = 'rgba(255,255,255,' + a + ')'; const s = r() < 0.07 ? 2 : 1; g.fillRect(x, y, s, s);
     }
     const md = P.moonDir, l = Math.hypot(md[0], md[1], md[2]), dx = md[0] / l, dy = md[1] / l, dz = md[2] / l;
     const phi = Math.atan2(dz, -dx), mx = ((phi / TAU) % 1 + 1) % 1 * w, my = Math.acos(dy) / Math.PI * h;
-    const hg = g.createRadialGradient(mx, my, 0, mx, my, 90);
-    hg.addColorStop(0, rgba(P.moonCol, 0.55)); hg.addColorStop(0.15, rgba(P.moonCol, 0.22)); hg.addColorStop(1, rgba(P.moonCol, 0));
-    g.fillStyle = hg; g.fillRect(mx - 90, my - 90, 180, 180);
-    g.beginPath(); g.arc(mx, my, 7, 0, TAU); g.fillStyle = '#f4f8ff'; g.fill();
+    const hg = g.createRadialGradient(mx, my, 0, mx, my, 170);
+    hg.addColorStop(0, rgba(P.moonCol, 0.55)); hg.addColorStop(0.1, rgba(P.moonCol, 0.22)); hg.addColorStop(1, rgba(P.moonCol, 0));
+    g.fillStyle = hg; g.fillRect(mx - 170, my - 170, 340, 340);
+    g.beginPath(); g.arc(mx, my, 13, 0, TAU); g.fillStyle = '#f4f8ff'; g.fill();
     if (id === 'neon') {
       const cg = g.createLinearGradient(0, h * 0.28, 0, h * 0.5); cg.addColorStop(0, 'rgba(255,60,160,0)'); cg.addColorStop(1, 'rgba(255,60,160,.35)');
       g.fillStyle = cg; g.fillRect(0, h * 0.28, w, h * 0.22);
@@ -2203,6 +2203,7 @@ function applyTier() {
   QUAL_LIST.forEach((m) => { m.castShadow = t.shadow > 0 && r.quality >= 2; });
   r.renderer.shadowMap.enabled = t.shadow > 0;
   r.moon.castShadow = t.shadow > 0;
+  r.hemi.intensity = r.baseHemi * (t.cheap ? 1.9 : 1); r.moon.intensity = r.baseMoon * (t.cheap ? 1.5 : 1);
   if (r.moon.shadow.mapSize.x !== t.mapSize) { r.moon.shadow.mapSize.set(t.mapSize, t.mapSize); if (r.moon.shadow.map) { r.moon.shadow.map.dispose(); r.moon.shadow.map = null; } }
 }
 function setQuality(q) {
@@ -2216,14 +2217,15 @@ function setQuality(q) {
 function lookFor(T, S) {
   const P = T.pal, r = R3;
   r.scene.fog.color.set(P.fog); r.scene.fog.density = P.fogD;
-  r.hemi.color.set(P.hemi[0]); r.hemi.groundColor.set(P.hemi[1]); r.hemi.intensity = P.hemi[2];
-  r.moon.color.set(P.sun[0]); r.moon.intensity = P.sun[1];
+  r.hemi.color.set(P.hemi[0]); r.hemi.groundColor.set(P.hemi[1]); r.baseHemi = P.hemi[2]; r.hemi.intensity = r.baseHemi;
+  r.moon.color.set(P.sun[0]); r.baseMoon = P.sun[1]; r.moon.intensity = r.baseMoon;
   r.moonDir.set(P.moonDir[0], P.moonDir[1], P.moonDir[2]).normalize();
   if (!S.skyTex) S.skyTex = skyTexture(P, T.id);
   r.skyMat.map = S.skyTex; r.skyMat.needsUpdate = true;
   if (!S.env) S.env = r.pmrem.fromEquirectangular(envTexture(P, T.id)).texture;
   r.scene.environment = TIERS[Math.max(0, r.quality)].env ? S.env : null; r.scene.environmentIntensity = T.id === 'neon' ? 1.0 : 0.65;
   r.renderer.setClearColor(P.fog);
+  const tt = TIERS[Math.max(0, r.quality)]; r.hemi.intensity = r.baseHemi * (tt.cheap ? 1.9 : 1); r.moon.intensity = r.baseMoon * (tt.cheap ? 1.5 : 1);
 }
 
 function disposeCars() {
@@ -2501,7 +2503,7 @@ function drawHUD(ctx, arc, W) {
     const ready = P.nitro >= 60 && !P.nitroOn;
     if (early || ready) {
       const lines = early ? [arc.touchStyle === 'tilt' ? 'Tilt your phone to steer' : 'Drag left or right to steer', 'Swipe up for nitro', 'Hold a downward drag to brake'] : ['Swipe up for nitro'];
-      const lw = S(early ? 236 : 170), lh = S(early ? 66 : 30), lx = (w - lw) / 2, ly = h - hp.bottom - lh - (early ? S(70) : S(62));
+      const lw = S(early ? 268 : 170), lh = S(early ? 66 : 30), lx = (w - lw) / 2, ly = h - hp.bottom - lh - (early ? S(70) : S(62));
       const pulse = 0.65 + 0.35 * Math.sin(arc.time * 5);
       ctx.save(); ctx.globalAlpha = early ? clamp(1 - (W.t - 6) / 2, 0, 1) : pulse;
       plate(ctx, lx, ly, lw, lh, 12);

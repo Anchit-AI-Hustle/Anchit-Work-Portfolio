@@ -2424,7 +2424,7 @@ function updateCamera(dt) {
   if (ph === 'attract' || ph === 'over' || ph === 'interlude') mode = 'orbit';
   else if (ph === 'live' && b.state !== 'none') {
     if (b.state === 'gone') mode = 'hold';
-    else if (b.state === 'held' || b.state === 'thrown' || BAT.state === 'run') mode = 'action';
+    else if (b.state === 'held' || b.state === 'thrown') mode = 'action';
     else mode = 'ball';
   } else if (ph === 'dead') {
     if ((G.deadKind === 'six' || G.deadKind === 'sixgate' || G.deadKind === 'glass') && CAM.holdSet) mode = 'hold';
