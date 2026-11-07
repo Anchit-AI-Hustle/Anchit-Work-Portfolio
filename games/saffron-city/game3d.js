@@ -8,6 +8,10 @@ import * as THREE from '/games/vendor/three/three.module.min.js';
  * three.js world: extruded buildings with lit windows, painted roads, lamp
  * light pools, a sunset sea, cars with working lights and a chase camera.
  * Everything is built in code from primitives and procedural textures.
+ *
+ * Quality adapts by itself (pixel ratio, shadow size, draw distance). A browser
+ * that renders in software gets a lighter world. For testing, ?q=0|1|2 pins
+ * the quality tier and ?lod=0|1 pins the mesh detail.
  */
 'use strict';
 
@@ -2005,6 +2009,8 @@ function render3D(arc) {
     const west = 0.5 + 0.5 * ((dx / l) * (sd.x / sl) + (dz / l) * (sd.z / sl));
     const fc = GL.scene.fog.color, gk = 1.1 * (0.25 + 0.75 * west); fc.copy(TOD.opp).lerp(TOD.hor, west);
     fc.r += TOD.glow.r * gk; fc.g += TOD.glow.g * gk; fc.b += TOD.glow.b * gk;
+    const sdh = Math.max(0, (dx / l) * sd.x / sl + (dz / l) * sd.z / sl), sg = (Math.pow(sdh, 6) * 0.42 + Math.pow(sdh, 48) * 0.8) * clamp(1 + sd.y * 6, 0, 1);
+    fc.r += TOD.sunCol.r * sg; fc.g += TOD.sunCol.g * sg; fc.b += TOD.sunCol.b * sg;
   }
   GL.sky.position.copy(cam.position);
   GL.sea.material.uniforms.uCam.value.copy(cam.position);
