@@ -2613,7 +2613,7 @@ function syncScene(dt) {
     if (a.g.visible) {
       const sc = A_.state === 'scold';
       a.g.position.set(A_.z + (A_.shake || 0) * 0.03, A_.h + 0.25 - (1 - A_.up) * 2.1, -A_.x);
-      a.g.scale.setScalar(1.2);
+      a.g.scale.setScalar(1.3);
       a.g.rotation.y = -PI / 2;
       a.armR.rotation.x = sc ? -2.7 + sin(A_.t * 22) * 0.18 : -0.35 + sin(G.time * 1.2) * 0.05;
       a.armR.rotation.z = sc ? -0.1 : -0.12;
