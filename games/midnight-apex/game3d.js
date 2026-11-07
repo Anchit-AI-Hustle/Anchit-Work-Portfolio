@@ -920,6 +920,8 @@ const planeG = (w, h, hex, pos, rot) => prep(new THREE.PlaneGeometry(w, h), hex,
 
 /* ------------------------------------------------------------ textures */
 let RENDERER = null;
+let TEX_ANISO = 1;
+const ALL_TEX = [];
 function canvasTex(w, h, draw, o) {
   o = o || {};
   const c = document.createElement('canvas'); c.width = w; c.height = h;
@@ -928,9 +930,11 @@ function canvasTex(w, h, draw, o) {
   t.colorSpace = o.linear ? THREE.NoColorSpace : THREE.SRGBColorSpace;
   if (o.repeat !== false) { t.wrapS = t.wrapT = THREE.RepeatWrapping; }
   if (o.repeat && o.repeat !== true) t.repeat.set(o.repeat[0], o.repeat[1]);
-  t.anisotropy = RENDERER ? Math.min(8, RENDERER.capabilities.getMaxAnisotropy()) : 4;
-  t.generateMipmaps = true; t.minFilter = THREE.LinearMipmapLinearFilter;
+  t.anisotropy = TEX_ANISO;
+  if (o.noMip) { t.generateMipmaps = false; t.minFilter = THREE.LinearFilter; }
+  else { t.generateMipmaps = true; t.minFilter = THREE.LinearMipmapLinearFilter; }
   t.needsUpdate = true;
+  ALL_TEX.push(t);
   return t;
 }
 function noiseFill(g, w, h, base, amp, n, seed) {
@@ -1225,7 +1229,7 @@ function skyTexture(P, id) {
       const cg = g.createLinearGradient(0, h * 0.28, 0, h * 0.5); cg.addColorStop(0, 'rgba(255,60,160,0)'); cg.addColorStop(1, 'rgba(255,60,160,.35)');
       g.fillStyle = cg; g.fillRect(0, h * 0.28, w, h * 0.22);
     }
-  }, { repeat: false });
+  }, { repeat: false, noMip: true });
 }
 
 /* ------------------------------------------------------------ cars */
@@ -2164,10 +2168,10 @@ function setup3D(arc) {
 
 // Four looks, from "everything" to "a slow or software renderer". Each step trades pixels, shadows, lights and shading cost.
 const TIERS = [
-  { px: 0.45, budget: 150000, shadow: 0, spots: 0, cheap: true, overlay: false, env: false, mapSize: 1024 },
-  { px: 0.7, budget: 460000, shadow: 0, spots: 1, cheap: false, overlay: true, env: true, mapSize: 1024 },
-  { px: 0.88, budget: 1000000, shadow: 1, spots: 2, cheap: false, overlay: true, env: true, mapSize: 1024 },
-  { px: 1, budget: 1.7e6, shadow: 1, spots: 2, cheap: false, overlay: true, env: true, mapSize: 2048 }
+  { px: 0.45, budget: 150000, shadow: 0, spots: 0, cheap: true, overlay: false, env: false, mapSize: 1024, aniso: 1 },
+  { px: 0.7, budget: 460000, shadow: 0, spots: 1, cheap: false, overlay: true, env: true, mapSize: 1024, aniso: 2 },
+  { px: 0.88, budget: 1000000, shadow: 1, spots: 2, cheap: false, overlay: true, env: true, mapSize: 1024, aniso: 4 },
+  { px: 1, budget: 1.7e6, shadow: 1, spots: 2, cheap: false, overlay: true, env: true, mapSize: 2048, aniso: 8 }
 ];
 function resize3D(arc) {
   if (!R3) return;
@@ -2199,6 +2203,8 @@ function applyTier() {
     if (o.userData && o.userData.ov) o.visible = t.overlay;
   });
   r.scene.environment = t.env && r.cur ? r.cur.env : null;
+  const an = Math.min(t.aniso, r.renderer.capabilities.getMaxAnisotropy()); TEX_ANISO = an;
+  ALL_TEX.forEach((tx) => { if (tx.anisotropy !== an) { tx.anisotropy = an; tx.needsUpdate = true; } });
   r.spots.forEach((sp, i) => { sp.visible = i < t.spots; });
   QUAL_LIST.forEach((m) => { m.castShadow = t.shadow > 0 && r.quality >= 2; });
   r.renderer.shadowMap.enabled = t.shadow > 0;

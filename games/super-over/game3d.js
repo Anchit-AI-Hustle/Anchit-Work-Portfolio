@@ -2080,8 +2080,8 @@ function cameraRig(dt) {
     const bx = BW.x, bz = BW.z, by = BW.y;
     _hv.set(bx - BASE_BAT.x, 0, bz - BASE_BAT.z); const d0 = _hv.length();
     if (d0 > 3.5) { _hv.multiplyScalar(1 / d0); CAM.dir.lerp(_hv, CAM.snap ? 1 : 1 - Math.exp(-dt * 2.2)).normalize(); }
-    const back = lerp(8.5, 18, clamp(d0 / 55, 0, 1)) * (portrait ? 1.2 : 1);
-    const height = 5.4 + back * 0.3 + by * 0.4;
+    const back = lerp(7.5, 17, clamp(d0 / 55, 0, 1)) * (portrait ? 1.1 : 1);
+    const height = 4.3 + back * 0.27 + by * 0.4;
     dPos.set(bx - CAM.dir.x * back, Math.max(4, height), bz - CAM.dir.z * back);
     const rad = Math.hypot(dPos.x, dPos.z); if (rad > 50) { dPos.x *= 50 / rad; dPos.z *= 50 / rad; }
     dTgt.set(bx + CAM.dir.x * 3.5, by * 0.7 + 0.2, bz + CAM.dir.z * 3.5);
@@ -2113,7 +2113,7 @@ function rigPersonFrame(p) {
 
 function applyQuality() {
   const r = R3.renderer; if (!r) return;
-  const f = [0.55, 0.72, 0.88, 1][R3.q];
+  const f = (R3.soft ? [0.42, 0.6, 0.8, 1] : [0.55, 0.72, 0.88, 1])[R3.q];
   r.setPixelRatio(Math.max(0.6, arc.dpr * f)); r.setSize(arc.w, arc.h, false);
   const key = R3.key, want = R3.q >= 3 ? 2048 : 1024;
   key.castShadow = R3.q >= 1;
@@ -2147,7 +2147,7 @@ function frame3D(dt) {
   /* people */
   for (let i = 0; i < NP; i++) PPL.st[i].vis = true;
   if (!fieldView) {
-    for (const i of [P_BAT, P_NON, P_BOWL]) PPL.st[i].px = null;
+    PPL.st[P_BAT].px = PPL.st[P_NON].px = PPL.st[P_BOWL].px = null;
     poseFieldersBat(dt);
     poseBatter(PPL.st[P_BAT], dt);
     poseNonStriker(PPL.st[P_NON], dt);
