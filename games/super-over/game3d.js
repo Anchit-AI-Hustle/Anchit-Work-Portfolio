@@ -1186,8 +1186,8 @@ function buildWorld() {
 
   /* the crowd: instanced people on every row, bouncing when the ground erupts */
   {
-    const torso = new THREE.BoxGeometry(0.62, 0.78, 0.4); torso.translate(0, 0.39, 0);
-    const head = new THREE.BoxGeometry(0.34, 0.36, 0.34); head.translate(0, 0.96, 0);
+    const torso = new THREE.CylinderGeometry(0.3, 0.38, 0.8, 6, 1, true).translate(0, 0.4, 0).scale(1, 1, 0.72);
+    const head = new THREE.OctahedronGeometry(0.2).scale(1, 1.15, 1).translate(0, 1.0, 0);
     const geo = mergeGeos([{ g: torso }, { g: head, c: rgbOf('#e8b996') }]);
     const mat = new THREE.MeshBasicMaterial({ vertexColors: true });
     mat.onBeforeCompile = (s) => {
@@ -2083,7 +2083,7 @@ function cameraRig(dt) {
     const back = lerp(8.5, 18, clamp(d0 / 55, 0, 1)) * (portrait ? 1.2 : 1);
     const height = 5.4 + back * 0.3 + by * 0.4;
     dPos.set(bx - CAM.dir.x * back, Math.max(4, height), bz - CAM.dir.z * back);
-    const rad = Math.hypot(dPos.x, dPos.z); if (rad > 62) { dPos.x *= 62 / rad; dPos.z *= 62 / rad; }
+    const rad = Math.hypot(dPos.x, dPos.z); if (rad > 50) { dPos.x *= 50 / rad; dPos.z *= 50 / rad; }
     dTgt.set(bx + CAM.dir.x * 3.5, by * 0.7 + 0.2, bz + CAM.dir.z * 3.5);
     fov = portrait ? 60 : 46;
   }
