@@ -2085,7 +2085,7 @@ function cameraRig(dt) {
     const height = 4.3 + back * 0.27 + by * 0.4 + near * 2.5;
     dPos.set(bx - CAM.dir.x * back, Math.max(4, height), bz - CAM.dir.z * back);
     const rad = Math.hypot(dPos.x, dPos.z); if (rad > 50) { dPos.x *= 50 / rad; dPos.z *= 50 / rad; }
-    dTgt.set(bx + CAM.dir.x * 3.5, by * 0.7 + 0.2, bz + CAM.dir.z * 3.5);
+    dTgt.set(bx + CAM.dir.x * 7, by * 0.7 + 0.3, bz + CAM.dir.z * 7);
     dTgt.x = lerp(dTgt.x, 0, near); dTgt.z = lerp(dTgt.z, 1.5, near); dTgt.y = lerp(dTgt.y, 0.6, near);
     fov = portrait ? 60 : 46;
   }
