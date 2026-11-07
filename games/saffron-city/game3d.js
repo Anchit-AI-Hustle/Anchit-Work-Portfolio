@@ -612,7 +612,7 @@ if (kind < 0.5) {
   vec2 lo = glassT ? vec2(0.05, 0.07) : (shop ? vec2(0.06, 0.08) : vec2(0.22, 0.2));
   vec2 hi = glassT ? vec2(0.95, 0.93) : (shop ? vec2(0.94, 0.8) : vec2(0.78, 0.8));
   vec2 q = (f - lo) / (hi - lo);
-  vec2 fw = fwidth(q) + 1e-4;
+  vec2 fw = fwidth(cell) / (hi - lo) + 1e-4;
   vec2 mm = smoothstep(vec2(0.0), fw, q) * (1.0 - smoothstep(vec2(1.0) - fw, vec2(1.0), q));
   float inside = mm.x * mm.y;
   inside = mix(inside, 0.5, smoothstep(0.4, 1.0, max(fw.x, fw.y)));
@@ -966,11 +966,11 @@ function bldGeo(g, b, lampsOut) {
   }
   // ordinary building
   const faces = roadSides(b), glass = !!b.glass, ribs = !!b.ribs;
-  const nfl = Math.max(1, Math.round(H / (glass ? 26 : 30))), chh = H / nfl;
+  const nfl = Math.max(1, Math.round(H / (glass ? 20 : 30))), chh = H / nfl;
   const sd = ((b.seed | 0) % 997) * 0.01;
   const shopOK = !glass && !ribs && b.ds !== 'heights' && b.ds !== 'docks';
   wallsG(g, x0, z0, x1, z1, 0, H, tint(glass ? 0.7 : 0.97), (s, len) => {
-    const nb = Math.max(1, Math.round(len / (glass ? 15 : 22)));
+    const nb = Math.max(1, Math.round(len / (glass ? 11 : 22)));
     if (ribs) return [5, 0, 0, 0];
     return [glass ? 1.6 : (faces[s] && shopOK ? 1.2 : 1.0), len / nb, chh, sd + s * 7.3];
   });
@@ -987,7 +987,7 @@ function bldGeo(g, b, lampsOut) {
     g.q([x1, H, z1, x1, H, z0, x1, H + ph, z0, x1, H + ph, z1], 1, 0, 0, pc, null, D0); g.q([x0, H, z0, x0, H, z1, x0, H + ph, z1, x0, H + ph, z0], -1, 0, 0, pc, null, D0);
     if (glass && b.w > 50 && b.d > 50) {
       const ins = Math.min(b.w, b.d) * 0.2, H2 = H * 0.1;
-      wallsG(g, x0 + ins, z0 + ins, x1 - ins, z1 - ins, H, H + H2, tint(0.7), (s, len) => [1.6, len / Math.max(1, Math.round(len / 15)), 26, sd + s]);
+      wallsG(g, x0 + ins, z0 + ins, x1 - ins, z1 - ins, H, H + H2, tint(0.7), (s, len) => [1.6, len / Math.max(1, Math.round(len / 11)), 20, sd + s]);
       g.q([x0 + ins, H + H2, z1 - ins, x1 - ins, H + H2, z1 - ins, x1 - ins, H + H2, z0 + ins, x0 + ins, H + H2, z0 + ins], 0, 1, 0, roofC, null, D0);
       roofY = H + H2;
     }
@@ -2992,11 +2992,15 @@ function updatePlayer(dt) {
     const v = pl.veh, ax = inp.axis(), c = v.c;
     if (gmode) {
       const brakeIn = ax.y > 0.42 && ax.y > Math.abs(ax.x) * 0.6, pulse = G.time < G.brakeUntil, boost = ax.y < -0.45 && !tiltM;
+      if (G.stopV !== v) { G.stopV = v; G.stopHold = false; }
+      if ((brakeIn || pulse) && vSpeed(v) < 12) G.stopHold = true;
+      if (G.stopHold && inp.gesture.active && !brakeIn && !pulse) G.stopHold = false;
       if (brakeIn || pulse) { c.thr = 0; c.brk = brakeIn ? clamp(ax.y, 0.6, 1) : 0.9; }
+      else if (G.stopHold) { c.thr = 0; c.brk = 0; }
       else { c.brk = 0; c.thr = boost ? 1 : (v.f < v.T.vmax * 0.66 ? 1 : 0.1); }
     } else { c.thr = Math.max(0, -ax.y); c.brk = Math.max(0, ax.y); }
     c.str = lerp(c.str, ax.x, Math.min(1, dt * 9));
-    c.hb = inp.down('Space');
+    c.hb = inp.down('Space') || (gmode && G.stopHold && c.brk < 0.3);
     pl.x = v.x; pl.y = v.y; pl.a = v.a;
     if (pl.hum) {
       const sp = vSpeed(v), base = v.type === 'bike' ? 70 : v.type === 'coupe' ? 62 : v.type === 'van' ? 42 : v.type === 'auto' ? 52 : 50;
@@ -3092,7 +3096,7 @@ function updateVehFx(v, dt) {
 
 function manageSpawns() {
   const D = DIFF[G.diff], touch = touchish();
-  const tTraffic = Math.round(24 * D.traffic * (touch ? 0.72 : 1)), tParked = touch ? 14 : 18, tPed = touch ? 26 : 38;
+  const tTraffic = Math.round(24 * D.traffic * (touch ? 0.8 : 1.15) * (GL.soft ? 0.7 : 1)), tParked = Math.round((touch ? 15 : 22) * (GL.soft ? 0.7 : 1)), tPed = Math.round((touch ? 28 : 42) * (GL.soft ? 0.75 : 1));
   let nT = 0, nP = 0, nPol = 0;
   for (let i = V.length - 1; i >= 0; i--) {
     const v = V[i], d = hyp(v.x - G.fx, v.y - G.fy), vis = inView(v.x, v.y, 80);
@@ -3118,9 +3122,9 @@ function manageSpawns() {
 function populate() {
   G.initial = true;
   const touch = touchish(), D = DIFF[G.diff];
-  for (let i = 0; i < 160 && V.filter((v) => v.ai && v.ai.kind === 'traffic' && !v.police).length < Math.round(24 * D.traffic * (touch ? 0.72 : 1)); i++) spawnTraffic(pickTrafficType(), 60, 1000);
-  for (let i = 0; i < 120 && V.filter((v) => v.parked && !v.mine).length < (touch ? 14 : 18); i++) spawnParked(pickParkedType(), 120, 1000);
-  for (let i = 0; i < 80 && PD.length < (touch ? 26 : 38); i++) spawnPedAt(60, 900);
+  for (let i = 0; i < 160 && V.filter((v) => v.ai && v.ai.kind === 'traffic' && !v.police).length < Math.round(24 * D.traffic * (touch ? 0.8 : 1.15) * (GL.soft ? 0.7 : 1)); i++) spawnTraffic(pickTrafficType(), 60, 1000);
+  for (let i = 0; i < 120 && V.filter((v) => v.parked && !v.mine).length < Math.round((touch ? 15 : 22) * (GL.soft ? 0.7 : 1)); i++) spawnParked(pickParkedType(), 120, 1000);
+  for (let i = 0; i < 80 && PD.length < Math.round((touch ? 28 : 42) * (GL.soft ? 0.75 : 1)); i++) spawnPedAt(60, 900);
   for (let i = 0; i < 2; i++) spawnTraffic('police', 300, 1000);
   G.initial = false;
 }
@@ -3567,7 +3571,7 @@ function drawLabels(c, arc) {
   // a hint for whatever the player is doing now, on touch
   if (t && arc.touchStyle !== 'pads') {
     const tilt = arc.touchStyle === 'tilt', car = !!pl.veh;
-    const tip = car ? (tilt ? 'Tilt to steer. Tap to brake, tap again when stopped to get out.' : 'Drag left or right to steer. Drag down to brake. Swipe up to honk.') : (tilt ? 'Tilt to turn and hold a finger to walk. Tap a car to get in.' : 'Drag to walk. Tap a nearby car to get in.');
+    const tip = car ? (G.stopHold ? 'Stopped. Tap to get out, or touch the screen to drive on.' : tilt ? 'Tilt to steer. Tap to brake, tap again when stopped to get out.' : 'Drag left or right to steer. Drag down to brake. Swipe up to honk.') : (tilt ? 'Tilt to turn and hold a finger to walk. Tap a car to get in.' : 'Drag to walk. Tap a nearby car to get in.');
     if (tip !== G.tip) { G.tip = tip; G.tipT = 7; }
     if (G.tipT > 0 && !G.banner) {
       const a = clamp(G.tipT / 1.2, 0, 1);
@@ -3639,7 +3643,7 @@ const arc = Arcade.create({
         hp: Math.round(pl.hp), carHp: pv ? Math.round(pv.hp) : null, hour: +G.hour.toFixed(2), night: +nightOf(G.hour).toFixed(2),
         chain: G.chain, hustleLeft: Math.round(G.hustleLeft), tiles: GL.chunks.size, zoom: +CAM.fov.toFixed(1), caught: !!G.caught, arrest: +G.arrest.toFixed(2),
         offers: G.offers.map((o) => ({ t: o.type, x: Math.round(o.x), y: Math.round(o.y), cd: Math.round(o.cd) })), jobs: G.stats.jobs, crashes: G.stats.crashes,
-        cam: { yaw: +CAM.yaw.toFixed(2), x: Math.round(CAM.x), y: Math.round(CAM.y), z: Math.round(CAM.z) }, fps: Math.round(GL.fps), quality: GL.q, buildMs: Math.round(GL.buildMs / Math.max(1, GL.buildN)), cpuSync: +(GL.cpuSync || 0).toFixed(1), cpuRender: +(GL.cpuRender || 0).toFixed(1), soft: !!GL.soft, cpuUpd: +(GL.cpuUpd || 0).toFixed(1), cpuHud: +(GL.cpuHud || 0).toFixed(1), touchStyle: a.touchStyle,
+        ctl: pv ? { thr: +pv.c.thr.toFixed(2), brk: +pv.c.brk.toFixed(2), str: +pv.c.str.toFixed(2), f: Math.round(pv.f), hold: !!G.stopHold } : null, cam: { yaw: +CAM.yaw.toFixed(2), x: Math.round(CAM.x), y: Math.round(CAM.y), z: Math.round(CAM.z) }, fps: Math.round(GL.fps), quality: GL.q, buildMs: Math.round(GL.buildMs / Math.max(1, GL.buildN)), cpuSync: +(GL.cpuSync || 0).toFixed(1), cpuRender: +(GL.cpuRender || 0).toFixed(1), soft: !!GL.soft, cpuUpd: +(GL.cpuUpd || 0).toFixed(1), cpuHud: +(GL.cpuHud || 0).toFixed(1), touchStyle: a.touchStyle,
       };
     };
     // helpers for automated tests

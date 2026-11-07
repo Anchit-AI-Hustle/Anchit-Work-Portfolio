@@ -1022,7 +1022,7 @@ function buildWorld() {
     m.position.y = y; m.receiveShadow = true; m.renderOrder = order; grp.add(m); return m;
   };
   // the square and the thirty-yard circle
-  const circ = ctex(2048, 2048, (g, w, h) => {
+  const circ = ctex(1024, 1024, (g, w, h) => {
     const X = (m) => (m + 30) / 60 * w, Z = (m) => (30 - m) / 60 * h, S = w / 60;
     g.fillStyle = 'rgba(96,190,104,0.22)'; g.fillRect(X(-4.2), Z(HALF + 5.9), 8.4 * S, (PITCH + 11) * S);
     g.strokeStyle = 'rgba(255,255,255,0.3)'; g.lineWidth = 0.12 * S; g.setLineDash([0.5 * S, 0.35 * S]);
@@ -2071,7 +2071,7 @@ function cameraRig(dt) {
   }
   let fov;
   if (want === 'bat') {
-    const drift = arc.state === 'menu' || G.attract ? Math.sin(G.clock * 0.25) * 0.35 : 0;
+    const drift = !arc.reducedMotion && (arc.state === 'menu' || G.attract) ? Math.sin(G.clock * 0.25) * 0.35 : 0;
     dPos.set(0.1 + drift, portrait ? 3.5 : 3.15, BASE_BAT.z + (portrait ? 9.4 : 8.3));
     dTgt.set(0.02, portrait ? 0.95 : 1.0, -6.5);
     if (VB.mode === 'path' || VB.mode === 'lerp') dTgt.x += clamp(BW.x, -2, 2) * 0.12;
@@ -2082,14 +2082,14 @@ function cameraRig(dt) {
     if (d0 > 3.5) { _hv.multiplyScalar(1 / d0); CAM.dir.lerp(_hv, CAM.snap ? 1 : 1 - Math.exp(-dt * 2.2)).normalize(); }
     const near = clamp(1 - d0 / 36, 0, 1) * 0.55;
     const back = (lerp(7.5, 17, clamp(d0 / 55, 0, 1)) + near * 7) * (portrait ? 1.1 : 1);
-    const height = 4.3 + back * 0.27 + by * 0.4 + near * 2.5;
-    dPos.set(bx - CAM.dir.x * back, Math.max(4, height), bz - CAM.dir.z * back);
+    const height = 3.4 + back * 0.22 + by * 0.35 + near * 2.2;
+    dPos.set(bx - CAM.dir.x * back, Math.max(3.2, height), bz - CAM.dir.z * back);
     const rad = Math.hypot(dPos.x, dPos.z); if (rad > 50) { dPos.x *= 50 / rad; dPos.z *= 50 / rad; }
-    dTgt.set(bx + CAM.dir.x * 7, by * 0.7 + 0.3, bz + CAM.dir.z * 7);
+    dTgt.set(bx + CAM.dir.x * 13, by * 0.6 + 0.9, bz + CAM.dir.z * 13);
     dTgt.x = lerp(dTgt.x, 0, near); dTgt.z = lerp(dTgt.z, 1.5, near); dTgt.y = lerp(dTgt.y, 0.6, near);
     fov = portrait ? 60 : 46;
   }
-  const rate = want === 'bat' ? 7 : 4.2, k = CAM.snap ? 1 : 1 - Math.exp(-dt * rate);
+  const rate = (want === 'bat' ? 7 : 4.2) * (arc.reducedMotion ? 0.55 : 1), k = CAM.snap ? 1 : 1 - Math.exp(-dt * rate);
   CAM.pos.lerp(dPos, k); CAM.tgt.lerp(dTgt, CAM.snap ? 1 : 1 - Math.exp(-dt * (rate + 2.5)));
   CAM.fov += (fov - CAM.fov) * (CAM.snap ? 1 : 1 - Math.exp(-dt * 3)); CAM.snap = false;
   cam.position.copy(CAM.pos);

@@ -46,7 +46,7 @@ const CAR_HALF = 0.19;      // half width of a car in road-half-width units
 const KMH = 280 / BASE_MAX;
 const SC = 0.004;           // metres per world unit
 const HW = ROAD_W * SC;     // road half width in metres (8)
-const CL = 1100;            // car length in world units (4.4 m), used for contact and spacing
+const CL = 800;             // contact length of a car in world units (3.2 m), used for contact and spacing
 const EDGE_X = 1.12;        // where the paved shoulder ends, in road-half-width units
 
 /* ------------------------------------------------------------ cars (stats and look) */
@@ -441,10 +441,10 @@ function aiPlan(W, c) {
       if (asd < 0.46) avoid += (sdx > 0 ? -1 : (sdx < 0 ? 1 : (c.x > 0 ? -1 : 1))) * (1 - asd / 0.46) * 1.3;
       continue;
     }
-    if (dz <= CL || dz > CL + 4400) continue;
+    if (dz <= CL || dz > CL + 5200) continue;
     const dx = o.x - c.x, adx = Math.abs(dx);
     if (adx < 0.5) {
-      const str = 1 - (dz - CL) / 4400;
+      const str = 1 - (dz - CL) / 5200;
       let dir = dx > 0 ? -1 : 1;
       if (adx < 0.04) dir = c.x > 0 ? -1 : 1;
       if (c.x + dir * 0.5 > 0.86 || c.x + dir * 0.5 < -0.86) dir = -dir;
@@ -925,7 +925,7 @@ const ALL_TEX = [];
 function canvasTex(w, h, draw, o) {
   o = o || {};
   const c = document.createElement('canvas'); c.width = w; c.height = h;
-  const g = c.getContext('2d'); draw(g, w, h);
+  const g = c.getContext('2d', { willReadFrequently: true }); draw(g, w, h);
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = o.linear ? THREE.NoColorSpace : THREE.SRGBColorSpace;
   if (o.repeat !== false) { t.wrapS = t.wrapT = THREE.RepeatWrapping; }
@@ -1560,7 +1560,8 @@ function updateTraffic(TR, W) {
 
 /* ------------------------------------------------------------ building the 3D track */
 const SEGM = SEG * SC;
-const QUAL_LIST = [];   // scenery meshes whose shadow casting follows the quality level
+const QUAL_LIST = [];
+const CULL = [];     // instanced chunks, hidden when far from the camera   // scenery meshes whose shadow casting follows the quality level
 
 function strip(rows, cols, fn, o) {
   o = o || {};
@@ -1645,6 +1646,7 @@ function addInstanced(T, group, parts, items, chunks) {
       im.castShadow = !!part.cast; im.receiveShadow = !!part.recv; if (part.ov) im.userData.ov = true;
       if (part.cast) QUAL_LIST.push(im);
       group.add(im);
+      if (part.cull !== false) { im.computeBoundingSphere(); const bs = im.boundingSphere; im.frustumCulled = true; CULL.push({ im, x: bs.center.x, y: bs.center.y, z: bs.center.z, r: bs.radius }); }
     }
   }
 }
@@ -1929,20 +1931,21 @@ function buildTrackScene(T) {
 
   // lamps
   const tint = id === 'neon' ? '#bfe9ff' : id === 'ghat' ? '#ffd9a0' : '#ffb55a';
-  ['lampL', 'lampR'].forEach((key) => {
-    const its = items(key, (b, out) => {
-      out.push(mk(b));
+  {
+    const its = [];
+    ['lampL', 'lampR'].forEach((key) => items(key, (b, out) => {
+      its.push(mk(b));
       const side = b.sp.off < 0 ? -1 : 1, z = b.seg.i * SEG + SEG / 2;
       frameAt(T, z); const pm = new THREE.Matrix4(); surf(side * 0.86, 0.05, _t1);
       setBasis(pm, FR.rx, FR.ry, FR.rz, FR.ux, FR.uy, FR.uz, FR.fx, FR.fy, FR.fz, _t1.x, _t1.y, _t1.z);
       pm.multiply(new THREE.Matrix4().makeRotationX(-Math.PI / 2)).multiply(new THREE.Matrix4().makeScale(19, 19, 1));
       pools.push({ m: pm, i: b.seg.i });
-    });
-    if (its.length) addInstanced(T, group, lampParts(tint), its, 1);
-  });
+    }));
+    if (its.length) addInstanced(T, group, lampParts(tint), its, 8);
+  }
   if (pools.length) {
     const pm = new THREE.MeshBasicMaterial({ map: SH.pool, color: tint, transparent: true, opacity: id === 'neon' ? 0.42 : 0.5, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false, fog: false });
-    addInstanced(T, group, [{ geo: ARC_PLANE, mat: pm, ov: true }], pools, 3);
+    addInstanced(T, group, [{ geo: ARC_PLANE, mat: pm, ov: true }], pools, 8);
   }
 
   if (id === 'harbour') {
@@ -2168,10 +2171,10 @@ function setup3D(arc) {
 
 // Four looks, from "everything" to "a slow or software renderer". Each step trades pixels, shadows, lights and shading cost.
 const TIERS = [
-  { px: 0.45, budget: 150000, shadow: 0, spots: 0, cheap: true, overlay: false, env: false, mapSize: 1024, aniso: 1 },
-  { px: 0.7, budget: 460000, shadow: 0, spots: 1, cheap: false, overlay: true, env: true, mapSize: 1024, aniso: 2 },
-  { px: 0.88, budget: 1000000, shadow: 1, spots: 2, cheap: false, overlay: true, env: true, mapSize: 1024, aniso: 4 },
-  { px: 1, budget: 1.7e6, shadow: 1, spots: 2, cheap: false, overlay: true, env: true, mapSize: 2048, aniso: 8 }
+  { px: 0.45, budget: 125000, shadow: 0, spots: 0, cheap: true, overlay: false, env: false, mapSize: 1024, aniso: 1, cull: 240 },
+  { px: 0.7, budget: 460000, shadow: 0, spots: 1, cheap: false, overlay: true, env: true, mapSize: 1024, aniso: 2, cull: 420 },
+  { px: 0.88, budget: 1000000, shadow: 1, spots: 2, cheap: false, overlay: true, env: true, mapSize: 1024, aniso: 4, cull: 650 },
+  { px: 1, budget: 1.7e6, shadow: 1, spots: 2, cheap: false, overlay: true, env: true, mapSize: 2048, aniso: 8, cull: 900 }
 ];
 function resize3D(arc) {
   if (!R3) return;
@@ -2340,6 +2343,8 @@ function renderScene(W, dt, a) {
     }
     q.geo.attributes.position.needsUpdate = true;
   }
+  const maxD = TIERS[Math.max(0, r.quality)].cull;
+  for (let i = 0; i < CULL.length; i++) { const c = CULL[i], dx = c.x - cp.x, dy = c.y - cp.y, dz = c.z - cp.z; c.im.visible = (!c.im.userData.ov || TIERS[Math.max(0, r.quality)].overlay) && Math.sqrt(dx * dx + dy * dy + dz * dz) - c.r < maxD; }
   r.renderer.render(r.scene, r.camera); if (!r.firstR) { r.firstR = 1; mark('first-render-done'); }
 }
 
@@ -2642,7 +2647,7 @@ function debugState() {
     gear: P.gear, rpm: +P.rpm.toFixed(2), drift: +P.drift.toFixed(2), draft: +P.draft.toFixed(2), crashes: P.crashes, crashLog: P.crashLog, nearMisses: P.nearMisses, trackLen: W.T.L,
     rivals: W.rivals.map((r) => ({ name: r.name, dist: Math.round(r.dist), x: +r.x.toFixed(2), speed: Math.round(r.speed * KMH), pos: positionOf(W, r), finished: r.finished })),
     traffic: W.traffic.length, results: W.results,
-    gfx: R3 ? { quality: R3.quality, fps: Math.round(R3.fps), touchStyle: a.touchStyle, fov: +W.fov.toFixed(1), nLatch: +P.nLatch.toFixed(2) } : null
+    gfx: R3 ? { cpuScene: +(R3.cpuScene || 0).toFixed(1), cpuHud: +(R3.cpuHud || 0).toFixed(1), quality: R3.quality, fps: Math.round(R3.fps), touchStyle: a.touchStyle, fov: +W.fov.toFixed(1), nLatch: +P.nLatch.toFixed(2) } : null
   };
 }
 
@@ -2750,8 +2755,12 @@ Arcade.create({
     }
     measureFps(dtRaw);
     if (R3.worldRef !== W) { activateWorld(W); R3.qWarm = 0; }
+    const c0 = performance.now();
     renderScene(W, a.state === 'pause' ? 0 : dtReal, a);
+    const c1 = performance.now();
     if (a.state !== 'menu') drawHUD(ctx, a, W);
+    const c2 = performance.now();
+    R3.cpuScene = (R3.cpuScene || c1 - c0) * 0.9 + (c1 - c0) * 0.1; R3.cpuHud = (R3.cpuHud || c2 - c1) * 0.9 + (c2 - c1) * 0.1;
   },
   onPause() { engineStop(); },
   onResume() { if (Wd && !Wd.attract) engineStart(); },

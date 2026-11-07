@@ -1202,7 +1202,7 @@ const COLF = (c) => new THREE.Color(c);
 function buildWorld(arc) {
   const dom = arc.canvas;
   W3.soft = isSoftwareGL();
-  R = new THREE.WebGLRenderer({ canvas: dom, antialias: !W3.soft && !/[?&]aa=0/.test(location.search), powerPreference: 'high-performance' });
+  R = new THREE.WebGLRenderer({ canvas: dom, antialias: !W3.soft, powerPreference: 'high-performance' });
   R.outputColorSpace = THREE.SRGBColorSpace;
   R.toneMapping = THREE.ACESFilmicToneMapping; R.toneMappingExposure = 1.08;
   R.shadowMap.enabled = true; R.shadowMap.type = THREE.PCFShadowMap;
@@ -1418,7 +1418,7 @@ const FIELDERS = [mkF(0, FIELD_X0[0], 'f0', 'keeper'), mkF(1, FIELD_X0[1], 'f1',
 FIELDERS[0].zone = [-10.8, -1.8]; FIELDERS[0].face = 1;
 const BOWLER = FIELDERS[4];
 BOWLER.runT = 0; BOWLER.runDur = 1; BOWLER.runFrom = BOWL_X + 3; BOWLER.arm = 0;
-const AUNTY = { state: 'hidden', t: 0, up: 0, x: 3.5, h: 3.3, z: ZW - 0.55, shake: 0, cd: 0 };
+const AUNTY = { state: 'hidden', t: 0, up: 0, x: 3.5, h: 3.3, z: ZW - 0.8, shake: 0, cd: 0 };
 const DOG = { active: false, x: 0, z: 1.0, dir: 1, state: 'walk', t: 0, phase: 0, goal: 0, stops: 0, carry: false, barkT: 0, fetch: false };
 const AUTO = { state: 'none', x: 0, z: -1.45, dir: -1, t: 0, wheel: 0, horned: 0, speed: 11.2, hold: 0, s: 0, hx: -1, hz: 0, door: 0 };
 const BIRDS = [];
@@ -1429,6 +1429,7 @@ let partCursor = 0;
 const POPS = [];
 const BUBBLES = [];
 const TEST = { kind: null };
+const HINT = { swings: 0, t: 0 };
 
 const SND = {
   tone(f, d, o) { if (arc) arc.sfx.tone(f, d, o); },
@@ -1809,7 +1810,7 @@ function endBall(kind, info) {
   if (out && !trial) SND.out();
   if (kind === 'glass') {
     AUNTY.state = 'scold'; AUNTY.t = 0;
-    setTimeout(() => { if (G.phase === 'dead' || G.phase === 'ready') sayAt(pick(LINES.aunty), AUNTY.x, AUNTY.h + 2.0, ZW - 0.55, 2.4); }, 500);
+    setTimeout(() => { if (G.phase === 'dead' || G.phase === 'ready') sayAt(pick(LINES.aunty), AUNTY.x, AUNTY.h + 2.3, AUNTY.z, 2.4); }, 500);
   }
   if (out && !trial && G.outs === 2 && G.outs < G.maxOuts) setTimeout(() => say(pick(LINES.lastMan), BAT, 2.0, 1.9), 1200);
   G.flags.lastEnd = kind;
@@ -1904,6 +1905,7 @@ function pressBat(shot) {
   const s = shot || { loft: false, ground: false, bias: 0, side: 0, fromAxis: true };
   SW.shot = shot ? s : null;
   const rs = shot || readShot();
+  HINT.swings++;
   SW.on = true; SW.t = 0; SW.hit = false; SW.kind = rs.loft ? 2 : rs.ground ? 0 : 1; SW.dur = G.D.swing; SW.cd = SW.dur + 0.28; SW.after = 0; SW.voff = 0;
   SND.swish();
 }
@@ -2203,7 +2205,7 @@ function updateAunty(dt) {
   if (A_.state === 'hidden') {
     if (G.auntyTimer <= 0 || A_.cd < 0) {
       A_.state = 'rise'; A_.t = 0; A_.cd = 0; G.auntyTimer = rr(22, 38);
-      if (rnd() < 0.7) setTimeout(() => { if (A_.state !== 'hidden') sayAt(pick(LINES.auntyChat), A_.x, A_.h + 2.05, ZW - 0.55, 2.3); }, 700);
+      if (rnd() < 0.7) setTimeout(() => { if (A_.state !== 'hidden') sayAt(pick(LINES.auntyChat), A_.x, A_.h + 2.3, A_.z, 2.3); }, 700);
     }
   } else if (A_.state === 'rise') {
     A_.up = min(1, A_.up + dt * 2.6); if (A_.up >= 1) { A_.state = 'idle'; A_.t = 0; }
@@ -2376,7 +2378,7 @@ function update(dt, a) {
   arc = a;
   let gdt = dt;
   if (G.slow > 0) { G.slow -= dt; gdt = dt * 0.28; }
-  G.time += gdt; G.t += gdt;
+  G.time += gdt; G.t += gdt; HINT.t += dt;
   const inp = a.input;
   const gest = a.touchMode && a.touchStyle !== 'pads' && G.phase !== 'interlude';
   if (gest) {
@@ -2610,7 +2612,8 @@ function syncScene(dt) {
     a.g.visible = A_.up > 0.001;
     if (a.g.visible) {
       const sc = A_.state === 'scold';
-      a.g.position.set(A_.z + (A_.shake || 0) * 0.03, A_.h - (1 - A_.up) * 1.45, -A_.x);
+      a.g.position.set(A_.z + (A_.shake || 0) * 0.03, A_.h + 0.25 - (1 - A_.up) * 2.1, -A_.x);
+      a.g.scale.setScalar(1.2);
       a.g.rotation.y = -PI / 2;
       a.armR.rotation.x = sc ? -2.7 + sin(A_.t * 22) * 0.18 : -0.35 + sin(G.time * 1.2) * 0.05;
       a.armR.rotation.z = sc ? -0.1 : -0.12;
@@ -2824,6 +2827,20 @@ function drawGesture(c) {
   c.restore();
 }
 
+// A first-play reminder of the touch gestures: touch screens hide the shell's key hint.
+function drawTouchHint(c) {
+  if (!(arc.state === 'play' && arc.touchMode && arc.touchStyle !== 'pads' && HINT.swings < 3 && HINT.t < 16)) return;
+  if (G.phase === 'interlude' || G.phase === 'over') return;
+  const lines = V.portrait ? ['TAP TO SWING, LIFT AS THE BALL ARRIVES', 'SWIPE UP LOFT  DOWN GROUND  LEFT EARLY  RIGHT LATE'] : ['TAP TO SWING, LIFT AS THE BALL ARRIVES   SWIPE UP LOFT, DOWN GROUND, LEFT EARLY, RIGHT LATE'];
+  c.font = '600 ' + (V.portrait ? 10 : 11.5) + 'px ' + FONT_MONO; c.textAlign = 'center'; c.textBaseline = 'alphabetic';
+  const w = max.apply(null, lines.map((l) => c.measureText(l).width)) + 24, h = lines.length * 16 + 12;
+  const x = (V.W - w) / 2, y = V.H - h - (V.portrait ? 96 : 24);
+  const a = clamp((16 - HINT.t) / 2, 0, 1) * 0.92;
+  c.globalAlpha = a; plate(c, x, y, w, h);
+  c.fillStyle = '#FFE9B0'; lines.forEach((l, i) => c.fillText(l, V.W / 2, y + 20 + i * 16));
+  c.globalAlpha = 1;
+}
+
 /* ------------------------------------------------------------ the frame */
 function render(c, a) {
   arc = a; arcRef = a;
@@ -2838,10 +2855,9 @@ function render(c, a) {
       camera.position.copy(CAM.p);
       if (!a.reducedMotion) { camera.position.x += (a.shakeX || 0) * 0.012; camera.position.y += (a.shakeY || 0) * 0.012; }
       camera.lookAt(CAM.t);
-      if (!W3.lost && !W3.norender) {
+      if (!W3.lost) {
         const t1 = performance.now();
         R.render(scene, camera);
-        if (W3.prof) { R.getContext().finish(); }
         W3.tRender = performance.now() - t1; W3.calls = R.info.render.calls; W3.tris = R.info.render.triangles;
         // quality auto-scale: step down when frames run slow (a settle window skips the frames that compile shaders)
         if (W3.settle > 0) W3.settle--;
@@ -2855,10 +2871,10 @@ function render(c, a) {
         }
       }
     }
-    if (W3.nohud) return;
     drawHUD(c);
     drawBubbles(c); drawPops(c);
     drawGesture(c);
+    drawTouchHint(c);
     drawInterlude(c);
     if (CAM.flash > 0.01 && !a.reducedMotion) { c.fillStyle = 'rgba(255,238,205,' + CAM.flash * 0.7 + ')'; c.fillRect(0, 0, V.W, V.H); }
     if (W3.failed) {
@@ -2901,7 +2917,9 @@ function menuShow(a) {
     eyebrow: 'Gully cricket',
     title: 'Gully <em>Champs</em>',
     html:
-      '<p>A golden-hour afternoon, a narrow lane, and a taped tennis ball. The bowler runs in from the far end. <b>Tap</b> as the ball reaches you to swing, <b>swipe up</b> to loft it or <b>swipe down</b> to keep it on the ground, and tap <b>Run</b> to dash between the crate and the chalk line.</p>' +
+      (a.touchMode
+        ? '<p>A golden-hour afternoon, a narrow lane, and a taped tennis ball. The bowler runs in from the far end. <b>Tap</b> to swing and lift your finger as the ball reaches you. <b>Swipe up</b> to loft it, <b>swipe down</b> to keep it on the ground, <b>swipe left</b> to play it early to the front, <b>swipe right</b> to play it late behind you, and tap <b>Run</b> to dash between the crate and the chalk line.</p>'
+        : '<p>A golden-hour afternoon, a narrow lane, and a taped tennis ball. The bowler runs in from the far end. Press <b>Bat</b> as the ball reaches you, hold <b>Up</b> to loft it or <b>Down</b> to keep it on the ground, and tap <b>R</b> to dash between the crate and the chalk line.</p>') +
       '<div class="eyebrow" style="margin:2px 0 8px">House rules</div>' + rulesHtml() +
       '<p style="font-size:14px"><b style="color:var(--ink)">Last Man Standing</b>: three outs, score as much as you can. <b style="color:var(--ink)">Chase the Colony</b>: beat the rival lane\'s target in three overs. <b style="color:var(--ink)">Super Sunday</b>: three chases against three lanes, getting harder.</p>',
     options: [
@@ -2965,7 +2983,7 @@ A.create({
       W3.q = coarse ? 1 : 0;
       W3.softHint = isSoftwareGL(); if (W3.softHint) W3.q = 4;
       const qp = /[?&]q=(\d)/.exec(location.search); if (qp) W3.q = +qp[1];
-      W3.prof = /[?&]prof=1/.test(location.search); W3.norender = /[?&]norender=1/.test(location.search); W3.fixq = /[?&]fixq=1/.test(location.search); W3.nohud = /[?&]nohud=1/.test(location.search);
+      W3.fixq = /[?&]fixq=1/.test(location.search); // dev only: ?q=N picks a quality level, ?fixq=1 stops the auto-scaler
       buildWorld(a);
     } catch (e) {
       W3.failed = true;
@@ -2989,7 +3007,7 @@ A.create({
     resetScene();
     AUTO.state = 'none'; AUTO.door = 0; DOG.active = false; DOG.carry = false; AUNTY.state = 'hidden'; AUNTY.up = 0;
     G.autoTimer = rr(24, 36); G.dogTimer = rr(8, 16); G.auntyTimer = rr(5, 10);
-    G.yield = 0;
+    G.yield = 0; HINT.swings = 0; HINT.t = 0;
     newMatch();
   },
   update,
