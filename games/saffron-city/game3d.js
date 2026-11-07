@@ -1855,7 +1855,7 @@ function syncPeds() {
   const M = FX.mats, d = M.d;
   let n = 0, nl = 0, nb = 0;
   const put2 = (p, isPlayer) => {
-    if (n >= 88) return;
+    if (n >= 80) return;
     const dx = p.x - CAM.x, dz = p.y - CAM.z; if (dx * dx + dz * dz > 1100 * 1100) return;
     _sph.center.set(p.x, 9, p.y); _sph.radius = 16; if (!GL.frustum.intersectsSphere(_sph)) return;
     const run = p.state === 'flee' || p.state === 'dive' || (isPlayer && pl.sprint);
@@ -3655,6 +3655,7 @@ const arc = Arcade.create({
     };
     // helpers for automated tests
     a.cheat = {
+      chunk(tx, ty) { const r = buildChunkGeo(tx, ty); const n = r.geo.attributes.position.count; r.geo.dispose(); return n; },
       step(n, dt) { for (let i = 0; i < n; i++) { updatePlay(dt || 1 / 30); a.input.endFrame(); } },
       tp(x, y) { pl.x = x; pl.y = y; if (pl.veh) { pl.veh.x = x; pl.veh.y = y; } G.camX = x; G.camY = y; },
       cash(n) { G.cash = n; }, heat(n) { G.heat = n; G.unseen = 0; }, time(h) { G.hour = h; }, hustle(s) { G.hustleLeft = s; },

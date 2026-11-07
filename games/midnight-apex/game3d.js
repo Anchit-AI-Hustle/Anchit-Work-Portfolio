@@ -13,8 +13,6 @@ import * as THREE from '/games/vendor/three/three.module.min.js';
  */
 
 const TAU = Math.PI * 2;
-function mark(n) { (window.__prof = window.__prof || []).push([n, Math.round(performance.now())]); }
-mark('module');
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 const lerp = (a, b, t) => a + (b - a) * t;
 const mod = (a, n) => ((a % n) + n) % n;
@@ -365,8 +363,8 @@ function placeCar(T, c) { c.z = mod(c.dist, T.L); }
 const gridSlot = (slot) => ({ dist: -(Math.floor(slot / 2) * 1500 + 800), x: slot % 2 ? 0.36 : -0.36 });
 
 function newWorld(cfg) {
-  mark('newWorld');
-  const T = getTrack(cfg.track), segs = T.segs; mark('track-built');
+ 
+  const T = getTrack(cfg.track), segs = T.segs;
   for (let i = 0; i < T.n; i++) { const s = segs[i]; for (let j = 0; j < s.spr.length; j++) s.spr[j].hit = -9; }
   racerId = 0;
   const W = {
@@ -1746,7 +1744,7 @@ const TS = {};   // built track scenes, by track id
 
 function buildTrackScene(T) {
   if (TS[T.id]) return TS[T.id];
-  trackExtents(T); mark('scene-start ' + T.id);
+  trackExtents(T); 
   const P = T.pal, id = T.id, M = T.M, FS = T.FS, segs = T.segs, SH = shared();
   const group = new THREE.Group(); group.name = 'track-' + id;
   const S = { group, id, T, update: null, rain: null, sea: null, farPlane: null, env: null, tunnelLights: null };
@@ -1827,7 +1825,7 @@ function buildTrackScene(T) {
     const gm = new THREE.Mesh(gg, groundMat); gm.receiveShadow = true; group.add(gm);
   });
 
-  mark('ground-done');
+ 
   /* ---- guard rails */
   const railMat = new THREE.MeshStandardMaterial({ map: SH.metal, color: '#c4cad2', metalness: 0.75, roughness: 0.38, side: THREE.DoubleSide });
   const postMat = new THREE.MeshStandardMaterial({ color: '#3a3f46', roughness: 0.6, metalness: 0.4 });
@@ -1915,7 +1913,7 @@ function buildTrackScene(T) {
     if (lampItems.length) addInstanced(T, group, [{ geo: boxG(0.4, 0.1, 2.4, '#bfe9ff'), mat: new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false }) }], lampItems, 1);
   }
 
-  mark('rails-done');
+ 
   /* ---- roadside scenery */
   const buckets = {};
   segs.forEach((sg) => sg.spr.forEach((sp) => { (buckets[sp.key] = buckets[sp.key] || []).push({ seg: sg, sp }); }));
@@ -2109,7 +2107,7 @@ function buildTrackScene(T) {
   }
 
   // centre of the lap, used by far things
-  S.update = null; mark('scene-end ' + id);
+  S.update = null; 
   return (TS[id] = S);
 }
 
@@ -2158,7 +2156,7 @@ function setup3D(arc) {
     quality: -1, qT: 0, qN: 0, qMax: 0, fps: 60, soft: false, lastNow: 0, camPos: new THREE.Vector3(), camTgt: new THREE.Vector3(), camUp: new THREE.Vector3(0, 1, 0), moonDir: new THREE.Vector3(0.3, 0.4, -0.8),
     shakeS: 0, time: 0, camInit: false, blink: 0
   };
-  FX = createFX(scene); window.__r3 = R3;
+  FX = createFX(scene);
   R3.TR = createTraffic(scene);
   try {
     const gl = renderer.getContext(), ext = gl.getExtension('WEBGL_debug_renderer_info');
@@ -2250,7 +2248,7 @@ function disposeCars() {
 }
 
 function activateWorld(W) {
-  mark('activate'); const r = R3, T = W.T, S = buildTrackScene(T);
+  const r = R3, T = W.T, S = buildTrackScene(T);
   if (r.cur !== S) {
     if (r.cur) r.scene.remove(r.cur.group);
     r.scene.add(S.group); r.cur = S; lookFor(T, S);
@@ -2275,9 +2273,9 @@ function updateCamera(W, dt, a) {
   surf(P.xCam * follow, up, _cu);
   const bankUp = { x: FR.ux, y: FR.uy, z: FR.uz };
   r.camPos.set(_cu.x, _cu.y, _cu.z);
-  const ahead = (port ? 26 : 19) / SC;
+  const ahead = (port ? 21 : 19) / SC;
   frameAt(T, P.dist + ahead);
-  surf(P.xCam * 0.42, 0.9, _cu);
+  surf(P.xCam * 0.42, port ? 0.3 : 0.9, _cu);
   r.camTgt.set(_cu.x, _cu.y, _cu.z);
   // shake and drift
   const sx = a.shakeX || 0, sy = a.shakeY || 0;
@@ -2346,7 +2344,7 @@ function renderScene(W, dt, a) {
   }
   const maxD = TIERS[Math.max(0, r.quality)].cull;
   for (let i = 0; i < CULL.length; i++) { const c = CULL[i], dx = c.x - cp.x, dy = c.y - cp.y, dz = c.z - cp.z; c.im.visible = (!c.im.userData.ov || TIERS[Math.max(0, r.quality)].overlay) && Math.sqrt(dx * dx + dy * dy + dz * dz) - c.r < maxD; }
-  r.renderer.render(r.scene, r.camera); if (!r.firstR) { r.firstR = 1; mark('first-render-done'); }
+  r.renderer.render(r.scene, r.camera); if (!r.firstR) { r.firstR = 1; }
 }
 
 /* ------------------------------------------------------------ HUD */
@@ -2699,7 +2697,7 @@ Arcade.create({
   formatScore: fmtTime,
   resize: (a) => resize3D(a),
   init(a) {
-    mark('init'); ARC = a;
+    ARC = a;
     BESTS = a.store.get('midnight-apex.bests', {}) || {};
     if (!setup3D(a)) { NO3D = true; showNo3D(a); return; }
     setQuality(R3.soft ? 0 : 3); resize3D(a);

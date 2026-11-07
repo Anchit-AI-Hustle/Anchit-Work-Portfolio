@@ -24,7 +24,6 @@ const Arcade = window.Arcade;
   const lerp = (a, b, t) => a + (b - a) * t;
   const sstep = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
   const hyp = Math.hypot;
-  const sgn = (v) => (v < 0 ? -1 : 1);
   let rnd = Math.random;
   const rr = (a, b) => a + (b - a) * rnd();
   const pickOf = (a) => a[(rnd() * a.length) | 0];
@@ -327,7 +326,6 @@ const Arcade = window.Arcade;
     celebrate: 0, fireT: 0, track: null,
   };
 
-  const TARGET_TEXT = () => (G.mode === 'nets' ? '' : 'Need ' + Math.max(0, G.target - G.runs) + ' from ' + (G.ballsTotal - G.balls));
 
   function newBowler(pace) {
     const list = pace ? PACE_BOWLERS : SPIN_BOWLERS;
@@ -784,7 +782,7 @@ const Arcade = window.Arcade;
           const p = clamp(0.45 + 0.9 * (RN.t1 - t), 0.45, 0.97);
           if (rnd() < p) {
             RN.state = 'out';
-            breakStumpsField(ez);
+            breakStumpsField(FS.thr.ez);
             end({ runs: RN.k, wicket: 'Run out', runout: true }, 0);
             return;
           }
@@ -1446,7 +1444,7 @@ function rigPerson(i, p) {
     return;
   }
   rigJoints(p);
-  const hipY = 0.93 - p.crouch, lc = Math.cos(p.lean), ls = Math.sin(p.lean);
+  const hipY = 0.93 - p.crouch;
   R.fw.set(0, 0, 1).transformDirection(bodyM); R.lf.set(1, 0, 0).transformDirection(bodyM); R.up.set(0, 1, 0).transformDirection(bodyM);
   // trunk
   toWorld(0, hipY - 0.1, 0, _c); toWorld(0, hipY + 0.1, 0, _d);
@@ -1511,10 +1509,9 @@ function placeBat(k, grip, bdir, fdir) {
 
 /* ====================================================================== 3D: poses */
 const wrapA = (a) => { while (a > Math.PI) a -= TAU; while (a < -Math.PI) a += TAU; return a; };
-const SHIRT_BAT = '#e8892b', SHIRT_FLD = '#1c6fb5';
+const SHIRT_BAT = '#e8892b';
 const BASE_BAT = new THREE.Vector3(-0.45, 0, HALF - HITZ);
 const BW = new THREE.Vector3(); // the ball in world space, this frame
-const BALL = { vis: false, mode: 'none', held: false };
 
 function resetPose(p) {
   p.y = 0; p.pitch = 0; p.crouch = 0; p.lean = 0.05; p.twist = 0; p.look = 0;
@@ -1553,7 +1550,6 @@ function standStill(p, t) {
   p.ht[0].set(0.27, 0.8, 0.04); p.ht[1].set(-0.27, 0.8, 0.04);
 }
 const _hv = new THREE.Vector3(), _hv2 = new THREE.Vector3(), _hv3 = new THREE.Vector3();
-const FDIR = new THREE.Vector3();
 
 /* ---------------------------------------------------------------- the batter */
 const BAT_POSE = {
@@ -1893,8 +1889,6 @@ class FxPool {
   clear() { this.n = 0; this.pts.geometry.setDrawRange(0, 0); }
 }
 const FX = { add: null, norm: null };
-const _col = new THREE.Color();
-const colOf = (c) => _col.set(c);
 function clearFx() { if (FX.add) { FX.add.clear(); FX.norm.clear(); } }
 function spawnSparks(x, y, zb, n, col) {
   if (!FX.add) return;
@@ -2633,6 +2627,21 @@ function initRenderer() {
     wrapTxt(ctx, '3D graphics are not available in this browser, so the stadium cannot be drawn.', w / 2, h * 0.45, Math.min(w - 40, 420), 22, 16, C.ink);
   }
 
+  // The line a finger draws while it picks the shot.
+  function drawSwipeTrail(ctx) {
+    const gz = arc.input.gesture;
+    if (!gz.active || gz.type === 'mouse' || arc.touchStyle !== 'gesture' || arc.state !== 'play' || G.view !== 'bat') return;
+    const len = Math.hypot(gz.dx, gz.dy); if (len < 10) return;
+    ctx.save();
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.strokeStyle = 'rgba(255,183,54,0.28)'; ctx.lineWidth = 12; ctx.beginPath(); ctx.moveTo(gz.sx, gz.sy); ctx.lineTo(gz.x, gz.y); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,214,140,0.95)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(gz.sx, gz.sy); ctx.lineTo(gz.x, gz.y); ctx.stroke();
+    const a = Math.atan2(gz.dy, gz.dx);
+    ctx.fillStyle = 'rgba(255,214,140,0.95)'; ctx.beginPath();
+    ctx.moveTo(gz.x + Math.cos(a) * 12, gz.y + Math.sin(a) * 12); ctx.lineTo(gz.x + Math.cos(a + 2.5) * 12, gz.y + Math.sin(a + 2.5) * 12); ctx.lineTo(gz.x + Math.cos(a - 2.5) * 12, gz.y + Math.sin(a - 2.5) * 12); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
   function render(ctx, a) {
     arc = a;
     const now = performance.now();
@@ -2643,7 +2652,7 @@ function initRenderer() {
       frame3D(dtr);
       R3.renderer.render(R3.scene, R3.camera);
     }
-    if (!G.attract && arc.state !== 'menu') drawHUD(ctx);
+    if (!G.attract && arc.state !== 'menu') { drawHUD(ctx); drawSwipeTrail(ctx); }
     if (G.cutFlash > 0.01) { ctx.fillStyle = 'rgba(255,248,230,' + clamp(G.cutFlash, 0, 1) * 0.6 + ')'; ctx.fillRect(0, 0, w, h); }
     if (G.fade > 0.01) { ctx.fillStyle = 'rgba(5,6,10,' + clamp(G.fade, 0, 1) + ')'; ctx.fillRect(0, 0, w, h); }
   }
