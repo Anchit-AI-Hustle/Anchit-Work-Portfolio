@@ -23,11 +23,13 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // How long to play before the photo, and what to hold. Tuned per game so the
 // frame shows the game doing its thing rather than its first second.
 const PLAY = {
-  'saffron-city': { ms: 5000, keys: ['ArrowUp'], taps: ['KeyF'], tapAt: 400 },
-  'midnight-apex': { ms: 9000, keys: ['ArrowUp'], taps: [] },
-  'turf-kings': { ms: 4500, keys: ['ArrowUp', 'ArrowRight'], taps: [] },
-  'super-over': { ms: 3600, keys: [], taps: [] },
-  'gully-champs': { ms: 3200, keys: [], taps: [] },
+  // The five 3D games pick their own quality, and a machine with no GPU makes them choose the lowest. A poster is
+  // one still, so each is pinned to full detail: a query flag where the game reads one, or its own test hook.
+  'saffron-city': { ms: 5000, keys: ['ArrowUp'], taps: ['KeyF'], tapAt: 400, query: '?q=2&lod=1' },
+  'midnight-apex': { ms: 9000, keys: ['ArrowUp'], taps: [], hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
+  'turf-kings': { ms: 4500, keys: ['ArrowUp', 'ArrowRight'], taps: [], query: '?quality=0' },
+  'super-over': { ms: 3600, keys: [], taps: [], query: '?q=3' },
+  'gully-champs': { ms: 3200, keys: [], taps: [], query: '?q=3&fixq=1' },
   'court-lights': { ms: 2800, keys: [], taps: ['Space'], tapAt: 700 },
   'sky-thread': { ms: 3500, keys: ['ArrowUp', 'ArrowRight'], taps: ['Space'], tapAt: 500 },
   'tiffin-dash': { ms: 2800, keys: ['ArrowUp'], taps: ['Space'], tapAt: 400 },
@@ -40,19 +42,21 @@ const PLAY = {
 async function shoot(browser, slug) {
   const ctx = await browser.newContext({ viewport: { width: 1200, height: 682 }, deviceScaleFactor: 1 });
   const page = await ctx.newPage();
-  await page.goto(BASE + '/games/' + slug, { waitUntil: 'load' });
+  const p = PLAY[slug] || { ms: 3000, keys: [], taps: [] };
+  await page.goto(BASE + '/games/' + slug + (p.query || ''), { waitUntil: 'load' });
   await page.waitForFunction(() => window.__arcade && window.__arcade.frame > 5, null, { timeout: 10000 });
   await page.evaluate(() => document.fonts && document.fonts.ready);
   await page.click('.arc-card .arc-btn.primary');
-  const p = PLAY[slug] || { ms: 3000, keys: [], taps: [] };
   for (const k of p.keys) await page.keyboard.down(k);
   const start = Date.now();
   for (const t of p.taps) { await sleep(p.tapAt || 300); await page.keyboard.press(t); }
   while (Date.now() - start < p.ms) await sleep(100);
   // Freeze the frame: pause the loop without opening the pause panel.
-  await page.addStyleTag({ content: '.arc-bar,.arc-hint,.arc-toast,.arc-touch,.arc-panel{display:none!important}' });
+  if (p.hiq) { await page.evaluate(p.hiq); await page.waitForFunction((f) => window.__arcade.frame > f + 3, await page.evaluate(() => window.__arcade.frame), { timeout: 60000 }); }
+  await page.addStyleTag({ content: '.arc-bar,.arc-hint,.arc-toast,.arc-touch,.arc-panel,.arc-float{display:none!important}' });
   await sleep(250);
-  const buf = await page.locator('.arc-stage canvas').screenshot();
+  // The stage, not one canvas: a 3D game draws on a WebGL canvas with its HUD on a second one above it.
+  const buf = await page.locator('.arc-stage').screenshot();
   for (const k of p.keys) await page.keyboard.up(k);
   await ctx.close();
   const img = sharp(buf).resize(1200, 630, { fit: 'cover', position: 'centre' });
