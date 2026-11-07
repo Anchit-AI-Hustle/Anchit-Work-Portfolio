@@ -62,7 +62,9 @@ async function hub(browser, vp) {
   const res = await page.goto(BASE + '/games', { waitUntil: 'load' });
   check(`[${vp.name}] /games answers 200`, res && res.status() === 200, res && String(res.status()));
   const cards = await page.$$eval('[data-slug]', (els) => els.map((e) => e.getAttribute('data-slug')));
-  check(`[${vp.name}] hub lists all ${GAMES.length} games`, GAMES.every((g) => cards.includes(g)), cards.join(','));
+  // A game may be tested on its preview page (turf-kings/3d); the hub lists the game itself.
+  const listed = GAMES.map((g) => g.split('/')[0]);
+  check(`[${vp.name}] hub lists all ${listed.length} games`, listed.every((g) => cards.includes(g)), cards.join(','));
   await page.evaluate(() => new Promise((r) => { let y = 0; const step = () => { y += 600; window.scrollTo(0, y); if (y < document.body.scrollHeight) setTimeout(step, 40); else r(); }; step(); }));
   await sleep(400);
   const broken = await page.$$eval('[data-slug] img', (imgs) => imgs.filter((i) => !(i.complete && i.naturalWidth > 0)).map((i) => i.src));
@@ -158,7 +160,7 @@ async function game(browser, vp, slug) {
   check(`${tag} touch controls ${vp.hasTouch ? 'shown' : 'hidden'}`, touchShown === vp.hasTouch);
 
   if (!vp.hasTouch) {
-    const box = await page.locator('.arc-stage canvas').boundingBox();
+    const box = await page.locator('.arc-stage canvas').first().boundingBox();
     if (box) {
       await page.mouse.move(box.x + box.width * 0.4, box.y + box.height * 0.45);
       await page.mouse.down();
