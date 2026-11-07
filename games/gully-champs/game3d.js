@@ -1355,7 +1355,7 @@ function sizeRenderer() {
   R.setSize(arcRef.w, arcRef.h, false);
   camera.aspect = arcRef.w / arcRef.h;
   const portrait = arcRef.h > arcRef.w * 1.05;
-  camera.fov = portrait ? 68 : 48;
+  camera.fov = portrait ? 68 : 43;
   camera.updateProjectionMatrix();
   const sf = (R.domElement.height) / (2 * Math.tan(camera.fov * PI / 360));
   if (layers) Object.keys(layers).forEach((k) => { layers[k].mat.uniforms.uScale.value = sf; });
@@ -2414,7 +2414,7 @@ function computeView() { V.W = arc.w; V.H = arc.h; V.portrait = V.H > V.W * 1.05
 
 function homeRig(pp, tt) {
   if (V.portrait) { pp.set(0, 3.5, 9.4); tt.set(0, 0.6, -4.6); }
-  else { pp.set(0, 3.1, 8.6); tt.set(0, 0.9, -4.0); }
+  else { pp.set(0, 3.3, 9.4); tt.set(0, 0.9, -4.2); }
 }
 function updateCamera(dt) {
   if (!arc) return;
