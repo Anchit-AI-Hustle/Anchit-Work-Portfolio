@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Midnight Apex | Games | Anchit Tandon</title>
-  <meta name="description" content="A night street racer on a pseudo-3D road. Three tracks, three cars, five rivals, traffic and nitro. Three laps to the chequered flag.">
+  <meta name="description" content="A 3D night street racer. Three tracks, three cars, five rivals, traffic and nitro. Three laps to the chequered flag.">
   <link rel="canonical" href="https://anchit-tandon.com/games/midnight-apex">
   <meta name="theme-color" content="#0F0D0A">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Midnight Apex | Games | Anchit Tandon">
-  <meta property="og:description" content="A night street racer on a pseudo-3D road. Three tracks, three cars, five rivals, traffic and nitro. Three laps to the chequered flag.">
+  <meta property="og:description" content="A 3D night street racer. Three tracks, three cars, five rivals, traffic and nitro. Three laps to the chequered flag.">
   <meta property="og:url" content="https://anchit-tandon.com/games/midnight-apex">
   <meta property="og:image" content="https://anchit-tandon.com/games/midnight-apex/poster.png">
   <meta name="twitter:card" content="summary_large_image">
@@ -23,6 +23,15 @@
 <body>
   <noscript><p style="padding:24px;color:#FBF5EC;background:#0F0D0A;font-family:sans-serif">This game needs JavaScript.</p></noscript>
   <script src="/games/shared/arcade.js" defer></script>
-  <script src="/games/midnight-apex/game.js" defer></script>
+  <script>
+    /* The 3D game needs WebGL2; without it the 2D version of the same game loads instead. */
+    document.addEventListener("DOMContentLoaded", function () {
+      var ok = false;
+      try { var gl = document.createElement("canvas").getContext("webgl2"); ok = !!gl; var x = gl && gl.getExtension("WEBGL_lose_context"); if (x) x.loseContext(); } catch (e) { ok = false; }
+      var s = document.createElement("script");
+      if (ok) { s.type = "module"; s.src = "/games/midnight-apex/game3d.js"; } else { s.src = "/games/midnight-apex/game.js"; }
+      document.body.appendChild(s);
+    });
+  </script>
 </body>
 </html>
