@@ -1994,6 +1994,11 @@ function render3D(arc) {
   cam.updateMatrixWorld();
   GL.pv.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse); GL.frustum.setFromProjectionMatrix(GL.pv);
   streamChunks(CAM.ground.x, CAM.ground.y, G.preload ? 99 : 1);
+  { // fog takes the colour of the horizon in the direction the camera looks
+    const dx = CAM.lx - CAM.x, dz = CAM.lz - CAM.z, l = Math.hypot(dx, dz) || 1, sd = TOD.sunDir, sl = Math.hypot(sd.x, sd.z) || 1;
+    const west = 0.5 + 0.5 * ((dx / l) * (sd.x / sl) + (dz / l) * (sd.z / sl));
+    GL.scene.fog.color.copy(TOD.opp).lerp(TOD.hor, west).multiplyScalar(0.94);
+  }
   GL.sky.position.copy(cam.position);
   GL.sea.material.uniforms.uCam.value.copy(cam.position);
   // the key light follows the player so its shadow map stays sharp where you are looking
@@ -3013,7 +3018,7 @@ function updatePlayer(dt) {
       m = hyp(wx, wy); if (m > 1) { wx /= m; wy /= m; m = 1; }
       pl.fwdK = fwd > 0 ? clamp(fwd / Math.max(0.4, m), 0, 1) : 0;
     }
-    const sprint = inp.down('ShiftLeft', 'ShiftRight', 'Space') || (gmode && !tiltM && m > 0.93) || G.dashT > 0;
+    const sprint = inp.down('ShiftLeft', 'ShiftRight', 'Space') || G.dashT > 0;
     pl.sprint = sprint && m > 0.1;
     const sp = sprint ? 165 : 98;
     pl.vx = lerp(pl.vx, wx * sp, Math.min(1, dt * 12)); pl.vy = lerp(pl.vy, wy * sp, Math.min(1, dt * 12));
@@ -3459,8 +3464,8 @@ function drawHUD(c, arc) {
   // job card
   if (t) { const jw = Math.max(170, w - pad * 2 - (R * 2 + 14)); jobCard(c, pad, y + ch + 6, jw, arc); }
   else { const jw = 292; jobCard(c, w - pad - jw, pad, jw, arc); }
-  // speed / vehicle (desktop)
-  if (!t) {
+  // speed / vehicle (desktop, and on touch when the stick is not in the corner)
+  if (!t || arc.touchStyle !== 'pads') {
     plate(c, pad, h - pad - 54, 190, 54, 12, 0.7);
     const sp = v ? Math.round(vSpeed(v) * 0.36) : 0;
     text(c, v ? v.T.name.toUpperCase() : 'ON FOOT', pad + 12, h - pad - 38, '600 10px ' + F_MONO, '#c9a96e');
