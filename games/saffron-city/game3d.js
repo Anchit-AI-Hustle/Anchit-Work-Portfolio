@@ -1146,9 +1146,10 @@ function buildSeaGeo() {
 function seaMaterial() {
   return new THREE.ShaderMaterial({
     fog: true, side: THREE.DoubleSide, defines: LOD ? {} : { LITE: 1 },
-    uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, {
+    // the time of day objects are shared by reference (merge() would clone them and the sea would never change colour)
+    uniforms: Object.assign(THREE.UniformsUtils.merge([THREE.UniformsLib.fog]), {
       uTime: UN.uTime, uNight: UN.uNight, uSunDir: { value: TOD.sunDir }, uSunCol: { value: TOD.sunCol }, uHor: { value: TOD.hor }, uZen: { value: TOD.zen }, uCam: { value: new THREE.Vector3() },
-    }]),
+    }),
     vertexShader: `
 attribute float aD; varying float vD; varying vec3 vW;
 #include <fog_pars_vertex>
@@ -2002,7 +2003,8 @@ function render3D(arc) {
   { // fog takes the colour of the horizon in the direction the camera looks
     const dx = CAM.lx - CAM.x, dz = CAM.lz - CAM.z, l = Math.hypot(dx, dz) || 1, sd = TOD.sunDir, sl = Math.hypot(sd.x, sd.z) || 1;
     const west = 0.5 + 0.5 * ((dx / l) * (sd.x / sl) + (dz / l) * (sd.z / sl));
-    GL.scene.fog.color.copy(TOD.opp).lerp(TOD.hor, west).multiplyScalar(0.94);
+    const fc = GL.scene.fog.color, gk = 1.1 * (0.25 + 0.75 * west); fc.copy(TOD.opp).lerp(TOD.hor, west);
+    fc.r += TOD.glow.r * gk; fc.g += TOD.glow.g * gk; fc.b += TOD.glow.b * gk;
   }
   GL.sky.position.copy(cam.position);
   GL.sea.material.uniforms.uCam.value.copy(cam.position);

@@ -430,8 +430,9 @@ function aiPlan(W, c) {
     const bz = wrapD(c.dist - P.dist, L);
     if (bz > CL + 200 && bz < CL + 2800 && P.speed > c.speed - 900 && Math.sin(W.t * 0.35 + c.id * 1.9) > 0.15) { blocking = true; tx = clamp(P.x, -0.72, 0.72); }
   }
-  for (let j = 0; j < W.obst.length; j++) {
-    const o = W.obst[j];
+  const ob = W.obst || [];
+  for (let j = 0; j < ob.length; j++) {
+    const o = ob[j];
     if (o === c || o.ghost || (blocking && o === P)) continue;
     const dz = wrapD(o.dist - c.dist, L);
     if (dz <= 150 && dz > -CL) {
@@ -466,8 +467,9 @@ function updateRival(W, c, dt) {
   c.dist += c.speed * dt;
   // two cars that would sit on top of each other part them sideways
   const L = W.T.L;
-  for (let j = 0; j < W.obst.length; j++) {
-    const o = W.obst[j];
+  const ob = W.obst || [];
+  for (let j = 0; j < ob.length; j++) {
+    const o = ob[j];
     if (o === c || o.isPlayer || o.ghost) continue;
     const dz = wrapD(o.dist - c.dist, L), dxx = c.x - o.x;
     if (Math.abs(dz) < CL * 0.7 && Math.abs(dxx) < 0.2) c.x = clamp(c.x + (dxx >= 0 ? 1 : -1) * dt * 1.4, -0.9, 0.9);
@@ -2297,12 +2299,21 @@ function updateLights(W, dt) {
   r.moon.target.position.copy(_wp);
   r.moon.position.copy(_wp).addScaledVector(r.moonDir, 80);
   r.moon.target.updateMatrixWorld(); r.moon.updateMatrixWorld();
+  // A car right in front catches the full beam at a metre or two and burns to a white disc; dim the beams as it closes.
+  let near = 1;
+  const ob = W.obst || [];
+  for (let j = 0; j < ob.length; j++) {
+    const o = ob[j]; if (o === P) continue;
+    const dz = wrapD(o.dist - P.dist, W.T.L);
+    if (dz > 0 && dz < 3600 && Math.abs(o.x - P.x) < 0.75) near = Math.min(near, clamp((dz - 500) / 3100, 0.05, 1));
+  }
+  near *= near;
   for (let i = 0; i < 2; i++) {
     const sd = i ? 1 : -1, sp = r.spots[i];
     sp.position.set(sd * 0.62, 0.72, -2.1).applyMatrix4(car.root.matrix);
     sp.target.position.set(sd * 0.9, -0.2, -26).applyMatrix4(car.root.matrix);
     sp.target.updateMatrixWorld();
-    sp.intensity = (W.T.id === 'neon' ? 900 : 1500) * (P.nitroOn ? 1.2 : 1) * (R3.quality >= 2 ? 1 : 1.4);
+    sp.intensity = (W.T.id === 'neon' ? 900 : 1500) * (P.nitroOn ? 1.2 : 1) * (R3.quality >= 2 ? 1 : 1.4) * near;
   }
 }
 
