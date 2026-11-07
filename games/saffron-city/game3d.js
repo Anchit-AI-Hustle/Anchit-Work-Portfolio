@@ -580,10 +580,14 @@ const GLSL_COMMON = `
 float h21(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * 0.1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
 float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
   return mix(mix(h21(i), h21(i + vec2(1.0, 0.0)), f.x), mix(h21(i + vec2(0.0, 1.0)), h21(i + vec2(1.0, 1.0)), f.x), f.y); }
+#ifdef LITE
+#define vn(p) 0.5
+#endif
 `;
 function cityMaterial() {
   const m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, metalness: 0.0 });
   m.shadowSide = THREE.DoubleSide;
+  if (!LOD) m.defines = { LITE: 1 };
   m.onBeforeCompile = (sh) => {
     sh.uniforms.uNight = UN.uNight; sh.uniforms.uWin = UN.uWin; sh.uniforms.uTime = UN.uTime;
     sh.vertexShader = sh.vertexShader
@@ -707,7 +711,7 @@ if (kind < 0.5) {
       .replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\nif (wM >= 0.0) metalnessFactor = wM;')
       .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\ntotalEmissiveRadiance += wEm;');
   };
-  m.customProgramCacheKey = () => 'sc-city-1';
+  m.customProgramCacheKey = () => 'sc-city-' + LOD;
   return m;
 }
 
@@ -1143,7 +1147,7 @@ function buildSeaGeo() {
 
 function seaMaterial() {
   return new THREE.ShaderMaterial({
-    fog: true, side: THREE.DoubleSide,
+    fog: true, side: THREE.DoubleSide, defines: LOD ? {} : { LITE: 1 },
     uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, {
       uTime: UN.uTime, uNight: UN.uNight, uSunDir: { value: TOD.sunDir }, uSunCol: { value: TOD.sunCol }, uHor: { value: TOD.hor }, uZen: { value: TOD.zen }, uCam: { value: new THREE.Vector3() },
     }]),
@@ -1159,9 +1163,11 @@ varying float vD; varying vec3 vW; uniform float uTime; uniform float uNight; un
 void main() {
   vec2 p = vW.xz; float t = uTime; vec2 g = vec2(0.0);
   g += vec2(0.8, 0.3) * 0.05 * cos(dot(p, vec2(0.8, 0.3)) * 0.11 + t * 1.3);
+#ifndef LITE
   g += vec2(-0.4, 0.9) * 0.04 * cos(dot(p, vec2(-0.4, 0.9)) * 0.19 - t * 1.7);
   g += vec2(0.2, -0.95) * 0.025 * cos(dot(p, vec2(0.2, -0.95)) * 0.43 + t * 2.3);
   g += vec2(0.6, 0.7) * 0.014 * cos(dot(p, vec2(0.6, 0.7)) * 0.9 + t * 3.1);
+#endif
   float far = smoothstep(500.0, 2200.0, distance(uCam, vW));
   g *= 1.0 - 0.7 * far;
   vec3 n = normalize(vec3(-g.x, 1.0, -g.y));
@@ -1188,7 +1194,7 @@ void main() {
 
 function skyMaterial() {
   return new THREE.ShaderMaterial({
-    side: THREE.BackSide, depthWrite: false, depthTest: false, fog: false,
+    side: THREE.BackSide, depthWrite: false, depthTest: false, fog: false, defines: LOD ? {} : { LITE: 1 },
     uniforms: {
       uHor: { value: TOD.hor }, uZen: { value: TOD.zen }, uSunDir: { value: TOD.sunDir }, uSunCol: { value: TOD.sunCol }, uGlow: { value: TOD.glow }, uMoon: { value: TOD.moonDir },
       uNight: UN.uNight, uTime: UN.uTime, uStar: { value: 0 }, uSunUp: { value: 0 }, uFogC: { value: TOD.fog }, uOpp: { value: TOD.opp },
@@ -1210,6 +1216,7 @@ void main() {
   col += uSunCol * (pow(sd, 6.0) * 0.42 + pow(sd, 48.0) * 0.8);
   float disc = smoothstep(0.99935, 0.9997, sd);
   col = mix(col, uSunCol * 6.0, disc * uSunUp);
+#ifndef LITE
   // clouds lit from below by the low sun
   vec2 cp = d.xz / (h + 0.28) * 1.6 + vec2(uTime * 0.004, 0.0);
   float cl = smoothstep(0.5, 0.8, fbm(cp)) * smoothstep(0.02, 0.2, h) * (1.0 - smoothstep(0.55, 0.95, h));
@@ -1232,6 +1239,10 @@ void main() {
   float land = smoothstep(-0.2, 0.4, d.x) + smoothstep(0.6, 0.0, abs(d.z)) * 0.0;
   float rd = smoothstep(ridge, ridge - 0.004, h) * smoothstep(-0.02, 0.0, h) * land;
   col = mix(col, mix(uFogC, uZen, 0.28) * 0.62, rd);
+#else
+  float md = max(dot(d, uMoon), 0.0);
+  col += vec3(0.8, 0.88, 1.0) * smoothstep(0.9993, 0.9997, md) * 1.6 * uNight;
+#endif
   gl_FragColor = vec4(col, 1.0);
 #include <tonemapping_fragment>
 #include <colorspace_fragment>
@@ -1586,7 +1597,7 @@ function initGL(arc) {
   const far = GL.far = new THREE.Mesh(shore.far, GL.cityMat); far.receiveShadow = true; scene.add(far);
   buildDynamics(scene);
   // a dusk environment so paint, glass and wet roads have something to reflect
-  try {
+  if (LOD) try {
     const es = new THREE.Scene();
     const em = new THREE.ShaderMaterial({
       side: THREE.BackSide,
