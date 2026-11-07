@@ -586,7 +586,6 @@ float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
 `;
 function cityMaterial() {
   const m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, metalness: 0.0 });
-  m.shadowSide = THREE.DoubleSide;
   if (!LOD) m.defines = { LITE: 1 };
   m.onBeforeCompile = (sh) => {
     sh.uniforms.uNight = UN.uNight; sh.uniforms.uWin = UN.uWin; sh.uniforms.uTime = UN.uTime;
@@ -622,15 +621,15 @@ if (kind < 0.5) {
   wall *= 0.86 + 0.26 * mix(0.5, streak, fadeD);
   wall *= 0.8 + 0.2 * smoothstep(0.0, 0.1, f.y);
   if (id.y < 0.5 && !shop) wall *= 0.86;
-  vec3 glass = mix(vec3(0.025, 0.04, 0.065), vec3(0.11, 0.15, 0.21), rn2 * 0.8);
-  float litP = shop ? 0.92 : 0.32 + 0.4 * h21(vec2(seed, id.y * 3.1));
+  vec3 glass = glassT ? mix(vec3(0.05, 0.08, 0.12), vec3(0.14, 0.2, 0.28), rn2) : mix(vec3(0.025, 0.04, 0.065), vec3(0.11, 0.15, 0.21), rn2 * 0.8);
+  float litP = shop ? 0.92 : (glassT ? 0.18 + 0.3 * h21(vec2(seed, id.y * 3.1)) : 0.32 + 0.4 * h21(vec2(seed, id.y * 3.1)));
   float lit = step(rn, litP) * uWin;
   vec3 lc = mix(vec3(1.0, 0.72, 0.4), vec3(0.72, 0.85, 1.0), step(0.86, rn2));
   lc *= 0.55 + 0.95 * h21(id + 9.1);
   float mull = glassT ? 0.0 : (1.0 - smoothstep(0.0, 0.05 + fw.x, abs(q.x - 0.5))) * 0.7;
   diffuseColor.rgb = mix(wall, glass, inside * (1.0 - mull * 0.5));
   float shelf = shop ? (0.55 + 0.45 * step(0.5, fract(q.y * 3.0 + rn * 2.0)) * (0.5 + 0.5 * h21(floor(q * vec2(7.0, 3.0)) + seed))) : 1.0;
-  wEm = lc * lit * inside * (1.0 - mull * 0.85) * 1.0 * shelf * (shop ? 0.85 : 1.0);
+  wEm = lc * lit * inside * (1.0 - mull * 0.85) * shelf * (shop ? 0.8 : (glassT ? 0.7 : 1.0));
   wR = mix(0.88, 0.1, inside); wM = inside * 0.5;
 } else if (kind < 2.5) {
   float hw = vWd.y, L = vWd.z, sg = vWd.w;
@@ -718,7 +717,6 @@ if (kind < 0.5) {
 /* ---- vehicles: one patched material, tint only the paint vertices */
 function vehicleMaterial() {
   const m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.4, metalness: 0.2 });
-  m.shadowSide = THREE.DoubleSide;
   m.onBeforeCompile = (sh) => {
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', '#include <common>\nattribute float vk; attribute vec3 iCol; attribute vec2 iLamp; varying float vVk; varying vec2 vLamp;')
@@ -811,9 +809,9 @@ function treeG(g, t, out) {
       const i0 = g.n; cylG(g, 0, 0, 0, 3.4 - k * 0.7, 2.7 - k * 0.7, hh, 6, k % 2 ? trunk2 : trunk); g.place(i0, 0, px, py, pz);
       px = nx; pz = nz; py += hh;
     }
-    const g1 = lin('#2f7a3a'), g2 = lin('#4aa047');
+    const g1 = lin('#3f9448'), g2 = lin('#6cc05c');
     for (let f = 0; f < (LOD ? 9 : 6); f++) {
-      const a = t.rot + f * TAU / (LOD ? 9 : 6) + h1, ca = Math.cos(a), sa = Math.sin(a), L = 46 + (f % 3) * 5, wv = 5.5, nxv = -sa, nzv = ca;
+      const a = t.rot + f * TAU / (LOD ? 9 : 6) + h1, ca = Math.cos(a), sa = Math.sin(a), L = 38 + (f % 3) * 5, wv = 5, nxv = -sa, nzv = ca;
       const mx = px + ca * L * 0.5, mz = pz + sa * L * 0.5, ex = px + ca * L, ez = pz + sa * L, col = f % 2 ? g1 : g2;
       const up = [0, 1, 0];
       g.qh([px - nxv * 1.5, py, pz - nzv * 1.5, px + nxv * 1.5, py, pz + nzv * 1.5, mx + nxv * wv, py + 9, mz + nzv * wv, mx - nxv * wv, py + 9, mz - nzv * wv], up, col);
@@ -917,7 +915,7 @@ function bldGeo(g, b, lampsOut) {
     return;
   }
   if (b.k === 'ship') {
-    const cz = z0 + b.d / 2, hullR = lin('#8a2f25'), hullB = lin('#233a52'), deck = lin('#7d7f84');
+    const cz = z0 + b.d / 2, hullR = lin('#8a2f25'), hullB = lin('#3d6490'), deck = lin('#7d7f84');
     const outline = [x0, cz, x0 + 36, cz - 38, x0 + 76, cz - 54, x1 - 24, cz - 54, x1, cz - 46, x1, cz + 46, x1 - 24, cz + 54, x0 + 76, cz + 54, x0 + 36, cz + 38];
     prismG(g, outline, -8, 24, hullR, deck);
     prismG(g, outline.map((v, i) => (i % 2 ? cz + (v - cz) * 0.99 : v)), 24, 52, hullB, deck);
@@ -1834,11 +1832,11 @@ function syncVehicles(dt) {
       if (v.wreck && v.wreckT > 1.4 && !v.burnt) addPool(v.x, 2.4, v.y, 120 + Math.sin(GL.clock * 18) * 10, [1, 0.5, 0.15], 0.9);
     }
     if (v.player && lampK > 0.02) {
-      GL.spot.visible = true; GL.spot.intensity = 5200 * lampK;
+      GL.spot.intensity = 1100 * lampK;
       GL.spot.position.set(v.x + ca * T.L * 0.4, 9, v.y + sa * T.L * 0.4); GL.spot.target.position.set(v.x + ca * 220, 0, v.y + sa * 220); GL.spot.target.updateMatrixWorld();
     }
   }
-  if (!pl.veh || lampK <= 0.02) GL.spot.visible = false;
+  if (!pl.veh || lampK <= 0.02) GL.spot.intensity = 0;
   for (const t in VM) {
     const vm = VM[t]; vm.body.count = vm.n; vm.wheels.count = vm.nw;
     if (vm.n) { vm.body.instanceMatrix.needsUpdate = true; vm.wheels.instanceMatrix.needsUpdate = true; vm.geo.attributes.iCol.needsUpdate = true; vm.geo.attributes.iLamp.needsUpdate = true; }
