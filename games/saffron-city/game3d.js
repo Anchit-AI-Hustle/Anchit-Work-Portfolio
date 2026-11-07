@@ -1987,6 +1987,7 @@ function render3D(arc) {
     GL.fps = GL.fpsN / GL.fpsT; GL.fpsT = 0; GL.fpsN = 0;
     if (!GL.pinned && GL.q > 0 && GL.fps < 34) { GL.lowRuns++; if (GL.lowRuns >= 2) { GL.q--; GL.lowRuns = 0; applyQuality(); } } else GL.lowRuns = 0;
   }
+  const tc0 = performance.now();
   applyTOD(G.hour);
   const cam = GL.camera;
   cam.updateMatrixWorld();
@@ -2002,7 +2003,9 @@ function render3D(arc) {
   syncVehicles(dt);
   syncPeds();
   syncFx(dt);
+  const tc1 = performance.now();
   r.render(GL.scene, cam);
+  GL.cpuSync = lerp(GL.cpuSync || 0, tc1 - tc0, 0.1); GL.cpuRender = lerp(GL.cpuRender || 0, performance.now() - tc1, 0.1);
 }
 
 /* ================================================================ game state */
@@ -3631,7 +3634,7 @@ const arc = Arcade.create({
         hp: Math.round(pl.hp), carHp: pv ? Math.round(pv.hp) : null, hour: +G.hour.toFixed(2), night: +nightOf(G.hour).toFixed(2),
         chain: G.chain, hustleLeft: Math.round(G.hustleLeft), tiles: GL.chunks.size, zoom: +CAM.fov.toFixed(1), caught: !!G.caught, arrest: +G.arrest.toFixed(2),
         offers: G.offers.map((o) => ({ t: o.type, x: Math.round(o.x), y: Math.round(o.y), cd: Math.round(o.cd) })), jobs: G.stats.jobs, crashes: G.stats.crashes,
-        cam: { yaw: +CAM.yaw.toFixed(2), x: Math.round(CAM.x), y: Math.round(CAM.y), z: Math.round(CAM.z) }, fps: Math.round(GL.fps), quality: GL.q, buildMs: Math.round(GL.buildMs / Math.max(1, GL.buildN)), touchStyle: a.touchStyle,
+        cam: { yaw: +CAM.yaw.toFixed(2), x: Math.round(CAM.x), y: Math.round(CAM.y), z: Math.round(CAM.z) }, fps: Math.round(GL.fps), quality: GL.q, buildMs: Math.round(GL.buildMs / Math.max(1, GL.buildN)), cpuSync: +(GL.cpuSync || 0).toFixed(1), cpuRender: +(GL.cpuRender || 0).toFixed(1), soft: !!GL.soft, touchStyle: a.touchStyle,
       };
     };
     // helpers for automated tests
