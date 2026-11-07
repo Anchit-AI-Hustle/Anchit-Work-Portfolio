@@ -2028,7 +2028,7 @@ const DIFF = {
 };
 const V = [], PD = [];
 let vid = 0;
-const START_YAW = -0.3;
+const START_YAW = PI;
 const pl = { x: 0, y: 0, vx: 0, vy: 0, a: 0, hp: 100, inv: 0, step: 0, veh: null, moving: false, hit: 0, face: 0 };
 let arcRef = null;
 const touchish = () => !!(arcRef && arcRef.touchMode);
@@ -3236,12 +3236,13 @@ function resetGame() {
   pl.hp = 100; pl.inv = 0; pl.veh = null; pl.vx = pl.vy = 0; pl.a = 0.3;
   const s = SAFE[0]; pl.x = s.x + 30; pl.y = s.y + 6;
   G.fx = pl.x; G.fy = pl.y; G.camX = pl.x; G.camY = pl.y; G.lookX = G.lookY = 0; CAM.yaw = START_YAW; CAM.cdist = 120; G.hintT = 0; G.tip = ''; G.tipT = 0; G.brakeUntil = 0; G.hornReq = 0; G.dashT = 0;
-  starterCar(s);
+  const sc0 = starterCar(s);
+  pl.x = sc0.x + 58; pl.y = sc0.y + 9; pl.a = PI; G.fx = pl.x; G.fy = pl.y; G.camX = pl.x; G.camY = pl.y;
   populate();
   const types = ['courier', 'courier', 'courier', 'fare', 'fare', 'race', 'race', 'getaway', 'getaway'];
   types.forEach((t, i) => { const o = { type: t, x: 0, y: 0, cd: 0, hidden: false }; G.offers.push(o); placeOffer(o, pl.x, pl.y, i < 4 ? 260 : 500, i < 4 ? 1100 : 2400); });
   for (let i = 0; i < 6; i++) managePickups();
-  banner('Saffron City', arcRef.touchMode ? 'Walk to the car and tap Car. Drive into a glowing marker for a job.' : 'Walk to the yellow car and press F. Drive into a glowing marker for a job.', 5200, '#FFB736');
+  banner('Saffron City', arcRef.touchMode ? (arcRef.touchStyle === 'pads' ? 'Walk to the car and tap Car. Drive into a glowing marker for a job.' : 'Drag to walk to the yellow car, then tap it to get in. Drive into a glowing marker for a job.') : 'Walk to the yellow car and press F. Drive into a glowing marker for a job.', 5200, '#FFB736');
   arcRef.toast('Marine Parade', 'Entering', 1800);
   G.district = districtAt(pl.x, pl.y);
 }

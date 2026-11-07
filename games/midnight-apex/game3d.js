@@ -436,20 +436,20 @@ function aiPlan(W, c) {
     const o = W.obst[j];
     if (o === c || o.ghost || (blocking && o === P)) continue;
     const dz = wrapD(o.dist - c.dist, L);
-    if (dz <= CL && dz > -CL) {
+    if (dz <= 150 && dz > -CL) {
       const sdx = o.x - c.x, asd = Math.abs(sdx);
       if (asd < 0.46) avoid += (sdx > 0 ? -1 : (sdx < 0 ? 1 : (c.x > 0 ? -1 : 1))) * (1 - asd / 0.46) * 1.3;
       continue;
     }
-    if (dz <= CL || dz > CL + 5200) continue;
+    if (dz <= 150 || dz > 4400) continue;
     const dx = o.x - c.x, adx = Math.abs(dx);
     if (adx < 0.5) {
-      const str = 1 - (dz - CL) / 5200;
+      const str = 1 - (dz - 150) / 4250;
       let dir = dx > 0 ? -1 : 1;
       if (adx < 0.04) dir = c.x > 0 ? -1 : 1;
       if (c.x + dir * 0.5 > 0.86 || c.x + dir * 0.5 < -0.86) dir = -dir;
       avoid += dir * str * (1.5 + 0.5 * c.skill);
-      if (dz < CL + 1700 && adx < 0.33 && o.speed < c.speed + 600) slow = Math.min(slow, o.speed * 0.98);
+      if (dz < 1550 && adx < 0.33 && o.speed < c.speed + 600) slow = Math.min(slow, o.speed * 0.98);
     }
   }
   PLAN.tx = tx; PLAN.vcap = vcap; PLAN.slow = slow; PLAN.avoid = avoid;
@@ -466,13 +466,13 @@ function updateRival(W, c, dt) {
   c.vx += (want - c.vx) * Math.min(1, dt * 5);
   c.x = clamp(c.x + c.vx * dt, -0.9, 0.9);
   c.dist += c.speed * dt;
-  // never drive through the car in front
+  // two cars that would sit on top of each other part them sideways
   const L = W.T.L;
   for (let j = 0; j < W.obst.length; j++) {
     const o = W.obst[j];
     if (o === c || o.isPlayer || o.ghost) continue;
-    const dz = wrapD(o.dist - c.dist, L);
-    if (dz > 0 && dz < CL * 0.95 && Math.abs(o.x - c.x) < 0.3) { c.dist = o.dist - CL * 0.95; if (c.speed > o.speed) c.speed = o.speed * 0.98; }
+    const dz = wrapD(o.dist - c.dist, L), dxx = c.x - o.x;
+    if (Math.abs(dz) < CL * 0.7 && Math.abs(dxx) < 0.2) c.x = clamp(c.x + (dxx >= 0 ? 1 : -1) * dt * 1.4, -0.9, 0.9);
   }
 }
 

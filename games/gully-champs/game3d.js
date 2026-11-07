@@ -91,7 +91,7 @@ HOUSES.forEach((h, hi) => {
     const h0 = f * STOREY + (f === 0 ? 1.15 : 1.0);
     WIN.push({ x0: w[1] - w[2] / 2, x1: w[1] + w[2] / 2, h0, h1: h0 + 1.4, type: w[3], broken: false, hi, side: h.side, col: SHUT[(hi + wi) % SHUT.length], f, cx: w[1], w: w[2], k: WIN.length });
   });
-  h.balc.forEach((b) => BALC.push({ f: b[0], x0: b[1], x1: b[2], hb: b[0] * STOREY, hi, side: h.side }));
+  h.balc.forEach((b) => BALC.push({ f: b[0], x0: b[1], x1: b[2], hb: b[0] * STOREY, hi, side: h.side, aunty: h.side > 0 && b[0] === 1 && b[1] === 2.1 }));
 });
 // Collision boxes: [x0,x1, z0,z1, h0,h1, restitution]
 const BOXES = [];
@@ -544,9 +544,9 @@ function buildBalcony(b, gb, bi) {
   laneBox(gb, s, (b.x0 + b.x1) / 2 - 0.02, (b.x0 + b.x1) / 2 + 0.02, hb, hb + 2.25, 0.05, 0.08, '#eadfc6');
   // plants on the parapet
   const sr = A.rng(100 + bi * 17);
-  const n = 2 + ((bi + 1) % 2);
+  const n = b.aunty ? 1 : 2 + ((bi + 1) % 2);
   for (let k = 0; k < n; k++) {
-    const gxp = b.x0 + 0.5 + sr() * (b.x1 - b.x0 - 1.0), r = 0.16 + sr() * 0.07;
+    const gxp = (b.aunty ? b.x1 - 0.55 : b.x0 + 0.5) + sr() * (b.x1 - b.x0 - 1.0), r = 0.16 + sr() * 0.07;
     const X = s * (ZW - BAL_D + 0.08), Y = hb + PARA_H + 0.07, Z = -gxp;
     gb.cyl(r * 0.85, r * 0.6, r * 1.5, X, Y + r * 0.75, Z, '#b5532e', 9);
     gb.cyl(r * 0.92, r * 0.92, r * 0.18, X, Y + r * 1.5, Z, '#c76a3e', 9);
@@ -559,13 +559,13 @@ function buildBalcony(b, gb, bi) {
     gb.box(0.4, 0.5, 0.04, X, hb + 0.72, Z + 0.18, '#d9d2c2');
     [[-0.17, -0.17], [0.17, -0.17], [-0.17, 0.17], [0.17, 0.17]].forEach((p) => gb.box(0.04, 0.46, 0.04, X + p[0], hb + 0.23, Z + p[1], '#cfc8b8'));
   }
-  // clothes line posts
-  [b.x0 + 0.3, b.x1 - 0.3].forEach((gxp) => {
+  // clothes line posts (the aunty's balcony stays clear so she can be seen)
+  if (!b.aunty) [b.x0 + 0.3, b.x1 - 0.3].forEach((gxp) => {
     gb.cyl(0.015, 0.015, 2.1, s * (ZW - BAL_D + 0.22), hb + 1.05, -gxp, '#3a3030', 5);
   });
-  gb.box(0.012, 0.012, b.x1 - b.x0 - 0.6, s * (ZW - BAL_D + 0.22), hb + 2.1, -(b.x0 + b.x1) / 2, '#2a2222');
+  if (!b.aunty) gb.box(0.012, 0.012, b.x1 - b.x0 - 0.6, s * (ZW - BAL_D + 0.22), hb + 2.1, -(b.x0 + b.x1) / 2, '#2a2222');
   // register the clothes on the line
-  const cn = Math.max(2, Math.round((b.x1 - b.x0 - 0.6) / 0.42));
+  const cn = b.aunty ? 0 : Math.max(2, Math.round((b.x1 - b.x0 - 0.6) / 0.42));
   for (let k = 0; k < cn; k++) {
     const t = (k + 0.5) / cn;
     FX.clothesData.push({ x: lerp(b.x0 + 0.3, b.x1 - 0.3, t), h: hb + 2.1, d: ZW - BAL_D + 0.22, s, w: 0.3 + (k % 2) * 0.04, len: 0.55 + ((k + bi) % 3) * 0.13, c: ['#e23e57', '#f5e6c4', '#2f80c9', '#f2b01e', '#3f9e5a', '#c43372'][(bi + k) % 6], ph: bi * 1.7 + k });
@@ -1112,7 +1112,7 @@ function buildAuto(root) {
 
 function buildAunty(root, clip) {
   const g = new THREE.Group();
-  const gb = new GB(), saree = '#c43372', gold = '#e8b64a';
+  const gb = new GB(), saree = '#e04a8f', gold = '#f2c860';
   gb.cyl(0.19, 0.3, 0.95, 0, 0.5, 0, saree, 14);
   gb.cyl(0.305, 0.305, 0.09, 0, 0.08, 0, gold, 14);
   gb.add(new THREE.BoxGeometry(0.14, 0.9, 0.36), '#f2c860', 0.13, 0.55, 0.12, 0, 0, -0.18);

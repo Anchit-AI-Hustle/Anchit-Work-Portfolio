@@ -1339,7 +1339,7 @@ function buildPeople() {
   }
   // blob shadows keep everybody planted, even outside the shadow map
   const blobTex = ctex(64, 64, (g, w, h) => radial(g, w, h, [[0, 'rgba(0,0,0,0.55)'], [0.6, 'rgba(0,0,0,0.25)'], [1, 'rgba(0,0,0,0)']]), { mip: false });
-  PPL.blob = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 }), NP + 2);
+  PPL.blob = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 }), NP);
   PPL.blob.frustumCulled = false; PPL.blob.renderOrder = 5; R3.scene.add(PPL.blob);
   // bats
   const bg = mergeGeos([
@@ -2436,8 +2436,9 @@ function initRenderer() {
     } else if (G.view === 'bat' && (G.phase === 'runup' || G.phase === 'delivery' || G.phase === 'shot')) {
       // the chosen shot
       const d = G.dir;
-      if (G.D) {
-        const s = shotFor(d.dx, d.dy, G.D);
+      const gestMode = touch && arc.touchStyle === 'gesture';
+      if (G.D && (!gestMode || liveSwipe || G.swing)) {
+        const s = G.swing ? G.swing.s : shotFor(d.dx, d.dy, G.D);
         const arrows = (d.dx < 0 ? '← ' : '') + (d.dx > 0 ? '→ ' : '') + (d.dy < 0 ? '↑ ' : '') + (d.dy > 0 ? '↓ ' : '');
         ctx.globalAlpha = 0.9;
         plate(ctx, w / 2 - 82, by - 22, 164, 36, 10, 0.6);
