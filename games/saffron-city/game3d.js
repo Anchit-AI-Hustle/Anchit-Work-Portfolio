@@ -588,12 +588,12 @@ function cityMaterial() {
   const m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, metalness: 0.0 });
   if (!LOD) m.defines = { LITE: 1 };
   m.onBeforeCompile = (sh) => {
-    sh.uniforms.uNight = UN.uNight; sh.uniforms.uWin = UN.uWin; sh.uniforms.uTime = UN.uTime; sh.uniforms.uDbg = { value: (/[?&]dbg=(\d)/.exec(location.search) || [0, 0])[1] * 1 };
+    sh.uniforms.uNight = UN.uNight; sh.uniforms.uWin = UN.uWin; sh.uniforms.uTime = UN.uTime;
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', '#include <common>\nattribute vec4 wd; attribute vec2 wuv; varying vec4 vWd; varying vec2 vWuv; varying vec3 vWp;')
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvWd = wd; vWuv = wuv; vWp = position;');
     sh.fragmentShader = sh.fragmentShader
-      .replace('#include <common>', '#include <common>\nvarying vec4 vWd; varying vec2 vWuv; varying vec3 vWp; uniform float uNight; uniform float uWin; uniform float uTime; uniform float uDbg;\n' + GLSL_COMMON)
+      .replace('#include <common>', '#include <common>\nvarying vec4 vWd; varying vec2 vWuv; varying vec3 vWp; uniform float uNight; uniform float uWin; uniform float uTime;\n' + GLSL_COMMON)
       .replace('#include <color_fragment>', '#include <color_fragment>\n' + `
 vec3 wEm = vec3(0.0); float wR = -1.0; float wM = -1.0;
 float kind = vWd.x;
@@ -602,7 +602,7 @@ if (kind < 0.5) {
   float n = vn(vWp.xz * 0.3 + vWp.y * 0.17);
   diffuseColor.rgb *= 0.9 + 0.2 * mix(0.5, n, fadeD);
 } else if (kind < 1.9) {
-  float cw = vWd.y, ch = vWd.z, seed = vWd.w;
+  float cw = vWd.y, ch = vWd.z, seed = floor(vWd.w * 64.0 + 0.5) / 64.0;
   vec2 cell = vWuv / vec2(cw, ch);
   vec2 id = floor(cell), f = fract(cell);
   float rn = h21(id + seed * 0.37);
@@ -623,14 +623,14 @@ if (kind < 0.5) {
   if (id.y < 0.5 && !shop) wall *= 0.86;
   vec3 glass = glassT ? mix(vec3(0.05, 0.08, 0.12), vec3(0.14, 0.2, 0.28), rn2) : mix(vec3(0.025, 0.04, 0.065), vec3(0.11, 0.15, 0.21), rn2 * 0.8);
   float litP = shop ? 0.92 : (glassT ? 0.18 + 0.3 * h21(vec2(seed, id.y * 3.1)) : 0.32 + 0.4 * h21(vec2(seed, id.y * 3.1)));
-  float lit = step(rn, litP) * uWin; if (uDbg == 1.0) lit = 0.0;
+  float lit = step(rn, litP) * uWin;
   vec3 lc = mix(vec3(1.0, 0.72, 0.4), vec3(0.72, 0.85, 1.0), step(0.86, rn2));
   lc *= 0.55 + 0.95 * h21(id + 9.1);
   float mull = glassT ? 0.0 : (1.0 - smoothstep(0.0, 0.05 + fw.x, abs(q.x - 0.5))) * 0.7;
   diffuseColor.rgb = mix(wall, glass, inside * (1.0 - mull * 0.5));
   float shelf = shop ? (0.55 + 0.45 * step(0.5, fract(q.y * 3.0 + rn * 2.0)) * (0.5 + 0.5 * h21(floor(q * vec2(7.0, 3.0)) + seed))) : 1.0;
   wEm = lc * lit * inside * (1.0 - mull * 0.85) * shelf * (shop ? 0.8 : (glassT ? 0.7 : 1.0));
-  wR = mix(0.88, 0.1, inside); wM = inside * 0.5; if (uDbg == 2.0) { wR = 0.9; wM = 0.0; }
+  wR = mix(0.88, 0.1, inside); wM = inside * 0.5;
 } else if (kind < 2.5) {
   float hw = vWd.y, L = vWd.z, sg = vWd.w;
   float u = vWuv.x, v = vWuv.y, au = abs(u);
