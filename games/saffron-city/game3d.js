@@ -1566,7 +1566,7 @@ function initGL(arc) {
   let renderer;
   GL.soft = softwareGL();
   LOD = GL.soft ? 0 : 1;
-  const m = /[?&]lod=(\d)/.exec(location.search); if (m) LOD = +m[1];
+  const m = /[?&]lod=(\d)/.exec(location.search); if (m) { LOD = +m[1]; if (LOD) GL.soft = false; }
   if (GL.soft) GL.q = 0;
   try {
     renderer = new THREE.WebGLRenderer({ canvas: arc.canvas, antialias: !GL.soft, powerPreference: 'high-performance' });
