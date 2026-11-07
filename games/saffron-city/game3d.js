@@ -3634,7 +3634,7 @@ const arc = Arcade.create({
         hp: Math.round(pl.hp), carHp: pv ? Math.round(pv.hp) : null, hour: +G.hour.toFixed(2), night: +nightOf(G.hour).toFixed(2),
         chain: G.chain, hustleLeft: Math.round(G.hustleLeft), tiles: GL.chunks.size, zoom: +CAM.fov.toFixed(1), caught: !!G.caught, arrest: +G.arrest.toFixed(2),
         offers: G.offers.map((o) => ({ t: o.type, x: Math.round(o.x), y: Math.round(o.y), cd: Math.round(o.cd) })), jobs: G.stats.jobs, crashes: G.stats.crashes,
-        cam: { yaw: +CAM.yaw.toFixed(2), x: Math.round(CAM.x), y: Math.round(CAM.y), z: Math.round(CAM.z) }, fps: Math.round(GL.fps), quality: GL.q, buildMs: Math.round(GL.buildMs / Math.max(1, GL.buildN)), cpuSync: +(GL.cpuSync || 0).toFixed(1), cpuRender: +(GL.cpuRender || 0).toFixed(1), soft: !!GL.soft, touchStyle: a.touchStyle,
+        cam: { yaw: +CAM.yaw.toFixed(2), x: Math.round(CAM.x), y: Math.round(CAM.y), z: Math.round(CAM.z) }, fps: Math.round(GL.fps), quality: GL.q, buildMs: Math.round(GL.buildMs / Math.max(1, GL.buildN)), cpuSync: +(GL.cpuSync || 0).toFixed(1), cpuRender: +(GL.cpuRender || 0).toFixed(1), soft: !!GL.soft, cpuUpd: +(GL.cpuUpd || 0).toFixed(1), cpuHud: +(GL.cpuHud || 0).toFixed(1), touchStyle: a.touchStyle,
       };
     };
     // helpers for automated tests
@@ -3678,7 +3678,7 @@ const arc = Arcade.create({
       stopHum(); updateWorld(dt, true); updateCamera(dt, true);
     }
   },
-  update(dt, a) { updatePlay(dt); },
+  update(dt, a) { const t0 = performance.now(); updatePlay(dt); GL.cpuUpd = lerp(GL.cpuUpd || 0, performance.now() - t0, 0.1); },
   render(ctx, a) {
     if (GL.fail) {
       ctx.fillStyle = '#0F0D0A'; ctx.fillRect(0, 0, a.w, a.h);
@@ -3687,10 +3687,12 @@ const arc = Arcade.create({
     }
     render3D(a);
     G.preload = false;
+    const th0 = performance.now();
     if (G.phase === 'play' || G.phase === 'over') drawHUD(ctx, a);
     else {
       const g = ctx.createRadialGradient(a.w / 2, a.h / 2, Math.min(a.w, a.h) * 0.35, a.w / 2, a.h / 2, Math.max(a.w, a.h) * 0.8);
       g.addColorStop(0, 'rgba(6,5,3,0)'); g.addColorStop(1, 'rgba(6,5,3,.5)'); ctx.fillStyle = g; ctx.fillRect(0, 0, a.w, a.h);
     }
+    GL.cpuHud = lerp(GL.cpuHud || 0, performance.now() - th0, 0.1);
   },
 });
