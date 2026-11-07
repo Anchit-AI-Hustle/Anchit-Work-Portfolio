@@ -1401,7 +1401,8 @@ function makeCar(kind, hex, o) {
   o = o || {};
   const G = carGeos(kind), M = carMats(), K = KINDS[kind];
   const root = new THREE.Group(); root.matrixAutoUpdate = false;
-  const bodyMat = new THREE.MeshPhysicalMaterial({ color: K.taxi ? '#f2b81c' : hex, metalness: 0.6, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.08 });
+  const paint = K.taxi ? '#f2b81c' : hex;
+  const bodyMat = new THREE.MeshPhysicalMaterial({ color: paint, emissive: paint, emissiveIntensity: o.player ? 0.1 : 0.06, metalness: 0.45, roughness: 0.36, clearcoat: 1, clearcoatRoughness: 0.08 });
   const tailMat = new THREE.MeshBasicMaterial({ color: '#7a1018', toneMapped: false });
   const body = new THREE.Mesh(G.body, bodyMat), glass = new THREE.Mesh(G.glass, M.glass), dark = new THREE.Mesh(G.dark, M.dark);
   const head = new THREE.Mesh(G.head, M.head), tail = new THREE.Mesh(G.tail, tailMat);
@@ -2267,8 +2268,8 @@ const _wp = new THREE.Vector3(), _wt = new THREE.Vector3(), _cu = { x: 0, y: 0, 
 function updateCamera(W, dt, a) {
   const r = R3, P = W.P, T = W.T, cam = r.camera, aspect = a.w / a.h, port = aspect < 0.9;
   const sp = clamp(P.speed / (BASE_MAX * 1.1), 0, 1.3);
-  const back = (port ? 12.2 : 7.8) + sp * 2.0 + (P.nitroOn ? 1.2 : 0) + (a.reducedMotion ? 0 : 0);
-  const up = (port ? 4.8 : 2.8) + sp * 0.5;
+  const back = (port ? 11.4 : 6.7) + sp * 1.8 + (P.nitroOn && !a.reducedMotion ? 1.1 : 0);
+  const up = (port ? 4.5 : 2.5) + sp * 0.45;
   const follow = port ? 0.92 : 0.62;
   frameAt(T, P.dist - back / SC);
   surf(P.xCam * follow, up, _cu);
@@ -2439,7 +2440,7 @@ function drawSpeedLines(ctx, a, W) {
   for (let i = 0; i < n; i++) {
     const seed = hash(i * 7 + 3), ang = seed * TAU, ph = (t * (1.7 + hash(i) * 1.5) + hash(i + 40)) % 1;
     const r0 = R * (0.3 + ph * 0.55), r1 = r0 + R * (0.1 + 0.18 * k) * (0.4 + ph);
-    ctx.globalAlpha = k * 0.34 * Math.sin(ph * Math.PI);
+    ctx.globalAlpha = k * 0.26 * Math.sin(ph * Math.PI);
     ctx.strokeStyle = P.nitroOn ? '#a8dcff' : '#ffffff'; ctx.lineWidth = 1 + hash(i + 9) * 2;
     ctx.beginPath(); ctx.moveTo(cx + Math.cos(ang) * r0, cy + Math.sin(ang) * r0 * 0.8); ctx.lineTo(cx + Math.cos(ang) * r1, cy + Math.sin(ang) * r1 * 0.8); ctx.stroke();
   }

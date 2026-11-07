@@ -1560,6 +1560,23 @@ function softwareGL() {
     return /swiftshader|llvmpipe|softpipe|software|basic render/i.test(name);
   } catch (err) { return false; }
 }
+// A dusk environment so paint, glass and wet roads have something to reflect (rebuilt after a lost context).
+function makeEnv() {
+  if (!LOD) { GL.scene.environment = null; return; }
+  try {
+    const es = new THREE.Scene();
+    const em = new THREE.ShaderMaterial({
+      side: THREE.BackSide,
+      vertexShader: 'varying vec3 vD; void main() { vD = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+      fragmentShader: 'varying vec3 vD; void main() { vec3 d = normalize(vD); float h = d.y; vec3 hor = vec3(1.0, 0.36, 0.1), zen = vec3(0.07, 0.1, 0.34); vec3 c = mix(hor, zen, pow(clamp(h, 0.0, 1.0), 0.45)); if (h < 0.0) c = mix(hor, vec3(0.12, 0.09, 0.09), clamp(-h * 3.0, 0.0, 1.0)); float s = max(dot(d, normalize(vec3(-0.93, 0.05, 0.37))), 0.0); c += vec3(1.0, 0.5, 0.2) * pow(s, 14.0) * 2.0; gl_FragColor = vec4(c, 1.0); }',
+    });
+    es.add(new THREE.Mesh(new THREE.SphereGeometry(50, 24, 12), em));
+    const pm = new THREE.PMREMGenerator(GL.renderer);
+    if (GL.env) GL.env.dispose();
+    GL.env = pm.fromScene(es, 0.02, 1, 200).texture; GL.scene.environment = GL.env; GL.scene.environmentIntensity = 0.7;
+    pm.dispose(); em.dispose();
+  } catch (e) { /* no environment: the lights still work */ }
+}
 function initGL(arc) {
   let renderer;
   GL.soft = softwareGL();
@@ -1575,7 +1592,7 @@ function initGL(arc) {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
   arc.canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); GL.lost = true; });
-  arc.canvas.addEventListener('webglcontextrestored', () => { GL.lost = false; GL.shadowDirty = true; });
+  arc.canvas.addEventListener('webglcontextrestored', () => { GL.lost = false; GL.needEnv = true; });
   const scene = GL.scene = new THREE.Scene();
   scene.fog = new THREE.Fog(0x331a20, 240, 1350);
   const cam = GL.camera = new THREE.PerspectiveCamera(58, 1, 3, 9000);
@@ -1594,19 +1611,7 @@ function initGL(arc) {
   const sh = GL.shore = new THREE.Mesh(shore.shore, GL.cityMat); sh.receiveShadow = true; scene.add(sh);
   const far = GL.far = new THREE.Mesh(shore.far, GL.cityMat); far.receiveShadow = true; scene.add(far);
   buildDynamics(scene);
-  // a dusk environment so paint, glass and wet roads have something to reflect
-  if (LOD) try {
-    const es = new THREE.Scene();
-    const em = new THREE.ShaderMaterial({
-      side: THREE.BackSide,
-      vertexShader: 'varying vec3 vD; void main() { vD = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
-      fragmentShader: 'varying vec3 vD; void main() { vec3 d = normalize(vD); float h = d.y; vec3 hor = vec3(1.0, 0.36, 0.1), zen = vec3(0.07, 0.1, 0.34); vec3 c = mix(hor, zen, pow(clamp(h, 0.0, 1.0), 0.45)); if (h < 0.0) c = mix(hor, vec3(0.12, 0.09, 0.09), clamp(-h * 3.0, 0.0, 1.0)); float s = max(dot(d, normalize(vec3(-0.93, 0.05, 0.37))), 0.0); c += vec3(1.0, 0.5, 0.2) * pow(s, 14.0) * 2.0; gl_FragColor = vec4(c, 1.0); }',
-    });
-    es.add(new THREE.Mesh(new THREE.SphereGeometry(50, 24, 12), em));
-    const pm = new THREE.PMREMGenerator(renderer);
-    GL.env = pm.fromScene(es, 0.02, 1, 200).texture; scene.environment = GL.env; scene.environmentIntensity = 0.7;
-    pm.dispose(); em.dispose();
-  } catch (e) { /* no environment: the lights still work */ }
+  makeEnv();
   applyTOD(G.hour);
 }
 
@@ -1981,6 +1986,7 @@ function render3D(arc) {
   if (!r || GL.lost) return;
   GL.clock += dt;
   UN.uTime.value = GL.clock;
+  if (GL.needEnv) { GL.needEnv = false; makeEnv(); }
   // quality: if the first seconds run slow, shed pixels and shadow cost
   GL.fpsT += dt; GL.fpsN++;
   if (GL.fpsT >= 1.6) {
@@ -3644,7 +3650,7 @@ const arc = Arcade.create({
         hp: Math.round(pl.hp), carHp: pv ? Math.round(pv.hp) : null, hour: +G.hour.toFixed(2), night: +nightOf(G.hour).toFixed(2),
         chain: G.chain, hustleLeft: Math.round(G.hustleLeft), tiles: GL.chunks.size, zoom: +CAM.fov.toFixed(1), caught: !!G.caught, arrest: +G.arrest.toFixed(2),
         offers: G.offers.map((o) => ({ t: o.type, x: Math.round(o.x), y: Math.round(o.y), cd: Math.round(o.cd) })), jobs: G.stats.jobs, crashes: G.stats.crashes,
-        ctl: pv ? { thr: +pv.c.thr.toFixed(2), brk: +pv.c.brk.toFixed(2), str: +pv.c.str.toFixed(2), f: Math.round(pv.f), hold: !!G.stopHold } : null, cam: { yaw: +CAM.yaw.toFixed(2), x: Math.round(CAM.x), y: Math.round(CAM.y), z: Math.round(CAM.z) }, fps: Math.round(GL.fps), quality: GL.q, buildMs: Math.round(GL.buildMs / Math.max(1, GL.buildN)), cpuSync: +(GL.cpuSync || 0).toFixed(1), cpuRender: +(GL.cpuRender || 0).toFixed(1), soft: !!GL.soft, cpuUpd: +(GL.cpuUpd || 0).toFixed(1), cpuHud: +(GL.cpuHud || 0).toFixed(1), touchStyle: a.touchStyle,
+        ctl: pv ? { thr: +pv.c.thr.toFixed(2), brk: +pv.c.brk.toFixed(2), str: +pv.c.str.toFixed(2), f: Math.round(pv.f), hold: !!G.stopHold } : null, cam: { yaw: +CAM.yaw.toFixed(2), x: Math.round(CAM.x), y: Math.round(CAM.y), z: Math.round(CAM.z) }, fps: Math.round(GL.fps), quality: GL.q, buildMs: Math.round(GL.buildMs / Math.max(1, GL.buildN)), cpuSync: +(GL.cpuSync || 0).toFixed(1), cpuRender: +(GL.cpuRender || 0).toFixed(1), soft: !!GL.soft, verts: (() => { let n = 0; for (const c of GL.chunks.values()) n += c.mesh.geometry.attributes.position.count; return n; })(), cpuUpd: +(GL.cpuUpd || 0).toFixed(1), cpuHud: +(GL.cpuHud || 0).toFixed(1), touchStyle: a.touchStyle,
       };
     };
     // helpers for automated tests
