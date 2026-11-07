@@ -1617,6 +1617,7 @@ function resizeGL(arc) {
   GL.renderer.setPixelRatio(GL.soft ? clamp(Math.sqrt(56000 / (arc.w * arc.h)), 0.2, arc.dpr) : arc.dpr * GL.qMul);
   GL.renderer.setSize(arc.w, arc.h, false);
   GL.camera.aspect = arc.w / arc.h;
+  GL.camera.updateProjectionMatrix();
   GL.lastFov = 0;
 }
 
@@ -1829,7 +1830,7 @@ function syncVehicles(dt) {
         else { FX.glow.add(bx - sa * zl, 9, bz + ca * zl, 1, 0.08, 0.04, a, v.brakeL ? 16 : 9); FX.glow.add(bx + sa * zl, 9, bz - ca * zl, 1, 0.08, 0.04, a, v.brakeL ? 16 : 9); }
         if (v.brakeL && d2 < 500 * 500) addPool(bx - ca * 18, 2.4, bz - sa * 18, 60, [1, 0.12, 0.06], 0.5);
       }
-      if (v.wreck && v.wreckT > 1.4 && !v.burnt) addPool(v.x, 2.4, v.y, 120 + Math.sin(GL.clock * 18) * 10, [1, 0.5, 0.15], 0.9);
+      if (v.wreck && v.wreckT > 1.4 && !v.burnt) addPool(v.x, 2.4, v.y, 120 + (reduced ? 0 : Math.sin(GL.clock * 18) * 10), [1, 0.5, 0.15], 0.9);
     }
     if (v.player && lampK > 0.02) {
       GL.spot.intensity = 1100 * lampK;
@@ -1912,7 +1913,7 @@ function syncFx(dt) {
     const dx = x - CAM.x, dz = z - CAM.z, d2 = dx * dx + dz * dz; if (d2 > 1700 * 1700) return;
     k *= sm(70, 260, Math.sqrt(d2));
     if (k < 0.02) return;
-    const c = lin(hex), pul = 1 + 0.06 * Math.sin(t * 3 + x);
+    const c = lin(hex), pul = arcRef.reducedMotion ? 1 : 1 + 0.06 * Math.sin(t * 3 + x);
     addRing(x, z, r * pul, c, 0.8 * k); addRing(x, z, r * 0.62, c, 0.3 * k); addPool(x, 2.6, z, r * 2.6, c, 0.28 * k); addBeam(x, z, r * 0.5, hgt, c, 0.34 * k);
     FX.glow.add(x, hgt * 0.04 + 6, z, c[0], c[1], c[2], 0.5, r * 1.2);
   };
