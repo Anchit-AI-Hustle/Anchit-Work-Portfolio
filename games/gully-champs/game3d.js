@@ -2973,7 +2973,7 @@ A.create({
     }
     resetScene();
     a.debug = dbg;
-    window.__gully = { G, BALL, BAT, SW, FIELDERS, AUNTY, DOG, AUTO, CRATE, WIN, TEST, CAM, W3, startAuto, startAuntyScold: () => { AUNTY.state = 'scold'; AUNTY.t = 0; }, scareBirds, camera: () => camera, scene: () => scene, R: () => R, THREE };
+    window.__gully = { G, BALL, BAT, SW, FIELDERS, AUNTY, DOG, AUTO, CRATE, WIN, TEST, CAM, W3, startAuto, startAuntyScold: () => { AUNTY.state = 'scold'; AUNTY.t = 0; }, scareBirds, camera: () => camera, scene: () => scene, R: () => R, THREE, step: (n, dt) => { dt = dt || 1 / 60; for (let i = 0; i < (n || 1); i++) { arc.time += dt; update(dt, arc); arc.input.endFrame(); } } };
     G.autoTimer = rr(22, 34); G.dogTimer = rr(6, 12); G.auntyTimer = rr(4, 9);
     CAM.snap = true;
     menuShow(a);
