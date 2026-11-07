@@ -2080,11 +2080,13 @@ function cameraRig(dt) {
     const bx = BW.x, bz = BW.z, by = BW.y;
     _hv.set(bx - BASE_BAT.x, 0, bz - BASE_BAT.z); const d0 = _hv.length();
     if (d0 > 3.5) { _hv.multiplyScalar(1 / d0); CAM.dir.lerp(_hv, CAM.snap ? 1 : 1 - Math.exp(-dt * 2.2)).normalize(); }
-    const back = lerp(7.5, 17, clamp(d0 / 55, 0, 1)) * (portrait ? 1.1 : 1);
-    const height = 4.3 + back * 0.27 + by * 0.4;
+    const near = clamp(1 - d0 / 36, 0, 1) * 0.55;
+    const back = (lerp(7.5, 17, clamp(d0 / 55, 0, 1)) + near * 7) * (portrait ? 1.1 : 1);
+    const height = 4.3 + back * 0.27 + by * 0.4 + near * 2.5;
     dPos.set(bx - CAM.dir.x * back, Math.max(4, height), bz - CAM.dir.z * back);
     const rad = Math.hypot(dPos.x, dPos.z); if (rad > 50) { dPos.x *= 50 / rad; dPos.z *= 50 / rad; }
     dTgt.set(bx + CAM.dir.x * 3.5, by * 0.7 + 0.2, bz + CAM.dir.z * 3.5);
+    dTgt.x = lerp(dTgt.x, 0, near); dTgt.z = lerp(dTgt.z, 1.5, near); dTgt.y = lerp(dTgt.y, 0.6, near);
     fov = portrait ? 60 : 46;
   }
   const rate = want === 'bat' ? 7 : 4.2, k = CAM.snap ? 1 : 1 - Math.exp(-dt * rate);
