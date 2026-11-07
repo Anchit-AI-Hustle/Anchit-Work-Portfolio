@@ -1615,7 +1615,8 @@ function initGL(arc) {
 function resizeGL(arc) {
   if (!GL.renderer) return;
   GL.w = arc.w; GL.h = arc.h;
-  GL.renderer.setPixelRatio(arc.dpr * GL.qMul);
+  // software rendering pays for every pixel, so it gets a small fixed budget; a GPU gets the full device ratio
+  GL.renderer.setPixelRatio(GL.soft ? clamp(Math.sqrt(56000 / (arc.w * arc.h)), 0.2, arc.dpr) : arc.dpr * GL.qMul);
   GL.renderer.setSize(arc.w, arc.h, false);
   GL.camera.aspect = arc.w / arc.h;
   GL.lastFov = 0;
