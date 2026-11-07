@@ -2150,7 +2150,7 @@ function setup3D(arc) {
     quality: -1, qT: 0, qN: 0, qMax: 0, fps: 60, soft: false, lastNow: 0, camPos: new THREE.Vector3(), camTgt: new THREE.Vector3(), camUp: new THREE.Vector3(0, 1, 0), moonDir: new THREE.Vector3(0.3, 0.4, -0.8),
     shakeS: 0, time: 0, camInit: false, blink: 0
   };
-  FX = createFX(scene);
+  FX = createFX(scene); window.__r3 = R3;
   R3.TR = createTraffic(scene);
   try {
     const gl = renderer.getContext(), ext = gl.getExtension('WEBGL_debug_renderer_info');
