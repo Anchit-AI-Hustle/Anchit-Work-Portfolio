@@ -127,6 +127,14 @@
     const down = new Set(); const hit = new Set();
     const stick = { x: 0, y: 0, active: false };
     const pointer = { x: 0, y: 0, nx: 0.5, ny: 0.5, down: false, pressed: false, released: false, id: null, type: 'mouse', seen: false };
+    // Tap-to-play: one finger on the canvas is a tap, a swipe or a drag. A drag
+    // can steer (dragSteer 'x' or 'xy') like a stick that appears under the
+    // thumb; a tilt of the phone can steer too (tiltSteer). Read with
+    // input.tap() / input.swipe() (one frame each) and input.gesture (live).
+    const gesture = { active: false, sx: 0, sy: 0, x: 0, y: 0, dx: 0, dy: 0, t0: 0, type: '' };
+    const tilt = { x: 0, y: 0, active: false };
+    let tapped = null, swiped = null;
+    const DRAG_R = 56;
     const AXIS = { left: ['ArrowLeft', 'KeyA'], right: ['ArrowRight', 'KeyD'], up: ['ArrowUp', 'KeyW'], down: ['ArrowDown', 'KeyS'] };
     const any = (list) => list.some((k) => down.has(k));
     const api = {
@@ -141,7 +149,12 @@
         let x = (any(AXIS.right) ? 1 : 0) - (any(AXIS.left) ? 1 : 0);
         let y = (any(AXIS.down) ? 1 : 0) - (any(AXIS.up) ? 1 : 0);
         if (stick.active) { x += stick.x; y += stick.y; }
-        const keyed = x !== 0 || y !== 0 || stick.active;
+        if (api.dragSteer && gesture.active && gesture.type !== 'mouse') {
+          x += clamp(gesture.dx / DRAG_R, -1, 1);
+          if (api.dragSteer === 'xy') y += clamp(gesture.dy / DRAG_R, -1, 1);
+        }
+        if (api.tiltSteer && tilt.active) { x += tilt.x; if (api.tiltSteer === 'xy') y += tilt.y; }
+        const keyed = x !== 0 || y !== 0 || stick.active || gesture.active || (api.tiltSteer && tilt.active);
         const ms = api.mouseSteer;
         if (ms && pointer.seen && !keyed) {
           const ax = pointer.nx * 2 - 1, ay = pointer.ny * 2 - 1;
@@ -152,15 +165,18 @@
         if (m > 1) { x /= m; y /= m; }
         return { x, y };
       },
-      stick, pointer, mouseSteer: false,
+      stick, pointer, gesture, tilt, mouseSteer: false, dragSteer: false, tiltSteer: false,
+      tap() { return tapped; },
+      swipe() { return swiped; },
       clear() {
         down.clear(); hit.clear();
         stick.x = stick.y = 0; stick.active = false;
         pointer.down = false; pointer.pressed = false; pointer.released = false;
         // Drop mouseSteer ghosts so pause/resume does not keep yanking the axis.
         pointer.seen = false; pointer.nx = 0.5; pointer.ny = 0.5;
+        gesture.active = false; gesture.dx = gesture.dy = 0; tapped = swiped = null;
       },
-      endFrame() { hit.clear(); pointer.pressed = false; pointer.released = false; },
+      endFrame() { hit.clear(); pointer.pressed = false; pointer.released = false; tapped = swiped = null; },
     };
     const local = (e) => {
       const r = canvas.getBoundingClientRect();
@@ -173,11 +189,51 @@
       pointer.type = e.pointerType || 'mouse'; pointer.seen = true;
       if (extra) extra();
     };
+    const now = () => (window.performance ? performance.now() : Date.now());
     canvas.addEventListener('pointerdown', (e) => {
       apply(e, () => { pointer.down = true; pointer.pressed = true; pointer.id = e.pointerId; });
       try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* synthetic event */ }
+      if (!gesture.active) {
+        gesture.active = true; gesture.type = pointer.type; gesture.t0 = now();
+        gesture.sx = gesture.x = pointer.x; gesture.sy = gesture.y = pointer.y; gesture.dx = gesture.dy = 0; gesture.id = e.pointerId;
+      }
     });
-    canvas.addEventListener('pointermove', (e) => apply(e));
+    canvas.addEventListener('pointermove', (e) => {
+      apply(e);
+      if (gesture.active && e.pointerId === gesture.id) {
+        gesture.x = pointer.x; gesture.y = pointer.y; gesture.dx = gesture.x - gesture.sx; gesture.dy = gesture.y - gesture.sy;
+      }
+    });
+    const endGesture = (e) => {
+      if (!gesture.active || (e && e.pointerId != null && gesture.id != null && e.pointerId !== gesture.id)) return;
+      const ms = Math.max(1, now() - gesture.t0), dist = Math.hypot(gesture.dx, gesture.dy);
+      const r = canvas.getBoundingClientRect();
+      const at = { x: gesture.x, y: gesture.y, nx: r.width ? gesture.x / r.width : 0.5, ny: r.height ? gesture.y / r.height : 0.5, ms };
+      if (e && e.type === 'pointercancel') { /* no gesture */ }
+      else if (dist < 14 && ms < 350) tapped = at;
+      else if (dist >= 36 && ms < 500) {
+        const ax = Math.abs(gesture.dx), ay = Math.abs(gesture.dy);
+        swiped = Object.assign(at, {
+          dir: ax > ay ? (gesture.dx > 0 ? 'right' : 'left') : (gesture.dy > 0 ? 'down' : 'up'),
+          dx: gesture.dx, dy: gesture.dy, angle: Math.atan2(gesture.dy, gesture.dx),
+          power: clamp(dist / ms / 2.2, 0.2, 1),
+          x0: gesture.sx, y0: gesture.sy, nx0: r.width ? gesture.sx / r.width : 0.5, ny0: r.height ? gesture.sy / r.height : 0.5,
+        });
+      }
+      gesture.active = false; gesture.dx = gesture.dy = 0; gesture.id = null;
+    };
+    canvas.addEventListener('pointerup', endGesture);
+    canvas.addEventListener('pointercancel', endGesture);
+    // Phone tilt, landscape aware: x = left/right lean, y = forward/back lean.
+    window.addEventListener('deviceorientation', (e) => {
+      if (e.gamma == null || e.beta == null) return;
+      const ang = (screen.orientation && screen.orientation.angle) || window.orientation || 0;
+      let lr = e.gamma, fb = e.beta - 35;
+      if (ang === 90) { lr = e.beta; fb = -e.gamma - 35; } else if (ang === -90 || ang === 270) { lr = -e.beta; fb = e.gamma - 35; }
+      tilt.x = clamp(lr / 28, -1, 1); tilt.y = clamp(fb / 28, -1, 1);
+      if (Math.abs(tilt.x) < 0.06) tilt.x = 0;
+      tilt.active = true;
+    });
     const up = () => { if (pointer.down) pointer.released = true; pointer.down = false; pointer.id = null; };
     canvas.addEventListener('pointerup', up);
     canvas.addEventListener('pointercancel', up);
@@ -207,6 +263,8 @@
       '</header>' +
       '<main class="arc-stage">' +
         '<canvas aria-label="' + esc(opts.title || 'Game') + ' play area" role="img"></canvas>' +
+        (opts.three ? '<canvas class="arc-hud" aria-hidden="true"></canvas>' : '') +
+        '<div class="arc-float" aria-hidden="true"><i></i></div>' +
         '<div class="arc-hint"></div>' +
         '<div class="arc-toast" role="status" aria-live="polite"></div>' +
         '<div class="arc-touch"></div>' +
@@ -216,7 +274,11 @@
 
     const stage = app.querySelector('.arc-stage');
     const canvas = app.querySelector('canvas');
-    const ctx = canvas.getContext('2d');
+    // 3D games (opts.three) draw the world with WebGL on `canvas` and their HUD
+    // on a transparent 2D overlay; ctx is always the 2D surface a game draws on.
+    const hud = opts.three ? app.querySelector('.arc-hud') : null;
+    const ctx = (hud || canvas).getContext('2d');
+    const floatEl = app.querySelector('.arc-float');
     const panel = app.querySelector('.arc-panel');
     const card = app.querySelector('.arc-card');
     const toastEl = app.querySelector('.arc-toast');
@@ -235,6 +297,7 @@
 
     const arc = {
       slug, opts, canvas, ctx, input, sfx, stage, app,
+      hud, three: !!opts.three,
       state: 'menu', w: 0, h: 0, dpr: 1, time: 0, frame: 0, reducedMotion,
       choices: {}, debug: null,
       clamp, lerp, rng, store, esc,
@@ -242,7 +305,8 @@
     // Shared safe zone so in-game HUD never sits under the stick and pads.
     arc.hudPad = () => {
       const touch = !!arc.touchMode;
-      return { top: 12, left: 12, right: 12, bottom: touch ? 188 : 52, touch };
+      const gest = touch && arc.touchStyle !== 'pads' && !!opts.gestures;
+      return { top: 12, left: 12, right: 12, bottom: touch ? (gest ? 64 : 188) : 52, touch };
     };
 
     /* sizing */
@@ -256,7 +320,8 @@
       let dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       if (area * dpr * dpr > MAX_PX) dpr = Math.max(1, Math.sqrt(MAX_PX / area));
       arc.w = Math.max(1, Math.round(r.width)); arc.h = Math.max(1, Math.round(r.height)); arc.dpr = dpr;
-      canvas.width = Math.round(arc.w * dpr); canvas.height = Math.round(arc.h * dpr);
+      if (hud) { hud.width = Math.round(arc.w * dpr); hud.height = Math.round(arc.h * dpr); }
+      else { canvas.width = Math.round(arc.w * dpr); canvas.height = Math.round(arc.h * dpr); }
       if (opts.resize) opts.resize(arc);
     };
     if (window.ResizeObserver) new ResizeObserver(fit).observe(stage); else window.addEventListener('resize', fit);
@@ -265,7 +330,8 @@
     /* touch */
     const isCoarse = window.matchMedia && matchMedia('(pointer: coarse)').matches;
     const paintHint = () => {
-      const h = arc.touchMode ? (opts.touchHint || 'Stick to move, pads to act') : (opts.hint || '');
+      const g = arc.touchMode && opts.gestures && arc.touchStyle !== 'pads' && arc.state === 'play';
+      const h = g ? (opts.gestures.hint || '') : arc.touchMode ? (opts.touchHint || 'Stick to move, pads to act') : (opts.hint || '');
       hintEl.textContent = h;
     };
     const setTouch = (on) => { app.classList.toggle('touch', !!on); arc.touchMode = !!on; paintHint(); };
@@ -294,7 +360,7 @@
       pads.innerHTML = '';
       (list || []).forEach((p) => {
         const b = document.createElement('button'); b.type = 'button';
-        b.className = 'arc-pad' + (p.big ? ' big' : '') + (p.hot ? ' hot' : '');
+        b.className = 'arc-pad' + (p.big ? ' big' : '') + (p.hot ? ' hot' : '') + (p.keep ? ' keep' : '');
         b.textContent = p.label; b.setAttribute('aria-label', p.label);
         const on = (e) => { e.preventDefault(); try { b.setPointerCapture(e.pointerId); } catch (err) { /* synthetic */ } input.press(p.key); b.classList.add('on'); sfx.unlock(); };
         const off = () => { input.release(p.key); b.classList.remove('on'); };
@@ -352,7 +418,9 @@
     /* panels */
     const keysHtml = () => {
       let k = (opts.keys || []).slice();
-      if (arc.touchMode) {
+      const gstyle = opts.gestures && arc.touchMode && (arc.choices.touchStyle || 'gesture') !== 'pads';
+      if (gstyle && opts.gestures.keys) k = opts.gestures.keys.slice();
+      else if (arc.touchMode) {
         if (opts.touchKeys && opts.touchKeys.length) k = opts.touchKeys.slice();
         else k.push(['On-screen stick and buttons', 'Move and act on a phone']);
       } else if (mouseOpts && mouseOpts.keys && mouseOpts.keys.length) {
@@ -405,14 +473,37 @@
     };
     arc.hidePanel = () => { panel.hidden = true; app.classList.remove('panel-open'); card.innerHTML = ''; try { canvas.focus && canvas.focus(); } catch (e) { /* ignore */ } };
 
+    arc.touchStyle = 'pads';
+    const applyTouchStyle = () => {
+      const g = opts.gestures;
+      let style = 'pads';
+      if (g && arc.touchMode) style = arc.choices.touchStyle || store.get('arcade.' + slug + '.touchStyle', 'gesture') || 'gesture';
+      arc.touchStyle = style;
+      app.classList.toggle('gestures', style !== 'pads' && !!g && !!arc.touchMode);
+      input.dragSteer = style === 'gesture' ? (g.drag || false) : false;
+      input.tiltSteer = style === 'tilt' ? (g.tilt === true ? 'x' : g.tilt) : false;
+      if (style === 'tilt') {
+        const D = window.DeviceOrientationEvent;
+        // iOS asks once, and only from inside a tap: arc.start runs from the Play tap.
+        if (D && typeof D.requestPermission === 'function') D.requestPermission().catch(() => {});
+      }
+      paintHint();
+    };
     arc.start = () => {
       arc.hidePanel(); input.clear(); arc.time = 0; arc.state = 'play'; paintPause(); sfx.unlock();
+      applyTouchStyle();
       store.set('arcade.played.' + slug, (store.get('arcade.played.' + slug, 0) || 0) + 1);
       if (opts.start) opts.start(arc, arc.choices);
     };
     arc.menu = (p) => {
       arc.state = 'menu'; paintPause();
       const m = Object.assign({ actions: [{ label: 'Play', primary: true, on: arc.start }, { label: 'All games', href: '/games' }], showKeys: true }, opts.menu || {}, p || {});
+      if (opts.gestures && arc.touchMode) {
+        const ch = [{ v: 'gesture', label: 'Tap & swipe' }];
+        if (opts.gestures.tilt) ch.push({ v: 'tilt', label: 'Tilt to steer' });
+        ch.push({ v: 'pads', label: 'Stick & buttons' });
+        m.options = [{ id: 'touchStyle', label: 'Touch controls', choices: ch, value: 'gesture' }].concat(m.options || []);
+      }
       const best = arc.best();
       if (best != null && m.html != null && !m.noBest) m.html += '<div class="stat"><div>Your best<b>' + esc(opts.formatScore ? opts.formatScore(best) : best) + '</b></div></div>';
       arc.panel(m);
@@ -473,10 +564,14 @@
       try {
         if (arc.state === 'play') { arc.time += dt; if (opts.update) opts.update(dt, arc); }
         else if (arc.state !== 'pause' && opts.idle) opts.idle(dt, arc);
+        if (hud) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, hud.width, hud.height); }
         ctx.setTransform(arc.dpr, 0, 0, arc.dpr, 0, 0);
+        arc.shakeX = arc.shakeY = 0;
         if (arc.shake > 0 && !reducedMotion) {
           const s = arc.shake;
-          ctx.translate((Math.random() - 0.5) * s * 2, (Math.random() - 0.5) * s * 2);
+          arc.shakeX = (Math.random() - 0.5) * s * 2; arc.shakeY = (Math.random() - 0.5) * s * 2;
+          // A 3D game moves its camera by shakeX/shakeY; the HUD stays put.
+          if (!hud) ctx.translate(arc.shakeX, arc.shakeY);
           arc.shake = Math.max(0, s - dt * 48);
         } else {
           arc.shake = 0;
@@ -485,6 +580,15 @@
       } catch (err) {
         console.error(err);
       }
+      // The stick that appears under the thumb while a drag steers.
+      const gz = input.gesture;
+      const showFloat = arc.state === 'play' && input.dragSteer && gz.active && gz.type !== 'mouse';
+      if (showFloat) {
+        const R = 56, kx = clamp(gz.dx, -R, R), ky = input.dragSteer === 'xy' ? clamp(gz.dy, -R, R) : 0;
+        floatEl.style.transform = 'translate(' + (gz.sx - 60) + 'px,' + (gz.sy - 60) + 'px)';
+        floatEl.firstChild.style.transform = 'translate(' + kx + 'px,' + ky + 'px)';
+      }
+      if (floatEl.classList.contains('on') !== showFloat) floatEl.classList.toggle('on', showFloat);
       input.endFrame();
       arc.frame++;
       requestAnimationFrame(tick);

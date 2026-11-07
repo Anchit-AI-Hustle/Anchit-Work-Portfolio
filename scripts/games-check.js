@@ -16,6 +16,7 @@
 //   MUT=stall  freezes requestAnimationFrame, so "the game advances" must fail.
 //   MUT=error  throws inside the first frame of play, so "no errors" must fail.
 const { chromium } = require('./_playwright.js');
+const sharp = require('sharp');
 
 const BASE = (process.env.BASE || 'http://127.0.0.1:8099').replace(/\/$/, '');
 const MUT = process.env.MUT || '';
@@ -138,12 +139,12 @@ async function game(browser, vp, slug) {
   const modes = await page.evaluate(() => Array.from(document.querySelectorAll('.arc-seg')).map((e) => e.getAttribute('data-opt')));
   check(`${tag} menu offers a mode picker`, modes.includes('mode'), modes.join(','));
 
-  const blank = await page.evaluate(() => {
-    const c = document.querySelector('.arc-stage canvas');
-    const g = c.getContext('2d');
-    const d = g.getImageData(0, 0, c.width, c.height).data;
+  // Pixels as the player sees them: a screenshot of the stage, which works for
+  // a 2D canvas and a WebGL one alike (a WebGL canvas has no 2D context to read).
+  const shot = await page.locator('.arc-stage canvas').first().screenshot();
+  const blank = await sharp(shot).raw().toBuffer({ resolveWithObject: true }).then(({ data, info }) => {
     const seen = new Set();
-    for (let i = 0; i < d.length; i += 4 * 97) seen.add((d[i] >> 4) << 8 | (d[i + 1] >> 4) << 4 | (d[i + 2] >> 4));
+    for (let i = 0; i < data.length; i += info.channels * 97) seen.add((data[i] >> 4) << 8 | (data[i + 1] >> 4) << 4 | (data[i + 2] >> 4));
     return seen.size;
   });
   check(`${tag} canvas draws a scene behind the menu`, blank > 24, blank + ' colour buckets');
