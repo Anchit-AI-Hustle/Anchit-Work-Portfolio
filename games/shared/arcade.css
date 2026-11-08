@@ -32,7 +32,7 @@ body.arcade {
   font-family: var(--font-body); font-weight: 400; line-height: 1.5;
   -webkit-font-smoothing: antialiased; overflow: hidden;
   overscroll-behavior: none; -webkit-tap-highlight-color: transparent;
-  -webkit-user-select: none; user-select: none;
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
 }
 body.arcade button { font: inherit; color: inherit; }
 body.arcade :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
@@ -145,24 +145,25 @@ html[data-consent-open="1"] body.arcade .arc-app {
 .arc-app.panel-open .arc-touch, .arc-app.panel-open .arc-hint { display: none; }
 .arc-stick {
   position: absolute; left: max(18px, env(safe-area-inset-left)); bottom: max(18px, env(safe-area-inset-bottom));
-  width: 132px; height: 132px; border-radius: 50%; pointer-events: auto; touch-action: none;
+  width: calc(132px * var(--ps, 1)); height: calc(132px * var(--ps, 1)); border-radius: 50%; pointer-events: auto; touch-action: none;
   background: rgba(15,13,10,.55); border: 1px solid rgba(251,245,236,.28);
   box-shadow: 0 12px 32px rgba(0,0,0,.4);
 }
 .arc-stick i {
-  position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%;
+  position: absolute; left: 50%; top: 50%; width: calc(56px * var(--ps, 1)); height: calc(56px * var(--ps, 1));
+  margin: calc(-28px * var(--ps, 1)) 0 0 calc(-28px * var(--ps, 1)); border-radius: 50%;
   background: rgba(251,245,236,.28); border: 1px solid rgba(251,245,236,.45);
 }
 .arc-pads {
   position: absolute; right: max(14px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom));
-  display: flex; flex-wrap: wrap-reverse; justify-content: flex-end; gap: 10px; max-width: 220px; pointer-events: none;
+  display: flex; flex-wrap: wrap-reverse; justify-content: flex-end; gap: 10px; max-width: calc(220px * var(--ps, 1)); pointer-events: none;
 }
 .arc-pad {
-  pointer-events: auto; touch-action: none; min-width: 64px; height: 64px; padding: 0 12px; border-radius: 32px;
+  pointer-events: auto; touch-action: none; min-width: calc(64px * var(--ps, 1)); height: calc(64px * var(--ps, 1)); padding: 0 12px; border-radius: 999px;
   background: rgba(15,13,10,.48); border: 1px solid rgba(251,245,236,.28); color: var(--ink);
   font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; cursor: pointer;
 }
-.arc-pad.big { min-width: 78px; height: 78px; border-radius: 39px; }
+.arc-pad.big { min-width: calc(78px * var(--ps, 1)); height: calc(78px * var(--ps, 1)); }
 .arc-pad.hot { background: rgba(255,105,64,.42); border-color: rgba(255,105,64,.8); }
 .arc-pad.on { background: rgba(251,245,236,.32); }
 .arc-hint {
@@ -189,3 +190,22 @@ html[data-consent-open="1"] body.arcade .arc-app {
   background: rgba(251,245,236,.35); border: 1px solid rgba(251,245,236,.6);
 }
 @media (prefers-reduced-motion: reduce) { .arc-float { transition: none; } }
+
+/* Settings: button size and which side the stick sits on, saved per player. */
+.arc-app.size-s .arc-touch { --ps: .82; }
+.arc-app.size-l .arc-touch { --ps: 1.22; }
+.arc-app.size-l .arc-pad { font-size: 13px; }
+.arc-app.lefty .arc-stick { left: auto; right: max(18px, env(safe-area-inset-right)); }
+.arc-app.lefty .arc-pads { right: auto; left: max(14px, env(safe-area-inset-left)); justify-content: flex-start; }
+.arc-opts .note { margin-top: 4px; font-size: 13px; color: var(--ink-mute); }
+/* Phones on their side: a slimmer bar and controls, so the play area keeps its height. */
+@media (orientation: landscape) and (max-height: 500px) {
+  :root { --arc-bar-h: 44px; }
+  .arc-touch { --ps: .86; }
+  .arc-app.size-s .arc-touch { --ps: .72; }
+  .arc-app.size-l .arc-touch { --ps: 1.04; }
+  .arc-card { padding: 16px 20px; }
+  .arc-card h1, .arc-card h2 { font-size: 27px; margin: 4px 0 6px; }
+}
+/* Very narrow phones: four tools must still fit beside the title. */
+@media (max-width: 380px) { .arc-tools { gap: 4px; } .arc-tool { min-width: 44px; padding: 0 8px; } .arc-back span { display: none; } }

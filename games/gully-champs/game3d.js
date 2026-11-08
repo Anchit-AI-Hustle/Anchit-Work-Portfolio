@@ -2949,6 +2949,8 @@ function dbg() {
 }
 
 A.create({
+  // Settings > Graphics: 'smooth' and 'sharp' pin a quality level, 'auto' hands it back to the frame-rate auto-scaler.
+  graphics(level) { if (level === 'auto') { W3.fixq = false; return; } W3.fixq = true; W3.q = level === 'sharp' ? 0 : 3; applyQuality(); },
   slug: 'gully-champs',
   title: 'Gully Champs',
   genre: 'Gully cricket',

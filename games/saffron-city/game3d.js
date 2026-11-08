@@ -3629,6 +3629,8 @@ function showMenu(arc, extra) {
 }
 
 const arc = Arcade.create({
+  // Settings > Graphics: 'smooth' and 'sharp' pin a quality level, 'auto' hands it back to the frame-rate auto-scaler.
+  graphics(level) { if (level === 'auto') { GL.pinned = false; return; } GL.q = level === 'sharp' ? 2 : 0; GL.pinned = true; applyQuality(); },
   slug: 'saffron-city', title: 'Saffron City', genre: 'Open-world sandbox', three: true,
   keys: [['WASD / arrows', 'Walk or drive'], ['Space', 'Handbrake (sprint on foot)'], ['Shift', 'Sprint on foot'], ['F', 'Get in or out of a car'], ['H', 'Horn'], ['Q / E', 'Turn the camera on foot'], ['M', 'City map']],
   gestures: {
@@ -3636,6 +3638,8 @@ const arc = Arcade.create({
     hint: 'Drag to walk or steer   Drag down to brake   Tap a car to get in   Swipe up to honk',
     keys: [['Drag', 'Walk on foot. In a car: left and right steer, down brakes'], ['Tap', 'Tap a nearby car to get in. In a car, tap when stopped to get out'], ['Swipe up', 'Honk the horn'], ['Tilt style', 'Tilt to steer, hold a finger to walk, tap to brake'], ['Map pad', 'Open the city map']],
   },
+  // Controller: A car, X handbrake, B horn, Y map; right trigger gas, left trigger brake.
+  gamepad: { buttons: ['KeyF', 'Space', 'KeyH', 'KeyM'], rt: 'ArrowUp', lt: 'ArrowDown' },
   touch: { stick: true, pads: [{ label: 'Car', key: 'KeyF' }, { label: 'Brake', key: 'Space', big: true, hot: true }, { label: 'Map', key: 'KeyM', keep: true }, { label: 'Horn', key: 'KeyH' }] },
   touchKeys: [['On-screen stick', 'Walk or steer'], ['Car', 'Get in or out'], ['Brake', 'Handbrake'], ['Horn', 'Honk'], ['Map', 'Open the city map']],
   touchHint: 'Stick to walk or steer, Car pad to get in, Brake, Horn, Map',
