@@ -508,21 +508,6 @@ function skylineTex() {
   });
 }
 
-function dotTex() {
-  return canvasTex(64, 64, (g, w, h) => {
-    const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-    gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.25, 'rgba(255,255,255,.55)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
-    g.fillStyle = gr; g.fillRect(0, 0, w, h);
-  }, { data: true });
-}
-function streakTex() {
-  return canvasTex(16, 128, (g, w, h) => {
-    const gr = g.createLinearGradient(0, 0, 0, h);
-    gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(0.5, 'rgba(255,255,255,1)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
-    g.fillStyle = gr; g.fillRect(0, 0, w, h);
-  }, { data: true });
-}
-
 /* ------------------------------------------------------------------ geometry kit */
 // Every prop is a handful of primitives baked into one vertex-coloured mesh per
 // material, so a scooter is one draw call, not twelve.
@@ -658,7 +643,6 @@ function setup3D(a) {
   try {
     renderer = new THREE.WebGLRenderer({ canvas: a.canvas, antialias: true, powerPreference: 'high-performance' });
   } catch (e) { return false; }
-  if (!renderer || !renderer.getContext()) return false;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;

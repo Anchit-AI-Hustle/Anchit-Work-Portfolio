@@ -603,7 +603,6 @@ function setup3D(a) {
   try {
     renderer = new THREE.WebGLRenderer({ canvas: a.canvas, antialias: true, powerPreference: 'high-performance' });
   } catch (e) { return false; }
-  if (!renderer || !renderer.getContext()) return false;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;

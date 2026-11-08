@@ -377,21 +377,6 @@ function fenceTex() {
   });
 }
 
-function windowsTex() {
-  return canvasTex(256, 512, (g, w, h) => {
-    g.fillStyle = '#000'; g.fillRect(0, 0, w, h);
-    const cols = 8, rows = 22, cw = w / cols, ch = h / rows;
-    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
-      const on = rnd();
-      if (on < 0.42) continue;
-      const warm = rnd() < 0.78;
-      const a = 0.35 + rnd() * 0.65;
-      g.fillStyle = warm ? 'rgba(255,' + (170 + (rnd() * 50 | 0)) + ',' + (90 + (rnd() * 50 | 0)) + ',' + a.toFixed(2) + ')' : 'rgba(170,200,255,' + (a * 0.7).toFixed(2) + ')';
-      g.fillRect(c * cw + cw * 0.22, r * ch + ch * 0.25, cw * 0.56, ch * 0.5);
-    }
-  });
-}
-
 function ballTex() {
   return canvasTex(512, 256, (g, w, h) => {
     g.fillStyle = '#d4602a'; g.fillRect(0, 0, w, h);
@@ -1194,7 +1179,7 @@ function toScreen(x, y, z) {
 }
 
 function drawHUD(c) {
-  const w = arc.w, h = arc.h, pad = arc.hudPad ? arc.hudPad() : { top: 12, left: 12, right: 12, bottom: 52 };
+  const w = arc.w, pad = arc.hudPad ? arc.hudPad() : { top: 12, left: 12, right: 12, bottom: 52 };
   const sw = (full) => min(full, max(96, w / 2 - 66 - 12));
   plate(c, pad.left, pad.top, sw(150), 70, 12);
   txt(c, 'POINTS', pad.left + 14, pad.top + 16, 10, GOLD, 600, 'left', F_MONO);

@@ -8,7 +8,7 @@ import * as THREE from '/games/vendor/three/three.module.min.js';
  */
 
 const PI = Math.PI, TAU = Math.PI * 2;
-const abs = Math.abs, sin = Math.sin, cos = Math.cos, min = Math.min, max = Math.max, hypot = Math.hypot;
+const abs = Math.abs, sin = Math.sin, cos = Math.cos, min = Math.min, max = Math.max;
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 const lerp = (a, b, t) => a + (b - a) * t;
 const damp = (a, b, k, dt) => lerp(a, b, 1 - Math.exp(-k * dt));

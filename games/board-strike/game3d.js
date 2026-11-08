@@ -951,7 +951,7 @@ for (const x of [-1.18, 1.18]) for (const z of [-1.18, 1.18]) for (const y of [-
 
 function safeArea() {
   const pad = arc.hudPad ? arc.hudPad() : { top: 12, bottom: 52 };
-  const w = arc.w, h = arc.h;
+  const w = arc.w;
   return { top: pad.top + (w < 520 ? 74 : 62), bottom: pad.bottom + 38, side: w < 520 ? 6 : 24 };
 }
 
