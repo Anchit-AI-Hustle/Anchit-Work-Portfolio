@@ -23,20 +23,20 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // How long to play before the photo, and what to hold. Tuned per game so the
 // frame shows the game doing its thing rather than its first second.
 const PLAY = {
-  // The five 3D games pick their own quality, and a machine with no GPU makes them choose the lowest. A poster is
+  // The 3D games pick their own quality, and a machine with no GPU makes them choose the lowest. A poster is
   // one still, so each is pinned to full detail: a query flag where the game reads one, or its own test hook.
   'saffron-city': { ms: 5000, keys: ['ArrowUp'], taps: ['KeyF'], tapAt: 400, query: '?q=2&lod=1' },
   'midnight-apex': { ms: 9000, keys: ['ArrowUp'], taps: [], hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
   'turf-kings': { ms: 4500, keys: ['ArrowUp', 'ArrowRight'], taps: [], query: '?quality=0' },
   'super-over': { ms: 3600, keys: [], taps: [], query: '?q=3' },
   'gully-champs': { ms: 3200, keys: [], taps: [], query: '?q=3&fixq=1' },
-  'court-lights': { ms: 2800, keys: [], taps: ['Space'], tapAt: 700 },
-  'sky-thread': { ms: 3500, keys: ['ArrowUp', 'ArrowRight'], taps: ['Space'], tapAt: 500 },
-  'tiffin-dash': { ms: 2800, keys: ['ArrowUp'], taps: ['Space'], tapAt: 400 },
-  'board-strike': { ms: 2600, keys: ['ArrowRight'], taps: ['Space'], tapAt: 500 },
-  'yard-catch': { ms: 2800, keys: ['ArrowRight'], taps: [] },
-  'rally-cage': { ms: 2800, keys: ['ArrowRight'], taps: ['Space'], tapAt: 200 },
-  'fare-run': { ms: 2800, keys: ['ArrowRight'], taps: [] },
+  'court-lights': { ms: 2800, keys: [], taps: ['Space'], tapAt: 700, query: '?q=3' },
+  'sky-thread': { ms: 3500, keys: ['ArrowUp', 'ArrowRight'], taps: ['Space'], tapAt: 500, query: '?q=3' },
+  'tiffin-dash': { ms: 2800, keys: ['ArrowUp'], taps: ['Space'], tapAt: 400, hiq: () => window.__arcade.dev && window.__arcade.dev.setQuality(3) },
+  'board-strike': { ms: 2600, keys: ['ArrowRight'], taps: ['Space'], tapAt: 500, query: '?q=3' },
+  'yard-catch': { ms: 2800, keys: ['ArrowRight'], taps: [], query: '?q=3' },
+  'rally-cage': { ms: 2800, keys: ['ArrowRight'], taps: ['Space'], tapAt: 200, query: '?q=3' },
+  'fare-run': { ms: 2800, keys: ['ArrowRight'], taps: [], hiq: () => window.__arcade.dev && window.__arcade.dev.setQuality(3) },
 };
 
 async function shoot(browser, slug) {

@@ -23,6 +23,15 @@
 <body>
   <noscript><p style="padding:24px;color:#FBF5EC;background:#0F0D0A;font-family:sans-serif">This game needs JavaScript.</p></noscript>
   <script src="/games/shared/arcade.js" defer></script>
-  <script src="/games/court-lights/game.js" defer></script>
+  <script>
+    /* The 3D game needs WebGL2; without it the 2D version of the same game loads instead. */
+    document.addEventListener("DOMContentLoaded", function () {
+      var ok = false;
+      try { var gl = document.createElement("canvas").getContext("webgl2"); ok = !!gl; var x = gl && gl.getExtension("WEBGL_lose_context"); if (x) x.loseContext(); } catch (e) { ok = false; }
+      var s = document.createElement("script");
+      if (ok) { s.type = "module"; s.src = "/games/court-lights/game3d.js"; } else { s.src = "/games/court-lights/game.js"; }
+      document.body.appendChild(s);
+    });
+  </script>
 </body>
 </html>
