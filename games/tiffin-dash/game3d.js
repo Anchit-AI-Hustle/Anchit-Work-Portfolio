@@ -1267,8 +1267,8 @@ function placeObjs(t) {
 // Three point-sprite systems: soft glow (additive), dust (normal) and marigold
 // petals (hard edged, tumbling). One draw call each, nothing allocated per frame.
 const PVS = [
-  'attribute float aSize; attribute float aAlpha; attribute vec3 aCol; varying vec3 vCol; varying float vA; uniform float uScale;',
-  'void main(){ vCol = aCol; vA = aAlpha; vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_PointSize = aSize * uScale / max(0.1, -mv.z); gl_Position = projectionMatrix * mv; }',
+  'attribute float aSize; attribute float aAlpha; attribute vec3 aCol; varying vec3 vCol; varying float vA; uniform float uScale; uniform float uMax;',
+  'void main(){ vCol = aCol; vA = aAlpha; vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_PointSize = min(aSize * uScale / max(0.1, -mv.z), uMax); gl_Position = projectionMatrix * mv; }',
 ].join('\n');
 const PFS = [
   'varying vec3 vCol; varying float vA; uniform float uHard;',
@@ -1288,7 +1288,7 @@ function createFX(scene) {
     geo.setAttribute('aCol', new THREE.BufferAttribute(col, 3).setUsage(THREE.DynamicDrawUsage));
     geo.setAttribute('aSize', new THREE.BufferAttribute(size, 1).setUsage(THREE.DynamicDrawUsage));
     geo.setAttribute('aAlpha', new THREE.BufferAttribute(alpha, 1).setUsage(THREE.DynamicDrawUsage));
-    const mat = new THREE.ShaderMaterial({ uniforms: { uScale: { value: 400 }, uHard: { value: hard ? 1 : 0 } }, vertexShader: PVS, fragmentShader: PFS, transparent: true, depthWrite: false, blending });
+    const mat = new THREE.ShaderMaterial({ uniforms: { uScale: { value: 400 }, uMax: { value: 64 }, uHard: { value: hard ? 1 : 0 } }, vertexShader: PVS, fragmentShader: PFS, transparent: true, depthWrite: false, blending });
     const pts = new THREE.Points(geo, mat); pts.frustumCulled = false; pts.renderOrder = 5; scene.add(pts);
     const P = [];
     for (let i = 0; i < n; i++) P.push({ life: 0, max: 1, x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, r: 1, g: 1, b: 1, size: 0.1, grow: 0, drag: 0, grav: 0, spin: 0 });
@@ -1331,7 +1331,8 @@ function createFX(scene) {
     clear() { [sys.glow, sys.dust, sys.petal].forEach((s) => s.P.forEach((p) => { p.life = 0; })); },
     step(dt, scroll, t, camera, r) {
       const scale = r.domElement.height / (2 * Math.tan((camera.fov * PI / 180) / 2));
-      [sys.glow, sys.dust, sys.petal, motes, halos].forEach((s) => { s.mat.uniforms.uScale.value = scale; });
+      const pr = r.getPixelRatio();
+      [sys.glow, sys.dust, sys.petal, motes, halos].forEach((s) => { s.mat.uniforms.uScale.value = scale; s.mat.uniforms.uMax.value = (s === halos ? 150 : s === sys.dust ? 90 : 34) * pr; });
       [sys.glow, sys.dust, sys.petal].forEach((s) => {
         for (let i = 0; i < s.n; i++) {
           const p = s.P[i];

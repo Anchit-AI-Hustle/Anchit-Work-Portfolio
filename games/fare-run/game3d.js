@@ -1175,8 +1175,8 @@ function placeObjs(t) {
 
 /* ------------------------------------------------------------------ effects */
 const PVS = [
-  'attribute float aSize; attribute float aAlpha; attribute vec3 aCol; varying vec3 vCol; varying float vA; uniform float uScale;',
-  'void main(){ vCol = aCol; vA = aAlpha; vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_PointSize = aSize * uScale / max(0.1, -mv.z); gl_Position = projectionMatrix * mv; }',
+  'attribute float aSize; attribute float aAlpha; attribute vec3 aCol; varying vec3 vCol; varying float vA; uniform float uScale; uniform float uMax;',
+  'void main(){ vCol = aCol; vA = aAlpha; vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_PointSize = min(aSize * uScale / max(0.1, -mv.z), uMax); gl_Position = projectionMatrix * mv; }',
 ].join('\n');
 const PFS = [
   'varying vec3 vCol; varying float vA; uniform float uHard;',
@@ -1196,7 +1196,7 @@ function createFX(scene) {
     geo.setAttribute('aCol', new THREE.BufferAttribute(col, 3).setUsage(THREE.DynamicDrawUsage));
     geo.setAttribute('aSize', new THREE.BufferAttribute(size, 1).setUsage(THREE.DynamicDrawUsage));
     geo.setAttribute('aAlpha', new THREE.BufferAttribute(alpha, 1).setUsage(THREE.DynamicDrawUsage));
-    const mat = new THREE.ShaderMaterial({ uniforms: { uScale: { value: 400 }, uHard: { value: hard ? 1 : 0 } }, vertexShader: PVS, fragmentShader: PFS, transparent: true, depthWrite: false, blending });
+    const mat = new THREE.ShaderMaterial({ uniforms: { uScale: { value: 400 }, uMax: { value: 64 }, uHard: { value: hard ? 1 : 0 } }, vertexShader: PVS, fragmentShader: PFS, transparent: true, depthWrite: false, blending });
     const pts = new THREE.Points(geo, mat); pts.frustumCulled = false; pts.renderOrder = 5; scene.add(pts);
     const P = [];
     for (let i = 0; i < n; i++) P.push({ life: 0, max: 1, x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, r: 1, g: 1, b: 1, size: 0.1, grow: 0, drag: 0, grav: 0, spin: 0 });
@@ -1205,7 +1205,7 @@ function createFX(scene) {
   const sys = { glow: mk(260, THREE.AdditiveBlending, false), dust: mk(220, THREE.NormalBlending, false), petal: mk(200, THREE.NormalBlending, true) };
   const C = {
     gold: new THREE.Color('#ffc24a'), warm: new THREE.Color('#ff9a3a'), prim: new THREE.Color(PRIM), dust: new THREE.Color('#b89c7a'),
-    petal: new THREE.Color('#ff9a1a'), steel: new THREE.Color('#dfe4e8'), clay: new THREE.Color('#c0602e'), wood: new THREE.Color('#9a6a3a'), smoke: new THREE.Color('#8a8078'), white: new THREE.Color('#fff4dc'),
+    petal: new THREE.Color('#ff9a1a'), steel: new THREE.Color('#dfe4e8'), clay: new THREE.Color('#c0602e'), wood: new THREE.Color('#9a6a3a'), smoke: new THREE.Color('#c8beb2'), white: new THREE.Color('#fff4dc'),
   };
   const petalCols = ['#ff8a00', '#ffcc1a', '#ff5a1a', '#ffe680', '#e8402a'].map((c) => new THREE.Color(c));
   // Floating dust motes in the low sun, and the bulbs' halos.
@@ -1239,7 +1239,8 @@ function createFX(scene) {
     clear() { [sys.glow, sys.dust, sys.petal].forEach((s) => s.P.forEach((p) => { p.life = 0; })); },
     step(dt, scroll, t, camera, r) {
       const scale = r.domElement.height / (2 * Math.tan((camera.fov * PI / 180) / 2));
-      [sys.glow, sys.dust, sys.petal, motes, halos].forEach((s) => { s.mat.uniforms.uScale.value = scale; });
+      const pr = r.getPixelRatio();
+      [sys.glow, sys.dust, sys.petal, motes, halos].forEach((s) => { s.mat.uniforms.uScale.value = scale; s.mat.uniforms.uMax.value = (s === halos ? 150 : s === sys.dust ? 90 : 34) * pr; });
       [sys.glow, sys.dust, sys.petal].forEach((s) => {
         for (let i = 0; i < s.n; i++) {
           const p = s.P[i];
@@ -1311,7 +1312,7 @@ function renderScene(dtReal, a) {
   // Exhaust puffs and wheel dust.
   if (a.state !== 'pause' && FX) {
     r.puff = (r.puff || 0) + dtReal;
-    if (r.puff > 0.09) { r.puff = 0; const ax = laneX(G.laneT); FX.emit(ax - 0.5, 0.25, 1.25, -0.4 + rnd() * 0.2, 0.35, 1.4, FX.C.smoke, 0.1, 0.7, 'dust', -0.3); if (rnd() < 0.5) FX.emit(ax + (rnd() < 0.5 ? 0.6 : -0.6), 0.05, 0.9, 0, 0.3, 1.5, FX.C.dust, 0.2, 0.5, 'dust', -0.2); }
+    if (r.puff > 0.16) { r.puff = 0; const ax = laneX(G.laneT); FX.emit(ax - 0.5, 0.25, 1.25, -0.4 + rnd() * 0.2, 0.35, 1.4, FX.C.smoke, 0.07, 0.55, 'dust', -0.3); if (rnd() < 0.5) FX.emit(ax + (rnd() < 0.5 ? 0.6 : -0.6), 0.05, 0.9, 0, 0.3, 1.5, FX.C.dust, 0.2, 0.5, 'dust', -0.2); }
   }
   // Chase camera: higher and further back on a tall phone screen so three lanes fit.
   const aspect = a.w / max(1, a.h);
