@@ -126,7 +126,13 @@
   }
 
   function stepBall(dt) {
-    const b = G.ball; if (!b || !b.air) return;
+    const b = G.ball; if (!b) return;
+    if (!b.air) {
+      // A ball that has come to rest after a make or a miss is cleared here.
+      // Without this a miss that landed left the game stuck in 'miss'.
+      if (G.phase === 'net' || G.phase === 'miss') { b.dead += dt; if (b.dead > 0.55) resetBall(); }
+      return;
+    }
     b.flightT = (b.flightT || 0) + dt;
     b.vy -= GRAV * dt; b.x += b.vx * dt; b.y += b.vy * dt; b.z += b.vz * dt; b.spin += dt * 14;
     b.vx *= 0.999; b.vz *= 0.999;
@@ -380,15 +386,17 @@
 
   function drawHUD(c) {
     const w = arc.w, h = arc.h, pad = arc.hudPad ? arc.hudPad() : { top: 12, left: 12, bottom: 52 };
-    plate(c, pad.left, pad.top, 150, 70, 12);
+    // Side plates shrink on a narrow phone so they never sit under the clock.
+    const sw = (full) => min(full, max(96, w / 2 - 66 - 12));
+    plate(c, pad.left, pad.top, sw(150), 70, 12);
     txt(c, 'POINTS', pad.left + 14, pad.top + 16, 10, GOLD, 600, 'left', F_MONO);
     txt(c, String(G.score), pad.left + 14, pad.top + 42, 28, INK, 500, 'left', F_DISP);
     const clock = G.mode === 'twentyone' ? 'TO 21' : (Math.max(0, G.time) | 0) + 's';
     plate(c, w / 2 - 54, pad.top, 108, 44, 12);
     txt(c, clock, w / 2, pad.top + 22, 22, G.time < 10 && G.mode !== 'twentyone' ? PRIM : INK, 500, 'center', F_DISP);
     if (G.combo > 1) {
-      plate(c, w - pad.right - 120, pad.top, 120, 44, 12);
-      txt(c, 'STREAK x' + G.combo, w - pad.right - 60, pad.top + 22, 12, WARM, 600, 'center', F_MONO);
+      plate(c, w - pad.right - sw(120), pad.top, sw(120), 44, 12);
+      txt(c, 'STREAK x' + G.combo, w - pad.right - sw(120) / 2, pad.top + 22, 12, WARM, 600, 'center', F_MONO);
     }
     if (G.phase === 'aim') {
       const bw = min(220, w - 40), bx = w / 2 - bw / 2, by = h - pad.bottom - 28;

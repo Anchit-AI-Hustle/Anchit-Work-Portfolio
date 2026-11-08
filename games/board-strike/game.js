@@ -455,14 +455,16 @@
 
   function drawHUD(c) {
     const w = arc.w, pad = arc.hudPad ? arc.hudPad() : { top: 12, left: 12, right: 12 };
-    plate(c, pad.left, pad.top, 150, 64, 12);
+    // Side plates shrink on a narrow phone so they never sit under the clock.
+    const sw = (full) => min(full, max(96, w / 2 - 66 - 12));
+    plate(c, pad.left, pad.top, sw(150), 64, 12);
     txt(c, 'POINTS', pad.left + 14, pad.top + 16, 10, GOLD, 600, 'left', F_MONO);
     txt(c, String(Math.round(G.score)), pad.left + 14, pad.top + 40, 24, INK, 500, 'left', F_DISP);
     plate(c, w / 2 - 58, pad.top, 116, 44, 12);
     const clock = G.mode === 'clock' ? (Math.max(0, G.time | 0) + 's') : (G.mode === 'practice' ? 'PRACTICE' : 'CLEAR');
     txt(c, clock, w / 2, pad.top + 22, G.mode === 'clock' ? 20 : 12, G.mode === 'clock' && G.time < 12 ? PRIM : INK, 500, 'center', G.mode === 'clock' ? F_DISP : F_MONO);
-    plate(c, w - pad.right - 132, pad.top, 132, 44, 12);
-    txt(c, G.pocketed + ' pocketed', w - pad.right - 66, pad.top + 22, 12, WARM, 600, 'center', F_MONO);
+    plate(c, w - pad.right - sw(132), pad.top, sw(132), 44, 12);
+    txt(c, G.pocketed + ' pocketed', w - pad.right - sw(132) / 2, pad.top + 22, 12, WARM, 600, 'center', F_MONO);
     if (G.combo > 1) {
       plate(c, w / 2 - 48, pad.top + 52, 96, 28, 10);
       txt(c, 'x' + G.combo + ' combo', w / 2, pad.top + 66, 12, PRIM, 700, 'center', F_MONO);

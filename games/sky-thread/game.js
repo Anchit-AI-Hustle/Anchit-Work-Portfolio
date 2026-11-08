@@ -808,14 +808,16 @@
 
   function drawHUD(c) {
     const w = arc.w, pad = arc.hudPad ? arc.hudPad() : { top: 12, left: 12, right: 12 };
-    plate(c, pad.left, pad.top, 150, 64, 12);
+    // Side plates shrink on a narrow phone so they never sit under the clock.
+    const sw = (full) => min(full, max(96, w / 2 - 66 - 12));
+    plate(c, pad.left, pad.top, sw(150), 64, 12);
     txt(c, 'CUTS', pad.left + 14, pad.top + 16, 10, GOLD, 600, 'left', F_MONO);
     txt(c, String(G.cuts), pad.left + 14, pad.top + 40, 26, INK, 500, 'left', F_DISP);
     plate(c, w / 2 - 58, pad.top, 116, 44, 12);
     const mid = G.mode === 'dusk' ? (Math.max(0, G.time | 0) + 's') : G.mode === 'hunt' ? (G.cuts + ' / 6') : 'ENDLESS';
     txt(c, mid, w / 2, pad.top + 22, G.mode === 'dusk' ? 22 : 14, G.mode === 'dusk' && G.time < 12 ? PRIM : INK, 500, 'center', G.mode === 'dusk' ? F_DISP : F_MONO);
-    plate(c, w - pad.right - 132, pad.top, 132, 44, 12);
-    txt(c, G.me.pull > 0.5 ? 'PULLING' : 'GLIDING', w - pad.right - 66, pad.top + 22, 12, G.me.pull > 0.5 ? WARM : INK, 600, 'center', F_MONO);
+    plate(c, w - pad.right - sw(132), pad.top, sw(132), 44, 12);
+    txt(c, G.me.pull > 0.5 ? 'PULLING' : 'GLIDING', w - pad.right - sw(132) / 2, pad.top + 22, 12, G.me.pull > 0.5 ? WARM : INK, 600, 'center', F_MONO);
   }
 
   // The shell hides its own hint on touch, so the gesture reminder is drawn
