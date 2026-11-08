@@ -16,7 +16,7 @@ const rnd = Math.random;
 const F_DISP = 'Fraunces, Times New Roman, serif';
 const F_UI = 'Inter, sans-serif';
 const F_MONO = 'JetBrains Mono, ui-monospace, monospace';
-const BG = '#0F0D0A', INK = '#FBF5EC', GOLD = '#c9a96e', WARM = '#FFB736', PRIM = '#FF6940';
+const INK = '#FBF5EC', GOLD = '#c9a96e', WARM = '#FFB736', PRIM = '#FF6940';
 const SHOPS = ['Chai', 'Bakery', 'Tailor', 'Florist', 'Spices', 'Jewels'];
 
 // 2D units to metres. A runner is 52 units tall, so a metre is 32 of them.
