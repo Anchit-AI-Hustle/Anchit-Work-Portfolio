@@ -46,8 +46,8 @@ export async function verifySecret(v, stored) {
 // Recovery code: 10 chars, unambiguous alphabet, shown once as XXXXX-XXXXX
 const ALPH = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 export function newRecoveryCode() {
-  const b = crypto.randomBytes(10); let s = '';
-  for (let i = 0; i < 10; i++) s += ALPH[b[i] % ALPH.length];
+  let s = '';
+  for (let i = 0; i < 10; i++) s += ALPH[crypto.randomInt(ALPH.length)]; // unbiased
   return s.slice(0, 5) + '-' + s.slice(5);
 }
 export function normRecovery(v) { return String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
