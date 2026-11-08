@@ -102,25 +102,16 @@
         id: 'intelligence',
         title: 'Intelligence & Research',
         short: 'Read the market, diagnose performance and identify the real constraint.',
-        dashboard: 'd2c-lifecycle-os',
+        dashboard: 'lifecycle-analysis',
         apps: [
-          {
-            id: 'd2c-lifecycle-os',
-            title: 'Full Lifecycle Plan',
-            description: 'The one-shot Lifecycle OS engine: brand benchmark, lifecycle blueprint, segments and KPIs.',
-            path: '/lifecycle-os-plan',
-            aliases: ['/lifecycle-os-plan.html', '/d2c-lifecycle-os', '/d2c-lifecycle-os.html'],
-            role: 'Dashboard',
-            capabilities: ['Brand and category benchmark', 'Lifecycle blueprint', 'Segment strategy', 'KPI plan']
-          },
           {
             id: 'lifecycle-analysis',
             title: 'Data Analysis',
             description: 'KPI diagnostics, signal detection and revenue decomposition in one workspace.',
             path: '/lifecycle-os-analysis',
             aliases: ['/lifecycle-os-analysis.html'],
-            capabilities: ['KPI diagnostics', 'Revenue decomposition', 'Cohort heatmaps', 'CSV export'],
-            dependsOn: ['d2c-lifecycle-os']
+            role: 'Dashboard',
+            capabilities: ['KPI diagnostics', 'Revenue decomposition', 'Cohort heatmaps', 'CSV export']
           },
           {
             id: 'lifecycle-intel',
@@ -129,7 +120,7 @@
             path: '/lifecycle-os-intel',
             aliases: ['/lifecycle-os-intel.html'],
             capabilities: ['Competitive context', 'Channel benchmarks', 'Category baselines', 'Opportunity signals'],
-            dependsOn: ['d2c-lifecycle-os']
+            dependsOn: ['lifecycle-analysis']
           },
           {
             id: 'lifecycle-cohorts',
@@ -162,7 +153,7 @@
             title: 'Lifecycle Command Center',
             description: 'The operating dashboard that connects analysis, planning, creation and execution.',
             path: '/lifecycle-os',
-            aliases: ['/lifecycle-os.html'],
+            aliases: ['/lifecycle-os.html', '/d2c-lifecycle-os', '/d2c-lifecycle-os.html'],
             role: 'Dashboard',
             capabilities: ['Cross-tool orchestration', 'Workflow handoffs', 'Operating dashboard', 'Shared context']
           },
