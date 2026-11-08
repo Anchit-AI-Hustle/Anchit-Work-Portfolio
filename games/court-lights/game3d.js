@@ -581,29 +581,63 @@ function buildSky() {
   stars.renderOrder = -9; R3.scene.add(stars);
 }
 
+// Windows are drawn by the shader from world position, so every tower gets
+// floor-sized windows whatever its size, some lit warm, some cool, many dark.
+function cityMaterial() {
+  const mat = std({ color: 0x17121c, roughness: 0.85, metalness: 0.15 });
+  mat.onBeforeCompile = (sh) => {
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vWP; varying vec3 vWN;')
+      .replace('#include <begin_vertex>', [
+        '#include <begin_vertex>',
+        'vec4 wp4 = vec4(transformed, 1.0); vec3 wn3 = objectNormal;',
+        '#ifdef USE_INSTANCING',
+        ' wp4 = instanceMatrix * wp4; wn3 = mat3(instanceMatrix) * wn3;',
+        '#endif',
+        'vWP = (modelMatrix * wp4).xyz; vWN = normalize(mat3(modelMatrix) * wn3);',
+      ].join('\n'));
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vWP; varying vec3 vWN;\nfloat h21(vec2 p){ p=fract(p*vec2(123.34,456.21)); p+=dot(p,p+45.32); return fract(p.x*p.y); }')
+      .replace('#include <emissivemap_fragment>', [
+        '#include <emissivemap_fragment>',
+        '{ vec3 n = normalize(vWN); float side = 1.0 - step(0.6, abs(n.y));',
+        '  vec2 tg = normalize(vec2(-n.z, n.x) + 1e-5); float hc = dot(vWP.xz, tg);',
+        '  vec2 cell = vec2(hc / 1.55, vWP.y / 2.9); vec2 id = floor(cell); vec2 f = fract(cell);',
+        '  float win = step(0.2, f.x) * step(f.x, 0.8) * step(0.28, f.y) * step(f.y, 0.78);',
+        '  vec2 bid = id + floor(n.xz * 3.0) * 37.0 + floor(vWP.xz / 40.0) * 11.0;',
+        '  float lit = step(0.56, h21(bid)); float tone = h21(bid + 7.7); float lv = 0.45 + 0.75 * h21(bid + 3.1);',
+        '  vec3 wc = mix(vec3(1.0, 0.68, 0.36), vec3(0.62, 0.74, 1.0), step(0.8, tone));',
+        '  float base = smoothstep(-6.0, 6.0, vWP.y);',
+        '  totalEmissiveRadiance += wc * win * lit * lv * side * 1.25 * base;',
+        '  diffuseColor.rgb += vec3(0.03, 0.025, 0.05) * win * (1.0 - lit) * side; }',
+      ].join('\n'));
+  };
+  return mat;
+}
+
 function buildCity() {
-  const wt = windowsTex();
-  const mat = std({ color: 0x14101a, roughness: 0.9, metalness: 0.1, emissive: 0xffffff, emissiveMap: wt, emissiveIntensity: 1.15 });
+  const mat = cityMaterial();
   const geo = new THREE.BoxGeometry(1, 1, 1); geo.translate(0, 0.5, 0);
   const rng = A.rng(42);
   const list = [];
-  for (let i = 0; i < 70; i++) {
-    const side = i % 3;
+  for (let i = 0; i < 120; i++) {
+    const side = i % 4;
     let x, z;
-    if (side === 0) { x = (rng() - 0.5) * 160; z = 26 + rng() * 80; }
-    else if (side === 1) { x = 22 + rng() * 60; z = -20 + rng() * 90; }
-    else { x = -22 - rng() * 60; z = -20 + rng() * 90; }
-    if (abs(x) < 16 && z < 22) continue;
-    const w = 6 + rng() * 12, d = 6 + rng() * 12, h = 8 + rng() * 40;
-    list.push([x, -24, z, w, h + 24 - 6, d]);
+    if (side < 2) { x = (rng() - 0.5) * 220; z = 30 + rng() * 150; }
+    else if (side === 2) { x = 22 + rng() * 70; z = -25 + rng() * 110; }
+    else { x = -22 - rng() * 70; z = -25 + rng() * 110; }
+    if (abs(x) < 16 && z < 26) continue;
+    const w = 7 + rng() * 14, d = 7 + rng() * 14;
+    // a gap behind the hoop so the dusk sky shows through
+    const gap = abs(x) < 28 && z < 90 ? 0.35 : 1;
+    const h = (6 + rng() * rng() * 60) * gap + 4;
+    list.push([x, -30, z, w, h + 30 - 6, d]);
   }
   const im = new THREE.InstancedMesh(geo, mat, list.length);
-  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3();
-  list.forEach((b, i) => { p.set(b[0], b[1], b[2]); s.set(b[3], b[4], b[5]); q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), (rng() - 0.5) * 0.3); m.compose(p, q, s); im.setMatrixAt(i, m); });
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
+  list.forEach((b, i) => { p.set(b[0], b[1], b[2]); s.set(b[3], b[4], b[5]); q.setFromAxisAngle(up, (rng() - 0.5) * 0.3); m.compose(p, q, s); im.setMatrixAt(i, m); });
   R3.scene.add(im);
   // red aviation lights on the tallest tops
   const lg = new THREE.SphereGeometry(0.35, 8, 6);
-  const tall = list.filter((b) => b[4] > 42).slice(0, 14);
+  const tall = list.filter((b) => b[4] > 48).slice(0, 14);
   const lm = new THREE.MeshBasicMaterial({ color: 0xff3020, fog: false });
   W.redLights = new THREE.InstancedMesh(lg, lm, Math.max(1, tall.length));
   tall.forEach((b, i) => { p.set(b[0], b[1] + b[4] + 0.6, b[2]); s.set(1, 1, 1); q.identity(); m.compose(p, q, s); W.redLights.setMatrixAt(i, m); });
@@ -622,8 +656,6 @@ function buildRoof() {
   const ct = courtTex();
   const court = new THREE.Mesh(new THREE.PlaneGeometry(CX1 - CX0, CZ1 - CZ0), std({ map: ct, roughness: 0.82, metalness: 0.0 }));
   court.rotation.x = -PI / 2; court.position.set(0, 0, (CZ0 + CZ1) / 2);
-  // canvas top row is the near end, so the plane is turned to match
-  court.rotation.z = PI;
   court.receiveShadow = true; R3.scene.add(court);
   const roof = new THREE.Mesh(new THREE.PlaneGeometry(26, 30), std({ map: concreteTex(), color: 0x8a8078, roughness: 0.95 }));
   roof.rotation.x = -PI / 2; roof.position.set(0, -0.01, 4); roof.receiveShadow = true; R3.scene.add(roof);
@@ -844,7 +876,7 @@ function buildShooter() {
   P.arms = []; P.legs = [];
   [-1, 1].forEach((sd) => {
     const shoulder = new THREE.Group(); shoulder.position.set(sd * 0.25, 0.52, 0); torso.add(shoulder);
-    const cap = new THREE.Mesh(new THREE.SphereGeometry(0.075, 10, 8), jersey); cap.scale.set(1, 0.8, 1); shoulder.add(cap);
+    const cap = new THREE.Mesh(new THREE.SphereGeometry(0.06, 10, 8), jersey); cap.scale.set(1, 0.85, 1); shoulder.add(cap);
     shoulder.add(limb(0.05, 0.22, skin));
     const elbow = new THREE.Group(); elbow.position.y = -0.33; shoulder.add(elbow);
     elbow.add(limb(0.042, 0.22, skin));
@@ -899,8 +931,7 @@ function poseShooter(dt) {
     const e = lerp(-1.65, -1.45, ra) * (1 - fo) + fo * -0.12;
     Ar.shoulder.rotation.x = s;
     Ar.elbow.rotation.x = e;
-    Ar.shoulder.rotation.z = Ar.sd * (0.32 - ra * 0.12 - fo * 0.12);
-    Ar.shoulder.rotation.y = -Ar.sd * 0.25 * (1 - fo);
+    Ar.shoulder.rotation.z = -Ar.sd * (0.3 - fo * 0.12);
   });
 }
 
@@ -964,13 +995,13 @@ function initRenderer() {
     R3.q = R3.soft ? 0 : (window.matchMedia && matchMedia('(pointer: coarse)').matches ? 2 : 3);
     const qm = /[?&]q=(\d)/.exec(location.search); if (qm) { R3.q = clamp(+qm[1], 0, 3); R3.lock = true; }
     R3.scene = new THREE.Scene();
-    R3.scene.fog = new THREE.FogExp2(0x2c1a2e, 0.011);
+    R3.scene.fog = new THREE.FogExp2(0x3a2238, 0.0085);
     R3.camera = new THREE.PerspectiveCamera(46, arc.w / arc.h, 0.1, 900);
     R3.glow = glowTex();
     colorsInit();
     buildSky(); buildCity(); buildRoof(); buildCage(); buildStrings(); buildFloodlights(); buildHoop(); buildShooter(); buildBall(); buildLights();
     FX.add = new FxPool(900, true); FX.norm = new FxPool(700, false);
-    R3.camPos = new THREE.Vector3(0, 2.4, -3.6); R3.camLook = new THREE.Vector3(0, 2.6, 6);
+    R3.camPos = new THREE.Vector3(-0.55, 2.9, -5.5); R3.camLook = new THREE.Vector3(0, 2.4, 6.4);
     R3.tmpV = new THREE.Vector3(); R3.tmpV2 = new THREE.Vector3(); R3.proj = new THREE.Vector3();
     applyQuality();
     R3.ok = true;
@@ -995,10 +1026,10 @@ function cameraRig(dt) {
   const cam = R3.camera, b = G.ball, rm = arc.reducedMotion;
   const portrait = arc.h > arc.w * 1.05;
   const asp = arc.w / arc.h;
-  // keep about 4.6 m of width at the hoop in portrait, a little more height in landscape
-  let fov = portrait ? clamp(2 * Math.atan(Math.tan(21 * PI / 180) / asp) * 180 / PI, 44, 74) : 44;
-  let px = -G.aimX * 0.45, py = portrait ? 2.75 : 2.35, pz = portrait ? -4.4 : -3.6;
-  let lx = -G.aimX * 0.6, ly = portrait ? 2.55 : 2.45, lz = 6.2;
+  // over the shooter's right shoulder; about 5.4 m of width at the hoop in portrait
+  let fov = portrait ? clamp(2 * Math.atan(Math.tan(12.5 * PI / 180) / asp) * 180 / PI, 38, 64) : 37;
+  let px = -0.55 - G.aimX * 0.4, py = portrait ? 3.05 : 2.85, pz = portrait ? -5.6 : -5.5;
+  let lx = -0.05 - G.aimX * 0.55, ly = portrait ? 2.35 : 2.4, lz = 6.4;
   const flying = b && b.air && G.phase !== 'aim';
   if (flying) {
     const u = clamp(b.flightT / 1.0, 0, 1);
@@ -1007,7 +1038,7 @@ function cameraRig(dt) {
   }
   if (G.slow > 0 && !rm) { const s = sin(clamp(G.slow / 0.7, 0, 1) * PI) * 0.12; fov *= 1 - s; lx = lerp(lx, -RIM.x, s * 4); ly = lerp(ly, RIM.y, s * 4); }
   if (G.phase === 'net' && !rm) { const s = clamp(1 - G.swishT / 1.2, 0, 1); pz += s * 0.4; }
-  if (G.attract) { const t = R3.time * 0.12; px = sin(t) * 1.6; pz = -4.2 + cos(t * 1.3) * 0.4; py = 2.6; }
+  if (G.attract) { const t = R3.time * 0.12; px = sin(t) * 1.8; pz = -5.2 + cos(t * 1.3) * 0.5; py = 2.9; }
   const k = 1 - Math.exp(-dt * (rm ? 2.2 : 4));
   R3.camPos.x = lerp(R3.camPos.x, px, k); R3.camPos.y = lerp(R3.camPos.y, py, k); R3.camPos.z = lerp(R3.camPos.z, pz, k);
   R3.camLook.x = lerp(R3.camLook.x, lx, k); R3.camLook.y = lerp(R3.camLook.y, ly, k); R3.camLook.z = lerp(R3.camLook.z, lz, k);
@@ -1086,9 +1117,10 @@ function frame3D(dt) {
   R3.hoopL.intensity = 3.5 + fl * 8;
   W.lampGlows.forEach((g, i) => { g.material.opacity = 0.75 + fl * 0.25 + (rm ? 0 : sin(t * 3 + i) * 0.03); });
   W.coneMat.uniforms.uA.value = 0.07 + fl * 0.06;
-  W.redLights.material.color.setScalar(1).multiply(new THREE.Color(1, 0.19, 0.12)).multiplyScalar(rm ? 1 : 0.4 + 0.6 * (sin(t * 2.5) > 0 ? 1 : 0.15));
+  const blink = rm ? 1 : 0.4 + 0.6 * (sin(t * 2.5) > 0 ? 1 : 0.15);
+  W.redLights.material.color.setRGB(blink, 0.19 * blink, 0.12 * blink);
   FX.add.step(sdt); FX.norm.step(sdt);
-  FX.add.u.uK.value = FX.norm.u.uK.value = arc.h * R3.renderer.getPixelRatio() * 0.6;
+  FX.add.u.uK.value = FX.norm.u.uK.value = arc.h * R3.renderer.getPixelRatio() / (2 * Math.tan(R3.camera.fov * PI / 360));
   cameraRig(dt);
   // quality auto-scale on real frame time
   if (!R3.lock && arc.state === 'play') {
@@ -1116,6 +1148,7 @@ function txt(c, s, x, y, size, col, wgt, align, font) {
 }
 
 function toScreen(x, y, z) {
+  if (!R3.ok) return { x: 0, y: 0, z: 2 };
   const v = R3.proj.set(-x, y, z).project(R3.camera);
   return { x: (v.x * 0.5 + 0.5) * arc.w, y: (-v.y * 0.5 + 0.5) * arc.h, z: v.z };
 }
@@ -1206,7 +1239,7 @@ function render(c) {
     try { frame3D(arc.state === 'pause' ? 0 : dt); R3.renderer.render(R3.scene, R3.camera); } catch (e) { R3.ok = false; try { console.warn(e); } catch (er) { /* ignore */ } }
   }
   if (arc.state === 'play' && !G.attract) {
-    drawPops(c); drawTouchAim(c); drawHUD(c); drawTouchHint(c);
+    if (R3.ok) drawPops(c); drawTouchAim(c); drawHUD(c); drawTouchHint(c);
   }
 }
 
