@@ -1,0 +1,12 @@
+{
+  // Cloudflare Workers (standby host): serve the built site from www/, same output Vercel serves.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "anchit-work-portfolio",
+  "compatibility_date": "2026-11-04",
+  "assets": {
+    "directory": "./www",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+  "observability": { "enabled": true }
+}
