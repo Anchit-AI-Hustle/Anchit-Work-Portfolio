@@ -17,7 +17,7 @@ const { chromium } = require('./_playwright.js');
 
 const BASE = (process.env.BASE || 'http://127.0.0.1:8099').replace(/\/$/, '');
 const ROOT = path.join(__dirname, '..');
-const GAMES = ['saffron-city', 'midnight-apex', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'sky-thread', 'tiffin-dash', 'board-strike', 'yard-catch', 'rally-cage', 'fare-run'];
+const GAMES = ['saffron-city', 'midnight-apex', 'ghat-riders', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'sky-thread', 'tiffin-dash', 'board-strike', 'yard-catch', 'rally-cage', 'fare-run'];
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // How long to play before the photo, and what to hold. Tuned per game so the
@@ -27,6 +27,7 @@ const PLAY = {
   // one still, so each is pinned to full detail: a query flag where the game reads one, or its own test hook.
   'saffron-city': { ms: 5000, keys: ['ArrowUp'], taps: ['KeyF'], tapAt: 400, query: '?q=2&lod=1' },
   'midnight-apex': { ms: 9000, keys: ['ArrowUp'], taps: [], hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
+  'ghat-riders': { ms: 9000, keys: ['ArrowUp'], taps: [], hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
   'turf-kings': { ms: 4500, keys: ['ArrowUp', 'ArrowRight'], taps: [], query: '?quality=0' },
   'super-over': { ms: 3600, keys: [], taps: [], query: '?q=3' },
   'gully-champs': { ms: 3200, keys: [], taps: [], query: '?q=3&fixq=1' },
@@ -68,10 +69,14 @@ async function shoot(browser, slug) {
 
 async function sheet() {
   const W = 1200, H = 630;
-  // Twelve posters in a 4 by 3 grid.
-  const cellW = 300, cellH = 210;
+  // Every poster in a grid five across; a short last row is centred under the rest.
+  const cols = 5, rows = Math.ceil(GAMES.length / cols);
+  const cellW = Math.floor(W / cols), cellH = Math.floor(H / rows);
   const thumbs = await Promise.all(GAMES.map((g) => sharp(path.join(ROOT, 'games', g, 'poster.png')).resize(cellW, cellH, { fit: 'cover' }).toBuffer()));
-  const comp = thumbs.map((b, i) => ({ input: b, left: (i % 4) * cellW, top: Math.floor(i / 4) * cellH }));
+  const comp = thumbs.map((b, i) => {
+    const row = Math.floor(i / cols), inRow = Math.min(cols, GAMES.length - row * cols);
+    return { input: b, left: Math.round((W - inRow * cellW) / 2) + (i % cols) * cellW, top: row * cellH };
+  });
   const label = Buffer.from(
     `<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">` +
     `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0.55" stop-color="#0F0D0A" stop-opacity="0"/><stop offset="1" stop-color="#0F0D0A" stop-opacity="0.92"/></linearGradient></defs>` +

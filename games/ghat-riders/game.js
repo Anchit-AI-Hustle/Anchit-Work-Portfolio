@@ -428,7 +428,7 @@ function readInput(W, P, dt) {
   let sx = inp.axis().x;
   if (inp.stick.active) { sx = clamp(inp.stick.x * 1.3, -1, 1); if (Math.abs(sx) < 0.07) sx = 0; }
   else if (a.touchMode && a.touchStyle === 'tilt') sx = clamp(sx * 1.25, -1, 1);
-  else if (sx === 0 && !a.touchMode && inp.pointer.seen && inp.pointer.type === 'mouse' && !inp.gesture.active) {
+  else if (sx === 0 && !a.touchMode && inp.pointer.seen && inp.pointer.type === 'mouse') {
     // mouse: steer toward the pointer
     sx = clamp((inp.pointer.nx - 0.5) * 2.4, -1, 1);
     if (Math.abs(sx) < 0.06) sx = 0;
@@ -497,7 +497,7 @@ function aiControl(W, R, dt) {
     tx = (lOk && (!rOk || Math.abs(l - R.x) < Math.abs(rr - R.x))) ? l : rOk ? rr : tx;
   }
   // barging: line up beside a rider, then shove
-  if (!W.attract || true) {
+  if (!R.finished) {
     ai.cd -= dt;
     if (ai.barge && ai.bargeT) {
       const o = ai.bargeT;
