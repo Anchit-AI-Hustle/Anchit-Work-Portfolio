@@ -92,7 +92,7 @@ function scoreShot(kind) {
   arc.sfx.noise(0.18, { freq: 3200, filter: 'highpass', vol: 0.05 });
   arc.buzz(14);
   if (G.combo >= 3 && !arc.reducedMotion) G.slow = 0.7;
-  if (G.mode === 'twentyone' && G.score >= 21) { if (!arc.reducedMotion) G.slow = 0.9; G.endIn = 1.1; }
+  if (G.mode === 'twentyone' && G.score >= 21) { if (!arc.reducedMotion) G.slow = 0.9; G.endIn = 1.1; G.go = 2; }
 }
 
 function miss() {
@@ -235,7 +235,7 @@ function newMatch(ch) {
   G.attract = false;
   FXK.clear();
   resetBall(); G.ballIn = 1;
-  R3.accT = 0; R3.accN = 0; R3.settle = 1;
+  R3.accT = 0; R3.accN = 0; R3.settle = 1; R3.snap = true;
   arc.toast(G.mode === 'twentyone' ? 'First to 21' : G.mode === 'sudden' ? 'Make or miss' : 'Sixty seconds', 'Court Lights', 1400);
 }
 
@@ -603,11 +603,11 @@ function cityMaterial() {
         '  vec2 cell = vec2(hc / 1.55, vWP.y / 2.9); vec2 id = floor(cell); vec2 f = fract(cell);',
         '  float win = step(0.2, f.x) * step(f.x, 0.8) * step(0.28, f.y) * step(f.y, 0.78);',
         '  vec2 bid = id + floor(n.xz * 3.0) * 37.0 + floor(vWP.xz / 40.0) * 11.0;',
-        '  float lit = step(0.56, h21(bid)); float tone = h21(bid + 7.7); float lv = 0.45 + 0.75 * h21(bid + 3.1);',
+        '  float lit = step(0.62, h21(bid)); float tone = h21(bid + 7.7); float lv = 0.3 + 0.6 * h21(bid + 3.1);',
         '  vec3 wc = mix(vec3(1.0, 0.68, 0.36), vec3(0.62, 0.74, 1.0), step(0.8, tone));',
         '  float base = smoothstep(-6.0, 6.0, vWP.y);',
         '  totalEmissiveRadiance += wc * win * lit * lv * side * 1.25 * base;',
-        '  diffuseColor.rgb += vec3(0.03, 0.025, 0.05) * win * (1.0 - lit) * side; }',
+        '  diffuseColor.rgb += vec3(0.015, 0.012, 0.03) * win * (1.0 - lit) * side; }',
       ].join('\n'));
   };
   return mat;
@@ -618,18 +618,20 @@ function buildCity() {
   const geo = new THREE.BoxGeometry(1, 1, 1); geo.translate(0, 0.5, 0);
   const rng = A.rng(42);
   const list = [];
-  for (let i = 0; i < 120; i++) {
+  for (let i = 0; i < 130; i++) {
     const side = i % 4;
     let x, z;
-    if (side < 2) { x = (rng() - 0.5) * 220; z = 30 + rng() * 150; }
-    else if (side === 2) { x = 22 + rng() * 70; z = -25 + rng() * 110; }
-    else { x = -22 - rng() * 70; z = -25 + rng() * 110; }
-    if (abs(x) < 16 && z < 26) continue;
-    const w = 7 + rng() * 14, d = 7 + rng() * 14;
-    // a gap behind the hoop so the dusk sky shows through
-    const gap = abs(x) < 28 && z < 90 ? 0.35 : 1;
-    const h = (6 + rng() * rng() * 60) * gap + 4;
-    list.push([x, -30, z, w, h + 30 - 6, d]);
+    if (side < 2) { x = (rng() - 0.5) * 260; z = 34 + rng() * 170; }
+    else if (side === 2) { x = 26 + rng() * 90; z = -30 + rng() * 140; }
+    else { x = -26 - rng() * 90; z = -30 + rng() * 140; }
+    const dist = hypot(x, z - 4);
+    if (dist < 30) continue;
+    const w = 8 + rng() * 16, d = 8 + rng() * 16;
+    // we are on a tall roof: the near blocks sit below us, the towers stand far off,
+    // and the line behind the hoop stays low so the dusk shows through
+    const gap = abs(x) < 34 && z > 0 ? 0.45 : 1;
+    const top = clamp((dist - 40) * 0.42, -8, 70) * (0.35 + rng() * 0.65) * gap - 4 + rng() * 6;
+    list.push([x, -40, z, w, top + 40, d]);
   }
   const im = new THREE.InstancedMesh(geo, mat, list.length);
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
@@ -637,7 +639,7 @@ function buildCity() {
   R3.scene.add(im);
   // red aviation lights on the tallest tops
   const lg = new THREE.SphereGeometry(0.35, 8, 6);
-  const tall = list.filter((b) => b[4] > 48).slice(0, 14);
+  const tall = list.filter((b) => b[4] > 70).slice(0, 14);
   const lm = new THREE.MeshBasicMaterial({ color: 0xff3020, fog: false });
   W.redLights = new THREE.InstancedMesh(lg, lm, Math.max(1, tall.length));
   tall.forEach((b, i) => { p.set(b[0], b[1] + b[4] + 0.6, b[2]); s.set(1, 1, 1); q.identity(); m.compose(p, q, s); W.redLights.setMatrixAt(i, m); });
@@ -935,6 +937,43 @@ function poseShooter(dt) {
   });
 }
 
+// Neighbours watching from beyond the cage; they jump when the net snaps.
+function buildCrowd() {
+  const spots = [];
+  for (let i = 0; i < 6; i++) { spots.push([-(5.5 + (i % 2) * 0.8), 0.6 + i * 1.35, 1]); spots.push([5.5 + ((i + 1) % 2) * 0.8, 1.2 + i * 1.3, -1]); }
+  const n = spots.length;
+  const shirt = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.17, 0.34, 4, 10), std({ color: 0xffffff, roughness: 0.8 }), n);
+  const legs = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.065, 0.62, 4, 8), std({ color: 0x24262c, roughness: 0.85 }), n * 2);
+  const arms = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.05, 0.42, 4, 8), std({ color: 0x8a5a3c, roughness: 0.6 }), n * 2);
+  const head = new THREE.InstancedMesh(new THREE.SphereGeometry(0.11, 12, 10), std({ color: 0x8a5a3c, roughness: 0.6 }), n);
+  const hair = new THREE.InstancedMesh(new THREE.SphereGeometry(0.115, 12, 8, 0, TAU, 0, PI * 0.5), std({ color: 0x15100d, roughness: 0.9 }), n);
+  const cols = ['#c22a5a', '#e07a2a', '#1f6b5a', '#f2b13a', '#3a4a8a', '#d9c9ae', '#7a2a18'];
+  spots.forEach((sp, i) => { shirt.setColorAt(i, new THREE.Color(cols[i % cols.length])); });
+  [shirt, legs, arms, head].forEach((m) => { m.castShadow = true; R3.scene.add(m); });
+  R3.scene.add(hair);
+  W.crowd = { shirt, legs, arms, head, hair, spots, ph: spots.map(() => rnd() * TAU), m: new THREE.Matrix4(), q: new THREE.Quaternion(), e: new THREE.Euler(), p: new THREE.Vector3(), sc: new THREE.Vector3(1, 1, 1) };
+}
+function animCrowd(t) {
+  const C = W.crowd; if (!C) return;
+  const hype = clamp(1.2 - G.swishT / 1.6, 0, 1) * (G.attract ? 0.6 : 1) + clamp(G.combo / 6, 0, 0.5);
+  const rm = arc.reducedMotion;
+  const put = (mesh, i, x, y, z, rx, rz, ry) => { C.e.set(rx || 0, ry || 0, rz || 0); C.q.setFromEuler(C.e); C.p.set(x, y, z); C.m.compose(C.p, C.q, C.sc); mesh.setMatrixAt(i, C.m); };
+  C.spots.forEach((sp, i) => {
+    const ph = C.ph[i];
+    const jump = rm ? 0 : max(0, sin(t * 7 + ph)) * 0.14 * hype;
+    const sway = rm ? 0 : sin(t * 1.3 + ph) * 0.03;
+    const face = sp[2] > 0 ? -PI / 2 : PI / 2;
+    const x = sp[0] + sway, z = sp[1], y = jump;
+    put(C.legs, i * 2, x, 0.4 + y, z - 0.08, 0, 0, face); put(C.legs, i * 2 + 1, x, 0.4 + y, z + 0.08, 0, 0, face);
+    put(C.shirt, i, x, 1.06 + y, z, 0, 0, face);
+    put(C.head, i, x, 1.52 + y, z, 0, 0, face); put(C.hair, i, x, 1.535 + y, z, 0, 0, face);
+    const cheer = rm ? 0.2 * hype : clamp(hype, 0, 1) * (0.6 + 0.4 * sin(t * 6 + ph));
+    put(C.arms, i * 2, x, 1.1 + y + cheer * 0.25, z - 0.21, -cheer * 2.6, 0, 0);
+    put(C.arms, i * 2 + 1, x, 1.1 + y + cheer * 0.25, z + 0.21, cheer * 2.6, 0, 0);
+  });
+  [C.legs, C.shirt, C.head, C.hair, C.arms].forEach((m) => { m.instanceMatrix.needsUpdate = true; });
+}
+
 function buildBall() {
   const mat = std({ map: ballTex(), roughness: 0.62, metalness: 0.0, emissive: 0xffb736, emissiveIntensity: 0 });
   W.ball = new THREE.Mesh(new THREE.SphereGeometry(BR, 28, 20), mat);
@@ -987,7 +1026,7 @@ function initRenderer() {
     R3.soft = softwareGL();
     const r = new THREE.WebGLRenderer({ canvas: arc.canvas, antialias: !R3.soft, powerPreference: 'high-performance' });
     r.outputColorSpace = THREE.SRGBColorSpace; r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.05;
-    r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap;
+    r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFShadowMap;
     r.setClearColor(0x120d1c, 1);
     R3.renderer = r; R3.aniso = Math.min(8, r.capabilities.getMaxAnisotropy());
     arc.canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); R3.lost = true; });
@@ -999,9 +1038,9 @@ function initRenderer() {
     R3.camera = new THREE.PerspectiveCamera(46, arc.w / arc.h, 0.1, 900);
     R3.glow = glowTex();
     colorsInit();
-    buildSky(); buildCity(); buildRoof(); buildCage(); buildStrings(); buildFloodlights(); buildHoop(); buildShooter(); buildBall(); buildLights();
+    buildSky(); buildCity(); buildRoof(); buildCage(); buildStrings(); buildFloodlights(); buildHoop(); buildShooter(); buildBall(); buildCrowd(); buildLights();
     FX.add = new FxPool(900, true); FX.norm = new FxPool(700, false);
-    R3.camPos = new THREE.Vector3(-0.55, 2.9, -5.5); R3.camLook = new THREE.Vector3(0, 2.4, 6.4);
+    R3.camPos = new THREE.Vector3(-1.15, 3.1, -7.0); R3.camLook = new THREE.Vector3(0, 2.4, 6.4);
     R3.tmpV = new THREE.Vector3(); R3.tmpV2 = new THREE.Vector3(); R3.proj = new THREE.Vector3();
     applyQuality();
     R3.ok = true;
@@ -1027,9 +1066,9 @@ function cameraRig(dt) {
   const portrait = arc.h > arc.w * 1.05;
   const asp = arc.w / arc.h;
   // over the shooter's right shoulder; about 5.4 m of width at the hoop in portrait
-  let fov = portrait ? clamp(2 * Math.atan(Math.tan(12.5 * PI / 180) / asp) * 180 / PI, 38, 64) : 37;
-  let px = -0.55 - G.aimX * 0.4, py = portrait ? 3.05 : 2.85, pz = portrait ? -5.6 : -5.5;
-  let lx = -0.05 - G.aimX * 0.55, ly = portrait ? 2.35 : 2.4, lz = 6.4;
+  let fov = portrait ? clamp(2 * Math.atan(Math.tan(11.5 * PI / 180) / asp) * 180 / PI, 34, 60) : 33;
+  let px = (portrait ? -0.6 : -1.15) - G.aimX * 0.4, py = portrait ? 3.7 : 3.1, pz = portrait ? -8.2 : -7.0;
+  let lx = (portrait ? -0.12 : -0.4) - G.aimX * 0.55, ly = portrait ? 1.95 : 2.45, lz = 6.4;
   const flying = b && b.air && G.phase !== 'aim';
   if (flying) {
     const u = clamp(b.flightT / 1.0, 0, 1);
@@ -1038,14 +1077,14 @@ function cameraRig(dt) {
   }
   if (G.slow > 0 && !rm) { const s = sin(clamp(G.slow / 0.7, 0, 1) * PI) * 0.12; fov *= 1 - s; lx = lerp(lx, -RIM.x, s * 4); ly = lerp(ly, RIM.y, s * 4); }
   if (G.phase === 'net' && !rm) { const s = clamp(1 - G.swishT / 1.2, 0, 1); pz += s * 0.4; }
-  if (G.attract) { const t = R3.time * 0.12; px = sin(t) * 1.8; pz = -5.2 + cos(t * 1.3) * 0.5; py = 2.9; }
-  const k = 1 - Math.exp(-dt * (rm ? 2.2 : 4));
+  if (G.attract) { const t = R3.time * 0.12; px = sin(t) * 2.2; pz = -6.6 + cos(t * 1.3) * 0.6; py = 3.1; }
+  const k = R3.snap ? 1 : 1 - Math.exp(-dt * (rm ? 2.2 : 4)); R3.snap = false;
   R3.camPos.x = lerp(R3.camPos.x, px, k); R3.camPos.y = lerp(R3.camPos.y, py, k); R3.camPos.z = lerp(R3.camPos.z, pz, k);
   R3.camLook.x = lerp(R3.camLook.x, lx, k); R3.camLook.y = lerp(R3.camLook.y, ly, k); R3.camLook.z = lerp(R3.camLook.z, lz, k);
   cam.position.copy(R3.camPos);
   cam.position.x += (arc.shakeX || 0) * 0.006; cam.position.y += (arc.shakeY || 0) * 0.006;
   cam.lookAt(R3.camLook);
-  if (abs(cam.fov - fov) > 0.01 || abs(cam.aspect - asp) > 0.0001) { cam.fov = lerp(cam.fov, fov, 1 - Math.exp(-dt * 6)); cam.aspect = asp; cam.updateProjectionMatrix(); }
+  if (abs(cam.fov - fov) > 0.01 || abs(cam.aspect - asp) > 0.0001) { cam.fov = k === 1 ? fov : lerp(cam.fov, fov, 1 - Math.exp(-dt * 6)); cam.aspect = asp; cam.updateProjectionMatrix(); }
 }
 
 const _q = new THREE.Quaternion(), _ax = new THREE.Vector3();
@@ -1119,6 +1158,7 @@ function frame3D(dt) {
   W.coneMat.uniforms.uA.value = 0.07 + fl * 0.06;
   const blink = rm ? 1 : 0.4 + 0.6 * (sin(t * 2.5) > 0 ? 1 : 0.15);
   W.redLights.material.color.setRGB(blink, 0.19 * blink, 0.12 * blink);
+  animCrowd(t);
   FX.add.step(sdt); FX.norm.step(sdt);
   FX.add.u.uK.value = FX.norm.u.uK.value = arc.h * R3.renderer.getPixelRatio() / (2 * Math.tan(R3.camera.fov * PI / 360));
   cameraRig(dt);
@@ -1166,19 +1206,30 @@ function drawHUD(c) {
     plate(c, w - pad.right - sw(120), pad.top, sw(120), 44, 12);
     txt(c, 'STREAK x' + G.combo, w - pad.right - sw(120) / 2, pad.top + 22, 12, G.combo >= 3 ? PRIM : WARM, 600, 'center', F_MONO);
   }
-  if (G.phase === 'aim') {
-    const bw = min(240, w - 40), bx = w / 2 - bw / 2, by = h - pad.bottom - 30;
-    plate(c, bx - 10, by - 22, bw + 20, 42, 12, 0.72);
-    txt(c, G.holding ? 'RELEASE IN THE GOLD' : 'HOLD TO CHARGE', w / 2, by - 9, 9, GOLD, 600, 'center', F_MONO);
-    c.fillStyle = 'rgba(251,245,236,.12)'; rr2(c, bx, by, bw, 10, 5); c.fill();
-    const s0 = SWEET[0] * bw, s1 = (SWEET[1] - SWEET[0]) * bw;
-    c.fillStyle = 'rgba(255,183,54,.38)'; rr2(c, bx + s0, by, s1, 10, 5); c.fill();
-    c.strokeStyle = 'rgba(255,183,54,.85)'; c.lineWidth = 1; rr2(c, bx + s0, by - 2, s1, 14, 6); c.stroke();
-    const inB = G.charge >= SWEET[0] && G.charge <= SWEET[1];
-    c.fillStyle = inB ? WARM : PRIM;
-    rr2(c, bx, by, max(5, bw * G.charge), 10, 5); c.fill();
-    if (inB && !arc.reducedMotion) { c.fillStyle = 'rgba(255,230,170,.5)'; rr2(c, bx + bw * G.charge - 6, by - 3, 8, 16, 4); c.fill(); }
-  }
+  if (G.phase === 'aim') drawMeter(c, pad);
+}
+
+// The shot meter stands beside the shooter: fill climbs while held, the gold band is the make window.
+function drawMeter(c, pad) {
+  const w = arc.w, h = arc.h;
+  const sp = toScreen(0, 1.45, 0.2);
+  const mh = clamp(h * 0.2, 110, 170), mw = 14;
+  let x = (sp.z <= 1 ? sp.x : w * 0.5) + clamp(w * 0.085, 56, 120);
+  x = clamp(x, 24, w - 40);
+  let y1 = clamp((sp.z <= 1 ? sp.y : h * 0.7) + mh * 0.35, pad.top + 120 + mh, h - pad.bottom - 24);
+  const y0 = y1 - mh;
+  plate(c, x - 12, y0 - 30, mw + 24, mh + 42, 12, 0.7);
+  txt(c, G.holding ? 'LIFT' : 'HOLD', x + mw / 2, y0 - 15, 9, GOLD, 700, 'center', F_MONO);
+  c.fillStyle = 'rgba(251,245,236,.12)'; rr2(c, x, y0, mw, mh, 6); c.fill();
+  const yb = (v) => y1 - v * mh;
+  c.fillStyle = 'rgba(255,183,54,.32)'; c.fillRect(x, yb(SWEET[1]), mw, (SWEET[1] - SWEET[0]) * mh);
+  c.strokeStyle = 'rgba(255,183,54,.9)'; c.lineWidth = 1.5; c.strokeRect(x - 3, yb(SWEET[1]), mw + 6, (SWEET[1] - SWEET[0]) * mh);
+  const inB = G.charge >= SWEET[0] && G.charge <= SWEET[1];
+  const fh = max(4, G.charge * mh);
+  const gr = c.createLinearGradient(0, y1, 0, y0);
+  gr.addColorStop(0, '#a8361c'); gr.addColorStop(0.55, PRIM); gr.addColorStop(1, '#ffd27a');
+  c.fillStyle = inB ? WARM : gr; rr2(c, x + 2, y1 - fh, mw - 4, fh, 4); c.fill();
+  if (inB && !arc.reducedMotion) { c.fillStyle = 'rgba(255,240,200,.75)'; c.fillRect(x - 4, y1 - fh - 2, mw + 8, 4); }
 }
 
 function drawPops(c) {
@@ -1229,6 +1280,16 @@ function drawFail(c) {
   txt(c, '3D graphics are not available on this device', w / 2, h * 0.45, 14, INK, 600, 'center');
 }
 
+function vignette(c) {
+  const w = arc.w, h = arc.h;
+  if (!R3.vig || R3.vigW !== w || R3.vigH !== h) {
+    R3.vigW = w; R3.vigH = h;
+    R3.vig = c.createRadialGradient(w * 0.5, h * 0.48, min(w, h) * 0.32, w * 0.5, h * 0.5, max(w, h) * 0.78);
+    R3.vig.addColorStop(0, 'rgba(0,0,0,0)'); R3.vig.addColorStop(1, 'rgba(8,4,10,.5)');
+  }
+  c.fillStyle = R3.vig; c.fillRect(0, 0, w, h);
+}
+
 function render(c) {
   const now = performance.now();
   const dt = R3.last ? Math.min(0.05, (now - R3.last) / 1000) : 1 / 60;
@@ -1238,6 +1299,7 @@ function render(c) {
   else if (!R3.lost) {
     try { frame3D(arc.state === 'pause' ? 0 : dt); R3.renderer.render(R3.scene, R3.camera); } catch (e) { R3.ok = false; try { console.warn(e); } catch (er) { /* ignore */ } }
   }
+  vignette(c);
   if (arc.state === 'play' && !G.attract) {
     if (R3.ok) drawPops(c); drawTouchAim(c); drawHUD(c); drawTouchHint(c);
   }

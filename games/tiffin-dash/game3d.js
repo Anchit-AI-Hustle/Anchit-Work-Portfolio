@@ -175,7 +175,7 @@ function touchRead(dt, inp) {
 
 const PADY = { prev: 0 };
 function update(dt) {
-  if (G.phase === 'over') return;
+  if (G.phase === 'over' || G.freeze) return;
   // A big delivery slows the street for a beat; the clock of the world, not the shell's.
   if (G.slowT > 0) { G.slowT = max(0, G.slowT - dt); dt *= arc.reducedMotion ? 1 : 0.42; }
   G.t += dt; G.run += dt; G.inv = max(0, G.inv - dt); G.slide = max(0, G.slide - dt);
@@ -490,20 +490,20 @@ function skylineTex() {
     g.clearRect(0, 0, w, h);
     const r = seeded(77);
     // Far row: domes, a clock tower, water tanks and roofs, in violet haze.
-    g.fillStyle = 'rgba(74,44,78,.85)';
+    g.fillStyle = 'rgba(150,84,96,.55)';
     for (let x = 0; x < w; x += 30 + r() * 50) { const bh = 60 + r() * 90; g.fillRect(x, h - bh, 34 + r() * 40, bh); }
-    g.beginPath(); g.arc(w * 0.46, h - 150, 52, PI, TAU); g.fill(); g.fillRect(w * 0.46 - 52, h - 150, 104, 150);
-    g.fillRect(w * 0.46 - 3, h - 222, 6, 24); g.beginPath(); g.arc(w * 0.46, h - 224, 7, 0, TAU); g.fill();
+    g.beginPath(); g.arc(w * 0.36, h - 130, 40, PI, TAU); g.fill(); g.fillRect(w * 0.36 - 40, h - 130, 80, 130);
+    g.fillRect(w * 0.36 - 2, h - 186, 4, 18); g.beginPath(); g.arc(w * 0.36, h - 188, 5, 0, TAU); g.fill();
     g.fillRect(w * 0.62, h - 230, 30, 230); g.beginPath(); g.moveTo(w * 0.62 - 6, h - 230); g.lineTo(w * 0.62 + 15, h - 270); g.lineTo(w * 0.62 + 36, h - 230); g.fill();
     g.fillStyle = 'rgba(255,214,140,.9)'; g.beginPath(); g.arc(w * 0.62 + 15, h - 200, 9, 0, TAU); g.fill();
-    g.fillStyle = 'rgba(52,30,58,.95)';
+    g.fillStyle = 'rgba(112,60,80,.72)';
     for (let x = 0; x < w; x += 40 + r() * 60) {
       const bh = 30 + r() * 70, bw = 40 + r() * 60;
       g.fillRect(x, h - bh, bw, bh);
       if (r() < 0.4) { g.fillRect(x + bw * 0.3, h - bh - 14, 18, 14); }
       g.fillStyle = 'rgba(255,190,100,.75)';
       for (let k = 0; k < 4; k++) if (r() < 0.5) g.fillRect(x + 6 + r() * (bw - 12), h - bh + 8 + r() * (bh - 16), 4, 5);
-      g.fillStyle = 'rgba(52,30,58,.95)';
+      g.fillStyle = 'rgba(112,60,80,.72)';
     }
   });
 }
@@ -606,7 +606,7 @@ function makeMaterials() {
 /* ------------------------------------------------------------------ the 3D stage */
 let R3 = null, NO3D = false, FX = null;
 const TIERS = [
-  { px: 0.5, budget: 220000, shadow: false, map: 512, cheap: true, aniso: 1, lamps: 0, sky: 0, fxScale: 0.5 },
+  { px: 0.5, budget: 130000, shadow: false, map: 512, cheap: true, aniso: 1, lamps: 0, sky: 0, fxScale: 0.5 },
   { px: 0.75, budget: 650000, shadow: true, map: 1024, cheap: false, aniso: 2, lamps: 1, sky: 1, fxScale: 0.75 },
   { px: 0.9, budget: 1200000, shadow: true, map: 1024, cheap: false, aniso: 4, lamps: 2, sky: 1, fxScale: 1 },
   { px: 1, budget: 2100000, shadow: true, map: 2048, cheap: false, aniso: 8, lamps: 3, sky: 1, fxScale: 1 },
@@ -649,7 +649,7 @@ function skyMaterial(P) {
 }
 
 const PAL = {
-  top: '#2a1f4a', mid: '#a44a5a', hor: '#ff9a52', ground: '#3a2418', sun: '#ffb070', sunDir: [-0.18, 0.09, -1],
+  top: '#2a1f4a', mid: '#a44a5a', hor: '#ff9a52', ground: '#3a2418', sun: '#ffb070', sunDir: [0.07, 0.075, -1],
   fog: '#c0705a', fogD: 0.021, hemiSky: '#ffc49a', hemiGround: '#5a3a3a', hemi: 0.75, key: '#ffb27a', keyI: 2.6, fill: '#8a7ad8', fillI: 0.55,
 };
 
@@ -992,7 +992,7 @@ function buildHero() {
   const mkArm = (side) => {
     const sh = new THREE.Group(); sh.position.set(side * 0.24, 0.5, 0); hips.add(sh);
     const up = new Kit(); up.add(M.cloth, cap(0.056, 0.2), JACKET, [0, -0.14, 0]);
-    up.add(M.cloth, GEO.sph8, JACKET_D, [0, 0, 0], null, [0.08, 0.07, 0.08]);
+    up.add(M.cloth, GEO.sph8, JACKET, [0, -0.01, 0], null, [0.068, 0.06, 0.068]);
     sh.add(up.build());
     const el = new THREE.Group(); el.position.y = -0.3; sh.add(el);
     const lo = new Kit(); lo.add(M.cloth, cap(0.048, 0.16), JACKET, [0, -0.11, 0]);
@@ -1014,14 +1014,15 @@ function buildHero() {
   HERO.root = root; HERO.hips = hips; HERO.head = head;
   HERO.armL = mkArm(-1); HERO.armR = mkArm(1); HERO.legL = mkLeg(-1); HERO.legR = mkLeg(1);
   // The carried stack sits in the right hand: up to five small steel carriers.
-  const stack = new THREE.Group(); stack.position.set(0, -0.36, -0.05); HERO.armR.el.add(stack);
+  const stack = new THREE.Group(); stack.position.set(0.02, -0.3, 0); HERO.armR.el.add(stack); HERO.stackG = stack;
   HERO.stack = [];
   for (let i = 0; i < 5; i++) {
     const k = new Kit();
-    k.add(M.metal, GEO.cyl, '#d8dde2', [0, 0, 0], null, [0.1, 0.08, 0.1]);
-    k.add(M.metal, GEO.cyl, '#a9b0b8', [0, 0.045, 0], null, [0.105, 0.012, 0.105]);
-    k.add(M.paint, GEO.cyl, i % 2 ? WARM : '#e09030', [0, -0.01, 0], null, [0.102, 0.02, 0.102]);
-    const m = k.build(); m.position.y = -0.04 - i * 0.09; m.visible = false; stack.add(m); HERO.stack.push(m);
+    k.add(M.metal, GEO.cyl, '#d8dde2', [0, 0, 0], null, [0.12, 0.095, 0.12]);
+    k.add(M.metal, GEO.cyl, '#a9b0b8', [0, 0.052, 0], null, [0.126, 0.014, 0.126]);
+    k.add(M.paint, GEO.cyl, i % 2 ? WARM : '#e09030', [0, -0.012, 0], null, [0.123, 0.022, 0.123]);
+    if (i === 0) { k.add(M.metal, GEO.tor, '#a9b0b8', [0, 0.1, 0], null, [0.07, 0.07, 0.12]); }
+    const m = k.build(); m.position.y = -0.1 - i * 0.105; m.visible = false; stack.add(m); HERO.stack.push(m);
   }
   HERO.pose = { lean: 0, hipY: 0.92, thL: 0, thR: 0, knL: 0, knR: 0, shL: 0, shR: 0, elL: 0, elR: 0, roll: 0 };
   HERO.phase = 0;
@@ -1035,13 +1036,13 @@ function animHero(dt, real) {
   const ph = HERO.phase;
   let lean = -0.18, hipY = 0.92 + abs(sin(ph)) * 0.06, thL = sin(ph) * 0.95, thR = -sin(ph) * 0.95;
   let knL = -max(0, sin(ph - 1.4)) * 1.5 - 0.2, knR = -max(0, sin(ph + PI - 1.4)) * 1.5 - 0.2;
-  let shL = -sin(ph) * 0.9, shR = 0.35 - sin(ph + PI) * 0.25, elL = 1.1, elR = 1.25, roll = sin(ph) * 0.06;
+  let shL = -sin(ph) * 0.9, shR = 0.15 - sin(ph + PI) * 0.18, elL = 1.1, elR = 0.35, roll = sin(ph) * 0.06;
   if (air) {
     const up = clamp(G.pvy / 720, -1, 1);
     lean = -0.25; hipY = 0.92; thL = 1.05; thR = 0.35 + up * 0.3; knL = -1.6; knR = -0.6 - (1 - up) * 0.6;
     shL = 2.2 - up * 0.4; shR = 1.0; elL = 0.4; elR = 1.1; roll = 0;
   } else if (sliding) {
-    lean = 1.08; hipY = 0.34; thL = 1.45; thR = 1.25; knL = -0.15; knR = -0.7; shL = -0.6; shR = 1.3; elL = 0.3; elR = 1.2; roll = 0;
+    lean = 1.08; hipY = 0.34; thL = 1.45; thR = 1.25; knL = -0.15; knR = -0.7; shL = -0.6; shR = 0.5; elL = 0.3; elR = 1.2; roll = 0;
   }
   if (G.hitT > 0) { lean += sin(G.hitT * 30) * 0.25 * G.hitT; roll += 0.3 * G.hitT; }
   const k = 1 - Math.exp(-real * 18);
@@ -1052,7 +1053,8 @@ function animHero(dt, real) {
   HERO.head.rotation.x = -P.lean * 0.6;
   HERO.legL.hp.rotation.x = P.thL; HERO.legR.hp.rotation.x = P.thR;
   HERO.legL.kn.rotation.x = P.knL; HERO.legR.kn.rotation.x = P.knR;
-  HERO.armL.sh.rotation.set(P.shL, 0, -0.12); HERO.armR.sh.rotation.set(P.shR, 0, 0.12);
+  HERO.armL.sh.rotation.set(P.shL, 0, -0.12); HERO.armR.sh.rotation.set(P.shR, 0, G.hold > 0 ? 0.42 : 0.12);
+  HERO.stackG.rotation.set(-P.shR - P.elR - P.lean, 0, -(G.hold > 0 ? 0.42 : 0.12) - P.roll);
   HERO.armL.el.rotation.x = P.elL; HERO.armR.el.rotation.x = P.elR;
   HERO.root.position.set(0, G.py * S, -14 * S);
   const blink = G.inv > 0 && !G.attract && !arc.reducedMotion && ((G.t * 16) | 0) % 2 === 1;
@@ -1431,7 +1433,7 @@ function renderScene(dtReal, a) {
   r.sky.position.copy(cam.position);
   r.skyMat.uniforms.uTime.value = t;
   // The low sun sits at the end of the lane; the key light follows the runner for tight shadows.
-  r.key.position.set(-5, 11, -30); r.key.target.position.set(0, 0, -6);
+  r.key.position.set(3, 8, -30); r.key.target.position.set(0, 0, -6);
   r.key.target.updateMatrixWorld();
   // Point lights borrow the nearest lamp heads ahead.
   const tier = TIERS[max(0, r.quality)];
@@ -1614,7 +1616,8 @@ A.create({
   onMenu(a) { arc = a; G.attractReady = false; reset(true); G.attractReady = true; },
   init(a) {
     arc = a; a.debug = dbg; G.D = DIFF.normal;
-    a.dev = { get R3() { return R3; }, W3, get FX() { return FX; }, HERO, setQuality: (q) => { if (R3) R3.lockQ = true; setQuality(q); } };
+    a.dev = { get R3() { return R3; }, W3, get FX() { return FX; }, HERO, setQuality: (q) => { if (R3) R3.lockQ = true; setQuality(q); },
+      ff: (sec) => { for (let i = 0, n = Math.round(sec * 60); i < n && a.state === 'play'; i++) update(1 / 60); }, G };
     if (!setup3D(a)) { NO3D = true; showNo3D(a); return; }
     R3.qMax = 3;
     setQuality(R3.soft ? 0 : 3); resize3D(a);

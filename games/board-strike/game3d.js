@@ -737,8 +737,11 @@ function buildWorld() {
   const win = new THREE.DirectionalLight('#8aa6e0', 0.55);
   win.position.set(4, 5, -6); scene.add(win);
   const rim = new THREE.PointLight('#ff8a4a', 2.2, 9, 1.6);
-  rim.position.set(-3.6, 1.2, -2.6); scene.add(rim);
+  rim.position.set(-3.8, 1.4, -3.0); scene.add(rim);
   M.rim = rim;
+  // warm wall wash so the back wall and window read in a tall phone view
+  const wash = new THREE.PointLight('#ffa860', 4.0, 7, 1.3);
+  wash.position.set(0.9, -0.6, -3.4); scene.add(wash);
 
   /* the board */
   const N = R3.soft ? 1024 : 2048;
@@ -810,22 +813,22 @@ function buildWorld() {
   const rug = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 3.6), std({ map: colorTex(rugCanvas()), roughness: 0.95 }));
   rug.rotation.x = -PI / 2; rug.position.set(0, FLOOR + 0.006, 0.1); rug.receiveShadow = true; scene.add(rug);
   const plaster = colorTex(plasterCanvas(), true, true); plaster.repeat.set(4, 2);
-  const wallMat = std({ map: plaster, roughness: 0.95, color: '#c8a090' });
+  const wallMat = std({ map: plaster, roughness: 0.95, color: '#f0c8b0' });
   const back = new THREE.Mesh(new THREE.PlaneGeometry(18, 9), wallMat);
-  back.position.set(0, FLOOR + 4.5, -6.2); back.receiveShadow = true; scene.add(back);
+  back.position.set(0, FLOOR + 4.5, -4.3); back.receiveShadow = true; scene.add(back);
   const left = new THREE.Mesh(new THREE.PlaneGeometry(14, 9), wallMat);
   left.position.set(-7, FLOOR + 4.5, 0); left.rotation.y = PI / 2; scene.add(left);
   const right = left.clone(); right.position.x = 7; right.rotation.y = -PI / 2; scene.add(right);
   // skirting
   const skirt = new THREE.Mesh(new THREE.BoxGeometry(18, 0.3, 0.06), std({ color: '#2a160c', roughness: 0.7 }));
-  skirt.position.set(0, FLOOR + 0.15, -6.17); scene.add(skirt);
+  skirt.position.set(0, FLOOR + 0.15, -4.27); scene.add(skirt);
   // the window: a dusk sky over rooftops, framed in teak
   const skyTex = colorTex(skyCanvas());
   const sky = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 2.2), new THREE.MeshBasicMaterial({ map: skyTex, fog: false }));
-  sky.position.set(2.4, 1.7, -6.15); scene.add(sky);
+  sky.position.set(0, 0.7, -4.25); scene.add(sky);
   const teak = std({ color: '#3a2214', roughness: 0.6 });
   const bars = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), teak, 7);
-  const bar = (i, x, y, w, h) => { dm.position.set(x, y, -6.1); dm.scale.set(w, h, 0.12); dm.updateMatrix(); bars.setMatrixAt(i, dm.matrix); };
+  const bar = (i, x, y, w, h) => { dm.position.set(x - 2.4, y - 1.0, -4.2); dm.scale.set(w, h, 0.12); dm.updateMatrix(); bars.setMatrixAt(i, dm.matrix); };
   bar(0, 2.4, 2.85, 2.9, 0.14); bar(1, 2.4, 0.55, 2.9, 0.16); bar(2, 1.05, 1.7, 0.14, 2.4); bar(3, 3.75, 1.7, 0.14, 2.4);
   bar(4, 2.4, 1.7, 0.08, 2.2); bar(5, 2.4, 1.7, 2.6, 0.06); bar(6, 2.4, 0.42, 3.2, 0.1);
   dm.scale.set(1, 1, 1);
@@ -833,26 +836,26 @@ function buildWorld() {
   // curtains
   const cloth = makeCanvas(256, 256); { const g = cloth.getContext('2d'); const gr = g.createLinearGradient(0, 0, 256, 0); for (let i = 0; i <= 8; i++) gr.addColorStop(i / 8, i % 2 ? '#7a2420' : '#a83a28'); g.fillStyle = gr; g.fillRect(0, 0, 256, 256); g.fillStyle = 'rgba(255,200,120,0.25)'; for (let y = 20; y < 256; y += 40) g.fillRect(0, y, 256, 3); }
   const curtainMat = std({ map: colorTex(cloth), roughness: 0.9, side: THREE.DoubleSide });
-  for (const cx of [0.75, 4.05]) { const cu = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 3.4), curtainMat); cu.position.set(cx, 1.4, -6.0); scene.add(cu); }
+  for (const cx of [-1.65, 1.65]) { const cu = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 3.4), curtainMat); cu.position.set(cx, 0.4, -4.1); scene.add(cu); }
 
   /* props: a shelf of brass pots and a diya, a side table with a glass of chai, cushions */
   const shelf = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.08, 0.5), teak);
-  shelf.position.set(-2.6, 1.0, -5.9); shelf.castShadow = true; scene.add(shelf);
+  shelf.position.set(-3.9, 1.0, -4.0); shelf.castShadow = true; scene.add(shelf);
   const potGeo = new THREE.LatheGeometry([[0, 0], [0.16, 0.02], [0.22, 0.16], [0.18, 0.32], [0.1, 0.38], [0.12, 0.44], [0.0, 0.44]].map((p) => new THREE.Vector2(p[0], p[1])), 24);
   const pots = new THREE.InstancedMesh(potGeo, brass, 4);
-  [[-3.4, 1.04, -5.9, 1], [-2.9, 1.04, -5.85, 0.8], [-2.0, 1.04, -5.9, 1.15], [5.6, FLOOR, -4.6, 2.2]].forEach((p, i) => { dm.position.set(p[0], p[1], p[2]); dm.scale.setScalar(p[3]); dm.updateMatrix(); pots.setMatrixAt(i, dm.matrix); });
+  [[-4.7, 1.04, -4.0, 1], [-4.2, 1.04, -3.95, 0.8], [-3.3, 1.04, -4.0, 1.15], [5.2, FLOOR, -3.5, 2.2]].forEach((p, i) => { dm.position.set(p[0], p[1], p[2]); dm.scale.setScalar(p[3]); dm.updateMatrix(); pots.setMatrixAt(i, dm.matrix); });
   dm.scale.setScalar(1);
   pots.castShadow = true; scene.add(pots);
-  const flameMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(4, 2.2, 0.8), fog: false });
+  const flameMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(2.2, 1.0, 0.28), fog: false });
   M.flames = [];
-  for (const fx of [-1.5, -1.3]) {
+  for (const fx of [-3.85, -3.65]) {
     const diya = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 6, 0, TAU, PI / 2, PI / 2), std({ color: '#a84a20', roughness: 0.8 }));
-    diya.position.set(fx, 1.12, -5.8); diya.rotation.x = PI; scene.add(diya);
+    diya.position.set(fx, 1.12, -3.9); diya.rotation.x = PI; scene.add(diya);
     const fl = new THREE.Mesh(new THREE.ConeGeometry(0.022, 0.08, 8), flameMat);
-    fl.position.set(fx, 1.17, -5.8); scene.add(fl); M.flames.push(fl);
+    fl.position.set(fx, 1.17, -3.9); scene.add(fl); M.flames.push(fl);
   }
   // side table, glass of chai
-  const sideTop = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.06, 32), std({ color: '#c08060', map: frameTex, roughness: 0.45 }));
+  const sideTop = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.06, 32), std({ color: '#e0a080', map: frameTex, roughness: 0.4 }));
   sideTop.position.set(2.7, FLOOR + 1.05, -1.2); sideTop.castShadow = true; sideTop.receiveShadow = true; scene.add(sideTop);
   const sideLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.12, 1.05, 12), teak);
   sideLeg.position.set(2.7, FLOOR + 0.52, -1.2); scene.add(sideLeg);
@@ -862,13 +865,23 @@ function buildWorld() {
   chai.position.set(2.6, FLOOR + 1.155, -1.1); scene.add(chai);
   const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.17, 0.02, 28), brass);
   plate.position.set(2.85, FLOOR + 1.09, -1.35); scene.add(plate);
-  const cushGeo = new THREE.SphereGeometry(0.5, 20, 12); cushGeo.scale(1, 0.32, 1);
-  const cc = makeCanvas(256, 256); { const g = cc.getContext('2d'); g.fillStyle = '#c4572e'; g.fillRect(0, 0, 256, 256); for (let i = 0; i < 256; i += 32) { g.fillStyle = '#e8b04a'; g.fillRect(0, i, 256, 6); g.fillStyle = '#5a1e1a'; g.fillRect(0, i + 14, 256, 3); } }
-  const cushTex = colorTex(cc, true, true); cushTex.repeat.set(2, 2);
+  const cs = new THREE.Shape(); { const q = 0.42, rr0 = 0.12; cs.moveTo(-q + rr0, -q); cs.lineTo(q - rr0, -q); cs.quadraticCurveTo(q, -q, q, -q + rr0); cs.lineTo(q, q - rr0); cs.quadraticCurveTo(q, q, q - rr0, q); cs.lineTo(-q + rr0, q); cs.quadraticCurveTo(-q, q, -q, q - rr0); cs.lineTo(-q, -q + rr0); cs.quadraticCurveTo(-q, -q, -q + rr0, -q); }
+  const cushGeo = new THREE.ExtrudeGeometry(cs, { depth: 0.06, bevelEnabled: true, bevelThickness: 0.09, bevelSize: 0.08, bevelSegments: 5, curveSegments: 8 });
+  cushGeo.rotateX(-PI / 2); cushGeo.translate(0, -0.15, 0);
+  const cc = makeCanvas(256, 256); { const g = cc.getContext('2d'); g.fillStyle = '#b8452a'; g.fillRect(0, 0, 256, 256); g.strokeStyle = '#e8b04a'; g.lineWidth = 6; g.strokeRect(20, 20, 216, 216); g.fillStyle = '#e8b04a'; g.save(); g.translate(128, 128); for (let k = 0; k < 8; k++) { g.rotate(PI / 4); g.beginPath(); g.ellipse(0, -40, 12, 34, 0, 0, TAU); g.fill(); } g.restore(); g.fillStyle = '#5a1e1a'; g.beginPath(); g.arc(128, 128, 18, 0, TAU); g.fill(); }
+  const cushTex = colorTex(cc); cushTex.repeat.set(1.18, 1.18); cushTex.offset.set(0.5, 0.5);
   const cush = new THREE.InstancedMesh(cushGeo, std({ map: cushTex, roughness: 0.9 }), 2);
-  [[-2.4, FLOOR + 0.16, 0.6], [-2.2, FLOOR + 0.16, -1.6]].forEach((p, i) => { dm.position.set(p[0], p[1], p[2]); dm.rotation.set(0, i * 0.7, 0); dm.updateMatrix(); cush.setMatrixAt(i, dm.matrix); });
+  [[-2.5, FLOOR + 0.16, 0.7], [-2.3, FLOOR + 0.16, -1.5]].forEach((p, i) => { dm.position.set(p[0], p[1], p[2]); dm.rotation.set(0, i * 0.7, 0); dm.updateMatrix(); cush.setMatrixAt(i, dm.matrix); });
   dm.rotation.set(0, 0, 0);
   cush.castShadow = true; cush.receiveShadow = true; scene.add(cush);
+
+  // a tall brass oil lamp by the window, its flames lighting the wall
+  const samai = new THREE.Mesh(new THREE.LatheGeometry([[0, 0], [0.28, 0.02], [0.3, 0.06], [0.06, 0.12], [0.04, 1.1], [0.08, 1.16], [0.26, 1.2], [0.28, 1.26], [0.0, 1.24]].map((p) => new THREE.Vector2(p[0], p[1])), 24), brass);
+  samai.position.set(0.9, FLOOR, -3.6); samai.castShadow = true; scene.add(samai);
+  for (let i = 0; i < 5; i++) {
+    const a = i / 5 * TAU, fl = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.12, 8), flameMat);
+    fl.position.set(0.9 + Math.cos(a) * 0.22, FLOOR + 1.33, -3.6 + Math.sin(a) * 0.22); scene.add(fl); M.flames.push(fl);
+  }
 
   /* the pendant lamp (high above, seen in tall views) */
   const shade = new THREE.Mesh(new THREE.LatheGeometry([[0.05, 0.4], [0.3, 0.2], [0.75, -0.05], [0.78, -0.08]].map((p) => new THREE.Vector2(p[0], p[1])), 32), std({ color: '#2a3a2a', roughness: 0.4, metalness: 0.6, side: THREE.DoubleSide }));
@@ -967,7 +980,7 @@ function fitCamera(pitch) {
 function cameraRig(dt) {
   const cam = R3.camera, w = arc.w, h = arc.h, sa = safeArea();
   const portrait = w / h < 0.8;
-  const pitch = portrait ? 0.86 : 1.04;
+  const pitch = portrait ? 0.8 : 1.04;
   const key = w + 'x' + h + ':' + sa.bottom + ':' + pitch;
   if (key !== CAM.fitKey) { CAM.fitKey = key; fitCamera(pitch); CAM.pitch = pitch; }
   const rm = arc.reducedMotion;
