@@ -1270,7 +1270,7 @@ function placeKite(k, dt) {
   }
   const P = k.tailP, Q = k.tailQ, h = min(dt, 1 / 30);
   P[0].copy(k.tip); Q[0].copy(k.tip);
-  const wx = G.wind.x * 5.5, gy = -3.2;
+  const wx = G.wind.x * 2.2, gy = -6.5;
   for (let i = 1; i < N; i++) {
     const p = P[i], q = Q[i];
     T.v.subVectors(p, q).multiplyScalar(0.94);
@@ -1835,7 +1835,7 @@ function drawGlow() {
   if (me && me.alive && GL.length) {
     for (const gl of GL) {
       threadAt(me, gl.t * gl.t, me.anchor, me.bridle, T.c);
-      P.push(T.c.x, T.c.y, T.c.z, T.c.distanceTo(R3.cam.position) * 0.022, 1 - gl.t * 0.5, C_WHITE.r, C_WHITE.g, C_WHITE.b);
+      P.push(T.c.x, T.c.y, T.c.z, T.c.distanceTo(R3.cam.position) * 0.009, 1 - gl.t * 0.5, C_WHITE.r, C_WHITE.g, C_WHITE.b);
     }
   }
   // festival bulbs and lanterns glow more as it gets dark
@@ -1843,7 +1843,8 @@ function drawGlow() {
   STRANDS.forEach((s) => s.pts.forEach((p, j) => {
     const on = 0.55 + 0.45 * sin(R3.clock * 2.4 + j * 1.3 + s.ph);
     const c = s.cols[j];
-    P.push(p.x, p.y - 0.05, p.z, (s.own ? 0.22 : 0.7) * night, on * 0.5, c.r * 0.5, c.g * 0.5, c.b * 0.5);
+    if (s.own) return;
+    P.push(p.x, p.y - 0.05, p.z, 0.7 * night, on * 0.5, c.r * 0.5, c.g * 0.5, c.b * 0.5);
   }));
   LANT.list.forEach((l) => P.push(l.x + sin(R3.clock * 0.7 + l.ph), l.y, l.z, 3.4, 0.45 + R3.tod * 0.4, 1.0, 0.45, 0.12));
   P.mat.uniforms.uScale.value = (R3.renderer ? R3.renderer.getDrawingBufferSize(V2).y : arc.h) / (2 * Math.tan(R3.cam.fov * PI / 360));
@@ -1980,7 +1981,6 @@ function render(c, a) {
   R3.msHud = lerp(R3.msHud || 0, performance.now() - t3, 0.1);
 }
 
-window.__sky3d = R3;
 function nearestRival() {
   let best = null, bd = 9;
   for (const r of G.rivals) { if (!r.alive || !G.me) continue; const d = hypot(r.x - G.me.x, r.y - G.me.y); if (d < bd) { bd = d; best = r; } }

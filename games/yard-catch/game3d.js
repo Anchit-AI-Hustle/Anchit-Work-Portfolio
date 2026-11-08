@@ -509,7 +509,7 @@ function buildWorld() {
   spire.position.set(-6, 14, -40); scene.add(spire);
 
   /* the loft gallery the sacks drop from: a beam on posts, bracket lamps, pulleys */
-  const woodC = makeCanvas(512, 128); woodGrain(woodC.getContext('2d'), 512, 128, '#5a3a24', '#22140c', '#8a5a34', 9, 60);
+  const woodC = makeCanvas(512, 128); woodGrain(woodC.getContext('2d'), 512, 128, '#9a6a42', '#3a2214', '#c08a5a', 9, 60);
   const woodTex = colorTex(woodC, true, true);
   const wood = std({ map: woodTex, roughness: 0.75, color: '#ffffff' });
   M.beam = new THREE.Mesh(new THREE.BoxGeometry(1, 0.42, 0.5), wood); M.beam.castShadow = true; scene.add(M.beam);
@@ -688,10 +688,15 @@ function layoutYard() {
   M.beam.scale.set(span, 1, 1); M.beam.position.set(0, W.loftY + 0.21, -0.45);
   M.beam2.scale.set(span, 1, 1); M.beam2.position.set(0, W.loftY + 0.36, -1.2);
   const dm = new THREE.Object3D(); let n = 0;
-  const step = max(2.2, half * 0.55);
-  for (let x = -half - 2; x <= half + 2.01 && n < 14; x += step, n++) {
-    dm.position.set(x, W.loftY / 2, -1.5); dm.scale.set(1, W.loftY, 1); dm.updateMatrix(); M.pillars.setMatrixAt(n, dm.matrix);
-    dm.scale.set(1, 1, 1); dm.position.set(x, W.loftY - 0.6, -1.3); dm.updateMatrix(); M.lamps.setMatrixAt(n, dm.matrix);
+  // posts stand just outside the lane and further out; a wide yard gets two more inside it
+  const xs = [half + 0.3, half + 3.4, half + 6.5];
+  if (half > 4) xs.push(half * 0.5);
+  for (const x0 of xs) for (const sx of [-1, 1]) {
+    if (n >= 14) break;
+    const x = x0 * sx;
+    dm.position.set(x, W.loftY / 2, -1.6); dm.scale.set(1, W.loftY, 1); dm.updateMatrix(); M.pillars.setMatrixAt(n, dm.matrix);
+    dm.scale.set(1, 1, 1); dm.position.set(x, W.loftY - 0.6, -1.4); dm.updateMatrix(); M.lamps.setMatrixAt(n, dm.matrix);
+    n++;
   }
   M.pillars.count = n; M.lamps.count = n; M.pillars.instanceMatrix.needsUpdate = true; M.lamps.instanceMatrix.needsUpdate = true;
   // pulleys and a sack waiting on a rope at each
