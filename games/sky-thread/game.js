@@ -27,7 +27,11 @@
     me: null, rivals: [], wind: { x: 0.4, y: 0.15 }, parts: [], pops: [],
     roofs: [], farRoofs: [], birds: [], leaves: [], attract: true,
     mode: 'dusk', diff: 'normal',
+    hintT: 0, yank: 0, drag0: null, yanks: 0,
   };
+  // Fingers on the canvas, counted here: the shell's gesture follows only the
+  // first one, and a second finger held down is how a steering thumb pulls.
+  const fingers = new Set();
 
   function kite(col, x, y, ai) {
     return {
@@ -111,6 +115,7 @@
     G.cutCool = 0;
     G.spawnT = attract ? 0 : 1.2;
     G.crossSpark = 0;
+    G.hintT = 0; G.yank = 0; G.drag0 = null; G.yanks = 0;
   }
 
   function handOf() {
@@ -189,8 +194,54 @@
     }
   }
 
+  // Tap & swipe: drag anywhere and the kite follows the finger's movement
+  // (relative, so the thumb never covers it), tap to yank the string for a
+  // moment, or rest a second finger anywhere to keep pulling.
+  // Tilt to steer: lean the phone, hold any finger down to pull.
+  function touchStyle() {
+    const p = arc.input.pointer;
+    if (!arc.touchMode || arc.touchStyle === 'pads' || !p || p.type === 'mouse') return '';
+    return arc.touchStyle;
+  }
+
+  function steerTouch(dt, style) {
+    const inp = arc.input, ax = inp.axis(), gz = inp.gesture, me = G.me;
+    if (inp.tap()) {
+      G.yank = 0.9; G.yanks++;
+      arc.sfx.tone(520, 0.06, { type: 'triangle', vol: 0.07 });
+    }
+    G.yank = max(0, G.yank - dt);
+    const keyPull = inp.down('Space', 'KeyJ', 'ShiftLeft', 'ShiftRight');
+    const n = fingers.size;
+    const pull = keyPull || G.yank > 0 || n >= 2 || (style === 'tilt' && n >= 1) ? 1 : 0;
+    me.pull = lerp(me.pull, pull, 1 - Math.exp(-dt * 8));
+    if (style === 'gesture' && gz.active && gz.type !== 'mouse') {
+      if (!G.drag0) G.drag0 = { fx: gz.x, fy: gz.y, x: me.x, y: me.y };
+      const d = G.drag0;
+      const tx = clamp(d.x + ((gz.x - d.fx) / arc.w) * 1.6, 0.08, 0.92);
+      const ty = clamp(d.y + ((gz.y - d.fy) / arc.h) * 1.6, 0.08, 0.72);
+      const k = 1 - Math.exp(-dt * 10);
+      me.vx = lerp(me.vx, (tx - me.x) * 5, k);
+      me.vy = lerp(me.vy, (ty - me.y) * 5, k);
+    } else {
+      G.drag0 = null;
+    }
+    me.vx += ax.x * dt * 1.6;
+    me.vy += ax.y * dt * 1.6;
+  }
+
   function steerMe(dt) {
     const inp = arc.input, ax = inp.axis(), p = inp.pointer;
+    const ts = touchStyle();
+    if (ts) {
+      steerTouch(dt, ts);
+      G.me.vx += G.wind.x * dt * 0.35;
+      G.me.vy += (G.wind.y - 0.18) * dt * 0.4;
+      G.me.vx *= Math.exp(-dt * 1.8); G.me.vy *= Math.exp(-dt * 1.8);
+      G.me.x = clamp(G.me.x + G.me.vx * dt, 0.08, 0.92);
+      G.me.y = clamp(G.me.y + G.me.vy * dt, 0.08, 0.72);
+      return;
+    }
     const pull = (inp.action() || inp.down('ShiftLeft', 'ShiftRight')) ? 1 : 0;
     G.me.pull = lerp(G.me.pull, pull, 1 - Math.exp(-dt * 8));
     const keyed = abs(ax.x) > 0.08 || abs(ax.y) > 0.08;
@@ -286,7 +337,7 @@
   }
 
   function update(dt) {
-    G.t += dt; G.cutCool = max(0, (G.cutCool || 0) - dt);
+    G.t += dt; G.hintT += dt; G.cutCool = max(0, (G.cutCool || 0) - dt);
     G.crossSpark = max(0, (G.crossSpark || 0) - dt);
     if (G.mode === 'dusk') G.time -= dt;
     G.wind.x = 0.25 + 0.35 * sin(G.t * 0.35);
@@ -767,6 +818,25 @@
     txt(c, G.me.pull > 0.5 ? 'PULLING' : 'GLIDING', w - pad.right - 66, pad.top + 22, 12, G.me.pull > 0.5 ? WARM : INK, 600, 'center', F_MONO);
   }
 
+  // The shell hides its own hint on touch, so the gesture reminder is drawn
+  // here for the first seconds of play.
+  function drawTouchHint(c) {
+    if (!arc.touchMode || arc.touchStyle === 'pads' || G.attract || G.hintT > 6.5) return;
+    const a = arc.reducedMotion ? 1 : clamp(6.5 - G.hintT, 0, 1);
+    const w = arc.w, pad = arc.hudPad ? arc.hudPad() : { bottom: 64 };
+    const lines = arc.touchStyle === 'tilt'
+      ? ['Tilt the phone to steer', 'Hold a finger down to pull and cut']
+      : ['Drag anywhere to fly the kite', 'Tap to yank, or hold a second finger to pull'];
+    c.save(); c.globalAlpha = a;
+    c.font = '600 13px ' + F_UI;
+    const mw = min(w - 24, max(c.measureText(lines[0]).width, c.measureText(lines[1]).width) + 32);
+    const y = arc.h - pad.bottom - 64;
+    plate(c, (w - mw) / 2, y - 10, mw, 50, 12);
+    txt(c, lines[0], w / 2, y + 5, 13, INK, 600, 'center');
+    txt(c, lines[1], w / 2, y + 25, 13, INK, 600, 'center');
+    c.restore();
+  }
+
   function render(c) {
     const w = arc.w, h = arc.h;
     c.clearRect(0, 0, w, h);
@@ -780,7 +850,7 @@
     drawParts(c);
     drawPops(c);
     drawVignette(c, w, h);
-    if (arc.state === 'play' && !G.attract) drawHUD(c);
+    if (arc.state === 'play' && !G.attract) { drawHUD(c); drawTouchHint(c); }
   }
 
   function dbg() {
@@ -789,6 +859,7 @@
       phase: G.phase, mode: G.mode, diff: G.diff, time: +G.time.toFixed(2), score: Math.round(G.score), cuts: G.cuts, alive: !!G.alive,
       x: +m.x.toFixed(3), y: +m.y.toFixed(3), pull: +m.pull.toFixed(2),
       rivals: G.rivals.filter((r) => r.alive).length, wind: +G.wind.x.toFixed(2), attract: !!G.attract,
+      yanks: G.yanks, fingers: fingers.size,
     };
   }
 
@@ -803,6 +874,17 @@
     mouse: { cursor: 'crosshair', keys: [['Move mouse', 'Steer toward the pointer'], ['Click / hold', 'Pull to cut']] },
     touch: { stick: true, pads: [{ label: 'Pull', key: 'Space', big: true, hot: true }] },
     touchKeys: [['On-screen stick', 'Steer'], ['Pull (hold)', 'Cut a rival thread']],
+    gestures: {
+      drag: false,
+      tilt: 'xy',
+      hint: 'Drag to fly, tap to yank, hold a second finger to pull',
+      keys: [
+        ['Drag anywhere', 'Fly the kite'],
+        ['Tap', 'Yank the string'],
+        ['Second finger (hold)', 'Keep pulling to cut'],
+        ['Tilt to steer', 'Lean to fly, hold a finger to pull'],
+      ],
+    },
     formatScore: (v) => Math.round(v) + ' pts',
     menu: {
       eyebrow: 'Kite fighting',
@@ -815,9 +897,18 @@
     },
     pauseHtml() { return '<div class="stat"><div>Cuts<b>' + G.cuts + '</b></div>' + (G.mode === 'dusk' ? '<div>Time<b>' + Math.max(0, G.time | 0) + 's</b></div>' : '') + '</div>'; },
     onMenu(a) { arc = a; resetWorld(true); },
-    init(a) { arc = a; a.debug = dbg; G.D = DIFF.normal; resetWorld(true); a.menu(); },
+    init(a) {
+      arc = a; a.debug = dbg; G.D = DIFF.normal; resetWorld(true);
+      const cv = a.canvas;
+      cv.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse') fingers.add(e.pointerId); });
+      const lift = (e) => fingers.delete(e.pointerId);
+      cv.addEventListener('pointerup', lift); cv.addEventListener('pointercancel', lift); cv.addEventListener('lostpointercapture', lift);
+      window.addEventListener('blur', () => fingers.clear());
+      a.menu();
+    },
+    onPause() { fingers.clear(); },
     start(a, ch) {
-      arc = a; resetWorld(false, ch);
+      arc = a; resetWorld(false, ch); fingers.clear();
       const label = G.mode === 'hunt' ? 'Cut six threads' : G.mode === 'endless' ? 'Endless sky' : 'Until dusk';
       arc.toast(label, 'Sky Thread', 1400);
     },

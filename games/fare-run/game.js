@@ -35,7 +35,7 @@
     G.t = 0; G.dist = 0; G.speed = attract ? 180 : G.D.spd * (rush ? 1.18 : 1);
     G.maxLives = rush ? 2 : 3; G.lives = G.maxLives; G.score = 0;
     G.clock = G.mode === 'night' ? 90 : 0;
-    G.lane = 1; G.laneT = 1; G.cool = attract ? 0 : 1.2; G.objs = []; G.parts = []; G.floats = [];
+    G.lane = 1; G.laneT = 1; G.cool = attract ? 0 : 1.2; G.objs = []; G.parts = []; G.floats = []; G.touchActs = 0;
     G.phase = 'run'; G.attract = !!attract; G.fares = 0; G.next = attract ? 400 : 480 * G.D.dens * (rush ? 0.82 : 1);
     G.flash = 0;
     if (!attract) G.objs.push({ kind: 'fare', lane: 1, y: -40, h: 36 });
@@ -82,6 +82,30 @@
     else arc.toast('Watch the lane', G.lives + ' left', 800);
   }
 
+  // One finger: tap the left, middle or right of the screen to take that lane,
+  // or swipe sideways. A swipe moves one lane once it passes 28 px and one more
+  // for each further step, so the auto turns while the finger is still moving.
+  const FG = { t0: -1, steps: 0 };
+  function touchLane(want) {
+    const inp = arc.input, gz = inp.gesture, tp = inp.tap(), sw = inp.swipe();
+    const fresh = gz.t0 !== FG.t0;
+    if (gz.active) {
+      if (fresh) { FG.t0 = gz.t0; FG.steps = 0; }
+      const adx = abs(gz.dx);
+      if (adx > abs(gz.dy) * 0.8) {
+        const step = max(110, arc.w * 0.28);
+        const steps = adx < 28 ? 0 : (gz.dx < 0 ? -1 : 1) * (Math.floor((adx - 28) / step) + 1);
+        if (steps !== FG.steps) { want = G.lane + (steps - FG.steps); FG.steps = steps; G.touchActs++; }
+      }
+      return want;
+    }
+    const moved = !fresh && FG.steps !== 0;
+    if (tp) { want = tp.nx < 1 / 3 ? 0 : tp.nx > 2 / 3 ? 2 : 1; G.touchActs++; }
+    else if (sw && !moved && (sw.dir === 'left' || sw.dir === 'right')) { want = G.lane + (sw.dir === 'left' ? -1 : 1); G.touchActs++; }
+    if (tp || sw) { FG.t0 = gz.t0; FG.steps = 0; }
+    return want;
+  }
+
   function update(dt) {
     if (G.phase === 'over') return;
     G.t += dt; G.cool = max(0, G.cool - dt); G.flash = max(0, G.flash - dt);
@@ -101,7 +125,9 @@
       if (ax.x < -0.65) { want = G.lane - 1; G.laneCool = 0.16; }
       if (ax.x > 0.65) { want = G.lane + 1; G.laneCool = 0.16; }
     }
-    if (p && p.pressed) want = p.nx < 0.38 ? 0 : p.nx > 0.62 ? 2 : 1;
+    const gest = gestStyle() && p && p.type !== 'mouse';
+    if (gest) want = touchLane(want);
+    else if (p && p.pressed) want = p.nx < 0.38 ? 0 : p.nx > 0.62 ? 2 : 1;
     want = clamp(want | 0, 0, 2);
     if (want !== G.lane) { G.lane = want; arc.sfx.tone(280, 0.05, { type: 'square', vol: 0.06 }); }
     G.laneT = lerp(G.laneT, G.lane, 1 - Math.exp(-dt * 12));
@@ -325,6 +351,48 @@
     txt(c, G.fares + ' fares', pad.left + 59, pad.top + 91, 12, WARM, 600, 'center', F_MONO);
   }
 
+  // Tap & swipe (the shell's gesture touch style): one finger, no stick or pads.
+  // The shell hides its own hint on touch, so the first seconds of play say it here.
+  function gestStyle() { return !!(arc && arc.touchMode && arc.touchStyle === 'gesture'); }
+  function drawTouchHint(c, lines) {
+    if (!gestStyle() || arc.state !== 'play' || G.attract) return;
+    const t = arc.time, life = 5;
+    if (t >= life) return;
+    const a = arc.reducedMotion ? 1 : clamp(min(t / 0.35, (life - t) / 0.7), 0, 1);
+    const w = arc.w, bw = min(w - 32, 340), lh = 19, bh = 20 + lines.length * lh;
+    const pad = arc.hudPad ? arc.hudPad() : { bottom: 64 };
+    const x = (w - bw) / 2, y = arc.h - pad.bottom - bh - 14;
+    c.save();
+    c.globalAlpha = a;
+    c.fillStyle = 'rgba(15,13,10,.82)'; rr(c, x, y, bw, bh, 12); c.fill();
+    c.strokeStyle = 'rgba(201,169,110,.4)'; c.lineWidth = 1; rr(c, x, y, bw, bh, 12); c.stroke();
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    lines.forEach((s, i) => {
+      c.font = (i ? '500 ' : '700 ') + '13px ' + F_UI;
+      c.fillStyle = i ? 'rgba(251,245,236,.86)' : WARM;
+      c.fillText(s, w / 2, y + 10 + lh / 2 + i * lh);
+    });
+    c.restore();
+  }
+
+  // The three tap zones, shown faintly while the touch hint is up.
+  function drawLaneGuides(c) {
+    if (!gestStyle() || arc.time >= 5) return;
+    const t = arc.time, a = arc.reducedMotion ? 1 : clamp(min(t / 0.35, (5 - t) / 0.7), 0, 1);
+    const pad = arc.hudPad ? arc.hudPad() : { top: 12, bottom: 64 };
+    const top = pad.top + 120, bot = arc.h - pad.bottom - 90;
+    if (bot <= top) return;
+    c.save();
+    c.globalAlpha = a * 0.5;
+    c.strokeStyle = 'rgba(251,245,236,.5)'; c.lineWidth = 1.5; c.setLineDash([6, 8]);
+    [1, 2].forEach((k) => { const x = arc.w * k / 3; c.beginPath(); c.moveTo(x, top); c.lineTo(x, bot); c.stroke(); });
+    c.setLineDash([]);
+    c.globalAlpha = a * 0.75;
+    c.font = '700 11px ' + F_MONO; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = WARM;
+    ['TAP', 'TAP', 'TAP'].forEach((s, k) => c.fillText(s, arc.w * (k + 0.5) / 3, top + 14));
+    c.restore();
+  }
+
   function render(c) {
     const w = arc.w, h = arc.h;
     c.clearRect(0, 0, w, h);
@@ -355,13 +423,18 @@
       c.fillStyle = 'rgba(255,105,64,' + (G.flash * 0.4) + ')';
       c.fillRect(0, 0, w, h);
     }
-    if (arc.state === 'play' && !G.attract) drawHUD(c);
+    if (arc.state === 'play' && !G.attract) {
+      drawHUD(c);
+      drawLaneGuides(c);
+    }
+    drawTouchHint(c, ['Tap a lane, or swipe left or right', 'Pick up the fares, dodge the carts']);
   }
 
   function dbg() {
     return {
       phase: G.phase, mode: G.mode, diff: G.diff, score: Math.round(G.score), lives: G.lives, lane: G.lane,
       dist: Math.round(G.dist), fares: G.fares, objs: G.objs.length, attract: !!G.attract, t: +G.t.toFixed(2),
+      touchActs: G.touchActs || 0, touchStyle: arc.touchStyle,
     };
   }
 
@@ -376,6 +449,11 @@
     mouse: { cursor: 'pointer', keys: [['Click left, middle or right', 'Jump to that lane']] },
     touch: { stick: true, pads: [{ label: 'Left', key: 'ArrowLeft' }, { label: 'Right', key: 'ArrowRight', hot: true }] },
     touchKeys: [['On-screen stick', 'Change lane'], ['Left / Right pads', 'Nudge one lane']],
+    gestures: {
+      drag: false,
+      hint: 'Tap a lane, or swipe left or right',
+      keys: [['Tap left, middle or right', 'Take that lane'], ['Swipe left / right', 'Move one lane, a long swipe moves two']],
+    },
     formatScore: (v) => Math.round(v) + ' pts',
     menu: {
       eyebrow: 'Auto runner',

@@ -50,7 +50,7 @@
     G.mode = (ch && ch.mode) || G.mode || 'load';
     G.diff = (ch && ch.diff) || G.diff || 'normal';
     G.D = DIFF[G.diff] || DIFF.normal;
-    G.t = 0; G.score = 0; G.combo = 0; G.px = 0.5;
+    G.t = 0; G.score = 0; G.combo = 0; G.px = 0.5; G.touchDrag = 0;
     G.maxLives = G.mode === 'clean' ? 1 : 3;
     G.lives = G.maxLives;
     G.clock = G.mode === 'shift' ? 75 : 0;
@@ -148,7 +148,11 @@
     }
     const inp = arc.input, ax = inp.axis(), p = inp.pointer;
     G.px = clamp(G.px + ax.x * dt * 2.1, 0.08, 0.92);
-    if (p && p.seen && abs(ax.x) < 0.08) G.px = lerp(G.px, clamp(p.nx, 0.08, 0.92), 1 - Math.exp(-dt * 16));
+    // Tap & swipe: the crate sits under the finger, anywhere on the screen, and
+    // follows it a touch faster than the mouse so a drag feels held, not towed.
+    const finger = gestStyle() && p && p.type !== 'mouse' && inp.gesture.active;
+    if (finger) { G.touchDrag += dt; G.px = lerp(G.px, clamp(p.nx, 0.08, 0.92), 1 - Math.exp(-dt * 26)); }
+    else if (p && p.seen && abs(ax.x) < 0.08) G.px = lerp(G.px, clamp(p.nx, 0.08, 0.92), 1 - Math.exp(-dt * 16));
     if (G.next <= 0) spawn();
     const gy = groundY();
     const hx = G.px * arc.w, hw = G.D.catch || 70;
@@ -591,6 +595,30 @@
     }
   }
 
+  // Tap & swipe (the shell's gesture touch style): one finger, no stick or pads.
+  // The shell hides its own hint on touch, so the first seconds of play say it here.
+  function gestStyle() { return !!(arc && arc.touchMode && arc.touchStyle === 'gesture'); }
+  function drawTouchHint(c, lines) {
+    if (!gestStyle() || arc.state !== 'play' || G.attract) return;
+    const t = arc.time, life = 5;
+    if (t >= life) return;
+    const a = arc.reducedMotion ? 1 : clamp(min(t / 0.35, (life - t) / 0.7), 0, 1);
+    const w = arc.w, bw = min(w - 32, 340), lh = 19, bh = 20 + lines.length * lh;
+    const pad = arc.hudPad ? arc.hudPad() : { bottom: 64 };
+    const x = (w - bw) / 2, y = arc.h - pad.bottom - bh - 14;
+    c.save();
+    c.globalAlpha = a;
+    c.fillStyle = 'rgba(15,13,10,.82)'; rr(c, x, y, bw, bh, 12); c.fill();
+    c.strokeStyle = 'rgba(201,169,110,.4)'; c.lineWidth = 1; rr(c, x, y, bw, bh, 12); c.stroke();
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    lines.forEach((s, i) => {
+      c.font = (i ? '500 ' : '700 ') + '13px ' + F_UI;
+      c.fillStyle = i ? 'rgba(251,245,236,.86)' : WARM;
+      c.fillText(s, w / 2, y + 10 + lh / 2 + i * lh);
+    });
+    c.restore();
+  }
+
   function render(c) {
     const w = arc.w, h = arc.h;
     c.clearRect(0, 0, w, h);
@@ -600,12 +628,14 @@
     drawParts(c);
     drawVignette(c, w, h);
     if (arc.state === 'play' && !G.attract) drawHUD(c);
+    drawTouchHint(c, ['Drag anywhere, the crate follows', 'Catch the brown sacks, skip the green']);
   }
 
   function dbg() {
     return {
       phase: G.phase, mode: G.mode, diff: G.diff, score: Math.round(G.score), lives: G.lives, combo: G.combo,
       px: +G.px.toFixed(3), items: G.items.length, caught: G.caught, attract: !!G.attract, t: +G.t.toFixed(2),
+      touchDrag: +(G.touchDrag || 0).toFixed(2), touchStyle: arc.touchStyle,
     };
   }
 
@@ -617,6 +647,11 @@
     mouse: { cursor: 'none', keys: [['Move mouse', 'The crate follows']] },
     touch: { stick: true, pads: [] },
     touchKeys: [['On-screen stick', 'Slide the crate']],
+    gestures: {
+      drag: false,
+      hint: 'Drag anywhere, the crate follows your finger',
+      keys: [['Drag anywhere', 'The crate follows your finger'], ['Lift', 'The crate stays put']],
+    },
     formatScore: (v) => Math.round(v) + ' pts',
     menu: {
       eyebrow: 'Arcade catch',

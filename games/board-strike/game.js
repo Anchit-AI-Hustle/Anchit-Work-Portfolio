@@ -24,7 +24,7 @@
     t: 0, time: 75, score: 0, combo: 0, pocketed: 0, queen: false, phase: 'aim',
     pieces: [], striker: null, charge: 0, holding: false, aim: 0, sx: 0,
     parts: [], floats: [], attract: true, moving: 0, mode: 'clock', diff: 'normal',
-    flash: 0,
+    flash: 0, shots: 0, hintT: 0, tg: null,
   };
 
   function mkPiece(x, y, kind) {
@@ -40,7 +40,7 @@
       G.pieces.push(mkPiece(cos(a) * 0.16, sin(a) * 0.16, i % 2 ? 'dark' : 'light'));
     }
     G.striker = mkPiece(0, 0.72, 'striker');
-    G.sx = 0; G.aim = 0; G.charge = 0; G.holding = false; G.moving = 0;
+    G.sx = 0; G.aim = 0; G.charge = 0; G.holding = false; G.moving = 0; G.tg = null;
   }
 
   function reset(attract, ch) {
@@ -49,6 +49,7 @@
     const D = DIFF[G.diff] || DIFF.normal;
     G.t = 0; G.time = D.time; G.score = 0; G.combo = 0; G.pocketed = 0; G.queen = false;
     G.phase = 'aim'; G.parts.length = 0; G.floats.length = 0; G.attract = !!attract; G.flash = 0;
+    G.shots = 0; G.hintT = 0;
     layout();
   }
 
@@ -164,20 +165,90 @@
     G.striker.vx = sin(G.aim) * pwr;
     G.striker.vy = -cos(G.aim) * pwr;
     G.phase = 'roll'; G.holding = false; G.charge = 0;
+    if (!G.attract) G.shots++;
     arc.sfx.tone(240 + pwr * 40, 0.08, { type: 'triangle', vol: 0.12 });
+  }
+
+  // Tap & swipe on a phone, one finger, no buttons. The first 14 px of a drag
+  // decide what it is: sideways slides the striker along the baseline, down
+  // is a slingshot (pull back, the further the harder, let go to strike) and
+  // up points at a target (hold to charge, or flick up to strike at once).
+  // A tap on the baseline places the striker there; a tap above it aims.
+  function gestTouch() {
+    const p = arc.input.pointer;
+    return !!arc.touchMode && arc.touchStyle === 'gesture' && !!p && p.type !== 'mouse';
+  }
+
+  function aimAt(x, y) {
+    const w = fromPx(x, y);
+    G.aim = clamp(Math.atan2(w.x - G.sx, -(w.y - 0.72)), -1.15, 1.15);
+  }
+
+  function readTouch(dt) {
+    const inp = arc.input, gz = inp.gesture, b = boardRect(), u = 2 / b.s;
+    if (gz.active && gz.type !== 'mouse') {
+      if (!G.tg) G.tg = { x: gz.x, y: gz.y, sx: G.sx, mode: '', t: 0, done: false };
+      const tg = G.tg;
+      if (tg.done) return;
+      tg.t += dt;
+      const dx = gz.x - tg.x, dy = gz.y - tg.y;
+      if (!tg.mode && hypot(dx, dy) > 14) tg.mode = abs(dx) > abs(dy) * 1.2 ? 'place' : dy > 0 ? 'sling' : 'point';
+      if (!tg.mode && tg.t > 0.35) tg.mode = 'point';
+      if (tg.mode === 'place') {
+        G.sx = clamp(tg.sx + dx * u, -0.62, 0.62);
+        if (dy > 34) { tg.mode = 'sling'; tg.x = gz.x; tg.y = gz.y; }
+      }
+      if (tg.mode === 'sling') {
+        const ox = gz.x - tg.x, oy = gz.y - tg.y;
+        G.charge = clamp((hypot(ox, oy) - 10) / (b.s * 0.42), 0, 1);
+        G.holding = G.charge > 0.04;
+        if (oy > 4) G.aim = clamp(Math.atan2(-ox, oy), -1.15, 1.15);
+      } else if (tg.mode === 'point') {
+        aimAt(gz.x, gz.y);
+        G.holding = true; G.charge = min(1, G.charge + dt * 1.05);
+        if (G.charge >= 1) { tg.done = true; shoot(); }
+      }
+      return;
+    }
+    const tg = G.tg; G.tg = null;
+    const tp = inp.tap(), sw = inp.swipe();
+    if (!tg) return;
+    if (tg.done) return;
+    if (tg.mode === 'sling' || tg.mode === 'point') {
+      if (tg.mode === 'point' && sw && sw.dy < 0) {
+        G.aim = clamp(Math.atan2(sw.dx, -sw.dy), -1.15, 1.15);
+        G.charge = max(G.charge, 0.2 + 0.8 * sw.power);
+      }
+      if (G.charge >= 0.06) shoot();
+      else { G.charge = 0; G.holding = false; }
+      return;
+    }
+    G.charge = 0; G.holding = false;
+    if (!tg.mode && tp) {
+      const w = fromPx(tp.x, tp.y);
+      if (abs(w.y - 0.72) < 0.14 && abs(w.x) < 0.9) G.sx = clamp(w.x, -0.62, 0.62);
+      else aimAt(tp.x, tp.y);
+    }
   }
 
   function readAim(dt) {
     const inp = arc.input, p = inp.pointer, ax = inp.axis();
+    if (gestTouch() && (inp.gesture.active || G.tg)) {
+      readTouch(dt);
+      if (G.phase === 'aim') { G.striker.x = G.sx; G.striker.y = 0.72; }
+      return;
+    }
+    // In tap & swipe a lifted finger leaves no hover, so the pointer does not aim.
+    const hover = p && p.seen && !gestTouch();
     const charging = G.holding || inp.action();
     if (!charging) {
       G.sx = clamp(G.sx + ax.x * dt * 1.55, -0.62, 0.62);
-      if (p && p.seen && abs(ax.x) < 0.08 && !p.down) {
+      if (hover && abs(ax.x) < 0.08 && !p.down) {
         const w = fromPx(p.x, p.y);
         if (w.y > 0.45) G.sx = clamp(w.x, -0.62, 0.62);
       }
     }
-    if (p && p.seen) {
+    if (hover) {
       const w = fromPx(p.x, p.y);
       G.aim = clamp(Math.atan2(w.x - G.sx, -(w.y - 0.72)), -1.15, 1.15);
     } else {
@@ -192,7 +263,7 @@
   }
 
   function update(dt) {
-    G.t += dt;
+    G.t += dt; G.hintT += dt;
     G.flash = max(0, G.flash - dt);
     if (G.phase === 'over') return;
     if (G.mode === 'clock') {
@@ -366,6 +437,12 @@
     c.setLineDash([]);
     c.fillStyle = WARM; c.beginPath();
     c.arc(s.x + sin(G.aim) * len, s.y - cos(G.aim) * len, 3.5, 0, TAU); c.fill();
+    if (G.tg && G.tg.mode === 'sling' && G.charge > 0.02) {
+      // The pulled-back band, so the slingshot reads as a slingshot.
+      const back = 14 + G.charge * 46;
+      c.strokeStyle = 'rgba(251,245,236,.55)'; c.lineWidth = 2;
+      c.beginPath(); c.moveTo(s.x - 12, s.y); c.lineTo(s.x - sin(G.aim) * back, s.y + cos(G.aim) * back); c.lineTo(s.x + 12, s.y); c.stroke();
+    }
     const pad = arc.hudPad ? arc.hudPad() : { bottom: 52 };
     const bw = min(240, arc.w - 40), bx = arc.w / 2 - bw / 2, by = arc.h - pad.bottom - 22;
     plate(c, bx - 8, by - 10, bw + 16, 28, 10);
@@ -398,6 +475,23 @@
     c.fillStyle = v; c.fillRect(0, 0, w, h);
   }
 
+  // The shell hides its own hint on touch, so the gesture reminder is drawn
+  // here for the first seconds of play.
+  function drawTouchHint(c) {
+    if (!arc.touchMode || arc.touchStyle === 'pads' || G.attract || G.hintT > 6.5) return;
+    const a = arc.reducedMotion ? 1 : clamp(6.5 - G.hintT, 0, 1);
+    const w = arc.w, b = boardRect();
+    const lines = ['Slide sideways to place the striker', 'Pull back and let go to strike, or flick up'];
+    c.save(); c.globalAlpha = a;
+    c.font = '600 13px ' + F_UI;
+    const mw = min(w - 24, max(c.measureText(lines[0]).width, c.measureText(lines[1]).width) + 32);
+    const y = min(arc.h - 150, b.y + b.s + 44);
+    plate(c, (w - mw) / 2, y - 10, mw, 50, 12);
+    txt(c, lines[0], w / 2, y + 5, 13, INK, 600, 'center');
+    txt(c, lines[1], w / 2, y + 25, 13, INK, 600, 'center');
+    c.restore();
+  }
+
   function render(c) {
     const w = arc.w, h = arc.h;
     drawRoom(c, w, h);
@@ -419,7 +513,7 @@
       c.fillStyle = 'rgba(255,183,54,' + (G.flash * 0.35) + ')';
       c.fillRect(0, 0, w, h);
     }
-    if (arc.state === 'play' && !G.attract) drawHUD(c);
+    if (arc.state === 'play' && !G.attract) { drawHUD(c); drawTouchHint(c); }
   }
 
   function dbg() {
@@ -427,7 +521,8 @@
     return {
       phase: G.phase, mode: G.mode, diff: G.diff, score: Math.round(G.score), time: +G.time.toFixed(2), pocketed: G.pocketed,
       sx: +G.sx.toFixed(3), aim: +G.aim.toFixed(3), charge: +G.charge.toFixed(3),
-      vx: +s.vx.toFixed(2), moving: G.moving, attract: !!G.attract,
+      vx: +s.vx.toFixed(2), moving: G.moving, attract: !!G.attract, shots: G.shots,
+      touch: G.tg ? G.tg.mode || 'hold' : '',
     };
   }
 
@@ -443,6 +538,16 @@
     onMenu(a) { arc = a; reset(true); },
     touch: { stick: true, pads: [{ label: 'Strike', key: 'Space', big: true, hot: true }] },
     touchKeys: [['On-screen stick', 'Place and aim'], ['Strike (hold)', 'Charge, then release']],
+    gestures: {
+      drag: false,
+      hint: 'Slide to place, pull back and let go to strike',
+      keys: [
+        ['Slide sideways', 'Place the striker'],
+        ['Pull back, let go', 'Strike, further is harder'],
+        ['Flick up', 'Quick strike that way'],
+        ['Tap', 'Place on the line, or aim'],
+      ],
+    },
     formatScore: (v) => Math.round(v) + ' pts',
     menu: {
       eyebrow: 'Carrom',
