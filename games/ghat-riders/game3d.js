@@ -930,7 +930,6 @@ function mergeG(list) {
 const boxG = (w, h, d, hex, pos, rot) => prep(new THREE.BoxGeometry(w, h, d), hex, pos, rot);
 const cylG = (rt, rb, h, seg, hex, pos, rot, scl) => prep(new THREE.CylinderGeometry(rt, rb, h, seg), hex, pos, rot, scl);
 const sphG = (r, hex, pos, scl, ws, hs) => prep(new THREE.SphereGeometry(r, ws || 10, hs || 7), hex, pos, null, scl);
-const capG = (r, len, hex, pos, rot, scl) => prep(new THREE.CapsuleGeometry(r, len, 3, 8), hex, pos, rot, scl);
 // a cylinder (or capsule) from point a to point b
 function limbG(a, b, r, hex, cap, r2, seg) {
   _v1.set(a[0], a[1], a[2]); _v2.set(b[0], b[1], b[2]);
