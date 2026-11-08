@@ -566,7 +566,8 @@
   function drawHUD(c) {
     const w = arc.w, pad = arc.hudPad ? arc.hudPad() : { top: 12, left: 12, right: 12 };
     const flash = G.comboFlash > 0;
-    plate(c, pad.left, pad.top, 150, 64, 12);
+    // On a phone the score plate narrows so it never runs under the centre chip.
+    plate(c, pad.left, pad.top, min(150, w / 2 - 70 - pad.left - 8), 64, 12);
     txt(c, 'SCORE', pad.left + 14, pad.top + 16, 10, GOLD, 600, 'left', F_MONO);
     txt(c, String(Math.round(G.score)), pad.left + 14, pad.top + 40, 24, INK, 500, 'left', F_DISP);
     // Center chip: clock or combo, with combo flash ring.
@@ -598,14 +599,14 @@
   // Tap & swipe (the shell's gesture touch style): one finger, no stick or pads.
   // The shell hides its own hint on touch, so the first seconds of play say it here.
   function gestStyle() { return !!(arc && arc.touchMode && arc.touchStyle === 'gesture'); }
-  function drawTouchHint(c, lines) {
+  function drawTouchHint(c, lines, at) {
     if (!gestStyle() || arc.state !== 'play' || G.attract) return;
     const t = arc.time, life = 5;
     if (t >= life) return;
     const a = arc.reducedMotion ? 1 : clamp(min(t / 0.35, (life - t) / 0.7), 0, 1);
     const w = arc.w, bw = min(w - 32, 340), lh = 19, bh = 20 + lines.length * lh;
     const pad = arc.hudPad ? arc.hudPad() : { bottom: 64 };
-    const x = (w - bw) / 2, y = arc.h - pad.bottom - bh - 14;
+    const x = (w - bw) / 2, y = at != null ? at : arc.h - pad.bottom - bh - 14;
     c.save();
     c.globalAlpha = a;
     c.fillStyle = 'rgba(15,13,10,.82)'; rr(c, x, y, bw, bh, 12); c.fill();
