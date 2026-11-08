@@ -593,7 +593,7 @@ const LOOKS = {
   night: {
     top: '#03050f', mid: '#10142c', hor: '#33284a', ground: '#0c0a10', sun: '#9fb4ff', sunDir: [0.3, 0.32, -1], stars: 1,
     fog: '#1b1a2e', fogD: 0.026, hemiSky: '#43507e', hemiGround: '#14100c', hemi: 0.45, key: '#9ab0e8', keyI: 0.75, fill: '#5a4a8a', fillI: 0.25,
-    keyPos: [8, 14, -26], emis: 1.9, lamp: 55, head: 2.4, skyline: 0.55,
+    keyPos: [8, 14, -26], emis: 1.45, lamp: 55, head: 2.4, skyline: 0.55,
   },
 };
 let PAL = LOOKS.dusk;
@@ -892,7 +892,7 @@ function placeWorld(scrollM, t) {
   for (let si = 0; si < W3.NSTR; si++) {
     const along = ((si * gap + 3 - scrollM * 1) % sspan + sspan) % sspan;
     const z = NEAR_Z - along;
-    const y0 = 6.3 + (si % 2) * 0.6;
+    const y0 = 7.9 + (si % 2) * 0.6;
     for (let f = 0; f < W3.NFLAG; f++) {
       const u = f / (W3.NFLAG - 1), x = -WALK + u * WALK * 2;
       const y = y0 - 1.1 * sin(u * PI);
@@ -923,6 +923,7 @@ function placeWorld(scrollM, t) {
 
 /* ------------------------------------------------------------------ the auto */
 const AUTO = {};
+const HALF_CYL = new THREE.CylinderGeometry(1, 1, 1, 20, 1, false, -PI / 2, PI);
 function wheelKit(r, w) {
   const k = new Kit();
   k.add(M.matte, GEO.cyl, '#121110', [0, 0, 0], [0, 0, PI / 2], [r, w, r]);
@@ -950,14 +951,18 @@ function buildAuto() {
   k.add(M.glow, GEO.sph8, '#ffb020', [0.32, 0.86, -1.18], null, [0.05, 0.05, 0.03]);
   k.add(M.glow, GEO.sph8, '#ffb020', [-0.32, 0.86, -1.18], null, [0.05, 0.05, 0.03]);
   // Canopy: roof, rounded edges, side skirts, back panel with a small window.
-  k.add(M.cloth, GEO.box, CANOPY, [0, 1.74, 0.2], null, [1.2, 0.08, 2.0]);
-  k.add(M.cloth, GEO.cyl, CANOPY, [0.6, 1.66, 0.2], [PI / 2, 0, 0], [0.13, 2.0, 0.13]);
-  k.add(M.cloth, GEO.cyl, CANOPY, [-0.6, 1.66, 0.2], [PI / 2, 0, 0], [0.13, 2.0, 0.13]);
+  k.add(M.cloth, HALF_CYL, CANOPY, [0, 1.5, 0.22], [-PI / 2, 0, 0], [0.73, 2.0, 0.3]);
+  k.add(M.cloth, GEO.box, CANOPY_D, [0, 1.5, 0.22], null, [1.47, 0.05, 2.02]);
   k.add(M.cloth, GEO.box, CANOPY_D, [0.71, 1.42, 0.45], null, [0.04, 0.42, 1.5]);
   k.add(M.cloth, GEO.box, CANOPY_D, [-0.71, 1.42, 0.45], null, [0.04, 0.42, 1.5]);
-  k.add(M.cloth, GEO.box, CANOPY, [0, 1.3, 1.17], null, [1.42, 0.78, 0.06]);
-  k.add(M.matte, GEO.box, '#141820', [0, 1.38, 1.205], null, [0.6, 0.24, 0.02]);
+  k.add(M.cloth, GEO.box, CANOPY, [0, 1.07, 1.17], null, [1.42, 0.3, 0.06]);
+  k.add(M.cloth, GEO.box, CANOPY, [0.62, 1.35, 1.17], null, [0.18, 0.3, 0.06]);
+  k.add(M.cloth, GEO.box, CANOPY, [-0.62, 1.35, 1.17], null, [0.18, 0.3, 0.06]);
   k.add(M.paint, GEO.box, TRIM, [0, 0.94, 1.18], null, [1.42, 0.06, 0.06]);
+  k.add(M.paint, GEO.box, TRIM, [0, 1.52, 1.19], null, [1.44, 0.05, 0.05]);
+  k.add(M.metal, GEO.cyl8, CHROME, [0, 0.32, 1.22], [0, 0, PI / 2], [0.035, 1.3, 0.035]);
+  k.add(M.matte, GEO.box, '#141210', [0.6, 0.18, 1.08], null, [0.2, 0.2, 0.02]);
+  k.add(M.matte, GEO.box, '#141210', [-0.6, 0.18, 1.08], null, [0.2, 0.2, 0.02]);
   // Pillars and the windscreen frame.
   [[0.56, -0.62], [-0.56, -0.62], [0.68, 0.1], [-0.68, 0.1]].forEach((p) => k.add(M.metal, GEO.cyl8, '#2a2a2a', [p[0], 1.3, p[1]], null, [0.025, 0.85, 0.025]));
   k.add(M.metal, GEO.box, '#2a2a2a', [0, 1.7, -0.68], null, [1.15, 0.05, 0.05]);
@@ -981,17 +986,19 @@ function buildAuto() {
   k.add(M.glow, GEO.box, '#ff4a2a', [0.38, 1.1, -0.455], null, [0.11, 0.05, 0.01]);
   k.add(M.metal, GEO.cyl8, CHROME, [0, 1.08, -0.55], [0, 0, PI / 2], [0.02, 0.7, 0.02]);
   body.add(k.build());
+  const rearGlass = new THREE.Mesh(new THREE.PlaneGeometry(1.06, 0.3), new THREE.MeshStandardMaterial({ color: '#2a3442', transparent: true, opacity: 0.35, roughness: 0.05, metalness: 0.5, depthWrite: false }));
+  rearGlass.position.set(0, 1.35, 1.2); body.add(rearGlass);
   const glass = new THREE.Mesh(new THREE.PlaneGeometry(1.08, 0.66), new THREE.MeshStandardMaterial({ color: '#9fc4d8', transparent: true, opacity: 0.32, roughness: 0.05, metalness: 0.4, side: THREE.DoubleSide, depthWrite: false }));
   glass.position.set(0, 1.36, -0.66); glass.rotation.x = 0.18; body.add(glass);
   const plate = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.16), new THREE.MeshStandardMaterial({ map: plateTex(), roughness: 0.6 }));
   plate.position.set(0, 0.6, 1.181); body.add(plate);
   // Driver in a khaki shirt, hands on the bar.
   const d = new Kit();
-  d.add(M.cloth, cap(0.17, 0.26), '#b59a5a', [0, 1.38, -0.2], null, [1.1, 1, 0.8]);
-  d.add(M.skin, GEO.sph, '#7a4e34', [0, 1.78, -0.22], null, [0.11, 0.13, 0.115]);
-  d.add(M.matte, GEO.sph, '#151010', [0, 1.83, -0.2], null, [0.115, 0.08, 0.12]);
-  d.add(M.cloth, cap(0.05, 0.3), '#b59a5a', [0.2, 1.3, -0.4], [1.0, 0, -0.2]);
-  d.add(M.cloth, cap(0.05, 0.3), '#b59a5a', [-0.2, 1.3, -0.4], [1.0, 0, 0.2]);
+  d.add(M.cloth, cap(0.16, 0.22), '#b59a5a', [0, 1.24, -0.2], null, [1.1, 1, 0.8]);
+  d.add(M.skin, GEO.sph, '#7a4e34', [0, 1.55, -0.22], null, [0.11, 0.13, 0.115]);
+  d.add(M.matte, GEO.sph, '#151010', [0, 1.6, -0.2], null, [0.115, 0.08, 0.12]);
+  d.add(M.cloth, cap(0.05, 0.3), '#b59a5a', [0.2, 1.2, -0.4], [1.0, 0, -0.2]);
+  d.add(M.cloth, cap(0.05, 0.3), '#b59a5a', [-0.2, 1.2, -0.4], [1.0, 0, 0.2]);
   d.add(M.cloth, cap(0.07, 0.3), '#3a3430', [0.12, 1.05, -0.35], [1.4, 0, 0]);
   d.add(M.cloth, cap(0.07, 0.3), '#3a3430', [-0.12, 1.05, -0.35], [1.4, 0, 0]);
   const driver = d.build(); body.add(driver);
@@ -1000,9 +1007,9 @@ function buildAuto() {
   for (let i = 0; i < 2; i++) {
     const pk = new Kit();
     const x = i ? 0.32 : -0.32;
-    pk.add(M.cloth, cap(0.15, 0.22), shirt[i], [x, 1.32, 0.74], null, [1, 1, 0.8]);
-    pk.add(M.skin, GEO.sph, '#8d5b3e', [x, 1.68, 0.74], null, [0.1, 0.12, 0.105]);
-    pk.add(M.matte, GEO.sph, i ? '#2a1a12' : '#151010', [x, 1.72, 0.77], null, [0.105, 0.09, 0.1]);
+    pk.add(M.cloth, cap(0.15, 0.2), shirt[i], [x, 1.2, 0.74], null, [1, 1, 0.8]);
+    pk.add(M.skin, GEO.sph, '#8d5b3e', [x, 1.5, 0.74], null, [0.1, 0.12, 0.105]);
+    pk.add(M.matte, GEO.sph, i ? '#2a1a12' : '#151010', [x, 1.54, 0.77], null, [0.105, 0.09, 0.1]);
     const m = pk.build(); m.visible = false; body.add(m); AUTO.riders.push(m);
   }
   // Wheels: one in front that steers, two behind.
@@ -1304,7 +1311,7 @@ function renderScene(dtReal, a) {
   // Exhaust puffs and wheel dust.
   if (a.state !== 'pause' && FX) {
     r.puff = (r.puff || 0) + dtReal;
-    if (r.puff > 0.09) { r.puff = 0; const ax = laneX(G.laneT); FX.emit(ax - 0.45, 0.35, 1.3, -0.3 + rnd() * 0.2, 0.5, 1.2, FX.C.smoke, 0.18, 0.9, 'dust', -0.3); if (rnd() < 0.5) FX.emit(ax + (rnd() < 0.5 ? 0.6 : -0.6), 0.05, 0.9, 0, 0.3, 1.5, FX.C.dust, 0.2, 0.5, 'dust', -0.2); }
+    if (r.puff > 0.09) { r.puff = 0; const ax = laneX(G.laneT); FX.emit(ax - 0.5, 0.25, 1.25, -0.4 + rnd() * 0.2, 0.35, 1.4, FX.C.smoke, 0.1, 0.7, 'dust', -0.3); if (rnd() < 0.5) FX.emit(ax + (rnd() < 0.5 ? 0.6 : -0.6), 0.05, 0.9, 0, 0.3, 1.5, FX.C.dust, 0.2, 0.5, 'dust', -0.2); }
   }
   // Chase camera: higher and further back on a tall phone screen so three lanes fit.
   const aspect = a.w / max(1, a.h);
@@ -1314,8 +1321,8 @@ function renderScene(dtReal, a) {
   const fov = lerp(56, 70, port) + spd * 6;
   if (abs(cam.fov - fov) > 0.01) { cam.fov = fov; cam.updateProjectionMatrix(); }
   const ax = laneX(G.laneT);
-  _camT.set(ax * lerp(0.55, 0.45, port), lerp(3.1, 5.6, port), lerp(6.4, 8.6, port));
-  _look.set(ax * lerp(0.75, 0.6, port), lerp(1.1, 0.2, port), lerp(-10, -9, port));
+  _camT.set(ax * lerp(0.5, 0.5, port), lerp(3.5, 4.0, port), lerp(7.8, 8.0, port));
+  _look.set(ax * lerp(0.7, 0.65, port), lerp(0.9, 0.7, port), lerp(-12, -11, port));
   if (!r.camInit) { r.cam.copy(_camT); r.look.copy(_look); r.camInit = true; }
   const kc = 1 - Math.exp(-dtReal * (rm ? 3.5 : 7));
   r.cam.lerp(_camT, kc); r.look.lerp(_look, kc);

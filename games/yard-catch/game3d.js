@@ -267,7 +267,7 @@ function weaveBump() {
 // A tied jute sack: a lathe bag with a pinched neck and a tuft, pressed flatter front to back.
 function sackGeometry() {
   const pts = [[0, 0], [0.13, 0.008], [0.2, 0.05], [0.235, 0.14], [0.23, 0.27], [0.19, 0.37], [0.1, 0.44], [0.05, 0.47], [0.075, 0.5], [0.09, 0.55], [0.05, 0.57], [0, 0.565]];
-  const geo = new THREE.LatheGeometry(pts.map((p) => new THREE.Vector2(p[0], p[1])), 28);
+  const geo = new THREE.LatheGeometry(pts.map((p) => new THREE.Vector2(p[0], p[1])), 16);
   geo.translate(0, -0.27, 0); geo.scale(1.25, 1.15, 0.85);
   geo.computeVertexNormals();
   return geo;
@@ -454,7 +454,7 @@ function freeAll() { for (const v of M.vis) { v.state = 'free'; v.owner = null; 
 function buildWorld() {
   const scene = new THREE.Scene();
   R3.scene = scene;
-  scene.fog = new THREE.Fog('#5a2c28', 18, 46);
+  scene.fog = new THREE.Fog('#6a3430', 16, 60);
   const sky = new THREE.Mesh(new THREE.SphereGeometry(80, 24, 16), skyMaterial());
   sky.renderOrder = -10; scene.add(sky);
 
@@ -473,21 +473,21 @@ function buildWorld() {
   key.castShadow = true; key.shadow.mapSize.set(2048, 2048);
   key.shadow.bias = -0.0005; key.shadow.normalBias = 0.02;
   scene.add(key); scene.add(key.target); R3.key = key;
-  const sun = new THREE.DirectionalLight('#ff8a40', 1.3); sun.position.set(14, 3, -20); scene.add(sun);
+  const sun = new THREE.DirectionalLight('#ff8a40', 1.3); sun.position.set(14, 3, -20); scene.add(sun); M.sun = sun;
   const lampL = new THREE.PointLight('#ffa050', 6, 9, 1.5); lampL.position.set(0, 3.2, -1.2); scene.add(lampL); M.lamp = lampL;
 
   /* ground */
-  const stone = colorTex(stoneCanvas(), true, true); stone.repeat.set(10, 7);
+  const stone = colorTex(stoneCanvas(), true, true); stone.repeat.set(26, 17);
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(60, 40), std({ map: stone, roughness: 0.82, color: '#e8d0b8' }));
   ground.rotation.x = -PI / 2; ground.position.z = -8; ground.receiveShadow = true; scene.add(ground);
 
   /* warehouses and skyline */
   const wh = [
-    { x: -9, z: -16, w: 8, h: 8, d: 5, sign: 'MASALA MANDI', tint: '#5a2e22' },
-    { x: 0, z: -19, w: 9, h: 10, d: 5, sign: 'YARD 7  GODOWN', tint: '#4a2a26' },
-    { x: 9.5, z: -16, w: 8, h: 7.5, d: 5, sign: 'CHAI AND GRAIN', tint: '#5e3426' },
-    { x: -18, z: -20, w: 9, h: 9, d: 5, sign: 'COLD STORE', tint: '#3e2422' },
-    { x: 18.5, z: -21, w: 9, h: 9.5, d: 5, sign: 'ROPE AND JUTE', tint: '#46281e' },
+    { x: -8.5, z: -21, w: 8, h: 6, d: 5, sign: 'MASALA MANDI', tint: '#5a2e22' },
+    { x: 1, z: -25, w: 9, h: 7, d: 5, sign: 'YARD 7  GODOWN', tint: '#4a2a26' },
+    { x: 10.5, z: -21, w: 8, h: 5.5, d: 5, sign: 'CHAI AND GRAIN', tint: '#5e3426' },
+    { x: -18, z: -25, w: 9, h: 7, d: 5, sign: 'COLD STORE', tint: '#3e2422' },
+    { x: 19.5, z: -26, w: 9, h: 7.5, d: 5, sign: 'ROPE AND JUTE', tint: '#46281e' },
   ];
   const roofMat = std({ color: '#2a1a14', roughness: 0.6, metalness: 0.3 });
   const roofShape = new THREE.Shape(); roofShape.moveTo(-0.5, 0); roofShape.lineTo(0.5, 0); roofShape.lineTo(0, 0.22); roofShape.closePath();
@@ -502,11 +502,11 @@ function buildWorld() {
   });
   const sk = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), std({ color: '#1e1218', roughness: 1 }), 18);
   const dm = new THREE.Object3D();
-  for (let i = 0; i < 18; i++) { const w = 3 + rnd() * 5, h = 6 + rnd() * 12; dm.position.set(-40 + i * 4.8 + rnd() * 2, h / 2, -30 - rnd() * 6); dm.scale.set(w, h, 3); dm.updateMatrix(); sk.setMatrixAt(i, dm.matrix); }
+  for (let i = 0; i < 18; i++) { const w = 3 + rnd() * 5, h = 6 + rnd() * 12; dm.position.set(-40 + i * 4.8 + rnd() * 2, h / 2, -36 - rnd() * 6); dm.scale.set(w, h, 3); dm.updateMatrix(); sk.setMatrixAt(i, dm.matrix); }
   dm.scale.set(1, 1, 1); scene.add(sk);
   // a temple spire on the skyline
   const spire = new THREE.Mesh(new THREE.ConeGeometry(2.2, 9, 8), std({ color: '#2a1620', roughness: 1 }));
-  spire.position.set(-6, 14, -32); scene.add(spire);
+  spire.position.set(-6, 14, -40); scene.add(spire);
 
   /* the loft gallery the sacks drop from: a beam on posts, bracket lamps, pulleys */
   const woodC = makeCanvas(512, 128); woodGrain(woodC.getContext('2d'), 512, 128, '#5a3a24', '#22140c', '#8a5a34', 9, 60);
@@ -518,10 +518,9 @@ function buildWorld() {
   M.lamps = new THREE.InstancedMesh(new THREE.SphereGeometry(0.09, 12, 8), new THREE.MeshBasicMaterial({ color: new THREE.Color(3, 1.8, 0.7) }), 14); scene.add(M.lamps);
   M.ropes = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.015, 0.015, 1, 5), std({ color: '#c8a870', roughness: 1 }), 6); scene.add(M.ropes);
   M.pulleys = new THREE.InstancedMesh(new THREE.TorusGeometry(0.12, 0.035, 8, 16), std({ color: '#8a6a3a', metalness: 0.7, roughness: 0.35 }), 6); scene.add(M.pulleys);
-  M.hooks = new THREE.InstancedMesh(sackGeometry(), undefined, 6); M.hooks.castShadow = true; scene.add(M.hooks);
   // festoon lights strung under the loft
-  M.bulbs = new THREE.InstancedMesh(new THREE.SphereGeometry(0.055, 10, 8), new THREE.MeshBasicMaterial({ color: '#ffffff' }), 28);
-  for (let i = 0; i < 28; i++) M.bulbs.setColorAt(i, i % 3 === 0 ? new THREE.Color(3, 1.1, 0.5) : new THREE.Color(3, 2, 0.8));
+  M.bulbs = new THREE.InstancedMesh(new THREE.SphereGeometry(0.04, 8, 6), new THREE.MeshBasicMaterial({ color: '#ffffff' }), 28);
+  for (let i = 0; i < 28; i++) M.bulbs.setColorAt(i, i % 3 === 0 ? new THREE.Color(1.8, 0.6, 0.25) : new THREE.Color(1.7, 1.1, 0.4));
   scene.add(M.bulbs);
   M.wireGeo = new THREE.BufferGeometry(); M.wireGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(29 * 3), 3));
   M.wire = new THREE.Line(M.wireGeo, new THREE.LineBasicMaterial({ color: '#1a120c' })); M.wire.frustumCulled = false; scene.add(M.wire);
@@ -530,22 +529,28 @@ function buildWorld() {
   const bump = colorTex(weaveBump(), false, true); bump.repeat.set(6, 3);
   M.sackMats = {};
   for (const k in SACK) M.sackMats[k] = std({ map: colorTex(sackCanvas(k)), bumpMap: bump, bumpScale: 1.5, roughness: 0.95 });
-  M.hooks.material = M.sackMats.grain;
   const sg = sackGeometry(); M.sackGeo = sg;
   for (let i = 0; i < 14; i++) {
     const m = new THREE.Mesh(sg, M.sackMats.spice); m.castShadow = true; m.receiveShadow = true; m.visible = false; scene.add(m);
     M.vis.push({ mesh: m, state: 'free', owner: null, t: 0, x: 0, y: 0, vy: 0, kind: 'spice', spoil: false });
   }
-  const piles = new THREE.InstancedMesh(sg, M.sackMats.spice, 36);
+  // a soft blob on the cobbles under every falling sack: where it will land
+  const bc = makeCanvas(128, 128); { const g = bc.getContext('2d'); const rg2 = g.createRadialGradient(64, 64, 4, 64, 64, 62); rg2.addColorStop(0, 'rgba(0,0,0,0.75)'); rg2.addColorStop(0.6, 'rgba(0,0,0,0.35)'); rg2.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = rg2; g.fillRect(0, 0, 128, 128); }
+  const blobG = new THREE.PlaneGeometry(1, 1); blobG.rotateX(-PI / 2);
+  M.blobs = new THREE.InstancedMesh(blobG, new THREE.MeshBasicMaterial({ map: colorTex(bc), transparent: true, depthWrite: false, opacity: 0.8 }), 14);
+  M.blobs.renderOrder = 2; M.blobs.frustumCulled = false; scene.add(M.blobs);
+  const piles = new THREE.InstancedMesh(sg, M.sackMats.grain, 36);
   const pileAt = [[-4.6, -3.2, 7], [-2.8, -4.4, 5], [3.4, -3.6, 8], [5.6, -4.8, 6], [-7.5, -5.5, 6], [8.4, -6, 4]];
   let n = 0; const kinds = ['spice', 'tea', 'grain'];
   pileAt.forEach((p) => {
     for (let k = 0; k < p[2] && n < 36; k++, n++) {
-      const row = k < 3 ? 0 : k < 5 ? 1 : 2, col = row === 0 ? k : row === 1 ? k - 3 : 0;
-      dm.position.set(p[0] + (col - (row === 0 ? 1 : row === 1 ? 0.5 : 0)) * 0.55, 0.27 + row * 0.42, p[1] + (rnd() - 0.5) * 0.1);
-      dm.rotation.set(-PI / 2 + 0.1 + rnd() * 0.15, 0, (rnd() - 0.5) * 0.4); dm.scale.setScalar(1.1);
+      // a row of upright sacks with a second row leaning on them
+      const row = k < 4 ? 0 : 1, col = row === 0 ? k : k - 4;
+      dm.position.set(p[0] + (col - (row === 0 ? 1.5 : 1)) * 0.6 + (rnd() - 0.5) * 0.08, 0.36 + row * 0.12, p[1] - row * 0.5);
+      dm.rotation.set(row ? -0.25 : (rnd() - 0.5) * 0.15, rnd() * TAU, (rnd() - 0.5) * 0.2); dm.scale.setScalar(1.2 + rnd() * 0.15);
       dm.updateMatrix(); piles.setMatrixAt(n, dm.matrix);
-      piles.setColorAt(n, new THREE.Color(kinds[(k + n) % 3] === 'tea' ? '#9a6a50' : kinds[(k + n) % 3] === 'grain' ? '#fff0c8' : '#ffffff'));
+      const kk = kinds[(k + n) % 3];
+      piles.setColorAt(n, new THREE.Color(kk === 'tea' ? '#8a6448' : kk === 'grain' ? '#ffffff' : '#ff9a72'));
     }
   });
   piles.count = n; dm.rotation.set(0, 0, 0); dm.scale.set(1, 1, 1);
@@ -618,7 +623,13 @@ function buildWorld() {
   const tbt = new THREE.Mesh(new THREE.SphereGeometry(0.11, 12, 8), turban); tbt.position.y = 0.11; tbt.scale.set(1, 0.6, 1); P.head.add(tbt);
   const mous = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.018, 0.02), std({ color: '#1a0e08' })); mous.position.set(0, -0.03, 0.12); P.head.add(mous);
   P.arms = [];
-  for (const sx of [-1, 1]) { const a = cap(0.05, 0.5, kurta); a.position.set(sx * 0.22, 0.48, 0); P.hips.add(a); P.arms.push(a); }
+  for (const sx of [-1, 1]) {
+    const sh = new THREE.Group(); sh.position.set(sx * 0.23, 0.5, 0); P.hips.add(sh);
+    const up = cap(0.055, 0.22, kurta); up.position.y = -0.15; sh.add(up);
+    const el = new THREE.Group(); el.position.y = -0.3; sh.add(el);
+    const fo = cap(0.045, 0.2, skin); fo.position.y = -0.13; el.add(fo);
+    P.arms.push({ sh, el });
+  }
   P.legs = [];
   for (const sx of [-1, 1]) {
     const hip = new THREE.Group(); hip.position.set(sx * 0.1, 0, 0); P.hips.add(hip);
@@ -685,13 +696,12 @@ function layoutYard() {
   M.pillars.count = n; M.lamps.count = n; M.pillars.instanceMatrix.needsUpdate = true; M.lamps.instanceMatrix.needsUpdate = true;
   // pulleys and a sack waiting on a rope at each
   for (let i = 0; i < 6; i++) {
-    const x = -half * 0.9 + (i + 0.5) * (half * 1.8 / 6), len = 0.6 + (i % 3) * 0.35;
+    const x = -half * 0.9 + (i + 0.5) * (half * 1.8 / 6), len = 0.3 + (i % 3) * 0.15;
     dm.position.set(x, W.loftY - 0.05, -0.75); dm.rotation.set(0, 0, 0); dm.updateMatrix(); M.pulleys.setMatrixAt(i, dm.matrix);
     dm.position.set(x, W.loftY - len / 2, -0.85); dm.scale.set(1, len, 1); dm.updateMatrix(); M.ropes.setMatrixAt(i, dm.matrix); dm.scale.set(1, 1, 1);
-    dm.position.set(x, W.loftY - len - 0.3, -0.85); dm.rotation.set(0, i, 0); dm.updateMatrix(); M.hooks.setMatrixAt(i, dm.matrix);
   }
   dm.rotation.set(0, 0, 0);
-  M.pulleys.instanceMatrix.needsUpdate = true; M.ropes.instanceMatrix.needsUpdate = true; M.hooks.instanceMatrix.needsUpdate = true;
+  M.pulleys.instanceMatrix.needsUpdate = true; M.ropes.instanceMatrix.needsUpdate = true;
   M.lamp.position.set(0, W.loftY - 0.8, -0.9);
   // the floodlight's shadow box hugs the lane
   const sc = R3.key.shadow.camera; sc.left = -half - 1.5; sc.right = half + 1.5; sc.top = 3; sc.bottom = -3; sc.near = 4; sc.far = 30;
@@ -724,8 +734,14 @@ const PX = { x: 0, y: 0 };
 
 /* --------------------------------------------------------------- per frame */
 function updateSacks(dt) {
+  const dm = M.dm2 || (M.dm2 = new THREE.Object3D());
+  let nb = 0;
   for (const v of M.vis) {
     const m = v.mesh;
+    if (v.state === 'drop' || v.state === 'fall') {
+      const hgt = max(0, m.position.y - 0.2), k = clamp(1 - hgt / max(1, W.dropY), 0, 1);
+      dm.position.set(m.position.x, 0.012, m.position.z); dm.scale.set(0.35 + k * 0.5, 1, 0.25 + k * 0.35); dm.updateMatrix(); M.blobs.setMatrixAt(nb++, dm.matrix);
+    }
     if (v.state === 'drop' && v.owner) {
       const o = v.owner;
       o.rot += o.spin * dt;
@@ -749,6 +765,7 @@ function updateSacks(dt) {
       if (k >= 1) { v.state = 'free'; m.visible = false; m.scale.setScalar(1); }
     }
   }
+  M.blobs.count = nb; M.blobs.instanceMatrix.needsUpdate = true;
 }
 
 function updateCart(dt) {
@@ -765,11 +782,12 @@ function updateCart(dt) {
   M.crate.rotation.z = damp(M.crate.rotation.z, clamp(-M.cartV * 0.015, -0.12, 0.12), 8, dt);
   // the rim and mouth glow when a sack is close
   const g = G.nearGlow;
-  M.glow.material.uniforms.uA.value = 0.15 + g * 0.85 + G.comboFlash * 0.8;
-  M.rim.material.opacity = 0.3 + g * 0.7;
-  // blink while invulnerable after a miss, as the 2D crate does (not under reduced motion)
-  const blink = G.inv > 0 && !G.attract && !arc.reducedMotion && ((R3.time * 14) | 0) % 2 === 0;
-  M.crate.visible = !blink;
+  // after a miss the rim pulses red while the crate is safe (no strobe under reduced motion)
+  const safe = G.inv > 0 && !G.attract;
+  const pulse = safe ? (arc.reducedMotion ? 0.6 : 0.5 + 0.5 * sin(R3.time * 14)) : 0;
+  M.glow.material.uniforms.uA.value = 0.15 + g * 0.85 + G.comboFlash * 0.8 + pulse * 0.4;
+  M.rim.material.color.set(safe ? '#ff4030' : '#ff8a40');
+  M.rim.material.opacity = 0.3 + g * 0.7 + pulse * 0.5;
   // the heap inside
   for (let i = 0; i < M.pile.length; i++) {
     const k = G.pile[i];
@@ -791,7 +809,7 @@ function updateCart(dt) {
   P.root.rotation.y = damp(P.root.rotation.y, clamp(M.cartV * 0.05, -0.5, 0.5), 6, dt);
   P.hips.rotation.x = 0.18 + walk * 0.1;
   // arms reach for the handles
-  for (let i = 0; i < 2; i++) { const a = P.arms[i]; a.rotation.x = -1.05 + sin(ph + (i ? 0 : PI)) * 0.05 * walk; a.position.z = 0.16; }
+  for (let i = 0; i < 2; i++) { const a = P.arms[i]; a.sh.rotation.x = -0.75 + sin(ph + (i ? 0 : PI)) * 0.06 * walk; a.el.rotation.x = -0.55; a.sh.rotation.z = (i ? -1 : 1) * 0.12; }
   let ny = 0;
   for (const o of G.items) if (!o.spoil && o.y < GY && o.y > ny) ny = o.y;
   P.head.rotation.x = damp(P.head.rotation.x, -0.25 - (ny ? (1 - ny) * 0.4 : 0), 4, dt);
@@ -842,10 +860,11 @@ function frame3D(dt) {
 
 function applyQuality() {
   const r = R3.renderer; if (!r) return;
-  const f = (R3.soft ? [0.45, 0.6, 0.8, 1] : [0.55, 0.72, 0.88, 1])[R3.q];
+  const f = (R3.soft ? [0.4, 0.6, 0.8, 1] : [0.55, 0.72, 0.88, 1])[R3.q];
   r.setPixelRatio(Math.max(0.5, arc.dpr * f)); r.setSize(arc.w, arc.h, false);
   // reflections cost the most on a software renderer, so the lightest level drops them for a brighter sky light
-  if (R3.scene) { R3.scene.environment = R3.q >= 1 ? R3.env : null; R3.hemi.intensity = R3.q >= 1 ? 0.75 : 1.25; }
+  // the lightest level also drops real shadows (the blob under each sack stays) and the low sun
+  if (R3.scene) { R3.scene.environment = R3.q >= 1 ? R3.env : null; R3.hemi.intensity = R3.q >= 1 ? 0.75 : 1.3; M.sun.visible = R3.q >= 1; R3.key.castShadow = R3.q >= 1; }
   const key = R3.key, want = R3.q >= 3 ? 2048 : R3.q >= 1 ? 1024 : 512;
   if (key.shadow.mapSize.x !== want) { key.shadow.mapSize.set(want, want); if (key.shadow.map) { key.shadow.map.dispose(); key.shadow.map = null; } }
 }
@@ -1045,7 +1064,9 @@ function boot() {
     },
     update, idle, render,
   });
-  window.__yardcatch = { G, R3, W, CAM, M };
+  // for test scripts: the screen x of the lowest good sack, if any
+  const target = () => { let best = null; for (const o of G.items) if (!o.spoil && (!best || o.y > best.y)) best = o; if (!best || !R3.ok) return null; toPx(laneX(best.x), 1, 0, PX); return PX.x; };
+  window.__yardcatch = { G, R3, W, CAM, M, target };
 }
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();

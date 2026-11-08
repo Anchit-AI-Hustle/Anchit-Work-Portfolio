@@ -1236,6 +1236,7 @@ function placeKite(k, dt) {
   if (!k.alive && k.cutT > 4) { v.grp.visible = false; return; }
   v.grp.visible = true;
   v.grp.position.copy(k.world);
+  v.grp.scale.setScalar(k === G.me ? 1 : 1.35);
   // Face the eye, turned a little toward the flyer, then roll with the motion.
   _fwd.subVectors(R3.camRef.position, k.world).normalize();
   if (k.flyer) { T.v.subVectors(k.flyer.hand, k.world).normalize(); _fwd.lerp(T.v, 0.22).normalize(); }
@@ -1393,7 +1394,7 @@ function buildWorld() {
   R3.sun.shadow.bias = -0.0006; R3.sun.shadow.normalBias = 0.04; R3.sun.shadow.radius = 2.5;
   const sc = R3.sun.shadow.camera; sc.left = -50; sc.right = 50; sc.top = 34; sc.bottom = -34; sc.near = 1; sc.far = 340;
   scene.add(R3.sun); scene.add(R3.sun.target);
-  R3.fill = new THREE.DirectionalLight('#ffb8a0', 0.6); R3.fill.position.set(-10, 30, 60); R3.fill.target.position.set(0, 0, -60);
+  R3.fill = new THREE.DirectionalLight('#ff9a8a', 0.6); R3.fill.position.set(-60, 20, -30); R3.fill.target.position.set(0, 0, -30);
   scene.add(R3.fill); scene.add(R3.fill.target);
   // the city
   genCity();
@@ -1625,15 +1626,15 @@ function applyTod(tod) {
   // the light that casts shadows never goes below a low angle, so roofs stay readable at dusk
   // (a game's licence: the key light comes in from the side and a little higher
   // than the sun you see, so the roofs carry long readable shadows)
-  const laz = 52 * PI / 180, lel = lerp(27, 13, tod) * PI / 180;
+  const laz = 122 * PI / 180, lel = lerp(26, 13, tod) * PI / 180;
   const ld = T.d.set(sin(laz) * cos(lel), sin(lel), -cos(laz) * cos(lel));
   R3.sun.position.copy(R3.sun.target.position).addScaledVector(ld, 160);
   R3.sun.intensity = 0.9 + 2.6 * lit;
   R3.sun.color.set('#ffb070').lerp(T.col.set('#ff6a3a'), tod);
-  R3.hemi.intensity = 0.8 - tod * 0.22;
+  R3.hemi.intensity = 0.95 - tod * 0.25;
   R3.hemi.color.set('#ffcfa8').lerp(T.col.set('#7a5aa0'), tod);
   R3.hemi.groundColor.set('#5a3a40').lerp(T.col.set('#241828'), tod);
-  R3.fill.intensity = 0.42 - tod * 0.14;
+  R3.fill.intensity = 0.5 - tod * 0.15;
   R3.backlit = 0.6 + (1 - tod) * 0.4;
   // fog takes the colour of the horizon
   T.col.set(SKYC.hor0).lerp(T.col2.set(SKYC.hor1), tod).lerp(T.col2.set('#6a3a4a'), tod * 0.55);
@@ -1980,6 +1981,11 @@ function render(c, a) {
 }
 
 window.__sky3d = R3;
+function nearestRival() {
+  let best = null, bd = 9;
+  for (const r of G.rivals) { if (!r.alive || !G.me) continue; const d = hypot(r.x - G.me.x, r.y - G.me.y); if (d < bd) { bd = d; best = r; } }
+  return best ? [+best.x.toFixed(3), +best.y.toFixed(3)] : null;
+}
 function dbg() {
   const m = G.me || { x: 0, y: 0, pull: 0, alive: false };
   return {
@@ -1987,6 +1993,7 @@ function dbg() {
     x: +m.x.toFixed(3), y: +m.y.toFixed(3), pull: +m.pull.toFixed(2),
     rivals: G.rivals.filter((r) => r.alive).length, wind: +G.wind.x.toFixed(2), attract: !!G.attract,
     yanks: G.yanks, fingers: fingers.size,
+    near: nearestRival(),
     touchStyle: arc ? arc.touchStyle : '', quality: R3.q, fps: R3.fps || null, webgl: !!R3.ok,
     draws: R3.renderer ? R3.renderer.info.render.calls : 0, tod: +R3.tod.toFixed(2),
     ms: [R3.msPrep, R3.msGL, R3.msHud, R3.msStep].map((v) => +(v || 0).toFixed(1)), tris: R3.renderer ? R3.renderer.info.render.triangles : 0,
