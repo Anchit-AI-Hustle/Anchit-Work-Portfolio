@@ -44,7 +44,7 @@
     G.t = 0; G.dist = 0; G.speed = attract ? 180 : G.D.spd * (rush ? 1.16 : 1);
     G.maxLives = rush ? 1 : 3; G.lives = G.maxLives; G.score = 0; G.hold = 0; G.combo = 0;
     G.clock = G.mode === 'shift' ? 90 : 0;
-    G.py = 0; G.pvy = 0; G.slide = 0; G.inv = attract ? 0 : 1.4; G.run = 0;
+    G.py = 0; G.pvy = 0; G.slide = 0; G.inv = attract ? 0 : 1.4; G.run = 0; G.jbuf = 0; G.touchActs = 0;
     G.objs = []; G.shops = []; G.roofs = []; G.parts = []; G.floats = []; G.dust = [];
     G.phase = 'run'; G.attract = !!attract; G.next = attract ? 400 : 520 * G.D.gap * (rush ? 0.82 : 1); G.nextShop = 0;
     seedWorld();
@@ -159,6 +159,34 @@
     o.dead = true;
   }
 
+  // One finger: tap, hold or flick up to jump; flick down to slide (held, it
+  // keeps sliding; in the air it drops you fast). Acts on the live drag, so a
+  // flick fires as it crosses the threshold, not when the finger lifts.
+  const TG = { t0: -1, done: '' };
+  function touchRead(dt, inp) {
+    const gz = inp.gesture, tp = inp.tap(), sw = inp.swipe();
+    const out = { jump: false, slide: false };
+    const fresh = gz.t0 !== TG.t0;
+    if (gz.active) {
+      if (fresh) { TG.t0 = gz.t0; TG.done = ''; }
+      const ady = abs(gz.dy), adx = abs(gz.dx);
+      const held = (window.performance ? performance.now() : Date.now()) - gz.t0;
+      if (gz.dy < -24 && ady > adx * 0.7) { if (!TG.done) { out.jump = true; TG.done = 'up'; } }
+      else if (gz.dy > 24 && ady > adx * 0.7) { out.slide = true; if (TG.done !== 'down') G.touchActs++; TG.done = 'down'; }
+      else if (!TG.done && adx < 14 && ady < 14 && held > 150) { out.jump = true; TG.done = 'hold'; }
+      if (out.jump) G.touchActs++;
+      return out;
+    }
+    const acted = !fresh && TG.done;
+    if (tp && !acted) { out.jump = true; G.touchActs++; }
+    if (sw && !acted) {
+      if (sw.dir === 'up') { out.jump = true; G.touchActs++; }
+      else if (sw.dir === 'down') { out.slide = true; G.touchActs++; }
+    }
+    if (tp || sw) { TG.t0 = gz.t0; TG.done = TG.done || 'end'; }
+    return out;
+  }
+
   function update(dt) {
     if (G.phase === 'over') return;
     G.t += dt; G.run += dt; G.inv = max(0, G.inv - dt); G.slide = max(0, G.slide - dt);
@@ -171,10 +199,19 @@
     G.dist += G.speed * dt;
     G.score += dt * 8;
     const inp = arc.input;
+    // Tap & swipe: a finger never reads as a mouse click, the gesture decides.
+    const gest = gestStyle() && inp.pointer.type !== 'mouse';
     const low = inp.pointer.ny > 0.78;
-    const jump = inp.hit('Space', 'KeyJ', 'Enter', 'ArrowUp', 'KeyW') || (inp.pointer.pressed && !low);
-    const slide = inp.down('ArrowDown', 'KeyS') || inp.hit('ArrowDown', 'KeyS') || (inp.pointer.down && low);
+    let jump = inp.hit('Space', 'KeyJ', 'Enter', 'ArrowUp', 'KeyW') || (!gest && inp.pointer.pressed && !low);
+    let slide = inp.down('ArrowDown', 'KeyS') || inp.hit('ArrowDown', 'KeyS') || (!gest && inp.pointer.down && low);
+    if (gest) {
+      const tj = touchRead(dt, inp);
+      if (tj.jump) G.jbuf = 0.14;
+      if (tj.slide) slide = true;
+    }
+    if (G.jbuf > 0) { G.jbuf -= dt; if (G.py <= 0.01) { jump = true; G.jbuf = 0; } }
     if (jump && G.py <= 0.01) { G.pvy = 720; arc.sfx.tone(320, 0.06, { type: 'square', vol: 0.08 }); }
+    if (slide && gest && G.py > 0.01 && G.pvy > -620) G.pvy = -620;
     if (slide && G.py <= 0.01) {
       G.slide = 0.42;
       dustPuff(118, groundY() - 4, 5, true);
@@ -834,7 +871,8 @@
 
   function drawHUD(c) {
     const w = arc.w, pad = arc.hudPad ? arc.hudPad() : { top: 12, left: 12, right: 12 };
-    chip(c, pad.left, pad.top, 148, 56, 'SCORE', String(Math.round(G.score)));
+    // On a phone the score chip narrows so it never runs under the centre chip.
+    chip(c, pad.left, pad.top, min(148, w / 2 - 64 - pad.left - 8), 56, 'SCORE', String(Math.round(G.score)));
 
     const mid = G.clock
       ? (Math.max(0, G.clock | 0) + 's')
@@ -866,6 +904,30 @@
     }
   }
 
+  // Tap & swipe (the shell's gesture touch style): one finger, no stick or pads.
+  // The shell hides its own hint on touch, so the first seconds of play say it here.
+  function gestStyle() { return !!(arc && arc.touchMode && arc.touchStyle === 'gesture'); }
+  function drawTouchHint(c, lines, at) {
+    if (!gestStyle() || arc.state !== 'play' || G.attract) return;
+    const t = arc.time, life = 5;
+    if (t >= life) return;
+    const a = arc.reducedMotion ? 1 : clamp(min(t / 0.35, (life - t) / 0.7), 0, 1);
+    const w = arc.w, bw = min(w - 32, 340), lh = 19, bh = 20 + lines.length * lh;
+    const pad = arc.hudPad ? arc.hudPad() : { bottom: 64 };
+    const x = (w - bw) / 2, y = at != null ? at : arc.h - pad.bottom - bh - 14;
+    c.save();
+    c.globalAlpha = a;
+    c.fillStyle = 'rgba(15,13,10,.82)'; rr(c, x, y, bw, bh, 12); c.fill();
+    c.strokeStyle = 'rgba(201,169,110,.4)'; c.lineWidth = 1; rr(c, x, y, bw, bh, 12); c.stroke();
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    lines.forEach((s, i) => {
+      c.font = (i ? '500 ' : '700 ') + '13px ' + F_UI;
+      c.fillStyle = i ? 'rgba(251,245,236,.86)' : WARM;
+      c.fillText(s, w / 2, y + 10 + lh / 2 + i * lh);
+    });
+    c.restore();
+  }
+
   function render(c) {
     const w = arc.w, h = arc.h;
     c.clearRect(0, 0, w, h);
@@ -878,13 +940,14 @@
     drawSpeedLines(c, w, h);
     drawVignette(c, w, h);
     if (arc.state === 'play' && !G.attract) drawHUD(c);
+    drawTouchHint(c, ['Tap or swipe up to jump', 'Swipe down to slide under the cloth']);
   }
 
   function dbg() {
     return {
       phase: G.phase, mode: G.mode, diff: G.diff, dist: Math.round(G.dist), speed: Math.round(G.speed), score: Math.round(G.score),
       lives: G.lives, hold: G.hold, py: +G.py.toFixed(1), slide: +G.slide.toFixed(2),
-      objs: G.objs.length, combo: G.combo, attract: !!G.attract,
+      objs: G.objs.length, combo: G.combo, attract: !!G.attract, touchActs: G.touchActs, touchStyle: arc.touchStyle,
     };
   }
 
@@ -899,6 +962,11 @@
     mouse: { cursor: 'pointer', keys: [['Click', 'Jump'], ['Click the lower street', 'Slide']] },
     touch: { stick: false, pads: [{ label: 'Jump', key: 'Space', big: true, hot: true }, { label: 'Slide', key: 'ArrowDown' }] },
     touchKeys: [['Jump', 'Scooters and carts'], ['Slide', 'Hanging cloth']],
+    gestures: {
+      drag: false,
+      hint: 'Tap or swipe up to jump, swipe down to slide',
+      keys: [['Tap / swipe up', 'Jump the scooters and carts'], ['Swipe down', 'Slide under hanging cloth'], ['Swipe down in the air', 'Drop fast']],
+    },
     formatScore: (v) => Math.round(v) + ' pts',
     menu: {
       eyebrow: 'Arcade runner',

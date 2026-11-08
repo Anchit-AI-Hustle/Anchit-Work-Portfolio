@@ -17,6 +17,13 @@
  *
  * window.__arcade is the instance, so a test can read arc.state, arc.frame
  * and whatever the game returns from arc.debug().
+ *
+ * Every device gets the same game: keyboard and mouse on a laptop, a game
+ * controller (Gamepad API: left stick and d-pad move, face buttons press the
+ * game's own action keys, Start pauses), and touch on a phone or tablet. The
+ * gear button opens Settings, kept per player in localStorage and shared by
+ * every game: button size, which side the stick sits, swipe and tilt
+ * sensitivity, vibration and motion.
  */
 (function () {
   'use strict';
@@ -37,6 +44,9 @@
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
   };
+  // Player settings, shared by every game. Read once per page, saved on change.
+  const PREF_DEF = { size: 'm', hand: 'right', sens: 'med', haptics: 'on', motion: 'auto', graphics: 'auto' };
+  const prefs = Object.assign({}, PREF_DEF, store.get('arcade.prefs', {}) || {});
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   const ICON = {
@@ -45,6 +55,7 @@
     play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg>',
     sound: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/></svg>',
     mute: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>',
+    gear: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
     full: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
   };
 
@@ -133,8 +144,12 @@
     // input.tap() / input.swipe() (one frame each) and input.gesture (live).
     const gesture = { active: false, sx: 0, sy: 0, x: 0, y: 0, dx: 0, dy: 0, t0: 0, type: '' };
     const tilt = { x: 0, y: 0, active: false };
+    // A game controller's left stick / d-pad, written each frame by the shell.
+    const pad = { x: 0, y: 0, active: false };
     let tapped = null, swiped = null;
-    const DRAG_R = 56;
+    // How far a drag travels for full lock, and how far a phone tilts for it.
+    // Settings > Sensitivity moves both.
+    let DRAG_R = 56, TILT_D = 28;
     const AXIS = { left: ['ArrowLeft', 'KeyA'], right: ['ArrowRight', 'KeyD'], up: ['ArrowUp', 'KeyW'], down: ['ArrowDown', 'KeyS'] };
     const any = (list) => list.some((k) => down.has(k));
     const api = {
@@ -154,7 +169,8 @@
           if (api.dragSteer === 'xy') y += clamp(gesture.dy / DRAG_R, -1, 1);
         }
         if (api.tiltSteer && tilt.active) { x += tilt.x; if (api.tiltSteer === 'xy') y += tilt.y; }
-        const keyed = x !== 0 || y !== 0 || stick.active || gesture.active || (api.tiltSteer && tilt.active);
+        if (pad.active) { x += pad.x; y += pad.y; }
+        const keyed = x !== 0 || y !== 0 || stick.active || gesture.active || pad.active || (api.tiltSteer && tilt.active);
         const ms = api.mouseSteer;
         if (ms && pointer.seen && !keyed) {
           const ax = pointer.nx * 2 - 1, ay = pointer.ny * 2 - 1;
@@ -165,7 +181,12 @@
         if (m > 1) { x /= m; y /= m; }
         return { x, y };
       },
-      stick, pointer, gesture, tilt, mouseSteer: false, dragSteer: false, tiltSteer: false,
+      stick, pointer, gesture, tilt, pad, mouseSteer: false, dragSteer: false, tiltSteer: false,
+      setSens(level) {
+        DRAG_R = level === 'high' ? 38 : level === 'low' ? 80 : 56;
+        TILT_D = level === 'high' ? 18 : level === 'low' ? 38 : 28;
+      },
+      get dragRadius() { return DRAG_R; },
       tap() { return tapped; },
       swipe() { return swiped; },
       clear() {
@@ -230,7 +251,7 @@
       const ang = (screen.orientation && screen.orientation.angle) || window.orientation || 0;
       let lr = e.gamma, fb = e.beta - 35;
       if (ang === 90) { lr = e.beta; fb = -e.gamma - 35; } else if (ang === -90 || ang === 270) { lr = -e.beta; fb = e.gamma - 35; }
-      tilt.x = clamp(lr / 28, -1, 1); tilt.y = clamp(fb / 28, -1, 1);
+      tilt.x = clamp(lr / TILT_D, -1, 1); tilt.y = clamp(fb / TILT_D, -1, 1);
       if (Math.abs(tilt.x) < 0.06) tilt.x = 0;
       tilt.active = true;
     });
@@ -245,7 +266,8 @@
   function create(opts) {
     opts = opts || {};
     const slug = opts.slug || 'game';
-    const reducedMotion = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+    const sysReduced = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+    const reducedMotion = prefs.motion === 'reduced' || (prefs.motion !== 'full' && sysReduced);
 
     // Chrome
     document.body.classList.add('arcade');
@@ -258,6 +280,7 @@
         '<div class="arc-tools">' +
           '<button class="arc-tool" type="button" data-arc="pause" aria-label="Pause">' + ICON.pause + '</button>' +
           '<button class="arc-tool" type="button" data-arc="sound" aria-label="Sound"></button>' +
+          '<button class="arc-tool" type="button" data-arc="settings" aria-label="Settings">' + ICON.gear + '</button>' +
           '<button class="arc-tool" type="button" data-arc="full" aria-label="Full screen">' + ICON.full + '</button>' +
         '</div>' +
       '</header>' +
@@ -287,6 +310,7 @@
     const btnPause = app.querySelector('[data-arc="pause"]');
     const btnSound = app.querySelector('[data-arc="sound"]');
     const btnFull = app.querySelector('[data-arc="full"]');
+    const btnSettings = app.querySelector('[data-arc="settings"]');
     const input = Input(canvas);
     const mouseOpts = opts.mouse === true ? {} : (opts.mouse || null);
     if (mouseOpts) {
@@ -299,7 +323,7 @@
       slug, opts, canvas, ctx, input, sfx, stage, app,
       hud, three: !!opts.three,
       state: 'menu', w: 0, h: 0, dpr: 1, time: 0, frame: 0, reducedMotion,
-      choices: {}, debug: null,
+      choices: {}, debug: null, prefs, inputMode: 'keyboard', device: 'desktop', gamepad: false,
       clamp, lerp, rng, store, esc,
     };
     // Shared safe zone so in-game HUD never sits under the stick and pads.
@@ -329,15 +353,33 @@
 
     /* touch */
     const isCoarse = window.matchMedia && matchMedia('(pointer: coarse)').matches;
+    // phone / tablet / desktop, from the pointer and the short side of the screen.
+    const shortSide = Math.min(screen.width || 9999, screen.height || 9999);
+    arc.device = isCoarse ? (shortSide < 600 ? 'phone' : 'tablet') : 'desktop';
+    app.classList.add('dev-' + arc.device);
     const paintHint = () => {
       const g = arc.touchMode && opts.gestures && arc.touchStyle !== 'pads' && arc.state === 'play';
       const h = g ? (opts.gestures.hint || '') : arc.touchMode ? (opts.touchHint || 'Stick to move, pads to act') : (opts.hint || '');
       hintEl.textContent = h;
     };
-    const setTouch = (on) => { app.classList.toggle('touch', !!on); arc.touchMode = !!on; paintHint(); };
-    setTouch(isCoarse);
-    window.addEventListener('pointerdown', (e) => { if (e.pointerType === 'touch') setTouch(true); }, { passive: true });
-    window.addEventListener('keydown', () => { if (arc.touchMode && !isCoarse) setTouch(false); });
+    const setTouch = (on) => {
+      if (arc.touchMode === !!on) return;
+      app.classList.toggle('touch', !!on); arc.touchMode = !!on;
+      if (on) arc.inputMode = 'touch';
+      // A tablet with a keyboard or a laptop with a touch screen: the controls
+      // follow whatever the player last used, and the open panel's legend too.
+      if (arc.state === 'play' || arc.state === 'pause') applyTouchStyle();
+      paintHint();
+    };
+    arc.touchMode = null; setTouch(isCoarse);
+    window.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'touch') setTouch(true);
+      else if (e.pointerType === 'mouse') { arc.inputMode = 'mouse'; if (!isCoarse) setTouch(false); }
+    }, { passive: true });
+    window.addEventListener('pointermove', (e) => {
+      if (e.pointerType === 'mouse' && (e.movementX || e.movementY) && arc.touchMode && !isCoarse) { arc.inputMode = 'mouse'; setTouch(false); }
+    }, { passive: true });
+    window.addEventListener('keydown', () => { arc.inputMode = 'keyboard'; if (arc.touchMode && !isCoarse) setTouch(false); });
     const t = opts.touch || {};
     if (t.stick) {
       const s = document.createElement('div'); s.className = 'arc-stick'; s.setAttribute('aria-hidden', 'true');
@@ -356,13 +398,15 @@
       s.addEventListener('pointerup', end); s.addEventListener('pointercancel', end); s.addEventListener('lostpointercapture', end);
     }
     const pads = document.createElement('div'); pads.className = 'arc-pads'; touchEl.appendChild(pads);
+    let padList = [];
     arc.setPads = (list) => {
+      padList = (list || []).slice();
       pads.innerHTML = '';
       (list || []).forEach((p) => {
         const b = document.createElement('button'); b.type = 'button';
         b.className = 'arc-pad' + (p.big ? ' big' : '') + (p.hot ? ' hot' : '') + (p.keep ? ' keep' : '');
         b.textContent = p.label; b.setAttribute('aria-label', p.label);
-        const on = (e) => { e.preventDefault(); try { b.setPointerCapture(e.pointerId); } catch (err) { /* synthetic */ } input.press(p.key); b.classList.add('on'); sfx.unlock(); };
+        const on = (e) => { e.preventDefault(); try { b.setPointerCapture(e.pointerId); } catch (err) { /* synthetic */ } input.press(p.key); b.classList.add('on'); sfx.unlock(); arc.buzz(8); };
         const off = () => { input.release(p.key); b.classList.remove('on'); };
         b.addEventListener('pointerdown', on); b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('lostpointercapture', off);
         pads.appendChild(b);
@@ -402,6 +446,7 @@
     paintSound();
     btnSound.addEventListener('click', () => { sfx.unlock(); sfx.setMuted(!sfx.muted); paintSound(); if (opts.onMute) opts.onMute(sfx.muted); });
     btnPause.addEventListener('click', () => { if (arc.state === 'play') arc.pause(); else if (arc.state === 'pause') arc.resume(); });
+    btnSettings.addEventListener('click', () => { sfx.unlock(); arc.settings(); });
     const fsTarget = app;
     if (!(fsTarget.requestFullscreen || fsTarget.webkitRequestFullscreen)) btnFull.hidden = true;
     btnFull.addEventListener('click', () => {
@@ -417,6 +462,20 @@
 
     /* panels */
     const keysHtml = () => {
+      if (arc.gamepad && !arc.touchMode) {
+        const g = padButtons();
+        const named = { ArrowUp: 'Up', ArrowDown: 'Down', ShiftLeft: 'Sprint', Space: 'Main action' };
+        const fromKeys = (code) => { const k = code.replace(/^Key/, '').replace(/Left$/, ''); const r = (opts.keys || []).find((row) => new RegExp('(^|[ /])' + k + '($|[ /(])', 'i').test(row[0])); return r ? r[1] : null; };
+        const name = (code) => { const p = padList.find((x) => x.key === code); return p ? p.label : (fromKeys(code) || named[code] || code.replace(/^Key/, '')); };
+        const rows = [['Left stick / D-pad', 'Move']];
+        // A button that shares its job with a trigger is listed once: "A / RT".
+        const trig = (code) => (code === g[4] ? ' / RT' : '') + (code === g[5] ? ' / LT' : '');
+        ['A', 'X', 'B', 'Y'].forEach((n, i) => { if (g[i]) rows.push([n + trig(g[i]), name(g[i])]); });
+        if (g[4] && g.slice(0, 4).indexOf(g[4]) < 0) rows.push(['RT', name(g[4])]);
+        if (g[5] && g.slice(0, 4).indexOf(g[5]) < 0) rows.push(['LT', name(g[5])]);
+        rows.push(['Start', 'Pause']);
+        return '<div class="arc-keys">' + rows.map((r) => '<kbd>' + esc(r[0]) + '</kbd><span>' + esc(r[1]) + '</span>').join('') + '</div>';
+      }
       let k = (opts.keys || []).slice();
       const gstyle = opts.gestures && arc.touchMode && (arc.choices.touchStyle || 'gesture') !== 'pads';
       if (gstyle && opts.gestures.keys) k = opts.gestures.keys.slice();
@@ -434,15 +493,22 @@
     const optionsHtml = (list) => {
       if (!list || !list.length) return '';
       return '<div class="arc-opts">' + list.map((o) => {
-        if (arc.choices[o.id] == null) arc.choices[o.id] = store.get('arcade.' + slug + '.' + o.id, o.value != null ? o.value : o.choices[0].v);
-        if (!o.choices.some((c) => c.v === arc.choices[o.id])) arc.choices[o.id] = o.choices[0].v;
-        return '<div><div class="label">' + esc(o.label) + '</div><div class="arc-seg" data-opt="' + esc(o.id) + '">' +
-          o.choices.map((c) => '<button type="button" data-v="' + esc(c.v) + '" aria-pressed="' + (arc.choices[o.id] === c.v) + '">' + esc(c.label) + '</button>').join('') +
-          '</div></div>';
+        let cur;
+        if (o.global) cur = prefs[o.id];
+        else {
+          if (arc.choices[o.id] == null) arc.choices[o.id] = store.get('arcade.' + slug + '.' + o.id, o.value != null ? o.value : o.choices[0].v);
+          if (!o.choices.some((c) => c.v === arc.choices[o.id])) arc.choices[o.id] = o.choices[0].v;
+          cur = arc.choices[o.id];
+        }
+        return '<div><div class="label">' + esc(o.label) + '</div><div class="arc-seg" data-opt="' + esc(o.id) + '" role="group" aria-label="' + esc(o.label) + '">' +
+          o.choices.map((c) => '<button type="button" data-v="' + esc(c.v) + '" aria-pressed="' + (cur === c.v) + '">' + esc(c.label) + '</button>').join('') +
+          '</div>' + (o.note ? '<div class="note">' + esc(o.note) + '</div>' : '') + '</div>';
       }).join('') + '</div>';
     };
+    let lastPanel = null;
     arc.panel = (p) => {
       p = p || {};
+      if (!p.isSettings) lastPanel = p;
       card.innerHTML =
         (p.eyebrow ? '<div class="eyebrow">' + esc(p.eyebrow) + '</div>' : '') +
         (p.title ? '<h2>' + p.title + '</h2>' : '') +
@@ -463,7 +529,13 @@
           const def = (p.options || []).find((o) => o.id === id);
           const c = def && def.choices.find((x) => String(x.v) === b.getAttribute('data-v'));
           if (!c) return;
-          arc.choices[id] = c.v; store.set('arcade.' + slug + '.' + id, c.v);
+          if (def.global) {
+            prefs[id] = c.v; store.set('arcade.prefs', prefs); applyPrefs();
+            if (id === 'haptics' && c.v === 'on') arc.buzz(20, true);
+            if (id === 'graphics' && opts.graphics) { try { opts.graphics(c.v); } catch (err) { console.warn(err); } }
+          }
+          else { arc.choices[id] = c.v; store.set('arcade.' + slug + '.' + id, c.v); }
+          if (id === 'touchStyle' && (arc.state === 'play' || arc.state === 'pause')) applyTouchStyle();
           seg.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
         });
       });
@@ -480,7 +552,7 @@
       if (g && arc.touchMode) style = arc.choices.touchStyle || store.get('arcade.' + slug + '.touchStyle', 'gesture') || 'gesture';
       arc.touchStyle = style;
       app.classList.toggle('gestures', style !== 'pads' && !!g && !!arc.touchMode);
-      input.dragSteer = style === 'gesture' ? (g.drag || false) : false;
+      input.dragSteer = style === 'gesture' && g ? (g.drag || false) : false;
       input.tiltSteer = style === 'tilt' ? (g.tilt === true ? 'x' : g.tilt) : false;
       if (style === 'tilt') {
         const D = window.DeviceOrientationEvent;
@@ -489,14 +561,24 @@
       }
       paintHint();
     };
+    // Keep the screen awake while a round runs: a tilt-steered race has no touches to stop a phone dimming.
+    let wake = null;
+    const keepAwake = (on) => {
+      try {
+        if (on && !wake && navigator.wakeLock && document.visibilityState === 'visible') {
+          wake = 'pending';
+          navigator.wakeLock.request('screen').then((w) => { if (arc.state !== 'play') { w.release().catch(() => {}); wake = null; return; } wake = w; w.addEventListener('release', () => { if (wake === w) wake = null; }); }).catch(() => { wake = null; });
+        } else if (!on && wake && wake !== 'pending') { wake.release().catch(() => {}); wake = null; }
+      } catch (e) { wake = null; }
+    };
     arc.start = () => {
-      arc.hidePanel(); input.clear(); arc.time = 0; arc.state = 'play'; paintPause(); sfx.unlock();
+      arc.hidePanel(); input.clear(); arc.time = 0; arc.state = 'play'; paintPause(); sfx.unlock(); keepAwake(true);
       applyTouchStyle();
       store.set('arcade.played.' + slug, (store.get('arcade.played.' + slug, 0) || 0) + 1);
       if (opts.start) opts.start(arc, arc.choices);
     };
     arc.menu = (p) => {
-      arc.state = 'menu'; paintPause();
+      arc.state = 'menu'; paintPause(); keepAwake(false);
       const m = Object.assign({ actions: [{ label: 'Play', primary: true, on: arc.start }, { label: 'All games', href: '/games' }], showKeys: true }, opts.menu || {}, p || {});
       if (opts.gestures && arc.touchMode) {
         const ch = [{ v: 'gesture', label: 'Tap & swipe' }];
@@ -511,14 +593,57 @@
     };
     arc.pause = () => {
       if (arc.state !== 'play') return;
-      arc.state = 'pause'; paintPause(); input.clear();
+      arc.state = 'pause'; paintPause(); input.clear(); keepAwake(false);
       if (opts.onPause) opts.onPause(arc);
       arc.panel({
         eyebrow: 'Paused', title: esc(opts.title || 'Paused'), html: opts.pauseHtml ? opts.pauseHtml(arc) : '', showKeys: true,
         actions: [{ label: 'Resume', primary: true, on: arc.resume }, { label: 'Restart', on: arc.start }, { label: 'Quit to menu', on: () => arc.menu() }],
       });
     };
-    arc.resume = () => { if (arc.state !== 'pause') return; arc.hidePanel(); arc.state = 'play'; paintPause(); if (opts.onResume) opts.onResume(arc); };
+    arc.resume = () => { if (arc.state !== 'pause') return; arc.hidePanel(); input.clear(); arc.state = 'play'; paintPause(); applyTouchStyle(); keepAwake(true); if (opts.onResume) opts.onResume(arc); };
+
+    /* settings: one panel for every game, kept per player */
+    arc.settings = () => {
+      if (arc.state === 'play') arc.pause();
+      const touchy = isCoarse || arc.touchMode;
+      const o = [];
+      if (touchy && opts.gestures) {
+        const ch = [{ v: 'gesture', label: 'Tap & swipe' }];
+        if (opts.gestures.tilt) ch.push({ v: 'tilt', label: 'Tilt to steer' });
+        ch.push({ v: 'pads', label: 'Stick & buttons' });
+        o.push({ id: 'touchStyle', label: 'Touch controls', choices: ch, value: 'gesture' });
+      }
+      if (touchy) {
+        o.push({ id: 'size', global: true, label: 'Button size', choices: [{ v: 's', label: 'Small' }, { v: 'm', label: 'Medium' }, { v: 'l', label: 'Large' }] });
+        o.push({ id: 'hand', global: true, label: 'Stick on the', choices: [{ v: 'right', label: 'Left' }, { v: 'left', label: 'Right' }], note: 'Buttons sit on the other side.' });
+        o.push({ id: 'sens', global: true, label: 'Swipe and tilt sensitivity', choices: [{ v: 'low', label: 'Gentle' }, { v: 'med', label: 'Normal' }, { v: 'high', label: 'Quick' }] });
+        if (navigator.vibrate) o.push({ id: 'haptics', global: true, label: 'Vibration', choices: [{ v: 'on', label: 'On' }, { v: 'off', label: 'Off' }] });
+      }
+      if (opts.graphics) o.push({ id: 'graphics', global: true, label: 'Graphics', choices: [{ v: 'auto', label: 'Auto' }, { v: 'smooth', label: 'Smoother' }, { v: 'sharp', label: 'Sharper' }], note: 'Auto adjusts detail to keep play smooth. Smoother suits older phones, Sharper suits a fast computer.' });
+      o.push({ id: 'motion', global: true, label: 'Motion', choices: [{ v: 'auto', label: 'Match my device' }, { v: 'full', label: 'Full' }, { v: 'reduced', label: 'Reduced' }], note: 'Reduced turns off screen shake and flashes.' });
+      const dev = arc.gamepad ? 'a game controller' : arc.touchMode ? (arc.device === 'tablet' ? 'a tablet, by touch' : 'a phone, by touch') : 'keyboard and mouse';
+      const back = () => { if (lastPanel) arc.panel(lastPanel); else arc.menu(); };
+      arc.panel({
+        isSettings: true, eyebrow: 'Settings', title: 'Controls and display',
+        html: '<p>Playing with ' + esc(dev) + '. A controller works too: plug one in and press a button. Settings are saved on this device for every game.</p>',
+        options: o, showKeys: true,
+        actions: [{ label: arc.state === 'pause' ? 'Back to game' : 'Done', primary: true, on: arc.state === 'pause' ? arc.resume : back }].concat(arc.state === 'pause' ? [{ label: 'Pause menu', on: back }] : []),
+      });
+    };
+    const applyPrefs = () => {
+      app.classList.toggle('size-s', prefs.size === 's');
+      app.classList.toggle('size-l', prefs.size === 'l');
+      app.classList.toggle('lefty', prefs.hand === 'left');
+      input.setSens(prefs.sens);
+      arc.reducedMotion = prefs.motion === 'reduced' || (prefs.motion !== 'full' && sysReduced);
+    };
+    applyPrefs();
+    // A short buzz on touch devices that have it. force: play it even before a round (the settings preview).
+    arc.buzz = (ms, force) => {
+      if (prefs.haptics !== 'on' || !navigator.vibrate || !(arc.touchMode || force)) return;
+      if (!force && arc.state !== 'play') return;
+      try { navigator.vibrate(ms); } catch (e) { /* not allowed yet */ }
+    };
 
     /* scores */
     const bestKey = 'arcade.best.' + slug;
@@ -531,7 +656,7 @@
     };
     arc.over = (o) => {
       o = o || {};
-      arc.state = 'over'; paintPause(); input.clear();
+      arc.state = 'over'; paintPause(); input.clear(); keepAwake(false);
       if (opts.onOver) opts.onOver(arc);
       let stats = '';
       if (typeof o.score === 'number') {
@@ -556,18 +681,81 @@
     };
     arc.shake = 0; // games may add to this; cleared each frame, ignored under reduced motion
 
+    /* game controller */
+    // Face buttons press the game's own action keys: the touch pads it declares,
+    // in order (A, X, B, Y), so a controller always matches the on-screen
+    // buttons. A game can name its own with opts.gamepad = { buttons: [...], rt, lt }.
+    const MOVE = /^(Arrow|Key[WASD]$)/;
+    function padButtons() {
+      const g = opts.gamepad || {};
+      let b = (g.buttons || padList.map((p) => p.key).filter((k) => k && !MOVE.test(k))).filter((k, i, a) => a.indexOf(k) === i);
+      if (!b.length) b = ['Space'];
+      return [b[0], b[1], b[2], b[3], g.rt || b[0], g.lt || null];
+    }
+    const gp = { prev: [], held: new Map(), navT: 0 };
+    // An open panel's legend follows the device: a controller plugged in mid-menu swaps it at once.
+    const refreshKeys = () => { const k = card.querySelector('.arc-keys'); if (k) k.outerHTML = keysHtml() || '<div class="arc-keys"></div>'; };
+    const btn = (g, i) => !!(g.buttons[i] && (g.buttons[i].pressed || g.buttons[i].value > 0.5));
+    const releasePad = () => { gp.held.forEach((code) => input.release(code)); gp.held.clear(); input.pad.x = input.pad.y = 0; input.pad.active = false; };
+    const focusables = () => Array.from(card.querySelectorAll('button, a.arc-btn')).filter((el) => el.offsetParent !== null);
+    const pollPad = (dt) => {
+      if (!navigator.getGamepads) return;
+      let g = null;
+      try { const all = navigator.getGamepads(); for (let i = 0; i < all.length; i++) if (all[i] && all[i].connected) { g = all[i]; break; } } catch (e) { return; }
+      if (!g) { if (arc.gamepad) { arc.gamepad = false; releasePad(); } return; }
+      if (!arc.gamepad) { arc.gamepad = true; arc.toast('Controller connected', null, 1600); refreshKeys(); }
+      const dz = (v) => (Math.abs(v) < 0.2 ? 0 : (v - Math.sign(v) * 0.2) / 0.8);
+      let x = dz(g.axes[0] || 0), y = dz(g.axes[1] || 0);
+      if (btn(g, 14)) x = -1; if (btn(g, 15)) x = 1; if (btn(g, 12)) y = -1; if (btn(g, 13)) y = 1;
+      const pressedAny = g.buttons.some((b, i) => i < 16 && b && b.pressed);
+      if (pressedAny || x || y) { arc.inputMode = 'gamepad'; if (arc.touchMode) setTouch(false); }
+      const edge = (i) => btn(g, i) && !gp.prev[i];
+      if (edge(9) || edge(8)) { if (arc.state === 'play') arc.pause(); else if (arc.state === 'pause') arc.resume(); }
+      else if (!panel.hidden) {
+        // Menus: stick or d-pad moves between buttons, A presses, B goes back to the game.
+        releasePad();
+        gp.navT -= dt;
+        const dir = Math.abs(y) > 0.5 ? Math.sign(y) : Math.abs(x) > 0.5 ? Math.sign(x) : 0;
+        if (dir && gp.navT <= 0) {
+          const list = focusables(); const i = list.indexOf(document.activeElement);
+          const next = list[(i < 0 ? 0 : (i + dir + list.length) % list.length)];
+          if (next) { try { next.focus({ preventScroll: false }); } catch (e) { next.focus(); } }
+          gp.navT = 0.22;
+        }
+        if (!dir) gp.navT = 0;
+        if (edge(0)) {
+          const f = document.activeElement && card.contains(document.activeElement) ? document.activeElement : card.querySelector('.arc-btn.primary');
+          if (f) f.click();
+        }
+        if (edge(1) && arc.state === 'pause') arc.resume();
+      } else if (arc.state === 'play') {
+        input.pad.x = x; input.pad.y = y; input.pad.active = !!(x || y);
+        const map = padButtons(), want = new Map();
+        [0, 2, 1, 3, 7, 6].forEach((bi, slot) => { const code = map[slot]; if (code && btn(g, bi)) want.set(code, true); });
+        gp.held.forEach((code, k) => { if (!want.has(code)) { input.release(code); gp.held.delete(k); } });
+        want.forEach((v, code) => { if (!gp.held.has(code)) { input.press(code); gp.held.set(code, code); } });
+      }
+      gp.prev = g.buttons.map((b, i) => btn(g, i));
+    };
+    window.addEventListener('gamepadconnected', () => { if (!arc.gamepad) arc.toast('Controller connected', null, 1600); arc.gamepad = true; arc.inputMode = 'gamepad'; refreshKeys(); });
+    window.addEventListener('gamepaddisconnected', () => { arc.gamepad = false; releasePad(); refreshKeys(); if (arc.state === 'play') arc.pause(); });
+
     /* loop */
-    let last = 0;
+    let last = 0, shakeSeen = 0;
     const tick = (now) => {
       const dt = last ? Math.min(0.05, (now - last) / 1000) : 1 / 60;
       last = now;
+      pollPad(dt);
       try {
         if (arc.state === 'play') { arc.time += dt; if (opts.update) opts.update(dt, arc); }
         else if (arc.state !== 'pause' && opts.idle) opts.idle(dt, arc);
         if (hud) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, hud.width, hud.height); }
         ctx.setTransform(arc.dpr, 0, 0, arc.dpr, 0, 0);
         arc.shakeX = arc.shakeY = 0;
-        if (arc.shake > 0 && !reducedMotion) {
+        // A hit big enough to shake the screen is felt on a phone too.
+        const shake0 = arc.shake;
+        if (shake0 > shakeSeen + 4) arc.buzz(Math.round(clamp(shake0 * 3, 12, 60)));
+        if (arc.shake > 0 && !arc.reducedMotion) {
           const s = arc.shake;
           arc.shakeX = (Math.random() - 0.5) * s * 2; arc.shakeY = (Math.random() - 0.5) * s * 2;
           // A 3D game moves its camera by shakeX/shakeY; the HUD stays put.
@@ -576,6 +764,7 @@
         } else {
           arc.shake = 0;
         }
+        shakeSeen = Math.max(0, shake0 - dt * 48);
         if (opts.render) opts.render(ctx, arc);
       } catch (err) {
         console.error(err);
@@ -596,6 +785,7 @@
 
     window.__arcade = arc;
     if (opts.init) opts.init(arc);
+    if (opts.graphics && prefs.graphics !== 'auto') { try { opts.graphics(prefs.graphics); } catch (err) { console.warn(err); } }
     paintPause();
     requestAnimationFrame(tick);
     return arc;

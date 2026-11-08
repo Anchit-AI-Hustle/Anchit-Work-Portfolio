@@ -21,7 +21,7 @@
   let arc;
   const G = {
     mode: 'sixty', phase: 'aim', time: 60, score: 0, combo: 0, makes: 0, attempts: 0, streak: 0,
-    aimX: 0, charge: 0, holding: false, go: 0, t: 0,
+    aimX: 0, charge: 0, holding: false, go: 0, t: 0, hintT: 0, tAim: null,
     ball: null, parts: [], net: [], buildings: [], attract: true,
   };
 
@@ -126,7 +126,13 @@
   }
 
   function stepBall(dt) {
-    const b = G.ball; if (!b || !b.air) return;
+    const b = G.ball; if (!b) return;
+    if (!b.air) {
+      // A ball that has come to rest after a make or a miss is cleared here.
+      // Without this a miss that landed left the game stuck in 'miss'.
+      if (G.phase === 'net' || G.phase === 'miss') { b.dead += dt; if (b.dead > 0.55) resetBall(); }
+      return;
+    }
     b.flightT = (b.flightT || 0) + dt;
     b.vy -= GRAV * dt; b.x += b.vx * dt; b.y += b.vy * dt; b.z += b.vz * dt; b.spin += dt * 14;
     b.vx *= 0.999; b.vz *= 0.999;
@@ -196,10 +202,27 @@
     }
   }
 
+  // Tap & swipe on a phone: touch anywhere and hold to charge, slide the same
+  // finger sideways to aim (relative, so the shot never jumps under the thumb),
+  // lift in the gold band to shoot. A tap too short to charge shoots nothing.
+  function gestTouch() {
+    const p = arc.input.pointer;
+    return !!arc.touchMode && arc.touchStyle === 'gesture' && !!p && p.type !== 'mouse';
+  }
+
   function readAim(dt) {
-    const inp = arc.input, ax = inp.axis(), p = inp.pointer;
+    const inp = arc.input, ax = inp.axis(), p = inp.pointer, gz = inp.gesture;
+    const gt = gestTouch();
     if (abs(ax.x) > 0.08) {
       G.aimX = clamp(G.aimX + ax.x * dt * 1.7, -0.72, 0.72);
+    } else if (gt) {
+      if (gz.active && gz.type !== 'mouse') {
+        if (!G.tAim) G.tAim = { x: gz.x, aim: G.aimX };
+        G.aimX = clamp(G.tAim.aim + ((gz.x - G.tAim.x) / max(160, arc.w * 0.45)) * 0.72, -0.72, 0.72);
+      } else {
+        G.tAim = null;
+        G.aimX *= Math.exp(-dt * 1.4);
+      }
     } else if (p && p.seen) {
       G.aimX = lerp(G.aimX, (p.nx - 0.5) * 1.44, 1 - Math.exp(-dt * 10));
     } else if (abs(ax.x) < 0.08) {
@@ -212,13 +235,16 @@
         // Full charge fires even if the player keeps holding, so a long press
         // cannot lock the shot. Overcharging leaves the gold band on purpose.
         if (G.charge >= 1) shoot();
-      } else if (G.holding) shoot();
+      } else if (G.holding) {
+        if (gt && G.charge < 0.1) { G.holding = false; G.charge = 0; } else shoot();
+      }
     }
   }
 
   function newMatch(ch) {
     G.mode = (ch && ch.mode) || 'sixty';
     G.score = 0; G.combo = 0; G.makes = 0; G.attempts = 0; G.streak = 0; G.aimX = 0; G.t = 0; G.go = 0.8;
+    G.hintT = 0; G.tAim = null;
     G.time = G.mode === 'sixty' ? 60 : G.mode === 'sudden' ? 90 : 99;
     G.parts.length = 0; G.attract = false;
     resetBall();
@@ -226,7 +252,7 @@
   }
 
   function update(dt) {
-    G.t += dt; G.go = max(0, G.go - dt);
+    G.t += dt; G.go = max(0, G.go - dt); G.hintT += dt;
     if (G.phase === 'over') return;
     if (G.mode === 'sixty' || G.mode === 'sudden') {
       G.time -= dt;
@@ -360,15 +386,17 @@
 
   function drawHUD(c) {
     const w = arc.w, h = arc.h, pad = arc.hudPad ? arc.hudPad() : { top: 12, left: 12, bottom: 52 };
-    plate(c, pad.left, pad.top, 150, 70, 12);
+    // Side plates shrink on a narrow phone so they never sit under the clock.
+    const sw = (full) => min(full, max(96, w / 2 - 66 - 12));
+    plate(c, pad.left, pad.top, sw(150), 70, 12);
     txt(c, 'POINTS', pad.left + 14, pad.top + 16, 10, GOLD, 600, 'left', F_MONO);
     txt(c, String(G.score), pad.left + 14, pad.top + 42, 28, INK, 500, 'left', F_DISP);
     const clock = G.mode === 'twentyone' ? 'TO 21' : (Math.max(0, G.time) | 0) + 's';
     plate(c, w / 2 - 54, pad.top, 108, 44, 12);
     txt(c, clock, w / 2, pad.top + 22, 22, G.time < 10 && G.mode !== 'twentyone' ? PRIM : INK, 500, 'center', F_DISP);
     if (G.combo > 1) {
-      plate(c, w - pad.right - 120, pad.top, 120, 44, 12);
-      txt(c, 'STREAK x' + G.combo, w - pad.right - 60, pad.top + 22, 12, WARM, 600, 'center', F_MONO);
+      plate(c, w - pad.right - sw(120), pad.top, sw(120), 44, 12);
+      txt(c, 'STREAK x' + G.combo, w - pad.right - sw(120) / 2, pad.top + 22, 12, WARM, 600, 'center', F_MONO);
     }
     if (G.phase === 'aim') {
       const bw = min(220, w - 40), bx = w / 2 - bw / 2, by = h - pad.bottom - 28;
@@ -379,6 +407,38 @@
       c.fillStyle = G.charge >= SWEET[0] && G.charge <= SWEET[1] ? WARM : PRIM;
       rr(c, bx, by, max(4, bw * G.charge), 8, 4); c.fill();
     }
+  }
+
+  // Where the ball will cross the rim height at the current aim, so a thumb
+  // that covers the court still sees the line it is about to shoot.
+  function drawTouchAim(c) {
+    if (!gestTouch() || G.phase !== 'aim' || !(G.holding || arc.input.gesture.active)) return;
+    const ch = G.charge >= 0.3 ? G.charge : 0.68;
+    const tt = (RIM.z - 0.35) / (4.05 + ch * 5.35);
+    const x = G.aimX * 3.6 * tt;
+    const r = proj(RIM.x, RIM.y, RIM.z), q = proj(x, RIM.y - 0.02, RIM.z);
+    const on = abs(x) < RIM.r * 0.6;
+    c.save();
+    c.strokeStyle = on ? WARM : 'rgba(255,105,64,.85)'; c.lineWidth = 2; c.globalAlpha = 0.9;
+    c.beginPath(); c.ellipse(q.x, q.y, 9, 4, 0, 0, TAU); c.stroke();
+    c.setLineDash([3, 5]); c.globalAlpha = 0.55;
+    c.beginPath(); c.moveTo(q.x, q.y + 6); c.lineTo(q.x, r.y + 46); c.stroke();
+    c.restore();
+  }
+
+  // The shell hides its own hint on touch, so the gesture reminder is drawn
+  // here for the first seconds of play.
+  function drawTouchHint(c) {
+    if (!arc.touchMode || arc.touchStyle === 'pads' || G.attract || G.hintT > 6) return;
+    const a = arc.reducedMotion ? 1 : clamp(6 - G.hintT, 0, 1);
+    const w = arc.w, pad = arc.hudPad ? arc.hudPad() : { bottom: 64 };
+    const msg = 'Hold to charge, slide to aim, lift in the gold';
+    c.save(); c.globalAlpha = a;
+    c.font = '600 13px ' + F_UI;
+    const mw = min(w - 24, c.measureText(msg).width + 32), y = arc.h - pad.bottom - 76;
+    plate(c, (w - mw) / 2, y - 16, mw, 32, 12, 0.66);
+    txt(c, msg, w / 2, y, 13, INK, 600, 'center');
+    c.restore();
   }
 
   function render(c) {
@@ -398,7 +458,7 @@
     const vig = c.createRadialGradient(w * 0.5, h * 0.45, min(w, h) * 0.28, w * 0.5, h * 0.5, min(w, h) * 0.78);
     vig.addColorStop(0, 'rgba(0,0,0,0)'); vig.addColorStop(1, 'rgba(8,6,4,.5)');
     c.fillStyle = vig; c.fillRect(0, 0, w, h);
-    if (arc.state === 'play' && !G.attract) drawHUD(c);
+    if (arc.state === 'play' && !G.attract) { drawTouchAim(c); drawHUD(c); drawTouchHint(c); }
   }
 
   function dbg() {
@@ -422,6 +482,15 @@
     mouse: { cursor: 'crosshair', keys: [['Move mouse', 'Aim'], ['Click / hold', 'Charge, then release']] },
     touch: { stick: true, pads: [{ label: 'Shoot', key: 'Space', big: true, hot: true }] },
     touchKeys: [['On-screen stick', 'Aim'], ['Shoot (hold)', 'Charge, then release']],
+    gestures: {
+      drag: false,
+      hint: 'Hold to charge, slide to aim, lift in the gold',
+      keys: [
+        ['Touch and hold', 'Charge the shot'],
+        ['Slide left / right', 'Aim'],
+        ['Lift in the gold band', 'Shoot'],
+      ],
+    },
     formatScore: (v) => Math.round(v) + ' pts',
     menu: {
       eyebrow: 'Street basketball',

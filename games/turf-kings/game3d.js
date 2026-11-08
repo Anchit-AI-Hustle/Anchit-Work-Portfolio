@@ -2680,6 +2680,8 @@ function resize(a) {
 }
 
 arc = Arcade.create({
+  // Settings > Graphics: 'smooth' and 'sharp' pin a quality level, 'auto' hands it back to the frame-rate auto-scaler.
+  graphics(level) { if (level === 'auto') { PERF.lock = false; return; } PERF.lock = true; PERF.level = level === 'sharp' ? 0 : 3; if (W3.ready) applyQuality(PERF.level); },
   slug: 'turf-kings', title: 'Turf Kings', genre: 'Arcade football', three: true,
   hint: 'WASD move  |  click a mate or J pass  |  K shoot  |  L sprint',
   touchHint: 'Stick to run, Shoot / Pass / Sprint pads',
@@ -2708,6 +2710,8 @@ arc = Arcade.create({
     ['K', 'Shoot (hold to charge)'],
     ['Q', 'Switch player'],
   ],
+  // Controller: A pass, X lob, B shoot, Y switch; right trigger sprint, left trigger switch.
+  gamepad: { buttons: ['KeyJ', 'KeyU', 'KeyK', 'KeyQ'], rt: 'ShiftLeft', lt: 'KeyQ' },
   touch: {
     stick: true,
     pads: [{ label: 'Shoot', key: 'KeyK', big: true, hot: true }, { label: 'Pass', key: 'KeyJ' }, { label: 'Sprint', key: 'ShiftLeft', keep: true }, { label: 'Switch', key: 'KeyQ' }],

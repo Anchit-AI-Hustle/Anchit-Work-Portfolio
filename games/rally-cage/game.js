@@ -37,7 +37,7 @@
     G.mode = (ch && ch.mode) || G.mode || 'lives';
     G.diff = (ch && ch.diff) || G.diff || 'normal';
     G.D = DIFF[G.diff] || DIFF.normal;
-    G.t = 0; G.score = 0; G.rally = 0; G.bestRally = 0; G.px = 0.5;
+    G.t = 0; G.score = 0; G.rally = 0; G.bestRally = 0; G.px = 0.5; G.touchDrag = 0; G.touchServes = 0;
     G.maxLives = G.mode === 'survival' ? 1 : 3;
     G.lives = G.maxLives;
     G.parts = []; G.floats = []; G.trail = []; G.attract = !!attract; G.phase = 'serve'; G.flash = 0;
@@ -87,9 +87,19 @@
     G.t += dt; G.flash = max(0, G.flash - dt);
     const inp = arc.input, ax = inp.axis(), p = inp.pointer;
     G.px = clamp(G.px + ax.x * dt * 2.2, 0.1, 0.9);
-    if (p && p.seen && abs(ax.x) < 0.08) G.px = lerp(G.px, clamp(p.nx, 0.1, 0.9), 1 - Math.exp(-dt * 16));
+    // Tap & swipe: the paddle sits under the finger, anywhere on the screen.
+    // A finger only serves on a tap or a flick up, so dragging never serves.
+    const gest = gestStyle() && p && p.type !== 'mouse';
+    if (gest && inp.gesture.active) { G.touchDrag += dt; G.px = lerp(G.px, clamp(p.nx, 0.1, 0.9), 1 - Math.exp(-dt * 26)); }
+    else if (p && p.seen && abs(ax.x) < 0.08) G.px = lerp(G.px, clamp(p.nx, 0.1, 0.9), 1 - Math.exp(-dt * 16));
     if (G.phase === 'serve') {
-      if (inp.actionHit() || inp.hit('ArrowUp', 'KeyW')) serve();
+      let go;
+      if (gest) {
+        const tp = inp.tap(), sw = inp.swipe();
+        go = inp.hit('Space', 'KeyJ', 'Enter', 'NumpadEnter', 'ArrowUp', 'KeyW') || !!tp || !!(sw && sw.dir === 'up');
+        if (tp || (sw && sw.dir === 'up')) G.touchServes++;
+      } else go = inp.actionHit() || inp.hit('ArrowUp', 'KeyW');
+      if (go) serve();
       return;
     }
     const b = G.ball;
@@ -292,7 +302,8 @@
 
   function drawHUD(c) {
     const w = arc.w, pad = arc.hudPad ? arc.hudPad() : { top: 12, left: 12, right: 12 };
-    plate(c, pad.left, pad.top, 150, 64, 12);
+    // On a phone the score plate narrows so it never runs under the centre chip.
+    plate(c, pad.left, pad.top, min(150, w / 2 - 70 - pad.left - 8), 64, 12);
     txt(c, 'SCORE', pad.left + 14, pad.top + 16, 10, GOLD, 600, 'left', F_MONO);
     txt(c, String(Math.round(G.score)), pad.left + 14, pad.top + 40, 24, INK, 500, 'left', F_DISP);
     plate(c, w / 2 - 70, pad.top, 140, 44, 12);
@@ -303,8 +314,32 @@
       c.beginPath(); c.arc(hx - i * 18, pad.top + 22, 6, 0, TAU); c.fill();
     }
     if (G.phase === 'serve' && !G.attract) {
-      txt(c, 'CLICK OR SPACE TO SERVE', w / 2, arc.h * 0.5, 14, GOLD, 600, 'center', F_MONO);
+      txt(c, arc.touchMode ? 'TAP TO SERVE' : 'CLICK OR SPACE TO SERVE', w / 2, arc.h * 0.5, 14, GOLD, 600, 'center', F_MONO);
     }
+  }
+
+  // Tap & swipe (the shell's gesture touch style): one finger, no stick or pads.
+  // The shell hides its own hint on touch, so the first seconds of play say it here.
+  function gestStyle() { return !!(arc && arc.touchMode && arc.touchStyle === 'gesture'); }
+  function drawTouchHint(c, lines, at) {
+    if (!gestStyle() || arc.state !== 'play' || G.attract) return;
+    const t = arc.time, life = 5;
+    if (t >= life) return;
+    const a = arc.reducedMotion ? 1 : clamp(min(t / 0.35, (life - t) / 0.7), 0, 1);
+    const w = arc.w, bw = min(w - 32, 340), lh = 19, bh = 20 + lines.length * lh;
+    const pad = arc.hudPad ? arc.hudPad() : { bottom: 64 };
+    const x = (w - bw) / 2, y = at != null ? at : arc.h - pad.bottom - bh - 14;
+    c.save();
+    c.globalAlpha = a;
+    c.fillStyle = 'rgba(15,13,10,.82)'; rr(c, x, y, bw, bh, 12); c.fill();
+    c.strokeStyle = 'rgba(201,169,110,.4)'; c.lineWidth = 1; rr(c, x, y, bw, bh, 12); c.stroke();
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    lines.forEach((s, i) => {
+      c.font = (i ? '500 ' : '700 ') + '13px ' + F_UI;
+      c.fillStyle = i ? 'rgba(251,245,236,.86)' : WARM;
+      c.fillText(s, w / 2, y + 10 + lh / 2 + i * lh);
+    });
+    c.restore();
   }
 
   function render(c) {
@@ -329,6 +364,7 @@
       c.fillRect(0, 0, arc.w, arc.h);
     }
     if (arc.state === 'play' && !G.attract) drawHUD(c);
+    drawTouchHint(c, ['Drag anywhere, the paddle follows', 'Tap to serve after a drop'], arc.h * 0.58);
   }
 
   function dbg() {
@@ -336,6 +372,7 @@
     return {
       phase: G.phase, mode: G.mode, diff: G.diff, score: Math.round(G.score), lives: G.lives, rally: G.rally,
       px: +G.px.toFixed(3), bx: +b.x.toFixed(3), by: +b.y.toFixed(3), attract: !!G.attract, t: +G.t.toFixed(2),
+      touchDrag: +(G.touchDrag || 0).toFixed(2), touchServes: G.touchServes || 0, touchStyle: arc.touchStyle,
     };
   }
 
@@ -350,6 +387,11 @@
     mouse: { cursor: 'none', keys: [['Move mouse', 'The paddle follows'], ['Click', 'Serve']] },
     touch: { stick: true, pads: [{ label: 'Serve', key: 'Space', big: true, hot: true }] },
     touchKeys: [['On-screen stick', 'Slide the paddle'], ['Serve', 'Start the rally']],
+    gestures: {
+      drag: false,
+      hint: 'Drag anywhere, the paddle follows, tap to serve',
+      keys: [['Drag anywhere', 'The paddle follows your finger'], ['Tap / swipe up', 'Serve after a drop']],
+    },
     formatScore: (v) => Math.round(v) + ' pts',
     menu: {
       eyebrow: 'Rooftop squash',

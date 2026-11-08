@@ -2672,6 +2672,8 @@ function initRenderer() {
 
   function boot() {
     arc = Arcade.create({
+      // Settings > Graphics: 'smooth' and 'sharp' pin a quality level, 'auto' hands it back to the frame-rate auto-scaler.
+      graphics(level) { if (level === 'auto') { R3.lock = false; return; } R3.lock = true; R3.q = level === 'sharp' ? 3 : 1; applyQuality(); },
       slug: 'super-over', title: 'Super Over', genre: 'Stadium cricket', three: true,
       hint: 'Arrows pick the shot  |  click or Space swings  |  R to run',
       touchHint: 'Stick picks the shot, Bat pad swings, Run pad for the extra',

@@ -2692,12 +2692,16 @@ function showNo3D(a) {
 }
 
 Arcade.create({
+  // Settings > Graphics: 'smooth' and 'sharp' pin a quality level, 'auto' hands it back to the frame-rate auto-scaler.
+  graphics(level) { if (!R3) return; if (level === 'auto') { R3.lockQ = false; return; } R3.lockQ = true; setQuality(level === 'sharp' ? 3 : 1); },
   three: true,
   slug: 'midnight-apex', title: 'Midnight Apex', genre: 'Street racing',
   hint: 'WASD or mouse to steer. Hold click or Up for gas. Shift or N for nitro.',
   touchHint: 'Stick steers, Gas and Brake pads, Nitro when you have it',
   keys: [['Left Right / A D', 'Steer'], ['Up / W', 'Gas'], ['Down / S', 'Brake'], ['Shift / N (hold)', 'Nitro']],
   mouse: { steer: false, cursor: 'none', keys: [['Move mouse', 'Steer'], ['Click / hold', 'Gas']] },
+  // Controller: A or right trigger gas, B or left trigger brake, X nitro.
+  gamepad: { buttons: ['ArrowUp', 'KeyN', 'ArrowDown'], rt: 'ArrowUp', lt: 'ArrowDown' },
   touch: { stick: true, pads: [{ label: 'Gas', key: 'ArrowUp', hot: true, big: true }, { label: 'Brake', key: 'ArrowDown' }, { label: 'Nitro', key: 'KeyN' }] },
   touchKeys: [['On-screen stick', 'Steer'], ['Gas', 'Accelerate'], ['Brake', 'Slow down'], ['Nitro', 'Boost']],
   gestures: {
