@@ -173,3 +173,19 @@ html[data-consent-open="1"] body.arcade .arc-app {
 .arc-app.touch .arc-hint { display: none; }
 
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+/* 3D games: WebGL world below, transparent 2D HUD above, input on the world. */
+.arc-stage canvas.arc-hud { pointer-events: none; z-index: 1; }
+/* Tap & swipe: the stick and pads step aside; a pad marked keep stays. */
+.arc-app.gestures .arc-stick, .arc-app.gestures .arc-pad:not(.keep) { display: none; }
+.arc-float {
+  position: absolute; left: 0; top: 0; width: 120px; height: 120px; border-radius: 50%; z-index: 2;
+  pointer-events: none; opacity: 0; border: 2px solid rgba(251,245,236,.35); background: rgba(15,13,10,.18);
+  transition: opacity .12s linear;
+}
+.arc-float.on { opacity: 1; }
+.arc-float i {
+  position: absolute; left: 36px; top: 36px; width: 48px; height: 48px; border-radius: 50%;
+  background: rgba(251,245,236,.35); border: 1px solid rgba(251,245,236,.6);
+}
+@media (prefers-reduced-motion: reduce) { .arc-float { transition: none; } }
