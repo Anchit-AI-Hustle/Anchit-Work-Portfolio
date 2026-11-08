@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prompter Cam</title>
+<meta name="description" content="A free teleprompter with camera, virtual backgrounds and recording. Save your scripts and settings with your mobile number and a 4-digit PIN.">
+<meta name="theme-color" content="#0a1f18">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a1f18'/%3E%3Crect x='12' y='20' width='40' height='4' rx='2' fill='%23d5b94c'/%3E%3Crect x='12' y='30' width='30' height='4' rx='2' fill='%23f1f4f2'/%3E%3Crect x='12' y='40' width='34' height='4' rx='2' fill='%236eaf99'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Atkinson+Hyperlegible:wght@400;700&family=Lora:wght@400;500;700&display=swap">
+<style>
+:root{
+  --bg:#091815; --bg2:#0a1f18; --panel:#0f2d25; --panel2:#123529; --line:#1d4538; --line2:#2a5c4b;
+  --fg:#c9d2cf; --fg-strong:#f1f4f2; --muted:#8cc0ad; --dim:#6e9a8b;
+  --gold:#d5b94c; --mint:#4cd293; --ink:#070707; --rec:#e5484d; --warn:#e3a35a; --danger:#ff8a8f;
+  --display:"Sora",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --barh:56px; --dockh:72px; --r:10px;
+  /* prompter (overridden per script from JS) */
+  --tp-size:44px; --tp-lh:1.45; --tp-font:var(--body); --tp-weight:500; --tp-color:#f1f4f2; --tp-stage:#091815; --tp-width:34ch; --tp-align:left; --guide:24%;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+h1,h2,h3{font-family:var(--display);color:var(--fg-strong);margin:0;line-height:1.2}
+a{color:var(--gold)}
+button{font:600 13.5px/1 var(--display);cursor:pointer;border:1px solid var(--line2);background:var(--panel);color:var(--fg-strong);padding:0 14px;min-height:40px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;transition:border-color .15s,background .15s,filter .15s}
+button:hover{border-color:var(--muted)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.primary{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+button.primary:hover{filter:brightness(1.07)}
+button.rec{background:var(--rec);color:#fff;border-color:var(--rec)}
+button.rec.live{animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 6px rgba(229,72,77,.25)}}
+button.ghost{background:transparent;border-color:transparent;color:var(--fg)}
+button.ghost:hover{background:var(--panel);border-color:var(--line)}
+button.danger{background:transparent;border-color:#6b2a2d;color:var(--danger)}
+button.icon{padding:0;width:40px}
+button.sm{min-height:32px;padding:0 10px;font-size:12.5px}
+:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+svg.i{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+input[type=text],input[type=tel],input[type=password],input[type=search],select,textarea{background:var(--bg2);color:var(--fg-strong);border:1px solid var(--line2);border-radius:8px;padding:0 12px;min-height:44px;font:400 15px var(--body);width:100%}
+textarea{padding:12px;line-height:1.55;resize:vertical}
+input::placeholder,textarea::placeholder{color:var(--dim)}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238cc0ad' stroke-width='2' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+input[type=range]{accent-color:var(--gold);width:100%;min-height:28px}
+input[type=color]{width:44px;height:36px;border:1px solid var(--line2);border-radius:8px;background:var(--bg2);padding:2px;cursor:pointer}
+input[type=checkbox]{accent-color:var(--gold);width:18px;height:18px}
+label{color:var(--muted);font-size:13px}
+.mono{font-family:var(--mono)}
+.tabnum{font-variant-numeric:tabular-nums}
+.small{font-size:12.5px;color:var(--muted)}
+.err{color:var(--danger);font-size:13px;min-height:1.2em}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.grow{flex:1;min-width:0}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- AUTH ---------- */
+#authView{min-height:100%;display:grid;grid-template-columns:1.1fr 1fr;background:radial-gradient(1200px 600px at 10% 0%,#123d31 0,transparent 60%),var(--bg)}
+.pitch{padding:clamp(28px,6vw,72px);display:flex;flex-direction:column;justify-content:center;gap:22px;max-width:640px}
+.logo{display:flex;align-items:center;gap:10px;font:700 18px var(--display);color:var(--fg-strong)}
+.logo .mark{width:30px;height:30px;border-radius:8px;background:var(--bg2);border:1px solid var(--line2);display:grid;place-items:center}
+.logo .mark i{display:block;height:3px;border-radius:2px;margin:2px 0}
+.pitch h1{font-size:clamp(30px,4.2vw,52px);letter-spacing:-.02em}
+.pitch h1 em{font-style:normal;color:var(--gold)}
+.pitch p{font-size:16.5px;color:var(--fg);max-width:46ch;margin:0}
+.feats{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;margin:6px 0 0;padding:0;list-style:none}
+.feats li{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--fg)}
+.feats li svg{color:var(--mint);margin-top:2px}
+.authWrap{display:grid;place-items:center;padding:24px 16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px;width:min(420px,100%);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:4px;margin-bottom:20px}
+.tabs button{border:0;background:transparent;color:var(--muted);min-height:38px}
+.tabs button[aria-selected=true]{background:var(--panel2);color:var(--fg-strong);box-shadow:inset 0 0 0 1px var(--line2)}
+form.stack{display:grid;gap:14px}
+.field{display:grid;gap:6px}
+.phone{display:grid;grid-template-columns:118px 1fr;gap:8px}
+.pin{font:600 24px var(--mono)!important;letter-spacing:.6em;text-align:center;padding-left:.6em!important}
+.pinWrap{position:relative}
+.pinWrap button{position:absolute;right:4px;top:4px;min-height:36px}
+.linkbtn{background:none;border:0;color:var(--gold);padding:0;min-height:auto;font:500 13px var(--body);text-decoration:underline;text-underline-offset:3px}
+.fine{font-size:12px;color:var(--dim);line-height:1.5}
+
+/* ---------- APP SHELL ---------- */
+.bar{position:sticky;top:0;z-index:30;background:rgba(10,31,24,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+.bar .in{display:flex;align-items:center;gap:8px;min-height:var(--barh);padding:6px max(16px,env(safe-area-inset-right,0px)) 6px max(16px,env(safe-area-inset-left,0px))}
+.who{display:flex;align-items:center;gap:8px;color:var(--fg);font-size:13px}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--panel2);border:1px solid var(--line2);display:grid;place-items:center;font:700 13px var(--display);color:var(--gold)}
+
+/* library */
+#libView main{max-width:1180px;margin:0 auto;padding:24px max(16px,env(safe-area-inset-right,0px)) 60px max(16px,env(safe-area-inset-left,0px))}
+.libHead{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.libHead h1{font-size:26px}
+.libHead .search{width:min(300px,100%)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.sc{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;min-height:178px;cursor:pointer;transition:border-color .15s,transform .15s}
+.sc:hover{border-color:var(--line2);transform:translateY(-1px)}
+.sc h3{font-size:16px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.sc p{margin:0;color:var(--muted);font-size:13.5px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;flex:1}
+.sc .meta{display:flex;gap:12px;font:500 12px var(--mono);color:var(--dim);flex-wrap:wrap}
+.sc .acts{display:flex;gap:6px;justify-content:flex-end}
+.sc.new{border-style:dashed;align-items:center;justify-content:center;color:var(--gold);font:600 15px var(--display)}
+.banner{background:var(--panel2);border:1px solid var(--line2);border-left:3px solid var(--gold);border-radius:10px;padding:12px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.empty{padding:40px 20px;text-align:center;color:var(--muted)}
+
+/* ---------- STUDIO ---------- */
+#studioView{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--tp-stage)}
+#studioView .bar{position:relative;background:rgba(10,31,24,.96)}
+.titleBtn{background:none;border:0;padding:0 4px;min-height:36px;font:600 15px var(--display);color:var(--fg-strong);max-width:100%;overflow:hidden;text-overflow:ellipsis;display:block;text-align:left}
+.stats{display:flex;gap:12px;font:500 12px var(--mono);color:var(--muted)}
+.stats b{color:var(--fg-strong);font-weight:500}
+.save{font:500 11.5px var(--mono);color:var(--dim);min-width:52px}
+.stage{position:relative;flex:1;min-height:0;overflow:hidden;background:var(--tp-stage)}
+.camLayer{position:absolute;inset:0;display:grid;place-items:center;z-index:1;pointer-events:none}
+.camLayer canvas{max-width:100%;max-height:100%;background:#000;display:block}
+.mirrorPrev canvas#out{transform:scaleX(-1)}
+.scroll{position:absolute;inset:0;z-index:2;overflow-y:auto;overflow-x:hidden;padding:calc(var(--guide) - .2em) max(20px,env(safe-area-inset-right,0px)) 85vh max(20px,env(safe-area-inset-left,0px));scrollbar-width:none;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.scroll::-webkit-scrollbar{display:none}
+.stage.focus .scroll{-webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,.28) 0,rgba(0,0,0,.28) calc(var(--guide) - 14%),#000 calc(var(--guide) - 2%),#000 calc(var(--guide) + 20%),rgba(0,0,0,.28) calc(var(--guide) + 42%));mask-image:linear-gradient(to bottom,rgba(0,0,0,.28) 0,rgba(0,0,0,.28) calc(var(--guide) - 14%),#000 calc(var(--guide) - 2%),#000 calc(var(--guide) + 20%),rgba(0,0,0,.28) calc(var(--guide) + 42%))}
+.txt{max-width:var(--tp-width);margin:0 auto;font-family:var(--tp-font);font-size:var(--tp-size);line-height:var(--tp-lh);font-weight:var(--tp-weight);color:var(--tp-color);text-align:var(--tp-align);overflow-wrap:break-word}
+.txt p{margin:0 0 .75em}
+.txt .cue{font-family:var(--display);font-size:.5em;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:1.4em 0 .6em;font-weight:700;line-height:1.3}
+.txt strong{color:var(--gold);font-weight:700}
+.txt .pause{display:inline-block;font:700 .42em var(--display);letter-spacing:.12em;color:var(--ink);background:var(--warn);border-radius:6px;padding:.25em .6em;vertical-align:middle}
+.txt .end{font:600 .4em var(--display);color:var(--dim);letter-spacing:.2em;text-transform:uppercase;padding-top:1em}
+.stage.upper .txt{text-transform:uppercase}
+.stage.mirrorX .txt{transform:scaleX(-1)}
+.guide{position:absolute;left:0;right:0;top:var(--guide);height:2px;background:var(--gold);opacity:.75;z-index:3;pointer-events:none}
+.guide::before,.guide::after{content:"";position:absolute;top:-7px;border:8px solid transparent}
+.guide::before{left:0;border-left-color:var(--gold)}
+.guide::after{right:0;border-right-color:var(--gold)}
+.stage.noGuide .guide{display:none}
+.progress{position:absolute;left:0;top:0;height:3px;background:var(--mint);z-index:4;width:0;transition:width .2s linear}
+/* split layout: camera as picture-in-picture */
+.stage.split .camLayer{inset:auto;width:var(--pipw,min(30vw,340px));aspect-ratio:var(--pipar,16/9);top:12px;right:12px;z-index:5;border-radius:10px;overflow:hidden;border:1px solid var(--line2);box-shadow:0 10px 30px rgba(0,0,0,.5);background:#000;pointer-events:auto}
+.stage.split .camLayer canvas{width:100%;height:100%;object-fit:contain}
+.stage.split.pip-tl .camLayer{left:12px;right:auto}
+.stage.split.pip-bl .camLayer{left:12px;right:auto;top:auto;bottom:12px}
+.stage.split.pip-br .camLayer{top:auto;bottom:12px}
+.stage.split.pip-s{--pipw:min(24vw,220px)} .stage.split.pip-m{--pipw:min(32vw,340px)} .stage.split.pip-l{--pipw:min(48vw,560px)}
+.stage.split.portrait.pip-s{--pipw:min(11vw,120px)} .stage.split.portrait.pip-m{--pipw:min(15vw,190px)} .stage.split.portrait.pip-l{--pipw:min(24vw,300px)}
+.stage.split .camLayer{max-height:calc(100% - 24px)}
+.stage.overlay .camLayer canvas{width:100%;height:100%;object-fit:contain}
+.stage.overlay .scroll{background:linear-gradient(to bottom,rgba(0,0,0,var(--dimv,.55)) 0,rgba(0,0,0,var(--dimv,.55)) 100%)}
+.stage.overlay{background:#000}
+.stage.camHidden .camLayer{display:none}
+.camLayer .badge{position:absolute;left:8px;top:8px;font:500 11px var(--mono);background:rgba(0,0,0,.6);color:#fff;padding:4px 8px;border-radius:6px;display:flex;gap:6px;align-items:center;z-index:2}
+.camLayer .badge i{width:8px;height:8px;border-radius:50%;background:var(--rec);display:none}
+.recording .camLayer .badge i{display:inline-block;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:.2}}
+.camLayer .meter{position:absolute;left:8px;right:8px;bottom:8px;height:4px;background:rgba(255,255,255,.18);border-radius:2px;overflow:hidden;z-index:2}
+.camLayer .meter i{display:block;height:100%;width:0;background:var(--mint)}
+.camOff{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:14px;color:var(--muted);font-size:12.5px;background:#05100d;z-index:1;cursor:pointer;line-height:1.45}
+.camOff.err{color:#ffd1d3;background:#2a0b0d}
+.stage.overlay .camOff{font-size:15px}
+.dock{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:rgba(10,31,24,.97);border-top:1px solid var(--line);padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));z-index:10}
+.timer{font:500 18px var(--mono);color:var(--fg-strong);min-width:62px}
+.timer.live{color:var(--rec)}
+.spd{display:flex;align-items:center;gap:4px;font:500 12.5px var(--mono);color:var(--muted)}
+.spd b{color:var(--fg-strong);font-weight:500;min-width:3ch;text-align:center}
+.kbdHint{font-size:12px;color:var(--dim)}
+.kbd{font:500 11px var(--mono);border:1px solid var(--line2);border-radius:4px;padding:1px 5px;color:var(--fg)}
+.count{position:fixed;inset:0;z-index:60;display:none;place-items:center;background:rgba(7,7,7,.5);font:700 min(34vw,240px) var(--display);color:var(--gold);pointer-events:none}
+.count.show{display:grid}
+
+/* drawers & modals */
+.drawer{position:fixed;z-index:50;top:0;right:0;bottom:0;width:min(440px,100vw);background:var(--panel);border-left:1px solid var(--line);transform:translateX(102%);transition:transform .22s ease;display:flex;flex-direction:column;box-shadow:-20px 0 60px rgba(0,0,0,.35)}
+.drawer.open{transform:none}
+.drawer header{display:flex;align-items:center;gap:8px;padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px;border-bottom:1px solid var(--line)}
+.drawer header h2{font-size:17px;flex:1}
+.drawer .body{flex:1;overflow-y:auto;padding:16px max(16px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) 16px;display:grid;gap:18px;align-content:start;overscroll-behavior:contain}
+.drawer footer{border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;flex-wrap:wrap}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:45;opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.show{opacity:1;pointer-events:auto}
+@media (prefers-reduced-motion:reduce){.drawer,.scrim,.sc{transition:none}}
+.stage.overlay .camOff{background:transparent;color:transparent;pointer-events:none}
+#studioView.panel .kbdHint{display:none}
+.bgTile .lb{background:rgba(0,0,0,.55);padding:2px 6px;border-radius:4px;text-shadow:none}
+/* settings = non-blocking panel so the live preview stays visible while tuning */
+@media (min-width:1001px){#studioView.panel .stage{margin-right:min(440px,100vw)}#studioView.panel .bar,#studioView.panel .dock{padding-right:calc(440px + 16px)}}
+@media (max-width:700px){#drSettings{top:auto;height:58vh;width:100vw;border-left:0;border-top:1px solid var(--line2);border-radius:16px 16px 0 0;transform:translateY(102%)}#drSettings.open{transform:none}#drSettings header{padding-top:12px}}
+.sec{display:grid;gap:12px}
+.sec h3{font:700 11.5px var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.ctl{display:grid;grid-template-columns:120px 1fr auto;gap:10px;align-items:center}
+.ctl output{font:500 12.5px var(--mono);color:var(--fg-strong);min-width:54px;text-align:right}
+.ctl.two{grid-template-columns:120px 1fr}
+.seg{display:flex;background:var(--bg2);border:1px solid var(--line2);border-radius:8px;padding:3px;gap:3px;flex-wrap:wrap}
+.seg button{flex:1;border:0;background:transparent;min-height:34px;color:var(--muted);padding:0 8px;font-size:12.5px}
+.seg button[aria-pressed=true]{background:var(--panel2);color:var(--fg-strong);box-shadow:inset 0 0 0 1px var(--line2)}
+.chk{display:flex;align-items:center;gap:10px;color:var(--fg);font-size:14px;min-height:32px;cursor:pointer}
+.bgGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.bgTile{position:relative;aspect-ratio:16/10;border-radius:8px;border:2px solid transparent;overflow:hidden;cursor:pointer;background:var(--bg2) center/cover no-repeat;padding:0;min-height:0;display:grid;place-items:center;font:600 11px var(--display);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.7)}
+.bgTile[aria-pressed=true]{border-color:var(--gold)}
+.bgTile .x{position:absolute;right:2px;top:2px;width:22px;height:22px;min-height:0;border-radius:6px;background:rgba(0,0,0,.65);border:0;padding:0;font-size:13px;color:#fff}
+.bgTile.add{border:1px dashed var(--line2);color:var(--gold);text-shadow:none}
+.take{border:1px solid var(--line);border-radius:10px;padding:10px;display:grid;gap:8px;background:var(--bg2)}
+.take video{width:100%;max-height:260px;background:#000;border-radius:6px;display:block}
+.take .meta{font:500 11.5px var(--mono);color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}
+.take a.dl{font:600 13px var(--display);background:var(--gold);color:var(--ink);padding:0 12px;min-height:36px;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.note{background:var(--bg);border:1px solid var(--line);border-left:3px solid var(--warn);padding:10px 12px;font-size:13px;border-radius:8px;color:var(--fg)}
+.modal{position:fixed;inset:0;z-index:70;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.55)}
+.modal .card{width:min(440px,100%);display:grid;gap:14px}
+.modal h2{font-size:19px}
+.code{font:600 clamp(22px,7vw,30px) var(--mono);letter-spacing:.08em;color:var(--gold);background:var(--bg2);border:1px dashed var(--line2);border-radius:10px;padding:14px;text-align:center;user-select:all}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--gold);color:var(--ink);font:600 13.5px var(--display);padding:11px 16px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:80;max-width:calc(100vw - 32px);text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.toast.show{opacity:1}
+.toast.bad{background:#ffd1d3;color:#3a0a0c}
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.25);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#boot{position:fixed;inset:0;display:grid;place-items:center;background:var(--bg);z-index:100}
+
+/* ---------- responsive ---------- */
+@media (max-width:1000px){
+  #authView{grid-template-columns:1fr}
+  .pitch{padding:28px 16px 0;max-width:none}
+  .pitch p{font-size:15px}
+  .authWrap{padding-top:8px;padding-bottom:40px}
+  .kbdHint{display:none}
+}
+@media (max-width:700px){
+  .feats{grid-template-columns:1fr}
+  .stats,.who .nm{display:none}
+  .hideSm{display:none!important}
+  .ctl{grid-template-columns:96px 1fr auto}
+  .ctl.two{grid-template-columns:96px 1fr}
+  .stage.split.pip-s{--pipw:30vw} .stage.split.pip-m{--pipw:40vw} .stage.split.pip-l{--pipw:62vw}
+  .stage.split.portrait.pip-s{--pipw:22vw} .stage.split.portrait.pip-m{--pipw:28vw} .stage.split.portrait.pip-l{--pipw:40vw}
+  .dock{gap:6px}
+  .dock button{padding:0 11px}
+  .timer{font-size:16px;min-width:54px}
+  .libHead h1{font-size:22px}
+  .libHead .grow{flex-basis:100%}
+  .libHead .search{width:auto;flex:1}
+  .sc.new{display:none}
+}
+@media (max-width:420px){
+  .dock .lbl{display:none}
+  .bgGrid{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+<div id="boot" aria-live="polite"><div class="spinner" role="status" aria-label="Loading"></div></div>
+
+<!-- ================= AUTH ================= -->
+<div id="authView" hidden>
+  <section class="pitch">
+    <div class="logo"><span class="mark" aria-hidden="true"><span style="width:16px"><i style="background:var(--gold)"></i><i style="background:var(--fg-strong);width:70%"></i><i style="background:var(--muted);width:85%"></i></span></span>Prompter Cam</div>
+    <h1>Read your script. <em>Look at the lens.</em> Nail the take.</h1>
+    <p>A free teleprompter that sits right under your camera, with virtual backgrounds and one-click recording. Your scripts and settings are saved to your account, so they are waiting on any device.</p>
+    <ul class="feats">
+      <li><svg class="i" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Unlimited scripts, each with its own speed, size and look</li>
+      <li><svg class="i" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Blur, colour, studio or your own image as background</li>
+      <li><svg class="i" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Record 16:9, 9:16 reels or square, up to 4K</li>
+      <li><svg class="i" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Video never leaves your device</li>
+    </ul>
+  </section>
+  <div class="authWrap">
+    <div class="card">
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" id="tabIn" aria-selected="true" aria-controls="formIn">Sign in</button>
+        <button type="button" role="tab" id="tabUp" aria-selected="false" aria-controls="formUp">Create account</button>
+      </div>
+
+      <form id="formIn" class="stack" novalidate autocomplete="on">
+        <div class="field"><label for="inNum">Mobile number</label>
+          <div class="phone"><select id="inCc" aria-label="Country code"></select><input id="inNum" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="98765 43210" required></div></div>
+        <div class="field"><label for="inPin">4-digit PIN</label>
+          <div class="pinWrap"><input id="inPin" class="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="current-password" required><button type="button" class="ghost sm" data-eye="inPin">Show</button></div></div>
+        <p class="err" id="inErr" role="alert"></p>
+        <button class="primary" type="submit" id="inBtn">Sign in</button>
+        <div class="row" style="justify-content:space-between"><button type="button" class="linkbtn" id="toReset">Forgot PIN?</button><button type="button" class="linkbtn" id="toUp">New here? Create an account</button></div>
+      </form>
+
+      <form id="formUp" class="stack" novalidate hidden>
+        <div class="field"><label for="upName">Your name <span class="fine">(optional)</span></label><input id="upName" type="text" autocomplete="name" maxlength="60" placeholder="What should we call you?"></div>
+        <div class="field"><label for="upNum">Mobile number</label>
+          <div class="phone"><select id="upCc" aria-label="Country code"></select><input id="upNum" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="98765 43210" required></div></div>
+        <div class="field"><label for="upPin">Choose a 4-digit PIN</label>
+          <div class="pinWrap"><input id="upPin" class="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="new-password" required><button type="button" class="ghost sm" data-eye="upPin">Show</button></div></div>
+        <div class="field"><label for="upPin2">Confirm PIN</label><input id="upPin2" class="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="new-password" required></div>
+        <p class="err" id="upErr" role="alert"></p>
+        <button class="primary" type="submit" id="upBtn">Create account</button>
+        <p class="fine">We do not send an OTP, so your number is just your username. After sign-up you get a one-time recovery code: save it, it is the only way to reset a forgotten PIN.</p>
+      </form>
+
+      <form id="formReset" class="stack" novalidate hidden>
+        <h2 style="font-size:18px">Reset your PIN</h2>
+        <p class="small" style="margin:0">Use the recovery code you saved when you created your account.</p>
+        <div class="field"><label for="rsNum">Mobile number</label>
+          <div class="phone"><select id="rsCc" aria-label="Country code"></select><input id="rsNum" type="tel" inputmode="numeric" autocomplete="tel-national" required></div></div>
+        <div class="field"><label for="rsCode">Recovery code</label><input id="rsCode" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABCDE-23456" class="mono" required></div>
+        <div class="field"><label for="rsPin">New 4-digit PIN</label><input id="rsPin" class="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="new-password" required></div>
+        <p class="err" id="rsErr" role="alert"></p>
+        <button class="primary" type="submit" id="rsBtn">Reset PIN and sign in</button>
+        <button type="button" class="linkbtn" id="rsBack">Back to sign in</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ================= LIBRARY ================= -->
+<div id="libView" hidden>
+  <header class="bar"><div class="in">
+    <div class="logo"><span class="mark" aria-hidden="true"><span style="width:16px"><i style="background:var(--gold)"></i><i style="background:var(--fg-strong);width:70%"></i><i style="background:var(--muted);width:85%"></i></span></span><span>Prompter Cam</span></div>
+    <div class="grow"></div>
+    <button type="button" class="ghost who" id="btnAccount" aria-label="Account"><span class="nm" id="whoName"></span><span class="avatar" id="whoAv">?</span></button>
+  </div></header>
+  <main>
+    <div class="banner" id="legacyBanner" hidden>
+      <span class="grow">Scripts from the older Prompter Cam were found on this device. Import them into your account?</span>
+      <button type="button" class="primary sm" id="btnLegacy">Import</button><button type="button" class="ghost sm" id="btnLegacyNo">Not now</button>
+    </div>
+    <div class="libHead">
+      <div class="grow"><h1>Your scripts</h1><p class="small" id="libCount" style="margin:4px 0 0"></p></div>
+      <input type="search" class="search" id="libSearch" placeholder="Search scripts" aria-label="Search scripts">
+      <button type="button" class="primary" id="btnNew"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New script</button>
+    </div>
+    <div class="grid" id="libGrid"></div>
+  </main>
+</div>
+
+<!-- ================= STUDIO ================= -->
+<div id="studioView" hidden>
+  <header class="bar"><div class="in">
+    <button type="button" class="ghost icon" id="btnBack" aria-label="Back to scripts" title="Back to scripts"><svg class="i" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <div class="grow"><button type="button" class="titleBtn" id="stTitle" title="Edit script">Untitled</button></div>
+    <div class="stats"><span>Words <b id="stWords" class="tabnum">0</b></span><span>Read time <b id="stTime" class="tabnum">0:00</b></span></div>
+    <span class="save" id="saveState" aria-live="polite"></span>
+    <button type="button" class="ghost" id="btnEdit" title="Edit script (E)"><svg class="i" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg><span class="hideSm">Edit</span></button>
+    <button type="button" class="ghost" id="btnSettings" title="Settings (S)"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg><span class="hideSm">Settings</span></button>
+    <button type="button" class="ghost" id="btnTakes" title="Takes"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3"/></svg><span class="mono" id="takeCount">0</span></button>
+  </div></header>
+
+  <div class="stage split pip-m focus" id="stage">
+    <div class="progress" id="progress"></div>
+    <div class="camLayer" id="camLayer">
+      <canvas id="out" width="1280" height="720" aria-label="Camera preview"></canvas>
+      <div class="badge"><i></i><span id="camLabel">camera off</span></div>
+      <div class="meter"><i id="meter"></i></div>
+      <div class="camOff" id="camOff" role="button" tabindex="0">Tap <b>&nbsp;Camera&nbsp;</b> to turn on your webcam and mic</div>
+    </div>
+    <div class="guide" aria-hidden="true"></div>
+    <div class="scroll" id="scroll" tabindex="0" aria-label="Script"><div class="txt" id="txt"></div></div>
+  </div>
+
+  <div class="dock">
+    <button type="button" id="btnCam" title="Start camera"><svg class="i" viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><span class="lbl" id="camBtnLbl">Camera</span></button>
+    <button type="button" class="rec" id="btnRec" title="Record (R)"><svg class="i" viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><circle cx="12" cy="12" r="6"/></svg><span id="recLbl">Record</span></button>
+    <button type="button" class="primary" id="btnPlay" title="Scroll (Space)"><svg class="i" viewBox="0 0 24 24" id="playIco" style="fill:currentColor;stroke:none"><path d="M7 4v16l13-8z"/></svg><span class="lbl" id="playLbl">Scroll</span></button>
+    <button type="button" class="icon" id="btnTop" title="Back to top (Home)" aria-label="Back to top"><svg class="i" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+    <div class="spd"><button type="button" class="icon sm" id="spdDown" aria-label="Slower" title="Slower (←)">−</button><b id="spdVal" class="tabnum">130</b><span class="hideSm">wpm</span><button type="button" class="icon sm" id="spdUp" aria-label="Faster" title="Faster (→)">+</button></div>
+    <span class="timer tabnum" id="timer">00:00</span>
+    <div class="grow"></div>
+    <span class="kbdHint"><span class="kbd">Space</span> scroll <span class="kbd">R</span> record <span class="kbd">← →</span> speed <span class="kbd">H</span> hide cam</span>
+    <button type="button" class="ghost icon" id="btnCamHide" title="Hide / show camera (H)" aria-label="Hide or show camera preview"><svg class="i" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+    <button type="button" class="ghost icon" id="btnFull" title="Full screen (F)" aria-label="Full screen"><svg class="i" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
+  </div>
+  <div class="count" id="count" aria-live="assertive">3</div>
+</div>
+
+<!-- ================= DRAWERS ================= -->
+<div class="scrim" id="scrim"></div>
+
+<aside class="drawer" id="drEdit" aria-label="Edit script" role="dialog">
+  <header><h2>Edit script</h2><button type="button" class="ghost sm" data-close>Done</button></header>
+  <div class="body">
+    <div class="field"><label for="edTitle">Title</label><input id="edTitle" type="text" maxlength="120"></div>
+    <div class="field" style="min-height:0"><label for="edBody">Script</label><textarea id="edBody" spellcheck="true" style="min-height:52vh" placeholder="Paste or type your script. Leave a blank line between paragraphs."></textarea></div>
+    <p class="fine" style="margin:0">Tips: a line starting with <b>#</b> becomes a gold section cue. Wrap words in <b>**double stars**</b> to emphasise. Type <b>[pause]</b> for a visual pause marker. Changes save automatically.</p>
+  </div>
+</aside>
+
+<aside class="drawer" id="drSettings" aria-label="Settings" role="dialog">
+  <header><h2>Settings <span class="small" style="font-family:var(--body);font-weight:400">for this script</span></h2><button type="button" class="ghost sm" data-close>Done</button></header>
+  <div class="body" id="setBody">
+    <div class="sec"><h3>Scrolling</h3>
+      <div class="ctl"><label for="sWpm">Speed</label><input type="range" id="sWpm" min="60" max="260" step="5" data-k="wpm"><output for="sWpm" data-o="wpm"></output></div>
+      <div class="ctl"><label for="sGuide">Reading line</label><input type="range" id="sGuide" min="5" max="70" step="1" data-k="guide"><output data-o="guide"></output></div>
+      <div class="ctl two"><label>Countdown</label><div class="seg" data-seg="countdown"><button type="button" data-v="0">Off</button><button type="button" data-v="3">3 s</button><button type="button" data-v="5">5 s</button><button type="button" data-v="10">10 s</button></div></div>
+      <label class="chk"><input type="checkbox" data-k="autoScroll"> Start scrolling when recording starts</label>
+      <label class="chk"><input type="checkbox" data-k="focus"> Focus mode (fade text away from the reading line)</label>
+      <label class="chk"><input type="checkbox" data-k="showGuide"> Show reading line</label>
+      <label class="chk"><input type="checkbox" data-k="mirrorX"> Mirror text (for teleprompter glass)</label>
+    </div>
+    <div class="sec"><h3>Text</h3>
+      <div class="ctl"><label for="sSize">Size</label><input type="range" id="sSize" min="18" max="120" step="1" data-k="fontSize"><output data-o="fontSize"></output></div>
+      <div class="ctl"><label for="sLh">Line spacing</label><input type="range" id="sLh" min="1.1" max="2.2" step="0.05" data-k="lineHeight"><output data-o="lineHeight"></output></div>
+      <div class="ctl"><label for="sWidth">Line width</label><input type="range" id="sWidth" min="16" max="80" step="1" data-k="width"><output data-o="width"></output></div>
+      <div class="ctl two"><label for="sFont">Font</label><select id="sFont" data-k="font"><option value="plex">IBM Plex Sans</option><option value="atkinson">Atkinson Hyperlegible</option><option value="sora">Sora</option><option value="lora">Lora (serif)</option><option value="mono">IBM Plex Mono</option><option value="system">System font</option></select></div>
+      <div class="ctl two"><label>Weight</label><div class="seg" data-seg="weight"><button type="button" data-v="400">Regular</button><button type="button" data-v="500">Medium</button><button type="button" data-v="700">Bold</button></div></div>
+      <div class="ctl two"><label>Align</label><div class="seg" data-seg="align"><button type="button" data-v="left">Left</button><button type="button" data-v="center">Centre</button></div></div>
+      <div class="ctl two"><label>Colours</label><div class="row"><label class="row" style="gap:6px">Text <input type="color" data-k="textColor"></label><label class="row" style="gap:6px">Background <input type="color" data-k="stageColor"></label><button type="button" class="sm" id="swapCol">Light / dark</button></div></div>
+      <label class="chk"><input type="checkbox" data-k="upper"> ALL CAPS</label>
+    </div>
+    <div class="sec"><h3>Layout</h3>
+      <div class="ctl two"><label>Camera view</label><div class="seg" data-seg="layout"><button type="button" data-v="split">Text + small preview</button><button type="button" data-v="overlay">Text over camera</button></div></div>
+      <div class="ctl" data-show="overlay"><label for="sDim">Dim camera</label><input type="range" id="sDim" min="0" max="0.9" step="0.05" data-k="overlayDim"><output data-o="overlayDim"></output></div>
+      <div class="ctl two" data-show="split"><label>Preview size</label><div class="seg" data-seg="pipSize"><button type="button" data-v="s">S</button><button type="button" data-v="m">M</button><button type="button" data-v="l">L</button></div></div>
+      <div class="ctl two" data-show="split"><label>Preview corner</label><div class="seg" data-seg="pipPos"><button type="button" data-v="tl" aria-label="Top left">↖</button><button type="button" data-v="tr" aria-label="Top right">↗</button><button type="button" data-v="bl" aria-label="Bottom left">↙</button><button type="button" data-v="br" aria-label="Bottom right">↘</button></div></div>
+    </div>
+    <div class="sec"><h3>Background</h3>
+      <div class="bgGrid" id="bgGrid"></div>
+      <div class="ctl" data-showbg="blur"><label for="sBlur">Blur amount</label><input type="range" id="sBlur" min="4" max="40" step="1" data-k="bgBlur"><output data-o="bgBlur"></output></div>
+      <div class="ctl two" data-showbg="color"><label>Colour</label><input type="color" data-k="bgColor"></div>
+      <input type="file" id="bgFile" accept="image/jpeg,image/png,image/webp" hidden>
+      <p class="fine" style="margin:0">Backgrounds are applied on your device using an on-device AI model. Works best with even light and a plain wall behind you.</p>
+    </div>
+    <div class="sec"><h3>Camera &amp; recording</h3>
+      <div class="ctl two"><label>Frame</label><div class="seg" data-seg="aspect"><button type="button" data-v="16:9">16:9</button><button type="button" data-v="9:16">9:16 reel</button><button type="button" data-v="1:1">1:1</button><button type="button" data-v="4:5">4:5</button></div></div>
+      <div class="ctl two"><label>Quality</label><div class="seg" data-seg="res"><button type="button" data-v="720">720p</button><button type="button" data-v="1080">1080p</button><button type="button" data-v="2160">4K</button></div></div>
+      <div class="ctl two"><label>Frame rate</label><div class="seg" data-seg="fps"><button type="button" data-v="24">24</button><button type="button" data-v="30">30</button><button type="button" data-v="60">60</button></div></div>
+      <div class="ctl two"><label for="camSel">Camera</label><select id="camSel" data-dev="cam"><option value="">Default camera</option></select></div>
+      <div class="ctl two"><label for="micSel">Microphone</label><select id="micSel" data-dev="mic"><option value="">Default microphone</option></select></div>
+      <label class="chk"><input type="checkbox" data-k="mirrorPreview"> Mirror my preview (recording is never mirrored)</label>
+      <label class="chk"><input type="checkbox" data-k="noise"> Noise suppression &amp; echo cancellation</label>
+      <p class="fine" style="margin:0">Camera changes apply when you press <b>Apply camera</b> or restart the camera. Recordings stay on this device until you download them.</p>
+      <div class="row"><button type="button" id="btnApplyCam">Apply camera</button></div>
+    </div>
+  </div>
+  <footer><button type="button" class="primary sm" id="btnSaveDefault">Use as default for new scripts</button><button type="button" class="ghost sm" id="btnResetSet">Reset to my defaults</button></footer>
+</aside>
+
+<aside class="drawer" id="drTakes" aria-label="Takes" role="dialog">
+  <header><h2>Takes</h2><button type="button" class="ghost sm" data-close>Done</button></header>
+  <div class="body"><p class="small" id="takesHelp" style="margin:0">Nothing recorded yet.</p><div id="takes" style="display:grid;gap:12px"></div></div>
+</aside>
+
+<aside class="drawer" id="drAccount" aria-label="Account" role="dialog">
+  <header><h2>Account</h2><button type="button" class="ghost sm" data-close>Done</button></header>
+  <div class="body">
+    <div class="sec"><h3>Profile</h3>
+      <div class="field"><label for="acName">Name</label><input id="acName" type="text" maxlength="60"></div>
+      <div class="field"><label>Mobile number</label><div class="mono" id="acPhone" style="color:var(--fg-strong)"></div></div>
+      <div class="row"><button type="button" class="sm" id="btnSaveName">Save name</button></div>
+    </div>
+    <div class="sec"><h3>Change PIN</h3>
+      <div class="ctl two"><label for="acCur">Current PIN</label><input id="acCur" class="pin" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password"></div>
+      <div class="ctl two"><label for="acNew">New PIN</label><input id="acNew" class="pin" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password"></div>
+      <p class="err" id="acPinErr"></p>
+      <div class="row"><button type="button" class="sm" id="btnChangePin">Change PIN</button></div>
+    </div>
+    <div class="sec"><h3>Recovery code</h3>
+      <p class="small" style="margin:0">Lost your recovery code? Make a new one. The old one stops working.</p>
+      <div class="row"><button type="button" class="sm" id="btnNewRecovery">Get a new recovery code</button></div>
+    </div>
+    <div class="sec"><h3>Session</h3>
+      <div class="row"><button type="button" class="sm" id="btnLogout">Sign out</button></div>
+    </div>
+    <div class="sec"><h3>Danger zone</h3>
+      <p class="small" style="margin:0">Deletes your account, all scripts, settings and uploaded backgrounds. This cannot be undone.</p>
+      <div class="row"><button type="button" class="danger sm" id="btnDeleteAcc">Delete my account</button></div>
+    </div>
+  </div>
+</aside>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<video id="cam" playsinline muted autoplay hidden></video>
+<script type="module" src="/app.js"></script>
+</body>
+</html>
