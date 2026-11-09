@@ -1115,7 +1115,7 @@ function stepPeople(dt) {
       const k = p.kite;
       if (k.alive) {
         T.v.subVectors(k.world, p.pos);
-        p.yaw = lerp(p.yaw, Math.atan2(T.v.x, T.v.z), 1 - Math.exp(-dt * 3));
+        const dy = Math.atan2(T.v.x, T.v.z) - p.yaw; p.yaw += (dy - Math.PI * 2 * Math.round(dy / (Math.PI * 2))) * (1 - Math.exp(-dt * 3));
         raiseR = -2.1 - k.pull * 0.35 + sin(t * 9 + p.ph) * 0.06 * k.pull;
         raiseL = -0.7; armL = 0.25;
         lean = -0.08 - k.pull * 0.08;

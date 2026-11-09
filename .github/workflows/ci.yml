@@ -103,6 +103,9 @@ jobs:
       - name: Games suite
         run: npm run test:games
 
+      - name: Kart Mela chase camera follows the kart in every direction
+        run: npm run test:kartcam
+
       - name: Verify canonical app routes
         run: |
           test -f www/how-to/index.html

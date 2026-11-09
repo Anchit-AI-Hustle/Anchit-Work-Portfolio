@@ -2708,9 +2708,13 @@ function updateCamera(W, dt, a) {
   const look = (x, y, z) => { _ct.set(x, y, z); };
   if (mode === 'chase' || mode === 'grid') {
     const vx = Math.sin(P.h) * P.v - Math.cos(P.h) * P.slip, vz = Math.cos(P.h) * P.v + Math.sin(P.h) * P.slip;
-    const velYaw = Math.abs(P.v) > 2 ? Math.atan2(vx, vz) : P.h;
-    const want = P.drift ? lerp(P.h, velYaw, 0.55) : lerp(P.h, velYaw, 0.3);
-    r.camYaw += wrapA(want - r.camYaw) * Math.min(1, dt * (P.spinT > 0 || P.tumbleT > 0 ? 1.5 : 5.5));
+    // Angles blend along the short way round: a plain lerp across the +-PI seam swung the camera
+    // sideways whenever the kart faced that way. Velocity only steers the view at speed, and the
+    // further the view has fallen behind the kart's nose, the faster it catches up.
+    const spd = Math.abs(P.v), velYaw = spd > 2 ? Math.atan2(vx, vz) : P.h;
+    const want = P.h + wrapA(velYaw - P.h) * (P.drift ? 0.55 : 0.3) * clamp((spd - 3) / 12, 0, 1);
+    const lag = wrapA(want - r.camYaw);
+    r.camYaw = wrapA(r.camYaw + lag * Math.min(1, dt * (P.spinT > 0 || P.tumbleT > 0 ? 1.5 : 5.5 + Math.abs(lag) * 6)));
     let back = (port ? 6.4 : 5.6) + sp * 0.9, up = (port ? 2.85 : 2.3) + sp * 0.15;
     if (mode === 'grid') { back += Math.max(0, W.cd - 0.5) * 1.2; up += Math.max(0, W.cd - 0.5) * 0.5; }
     let yaw = r.camYaw;
@@ -3406,6 +3410,7 @@ const dev = {
   skip: () => { const W = Wd; if (!W) return; if (W.phase === 'intro') { W.phase = 'countdown'; W.cd = 0.05; W.fade = 0; } else if (W.phase === 'countdown') W.cd = 0.05; },
   ff: (sec) => { const n = Math.round(sec * 50); for (let i = 0; i < n && Wd && !Wd.results; i++) stepWorld(Wd, 0.02); },
   view: () => VIEW,
+  cam: () => (R3 && R3.camera ? { x: R3.camera.position.x, z: R3.camera.position.z, yaw: R3.camYaw, mode: R3.mode } : null),
   touch: () => TOUCH,
   bot: (on) => { if (Wd) Wd.P.bot = on !== false; },
   item: (id) => { if (Wd) { Wd.P.item = id || 'rocket'; Wd.P.roulT = 0; } },
