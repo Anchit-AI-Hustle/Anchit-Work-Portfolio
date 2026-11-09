@@ -336,7 +336,6 @@ function init(a) {
   try {
     renderer = new THREE.WebGLRenderer({ canvas: a.canvas, antialias: !GLINFO.soft, powerPreference: 'high-performance', stencil: false });
   } catch (e) { return fail(a); }
-  if (!renderer || !renderer.getContext()) return fail(a);
   R.soft = GLINFO.soft; LITE = R.soft && !/[?&](q=3|hq=1)/.test(location.search);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -406,7 +405,7 @@ function fitCamera(a) {
     }
     return (lo + hi) / 2;
   };
-  let lo = 20, hi = 400, D = 60, Ty = 14;
+  let lo = 20, hi = 400, D, Ty;
   for (let i = 0; i < 26; i++) {
     D = (lo + hi) / 2; Ty = solveTy(D, false); place(D, Ty);
     const span = ndcY(30.6) - ndcY(-0.8);

@@ -1086,7 +1086,7 @@ export function boot(view) {
     },
     render(ctx, a) {
       if (!GAME) { ctx.fillStyle = '#07060a'; ctx.fillRect(0, 0, a.w, a.h); return; }
-      let ok = true;
+      let ok;
       try { ok = view.render(a, GAME, ctx) !== false; } catch (e) { ok = false; console.warn(e); }
       if (ok) drawHUD(ctx, a, GAME);
     },

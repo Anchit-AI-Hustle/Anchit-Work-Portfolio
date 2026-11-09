@@ -934,7 +934,7 @@ export function boot(view) {
     },
     render(ctx, a) {
       if (!MG || !MG.pose) { ctx.fillStyle = '#07060a'; ctx.fillRect(0, 0, a.w, a.h); return; }
-      let ok = true;
+      let ok;
       try { ok = view.render(a, MG, ctx) !== false; } catch (e) { ok = false; console.warn(e); }
       if (!ok) return;
       drawHUD(ctx, a, MG);

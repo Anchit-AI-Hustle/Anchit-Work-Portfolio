@@ -143,7 +143,7 @@ function endlessLevel(n, seed) {
   for (let r = 0; r < rows; r++) {
     const half = [];
     for (let c = 0; c < 7; c++) {
-      let on = true;
+      let on;
       if (style === 0) on = R() < 0.72;
       else if (style === 1) on = ((r + c) % 2) === 0 || r % 4 === 0;
       else if (style === 2) on = c % 3 !== 2 || r % 3 === 0;
@@ -1295,7 +1295,7 @@ export function boot(view) {
     },
     render(ctx, a) {
       if (!MG) { drawLoading(ctx, a); return; }
-      let ok = true;
+      let ok;
       try { ok = view.render(a, MG, ctx) !== false; } catch (e) { ok = false; console.warn(e); }
       if (!ok) { drawLoading(ctx, a); return; }
       drawHUD(ctx, a, MG);

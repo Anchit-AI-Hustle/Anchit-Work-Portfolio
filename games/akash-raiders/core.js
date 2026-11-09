@@ -1092,7 +1092,7 @@ function drawHUD(ctx, a, g) {
   if (a.touchMode && a.touchStyle !== 'pads') px = W - pad.right - 120;
   if (P.spread > 0) px = pill(ctx, px, by, 'SPREAD', '#ffb736', P.spread, 12);
   if (P.shield > 0) px = pill(ctx, px, by, 'SHIELD', '#6ee7ff', P.shield, 14);
-  if (P.slow > 0) px = pill(ctx, px, by, 'SLOW', '#b69cff', P.slow, 7);
+  if (P.slow > 0) pill(ctx, px, by, 'SLOW', '#b69cff', P.slow, 7);
   // score pops and pickup labels, placed by the view's projection
   ctx.textAlign = 'center';
   for (let i = 0; i < NPOP; i++) {
@@ -1294,7 +1294,7 @@ export function boot(view) {
     },
     render(ctx, a) {
       if (!G) { ctx.fillStyle = '#05040c'; ctx.fillRect(0, 0, a.w, a.h); return; }
-      let ok = true;
+      let ok;
       try { ok = view.render(a, G, ctx) !== false; } catch (e) { ok = false; console.warn(e); }
       if (!ok) return;
       drawHUD(ctx, a, G);

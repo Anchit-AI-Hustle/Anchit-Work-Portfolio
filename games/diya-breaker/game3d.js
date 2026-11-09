@@ -160,7 +160,6 @@ const GLINFO = { soft: false };
 function setupRenderer(a) {
   let renderer;
   try { renderer = new THREE.WebGLRenderer({ canvas: a.canvas, antialias: !GLINFO.soft, powerPreference: 'high-performance' }); } catch (e) { return false; }
-  if (!renderer || !renderer.getContext()) return false;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
@@ -310,6 +309,8 @@ function reflMaterial(color, map, rough, strength, repeat) {
 function sizeRefl() {
   const t = TIERS[Math.max(0, R.quality)];
   REFL.on = t.refl > 0 && !R.lost;
+  // The shell can resize before the floor material that owns these uniforms is built.
+  if (!REFL.u) return;
   REFL.u.on.value = REFL.on ? 1 : 0;
   if (!REFL.on) return;
   const gl = R.renderer.getContext();
