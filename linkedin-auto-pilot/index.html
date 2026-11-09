@@ -71,12 +71,16 @@ footer{color:var(--muted);font-size:.85rem;margin-top:24px}
 (function(){
   var P=JSON.parse(document.getElementById('data').textContent);
   function el(t,c,x){var n=document.createElement(t);if(c)n.className=c;if(x!=null)n.textContent=x;return n;}
+  // Every URL from the post data is checked before it becomes a link or a video source: only
+  // https on the open web, a path on this site, or (for the demo videos) an inline video. Anything
+  // else, such as javascript: or other data: URLs, is dropped.
+  function safeUrl(u,local){try{var x=new URL(String(u),location.href);if(x.protocol==='https:'&&(!local||x.origin===location.origin))return x.href;}catch(e){}return null;}
   var LINK=/(https?:\/\/[^\s|)]+|(?:[a-z0-9-]+\.)+(?:com|in)(?:\/[^\s|)]*)?|#[A-Za-z0-9]+)/g;
   function render(node,text){
     node.textContent=''; var last=0; text.replace(LINK,function(m,_,i){
       node.appendChild(document.createTextNode(text.slice(last,i)));
       if(m.charAt(0)==='#'){node.appendChild(el('span','tag',m));}
-      else{var a=el('a',null,m);a.href=m.indexOf('http')===0?m:'https://'+m;a.target='_blank';a.rel='noopener';node.appendChild(a);}
+      else{var u=safeUrl(m.indexOf('http')===0?m:'https://'+m);if(u){var a=el('a',null,m);a.href=u;a.target='_blank';a.rel='noopener';node.appendChild(a);}else node.appendChild(document.createTextNode(m));}
       last=i+m.length; return m;});
     node.appendChild(document.createTextNode(text.slice(last)));
   }
@@ -86,14 +90,14 @@ footer{color:var(--muted);font-size:.85rem;margin-top:24px}
     var c=el('article','card'); c.id='day-'+p.day;
     var h=el('div','head'); h.appendChild(el('div','avatar','AT'));
     var who=el('div'); who.appendChild(el('div','name','Anchit Tandon')); who.appendChild(el('div','sub','Product Lead & AI Builder | Ex-Times Internet')); h.appendChild(who);
-    var dd=el('div','day'); dd.appendChild(el('div',null,'Day '+p.day)); dd.appendChild(el('div',null,p.when||'')); var bg=el('span','badge '+(p.status==='Live'?'live':'sched')); if(p.live){var la=el('a',null,'Live on LinkedIn ↗'); la.href=p.live; la.target='_blank'; la.rel='noopener'; bg.appendChild(la);} else bg.textContent=p.status||''; dd.appendChild(bg); h.appendChild(dd); c.appendChild(h);
+    var dd=el('div','day'); dd.appendChild(el('div',null,'Day '+p.day)); dd.appendChild(el('div',null,p.when||'')); var bg=el('span','badge '+(p.status==='Live'?'live':'sched')); var live=p.live&&safeUrl(p.live); if(live){var la=el('a',null,'Live on LinkedIn ↗'); la.href=live; la.target='_blank'; la.rel='noopener'; bg.appendChild(la);} else bg.textContent=p.status||''; dd.appendChild(bg); h.appendChild(dd); c.appendChild(h);
     var lines=p.post.split('\n'), short=lines.slice(0,2).join('\n');
     var body=el('div','body'); render(body,short); c.appendChild(body);
     var more=el('button','more','…see more'); more.type='button'; more.setAttribute('aria-expanded','false');
     function set(open){render(body,open?p.post:short); more.textContent=open?'show less':'…see more'; more.setAttribute('aria-expanded',String(open));}
     more.addEventListener('click',function(){set(more.getAttribute('aria-expanded')!=='true');});
     c.appendChild(more);
-    if(p.ad){var vw=el('div','ad'); var v=document.createElement('video'); v.src=p.ad; v.controls=true; v.muted=true; v.loop=true; v.playsInline=true; v.preload='metadata'; v.setAttribute('aria-label','Video ad for '+p.title); vw.appendChild(v); var ac=el('div','adcap'); ac.appendChild(el('span',null,'\ud83c\udfac Demo video: real screen recording of the live product, with music')); if(p.adname){var dl=el('span','adfile',p.adname); ac.appendChild(dl);} vw.appendChild(ac); c.appendChild(vw);}
+    var ad=p.ad&&(/^data:video\/(mp4|webm);base64,/.test(String(p.ad))?String(p.ad):safeUrl(p.ad,true)); if(ad){var vw=el('div','ad'); var v=document.createElement('video'); v.src=ad; v.controls=true; v.muted=true; v.loop=true; v.playsInline=true; v.preload='metadata'; v.setAttribute('aria-label','Video ad for '+p.title); vw.appendChild(v); var ac=el('div','adcap'); ac.appendChild(el('span',null,'\ud83c\udfac Demo video: real screen recording of the live product, with music')); if(p.adname){var dl=el('span','adfile',p.adname); ac.appendChild(dl);} vw.appendChild(ac); c.appendChild(vw);}
     var m=el('div','meta'); m.appendChild(el('span',null,p.title)); m.appendChild(el('span',null,p.post.length.toLocaleString('en-IN')+' of 3,000 characters')); c.appendChild(m);
     var cm=el('div','comment'); cm.appendChild(el('div','avatar','AT')); var b=el('div','bubble'); b.appendChild(el('b',null,'Anchit Tandon (first comment)')); var t=el('span'); render(t,p.first_comment); b.appendChild(t); cm.appendChild(b); c.appendChild(cm);
     feed.appendChild(c); cards.push(set);
