@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Chhat Hopper | Games | Anchit Tandon</title>
+  <meta name="description" content="A 3D side-scrolling platformer over old city rooftops, a monsoon forest and a night bazaar. Glide on your kite and win it back from a cheeky monkey.">
+  <link rel="canonical" href="https://anchit-tandon.com/games/chhat-hopper">
+  <meta name="theme-color" content="#0F0D0A">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Chhat Hopper | Games | Anchit Tandon">
+  <meta property="og:description" content="A 3D side-scrolling platformer over old city rooftops, a monsoon forest and a night bazaar. Glide on your kite and win it back from a cheeky monkey.">
+  <meta property="og:url" content="https://anchit-tandon.com/games/chhat-hopper">
+  <meta property="og:image" content="https://anchit-tandon.com/games/chhat-hopper/poster.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/icons/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/games/shared/arcade.css">
+</head>
+<body>
+  <noscript><p style="padding:24px;color:#FBF5EC;background:#0F0D0A;font-family:sans-serif">This game needs JavaScript.</p></noscript>
+  <script src="/games/shared/arcade.js" defer></script>
+  <script>
+    /* The 3D game needs WebGL2; without it the 2D version of the same game loads instead. */
+    document.addEventListener("DOMContentLoaded", function () {
+      var ok = false;
+      try { var gl = document.createElement("canvas").getContext("webgl2"); ok = !!gl; var x = gl && gl.getExtension("WEBGL_lose_context"); if (x) x.loseContext(); } catch (e) { ok = false; }
+      var s = document.createElement("script");
+      if (ok) { s.type = "module"; s.src = "/games/chhat-hopper/game3d.js"; } else { s.src = "/games/chhat-hopper/game.js"; }
+      document.body.appendChild(s);
+    });
+  </script>
+</body>
+</html>

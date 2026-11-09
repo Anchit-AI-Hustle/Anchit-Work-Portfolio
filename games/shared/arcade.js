@@ -24,6 +24,14 @@
  * gear button opens Settings, kept per player in localStorage and shared by
  * every game: button size, which side the stick sits, swipe and tilt
  * sensitivity, vibration and motion.
+ *
+ * Feel: arc.haptic(kind, strength) plays a named pattern ('tap', 'hit',
+ * 'heavy', 'success', 'fail', 'boost') on a phone's vibration motor and as
+ * controller rumble, honouring Settings > Vibration; arc.buzz(ms) still works
+ * and goes the same way. Panels fade and settle in and out rather than cut,
+ * Play fades through black, and arc.fade() gives a game the same cut.
+ * 3D games can add /games/shared/fx3d.js for bloom, grade, grain, letterbox
+ * and an establishing camera move.
  */
 (function () {
   'use strict';
@@ -289,6 +297,7 @@
         (opts.three ? '<canvas class="arc-hud" aria-hidden="true"></canvas>' : '') +
         '<div class="arc-float" aria-hidden="true"><i></i></div>' +
         '<div class="arc-hint"></div>' +
+        '<div class="arc-veil" aria-hidden="true"></div>' +
         '<div class="arc-toast" role="status" aria-live="polite"></div>' +
         '<div class="arc-touch"></div>' +
         '<div class="arc-panel" hidden><div class="arc-card" role="dialog" aria-modal="true"></div></div>' +
@@ -305,6 +314,7 @@
     const panel = app.querySelector('.arc-panel');
     const card = app.querySelector('.arc-card');
     const toastEl = app.querySelector('.arc-toast');
+    const veilEl = app.querySelector('.arc-veil');
     const hintEl = app.querySelector('.arc-hint');
     const touchEl = app.querySelector('.arc-touch');
     const btnPause = app.querySelector('[data-arc="pause"]');
@@ -424,7 +434,7 @@
         if (arc.state === 'play') { arc.pause(); e.preventDefault(); return; }
         if (arc.state === 'pause') { arc.resume(); e.preventDefault(); return; }
       }
-      if (!panel.hidden && (e.code === 'Enter' || e.code === 'NumpadEnter')) {
+      if (panelOpen() && (e.code === 'Enter' || e.code === 'NumpadEnter')) {
         const primary = card.querySelector('.arc-btn.primary');
         if (primary && document.activeElement && document.activeElement.tagName !== 'BUTTON') { primary.click(); e.preventDefault(); }
         return;
@@ -505,7 +515,25 @@
           '</div>' + (o.note ? '<div class="note">' + esc(o.note) + '</div>' : '') + '</div>';
       }).join('') + '</div>';
     };
-    let lastPanel = null;
+    let lastPanel = null, leaveTimer = 0;
+    // Panels never cut: a closed panel fades and scales in, an open one swaps
+    // its content with a short rise, and a closing one fades out while play
+    // resumes underneath. panelOpen() is false while it is fading away.
+    const panelOpen = () => !panel.hidden && !panel.classList.contains('fx-leave');
+    const showPanel = (kind) => {
+      clearTimeout(leaveTimer);
+      const wasOpen = panelOpen();
+      panel.classList.remove('fx-leave');
+      panel.hidden = false;
+      panel.classList.toggle('fx-over', kind === 'over');
+      if (!wasOpen) {
+        panel.classList.add('fx-enter');
+        void panel.offsetWidth; // commit the start state so the change below transitions
+        panel.classList.remove('fx-enter');
+      } else {
+        card.classList.remove('fx-swap'); void card.offsetWidth; card.classList.add('fx-swap');
+      }
+    };
     arc.panel = (p) => {
       p = p || {};
       if (!p.isSettings) lastPanel = p;
@@ -531,7 +559,7 @@
           if (!c) return;
           if (def.global) {
             prefs[id] = c.v; store.set('arcade.prefs', prefs); applyPrefs();
-            if (id === 'haptics' && c.v === 'on') arc.buzz(20, true);
+            if (id === 'haptics' && c.v === 'on') arc.haptic('hit', 0.8, true);
             if (id === 'graphics' && opts.graphics) { try { opts.graphics(c.v); } catch (err) { console.warn(err); } }
           }
           else { arc.choices[id] = c.v; store.set('arcade.' + slug + '.' + id, c.v); }
@@ -539,11 +567,29 @@
           seg.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
         });
       });
-      panel.hidden = false; app.classList.add('panel-open');
+      showPanel(p.kind);
+      app.classList.add('panel-open');
       const first = card.querySelector('.arc-btn.primary') || card.querySelector('.arc-btn');
       if (first && !arc.touchMode) setTimeout(() => { try { first.focus({ preventScroll: true }); } catch (e) { first.focus(); } }, 30);
     };
-    arc.hidePanel = () => { panel.hidden = true; app.classList.remove('panel-open'); card.innerHTML = ''; try { canvas.focus && canvas.focus(); } catch (e) { /* ignore */ } };
+    arc.hidePanel = () => {
+      app.classList.remove('panel-open');
+      clearTimeout(leaveTimer);
+      if (panel.hidden) { card.innerHTML = ''; }
+      else {
+        // Fade and lift the card away; the stage takes input at once.
+        panel.classList.remove('fx-over'); panel.classList.add('fx-leave');
+        leaveTimer = setTimeout(() => { panel.hidden = true; panel.classList.remove('fx-leave'); card.innerHTML = ''; }, arc.reducedMotion ? 150 : 240);
+      }
+      try { canvas.focus && canvas.focus(); } catch (e) { /* ignore */ }
+    };
+    // A short fade through black: Play, Play again, Restart, or a game's own cut.
+    let veilTimer = 0;
+    arc.fade = (hold) => {
+      clearTimeout(veilTimer);
+      veilEl.classList.add('on');
+      veilTimer = setTimeout(() => veilEl.classList.remove('on'), hold == null ? 150 : hold);
+    };
 
     arc.touchStyle = 'pads';
     const applyTouchStyle = () => {
@@ -572,6 +618,7 @@
       } catch (e) { wake = null; }
     };
     arc.start = () => {
+      arc.fade();
       arc.hidePanel(); input.clear(); arc.time = 0; arc.state = 'play'; paintPause(); sfx.unlock(); keepAwake(true);
       applyTouchStyle();
       store.set('arcade.played.' + slug, (store.get('arcade.played.' + slug, 0) || 0) + 1);
@@ -617,8 +664,9 @@
         o.push({ id: 'size', global: true, label: 'Button size', choices: [{ v: 's', label: 'Small' }, { v: 'm', label: 'Medium' }, { v: 'l', label: 'Large' }] });
         o.push({ id: 'hand', global: true, label: 'Stick on the', choices: [{ v: 'right', label: 'Left' }, { v: 'left', label: 'Right' }], note: 'Buttons sit on the other side.' });
         o.push({ id: 'sens', global: true, label: 'Swipe and tilt sensitivity', choices: [{ v: 'low', label: 'Gentle' }, { v: 'med', label: 'Normal' }, { v: 'high', label: 'Quick' }] });
-        if (navigator.vibrate) o.push({ id: 'haptics', global: true, label: 'Vibration', choices: [{ v: 'on', label: 'On' }, { v: 'off', label: 'Off' }] });
+        if (navigator.vibrate) o.push({ id: 'haptics', global: true, label: arc.gamepad ? 'Vibration and rumble' : 'Vibration', choices: [{ v: 'on', label: 'On' }, { v: 'off', label: 'Off' }] });
       }
+      if (!touchy && arc.gamepad) o.push({ id: 'haptics', global: true, label: 'Controller rumble', choices: [{ v: 'on', label: 'On' }, { v: 'off', label: 'Off' }] });
       if (opts.graphics) o.push({ id: 'graphics', global: true, label: 'Graphics', choices: [{ v: 'auto', label: 'Auto' }, { v: 'smooth', label: 'Smoother' }, { v: 'sharp', label: 'Sharper' }], note: 'Auto adjusts detail to keep play smooth. Smoother suits older phones, Sharper suits a fast computer.' });
       o.push({ id: 'motion', global: true, label: 'Motion', choices: [{ v: 'auto', label: 'Match my device' }, { v: 'full', label: 'Full' }, { v: 'reduced', label: 'Reduced' }], note: 'Reduced turns off screen shake and flashes.' });
       const dev = arc.gamepad ? 'a game controller' : arc.touchMode ? (arc.device === 'tablet' ? 'a tablet, by touch' : 'a phone, by touch') : 'keyboard and mouse';
@@ -636,14 +684,88 @@
       app.classList.toggle('lefty', prefs.hand === 'left');
       input.setSens(prefs.sens);
       arc.reducedMotion = prefs.motion === 'reduced' || (prefs.motion !== 'full' && sysReduced);
+      app.classList.toggle('rm', arc.reducedMotion);
     };
     applyPrefs();
-    // A short buzz on touch devices that have it. force: play it even before a round (the settings preview).
-    arc.buzz = (ms, force) => {
-      if (prefs.haptics !== 'on' || !navigator.vibrate || !(arc.touchMode || force)) return;
-      if (!force && arc.state !== 'play') return;
-      try { navigator.vibrate(ms); } catch (e) { /* not allowed yet */ }
+    /* haptics: a phone's vibration motor and a controller's rumble, one call */
+    // arc.haptic(kind, strength): kind is 'tap' | 'hit' | 'heavy' | 'success' |
+    // 'fail' | 'boost' (or a pattern object), strength 0..1 scales it. Plays
+    // during a round and on its results; Settings > Vibration turns it off for
+    // every game. A stronger pattern still playing is not cut off by a weaker one.
+    let hapticUntil = 0, hapticPri = 0, hapticAt = 0, rumbleTimers = [];
+    const activePad = () => {
+      if (!navigator.getGamepads) return null;
+      try {
+        const all = navigator.getGamepads();
+        if (gp.index != null && all[gp.index] && all[gp.index].connected) return all[gp.index];
+        for (let i = 0; i < all.length; i++) if (all[i] && all[i].connected) return all[i];
+      } catch (e) { /* no pads */ }
+      return null;
     };
+    const rumble = (steps, s) => {
+      rumbleTimers.forEach(clearTimeout); rumbleTimers = [];
+      const g = activePad(); if (!g) return;
+      const act = g.vibrationActuator;
+      const legacy = g.hapticActuators && g.hapticActuators[0];
+      const play = (dur, strong, weak) => {
+        try {
+          if (act && act.playEffect) {
+            const kind = act.effects && act.effects.indexOf && act.effects.indexOf('dual-rumble') < 0 && act.effects.indexOf('trigger-rumble') >= 0 ? 'trigger-rumble' : 'dual-rumble';
+            const params = kind === 'trigger-rumble' ? { duration: dur, leftTrigger: weak, rightTrigger: strong } : { startDelay: 0, duration: dur, strongMagnitude: strong, weakMagnitude: weak };
+            const r = act.playEffect(kind, params); if (r && r.catch) r.catch(() => {});
+          } else if (legacy && legacy.pulse) {
+            const r = legacy.pulse(Math.max(strong, weak), dur); if (r && r.catch) r.catch(() => {});
+          }
+        } catch (e) { /* no rumble on this pad */ }
+      };
+      steps.forEach((st) => {
+        // A light pattern still has to be felt: magnitudes keep a floor, like the phone pulse lengths do.
+        const k = 0.4 + 0.6 * s;
+        const go = () => play(Math.round(st[1]), clamp(st[2] * k, 0, 1), clamp(st[3] * k, 0, 1));
+        if (st[0] > 0) rumbleTimers.push(setTimeout(go, st[0])); else go();
+      });
+    };
+    // vib: a navigator.vibrate pattern; rumble: [delay ms, duration ms, strong, weak]; pri: what may cut in.
+    const HAPTICS = {
+      tap: { vib: [12], rumble: [[0, 55, 0.12, 0.35]], pri: 1 },
+      hit: { vib: [28], rumble: [[0, 120, 0.5, 0.7]], pri: 2 },
+      heavy: { vib: [60, 40, 30], rumble: [[0, 260, 1, 0.85], [300, 150, 0.45, 0.35]], pri: 3 },
+      success: { vib: [22, 50, 22, 50, 50], rumble: [[0, 90, 0.35, 0.55], [140, 90, 0.45, 0.65], [290, 240, 0.75, 0.9]], pri: 4 },
+      fail: { vib: [90, 70, 150], rumble: [[0, 180, 0.85, 0.35], [260, 300, 0.6, 0.2]], pri: 4 },
+      boost: { vib: [10, 25, 10, 25, 35], rumble: [[0, 420, 0.25, 0.8]], pri: 2 },
+    };
+    arc.haptics = HAPTICS;
+    const fireHaptic = (p, s, force, playOnly) => {
+      if (prefs.haptics === 'off' || !p) return false;
+      if (!force && !(arc.state === 'play' || (!playOnly && arc.state === 'over'))) return false;
+      s = clamp(s == null ? 1 : +s || 0, 0, 1);
+      if (s <= 0.01) return false;
+      const now = window.performance ? performance.now() : Date.now();
+      const pri = p.pri || 1;
+      if (now < hapticUntil && pri < hapticPri) return false;
+      if (now - hapticAt < 45 && pri <= hapticPri) return false;
+      // Reduced motion: one gentle pulse instead of a drum roll.
+      let vib = (p.vib || []).slice(), steps = (p.rumble || []).slice();
+      if (arc.reducedMotion) { vib = vib.slice(0, 1); steps = steps.slice(0, 1); s *= 0.75; }
+      let len = 0;
+      vib = vib.map((v, i) => (i % 2 ? v : Math.max(4, Math.round(v * (0.45 + 0.55 * s)))));
+      vib.forEach((v) => { len += v; });
+      steps.forEach((st) => { len = Math.max(len, st[0] + st[1]); });
+      hapticAt = now; hapticPri = pri; hapticUntil = now + len;
+      if (navigator.vibrate && vib.length && (arc.touchMode || force)) {
+        try { navigator.vibrate(vib.length === 1 ? vib[0] : vib); } catch (e) { /* not allowed yet */ }
+      }
+      if (arc.gamepad && steps.length) rumble(steps, s);
+      return true;
+    };
+    arc.haptic = (kind, strength, force) => fireHaptic(typeof kind === 'object' && kind ? kind : HAPTICS[kind] || HAPTICS.tap, strength, force, false);
+    // A short buzz (kept for every game written before arc.haptic). force: play it even before a round (the settings preview).
+    arc.buzz = (ms, force) => {
+      ms = Math.max(1, +ms || 0);
+      const p = { vib: [ms], rumble: [[0, Math.round(ms * 1.6 + 30), clamp(ms / 70, 0.1, 1), clamp(ms / 40, 0.2, 1)]], pri: ms >= 60 ? 3 : ms >= 25 ? 2 : 1 };
+      return fireHaptic(p, 1, force, true);
+    };
+    arc.hapticAge = () => (window.performance ? performance.now() : Date.now()) - hapticAt;
 
     /* scores */
     const bestKey = 'arcade.best.' + slug;
@@ -666,6 +788,7 @@
           (r.isNew ? '<div class="new">New best<b class="new">&#9733;</b></div>' : '') + '</div>';
       }
       arc.panel({
+        kind: 'over',
         eyebrow: o.eyebrow || 'Game over', title: o.title || 'Game over', html: (o.html || '') + stats,
         actions: [{ label: o.again || 'Play again', primary: true, on: arc.start }, { label: 'Change settings', on: () => arc.menu() }, { label: 'All games', href: '/games' }],
       });
@@ -692,7 +815,7 @@
       if (!b.length) b = ['Space'];
       return [b[0], b[1], b[2], b[3], g.rt || b[0], g.lt || null];
     }
-    const gp = { prev: [], held: new Map(), navT: 0 };
+    const gp = { prev: [], held: new Map(), navT: 0, index: null };
     // An open panel's legend follows the device: a controller plugged in mid-menu swaps it at once.
     const refreshKeys = () => { const k = card.querySelector('.arc-keys'); if (k) k.outerHTML = keysHtml() || '<div class="arc-keys"></div>'; };
     const btn = (g, i) => !!(g.buttons[i] && (g.buttons[i].pressed || g.buttons[i].value > 0.5));
@@ -701,7 +824,7 @@
     const pollPad = (dt) => {
       if (!navigator.getGamepads) return;
       let g = null;
-      try { const all = navigator.getGamepads(); for (let i = 0; i < all.length; i++) if (all[i] && all[i].connected) { g = all[i]; break; } } catch (e) { return; }
+      try { const all = navigator.getGamepads(); for (let i = 0; i < all.length; i++) if (all[i] && all[i].connected) { g = all[i]; gp.index = i; break; } } catch (e) { return; }
       if (!g) { if (arc.gamepad) { arc.gamepad = false; releasePad(); } return; }
       if (!arc.gamepad) { arc.gamepad = true; arc.toast('Controller connected', null, 1600); refreshKeys(); }
       const dz = (v) => (Math.abs(v) < 0.2 ? 0 : (v - Math.sign(v) * 0.2) / 0.8);
@@ -711,7 +834,7 @@
       if (pressedAny || x || y) { arc.inputMode = 'gamepad'; if (arc.touchMode) setTouch(false); }
       const edge = (i) => btn(g, i) && !gp.prev[i];
       if (edge(9) || edge(8)) { if (arc.state === 'play') arc.pause(); else if (arc.state === 'pause') arc.resume(); }
-      else if (!panel.hidden) {
+      else if (panelOpen()) {
         // Menus: stick or d-pad moves between buttons, A presses, B goes back to the game.
         releasePad();
         gp.navT -= dt;
@@ -754,7 +877,7 @@
         arc.shakeX = arc.shakeY = 0;
         // A hit big enough to shake the screen is felt on a phone too.
         const shake0 = arc.shake;
-        if (shake0 > shakeSeen + 4) arc.buzz(Math.round(clamp(shake0 * 3, 12, 60)));
+        if (shake0 > shakeSeen + 4 && arc.hapticAge() > 160) arc.buzz(Math.round(clamp(shake0 * 3, 12, 60)));
         if (arc.shake > 0 && !arc.reducedMotion) {
           const s = arc.shake;
           arc.shakeX = (Math.random() - 0.5) * s * 2; arc.shakeY = (Math.random() - 0.5) * s * 2;

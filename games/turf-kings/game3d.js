@@ -1,4 +1,5 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
+import { createFX as createPost } from '/games/shared/fx3d.js';
 
 /*
  * Turf Kings 3D: arcade five-a-side football on a floodlit rooftop cage pitch.
@@ -83,7 +84,7 @@ const G0 = { x: 0, y: 0 }, G1 = { x: 0, y: 0 }, PJ = { x: 0, y: 0 }, SW = { x: 0
 // phones look down the pitch from behind the attack; wide screens look across it.
 const V = { portrait: false, f: 1, lx: 0, ly: -1, rx: 1, ry: 0 };
 const CAM = { snap: true, tx: 0, ty: 0, zm: 1, pen: false };
-let renderer = null, scene = null, camera = null, NOGL = false, LOST = false;
+let renderer = null, scene = null, camera = null, NOGL = false, LOST = false, POST = null;
 
 const uOf = (x, y) => x * V.rx + y * V.ry;
 const vOf = (x, y) => -(x * V.lx + y * V.ly);
@@ -253,6 +254,7 @@ function kickBall(p, dx, dy, speed, vz, kind) {
   const pw = clamp(speed / 900, 0, 1);
   for (let i = 0; i < 3; i++) spawn(0, b.x, b.y, 2, (rnd() - 0.5) * 60 - dx * 30, (rnd() - 0.5) * 60 - dy * 30, 20 + rnd() * 20, 0.35, '#e8efdc', 3);
   if (kind === 'shot') snd.kick(pw); else snd.pass();
+  if (!S.demo && p.team === 0 && p.i === S.ctrl) arc.haptic(kind === 'shot' ? 'hit' : 'tap', kind === 'shot' ? 0.5 + pw * 0.5 : 0.35);
   if (kind === 'shot') S.excite = Math.min(1, S.excite + 0.5);
 }
 function ballConfine() {
@@ -418,6 +420,7 @@ function wallBounce(sp) {
 }
 function postHit() {
   snd.post(); S.excite = 1;
+  if (!S.demo) { arc.haptic('hit', 0.9); if (POST) POST.kick(-3); }
   if (S.phase === 'penalties') return;
   sayRare('post', true);
   const b = S.ball; for (let i = 0; i < 4; i++) spawn(2, b.x, b.y, b.z, (rnd() - 0.5) * 120, (rnd() - 0.5) * 120, 40 + rnd() * 50, 0.4, '#ffe9a8', 2);
@@ -448,6 +451,7 @@ function scoreGoal(sx) {
   S.excite = 1; S.flash = arc.reducedMotion ? 0 : 1;
   confetti(scorer.x, scorer.y, team);
   snd.roar(true); snd.whistle(false);
+  if (!S.demo) { arc.haptic(team === 0 ? 'success' : 'fail', 1); if (POST) { POST.flash(team === 0 ? 0.24 : 0.1, '#fff2d0'); POST.kick(-5); } }
   if (!S.demo) {
     arc.toast('GOAL!', scorer.name + (og ? ' (og)' : '') + '  ' + S.teams[team].abbr + '  ' + matchClock(), 2800);
     say(og ? pick(LINES.og) : pick(LINES.goal), 3);
@@ -473,6 +477,7 @@ function callFoul(fouler, victim) {
   S.charging = false;
   const b = S.ball; b.owner = null; b.vx = b.vy = b.vz = 0; b.z = 0; b.x = S.foul.x; b.y = S.foul.y;
   snd.whistle(false);
+  if (!S.demo) arc.haptic('hit', 0.6);
   if (!S.demo) { arc.toast('Foul!', 'Free kick ' + S.teams[victim.team].short, 1800); say('Clumsy from behind. Free kick.', 2.6); }
 }
 
@@ -1165,7 +1170,8 @@ function penResolve(goal) {
   const pen = S.pen; if (pen.stage === 'result') return;
   pen.kicks[pen.team].push(goal ? 1 : 0);
   pen.stage = 'result'; pen.t = 0; pen.res = goal ? 'goal' : (pen.saved ? 'saved' : 'missed');
-  if (goal) { snd.roar(true); if (!S.demo) arc.toast('GOAL!', pen.taker.name, 1500); confetti(HL, 0, pen.team); }
+  if (!S.demo) arc.haptic(goal === (pen.team === 0) ? 'success' : 'fail', 0.9);
+  if (goal) { snd.roar(true); if (!S.demo) arc.toast('GOAL!', pen.taker.name, 1500); confetti(HL, 0, pen.team); if (POST) POST.flash(0.18, '#fff2d0'); }
   else { snd.ooh(); if (!S.demo) arc.toast(pen.saved ? 'Saved!' : 'Missed!', pen.taker.name, 1500); }
   pen.k++;
   // decided?
@@ -1384,6 +1390,7 @@ function showResult() {
     '<p>' + sc + '</p>' +
     '<div class="stat"><div>Shots<b>' + S.stats.shots[0] + ' - ' + S.stats.shots[1] + '</b></div><div>On target<b>' + S.stats.sot[0] + ' - ' + S.stats.sot[1] + '</b></div><div>Possession<b>' + pa + '% - ' + (100 - pa) + '%</b></div><div>Fouls<b>' + S.stats.fouls[0] + ' - ' + S.stats.fouls[1] + '</b></div></div>';
   const verdict = won ? (tie ? 'Won on penalties' : 'Victory') : drew ? 'Honours even' : 'Beaten';
+  arc.haptic(won ? 'success' : drew ? 'hit' : 'fail', 1);
   const detail = '<p>Points: goals ' + h * 100 + ' minus conceded ' + a * 50 + (won ? ' plus win bonus ' + (tie ? 200 : 300) : drew ? ' plus draw bonus 100' : '') + ' = <b style="color:var(--ink)">' + pts + '</b></p>';
   if (S.cfg.mode !== 'cup') {
     arc.over({ score: pts, scoreLabel: 'Points', eyebrow: 'Full time', title: verdict, html: html + detail, again: 'Play again' });
@@ -2570,7 +2577,7 @@ function render(ctx, a) {
   if (PERF.skip <= 1 || PERF.tick % PERF.skip === 0 || PERF.tick < 3) {
     camStep(running ? dtR * PERF.skip : 0);
     syncScene(running ? dtR * PERF.skip : 0, running);
-    if (!LOST) renderer.render(scene, camera);
+    if (!LOST) { if (POST) { const L = PERF.level; POST.setQuality(L <= 0 ? 3 : L === 1 ? 2 : L === 2 ? 1 : 0, PERF.lock); POST.render(scene, camera); } else renderer.render(scene, camera); }
   }
   perfTick(dtMs);
   if (!(a.state === 'menu')) {
@@ -2669,6 +2676,9 @@ function initThree(a) {
   buildRigs();
   buildFx(TEXQ);
   scene.add(camera);
+  // Shared post pass: bloom on the floodlights and the city, grade, grain. A sweep over the rooftop pitch
+  // at kick-off settles on the broadcast shot; the results drift slowly over the stadium.
+  POST = createPost(renderer, { arc: a, soft, intro: { yaw: 0.9, up: 0.25, back: 0.35, dur: 2.2 }, results: { yaw: 0.3, rise: 0.05 }, target: (v) => (CAM.pen ? null : v.set(CAM.tx, 0, CAM.ty)), look: { bloom: 0.55, threshold: 0.7 } });
   if (soft && !qm) { PERF.level = 3; applyQuality(3); }
   if (qm) { PERF.lock = true; PERF.level = +qm[1]; applyQuality(PERF.level); }
 }

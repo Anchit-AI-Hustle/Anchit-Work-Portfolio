@@ -1,4 +1,5 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
+import { createFX as createPost } from '/games/shared/fx3d.js';
 /*
  * Sky Thread, in real 3D: kite fighting over an invented old-city neighbourhood
  * at sunset, on a festival evening. Original world, names and code.
@@ -53,6 +54,7 @@ const KW = 0.95, KH = 1.1; // kite half width and half height, metres
 const EYE = new V3(0, 10.6, -1.8);
 
 /* ====================================================================== state of the 3D side */
+let POST = null;
 const R3 = {
   ok: false, lost: false, soft: false, q: 2, qMax: 3, lock: false, accT: 0, accN: 0, fps: 0, settle: 1, goodT: 0,
   renderer: null, scene: null, cam: null, camRef: null, tanH: 0.5, pitch: 0.2, fov: 55, aspect: 1,
@@ -240,11 +242,13 @@ function cutKite(k, byMe, hit) {
     floatPop(k.world, 'CUT', '+' + pts);
     arc.toast('Thread cut', '+' + pts, 900);
     G.slow = 0.42; R3.punch = 1;
-    arc.shake += 7; arc.buzz(35);
+    arc.shake += 7; arc.haptic('success', 0.85);
+    if (POST) { POST.flash(0.22, '#fff0c8'); POST.kick(-5); }
     arc.sfx.noise(0.6, { filter: 'bandpass', freq: 900, vol: 0.06 });
     cheer(k);
   } else {
-    arc.shake += 11; arc.buzz(90);
+    arc.shake += 11; arc.haptic(k === G.me ? 'fail' : 'heavy', k === G.me ? 1 : 0.5);
+    if (POST && k === G.me) POST.kick(6);
     if (k === G.me) cheerRivals();
   }
 }
@@ -382,6 +386,7 @@ function spawnRival() {
 function finish(why) {
   if (G.phase === 'over' || G.attract || !arc || arc.state !== 'play') return;
   G.phase = 'over';
+  arc.haptic(G.alive ? 'success' : 'fail');
   arc.over({
     eyebrow: why, title: G.cuts >= 6 ? 'Sky <em>cleared</em>' : 'Thread <em>cut</em>',
     score: G.score, scoreLabel: 'Score',
@@ -1732,6 +1737,8 @@ function boot(a) {
         R3.env = pm.fromScene(env, 0.04).texture; R3.scene.environment = R3.env; R3.scene.environmentIntensity = 0.55;
         pm.dispose();
       } catch (e) { /* no environment: still lit */ }
+      // Shared post pass: bloom on the sun, lanterns and threads, grade, grain; a slow pan up into the sky at the start.
+      POST = createPost(R3.renderer, { arc, soft: R3.soft, intro: { dist: 30, yaw: 0.4, up: 0.08, back: 0.15, dur: 2.2 }, results: { dist: 30, yaw: 0.16, rise: 0.04 }, look: { bloom: 0.55, threshold: 0.7 } });
       applyQuality();
       R3.ok = true;
     }
@@ -1952,7 +1959,7 @@ function render(c, a) {
       drawThreads();
       drawGlow();
       const t1 = performance.now();
-      R3.renderer.render(R3.scene, R3.cam);
+      if (POST) { POST.setQuality(R3.q, R3.lock); POST.render(R3.scene, R3.cam); } else R3.renderer.render(R3.scene, R3.cam);
       const t2 = performance.now();
       R3.msPrep = lerp(R3.msPrep || 0, t1 - t0, 0.1); R3.msGL = lerp(R3.msGL || 0, t2 - t1, 0.1);
     } catch (err) {

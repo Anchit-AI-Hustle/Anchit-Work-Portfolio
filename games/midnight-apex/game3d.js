@@ -1,4 +1,5 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
+import { createFX as createPost } from '/games/shared/fx3d.js';
 
 /*
  * Midnight Apex, 3D edition.
@@ -535,6 +536,8 @@ function crashFx(W, strength, side, kind) {
   if (W.attract) { P.hitCd = 0.35; return; }
   P.cleanT = 0; P.hitCd = 0.35; P.crashes++;
   if (!ARC.reducedMotion) W.shake = Math.max(W.shake, 6 + strength * 12);
+  ARC.haptic(strength > 0.5 ? 'heavy' : 'hit', 0.5 + strength * 0.5);
+  if (POST && strength > 0.5) { POST.flash(0.16 + strength * 0.12, '#ffd8b8'); POST.kick(-4); }
   sparksAt(W, side || (Math.random() < 0.5 ? -1 : 1), Math.round(8 + strength * 22), 0.8 + strength * 0.7);
   ARC.sfx.noise(0.3, { freq: 560, vol: 0.14 + 0.3 * strength });
   ARC.sfx.tone(120, 0.24, { type: 'sawtooth', slide: 42, vol: 0.12 + 0.14 * strength });
@@ -583,6 +586,7 @@ function updatePlayer(W, dt) {
   if (live && racing && nit && P.nitro > 0 && P.speed > 1800) {
     if (!P.nitroOn) {
       P.nitroOn = true;
+      if (!W.attract) { ARC.haptic('boost', 1); if (POST) POST.kick(6); }
       ARC.sfx.noise(0.8, { filter: 'highpass', freq: 900, vol: 0.28 });
       ARC.sfx.tone(260, 0.6, { type: 'sawtooth', slide: 1100, vol: 0.1 });
     }
@@ -602,7 +606,7 @@ function updatePlayer(W, dt) {
       if (dz > CL + 200 && dz < CL + 3800 && adx < 0.26 && o.speed > BASE_MAX * 0.33 && P.speed > BASE_MAX * 0.45) drafting = true;
       if (adz < CL && adx > 0.34 && adx < 0.47 && P.speed > o.speed + 1300 && W.t - o.nmT > 2 && P.hitCd <= 0) {
         o.nmT = W.t; P.nearMisses++; addNitro(W, 13);
-        ARC.toast('Near miss', '+ nitro', 700);
+        ARC.toast('Near miss', '+ nitro', 700); ARC.haptic('tap', 0.6);
         ARC.sfx.noise(0.18, { filter: 'highpass', freq: 1400, vol: 0.2 });
       }
     }
@@ -739,7 +743,7 @@ function wallScrape(W, side, dt) {
   W.sparksT -= dt;
   if (W.sparksT <= 0 && P.speed > 1200) { W.sparksT = 0.05; sparksAt(W, side, 3, 0.8); }
   W.scr -= dt;
-  if (W.scr <= 0) { W.scr = 0.12; if (!W.attract) ARC.sfx.noise(0.14, { filter: 'bandpass', freq: 1700, vol: 0.14 }); }
+  if (W.scr <= 0) { W.scr = 0.12; if (!W.attract) { ARC.sfx.noise(0.14, { filter: 'bandpass', freq: 1700, vol: 0.14 }); ARC.haptic('tap', 0.45); } }
   if (!ARC.reducedMotion) W.shake = Math.max(W.shake, 3);
 }
 
@@ -767,7 +771,7 @@ function updateLaps(W) {
       let msg = fmtTime(lt), sub = lap < LAPS ? 'Lap ' + lap + ' done' : 'Final lap';
       if (lt <= prevBest) sub += ' - best lap';
       if (stored != null) msg += '  (' + (lt <= stored ? '-' : '+') + Math.abs(lt - stored).toFixed(2) + ')';
-      if (lap < LAPS) { ARC.toast(msg, sub, 2000); ARC.sfx.tone(660, 0.12, { type: 'triangle', vol: 0.2 }); ARC.sfx.tone(990, 0.16, { type: 'triangle', vol: 0.2, delay: 0.12 }); }
+      if (lap < LAPS) { ARC.haptic('hit', 0.6); ARC.toast(msg, sub, 2000); ARC.sfx.tone(660, 0.12, { type: 'triangle', vol: 0.2 }); ARC.sfx.tone(990, 0.16, { type: 'triangle', vol: 0.2, delay: 0.12 }); }
       if (lap >= LAPS) finishPlayer(W, tNow);
     }
   }
@@ -782,6 +786,8 @@ function finishPlayer(W, tNow) {
   ARC.toast(W.mode === 'race' ? 'You finished ' + ordinal(pos) : 'Time ' + fmtTime(tNow), 'Chequered flag', 2600);
   [523, 659, 784, 1046].forEach((f, i) => ARC.sfx.tone(f, 0.22, { type: 'triangle', vol: 0.2, delay: i * 0.11 }));
   if (FX) FX.confetti(W);
+  ARC.haptic(W.mode !== 'race' || pos <= 3 ? 'success' : 'hit', 1);
+  if (POST) POST.flash(0.2, '#fff2d0');
 }
 
 /* ------------------------------------------------------------ main step */
@@ -792,8 +798,8 @@ function stepWorld(W, dt) {
     const step = W.cd < 0.6 ? -1 : W.cd < 1.4 ? 0 : W.cd < 2.2 ? 1 : W.cd < 3.0 ? 2 : 3;
     if (step !== W.lastBeep) {
       W.lastBeep = step;
-      if (step >= 0 && step < 3) beep(520, 0.16, 0.18);
-      if (step === 3) { beep(1040, 0.5, 0.2); ARC.toast('GO!', '', 900); W.phase = 'racing'; W.t = 0; W.goT = 0.9; }
+      if (step >= 0 && step < 3) { beep(520, 0.16, 0.18); if (!W.attract) ARC.haptic('tap', 0.4); }
+      if (step === 3) { beep(1040, 0.5, 0.2); if (!W.attract) ARC.haptic('hit', 0.8); ARC.toast('GO!', '', 900); W.phase = 'racing'; W.t = 0; W.goT = 0.9; }
     }
     advanceAI(W, dt, false);
     updatePlayer(W, dt);
@@ -861,6 +867,7 @@ function endRace(W) {
 
 function timeUp() {
   engineStop();
+  ARC.haptic('fail');
   ARC.over({
     eyebrow: 'Out of time', title: 'Time <em>up</em>',
     html: '<p>Eight minutes on the clock and no chequered flag. Pull the nitro in the straights and keep it clean in the bends.</p>',
@@ -2120,7 +2127,7 @@ function trackExtents(T) {
 }
 
 /* ------------------------------------------------------------ the 3D stage: renderer, lights, sky, camera */
-let R3 = null;
+let R3 = null, POST = null;
 let NO3D = false;
 
 function setup3D(arc) {
@@ -2167,6 +2174,9 @@ function setup3D(arc) {
   } catch (e) { R3.soft = false; }
   arc.canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); R3.lost = true; });
   arc.canvas.addEventListener('webglcontextrestored', () => { R3.lost = false; });
+  // Shared post pass: bloom on street lamps, tail lights and neon, grade, grain. During the countdown the
+  // camera swings round from the front quarter onto the chase shot; the results drift slowly round the car.
+  POST = createPost(renderer, { arc, soft: R3.soft, intro: { yaw: 1.1, up: 0.35, back: 0.4, dur: 2.8 }, results: { yaw: 0.45, rise: 0.15 }, target: (v) => (R3.cars && R3.cars.player ? v.set(0, 0.6, 0).applyMatrix4(R3.cars.player.root.matrix) : null), look: { bloom: 0.85, bloomWide: 0.65, threshold: 0.6, sat: 1.08 } });
   return true;
 }
 
@@ -2355,7 +2365,8 @@ function renderScene(W, dt, a) {
   }
   const maxD = TIERS[Math.max(0, r.quality)].cull;
   for (let i = 0; i < CULL.length; i++) { const c = CULL[i], dx = c.x - cp.x, dy = c.y - cp.y, dz = c.z - cp.z; c.im.visible = (!c.im.userData.ov || TIERS[Math.max(0, r.quality)].overlay) && Math.sqrt(dx * dx + dy * dy + dz * dz) - c.r < maxD; }
-  r.renderer.render(r.scene, r.camera); if (!r.firstR) { r.firstR = 1; }
+  if (POST) { POST.setQuality(r.quality, r.lockQ); POST.render(r.scene, r.camera); } else r.renderer.render(r.scene, r.camera);
+  if (!r.firstR) { r.firstR = 1; }
 }
 
 /* ------------------------------------------------------------ HUD */
