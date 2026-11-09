@@ -4,10 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Marketing Calendar | AI Campaign Planner | Lifecycle OS</title>
-<link rel="icon" type="image/png" href="AnchitTandon-AppLogo.png">
+<link rel="icon" type="image/png" href="/icons/anchit-app-icon-192-20260607.png">
 <meta name="theme-color" content="#FF6940">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
 <style>
   /* Champagne palette, anchit-tandon.com Lifecycle OS. RGB triplets so Tailwind
      opacity modifiers (bg-gold/20 etc.) resolve via rgb(var(--x)/<alpha-value>). */
@@ -24,17 +23,6 @@
     --chip-rgb:242 234 220; --line-rgb:168 134 63;
   }
 </style>
-<script>
-  if (typeof tailwind !== 'undefined') tailwind.config = { theme: { extend: {
-    colors: {
-      bg:   { DEFAULT:'rgb(var(--bg-rgb)/<alpha-value>)', soft:'rgb(var(--surface-rgb)/<alpha-value>)', card:'rgb(var(--card-rgb)/<alpha-value>)' },
-      ink:  { DEFAULT:'rgb(var(--ink-rgb)/<alpha-value>)', dim:'rgb(var(--ink-dim-rgb)/<alpha-value>)', mute:'rgb(var(--ink-mute-rgb)/<alpha-value>)' },
-      green:{ DEFAULT:'rgb(var(--primary-rgb)/<alpha-value>)', bright:'rgb(var(--accent-rgb)/<alpha-value>)' },
-      gold: { DEFAULT:'rgb(var(--gold-rgb)/<alpha-value>)' }, cream:'rgb(var(--cream-rgb)/<alpha-value>)',
-    },
-    fontFamily: { sans:['Inter','sans-serif'], mono:['"JetBrains Mono"','monospace'], serif:['Fraunces','Georgia','serif'] },
-  }}};
-</script>
 <style>
   body { background:rgb(var(--bg-rgb)); color:rgb(var(--ink-rgb)); font-family:'Inter',sans-serif; overflow-x:hidden; }
   body::before{ content:''; position:fixed; inset:0; z-index:0; pointer-events:none; background:radial-gradient(44% 38% at 14% 8%, rgba(255,105,64,.10), transparent 60%), radial-gradient(40% 36% at 88% 16%, rgba(201,169,110,.10), transparent 62%); }
@@ -190,6 +178,8 @@
 }
 </script>
 <!-- seo:auto:end -->
+<!-- Tailwind, compiled at build time by scripts/build-tailwind.mjs with the theme this page used to hand the CDN compiler. Last in <head> so utilities follow the page's own rules, as the CDN's injected <style> did. -->
+<link rel="stylesheet" href="/assets/tw-lifecycle-calendar.css">
 </head>
 <body class="min-h-screen">
 

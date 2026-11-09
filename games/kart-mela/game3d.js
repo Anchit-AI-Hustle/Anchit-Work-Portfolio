@@ -1234,10 +1234,10 @@ function softBlob(g, x, y, r, col, a) {
 }
 function vnoise(seed, cells) {
   const r = rng(seed), G = new Float32Array(cells * cells); for (let i = 0; i < G.length; i++) G[i] = r();
+  const g = (i, j) => G[((j % cells + cells) % cells) * cells + ((i % cells + cells) % cells)];
   return (u, v) => {
     const x = u * cells, y = v * cells, xi = Math.floor(x), yi = Math.floor(y), tx = x - xi, ty = y - yi;
     const sx = tx * tx * (3 - 2 * tx), sy = ty * ty * (3 - 2 * ty);
-    const g = (i, j) => G[((j % cells + cells) % cells) * cells + ((i % cells + cells) % cells)];
     return lerp(lerp(g(xi, yi), g(xi + 1, yi), sx), lerp(g(xi, yi + 1), g(xi + 1, yi + 1), sx), sy);
   };
 }
@@ -1371,7 +1371,10 @@ function textures() {
   }, { clamp: true });
   // striped canopy and tent cloth
   TX.stripes = canvasTex(256, 64, (g, w, h) => { const c = ['#e8452c', '#fff2dc', '#ffb736', '#fff2dc', '#2d7fd1', '#fff2dc']; for (let i = 0; i < 12; i++) { g.fillStyle = c[i % c.length]; g.fillRect(i * w / 12, 0, w / 12 + 1, h); } });
-  TX.water = normalTex(256, (u, v) => { const a = vnoise(77, 32)(u, v), b = vnoise(78, 8)(u, v); return a * 0.6 + b * 0.4; }, 2.2, [6, 6]);
+  // Both noise fields are built once, not once per pixel: building them inside the callback made
+  // 65,536 pairs of them (and ~70 million random draws), the bulk of this game's start-up time.
+  const wa = vnoise(77, 32), wb = vnoise(78, 8);
+  TX.water = normalTex(256, (u, v) => wa(u, v) * 0.6 + wb(u, v) * 0.4, 2.2, [6, 6]);
   return TX;
 }
 

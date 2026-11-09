@@ -186,6 +186,7 @@ export function createFX(renderer, o) {
   const savedPos = new THREE.Vector3(), savedQuat = new THREE.Quaternion(), UP = new THREE.Vector3(0, 1, 0);
   const qYaw = new THREE.Quaternion(), qBase = new THREE.Quaternion(), qLook = new THREE.Quaternion();
   const size = new THREE.Vector2();
+  const prevClear = new THREE.Color(); // reused by plainBars every frame the bars show
 
   const reduced = () => !!(arc && arc.reducedMotion);
   const portrait = () => { renderer.getSize(size); return size.y > size.x * 1.1; };
@@ -240,6 +241,7 @@ export function createFX(renderer, o) {
     const time = arc ? arc.time : 0;
     // A new round: Play from the menu, Play again from results, Restart from pause.
     const fresh = state === 'play' && (st.prevState === 'menu' || st.prevState === 'over' || (st.prevState === 'play' || st.prevState === 'pause') && time + 1e-4 < st.prevTime - 0.05);
+    st.fresh = fresh;
     if (fresh && introCfg && !reduced()) { st.introOn = true; st.intro = 0; st.introDur = introCfg.dur; st.barsHold = introCfg.dur * 0.7; }
     if (state === 'play' && st.introOn) { st.intro += dt; if (st.intro >= st.introDur) st.introOn = false; }
     if (state !== 'play' && state !== 'pause') st.introOn = false;
@@ -261,6 +263,21 @@ export function createFX(renderer, o) {
 
   const active = () => userOn && !failed && !lost && quality >= 1 && (!soft || pinned);
 
+  // Shader warm-up. three.js builds a material's program the first time it
+  // draws it and waits for the link right there, one program after another,
+  // so the first frame a new car, effect or the post pass itself appears is a
+  // hitch. renderer.compile() hands every program a scene needs to the driver
+  // at once, hidden objects included, without drawing; by the time they first
+  // draw they are ready or nearly so. Once per scene, and again when a round
+  // starts, because a game's start() adds that round's own objects. Any
+  // failure leaves the game drawing exactly as it did before.
+  const warmed = new WeakSet();
+  const warm = (scene, camera, first) => {
+    try { renderer.compile(scene, camera); } catch (e) { /* lost context: the draw below compiles as before */ }
+    if (!first || (soft && !pinned)) return;
+    try { for (const m of [mPre, mDown, mBlur, mComp]) { quad.material = m; renderer.compile(qScene, qCam); } } catch (e) { /* post pass compiles on first use */ }
+  };
+
   // Bars without the post pass: clear two strips with a scissor.
   const plainBars = (amount) => {
     if (amount <= 0.002) return;
@@ -269,7 +286,7 @@ export function createFX(renderer, o) {
       const w = gl.drawingBufferWidth, h = gl.drawingBufferHeight;
       const bh = Math.round(h * amount * (portrait() ? 0.045 : 0.07));
       if (bh < 1) return;
-      const prev = new THREE.Color(); renderer.getClearColor(prev); const pa = renderer.getClearAlpha();
+      const prev = prevClear; renderer.getClearColor(prev); const pa = renderer.getClearAlpha();
       renderer.setRenderTarget(null);
       renderer.setScissorTest(true); renderer.setClearColor(0x000000, 1);
       const pr = renderer.getPixelRatio();
@@ -294,6 +311,10 @@ export function createFX(renderer, o) {
     info() { return { enabled: active(), quality, pinned, soft, lost, failed, size: [W, H], bars: +st.bars.toFixed(2), intro: st.introOn, postCalls: st.postCalls }; },
     render(scene, camera) {
       const dt = tickState();
+      if (scene && camera) {
+        if (!warmed.has(scene)) { warmed.add(scene); warm(scene, camera, true); }
+        else if (st.fresh) warm(scene, camera, false);
+      }
       const moved = cineBegin(camera);
       try {
         renderer.setRenderTarget(null);

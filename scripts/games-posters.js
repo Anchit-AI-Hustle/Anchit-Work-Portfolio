@@ -9,7 +9,8 @@
 //   ONLY=turf-kings  limits it to one game.
 //
 // Writes games/<slug>/poster.png (og:image), games/<slug>/poster.webp (hub
-// card) and games/og.png (the hub's own preview, a contact sheet of every game).
+// card, with poster-480.webp and poster-800.webp beside it for the hub's srcset)
+// and games/og.png (the hub's own preview, a contact sheet of every game).
 const path = require('path');
 const fs = require('fs');
 const sharp = require('sharp');
@@ -76,6 +77,9 @@ async function shoot(browser, slug) {
   const dir = path.join(ROOT, 'games', slug);
   await img.clone().png({ compressionLevel: 9, palette: true, quality: 90 }).toFile(path.join(dir, 'poster.png'));
   await img.clone().webp({ quality: 78 }).toFile(path.join(dir, 'poster.webp'));
+  // Smaller copies for the hub's srcset: a card is 360 to 480 CSS pixels wide, so
+  // the full 1200px poster was three to six times the pixels it is shown at.
+  for (const w of [480, 800]) await img.clone().resize(w).webp({ quality: 74, effort: 6 }).toFile(path.join(dir, `poster-${w}.webp`));
   console.log('  poster  ' + slug);
 }
 

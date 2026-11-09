@@ -861,7 +861,8 @@ function frame3D(dt) {
     R3.accT += R3.realDt; R3.accN++;
     if (R3.accT > 1.3 && R3.accN >= 3) {
       const avg = R3.accT / R3.accN; R3.fps = Math.round(1 / avg);
-      if (R3.settle > 0) R3.settle--; else if (avg > 0.03 && R3.q > 0) { R3.q--; applyQuality(); R3.settle = 1; }
+      if (avg > 0.05 && R3.q > 0) { R3.q = Math.max(0, R3.q - 2); applyQuality(); R3.settle = 0; } // under 20 fps: two steps now, not one every 2.6 s
+      else if (R3.settle > 0) R3.settle--; else if (avg > 0.03 && R3.q > 0) { R3.q--; applyQuality(); R3.settle = 1; }
       R3.accT = 0; R3.accN = 0;
     }
   } else if (arc.state !== 'play') { R3.accT += R3.realDt; R3.accN++; if (R3.accT > 1.3) { R3.fps = Math.round(R3.accN / R3.accT); R3.accT = 0; R3.accN = 0; } }
@@ -870,7 +871,10 @@ function frame3D(dt) {
 function applyQuality() {
   const r = R3.renderer; if (!r) return;
   const f = (R3.soft ? [0.4, 0.6, 0.8, 1] : [0.55, 0.72, 0.88, 1])[R3.q];
-  r.setPixelRatio(Math.max(0.5, arc.dpr * f)); r.setSize(arc.w, arc.h, false);
+  // A software renderer pays for every pixel on the CPU, so at its lowest tier it gets a fixed
+  // budget, as Saffron City does, instead of filling every pixel of a 1440x900 window.
+  const pr = Math.max(0.5, arc.dpr * f);
+  r.setPixelRatio(R3.soft && R3.q === 0 ? Math.max(0.3, Math.min(pr, Math.sqrt(160000 / Math.max(1, arc.w * arc.h)))) : pr); r.setSize(arc.w, arc.h, false);
   // reflections cost the most on a software renderer, so the lightest level drops them for a brighter sky light
   // the lightest level also drops real shadows (the blob under each sack stays) and the low sun
   if (R3.scene) { R3.scene.environment = R3.q >= 1 ? R3.env : null; R3.hemi.intensity = R3.q >= 1 ? 0.75 : 1.3; M.sun.visible = R3.q >= 1; R3.key.castShadow = R3.q >= 1; }

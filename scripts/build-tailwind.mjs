@@ -31,6 +31,19 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PAGES = [
   { src: 'gram-street-coffee/index.html', out: 'assets/tw-gram-street.css' },
   { src: 'deli-chic/index.html',          out: 'assets/tw-deli-chic.css' },
+  // The Lifecycle OS calendar ran the CDN compiler too: 1.9s to first paint and
+  // a second of main-thread work on a throttled phone, behind a page-specific
+  // CSP that allowed 'unsafe-eval' for it. This config is the one its inline
+  // `tailwind.config` script gave the CDN, so the stylesheet is the same.
+  { src: 'lifecycle-os-calendar.html',    out: 'assets/tw-lifecycle-calendar.css', config: {
+    colors: {
+      bg:   { DEFAULT: 'rgb(var(--bg-rgb)/<alpha-value>)', soft: 'rgb(var(--surface-rgb)/<alpha-value>)', card: 'rgb(var(--card-rgb)/<alpha-value>)' },
+      ink:  { DEFAULT: 'rgb(var(--ink-rgb)/<alpha-value>)', dim: 'rgb(var(--ink-dim-rgb)/<alpha-value>)', mute: 'rgb(var(--ink-mute-rgb)/<alpha-value>)' },
+      green: { DEFAULT: 'rgb(var(--primary-rgb)/<alpha-value>)', bright: 'rgb(var(--accent-rgb)/<alpha-value>)' },
+      gold: { DEFAULT: 'rgb(var(--gold-rgb)/<alpha-value>)' }, cream: 'rgb(var(--cream-rgb)/<alpha-value>)',
+    },
+    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'], serif: ['Fraunces', 'Georgia', 'serif'] },
+  } },
 ];
 
 const ENTRY = '@tailwind base;\n@tailwind components;\n@tailwind utilities;\n';
@@ -72,8 +85,16 @@ async function main() {
   try {
     for (const page of PAGES) {
       const out = join(ROOT, page.out);
-      await run('npx', ['tailwindcss', '-i', entry, '-o', out,
-                        '--content', join(ROOT, page.src), '--minify'], { cwd: ROOT });
+      // A page with its own theme gets its own config; the others keep using
+      // the root tailwind.config.js, exactly as before.
+      const cfgFile = page.config ? join(ROOT, '.tw-config.cjs') : null;
+      if (cfgFile) await writeFile(cfgFile, 'module.exports = ' + JSON.stringify({ content: [join(ROOT, page.src)], theme: { extend: page.config } }) + ';\n', 'utf8');
+      try {
+        await run('npx', ['tailwindcss', '-i', entry, '-o', out, ...(cfgFile ? ['-c', cfgFile] : []),
+                          '--content', join(ROOT, page.src), '--minify'], { cwd: ROOT });
+      } finally {
+        if (cfgFile) await unlink(cfgFile).catch(() => {});
+      }
       const css = await readFile(out, 'utf8');
       console.log(`[tailwind] ${page.src} → ${page.out} (${(css.length / 1024).toFixed(1)}KB)`);
     }

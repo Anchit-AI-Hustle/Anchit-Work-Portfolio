@@ -869,9 +869,15 @@
       const dt = last ? Math.min(0.05, (now - last) / 1000) : 1 / 60;
       last = now;
       pollPad(dt);
+      // The very first frame only paints the shell and the menu. A 3D game
+      // builds its world and compiles its shaders on its first draw, which on a
+      // phone can be a second or more of work; doing it one frame later means
+      // the menu is on screen (and fading in) while that runs, instead of
+      // after it. Nothing a game draws is lost: it draws from frame two on.
+      const boot = arc.frame === 0;
       try {
         if (arc.state === 'play') { arc.time += dt; if (opts.update) opts.update(dt, arc); }
-        else if (arc.state !== 'pause' && opts.idle) opts.idle(dt, arc);
+        else if (!boot && arc.state !== 'pause' && opts.idle) opts.idle(dt, arc);
         if (hud) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, hud.width, hud.height); }
         ctx.setTransform(arc.dpr, 0, 0, arc.dpr, 0, 0);
         arc.shakeX = arc.shakeY = 0;
@@ -888,7 +894,7 @@
           arc.shake = 0;
         }
         shakeSeen = Math.max(0, shake0 - dt * 48);
-        if (opts.render) opts.render(ctx, arc);
+        if (opts.render && !boot) opts.render(ctx, arc);
       } catch (err) {
         console.error(err);
       }

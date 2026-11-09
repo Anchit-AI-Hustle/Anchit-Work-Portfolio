@@ -2000,7 +2000,8 @@ function render3D(arc) {
   GL.fpsT += dt; GL.fpsN++;
   if (GL.fpsT >= 1.6) {
     GL.fps = GL.fpsN / GL.fpsT; GL.fpsT = 0; GL.fpsN = 0;
-    if (!GL.pinned && GL.q > 0 && GL.fps < 34) { GL.lowRuns++; if (GL.lowRuns >= 2) { GL.q--; GL.lowRuns = 0; applyQuality(); } } else GL.lowRuns = 0;
+    // Two slow windows in a row step down; under 22 fps one is enough, so a phone that cannot hold the city is not left stuttering for 6 s.
+    if (!GL.pinned && GL.q > 0 && GL.fps < 34) { GL.lowRuns++; if (GL.lowRuns >= 2 || GL.fps < 22) { GL.q--; GL.lowRuns = 0; applyQuality(); } } else GL.lowRuns = 0;
   }
   const tc0 = performance.now();
   applyTOD(G.hour);
