@@ -17,7 +17,7 @@ const { chromium } = require('./_playwright.js');
 
 const BASE = (process.env.BASE || 'http://127.0.0.1:8099').replace(/\/$/, '');
 const ROOT = path.join(__dirname, '..');
-const GAMES = ['saffron-city', 'midnight-apex', 'ghat-riders', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'sky-thread', 'tiffin-dash', 'board-strike', 'yard-catch', 'rally-cage', 'fare-run', 'chhat-hopper', 'kart-mela', 'paint-ops'];
+const GAMES = ['saffron-city', 'midnight-apex', 'ghat-riders', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'sky-thread', 'tiffin-dash', 'board-strike', 'yard-catch', 'rally-cage', 'fare-run', 'chhat-hopper', 'kart-mela', 'paint-ops', 'nitro-goal'];
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // How long to play before the photo, and what to hold. Tuned per game so the
@@ -40,6 +40,7 @@ const PLAY = {
   'chhat-hopper': { ms: 4500, keys: ['ArrowRight'], taps: ['Space'], tapAt: 1800, setup: () => window.__arcade.dev && window.__arcade.dev.level('1-1'), hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
   'kart-mela': { ms: 6000, keys: ['ArrowUp'], taps: [], setup: () => window.__arcade.dev && window.__arcade.dev.skip(), hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
   'paint-ops': { ms: 2200, keys: ['ArrowRight'], taps: [], setup: () => window.__arcade.dev && window.__arcade.dev.skipIntro(), hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
+  'nitro-goal': { ms: 5000, keys: ['ArrowUp'], taps: ['Space'], tapAt: 300, hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
   'fare-run': { ms: 2800, keys: ['ArrowRight'], taps: [], hiq: () => window.__arcade.dev && window.__arcade.dev.setQuality(3) },
 };
 
