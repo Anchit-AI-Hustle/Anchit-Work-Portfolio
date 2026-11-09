@@ -370,6 +370,22 @@ a fixed set of start times cannot be relied on to provoke it. Its header says so
 Treat it as a guard against a regression that reproduces, not as proof of one
 that does not.
 
+### Load-time budgets
+
+`npm run test:perf` (after `npm run build`, no server needed, it starts its own)
+opens the games hub, the home page and every game on a phone with the network
+held to Chrome's Fast 4G profile and the CPU slowed 4x, and fails when the hub
+or home page's largest paint, the time until a game's menu is on screen, or the
+time until it is ready (loop running, Play answered at once) goes over its
+budget. The last one is mostly the game drawing its first 3D frame, which on a
+runner with no GPU is software rendering and varies by a second or more, so its
+budget is wide. Its server answers like the CDN (brotli, the
+`vercel.json` Cache-Control rules), because `npx serve` sends three.js
+uncompressed and would measure a download production never makes. Budgets are
+deliberately loose (`HUB_LCP`, `HOME_LCP`, `MENU`, `READY` override them, in ms; `WWW` points it at another built tree): they
+exist to catch a 1.5 MB favicon or a module fetched only after the page has
+finished parsing, not a 5% drift. It is not part of CI yet.
+
 ## Native apps, iOS + Android via Capacitor
 
 > The `android/` and `ios/` folders are already scaffolded and committed.

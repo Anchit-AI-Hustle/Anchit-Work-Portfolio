@@ -1971,7 +1971,8 @@ function render(c, a) {
       R3.accT += real; R3.accN++;
       if (R3.accT > 1.2 && R3.accN >= 4) {
         const avg = R3.accT / R3.accN; R3.fps = Math.round(1 / avg);
-        if (R3.settle > 0) R3.settle--;
+        if (avg > 0.05 && R3.q > 0) { R3.q = Math.max(0, R3.q - 2); applyQuality(); R3.settle = 0; R3.goodT = 0; } // under 20 fps: two steps at once
+        else if (R3.settle > 0) R3.settle--;
         else if (avg > 0.034 && R3.q > 0) { R3.q--; applyQuality(); R3.settle = 1; R3.goodT = 0; }
         else if (avg < 0.019 && R3.q < R3.qMax) { R3.goodT++; if (R3.goodT >= 4) { R3.q++; applyQuality(); R3.goodT = 0; R3.settle = 1; } }
         else R3.goodT = 0;

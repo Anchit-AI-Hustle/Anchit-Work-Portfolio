@@ -45,11 +45,16 @@ self.addEventListener('install', (e) => {
 });
 
 self.addEventListener('activate', (e) => {
-  e.waitUntil(
+  e.waitUntil(Promise.all([
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    )
-  );
+    ),
+    // Navigation preload: the browser starts the page request while this
+    // worker is still waking up, instead of after. Pages are network-first, so
+    // without it every controlled navigation paid the worker's start-up time
+    // (tens to a couple of hundred ms on a phone) before the request even left.
+    self.registration.navigationPreload ? self.registration.navigationPreload.enable().catch(() => {}) : null,
+  ]));
   self.clients.claim();
 });
 
@@ -67,7 +72,8 @@ self.addEventListener('fetch', (e) => {
   // Network-first for HTML so updates ship fast
   if (req.mode === 'navigate' || req.destination === 'document') {
     e.respondWith(
-      fetch(req)
+      Promise.resolve(e.preloadResponse)
+        .then(pre => pre || fetch(req))
         .then(res => {
           const copy = res.clone();
           caches.open(CACHE).then(c => c.put(req, copy));

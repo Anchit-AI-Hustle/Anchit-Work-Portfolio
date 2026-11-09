@@ -10,6 +10,7 @@ import { existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { deferGoogleFontsIn } from './defer-fonts.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -93,7 +94,8 @@ const assets = [
   // MP4s, posters, VTT) ships as plain static files next to the page.
   'movies',
   // Games: /games is the hub, /games/<slug> each game. Plain HTML, CSS and
-  // JavaScript on one shared shell (games/shared/arcade.js), no build step.
+  // JavaScript on one shared shell (games/shared/arcade.js), no bundler; the
+  // build only versions their URLs and adds modulepreload (optimizeGames).
   'games',
 ];
 
@@ -151,6 +153,145 @@ async function fingerprintStudyAssets() {
   console.log(`[build-www] fingerprinted ${refs} study asset links in ${pages} pages`);
 }
 
+// Games: version every script, stylesheet and poster under /games by content,
+// and start the 3D engine downloading with the page instead of after it.
+//
+// 1. VERSIONED URLS. Every '/games/...' or './...' reference to a .js, .css,
+//    .webp or .png that exists in the build gets ?v=<content hash>, in the game
+//    modules (import specifiers and the 2D fallback loaders) and in the pages.
+//    A module's hash is taken AFTER its own imports are rewritten, so changing
+//    three.js changes every module that imports it, and an old page can never
+//    pair with new code. vercel.json marks /games/* requests that carry ?v= as
+//    immutable for a year, so a returning player downloads nothing and does not
+//    even revalidate; a request without ?v= (a page that builds a path at run
+//    time) keeps the default, always revalidated, so nothing can go stale.
+//
+// 2. MODULEPRELOAD. A game page used to fetch its module only after
+//    DOMContentLoaded, which itself waited on the Google Fonts stylesheet, and
+//    then three.module.min.js, then three.core.min.js, one after another. The
+//    page now lists the whole static import graph of the module its loader
+//    names as <link rel="modulepreload">, so the browser fetches and compiles
+//    it in parallel with the page. The graph is read from the files, so it
+//    cannot drift from what the game actually imports.
+const GAME_REF = /(["'])((?:\/games\/|\.\.?\/)[^"'\s?#]+\.(?:js|mjs|css|webp|png))\1/g;
+const STATIC_IMPORT = /(?:^|[;\s}])(?:import|export)\s*(?:[\w*{}\s,$]+?\s*from\s*)?["']([^"']+)["']/g;
+async function optimizeGames() {
+  const GAMES = join(WWW, 'games');
+  if (!existsSync(GAMES)) return;
+  const files = [];
+  const walk = async (dir) => {
+    for (const e of await readdir(dir, { withFileTypes: true })) {
+      const full = join(dir, e.name);
+      if (e.isDirectory()) await walk(full); else files.push(full);
+    }
+  };
+  await walk(GAMES);
+  const urlOf = (file) => '/' + file.slice(WWW.length + 1).split('\\').join('/');
+  const fileOf = (spec, fromUrl) => {
+    const u = spec.startsWith('/') ? spec : new URL(spec, 'http://x' + fromUrl).pathname;
+    if (!u.startsWith('/games/')) return null;
+    const f = join(WWW, u.slice(1));
+    return existsSync(f) ? f : null;
+  };
+
+  // Rewrite a text file's references, hashing each target first (depth first).
+  const hashes = new Map();
+  const rewritten = new Map();
+  const visiting = new Set();
+  const rewrite = async (file) => {
+    if (rewritten.has(file)) return rewritten.get(file);
+    visiting.add(file);
+    const src = await readFile(file, 'utf8');
+    const from = urlOf(file);
+    let out = '', last = 0, m;
+    GAME_REF.lastIndex = 0;
+    const matches = [];
+    while ((m = GAME_REF.exec(src))) matches.push({ index: m.index, len: m[0].length, q: m[1], spec: m[2] });
+    for (const r of matches) {
+      const target = fileOf(r.spec, from);
+      if (!target || target === file || visiting.has(target)) continue;
+      const h = await hashOf(target);
+      out += src.slice(last, r.index) + r.q + r.spec + '?v=' + h + r.q;
+      last = r.index + r.len;
+    }
+    out += src.slice(last);
+    visiting.delete(file);
+    rewritten.set(file, out);
+    return out;
+  };
+  const hashOf = async (file) => {
+    if (hashes.has(file)) return hashes.get(file);
+    const text = /\.(js|mjs|css)$/.test(file);
+    const bytes = text ? Buffer.from(await rewrite(file)) : await readFile(file);
+    const h = createHash('sha256').update(bytes).digest('hex').slice(0, 10);
+    hashes.set(file, h);
+    return h;
+  };
+
+  // The static import graph of a module, itself first.
+  const graph = (file, seen = new Set()) => {
+    if (seen.has(file)) return seen;
+    seen.add(file);
+    const src = rewritten.get(file) || '';
+    const deps = [...src.matchAll(STATIC_IMPORT)].map((m) => fileOf(m[1].split('?')[0], urlOf(file)));
+    for (const dep of deps) if (dep) graph(dep, seen);
+    return seen;
+  };
+
+  let pages = 0, preloads = 0;
+  for (const f of files) if (/\.(js|mjs|css)$/.test(f)) await hashOf(f);
+  for (const f of files) {
+    if (/\.(js|mjs|css)$/.test(f)) { await writeFile(f, rewritten.get(f)); continue; }
+    if (!f.endsWith('.html')) continue;
+    let html = await rewrite(f);
+    // The module the page's loader runs when WebGL2 is there.
+    const entry = /\.type\s*=\s*["']module["'];?\s*\w+\.src\s*=\s*["']([^"'?]+)/.exec(html) ||
+      /<script[^>]*type=["']module["'][^>]*src=["']([^"'?]+)/i.exec(html);
+    const entryFile = entry && fileOf(entry[1], urlOf(f));
+    if (entryFile && !html.includes('rel="modulepreload"')) {
+      const tags = [...graph(entryFile)].map((dep) => `  <link rel="modulepreload" href="${urlOf(dep)}?v=${hashes.get(dep)}">`);
+      html = html.replace(/(<meta[^>]+name=["']viewport["'][^>]*>\n?)/i, `$1${tags.join('\n')}\n`);
+      preloads += tags.length;
+    }
+    html = await posterSrcset(html, hashOf);
+    await writeFile(f, html);
+    pages++;
+  }
+  console.log(`[build-www] games: versioned ${hashes.size} files, ${pages} pages, ${preloads} modulepreload links`);
+}
+
+// The hub's cards showed each game's full 1200px poster in a card 360 to 480
+// CSS pixels wide. Where the smaller copies games-posters.js writes beside a
+// poster exist, the <img> gets a srcset and sizes, so a phone downloads the
+// 800px copy and a desktop the 480px one. A poster without them is untouched.
+async function posterSrcset(html, hashOf) {
+  const re = /<img\b([^>]*?)\bsrc="(\/games\/([\w-]+)\/poster\.webp)\?v=(\w+)"([^>]*)>/g;
+  let out = '', last = 0, m;
+  while ((m = re.exec(html))) {
+    if (/srcset=/.test(m[0])) continue;
+    const dir = join(WWW, 'games', m[3]);
+    const small = [480, 800].map((w) => join(dir, `poster-${w}.webp`));
+    if (!small.every((p) => existsSync(p))) continue;
+    const feature = /class="[^"]*\bfeature\b/.test(html.slice(html.lastIndexOf('<article', m.index), m.index));
+    const sizes = feature ? '(max-width: 860px) calc(100vw - 32px), min(712px, 56vw)' : '(max-width: 680px) calc(100vw - 32px), (max-width: 1080px) 46vw, 400px';
+    const set = [`/games/${m[3]}/poster-480.webp?v=${await hashOf(small[0])} 480w`, `/games/${m[3]}/poster-800.webp?v=${await hashOf(small[1])} 800w`, `${m[2]}?v=${m[4]} 1200w`].join(', ');
+    out += html.slice(last, m.index) + `<img${m[1]}src="${m[2]}?v=${m[4]}" srcset="${set}" sizes="${sizes}"${m[5]}>`;
+    last = m.index + m[0].length;
+  }
+  return out + html.slice(last);
+}
+
+// Google Fonts no longer holds the first paint on any page (see
+// scripts/defer-fonts.mjs for why and how).
+async function deferGoogleFonts() {
+  let pages = 0;
+  for (const file of await collectHtmlFiles(WWW)) {
+    const before = await readFile(file, 'utf8');
+    const after = deferGoogleFontsIn(before, file.slice(WWW.length + 1));
+    if (after !== before) { await writeFile(file, after); pages++; }
+  }
+  console.log(`[build-www] fonts: Google Fonts stylesheet no longer blocks first paint on ${pages} page(s)`);
+}
 async function stampServiceWorker() {
   const swPath = join(WWW, 'sw.js');
   if (!existsSync(swPath)) return;
@@ -338,6 +479,8 @@ async function main() {
   await patchHowToCardRoute();
   await buildHowTo();
   await fingerprintStudyAssets();
+  await optimizeGames();
+  await deferGoogleFonts();
   await stampServiceWorker();
   await injectConsent();
   // Gamified App Skill Map / Project Playbooks widgets removed from the site,
