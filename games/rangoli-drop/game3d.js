@@ -226,7 +226,6 @@ function makePool(cap, frag, blending) {
   P.mat = mat; P.pts = new THREE.Points(geo, mat); P.pts.frustumCulled = false;
   return P;
 }
-const _c = { r: 1, g: 1, b: 1 };
 function emit(P, x, y, z, vx, vy, vz, life, size, grow, col, alpha, drag, grav, rot, spin) {
   if (P.n >= P.cap || !(R.density > 0)) return;
   const i = P.n++;
@@ -268,7 +267,6 @@ function buildRenderer(a) {
   let renderer;
   const soft = (() => { try { const g = document.createElement('canvas').getContext('webgl2'); const e = g && g.getExtension('WEBGL_debug_renderer_info'); const n = g ? String(g.getParameter(e ? e.UNMASKED_RENDERER_WEBGL : g.RENDERER)) : ''; const x = g && g.getExtension('WEBGL_lose_context'); if (x) x.loseContext(); return SOFT_RE.test(n); } catch (er) { return false; } })();
   try { renderer = new THREE.WebGLRenderer({ canvas, antialias: !soft, powerPreference: 'high-performance', alpha: false, stencil: false }); } catch (e) { return false; }
-  if (!renderer || !renderer.getContext()) return false;
   renderer.debug.checkShaderErrors = false;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;

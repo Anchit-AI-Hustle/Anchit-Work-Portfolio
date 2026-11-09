@@ -20,7 +20,7 @@ import { boot, PY, BAR, barX, barY, KITE, BUG, MOTH, DUAL_DX, S_WAIT, clamp, ler
  */
 
 /* ------------------------------------------------------------ small helpers, all reused */
-const _m = new THREE.Matrix4(), _m2 = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _s = new THREE.Vector3(), _p = new THREE.Vector3(), _c = new THREE.Color();
+const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _s = new THREE.Vector3(), _p = new THREE.Vector3(), _c = new THREE.Color();
 const _v = new THREE.Vector3(), _v2 = new THREE.Vector3(), _q2 = new THREE.Quaternion();
 const rand = (a) => (Math.random() - 0.5) * a;
 function rng(seed) {
@@ -384,7 +384,6 @@ function setQuality(q) {
 function graphics(level) { if (level === 'auto') { R.lock = false; return; } R.lock = true; setQuality(level === 'sharp' ? 3 : 1); }
 
 /* ------------------------------------------------------------ the camera: rooftop height, looking up into the sky */
-const VP = { top: 0, bot: 0 };
 const _pj = new THREE.Vector3();
 function ndcY(y) { _pj.set(0, y, 0).project(camera); return _pj.y; }
 function ndcX(x, y) { _pj.set(x, y, 0).project(camera); return _pj.x; }
@@ -980,7 +979,7 @@ function sync(a, G, dt) {
   if (P.state !== 'captured') R.rockets[2].visible = false;
   R.rockets[3].visible = false;
   // raiders
-  let kN = 0, bN = 0, mN = 0, fN = 0, wN = 0, lN = 0;
+  let kN = 0, bN = 0, mN = 0, wN = 0, lN = 0;
   for (let i = 0; i < G.E.length; i++) {
     const e = G.E[i]; if (!e.on || e.st === S_WAIT) continue;
     const x = lerp(e.px, e.x, al), y = lerp(e.py, e.y, al) + (e.dive ? 0 : Math.sin(t * 2.2 + e.seed) * 0.07);

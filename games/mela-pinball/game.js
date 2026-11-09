@@ -8,9 +8,9 @@
   'use strict';
   import('/games/mela-pinball/core.js').then(function (M) {
     var T = M.TABLE, BR = M.BR, DMD = M.DMD, TAU = M.TAU, clamp = M.clamp, lerp = M.lerp;
-    var ARC = null, W = 0, H = 0, S = 1, OX = 0, OY = 0, DH = 0, DW = 0, DX = 0;
+    var W = 0, H = 0, S = 1, OX = 0, OY = 0, DH = 0, DW = 0, DX = 0;
     var bg = null, bgKey = '', dmdCv = null, dmdCtx = null, dmdImg = null, dmdVer = -1, mask = null;
-    var parts = [], t = 0, lastNow = 0;
+    var parts = [], lastNow = 0;
     var X0 = -23.6, X1 = 26.6, Y0 = -7, Y1 = 101.5;
     function sx(x) { return OX + (x - X0) * S; }
     function sy(y) { return OY + (Y1 - y) * S; }
@@ -107,12 +107,12 @@
       three: false,
       get hudScore() { return false; },
       get hudTop() { return DH + 6; },
-      init: function (a) { ARC = a; layout(a); return true; },
+      init: function (a) { layout(a); return true; },
       resize: function (a) { layout(a); bg = null; },
       newGame: function () { parts.length = 0; },
       moment: function () {},
       render: function (a, Wd, ctx) {
-        var now = performance.now(), dt = lastNow ? Math.min(0.1, (now - lastNow) / 1000) : 1 / 60; lastNow = now; t += dt;
+        var now = performance.now(), dt = lastNow ? Math.min(0.1, (now - lastNow) / 1000) : 1 / 60; lastNow = now;
         if (W !== a.w || H !== a.h) { layout(a); bg = null; }
         paintStatic(a);
         ctx.drawImage(bg, 0, 0, W, H);

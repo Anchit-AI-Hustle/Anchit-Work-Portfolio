@@ -218,7 +218,7 @@ function lock(G, hard, dropRows) {
   if (above && n === 0) { endGame(G, 'topout'); return; }
   // score at the level the piece landed on
   const L = G.level;
-  let pts = 0, label = '', hardClear = false;
+  let pts, label, hardClear;
   if (tw === 2) { pts = [400, 800, 1200, 1600][n]; label = n ? 'Twist ' + LABEL[n] : 'Twist'; hardClear = n > 0; G.stats.twists++; }
   else if (tw === 1) { pts = [100, 200, 400, 400][n]; label = n ? 'Mini twist ' + LABEL[n].toLowerCase() : 'Mini twist'; hardClear = n > 0; G.stats.twists++; }
   else { pts = [0, 100, 300, 500, 800][n]; label = LABEL[n]; hardClear = n === 4; }
@@ -952,7 +952,7 @@ function finish(G) {
   const a = ARC, s = G.stats, mode = G.cfg.mode;
   const pps = G.time > 0 ? (s.pieces / G.time).toFixed(2) : '0';
   const cell = (k, v) => '<div>' + k + '<b>' + v + '</b></div>';
-  let html = '', title = '', eyebrow = '';
+  let html, title, eyebrow;
   if (mode === 'sprint') {
     const won = G.endKind === 'win';
     const prev = a.store.get(bestKey('sprint'), null);

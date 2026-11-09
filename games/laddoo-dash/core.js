@@ -263,7 +263,7 @@ function target(G, s) {
 }
 function decide(G, s) {
   const M = G.M, cx = ((s.tx % M.W) + M.W) % M.W, cy = s.ty;
-  let best = -1, bd = 1e9, n = 0;
+  let best = -1, bd = 1e9;
   if (s.fright && s.st === 'active') {
     // Frightened: a random open way, never straight back.
     const start = (G.rng() * 4) | 0;
@@ -273,7 +273,6 @@ function decide(G, s) {
     for (let d = 0; d < 4; d++) {
       if (d === REV[s.dir]) continue;
       if (!spiritOpen(M, cx + DX[d], cy + DY[d])) continue;
-      n++;
       const ex = wrapDX(M, cx + DX[d] - TGT.x), ey = cy + DY[d] - TGT.y, dd = ex * ex + ey * ey;
       if (dd < bd) { bd = dd; best = d; }
     }
@@ -332,7 +331,7 @@ function releaseCheck(G) {
   for (let i = 1; i < 4; i++) {
     const s = G.sp[i];
     if (s.st !== 'house' || s.released) continue;
-    let go = false;
+    let go;
     if (G.deathDots >= 0) go = G.deathDots >= glob[i];
     else go = s.dots >= lim[i];
     if (!go && G.noDotT > 4 * d.rel) { go = true; G.noDotT = 0; }

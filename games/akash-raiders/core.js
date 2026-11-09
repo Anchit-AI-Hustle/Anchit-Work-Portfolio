@@ -1025,7 +1025,6 @@ function musicTick() {
 /* ------------------------------------------------------------ HUD */
 const PJ = { x: 0, y: 0, on: false };
 const PU_NAME = ['S', '', '', 'N'];
-const PU_COL = ['#ffb736', '#6ee7ff', '#b69cff', '#ff7ad9'];
 const FONT_M = '"JetBrains Mono", ui-monospace, monospace', FONT_B = 'Inter, -apple-system, sans-serif';
 const FT0 = '700 20px ' + FONT_M, FT1 = '700 24px ' + FONT_M, FT2 = '700 18px ' + FONT_M, FT3 = '700 22px ' + FONT_M, FT4 = '700 14px ' + FONT_M, FT5 = '700 16px ' + FONT_M, FT6 = '500 12px ' + FONT_B, FT7 = '500 14px ' + FONT_B, FT8 = '600 10px ' + FONT_M, FT9 = '700 13px ' + FONT_M, FT10 = '800 11px ' + FONT_B, FT11 = '600 12px ' + FONT_B, FT12 = '700 11px ' + FONT_M, FT13 = '700 12px ' + FONT_M;
 const FB0 = '600 30px Fraunces, Georgia, serif', FB1 = '600 44px Fraunces, Georgia, serif', FB2 = '600 18px Fraunces, Georgia, serif', FB3 = '600 24px Fraunces, Georgia, serif';
@@ -1086,7 +1085,6 @@ function drawHUD(ctx, a, g) {
   if (!a.touchMode || a.touchStyle === 'pads') {
     for (let i = 0; i < 3; i++) starIcon(ctx, nx + 8 + i * 17, by + 12, i < g.P.nova);
     ctx.font = FT8; ctx.fillStyle = 'rgba(251,245,236,0.55)'; ctx.fillText(a.gamepad ? 'X NOVA' : 'X NOVA', nx + 58, by + 7);
-    nx += 110;
   }
   const P = g.P; let px = W - pad.right - 4; ctx.textAlign = 'right';
   if (a.touchMode && a.touchStyle !== 'pads') px = W - pad.right - 120;

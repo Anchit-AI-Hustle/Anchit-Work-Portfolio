@@ -1,6 +1,6 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
 import { createFX as createPost } from '/games/shared/fx3d.js';
-import { boot, SPIRITS, BONUS, WALL, PATH, DOOR, HOUSE, TUN, TAU, clamp, lerp } from '/games/laddoo-dash/core.js';
+import { boot, SPIRITS, BONUS, WALL, TAU, clamp } from '/games/laddoo-dash/core.js';
 
 /*
  * Laddoo Dash in 3D. The rules live in core.js; this file builds the maze of
@@ -13,7 +13,7 @@ import { boot, SPIRITS, BONUS, WALL, PATH, DOOR, HOUSE, TUN, TAU, clamp, lerp } 
  */
 
 /* ------------------------------------------------------------ helpers (nothing here runs per frame) */
-const _m4 = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _s = new THREE.Vector3(), _p = new THREE.Vector3(), _c = new THREE.Color(), _v = new THREE.Vector3(), _v2 = new THREE.Vector3();
+const _m4 = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _s = new THREE.Vector3(), _p = new THREE.Vector3(), _c = new THREE.Color(), _v = new THREE.Vector3();
 const UP = new THREE.Vector3(0, 1, 0), ZERO_M = new THREE.Matrix4().makeScale(0, 0, 0);
 // Colours used every frame are parsed once, here, never in the loop.
 const COLS = new Map();
@@ -239,7 +239,7 @@ function buildMazeGeo(M) {
     }
   }
   // sides, neon strips along their top edges and a glow skirt on the floor in front of them
-  const neon = [], skirt = [];
+  const neon = [];
   const runs = (isEdge, len, other, emit) => {
     for (let o = 0; o < other; o++) {
       let k = 0;

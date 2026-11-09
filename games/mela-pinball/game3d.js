@@ -136,7 +136,7 @@ function setup(a) {
   const rim = new THREE.DirectionalLight('#ff7ad0', 0.55); rim.position.set(40, 30, -80);
   [hemi, key, rim].forEach((l) => l.layers.enable(1));
   scene.add(hemi, key, key.target, rim);
-  let soft = false;
+  let soft;
   try { const gl = renderer.getContext(), ext = gl.getExtension('WEBGL_debug_renderer_info'); soft = /swiftshader|llvmpipe|softpipe|software|basic render/i.test(String(gl.getParameter(ext ? ext.UNMASKED_RENDERER_WEBGL : gl.RENDERER))); } catch (e) { soft = false; }
   R = {
     renderer, scene, camera, hemi, key, rim, soft, aniso: Math.min(8, renderer.capabilities.getMaxAnisotropy()),
@@ -168,11 +168,6 @@ function M() {
   m.plastic = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.18, metalness: 0.0, transparent: true, opacity: 0.78, emissive: '#ffffff', emissiveIntensity: 0.0 });
   m.glow = new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false });
   return m;
-}
-function track(mesh, refl, shadow) {
-  if (refl) mesh.layers.enable(1);
-  if (shadow) { mesh.castShadow = true; }
-  return mesh;
 }
 
 /* ------------------------------------------------------------ the first frame */
@@ -275,7 +270,7 @@ function paintPlayfield1() {
   R.pfDraw = { g, W, H, sx, sy, P };
 }
 function paintPlayfield2() {
-  const { g, W, H, sx, sy, P } = R.pfDraw;
+  const { g, H, sy, P } = R.pfDraw;
   const T = TABLE;
   const label = (s, x, y, size, col, rot, font) => {
     const p = P(x, y); g.save(); g.translate(p[0], p[1]); g.rotate(rot || 0);
@@ -309,7 +304,7 @@ function paintPlayfield2() {
   g.restore();
 }
 function paintPlayfield3() {
-  const { g, W, H, sx, sy, P } = R.pfDraw;
+  const { g, W, H, sx, P } = R.pfDraw;
   const T = TABLE;
   // insert sockets: a dark well and a coloured rim for every lamp (the light itself is a separate mesh)
   T.lamps.forEach((lp) => {
@@ -626,7 +621,6 @@ function buildBalls() {
   const rod = new THREE.Mesh(mergeG([cylG(0.6, 0.6, 0.5, 12, '#f0f0f4', [0, 0, 0.25], [Math.PI / 2, 0, 0]), cylG(0.28, 0.28, 13, 8, '#d0d4dc', [0, 0, 6.8], [Math.PI / 2, 0, 0]), cylG(1.0, 1.0, 1.6, 16, '#e8243f', [0, 0, 14.0], [Math.PI / 2, 0, 0])].concat(coil)), M().chrome);
   rod.castShadow = true; pl.add(rod); R.scene.add(pl); R.plunger = rod;
 }
-const _bp = new THREE.Vector3();
 function updateBalls(W) {
   if (!R.balls) return;
   let n = 0;

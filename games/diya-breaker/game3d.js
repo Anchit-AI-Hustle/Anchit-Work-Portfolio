@@ -1,6 +1,6 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
 import { createFX } from '/games/shared/fx3d.js';
-import { boot, events, COLS, ROWS, HALF, TOPY, GRID_TOP, BH, PAD_Y, PAD_H, BALL_R, K_CLAY, K_GLASS, K_METAL, K_GOLD, K_FIRE, K_MOVE, POWERS, clamp, lerp, TAU, smooth01 } from '/games/diya-breaker/core.js';
+import { boot, events, COLS, ROWS, HALF, TOPY, PAD_Y, PAD_H, BALL_R, K_GLASS, K_METAL, K_GOLD, K_FIRE, K_MOVE, POWERS, clamp, lerp, TAU, smooth01 } from '/games/diya-breaker/core.js';
 
 /*
  * Diya Breaker in 3D. The rules live in core.js; this file builds the
@@ -1087,7 +1087,6 @@ function syncPaddle(G, dt, rm) {
   R.padInlay.color.set(col).multiplyScalar(P.stun > 0 ? 0.8 : 1.5 + Math.sin(R.time * 6) * 0.2);
   R.padGlowMat.color.set(col).multiplyScalar(0.55 + (rm ? 0 : sq * 0.6));
 }
-let haloN = 0;
 function syncBalls(G, dt, a) {
   const hp = R.halo.geometry.attributes.position, hs = R.halo.geometry.attributes.aSize, ha = R.halo.geometry.attributes.aAlpha, hc = R.halo.geometry.attributes.aCol;
   const fire = G.fireT > 0;

@@ -4,7 +4,7 @@
  * The rules, controls, sound and HUD come from core.js, exactly as in 3D;
  * this only paints the courtyard, the brass frame and the glowing tiles.
  */
-import { frozen, COLS, ROWS, SHAPES, SIZE, PIECE_COL, clamp, layoutUnits, margins, slotAt, makeAnim, animEvent, animTick, boardTile, paletteOf, ghostOn, TAU } from '/games/rangoli-drop/core.js';
+import { frozen, COLS, SHAPES, SIZE, PIECE_COL, clamp, layoutUnits, margins, slotAt, makeAnim, animEvent, animTick, boardTile, paletteOf, ghostOn, TAU } from '/games/rangoli-drop/core.js';
 
 const hexRgb = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
 const mixHex = (a, b, t) => { const x = hexRgb(a), y = hexRgb(b); return 'rgb(' + Math.round(x[0] + (y[0] - x[0]) * t) + ',' + Math.round(x[1] + (y[1] - x[1]) * t) + ',' + Math.round(x[2] + (y[2] - x[2]) * t) + ')'; };
@@ -15,7 +15,7 @@ export function make2D(opts) {
   const A = opts.anim || makeAnim();
   const owner = !opts.anim;
   let TS = null, TM = null;
-  let ARC = null, W = 0, H = 0, DPR = 1, k = 20, ox = 0, oy = 0, U = null, bgKey = '', bgCanvas = null, spr = [], ghostSpr = [], dots = [], sprK = 0, lastNow = 0, time = 0;
+  let W = 0, H = 0, DPR = 1, k = 20, ox = 0, oy = 0, U = null, bgKey = '', bgCanvas = null, spr = [], ghostSpr = [], dots = [], sprK = 0, lastNow = 0, time = 0;
   const L = { cell: 0, bx0: 0, by0: 0, bx1: 0, by1: 0, ty: 0, portrait: true, tall: false, hold: { x: 0, y: 0, w: 0, h: 0 }, next: { x: 0, y: 0, w: 0, h: 0 } };
   const SL = { x: 0, y: 0, s: 1 };
   const sx = (u) => ox + u * k, sy = (v) => oy - v * k;
@@ -126,8 +126,8 @@ export function make2D(opts) {
   }
   const view = {
     name: '2d', three: false, anim: A, layout: L,
-    init(a) { ARC = a; layout(a); return true; },
-    resize(a) { ARC = a; layout(a); },
+    init(a) { layout(a); return true; },
+    resize(a) { layout(a); },
     newGame(G) { if (owner) { Object.assign(A, makeAnim()); animEvent(A, 'level', { level: G.level, snap: true }, G); } P.n = 0; },
     event(type, d, G) {
       if (owner) animEvent(A, type, d, G);
@@ -147,7 +147,6 @@ export function make2D(opts) {
       g.globalAlpha = fadeIn == null ? 1 : fadeIn;
       g.drawImage(background(level), 0, 0, W, H);
       // lamps drifting up behind the board
-      const pal = paletteOf(level);
       for (let i = 0; i < DIYA_N; i++) {
         const yy = ((diya[i * 4 + 1] + time * diya[i * 4 + 2]) % 1);
         const x = diya[i * 4] * W, y = H * (1.05 - yy * 1.1), s = (6 + diya[i * 4 + 3] * 6) * (0.85 + 0.15 * Math.sin(time * 6 + i));

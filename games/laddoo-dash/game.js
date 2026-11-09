@@ -8,7 +8,7 @@
   'use strict';
   import('/games/laddoo-dash/core.js').then(function (M) {
     var SPIRITS = M.SPIRITS, BONUS = M.BONUS, WALL = M.WALL, TAU = M.TAU, clamp = M.clamp;
-    var ARC = null, W = 0, H = 0, cache = null, cacheKey = '', cam = { x: 0, y: 0, s: 20, ox: 0, oy: 0, init: false };
+    var W = 0, H = 0, cache = null, cacheKey = '', cam = { x: 0, y: 0, s: 20, ox: 0, oy: 0, init: false };
     var parts = [], glowC = null, t = 0, last = 0;
     function glowSprite() {
       if (glowC) return glowC;
@@ -124,7 +124,7 @@
     }
     var view = {
       name: '2d', three: false,
-      init: function (a) { ARC = a; return true; },
+      init: function () { return true; },
       resize: function () { cacheKey = ''; },
       setMaze: function () { cacheKey = ''; cam.init = false; },
       newGame: function () { cacheKey = ''; cam.init = false; parts.length = 0; },

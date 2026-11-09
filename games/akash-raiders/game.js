@@ -7,7 +7,7 @@
 (function () {
   'use strict';
   import('/games/akash-raiders/core.js').then(function (M) {
-    var XW = M.XW, PY = M.PY, BAR = M.BAR, TAU = M.TAU, clamp = M.clamp, lerp = M.lerp, KITE = M.KITE, BUG = M.BUG, MOTH = M.MOTH, DUAL_DX = M.DUAL_DX;
+    var BAR = M.BAR, TAU = M.TAU, clamp = M.clamp, lerp = M.lerp, KITE = M.KITE, BUG = M.BUG, MOTH = M.MOTH, DUAL_DX = M.DUAL_DX;
     var ARC = null, W = 0, H = 0, S = 20, CX = 0, Y0 = 0, bg = null, city = null, stars = [], parts = [], rings = [], t = 0;
     var KITE_COL = ['#ff8a3d', '#ff5fa2', '#3fd6c6', '#ffd23f'];
     function sx(x) { return CX + x * S; }
