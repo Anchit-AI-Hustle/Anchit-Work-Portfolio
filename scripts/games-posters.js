@@ -17,7 +17,7 @@ const { chromium } = require('./_playwright.js');
 
 const BASE = (process.env.BASE || 'http://127.0.0.1:8099').replace(/\/$/, '');
 const ROOT = path.join(__dirname, '..');
-const GAMES = ['saffron-city', 'midnight-apex', 'ghat-riders', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'sky-thread', 'tiffin-dash', 'board-strike', 'yard-catch', 'rally-cage', 'fare-run', 'chhat-hopper', 'kart-mela', 'paint-ops', 'nitro-goal'];
+const GAMES = ['saffron-city', 'midnight-apex', 'ghat-riders', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'sky-thread', 'tiffin-dash', 'board-strike', 'yard-catch', 'rally-cage', 'fare-run', 'chhat-hopper', 'kart-mela', 'paint-ops', 'nitro-goal', 'mela-pinball', 'laddoo-dash', 'rangoli-drop', 'akash-raiders', 'diya-breaker'];
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // How long to play before the photo, and what to hold. Tuned per game so the
@@ -41,6 +41,11 @@ const PLAY = {
   'kart-mela': { ms: 6000, keys: ['ArrowUp'], taps: [], setup: () => window.__arcade.dev && window.__arcade.dev.skip(), hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
   'paint-ops': { ms: 2200, keys: ['ArrowRight'], taps: [], setup: () => window.__arcade.dev && window.__arcade.dev.skipIntro(), hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
   'nitro-goal': { ms: 5000, keys: ['ArrowUp'], taps: ['Space'], tapAt: 300, hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
+  'mela-pinball': { ms: 4500, keys: [], taps: ['Space'], tapAt: 400, setup: () => window.__arcade.dev && window.__arcade.dev.multiball(), hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
+  'laddoo-dash': { ms: 2500, keys: [], taps: [], query: '?q=3', setup: () => { const d = window.__arcade.dev; d.bot(true); d.skip(); d.warp(9); d.power(); }, hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
+  'rangoli-drop': { ms: 7000, keys: [], taps: [], setup: () => window.__arcade.dev && window.__arcade.dev.showcase(true), hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
+  'akash-raiders': { ms: 2500, keys: [], taps: [], query: '?hq=1', setup: () => { const d = window.__arcade.dev; if (d) { d.skip(); d.level(2); d.ff(13.5, true); d.bot(true); } }, hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
+  'diya-breaker': { ms: 11000, keys: [], taps: [], setup: () => { const d = window.__arcade.dev; if (!d) return; d.level(29); d.skip(); d.auto(true); setTimeout(() => d.power('multi'), 2500); }, hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
   'fare-run': { ms: 2800, keys: ['ArrowRight'], taps: [], hiq: () => window.__arcade.dev && window.__arcade.dev.setQuality(3) },
 };
 
@@ -77,8 +82,9 @@ async function shoot(browser, slug) {
 async function sheet() {
   const W = 1200, H = 630;
   // Every poster in one grid; a short last row is centred under the rest.
-  // Four to six across, whichever leaves the fewest empty cells (five on a tie).
-  const cols = [5, 4, 6].reduce((b, c) => ((c - GAMES.length % c) % c < (b - GAMES.length % b) % b ? c : b));
+  // A near-square grid: the sheet is 1200x630 and so is every poster, so as many columns as rows keeps
+  // each cell the posters' own shape.
+  const cols = Math.ceil(Math.sqrt(GAMES.length));
   const rows = Math.ceil(GAMES.length / cols);
   const cellW = Math.floor(W / cols), cellH = Math.floor(H / rows);
   const thumbs = await Promise.all(GAMES.map((g) => sharp(path.join(ROOT, 'games', g, 'poster.png')).resize(cellW, cellH, { fit: 'cover' }).toBuffer()));
