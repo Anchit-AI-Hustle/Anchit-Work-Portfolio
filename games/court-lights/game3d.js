@@ -1,4 +1,5 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
+import { createFX as createPost } from '/games/shared/fx3d.js';
 /*
  * Court Lights, in real 3D: rooftop street basketball after dark.
  * An original game. No licensed names; every model and texture is made in code.
@@ -44,6 +45,7 @@ const G = {
   ball: null, attract: true, pops: [], shotT: 9, slow: 0, flare: 0, swishT: 9, ballIn: 1, lastMiss: '',
   release: { x: HAND0.x, y: HAND0.y + 0.6, z: HAND0.z },
 };
+let POST = null;
 const R3 = { ok: false, lost: false, q: 2, lock: false, soft: false, fps: null, accT: 0, accN: 0, settle: 1, time: 0, last: 0, realDt: 1 / 60 };
 
 /* ====================================================================== rules */
@@ -70,6 +72,7 @@ function shoot() {
   b.spin = 7 + c * 6;
   G.phase = 'flight'; G.attempts++; G.holding = false; G.charge = 0; G.shotT = 0; G.lastMiss = '';
   if (!G.attract) {
+    arc.haptic('tap', 0.3 + c * 0.4);
     arc.sfx.tone(220 + c * 80, 0.09, { type: 'triangle', vol: 0.12 });
     arc.sfx.noise(0.05, { freq: 900, vol: 0.06 });
   }
@@ -90,7 +93,8 @@ function scoreShot(kind) {
   arc.sfx.tone(kind === 'swish' ? 880 : 520, 0.16, { type: 'sine', vol: 0.16 });
   if (kind === 'swish') arc.sfx.tone(1320, 0.22, { type: 'sine', vol: 0.1, delay: 0.05 });
   arc.sfx.noise(0.18, { freq: 3200, filter: 'highpass', vol: 0.05 });
-  arc.buzz(14);
+  arc.haptic(kind === 'swish' || G.combo >= 3 ? 'success' : 'hit', min(1, 0.55 + G.combo * 0.1));
+  if (POST) { POST.flash(kind === 'swish' ? 0.2 : 0.12, '#fff0c8'); if (G.combo >= 3) POST.kick(-4); }
   if (G.combo >= 3 && !arc.reducedMotion) G.slow = 0.7;
   if (G.mode === 'twentyone' && G.score >= 21) { if (!arc.reducedMotion) G.slow = 0.9; G.endIn = 1.1; G.go = 2; }
 }
@@ -106,6 +110,7 @@ function miss() {
 function finish(why) {
   if (G.phase === 'over' || !playing()) return;
   G.phase = 'over';
+  arc.haptic(G.score >= 21 || G.makes > 0 ? 'success' : 'fail');
   arc.over({
     eyebrow: why || 'Buzzer', title: G.score >= 21 ? 'Lights <em>out</em>' : 'Buzzer',
     score: G.score, scoreLabel: 'Points',
@@ -139,7 +144,7 @@ function resolveRim() {
     FXK.rim(b.x, b.z, 1);
     if (!G.attract) {
       arc.sfx.tone(360, 0.06, { type: 'square', vol: 0.08 }); arc.sfx.tone(190, 0.12, { type: 'triangle', vol: 0.06, delay: 0.02 });
-      arc.shake = Math.max(arc.shake, 5); arc.buzz(20);
+      arc.shake = Math.max(arc.shake, 5); arc.haptic('hit', 0.7);
     }
     G.lastMiss = why === 'Early' ? 'Early, rimmed out' : why === 'Late' ? 'Late, rimmed out' : 'Rimmed out';
   } else {
@@ -1027,6 +1032,8 @@ function initRenderer() {
     FX.add = new FxPool(900, true); FX.norm = new FxPool(700, false);
     R3.camPos = new THREE.Vector3(-1.15, 3.1, -7.0); R3.camLook = new THREE.Vector3(0, 2.4, 6.4);
     R3.tmpV = new THREE.Vector3(); R3.tmpV2 = new THREE.Vector3(); R3.proj = new THREE.Vector3();
+    // Shared post pass: bloom on the floodlights and the rim glow, grade, grain; the camera swings onto the hoop at the start.
+    POST = createPost(r, { arc, soft: R3.soft, intro: { yaw: -0.8, up: 0.35, back: 0.35 }, results: { yaw: 0.28 }, target: (v) => v.copy(R3.camLook), look: { bloom: 0.62, threshold: 0.68, vignette: 0.12 } });
     applyQuality();
     R3.ok = true;
   } catch (err) {
@@ -1282,7 +1289,7 @@ function render(c) {
   R3.last = now;
   if (!R3.ok) drawFail(c);
   else if (!R3.lost) {
-    try { frame3D(arc.state === 'pause' ? 0 : dt); R3.renderer.render(R3.scene, R3.camera); } catch (e) { R3.ok = false; try { console.warn(e); } catch (er) { /* ignore */ } }
+    try { frame3D(arc.state === 'pause' ? 0 : dt); if (POST) { POST.setQuality(R3.q, R3.lock); POST.render(R3.scene, R3.camera); } else R3.renderer.render(R3.scene, R3.camera); } catch (e) { R3.ok = false; try { console.warn(e); } catch (er) { /* ignore */ } }
   }
   vignette(c);
   if (arc.state === 'play' && !G.attract) {

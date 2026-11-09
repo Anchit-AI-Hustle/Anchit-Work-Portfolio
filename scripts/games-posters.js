@@ -17,7 +17,7 @@ const { chromium } = require('./_playwright.js');
 
 const BASE = (process.env.BASE || 'http://127.0.0.1:8099').replace(/\/$/, '');
 const ROOT = path.join(__dirname, '..');
-const GAMES = ['saffron-city', 'midnight-apex', 'ghat-riders', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'sky-thread', 'tiffin-dash', 'board-strike', 'yard-catch', 'rally-cage', 'fare-run'];
+const GAMES = ['saffron-city', 'midnight-apex', 'ghat-riders', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'sky-thread', 'tiffin-dash', 'board-strike', 'yard-catch', 'rally-cage', 'fare-run', 'chhat-hopper', 'kart-mela', 'paint-ops'];
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // How long to play before the photo, and what to hold. Tuned per game so the
@@ -37,6 +37,9 @@ const PLAY = {
   'board-strike': { ms: 2600, keys: ['ArrowRight'], taps: ['Space'], tapAt: 500, query: '?q=3' },
   'yard-catch': { ms: 2800, keys: ['ArrowRight'], taps: [], query: '?q=3' },
   'rally-cage': { ms: 2800, keys: ['ArrowRight'], taps: ['Space'], tapAt: 200, query: '?q=3' },
+  'chhat-hopper': { ms: 4500, keys: ['ArrowRight'], taps: ['Space'], tapAt: 1800, setup: () => window.__arcade.dev && window.__arcade.dev.level('1-1'), hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
+  'kart-mela': { ms: 6000, keys: ['ArrowUp'], taps: [], setup: () => window.__arcade.dev && window.__arcade.dev.skip(), hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
+  'paint-ops': { ms: 2200, keys: ['ArrowRight'], taps: [], setup: () => window.__arcade.dev && window.__arcade.dev.skipIntro(), hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
   'fare-run': { ms: 2800, keys: ['ArrowRight'], taps: [], hiq: () => window.__arcade.dev && window.__arcade.dev.setQuality(3) },
 };
 
@@ -48,6 +51,7 @@ async function shoot(browser, slug) {
   await page.waitForFunction(() => window.__arcade && window.__arcade.frame > 5, null, { timeout: 10000 });
   await page.evaluate(() => document.fonts && document.fonts.ready);
   await page.click('.arc-card .arc-btn.primary');
+  if (p.setup) await page.evaluate(p.setup);
   for (const k of p.keys) await page.keyboard.down(k);
   const start = Date.now();
   for (const t of p.taps) { await sleep(p.tapAt || 300); await page.keyboard.press(t); }
@@ -57,7 +61,9 @@ async function shoot(browser, slug) {
   await page.addStyleTag({ content: '.arc-bar,.arc-hint,.arc-toast,.arc-touch,.arc-panel,.arc-float{display:none!important}' });
   await sleep(250);
   // The stage, not one canvas: a 3D game draws on a WebGL canvas with its HUD on a second one above it.
-  const buf = await page.locator('.arc-stage').screenshot();
+  // A clip of the page, not an element shot: a stage that shakes on impact never reads as stable.
+  const box = await page.locator('.arc-stage').boundingBox();
+  const buf = await page.screenshot({ clip: box, timeout: 120000 });
   for (const k of p.keys) await page.keyboard.up(k);
   await ctx.close();
   const img = sharp(buf).resize(1200, 630, { fit: 'cover', position: 'centre' });
@@ -69,8 +75,10 @@ async function shoot(browser, slug) {
 
 async function sheet() {
   const W = 1200, H = 630;
-  // Every poster in a grid five across; a short last row is centred under the rest.
-  const cols = 5, rows = Math.ceil(GAMES.length / cols);
+  // Every poster in one grid; a short last row is centred under the rest.
+  // Four to six across, whichever leaves the fewest empty cells (five on a tie).
+  const cols = [5, 4, 6].reduce((b, c) => ((c - GAMES.length % c) % c < (b - GAMES.length % b) % b ? c : b));
+  const rows = Math.ceil(GAMES.length / cols);
   const cellW = Math.floor(W / cols), cellH = Math.floor(H / rows);
   const thumbs = await Promise.all(GAMES.map((g) => sharp(path.join(ROOT, 'games', g, 'poster.png')).resize(cellW, cellH, { fit: 'cover' }).toBuffer()));
   const comp = thumbs.map((b, i) => {

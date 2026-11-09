@@ -1,4 +1,5 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
+import { createFX as createPost } from '/games/shared/fx3d.js';
 
 /*
  * Fare Run, in 3D: an auto through a dusk bazaar, three lanes, chase camera.
@@ -75,6 +76,7 @@ function spawn() {
 function finish(why) {
   if (G.phase === 'over' || G.attract || !arc || arc.state !== 'play') return;
   G.phase = 'over';
+  arc.haptic(why === 'Night over' ? 'success' : 'fail');
   arc.over({
     eyebrow: why, title: why === 'Night over' ? 'Shift <em>done</em>' : 'Fare <em>cut</em>',
     score: Math.round(G.score), scoreLabel: 'Score',
@@ -89,7 +91,8 @@ function objZ(o) { return -((PY - o.y) - 10) * SF; }
 function hit(o) {
   G.lives--; G.cool = 0.9; G.flash = 0.2; G.hitT = 0.5;
   if (!arc.reducedMotion) G.slowT = 0.25;
-  arc.shake = 8; arc.buzz(45);
+  arc.shake = 8; arc.haptic('heavy', 0.75);
+  if (POST) { POST.flash(0.3, '#ffd2b8'); POST.kick(-5); }
   arc.sfx.tone(150, 0.16, { type: 'sawtooth', slide: 80, vol: 0.12 });
   arc.sfx.noise(0.3, { freq: o.kind === 'pot' ? 2400 : 700, vol: 0.2 });
   if (FX) {
@@ -110,7 +113,7 @@ function pickUp(o) {
   arc.sfx.tone(660, 0.08, { type: 'sine', vol: 0.12 });
   arc.sfx.tone(990, 0.1, { type: 'sine', vol: 0.07, delay: 0.06 });
   arc.toast('Fare on', '+40', 600);
-  arc.buzz(10);
+  arc.haptic('tap', 0.55);
   // The fare rides along for a few seconds, then hops off with a tip of light.
   const seat = G.riders[0] <= G.riders[1] ? 0 : 1;
   G.riders[seat] = 6;
@@ -169,7 +172,7 @@ function update(dt) {
   else if (p && p.pressed) want = p.nx < 0.38 ? 0 : p.nx > 0.62 ? 2 : 1;
   want = clamp(want | 0, 0, 2);
   if (want !== G.lane) {
-    G.steer = want - G.lane; G.lane = want; arc.sfx.tone(280, 0.05, { type: 'square', vol: 0.06 });
+    G.steer = want - G.lane; G.lane = want; arc.sfx.tone(280, 0.05, { type: 'square', vol: 0.06 }); if (!G.attract) arc.haptic('tap', 0.2);
     if (FX) FX.burst(laneX(G.laneT), 0.05, 1.0, 6, FX.C.dust, 1.6, 'dust');
   }
   G.laneT = lerp(G.laneT, G.lane, 1 - Math.exp(-dt * 12));
@@ -538,7 +541,7 @@ function makeMaterials() {
 }
 
 /* ------------------------------------------------------------------ the 3D stage */
-let R3 = null, NO3D = false, FX = null;
+let R3 = null, NO3D = false, FX = null, POST = null;
 const TIERS = [
   { px: 0.5, budget: 130000, shadow: false, map: 512, cheap: true, aniso: 1, lamps: 0, sky: 0, fxScale: 0.5 },
   { px: 0.75, budget: 650000, shadow: true, map: 1024, cheap: false, aniso: 2, lamps: 1, sky: 1, fxScale: 0.75 },
@@ -657,6 +660,8 @@ function setup3D(a) {
   buildAuto();
   buildPools();
   FX = createFX(scene);
+  // Shared post pass: bloom on the lamps and halos, grade, grain; a swing-in establishing shot at the start.
+  POST = createPost(renderer, { arc: a, soft: R3.soft, intro: { yaw: 0.8, up: 0.55 }, results: true, target: (v) => v.set(AUTO.root ? AUTO.root.position.x : 0, 1, 0), look: { vignette: 0.14, bloom: 0.45, threshold: 0.74 } });
   return true;
 }
 function resize3D(a) {
@@ -1344,7 +1349,7 @@ function renderScene(dtReal, a) {
   AUTO.beam.material.opacity = night ? 0.07 : 0.025;
   W3.heads.material.color.setScalar(1);
   if (FX) { placeHalos(t); FX.step(a.state === 'pause' ? 0 : dtReal, a.state === 'pause' ? 0 : scrollStep, t, cam, r.renderer); }
-  r.renderer.render(r.scene, cam);
+  if (POST) { POST.setQuality(r.quality, r.lockQ); POST.render(r.scene, cam); } else r.renderer.render(r.scene, cam);
 }
 
 /* ------------------------------------------------------------------ HUD */

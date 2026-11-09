@@ -1,4 +1,5 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
+import { createFX as createPost } from '/games/shared/fx3d.js';
 /*
  * Yard Catch 3D: spice sacks tumble from a warehouse loft into a market yard
  * at dusk, and a porter wheels his crate under them. Same rules, modes,
@@ -80,6 +81,7 @@ function scorePop(X, Y, text, col, big) { G.pops.push({ X, Y, text, col: col || 
 function finish(why, html) {
   if (G.phase === 'over' || G.attract || !arc || arc.state !== 'play') return;
   G.phase = 'over';
+  arc.haptic(why === 'Shift over' ? 'success' : 'fail');
   arc.over({
     eyebrow: why, title: why === 'Shift over' ? 'Shift <em>done</em>' : 'Yard <em>closed</em>',
     score: Math.round(G.score), scoreLabel: 'Score',
@@ -92,7 +94,7 @@ function miss(o) {
   if (G.phase === 'over' || G.inv > 0) return;
   G.lives--; G.combo = 0; G.inv = 1.15; G.hurt = 1;
   arc.shake = 6; arc.sfx.tone(140, 0.14, { type: 'sawtooth', slide: 70, vol: 0.12 });
-  arc.buzz(35);
+  arc.haptic('heavy', 0.6);
   if (G.lives <= 0) finish('Dropped the load', '<p>' + G.caught + ' sacks caught before the pile went over.</p>');
   else arc.toast('Missed a sack', G.lives + ' left', 800);
   void o;
@@ -106,7 +108,8 @@ function catchItem(o) {
     spoilFx(X, Y);
     arc.toast('Spoiled', 'Skip those', 800);
     arc.sfx.tone(180, 0.12, { type: 'square', vol: 0.1 });
-    arc.shake = Math.max(arc.shake, 5); arc.buzz(30);
+    arc.shake = Math.max(arc.shake, 5); arc.haptic('hit', 0.8);
+    if (POST) POST.flash(0.2, '#c8ffb0');
     if (G.lives <= 0) finish('Spoiled crate', '<p>' + G.caught + ' good sacks before a spoiled one landed.</p>');
   } else {
     G.combo++; G.caught++;
@@ -118,9 +121,9 @@ function catchItem(o) {
     scorePop(X, Y + 0.5, '+' + add, G.combo >= 5 ? WARM : INK, G.combo >= 5);
     arc.sfx.tone(520 + G.combo * 40, 0.07, { type: 'sine', vol: 0.12 });
     arc.sfx.noise(0.08, { freq: 900, vol: 0.06 });
-    if (!G.attract) arc.buzz(10);
+    if (!G.attract) arc.haptic('tap', min(1, 0.35 + G.combo * 0.06));
     if (G.combo >= 5) arc.toast('Combo x' + G.combo, '+' + add, 700);
-    if (G.combo % 5 === 0) { marigolds(X, Y + 0.4); CAM.kick = 1; arc.sfx.tone(880, 0.12, { type: 'triangle', vol: 0.08, delay: 0.05 }); }
+    if (G.combo % 5 === 0) { marigolds(X, Y + 0.4); CAM.kick = 1; if (!G.attract) { arc.haptic('success', 0.7); if (POST) POST.flash(0.14, '#ffe2a0'); } arc.sfx.tone(880, 0.12, { type: 'triangle', vol: 0.08, delay: 0.05 }); }
   }
   o.dead = true;
   releaseVis(o, 'gone');
@@ -185,6 +188,7 @@ function tickPops(dt) {
 }
 
 /* ===================================================================== 3D world */
+let POST = null;
 const R3 = {
   ok: false, lost: false, renderer: null, scene: null, camera: null, q: 3, lock: false, soft: false,
   aniso: 4, fps: 0, accT: 0, accN: 0, settle: 2, last: 0, realDt: 1 / 60, time: 0, key: null, env: null, hemi: null,
@@ -901,6 +905,8 @@ function initRenderer() {
     buildWorld();
     R3.scene.add(R3.camera);
     R3.ok = true;
+    // Shared post pass: bloom on the lamps and catches, grade, grain; a swing onto the yard at the start.
+    POST = createPost(R3.renderer, { arc, soft: R3.soft, intro: { yaw: 0.7, up: 0.4, back: 0.45 }, results: { yaw: 0.3 }, target: (v) => v.set(CAM.x * 0.6, CAM.Y - CAM.D * Math.tan(CAM.tilt), 0), look: { bloom: 0.5, threshold: 0.72 } });
     applyQuality();
   } catch (err) {
     R3.ok = false; R3.fail = String(err && err.message || err);
@@ -1002,7 +1008,7 @@ function render(c, a) {
   if (!R3.ok) drawFail(c);
   else if (!R3.lost) {
     frame3D(dt);
-    R3.renderer.render(R3.scene, R3.camera);
+    if (POST) { POST.setQuality(R3.q, R3.lock); POST.render(R3.scene, R3.camera); } else R3.renderer.render(R3.scene, R3.camera);
   }
   // a red edge when a life goes (a soft vignette, never a flash under reduced motion)
   G.hurt = max(0, G.hurt - dt * 1.8);

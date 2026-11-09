@@ -209,3 +209,28 @@ html[data-consent-open="1"] body.arcade .arc-app {
 }
 /* Very narrow phones: four tools must still fit beside the title. */
 @media (max-width: 380px) { .arc-tools { gap: 4px; } .arc-tool { min-width: 44px; padding: 0 8px; } .arc-back span { display: none; } }
+
+/* Transitions: panels fade and settle in, lift away when closed, and swap
+   content with a short rise; Play fades through black. Reduced motion keeps
+   the fades and drops the scale, blur and rise. */
+.arc-panel { opacity: 1; transition: opacity .28s ease; }
+.arc-panel .arc-card { transition: transform .38s cubic-bezier(.2,.85,.25,1), filter .32s ease, opacity .3s ease; will-change: auto; }
+.arc-panel.fx-enter { opacity: 0; transition: none; }
+.arc-panel.fx-enter .arc-card { transform: translateY(16px) scale(.955); filter: blur(6px); opacity: 0; transition: none; }
+.arc-panel.fx-leave { opacity: 0; pointer-events: none; transition: opacity .22s ease; }
+.arc-panel.fx-leave .arc-card { transform: translateY(-6px) scale(1.025); filter: blur(5px); opacity: 0; transition: transform .22s ease, filter .22s ease, opacity .2s ease; }
+/* Results: the moment lands first, then the card rises in. */
+.arc-panel.fx-over { transition: opacity .5s ease .12s; }
+.arc-panel.fx-over .arc-card { transition: transform .55s cubic-bezier(.2,.85,.25,1) .3s, filter .45s ease .3s, opacity .45s ease .3s; }
+.arc-card.fx-swap { animation: arc-swap .3s cubic-bezier(.2,.85,.25,1) both; }
+@keyframes arc-swap { from { opacity: .25; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.arc-card .arc-btn { transition: transform .15s ease, border-color .15s ease, background .2s ease; }
+.arc-card .arc-btn:active { transform: scale(.97); }
+.arc-veil {
+  position: absolute; inset: 0; z-index: 3; pointer-events: none; background: #000; opacity: 0;
+  transition: opacity .5s ease;
+}
+.arc-veil.on { opacity: 1; transition: opacity .14s ease-in; }
+.arc-app.rm .arc-panel .arc-card, .arc-app.rm .arc-panel.fx-enter .arc-card, .arc-app.rm .arc-panel.fx-leave .arc-card { transform: none; filter: none; }
+.arc-app.rm .arc-card.fx-swap { animation: arc-fade .2s linear both; }
+@keyframes arc-fade { from { opacity: .3; } to { opacity: 1; } }

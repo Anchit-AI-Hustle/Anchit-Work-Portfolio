@@ -1,4 +1,5 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
+import { createFX as createPost } from '/games/shared/fx3d.js';
 /*
  * Super Over, in real 3D: a stadium T20 batting game under floodlights.
  * You bat, the computer bowls and fields. Original art, names and code.
@@ -509,6 +510,7 @@ const Arcade = window.Arcade;
     ballAt(D, G.swing.contactAt);
     const q = clamp(r.q, 0, 1);
     if (r.kind === 'middled') snd.bat(1); else if (r.kind === 'good') snd.bat(0.7); else if (r.kind === 'defend') snd.bat(0.25); else snd.dull();
+    if (!G.attract) { arc.haptic(r.kind === 'middled' ? 'heavy' : r.kind === 'good' ? 'hit' : 'tap', r.kind === 'middled' ? 1 : r.kind === 'good' ? 0.75 : 0.45); if (POST && r.kind === 'middled') { POST.flash(0.2, '#fff3c4'); POST.kick(-4); } }
     G.punch = r.kind === 'middled' ? 1 : r.kind === 'good' ? 0.6 : 0.3;
     G.flash = r.kind === 'middled' ? 0.35 : 0;
     kick(r.kind === 'middled' && r.v > 30 ? 0.45 : 0.15);
@@ -841,8 +843,8 @@ const Arcade = window.Arcade;
     const big = res.boundary || res.wicket;
     G.resultDur = res.boundary === 6 ? 2.4 : res.boundary ? 2.0 : res.wicket ? 2.2 : 1.45;
     if (!G.attract) arc.toast(res.text, res.small, Math.round(G.resultDur * 1000 - 200));
-    if (res.boundary === 6 || res.boundary === 4) { G.crowd = 1; }
-    if (res.wicket) { G.crowd = 0.7; }
+    if (res.boundary === 6 || res.boundary === 4) { G.crowd = 1; if (!G.attract) { arc.haptic(res.boundary === 6 ? 'success' : 'boost', 1); if (POST) POST.flash(res.boundary === 6 ? 0.22 : 0.12, '#fff0c8'); } }
+    if (res.wicket) { G.crowd = 0.7; if (!G.attract) { arc.haptic('heavy', 0.9); if (POST) POST.kick(-5); } }
     if (res.wicket && res.wicket !== 'Run out' && G.view === 'bat') snd.gasp();
     void big;
     // match over?
@@ -852,8 +854,8 @@ const Arcade = window.Arcade;
     else if (G.wkts >= G.wktsTotal) G.over = true;
     if (G.over) {
       G.resultDur = G.won ? 3.2 : 2.4;
-      if (G.won) { G.celebrate = 1; G.fireShow = 3; snd.win(); snd.roar(1); snd.drums(8); }
-      else { snd.lose(); }
+      if (G.won) { G.celebrate = 1; G.fireShow = 3; snd.win(); snd.roar(1); snd.drums(8); if (!G.attract) arc.haptic('success', 1); }
+      else { snd.lose(); if (!G.attract) arc.haptic('fail', 1); }
     }
     if (res.wicket && !G.over) {
       const nm = G.queue.shift() || 'Jai Holloway';
@@ -894,6 +896,7 @@ const Arcade = window.Arcade;
 
 
 /* ====================================================================== 3D: shared bits */
+let POST = null;
 const R3 = { ok: false, lost: false, q: 3, lock: false, renderer: null, scene: null, camera: null, aniso: 4, time: 0, last: 0, accT: 0, accN: 0, accW: 0, key: null, hemi: null, sky: null, fail: '' };
 const B2W = (x, y, zb, out) => out.set(x, y, HALF - zb);
 const F2W = (x, y, zf, out) => out.set(x, y, -zf);
@@ -2279,6 +2282,9 @@ function initRenderer() {
     FX.add = new FxPool(1400, true); FX.norm = new FxPool(700, false);
     buildStumps(); buildBall();
     R3.scene.add(R3.camera);
+    // Shared post pass: bloom on the floodlights and the fireworks, grade, grain. A sweep across the ground
+    // settles behind the batter before the first ball; the results drift slowly over the stadium.
+    POST = createPost(r, { arc, soft: R3.soft, intro: { yaw: 1.15, up: 0.35, back: 0.25, dur: 2.2 }, results: { yaw: 0.35, rise: 0.08 }, target: (v) => v.copy(CAM.tgt), look: { bloom: 0.6, bloomWide: 0.45, threshold: 0.68 } });
     applyQuality();
     R3.ok = true;
   } catch (err) {
@@ -2650,7 +2656,7 @@ function initRenderer() {
     if (!R3.ok) drawFail(ctx);
     else if (!R3.lost) {
       frame3D(dtr);
-      R3.renderer.render(R3.scene, R3.camera);
+      if (POST) { POST.setQuality(R3.q, R3.lock); POST.render(R3.scene, R3.camera); } else R3.renderer.render(R3.scene, R3.camera);
     }
     if (!G.attract && arc.state !== 'menu') { drawHUD(ctx); drawSwipeTrail(ctx); }
     if (G.cutFlash > 0.01) { ctx.fillStyle = 'rgba(255,248,230,' + clamp(G.cutFlash, 0, 1) * 0.6 + ')'; ctx.fillRect(0, 0, w, h); }

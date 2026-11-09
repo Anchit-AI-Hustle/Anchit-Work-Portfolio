@@ -1,4 +1,5 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
+import { createFX as createPost } from '/games/shared/fx3d.js';
 /*
  * Rally Cage, in real 3D: squash in a floodlit cage on a city terrace.
  * Original world on the Arcade shell; every model and texture is made in code.
@@ -49,6 +50,7 @@ const G = {
   ball: null, lamps: [], floats: [], phase: 'serve', attract: true,
   mode: 'lives', diff: 'normal', flash: 0, slow: 0, hitT: 9, wallT: 9, dropT: 9, relit: 9,
 };
+let POST = null;
 const R3 = { ok: false, lost: false, q: 2, lock: false, soft: false, fps: null, accT: 0, accN: 0, settle: 1, time: 0, last: 0, realDt: 1 / 60 };
 
 /* ====================================================================== rules (the flat game's) */
@@ -82,6 +84,7 @@ function floatTxt(x, y, text, col, big) {
 function endGame(why, title) {
   if (G.phase === 'over' || G.attract || !arc || arc.state !== 'play') return;
   G.phase = 'over';
+  arc.haptic(/held/.test(title) ? 'success' : 'fail');
   arc.over({
     eyebrow: why, title: title,
     score: Math.round(G.score), scoreLabel: 'Score',
@@ -93,6 +96,7 @@ function endGame(why, title) {
 function drop() {
   G.lives--; G.rally = 0; G.flash = 0.18; G.dropT = 0;
   arc.shake = 7; arc.sfx.tone(140, 0.16, { type: 'sawtooth', slide: 70, vol: 0.12 });
+  arc.haptic('heavy', 0.65); if (POST) POST.kick(-4);
   FXK.drop(G.ball.x);
   if (G.lives <= 0) endGame('Rally broken', 'Cage <em>quiet</em>');
   else {
@@ -157,11 +161,12 @@ function update(dt) {
       floatTxt(l.x, l.y, '+30', WARM);
       b.vy = abs(b.vy) * 1.02; arc.sfx.tone(880, 0.1, { type: 'sine', vol: 0.12 });
       arc.sfx.noise(0.12, { freq: 5200, filter: 'highpass', vol: 0.06 });
-      G.flash = 0.1; arc.buzz(10);
+      G.flash = 0.1; arc.haptic('hit', 0.55);
     }
   });
   if (G.lamps.length && G.lamps.every((l) => !l.on)) {
     G.lamps.forEach((l) => { l.on = true; l.outT = 9; });
+    arc.haptic('success', 0.8); if (POST) POST.flash(0.25, '#fff0c8');
     G.score += 50; G.relit = 0;
     floatTxt(0.5, 0.35, '+50 lamps', GOLD, true);
     arc.toast('Lamps back', '+50', 700);
@@ -180,8 +185,8 @@ function update(dt) {
     floatTxt(b.x, b.y - 0.04, '+' + (5 + G.rally), PRIM);
     arc.sfx.tone(320 + G.rally * 20, 0.06, { type: 'triangle', vol: 0.1 });
     FXK.paddle(b, off);
-    arc.buzz(8);
-    if (G.rally % 10 === 0 && !arc.reducedMotion) G.slow = 0.55;
+    arc.haptic('tap', min(1, 0.35 + abs(off) * 0.4 + G.rally * 0.02));
+    if (G.rally % 10 === 0) { arc.haptic('boost', 0.8); if (POST) POST.flash(0.16, '#ffe2a0'); if (!arc.reducedMotion) G.slow = 0.55; }
     if (G.mode === 'eleven' && G.rally >= 11) endGame('Rally of 11', 'Cage <em>held</em>');
   } else if (b.y > 1.02) drop();
 }
@@ -800,6 +805,8 @@ function initRenderer() {
     FX.add = new FxPool(800, true); FX.norm = new FxPool(600, false);
     R3.camPos = new THREE.Vector3(0, 4, -7); R3.camLook = new THREE.Vector3(0, 0.6, 5);
     R3.proj = new THREE.Vector3(); R3.v = new THREE.Vector3();
+    // Shared post pass: bloom on the floodlights and lamps, grade, grain; the camera swings onto the court at the start.
+    POST = createPost(r, { arc, soft: R3.soft, intro: { yaw: 0.85, up: 0.45, back: 0.4 }, results: { yaw: 0.3 }, target: (v) => v.copy(R3.camLook), look: { bloom: 0.62, threshold: 0.68 } });
     applyQuality();
     R3.ok = true;
   } catch (err) {
@@ -1029,7 +1036,7 @@ function render(c) {
   R3.last = now;
   if (!R3.ok) drawFail(c);
   else if (!R3.lost) {
-    try { frame3D(arc.state === 'pause' ? 0 : dt); R3.renderer.render(R3.scene, R3.camera); } catch (e) { R3.ok = false; try { console.warn(e); } catch (er) { /* ignore */ } }
+    try { frame3D(arc.state === 'pause' ? 0 : dt); if (POST) { POST.setQuality(R3.q, R3.lock); POST.render(R3.scene, R3.camera); } else R3.renderer.render(R3.scene, R3.camera); } catch (e) { R3.ok = false; try { console.warn(e); } catch (er) { /* ignore */ } }
   }
   if (G.dropT < 0.5 && !arc.reducedMotion) {
     const a = (1 - G.dropT / 0.5) * 0.45;

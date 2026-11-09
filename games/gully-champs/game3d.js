@@ -1,4 +1,5 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
+import { createFX as createPost } from '/games/shared/fx3d.js';
 
 /*
  * Gully Champs 3D: street cricket in a real 3D lane at golden hour.
@@ -199,6 +200,7 @@ const windowAt = (x, h, side) => {
 
 /* ------------------------------------------------------------ three helpers */
 let R = null; // renderer
+let POST = null; // shared post pass
 let maxAniso = 4;
 const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
 const mkCanvas = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
@@ -1210,6 +1212,9 @@ function buildWorld(arc) {
   maxAniso = Math.min(8, R.capabilities.getMaxAnisotropy());
   dom.addEventListener('webglcontextlost', (e) => { e.preventDefault(); W3.lost = true; }, false);
   dom.addEventListener('webglcontextrestored', () => { W3.lost = false; }, false);
+  // Shared post pass: bloom on the warm sun, the window lamps and the sparks, grade, grain. The lane has
+  // its own orbit for menus and results and its own cuts, so no extra camera moves here (walls are close).
+  POST = createPost(R, { arc, soft: W3.soft, look: { bloom: 0.42, threshold: 0.76, vignette: 0.28 } });
 
   scene = new THREE.Scene();
   scene.fog = new THREE.Fog('#f0c394', 26, 105);
@@ -1802,6 +1807,13 @@ function endBall(kind, info) {
     if (out) addOut(kind);
   }
   if (arc) arc.toast(text, small, lowKey ? 1300 : 1900);
+  if (arc && !trial) {
+    if (kind === 'glass') { arc.haptic('heavy', 1); if (POST) POST.flash(0.2, '#e8f4ff'); }
+    else if (kind === 'six' || kind === 'sixgate') arc.haptic('success', 0.9);
+    else if (out) arc.haptic('fail', 0.8);
+    else if (kind === 'four' || kind === 'won') arc.haptic('success', kind === 'won' ? 1 : 0.8);
+    else if (kind === 'two') arc.haptic('hit', 0.7);
+  }
   if (line) {
     const spk = (kind === 'four' || kind === 'two' || kind === 'six' || kind === 'sixgate') ? FIELDERS[1] : (kind === 'dot' ? FIELDERS[0] : BOWLER);
     say(pick(line), spk, 1.8, 1.95);
@@ -1842,6 +1854,7 @@ function prepareNextBall() {
 
 function finishMatch(won) {
   if (G.ended) return; G.ended = true;
+  if (arc) arc.haptic(won || (G.mode === 'last' && G.runs >= 30) ? 'success' : 'fail', 1);
   let bonus = 0;
   if (G.mode !== 'last' && won) bonus = 20 + (G.maxOuts - G.outs) * 5 + max(0, G.ballLimit - G.balls) * 2;
   const rec = { name: dispName(), runs: G.runs, target: G.target, won, bonus, outs: G.outs, balls: G.balls };
@@ -1941,6 +1954,8 @@ function contact(p) {
   G.shotLabel = lab;
   pop(lab, b.x, 1.7, lab === 'PERFECT' ? '#FFB736' : lab === 'Good' ? '#FBF5EC' : '#FF8A3D', lab === 'PERFECT' ? 22 : 17, 0.9);
   SND.bat(q);
+  arc.haptic(q > 0.8 ? 'heavy' : q > 0.4 ? 'hit' : 'tap', 0.4 + q * 0.6);
+  if (POST && q > 0.8) { POST.flash(0.14, '#fff3c4'); POST.kick(-3); }
   sparkBurst(b.x, b.h, 0, q > 0.7 ? 14 : 7);
   kick(0.26 * (0.4 + q)); if (!arc.reducedMotion) G.slow = q > 0.8 ? 0.14 : 0.06;
   if (lab === 'PERFECT' && rnd() < 0.5) say(pick(LINES.perfect), FIELDERS[3], 1.3, 1.9);
@@ -2863,7 +2878,7 @@ function render(c, a) {
       camera.lookAt(CAM.t);
       if (!W3.lost) {
         const t1 = performance.now();
-        R.render(scene, camera);
+        if (POST) { const q = W3.q; POST.setQuality(q <= 1 ? 3 : q === 2 ? 2 : q === 3 ? 1 : 0, !!W3.fixq); POST.render(scene, camera); } else R.render(scene, camera);
         W3.tRender = performance.now() - t1; W3.calls = R.info.render.calls; W3.tris = R.info.render.triangles;
         // quality auto-scale: step down when frames run slow (a settle window skips the frames that compile shaders)
         if (W3.settle > 0) W3.settle--;

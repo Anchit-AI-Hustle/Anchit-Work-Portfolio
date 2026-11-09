@@ -1,4 +1,5 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
+import { createFX as createPost } from '/games/shared/fx3d.js';
 
 /*
  * Tiffin Dash, in 3D: a third-person run down a bazaar lane at dusk.
@@ -81,6 +82,7 @@ function spawn() {
 function finish(why) {
   if (G.phase === 'over' || G.attract || !arc || arc.state !== 'play') return;
   G.phase = 'over';
+  arc.haptic(why === 'Shift over' ? 'success' : 'fail');
   arc.over({
     eyebrow: why, title: why === 'Shift over' ? 'Shift <em>done</em>' : 'Tiffin <em>down</em>',
     score: Math.round(G.score), scoreLabel: 'Score',
@@ -95,7 +97,8 @@ function hit(o) {
   if (G.inv > 0) return;
   G.lives--; G.inv = 1.2; G.combo = 0;
   const dropped = G.hold; G.hold = 0;
-  arc.shake = 8; arc.buzz(40);
+  arc.shake = 8; arc.haptic('heavy', 0.7 + 0.06 * dropped);
+  if (POST) { POST.flash(0.28, '#ffd2b8'); POST.kick(-5); }
   arc.sfx.tone(160, 0.16, { type: 'sawtooth', slide: 80, vol: 0.14 });
   arc.sfx.noise(0.25, { freq: 700, vol: 0.18 });
   G.hitT = 0.45;
@@ -119,6 +122,7 @@ function collect(o) {
     arc.sfx.tone(990, 0.1, { type: 'sine', vol: 0.07, delay: 0.05 });
     if (FX) { FX.burst(0, 0.75, z, 18, FX.C.gold, 3.2, 'glow'); FX.ring(0, 0.06, z, FX.C.warm); }
     floatScore(0, 1.9, z, '+' + pts, WARM);
+    arc.haptic('tap', min(1, 0.4 + G.combo * 0.12));
     if (G.combo >= 3) arc.toast('Hot stack x' + G.combo, '+' + pts, 700);
   } else if (o.door) {
     // Empty doors stay put so a runner without tiffins is not blocked.
@@ -130,7 +134,8 @@ function collect(o) {
     arc.sfx.tone(880, 0.12, { type: 'sine', vol: 0.14 });
     arc.sfx.tone(1320, 0.16, { type: 'triangle', vol: 0.08, delay: 0.08 });
     arc.toast('Delivered', '+' + pts, 800);
-    arc.buzz(18);
+    arc.haptic(G.slowT > 0 ? 'success' : 'hit', 0.85);
+    if (POST && G.slowT > 0) POST.flash(0.18, '#ffe7b0');
     if (FX) {
       FX.burst(0, 2.2, z, 46, FX.C.petal, 5, 'petal');
       FX.burst(0, 1.2, z, 24, FX.C.gold, 4, 'glow');
@@ -207,7 +212,7 @@ function update(dt) {
   }
   if (G.jbuf > 0) { G.jbuf -= dt; if (G.py <= 0.01) { jump = true; G.jbuf = 0; } }
   if (jump && G.py <= 0.01) {
-    G.pvy = 720; arc.sfx.tone(320, 0.06, { type: 'square', vol: 0.08 });
+    G.pvy = 720; arc.sfx.tone(320, 0.06, { type: 'square', vol: 0.08 }); arc.haptic('tap', 0.3);
     if (FX) FX.burst(0, 0.05, 0.1, 8, FX.C.dust, 1.6, 'dust');
   }
   if (slide && gest && G.py > 0.01 && G.pvy > -620) G.pvy = -620;
@@ -589,7 +594,7 @@ function makeMaterials() {
 }
 
 /* ------------------------------------------------------------------ the 3D stage */
-let R3 = null, NO3D = false, FX = null;
+let R3 = null, NO3D = false, FX = null, POST = null;
 const TIERS = [
   { px: 0.5, budget: 130000, shadow: false, map: 512, cheap: true, aniso: 1, lamps: 0, sky: 0, fxScale: 0.5 },
   { px: 0.75, budget: 650000, shadow: true, map: 1024, cheap: false, aniso: 2, lamps: 1, sky: 1, fxScale: 0.75 },
@@ -697,6 +702,8 @@ function setup3D(a) {
   buildHero();
   buildPools();
   FX = createFX(scene);
+  // Shared post pass: bloom on the lamps and glints, grade, grain; a swing-in establishing shot at the start.
+  POST = createPost(renderer, { arc: a, soft: R3.soft, intro: { yaw: -0.8, up: 0.5 }, results: true, target: (v) => (HERO.root ? v.copy(HERO.root.position).setY(HERO.root.position.y + 1) : null), look: { bloom: 0.45, threshold: 0.74 } });
   return true;
 }
 
@@ -1431,7 +1438,7 @@ function renderScene(dtReal, a) {
   r.deliverLight.position.set(0, 1.6, -1.5);
   r.deliverLight.intensity = G.deliverT * 14;
   if (FX) { placeHalos(t); FX.step(a.state === 'pause' ? 0 : dtReal, a.state === 'pause' ? 0 : scrollStep, t, cam, r.renderer); }
-  r.renderer.render(r.scene, cam);
+  if (POST) { POST.setQuality(r.quality, r.lockQ); POST.render(r.scene, cam); } else r.renderer.render(r.scene, cam);
 }
 
 /* ------------------------------------------------------------------ HUD */

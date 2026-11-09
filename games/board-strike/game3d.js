@@ -1,4 +1,5 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
+import { createFX as createPost } from '/games/shared/fx3d.js';
 /*
  * Board Strike 3D: a polished carrom board on a stand in a lamplit room.
  * Same rules, modes, scoring and controls as the 2D game.js (which stays the
@@ -82,7 +83,7 @@ function pocket(p, k) {
     arc.toast(G.mode === 'practice' ? 'Try again' : 'Foul', 'Striker in', 800);
     arc.sfx.tone(160, 0.12, { type: 'sawtooth', vol: 0.1 });
     G.flash = 0.18;
-    if (!G.attract) { arc.shake = Math.max(arc.shake, 7); arc.buzz(40); }
+    if (!G.attract) { arc.shake = Math.max(arc.shake, 7); arc.haptic('fail', 0.6); }
     burst(pk.x, pk.y, 'foul');
     return;
   }
@@ -96,7 +97,7 @@ function pocket(p, k) {
   arc.sfx.tone(p.kind === 'queen' ? 880 : 520, 0.12, { type: 'sine', vol: 0.14 });
   arc.sfx.tone(p.kind === 'queen' ? 1320 : 780, 0.1, { type: 'triangle', vol: 0.06, delay: 0.06 });
   arc.toast(p.kind === 'queen' ? 'Queen' : 'Pocket', '+' + pts, 700);
-  if (!G.attract) arc.buzz(p.kind === 'queen' ? 30 : 14);
+  if (!G.attract) { arc.haptic(p.kind === 'queen' ? 'success' : 'hit', p.kind === 'queen' ? 1 : 0.45 + 0.1 * min(4, G.combo)); if (POST && p.kind === 'queen') POST.flash(0.22, '#ffe2a0'); }
   if (p.kind === 'queen' && !G.attract && !arc.reducedMotion) { G.slow = 0.55; G.focus = pk; G.focusT = 1.1; }
   if (G.pieces.every((c) => c.kind === 'striker' || c.in)) {
     burst(0, 0, 'clear');
@@ -108,6 +109,7 @@ function finish(why) {
   if (G.phase === 'over' || G.attract || !arc || arc.state !== 'play') return;
   G.phase = 'over';
   const cleared = G.pieces.every((c) => c.kind === 'striker' || c.in);
+  arc.haptic(cleared || G.score > 0 ? 'success' : 'fail');
   arc.over({
     eyebrow: why || 'Clock', title: cleared ? 'Board <em>clear</em>' : (G.mode === 'clock' ? 'Time' : 'Board <em>left</em>'),
     score: Math.round(G.score), scoreLabel: 'Points',
@@ -133,7 +135,7 @@ function collide(a, b) {
   b.vx += j * nx * ib; b.vy += j * ny * ib;
   const tang = rvx * -ny + rvy * nx;
   a.spin += tang * 18; b.spin -= tang * 18;
-  if (-dv > 0.25) hitFx(a.x + nx * a.r, a.y + ny * a.r, -dv);
+  if (-dv > 0.25) { hitFx(a.x + nx * a.r, a.y + ny * a.r, -dv); if (!G.attract) arc.haptic('tap', clamp(-dv * 0.25, 0.15, 0.7)); }
   return -dv;
 }
 
@@ -192,7 +194,7 @@ function shoot() {
   arc.sfx.tone(240 + pwr * 40, 0.08, { type: 'triangle', vol: 0.12 });
   arc.sfx.noise(0.06, { freq: 2400, vol: 0.05 });
   shotFx(G.striker.x, G.striker.y, c);
-  if (!G.attract && c > 0.75) { arc.shake = Math.max(arc.shake, 3); arc.buzz(12); }
+  if (!G.attract) { arc.haptic(c > 0.75 ? 'hit' : 'tap', 0.3 + c * 0.6); if (c > 0.75) { arc.shake = Math.max(arc.shake, 3); if (POST) POST.kick(-3); } }
 }
 
 /* --------------------------------------------------------------- aiming input */
@@ -323,6 +325,7 @@ function idle(dt) {
 }
 
 /* ===================================================================== 3D */
+let POST = null;
 const R3 = {
   ok: false, lost: false, renderer: null, scene: null, camera: null, q: 3, lock: false, soft: false,
   aniso: 4, fps: 0, accT: 0, accN: 0, settle: 2, last: 0, realDt: 1 / 60, time: 0,
@@ -1193,6 +1196,8 @@ function initRenderer() {
     buildWorld();
     R3.scene.add(R3.camera);
     R3.ok = true;
+    // Shared post pass: bloom on the lamp and the queen, grade, grain; the camera swings onto the board at the start.
+    POST = createPost(r, { arc, soft: R3.soft, intro: { yaw: 0.9, up: 0.35, back: 0.5, dur: 2.1 }, results: { yaw: 0.35 }, target: (v) => v.copy(CAM.look), look: { bloom: 0.5, threshold: 0.72 } });
     applyQuality();
   } catch (err) {
     R3.ok = false; R3.fail = String(err && err.message || err);
@@ -1295,7 +1300,7 @@ function render(c, a) {
   if (!R3.ok) drawFail(c);
   else if (!R3.lost) {
     frame3D(dt);
-    R3.renderer.render(R3.scene, R3.camera);
+    if (POST) { POST.setQuality(R3.q, R3.lock); POST.render(R3.scene, R3.camera); } else R3.renderer.render(R3.scene, R3.camera);
   }
   drawFloats(c);
   if (G.flash > 0 && !arc.reducedMotion) {

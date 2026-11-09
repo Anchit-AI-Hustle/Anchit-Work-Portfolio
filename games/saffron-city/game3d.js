@@ -1,4 +1,5 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
+import { createFX as createPost } from '/games/shared/fx3d.js';
 
 /*
  * Saffron City, in 3D: an original open-world city sandbox at dusk.
@@ -1618,6 +1619,9 @@ function initGL(arc) {
   buildDynamics(scene);
   makeEnv();
   applyTOD(G.hour);
+  // Shared post pass: bloom on windows, neon, headlights and the sea glint, grade, grain. A crane shot
+  // over the city settles onto the player at the start; the results drift slowly over the streets.
+  POST = createPost(renderer, { arc, soft: GL.soft, intro: { yaw: 1.0, up: 1.1, back: 0.9, dur: 3.0 }, results: { yaw: 0.4, rise: 0.25 }, target: (v) => v.set(CAM.ground.x, 10, CAM.ground.y), look: { bloom: 0.6, bloomWide: 0.45, threshold: 0.68 } });
 }
 
 function resizeGL(arc) {
@@ -2023,7 +2027,7 @@ function render3D(arc) {
   syncPeds();
   syncFx(dt);
   const tc1 = performance.now();
-  r.render(GL.scene, cam);
+  if (POST) { POST.setQuality(GL.q >= 2 ? 3 : GL.q === 1 ? 2 : 0, GL.pinned); POST.render(GL.scene, cam); } else r.render(GL.scene, cam);
   GL.cpuSync = lerp(GL.cpuSync || 0, tc1 - tc0, 0.1); GL.cpuRender = lerp(GL.cpuRender || 0, performance.now() - tc1, 0.1);
 }
 
@@ -2044,7 +2048,7 @@ const V = [], PD = [];
 let vid = 0;
 const START_YAW = PI;
 const pl = { x: 0, y: 0, vx: 0, vy: 0, a: 0, hp: 100, inv: 0, step: 0, veh: null, moving: false, hit: 0, face: 0 };
-let arcRef = null;
+let arcRef = null, POST = null;
 const touchish = () => !!(arcRef && arcRef.touchMode);
 
 /* ---------------------------------------------------------------- particles and skids */
@@ -2173,7 +2177,7 @@ function damage(v, amt) {
 }
 function wreckVeh(v) {
   v.hp = 0; v.wreck = true; v.wreckT = 0; v.ai = null; v.c.thr = v.c.brk = v.c.str = 0; v.siren = false;
-  if (v.player) { banner('Car wrecked', 'Get out before it burns. Press F', 3000, '#FF8A3D'); arcRef.sfx.tone(120, 0.6, { type: 'sawtooth', slide: 50, vol: 0.2 }); }
+  if (v.player) { arcRef.haptic('fail', 0.9); banner('Car wrecked', 'Get out before it burns. Press F', 3000, '#FF8A3D'); arcRef.sfx.tone(120, 0.6, { type: 'sawtooth', slide: 50, vol: 0.2 }); }
   for (let i = 0; i < 12; i++) emit('smoke', v.x, v.y, (rr() - 0.5) * 60, (rr() - 0.5) * 60, 1.4, 10 + rr() * 8, 'rgba(60,60,60,.55)');
 }
 
@@ -2184,6 +2188,8 @@ function crashFx(v, spd, px, py) {
     arcRef.sfx.noise(0.26, { freq: 650 + rr() * 300, vol: clamp(spd / 340, 0.1, 0.4) });
     arcRef.sfx.tone(90 + rr() * 30, 0.2, { type: 'square', slide: 45, vol: clamp(spd / 500, 0.08, 0.28) });
     if (!arcRef.reducedMotion) G.shake = Math.max(G.shake, clamp(spd / 40, 2, 11));
+    arcRef.haptic(spd > 220 ? 'heavy' : 'hit', clamp(spd / 320, 0.25, 1));
+    if (POST && spd > 220) { POST.flash(0.14, '#ffd8b8'); POST.kick(-4); }
   } else if (vDist(v) < 380) arcRef.sfx.noise(0.16, { freq: 700, vol: clamp(spd / 700, 0.04, 0.16) });
 }
 const vDist = (o) => hyp(o.x - G.fx, o.y - G.fy);
@@ -2677,6 +2683,7 @@ function addHeat(amt, why) {
   if (stars() > before) {
     banner(stars() + (stars() === 1 ? ' star' : ' stars'), why === 'jack' ? 'Carjacking: the police are on the way' : 'The police are after you', 2200, '#FF5252');
     arcRef.sfx.tone(660, 0.18, { type: 'square', vol: 0.12 }); arcRef.sfx.tone(880, 0.22, { type: 'square', vol: 0.12, delay: 0.16 });
+    arcRef.haptic('heavy', 0.45 + stars() * 0.1);
   }
 }
 function onCarCrash(a, b, sp) {
@@ -2874,13 +2881,15 @@ function completeJob(msg, sub, base, bonus) {
   banner(msg, money(r.total) + (r.mult > 1 ? '  chain x' + r.mult.toFixed(1) : '') + (sub ? '  ' + sub : ''), 3000, '#38D6B8');
   popText('+' + money(r.total), pl.x, pl.y - 22, '#7dff9b');
   sfxCash();
+  arcRef.haptic('success', 1);
+  if (POST) POST.flash(0.16, '#d8ffd8');
   for (let i = 0; i < 24; i++) { const a = rr() * TAU, s = 60 + rr() * 140; emit('cash', pl.x, pl.y, Math.cos(a) * s, Math.sin(a) * s - 40, 0.9 + rr() * 0.5, 2 + rr() * 2, rr() < 0.5 ? '#7dff9b' : '#FFB736', 220); }
   endJobCleanup(j); G.job = null;
 }
 function failJob(why, quiet) {
   const j = G.job; if (!j) return;
   G.chain = 0; G.chainT = 0;
-  if (!quiet) banner('Job failed', why, 2600, '#FF5252');
+  if (!quiet) { banner('Job failed', why, 2600, '#FF5252'); arcRef.haptic('fail', 0.8); }
   arcRef.sfx.tone(240, 0.3, { type: 'sawtooth', slide: 110, vol: 0.16 });
   endJobCleanup(j); G.job = null;
 }
@@ -2909,8 +2918,8 @@ function updateJob(dt) {
     if (j.stage === 'count') {
       j.cdt -= dt;
       const n = Math.ceil(j.cdt);
-      if (n !== j.lastN && n > 0) { j.lastN = n; arcRef.sfx.tone(520, 0.12, { type: 'square', vol: 0.14 }); banner(String(n), 'Race starts', 900, j.col); }
-      if (j.cdt <= 0) { j.stage = 'race'; if (rv && rv.ai) rv.ai.go = true; banner('GO!', '', 900, '#38D6B8'); arcRef.sfx.tone(880, 0.3, { type: 'square', vol: 0.16 }); }
+      if (n !== j.lastN && n > 0) { j.lastN = n; arcRef.sfx.tone(520, 0.12, { type: 'square', vol: 0.14 }); arcRef.haptic('tap', 0.45); banner(String(n), 'Race starts', 900, j.col); }
+      if (j.cdt <= 0) { j.stage = 'race'; if (rv && rv.ai) rv.ai.go = true; banner('GO!', '', 900, '#38D6B8'); arcRef.sfx.tone(880, 0.3, { type: 'square', vol: 0.16 }); arcRef.haptic('boost', 0.9); }
     } else {
       const cp = j.cps[j.cp];
       if (cp && hyp(pl.x - cp.x, pl.y - cp.y) < 56) {
@@ -3056,6 +3065,7 @@ function updatePlayer(dt) {
             const dmg = Math.min(32, spd * 0.09); pl.hp -= dmg; pl.inv = 1.2; pl.vx += v.vx * 0.5; pl.vy += v.vy * 0.5;
             popText('Ow!', pl.x, pl.y - 14, '#FF8A3D'); arcRef.sfx.tone(180, 0.12, { type: 'triangle', slide: 90, vol: 0.18 });
             if (!arcRef.reducedMotion) G.shake = Math.max(G.shake, 5);
+            arcRef.haptic('hit', 0.8);
             if (v.player) addHeat(0.1, 'hit');
             if (pl.hp <= 0) { pl.hp = 1; startCaught('ko'); }
           }
@@ -3069,7 +3079,7 @@ function updatePlayer(dt) {
   for (let i = PK.length - 1; i >= 0; i--) {
     const k = PK[i];
     if (hyp(k.x - pl.x, k.y - pl.y) < (pl.veh ? 28 : 20)) {
-      PK.splice(i, 1); G.cash += k.v; popText('+' + money(k.v), k.x, k.y - 8, '#7dff9b'); sfxCash();
+      PK.splice(i, 1); G.cash += k.v; popText('+' + money(k.v), k.x, k.y - 8, '#7dff9b'); sfxCash(); arcRef.haptic('tap', 0.5);
       for (let q = 0; q < 8; q++) emit('cash', k.x, k.y, (rr() - 0.5) * 120, -rr() * 90, 0.7, 2.4, '#7dff9b', 220);
     }
   }
@@ -3234,6 +3244,7 @@ function endHustle() {
   stopHum();
   const arc = arcRef;
   arc.sfx.tone(520, 0.2, { type: 'triangle', vol: 0.15 }); arc.sfx.tone(780, 0.3, { type: 'triangle', vol: 0.15, delay: 0.18 });
+  arc.haptic('success');
   arc.over({
     score: Math.round(G.cash), scoreLabel: 'Cash', eyebrow: 'Time up', title: 'Ten minute hustle',
     html: '<p>' + esc(rankOf(G.cash)) + '. ' + G.stats.jobs + (G.stats.jobs === 1 ? ' job' : ' jobs') + ' done, ' + G.stats.crashes + ' crashes.</p>',
