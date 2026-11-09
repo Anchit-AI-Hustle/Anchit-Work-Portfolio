@@ -95,8 +95,6 @@ const assets = [
   // Games: /games is the hub, /games/<slug> each game. Plain HTML, CSS and
   // JavaScript on one shared shell (games/shared/arcade.js), no build step.
   'games',
-  // The LinkedIn series page: every post, its demo video and how the series was built.
-  'linkedin-auto-pilot',
 ];
 
 // Stamp the service worker's cache name from the content it will serve.
