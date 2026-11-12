@@ -1,4 +1,6 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
+import { createHuman, createCrowd } from '/games/shared/human.js';
+import { createVFX } from '/games/shared/vfx.js';
 /*
  * Kart Mela, a cartoon kart racing festival.
  *
@@ -296,7 +298,7 @@ function mkKart(c, idx, isPlayer) {
     boostT: 0, boostK: 1, spinT: 0, spinDir: 1, tumbleT: 0, shrinkT: 0, shieldT: 0, invulnT: 0, stall: 0, sneezeT: 0, respawnT: 0, safeS: 0, lastGoodY: 0, dhPrev: false, wasRamp: false, lastRampY: 0, hopWin: 0,
     item: null, roulT: 0, roulPick: null, holdT: 0,
     totalD: 0, prevS: 0, lap: 0, lapT0: 0, laps: [], finished: false, finT: 0, place: idx + 1, bot: !isPlayer,
-    ai: { off: (Math.random() - 0.5) * 2.4, cd: 0, driftCd: 0, useAt: 0, shortcut: false, mood: Math.random(), skill: 0.8 + Math.random() * 0.2 },
+    ai: { off: (Math.random() - 0.5) * 2.4, cd: 0, driftCd: 0, useAt: 0, shortcut: false, mood: Math.random(), skill: 0.8 + Math.random() * 0.2, mind: mkMind() }, emo: null,
     anim: { lean: 0, bob: 0, bobV: 0, pitch: 0, roll: 0, wheel: 0, steer: 0, cele: 0, react: 0, reactK: '', head: 0, squash: 0, yawVis: 0, spinYaw: 0, flip: 0, rescue: 0 },
     stats: { drifts: 0, turbos: 0, ultra: 0, hits: 0, taken: 0, items: 0, overtakes: 0, tricks: 0, bestLap: null, boxes: 0 }
   };
@@ -521,9 +523,44 @@ function readPlayer(W, P, dt) {
 }
 
 /* ------------------------------------------------------------ AI */
+// Each rival drives like a person: a day that is a touch better or worse than usual, a moment to
+// react to a peel or a kart that appears ahead, a braking habit that changes bend to bend, a temper
+// when passed and a wobble of nerves after a hit, and the odd small mistake (a lift and a run
+// wide), more likely with someone right behind. It all averages out, so the race stays fair.
+function mkMind() {
+  const r = Math.random;
+  return { form: 0.978 + r() * 0.038, rx: 0.15 + r() * 0.15, seen: 0, brk: 1, brkT: 0, err: 0, errT: 0, errDir: 0, errK: 0, nextErr: 8 + r() * 16, heat: 0, cool: 0, press: 0, place: 0 };
+}
+function emote(K, k, t) { if (!K.emo || K.emo.t <= 0 || k === 'slump') K.emo = { k, t: t || 1.2, d: t || 1.2 }; }
+function humanMind(W, K, dt) {
+  const m = K.ai.mind, T = W.T;
+  if (m.heat > 0) m.heat = Math.max(0, m.heat - dt / 9);
+  if (m.cool > 0) m.cool = Math.max(0, m.cool - dt / 5);
+  if (K.anim.react > 0.5) m.cool = 1;
+  let press = 0;
+  for (let i = 0; i < W.karts.length; i++) { const o = W.karts[i]; if (o === K) continue; const g = K.totalD - o.totalD; if (g > 0.5 && g < 8 && Math.abs(o.lat - K.lat) < 3) press = Math.max(press, (o.isPlayer ? 1 : 0.5) * (1 - g / 8)); }
+  m.press += (press - m.press) * Math.min(1, dt * 2);
+  if (m.place && K.place !== m.place && W.phase === 'race' && !W.attract) {
+    if (K.place > m.place) { m.heat = 1; emote(K, 'slump', 1.1); } else emote(K, 'fist', 1.0);
+  }
+  m.place = K.place;
+  m.brkT -= dt;
+  if (m.brkT <= 0) { m.brkT = 2.5 + Math.random() * 3; m.brk = 0.86 + Math.random() * 0.24 - m.heat * 0.05; }
+  if (m.errT > 0) m.errT -= dt;
+  else if (W.phase === 'race' && K.v > 12 && !K.onShort) {
+    m.nextErr -= dt * (1 + m.press * 1.6 + m.heat * 0.8 + (1 - m.form) * 12);
+    if (m.nextErr <= 0) {
+      const cs = T.CVS[K.hi < 0 ? 0 : (K.hi + 6) % T.N];
+      m.errT = m.err = 0.5 + Math.random() * 0.7; m.errDir = Math.abs(cs) > 0.006 ? -Math.sign(cs) : (Math.random() < 0.5 ? -1 : 1);
+      m.errK = 1.0 + Math.random() * 1.4; m.nextErr = 12 + Math.random() * 22;
+      emote(K, 'shake', 1.0);
+    }
+  }
+}
 const AIV = { x: 0, y: 0, z: 0 };
 function aiDrive(W, K, dt) {
-  const T = W.T, d = W.d, ai = K.ai;
+  const T = W.T, d = W.d, ai = K.ai, m = ai.mind, human = !K.isPlayer && !W.attract;
+  if (human) humanMind(W, K, dt);
   const look = 7 + Math.max(0, K.v) * 0.55;
   const s = K.s;
   // decide on the shortcut when its mouth comes up
@@ -551,6 +588,7 @@ function aiDrive(W, K, dt) {
     for (let i = 0; i < W.objs.length; i++) { const o = W.objs[i]; if (o.type === 'peel') consider(o.s, o.lat, 0.9); }
     for (let i = 0; i < W.haz.length; i++) { const h = W.haz[i]; if (h.k !== 'puddle' || ai.skill > 0.9) consider(h.s, h.lat, h.r); }
     for (let i = 0; i < W.karts.length; i++) { const o = W.karts[i]; if (o !== K && o.v < K.v - 2) consider(o.s, o.lat, 1.1); }
+    if (human) { if (Math.abs(avoid) > 0.05) m.seen += dt; else m.seen = 0; if (m.seen < m.rx) avoid *= 0.35; if (m.errT > 0) lat += m.errDir * m.errK * Math.sin(Math.PI * (1 - m.errT / m.err)); }
     lat = clamp(lat + avoid * 1.6, -T.def.hw + 1.2, T.def.hw - 1.2);
     posAt(T, ls, lat, 0, AIV); tx = AIV.x; tz = AIV.z;
   }
@@ -558,7 +596,7 @@ function aiDrive(W, K, dt) {
   const err = wrapA(want - (K.h + (K.drift ? K.drift * 0.0 : 0)));
   let steer = clamp(-err * 2.4, -1, 1);
   // speed for the bend ahead, pace and a gentle rubber band
-  let vs = 99; const bl = K.v * K.v / 30 + 6;
+  let vs = 99; const bl = (K.v * K.v / 30 + 6) * (human ? m.brk : 1);
   for (let k = 0; k <= 4; k++) vs = Math.min(vs, T.VS[Math.floor(((s + bl * k / 4) % T.L + T.L) % T.L / T.ds) % T.N]);
   let pace = d.ai * (0.95 + 0.05 * ai.skill);
   if (!W.attract && !K.isPlayer) {
@@ -568,7 +606,8 @@ function aiDrive(W, K, dt) {
     else pace *= 1 + d.ahead * clamp(-gap / 140, 0, 1);
   }
   if (K.bot && K.isPlayer) pace = 0.96;
-  const vt = Math.min(K.top * d.speed * pace, vs * (1.02 + 0.06 * ai.skill));
+  if (human) pace *= m.form * (1 + m.heat * 0.012 - m.cool * 0.025) * (m.errT > 0 ? 0.92 : 1);
+  const vt = Math.min(K.top * d.speed * pace, vs * (1.02 + 0.06 * ai.skill) * (human ? 1 + (1 - m.brk) * 0.12 : 1));
   K.gas = K.v < vt; K.brk = K.v > vt + 3;
   // drift through long bends for a mini-turbo
   ai.driftCd -= dt;
@@ -578,7 +617,7 @@ function aiDrive(W, K, dt) {
   else if (K.drift) { K.driftHeld = c > 0.009 && K.driftT < 2.2 + ai.skill * 1.2; if (K.driftHeld) steer = clamp(steer * 0.75 + K.drift * 0.3, -1, 1); }
   else if (ai.dHold > 0) { ai.dHold -= dt; K.driftHeld = true; steer = ai.driftDir * 0.7; }
   else K.driftHeld = false;
-  K.steerIn += (steer - K.steerIn) * Math.min(1, dt * 9);
+  K.steerIn += (steer - K.steerIn) * Math.min(1, dt * (human ? 2.2 / m.rx : 9));
   // items: hold a moment, then use when it helps
   let use = false;
   if (K.item && !W.attract && W.phase === 'race') {
@@ -671,6 +710,7 @@ function useItem(W, K) {
       if (o === K || o.finished || o.respawnT > 0) return;
       if (o.shieldT > 0) { o.shieldT = 0; VIEW.fx('block', o); return; }
       o.shrinkT = 3.8; o.item = null; o.roulT = 0; endDrift(W, o, false); o.v *= 0.7; o.anim.react = 1; o.anim.reactK = 'cut';
+      VIEW.fx('zap', o);
     });
     if (K.isPlayer) pop(W, 'Power cut!', 'Everyone else shrinks', '#9b6bff', true);
     else if (!W.P.finished) { pop(W, 'Power cut!', K.c.name + ' pulled the plug', '#9b6bff', true); rumble(120, 0.6, 0.6); }
@@ -1009,7 +1049,8 @@ function rankKarts(W) {
   });
   ord.forEach((K, i) => {
     const np = i + 1;
-    if (K.isPlayer && W.phase === 'race' && K.place && np < K.place && W.raceT > 2) { K.stats.overtakes++; }
+    if (K.isPlayer && W.phase === 'race' && K.place && np < K.place && W.raceT > 2) { K.stats.overtakes++; emote(K, 'fist', 0.9); }
+    else if (K.isPlayer && W.phase === 'race' && K.place && np > K.place && W.raceT > 2) emote(K, 'slump', 0.9);
     K.place = np;
   });
   W.order = ord;
@@ -1379,7 +1420,55 @@ function textures() {
 }
 
 /* ------------------------------------------------------------ particles */
-let FX = null;
+let FX = null, VFX = null;
+const _vq = new THREE.Vector3(), _vq2 = new THREE.Vector3(), _vn = new THREE.Vector3(0, 1, 0);
+
+/* ------------------------------------------------------------ boost set piece: road heat glow and shed sparks */
+// finish show: one shell at a time, each sent up where the finish camera is looking at that moment
+const _fs = new THREE.Vector3();
+function finishShow(st, dt, cam) {
+  if (!st || st.n <= 0 || !VFX || !cam) return;
+  st.t -= dt; if (st.t > 0) return;
+  st.t = 0.45 + Math.random() * 0.3; st.n--;
+  const d = 22 + Math.random() * 8, th = Math.tan(cam.fov * Math.PI / 360);
+  _fs.set((Math.random() - 0.5) * 1.2 * d * th * cam.aspect, d * th * (0.2 + Math.random() * 0.35), -d);
+  cam.updateMatrixWorld(); _fs.applyMatrix4(cam.matrixWorld);
+  VFX.fireworks(_fs, { launch: true, size: 1.3 });
+}
+let _boostTex = null;
+const KART_NOZZLES = [[-0.28, 0.7, -1.4], [0.28, 0.7, -1.4]];
+const _bz = new THREE.Vector3(), _bd = new THREE.Vector3();
+function boostTex() {
+  if (_boostTex) return _boostTex;
+  const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
+  const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  gr.addColorStop(0, 'rgba(255,240,215,1)'); gr.addColorStop(0.22, 'rgba(255,170,80,0.8)'); gr.addColorStop(0.55, 'rgba(255,100,40,0.28)'); gr.addColorStop(1, 'rgba(255,70,20,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+  _boostTex = new THREE.CanvasTexture(c); _boostTex.colorSpace = THREE.SRGBColorSpace; return _boostTex;
+}
+// an additive pool of light on the road behind the machine, child of its root (local +back is `back`)
+function makeBoostGlow(parent, z, w, l, color) {
+  const mat = new THREE.MeshBasicMaterial({ map: boostTex(), color, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false });
+  mat.userData.keepMat = true;
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, l), mat);
+  m.rotation.x = -Math.PI / 2; m.position.set(0, 0.05, z); m.renderOrder = 2; m.visible = false; m.userData.keepMat = true;
+  parent.add(m); return m;
+}
+// drive one boost: jet length flickers between 1.5 and 2 times, the glow breathes, sparks shed off the jet
+function driveBoost(st, on, dt, root, glow, nozzles, back, quality, reduced) {
+  st.t = (st.t || 0) + dt; st.k = (st.k || 0) + ((on ? 1 : 0) - (st.k || 0)) * Math.min(1, dt * (on ? 10 : 4));
+  const f = reduced ? 1.6 : 1.55 + 0.3 * Math.sin(st.t * 31) * Math.sin(st.t * 11.3 + 1.7) + 0.15 * Math.sin(st.t * 57);
+  if (st.h) for (let i = 0; i < st.h.length; i++) st.h[i].set(f);
+  if (glow) { glow.visible = st.k > 0.02; glow.material.opacity = st.k * (reduced ? 0.5 : 0.55 + 0.2 * Math.sin(st.t * 23) * Math.sin(st.t * 9.1)); }
+  if (!on || quality < 1 || !VFX) return;
+  st.sp = (st.sp || 0) - dt; if (st.sp > 0) return;
+  st.sp = quality >= 2 ? 0.08 : 0.16;
+  const nz = nozzles[(Math.random() * nozzles.length) | 0];
+  root.updateWorldMatrix(true, false);
+  _bz.set(nz[0], nz[1], nz[2] + back * (0.6 + Math.random() * 1.2)).applyMatrix4(root.matrixWorld);
+  _bd.set((Math.random() - 0.5) * 0.6, 0.5, back).transformDirection(root.matrixWorld);
+  VFX.impact(_bz, _bd, { kind: 'spark', size: 0.26 });
+}
 function makePool(n, additive, kind) {
   const geo = new THREE.BufferGeometry();
   const pos = new Float32Array(n * 3), col = new Float32Array(n * 3), size = new Float32Array(n), alpha = new Float32Array(n);
@@ -1399,13 +1488,14 @@ function makePool(n, additive, kind) {
     transparent: true, depthWrite: false, blending: additive ? THREE.AdditiveBlending : THREE.NormalBlending, fog: false
   });
   const pts = new THREE.Points(geo, mat); pts.frustumCulled = false; pts.renderOrder = 5;
-  return { n, pos, col, size, alpha, geo, mat, pts, vel: new Float32Array(n * 3), life: new Float32Array(n), max: new Float32Array(n), s0: new Float32Array(n), grow: new Float32Array(n), grav: new Float32Array(n), drag: new Float32Array(n), a0: new Float32Array(n), spin: new Float32Array(n), head: 0, kind };
+  return { n, pos, col, size, alpha, geo, mat, pts, vel: new Float32Array(n * 3), life: new Float32Array(n), max: new Float32Array(n), s0: new Float32Array(n), grow: new Float32Array(n), grav: new Float32Array(n), drag: new Float32Array(n), a0: new Float32Array(n), spin: new Float32Array(n), floor: new Float32Array(n).fill(-1e9), head: 0, kind };
 }
 function createFX(scene) {
   const F = { add: makePool(900, true), soft: makePool(700, false), conf: makePool(420, false, 'square'), rain: makePool(700, false, 'streak'), density: 1 };
   scene.add(F.add.pts, F.soft.pts, F.conf.pts, F.rain.pts);
-  F.emit = (pool, x, y, z, vx, vy, vz, life, size, hex, alpha, grav, drag, grow) => {
+  F.emit = (pool, x, y, z, vx, vy, vz, life, size, hex, alpha, grav, drag, grow, floor) => {
     const P = F[pool]; const i = P.head; P.head = (P.head + 1) % P.n;
+    P.floor[i] = floor == null ? -1e9 : floor;
     P.pos[i * 3] = x; P.pos[i * 3 + 1] = y; P.pos[i * 3 + 2] = z;
     P.vel[i * 3] = vx; P.vel[i * 3 + 1] = vy; P.vel[i * 3 + 2] = vz;
     _c.set(hex); P.col[i * 3] = _c.r; P.col[i * 3 + 1] = _c.g; P.col[i * 3 + 2] = _c.b;
@@ -1424,6 +1514,8 @@ function createFX(scene) {
         P.vel[i * 3] *= dr; P.vel[i * 3 + 1] = P.vel[i * 3 + 1] * dr - P.grav[i] * dt; P.vel[i * 3 + 2] *= dr;
         if (k === 'conf') { P.spin[i] += dt * 9; P.vel[i * 3] += Math.sin(P.spin[i]) * dt * 2; }
         P.pos[i * 3] += P.vel[i * 3] * dt; P.pos[i * 3 + 1] += P.vel[i * 3 + 1] * dt; P.pos[i * 3 + 2] += P.vel[i * 3 + 2] * dt;
+        // sparks hit the road and skip along it
+        if (P.pos[i * 3 + 1] < P.floor[i]) { P.pos[i * 3 + 1] = P.floor[i]; P.vel[i * 3 + 1] = -P.vel[i * 3 + 1] * 0.32; P.vel[i * 3] *= 0.55; P.vel[i * 3 + 2] *= 0.55; }
         P.size[i] = P.s0[i] * (1 + P.grow[i] * (1 - f)) * (k === 'conf' ? 0.6 + 0.4 * Math.abs(Math.sin(P.spin[i])) : 1);
         P.alpha[i] = P.a0[i] * (k === 'add' ? f : Math.min(1, f * 2.5));
       }
@@ -1435,9 +1527,9 @@ function createFX(scene) {
 }
 const fxOK = () => FX && R3 && !R3.lost;
 const rnd = (a) => (Math.random() - 0.5) * a;
-function sparkBurst(x, y, z, n, spread, up, hex) {
+function sparkBurst(x, y, z, n, spread, up, hex, floor) {
   if (!fxOK()) return;
-  for (let i = 0; i < n * FX.density; i++) FX.emit('add', x, y, z, rnd(spread), Math.random() * up, rnd(spread), 0.25 + Math.random() * 0.35, 0.09 + Math.random() * 0.07, hex || (Math.random() < 0.5 ? '#ffd27a' : '#ff8a3a'), 1, 9, 1.2, 0);
+  for (let i = 0; i < n * FX.density; i++) FX.emit('add', x, y, z, rnd(spread), Math.random() * up, rnd(spread), 0.35 + Math.random() * 0.45, 0.09 + Math.random() * 0.07, hex || (Math.random() < 0.5 ? '#ffd27a' : '#ff8a3a'), 1, 9.8, 0.9, 0, floor);
 }
 function smokePuff(x, y, z, n, hex, size, life) {
   if (!fxOK()) return;
@@ -1465,14 +1557,14 @@ const VIEW3D = {
     if (!fxOK()) return;
     const W = Wd;
     switch (kind) {
-      case 'turbo': {
+      case 'turbo': { if (VFX && (b || 1) >= 2) { kartPoint(a, 0, 0.5, -1.3, V); VFX.impact(_vq.set(V.x, V.y, V.z), _vn, { kind: 'spark', size: 0.6, color: SPARK_COL[b] }); }
         const lv = b || 1; kartPoint(a, 0, 0.6, -1.3, V);
         for (let i = 0; i < 14 * lv * FX.density; i++) FX.emit('add', V.x, V.y, V.z, rnd(3), Math.random() * 2, rnd(3), 0.35 + Math.random() * 0.3, 0.25, SPARK_COL[lv], 1, 0, 2, 1);
         FX.emit('add', V.x, V.y, V.z, 0, 0, 0, 0.2, 1.6 + lv * 0.4, SPARK_COL[lv], 0.8, 0, 0, 1.2);
         if (a.isPlayer) R3.fovKick = Math.max(R3.fovKick, 6 + lv * 3);
         break;
       }
-      case 'sparkup': { kartPoint(a, 0, 0.3, -1.0, V); sparkBurst(V.x, V.y, V.z, 10, 4, 3, SPARK_COL[b]); break; }
+      case 'sparkup': { kartPoint(a, 0, 0.3, -1.0, V); sparkBurst(V.x, V.y, V.z, 10, 4, 3, SPARK_COL[b], a.gy + 0.03); break; }
       case 'hit': {
         kartPoint(a, 0, 0.9, 0, V);
         if (b === 'rocket') { sparkBurst(V.x, V.y, V.z, 26, 8, 6, '#fff3d6'); FX.emit('add', V.x, V.y, V.z, 0, 0, 0, 0.25, 3.6, '#ffd27a', 1, 0, 0, 1.5); smokePuff(V.x, V.y, V.z, 8, '#d8d2c8', 1.4, 1.4); }
@@ -1480,25 +1572,27 @@ const VIEW3D = {
         else { for (let i = 0; i < 8; i++) FX.emit('add', V.x + rnd(1), V.y + 0.6 + Math.random() * 0.4, V.z + rnd(1), rnd(1), 1.5, rnd(1), 0.9, 0.22, '#ffe066', 1, 1, 1, 0); }
         break;
       }
-      case 'block': { kartPoint(a, 0, 0.9, 0, V); for (let i = 0; i < 24 * FX.density; i++) FX.emit('conf', V.x, V.y, V.z, rnd(8), Math.random() * 5, rnd(8), 1.8, 0.2, i % 2 ? '#ff9a1f' : '#ffd23f', 1, 4, 1, 0); break; }
-      case 'shield': { kartPoint(a, 0, 1, 0, V); FX.emit('add', V.x, V.y, V.z, 0, 0, 0, 0.35, 3, '#ffb736', 0.6, 0, 0, 1); break; }
+      case 'block': { if (VFX) { kartPoint(a, 0, 0.6, 0, V); VFX.ring(_vq.set(V.x, V.y, V.z), '#ffb736', { kind: 'shock', size: 1 }); } kartPoint(a, 0, 0.9, 0, V); for (let i = 0; i < 24 * FX.density; i++) FX.emit('conf', V.x, V.y, V.z, rnd(8), Math.random() * 5, rnd(8), 1.8, 0.2, i % 2 ? '#ff9a1f' : '#ffd23f', 1, 4, 1, 0); break; }
+      case 'shield': { if (VFX) { kartPoint(a, 0, 0.8, 0, V); VFX.burst(_vq.set(V.x, V.y, V.z), { color: '#ffb736', size: 0.8 }); } kartPoint(a, 0, 1, 0, V); FX.emit('add', V.x, V.y, V.z, 0, 0, 0, 0.35, 3, '#ffb736', 0.6, 0, 0, 1); break; }
       case 'chai': { kartPoint(a, 0, 1.4, 0.3, V); smokePuff(V.x, V.y, V.z, 6, '#f4ece0', 0.7, 0.9); if (a.isPlayer) R3.fovKick = Math.max(R3.fovKick, 10); break; }
       case 'land': { kartPoint(a, 0, 0.1, 0, V); smokePuff(V.x, V.y, V.z, 6 + (b > 8 ? 6 : 0), W.T.def.id === 'roof' ? '#d9b08a' : W.T.def.id === 'hill' ? '#c9d2d6' : '#a08060', 1.1, 0.9); break; }
-      case 'launch': { kartPoint(a, 0, 0.2, -0.8, V); sparkBurst(V.x, V.y, V.z, 8, 3, 2); break; }
-      case 'wall': { kartPoint(a, Math.sign(a.lat || 1) * -0.9, 0.4, 0.6, V); sparkBurst(V.x, V.y, V.z, clamp(b * 1.5, 4, 22), 5, 3); break; }
-      case 'bump': { V.x = (a.x + b.x) / 2; V.y = (a.y + b.y) / 2 + 0.6; V.z = (a.z + b.z) / 2; sparkBurst(V.x, V.y, V.z, 6 + 14 * c, 5, 3, '#ffe9b0'); FX.emit('add', V.x, V.y, V.z, 0, 0, 0, 0.15, 1 + c, '#fff3d6', 0.8, 0, 0, 1.3); break; }
+      case 'launch': { kartPoint(a, 0, 0.2, -0.8, V); sparkBurst(V.x, V.y, V.z, 8, 3, 2, null, a.gy + 0.03); break; }
+      case 'wall': { kartPoint(a, Math.sign(a.lat || 1) * -0.9, 0.4, 0.6, V); sparkBurst(V.x, V.y, V.z, clamp(b * 1.5, 4, 22), 5, 3, null, a.gy + 0.03); break; }
+      case 'bump': { V.x = (a.x + b.x) / 2; V.y = (a.y + b.y) / 2 + 0.6; V.z = (a.z + b.z) / 2; sparkBurst(V.x, V.y, V.z, 6 + 14 * c, 5, 3, '#ffe9b0', V.y - 0.57); FX.emit('add', V.x, V.y, V.z, 0, 0, 0, 0.15, 1 + c, '#fff3d6', 0.8, 0, 0, 1.3); break; }
       case 'pad': { kartPoint(a, 0, 0.3, -1.2, V); for (let i = 0; i < 10 * FX.density; i++) FX.emit('add', V.x, V.y, V.z, rnd(2), Math.random() * 2, rnd(2), 0.4, 0.3, '#ff9a1f', 1, 0, 2, 1); if (a.isPlayer) R3.fovKick = Math.max(R3.fovKick, 8); break; }
       case 'splash': { if (Math.random() > 0.35 * FX.density) break; kartPoint(a, rnd(1.6), 0.15, -0.6, V); FX.emit('soft', V.x, V.y, V.z, rnd(3), 2 + Math.random() * 2.5, rnd(3), 0.6, 0.45, '#dfeaf2', 0.6, 9, 0.6, 1.5); if (a.isPlayer && Math.random() < 0.3) R3.drops = Math.min(1, R3.drops + 0.25); break; }
       case 'spice': { const cols = ['#e8452c', '#ffc531', '#ff7a1a', '#c0392b']; const col = cols[(a.i || 0) % 4]; for (let i = 0; i < 18 * FX.density; i++) FX.emit('soft', a.x + rnd(1.5), (a.y || 0) + 0.6, a.z + rnd(1.5), rnd(4), 1 + Math.random() * 2.5, rnd(4), 1.6, 1.0, col, 0.7, -0.2, 1.4, 2.6); break; }
-      case 'box': { sparkBurst(a.x, a.y, a.z, 16, 6, 4, '#ffffff'); FX.emit('add', a.x, a.y, a.z, 0, 0, 0, 0.25, 2.4, '#b8e6ff', 0.9, 0, 0, 1.2); for (let i = 0; i < 10 * FX.density; i++) FX.emit('conf', a.x, a.y, a.z, rnd(6), Math.random() * 4, rnd(6), 1.2, 0.18, ['#ff4f9a', '#ffb736', '#44ffa8', '#38c8ff', '#9b6bff'][i % 5], 1, 5, 1, 0); break; }
+      case 'box': { if (VFX) VFX.ring(_vq.set(a.x, a.y, a.z), '#7fe0ff', { kind: 'energy', size: 0.9 }); sparkBurst(a.x, a.y, a.z, 16, 6, 4, '#ffffff'); FX.emit('add', a.x, a.y, a.z, 0, 0, 0, 0.25, 2.4, '#b8e6ff', 0.9, 0, 0, 1.2); for (let i = 0; i < 10 * FX.density; i++) FX.emit('conf', a.x, a.y, a.z, rnd(6), Math.random() * 4, rnd(6), 1.2, 0.18, ['#ff4f9a', '#ffb736', '#44ffa8', '#38c8ff', '#9b6bff'][i % 5], 1, 5, 1, 0); break; }
       case 'boxback': { FX.emit('add', a.x, a.y, a.z, 0, 0, 0, 0.3, 1.6, '#ffffff', 0.6, 0, 0, 0.6); break; }
       case 'peelhit': { FX.emit('add', a.x, a.y + 0.3, a.z, 0, 0, 0, 0.2, 1.2, '#ffc531', 0.8, 0, 0, 1); break; }
       case 'rocketTrail': { if (Math.random() < 0.8 * FX.density) { FX.emit('soft', a.x - Math.sin(a.h) * 0.7, a.y, a.z - Math.cos(a.h) * 0.7, rnd(0.5), rnd(0.5), rnd(0.5), 0.8, 0.45, '#efe8dc', 0.6, -0.2, 1, 2); FX.emit('add', a.x - Math.sin(a.h) * 0.6, a.y, a.z - Math.cos(a.h) * 0.6, rnd(1), rnd(1), rnd(1), 0.2, 0.3, '#ff9a3a', 1, 0, 1, 0); } break; }
-      case 'boom': { sparkBurst(a.x, a.y, a.z, 22, 7, 5, '#fff3d6'); FX.emit('add', a.x, a.y, a.z, 0, 0, 0, 0.3, 4, '#ffb060', 0.9, 0, 0, 1.4); smokePuff(a.x, a.y, a.z, 10, '#e8e0d4', 1.5, 1.6); if (W && Math.hypot(W.P.x - a.x, W.P.z - a.z) < 25) { ARC.shake = Math.max(ARC.shake, 5); R3.flash = Math.max(R3.flash, 0.35); } break; }
+      case 'boom': { if (VFX) VFX.explosion(_vq.set(a.x, a.y, a.z), { size: 0.6 }); sparkBurst(a.x, a.y, a.z, 22, 7, 5, '#fff3d6'); FX.emit('add', a.x, a.y, a.z, 0, 0, 0, 0.3, 4, '#ffb060', 0.9, 0, 0, 1.4); smokePuff(a.x, a.y, a.z, 10, '#e8e0d4', 1.5, 1.6); if (W && Math.hypot(W.P.x - a.x, W.P.z - a.z) < 25) { ARC.shake = Math.max(ARC.shake, 5); R3.flash = Math.max(R3.flash, 0.35); } break; }
       case 'rescue': { kartPoint(a, 0, 3, 0, V); sparkBurst(V.x, V.y, V.z, 12, 3, 2, '#38e1ff'); break; }
       case 'stall': { kartPoint(a, 0, 0.5, -1.1, V); smokePuff(V.x, V.y, V.z, 12, '#5a5652', 1.2, 1.4); break; }
       case 'use': { break; }
-      case 'finish': { kartPoint(a, 0, 1, 6, V); confettiAt(V.x, V.y + 4, V.z, 90, 10); if (!ARC.reducedMotion) R3.flash = Math.max(R3.flash, b === 1 ? 0.6 : 0.3); break; }
+      case 'zap': { if (!VFX || Math.hypot(a.x - R3.camera.position.x, a.z - R3.camera.position.z) > 70) break; _vq.set(a.x + rnd(4), a.y + 14, a.z + rnd(4)); _vq2.set(a.x, a.y + 0.8, a.z); VFX.lightning(_vq, _vq2, { color: '#b89bff', duration: 0.45, branches: 3 }); VFX.ring(_vq2.set(a.x, a.y + 0.05, a.z), '#9b6bff', { kind: 'shock', size: 1.2 }); break; }
+      case 'finish': { kartPoint(a, 0, 1, 6, V); confettiAt(V.x, V.y + 4, V.z, 90, 10);
+        if (VFX && a.isPlayer && R3) R3.show = { n: b <= 3 ? 7 : 3, t: 0.1 }; if (!ARC.reducedMotion) R3.flash = Math.max(R3.flash, b === 1 ? 0.6 : 0.3); break; }
     }
   }
 };
@@ -1745,6 +1839,14 @@ function poseKart(B, K, W, dt, t) {
     if (d2 < 64) { const rel = wrapA(Math.atan2(dx, dz) - K.h); A.look = (A.look || 0) + (clamp(rel, -1.1, 1.1) - (A.look || 0)) * Math.min(1, dt * 6); hy = A.look; }
     else A.look = (A.look || 0) * Math.exp(-dt * 4);
   }
+  // feelings after a moment in the race: a fist after a pass, a slump when passed, a shake of the head after a slip
+  const E = K.emo; let ek = 0;
+  if (E && E.t > 0) { E.t -= dt; ek = Math.sin(Math.PI * clamp(1 - E.t / E.d, 0, 1)); }
+  if (ek > 0 && A.react <= 0 && !cele) {
+    if (E.k === 'slump') { hx += 0.32 * ek; B.driver.rotation.x += 0.12 * ek; }
+    else if (E.k === 'shake') hy += Math.sin(t * (RM ? 6 : 14)) * 0.3 * ek;
+    else if (E.k === 'fist') { hx -= 0.12 * ek; hy *= 1 - ek; }
+  }
   B.head.rotation.set(hx, hy, hz);
   const hb = cele ? Math.abs(Math.sin(t * 7)) * 0.05 : 0;
   B.head.position.y = 0.62 + hb;
@@ -1757,6 +1859,7 @@ function poseKart(B, K, W, dt, t) {
   } else {
     const st = K.steerIn * 0.4;
     B.armL.rotation.set(st * 0.5, 0, st * 0.6); B.armR.rotation.set(-st * 0.5, 0, st * 0.6);
+    if (ek > 0 && E.k === 'fist') B.armR.rotation.set(-2.3 * ek + Math.sin(t * 12) * 0.15 * ek, 0, -0.3 * ek);
   }
   // a shrunken kart blinks while it is invulnerable
   B.chassis.visible = !(K.invulnT > 0 && K.invulnT < 1.6 && Math.floor(t * 14) % 2 === 0 && K.spinT <= 0 && K.tumbleT <= 0);
@@ -1819,9 +1922,9 @@ const inGap = (T, s) => { for (let g = 0; g < T.gaps.length; g++) if (s > T.gaps
 
 // Looks of each circuit: sky, sun, fog, grade
 const LOOK = {
-  fair: { skyTop: '#060a22', skyMid: '#141a45', skyHor: '#6a3a6e', sun: '#a8bcff', sunI: 1.1, sunEl: 0.75, sunAz: 2.2, fog: '#2a1f44', fogD: 0.0045, hemiSky: '#5a6ab8', hemiGnd: '#3a2a20', hemiI: 0.75, exposure: 1.25, cloud: 0.25, stars: 1, night: 1, bloom: 1.15, thresh: 0.85, grade: [1.04, 0.98, 1.08], sat: 1.15, rain: 0, envI: 0.45 },
-  hill: { skyTop: '#5d6c78', skyMid: '#8b989c', skyHor: '#b9c2bd', sun: '#e9eef0', sunI: 1.35, sunEl: 1.0, sunAz: -0.7, fog: '#9fa9a6', fogD: 0.0105, hemiSky: '#cfdadc', hemiGnd: '#3f4d36', hemiI: 1.25, exposure: 1.12, cloud: 1, stars: 0, night: 0, bloom: 0.55, thresh: 1.1, grade: [0.97, 1.02, 1.04], sat: 1.08, rain: 1, envI: 0.9 },
-  roof: { skyTop: '#2a3b84', skyMid: '#c46a78', skyHor: '#ffb062', sun: '#ffb27a', sunI: 3.4, sunEl: 0.14, sunAz: 2.55, fog: '#e6a27a', fogD: 0.0032, hemiSky: '#ffd6b0', hemiGnd: '#6a4030', hemiI: 0.9, exposure: 1.02, cloud: 0.4, stars: 0, night: 0, bloom: 0.75, thresh: 0.95, grade: [1.06, 1.0, 0.94], sat: 1.12, rain: 0, envI: 0.8 }
+  fair: { skyTop: '#060a22', skyMid: '#141a45', skyHor: '#6a3a6e', sun: '#a8bcff', sunI: 1.1, sunEl: 0.75, sunAz: 2.2, fog: '#2a1f44', fogD: 0.0045, hemiSky: '#5a6ab8', hemiGnd: '#3a2a20', hemiI: 0.75, exposure: 1.25, cloud: 0.25, stars: 1, night: 1, bloom: 1.15, thresh: 0.85, grade: [1.03, 0.99, 1.05], sat: 1.06, rain: 0, envI: 0.45 },
+  hill: { skyTop: '#5d6c78', skyMid: '#8b989c', skyHor: '#b9c2bd', sun: '#e9eef0', sunI: 1.35, sunEl: 1.0, sunAz: -0.7, fog: '#9fa9a6', fogD: 0.0105, hemiSky: '#cfdadc', hemiGnd: '#3f4d36', hemiI: 1.25, exposure: 1.12, cloud: 1, stars: 0, night: 0, bloom: 0.55, thresh: 1.1, grade: [0.98, 1.01, 1.03], sat: 1.03, rain: 1, envI: 0.9 },
+  roof: { skyTop: '#2a3b84', skyMid: '#c46a78', skyHor: '#ffb062', sun: '#ffb27a', sunI: 3.4, sunEl: 0.14, sunAz: 2.55, fog: '#e6a27a', fogD: 0.0032, hemiSky: '#ffd6b0', hemiGnd: '#6a4030', hemiI: 0.9, exposure: 1.02, cloud: 0.4, stars: 0, night: 0, bloom: 0.75, thresh: 0.95, grade: [1.05, 1.0, 0.95], sat: 1.05, rain: 0, envI: 0.8 }
 };
 
 const SCN = {};
@@ -2417,6 +2520,9 @@ function setup3D(arc) {
     sunDir: new THREE.Vector3(), envs: {}, lockQ: false, fovKick: 0, flash: 0, drops: 0, roll: 0, fov: 64, shot: 0, shotT: 0, fwT: 2, good: 0, startQ: 3, post: null
   };
   FX = createFX(scene);
+  // Spectacle: boost flame jets and speed lines, item energy rings, rocket explosions, the power cut's
+  // lightning, finish fireworks. Thinner on low tiers; its shaders compile after the menu.
+  try { VFX = createVFX(renderer, scene, camera, { quality: 2, soft: R3.soft, lights: 0 }); R3.vfxWarm = 30; } catch (e) { VFX = null; }
   makePools();
   R3.post = makePost();
   try {
@@ -2505,7 +2611,7 @@ function cheapOf(m) {
 function applyTier() {
   const r = R3, t = TIERS[r.quality];
   r.scene.traverse((o) => {
-    if ((o.isMesh || o.isInstancedMesh) && o.material && !Array.isArray(o.material) && !o.material.isShaderMaterial) {
+    if ((o.isMesh || o.isInstancedMesh) && o.material && !Array.isArray(o.material) && !o.material.isShaderMaterial && !o.userData.keepMat && !o.material.userData.keepMat) {
       const full = fullOf(o.material), want = t.cheap ? cheapOf(full) : full;
       if (o.material !== want) o.material = want;
     }
@@ -2515,6 +2621,7 @@ function applyTier() {
   r.renderer.shadowMap.enabled = t.shadow; r.sun.castShadow = t.shadow;
   if (r.sun.shadow.mapSize.x !== t.map) { r.sun.shadow.mapSize.set(t.map, t.map); if (r.sun.shadow.map) { r.sun.shadow.map.dispose(); r.sun.shadow.map = null; } }
   if (FX) FX.density = t.fx;
+  if (VFX) VFX.setQuality(r.quality);
   if (r.blobs) r.blobs.visible = !t.shadow;
   r.skyU.uDetail.value = t.cheap ? 0 : 1;
   r.scene.environment = t.cheap ? null : (r.cur ? r.envs[r.cur.T.id] : null);
@@ -2608,12 +2715,100 @@ function activateWorld(W) {
   if (r.ghostModel) { r.scene.remove(r.ghostModel.root); r.ghostModel = null; }
   if (W.ghost) { const gc = CHARS[CHAR_IDX[W.ghost.char]] || CHARS[0]; r.ghostModel = makeKart(gc, true); r.scene.add(r.ghostModel.root); }
   r.podium.visible = false;
+  if (!S.people && r.quality >= 1) { makeSpectators(T, S); try { r.renderer.compile(r.scene, r.camera); } catch (e) { /* lost context: the first draw compiles */ } }
   FX.clear();
   r.skidAge.fill(99); r.skidA.array.fill(0); r.skidA.needsUpdate = true;
   applyTier();
   r.camInit = false; r.worldRef = W; r.shot = 0; r.shotT = 0; r.fovKick = 0;
   // the item boxes of this race
   S.boxIM.count = W.boxes.length; S.starIM.count = W.boxes.length;
+}
+
+// Soft contact shadows under people who do not cast real ones (crowds, passers-by): one
+// instanced draw of a dark radial blob at each pair of feet, so nobody seems to float.
+let BLOB_TEX = null;
+function footShadows(parent, n) {
+  if (!BLOB_TEX) {
+    const c = document.createElement('canvas'); c.width = c.height = 64;
+    const g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gr.addColorStop(0, 'rgba(0,0,0,0.55)'); gr.addColorStop(0.55, 'rgba(0,0,0,0.28)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+    BLOB_TEX = new THREE.CanvasTexture(c);
+  }
+  const geo = new THREE.PlaneGeometry(1, 1); geo.rotateX(-Math.PI / 2);
+  const mesh = new THREE.InstancedMesh(geo, new THREE.MeshBasicMaterial({ map: BLOB_TEX, transparent: true, depthWrite: false, fog: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }), Math.max(1, n));
+  mesh.userData.keepMat = true; mesh.renderOrder = 1; mesh.frustumCulled = false;
+  const m = new THREE.Matrix4();
+  const api = {
+    mesh,
+    set(i, x, y, z, s) { m.makeScale(s, 1, s * 0.8); m.setPosition(x, y + 0.02, z); mesh.setMatrixAt(i, m); mesh.instanceMatrix.needsUpdate = true; },
+  };
+  parent.add(mesh);
+  return api;
+}
+
+/* ------------------------------------------------------------ people at the mela */
+// Fairgoers along the fences by the start, each one on their own timing (one instanced draw,
+// animated on the GPU), and a marshal on the verge who holds the flag up through the lights,
+// waves it on GO and waves the chequers at the finish.
+function makeSpectators(T, S) {
+  if (S.people !== undefined) return S.people;
+  const hw = T.def.hw, r = rng(515 + TRACK_IDX[T.id] * 7), members = [];
+  if (!T.def.voidOff) {
+    const off = hw + T.def.wall + 1.1;
+    for (let s = T.startS - 30; s < T.startS + 44; s += 0.9) {
+      for (let sd = -1; sd <= 1; sd += 2) for (let row = 0; row < 2; row++) {
+        if (r() > 0.8) continue;
+        posAt(T, s + (r() - 0.5) * 0.5, sd * (off + row * 0.8 + r() * 0.3), 0, V);
+        const x = V.x, y = V.y, z = V.z; posAt(T, s, 0, 0, V);
+        members.push({ x, y, z, yaw: Math.atan2(V.x - x, V.z - z) + (r() - 0.5) * 0.6 });
+      }
+    }
+  }
+  const q = R3 ? Math.max(1, R3.quality) : 2;
+  const crowd = members.length ? createCrowd({ members, unit: 1, seed: 21 + TRACK_IDX[T.id], seated: false, quality: q, colors: ['#ff4f9a', '#ffb736', '#38c8ff', '#44ffa8', '#f4f1ea'], teamShare: 0.4 }) : null;
+  if (crowd) { crowd.mesh.userData.keepMat = true; S.group.add(crowd.mesh); const fs = footShadows(S.group, members.length); members.forEach((mm, i) => fs.set(i, mm.x, mm.y, mm.z, 0.62)); S.feet = fs; }
+  const m = createHuman({ seed: 88 + TRACK_IDX[T.id], quality: q, outfit: { top: '#ff7a1a', top2: '#f4f1ea', sleeves: 'long', bottom: '#2a2f3a', legs: 'trousers', cap: '#ff7a1a' } });
+  posAt(T, T.startS + 5, hw + 1.8, 0, V); m.group.position.set(V.x, V.y, V.z);
+  posAt(T, T.startS - 4, 0, 0, V); m.group.rotation.y = Math.atan2(V.x - m.group.position.x, V.z - m.group.position.z);
+  const ft = canvasTex(64, 48, (g) => { for (let y = 0; y < 6; y++) for (let x = 0; x < 8; x++) { g.fillStyle = (x + y) % 2 ? '#111' : '#f4f1ea'; g.fillRect(x * 8, y * 8, 8, 8); } }, { clamp: true });
+  const flag = new THREE.Group();
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.9, 6), new THREE.MeshStandardMaterial({ color: '#d8d4cc', roughness: 0.5, metalness: 0.4 })); pole.position.y = 0.3; flag.add(pole);
+  const cloth = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 0.4), new THREE.MeshStandardMaterial({ map: ft, side: THREE.DoubleSide, roughness: 0.9 })); cloth.position.set(0.28, 0.56, 0); flag.add(cloth);
+  flag.rotation.x = Math.PI / 2; flag.position.y = -0.05; m.bones.wristR.add(flag);
+  m.mesh.userData.keepMat = true; S.group.add(m.group);
+  S.people = { crowd, m, cloth, phase: '', cheerT: 0, waveT: 0 };
+  return S.people;
+}
+const _pl = new THREE.Vector3();
+function updatePeople(W, dt) {
+  const pp = R3.cur && R3.cur.people; if (!pp) return;
+  const T = W.T, P = W.P, cp = R3.camera.position;
+  posAt(T, T.startS, 0, 0, V);
+  const near = Math.hypot(cp.x - V.x, cp.z - V.z) < 140 && R3.quality >= 1;
+  _pl.set(P.x, P.y + 1, P.z);
+  if (pp.crowd) {
+    pp.crowd.mesh.visible = near;
+    if (R3.cur.feet) R3.cur.feet.mesh.visible = near;
+    if (near) {
+      pp.crowd.update(dt, { look: _pl, excite: W.phase === 'countdown' || W.phase === 'intro' ? 0.38 : W.phase === 'race' ? 0.45 : 0.6 });
+      pp.cheerT -= dt;
+      let ds = P.s - T.startS; if (ds > T.L / 2) ds -= T.L; if (ds < -T.L / 2) ds += T.L;
+      if (pp.cheerT <= 0 && Math.abs(ds) < 22 && W.phase !== 'intro') { pp.crowd.react(W.phase === 'finished' || W.phase === 'podium' ? 'cheer' : Math.random() < 0.5 ? 'cheer' : 'wave', 0.9); pp.cheerT = 2.6; }
+    }
+  }
+  const m = pp.m; m.group.visible = near;
+  if (!near) return;
+  if (W.phase !== pp.phase) {
+    if (W.phase === 'countdown') m.play('point', { hold: true, target: _pl.set(m.group.position.x, m.group.position.y + 6, m.group.position.z) });
+    else if (pp.phase === 'countdown') { m.stop('point'); m.play('wave'); }
+    pp.phase = W.phase;
+  }
+  pp.waveT -= dt;
+  if ((W.finalLap || W.phase === 'finished') && pp.waveT <= 0) { let ds = T.startS - P.s; if (ds < 0) ds += T.L; if (ds < 40 || W.phase === 'finished') { m.play('wave'); pp.waveT = 2.2; } }
+  m.lookAt(_pl.set(P.x, P.y + 1, P.z));
+  m.update(dt, { speed: 0, turn: 0, accel: 0 });
+  pp.cloth.rotation.y = Math.sin(R3.time * 5.9) * 0.28;
 }
 
 const _gp = { x: 0, y: 0, z: 0, h: 0 };
@@ -2720,6 +2915,8 @@ function updateCamera(W, dt, a) {
     r.camYaw = wrapA(r.camYaw + lag * Math.min(1, dt * (P.spinT > 0 || P.tumbleT > 0 ? 1.5 : 5.5 + Math.abs(lag) * 6)));
     let back = (port ? 6.4 : 5.6) + sp * 0.9, up = (port ? 2.85 : 2.3) + sp * 0.15;
     if (mode === 'grid') { back += Math.max(0, W.cd - 0.5) * 1.2; up += Math.max(0, W.cd - 0.5) * 0.5; }
+    // a boost eases the camera back a little; it never changes where the camera points
+    r.bpb = (r.bpb || 0) + ((mode === 'chase' && P.boostT > 0 && !rm ? 1 : 0) - (r.bpb || 0)) * Math.min(1, dt * 4); back += r.bpb * 0.9; up += r.bpb * 0.15;
     let yaw = r.camYaw;
     if (P.lookBack && mode === 'chase') { yaw += Math.PI; back = 5; }
     _cp.set(P.x - Math.sin(yaw) * back, P.y + up, P.z - Math.cos(yaw) * back);
@@ -2806,7 +3003,7 @@ function updateCamera(W, dt, a) {
   cam.rotateZ(r.roll);
   // speed and boosts widen the lens
   r.fovKick = Math.max(0, r.fovKick - dt * 9);
-  const kick = mode === 'chase' && !rm ? sp * 7 + (P.boostT > 0 ? 6 : 0) + r.fovKick : mode === 'chase' ? sp * 2 : 0;
+  const kick = mode === 'chase' && !rm ? sp * 7 + (P.boostT > 0 ? 10 : 0) + r.fovKick : mode === 'chase' ? sp * 2 : 0;
   r.fov += (fovT + kick - r.fov) * Math.min(1, dt * (snap ? 60 : 5));
   if (Math.abs(cam.fov - r.fov) > 0.01 || Math.abs(cam.aspect - aspect) > 1e-4) { cam.fov = r.fov; cam.aspect = aspect; cam.updateProjectionMatrix(); }
   cam.updateMatrixWorld();
@@ -2820,7 +3017,7 @@ function emitKartFx(W, K, B, dt, a) {
   if (K.drift && !K.air) {
     for (let s = -1; s <= 1; s += 2) {
       kartPoint(K, s * 0.8, 0.12, -0.85, V);
-      if (K.level > 0) { for (let i = 0; i < 2 * FX.density; i++) FX.emit('add', V.x, V.y, V.z, rnd(3) - Math.sin(K.h) * 3, 0.8 + Math.random() * 2.2, rnd(3) - Math.cos(K.h) * 3, 0.18 + Math.random() * 0.15, 0.13 + K.level * 0.03, SPARK_COL[K.level], 1, 10, 1, 0); }
+      if (K.level > 0) { for (let i = 0; i < 2 * FX.density; i++) FX.emit('add', V.x, V.y, V.z, rnd(3) - Math.sin(K.h) * 3, 0.8 + Math.random() * 2.2, rnd(3) - Math.cos(K.h) * 3, 0.28 + Math.random() * 0.2, 0.13 + K.level * 0.03, SPARK_COL[K.level], 1, 10, 1, 0, K.gy + 0.03); }
       if (Math.random() < 0.5 * FX.density) FX.emit('soft', V.x, V.y, V.z, rnd(1), 0.5, rnd(1), 0.7, 0.5, T.def.id === 'roof' ? '#d8c0a8' : '#c8c8cc', 0.32, -0.2, 1.2, 2.4);
     }
     if (K.level > 0 && B) { kartPoint(K, 0, 0.4, -1.0, V); FX.emit('add', V.x, V.y, V.z, 0, 0, 0, 0.06, 1.0 + K.level * 0.25, SPARK_COL[K.level], 0.35, 0, 0, 0); }
@@ -2851,6 +3048,7 @@ function renderScene(W, dt, a) {
   r.renderer.info.reset();
   poseWorld(W, dt);
   updateCamera(W, dt, a);
+  updatePeople(W, dt);
   // a rival right in front of the lens would fill the screen: let the camera see through it
   const cp0 = r.camera.position;
   for (let i = 0; i < W.karts.length; i++) {
@@ -2921,6 +3119,24 @@ function renderScene(W, dt, a) {
   pc.uAberr.value = !a.reducedMotion && P.boostT > 0 && r.mode === 'chase' ? 0.0035 : 0;
   r.skyU.uTime.value = r.time;
   r.sky.position.copy(r.camera.position);
+  if (VFX) {
+    if (r.vfxWarm > 0 && --r.vfxWarm === 0) VFX.warm();
+    VFX.setReduced(!!a.reducedMotion);
+    VFX.setGround(P.gy);
+    // the boost: a flame jet from each pipe, its heat glow, and speed lines
+    const B0 = r.karts[0];
+    const bOn = !!(B0 && P.boostT > 0 && P.respawnT <= 0);
+    if (bOn) {
+      if (!r.boostH) r.boostH = [-1, 1].map((sd) => VFX.nitro(B0.root, { offset: [sd * 0.28, 0.7, -1.4], dir: [0, 0, -1], size: 1.05, color: P.boostK > 1.12 ? '#ffb24a' : '#ff7a2a' }));
+    } else if (r.boostH) { r.boostH.forEach((h) => h.stop()); r.boostH = null; }
+    // a pool of heat on the ground behind the kart, sparks shed off both jets
+    if (B0 && B0.bGlowFor !== B0.root) { B0.bGlow = makeBoostGlow(B0.root, -2.6, 2.4, 4.4, '#ffa04a'); B0.bGlowFor = B0.root; }
+    r.bst = r.bst || {}; r.bst.h = r.boostH;
+    finishShow(r.show, dt, r.camera);
+    if (B0) driveBoost(r.bst, bOn, dt, B0.root, B0.bGlow, KART_NOZZLES, -1, r.quality, !!a.reducedMotion);
+    VFX.speedLines(r.camera, !W.attract && !a.reducedMotion && bOn && r.mode === 'chase' ? 1 : 0);
+    VFX.update(dt);
+  }
   if (TIERS[r.quality].post) renderWithPost(L, a);
   else { r.renderer.setRenderTarget(null); r.renderer.render(r.scene, r.camera); }
 }

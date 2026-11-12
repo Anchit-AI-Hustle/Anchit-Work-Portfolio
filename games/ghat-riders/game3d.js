@@ -1,5 +1,7 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
 import { createFX as createPost } from '/games/shared/fx3d.js';
+import { createHuman, createCrowd } from '/games/shared/human.js';
+import { createVFX } from '/games/shared/vfx.js';
 
 /*
  * Ghat Riders, a 3D motorbike road race with shoulder barging.
@@ -291,7 +293,7 @@ function mkRider(o) {
     s: 0, x: 0, v: 0, vx: 0, lean: 0, steer: 0, thr: 0, wob: 0, wobPh: 0, crash: 0, crashT: 0, crashDur: 0, crashDir: 1, crashSpin: 0,
     shoveT: 0, shoveSide: 0, shoveCd: 0, shoveDone: false, nitro: 20, nitroOn: false, nLatch: 0, brLatch: 0, draft: 0, finished: false, finT: 0, place: 0,
     invuln: 0, oil: 0, gravel: 0, scrape: 0, onShoulder: false, peg: 0, wheel: 0, tumble: 0, react: 0, lastHit: -9, pass: {},
-    ai: { tx: 0, bias: 0, cd: 1 + Math.random() * 2, barge: 0, bargeT: null, nitroT: 0, mood: Math.random() },
+    ai: { tx: 0, bias: 0, cd: 1 + Math.random() * 2, barge: 0, bargeT: null, nitroT: 0, mood: Math.random(), mind: mkMind() }, emo: null,
     stats: { shoves: 0, knocks: 0, taken: 0, crashes: 0, passes: 0, near: 0 }
   }, o, { b, top: bikeTop(b), acc: bikeAcc(b), steerMax: bikeSteer(b), grip: bikeGrip(b) });
 }
@@ -472,11 +474,53 @@ function inRange(W, P, side) {
 }
 
 /* ------------------------------------------------------------ AI */
+// A rival is a person on a bike, not a machine. Each one has a day (form), a reaction time for
+// things that appear ahead, a habit of braking a touch early or late into each bend, a temper
+// that rises when they are passed and cools after a scare, and the odd small mistake: a lift and
+// a run wide that is more likely when someone is right on their tail. All of it is small and
+// averages out, so the field stays fair; the rubber band still keeps the race close.
+function mkMind() {
+  const r = Math.random;
+  return {
+    form: 0.975 + r() * 0.04, rx: 0.15 + r() * 0.15, seen: 0, brk: 1, brkT: 0, err: 0, errT: 0, errDir: 0, errK: 0,
+    nextErr: 7 + r() * 16, temper: 0.75 + r() * 0.5, heat: 0, cool: 0, press: 0
+  };
+}
+function emote(R, k, t) { if (!R.emo || R.emo.t <= 0 || k === 'crash') R.emo = { k, t: t || 1.4, d: t || 1.4 }; }
+function humanMind(W, R, dt, cAhead) {
+  const m = R.ai.mind, P = W.P;
+  if (m.heat > 0) m.heat = Math.max(0, m.heat - dt / 9);
+  if (m.cool > 0) m.cool = Math.max(0, m.cool - dt / 5);
+  if (R.emo && R.emo.t > 0) R.emo.t -= dt;
+  // pressure: the player (or anyone) right behind
+  let press = 0;
+  for (let i = 0; i < W.riders.length; i++) { const o = W.riders[i]; if (o === R || o.crash > 0) continue; const ds = R.s - o.s; if (ds > 0.5 && ds < 9 && Math.abs(o.x - R.x) < 2.6) press = Math.max(press, (o.isPlayer ? 1 : 0.5) * (1 - ds / 9)); }
+  m.press += (press - m.press) * Math.min(1, dt * 2);
+  // a glance over the shoulder at whoever is close behind
+  if (m.press > 0.55 && Math.random() < dt * 0.5) emote(R, 'look', 0.9);
+  // brake points: re-judged as each bend comes up
+  m.brkT -= dt;
+  if (m.brkT <= 0) { m.brkT = 2.5 + Math.random() * 3; m.brk = 0.86 + Math.random() * 0.24 - m.heat * 0.06; }
+  // the odd mistake, sooner on a bad day, under pressure, or hot after being passed
+  if (m.errT > 0) m.errT -= dt;
+  else if (W.phase === 'racing' && R.v > 16) {
+    m.nextErr -= dt * (1 + m.press * 1.6 + m.heat * 0.8 + (1.0 - m.form) * 12);
+    if (m.nextErr <= 0) {
+      m.errT = m.err = 0.5 + Math.random() * 0.7;
+      m.errDir = Math.abs(cAhead) > 0.0015 ? -Math.sign(cAhead) : (Math.random() < 0.5 ? -1 : 1);
+      m.errK = 0.8 + Math.random() * 1.3;
+      m.nextErr = 12 + Math.random() * 22;
+      if (Math.abs(R.s - P.s) < 40) emote(R, 'shake', 1.2);
+    }
+  }
+}
 function aiControl(W, R, dt) {
   const T = W.T, d = W.d, P = W.P;
   const ai = R.ai;
   const look = R.s + 10 + R.v * 0.55;
   let cAhead = 0; for (let k = 0; k < 4; k++) cAhead += curvAt(T, look + k * 6); cAhead /= 4;
+  const m = ai.mind, human = !R.isPlayer && !R.bot;
+  if (human) humanMind(W, R, dt, cAhead);
   ai.bias += ((Math.sin(W.t * 0.13 + R.idx * 1.7) * 1.4) - ai.bias) * dt * 0.5;
   let tx = clamp(cAhead * 160, -3.6, 3.6) + ai.bias;
   // things to ride around: traffic, cows, oil, other riders
@@ -491,6 +535,8 @@ function aiControl(W, R, dt) {
   for (let i = 0; i < W.hazards.length; i++) { const h = W.hazards[i]; if (h.kind === 'oil') consider(h.s, h.x, h.rx, h.rs, R.v); }
   for (let i = 0; i < W.patrols.length; i++) { const p = W.patrols[i]; consider(p.s, p.x, 0.6, 1.2, R.v - p.v); }
   for (let i = 0; i < W.riders.length; i++) { const o = W.riders[i]; if (o !== R && (o.crash > 0 || o.v < R.v - 6)) consider(o.s, o.x, 0.6, 1.1, R.v - o.v); }
+  // a person needs a moment to see a new hazard, unless it is right there
+  if (human) { if (avoid) m.seen += dt; else m.seen = 0; if (avoid && m.seen < m.rx && aDist > 9) avoid = null; }
   if (avoid) {
     const l = avoid.x - avoid.hw - 1.5, rr = avoid.x + avoid.hw + 1.5;
     const lOk = l > -XW + 0.9, rOk = rr < XW - 0.9;
@@ -515,17 +561,18 @@ function aiControl(W, R, dt) {
         if (Math.abs(o.s - R.s) < 3.2 && Math.abs(o.x - R.x) < 3.6) { if (!tgt || o.isPlayer) tgt = o; }
       }
       if (tgt) {
-        const want = (tgt.isPlayer ? 1.2 : 0.35) * d.aggr * R.aggr;
+        const want = (tgt.isPlayer ? 1.2 : 0.35) * d.aggr * R.aggr * (human ? m.temper * (1 + m.heat * 0.7) * (1 - m.cool * 0.8) : 1);
         if (Math.random() < want * 0.9) { ai.barge = 0.7; ai.bargeT = tgt; }
         ai.cd = 0.7 + Math.random() * 0.8;
       }
     }
   }
+  if (human && m.errT > 0) tx += m.errDir * m.errK * Math.sin(Math.PI * (1 - m.errT / m.err));
   tx = clamp(tx, -XW + 1.0, XW - 1.0);
-  ai.tx += (tx - ai.tx) * Math.min(1, dt * 3);
+  ai.tx += (tx - ai.tx) * Math.min(1, dt * (human ? 0.66 / m.rx : 3));
   // speed: the bend ahead, pace and a gentle rubber band
   let vSafe = 1e9;
-  const brakeLook = R.v * R.v / 26 + 8;
+  const brakeLook = (R.v * R.v / 26 + 8) * (human ? m.brk : 1);
   for (let k = 0; k <= 5; k++) vSafe = Math.min(vSafe, T.VS[rowOf(T, R.s + brakeLook * k / 5)]);
   let pace = (R.pace || 1) * d.pace;
   if (!R.isPlayer && !W.attract) {
@@ -533,7 +580,8 @@ function aiControl(W, R, dt) {
     if (gap < -70) pace += d.band; else if (gap > 110) pace -= d.band * 0.8;
   }
   if (R.bot) pace = 0.97;
-  const vt = Math.min(R.top * pace, vSafe * (0.93 + 0.06 * (R.pace || 1)));
+  if (human) pace *= m.form * (1 + m.heat * 0.012 - m.cool * 0.025) * (m.errT > 0 ? 0.93 : 1);
+  const vt = Math.min(R.top * pace, vSafe * (0.93 + 0.06 * (R.pace || 1)) * (human ? 1 + (1 - m.brk) * 0.12 : 1));
   const push = R.v * R.v * curvAt(T, R.s) * CENT * R.grip;
   const steer = clamp(((ai.tx - R.x) * 1.4 + push - R.vx * 0.2) / R.steerMax, -1, 1);
   let nit = false;
@@ -600,6 +648,8 @@ function crash(W, R, dir, kind) {
   R.crash = 1; R.crashT = 0; R.crashDur = (kind === 'shove' ? 2.9 : 2.5) + Math.random() * 0.5; R.crashDir = dir || (R.x < 0 ? -1 : 1);
   R.crashKind = kind; R.crashSpin = (Math.random() - 0.5) * 2.5; R.nitroOn = false; R.shoveT = 0; R.wob = 0; R.stats.crashes++;
   R.crashV = R.v;
+  if (R.ai && R.ai.mind) { R.ai.mind.cool = 1; R.ai.mind.heat = 0; R.ai.mind.errT = 0; }
+  emote(R, 'crash', R.crashDur);
   if (R.isPlayer) {
     ARC.shake = Math.max(ARC.shake, 12); ARC.haptic('heavy', 1);
     if (POST) { POST.flash(0.3, '#ffe0c8'); POST.kick(-6); }
@@ -784,8 +834,10 @@ function passes(W) {
     const o = W.riders[i]; if (o === P) continue;
     const ahead = o.s > P.s, was = P.pass[o.idx];
     if (was === true && !ahead && o.crash <= 0) {
-      if (Math.abs(o.x - P.x) < 3.6 && W.t - P.lastHit > 1.2) { P.stats.passes++; addNitro(P, 10); pop(W, 'Clean pass', o.name, '#44ffa8'); tone(880, 0.07, { type: 'triangle', vol: 0.08 }); }
+      if (Math.abs(o.x - P.x) < 3.6 && W.t - P.lastHit > 1.2) { P.stats.passes++; addNitro(P, 10); pop(W, 'Clean pass', o.name, '#44ffa8'); tone(880, 0.07, { type: 'triangle', vol: 0.08 }); if (Math.random() < 0.5) emote(P, 'fist', 0.8); }
+      if (o.ai && o.ai.mind) { o.ai.mind.heat = 1; emote(o, 'shake', 1.1); }
     }
+    else if (was === false && ahead && o.crash <= 0 && Math.abs(o.x - P.x) < 4) emote(o, 'fist', 1.1);
     P.pass[o.idx] = ahead;
   }
   for (let i = 0; i < W.traffic.length; i++) {
@@ -824,6 +876,8 @@ function stepWorld(W, dtReal) {
     const R = W.riders[i];
     if (!R.finished && R.s >= T.finishS && W.phase !== 'grid') {
       R.finished = true; R.finT = W.t; R.crash = 0;
+      let fin = 0; for (let k = 0; k < W.riders.length; k++) if (W.riders[k].finished) fin++;
+      R.place = fin;
       if (R.isPlayer && !W.attract && W.phase === 'racing') {
         W.phase = 'finished'; W.finWait = 0; P_finish(W);
       }
@@ -845,6 +899,7 @@ function P_finish(W) {
   W.banner = W.cfg.mode === 'time' ? 'FINISH' : ordinal(pos).toUpperCase(); W.bannerT = 3;
   tone(660, 0.18, { type: 'triangle', vol: 0.14 }); tone(880, 0.18, { type: 'triangle', vol: 0.14, delay: 0.18 }); tone(1320, 0.4, { type: 'triangle', vol: 0.14, delay: 0.36 });
   confetti(W, 160);
+  if (VFX && R3) { R3.show = { n: pos <= 3 ? 7 : 3, t: 0.1 }; R3.camera.updateMatrixWorld(); VFX.confetti(_vq.set(0, 0.8, -6).applyMatrix4(R3.camera.matrixWorld), { count: 120 }); }
   ARC.haptic(pos <= 3 || W.cfg.mode === 'time' ? 'success' : 'hit', 1);
   if (POST) POST.flash(0.22, '#fff2d0');
   if (pos <= 3 && W.cfg.mode !== 'time') ARC.toast(pos === 1 ? 'Winner!' : 'Podium!', W.T.def.name, 1800);
@@ -900,7 +955,53 @@ function endRace(W) {
 /* ------------------------------------------------------------ geometry helpers */
 const _m4 = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _s3 = new THREE.Vector3(), _p3 = new THREE.Vector3(), _c = new THREE.Color();
 const _v1 = new THREE.Vector3(), _v2 = new THREE.Vector3(), _v3 = new THREE.Vector3(), _up = new THREE.Vector3(0, 1, 0);
-const V = { x: 0, y: 0, z: 0 }, V2 = { x: 0, y: 0, z: 0 };
+const V = { x: 0, y: 0, z: 0 }, V2 = { x: 0, y: 0, z: 0 }, _vq = new THREE.Vector3();
+
+/* ------------------------------------------------------------ boost set piece: road heat glow and shed sparks */
+// finish show: one shell at a time, each sent up where the finish camera is looking at that moment
+const _fs = new THREE.Vector3();
+function finishShow(st, dt, cam) {
+  if (!st || st.n <= 0 || !VFX || !cam) return;
+  st.t -= dt; if (st.t > 0) return;
+  st.t = 0.45 + Math.random() * 0.3; st.n--;
+  const d = 22 + Math.random() * 8, th = Math.tan(cam.fov * Math.PI / 360);
+  _fs.set((Math.random() - 0.5) * 1.2 * d * th * cam.aspect, d * th * (0.2 + Math.random() * 0.35), -d);
+  cam.updateMatrixWorld(); _fs.applyMatrix4(cam.matrixWorld);
+  VFX.fireworks(_fs, { launch: true, size: 1.3 });
+}
+let _boostTex = null;
+const _bz = new THREE.Vector3(), _bd = new THREE.Vector3();
+function boostTex() {
+  if (_boostTex) return _boostTex;
+  const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
+  const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  gr.addColorStop(0, 'rgba(255,240,215,1)'); gr.addColorStop(0.22, 'rgba(255,170,80,0.8)'); gr.addColorStop(0.55, 'rgba(255,100,40,0.28)'); gr.addColorStop(1, 'rgba(255,70,20,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+  _boostTex = new THREE.CanvasTexture(c); _boostTex.colorSpace = THREE.SRGBColorSpace; return _boostTex;
+}
+// an additive pool of light on the road behind the machine, child of its root (local +back is `back`)
+function makeBoostGlow(parent, z, w, l, color) {
+  const mat = new THREE.MeshBasicMaterial({ map: boostTex(), color, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false });
+  mat.userData.keepMat = true;
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, l), mat);
+  m.rotation.x = -Math.PI / 2; m.position.set(0, 0.05, z); m.renderOrder = 2; m.visible = false; m.userData.keepMat = true;
+  parent.add(m); return m;
+}
+// drive one boost: jet length flickers between 1.5 and 2 times, the glow breathes, sparks shed off the jet
+function driveBoost(st, on, dt, root, glow, nozzles, back, quality, reduced) {
+  st.t = (st.t || 0) + dt; st.k = (st.k || 0) + ((on ? 1 : 0) - (st.k || 0)) * Math.min(1, dt * (on ? 10 : 4));
+  const f = reduced ? 1.6 : 1.55 + 0.3 * Math.sin(st.t * 31) * Math.sin(st.t * 11.3 + 1.7) + 0.15 * Math.sin(st.t * 57);
+  if (st.h) for (let i = 0; i < st.h.length; i++) st.h[i].set(f);
+  if (glow) { glow.visible = st.k > 0.02; glow.material.opacity = st.k * (reduced ? 0.5 : 0.55 + 0.2 * Math.sin(st.t * 23) * Math.sin(st.t * 9.1)); }
+  if (!on || quality < 1 || !VFX) return;
+  st.sp = (st.sp || 0) - dt; if (st.sp > 0) return;
+  st.sp = quality >= 2 ? 0.08 : 0.16;
+  const nz = nozzles[(Math.random() * nozzles.length) | 0];
+  root.updateWorldMatrix(true, false);
+  _bz.set(nz[0], nz[1], nz[2] + back * (0.6 + Math.random() * 1.2)).applyMatrix4(root.matrixWorld);
+  _bd.set((Math.random() - 0.5) * 0.6, 0.5, back).transformDirection(root.matrixWorld);
+  VFX.impact(_bz, _bd, { kind: 'spark', size: 0.26 });
+}
 
 // Bake a primitive: place it, give it one vertex colour, drop its uvs so a whole model merges into one mesh.
 function prep(geo, hex, pos, rot, scl) {
@@ -1024,8 +1125,20 @@ function textures() {
     for (let y = 0; y < h; y += 256) g.fillRect(w / 2 - 5, y + 30, 10, 140);
     g.fillStyle = 'rgba(80,72,60,.5)'; g.fillRect(0, 0, 8, h); g.fillRect(w - 8, 0, 8, h);
   }, { repeat: [1, 1] });
-  const nh = vnoise(5, 64), nh2 = vnoise(9, 16);
-  TX.roadN = normalTex(256, (u, v) => nh(u, v) * 0.6 + nh2(u, v) * 0.4, 3, [1, 1]);
+  // fine asphalt grain only: a broad low-frequency term read as big dark blotches under a low sun
+  // fine asphalt grain only, near texel size so it averages out to an even surface at distance:
+  // any broader bump term reads as dark and light blotches under the low sun
+  const nh = vnoise(5, 192), nh2 = vnoise(9, 128);
+  TX.roadN = normalTex(256, (u, v) => nh(u, v) * 0.7 + nh2(u, v) * 0.3, 1.0, [1, 1]);
+  // damp tarmac for the dawn mist: the wheel tracks are polished a little smoother, the edges and
+  // the centre stay matt, and a few shallow puddles sit in the dips. Roughness is the green channel.
+  TX.roadR = canvasTex(256, 512, (g, w, h) => {
+    g.fillStyle = 'rgb(0,178,0)'; g.fillRect(0, 0, w, h);
+    const r = rng(23);
+    [0.27, 0.73].forEach((u) => { const gr = g.createLinearGradient(u * w - 34, 0, u * w + 34, 0); gr.addColorStop(0, 'rgba(0,178,0,0)'); gr.addColorStop(0.5, 'rgb(0,156,0)'); gr.addColorStop(1, 'rgba(0,178,0,0)'); g.fillStyle = gr; g.fillRect(u * w - 34, 0, 68, h); });
+    for (let i = 0; i < 26; i++) { g.fillStyle = 'rgba(0,' + (150 + r() * 40 | 0) + ',0,0.35)'; g.fillRect(r() * w, r() * h, 2 + r() * 3, 40 + r() * 140); }
+    for (let i = 0; i < 4; i++) { const x = (0.2 + r() * 0.6) * w, y = r() * h, rx = 10 + r() * 16, ry = 26 + r() * 40; const gr = g.createRadialGradient(x, y, 0, x, y, ry); gr.addColorStop(0, 'rgb(0,96,0)'); gr.addColorStop(0.6, 'rgba(0,118,0,0.8)'); gr.addColorStop(1, 'rgba(0,178,0,0)'); g.fillStyle = gr; g.beginPath(); g.ellipse(x, y, rx, ry, 0, 0, TAU); g.fill(); }
+  }, { data: true, repeat: [1, 1] });
   // the banks: one grey detail texture, the hue comes from vertex colours
   TX.ground = canvasTex(512, 512, (g, w, h) => {
     noiseFill(g, w, h, '#bdbdbd', 0.32, 20000, 21, 3);
@@ -1034,7 +1147,9 @@ function textures() {
     for (let i = 0; i < 260; i++) { g.strokeStyle = 'rgba(255,255,255,' + (0.06 + r() * 0.1) + ')'; g.lineWidth = 1; const x = r() * w, y = r() * h; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (r() - 0.5) * 6, y - 4 - r() * 8); g.stroke(); }
   });
   const rk = vnoise(13, 24), rk2 = vnoise(31, 8);
-  TX.groundN = normalTex(256, (u, v) => rk(u, v) * 0.5 + Math.abs(Math.sin((v + rk2(u, v) * 0.3) * TAU * 6)) * 0.35 + rk2(u, v) * 0.3, 5, [1, 1]);
+  // soil and grass clumps, no regular rows: a sine term here printed zebra bands across every bank
+  const rk3 = vnoise(47, 96);
+  TX.groundN = normalTex(256, (u, v) => rk(u, v) * 0.45 + rk2(u, v) * 0.2 + rk3(u, v) * 0.35, 2.2, [1, 1]);
   // soft blobs for mist, glow and particles
   TX.mist = canvasTex(256, 256, (g, w, h) => {
     g.clearRect(0, 0, w, h); const r = rng(8);
@@ -1122,19 +1237,19 @@ function makePool(n, additive, square) {
     transparent: true, depthWrite: false, blending: additive ? THREE.AdditiveBlending : THREE.NormalBlending, fog: false
   });
   const pts = new THREE.Points(geo, mat); pts.frustumCulled = false; pts.renderOrder = 5;
-  const P = { n, pos, col, size, alpha, geo, mat, pts, vel: new Float32Array(n * 3), life: new Float32Array(n), max: new Float32Array(n), s0: new Float32Array(n), grow: new Float32Array(n), grav: new Float32Array(n), drag: new Float32Array(n), a0: new Float32Array(n), spin: new Float32Array(n), head: 0, live: 0 };
+  const P = { n, pos, col, size, alpha, geo, mat, pts, vel: new Float32Array(n * 3), life: new Float32Array(n), max: new Float32Array(n), s0: new Float32Array(n), grow: new Float32Array(n), grav: new Float32Array(n), drag: new Float32Array(n), a0: new Float32Array(n), spin: new Float32Array(n), floor: new Float32Array(n).fill(-1e9), head: 0, live: 0 };
   return P;
 }
 function createFX(scene) {
   const F = { add: makePool(700, true), soft: makePool(600, false), conf: makePool(360, false, true), density: 1 };
   scene.add(F.add.pts, F.soft.pts, F.conf.pts);
-  F.emit = (pool, x, y, z, vx, vy, vz, life, size, hex, alpha, grav, drag, grow) => {
+  F.emit = (pool, x, y, z, vx, vy, vz, life, size, hex, alpha, grav, drag, grow, floor) => {
     const P = F[pool]; const i = P.head; P.head = (P.head + 1) % P.n;
     P.pos[i * 3] = x; P.pos[i * 3 + 1] = y; P.pos[i * 3 + 2] = z;
     P.vel[i * 3] = vx; P.vel[i * 3 + 1] = vy; P.vel[i * 3 + 2] = vz;
     _c.set(hex); P.col[i * 3] = _c.r; P.col[i * 3 + 1] = _c.g; P.col[i * 3 + 2] = _c.b;
     P.life[i] = life; P.max[i] = life; P.s0[i] = size; P.size[i] = size; P.a0[i] = alpha; P.alpha[i] = alpha;
-    P.grav[i] = grav || 0; P.drag[i] = drag || 0; P.grow[i] = grow || 0; P.spin[i] = Math.random() * 6;
+    P.grav[i] = grav || 0; P.drag[i] = drag || 0; P.grow[i] = grow || 0; P.spin[i] = Math.random() * 6; P.floor[i] = floor == null ? -1e9 : floor;
   };
   F.update = (dt, scale) => {
     ['add', 'soft', 'conf'].forEach((k) => {
@@ -1148,6 +1263,8 @@ function createFX(scene) {
         P.vel[i * 3] *= dr; P.vel[i * 3 + 1] = P.vel[i * 3 + 1] * dr - P.grav[i] * dt; P.vel[i * 3 + 2] *= dr;
         if (k === 'conf') { P.spin[i] += dt * 9; P.vel[i * 3] += Math.sin(P.spin[i]) * dt * 2; }
         P.pos[i * 3] += P.vel[i * 3] * dt; P.pos[i * 3 + 1] += P.vel[i * 3 + 1] * dt; P.pos[i * 3 + 2] += P.vel[i * 3 + 2] * dt;
+        // sparks and grit hit the road and bounce, losing most of their energy
+        if (P.pos[i * 3 + 1] < P.floor[i]) { P.pos[i * 3 + 1] = P.floor[i]; P.vel[i * 3 + 1] = -P.vel[i * 3 + 1] * 0.32; P.vel[i * 3] *= 0.55; P.vel[i * 3 + 2] *= 0.55; }
         P.size[i] = P.s0[i] * (1 + P.grow[i] * (1 - f)) * (k === 'conf' ? 0.6 + 0.4 * Math.abs(Math.sin(P.spin[i])) : 1);
         P.alpha[i] = P.a0[i] * (k === 'add' ? f : Math.min(1, f * 2.5));
       }
@@ -1169,37 +1286,45 @@ function gravelAt(W, R) {
   if (!fxOK()) return;
   for (let i = 0; i < 2; i++) {
     posAt(W.T, R.s - 0.7, R.x + (Math.random() - 0.5) * 0.5, 0.1, V);
-    FX.emit('soft', V.x, V.y, V.z, (Math.random() - 0.5) * 5, 1.5 + Math.random() * 2.5, (Math.random() - 0.5) * 5, 0.6, 0.14, '#5a4a3a', 1, 9, 0.5, 0);
+    FX.emit('soft', V.x, V.y, V.z, (Math.random() - 0.5) * 5, 1.5 + Math.random() * 2.5, (Math.random() - 0.5) * 5, 0.9, 0.14, '#5a4a3a', 1, 9.8, 0.5, 0, V.y - 0.08);
   }
   dustAt(W, R, 0.8);
 }
-function sparkBurst(x, y, z, n, spread, up, hex) {
+function sparkBurst(x, y, z, n, spread, up, hex, floor) {
   if (!fxOK()) return;
-  for (let i = 0; i < n * FX.density; i++) FX.emit('add', x, y, z, (Math.random() - 0.5) * spread, Math.random() * up, (Math.random() - 0.5) * spread, 0.25 + Math.random() * 0.35, 0.09 + Math.random() * 0.07, hex || (Math.random() < 0.5 ? '#ffd27a' : '#ff8a3a'), 1, 9, 1.2, 0);
+  for (let i = 0; i < n * FX.density; i++) FX.emit('add', x, y, z, (Math.random() - 0.5) * spread, Math.random() * up, (Math.random() - 0.5) * spread, 0.35 + Math.random() * 0.45, 0.09 + Math.random() * 0.07, hex || (Math.random() < 0.5 ? '#ffd27a' : '#ff8a3a'), 1, 9.8, 0.9, 0, floor);
 }
 function pegSparks(W, R) {
   if (!fxOK()) return;
   const side = R.lean > 0 ? 1 : -1;
   posAt(W.T, R.s + 0.05, R.x + side * 0.42, 0.05, V);
-  for (let i = 0; i < 3; i++) FX.emit('add', V.x, V.y, V.z, (Math.random() - 0.5) * 2 - FR.fx * 3, Math.random() * 2, (Math.random() - 0.5) * 2 - FR.fz * 3, 0.3, 0.07, '#ffd27a', 1, 7, 1, 0);
+  for (let i = 0; i < 3; i++) FX.emit('add', V.x, V.y, V.z, (Math.random() - 0.5) * 2 - FR.fx * 3, Math.random() * 2, (Math.random() - 0.5) * 2 - FR.fz * 3, 0.45, 0.07, '#ffd27a', 1, 9.8, 1, 0, V.y - 0.04);
 }
 function scrapeFx(W, R, side, k) {
   if (!fxOK() || !chance(0.7)) return;
   posAt(W.T, R.s, side * (XW + 0.1), 0.35, V);
-  if (k > 0.2) sparkBurst(V.x, V.y, V.z, 4, 3, 3);
+  if (k > 0.2) sparkBurst(V.x, V.y, V.z, 4, 3, 3, null, V.y - 0.33);
   else FX.emit('soft', V.x, V.y, V.z, (Math.random() - 0.5) * 2, 1 + Math.random(), (Math.random() - 0.5) * 2, 0.8, 0.7, W.T.look.dirt, 0.6, -0.2, 1, 2);
 }
 function clashFx(W, A, B, k) {
   if (!fxOK()) return;
   posAt(W.T, (A.s + B.s) / 2, (A.x + B.x) / 2, 1.0, V);
-  sparkBurst(V.x, V.y, V.z, 10 + 16 * k, 5, 3.5, '#ffe9b0');
+  sparkBurst(V.x, V.y, V.z, 10 + 16 * k, 5, 3.5, '#ffe9b0', V.y - 0.98);
   FX.emit('add', V.x, V.y, V.z, 0, 0, 0, 0.18, 1.6 * k + 0.4, '#fff3d6', 0.9, 0, 0, 1.5);
 }
 function crashFx(W, R) {
   if (!fxOK()) return;
+  if (VFX && Math.abs(R.s - W.P.s) < 70) {
+    posAt(W.T, R.s, R.x, 0.35, V); _vq.set(V.x, V.y, V.z);
+    const big = R.isPlayer || (R.crashV || 0) > 30;
+    VFX.impact(_vq, _up, { kind: 'spark', size: big ? 1.9 : 1.3 }); VFX.dust(_vq, { size: big ? 2.2 : 1.5, color: W.T.look.dirt });
+    if (big) { VFX.impact(_vq, _up, { kind: 'glass', size: 1.2 }); VFX.smokePlume(_vq, { size: 0.8, duration: 1.6 }); }
+  }
   posAt(W.T, R.s, R.x, 0.3, V);
-  sparkBurst(V.x, V.y, V.z, 18, 5, 4);
+  sparkBurst(V.x, V.y, V.z, 18, 5, 4, null, V.y - 0.28);
   for (let i = 0; i < 10 * FX.density; i++) FX.emit('soft', V.x, V.y, V.z, (Math.random() - 0.5) * 4, Math.random() * 2, (Math.random() - 0.5) * 4, 1.4, 1.1, W.T.look.dirt, 0.55, -0.2, 1.4, 2.4);
+  // a few bits of plastic and grit skitter across the tarmac
+  for (let i = 0; i < 6 * FX.density; i++) FX.emit('soft', V.x, V.y + 0.2, V.z, (Math.random() - 0.5) * 6, 2 + Math.random() * 3, (Math.random() - 0.5) * 6, 1.6, 0.1, Math.random() < 0.5 ? '#2a2724' : R.paint, 1, 9.8, 0.4, 0, V.y - 0.26);
 }
 function confetti(W, n) {
   if (!fxOK()) return;
@@ -1209,6 +1334,63 @@ function confetti(W, n) {
     FX.emit('conf', V.x, V.y, V.z, (Math.random() - 0.5) * 6, Math.random() * 4, (Math.random() - 0.5) * 6, 3 + Math.random() * 1.5, 0.22, cols[i % cols.length], 1, 2.2, 0.9, 0);
   }
 }
+
+/* ------------------------------------------------------------ skid marks and scuffs: laid on the road, fading */
+// One instanced quad per short segment of rubber. Each wheel that skids leaves a chain of
+// segments joined end to end; a segment darkens as it is laid and fades over its life.
+// The pool is fixed (no allocation in the frame loop) and sized by the quality tier.
+const MARK_VS = 'attribute float aA; varying float vA; varying vec2 vUv; void main(){ vA = aA; vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(position, 1.0); }';
+const MARK_FS = 'uniform vec3 uCol; varying float vA; varying vec2 vUv; float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }' +
+  ' void main(){ float e = smoothstep(0.0, 0.22, vUv.x) * smoothstep(1.0, 0.78, vUv.x); float g = 0.75 + 0.25 * h(floor(vUv * vec2(6.0, 18.0))); float a = vA * e * g; if (a < 0.004) discard; gl_FragColor = vec4(uCol, a); }';
+function makeMarks(scene, max) {
+  const geo = new THREE.PlaneGeometry(1, 1); geo.rotateX(-Math.PI / 2);
+  const aA = new THREE.InstancedBufferAttribute(new Float32Array(max), 1); aA.setUsage(THREE.DynamicDrawUsage); geo.setAttribute('aA', aA);
+  const mat = new THREE.ShaderMaterial({ uniforms: { uCol: { value: new THREE.Color('#0e0d0c') } }, vertexShader: MARK_VS, fragmentShader: MARK_FS, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3, fog: false });
+  const mesh = new THREE.InstancedMesh(geo, mat, max); mesh.frustumCulled = false; mesh.renderOrder = 2; mesh.count = max;
+  const zero = new THREE.Matrix4().makeScale(0, 0, 0);
+  for (let i = 0; i < max; i++) mesh.setMatrixAt(i, zero);
+  scene.add(mesh);
+  const age = new Float32Array(max), life = new Float32Array(max), a0 = new Float32Array(max);
+  const mx = new THREE.Matrix4(), bx = new THREE.Vector3(), by = new THREE.Vector3(), bz = new THREE.Vector3();
+  const M = { mesh, max, cap: max, head: 0, live: 0, on: true };
+  M.add = (ax, ay, az, bxp, byp, bzp, w, alpha, lf) => {
+    if (!M.on || M.cap <= 0) return;
+    bz.set(bxp - ax, byp - ay, bzp - az); const len = bz.length(); if (len < 0.05) return;
+    bz.multiplyScalar(1 / len); bx.set(-bz.z, 0, bz.x).normalize(); by.crossVectors(bz, bx);
+    bx.multiplyScalar(w); by.multiplyScalar(1); bz.multiplyScalar(len + 0.04);
+    mx.makeBasis(bx, by, bz); mx.setPosition((ax + bxp) / 2, (ay + byp) / 2 + 0.025, (az + bzp) / 2);
+    const i = M.head; M.head = (M.head + 1) % M.cap;
+    mesh.setMatrixAt(i, mx); age[i] = 0; life[i] = lf; a0[i] = alpha; aA.array[i] = alpha;
+    mesh.instanceMatrix.needsUpdate = true; aA.needsUpdate = true;
+  };
+  // A wheel that may or may not be skidding this frame: lays a segment every ~0.5 m while it does.
+  M.trail = (st, on, x, y, z, w, alpha, lf) => {
+    if (!on || !M.on) { st.on = false; return; }
+    if (!st.on) { st.on = true; st.x = x; st.y = y; st.z = z; return; }
+    const dx = x - st.x, dz = z - st.z, d2 = dx * dx + dz * dz;
+    if (d2 > 36) { st.x = x; st.y = y; st.z = z; return; }
+    if (d2 < 0.25) return;
+    M.add(st.x, st.y, st.z, x, y, z, w, alpha, lf);
+    st.x = x; st.y = y; st.z = z;
+  };
+  M.update = (dt) => {
+    let any = false;
+    for (let i = 0; i < M.cap; i++) {
+      if (life[i] <= 0) continue;
+      age[i] += dt;
+      const k = age[i] / life[i];
+      let a = k >= 1 ? 0 : a0[i] * Math.min(1, age[i] * 8) * (1 - k * k);
+      if (k >= 1) { life[i] = 0; mesh.setMatrixAt(i, zero); mesh.instanceMatrix.needsUpdate = true; }
+      if (aA.array[i] !== a) { aA.array[i] = a; any = true; }
+    }
+    if (any) aA.needsUpdate = true;
+  };
+  M.clear = () => { for (let i = 0; i < M.max; i++) { life[i] = 0; aA.array[i] = 0; mesh.setMatrixAt(i, zero); } M.head = 0; mesh.instanceMatrix.needsUpdate = true; aA.needsUpdate = true; };
+  // Tier: 0 marks off, otherwise a share of the pool.
+  M.setCap = (n) => { n = Math.max(0, Math.min(M.max, n | 0)); if (n === M.cap) return; M.clear(); M.cap = n; M.on = n > 0; mesh.visible = M.on; mesh.count = Math.max(1, n); };
+  return M;
+}
+let MARKS = null, VFX = null;
 
 /* ------------------------------------------------------------ motorbikes and riders */
 // Local frame: forward is -z, origin on the ground halfway between the axles.
@@ -1306,48 +1488,12 @@ function lightsGeo() {
   L.push(boxG(0.14, 0.05, 0.02, '#ff2a1a', [0, 0.82, 0.98]));
   const g = mergeG(L); GEO.lights = g; return g;
 }
-function riderGeo(kind, jacket, helmet, trousers, patrol) {
-  const key = 'rider' + kind + jacket + helmet + (patrol ? 'p' : '');
-  if (GEO[key]) return GEO[key];
-  const p = POSE[KIND_POSE[kind]], L = [], skin = '#a8714f', boot = '#1a1716', glove = '#222';
-  const o = (a) => [a[0] - p.pelvis[0], a[1] - p.pelvis[1], a[2] - p.pelvis[2]];
-  // torso from pelvis to shoulders, a little broader at the chest
-  L.push(limbG(o(p.pelvis), o(p.sh), 0.17, jacket, true));
-  L.push(sphG(0.2, jacket, o([p.sh[0], p.sh[1] - 0.06, p.sh[2] + 0.03]), [1.25, 0.75, 0.9]));
-  // a stripe across the back
-  L.push(limbG(o([-0.19, lerp(p.pelvis[1], p.sh[1], 0.55), lerp(p.pelvis[2], p.sh[2], 0.55) + 0.11]), o([0.19, lerp(p.pelvis[1], p.sh[1], 0.55), lerp(p.pelvis[2], p.sh[2], 0.55) + 0.11]), 0.035, patrol ? '#c8ff3a' : '#f5efe3'));
-  // neck and helmet with a dark visor
-  L.push(limbG(o(p.sh), o(p.head), 0.06, skin));
-  L.push(sphG(0.16, helmet, o(p.head), [1, 1.02, 1.12], 16, 12));
-  L.push(sphG(0.15, '#121620', o([p.head[0], p.head[1] - 0.005, p.head[2] - 0.07]), [0.93, 0.62, 0.95], 14, 9));
-  if (patrol) L.push(boxG(0.035, 0.06, 0.3, '#1f5fbf', o([0, p.head[1] + 0.16, p.head[2]])));
-  else L.push(boxG(0.04, 0.03, 0.26, '#ffffff', o([0, p.head[1] + 0.165, p.head[2] + 0.02])));
-  // legs: thigh to knee to the peg, boots
-  [-1, 1].forEach((sd) => {
-    const hip = [sd * 0.13, p.pelvis[1], p.pelvis[2]], knee = [sd * p.knee[0], p.knee[1], p.knee[2]], peg = [sd * p.peg[0], p.peg[1] + 0.06, p.peg[2]];
-    L.push(limbG(o(hip), o(knee), 0.085, trousers, true));
-    L.push(limbG(o(knee), o(peg), 0.07, trousers, true));
-    L.push(boxG(0.11, 0.12, 0.26, boot, o([peg[0], peg[1] - 0.02, peg[2] - 0.06])));
-  });
-  const g = mergeG(L); GEO[key] = g; return g;
-}
-function armGeo(kind, jacket, side) {
-  const key = 'arm' + kind + jacket + side;
-  if (GEO[key]) return GEO[key];
-  const p = POSE[KIND_POSE[kind]], sh = [side * 0.2, p.sh[1] - 0.04, p.sh[2] + 0.02], gr = [side * p.grip[0], p.grip[1] + 0.02, p.grip[2]];
-  const el = [lerp(sh[0], gr[0], 0.5) + side * 0.09, lerp(sh[1], gr[1], 0.5) - 0.05, lerp(sh[2], gr[2], 0.5)];
-  const o = (a) => [a[0] - sh[0], a[1] - sh[1], a[2] - sh[2]];
-  const L = [limbG(o(sh), o(el), 0.07, jacket, true), limbG(o(el), o(gr), 0.06, jacket, true), sphG(0.055, '#1d1d1f', o(gr))];
-  const g = mergeG(L); g.userData.shoulder = sh; GEO[key] = g; return g;
-}
-
 let BMAT = null;
 function bikeMats() {
   if (BMAT) return BMAT;
   BMAT = {
     body: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.38, metalness: 0.35 }),
     wheel: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.6, metalness: 0.3 }),
-    rider: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.72, metalness: 0.05 }),
     lights: new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false }),
     glow: new THREE.SpriteMaterial({ map: textures().glow, color: '#ffe8b8', transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.85 }),
     tailGlow: new THREE.SpriteMaterial({ map: textures().glow, color: '#ff3020', transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.7 }),
@@ -1380,13 +1526,34 @@ function makeBike(R, o) {
   const rroot = new THREE.Group(); rroot.rotation.order = 'YXZ';
   const lean = new THREE.Group(); rroot.add(lean);
   const torso = new THREE.Group(); torso.position.set(p.pelvis[0], p.pelvis[1], p.pelvis[2]); lean.add(torso);
-  const rb = new THREE.Mesh(riderGeo(kind, R.jacket, R.helmet, o.patrol ? '#2a3550' : '#23262d', o.patrol), M.rider); rb.castShadow = true; torso.add(rb);
-  const arms = [-1, 1].map((sd) => {
-    const g = armGeo(kind, R.jacket, sd), piv = new THREE.Group(), sh = g.userData.shoulder;
-    piv.position.set(sh[0] - p.pelvis[0], sh[1] - p.pelvis[1], sh[2] - p.pelvis[2]);
-    const m = new THREE.Mesh(g, M.rider); m.castShadow = true; piv.add(m); torso.add(piv); return piv;
-  });
-  return { root, body, wf, wr, lights, glow, tail, beacon, rroot, lean, torso, arms, pose: p, kind, R, tum: { x: 0, y: 0, z: 0, rx: 0, rz: 0 } };
+  // The rider is a person: proportions, a face that blinks and looks about, gloves on the bars.
+  // The figure sits with its pelvis on the torso pivot, so the tumble and the lean move it whole.
+  // The person in the saddle is built a moment later (attachRider), a few per frame, so the
+  // first frame of a course, and the menu behind it, costs no more than a bare bike.
+  const humOpts = { seed: 41 + (R.idx || 0) * 17 + (o.patrol ? 300 + (o.pi || 0) * 7 : 0), sex: /Zoya|Meera/.test(R.name || '') ? 'f' : 'm', build: kind === 'thunder' ? 'heavy' : kind === 'phantom' ? 'athletic' : 'average',
+    castShadow: true, outfit: { top: R.jacket, top2: o.patrol ? '#c8ff3a' : null, sleeves: 'long', bottom: o.patrol ? '#2a3550' : '#23262d', legs: 'trousers', shoes: '#1a1716', soles: '#2a2622', gloves: '#1f1f22', helmet: R.helmet } };
+  const arms = [new THREE.Object3D(), new THREE.Object3D()];
+  return { root, body, wf, wr, lights, glow, tail, beacon, rroot, lean, torso, arms, hum: null, humOpts, emoK: '', pose: p, kind, R, tum: { x: 0, y: 0, z: 0, rx: 0, rz: 0 } };
+}
+function attachRider(B) {
+  const o = B.humOpts; o.quality = Math.max(0, R3.quality);
+  const hum = createHuman(o);
+  hum.play('drive', { bars: true, hold: true });
+  const hk = hum.height / 1.75;
+  hum.group.rotation.y = Math.PI; hum.group.position.set(0, -0.45 * hk, -0.1 * hk);
+  hum.mesh.userData.keepMat = true; B.torso.add(hum.group);
+  B.hum = hum;
+}
+// Riders, then the roadside crowds, joined to the scene one or two per frame once a few frames
+// of the course have drawn: nothing of it lands in the first frame or the menu's start-up.
+function pumpPeople() {
+  const r = R3, q = r.peopleQ; if (!q) return;
+  if (r.peopleWait > 0) { r.peopleWait--; return; }
+  for (let n = 0; n < 2 && q.length; n++) { const B = q.shift(); if (!B.hum && B.rroot.parent) attachRider(B); }
+  if (!q.length) {
+    if (r.quality >= 1 && r.cur && !r.cur.people) { makeSpectators(r.cur.T, r.cur); r.lodT = 0; }
+    r.peopleQ = null;
+  }
 }
 
 const _pp = { x: 0, y: 0, z: 0 };
@@ -1431,6 +1598,21 @@ function poseBike(B, W, R, dt) {
       const arm = B.arms[sd > 0 ? 1 : 0];
       arm.rotation.set(0.25 * sh, -sd * 1.15 * sh, -sd * 0.5 * sh);
     }
+    // a person, not a mannequin: breathing on the grid, a glance back at whoever is close,
+    // a fist after a pass, a shake of the head after a slip, an arm up crossing the line
+    const tt = W.t + R.idx * 1.7, rm = ARC.reducedMotion;
+    if (R.emo && R.emo.t > 0 && R.isPlayer) R.emo.t -= dt;
+    const E = R.emo, ek = E && E.t > 0 ? Math.sin(Math.PI * clamp(1 - E.t / E.d, 0, 1)) : 0;
+    if (W.phase === 'grid' || R.v < 2) {
+      const br = Math.sin((W.t + R.idx) * 1.9);
+      B.torso.position.y += br * 0.008; B.torso.rotation.x += br * 0.02;
+      B.torso.rotation.y = Math.sin(tt * 0.45) * 0.35 * Math.max(0, Math.sin(tt * 0.21));
+    } else if (ek > 0 && sh <= 0) {
+      if (E.k === 'look') B.torso.rotation.y = (R.x > W.P.x ? 1 : -1) * 0.55 * ek;
+      else if (E.k === 'shake') B.torso.rotation.y = Math.sin(tt * (rm ? 6 : 13)) * 0.18 * ek;
+      else if (E.k === 'fist') B.arms[0].rotation.set(-2.2 * ek, 0, -0.5 * ek);
+    }
+    if (R.finished && R.v < 16 && R.place <= 3 && !rm) { const k = clamp((W.t - R.finT) * 1.5, 0, 1); B.arms[0].rotation.set(-2.6 * k + Math.sin(W.t * 8) * 0.15 * k, 0, -0.4 * k); }
     B.tum.x = 0; B.tum.y = 0; B.tum.z = 0;
   } else {
     // the rider rolls away, sits up dazed, then climbs back on
@@ -1457,9 +1639,178 @@ function poseBike(B, W, R, dt) {
       B.arms[0].rotation.set(0, 0, 0); B.arms[1].rotation.set(0, 0, 0);
     }
   }
+  if (B.hum) poseRider(B, W, R, dt, crashing);
   // blink while invulnerable after a remount (never under reduced motion)
   const vis = !(R.invuln > 0 && !ARC.reducedMotion && Math.floor(R.invuln * 10) % 2 === 0);
   rr.visible = vis; root.visible = vis || R.invuln <= 0;
+  // a bike waits for its rider before it shows
+  if (!B.hum) { rr.visible = false; root.visible = false; }
+}
+
+// The person on the bike: feet on the pegs, a tuck that matches the bike, hands on the bars,
+// eyes on the road ahead or on whoever is alongside, and the emotion of the moment.
+// hip pitch, knee bend, forward lean of the spine, knee splay: worked out from each bike's saddle,
+// knee and footpeg points so the thigh and shin reach the peg (roadster upright, cruiser feet forward, sport tucked)
+const LEGS = { roadster: [-1.22, 2.0, 0.15, 0.1], cruiser: [-1.5, 1.05, 0.0, 0.22], sport: [-1.29, 2.05, 0.45, 0.12] };
+const _look = new THREE.Vector3();
+function poseRider(B, W, R, dt, crashing) {
+  const H = B.hum, bn = H.bones, pk = KIND_POSE[B.kind], leg = LEGS[pk];
+  H.steer = crashing ? 0 : clamp(R.vx / (R.steerMax || 6), -1, 1);
+  // what this rider is looking at
+  let look = null;
+  const E = R.emo, ek = E && E.t > 0 ? Math.sin(Math.PI * clamp(1 - E.t / E.d, 0, 1)) : 0;
+  if (!crashing && E && E.t > 0 && E.k === 'look') {
+    let best = null, bd = 99;
+    for (let i = 0; i < W.riders.length; i++) { const o = W.riders[i]; if (o === R) continue; const ds = R.s - o.s; if (ds > 0 && ds < bd && Math.abs(o.x - R.x) < 4) { bd = ds; best = o; } }
+    if (best) { posAt(W.T, best.s, best.x, 1.2, V2); look = _look.set(V2.x, V2.y, V2.z); }
+  } else if (!crashing && W.phase === 'grid') { posAt(W.T, START_S + 2, -6.5, 1.6, V2); look = _look.set(V2.x, V2.y, V2.z); }
+  else if (!crashing) { posAt(W.T, R.s + 30, R.x * 0.5, 1.0, V2); look = _look.set(V2.x, V2.y, V2.z); }
+  H.lookAt(look);
+  // a fresh feeling plays once
+  const k = E && E.t > 0 ? E.k : '';
+  if (k !== B.emoK) {
+    if (k === 'fist') H.play('fistPump', { side: 'left' });
+    else if (k === 'crash') { H.stop('drive'); H.play('handsOnHead'); }
+    B.emoK = k;
+  }
+  if (!crashing && !H.playing('drive')) H.play('drive', { bars: true, hold: true });
+  if (R.finished && R.place <= 3 && !B.cheered && R.v < 18) { B.cheered = true; H.play('celebrate'); }
+  H.setMood(R.finished ? (R.place <= 3 ? 1 : -0.3) : E && E.t > 0 && E.k === 'shake' ? -0.6 : 0.15);
+  // riders far down the road are animated a few times a second, not every frame
+  const far = B.rroot.position.distanceToSquared(R3.camera.position) > 3600;
+  B.hAcc = (B.hAcc || 0) + dt;
+  if (far && B.hAcc < 0.12) return;
+  H.update(B.hAcc, { speed: 0, turn: 0, accel: 0 }); B.hAcc = 0;
+  if (crashing) return;
+  // legs down to the pegs; the sport bike's rider tucks over the tank
+  bn.hipL.rotation.x = bn.hipR.rotation.x = leg[0];
+  bn.kneeL.rotation.x = bn.kneeR.rotation.x = leg[1];
+  bn.hipL.rotation.z = leg[3]; bn.hipR.rotation.z = -leg[3];
+  const tuck = clamp((R.v - 25) / 25, 0, 1) * B.pose.lean;
+  bn.spine.rotation.x += leg[2] + tuck * 0.25;
+  bn.neck.rotation.x -= (leg[2] + tuck * 0.25) * 0.7;
+  // the body leans a little further into the bend than the bike, the inside knee opens
+  bn.chest.rotation.z += R.lean * 0.18;
+  if (R.lean > 0.2) bn.hipL.rotation.z += R.lean * 0.4; else if (R.lean < -0.2) bn.hipR.rotation.z += R.lean * 0.4;
+  // a shove: the arm and shoulder go into it
+  if (R.shoveT > 0) {
+    const sh = Math.sin(clamp((0.42 - R.shoveT) / 0.42, 0, 1) * Math.PI), sd = R.shoveSide;
+    const s1 = sd > 0 ? bn.shoulderL : bn.shoulderR;
+    s1.rotation.z += sd * 1.0 * sh; bn.chest.rotation.y += sd * 0.35 * sh;
+  }
+  // a shake of the head after a slip or being passed
+  if (ek > 0 && E.k === 'shake') bn.head.rotation.y += Math.sin(W.t * 13) * 0.25 * ek;
+}
+
+/* ------------------------------------------------------------ people at the roadside */
+// Villagers and race fans: a crowd at the start and the finish, people outside the village
+// houses and around the chai stalls. Each crowd is one instanced draw animated on the GPU,
+// every member on their own phase (they never move in sync), facing the road. Two marshals in
+// full detail: one flags the start, one waves the riders home.
+// Soft contact shadows under people who do not cast real ones (crowds, passers-by): one
+// instanced draw of a dark radial blob at each pair of feet, so nobody seems to float.
+let BLOB_TEX = null;
+function footShadows(parent, n) {
+  if (!BLOB_TEX) {
+    const c = document.createElement('canvas'); c.width = c.height = 64;
+    const g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gr.addColorStop(0, 'rgba(0,0,0,0.55)'); gr.addColorStop(0.55, 'rgba(0,0,0,0.28)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+    BLOB_TEX = new THREE.CanvasTexture(c);
+  }
+  const geo = new THREE.PlaneGeometry(1, 1); geo.rotateX(-Math.PI / 2);
+  const mesh = new THREE.InstancedMesh(geo, new THREE.MeshBasicMaterial({ map: BLOB_TEX, transparent: true, depthWrite: false, fog: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }), Math.max(1, n));
+  mesh.userData.keepMat = true; mesh.renderOrder = 1; mesh.frustumCulled = false;
+  const m = new THREE.Matrix4();
+  const api = {
+    mesh,
+    set(i, x, y, z, s) { m.makeScale(s, 1, s * 0.8); m.setPosition(x, y + 0.02, z); mesh.setMatrixAt(i, m); mesh.instanceMatrix.needsUpdate = true; },
+  };
+  parent.add(mesh);
+  return api;
+}
+
+function spectatorSpots(T) {
+  const D = decorFor(T), r = rng(4242 + COURSE_IDX[T.id] * 31), N = T.N;
+  const ok = (s, sd) => { const i = rowOf(T, s), k = sd < 0 ? T.KL[i] : T.KR[i]; return k > -0.3 && k < 0.55 && T.TUN[i] < 0.1; };
+  const put = (list, s, sd, off) => { groundPos(T, s, sd * off, V); posAt(T, s, 0, 1.4, V2); list.push({ x: V.x, y: V.y, z: V.z, yaw: Math.atan2(V2.x - V.x, V2.z - V.z) + (r() - 0.5) * 0.5 }); };
+  const ends = [], road = [];
+  const bank = (list, s0, s1, rows, step) => {
+    for (let sd = -1; sd <= 1; sd += 2) for (let s = s0; s < s1; s += step) { if (!ok(s, sd)) continue; for (let j = 0; j < rows; j++) if (r() < 0.82) put(list, s + (r() - 0.5) * step * 0.6, sd, 7.55 + j * 0.75 + r() * 0.25); }
+  };
+  bank(ends, START_S - 22, START_S + 26, 2, 0.95);
+  bank(ends, T.finishS - 34, T.finishS + 12, 3, 0.85);
+  D.houses.forEach((h) => { const sd = Math.sign(h.x) || 1; if (r() < 0.65 && ok(h.s, sd)) for (let k = 0; k < 2 + ((r() * 3) | 0); k++) put(road, h.s + (r() - 0.5) * 6, sd, 7.6 + r() * 1.4); });
+  D.chai.forEach((c) => { const sd = Math.sign(c.x) || 1; for (let k = 0; k < 5; k++) put(road, c.s + (r() - 0.5) * 7, sd, 7.7 + r() * 1.6); });
+  D.temple.forEach((c) => { const sd = Math.sign(c.x) || 1; for (let k = 0; k < 4; k++) if (ok(c.s, sd)) put(road, c.s + (r() - 0.5) * 8, sd, 7.8 + r() * 1.5); });
+  void N;
+  return { ends, road };
+}
+function flagGeo(check) {
+  const tex = canvasTex(64, 48, (g, w, h) => { if (check) { for (let y = 0; y < 6; y++) for (let x = 0; x < 8; x++) { g.fillStyle = (x + y) % 2 ? '#111' : '#f4f1ea'; g.fillRect(x * 8, y * 8, 8, 8); } } else { g.fillStyle = '#2f9a4a'; g.fillRect(0, 0, w, h); g.fillStyle = '#f4f1ea'; g.fillRect(0, 0, w, 6); } }, { clamp: true });
+  const grp = new THREE.Group();
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.9, 6), new THREE.MeshStandardMaterial({ color: '#d8d4cc', roughness: 0.5, metalness: 0.4 }));
+  pole.position.y = 0.3; grp.add(pole);
+  const cloth = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.36, 6, 1), new THREE.MeshStandardMaterial({ map: tex, side: THREE.DoubleSide, roughness: 0.9 }));
+  cloth.position.set(0.26, 0.56, 0); grp.add(cloth);
+  grp.userData.cloth = cloth;
+  return grp;
+}
+function makeSpectators(T, S) {
+  if (S.people) return S.people;
+  const sp = spectatorSpots(T), q = R3 ? Math.max(0, R3.quality) : 2;
+  const mk = (members, seed) => {
+    if (!members.length) return null;
+    const c = createCrowd({ members, unit: 1, seed, seated: false, quality: Math.max(1, q), colors: ['#e7672e', '#2b7fc1', '#f2c230', '#c2272d', '#f4f1ea'], teamShare: 0.35 });
+    c.mesh.userData.keepMat = true; S.group.add(c.mesh); return c;
+  };
+  const marshal = (s, off, check) => {
+    const h = createHuman({ seed: check ? 77 : 55, quality: q, outfit: { top: '#ff7a1a', top2: '#f4f1ea', sleeves: 'long', bottom: '#2a2f3a', legs: 'trousers', cap: '#ff7a1a' } });
+    groundPos(T, s, off, V); h.group.position.set(V.x, V.y, V.z);
+    posAt(T, s, 0, 0, V2); h.group.rotation.y = Math.atan2(V2.x - V.x, V2.z - V.z) + (check ? 0.6 : -0.6);
+    const f = flagGeo(check); f.rotation.set(Math.PI / 2, 0, 0); f.position.set(0, -0.05, 0); h.bones.wristR.add(f);
+    h.mesh.userData.keepMat = true; S.group.add(h.group);
+    return { h, flag: f, s, check, cd: 0 };
+  };
+  const ends = mk(sp.ends, 11 + COURSE_IDX[T.id]), road = mk(sp.road, 23 + COURSE_IDX[T.id]);
+  const feet = (list, c) => { if (!c) return; const fs = footShadows(S.group, list.length); list.forEach((m, i) => fs.set(i, m.x, m.y, m.z, 0.62)); c.feet = fs.mesh; };
+  feet(sp.ends, ends); feet(sp.road, road);
+  S.people = { ends, road, start: marshal(START_S + 3, -6.6, false), fin: marshal(T.finishS + 2, 6.6, true), cheerT: 0 };
+  return S.people;
+}
+const _hp = new THREE.Vector3();
+function updatePeople(W, dt) {
+  const S = R3.cur, pp = S && S.people; if (!pp) return;
+  const P = W.P, T = W.T, q = R3.quality;
+  const show = q >= 1;
+  pp.start.h.group.visible = pp.fin.h.group.visible = show;
+  if (!show) { [pp.ends, pp.road].forEach((c) => { if (c) c.mesh.visible = c.feet.visible = false; }); return; }
+  posAt(T, P.s, P.x, 1.2, V); _hp.set(V.x, V.y, V.z);
+  const nearStart = Math.abs(P.s - START_S) < 120, nearFin = Math.abs(P.s - T.finishS) < 160;
+  if (pp.ends) { pp.ends.mesh.visible = pp.ends.feet.visible = (nearStart || nearFin) && q >= 0; if (pp.ends.mesh.visible) pp.ends.update(dt, { look: _hp, excite: W.phase === 'grid' ? 0.35 : W.phase === 'finished' ? 0.6 : 0.42 }); }
+  if (pp.road) { pp.road.mesh.visible = pp.road.feet.visible = q >= 1; if (pp.road.mesh.visible) pp.road.update(dt, { look: _hp, excite: 0.22 }); }
+  // the crowd goes up as the pack goes by, and again for the finish
+  pp.cheerT -= dt;
+  if (pp.cheerT <= 0 && pp.ends && (Math.abs(P.s - START_S) < 18 || Math.abs(P.s - T.finishS) < 22) && W.phase !== 'grid') { pp.ends.react('cheer', 0.8); pp.cheerT = 2.5; }
+  if (pp.cheerT <= 0 && pp.road && W.phase === 'racing') { pp.road.react(Math.random() < 0.5 ? 'wave' : 'cheer', 0.4); pp.cheerT = 3 + Math.random() * 3; }
+  // the starter holds the flag up through the countdown and sweeps it down on GO
+  const st = pp.start, fn = pp.fin;
+  if (nearStart) {
+    const hS = st.h;
+    if (W.phase === 'grid' && !hS.playing('point')) hS.play('point', { hold: true, target: _hp.set(hS.group.position.x, hS.group.position.y + 6, hS.group.position.z) });
+    else if (W.phase !== 'grid' && hS.playing('point')) { hS.stop('point'); hS.play('wave'); }
+    posAt(T, P.s, P.x, 1.2, V); hS.lookAt(_hp.set(V.x, V.y, V.z));
+    hS.update(dt, { speed: 0, turn: 0, accel: 0 });
+  }
+  if (nearFin) {
+    const hF = fn.h;
+    fn.cd -= dt;
+    if ((P.s > T.finishS - 90 || P.finished) && fn.cd <= 0) { hF.play('wave', { side: 'right' }); fn.cd = 2.1; }
+    posAt(T, P.s, P.x, 1.2, V); hF.lookAt(_hp.set(V.x, V.y, V.z));
+    hF.update(dt, { speed: 0, turn: 0, accel: 0 });
+  }
+  const tt = R3.time;
+  st.flag.userData.cloth.rotation.y = Math.sin(tt * 5.3) * 0.25; fn.flag.userData.cloth.rotation.y = Math.sin(tt * 6.1 + 1) * 0.3;
 }
 
 /* ------------------------------------------------------------ traffic, cows */
@@ -1769,8 +2120,9 @@ function buildCourseScene(T) {
     }
     return { P, C, U, Nn };
   });
-  const groundMat = new THREE.MeshStandardMaterial({ vertexColors: true, map: tx.ground, normalMap: tx.groundN, normalScale: new THREE.Vector2(1.2, 1.2), roughness: 0.96, metalness: 0 });
-  const roadMat = new THREE.MeshStandardMaterial({ map: tx.road, normalMap: tx.roadN, normalScale: new THREE.Vector2(0.6, 0.6), roughness: look.night ? 0.72 : 0.86, metalness: 0.02, color: look.night ? '#d8d4dc' : '#ffffff' });
+  const groundMat = new THREE.MeshStandardMaterial({ vertexColors: true, map: tx.ground, normalMap: tx.groundN, normalScale: new THREE.Vector2(0.7, 0.7), roughness: 0.96, metalness: 0 });
+  const damp = !look.night && look.mist > 0.5;
+  const roadMat = new THREE.MeshStandardMaterial({ map: tx.road, normalMap: tx.roadN, normalScale: new THREE.Vector2(damp ? 0.12 : 0.24, damp ? 0.12 : 0.24), roughnessMap: damp ? tx.roadR : null, roughness: look.night ? 0.72 : damp ? 1 : 0.86, metalness: 0.02, color: look.night ? '#d8d4dc' : look.mist > 0.5 ? '#ecebef' : '#ffffff' }); // the dawn mist leaves the tarmac damp, so it catches the sky
   for (let c0 = 0; c0 < N - 1; c0 += CH) {
     const c1 = Math.min(N - 1, c0 + CH), rowsN = c1 - c0 + 1;
     // banks
@@ -2011,7 +2363,9 @@ function setup3D(arc) {
   const sun = new THREE.DirectionalLight('#ffe0b8', 2.4);
   sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
   const sc = sun.shadow.camera; sc.left = -26; sc.right = 26; sc.top = 26; sc.bottom = -26; sc.near = 2; sc.far = 240;
-  sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.05;
+  // the dawn and dusk suns sit only a few degrees up; with a small bias the road shadowed itself
+  // in wavy blotches (acne), so the offset along the surface normal is larger
+  sun.shadow.bias = -0.0008; sun.shadow.normalBias = 0.14;
   scene.add(sun, sun.target);
   const head = new THREE.SpotLight('#ffe9c4', 0, 70, 0.42, 0.55, 1.6); scene.add(head, head.target);
   const skyU = { uTop: { value: new THREE.Color() }, uMid: { value: new THREE.Color() }, uHor: { value: new THREE.Color() }, uFog: { value: new THREE.Color() }, uSunDir: { value: new THREE.Vector3(0, 0.2, -1) }, uSun: { value: new THREE.Color() }, uCloud: { value: 0.5 }, uTime: { value: 0 } };
@@ -2023,6 +2377,7 @@ function setup3D(arc) {
     quality: -1, qT: 0, qN: 0, fps: 60, soft: false, lastNow: 0, camPos: new THREE.Vector3(), camTgt: new THREE.Vector3(), camInit: false, time: 0, sunDir: new THREE.Vector3(), envs: {}, tunK: 0, lockQ: false
   };
   FX = createFX(scene);
+  MARKS = makeMarks(scene, 260);
   try {
     const gl = renderer.getContext(), ext = gl.getExtension('WEBGL_debug_renderer_info');
     const name = ext ? String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)) : '';
@@ -2034,6 +2389,9 @@ function setup3D(arc) {
   // Shared post pass: bloom on headlights, lamps and nitro, grade, grain, letterbox behind the menu.
   // The grid countdown and the results orbit are this game's own camera, so no extra moves here.
   POST = createPost(renderer, { arc, soft: R3.soft, look: { bloom: 0.5, threshold: 0.72 } });
+  // Spectacle: the nitro flame jet with its heat glow and speed lines, crash sparks, dust and smoke,
+  // finish fireworks. Thinner on low tiers and a software renderer; its shaders compile after the menu.
+  try { VFX = createVFX(renderer, scene, camera, { quality: 2, soft: R3.soft, lights: 0 }); R3.vfxWarm = 30; } catch (e) { VFX = null; }
   return true;
 }
 
@@ -2066,7 +2424,7 @@ function cheapOf(m) {
 function applyTier() {
   const r = R3, t = TIERS[r.quality];
   r.scene.traverse((o) => {
-    if (o.isMesh && o.material && !Array.isArray(o.material)) {
+    if (o.isMesh && o.material && !Array.isArray(o.material) && !o.userData.keepMat && !o.material.userData.keepMat) {
       const full = fullOf(o.material), want = t.cheap ? cheapOf(full) : full;
       if (o.material !== want) o.material = want;
     }
@@ -2077,6 +2435,8 @@ function applyTier() {
   r.renderer.shadowMap.enabled = t.shadow; r.sun.castShadow = t.shadow;
   if (r.sun.shadow.mapSize.x !== t.map) { r.sun.shadow.mapSize.set(t.map, t.map); if (r.sun.shadow.map) { r.sun.shadow.map.dispose(); r.sun.shadow.map = null; } }
   if (FX) FX.density = t.fx;
+  if (MARKS) MARKS.setCap([0, 90, 170, 260][r.quality]);
+  if (VFX) VFX.setQuality(r.quality);
   r.scene.environment = t.cheap ? null : (r.cur ? r.envs[r.cur.T.id] : null);
   lightLevels();
 }
@@ -2122,8 +2482,8 @@ function lookFor(T, S) {
 /* ------------------------------------------------------------ the world in 3D: bikes, traffic, cows */
 function disposeWorld3D() {
   const r = R3; if (!r.bikes) return;
-  r.bikes.forEach((B) => { r.scene.remove(B.root, B.rroot); });
-  r.patrolBikes.forEach((B) => { r.scene.remove(B.root, B.rroot); });
+  r.bikes.forEach((B) => { r.scene.remove(B.root, B.rroot); if (B.hum) B.hum.dispose(); });
+  r.patrolBikes.forEach((B) => { r.scene.remove(B.root, B.rroot); if (B.hum) B.hum.dispose(); });
   r.cows.forEach((c) => r.scene.remove(c));
   Object.keys(r.traffic).forEach((k) => { const t = r.traffic[k]; r.scene.remove(t.im); t.im.dispose(); });
   if (r.tLights) { r.scene.remove(r.tLights); r.tLights.dispose(); }
@@ -2138,13 +2498,14 @@ function activateWorld(W) {
     if (r.cur) r.scene.remove(r.cur.group);
     r.scene.add(S.group); r.cur = S; lookFor(T, S);
   }
+  // bystanders are a full-detail extra: none on the lowest tier or a software renderer
   disposeWorld3D();
   const night = !!T.look.night;
   r.bikes = W.riders.map((R) => makeBike(R, { night }));
   r.bikes.forEach((B) => r.scene.add(B.root, B.rroot));
   r.patrolBikes = W.patrols.map((p) => {
     const pr = { kind: 'thunder', paint: '#f4f4f4', jacket: '#eef1f4', helmet: '#f4f4f4', beacon: 0 };
-    const B = makeBike(pr, { patrol: true, night }); B.p = p; r.scene.add(B.root, B.rroot); return B;
+    const B = makeBike(pr, { patrol: true, night, pi: W.patrols.indexOf(p) }); B.p = p; r.scene.add(B.root, B.rroot); return B;
   });
   // traffic: one instanced mesh per kind
   if (!TRAF_GEO) TRAF_GEO = { truck: truckGeo(), bus: busGeo(), car: carGeo(), tempo: tempoGeo(), lights: vLightsGeo() };
@@ -2178,7 +2539,10 @@ function activateWorld(W) {
     const m = new THREE.Mesh(g, HAZ_MAT[h.kind]); posAt(T, h.s, h.x, 0.03, V); m.position.set(V.x, V.y, V.z); m.rotation.y = -FR.h; m.receiveShadow = true; m.renderOrder = 1; r.scene.add(m); return m;
   });
   FX.clear();
+  if (MARKS) MARKS.clear();
+  r.skid = W.riders.map(() => ({ on: false, x: 0, y: 0, z: 0, s: { on: false, x: 0, y: 0, z: 0 } }));
   applyTier();
+  r.peopleQ = r.bikes.concat(r.patrolBikes); r.peopleWait = 3;
   r.camInit = false; r.worldRef = W;
 }
 
@@ -2224,12 +2588,25 @@ function poseWorld(W, dt) {
   }
 }
 
+// Full detail for the riders near the lens, lighter rigs further away, lightest on a slow device.
+function riderLod(W, dt) {
+  const r = R3; r.lodT = (r.lodT || 0) - dt; if (r.lodT > 0) return; r.lodT = 0.5;
+  const cp = r.camera.position, q = r.quality;
+  const all = r.bikes.concat(r.patrolBikes);
+  for (let i = 0; i < all.length; i++) {
+    const B = all[i]; if (!B.hum) continue;
+    const d = B.rroot.position.distanceTo(cp);
+    const want = q <= 0 ? 'far' : q === 1 ? (d < 18 ? 'mid' : 'far') : d < 30 ? 'full' : d < 80 ? 'mid' : 'far';
+    if (B.hum.lod !== want) B.hum.setLod(want);
+  }
+}
+
 /* ------------------------------------------------------------ camera */
 const _cp = new THREE.Vector3(), _ct = new THREE.Vector3();
 function updateCamera(W, dt, a) {
   const r = R3, P = W.P, T = W.T, cam = r.camera, aspect = a.w / a.h, port = aspect < 0.9;
   const sp = clamp(P.v / 50, 0, 1.5), rm = a.reducedMotion;
-  let back = (port ? 5.0 : 4.5) + sp * 1.0 + (P.nitroOn && !rm ? 0.8 : 0);
+  let back = (port ? 5.0 : 4.5) + sp * 1.0 + (P.nitroOn && !rm ? 1.5 : 0);
   let up = (port ? 2.05 : 1.8) + sp * 0.2;
   let side = P.x * 0.82, look = port ? 10 : 12, lookUp = port ? 1.45 : 1.15;
   let orbit = 0;
@@ -2237,6 +2614,17 @@ function updateCamera(W, dt, a) {
   if (W.phase === 'finished' || W.phase === 'busted' || W.phase === 'over') { r.orb = (r.orb || 0) + dt * 0.35; orbit = Math.sin(r.orb) * 0.9 + 0.6; back += 2; up += 1.2; look = 1; }
   else r.orb = 0;
   if (W.phase === 'grid' && !W.attract) { back += W.cd * 1.6; up += W.cd * 0.7; }
+  // a rival tucked in right behind you sits between the lens and your bike: rise and look over it
+  let occ = 0;
+  if (orbit === 0 && P.crash <= 0) {
+    for (let i = 0; i < W.riders.length; i++) {
+      const R = W.riders[i]; if (R === P || R.crash > 0) continue;
+      const ds = P.s - R.s; if (ds < 0.3 || ds > back + 0.5) continue;
+      const dx = Math.abs(R.x - side); if (dx < 1.7) occ = Math.max(occ, 1 - dx / 1.7);
+    }
+  }
+  r.occ = (r.occ || 0) + (occ - (r.occ || 0)) * Math.min(1, dt * (occ > (r.occ || 0) ? 5 : 2));
+  up += r.occ * 1.6; lookUp -= r.occ * 0.25;
   posAt(T, P.s - back * Math.cos(orbit), side + back * Math.sin(orbit) * 1.4, 0, _pp);
   // keep the camera above the ground it passes over
   const gi = rowOf(T, P.s - back);
@@ -2257,18 +2645,38 @@ function updateCamera(W, dt, a) {
   r.roll = (r.roll || 0) + (roll - (r.roll || 0)) * Math.min(1, dt * 6);
   cam.rotateZ(-r.roll);
   const base = port ? 70 : clamp(2 * Math.atan(Math.tan(33 * Math.PI / 180) / Math.max(0.5, aspect / 1.6)) * 180 / Math.PI, 50, 68);
-  const kick = rm ? 0 : sp * 7 + (P.nitroOn ? 7 : 0) + P.draft * 2;
+  const kick = rm ? 0 : sp * 7 + (P.nitroOn ? 13 : 0) + P.draft * 2;
   W.fov += (base + kick - (W.fov || base)) * Math.min(1, dt * 4);
   if (Math.abs(cam.fov - W.fov) > 0.01 || cam.aspect !== aspect) { cam.fov = W.fov; cam.aspect = aspect; cam.updateProjectionMatrix(); }
   cam.updateMatrixWorld();
+}
+
+// a rival close enough to fill the lens is hidden for that frame, so your own bike always reads
+// (also any rival sitting between the lens and your bike, close to that line of sight)
+const _nl = new THREE.Vector3(), _nr = new THREE.Vector3();
+function nearLens() {
+  const r = R3, cp = r.camera.position, all = r.bikes, me = all[0];
+  if (!me) return;
+  _nl.copy(me.root.position).sub(cp); const dp = _nl.length(); if (dp < 0.01) return; _nl.multiplyScalar(1 / dp);
+  for (let i = 1; i < all.length; i++) {
+    const B = all[i]; if (!B.rroot.visible) continue;
+    _nr.copy(B.root.position).sub(cp);
+    const along = _nr.dot(_nl), d2 = _nr.lengthSq();
+    const off = Math.sqrt(Math.max(0, d2 - along * along));
+    if (d2 < 6.25 || (along > -0.5 && along < dp - 1.6 && off < 1.5)) { B.rroot.visible = false; B.root.visible = false; }
+  }
 }
 
 /* ------------------------------------------------------------ per-frame visuals */
 function renderScene(W, dt, a) {
   const r = R3, T = W.T, S = r.cur, P = W.P;
   r.time += dt;
+  pumpPeople();
   poseWorld(W, dt);
   updateCamera(W, dt, a);
+  nearLens();
+  updatePeople(W, dt);
+  riderLod(W, dt);
   // sun and its shadow box follow the player
   posAt(T, P.s + 6, P.x, 0, V);
   r.sun.target.position.set(V.x, V.y, V.z);
@@ -2304,6 +2712,21 @@ function renderScene(W, dt, a) {
         FX.emit('add', V.x, V.y, V.z, -FR.fx * 30, 0, -FR.fz * 30, 0.18, 0.05, '#dfe8ff', 0.5, 0, 0, 0);
       }
     }
+    // rubber and smoke: a locked rear wheel, an oil wobble, a bike sliding on its side
+    if (MARKS && MARKS.on && r.skid) {
+      for (let i = 0; i < W.riders.length; i++) {
+        const R = W.riders[i], st = r.skid[i]; if (!st) continue;
+        const near = Math.abs(R.s - P.s) < 80;
+        const lock = near && R.crash <= 0 && ((R.brakeIn && R.v > 18) || (R.wob > 0.35 && R.v > 14));
+        posAt(T, R.s - 0.7, R.x, 0, V);
+        MARKS.trail(st, lock, V.x, V.y, V.z, 0.12, (R.brakeIn ? 0.55 : 0.35) * clamp((R.v - 12) / 22, 0.25, 1), 10);
+        if (lock && R.v > 24 && Math.random() < dt * 16 * FX.density) FX.emit('soft', V.x, V.y + 0.15, V.z, (Math.random() - 0.5) * 0.8, 0.5 + Math.random() * 0.5, (Math.random() - 0.5) * 0.8, 1.5 + Math.random() * 0.8, 0.55, '#d8d4cc', 0.22, -0.5, 1.6, 3.2);
+        const slide = near && R.crash > 0 && R.v > 2.5 && R.crashT < R.crashDur * 0.7;
+        MARKS.trail(st.s, slide, V.x, V.y, V.z, 0.32, 0.4, 14);
+        if (slide && Math.random() < dt * 20 * FX.density) FX.emit('soft', V.x, V.y + 0.1, V.z, (Math.random() - 0.5) * 1.5, 0.4 + Math.random(), (Math.random() - 0.5) * 1.5, 1.2, 0.7, T.look.dirt, 0.35, -0.3, 1.4, 2.6);
+      }
+      MARKS.update(dt);
+    }
     for (let i = 0; i < S.falls.length; i++) {
       const f = S.falls[i]; if (Math.abs(f.s - P.s) > 90) continue;
       if (Math.random() < dt * 22 * FX.density) FX.emit('soft', f.x + (Math.random() - 0.5) * 3, f.y + 0.4, f.z + (Math.random() - 0.5) * 3, (Math.random() - 0.5) * 2, 1.5 + Math.random() * 2, (Math.random() - 0.5) * 2, 1.6, 1.5, '#ffffff', 0.35, -0.2, 1, 2.2);
@@ -2324,6 +2747,23 @@ function renderScene(W, dt, a) {
     const c = CULL[i]; if (c.course !== T.id) continue;
     const dx = c.x - cp.x, dy = c.y - cp.y, dz = c.z - cp.z, d = Math.sqrt(dx * dx + dy * dy + dz * dz) - c.r;
     c.im.visible = (c.im.userData.ov ? t.ov : true) && d < (c.far ? t.cull * 2.6 : c.terrain ? t.cull * 1.15 : t.cull);
+  }
+  if (VFX) {
+    if (r.vfxWarm > 0 && --r.vfxWarm === 0) VFX.warm();
+    VFX.setReduced(!!a.reducedMotion);
+    posAt(T, P.s, P.x, 0, V); VFX.setGround(V.y);
+    // the nitro jet rides the player's exhaust; speed lines only at real speed, never under reduced motion
+    const B0 = r.bikes[0];
+    // nitro: a long jet (hot core to orange tips, 1.5 to 2.5 bike lengths), a pool of heat on the road, shed sparks
+    const nOn = !!(B0 && P.nitroOn && P.crash <= 0);
+    if (nOn) { if (!r.nitroH || !r.nitroH.active) r.nitroH = VFX.nitro(B0.root, { offset: [0.19, 0.66, 1.0], dir: [0, 0.05, 1], size: 1.45, color: '#ff8a3a' }); }
+    else if (r.nitroH && r.nitroH.active) { r.nitroH.stop(); r.nitroH = null; }
+    if (B0 && !r.nGlow) r.nGlow = makeBoostGlow(B0.root, 1.9, 2.4, 4.4, '#ff9a4a');
+    r.nst = r.nst || {}; r.nst.h = r.nitroH ? [r.nitroH] : null;
+    finishShow(r.show, dt, r.camera);
+    if (B0) driveBoost(r.nst, nOn, dt, B0.root, r.nGlow, [[0.19, 0.66, 1.0]], 1, r.quality, !!a.reducedMotion);
+    VFX.speedLines(r.camera, W.attract || a.reducedMotion ? 0 : P.nitroOn && P.crash <= 0 ? 1 : P.v > 44 ? clamp((P.v - 30) / 30, 0, 1) * 0.6 : 0);
+    VFX.update(dt);
   }
   if (POST) { POST.setQuality(r.quality, r.lockQ); POST.render(r.scene, r.camera); } else r.renderer.render(r.scene, r.camera);
 }
@@ -2635,7 +3075,11 @@ const dev = {
   quality: (q) => { if (R3) R3.lockQ = true; setQuality(q); },
   cash: (n) => { SAVE.cash = n; saveGame(); },
   unlock: (n) => { SAVE.unlocked = clamp(n, 1, 3); saveGame(); },
-  shove: (sd) => { if (Wd) Wd.queuedShove = sd; }
+  shove: (sd) => { if (Wd) Wd.queuedShove = sd; },
+  r3: () => R3,
+  crash: (i) => { if (Wd) { const R = Wd.riders[i] || Wd.P; crash(Wd, R, 1, 'wall'); } },
+  // who is drawn where, measured from the camera (for checks)
+  probe: () => { if (!R3 || !R3.bikes) return null; const c = R3.camera.position; return { cam: [+c.x.toFixed(2), +c.y.toFixed(2), +c.z.toFixed(2)], bikes: R3.bikes.map((B) => ({ name: B.R.name, vis: B.root.visible && B.rroot.visible, hum: !!B.hum, d: +B.root.position.distanceTo(c).toFixed(2), top: B.hum ? B.hum.outfit.top : null })) }; }
 };
 function measureFps(dt) {
   const r = R3;
