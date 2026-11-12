@@ -144,7 +144,7 @@ function mkCar(id, team, slot, name, isPlayer, level) {
     turtle: 0, rightT: 0, demoT: 0, hitCD: 0, steer: 0, spin: 0, airT: 0, sonic: false, vmul: 1, fellJump: false, lastShotT: -9,
     susp: 0, suspV: 0, jumps: 0, flips: 0,
     stats: { goals: 0, assists: 0, saves: 0, shots: 0, demos: 0, touches: 0, points: 0 },
-    ai: { think: 0, mode: 'attack', tx: 0, ty: 0, tz: 0, bx: 0, by: 0, bz: 0, plan: null, pt: 0, p1: false, p2: false, flipX: 1, flipY: 0, stuck: 0, rev: 0, hes: 0, aerial: false, boostOK: true },
+    ai: { think: 0, mode: 'attack', tx: 0, ty: 0, tz: 0, bx: 0, by: 0, bz: 0, plan: null, pt: 0, p1: false, p2: false, flipX: 1, flipY: 0, stuck: 0, rev: 0, hes: 0, aerial: false, boostOK: true, form: isPlayer ? 1 : 0.88 + Math.random() * 0.24, mood: 0, D: null, cheer: 0 },
     ctl: { thr: 0, steer: 0, pitch: 0, yaw: 0, roll: 0, boost: false, jumpPress: false, jumpHeld: false, flipX: 0, flipY: 0, slide: false }
   };
 }
@@ -639,13 +639,30 @@ function orientCtl(c, t, up, k, gain) {
     if (!t) k.pitch = clamp(-T2.dot(c.r) * gain, -1, 1);
   }
 }
+// A bot is a person at the wheel: it has a better or worse day (form, fixed for the match) and a mood
+// that swings with goals. Confident after scoring it reacts a touch quicker; rattled after conceding it
+// hurries, hesitates and misjudges a little more. Small enough that every difficulty stays fair.
+function botDiff(c) {
+  const A = c.ai, base = DIFF[c.level] || DIFF.normal;
+  if (!A.D) A.D = Object.assign({}, base);
+  const E = A.D, f = A.form || 1, m = A.mood || 0, up = Math.max(0, m), down = Math.max(0, -m);
+  E.react = base.react * f * (1 - 0.1 * up - 0.05 * down);
+  E.aim = base.aim * (0.7 + 0.3 * f) * (1 - 0.15 * up + 0.3 * down);
+  E.hes = Math.min(0.5, base.hes * f + 0.05 * down);
+  E.save = Math.min(1, base.save * (1.06 - 0.06 * f) * (1 - 0.08 * down));
+  return E;
+}
 function aiStep(G, c, dt) {
-  const A = c.ai, D = DIFF[c.level] || DIFF.normal, k = c.ctl, B = G.ball;
+  const A = c.ai, k = c.ctl, B = G.ball;
+  if (A.mood) { A.mood *= Math.exp(-dt / 9); if (Math.abs(A.mood) < 0.01) A.mood = 0; }
+  const D = botDiff(c);
   k.thr = 0; k.steer = 0; k.pitch = 0; k.yaw = 0; k.roll = 0; k.boost = false; k.slide = false; k.jumpHeld = false; k.flipX = 0; k.flipY = 0;
   if (c.demoT > 0 || G.frozen) return;
   A.think -= dt;
   if (A.think <= 0) { A.think = D.react * (0.6 + Math.random() * 0.8); aiDecide(G, c, D); }
   if (A.hes > 0) { A.hes -= dt; k.thr = 0.2; }
+  // the scorers let off a little celebratory hop once the ball is in
+  if (G.phase === 'goal' && A.cheer > 0) { A.cheer -= dt; if (A.cheer <= 0 && c.ground && !A.plan && A.mood > 0.4) aiPlan(c, 'single'); }
   // jump plans run on their own clock
   if (A.plan) {
     A.pt += dt;
@@ -937,6 +954,7 @@ function scored(G, team) {
   if (assist) { assist.stats.assists++; points(G, assist, 50, 'Assist'); }
   feed(G, (scorer ? scorer.name : 'Own goal') + (assist ? ', assist ' + assist.name : '') + ', ' + kmh + ' km/h', TEAM[team].glow);
   G.phase = 'goal'; G.pt = 0; G.ts = 0.25; G.crowd = 1;
+  G.cars.forEach((c) => { if (c.isPlayer && !c.bot) return; c.ai.mood = c.team === team ? 0.9 : -0.8; c.ai.cheer = c.team === team ? 0.6 + Math.random() * 0.9 : 0; });
   emit('goal', G.goalInfo);
   if (AU) AU.roarK = 1;
   if (!G.cfg.attract) {

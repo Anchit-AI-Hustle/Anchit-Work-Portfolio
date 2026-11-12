@@ -1,5 +1,7 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
 import { createFX as createPost } from '/games/shared/fx3d.js';
+import * as HUMAN from '/games/shared/human.js';
+import { createVFX } from '/games/shared/vfx.js';
 /*
  * Super Over, in real 3D: a stadium T20 batting game under floodlights.
  * You bat, the computer bowls and fields. Original art, names and code.
@@ -76,6 +78,7 @@ const Arcade = window.Arcade;
     wide: ['Wide called, an extra run.', 'Too far outside, the umpire stretches his arms.'],
     drop: ['Dropped! A life for the batter.', 'It burst through the hands, what a miss.'],
     overthrow: ['Overthrow! One more trickles away.'],
+    fumble: ['Misfield! It squirts through the hands.', 'Fumbled in the deep, they will want another.', 'Not clean at all, the ball gets away from him.'],
     inside: ['Inside edge, and it crashes into the stumps!'],
   };
   const sayOf = (k) => pickOf(SAY[k]);
@@ -128,7 +131,8 @@ const Arcade = window.Arcade;
   function makeDelivery(bw, cfg, ramp, lastKind) {
     const pace = bw.pace;
     let kind;
-    if (rnd() < cfg.loose) kind = rnd() < 0.5 ? 'halfvolley' : 'longhop';
+    const loose = cfg.loose * (1 + 0.3 * (bw.form || 0) + 0.5 * (bw.rattled || 0));
+    if (rnd() < loose) kind = rnd() < 0.5 ? 'halfvolley' : 'longhop';
     else {
       const list = pace
         ? [['good', 28], ['full', 20], ['short', 15], ['yorker', 12], ['slower', 12], ['inswing', 9], ['outswing', 9]]
@@ -166,6 +170,7 @@ const Arcade = window.Arcade;
       outsideLeg: xb < -0.22, speed: v1, kmh: Math.round(v1 * 5.4), win: cfg.win, arm: bw.arm,
     });
     D.wide = Math.abs(line) > 0.95;
+    bw.rattled = Math.max(0, (bw.rattled || 0) * 0.5);
     return D;
   }
 
@@ -330,7 +335,8 @@ const Arcade = window.Arcade;
 
   function newBowler(pace) {
     const list = pace ? PACE_BOWLERS : SPIN_BOWLERS;
-    return { name: pickOf(list), pace, arm: rnd() < 0.78 ? 1 : -1 };
+    // form: some nights the radar is off, some nights it is on; a pace bowler hit for a boundary tightens up or wobbles
+    return { name: pickOf(list), pace, arm: rnd() < 0.78 ? 1 : -1, form: rr(-1, 1), rattled: 0 };
   }
 
   function bowlerFor() {
@@ -374,6 +380,9 @@ const Arcade = window.Arcade;
     G.hintT = 0; G.bounced = false; G.hit = null;
     if (!G.attract) { G.deliveries++; }
     G.dirHold = 0;
+    // a new ball: whoever was still reacting to the last one gets back into position
+    if (HUM.on) { HUM.react.fill(0); for (const h of HUM.list) h.stop(); }
+    vfxTrail(false);
   }
 
   function onRelease() {
@@ -623,7 +632,7 @@ const Arcade = window.Arcade;
       }
       if (bf) { best = { i, f: bf, slack: bs, air: catchable }; bestSpd = spd; }
     }
-    FS.fate = 'field'; FS.dropped = false; FS.col = null; FS.catcher = null; FS.six = false; FS.pickSpd = best ? bestSpd : 0;
+    FS.fate = 'field'; FS.dropped = false; FS.fumble = false; FS.fumAnn = false; FS.col = null; FS.catcher = null; FS.six = false; FS.pickSpd = best ? bestSpd : 0;
     if (best) {
       const i = best.i, t = i * DTS;
       if (best.air) {
@@ -638,7 +647,12 @@ const Arcade = window.Arcade;
         FS.catchP = pc;
         if (rnd() < pc) { FS.fate = 'caught'; FS.tFate = t; FS.catcher = best.f; FS.cx = SX[i]; FS.cz = SZ[i]; FS.cy = SY[i]; }
         else { FS.dropped = true; FS.tCatch = t; FS.col = best.f; FS.cx = SX[i]; FS.cz = SZ[i]; FS.tC = t + 0.95; }
-      } else { FS.col = best.f; FS.tC = t; FS.cx = SX[i]; FS.cz = SZ[i]; }
+      } else {
+        FS.col = best.f; FS.tC = t; FS.cx = SX[i]; FS.cz = SZ[i];
+        // a fumble: harder balls and lesser hands slip more often; the ball squirts off and costs a moment
+        const pf = clamp((1 - cfg.catchSk) * 0.8 + (spd > 20 ? 0.035 : 0.012) + (best.slack < 0.4 ? 0.03 : 0), 0, 0.16);
+        if (rnd() < pf) { FS.fumble = true; FS.tF = t; FS.tC = t + rr(0.45, 0.8); FS.fx = rr(-1, 1); }
+      }
     } else if (crossI >= 0) {
       FS.fate = 'boundary'; FS.tFate = crossI * DTS; FS.six = crossSix;
       FS.cx = SX[crossI]; FS.cz = SZ[crossI];
@@ -679,6 +693,7 @@ const Arcade = window.Arcade;
     }
     FS.trail = [];
     G.fieldCam = null;
+    if (!G.attract && (FS.six || (hit.al || 0) > 18 || hit.v > 30)) vfxTrail(true);
     FS.runPrompt = { show: false, margin: 0 };
     FS.label = hit.kind;
   }
@@ -725,6 +740,11 @@ const Arcade = window.Arcade;
     }
     const tHold = FS.dropped ? FS.tCatch : FS.tC;
     if (t < tHold) { sampleAt(t); return; }
+    if (FS.fumble && t >= FS.tF && t < FS.tC) {
+      // through the fingers and off the boot: a short squirt along the grass before it is gathered
+      const u = (t - FS.tF) / Math.max(0.1, FS.tC - FS.tF), e = Math.sin(Math.min(1, u) * Math.PI);
+      FBX = FS.cx + FS.fx * e * 0.9; FBZ = FS.cz + e * 0.5; FBY = 0.06 + e * 0.2; return;
+    }
     if (FS.dropped && t < FS.tC) {
       const u = t - FS.tCatch;
       FBX = FS.cx + u * 0.6; FBZ = FS.cz; FBY = u < 0.4 ? 1.1 * (1 - u / 0.4) * (1 - u / 0.4) : 0;
@@ -767,6 +787,7 @@ const Arcade = window.Arcade;
         end({ runs: 0, wicket: role === 'Keeper' ? 'Caught behind' : role === 'Bowler' ? 'Caught and bowled' : 'Caught at ' + role.toLowerCase(), behind: role === 'Keeper' }, 0);
       }
     } else {
+      if (FS.fumble && !FS.fumAnn && t >= FS.tF) { FS.fumAnn = true; G.comment = sayOf('fumble'); G.commentT = 2.2; if (arc.sfx) arc.sfx.noise(0.2, { filter: 'bandpass', freq: 500, vol: 0.05 }); }
       if (FS.dropped && !FS.dropAnn && t >= FS.tCatch) { FS.dropAnn = true; arc.toast('Dropped!', 'Catch put down', 1100); G.comment = sayOf('drop'); G.commentT = 2.6; snd.gasp(); }
       const rel = FS.tC + THROW_REL + (FS.dropped ? 0.2 : 0);
       if (!FS.relDone && t >= rel) {
@@ -799,9 +820,11 @@ const Arcade = window.Arcade;
 
   function announceField() {
     const o = FS.outcome;
-    if (o.boundary === 6) { G.crowd = 1; snd.roar(1); snd.drums(6); snd.whistle(); G.fireShow = 1.4; }
-    else if (o.boundary === 4) { G.crowd = 0.8; snd.roar(0.7); snd.drums(4); }
+    if (o.boundary === 6) { G.crowd = 1; snd.roar(1); snd.drums(6); snd.whistle(); G.fireShow = 1.4; vfxSix(FS.cx, -FS.cz); }
+    else if (o.boundary === 4) { G.crowd = 0.8; snd.roar(0.7); snd.drums(4); vfxFour(FS.cx, -FS.cz); }
     else if (o.wicket) { G.crowd = 0.7; snd.gasp(); }
+    if (o.wicket && FS.fate === 'caught' && FS.catcher) vfxCatch(FS.cx, FS.cy || 1.2, -FS.cz);
+    vfxTrail(false);
   }
 
   function finalizeField() {
@@ -843,6 +866,8 @@ const Arcade = window.Arcade;
     const big = res.boundary || res.wicket;
     G.resultDur = res.boundary === 6 ? 2.4 : res.boundary ? 2.0 : res.wicket ? 2.2 : 1.45;
     if (!G.attract) arc.toast(res.text, res.small, Math.round(G.resultDur * 1000 - 200));
+    if ((res.boundary === 6 || res.boundary === 4) && G.bowler && rnd() < 0.6) G.bowler.rattled = 1;
+    humanReact(res);
     if (res.boundary === 6 || res.boundary === 4) { G.crowd = 1; if (!G.attract) { arc.haptic(res.boundary === 6 ? 'success' : 'boost', 1); if (POST) POST.flash(res.boundary === 6 ? 0.22 : 0.12, '#fff0c8'); } }
     if (res.wicket) { G.crowd = 0.7; if (!G.attract) { arc.haptic('heavy', 0.9); if (POST) POST.kick(-5); } }
     if (res.wicket && res.wicket !== 'Run out' && G.view === 'bat') snd.gasp();
@@ -854,7 +879,7 @@ const Arcade = window.Arcade;
     else if (G.wkts >= G.wktsTotal) G.over = true;
     if (G.over) {
       G.resultDur = G.won ? 3.2 : 2.4;
-      if (G.won) { G.celebrate = 1; G.fireShow = 3; snd.win(); snd.roar(1); snd.drums(8); if (!G.attract) arc.haptic('success', 1); }
+      if (G.won) { G.celebrate = 1; G.fireShow = 3; snd.win(); snd.roar(1); snd.drums(8); if (!G.attract) { arc.haptic('success', 1); vfxWin(); } }
       else { snd.lose(); if (!G.attract) arc.haptic('fail', 1); }
     }
     if (res.wicket && !G.over) {
@@ -964,7 +989,7 @@ const CROWD = ['#c0392b', '#e74c3c', '#2c6bd1', '#f1c40f', '#ecf0f1', '#e67e22',
 const STAND = { n: 24, r0: 74, dr: 1.6, h0: 1.0, dh: 1.05 };
 const standR = (i) => STAND.r0 + i * STAND.dr;
 const standH = (i) => STAND.h0 + i * STAND.dh;
-const WORLD = { crowdU: { uTime: { value: 0 }, uCrowd: { value: 0 } }, boardMat: null, flashU: { uTime: { value: 0 }, uAmt: { value: 0.2 } } };
+const WORLD = { crowdU: { uTime: { value: 0 }, uCrowd: { value: 0 }, uCrowdT: { value: 9 } }, crowdPeak: 0, boardMat: null, flashU: { uTime: { value: 0 }, uAmt: { value: 0.2 } } };
 
 /* ====================================================================== 3D: the stadium */
 function buildWorld() {
@@ -1015,7 +1040,22 @@ function buildWorld() {
     g.strokeStyle = 'rgba(20,80,28,0.16)'; g.lineWidth = 1;
     for (let i = 0; i < 700; i++) { const x = r() * w, y = r() * h; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (r() - 0.5) * 2, y - 3 - r() * 5); g.stroke(); }
   }, { repeat: [14.4, 14.4] });
-  const ground = new THREE.Mesh(new THREE.CircleGeometry(72, 96).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ map: grassTex, roughness: 0.96, metalness: 0 }));
+  const gMat = new THREE.MeshStandardMaterial({ map: grassTex, roughness: 0.96, metalness: 0 });
+  // A real outfield is never one green: broad patches of thicker and thinner sward, and the run-ups and the
+  // ends of the square trodden pale and dry by a season of feet. World-space, so it never repeats with the tile.
+  gMat.onBeforeCompile = (sh) => {
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec2 vWG;').replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\n vWG = (modelMatrix * vec4(transformed, 1.0)).xz;');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec2 vWG;\nfloat gN(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); float a = fract(sin(dot(i, vec2(127.1, 311.7))) * 43758.5453), b = fract(sin(dot(i + vec2(1.0, 0.0), vec2(127.1, 311.7))) * 43758.5453), c = fract(sin(dot(i + vec2(0.0, 1.0), vec2(127.1, 311.7))) * 43758.5453), d = fract(sin(dot(i + vec2(1.0, 1.0), vec2(127.1, 311.7))) * 43758.5453); return mix(mix(a, b, f.x), mix(c, d, f.x), f.y); }')
+      .replace('#include <map_fragment>', `#include <map_fragment>
+        float mN = gN(vWG * 0.07) * 0.6 + gN(vWG * 0.23 + 7.0) * 0.4;
+        diffuseColor.rgb *= 0.84 + 0.3 * mN;
+        float worn = smoothstep(3.2, 0.6, abs(vWG.x)) * smoothstep(30.0, 11.0, abs(vWG.y)) * step(11.2, abs(vWG.y));
+        worn *= smoothstep(0.25, 0.8, gN(vWG * 1.1) * 0.7 + gN(vWG * 3.7 + 3.0) * 0.3);
+        diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.4, 0.4, 0.25), worn * 0.4);
+        // floodlit turf is never one green: pull the saturation back a touch toward a natural sward
+        float gl = dot(diffuseColor.rgb, vec3(0.3, 0.59, 0.11)); diffuseColor.rgb = mix(vec3(gl), diffuseColor.rgb, 0.82);`);
+  };
+  const ground = new THREE.Mesh(new THREE.CircleGeometry(72, 96).rotateX(-Math.PI / 2), gMat);
   ground.receiveShadow = true; grp.add(ground);
 
   const decal = (geo, map, y, order, extra) => {
@@ -1192,12 +1232,27 @@ function buildWorld() {
     const geo = mergeGeos([{ g: torso }, { g: head, c: rgbOf('#e8b996') }]);
     const mat = new THREE.MeshBasicMaterial({ vertexColors: true });
     mat.onBeforeCompile = (s) => {
-      s.uniforms.uTime = WORLD.crowdU.uTime; s.uniforms.uCrowd = WORLD.crowdU.uCrowd;
-      s.vertexShader = s.vertexShader.replace('#include <common>', '#include <common>\nuniform float uTime; uniform float uCrowd;')
+      s.uniforms.uTime = WORLD.crowdU.uTime; s.uniforms.uCrowd = WORLD.crowdU.uCrowd; s.uniforms.uCrowdT = WORLD.crowdU.uCrowdT;
+      s.vertexShader = s.vertexShader.replace('#include <common>', '#include <common>\nuniform float uTime; uniform float uCrowd; uniform float uCrowdT;')
         .replace('#include <begin_vertex>', `#include <begin_vertex>
           float ph = fract(sin(dot(instanceMatrix[3].xz, vec2(12.9898, 78.233))) * 43758.5453);
-          float up = max(0.0, sin(uTime * (5.0 + ph * 4.0) + ph * 40.0));
-          transformed.y += up * uCrowd * (0.18 + 0.4 * ph) + sin(uTime * 1.3 + ph * 30.0) * 0.015;`);
+          float ph2 = fract(ph * 57.31 + 0.17);
+          // nobody reacts on the same frame: each person takes their own beat (up to 0.9 s) to catch on, a few stay seated
+          float react = smoothstep(ph2 * 0.9, ph2 * 0.9 + 0.35, uCrowdT) * step(0.12, ph2);
+          float up = max(0.0, sin(uTime * (4.0 + ph * 4.5) + ph * 40.0));
+          float cheer = uCrowd * react;
+          transformed.y += up * cheer * (0.14 + 0.36 * ph) + cheer * 0.18 * step(0.5, ph);
+          // between the big moments, everyone breathes and fidgets on their own clock, and now and then someone
+          // stands for a look, waves to a friend or leans over to talk to a neighbour
+          float slot = floor(uTime / 7.0 + ph * 13.0), sl = fract(uTime / 7.0 + ph * 13.0);
+          float pick = fract(sin(slot * 12.9898 + ph * 311.7) * 43758.5453);
+          float env = sin(clamp(sl * 1.25, 0.0, 1.0) * 3.14159);
+          float act = step(0.9, pick) * env * (1.0 - cheer);
+          float stand = act * step(0.96, pick), wave = act * (1.0 - step(0.96, pick)) * step(0.93, pick), lean = act * (1.0 - step(0.93, pick));
+          float headK = smoothstep(0.7, 0.95, position.y);
+          transformed.y += stand * 0.32 + sin(uTime * (1.1 + ph * 0.7) + ph * 30.0) * 0.012;
+          transformed.x += headK * (lean * (ph2 > 0.5 ? 0.16 : -0.16) + wave * sin(uTime * 7.0 + ph * 9.0) * 0.12);
+          transformed.z += headK * wave * 0.05;`);
     };
     const SECT = 14, pts = [], GREY = new THREE.Color(0x777788);
     for (let k = 0; k < SECT; k++) pts.push([]);
@@ -1336,6 +1391,7 @@ function buildPeople() {
       ht: [new THREE.Vector3(0.24, 0.9, 0.1), new THREE.Vector3(-0.24, 0.9, 0.1)],
       hw: [new THREE.Vector3(), new THREE.Vector3()], useW: [false, false], pw: [new THREE.Vector3(), new THREE.Vector3()], usePW: [false, false],
       sh: [new THREE.Vector3(), new THREE.Vector3()], wr: [new THREE.Vector3(), new THREE.Vector3()], head: new THREE.Vector3(), hatS: 1, skin: SKINS[i % SKINS.length],
+      seed: (i * 2.399 + 0.7) % 6.283, walkIn: 0, fdust: 0,
     });
   }
   // blob shadows keep everybody planted, even outside the shadow map
@@ -1444,6 +1500,7 @@ function rigPerson(i, p) {
   if (!p.vis) {
     for (const k in M) { const c = k === 'torso' || k === 'pelvis' || k === 'head' || k === 'hat' ? 1 : 2; for (let s = 0; s < c; s++) M[k].setMatrixAt(i * c + s, HIDE); }
     PPL.blob.setMatrixAt(i, HIDE);
+    if (HUM.on && HUM.list[i]) HUM.list[i].group.visible = false;
     return;
   }
   rigJoints(p);
@@ -1491,6 +1548,146 @@ function rigPerson(i, p) {
   const bs = 0.62 + p.crouch * 0.3 + Math.abs(p.pitch) * 0.9;
   _m4.makeScale(bs, 1, bs).setPosition(p.x + Math.sin(p.yaw) * Math.abs(p.pitch) * 0.7, 0.02, p.z + Math.cos(p.yaw) * Math.abs(p.pitch) * 0.7);
   PPL.blob.setMatrixAt(i, _m4);
+  if (HUM.on && i < HUM.list.length) {
+    for (const k in M) { if (k === 'pad') continue; const c = k === 'torso' || k === 'pelvis' || k === 'head' || k === 'hat' ? 1 : 2; for (let s = 0; s < c; s++) M[k].setMatrixAt(i * c + s, HIDE); }
+    try { wearPose(i, p, HUM.dt || 0); }
+    catch (e) { HUM.on = false; for (const h of HUM.list) h.group.visible = false; for (const k in PPL.m) PPL.m[k].visible = true; try { console.warn('super-over: people off', e && e.message); } catch (er) { /* ignore */ } }
+  }
+}
+
+/* ---------------------------------------------------------------- real people
+ * The poses above are the game's own (the stance, the backlift and the stroke, the run-up and the arm over, the
+ * dive, the throw). With the shared people library they are worn by real bodies: proportions, skin, faces that
+ * blink and watch the ball. Each body copies the pose: the trunk from the lean and twist, then two-bone IK with its
+ * own limb lengths takes each hand and foot to the targets the pose chose, so the bat stays in the hands. When a
+ * player is free (after a ball) the library's own reactions play instead: a bowler with his hands on his head
+ * after a six, fielders jumping on a wicket, a batter slumping on the way off. Any failure leaves the old figures. */
+const HUM = { on: false, queue: 0, envAt: 0, dt: 0, uo: { speed: 0, turn: 0, look: null }, list: [], lod: '', react: new Float32Array(NP), act: [], look: new THREE.Vector3(), q: new THREE.Quaternion(), qp: new THREE.Quaternion(), m: new THREE.Matrix4(),
+  S: new THREE.Vector3(), M: new THREE.Vector3(), E: new THREE.Vector3(), u: new THREE.Vector3(), f: new THREE.Vector3(), x: new THREE.Vector3(), y: new THREE.Vector3(), z: new THREE.Vector3(), pole: new THREE.Vector3() };
+const HKIT = {
+  bat: { top: '#e8892b', top2: '#1a2a4a', sleeves: 'long', bottom: '#f1f1ea', legs: 'trousers', shoes: '#f1f1ec', soles: '#d8d8d2', gloves: '#f6f6f1', helmet: '#1a2a4a' },
+  fld: { top: '#1c72bd', top2: '#0e1c3a', sleeves: 'short', bottom: '#15264a', legs: 'trousers', shoes: '#e9e9e4', soles: '#cfcfca', cap: '#0e1c3a' },
+  keep: { top: '#e5c52e', top2: '#15264a', sleeves: 'long', bottom: '#15264a', legs: 'trousers', shoes: '#e9e9e4', soles: '#cfcfca', gloves: '#efe3c2', cap: '#0e1c3a' },
+  ump: { top: '#e8e6de', top2: '#c8c6be', sleeves: 'long', bottom: '#26262c', legs: 'trousers', shoes: '#1a1a1a', soles: '#2a2a2a', cap: '#16161a' },
+};
+const hKitOf = (i) => (i === P_BAT || i === P_NON ? 'bat' : i === P_UMP ? 'ump' : i === P_FLD ? 'keep' : 'fld');
+// full rigs for the people the batting camera sees up close, lighter ones in the deep
+const hLodOf = (i, q) => (q >= 2 ? (i <= P_FLD + 1 ? 'full' : 'mid') : q === 1 ? (i <= P_FLD ? 'full' : 'far') : (i === P_BAT ? 'mid' : 'far'));
+// On the lightest tier only the five people the batting camera sees up close get real bodies; the fielders in
+// the deep keep the cheap instanced figures (one draw for all of them).
+const hCount = (q) => (q === 0 ? P_FLD + 1 : NP);
+// one build per role and no hair choice under the caps and helmets: few body templates to make, so each new
+// body costs little when it is built behind the menu
+const HBUILD = (i) => (i === P_UMP ? 'heavy' : i === P_FLD ? 'average' : 'athletic');
+// Built a body per frame once the menu is on screen, so the first paint never waits for them; until all are
+// ready the old figures stand in. Then the stadium's environment light is baked, a frame later.
+function stepHumans() {
+  if (HUM.queue < 0) return;
+  if (typeof HUMAN.createHuman !== 'function') { HUM.queue = -1; HUM.envAt = 2; return; }
+  try {
+    {
+      const i = HUM.list.length;
+      const kit = hKitOf(i);
+      const h = HUMAN.createHuman({ seed: 4100 + i * 37, sex: 'm', quality: R3.q, lod: hLodOf(i, R3.q), outfit: Object.assign({ number: kit === 'fld' || kit === 'keep' ? (i * 7 + 3) % 99 : null }, HKIT[kit]),
+        build: HBUILD(i), hair: 'short', age: i === P_UMP ? 'older' : undefined });
+      h.group.rotation.order = 'YXZ'; h.group.visible = false;
+      R3.scene.add(h.group); HUM.list.push(h);
+    }
+    if (HUM.list.length < hCount(R3.q)) return;
+    HUM.queue = -1;
+    HUM.lod = 'q' + R3.q; HUM.on = true;
+    HUM.envAt = 2;
+  } catch (e) {
+    HUM.on = false; HUM.queue = -1; HUM.envAt = 2;
+    for (const h of HUM.list) { try { h.dispose(); } catch (er) { /* ignore */ } }
+    HUM.list.length = 0;
+    try { console.warn('super-over: people library unavailable', e && e.message); } catch (er) { /* ignore */ }
+  }
+}
+// A change of quality tier swaps detail one body per frame, so it never stalls a frame.
+function humanLod() {
+  if (!HUM.on) return;
+  if (HUM.lod !== 'q' + R3.q) { HUM.lod = 'q' + R3.q; HUM.lodI = 0; }
+  if (HUM.lodI == null || HUM.lodI >= HUM.list.length) return;
+  const i = HUM.lodI++;
+  try { HUM.list[i].setLod(hLodOf(i, R3.q)); } catch (e) { /* keep the old detail */ }
+}
+// orient a bone in world space: its -Y (toward its child) along dir, its X along the bend axis
+function aimBone(bone, dir, bend) {
+  const H = HUM;
+  H.y.copy(dir).multiplyScalar(-1).normalize();
+  H.x.copy(bend).addScaledVector(H.y, -bend.dot(H.y));
+  if (H.x.lengthSq() < 1e-8) H.x.set(1, 0, 0).addScaledVector(H.y, -H.y.x);
+  H.x.normalize(); H.z.crossVectors(H.x, H.y);
+  H.m.makeBasis(H.x, H.y, H.z); H.q.setFromRotationMatrix(H.m);
+  bone.parent.getWorldQuaternion(H.qp);
+  bone.quaternion.copy(H.qp.invert().multiply(H.q));
+  bone.updateMatrixWorld(true);
+}
+// two bones from a joint to a target, with this body's own bone lengths
+function limbTo(b0, b1, T, l1, l2, pole, arm) {
+  const H = HUM;
+  b0.getWorldPosition(H.S);
+  ik2(H.S, T, l1, l2, pole, H.M, H.E);
+  H.u.subVectors(H.M, H.S); H.f.subVectors(H.E, H.M);
+  // the bend axis: arms fold forward about +X, legs fold back about the same axis
+  if (arm) H.pole.crossVectors(H.f, H.u); else H.pole.crossVectors(H.u, H.f);
+  if (H.pole.lengthSq() < 1e-8) H.pole.copy(RIG.lf);
+  aimBone(b0, H.u, H.pole);
+  aimBone(b1, H.f, H.pole);
+}
+function wearPose(i, p, dt) {
+  const h = HUM.list[i];
+  if (!h) return;
+  if (!p.vis) { h.group.visible = false; return; }
+  h.group.visible = true;
+  h.group.position.set(p.x, p.y, p.z); h.group.rotation.set(p.pitch || 0, p.yaw, 0);
+  const free = HUM.react[i] > 0;
+  if (free) HUM.react[i] = Math.max(0, HUM.react[i] - dt);
+  HUM.uo.look = BALLM.mesh && BALLM.mesh.visible ? BW : null;
+  h.update(dt, HUM.uo);
+  if (free && h.playing()) {
+    // the library is acting this one out: keep any bat in the hand that holds it
+    h.bones.wristL.getWorldPosition(p.wr[0]); h.bones.wristR.getWorldPosition(p.wr[1]);
+    return;
+  }
+  const R = RIG, b = h.bones, sc = h.height / 1.75;
+  // trunk: the hips sit where the pose crouched them, the back leans and the shoulders turn
+  b.root.position.set(0, 0, 0); b.root.rotation.set(0, 0, 0);
+  b.pelvis.position.set(0, (0.9 - p.crouch) / sc + 0.045, 0); b.pelvis.rotation.set(0, p.twist * 0.25, 0);
+  b.spine.rotation.set(p.lean * 0.45, p.twist * 0.3, 0); b.chest.rotation.set(p.lean * 0.4, p.twist * 0.45, 0);
+  h.group.updateMatrixWorld(true);
+  // arms to the hands the pose chose (the bat grip, the ball, the release point)
+  for (let s = 0; s < 2; s++) {
+    R.pole.set(0, 0, 0).addScaledVector(R.fw, -0.7).addScaledVector(R.lf, SIDE[s] * 0.5).addScaledVector(R.up, -0.25);
+    limbTo(s ? b.shoulderR : b.shoulderL, s ? b.elbowR : b.elbowL, p.wr[s], 0.29 * sc, 0.255 * sc, R.pole, true);
+    (s ? b.wristR : b.wristL).rotation.set(0, 0, 0);
+    p.wr[s].copy(HUM.E);
+  }
+  // legs to the feet, knees forward, the soles flat on the grass
+  for (let s = 0; s < 2; s++) {
+    R.pole.copy(R.fw).addScaledVector(R.lf, SIDE[s] * -0.12);
+    limbTo(s ? b.hipR : b.hipL, s ? b.kneeR : b.kneeL, R.ank[s], 0.42 * sc, 0.405 * sc, R.pole, false);
+    const an = s ? b.ankleR : b.ankleL;
+    h.group.getWorldQuaternion(HUM.q); an.parent.getWorldQuaternion(HUM.qp); an.quaternion.copy(HUM.qp.invert().multiply(HUM.q));
+    if (p.pad) { segMat(PPL.m.pad, i * 2 + s, HUM.M, HUM.E, 0.13, 0.09, R.fw); }
+  }
+}
+// After a ball: everyone reacts in their own way and their own time.
+function humanReact(res) {
+  if (!HUM.on || G.attract) return;
+  const go = (i, name, delay, o) => { const h = HUM.list[i]; if (!h) return; setTimeout(() => { try { if (!PPL.st[i].vis) return; const d = h.play(name, o); HUM.react[i] = d + 0.1; HUM.act[i] = name; } catch (e) { /* ignore */ } }, delay * 1000); };
+  const rd = () => 0.15 + rnd() * 0.3;
+  if (res.wicket) {
+    go(P_BOWL, rnd() < 0.5 ? 'celebrate' : 'fistPump', rd());
+    for (let i = P_FLD; i < P_FLD + 6; i++) if (rnd() < 0.7) go(i, rnd() < 0.5 ? 'cheer' : 'clap', rd() + rnd() * 0.3);
+    go(P_BAT, rnd() < 0.6 ? 'slump' : 'handsOnHead', 0.4 + rnd() * 0.4);
+  } else if (res.boundary) {
+    go(P_BOWL, rnd() < 0.55 ? 'handsOnHead' : 'slump', rd());
+    go(P_NON, rnd() < 0.6 ? 'clap' : 'fistPump', rd());
+    if (res.boundary === 6) go(P_BAT, 'fistPump', 0.3 + rnd() * 0.3);
+    for (let i = P_FLD + 1; i < NP; i++) if (rnd() < 0.3) go(i, rnd() < 0.5 ? 'shrug' : 'slump', rd() + 0.2);
+  } else if (res.say === 'dot' && rnd() < 0.4) go(P_BOWL, rnd() < 0.5 ? 'fistPump' : 'clap', rd(), { intensity: 0.6 });
 }
 
 function flushPeople() {
@@ -1531,9 +1728,12 @@ function faceTo(p, tx, tz, dt, rate) {
   p.yaw += wrapA(want - p.yaw) * (rate ? 1 - Math.exp(-rate * dt) : 1);
 }
 function ready(p, t, depth) {
-  const d = depth == null ? 1 : depth;
-  p.crouch = 0.12 * d + Math.sin(t * 1.7 + p.skin.length) * 0.008; p.lean = 0.12 + 0.24 * d;
-  p.fl[0].set(0.2, 0.08, 0.04); p.fl[1].set(-0.2, 0.08, -0.04);
+  const d = depth == null ? 1 : depth, sd = p.seed || 0;
+  // breathing (about 15 a minute, each on their own clock) and a slow shift of weight from one foot to the other
+  const br = Math.sin(t * (1.5 + (sd % 0.5)) + sd * 3.0), ws = Math.sin(t * 0.37 + sd * 1.7);
+  p.crouch = 0.12 * d + br * 0.01; p.lean = 0.12 + 0.24 * d + br * 0.01;
+  p.fl[0].set(0.2 + ws * 0.02, 0.08, 0.04); p.fl[1].set(-0.2 + ws * 0.02, 0.08, -0.04);
+  p.x += ws * 0.03;
   p.ht[0].set(0.2, 0.64 - p.crouch * 0.6, 0.24 + 0.1 * d); p.ht[1].set(-0.2, 0.64 - p.crouch * 0.6, 0.24 + 0.1 * d);
 }
 function runPose(p, v, dt) {
@@ -1548,7 +1748,8 @@ function runPose(p, v, dt) {
   p.y = Math.abs(Math.sin(p.phase)) * 0.035 * s;
 }
 function standStill(p, t) {
-  p.crouch = 0; p.lean = 0.05 + Math.sin(t * 1.3 + p.skin.length) * 0.01;
+  const sd = p.seed || 0;
+  p.crouch = Math.sin(t * 1.4 + sd * 3.0) * 0.006; p.lean = 0.05 + Math.sin(t * 1.3 + sd) * 0.01;
   p.fl[0].set(0.13, 0.08, 0.02); p.fl[1].set(-0.13, 0.08, -0.02);
   p.ht[0].set(0.27, 0.8, 0.04); p.ht[1].set(-0.27, 0.8, 0.04);
 }
@@ -1717,6 +1918,9 @@ function poseBowler(p, dt) {
   const sh2 = shLocal(p, os, _hv2);
   const k = sstep(-0.4, 0.05, tb);
   p.ht[os].set(sh2.x + SIDE[os] * 0.02, sh2.y + lerp(0.25, -0.38, k), sh2.z + lerp(0.38, 0.12, k));
+  // the front foot lands at the crease in the delivery stride, and again as he follows through
+  if (!G.attract && ((p.fdust < 0 && tb >= 0) || (p.fdust < 0.32 && tb >= 0.32))) spawnFoot(p.x + (tb < 0.2 ? -0.08 * arm : 0.1 * arm), p.z + 0.35, tb < 0.2 ? 1 : 0.6, false);
+  p.fdust = tb;
   // stay out of the batter's way afterward
   p.vis = true;
 }
@@ -1751,8 +1955,19 @@ function poseFieldersBat(dt) {
     const p = PPL.st[P_FLD + i], e = fp[i]; if (!e) { p.vis = false; continue; }
     p.vis = true; resetPose(p);
     p.x = e[1]; p.z = -e[2];
-    ready(p, G.clock, i === 0 ? 1.9 : i === 1 ? 1.5 : 0.8);
     faceTo(p, 0, BASE_BAT.z, 0, 0);
+    // the walk-in: everyone but the keeper and the slip takes a few steps toward the bat as the bowler runs in,
+    // and is set, low and still, at the moment of release; then they drift back to their marks
+    let walk = 0, wv = 0, back = false;
+    if (i > 1 && G.D && !G.attract) {
+      const tb = G.tb, want = G.phase === 'runup' || G.phase === 'shot' ? sstep(-1.5 - (p.seed % 0.4), -0.05, tb) : 0;
+      const prev = p.walkIn, rate = want > prev ? 1.1 : 0.45;
+      p.walkIn = prev + clamp(want - prev, -rate * dt, rate * dt);
+      wv = Math.abs(p.walkIn - prev) / Math.max(dt, 1e-3) * 1.6; walk = p.walkIn * 1.6; back = p.walkIn < prev;
+    } else p.walkIn = 0;
+    p.x += Math.sin(p.yaw) * walk; p.z += Math.cos(p.yaw) * walk;
+    // walking back to the mark is a backpedal: the stride cycle runs in reverse
+    if (wv > 0.25) runPose(p, Math.min(2.2, wv), back ? -dt : dt); else ready(p, G.clock, i === 0 ? 1.9 : i === 1 ? 1.5 : 0.8 + (p.walkIn > 0.9 ? 0.35 : 0));
     if (i === 0) { p.ht[0].set(0.15, 0.4, 0.42); p.ht[1].set(-0.15, 0.4, 0.42); p.crouch = 0.4; p.lean = 0.65; p.fl[0].set(0.2, 0.08, 0.05); p.fl[1].set(-0.2, 0.08, -0.05); }
     p.px = null;
   }
@@ -1892,17 +2107,60 @@ class FxPool {
   clear() { this.n = 0; this.pts.geometry.setDrawRange(0, 0); }
 }
 const FX = { add: null, norm: null };
-function clearFx() { if (FX.add) { FX.add.clear(); FX.norm.clear(); } }
+function clearFx() { if (FX.add) { FX.add.clear(); FX.norm.clear(); } STAIN.clear(); }
 function spawnSparks(x, y, zb, n, col) {
   if (!FX.add) return;
   const c = new THREE.Color(col || '#fff');
   for (let i = 0; i < n; i++) FX.add.add(x, y, HALF - zb, rr(-2.5, 2.5), rr(0.5, 3.5), rr(-3, 1.5), rr(0.3, 0.6), rr(0.03, 0.06), c, 0.95, 7, 0.98);
 }
+const DUSTC = new THREE.Color('#cdb48a'), SCUFFC = new THREE.Color('#6a4a2a'), FOOTC = new THREE.Color('#7a5a36'), GRASSD = new THREE.Color('#8f9a62');
+// A ball pitching on a dry strip: a low puff that rises a little, spreads, hangs and settles, and a scuff where the seam bit.
 function spawnDust(x, zb) {
   if (!FX.norm) return;
-  const c = new THREE.Color('#cdb48a');
-  for (let i = 0; i < 9; i++) FX.norm.add(x + rr(-0.1, 0.1), 0.04, HALF - zb, rr(-0.7, 0.7), rr(0.3, 1.1), rr(-0.6, 0.6), rr(0.4, 0.8), rr(0.1, 0.22), c, 0.5, 1.2, 0.96);
+  for (let i = 0; i < 12; i++) FX.norm.add(x + rr(-0.08, 0.08), 0.04, HALF - zb + rr(-0.1, 0.1), rr(-0.6, 0.6), rr(0.2, 0.9), rr(-1.2, 0.2), rr(0.6, 1.1), rr(0.08, 0.2), DUSTC, 0.42, -0.15, 0.93);
+  for (let i = 0; i < 5; i++) FX.norm.add(x, 0.05, HALF - zb, rr(-0.8, 0.8), rr(0.8, 1.8), rr(-1.5, 0), rr(0.5, 0.8), rr(0.02, 0.03), SCUFFC, 0.9, 9.8, 0.99);
+  if (STAIN.ok) STAIN.add(x, HALF - zb - 0.05, 0.16, 0.34, SCUFFC, 0.55, 14);
 }
+// A footfall on the crease or in the rough: a little kick of dust and a print that fades.
+function spawnFoot(X, Z, k, onGrass) {
+  if (!FX.norm || arc.reducedMotion) return;
+  const n = Math.round(2 + 4 * k);
+  for (let i = 0; i < n; i++) FX.norm.add(X + rr(-0.06, 0.06), 0.03, Z + rr(-0.06, 0.06), rr(-0.4, 0.4) * k, rr(0.15, 0.5) * k, rr(-0.4, 0.4) * k, rr(0.5, 0.9), rr(0.06, 0.13), onGrass ? GRASSD : DUSTC, 0.3 * (onGrass ? 0.5 : 1), -0.1, 0.93);
+  if (STAIN.ok && !onGrass) STAIN.add(X, Z, 0.13, 0.2, FOOTC, 0.4, 10);
+}
+/* Marks on the pitch: instanced soft decals with their own fade, one draw for all. */
+const STAIN = {
+  ok: false, n: 24, head: 0, mesh: null, aA: null, life: null, max: null, a0: null, d: new THREE.Object3D(), live: 0,
+  build(scene) {
+    const n = this.n, g = new THREE.PlaneGeometry(1, 1); g.rotateX(-Math.PI / 2);
+    const seeds = new Float32Array(n); for (let i = 0; i < n; i++) seeds[i] = Math.random();
+    this.aA = new THREE.InstancedBufferAttribute(new Float32Array(n), 1).setUsage(THREE.DynamicDrawUsage);
+    g.setAttribute('aA', this.aA); g.setAttribute('aSeed', new THREE.InstancedBufferAttribute(seeds, 1));
+    this.mesh = new THREE.InstancedMesh(g, new THREE.ShaderMaterial({
+      transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -6, polygonOffsetUnits: -6,
+      vertexShader: 'attribute float aA; attribute float aSeed; varying float vA; varying float vS; varying vec2 vUv; varying vec3 vC; void main(){ vUv = uv; vA = aA; vS = aSeed; vC = instanceColor; gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(position, 1.0); }',
+      fragmentShader: 'varying float vA; varying float vS; varying vec2 vUv; varying vec3 vC; float h(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7)) + vS * 91.3) * 43758.5453); } void main(){ vec2 d = vUv - 0.5; float ang = atan(d.y, d.x); float r = length(d) * 2.0; float edge = 0.6 + 0.2 * sin(ang * 3.0 + vS * 20.0) + 0.1 * sin(ang * 5.0 + vS * 9.0); float sp = step(0.8, h(floor(vUv * 18.0))) * smoothstep(1.2, 0.5, r); float a = (smoothstep(edge, edge * 0.4, r) * 0.8 + sp * 0.4) * vA; if (a < 0.01) discard; gl_FragColor = vec4(vC, a);\n #include <colorspace_fragment>\n }',
+    }), n);
+    this.life = new Float32Array(n); this.max = new Float32Array(n); this.a0 = new Float32Array(n);
+    this.d.scale.set(0, 0, 0); this.d.updateMatrix();
+    for (let i = 0; i < n; i++) { this.mesh.setMatrixAt(i, this.d.matrix); this.mesh.setColorAt(i, SCUFFC); }
+    this.mesh.frustumCulled = false; this.mesh.renderOrder = 6; scene.add(this.mesh); this.ok = true;
+  },
+  add(x, z, w, l, col, alpha, life) {
+    const i = this.head; this.head = (this.head + 1) % this.n;
+    this.d.position.set(x, 0.016, z); this.d.rotation.set(0, (Math.random() - 0.5) * 0.6, 0); this.d.scale.set(w, 1, l); this.d.updateMatrix();
+    this.mesh.setMatrixAt(i, this.d.matrix); this.mesh.setColorAt(i, col);
+    this.life[i] = life; this.max[i] = life; this.a0[i] = alpha; this.live = 1;
+    this.mesh.instanceMatrix.needsUpdate = true; this.mesh.instanceColor.needsUpdate = true;
+  },
+  step(dt) {
+    if (!this.live) return;
+    let any = 0;
+    for (let i = 0; i < this.n; i++) { if (this.life[i] <= 0) continue; any = 1; this.life[i] -= dt; this.aA.array[i] = this.a0[i] * Math.min(1, Math.max(0, this.life[i] / this.max[i]) * 3); }
+    this.aA.needsUpdate = true; if (!any) this.live = 0;
+  },
+  clear() { if (!this.ok) return; this.life.fill(0); this.aA.array.fill(0); this.aA.needsUpdate = true; },
+};
 function spawnFirework3() {
   if (!FX.add) return;
   const a = rr(0, TAU), rad = rr(95, 130), cx = Math.cos(a) * rad, cz = Math.sin(a) * rad, cy = rr(42, 78);
@@ -1940,8 +2198,61 @@ function buildStumps() {
 function resetStumps() {
   for (const s of STUMPS.st) { s.x = s.rx; s.y = s.ry; s.z = s.rz; s.ax = s.ay = s.az = 0; s.vx = s.vy = s.vz = 0; s.wx = s.wy = s.wz = 0; s.on = false; }
 }
+/* ---------------------------------------------------------------- the big moments (shared spectacle layer)
+ * A six: the ball leaves a hot trail on its way into the stands, shells go up from the crowd and confetti rains
+ * on the seats. A wicket: the stumps explode in splinters and dust and the moment drops into slow motion. A catch:
+ * a puff off the gloves and a shower of confetti from the nearest stand. A win: the full stadium burst. Every
+ * effect is tiered by quality (thin on a software renderer) and gentle under reduced motion. */
+let VFX = null, VFXK = 1, VTRAIL = null;
+const VP = new THREE.Vector3(), VN = new THREE.Vector3(0, 1, 0);
+const VPAL = ['#FFB736', '#FF6940', '#fff3c4', '#7fd1ff', '#ff7ab6', '#9dffb0'];
+function vfxOn() { return VFX && !G.attract; }
+// a point in the stands toward a given direction across the field
+function standAt(x, z, rowFrac, out) { const a = Math.atan2(z, x), rad = standR(Math.round(STAND.n * rowFrac)) + 1; return out.set(Math.cos(a) * rad, standH(Math.round(STAND.n * rowFrac)) + 1.5, Math.sin(a) * rad); }
+function vfxSix(x, z) {
+  if (!vfxOn()) return;
+  try {
+    for (let i = 0; i < 4; i++) {
+      standAt(x + rr(-30, 30), z + rr(-30, 30), rr(0.4, 0.9), VP); VP.y += rr(18, 30);
+      VFX.fireworks(VP, { launch: true, delay: i * 0.35 + rr(0, 0.15), burst: i === 0 ? 'chrysanthemum' : 'mixed', color: pickOf(VPAL), color2: pickOf(VPAL), size: 1.4 });
+    }
+    standAt(x, z, 0.3, VP); VFX.confetti(VP, { count: 120, size: 1.4, colors: VPAL });
+    VFX.timeWarp(0.55, 0.7);
+  } catch (e) { /* the moment still plays without it */ }
+}
+function vfxFour(x, z) {
+  if (!vfxOn()) return;
+  try { VP.set(x, 0.3, z); VFX.burst(VP, { color: '#FFB736', size: 1.6 }); VFX.ring(VP.setY(0.05), '#fff3c4', { size: 3, kind: 'shock' }); standAt(x, z, 0.25, VP); VFX.confetti(VP, { count: 70, colors: VPAL }); } catch (e) { /* ignore */ }
+}
+function vfxStumps(e) {
+  if (!vfxOn()) return;
+  try {
+    VP.set(0, 0.45, e === 0 ? HALF : -HALF);
+    VFX.impact(VP, VN.set(0, 0.4, e === 0 ? -1 : 1).normalize(), { kind: 'dust', color: '#cdb48a', size: 1.3 });
+    VFX.impact(VP, VN, { kind: 'spark', color: '#fff1c9', size: 0.8 });
+    VFX.ring(VP.setY(0.04), '#e8d6a8', { size: 1.6, kind: 'shock' });
+    VFX.timeWarp(0.3, 1.0);
+  } catch (er) { /* ignore */ }
+}
+function vfxCatch(x, y, z) {
+  if (!vfxOn()) return;
+  try { VP.set(x, y, z); VFX.impact(VP, VN.set(0, 1, 0), { kind: 'dust', color: '#e8e2cf', size: 0.8 }); standAt(x, z, 0.35, VP); VFX.confetti(VP, { count: 90, colors: VPAL }); } catch (e) { /* ignore */ }
+}
+function vfxWin() {
+  if (!VFX) return;
+  try { VFX.winBurst(VP.set(0, 0, -6), { colors: VPAL, size: 2 }); } catch (e) { /* ignore */ }
+}
+function vfxTrail(on) {
+  if (!VFX) return;
+  try {
+    if (on && !VTRAIL && BALLM.mesh) VTRAIL = VFX.trail(BALLM.mesh, { color: '#ffd27a', width: 0.22, life: 0.5, core: 0.9 });
+    else if (!on && VTRAIL) { VTRAIL.stop(); VTRAIL = null; }
+  } catch (e) { VTRAIL = null; }
+}
+
 function breakStumps3(e) {
   if (!STUMPS.im) return;
+  vfxStumps(e);
   const dir = e === 0 ? 1 : -1;
   for (let k = 0; k < 5; k++) {
     const s = STUMPS.st[e * 5 + k]; s.on = true;
@@ -2119,12 +2430,21 @@ function applyQuality() {
   r.setPixelRatio(R3.soft && R3.q === 0 ? Math.max(0.3, Math.min(pr, Math.sqrt(160000 / Math.max(1, arc.w * arc.h)))) : pr); r.setSize(arc.w, arc.h, false);
   const key = R3.key, want = R3.q >= 3 ? 2048 : 1024;
   key.castShadow = R3.q >= 1;
+  if (R3.scene) R3.scene.environment = R3.q >= 1 ? R3.env || null : null;
+  if (VFX) VFX.setQuality(R3.q);
+  if (R3.q >= 1 && R3.env === undefined && HUM.queue < 0 && !(HUM.envAt > 0)) HUM.envAt = 2;
   if (key.shadow.mapSize.x !== want) { key.shadow.mapSize.set(want, want); if (key.shadow.map) { key.shadow.map.dispose(); key.shadow.map = null; } }
 }
 
 function frame3D(dt) {
   R3.time += dt;
+  if (HUM.queue >= 0 && arc.frame > 4) stepHumans();
+  // the environment bake is only for tiers that use it: on a software renderer it is seconds of work for nothing
+  if (HUM.envAt > 0 && --HUM.envAt === 0) { if (R3.q >= 1 && !R3.soft) buildEnv(); }
   const t = R3.time;
+  // seconds since the ground last erupted: each seat starts its reaction at its own moment after it
+  if (G.crowd > WORLD.crowdPeak + 0.15) WORLD.crowdU.uCrowdT.value = 0; else WORLD.crowdU.uCrowdT.value = Math.min(30, WORLD.crowdU.uCrowdT.value + dt);
+  WORLD.crowdPeak = G.crowd;
   WORLD.crowdU.uTime.value = t; WORLD.crowdU.uCrowd.value = clamp(G.crowd * 1.15, 0, 1) * (arc.reducedMotion ? 0.35 : 1);
   WORLD.flashU.uTime.value = arc.reducedMotion ? 0 : t; WORLD.flashU.uAmt.value = arc.reducedMotion ? 0 : 0.04 + 0.3 * G.crowd;
   WORLD.boardMat.color.setScalar(0.9 + (arc.reducedMotion ? 0 : 0.06 * Math.sin(t * 2.2)));
@@ -2170,6 +2490,8 @@ function frame3D(dt) {
     if (rad > ROPE + 5 && FS.six) showBall = false;
     if (rad > ROPE + 22) showBall = false;
   }
+  if (HUM.on) humanLod();
+  HUM.dt = dt;
   for (let i = 0; i < NP; i++) rigPerson(i, PPL.st[i]);
   // the batter's name and number, on the back of the shirt
   {
@@ -2183,7 +2505,8 @@ function frame3D(dt) {
   flushPeople();
   // bats
   if (!fieldView) {
-    drawBatterBat();
+    if (HUM.on && HUM.react[P_BAT] > 0 && HUM.list[P_BAT].playing()) { const bp = PPL.st[P_BAT]; _hv2.set(0.1, -0.95, 0.15).normalize(); _hv3.set(0, 0, -1); placeBat(0, bp.wr[1], _hv2, _hv3); }
+    else drawBatterBat();
     const ns = PPL.st[P_NON]; _hv.copy(ns.wr[1]); _hv2.set(0.05, -0.97, -0.2).normalize(); _hv3.set(0, 0, -1);
     placeBat(1, _hv, _hv2, _hv3);
   } else {
@@ -2222,7 +2545,7 @@ function frame3D(dt) {
   updateTracker();
 
   /* particles */
-  FX.add.step(dt); FX.norm.step(dt);
+  FX.add.step(dt); FX.norm.step(dt); STAIN.step(dt);
 
   cameraRig(dt);
   // the light that casts the shadows follows the action
@@ -2284,17 +2607,37 @@ function initRenderer() {
     buildWorld();
     buildPeople();
     FX.add = new FxPool(1400, true); FX.norm = new FxPool(700, false);
-    buildStumps(); buildBall();
+    buildStumps(); buildBall(); STAIN.build(R3.scene);
     R3.scene.add(R3.camera);
+    try { VFX = createVFX(r, R3.scene, R3.camera, { quality: R3.q, unit: 1, groundY: 0, soft: R3.soft, reduced: arc.reducedMotion }); VFX.warm(); }
+    catch (e) { VFX = null; try { console.warn('super-over: spectacle layer off', e && e.message); } catch (er) { /* ignore */ } }
     // Shared post pass: bloom on the floodlights and the fireworks, grade, grain. A sweep across the ground
     // settles behind the batter before the first ball; the results drift slowly over the stadium.
-    POST = createPost(r, { arc, soft: R3.soft, intro: { yaw: 1.15, up: 0.35, back: 0.25, dur: 2.2 }, results: { yaw: 0.35, rise: 0.08 }, target: (v) => v.copy(CAM.tgt), look: { bloom: 0.6, bloomWide: 0.45, threshold: 0.68 } });
+    POST = createPost(r, { arc, soft: R3.soft, intro: { yaw: 1.15, up: 0.35, back: 0.25, dur: 2.2 }, results: { yaw: 0.35, rise: 0.08 }, target: (v) => v.copy(CAM.tgt), preset: 'night', handheld: true, dof: { results: 0.7, radius: 0.22 }, look: { bloom: 0.52, bloomWide: 0.4, threshold: 0.7 } });
     applyQuality();
     R3.ok = true;
   } catch (err) {
     R3.ok = false; R3.fail = String(err && err.message || err);
     try { console.warn('3D unavailable: ' + R3.fail); } catch (e) { /* ignore */ }
   }
+}
+// The stadium as an environment light: the night sky, the dark bowl and the six floodlight banks, so a
+// helmet, a pad or the lacquered ball shows the lights it stands under. Skipped on the lightest tier.
+function buildEnv() {
+  const r = R3.renderer;
+  if (!r || R3.env !== undefined) return;
+  R3.env = null;
+    try {
+      const env = new THREE.Scene();
+      const gt = ctex(4, 128, (g, w, h) => { const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#05081a'); gr.addColorStop(0.42, '#1a2850'); gr.addColorStop(0.5, '#2a3048'); gr.addColorStop(0.56, '#141a20'); gr.addColorStop(1, '#16301c'); g.fillStyle = gr; g.fillRect(0, 0, w, h); }, { mip: false });
+      env.add(new THREE.Mesh(new THREE.SphereGeometry(50, 16, 12), new THREE.MeshBasicMaterial({ map: gt, side: THREE.BackSide })));
+      const lamp = new THREE.MeshBasicMaterial({ color: new THREE.Color(9, 8.6, 7.6) }), lg = new THREE.PlaneGeometry(9, 4.5);
+      for (const deg of [24, 90, 156, 204, 270, 336]) { const a = deg * D2R, m = new THREE.Mesh(lg, lamp); m.position.set(Math.sin(a) * 40, 22, -Math.cos(a) * 40); m.lookAt(0, 8, 0); env.add(m); }
+      const pm = new THREE.PMREMGenerator(r);
+      R3.env = pm.fromScene(env, 0.04).texture; pm.dispose(); gt.dispose();
+      R3.scene.environmentIntensity = 0.42;
+    } catch (e) { R3.env = null; }
+  applyQuality();
 }
   function rrect(ctx, x, y, w, h, r) {
     ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
@@ -2659,8 +3002,10 @@ function initRenderer() {
     const w = arc.w, h = arc.h;
     if (!R3.ok) drawFail(ctx);
     else if (!R3.lost) {
-      frame3D(dtr);
+      frame3D(dtr * VFXK);
+      if (VFX) { try { VFX.setReduced(arc.reducedMotion); VFXK = arc.state === 'play' ? VFX.update(dtr) : (VFX.update(dtr), 1); VFX.applyShake(R3.camera); } catch (e) { VFX = null; VFXK = 1; } }
       if (POST) { POST.setQuality(R3.q, R3.lock); POST.render(R3.scene, R3.camera); } else R3.renderer.render(R3.scene, R3.camera);
+      if (VFX) VFX.removeShake(R3.camera);
     }
     if (!G.attract && arc.state !== 'menu') { drawHUD(ctx); drawSwipeTrail(ctx); }
     if (G.cutFlash > 0.01) { ctx.fillStyle = 'rgba(255,248,230,' + clamp(G.cutFlash, 0, 1) * 0.6 + ')'; ctx.fillRect(0, 0, w, h); }
@@ -2732,7 +3077,7 @@ function initRenderer() {
         R3.accT = 0; R3.accN = 0; R3.settle = 1;
         a.toast(G.mode === 'nets' ? 'Endless Nets' : 'Chase ' + G.target, MODE_NAME[G.mode] + ' / ' + DIFFS[G.diff].label, 1900);
       },
-      update: (dt) => update(dt),
+      update: (dt) => update(dt * VFXK),
       idle: (dt) => idle(dt),
       render: (ctx, a) => render(ctx, a),
     });
@@ -2747,7 +3092,7 @@ function initRenderer() {
         fieldT: FS.t, over: G.over, won: G.won, score: G.finalScore, touchStyle: arc.touchStyle, quality: R3.q, fps: R3.fps || null, webgl: R3.ok,
       };
     };
-    window.__superover = { G, FS, RN, DIFFS, SWING_LAG, startSwing, FL: () => FL, R3, CAM, step: (dt) => { update(dt); arc.input.endFrame(); } };
+    window.__superover = { fxtest: () => { vfxSix(0, -40); vfxStumps(1); vfxCatch(10, 1.5, -20); vfxWin(); vfxTrail(true); }, vfx: () => VFX, finish: () => { G.over = true; finishMatch(); }, HUM, G, FS, RN, DIFFS, SWING_LAG, startSwing, FL: () => FL, R3, CAM, step: (dt) => { update(dt); arc.input.endFrame(); } };
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();

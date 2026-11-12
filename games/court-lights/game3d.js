@@ -1,5 +1,7 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
 import { createFX as createPost } from '/games/shared/fx3d.js';
+import { createHuman, createCrowd } from '/games/shared/human.js';
+import { createVFX } from '/games/shared/vfx.js';
 /*
  * Court Lights, in real 3D: rooftop street basketball after dark.
  * An original game. No licensed names; every model and texture is made in code.
@@ -82,7 +84,7 @@ function playing() { return !G.attract && arc && arc.state === 'play'; }
 
 function scoreShot(kind) {
   const b = G.ball;
-  b.scored = true; G.phase = 'net'; G.swishT = 0;
+  b.scored = true; G.phase = 'net'; G.swishT = 0; G.lastKind = kind;
   FXK.make(kind);
   if (!playing()) return;
   const pts = 3 + G.combo;
@@ -110,6 +112,7 @@ function miss() {
 function finish(why) {
   if (G.phase === 'over' || !playing()) return;
   G.phase = 'over';
+  VX.win();
   arc.haptic(G.score >= 21 || G.makes > 0 ? 'success' : 'fail');
   arc.over({
     eyebrow: why || 'Buzzer', title: G.score >= 21 ? 'Lights <em>out</em>' : 'Buzzer',
@@ -176,7 +179,7 @@ function stepBall(dtIn) {
     if (b.vz > 0 && b.z > BOARD_Z - BR && b.z < BOARD_Z + 0.15 && b.y > BOARD_Y0 - 0.08 && b.y < BOARD_Y1 + 0.08 && abs(b.x) < BOARD_HW + 0.05) {
       b.z = BOARD_Z - BR; b.vz *= -0.42; b.vx *= 0.85;
       if (!G.attract) arc.sfx.tone(310, 0.05, { type: 'square', vol: 0.06 });
-      FXK.board(b.x, b.y);
+      FXK.board(b.x, b.y); VX.board(b.x, b.y);
     }
     if (!b.resolved && py > RIM.y && b.y <= RIM.y && b.vy < 0) resolveRim();
     // the cage keeps the ball on the roof
@@ -343,7 +346,38 @@ function courtTex() {
     g.font = 'italic 600 ' + (0.42 * s) + 'px ' + F_DISP; g.textAlign = 'center'; g.textBaseline = 'middle';
     g.fillStyle = 'rgba(201,169,110,.55)'; g.fillText('Court Lights', 0, 0);
     g.restore();
+    // sneaker scuffs where feet plant and turn: the shooter's spot, the key, under the rim
+    const scuff = (cx, cz, spread, n) => {
+      for (let i = 0; i < n; i++) {
+        const a = rnd() * TAU, d = rnd() * spread, x = px(cx + cos(a) * d), y = pz(cz + sin(a) * d * 0.7);
+        g.strokeStyle = 'rgba(' + (rnd() < 0.8 ? '20,12,10,' : '240,220,200,') + (0.05 + rnd() * 0.12).toFixed(3) + ')';
+        g.lineWidth = 1 + rnd() * 3; g.beginPath(); g.arc(x, y, 8 + rnd() * 26, a, a + 0.5 + rnd() * 1.3); g.stroke();
+      }
+    };
+    scuff(0, 0.2, 1.2, 140); scuff(0, 6.2, 1.6, 110); scuff(-1.6, 3.2, 1.0, 40); scuff(1.8, 2.5, 1.0, 40);
+    // the paint wears thin at the edges of the lines, dust gathers along the fence
+    for (let i = 0; i < 600; i++) { g.fillStyle = 'rgba(74,42,34,' + (rnd() * 0.25).toFixed(3) + ')'; g.fillRect(rnd() * W, rnd() * H, 2 + rnd() * 5, 1 + rnd() * 2); }
+    const edge = g.createLinearGradient(0, 0, W, 0);
+    edge.addColorStop(0, 'rgba(30,20,16,.35)'); edge.addColorStop(0.08, 'rgba(30,20,16,0)'); edge.addColorStop(0.92, 'rgba(30,20,16,0)'); edge.addColorStop(1, 'rgba(30,20,16,.35)');
+    g.fillStyle = edge; g.fillRect(0, 0, W, H);
     grain(g, W, H, 9000, 0.06);
+  }, { clamp: true });
+}
+// Roughness for the court: sealed rubber that has been played to a sheen where feet go most, dull in the corners.
+function courtRough() {
+  const W2 = 256, H2 = 331;
+  return canvasTex(W2, H2, (g) => {
+    g.fillStyle = 'rgb(150,150,150)'; g.fillRect(0, 0, W2, H2);
+    const pol = (cx, cy, r, a) => { const gr = g.createRadialGradient(cx, cy, 2, cx, cy, r); gr.addColorStop(0, 'rgba(70,70,70,' + a + ')'); gr.addColorStop(1, 'rgba(70,70,70,0)'); g.fillStyle = gr; g.fillRect(0, 0, W2, H2); };
+    pol(W2 / 2, H2 * 0.27, 90, 0.9); pol(W2 / 2, H2 * 0.78, 80, 0.7); pol(W2 / 2, H2 * 0.5, 120, 0.5);
+    for (let i = 0; i < 4000; i++) { const v = 110 + (rnd() * 90) | 0; g.fillStyle = 'rgba(' + v + ',' + v + ',' + v + ',.35)'; g.fillRect(rnd() * W2, rnd() * H2, 1 + rnd() * 2, 1 + rnd() * 2); }
+  }, { clamp: true, srgb: false });
+}
+function blobTex() {
+  return canvasTex(64, 64, (g, w, h) => {
+    const gr = g.createRadialGradient(w / 2, h / 2, 1, w / 2, h / 2, w / 2);
+    gr.addColorStop(0, 'rgba(0,0,0,.8)'); gr.addColorStop(0.5, 'rgba(0,0,0,.42)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
   }, { clamp: true });
 }
 
@@ -422,16 +456,6 @@ function boardTex() {
   }, { clamp: true });
 }
 
-function numberTex() {
-  return canvasTex(256, 256, (g, w, h) => {
-    g.clearRect(0, 0, w, h);
-    g.font = '700 150px ' + F_UI; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.lineWidth = 12; g.strokeStyle = '#2a1408'; g.strokeText('11', w / 2, h * 0.6);
-    g.fillStyle = '#FBF5EC'; g.fillText('11', w / 2, h * 0.6);
-    g.font = '700 38px ' + F_UI; g.fillStyle = '#FBF5EC'; g.fillText('VEER', w / 2, h * 0.17);
-  }, { clamp: true });
-}
-
 function glowTex() {
   return canvasTex(128, 128, (g, w, h) => {
     const gr = g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
@@ -500,8 +524,42 @@ function colorsInit() {
   COL.spark = new THREE.Color('#ffe0a0'); COL.conf = ['#FFB736', '#FF6940', '#FBF5EC', '#c9a96e', '#7fd1ff', '#ff7ab6'].map((c) => new THREE.Color(c));
 }
 // Effects take game coordinates and convert here.
+// Spectacle on top of the court's own particles: a ribbon behind every shot, a gold power burst and a
+// shockwave at the rim on a make, a spark crack on the iron, fireworks over the hoop when the streak is
+// on fire, and a victory shower when the buzzer goes on a good night. Tier-gated inside the library.
+let VFX = null, VTR = null;
+const _vp = new THREE.Vector3(), _vn = new THREE.Vector3(0, 1, 0), _vb = new THREE.Vector3(0, 0, -1);
+function buildVFX() {
+  try { VFX = createVFX(R3.renderer, R3.scene, R3.camera, { quality: R3.q, unit: 1, groundY: 0, soft: R3.soft, reduced: !!arc.reducedMotion }); VFX.warm(); } catch (e) { VFX = null; }
+}
+const VX = {
+  make(kind) {
+    if (!VFX) return;
+    _vp.set(-RIM.x, RIM.y, RIM.z);
+    VFX.ring(_vp, kind === 'swish' ? '#ffd27a' : '#fff1d6', { size: kind === 'swish' ? 1.2 : 0.9, normal: _vn, kind: 'shock' });
+    VFX.burst(_vp, { color: G.combo >= 3 ? '#ff7a2a' : '#ffb736', size: kind === 'swish' ? 0.8 : 0.6 });
+    if (G.combo >= 3 && !G.attract) {
+      _vp.set(-RIM.x - 1.2, RIM.y + 3.2, RIM.z + 1.5); VFX.fireworks(_vp, { burst: 'peony', size: 0.7, color: '#ffb736', color2: '#ff6940' });
+      _vp.set(-RIM.x + 1.4, RIM.y + 3.6, RIM.z + 1.8); VFX.fireworks(_vp, { burst: 'crackle', size: 0.6, color: '#fff1d6', delay: 0.25 });
+      if (!arc.reducedMotion) VFX.timeWarp(0.45, 0.8);
+    }
+  },
+  rim(x, z, s) { if (!VFX) return; _vp.set(-x, RIM.y, z); VFX.impact(_vp, _vn, { kind: 'spark', color: '#ffb070', size: 0.35 + s * 0.3 }); },
+  board(x, y) { if (!VFX) return; _vp.set(-x, y, BOARD_Z - 0.04); VFX.impact(_vp, _vb, { kind: 'glass', size: 0.3 }); },
+  win() { if (!VFX || G.makes < 3) return; _vp.set(0, 3.2, 4.5); VFX.winBurst(_vp, { colors: ['#ffb736', '#ff6940', '#fff1d6'], size: 0.55 }); },
+  // a ribbon follows the ball while it is in the air
+  tick(dt) {
+    if (!VFX) return;
+    const b = G.ball, air = !!(b && b.air);
+    if (air && !VTR) VTR = VFX.trail(W.ball, { color: G.combo >= 3 && !G.attract ? '#ff7a2a' : '#ffd9a0', width: 0.16, life: 0.35, core: 0.7 });
+    else if (!air && VTR) { VTR.stop(); VTR = null; }
+    VFX.setReduced(!!arc.reducedMotion);
+    VFX.update(dt);
+  },
+};
 const FXK = {
   make(kind) {
+    VX.make(kind);
     if (!FX.add) return;
     G.flare = 1;
     const rm = arc && arc.reducedMotion;
@@ -517,6 +575,7 @@ const FXK = {
     }
   },
   rim(x, z, s) {
+    VX.rim(x, z, s);
     if (!FX.add) return;
     const n = (arc && arc.reducedMotion ? 6 : 18) * s;
     for (let i = 0; i < n; i++) FX.add.add(-x, RIM.y, z, rr(-2.5, 2.5), rr(0.5, 3.2), rr(-2.5, 1.5), rr(0.2, 0.45), rr(0.03, 0.06), COL.spark, 1, 8, 0.96);
@@ -646,7 +705,7 @@ function buildCity() {
 
 function buildRoof() {
   const ct = courtTex();
-  const court = new THREE.Mesh(new THREE.PlaneGeometry(CX1 - CX0, CZ1 - CZ0), std({ map: ct, roughness: 0.82, metalness: 0.0 }));
+  const court = new THREE.Mesh(new THREE.PlaneGeometry(CX1 - CX0, CZ1 - CZ0), std({ map: ct, roughness: 0.9, roughnessMap: courtRough(), metalness: 0.0, envMapIntensity: 0.8 }));
   court.rotation.x = -PI / 2; court.position.set(0, 0, (CZ0 + CZ1) / 2);
   court.receiveShadow = true; R3.scene.add(court);
   const roof = new THREE.Mesh(new THREE.PlaneGeometry(26, 30), std({ map: concreteTex(), color: 0x8a8078, roughness: 0.95 }));
@@ -836,64 +895,51 @@ function writeNet() {
   W.netLines.geometry.attributes.position.needsUpdate = true;
 }
 
-/* ---------------------------------------------------------------------- the shooter */
-const P = {};
-function limb(r, len, mat) {
-  const m = new THREE.Mesh(new THREE.CapsuleGeometry(r, len, 4, 10), mat);
-  m.position.y = -(len / 2 + r * 0.6); m.castShadow = true;
-  return m;
-}
+/* ---------------------------------------------------------------------- the people */
+// The shooter, a friend feeding passes from a ball cart, and the neighbours watching from the next roofs.
+// Bodies, faces, blinks, gait and reactions come from the shared people library; the shot itself
+// (crouch, set, release, follow-through) is posed here on top of it so it matches the timing of the rules.
+const P = { cr: 0, ra: 0, ju: 0, fo: 0, wArm: 1, mood: 0, pend: null, prevPhase: '', prevIn: 1 };
+const NPC = { pend: null, reached: false };
+const _lk = new THREE.Vector3();
+function humanQ() { return R3.soft ? 0 : R3.q >= 2 ? 3 : 2; }
 function buildShooter() {
-  const skin = std({ color: 0x8a5a3c, roughness: 0.62 });
-  const jersey = std({ color: 0xff6940, roughness: 0.75 });
-  const trim = std({ color: 0x2a1610, roughness: 0.7 });
-  const shorts = std({ color: 0x1d1a18, roughness: 0.8 });
-  const sock = std({ color: 0xf2ede4, roughness: 0.85 });
-  const shoe = std({ color: 0xf6f2ea, roughness: 0.5 });
-  const sole = std({ color: 0xff6940, roughness: 0.6 });
-  const hair = std({ color: 0x15100d, roughness: 0.9 });
-  const root = new THREE.Group(); root.position.set(0, 0, 0.2); R3.scene.add(root); P.root = root;
-  const hip = new THREE.Group(); hip.position.y = 0.95; root.add(hip); P.hip = hip;
-  const sh = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.19, 0.3, 14), shorts); sh.position.y = -0.06; sh.scale.z = 0.78; sh.castShadow = true; hip.add(sh);
-  const torso = new THREE.Group(); hip.add(torso); P.torso = torso;
-  const chest = new THREE.Mesh(new THREE.CapsuleGeometry(0.16, 0.32, 6, 14), jersey); chest.position.y = 0.32; chest.scale.set(1.3, 1, 0.78); chest.castShadow = true; torso.add(chest);
-  const band = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.05, 14), trim); band.position.y = 0.06; band.scale.z = 0.78; torso.add(band);
-  const num = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.3), new THREE.MeshStandardMaterial({ map: numberTex(), transparent: true, roughness: 0.8, depthWrite: false }));
-  num.position.set(0, 0.36, -0.132); num.rotation.y = PI; torso.add(num);
-  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 0.1, 10), skin); neck.position.y = 0.64; torso.add(neck);
-  const head = new THREE.Group(); head.position.y = 0.76; torso.add(head); P.head = head;
-  const skull = new THREE.Mesh(new THREE.SphereGeometry(0.11, 18, 14), skin); skull.scale.set(0.92, 1.08, 1); skull.castShadow = true; head.add(skull);
-  const hr = new THREE.Mesh(new THREE.SphereGeometry(0.115, 18, 10, 0, TAU, 0, PI * 0.55), hair); hr.position.y = 0.012; hr.rotation.x = -0.25; head.add(hr);
-  const hb = new THREE.Mesh(new THREE.TorusGeometry(0.108, 0.014, 6, 20), jersey); hb.rotation.x = PI / 2 - 0.15; hb.position.y = 0.03; head.add(hb);
-  P.arms = []; P.legs = [];
-  [-1, 1].forEach((sd) => {
-    const shoulder = new THREE.Group(); shoulder.position.set(sd * 0.25, 0.52, 0); torso.add(shoulder);
-    const cap = new THREE.Mesh(new THREE.SphereGeometry(0.06, 10, 8), jersey); cap.scale.set(1, 0.85, 1); shoulder.add(cap);
-    shoulder.add(limb(0.05, 0.22, skin));
-    const elbow = new THREE.Group(); elbow.position.y = -0.33; shoulder.add(elbow);
-    elbow.add(limb(0.042, 0.22, skin));
-    const hand = new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 8), skin); hand.position.y = -0.31; hand.scale.set(0.8, 1.1, 0.6); elbow.add(hand);
-    P.arms.push({ shoulder, elbow, hand, sd });
-    const hipJ = new THREE.Group(); hipJ.position.set(sd * 0.095, -0.12, 0); hip.add(hipJ);
-    hipJ.add(limb(0.072, 0.26, skin));
-    const knee = new THREE.Group(); knee.position.y = -0.41; hipJ.add(knee);
-    knee.add(limb(0.058, 0.27, skin));
-    const sk = new THREE.Mesh(new THREE.CylinderGeometry(0.062, 0.058, 0.16, 10), sock); sk.position.y = -0.33; knee.add(sk);
-    const foot = new THREE.Group(); foot.position.y = -0.43; knee.add(foot);
-    const sh1 = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.08, 0.26), shoe); sh1.position.set(0, -0.0, 0.05); sh1.castShadow = true; foot.add(sh1);
-    const so = new THREE.Mesh(new THREE.BoxGeometry(0.115, 0.025, 0.27), sole); so.position.set(0, -0.045, 0.05); foot.add(so);
-    P.legs.push({ hipJ, knee, foot, sd });
-  });
+  const H = createHuman({ seed: 23, quality: humanQ(), sex: 'm', build: 'athletic', height: 1.82, hair: 'short',
+    outfit: { top: '#ff6940', top2: '#2a1610', sleeves: 'none', bottom: '#1d1a18', legs: 'long-shorts', socks: '#f2ede4', socksHigh: true, shoes: '#f6f2ea', soles: '#ff6940', number: 11, numberInk: '#2a1408' } });
+  H.group.position.set(0, 0, 0.2); R3.scene.add(H.group);
+  // his name across the shoulders, above the number
+  const name = new THREE.Mesh(new THREE.PlaneGeometry(0.24, 0.06), new THREE.MeshStandardMaterial({ map: canvasTex(256, 64, (g, w, h) => {
+    g.clearRect(0, 0, w, h); g.font = '700 46px ' + F_UI; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#2a1408'; g.fillText('VEER', w / 2, h / 2 + 2);
+  }, { clamp: true }), transparent: true, roughness: 0.8, depthWrite: false }));
+  name.position.set(0, 0.13, -0.142); name.rotation.y = PI; name.renderOrder = 2; H.bones.chest.add(name);
+  P.H = H; P.root = H.group; P.hands = [H.bones.fingersL, H.bones.fingersR];
 }
-
-// One pose from three numbers: crouch, how far the ball is raised, and the jump.
+function buildPasser() {
+  const H = createHuman({ seed: 71, quality: humanQ(), sex: 'f', build: 'athletic', hair: 'ponytail',
+    outfit: { top: '#1f6b5a', top2: '#f2ede4', sleeves: 'short', bottom: '#23262d', legs: 'shorts', socks: '#f2ede4', shoes: '#2a2a2e', soles: '#e9e6df' } });
+  H.group.position.set(1.85, 0, 2.5); H.group.rotation.y = Math.atan2(0 - 1.85, 0.2 - 2.5) + 0.25; R3.scene.add(H.group);
+  NPC.H = H; NPC.hand = H.bones.fingersR;
+  // a ball cart beside her, the spares she feeds from
+  const cart = new THREE.Group(); cart.position.set(2.45, 0, 2.95); cart.rotation.y = 0.4; R3.scene.add(cart);
+  const metal = std({ color: 0x2b2a2c, roughness: 0.45, metalness: 0.75 });
+  const frame = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.04, 0.34), metal); frame.position.y = 0.62; cart.add(frame);
+  const legs = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.015, 0.015, 0.62, 6), metal, 4);
+  const o = new THREE.Object3D();
+  [[-0.29, -0.15], [0.29, -0.15], [-0.29, 0.15], [0.29, 0.15]].forEach((q, i) => { o.position.set(q[0], 0.31, q[1]); o.updateMatrix(); legs.setMatrixAt(i, o.matrix); });
+  cart.add(legs);
+  const balls = new THREE.InstancedMesh(new THREE.SphereGeometry(BR, 18, 12), std({ map: ballTex(), roughness: 0.62 }), 5);
+  [[-0.18, 0], [0.0, 0.02], [0.18, -0.01], [-0.09, 0.0], [0.09, 0.01]].forEach((q, i) => { o.position.set(q[0], 0.62 + BR + (i > 2 ? 0.18 : 0), q[1]); o.rotation.set(i, i * 2, 0); o.updateMatrix(); balls.setMatrixAt(i, o.matrix); });
+  balls.castShadow = true; cart.add(balls);
+  NPC.rack = new THREE.Vector3(2.45, 0.85, 2.95);
+}
+// One pose from four numbers: crouch, how far the ball is raised, the jump and the follow-through,
+// laid over the library's own idle so the breathing, weight shift and blinks carry on underneath.
 function poseShooter(dt) {
-  const c = G.charge;
-  const t = G.shotT;
+  if (!P.H) return;
+  const c = G.charge, t = G.shotT, H = P.H;
   let crouch, raise, jump = 0, follow = 0;
   if (G.phase === 'aim') {
-    const breath = sin(R3.time * 2.2) * 0.02;
-    crouch = clamp(c * 1.25, 0, 0.75) + (G.holding ? 0 : 0.12 + breath);
+    crouch = clamp(c * 1.25, 0, 0.75) + (G.holding ? 0 : 0.08);
     raise = G.holding ? clamp(0.3 + c * 0.9, 0, 1) : 0.15 + G.ballIn * 0.1;
   } else {
     const up = clamp(t / 0.22, 0, 1), down = clamp((t - 0.45) / 0.3, 0, 1);
@@ -903,65 +949,140 @@ function poseShooter(dt) {
     if (t > 1.2) raise = lerp(1, 0.2, clamp((t - 1.2) / 0.5, 0, 1));
   }
   const k = 1 - Math.exp(-dt * 14);
-  P.cr = lerp(P.cr || 0, crouch, k); P.ra = lerp(P.ra || 0, raise, k); P.ju = lerp(P.ju || 0, jump, 1 - Math.exp(-dt * 20)); P.fo = lerp(P.fo || 0, follow, k);
-  const cr = P.cr, ra = P.ra, fo = P.fo;
-  P.root.position.x = 0;
+  const wasUp = P.ju > 0.05;
+  P.cr = lerp(P.cr, crouch, k); P.ra = lerp(P.ra, raise, k); P.ju = lerp(P.ju, jump, 1 - Math.exp(-dt * 20)); P.fo = lerp(P.fo, follow, k);
+  // touchdown: a scuff of dust from the soles
+  if (wasUp && P.ju <= 0.05 && dt > 0) FXK.dust(-P.root.position.x, P.root.position.z + 0.1, 0.45);
+  // reactions take a beat to arrive, as they do in a person, and end the moment the next ball comes
+  if (P.pend && R3.time >= P.pend.at) { H.play(P.pend.name, { speed: P.pend.speed || 1.25, intensity: P.pend.k || 1 }); P.reacting = P.pend.name; P.pend = null; }
+  if (P.reacting && (!H.playing(P.reacting) || (G.phase === 'aim' && G.ballIn > 0.15))) { if (H.playing(P.reacting)) H.stop(P.reacting); P.reacting = null; }
+  P.wArm = lerp(P.wArm, P.reacting ? 0 : 1, 1 - Math.exp(-dt * (P.reacting ? 10 : 6)));
+  P.mood = lerp(P.mood, clamp(G.combo / 4, 0, 1) - (G.phase === 'miss' ? 0.5 : 0), 1 - Math.exp(-dt * 2));
+  H.setMood(P.mood);
+  const b = G.ball;
+  if (b && b.air) _lk.set(-b.x, b.y, b.z); else _lk.set(-RIM.x, RIM.y, RIM.z);
+  H.update(dt, { speed: 0, look: _lk });
   P.root.position.y = P.ju;
-  P.hip.position.y = 0.95 - cr * 0.2;
-  P.torso.rotation.x = cr * 0.22 - fo * 0.08;
   P.root.rotation.y = -G.aimX * 0.35;
-  P.head.rotation.x = -0.15 - ra * 0.2;
-  P.legs.forEach((L) => {
-    L.hipJ.rotation.x = -cr * 0.85 - (P.ju > 0.05 ? 0.1 : 0);
-    L.knee.rotation.x = cr * 1.5 + (P.ju > 0.05 ? 0.25 : 0);
-    L.foot.rotation.x = -cr * 0.6 + (P.ju > 0.05 ? 0.4 : 0);
-    L.hipJ.rotation.z = L.sd * 0.06;
-  });
-  P.arms.forEach((Ar) => {
-    // chest hold (shoulder -0.55, elbow -1.6) to the set point (-2.2, -1.5) to a straight release (-2.75, -0.15)
-    const s = lerp(-0.55, -2.2, ra) + fo * -0.55;
-    const e = lerp(-1.65, -1.45, ra) * (1 - fo) + fo * -0.12;
-    Ar.shoulder.rotation.x = s;
-    Ar.elbow.rotation.x = e;
-    Ar.shoulder.rotation.z = -Ar.sd * (0.3 - fo * 0.12);
-  });
+  const B = H.bones, w = P.wArm, cr = P.cr * w, ra = P.ra, fo = P.fo, air = P.ju > 0.05 ? 1 : 0;
+  B.pelvis.position.y -= cr * 0.17;
+  B.hipL.rotation.x += -cr * 0.85 - air * 0.1; B.hipR.rotation.x += -cr * 0.85 - air * 0.1;
+  B.kneeL.rotation.x += cr * 1.5 + air * 0.25; B.kneeR.rotation.x += cr * 1.5 + air * 0.25;
+  B.ankleL.rotation.x += -cr * 0.6 + air * 0.4; B.ankleR.rotation.x += -cr * 0.6 + air * 0.4;
+  B.spine.rotation.x += cr * 0.22 - fo * 0.08 * w;
+  // chest hold, to the set point above the forehead, to a straight release and a held wrist flick
+  const sx = lerp(-0.55, -2.2, ra) + fo * -0.55, ex = lerp(-1.65, -1.45, ra) * (1 - fo) + fo * -0.12;
+  const arms = [[B.shoulderL, B.elbowL, B.wristL, -1], [B.shoulderR, B.elbowR, B.wristR, 1]];
+  for (let i = 0; i < 2; i++) {
+    const A = arms[i];
+    A[0].rotation.x = lerp(A[0].rotation.x, sx, w); A[0].rotation.y = lerp(A[0].rotation.y, 0, w);
+    A[0].rotation.z = lerp(A[0].rotation.z, A[3] * (0.3 - fo * 0.12), w);
+    A[1].rotation.x = lerp(A[1].rotation.x, ex, w);
+    A[2].rotation.x = lerp(A[2].rotation.x, -0.25 * ra + fo * 0.9, w);
+  }
+}
+// The friend with the ball cart: watches the shot, reacts a moment later, reaches for a spare as the
+// ball dies, and feeds it to the shooter's hands.
+function poseNPC(dt) {
+  const H = NPC.H; if (!H) return;
+  const b = G.ball;
+  if (NPC.pend && R3.time >= NPC.pend.at) { H.play(NPC.pend.name, { speed: 1.15, intensity: NPC.pend.k || 1 }); NPC.pend = null; }
+  if (b && (G.phase === 'net' || G.phase === 'miss') && !b.air && b.dead > 0.18 && !NPC.reached) { NPC.reached = true; H.play('reach', { target: NPC.rack, speed: 1.6 }); }
+  if (b && b.air) _lk.set(-b.x, b.y, b.z); else if (P.H) P.H.bones.head.getWorldPosition(_lk); else _lk.set(0, 1.7, 0.2);
+  H.update(dt, { speed: 0, look: _lk });
+}
+function feedPass() {
+  if (!NPC.H) { W.passFrom.set(1.6, 1.0, 1.2); return; }
+  NPC.reached = false;
+  NPC.H.play('throw', { from: 0.42, speed: 1.3 });
+  NPC.hand.getWorldPosition(W.passFrom);
+}
+function reactTo(made, kind) {
+  const d = 0.18 + rnd() * 0.17;
+  if (made) {
+    P.pend = { at: R3.time + d, name: G.combo >= 3 ? 'celebrate' : kind === 'swish' && rnd() < 0.6 ? 'fistPump' : rnd() < 0.5 ? 'fistPump' : 'clap', k: 0.85, speed: G.combo >= 3 ? 1.3 : 1.2 };
+    NPC.pend = { at: R3.time + d + 0.15 + rnd() * 0.3, name: G.combo >= 3 ? 'cheer' : rnd() < 0.6 ? 'clap' : 'point', k: 0.8 };
+    if (W.crowd) W.crowd.react(G.combo >= 3 || kind === 'swish' ? 'cheer' : 'clap');
+  } else {
+    P.pend = { at: R3.time + d, name: rnd() < 0.55 ? 'handsOnHead' : 'shrug', k: 0.7, speed: 1.4 };
+    if (rnd() < 0.5) NPC.pend = { at: R3.time + d + 0.3, name: 'shrug', k: 0.5 };
+    if (W.crowd && rnd() < 0.6) W.crowd.react('groan');
+  }
 }
 
-// Neighbours watching from beyond the cage; they jump when the net snaps.
+// Neighbours watching from beyond the cage, each on their own clock: they lean in, cheer a make a beat
+// late, groan at a miss, and now and then wave, clap or turn to the person next to them.
 function buildCrowd() {
-  const spots = [];
-  for (let i = 0; i < 6; i++) { spots.push([-(5.5 + (i % 2) * 0.8), 0.6 + i * 1.35, 1]); spots.push([5.5 + ((i + 1) % 2) * 0.8, 1.2 + i * 1.3, -1]); }
-  const n = spots.length;
-  const shirt = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.17, 0.34, 4, 10), std({ color: 0xffffff, roughness: 0.8 }), n);
-  const legs = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.065, 0.62, 4, 8), std({ color: 0x24262c, roughness: 0.85 }), n * 2);
-  const arms = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.05, 0.42, 4, 8), std({ color: 0x8a5a3c, roughness: 0.6 }), n * 2);
-  const head = new THREE.InstancedMesh(new THREE.SphereGeometry(0.11, 12, 10), std({ color: 0x8a5a3c, roughness: 0.6 }), n);
-  const hair = new THREE.InstancedMesh(new THREE.SphereGeometry(0.115, 12, 8, 0, TAU, 0, PI * 0.5), std({ color: 0x15100d, roughness: 0.9 }), n);
-  const cols = ['#c22a5a', '#e07a2a', '#1f6b5a', '#f2b13a', '#3a4a8a', '#d9c9ae', '#7a2a18'];
-  spots.forEach((sp, i) => { shirt.setColorAt(i, new THREE.Color(cols[i % cols.length])); });
-  [shirt, legs, arms, head].forEach((m) => { m.castShadow = true; R3.scene.add(m); });
-  R3.scene.add(hair);
-  W.crowd = { shirt, legs, arms, head, hair, spots, ph: spots.map(() => rnd() * TAU), m: new THREE.Matrix4(), q: new THREE.Quaternion(), e: new THREE.Euler(), p: new THREE.Vector3(), sc: new THREE.Vector3(1, 1, 1) };
+  const members = [];
+  for (let i = 0; i < 6; i++) {
+    const a = [-(5.5 + (i % 2) * 0.8), 0.6 + i * 1.35], b2 = [5.5 + ((i + 1) % 2) * 0.8, 1.2 + i * 1.3];
+    [a, b2].forEach((q) => members.push({ x: q[0], y: 0, z: q[1], yaw: Math.atan2(0 - q[0], 3.5 - q[1]) }));
+  }
+  W.crowd = createCrowd({ members, unit: 1, seed: 9, quality: humanQ(), seated: false, colors: ['#c22a5a', '#e07a2a', '#1f6b5a', '#f2b13a', '#3a4a8a'] });
+  W.crowd.mesh.castShadow = true; R3.scene.add(W.crowd.mesh);
 }
-function animCrowd(t) {
+function animCrowd(t, dt) {
   const C = W.crowd; if (!C) return;
   const hype = clamp(1.2 - G.swishT / 1.6, 0, 1) * (G.attract ? 0.6 : 1) + clamp(G.combo / 6, 0, 0.5);
-  const rm = arc.reducedMotion;
-  const put = (mesh, i, x, y, z, rx, rz, ry) => { C.e.set(rx || 0, ry || 0, rz || 0); C.q.setFromEuler(C.e); C.p.set(x, y, z); C.m.compose(C.p, C.q, C.sc); mesh.setMatrixAt(i, C.m); };
-  C.spots.forEach((sp, i) => {
-    const ph = C.ph[i];
-    const jump = rm ? 0 : max(0, sin(t * 7 + ph)) * 0.14 * hype;
-    const sway = rm ? 0 : sin(t * 1.3 + ph) * 0.03;
-    const face = sp[2] > 0 ? -PI / 2 : PI / 2;
-    const x = sp[0] + sway, z = sp[1], y = jump;
-    put(C.legs, i * 2, x, 0.4 + y, z - 0.08, 0, 0, face); put(C.legs, i * 2 + 1, x, 0.4 + y, z + 0.08, 0, 0, face);
-    put(C.shirt, i, x, 1.06 + y, z, 0, 0, face);
-    put(C.head, i, x, 1.52 + y, z, 0, 0, face); put(C.hair, i, x, 1.535 + y, z, 0, 0, face);
-    const cheer = rm ? 0.2 * hype : clamp(hype, 0, 1) * (0.6 + 0.4 * sin(t * 6 + ph));
-    put(C.arms, i * 2, x, 1.1 + y + cheer * 0.25, z - 0.21, -cheer * 2.6, 0, 0);
-    put(C.arms, i * 2 + 1, x, 1.1 + y + cheer * 0.25, z + 0.21, cheer * 2.6, 0, 0);
+  C.excite(clamp(0.15 + hype * 0.85, 0, 1));
+  const b = G.ball;
+  if (b) _lk.set(-b.x, max(1, b.y), b.z); else _lk.set(0, 2, 4);
+  C.update(dt, { look: _lk });
+}
+
+// What keeps people and the ball on the ground: soft contact shadows. Pools of warm light under the
+// floods. And the air itself: dust and humidity drifting through the light, drawn by the GPU alone.
+function buildAtmosphere() {
+  const bt = blobTex();
+  const bm = new THREE.MeshBasicMaterial({ map: bt, transparent: true, depthWrite: false, opacity: 0.8, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+  const g1 = new THREE.PlaneGeometry(1, 1); g1.rotateX(-PI / 2);
+  W.blobs = new THREE.InstancedMesh(g1, bm, 6); W.blobs.frustumCulled = false; W.blobs.renderOrder = 2; R3.scene.add(W.blobs);
+  W.blobM = new THREE.Matrix4(); W.blobQ = new THREE.Quaternion(); W.blobP = new THREE.Vector3(); W.blobS = new THREE.Vector3();
+  const pt = canvasTex(128, 128, (g, w, h) => {
+    const gr = g.createRadialGradient(w / 2, h / 2, 1, w / 2, h / 2, w / 2);
+    gr.addColorStop(0, 'rgba(255,214,160,.55)'); gr.addColorStop(0.45, 'rgba(255,190,130,.18)'); gr.addColorStop(1, 'rgba(255,170,110,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  }, { clamp: true });
+  const poolM = new THREE.MeshBasicMaterial({ map: pt, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.32, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
+  W.pools = [];
+  [[-2.4, 6.4, 5.5], [2.4, 6.4, 5.5], [0, 0.6, 4.6], [-3.3, -1.2, 3.2], [3.3, -1.2, 3.2]].forEach((q) => {
+    const m = new THREE.Mesh(g1, poolM); m.position.set(q[0], 0.012, q[1]); m.scale.set(q[2], 1, q[2] * 0.85); m.renderOrder = 1; R3.scene.add(m); W.pools.push(m);
   });
-  [C.legs, C.shirt, C.head, C.hair, C.arms].forEach((m) => { m.instanceMatrix.needsUpdate = true; });
+  // haze: motes that hang in the lit air, brightest inside the beams; positions move in the vertex shader
+  const n = 220, pos = new Float32Array(n * 3), sd = new Float32Array(n);
+  for (let i = 0; i < n; i++) { pos[i * 3] = rr(-4.6, 4.6); pos[i * 3 + 1] = rr(0.4, 7.2); pos[i * 3 + 2] = rr(-2.5, 9.5); sd[i] = rnd(); }
+  const hg = new THREE.BufferGeometry(); hg.setAttribute('position', new THREE.BufferAttribute(pos, 3)); hg.setAttribute('aSeed', new THREE.BufferAttribute(sd, 1));
+  W.hazeU = { uTime: { value: 0 }, uK: { value: 600 }, uA: { value: 1 } };
+  W.haze = new THREE.Points(hg, new THREE.ShaderMaterial({
+    uniforms: W.hazeU, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: 'attribute float aSeed; uniform float uTime; uniform float uK; varying float vA; void main(){ vec3 p = position; float t = uTime * (0.05 + aSeed * 0.06);' +
+      ' p.x += sin(t * 3.1 + aSeed * 40.0) * 0.6; p.y += sin(t * 2.3 + aSeed * 17.0) * 0.4 + mod(t * 0.4 + aSeed * 7.0, 1.0) * 0.3; p.z += cos(t * 2.7 + aSeed * 23.0) * 0.6;' +
+      ' float beam = exp(-pow(abs(p.x) - 2.6, 2.0) * 0.18) * smoothstep(1.0, 8.0, p.z) + 0.25;' +
+      ' vec4 mv = modelViewMatrix * vec4(p, 1.0); vA = beam * (0.5 + 0.5 * sin(uTime * (0.6 + aSeed) + aSeed * 30.0)) * smoothstep(0.5, 2.5, -mv.z);' +
+      ' gl_PointSize = max(1.0, (0.035 + aSeed * 0.05) * uK / max(0.3, -mv.z)); gl_Position = projectionMatrix * mv; }',
+    fragmentShader: 'uniform float uA; varying float vA; void main(){ float d = length(gl_PointCoord - 0.5) * 2.0; if (d > 1.0) discard; float a = pow(1.0 - d, 2.0) * vA * 0.32 * uA; gl_FragColor = vec4(vec3(1.0, 0.86, 0.66) * a, a); }',
+  }));
+  W.haze.frustumCulled = false; W.haze.renderOrder = 7; R3.scene.add(W.haze);
+}
+// A small night environment so polished paint, the rim and the glass pick up the floodlights.
+function buildEnv() {
+  if (R3.soft) return;
+  try {
+    const env = new THREE.Scene();
+    env.add(new THREE.Mesh(new THREE.SphereGeometry(30, 16, 8), new THREE.MeshBasicMaterial({ color: new THREE.Color(0.05, 0.03, 0.07), side: THREE.BackSide })));
+    const hor = new THREE.Mesh(new THREE.CylinderGeometry(29, 29, 6, 24, 1, true), new THREE.MeshBasicMaterial({ color: new THREE.Color(0.55, 0.22, 0.1), side: THREE.BackSide }));
+    hor.position.set(0, 1, 0); env.add(hor);
+    const lamp = new THREE.MeshBasicMaterial({ color: new THREE.Color(14, 11, 8) });
+    [[-5.6, 7.1, -2.6], [5.6, 7.1, -2.6], [-5.6, 7.1, 9.6], [5.6, 7.1, 9.6]].forEach((q) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.7), lamp); m.position.set(q[0], q[1], q[2] - 3.5); m.lookAt(0, 0, 0); env.add(m); });
+    const pm = new THREE.PMREMGenerator(R3.renderer);
+    R3.env = pm.fromScene(env, 0.04).texture; pm.dispose();
+    R3.scene.environment = R3.env; R3.scene.environmentIntensity = 0.7;
+  } catch (e) { /* plain lighting */ }
+}
+function placeBlob(i, x, z, size, a) {
+  W.blobP.set(x, 0.014, z); W.blobS.set(size, 1, size * 0.8);
+  if (a <= 0.02) W.blobS.set(0.0001, 1, 0.0001);
+  W.blobM.compose(W.blobP, W.blobQ, W.blobS); W.blobs.setMatrixAt(i, W.blobM);
 }
 
 function buildBall() {
@@ -1028,12 +1149,16 @@ function initRenderer() {
     R3.camera = new THREE.PerspectiveCamera(46, arc.w / arc.h, 0.1, 900);
     R3.glow = glowTex();
     colorsInit();
-    buildSky(); buildCity(); buildRoof(); buildCage(); buildStrings(); buildFloodlights(); buildHoop(); buildShooter(); buildBall(); buildCrowd(); buildLights();
+    buildSky(); buildCity(); buildRoof(); buildCage(); buildStrings(); buildFloodlights(); buildHoop(); buildBall(); buildLights();
+    // the people, the air and the effects arrive over the first frames after the menu is up, one piece a frame,
+    // so the menu paints as soon as the court exists
+    R3.late = [buildShooter, buildAtmosphere, buildPasser, buildCrowd, buildEnv, buildVFX];
     FX.add = new FxPool(900, true); FX.norm = new FxPool(700, false);
+    W.passFrom = new THREE.Vector3(1.6, 1.0, 1.2);
     R3.camPos = new THREE.Vector3(-1.15, 3.1, -7.0); R3.camLook = new THREE.Vector3(0, 2.4, 6.4);
     R3.tmpV = new THREE.Vector3(); R3.tmpV2 = new THREE.Vector3(); R3.proj = new THREE.Vector3();
     // Shared post pass: bloom on the floodlights and the rim glow, grade, grain; the camera swings onto the hoop at the start.
-    POST = createPost(r, { arc, soft: R3.soft, intro: { yaw: -0.8, up: 0.35, back: 0.35 }, results: { yaw: 0.28 }, target: (v) => v.copy(R3.camLook), look: { bloom: 0.62, threshold: 0.68, vignette: 0.12 } });
+    POST = createPost(r, { arc, soft: R3.soft, intro: { yaw: -0.8, up: 0.35, back: 0.35 }, results: { yaw: 0.28 }, target: (v) => v.copy(R3.camLook), look: { bloom: 0.58, threshold: 0.7, vignette: 0.2, sat: 0.97, contrast: 1.04, lift: [0.008, 0.012, 0.026], gain: [1.03, 1.0, 0.96], grain: 0.03 } });
     applyQuality();
     R3.ok = true;
   } catch (err) {
@@ -1054,6 +1179,10 @@ function applyQuality() {
   key.castShadow = R3.q >= 1;
   if (key.shadow.mapSize.x !== want) { key.shadow.mapSize.set(want, want); if (key.shadow.map) { key.shadow.map.dispose(); key.shadow.map = null; } }
   if (W.halo) W.halo.visible = R3.q >= 1;
+  if (W.haze) W.haze.visible = R3.q >= 2;
+  if (W.pools) W.pools.forEach((m) => { m.visible = R3.q >= 1; });
+  if (R3.env) R3.scene.environment = R3.q >= 1 ? R3.env : null;
+  if (VFX) VFX.setQuality(R3.q);
 }
 
 function cameraRig(dt) {
@@ -1087,18 +1216,22 @@ function frame3D(dt) {
   R3.time += dt;
   const t = R3.time, rm = arc.reducedMotion;
   const sdt = dt * (G.slow > 0 ? 0.35 : 1);
+  poseNPC(dt);
+  if (NPC.H) NPC.H.group.updateMatrixWorld(true);
+  if (G.ballIn < P.prevIn - 0.2) feedPass();
+  P.prevIn = G.ballIn;
+  if (G.phase !== P.prevPhase) { if (G.phase === 'net') reactTo(true, G.lastKind); else if (G.phase === 'miss') reactTo(false); P.prevPhase = G.phase; }
   poseShooter(dt);
-  P.root.updateMatrixWorld(true);
+  if (P.root) P.root.updateMatrixWorld(true);
   // the ball rides in the hands until it is shot
   const b = G.ball;
   const bm = W.ball;
   if (b && !b.air && G.phase === 'aim') {
-    P.arms[0].hand.getWorldPosition(W.hm); P.arms[1].hand.getWorldPosition(W.hm2);
-    W.hm.add(W.hm2).multiplyScalar(0.5);
+    if (P.hands) { P.hands[0].getWorldPosition(W.hm); P.hands[1].getWorldPosition(W.hm2); W.hm.add(W.hm2).multiplyScalar(0.5); } else W.hm.set(-HAND0.x, HAND0.y + 0.15, HAND0.z);
     // in front of the palms, a touch higher
     W.hm.y += 0.1; W.hm.z += 0.1;
     const inK = ease(G.ballIn);
-    bm.position.set(lerp(1.6, W.hm.x, inK), lerp(1.0, W.hm.y, inK) + sin(G.ballIn * PI) * 0.4, lerp(1.2, W.hm.z, inK));
+    bm.position.set(lerp(W.passFrom.x, W.hm.x, inK), lerp(W.passFrom.y, W.hm.y, inK) + sin(G.ballIn * PI) * 0.4, lerp(W.passFrom.z, W.hm.z, inK));
     G.release.x = -bm.position.x; G.release.y = bm.position.y; G.release.z = bm.position.z;
     b.x = G.release.x; b.y = G.release.y; b.z = G.release.z;
     _ax.set(1, 0, 0); _q.setFromAxisAngle(_ax, -dt * 0.4); W.ballQ.premultiply(_q);
@@ -1153,8 +1286,20 @@ function frame3D(dt) {
   W.coneMat.uniforms.uA.value = 0.07 + fl * 0.06;
   const blink = rm ? 1 : 0.4 + 0.6 * (sin(t * 2.5) > 0 ? 1 : 0.15);
   W.redLights.material.color.setRGB(blink, 0.19 * blink, 0.12 * blink);
-  animCrowd(t);
+  animCrowd(t, dt);
+  // contact shadows: the shooter's feet, the ball (fainter and wider as it rises), the passer, the cart
+  if (W.blobs) {
+    const air = P.ju || 0;
+    if (P.root) placeBlob(0, P.root.position.x, P.root.position.z + 0.08, 0.95 + air * 0.8, 1 - air * 1.5); else placeBlob(0, 0, 0, 0, 0);
+    if (b) { const bh = max(0, bm.position.y - BR); placeBlob(1, bm.position.x, bm.position.z, 0.34 + bh * 0.12, clamp(1 - bh / 5, 0, 1)); } else placeBlob(1, 0, 0, 0, 0);
+    if (NPC.H) placeBlob(2, NPC.H.group.position.x, NPC.H.group.position.z, 0.9, 1); else placeBlob(2, 0, 0, 0, 0);
+    if (NPC.H) placeBlob(3, 2.45, 2.95, 0.85, 1); else placeBlob(3, 0, 0, 0, 0);
+    for (let i = 4; i < 6; i++) placeBlob(i, 0, 0, 0, 0);
+    W.blobs.instanceMatrix.needsUpdate = true;
+  }
+  if (W.haze && W.haze.visible) { W.hazeU.uTime.value = t; W.hazeU.uK.value = arc.h * R3.renderer.getPixelRatio() / (2 * Math.tan(R3.camera.fov * PI / 360)); W.hazeU.uA.value = 1 + fl * 0.6; }
   FX.add.step(sdt); FX.norm.step(sdt);
+  VX.tick(dt);
   FX.add.u.uK.value = FX.norm.u.uK.value = arc.h * R3.renderer.getPixelRatio() / (2 * Math.tan(R3.camera.fov * PI / 360));
   cameraRig(dt);
   // quality auto-scale on real frame time
@@ -1293,6 +1438,7 @@ function render(c) {
   R3.last = now;
   if (!R3.ok) drawFail(c);
   else if (!R3.lost) {
+    if (R3.late && R3.late.length && arc.frame > 2) { try { R3.late.shift()(); if (!R3.late.length) applyQuality(); } catch (e) { R3.late.length = 0; } }
     try { frame3D(arc.state === 'pause' ? 0 : dt); if (POST) { POST.setQuality(R3.q, R3.lock); POST.render(R3.scene, R3.camera); } else R3.renderer.render(R3.scene, R3.camera); } catch (e) { R3.ok = false; try { console.warn(e); } catch (er) { /* ignore */ } }
   }
   vignette(c);
