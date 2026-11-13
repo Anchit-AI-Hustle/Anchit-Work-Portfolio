@@ -12,20 +12,20 @@
 <meta property="og:image" content="https://anchit-tandon.com/assets/og/og-default.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=__FONT_Q__:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap">
 <style>
 /* Brand tokens read from lenskart.com computed styles (13 Nov 2026). See the "Brand schema" tab. */
 :root{
-  --primary:#000042; --primary-50:#EEF0FA; --primary-700:#00002E;
-  --accent:#00BAC6; --accent-ink:#00707A; --accent-50:#E3F7F8;
-  --ink:#000042; --heading:#000042; --body:#333368; --muted:#66668E;
-  --page:#F7F7FB; --surface:#FFFFFF; --border:#D9D9E6; --border-soft:#ECECF4;
+  --primary:#000042; --primary-50:#F0F0F6; --primary-700:#333368;
+  --accent:#0EAE8A; --accent-ink:#006B4E; --accent-50:#ECFEFA;
+  --ink:#000042; --heading:#000042; --body:#333368; --muted:#5C5C85;
+  --page:#FBF9F7; --surface:#FFFFFF; --border:#DBDBEA; --border-soft:#F0F0F6;
   --success:#1B7938; --success-bg:#DFF1E4; --orange:#E8590C; --orange-ink:#A8410A; --warn-bg:#FFF1E8;
-  --gold-bg:#FFF6DC; --gold-ink:#7A5A00; --danger:#D7263D; --danger-ink:#A8172B; --danger-bg:#FDE8EB;
-  --r-btn:8px; --r-tag:4px; --r-panel:12px; --r-card:16px; --r-pill:9999px;
+  --gold-bg:#FFF8D9; --gold-ink:#7B5C0A; --danger:#EC3331; --danger-ink:#B3201E; --danger-bg:#FFE9E7;
+  --r-btn:12px; --r-tag:4px; --r-panel:12px; --r-card:16px; --r-pill:9999px;
   --sh-card:0 4px 16px rgba(0,0,66,.07);
-  --hero:linear-gradient(120deg,#EEF0FA,#E3F7F8);
-  --font:'__FONT__','Noto Sans Devanagari',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --hero:linear-gradient(120deg,#F7F2ED,#ECFEFA);
+  --font:'Plus Jakarta Sans','Noto Sans Devanagari',system-ui,-apple-system,'Segoe UI',sans-serif;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -105,7 +105,7 @@ main .wrap{padding-top:24px;padding-bottom:48px}
 .plan li{margin:4px 0}
 .plan{margin:8px 0 0;padding-left:20px}
 .offer{background:#fff;border:1px solid var(--border);border-radius:var(--r-card);overflow:hidden}
-.offer .banner{background:linear-gradient(120deg,#000042,#1A1A7A 60%,#00707A);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.offer .banner{background:linear-gradient(120deg,#000042,#333368 60%,#0A8367);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:8px}
 .offer .banner small{font-size:12px;opacity:.9}
 .offer.hold .banner{background:#4A4A6A}
 .offer .inner{padding:14px 16px;display:grid;gap:8px}
@@ -260,7 +260,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
         <div class="card" style="padding:14px">
           <div class="ring">
             <svg width="72" height="72" viewBox="0 0 72 72" role="img" aria-labelledby="ringT"><title id="ringT">Prescription freshness</title>
-              <circle cx="36" cy="36" r="30" fill="none" stroke="#ECECF4" stroke-width="8"/>
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#F0F0F6" stroke-width="8"/>
               <circle id="ringArc" cx="36" cy="36" r="30" fill="none" stroke="#000042" stroke-width="8" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="124" transform="rotate(-90 36 36)"/>
               <text x="36" y="41" text-anchor="middle" font-size="17" font-weight="700" fill="#000042" id="ringTxt">31</text>
             </svg>
@@ -346,7 +346,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
         <h3>Guardrails built in</h3>
         <ul class="plan">
           <li>No product, price or discount inside a check-in. The message is about the eye test only.</li>
-          <li>At most one check-in when a test falls due and one reminder a week later, then it stops until the next due date.</li>
+          <li>At most one check-in when a test falls due and one reminder a week later, then it stops until the next due date. Every message says how to opt out.</li>
           <li>Nothing is sent while a service ticket is open; the ticket gets fixed first.</li>
           <li>No fear language and no diagnosis. Symptoms lead to an eye test with an optometrist, never to a product.</li>
         </ul>
@@ -378,7 +378,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
     <div class="grid" style="align-content:start">
       <div class="card">
         <h3>1 · Who is due this week</h3>
-        <p class="small muted" style="margin-top:4px">Share of the cohort in each tier. Overdue = Recall Score 60+, Due now = 35 to 59, Not due = under 35.</p>
+        <p class="small muted" style="margin-top:4px">Share of the cohort in each tier. Overdue = Recall Score 60+. Due now = 35 to 59, or any reported symptom, or a test at its interval. Not due = the rest.</p>
         <div id="riskbars" style="margin-top:10px"></div>
       </div>
       <div class="card">
@@ -405,7 +405,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
     </div>
     <div class="card calc" style="align-self:start">
       <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center"><h3>3 · What it is worth for Lenskart</h3><span class="tag warn">Assumptions: edit me</span></div>
-      <p class="small muted" style="margin:6px 0 10px">Scales the idea to Lenskart India. Base figures are Lenskart's own disclosures (Q4 FY26 and Q2 FY27 shareholders' letters); uplift rates are my assumptions to be tested.</p>
+      <p class="small muted" style="margin:6px 0 10px">Scales the idea to Lenskart India. Base figures are Lenskart's own disclosures (Q4 FY26, Q1 FY27 and Q2 FY27 shareholders' letters); uplift rates are my assumptions to be tested.</p>
       <div class="row"><label for="m-acc">India customers who bought last year<small>FY25 disclosed: 9.9M transacting accounts</small></label><input id="m-acc" type="number" step="100000" value="9900000"></div>
       <div class="row"><label for="m-ret">Extra who come back after a recall (pp)<small>Assumption, tested vs holdout</small></label><input id="m-ret" type="number" step="0.5" min="0" value="2"></div>
       <div class="row"><label for="m-rev">Revenue per transacting account (₹)<small>Derived: FY26 India revenue ₹5,265 cr / 12.3M accounts</small></label><input id="m-rev" type="number" step="10" value="4280"></div>
@@ -418,13 +418,13 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
       <div class="row"><label for="m-fx">₹ per US$<small>Reference rate, 13 Nov 2026</small></label><input id="m-fx" type="number" step="0.05" value="94.25"></div>
       <div id="levers" style="margin-top:8px"></div>
       <p class="label" style="margin-top:14px">Running costs a year</p>
-      <div class="row"><label for="m-msg">WhatsApp marketing message (₹)<small>Meta India list rate, from 1 Oct 2026</small></label><input id="m-msg" type="number" step="0.0001" min="0" value="0.8631"></div>
+      <div class="row"><label for="m-msg">WhatsApp marketing message (₹)<small>Meta India list rate</small></label><input id="m-msg" type="number" step="0.0001" min="0" value="0.8631"></div>
       <div class="row"><label for="m-book">Recalled customers who take a re-test (%)<small>Assumption</small></label><input id="m-book" type="number" step="1" min="0" max="100" value="6"></div>
       <div class="row"><label for="m-test">Cost of one extra eye test (₹)<small>Assumption: optometrist time</small></label><input id="m-test" type="number" step="5" min="0" value="60"></div>
       <div class="row"><label for="m-over">Overdue and still unbooked after 7 days (%)<small>Assumption: one store call each</small></label><input id="m-over" type="number" step="1" min="0" max="100" value="9"></div>
       <div class="row"><label for="m-call">3-minute store call (₹)<small>Assumption</small></label><input id="m-call" type="number" step="1" min="0" value="15"></div>
       <div class="row"><label for="m-tot">Accounts scored a year<small>FY26 disclosed: 12.3M India transacting accounts</small></label><input id="m-tot" type="number" step="100000" min="0" value="12300000"></div>
-      <div class="row"><label for="m-ai">AI scoring and message (₹ per account)<small>Assumption</small></label><input id="m-ai" type="number" step="0.1" min="0" value="0.5"></div>
+      <div class="row"><label for="m-ai">AI scoring and message (₹ per account)<small>Assumption</small></label><input id="m-ai" type="number" step="0.1" min="0" value="0.6"></div>
       <div id="costs" style="margin-top:8px"></div>
       <div style="border-top:2px solid var(--primary-50);padding-top:12px;margin-top:4px">
         <p class="label">Annual incremental revenue</p>
@@ -444,21 +444,21 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
   <div class="grid">
     <div class="card">
       <h2 id="brand">Lenskart brand context schema</h2>
-      <p style="margin-top:8px" id="brand-intro">__BRAND_INTRO__</p>
+      <p style="margin-top:8px" id="brand-intro">Read from computed styles on 13 Nov 2026 with a headless browser, on Lenskart's India store locator, its Lenskart at Home page and its US storefront, which shares the same token names. From the network this audit ran on, Lenskart's India home and product pages redirected to the US storefront, so the Gold colours are taken from declared CSS variables, not from a rendered Gold page. Lenskart Sans is Lenskart's own typeface, so this prototype uses Plus Jakarta Sans, the face Lenskart renders on Lenskart at Home and on its US storefront. The Lenskart logo is deliberately not reproduced.</p>
     </div>
     <div><h3 style="margin-bottom:10px">Colour tokens</h3><div class="swatches" id="swatches"></div></div>
     <div class="grid two">
-      <div class="card"><h3>Type</h3><ul class="plan small">__BRAND_TYPE__</ul></div>
-      <div class="card"><h3>Shape and depth</h3><ul class="plan small">__BRAND_SHAPE__</ul></div>
-      <div class="card"><h3>Product page anatomy</h3><ol class="plan small">__BRAND_PDP__</ol></div>
-      <div class="card"><h3>Voice</h3><ul class="plan small">__BRAND_VOICE__</ul></div>
+      <div class="card"><h3>Type</h3><ul class="plan small"><li><b>Lenskart Sans</b> (own typeface) on the store locator and for headings and prices on Lenskart at Home; <b>Plus Jakarta Sans</b> for body text there and across the US storefront. Lenskart Serif appears once, on a store locator sub-heading.</li><li>Section heading 24 to 28px, 700 to 800, navy. Product title 16px/500. Price 20px/600. Body 13 to 16px.</li><li>Buttons 16 to 20px, 700, white on navy. Noto Sans Devanagari is added here for Hindi.</li></ul></div>
+      <div class="card"><h3>Shape and depth</h3><ul class="plan small"><li>Primary button: navy #000042, 48px tall, 8 to 12px radius, no border. Outline button: 1px #737397 border, 8px radius.</li><li>Cards 16px radius with a 1px #DBDBEA or #F0F0F6 border; inner panels 12px and 8px.</li><li>Shadows are soft: 0 1px 16px rgba(0,0,0,.08) on product cards; 0 12px 16px -4px rgba(16,24,40,.08) on store cards.</li><li>Pages are white with warm off-white panels (#FBF9F7, #F7F2ED).</li></ul></div>
+      <div class="card"><h3>Product page anatomy</h3><ol class="plan small"><li>Photos, 360 view and AR Try On tabs; a "Scan Face" prompt for frame size.</li><li>Title 16px, price 20px in navy, with a dashed-border offer line in blue.</li><li>One navy "Select Lenses" button, sticky at the bottom on a phone.</li><li>A three-step lens flow: power type, lens package, add power. Coatings come bundled in tiered packages, each priced as frame plus lens.</li></ol></div>
+      <div class="card"><h3>Voice</h3><ul class="plan small"><li>Plain and practical: "Book Free Appointment", "Not sure about your size? Do face scan for perfect size".</li><li>Service promises are stated as numbers: "12 Step Eye Checkup", "in just 15 minutes", "Try 150+ frames at home".</li><li>Offers are loud and repeated: "Buy 1 Get 1 Free with GOLD" on listing cards.</li><li>This concept keeps the practical tone and drops the offer from every recall message.</li></ul></div>
     </div>
   </div>
 </section>
 
 </div>
 </main>
-<footer><div class="wrap">Sources: Lenskart Q4 FY26, Q1 FY27 and Q2 FY27 shareholders' letters, Annual Report FY2025-26, Q3 FY26 earnings call transcript, lenskart.com and the Lenskart app listings checked 13 Nov 2026. Full analysis: <a href="/lenskart-study" target="_top">anchit-tandon.com/lenskart-study</a>. Prices in the customer view are illustrative, except the ₹199 lens-replacement fitting fee, which is from the annual report. Concept work by Anchit Tandon - anchit.tandon@gmail.com.</div></footer>
+<footer><div class="wrap">Sources: Lenskart Q4 FY26, Q1 FY27 and Q2 FY27 shareholders' letters, Annual Report FY2025-26, Q3 FY26 earnings call transcript, lenskart.com and the Lenskart app listings checked 13 Nov 2026. Full analysis: <a href="/lenskart-study" target="_top">anchit-tandon.com/lenskart-study</a>. Prices in the customer view are illustrative, except the ₹199 lens-replacement fitting fee (annual report) and the ₹99 home eye test (lenskart.com). Concept work by Anchit Tandon - anchit.tandon@gmail.com.</div></footer>
 
 <script>
 (function(){
@@ -473,6 +473,8 @@ function el(id){return document.getElementById(id);}
 /* ---------- Engine: transparent rules (illustrative weights) ---------- */
 function band(age){ return age<18?'minor':(age<40?'adult':'senior'); }
 function interval(age){ return age<18?6:(age<40?24:12); }
+// Lenskart's home eye test is for ages 14 to 75, in the cities it serves.
+function canHome(p){ return p.home && p.age>=14 && p.age<=75; }
 function score(s,p){
   var iv = interval(p.age);
   var f = [
@@ -482,7 +484,8 @@ function score(s,p){
     {k:'Screen time', v:clamp(s.screen-6,0,8)/8*10, max:10}
   ];
   var r = Math.round(clamp(f.reduce(function(a,x){return a+x.v;},0),0,100));
-  var tier = r>=60?'Overdue':r>=35?'Due now':'Not due';
+  // A reported symptom, or a test at or past its interval, is never "not due".
+  var tier = r>=60?'Overdue':(r>=35||s.sym>0||s.test>=iv)?'Due now':'Not due';
   return {risk:r,tier:tier,factors:f,iv:iv};
 }
 function actions(s,res,p){
@@ -495,14 +498,14 @@ function actions(s,res,p){
     return a;
   }
   if(res.tier==='Overdue'){
-    a.push({t:'Free re-test, booked in two taps',d:'The nearest store slot'+(p.home?', or a home eye test in '+p.city:'')+', pre-filled from the saved profile.'});
+    a.push({t:'Free re-test, booked in two taps',d:'The nearest store slot'+(canHome(p)?', or a home eye test in '+p.city+' (₹99, free for Gold members)':'')+', pre-filled from the saved profile.'});
     a.push({t:'Store call on day 8 if no slot is booked',d:'One call from the home store, prompted in the store team\'s daily list. About six calls a store a week at Lenskart\'s scale, never a call centre blast.'});
     a.push(who);
   } else if(res.tier==='Due now'){
-    a.push({t:'Re-test reminder with a slot',d:g==='minor'?'Children are checked on a 6-month rhythm; the reminder goes out two weeks before the date.':'One reminder with the nearest free slot. No follow-up call.'});
+    a.push({t:'Re-test reminder with a slot',d:g==='minor'?'Children are checked on a 6-month rhythm, at a store. No follow-up call.':'One reminder with the nearest free slot. No follow-up call.'});
     a.push(who);
   } else {
-    a.push({t:'Nothing to sell',d:'The prescription is fresh. A care tip at most; the next check is in the calendar.'});
+    a.push({t:'Nothing is sent, nothing is sold',d:'The prescription is fresh and no symptoms are reported. The next check is in the calendar.'});
   }
   return a;
 }
@@ -514,8 +517,8 @@ function nextStep(s,res,p){
     if(res.tier==='Not due') return {hold:true,tag:'Not due',cat:'All good',title:'No new pair needed',sub:'Your next eye check is in about '+Math.max(1,res.iv-s.test)+' months. We will remind you then.',price:'',note:''};
     return {hold:true,tag:'After the test',cat:'Eye test first',title:'Shown after your eye test',sub:'We suggest lenses or a pair only once an optometrist has checked your power.',price:'',note:''};
   }
-  if(s.result==='same') return {hold:true,tag:'Power unchanged',cat:'Keep your pair',title:'Your power is the same',sub:'No new lenses needed. Drop in for a free clean and fit adjustment at any store.',price:'',note:''};
-  if(g==='minor') return {hold:false,tag:'Power changed',cat:'For '+p.name,title:s.pair<=12?'Myopia-control lenses in '+p.name+'\'s current frame':'Myopia-control lenses in a new kids frame',sub:s.pair<=12?'The frame is under a year old and still fits. Only the lenses change.':'The frame is over a year old; children outgrow frames, so a fit check comes with it.',price:s.pair<=12?'From ₹2,500':'From ₹3,500',note:'Illustrative price. An optometrist confirms the lens.'};
+  if(s.result==='same') return {hold:true,tag:'Power unchanged',cat:'Keep your pair',title:'Your power is the same',sub:'No new lenses needed. Any store will adjust the fit for free.',price:'',note:''};
+  if(g==='minor') return {hold:false,tag:'Power changed',cat:'For '+p.name,title:s.pair<=12?'New lenses in '+p.name+'\'s current frame':'New lenses in a new kids frame',sub:(s.pair<=12?'The frame is under a year old and still fits. Only the lenses change.':'The frame is over a year old; children outgrow frames, so a fit check comes with it.')+' If the optometrist recommends them, these can be myopia-control lenses.',price:s.pair<=12?'From ₹2,500':'From ₹3,500',note:'Illustrative price. The optometrist decides the lens.'};
   if(g==='senior' && p.near) return {hold:false,tag:'Power changed',cat:'Near and far',title:'Progressive lenses, one pair for reading and distance',sub:s.pair<=24?'Fitted into your current frame if it suits progressives; the store checks the fit height.':'In a new frame, with the fit height measured in store.',price:'From ₹4,000',note:'Illustrative price. '+(p.gold?'Your Gold price applies.':'')};
   if(s.pair<=24) return {hold:false,tag:'Power changed',cat:'Keep your frame',title:'New lenses in your current frame',sub:'Free Lens Replacement: fresh anti-glare lenses fitted into the frame you already own.',price:'₹199 fitting fee',note:'Fee as published in Lenskart\'s FY26 annual report. Higher lens tiers cost extra.'};
   return {hold:false,tag:'Power changed',cat:p.gold?'Gold member':'New pair',title:p.gold?'A new pair, with your Gold second pair':'A new pair in your new power',sub:'Your frame is over two years old. '+(p.gold?'Your membership covers a second pair.':'Your Gold membership has lapsed; renewing is optional and shown once, here.'),price:'From ₹1,500',note:'Illustrative price.'};
@@ -527,7 +530,7 @@ var P = [
    s:{test:26,pair:26,sym:2,screen:10,ticket:false,result:'none'}},
   {name:'Arjun', age:34, city:'Pune', home:true, gold:true, power:'−1.00', near:false,
    s:{test:7,pair:7,sym:0,screen:8,ticket:false,result:'none'}},
-  {name:'Kabir', age:9, city:'Lucknow', home:false, gold:true, power:'−1.50', near:false, parent:'Sana',
+  {name:'Kabir', age:9, city:'Lucknow', home:true, gold:true, power:'−1.50', near:false, parent:'Sana',
    s:{test:8,pair:8,sym:1,screen:4,ticket:false,result:'none'}},
   {name:'Meera', age:47, city:'Chennai', home:true, gold:true, power:'−0.75', near:true,
    s:{test:15,pair:15,sym:1,screen:7,ticket:false,result:'none'}}
@@ -585,7 +588,7 @@ function renderCustomer(){
   var fresh = 100-res.risk;
   el('ringTxt').textContent = fresh;
   el('ringArc').setAttribute('stroke-dashoffset', String(188.5*(1-fresh/100)));
-  el('ringArc').setAttribute('stroke', res.tier==='Overdue'?'#D7263D':res.tier==='Due now'?'#E8590C':'#1B7938');
+  el('ringArc').setAttribute('stroke', res.tier==='Overdue'?'#EC3331':res.tier==='Due now'?'#E8590C':'#1B7938');
   el('s-status').textContent = s.ticket ? 'We are fixing your open ticket first' : res.tier==='Overdue' ? 'Your eye test is overdue' : res.tier==='Due now' ? 'Your eye test is due' : 'Your prescription is up to date';
   var over = s.test - res.iv;
   el('s-sub').textContent = over>0 ? over+' months past the '+res.iv+'-month check' : (res.iv-s.test)+' months until the '+res.iv+'-month check';
@@ -594,9 +597,9 @@ function renderCustomer(){
   nudge.className = 'nudge ' + (res.tier==='Overdue'?'high':res.tier==='Due now'?'med':'low');
   var plan;
   if(s.ticket){ el('s-nudge-title').textContent='Ticket first, then your eye test'; plan=['Your store has the ticket and will update you.','No reminders or offers until it is closed.']; }
-  else if(res.tier==='Overdue'){ el('s-nudge-title').textContent='Book a free re-test this week'; plan=['Nearest store: free eye test, 15 minutes, slots today.'].concat(p.home?['Or a home eye test in '+p.city+'.']:[]).concat(['Your saved power and face scan are already attached.','If nothing is booked in 7 days, your store calls once.']); }
-  else if(res.tier==='Due now'){ el('s-nudge-title').textContent = g==='minor' ? p.name+'\'s 6-month check is due' : 'Time for your regular eye check'; plan=[g==='minor'?'Children\'s power can change fast; a 15-minute check at the store.':'A 15-minute free check at the store, or at home.','One reminder, no follow-up calls.']; }
-  else { el('s-nudge-title').textContent='Nothing to do right now'; plan=['Your prescription is fresh.','Free clean and fit adjustment at any store, any time.']; }
+  else if(res.tier==='Overdue'){ el('s-nudge-title').textContent='Book a free re-test this week'; plan=['Nearest store: free eye test, slots today.'].concat(canHome(p)?['Or a home eye test in '+p.city+': ₹99, free for Gold members.']:[]).concat(['Your saved power and face scan are already attached.','If nothing is booked in 7 days, your store calls once.']); }
+  else if(res.tier==='Due now'){ el('s-nudge-title').textContent = g==='minor' ? p.name+'\'s 6-month check is due' : 'Time for your regular eye check'; plan=[g==='minor'?'Children\'s power can change fast; a free check at the store.':'A free check at the store'+(canHome(p)?', or ₹99 at home (free for Gold members).':'.'),'One reminder, no follow-up calls.']; }
+  else { el('s-nudge-title').textContent='Nothing to do right now'; plan=['Your prescription is fresh.','Any store will adjust the fit for free, any time.']; }
   el('s-plan').innerHTML = plan.map(function(x){return '<li>'+x+'</li>';}).join('');
   var n = nextStep(s,res,p);
   var o = el('s-next'); o.className = 'offer'+(n.hold?' hold':'');
@@ -614,12 +617,12 @@ function renderCustomer(){
 var QA = {
   need:{q:'Do I need new glasses?', a:function(p,s,res){
     if(s.ticket) return 'Let us sort out your open ticket first. I will not suggest anything until that is done.';
-    if(res.tier==='Not due') return 'No. Your last eye test was '+s.test+' months ago and your power is recent. Nothing to buy.';
-    return 'I cannot tell from here, and nobody should guess. Your last test was '+s.test+' months ago, so the honest answer is a free 15-minute eye test first. If your power is unchanged, you keep your pair.';}},
+    if(res.tier==='Not due') return 'Nothing suggests you need a new pair: your last eye test was '+s.test+' months ago. If anything feels off, book a free eye test and an optometrist will check.';
+    return 'I cannot tell from here, and nobody should guess. Your last test was '+s.test+' months ago, so the honest answer is a free eye test first. If your power is unchanged, you keep your pair.';}},
   frame:{q:'Can I keep my frame?', a:function(p,s){
     return s.pair<=24 ? 'Yes. If your power has changed, the store can fit fresh anti-glare lenses into your current frame for a ₹199 fitting fee.' : 'Usually yes: Lenskart fits new lenses into any frame for a ₹199 fitting fee. Yours is over two years old, so the store will check the hinges and fit first.';}},
   cost:{q:'What will the test cost?', a:function(p){
-    return 'The eye test at a store is free. '+(p.home?'A home eye test in '+p.city+' may carry a visit fee, shown before you book.':'Your nearest option is the store.');}}
+    return 'The eye test at a store is free. '+(canHome(p)?'A home eye test in '+p.city+' costs ₹99 and is free for Gold members. It is for ages 14 to 75; anyone with diabetes or high blood pressure needs a clinical eye test instead.':'Home eye tests are for ages 14 to 75, so the store is the place for '+p.name+'.');}}
 };
 function addMsg(cls,txt){ var b=document.createElement('div'); b.className='bubble '+cls; b.textContent=txt; el('chat').appendChild(b); }
 function resetChat(){
@@ -668,14 +671,14 @@ function renderCheckin(){
     msg = en ? 'No message is sent.\n\n'+p.name+'\'s last eye test was '+s.test+' months ago. The next check-in goes out in about '+Math.max(1,res.iv-s.test)+' months.'
              : 'कोई संदेश नहीं भेजा जाता।\n\n'+p.name+' की पिछली आंखों की जांच '+s.test+' महीने पहले हुई थी। अगला चेक-इन लगभग '+Math.max(1,res.iv-s.test)+' महीने बाद जाएगा।';
   } else if(toParent){
-    msg = en ? 'Hello '+p.parent+',\n\n'+p.name+'\'s last eye test with us was '+s.test+' months ago. Children\'s power can change quickly, so we suggest a check every 6 months.\n\nThe test is free and takes about 15 minutes at your Lenskart store in '+p.city+'.'+(res.tier==='Overdue'?'\n\nIf it is easier, reply CALL and your store will phone you once.':'')+'\n\nIf '+p.name+'\'s power is the same, nothing needs to change.'
-             : 'नमस्ते '+p.parent+',\n\n'+p.name+' की पिछली आंखों की जांच हमारे यहां '+s.test+' महीने पहले हुई थी। बच्चों का नंबर जल्दी बदल सकता है, इसलिए हम हर 6 महीने में जांच की सलाह देते हैं।\n\nजांच मुफ़्त है और '+p.city+' के आपके Lenskart स्टोर पर लगभग 15 मिनट लेती है।'+(res.tier==='Overdue'?'\n\nअगर आसान लगे तो CALL लिखकर भेजें, आपका स्टोर एक बार फ़ोन करेगा।':'')+'\n\nअगर '+p.name+' का नंबर वही है, तो कुछ बदलने की ज़रूरत नहीं।';
+    msg = en ? 'Hello '+p.parent+',\n\n'+p.name+'\'s last eye test with us was '+s.test+' months ago. Children\'s power can change quickly, so we suggest a check every 6 months.\n\nThe test is free at your Lenskart store in '+p.city+'.'+(res.tier==='Overdue'?'\n\nIf nothing is booked in a week, your store will call once.':'')+'\n\nIf '+p.name+'\'s power is the same, nothing needs to change.\n\nReply STOP to opt out of check-ins.'
+             : 'नमस्ते '+p.parent+',\n\n'+p.name+' की पिछली आंखों की जांच हमारे यहां '+s.test+' महीने पहले हुई थी। बच्चों का नंबर जल्दी बदल सकता है, इसलिए हम हर 6 महीने में जांच की सलाह देते हैं।\n\n'+p.city+' के आपके Lenskart स्टोर पर जांच मुफ़्त है।'+(res.tier==='Overdue'?'\n\nअगर एक हफ्ते में बुकिंग नहीं हुई, तो आपका स्टोर एक बार फ़ोन करेगा।':'')+'\n\nअगर '+p.name+' का नंबर वही है, तो कुछ बदलने की ज़रूरत नहीं।\n\nचेक-इन बंद करने के लिए STOP लिखें।';
     btns = en ? ['Book a free eye test','Not now'] : ['मुफ़्त जांच बुक करें','अभी नहीं'];
   } else {
     var symLine = s.sym>0 ? (en ? ' You also told us about eye strain or headaches recently.' : ' आपने हाल में आंखों में थकान या सिरदर्द के बारे में भी बताया था।') : '';
-    msg = en ? 'Hi '+p.name+',\n\nYour last eye test with us was '+s.test+' months ago.'+symLine+' '+(p.near?'After 40, near vision often changes, so a yearly check helps.':'A quick check tells you if your power is still right.')+'\n\nThe test is free and takes about 15 minutes at a store'+(p.home?', or we can come to you in '+p.city:'')+'.'+(res.tier==='Overdue'?'\n\nIf you have not booked in a week, your store will call once. Reply STOP to skip that.':'')+'\n\nIf your power is the same, you keep your pair.'
-             : 'नमस्ते '+p.name+',\n\nआपकी पिछली आंखों की जांच हमारे यहां '+s.test+' महीने पहले हुई थी।'+symLine+' '+(p.near?'40 के बाद पास की नज़र अक्सर बदलती है, इसलिए साल में एक जांच मदद करती है।':'एक छोटी जांच बता देगी कि आपका नंबर अब भी सही है या नहीं।')+'\n\nजांच मुफ़्त है और स्टोर पर लगभग 15 मिनट लेती है'+(p.home?', या हम '+p.city+' में आपके घर आ सकते हैं':'')+'।'+(res.tier==='Overdue'?'\n\nअगर एक हफ्ते में बुकिंग नहीं हुई, तो आपका स्टोर एक बार फ़ोन करेगा। इसे रोकने के लिए STOP लिखें।':'')+'\n\nअगर आपका नंबर वही है, तो आपका चश्मा वही रहेगा।';
-    btns = en ? ['Book a free eye test'].concat(p.home?['Book a home eye test']:[]).concat(['Not now']) : ['मुफ़्त जांच बुक करें'].concat(p.home?['घर पर जांच बुक करें']:[]).concat(['अभी नहीं']);
+    msg = en ? 'Hi '+p.name+',\n\nYour last eye test with us was '+s.test+' months ago.'+symLine+' '+(p.near?'After 40, near vision often changes, so a yearly check helps.':'A quick check tells you if your power is still right.')+'\n\nThe test is free at any Lenskart store'+(canHome(p)?', and a home eye test is available in '+p.city:'')+'.'+(res.tier==='Overdue'?'\n\nIf you have not booked in a week, your store will call once.':'')+'\n\nIf your power is the same, you keep your pair.\n\nReply STOP to opt out of check-ins.'
+             : 'नमस्ते '+p.name+',\n\nआपकी पिछली आंखों की जांच हमारे यहां '+s.test+' महीने पहले हुई थी।'+symLine+' '+(p.near?'40 के बाद पास की नज़र अक्सर बदलती है, इसलिए साल में एक जांच मदद करती है।':'एक छोटी जांच बता देगी कि आपका नंबर अब भी सही है या नहीं।')+'\n\nकिसी भी Lenskart स्टोर पर जांच मुफ़्त है'+(canHome(p)?', और '+p.city+' में घर पर जांच भी उपलब्ध है':'')+'।'+(res.tier==='Overdue'?'\n\nअगर एक हफ्ते में बुकिंग नहीं हुई, तो आपका स्टोर एक बार फ़ोन करेगा।':'')+'\n\nअगर आपका नंबर वही है, तो आपका चश्मा वही रहेगा।\n\nचेक-इन बंद करने के लिए STOP लिखें।';
+    btns = en ? ['Book a free store eye test'].concat(canHome(p)?['Book a home eye test']:[]).concat(['Not now']) : ['स्टोर पर मुफ़्त जांच बुक करें'].concat(canHome(p)?['घर पर जांच बुक करें']:[]).concat(['अभी नहीं']);
   }
   body.innerHTML = '';
   var m = document.createElement('div'); m.className='wa-msg'; m.textContent = msg;
@@ -760,7 +763,7 @@ function calc(){
   var msg=v('m-msg'), book=v('m-book')/100, test=v('m-test'), over=v('m-over')/100, call=v('m-call'), tot=v('m-tot'), ai=v('m-ai');
   var c1=acc*3*msg, c2=first*2*msg, c3=gold*1*msg, c4=acc*book*test, c5=acc*over*call, c6=tot*ai, cost=c1+c2+c3+c4+c5+c6;
   el('costs').innerHTML = [
-    ['Recall check-ins (3 per customer)', c1],['First-test follow-ups (2 each)', c2],['Family invites (1 per Gold member)', c3],
+    ['Recall check-ins (up to 3 per customer)', c1],['First-test follow-ups (2 each)', c2],['Family invites (1 per Gold member)', c3],
     ['Extra eye tests', c4],['Store calls on day 8', c5],['AI scoring and message drafting', c6]
   ].map(function(l){return '<div class="lever" style="padding:8px 0"><div class="lever-head"><span>'+l[0]+'</span><span>'+CR2(l[1])+'</span></div></div>';}).join('')
    + '<div class="lever" style="padding:8px 0"><div class="lever-head"><b>Total running cost</b><b id="m-cost">'+CR2(cost)+'</b></div></div>';
@@ -773,7 +776,7 @@ function calc(){
 Array.prototype.forEach.call(document.querySelectorAll('.calc input'),function(i){i.addEventListener('input',calc);});
 
 /* ---------- Brand swatches ---------- */
-var SW = __SWATCHES__;
+var SW = [['#000042','Primary navy','Text, headings, primary buttons'],['#333368','Body text','Also button hover'],['#66668E','Secondary text','Captions, card titles'],['#0EAE8A','Teal accent','Secondary colour variable'],['#008863','Teal, strong','"Try On" chip'],['#ECFEFA','Teal tint','"360" chip background'],['#E0C67C','Gold','Gold membership variable'],['#FFF8D9','Gold tint','Gold membership variable'],['#2261D1','Offer blue','"Buy 1 Get 1 Free" text'],['#EC3331','Error red','Error variable'],['#DBDBEA','Border','Store card border'],['#FBF9F7','Warm off-white','Panels and review cards']];
 el('swatches').innerHTML = SW.map(function(s){return '<div class="sw"><i style="background:'+s[0]+'"></i><div><b>'+s[1]+'</b>'+s[0]+'<br>'+s[2]+'</div></div>';}).join('');
 
 /* ---------- Boot ---------- */
