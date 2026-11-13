@@ -59,7 +59,27 @@ for(const panel of $$('[data-filters]')){
   $('[data-result-count]',section).textContent=shown+' '+(shown===1?'result':'results');
   $('[data-filter-empty]',section).hidden=shown!==0;
  };
- query.addEventListener('input',filter);sort.addEventListener('change',filter);stock.addEventListener('change',filter);
+ const sorts={'title-ascending':'az','price-ascending':'price-up','price-descending':'price-down'};
+ const originalSorts=Object.fromEntries(Object.entries(sorts).map(([key,value])=>[value,key]));
+ function readFilters(){
+  const params=new URL(location.href).searchParams;
+  sort.value=sorts[params.get('sort_by')]||'original';
+  if(!sort.value)sort.value='original';
+  stock.checked=!stock.closest('label').hidden&&params.get('filter.v.availability')==='1';
+  query.value=params.get('filter_name')||'';
+  filter();
+ }
+ function updateFilters(){
+  const url=new URL(location.href);
+  for(const [key,value] of [['sort_by',originalSorts[sort.value]],['filter.v.availability',stock.checked?'1':''],['filter_name',query.value.trim()]]){
+   if(value)url.searchParams.set(key,value);else url.searchParams.delete(key);
+  }
+  history.replaceState(history.state,'',url);
+  filter();
+ }
+ query.addEventListener('input',updateFilters);sort.addEventListener('change',updateFilters);stock.addEventListener('change',updateFilters);
+ addEventListener('popstate',readFilters);
+ if(new URL(location.href).search)readFilters();
 }
 
 const data=$('#product-data');
@@ -142,7 +162,7 @@ if(search){
  const kind={product:'Jewellery & fragrance',collection:'Collection',page:'The house',article:'Journal',journal:'Journal',tag:'Journal topic'};
  let pending, version=0;
  function searchData(){
-  return pending ||= fetch(B+'/catalog/search.json?v=maison-1').then(r=>{if(!r.ok)throw Error();return r.json()}).catch(e=>{pending=null;throw e;});
+  return pending ||= fetch(B+'/catalog/search.json?v=maison-2').then(r=>{if(!r.ok)throw Error();return r.json()}).catch(e=>{pending=null;throw e;});
  }
  function card(item){
   const root=el('article','','shop-card'), link=anchor(href(item.path),''), media=el('div','','shop-card-image');

@@ -7,7 +7,7 @@ const JOURNAL='/blogs/lab-grown-diamond-journal-by-xazina';
 const COLLECTION='/collections/all';
 const FALLBACK=B+'/media/act-form.webp';
 const ART={jewellery:B+'/media/maison-cover.webp',journal:B+'/media/act-spectrum.webp',atelier:B+'/media/atelier.webp',fragrance:B+'/media/perfume.webp'};
-const VERSION='maison-1';
+const VERSION='maison-2';
 const escape=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const plain=value=>String(value??'').replace(/<[^>]+>/g,' ').replace(/&nbsp;/gi,' ').replace(/\s+/g,' ').trim();
 const local=path=>B+(path==='/'?'':path);
