@@ -367,13 +367,23 @@
      The inline nav measures 700px. On a 320px phone it simply ran off the
      side of the screen, and the wordmark wrapped onto three lines, which made
      the fixed header 105px tall · taller than the hero's 90px top padding, so
-     the headline was buried behind it. Below 900px the links become a sheet
+     the headline was buried behind it. Below 1180px the links become a sheet
      behind a toggle, the wordmark stays on one line, and the header goes back
      to a single row. */
   .nav-links { display: contents; }
   .nav-toggle { display: none; }
 
-  @media (max-width: 900px) {
+  /* The inline row needs ~1250px. Between 900 and 1280 it did not fit, so
+     every label wrapped onto two or three lines and the wordmark stacked into
+     a 105px header. The sheet now takes over below 1180, and the band above it
+     gets a tighter row that holds one line. */
+  .nav a, .wordmark span, #audioBtn, #headerBagBtn { white-space: nowrap; }
+  @media (min-width: 1180px) and (max-width: 1399px) {
+    .nav a { padding: 0 8px; font-size: 0.86rem; }
+    .nav { gap: 2px; }
+  }
+
+  @media (max-width: 1179px) {
     .site-head { padding: 6px var(--pad); gap: 6px; }
     .wordmark { font-size: 1rem; gap: 8px; min-width: 0; }
     .wordmark span { white-space: nowrap; }
@@ -1258,6 +1268,28 @@
   </button>
 </nav>
 </header>
+<script>
+/* The disclaimer bar sits in normal flow above a position:fixed header, so at
+   the top of the page it painted straight over the logo and the nav. Push the
+   header down by however much of the bar is still on screen; once the bar has
+   scrolled away the offset is 0 and the header pins to the top as before.
+   `translate` (not top/transform) so nothing else that styles it is touched. */
+(function () {
+  var bar = document.querySelector('.concept-bar'), head = document.querySelector('header.site-head');
+  if (!bar || !head) return;
+  var queued = 0;
+  function place() {
+    queued = 0;
+    var y = Math.max(0, Math.round(bar.getBoundingClientRect().bottom));
+    head.style.translate = y ? '0 ' + y + 'px' : '';
+  }
+  function ask() { if (!queued) queued = requestAnimationFrame(place); }
+  addEventListener('scroll', ask, { passive: true });
+  addEventListener('resize', ask);
+  place();
+})();
+</script>
+
 
 <!-- Ultra-Thin Live Bar Hours & Sell-Out Info Strip -->
 <div id="gsAnnounceBar" class="relative z-30 text-[11px] sm:text-xs font-semibold tracking-wider py-2 px-4">
@@ -1993,7 +2025,7 @@
 
   <!-- ================= SPECIALTY ROASTERY & EXTRACTION CRAFT ================= -->
 <section class="py-24 px-6 md:px-12 max-w-7xl mx-auto" id="roasteryCraft">
-  <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+  <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-12 gap-6">
     <div>
       <span class="text-xs font-black uppercase tracking-[0.25em] text-[#7C3AED]">The Sensory Extraction & Roastery Bar</span>
       <h2 class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight mt-2 text-[#2B1650]">
@@ -2004,14 +2036,14 @@
         </p>
     </div>
     <!-- Mode Switcher Tabs -->
-    <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-[#2B1650]/20 shadow-sm text-xs font-black uppercase tracking-wider overflow-x-auto">
-      <button onclick="switchCraftTab('extraction')" id="craftTab-extraction" class="py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow whitespace-nowrap">
+    <div class="grid grid-cols-3 lg:flex items-stretch lg:items-center gap-1.5 lg:gap-2 w-full lg:w-auto shrink-0 p-1.5 rounded-2xl bg-white border border-[#2B1650]/20 shadow-sm text-[11px] sm:text-xs font-black uppercase tracking-wide sm:tracking-wider">
+      <button onclick="switchCraftTab('extraction')" id="craftTab-extraction" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all bg-[#2B1650] text-[#F1E9FF] shadow lg:whitespace-nowrap">
         1. 9-Bar Extraction
         </button>
-      <button onclick="switchCraftTab('microfoam')" id="craftTab-microfoam" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650] whitespace-nowrap">
+      <button onclick="switchCraftTab('microfoam')" id="craftTab-microfoam" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap">
         2. Microfoam Pour
         </button>
-      <button onclick="switchCraftTab('roast')" id="craftTab-roast" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650] whitespace-nowrap">
+      <button onclick="switchCraftTab('roast')" id="craftTab-roast" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap">
         3. Roast Spectrum
         </button>
     </div>
@@ -2360,7 +2392,7 @@
   </div>
 
   <!-- 3 Core D2C Products Grid -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="productGridContainer"></div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8" id="productGridContainer"></div>
 </section>
 
 <!-- CHEF SECTION: SCROLL-DRAWN TIMELINE -->
@@ -2560,7 +2592,7 @@
 <!-- ALL 3 LOCATIONS & CELEBRATED STEAMED WINDOW (SCRATCH TO REVEAL) -->
 <section class="visit" id="destinations" aria-labelledby="visit-title">
   <div class="max-w-7xl mx-auto space-y-10 scroll-reveal">
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
       <div>
         <span class="eyebrow-label">Interactive Destination Explorer</span>
         <h2 id="visit-title" class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight text-[#2B1650] mt-2">
@@ -2568,14 +2600,14 @@
           </h2>
       </div>
       <!-- 3 Location Buttons -->
-      <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-[#2B1650]/20 shadow-sm text-xs font-black uppercase tracking-wider overflow-x-auto">
-        <button id="locTab-phase1" onclick="switchLocation('phase1')" class="py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow">
+      <div class="grid grid-cols-3 lg:flex items-stretch lg:items-center gap-1.5 lg:gap-2 w-full lg:w-auto shrink-0 p-1.5 rounded-2xl bg-white border border-[#2B1650]/20 shadow-sm text-[11px] sm:text-xs font-black uppercase tracking-wide sm:tracking-wider">
+        <button id="locTab-phase1" onclick="switchLocation('phase1')" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all bg-[#2B1650] text-[#F1E9FF] shadow lg:whitespace-nowrap">
           1. DLF Phase 1 Flagship
           </button>
-        <button id="locTab-gcr" onclick="switchLocation('gcr')" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650]">
+        <button id="locTab-gcr" onclick="switchLocation('gcr')" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap">
           2. Golf Course Road
           </button>
-        <button id="locTab-sec56" onclick="switchLocation('sec56')" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650]">
+        <button id="locTab-sec56" onclick="switchLocation('sec56')" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap">
           3. Sector 56 Hub
           </button>
       </div>
@@ -2911,9 +2943,9 @@
     ['phase1', 'gcr', 'sec56'].forEach(k => {
       const btn = document.getElementById(LOCATIONS[k].tabId);
       if (k === key) {
-        btn.className = 'py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow';
+        btn.className = 'py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all bg-[#2B1650] text-[#F1E9FF] shadow lg:whitespace-nowrap';
       } else {
-        btn.className = 'py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650]';
+        btn.className = 'py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap';
       }
     });
 
@@ -4018,9 +4050,9 @@
       }
       if (btn) {
         if (t === tab) {
-          btn.className = "py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow whitespace-nowrap";
+          btn.className = "py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all bg-[#2B1650] text-[#F1E9FF] shadow lg:whitespace-nowrap";
         } else {
-          btn.className = "py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650] whitespace-nowrap";
+          btn.className = "py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap";
         }
       }
     });
@@ -4932,7 +4964,7 @@
     });
     // Leaving the mobile range with the sheet open would strand it on desktop.
     if (window.matchMedia) {
-      window.matchMedia('(min-width: 901px)').addEventListener('change', function (m) {
+      window.matchMedia('(min-width: 1180px)').addEventListener('change', function (m) {
         if (m.matches) setOpen(false);
       });
     }

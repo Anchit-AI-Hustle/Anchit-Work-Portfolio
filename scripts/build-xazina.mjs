@@ -1,13 +1,14 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { existsSync } from 'node:fs';
+import { tidy } from './xazina-tidy.mjs';
 
 const B='/xazina-revamp', ORIGIN='https://xazina.com', LIVE='https://anchit-tandon.com';
 const JOURNAL='/blogs/lab-grown-diamond-journal-by-xazina';
 const COLLECTION='/collections/all';
 const FALLBACK=B+'/media/act-form.webp';
 const ART={jewellery:B+'/media/maison-cover.webp',journal:B+'/media/act-spectrum.webp',atelier:B+'/media/atelier.webp',fragrance:B+'/media/perfume.webp'};
-const VERSION='maison-2';
+const VERSION='maison-3';
 const escape=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const plain=value=>String(value??'').replace(/<[^>]+>/g,' ').replace(/&nbsp;/gi,' ').replace(/\s+/g,' ').trim();
 const local=path=>B+(path==='/'?'':path);
@@ -95,7 +96,7 @@ function grid(cards,kicker='The edit',count=cards.length,filters=true){
 }
 function blocks(items,extra='') {
  if(!items?.length)return '';
- return `<div class="shop-paper shop-source ${extra}"><div class="shop-wrap shop-section">${items.map((b,i)=>`<section class="source-block" data-source-block><span class="source-number">${String(i+1).padStart(2,'0')} / XAZINA ${icon('shop-spark')}</span><div class="source-content">${b.html}</div></section>`).join('')}</div></div>`;
+ return `<div class="shop-paper shop-source ${extra}"><div class="shop-wrap shop-section">${items.map((b,i)=>`<section class="source-block" data-source-block><span class="source-number">${String(i+1).padStart(2,'0')} / XAZINA ${icon('shop-spark')}</span><div class="source-content">${tidy(b.html)}</div></section>`).join('')}</div></div>`;
 }
 function originLink(item,label='View original on Xazina'){return button(ORIGIN+item.path,label,'glass',true);}
 function unavailable(item,label){
@@ -121,7 +122,7 @@ function product(snapshot,p){
  <p class="shop-small">Prices and availability are a catalog snapshot. Xazina confirms both at checkout.</p>
  <nav class="shop-product-guide" aria-label="Fit and delivery"><a href="${local('/pages/size-guide')}">Size guide</a><a href="${local('/policies/shipping-policy')}">Shipping</a><a href="${local('/policies/refund-policy')}">Returns</a></nav>
  </div></div></div></section>
- <section class="shop-paper"><div class="shop-wrap shop-section shop-details"><div><p class="shop-kicker">Craft notes</p><h2>The details.</h2></div><div class="source-content">${p.description||'<p>Explore the original listing for product details.</p>'}</div></div></section>
+ <section class="shop-paper"><div class="shop-wrap shop-section shop-details"><div><p class="shop-kicker">Craft notes</p><h2>The details.</h2></div><div class="source-content">${tidy(p.description)||'<p>Explore the original listing for product details.</p>'}</div></div></section>
  ${related.length?grid(related.map(productCard),'More from Xazina',related.length,false):''}
  <dialog class="shop-lightbox" data-lightbox><button type="button" data-close-photo aria-label="Close product photo">Close ×</button><img alt=""></dialog>
  <script type="application/json" id="product-data">${escapedData}</script>`;
@@ -134,10 +135,14 @@ function display(snapshot,item) {
   const collectionLinks=snapshot.menu.slice(0,6).map(x=>[x.title,x.href]);
   const img=item.image|| (item.path.includes('fragrance')?ART.fragrance:ART.jewellery);
   const children=item.members.map(p=>products[p]).filter(Boolean);
-  return hero({...item,image:img},'The collection',{desc:plain(item.description).slice(0,190)||`${item.count} pieces in this edit.`,action:`<a class="shop-cover-action" href="#collection-edit">Shop the collection ${icon('shop-arrow')}</a>`})
+  // 35 captured collections list no products of their own; their pieces live
+  // in the curated blocks below. They used to open on "0 pieces in this edit"
+  // and an empty, filterable grid, which read as a broken page.
+  const empty=item.captured&&!children.length;
+  return hero({...item,image:img},'The collection',{desc:plain(item.description).slice(0,190)||(empty?'A curated edit from the house of Xazina.':`${item.count} pieces in this edit.`),action:`<a class="shop-cover-action" href="#collection-edit">Shop the collection ${icon('shop-arrow')}</a>`})
    +`<nav class="shop-ribbon" id="collection-edit" aria-label="Collections"><div class="shop-wrap">${list(collectionLinks)}<a href="${local('/collections')}">All collections</a></div></nav>`
-   +(item.captured?grid(children.map(productCard),'The collection',children.length):unavailable(item,'Explore this collection on Xazina.'))
-   +(item.description?`<section class="shop-paper shop-wrap-wide"><div class="shop-wrap shop-section shop-details"><div><p class="shop-kicker">From the house</p><h2>About the edit.</h2></div><div class="source-content">${item.description}</div></div></section>`:'')
+   +(empty?'':item.captured?grid(children.map(productCard),'The collection',children.length):unavailable(item,'Explore this collection on Xazina.'))
+   +(item.description?`<section class="shop-paper shop-wrap-wide"><div class="shop-wrap shop-section shop-details"><div><p class="shop-kicker">From the house</p><h2>About the edit.</h2></div><div class="source-content">${tidy(item.description)}</div></div></section>`:'')
    +blocks(item.blocks);
  }
  if(item.kind==='journal'||item.kind==='tag'){
@@ -146,7 +151,7 @@ function display(snapshot,item) {
  }
  if(item.kind==='article'){
   return hero(item,'The journal',{photo:ART.journal,desc:item.description,cover:true})
-    +(item.content?`<section class="shop-paper"><div class="shop-wrap shop-section shop-article"><aside><p class="shop-kicker">The Xazina journal</p>${item.date?`<p>${escape(item.date.slice(0,10))}</p>`:''}${button(local(JOURNAL),'All stories','dark')}</aside><article class="source-content">${item.content}</article></div></section>`:unavailable(item,'Read the full story on Xazina.'))
+    +(item.content?`<section class="shop-paper"><div class="shop-wrap shop-section shop-article"><aside><p class="shop-kicker">The Xazina journal</p>${item.date?`<p>${escape(item.date.slice(0,10))}</p>`:''}${button(local(JOURNAL),'All stories','dark')}</aside><article class="source-content">${tidy(item.content)}</article></div></section>`:unavailable(item,'Read the full story on Xazina.'))
     +(item.related?.length?`<div class="shop-paper"><nav class="shop-wrap shop-section shop-inline-links" aria-label="Related stories">${list(item.related)}</nav></div>`:'');
  }
  if(item.kind==='search')return hero(item,'Find something brilliant',{photo:ART.journal,desc:'Search products, collections, guides and journal stories.'})+

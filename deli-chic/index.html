@@ -359,6 +359,16 @@
       justify-content: center;
       backdrop-filter: blur(8px);
     }
+    /* Three flex:1 pills kept their min-content width (wide-tracked caps), so
+       on a phone the row ran 80px off screen and "03. Shahi Marinades" was
+       cut in half. Below 640 they shrink, tighten and wrap inside the pill. */
+    @media (max-width: 639px) {
+      .deli-stage-nav { gap: 6px; }
+      .deli-stage-btn {
+        min-width: 0; padding: 6px 6px; font-size: 0.62rem;
+        letter-spacing: 0.06em; line-height: 1.15; text-align: center;
+      }
+    }
     .deli-stage-btn:hover {
       background: rgba(255, 255, 255, 0.22);
       color: #FFFFFF;
@@ -389,6 +399,9 @@
       -webkit-backdrop-filter: blur(20px) !important;
       border-bottom: 2px solid rgba(205, 38, 83, 0.22) !important;
       box-shadow: 0 6px 25px rgba(74, 14, 23, 0.08) !important;
+      /* transition-all would animate the disclaimer offset and make the
+         header trail the page while scrolling. */
+      transition-property: color, background-color, border-color, box-shadow !important;
     }
     .deli-nav-link {
       color: #4A0E17 !important;
@@ -406,10 +419,20 @@
        nav its own breathing room and tighten the tracking a little so the
        whole row still fits comfortably at 1280. */
     header.deli-site-header nav { margin-right: 2.25rem !important; }
-    @media (max-width: 1400px) {
+    /* The nav is min-w-0 and its links are nowrap, so a row that is too wide
+       never wraps: the nav quietly shrinks and its links slide UNDER the audio
+       and WhatsApp pills. Measured, it was too wide at every desktop width
+       (needs ~763px, got ~559px at 1440). So the row gets the screen it is on
+       (1680px cap instead of 1280) and sheds low-priority items in steps:
+       each item hidden here is still one tap away elsewhere on the page. */
+    header.deli-site-header > div { max-width: 1680px !important; }
+    @media (max-width: 1599px) {
       .deli-nav-link { letter-spacing: 0.12em !important; font-size: 0.74rem !important; }
       header.deli-site-header nav { gap: 1.35rem !important; margin-right: 1.75rem !important; }
     }
+    @media (max-width: 1799px) { .deli-tagline { display: none !important; } }
+    @media (max-width: 1439px) { .deli-wa-pill { display: none !important; } }
+    @media (max-width: 1279px) { .deli-nav-loupe { display: none !important; } }
 
     /* Editorial Cards */
     .deli-card {
@@ -917,7 +940,7 @@
         DC
         </div>
       <span class="text-xl font-serif-chic font-black tracking-tight text-[#4A0E17] leading-none">Deli Chic</span>
-      <span class="hidden 2xl:inline text-[9px] tracking-[0.26em] uppercase font-bold text-[#CD2653] font-luxury border-l border-[#C59A45]/40 pl-2.5 ml-0.5">Food For Thought</span>
+      <span class="deli-tagline hidden 2xl:inline text-[9px] tracking-[0.26em] uppercase font-bold text-[#CD2653] font-luxury border-l border-[#C59A45]/40 pl-2.5 ml-0.5">Food For Thought</span>
     </a>
 
     <!-- Navigation Links -->
@@ -929,7 +952,7 @@
          was hiding. -->
     <nav class="hidden lg:flex items-center gap-4 xl:gap-5 text-xs font-bold uppercase tracking-[0.14em] xl:tracking-[0.18em] min-w-0">
       <a href="#larder" class="deli-nav-link whitespace-nowrap">The Larder</a>
-      <a href="#masterCarver" class="deli-nav-link whitespace-nowrap">Master Carver Loupe</a>
+      <a href="#masterCarver" class="deli-nav-link deli-nav-loupe whitespace-nowrap">Master Carver Loupe</a>
       <a href="#boucherieExperience" class="deli-nav-link whitespace-nowrap">Haute Standards</a>
       <a href="#hubs" class="deli-nav-link whitespace-nowrap">NCR Hubs (4)</a>
       <a href="#heritage" class="deli-nav-link whitespace-nowrap">Our Story</a>
@@ -944,7 +967,7 @@
       </button>
 
       <!-- WhatsApp Direct Concierge -->
-      <a href="https://wa.link/bk4b8e" target="_blank" rel="noreferrer noopener" class="hidden xl:inline-flex items-center gap-2 px-3.5 py-2 rounded-full border border-emerald-600/30 text-emerald-800 text-xs font-bold uppercase tracking-wider hover:bg-emerald-50 transition-all bg-emerald-50/50">
+      <a href="https://wa.link/bk4b8e" target="_blank" rel="noreferrer noopener" class="deli-wa-pill hidden xl:inline-flex items-center gap-2 px-3.5 py-2 rounded-full border border-emerald-600/30 text-emerald-800 text-xs font-bold uppercase tracking-wider hover:bg-emerald-50 transition-all bg-emerald-50/50">
         <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
         <span>WhatsApp Concierge</span>
       </a>
@@ -957,6 +980,28 @@
     </div>
   </div>
 </header>
+<script>
+/* The disclaimer bar sits in normal flow above a position:fixed header, so at
+   the top of the page it painted straight over the logo and the nav. Push the
+   header down by however much of the bar is still on screen; once the bar has
+   scrolled away the offset is 0 and the header pins to the top as before.
+   `translate` (not top/transform) so nothing else that styles it is touched. */
+(function () {
+  var bar = document.querySelector('.concept-bar'), head = document.querySelector('header.deli-site-header');
+  if (!bar || !head) return;
+  var queued = 0;
+  function place() {
+    queued = 0;
+    var y = Math.max(0, Math.round(bar.getBoundingClientRect().bottom));
+    head.style.translate = y ? '0 ' + y + 'px' : '';
+  }
+  function ask() { if (!queued) queued = requestAnimationFrame(place); }
+  addEventListener('scroll', ask, { passive: true });
+  addEventListener('resize', ask);
+  place();
+})();
+</script>
+
 
 <!-- ================= HERO SECTION: CULINARY SHOWCASE WITH LIVE ATMOSPHERIC CANVAS ================= -->
 <section class="relative pt-10 pb-20 md:pt-14 md:pb-28 px-6 md:px-10 max-w-7xl mx-auto overflow-hidden">
@@ -1013,17 +1058,17 @@
     <!-- Right Master Carver's Interactive Loupe Feature -->
     <div class="lg:col-span-5 relative" id="masterCarver">
       <!-- Interactive Cut Tabs for Loupe -->
-      <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-white/80 border border-[#CD2653]/20 mb-3 text-[10px] font-bold uppercase tracking-wider overflow-x-auto">
-        <button onclick="setLoupeCut('charcuterie')" id="loupeTab-charcuterie" class="py-1.5 px-3 rounded-xl bg-[#CD2653] text-white transition-all whitespace-nowrap">
+      <div class="grid grid-cols-4 sm:flex items-stretch sm:items-center gap-1 sm:gap-1.5 p-1 rounded-2xl bg-white/80 border border-[#CD2653]/20 mb-3 text-[10px] font-bold uppercase tracking-wide sm:tracking-wider">
+        <button onclick="setLoupeCut('charcuterie')" id="loupeTab-charcuterie" class="py-1.5 rounded-xl leading-tight text-center px-1 sm:px-3 bg-[#CD2653] text-white transition-all sm:whitespace-nowrap">
           Charcuterie
           </button>
-        <button onclick="setLoupeCut('poultry')" id="loupeTab-poultry" class="py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap">
+        <button onclick="setLoupeCut('poultry')" id="loupeTab-poultry" class="py-1.5 rounded-xl leading-tight text-center px-1 sm:px-3 text-[#524842] hover:text-[#CD2653] transition-all sm:whitespace-nowrap">
           Fresh Breast
           </button>
-        <button onclick="setLoupeCut('marinade')" id="loupeTab-marinade" class="py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap">
+        <button onclick="setLoupeCut('marinade')" id="loupeTab-marinade" class="py-1.5 rounded-xl leading-tight text-center px-1 sm:px-3 text-[#524842] hover:text-[#CD2653] transition-all sm:whitespace-nowrap">
           Lucknowi Cut
           </button>
-        <button onclick="setLoupeCut('momos')" id="loupeTab-momos" class="py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap">
+        <button onclick="setLoupeCut('momos')" id="loupeTab-momos" class="py-1.5 rounded-xl leading-tight text-center px-1 sm:px-3 text-[#524842] hover:text-[#CD2653] transition-all sm:whitespace-nowrap">
           Prawn Dim Sum
           </button>
       </div>
@@ -1173,7 +1218,7 @@
           </div>
         </div>
         <div class="lg:col-span-5 hidden lg:block">
-          <img src="/assets/brand/u-1599488615731-7e5c2823ff28-800.webp" loading="lazy" decoding="async" alt="Royal Awadhi Shahi Saffron Marinade" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#D4AF37]/70" />
+          <img src="/assets/brand/dc-lucknowi-marinade-800.webp" loading="lazy" decoding="async" alt="Royal Awadhi Shahi Saffron Marinade" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#D4AF37]/70" />
         </div>
       </div>
     </div>
@@ -1257,7 +1302,7 @@
               <svg width="36" height="42" viewBox="0 0 36 42" fill="none"><path d="M18 0v18c0 6 8 6 8 12s-6 10-12 10" stroke="#D1D5DB" stroke-width="4" stroke-linecap="round"/><circle cx="18" cy="6" r="4" fill="#9CA3AF"/></svg>
             </div>
             <div class="relative h-44 overflow-hidden">
-              <img src="/assets/brand/u-1599488615731-7e5c2823ff28-800.webp" alt="" loading="lazy" decoding="async" class="w-full h-full object-cover" />
+              <img src="/assets/brand/dc-chicken-breast-450.webp" alt="" loading="lazy" decoding="async" class="w-full h-full object-cover" />
               <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/75 border border-emerald-400/50 text-emerald-300 text-[9px] font-luxury font-bold uppercase tracking-widest">Station 04 • Vacuum Locked</span>
             </div>
             <div class="p-5 space-y-1.5">
@@ -1303,7 +1348,7 @@
   </div>
 
   <!-- Category Filter Tabs -->
-  <div class="flex items-center gap-2.5 overflow-x-auto pb-4 mb-10 text-xs font-bold uppercase tracking-wider scrollbar-none" id="categoryTabs">
+  <div class="flex items-center gap-2.5 overflow-x-auto sm:flex-wrap sm:overflow-visible pb-4 mb-10 text-xs font-bold uppercase tracking-wider scrollbar-none" id="categoryTabs">
     <button onclick="filterCategory('all')" id="tab-all" class="cat-pill px-5 py-2.5 rounded-full bg-[#CD2653] text-white shadow-sm transition-all whitespace-nowrap">
       All Larder (12)
       </button>
@@ -1805,7 +1850,7 @@
         title: 'Lucknowi Shahi Saffron Marinade',
         desc: 'Infused with Awadhi mace, roasted gram flour, hung curd and royal saffron threads.',
         badge: 'Chef Master Marinade Inspection',
-        image: '/assets/brand/u-1599488615731-7e5c2823ff28-1200.webp'
+        image: '/assets/brand/dc-lucknowi-marinade-1200.webp'
       },
       momos: {
         title: 'Handcrafted Coastal Prawn Dim Sum',
@@ -2479,9 +2524,9 @@
       ['charcuterie', 'poultry', 'marinade', 'momos'].forEach(k => {
         const btn = document.getElementById(`loupeTab-${k}`);
         if (k === key) {
-          btn.className = 'py-1.5 px-3 rounded-xl bg-[#CD2653] text-white transition-all whitespace-nowrap';
+          btn.className = 'py-1.5 rounded-xl leading-tight text-center px-1 sm:px-3 bg-[#CD2653] text-white transition-all sm:whitespace-nowrap';
         } else {
-          btn.className = 'py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap';
+          btn.className = 'py-1.5 rounded-xl leading-tight text-center px-1 sm:px-3 text-[#524842] hover:text-[#CD2653] transition-all sm:whitespace-nowrap';
         }
       });
 
