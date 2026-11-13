@@ -88,17 +88,17 @@ function hero(item,kicker,options={}) {
 function productCard(p) {
  if(!p)return '';
  return `<article class="shop-card" data-card data-title="${escape(p.title.toLowerCase())}" data-price="${p.price??0}" data-available="${p.available?'yes':'no'}">
- <a href="${local(p.path)}"><div class="shop-card-image">${image(p.image,p.images?.[0]?.alt||p.title,680)}<span>${icon('shop-external')}</span></div>
+ <a href="${local(p.path)}"><div class="shop-card-image">${image(p.image,p.images?.[0]?.alt||p.title,680)}<span>${icon('shop-arrow')}</span></div>
  <div class="shop-card-text"><p class="shop-kicker">${escape(p.type||'Xazina jewellery')}</p><h2>${escape(p.title)}</h2>${p.price!==null?`<p>From ${money(p.price)}</p>`:''}</div></a></article>`;
 }
 function routeCard(p) {
  return `<article class="shop-card shop-editor-card" data-card data-title="${escape(p.title.toLowerCase())}" data-price="0" data-available="yes"><a href="${local(p.path)}">
- <div class="shop-card-image">${image(p.image||ART[p.kind==='article'?'journal':'jewellery'],'',720)}<span>${icon('shop-external')}</span></div>
+ <div class="shop-card-image">${image(p.image||ART[p.kind==='article'?'journal':'jewellery'],'',720)}<span>${icon('shop-arrow')}</span></div>
  <div class="shop-card-text"><p class="shop-kicker">${escape(p.kind==='article'?'The Xazina journal':p.kind==='collection'?'Curated collection':'The house')}</p><h2>${escape(p.title)}</h2></div></a></article>`;
 }
 function grid(cards,kicker='The edit',count=cards.length,filters=true){
  return `<section class="shop-paper"><div class="shop-wrap shop-section">
- <div class="shop-list-head"><div><p class="shop-kicker">${escape(kicker)}</p><h2>Discover the edit.</h2><p data-result-count>${count} ${count===1?'result':'results'}</p></div>
+ <div class="shop-list-head"><div><p class="shop-kicker">${escape(kicker)}</p><h2>Discover the edit.</h2><p data-result-count aria-live="polite">${count} ${count===1?'result':'results'}</p></div>
  ${filters?`<div class="shop-filters" data-filters><label>Find within this edit <input type="search" placeholder="Filter by name" data-filter-query></label>
  <label>Sort by <select data-filter-sort><option value="original">Featured</option><option value="az">Name A to Z</option><option value="price-up">Price: low to high</option><option value="price-down">Price: high to low</option></select></label><label class="shop-check"><input type="checkbox" data-filter-stock> In stock</label></div>`:''}</div>
  <div class="shop-grid" data-grid>${cards.join('')}</div>
@@ -123,7 +123,17 @@ function product(snapshot,p){
  const first=p.variants.find(v=>v.available)||p.variants[0];
  const images=p.images.length?p.images:[{url:p.image,alt:p.title}];
  const featured=images[0];
- const related=Object.values(snapshot.products).filter(x=>x.path!==p.path&&x.type&&x.type===p.type).slice(0,4);
+ // 429 of 436 products carry no type, so matching on type alone left almost
+ // every product page without "More from Xazina". The pieces it shares a
+ // collection with fill in, smallest (most specific) collection first.
+ let related=Object.values(snapshot.products).filter(x=>x.path!==p.path&&x.type&&x.type===p.type).slice(0,4);
+ if(related.length<4){
+  const homes=Object.values(snapshot.entries).filter(e=>e.kind==='collection'&&e.members?.includes(p.path)&&e.path!=='/collections/all').sort((a,b)=>a.members.length-b.members.length);
+  for(const c of homes)for(const m of c.members){
+   const x=snapshot.products[m];
+   if(related.length<4&&x&&x.path!==p.path&&!related.includes(x))related.push(x);
+  }
+ }
  const escapedData=JSON.stringify({path:p.path,title:p.title,images,variants:p.variants}).replace(/</g,'\\u003c');
  return `<section class="shop-product"><div class="shop-wrap">${crumb(p.path,p.title)}
  <div class="shop-product-layout">
