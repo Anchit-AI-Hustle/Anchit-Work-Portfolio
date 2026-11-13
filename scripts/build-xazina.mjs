@@ -105,9 +105,15 @@ function grid(cards,kicker='The edit',count=cards.length,filters=true){
  <p class="shop-empty" data-filter-empty ${count?'hidden':''}>${count?'No results match those filters.':'This edit has no listed items.'}</p>
  </div></section>`;
 }
+// "08 / XAZINA" said nothing. A block that shows no heading of its own is
+// labelled with its section title, so a run of photos still says what it is.
+function label(b){
+ const title=plain(b.title);
+ return title&&!/<h[1-4][\s>]/i.test(b.html)?title.toUpperCase().slice(0,48):'XAZINA';
+}
 function blocks(items,extra='') {
  if(!items?.length)return '';
- return `<div class="shop-paper shop-source ${extra}"><div class="shop-wrap shop-section">${items.map((b,i)=>`<section class="source-block" data-source-block><span class="source-number">${String(i+1).padStart(2,'0')} / XAZINA ${icon('shop-spark')}</span><div class="source-content">${tidy(b.html)}</div></section>`).join('')}</div></div>`;
+ return `<div class="shop-paper shop-source ${extra}"><div class="shop-wrap shop-section">${items.map((b,i)=>`<section class="source-block" data-source-block><span class="source-number">${String(i+1).padStart(2,'0')} / ${escape(label(b))} ${icon('shop-spark')}</span><div class="source-content">${tidy(b.html)}</div></section>`).join('')}</div></div>`;
 }
 function originLink(item,label='View original on Xazina'){return button(ORIGIN+item.path,label,'glass',true);}
 function unavailable(item,label){

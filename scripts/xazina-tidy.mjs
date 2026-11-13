@@ -15,6 +15,9 @@
 //   src-span    copy sitting among cards; it takes a full row
 //   src-aside   a short heading block beside a long body (FAQs)
 //   src-chips   three or more short links in a row
+//   src-flat    a carousel column wrapping a pair of cards; it steps aside so
+//               every card joins the outer grid (4 + 4, not 3 + 3 + an orphan)
+//   src-quote   a testimonial: src-qmark marks its loose “ ” glyphs
 //
 // It also removes three things the capture turned into visible text: inline
 // style values that leaked out of an attribute, Shopify's screen-reader price
@@ -135,9 +138,34 @@ export function clean(html) {
     .replace(/<p>\s*Type:\s*<\/p>/g, '');
 }
 
+const QMARK = /^\s*["“”„«»❝❞]\s*$/;
+function finish(n) {
+  if (!n.tag) return;
+  const k = kids(n);
+  // A card whose whole content is a pair or trio of cards is a carousel
+  // column, not a card: it steps aside so those cards join the outer grid.
+  // Bigger inner grids (a 12-piece "For Her" tab panel) stay panels.
+  if (n.cls?.includes('src-grid')) {
+    const cards = k.filter(c => c.cls?.includes('src-card'));
+    let total = 0, flat = 0;
+    for (const c of cards) {
+      const ck = kids(c), inner = ck.length === 1 && ck[0].cls?.includes('src-grid') ? kids(ck[0]).filter(x => x.cls?.includes('src-card')) : null;
+      if (inner && inner.length <= 3) { add(c, 'src-flat'); add(ck[0], 'src-flat'); total += inner.length; flat++; } else total++;
+    }
+    if (flat) {
+      n.cls = n.cls.filter(x => x !== 'src-few' && !/^src-n\d$/.test(x));
+      if (total <= 3) add(n, 'src-few', 'src-n' + total);
+    }
+  }
+  if (k.length === 0 && n.tag !== '#root' && QMARK.test(n.children.map(c => c.text || '').join(''))) add(n, 'src-qmark');
+  if (k.some(c => !kids(c).length && QMARK.test(c.children.map(x => x.text || '').join('')))) add(n, 'src-quote');
+  n.children.forEach(finish);
+}
+
 export function tidy(html) {
   if (!html) return html;
   const tree = parse(clean(html));
   shape(tree, false);
+  finish(tree);
   return serialize(tree);
 }

@@ -179,6 +179,20 @@ a:is(:hover,:focus-visible) .src-swap>:nth-child(2),a.src-swap:is(:hover,:focus-
 .src-chips>a{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border:1px solid var(--house-hair);color:var(--house-ink);text-decoration:none;font-size:13px;font-weight:600;letter-spacing:.02em}
 .src-chips>a:hover{background:#eadeed}
 .src-chips>a p{margin:0}
+/* Carousel columns step aside so their cards share the outer grid. */
+.src-flat{display:contents}
+/* Cards are narrow by design: a card that is also an image/copy pair stays stacked. */
+.src-card.src-split{grid-template-columns:minmax(0,1fr)!important;gap:14px;align-items:start}
+.src-card.src-split .src-split-media :is(img,video){aspect-ratio:4/3}
+/* Testimonials: one opening mark, the words in the serif, then who said it. */
+.src-grid:has(.src-quote){--min:clamp(220px,23cqi,320px)}
+.src-quote{display:flex;flex-direction:column}
+.src-quote>.src-qmark{font:400 64px/1 var(--serif);color:#9b72ae;height:34px;overflow:visible;margin:4px 0 0}
+.src-quote>.src-qmark~.src-qmark{display:none}
+.src-quote>p{max-width:none}
+.src-quote>.src-qmark~p{font:italic 400 clamp(16px,1.35vw,19px)/1.5 var(--serif);color:var(--house-ink);margin:0 0 14px}
+.src-quote>.src-qmark~.src-qmark~p{font:600 13px/1.4 var(--sans);font-style:normal;margin:0;padding-top:12px;border-top:1px solid var(--house-hair)}
+.src-quote>.src-qmark~.src-qmark~p~p{font-weight:600;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--house-muted);margin-top:3px;padding:0;border:0}
 @media(prefers-reduced-motion:reduce){.src-swap>:nth-child(2),.source-content summary::after{transition:none}}
 .source-block{border-top:1px solid #d4c2da;padding:22px 0 clamp(26px,4vw,64px);display:grid;grid-template-columns:115px minmax(0,1fr);gap:16px}
 .source-number{display:flex;align-items:center;gap:6px;height:max-content;font-size:9px;color:#764e83;letter-spacing:.12em;font-weight:700}
