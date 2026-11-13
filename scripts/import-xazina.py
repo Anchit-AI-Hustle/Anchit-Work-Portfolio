@@ -199,7 +199,8 @@ for item in coll:
         s=soup(extra)
         for sec in (s.select('main > *')):
             # Product cards and filters are rendered from the catalog, not copied.
-            if sec.select_one('form[action^="/collections"], [id*="ProductGrid"], .collection-product-grid, .product-card, .f-price'):continue
+            if 'product-grid' in (sec.get('id') or '') and sec.select_one('a[href*="/products/"]'):continue
+            if sec.select_one('form[action^="/collections"], [id*="ProductGrid"], .collection-product-grid') and sec.select_one('a[href*="/products/"]'):continue
             extraBlocks+=sectionize(soup('<main>'+str(sec)+'</main>').main,path)
     entries[path]={'title':clean(item['title']),'kind':'collection','path':path,'image':media((item.get('image') or {}).get('src')) or maps['collections'].get(path,{}).get('image',''),
                    'description':''.join(render(c,path) for c in soup(item.get('description') or '').contents),
