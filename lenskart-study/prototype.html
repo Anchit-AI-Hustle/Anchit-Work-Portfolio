@@ -616,7 +616,6 @@ function renderCustomer(){
 }
 var QA = {
   need:{q:'Do I need new glasses?', a:function(p,s,res){
-    if(s.ticket) return 'Let us sort out your open ticket first. I will not suggest anything until that is done.';
     if(res.tier==='Not due') return 'Nothing suggests you need a new pair: your last eye test was '+s.test+' months ago. If anything feels off, book a free eye test and an optometrist will check.';
     return 'I cannot tell from here, and nobody should guess. Your last test was '+s.test+' months ago, so the honest answer is a free eye test first. If your power is unchanged, you keep your pair.';}},
   frame:{q:'Can I keep my frame?', a:function(p,s){
@@ -634,7 +633,8 @@ el('quick').addEventListener('click',function(e){
   var b = e.target.closest('button'); if(!b) return;
   var p = P[cur], k = b.getAttribute('data-q');
   addMsg('me', QA[k].q);
-  var reply = QA[k].a(p, simState, score(simState,p));
+  // An open ticket holds the assistant too: no question gets a priced answer.
+  var reply = simState.ticket ? 'Let us sort out your open ticket first. Your store has it and will update you. I will not suggest anything until that is done.' : QA[k].a(p, simState, score(simState,p));
   // The reply belongs to the customer who asked. Drop it if they have been switched.
   setTimeout(function(){ if(P[cur]===p) addMsg('ai', reply); }, 250);
 });

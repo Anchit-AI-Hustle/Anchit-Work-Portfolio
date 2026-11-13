@@ -29,6 +29,7 @@
 //   presale   a product is offered before the eye test
 //   ticket    an offer is made while a service ticket is open
 //   promo     a discount inside the check-in message
+//   ticketchat the assistant quotes a price while a service ticket is open
 //   kidhome   a home eye test offered for a child under 14
 //   symptom   a customer reporting symptoms is told their prescription is fine
 //   deeplink  the prototype ignores its hash on load
@@ -63,6 +64,7 @@ function mutate(src) {
   if (MUT === 'promo') return src.replace("If your power is the same, you keep your pair.\\n\\nReply STOP", "If your power is the same, you keep your pair. Get 20% off a new pair today.\\n\\nReply STOP");
   if (MUT === 'kidhome') return src.replace('return p.home && p.age>=14 && p.age<=75;', 'return p.home;');
   if (MUT === 'symptom') return src.replace('(r>=35||s.sym>0||s.test>=iv)', '(r>=35)');
+  if (MUT === 'ticketchat') return src.replace('var reply = simState.ticket ?', 'var reply = false ?');
   if (MUT === 'deeplink') return src.replace('function fromHash(scroll, focus){', 'function fromHash(scroll, focus){ if(!focus) return;');
   if (MUT === 'walkurl') return src.replace('<a href="/lenskart-study/prototype#checkin">https://', '<a href="/lenskart-study/prototype#console">https://');
   return src;
@@ -324,11 +326,18 @@ async function prototype(browser, vp) {
   await page.check('#in-ticket');
   const held = await nextCard(page);
   const heldSteps = await page.$$eval('#e-actions .step b', (b) => b.map((x) => x.textContent.trim()));
+  const heldChat = [];
+  for (const q of ['need', 'frame', 'cost']) {
+    await page.click(`#quick button[data-q="${q}"]`);
+    await page.waitForTimeout(400);
+    heldChat.push((await page.$$eval('#chat .bubble.ai', (b) => b.map((x) => x.textContent))).pop());
+  }
   await page.click('#t-checkin');
   const heldMsg = norm(await page.textContent('#wa-body'));
   await page.click('#t-customer');
-  check(`${L}: an open service ticket holds the offer, the actions and the check-in`,
-    held.hold && held.title === 'No offer while your ticket is open' && heldSteps[0] === 'Hold every message and offer' && /^No message is sent/.test(heldMsg),
+  check(`${L}: an open service ticket holds the offer, the actions, the assistant and the check-in`,
+    held.hold && held.title === 'No offer while your ticket is open' && heldSteps[0] === 'Hold every message and offer' && /^No message is sent/.test(heldMsg)
+      && heldChat.every((r) => /open ticket first/.test(r) && !/₹/.test(r)),
     `${held.title} | ${heldSteps[0]} | ${heldMsg.slice(0, 40)}`);
 
   // Ask Neha a question, switch to Arjun inside the 250 ms reply window.
