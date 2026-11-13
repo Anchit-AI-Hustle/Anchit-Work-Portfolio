@@ -86,6 +86,7 @@ const assets = [
   'cyber',
   'gram-street-coffee',
   'deli-chic',
+  'xazina-revamp',
   'pw-study',
   'amar-ujala',
   'ET_Study',
