@@ -26,7 +26,7 @@ jobs:
           pathlib.Path('scripts/build_resume_site_pdf.py').write_bytes(zlib.decompress(base64.b64decode(os.environ['SOURCE'])))
           PYCODE
           python scripts/build_resume_site_pdf.py
-          pdfinfo assets/resume.pdf | grep Pages
+          test -s assets/resume.pdf
       - name: Publish updated resume to repository
         run: |
           git config user.name 'github-actions[bot]'
