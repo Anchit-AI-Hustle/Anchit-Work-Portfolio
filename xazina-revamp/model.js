@@ -45,7 +45,8 @@ function hypercube(dim) {
   return { vertices, edges };
 }
 
-const facets = gemstone(), cubes = { 4: hypercube(4), 5: hypercube(5) };
+export const facets = gemstone();
+const cubes = { 4: hypercube(4), 5: hypercube(5) };
 
 export function mountModel(canvas) {
   const ctx = canvas.getContext('2d');
@@ -78,7 +79,7 @@ export function mountModel(canvas) {
     ctx.fillStyle = gradient;
     ctx.fillRect(x - r, y - r, 2 * r, 2 * r);
   }
-  function drawGem(yaw, pitch, scale) {
+  function drawGem(yaw, pitch, scale, time) {
     const transformed = facets.map((face, i) => {
       const p = face.map(v => camera(v.slice(), yaw, pitch));
       return { p, i, z: p.reduce((s, v) => s + v[2], 0) / p.length };
@@ -89,9 +90,9 @@ export function mountModel(canvas) {
       const b = p[2].map((x, k) => x - p[0][k]);
       const n = [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
       const len = Math.hypot(...n) || 1;
-      const key = Math.abs((n[0] * -.48 + n[1] * .68 + n[2] * .55) / len);
+      const key = Math.abs((n[0] * (-.48 + Math.sin(time * 1.25) * .42) + n[1] * .68 + n[2] * .55) / len);
       const contrast = mod(i * 29, 17) / 17;
-      const shine = Math.min(97, 16 + 56 * key ** 2 + 24 * contrast);
+      const shine = Math.min(97, 11 + 72 * key ** 2 + 24 * contrast);
       const color = i % 9 === 0 ? 215 : i % 7 === 0 ? 23 : 37;
       const x = xy[0][0], y = xy[0][1], end = xy[2];
       const grad = ctx.createLinearGradient(x, y, end[0] + .01, end[1] + .01);
@@ -112,7 +113,7 @@ export function mountModel(canvas) {
       if (key > .965 && i % 3 === 0) glow(x, y, scale * .13, '#fff3d892');
     }
   }
-  function drawCube(dim, phase, dispersion, yaw, pitch, scale) {
+  function drawCube(dim, phase, dispersion, yaw, pitch, scale, time) {
     const { vertices, edges } = cubes[dim];
     const points = vertices.map(v => {
       const p = v.slice();
@@ -129,7 +130,7 @@ export function mountModel(canvas) {
       return camera(p, yaw, pitch);
     });
     const xy = points.map(p => project(p, scale));
-    const palette = [34, 312, 192, 46, 262];
+    const palette = [37, 329, 183, 215, 270];
     const sorted = edges.slice().sort(([a, b], [c, d]) =>
       points[a][2] + points[b][2] - points[c][2] - points[d][2]);
     for (const [a, b, axis] of sorted) {
@@ -139,9 +140,12 @@ export function mountModel(canvas) {
       ctx.beginPath();
       ctx.moveTo(x, y);
       ctx.lineTo(ex, ey);
-      ctx.lineWidth = dim === 4 && axis === 3 ? 1.6 : 1.15;
+      ctx.lineWidth = dim === 4 && axis === 3 ? 1.8 : 1.35;
+      ctx.shadowColor = `hsl(${hue},95%,64%)`;
+      ctx.shadowBlur = dim === 5 ? 9 * dispersion : axis === 3 ? 6 : 0;
       ctx.strokeStyle = `hsla(${hue}, ${dim === 5 ? 86 : 63}%, 74%, ${front})`;
       ctx.stroke();
+      ctx.shadowBlur = 0;
       if (dim === 5 && dispersion > .12) {
         ctx.beginPath();
         ctx.moveTo(x + 3 * dispersion, y - 2 * dispersion);
@@ -150,6 +154,15 @@ export function mountModel(canvas) {
         ctx.strokeStyle = `hsla(${hue + 48}, 95%, 66%, ${front * dispersion * .5})`;
         ctx.stroke();
       }
+    }
+    for (let i = 0; i < sorted.length; i += dim === 5 ? 5 : 4) {
+      const [a, b, axis] = sorted[i];
+      const progress = mod(time * (.27 + axis * .038) + (a + b) * .136, 1);
+      const x = lerp(xy[a][0], xy[b][0], progress), y = lerp(xy[a][1], xy[b][1], progress);
+      const hue = dim === 5 ? lerp(39, palette[axis], dispersion) : 40;
+      glow(x, y, dim === 5 ? 16 : 12, `hsla(${hue},100%,73%,.82)`);
+      ctx.fillStyle = '#fff4e3';
+      ctx.fillRect(x - 1.2, y - 1.2, 2.4, 2.4);
     }
     for (let i = 0; i < xy.length; i++) {
       const [x, y] = xy[i];
@@ -168,9 +181,9 @@ export function mountModel(canvas) {
     ctx.scale(1, .14);
     glow(0, 0, span * .36, mode === 5 ? '#8b56ad57' : '#d597595c');
     ctx.restore();
-    if (mode === 3) drawGem(.3 + yaw + angle, .82 + pitch, span * .325);
+    if (mode === 3) drawGem(.3 + yaw + angle, .82 + pitch, span * .325, time);
     else drawCube(mode, mode === 4 ? phase : time * .32, dispersion,
-      .48 + yaw, .35 + pitch, span * (mode === 4 ? .205 : .195));
+      .48 + yaw, .35 + pitch, span * (mode === 4 ? .192 : .178), time);
   }
   return { size, draw };
 }
