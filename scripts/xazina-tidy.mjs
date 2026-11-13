@@ -146,12 +146,15 @@ function finish(n) {
   // column, not a card: it steps aside so those cards join the outer grid.
   // Bigger inner grids (a 12-piece "For Her" tab panel) stay panels.
   if (n.cls?.includes('src-grid')) {
+    // All or nothing: a carousel's columns are alike, while a set of tab
+    // panels mixes sizes (Designer's Choice: All 9, Rings 4, Earrings 2). If
+    // only the small panels stepped aside, single pieces would take a whole
+    // column beside panels squeezing four into the same width.
     const cards = k.filter(c => c.cls?.includes('src-card'));
-    let total = 0, flat = 0;
-    for (const c of cards) {
-      const ck = kids(c), inner = ck.length === 1 && ck[0].cls?.includes('src-grid') ? kids(ck[0]).filter(x => x.cls?.includes('src-card')) : null;
-      if (inner && inner.length <= 3) { add(c, 'src-flat'); add(ck[0], 'src-flat'); total += inner.length; flat++; } else total++;
-    }
+    const inner = cards.map(c => { const ck = kids(c); return ck.length === 1 && ck[0].cls?.includes('src-grid') ? [ck[0], kids(ck[0]).filter(x => x.cls?.includes('src-card')).length] : null; });
+    const flat = cards.length >= 2 && inner.every(x => x && x[1] <= 3) ? cards.length : 0;
+    let total = 0;
+    if (flat) cards.forEach((c, i) => { add(c, 'src-flat'); add(inner[i][0], 'src-flat'); total += inner[i][1]; });
     if (flat) {
       n.cls = n.cls.filter(x => x !== 'src-few' && !/^src-n\d$/.test(x));
       if (total <= 3) add(n, 'src-few', 'src-n' + total);
