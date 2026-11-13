@@ -92,7 +92,11 @@ const CANONICAL = {
   Phone: /tel:(\+?[0-9]+)/g,
 };
 // Pages that speak as another business, not as me. See the identity check.
-const SHOP_ROUTE = /^\/(deli-chic|gram-street-coffee)(?:\/|$)/;
+const SHOP_ROUTE = /^\/(deli-chic|gram-street-coffee|xazina-revamp)(?:\/|$)/;
+// Xazina's storefront also carries the house's own mailboxes (sales@ on every
+// page, support@ on one captured section). Two mailboxes are two identities,
+// so each address is held to one spelling of itself, not compared with mine.
+const SHOP_EMAIL = new Set(['xazina-revamp']);
 // Pages that speak as another PERSON. Ayushi's portfolio carries her own email
 // and phone; they are held to one spelling of her details, not compared with mine.
 const PERSON_ROUTE = /^\/(ayushi)(?:-rawat)?(?:\/|$)/;
@@ -204,7 +208,8 @@ const PERSON_ROUTE = /^\/(ayushi)(?:-rawat)?(?:\/|$)/;
       const key = shop && name === 'Phone' ? `${name} (${shop})`
         : person && (name === 'Email' || name === 'Phone') ? `${name} (${person})` : name;
       for (const m of content.matchAll(new RegExp(re.source, 'g'))) {
-        (identity[key] ||= new Map()).set(m[1], (identity[key].get(m[1]) || new Set()).add(route));
+        const k = SHOP_EMAIL.has(shop) && name === 'Email' ? `${name} (${shop}: ${m[1].toLowerCase()})` : key;
+        (identity[k] ||= new Map()).set(m[1], (identity[k].get(m[1]) || new Set()).add(route));
       }
     }
 

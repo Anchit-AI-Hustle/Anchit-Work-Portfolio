@@ -52,9 +52,20 @@ function crumb(path,title){
  const parent=({products:['Jewellery',local(COLLECTION)],collections:['Collections',local('/collections')],pages:['The House',local('/pages')],blogs:['Journal',local(JOURNAL)],policies:['Client care',local('/policies')]})[part];
  return `<nav class="shop-crumb" aria-label="Breadcrumb"><a href="${B}">Xazina</a>${parent && parent[1]!==local(path)?`<span>/</span><a href="${parent[1]}">${parent[0]}</a>`:''}<span>/</span><span aria-current="page">${escape(title)}</span></nav>`;
 }
+// Search and share cards want 60-160 characters (scripts/seo-basics.js). The
+// captured copy is either a whole product story (cut at 210, so 422 product
+// pages failed) or a one-line account prompt (as short as 46).
+const DESC_TAIL=' Lab-grown diamond jewellery and fine fragrance from the house of Xazina.';
+function metaDescription(text){
+ let d=plain(text);
+ if([...d].length<60)d=(d?d.replace(/[\s.]*$/,'.'):'')+DESC_TAIL;
+ d=d.trim();
+ if([...d].length>160)d=[...d].slice(0,157).join('').replace(/[\s,;:.-]+\S*$/,'')+'…';
+ return d;
+}
 function shell(snapshot,item,content) {
  const title=`${item.title} | Xazina`;
- const desc=plain(item.description||item.excerpt||'Explore Xazina’s lab-grown diamond jewellery, fine fragrance and craft.').slice(0,210);
+ const desc=metaDescription(item.description||item.excerpt||'Explore Xazina’s lab-grown diamond jewellery, fine fragrance and craft.');
  const extra=item.kind==='product'?'<meta property="og:type" content="product">':'';
  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
  <meta name="theme-color" content="#110c1c"><meta name="robots" content="noindex,follow"><title>${escape(title)}</title>
@@ -221,7 +232,7 @@ export async function buildXazina(www,source){
  for(const [path,dest] of Object.entries(aliases)){
   if(known.has(path)||!pathOK(path)||(!known.has(dest)&&dest!=='/'))continue;
   const destination=local(dest);
-  await out(path,`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0;url=${escape(destination)}"><link rel="canonical" href="${LIVE+destination}"><title>Continue to Xazina</title><script type="module" src="${B}/shop-redirect.js"></script></head><body><a id="destination" href="${escape(destination)}">Continue to Xazina</a></body></html>`);
+  await out(path,`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0;url=${escape(destination)}"><link rel="canonical" href="${LIVE+destination}"><title>Continue to Xazina</title><meta name="description" content="This Xazina page has moved. Continue to its new address in the Xazina storefront concept."><meta property="og:image" content="${LIVE+FALLBACK}"><link rel="icon" href="${B}/media/mark.svg" type="image/svg+xml"><script type="module" src="${B}/shop-redirect.js"></script></head><body><a id="destination" href="${escape(destination)}">Continue to Xazina</a></body></html>`);
  }
  console.log(`[xazina] ${all.length} themed routes and ${Object.keys(aliases).length} mapped aliases`);
 }
