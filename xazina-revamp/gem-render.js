@@ -1,5 +1,5 @@
 import * as THREE from '/assets/vendor/three.module.min.js';
-import { facets } from './model.js?v=light-2';
+import { facets } from './model.js?v=prism-3';
 
 const vertexShader = /* glsl */ `
 varying vec3 vPosition;
