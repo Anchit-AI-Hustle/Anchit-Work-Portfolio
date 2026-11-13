@@ -2,7 +2,7 @@ import { mountModel } from './model.js?v=prism-3';
 import { mountOptics } from './optics.js?v=prism-3';
 
 const acts = [
-  { index: '01 / THE FORM', lines: ['A Study', 'in ', 'Light.'], caption: 'A lab-grown diamond. Three ways to see what light can do.', mark: '01 / REFLECTION' },
+  { index: '01 / THE FORM', lines: ['A Study', 'in ', 'Light.'], caption: 'A lab-grown diamond. Three scenes that play automatically.', mark: '01 / REFLECTION' },
   { index: '02 / TIME', lines: ['A moment,', 'un', 'folded.'], caption: 'A single cut, separated into moments. Scroll to move through them.', mark: '02 / TIME SLICE' },
   { index: '03 / SPECTRUM', lines: ['Light', 'comes ', 'apart.'], caption: 'One white beam, split into a spectrum. The colour was there all along.', mark: '03 / DISPERSION' }
 ];
@@ -30,6 +30,8 @@ export function mountStory({ motion, media, onEffects }) {
   let sceneProgress = 0, chapterProgress = 0, activeAnimations = [], sceneObserver;
   let frame = 0, start = 0, time = 0, x = 0, y = 0, toX = 0, toY = 0;
   let focused = false, gem, gemLoading = false, scrollOverride = null, scrolling;
+  const dwell = 5.8;
+  let nextCut = dwell, userDirected = false, anchorScroll = window.scrollY;
 
   function cancelTransitions() {
     for (const animation of activeAnimations) animation.stop();
@@ -73,7 +75,7 @@ export function mountStory({ motion, media, onEffects }) {
     caption.textContent = d.caption;
     index.textContent = d.index;
     coordinates.textContent = d.mark;
-    next.querySelector('span').textContent = act === 2 ? 'Continue to jewellery' : 'Scroll or tap for the next act';
+    next.querySelector('span').textContent = act === 2 ? 'Continue to jewellery' : 'Next scene';
     buttons.forEach((button, i) => {
       if (i === act) button.setAttribute('aria-current','step');
       else button.removeAttribute('aria-current');
@@ -84,7 +86,7 @@ export function mountStory({ motion, media, onEffects }) {
   }
 
   function updateScroll() {
-    if (!effects) return;
+    if (!effects || !userDirected) return;
     const { top, height } = story.getBoundingClientRect();
     const total = Math.max(1, height - film.offsetHeight);
     sceneProgress = clamp(-top / total);
@@ -96,6 +98,8 @@ export function mountStory({ motion, media, onEffects }) {
   }
 
   function scrollToAct(i) {
+    userDirected = true;
+    nextCut = time + dwell;
     if (i > 2) {
       document.querySelector('#jewellery').scrollIntoView({ behavior: effects ? 'smooth' : 'instant' });
       return;
@@ -119,6 +123,13 @@ export function mountStory({ motion, media, onEffects }) {
     if (effects && start) time += Math.min((now - start) / 1000, .05);
     start = effects ? now : 0;
     x += (toX - x) * .12; y += (toY - y) * .12;
+    if (effects && !userDirected && !isStructure) {
+      if (time >= nextCut) {
+        nextCut = time + dwell;
+        show((act + 1) % acts.length);
+      }
+      chapterProgress = clamp(1 - (nextCut - time) / dwell, .07);
+    }
     decorate();
     if (effects) schedule();
   }
@@ -169,9 +180,10 @@ export function mountStory({ motion, media, onEffects }) {
   media.addEventListener('change', event => setEffects(!event.matches));
   structure.addEventListener('click', () => {
     isStructure = !isStructure;
+    nextCut = time + dwell;
     film.classList.toggle('is-structure', isStructure);
     structure.setAttribute('aria-pressed', String(isStructure));
-    structure.lastChild.textContent = isStructure ? ' Return to film' : ' Reveal structure';
+    structure.lastChild.textContent = isStructure ? ' Return to film' : ' Show geometry';
     if (isStructure && !gem && !gemLoading) {
       gemLoading = true;
       import('./gem-render.js?v=prism-3').then(({ createGemRenderer }) => {
@@ -193,7 +205,10 @@ export function mountStory({ motion, media, onEffects }) {
     focused = true;
   }, { passive:true });
   film.addEventListener('pointerleave', () => { toX = toY = 0; focused = false; });
-  addEventListener('scroll', updateScroll, { passive:true });
+  addEventListener('scroll', () => {
+    if (Math.abs(window.scrollY - anchorScroll) > 12) userDirected = true;
+    updateScroll();
+  }, { passive:true });
   document.addEventListener('visibilitychange', () => { start = 0; schedule(); });
   new ResizeObserver(resize).observe(film);
   sceneObserver = new IntersectionObserver(([entry]) => {
