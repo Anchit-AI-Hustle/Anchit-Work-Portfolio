@@ -3394,7 +3394,10 @@
     // compositor transition. Nothing runs while the walk is off screen.
     // The last pose is the end of the run: the counter layer has faded and
     // the docked 10-seater bar has come forward, the view the caption names.
-    var POSES = [0.02, 0.45, 1];
+    // Under 760px the walk's perspective tightens to 760px, which left the
+    // bar at about 0.62x (200px on a phone). 1.05 brings it to about 0.96x.
+    var narrow = window.matchMedia('(max-width: 760px)');
+    var POSES = [0.02, 0.45, narrow.matches ? 1.05 : 1];
     var shown = -1, inView = false, ticking = false;
     sec.classList.add('is-stepped');
     function onScroll() {
@@ -3412,7 +3415,7 @@
       });
     }
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', function () { shown = -1; onScroll(); });
+    window.addEventListener('resize', function () { POSES[2] = narrow.matches ? 1.05 : 1; shown = -1; onScroll(); });
 
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (en) {
