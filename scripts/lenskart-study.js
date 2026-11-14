@@ -36,6 +36,8 @@
 //   reset       a re-test result does not reset the clock
 //   refer       unchanged power with trouble seeing is closed out as "keep your pair"
 //   doctorchat  the assistant quotes prices to someone told to see a doctor
+//   goldtoggle  the Gold toggle changes nothing
+//   leverdrift  the calculator's net by lever stops matching the case study
 //   nocall      the store calls a customer who never agreed to calls
 //   consolemath the console table uses different maths from the calculator
 //   embedbar    the embedded prototype shows a second consent bar
@@ -78,6 +80,8 @@ function mutate(src) {
     consolemath: ['retests*perRetest(I)*I.incr - lost', 'n*0.07*4280'],
     refer: ["(s.result==='same' && s.sym===1) ? 'refer' : 'tested'", "'tested'"],
     doctorchat: ["var reply = st==='doctor' ?", 'var reply = false ?'],
+    goldtoggle: ["[s.gold?'Or a home eye test in '+p.city+': free with your Gold membership.':", "[false?'':"],
+    leverdrift: ["['Store call on day 8', rCall*perRetest(I)*I.incr*mar - c4 - rCall*perT]", "['Store call on day 8', rCall*perRetest(I)*I.incr*mar]"],
     embedbar: ['html.embed #consentBar{display:none!important}', ''],
     ambush: ["<p class=\"lede\">I'm Anchit Tandon, a product manager. I studied Lenskart", '<p class="lede">Lenskart'],
     deeplink: ['function fromHash(scroll, focus){', 'function fromHash(scroll, focus){ if(!focus) return;'],
@@ -174,7 +178,7 @@ async function walkthrough(browser, vp) {
   const { ctx, page } = await open(browser, vp, '/lenskart-study#walkthrough');
   const steps = await page.$$eval('#walk li .wu a', (as) => as.map((a) => [a.getAttribute('href'), a.textContent.trim()]));
   steps.push(await page.$eval('.share a', (a) => [a.getAttribute('href'), a.textContent.trim()]));
-  const tries = await page.$$eval('#system a.try', (as) => as.map((a) => a.getAttribute('href')));
+  const tries = await page.$$eval('#bet a.try', (as) => as.map((a) => a.getAttribute('href')));
   const bad = steps.filter(([href, txt]) => {
     if (!txt.startsWith('https://anchit-tandon.com/')) return true;
     const u = new URL(txt); return u.pathname + u.hash !== href;
@@ -210,11 +214,11 @@ async function caseStudy(browser, vp) {
   const sys = await page.evaluate(() => ({
     order: [...document.querySelectorAll('main > section')].slice(0, 2).map((s) => s.id),
     h2: (document.querySelector('#sys-h') || {}).textContent || '',
-    feats: [...document.querySelectorAll('#system .feat .step b')].map((b) => b.textContent.trim()),
+    feats: [...document.querySelectorAll('#bet .feat .step b')].map((b) => b.textContent.trim()),
     skip: (document.querySelector('a.skip') || { getAttribute() {} }).getAttribute('href'),
   }));
-  check(`${L}: summary first, then the proposed system with six named features`,
-    sys.order.join() === 'summary,system' && /Vision Recall Engine/.test(sys.h2) && sys.feats.join() === FEATURES.join(), JSON.stringify(sys));
+  check(`${L}: summary first, then the evidence; the proposal is stated once, with six named features`,
+    sys.order.join() === 'summary,business' && /Vision Recall Engine/.test(sys.h2) && sys.feats.join() === FEATURES.join(), JSON.stringify(sys));
   // A first-time visitor must be told what this is before being told a claim:
   // who wrote it, that it is not Lenskart's, the finding, and how to read it.
   const intro = await page.evaluate(() => ({
@@ -308,6 +312,10 @@ async function caseStudy(browser, vp) {
   const costRows = await page.$$eval('#im-cost tbody tr', (rs) => rs.map((r) => parseFloat(r.cells[2].innerText)));
   const costTotal = costRows.pop();
   check(`${L}: running costs are itemised and add up`, costTotal === 3.94 && Math.abs(costRows.reduce((a, b) => a + b, 0) - costTotal) <= 0.011, costRows.join('+') + '=' + costTotal);
+  // Which lever earns the money: the rows must add up to the net.
+  const lev = await page.$$eval('#im-lever tbody tr', (rs) => rs.map((r) => r.cells[1].innerText.trim()));
+  const levSum = lev.slice(0, -1).reduce((a, x) => a + f(x), 0);
+  check(`${L}: the net is broken down by lever and the rows add up`, lev.length === 5 && lev[lev.length - 1] === row('Net of running costs')[1] && Math.abs(levSum - f(lev[lev.length - 1])) <= 0.11, lev.join(' , '));
   const sensBase = await page.$$eval('#im-sens tbody tr', (rs) => rs.map((r) => r.cells[2].innerText.trim()));
   check(`${L}: every sensitivity row shares the base case`, sensBase.length === 8 && sensBase.every((x) => x === row('Net of running costs')[1]), sensBase.join());
   const hidden = await page.$$eval('#im-range td.num, #im-cost td.num, #im-sens td.num', (cs) => cs.filter((c) => {
@@ -393,6 +401,12 @@ async function prototype(browser, vp) {
   check(`${L}: no store call for a customer who did not agree to one`,
     !noCall.some((t) => /^Store call/.test(t)) && noCall.some((t) => /^No store call/.test(t)) && !/will call/.test(noCallMsg) && /remind you once more/.test(noCallMsg), JSON.stringify(noCall));
 
+  // Gold members get the home eye test free; the plan and the assistant must say so.
+  const goldPlan = [norm(await page.textContent('#s-plan'))];
+  await page.check('#in-gold'); goldPlan.push(norm(await page.textContent('#s-plan')), await ask(page, 'cost'));
+  await page.uncheck('#in-gold');
+  check(`${L}: the Gold toggle changes the home eye test price`, /₹99, free for Gold members/.test(goldPlan[0]) && /free with your Gold membership/.test(goldPlan[1]) && /free with your Gold membership/.test(goldPlan[2]), goldPlan[1].slice(0, 90));
+
   // What a customer tells us can only add care. Trouble seeing brings a test
   // forward; just after a test it is a re-check, never a sale; red-flag
   // symptoms go to a doctor and stop everything else.
@@ -412,7 +426,6 @@ async function prototype(browser, vp) {
 
   // A re-test happens today: it resets the clock everywhere at once.
   await who(page, 0);
-  await page.click('#in-sym button[data-s="0"]');
   await page.click('#in-result button[data-r="same"]');
   const after = {};
   after.same = { tier: await tierOf(page), card: await nextCard(page), plan: norm(await page.textContent('#s-nudge-title')), disabled: await page.$eval('#in-test', (e) => e.disabled), reply: await ask(page, 'need'), msg: await checkinText(page) };
@@ -636,6 +649,7 @@ async function consistency(browser) {
     const cells = (label) => { const r = [...document.querySelectorAll('#im-range tbody tr')].find((x) => x.cells[0].innerText.trim().startsWith(label)); return r ? [1, 2, 3].map((i) => r.cells[i].innerText.trim()) : []; };
     return {
       net: cells('Net of running costs'), rev: cells('Extra revenue'), cost: cells('Less running costs').map((c) => c.replace('−', '')),
+      lever: [...document.querySelectorAll('#im-lever tbody tr')].slice(0, 4).map((r) => r.cells[1].innerText.trim()),
       sens: [...document.querySelectorAll('#im-sens tbody tr')].map((r) => ({ k: r.dataset.k, lo: r.dataset.lo, hi: r.dataset.hi, cells: [1, 3].map((i) => r.cells[i].innerText.trim()) })),
     };
   });
@@ -650,6 +664,9 @@ async function consistency(browser) {
   const okCases = cases.every((c, i) => c.net === study.net[i] && c.rev === study.rev[i] && c.cost === study.cost[i]);
   check('case study low, base and high match the prototype calculator', study.net.length === 3 && okCases,
     `case study ${JSON.stringify([study.rev, study.cost, study.net])} vs calculator ${JSON.stringify(cases)}`);
+  await read({});
+  const byLever = await b.page.$$eval('#bylever .lever-head span:last-child', (xs) => xs.map((x) => x.textContent.replace('₹', '').replace(' cr', '').trim()));
+  check('the case study\'s net by lever matches the prototype calculator', study.lever.length === 4 && study.lever.join() === byLever.join(), `case study ${study.lever.join()} vs calculator ${byLever.join()}`);
   const bad = [];
   for (const r of study.sens) {
     const lo = (await read({ [r.k]: r.lo })).net; const hi = (await read({ [r.k]: r.hi })).net;
