@@ -52,6 +52,8 @@
 // MUT=final         a final-year learner is offered a Vidyapeeth trial
 // MUT=pilot         the 90-day plan pilots NEET droppers, who have no next batch
 // MUT=mentors       the case study's mentor head-count drifts from the calculator's
+// MUT=ambush        the consent question covers the first screen again
+// MUT=nostart       the case study opens with no 'start here' steps
 const { chromium } = require('./_playwright.js');
 const vercel = require('../vercel.json');
 const BASE = process.env.BASE || 'http://127.0.0.1:8099';
@@ -93,6 +95,8 @@ function mutate(src) {
   if (MUT === 'final') return src.replace(' && !p.final, held', ', held').replace('if(p.offline && !p.final) a.push', 'if(p.offline) a.push');
   if (MUT === 'pilot') return src.replace('<li>Class 10 and Class 11 (JEE, NEET): both have a next batch</li>', '<li>Class 11 JEE and NEET dropper</li>');
   if (MUT === 'mentors') return src.replace('about 51 full-time mentors at 60% of their week on calls, and more', 'roughly 30 full-time mentors, and more');
+  if (MUT === 'ambush') return src.replace(' data-consent-defer', '');
+  if (MUT === 'nostart') return src.replace(/<nav class="start"[\s\S]*?<\/nav>/, '');
   if (MUT === 'walkurl') return src.replace('<a href="/pw-study/prototype#pulse">https://', '<a href="/pw-study/prototype#console">https://');
   return src;
 }
@@ -208,11 +212,39 @@ async function walkthrough(browser, vp) {
   }
 }
 
+// A first-time visitor must learn who this is from, what it is and where to
+// start before any jargon, and no consent question may cover that first screen.
+async function firstScreen(page, L, kind) {
+  const f = await page.evaluate(() => {
+    const vis = (el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.top >= 0 && r.bottom <= innerHeight; };
+    const bar = document.getElementById('consentBar');
+    return {
+      lede: (document.querySelector('.hero .lede') || {}).textContent || '',
+      steps: [...document.querySelectorAll('.start a')].filter(vis).length,
+      consent: !!(bar && bar.getBoundingClientRect().height > 0 && bar.getAttribute('data-in') === '1'),
+    };
+  });
+  if (kind === 'study') {
+    check(`${L}: first screen says who and what, with three visible "start here" steps`,
+      /application for a Product Manager role/.test(f.lede) && f.steps === 3, `steps=${f.steps} lede=${f.lede.slice(0, 60)}`);
+  } else {
+    check(`${L}: first screen says what the prototype is and how to use it`, /made-up students/.test(f.lede) && /Pick one/.test(f.lede), f.lede.slice(0, 80));
+  }
+  check(`${L}: no consent question covers the first screen`, !f.consent, 'consent bar up=' + f.consent);
+  // It is deferred, not dropped: reading on brings the question.
+  await page.evaluate(() => window.scrollTo(0, innerHeight * 1.5));
+  await page.waitForTimeout(700);
+  const later = await page.evaluate(() => !!document.getElementById('consentBar'));
+  check(`${L}: the consent question still comes once the visitor reads on`, later, 'consent bar present=' + later);
+  await page.evaluate(() => window.scrollTo(0, 0));
+}
+
 async function caseStudy(browser, vp) {
   const L = `[${vp.name}] /pw-study`;
   const { ctx, page, bag, status } = await open(browser, vp, '/pw-study');
   check(`${L}: HTTP 200`, status === 200, status);
   await names(page, L);
+  await firstScreen(page, L, 'study');
 
   // The proposed system is the first thing after the hero, by its feature names.
   const sys = await page.evaluate(() => ({
@@ -374,6 +406,7 @@ async function prototype(browser, vp) {
   const { ctx, page, bag, status } = await open(browser, vp, '/pw-study/prototype');
   check(`${L}: HTTP 200`, status === 200, status);
   await names(page, L);
+  await firstScreen(page, L, 'proto');
 
   // The hero's feature links switch tabs; a tab click writes its own link.
   await page.click('.feats a[href="#console"]');
