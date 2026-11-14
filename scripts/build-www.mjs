@@ -89,6 +89,7 @@ const assets = [
   'deli-chic',
   'xazina-revamp',
   'pw-study',
+  'lenskart-study',
   'amar-ujala',
   'ET_Study',
   'TimesHealth_Study',
