@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090812">
+  <title>Xazina | A Study in Light</title>
+  <meta name="description" content="An independent Xazina design concept. Explore lab-grown diamond jewellery, fine fragrance, and an interactive study of light.">
+  <meta property="og:title" content="Xazina | A Study in Light">
+  <meta property="og:description" content="Lab-grown diamonds, fine fragrance, and an interactive study of light.">
+  <meta property="og:image" content="https://anchit-tandon.com/xazina-revamp/media/act-form.webp">
+  <meta property="og:url" content="https://anchit-tandon.com/xazina-revamp">
+  <link rel="canonical" href="https://anchit-tandon.com/xazina-revamp">
+  <link rel="icon" href="/xazina-revamp/media/mark.svg" type="image/svg+xml">
+  <link rel="preload" href="/xazina-revamp/media/serif.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/xazina-revamp/style.css?v=prism-4">
+  <script defer src="/assets/vendor/xazina/motion.js"></script>
+  <script type="module" src="/xazina-revamp/page.js?v=prism-4"></script>
+</head>
+<body id="top">
+  <a class="skip" href="#main">Skip to content</a>
+  <div class="concept-bar" role="note"><p>Independent design concept by <a href="/">Anchit Tandon</a>, not affiliated with Xazina. Xazina handles purchases and appointments; prices are a catalog snapshot.</p><nav aria-label="About this concept"><a href="/">Portfolio</a><a href="/xazina-revamp/#design-notes">Design notes</a><a href="/assets/resume.pdf">Resume</a><a href="mailto:anchit.tandon@gmail.com?subject=Your%20Xazina%20concept">Email Anchit</a></nav></div>
+  <div class="light-progress" aria-hidden="true"></div>
+  <svg class="svg-defs" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs>
+    <symbol id="arrow" viewBox="0 0 24 24"><path d="M3 12h16m-6-6 6 6-6 6"/></symbol>
+    <symbol id="external" viewBox="0 0 24 24"><path d="M5 19 19 5M9 5h10v10"/></symbol>
+    <symbol id="down" viewBox="0 0 24 24"><path d="M12 4v15m-6-6 6 6 6-6"/></symbol>
+    <symbol id="spark" viewBox="0 0 24 24"><path d="M12 1c0 7-4 11-11 11 7 0 11 4 11 11 0-7 4-11 11-11-7 0-11-4-11-11Z"/></symbol>
+  </defs></svg>
+  <main id="main">
+    <section class="light-story" id="light-story" aria-labelledby="hero-title">
+      <div class="film" id="film" data-act="0">
+        <div class="film-visuals" aria-hidden="true">
+          <picture class="film-shot current" data-shot="0">
+            <source media="(max-width: 680px)" srcset="/xazina-revamp/media/act-form-mobile.webp">
+            <img src="/xazina-revamp/media/act-form.webp" width="1440" height="960" alt="" fetchpriority="high">
+          </picture>
+          <picture class="film-shot" data-shot="1">
+            <source media="(max-width: 680px)" srcset="/xazina-revamp/media/act-time-mobile.webp">
+            <img src="/xazina-revamp/media/act-time.webp" width="1440" height="960" alt="">
+          </picture>
+          <picture class="film-shot" data-shot="2">
+            <source media="(max-width: 680px)" srcset="/xazina-revamp/media/act-spectrum-mobile.webp">
+            <img src="/xazina-revamp/media/act-spectrum.webp" width="1440" height="960" alt="">
+          </picture>
+          <div class="film-shadow"></div>
+          <div class="film-split"></div>
+          <canvas class="film-optics" id="film-optics"></canvas>
+          <div class="film-structure">
+            <canvas class="film-projection" id="film-projection"></canvas>
+            <canvas class="film-gem" id="film-gem"></canvas>
+          </div>
+        </div>
+
+        <header class="film-top wrap">
+          <a href="#top" class="film-brand" aria-label="Xazina, back to top">XAZINA<span> / </span><sup>✧</sup></a>
+          <nav aria-label="Xazina sections"><a href="#jewellery">Jewellery</a><a href="#fragrance">Fragrance</a><a href="#atelier">Atelier</a></nav>
+          <a class="film-visit" href="https://www.xazina.com/">Visit Xazina <svg aria-hidden="true"><use href="#external"/></svg></a>
+        </header>
+
+        <div class="film-type wrap">
+          <div class="film-copy">
+            <p class="film-overline"><i></i><span id="film-index">01 / THE FORM</span><span class="concept-tag">New in this concept</span></p>
+            <h1 id="hero-title">A Study<br>in <em>Light.</em></h1>
+            <p id="film-caption">Lab-grown diamond jewellery and fine fragrance. Three scenes play as you watch.</p>
+            <a class="film-primary" href="/xazina-revamp/collections/all">Shop all jewellery <svg aria-hidden="true"><use href="#arrow"/></svg></a>
+          </div>
+        </div>
+
+        <div class="film-lens" aria-hidden="true"><b></b><span id="film-coordinates">01 / REFLECTION</span></div>
+        <div class="film-deck wrap" id="film-controls" hidden>
+          <nav class="film-chapters" aria-label="Choose a chapter">
+            <button type="button" data-act-button="0" aria-current="step"><b>01</b> Form</button>
+            <button type="button" data-act-button="1"><b>02</b> Time</button>
+            <button type="button" data-act-button="2"><b>03</b> Spectrum</button>
+          </nav>
+          <div class="film-tools">
+            <button type="button" id="structure-toggle" aria-pressed="false"><svg aria-hidden="true"><use href="#spark"/></svg> Show geometry</button>
+            <button type="button" id="effects-toggle" aria-pressed="false">Pause motion</button>
+          </div>
+          <div class="film-instruction">
+            <button type="button" id="next-act"><svg aria-hidden="true"><use href="#down"/></svg><span>Next scene</span></button>
+            <a href="#light-lab">Open Light Lab <svg aria-hidden="true"><use href="#external"/></svg></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="jewellery light" id="jewellery" aria-labelledby="jewellery-title">
+      <div class="wrap section-pad">
+        <div class="section-line"><span>OUR MOST LOVED / 01</span><span class="concept-tag">Kept from xazina.com</span><svg aria-hidden="true"><use href="#spark"/></svg></div>
+        <div class="section-heading" data-reveal>
+          <h2 id="jewellery-title">Our most<br><em>loved.</em></h2>
+          <div><p>The four pieces Xazina’s own home page calls its most loved, with prices from the catalog snapshot.</p><a class="text-link" href="https://www.xazina.com/pages/all-collections">View all collections <svg aria-hidden="true"><use href="#external"/></svg></a></div>
+        </div>
+        <div class="collection-grid" data-most-loved>
+          <article class="piece feature" data-reveal>
+            <a href="https://www.xazina.com/products/the-golden-hour">
+              <div class="piece-media"><img src="/xazina-revamp/media/golden.webp" alt="Yellow cushion-cut diamond ring with tapered white side stones" width="1024" height="1536" loading="lazy"><span aria-hidden="true">01</span></div>
+              <div class="piece-caption"><div><h3>The Golden Hour</h3><p>Yellow diamond ring</p></div><svg aria-hidden="true"><use href="#external"/></svg></div>
+            </a>
+          </article>
+          <article class="piece" data-reveal>
+            <a href="https://www.xazina.com/products/white-blue-diamond-pave-band">
+              <div class="piece-media"><img src="/xazina-revamp/media/pave.webp" alt="White metal band edged with blue and white pavé diamonds" width="780" height="1170" loading="lazy"><span aria-hidden="true">02</span></div>
+              <div class="piece-caption"><div><h3>White &amp; Blue Pavé</h3><p>Diamond band</p></div><svg aria-hidden="true"><use href="#external"/></svg></div>
+            </a>
+          </article>
+          <article class="piece" data-reveal>
+            <a href="https://www.xazina.com/products/pink-cushion-diamond-ring">
+              <div class="piece-media"><img src="/xazina-revamp/media/pink.webp" alt="Pink cushion-cut diamond ring with a halo and white side stones" width="780" height="1040" loading="lazy"><span aria-hidden="true">03</span></div>
+              <div class="piece-caption"><div><h3>Pink Cushion</h3><p>Diamond ring</p></div><svg aria-hidden="true"><use href="#external"/></svg></div>
+            </a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="lab" id="light-lab" aria-labelledby="lab-title">
+      <div class="wrap section-pad">
+        <div class="section-line"><span>THE LIGHT LAB / 02</span><span class="concept-tag">New in this concept</span><svg aria-hidden="true"><use href="#spark"/></svg></div>
+        <div class="lab-layout">
+          <div class="stage" id="stage" data-mode="3">
+            <div class="stage-grid" aria-hidden="true"></div>
+            <img class="stage-fallback" src="/xazina-revamp/media/diamond-small.webp" alt="" loading="lazy">
+            <canvas class="lab-webgl" id="lab-webgl" aria-hidden="true"></canvas>
+            <canvas id="model" role="img" aria-label="Interactive model of a faceted brilliant-cut gemstone"></canvas>
+            <span class="stage-name" id="stage-name" aria-hidden="true">FIG 01 / BRILLIANT CUT</span>
+            <span class="stage-note" id="stage-note">Auto rotates · Drag if you like</span>
+          </div>
+          <div class="lab-copy">
+            <h2 id="lab-title" data-reveal>The dimensions<br>of <em>light.</em></h2>
+            <p data-reveal>Rotate a brilliant cut, move through time, or split light into colour. Three ways to look closer.</p>
+            <div class="lab-ui" id="lab-ui" hidden>
+              <fieldset class="modes">
+                <legend class="sr-only">Choose a view</legend>
+                <label><input type="radio" name="dimension" value="3" checked><span><b>01</b> Facets</span></label>
+                <label><input type="radio" name="dimension" value="4"><span><b>02</b> Time</span></label>
+                <label><input type="radio" name="dimension" value="5"><span><b>03</b> Light</span></label>
+              </fieldset>
+              <p class="mode-description" id="mode-description" aria-live="polite">Turn a brilliant-cut model to see how its facets catch the light.</p>
+              <div class="range-control">
+                <label for="model-value" id="value-label">Rotation</label>
+                <output for="model-value" id="value-readout">0°</output>
+                <input id="model-value" type="range" min="0" max="360" value="0">
+              </div>
+              <div class="lab-actions">
+                <button id="play-model" type="button">Pause rotation</button>
+                <button id="reset-model" type="button">Reset view <span aria-hidden="true">↺</span></button>
+              </div>
+            </div>
+            <noscript><p>The interactive models require JavaScript.</p></noscript>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="fragrance" id="fragrance" aria-labelledby="fragrance-title">
+      <div class="wrap section-pad">
+        <div class="section-line"><span>EAU DE PARFUM / 03</span><span class="concept-tag">New in this concept</span><svg aria-hidden="true"><use href="#spark"/></svg></div>
+        <div class="scent-layout">
+          <figure data-reveal><img src="/xazina-revamp/media/perfume.webp" alt="Xazina Kohinoor Amber perfume bottle with a sculpted white cap, surrounded by fragrance ingredients" width="1250" height="1875" loading="lazy"><figcaption>KOHINOOR AMBER / EAU DE PARFUM</figcaption></figure>
+          <div class="scent-copy" data-reveal>
+            <h2 id="fragrance-title">Fragrance, in<br><em>another key.</em></h2>
+            <p>From Kohinoor Amber to Kashmir Sapphire, explore the scents in Xazina’s fragrance collection.</p>
+            <a class="button solid" href="https://www.xazina.com/collections/fragrances">Explore fragrance <svg aria-hidden="true"><use href="#external"/></svg></a>
+            <a class="text-link" href="https://www.xazina.com/products/kohinoor-amber-eau-de-parfum">Discover Kohinoor Amber <svg aria-hidden="true"><use href="#external"/></svg></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="atelier light" id="atelier" aria-labelledby="atelier-title">
+      <div class="wrap section-pad">
+        <div class="section-line"><span>THE ATELIER / 04</span><span class="concept-tag">New in this concept</span><svg aria-hidden="true"><use href="#spark"/></svg></div>
+        <div class="atelier-layout">
+          <div data-reveal>
+            <h2 id="atelier-title">Make it <em>yours.</em></h2>
+            <p>Bring a piece you’ve imagined to life with Xazina’s bespoke jewellery service.</p>
+            <a class="button dark" href="https://www.xazina.com/pages/customise-jewellery">Create your own piece <svg aria-hidden="true"><use href="#external"/></svg></a>
+            <a class="text-link" href="https://www.xazina.com/pages/contact-xazina">Contact Xazina <svg aria-hidden="true"><use href="#external"/></svg></a>
+          </div>
+          <figure class="atelier-art" data-reveal><img src="/xazina-revamp/media/atelier.webp" alt="Jewellery sketches and rings laid out on a design table" width="1250" height="938" loading="lazy"></figure>
+        </div>
+        <div class="standards" aria-label="Learn about Xazina’s jewellery standards">
+          <a href="https://www.xazina.com/pages/hallmarked-gold">Hallmarked gold <svg aria-hidden="true"><use href="#external"/></svg></a>
+          <a href="https://www.xazina.com/pages/xazinas-lab-grown-diamonds">Lab-grown diamonds <svg aria-hidden="true"><use href="#external"/></svg></a>
+          <a href="https://www.xazina.com/pages/buyback-and-upgrade">Buyback &amp; upgrades <svg aria-hidden="true"><use href="#external"/></svg></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="notes light" id="design-notes" aria-labelledby="notes-title">
+      <div class="wrap section-pad">
+        <div class="section-line"><span>DESIGN NOTES</span><span class="concept-tag">About this concept</span><svg aria-hidden="true"><use href="#spark"/></svg></div>
+        <div class="notes-layout">
+          <div class="notes-intro">
+            <h2 id="notes-title">How I <em>built it.</em></h2>
+            <p>An independent concept, not a commission. What I set out to fix, what I left alone, and how I would know whether it worked.</p>
+          </div>
+          <ol class="notes-list">
+            <li>
+              <h3><b>01</b> Problem</h3>
+              <div>
+                <p>Xazina’s catalog is deep: <span data-fact="products">436</span> products, <span data-fact="collections">110</span> collections and <span data-fact="articles">162</span> journal stories. Depth is hard to browse, and rebuilding the store from a snapshot showed me exactly where it strains.</p>
+                <p><span data-fact="untyped">429</span> of the <span data-fact="products">436</span> products carry no product type, so a card had nothing to say about what kind of piece it was. The captured menu was flat, so For Her listed “Solitaire” twice, once for rings and once for earrings, with nothing to tell them apart.</p>
+              </div>
+            </li>
+            <li>
+              <h3><b>02</b> What I kept</h3>
+              <div>
+                <p>Everything that is Xazina’s. The catalog, prices, variants, collections, journal stories and policies all come from one snapshot of xazina.com, with Xazina’s real product photography from its Shopify store.</p>
+                <p>Xazina’s own home-page blocks stay, under “From the house.”, and so does its “Our most loved” list near the top. Purchases and appointments stay with Xazina.</p>
+              </div>
+            </li>
+            <li>
+              <h3><b>03</b> What I changed</h3>
+              <div>
+                <ul>
+                  <li>A new opening: a three-scene film and a Light Lab you can turn by hand, both made for this concept.</li>
+                  <li>The menu groups pieces under Rings, Earrings, Wrists and Neck, so each “Solitaire” sits under its own category.</li>
+                  <li>Every card names the piece’s most specific collection, such as “Cocktail Rings” or “Stud Earrings”, instead of one fallback label repeated on <span data-fact="untyped">429</span> cards.</li>
+                  <li>Prices read one way. The capture mixed “₹293,617.00”, “₹ 148,756” and “₹2,93,617”; every price now uses Indian grouping and shows paise only when a price has them.</li>
+                  <li>I removed what the capture leaked onto the page: Shopify’s hidden screen-reader labels for the regular, sale and unit price (and a stray “/per”), plus an empty “Type:” label before every product title.</li>
+                  <li>In my first build, 35 collections whose pieces live in curated blocks opened on a count of zero pieces above an empty grid. They now open on the edit itself.</li>
+                  <li>Search and share descriptions fit 60 to 160 characters. When my first build cut the full product story at 210, 422 product pages failed that check.</li>
+                </ul>
+              </div>
+            </li>
+            <li>
+              <h3><b>04</b> Hypothesis</h3>
+              <div>
+                <p>I think shoppers reach the right piece faster when every card says what it is and the menu says where it sits.</p>
+                <p>I also think a bag that hands Xazina a filled cart carries more people through to checkout than a link that makes them find each piece again. Both are hypotheses; neither has been tested with real shoppers.</p>
+              </div>
+            </li>
+            <li>
+              <h3><b>05</b> How I’d measure it</h3>
+              <div>
+                <p class="notes-flag">Intended metrics. Not measured: this concept has no traffic.</p>
+                <dl class="notes-metrics">
+                  <div><dt>Product page to bag</dt><dd>Share of product-page views that end in Add to bag.</dd></div>
+                  <div><dt>Search to product</dt><dd>Share of searches followed by a product-page visit.</dd></div>
+                  <div><dt>Bag to Xazina hand-off</dt><dd>Share of bag views that end in Continue to Xazina checkout.</dd></div>
+                </dl>
+              </div>
+            </li>
+            <li>
+              <h3><b>06</b> What is real, what is a demo</h3>
+              <div>
+                <p><strong>Real:</strong> the products, prices, variants, photos and copy, from a catalog snapshot of xazina.com. The build generates all <span data-fact="pages">852</span> pages of this concept from that snapshot. The checkout is Xazina’s own cart.</p>
+                <p><strong>Mine:</strong> the film, the Light Lab and every layout. Prices are a snapshot, so they can drift from the live store, and Xazina confirms them at checkout. I am not affiliated with Xazina.</p>
+              </div>
+            </li>
+            <li>
+              <h3><b>07</b> How checkout works here</h3>
+              <div>
+                <ol class="notes-steps">
+                  <li>Add a piece on its product page. The bag is kept in this browser only.</li>
+                  <li>The bag lists your pieces at snapshot prices.</li>
+                  <li>“Continue to Xazina checkout” opens xazina.com/cart with the same pieces and quantities already in it.</li>
+                  <li>Xazina confirms price, stock, tax and delivery, and takes the payment.</li>
+                </ol>
+                <p>Unlike my <a href="/deli-chic">Deli Chic</a> and <a href="/gram-street-coffee">Gram Street Coffee</a> concepts, where the order is a simulated demo, a purchase here really happens, on xazina.com.</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap footer">
+    <a href="#top" class="wordmark" aria-label="Xazina, back to top">XAZINA</a>
+    <p>Independent design concept by <a href="/">Anchit Tandon</a>. Products and purchases are handled on <a href="https://www.xazina.com/">Xazina’s official store</a>.</p>
+    <a class="back" href="#top">Back to top ↑</a>
+  </footer>
+</body>
+</html>

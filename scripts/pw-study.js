@@ -3,7 +3,7 @@
 //
 // WHAT THIS GUARDS
 //   Both pages are self-contained HTML with a lot of inline logic: a risk
-//   engine, age-based Weekly Pulse routing, a seeded 5,000-learner console and
+//   engine, age-based Weekly Progress Report routing, a seeded 5,000-learner console and
 //   an impact calculator whose total is quoted on the case study itself. None
 //   of that was covered by any suite, so a change to the engine weights, the
 //   calculator defaults or a label could ship a page that contradicts its own
@@ -41,6 +41,23 @@
 // walkthrough landing checks must fail. MUT=walkurl points one walkthrough
 // link somewhere other than the URL it shows; the walkthrough URL check must
 // fail.
+//
+// Added after the November 2026 review, each with a mutation that must fail it:
+// MUT=pulsestale    the Weekly Pulse reads the persona's defaults, not the simulator
+// MUT=gap           a learner watching every lecture but failing tests reads Low risk
+// MUT=nocap         a conversion of 500% is taken at face value
+// MUT=consoledrift  the console's groups no longer scale to the calculator's total
+// MUT=minorprice    an under-18 sees a price and an offer in their own app
+// MUT=block         a high-risk adult cannot choose the next batch
+// MUT=final         a final-year learner is offered a Vidyapeeth trial
+// MUT=pilot         the 90-day plan pilots NEET droppers, who have no next batch
+// MUT=mentors       the case study's mentor head-count drifts from the calculator's
+// MUT=ambush        the consent question covers the first screen again
+// MUT=nostart       the case study opens with no 'start here' steps
+// MUT=focussteal    the deferred consent question takes the visitor's focus
+// MUT=oldfeature    a retired feature name comes back on a tab
+// MUT=noalias       links shared before the rename stop landing
+// MUT=noevidence    the research table behind the design is dropped
 const { chromium } = require('./_playwright.js');
 const vercel = require('../vercel.json');
 const BASE = process.env.BASE || 'http://127.0.0.1:8099';
@@ -63,16 +80,32 @@ const CSP = (() => {
 function mutate(src) {
   if (MUT === 'race') return src.replace('if(P[cur]===p) addMsg', 'addMsg');
   if (MUT === 'label') return src.replace("k:'Lectures not done'", "k:'Behind batch pace'");
-  if (MUT === 'dash') return src.replace('</body>', '<p>one, two</p></body>');
+  // Escaped so the site-wide no-dash sweep cannot "fix" the mutation itself, as it once did.
+  if (MUT === 'dash') return src.replace('</body>', '<p>one \u2014 two</p></body>');
   if (MUT === 'auditnav') return src.replace(/<div class="hero-ctas" style="margin-top:6px"><a class="btn btn-outline sm" href="#top">.*?<\/div>/, '');
   if (MUT === 'protonav') return src.replace(/<div class="xlinks">.*?<\/div>/, '');
   if (MUT === 'costdrift') return src.replace('id="m-wa" type="number" step="0.001" min="0" value="0.115"', 'id="m-wa" type="number" step="0.001" min="0" value="1.15"');
-  if (MUT === 'bigcall') return src.replace("t:'7-day AI comeback plan'", "t:'Human mentor call within 24 hours'")
+  if (MUT === 'bigcall') return src.replace("t:'7-day AI catch-up plan'", "t:'Human mentor call within 24 hours'")
     .replace("What we are doing: a 7-day catch-up plan is ready in the app.", "What we are doing: a PW mentor will call tomorrow at 6:30 pm.");
   if (MUT === 'oldname') return src.replace('<strong>Learner Retention Engine</strong>', '<strong>Agla Kadam</strong>');
   if (MUT === 'deeplink') return src.replace('function fromHash(scroll, focus){', 'function fromHash(scroll, focus){ if(!focus) return;');
   if (MUT === 'offer') return src.replace("var strong = p.offline && res.tier==='Low' && s.test>=70 && s.lec>=75", 'var strong = p.offline');
-  if (MUT === 'walkurl') return src.replace('<a href="/pw-study/prototype#pulse">https://', '<a href="/pw-study/prototype#console">https://');
+  if (MUT === 'pulsestale') return src.replace('var p=P[cur], s=simState,', 'var p=P[cur], s=P[cur].s,');
+  if (MUT === 'gap') return src.replace('v:s.test<40?', 'v:false&&s.test<40?');
+  if (MUT === 'nocap') return src.replace('if(PCT[k] && x>100)', 'if(false && PCT[k] && x>100)');
+  if (MUT === 'consoledrift') return src.replace('var reL=N*(v.elig/100)*(v.ren/100)', 'var reL=N*(v.elig/100)*(v.ren/100)*2');
+  if (MUT === 'minorprice') return src.replace('  if(minor){\n    // DPDP', '  if(false){\n    // DPDP');
+  if (MUT === 'block') return src.replace('type="button" data-act="buy">Continue', 'type="button" data-act="buy" disabled>Continue');
+  if (MUT === 'final') return src.replace(' && !p.final, held', ', held').replace('if(p.offline && !p.final) a.push', 'if(p.offline) a.push');
+  if (MUT === 'pilot') return src.replace('<li>Class 10 and Class 11 (JEE, NEET): both have a next batch</li>', '<li>Class 11 JEE and NEET dropper</li>');
+  if (MUT === 'mentors') return src.replace('about 51 full-time mentors at 60% of their week on calls, and more', 'roughly 30 full-time mentors, and more');
+  if (MUT === 'ambush') return src.replace(' data-consent-defer', '');
+  if (MUT === 'focussteal') return src.replace('</body>', '<script>document.addEventListener("click",function(){},true);(function w(){var b=document.querySelector("#consentBar .cb-primary");if(b&&!w.d){w.d=1;b.focus();}else if(!b)setTimeout(w,50);})();</script></body>');
+  if (MUT === 'nostart') return src.replace(/<nav class="start"[\s\S]*?<\/nav>/, '');
+  if (MUT === 'walkurl') return src.replace('<a href="/pw-study/prototype#report">https://', '<a href="/pw-study/prototype#dashboard">https://');
+  if (MUT === 'oldfeature') return src.replace('tabindex="-1">Weekly Report</button>', 'tabindex="-1">Weekly Pulse</button>');
+  if (MUT === 'noevidence') return src.replace(/<div class="card" id="evidence"[\s\S]*?<\/table><\/div>\s*<\/div>/, '');
+  if (MUT === 'noalias') return src.replace("h = ALIAS[h] || h;", '');
   return src;
 }
 
@@ -119,7 +152,11 @@ const dashes = (frame) => frame.evaluate(() => {
 });
 const hScroll = (page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 
-const FEATURES = ['Drift Score', 'Comeback Plan', 'Weekly Pulse', 'Results-Day Next Step', 'Growth Console'];
+const FEATURES = ['Drop-off Risk Score', 'Catch-up Plan', 'Weekly Progress Report', 'Next-Step Recommendation', 'Renewals Dashboard'];
+// Names retired in Nov 2026: each said something the feature did not do, or the UI called it something else.
+const RETIRED = /Drift Score|Comeback Plan|Weekly Pulse|Results-Day Next Step|Growth Console|Parent Pulse|Self Pulse|Study Pulse/i;
+// Old deep links, shared before the rename, and where each must land now.
+const ALIASES = { drift: 'risk', plan: 'catchup', next: 'recommendation', pulse: 'report', console: 'dashboard' };
 
 // One clear English name everywhere: page source, title and description.
 async function names(page, L) {
@@ -127,11 +164,19 @@ async function names(page, L) {
   const old = html.match(/.{0,30}(agla|kadam).{0,30}/gi) || [];
   const title = await page.title();
   check(`${L}: feature named "Learner Retention Engine", no Hindi working name`, old.length === 0 && /Learner Retention Engine/.test(title), old.join(' | ') || title);
+  // Visible text on every tab, hidden ones included, plus titles and alt text.
+  const text = await page.evaluate(() => {
+    const c = document.body.cloneNode(true); c.querySelectorAll('script,style').forEach((n) => n.remove());
+    return document.title + ' ' + c.textContent + ' ' + [...document.querySelectorAll('[alt],[aria-label],[title]')].map((e) => [e.getAttribute('alt'), e.getAttribute('aria-label'), e.getAttribute('title')].join(' ')).join(' ');
+  });
+  const hit = text.match(new RegExp('.{0,25}(' + RETIRED.source + ').{0,25}', 'gi')) || [];
+  check(`${L}: no retired feature name anywhere on the page`, hit.length === 0, hit.slice(0, 3).join(' | '));
 }
 
 // Where each shared link must land: a case study section heading on screen,
 // or the prototype tab it names, selected and on screen.
-const PROTO_TAB = { student: 't-student', drift: 't-student', plan: 't-student', next: 't-student', pulse: 't-parent', console: 't-console', brand: 't-brand' };
+const PROTO_TAB = { student: 't-student', risk: 't-student', catchup: 't-student', recommendation: 't-student', report: 't-parent', dashboard: 't-console', brand: 't-brand',
+  drift: 't-student', plan: 't-student', next: 't-student', pulse: 't-parent', console: 't-console' };
 async function landed(page, href) {
   const u = new URL(href, BASE);
   const h = u.hash.slice(1);
@@ -142,15 +187,16 @@ async function landed(page, href) {
     }, h);
   }
   if (u.pathname !== '/pw-study/prototype' || !PROTO_TAB[h]) return false;
-  return page.evaluate(([tab, h]) => {
+  return page.evaluate(([tab, h, aliases]) => {
+    h = aliases[h] || h;
     const t = document.getElementById(tab);
     const target = document.getElementById(h);
     const r = target.getBoundingClientRect();
     // A whole-tab link must also keep the concept notice bar on screen.
     const bar = document.getElementById('dl-bar').getBoundingClientRect();
-    const whole = t.getAttribute('aria-controls') === 'p-' + ({ pulse: 'parent' }[h] || h);
+    const whole = t.getAttribute('aria-controls') === 'p-' + ({ report: 'parent', dashboard: 'console' }[h] || h);
     return t.getAttribute('aria-selected') === 'true' && r.top >= 0 && r.top < innerHeight && (!whole || (bar.top >= 0 && bar.top < innerHeight));
-  }, [PROTO_TAB[h], h]);
+  }, [PROTO_TAB[h], h, ALIASES]);
 }
 
 // The recruiter walkthrough: every step shows a complete URL, links to exactly
@@ -178,7 +224,8 @@ async function walkthrough(browser, vp) {
     lines.length === 8 && urls.join() === steps.slice(0, 7).map((s) => s[1]).join(), clip.replace(/\n/g, ' | ').slice(0, 160));
   await ctx.close();
 
-  for (const href of [...steps.map((s) => s[0]), ...tries, '/pw-study/prototype#brand']) {
+  const old = Object.keys(ALIASES).map((k) => '/pw-study/prototype#' + k);
+  for (const href of [...steps.map((s) => s[0]), ...tries, '/pw-study/prototype#brand', ...old]) {
     const o = await open(browser, vp, href);
     await o.page.waitForTimeout(500);
     const ok = await landed(o.page, href);
@@ -187,11 +234,44 @@ async function walkthrough(browser, vp) {
   }
 }
 
+// A first-time visitor must learn who this is from, what it is and where to
+// start before any jargon, and no consent question may cover that first screen.
+async function firstScreen(page, L, kind) {
+  const f = await page.evaluate(() => {
+    const vis = (el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.top >= 0 && r.bottom <= innerHeight; };
+    const bar = document.getElementById('consentBar');
+    return {
+      lede: (document.querySelector('.hero .lede') || {}).textContent || '',
+      steps: [...document.querySelectorAll('.start a')].filter(vis).length,
+      consent: !!(bar && bar.getBoundingClientRect().height > 0 && bar.getAttribute('data-in') === '1'),
+    };
+  });
+  if (kind === 'study') {
+    check(`${L}: first screen says who and what, with three visible "start here" steps`,
+      /application for a Product Manager role/.test(f.lede) && f.steps === 3, `steps=${f.steps} lede=${f.lede.slice(0, 60)}`);
+  } else {
+    check(`${L}: first screen says what the prototype is and how to use it`, /made-up students/.test(f.lede) && /Pick one/.test(f.lede), f.lede.slice(0, 80));
+  }
+  check(`${L}: no consent question covers the first screen`, !f.consent, 'consent bar up=' + f.consent);
+  // It is deferred, not dropped: reading on brings the question.
+  // A focused control is the visitor's place on the page; the late question must not take it,
+  // or a Space meant for scrolling answers it.
+  await page.focus('.hero a, .hero button').catch(() => {});
+  const before = await page.evaluate(() => document.activeElement && (document.activeElement.textContent || '').trim().slice(0, 30));
+  await page.evaluate(() => window.scrollTo(0, innerHeight * 1.5));
+  await page.waitForTimeout(700);
+  const later = await page.evaluate(() => ({ bar: !!document.getElementById('consentBar'), inBar: !!(document.activeElement && document.activeElement.closest('#consentBar')) }));
+  check(`${L}: the consent question still comes once the visitor reads on`, later.bar, 'consent bar present=' + later.bar);
+  check(`${L}: the late consent question leaves the visitor's focus where it was`, later.bar && !later.inBar, `focus was on "${before}", now in bar=${later.inBar}`);
+  await page.evaluate(() => window.scrollTo(0, 0));
+}
+
 async function caseStudy(browser, vp) {
   const L = `[${vp.name}] /pw-study`;
   const { ctx, page, bag, status } = await open(browser, vp, '/pw-study');
   check(`${L}: HTTP 200`, status === 200, status);
   await names(page, L);
+  await firstScreen(page, L, 'study');
 
   // The proposed system is the first thing after the hero, by its feature names.
   const sys = await page.evaluate(() => ({
@@ -254,6 +334,18 @@ async function caseStudy(browser, vp) {
   const body = await page.evaluate(() => document.body.textContent);
   const unverified = ['30 of 330', 'mainly for new enrollments', 'monthly mentor sessions'].filter((q) => body.includes(q));
   check(`${L}: no quote that could not be verified`, unverified.length === 0, unverified.join(' | '));
+  // The pilot must use grades with a next batch, gate on a backtest and be sized to detect the lift.
+  const plan = norm(await page.textContent('#plan'));
+  check(`${L}: pilot uses grades with a next batch, a backtest gate and a sized holdout`,
+    /Class 10 and Class 11/.test(plan) && !/Class 11 JEE and NEET dropper/.test(plan) && /AUC of 0\.70/.test(plan) && /13,300 learners/.test(plan), plan.slice(0, 160));
+  const risks = norm(await page.textContent('#risks'));
+  check(`${L}: risks cover DPDP s.9(3) and the holdout's fairness`, /s\.9\(3\)/.test(risks) && /never the child/.test(risks) && /holdout is fair/i.test(risks), risks.slice(0, 120));
+  // The design choices rest on published evidence: each row names its source and links to it.
+  const ev = await page.$$eval('#evidence tbody tr', (rs) => rs.map((r) => r.querySelectorAll('a[href^="https://"]').length)).catch(() => []);
+  check(`${L}: research table backs the design, every row linked to its source`, ev.length >= 7 && ev.every((n) => n >= 1), JSON.stringify(ev));
+  check(`${L}: DPDP row states when the children's rules apply and the fallback`, /May 2027/.test(risks) && /18\+ learners/.test(risks), risks.slice(0, 80));
+  const q2 = norm(await page.textContent('#q2').catch(() => ''));
+  check(`${L}: latest quarter (Q2 FY27) is reported with its source`, /₹1,242 cr/.test(q2) && /Inc42/.test(q2), q2.slice(0, 120));
   const d = await dashes(page);
   check(`${L}: no em/en dash`, d.length === 0, d.join(' | '));
   await page.waitForTimeout(300);
@@ -262,19 +354,100 @@ async function caseStudy(browser, vp) {
   await ctx.close();
 }
 
+// Drag a simulator slider the way a person would: set it and fire input.
+const slide = (page, vals) => page.evaluate((vals) => {
+  for (const [id, v] of Object.entries(vals)) { const e = document.getElementById(id); e.value = v; e.dispatchEvent(new Event('input', { bubbles: true })); }
+}, vals);
+
+// Contrast ratio of an element's text on a given background colour.
+const contrast = (page, sel, bgSel) => page.evaluate(([sel, bgSel]) => {
+  const rgb = (c) => c.match(/\d+(\.\d+)?/g).slice(0, 3).map(Number);
+  const lum = (c) => { const [r, g, b] = rgb(c).map((x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+  const out = [];
+  document.querySelectorAll(sel).forEach((t) => {
+    const bg = getComputedStyle(t.closest(bgSel)).backgroundColor;
+    const a = lum(getComputedStyle(t).color), b = lum(bg);
+    out.push((Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05));
+  });
+  return out;
+}, [sel, bgSel]);
+
+async function reviewFixes(page, L) {
+  // 1. The weekly report is built from the simulator, not from the persona's defaults.
+  await page.click('#t-student');
+  await page.click('.persona-row .chip[data-p="0"]');
+  await slide(page, { 'in-lec': 90, 'in-test': 85, 'in-idle': 0, 'in-doubt': 4, 'in-streak': 14 });
+  await page.click('#t-parent');
+  const pulse = norm(await page.textContent('#wa-body'));
+  const status = norm(await page.textContent('#pp-status'));
+  check(`${L}: Weekly Progress Report follows the simulator`, /90% of lectures done/.test(pulse) && !/has not studied/.test(pulse) && /low risk/.test(status), status);
+  // A minor who turns strong: the trial goes to the parent, never into the child's app.
+  check(`${L}: a strong under-18's trial offer goes to the parent`, /trial class is also available/.test(pulse), pulse.slice(-160));
+
+  // 2. Watching everything but failing tests is not "on track".
+  await page.click('#t-student');
+  await slide(page, { 'in-lec': 100, 'in-test': 30, 'in-idle': 0, 'in-doubt': 3, 'in-streak': 10 });
+  const gapTier = norm(await page.textContent('#e-tier'));
+  check(`${L}: 100% lectures with a 30% test average is not Low risk`, gapTier !== 'Low risk', gapTier);
+
+  // 3. Under-18s see no price or offer; adults do, even at high risk.
+  const card = {};
+  for (const i of [0, 2, 1]) { await page.click(`.persona-row .chip[data-p="${i}"]`); card[i] = norm(await page.textContent('#s-next')); }
+  check(`${L}: under-18s see no price in their own app; adults do`,
+    !/₹|% OFF/.test(card[0]) && !/₹|% OFF/.test(card[2]) && /never to you/.test(card[0]) && /₹/.test(card[1]), JSON.stringify([card[0].slice(-90), card[1].slice(-60)]));
+  await page.click('.persona-row .chip[data-p="3"]');
+  await slide(page, { 'in-lec': 20, 'in-test': 30, 'in-idle': 14, 'in-doubt': 0, 'in-streak': 0 });
+  const kTier = norm(await page.textContent('#e-tier'));
+  const buy = await page.$eval('#s-next button[data-act="buy"]', (b) => !b.disabled).catch(() => false);
+  await page.click('#s-next button[data-act="buy"]').catch(() => {});
+  const msg = norm(await page.textContent('#s-next-msg').catch(() => ''));
+  check(`${L}: a high-risk adult can still choose the next batch, and the button responds`, kTier === 'High risk' && buy && /Prototype only/.test(msg), `${kTier} enabled=${buy} msg=${msg}`);
+
+  // 4. A final-year learner gets no Vidyapeeth trial anywhere.
+  await page.click('.persona-row .chip[data-p="1"]');
+  const amanSteps = norm(await page.textContent('#e-actions'));
+  await page.click('#t-parent');
+  const amanPulse = norm(await page.textContent('#wa-body'));
+  check(`${L}: final-year Aman gets an in-year upgrade, never a trial`, !/trial/i.test(amanSteps) && !/trial class/.test(amanPulse) && /Infinity Pro/.test(amanSteps), amanSteps.slice(0, 120));
+
+  // 5. Inputs are capped, and the console scales exactly to the calculator.
+  await page.click('#t-console');
+  const totalAt = async (v) => { await page.fill('#m-off', String(v)); return norm(await page.textContent('#m-total')); };
+  const at100 = await totalAt(100), at500 = await totalAt(500);
+  const note = norm(await page.textContent('#m-note'));
+  await page.fill('#m-off', '1');
+  check(`${L}: percentage inputs are capped at 100 and say so`, at100 === at500 && /Capped at 100%/.test(note), `${at100} vs ${at500}; ${note}`);
+  const scaled = async () => [(norm(await page.textContent('#seg-scale')).match(/= (₹[\d,.]+ cr)/) || [])[1], (norm(await page.textContent('#m-total')).match(/^(₹[\d,.]+ cr)/) || [])[1]];
+  const s1 = await scaled();
+  await page.fill('#m-ren', '2');
+  const s2 = await scaled();
+  await page.fill('#m-ren', '4');
+  check(`${L}: console groups scale to the calculator's total, and follow its edits`, s1[0] && s1[0] === s1[1] && s2[0] === s2[1] && s1[0] !== s2[0], JSON.stringify([s1, s2]));
+
+  // 6. WhatsApp timestamps meet AA contrast on both bubble colours.
+  await page.click('#t-parent');
+  const ratios = await contrast(page, '#wa-body .wa-time', '.wa-msg');
+  check(`${L}: WhatsApp timestamps reach 4.5:1 contrast`, ratios.length > 0 && ratios.every((r) => r >= 4.5), ratios.map((r) => r.toFixed(2)).join(', '));
+  await page.click('#t-student');
+  await page.click('.persona-row .chip[data-p="0"]');
+}
+
 async function prototype(browser, vp) {
   const L = `[${vp.name}] /pw-study/prototype`;
   const { ctx, page, bag, status } = await open(browser, vp, '/pw-study/prototype');
   check(`${L}: HTTP 200`, status === 200, status);
   await names(page, L);
+  await firstScreen(page, L, 'proto');
 
+  const feats = await page.$$eval('.feats a', (as) => as.map((a) => a.textContent.replace(/^\d/, '').trim()));
+  check(`${L}: the five features carry the same names as the case study`, feats.join() === FEATURES.join(), JSON.stringify(feats));
   // The hero's feature links switch tabs; a tab click writes its own link.
-  await page.click('.feats a[href="#console"]');
+  await page.click('.feats a[href="#dashboard"]');
   const viaFeat = await page.getAttribute('#t-console', 'aria-selected');
   await page.click('#t-parent');
   const hashNow = await page.evaluate(() => location.hash);
   await page.click('#t-student');
-  check(`${L}: feature links switch tabs and each tab has its own link`, viaFeat === 'true' && hashNow === '#pulse', `console=${viaFeat} hash=${hashNow}`);
+  check(`${L}: feature links switch tabs and each tab has its own link`, viaFeat === 'true' && hashNow === '#report', `dashboard=${viaFeat} hash=${hashNow}`);
 
   const tiers = { 0: 'High risk', 1: 'Low risk', 2: 'Medium risk', 3: 'Medium risk' };
   const got = {};
@@ -290,7 +463,7 @@ async function prototype(browser, vp) {
   await page.click('.persona-row .chip[data-p="0"]');
   const steps = await page.$$eval('#e-actions .step b', (b) => b.map((x) => x.textContent.trim()));
   check(`${L}: high risk escalates to a mentor, never calls everyone`,
-    steps[0] === '7-day AI comeback plan' && steps.some((t) => /^Mentor call on day 8/.test(t)) && !steps.some((t) => /24 hours/.test(t)), JSON.stringify(steps));
+    steps[0] === '7-day AI catch-up plan' && steps.some((t) => /^Mentor call on day 8/.test(t)) && !steps.some((t) => /24 hours/.test(t)), JSON.stringify(steps));
 
   // The card and the engine must not disagree about pace. A learner the card
   // calls ahead must not have an engine factor that says they are behind.
@@ -320,11 +493,11 @@ async function prototype(browser, vp) {
   const amanBefore = norm(await page.textContent('#wa-title'));
   await page.check('#pp-share');
   const amanAfter = norm(await page.textContent('#wa-title'));
-  check(`${L}: Pulse title by age and opt-in`,
-    kabir === 'PW Study Pulse' && amanBefore === 'PW Study Pulse' && amanAfter === 'PW Parent Pulse',
+  check(`${L}: weekly report sender by age and opt-in`,
+    kabir === 'PW Progress Report' && amanBefore === 'PW Progress Report' && amanAfter === 'PW Parent Report',
     `Kabir=${kabir} Aman=${amanBefore} -> ${amanAfter}`);
 
-  // Riya's high-risk Pulse, in both languages, states the escalation and never
+  // Riya's high-risk report, in both languages, states the escalation and never
   // promises a call tomorrow: that is a promise PW's mentors cannot keep at scale.
   await page.click('#pp-learner button[data-p="0"]');
   const pulse = {};
@@ -332,11 +505,13 @@ async function prototype(browser, vp) {
   await page.click('#pp-lang button[data-l="en"]');
   // Riya is high risk: results day holds the next batch back and offers no
   // Vidyapeeth trial, which only strong learners in centre cities get.
-  check(`${L}: results-day Pulse holds offers back at high risk`,
+  check(`${L}: next-step recommendation holds offers back at high risk`,
     /shown once the catch-up plan is done/.test(pulse.en) && !/trial class/.test(pulse.en) && !/ट्रायल/.test(pulse.hi), pulse.en.slice(-200));
-  check(`${L}: Pulse escalates to a mentor after a week, in English and Hindi`,
+  check(`${L}: weekly report escalates to a mentor after a week, in English and Hindi`,
     /still behind after a week, a PW mentor will call/.test(pulse.en) && /एक हफ्ते बाद भी/.test(pulse.hi)
       && !/tomorrow|6:30/.test(pulse.en) && !/कल शाम|6:30/.test(pulse.hi), pulse.en.slice(0, 120));
+
+  await reviewFixes(page, L);
 
   const total = norm(await page.textContent('#m-total'));
   check(`${L}: impact total ₹85.3 cr · $8.97M`, total === '₹85.3 cr · $8.97M', total);
@@ -431,6 +606,14 @@ async function consistency(browser) {
   const calc = (norm(await b.page.textContent('#m-net')).match(/₹(-?[\d.]+) cr/) || [])[1] || '';
   await b.ctx.close();
   check('case study net base matches the prototype calculator', study !== '' && study === calc, `case study ${study} vs calculator ${calc}`);
+  const a2 = await open(browser, vp, '/pw-study');
+  const mStudy = ((await a2.page.textContent('#impact')).match(/about (\d+) full-time mentors/) || [])[1];
+  await a2.ctx.close();
+  const b2 = await open(browser, vp, '/pw-study/prototype');
+  await b2.page.click('#t-console');
+  const mCalc = ((await b2.page.textContent('#m-net-sub')).match(/about (\d+) full-time mentors/) || [])[1];
+  await b2.ctx.close();
+  check('case study mentor head-count matches the prototype calculator', !!mStudy && mStudy === mCalc, `case study ${mStudy} vs calculator ${mCalc}`);
 }
 
 (async () => {

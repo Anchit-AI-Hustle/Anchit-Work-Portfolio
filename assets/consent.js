@@ -17,6 +17,12 @@
   var KEY = 'cookie-consent';          // 'granted' | 'denied'
   var ANALYTICS_SRC = '/_vercel/insights/script.js';
   var loaded = false;
+  // The three concept storefronts are other brands' shops. The portfolio's
+  // orange banner sat on top of them at 15% of a phone screen, over the hero's
+  // call to action, before the visitor had seen the shop. There it is neutral
+  // chrome (the same black and cream as the concept bar) and waits for the
+  // first scroll.
+  var STOREFRONT = /^\/(xazina-revamp|deli-chic|gram-street-coffee)(\/|$)/.test(location.pathname);
 
   function read() {
     try { return localStorage.getItem(KEY); } catch (e) { return null; }
@@ -35,7 +41,9 @@
     document.head.appendChild(s);
   }
 
-  function banner() {
+  // quiet: shown while the visitor is mid-interaction (a deferred ask), so it
+  // must not take their focus; a stray Space would otherwise answer it.
+  function banner(quiet) {
     if (document.getElementById('consentBar')) return;
 
     var bar = document.createElement('div');
@@ -43,6 +51,13 @@
     bar.setAttribute('role', 'dialog');
     bar.setAttribute('aria-live', 'polite');
     bar.setAttribute('aria-label', 'Cookies and analytics');
+    if (STOREFRONT) {
+      // On the element, not the root: a root custom property restyles the page.
+      var neutral = { '--cb-bg': '#111', '--cb-line': '#3a3732', '--cb-ink': '#f5f0e8', '--cb-muted': '#d9d3c8',
+        '--cb-link': '#f5f0e8', '--cb-accent': '#f5f0e8', '--cb-accent-2': '#f5f0e8', '--cb-on-accent': '#111',
+        '--cb-font': 'system-ui,-apple-system,"Segoe UI",sans-serif' };
+      for (var k in neutral) bar.style.setProperty(k, neutral[k]);
+    }
     bar.innerHTML =
       '<div class="cb-inner">' +
         '<p class="cb-text">This site stores a couple of display preferences, which need no permission. ' +
@@ -167,13 +182,34 @@
     });
 
     var first = bar.querySelector('.cb-primary');
-    if (first) first.focus({ preventScroll: true });
+    if (first && !quiet) first.focus({ preventScroll: true });
   }
 
   function init() {
     var choice = read();
     if (choice === 'granted') { loadAnalytics(); return; }
     if (choice === 'denied') return;
+    // The concept storefronts ask after the first scroll, so the hero stays the
+    // shop's. Shown mid-interaction, the question is quiet: it must not take the
+    // visitor's focus, or a Space pressed to scroll would answer it.
+    if (STOREFRONT && (window.scrollY || 0) < 1) {
+      addEventListener('scroll', function once() { removeEventListener('scroll', once); banner(true); }, { passive: true });
+      return;
+    }
+    // A page can ask the question to wait until the visitor has started
+    // reading (data-consent-defer on <html>), so its first screen stays theirs.
+    // Nothing is loaded in the meantime, so waiting costs no privacy.
+    if (document.documentElement.hasAttribute('data-consent-defer')) {
+      var asked = false, timer;
+      var ask = function () {
+        if (asked) return; asked = true;
+        window.removeEventListener('scroll', onScroll); clearTimeout(timer); banner(true);
+      };
+      var onScroll = function () { if (window.scrollY > window.innerHeight * 0.6) ask(); };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      timer = setTimeout(ask, 20000);
+      return;
+    }
     banner();
   }
 

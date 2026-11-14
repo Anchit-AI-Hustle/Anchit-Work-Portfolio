@@ -10,6 +10,91 @@
   },
   "redirects": [
     {
+      "source": "/xazina-revamp/blogs",
+      "destination": "/xazina-revamp/blogs/lab-grown-diamond-journal-by-xazina",
+      "permanent": true
+    },
+    {
+      "source": "/xazina-revamp/collections/:collection/products/:product",
+      "destination": "/xazina-revamp/products/:product",
+      "permanent": true
+    },
+    {
+      "source": "/xazina-revamp/collections/bangle",
+      "destination": "/xazina-revamp/collections/lab-grown-diamond-bangle",
+      "permanent": true
+    },
+    {
+      "source": "/xazina-revamp/collections/classic-diamond-earrings",
+      "destination": "/xazina-revamp/collections/stud-diamond-earrings",
+      "permanent": true
+    },
+    {
+      "source": "/xazina-revamp/collections/diamond-hoops",
+      "destination": "/xazina-revamp/collections/lab-grown-diamond-bali-earrings",
+      "permanent": true
+    },
+    {
+      "source": "/xazina-revamp/collections/lab-grown-diamond-hoop-earrings",
+      "destination": "/xazina-revamp/collections/lab-grown-diamond-bali-earrings",
+      "permanent": true
+    },
+    {
+      "source": "/xazina-revamp/collections/mens-cuban",
+      "destination": "/xazina-revamp/collections/mens-knot-bracelets",
+      "permanent": true
+    },
+    {
+      "source": "/xazina-revamp/collections/mens-diamond-bracelets",
+      "destination": "/xazina-revamp/collections/mens-tennis-bracelets",
+      "permanent": true
+    },
+    {
+      "source": "/xazina-revamp/collections/mens-diamond-chains",
+      "destination": "/xazina-revamp/collections/mens-neck",
+      "permanent": true
+    },
+    {
+      "source": "/xazina-revamp/collections/mens-lab-grown-diamond-rings",
+      "destination": "/xazina-revamp/collections/mens-solitaire-rings",
+      "permanent": true
+    },
+    {
+      "source": "/xazina-revamp/collections/neckline-trinklets",
+      "destination": "/xazina-revamp/collections/trinklets",
+      "permanent": true
+    },
+    {
+      "source": "/xazina-revamp/collections/statement",
+      "destination": "/xazina-revamp/collections/luxury-statement-diamond-necklaces",
+      "permanent": true
+    },
+    {
+      "source": "/xazina-revamp/collections/statement-diamond-earrings",
+      "destination": "/xazina-revamp/collections/diamond-dangler-earrings",
+      "permanent": true
+    },
+    {
+      "source": "/xazina-revamp/collections/the-solitaire-shine",
+      "destination": "/xazina-revamp/collections/the-classics",
+      "permanent": true
+    },
+    {
+      "source": "/xazina-revamp/pages/product-guide",
+      "destination": "/xazina-revamp/pages/diamond-shape-guide",
+      "permanent": true
+    },
+    {
+      "source": "/xazina-revamp/pages/schedule-us-appointment",
+      "destination": "/xazina-revamp/pages/contact-xazina",
+      "permanent": true
+    },
+    {
+      "source": "/xazina-revamp/products/hear-diamond-cluster-pendant",
+      "destination": "/xazina-revamp/products/heart-diamond-cluster-pendant",
+      "permanent": true
+    },
+    {
       "source": "/ayushi-rawat/studies",
       "destination": "/ayushi-rawat/case-studies",
       "permanent": true
@@ -138,6 +223,16 @@
       "source": "/how-to-2/:path*",
       "destination": "/how-to/:path*",
       "permanent": false
+    },
+    {
+      "source": "/resume",
+      "destination": "/assets/resume.pdf",
+      "permanent": false
+    },
+    {
+      "source": "/cv",
+      "destination": "/assets/resume.pdf",
+      "permanent": false
     }
   ],
   "rewrites": [
@@ -148,6 +243,10 @@
     {
       "source": "/gram-street-coffee/:path*",
       "destination": "/gram-street-coffee/:path*"
+    },
+    {
+      "source": "/xazina-revamp",
+      "destination": "/xazina-revamp/index.html"
     },
     {
       "source": "/deli-chic",
@@ -164,6 +263,14 @@
     {
       "source": "/pw-study/prototype",
       "destination": "/pw-study/prototype.html"
+    },
+    {
+      "source": "/lenskart-study",
+      "destination": "/lenskart-study/index.html"
+    },
+    {
+      "source": "/lenskart-study/prototype",
+      "destination": "/lenskart-study/prototype.html"
     },
     {
       "source": "/amar-ujala/study",
@@ -273,6 +380,24 @@
         {
           "key": "Content-Security-Policy",
           "value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; frame-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://i.ytimg.com https://i0.wp.com https://i1.wp.com https://i2.wp.com https://delichic.co.in https://mh.delichic.co.in; connect-src 'self'; media-src 'self' blob: data:; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests"
+        }
+      ]
+    },
+    {
+      "source": "/xazina-revamp",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; frame-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://xazina.com https://cdn.shopify.com https://i.ytimg.com https://i0.wp.com https://i1.wp.com https://i2.wp.com https://delichic.co.in https://mh.delichic.co.in; connect-src 'self'; media-src 'self' blob: data: https://xazina.com https://cdn.shopify.com; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests"
+        }
+      ]
+    },
+    {
+      "source": "/xazina-revamp/:path*",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; frame-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://xazina.com https://cdn.shopify.com https://i.ytimg.com https://i0.wp.com https://i1.wp.com https://i2.wp.com https://delichic.co.in https://mh.delichic.co.in; connect-src 'self'; media-src 'self' blob: data: https://xazina.com https://cdn.shopify.com; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests"
         }
       ]
     },

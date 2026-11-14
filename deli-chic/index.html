@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Deli Chic · Food For Thought | Haute Boucherie &amp; Artisanal Larder</title>
+<title>Deli Chic storefront concept | design by Anchit Tandon</title>
 <!-- Tailwind CSS -->
 <!-- Tailwind, compiled and self-hosted (scripts/build-tailwind.mjs).
      The CDN build shipped a ~300KB JIT compiler, scanned the DOM at
@@ -43,6 +43,9 @@
       --chic-muted: #6B625B;
       --chic-gold: #C59A45;
       --chic-gold-bright: #FFA517;
+      --dn-bg: var(--chic-linen-warm); --dn-ink: var(--chic-charcoal); --dn-muted: #524842; --dn-accent: var(--chic-crimson-dark);
+      --dn-card: var(--chic-linen); --dn-rule: rgba(74, 14, 23, 0.14); --dn-tag-bg: var(--chic-burgundy); --dn-tag-ink: var(--chic-linen);
+      --dn-pad: clamp(18px, 5vw, 40px); --dn-display: var(--font-serif);
       --font-serif: "Playfair Display", Georgia, serif;
       --font-luxury: "Cinzel", serif;
       --font-sans: "Plus Jakarta Sans", sans-serif;
@@ -319,10 +322,11 @@
       aspect-ratio: 1;
       margin-top: calc(min(44vw, 54vh) / -2);
       border-radius: 50%;
-      background: conic-gradient(from var(--rot, 0deg), #FFE6A3, #4A0E17, #C59A45, #FFE6A3, #CD2653, #FFE6A3);
+      background: conic-gradient(from 0deg, #FFE6A3, #4A0E17, #C59A45, #FFE6A3, #CD2653, #FFE6A3);
       -webkit-mask: radial-gradient(circle, transparent 0 58%, #000 59%);
       mask: radial-gradient(circle, transparent 0 58%, #000 59%);
-      transform: scale(var(--s, 1));
+      transform: scale(0.96);
+      transition: transform 1.1s cubic-bezier(0.16, 1, 0.3, 1);
       opacity: 0.18;
       pointer-events: none;
       z-index: 0;
@@ -359,6 +363,16 @@
       justify-content: center;
       backdrop-filter: blur(8px);
     }
+    /* Three flex:1 pills kept their min-content width (wide-tracked caps), so
+       on a phone the row ran 80px off screen and "03. Shahi Marinades" was
+       cut in half. Below 640 they shrink, tighten and wrap inside the pill. */
+    @media (max-width: 639px) {
+      .deli-stage-nav { gap: 6px; }
+      .deli-stage-btn {
+        min-width: 0; padding: 6px 6px; font-size: 0.62rem;
+        letter-spacing: 0.06em; line-height: 1.15; text-align: center;
+      }
+    }
     .deli-stage-btn:hover {
       background: rgba(255, 255, 255, 0.22);
       color: #FFFFFF;
@@ -378,6 +392,9 @@
     #deliAnnounceBar { margin-top: 58px; }
 
     /* Fixed Header Solid Contrast */
+    @media (max-width: 1024px), (pointer: coarse) {
+      *, *::before, *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+    }
     header.deli-site-header {
       position: fixed !important;
       top: 0 !important;   /* one pinned line: the announce strip scrolls away */
@@ -385,10 +402,15 @@
       right: 0 !important;
       z-index: 50 !important;
       background: #FFFDF9 !important;
-      backdrop-filter: blur(20px) !important;
-      -webkit-backdrop-filter: blur(20px) !important;
+      /* No backdrop blur: the background above is opaque, so the blur was
+         invisible, and it was redone every frame the page moved under it. */
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
       border-bottom: 2px solid rgba(205, 38, 83, 0.22) !important;
       box-shadow: 0 6px 25px rgba(74, 14, 23, 0.08) !important;
+      /* transition-all would animate the disclaimer offset and make the
+         header trail the page while scrolling. */
+      transition-property: color, background-color, border-color, box-shadow !important;
     }
     .deli-nav-link {
       color: #4A0E17 !important;
@@ -406,10 +428,40 @@
        nav its own breathing room and tighten the tracking a little so the
        whole row still fits comfortably at 1280. */
     header.deli-site-header nav { margin-right: 2.25rem !important; }
-    @media (max-width: 1400px) {
+    /* The nav is min-w-0 and its links are nowrap, so a row that is too wide
+       never wraps: the nav quietly shrinks and its links slide UNDER the audio
+       and WhatsApp pills. Measured, it was too wide at every desktop width
+       (needs ~763px, got ~559px at 1440). So the row gets the screen it is on
+       (1680px cap instead of 1280) and sheds low-priority items in steps:
+       each item hidden here is still one tap away elsewhere on the page. */
+    header.deli-site-header > div { max-width: 1680px !important; }
+    @media (max-width: 1599px) {
       .deli-nav-link { letter-spacing: 0.12em !important; font-size: 0.74rem !important; }
       header.deli-site-header nav { gap: 1.35rem !important; margin-right: 1.75rem !important; }
     }
+    @media (max-width: 1799px) { .deli-tagline { display: none !important; } }
+    /* Phone and tablet menu sheet, hung from the header so it rides with it. */
+    .deli-burger { display: inline-block; width: 14px; }
+    .deli-burger i { display: block; height: 2px; margin: 3px 0; border-radius: 2px; background: currentColor; transition: transform .2s ease, opacity .2s ease; }
+    #deliMenuBtn[aria-expanded="true"] .deli-burger i:nth-child(1) { transform: translateY(5px) rotate(45deg); }
+    #deliMenuBtn[aria-expanded="true"] .deli-burger i:nth-child(2) { opacity: 0; }
+    #deliMenuBtn[aria-expanded="true"] .deli-burger i:nth-child(3) { transform: translateY(-5px) rotate(-45deg); }
+    .deli-mobile-nav { position: absolute; top: 100%; left: 8px; right: 8px; display: grid; gap: 2px; padding: 8px; background: #FFFDF9; border: 1px solid rgba(205, 38, 83, .22); border-radius: 18px; box-shadow: 0 22px 44px rgba(74, 14, 23, .18); max-height: calc(100svh - 90px); overflow-y: auto; }
+    .deli-mobile-nav[hidden] { display: none; }
+    .deli-mobile-nav a { display: flex; align-items: center; min-height: 48px; padding: 0 14px; border-radius: 12px; color: #4A0E17; font-weight: 800; font-size: .8rem; letter-spacing: .14em; text-transform: uppercase; }
+    .deli-mobile-nav a:hover, .deli-mobile-nav a:focus-visible { background: #FFF0F3; color: #CD2653; }
+    /* A jump lands below the 58px fixed header, not under it. */
+    [id] { scroll-margin-top: 76px; }
+    /* Phones: every control a thumb has to hit is at least 44px tall. */
+    @media (max-width: 767px) {
+      #basketModal button, #basketModal input, #basketModal a, .cat-pill, [id^="loupeTab-"], .deli-stage-btn, .deli-add-btn { min-height: 44px; }
+    }
+    .deli-toast { position: fixed; left: 50%; bottom: 18px; z-index: 75; display: flex; align-items: center; gap: 12px; max-width: calc(100vw - 24px); padding: 10px 10px 10px 16px; border-radius: 999px; background: #4A0E17; color: #FFF9F4; font-size: 13px; font-weight: 700; box-shadow: 0 16px 36px rgba(0,0,0,.28); transform: translate(-50%, 140%); opacity: 0; transition: transform .3s ease, opacity .3s ease; }
+    .deli-toast.is-on { transform: translate(-50%, 0); opacity: 1; }
+    .deli-toast button { min-height: 40px; padding: 0 14px; border-radius: 999px; background: #CD2653; color: #fff; font-size: 11px; text-transform: uppercase; letter-spacing: .12em; white-space: nowrap; }
+    @media (prefers-reduced-motion: reduce) { .deli-toast { transition: none; } }
+    @media (max-width: 1439px) { .deli-wa-pill { display: none !important; } }
+    @media (max-width: 1279px) { .deli-nav-loupe { display: none !important; } }
 
     /* Editorial Cards */
     .deli-card {
@@ -621,19 +673,18 @@
     gap: clamp(28px, 4vw, 52px);
     padding: 0 12vw;
     will-change: transform;
-    transform: translate3d(var(--rail-x, 0px), 0, 0);
+    transform: translate3d(0, 0, 0);
   }
   .rail-station-card {
     width: clamp(280px, 32vw, 390px);
     flex-shrink: 0;
-    transform-origin: 50% -14px;
-    transform: rotateZ(var(--pendulum-deg, 0deg));
-    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
-    background: rgba(24, 11, 15, 0.88);
+    transition: border-color 0.3s ease;
+    /* Opaque enough to need no backdrop blur, which was redone every frame
+       as the rail moved. */
+    background: rgba(24, 11, 15, 0.94);
     border: 1px solid rgba(197, 154, 69, 0.34);
     border-radius: 22px;
     box-shadow: 0 24px 48px rgba(0, 0, 0, 0.55);
-    backdrop-filter: blur(10px);
     overflow: hidden;
     color: #FFF9F4;
   }
@@ -696,7 +747,13 @@
   .bwalk-cap b { display: block; font-family: var(--font-serif-chic, Georgia, serif); font-size: clamp(1.55rem, 3.6vw, 2.5rem); letter-spacing: -0.02em; line-height: 1.06; }
   .bwalk-cap span { display: block; margin-top: 6px; font-size: clamp(.85rem, 1.8vw, 1rem); font-weight: 500; opacity: .86; max-width: 44ch; margin-inline: auto; }
   .bwalk-step {
-    position: absolute; top: clamp(32px, 5.5vh, 64px); left: 0; right: 0; z-index: 26;
+    /* below the 58px fixed header, which it used to slide under. A pill, so
+       it reads where it crosses the hanging rail instead of tangling with it. */
+    margin-top: 58px;
+    position: absolute; top: clamp(32px, 5.5vh, 64px); left: 50%; right: auto; z-index: 26;
+    transform: translateX(-50%); width: max-content; max-width: calc(100vw - 32px);
+    padding: 6px 14px; border-radius: 999px; background: rgba(24, 11, 15, 0.92);
+    border: 1px solid rgba(197, 154, 69, 0.38);
     text-align: center; color: #C59A45; font-size: .72rem;
     letter-spacing: .32em; text-transform: uppercase; font-weight: 800;
     pointer-events: none;
@@ -863,27 +920,54 @@
   .bag-bounce { animation: basketElasticBounce 0.48s cubic-bezier(0.34, 1.56, 0.64, 1); }
   </style>
 <!-- seo:auto:start -->
-<!-- Managed by scripts/seo-inject.mjs · edit seo.config.json, not here. -->
-<meta name="description" content="Artisanal cuts, 100% antibiotic residue-free poultry, handcrafted charcuterie and gourmet dim sum. Chilled 0°C–4°C delivery across Delhi NCR." />
+<!-- Managed by scripts/seo-inject.mjs, edit seo.config.json, not here. -->
+<meta name="description" content="Independent storefront redesign concept for a Delhi NCR gourmet butcher, by Anchit Tandon: larder, basket and delivery hubs. Illustrative photos." />
 <link rel="canonical" href="https://anchit-tandon.com/deli-chic" />
-<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+<meta name="robots" content="noindex,follow" />
 <meta name="author" content="Anchit Tandon" />
 <link rel="icon" href="/icons/favicon.svg" type="image/svg+xml" />
-<meta property="og:title" content="Deli Chic · Food For Thought | Haute Boucherie &amp; Artisanal Larder" />
-<meta property="og:description" content="Artisanal cuts, 100% antibiotic residue-free poultry, handcrafted charcuterie and gourmet dim sum. Chilled 0°C–4°C delivery across Delhi NCR." />
+<meta property="og:title" content="Deli Chic storefront concept | design by Anchit Tandon" />
+<meta property="og:description" content="Independent storefront redesign concept for a Delhi NCR gourmet butcher, by Anchit Tandon: larder, basket and delivery hubs. Illustrative photos." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://anchit-tandon.com/deli-chic" />
 <meta property="og:image" content="https://i1.wp.com/mh.delichic.co.in/wp-content/uploads/2020/09/Chicken-Breast-Antibiotic-Free-scaled.jpg" />
 <meta property="og:site_name" content="Anchit Tandon" />
 <meta property="og:locale" content="en_US" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Deli Chic · Food For Thought | Haute Boucherie &amp; Artisanal Larder" />
-<meta name="twitter:description" content="Artisanal cuts, 100% antibiotic residue-free poultry, handcrafted charcuterie and gourmet dim sum. Chilled 0°C–4°C delivery across Delhi NCR." />
+<meta name="twitter:title" content="Deli Chic storefront concept | design by Anchit Tandon" />
+<meta name="twitter:description" content="Independent storefront redesign concept for a Delhi NCR gourmet butcher, by Anchit Tandon: larder, basket and delivery hubs. Illustrative photos." />
 <meta name="twitter:image" content="https://i1.wp.com/mh.delichic.co.in/wp-content/uploads/2020/09/Chicken-Breast-Antibiotic-Free-scaled.jpg" />
 <!-- seo:auto:end -->
 </head>
 <body class="linen-texture selection:bg-[#CD2653] selection:text-white">
-<div class="concept-bar" role="note" style="position:relative;z-index:60;padding:8px 16px;text-align:center;font:600 12px/1.45 system-ui,-apple-system,sans-serif;letter-spacing:.02em;background:#111;color:#f5f0e8">Concept storefront by <a href="/" style="color:inherit;text-decoration:underline;text-underline-offset:2px">Anchit Tandon</a>, not affiliated with Deli Chic. Nothing here places a real order.</div>
+<a href="#larder" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[90] focus:px-4 focus:py-3 focus:rounded-full focus:bg-[#4A0E17] focus:text-white focus:font-bold">Skip to the larder</a>
+<style>
+  /* Concept bar: neutral chrome, deliberately not either brand's palette, so
+     it reads as the frame around the work rather than part of the shop. */
+  .concept-bar{position:relative;z-index:60;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 18px;padding:8px 16px;font:600 12px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.02em;background:#111;color:#f5f0e8;text-align:center}
+  .concept-bar p{margin:0}
+  .concept-bar a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+  .concept-bar nav{display:flex;flex-wrap:wrap;justify-content:center;gap:0 14px}
+  .concept-bar nav a{display:inline-flex;align-items:center;min-height:24px}
+  .concept-bar a:focus-visible{outline:2px solid #f5f0e8;outline-offset:2px}
+  /* Design notes: the reasoning behind the concept, in the page's own type. */
+  .design-notes{padding:clamp(56px,9vw,112px) var(--dn-pad,24px);background:var(--dn-bg);color:var(--dn-ink);scroll-margin-top:72px}
+  .design-notes .dn-wrap{max-width:1120px;margin:0 auto}
+  .design-notes .dn-kicker{margin:0 0 12px;font:800 12px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--dn-accent)}
+  .design-notes h2{margin:0;font-family:var(--dn-display);font-size:clamp(1.9rem,4vw,3rem);line-height:1.08;letter-spacing:-.02em;max-width:22ch}
+  .design-notes .dn-lede{margin:16px 0 0;max-width:62ch;font-size:clamp(1rem,1.6vw,1.125rem);line-height:1.6;color:var(--dn-muted)}
+  .design-notes .dn-grid{display:grid;gap:16px;margin-top:clamp(28px,4vw,44px);grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+  .design-notes .dn-card{padding:22px 22px 24px;border-radius:18px;background:var(--dn-card);border:1px solid var(--dn-rule)}
+  .design-notes .dn-card h3{margin:0 0 10px;font:800 13px/1.35 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--dn-accent)}
+  .design-notes .dn-card p,.design-notes .dn-card li{margin:0;font-size:15px;line-height:1.6;color:var(--dn-ink)}
+  .design-notes .dn-card ul{margin:0;padding-left:18px;display:grid;gap:6px;list-style:disc}
+  .design-notes .dn-card li::marker{color:var(--dn-accent)}
+  .design-notes .dn-tag{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;font:700 11px/1.5 system-ui,-apple-system,sans-serif;letter-spacing:.06em;text-transform:uppercase;background:var(--dn-tag-bg);color:var(--dn-tag-ink);vertical-align:middle}
+  .design-notes .dn-foot{margin:28px 0 0;font-size:14px;line-height:1.6;color:var(--dn-muted)}
+  .design-notes .dn-foot a{color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:2px}
+  .concept-label{display:inline-block;margin:0 0 12px;padding:3px 10px;border-radius:999px;font:700 11px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.08em;text-transform:uppercase;background:#111;color:#f5f0e8}
+</style>
+<div class="concept-bar" role="note"><p>Concept storefront by <a href="/">Anchit Tandon</a>, not affiliated with Deli Chic. No real orders · illustrative photos · sample statuses.</p><nav aria-label="About this concept"><a href="/">Portfolio</a><a href="#design-notes">Design notes</a><a href="/assets/resume.pdf">Resume</a><a href="mailto:anchit.tandon@gmail.com?subject=Your%20Deli%20Chic%20concept">Email Anchit</a></nav></div>
 
 <!-- Luxury Film Grain Cinematic Overlay -->
 <div class="film-grain" aria-hidden="true"></div>
@@ -894,14 +978,11 @@
 <div id="deliAnnounceBar" class="relative z-40 bg-[#4A0E17] text-[#FFF9F4] text-[11px] sm:text-xs font-medium tracking-wider py-1.5 px-4 border-b border-[#C59A45]/30">
   <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
     <div class="flex items-center gap-x-2 min-w-0 whitespace-nowrap">
-      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
-      <span class="font-bold shrink-0">All 4 NCR hubs open</span>
+      <span class="font-bold shrink-0">Sample status · 4 NCR delivery hubs</span>
       <span class="text-white/80 truncate hidden sm:inline">Slot 1 (10 AM–1 PM) &amp; Slot 2 (5 PM–8 PM) • Free express cold-chain on ₹999+</span>
     </div>
     <div class="hidden md:flex items-center gap-5 text-[11px] text-[#F7EFE6] whitespace-nowrap shrink-0">
-      <span>✦ Use Code <strong class="text-[#FFA517] underline tracking-widest font-black">WoW20</strong> (20% OFF)</span>
-      <span>•</span>
-      <span>Sodexo Accepted</span>
+      <span>✦ Sample code <strong class="text-[#FFA517] underline tracking-widest font-black">WoW20</strong> (20% off in this demo)</span>
       <span>•</span>
       <a href="tel:+919810002023" class="hover:text-white transition-colors">+91 98100 02023</a>
     </div>
@@ -917,7 +998,7 @@
         DC
         </div>
       <span class="text-xl font-serif-chic font-black tracking-tight text-[#4A0E17] leading-none">Deli Chic</span>
-      <span class="hidden 2xl:inline text-[9px] tracking-[0.26em] uppercase font-bold text-[#CD2653] font-luxury border-l border-[#C59A45]/40 pl-2.5 ml-0.5">Food For Thought</span>
+      <span class="deli-tagline hidden 2xl:inline text-[9px] tracking-[0.26em] uppercase font-bold text-[#CD2653] font-luxury border-l border-[#C59A45]/40 pl-2.5 ml-0.5">Food For Thought</span>
     </a>
 
     <!-- Navigation Links -->
@@ -929,7 +1010,6 @@
          was hiding. -->
     <nav class="hidden lg:flex items-center gap-4 xl:gap-5 text-xs font-bold uppercase tracking-[0.14em] xl:tracking-[0.18em] min-w-0">
       <a href="#larder" class="deli-nav-link whitespace-nowrap">The Larder</a>
-      <a href="#masterCarver" class="deli-nav-link whitespace-nowrap">Master Carver Loupe</a>
       <a href="#boucherieExperience" class="deli-nav-link whitespace-nowrap">Haute Standards</a>
       <a href="#hubs" class="deli-nav-link whitespace-nowrap">NCR Hubs (4)</a>
       <a href="#heritage" class="deli-nav-link whitespace-nowrap">Our Story</a>
@@ -937,27 +1017,82 @@
 
     <!-- Action Controls -->
     <div class="flex items-center gap-2.5 shrink-0">
-      <!-- Cold-Room Spatial Audio Toggle (15% Gain) -->
-      <button type="button" id="deliAudioBtn" onclick="toggleDeliAudio()" aria-pressed="false" title="Toggle 2.4°C Cold-Room &amp; Vacuum-Seal Acoustics (15% Gain)" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#C59A45]/40 text-[#4A0E17] text-[10px] font-bold uppercase tracking-wider hover:bg-[#F7EFE6] transition-all">
+      <!-- Ambient audio toggle -->
+      <button type="button" id="deliAudioBtn" onclick="toggleDeliAudio()" aria-pressed="false" title="Play ambient cold-room sounds" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#C59A45]/40 text-[#4A0E17] text-[10px] font-bold uppercase tracking-wider hover:bg-[#F7EFE6] transition-all">
         <svg class="w-3.5 h-3.5 text-[#CD2653]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 10v4M6 7v10M10 4v16M14 8v8M18 6v12M22 10v4"/></svg>
-        <span id="deliAudioLabel">2.4°C Audio</span>
+        <span id="deliAudioLabel">Ambient audio</span>
       </button>
 
       <!-- WhatsApp Direct Concierge -->
-      <a href="https://wa.link/bk4b8e" target="_blank" rel="noreferrer noopener" class="hidden xl:inline-flex items-center gap-2 px-3.5 py-2 rounded-full border border-emerald-600/30 text-emerald-800 text-xs font-bold uppercase tracking-wider hover:bg-emerald-50 transition-all bg-emerald-50/50">
+      <a href="https://wa.link/bk4b8e" target="_blank" rel="noreferrer noopener" class="deli-wa-pill hidden xl:inline-flex items-center gap-2 px-3.5 py-2 rounded-full border border-emerald-600/30 text-emerald-800 text-xs font-bold uppercase tracking-wider hover:bg-emerald-50 transition-all bg-emerald-50/50">
         <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
         <span>WhatsApp Concierge</span>
       </a>
 
+      <!-- Menu below lg: the nav above is hidden there, and phones and tablets
+           had no way to reach the hubs or the story but 14 screens of scroll. -->
+      <button type="button" id="deliMenuBtn" class="lg:hidden inline-flex items-center justify-center gap-2 min-h-[44px] px-3.5 rounded-full border border-[#CD2653]/30 text-[#4A0E17] text-xs font-bold uppercase tracking-wider" aria-expanded="false" aria-controls="deliMobileNav">
+        <span aria-hidden="true" class="deli-burger"><i></i><i></i><i></i></span><span>Menu</span>
+      </button>
+
       <!-- Basket Trigger -->
-      <button id="deliBasketBtn" onclick="toggleBasket(true)" class="px-4 py-2 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#8C1434] transition-all shadow-md shadow-[#CD2653]/30 flex items-center gap-2 shrink-0 whitespace-nowrap">
+      <button id="deliBasketBtn" onclick="toggleBasket(true, this)" aria-haspopup="dialog" class="min-h-[44px] px-4 py-2 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#8C1434] transition-all shadow-md shadow-[#CD2653]/30 flex items-center gap-2 shrink-0 whitespace-nowrap">
         <span>Basket</span>
-        <span class="px-2 py-0.5 bg-white/25 rounded-full text-[10px] font-black" id="basketCount">0</span>
+        <span class="px-2 py-0.5 bg-white/25 rounded-full text-[10px] font-black" id="basketCount" aria-live="polite">0</span>
       </button>
     </div>
   </div>
+  <nav id="deliMobileNav" class="deli-mobile-nav lg:hidden" aria-label="Sections" hidden>
+    <a href="#larder">The Larder</a>
+    <a href="#boucherieExperience">Haute Standards</a>
+    <a href="#hubs">NCR Hubs (4)</a>
+    <a href="#heritage">Our Story</a>
+    <a href="https://wa.link/bk4b8e" target="_blank" rel="noreferrer noopener">WhatsApp Concierge ↗</a>
+  </nav>
 </header>
+<script>
+/* The disclaimer bar sits in normal flow above a position:fixed header, so at
+   the top of the page it painted straight over the logo and the nav. Push the
+   header down by however much of the bar is still on screen; once the bar has
+   scrolled away the offset is 0 and the header pins to the top as before.
+   `translate` (not top/transform) so nothing else that styles it is touched. */
+(function () {
+  var bar = document.querySelector('.concept-bar'), head = document.querySelector('header.deli-site-header');
+  if (!bar || !head) return;
+  var queued = 0;
+  function place() {
+    queued = 0;
+    var y = Math.max(0, Math.round(bar.getBoundingClientRect().bottom));
+    head.style.translate = y ? '0 ' + y + 'px' : '';
+  }
+  function ask() { if (!queued) queued = requestAnimationFrame(place); }
+  addEventListener('scroll', ask, { passive: true });
+  addEventListener('resize', ask);
+  place();
+})();
+</script>
+<script>
+/* The phone and tablet menu. Below lg the nav above is display:none, and
+   nothing replaced it: the hubs sat 14 screens down with no way to them. */
+(function () {
+  var btn = document.getElementById('deliMenuBtn'), nav = document.getElementById('deliMobileNav');
+  if (!btn || !nav) return;
+  function set(open, refocus) {
+    nav.hidden = !open;
+    btn.setAttribute('aria-expanded', String(open));
+    if (open) { var a = nav.querySelector('a'); if (a) a.focus(); }
+    else if (refocus) btn.focus();
+  }
+  btn.addEventListener('click', function () { set(nav.hidden); });
+  nav.addEventListener('click', function (e) { if (e.target.closest('a')) set(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !nav.hidden) set(false, true); });
+  document.addEventListener('click', function (e) { if (!nav.hidden && !nav.contains(e.target) && !btn.contains(e.target)) set(false); });
+  matchMedia('(min-width: 1024px)').addEventListener('change', function (m) { if (m.matches) set(false); });
+})();
+</script>
 
+
+<main id="main">
 <!-- ================= HERO SECTION: CULINARY SHOWCASE WITH LIVE ATMOSPHERIC CANVAS ================= -->
 <section class="relative pt-10 pb-20 md:pt-14 md:pb-28 px-6 md:px-10 max-w-7xl mx-auto overflow-hidden">
   <!-- Atmospheric Culinary Steam & Golden Particle Canvas -->
@@ -1013,17 +1148,17 @@
     <!-- Right Master Carver's Interactive Loupe Feature -->
     <div class="lg:col-span-5 relative" id="masterCarver">
       <!-- Interactive Cut Tabs for Loupe -->
-      <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-white/80 border border-[#CD2653]/20 mb-3 text-[10px] font-bold uppercase tracking-wider overflow-x-auto">
-        <button onclick="setLoupeCut('charcuterie')" id="loupeTab-charcuterie" class="py-1.5 px-3 rounded-xl bg-[#CD2653] text-white transition-all whitespace-nowrap">
+      <div class="grid grid-cols-4 sm:flex items-stretch sm:items-center gap-1 sm:gap-1.5 p-1 rounded-2xl bg-white/80 border border-[#CD2653]/20 mb-3 text-[10px] font-bold uppercase tracking-wide sm:tracking-wider">
+        <button onclick="setLoupeCut('charcuterie')" id="loupeTab-charcuterie" class="py-1.5 rounded-xl leading-tight text-center px-1 sm:px-3 bg-[#CD2653] text-white transition-all sm:whitespace-nowrap">
           Charcuterie
           </button>
-        <button onclick="setLoupeCut('poultry')" id="loupeTab-poultry" class="py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap">
+        <button onclick="setLoupeCut('poultry')" id="loupeTab-poultry" class="py-1.5 rounded-xl leading-tight text-center px-1 sm:px-3 text-[#524842] hover:text-[#CD2653] transition-all sm:whitespace-nowrap">
           Fresh Breast
           </button>
-        <button onclick="setLoupeCut('marinade')" id="loupeTab-marinade" class="py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap">
+        <button onclick="setLoupeCut('marinade')" id="loupeTab-marinade" class="py-1.5 rounded-xl leading-tight text-center px-1 sm:px-3 text-[#524842] hover:text-[#CD2653] transition-all sm:whitespace-nowrap">
           Lucknowi Cut
           </button>
-        <button onclick="setLoupeCut('momos')" id="loupeTab-momos" class="py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap">
+        <button onclick="setLoupeCut('momos')" id="loupeTab-momos" class="py-1.5 rounded-xl leading-tight text-center px-1 sm:px-3 text-[#524842] hover:text-[#CD2653] transition-all sm:whitespace-nowrap">
           Prawn Dim Sum
           </button>
       </div>
@@ -1064,11 +1199,11 @@
         <div class="absolute bottom-5 left-5 right-5 p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-[#CD2653]/20 shadow-lg text-left flex items-center justify-between">
           <div>
             <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
               <span id="loupeBadgeText" class="text-[11px] font-bold uppercase tracking-wider text-emerald-800">Master Carver 2.5x Loupe Active</span>
             </div>
             <h4 id="loupeTitleText" class="text-base font-serif-chic font-bold text-[#4A0E17] mt-0.5">Prime Wood-Smoked Charcuterie</h4>
-            <p id="loupeDescText" class="text-[11px] text-[#6B625B]">Move cursor or drag finger across cut to inspect curing grain &amp; cellular density.</p>
+            <p id="loupeDescText" class="text-[11px] text-[#6B625B]">Move your cursor, or drag a finger, across the cut to look closer at the grain.</p>
           </div>
           <div class="text-right">
             <span class="text-xs font-luxury font-bold text-[#C59A45]" id="liveTempSensor">2.4°C</span>
@@ -1173,7 +1308,7 @@
           </div>
         </div>
         <div class="lg:col-span-5 hidden lg:block">
-          <img src="/assets/brand/u-1599488615731-7e5c2823ff28-800.webp" loading="lazy" decoding="async" alt="Royal Awadhi Shahi Saffron Marinade" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#D4AF37]/70" />
+          <img src="/assets/brand/dc-lucknowi-marinade-800.webp" loading="lazy" decoding="async" alt="Royal Awadhi Shahi Saffron Marinade" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#D4AF37]/70" />
         </div>
       </div>
     </div>
@@ -1257,7 +1392,7 @@
               <svg width="36" height="42" viewBox="0 0 36 42" fill="none"><path d="M18 0v18c0 6 8 6 8 12s-6 10-12 10" stroke="#D1D5DB" stroke-width="4" stroke-linecap="round"/><circle cx="18" cy="6" r="4" fill="#9CA3AF"/></svg>
             </div>
             <div class="relative h-44 overflow-hidden">
-              <img src="/assets/brand/u-1599488615731-7e5c2823ff28-800.webp" alt="" loading="lazy" decoding="async" class="w-full h-full object-cover" />
+              <img src="/assets/brand/dc-chicken-breast-450.webp" alt="" loading="lazy" decoding="async" class="w-full h-full object-cover" />
               <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/75 border border-emerald-400/50 text-emerald-300 text-[9px] font-luxury font-bold uppercase tracking-widest">Station 04 • Vacuum Locked</span>
             </div>
             <div class="p-5 space-y-1.5">
@@ -1303,7 +1438,7 @@
   </div>
 
   <!-- Category Filter Tabs -->
-  <div class="flex items-center gap-2.5 overflow-x-auto pb-4 mb-10 text-xs font-bold uppercase tracking-wider scrollbar-none" id="categoryTabs">
+  <div class="flex items-center gap-2.5 overflow-x-auto sm:flex-wrap sm:overflow-visible pb-4 mb-10 text-xs font-bold uppercase tracking-wider scrollbar-none" id="categoryTabs">
     <button onclick="filterCategory('all')" id="tab-all" class="cat-pill px-5 py-2.5 rounded-full bg-[#CD2653] text-white shadow-sm transition-all whitespace-nowrap">
       All Larder (12)
       </button>
@@ -1334,7 +1469,7 @@
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
       <div>
         <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#CD2653]/30 border border-[#C59A45]/40 text-[#FFA517] text-xs font-bold uppercase tracking-wider mb-3">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
           <span>Temperature-Controlled Cold-Chain</span>
         </div>
         <h2 class="text-4xl md:text-5xl font-serif-chic font-bold tracking-tight text-white">
@@ -1438,7 +1573,7 @@
           <p><strong>Direct Hotline:</strong> <a href="tel:+919810002023" class="text-[#CD2653] underline font-bold">+91 98100 02023</a></p>
           <p><strong>WhatsApp Concierge:</strong> <a href="https://wa.link/bk4b8e" target="_blank" rel="noopener" class="text-emerald-700 underline font-bold">wa.link/bk4b8e</a></p>
           <p><strong>Delivery Slots:</strong> 10:00 AM – 1:00 PM &amp; 5:00 PM – 8:00 PM</p>
-          <p><strong>Payment Modes:</strong> Sodexo, UPI, Debit/Credit Cards &amp; Net Banking</p>
+          <p><strong>Payment modes (sample):</strong> UPI, Debit/Credit Cards &amp; Net Banking</p>
         </div>
       </div>
     </div>
@@ -1522,11 +1657,13 @@
 </section>
 
 <!-- ================= FOOTER ================= -->
+</main>
+<section class="design-notes" id="design-notes" aria-labelledby="design-notes-title"><div class="dn-wrap"><p class="dn-kicker">Design notes · concept by Anchit Tandon</p><h2 id="design-notes-title">Why this storefront looks the way it does.</h2><p class="dn-lede">Deli Chic is a real Delhi NCR gourmet butcher. This page is my independent redesign of its storefront, built to show how I would carry a shopper from a first look to a confident order. It is not Deli Chic's site.</p><div class="dn-grid"><article class="dn-card"><h3>The problem</h3><p>A premium butcher sells on trust and freshness, and a shopper wants to know three things fast: is it good, is it cold all the way to my door, and does it deliver to me. I had no access to Deli Chic's analytics, so everything below is a <strong>design hypothesis</strong>, not a finding.</p></article><article class="dn-card"><h3>What I kept</h3><ul><li>The brand's own catalogue: product names, prices and photographs from its public shop.</li><li>Its temperature claim, Chilled, Never Frozen, and the 0°C–4°C cold chain it describes.</li><li>Its four Delhi NCR hubs and two culinary lineages, European charcuterie and Awadhi marinades.</li></ul></article><article class="dn-card"><h3>What I changed</h3><ul><li>A larder with filters and a basket drawer, so a shopper never leaves the page to build an order.</li><li>A cold-room walk-through that shows the process, cut to sealed, as the one signature moment.</li><li>The four hubs, the areas each covers and the two delivery slots, shown before the basket rather than after it.</li><li>Slower, heavier motion than my Gram Street concept, to match a cold-chain brand.</li></ul></article><article class="dn-card"><h3>Hypothesis</h3><p>If the cold chain and the delivery hubs are visible before the basket, fewer shoppers abandon at checkout over the two questions that matter for raw protein: freshness and whether it reaches them.</p></article><article class="dn-card"><h3>How I would measure it <span class="dn-tag">Intended, not measured</span></h3><ul><li>Add-to-basket rate from the larder.</li><li>Basket to order-preview completion.</li><li>WhatsApp order-draft starts.</li></ul><p style="margin-top:10px">This concept has no live traffic, so none of these has been measured.</p></article><article class="dn-card"><h3>What is real and what is a demo</h3><ul><li><strong>From Deli Chic's public catalogue:</strong> product names, prices, product photos, and product claims such as antibiotic residue-free. I have not verified those claims.</li><li><strong>Demo:</strong> the basket and checkout (no card is taken; WhatsApp only drafts a message marked DEMO), the promo code and the hub status line.</li><li><strong>Illustrative:</strong> the atmosphere photography. Phone and WhatsApp links go to the brand, not to me.</li></ul></article><article class="dn-card"><h3>How checkout works here</h3><p>The order is simulated end to end: you get a preview and a WhatsApp draft you can read, and nothing is sent. In my Xazina concept the bag hands off to Xazina's real cart instead, because that catalogue is a real snapshot of the live store.</p></article><article class="dn-card"><h3>Motion decisions</h3><ul><li>No motion on raw-protein imagery: a pulse or a warm colour cycle on a cut reads as spoilage.</li><li>No springy or bouncy easing anywhere; it contradicts the cold-chain claim.</li><li>One pinned scroll-through, and everything decorative pauses off screen.</li></ul></article></div><p class="dn-foot">Questions about the concept? <a href="mailto:anchit.tandon@gmail.com?subject=Your%20Deli%20Chic%20concept">Email Anchit</a>, or see the rest of my work on the <a href="/">portfolio</a>.</p></div></section>
 <footer class="border-t border-[#CD2653]/15 py-12 px-6 md:px-10 text-center sm:text-left bg-white">
   <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-xs text-[#6B625B]">
     <div>
       <strong class="font-serif-chic font-bold text-base block text-[#4A0E17]">Deli Chic, Food For Thought</strong>
-      <span>Concept site by Anchit Tandon. Deli Chic and its marks belong to their owner.</span>
+      <span>Concept storefront by <a href="/" class="underline">Anchit Tandon</a>. Deli Chic and its marks belong to their owner. <a href="mailto:anchit.tandon@gmail.com?subject=Your%20Deli%20Chic%20concept" class="underline font-bold">Email Anchit</a></span>
     </div>
     <div class="flex gap-6 uppercase tracking-widest font-luxury font-bold text-[11px]">
       <a href="https://delichic.co.in/" target="_blank" rel="noopener" class="hover:text-[#CD2653] transition-colors">The real Deli Chic &#8599;</a>
@@ -1537,7 +1674,7 @@
 </footer>
 
 <!-- ================= SLIDE-OVER BASKET DRAWER ================= -->
-<div id="basketModal" class="fixed inset-0 z-50 hidden">
+<div id="basketModal" class="fixed inset-0 z-50 hidden" style="z-index:70" role="dialog" aria-modal="true" aria-labelledby="dcBasketTitle">
   <div onclick="toggleBasket(false)" class="absolute inset-0 bg-black/75 backdrop-blur-sm"></div>
   <div id="dcPanel" data-consent-pad class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-[#CD2653]/25 p-8 flex flex-col justify-between overflow-y-auto shadow-2xl text-[#1C1917]">
     <div>
@@ -1545,9 +1682,9 @@
       <div class="flex items-center justify-between border-b border-[#CD2653]/15 pb-4">
         <div>
           <span class="text-[10px] font-luxury font-bold uppercase tracking-widest text-[#CD2653]">Haute Boucherie</span>
-          <h3 class="text-xl font-serif-chic font-bold text-[#4A0E17]">Your Artisanal Basket</h3>
+          <h3 id="dcBasketTitle" class="text-xl font-serif-chic font-bold text-[#4A0E17]">Your Artisanal Basket</h3>
         </div>
-        <button onclick="toggleBasket(false)" class="text-xs uppercase tracking-widest text-[#CD2653] font-bold hover:underline">Close ✕</button>
+        <button type="button" id="dcClose" onclick="toggleBasket(false)" class="min-w-[44px] min-h-[44px] px-3 rounded-full border border-[#CD2653]/30 text-xs uppercase tracking-widest text-[#CD2653] font-bold hover:bg-[#FFF0F3]">Close ✕</button>
       </div>
 
       <!-- Free Delivery Threshold Meter -->
@@ -1578,10 +1715,10 @@
       <div>
         <label class="block text-[11px] font-bold uppercase tracking-wider text-[#6B625B] mb-1.5">Select NCR Delivery Slot:</label>
         <div class="grid grid-cols-2 gap-2 text-xs">
-          <button onclick="setSlot('Morning (10 AM–1 PM)')" id="slot-morning" class="slot-btn py-2 px-3 rounded-xl border border-[#CD2653] bg-[#CD2653] text-white font-bold transition-all">
+          <button type="button" aria-pressed="true" onclick="setSlot('Morning (10 AM–1 PM)')" id="slot-morning" class="slot-btn py-2 px-3 rounded-xl border border-[#CD2653] bg-[#CD2653] text-white font-bold transition-all">
             10 AM – 1 PM
             </button>
-          <button onclick="setSlot('Evening (5 PM–8 PM)')" id="slot-evening" class="slot-btn py-2 px-3 rounded-xl border border-[#CD2653]/30 bg-white text-[#524842] font-bold transition-all">
+          <button type="button" aria-pressed="false" onclick="setSlot('Evening (5 PM–8 PM)')" id="slot-evening" class="slot-btn py-2 px-3 rounded-xl border border-[#CD2653]/30 bg-white text-[#524842] font-bold transition-all">
             5 PM – 8 PM
             </button>
         </div>
@@ -1589,14 +1726,15 @@
 
       <!-- Promo Code Input -->
       <div class="flex gap-2">
-        <input type="text" id="promoInput" placeholder="Enter Code (e.g. WoW20)" class="w-full px-4 py-2 rounded-xl border border-[#CD2653]/30 text-xs uppercase font-luxury font-bold focus:outline-none focus:border-[#CD2653]" />
-        <button onclick="applyPromo()" class="px-5 py-2 rounded-xl bg-[#4A0E17] text-white font-bold text-xs uppercase hover:bg-[#2F090F] transition-all">
+        <input type="text" id="promoInput" aria-label="Promo code" aria-describedby="promoNotice promoError" placeholder="Code WoW20 · 20% off ₹999+" class="w-full px-4 py-2 rounded-xl border border-[#CD2653]/30 text-xs uppercase font-luxury font-bold focus:outline-none focus:border-[#CD2653]" />
+        <button type="button" onclick="applyPromo()" class="px-5 py-2 rounded-xl bg-[#4A0E17] text-white font-bold text-xs uppercase hover:bg-[#2F090F] transition-all">
           Apply
           </button>
       </div>
-      <div id="promoNotice" class="text-[11px] text-emerald-700 font-bold hidden">
+      <div id="promoNotice" class="text-[11px] text-emerald-700 font-bold hidden" role="status">
         ✓ Code WoW20 Applied! 20% Discount Activated.
         </div>
+      <div id="promoError" class="text-[11px] text-[#B4232F] font-bold hidden" role="alert"></div>
 
       <!-- Calculations -->
       <div class="space-y-1.5 text-xs text-[#524842]">
@@ -1614,8 +1752,8 @@
         </div>
       </div>
 
-      <button onclick="startDeliCheckout()" class="knife-glint w-full py-4 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#8C1434] transition-all shadow-lg shadow-[#CD2653]/30 flex items-center justify-center gap-2">
-        <span>Dispatch via WhatsApp Concierge ↗</span>
+      <button type="button" id="dcStart" onclick="startDeliCheckout()" class="knife-glint disabled:opacity-40 disabled:cursor-not-allowed w-full py-4 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#8C1434] transition-all shadow-lg shadow-[#CD2653]/30 flex items-center justify-center gap-2">
+        <span>Continue to delivery details →</span>
       </button>
     </div>
 
@@ -1805,7 +1943,7 @@
         title: 'Lucknowi Shahi Saffron Marinade',
         desc: 'Infused with Awadhi mace, roasted gram flour, hung curd and royal saffron threads.',
         badge: 'Chef Master Marinade Inspection',
-        image: '/assets/brand/u-1599488615731-7e5c2823ff28-1200.webp'
+        image: '/assets/brand/dc-lucknowi-marinade-1200.webp'
       },
       momos: {
         title: 'Handcrafted Coastal Prawn Dim Sum',
@@ -1850,7 +1988,7 @@
           </div>
 
           <div class="p-6 pt-0">
-            <button onclick="addToBasket('${p.id}', this)" class="w-full py-3 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#8C1434] transition-all shadow-md shadow-[#CD2653]/25 flex items-center justify-center gap-2">
+            <button type="button" onclick="addToBasket('${p.id}', this)" class="deli-add-btn w-full py-3 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#8C1434] transition-all shadow-md shadow-[#CD2653]/25 flex items-center justify-center gap-2">
               <span>+ Add to Basket</span>
             </button>
           </div>
@@ -1892,42 +2030,35 @@
       ];
       var at = -1;
       var capT = 0;
-      var lastP = 0;
-      var settleTimer = 0;
+      var maxShift = -1, railInView = false;
+      function measure() {
+        var vw = window.innerWidth || 1280;
+        var last = cards[cards.length - 1];
+        var gutter = Math.max(16, vw * 0.06);
+        maxShift = Math.max(0, track.offsetLeft + last.offsetLeft + last.offsetWidth - (vw - gutter));
+      }
       function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
 
       function place(p) {
-        var trackWidth = track.scrollWidth || 1600;
-        var vw = window.innerWidth || 1280;
-        var maxShift = Math.max(0, trackWidth - vw * 0.78);
-        var shiftX = -p * maxShift;
-        track.style.setProperty('--rail-x', shiftX.toFixed(1) + 'px');
-
-        // Pendulum inertia based on scroll velocity delta (1.5deg to 3.0deg)
-        var dp = p - lastP;
-        lastP = p;
-        var rawTilt = Math.max(-3.0, Math.min(3.0, dp * 140));
-        if (Math.abs(rawTilt) > 0.15) {
-          var snappedTilt = rawTilt > 0 ? Math.max(1.5, rawTilt) : Math.min(-1.5, rawTilt);
-          for (var c = 0; c < cards.length; c++) {
-            cards[c].style.setProperty('--pendulum-deg', snappedTilt.toFixed(2) + 'deg');
-          }
-          clearTimeout(settleTimer);
-          settleTimer = setTimeout(function () {
-            for (var c2 = 0; c2 < cards.length; c2++) {
-              cards[c2].style.setProperty('--pendulum-deg', '0deg');
-            }
-          }, 140);
-        }
+        // The end point was trackWidth - 0.78vw, a guess that suited a wide
+        // screen: on a phone the rail stopped with the last card's left edge
+        // 63px off screen. It now stops with the last card fully in view and a
+        // gutter on its right, measured from the card itself (offsetLeft is
+        // untouched by the transform this sets).
+        // The extent is measured once per size (it read offsetLeft and
+        // offsetWidth, forcing layout, on every scroll frame), and the shift is
+        // written as the track's own transform rather than a custom property.
+        // The velocity pendulum that swung the cards on every scroll is gone:
+        // the brand study rules out springy motion on this site.
+        if (maxShift < 0) measure();
+        track.style.transform = 'translate3d(' + (-p * maxShift).toFixed(1) + 'px,0,0)';
 
         if (hint) hint.style.opacity = (1 - clamp01(p / 0.08)).toFixed(3);
         var k = 0;
         for (var j = 0; j < STEPS.length; j++) if (p >= STEPS[j][0]) k = j;
-        for (var m = 0; m < cards.length; m++) {
-          cards[m].classList.toggle('is-active-station', m === k);
-        }
         if (k !== at) {
           at = k;
+          for (var m = 0; m < cards.length; m++) cards[m].classList.toggle('is-active-station', m === k);
           if (step) step.textContent = STEPS[k][1];
           if (cap) {
             clearTimeout(capT);
@@ -1944,29 +2075,34 @@
 
       var ticking = false;
       function onScroll() {
-        if (ticking) return;
+        if (ticking || !railInView) return;
         ticking = true;
         requestAnimationFrame(function () {
           ticking = false;
           var r = rail.getBoundingClientRect();
           var span = r.height - frame.offsetHeight;
           var p = span > 0 ? clamp01(-r.top / span) : 0;
-          sec.style.setProperty('--p', p.toFixed(4));
           place(p);
         });
       }
       window.addEventListener('scroll', onScroll, { passive: true });
-      window.addEventListener('resize', onScroll);
+      window.addEventListener('resize', function () { maxShift = -1; onScroll(); });
       if ('IntersectionObserver' in window) {
         new IntersectionObserver(function (en) {
           var live = en[0].isIntersecting;
+          railInView = live;
           sec.classList.toggle('is-live', live);
           sec.classList.toggle('is-past', !live);
+          if (live) onScroll();
         }, { threshold: 0 }).observe(sec);
       } else {
+        railInView = true;
         sec.classList.add('is-live');
+        onScroll();
       }
-      onScroll();
+      // The observer's first callback places the rail, including after a
+      // reload restores a mid-rail scroll position.
+      place(0);
     })();
 
     /* The bench: measure where each stop sits on the rail, then run it.
@@ -2085,8 +2221,10 @@
         btn.classList.remove('bg-[#CD2653]', 'text-white', 'shadow-sm');
         btn.classList.add('bg-white', 'text-[#524842]');
       });
+      document.querySelectorAll('.cat-pill').forEach(btn => btn.setAttribute('aria-pressed', 'false'));
       const active = document.getElementById(`tab-${cat}`);
       if (active) {
+        active.setAttribute('aria-pressed', 'true');
         active.classList.add('bg-[#CD2653]', 'text-white', 'shadow-sm');
         active.classList.remove('bg-white', 'text-[#524842]');
       }
@@ -2217,6 +2355,7 @@
         if (canvas.width !== w || canvas.height !== h) {
           canvas.width = w; canvas.height = h; gl.viewport(0, 0, w, h);
         }
+        canvas.style.height = Math.round(ch) + 'px';
       }
       function draw(now) {
         mx += (tx - mx) * 0.06; my += (ty - my) * 0.06;
@@ -2225,8 +2364,14 @@
         gl.uniform2f(uM, mx, my);
         gl.drawArrays(gl.TRIANGLES, 0, 3);
       }
+      // It used to draw for as long as the hero was on screen: about 260ms of
+      // work a second on a throttled phone, 430 on a laptop, with nobody
+      // touching the page. It now moves on load, scroll, pointer and touch,
+      // and holds its last frame 2.5s after the visitor stops.
+      var IDLE_MS = 2500, lastActive = performance.now();
       function loop(now) {
         if (!running) return;
+        if (now - lastActive > IDLE_MS) { running = false; return; }
         if (now - lastDraw >= MIN_DT) { lastDraw = now; draw(now); }
         raf = requestAnimationFrame(loop);
       }
@@ -2234,9 +2379,14 @@
         if (running || document.hidden || !onScreen) return;
         running = true; raf = requestAnimationFrame(loop);
       }
+      function poke() { lastActive = performance.now(); start(); }
+      window.addEventListener('scroll', poke, { passive: true });
+      window.addEventListener('touchstart', poke, { passive: true });
       function stop() { running = false; cancelAnimationFrame(raf); }
 
-      canvas.style.width = '100%'; canvas.style.height = '100%';
+      canvas.style.width = '100%';
+      canvas.style.bottom = 'auto';
+      canvas.style.webkitMaskImage = canvas.style.maskImage = 'linear-gradient(#000 72%, transparent)';
       resize(); draw(performance.now());
       // Observe the PARENT. Observing the canvas while resize() touches the
       // canvas is a feedback loop, and it cost this page 2.3fps.
@@ -2249,6 +2399,7 @@
       window.addEventListener('pointermove', function (e) {
         tx = e.clientX / window.innerWidth;
         ty = 1 - (e.clientY / window.innerHeight);
+        poke();
       }, { passive: true });
 
       if (typeof IntersectionObserver !== 'undefined') {
@@ -2282,29 +2433,34 @@
       const colors = [[14, 34, 52], [22, 18, 16], [36, 20, 14]];
       let weights = [1, 0, 0];
 
-      function ss(a, b, x) {
-        const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
-        return t * t * (3 - 2 * t);
-      }
-
       function total() { return wrap.offsetHeight - window.innerHeight; }
 
       window.jumpDeliChapter = function(index) {
         const totalHeight = total();
         const targetY = wrap.getBoundingClientRect().top + window.scrollY + totalHeight * ((index + 0.5) / 3);
-        window.scrollTo({ top: targetY, behavior: 'smooth' });
+        window.scrollTo({ top: targetY, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
       };
 
+      // Stepped, not scrubbed. The three chapters used to cross-fade
+      // continuously with scroll, so most positions showed two chapters at
+      // half opacity over each other, and the stage repainted its full-screen
+      // background colour every frame. Scroll now picks the chapter; the
+      // stylesheet glides to it in one transition. Off screen, nothing runs.
+      let shownChapter = -1, stageInView = false;
+      if (!prefersReducedMotion) {
+        chs.forEach((c) => { if (c) c.style.transition = 'opacity .5s ease, transform .6s cubic-bezier(.16,1,.3,1)'; });
+        stage.style.transition = 'background-color .6s ease';
+      }
       function update() {
         const top = wrap.getBoundingClientRect().top;
         const p = Math.min(1, Math.max(0, -top / total()));
-        const t = p * 3;
+        const k = Math.min(2, Math.floor(p * 3));
+        if (k === shownChapter) return;
+        shownChapter = k;
         let r = 0, g = 0, b = 0;
 
         for (let i = 0; i < 3; i++) {
-          const a = i === 0 ? 1 : ss(i - 0.15, i + 0.15, t);
-          const z = i === 2 ? 1 : 1 - ss(i + 0.85, i + 1.15, t);
-          const w = a * z;
+          const w = i === k ? 1 : 0;
           weights[i] = w;
           chs[i].style.opacity = w.toFixed(3);
           chs[i].style.transform = `translateY(${((1 - w) * 30).toFixed(1)}px)`;
@@ -2317,6 +2473,7 @@
             } else {
               btn.classList.remove('active');
             }
+            btn.setAttribute('aria-pressed', String(w > 0.5));
           }
 
           r += colors[i][0] * w;
@@ -2333,13 +2490,18 @@
           b2.classList.toggle('is-illuminated', lit);
         }
 
-        seal.style.setProperty('--rot', `${(p * 540).toFixed(1)}deg`);
-        seal.style.setProperty('--s', `${(0.92 + 0.12 * Math.sin(p * Math.PI * 3)).toFixed(3)}`);
+        // Rotate the seal itself: its mask is a circle, so this looks the same
+        // as turning the conic gradient, without repainting it.
+        seal.style.transform = `rotate(${k * 180}deg) scale(${[0.96, 1.04, 0.98][k]})`;
         stage.style.backgroundColor = `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
       }
 
       let ticking = false;
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver((en) => { stageInView = en[0].isIntersecting; if (stageInView) onScroll(); }, { threshold: 0 }).observe(wrap);
+      } else { stageInView = true; }
       function onScroll() {
+        if (!stageInView) return;
         if (!ticking) {
           ticking = true;
           requestAnimationFrame(() => {
@@ -2349,7 +2511,7 @@
         }
       }
       window.addEventListener('scroll', onScroll, { passive: true });
-      window.addEventListener('resize', onScroll);
+      window.addEventListener('resize', () => { shownChapter = -1; onScroll(); });
       update();
 
       // Sensory Canvas: Ch01 clinical scan grid, Ch02 Beechwood smoke & embers, Ch03 Saffron strands & mace DOF
@@ -2479,9 +2641,9 @@
       ['charcuterie', 'poultry', 'marinade', 'momos'].forEach(k => {
         const btn = document.getElementById(`loupeTab-${k}`);
         if (k === key) {
-          btn.className = 'py-1.5 px-3 rounded-xl bg-[#CD2653] text-white transition-all whitespace-nowrap';
+          btn.className = 'py-1.5 rounded-xl leading-tight text-center px-1 sm:px-3 bg-[#CD2653] text-white transition-all sm:whitespace-nowrap';
         } else {
-          btn.className = 'py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap';
+          btn.className = 'py-1.5 rounded-xl leading-tight text-center px-1 sm:px-3 text-[#524842] hover:text-[#CD2653] transition-all sm:whitespace-nowrap';
         }
       });
 
@@ -2603,14 +2765,28 @@
       }
 
       container.addEventListener('mousemove', (e) => updateLoupe(e.clientX, e.clientY), { passive: true });
-      container.addEventListener('touchmove', (e) => {
+      // Touch: a vertical swipe over the photo must scroll the page (it covers
+      // half a phone screen, and swallowed every scroll that started on it).
+      // touch-action: pan-y hands vertical drags to the browser; the lens
+      // follows horizontal drags and taps, and goes away when the finger lifts.
+      container.style.touchAction = 'pan-y';
+      container.addEventListener('touchstart', (e) => {
         if (e.touches && e.touches[0]) {
           glass.style.display = 'block';
           syncGlassBackground();
           updateLoupe(e.touches[0].clientX, e.touches[0].clientY);
-          e.preventDefault();
         }
-      }, { passive: false });
+      }, { passive: true });
+      container.addEventListener('touchmove', (e) => {
+        if (e.touches && e.touches[0]) updateLoupe(e.touches[0].clientX, e.touches[0].clientY);
+      }, { passive: true });
+      const loupeOff = () => {
+        glass.style.display = 'none';
+        if (callout) callout.classList.remove('is-visible');
+        hotspots.forEach(h => h.classList.remove('is-snapped'));
+      };
+      container.addEventListener('touchend', loupeOff, { passive: true });
+      container.addEventListener('touchcancel', loupeOff, { passive: true });
     })();
 
     // 6. Basket Management + Fly-to-Basket Quadratic Bezier Arc
@@ -2625,12 +2801,37 @@
       updateBasketUI();
       dcStep('bag');
 
+      // On a phone the drawer is the whole screen: opening it on every add
+      // turned a three-item order into three trips in and out. There, a toast
+      // confirms the add and offers the basket; larger screens keep the drawer.
+      const small = window.matchMedia('(max-width: 767px)').matches;
       if (btnEl && typeof window.launchDeliBezierFly === 'function' && !prefersReducedMotion) {
         window.launchDeliBezierFly(btnEl, p ? p.image : '');
-        setTimeout(() => toggleBasket(true), 540);
-      } else {
-        toggleBasket(true);
       }
+      if (small) deliToast(`${p.name} added`);
+      else if (btnEl && !prefersReducedMotion) setTimeout(() => toggleBasket(true, btnEl), 540);
+      else toggleBasket(true, btnEl);
+    }
+
+    let deliToastTimer = 0;
+    function deliToast(msg) {
+      let t = document.getElementById('deliToast');
+      if (!t) {
+        t = document.createElement('div');
+        t.id = 'deliToast'; t.className = 'deli-toast'; t.setAttribute('role', 'status');
+        t.innerHTML = '<span></span><button type="button">View basket</button>';
+        t.querySelector('button').addEventListener('click', () => { t.classList.remove('is-on'); toggleBasket(true, document.getElementById('deliBasketBtn')); });
+        document.body.appendChild(t);
+      }
+      t.querySelector('span').textContent = msg;
+      t.classList.add('is-on');
+      clearTimeout(deliToastTimer);
+      deliToastTimer = setTimeout(() => t.classList.remove('is-on'), 3600);
+    }
+
+    function removeItem(idx) {
+      basket.splice(idx, 1);
+      updateBasketUI();
     }
 
     function changeQty(idx, delta) {
@@ -2645,7 +2846,10 @@
       selectedSlot = slotName;
       const mBtn = document.getElementById('slot-morning');
       const eBtn = document.getElementById('slot-evening');
-      if (slotName.includes('Morning') || slotName.includes('10 AM')) {
+      const morning = slotName.includes('Morning') || slotName.includes('10 AM');
+      mBtn.setAttribute('aria-pressed', String(morning));
+      eBtn.setAttribute('aria-pressed', String(!morning));
+      if (morning) {
         mBtn.className = 'slot-btn py-2 px-3 rounded-xl border border-[#CD2653] bg-[#CD2653] text-white font-bold transition-all';
         eBtn.className = 'slot-btn py-2 px-3 rounded-xl border border-[#CD2653]/30 bg-white text-[#524842] font-bold transition-all';
       } else {
@@ -2654,18 +2858,29 @@
       }
     }
 
+    // Errors used to be blocking alert() pop-ups; they now sit under the field.
+    function promoError(msg) {
+      const box = document.getElementById('promoError');
+      if (!box) return;
+      box.textContent = msg || '';
+      box.classList.toggle('hidden', !msg);
+    }
     function applyPromo() {
       const code = document.getElementById('promoInput').value.trim().toUpperCase();
       if (code === 'WOW20') {
         const subtotal = basket.reduce((s, i) => s + i.price * i.qty, 0);
         if (subtotal >= 999) {
           isPromoApplied = true;
-          document.getElementById('promoNotice').classList.remove('hidden');
+          promoError('');
         } else {
-          alert('Promo WoW20 requires minimum order value of ₹999. Add more cuts to qualify!');
+          promoError(`WoW20 needs a ₹999 basket. Add ₹${999 - subtotal} more to use it.`);
         }
       } else {
-        alert('Invalid promo code. Use verified code WoW20.');
+        // A different code replaces the old one rather than sitting beside it.
+        isPromoApplied = false;
+        updateBasketUI();
+        promoError(code ? 'That code is not valid. Try WoW20.' : 'Enter a promo code first.');
+        return;
       }
       updateBasketUI();
     }
@@ -2704,6 +2919,12 @@
       } else {
         document.getElementById('discountRow').style.display = 'none';
       }
+      // The "Applied" line follows the discount, instead of outliving it.
+      document.getElementById('promoNotice').classList.toggle('hidden', !discount);
+      if (isPromoApplied && !discount && subtotal > 0) promoError(`WoW20 is paused: the basket is under ₹999. Add ₹${999 - subtotal} to bring it back.`);
+      else if (discount) promoError('');
+      const start = document.getElementById('dcStart');
+      if (start) start.disabled = basket.length === 0;
 
       const finalTotal = subtotal - discount;
       document.getElementById('finalTotalPrice').textContent = `₹${finalTotal}`;
@@ -2726,21 +2947,52 @@
           <h4 class="font-bold text-sm text-[#4A0E17]">${item.name}</h4>
           <span class="text-[11px] text-[#CD2653] font-bold block">${item.weight} • ₹${item.price} each</span>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
           <div class="flex items-center border border-[#CD2653]/30 rounded-lg overflow-hidden bg-white text-xs font-bold">
-            <button onclick="changeQty(${idx}, -1)" class="px-2 py-1 hover:bg-[#FFF0F3] text-[#4A0E17]">-</button>
-            <span class="px-2.5 py-1 text-[#CD2653]">${item.qty}</span>
-            <button onclick="changeQty(${idx}, 1)" class="px-2 py-1 hover:bg-[#FFF0F3] text-[#4A0E17]">+</button>
+            <button type="button" onclick="changeQty(${idx}, -1)" aria-label="One fewer ${item.name}" class="w-10 h-10 hover:bg-[#FFF0F3] text-[#4A0E17]">−</button>
+            <span class="px-2 text-[#CD2653]" aria-label="Quantity">${item.qty}</span>
+            <button type="button" onclick="changeQty(${idx}, 1)" aria-label="One more ${item.name}" class="w-10 h-10 hover:bg-[#FFF0F3] text-[#4A0E17]">+</button>
           </div>
+          <button type="button" onclick="removeItem(${idx})" aria-label="Remove ${item.name}" class="w-10 h-10 rounded-lg text-[#6B625B] hover:text-[#CD2653] hover:bg-[#FFF0F3] text-base">×</button>
           <span class="font-serif-chic font-bold text-[#4A0E17] text-sm min-w-[50px] text-right">₹${item.price * item.qty}</span>
         </div>
       </div>
     `).join('');
     }
 
-    function toggleBasket(open) {
-      document.getElementById('basketModal').classList.toggle('hidden', !open);
+    // A dialog, not just a div that appears: focus moves in and stays in,
+    // Esc closes it, the page behind stops scrolling, and focus goes back to
+    // whatever opened it.
+    let dcOpener = null;
+    function dcFocusables() {
+      return [...document.querySelectorAll('#dcPanel button, #dcPanel a[href], #dcPanel input, #dcPanel textarea, #dcPanel select')]
+        .filter(el => !el.disabled && el.offsetParent !== null);
     }
+    function toggleBasket(open, opener) {
+      const modal = document.getElementById('basketModal');
+      const wasOpen = !modal.classList.contains('hidden');
+      modal.classList.toggle('hidden', !open);
+      document.documentElement.style.overflow = open ? 'hidden' : '';
+      document.getElementById('deliBasketBtn')?.setAttribute('aria-expanded', String(!!open));
+      if (open && !wasOpen) {
+        dcOpener = opener || document.activeElement;
+        requestAnimationFrame(() => document.getElementById('dcClose')?.focus());
+      } else if (!open && wasOpen) {
+        const back = dcOpener && document.contains(dcOpener) ? dcOpener : document.getElementById('deliBasketBtn');
+        back?.focus?.();
+        dcOpener = null;
+      }
+    }
+    document.addEventListener('keydown', (e) => {
+      const modal = document.getElementById('basketModal');
+      if (!modal || modal.classList.contains('hidden')) return;
+      if (e.key === 'Escape') { e.preventDefault(); toggleBasket(false); return; }
+      if (e.key !== 'Tab') return;
+      const f = dcFocusables(); if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && (document.activeElement === last || !modal.contains(document.activeElement))) { e.preventDefault(); first.focus(); }
+    });
 
     /* ---- placing the order ----------------------------------------------
        The message this used to build was a good one, but it was addressed
@@ -2873,6 +3125,9 @@
       if (wa) wa.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(dcOrderText(order))}`;
 
       basket.length = 0;
+      isPromoApplied = false;
+      const pi = document.getElementById('promoInput'); if (pi) pi.value = '';
+      promoError('');
       updateBasketUI();
       dcStep('done');
       return false;
@@ -3099,7 +3354,7 @@
           deliAmbientGain.gain.setTargetAtTime(deliAudioActive ? 0.15 : 0.0, deliAudioCtx.currentTime, 0.08);
         }
         if (btn) btn.setAttribute('aria-pressed', deliAudioActive ? 'true' : 'false');
-        if (lbl) lbl.textContent = deliAudioActive ? '2.4°C Live' : '2.4°C Audio';
+        if (lbl) lbl.textContent = deliAudioActive ? 'Ambient audio: on' : 'Ambient audio';
         if (deliAudioActive) playSubZeroSealClick();
       } catch (e) {}
     };

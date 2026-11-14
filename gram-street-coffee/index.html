@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Gram Street Coffee | D2C Roastery, Japanese Matcha &amp; Gelato · Gurugram</title>
+<title>Gram Street Coffee storefront concept | design by Anchit Tandon</title>
 <meta name="theme-color" content="#CDB8F7">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23CDB8F7'/%3E%3Ccircle cx='32' cy='32' r='14' fill='%232B1650'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,10 +26,13 @@
     --accent: #7C3AED;
     --chrome: linear-gradient(135deg, #FBFAFF 0%, #C4BFD6 28%, #FFFFFF 46%, #9A94B3 68%, #E9E6F3 100%);
     --pad: clamp(18px, 5vw, 64px);
+    --dn-bg: #F1E9FF; --dn-ink: #2B1650; --dn-muted: #534168; --dn-accent: #5B21B6; --dn-card: #FFFFFF;
+    --dn-rule: rgba(43, 22, 80, 0.14); --dn-tag-bg: #2B1650; --dn-tag-ink: #F1E9FF; --dn-pad: var(--pad);
+    --dn-display: var(--font);
     --font: "Bricolage Grotesque", ui-rounded, "Segoe UI", system-ui, sans-serif;
   }
   *, *::before, *::after { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; scroll-padding-top: 76px; }
   body {
     margin: 0;
     font-family: var(--font);
@@ -174,7 +177,7 @@
     background: rgba(205, 184, 247, 0.88);
     -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
-    border-b: 1px solid rgba(43, 22, 80, 0.15);
+    border-bottom: 1px solid rgba(43, 22, 80, 0.15);
   }
   /* ── THE COUNTER ───────────────────────────────────────────────────────
      The drawn bar in the hero. Everything animates on transform or opacity,
@@ -367,13 +370,41 @@
      The inline nav measures 700px. On a 320px phone it simply ran off the
      side of the screen, and the wordmark wrapped onto three lines, which made
      the fixed header 105px tall · taller than the hero's 90px top padding, so
-     the headline was buried behind it. Below 900px the links become a sheet
+     the headline was buried behind it. Below 1200px the links become a sheet
      behind a toggle, the wordmark stays on one line, and the header goes back
      to a single row. */
   .nav-links { display: contents; }
   .nav-toggle { display: none; }
 
-  @media (max-width: 900px) {
+  /* The inline row needs ~1250px. Between 900 and 1280 it did not fit, so
+     every label wrapped onto two or three lines and the wordmark stacked into
+     a 105px header. The sheet now takes over below 1200, and the band above it
+     gets a tighter row that holds one line. */
+  .nav a, .wordmark span, #audioBtn, #headerBagBtn { white-space: nowrap; }
+  .gs-toast { position: fixed; left: 50%; bottom: 18px; z-index: 75; display: flex; align-items: center; gap: 12px; max-width: calc(100vw - 24px); padding: 10px 10px 10px 16px; border-radius: 999px; background: #2B1650; color: #F1E9FF; font-size: 13px; font-weight: 800; box-shadow: 0 16px 36px rgba(0,0,0,.28); transform: translate(-50%, 140%); opacity: 0; transition: transform .3s ease, opacity .3s ease; }
+  .gs-toast.is-on { transform: translate(-50%, 0); opacity: 1; }
+  .gs-toast button { min-height: 40px; padding: 0 14px; border-radius: 999px; background: #7C3AED; color: #fff; font-size: 11px; text-transform: uppercase; letter-spacing: .12em; white-space: nowrap; }
+  @media (prefers-reduced-motion: reduce) { .gs-toast { transition: none; } }
+  #cartModal input:focus-visible, #cartModal textarea:focus-visible, input[type="email"]:focus-visible { outline: 2px solid #7C3AED; outline-offset: 2px; }
+  /* Tabs: the arrow keys move between them, as in any tab row. */
+  @media (max-width: 1024px), (pointer: coarse) {
+    .counter-scene *, .counter-scene *::before, .counter-scene *::after { animation: none !important; }
+    *, *::before, *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+    .site-head { background: rgba(241, 233, 255, 0.97) !important; }
+  }
+  /* Phones: controls a thumb has to hit are at least 44px tall. */
+  @media (max-width: 767px) {
+    #cartModal button, #cartModal input, #cartModal textarea, #headerBagBtn, #audioBtn, [onclick*="addBarItemToCart"], [onclick*="setSubMode"], [onclick*="addToCart"] { min-height: 44px; }
+    #cartModal input, #cartModal textarea, input[type="email"] { font-size: 16px; }
+    [data-cupping] button, #locDirectionsBtn, #locZomatoBtn:not([hidden]), footer a, [role="tab"], form button { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+    #locPhone { display: inline-flex; align-items: center; min-height: 44px; }
+  }
+  @media (min-width: 1200px) and (max-width: 1399px) {
+    .nav a { padding: 0 8px; font-size: 0.86rem; }
+    .nav { gap: 2px; }
+  }
+
+  @media (max-width: 1199px) {
     .site-head { padding: 6px var(--pad); gap: 6px; }
     .wordmark { font-size: 1rem; gap: 8px; min-width: 0; }
     .wordmark span { white-space: nowrap; }
@@ -440,6 +471,11 @@
   .hero.no-gl { background: linear-gradient(135deg, #e7dcff, #cdb8f7 50%, #b79af0); }
   #fx { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
   .hero-inner { position: relative; z-index: 2; max-width: 900px; }
+  @media (min-width: 601px) and (max-width: 1099px) and (orientation: portrait) {
+    /* The hero already starts below the header and the hours strip, so it
+       needs only a breath of padding, not the phone-sized clearance. */
+    .hero { min-height: min(calc(100svh - 150px), 900px); justify-content: flex-start; padding-top: clamp(48px, 6vh, 80px); }
+  }
   .hero h1 { font-size: clamp(2.2rem, 5.2vw, 4.4rem); max-width: 16ch; letter-spacing: -0.04em; line-height: 1.05; }
   .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.08em; margin-bottom: -0.08em; }
   .w > span { display: inline-block; animation: rise 0.95s cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: calc(var(--i) * 75ms + 250ms); }
@@ -453,6 +489,9 @@
   .btn-primary { background: var(--grape); color: var(--lilac-soft); }
   .btn-primary:hover { background: #3d2272; box-shadow: 0 10px 25px rgba(43, 22, 80, 0.25); }
   .btn-chrome { background: var(--chrome); color: var(--grape); border-color: rgba(43, 22, 80, 0.4); }
+  /* Secondary hero links: same height and target, no fill, so the shop is the one obvious next step. */
+  .btn-quiet { background: transparent; color: var(--grape); border-color: rgba(43, 22, 80, 0.45); }
+  .btn-quiet:hover { background: rgba(255, 255, 255, 0.45); }
   .btn-chrome:hover { filter: brightness(1.08); box-shadow: 0 10px 25px rgba(255, 255, 255, 0.4); }
 
   /* marquee */
@@ -708,8 +747,8 @@
   .walk-facade-glass-pane {
     position: absolute;
     inset: 0;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    /* No backdrop blur: a full-screen blur over a moving scene was redrawn
+       every frame. The tint below carries the glass on its own. */
     background: linear-gradient(
       115deg,
       rgba(205, 184, 247, 0.24) 0%,
@@ -758,13 +797,27 @@
   }
   .walk-cap b { display: block; font-size: clamp(1.85rem, 4.8vw, 3.2rem); letter-spacing: -0.03em; line-height: 1.04; text-shadow: 0 8px 28px rgba(18, 8, 38, 0.85); }
   .walk-cap span { display: block; margin-top: 10px; font-size: clamp(.95rem, 2vw, 1.1rem); font-weight: 600; opacity: .9; max-width: 40ch; margin-inline: auto; text-shadow: 0 4px 18px rgba(18, 8, 38, 0.9); }
+  /* The step label sat on top of the fascia sign at every size (a 247px
+     overlap at 1440). The sign's bottom edge is y=130 of a 1440x900 slice,
+     so it lands at max(130/1440 vw, 130/900 vh); the label starts below it. */
   .walk-step {
-    position: absolute; top: clamp(72px, 10vh, 110px); left: 0; right: 0;
+    position: absolute; top: calc(max(9.03vw, 14.45vh) + 18px); left: 0; right: 0;
     display: flex; align-items: center; justify-content: center; gap: 14px;
     text-align: center; color: #CDB8F7; font-size: .72rem;
     letter-spacing: .28em; text-transform: uppercase; font-weight: 800;
     pointer-events: none; z-index: 35;
   }
+  /* A pill behind the step label, so it reads wherever it lands on the scene
+     (on a portrait tablet it sat on the doorframe's chrome edge). */
+  #walkStepLabel { padding: 5px 12px; border-radius: 999px; background: rgba(27, 14, 54, 0.78); border: 1px solid rgba(205, 184, 247, 0.35); color: #F1E9FF; }
+  .walk.is-stepped .walk-layer,
+  .walk.is-stepped .walk-facade-mask,
+  .walk.is-stepped .walk-chrome-flare {
+    transition: transform .8s cubic-bezier(.16, 1, .3, 1), opacity .55s ease;
+  }
+  .walk.is-stepped .walk-hint { transition: opacity .4s ease; }
+  .walk-sign-short { display: none; }
+  @media (max-aspect-ratio: 21/20) { .walk-sign-long { display: none; } .walk-sign-short { display: inline; } }
   .walk-frame-hud {
     font-family: "JetBrains Mono", ui-monospace, monospace;
     padding: 4px 10px;
@@ -980,9 +1033,11 @@
   #orbit .dot { fill: var(--grape); }
   #orbit .dot-far { fill: var(--lilac-soft); stroke: var(--grape); stroke-width: 3; }
   #orbit .hub { fill: var(--grape); }
-  #orbit .pulse { fill: none; stroke: var(--berry); stroke-width: 2; opacity: 0; vector-effect: non-scaling-stroke; transform-box: fill-box; transform-origin: center; animation: pulse 3.6s ease-out infinite; animation-delay: calc(var(--k) * 1.2s); }
+  #orbit .pulse { fill: none; stroke: var(--berry); stroke-width: 2; opacity: 0; vector-effect: non-scaling-stroke; transform-box: fill-box; transform-origin: center; animation: orbitPulse 3.6s ease-out infinite; animation-delay: calc(var(--k) * 1.2s); }
   #orbit:not(.is-live) .pulse { animation-play-state: paused; }
-  @keyframes pulse { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(22); opacity: 0; } }
+  /* Was named "pulse", which replaced Tailwind's animate-pulse keyframes: the
+     green "open" dot in the announcement bar grew to 176px over the hours. */
+  @keyframes orbitPulse { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(22); opacity: 0; } }
   #orbit text { font-family: var(--font); font-weight: 800; font-size: 28px; fill: var(--grape); letter-spacing: -0.02em; paint-order: stroke; stroke: var(--lilac); stroke-width: 9px; stroke-linejoin: round; }
   #orbit text.hubtxt { font-size: 30px; }
   #orbit.armed .ring-1 { stroke-dasharray: 754; stroke-dashoffset: 754; transition: stroke-dashoffset 1.6s ease; }
@@ -1034,7 +1089,9 @@
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 0.2em;
-    color: var(--accent);
+    /* --accent on the lilac page measured 3.2:1; this violet clears 5:1 on
+       lilac and 9:1 on white, the only two grounds these labels sit on. */
+    color: #5B21B6;
   }
   .eyebrow-label::before {
     content: "";
@@ -1151,71 +1208,55 @@
     .buoyant-pill { animation: none !important; }
   }
 </style>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "CafeOrCoffeeShop",
-  "name": "Gram Street Coffee",
-  "description": "Third-wave specialty coffee roastery, ceremonial Japanese Uji matcha bar, and artisanal small-batch gelato counter in Gurugram, founded by Chef Vanshika Bhatia.",
-  "url": "https://anchit-tandon.com/gram-street-coffee",
-  "telephone": "+91-81300-56889",
-  "email": "hello@gramstreetcoffee.com",
-  "foundingDate": "2023",
-  "founder": {
-    "@type": "Person",
-    "name": "Chef Vanshika Bhatia"
-  },
-  "servesCuisine": ["Specialty Coffee", "Ceremonial Japanese Matcha", "Artisanal Gelato", "Japanese Sandos", "Craft Viennoiserie"],
-  "priceRange": "₹₹",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "Block F, 16 Arjun Marg, DLF Phase 1, Sector 26A",
-    "addressLocality": "Gurugram",
-    "addressRegion": "Haryana",
-    "postalCode": "122002",
-    "addressCountry": "IN"
-  },
-  "openingHoursSpecification": [
-    {
-      "@type": "OpeningHoursSpecification",
-      "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-      "opens": "08:30",
-      "closes": "22:30"
-    },
-    {
-      "@type": "OpeningHoursSpecification",
-      "dayOfWeek": ["Saturday", "Sunday"],
-      "opens": "08:00",
-      "closes": "23:00"
-    }
-  ],
-  "sameAs": [
-    "https://www.instagram.com/gramstreetcoffee/",
-    "https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon"
-  ]
-}
-</script>
+<!-- No LocalBusiness JSON-LD: this is a design concept, not the cafe's own site,
+     and structured data would present it to search engines as the real business. -->
 <!-- seo:auto:start -->
-<!-- Managed by scripts/seo-inject.mjs · edit seo.config.json, not here. -->
-<meta name="description" content="In-house specialty roasts, ceremonial Uji matcha, and small-batch gelato. DLF Phase 1, Golf Course Road &amp; Sector 56, Gurugram." />
+<!-- Managed by scripts/seo-inject.mjs, edit seo.config.json, not here. -->
+<meta name="description" content="Independent storefront redesign concept for a Gurugram café, by Anchit Tandon: menu, bag, checkout and outlet finder. Illustrative photos, sample statuses." />
 <link rel="canonical" href="https://anchit-tandon.com/gram-street-coffee" />
-<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+<meta name="robots" content="noindex,follow" />
 <meta name="author" content="Anchit Tandon" />
-<meta property="og:title" content="Gram Street Coffee | D2C Roastery, Japanese Matcha &amp; Gelato · Gurugram" />
-<meta property="og:description" content="In-house specialty roasts, ceremonial Uji matcha, and small-batch gelato. DLF Phase 1, Golf Course Road &amp; Sector 56, Gurugram." />
+<meta property="og:title" content="Gram Street Coffee storefront concept | design by Anchit Tandon" />
+<meta property="og:description" content="Independent storefront redesign concept for a Gurugram café, by Anchit Tandon: menu, bag, checkout and outlet finder. Illustrative photos, sample statuses." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://anchit-tandon.com/gram-street-coffee" />
 <meta property="og:image" content="https://anchit-tandon.com/assets/brand/u-1501339847302-ac426a4a7cbb-1200.jpg" />
 <meta property="og:site_name" content="Anchit Tandon" />
 <meta property="og:locale" content="en_US" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Gram Street Coffee | D2C Roastery, Japanese Matcha &amp; Gelato · Gurugram" />
-<meta name="twitter:description" content="In-house specialty roasts, ceremonial Uji matcha, and small-batch gelato. DLF Phase 1, Golf Course Road &amp; Sector 56, Gurugram." />
+<meta name="twitter:title" content="Gram Street Coffee storefront concept | design by Anchit Tandon" />
+<meta name="twitter:description" content="Independent storefront redesign concept for a Gurugram café, by Anchit Tandon: menu, bag, checkout and outlet finder. Illustrative photos, sample statuses." />
 <meta name="twitter:image" content="https://anchit-tandon.com/assets/brand/u-1501339847302-ac426a4a7cbb-1200.jpg" />
 <!-- seo:auto:end -->
 </head>
 <body>
-<div class="concept-bar" role="note" style="position:relative;z-index:60;padding:8px 16px;text-align:center;font:600 12px/1.45 system-ui,-apple-system,sans-serif;letter-spacing:.02em;background:#111;color:#f5f0e8">Concept storefront by <a href="/" style="color:inherit;text-decoration:underline;text-underline-offset:2px">Anchit Tandon</a>, not affiliated with Gram Street Coffee. Nothing here places a real order.</div>
+<style>
+  /* Concept bar: neutral chrome, deliberately not either brand's palette, so
+     it reads as the frame around the work rather than part of the shop. */
+  .concept-bar{position:relative;z-index:60;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 18px;padding:8px 16px;font:600 12px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.02em;background:#111;color:#f5f0e8;text-align:center}
+  .concept-bar p{margin:0}
+  .concept-bar a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+  .concept-bar nav{display:flex;flex-wrap:wrap;justify-content:center;gap:0 14px}
+  .concept-bar nav a{display:inline-flex;align-items:center;min-height:24px}
+  .concept-bar a:focus-visible{outline:2px solid #f5f0e8;outline-offset:2px}
+  /* Design notes: the reasoning behind the concept, in the page's own type. */
+  .design-notes{padding:clamp(56px,9vw,112px) var(--dn-pad,24px);background:var(--dn-bg);color:var(--dn-ink);scroll-margin-top:72px}
+  .design-notes .dn-wrap{max-width:1120px;margin:0 auto}
+  .design-notes .dn-kicker{margin:0 0 12px;font:800 12px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--dn-accent)}
+  .design-notes h2{margin:0;font-family:var(--dn-display);font-size:clamp(1.9rem,4vw,3rem);line-height:1.08;letter-spacing:-.02em;max-width:22ch}
+  .design-notes .dn-lede{margin:16px 0 0;max-width:62ch;font-size:clamp(1rem,1.6vw,1.125rem);line-height:1.6;color:var(--dn-muted)}
+  .design-notes .dn-grid{display:grid;gap:16px;margin-top:clamp(28px,4vw,44px);grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+  .design-notes .dn-card{padding:22px 22px 24px;border-radius:18px;background:var(--dn-card);border:1px solid var(--dn-rule)}
+  .design-notes .dn-card h3{margin:0 0 10px;font:800 13px/1.35 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--dn-accent)}
+  .design-notes .dn-card p,.design-notes .dn-card li{margin:0;font-size:15px;line-height:1.6;color:var(--dn-ink)}
+  .design-notes .dn-card ul{margin:0;padding-left:18px;display:grid;gap:6px;list-style:disc}
+  .design-notes .dn-card li::marker{color:var(--dn-accent)}
+  .design-notes .dn-tag{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;font:700 11px/1.5 system-ui,-apple-system,sans-serif;letter-spacing:.06em;text-transform:uppercase;background:var(--dn-tag-bg);color:var(--dn-tag-ink);vertical-align:middle}
+  .design-notes .dn-foot{margin:28px 0 0;font-size:14px;line-height:1.6;color:var(--dn-muted)}
+  .design-notes .dn-foot a{color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:2px}
+  .concept-label{display:inline-block;margin:0 0 12px;padding:3px 10px;border-radius:999px;font:700 11px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.08em;text-transform:uppercase;background:#111;color:#f5f0e8}
+</style>
+<div class="concept-bar" role="note"><p>Concept storefront by <a href="/">Anchit Tandon</a>, not affiliated with Gram Street Coffee. No real orders · illustrative photos · sample statuses.</p><nav aria-label="About this concept"><a href="/">Portfolio</a><a href="#design-notes">Design notes</a><a href="/assets/resume.pdf">Resume</a><a href="mailto:anchit.tandon@gmail.com?subject=Your%20Gram%20Street%20concept">Email Anchit</a></nav></div>
 
 <!-- Luxury Film Grain Cinematic Overlay -->
 <div class="film-grain" aria-hidden="true"></div>
@@ -1243,28 +1284,50 @@
     <a href="#events">Cuppings</a>
     <a href="#destinations">Find Us (3)</a>
   </div>
-  <!-- Spatial Audio Toggle Button (15% Gain 65°C Steam Wand Acoustics) -->
-  <button id="audioBtn" onclick="toggleAudio()" aria-label="Toggle ambient audio" title="Toggle 65°C Steam Wand &amp; Bar Acoustics (15% Gain)" class="ml-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-[#2B1650]/40 text-[#2B1650] flex items-center gap-1.5 bg-white/70 hover:bg-white transition-all">
+  <!-- Ambient audio toggle -->
+  <button id="audioBtn" onclick="toggleAudio()" aria-pressed="false" aria-label="Ambient bar audio" title="Play ambient bar sounds" class="ml-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-[#2B1650]/40 text-[#2B1650] flex items-center gap-1.5 bg-white/70 hover:bg-white transition-all">
     <span id="audioDot" class="w-2 h-2 rounded-full bg-slate-400"></span>
     <svg class="w-3.5 h-3.5 text-[#2B1650]" viewBox="0 0 16 16" fill="none" aria-hidden="true">
       <path d="M2 6.5v3M5 4.5v7M8 2.5v11M11 5v6M14 6.5v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
     </svg>
-    <span id="audioLabel" class="hidden sm:inline">65°C Audio</span>
+    <span id="audioLabel" class="hidden xl:inline">Ambient audio</span>
   </button>
   <!-- Roastery Bag Trigger -->
-  <button id="headerBagBtn" onclick="toggleCart(true)" class="ml-2 px-4 py-1.5 rounded-full bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-wider hover:bg-[#4C1D95] transition-all flex items-center gap-1.5 shadow">
+  <button id="headerBagBtn" onclick="toggleCart(true, this)" aria-haspopup="dialog" class="ml-2 px-4 py-1.5 rounded-full bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-wider hover:bg-[#4C1D95] transition-all flex items-center gap-1.5 shadow">
     <span>Bag</span>
     <span class="px-1.5 py-0.2 bg-white/30 rounded-full text-[10px]" id="cartCount">0</span>
   </button>
 </nav>
 </header>
+<script>
+/* The disclaimer bar sits in normal flow above a position:fixed header, so at
+   the top of the page it painted straight over the logo and the nav. Push the
+   header down by however much of the bar is still on screen; once the bar has
+   scrolled away the offset is 0 and the header pins to the top as before.
+   `translate` (not top/transform) so nothing else that styles it is touched. */
+(function () {
+  var bar = document.querySelector('.concept-bar'), head = document.querySelector('header.site-head');
+  if (!bar || !head) return;
+  var queued = 0;
+  function place() {
+    queued = 0;
+    var y = Math.max(0, Math.round(bar.getBoundingClientRect().bottom));
+    head.style.translate = y ? '0 ' + y + 'px' : '';
+  }
+  function ask() { if (!queued) queued = requestAnimationFrame(place); }
+  addEventListener('scroll', ask, { passive: true });
+  addEventListener('resize', ask);
+  place();
+})();
+</script>
+
 
 <!-- Ultra-Thin Live Bar Hours & Sell-Out Info Strip -->
 <div id="gsAnnounceBar" class="relative z-30 text-[11px] sm:text-xs font-semibold tracking-wider py-2 px-4">
   <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
     <div class="flex items-center gap-2 min-w-0 whitespace-nowrap">
       <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
-      <span class="font-mono-code font-bold text-[#CDB8F7] shrink-0">OPEN TODAY: 8:30 AM – 10:30 PM IST</span>
+      <span class="font-mono-code font-bold text-[#CDB8F7] shrink-0">Hours: 8:30 AM – 10:30 PM IST</span>
       <span class="text-white/85 truncate hidden md:inline">• 3 Gurugram Bars (DLF Phase 1, Golf Course Rd &amp; Sector 56) • Small-batch croissants &amp; micro-lots often sell out by 2 PM</span>
     </div>
     <div class="hidden lg:flex items-center gap-4 text-[11px] text-[#F1E9FF] whitespace-nowrap shrink-0 font-mono-code">
@@ -1468,9 +1531,9 @@
       Specialty in-house roasts, ceremonial Japanese Uji matcha and traditional small-batch gelato, from a lilac glass-fronted counter in Gurugram.
       </p>
     <div class="cta-row">
-      <a class="btn btn-primary" href="#chapters">Explore the Counter</a>
-      <a class="btn btn-chrome" href="#d2cShop">Shop Fresh Roasts (₹)</a>
-      <a class="btn btn-primary" href="#destinations">Visit Bar &amp; Wipe Glass ↗</a>
+      <a class="btn btn-primary" href="#d2cShop">Shop Fresh Roasts (₹)</a>
+      <a class="btn btn-quiet" href="#chapters">Explore the Flavours</a>
+      <a class="btn btn-quiet" href="#destinations">Find the Counter</a>
     </div>
   </div>
 </section>
@@ -1524,7 +1587,8 @@
           <rect width="1440" height="900" fill="url(#lilacFacadeGrad)" mask="url(#facadeDoorCutout)"/>
           <!-- Arjun Marg Fascia Header Signage -->
           <rect x="110" y="68" width="1220" height="62" rx="10" fill="#1C0D38" stroke="#CDB8F7" stroke-opacity="0.4" stroke-width="2"/>
-          <text x="720" y="108" text-anchor="middle" fill="#F1E9FF" font-family="Bricolage Grotesque, sans-serif" font-size="26" font-weight="800" letter-spacing="9">16 ARJUN MARG • GRAM STREET COFFEE</text>
+          <text class="walk-sign-long" x="720" y="108" text-anchor="middle" fill="#F1E9FF" font-family="Bricolage Grotesque, sans-serif" font-size="26" font-weight="800" letter-spacing="9">16 ARJUN MARG • GRAM STREET COFFEE</text>
+          <text class="walk-sign-short" x="720" y="108" text-anchor="middle" fill="#F1E9FF" font-family="Bricolage Grotesque, sans-serif" font-size="26" font-weight="800" letter-spacing="9">GRAM STREET</text>
           <!-- Brushed Chrome Doorframe & Window Mullions -->
           <rect x="486" y="146" width="468" height="688" rx="24" stroke="url(#brushedChromeEdge)" stroke-width="9" fill="none"/>
           <rect x="130" y="210" width="290" height="440" rx="14" stroke="url(#brushedChromeEdge)" stroke-width="5" fill="none"/>
@@ -1693,11 +1757,10 @@
 
       <div class="walk-step" id="walkStep">
         <span id="walkStepLabel">01 / The Lilac Streetfront</span>
-        <span class="walk-frame-hud" id="walkFrameHud">FRAME 01 / 90</span>
       </div>
       <div class="walk-cap" id="walkCap">
         <b>A lilac front on Arjun Marg.</b>
-        <span>Move your cursor across the lilac architectural glass or scroll to cross the threshold into our 10-seater brushed-chrome bar.</span>
+        <span>Lilac glass. Chrome accents. A tiny room by design. Scroll to step inside.</span>
       </div>
       <div class="walk-hint" id="walkHint">Scroll<i></i></div>
     </div>
@@ -1778,7 +1841,7 @@
           </div>
           <div class="z-10">
             <div class="text-2xl font-display font-black text-white">Croissant Gelato Latte</div>
-            <div class="text-xs text-white/90 font-medium mt-1">Warm Brioche Amber (#C88A4B) &bull; Smoked Cacao (#1C1412) &amp; -12°C pozzetti churn</div>
+            <div class="text-xs text-white/90 font-medium mt-1">Warm brioche and smoked cacao, churned in-house</div>
           </div>
         </div>
       </div>
@@ -1809,7 +1872,7 @@
       </p>
     </div>
     <div class="font-mono-code text-xs uppercase tracking-wider text-[#2B1650] font-bold bg-[#F8F5FF] px-4 py-2.5 rounded-full border border-[#2B1650]/20 shadow-sm">
-      ● Live Bar Status: Pulling Nagaland Kiphire Lot (93.5°C)
+      Sample status · On the bar: Nagaland Kiphire lot
     </div>
   </div>
 
@@ -1940,7 +2003,7 @@
           <div>
             <div class="flex items-center gap-2">
               <h4 class="font-serif-editorial font-bold text-lg text-[#2B1650]">Eggplant Parm Milk-Bread Sando</h4>
-              <span class="px-2 py-0.5 rounded-full bg-purple-100 text-[#7C3AED] text-[9px] font-black uppercase tracking-wider">Chef Vanshika Special</span>
+              <span class="px-2 py-0.5 rounded-full bg-purple-100 text-[#7C3AED] text-[9px] font-black uppercase tracking-wider">House special</span>
             </div>
             <p class="text-xs font-medium text-[#534168] mt-1">Crispy panko aubergine, slow-simmered San Marzano marinara, basil oil &amp; aged provolone on Japanese shokupan.</p>
           </div>
@@ -1993,32 +2056,32 @@
 
   <!-- ================= SPECIALTY ROASTERY & EXTRACTION CRAFT ================= -->
 <section class="py-24 px-6 md:px-12 max-w-7xl mx-auto" id="roasteryCraft">
-  <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+  <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-12 gap-6">
     <div>
       <span class="text-xs font-black uppercase tracking-[0.25em] text-[#7C3AED]">The Sensory Extraction & Roastery Bar</span>
       <h2 class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight mt-2 text-[#2B1650]">
         The Roastery &amp; Craft.
         </h2>
       <p class="mt-3 text-base text-[#534168] max-w-2xl font-semibold leading-relaxed">
-        Step behind our lilac glass counter in DLF Phase 1, Gurugram. Explore our precision 9-bar bottomless espresso extraction telemetry, velvety microfoam emulsion chemistry, and single-origin roast spectrums.
+        Step behind our lilac glass counter in DLF Phase 1, Gurugram. See how we pull a 9-bar espresso, steam velvety microfoam and roast our single origins.
         </p>
     </div>
     <!-- Mode Switcher Tabs -->
-    <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-[#2B1650]/20 shadow-sm text-xs font-black uppercase tracking-wider overflow-x-auto">
-      <button onclick="switchCraftTab('extraction')" id="craftTab-extraction" class="py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow whitespace-nowrap">
+    <div role="tablist" class="grid grid-cols-3 lg:flex items-stretch lg:items-center gap-1.5 lg:gap-2 w-full lg:w-auto shrink-0 p-1.5 rounded-2xl bg-white border border-[#2B1650]/20 shadow-sm text-[11px] sm:text-xs font-black uppercase tracking-wide sm:tracking-wider">
+      <button type="button" role="tab" aria-selected="true" aria-controls="craftPanel-extraction" onclick="switchCraftTab('extraction')" id="craftTab-extraction" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all bg-[#2B1650] text-[#F1E9FF] shadow lg:whitespace-nowrap">
         1. 9-Bar Extraction
         </button>
-      <button onclick="switchCraftTab('microfoam')" id="craftTab-microfoam" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650] whitespace-nowrap">
+      <button type="button" role="tab" aria-selected="false" aria-controls="craftPanel-microfoam" onclick="switchCraftTab('microfoam')" id="craftTab-microfoam" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap">
         2. Microfoam Pour
         </button>
-      <button onclick="switchCraftTab('roast')" id="craftTab-roast" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650] whitespace-nowrap">
+      <button type="button" role="tab" aria-selected="false" aria-controls="craftPanel-roast" onclick="switchCraftTab('roast')" id="craftTab-roast" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap">
         3. Roast Spectrum
         </button>
     </div>
   </div>
 
   <!-- Panel 1: 9-Bar Bottomless Naked Portafilter Extraction Telemetry (60-Frame Scrub) -->
-  <div id="craftPanel-extraction" class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
+  <div id="craftPanel-extraction" role="tabpanel" aria-labelledby="craftTab-extraction" class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
     <!-- Left Controls & Telemetry -->
     <div class="lg:col-span-6 space-y-5">
       <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-black uppercase tracking-wider">
@@ -2028,7 +2091,7 @@
         Syrupy Golden Extraction.
       </h3>
       <p class="text-sm sm:text-base text-[#534168] font-medium leading-relaxed">
-        Scrub the 60-frame extraction timeline or hold directly on the portafilter stage to pull a live shot from <strong class="text-[#2B1650]">0.0s pre-infusion</strong> to <strong class="text-[#2B1650]">27.4s tiger-striped crema</strong>.
+        Drag the timeline or hold on the portafilter to pull a live shot from <strong class="text-[#2B1650]">0.0s pre-infusion</strong> to <strong class="text-[#2B1650]">27.4s tiger-striped crema</strong>.
       </p>
 
       <!-- Real Telemetry Grid (Driven Live by Frame Scrubber) -->
@@ -2050,7 +2113,7 @@
       <!-- Interactive 60-Frame Extraction Scrubber (0.0s to 27.4s) -->
       <div class="p-4 rounded-2xl bg-[#F8F5FF] border border-[#2B1650]/15 space-y-2.5">
         <div class="flex items-center justify-between text-[11px] font-mono-code font-bold">
-          <span class="text-[#2B1650] uppercase">60-Frame Shot Scrubber</span>
+          <span class="text-[#2B1650] uppercase">Shot timeline</span>
           <span id="extractionPhaseBadge" class="px-2.5 py-0.5 rounded-full bg-[#2B1650] text-[#F1E9FF]">18.1s–27.4s • Tiger-Striped Crema</span>
         </div>
         <input
@@ -2101,7 +2164,7 @@
       <canvas id="coffeeSteamCanvas" class="absolute inset-0 pointer-events-none z-10"></canvas>
       <div class="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none z-20">
         <span id="extractionFrameHud" class="px-3 py-1 rounded-full bg-black/75 backdrop-blur-md border border-white/20 text-[11px] font-mono-code font-bold text-[#CDB8F7]">
-          FRAME 60 / 60 • 27.4s
+          Shot time 27.4s
         </span>
         <span class="px-3 py-1 rounded-full bg-[#7C3AED]/85 backdrop-blur-md text-[10px] font-mono-code font-bold text-white uppercase tracking-wider">
           Hold or Drag to Scrub Shot
@@ -2115,7 +2178,7 @@
   </div>
 
   <!-- Panel 2: Microfoam Pour Studio (Interactive Fluid Path + 100% Gloss Tilt Shader) -->
-  <div id="craftPanel-microfoam" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
+  <div id="craftPanel-microfoam" role="tabpanel" aria-labelledby="craftTab-microfoam" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
     <!-- Left Controls -->
     <div class="lg:col-span-6 space-y-6">
       <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black uppercase tracking-wider">
@@ -2236,7 +2299,7 @@
   </div>
 
   <!-- Panel 3: Origin Roast Profile & Continuous Thermal Slider (196°C → 218°C → 235°C) -->
-  <div id="craftPanel-roast" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
+  <div id="craftPanel-roast" role="tabpanel" aria-labelledby="craftTab-roast" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
     <!-- Left Origin Profile Details -->
     <div class="lg:col-span-6 space-y-6">
       <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-black uppercase tracking-wider">
@@ -2360,7 +2423,7 @@
   </div>
 
   <!-- 3 Core D2C Products Grid -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="productGridContainer"></div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8" id="productGridContainer"></div>
 </section>
 
 <!-- CHEF SECTION: SCROLL-DRAWN TIMELINE -->
@@ -2368,6 +2431,7 @@
 <section class="chef" id="chef" aria-labelledby="chef-title">
   <div class="chef-grid scroll-reveal" data-slot="chef">
     <div>
+      <p class="concept-label">Illustrative copy, not confirmed by the café</p>
       <h2 id="chef-title">From pie shop to purple latte.</h2>
       <p class="lead">Chef Vanshika Bhatia built Gram Street as a compact, beverage-first counter, and she keeps building focused culinary destinations.</p>
 
@@ -2440,6 +2504,7 @@
 <section class="cities" id="cities" aria-labelledby="cities-title">
   <div class="cities-grid scroll-reveal">
     <div>
+      <p class="concept-label">Illustrative plan, not the café's announced roadmap</p>
       <h2 id="cities-title">A movement, city by city.</h2>
       <p>Gram Street began in Gurugram across DLF Phase 1, Golf Course Road and Sector 56. Mumbai, Bengaluru, Hyderabad and Jaipur are the planned next destinations, with Dubai, Singapore and London thereafter.</p>
       <div class="legend"><span>Inner ring: next across India.</span><span>Outer ring: international expansion.</span></div>
@@ -2495,15 +2560,15 @@
             Join List →
           </button>
         </form>
-        <p id="eventSubMsg" class="hidden text-xs font-bold text-emerald-700">
-          ✓ You're on the sensory guestlist! Watch your inbox this Friday at 9 AM.
+        <p id="eventSubMsg" role="status" class="hidden text-xs font-bold text-emerald-700">
+          ✓ Demo only: this concept stores no emails, so nothing was sent.
         </p>
       </div>
     </div>
 
     <!-- Right Column: 3 Upcoming Events Horizontal Cards -->
     <div class="lg:col-span-7 space-y-5">
-      <div class="d2c-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div data-cupping class="d2c-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div class="flex items-center gap-5">
           <div class="w-20 h-20 rounded-2xl bg-[#2B1650] text-[#F1E9FF] flex flex-col items-center justify-center shrink-0 border border-[#CDB8F7]/40">
             <span class="font-serif-editorial font-bold text-2xl leading-none">26</span>
@@ -2515,12 +2580,12 @@
             <p class="text-xs font-medium text-[#534168] mt-1">Side-by-sideSCA protocol tasting of 5 washed and anaerobic Indian micro-lots roasted on our Giesen W6A.</p>
           </div>
         </div>
-        <button onclick="this.textContent='✓ Spot Reserved'; this.className='px-4 py-2.5 rounded-xl bg-emerald-700 text-white font-mono-code text-xs font-bold shrink-0';" class="px-4 py-2.5 rounded-xl bg-[#F5EFFF] hover:bg-[#7C3AED] text-[#7C3AED] hover:text-white border border-[#7C3AED]/30 font-mono-code text-xs font-bold transition-all shrink-0">
+        <button onclick="this.textContent='✓ Reserved (demo)'; this.className='px-4 py-2.5 rounded-xl bg-emerald-700 text-white font-mono-code text-xs font-bold shrink-0';" class="px-4 py-2.5 rounded-xl bg-[#F5EFFF] hover:bg-[#7C3AED] text-[#7C3AED] hover:text-white border border-[#7C3AED]/30 font-mono-code text-xs font-bold transition-all shrink-0">
           RSVP →
         </button>
       </div>
 
-      <div class="d2c-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div data-cupping class="d2c-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div class="flex items-center gap-5">
           <div class="w-20 h-20 rounded-2xl bg-[#2B1650] text-[#F1E9FF] flex flex-col items-center justify-center shrink-0 border border-[#CDB8F7]/40">
             <span class="font-serif-editorial font-bold text-2xl leading-none">02</span>
@@ -2532,12 +2597,12 @@
             <p class="text-xs font-medium text-[#534168] mt-1">Learn 78°C water tempering, 100-prong bamboo whisking geometry, and oat/coconut milk layering.</p>
           </div>
         </div>
-        <button onclick="this.textContent='✓ Spot Reserved'; this.className='px-4 py-2.5 rounded-xl bg-emerald-700 text-white font-mono-code text-xs font-bold shrink-0';" class="px-4 py-2.5 rounded-xl bg-[#F5EFFF] hover:bg-[#7C3AED] text-[#7C3AED] hover:text-white border border-[#7C3AED]/30 font-mono-code text-xs font-bold transition-all shrink-0">
+        <button onclick="this.textContent='✓ Reserved (demo)'; this.className='px-4 py-2.5 rounded-xl bg-emerald-700 text-white font-mono-code text-xs font-bold shrink-0';" class="px-4 py-2.5 rounded-xl bg-[#F5EFFF] hover:bg-[#7C3AED] text-[#7C3AED] hover:text-white border border-[#7C3AED]/30 font-mono-code text-xs font-bold transition-all shrink-0">
           RSVP →
         </button>
       </div>
 
-      <div class="d2c-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div data-cupping class="d2c-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div class="flex items-center gap-5">
           <div class="w-20 h-20 rounded-2xl bg-[#2B1650] text-[#F1E9FF] flex flex-col items-center justify-center shrink-0 border border-[#CDB8F7]/40">
             <span class="font-serif-editorial font-bold text-2xl leading-none">09</span>
@@ -2549,7 +2614,7 @@
             <p class="text-xs font-medium text-[#534168] mt-1">Hands-on 1:2 extraction ratio calibration, WDT distribution, and 65°C mirror-gloss rosetta pouring.</p>
           </div>
         </div>
-        <button onclick="this.textContent='✓ Spot Reserved'; this.className='px-4 py-2.5 rounded-xl bg-emerald-700 text-white font-mono-code text-xs font-bold shrink-0';" class="px-4 py-2.5 rounded-xl bg-[#F5EFFF] hover:bg-[#7C3AED] text-[#7C3AED] hover:text-white border border-[#7C3AED]/30 font-mono-code text-xs font-bold transition-all shrink-0">
+        <button onclick="this.textContent='✓ Reserved (demo)'; this.className='px-4 py-2.5 rounded-xl bg-emerald-700 text-white font-mono-code text-xs font-bold shrink-0';" class="px-4 py-2.5 rounded-xl bg-[#F5EFFF] hover:bg-[#7C3AED] text-[#7C3AED] hover:text-white border border-[#7C3AED]/30 font-mono-code text-xs font-bold transition-all shrink-0">
           RSVP →
         </button>
       </div>
@@ -2560,7 +2625,7 @@
 <!-- ALL 3 LOCATIONS & CELEBRATED STEAMED WINDOW (SCRATCH TO REVEAL) -->
 <section class="visit" id="destinations" aria-labelledby="visit-title">
   <div class="max-w-7xl mx-auto space-y-10 scroll-reveal">
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
       <div>
         <span class="eyebrow-label">Interactive Destination Explorer</span>
         <h2 id="visit-title" class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight text-[#2B1650] mt-2">
@@ -2568,14 +2633,14 @@
           </h2>
       </div>
       <!-- 3 Location Buttons -->
-      <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-[#2B1650]/20 shadow-sm text-xs font-black uppercase tracking-wider overflow-x-auto">
-        <button id="locTab-phase1" onclick="switchLocation('phase1')" class="py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow">
+      <div role="tablist" class="grid grid-cols-3 lg:flex items-stretch lg:items-center gap-1.5 lg:gap-2 w-full lg:w-auto shrink-0 p-1.5 rounded-2xl bg-white border border-[#2B1650]/20 shadow-sm text-[11px] sm:text-xs font-black uppercase tracking-wide sm:tracking-wider">
+        <button type="button" role="tab" aria-selected="true" aria-controls="locPanel" id="locTab-phase1" onclick="switchLocation('phase1')" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all bg-[#2B1650] text-[#F1E9FF] shadow lg:whitespace-nowrap">
           1. DLF Phase 1 Flagship
           </button>
-        <button id="locTab-gcr" onclick="switchLocation('gcr')" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650]">
+        <button type="button" role="tab" aria-selected="false" aria-controls="locPanel" id="locTab-gcr" onclick="switchLocation('gcr')" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap">
           2. Golf Course Road
           </button>
-        <button id="locTab-sec56" onclick="switchLocation('sec56')" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650]">
+        <button type="button" role="tab" aria-selected="false" aria-controls="locPanel" id="locTab-sec56" onclick="switchLocation('sec56')" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap">
           3. Sector 56 Hub
           </button>
       </div>
@@ -2583,7 +2648,7 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
       <!-- Store Info -->
-      <div class="lg:col-span-5 space-y-6 text-left">
+      <div id="locPanel" role="tabpanel" aria-label="Selected location" class="lg:col-span-5 space-y-6 text-left">
         <div id="locBadge" class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold uppercase">
           <span>● Flagship Roastery &amp; Café • Open 8:30 AM – 10:30 PM</span>
         </div>
@@ -2664,7 +2729,7 @@
         Subscribe →
       </button>
     </form>
-    <p id="newsSuccess" class="hidden mt-4 text-xs font-bold text-emerald-700">
+    <p id="newsSuccess" role="status" class="hidden mt-4 text-xs font-bold text-emerald-700">
       ✓ Welcome to Gram Street Roastery Dispatches · your 15% first-bag code (GRAM15) is on its way.
     </p>
   </div>
@@ -2707,13 +2772,13 @@
 </main>
 
 <!-- SLIDE-OVER ROASTERY BAG DRAWER -->
-<div id="cartModal" class="fixed inset-0 z-50 hidden">
+<div id="cartModal" class="fixed inset-0 z-50 hidden" style="z-index:70" role="dialog" aria-modal="true" aria-labelledby="bagTitle">
 <div onclick="toggleCart(false)" class="absolute inset-0 bg-black/75 backdrop-blur-sm"></div>
 <div id="bagPanel" data-consent-pad class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-[#2B1650]/35 p-8 flex flex-col justify-between overflow-y-auto shadow-2xl text-[#2B1650]">
   <div>
     <div class="flex items-center justify-between border-b border-[#2B1650]/20 pb-5">
-      <h3 class="text-xl font-display font-black uppercase tracking-tight text-[#2B1650]">Your Roastery Bag</h3>
-      <button onclick="toggleCart(false)" class="text-xs uppercase tracking-widest text-[#7C3AED] font-black hover:underline">Close ✕</button>
+      <h3 id="bagTitle" class="text-xl font-display font-black uppercase tracking-tight text-[#2B1650]">Your Bag</h3>
+      <button type="button" id="bagClose" onclick="toggleCart(false)" class="min-w-[44px] min-h-[44px] px-3 rounded-full border border-[#7C3AED]/30 text-xs uppercase tracking-widest text-[#7C3AED] font-black hover:bg-[#F5EFFF]">Close ✕</button>
     </div>
     <div id="bagBody"><div id="cartItemsList" class="mt-6 space-y-4 max-h-[60vh] overflow-y-auto pr-1"></div></div>
   </div>
@@ -2731,15 +2796,16 @@
       <span class="font-bold uppercase tracking-wider text-[#534168]">Subtotal</span>
       <span id="cartTotalPrice" class="text-2xl font-display font-black text-[#7C3AED]">₹0</span>
     </div>
-    <button onclick="startCheckout()" class="w-full py-4 rounded-full bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-[0.2em] hover:bg-[#3D2272] transition-all shadow-lg">
-      Proceed to Roast &amp; Dispatch (₹) →
+    <button type="button" id="bagProceed" onclick="startCheckout()" class="w-full py-4 rounded-full bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-[0.2em] hover:bg-[#3D2272] transition-all shadow-lg disabled:opacity-40 disabled:cursor-not-allowed">
+      Continue to your details →
       </button>
   </div>
 
   <!-- Step 2: who the roast is for. An order needs a name, a number to call
        and somewhere to take it; asking for less would not be an order. -->
   <form id="bagCheckout" class="hidden border-t border-[#2B1650]/20 pt-6 space-y-3" novalidate>
-    <p class="text-[11px] font-black uppercase tracking-[0.18em] text-[#7C3AED]">Roast &amp; dispatch · your details</p>
+    <p class="text-[11px] font-black uppercase tracking-[0.18em] text-[#7C3AED]">Your details</p>
+    <p id="bagRecap" class="text-xs font-bold text-[#2B1650] bg-[#F5EFFF] rounded-xl px-3 py-2"></p>
     <label class="block">
       <span class="block text-[11px] font-bold uppercase tracking-wider text-[#534168] mb-1">Name</span>
       <input id="ordName" name="name" autocomplete="name" class="w-full px-4 py-2.5 rounded-xl border border-[#2B1650]/25 text-sm bg-[#F5EFFF] focus:outline-none focus:ring-2 focus:ring-[#7C3AED]">
@@ -2767,7 +2833,7 @@
   <!-- Step 3: placed, with a reference the roastery can be held to -->
   <div id="bagDone" class="hidden border-t border-[#2B1650]/20 pt-6 space-y-3">
     <p class="text-[11px] font-black uppercase tracking-[0.18em] text-[#7C3AED]">Demo order previewed</p>
-    <p class="text-3xl font-display font-black tracking-tight text-[#2B1650]" id="ordRef">GS-0000</p>
+    <p class="text-3xl font-display font-black tracking-tight text-[#2B1650]" id="ordRef" tabindex="-1">GS-0000</p>
     <p class="text-xs font-semibold text-[#534168] leading-relaxed" id="ordSummary"></p>
     <div class="flex items-center gap-2 pt-1">
       <a id="ordWa" href="#" target="_blank" rel="noopener" class="flex-1 text-center py-3.5 rounded-full bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-[0.16em] hover:bg-[#3D2272] transition-all">Send it on WhatsApp ↗</a>
@@ -2780,6 +2846,7 @@
 </div>
 
 <!-- ================= DEEP-GRAPE EDITORIAL FOOTER ================= -->
+<section class="design-notes" id="design-notes" aria-labelledby="design-notes-title"><div class="dn-wrap"><p class="dn-kicker">Design notes · concept by Anchit Tandon</p><h2 id="design-notes-title">Why this storefront looks the way it does.</h2><p class="dn-lede">Gram Street Coffee is a real Gurugram café. This page is my independent redesign of its storefront, built to show how I would take a first-time visitor from curiosity to an order. It is not the café's site.</p><div class="dn-grid"><article class="dn-card"><h3>The problem</h3><p>A café site has two jobs for a first-time visitor: show what the place is in one screen, then get them to an order or to the counter. I had no access to Gram Street's analytics, so everything below is a <strong>design hypothesis</strong>, not a finding.</p></article><article class="dn-card"><h3>What I kept</h3><ul><li>The brand's own material language: lilac glass, chrome, a tiny room by design.</li><li>Its three pillars, in its order: coffee, matcha, gelato.</li><li>The three Gurugram counters, and the real Zomato, Swiggy and Instagram links.</li></ul></article><article class="dn-card"><h3>What I changed</h3><ul><li>A walk-in scroll from the street to the counter, as the one signature moment.</li><li>A menu with a bag and a two-step checkout that keeps a recap of the order.</li><li>An outlet finder with a tab per counter, which hides an order link that would have pointed to the wrong outlet.</li><li>One primary call to action in the hero: the shop.</li></ul></article><article class="dn-card"><h3>Hypothesis</h3><p>If the menu and the nearest counter are each one tap from the first screen, more first-time visitors reach an order or directions than on a page that leads with the story.</p></article><article class="dn-card"><h3>How I would measure it <span class="dn-tag">Intended, not measured</span></h3><ul><li>Hero to menu click rate.</li><li>Add-to-bag rate, and bag to checkout completion.</li><li>Directions taps per outlet.</li></ul><p style="margin-top:10px">This concept has no live traffic, so none of these has been measured.</p></article><article class="dn-card"><h3>What is real and what is a demo</h3><ul><li><strong>Real:</strong> the outbound Instagram, Zomato and Swiggy links.</li><li><strong>Demo:</strong> the bag and checkout (no card is taken; WhatsApp only drafts a message marked DEMO), the guestlist and RSVPs (nothing is stored) and the bar status line.</li><li><strong>Illustrative:</strong> the photography, the founder story and the city plans.</li></ul></article><article class="dn-card"><h3>How checkout works here</h3><p>The order is simulated end to end: you get a reference and a WhatsApp draft you can read, and nothing leaves the page. In my Xazina concept the bag hands off to Xazina's real cart instead, because that catalogue is a real snapshot of the live store.</p></article><article class="dn-card"><h3>Motion decisions</h3><ul><li>One pinned scroll-through, never a second one competing with it.</li><li>No cursor trail, confetti or particle bursts: the brand's claim is precision.</li><li>Everything decorative pauses off screen and under reduced motion.</li></ul></article></div><p class="dn-foot">Questions about the concept? <a href="mailto:anchit.tandon@gmail.com?subject=Your%20Gram%20Street%20concept">Email Anchit</a>, or see the rest of my work on the <a href="/">portfolio</a>.</p></div></section>
 <footer>
   <div class="max-w-7xl mx-auto text-center space-y-6">
     <div class="inline-flex items-center gap-3">
@@ -2797,7 +2864,7 @@
     </div>
     <div class="pt-6 border-t border-white/15 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[#CDB8F7]/85 font-mono-code">
       <div>16 Arjun Marg (DLF Phase 1) • DLF Summit Plaza (Sector 53) • Jalvayu Towers (Sector 56)</div>
-      <div>Open Daily 08:30 AM – 10:30 PM IST • Made in Gurugram • © 2026 Gram Street Coffee</div>
+      <div>Concept storefront by <a href="/" class="underline">Anchit Tandon</a> · not affiliated with Gram Street Coffee · <a href="mailto:anchit.tandon@gmail.com?subject=Your%20Gram%20Street%20concept" class="underline">Email Anchit</a></div>
     </div>
   </div>
 </footer>
@@ -2806,7 +2873,9 @@
 <script>
 (function () {
   "use strict";
-  var reduce = false;
+  // 9994900 replaced this check with `false`, which quietly switched off
+  // every reduced-motion branch on the page.
+  var reduce = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 
   // 1. D2C Products Catalog
   const PRODUCTS = [
@@ -2863,7 +2932,7 @@
       address: 'Block F, 16 Arjun Marg, DLF Phase 1, Sector 26A, Gurugram 122002',
       phone: '+91 81300 56889',
       directions: 'https://www.google.com/maps/search/?api=1&query=Gram+Street+Coffee+DLF+Phase+1+Gurugram',
-      zomato: 'https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon',
+      order: 'https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon',
       image: '/assets/brand/u-1554118811-1e0d58224f24-1200.webp',
       caption: '16 Arjun Marg Flagship Bar'
     },
@@ -2877,7 +2946,9 @@
       address: 'DLF Summit Plaza, Sector 53, Golf Course Road, Gurugram 122002',
       phone: '+91 81300 56889',
       directions: 'https://www.google.com/maps/search/?api=1&query=Gram+Street+Coffee+DLF+Summit+Plaza+Golf+Course+Road+Gurgaon',
-      zomato: 'https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon',
+      // This reused the DLF Phase 1 Zomato page: a different outlet. No
+      // listing for this bar is known, so its order button steps aside.
+      order: '',
       image: '/assets/brand/u-1501339847302-ac426a4a7cbb-1200.webp',
       caption: 'DLF Summit Plaza (Sector 53)'
     },
@@ -2891,7 +2962,7 @@
       address: 'Jalvayu Towers, Sector 56, Gurugram 122011',
       phone: '+91 81300 56889',
       directions: 'https://www.google.com/maps/search/?api=1&query=Gram+Street+Coffee+Jalvayu+Towers+Sector+56+Gurugram',
-      zomato: 'https://www.swiggy.com/city/gurgaon/gram-street-coffee-arjun-marg-jalvayu-towers-rest1462852',
+      order: 'https://www.swiggy.com/city/gurgaon/gram-street-coffee-arjun-marg-jalvayu-towers-rest1462852',
       image: '/assets/brand/u-1442512595331-e89e73853f31-1200.webp',
       caption: 'Jalvayu Towers Express Hub'
     }
@@ -2910,10 +2981,11 @@
 
     ['phase1', 'gcr', 'sec56'].forEach(k => {
       const btn = document.getElementById(LOCATIONS[k].tabId);
+      btn.setAttribute('aria-selected', String(k === key));
       if (k === key) {
-        btn.className = 'py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow';
+        btn.className = 'py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all bg-[#2B1650] text-[#F1E9FF] shadow lg:whitespace-nowrap';
       } else {
-        btn.className = 'py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650]';
+        btn.className = 'py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap';
       }
     });
 
@@ -2926,7 +2998,12 @@
     document.getElementById('locPhone').textContent = loc.phone;
     document.getElementById('locPhone').href = `tel:${loc.phone.replace(/\s+/g, '')}`;
     document.getElementById('locDirectionsBtn').href = loc.directions;
-    document.getElementById('locZomatoBtn').href = loc.zomato;
+    const orderBtn = document.getElementById('locZomatoBtn');
+    orderBtn.hidden = !loc.order;
+    if (loc.order) {
+      orderBtn.href = loc.order;
+      orderBtn.textContent = `Order on ${/swiggy\./.test(loc.order) ? 'Swiggy' : 'Zomato'} ↗`;
+    }
     document.getElementById('scratchCaption').textContent = loc.caption;
 
     const bgImg = document.getElementById('scratchBgImage');
@@ -3038,12 +3115,22 @@
     // 30fps ceiling is indistinguishable here and halves the fragment work.
     // rAF still drives it, so the browser keeps control of when we paint.
     var MIN_DT = 1000 / 30, lastDraw = 0;
+    // It used to draw for as long as the hero was on screen, which kept the
+    // page busy at idle (about 345ms of work a second on a throttled phone,
+    // 450 on a laptop). It now moves while the visitor does: on load, on
+    // scroll, on pointer or touch, and holds its last frame 2.5s after.
+    var IDLE_MS = 2500, lastActive = performance.now();
     function loop(now) {
       if (!running) return;
+      if (now - lastActive > IDLE_MS) { running = false; return; }
       if (now - lastDraw >= MIN_DT) { lastDraw = now; draw(now); }
       requestAnimationFrame(loop);
     }
     function start() { if (running || !visible || document.hidden) return; running = true; requestAnimationFrame(loop); }
+    // Reduced motion keeps the single still frame drawn below: nothing wakes it.
+    function poke() { if (reduce) return; lastActive = performance.now(); start(); }
+    window.addEventListener("scroll", poke, { passive: true });
+    window.addEventListener("touchstart", poke, { passive: true });
     function stop() { running = false; }
 
     resize(); draw(performance.now());
@@ -3052,7 +3139,8 @@
       hero.addEventListener("pointermove", function (e) {
         var r = hero.getBoundingClientRect();
         tx = (e.clientX - r.left) / r.width; ty = 1 - (e.clientY - r.top) / r.height;
-      });
+        poke();
+      }, { passive: true });
       if (typeof IntersectionObserver !== "undefined") {
         new IntersectionObserver(function (en) { visible = en[0].isIntersecting; visible ? start() : stop(); }).observe(hero);
       }
@@ -3226,9 +3314,9 @@
     }, { passive: true });
 
     var STEPS = [
-      [0.00, '01 / The Lilac Streetfront', 'Outside on 16 Arjun Marg.', 'Frames 01–30: Lilac architectural glass facade with live specular pane reflection. Scroll to push through the doorway.'],
-      [0.33, '02 / Crossing the Glass Threshold', 'Chrome specular flare across pastel.', 'Frames 31–60: Scaling through the brushed-steel doorframe as street acoustics give way to the espresso bar.'],
-      [0.67, '03 / The 10-Seater Chrome Bar', 'Docked at the brushed-steel counter.', 'Frames 61–90: E61 9.2-bar groupheads, 78°C Uji matcha chasen station and -12°C pozzetti gelato bar.']
+      [0.00, '01 / The Lilac Streetfront', 'Outside on 16 Arjun Marg.', 'Lilac glass. Chrome accents. A tiny room by design. Scroll to step inside.'],
+      [0.33, '02 / Through the Door', 'Chrome cutting through the pastel.', 'The street goes quiet and the espresso bar comes into view.'],
+      [0.67, '03 / The 10-Seater Chrome Bar', 'At the counter.', 'Espresso, the matcha whisking station and the gelato counter, side by side.']
     ];
     var at = -1;
     var capT = 0;
@@ -3296,28 +3384,50 @@
     }
     if (cap) cap.style.transition = 'opacity .34s ease, transform .34s cubic-bezier(.16,1,.3,1)';
 
-    var ticking = false;
+    // Stepped, not scrubbed. The walk used to interpolate every layer on every
+    // scroll frame, so most scroll positions showed a half-dissolved mix of two
+    // scenes with the caption faded out between them: it read as broken, and
+    // the per-frame work (layout read, five layer transforms, a custom property
+    // on the section that restyled everything inside it) made scrolling lag.
+    // Now scroll only picks which of the three scenes is showing; each scene is
+    // a fully composed pose, and the browser glides between them in one
+    // compositor transition. Nothing runs while the walk is off screen.
+    // The last pose is the end of the run: the counter layer has faded and
+    // the docked 10-seater bar has come forward, the view the caption names.
+    // Under 760px the walk's perspective tightens to 760px, which left the
+    // bar at about 0.62x (200px on a phone). 1.05 brings it to about 0.96x.
+    var narrow = window.matchMedia('(max-width: 760px)');
+    var POSES = [0.02, 0.45, narrow.matches ? 1.05 : 1];
+    var shown = -1, inView = false, ticking = false;
+    sec.classList.add('is-stepped');
     function onScroll() {
-      if (ticking) return;
+      if (ticking || !inView) return;
       ticking = true;
       requestAnimationFrame(function () {
         ticking = false;
         var r = rail.getBoundingClientRect();
         var span = r.height - frame.offsetHeight;
         var p = span > 0 ? clamp01(-r.top / span) : 0;
-        sec.style.setProperty('--p', p.toFixed(4));
-        place(p);
+        var k = p < 0.33 ? 0 : p < 0.67 ? 1 : 2;
+        if (k === shown) return;
+        shown = k;
+        place(POSES[k]);
       });
     }
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
+    window.addEventListener('resize', function () { POSES[2] = narrow.matches ? 1.05 : 1; shown = -1; onScroll(); });
 
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (en) {
-        sec.classList.toggle('is-past', !en[0].isIntersecting);
+        inView = en[0].isIntersecting;
+        sec.classList.toggle('is-past', !inView);
+        if (inView) onScroll();
       }, { threshold: 0 }).observe(sec);
-    }
-    onScroll();
+    } else { inView = true; onScroll(); }
+    // Composed first scene straight away. The observer's first callback then
+    // picks the right scene, including after a reload restores a mid-walk
+    // scroll position.
+    shown = 0; place(POSES[0]);
   })();
 
   /* 4. Timeline Line Drawing & Orbit Reveal */
@@ -3595,15 +3705,16 @@
 
   if (scratchCanvas) {
     scratchCanvas.addEventListener('mousemove', (e) => wipeScratchAt(e.clientX, e.clientY));
+    // The glass is 56% of a phone screen, and preventDefault on every
+    // touchmove meant no swipe that started on it ever scrolled. pan-y gives
+    // vertical swipes back to the page; side-to-side strokes still wipe.
+    scratchCanvas.style.touchAction = 'pan-y';
     scratchCanvas.addEventListener('touchmove', (e) => {
-      if (e.touches && e.touches[0]) {
-        wipeScratchAt(e.touches[0].clientX, e.touches[0].clientY);
-        e.preventDefault();
-      }
-    }, { passive: false });
+      if (e.touches && e.touches[0]) wipeScratchAt(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
     scratchCanvas.addEventListener('touchstart', (e) => {
       if (e.touches && e.touches[0]) wipeScratchAt(e.touches[0].clientX, e.touches[0].clientY);
-    });
+    }, { passive: true });
     window.addEventListener('resize', window.initScratchWindow);
     window.initScratchWindow();
   }
@@ -3645,14 +3756,16 @@
       whiteNoise.start(0);
 
       isPlayingAudio = true;
+      document.getElementById('audioBtn').setAttribute('aria-pressed', 'true');
       document.getElementById('audioDot').className = 'w-2 h-2 rounded-full bg-emerald-400 animate-ping';
-      document.getElementById('audioLabel').textContent = '65°C Steam: On';
+      document.getElementById('audioLabel').textContent = 'Ambient audio: on';
     } else {
       if (audioCtx) audioCtx.close();
       audioCtx = null;
       isPlayingAudio = false;
+      document.getElementById('audioBtn').setAttribute('aria-pressed', 'false');
       document.getElementById('audioDot').className = 'w-2 h-2 rounded-full bg-slate-400';
-      document.getElementById('audioLabel').textContent = '65°C Audio';
+      document.getElementById('audioLabel').textContent = 'Ambient audio';
     }
   };
 
@@ -3731,10 +3844,10 @@
           <p class="text-xs font-semibold text-[#534168] mb-5 leading-relaxed">${p.notes}</p>
 
           <div class="grid grid-cols-2 gap-2 p-1.5 rounded-xl bg-[#F5EFFF] border border-[#7C3AED]/25 text-[11px] font-black uppercase tracking-wider mb-2">
-            <button onclick="window.setSubMode('${p.id}', false)" class="py-2.5 rounded-lg transition-all ${!isSub ? 'bg-[#7C3AED] text-white shadow-sm' : 'text-[#534168]'}">
+            <button type="button" aria-pressed="${!isSub}" data-sub="${p.id}:0" onclick="window.setSubMode('${p.id}', false)" class="py-2.5 rounded-lg transition-all ${!isSub ? 'bg-[#7C3AED] text-white shadow-sm' : 'text-[#534168]'}">
               One-Time (₹${p.price})
               </button>
-            <button onclick="window.setSubMode('${p.id}', true)" class="py-2.5 rounded-lg transition-all ${isSub ? 'bg-[#7C3AED] text-white shadow-sm' : 'text-[#534168]'}">
+            <button type="button" aria-pressed="${isSub}" data-sub="${p.id}:1" onclick="window.setSubMode('${p.id}', true)" class="py-2.5 rounded-lg transition-all ${isSub ? 'bg-[#7C3AED] text-white shadow-sm' : 'text-[#534168]'}">
               Subscribe (-15%)
               </button>
           </div>
@@ -3751,9 +3864,12 @@
     if (typeof window.bindKineticCards === 'function') window.bindKineticCards();
   }
 
+  // The grid re-renders on every toggle, which dropped keyboard focus to
+  // <body>; focus goes back to the toggle that was pressed.
   window.setSubMode = function(id, isSub) {
     subMode[id] = isSub;
     renderProducts();
+    document.querySelector(`[data-sub="${id}:${isSub ? 1 : 0}"]`)?.focus();
   };
 
   window.addToCart = function(pId, triggerBtn) {
@@ -3767,21 +3883,43 @@
     updateCartUI();
     step('bag');
     const sourceEl = triggerBtn || (window.event && window.event.currentTarget) || null;
-    window.launchBezierFlyToBag(sourceEl, product.image, 'GS').then(() => {
-      window.toggleCart(true);
-    });
+    afterAdd(sourceEl, product.image, 'GS', product.name);
   };
+
+  // On a phone the bag is the whole screen: throwing it up on every add made
+  // a three-drink order three trips in and out. There a toast confirms and
+  // offers the bag; larger screens keep the drawer. Reduced motion skips the
+  // fly-to-bag pill.
+  function afterAdd(sourceEl, image, tag, name) {
+    const small = window.matchMedia('(max-width: 767px)').matches;
+    const fly = reduce ? Promise.resolve() : window.launchBezierFlyToBag(sourceEl, image, tag);
+    if (small) { gsToast(`${name} added`); return; }
+    Promise.resolve(fly).then(() => window.toggleCart(true, sourceEl));
+  }
+  let gsToastTimer = 0;
+  function gsToast(msg) {
+    let t = document.getElementById('gsToast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'gsToast'; t.className = 'gs-toast'; t.setAttribute('role', 'status');
+      t.innerHTML = '<span></span><button type="button">View bag</button>';
+      t.querySelector('button').addEventListener('click', () => { t.classList.remove('is-on'); window.toggleCart(true, document.getElementById('headerBagBtn')); });
+      document.body.appendChild(t);
+    }
+    t.querySelector('span').textContent = msg;
+    t.classList.add('is-on');
+    clearTimeout(gsToastTimer);
+    gsToastTimer = setTimeout(() => t.classList.remove('is-on'), 3600);
+  }
 
   window.addBarItemToCart = function(id, name, price) {
     const exist = cart.find(i => i.id === id);
     if (exist) exist.qty += 1;
-    else cart.push({ id, name, price, qty: 1, isSub: false });
+    else cart.push({ id, name, price, qty: 1, isSub: false, bar: true });
     updateCartUI();
     step('bag');
     const sourceEl = (window.event && window.event.currentTarget) || null;
-    window.launchBezierFlyToBag(sourceEl, '/assets/brand/u-1646954256973-f7fd9ce626b1-800.webp', 'BAR').then(() => {
-      window.toggleCart(true);
-    });
+    afterAdd(sourceEl, '/assets/brand/u-1646954256973-f7fd9ce626b1-800.webp', 'BAR', name);
   };
 
   function updateCartUI() {
@@ -3791,32 +3929,106 @@
     if (countEl) countEl.textContent = count;
     const priceEl = document.getElementById('cartTotalPrice');
     if (priceEl) priceEl.textContent = `₹${total}`;
+    const proceed = document.getElementById('bagProceed');
+    if (proceed) proceed.disabled = cart.length === 0;
     const list = document.getElementById('cartItemsList');
-    if (list) {
+    if (list && !cart.length) {
+      list.innerHTML = `<div class="py-12 text-center">
+        <p class="font-display font-black uppercase text-lg text-[#2B1650]">Your bag is empty</p>
+        <p class="text-xs mt-2 text-[#534168]">Pick a drink from <a href="#barMenu" onclick="toggleCart(false)" class="underline font-bold">today's menu</a> or a roast from <a href="#d2cShop" onclick="toggleCart(false)" class="underline font-bold">the beans</a>.</p>
+      </div>`;
+    } else if (list) {
       list.innerHTML = cart.map((item, idx) => `
-        <div class="flex items-center justify-between p-4 rounded-2xl bg-[#F5EFFF] border border-[#7C3AED]/25">
-        <div>
+        <div class="flex items-center justify-between gap-3 p-4 rounded-2xl bg-[#F5EFFF] border border-[#7C3AED]/25">
+        <div class="min-w-0">
           <div class="font-bold uppercase text-sm text-[#2B1650]">${item.name}</div>
-          <div class="text-[11px] text-[#7C3AED] uppercase tracking-wider font-black">${item.isSub ? 'Monthly Roast Subscription (-15%)' : 'Fresh Single Bag'} • Qty: ${item.qty}</div>
+          <div class="text-[11px] text-[#7C3AED] uppercase tracking-wider font-black">${item.isSub ? 'Monthly roast subscription (−15%)' : item.bar ? 'From the bar' : 'Fresh roast, single bag'} • ₹${item.price} each</div>
+          <div class="font-black text-[#2B1650] mt-1">₹${item.price * item.qty}</div>
         </div>
-        <div class="flex items-center gap-3">
-          <span class="font-black text-[#7C3AED]">₹${item.price * item.qty}</span>
-          <button onclick="window.removeCartItem(${idx})" class="text-xs text-rose-600 font-bold hover:scale-110">✕</button>
+        <div class="flex items-center gap-1 shrink-0">
+          <div class="flex items-center border border-[#7C3AED]/30 rounded-xl overflow-hidden bg-white font-black text-sm">
+            <button type="button" onclick="window.changeCartQty(${idx}, -1)" aria-label="One fewer ${item.name}" class="w-10 h-10 hover:bg-[#F5EFFF]">−</button>
+            <span class="w-7 text-center text-[#7C3AED]" aria-label="Quantity">${item.qty}</span>
+            <button type="button" onclick="window.changeCartQty(${idx}, 1)" aria-label="One more ${item.name}" class="w-10 h-10 hover:bg-[#F5EFFF]">+</button>
+          </div>
+          <button type="button" onclick="window.removeCartItem(${idx})" aria-label="Remove ${item.name}" class="w-10 h-10 rounded-xl text-rose-600 font-bold hover:bg-rose-50">✕</button>
         </div>
       </div>
     `).join('');
     }
   }
 
+  window.changeCartQty = function(idx, d) {
+    if (!cart[idx]) return;
+    cart[idx].qty += d;
+    if (cart[idx].qty <= 0) cart.splice(idx, 1);
+    updateCartUI();
+  };
+
   window.removeCartItem = function(idx) {
     cart.splice(idx, 1);
     updateCartUI();
   };
 
-  window.toggleCart = function(open) {
+  // A dialog: focus moves in and stays, Esc closes, the page behind stops
+  // scrolling, and focus returns to whatever opened it.
+  let bagOpener = null;
+  window.toggleCart = function(open, opener) {
     const modal = document.getElementById('cartModal');
-    if (modal) modal.classList.toggle('hidden', !open);
+    if (!modal) return;
+    const wasOpen = !modal.classList.contains('hidden');
+    modal.classList.toggle('hidden', !open);
+    document.documentElement.style.overflow = open ? 'hidden' : '';
+    document.getElementById('headerBagBtn')?.setAttribute('aria-expanded', String(!!open));
+    if (open && !wasOpen) {
+      bagOpener = opener || document.activeElement;
+      requestAnimationFrame(() => document.getElementById('bagClose')?.focus());
+    } else if (!open && wasOpen) {
+      const back = bagOpener && document.contains(bagOpener) ? bagOpener : document.getElementById('headerBagBtn');
+      back?.focus?.();
+      bagOpener = null;
+    }
   };
+  document.addEventListener('keydown', (e) => {
+    const modal = document.getElementById('cartModal');
+    if (!modal || modal.classList.contains('hidden')) return;
+    if (e.key === 'Escape') { e.preventDefault(); window.toggleCart(false); return; }
+    if (e.key !== 'Tab') return;
+    const f = [...modal.querySelectorAll('button, a[href], input, textarea, select')].filter(el => !el.disabled && el.offsetParent !== null);
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && (document.activeElement === last || !modal.contains(document.activeElement))) { e.preventDefault(); first.focus(); }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    const tab = e.target.closest && e.target.closest('[role="tab"]');
+    if (!tab || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+    const tabs = [...tab.parentElement.querySelectorAll('[role="tab"]')];
+    let i = tabs.indexOf(tab);
+    i = e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : (i + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+    e.preventDefault(); tabs[i].focus(); tabs[i].click();
+  });
+
+  // Cuppings: the next three Sundays from today in India, so the list never
+  // shows dates already gone (it read 26 Oct, 02 Nov, 09 Nov: all past, and
+  // all Mondays in 2026).
+  (function () {
+    const cards = document.querySelectorAll('[data-cupping]');
+    if (!cards.length) return;
+    const now = new Date(Date.now() + 330 * 60000);                  // IST
+    const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    d.setUTCDate(d.getUTCDate() + ((7 - d.getUTCDay()) % 7 || 7));     // next Sunday, never today
+    const MON = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    cards.forEach((card, i) => {
+      const day = new Date(d.getTime() + i * 7 * 86400000);
+      const box = card.querySelector('.w-20.h-20');
+      if (!box) return;
+      const [num, mon] = box.querySelectorAll('span');
+      if (num) num.textContent = String(day.getUTCDate()).padStart(2, '0');
+      if (mon) mon.textContent = MON[day.getUTCMonth()];
+    });
+  })();
 
   /* ---- placing the order -------------------------------------------------
      What used to be here was an alert() that said "Order Confirmed!" and
@@ -3840,6 +4052,13 @@
     });
     var body = document.getElementById('bagBody');
     if (body) body.classList.toggle('hidden', which !== 'bag');
+    // The details step hid the items and the total; a one-line recap stays.
+    if (which === 'checkout') {
+      var recap = document.getElementById('bagRecap');
+      var n = cart.reduce(function (t, i) { return t + i.qty; }, 0);
+      if (recap) recap.textContent = n + (n === 1 ? ' item' : ' items') + ' · ₹' + cart.reduce(function (t, i) { return t + i.price * i.qty; }, 0) + ' · ' + cart.map(function (i) { return i.qty + '× ' + i.name; }).join(', ');
+    }
+    if (which === 'done') requestAnimationFrame(function () { var r = document.getElementById('ordRef'); if (r) r.focus(); });
     // With the bag hidden, justify-between leaves a column of white above the
     // step and the drawer reads as broken. The later steps sit under the
     // header instead.
@@ -3882,7 +4101,7 @@
     });
     lines.push('', 'Total: Rs ' + o.total, '', o.name + ' - ' + o.phone, o.address);
     if (o.note) lines.push('Note: ' + o.note);
-    lines.push('', 'Please confirm the roast and send a payment link.');
+    lines.push('', 'Please confirm the order and send a payment link.');
     return lines.join('\n');
   }
 
@@ -3956,6 +4175,10 @@
 
     cart.length = 0;
     updateCartUI();
+    // The "Your last order" chip only appeared after a reload; it shows now.
+    var chipRef = document.getElementById('ordLastRef'), chip = document.getElementById('ordLast');
+    if (chipRef) chipRef.textContent = order.ref;
+    if (chip) chip.classList.remove('hidden');
     step('done');
     return false;
   }
@@ -4016,11 +4239,12 @@
           p.classList.remove('grid');
         }
       }
+      if (btn) btn.setAttribute('aria-selected', String(t === tab));
       if (btn) {
         if (t === tab) {
-          btn.className = "py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow whitespace-nowrap";
+          btn.className = "py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all bg-[#2B1650] text-[#F1E9FF] shadow lg:whitespace-nowrap";
         } else {
-          btn.className = "py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650] whitespace-nowrap";
+          btn.className = "py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap";
         }
       }
     });
@@ -4250,7 +4474,7 @@
     if (phaseBadge) phaseBadge.textContent = st.phase;
     if (frameHud) {
       const fStr = st.frameIdx < 10 ? '0' + st.frameIdx : String(st.frameIdx);
-      frameHud.textContent = `FRAME ${fStr} / 60 • ${st.t.toFixed(1)}s`;
+      frameHud.textContent = `Shot time ${st.t.toFixed(1)}s`;
     }
     if (statusText) {
       statusText.textContent = `${st.pressure.toFixed(1)} BAR • ${st.yieldG.toFixed(1)}g Yield`;
@@ -4932,7 +5156,7 @@
     });
     // Leaving the mobile range with the sheet open would strand it on desktop.
     if (window.matchMedia) {
-      window.matchMedia('(min-width: 901px)').addEventListener('change', function (m) {
+      window.matchMedia('(min-width: 1200px)').addEventListener('change', function (m) {
         if (m.matches) setOpen(false);
       });
     }

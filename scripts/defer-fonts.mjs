@@ -22,7 +22,7 @@
 // largest paint 800 ms later every run (the hero paragraph grows when Inter
 // lands). Those keep the blocking stylesheet; every other page measured
 // within 0.01 of its old shift. A path is relative to www/.
-const KEEP_BLOCKING = [/^ET_Study\//, /^TimesHealth_Study\//, /^pw-study\//, /^ayushi-rawat\/index\.html$/, /^lifecycle-os-intel\.html$/, /^marketing-101\.html$/, /^freelancer\.html$/];
+const KEEP_BLOCKING = [/^ET_Study\//, /^TimesHealth_Study\//, /^pw-study\//, /^lenskart-study\//, /^ayushi-rawat\/index\.html$/, /^lifecycle-os-intel\.html$/, /^marketing-101\.html$/, /^freelancer\.html$/];
 const SKIP = /(<(script|noscript|template|textarea)\b[\s\S]*?<\/\2\s*>)/i;
 
 export function deferGoogleFontsIn(html, relPath = '') {

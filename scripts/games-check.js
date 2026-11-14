@@ -66,7 +66,8 @@ async function hub(browser, vp) {
   const listed = GAMES.map((g) => g.split('/')[0]);
   check(`[${vp.name}] hub lists all ${listed.length} games`, listed.every((g) => cards.includes(g)), cards.join(','));
   await page.evaluate(() => new Promise((r) => { let y = 0; const step = () => { y += 600; window.scrollTo(0, y); if (y < document.body.scrollHeight) setTimeout(step, 40); else r(); }; step(); }));
-  await sleep(400);
+  // Wait for the lazy posters to finish (a busy machine can take more than a moment), then judge them.
+  await page.waitForFunction(() => [...document.querySelectorAll('[data-slug] img')].every((i) => i.complete), null, { timeout: 5000 }).catch(() => {});
   const broken = await page.$$eval('[data-slug] img', (imgs) => imgs.filter((i) => !(i.complete && i.naturalWidth > 0)).map((i) => i.src));
   check(`[${vp.name}] every poster loads`, broken.length === 0, broken.join(' '));
   check(`[${vp.name}] hub does not scroll sideways`, await noSideScroll(page));
