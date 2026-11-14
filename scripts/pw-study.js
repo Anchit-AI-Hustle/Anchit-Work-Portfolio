@@ -71,6 +71,11 @@
 // MUT=swatch     the Muted swatch drifts from the --muted token
 // MUT=tutobase   AI Tuto reads as part of the base plan while the costs leave it out
 // MUT=tutogate   AI Tuto's rollout gate sits below its cost break-even
+// Second review (8.3 / 7.8), each with a mutation that must fail it:
+// MUT=floor (3 weeks idle reads Low)  couple (streak and idle both above 0)  planfit (18 lectures in "3 short sessions")
+// MUT=highpromo (discount shown at high risk)  plural ("1 lectures")  danda (Hindi ends with ".")
+// MUT=limits (150pp uplift, high risk above at risk)  finalchat (final-year chat sells a next batch)
+// MUT=noaiq / nosens / noleak / nested   case study AI-quality plan, sensitivity, problem size, nested iframe scroll
 // MUT=nosixq / nostack / breakeven / nogates / navcut / overclaim   case study blocks
 const { chromium } = require('./_playwright.js');
 const vercel = require('../vercel.json');
@@ -118,7 +123,7 @@ function mutate(src) {
   if (MUT === 'nostart') return src.replace(/<nav class="start"[\s\S]*?<\/nav>/, '');
   if (MUT === 'walkurl') return src.replace('<a href="/pw-study/prototype#report">https://', '<a href="/pw-study/prototype#dashboard">https://');
   if (MUT === 'oldfeature') return src.replace('tabindex="-1">Weekly Progress Report</button>', 'tabindex="-1">Weekly Pulse</button>');
-  if (MUT === 'noevidence') return src.replace(/<div class="card" id="evidence"[\s\S]*?<\/table><\/div>\s*<\/div>/, '');
+  if (MUT === 'noevidence') return src.replace(/<details class="card" id="evidence"[\s\S]*?<\/details>/, '');
   if (MUT === 'noalias') return src.replace("h = ALIAS[h] || h;", '');
   if (MUT === 'vp') return src.replace('if(p.offline && p.vp && !p.final) a.push', 'if(p.offline && !p.final) a.push').replace(' && !p.final && p.vp, held', ' && !p.final, held').replace('!p.final && p.offline && p.vp && res.tier', '!p.final && p.offline && res.tier');
   if (MUT === 'finalmsg') return src.replace('var resultsEn = p.final ?', 'var resultsEn = false ?');
@@ -135,6 +140,18 @@ function mutate(src) {
   if (MUT === 'breakeven') return src.replace('a lift of <b>0.62pp</b>', 'a lift of <b>2pp</b>');
   if (MUT === 'nogates') return src.replace(/<div class="card" id="gates"[\s\S]*?<\/table><\/div>/, '<div>');
   if (MUT === 'navcut') return src.replace('<a href="#risks">Risks</a>', '');
+  if (MUT === 'floor') return src.replace("r = Math.max(r, s.idle>=14 ? 60 : s.idle>=7 ? 35 : 0);", '');
+  if (MUT === 'couple') return src.replace("if(k==='streak' && simState.streak>0 && simState.idle>0)", 'if(false)').replace("if(k==='idle' && simState.idle>0 && simState.streak>0)", 'if(false)');
+  if (MUT === 'planfit') return src.replace("return Math.min(behind, tier==='High'?6:tier==='Medium'?3:0);", 'return behind;');
+  if (MUT === 'highpromo') return src.replace("(high?'':'<s>'+INR(nx.mrp)+'</s>", "(false?'':'<s>'+INR(nx.mrp)+'</s>");
+  if (MUT === 'plural') return src.replace("return n+' '+w+(n===1?'':'s');", "return n+' '+w+'s';");
+  if (MUT === 'danda') return src.replace("return t.replace(/\\.(?=\\s|$)/g,'।');", 'return t;');
+  if (MUT === 'limits') return src.replace('if(v.ren>60){', 'if(false){').replace('if(v.hi>v.risk){', 'if(false){');
+  if (MUT === 'finalchat') return src.replace("else if(p.final) txt = ", "else if(false) txt = ");
+  if (MUT === 'noaiq') return src.replace(/<div class="card" id="aiq"[\s\S]*?<\/ul><\/div>/, '');
+  if (MUT === 'nosens') return src.replace(/<table class="t-fit" id="sens">[\s\S]*?<\/table>/, '');
+  if (MUT === 'noleak') return src.replace('about <b>₹600 cr a year</b> of online fees', 'some online fees');
+  if (MUT === 'nested') return src.replace("fr.addEventListener('load', function(){ fit();", "fr.addEventListener('load', function(){ return;");
   if (MUT === 'tutogate') return src.replace('it scales only if recovery rises 11.3 points', 'it scales only if recovery rises 10 points');
   if (MUT === 'tutobase') return src.replace('<td>A pilot arm, not in the base cost: one hour', '<td>One hour');
   if (MUT === 'overclaim') return src.replace('found where PW cannot yet see paying students drift away', 'found where paying students quietly drop off');
@@ -404,6 +421,26 @@ async function caseStudy(browser, vp) {
   check(`${L}: break-even and downside match the sizing`, down.includes(`${be}pp`) && down.includes(`₹${zero} cr`) && down.includes('₹10.0 cr'), `${be}pp ₹${zero} cr :: ${down.slice(0, 120)}`);
   const gates = await page.$$eval('#gates tbody tr', (rs) => rs.length).catch(() => 0);
   check(`${L}: scale gates say what passes and what happens if it fails`, gates === 3 && /0\.62pp/.test(plan + norm(await page.textContent('#plan'))), gates);
+  const sysTxt2 = norm(await page.textContent('#system'));
+  check(`${L}: the leak is sized before the fix`, /₹600 cr a year/.test(sysTxt2) && /about 7%/.test(sysTxt2), sysTxt2.slice(0, 80));
+  const sens = await page.$$eval('#sens tbody tr', (rs) => rs.map((r) => r.cells[1].innerText.trim())).catch(() => []);
+  check(`${L}: sensitivity flexes renewal base, eligibility, incidence and margin`,
+    sens.join(' | ') === '69.1 / 79.1 / 89.1 | 65.6 / 79.1 / 92.7 | 79.1 / 74.2 | 59.7', sens.join(' | '));
+  const aiq = await page.$$eval('#aiq li', (l) => l.length).catch(() => 0);
+  check(`${L}: an AI quality plan backs the generated plans and reports`, aiq === 4, aiq);
+  const risks2 = norm(await page.textContent('#risks'));
+  check(`${L}: risks cover fairness, false alarms and AI safety; legal check comes first`,
+    /The score is fair/.test(risks2) && /A false alarm does no harm/.test(risks2) && /The AI stays safe/.test(risks2) && /week 0/.test(risks2) && /Week 0/.test(plan), '');
+  check(`${L}: scale rule uses the confidence bound, not the point estimate`, /lower 90% confidence bound/.test(plan) && /April 2027/.test(plan) && /randomised by household/.test(plan), '');
+  if (vp.width >= 1080) {
+    const fr = await page.$('.proto-frame');
+    await fr.scrollIntoViewIfNeeded();
+    const f = await fr.contentFrame();
+    await f.waitForFunction(() => document.readyState === 'complete');
+    await page.waitForTimeout(600);
+    const nest = await page.$eval('.proto-frame', (i) => { const d = i.contentDocument; return Math.ceil(d.body.getBoundingClientRect().height) - i.clientHeight; });
+    check(`${L}: embedded prototype is sized to its content, no scroll inside a scroll`, nest <= 4, nest + 'px');
+  }
   const hero = norm(await page.textContent('.hero .lede'));
   check(`${L}: hero does not overclaim`, !/quietly drop off/.test(hero) && /cannot yet see/.test(hero), hero.slice(0, 120));
   if (vp.width >= 1440) {
@@ -507,7 +544,7 @@ async function nineFixes(page, L) {
   await page.click('#t-parent');
   const kRep = norm(await page.textContent('#wa-body'));
   check(`${L}: a strong UPSC learner is never offered a Vidyapeeth trial`,
-    /Infinity Pro/.test(kSteps) && !/Vidyapeeth|trial/i.test(kSteps + kCard) && !/trial class/.test(kRep), kSteps.slice(0, 120));
+    /Prelims Test Series 2027/.test(kSteps) && /Prelims Test Series 2027/.test(kCard) && !/Vidyapeeth|trial/i.test(kSteps + kCard) && !/trial class/.test(kRep), kSteps.slice(0, 120));
   // 2. A final-year learner's results-day message sells nothing after the exam.
   await page.click('#pp-learner button[data-p="1"]');
   const aRep = norm(await page.textContent('#wa-body'));
@@ -565,6 +602,85 @@ async function nineFixes(page, L) {
   const negNote = norm(await page.textContent('#m-note'));
   await page.fill('#m-upg', '1.5');
   check(`${L}: a negative input says "below zero", not "not a number"`, /Below zero, so counted as 0: Plan upgrade uplift/.test(negNote) && !/Not a number/.test(negNote), negNote);
+  // 10. Second review: signals that contradict each other, plans that do not fit, words that do not agree.
+  await page.click('#t-student');
+  await page.click('.persona-row .chip[data-p="0"]');
+  await slide(page, { 'in-lec': 100, 'in-test': 100, 'in-idle': 21, 'in-doubt': 15 });
+  const away = [norm(await page.textContent('#e-tier')), norm(await page.textContent('#s-nudge-title'))];
+  check(`${L}: three weeks away is high risk, whatever the averages`, away[0] === 'High risk' && !/Great week/.test(away[1]), away.join(' | '));
+  await slide(page, { 'in-idle': 5, 'in-streak': 3 });
+  const idleAfter = await page.$eval('#in-idle', (e) => +e.value);
+  await slide(page, { 'in-idle': 2 });
+  const streakAfter = await page.$eval('#in-streak', (e) => +e.value);
+  check(`${L}: a current streak and days away cannot both be above zero`, idleAfter === 0 && streakAfter === 0, `idle=${idleAfter} streak=${streakAfter}`);
+  await slide(page, { 'in-lec': 30, 'in-test': 90, 'in-idle': 5, 'in-doubt': 2, 'in-streak': 0 });
+  const fit = norm(await page.textContent('#s-plan'));
+  await page.click('#quick button[data-q="backlog"]'); await page.waitForTimeout(400);
+  const backlogReply = norm(await page.$$eval('#chat .bubble.ai', (b) => b[b.length - 1].textContent));
+  check(`${L}: a 3-session plan holds 3 lectures and moves the rest to next week, and the chat agrees`,
+    /Session 1: 3 backlog lectures \(the other 15 next week\)/.test(fit) && /18 lecture peeche/.test(backlogReply) && /plan mein 3/.test(backlogReply), fit.slice(0, 90) + ' || ' + backlogReply);
+  const live = norm(await page.textContent('#chat-live'));
+  check(`${L}: the screen reader hears the AI's reply, not the learner's own question`, live === backlogReply, live.slice(0, 60));
+  await page.click('.persona-row .chip[data-p="1"]');
+  await slide(page, { 'in-test': 0 });
+  const amanWhy = norm(await page.textContent('#s-next'));
+  await page.click('#quick button[data-q="next"]'); await page.waitForTimeout(400);
+  const amanNext = norm(await page.$$eval('#chat .bubble.ai', (b) => b[b.length - 1].textContent));
+  check(`${L}: Aman's reason follows his score, and his chat sells no batch after the exam`,
+    !/strongest/.test(amanWhy) && /koi next batch nahi/.test(amanNext) && !/Infinity Pro|Yakeen/.test(amanNext), amanNext.slice(0, 90));
+  await page.click('.persona-row .chip[data-p="3"]');
+  await slide(page, { 'in-lec': 20, 'in-test': 30, 'in-idle': 14, 'in-doubt': 0, 'in-streak': 0 });
+  const kHigh = norm(await page.textContent('#s-next'));
+  check(`${L}: no discount or struck price is shown while an adult is high risk`, !/% OFF/.test(kHigh) && /₹/.test(kHigh) && /Continue/.test(kHigh), kHigh.slice(-140));
+  // Plurals, zero states and the Hindi danda in the weekly report.
+  await page.click('.persona-row .chip[data-p="2"]');
+  await slide(page, { 'in-lec': 73 });
+  await page.click('#t-parent');
+  await page.click('#pp-lang button[data-l="en"]');
+  const meenaRep = norm(await page.textContent('#wa-body'));
+  await page.click('#pp-lang button[data-l="hi"]');
+  const meenaHi = await page.textContent('#wa-body');
+  await page.click('#pp-lang button[data-l="en"]');
+  await page.click('#t-student');
+  await page.click('.persona-row .chip[data-p="0"]');
+  await slide(page, { 'in-lec': 0, 'in-test': 0, 'in-idle': 0, 'in-doubt': 0, 'in-streak': 0 });
+  await page.click('#t-parent');
+  const zeroRep = norm(await page.textContent('#wa-body'));
+  check(`${L}: weekly report says "1 lecture", never "0 days" or "0-day streak"`,
+    /1 lecture behind/.test(meenaRep) && !/\b1 lectures\b/.test(meenaRep) && !/\b0 days?\b|0-day/.test(zeroRep + meenaRep), meenaRep.slice(0, 120));
+  check(`${L}: Hindi sentences end with a danda`, /।/.test(meenaHi) && !/[\u0900-\u097F%]\.(\s|$)/.test(meenaHi), (meenaHi.match(/.{12}[\u0900-\u097F%]\.(\s|$)/) || [''])[0]);
+  // Keyboard: toggling the share checkbox keeps focus on it.
+  await page.click('#pp-learner button[data-p="1"]');
+  await page.focus('#pp-share');
+  await page.keyboard.press('Space');
+  const focusId = await page.evaluate(() => document.activeElement && document.activeElement.id);
+  await page.keyboard.press('Space');
+  check(`${L}: the share checkbox keeps keyboard focus when toggled`, focusId === 'pp-share', focusId);
+  const tbl = norm(await page.textContent('#aud-tbl'));
+  check(`${L}: recipient table has no doubled punctuation`, !/, ,|\. \./.test(tbl), tbl.slice(0, 80));
+  // Calculator limits the model itself implies.
+  await page.click('#t-console');
+  await page.fill('#m-ren', '150');
+  await page.fill('#m-hi', '60');
+  const lim = norm(await page.textContent('#m-note'));
+  await page.fill('#m-ren', '4'); await page.fill('#m-hi', '13');
+  await page.fill('#m-fx', '0');
+  const fxInvalid = await page.getAttribute('#m-fx', 'aria-invalid');
+  await page.fill('#m-fx', '95.1');
+  const costLine = norm(await page.textContent('#m-net-sub'));
+  check(`${L}: calculator holds uplift to 60pp and high risk within at risk, flags a bad FX`,
+    /Held re-enrolment uplift to 60pp/.test(lim) && /high risk to the at-risk share/.test(lim) && fxInvalid === 'true', lim);
+  check(`${L}: running costs show two decimals, matching the case study`, /Running costs ₹6\.15 cr/.test(costLine), costLine.slice(0, 40));
+  await page.fill('#m-acpu', '40000');
+  await page.click('#segtbl tbody tr[data-seg="On track, top scorer, centre city"] button.rowpick');
+  const zeroNet = norm(await page.textContent('#seg-detail'));
+  await page.fill('#m-acpu', '4104');
+  await page.fill('#m-u', '0');
+  const kpiZero = norm(await page.textContent('#kpis'));
+  await page.fill('#m-u', '4870000');
+  check(`${L}: a ₹0 net price and zero users read as what they are`,
+    /Net price is ₹0 at these inputs/.test(zeroNet) && !/No next batch/.test(zeroNet) && /₹0\s*Expected extra fees/.test(kpiZero), zeroNet.slice(0, 80) + ' || ' + kpiZero.slice(-40));
+
   // 9. The brand schema swatch matches the token the page uses.
   await page.click('#t-brand');
   const brand = await page.textContent('#p-brand');
@@ -675,6 +791,14 @@ async function prototype(browser, vp) {
   check(`${L}: console row click updates "Selected group"`,
     picked.every(([n, h, l]) => l === 'Selected group' && n === h) && picked[0][1] !== picked[1][1], JSON.stringify(picked));
 
+  if (vp.width < 1080) {
+    await page.click('#t-student');
+    await page.$eval('#in-test', (e) => e.scrollIntoView({ block: 'center' }));
+    await slide(page, { 'in-test': 20 });
+    const mini = await page.$eval('#mini', (m) => { const r = m.getBoundingClientRect(); return { on: r.top >= 0 && r.bottom <= innerHeight && r.height > 0, t: m.textContent }; });
+    const tier = norm(await page.textContent('#e-tier'));
+    check(`${L}: on a phone or tablet the score stays in view while dragging`, mini.on && mini.t.includes(tier.replace(' risk', '')), JSON.stringify(mini));
+  }
   let worst = 0;
   for (const tab of ['#t-student', '#t-parent', '#t-console', '#t-brand']) {
     await page.click(tab);
