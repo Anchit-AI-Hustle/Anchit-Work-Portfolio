@@ -638,12 +638,13 @@ html.embed body{padding-bottom:0!important}
 <script>
 (function(){
 'use strict';
-// Anything that would print as zero is zero: no "−₹0.0 cr".
-var NEG = function(n){return n<=-5e4 ? '−' : '';};
-var INR = function(n){return NEG(n) + '₹' + Math.abs(Math.round(n)).toLocaleString('en-IN');};
-var CR = function(n){return NEG(n) + '₹' + Math.abs(n/1e7).toLocaleString('en-IN',{maximumFractionDigits:1,minimumFractionDigits:1}) + ' cr';};
-var CR2 = function(n){return NEG(n) + '₹' + Math.abs(n/1e7).toLocaleString('en-IN',{maximumFractionDigits:2,minimumFractionDigits:2}) + ' cr';};
-var USDM = function(n,fx){return NEG(n) + '$' + Math.abs(n/fx/1e6).toLocaleString('en-US',{maximumFractionDigits:2,minimumFractionDigits:2}) + 'M';};
+// The sign follows what is printed: a value that rounds to zero at the shown
+// precision carries no minus, and one that does not keeps it.
+function signed(n, shown, unit){ var a = Math.abs(n); return (n<0 && a>=unit/2 ? '−' : '') + shown(a); }
+var INR = function(n){return signed(n, function(a){return '₹' + Math.round(a).toLocaleString('en-IN');}, 1);};
+var CR = function(n){return signed(n, function(a){return '₹' + (a/1e7).toLocaleString('en-IN',{maximumFractionDigits:1,minimumFractionDigits:1}) + ' cr';}, 1e6);};
+var CR2 = function(n){return signed(n, function(a){return '₹' + (a/1e7).toLocaleString('en-IN',{maximumFractionDigits:2,minimumFractionDigits:2}) + ' cr';}, 1e5);};
+var USDM = function(n,fx){return signed(n/fx, function(a){return '$' + (a/1e6).toLocaleString('en-US',{maximumFractionDigits:2,minimumFractionDigits:2}) + 'M';}, 1e4);};
 var clamp = function(v,a,b){return Math.max(a,Math.min(b,v));};
 function el(id){return document.getElementById(id);}
 function all(sel){return Array.prototype.slice.call(document.querySelectorAll(sel));}
@@ -911,6 +912,7 @@ el('quick').addEventListener('click',function(e){
   // An open ticket holds the assistant too: no question gets a priced answer.
   // Red-flag symptoms hold the assistant as well: every question gets the same answer.
   var reply = st==='doctor' ? 'Please see an eye doctor today. Sudden loss of vision, pain or flashes should not wait behind an eye test or new glasses. I will not suggest anything until you have been seen.'
+    : st==='refer' ? (band(p.age)==='minor'?p.name+'\'s':'Your')+' power has not changed, so new glasses will not help with this. Please see an eye doctor; the optometrist will write a referral. I will not suggest anything else until then.'
     : (simState.ticket && st!=='doctor') ? 'Let us sort out your open ticket first. Your store has it and will update you. I will not suggest anything until that is done.' : QA[k].a(p, simState, st);
   // The reply belongs to the customer who asked. Drop it if they have been switched.
   setTimeout(function(){ if(P[cur]===p && gen===chatGen) addMsg('ai', reply); }, 250);
@@ -1065,7 +1067,7 @@ function renderConsole(){
   var rows = segs.slice().sort(function(a,b){ var x=a[sortK], y=b[sortK]; return (typeof x==='string'? x.localeCompare(y) : x-y)*sortDir; });
   all('#segtbl th').forEach(function(th){ var k = th.querySelector('button').getAttribute('data-k'); th.setAttribute('aria-sort', k===sortK ? (sortDir>0?'ascending':'descending') : 'none'); });
   el('segtbl').querySelector('tbody').innerHTML = rows.map(function(s){
-    return '<tr class="pick'+(selSeg===s.key?' sel':'')+'" data-k="'+s.key+'"><th scope="row"><button type="button" class="rowbtn" aria-expanded="'+(selSeg===s.key)+'" aria-controls="seg-detail">'+s.seg+'</button><span class="act-m">'+s.action+'</span></th><td class="act">'+s.action+'</td><td class="num">'+s.n.toLocaleString('en-IN')+'</td><td class="num">'+(s.value?INR(s.value):'0')+'</td></tr>';
+    return '<tr class="pick'+(selSeg===s.key?' sel':'')+'" data-k="'+s.key+'"><th scope="row"><button type="button" class="rowbtn" aria-expanded="'+(selSeg===s.key)+'" aria-controls="seg-detail">'+s.seg+'</button><span class="act-m">'+s.action+'</span></th><td class="act">'+s.action+'</td><td class="num">'+s.n.toLocaleString('en-IN')+'</td><td class="num">'+(Math.round(s.value)?INR(s.value):'0')+'</td></tr>';
   }).join('');
   var d = el('seg-detail'), s = segs.filter(function(x){return x.key===selSeg;})[0];
   if(!s){ d.innerHTML = ''; return; }
