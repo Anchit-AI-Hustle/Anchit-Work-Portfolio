@@ -533,7 +533,8 @@ function updateDuo(G, mv, dt) {
   if (k >= 1) {
     a.move = null; d.move = null;
     clampIn(d); clampIn(a);
-    if (mv.hold) { startSub(G, a, d, mv.hold, mv.name, true); return; }
+    // a hold that cannot start (a cover or hold already running, or an illegal tag partner) ends the move normally
+    if (mv.hold && startSub(G, a, d, mv.hold, mv.name, true)) return;
     const dEnd = tpl.dEnd || 'up';
     if (dEnd === 'hit') { setSt(d, 'hit'); d.stun = 0.75; d.anim = 'stagger'; d.h = 1; d.pitch = 0; }
     else down(G, d, dEnd, (tpl.dGet || 1.6) * (mv.fin ? 1.6 : 1));
@@ -571,7 +572,8 @@ function runSpeed(w) { return (4.6 + w.def.stats.spd * 1.8) * (w.stam < 20 ? 0.8
 
 /* ------------------------------------------------------------ pins, holds, count outs */
 function startPin(G, a, d, bridge) {
-  if (!d.legal && G.cfg.match === 'tag') return;
+  // in a tag match only the two legal wrestlers can score a fall
+  if (G.cfg.match === 'tag' && (!a.legal || !d.legal)) return;
   // one referee: a second cover or hold waits until the current one ends
   if (G.pin || G.sub) return;
   stand(G, a);
@@ -603,7 +605,8 @@ function aiKickout(G, d, a) {
   return 9;
 }
 function startSub(G, a, d, holdName, name, fromFin) {
-  if (G.pin || G.sub) return;
+  if (G.pin || G.sub) return false;
+  if (G.cfg.match === 'tag' && (!a.legal || !d.legal)) return false;
   const H = HOLDS[holdName] || HOLDS.armLock;
   stand(G, a);
   setSt(a, 'sub'); setSt(d, 'sub'); a.role = 'a'; d.role = 'd';
@@ -615,6 +618,7 @@ function startSub(G, a, d, holdName, name, fromFin) {
   ev(G, 'sub', { a, d, m: G.sub.name }); say(G, 'sub', { a, d, m: G.sub.name });
   G.crowd = Math.min(1, G.crowd + 0.12);
   d.threat = null;
+  return true;
 }
 function placeSub(G) {
   const s = G.sub, a = s.a, d = s.d, f = d.face === 'front' ? 1 : -1;
