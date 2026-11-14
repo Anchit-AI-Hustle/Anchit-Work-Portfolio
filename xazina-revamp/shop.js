@@ -1,5 +1,6 @@
 const B='/xazina-revamp', STORE='https://xazina.com', KEY='xazina-bag-v1';
-const money=value=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:2}).format(value);
+// Paise only when a price has them: "₹1,48,756", not "₹1,48,756.00".
+const money=value=>{const paise=Math.round(Number(value)*100);return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',minimumFractionDigits:paise%100?2:0,maximumFractionDigits:2}).format(paise/100);};
 const $=(selector,root=document)=>root.querySelector(selector);
 const $$=(selector,root=document)=>[...root.querySelectorAll(selector)];
 const el=(tag,text,classes)=>{const node=document.createElement(tag);if(text)node.textContent=text;if(classes)node.className=classes;return node};
@@ -199,12 +200,12 @@ if(search){
  const kind={product:'Jewellery & fragrance',collection:'Collection',page:'The house',article:'Journal',journal:'Journal',tag:'Journal topic'};
  let pending, version=0;
  function searchData(){
-  return pending ||= fetch(B+'/catalog/search.json?v=maison-3').then(r=>{if(!r.ok)throw Error();return r.json()}).catch(e=>{pending=null;throw e;});
+  return pending ||= fetch(B+'/catalog/search.json?v=maison-4').then(r=>{if(!r.ok)throw Error();return r.json()}).catch(e=>{pending=null;throw e;});
  }
  function card(item){
   const root=el('article','','shop-card'), link=anchor(href(item.path),''), media=el('div','','shop-card-image');
   const img=el('img');img.src=imgUrl(item.image,680);img.alt='';img.loading='lazy';media.append(img);
-  const label=item.kind==='product'?(item.type||'Xazina jewellery'):(kind[item.kind]||'Xazina');
+  const label=item.kind==='product'?(item.eyebrow||item.type||'Xazina jewellery'):(kind[item.kind]||'Xazina');
   const copy=el('div','','shop-card-text');copy.append(el('p',label,'shop-kicker'),el('h2',item.title));
   if(typeof item.price==='number')copy.append(el('p','From '+money(item.price)));
   link.append(media,copy);root.append(link);return root;
@@ -245,6 +246,31 @@ if(search){
  addEventListener('popstate',read);read();
  // Arriving from the header's search icon: the field is the next thing to use.
  if(!input.value)input.focus({preventScroll:true});
+}
+
+// Captured videos: the poster loads only as the video nears the screen, and
+// the native controls stay hidden behind one play button until it plays.
+const videos=$$('video[data-poster]');
+if(videos.length){
+ const near=new IntersectionObserver(entries=>{
+  for(const entry of entries){
+   if(!entry.isIntersecting)continue;
+   entry.target.poster=entry.target.dataset.poster;
+   near.unobserve(entry.target);
+  }
+ },{rootMargin:'400px 0px'});
+ for(const video of videos)near.observe(video);
+}
+for(const video of $$('video[data-video]')){
+ const play=video.parentElement.querySelector('.src-play');
+ if(!play)continue;
+ video.controls=false;play.hidden=false;
+ const started=()=>{video.controls=true;play.hidden=true;};
+ play.addEventListener('click',()=>{
+  if(!video.poster&&video.dataset.poster)video.poster=video.dataset.poster;
+  started();video.play().catch(()=>{});video.focus({preventScroll:true});
+ });
+ video.addEventListener('play',started);
 }
 
 if(window.Motion&&!matchMedia('(prefers-reduced-motion: reduce)').matches){

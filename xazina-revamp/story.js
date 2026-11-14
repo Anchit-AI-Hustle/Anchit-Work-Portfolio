@@ -3,8 +3,8 @@ import { mountOptics } from './optics.js?v=prism-3';
 
 const acts = [
   { index: '01 / THE FORM', lines: ['A Study', 'in ', 'Light.'], caption: 'Lab-grown diamond jewellery and fine fragrance. Three scenes play as you watch.', mark: '01 / REFLECTION' },
-  { index: '02 / TIME', lines: ['A moment,', 'un', 'folded.'], caption: 'A single cut, separated into moments. Scroll to move through them.', mark: '02 / TIME SLICE' },
-  { index: '03 / SPECTRUM', lines: ['Light', 'comes ', 'apart.'], caption: 'One white beam, split into a spectrum. The colour was there all along.', mark: '03 / DISPERSION' }
+  { index: '02 / TIME', lines: ['A moment,', 'un', 'folded.'], caption: 'A single cut, separated into moments. Scroll to move through them.', mark: '02 / MOMENTS' },
+  { index: '03 / SPECTRUM', lines: ['Light', 'comes ', 'apart.'], caption: 'One white beam, split into a spectrum. The colour was there all along.', mark: '03 / COLOUR' }
 ];
 const clamp = (n, a = 0, b = 1) => Math.min(b, Math.max(a, n));
 

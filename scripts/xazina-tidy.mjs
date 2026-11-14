@@ -126,8 +126,44 @@ function shape(n, inLink) {
   for (const c of n.children) if (c.tag) shape(c, link);
 }
 
+const rupees = value => {
+  const paise = Math.round(value * 100);
+  return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: paise % 100 ? 2 : 0, maximumFractionDigits: 2 }).format(paise / 100);
+};
+
+// Captured videos arrived with native controls and an eager poster, so the
+// home fetched ~267KB of posters from xazina.com below the fold and showed
+// letterboxed tiles with a control bar on each. The poster now waits in
+// data-poster until the video nears the screen (shop.js), and a playable
+// video gets a play button; its controls appear once it plays.
+//
+// Xazina's "Say Yes To Forever!" hero carries one film twice: a landscape cut
+// for wide screens and a portrait cut for phones. Side by side they rendered
+// as two 172px slivers on a phone. Measured from the captured posters, so
+// each cut gets its true shape and only the one that suits the screen shows.
+const POSTER_SIZE = {
+  befcc636716e4f99ad144f62506e6852: [1800, 863],
+  '0de5d21095664a76bf0afa7f5fe55942': [1000, 1778],
+  '921d3e82fef84c7cb1a6ab3301552b78': [1200, 675],
+};
+function videos(html) {
+  let out = html.replace(/<video([^>]*)>([\s\S]*?)<\/video>/g, (whole, attrs, inner) => {
+    const id = (attrs.match(/preview_images\/([0-9a-f]{32})\./) || [])[1];
+    const size = POSTER_SIZE[id];
+    let a = attrs.replace(/\sposter="/, ' data-poster="').replace(/\spreload="[^"]*"/, '') + ' preload="none"';
+    if (size) a += ` style="aspect-ratio:${size[0]}/${size[1]}"`;
+    if (!/<source\b/.test(inner)) return `<video${a}>${inner}</video>`;
+    const shape = size ? (size[0] >= size[1] ? ' src-video-wide' : ' src-video-tall') : '';
+    return `<div class="src-video${shape}"><video${a} data-video>${inner}</video><button type="button" class="src-play" aria-label="Play video" hidden></button></div>`;
+  });
+  // Two cuts of one film side by side: mark them as a pair.
+  out = out.replace(/<div class="src-video src-video-(wide|tall)">([\s\S]*?<\/button><\/div>)(\s*)<div class="src-video src-video-(wide|tall)">/g,
+    (m, a, body, gap, b) => a === b ? m : `<div class="src-video src-video-${a} src-video-pair">${body}${gap}<div class="src-video src-video-${b} src-video-pair">`);
+  return out;
+}
+
 export function clean(html) {
-  return String(html ?? '')
+  return videos(String(html ?? ''))
     // An inline object-position/transform value that escaped its attribute
     // and rendered as copy: "54% 50%;transform:translate(-4%,0%) scale(1.5);"
     .replace(/>(\s*-?[\d.]+%\s+-?[\d.]+%;\s*transform:[^<]*)</g, '><')
@@ -137,8 +173,9 @@ export function clean(html) {
       (_, price) => `<p class="source-price">${price.replace(/Rs\.\s*/g, '₹')}</p>`)
     .replace(/<p>\s*Type:\s*<\/p>/g, '')
     // Captured prices came as "₹293,617.00", "₹ 148,756" and "₹2,93,617":
-    // all now read the way the product pages print them.
-    .replace(/₹\s?(\d[\d,]*)(\.\d{1,2})?(?![\d,])/g, (_, n, dec) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(+(n.replace(/,/g, '') + (dec || ''))))
+    // all now read the way the product pages print them, paise only when the
+    // price has some ("₹2,93,617", not "₹2,93,617.00").
+    .replace(/₹\s?(\d[\d,]*)(\.\d{1,2})?(?![\d,])/g, (_, n, dec) => rupees(+(n.replace(/,/g, '') + (dec || ''))))
     // Leftover tab labels of a widget whose tabs did not survive capture.
     .replace(/<div>\s*<p class="source-label">Stores<\/p>\s*<p class="source-label">Contact<\/p>\s*<\/div>/g, '');
 }
