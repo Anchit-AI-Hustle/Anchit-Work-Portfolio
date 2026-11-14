@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vision Recall Engine Prototype | Anchit Tandon, Lenskart Case Study</title>
-<meta name="description" content="Working prototype of the Vision Recall Engine, an AI re-test and repeat-purchase system proposed for Lenskart in a case study by Anchit Tandon. Synthetic data.">
+<meta name="description" content="A clickable concept demo by Anchit Tandon for his Lenskart case study: telling each customer when their next eye test is due. Synthetic data.">
 <meta name="robots" content="noindex, nofollow">
 <meta name="color-scheme" content="light">
 <link rel="canonical" href="https://anchit-tandon.com/lenskart-study/prototype">
@@ -150,7 +150,7 @@ table{border-collapse:collapse;width:100%;font-size:14px;min-width:640px}
 th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border-soft);vertical-align:top}
 th{background:var(--page);color:var(--heading);font-weight:600;font-size:13px;white-space:nowrap}
 th button{all:unset;cursor:pointer;display:inline-flex;gap:4px;align-items:center}
-th button:focus-visible{outline:3px solid var(--accent)}
+th button:focus-visible{outline:3px solid var(--accent-ink)}
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 tr:last-child td{border-bottom:0}
 .calc .row{display:grid;grid-template-columns:1fr 120px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-soft)}
@@ -212,70 +212,207 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
 </style>
 <style>html.embed .concept,html.embed .hero,html.embed footer,html.embed .dl-bar{display:none}</style>
 <script>if(/[?&]embed=1/.test(location.search))document.documentElement.classList.add("embed");</script>
+<style>
+/* Review pass: layout, focus, touch targets, embed. */
+.start{list-style:none;counter-reset:st;padding:0;margin:6px 0 2px;display:grid;gap:8px;max-width:820px}
+.start li{counter-increment:st;display:grid;grid-template-columns:28px 1fr;gap:10px;font-size:15px;line-height:22px;color:var(--body)}
+.start li::before{content:counter(st);width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px}
+.start li b{color:var(--heading)}
+@media (min-width:900px){.start{grid-template-columns:repeat(3,1fr);max-width:none;gap:16px}}
+@media (max-width:420px){.hero h1{font-size:22px;line-height:29px}.hero .wrap{padding-top:16px;padding-bottom:16px}.hero p.lede{font-size:15px;line-height:23px}}
+.skip{position:absolute;left:-9999px;top:0;background:#fff;color:var(--ink);padding:10px 14px;border-radius:8px;z-index:50;font-weight:600}
+.skip:focus{left:8px;top:8px}
+:focus-visible{outline-color:var(--accent-ink)}
+.concept a:focus-visible,.phone-top :focus-visible{outline-color:#8CF2DB}
+header.top{position:sticky;top:0;z-index:10}
+html.embed header.top{position:static}
+.ptitle{margin-bottom:6px}
+.tab,.chip,.quick button,.seg button,.feats a,.btn.sm{min-height:44px}
+.sim input[type=range]{min-height:44px}
+.sim input[type=range]:disabled{opacity:.45}
+.sim .field .note{font-size:12px;line-height:17px;color:var(--muted)}
+.sim .seg{justify-self:start;flex-wrap:wrap;border-radius:16px}
+.seg{flex-wrap:wrap;border-radius:16px}
+.seg button{border-radius:12px}
+.toggles{display:grid;gap:10px}
+.toggle input{flex:none}
+.phone{align-self:start}
+.stat b,.field label span,.offer .banner small{white-space:nowrap}
+.offer .banner{background:linear-gradient(120deg,#000042,#333368 60%,#006B4E)}
+.offer .banner small{opacity:1}
+.chat{max-height:320px;overflow:auto}
+.wa-head small{opacity:.9}
+.scroll-x{overflow-x:auto}
+.aud th{white-space:normal;font-size:13px}
+.aud tbody th{font-weight:700;color:var(--heading);white-space:nowrap;background:transparent}
+.aud tr.on th{background:var(--primary-50)}
+table{min-width:0}
+#segtbl tbody th{font-weight:400;white-space:normal;background:transparent;font-size:14px}
+.rowbtn{all:unset;cursor:pointer;font-weight:700;color:var(--heading);text-decoration:underline;text-decoration-color:var(--border);text-underline-offset:3px;display:block;min-height:24px}
+.rowbtn:focus-visible{outline:3px solid var(--accent-ink);outline-offset:2px;border-radius:4px}
+#segtbl tr.pick.sel th{background:var(--primary-50)}
+th button{min-height:24px}
+th[aria-sort="ascending"] button::after{content:"\25B2";font-size:10px}
+th[aria-sort="descending"] button::after{content:"\25BC";font-size:10px}
+.calc input{border-color:#737397}
+.calc input:focus{outline:3px solid var(--accent-ink);outline-offset:2px;box-shadow:none;border-color:#737397}
+.lever-head>:last-child{margin-left:auto;text-align:right}
+.bigtotal{overflow-wrap:anywhere}
+.fold{margin-top:14px;border:1px solid var(--border);border-radius:var(--r-panel);padding:0 12px}
+.fold summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--heading);padding:12px 0;min-height:44px}
+.fold[open] summary{border-bottom:1px solid var(--border-soft)}
+html.embed #consentBar{display:none!important}
+html.embed body{padding-bottom:0!important}
+:root{--cb-bg:#000042;--cb-line:#333368;--cb-ink:#FFFFFF;--cb-muted:#D9D9E8;--cb-accent:#8CF2DB;--cb-accent-2:#8CF2DB;--cb-link:#8CF2DB;--cb-on-accent:#000042;--cb-font:var(--font)}
+@media (max-width:480px){
+  .tabs{display:grid;grid-template-columns:1fr 1fr;border-radius:16px;width:100%}
+  .tab{border-radius:12px;white-space:normal}
+  .top .wrap{gap:8px}
+}
+@media (max-width:600px){
+  #segtbl th:nth-child(2),#segtbl td.act{display:none}
+  #segtbl th,#segtbl td{white-space:normal;padding:10px 8px}
+  #segtbl{table-layout:fixed;width:100%;min-width:0}
+  #segtbl th:first-child{width:46%}
+  #segtbl th:nth-child(3){width:24%}
+  #segtbl th button{white-space:normal;display:inline}
+}
+.factor{grid-template-columns:170px 1fr 40px}
+@media (max-width:420px){.factor{grid-template-columns:128px 1fr 36px}}
+@media (min-width:760px){
+  .cust-layout{grid-template-columns:minmax(300px,380px) 1fr}
+}
+@media (min-width:1080px){
+  .cust-layout{grid-template-columns:minmax(360px,420px) 1fr}
+}
+
+/* Second review pass. */
+.start li>span{min-width:0}
+.chip,.btn-outline,.seg,.tabs,.fold{border-color:#737397}
+:root{--cb-line:#8C8CB0}
+.fold.note{margin-top:4px}
+.act-m{display:none}
+.calc .row{grid-template-columns:1fr 136px}
+.calc input:invalid{border-color:var(--danger-ink)}
+.lever-head{flex-wrap:nowrap}
+.lever-head>:first-child{flex:1;min-width:0}
+.lever-head>:last-child{overflow-wrap:anywhere;white-space:nowrap}
+.chartbar .bar i.l{background:var(--success)}
+@media (max-width:600px){
+  .act-m{display:block;font-weight:400;font-size:13px;line-height:18px;color:var(--muted);margin-top:2px}
+  .aud thead{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+  .aud tr{display:block;padding:10px 0;border-bottom:1px solid var(--border-soft)}
+  .aud td,.aud tbody th{display:block;padding:2px 10px;border:0;white-space:normal}
+  .aud td[data-label]::before{content:attr(data-label) ": ";font-weight:600;color:var(--heading)}
+  .aud tr.on{background:var(--primary-50)}
+}
+@media (max-width:759px){
+  /* Controls sit directly above the phone they drive. */
+  .cust-layout>.grid{display:contents}
+  .cust-layout .sim{order:1}
+  .cust-layout .phone{order:2}
+  .cust-layout #due{order:3}
+}
+@media (max-width:480px){
+  header.top{position:static}
+  .sim .seg,#pp-person{display:grid;grid-template-columns:1fr;width:100%}
+  #pp-person{grid-template-columns:1fr 1fr}
+  .seg button{white-space:normal}
+}
+@media (max-height:520px){header.top{position:static}}
+@media print{
+  header.top{position:static}
+  #consentBar,.skip,.xlinks,.feats{display:none!important}
+  body{padding-bottom:0!important}
+  .panel{display:block!important}
+  .panel[hidden]{display:block!important}
+  .card,.phone,.wa,tr{break-inside:avoid}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+
+/* Third review pass. */
+.onscreen{max-width:820px}
+.dl-bar{padding:0;margin:0 0 12px;border-bottom:0;min-height:1px}
+.toggle{min-height:44px}
+.toggle[hidden]{display:none}
+#segtbl thead button{min-height:44px}
+.calc input{min-height:44px}
+#segtbl tr.pick.sel th{box-shadow:inset 4px 0 0 var(--primary)}
+@media (max-width:759px){header.top{position:static}}
+@page{margin:12mm}
+</style>
 </head>
 <body>
-<div class="concept" role="note"><b>Concept prototype</b> by Anchit Tandon. Not an official Lenskart product and not affiliated with Lenskart. Customer data is synthetic; AI replies are simulated with transparent rules. Nothing here is medical advice.</div>
+<a class="skip" href="#main">Skip to the prototype</a>
+<div class="concept" role="note"><b>Concept demo</b> by Anchit Tandon. Not a Lenskart product. Made-up customers; not medical advice.</div>
 <header class="top">
   <div class="wrap">
     <a class="brandmark" href="/lenskart-study" style="text-decoration:none" target="_top"><div class="dot" aria-hidden="true">VR</div><div><strong>Vision Recall Engine</strong><small>Back to the Lenskart case study</small></div></a>
-    <nav class="tabs" role="tablist" aria-label="Prototype views">
+    <div class="tabs" role="tablist" aria-label="Prototype views">
       <button class="tab" role="tab" id="t-customer" aria-controls="p-customer" aria-selected="true">Customer app</button>
       <button class="tab" role="tab" id="t-checkin" aria-controls="p-checkin" aria-selected="false" tabindex="-1">Sight Check-in</button>
       <button class="tab" role="tab" id="t-console" aria-controls="p-console" aria-selected="false" tabindex="-1">Growth Console</button>
       <button class="tab" role="tab" id="t-brand" aria-controls="p-brand" aria-selected="false" tabindex="-1">Brand schema</button>
-    </nav>
+    </div>
   </div>
 </header>
-<section class="hero">
+<section class="hero" aria-labelledby="hero-h">
   <div class="wrap">
-    <span class="eyebrow">Proposed system · Vision Recall Engine</span>
-    <h1>Every eye test starts a clock. <span class="accent">This keeps time for the customer.</span></h1>
-    <p class="lede">Lenskart already runs free eye tests, home and remote optometry, Free Lens Replacement, Gold and an AI stylist. The Vision Recall Engine connects them: it knows when each person's next eye test is due, books it, and offers a next pair only after the test says one is needed.</p>
-    <div class="xlinks"><a class="btn btn-outline sm" href="/lenskart-study" target="_top">Back to the case study</a><a class="btn btn-soft sm" href="/lenskart-study#audit" target="_top">See the live platform audit</a></div>
-    <nav class="feats" aria-label="The five features"><span class="label">Five features, all working here:</span><a href="#recall"><b>1</b>Recall Score</a><a href="#plan"><b>2</b>Re-test Plan</a><a href="#checkin"><b>3</b>Sight Check-in</a><a href="#next"><b>4</b>Next Pair Step</a><a href="#console"><b>5</b>Growth Console</a></nav>
-    <p class="small muted">Part of Anchit Tandon's Lenskart case study. Step-by-step review: <a href="/lenskart-study#walkthrough" target="_top">anchit-tandon.com/lenskart-study#walkthrough</a></p>
+    <span class="eyebrow">Concept demo · not a Lenskart product</span>
+    <h1 id="hero-h">A clickable demo of one idea for Lenskart: <span class="accent">tell every customer when their next eye test is due.</span></h1>
+    <p class="lede">I'm Anchit Tandon. I built this demo for my case study of Lenskart, the Indian eyewear retailer. It shows how Lenskart could remind each customer when their next eye test is due, book it, and suggest lenses or a new pair only after the test says one is needed. The six customers and all their data are made up.</p>
+    <div class="xlinks"><a class="btn btn-outline sm" href="/lenskart-study" target="_top">Read the case study</a><a class="btn btn-soft sm" href="/lenskart-study#audit" target="_top">See the evidence</a></div>
+    <ol class="start" aria-label="How to use this demo">
+      <li><span><b>Pick a customer.</b> Six people at different points: overdue, up to date, a child, a first eye test.</span></li>
+      <li><span><b>Change something.</b> Move the months since their last test, record a re-test result, or report trouble seeing.</span></li>
+      <li><span><b>Watch what happens.</b> The phone, the due date and the WhatsApp message all update, and each says why.</span></li>
+    </ol>
+    <nav class="feats" aria-label="The six features"><span class="label">Or jump to a feature:</span><a href="#due"><b>1</b>Due Date</a><a href="#plan"><b>2</b>Re-test Plan</a><a href="#checkin"><b>3</b>Sight Check-in</a><a href="#next"><b>4</b>Next Pair Step</a><a href="#followup"><b>5</b>First-Test Follow-up</a><a href="#console"><b>6</b>Growth Console</a></nav>
   </div>
 </section>
 
-<main>
+<main id="main">
 <div class="wrap">
-<div class="dl-bar" id="dl-bar"><span>Concept prototype by Anchit Tandon · synthetic data · not affiliated with Lenskart</span><nav class="dl-tabs" aria-label="Prototype screens"><a href="#customer">Customer app</a><a href="#checkin">Sight Check-in</a><a href="#console">Growth Console</a><a href="#brand">Brand schema</a></nav></div>
+<div class="dl-bar" id="dl-bar"></div>
 
 <!-- CUSTOMER -->
 <section class="panel on" id="p-customer" role="tabpanel" aria-labelledby="t-customer">
-  <p class="onscreen" id="customer">On this screen: <b>Recall Score</b> (engine output), <b>Re-test Plan</b> (the plan in the phone) and <b>Next Pair Step</b> (bottom of the phone).</p>
+  <h2 id="customer" class="ptitle">Customer app</h2>
+  <p class="onscreen">What a customer would see in the Lenskart app, and why. The simulator changes this customer's situation, the phone shows what they would see, and the Due Date card explains the reasoning. Here: <b>Due Date</b>, <b>Re-test Plan</b>, <b>Next Pair Step</b> and, for Ravi, the <b>First-Test Follow-up</b>.</p>
   <div class="persona-row" role="group" aria-label="Choose a customer">
-    <button class="chip" data-p="0" aria-pressed="true">Neha, 29 - Bengaluru</button>
-    <button class="chip" data-p="1" aria-pressed="false">Arjun, 34 - Pune</button>
-    <button class="chip" data-p="2" aria-pressed="false">Kabir, 9 - Lucknow</button>
-    <button class="chip" data-p="3" aria-pressed="false">Meera, 47 - Chennai</button>
+    <button class="chip" data-p="0" aria-pressed="true">Neha, 29 · Bengaluru</button>
+    <button class="chip" data-p="1" aria-pressed="false">Arjun, 34 · Pune</button>
+    <button class="chip" data-p="2" aria-pressed="false">Kabir, 9 · Lucknow</button>
+    <button class="chip" data-p="3" aria-pressed="false">Meera, 47 · Chennai</button>
+    <button class="chip" data-p="4" aria-pressed="false" id="followup">Ravi, 26 · first eye test</button>
+    <button class="chip" data-p="5" aria-pressed="false">Usha, 68 · Jaipur</button>
   </div>
   <div class="cust-layout">
-    <div class="phone" aria-label="Customer app preview">
+    <div class="phone" role="group" aria-label="Customer app preview">
       <div class="phone-top">
-        <small id="s-sub0">Lenskart app (concept)</small>
+        <small>Lenskart app (concept)</small>
         <h2 style="color:#fff;margin-top:2px" id="s-hello">Hi Neha</h2>
       </div>
       <div class="phone-body">
         <div class="card" style="padding:14px">
           <div class="ring">
-            <svg width="72" height="72" viewBox="0 0 72 72" role="img" aria-labelledby="ringT"><title id="ringT">Prescription freshness</title>
+            <svg width="72" height="72" viewBox="0 0 72 72" role="img" aria-labelledby="ringT"><title id="ringT">Months since the last eye test</title>
               <circle cx="36" cy="36" r="30" fill="none" stroke="#F0F0F6" stroke-width="8"/>
               <circle id="ringArc" cx="36" cy="36" r="30" fill="none" stroke="#000042" stroke-width="8" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="124" transform="rotate(-90 36 36)"/>
-              <text x="36" y="41" text-anchor="middle" font-size="17" font-weight="700" fill="#000042" id="ringTxt">31</text>
+              <text x="36" y="41" text-anchor="middle" font-size="17" font-weight="700" fill="#000042" id="ringTxt">38</text>
             </svg>
-            <div><p class="label">Prescription freshness</p><p id="s-status" style="font-weight:600;color:var(--heading)"></p><p class="small muted" id="s-sub"></p></div>
+            <div><p class="label" id="s-ringlabel">Months since your eye test</p><p id="s-status" style="font-weight:600;color:var(--heading)"></p><p class="small muted" id="s-sub"></p></div>
           </div>
         </div>
         <div class="stat-row">
-          <div class="stat"><b id="st-power"></b><span>Saved power</span></div>
+          <div class="stat"><b id="st-power"></b><span>Power</span></div>
           <div class="stat"><b id="st-test"></b><span>Last eye test</span></div>
           <div class="stat"><b id="st-pair"></b><span>Current pair</span></div>
         </div>
         <div class="nudge" id="s-nudge"><span id="plan" class="anchor"></span><p class="label" id="s-nudge-label">Re-test Plan</p><p id="s-nudge-title" style="font-weight:600;color:var(--heading)"></p><ul class="plan small" id="s-plan"></ul></div>
         <div class="card" style="padding:14px">
           <p class="label" style="margin-bottom:8px">Ask the eye-care assistant <span class="tag pri" style="margin-left:4px">Simulated</span></p>
-          <div class="chat" id="chat" aria-live="polite"></div>
+          <div class="chat" id="chat" role="log" aria-live="polite" aria-label="Assistant conversation" tabindex="0"></div>
           <div class="quick" style="margin-top:10px" id="quick"></div>
         </div>
         <p class="label" style="margin-top:4px" id="next">Your next pair step</p>
@@ -288,26 +425,37 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px">
           <h3>Signal simulator</h3><span class="tag pri">Change a signal to see the engine react</span>
         </div>
-        <div class="field"><label for="in-test">Months since last eye test <span id="v-test"></span></label><input type="range" id="in-test" min="0" max="48"></div>
-        <div class="field"><label for="in-pair">Months since current pair was bought <span id="v-pair"></span></label><input type="range" id="in-pair" min="0" max="48"></div>
-        <div class="field"><label for="in-sym">Symptoms reported in the check-in <span id="v-sym"></span></label><input type="range" id="in-sym" min="0" max="3"></div>
-        <div class="field"><label for="in-screen">Screen hours a day <span id="v-screen"></span></label><input type="range" id="in-screen" min="0" max="14"></div>
-        <div class="field" style="margin-bottom:10px"><span class="label">Re-test result</span>
-          <div class="seg" role="group" aria-label="Re-test result" id="in-result">
-            <button data-r="none" aria-pressed="true">Not tested yet</button><button data-r="same" aria-pressed="false">Power unchanged</button><button data-r="changed" aria-pressed="false">Power changed</button>
+        <div id="sim-main">
+          <div class="field"><label for="in-test">Months since last eye test <span id="v-test"></span></label><input type="range" id="in-test" min="0" max="60"><span class="note" id="n-test" hidden>Re-tested today. Choose "Not tested yet" to move this again.</span></div>
+          <div class="field"><label for="in-pair">Months since current pair was bought <span id="v-pair"></span></label><input type="range" id="in-pair" min="0" max="60"></div>
+          <div class="field" style="margin-bottom:12px"><span class="label" id="l-result">Re-test result</span>
+            <div class="seg" role="group" aria-labelledby="l-result" id="in-result">
+              <button type="button" data-r="none" aria-pressed="true">Not tested yet</button><button type="button" data-r="same" aria-pressed="false">Power unchanged</button><button type="button" data-r="changed" aria-pressed="false">Power changed</button>
+            </div></div>
+        </div>
+        <div id="sim-first" hidden>
+          <div class="field"><label for="in-days">Days since the first eye test, no order yet <span id="v-days"></span></label><input type="range" id="in-days" min="0" max="45"></div>
+        </div>
+        <div class="field" style="margin-bottom:12px"><span class="label" id="l-sym">What the customer has told us</span>
+          <div class="seg" role="group" aria-labelledby="l-sym" id="in-sym">
+            <button type="button" data-s="0" aria-pressed="true">Nothing</button><button type="button" data-s="1" aria-pressed="false">Trouble seeing</button><button type="button" data-s="2" aria-pressed="false">Sudden loss, pain or flashes</button>
           </div></div>
-        <label class="toggle" for="in-ticket"><input type="checkbox" id="in-ticket"> Open service ticket (wrong power, refund or delivery)</label>
+        <div class="toggles">
+          <label class="toggle" for="in-ticket"><input type="checkbox" id="in-ticket"> Open service ticket (wrong power, refund or delivery)</label>
+          <label class="toggle" for="in-call"><input type="checkbox" id="in-call"> Agreed at the eye test that the store may call</label>
+          <label class="toggle" for="in-gold"><input type="checkbox" id="in-gold"> Gold member</label>
+        </div>
       </div>
-      <div class="card" id="recall">
+      <div class="card" id="due">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
-          <h3>Recall Score: engine output</h3><span id="e-tier" class="tag"></span>
+          <h3>Due Date: engine output</h3><span id="e-tier" class="tag"></span>
         </div>
         <div class="engine-out" style="margin-top:12px">
-          <p><span class="label">How due is the next eye test</span><br><b id="e-risk" style="font-size:28px;line-height:34px;color:var(--heading)"></b><span class="muted"> / 100</span></p>
-          <div id="e-factors"></div>
-          <p class="why" id="e-why"></p>
+          <p><span class="label">Next eye test</span><br><b id="e-when" style="font-size:24px;line-height:32px;color:var(--heading)"></b></p>
+          <ul class="plan small" id="e-reasons" style="margin-top:0"></ul>
+          <div id="e-prio"></div>
           <div class="flow" id="e-actions"></div>
-          <p class="small muted">Rule weights and re-test intervals (6 months under 18, 24 months for 18 to 39, 12 months from 40) are illustrative; Lenskart's optometry team would set the clinical intervals. In production the signals come from data Lenskart already holds (the eye-test record and its date, order history, the face-scan profile, Gold status, service tickets), scored by a model trained on past cohorts and checked against a holdout group.</p>
+          <details class="fold note"><summary>How this would work in production</summary><p class="small muted" style="padding:10px 0 12px">The due date is a rule on two facts Lenskart already holds, the date of the last eye test and the wearer's age. The intervals here follow published guidance from the American Optometric Association, the UK College of Optometrists and the International Myopia Institute (every 12 months under 18, every 6 months for a child on myopia-control lenses, every 24 months from 18 to 64 and every 12 months from 65); Lenskart's optometry team would set the final ones. A separate priority score only orders the store call list. Symptoms are not held today; they would come from the assistant or a check-in reply. Lenskart's current lens-replacement offer is single use per customer, so repeat use is a policy change this product would need. In production, a model trained on past cohorts predicts who will act, and every action is checked against a holdout group.</p></details>
         </div>
       </div>
     </div>
@@ -321,42 +469,52 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
       <div class="card">
         <h2 id="checkin">Sight Check-in on WhatsApp</h2>
         <p style="margin-top:8px">Lenskart holds the date and result of every eye test it runs, but the customer has to remember when the next one is due. Sight Check-in sends one short, plain-language message when a test falls due, with a slot to book. <b>Who receives it depends on the wearer's age.</b></p>
-        <div style="overflow-x:auto;margin-top:12px"><table class="aud" id="aud-tbl">
-          <thead><tr><th>Wearer</th><th>Re-test rhythm (illustrative)</th><th>Check-in goes to</th></tr></thead>
+        <div class="scroll-x" style="margin-top:12px"><table class="aud" id="aud-tbl" aria-label="Who receives the check-in, by age">
+          <thead><tr><th scope="col">Wearer</th><th scope="col">Re-test rhythm</th><th scope="col">Check-in goes to</th></tr></thead>
           <tbody>
-            <tr data-a="minor"><td><b>Under 18</b></td><td>Every 6 months</td><td><b>Parent Check-in</b>: the parent who holds the account, with consent taken at the eye test (DPDP Act 2023 needs it for under-18s)</td></tr>
-            <tr data-a="adult"><td><b>18 to 39</b></td><td>Every 24 months, sooner with symptoms</td><td><b>Self Check-in</b>: the wearer</td></tr>
-            <tr data-a="senior"><td><b>40 and above</b></td><td>Every 12 months</td><td><b>Self Check-in</b>: the wearer. A family member gets a copy only if the wearer opts in</td></tr>
+            <tr data-a="minor"><th scope="row">Under 18</th><td>Every 12 months; every 6 months on myopia-control lenses</td><td><b>Parent Check-in</b>: the parent who holds the account, with consent taken at the eye test (DPDP Act 2023 needs it for under-18s)</td></tr>
+            <tr data-a="adult"><th scope="row">18 to 64</th><td>Every 24 months, sooner if they report trouble seeing</td><td><b>Self Check-in</b>: the wearer. A family member gets a copy only if the wearer opts in</td></tr>
+            <tr data-a="senior"><th scope="row">65 and above</th><td>Every 12 months</td><td><b>Self Check-in</b>: the wearer. A family member gets a copy only if the wearer opts in</td></tr>
           </tbody></table></div>
         <div class="ctl">
-          <span class="label">Customer</span>
-          <div class="seg" role="group" aria-label="Customer" id="pp-person" style="flex-wrap:wrap">
-            <button data-p="0" aria-pressed="true">Neha, 29</button><button data-p="1" aria-pressed="false">Arjun, 34</button><button data-p="2" aria-pressed="false">Kabir, 9</button><button data-p="3" aria-pressed="false">Meera, 47</button>
+          <span class="label" id="l-person">Customer</span>
+          <div class="seg" role="group" aria-labelledby="l-person" id="pp-person" style="flex-wrap:wrap">
+            <button type="button" data-p="0" aria-pressed="true">Neha, 29</button><button type="button" data-p="1" aria-pressed="false">Arjun, 34</button><button type="button" data-p="2" aria-pressed="false">Kabir, 9</button><button type="button" data-p="3" aria-pressed="false">Meera, 47</button><button type="button" data-p="4" aria-pressed="false">Ravi, 26</button><button type="button" data-p="5" aria-pressed="false">Usha, 68</button>
           </div>
         </div>
         <div class="ctl">
-          <span class="label">Language</span>
-          <div class="seg" role="group" aria-label="Language" id="pp-lang">
-            <button data-l="en" aria-pressed="true">English</button><button data-l="hi" aria-pressed="false">हिंदी</button>
+          <span class="label" id="l-lang">Language</span>
+          <div class="seg" role="group" aria-labelledby="l-lang" id="pp-lang">
+            <button type="button" data-l="en" aria-pressed="true">English</button><button type="button" data-l="hi" aria-pressed="false" lang="hi">हिंदी</button>
           </div>
           <label class="toggle" for="pp-share" id="pp-share-wrap"><input type="checkbox" id="pp-share"> Wearer opted in to a family copy</label>
         </div>
       </div>
+      <div class="card">
+        <h3>What each reply does</h3>
+        <ul class="plan">
+          <li><b>Book</b> opens the slot picker with the saved profile attached.</li>
+          <li><b>I'm having trouble seeing</b> moves the test up; within three months of a test it becomes a free re-check at the store.</li>
+          <li><b>Not now</b> snoozes the check-in for 90 days and cancels the store call.</li>
+          <li><b>STOP</b> ends check-ins for good.</li>
+        </ul>
+      </div>
       <div class="card soft">
         <h3>Guardrails built in</h3>
         <ul class="plan">
-          <li>No product, price or discount inside a check-in. The message is about the eye test only.</li>
-          <li>At most one check-in when a test falls due and one reminder a week later, then it stops until the next due date. Every message says how to opt out.</li>
+          <li>No price or discount in any message. A check-in is about the eye test only.</li>
+          <li>One check-in when a test falls due and one reminder a week later. If the test is still not done at one and a half times the interval, one more goes out and the store may call. Then it stops until the next due date.</li>
+          <li>The store calls only customers who agreed to a call at their eye test.</li>
           <li>Nothing is sent while a service ticket is open; the ticket gets fixed first.</li>
-          <li>No fear language and no diagnosis. Symptoms lead to an eye test with an optometrist, never to a product.</li>
+          <li>No fear language and no diagnosis. Sudden loss of vision, pain or flashes are sent to an eye doctor, not to a store.</li>
         </ul>
       </div>
     </div>
     <div class="grid" style="align-content:start">
-      <div class="channel" id="pp-channel" aria-live="polite"></div>
-      <div class="wa" aria-label="WhatsApp preview">
-        <div class="wa-head"><div class="av" aria-hidden="true">LK</div><div><b id="wa-title">Lenskart Sight Check-in</b><br><small style="opacity:.85">Business account (concept)</small></div></div>
-        <div class="wa-body" id="wa-body" aria-live="polite"></div>
+      <div class="channel" id="pp-channel" role="status"></div>
+      <div class="wa" role="group" aria-label="WhatsApp preview">
+        <div class="wa-head"><div class="av" aria-hidden="true">LK</div><div><b id="wa-title">Lenskart Sight Check-in</b><br><small>Business account (concept)</small></div></div>
+        <div class="wa-body" id="wa-body" role="status"></div>
       </div>
     </div>
   </div>
@@ -365,75 +523,92 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
 <!-- CONSOLE -->
 <section class="panel" id="p-console" role="tabpanel" aria-labelledby="t-console" hidden>
   <div style="display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:12px">
-    <div><h2 id="console">Growth Console</h2><p class="small" style="max-width:720px">The screen Lenskart's retention team would open every Monday: whose eye test is due, what each group gets this week, and what that is worth. Uses a made-up group of 5,000 customers so it runs without Lenskart data.</p></div>
-    <button class="btn btn-outline sm" id="reseed">Generate a new cohort</button>
+    <div><h2 id="console">Growth Console</h2><p class="small" style="max-width:720px">The screen Lenskart's CRM team would open every Monday: whose eye test is due, what each group gets, and what that is worth if the uplift holds. Uses a made-up group of 5,000 past customers so it runs without Lenskart data.</p></div>
+    <button class="btn btn-outline sm" id="reseed" type="button">Generate a new cohort</button>
   </div>
-  <div class="howto" aria-label="How to read this screen">
-    <div class="card soft"><p><b class="n">1</b><b>Who is due</b></p><p class="small" style="margin-top:6px">Every customer gets a Recall Score from the age of their prescription, their age band, symptoms, screen time and the age of their pair.</p></div>
-    <div class="card soft"><p><b class="n">2</b><b>What we do about it</b></p><p class="small" style="margin-top:6px">Customers are grouped by the action they get. Click any row to see who is in it and how the ₹ is worked out.</p></div>
-    <div class="card soft"><p><b class="n">3</b><b>What it is worth for Lenskart</b></p><p class="small" style="margin-top:6px">A what-if calculator on Lenskart's disclosed India numbers. Change any assumption and the total updates.</p></div>
+  <div class="howto">
+    <div class="card soft"><p><b class="n" aria-hidden="true">1</b><b>Who is due</b></p><p class="small" style="margin-top:6px">Every customer gets a due date from the date of their last eye test and their age band. On day one this is a backlog; after that it is a weekly trickle.</p></div>
+    <div class="card soft"><p><b class="n" aria-hidden="true">2</b><b>What we do about it</b></p><p class="small" style="margin-top:6px">Customers are grouped by the action they get. Select any row to see who is in it and how the ₹ is worked out.</p></div>
+    <div class="card soft"><p><b class="n" aria-hidden="true">3</b><b>What it is worth for Lenskart</b></p><p class="small" style="margin-top:6px">A what-if calculator on Lenskart's disclosed India numbers. The table on the left uses the same assumptions, so change one and both update.</p></div>
   </div>
   <div class="kpis" id="kpis"></div>
   <div class="grid console-grid" style="margin-top:16px">
     <div class="grid" style="align-content:start">
       <div class="card">
-        <h3>1 · Who is due this week</h3>
-        <p class="small muted" style="margin-top:4px">Share of the cohort in each tier. Overdue = Recall Score 60+. Due now = 35 to 59, or any reported symptom, or a test at its interval. Not due = the rest.</p>
+        <h3>1 · Who is due (backlog on day one)</h3>
+        <p class="small muted" style="margin-top:4px">Share of the cohort by due status. Overdue = one and a half intervals or more since the last test. Due now = at or past the interval. Not due = the rest.</p>
         <div id="riskbars" style="margin-top:10px"></div>
       </div>
       <div class="card">
         <h3>2 · What we do about it</h3>
-        <p class="small muted" style="margin-top:4px">Sorted by expected revenue won back, highest first. Click a column header to re-sort, or a row for detail.</p>
-        <div class="tbl-wrap" style="margin-top:10px"><table id="segtbl"><thead><tr>
-          <th><button data-k="seg">Group</button></th>
-          <th><button data-k="action">Action this week</button></th>
-          <th class="num"><button data-k="n">Customers</button></th>
-          <th class="num"><button data-k="avgRisk">Avg score</button></th>
-          <th class="num"><button data-k="value">Revenue won back (₹)</button></th>
+        <p class="small muted" style="margin-top:4px">Sorted by incremental revenue, highest first. Select a column header to re-sort, or a row for detail.</p>
+        <div class="tbl-wrap" style="margin-top:10px" tabindex="0" role="region" aria-label="Action groups table"><table id="segtbl"><thead><tr>
+          <th scope="col"><button type="button" data-k="seg">Group</button></th>
+          <th scope="col"><button type="button" data-k="action">Action</button></th>
+          <th scope="col" class="num"><button type="button" data-k="n">Customers</button></th>
+          <th scope="col" class="num"><button type="button" data-k="value">Incremental revenue (₹)</button></th>
         </tr></thead><tbody></tbody></table></div>
-        <div class="detail" id="seg-detail" aria-live="polite"></div>
+        <div class="detail" id="seg-detail" role="status"></div>
       </div>
       <div class="card">
         <h3>How to prove it (first 90 days)</h3>
         <div class="flow" style="margin-top:10px">
-          <div class="step"><span class="n">1</span><div><b>Pick 2 groups</b><p class="small">Children with myopia and adults whose last test is over 24 months old: clear due dates, clear need.</p></div></div>
-          <div class="step"><span class="n">2</span><div><b>90/10 holdout</b><p class="small">10% of due customers get today's experience. Measure the gap, not the absolute number.</p></div></div>
-          <div class="step"><span class="n">3</span><div><b>Primary metric</b><p class="small">Re-tests completed within 30 days of the due date, then orders within 30 days of the re-test.</p></div></div>
-          <div class="step"><span class="n">4</span><div><b>Guardrails</b><p class="small">WhatsApp opt-outs and blocks, NPS, wrong-power tickets, return rate.</p></div></div>
+          <div class="step"><span class="n" aria-hidden="true">1</span><div><b>Pick 2 groups</b><p class="small">Adults 18 to 64 past 24 months, and adults 65 and above past 12. Children join after legal sign-off on consent.</p></div></div>
+          <div class="step"><span class="n" aria-hidden="true">2</span><div><b>50/50 split in the pilot, 90/10 at scale</b><p class="small">Half of due customers get today's experience. Messages are randomised by customer, the store call by store.</p></div></div>
+          <div class="step"><span class="n" aria-hidden="true">3</span><div><b>Primary metric</b><p class="small">Incremental revenue per due customer against the holdout at 60 days.</p></div></div>
+          <div class="step"><span class="n" aria-hidden="true">4</span><div><b>Guardrails</b><p class="small">WhatsApp opt-outs and blocks, NPS, wrong-power tickets, return rate, optometrist slots used.</p></div></div>
         </div>
       </div>
     </div>
     <div class="card calc" style="align-self:start">
       <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center"><h3>3 · What it is worth for Lenskart</h3><span class="tag warn">Assumptions: edit me</span></div>
-      <p class="small muted" style="margin:6px 0 10px">Scales the idea to Lenskart India. Base figures are Lenskart's own disclosures (Q4 FY26, Q1 FY27 and Q2 FY27 shareholders' letters); uplift rates are my assumptions to be tested.</p>
-      <div class="row"><label for="m-acc">India customers who bought last year<small>FY25 disclosed: 9.9M transacting accounts</small></label><input id="m-acc" type="number" step="100000" value="9900000"></div>
-      <div class="row"><label for="m-ret">Extra who come back after a recall (pp)<small>Assumption, tested vs holdout</small></label><input id="m-ret" type="number" step="0.5" min="0" value="2"></div>
-      <div class="row"><label for="m-rev">Revenue per transacting account (₹)<small>Derived: FY26 India revenue ₹5,265 cr / 12.3M accounts</small></label><input id="m-rev" type="number" step="10" value="4280"></div>
-      <div class="row"><label for="m-first">First-ever eye tests a year<small>FY26 disclosed: "over 1 Cr"</small></label><input id="m-first" type="number" step="100000" value="10000000"></div>
-      <div class="row"><label for="m-conv">Extra who buy after a follow-up (%)<small>Assumption, of all first-ever tests</small></label><input id="m-conv" type="number" step="0.25" min="0" value="1"></div>
-      <div class="row"><label for="m-gold">Active Gold members<small>Q2 FY27 disclosed: 103 lakh</small></label><input id="m-gold" type="number" step="100000" value="10300000"></div>
-      <div class="row"><label for="m-fam">Extra who add a family member's pair (%)<small>Assumption</small></label><input id="m-fam" type="number" step="0.25" min="0" value="1"></div>
-      <div class="row"><label for="m-asp">India average selling price (₹)<small>Q2 FY27 disclosed: ₹1,950 a unit</small></label><input id="m-asp" type="number" step="10" value="1950"></div>
-      <div class="row"><label for="m-pm">India product margin (%)<small>Q2 FY27 disclosed: 64.0%</small></label><input id="m-pm" type="number" step="0.1" min="0" max="100" value="64"></div>
-      <div class="row"><label for="m-fx">₹ per US$<small>Reference rate, 13 Nov 2026</small></label><input id="m-fx" type="number" step="0.05" value="94.25"></div>
+      <p class="small muted" style="margin:6px 0 10px">₹1 cr = ₹10 million. pp = percentage points. A holdout is a comparison group that gets nothing. Scales the idea to Lenskart India for a year. The recall base is last year's customers, the group whose next test falls due this year. Base figures are Lenskart's own disclosures (Q4 FY26, Q1 FY27 and Q2 FY27 shareholders' letters); every rate marked "assumption" is mine and must be proven against a holdout.</p>
+      <p class="label">Lever 1 · Recall</p>
+      <div class="row"><label for="m-acc">India customers who bought last year<small>FY25 disclosed: 9.9M transacting accounts</small></label><input id="m-acc" type="number" min="0" step="100000" value="9900000"></div>
+      <div class="row"><label for="m-due">Whose eye test falls due in the year (%)<small>Assumption; the demo cohort shows <span id="c-due"></span></small></label><input id="m-due" type="number" min="0" max="100" step="1" value="40"></div>
+      <div class="row"><label for="m-reach">Reachable on WhatsApp with consent (%)<small>Assumption</small></label><input id="m-reach" type="number" min="0" max="100" step="1" value="80"></div>
+      <div class="row"><label for="m-take">Extra who take a re-test after the message (pp)<small>One published trial: an automated reminder added 2 points</small></label><input id="m-take" type="number" min="0" max="100" step="0.5" value="2"></div>
+      <div class="row"><label for="m-calllift">Extra again among those the store calls (pp)<small>Same trial: a personal call added 10 points, 8 more</small></label><input id="m-calllift" type="number" min="0" max="100" step="1" value="8"></div>
+      <div class="row"><label for="m-same">Re-tests where the power is unchanged (%)<small>Assumption: keep your pair, ₹0</small></label><input id="m-same" type="number" min="0" max="100" step="5" value="40"></div>
+      <div class="row"><label for="m-swap">Re-tests that end in a lens swap (%)<small>Assumption; the rest buy a new pair</small></label><input id="m-swap" type="number" min="0" max="100" step="5" value="25"></div>
+      <div class="row"><label for="m-swapv">Revenue from a lens swap (₹)<small>Assumption: ₹199 fitting fee plus lens upgrade</small></label><input id="m-swapv" type="number" min="0" step="50" value="900"></div>
+      <div class="row"><label for="m-order">Revenue from one order (₹)<small>Derived: 1.87 units × ₹1,950 selling price</small></label><input id="m-order" type="number" min="0" step="50" value="3650"></div>
+      <div class="row"><label for="m-incr">Truly extra, not just earlier (%)<small>Assumption: the rest would have come anyway, later</small></label><input id="m-incr" type="number" min="0" max="100" step="5" value="75"></div>
+      <div class="row"><label for="m-base">Due customers who would return anyway (%)<small>Assumption; not disclosed</small></label><input id="m-base" type="number" min="0" max="100" step="5" value="20"></div>
+      <div class="row"><label for="m-cann">Of those, now swap lenses instead of buying a pair (%)<small>Assumption: the cost of offering the swap first</small></label><input id="m-cann" type="number" min="0" max="100" step="1" value="3"></div>
+      <p class="label" style="margin-top:14px">Lever 2 · First-test follow-up</p>
+      <div class="row"><label for="m-first">First-ever eye tests a year<small>FY26 disclosed: "over 1 Cr"</small></label><input id="m-first" type="number" min="0" step="100000" value="10000000"></div>
+      <div class="row"><label for="m-found">Where a power is found (%)<small>Assumption; Lenskart reports about 70% for children</small></label><input id="m-found" type="number" min="0" max="100" step="5" value="70"></div>
+      <div class="row"><label for="m-noord">Of those, no order 30 days later (%)<small>Assumption; management says a significant majority buy</small></label><input id="m-noord" type="number" min="0" max="100" step="5" value="30"></div>
+      <div class="row"><label for="m-conv">Extra who order after a follow-up, vs holdout (pp)<small>Assumption; no published benchmark</small></label><input id="m-conv" type="number" min="0" max="100" step="0.5" value="3"></div>
+      <div class="row"><label for="m-fval">Revenue from a first order (₹)<small>Assumption: one pair at the ₹1,950 selling price; Hustlr Club is ₹500</small></label><input id="m-fval" type="number" min="0" step="50" value="1950"></div>
       <div id="levers" style="margin-top:8px"></div>
-      <p class="label" style="margin-top:14px">Running costs a year</p>
-      <div class="row"><label for="m-msg">WhatsApp marketing message (₹)<small>Meta India list rate</small></label><input id="m-msg" type="number" step="0.0001" min="0" value="0.8631"></div>
-      <div class="row"><label for="m-book">Recalled customers who take a re-test (%)<small>Assumption</small></label><input id="m-book" type="number" step="1" min="0" max="100" value="6"></div>
-      <div class="row"><label for="m-test">Cost of one extra eye test (₹)<small>Assumption: optometrist time</small></label><input id="m-test" type="number" step="5" min="0" value="60"></div>
-      <div class="row"><label for="m-over">Overdue and still unbooked after 7 days (%)<small>Assumption: one store call each</small></label><input id="m-over" type="number" step="1" min="0" max="100" value="9"></div>
+      <p class="label" style="margin-top:14px">From revenue to contribution</p>
+      <div class="row"><label for="m-pm">India product margin (%)<small>Q2 FY27 disclosed: 64.0%</small></label><input id="m-pm" type="number" step="0.1" min="0" max="100" value="64"></div>
+      <div class="row"><label for="m-sell">Variable selling cost (% of revenue)<small>Assumption: payment, delivery, store incentive</small></label><input id="m-sell" type="number" step="1" min="0" max="100" value="8"></div>
+      <div class="row"><label for="m-fx">₹ per US$<small>ECB reference rate, 13 Nov 2026</small></label><input id="m-fx" type="number" min="1" step="0.01" value="94.24"></div>
+      <details class="fold" id="cost-inputs"><summary>Running cost assumptions (9 inputs)</summary>
+      <div class="row"><label for="m-msg">WhatsApp marketing message (₹)<small>Meta India list rate, effective 1 Oct 2026</small></label><input id="m-msg" type="number" step="0.0001" min="0" value="0.8631"></div>
+      <div class="row"><label for="m-test">Store re-test (₹)<small>Assumption: optometrist time</small></label><input id="m-test" type="number" step="5" min="0" value="60"></div>
+      <div class="row"><label for="m-hshare">Re-tests done at home (%)<small>Assumption</small></label><input id="m-hshare" type="number" step="5" min="0" max="100" value="20"></div>
+      <div class="row"><label for="m-home">Home re-test visit (₹)<small>Assumption</small></label><input id="m-home" type="number" step="10" min="0" value="300"></div>
+      <div class="row"><label for="m-over">Overdue backlog (% of last year's customers)<small>Assumption; the demo cohort shows <span id="c-over"></span></small></label><input id="m-over" type="number" step="1" min="0" max="100" value="12"></div>
+      <div class="row"><label for="m-unb">Of those, unbooked on day 8 and agreed to a call (%)<small>Assumption: one store call each</small></label><input id="m-unb" type="number" step="5" min="0" max="100" value="60"></div>
       <div class="row"><label for="m-call">3-minute store call (₹)<small>Assumption</small></label><input id="m-call" type="number" step="1" min="0" value="15"></div>
       <div class="row"><label for="m-tot">Accounts scored a year<small>FY26 disclosed: 12.3M India transacting accounts</small></label><input id="m-tot" type="number" step="100000" min="0" value="12300000"></div>
-      <div class="row"><label for="m-ai">AI scoring and message (₹ per account)<small>Assumption</small></label><input id="m-ai" type="number" step="0.1" min="0" value="0.6"></div>
-      <div id="costs" style="margin-top:8px"></div>
-      <div style="border-top:2px solid var(--primary-50);padding-top:12px;margin-top:4px">
+      <div class="row"><label for="m-ai">AI ranking and message drafting (₹ per account)<small>Assumption</small></label><input id="m-ai" type="number" step="0.1" min="0" value="0.6"></div>
+      </details>
+      <p class="label" style="margin-top:14px">Running costs a year</p>
+      <div id="costs" style="margin-top:4px"></div>
+      <div style="border-top:2px solid var(--primary-50);padding-top:12px;margin-top:4px" role="status">
         <p class="label">Annual incremental revenue</p>
         <p class="bigtotal" id="m-total"></p>
         <p class="small" id="m-total-sub"></p>
         <div class="formula" id="m-total-f" style="margin-top:8px"></div>
-        <p class="label" style="margin-top:14px">Product margin, net of running costs</p>
+        <p class="label" style="margin-top:14px">Contribution after running costs</p>
         <p class="bigtotal" id="m-net"></p>
         <p class="small" id="m-net-sub"></p>
+        <div id="bylever"></div>
       </div>
     </div>
   </div>
@@ -444,7 +619,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
   <div class="grid">
     <div class="card">
       <h2 id="brand">Lenskart brand context schema</h2>
-      <p style="margin-top:8px" id="brand-intro">Read from computed styles on 13 Nov 2026 with a headless browser, on Lenskart's India store locator, its Lenskart at Home page and its US storefront, which shares the same token names. From the network this audit ran on, Lenskart's India home and product pages redirected to the US storefront, so the Gold colours are taken from declared CSS variables, not from a rendered Gold page. Lenskart Sans is Lenskart's own typeface, so this prototype uses Plus Jakarta Sans, the face Lenskart renders on Lenskart at Home and on its US storefront. The Lenskart logo is deliberately not reproduced.</p>
+      <p style="margin-top:8px">Read from computed styles on 13 Nov 2026 with a headless browser, on Lenskart's India store locator, its Lenskart at Home page and its US storefront, which shares the same token names. From the network this audit ran on, Lenskart's India home and product pages redirected to the US storefront, so the Gold colours are taken from declared CSS variables, not from a rendered Gold page. Lenskart Sans is Lenskart's own typeface, so this prototype uses Plus Jakarta Sans, the face Lenskart renders on Lenskart at Home and on its US storefront. The Lenskart logo is deliberately not reproduced.</p>
     </div>
     <div><h3 style="margin-bottom:10px">Colour tokens</h3><div class="swatches" id="swatches"></div></div>
     <div class="grid two">
@@ -458,90 +633,143 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
 
 </div>
 </main>
-<footer><div class="wrap">Sources: Lenskart Q4 FY26, Q1 FY27 and Q2 FY27 shareholders' letters, Annual Report FY2025-26, Q3 FY26 earnings call transcript, lenskart.com and the Lenskart app listings checked 13 Nov 2026. Full analysis: <a href="/lenskart-study" target="_top">anchit-tandon.com/lenskart-study</a>. Prices in the customer view are illustrative, except the ₹199 lens-replacement fitting fee (annual report) and the ₹99 home eye test (lenskart.com). Concept work by Anchit Tandon - anchit.tandon@gmail.com.</div></footer>
+<footer><div class="wrap">Sources: Lenskart Q4 FY26, Q1 FY27 and Q2 FY27 shareholders' letters, Annual Report FY2025-26, Q1 FY27 and Q3 FY26 earnings call transcripts, lenskart.com and the Lenskart app listings checked 13 Nov 2026. Full analysis: <a href="/lenskart-study" target="_top">anchit-tandon.com/lenskart-study</a>. Prices in the customer view are illustrative, except the ₹199 lens-replacement fitting fee (annual report) and the ₹99 home eye test (lenskart.com). Concept work by Anchit Tandon · anchit.tandon@gmail.com.</div></footer>
 
 <script>
 (function(){
 'use strict';
-var INR = function(n){return '₹' + Math.round(n).toLocaleString('en-IN');};
-var CR = function(n){return '₹' + (n/1e7).toLocaleString('en-IN',{maximumFractionDigits:1,minimumFractionDigits:1}) + ' cr';};
-var CR2 = function(n){return '₹' + (n/1e7).toLocaleString('en-IN',{maximumFractionDigits:2,minimumFractionDigits:2}) + ' cr';};
-var USDM = function(n,fx){return '$' + (n/fx/1e6).toLocaleString('en-US',{maximumFractionDigits:2,minimumFractionDigits:2}) + 'M';};
+// Anything that would print as zero is zero: no "−₹0.0 cr".
+var NEG = function(n){return n<=-5e4 ? '−' : '';};
+var INR = function(n){return NEG(n) + '₹' + Math.abs(Math.round(n)).toLocaleString('en-IN');};
+var CR = function(n){return NEG(n) + '₹' + Math.abs(n/1e7).toLocaleString('en-IN',{maximumFractionDigits:1,minimumFractionDigits:1}) + ' cr';};
+var CR2 = function(n){return NEG(n) + '₹' + Math.abs(n/1e7).toLocaleString('en-IN',{maximumFractionDigits:2,minimumFractionDigits:2}) + ' cr';};
+var USDM = function(n,fx){return NEG(n) + '$' + Math.abs(n/fx/1e6).toLocaleString('en-US',{maximumFractionDigits:2,minimumFractionDigits:2}) + 'M';};
 var clamp = function(v,a,b){return Math.max(a,Math.min(b,v));};
 function el(id){return document.getElementById(id);}
+function all(sel){return Array.prototype.slice.call(document.querySelectorAll(sel));}
 
-/* ---------- Engine: transparent rules (illustrative weights) ---------- */
-function band(age){ return age<18?'minor':(age<40?'adult':'senior'); }
-function interval(age){ return age<18?6:(age<40?24:12); }
+/* ---------- Engine ---------- */
+// Illustrative re-test intervals in months, by age band. Optometry owns these.
+var IV = {minor:12, myopia:6, adult:24, senior:12};
+function band(age){ return age<18?'minor':(age<65?'adult':'senior'); }
+function interval(p){ var b = band(p.age); return b==='minor' ? (p.myo?IV.myopia:IV.minor) : IV[b]; }
 // Lenskart's home eye test is for ages 14 to 75, in the cities it serves.
 function canHome(p){ return p.home && p.age>=14 && p.age<=75; }
-function score(s,p){
-  var iv = interval(p.age);
-  var f = [
-    {k:'Prescription age', v:clamp(s.test/iv,0,1.5)/1.5*50, max:50},
-    {k:'Symptoms reported', v:s.sym*8, max:24},
-    {k:'Age of current pair', v:Math.min(s.pair,36)/36*16, max:16},
-    {k:'Screen time', v:clamp(s.screen-6,0,8)/8*10, max:10}
-  ];
-  var r = Math.round(clamp(f.reduce(function(a,x){return a+x.v;},0),0,100));
-  // A reported symptom, or a test at or past its interval, is never "not due".
-  var tier = r>=60?'Overdue':(r>=35||s.sym>0||s.test>=iv)?'Due now':'Not due';
-  return {risk:r,tier:tier,factors:f,iv:iv};
+// The due status comes from the test date and the age band, nothing else.
+// What the customer tells us can only add care: a re-check, an earlier test,
+// or a doctor. It never makes a sale more likely.
+function status(s,p){
+  var iv = interval(p);
+  if(s.sym===2) return 'doctor';
+  // Trouble seeing soon after a test is a re-check of that test, not a new sale.
+  if(s.sym===1 && (p.first || (s.result==='none' && s.test<=3))) return 'recheck';
+  if(p.first) return s.days>30 ? 'stopped' : 'followup';
+  // Tested today with the power unchanged, yet still trouble seeing: glasses
+  // are not the answer, so the optometrist refers on.
+  if(s.result!=='none') return (s.result==='same' && s.sym===1) ? 'refer' : 'tested';
+  if(s.test>=1.5*iv) return 'overdue';
+  if(s.test>=iv || s.sym===1) return 'due';
+  return 'notdue';
 }
-function actions(s,res,p){
+var LABEL = {refer:'Refer to an eye doctor', doctor:'See an eye doctor', followup:'First-test follow-up', stopped:'Follow-up ended', tested:'Tested today', recheck:'Re-check', overdue:'Overdue', due:'Due now', notdue:'Not due'};
+var TAGCLS = {refer:'warn', doctor:'bad', followup:'pri', stopped:'ok', tested:'ok', recheck:'warn', overdue:'bad', due:'warn', notdue:'ok'};
+// Only overdue customers can get a store call. This score orders that list.
+function priority(s,p){
+  var iv = interval(p);
+  var f = [
+    {k:'Months past the due date', v:clamp((s.test-iv)/iv,0,2)/2*50, max:50},
+    {k:'Told us of trouble seeing', v:s.sym===1?20:0, max:20},
+    {k:'Child, or 65 and above', v:band(p.age)==='adult'?0:15, max:15},
+    {k:'Age of current pair', v:Math.min(s.pair,48)/48*15, max:15}
+  ];
+  return {score:Math.round(f.reduce(function(a,x){return a+x.v;},0)), factors:f};
+}
+function actions(s,st,p){
   var a=[], g=band(p.age);
-  var who = g==='minor' ? {t:'Parent Check-in on WhatsApp',d:'To '+p.parent+', the consented parent: when the test is due and a slot to book. No product in the message.'}
-          : {t:'Self Check-in on WhatsApp',d:'To '+p.name+': when the test is due and a slot to book. No product in the message.'};
-  if(s.ticket){
-    a.push({t:'Hold every message and offer',d:'A service ticket is open. Nothing is sent until it is closed; the store sees the ticket first.'});
-    a.push({t:'Recall restarts 7 days after the ticket closes',d:'Only if the customer rated the fix 4 or 5.'});
+  var who = g==='minor' ? {t:'Parent Check-in on WhatsApp',d:'To '+p.parent+', the consented parent: when the test is due and a slot to book. No price or discount in the message.'}
+          : {t:'Self Check-in on WhatsApp',d:'To '+p.name+': when the test is due and a slot to book. No price or discount in the message.'};
+  if(st==='doctor'){
+    a.push({t:'Point to an eye doctor today',d:'Sudden loss of vision, pain or flashes are not a job for an eye test. The app and the store say so plainly.'});
+    a.push({t:'Hold every message and offer',d:'Nothing is sent and nothing is suggested until the customer tells us they have been seen.'});
     return a;
   }
-  if(res.tier==='Overdue'){
-    a.push({t:'Free re-test, booked in two taps',d:'The nearest store slot'+(canHome(p)?', or a home eye test in '+p.city+' (₹99, free for Gold members)':'')+', pre-filled from the saved profile.'});
-    a.push({t:'Store call on day 8 if no slot is booked',d:'One call from the home store, prompted in the store team\'s daily list. About six calls a store a week at Lenskart\'s scale, never a call centre blast.'});
+  if(s.ticket){
+    a.push({t:'Hold every message and offer',d:'A service ticket is open. Nothing is sent until it is closed; the store sees the ticket first.'});
+    a.push({t:(p.first?'Follow-up':'Recall')+' restarts 7 days after the ticket closes',d:'If the fix was rated 1 to 3, the store manager calls first.'});
+    return a;
+  }
+  if(st==='refer'){
+    a.push({t:'Refer to an eye doctor',d:'The power has not changed, so glasses do not explain the trouble seeing. The optometrist writes a referral and the store logs it.'});
+    a.push({t:'No offer and no reminder',d:'The next check-in waits for the usual interval.'});
+  } else if(st==='followup'){
+    a.push({t:'Follow-up 1 on day 3',d:'The saved power and two ways to try frames. No price or discount.'});
+    a.push({t:'Follow-up 2 on day 21, then stop',d:'Sent only if there is still no order. After day 30 nothing more is sent.'});
+  } else if(st==='stopped'){
+    a.push({t:'Nothing more is sent',d:'Two follow-ups have gone and 30 days have passed. The power stays saved for whenever '+p.name+' returns.'});
+  } else if(st==='tested'){
+    a.push({t:'Clock reset',d:'The test is on record today. The next check-in is in '+interval(p)+' months.'});
+    a.push({t:'Next Pair Step',d:s.result==='same'?'Power unchanged: nothing is offered.':'Power changed: the step in the phone, chosen from the test result.'});
+  } else if(st==='recheck'){
+    a.push({t:'Free re-check at the store',d:'The last test was '+recent(p,s)+'. The store that tested '+p.name+' is told today.'});
+    a.push({t:'No reminder and no offer',d:p.first?'If the power was wrong, the saved power is corrected before any order.':(s.pair<=12?'If the power was wrong, the lenses are remade under the one-year warranty.':'The store checks the power again for free.')});
+  } else if(st==='overdue'){
+    a.push({t:'Free re-test, booked in two taps',d:'The nearest store slot'+(canHome(p)?', or a home eye test in '+p.city+(s.gold?' (free with Gold)':' (₹99, free for Gold members)'):'')+', pre-filled from the saved profile.'});
+    a.push(s.callOk ? {t:'Store call on day 8 if no slot is booked',d:'One call from the home store, from the store team\'s daily list. '+(g==='minor'?p.parent:p.name)+' agreed to a call at the last eye test.'}
+                    : {t:'No store call: one more reminder on day 8',d:(g==='minor'?p.parent:p.name)+' did not agree to a call at the last eye test, so the store does not ring.'});
     a.push(who);
-  } else if(res.tier==='Due now'){
-    a.push({t:'Re-test reminder with a slot',d:g==='minor'?'Children are checked on a 6-month rhythm, at a store. No follow-up call.':'One reminder with the nearest free slot. No follow-up call.'});
+  } else if(st==='due'){
+    a.push({t:'Re-test reminder with a slot',d:g==='minor'?'Children are checked on a regular rhythm, at a store. No follow-up call.':'One reminder with the nearest free slot. No follow-up call.'});
     a.push(who);
   } else {
-    a.push({t:'Nothing is sent, nothing is sold',d:'The prescription is fresh and no symptoms are reported. The next check is in the calendar.'});
+    a.push({t:'Nothing is sent, nothing is sold',d:'The prescription is recent and nothing has been reported. The next check is in the calendar.'});
   }
   return a;
 }
-/* Next Pair Step: nothing is offered before the eye test says it is needed. */
-function nextStep(s,res,p){
-  var g = band(p.age);
+/* Next Pair Step: nothing is suggested before an eye test says it is needed. */
+function nextStep(s,st,p){
+  var g = band(p.age), iv = interval(p);
+  if(st==='doctor') return {hold:true,tag:'On hold',cat:'Health first',title:'See an eye doctor first',sub:'Nothing is suggested until you have been seen.',price:'',note:''};
   if(s.ticket) return {hold:true,tag:'On hold',cat:'Service first',title:'No offer while your ticket is open',sub:'We fix the open ticket before suggesting anything new.',price:'',note:''};
+  if(st==='followup' || st==='stopped') return {hold:false,tag:'Power saved',cat:'Your first pair',title:'Try frames in your saved power',sub:'Your power from the eye test is already on your profile. Try frames with 3D Try On in the app or at your store, whenever you are ready.',price:'',note:''};
+  if(st==='refer') return {hold:true,tag:'Referral',cat:'Health first',title:(g==='minor'?p.name+'\'s':'Your')+' power has not changed',sub:'You told us about trouble seeing, and new glasses are not the answer. The optometrist will refer '+(g==='minor'?p.name:'you')+' to an eye doctor.',price:'',note:''};
+  if(st==='recheck') return {hold:true,tag:'Re-check',cat:'Service first',title:'A free re-check comes first',sub:p.first?'If the power from your eye test does not feel right, the store checks it again for free.':(s.pair<=12?'If the power in '+(g==='minor'?p.name+'\'s':'your')+' glasses is wrong, the lenses are remade under the one-year warranty.':'The store checks '+(g==='minor'?p.name+'\'s':'your')+' power again for free.'),price:'',note:''};
   if(s.result==='none'){
-    if(res.tier==='Not due') return {hold:true,tag:'Not due',cat:'All good',title:'No new pair needed',sub:'Your next eye check is in about '+Math.max(1,res.iv-s.test)+' months. We will remind you then.',price:'',note:''};
-    return {hold:true,tag:'After the test',cat:'Eye test first',title:'Shown after your eye test',sub:'We suggest lenses or a pair only once an optometrist has checked your power.',price:'',note:''};
+    if(st==='notdue') return {hold:true,tag:'Not due',cat:'All good',title:'No new pair needed',sub:(g==='minor'?p.name+'\'s':'Your')+' next eye check is in about '+mo(Math.max(1,iv-s.test))+'. We will remind you then.',price:'',note:''};
+    return {hold:true,tag:'After the test',cat:'Eye test first',title:'Shown after the eye test',sub:'We suggest lenses or a pair only once an optometrist has checked '+(g==='minor'?p.name+'\'s':'your')+' power.',price:'',note:''};
   }
-  if(s.result==='same') return {hold:true,tag:'Power unchanged',cat:'Keep your pair',title:'Your power is the same',sub:'No new lenses needed. Any store will adjust the fit for free.',price:'',note:''};
-  if(g==='minor') return {hold:false,tag:'Power changed',cat:'For '+p.name,title:s.pair<=12?'New lenses in '+p.name+'\'s current frame':'New lenses in a new kids frame',sub:(s.pair<=12?'The frame is under a year old and still fits. Only the lenses change.':'The frame is over a year old; children outgrow frames, so a fit check comes with it.')+' If the optometrist recommends them, these can be myopia-control lenses.',price:s.pair<=12?'From ₹2,500':'From ₹3,500',note:'Illustrative price. The optometrist decides the lens.'};
-  if(g==='senior' && p.near) return {hold:false,tag:'Power changed',cat:'Near and far',title:'Progressive lenses, one pair for reading and distance',sub:s.pair<=24?'Fitted into your current frame if it suits progressives; the store checks the fit height.':'In a new frame, with the fit height measured in store.',price:'From ₹4,000',note:'Illustrative price. '+(p.gold?'Your Gold price applies.':'')};
-  if(s.pair<=24) return {hold:false,tag:'Power changed',cat:'Keep your frame',title:'New lenses in your current frame',sub:'Free Lens Replacement: fresh anti-glare lenses fitted into the frame you already own.',price:'₹199 fitting fee',note:'Fee as published in Lenskart\'s FY26 annual report. Higher lens tiers cost extra.'};
-  return {hold:false,tag:'Power changed',cat:p.gold?'Gold member':'New pair',title:p.gold?'A new pair, with your Gold second pair':'A new pair in your new power',sub:'Your frame is over two years old. '+(p.gold?'Your membership covers a second pair.':'Your Gold membership has lapsed; renewing is optional and shown once, here.'),price:'From ₹1,500',note:'Illustrative price.'};
+  if(s.result==='same') return {hold:true,tag:'Power unchanged',cat:g==='minor'?'Keep the pair':'Keep your pair',title:(g==='minor'?p.name+'\'s':'Your')+' power is the same',sub:'No new lenses needed. Any store will adjust the fit for free.',price:'',note:''};
+  if(g==='minor' && p.myo) return {hold:false,tag:'Power changed',cat:'For '+p.name,title:'New myopia-control lenses in '+p.name+'\'s current frame',sub:(s.pair<=12?'The frame is under a year old. Only the lenses change.':'The frame is over a year old and children outgrow frames, so the store checks the fit.')+' The optometrist confirms the lens.',price:'Price set at the store',note:'Myopia-control lenses are not part of the lens-replacement offer.'};
+  if(g==='minor') return {hold:false,tag:'Power changed',cat:'For '+p.name,title:s.pair<=12?'New lenses in '+p.name+'\'s current frame':'New lenses, and a fit check on the frame',sub:(s.pair<=12?'The frame is under a year old. Only the lenses change.':'The frame is over a year old and children outgrow frames, so the store checks the fit.')+' If the optometrist recommends them, these can be myopia-control lenses.',price:'₹199 fitting fee',note:'Fee as published in Lenskart\'s FY26 annual report. The optometrist decides the lens; lens tiers cost extra.'};
+  if(p.near && p.age>=40) return {hold:false,tag:'Power changed',cat:'Near and far',title:'Progressive lenses in your current frame',sub:'One pair for reading and distance, if your frame suits progressives; the store measures the fit height. A new frame is your choice.',price:'From ₹649',note:'Lenskart\'s published lens-replacement total for basic progressives. Premium designs cost more.'};
+  return {hold:false,tag:'Power changed',cat:'Keep your frame',title:'New lenses in your current frame',sub:'Free Lens Replacement: fresh anti-glare lenses fitted into the frame you already own.'+(s.pair>24?' Your frame is over two years old, so the store checks the hinges and fit; a new frame is your choice.':''),price:'₹199 fitting fee',note:'Fee as published in Lenskart\'s FY26 annual report. Higher lens tiers cost extra.'};
 }
 
 /* ---------- Personas (synthetic) ---------- */
 var P = [
-  {name:'Neha', age:29, city:'Bengaluru', home:true, gold:false, power:'−2.25', near:false,
-   s:{test:26,pair:26,sym:2,screen:10,ticket:false,result:'none'}},
-  {name:'Arjun', age:34, city:'Pune', home:true, gold:true, power:'−1.00', near:false,
-   s:{test:7,pair:7,sym:0,screen:8,ticket:false,result:'none'}},
-  {name:'Kabir', age:9, city:'Lucknow', home:true, gold:true, power:'−1.50', near:false, parent:'Sana',
-   s:{test:8,pair:8,sym:1,screen:4,ticket:false,result:'none'}},
-  {name:'Meera', age:47, city:'Chennai', home:true, gold:true, power:'−0.75', near:true,
-   s:{test:15,pair:15,sym:1,screen:7,ticket:false,result:'none'}}
+  {name:'Neha', age:29, city:'Bengaluru', home:true, power:'−2.25', near:false,
+   s:{test:38,pair:38,sym:0,ticket:false,result:'none',gold:false,callOk:true,days:0}},
+  {name:'Arjun', age:34, city:'Pune', home:true, power:'−1.00', near:false,
+   s:{test:7,pair:7,sym:0,ticket:false,result:'none',gold:true,callOk:true,days:0}},
+  {name:'Kabir', age:9, city:'Lucknow', home:true, power:'−1.50', near:false, parent:'Sana', myo:true,
+   s:{test:8,pair:8,sym:0,ticket:false,result:'none',gold:true,callOk:true,days:0}},
+  {name:'Meera', age:47, city:'Chennai', home:true, power:'−0.75', near:true,
+   s:{test:15,pair:15,sym:1,ticket:false,result:'none',gold:true,callOk:false,days:0}},
+  {name:'Ravi', age:26, city:'Saharsa', home:false, power:'−1.25', near:false, first:true,
+   s:{test:0,pair:0,sym:0,ticket:false,result:'none',gold:false,callOk:false,days:12}},
+  {name:'Usha', age:68, city:'Jaipur', home:true, power:'+1.50', near:true,
+   s:{test:14,pair:30,sym:0,ticket:false,result:'none',gold:true,callOk:true,days:0}}
 ];
 var cur = 0, simState = JSON.parse(JSON.stringify(P[0].s));
-var SYM = ['None','1 of 3','2 of 3','3 of 3'];
+function mo(n){ return n+' month'+(n===1?'':'s'); }
+function since(m){ return m===0 ? 'this month' : mo(m)+' ago'; }
+function recent(p,s){ return p.first ? daysAgo(s.days) : (s.test===0 ? 'this month' : mo(s.test)+' ago'); }
+function daysAgo(n){ return n===0 ? 'today' : n===1 ? '1 day ago' : n+' days ago'; }
+function whose(p){ return band(p.age)==='minor' ? p.name+'\'s' : 'your'; }
 function ago(m){ return m===0?'This month':(m<12?m+' mo ago':(Math.floor(m/12)+'y '+(m%12?m%12+'m ':'')+'ago')); }
 
 /* ---------- Tabs + deep links ---------- */
-var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
-var HASH = {customer:'t-customer',recall:'t-customer',plan:'t-customer',next:'t-customer',checkin:'t-checkin',console:'t-console',brand:'t-brand'};
+var tabs = all('.tab');
+var HASH = {customer:'t-customer',due:'t-customer',plan:'t-customer',next:'t-customer',followup:'t-customer',checkin:'t-checkin',console:'t-console',brand:'t-brand'};
 var NAME = {'t-customer':'customer','t-checkin':'checkin','t-console':'console','t-brand':'brand'};
 function selectTab(t,write){
   tabs.forEach(function(x){
@@ -549,235 +777,351 @@ function selectTab(t,write){
     x.setAttribute('aria-selected',String(on)); x.tabIndex = on?0:-1;
     var p = el(x.getAttribute('aria-controls')); p.classList.toggle('on',on); p.hidden = !on;
   });
-  Array.prototype.forEach.call(document.querySelectorAll('.dl-tabs a'),function(a){
-    if(a.getAttribute('href')==='#'+NAME[t.id]) a.setAttribute('aria-current','true'); else a.removeAttribute('aria-current');
-  });
+  if(t.scrollIntoView) t.scrollIntoView({inline:'nearest',block:'nearest'});
   if(write && history.replaceState) history.replaceState(null,'','#'+NAME[t.id]);
   if(t.id==='t-checkin') renderCheckin();
+  if(t.id==='t-console') renderConsole();
 }
 function fromHash(scroll, focus){
   var h = location.hash.slice(1).toLowerCase(), id = HASH[h];
   if(!id) return;
   selectTab(el(id));
+  if(h==='followup' && cur!==4) pick(4);
   var target = el(h);
   if(scroll){
     var at = NAME[id]===h ? el('dl-bar') : target;
-    window.scrollTo(0, Math.max(0, at.getBoundingClientRect().top + window.pageYOffset - 12));
+    var hd = document.querySelector('header.top'), head = getComputedStyle(hd).position==='sticky' ? hd.offsetHeight : 0;
+    window.scrollTo(0, Math.max(0, at.getBoundingClientRect().top + window.pageYOffset - head - 12));
   }
   if(focus){ if(!target.hasAttribute('tabindex')) target.setAttribute('tabindex','-1'); target.focus({preventScroll:true}); }
 }
 tabs.forEach(function(t,i){
   t.addEventListener('click',function(){selectTab(t,true);});
   t.addEventListener('keydown',function(e){
-    if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();var n=tabs[(i+(e.key==='ArrowRight'?1:tabs.length-1))%tabs.length];selectTab(n,true);n.focus();}
+    var n = e.key==='ArrowRight' ? tabs[(i+1)%tabs.length] : e.key==='ArrowLeft' ? tabs[(i+tabs.length-1)%tabs.length] : e.key==='Home' ? tabs[0] : e.key==='End' ? tabs[tabs.length-1] : null;
+    if(n){ e.preventDefault(); selectTab(n,true); n.focus(); }
   });
 });
 
 /* ---------- Customer view ---------- */
-var ids = ['test','pair','sym','screen'];
+function press(sel,attr,val){ all(sel).forEach(function(b){b.setAttribute('aria-pressed',String(b.getAttribute(attr)===String(val)));}); }
 function setControls(){
-  ids.forEach(function(k){ el('in-'+k).value = simState[k]; });
-  el('in-ticket').checked = simState.ticket;
-  Array.prototype.forEach.call(document.querySelectorAll('#in-result button'),function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-r')===simState.result));});
+  var p = P[cur], tested = simState.result!=='none';
+  el('in-test').value = simState.test; el('in-pair').value = simState.pair; el('in-days').value = simState.days;
+  el('in-test').disabled = tested; el('n-test').hidden = !tested;
+  el('in-ticket').checked = simState.ticket; el('in-call').checked = simState.callOk; el('in-gold').checked = simState.gold;
+  press('#in-result button','data-r',simState.result); press('#in-sym button','data-s',simState.sym);
+  el('sim-main').hidden = !!p.first; el('sim-first').hidden = !p.first;
+  el('in-call').parentNode.hidden = !!p.first;
 }
 function renderCustomer(){
-  var p = P[cur], s = simState, res = score(s,p), g = band(p.age);
+  var p = P[cur], s = simState, st = status(s,p), g = band(p.age), iv = interval(p);
   el('s-hello').textContent = g==='minor' ? 'Hi '+p.parent+' ('+p.name+'\'s profile)' : 'Hi '+p.name;
-  el('v-test').textContent = s.test+' months'; el('v-pair').textContent = s.pair+' months';
-  el('v-sym').textContent = SYM[s.sym]; el('v-screen').textContent = s.screen+' h';
-  var fresh = 100-res.risk;
-  el('ringTxt').textContent = fresh;
-  el('ringArc').setAttribute('stroke-dashoffset', String(188.5*(1-fresh/100)));
-  el('ringArc').setAttribute('stroke', res.tier==='Overdue'?'#EC3331':res.tier==='Due now'?'#E8590C':'#1B7938');
-  el('s-status').textContent = s.ticket ? 'We are fixing your open ticket first' : res.tier==='Overdue' ? 'Your eye test is overdue' : res.tier==='Due now' ? 'Your eye test is due' : 'Your prescription is up to date';
-  var over = s.test - res.iv;
-  el('s-sub').textContent = over>0 ? over+' months past the '+res.iv+'-month check' : (res.iv-s.test)+' months until the '+res.iv+'-month check';
-  el('st-power').textContent = p.power; el('st-test').textContent = ago(s.test); el('st-pair').textContent = ago(s.pair);
-  var nudge = el('s-nudge');
-  nudge.className = 'nudge ' + (res.tier==='Overdue'?'high':res.tier==='Due now'?'med':'low');
-  var plan;
-  if(s.ticket){ el('s-nudge-title').textContent='Ticket first, then your eye test'; plan=['Your store has the ticket and will update you.','No reminders or offers until it is closed.']; }
-  else if(res.tier==='Overdue'){ el('s-nudge-title').textContent='Book a free re-test this week'; plan=['Nearest store: free eye test, slots today.'].concat(canHome(p)?['Or a home eye test in '+p.city+': ₹99, free for Gold members.']:[]).concat(['Your saved power and face scan are already attached.','If nothing is booked in 7 days, your store calls once.']); }
-  else if(res.tier==='Due now'){ el('s-nudge-title').textContent = g==='minor' ? p.name+'\'s 6-month check is due' : 'Time for your regular eye check'; plan=[g==='minor'?'Children\'s power can change fast; a free check at the store.':'A free check at the store'+(canHome(p)?', or ₹99 at home (free for Gold members).':'.'),'One reminder, no follow-up calls.']; }
-  else { el('s-nudge-title').textContent='Nothing to do right now'; plan=['Your prescription is fresh.','Any store will adjust the fit for free, any time.']; }
+  el('v-test').textContent = s.test+' months'; el('v-pair').textContent = s.pair+' months'; el('v-days').textContent = s.days+' days';
+  el('in-test').setAttribute('aria-valuetext', s.test+' months'); el('in-pair').setAttribute('aria-valuetext', s.pair+' months'); el('in-days').setAttribute('aria-valuetext', s.days+' days');
+  // Ring: how much of the interval has gone.
+  var frac = p.first ? 0 : clamp(s.test/iv,0,1);
+  el('ringTxt').textContent = p.first ? s.days : s.test;
+  el('s-ringlabel').textContent = p.first ? 'Days since your eye test' : 'Months since your eye test';
+  el('ringArc').setAttribute('stroke-dashoffset', String(188.5*(1-(p.first?clamp(s.days/30,0,1):frac))));
+  el('ringArc').setAttribute('stroke', st==='overdue'||st==='doctor'?'#EC3331':(st==='due'||st==='recheck')?'#C2410C':'#1B7938');
+  var own = g==='minor' ? p.name+'\'s' : 'Your';
+  var over = s.test - iv;
+  var when = (st==='tested'||st==='refer') ? 'Due in '+iv+' months' : over>0 ? 'Was due '+over+' month'+(over===1?'':'s')+' ago' : over===0 ? 'Due this month' : 'Due in '+(-over)+' month'+(over===-1?'':'s');
+  if(st==='due' && over<0) when = 'Brought forward: trouble seeing reported';
+  el('s-status').textContent = st==='doctor' ? 'Please see an eye doctor today'
+    : s.ticket ? 'We are fixing your open ticket first'
+    : st==='followup'||st==='stopped' ? 'Your power is saved'
+    : st==='refer' ? 'An eye doctor is the next step'
+    : st==='tested' ? 'Tested today'
+    : st==='recheck' ? 'Let us re-check '+whose(p)+' power'
+    : st==='overdue' ? own+' eye test is overdue'
+    : st==='due' ? own+' eye test is due'
+    : own+' prescription is up to date';
+  el('s-sub').textContent = p.first ? 'First eye test '+daysAgo(s.days) : ((st==='tested'||st==='refer') ? 'Next check in '+iv+' months' : when+' · checked every '+iv+' months');
+  el('st-power').textContent = p.power; el('st-test').textContent = p.first ? daysAgo(s.days) : ago(s.test); el('st-pair').textContent = p.first ? 'None yet' : ago(s.pair);
+  el('s-nudge').className = 'nudge ' + (st==='overdue'||st==='doctor'?'high':(st==='due'||st==='recheck')?'med':'low');
+  var title, plan;
+  if(st==='doctor'){ title='This needs an eye doctor, not an eye test'; plan=['Sudden loss of vision, eye pain or flashes of light should be seen today.','We have paused reminders and suggestions.']; }
+  else if(s.ticket){ title=p.first?'Ticket first, then your first pair':'Ticket first, then your eye test'; plan=['Your store has the ticket and will update you.','No reminders or offers until it is closed.']; }
+  else if(st==='refer'){ title='Tested today: an eye doctor is the next step'; plan=[own+' power has not changed, so new glasses will not fix this.','The optometrist will write a referral.','Next eye check in '+iv+' months.']; }
+  else if(st==='followup'){ title='Your first pair, when you are ready'; plan=['Your power from the eye test is saved on your profile.','Try frames with 3D Try On, or at your store in '+p.city+'.', s.days>=21?'No rush. That was our last reminder.':s.days<3?'No rush. We will remind you twice, then stop.':'No rush. We will remind you once more, then stop.']; }
+  else if(st==='stopped'){ title='No more reminders'; plan=['Your power stays saved on your profile.','Come back whenever it suits you.']; }
+  else if(st==='tested'){ title='Re-test done'; plan=[s.result==='same'?own+' power has not changed.':own+' power has changed; see the step below.','Next eye check in '+iv+' months.']; }
+  else if(st==='recheck'){ title='A free re-check at your store'; plan=[own+' test was '+recent(p,s)+', so this is on us.', p.first?'If the power does not feel right, the store checks it again.':(s.pair<=12?'If the power was wrong, the lenses are remade under the one-year warranty.':'The store checks the power again for free.'),'Your store has been told and will make time.']; }
+  else if(st==='overdue'){ title='Book a free re-test this week'; plan=['Nearest store: free eye test, slots today.'].concat(canHome(p)?[s.gold?'Or a home eye test in '+p.city+': free with your Gold membership.':'Or a home eye test in '+p.city+': ₹99, free for Gold members.']:[]).concat([(g==='minor'?p.name+'\'s':'Your')+' saved power and face scan are already attached.', s.callOk?'If nothing is booked in 7 days, your store calls once.':'We will remind you once more in 7 days.']); }
+  else if(st==='due'){ title = s.test<iv ? 'Let us check '+whose(p)+' eyes sooner' : g==='minor' ? p.name+'\'s regular eye check is due' : 'Time for your regular eye check'; plan=(s.test<iv && s.pair<=12 ? ['If the power in '+whose(p)+' glasses turns out to be wrong, the lenses are remade under the one-year warranty.'] : []).concat([g==='minor'?'Children\'s power can change fast; a free check at the store.':'A free check at the store'+(canHome(p)?(s.gold?', or at home, free with your Gold membership.':', or ₹99 at home (free for Gold members).'):'.'),'One reminder, no follow-up calls.']); }
+  else { title='Nothing to do right now'; plan=[own+' prescription is recent.','Any store will adjust the fit for free, any time.']; }
+  el('s-nudge-label').textContent = p.first ? 'First-Test Follow-up' : 'Re-test Plan';
+  el('s-nudge-title').textContent = title;
   el('s-plan').innerHTML = plan.map(function(x){return '<li>'+x+'</li>';}).join('');
-  var n = nextStep(s,res,p);
+  var n = nextStep(s,st,p);
   var o = el('s-next'); o.className = 'offer'+(n.hold?' hold':'');
   o.innerHTML = '<div class="banner"><b>'+n.title+'</b><small>'+n.tag+'</small></div><div class="inner"><span class="cat">'+n.cat+'</span><p class="small">'+n.sub+'</p>'+(n.price?'<div class="price"><b>'+n.price+'</b>'+(n.note?'<span>'+n.note+'</span>':'')+'</div>':'')+'</div>';
   // Engine card
-  var tg = el('e-tier'); tg.textContent = res.tier; tg.className = 'tag ' + (res.tier==='Overdue'?'bad':res.tier==='Due now'?'warn':'ok');
-  el('e-risk').textContent = res.risk;
-  el('e-factors').innerHTML = res.factors.map(function(f){
-    return '<div class="factor"><span>'+f.k+'</span><div class="bar"><i style="width:'+clamp(f.v/f.max*100,0,100)+'%"></i></div><span style="text-align:right">+'+f.v.toFixed(1)+'</span></div>';
-  }).join('');
-  var top = res.factors.slice().sort(function(a,b){return b.v-a.v;})[0];
-  el('e-why').innerHTML = '<b>Why:</b> the biggest driver is <b>'+top.k.toLowerCase()+'</b>. For a '+p.age+'-year-old the illustrative re-test interval is '+res.iv+' months; the last test was '+s.test+' months ago.';
-  el('e-actions').innerHTML = actions(s,res,p).map(function(a,i){return '<div class="step"><span class="n">'+(i+1)+'</span><div><b>'+a.t+'</b><p class="small">'+a.d+'</p></div></div>';}).join('');
+  var tg = el('e-tier'); tg.textContent = LABEL[st]; tg.className = 'tag ' + TAGCLS[st];
+  el('e-when').textContent = st==='doctor' ? 'On hold: eye doctor first' : (p.first && st==='recheck') ? 'Follow-up paused: free re-check first' : p.first ? (st==='stopped'?'Follow-up ended on day 30':'Follow-up window: day '+s.days+' of 30') : when;
+  var reasons = p.first ? ['First-ever eye test '+daysAgo(s.days)+'; a power was found.','No order yet.']
+    : ['Last eye test: '+((st==='tested'||st==='refer')?'today':since(s.test))+'.','Age '+p.age+(p.myo?', on myopia-control lenses':'')+': checked every '+iv+' months.'];
+  if(s.sym===1) reasons.push(st==='recheck' ? 'Reported trouble seeing soon after a test: this is a re-check, not a sale.'
+    : st==='refer' ? 'Reported trouble seeing, and the power is unchanged: referred to an eye doctor.'
+    : st==='tested' ? 'Reported trouble seeing before the test; the new power addresses it.'
+    : st==='overdue' ? 'Reported trouble seeing: raises the store-call priority.'
+    : s.test<iv ? 'Reported trouble seeing: the test is brought forward.'
+    : 'Reported trouble seeing: noted for the optometrist.');
+  if(s.sym===2) reasons.push('Reported sudden loss of vision, pain or flashes.');
+  if(s.ticket) reasons.push('A service ticket is open.');
+  el('e-reasons').innerHTML = reasons.map(function(r){return '<li>'+r+'</li>';}).join('');
+  if(st==='overdue' && !s.ticket){
+    var pr = priority(s,p);
+    el('e-prio').innerHTML = '<p style="margin:4px 0 8px"><span class="label">Store-call priority</span><br><b id="e-risk" style="font-size:24px;line-height:30px;color:var(--heading)">'+pr.score+'</b><span class="muted"> / 100 · orders the day-8 call list</span></p>'
+      + pr.factors.map(function(f){return '<div class="factor"><span>'+f.k+'</span><div class="bar"><i style="width:'+clamp(f.v/f.max*100,0,100)+'%"></i></div><span style="text-align:right">+'+f.v.toFixed(0)+'</span></div>';}).join('');
+  } else {
+    el('e-prio').innerHTML = '<p class="small muted" id="e-risk" style="margin:4px 0">No store-call priority: only overdue customers can be called.</p>';
+  }
+  el('e-actions').innerHTML = actions(s,st,p).map(function(a,i){return '<div class="step"><span class="n" aria-hidden="true">'+(i+1)+'</span><div><b>'+a.t+'</b><p class="small">'+a.d+'</p></div></div>';}).join('');
 }
 var QA = {
-  need:{q:'Do I need new glasses?', a:function(p,s,res){
-    if(res.tier==='Not due') return 'Nothing suggests you need a new pair: your last eye test was '+s.test+' months ago. If anything feels off, book a free eye test and an optometrist will check.';
-    return 'I cannot tell from here, and nobody should guess. Your last test was '+s.test+' months ago, so the honest answer is a free eye test first. If your power is unchanged, you keep your pair.';}},
-  frame:{q:'Can I keep my frame?', a:function(p,s){
-    return s.pair<=24 ? 'Yes. If your power has changed, the store can fit fresh anti-glare lenses into your current frame for a ₹199 fitting fee.' : 'Usually yes: Lenskart fits new lenses into any frame for a ₹199 fitting fee. Yours is over two years old, so the store will check the hinges and fit first.';}},
-  cost:{q:'What will the test cost?', a:function(p){
-    return 'The eye test at a store is free. '+(canHome(p)?'A home eye test in '+p.city+' costs ₹99 and is free for Gold members. It is for ages 14 to 75; anyone with diabetes or high blood pressure needs a clinical eye test instead.':'Home eye tests are for ages 14 to 75, so the store is the place for '+p.name+'.');}}
+  need:{q:'Do I need new glasses?', a:function(p,s,st){
+    if(st==='refer') return (band(p.age)==='minor'?p.name+'\'s':'Your')+' power has not changed, so new glasses will not help with this. Please see an eye doctor; the optometrist will write a referral.';
+    if(st==='followup'||st==='stopped') return 'Your eye test found that glasses would help you see far clearly. There is no rush and no obligation. Your power is saved, so you can try frames whenever you like.';
+    var kid = band(p.age)==='minor';
+    if(st==='tested') return s.result==='same' ? (kid?'No. '+p.name+'\'s power was checked today and has not changed. The current pair is fine.':'No. Your power was checked today and has not changed. Keep your pair.') : (kid?p.name+'\'s power changed in today\'s test, so new lenses are needed. The store can fit them into the current frame if it still fits.':'Your power changed in today\'s test, so you need new lenses. You do not need a new frame: the store can fit them into the one you have.');
+    if(st==='recheck') return p.first ? 'Your test was '+daysAgo(s.days)+'. Come in for a free re-check before choosing anything.' : (band(p.age)==='minor'?p.name+'\'s':'Your')+' test was '+recent(p,s)+', so the power should still be right. Come in for a free re-check'+(s.pair<=12?'; if the power was wrong, the lenses are remade under the one-year warranty.':'.');
+    if(st==='notdue') return kid ? 'Nothing suggests '+p.name+' needs a new pair: the last eye test was '+since(s.test)+'. If '+p.name+' is squinting or sitting closer to screens, tell me and I will book a free eye test.' : 'Nothing suggests you need a new pair: your last eye test was '+since(s.test)+'. If anything feels off, tell me and I will book a free eye test.';
+    return kid ? 'I cannot tell from here, and nobody should guess. '+p.name+'\'s last test was '+s.test+' months ago, so the honest answer is a free eye test first. If the power is unchanged, nothing needs to change.' : 'I cannot tell from here, and nobody should guess. Your last test was '+s.test+' months ago, so the honest answer is a free eye test first. If your power is unchanged, you keep your pair.';}},
+  frame:{q:'Can I keep my frame?', a:function(p,s,st){
+    if(st==='followup'||st==='stopped') return 'You do not have a Lenskart frame yet. If you already own a frame you like, any store can fit lenses in your power into it for a ₹199 fitting fee.';
+    if(band(p.age)==='minor') return 'Yes, if it still fits. If '+p.name+'\'s power has changed, the store can fit new lenses into the current frame and will check the fit, since children outgrow frames.';
+    return 'Yes. If your power has changed, the store can fit fresh anti-glare lenses into your current frame for a ₹199 fitting fee.'+(s.pair>24?' Yours is over two years old, so they will check the hinges and fit first.':'');}},
+  cost:{q:'What will the test cost?', a:function(p,s){
+    return 'The eye test at a store is free. '+(canHome(p)?'A home eye test in '+p.city+(s.gold?' is free with your Gold membership.':' costs ₹99 and is free for Gold members.')+' It is for ages 14 to 75; anyone with diabetes or high blood pressure needs a clinical eye test instead.':(p.age<14?'Home eye tests are for ages 14 to 75, so the store is the place for '+p.name+'.':'Home eye tests are not offered in '+p.city+' yet, so the store is the place.'));}}
 };
-function addMsg(cls,txt){ var b=document.createElement('div'); b.className='bubble '+cls; b.textContent=txt; el('chat').appendChild(b); }
+var chatGen = 0;
+function addMsg(cls,txt){ var b=document.createElement('div'); b.className='bubble '+cls; b.textContent=txt; var c=el('chat'); c.appendChild(b); c.scrollTop = c.scrollHeight; }
 function resetChat(){
-  var p = P[cur]; el('chat').innerHTML='';
+  var p = P[cur]; chatGen++; el('chat').innerHTML='';
   addMsg('ai', band(p.age)==='minor' ? 'Hi '+p.parent+'. Ask me anything about '+p.name+'\'s eye care.' : 'Hi '+p.name+'. Ask me anything about your eye care.');
   el('quick').innerHTML = Object.keys(QA).map(function(k){return '<button type="button" data-q="'+k+'">'+QA[k].q+'</button>';}).join('');
 }
 el('quick').addEventListener('click',function(e){
   var b = e.target.closest('button'); if(!b) return;
-  var p = P[cur], k = b.getAttribute('data-q');
+  var p = P[cur], k = b.getAttribute('data-q'), st = status(simState,p), gen = chatGen;
   addMsg('me', QA[k].q);
   // An open ticket holds the assistant too: no question gets a priced answer.
-  var reply = simState.ticket ? 'Let us sort out your open ticket first. Your store has it and will update you. I will not suggest anything until that is done.' : QA[k].a(p, simState, score(simState,p));
+  // Red-flag symptoms hold the assistant as well: every question gets the same answer.
+  var reply = st==='doctor' ? 'Please see an eye doctor today. Sudden loss of vision, pain or flashes should not wait behind an eye test or new glasses. I will not suggest anything until you have been seen.'
+    : (simState.ticket && st!=='doctor') ? 'Let us sort out your open ticket first. Your store has it and will update you. I will not suggest anything until that is done.' : QA[k].a(p, simState, st);
   // The reply belongs to the customer who asked. Drop it if they have been switched.
-  setTimeout(function(){ if(P[cur]===p) addMsg('ai', reply); }, 250);
+  setTimeout(function(){ if(P[cur]===p && gen===chatGen) addMsg('ai', reply); }, 250);
 });
+function rerender(){ setControls(); renderCustomer(); renderCheckin(); }
 function pick(i){
   cur = i; simState = JSON.parse(JSON.stringify(P[i].s));
-  Array.prototype.forEach.call(document.querySelectorAll('.persona-row .chip'),function(c){c.setAttribute('aria-pressed',String(+c.getAttribute('data-p')===i));});
-  Array.prototype.forEach.call(document.querySelectorAll('#pp-person button'),function(c){c.setAttribute('aria-pressed',String(+c.getAttribute('data-p')===i));});
+  press('.persona-row .chip','data-p',i); press('#pp-person button','data-p',i);
   share = false; el('pp-share').checked = false;
-  setControls(); resetChat(); renderCustomer(); renderCheckin();
+  resetChat(); rerender();
 }
-Array.prototype.forEach.call(document.querySelectorAll('.persona-row .chip'),function(c){c.addEventListener('click',function(){pick(+c.getAttribute('data-p'));});});
-ids.forEach(function(k){ el('in-'+k).addEventListener('input',function(e){ simState[k] = +e.target.value; renderCustomer(); }); });
-el('in-ticket').addEventListener('change',function(e){ simState.ticket = e.target.checked; renderCustomer(); });
-el('in-result').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b) return; simState.result=b.getAttribute('data-r'); setControls(); renderCustomer(); });
+all('.persona-row .chip').forEach(function(c){c.addEventListener('click',function(){pick(+c.getAttribute('data-p'));});});
+['test','pair','days'].forEach(function(k){ el('in-'+k).addEventListener('input',function(e){ simState[k] = +e.target.value; renderCustomer(); renderCheckin(); }); });
+el('in-ticket').addEventListener('change',function(e){ simState.ticket = e.target.checked; rerender(); });
+el('in-call').addEventListener('change',function(e){ simState.callOk = e.target.checked; rerender(); });
+el('in-gold').addEventListener('change',function(e){ simState.gold = e.target.checked; rerender(); });
+el('in-sym').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b) return; simState.sym=+b.getAttribute('data-s'); rerender(); });
+// A re-test happens today: it resets the clock. "Not tested yet" puts the
+// customer's own test date back.
+el('in-result').addEventListener('click',function(e){
+  var b=e.target.closest('button'); if(!b) return;
+  var r = b.getAttribute('data-r');
+  if(r==='none'){ if(simState.result!=='none') simState.test = P[cur].s.test; }
+  else simState.test = 0;
+  simState.result = r; rerender();
+});
 
 /* ---------- Sight Check-in ---------- */
 var lang = 'en', share = false;
 function renderCheckin(){
-  var p = P[cur], s = simState, res = score(s,p), g = band(p.age);
-  Array.prototype.forEach.call(document.querySelectorAll('#aud-tbl tbody tr'),function(r){r.classList.toggle('on',r.getAttribute('data-a')===g);});
-  el('pp-share-wrap').style.display = g==='senior' ? '' : 'none';
+  var p = P[cur], s = simState, st = status(s,p), g = band(p.age), iv = interval(p);
+  all('#aud-tbl tbody tr').forEach(function(r){r.classList.toggle('on',r.getAttribute('data-a')===g);});
+  el('pp-share-wrap').style.display = g==='minor' ? 'none' : '';
   var toParent = g==='minor', ch = el('pp-channel');
-  el('wa-title').textContent = toParent ? 'Lenskart Parent Check-in' : 'Lenskart Sight Check-in';
+  el('wa-title').textContent = p.first ? 'Lenskart Follow-up' : toParent ? 'Lenskart Parent Check-in' : 'Lenskart Sight Check-in';
   ch.className = 'channel ' + (toParent?'parent':'self');
   ch.innerHTML = toParent ? '<b>Goes to '+p.parent+', '+p.name+'\'s parent.</b> '+p.name+' is '+p.age+', so the parent who holds the account receives it, with consent taken at the eye test.'
-    : g==='senior' ? '<b>Goes to '+p.name+'.</b> '+(share?'A copy also goes to the family member '+p.name+' chose.':'No one else sees it unless '+p.name+' opts in to a family copy.')
-    : '<b>Goes to '+p.name+'.</b> Adults get their own check-in. No one else is copied.';
-  var body = el('wa-body'), msg, btns = [];
-  var en = lang==='en';
-  if(s.ticket){
-    msg = en ? 'No message is sent.\n\n'+p.name+' has an open service ticket, so the check-in is on hold until the ticket is closed.'
-             : 'कोई संदेश नहीं भेजा जाता।\n\n'+p.name+' की एक सर्विस टिकट खुली है, इसलिए टिकट बंद होने तक चेक-इन रुका रहेगा।';
-  } else if(res.tier==='Not due'){
-    msg = en ? 'No message is sent.\n\n'+p.name+'\'s last eye test was '+s.test+' months ago. The next check-in goes out in about '+Math.max(1,res.iv-s.test)+' months.'
-             : 'कोई संदेश नहीं भेजा जाता।\n\n'+p.name+' की पिछली आंखों की जांच '+s.test+' महीने पहले हुई थी। अगला चेक-इन लगभग '+Math.max(1,res.iv-s.test)+' महीने बाद जाएगा।';
+    : '<b>Goes to '+p.name+'.</b> '+(share?'A copy also goes to the family member '+p.name+' chose.':'No one else sees it unless '+p.name+' opts in to a family copy.');
+  var en = lang==='en', msg, btns = [], none = en ? 'No message is sent.\n\n' : 'कोई संदेश नहीं भेजा जाता।\n\n';
+  var stop = en ? '\n\nReply STOP to opt out of check-ins.' : '\n\nचेक-इन बंद करने के लिए STOP लिखें।';
+  if(st==='doctor'){
+    msg = none + (en ? p.name+' reported sudden loss of vision, pain or flashes. The app and the store point to an eye doctor today; no check-in goes out.'
+                     : p.name+' ने अचानक नज़र कम होने, दर्द या चमक दिखने की बात बताई है। ऐप और स्टोर आज ही आंखों के डॉक्टर को दिखाने को कहते हैं; कोई चेक-इन नहीं जाता।');
+  } else if(s.ticket){
+    msg = none + (en ? p.name+' has an open service ticket, so messages are on hold until the ticket is closed.'
+                     : p.name+' की एक सर्विस टिकट खुली है, इसलिए टिकट बंद होने तक संदेश रुके रहेंगे।');
+  } else if(st==='followup'){
+    if(s.days<3){
+      msg = none + (en ? 'The first follow-up goes out on day 3. Today is day '+s.days+'.' : 'पहला फ़ॉलो-अप तीसरे दिन जाता है। आज दिन '+s.days+' है।');
+    } else {
+      var k = s.days<21 ? 1 : 2;
+      msg = en ? 'Hi '+p.name+',\n\nYour eye test with us '+daysAgo(s.days)+' found that glasses would help you see far clearly. Your power is saved with us, so there is nothing to carry.\n\nWhen you are ready, you can try frames at your Lenskart store in '+p.city+', or with 3D Try On in the app.\n\nThis is message '+k+' of 2.'+(k===2?' We will not message you about this again.':'')+'\n\nReply STOP to opt out.'
+               : 'नमस्ते '+p.name+',\n\n'+s.days+' दिन पहले हमारे यहां हुई आंखों की जांच में पता चला कि चश्मे से आपको दूर का साफ़ दिखेगा। आपका नंबर हमारे पास सुरक्षित है, आपको कुछ लाने की ज़रूरत नहीं।\n\nजब आप तैयार हों, '+p.city+' के अपने Lenskart स्टोर पर या ऐप में 3D Try On से फ़्रेम आज़मा सकते हैं।\n\nयह 2 में से संदेश '+k+' है।'+(k===2?' इस बारे में हम आपको दोबारा संदेश नहीं भेजेंगे।':'')+'\n\nबंद करने के लिए STOP लिखें।';
+      btns = en ? ['Try frames in the app','Book a store visit','Not now'] : ['ऐप में फ़्रेम आज़माएं','स्टोर विज़िट बुक करें','अभी नहीं'];
+    }
+  } else if(st==='stopped'){
+    msg = none + (en ? 'Two follow-ups have gone and 30 days have passed. '+p.name+'\'s power stays saved.' : 'दो फ़ॉलो-अप जा चुके हैं और 30 दिन बीत गए हैं। '+p.name+' का नंबर सुरक्षित रहेगा।');
+  } else if(st==='tested' || st==='refer'){
+    msg = none + (en ? p.name+' was tested today'+(st==='refer'?' and referred to an eye doctor':'')+'. The next check-in goes out in '+iv+' months.' : p.name+' की जांच आज हुई है'+(st==='refer'?' और उन्हें आंखों के डॉक्टर के पास भेजा गया है':'')+'। अगला चेक-इन '+iv+' महीने बाद जाएगा।');
+  } else if(st==='recheck'){
+    msg = none + (en ? p.name+' reported trouble seeing; the last test was '+recent(p,s)+'. The store is told and offers a free re-check; no reminder goes out.'
+                     : p.name+' ने देखने में दिक्कत बताई है; पिछली जांच '+(p.first?(s.days===0?'आज':s.days+' दिन पहले'):(s.test===0?'इसी महीने':s.test+' महीने पहले'))+' हुई थी। स्टोर को बताया गया है और वह मुफ़्त दोबारा जांच करेगा; कोई रिमाइंडर नहीं जाता।');
+  } else if(st==='notdue'){
+    msg = none + (en ? p.name+'\'s last eye test was '+since(s.test)+'. The next check-in goes out in about '+mo(Math.max(1,iv-s.test))+'.'
+                     : p.name+' की पिछली आंखों की जांच '+(s.test===0?'इसी महीने':s.test+' महीने पहले')+' हुई थी। अगला चेक-इन लगभग '+Math.max(1,iv-s.test)+' महीने बाद जाएगा।');
   } else if(toParent){
-    msg = en ? 'Hello '+p.parent+',\n\n'+p.name+'\'s last eye test with us was '+s.test+' months ago. Children\'s power can change quickly, so we suggest a check every 6 months.\n\nThe test is free at your Lenskart store in '+p.city+'.'+(res.tier==='Overdue'?'\n\nIf nothing is booked in a week, your store will call once.':'')+'\n\nIf '+p.name+'\'s power is the same, nothing needs to change.\n\nReply STOP to opt out of check-ins.'
-             : 'नमस्ते '+p.parent+',\n\n'+p.name+' की पिछली आंखों की जांच हमारे यहां '+s.test+' महीने पहले हुई थी। बच्चों का नंबर जल्दी बदल सकता है, इसलिए हम हर 6 महीने में जांच की सलाह देते हैं।\n\n'+p.city+' के आपके Lenskart स्टोर पर जांच मुफ़्त है।'+(res.tier==='Overdue'?'\n\nअगर एक हफ्ते में बुकिंग नहीं हुई, तो आपका स्टोर एक बार फ़ोन करेगा।':'')+'\n\nअगर '+p.name+' का नंबर वही है, तो कुछ बदलने की ज़रूरत नहीं।\n\nचेक-इन बंद करने के लिए STOP लिखें।';
-    btns = en ? ['Book a free eye test','Not now'] : ['मुफ़्त जांच बुक करें','अभी नहीं'];
+    var callP = st==='overdue' ? (s.callOk ? (en?'\n\nIf nothing is booked in a week, your store will call once, as you agreed at the last eye test.':'\n\nअगर एक हफ्ते में बुकिंग नहीं हुई, तो आपका स्टोर एक बार फ़ोन करेगा, जैसा आपने पिछली जांच पर कहा था।') : (en?'\n\nWe will remind you once more in a week.':'\n\nहम एक हफ्ते बाद एक बार और याद दिलाएंगे।')) : '';
+    msg = en ? 'Hello '+p.parent+',\n\n'+p.name+'\'s last eye test with us was '+s.test+' months ago. Children\'s power can change quickly, so a regular check helps.\n\nThe test is free at your Lenskart store in '+p.city+'.'+callP+'\n\nIf '+p.name+'\'s power is the same, nothing needs to change.'+stop
+             : 'नमस्ते '+p.parent+',\n\n'+p.name+' की पिछली आंखों की जांच हमारे यहां '+s.test+' महीने पहले हुई थी। बच्चों का नंबर जल्दी बदल सकता है, इसलिए नियमित जांच मदद करती है।\n\n'+p.city+' के आपके Lenskart स्टोर पर जांच मुफ़्त है।'+callP+'\n\nअगर '+p.name+' का नंबर वही है, तो कुछ बदलने की ज़रूरत नहीं।'+stop;
+    btns = en ? ['Book a free store eye test','Trouble seeing','Not now'] : ['स्टोर पर मुफ़्त जांच बुक करें','देखने में दिक्कत है','अभी नहीं'];
   } else {
-    var symLine = s.sym>0 ? (en ? ' You also told us about eye strain or headaches recently.' : ' आपने हाल में आंखों में थकान या सिरदर्द के बारे में भी बताया था।') : '';
-    msg = en ? 'Hi '+p.name+',\n\nYour last eye test with us was '+s.test+' months ago.'+symLine+' '+(p.near?'After 40, near vision often changes, so a yearly check helps.':'A quick check tells you if your power is still right.')+'\n\nThe test is free at any Lenskart store'+(canHome(p)?', and a home eye test is available in '+p.city:'')+'.'+(res.tier==='Overdue'?'\n\nIf you have not booked in a week, your store will call once.':'')+'\n\nIf your power is the same, you keep your pair.\n\nReply STOP to opt out of check-ins.'
-             : 'नमस्ते '+p.name+',\n\nआपकी पिछली आंखों की जांच हमारे यहां '+s.test+' महीने पहले हुई थी।'+symLine+' '+(p.near?'40 के बाद पास की नज़र अक्सर बदलती है, इसलिए साल में एक जांच मदद करती है।':'एक छोटी जांच बता देगी कि आपका नंबर अब भी सही है या नहीं।')+'\n\nकिसी भी Lenskart स्टोर पर जांच मुफ़्त है'+(canHome(p)?', और '+p.city+' में घर पर जांच भी उपलब्ध है':'')+'।'+(res.tier==='Overdue'?'\n\nअगर एक हफ्ते में बुकिंग नहीं हुई, तो आपका स्टोर एक बार फ़ोन करेगा।':'')+'\n\nअगर आपका नंबर वही है, तो आपका चश्मा वही रहेगा।\n\nचेक-इन बंद करने के लिए STOP लिखें।';
-    btns = en ? ['Book a free store eye test'].concat(canHome(p)?['Book a home eye test']:[]).concat(['Not now']) : ['स्टोर पर मुफ़्त जांच बुक करें'].concat(canHome(p)?['घर पर जांच बुक करें']:[]).concat(['अभी नहीं']);
+    var symLine = s.sym===1 ? (en ? ' You also told us you are having trouble seeing.' : ' आपने यह भी बताया कि आपको देखने में दिक्कत हो रही है।') : '';
+    var callA = st==='overdue' ? (s.callOk ? (en?'\n\nIf you have not booked in a week, your store will call once, as you agreed at your last eye test.':'\n\nअगर एक हफ्ते में बुकिंग नहीं हुई, तो आपका स्टोर एक बार फ़ोन करेगा, जैसा आपने पिछली जांच पर कहा था।') : (en?'\n\nWe will remind you once more in a week.':'\n\nहम एक हफ्ते बाद एक बार और याद दिलाएंगे।')) : '';
+    msg = en ? 'Hi '+p.name+',\n\nYour last eye test with us was '+s.test+' months ago.'+symLine+' '+(p.near?'After 40, near vision often changes, so a check helps.':'A quick check tells you if your power is still right.')+'\n\nThe test is free at any Lenskart store'+(canHome(p)?', and a home eye test is available in '+p.city:'')+'.'+callA+'\n\nIf your power is the same, you keep your pair.'+stop
+             : 'नमस्ते '+p.name+',\n\nआपकी पिछली आंखों की जांच हमारे यहां '+s.test+' महीने पहले हुई थी।'+symLine+' '+(p.near?'40 के बाद पास की नज़र अक्सर बदलती है, इसलिए जांच मदद करती है।':'एक छोटी जांच बता देगी कि आपका नंबर अब भी सही है या नहीं।')+'\n\nकिसी भी Lenskart स्टोर पर जांच मुफ़्त है'+(canHome(p)?', और '+p.city+' में घर पर जांच भी उपलब्ध है':'')+'।'+callA+'\n\nअगर आपका नंबर वही है, तो आपका चश्मा वही रहेगा।'+stop;
+    btns = en ? ['Book a free store eye test'].concat(canHome(p)?['Book a home eye test']:[]).concat(['Trouble seeing','Not now']) : ['स्टोर पर मुफ़्त जांच बुक करें'].concat(canHome(p)?['घर पर जांच बुक करें']:[]).concat(['देखने में दिक्कत है','अभी नहीं']);
   }
-  body.innerHTML = '';
+  var body = el('wa-body'); body.innerHTML = ''; body.setAttribute('lang', en?'en':'hi');
   var m = document.createElement('div'); m.className='wa-msg'; m.textContent = msg;
-  var t = document.createElement('span'); t.className='wa-time'; t.textContent='10:05'; m.appendChild(t); body.appendChild(m);
+  var t = document.createElement('span'); t.className='wa-time'; t.setAttribute('aria-hidden','true'); t.textContent='10:05'; m.appendChild(t); body.appendChild(m);
   if(btns.length){ var w = document.createElement('div'); w.className='wa-btns'; w.innerHTML = btns.map(function(b){return '<span>'+b+'</span>';}).join(''); body.appendChild(w); }
 }
 el('pp-person').addEventListener('click',function(e){ var b=e.target.closest('button'); if(b) pick(+b.getAttribute('data-p')); });
-el('pp-lang').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b) return; lang=b.getAttribute('data-l');
-  Array.prototype.forEach.call(document.querySelectorAll('#pp-lang button'),function(x){x.setAttribute('aria-pressed',String(x===b));}); renderCheckin(); });
+el('pp-lang').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b) return; lang=b.getAttribute('data-l'); press('#pp-lang button','data-l',lang); renderCheckin(); });
 el('pp-share').addEventListener('change',function(e){ share=e.target.checked; renderCheckin(); });
+
+/* ---------- Calculator inputs (shared with the console table) ---------- */
+function v(id){ var x = parseFloat(el(id).value); return isFinite(x) ? Math.min(1e12, Math.max(0,x)) : 0; }
+function pc(id){ return clamp(v(id),0,100)/100; }
+function inputs(){
+  var same = pc('m-same'), swap = Math.min(pc('m-swap'), 1-same);
+  return {acc:v('m-acc'), due:pc('m-due'), reach:pc('m-reach'), take:pc('m-take'), calllift:pc('m-calllift'), base:pc('m-base'), cann:pc('m-cann'), found:pc('m-found'), fval:v('m-fval'), same:same, swap:swap, buy:Math.max(0,1-same-swap),
+    swapv:v('m-swapv'), order:v('m-order'), incr:pc('m-incr'), first:v('m-first'), noord:pc('m-noord'), conv:pc('m-conv'),
+    pm:pc('m-pm'), sell:pc('m-sell'), fx:v('m-fx'), msg:v('m-msg'), test:v('m-test'), hshare:pc('m-hshare'), home:v('m-home'),
+    over:pc('m-over'), unb:pc('m-unb'), call:v('m-call'), tot:v('m-tot'), ai:v('m-ai')};
+}
+// Revenue from one extra re-test: unchanged earns nothing, a swap a little, a pair an order.
+function perRetest(I){ return I.swap*I.swapv + I.buy*I.order; }
 
 /* ---------- Console: seeded synthetic cohort ---------- */
 function rng(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0; var t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
-var seed = 20261113, cohort = [], segs = [], sortK = 'value', sortDir = -1, selSeg = null;
+var seed = 20261113, cohort = [], sortK = 'value', sortDir = -1, selSeg = null;
 var GROUPS = {
-  ticket:{seg:'Open service ticket',action:'Hold every message and offer',resp:0,val:0,why:'Nothing is sent until the ticket is closed.'},
-  first:{seg:'First-ever test, did not buy',action:'Two follow-ups with the saved power, then stop',resp:0.06,val:4280,why:'They learned they need glasses and left without a pair.'},
-  child:{seg:'Children due (under 18)',action:'Parent Check-in and a 6-month re-test',resp:0.12,val:1950,why:'One pair at the India average selling price.'},
-  senior:{seg:'40 and above, due',action:'Yearly near-vision re-test',resp:0.08,val:4280,why:'Near vision changes after 40; progressives lift the order.'},
-  over:{seg:'Adults overdue',action:'Re-test in two taps; store call on day 8',resp:0.07,val:4280,why:'Last test is past the interval and they report symptoms.'},
-  due:{seg:'Adults due now',action:'One reminder with a slot',resp:0.05,val:4280,why:'One reminder, no call.'},
-  ok:{seg:'Not due',action:'Care tip only, no offer',resp:0,val:0,why:'A fresh prescription is not a sales lead.'}
+  adult:{seg:'Adults 18 to 64, due or overdue',action:'Check-in and re-test; a store call if overdue and agreed',recall:true,why:'The longest interval, and the largest group.'},
+  senior:{seg:'65 and above, due or overdue',action:'Check-in and re-test; a store call if overdue and agreed',recall:true,why:'Checked every year from 65.'},
+  child:{seg:'Children 8 to 17, due or overdue',action:'Parent Check-in and re-test at a store',recall:true,why:'The message goes to the parent; the test is at a store.'},
+  first:{seg:'First test in the last 30 days, power found, no order',action:'Two follow-ups with the saved power, then stop',recall:false,why:'They learned they need glasses and have not ordered yet.'},
+  ticket:{seg:'Open service ticket',action:'Hold every message',recall:false,zero:true,why:'Nothing is sent until the ticket is closed.'},
+  ok:{seg:'Not due',action:'Nothing is sent',recall:false,zero:true,why:'A recent prescription is not a sales lead.'}
 };
 function build(){
   var r = rng(seed); cohort = [];
   for(var i=0;i<5000;i++){
-    var a = r(), age = a<0.12 ? 6+Math.floor(r()*12) : a<0.70 ? 18+Math.floor(r()*22) : 40+Math.floor(r()*30);
-    var test = Math.floor(Math.pow(r(),1.4)*40);
-    var s = {test:test, pair:Math.min(48,test+Math.floor(r()*10)), sym:r()<0.6?0:(r()<0.6?1:(r()<0.7?2:3)), screen:Math.floor(3+r()*10)};
-    var res = score(s,{age:age});
-    var key = r()<0.04 ? 'ticket' : (r()<0.07 && res.tier!=='Not due') ? 'first' : res.tier==='Not due' ? 'ok' : age<18 ? 'child' : age>=40 ? 'senior' : res.tier==='Overdue' ? 'over' : 'due';
-    cohort.push({age:age,risk:res.risk,tier:res.tier,key:key});
+    var a = r(), age = a<0.12 ? 8+Math.floor(r()*10) : a<0.90 ? 18+Math.floor(r()*47) : 65+Math.floor(r()*16);
+    var myo = age<18 && r()<0.3, iv = interval({age:age,myo:myo});
+    // Months since the last test, as a share of this band's interval.
+    var test = Math.round(iv*(0.15 + Math.pow(r(),1.15)*1.6));
+    var st = test>=1.5*iv ? 'overdue' : test>=iv ? 'due' : 'notdue';
+    var u = r();
+    var key = u<0.03 ? 'ticket' : u<0.09 ? 'first' : st==='notdue' ? 'ok' : age<18 ? 'child' : age>=65 ? 'senior' : 'adult';
+    cohort.push({age:age,st:(key==='first'?'notdue':st),key:key});
   }
-  var by = {};
-  cohort.forEach(function(c){ (by[c.key]=by[c.key]||[]).push(c); });
-  segs = Object.keys(GROUPS).filter(function(k){return by[k];}).map(function(k){
-    var g = GROUPS[k], list = by[k];
-    return {key:k,seg:g.seg,action:g.action,n:list.length,avgRisk:Math.round(list.reduce(function(a,c){return a+c.risk;},0)/list.length),value:Math.round(list.length*g.resp*g.val),resp:g.resp,val:g.val,why:g.why};
-  });
   selSeg = null;
 }
+function segments(I){
+  var by = {};
+  cohort.forEach(function(c){ (by[c.key]=by[c.key]||[]).push(c); });
+  return Object.keys(GROUPS).filter(function(k){return by[k];}).map(function(k){
+    var g = GROUPS[k], n = by[k].length;
+    var nOver = by[k].filter(function(c){return c.st==='overdue';}).length;
+    var retests = n*I.reach*I.take + nOver*I.unb*I.calllift, lost = n*I.reach*I.base*I.cann*Math.max(0,I.order-I.swapv);
+    var value = g.zero ? 0 : g.recall ? retests*perRetest(I)*I.incr - lost : n*I.reach*I.conv*I.fval*I.incr;
+    return {key:k,seg:g.seg,action:g.action,n:n,nOver:nOver,retests:retests,lost:lost,value:Math.round(value),why:g.why,recall:g.recall,zero:!!g.zero};
+  });
+}
 function renderConsole(){
-  var n = cohort.length, cnt = {Overdue:0,'Due now':0,'Not due':0};
-  cohort.forEach(function(c){cnt[c.tier]++;});
-  var held = cohort.filter(function(c){return c.key==='ticket'||c.key==='ok';}).length;
+  var I = inputs(), segs = segments(I), n = cohort.length, cnt = {overdue:0,due:0,notdue:0};
+  cohort.forEach(function(c){cnt[c.st]++;});
+  var silent = cohort.filter(function(c){return c.key==='ticket'||c.key==='ok';}).length;
   var total = segs.reduce(function(a,s){return a+s.value;},0);
+  var duePc = (cnt.overdue+cnt.due)/n*100, overPc = cnt.overdue/n*100;
+  el('c-due').textContent = duePc.toFixed(1)+'%'; el('c-over').textContent = overPc.toFixed(1)+'%';
   el('kpis').innerHTML = [
     [n.toLocaleString('en-IN'),'Customers scored'],
-    [(cnt.Overdue/n*100).toFixed(1)+'%','Eye test overdue'],
-    [(held/n*100).toFixed(1)+'%','Get no offer this week'],
-    [INR(total),'Revenue won back, this cohort']
+    [duePc.toFixed(1)+'%','Due or overdue (backlog)'],
+    [(silent/n*100).toFixed(1)+'%','Get no message'],
+    [INR(total),'Incremental revenue, if the uplift holds']
   ].map(function(k){return '<div class="kpi"><b>'+k[0]+'</b><span>'+k[1]+'</span></div>';}).join('');
-  el('riskbars').innerHTML = [['Overdue','h'],['Due now','m'],['Not due','l']].map(function(t){
-    var pc = cnt[t[0]]/n*100; return '<div class="chartbar"><span>'+t[0]+'</span><div class="bar"><i class="'+t[1]+'" style="width:'+pc+'%"></i></div><span style="text-align:right">'+pc.toFixed(1)+'%</span></div>';
+  el('riskbars').innerHTML = [['Overdue','h','overdue'],['Due now','m','due'],['Not due','l','notdue']].map(function(t){
+    var p = cnt[t[2]]/n*100; return '<div class="chartbar"><span>'+t[0]+'</span><div class="bar"><i class="'+t[1]+'" style="width:'+p+'%"></i></div><span style="text-align:right">'+p.toFixed(1)+'%</span></div>';
   }).join('');
   var rows = segs.slice().sort(function(a,b){ var x=a[sortK], y=b[sortK]; return (typeof x==='string'? x.localeCompare(y) : x-y)*sortDir; });
+  all('#segtbl th').forEach(function(th){ var k = th.querySelector('button').getAttribute('data-k'); th.setAttribute('aria-sort', k===sortK ? (sortDir>0?'ascending':'descending') : 'none'); });
   el('segtbl').querySelector('tbody').innerHTML = rows.map(function(s){
-    return '<tr class="pick'+(selSeg===s.key?' sel':'')+'" data-k="'+s.key+'" tabindex="0"><td><b>'+s.seg+'</b></td><td>'+s.action+'</td><td class="num">'+s.n.toLocaleString('en-IN')+'</td><td class="num">'+s.avgRisk+'</td><td class="num">'+(s.value?INR(s.value):'0')+'</td></tr>';
+    return '<tr class="pick'+(selSeg===s.key?' sel':'')+'" data-k="'+s.key+'"><th scope="row"><button type="button" class="rowbtn" aria-expanded="'+(selSeg===s.key)+'" aria-controls="seg-detail">'+s.seg+'</button><span class="act-m">'+s.action+'</span></th><td class="act">'+s.action+'</td><td class="num">'+s.n.toLocaleString('en-IN')+'</td><td class="num">'+(s.value?INR(s.value):'0')+'</td></tr>';
   }).join('');
   var d = el('seg-detail'), s = segs.filter(function(x){return x.key===selSeg;})[0];
-  d.innerHTML = s ? '<div class="card soft"><p class="label">Selected group</p><h3>'+s.seg+'</h3><p class="small" style="margin-top:6px">'+s.why+'</p><div class="formula" style="margin-top:8px">'+(s.value ? s.n.toLocaleString('en-IN')+' customers × '+(s.resp*100).toFixed(0)+'% expected to act × '+INR(s.val)+' = '+INR(s.value) : s.n.toLocaleString('en-IN')+' customers × no offer = ₹0')+'</div><p class="small muted" style="margin-top:6px">Response rates are assumptions for this demo cohort. ₹4,280 is FY26 India revenue per transacting account; ₹1,950 is the Q2 FY27 India average selling price.</p></div>' : '';
+  if(!s){ d.innerHTML = ''; return; }
+  var f = s.zero ? s.n.toLocaleString('en-IN')+' customers × no message = ₹0'
+    : s.recall ? s.retests.toFixed(1)+' extra re-tests ('+s.n.toLocaleString('en-IN')+' due × '+(I.reach*100).toFixed(0)+'% reachable × '+(I.take*100).toFixed(1)+'pp, plus '+s.nOver.toLocaleString('en-IN')+' overdue × '+(I.unb*100).toFixed(0)+'% called × '+(I.calllift*100).toFixed(0)+'pp) × '+INR(perRetest(I))+' × '+(I.incr*100).toFixed(0)+'% truly extra, less '+INR(s.lost)+' from returners who swap = '+INR(s.value)
+    : s.n.toLocaleString('en-IN')+' customers × '+(I.reach*100).toFixed(0)+'% reachable × '+(I.conv*100).toFixed(1)+'pp extra orders × '+INR(I.fval)+' × '+(I.incr*100).toFixed(0)+'% truly extra = '+INR(s.value);
+  d.innerHTML = '<div class="card soft"><p class="label">Selected group</p><h3>'+s.seg+'</h3><p class="small" style="margin-top:6px"><b>Action:</b> '+s.action+'. '+s.why+'</p><div class="formula" style="margin-top:8px">'+f+'</div><p class="small muted" style="margin-top:6px">'+(s.recall?INR(perRetest(I))+' a re-test = '+(I.same*100).toFixed(0)+'% unchanged at ₹0 + '+(I.swap*100).toFixed(0)+'% lens swap at '+INR(I.swapv)+' + '+(I.buy*100).toFixed(0)+'% new pair at '+INR(I.order)+'. ':'')+'Every rate comes from the calculator on this screen and is an assumption until a holdout proves it.</p></div>';
 }
-function pickSeg(tr){ if(!tr) return; selSeg = tr.getAttribute('data-k'); renderConsole(); }
+function pickSeg(tr){ if(!tr) return; var k = tr.getAttribute('data-k'); selSeg = selSeg===k ? null : k; renderConsole(); selSeg = selSeg; var keep = k; var again = document.querySelector('#segtbl tr[data-k="'+keep+'"] .rowbtn'); if(again) again.focus(); }
 el('segtbl').addEventListener('click',function(e){
-  var hb = e.target.closest('th button');
-  if(hb){ var k=hb.getAttribute('data-k'); if(sortK===k) sortDir=-sortDir; else { sortK=k; sortDir = (k==='seg'||k==='action')?1:-1; } renderConsole(); return; }
+  var hb = e.target.closest('thead th button');
+  if(hb){ var k=hb.getAttribute('data-k'); if(sortK===k) sortDir=-sortDir; else { sortK=k; sortDir = (k==='seg'||k==='action')?1:-1; } renderConsole(); var b = document.querySelector('#segtbl th button[data-k="'+k+'"]'); if(b) b.focus(); return; }
   pickSeg(e.target.closest('tr.pick'));
 });
-el('segtbl').addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ var tr=e.target.closest('tr.pick'); if(tr){e.preventDefault();pickSeg(tr);} } });
-el('reseed').addEventListener('click',function(){ seed = (seed*1103515245+12345)&0x7fffffff; build(); renderConsole(); });
+el('reseed').addEventListener('click',function(){ seed = (seed*1103515245+12345)&0x7fffffff; build(); renderConsole(); calc(); });
 
 /* ---------- Calculator ---------- */
-function v(id){ var x = parseFloat(el(id).value); return isFinite(x)?x:0; }
 function calc(){
-  var acc=v('m-acc'), ret=v('m-ret')/100, rev=v('m-rev'), first=v('m-first'), conv=v('m-conv')/100, gold=v('m-gold'), fam=v('m-fam')/100, asp=v('m-asp'), pm=v('m-pm')/100, fx=v('m-fx')||1;
-  var A=acc*ret*rev, B=first*conv*rev, C=gold*fam*asp, total=A+B+C, margin=total*pm;
+  var I = inputs();
+  var dueN = I.acc*I.due*I.reach, calls = I.acc*I.over*I.unb, retests = dueN*I.take + calls*I.calllift;
+  var A = retests*perRetest(I)*I.incr;
+  var followN = I.first*I.found*I.noord*I.reach, B = followN*I.conv*I.fval*I.incr;
+  // Offering the lens swap first costs something: a few people who would have
+  // come back and bought a pair now swap lenses instead.
+  var C = dueN*I.base*I.cann*Math.max(0,I.order-I.swapv);
+  var total = A+B-C, contrib = total*Math.max(0,I.pm-I.sell), fxOk = I.fx>0;
   el('levers').innerHTML = [
-    ['Recall brings last year\'s customers back', A, acc.toLocaleString('en-IN')+' × '+(ret*100)+'pp × '+INR(rev)],
-    ['First-ever test, followed up', B, first.toLocaleString('en-IN')+' × '+(conv*100)+'% × '+INR(rev)],
-    ['Family member added by a Gold member', C, gold.toLocaleString('en-IN')+' × '+(fam*100)+'% × '+INR(asp)]
+    ['Recall: re-tests that would not have happened', A, Math.round(retests).toLocaleString('en-IN')+' extra re-tests × '+INR(perRetest(I))+' × '+(I.incr*100).toFixed(0)+'%'],
+    ['First-test follow-up', B, Math.round(followN*I.conv).toLocaleString('en-IN')+' extra orders × '+INR(I.fval)+' × '+(I.incr*100).toFixed(0)+'%'],
+    ['Returners who now swap lenses instead of buying', -C, Math.round(dueN*I.base*I.cann).toLocaleString('en-IN')+' customers × '+INR(Math.max(0,I.order-I.swapv))+' less each']
   ].map(function(l){return '<div class="lever"><div class="lever-head"><b>'+l[0]+'</b><span>'+CR(l[1])+'</span></div><div class="formula">'+l[2]+' = '+CR(l[1])+'</div></div>';}).join('');
-  var msg=v('m-msg'), book=v('m-book')/100, test=v('m-test'), over=v('m-over')/100, call=v('m-call'), tot=v('m-tot'), ai=v('m-ai');
-  var c1=acc*3*msg, c2=first*2*msg, c3=gold*1*msg, c4=acc*book*test, c5=acc*over*call, c6=tot*ai, cost=c1+c2+c3+c4+c5+c6;
+  var c1=dueN*2*I.msg, c2=followN*2*I.msg, c3=retests*((1-I.hshare)*I.test+I.hshare*I.home), c4=calls*I.call, c5=I.tot*I.ai, cost=c1+c2+c3+c4+c5;
   el('costs').innerHTML = [
-    ['Recall check-ins (up to 3 per customer)', c1],['First-test follow-ups (2 each)', c2],['Family invites (1 per Gold member)', c3],
-    ['Extra eye tests', c4],['Store calls on day 8', c5],['AI scoring and message drafting', c6]
+    ['Recall check-ins (2 per due customer)', c1],['First-test follow-ups (2 each)', c2],['Extra re-tests, store and home', c3],['Store calls on day 8', c4],['AI ranking and message drafting', c5]
   ].map(function(l){return '<div class="lever" style="padding:8px 0"><div class="lever-head"><span>'+l[0]+'</span><span>'+CR2(l[1])+'</span></div></div>';}).join('')
    + '<div class="lever" style="padding:8px 0"><div class="lever-head"><b>Total running cost</b><b id="m-cost">'+CR2(cost)+'</b></div></div>';
-  el('m-total').textContent = CR(total)+' · '+USDM(total,fx);
-  el('m-total-sub').textContent = 'About '+(total/5264.8e7*100).toFixed(1)+'% on top of FY26 India revenue of ₹5,265 cr.';
-  el('m-total-f').textContent = CR(A)+' + '+CR(B)+' + '+CR(C)+' = '+CR(total);
-  el('m-net').textContent = CR(margin-cost)+' · '+USDM(margin-cost,fx);
-  el('m-net-sub').textContent = CR(total)+' × '+(pm*100).toFixed(1)+'% product margin = '+CR(margin)+', less '+CR2(cost)+' running cost. Return on running cost: about '+(cost>0?(margin/cost).toFixed(0):'0')+'x.';
+  // Which lever earns the money, after its own costs.
+  var mar = Math.max(0,I.pm-I.sell), perT = (1-I.hshare)*I.test+I.hshare*I.home, rMsg = dueN*I.take, rCall = calls*I.calllift;
+  var LV = [['First-test follow-up', B*mar - c2], ['Store call on day 8', rCall*perRetest(I)*I.incr*mar - c4 - rCall*perT], ['Recall message', (rMsg*perRetest(I)*I.incr - C)*mar - c1 - rMsg*perT], ['AI ranking and drafting', -c5]];
+  el('bylever').innerHTML = '<p class="label" style="margin-top:14px">Net by lever</p>' + LV.map(function(l){return '<div class="lever" style="padding:8px 0"><div class="lever-head"><span>'+l[0]+'</span><span>'+CR(l[1])+'</span></div></div>';}).join('');
+  all('.calc input').forEach(function(i){ i.setAttribute('aria-invalid', String(!i.checkValidity())); });
+  el('m-total').textContent = CR(total)+(fxOk?' · '+USDM(total,I.fx):'');
+  el('m-total-sub').textContent = 'About '+(total/5264.8e7*100).toLocaleString('en-IN',{maximumFractionDigits:1})+'% on top of FY26 India revenue of ₹5,265 cr.';
+  el('m-total-f').textContent = CR(A)+' + '+CR(B)+' − '+CR(C)+' = '+CR(total);
+  el('m-net').textContent = CR(contrib-cost)+(fxOk?' · '+USDM(contrib-cost,I.fx):'');
+  el('m-net-sub').textContent = CR(total)+' × ('+(I.pm*100).toFixed(1)+'% product margin − '+(I.sell*100).toFixed(0)+'% selling cost) = '+CR(contrib)+', less '+CR2(cost)+' running cost. '+(I.pm<=I.sell ? 'No contribution at this margin.' : 'Return on running cost: '+(cost<=0||contrib<=0 ? 'n/a' : contrib<cost ? 'below 1x' : 'about '+(contrib/cost).toFixed(0)+'x')+'.');
 }
-Array.prototype.forEach.call(document.querySelectorAll('.calc input'),function(i){i.addEventListener('input',calc);});
+all('.calc input').forEach(function(i){i.addEventListener('input',function(){ calc(); renderConsole(); });});
 
 /* ---------- Brand swatches ---------- */
 var SW = [['#000042','Primary navy','Text, headings, primary buttons'],['#333368','Body text','Also button hover'],['#66668E','Secondary text','Captions, card titles'],['#0EAE8A','Teal accent','Secondary colour variable'],['#008863','Teal, strong','"Try On" chip'],['#ECFEFA','Teal tint','"360" chip background'],['#E0C67C','Gold','Gold membership variable'],['#FFF8D9','Gold tint','Gold membership variable'],['#2261D1','Offer blue','"Buy 1 Get 1 Free" text'],['#EC3331','Error red','Error variable'],['#DBDBEA','Border','Store card border'],['#FBF9F7','Warm off-white','Panels and review cards']];
 el('swatches').innerHTML = SW.map(function(s){return '<div class="sw"><i style="background:'+s[0]+'"></i><div><b>'+s[1]+'</b>'+s[0]+'<br>'+s[2]+'</div></div>';}).join('');
+
+/* Phone: the audience table stacks into cards, each cell with its column name. */
+(function(){ var t = el('aud-tbl'), heads = all('#aud-tbl thead th').map(function(h){return h.textContent.trim();});
+  all('#aud-tbl tbody tr').forEach(function(r){ [].forEach.call(r.cells,function(c,i){ if(c.tagName==='TD') c.setAttribute('data-label',heads[i]); }); }); })();
 
 /* ---------- Boot ---------- */
 build(); setControls(); resetChat(); renderCustomer(); renderCheckin(); renderConsole(); calc();
@@ -785,7 +1129,7 @@ fromHash(true);
 // The browser's own jump to the fragment runs after this script; land again once it has.
 window.addEventListener('load',function(){setTimeout(function(){fromHash(true);},0);});
 window.addEventListener('hashchange',function(){fromHash(true,true);});
-Array.prototype.forEach.call(document.querySelectorAll('.feats a, .dl-tabs a'),function(a){
+all('.feats a').forEach(function(a){
   a.addEventListener('click',function(e){e.preventDefault(); if(history.replaceState) history.replaceState(null,'',a.getAttribute('href')); fromHash(true,true);});
 });
 })();

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Lenskart Case Study: the Vision Recall Engine | Anchit Tandon</title>
-<meta name="description" content="Product case study by Anchit Tandon: a Lenskart platform audit and the Vision Recall Engine, an AI re-test and repeat-purchase system with a working prototype.">
+<meta name="description" content="An independent product case study of Lenskart by Anchit Tandon: what happens after the eye test, a live audit, and a working prototype of one idea.">
 <meta name="robots" content="noindex, nofollow">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#000042">
@@ -186,15 +186,106 @@ footer h3{color:#fff}
 @media (max-width:699px){.nav .cta{display:none}}
 @media (prefers-reduced-motion:no-preference){.bar i{transition:width .5s ease}}
 </style>
+<style>
+/* Review pass: layout, focus, touch targets, phone tables, print. */
+.skip{position:absolute;left:-9999px;top:0;background:#fff;color:var(--ink);padding:10px 14px;border-radius:8px;z-index:50;font-weight:600}
+.skip:focus{left:8px;top:8px}
+:focus-visible{outline-color:var(--accent-ink)}
+.notice :focus-visible,footer :focus-visible,.card.dark :focus-visible,.step.dark :focus-visible{outline-color:#8CF2DB}
+.nw,.wt small{white-space:nowrap}
+.kpi b{white-space:nowrap}
+.kpi .tag{display:inline-block;font-size:12px;line-height:16px;font-weight:600;color:var(--accent-ink)}
+.grid.top{align-items:start}
+.chip,.btn.sm{min-height:44px}
+.filters{align-items:center}
+.links{-webkit-mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 40px),transparent);padding:0 28px 0 20px}
+.links a[aria-current="true"]{background:var(--primary-50);color:var(--primary)}
+.links a:hover,.links a.on{color:var(--primary)}
+.hero h1 .accent{display:inline}
+.feat .step.dark{grid-column:auto}
+.mod.d{border-top:6px solid #8CF2DB}
+.card.dark .k{color:#8CF2DB}
+.shots{align-items:start}
+.shots figure a{display:block}
+tbody th{font-weight:700;color:var(--heading);background:transparent;font-size:14px;text-align:left;vertical-align:top;border-bottom:1px solid var(--border-soft);padding:12px 14px}
+tr:last-child th{border-bottom:0}
+tr.hl th{background:var(--primary-50)}
+tr[hidden]{display:none!important}
+.foot-h{color:#fff;font-size:18px;line-height:26px;font-weight:600}
+.proto-frame{height:1400px}
+:root{--cb-bg:#000042;--cb-line:#333368;--cb-ink:#FFFFFF;--cb-muted:#D9D9E8;--cb-accent:#8CF2DB;--cb-accent-2:#8CF2DB;--cb-link:#8CF2DB;--cb-on-accent:#000042;--cb-font:var(--font)}
+@media (max-width:420px){.kpi b{font-size:22px;line-height:28px}.hero h1{font-size:25px;line-height:32px}.hero .wrap{padding-top:20px;gap:12px}.hero .lede{font-size:16px;line-height:25px}.hero-ctas .btn{min-height:44px;padding:10px 14px;font-size:14px}}
+.hero h1{max-width:980px}
+.intro{display:grid;gap:16px;margin-top:8px}
+.intro .lbl{display:block;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:2px}
+.finding{background:#fff;border:1px solid var(--border);border-left:5px solid var(--accent);border-radius:var(--r-panel);padding:16px 20px;display:grid;gap:12px;color:var(--heading);font-size:17px;line-height:27px}
+.howread{background:#fff;border:1px solid var(--border);border-radius:var(--r-panel);padding:16px 20px}
+.howread ul{list-style:none;padding:0;margin:6px 0 0;display:grid;gap:4px;font-size:15px;line-height:23px}
+.howread li a{display:inline-block;padding:4px 0;font-weight:600;text-decoration:none}
+.howread li a b{display:inline-block;min-width:92px;color:var(--heading)}
+.howread li a:hover{text-decoration:underline}
+.howread .units{font-size:13px;line-height:19px;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px solid var(--border-soft)}
+@media (min-width:900px){.intro{grid-template-columns:1.25fr 1fr;align-items:start}}
+@media (max-width:800px){
+  .stack{min-width:0!important;table-layout:auto}
+  .stack thead{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+  .stack tr{display:block;padding:12px 14px;border-bottom:1px solid var(--border-soft)}
+  .stack tr:last-child{border-bottom:0}
+  .stack td,.stack tbody th{display:block;width:auto!important;padding:3px 0;border:0;background:transparent!important}
+  .stack tbody th{font-size:15px;margin-bottom:2px}
+  .stack td[data-label]::before{content:attr(data-label) ": ";font-weight:600;color:var(--heading)}
+  .stack tr.hl{background:var(--primary-50)}
+}
+@media (min-width:1080px){
+  .feat{grid-template-columns:repeat(3,1fr)}
+  .voices{grid-template-columns:repeat(3,1fr)}
+}
+@media (min-width:1080px) and (max-width:1139px){
+  .proto-frame{display:none}
+  .shots.mob-only{display:grid}
+}
+@media print{
+  .nav,.filters,#copy-walk,.proto-frame,.hero-ctas,.skip,#consentBar{display:none!important}
+  .shots.mob-only{display:grid!important}
+  .card,.step,tr,figure,.walk li{break-inside:avoid}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{background:#fff}
+  section.block{padding:20px 0}
+}
+
+/* Second review pass. */
+:root{--bar:#008863;--cb-line:#8C8CB0}
+.chip,.btn-outline{border-color:#737397}
+.links a{min-height:44px;display:inline-flex;align-items:center}
+.feat .try{display:inline-flex;align-items:center;min-height:44px}
+.walk .wu a{display:inline-flex;align-items:center;min-height:44px}
+.howread li a{min-height:44px;display:inline-flex;align-items:center;flex-wrap:wrap;column-gap:6px}
+.howread li{display:flex;flex-wrap:wrap;align-items:center;column-gap:4px}
+.proto-frame:focus-visible{outline:3px solid var(--accent-ink);outline-offset:2px}
+.shots figure img{max-width:420px;margin:0 auto}
+@media (min-width:700px) and (max-width:899px){.shots{grid-template-columns:1fr}}
+@media (min-width:900px){.shots{grid-template-columns:minmax(0,1.2fr) 1fr 1fr}}
+@media (min-width:601px) and (max-width:760px){.tbl.is-wide::before{content:'Swipe sideways for every column \2192';display:block;position:sticky;left:0;padding:8px 12px;font-size:12px;font-weight:600;color:#5b6170;border-bottom:1px solid var(--border)}}
+@media print{body{padding-bottom:0!important}}
+
+/* Third review pass. */
+.howread li{display:block}
+.howread li a{display:flex;min-height:36px}
+.howread li .d{display:block;font-size:14px;line-height:20px;color:var(--muted);margin:-4px 0 6px 98px}
+@media (max-width:420px){.howread li .d{margin-left:0}}
+@media (min-width:601px) and (max-width:800px){.tbl.is-wide::before{content:'Swipe sideways for every column \2192';display:block;position:sticky;left:0;padding:8px 12px;font-size:12px;font-weight:600;color:#5b6170;border-bottom:1px solid var(--border)}}
+@page{margin:12mm}
+</style>
 </head>
 <body>
-<div class="notice" role="note"><b>Independent case study</b> by Anchit Tandon. Not affiliated with or endorsed by Lenskart. Figures come from Lenskart's public filings, lenskart.com and its app listings; the prototype uses synthetic data.</div>
+<a class="skip" href="#main">Skip to content</a>
+<div class="notice" role="note"><b>Independent case study</b> by Anchit Tandon. Not affiliated with or endorsed by Lenskart.</div>
 
 <nav class="nav" aria-label="Sections">
   <div class="wrap">
     <a class="mark" href="#top"><i aria-hidden="true">AT</i><span><b>Lenskart Study</b><small>by Anchit Tandon</small></span></a>
     <div class="links" id="links">
-      <a href="#system">The system</a><a href="#walkthrough">Walkthrough</a><a href="#business">Business</a><a href="#engine">Engine</a><a href="#growth">Growth</a><a href="#audit">Live audit</a><a href="#gaps">Gaps</a><a href="#ideas">Ideation</a><a href="#bet">The bet</a><a href="#prototype">Prototype</a><a href="#impact">Impact</a><a href="#plan">Plan</a><a href="#risks">Risks</a><a href="#me">Why me</a>
+      <a href="#summary">Summary</a><a href="#business">Business</a><a href="#engine">Engine</a><a href="#growth">Growth</a><a href="#audit">Audit</a><a href="#gaps">Gaps</a><a href="#ideas">Ideas</a><a href="#bet">The bet</a><a href="#prototype">Prototype</a><a href="#impact">Impact</a><a href="#plan">Plan</a><a href="#risks">Risks</a><a href="#walkthrough">Walkthrough</a><a href="#me">Why me</a>
     </div>
     <a class="btn btn-primary sm cta" href="/lenskart-study/prototype">Open prototype</a>
   </div>
@@ -202,60 +293,42 @@ footer h3{color:#fff}
 
 <header class="hero" id="top">
   <div class="wrap">
-    <span class="eyebrow">Product case study · Lenskart · November 2026</span>
-    <h1>Two crore eye tests a year each start a clock. <span class="accent">Let AI keep time.</span></h1>
-    <p class="lede">A product case study of Lenskart, shown as work: how it makes money, what is live on its platforms, where repeat revenue leaks, and the system I would build, the <b>Vision Recall Engine</b>, with a working prototype in Lenskart's design system.</p>
+    <span class="eyebrow">Independent product case study · November 2026</span>
+    <h1>What happens after a Lenskart eye test? <span class="accent">A product case study, with a working prototype.</span></h1>
+    <p class="lede">I'm Anchit Tandon, a product manager. I studied Lenskart, the Indian eyewear retailer, from the outside, using only its public filings, its website and apps, and 3,500 customer reviews. This page shows what I found and the one thing I would build. It is my own work, not Lenskart's.</p>
     <div class="hero-ctas">
-      <a class="btn btn-primary" href="/lenskart-study/prototype">Open the working prototype</a>
-      <a class="btn btn-outline" href="#audit">See the live platform audit</a>
-      <a class="btn btn-soft" href="#walkthrough">7-step walkthrough</a>
+      <a class="btn btn-primary" href="#summary">Read the 1-minute summary</a>
+      <a class="btn btn-outline" href="/lenskart-study/prototype">Try the prototype</a>
+      <a class="btn btn-soft" href="#audit">See the evidence</a>
     </div>
-    <p class="meta">Sources: Lenskart Q4 FY26, Q1 FY27 and Q2 FY27 shareholders' letters, Annual Report FY2025-26, Q3 FY26 earnings call, the IPO prospectus and its Redseer industry report, lenskart.com and Lenskart's app-store listings, checked 13 Nov 2026. ₹94.25 per US$ (reference rate, 13 Nov 2026).</p>
+    <div class="intro">
+      <div class="finding">
+        <p><span class="lbl">The finding</span>Lenskart ran 2.07 crore (20.7 million) eye tests in India last year. I found nothing that tells those customers when the next one is due.</p>
+        <p><span class="lbl">The idea</span>The <b>Vision Recall Engine</b>: follow up people after their first eye test, tell every customer when their next one is due and book it, and suggest lenses or a new pair only after a test says one is needed.</p>
+      </div>
+      <div class="howread" aria-label="How to read this page">
+        <p class="lbl">How to read this page</p>
+        <ul>
+          <li><a href="#summary"><b>1 minute</b> The short version</a><span class="d">Four cards, just below.</span></li>
+          <li><a href="#walkthrough"><b>8 minutes</b> The 7-step walkthrough</a><span class="d">The idea, the prototype, the evidence, the numbers.</span></li>
+          <li><a href="#business"><b>20 minutes</b> The full study</a><span class="d">Thirteen sections, top to bottom.</span></li>
+        </ul>
+        <p class="units">₹1 crore (cr) = ₹10 million. 1 lakh = 100,000. FY26 = April 2025 to March 2026. pp = percentage points. A holdout is a comparison group that gets nothing.</p>
+      </div>
+    </div>
   </div>
 </header>
 
-<main>
-<!-- PROPOSED SYSTEM -->
-<section class="block" id="system" aria-labelledby="sys-h">
-  <div class="wrap">
-    <div class="sec-head"><span class="num">The proposed system</span><h2 id="sys-h">Vision Recall Engine: five features on top of what Lenskart already runs</h2><p>It reads the eye-test record Lenskart already holds, works out when each person's next test is due, books it, and suggests new lenses or a pair only after the test says one is needed. No new stores, products or capex. Every feature below works in the prototype, and each link opens the part of the screen where it runs.</p></div>
-    <div class="feat">
-      <div class="step"><span class="n">Feature 1</span><b>Recall Score</b><p>How due each customer's next eye test is, from the age of their prescription, their age band, symptoms, screen time and the age of their pair. Every score shows its reasons.</p><span class="for">For: the team that owns repeat revenue</span><a class="try" href="/lenskart-study/prototype#recall">See the Recall Score</a></div>
-      <div class="step"><span class="n">Feature 2</span><b>Re-test Plan</b><p>Overdue: a re-test booked in two taps, free at a store, and one call from the home store on day 8 only if nothing is booked. Due now, or any reported symptom: one reminder with a slot. Not due: nothing.</p><span class="for">For: the customer</span><a class="try" href="/lenskart-study/prototype#plan">See Neha's plan</a></div>
-      <div class="step"><span class="n">Feature 3</span><b>Sight Check-in</b><p>One short WhatsApp message when a test falls due, sent to the parent for under-18s and to the wearer for adults. It carries a slot to book and no product, price or discount.</p><span class="for">For: the wearer or the parent</span><a class="try" href="/lenskart-study/prototype#checkin">Open the Sight Check-in</a></div>
-      <div class="step"><span class="n">Feature 4</span><b>Next Pair Step</b><p>After the re-test: keep your pair if the power is unchanged, new lenses in your current frame if it changed, or the right new pair. Held back while a service ticket is open.</p><span class="for">For: the customer</span><a class="try" href="/lenskart-study/prototype#next">See the next pair step</a></div>
-      <div class="step dark"><span class="n">Feature 5</span><b>Growth Console</b><p>The Monday screen for the team that owns repeat revenue: customers grouped by action, what each group is expected to win back, and the running cost.</p><span class="for" style="color:#8CF2DB">For: the team that owns repeat revenue</span><a class="try" href="/lenskart-study/prototype#console" style="color:#8CF2DB">Open the console</a></div>
-    </div>
-    <p class="callout" style="margin-top:20px">My estimate: <b>₹148 cr a year</b> in extra India revenue, about <b>₹84 cr ($8.9M) of product margin after ₹10.8 cr of running costs</b>, in a ₹36 to 131 cr range, from people Lenskart has already tested or sold to. <a href="#impact">See the sizing</a></p>
-  </div>
-</section>
-
-<!-- WALKTHROUGH -->
-<section class="block" id="walkthrough" aria-labelledby="walk-h">
-  <div class="wrap">
-    <div class="sec-head"><span class="num">For reviewers and hiring managers</span><h2 id="walk-h">Review this case study in 7 steps, about 8 minutes</h2><p>Each step is a complete link that opens the right screen, so any step can be shared on its own.</p></div>
-    <ol class="walk" id="walk">
-      <li><span class="wn" aria-hidden="true">1</span><span class="wt">The proposed system <small>· 1 min</small></span><span class="small">The five features and what they are worth.</span><span class="wu"><a href="/lenskart-study#system">https://anchit-tandon.com/lenskart-study#system</a></span></li>
-      <li><span class="wn" aria-hidden="true">2</span><span class="wt">Customer app: Recall Score, Re-test Plan, Next Pair Step <small>· 2 min</small></span><span class="small">Pick a customer and change the signals; the score, the plan and what is offered after the re-test change with them.</span><span class="wu"><a href="/lenskart-study/prototype#customer">https://anchit-tandon.com/lenskart-study/prototype#customer</a></span></li>
-      <li><span class="wn" aria-hidden="true">3</span><span class="wt">Sight Check-in <small>· 1 min</small></span><span class="small">Switch between Kabir (9) and Neha (29) to see who receives it, in English or Hindi.</span><span class="wu"><a href="/lenskart-study/prototype#checkin">https://anchit-tandon.com/lenskart-study/prototype#checkin</a></span></li>
-      <li><span class="wn" aria-hidden="true">4</span><span class="wt">Growth Console <small>· 1 min</small></span><span class="small">Customers grouped by action, with the revenue each group wins back and a live calculator.</span><span class="wu"><a href="/lenskart-study/prototype#console">https://anchit-tandon.com/lenskart-study/prototype#console</a></span></li>
-      <li><span class="wn" aria-hidden="true">5</span><span class="wt">The evidence: live platform audit <small>· 1 min</small></span><span class="small">What Lenskart runs today, and what I could not find.</span><span class="wu"><a href="/lenskart-study#audit">https://anchit-tandon.com/lenskart-study#audit</a></span></li>
-      <li><span class="wn" aria-hidden="true">6</span><span class="wt">Sizing and running costs <small>· 1 min</small></span><span class="small">Low, base and high cases, as product margin net of WhatsApp, eye-test, store-call and AI costs.</span><span class="wu"><a href="/lenskart-study#impact">https://anchit-tandon.com/lenskart-study#impact</a></span></li>
-      <li><span class="wn" aria-hidden="true">7</span><span class="wt">Why me <small>· 1 min</small></span><span class="small">Where I have run this playbook before, and how to reach me.</span><span class="wu"><a href="/lenskart-study#me">https://anchit-tandon.com/lenskart-study#me</a></span></li>
-    </ol>
-    <div class="share"><button class="btn btn-primary sm" type="button" id="copy-walk">Copy all 7 links</button><span class="small">Or share one link for the whole review: <a href="/lenskart-study#walkthrough">https://anchit-tandon.com/lenskart-study#walkthrough</a></span><span class="small muted" id="copy-msg" role="status" aria-live="polite"></span></div>
-  </div>
-</section>
-
-<!-- TLDR -->
-<section class="block" aria-labelledby="tldr-h">
+<main id="main">
+<!-- SUMMARY -->
+<section class="block" id="summary" aria-labelledby="tldr-h">
   <div class="wrap">
     <div class="sec-head"><span class="num">In 60 seconds</span><h2 id="tldr-h">The short version</h2></div>
     <div class="grid g2 g4">
       <div class="card"><h3>1 · The eye test is the funnel</h3><p class="small" style="margin-top:6px">Lenskart ran 2.07 crore eye tests in India in FY26, up 54%, and about half were someone's first ever. Its own target: 100 million pairs a year needs 80 million tests.</p></div>
       <div class="card"><h3>2 · Strong AI, aimed at the first pair</h3><p class="small" style="margin-top:6px">Face scan, 3D try-on, an AI stylist whose users are nearly 3x more likely to buy, remote optometry in 934 stores, and an AI voice assistant that now answers calls.</p></div>
-      <div class="card"><h3>3 · The pieces of a recall exist, unconnected</h3><p class="small" style="margin-top:6px">Free eye tests, a ₹99 home test, lens replacement for a ₹199 fitting fee and one crore Gold members are live. I could not find anything that tells a customer their next test is due.</p></div>
-      <div class="card soft"><h3>4 · The bet</h3><p class="small" style="margin-top:6px">The Vision Recall Engine: one layer that knows when each person's next test is due, books it, and sells only what the test supports. My estimate: ₹148 cr a year of extra revenue, about ₹84 cr ($8.9M) of product margin after running costs, in a ₹36 to 131 cr range.</p></div>
+      <div class="card"><h3>3 · The pieces of a recall exist, unconnected</h3><p class="small" style="margin-top:6px">Free eye tests, a ₹99 home test, saved prescriptions, lens replacement from ₹199 and one crore members of Gold, Lenskart's paid membership, are live. I found nothing that tells a customer their next test is due; a rival, Titan Eye+, is reported to.</p></div>
+      <div class="card soft"><h3>4 · The bet</h3><p class="small" style="margin-top:6px">Follow up first-timers, tell each customer when their next test is due, and sell only what the test supports. My estimate, on first orders alone: about ₹16 cr a year of extra revenue and ₹5 cr ($0.5M) of contribution (profit after product, selling and running costs), in a range from a small loss to ₹10 cr. Most of it comes from the first-test follow-up. Small in year one, cheap to prove, unproven until tested against a holdout.</p></div>
     </div>
   </div>
 </section>
@@ -263,20 +336,20 @@ footer h3{color:#fff}
 <!-- BUSINESS -->
 <section class="block" id="business" aria-labelledby="biz-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">01 · How Lenskart makes money</span><h2 id="biz-h">A profitable, vertically integrated eyewear company, growing above 30%</h2><p>FY26 (year to 31 March 2026), proforma, from Lenskart's Q4 FY26 shareholders' letter. Trailing twelve months to September 2026: revenue above ₹10,000 cr.</p></div>
+    <div class="sec-head"><span class="num">01 · How Lenskart makes money</span><h2 id="biz-h">A profitable, vertically integrated eyewear company, growing above 30%</h2><p>FY26 (year to 31 March 2026), on the proforma basis Lenskart reports, from its Q4 FY26 shareholders' letter. Trailing twelve months to September 2026: revenue above ₹10,000 cr. EBITDA is operating profit before depreciation, PAT is profit after tax, YoY is year on year.</p></div>
     <div class="grid g2m g3">
-      <div class="card kpi"><b class="pri">₹9,002 cr</b><span>Revenue, +32.3% YoY</span><small>≈ $955M</small></div>
-      <div class="card kpi"><b>₹1,790 cr</b><span>EBITDA, 19.9% margin</span><small>Up from 16.9% in FY25 · adjusted PAT ₹530 cr</small></div>
-      <div class="card kpi"><b>3.53 cr</b><span>Eyewear units sold</span><small>2.88 cr India · 0.65 cr International</small></div>
-      <div class="card kpi"><b>2.38 cr</b><span>Eye tests, +48.5%</span><small>2.07 cr in India, about half first-time</small></div>
+      <div class="card kpi"><b class="pri">₹9,002&nbsp;cr</b><span>Revenue, +32.3% YoY</span><small>≈ $955M</small></div>
+      <div class="card kpi"><b>₹1,790&nbsp;cr</b><span>EBITDA, 19.9% margin</span><small>Up from 16.9% in FY25 · adjusted PAT ₹530 cr</small></div>
+      <div class="card kpi"><b>3.53&nbsp;cr</b><span>Eyewear units sold</span><small>2.88 cr India · 0.65 cr International</small></div>
+      <div class="card kpi"><b>2.38&nbsp;cr</b><span>Eye tests, +48.5%</span><small>2.07 cr in India, about half first-time</small></div>
       <div class="card kpi"><b>3,624</b><span>Stores, Sep 2026</span><small>2,868 in India across 665 cities · 756 abroad</small></div>
-      <div class="card kpi"><b>103 lakh</b><span>Active Gold members</span><small>India, Sep 2026, +38.6% YoY</small></div>
+      <div class="card kpi"><b>103&nbsp;lakh</b><span>Active Gold members</span><small>India, Sep 2026, +38.6% YoY</small></div>
     </div>
-    <div class="grid g2" style="margin-top:24px">
+    <div class="grid g2 top" style="margin-top:24px">
       <div class="card">
         <h3>FY26 revenue mix (₹9,002 cr)</h3>
         <div class="bar-row"><div class="lbl"><b>India</b><span>₹5,265 cr · 58.5% · +33.7%</span></div><div class="bar"><i style="width:58.5%;background:var(--primary)"></i></div></div>
-        <div class="bar-row"><div class="lbl"><b>International</b><span>₹3,790 cr · 42.1% · +30.2%</span></div><div class="bar"><i style="width:42.1%;background:var(--accent)"></i></div></div>
+        <div class="bar-row"><div class="lbl"><b>International</b><span>₹3,790 cr · 42.1% · +30.2%</span></div><div class="bar"><i style="width:42.1%;background:var(--bar)"></i></div></div>
         <p class="small muted">Shares are of consolidated revenue; the two segments add up to slightly more than it. Prescription eyeglasses were more than 80% of revenue in each of FY23 to FY25 (prospectus).</p>
       </div>
       <div class="card">
@@ -285,7 +358,7 @@ footer h3{color:#fff}
           <div class="card soft kpi"><b class="pri">₹1,950</b><span>Average selling price</span><small>Q2 FY27, +6.9% · 64.0% product margin</small></div>
           <div class="card kpi"><b>1.87</b><span>Units per transacting customer</span><small>Q1 FY27, up from 1.80 a year ago</small></div>
         </div>
-        <p style="margin-top:14px;color:var(--heading)"><b>1.23 crore customer accounts transacted in India in FY26</b>, about ₹4,280 of revenue each. In Q2 FY27, 57% of India sales were digitally influenced.</p>
+        <p style="margin-top:14px;color:var(--heading)"><b>1.23 crore customer accounts transacted in India in FY26.</b> One order is worth about ₹3,650 (1.87 units at ₹1,950). In Q2 FY27, 57% of India sales were digitally influenced.</p>
       </div>
     </div>
   </div>
@@ -299,35 +372,35 @@ footer h3{color:#fff}
       <div class="step"><span class="n">1 · Reach</span><b>12 cr+</b><p class="small">App downloads in India; 2,868 stores in 665 cities</p></div>
       <div class="step"><span class="n">2 · Test</span><b>2.07 cr</b><p class="small">India eye tests in FY26, about half first-time</p></div>
       <div class="step pri"><span class="n" style="color:var(--accent-ink)">3 · Buy</span><b>1.23 cr</b><p class="small">India customer accounts that transacted in FY26</p></div>
-      <div class="step dark"><span class="n">4 · Join</span><b>103 lakh</b><p class="small">Active Gold members: a second pair, lens upgrades, offers</p></div>
+      <div class="step dark"><span class="n">4 · Join</span><b>103 lakh</b><p class="small">Active Gold members: ₹500 a year for a second pair and offers</p></div>
       <div class="step"><span class="n">5 · Return</span><b>3.6</b><p class="small">Eyeglasses bought within two years by customers acquired in FY23</p></div>
     </div>
-    <p class="callout" style="margin-top:20px">The step with no public number, and where the next rupee is cheapest, is <b>5 back to 2</b>: the same person coming back for their next eye test. Lenskart's CEO has said "consumers do churn" and that "today consumers do not have enough triggers to buy more eyewear" (Q3 FY26 call).</p>
+    <p class="callout" style="margin-top:20px">The step with no public number is <b>the last one</b>: the same person coming back for their next eye test. Lenskart's CEO says "consumers do churn", that Gold "was designed many years back to address this", and that "today consumers do not have enough triggers to buy more eyewear" (Q3 FY26 call). Gold's clock is the renewal date. This study is about the other clock, the prescription date.</p>
   </div>
 </section>
 
 <!-- GROWTH -->
 <section class="block" id="growth" aria-labelledby="gr-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">03 · Where growth comes from</span><h2 id="gr-h">Eye tests are growing twice as fast as buyers</h2></div>
-    <div class="grid g2">
+    <div class="sec-head"><span class="num">03 · Where growth comes from</span><h2 id="gr-h">Eye tests are growing twice as fast as customers, by design</h2></div>
+    <div class="grid g2 top">
       <div class="card">
         <h3>India, FY26 growth year on year</h3>
         <div class="cols" role="img" aria-label="India FY26 growth: eye tests up 54.3%, revenue up 33.7%, transacting customer accounts up 24.2%">
-          <div class="col"><b style="color:var(--accent-ink)">+54.3%</b><div style="height:150px;background:var(--accent)"></div><span>Eye tests</span></div>
+          <div class="col"><b style="color:var(--accent-ink)">+54.3%</b><div style="height:150px;background:var(--bar)"></div><span>Eye tests</span></div>
           <div class="col"><b>+33.7%</b><div style="height:93px;background:var(--primary)"></div><span>Revenue</span></div>
           <div class="col"><b>+24.2%</b><div style="height:67px;background:#737397"></div><span>Customers</span></div>
         </div>
-        <p class="small" style="margin-top:12px">The same gap held in Q2 FY27: India eye tests +44.1%, transacting customer accounts +18.5%. Lenskart does not disclose how many tested people buy, so each new test is also a new prescription on file with a date, and a future test that someone has to win.</p>
+        <p class="small" style="margin-top:12px">The same gap held in Q2 FY27: India eye tests +44.1%, transacting customer accounts +18.5%. Management says a "significant majority of people who do an eye test end up buying glasses", and that first-timers "take slightly longer" (Q1 FY27 call). So the gap is mostly market creation, not a leak. It also means every test leaves a dated prescription on file, and a next test that someone has to win.</p>
       </div>
       <div>
         <h3 style="margin-bottom:10px">Q2 FY27, year on year (drivers sorted by growth)</h3>
-        <div class="tbl"><table>
-          <thead><tr><th>Driver</th><th>Metric</th><th class="num">Growth</th></tr></thead>
+        <div class="tbl" role="region" aria-label="Q2 FY27 growth by driver"><table>
+          <thead><tr><th scope="col">Driver</th><th scope="col">Metric</th><th scope="col" class="num">Growth</th></tr></thead>
           <tbody>
             <tr><td>Remote optometry</td><td>Stores, 303 → 934</td><td class="num">3.1x</td></tr>
             <tr><td>Gold</td><td>Subscription fees, ₹73 cr</td><td class="num">+54.6%</td></tr>
-            <tr><td>Eye tests, India</td><td>70.3 lakh in the quarter</td><td class="num">+44.1%</td></tr>
+            <tr><td>Eye tests, India</td><td>70 lakh in the quarter</td><td class="num">+44.1%</td></tr>
             <tr><td>Gold</td><td>Active members, 103 lakh</td><td class="num">+38.6%</td></tr>
             <tr><td>International</td><td>Revenue, ₹1,201 cr</td><td class="num">+29.5%</td></tr>
             <tr><td>Stores, India</td><td>Same-store sales</td><td class="num">+20.8%</td></tr>
@@ -343,37 +416,41 @@ footer h3{color:#fff}
 <section class="block" id="audit" aria-labelledby="au-h">
   <div class="wrap">
     <div class="sec-head"><span class="num">04 · Live platform audit</span><h2 id="au-h">What Lenskart already runs, and what I could not find</h2>
-      <p>Checked on 13 Nov 2026, logged out, with a headless browser: Lenskart's India store locator and a store page, the Lenskart at Home page with its FAQs, Lenskart's warranty policy text for India, aqualens.in, and six Lenskart apps on Google Play and the App Store, plus Lenskart's own filings. Nothing was purchased and no forms were submitted.</p>
-      <p class="small"><b>One limit, stated plainly:</b> from the network this audit ran on, Lenskart's India home, product, Gold and returns pages redirected to its US storefront. For those I rely on Lenskart's filings and app listings, and I have not seen the logged-in app.</p>
+      <p>Checked on 13 and 14 Nov 2026, logged out: Lenskart's India store locator and a store page, the Lenskart at Home page, Lenskart's India FAQ and terms page, the public catalogue data its web app loads, aqualens.in and six Lenskart apps on Google Play and the App Store, plus Lenskart's own filings. Nothing was purchased and no forms were submitted.</p>
+      <p class="small"><b>One limit, stated plainly:</b> from the network this audit ran on, Lenskart's rendered India home, product and Gold pages redirected to its US storefront. I read their content from Lenskart's India FAQ page and public catalogue data instead, and I have not seen the logged-in app.</p>
       <div class="hero-ctas" style="margin-top:6px"><a class="btn btn-outline sm" href="#top">Case study overview</a><a class="btn btn-primary sm" href="/lenskart-study/prototype">Open the working prototype</a></div></div>
     <div class="filters" role="group" aria-label="Filter capabilities">
-      <button class="chip" data-f="all" aria-pressed="true">All</button>
-      <button class="chip" data-f="live" aria-pressed="false">Live</button>
-      <button class="chip" data-f="part" aria-pressed="false">Partial</button>
-      <button class="chip" data-f="none" aria-pressed="false">Not found</button>
+      <button class="chip" type="button" data-f="all" aria-pressed="true">All</button>
+      <button class="chip" type="button" data-f="live" aria-pressed="false">Live</button>
+      <button class="chip" type="button" data-f="part" aria-pressed="false">Partial</button>
+      <button class="chip" type="button" data-f="none" aria-pressed="false">Not found</button>
+      <span class="small muted" id="audit-count" role="status" aria-live="polite">Showing all 22 capabilities</span>
     </div>
-    <div class="tbl"><table class="t-wide" id="audit-tbl">
-      <thead><tr><th style="width:24%">Capability</th><th style="width:12%">Status</th><th style="width:40%">What I saw (verbatim where quoted)</th><th style="width:24%">Where</th></tr></thead>
+    <div class="tbl" aria-labelledby="au-h"><table class="t-wide stack" id="audit-tbl">
+      <thead><tr><th scope="col" style="width:24%">Capability</th><th scope="col" style="width:12%">Status</th><th scope="col" style="width:40%">What I saw (verbatim where quoted)</th><th scope="col" style="width:24%">Where</th></tr></thead>
       <tbody>
-        <tr data-s="live"><td><b>Free eye test in store, bookable</b></td><td><span class="tag live">Live</span></td><td>"Get free eye test &amp; eye checkup by trained optometrist and eye specialist"; every store card has "Book Free Appointment".</td><td>lenskart.com/stores</td></tr>
-        <tr data-s="live"><td><b>Home eye test</b></td><td><span class="tag live">Live</span></td><td>"The test costs ₹99 and is free for Gold members."; 18 cities; "12 Step Eye Checkup"; "book an eye-test for up to 4 family members in a single appointment"; "Required age for eye test is 14 - 75 years".</td><td>Lenskart at Home page and its FAQ data</td></tr>
-        <tr data-s="live"><td><b>Remote optometry</b></td><td><span class="tag live">Live</span></td><td>"Remote optometry, now in 934 stores, let us open 94 Tier 2+ stores this quarter".</td><td>Q2 FY27 letter</td></tr>
-        <tr data-s="live"><td><b>Kids' eye test in store</b></td><td><span class="tag live">Live</span></td><td>For ages 8 and above in all India stores since January 2026; "~70% of kids we tested ... require vision correction".</td><td>Q3 FY26 call; Q1 FY27 letter</td></tr>
-        <tr data-s="live"><td><b>Face scan and 3D try-on</b></td><td><span class="tag live">Live</span></td><td>"Lenskart Face Analysis - An AI powered tool that helps you select the perfect glasses to suit your face shape"; "3D Try On"; "Over 100,000 face scans daily".</td><td>Google Play and App Store listings; Annual Report</td></tr>
-        <tr data-s="live"><td><b>AI stylist and AI support</b></td><td><span class="tag live">Live</span></td><td>B AI Stylist users are "nearly 3x more likely to make a purchase"; "Call Lenskart today and an AI voice assistant answers - no IVR, no queue"; an AI model "processes the majority of warranty decisions".</td><td>Annual Report; Q2 FY27 letter</td></tr>
-        <tr data-s="live"><td><b>New lenses in an existing frame</b></td><td><span class="tag live">Live</span></td><td>Free Lens Replacement: "walk into any store with any frame, Lenskart's own or any other brand, and get it fitted with fresh Anti-glare lenses for a flat fitting fee of ₹199". Store pages list "Lens Replacement" as a service.</td><td>Annual Report; store page</td></tr>
-        <tr data-s="live"><td><b>Paid membership</b></td><td><span class="tag live">Live</span></td><td>Lenskart Gold, 103 lakh active members: "a second pair, lens upgrades, exclusive offers"; "Membership is valid for a year".</td><td>Q2 FY27 letter; Google Play listing</td></tr>
-        <tr data-s="live"><td><b>Free servicing in store</b></td><td><span class="tag live">Live</span></td><td>Loose screws, misalignment, nose pads and loose fit are "attended to real time, at all Lenskart stores pan India (free of cost)".</td><td>Warranty policy (India text, served on the US storefront path)</td></tr>
-        <tr data-s="part"><td><b>Self-service eye test</b></td><td><span class="tag part">Partial</span></td><td>Drysh, an AI-assisted test: "you do most of it yourself, with an optometrist supervising"; "piloting ahead of a wider rollout".</td><td>Q2 FY27 letter</td></tr>
-        <tr data-s="part"><td><b>Family on one account</b></td><td><span class="tag part">Partial</span></td><td>In store, the face scan "lets us recognise an individual and their family members"; home tests cover up to 4 family members, and the app listing says "Now book Home Try On appointments for your family members too!". I found no public description of family profiles beyond that.</td><td>Q2 FY27 letter; Lenskart at Home; app listings</td></tr>
-        <tr data-s="part"><td><b>AI in customer messaging</b></td><td><span class="tag part">Partial</span></td><td>"We have been investing a lot in AI based CRM and to make it more conversational"; CRM was brought in-house this year. What it sends is not public.</td><td>Q3 FY26 call; Q2 FY27 letter</td></tr>
-        <tr data-s="part"><td><b>Contact lens repeat orders</b></td><td><span class="tag part">Partial</span></td><td>Aqualens Xclusive: "Order 3 times in 365 days &amp; win a FREE pair". No subscription, auto-reorder or run-out reminder on the pages I reached.</td><td>aqualens.in</td></tr>
-        <tr data-s="none"><td><b>Reminder that the next eye test is due</b></td><td><span class="tag none">Not found</span></td><td>No annual or 6-month reminder is promised anywhere I looked. The nearest thing is a static "6 Signs you need an eyetest" panel. In 3,500 app reviews, "remind" and "renew" appear zero times.</td><td>Store locator, Lenskart at Home, both app listings, warranty policy, aqualens.in, filings</td></tr>
-        <tr data-s="none"><td><b>Prescription age shown to the customer</b></td><td><span class="tag none">Not found</span></td><td>The prospectus says customers can review eye-test results from stores in the app. I found no "your power is N months old" or validity message on any public page.</td><td>Same pages; the logged-in app was not seen</td></tr>
-        <tr data-s="none"><td><b>Follow-up after a test with no purchase</b></td><td><span class="tag none">Not found</span></td><td>Not publicly documented. The home test FAQ says "there's no obligation to buy", which is right; what happens next is not described.</td><td>Lenskart at Home; filings</td></tr>
-        <tr data-s="none"><td><b>Scheduled re-test for children</b></td><td><span class="tag none">Not found</span></td><td>Kids are tested and myopia-control lenses are sold, but I found no scheduled follow-up. The home test excludes under-14s.</td><td>Lenskart at Home; filings</td></tr>
-        <tr data-s="none"><td><b>Trade-in or upgrade for an old pair, India</b></td><td><span class="tag none">Not found</span></td><td>No trade-in, buyback or upgrade offer for an old pair in India. The annual report describes a frame trade-in donation programme in Singapore.</td><td>Store locator, Lenskart at Home, warranty policy, app listings</td></tr>
-        <tr data-s="none"><td><b>One layer linking the test date to an action</b></td><td><span class="tag none">Not found</span></td><td>The test, lens replacement, Gold and the store each exist; no public evidence of a due date that triggers a booking, a store call or a next step.</td><td>Internal systems not visible publicly</td></tr>
+        <tr data-s="live"><th scope="row">Free eye test in store, bookable</th><td><span class="tag live">Live</span></td><td>"Get free eye test &amp; eye checkup by trained optometrist and eye specialist"; every store card has "Book Free Appointment".</td><td>lenskart.com/stores</td></tr>
+        <tr data-s="live"><th scope="row">Home eye test</th><td><span class="tag live">Live</span></td><td>"The test costs ₹99 and is free for Gold members."; 18 cities; "12 Step Eye Checkup"; "book an eye-test for up to 4 family members in a single appointment"; "Required age for eye test is 14 - 75 years".</td><td>Lenskart at Home page and its FAQ data</td></tr>
+        <tr data-s="live"><th scope="row">Remote optometry</th><td><span class="tag live">Live</span></td><td>"Remote optometry, now in 934 stores, let us open 94 Tier 2+ stores this quarter".</td><td>Q2 FY27 letter</td></tr>
+        <tr data-s="live"><th scope="row">Kids' eye test in store</th><td><span class="tag live">Live</span></td><td>For ages 8 and above in all India stores since January 2026; "~70% of kids we tested ... require vision correction".</td><td>Q3 FY26 call; Q1 FY27 letter</td></tr>
+        <tr data-s="live"><th scope="row">Face scan and 3D try-on</th><td><span class="tag live">Live</span></td><td>"Lenskart Face Analysis - An AI powered tool that helps you select the perfect glasses to suit your face shape"; "3D Try On"; "Over 100,000 face scans daily".</td><td>Google Play and App Store listings; Annual Report</td></tr>
+        <tr data-s="live"><th scope="row">AI stylist and AI support</th><td><span class="tag live">Live</span></td><td>B AI Stylist users are "nearly 3x more likely to make a purchase"; "Call Lenskart today and an AI voice assistant answers - no IVR, no queue"; an AI model "processes the majority of warranty decisions".</td><td>Annual Report; Q2 FY27 letter</td></tr>
+        <tr data-s="live"><th scope="row">Saved prescriptions</th><td><span class="tag live">Live</span></td><td>The web app's text bundle, as served on the US storefront, carries "My Saved Prescriptions" and "Use Saved Power"; the prospectus says customers in India can review eye-test results from stores in the app.</td><td>lenskart.com web app text; prospectus</td></tr>
+        <tr data-s="live"><th scope="row">New lenses in an existing frame</th><td><span class="tag live">Live</span></td><td>"Replacement is available in-store every day."; "Offer valid for Lenskart /Non-Lenskart products."; totals from ₹199 to ₹2,049 by lens; "Offer Valid for single use per user".</td><td>Lenskart India FAQ and terms; Annual Report</td></tr>
+        <tr data-s="live"><th scope="row">Paid membership</th><td><span class="tag live">Live</span></td><td>Lenskart Gold, ₹500 for one year, 103 lakh active members: "a second pair, lens upgrades, exclusive offers". The FAQ says members can "share your registered mobile number" with family and friends; the Gold family pass adds "Share phone numbers of any 4 of your favourite people and they will get Gold Membership Benefits at no extra cost!"</td><td>Lenskart India FAQ and Gold catalogue data; Q2 FY27 letter</td></tr>
+        <tr data-s="live"><th scope="row">A ₹500 first pair</th><td><span class="tag live">Live</span></td><td>Hustlr Club: "a face scan on the app, a colour, and a complete pair, frame, lenses and warranty, for ₹500".</td><td>Q2 FY27 letter</td></tr>
+        <tr data-s="live"><th scope="row">Returns</th><td><span class="tag live">Live</span></td><td>14 days on eyeglasses, and "a 45-day, no-questions-asked return or exchange policy ... on all progressive eyeglasses".</td><td>Lenskart India FAQ and terms</td></tr>
+        <tr data-s="live"><th scope="row">Free servicing in store</th><td><span class="tag live">Live</span></td><td>Loose screws, misalignment, nose pads and loose fit are "attended to real time, at all Lenskart stores pan India (free of cost)".</td><td>Warranty policy</td></tr>
+        <tr data-s="part"><th scope="row">Self-service eye test</th><td><span class="tag part">Partial</span></td><td>Drysh, an AI-assisted test: "you do most of it yourself, with an optometrist supervising"; "piloting ahead of a wider rollout".</td><td>Q2 FY27 letter</td></tr>
+        <tr data-s="part"><th scope="row">A family's eye care in one place</th><td><span class="tag part">Partial</span></td><td>Gold benefits are shared by phone number and home tests cover up to 4 family members; in store, the face scan "lets us recognise an individual and their family members". I found no family view of test dates or powers.</td><td>Lenskart India FAQ; Q2 FY27 letter; Lenskart at Home</td></tr>
+        <tr data-s="part"><th scope="row">AI in customer messaging</th><td><span class="tag part">Partial</span></td><td>"We have been investing a lot in AI based CRM and to make it more conversational"; CRM, the system that messages customers, was brought in-house this year. What it sends is not public.</td><td>Q3 FY26 call; Q2 FY27 letter</td></tr>
+        <tr data-s="part"><th scope="row">Contact lens repeat orders</th><td><span class="tag part">Partial</span></td><td>Aqualens Xclusive: "Order 3 times in 365 days &amp; win a FREE pair". No subscription, auto-reorder or run-out reminder on the pages I reached.</td><td>aqualens.in</td></tr>
+        <tr data-s="none"><th scope="row">Reminder that the next eye test is due</th><td><span class="tag none">Not found</span></td><td>Lenskart's FAQ describes notifications for "latest collections, exciting offers, store launches", not eye tests. The nearest thing is a static "6 Signs you need an eyetest" panel. In 3,500 app reviews, "remind" and "renew" appear zero times. Open magazine reports that rival Titan Eye+ offers eye-test reminders; I have not verified that first-hand.</td><td>India FAQ, store locator, Lenskart at Home, both app listings, filings; Open, 6 Nov 2026</td></tr>
+        <tr data-s="none"><th scope="row">Prescription age shown to the customer</th><td><span class="tag none">Not found</span></td><td>Powers are saved, but I found no "your power is N months old" or validity message on any public page or in the web app's text.</td><td>Same pages; the logged-in app was not seen</td></tr>
+        <tr data-s="none"><th scope="row">Follow-up after a test with no purchase</th><td><span class="tag none">Not found</span></td><td>Not publicly documented. The CEO names it as work to do: "we will have to use our engineering to see how do we do better CRM to bring these people into the fold".</td><td>Q1 FY27 call; Lenskart at Home</td></tr>
+        <tr data-s="none"><th scope="row">Scheduled re-test for children</th><td><span class="tag none">Not found</span></td><td>Kids are tested and myopia-control lenses are sold, but I found no scheduled follow-up. The home test excludes under-14s.</td><td>Lenskart at Home; filings</td></tr>
+        <tr data-s="none"><th scope="row">Trade-in or upgrade for an old pair, India</th><td><span class="tag none">Not found</span></td><td>No trade-in, buyback or upgrade offer for an old pair in India. The annual report describes a frame trade-in donation programme in Singapore.</td><td>India FAQ, store locator, warranty policy, app listings</td></tr>
+        <tr data-s="none"><th scope="row">One layer linking the test date to an action</th><td><span class="tag none">Not found</span></td><td>The test, the saved power, lens replacement, Gold and the store each exist; no public evidence of a due date that triggers a booking, a store call or a next step.</td><td>Internal systems not visible publicly</td></tr>
       </tbody></table></div>
     <p class="small muted" style="margin-top:10px">Sorted Live → Partial → Not found. "Not found" means not publicly documented; logged-in experiences, push notifications and internal tools could differ.</p>
   </div>
@@ -382,26 +459,26 @@ footer h3{color:#fff}
 <!-- GAPS -->
 <section class="block" id="gaps" aria-labelledby="gap-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">05 · Shortcomings</span><h2 id="gap-h">Five places the model leaks repeat revenue</h2></div>
+    <div class="sec-head"><span class="num">05 · Shortcomings</span><h2 id="gap-h">Five places repeat revenue may be leaking, on public evidence</h2></div>
     <div class="voices-head"><h3>In customers' own words</h3>
       <p class="small muted">I read 3,500 public reviews of the Lenskart app: the 3,000 most recent on Google Play (28 Aug to 12 Nov 2026) and the 500 most recent on the App Store (29 Apr to 11 Nov 2026), collected 13 Nov 2026. On Google Play 1,946 are 4-5★, mostly short praise. Of the 1,458 rated 1-3★ across both stores, by keyword match 243 mention delivery, 235 customer support, 220 refunds, returns or exchanges and 148 power, lens or product quality (33 of them a wrong or different power); a review can match more than one. Keyword counts are a blunt tool, and written reviews skew negative against a 4.5 rating. Quoted verbatim; names left out.</p></div>
     <div class="grid voices" id="voices">
-      <figure class="card voice"><blockquote>"I have tried to get power checked three times in 2 weeks and every time they have given me a different power."</blockquote><figcaption>Lenskart app, Google Play · 1★ · 7 Sep 2026</figcaption></figure>
-      <figure class="card voice"><blockquote>"The service was very professional, they identified that my eye glasses number is increased."</blockquote><figcaption>Lenskart app, App Store · 5★ · 22 Aug 2026</figcaption></figure>
-      <figure class="card voice"><blockquote>"We have 2 gold memberships in my family but have found that the non user or new user have better offers."</blockquote><figcaption>Lenskart app, App Store · 1★ · 4 Nov 2026</figcaption></figure>
-      <figure class="card voice"><blockquote>"Gold membership with all India validity 2 yrs but struggling to lens replacement order place since last 2 months."</blockquote><figcaption>Lenskart app, App Store · 1★ · 30 Sep 2026</figcaption></figure>
-      <figure class="card voice"><blockquote>"had booked an in-home eye test and the person arrived within 30 minutes and took his good time to do a proper eye test and show me some good frames."</blockquote><figcaption>Lenskart app, Google Play · 5★ · 27 Sep 2026</figcaption></figure>
-      <figure class="card voice"><blockquote>"I have been a loyal Lenskart customer for over five years, and my recent experiences have been consistently disappointing."</blockquote><figcaption>Lenskart app, Google Play · 1★ · 16 Oct 2026</figcaption></figure>
+      <figure class="card voice"><blockquote>"I have tried to get power checked three times in 2 weeks and every time they have given me a different power."</blockquote><figcaption>Lenskart app, Google Play · 1★ · <span class="nw">7 Sep 2026</span></figcaption></figure>
+      <figure class="card voice"><blockquote>"The service was very professional, they identified that my eye glasses number is increased."</blockquote><figcaption>Lenskart app, App Store · 5★ · <span class="nw">22 Aug 2026</span></figcaption></figure>
+      <figure class="card voice"><blockquote>"We have 2 gold memberships in my family but have found that the non user or new user have better offers."</blockquote><figcaption>Lenskart app, App Store · 1★ · <span class="nw">4 Nov 2026</span></figcaption></figure>
+      <figure class="card voice"><blockquote>"Gold membership with all India validity 2 yrs but struggling to lens replacement order place since last 2 months."</blockquote><figcaption>Lenskart app, App Store · 1★ · <span class="nw">30 Sep 2026</span></figcaption></figure>
+      <figure class="card voice"><blockquote>"had booked an in-home eye test and the person arrived within 30 minutes and took his good time to do a proper eye test and show me some good frames."</blockquote><figcaption>Lenskart app, Google Play · 5★ · <span class="nw">27 Sep 2026</span></figcaption></figure>
+      <figure class="card voice"><blockquote>"I have been a loyal Lenskart customer for over five years, and my recent experiences have been consistently disappointing."</blockquote><figcaption>Lenskart app, Google Play · 1★ · <span class="nw">16 Oct 2026</span></figcaption></figure>
     </div>
     <p class="small muted" style="margin:10px 0 20px">What this says: the eye test is what customers trust or distrust most, so a recall has to protect the power reading before it sells anything; returning customers notice when a new customer gets a better deal; and nobody in 3,500 reviews mentions being told their next test was due.</p>
-    <div class="tbl"><table class="t-wide">
-      <thead><tr><th style="width:22%">Shortcoming</th><th style="width:48%">Evidence</th><th style="width:30%">So what</th></tr></thead>
+    <div class="tbl" aria-labelledby="gap-h"><table class="t-wide stack">
+      <thead><tr><th scope="col" style="width:22%">Shortcoming</th><th scope="col" style="width:48%">Evidence</th><th scope="col" style="width:30%">So what</th></tr></thead>
       <tbody>
-        <tr><td><b>1. The second eye test has no owner</b></td><td>2.07 crore India tests in FY26, each leaving a dated prescription on file. No reminder, recall or prescription-age message is public. The CEO's examples of a trigger are collections, such as a wedding range that "ran out of stock very fast".</td><td>The only trigger a customer gets is fashion; the clinical one is unused.</td></tr>
-        <tr><td><b>2. Churn is acknowledged, not measured in public</b></td><td>"Consumers do churn." The disclosed "2-year repeat rate ... about 98%" is repeat orders divided by first orders, not the share of customers who return. No retention or churn rate is disclosed.</td><td>Heavy buyers can hide the people who never come back.</td></tr>
-        <tr><td><b>3. Tests are outrunning buyers</b></td><td>India eye tests +54.3% in FY26 against customer accounts +24.2%; +44.1% against +18.5% in Q2 FY27. "100 million pairs needs 80 million tests."</td><td>The more first-ever tests, the more people who leave knowing their power and nothing else.</td></tr>
-        <tr><td><b>4. Gold sells the second pair, not the next visit</b></td><td>Gold is "a second pair, lens upgrades, exclusive offers". Management plans to add "eye-care benefits and services on the app". 83 reviews mention Gold or membership; 71 of them are 1★.</td><td>The fee already covers a free home eye test; nothing I found tells a member when to use it.</td></tr>
-        <tr><td><b>5. Trust in the power reading is fragile</b></td><td>33 low-rated reviews mention a wrong or different power or lens, and 148 mention power, lens or product quality more broadly. One describes three tests in two weeks with a different power each time.</td><td>A recall that leads to a wrong pair does more harm than no recall.</td></tr>
+        <tr><th scope="row">1. The second eye test has no owner</th><td>2.07 crore India tests in FY26, each leaving a dated, saved prescription. No reminder, recall or prescription-age message is public. The CEO's examples of a trigger are collections, such as a wedding range that "ran out of stock very fast".</td><td>The only trigger a customer gets is fashion; the clinical one is unused.</td></tr>
+        <tr><th scope="row">2. Churn is acknowledged, not measured in public</th><td>"Consumers do churn." The disclosed "2-year repeat rate ... about 98%" is repeat orders divided by first orders, not the share of customers who return. No retention or churn rate is disclosed.</td><td>Heavy buyers can hide the people who never come back.</td></tr>
+        <tr><th scope="row">3. First-timers buy slowly, and nobody follows up</th><td>India eye tests +54.3% in FY26 against customer accounts +24.2%. Management says a significant majority of tested people buy and first-timers take longer, and names the fix: "better CRM to bring these people into the fold" (Q1 FY27 call).</td><td>The gap is deliberate. The open question is who follows up with the slow ones.</td></tr>
+        <tr><th scope="row">4. Gold's clock is the renewal date, not the prescription date</th><td>Gold "was designed many years back to address" churn. It is "a second pair, lens upgrades, exclusive offers", and management plans to add "eye-care benefits and services on the app". 83 reviews mention Gold or membership; 71 of them are 1★.</td><td>The fee already covers a free home eye test; nothing I found tells a member when to use it.</td></tr>
+        <tr><th scope="row">5. Trust in the power reading is fragile</th><td>33 low-rated reviews mention a wrong or different power or lens, and 148 mention power, lens or product quality more broadly. One describes three tests in two weeks with a different power each time.</td><td>A recall that leads to a wrong pair does more harm than no recall.</td></tr>
       </tbody></table></div>
   </div>
 </section>
@@ -410,41 +487,55 @@ footer h3{color:#fff}
 <section class="block" id="ideas" aria-labelledby="id-h">
   <div class="wrap">
     <div class="sec-head"><span class="num">06 · Ideation</span><h2 id="id-h">How might we turn every eye test into the next one?</h2><p>Constraint: no extra discounting and no new store formats. Seven options across acquisition, conversion, retention and upgrade, sorted by impact (my estimates).</p></div>
-    <div class="tbl"><table class="t-wide">
-      <thead><tr><th>AI bet</th><th>What it does</th><th>Revenue lever</th><th>Builds on</th><th>Impact</th><th>Effort</th></tr></thead>
+    <div class="tbl" aria-labelledby="id-h"><table class="t-wide stack">
+      <thead><tr><th scope="col">AI bet</th><th scope="col">What it does</th><th scope="col">Revenue lever</th><th scope="col">Builds on</th><th scope="col">Impact</th><th scope="col">Effort</th></tr></thead>
       <tbody>
-        <tr class="hl"><td><b>Vision Recall Engine</b></td><td>Due date → re-test → right next step</td><td>Repeat, lens upgrade</td><td>Eye-test record, face-scan profile, Gold</td><td>High</td><td>Med</td></tr>
-        <tr><td>Self-service eye test at scale</td><td>More tests per optometrist</td><td>New customers</td><td>Lenskart's Drysh pilot</td><td>High</td><td>In build</td></tr>
-        <tr class="hl"><td>Tested, not bought follow-up</td><td>Two messages with the saved power, then stop</td><td>Conversion</td><td>First-ever eye tests</td><td>High</td><td>Low</td></tr>
-        <tr class="hl"><td>Sight Check-in on WhatsApp</td><td>A due-date message with a slot, no offer</td><td>Repeat, trust</td><td>Store booking, home eye test</td><td>Med</td><td>Low</td></tr>
-        <tr><td>Kids' myopia tracker</td><td>6-month power chart for parents</td><td>Kids' lenses, family</td><td>Kids' eye test, myopia-control lenses</td><td>Med</td><td>Med</td></tr>
-        <tr><td>Contact lens run-out reorder</td><td>Reorder prompt timed to the pack</td><td>Repeat frequency</td><td>Aqualens</td><td>Med</td><td>Low</td></tr>
-        <tr><td>Old-pair trade-in at re-test</td><td>Credit for an old frame</td><td>Order value</td><td>Free Lens Replacement</td><td>Low</td><td>Med</td></tr>
+        <tr class="hl"><th scope="row">Vision Recall Engine</th><td>Due date → re-test → right next step</td><td>Repeat, lens upgrade</td><td>Saved prescriptions, Gold, store booking</td><td>High</td><td>Med</td></tr>
+        <tr><th scope="row">Self-service eye test at scale</th><td>More tests per optometrist</td><td>New customers</td><td>Lenskart's Drysh pilot</td><td>High</td><td>In build</td></tr>
+        <tr class="hl"><th scope="row">First-test follow-up</th><td>Two messages with the saved power, then stop</td><td>Conversion</td><td>First-ever eye tests</td><td>High</td><td>Low</td></tr>
+        <tr class="hl"><th scope="row">Sight Check-in on WhatsApp</th><td>A due-date message with a slot, no offer</td><td>Repeat, trust</td><td>Store booking, home eye test</td><td>Med</td><td>Low</td></tr>
+        <tr><th scope="row">Kids' myopia tracker</th><td>A power chart for parents</td><td>Kids' lenses, family</td><td>Kids' eye test, myopia-control lenses</td><td>Med</td><td>Med</td></tr>
+        <tr><th scope="row">Contact lens run-out reorder</th><td>Reorder prompt timed to the pack</td><td>Repeat frequency</td><td>Aqualens</td><td>Med</td><td>Low</td></tr>
+        <tr><th scope="row">Old-pair trade-in at re-test</th><td>Credit for an old frame</td><td>Order value</td><td>Free Lens Replacement</td><td>Low</td><td>Med</td></tr>
       </tbody></table></div>
     <p class="callout amber" style="margin-top:16px">The three highlighted rows share the same data, the eye-test record and its date, so they combine into one product. It feeds Lenskart's own test-led growth plan instead of competing with it.</p>
+    <div class="grid g3" style="margin-top:16px">
+      <div class="card"><h3>Recall is standard practice elsewhere</h3><p class="small" style="margin-top:6px">The UK College of Optometrists publishes recall intervals for its members, two years for most adults. India has no such norm, so Lenskart would be setting it.</p></div>
+      <div class="card"><h3>A personal call works; an automated one barely does</h3><p class="small" style="margin-top:6px">In one US eye-care trial, a personal call with a letter lifted follow-up from 28% to 38%; an automated call with a letter reached 30% (Callinan et al., 2017). A clinic, not a shop, and a single study.</p></div>
+      <div class="card"><h3>A rival is reported to do it</h3><p class="small" style="margin-top:6px">Open magazine reports that Titan Eye+'s rewards programme "offers eye-test reminders and eyewear servicing" (6 Nov 2026). I have not verified it first-hand.</p></div>
+    </div>
   </div>
 </section>
 
 <!-- BET -->
-<section class="block" id="bet" aria-labelledby="bet-h">
+<section class="block" id="bet" aria-labelledby="sys-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">07 · The bet</span><h2 id="bet-h">The Vision Recall Engine: one layer on top of what Lenskart already runs</h2><p>No new stores, products or capex. It connects the eye-test record Lenskart already holds to actions Lenskart already knows how to take. Five features: Recall Score, Re-test Plan, Sight Check-in, Next Pair Step, and the Growth Console for Lenskart's team.</p></div>
-    <div class="grid g3">
-      <div class="card mod"><span class="k">01 · RECALL SCORE</span><h3 style="margin-top:4px">Know who is due</h3><p class="small" style="margin-top:6px">A score for every customer, read from the date of their last eye test, their age band, symptoms they report, screen time and the age of their pair. Every score shows its reasons.</p></div>
-      <div class="card mod o"><span class="k">02 · RE-TEST PLAN + SIGHT CHECK-IN</span><h3 style="margin-top:4px">Book the test, not the sale</h3><p class="small" style="margin-top:6px">Overdue: a re-test in two taps, free at a store or ₹99 at home (free for Gold); the home store calls once on day 8 only if nothing is booked, about six calls a store a week. Due now: one reminder. The WhatsApp check-in goes to the parent for under-18s and to the wearer for adults, and never carries an offer.</p></div>
-      <div class="card dark"><span class="k" style="font-size:12px;font-weight:700;letter-spacing:.06em;color:#8CF2DB">03 · NEXT PAIR STEP</span><h3 style="margin-top:4px">Sell what the test supports</h3><p class="small" style="margin-top:6px">Power unchanged: keep your pair. Power changed: new lenses in the current frame for the ₹199 fitting fee when the frame is young, progressives where near vision has changed after 40, and for a child the lenses the optometrist recommends. Held back while a service ticket is open.</p></div>
+    <div class="sec-head" id="system"><span class="num">07 · The bet</span><h2 id="sys-h">The Vision Recall Engine: six features on top of what Lenskart already runs</h2><p>No new stores, products or investment. It reads the eye-test record Lenskart already holds, follows up people whose first test found a power, tells every customer when their next test is due, and suggests lenses or a pair only after a test says one is needed. Each link opens that feature in the prototype.</p></div>
+    <div class="feat">
+      <div class="step"><span class="n">Feature 1</span><b>Due Date</b><p>A due date for every customer, from the date of their last eye test and their age band. A separate priority score only orders the store call list. Both show their reasons.</p><span class="for">For: the CRM team</span><a class="try" href="/lenskart-study/prototype#due">See the Due Date</a></div>
+      <div class="step"><span class="n">Feature 2</span><b>Re&#8209;test Plan</b><p>Overdue: a re-test booked in two taps, free at a store, and one store call on day 8 only if the customer agreed to calls. Due now: one reminder. Not due: nothing.</p><span class="for">For: the customer</span><a class="try" href="/lenskart-study/prototype#plan">See Neha's plan</a></div>
+      <div class="step"><span class="n">Feature 3</span><b>Sight Check-in</b><p>One short WhatsApp message when a test falls due, to the parent for under-18s and to the wearer for adults. It carries a slot to book and no price or discount.</p><span class="for">For: the wearer or the parent</span><a class="try" href="/lenskart-study/prototype#checkin">Open the Sight Check-in</a></div>
+      <div class="step"><span class="n">Feature 4</span><b>Next Pair Step</b><p>After the re-test: keep your pair if the power is unchanged, new lenses in your current frame if it changed. Held back while a service ticket is open.</p><span class="for">For: the customer</span><a class="try" href="/lenskart-study/prototype#next">See the next pair step</a></div>
+      <div class="step"><span class="n">Feature 5</span><b>First-Test Follow-up</b><p>Two messages in 30 days to someone whose first eye test found a power and who has not ordered: their saved power and two ways to try frames. Then it stops.</p><span class="for">For: first-time customers</span><a class="try" href="/lenskart-study/prototype#followup">See Ravi's follow-up</a></div>
+      <div class="step dark"><span class="n">Feature 6</span><b>Growth Console</b><p>The Monday screen for the CRM team: customers grouped by action, the incremental revenue each group is worth if the uplift holds, and the running cost.</p><span class="for" style="color:#8CF2DB">For: the CRM team</span><a class="try" href="/lenskart-study/prototype#console" style="color:#8CF2DB">Open the console</a></div>
     </div>
-    <div class="grid g2" style="margin-top:20px">
-      <div class="card"><h3>Reuses (already live)</h3><ul class="reuse small" style="margin-top:6px"><li>The eye-test record and its date, from 2.07 crore India tests a year</li><li>Store appointment booking and the ₹99 home eye test</li><li>Free Lens Replacement and the lens packages</li><li>Lenskart Gold and the face-scan profile</li><li>The in-house CRM, the AI voice assistant and the store teams' daily assistant</li></ul></div>
-      <div class="card soft"><h3>Adds (not found today)</h3><ul class="reuse small" style="margin-top:6px"><li>A due date for every customer's next eye test, with reasons</li><li>A check-in that books a test and carries no offer</li><li>A capped store call when an overdue customer has not booked</li><li>A next step that depends on the re-test result</li><li>A 6-month rhythm for children, sent to the parent</li><li>A holdout to prove incremental lift</li></ul></div>
+    <p class="callout" style="margin-top:20px"><b>What pays first.</b> On my numbers the First-Test Follow-up earns the most and the store call comes second. The recall message on its own roughly breaks even in year one; it is there because it is what makes the call list possible and because a customer who returns keeps buying. <a href="#impact">See the sizing</a></p>
+    <div class="grid g2 top" style="margin-top:20px">
+      <div class="card"><h3>Reuses (already live)</h3><ul class="reuse small" style="margin-top:6px"><li>The saved prescription and its date, from 2.07 crore India tests a year</li><li>Store appointment booking and the ₹99 home eye test</li><li>Free Lens Replacement and the lens packages</li><li>Lenskart Gold and the face-scan profile</li><li>The in-house CRM, the AI voice assistant, and Saathi, the store managers' WhatsApp assistant, for the call list</li></ul></div>
+      <div class="card soft"><h3>Adds (not found today)</h3><ul class="reuse small" style="margin-top:6px"><li>A due date for every customer's next eye test, with reasons</li><li>A check-in that books a test and carries no price</li><li>A capped, consented store call when an overdue customer has not booked</li><li>A next step that depends on the re-test result</li><li>A follow-up for first-time tests with no order</li><li>A holdout to prove incremental lift</li></ul></div>
     </div>
-    <div class="card" style="margin-top:20px"><h3>Sight Check-in: who receives it</h3>
-      <div class="tbl" style="margin-top:10px"><table class="t-mid"><thead><tr><th>Wearer</th><th>Re-test rhythm (illustrative)</th><th>Check-in goes to</th></tr></thead><tbody>
-        <tr><td><b>Under 18</b></td><td>Every 6 months</td><td>The parent who holds the account, with consent at the eye test (DPDP Act 2023 requires verifiable parental consent for under-18s)</td></tr>
-        <tr><td><b>18 to 39</b></td><td>Every 24 months, sooner with symptoms</td><td>The wearer</td></tr>
-        <tr><td><b>40 and above</b></td><td>Every 12 months</td><td>The wearer; a family member gets a copy only if the wearer opts in</td></tr>
+    <div class="grid g3 top" style="margin-top:20px">
+      <div class="card"><h3>Where the AI is</h3><ul class="reuse small" style="margin-top:6px"><li>The due date is a rule, on purpose: it has to be explainable to a customer and owned by optometry.</li><li>A model ranks who is most likely to act, to order the store call list.</li><li>Language models draft each check-in in the customer's language and answer questions, inside fixed rules: no price, no diagnosis.</li></ul></div>
+      <div class="card"><h3>What I would not build</h3><ul class="reuse small" style="margin-top:6px"><li>No discount in any recall message.</li><li>No AI-read power; the optometrist decides.</li><li>No message to a child; it goes to the parent.</li><li>No contact-lens reorder or trade-in in the first release.</li><li>No call centre; one call, from the customer's own store.</li></ul></div>
+      <div class="card"><h3>Who owns it</h3><ul class="reuse small" style="margin-top:6px"><li><b>CRM</b> owns the engine and the holdout.</li><li><b>Optometry</b> owns the intervals and the symptom rules.</li><li><b>Store operations</b> owns the day-8 call list.</li><li><b>Legal</b> owns consent and the children's flow.</li></ul></div>
+    </div>
+    <div class="card" style="margin-top:20px"><h3 id="who-h">Sight Check-in: who receives it, and how often</h3>
+      <div class="tbl" style="margin-top:10px" aria-labelledby="who-h"><table class="t-mid stack"><thead><tr><th scope="col">Wearer</th><th scope="col">Re-test rhythm</th><th scope="col">Check-in goes to</th></tr></thead><tbody>
+        <tr><th scope="row">Under 18</th><td>Every 12 months; every 6 months for a child on myopia-control lenses</td><td>The parent who holds the account, with consent at the eye test (India's data protection law, the DPDP Act 2023, requires verifiable parental consent for under-18s)</td></tr>
+        <tr><th scope="row">18 to 64</th><td>Every 24 months, sooner if they report trouble seeing</td><td>The wearer; a family member gets a copy only if the wearer opts in</td></tr>
+        <tr><th scope="row">65 and above</th><td>Every 12 months</td><td>The wearer; a family member gets a copy only if the wearer opts in</td></tr>
       </tbody></table></div>
-      <p class="small muted" style="margin-top:8px">The intervals are placeholders for the prototype. Lenskart's optometry team would set the clinical ones.</p>
+      <p class="small muted" style="margin-top:8px">Intervals follow published guidance: the American Optometric Association (yearly from 6 to 17, at least every two years from 18 to 64, yearly from 65), the UK College of Optometrists (two years from 16) and the International Myopia Institute (six-monthly follow-up for children on myopia control). Lenskart's optometry team would set the final ones. India has no legal prescription expiry, so the due date would be Lenskart's own clinical claim.</p>
     </div>
   </div>
 </section>
@@ -452,13 +543,13 @@ footer h3{color:#fff}
 <!-- PROTOTYPE -->
 <section class="block" id="prototype" aria-labelledby="pr-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">08 · Working prototype</span><h2 id="pr-h">Try it: all five features, working</h2><p>Four sample customers (Neha 29, Arjun 34, Kabir 9, Meera 47). Change the signals and the re-test result and watch the score, plan, channel and next step change. The console groups a 5,000-customer synthetic cohort by action and shows the ₹ maths behind each group.</p>
+    <div class="sec-head"><span class="num">08 · Working prototype</span><h2 id="pr-h">Try it: all six features, working</h2><p>Six sample customers (Neha 29, Arjun 34, Kabir 9, Meera 47, Usha 68, and Ravi 26 after his first eye test). Change the signals and the re-test result and watch the due date, plan, channel and next step change. The console groups a 5,000-customer synthetic cohort by action, on the same assumptions as the calculator beside it.</p>
       <div class="hero-ctas" style="margin-top:6px"><a class="btn btn-primary" href="/lenskart-study/prototype">Open full screen</a></div></div>
-    <iframe class="proto-frame" src="/lenskart-study/prototype?embed=1" title="Vision Recall Engine working prototype" loading="lazy"></iframe>
+    <iframe class="proto-frame" id="proto-frame" src="/lenskart-study/prototype?embed=1" title="Vision Recall Engine working prototype" loading="lazy" scrolling="no"></iframe>
     <div class="shots mob-only">
-      <figure><img src="/lenskart-study/img/customer.png" alt="Prototype customer app: prescription freshness, a re-test plan, an eye-care assistant chat and the next pair step" loading="lazy" width="840" height="2228"><figcaption>Customer app: an eye test, not an offer</figcaption></figure>
-      <figure><img src="/lenskart-study/img/checkin.png" alt="Sight Check-in WhatsApp preview sent to the parent of a 9-year-old" loading="lazy" width="880" height="1008"><figcaption>Sight Check-in to the right person</figcaption></figure>
-      <figure><img src="/lenskart-study/img/console.png" alt="Growth console action table grouping customers by what they get this week, with the revenue each action is expected to win back" loading="lazy" width="1456" height="1590"><figcaption>Growth console: the Monday screen</figcaption></figure>
+      <figure><a href="/lenskart-study/prototype#customer"><img src="/lenskart-study/img/customer.png" alt="Prototype customer app: months since the last eye test, a re-test plan, an eye-care assistant chat and the next pair step" loading="lazy" width="840" height="2284"></a><figcaption>Customer app: an eye test, not an offer</figcaption></figure>
+      <figure><a href="/lenskart-study/prototype#checkin"><img src="/lenskart-study/img/checkin.png" alt="Sight Check-in WhatsApp preview sent to the parent of a 9-year-old" loading="lazy" width="880" height="1104"></a><figcaption>Sight Check-in to the right person</figcaption></figure>
+      <figure><a href="/lenskart-study/prototype#console"><img src="/lenskart-study/img/console.png" alt="Growth console table grouping customers by the action they get, with the incremental revenue of each group" loading="lazy" width="896" height="2296"></a><figcaption>Growth console: the Monday screen</figcaption></figure>
     </div>
   </div>
 </section>
@@ -466,44 +557,76 @@ footer h3{color:#fff}
 <!-- IMPACT -->
 <section class="block" id="impact" aria-labelledby="im-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">09 · Sizing the prize</span><h2 id="im-h">My estimate: about ₹84 cr a year of product margin after costs, from people Lenskart already knows</h2>
-      <p>A range, not a point: every uplift below is an assumption until a holdout proves it, so each is shown at half and one and a half times my base case. Revenue is converted to product margin at Lenskart's disclosed India rate before costs come off.</p></div>
-    <div class="grid split">
-      <div class="tbl"><table class="t-fit" id="im-range">
-        <thead><tr><th>Lever (India base)</th><th class="num">Low</th><th class="num">Base</th><th class="num">High</th></tr></thead>
+    <div class="sec-head"><span class="num">09 · Sizing the prize</span><h2 id="im-h">My estimate: about ₹5 cr a year of contribution on first orders. Small, and cheap to prove</h2>
+      <p>Two levers, each a feature in the prototype, and one cost of doing it honestly: some people who would have bought a pair will swap lenses instead. Every rate marked as an assumption is mine and unproven until a holdout. The low case loses money, and I show it.</p></div>
+    <div class="grid split top">
+      <div class="tbl" aria-labelledby="im-h"><table class="t-fit" id="im-range">
+        <thead><tr><th scope="col">Lever (India, a year)</th><th scope="col" class="num">Low</th><th scope="col" class="num">Base</th><th scope="col" class="num">High</th></tr></thead>
         <tbody>
-          <tr><td>Recall brings last year's customers back<br><span class="small muted">9.9M FY25 accounts × +1 / 2 / 3pp × ₹4,280 per account</span></td><td class="num">42.4</td><td class="num">84.7</td><td class="num">127.1</td></tr>
-          <tr><td>First-ever test, followed up<br><span class="small muted">1 cr first-ever tests × +0.5 / 1 / 1.5% buy × ₹4,280</span></td><td class="num">21.4</td><td class="num">42.8</td><td class="num">64.2</td></tr>
-          <tr><td>Family member added by a Gold member<br><span class="small muted">103 lakh members × +0.5 / 1 / 1.5% × ₹1,950 a pair</span></td><td class="num">10.0</td><td class="num">20.1</td><td class="num">30.1</td></tr>
-          <tr class="hl"><td><b>Extra revenue</b> <span class="small muted">(₹ cr a year)</span></td><td class="num"><b>73.8</b></td><td class="num"><b>147.6</b></td><td class="num"><b>221.4</b></td></tr>
-          <tr><td>Product margin at 64.0%<br><span class="small muted">India product margin, Q2 FY27</span></td><td class="num">47.2</td><td class="num">94.5</td><td class="num">141.7</td></tr>
-          <tr><td>Less running costs<br><span class="small muted">WhatsApp, extra eye tests, store calls, AI; held at base</span></td><td class="num">−10.82</td><td class="num">−10.82</td><td class="num">−10.82</td></tr>
-          <tr class="hl"><td><b>Net of running costs</b> <span class="small muted">(₹ cr a year)</span></td><td class="num"><b>36.4</b></td><td class="num"><b>83.7</b></td><td class="num"><b>130.9</b></td></tr>
-          <tr><td>Net in US$ at ₹94.25</td><td class="num">3.86M</td><td class="num">8.88M</td><td class="num">13.89M</td></tr>
+          <tr><td>Recall: re-tests that would not have happened<br><span class="small muted">9.9M customers × 40% due × 80% reachable = 3.17M. (3.17M × +1 / 2 / 3pp, plus 712,800 store calls × +4 / 8 / 12pp) × ₹1,503 a re-test × 75% truly extra</span></td><td class="num">6.8</td><td class="num">13.6</td><td class="num">20.3</td></tr>
+          <tr><td>First-test follow-up<br><span class="small muted">1 cr first-ever tests × 70% power found × 30% no order × 80% reachable × +1.5 / 3 / 4.5pp orders × ₹1,950 × 75%</span></td><td class="num">3.7</td><td class="num">7.4</td><td class="num">11.1</td></tr>
+          <tr><td>Returners who now swap lenses instead of buying a pair<br><span class="small muted">3.17M × 20% who would return anyway × 3% × ₹2,750 less each</span></td><td class="num">−5.2</td><td class="num">−5.2</td><td class="num">−5.2</td></tr>
+          <tr class="hl"><td><b>Extra revenue</b> <span class="small muted">(₹ cr a year)</span></td><td class="num"><b>5.2</b></td><td class="num"><b>15.7</b></td><td class="num"><b>26.2</b></td></tr>
+          <tr><td>Contribution at 56%<br><span class="small muted">64.0% India product margin less 8% variable selling cost</span></td><td class="num">2.9</td><td class="num">8.8</td><td class="num">14.7</td></tr>
+          <tr><td>Less running costs<br><span class="small muted">WhatsApp, extra re-tests, store calls, AI</span></td><td class="num">−3.29</td><td class="num">−3.94</td><td class="num">−4.59</td></tr>
+          <tr class="hl"><td><b>Net of running costs</b> <span class="small muted">(₹ cr a year)</span></td><td class="num"><b>−0.4</b></td><td class="num"><b>4.9</b></td><td class="num"><b>10.1</b></td></tr>
+          <tr><td>Net in US$ at ₹94.24</td><td class="num">−0.04M</td><td class="num">0.51M</td><td class="num">1.07M</td></tr>
         </tbody></table></div>
       <div class="card soft">
         <h3>Read this honestly</h3>
         <ul class="small" style="margin-top:6px">
-          <li><b>Lenskart-disclosed:</b> 9.9M (FY25) and 12.3M (FY26) India transacting customer accounts, FY26 India revenue ₹5,265 cr, "over 1 Cr first-ever tests in FY26", 103 lakh Gold members, ₹1,950 India selling price and 64.0% product margin in Q2 FY27. ₹4,280 is my division of FY26 India revenue by FY26 accounts.</li>
-          <li><b>Where each base uplift comes from.</b> Recall +2pp is about 198,000 accounts, 1.6% of FY26's 12.3M; for scale, my onboarding experiments at ET lifted subscriber retention 10%. First-test follow-up +1% is 100,000 buyers. Family +1% is 103,000 pairs, against 85.5 lakh India units sold in Q2 FY27 alone.</li>
-          <li><b>What I do not know:</b> how many of last year's customers return today and how many tested people buy. Neither is disclosed, so the uplifts are applied to the whole base and must be proven against a holdout.</li>
-          <li>Not included: build cost, and the cases where a recall ends in a ₹199 lens swap or in "keep your pair", which is the right outcome and earns less. Figures are rounded; totals use unrounded values. Every input is editable in the prototype's growth console.</li>
+          <li><b>Lenskart-disclosed:</b> 9.9M India transacting accounts in FY25 and 12.3M in FY26, "over 1 Cr first-ever tests in FY26", ₹1,950 selling price and 64.0% product margin in Q2 FY27, 1.87 units per customer.</li>
+          <li><b>Why FY25 customers:</b> someone who bought in FY25 reaches a 24-month interval during FY27. The 12% overdue share is a backlog assumption.</li>
+          <li><b>What a re-test is worth:</b> ₹1,503, from an assumed mix of 40% power unchanged (₹0), 25% lens swap (₹900) and 35% a new pair (one order, ₹3,650).</li>
+          <li><b>Where the recall uplifts come from:</b> one published trial, in a US eye clinic, where an automated reminder added 2 points to follow-up and a personal call 10 (Callinan et al., 2017). In that trial the call went to everyone; here it goes only to people the message did not move, so 8 more points may be generous. The first-test uplift has no published benchmark and is my assumption. I have no Lenskart baseline; measuring it is the pilot's first job.</li>
+          <li><b>The swap loss may be light.</b> Lenskart's own lens replacement offer coincided with its India selling price falling from about ₹1,760 to ₹1,609, so I show 6% as well as 3%; at 6% the net falls to ₹1.9 cr.</li>
+          <li><b>Each person is sized once.</b> Gold members and last year's customers are largely the same people (88 lakh members against 1.23 crore accounts at FY26 end), so there is no separate Gold lever.</li>
+          <li><b>Not counted:</b> anything after the first order, build cost, and the optometrist slot a re-test takes from a first-timer. Figures are rounded; totals use unrounded values. Every input is editable in the prototype's console.</li>
         </ul>
       </div>
     </div>
-    <h3 style="margin-top:24px">What it costs to run, and who makes the calls</h3>
-    <div class="tbl" style="margin-top:10px"><table class="t-fit" id="im-cost">
-      <thead><tr><th style="width:26%">Cost</th><th style="width:52%">Volume and rate</th><th class="num" style="width:22%">₹ cr a year</th></tr></thead>
+    <h3 style="margin-top:24px" id="lever-h">Which lever earns it</h3>
+    <div class="tbl" style="margin-top:10px" aria-labelledby="lever-h"><table class="t-fit" id="im-lever">
+      <thead><tr><th scope="col">Base case, after each lever's own costs</th><th scope="col" class="num">₹ cr a year</th></tr></thead>
       <tbody>
-        <tr><td><b>Recall check-ins</b></td><td>9.9M customers × up to 3 messages (check-in, reminder, booking confirmation) = 29.7M × ₹0.8631 marketing rate</td><td class="num">2.56</td></tr>
-        <tr><td><b>First-test follow-ups</b></td><td>1 cr first-ever tests × 2 messages = 20M × ₹0.8631</td><td class="num">1.73</td></tr>
-        <tr><td><b>Family invites</b></td><td>One per Gold member: 10.3M × ₹0.8631</td><td class="num">0.89</td></tr>
-        <tr><td><b>Extra eye tests</b></td><td>9.9M × 6% take a re-test = 594,000 tests × ₹60 of optometrist time</td><td class="num">3.56</td></tr>
-        <tr><td><b>Store calls on day 8</b></td><td>Only overdue customers with nothing booked after 7 days: 9.9M × 9% = 891,000 calls × ₹15 for a 3-minute call</td><td class="num">1.34</td></tr>
-        <tr><td><b>AI scoring and messages</b></td><td>12.3M accounts × ₹0.6 a year</td><td class="num">0.74</td></tr>
-        <tr class="hl"><td><b>Total running cost</b></td><td>Return on running cost: about 9x at base, 4x at low</td><td class="num"><b>10.82</b></td></tr>
+        <tr><td><b>First-test follow-up</b><br><span class="small muted">The largest, and the one with no published benchmark behind its uplift</span></td><td class="num">3.8</td></tr>
+        <tr><td><b>Store call on day 8</b><br><span class="small muted">The personal call is where the trial found the lift</span></td><td class="num">1.9</td></tr>
+        <tr><td><b>Recall message</b><br><span class="small muted">Roughly breaks even in year one, after the lens-swap loss; it creates the call list</span></td><td class="num">−0.2</td></tr>
+        <tr><td><b>AI ranking and drafting</b><br><span class="small muted">A cost shared by all three</span></td><td class="num">−0.7</td></tr>
+        <tr class="hl"><td><b>Net of running costs</b></td><td class="num"><b>4.9</b></td></tr>
       </tbody></table></div>
-    <p class="small muted" style="margin-top:8px">The WhatsApp rate is Meta's INR list rate for marketing messages in India; I price every message as marketing, the dearer category, because Meta decides the category. Eye-test cost, call cost, AI cost and the take-up shares are my estimates. 891,000 calls a year across 2,868 India stores is about six calls a store a week, made by the store that tested the customer; if a store is short of time, calls go first to the customers who are most overdue and everyone else gets the reminder only.</p>
+    <p class="small muted" style="margin-top:8px">So the order to build in is the follow-up first, the store call second, and the recall message third. The return of about 2x is on running costs only; it excludes build cost and the optometrist time a re-test takes from a first-timer.</p>
+    <div class="grid g3 top" style="margin-top:20px">
+      <div class="card"><h3>Why run it if year one is small</h3><p class="small" style="margin-top:6px">It costs about ₹4 cr a year to run. A 90-day pilot gives a first read on two of the three inputs that decide it, what a first-timer's order is worth and how many returners swap instead of buying. Whether the lift is extra or just earlier needs the 180-day read.</p></div>
+      <div class="card"><h3>What the model leaves out</h3><p class="small" style="margin-top:6px">Only the first order is counted. Customers Lenskart acquired in FY23 bought 3.6 eyeglasses within two years, so a customer who comes back and stays is worth more than one order. I have not put a number on that; the sensitivity table shows the net at a full year of an active account (₹5.3 cr).</p></div>
+      <div class="card"><h3>Where it grows</h3><p class="small" style="margin-top:6px">The base is the number of eye tests, and Lenskart wants to take those from 2 crore to 8 crore a year. The first-test half also answers the CRM gap management has named itself.</p></div>
+    </div>
+    <h3 style="margin-top:24px" id="sens-h">What moves the answer most</h3>
+    <div class="tbl" style="margin-top:10px" aria-labelledby="sens-h"><table class="t-fit" id="im-sens">
+      <thead><tr><th scope="col">One input changed, the rest at base</th><th scope="col" class="num">Worse</th><th scope="col" class="num">Base</th><th scope="col" class="num">Better</th></tr></thead>
+      <tbody>
+        <tr data-k="m-incr" data-lo="50" data-hi="100"><td>Truly extra, not just earlier<br><span class="small muted">50% / 75% / 100%</span></td><td class="num">0.9</td><td class="num">4.9</td><td class="num">8.8</td></tr>
+        <tr data-k="m-fval" data-lo="500" data-hi="3650"><td>Revenue from a first-timer's order<br><span class="small muted">₹500 (Hustlr Club) / ₹1,950 (one pair) / ₹3,650</span></td><td class="num">1.8</td><td class="num">4.9</td><td class="num">8.5</td></tr>
+        <tr data-k="m-cann" data-lo="6" data-hi="0"><td>Returners who swap instead of buying<br><span class="small muted">6% / 3% / 0%</span></td><td class="num">1.9</td><td class="num">4.9</td><td class="num">7.8</td></tr>
+        <tr data-k="m-conv" data-lo="1.5" data-hi="4.5"><td>Extra first-timers who order<br><span class="small muted">+1.5 / 3 / 4.5pp</span></td><td class="num">2.8</td><td class="num">4.9</td><td class="num">6.9</td></tr>
+        <tr data-k="m-take" data-lo="1" data-hi="3"><td>Extra who re-test after the message<br><span class="small muted">+1 / 2 / 3pp</span></td><td class="num">3.2</td><td class="num">4.9</td><td class="num">6.5</td></tr>
+        <tr data-k="m-calllift" data-lo="4" data-hi="12"><td>Extra again after the store call<br><span class="small muted">+4 / 8 / 12pp</span></td><td class="num">3.4</td><td class="num">4.9</td><td class="num">6.3</td></tr>
+        <tr data-k="m-order" data-lo="1950" data-hi="4280"><td>Revenue from a returner's order<br><span class="small muted">₹1,950 (one pair) / ₹3,650 / ₹4,280 (a year of an active account)</span></td><td class="num">3.7</td><td class="num">4.9</td><td class="num">5.3</td></tr>
+        <tr data-k="m-reach" data-lo="60" data-hi="95"><td>Reachable on WhatsApp with consent<br><span class="small muted">60% / 80% / 95%</span></td><td class="num">3.9</td><td class="num">4.9</td><td class="num">5.5</td></tr>
+      </tbody></table></div>
+    <p class="small muted" style="margin-top:8px">Net of running costs, ₹ cr a year. How much of the lift is truly extra moves the answer most, then what a first-timer's order is worth and how many returners swap instead of buying. How many people respond matters less, which is why the pilot's metric is revenue per due customer against a holdout, not bookings. The share of customers who fall due barely moves the net: more of them add revenue and cost in equal measure.</p>
+    <h3 style="margin-top:24px" id="cost-h">What it costs to run, and who makes the calls</h3>
+    <div class="tbl" style="margin-top:10px" aria-labelledby="cost-h"><table class="t-fit" id="im-cost">
+      <thead><tr><th scope="col" style="width:26%">Cost</th><th scope="col" style="width:52%">Volume and rate</th><th scope="col" class="num" style="width:22%">₹ cr a year</th></tr></thead>
+      <tbody>
+        <tr><td><b>Recall check-ins</b></td><td>3.17M due and reachable × 2 messages = 6.3M × ₹0.8631 marketing rate</td><td class="num">0.55</td></tr>
+        <tr><td><b>First-test follow-ups</b></td><td>1.68M first-timers with a power and no order × 2 messages = 3.4M × ₹0.8631</td><td class="num">0.29</td></tr>
+        <tr><td><b>Extra re-tests</b></td><td>120,384 re-tests: 80% in store at ₹60 of optometrist time, 20% at home at ₹300 a visit</td><td class="num">1.30</td></tr>
+        <tr><td><b>Store calls on day 8</b></td><td>9.9M × 12% overdue × 60% unbooked and agreed to a call = 712,800 calls × ₹15 for a 3-minute call</td><td class="num">1.07</td></tr>
+        <tr><td><b>AI ranking and messages</b></td><td>12.3M accounts × ₹0.6 a year</td><td class="num">0.74</td></tr>
+        <tr class="hl"><td><b>Total running cost</b></td><td>Return on running cost: about 2x at base, below 1x at low</td><td class="num"><b>3.94</b></td></tr>
+      </tbody></table></div>
+    <p class="small muted" style="margin-top:8px">₹0.8631 is Meta's INR list rate for a marketing message in India, effective 1 Oct 2026; I price every message as marketing, the dearer category, because Meta decides the category. Eye-test, visit, call and AI costs and the shares are my estimates. 712,800 calls a year across 2,868 India stores is about five calls a store a week, made by the store that tested the customer; if a store is short of time, calls go first to the highest priority scores and everyone else gets the reminder only.</p>
   </div>
 </section>
 
@@ -511,15 +634,19 @@ footer h3{color:#fff}
 <section class="block" id="plan" aria-labelledby="pl-h">
   <div class="wrap">
     <div class="sec-head"><span class="num">10 · First 90 days</span><h2 id="pl-h">Prove lift in two groups before scaling</h2></div>
-    <div class="grid g3">
-      <div class="card"><span class="tag pri">Weeks 1-3 · Baseline</span><ul class="small" style="margin-top:10px"><li>Pull two past cohorts of tested customers</li><li>Measure how many return, and when, today</li><li>Backtest: does prescription age predict the next order?</li></ul></div>
-      <div class="card"><span class="tag pri">Weeks 4-8 · Pilot</span><ul class="small" style="margin-top:10px"><li>Children with myopia and adults over 24 months</li><li>Check-in and re-test booking live with a 90/10 holdout</li><li>20 stores in 3 cities, with the day-8 call</li></ul></div>
-      <div class="card"><span class="tag pri">Weeks 9-13 · Next step</span><ul class="small" style="margin-top:10px"><li>Next Pair Step after the re-test</li><li>First-ever test follow-up in Tier 2+ stores</li><li>Read-out and scale decision</li></ul></div>
+    <div class="grid g3 top">
+      <div class="card"><span class="tag pri">Weeks 1-3 · Baseline</span><ul class="small" style="margin-top:10px"><li>Pull two past cohorts of tested customers</li><li>Measure how many return, and when, today</li><li>Backtest: does prescription age predict the next order?</li><li>Legal review of consent for existing records</li></ul></div>
+      <div class="card"><span class="tag pri">Weeks 4-8 · Pilot</span><ul class="small" style="margin-top:10px"><li>First-test follow-up in Tier 2+ stores (smaller cities), 50/50 by customer</li><li>Recall for adults 18 to 64 past 24 months, and 65 and above past 12; the store call randomised by store</li><li>Re-tests off-peak, capped at 5% of a store's weekly tests</li></ul></div>
+      <div class="card"><span class="tag pri">Weeks 9-13 · Next step</span><ul class="small" style="margin-top:10px"><li>Next Pair Step after the re-test</li><li>Children's flow, after legal sign-off</li><li>First read-out at 60 days; the extra-or-earlier question at 180</li><li>Scale decision; 90/10 holdout at scale</li></ul></div>
     </div>
-    <div class="grid g3" style="margin-top:16px">
-      <div class="card soft"><b style="color:var(--accent-ink)">North star</b><p class="small" style="margin-top:4px">Re-tests completed within 30 days of the due date.</p></div>
-      <div class="card"><b>Leading</b><p class="small" style="margin-top:4px">Check-in to booking rate, show-up rate, orders within 30 days of a re-test, lens-swap share.</p></div>
-      <div class="card" style="background:var(--premium-bg);border-color:transparent"><b style="color:var(--premium-ink)">Guardrails</b><p class="small" style="margin-top:4px">WhatsApp opt-outs and blocks, NPS, wrong-power tickets, return rate.</p></div>
+    <div class="grid g3 top" style="margin-top:16px">
+      <div class="card soft"><b style="color:var(--accent-ink)">North star</b><p class="small" style="margin-top:4px">Incremental revenue per due customer against the holdout at 60 days.</p></div>
+      <div class="card"><b>Leading</b><p class="small" style="margin-top:4px">Delivered rate, check-in to booking, show-up rate, re-tests within 30 days of the due date, lens-swap share.</p></div>
+      <div class="card" style="background:var(--premium-bg);border-color:transparent"><b style="color:var(--premium-ink)">Guardrails</b><p class="small" style="margin-top:4px">WhatsApp opt-outs and blocks, NPS (Lenskart's customer satisfaction score), wrong-power tickets, return rate, optometrist slots used.</p></div>
+    </div>
+    <div class="grid g2 top" style="margin-top:16px">
+      <div class="card"><h3>Sample size</h3><p class="small" style="margin-top:6px">To detect a 1 point lift on an assumed 6% 60-day order rate, at 80% power and 5% significance, an arm needs about 9,500 customers; that fits the follow-up and the store call. The recall message alone implies about half a point, which needs about 37,000 in each arm. Both are sized on order rate; the revenue metric and the store-randomised arm need more, set from the baseline variance measured in weeks 1 to 3.</p></div>
+      <div class="card"><h3>Data it needs</h3><p class="small" style="margin-top:6px">Test date and result, age band, order history, consent flags, ticket status. Events: check-in sent, delivered, booked, attended, result, order.</p></div>
     </div>
   </div>
 </section>
@@ -528,26 +655,46 @@ footer h3{color:#fff}
 <section class="block" id="risks" aria-labelledby="rk-h">
   <div class="wrap">
     <div class="sec-head"><span class="num">11 · What could break it</span><h2 id="rk-h">Riskiest assumptions, and the cheapest test for each</h2></div>
-    <div class="tbl"><table class="t-mid">
-      <thead><tr><th>Assumption</th><th>Why it could be wrong</th><th>Cheapest test</th></tr></thead>
+    <div class="tbl" aria-labelledby="rk-h"><table class="t-mid stack">
+      <thead><tr><th scope="col">Assumption</th><th scope="col">Why it could be wrong</th><th scope="col">Cheapest test</th></tr></thead>
       <tbody>
-        <tr class="hl"><td><b>A due date brings people back</b></td><td>They may already return on their own, when a pair breaks or a collection launches</td><td>Backtest return timing against prescription age before building anything</td></tr>
-        <tr class="hl"><td><b>The re-test is trusted</b></td><td>Reviews describe a different power at each test: "every time they have given me a different power" (Google Play, 7 Sep 2026)</td><td>In the pilot, a second optometrist confirms any change above 0.5; track wrong-power tickets per 1,000 re-tests</td></tr>
-        <tr><td><b>A message with no offer still gets opened</b></td><td>WhatsApp fatigue; one review says "the app sends too many notifications"</td><td>2-week check-in pilot; one check-in and one reminder per due date, then stop</td></tr>
-        <tr><td><b>Stores have time for the call</b></td><td>Six calls a week is still time away from walk-ins</td><td>Pilot in 20 stores; measure calls made and minutes spent</td></tr>
-        <tr><td><b>Lift is incremental</b></td><td>Returns may happen anyway through Gold and marketing</td><td>Keep a 10% holdout for every action</td></tr>
-        <tr><td><b>It does not cut order value</b></td><td>A recall may end in a ₹199 lens swap instead of a new pair</td><td>Track revenue per recalled customer against the holdout, not order count</td></tr>
-        <tr><td><b>Data use is allowed</b></td><td>A prescription is health data; children need a parent's consent</td><td>Consent at the eye test, age-gated; every message says how to opt out (DPDP Act 2023)</td></tr>
+        <tr class="hl"><th scope="row">A due date brings people back</th><td>They may already return on their own, when a pair breaks, a collection launches or Gold comes up for renewal</td><td>Backtest return timing against prescription age before building anything</td></tr>
+        <tr class="hl"><th scope="row">The re-test is trusted</th><td>Reviews describe a different power at each test: "every time they have given me a different power" (Google Play, 7 Sep 2026)</td><td>In the pilot, a second optometrist confirms any change above 0.5; track wrong-power tickets per 1,000 re-tests</td></tr>
+        <tr class="hl"><th scope="row">It does not cut order value</th><td>It has happened: the lens replacement offer took India selling price from about ₹1,760 to ₹1,609 in Q4 FY25, and units per customer dipped</td><td>It is in the sizing as a negative line. Track revenue per recalled customer against the holdout, not order count</td></tr>
+        <tr><th scope="row">Stores have optometrist time</th><td>Lenskart calls the optometrist one of "the scarcest skills in eyewear"; a re-test that ends in "keep your pair" takes a first-timer's slot</td><td>Recall slots off-peak or in remote and self-test rooms; cap re-tests at 5% of a store's weekly tests</td></tr>
+        <tr><th scope="row">The message arrives and is opened</th><td>Meta limits marketing messages per user, Lenskart's promotions use the same allowance, and one review says "the app sends too many notifications"</td><td>Measure the delivered rate in a 2-week pilot; one check-in and one reminder per due date; fall back to app push</td></tr>
+        <tr><th scope="row">The store call is allowed and wanted</th><td>Promotional calls to numbers on the do-not-disturb registry need consent</td><td>Call only customers who ticked "my store may call me" at the eye test</td></tr>
+        <tr><th scope="row">Old records can be used</th><td>Existing prescriptions were collected to make glasses, not to send reminders; a prescription is health data</td><td>A one-time notice with opt-out before the first check-in; every message says how to opt out (DPDP Act 2023)</td></tr>
+        <tr><th scope="row">Children can be included</th><td>Under-18s need a parent's verifiable consent, and the Act limits tracking of children</td><td>Fresh parental consent at the eye test; legal review before the children's flow goes live</td></tr>
+        <tr><th scope="row">Lift is incremental</th><td>A recall may only bring forward an order that was coming anyway</td><td>Keep a holdout for every action and read revenue at 60 and 180 days</td></tr>
+        <tr><th scope="row">Lens replacement can repeat</th><td>Today the offer is "valid for single use per user"</td><td>Price the second swap; the engine needs it to recur, at a fee that still earns</td></tr>
       </tbody></table></div>
-    <p class="small muted" style="margin-top:8px">Sorted by how much each assumption would change the plan. If prescription age does not predict the next order, the product shrinks to the children's 6-month rhythm and the first-ever test follow-up.</p>
+    <p class="small muted" style="margin-top:8px">Sorted by how much each assumption would change the plan. If prescription age does not predict the next order, the product shrinks to the first-test follow-up and the children's rhythm.</p>
+  </div>
+</section>
+
+<!-- WALKTHROUGH -->
+<section class="block" id="walkthrough" aria-labelledby="walk-h">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">12 · For reviewers</span><h2 id="walk-h">Review this case study in 7 steps, about 8 minutes</h2><p>Each step is a complete link that opens the right screen, so any step can be shared on its own.</p></div>
+    <ol class="walk" id="walk">
+      <li><span class="wn" aria-hidden="true">1</span><span class="wt">The proposed system <small>· 1&nbsp;min</small></span><span class="small">The six features and what they are worth.</span><span class="wu"><a href="/lenskart-study#system">https://anchit-tandon.com/lenskart-study#system</a></span></li>
+      <li><span class="wn" aria-hidden="true">2</span><span class="wt">Customer app: Due Date, Re&#8209;test Plan, Next Pair Step <small>· 2&nbsp;min</small></span><span class="small">Pick a customer and change the signals; the due date, the plan and what follows the re-test change with them.</span><span class="wu"><a href="/lenskart-study/prototype#customer">https://anchit-tandon.com/lenskart-study/prototype#customer</a></span></li>
+      <li><span class="wn" aria-hidden="true">3</span><span class="wt">Sight Check-in <small>· 1&nbsp;min</small></span><span class="small">Switch between Kabir (9) and Neha (29) to see who receives it, in English or Hindi.</span><span class="wu"><a href="/lenskart-study/prototype#checkin">https://anchit-tandon.com/lenskart-study/prototype#checkin</a></span></li>
+      <li><span class="wn" aria-hidden="true">4</span><span class="wt">Growth Console <small>· 1&nbsp;min</small></span><span class="small">Customers grouped by action, with the incremental revenue of each group and a live calculator.</span><span class="wu"><a href="/lenskart-study/prototype#console">https://anchit-tandon.com/lenskart-study/prototype#console</a></span></li>
+      <li><span class="wn" aria-hidden="true">5</span><span class="wt">The evidence: live platform audit <small>· 1&nbsp;min</small></span><span class="small">What Lenskart runs today, and what I could not find.</span><span class="wu"><a href="/lenskart-study#audit">https://anchit-tandon.com/lenskart-study#audit</a></span></li>
+      <li><span class="wn" aria-hidden="true">6</span><span class="wt">Sizing, sensitivity and running costs <small>· 1&nbsp;min</small></span><span class="small">Low, base and high cases, what moves the answer most, and what it costs to run.</span><span class="wu"><a href="/lenskart-study#impact">https://anchit-tandon.com/lenskart-study#impact</a></span></li>
+      <li><span class="wn" aria-hidden="true">7</span><span class="wt">Why me <small>· 1&nbsp;min</small></span><span class="small">Where I have run this playbook before, and how to reach me.</span><span class="wu"><a href="/lenskart-study#me">https://anchit-tandon.com/lenskart-study#me</a></span></li>
+    </ol>
+    <div class="share"><button class="btn btn-primary sm" type="button" id="copy-walk">Copy all 7 links</button><span class="small">Or share one link for the whole review: <a href="/lenskart-study#walkthrough">https://anchit-tandon.com/lenskart-study#walkthrough</a></span><span class="small muted" id="copy-msg" role="status" aria-live="polite"></span></div>
   </div>
 </section>
 
 <!-- WHY ME -->
 <section class="block" id="me" aria-labelledby="me-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">12 · Why me</span><h2 id="me-h">I have run this playbook on a paid subscription product</h2><p>Times Internet, June 2022 to April 2026: Associate PM → PM → Senior PM.</p></div>
-    <div class="grid g3">
+    <div class="sec-head"><span class="num">13 · Why me</span><h2 id="me-h">I have run this playbook on a paid subscription product</h2><p>Times Internet, June 2022 to April 2026: Associate PM → PM → Senior PM.</p></div>
+    <div class="grid g3 top">
       <div class="card kpi"><span class="tag pri">Revenue · Assisted Sales</span><b style="margin-top:8px">₹15L → ₹80L</b><small style="font-size:14px;line-height:21px">Monthly ET assisted-sales revenue through funnel redesign; 400%+ ROI in six months on ET Prime's assisted-conversion funnel.</small></div>
       <div class="card kpi"><span class="tag pri">AI Automation</span><b style="margin-top:8px">AI TeleSuite</b><small style="font-size:14px;line-height:21px">Built call transcription, quality scoring and pitch assist behind scaling Assisted Sales 5×, from ₹15L to ₹80L MRR.</small></div>
       <div class="card kpi"><span class="tag pri">Retention · Engagement</span><b style="margin-top:8px">+10% · +27%</b><small style="font-size:14px;line-height:21px">Subscriber retention through onboarding experiments; ET Markets engagement, ₹3 cr+ incremental yearly revenue.</small></div>
@@ -556,17 +703,20 @@ footer h3{color:#fff}
     <div class="hero-ctas" style="margin-top:16px"><a class="btn btn-primary" href="mailto:anchit.tandon@gmail.com?subject=Lenskart%20case%20study">Email Anchit</a><a class="btn btn-outline" href="https://www.linkedin.com/in/anchit-tandon" rel="noopener">LinkedIn</a><a class="btn btn-outline" href="/freelancer">Profile</a></div>
   </div>
 </section>
+
 </main>
 
 <footer>
   <div class="wrap">
-    <h3>Sources and method</h3>
+    <h2 class="foot-h">Sources and method</h2>
     <ul>
-      <li>Lenskart Q4 FY26 shareholders' letter (May 2026): FY26 revenue, segments, units, customer accounts, eye tests, Gold. Figures are proforma, as the company reports them.</li>
-      <li>Lenskart Q1 FY27 (Aug 2026) and Q2 FY27 (Nov 2026) shareholders' letters: quarterly growth, selling price, product margin, units per customer, remote optometry, Drysh, Gold, AI voice assistant.</li>
-      <li>Lenskart Annual Report FY2025-26: Free Lens Replacement, AI stylist, two-year purchase frequency. Q3 FY26 earnings call transcript (Feb 2026): churn, repeat rate, triggers, kids' eye tests. IPO prospectus (Oct 2025): the definition of the repeat-order metric, eye-test results in the app.</li>
-      <li>lenskart.com (store locator, a store page, Lenskart at Home, warranty policy), aqualens.in and six Lenskart apps on Google Play and the App Store, checked logged out on 13 Nov 2026 with a headless browser. Lenskart's India home, product, Gold and returns pages redirected to its US storefront from the audit's network and were not seen. Quotes are verbatim.</li>
+      <li>Lenskart Q4 FY26 shareholders' letter (May 2026): FY26 revenue, segments, units, customer accounts, eye tests, Gold, the lens replacement offer's effect on selling price. Figures are proforma, as the company reports them.</li>
+      <li>Lenskart Q1 FY27 (Aug 2026) and Q2 FY27 (Nov 2026) shareholders' letters: quarterly growth, selling price, product margin, units per customer, remote optometry, Drysh, Gold, the AI voice assistant, Saathi.</li>
+      <li>Lenskart Annual Report FY2025-26: Free Lens Replacement, AI stylist, two-year purchase frequency. Earnings call transcripts: Q1 FY27 (Aug 2026) on who buys after a test and on CRM; Q3 FY26 (Feb 2026) on churn, Gold, repeat rate, triggers and kids' eye tests. IPO prospectus (Oct 2025): the repeat-order metric, eye-test results in the app.</li>
+      <li>lenskart.com, checked logged out on 13 and 14 Nov 2026: the store locator, a store page, Lenskart at Home, the warranty policy, the India FAQ and terms page, the public catalogue data the web app loads, and the web app's text bundle; plus aqualens.in and six Lenskart apps on Google Play and the App Store. Lenskart's rendered India home, product and Gold pages redirected to its US storefront from the audit's network and were not seen. Quotes are verbatim.</li>
       <li>3,500 public app reviews (3,000 Google Play, 500 App Store), collected 13 Nov 2026; themes counted by keyword match.</li>
+      <li>Re-test intervals: American Optometric Association eye-exam schedule; UK College of Optometrists guidance on the routine eye examination; International Myopia Institute reports (2019). Reminder trial: Callinan et al., American Journal of Medical Quality, 2017. Titan Eye+ reminders: Open magazine, 6 Nov 2026.</li>
+      <li>WhatsApp rate: Meta's INR rate card for India, effective 1 Oct 2026. Exchange rate: European Central Bank reference rates, 13 Nov 2026.</li>
       <li>Brand tokens (colours, radii, Plus Jakarta Sans) read from lenskart.com computed styles. The Lenskart logo and Lenskart Sans are not used.</li>
     </ul>
     <p>Independent case study by Anchit Tandon. Not affiliated with or endorsed by Lenskart. "Lenskart" and its product names belong to their owner and are used only to describe their public products. Sizing uplifts are assumptions, labelled as such. Nothing here is medical advice.</p>
@@ -582,12 +732,22 @@ footer h3{color:#fff}
     var f=c.getAttribute('data-f');
     Array.prototype.forEach.call(chips,function(x){x.setAttribute('aria-pressed',String(x===c));});
     Array.prototype.forEach.call(rows,function(r){r.hidden=!(f==='all'||r.getAttribute('data-s')===f);});
+    var shown=Array.prototype.filter.call(rows,function(r){return !r.hidden;}).length, cnt=document.getElementById('audit-count');
+    if(cnt) cnt.textContent = f==='all' ? 'Showing all '+shown+' capabilities' : 'Showing '+shown+' of '+rows.length+': '+c.textContent.toLowerCase();
   });});
+  // On a phone the audit opens on what was not found; the rest is one tap away.
+  if(window.matchMedia && window.matchMedia('(max-width:600px)').matches){ var nf=document.querySelector('.filters .chip[data-f="none"]'); if(nf) nf.click(); }
   // Active section in nav
   var links=document.querySelectorAll('#links a'), map={};
   Array.prototype.forEach.call(links,function(a){map[a.getAttribute('href').slice(1)]=a;});
   if('IntersectionObserver' in window){
-    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&map[e.target.id]){Array.prototype.forEach.call(links,function(a){a.classList.remove('on');});map[e.target.id].classList.add('on');}});},{rootMargin:'-40% 0px -55% 0px'});
+    var bar=document.getElementById('links');
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&map[e.target.id]){
+      Array.prototype.forEach.call(links,function(a){a.classList.remove('on');a.removeAttribute('aria-current');});
+      var on=map[e.target.id]; on.classList.add('on'); on.setAttribute('aria-current','true');
+      // Keep the active link in view inside the scrolling nav, without moving the page.
+      bar.scrollLeft = Math.max(0, on.offsetLeft - bar.offsetLeft - (bar.clientWidth - on.offsetWidth)/2);
+    }});},{rootMargin:'-40% 0px -55% 0px'});
     Object.keys(map).forEach(function(id){var s=document.getElementById(id);if(s)io.observe(s);});
   }
   // Recruiter walkthrough: copy every step as full links
@@ -613,6 +773,20 @@ footer h3{color:#fff}
 // ones that overflow so the phone layout can show a cue.
 (function(){function mark(){document.querySelectorAll('.tbl').forEach(function(t){var w=t.scrollWidth>t.clientWidth+2;t.classList.toggle('is-wide',w);if(w){t.tabIndex=0;t.setAttribute('role','region');if(!t.hasAttribute('aria-label'))t.setAttribute('aria-label','Table, scrolls sideways');}});}
 if(document.readyState!=='loading')mark();else document.addEventListener('DOMContentLoaded',mark);window.addEventListener('resize',mark,{passive:true});})();
+</script>
+<script>
+// Phone tables stack into cards: each cell carries its column name.
+(function(){document.querySelectorAll('table.stack').forEach(function(t){
+  var heads=[].map.call(t.querySelectorAll('thead th'),function(h){return h.textContent.trim();});
+  t.querySelectorAll('tbody tr').forEach(function(r){[].forEach.call(r.cells,function(c,i){ if(c.tagName==='TD'&&heads[i]) c.setAttribute('data-label',heads[i]); });});
+});})();
+// The embedded prototype is the same origin: size the frame to its content so
+// the page scrolls, not the frame.
+(function(){var f=document.getElementById('proto-frame'); if(!f) return;
+  function fit(){ try{ var d=f.contentDocument; if(d&&d.body){ var h=Math.ceil(d.body.getBoundingClientRect().height); if(h>200) f.style.height=h+'px'; } }catch(e){} }
+  f.addEventListener('load',function(){ fit(); try{ if('ResizeObserver' in window) new ResizeObserver(fit).observe(f.contentDocument.body); f.contentDocument.addEventListener('click',function(){setTimeout(fit,60);}); f.contentDocument.addEventListener('input',function(){setTimeout(fit,60);}); }catch(e){} });
+  window.addEventListener('resize',fit,{passive:true});
+})();
 </script>
 </body>
 </html>
