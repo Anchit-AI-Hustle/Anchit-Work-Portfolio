@@ -408,8 +408,16 @@ function clampIn(w) {
 function setSt(w, st) { w.st = st; w.t = 0; }
 function startSolo(G, w, name, o) {
   const S0 = SOLO[name]; if (!S0) return;
+  dropMove(G, w);
   w.solo = Object.assign({ name, d: S0, t: 0, dur: (S0.dur || 1) * ((o && o.speed) || 1), hit: false, x0: w.x, z0: w.z, fprev: 0, target: null, mv: null }, o || {});
   setSt(w, 'solo'); w.anim = name; w.ak = 0; w.adur = w.solo.dur;
+}
+// a wrestler leaving a two-person move for any reason ends it for the partner too, so nobody is left frozen in it
+function dropMove(G, w) {
+  const mv = w.move; if (!mv) return;
+  w.move = null;
+  const o = mv.a === w ? mv.d : mv.a;
+  if (o && o.move === mv) { o.move = null; if (o.st === 'move') { o.h = Math.max(o.h, 0.9); o.pitch = 0; stand(G, o); } }
 }
 // a wrestler leaving a lock-up for any reason lets the partner go too, so nobody is left holding a lock alone
 function dropLock(G, w) {
@@ -423,11 +431,11 @@ function down(G, w, face, gt) {
   w.pitch = w.face === 'front' ? HALF : -HALF; w.h = LIE; w.roll = 0; w.yawOff = 0;
   w.getT = (gt || 1.4) * (0.75 + w.dmg / 160) * (1.25 - w.def.stats.tough * 0.35);
   if (w.bot) w.getT *= rnd(0.9, 1.15);
-  dropLock(G, w);
-  w.move = null; w.solo = null; w.perch = null; w.fly = null; w.threat = null;
+  dropLock(G, w); dropMove(G, w);
+  w.solo = null; w.perch = null; w.fly = null; w.threat = null;
   clampIn(w);
 }
-function stand(G, w) { dropLock(G, w); setSt(w, 'idle'); w.anim = 'idle'; w.h = 1; w.pitch = 0; w.roll = 0; w.yawOff = 0; w.move = null; w.solo = null; }
+function stand(G, w) { dropLock(G, w); dropMove(G, w); setSt(w, 'idle'); w.anim = 'idle'; w.h = 1; w.pitch = 0; w.roll = 0; w.yawOff = 0; w.move = null; w.solo = null; }
 function hurt(G, w, by, amt, o) {
   amt *= 0.5 * (by && by.bot ? G.D.dmgIn : G.D.dmgOut) * (1.25 - w.def.stats.tough * 0.35);
   if (by) amt *= 0.85 + by.def.stats.pow * 0.3;
@@ -497,6 +505,7 @@ function startDuo(G, a, d, tplName, o) {
   o = o || {};
   if (a.lock) breakLock(G, a.lock, true);
   if (d.lock) breakLock(G, d.lock, true);
+  dropMove(G, a); dropMove(G, d);
   const dur = tpl.dur * (o.speed || 1);
   const mv = { tpl, id: tplName, a, d, t: 0, dur, hit: false, name: o.name || tpl.name, dmg: o.dmg || tpl.dmg, fin: !!o.fin, sig: !!o.sig, autoPin: !!o.autoPin, hold: o.hold || null, ax: a.x, az: a.z };
   a.move = mv; d.move = mv; a.role = 'a'; d.role = 'd';
@@ -1079,7 +1088,7 @@ function tossOver(G, w, T) {
   const ox = sx ? Math.sign(T.x) : 0, oz = sx ? 0 : Math.sign(T.z);
   w.yaw = faceTo(w, T.x, T.z);
   startSolo(G, w, 'shove', { target: null, noRev: true });
-  dropLock(G, T); T.move = null;
+  dropLock(G, T); dropMove(G, T);
   startSolo(G, T, 'overTop', { ox, oz, x0: T.x, z0: T.z });
   T.yaw = Math.atan2(-ox, -oz);
   hurt(G, T, w, 6);
@@ -1173,7 +1182,7 @@ function updateW(G, w, dt) {
       }
       break;
     }
-    case 'move': if (w.move && w.move.a === w) updateDuo(G, w.move, dt); else if (!w.move) stand(G, w); break;
+    case 'move': if (w.move && w.move.a === w) updateDuo(G, w.move, dt); else if (!w.move || w.move.a.move !== w.move) { w.move = null; stand(G, w); } break;
     case 'perch': w.h = 0.7; w.pitch = 0.35; w.anim = 'perch'; if (w.t > 6) { w.perch = null; w.yb = RH; stand(G, w); } break;
     case 'fly': updateFly(G, w, dt); break;
     case 'pin': case 'pinned': case 'sub': break;
