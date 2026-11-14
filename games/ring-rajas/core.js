@@ -572,6 +572,8 @@ function runSpeed(w) { return (4.6 + w.def.stats.spd * 1.8) * (w.stam < 20 ? 0.8
 /* ------------------------------------------------------------ pins, holds, count outs */
 function startPin(G, a, d, bridge) {
   if (!d.legal && G.cfg.match === 'tag') return;
+  // one referee: a second cover or hold waits until the current one ends
+  if (G.pin || G.sub) return;
   stand(G, a);
   setSt(a, 'pin'); setSt(d, 'pinned'); a.anim = bridge ? 'bridge' : 'cover'; d.anim = 'pinned';
   torso(d, _p);
@@ -601,6 +603,7 @@ function aiKickout(G, d, a) {
   return 9;
 }
 function startSub(G, a, d, holdName, name, fromFin) {
+  if (G.pin || G.sub) return;
   const H = HOLDS[holdName] || HOLDS.armLock;
   stand(G, a);
   setSt(a, 'sub'); setSt(d, 'sub'); a.role = 'a'; d.role = 'd';

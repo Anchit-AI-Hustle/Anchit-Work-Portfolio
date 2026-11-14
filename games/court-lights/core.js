@@ -940,6 +940,8 @@ export function subIn(side, i, b) {
   evt('sub', b, out);
   if (side === M.user || rnd() < 0.5) say('sub', b);
 }
+// free throws earned at the horn (queued, or partway through the set) are taken before the quarter ends
+function ftPending() { return !!M.ft || !!(M.next && M.next.type === 'ft'); }
 function endQuarter() {
   M.phase = 'qend'; M.phaseT = 0; M.clock = 0;
   M.qScore.push(M.score.slice());
@@ -999,8 +1001,9 @@ function gameUpdate(dt) {
   }
   if (M.clock <= 0) {
     M.clock = 0;
+    const ftOwed = ftPending();
     if (B.state === 'shot' && B.shot && !B.shot.done) { M.buzzWait = true; }
-    else { M.buzzWait = false; endQuarter(); return; }
+    else if (!ftOwed) { M.buzzWait = false; endQuarter(); return; }
   }
   if (live && M.shot <= 0 && B.state !== 'shot' && M.poss >= 0) { M.shot = 0; violation('Shot clock violation', M.poss); }
   if (M.phase === 'dead') {
@@ -1028,7 +1031,7 @@ function gameUpdate(dt) {
   for (let s = 0; s < 2; s++) M.side[s].forEach((p) => { if (!p.court) p.stam = clamp(p.stam + dt * 0.018, 0, 1); });
   stepBall(dt);
   if (M.phase === 'live') { looseCheck(); rulesCheck(dt); }
-  if (M.buzzWait && (!B.shot || B.shot.done) && M.phase !== 'dead') { M.buzzWait = false; endQuarter(); }
+  if (M.buzzWait && (!B.shot || B.shot.done) && M.phase !== 'dead' && !ftPending()) { M.buzzWait = false; endQuarter(); }
   else if (M.buzzWait && M.phase === 'dead' && B.shot && B.shot.done) { M.buzzWait = false; if (M.next && M.next.type === 'ft') { /* free throws after the horn */ } else endQuarter(); }
   refsUpdate(dt);
 }
@@ -1755,7 +1758,7 @@ export function startC3(team, o) {
 function c3Update(dt) {
   const C = M.c3, p = C.me;
   M.t += dt; M.phaseT += dt; M.banT = max(0, M.banT - dt);
-  if (C.phase === 'done') { for (const q of M.court[0]) integrate(q, dt); stepBall(dt); if (C.endT > 0) { C.endT -= dt; if (C.endT <= 0) c3Finish(); } return; }
+  if (C.phase === 'done') { for (const q of M.court[0]) integrate(q, dt); stepBall(dt); if (C.endT > 0) { const air = B.shot && !B.shot.done && (C.holdT = (C.holdT || 0) + dt) < 3; if (!air) { C.endT -= dt; if (C.endT <= 0) c3Finish(); } } return; }
   if (C.phase !== 'intro') C.t -= dt;
   if (C.t <= 0 && C.phase !== 'done') { C.t = 0; c3End(); }
   const r = rackPos(C.rack), hz = CT.HOOP;
@@ -1805,14 +1808,15 @@ function c3End() {
   C.phase = 'done';
   // the others shoot their rounds: rated shooters score around their ratings, with a hot or cold day
   C.rivals.forEach((r) => { if (r.score == null) r.score = clamp(Math.round(8 + (r.info.rat.sht3 - 55) * 0.42 * M.diff.ai + rr(-5, 5)), 4, 29); });
-  const field = [{ me: true, info: C.me.info, score: C.pts }].concat(C.rivals).sort((a, b) => b.score - a.score);
-  C.field = field;
   evt('final', 0);
   // run the results beat on the game clock, so a pause during it holds it rather than losing it
-  C.endT = 1.8;
+  C.endT = 1.8; C.holdT = 0;
 }
 function c3Finish() {
-  const C = M.c3, field = C.field;
+  const C = M.c3;
+  // ranked only now, so a ball released before the horn that drops after it still counts
+  const field = [{ me: true, info: C.me.info, score: C.pts }].concat(C.rivals).sort((a, b) => b.score - a.score);
+  C.field = field;
   {
     if (arc.state !== 'play' || M.kind !== 'c3') return;
     const place = field.findIndex((f) => f.me) + 1;
