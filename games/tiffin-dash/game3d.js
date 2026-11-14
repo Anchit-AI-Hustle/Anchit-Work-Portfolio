@@ -1,5 +1,7 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
 import { createFX as createPost } from '/games/shared/fx3d.js';
+import { createHuman, createCrowd } from '/games/shared/human.js';
+import { createVFX } from '/games/shared/vfx.js';
 
 /*
  * Tiffin Dash, in 3D: a third-person run down a bazaar lane at dusk.
@@ -59,6 +61,7 @@ function reset(attract, ch) {
   G.phase = 'run'; G.attract = !!attract; G.next = attract ? 400 : 520 * G.D.gap * (rush ? 0.82 : 1);
   G.slowT = 0; G.hitT = 0; G.deliverT = 0; G.landT = 0;
   if (FX) FX.clear();
+  if (REAL.blobs) realClear();
   if (!attract) {
     G.objs.push({ kind: 'tiffin', x: 420, w: 22, h: 18, item: true, bob: rnd() * TAU });
     G.objs.push({ kind: 'door', x: 760, w: 36, h: 70, door: true });
@@ -82,6 +85,12 @@ function spawn() {
 function finish(why) {
   if (G.phase === 'over' || G.attract || !arc || arc.state !== 'play') return;
   G.phase = 'over';
+  if (VFX && why === 'Shift over') {
+    // a street party behind the results: cannons, pyro, gold shower and shells overhead
+    VFX.winBurst(VP.set(0, 0, -5), { size: 1.1, colors: ['#ffb736', '#ff6940', '#ffffff'] });
+    VFX.fireworks(VP.set(0, 14, -17), { count: 4, size: 1, delay: 0.4 });
+    VFX.confetti(VP.set(-WALK + 0.9, 5.5, -4), { count: 220, size: 1.1 }); VFX.confetti(VP.set(WALK - 0.9, 5.5, -4), { count: 220, size: 1.1 });
+  }
   arc.haptic(why === 'Shift over' ? 'success' : 'fail');
   arc.over({
     eyebrow: why, title: why === 'Shift over' ? 'Shift <em>done</em>' : 'Tiffin <em>down</em>',
@@ -97,6 +106,14 @@ function hit(o) {
   if (G.inv > 0) return;
   G.lives--; G.inv = 1.2; G.combo = 0;
   const dropped = G.hold; G.hold = 0;
+  if (REAL.blobs) realHit(o, dropped);
+  if (VFX) {
+    const z = o ? objZ(o) + 0.5 : -0.6;
+    VFX.impact(VP.set(0, 0.7, z), VUP, { kind: o && o.kind === 'scooter' ? 'spark' : 'dust', size: 1 });
+    VFX.dust(VP.set(0, 0.1, z), { size: 0.9 });
+    if (o && o.kind === 'cart') VFX.impact(VP.set(0, 0.9, z), VUP, { kind: 'powder', color: '#ffb24a', size: 0.7 });
+  }
+  crowdReact('gasp', 0.6);
   arc.shake = 8; arc.haptic('heavy', 0.7 + 0.06 * dropped);
   if (POST) { POST.flash(0.28, '#ffd2b8'); POST.kick(-5); }
   arc.sfx.tone(160, 0.16, { type: 'sawtooth', slide: 80, vol: 0.14 });
@@ -121,6 +138,7 @@ function collect(o) {
     arc.sfx.tone(660, 0.08, { type: 'sine', vol: 0.12 });
     arc.sfx.tone(990, 0.1, { type: 'sine', vol: 0.07, delay: 0.05 });
     if (FX) { FX.burst(0, 0.75, z, 18, FX.C.gold, 3.2, 'glow'); FX.ring(0, 0.06, z, FX.C.warm); }
+    if (VFX) VFX.ring(VP.set(0, 0.55, z), '#ffc24a', { size: 0.55 });
     floatScore(0, 1.9, z, '+' + pts, WARM);
     arc.haptic('tap', min(1, 0.4 + G.combo * 0.12));
     if (G.combo >= 3) arc.toast('Hot stack x' + G.combo, '+' + pts, 700);
@@ -134,6 +152,18 @@ function collect(o) {
     arc.sfx.tone(880, 0.12, { type: 'sine', vol: 0.14 });
     arc.sfx.tone(1320, 0.16, { type: 'triangle', vol: 0.08, delay: 0.08 });
     arc.toast('Delivered', '+' + pts, 800);
+    crowdReact('cheer', pts >= 240 ? 0.9 : 0.5);
+    if (VFX) {
+      // a gold ring on the street and confetti thrown down from the balconies on both sides
+      // right in front of the runner, where the eye already is
+      const zz = max(-3.2, min(z, -1.4)), big = pts >= 240;
+      VFX.ring(VP.set(0, 0.06, zz), '#ffc24a', { size: big ? 3.2 : 2.4, kind: 'shock' });
+      VFX.ring(VP.set(0, 1.4, zz), '#ffd27a', { size: big ? 2.4 : 1.8 });
+      VFX.burst(VP.set(0, 1.6, zz - 0.4), { color: '#ffc24a', size: big ? 2.6 : 1.8 });
+      VFX.confetti(VP.set(-WALK + 0.9, 5, zz - 2), { count: big ? 200 : 120, size: 1 });
+      VFX.confetti(VP.set(WALK - 0.9, 5, zz - 2), { count: big ? 200 : 120, size: 1 });
+      if (big) { VFX.goalBurst(VP.set(0, 0, zz - 5), { color: '#ffb736', color2: '#ff6940', size: 0.55 }); VFX.fireworks(VP.set(0, 14, -16), { count: 2, size: 0.8 }); }
+    }
     arc.haptic(G.slowT > 0 ? 'success' : 'hit', 0.85);
     if (POST && G.slowT > 0) POST.flash(0.18, '#ffe7b0');
     if (FX) {
@@ -361,13 +391,31 @@ function drawFacade(g, W, H, v, emis) {
     g.fillStyle = '#ece4d6'; g.fillRect(0, 0, W, H);
     speckle(g, W, H, 9000, ['rgba(120,100,80,.10)', 'rgba(255,255,255,.12)', 'rgba(90,70,55,.08)'], 2.5);
     // Rain streaks and grime.
+    // (their own random stream, so the lit windows of the colour and glow maps stay the same windows)
+    const rs = seeded(9000 + v * 13);
     for (let i = 0; i < 40; i++) {
-      g.fillStyle = 'rgba(70,55,45,' + (0.04 + r() * 0.07) + ')';
-      g.fillRect(r() * W, r() * H * 0.5, 2 + r() * 5, 40 + r() * 140);
+      g.fillStyle = 'rgba(70,55,45,' + (0.04 + rs() * 0.07) + ')';
+      g.fillRect(rs() * W, rs() * H * 0.5, 2 + rs() * 5, 40 + rs() * 140);
     }
     const gr = g.createLinearGradient(0, H * 0.55, 0, H);
     gr.addColorStop(0, 'rgba(60,45,35,0)'); gr.addColorStop(1, 'rgba(60,45,35,.35)');
     g.fillStyle = gr; g.fillRect(0, 0, W, H);
+    // Plaster chipped off near the ground and at the corners, the brick showing through.
+    const rc = seeded(5000 + v * 31);
+    for (let i = 0; i < 6; i++) {
+      const cx = rc() < 0.5 ? rc() * W * 0.25 : W - rc() * W * 0.25, cy = H * (0.35 + rc() * 0.62), rw = 10 + rc() * 26, rh = 8 + rc() * 18;
+      g.save(); g.beginPath();
+      for (let k = 0; k < 9; k++) { const a = k / 9 * TAU, rr = 0.6 + rc() * 0.5; g.lineTo(cx + Math.cos(a) * rw * rr, cy + Math.sin(a) * rh * rr); }
+      g.closePath(); g.fillStyle = 'rgba(70,52,40,.35)'; g.fill(); g.clip();
+      g.fillStyle = '#9a5a40'; g.fillRect(cx - rw, cy - rh, rw * 2, rh * 2);
+      g.fillStyle = 'rgba(210,190,170,.55)';
+      for (let by = cy - rh; by < cy + rh; by += 6) { g.fillRect(cx - rw, by, rw * 2, 1.2); for (let bx = cx - rw + ((by / 6) % 2) * 7; bx < cx + rw; bx += 14) g.fillRect(bx, by, 1.2, 6); }
+      g.restore();
+    }
+    // Damp at the foot of the wall.
+    const dg = g.createLinearGradient(0, H * 0.9, 0, H);
+    dg.addColorStop(0, 'rgba(45,38,30,0)'); dg.addColorStop(1, 'rgba(45,38,30,.45)');
+    g.fillStyle = dg; g.fillRect(0, H * 0.9, W, H * 0.1);
     // Cornice bands.
     g.fillStyle = 'rgba(255,250,240,.55)'; g.fillRect(0, 6, W, 10); g.fillRect(0, H * 0.33, W, 8);
     g.fillStyle = 'rgba(60,45,35,.25)'; g.fillRect(0, 16, W, 4); g.fillRect(0, H * 0.33 + 8, W, 4);
@@ -594,7 +642,8 @@ function makeMaterials() {
 }
 
 /* ------------------------------------------------------------------ the 3D stage */
-let R3 = null, NO3D = false, FX = null, POST = null;
+let R3 = null, NO3D = false, FX = null, POST = null, VFX = null;
+const VUP = new THREE.Vector3(0, 1, 0), VP = new THREE.Vector3();
 const TIERS = [
   { px: 0.5, budget: 130000, shadow: false, map: 512, cheap: true, aniso: 1, lamps: 0, sky: 0, fxScale: 0.5 },
   { px: 0.75, budget: 650000, shadow: true, map: 1024, cheap: false, aniso: 2, lamps: 1, sky: 1, fxScale: 0.75 },
@@ -701,9 +750,13 @@ function setup3D(a) {
   buildWorld();
   buildHero();
   buildPools();
+  buildReal();
+  buildCrowd();
+  buildWalkers();
+  try { VFX = createVFX(renderer, scene, camera, { quality: 2, unit: 1, groundY: 0 }); } catch (e) { VFX = null; }
   FX = createFX(scene);
   // Shared post pass: bloom on the lamps and glints, grade, grain; a swing-in establishing shot at the start.
-  POST = createPost(renderer, { arc: a, soft: R3.soft, intro: { yaw: -0.8, up: 0.5 }, results: true, target: (v) => (HERO.root ? v.copy(HERO.root.position).setY(HERO.root.position.y + 1) : null), look: { bloom: 0.45, threshold: 0.74 } });
+  POST = createPost(renderer, { arc: a, soft: R3.soft, intro: { yaw: -0.8, up: 0.5 }, results: true, target: (v) => (HERO.root ? v.copy(HERO.root.position).setY(HERO.root.position.y + 1) : null), look: { bloom: 0.42, threshold: 0.76, sat: 0.95, contrast: 1.07, lift: [0.02, 0.014, 0.024], gain: [1.03, 0.995, 0.95], grain: 0.042, vignette: 0.36 } });
   return true;
 }
 
@@ -729,7 +782,7 @@ function cheapOf(m) {
 function applyTier() {
   const r = R3, t = TIERS[r.quality];
   r.scene.traverse((o) => {
-    if (!o.isMesh || !o.material || Array.isArray(o.material)) return;
+    if (!o.isMesh || !o.material || Array.isArray(o.material) || o.userData.keepMat || o.material.userData.keepMat) return;
     const full = o.material.userData.full || o.material;
     const want = t.cheap ? cheapOf(full) : full;
     if (o.material !== want) o.material = want;
@@ -753,6 +806,7 @@ function setQuality(q) {
   if (q === R3.quality) return;
   R3.quality = q;
   applyTier(); resize3D(arc);
+  if (VFX) VFX.setQuality(q);
 }
 function measureFps(dt) {
   const r = R3;
@@ -768,6 +822,7 @@ function measureFps(dt) {
 
 /* ------------------------------------------------------------------ the street */
 const W3 = {};
+const DUSTY = new THREE.Color('#d2c3ae');
 function instanced(geo, mat, n, shadow) {
   const m = new THREE.InstancedMesh(geo, mat, n);
   m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -821,16 +876,16 @@ function buildWorld() {
     const mat = new THREE.MeshStandardMaterial({ map: facadeTex(v, false), emissiveMap: facadeTex(v, true), emissive: '#ffffff', emissiveIntensity: 1.25, roughness: 0.85 });
     const im = instanced(facGeo, mat, max(1, mine.length), false);
     im.count = mine.length;
-    mine.forEach((s, k) => { s.fIdx = k; s.fMesh = im; im.setColorAt(k, _c.set(s.tint)); });
+    mine.forEach((s, k) => { s.fIdx = k; s.fMesh = im; im.setColorAt(k, _c.set(s.tint).lerp(DUSTY, 0.3)); });
     W3.facades.push(im);
   }
-  slots.forEach((s, k) => W3.bodies.setColorAt(k, _c.set(s.tint).multiplyScalar(0.82)));
+  slots.forEach((s, k) => W3.bodies.setColorAt(k, _c.set(s.tint).lerp(DUSTY, 0.3).multiplyScalar(0.8)));
   // Awnings: striped, one per shop, in a spread of colours.
   const awnGeo = new THREE.BoxGeometry(1, 0.06, 1);
   const awnMat = new THREE.MeshStandardMaterial({ map: stripeTex(), roughness: 0.8, side: THREE.DoubleSide });
   W3.awnings = instanced(awnGeo, awnMat, slots.length, true);
   const awnCols = ['#ffffff', '#ffd9a0', '#bfe8ff', '#c8f0b0', '#ffc0d8', '#ffe680'];
-  slots.forEach((s, k) => W3.awnings.setColorAt(k, _c.set(awnCols[(k * 7) % awnCols.length])));
+  slots.forEach((s, k) => W3.awnings.setColorAt(k, _c.set(awnCols[(k * 7) % awnCols.length]).lerp(DUSTY, 0.22)));
   // Rooftop water tanks.
   const tank = new Kit();
   tank.add(M.matte, GEO.cyl, '#2a2a2e', [0, 0.6, 0], null, [0.65, 1.2, 0.65]);
@@ -1023,11 +1078,20 @@ function buildHero() {
 function animHero(dt, real) {
   const P = HERO.pose;
   const air = G.py > 1, sliding = G.slide > 0 && !air;
-  HERO.phase += dt * (G.speed / 24);
+  // A gait driven by the real ground speed: stride opens up with speed and the
+  // cadence follows so the planted foot travels with the street (no skating),
+  // capped near a sprinter's five steps a second.
+  const v = G.speed * S, sk = clamp((v - 5) / 9, 0, 1);
+  const amp = 0.78 + 0.32 * sk, stepLen = 2 * 0.88 * sin(amp);
+  const steps = min(5.2, v / stepLen);
+  HERO.phase += dt * steps * PI;
   const ph = HERO.phase;
-  let lean = -0.18, hipY = 0.92 + abs(sin(ph)) * 0.06, thL = sin(ph) * 0.95, thR = -sin(ph) * 0.95;
-  let knL = -max(0, sin(ph - 1.4)) * 1.5 - 0.2, knR = -max(0, sin(ph + PI - 1.4)) * 1.5 - 0.2;
-  let shL = -sin(ph) * 0.9, shR = 0.15 - sin(ph + PI) * 0.18, elL = 1.1, elR = 0.35, roll = sin(ph) * 0.06;
+  // pelvis drops at each footfall and rises at push-off
+  let lean = -0.16 - sk * 0.1, hipY = 0.9 + abs(sin(ph)) * (0.045 + sk * 0.03), thL = sin(ph) * amp, thR = -sin(ph) * amp;
+  let knL = -max(0, sin(ph - 1.4)) * (1.25 + sk * 0.45) - 0.2, knR = -max(0, sin(ph + PI - 1.4)) * (1.25 + sk * 0.45) - 0.2;
+  let shL = -sin(ph) * (0.7 + sk * 0.35), shR = 0.15 - sin(ph + PI) * 0.18, elL = 1.1, elR = 0.35, roll = sin(ph) * 0.06;
+  // landing weight: knees take the drop and the body sinks, then recovers
+  if (G.landT > 0 && !air) { const lk = G.landT * G.landT; hipY -= 0.16 * lk; knL -= 0.7 * lk; knR -= 0.7 * lk; lean -= 0.18 * lk; }
   if (air) {
     const up = clamp(G.pvy / 720, -1, 1);
     lean = -0.25; hipY = 0.92; thL = 1.05; thR = 0.35 + up * 0.3; knL = -1.6; knR = -0.6 - (1 - up) * 0.6;
@@ -1035,13 +1099,19 @@ function animHero(dt, real) {
   } else if (sliding) {
     lean = 1.08; hipY = 0.34; thL = 1.45; thR = 1.25; knL = -0.15; knR = -0.7; shL = -0.6; shR = 0.5; elL = 0.3; elR = 1.2; roll = 0;
   }
+  // a heavy stack in the right hand: the body leans away to balance it and that arm swings less
+  if (!sliding) { roll -= G.hold * 0.018; shR = lerp(shR, 0.12, G.hold * 0.12); }
   if (G.hitT > 0) { lean += sin(G.hitT * 30) * 0.25 * G.hitT; roll += 0.3 * G.hitT; }
   const k = 1 - Math.exp(-real * 18);
   P.lean = lerp(P.lean, lean, k); P.hipY = lerp(P.hipY, hipY, k);
   P.thL = lerp(P.thL, thL, k); P.thR = lerp(P.thR, thR, k); P.knL = lerp(P.knL, knL, k); P.knR = lerp(P.knR, knR, k);
   P.shL = lerp(P.shL, shL, k); P.shR = lerp(P.shR, shR, k); P.elL = lerp(P.elL, elL, k); P.elR = lerp(P.elR, elR, k); P.roll = lerp(P.roll, roll, k);
   HERO.hips.position.y = P.hipY; HERO.hips.rotation.set(P.lean, 0, P.roll);
-  HERO.head.rotation.x = -P.lean * 0.6;
+  // the head steadies against the bob and glances at what is coming
+  let look = 0;
+  for (let i = 0; i < G.objs.length; i++) { const o = G.objs[i]; const u = o.x - G.dist; if (!o.dead && u > 40 && u < 420) { look = o.item || o.door ? 0.12 : -0.05; break; } }
+  HERO.look = lerp(HERO.look || 0, look, 1 - Math.exp(-real * 4));
+  HERO.head.rotation.set(-P.lean * 0.6 + (air ? -0.15 : 0), HERO.look * 0.5, -P.roll * 0.8);
   HERO.legL.hp.rotation.x = P.thL; HERO.legR.hp.rotation.x = P.thR;
   HERO.legL.kn.rotation.x = P.knL; HERO.legR.kn.rotation.x = P.knR;
   HERO.armL.sh.rotation.set(P.shL, 0, -0.12); HERO.armR.sh.rotation.set(P.shR, 0, G.hold > 0 ? 0.42 : 0.12);
@@ -1237,7 +1307,9 @@ function placeObjs(t) {
     else if (o.kind === 'cart') v.rotation.set(0, o.yaw, 0);
     else if (o.kind === 'cloth') {
       const p = v.userData.panels;
-      for (let k = 0; k < p.length; k++) p[k].rotation.x = sin(t * 2.4 + (o.sway || 0) + k * 1.3) * 0.12;
+      // a runner who clips the line sets it swinging hard; it settles over a second or two
+      const amp = 0.12 + (o.hitT || 0) * 0.85; if (o.hitT) o.hitT = max(0, o.hitT - 0.012);
+      for (let k = 0; k < p.length; k++) p[k].rotation.x = sin(t * (2.4 + (o.hitT || 0) * 5) + (o.sway || 0) + k * 1.3) * amp;
     } else if (o.kind === 'tiffin') {
       const bob = abs(sin(t * 4 + (o.bob || 0))) * 0.22;
       v.userData.body.position.y = 0.35 + bob; v.userData.body.rotation.y = t * 2.2 + (o.bob || 0);
@@ -1288,7 +1360,7 @@ function createFX(scene) {
   const sys = { glow: mk(260, THREE.AdditiveBlending, false), dust: mk(220, THREE.NormalBlending, false), petal: mk(200, THREE.NormalBlending, true) };
   const C = {
     gold: new THREE.Color('#ffc24a'), warm: new THREE.Color('#ff9a3a'), prim: new THREE.Color(PRIM), dust: new THREE.Color('#b89c7a'),
-    petal: new THREE.Color('#ff9a1a'), steel: new THREE.Color('#dfe4e8'), white: new THREE.Color('#fff4dc'),
+    petal: new THREE.Color('#ff9a1a'), steel: new THREE.Color('#dfe4e8'), white: new THREE.Color('#fff4dc'), steam: new THREE.Color('#e8ddd0'),
   };
   const petalCols = ['#ff8a00', '#ffcc1a', '#ff5a1a', '#ffe680', '#e8402a'].map((c) => new THREE.Color(c));
   // Floating dust motes in the low sun, and the bulbs' halos.
@@ -1301,8 +1373,8 @@ function createFX(scene) {
       const s = sys[kind] || sys.glow;
       const p = s.P[s.head]; s.head = (s.head + 1) % s.n;
       p.x = x; p.y = y; p.z = z; p.vx = vx; p.vy = vy; p.vz = vz; p.r = c.r; p.g = c.g; p.b = c.b;
-      p.size = size; p.life = life; p.max = life; p.grav = grav || 0; p.drag = kind === 'dust' ? 2.2 : kind === 'petal' ? 1.4 : 1.2; p.grow = kind === 'dust' ? 1.6 : 0;
-      p.spin = kind === 'petal' ? rnd() * TAU : 0;
+      p.size = size; p.life = life; p.max = life; p.grav = grav || 0; p.drag = kind === 'dust' ? (grav < 0 ? 0.8 : 3.0) : kind === 'petal' ? 1.4 : 1.2; p.grow = kind === 'dust' ? (grav < 0 ? 0.9 : 1.6) : 0;
+      p.spin = kind === 'petal' ? rnd() * TAU : 0; p.bounce = kind === 'spark' ? 1 : 0;
     },
     burst(x, y, z, n, c, spd, kind) {
       n = Math.max(1, Math.round(n * this.scale));
@@ -1312,7 +1384,7 @@ function createFX(scene) {
         if (kind === 'petal') cc = petalCols[(rnd() * petalCols.length) | 0];
         this.emit(x, y, z, cos(a) * cos(e) * sp, abs(sin(e)) * sp + (kind === 'petal' ? 2 : 0.6), sin(a) * cos(e) * sp, cc,
           kind === 'dust' ? 0.25 + rnd() * 0.25 : kind === 'petal' ? 0.09 + rnd() * 0.05 : 0.08 + rnd() * 0.1,
-          kind === 'petal' ? 1.4 + rnd() * 0.9 : 0.4 + rnd() * 0.5, kind, kind === 'spark' ? 9 : kind === 'petal' ? 2.6 : kind === 'dust' ? -0.4 : 1.5);
+          kind === 'petal' ? 1.4 + rnd() * 0.9 : 0.4 + rnd() * 0.5, kind, kind === 'spark' ? 9 : kind === 'petal' ? 2.6 : kind === 'dust' ? 0.35 : 1.5);
       }
     },
     ring(x, y, z, c) {
@@ -1333,6 +1405,8 @@ function createFX(scene) {
           p.vx *= dr; p.vz *= dr; p.vy = p.vy * dr - p.grav * dt;
           if (s === sys.petal) { p.spin += dt * 6; p.vx += sin(p.spin) * dt * 1.5; if (p.y < 0.03) { p.y = 0.03; p.vy = 0; p.vx *= 0.8; p.vz *= 0.8; } }
           p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt + scroll;
+          if (p.bounce && p.y < 0.02 && p.vy < 0) { p.y = 0.02; p.vy = -p.vy * 0.35; p.vx *= 0.6; p.vz *= 0.6; }
+          if (s === sys.dust && p.y < 0.03) { p.y = 0.03; p.vy = 0; }
           p.size += p.grow * dt;
           const k = clamp(p.life / p.max, 0, 1);
           s.pos[i * 3] = p.x; s.pos[i * 3 + 1] = p.y; s.pos[i * 3 + 2] = p.z;
@@ -1379,6 +1453,271 @@ function placeHalos(t) {
   h.geo.attributes.position.needsUpdate = true; h.geo.attributes.aCol.needsUpdate = true; h.geo.attributes.aSize.needsUpdate = true; h.geo.attributes.aAlpha.needsUpdate = true;
 }
 
+/* ------------------------------------------------------------------ people on the pavements */
+// Shopkeepers in their doorways, customers at the goods, passers-by and kids:
+// an instanced crowd from the shared people library, one draw for all of
+// them, each with their own timing, heads turning to follow the runner, and
+// the street reacting to a delivery or a spill. The street scrolls, so the
+// crowd is drawn twice, one span apart, as the shopfronts wrap round.
+const HUM = { createHuman, createCrowd };
+const CROWD = { a: null, b: null, look: new THREE.Vector3(0, 1.3, -0.45) };
+function buildCrowd() {
+  if (!HUM) return;
+  try {
+    const rr = seeded(808), members = [];
+    W3.slots.forEach((s) => {
+      const base = NEAR_Z - s.i * SLOT - SLOT / 2, xf = s.side * (WALK + s.setback), face = -s.side * PI / 2;
+      if (rr() < 0.75) members.push({ x: xf - s.side * 0.42, y: 0.16, z: base + (rr() - 0.5) * 2.4, yaw: face + (rr() - 0.5) * 0.8 });
+      const n = rr() < 0.55 ? 1 + ((rr() * 2) | 0) : 0;
+      for (let k = 0; k < n; k++) members.push({ x: s.side * (WALK - 1.15 - rr() * 0.7), y: 0.16, z: base + (rr() - 0.5) * 4.6, yaw: face + (rr() - 0.5) * 1.8 });
+    });
+    const q = max(0, R3.quality);
+    const opt = { members, seated: false, quality: min(2, q), colors: ['#c23a2a', '#e8b04a', '#2a6a8a', '#f2ead8'], teamShare: 0.25 };
+    CROWD.a = HUM.createCrowd(Object.assign({ seed: 21 }, opt)); CROWD.b = HUM.createCrowd(Object.assign({ seed: 22 }, opt));
+    [CROWD.a, CROWD.b].forEach((c) => { c.mesh.userData.keepMat = true; c.mesh.frustumCulled = false; c.excite(0.08); R3.scene.add(c.mesh); });
+  } catch (e) { CROWD.a = CROWD.b = null; }
+}
+// A few full-rig passers-by walk the pavements on the sharper tiers: a
+// shopper, a woman with a bag, a man with a cloth bundle. They walk toward the
+// end of the lane at their own pace and the runner overtakes them.
+const WALKERS = [];
+function buildWalkers() {
+  if (!HUM) return;
+  try {
+    for (let i = 0; i < 3; i++) {
+      const h = HUM.createHuman({ seed: 300 + i * 7, quality: 2, lod: 'mid', castShadow: true });
+      // parked far below the street until they walk on: still in the scene, so their shader compiles with the rest
+      h.group.position.set(0, -60, 0); R3.scene.add(h.group);
+      WALKERS.push({ h, on: false, x: 0, z: 0, v: 1.3, side: 1, wait: 1 + i * 3 });
+    }
+  } catch (e) { WALKERS.length = 0; }
+}
+function stepWalkers(dt, scroll) {
+  const on = R3.quality >= 2;
+  for (let i = 0; i < WALKERS.length; i++) {
+    const w = WALKERS[i];
+    if (!on) { if (w.on) { w.on = false; w.h.group.position.y = -60; } continue; }
+    if (!w.on) {
+      w.wait -= dt;
+      if (w.wait > 0) continue;
+      w.on = true; w.side = rnd() < 0.5 ? -1 : 1; w.x = w.side * (WALK - 1.3 - rnd() * 0.6); w.z = -42 - rnd() * 10; w.v = 1.1 + rnd() * 0.5;
+    }
+    // they walk away from the camera, the street carries them back past the runner
+    w.z += scroll - w.v * dt;
+    w.h.group.position.set(w.x, 0.16, w.z); w.h.group.rotation.y = PI;
+    w.h.update(dt, { speed: w.v, turn: 0, look: abs(w.z) < 6 ? CROWD.look : null });
+    if (w.z > NEAR_Z - 6) { w.on = false; w.h.group.position.y = -60; w.wait = 2 + rnd() * 5; }
+  }
+}
+function crowdReact(kind, s) { if (CROWD.a) { CROWD.a.react(kind, s); CROWD.b.react(kind, s); } }
+function stepCrowd(dt, scrollM) {
+  if (!CROWD.a) return;
+  const off = ((scrollM % SPAN) + SPAN) % SPAN;
+  CROWD.a.mesh.position.z = off; CROWD.b.mesh.position.z = off - SPAN;
+  CROWD.look.set(0, 1.3 + HERO.root.position.y, -0.45);
+  CROWD.a.update(dt, { look: CROWD.look }); CROWD.b.update(dt, { look: CROWD.look });
+}
+
+/* ------------------------------------------------------------------ realism: contact shadows, pigeons, debris, scuffs */
+// Contact shadows are soft dark blobs drawn with multiply blending under
+// everything that stands on the street, so nothing floats even on the tier
+// with no shadow map. Scuff marks from a slide or a hard landing use the same
+// mesh, stretched, and fade back to the road over a few seconds. One draw call.
+const REAL = { blobN: 0, scuffs: [], debris: [], pig: [], pigT: 1.2, flutterT: 0 };
+const BLOB_MAX = 260;
+function buildReal() {
+  const scene = R3.scene;
+  const bt = canvasTex(64, 64, (g, w, h) => {
+    const gr = g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
+    gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.45, 'rgba(255,255,255,.7)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  }, { data: true });
+  const bg = new THREE.PlaneGeometry(1, 1); bg.rotateX(-PI / 2);
+  const bm = new THREE.MeshBasicMaterial({ map: bt, transparent: true, depthWrite: false, blending: THREE.MultiplyBlending, premultipliedAlpha: true, toneMapped: false, fog: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+  bm.userData.noShadow = true;
+  const blobs = new THREE.InstancedMesh(bg, bm, BLOB_MAX);
+  blobs.instanceMatrix.setUsage(THREE.DynamicDrawUsage); blobs.frustumCulled = false; blobs.renderOrder = 1; blobs.count = 0;
+  for (let i = 0; i < BLOB_MAX; i++) blobs.setColorAt(i, _c.setScalar(0.5));
+  scene.add(blobs); REAL.blobs = blobs;
+  // Pigeons: a body and folded wings; the wings open and beat in flight (vertex shader).
+  const k = new Kit();
+  k.add(M.matte, GEO.sph8, '#6f7684', [0, 0.11, 0], null, [0.07, 0.065, 0.13]);
+  k.add(M.matte, GEO.sph8, '#5c6372', [0, 0.17, -0.1], null, [0.045, 0.045, 0.05]);
+  k.add(M.matte, GEO.sph8, '#4d8a7a', [0, 0.145, -0.075], null, [0.05, 0.035, 0.04]);
+  k.add(M.matte, GEO.cone, '#2a2420', [0, 0.165, -0.15], [-PI / 2, 0, 0], [0.012, 0.04, 0.012]);
+  k.add(M.matte, GEO.box, '#4a505c', [0, 0.11, 0.15], [0.15, 0, 0], [0.06, 0.012, 0.09]);
+  k.add(M.matte, GEO.box, '#c05a4a', [0.025, 0.03, 0], null, [0.008, 0.06, 0.008]);
+  k.add(M.matte, GEO.box, '#c05a4a', [-0.025, 0.03, 0], null, [0.008, 0.06, 0.008]);
+  k.add(M.matte, GEO.box, '#7a8292', [0.13, 0.12, 0.01], null, [0.2, 0.012, 0.12]);
+  k.add(M.matte, GEO.box, '#7a8292', [-0.13, 0.12, 0.01], null, [0.2, 0.012, 0.12]);
+  const pg = k.geometry();
+  const NP = 18;
+  const aFly = new Float32Array(NP), aPh = new Float32Array(NP);
+  for (let i = 0; i < NP; i++) aPh[i] = rnd() * TAU;
+  pg.setAttribute('aFly', new THREE.InstancedBufferAttribute(aFly, 1).setUsage(THREE.DynamicDrawUsage));
+  pg.setAttribute('aPh', new THREE.InstancedBufferAttribute(aPh, 1));
+  const pm = new THREE.MeshLambertMaterial({ vertexColors: true });
+  const uT = { value: 0 }; REAL.pigT0 = uT;
+  pm.onBeforeCompile = (sh) => {
+    sh.uniforms.uTime = uT;
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute float aFly; attribute float aPh; uniform float uTime;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nfloat wx = abs(position.x);\nif (wx > 0.04) { float w = (wx - 0.04); transformed.x = sign(position.x) * (0.04 + w * mix(0.25, 1.0, aFly)); transformed.y += aFly * sin(uTime * 26.0 + aPh) * w * 1.6 + (1.0 - aFly) * 0.01; }');
+  };
+  pm.customProgramCacheKey = () => 'td-pigeon';
+  const pigs = new THREE.InstancedMesh(pg, pm, NP);
+  pigs.instanceMatrix.setUsage(THREE.DynamicDrawUsage); pigs.frustumCulled = false; pigs.castShadow = false; pigs.receiveShadow = false;
+  scene.add(pigs); REAL.pigs = pigs; REAL.aFly = aFly;
+  for (let i = 0; i < NP; i++) REAL.pig.push({ on: false, x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, yaw: 0, fly: 0, react: 0, hop: 0, peck: rnd() * TAU, sp: 0.6 + rnd() * 0.8 });
+  // Debris: fruit off a cart and the steel carriers you drop, both tumbling with real gravity and bounce.
+  const fruit = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 10, 8), new THREE.MeshStandardMaterial({ roughness: 0.55 }), 24);
+  const steel = new THREE.InstancedMesh(new THREE.CylinderGeometry(1, 1, 1, 14), new THREE.MeshStandardMaterial({ color: '#d8dde2', roughness: 0.25, metalness: 0.9 }), 10);
+  [fruit, steel].forEach((m) => { m.instanceMatrix.setUsage(THREE.DynamicDrawUsage); m.frustumCulled = false; m.castShadow = true; m.count = 0; scene.add(m); });
+  for (let i = 0; i < 24; i++) fruit.setColorAt(i, _c.set(['#ff8a1a', '#ffb020', '#e8402a', '#7ab030', '#f2d22a'][i % 5]));
+  REAL.fruit = fruit; REAL.steel = steel;
+}
+function realClear() { REAL.scuffs.length = 0; REAL.debris.length = 0; for (const p of REAL.pig) p.on = false; }
+function scuff(x, z, w, len, dark) { if (REAL.scuffs.length >= 26) REAL.scuffs.shift(); REAL.scuffs.push({ x, z, w, len, life: 3.2, dark }); }
+function realHit(o, dropped) {
+  const z = o ? objZ(o) + 0.4 : -0.6;
+  if (o && o.kind === 'cart') for (let i = 0; i < 9; i++) debris('fruit', (rnd() - 0.5) * 1.4, 0.9 + rnd() * 0.2, z + (rnd() - 0.5) * 0.6, (rnd() - 0.5) * 3.2, 1.5 + rnd() * 2.2, 1 + rnd() * 2.4, 0.07 + rnd() * 0.035);
+  if (o && o.kind === 'cloth') o.hitT = 1;
+  for (let i = 0; i < dropped; i++) debris('steel', 0.15, 1.1 + i * 0.1, -0.3, (rnd() - 0.4) * 2.4, 2 + rnd() * 1.6, 1.5 + rnd() * 2, 0.11);
+}
+function debris(kind, x, y, z, vx, vy, vz, r) {
+  const L = REAL.debris; if (L.length >= 30) return;
+  L.push({ kind, x, y, z, vx, vy, vz, r, rx: rnd() * TAU, rz: rnd() * TAU, wx: (rnd() - 0.5) * 12, wz: (rnd() - 0.5) * 12, life: 3.2 + rnd() });
+}
+function spawnFlock(scrollZ) {
+  let n = 3 + ((rnd() * 4) | 0);
+  const z0 = scrollZ, x0 = (rnd() - 0.5) * 3.6;
+  for (let i = 0; i < REAL.pig.length && n > 0; i++) {
+    const p = REAL.pig[i];
+    if (p.on) continue;
+    n--;
+    p.on = true; p.fly = 0; p.x = clamp(x0 + (rnd() - 0.5) * 1.6, -RW + 0.2, RW - 0.2); p.z = z0 + (rnd() - 0.5) * 2.2; p.y = 0;
+    p.vx = p.vy = p.vz = 0; p.yaw = rnd() * TAU; p.react = 0; p.hop = rnd() * 2;
+    // each bird has its own nerve: the closest reacts first, a few hang on a beat too long
+    p.nerve = 3.6 + rnd() * 3.2;
+  }
+}
+const _o4 = new THREE.Object3D();
+function stepReal(dt, scroll, t, a) {
+  if (!REAL.blobs) return;
+  const tier = TIERS[max(0, R3.quality)];
+  // ---- pigeons
+  REAL.pigT0.value = t;
+  REAL.pigT -= dt;
+  if (REAL.pigT <= 0 && a.state !== 'over') { REAL.pigT = 3 + rnd() * 4; spawnFlock(-30 - rnd() * 10); }
+  let flushed = 0;
+  for (let i = 0; i < REAL.pig.length; i++) {
+    const p = REAL.pig[i];
+    if (!p.on) { _o4.position.set(0, -50, 0); _o4.scale.setScalar(0.001); _o4.updateMatrix(); REAL.pigs.setMatrixAt(i, _o4.matrix); REAL.aFly[i] = 0; continue; }
+    p.z += scroll;
+    if (p.fly <= 0) {
+      // pecking and the odd hop; they notice the runner a few metres off, each in its own time
+      p.peck += dt * p.sp * 6; p.hop -= dt;
+      if (p.hop < 0) { p.hop = 1 + rnd() * 2.5; p.x += (rnd() - 0.5) * 0.2; p.yaw += (rnd() - 0.5) * 1.6; }
+      if (p.z > -p.nerve && !p.react) p.react = 0.12 + rnd() * 0.35;
+      if (p.react) { p.react -= dt; if (p.react <= 0) { p.fly = 1; p.vy = 2.6 + rnd() * 1.6; p.vx = (p.x >= 0 ? 1 : -1) * (1.2 + rnd() * 2.2); p.vz = -1.5 - rnd() * 2.5; p.yaw = Math.atan2(-p.vx, -p.vz); flushed++; } }
+    } else {
+      // flight: a hard first beat, then a climb that eases, drifting on the breeze
+      p.fly = min(1, p.fly + dt * 4);
+      p.vy += (1.4 - p.vy) * dt * 1.2; p.vx *= Math.exp(-dt * 0.4); p.vz *= Math.exp(-dt * 0.3);
+      p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt;
+      if (p.y > 9) p.on = false;
+    }
+    if (p.z > NEAR_Z - 4) p.on = false;
+    const peck = p.fly > 0 ? -0.15 : max(0, sin(p.peck)) * 0.5;
+    _o4.position.set(p.x, p.y, p.z); _o4.rotation.set(peck, p.yaw, 0, 'YXZ'); _o4.scale.setScalar(p.fly > 0 ? 1.15 : 1); _o4.updateMatrix();
+    REAL.pigs.setMatrixAt(i, _o4.matrix); REAL.aFly[i] = p.fly;
+  }
+  REAL.pigs.instanceMatrix.needsUpdate = true; REAL.pigs.geometry.attributes.aFly.needsUpdate = true;
+  if (flushed) { REAL.flutterT -= 1; if (REAL.flutterT < 0) { REAL.flutterT = 2; arc.sfx.noise(0.35, { filter: 'bandpass', freq: 1800, vol: 0.05 }); } }
+  REAL.flutterT = max(0, REAL.flutterT - dt);
+  // ---- steam off the chai stalls' kettles: rises, spreads and thins out as it climbs
+  if (FX && dt > 0 && tier.lamps >= 1) {
+    REAL.steamT = (REAL.steamT || 0) - dt;
+    if (REAL.steamT <= 0) {
+      REAL.steamT = 0.09;
+      const sl = W3.slots;
+      for (let k = 0; k < sl.length; k++) {
+        const s = sl[k];
+        if (s.v !== 0 || s.zc < -42 || s.zc > 4) continue;
+        FX.emit(s.side * (WALK - 0.55) + (rnd() - 0.5) * 0.15, 1.05, s.zc + (s.crates - 0.5) * 3 + (rnd() - 0.5) * 0.15, (rnd() - 0.5) * 0.15, 0.55 + rnd() * 0.3, (rnd() - 0.5) * 0.1, FX.C.steam, 0.2 + rnd() * 0.1, 2.2 + rnd() * 0.8, 'dust', -0.35);
+      }
+    }
+  }
+  // ---- debris
+  const D = REAL.debris;
+  let nf = 0, ns = 0;
+  for (let i = D.length - 1; i >= 0; i--) {
+    const d = D[i];
+    d.life -= dt;
+    if (d.life <= 0 || d.z > NEAR_Z) { D.splice(i, 1); continue; }
+    d.vy -= 9.8 * dt; d.x += d.vx * dt; d.y += d.vy * dt; d.z += d.vz * dt + scroll;
+    const floor = d.kind === 'steel' ? d.r * 0.5 : d.r;
+    if (d.y < floor) {
+      d.y = floor;
+      if (d.vy < -0.6) { d.vy = -d.vy * (d.kind === 'steel' ? 0.32 : 0.42); if (d.kind === 'steel' && d.vy > 1.2) arc.sfx.tone(1400 + rnd() * 600, 0.05, { type: 'triangle', vol: 0.025 }); }
+      else d.vy = 0;
+      const f = Math.exp(-dt * (d.kind === 'steel' ? 5 : 2.2)); d.vx *= f; d.vz *= f; d.wx *= f; d.wz *= f;
+      if (d.kind === 'fruit') { d.wx = d.vz / d.r; d.wz = -d.vx / d.r; }
+    }
+    if (abs(d.x) > RW - d.r) { d.x = Math.sign(d.x) * (RW - d.r); d.vx = -d.vx * 0.4; }
+    d.rx += d.wx * dt; d.rz += d.wz * dt;
+    const fade = min(1, d.life / 0.6);
+    _o4.position.set(d.x, d.y, d.z); _o4.rotation.set(d.rx, 0, d.rz);
+    if (d.kind === 'steel') { _o4.scale.set(d.r * fade, d.r * 0.85 * fade, d.r * fade); _o4.updateMatrix(); REAL.steel.setMatrixAt(ns++, _o4.matrix); }
+    else { _o4.scale.setScalar(d.r * fade); _o4.updateMatrix(); if (nf < 24) REAL.fruit.setMatrixAt(nf++, _o4.matrix); }
+  }
+  REAL.fruit.count = nf; REAL.steel.count = ns;
+  if (nf) REAL.fruit.instanceMatrix.needsUpdate = true;
+  if (ns) REAL.steel.instanceMatrix.needsUpdate = true;
+  // ---- scuffs
+  const S2 = REAL.scuffs;
+  for (let i = S2.length - 1; i >= 0; i--) { const s = S2[i]; s.life -= dt; s.z += scroll; if (s.life <= 0 || s.z > NEAR_Z) S2.splice(i, 1); }
+  // ---- contact shadows and scuffs, rebuilt every frame
+  REAL.blobN = 0;
+  const hy = HERO.root.position.y;
+  blob(0, -14 * S + 0.05, 0.75 + hy * 0.25, 0.6 + hy * 0.2, 0, lerp(0.42, 0.88, clamp(hy / 1.8, 0, 1)), 0);
+  for (let i = 0; i < G.objs.length; i++) {
+    const o = G.objs[i]; if (o.dead || !o.vis) continue;
+    const z = objZ(o);
+    if (o.kind === 'scooter') blob(0, z, 0.75, 1.7, o.yaw, 0.48, 0);
+    else if (o.kind === 'cart') blob(0, z, 2.6, 1.5, o.yaw, 0.5, 0);
+    else if (o.kind === 'cloth') { blob(-3, z, 0.55, 0.55, 0, 0.55, 0); blob(3, z, 0.55, 0.55, 0, 0.55, 0); }
+    else if (o.kind === 'tiffin') blob(0, z, 0.5, 0.5, 0, 0.7, 0);
+    else if (o.kind === 'door') { blob(-1.7, z, 0.8, 0.8, 0, 0.5, 0); blob(1.7, z, 0.8, 0.8, 0, 0.5, 0); }
+  }
+  const slots = W3.slots;
+  for (let k = 0; k < slots.length; k++) {
+    const s = slots[k];
+    if (s.zc < -70 || s.zc > NEAR_Z) continue;
+    blob(s.side * (WALK - 0.55), s.zc + (s.crates - 0.5) * 3, 1.9, 1.1, s.crates * 6, 0.55, 0.165);
+    if (s.lamp) blob(s.side * (RW + 0.35), s.zc - 2.2, 0.55, 0.55, 0, 0.55, 0.165);
+  }
+  for (let i = 0; i < WALKERS.length; i++) { const w = WALKERS[i]; if (w.on) blob(w.x, w.z, 0.75, 0.6, 0, 0.5, 0.165); }
+  if (CROWD.a) {
+    const mem = CROWD.a.members, off = CROWD.a.mesh.position.z;
+    for (let i = 0; i < mem.length; i++) { let z = mem[i].z + off; if (z > NEAR_Z) z -= SPAN; if (z > -60) blob(mem[i].x, z, 0.7, 0.55, mem[i].yaw, 0.55, 0.165); }
+  }
+  for (let i = 0; i < REAL.pig.length; i++) { const p = REAL.pig[i]; if (p.on && p.y < 2) blob(p.x, p.z, 0.3 + p.y * 0.1, 0.36 + p.y * 0.1, p.yaw, lerp(0.6, 0.95, clamp(p.y / 2, 0, 1)), 0); }
+  for (let i = 0; i < D.length; i++) { const d = D[i]; blob(d.x, d.z, d.r * 2.6, d.r * 2.6, 0, lerp(0.55, 0.92, clamp((d.y - d.r) / 1.5, 0, 1)), 0); }
+  for (let i = 0; i < S2.length; i++) { const s = S2[i]; blob(s.x, s.z, s.w, s.len, 0, lerp(1, s.dark, clamp(s.life / 2.4, 0, 1)), 0); }
+  REAL.blobs.count = REAL.blobN;
+  REAL.blobs.instanceMatrix.needsUpdate = true; if (REAL.blobs.instanceColor) REAL.blobs.instanceColor.needsUpdate = true;
+}
+// x, z on the street; w, l size; yaw; dark 0 black .. 1 none; y the surface height.
+function blob(x, z, w, l, yaw, dark, y) {
+  if (REAL.blobN >= BLOB_MAX || z > NEAR_Z || z < -90) return;
+  // fade into the haze with distance
+  const d = clamp((-z - 30) / 50, 0, 1);
+  _o4.position.set(x, (y || 0) + 0.012, z); _o4.rotation.set(0, yaw || 0, 0); _o4.scale.set(w, 1, l); _o4.updateMatrix();
+  REAL.blobs.setMatrixAt(REAL.blobN, _o4.matrix);
+  REAL.blobs.setColorAt(REAL.blobN, _c.setScalar(lerp(dark, 1, d)));
+  REAL.blobN++;
+}
+
 /* ------------------------------------------------------------------ frame: camera, lights, draw */
 const _look = new THREE.Vector3(), _camT = new THREE.Vector3(), _proj = new THREE.Vector3();
 function renderScene(dtReal, a) {
@@ -1398,6 +1737,10 @@ function renderScene(dtReal, a) {
     if (G.py <= 0.01 && G.slide <= 0 && ((G.run * 10) | 0) !== ((lr * 10) | 0)) FX.burst(0, 0.05, -0.2, 2, FX.C.dust, 1.0, 'dust');
     r.lastRun = G.run;
     if (G.slide > 0 && G.py <= 0.01) FX.burst(0, 0.05, -0.6, 2, FX.C.dust, 2.4, 'dust');
+    // Scuffs on the asphalt: shoe soles dragged through a slide, and a pair from a hard landing.
+    if (G.slide > 0 && G.py <= 0.01 && REAL.blobs) { r.scuffT = (r.scuffT || 0) - dtReal; if (r.scuffT <= 0) { r.scuffT = 0.07; scuff(-0.1 + rnd() * 0.05, -0.3, 0.14, 0.55, 0.62); scuff(0.12 + rnd() * 0.05, -0.25, 0.12, 0.5, 0.66); } }
+    if (G.landT > 0.97 && !r.landed && REAL.blobs) { r.landed = true; scuff(-0.12, -0.4, 0.16, 0.3, 0.7); scuff(0.12, -0.45, 0.16, 0.3, 0.7); }
+    if (G.landT < 0.9) r.landed = false;
   }
   // Camera: behind the runner, higher and wider on a tall phone screen.
   const aspect = a.w / max(1, a.h);
@@ -1438,7 +1781,22 @@ function renderScene(dtReal, a) {
   r.deliverLight.position.set(0, 1.6, -1.5);
   r.deliverLight.intensity = G.deliverT * 14;
   if (FX) { placeHalos(t); FX.step(a.state === 'pause' ? 0 : dtReal, a.state === 'pause' ? 0 : scrollStep, t, cam, r.renderer); }
+  stepReal(a.state === 'pause' ? 0 : dtReal, a.state === 'pause' ? 0 : scrollStep, t, a);
+  stepCrowd(a.state === 'pause' ? 0 : dtReal, scrollM);
+  if (WALKERS.length) stepWalkers(a.state === 'pause' ? 0 : dtReal, a.state === 'pause' ? 0 : scrollStep);
+  if (VFX) {
+    VFX.update(a.state === 'pause' ? 0 : dtReal);
+    // speed lines once the street is quick or a hot stack is building, never on the menu
+    const fast = a.state === 'play' && !G.attract ? max(clamp((G.speed - 330) / 200, 0, 0.8), G.combo >= 3 ? 0.45 : 0, G.mode === 'rush' ? 0.3 : 0) : 0;
+    VFX.speedLines(cam, fast);
+    // festival fireworks over the end of the lane at dusk, each shell its own colour and moment
+    r.fwT = (r.fwT == null ? 2 : r.fwT) - dtReal;
+    // above the street ahead, high in the band of sky the camera sees, clear of the fog
+    if (r.fwT <= 0 && a.state !== 'pause') { r.fwT = 1.8 + rnd() * 3; VFX.fireworks(VP.set((rnd() - 0.5) * 5, 13 + rnd() * 3, -15 - rnd() * 10), { size: 0.8 + rnd() * 0.4 }); }
+    VFX.applyShake(cam);
+  }
   if (POST) { POST.setQuality(r.quality, r.lockQ); POST.render(r.scene, cam); } else r.renderer.render(r.scene, cam);
+  if (VFX) VFX.removeShake(cam);
 }
 
 /* ------------------------------------------------------------------ HUD */
@@ -1609,12 +1967,23 @@ A.create({
   init(a) {
     arc = a; a.debug = dbg; G.D = DIFF.normal;
     a.dev = { get R3() { return R3; }, W3, get FX() { return FX; }, HERO, setQuality: (q) => { if (R3) R3.lockQ = true; setQuality(q); },
-      ff: (sec) => { for (let i = 0, n = Math.round(sec * 60); i < n && a.state === 'play'; i++) update(1 / 60); }, G };
+      ff: (sec) => { for (let i = 0, n = Math.round(sec * 60); i < n && a.state === 'play'; i++) update(1 / 60); }, G,
+      get VFX() { return VFX; },
+      // trigger a signature moment on purpose (screenshots, tests)
+      moment: (k) => {
+        if (k === 'deliver') { G.hold = 3; collect({ door: true, x: G.dist + 70, w: 36, h: 70 }); }
+        else if (k === 'hit') { G.inv = 0; hit({ kind: 'cart', x: G.dist + 40, w: 70, h: 36 }); }
+        else if (k === 'spark') { G.inv = 0; hit({ kind: 'scooter', x: G.dist + 40, w: 54, h: 28 }); }
+        else if (k === 'win') finish('Shift over');
+        else if (k === 'fireworks' && VFX) VFX.fireworks({ x: 0, y: 14, z: -18 }, { count: 3, size: 1 });
+      } };
     if (!setup3D(a)) { NO3D = true; showNo3D(a); return; }
     R3.qMax = 3;
     setQuality(R3.soft ? 0 : 3); resize3D(a);
     reset(true); G.attractReady = true;
     a.menu(); if (a.showStick) a.showStick(false);
+    // compile every effect's shader once the menu is up, so the first delivery never hitches
+    if (VFX) setTimeout(() => { try { VFX.warm(); } catch (e) { /* compiles on first use */ } }, 250);
   },
   start(a, ch) {
     if (NO3D) return;

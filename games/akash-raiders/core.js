@@ -478,7 +478,9 @@ function enemyFire(e, dt) {
 function aimShot(x, y, spd, spread, k) {
   const b = freeB(G.EB); if (!b) return;
   const P = G.P;
-  const tx = P.x + P.vx * 0.25 * G.D.aim + rnd(-0.6, 0.6), ty = PY;
+  // a raider aims at the rocket it saw a beat ago (0.15 to 0.3 s, a human's reaction), leading it a little
+  if (G.seenX == null) { G.seenX = P.x; G.seenVx = P.vx; }
+  const tx = G.seenX + G.seenVx * 0.25 * G.D.aim + rnd(-0.6, 0.6), ty = PY;
   let dx = tx - x, dy = ty - y; const d = Math.hypot(dx, dy) || 1; dx /= d; dy /= d;
   if (dy > -0.55) { dy = -0.55; dx = Math.sign(dx) * Math.sqrt(1 - dy * dy); }
   const c = Math.cos(spread), s = Math.sin(spread);
@@ -703,6 +705,7 @@ function step(dt) {
   save();
   const P = G.P;
   G.time += dt; G.pt += dt;
+  G.seenT = (G.seenT || 0) - dt; if (G.seenT <= 0 && G.P) { G.seenT = rnd(0.15, 0.3); G.seenX = G.P.x; G.seenVx = G.P.vx; }
   const slow = P.slow > 0 ? 0.45 : 1;
   const sdt = dt * slow;
   G.chainT -= dt; if (G.chainT <= 0 && G.chain) { G.chain = 0; G.mult = 1; }
