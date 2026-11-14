@@ -38,6 +38,8 @@
 //   doctorchat  the assistant quotes prices to someone told to see a doctor
 //   goldtoggle  the Gold toggle changes nothing
 //   leverdrift  the calculator's net by lever stops matching the case study
+//   losssign    a loss in the console prints as a gain
+//   referchat   the assistant quotes prices to someone referred to an eye doctor
 //   nocall      the store calls a customer who never agreed to calls
 //   consolemath the console table uses different maths from the calculator
 //   embedbar    the embedded prototype shows a second consent bar
@@ -81,6 +83,8 @@ function mutate(src) {
     refer: ["(s.result==='same' && s.sym===1) ? 'refer' : 'tested'", "'tested'"],
     doctorchat: ["var reply = st==='doctor' ?", 'var reply = false ?'],
     goldtoggle: ["[s.gold?'Or a home eye test in '+p.city+': free with your Gold membership.':", "[false?'':"],
+    losssign: ["(n<0 && a>=unit/2 ? '−' : '')", "''"],
+    referchat: ["    : st==='refer' ? (band(p.age)==='minor'?p.name+'\\'s':'Your')+' power has not changed, so new glasses will not help with this. Please see an eye doctor; the optometrist will write a referral. I will not suggest anything else until then.'\n", ''],
     leverdrift: ["['Store call on day 8', rCall*perRetest(I)*I.incr*mar - c4 - rCall*perT]", "['Store call on day 8', rCall*perRetest(I)*I.incr*mar]"],
     embedbar: ['html.embed #consentBar{display:none!important}', ''],
     ambush: ["<p class=\"lede\">I'm Anchit Tandon, a product manager. I studied Lenskart", '<p class="lede">Lenskart'],
@@ -436,9 +440,9 @@ async function prototype(browser, vp) {
   // Tested, power unchanged, and still trouble seeing: glasses are not the
   // answer, so the customer is referred on instead of told to keep the pair.
   await page.click('#in-sym button[data-s="1"]');
-  const ref = { tier: await tierOf(page), card: await nextCard(page), steps: await stepsOf(page), reply: await ask(page, 'need') };
+  const ref = { tier: await tierOf(page), card: await nextCard(page), steps: await stepsOf(page), reply: await ask(page, 'need'), other: [await ask(page, 'frame'), await ask(page, 'cost')] };
   check(`${L}: unchanged power with trouble seeing is referred to an eye doctor`,
-    ref.tier === 'Refer to an eye doctor' && ref.card.hold && /eye doctor/.test(ref.card.text) && !/Keep your pair/.test(ref.card.text) && /^Refer to an eye doctor/.test(ref.steps[0]) && /see an eye doctor/.test(ref.reply), `${ref.tier} | ${ref.card.title} | ${ref.steps[0]}`);
+    ref.tier === 'Refer to an eye doctor' && ref.card.hold && /eye doctor/.test(ref.card.text) && !/Keep your pair/.test(ref.card.text) && /^Refer to an eye doctor/.test(ref.steps[0]) && /see an eye doctor/.test(ref.reply) && ref.other.every((r) => /see an eye doctor/.test(r) && !/₹/.test(r)), `${ref.tier} | ${ref.card.title} | ${ref.steps[0]}`);
   await page.click('#in-result button[data-r="none"]');
   const back = [await tierOf(page), await page.$eval('#in-test', (e) => e.value + (e.disabled ? ' disabled' : ''))];
   check(`${L}: "Not tested yet" puts the customer's own test date back`, back[0] === 'Overdue' && back[1] === '38', back.join(' | '));
@@ -546,6 +550,12 @@ async function prototype(browser, vp) {
   const follow = t0.find(([n]) => /^First test/.test(n));
   check(`${L}: the console table uses the calculator's assumptions`,
     Math.abs(t1.reduce((a, [, v]) => a + money(v), 0) - kpi) <= 3 && recall0.length === 3 && recall0.every((v) => v === '0') && money(follow[1]) > 0, `kpi=${kpi} recall at 0pp=${recall0.join()}`);
+  // With no uplift but the lens-swap loss still on, the recall groups lose money and must say so.
+  await setNum(page, '#m-take', 0); await setNum(page, '#m-calllift', 0);
+  const tLoss = await table(); const kpiLoss = norm(await page.$eval('#kpis .kpi:last-child b', (b) => b.textContent));
+  await setNum(page, '#m-take', 2); await setNum(page, '#m-calllift', 8);
+  const lossRows = tLoss.filter(([n]) => /due or overdue/.test(n)).map(([, v]) => v);
+  check(`${L}: a loss in the console keeps its minus sign`, lossRows.length === 3 && lossRows.every((v) => /^−₹/.test(v)) && /^−₹/.test(kpiLoss), lossRows.join(' ') + ' kpi ' + kpiLoss);
   const zero = t1.filter(([n]) => /Open service ticket|Not due/.test(n)).map(([, v]) => v);
   check(`${L}: held and not-due groups get no message and are worth nothing`, zero.length === 2 && zero.every((z) => z === '0'), zero.join());
   // Selecting a row keeps keyboard focus on it and says it is expanded; a sort is announced.
