@@ -78,14 +78,14 @@ function mutate(src) {
     symptom: ["if(s.test>=iv || s.sym===1) return 'due';", "if(s.test>=iv) return 'due';"],
     doctor: ["if(s.sym===2) return 'doctor';", ''],
     reset: ['else simState.test = 0;', 'else simState.test = simState.test;'],
-    nocall: ["a.push(s.callOk ? {t:'Store call on day 8 if no slot is booked'", "a.push(true ? {t:'Store call on day 8 if no slot is booked'"],
+    nocall: ["a.push(s.callOk ? {t:'One call on day 8 if no slot is booked'", "a.push(true ? {t:'One call on day 8 if no slot is booked'"],
     consolemath: ['retests*perRetest(I)*I.incr - lost', 'n*0.07*4280'],
     refer: ["(s.result==='same' && s.sym===1) ? 'refer' : 'tested'", "'tested'"],
     doctorchat: ["var reply = st==='doctor' ?", 'var reply = false ?'],
     goldtoggle: ["[s.gold?'Or a home eye test in '+p.city+': free with your Gold membership.':", "[false?'':"],
     losssign: ["(n<0 && a>=unit/2 ? '−' : '')", "''"],
     referchat: ["    : st==='refer' ? (band(p.age)==='minor'?p.name+'\\'s':'Your')+' power has not changed, so new glasses will not help with this. Please see an eye doctor; the optometrist will write a referral. I will not suggest anything else until then.'\n", ''],
-    leverdrift: ["['Store call on day 8', rCall*perRetest(I)*I.incr*mar - c4 - rCall*perT]", "['Store call on day 8', rCall*perRetest(I)*I.incr*mar]"],
+    leverdrift: ["['Call in Recall Booking', rCall*perRetest(I)*I.incr*mar - c4 - rCall*perT]", "['Call in Recall Booking', rCall*perRetest(I)*I.incr*mar]"],
     embedbar: ['html.embed #consentBar{display:none!important}', ''],
     ambush: ['<p class="lede">An outside-in look at Lenskart, the Indian eyewear retailer, built only from public data', '<p class="lede">Lenskart'],
     deeplink: ['function fromHash(scroll, focus){', 'function fromHash(scroll, focus){ if(!focus) return;'],
@@ -138,10 +138,12 @@ async function open(browser, vp, path, slowFonts) {
   for (let i = 1; res.status() === 403 && i <= 3; i++) {
     console.log(`  note  ${path}: host answered 403, retry ${i} of 3`);
     await page.waitForTimeout(3000 * i);
+    // Everything logged so far belongs to the challenge page, not ours: start
+    // the bag again, so the retried page is judged only on its own errors.
+    bag.errors.length = 0; bag.failed.length = 0;
     // reload, not goto: the same URL again is a same-document hash change.
     res = (await page.reload({ waitUntil: 'networkidle' })) || res;
   }
-  if (res.status() !== 403) bag.failed = bag.failed.filter((f) => f !== (BASE + path).split('#')[0] + ' HTTP 403');
   return { ctx, page, bag, status: res.status() };
 }
 
@@ -264,6 +266,25 @@ async function caseStudy(browser, vp) {
   check(`${L}: the page opens by saying what it is, who wrote it and how to read it`,
     /case study/i.test(intro.h1) && !/Anchit|product manager/.test(intro.lede) && /public data/.test(intro.lede) && /may well have tested/.test(intro.lede) && /not Lenskart's/.test(intro.lede) && /20\.7 million/.test(intro.finding)
       && intro.read.join() === '#summary,#walkthrough,#problem' && /crore/.test(intro.units) && intro.order.join() === 'H1,lede,finding', JSON.stringify(intro.order) + ' ' + intro.read.join());
+  // Reviewer feedback: a deck, not a narrative. Numbered slides in order, the
+  // problem and the counter-evidence up front, Lenskart's own numbers in an
+  // appendix after the deck, and every chart labelled as Lenskart's.
+  const deck = await page.evaluate(() => ({
+    ids: [...document.querySelectorAll('main > section')].map((x) => x.id),
+    nums: [...document.querySelectorAll('main > section .sec-head .num')].map((n) => n.innerText.trim()),
+    biz: document.body.innerText.includes('How Lenskart makes money'),
+    growth: (document.querySelector('#growth h3') || {}).innerText || '',
+    why: document.querySelectorAll('#wn-tbl tbody tr').length,
+    rate: [...document.querySelectorAll('#rt-tbl tbody tr')].map((r) => [...r.cells].map((c) => c.innerText.trim()).join(' ')),
+    research: document.querySelectorAll('#rs-tbl tbody tr').length,
+  }));
+  const deckIds = 'summary,problem,research,audit,gaps,whynot,ideas,bet,prototype,impact,plan,risks,walkthrough,me,business,engine,growth,ledger';
+  const slideNo = deck.nums.slice(0, 14).map((n) => (n.match(/^SLIDE (\d\d)/i) || [])[1]).join();
+  check(`${L}: fourteen numbered slides in order, then the appendix`,
+    deck.ids.join() === deckIds && slideNo === Array.from({ length: 14 }, (_, i) => String(i + 1).padStart(2, '0')).join() && deck.nums.slice(14).every((n) => /^APPENDIX/i.test(n)), deck.ids.join() + ' | ' + slideNo);
+  check(`${L}: no "how Lenskart makes money" pitch, and the growth chart is labelled Lenskart's`, !deck.biz && /^Lenskart India/.test(deck.growth), deck.growth);
+  check(`${L}: counter-evidence, research and app ratings are on the page`,
+    deck.why === 7 && deck.research === 4 && deck.rate.join(' | ') === 'Google Play 4.5 7,92,550 7.6% | App Store, India 4.5 1,07,856 9.0%', `${deck.why} reasons, ${deck.research} age rows, ${deck.rate.join(' | ')}`);
   check(`${L}: a skip link to the content`, sys.skip === '#main' && !!(await page.$('main#main')), sys.skip);
 
   const counts = {}; const said = {};
@@ -336,8 +357,8 @@ async function caseStudy(browser, vp) {
 
   const range = await page.$$eval('#im-range tbody tr', (rs) => rs.map((r) => [...r.cells].map((c) => c.innerText.trim())));
   const row = (label) => (range.find((r) => r[0].startsWith(label)) || []).slice(1);
-  check(`${L}: sizing shows low, base and high`, row('Extra revenue').join() === '4.0,14.0,24.1', JSON.stringify(row('Extra revenue')));
-  check(`${L}: sizing is contribution net of running costs`, row('Net of running costs').join() === '−1.0,3.9,8.9', JSON.stringify(row('Net of running costs')));
+  check(`${L}: sizing shows low, base and high`, row('Extra revenue').join() === '3.9,8.8,13.7', JSON.stringify(row('Extra revenue')));
+  check(`${L}: sizing is contribution net of running costs`, row('Net of running costs').join() === '0.4,2.9,5.5', JSON.stringify(row('Net of running costs')));
   // Each column of levers must add up to the total printed under it.
   const f = (t) => parseFloat(String(t).replace('−', '-'));
   const sums = [0, 1, 2].map((i) => range.slice(0, 3).reduce((a, r) => a + f(r[i + 1]), 0));
@@ -345,13 +366,13 @@ async function caseStudy(browser, vp) {
   check(`${L}: the two levers less the lens-swap loss add up to the total in every column`, sums.every((x, i) => Math.abs(x - tot[i]) <= 0.11), sums.map((x) => x.toFixed(1)).join());
   const costRows = await page.$$eval('#im-cost tbody tr', (rs) => rs.map((r) => parseFloat(r.cells[2].innerText)));
   const costTotal = costRows.pop();
-  check(`${L}: running costs are itemised and add up`, costTotal === 3.94 && Math.abs(costRows.reduce((a, b) => a + b, 0) - costTotal) <= 0.011, costRows.join('+') + '=' + costTotal);
+  check(`${L}: running costs are itemised and add up`, costTotal === 2 && Math.abs(costRows.reduce((a, b) => a + b, 0) - costTotal) <= 0.011, costRows.join('+') + '=' + costTotal);
   // Which lever earns the money: the rows must add up to the net.
   const lev = await page.$$eval('#im-lever tbody tr', (rs) => rs.map((r) => r.cells[1].innerText.trim()));
   const levSum = lev.slice(0, -1).reduce((a, x) => a + f(x), 0);
   check(`${L}: the net is broken down by lever and the rows add up`, lev.length === 5 && lev[lev.length - 1] === row('Net of running costs')[1] && Math.abs(levSum - f(lev[lev.length - 1])) <= 0.11, lev.join(' , '));
   const sensBase = await page.$$eval('#im-sens tbody tr', (rs) => rs.map((r) => r.cells[2].innerText.trim()));
-  check(`${L}: every sensitivity row shares the base case`, sensBase.length === 8 && sensBase.every((x) => x === row('Net of running costs')[1]), sensBase.join());
+  check(`${L}: every sensitivity row shares the base case`, sensBase.length === 10 && sensBase.every((x) => x === row('Net of running costs')[1]), sensBase.join());
   const hidden = await page.$$eval('#im-range td.num, #im-cost td.num, #im-sens td.num', (cs) => cs.filter((c) => {
     const box = c.closest('.tbl').getBoundingClientRect(); const r = c.getBoundingClientRect();
     return r.right > box.right + 1 || r.left < box.left - 1;
@@ -430,10 +451,17 @@ async function prototype(browser, vp) {
   const noCall = await stepsOf(page);
   const noCallMsg = await checkinText(page);
   await page.check('#in-call');
-  check(`${L}: overdue books a re-test first, then one store call on day 8`,
-    steps[0] === 'Free re-test, booked in two taps' && steps.some((t) => /^Store call on day 8/.test(t)), JSON.stringify(steps));
-  check(`${L}: no store call for a customer who did not agree to one`,
-    !noCall.some((t) => /^Store call/.test(t)) && noCall.some((t) => /^No store call/.test(t)) && !/will call/.test(noCallMsg) && /remind you once more/.test(noCallMsg), JSON.stringify(noCall));
+  check(`${L}: overdue books a re-test into an open slot first, then one call on day 8 from the service line`,
+    steps[0] === 'Free re-test, booked in two taps' && steps.some((t) => /^One call on day 8/.test(t)) && /registered service line/.test(norm(await page.textContent('#e-actions'))) && !/from the home store\b/.test(norm(await page.textContent('#e-actions'))), JSON.stringify(steps));
+  check(`${L}: no call for a customer who did not agree to one`,
+    !noCall.some((t) => /^One call/.test(t)) && noCall.some((t) => /^No call/.test(t)) && !/will call/.test(noCallMsg) && /remind you once more/.test(noCallMsg), JSON.stringify(noCall));
+  // Adults are reminded only if they asked at the eye test (slide 06): without
+  // that, the engine, the phone and the check-in all stay silent.
+  await page.uncheck('#in-optin');
+  const noAsk = { steps: await stepsOf(page), plan: norm(await page.textContent('#s-plan')), msg: await checkinText(page) };
+  await page.check('#in-optin');
+  check(`${L}: an adult who did not ask for a reminder gets none, only the date in the app`,
+    /^No reminder: Neha did not ask for one/.test(noAsk.steps[0]) && noAsk.steps.length === 1 && /No reminders are sent/.test(noAsk.plan) && /^No message is sent/.test(noAsk.msg) && /did not ask for a reminder/.test(noAsk.msg), JSON.stringify(noAsk).slice(0, 160));
 
   // Gold members get the home eye test free; the plan and the assistant must say so.
   const goldPlan = [norm(await page.textContent('#s-plan'))];
@@ -538,8 +566,8 @@ async function prototype(browser, vp) {
   const msg = {}; const langs = {};
   for (const l of ['en', 'hi']) { await page.click(`#pp-lang button[data-l="${l}"]`); msg[l] = norm(await page.textContent('#wa-body')); langs[l] = await page.getAttribute('#wa-body', 'lang'); }
   await page.click('#pp-lang button[data-l="en"]');
-  check(`${L}: check-in escalates to one store call, in English and Hindi, each marked with its language`,
-    /your store will call once/.test(msg.en) && /आपका स्टोर एक बार फ़ोन करेगा/.test(msg.hi) && langs.en === 'en' && langs.hi === 'hi', msg.en.slice(0, 100));
+  check(`${L}: check-in escalates to one call from the service number, in English and Hindi, each marked with its language`,
+    /Lenskart will call once from its service number/.test(msg.en) && /Lenskart अपने सर्विस नंबर से एक बार फ़ोन करेगा/.test(msg.hi) && !/your store will call/.test(msg.en) && langs.en === 'en' && langs.hi === 'hi', msg.en.slice(0, 100));
   check(`${L}: check-in carries no price, offer or discount, and says how to opt out`, !SALES.test(msg.en) && !SALES.test(msg.hi) && /Reply STOP to stop these reminders/.test(msg.en), (msg.en.match(/.{0,30}(₹|%|off|offer|discount|gold).{0,20}/i) || [''])[0]);
   await page.click('#pp-person button[data-p="1"]');
   const arjun = norm(await page.textContent('#wa-body'));
@@ -560,34 +588,26 @@ async function prototype(browser, vp) {
       && /^No message is sent/.test(ravi.d40) && ravi.end === 'Follow-up ended' && !SALES.test(ravi.d12) && !SALES.test(ravi.d25)
       && ravi.sym[0] === 'Re-check' && /^No message is sent/.test(ravi.sym[1]), `${ravi.title} | ${ravi.d12.slice(0, 60)} | ${ravi.end}`);
 
+  // The Recall Dashboard is the product: groups, actions, holdouts and results.
+  // No money, no projections and no explanation of why to use it.
   await page.click('#t-console');
-  const total = norm(await page.textContent('#m-total'));
-  check(`${L}: impact total ₹14.0 cr · $1.49M`, total === '₹14.0 cr · $1.49M', total);
-  const netTxt = norm(await page.textContent('#m-net'));
-  check(`${L}: contribution after running costs ₹3.9 cr · $0.42M`, netTxt === '₹3.9 cr · $0.42M', netTxt);
-  const head = norm(await page.textContent('#segtbl th:last-child'));
-  check(`${L}: value column is labelled as incremental revenue`, /^Incremental revenue/.test(head), head);
-  // The table and the calculator share their assumptions: with no extra
-  // re-tests the recall groups are worth nothing, and the KPI is the row total.
-  const money = (t) => +t.replace(/[^\d]/g, '') || 0;
-  const table = () => page.$$eval('#segtbl tbody tr', (rs) => rs.map((r) => [r.cells[0].innerText.trim(), r.cells[3].innerText.trim()]));
-  const t1 = await table();
-  const kpi = money(norm(await page.$eval('#kpis .kpi:last-child b', (b) => b.textContent)));
-  await setNum(page, '#m-take', 0); await setNum(page, '#m-calllift', 0); await setNum(page, '#m-cann', 0);
-  const t0 = await table();
-  await setNum(page, '#m-take', 2); await setNum(page, '#m-calllift', 8); await setNum(page, '#m-cann', 3);
-  const recall0 = t0.filter(([n]) => /due or overdue/.test(n)).map(([, v]) => v);
-  const follow = t0.find(([n]) => /^First test/.test(n));
-  check(`${L}: the console table uses the calculator's assumptions`,
-    Math.abs(t1.reduce((a, [, v]) => a + money(v), 0) - kpi) <= 3 && recall0.length === 3 && recall0.every((v) => v === '0') && money(follow[1]) > 0, `kpi=${kpi} recall at 0pp=${recall0.join()}`);
-  // With no uplift but the lens-swap loss still on, the recall groups lose money and must say so.
-  await setNum(page, '#m-take', 0); await setNum(page, '#m-calllift', 0);
-  const tLoss = await table(); const kpiLoss = norm(await page.$eval('#kpis .kpi:last-child b', (b) => b.textContent));
-  await setNum(page, '#m-take', 2); await setNum(page, '#m-calllift', 8);
-  const lossRows = tLoss.filter(([n]) => /due or overdue/.test(n)).map(([, v]) => v);
-  check(`${L}: a loss in the console keeps its minus sign`, lossRows.length === 3 && lossRows.every((v) => /^−₹/.test(v)) && /^−₹/.test(kpiLoss), lossRows.join(' ') + ' kpi ' + kpiLoss);
-  const zero = t1.filter(([n]) => /Open service ticket|Not due/.test(n)).map(([, v]) => v);
-  check(`${L}: held and not-due groups get no message and are worth nothing`, zero.length === 2 && zero.every((z) => z === '0'), zero.join());
+  const dash = await page.evaluate(() => {
+    const p = document.getElementById('p-console');
+    return { text: p.innerText, heads: [...p.querySelectorAll('#segtbl thead th')].map((th) => th.innerText.trim()),
+      rows: [...p.querySelectorAll('#segtbl tbody tr')].map((r) => [r.cells[0].querySelector('.rowbtn').innerText.trim(), +r.cells[2].innerText.replace(/[^\d]/g, ''), +r.cells[3].innerText.replace(/[^\d]/g, '')]),
+      kpis: [...p.querySelectorAll('#kpis .kpi span')].map((k) => k.innerText.trim()), results: [...p.querySelectorAll('#restbl tbody td')].map((c) => c.innerText.trim()), calc: !!p.querySelector('.calc, #m-net') };
+  });
+  check(`${L}: the dashboard shows no money, projection or explanation`,
+    !/₹|\$|revenue is worth|incremental revenue|uplift|if the uplift holds|What it is worth|How to prove|Every rate/i.test(dash.text) && !dash.calc, (dash.text.match(/.{0,30}(₹|uplift|worth|prove).{0,30}/i) || [''])[0]);
+  check(`${L}: the dashboard's table is group, action, customers and holdout`, dash.heads.join() === 'Group,Action,Customers,Holdout', dash.heads.join());
+  const silentRows = dash.rows.filter(([n]) => /Open service ticket|Not due/.test(n));
+  const sent = dash.rows.filter(([n]) => !/Open service ticket|Not due|did not ask/i.test(n));
+  const noAskRow = dash.rows.find(([n]) => /did not ask/i.test(n)) || [];
+  check(`${L}: every contacted group holds out 10%, and silent groups hold out none`,
+    noAskRow[2] === 0 && silentRows.length === 2 && silentRows.every((r) => r[2] === 0) && sent.length === 3 && sent.every((r) => r[2] === Math.round(r[1] * 0.1)), JSON.stringify(dash.rows));
+  check(`${L}: people who did not ask are a silent group of their own; children need a parent who asked`, dash.rows.some(([n]) => n === 'Did not ask for a reminder, due') && dash.rows.some(([n]) => n === 'Adults who asked for a reminder, due') && dash.rows.some(([n]) => n === 'Children under 18, due, parent asked'), dash.rows.map((r) => r[0]).join(' | '));
+  check(`${L}: dashboard KPIs are counts, and results stay empty until a pilot runs`,
+    dash.kpis.join() === 'Customers scored,Contacted this cycle,Held out (10%),No message' && dash.results.length === 5 && dash.results.every((c) => c === 'Pending'), dash.kpis.join() + ' | ' + dash.results.slice(0, 3).join());
   // Selecting a row keeps keyboard focus on it and says it is expanded; a sort is announced.
   const picked = [];
   for (const idx of [-1, 0]) {
@@ -599,21 +619,47 @@ async function prototype(browser, vp) {
     picked.push([name, norm(await page.textContent('#seg-detail h3')), norm(await page.textContent('#seg-detail .label')),
       await page.evaluate(() => { const a = document.activeElement; return a.className + ' ' + a.getAttribute('aria-expanded'); })]);
   }
-  check(`${L}: a console row opens its detail by keyboard and keeps focus`,
+  check(`${L}: a dashboard row opens its rules by keyboard and keeps focus`,
     picked.every(([n, h, l, f]) => l === 'Selected group' && n === h && f === 'rowbtn true') && picked[0][1] !== picked[1][1], JSON.stringify(picked));
-  await page.click('#segtbl th button[data-k="n"]');
+  await page.click('#segtbl th button[data-k="hold"]');
   const sorted = await page.$$eval('#segtbl thead th', (ths) => ths.map((th) => th.getAttribute('aria-sort')));
-  await page.click('#segtbl th button[data-k="value"]');
-  check(`${L}: the sorted column is exposed`, sorted.join() === 'none,none,descending,none', sorted.join());
+  await page.click('#segtbl th button[data-k="n"]');
+  check(`${L}: the sorted column is exposed`, sorted.join() === 'none,none,none,descending', sorted.join());
+
+  // The sizing model is a separate tab, labelled as analysis, not product.
+  await page.click('#t-model');
+  const note = norm(await page.textContent('#p-model .model-note'));
+  check(`${L}: the sizing model is its own tab and says it is not part of the product`, /^Not part of the product/.test(note), note.slice(0, 60));
+  const total = norm(await page.textContent('#m-total'));
+  check(`${L}: model total ₹8.8 cr · $0.94M`, total === '₹8.8 cr · $0.94M', total);
+  const netTxt = norm(await page.textContent('#m-net'));
+  check(`${L}: contribution after running costs ₹2.9 cr · $0.31M`, netTxt === '₹2.9 cr · $0.31M', netTxt);
+  // With no recall lift but the lens-swap loss still on, the reminder loses money and must say so.
+  await setNum(page, '#m-take', 0); await setNum(page, '#m-calllift', 0);
+  const lossLine = norm(await page.textContent('#bylever'));
+  await setNum(page, '#m-take', 2); await setNum(page, '#m-calllift', 8);
+  check(`${L}: a loss in the model keeps its minus sign`, /Recall Reminder\s*−₹/.test(lossLine), lossLine.slice(0, 120));
+  const be = await page.$$eval('#breakeven .be', (bs) => bs.map((b) => [b.dataset.be, b.querySelector('b').textContent, b.querySelector('small').textContent]));
+  check(`${L}: break-even lifts for each action, in plain words`,
+    be.length === 3 && be.map((x) => x[1]).join() === '+0.21pp,+2.85pp,+6.49pp' && /^1 extra order for every 474 people/.test(be[0][2]), JSON.stringify(be).slice(0, 160));
+  // Review finding: break-even must solve the lever's own equation. Set the
+  // follow-up lift to its break-even and its line in "Net by lever" reads zero.
+  await setNum(page, '#m-conv', 0.2108);
+  const atBE = norm(await page.textContent('#bylever'));
+  await setNum(page, '#m-incr', 0);
+  const noIncr = await page.$$eval('#breakeven .be b', (bs) => bs.map((x) => x.textContent));
+  await setNum(page, '#m-conv', 3); await setNum(page, '#m-incr', 75);
+  check(`${L}: break-even agrees with the lever lines, and says n/a when nothing is truly extra`,
+    /First Prescription Follow-up\s*₹0\.0 cr/.test(atBE) && noIncr.every((x) => x === 'n/a'), atBE.slice(0, 80) + ' | ' + noIncr.join());
   // Nonsense inputs must not produce nonsense output.
   await setNum(page, '#m-acc', -5000000); await setNum(page, '#m-fx', 0); await setNum(page, '#m-pm', 250);
   const junk = norm(await page.textContent('#m-total')) + ' ' + norm(await page.textContent('#m-net')) + ' ' + norm(await page.textContent('#costs'));
   const noFx = !/\$/.test(norm(await page.textContent('#m-total')));
   await setNum(page, '#m-acc', 9900000); await setNum(page, '#m-fx', 94.24); await setNum(page, '#m-pm', 64);
-  check(`${L}: the calculator never shows NaN, Infinity, negative revenue or a dollar figure without a rate`, !/NaN|Infinity/.test(junk) && !/^−/.test(junk) && noFx && norm(await page.textContent('#m-net')) === '₹3.9 cr · $0.42M', junk.slice(0, 90));
+  check(`${L}: the calculator never shows NaN, Infinity, negative revenue or a dollar figure without a rate`, !/NaN|Infinity/.test(junk) && !/^−/.test(junk) && noFx && norm(await page.textContent('#m-net')) === '₹2.9 cr · $0.31M', junk.slice(0, 90));
 
   let worst = 0;
-  for (const tab of ['#t-customer', '#t-checkin', '#t-console', '#t-brand']) {
+  for (const tab of ['#t-customer', '#t-checkin', '#t-console', '#t-model', '#t-brand']) {
     await page.click(tab);
     worst = Math.max(worst, await hScroll(page));
   }
@@ -690,15 +736,16 @@ async function consistency(browser) {
     return {
       net: cells('Net of running costs'), rev: cells('Extra revenue'), cost: cells('Less running costs').map((c) => c.replace('−', '')),
       lever: [...document.querySelectorAll('#im-lever tbody tr')].slice(0, 4).map((r) => r.cells[1].innerText.trim()),
+      be: [...document.querySelectorAll('#im-be tbody tr')].map((r) => [r.dataset.be, r.cells[1].innerText.trim(), (r.cells[2].innerText.match(/every ([\d,]+)/) || [])[1]]),
       sens: [...document.querySelectorAll('#im-sens tbody tr')].map((r) => ({ k: r.dataset.k, lo: r.dataset.lo, hi: r.dataset.hi, cells: [1, 3].map((i) => r.cells[i].innerText.trim()) })),
     };
   });
   await a.ctx.close();
   const b = await open(browser, vp, '/lenskart-study/prototype');
-  await b.page.click('#t-console');
+  await b.page.click('#t-model');
   const num = async (id) => { const m = norm(await b.page.textContent(id)).match(/(−?)₹([\d.]+) cr/); return m ? m[1] + m[2] : ''; };
   const set = (o) => b.page.evaluate((o) => { for (const k in o) { const e = document.getElementById(k); e.value = o[k]; e.dispatchEvent(new Event('input', { bubbles: true })); } }, o);
-  const BASE_IN = { 'm-take': 2, 'm-calllift': 8, 'm-conv': 3, 'm-order': 3650, 'm-fval': 1950, 'm-incr': 75, 'm-reach': 80, 'm-cann': 3 };
+  const BASE_IN = { 'm-take': 2, 'm-calllift': 8, 'm-conv': 3, 'm-order': 1950, 'm-fval': 1950, 'm-incr': 75, 'm-reach': 30, 'm-cann': 3, 'm-freach': 80, 'm-noord': 30, 'm-due': 40, 'm-found': 70 };
   const read = async (o) => { await set({ ...BASE_IN, ...o }); return { net: await num('#m-net'), rev: await num('#m-total'), cost: await num('#m-cost') }; };
   const cases = [await read({ 'm-take': 1, 'm-calllift': 4, 'm-conv': 1.5 }), await read({}), await read({ 'm-take': 3, 'm-calllift': 12, 'm-conv': 4.5 })];
   const okCases = cases.every((c, i) => c.net === study.net[i] && c.rev === study.rev[i] && c.cost === study.cost[i]);
@@ -707,12 +754,14 @@ async function consistency(browser) {
   await read({});
   const byLever = await b.page.$$eval('#bylever .lever-head span:last-child', (xs) => xs.map((x) => x.textContent.replace('₹', '').replace(' cr', '').trim()));
   check('the case study\'s net by lever matches the prototype calculator', study.lever.length === 4 && study.lever.join() === byLever.join(), `case study ${study.lever.join()} vs calculator ${byLever.join()}`);
+  const beModel = await b.page.$$eval('#breakeven .be', (bs) => bs.map((x) => [x.dataset.be, x.querySelector('b').textContent, (x.querySelector('small').textContent.match(/every ([\d,]+)/) || [])[1]]));
+  check('the case study\'s break-even lifts match the prototype model', study.be.length === 3 && JSON.stringify(study.be) === JSON.stringify(beModel), `case study ${JSON.stringify(study.be)} vs model ${JSON.stringify(beModel)}`);
   const bad = [];
   for (const r of study.sens) {
     const lo = (await read({ [r.k]: r.lo })).net; const hi = (await read({ [r.k]: r.hi })).net;
     if (lo !== r.cells[0] || hi !== r.cells[1]) bad.push(`${r.k}: page ${r.cells.join('/')} vs calculator ${lo}/${hi}`);
   }
-  check('every sensitivity figure on the case study matches the prototype calculator', study.sens.length === 8 && bad.length === 0, bad.join(' | ') || study.sens.length + ' rows');
+  check('every sensitivity figure on the case study matches the prototype calculator', study.sens.length === 10 && bad.length === 0, bad.join(' | ') || study.sens.length + ' rows');
   await b.ctx.close();
 }
 
