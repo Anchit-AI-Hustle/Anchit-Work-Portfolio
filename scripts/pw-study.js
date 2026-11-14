@@ -57,6 +57,7 @@
 // MUT=focussteal    the deferred consent question takes the visitor's focus
 // MUT=oldfeature    a retired feature name comes back on a tab
 // MUT=noalias       links shared before the rename stop landing
+// MUT=noevidence    the research table behind the design is dropped
 const { chromium } = require('./_playwright.js');
 const vercel = require('../vercel.json');
 const BASE = process.env.BASE || 'http://127.0.0.1:8099';
@@ -103,6 +104,7 @@ function mutate(src) {
   if (MUT === 'nostart') return src.replace(/<nav class="start"[\s\S]*?<\/nav>/, '');
   if (MUT === 'walkurl') return src.replace('<a href="/pw-study/prototype#report">https://', '<a href="/pw-study/prototype#dashboard">https://');
   if (MUT === 'oldfeature') return src.replace('tabindex="-1">Weekly Report</button>', 'tabindex="-1">Weekly Pulse</button>');
+  if (MUT === 'noevidence') return src.replace(/<div class="card" id="evidence"[\s\S]*?<\/table><\/div>\s*<\/div>/, '');
   if (MUT === 'noalias') return src.replace("h = ALIAS[h] || h;", '');
   return src;
 }
@@ -338,6 +340,10 @@ async function caseStudy(browser, vp) {
     /Class 10 and Class 11/.test(plan) && !/Class 11 JEE and NEET dropper/.test(plan) && /AUC of 0\.70/.test(plan) && /13,300 learners/.test(plan), plan.slice(0, 160));
   const risks = norm(await page.textContent('#risks'));
   check(`${L}: risks cover DPDP s.9(3) and the holdout's fairness`, /s\.9\(3\)/.test(risks) && /never the child/.test(risks) && /holdout is fair/i.test(risks), risks.slice(0, 120));
+  // The design choices rest on published evidence: each row names its source and links to it.
+  const ev = await page.$$eval('#evidence tbody tr', (rs) => rs.map((r) => r.querySelectorAll('a[href^="https://"]').length)).catch(() => []);
+  check(`${L}: research table backs the design, every row linked to its source`, ev.length >= 7 && ev.every((n) => n >= 1), JSON.stringify(ev));
+  check(`${L}: DPDP row states when the children's rules apply and the fallback`, /May 2027/.test(risks) && /18\+ learners/.test(risks), risks.slice(0, 80));
   const q2 = norm(await page.textContent('#q2').catch(() => ''));
   check(`${L}: latest quarter (Q2 FY27) is reported with its source`, /₹1,242 cr/.test(q2) && /Inc42/.test(q2), q2.slice(0, 120));
   const d = await dashes(page);
