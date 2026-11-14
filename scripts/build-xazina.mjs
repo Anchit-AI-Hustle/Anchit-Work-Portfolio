@@ -8,11 +8,30 @@ const JOURNAL='/blogs/lab-grown-diamond-journal-by-xazina';
 const COLLECTION='/collections/all';
 const FALLBACK=B+'/media/act-form.webp';
 const ART={jewellery:B+'/media/maison-cover.webp',journal:B+'/media/act-spectrum.webp',atelier:B+'/media/atelier.webp',fragrance:B+'/media/perfume.webp'};
-const VERSION='maison-3';
+const VERSION='maison-4';
 const escape=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const plain=value=>String(value??'').replace(/<[^>]+>/g,' ').replace(/&nbsp;/gi,' ').replace(/\s+/g,' ').trim();
 const local=path=>B+(path==='/'?'':path);
-const money=value=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:2}).format(value);
+// 372 of 436 prices carry paise and the rest are whole rupees, which
+// maximumFractionDigits alone printed as "₹1,48,756.00". Paise show only when
+// a price really has them.
+const money=value=>{const paise=Math.round(Number(value)*100);return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',minimumFractionDigits:paise%100?2:0,maximumFractionDigits:2}).format(paise/100);};
+// Same words and links on all three storefront concepts. Neutral chrome.
+const CONCEPT_BAR='<div class="concept-bar" role="note"><p>Independent design concept by <a href="/">Anchit Tandon</a>, not affiliated with Xazina. Xazina handles purchases and appointments; prices are a catalog snapshot.</p><nav aria-label="About this concept"><a href="/">Portfolio</a><a href="/xazina-revamp/#design-notes">Design notes</a><a href="/assets/resume.pdf">Resume</a><a href="mailto:anchit.tandon@gmail.com?subject=Your%20Xazina%20concept">Email Anchit</a></nav></div>';
+// 429 of 436 products carry no type, so 429 cards wore the same "Xazina
+// jewellery" eyebrow. A card now names the piece's smallest (most specific)
+// collection, the same order "More from Xazina" uses. Collections that name a
+// placement on the old site rather than a kind of piece are passed over.
+const PLACEMENT=/home page|inspired page|^learn more$|^find your|^all collections$|^craftsmanship$|^best sellers$/i;
+const tidyTitle=t=>{const x=String(t).trim().replace(/\s*\/\s*/g,' / ');return x===x.toUpperCase()||x===x.toLowerCase()?x.toLowerCase().replace(/(^|[\s(/-])(\p{L})/gu,(m,a,b)=>a+b.toUpperCase()):x;};
+let EYEBROW=new Map();
+function eyebrows(snapshot){
+ const cols=Object.values(snapshot.entries).filter(e=>e.kind==='collection'&&e.path!=='/collections/all'&&e.members?.length&&!PLACEMENT.test(e.title.trim())).sort((a,b)=>a.members.length-b.members.length);
+ const map=new Map();
+ for(const c of cols)for(const m of c.members)if(!map.has(m))map.set(m,tidyTitle(c.title));
+ return map;
+}
+const eyebrow=p=>EYEBROW.get(p.path)||(p.type?tidyTitle(p.type):'Xazina jewellery');
 const icon=(name,cls='')=>`<svg class="${cls}" aria-hidden="true"><use href="#${name}"/></svg>`;
 const icons=`<svg class="svg-defs" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs>
 <symbol id="shop-arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></symbol>
@@ -98,10 +117,10 @@ function shell(snapshot,item,content) {
  <meta name="description" content="${escape(desc)}"><meta property="og:title" content="${escape(title)}"><meta property="og:description" content="${escape(desc)}">
  <meta property="og:image" content="${escape(item.image?sized(item.image):LIVE+FALLBACK)}"><link rel="canonical" href="${LIVE+local(item.path)}">${extra}
  <link rel="icon" href="${B}/media/mark.svg" type="image/svg+xml"><link rel="preload" href="${B}/media/serif.woff2" as="font" type="font/woff2" crossorigin>
- <link rel="stylesheet" href="${B}/style.css?v=prism-3"><link rel="stylesheet" href="${B}/shop.css?v=${VERSION}">
+ <link rel="stylesheet" href="${B}/style.css?v=prism-4"><link rel="stylesheet" href="${B}/shop.css?v=${VERSION}">
  <script defer src="/assets/vendor/xazina/motion.js"></script><script type="module" src="${B}/shop.js?v=${VERSION}"></script>
  </head><body class="shop-body" id="top" data-shop-kind="${escape(item.kind)}" data-shop-path="${escape(item.path)}">
- <a class="skip" href="#shop-main">Skip to content</a>${icons}${header(snapshot)}
+ <a class="skip" href="#shop-main">Skip to content</a>${CONCEPT_BAR}${icons}${header(snapshot)}
  <main id="shop-main">${content}</main>${footer(snapshot)}</body></html>`;
 }
 function hero(item,kicker,options={}) {
@@ -115,7 +134,7 @@ function productCard(p) {
  if(!p)return '';
  return `<article class="shop-card" data-card data-title="${escape(p.title.toLowerCase())}" data-price="${p.price??0}" data-available="${p.available?'yes':'no'}">
  <a href="${local(p.path)}"><div class="shop-card-image">${image(p.image,p.images?.[0]?.alt||p.title,680)}<span>${icon('shop-arrow')}</span></div>
- <div class="shop-card-text"><p class="shop-kicker">${escape(p.type||'Xazina jewellery')}</p><h2>${escape(p.title)}</h2>${p.price!==null?`<p>From ${money(p.price)}</p>`:''}</div></a></article>`;
+ <div class="shop-card-text"><p class="shop-kicker">${escape(eyebrow(p))}</p><h2>${escape(p.title)}</h2>${p.price!==null?`<p>From ${money(p.price)}</p>`:''}</div></a></article>`;
 }
 const storyDate=d=>{const t=new Date(d);return isNaN(t)?'':t.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});};
 function routeCard(p) {
@@ -132,11 +151,12 @@ function grid(cards,kicker='The edit',count=cards.length,filters=true){
  <p class="shop-empty" data-filter-empty ${count?'hidden':''}>${count?'No results match those filters. <button type="button" class="shop-link-button" data-filter-clear>Clear filters</button>':'This edit has no listed items.'}</p>
  </div></section>`;
 }
-// "08 / XAZINA" said nothing. A block that shows no heading of its own is
-// labelled with its section title, so a run of photos still says what it is.
+// "08 / XAZINA" said nothing. Every block is labelled with its section
+// title, so a run of photos still says what it is, and so do the home's
+// blocks, which all carry a heading and so all read "XAZINA" before.
 function label(b){
  const title=plain(b.title);
- return title&&!/<h[1-4][\s>]/i.test(b.html)?title.toUpperCase().slice(0,48):'XAZINA';
+ return title?title.toUpperCase().slice(0,48):'XAZINA';
 }
 function blocks(items,extra='') {
  if(!items?.length)return '';
@@ -166,7 +186,7 @@ function product(snapshot,p){
  <div class="shop-product-layout">
  <div class="shop-gallery" data-gallery><button type="button" class="shop-main-image" aria-label="Open full-size product photo">${image(featured.url,featured.alt||p.title,1200,true)}<span>${icon('shop-external')} View detail</span></button>
  ${images.length>1?`<div class="shop-thumbs" aria-label="Product photos">${images.map((im,i)=>`<button type="button" data-gallery-index="${i}" aria-pressed="${i===0}" aria-label="View product photo ${i+1}">${image(im.url,'',240)}</button>`).join('')}</div>`:''}</div>
- <div class="shop-product-copy"><p class="shop-kicker">${icon('shop-spark')} ${escape(p.type||'The Xazina edit')}</p><h1>${escape(p.title)}</h1>
+ <div class="shop-product-copy"><p class="shop-kicker">${icon('shop-spark')} ${escape(eyebrow(p))}</p><h1>${escape(p.title)}</h1>
  <p class="shop-price" data-variant-price>${first?money(first.price):''}</p><p class="shop-availability" data-variant-status>${first?.available?'In stock on Xazina':'Currently unavailable'}</p>
  <form class="shop-variant" data-variant-form>
  ${p.options.map((o,i)=>`<label>${escape(o.name)}<select data-option="${i}">${o.values.map(value=>`<option${value===first?.options[i]?' selected':''}>${escape(value)}</option>`).join('')}</select></label>`).join('')}
@@ -255,27 +275,56 @@ export async function buildXazina(www,source){
   const file=join(output,path.slice(1)+'.html');
   await mkdir(dirname(file),{recursive:true});await writeFile(file,body);
  }
+ EYEBROW=eyebrows(snapshot);
  for(const item of all)await out(item.path,shell(snapshot,item,display(snapshot,item)));
- const home=join(output,'index.html');
- let html=await readFile(home,'utf8');
- html=html.replace('</head>',`<meta name="robots" content="noindex,follow"><link rel="stylesheet" href="${B}/shop.css?v=${VERSION}"><script type="module" src="${B}/shop.js?v=${VERSION}"></script></head>`)
-  .replace('<main id="main">',icons+'<main id="main">')
-  .replace('</section>\n\n    <section class="jewellery','</section>\n'+header(snapshot,true)+'\n    <section class="jewellery')
-  .replace('  </main>',`<section id="original-edit" class="shop-home-source"><div class="shop-dark shop-wrap shop-section"><p class="shop-kicker">${icon('shop-spark')} THE XAZINA EDIT</p><h2>From the house.</h2><p>Engagement rings, the most-loved collections, the Xazina promise and the original diamond guides.</p></div>${blocks(snapshot.home,'shop-home-blocks')}</section></main>`)
-  .replace(/<footer class="wrap footer">[\s\S]*?<\/footer>/,footer(snapshot))
-  .replace(/href="https:\/\/(?:www\.)?xazina\.com([^"#?]*)"/g,(m,path)=>known.has(path)?`href="${local(path)}"`:m)
-  .replace('</nav>\n          <a class="film-visit"','<a href="/xazina-revamp/collections">Shop all</a><a href="/xazina-revamp/blogs/lab-grown-diamond-journal-by-xazina">Journal</a></nav>\n          <a class="film-visit"')
-  .replace('<a class="film-visit" href="https://www.xazina.com/">Visit Xazina <svg aria-hidden="true"><use href="#external"/></svg>','<a class="film-visit" href="#shop-navigation">Shop &amp; menu <svg aria-hidden="true"><use href="#down"/></svg>');
- await writeFile(home,html);
- const search=all.filter(x=>!['directory','handoff','cart','search','policy','retired'].includes(x.kind)).map(x=>({title:x.title,path:x.path,kind:x.kind,image:x.image||'',price:x.price,tags:x.tags||[],type:x.type||''}));
+ const search=all.filter(x=>!['directory','handoff','cart','search','policy','retired'].includes(x.kind)).map(x=>({title:x.title,path:x.path,kind:x.kind,image:x.image||'',price:x.price,tags:x.tags||[],type:x.type||'',...(x.kind==='product'?{eyebrow:eyebrow(x)}:{})}));
  await writeFile(join(output,'catalog','search.json'),JSON.stringify(search));
  await writeFile(join(output,'catalog','route-map.json'),JSON.stringify({...snapshot.inventory,routes:all.map(x=>({path:x.path,kind:x.kind,captured:x.captured??true}))}));
  await import('node:fs/promises').then(fs=>fs.unlink(join(output,'catalog','snapshot.json')));
  const aliases={'/blogs':JOURNAL,...snapshot.inventory.redirects};
+ let forwarded=0;
  for(const [path,dest] of Object.entries(aliases)){
   if(known.has(path)||!pathOK(path)||(!known.has(dest)&&dest!=='/'))continue;
   const destination=local(dest);
   await out(path,`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0;url=${escape(destination)}"><link rel="canonical" href="${LIVE+destination}"><title>Continue to Xazina</title><meta name="description" content="This Xazina page has moved. Continue to its new address in the Xazina storefront concept."><meta property="og:image" content="${LIVE+FALLBACK}"><link rel="icon" href="${B}/media/mark.svg" type="image/svg+xml"><script type="module" src="${B}/shop-redirect.js"></script></head><body><a id="destination" href="${escape(destination)}">Continue to Xazina</a></body></html>`);
+  forwarded++;
  }
+ const home=join(output,'index.html');
+ let html=await readFile(home,'utf8');
+ // The home showed the same three pieces twice: unpriced near the top, then
+ // priced in the captured "Our Most Loved" block. The priced list now fills
+ // the first section and the captured duplicate is dropped from below.
+ const loved=snapshot.home.find(b=>/^our most loved$/i.test(plain(b.title)));
+ const lovedPieces=loved?[...new Set([...loved.html.matchAll(/href="\/xazina-revamp(\/products\/[^"#?]+)"/g)].map(m=>m[1]))].map(p=>snapshot.products[p]).filter(Boolean):[];
+ const placed=lovedPieces.length>=2&&/data-most-loved>/.test(html);
+ if(placed){
+  const ownPhoto=new Map([...html.matchAll(/<a href="https:\/\/www\.xazina\.com(\/products\/[^"]+)">\s*<div class="piece-media">(<img [^>]+>)/g)].map(m=>[m[1],m[2]]));
+  const cards=lovedPieces.map((p,i)=>{
+   const photo=ownPhoto.get(p.path)||`<img src="${escape(sized(p.image,780))}" alt="${escape(p.images?.[0]?.alt||p.title)}" loading="lazy" decoding="async">`;
+   const from=new Set(p.variants.map(v=>v.price)).size>1?'From ':'';
+   return `          <article class="piece${i===0?' feature':''}" data-reveal>
+            <a href="${local(p.path)}">
+              <div class="piece-media">${photo}<span aria-hidden="true">${String(i+1).padStart(2,'0')}</span></div>
+              <div class="piece-caption"><div><h3>${escape(p.title)}</h3><p>${escape(eyebrow(p))}</p><p class="piece-price">${from}${money(p.price)}</p></div><svg aria-hidden="true"><use href="#arrow"/></svg></div>
+            </a>
+          </article>`;
+  }).join('\n');
+  html=html.replace(/<div class="collection-grid" data-most-loved>[\s\S]*?(\n        <\/div>\n      <\/div>\n    <\/section>)/,(m,end)=>`<div class="collection-grid${lovedPieces.length===4?' most-loved':''}" data-most-loved>\n${cards}${end}`);
+ }
+ const homeBlocks=placed?snapshot.home.filter(b=>b!==loved):snapshot.home;
+ const P=Object.values(snapshot.products), E=Object.values(snapshot.entries);
+ // Numbers the design notes quote, counted from this build rather than typed.
+ const facts={pages:all.length+forwarded+1,products:P.length,untyped:P.filter(p=>!p.type).length,collections:E.filter(e=>e.kind==='collection').length,articles:E.filter(e=>e.kind==='article').length};
+ html=html.replace('</head>',`<meta name="robots" content="noindex,follow"><link rel="stylesheet" href="${B}/shop.css?v=${VERSION}"><script type="module" src="${B}/shop.js?v=${VERSION}"></script></head>`)
+  .replace('<main id="main">',icons+'<main id="main">')
+  .replace('</section>\n\n    <section class="jewellery','</section>\n'+header(snapshot,true)+'\n    <section class="jewellery')
+  .replace('    <section class="notes light" id="design-notes"',`    <section id="original-edit" class="shop-home-source"><div class="shop-dark shop-wrap shop-section"><p class="shop-kicker">${icon('shop-spark')} THE XAZINA EDIT <span class="concept-tag">Kept from xazina.com</span></p><h2>From the house.</h2><p>Engagement rings, the collections, the Xazina promise and the original diamond guides: Xazina’s own home-page blocks, laid out for every screen.</p></div>${blocks(homeBlocks,'shop-home-blocks')}</section>\n\n    <section class="notes light" id="design-notes"`)
+  .replace(/<span data-fact="(\w+)">[^<]*<\/span>/g,(m,k)=>k in facts?String(facts[k]):m)
+  .replace(/<footer class="wrap footer">[\s\S]*?<\/footer>/,footer(snapshot))
+  .replace(/href="https:\/\/(?:www\.)?xazina\.com([^"#?]*)"/g,(m,path)=>known.has(path)?`href="${local(path)}"`:m)
+  .replace('</nav>\n          <a class="film-visit"','<a href="/xazina-revamp/collections">Shop all</a><a href="/xazina-revamp/blogs/lab-grown-diamond-journal-by-xazina">Journal</a></nav>\n          <a class="film-visit"')
+  .replace('<a class="film-visit" href="https://www.xazina.com/">Visit Xazina <svg aria-hidden="true"><use href="#external"/></svg>','<a class="film-visit" href="#shop-navigation">Shop &amp; menu <svg aria-hidden="true"><use href="#down"/></svg>');
+ if(!html.includes('id="original-edit"'))throw Error('Xazina home: the captured "From the house." section was not placed');
+ await writeFile(home,html);
  console.log(`[xazina] ${all.length} themed routes and ${Object.keys(aliases).length} mapped aliases`);
 }
