@@ -1141,7 +1141,9 @@ function tryPickup() {
   }
   takeBall(best);
 }
-function keeperMayHandle(g) { return VN.walls || inBox(g.x, g.y, g.team); }
+// in a shootout every kick is at the one goal at +HL, so the keeper's box is that goal's, not their team's own
+function keeperInBox(g) { return S.phase === 'penalties' ? abs(g.x - HL) < VN.boxD && abs(g.y) < VN.boxW : inBox(g.x, g.y, g.team); }
+function keeperMayHandle(g) { return VN.walls || keeperInBox(g); }
 function keeperHolds(g) {
   const b = S.ball; b.z = 15;
   g.holdT = 1.3 + rnd() * 1.0;
@@ -1211,7 +1213,7 @@ function keeperSaves() {
   if (b.owner || (S.phase !== 'play' && S.phase !== 'penalties')) return;
   for (let t = 0; t < 2; t++) {
     const g = gkOf(t); if (!g || g.out || g.noBallT > 0) continue;
-    if (!VN.walls && !inBox(g.x, g.y, g.team) && !g.diving) continue;
+    if (!VN.walls && !keeperInBox(g) && !g.diving) continue;
     const reach = PR + BR + (g.diving ? 24 : 9);
     const d = hyp(b.x - g.x, b.y - g.y);
     if (d < reach && b.z < (g.diving ? 70 : 52)) {

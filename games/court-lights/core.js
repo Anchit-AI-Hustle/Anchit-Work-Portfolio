@@ -368,7 +368,8 @@ function giveBall(p, how) {
   if (B.holder && B.holder !== p) B.holder.picked = false;
   B.state = 'held'; B.holder = p; B.shot = null; B.pass = null; B.guide = false;
   B.last = p; B.lastSide = p.side; p.picked = false; p.pvx = p.x; p.pvz = p.z;
-  if (M.poss !== p.side) changePoss(p.side, how);
+  // an offensive rebound keeps the ball but still resets the shot clock
+  if (M.poss !== p.side || how === 'oreb') changePoss(p.side, how);
   if (M.user === p.side && M.kind !== 'c3' && M.kind !== 'dunk') M.ctrl = p;
   evt('catch', p, how);
 }
@@ -695,10 +696,10 @@ function passArrival() {
 
 /* ---------------------------------------------------------------------- possession, fouls, violations */
 function changePoss(side, how) {
-  const was = M.poss;
+  const was = M.poss, prevShot = M.shot;
   M.poss = side; M.shot = 24; M.front = false; M.backT = 0;
   if (how === 'oreb') M.shot = max(M.shot, 14);
-  if (how === 'oreb' && was === side) M.shot = 14;
+  if (how === 'oreb' && was === side) M.shot = max(prevShot, 14);
   planOffence(side, how);
   for (const p of courtPlayers()) { p.ai.crash = false; p.ai.alley = null; p.ai.drive = false; if (p.react && p.react.what === 'contest') p.react = null; }
   if (M.user >= 0 && side !== M.user && M.kind === 'game') { const h = B.holder || B; M.ctrl = nearest(M.court[M.user], h.x, h.z); }
@@ -915,10 +916,13 @@ export function requestTimeout(side) {
   return true;
 }
 // Fresh legs at a dead ball: tired players come off for rested ones, fouled-out players must.
+function ftShooter() { return M.ft ? M.ft.by : M.next && M.next.type === 'ft' ? M.next.shooter : null; }
 export function autoSubs(side, force) {
   if (M.kind !== 'game') return;
   if (side === M.user && M.subs !== 'auto' && !force) { M.court[side].forEach((p, i) => { if (p.fouls >= 5) subIn(side, i, bestBench(side, p)); }); return; }
   M.court[side].forEach((p, i) => {
+    // a tired player owed free throws takes them first; only fouling out forces them off
+    if (p.fouls < 5 && p === ftShooter()) return;
     if (p.fouls >= 5 || p.stam < 0.55) { const b = bestBench(side, p); if (b && (p.fouls >= 5 || b.stam > p.stam + 0.3)) subIn(side, i, b); }
   });
 }
@@ -936,6 +940,9 @@ export function subIn(side, i, b) {
   M.court[side][i] = b;
   M.match[opp(side)][i] = b;
   if (B.holder === out) giveBall(b, 'sub');
+  // free throws owed to a player who leaves are taken by the one who comes in
+  if (M.next && M.next.type === 'ft' && M.next.shooter === out) M.next.shooter = b;
+  if (M.ft && M.ft.by === out) M.ft.by = b;
   if (M.ctrl === out) M.ctrl = b;
   evt('sub', b, out);
   if (side === M.user || rnd() < 0.5) say('sub', b);
