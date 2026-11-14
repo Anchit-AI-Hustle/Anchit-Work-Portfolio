@@ -357,8 +357,8 @@ async function caseStudy(browser, vp) {
 
   const range = await page.$$eval('#im-range tbody tr', (rs) => rs.map((r) => [...r.cells].map((c) => c.innerText.trim())));
   const row = (label) => (range.find((r) => r[0].startsWith(label)) || []).slice(1);
-  check(`${L}: sizing shows low, base and high`, row('Extra revenue').join() === '3.6,9.4,15.3', JSON.stringify(row('Extra revenue')));
-  check(`${L}: sizing is contribution net of running costs`, row('Net of running costs').join() === '0.2,3.3,6.3', JSON.stringify(row('Net of running costs')));
+  check(`${L}: sizing shows low, base and high`, row('Extra revenue').join() === '3.9,8.8,13.7', JSON.stringify(row('Extra revenue')));
+  check(`${L}: sizing is contribution net of running costs`, row('Net of running costs').join() === '0.4,2.9,5.5', JSON.stringify(row('Net of running costs')));
   // Each column of levers must add up to the total printed under it.
   const f = (t) => parseFloat(String(t).replace('−', '-'));
   const sums = [0, 1, 2].map((i) => range.slice(0, 3).reduce((a, r) => a + f(r[i + 1]), 0));
@@ -372,7 +372,7 @@ async function caseStudy(browser, vp) {
   const levSum = lev.slice(0, -1).reduce((a, x) => a + f(x), 0);
   check(`${L}: the net is broken down by lever and the rows add up`, lev.length === 5 && lev[lev.length - 1] === row('Net of running costs')[1] && Math.abs(levSum - f(lev[lev.length - 1])) <= 0.11, lev.join(' , '));
   const sensBase = await page.$$eval('#im-sens tbody tr', (rs) => rs.map((r) => r.cells[2].innerText.trim()));
-  check(`${L}: every sensitivity row shares the base case`, sensBase.length === 9 && sensBase.every((x) => x === row('Net of running costs')[1]), sensBase.join());
+  check(`${L}: every sensitivity row shares the base case`, sensBase.length === 10 && sensBase.every((x) => x === row('Net of running costs')[1]), sensBase.join());
   const hidden = await page.$$eval('#im-range td.num, #im-cost td.num, #im-sens td.num', (cs) => cs.filter((c) => {
     const box = c.closest('.tbl').getBoundingClientRect(); const r = c.getBoundingClientRect();
     return r.right > box.right + 1 || r.left < box.left - 1;
@@ -601,11 +601,11 @@ async function prototype(browser, vp) {
     !/₹|\$|revenue is worth|incremental revenue|uplift|if the uplift holds|What it is worth|How to prove|Every rate/i.test(dash.text) && !dash.calc, (dash.text.match(/.{0,30}(₹|uplift|worth|prove).{0,30}/i) || [''])[0]);
   check(`${L}: the dashboard's table is group, action, customers and holdout`, dash.heads.join() === 'Group,Action,Customers,Holdout', dash.heads.join());
   const silentRows = dash.rows.filter(([n]) => /Open service ticket|Not due/.test(n));
-  const sent = dash.rows.filter(([n]) => !/Open service ticket|Not due|did not ask/.test(n));
-  const noAskRow = dash.rows.find(([n]) => /did not ask/.test(n)) || [];
+  const sent = dash.rows.filter(([n]) => !/Open service ticket|Not due|did not ask/i.test(n));
+  const noAskRow = dash.rows.find(([n]) => /did not ask/i.test(n)) || [];
   check(`${L}: every contacted group holds out 10%, and silent groups hold out none`,
     noAskRow[2] === 0 && silentRows.length === 2 && silentRows.every((r) => r[2] === 0) && sent.length === 3 && sent.every((r) => r[2] === Math.round(r[1] * 0.1)), JSON.stringify(dash.rows));
-  check(`${L}: adults who did not ask are a silent group of their own`, dash.rows.some(([n]) => n === 'Adults who did not ask, due') && dash.rows.some(([n]) => n === 'Adults who asked for a reminder, due'), dash.rows.map((r) => r[0]).join(' | '));
+  check(`${L}: people who did not ask are a silent group of their own; children need a parent who asked`, dash.rows.some(([n]) => n === 'Did not ask for a reminder, due') && dash.rows.some(([n]) => n === 'Adults who asked for a reminder, due') && dash.rows.some(([n]) => n === 'Children under 18, due, parent asked'), dash.rows.map((r) => r[0]).join(' | '));
   check(`${L}: dashboard KPIs are counts, and results stay empty until a pilot runs`,
     dash.kpis.join() === 'Customers scored,Contacted this cycle,Held out (10%),No message' && dash.results.length === 5 && dash.results.every((c) => c === 'Pending'), dash.kpis.join() + ' | ' + dash.results.slice(0, 3).join());
   // Selecting a row keeps keyboard focus on it and says it is expanded; a sort is announced.
@@ -631,9 +631,9 @@ async function prototype(browser, vp) {
   const note = norm(await page.textContent('#p-model .model-note'));
   check(`${L}: the sizing model is its own tab and says it is not part of the product`, /^Not part of the product/.test(note), note.slice(0, 60));
   const total = norm(await page.textContent('#m-total'));
-  check(`${L}: model total ₹9.4 cr · $1.00M`, total === '₹9.4 cr · $1.00M', total);
+  check(`${L}: model total ₹8.8 cr · $0.94M`, total === '₹8.8 cr · $0.94M', total);
   const netTxt = norm(await page.textContent('#m-net'));
-  check(`${L}: contribution after running costs ₹3.3 cr · $0.35M`, netTxt === '₹3.3 cr · $0.35M', netTxt);
+  check(`${L}: contribution after running costs ₹2.9 cr · $0.31M`, netTxt === '₹2.9 cr · $0.31M', netTxt);
   // With no recall lift but the lens-swap loss still on, the reminder loses money and must say so.
   await setNum(page, '#m-take', 0); await setNum(page, '#m-calllift', 0);
   const lossLine = norm(await page.textContent('#bylever'));
@@ -641,7 +641,7 @@ async function prototype(browser, vp) {
   check(`${L}: a loss in the model keeps its minus sign`, /Recall Reminder\s*−₹/.test(lossLine), lossLine.slice(0, 120));
   const be = await page.$$eval('#breakeven .be', (bs) => bs.map((b) => [b.dataset.be, b.querySelector('b').textContent, b.querySelector('small').textContent]));
   check(`${L}: break-even lifts for each action, in plain words`,
-    be.length === 3 && be.map((x) => x[1]).join() === '+0.21pp,+2.56pp,+3.12pp' && /^1 extra order for every 474 people/.test(be[0][2]), JSON.stringify(be).slice(0, 160));
+    be.length === 3 && be.map((x) => x[1]).join() === '+0.21pp,+2.85pp,+6.49pp' && /^1 extra order for every 474 people/.test(be[0][2]), JSON.stringify(be).slice(0, 160));
   // Review finding: break-even must solve the lever's own equation. Set the
   // follow-up lift to its break-even and its line in "Net by lever" reads zero.
   await setNum(page, '#m-conv', 0.2108);
@@ -656,7 +656,7 @@ async function prototype(browser, vp) {
   const junk = norm(await page.textContent('#m-total')) + ' ' + norm(await page.textContent('#m-net')) + ' ' + norm(await page.textContent('#costs'));
   const noFx = !/\$/.test(norm(await page.textContent('#m-total')));
   await setNum(page, '#m-acc', 9900000); await setNum(page, '#m-fx', 94.24); await setNum(page, '#m-pm', 64);
-  check(`${L}: the calculator never shows NaN, Infinity, negative revenue or a dollar figure without a rate`, !/NaN|Infinity/.test(junk) && !/^−/.test(junk) && noFx && norm(await page.textContent('#m-net')) === '₹3.3 cr · $0.35M', junk.slice(0, 90));
+  check(`${L}: the calculator never shows NaN, Infinity, negative revenue or a dollar figure without a rate`, !/NaN|Infinity/.test(junk) && !/^−/.test(junk) && noFx && norm(await page.textContent('#m-net')) === '₹2.9 cr · $0.31M', junk.slice(0, 90));
 
   let worst = 0;
   for (const tab of ['#t-customer', '#t-checkin', '#t-console', '#t-model', '#t-brand']) {
@@ -745,7 +745,7 @@ async function consistency(browser) {
   await b.page.click('#t-model');
   const num = async (id) => { const m = norm(await b.page.textContent(id)).match(/(−?)₹([\d.]+) cr/); return m ? m[1] + m[2] : ''; };
   const set = (o) => b.page.evaluate((o) => { for (const k in o) { const e = document.getElementById(k); e.value = o[k]; e.dispatchEvent(new Event('input', { bubbles: true })); } }, o);
-  const BASE_IN = { 'm-take': 2, 'm-calllift': 8, 'm-conv': 3, 'm-order': 3650, 'm-fval': 1950, 'm-incr': 75, 'm-reach': 30, 'm-cann': 3, 'm-freach': 80, 'm-noord': 30, 'm-due': 40 };
+  const BASE_IN = { 'm-take': 2, 'm-calllift': 8, 'm-conv': 3, 'm-order': 1950, 'm-fval': 1950, 'm-incr': 75, 'm-reach': 30, 'm-cann': 3, 'm-freach': 80, 'm-noord': 30, 'm-due': 40, 'm-found': 70 };
   const read = async (o) => { await set({ ...BASE_IN, ...o }); return { net: await num('#m-net'), rev: await num('#m-total'), cost: await num('#m-cost') }; };
   const cases = [await read({ 'm-take': 1, 'm-calllift': 4, 'm-conv': 1.5 }), await read({}), await read({ 'm-take': 3, 'm-calllift': 12, 'm-conv': 4.5 })];
   const okCases = cases.every((c, i) => c.net === study.net[i] && c.rev === study.rev[i] && c.cost === study.cost[i]);
@@ -761,7 +761,7 @@ async function consistency(browser) {
     const lo = (await read({ [r.k]: r.lo })).net; const hi = (await read({ [r.k]: r.hi })).net;
     if (lo !== r.cells[0] || hi !== r.cells[1]) bad.push(`${r.k}: page ${r.cells.join('/')} vs calculator ${lo}/${hi}`);
   }
-  check('every sensitivity figure on the case study matches the prototype calculator', study.sens.length === 9 && bad.length === 0, bad.join(' | ') || study.sens.length + ' rows');
+  check('every sensitivity figure on the case study matches the prototype calculator', study.sens.length === 10 && bad.length === 0, bad.join(' | ') || study.sens.length + ' rows');
   await b.ctx.close();
 }
 

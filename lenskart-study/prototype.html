@@ -369,8 +369,8 @@ html.embed body{padding-bottom:0!important}
 <section class="hero" aria-labelledby="hero-h">
   <div class="wrap">
     <span class="eyebrow">Concept demo · not a Lenskart product</span>
-    <h1 id="hero-h">A clickable demo of one idea for Lenskart: <span class="accent">tell every customer when their next eye test is due.</span></h1>
-    <p class="lede">A demo built for an outside-in case study of Lenskart, the Indian eyewear retailer, from public data only. It shows how Lenskart could remind each customer when their next eye test is due, book it, and suggest lenses or a new pair only after the test says one is needed. The six customers and all their data are made up.</p>
+    <h1 id="hero-h">A clickable demo of one idea for Lenskart: <span class="accent">follow up first-time testers, and remind those who ask when their next eye test is due.</span></h1>
+    <p class="lede">A demo built for an outside-in case study of Lenskart, the Indian eyewear retailer, from public data only. It shows how Lenskart could follow up people after their first eye test, remind parents of children and adults who ask when the next test is due, book it, and suggest lenses or a new pair only after the test says one is needed. The six customers and all their data are made up.</p>
     <div class="xlinks"><a class="btn btn-outline sm" href="/lenskart-study" target="_top">Read the case study</a><a class="btn btn-soft sm" href="/lenskart-study#audit" target="_top">See the evidence</a></div>
     <ol class="start" aria-label="How to use this demo">
       <li><span><b>Pick a customer.</b> Six people at different points: overdue, up to date, a child, a first eye test.</span></li>
@@ -388,7 +388,7 @@ html.embed body{padding-bottom:0!important}
 <!-- CUSTOMER -->
 <section class="panel on" id="p-customer" role="tabpanel" aria-labelledby="t-customer">
   <h2 id="customer" class="ptitle">Customer app</h2>
-  <p class="onscreen">What a customer would see in the Lenskart app, and why. The simulator changes this customer's situation, the phone shows what they would see, and the Recall Date card explains the reasoning. Here: the <b>Recall Date</b>, <b>Recall Booking</b> (the plan in the phone), the <b>Recall Outcome</b> (bottom of the phone) and, for Ravi, the <b>First Prescription Follow-up</b>.</p>
+  <p class="onscreen">The customer's app. Change the situation in the simulator to see the screen update. Here: the <b>Recall Date</b>, <b>Recall Booking</b> (the plan in the phone), the <b>Recall Outcome</b> (bottom of the phone) and, for Ravi, the <b>First Prescription Follow-up</b>.</p>
   <div class="persona-row" role="group" aria-label="Choose a customer">
     <button class="chip" data-p="0" aria-pressed="true">Neha, 29 · Bengaluru</button>
     <button class="chip" data-p="1" aria-pressed="false">Arjun, 34 · Pune</button>
@@ -466,7 +466,7 @@ html.embed body{padding-bottom:0!important}
           <ul class="plan small" id="e-reasons" style="margin-top:0"></ul>
           <div id="e-prio"></div>
           <div class="flow" id="e-actions"></div>
-          <details class="fold note"><summary>How this would work in production</summary><p class="small muted" style="padding:10px 0 12px">The due date is a rule on two facts Lenskart already holds, the date of the last eye test and the wearer's age. The intervals here follow published guidance from the American Optometric Association, the UK College of Optometrists and the International Myopia Institute (every 12 months under 18, every 6 months for a child on myopia-control lenses, every 24 months from 18 to 64 and every 12 months from 65); Lenskart's optometry team would set the final ones. A separate priority score only orders the call list. Symptoms are not held today; they would come from the assistant or a reply to a reminder. Lenskart's FAQ, read on 13 Nov 2026, said the lens-replacement offer is single use per user, so repeat use is a policy change this product would need. In production, a model trained on past cohorts predicts who will act, and every action is checked against a holdout group.</p></details>
+          
         </div>
       </div>
     </div>
@@ -479,13 +479,13 @@ html.embed body{padding-bottom:0!important}
     <div class="grid" style="align-content:start">
       <div class="card">
         <h2 id="checkin">Recall Reminder on WhatsApp</h2>
-        <p style="margin-top:8px">Lenskart holds the date and result of every eye test it runs, but the customer has to remember when the next one is due. The Recall Reminder sends one short, plain-language message when a test falls due, with a slot to book. <b>Who receives it depends on the wearer's age.</b></p>
+        <p style="margin-top:8px">One WhatsApp message when a test falls due, with a slot to book. <b>Who receives it depends on the wearer's age, and on whether they asked for it.</b></p>
         <div class="scroll-x" style="margin-top:12px"><table class="aud" id="aud-tbl" aria-label="Who receives the reminder, by age">
           <thead><tr><th scope="col">Wearer</th><th scope="col">Re-test rhythm</th><th scope="col">Reminder goes to</th></tr></thead>
           <tbody>
-            <tr data-a="minor"><th scope="row">Under 18</th><td>Every 12 months; every 6 months on myopia-control lenses</td><td><b>To the parent</b>: the parent who holds the account, with consent taken at the eye test (DPDP Act 2023 needs it for under-18s)</td></tr>
-            <tr data-a="adult"><th scope="row">18 to 64</th><td>Every 24 months, sooner if they report trouble seeing</td><td><b>To the wearer</b>. A family member gets a copy only if the wearer opts in</td></tr>
-            <tr data-a="senior"><th scope="row">65 and above</th><td>Every 12 months</td><td><b>To the wearer</b>. A family member gets a copy only if the wearer opts in</td></tr>
+            <tr data-a="minor"><th scope="row">Under 18</th><td>Every 12 months; every 6 months on myopia-control lenses</td><td><b>To the parent</b>, if the parent asked at the eye test (the DPDP Act 2023 needs a parent's consent for under-18s)</td></tr>
+            <tr data-a="adult"><th scope="row">18 to 64</th><td>Every 24 months, sooner if they report trouble seeing</td><td><b>To the wearer</b>, only if they asked at the eye test. A family member gets a copy only if the wearer opts in</td></tr>
+            <tr data-a="senior"><th scope="row">65 and above</th><td>Every 12 months</td><td><b>To the wearer</b>, only if they asked at the eye test. A family member gets a copy only if the wearer opts in</td></tr>
           </tbody></table></div>
         <div class="ctl">
           <span class="label" id="l-person">Customer</span>
@@ -567,7 +567,7 @@ html.embed body{padding-bottom:0!important}
         <h3>Rules for every group</h3>
         <ul class="plan small" style="margin-top:8px">
           <li>No price or discount in any message</li>
-          <li>Adults are reminded only if they asked at their eye test</li>
+          <li>Reminders only for adults, or parents, who asked at the eye test</li>
           <li>Children: messages go to the consented parent</li>
           <li>Calls only to people who agreed, from Lenskart's registered service line</li>
           <li>Re-tests are booked into open optometrist slots only</li>
@@ -596,13 +596,13 @@ html.embed body{padding-bottom:0!important}
       <div class="row"><label for="m-same">Re-tests where the power is unchanged (%)<small>Assumption: keep your pair, ₹0</small></label><input id="m-same" type="number" min="0" max="100" step="5" value="40"></div>
       <div class="row"><label for="m-swap">Re-tests that end in a lens swap (%)<small>Assumption; the rest buy a new pair</small></label><input id="m-swap" type="number" min="0" max="100" step="5" value="25"></div>
       <div class="row"><label for="m-swapv">Revenue from a lens swap (₹)<small>Assumption, from Lenskart's published totals of ₹199 to ₹2,049; blue-light lenses are standard at no charge from 12 Nov 2026</small></label><input id="m-swapv" type="number" min="0" step="50" value="500"></div>
-      <div class="row"><label for="m-order">Revenue from one order (₹)<small>Derived: 1.87 units × ₹1,950 selling price</small></label><input id="m-order" type="number" min="0" step="50" value="3650"></div>
+      <div class="row"><label for="m-order">Revenue from a new pair after a re-test (₹)<small>One pair at the ₹1,950 India selling price (Q2 FY27). 1.87 units a customer a quarter would make it ₹3,650</small></label><input id="m-order" type="number" min="0" step="50" value="1950"></div>
       <div class="row"><label for="m-incr">Truly extra, not just earlier (%)<small>Assumption: the rest would have come anyway, later</small></label><input id="m-incr" type="number" min="0" max="100" step="5" value="75"></div>
       <div class="row"><label for="m-base">Due customers who would return anyway (%)<small>Assumption; not disclosed</small></label><input id="m-base" type="number" min="0" max="100" step="5" value="20"></div>
       <div class="row"><label for="m-cann">Of those, now swap lenses instead of buying a pair (%)<small>Assumption: the cost of offering the swap first</small></label><input id="m-cann" type="number" min="0" max="100" step="1" value="3"></div>
       <p class="label" style="margin-top:14px">Lever 2 · First Prescription Follow-up</p>
       <div class="row"><label for="m-first">First-ever eye tests a year<small>FY26 disclosed: "over 1 Cr"</small></label><input id="m-first" type="number" min="0" step="100000" value="10000000"></div>
-      <div class="row"><label for="m-found">Where a power is found (%)<small>Assumption; Lenskart reports about 70% for children</small></label><input id="m-found" type="number" min="0" max="100" step="5" value="70"></div>
+      <div class="row"><label for="m-found">Where a power is found (%)<small>Assumption; not disclosed</small></label><input id="m-found" type="number" min="0" max="100" step="5" value="70"></div>
       <div class="row"><label for="m-noord">Of those, no order 30 days later (%)<small>Assumption; management says a significant majority buy</small></label><input id="m-noord" type="number" min="0" max="100" step="5" value="30"></div>
       <div class="row"><label for="m-freach">First-timers reachable on WhatsApp (%)<small>Assumption: the number is given at the eye test</small></label><input id="m-freach" type="number" min="0" max="100" step="1" value="80"></div>
       <div class="row"><label for="m-conv">Extra who order after a follow-up, vs holdout (pp)<small>Assumption; no published benchmark</small></label><input id="m-conv" type="number" min="0" max="100" step="0.5" value="3"></div>
@@ -642,6 +642,7 @@ html.embed body{padding-bottom:0!important}
 
 <!-- BRAND -->
 <section class="panel" id="p-brand" role="tabpanel" aria-labelledby="t-brand" hidden>
+  <div class="model-note" role="note"><b>Not part of the product.</b> The design reference this demo was built from, read from Lenskart's public pages.</div>
   <div class="grid">
     <div class="card">
       <h2 id="brand">Lenskart brand context schema</h2>
@@ -736,7 +737,7 @@ function actions(s,st,p){
     a.push({t:'No offer and no reminder',d:'The next reminder waits for the usual interval.'});
   } else if(st==='followup'){
     a.push({t:'Follow-up 1 on day 3',d:'The saved power and two ways to try frames. No price or discount.'});
-    a.push({t:'Follow-up 2 on day 21, then stop',d:'Sent only if there is still no order. After day 30 nothing more is sent.'});
+    a.push({t:'Follow-up 2 on day 21, then stop',d:'Sent only if there is still no order. In a pilot test arm, a call from the testing store replaces it for people who agreed. After day 30 nothing more is sent.'});
   } else if(st==='stopped'){
     a.push({t:'Nothing more is sent',d:'Two follow-ups have gone and 30 days have passed. The power stays saved for whenever '+p.name+' returns.'});
   } else if(st==='tested'){
@@ -1057,10 +1058,10 @@ var seed = 20261113, cohort = [], sortK = 'n', sortDir = -1, selSeg = null;
 // Operational groups only. The dashboard shows what each group gets, never
 // what it is projected to earn; that lives in the separate sizing model.
 var GROUPS = {
-  first:{seg:'First test, power found, no order (last 30 days)',action:'Prescription follow-up: 2 messages, then stop',rules:[['Channel','WhatsApp'],['Messages','Day 3 and day 21'],['Call','None'],['Stops','Day 30, or on an order']]},
-  child:{seg:'Children under 18, due',action:'Reminder to the parent, with an open slot',rules:[['Channel','WhatsApp, to the consented parent'],['Messages','On the due date, and day 8 if not booked'],['Call','None'],['Slot','Open optometrist slots only']]},
+  first:{seg:'First test, power found, no order (last 30 days)',action:'Prescription follow-up: 2 touches, then stop',rules:[['Channel','WhatsApp'],['Messages','Day 3, and day 21 if no order'],['Call','Day 21, if they agreed at the test: a call from the testing store replaces message 2 (a pilot test arm)'],['Stops','Day 30, or on an order']]},
+  child:{seg:'Children under 18, due, parent asked',action:'Reminder to the parent, with an open slot',rules:[['Channel','WhatsApp, to the consented parent'],['Messages','On the due date, and day 8 if not booked'],['Call','None'],['Slot','Open optometrist slots only']]},
   optin:{seg:'Adults who asked for a reminder, due',action:'Reminder with an open slot; a call on day 8 if overdue',rules:[['Channel','WhatsApp'],['Messages','On the due date, and day 8 if not booked'],['Call','Day 8, overdue and agreed: one call from the service line'],['Slot','Open optometrist slots only']]},
-  noask:{seg:'Adults who did not ask, due',action:'No message; due date shown in the app',quiet:true,rules:[['Channel','None'],['In the app','Due date on the profile'],['Call','None']]},
+  noask:{seg:'Did not ask for a reminder, due',action:'No message; due date shown in the app',quiet:true,rules:[['Channel','None'],['In the app','Due date on the profile'],['Call','None']]},
   ticket:{seg:'Open service ticket',action:'Hold every message',zero:true,rules:[['Channel','None until the ticket closes'],['Restart','7 days after it closes']]},
   ok:{seg:'Not due',action:'Nothing is sent',zero:true,rules:[['Channel','None'],['Next','On the due date']]}
 };
@@ -1073,7 +1074,7 @@ function build(){
     var test = Math.round(iv*(0.15 + Math.pow(r(),1.15)*1.6));
     var st = test>=1.5*iv ? 'overdue' : test>=iv ? 'due' : 'notdue';
     var u = r(), asked = r()<0.3;
-    var key = u<0.03 ? 'ticket' : u<0.09 ? 'first' : st==='notdue' ? 'ok' : age<18 ? 'child' : asked ? 'optin' : 'noask';
+    var key = u<0.03 ? 'ticket' : u<0.09 ? 'first' : st==='notdue' ? 'ok' : !asked ? 'noask' : age<18 ? 'child' : 'optin';
     cohort.push({age:age,st:(key==='first'?'notdue':st),key:key});
   }
   selSeg = null;
@@ -1157,7 +1158,7 @@ function calc(){
   el('m-total-sub').textContent = 'About '+(total/5264.8e7*100).toLocaleString('en-IN',{maximumFractionDigits:1})+'% on top of FY26 India revenue of ₹5,265 cr.';
   el('m-total-f').textContent = CR(A)+' + '+CR(B)+' − '+CR(C)+' = '+CR(total);
   el('m-net').textContent = CR(contrib-cost)+(fxOk?' · '+USDM(contrib-cost,I.fx):'');
-  el('m-net-sub').textContent = CR(total)+' × ('+(I.pm*100).toFixed(1)+'% product margin − '+(I.sell*100).toFixed(0)+'% selling cost) = '+CR(contrib)+', less '+CR2(cost)+' running cost. '+(I.pm<=I.sell ? 'No contribution at this margin.' : 'Return on running cost: '+(cost<=0||contrib<=0 ? 'n/a' : contrib<cost ? 'below 1x' : 'about '+(contrib/cost).toFixed(0)+'x')+'.');
+  el('m-net-sub').textContent = CR(total)+' × ('+(I.pm*100).toFixed(1)+'% product margin − '+(I.sell*100).toFixed(0)+'% selling cost) = '+CR(contrib)+', less '+CR2(cost)+' running cost. '+(I.pm<=I.sell ? 'No contribution at this margin.' : 'Return on running cost: '+(cost<=0||contrib<=0 ? 'n/a' : contrib<cost ? 'below 1x' : 'about '+(contrib/cost).toFixed(1)+'x')+'.');
 }
 all('.calc input').forEach(function(i){i.addEventListener('input',calc);});
 
