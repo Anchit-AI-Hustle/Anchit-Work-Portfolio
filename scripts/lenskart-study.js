@@ -34,6 +34,8 @@
 //   symptom     a customer reporting trouble seeing is told all is fine
 //   doctor      sudden loss, pain or flashes are treated as a routine test
 //   reset       a re-test result does not reset the clock
+//   refer       unchanged power with trouble seeing is closed out as "keep your pair"
+//   doctorchat  the assistant quotes prices to someone told to see a doctor
 //   nocall      the store calls a customer who never agreed to calls
 //   consolemath the console table uses different maths from the calculator
 //   embedbar    the embedded prototype shows a second consent bar
@@ -72,7 +74,9 @@ function mutate(src) {
     doctor: ["if(s.sym===2) return 'doctor';", ''],
     reset: ['else simState.test = 0;', 'else simState.test = simState.test;'],
     nocall: ["a.push(s.callOk ? {t:'Store call on day 8 if no slot is booked'", "a.push(true ? {t:'Store call on day 8 if no slot is booked'"],
-    consolemath: ['n*I.reach*I.take*perRetest(I)*I.incr', 'n*0.07*4280'],
+    consolemath: ['retests*perRetest(I)*I.incr - lost', 'n*0.07*4280'],
+    refer: ["(s.result==='same' && s.sym===1) ? 'refer' : 'tested'", "'tested'"],
+    doctorchat: ["var reply = st==='doctor' ?", 'var reply = false ?'],
     embedbar: ['html.embed #consentBar{display:none!important}', ''],
     deeplink: ['function fromHash(scroll, focus){', 'function fromHash(scroll, focus){ if(!focus) return;'],
     walkurl: ['<a href="/lenskart-study/prototype#checkin">https://', '<a href="/lenskart-study/prototype#console">https://'],
@@ -218,8 +222,8 @@ async function caseStudy(browser, vp) {
     said[f] = norm(await page.textContent('#audit-count'));
   }
   await page.click('.filters .chip[data-f="all"]');
-  check(`${L}: audit filters show 11 live, 4 partial, 6 not found, and say so`,
-    counts.live === 11 && counts.part === 4 && counts.none === 6 && /^Showing 6 of 21/.test(said.none), JSON.stringify(counts) + ' ' + said.none);
+  check(`${L}: audit filters show 12 live, 4 partial, 6 not found, and say so`,
+    counts.live === 12 && counts.part === 4 && counts.none === 6 && /^Showing 6 of 22/.test(said.none), JSON.stringify(counts) + ' ' + said.none);
   // The audit could not load the rendered India storefront; the page must say so.
   const limit = await page.$eval('#audit .sec-head', (e) => e.innerText);
   check(`${L}: audit states that the rendered India storefront was not seen`, /redirected to its US storefront/.test(limit), limit.slice(0, 80));
@@ -281,17 +285,18 @@ async function caseStudy(browser, vp) {
 
   const range = await page.$$eval('#im-range tbody tr', (rs) => rs.map((r) => [...r.cells].map((c) => c.innerText.trim())));
   const row = (label) => (range.find((r) => r[0].startsWith(label)) || []).slice(1);
-  check(`${L}: sizing shows low, base and high`, row('Extra revenue').join() === '17.0,41.1,65.3', JSON.stringify(row('Extra revenue')));
-  check(`${L}: sizing is contribution net of running costs`, row('Net of running costs').join() === '6.1,18.2,30.4', JSON.stringify(row('Net of running costs')));
+  check(`${L}: sizing shows low, base and high`, row('Extra revenue').join() === '5.2,15.7,26.2', JSON.stringify(row('Extra revenue')));
+  check(`${L}: sizing is contribution net of running costs`, row('Net of running costs').join() === '−0.4,4.9,10.1', JSON.stringify(row('Net of running costs')));
   // Each column of levers must add up to the total printed under it.
-  const sums = [0, 1, 2].map((i) => range.slice(0, 2).reduce((a, r) => a + parseFloat(r[i + 1]), 0));
-  const tot = row('Extra revenue').map(parseFloat);
-  check(`${L}: the two levers add up to the total in every column`, sums.every((x, i) => Math.abs(x - tot[i]) <= 0.11), sums.map((x) => x.toFixed(1)).join());
+  const f = (t) => parseFloat(String(t).replace('−', '-'));
+  const sums = [0, 1, 2].map((i) => range.slice(0, 3).reduce((a, r) => a + f(r[i + 1]), 0));
+  const tot = row('Extra revenue').map(f);
+  check(`${L}: the two levers less the lens-swap loss add up to the total in every column`, sums.every((x, i) => Math.abs(x - tot[i]) <= 0.11), sums.map((x) => x.toFixed(1)).join());
   const costRows = await page.$$eval('#im-cost tbody tr', (rs) => rs.map((r) => parseFloat(r.cells[2].innerText)));
   const costTotal = costRows.pop();
-  check(`${L}: running costs are itemised and add up`, costTotal === 4.82 && Math.abs(costRows.reduce((a, b) => a + b, 0) - costTotal) <= 0.011, costRows.join('+') + '=' + costTotal);
+  check(`${L}: running costs are itemised and add up`, costTotal === 3.94 && Math.abs(costRows.reduce((a, b) => a + b, 0) - costTotal) <= 0.011, costRows.join('+') + '=' + costTotal);
   const sensBase = await page.$$eval('#im-sens tbody tr', (rs) => rs.map((r) => r.cells[2].innerText.trim()));
-  check(`${L}: every sensitivity row shares the base case`, sensBase.length === 6 && sensBase.every((x) => x === row('Net of running costs')[1]), sensBase.join());
+  check(`${L}: every sensitivity row shares the base case`, sensBase.length === 8 && sensBase.every((x) => x === row('Net of running costs')[1]), sensBase.join());
   const hidden = await page.$$eval('#im-range td.num, #im-cost td.num, #im-sens td.num', (cs) => cs.filter((c) => {
     const box = c.closest('.tbl').getBoundingClientRect(); const r = c.getBoundingClientRect();
     return r.right > box.right + 1 || r.left < box.left - 1;
@@ -338,17 +343,17 @@ async function prototype(browser, vp) {
 
   // Status per customer, the phone agreeing with the engine, and nothing for
   // sale before an eye test.
-  const tiers = { 0: 'Overdue', 1: 'Not due', 2: 'Due now', 3: 'Due now', 4: 'First-test follow-up' };
+  const tiers = { 0: 'Overdue', 1: 'Not due', 2: 'Due now', 3: 'Due now', 4: 'First-test follow-up', 5: 'Due now' };
   const got = {}; const disagree = []; const presale = [];
-  for (const i of [1, 2, 3, 4, 0]) {
+  for (const i of [1, 2, 3, 4, 5, 0]) {
     await who(page, i);
     got[i] = await tierOf(page);
     const st = norm(await page.textContent('#s-status'));
     if (/overdue/.test(st) !== (got[i] === 'Overdue') || /up to date/.test(st) !== (got[i] === 'Not due')) disagree.push(`p${i}: "${st}" vs ${got[i]}`);
     const n = await nextCard(page);
-    if (i < 4 ? (!n.hold || /₹/.test(n.text)) : SALES.test(n.text)) presale.push(`p${i}: ${n.title}`);
+    if (i !== 4 ? (!n.hold || /₹/.test(n.text)) : SALES.test(n.text)) presale.push(`p${i}: ${n.title}`);
   }
-  check(`${L}: Neha Overdue, Arjun Not due, Kabir Due now, Meera Due now, Ravi in follow-up`, Object.keys(tiers).every((i) => got[i] === tiers[i]), JSON.stringify(got));
+  check(`${L}: Neha Overdue, Arjun Not due, Kabir, Meera and Usha Due now, Ravi in follow-up`, Object.keys(tiers).every((i) => got[i] === tiers[i]), JSON.stringify(got));
   check(`${L}: phone and engine agree on how due the test is`, disagree.length === 0, disagree.join(' | '));
   check(`${L}: nothing is priced or offered before an eye test`, presale.length === 0, presale.join(' | '));
 
@@ -358,7 +363,7 @@ async function prototype(browser, vp) {
   const pairOnly = await tierOf(page);
   await who(page, 2); await setRange(page, '#in-test', 48);
   const longGap = [await tierOf(page), norm(await page.textContent('#s-status'))];
-  check(`${L}: an old pair does not change the due status; a long gap does`, pairOnly === 'Due now' && longGap[0] === 'Overdue' && /^Kabir's eye test is overdue/.test(longGap[1]), `${pairOnly} | ${longGap.join(' | ')}`);
+  check(`${L}: an old pair does not change the due status; a long gap does`, pairOnly === 'Due now' && longGap[0] === 'Overdue' && /^Kabir's eye test is overdue/.test(longGap[1]) && /Sana agreed to a call/.test(norm(await page.textContent('#e-actions'))), `${pairOnly} | ${longGap.join(' | ')}`);
 
   // Overdue gets a booking first; the store calls only a customer who agreed.
   await who(page, 0);
@@ -385,12 +390,13 @@ async function prototype(browser, vp) {
     re.tier === 'Re-check' && re.card.hold && !/₹/.test(re.card.text) && /^Free re-check/.test(re.steps[0]) && /^No message is sent/.test(re.msg), `${re.tier} | ${re.card.title} | ${re.steps[0]}`);
   await page.click('#in-sym button[data-s="2"]');
   await page.check('#in-ticket');
-  const doc = { tier: await tierOf(page), card: await nextCard(page), steps: await stepsOf(page), chat: [await ask(page, 'need'), await ask(page, 'frame')], msg: await checkinText(page) };
+  const doc = { tier: await tierOf(page), card: await nextCard(page), steps: await stepsOf(page), chat: [await ask(page, 'need'), await ask(page, 'frame'), await ask(page, 'cost')], msg: await checkinText(page) };
   check(`${L}: sudden loss, pain or flashes go to an eye doctor and hold everything`,
-    doc.tier === 'See an eye doctor' && doc.card.hold && /eye doctor/.test(doc.card.title) && /eye doctor/.test(doc.steps[0]) && /eye doctor today/.test(doc.chat[0]) && /^No message is sent/.test(doc.msg), `${doc.tier} | ${doc.card.title} | ${doc.steps[0]}`);
+    doc.tier === 'See an eye doctor' && doc.card.hold && /eye doctor/.test(doc.card.title) && /eye doctor/.test(doc.steps[0]) && doc.chat.every((r) => /eye doctor today/.test(r) && !/₹/.test(r)) && /^No message is sent/.test(doc.msg), `${doc.tier} | ${doc.card.title} | ${doc.steps[0]}`);
 
   // A re-test happens today: it resets the clock everywhere at once.
   await who(page, 0);
+  await page.click('#in-sym button[data-s="0"]');
   await page.click('#in-result button[data-r="same"]');
   const after = {};
   after.same = { tier: await tierOf(page), card: await nextCard(page), plan: norm(await page.textContent('#s-nudge-title')), disabled: await page.$eval('#in-test', (e) => e.disabled), reply: await ask(page, 'need'), msg: await checkinText(page) };
@@ -398,6 +404,12 @@ async function prototype(browser, vp) {
     after.same.tier === 'Tested today' && after.same.plan === 'Re-test done' && after.same.disabled && /has not changed/.test(after.same.reply) && /^No message is sent/.test(after.same.msg) && !/overdue/i.test(after.same.msg),
     `${after.same.tier} | ${after.same.plan} | ${after.same.msg.slice(0, 50)}`);
   check(`${L}: unchanged power keeps the pair, with no price`, after.same.card.title === 'Your power is the same' && after.same.card.hold && !/₹/.test(after.same.card.text), after.same.card.title);
+  // Tested, power unchanged, and still trouble seeing: glasses are not the
+  // answer, so the customer is referred on instead of told to keep the pair.
+  await page.click('#in-sym button[data-s="1"]');
+  const ref = { tier: await tierOf(page), card: await nextCard(page), steps: await stepsOf(page), reply: await ask(page, 'need') };
+  check(`${L}: unchanged power with trouble seeing is referred to an eye doctor`,
+    ref.tier === 'Refer to an eye doctor' && ref.card.hold && /eye doctor/.test(ref.card.text) && !/Keep your pair/.test(ref.card.text) && /^Refer to an eye doctor/.test(ref.steps[0]) && /see an eye doctor/.test(ref.reply), `${ref.tier} | ${ref.card.title} | ${ref.steps[0]}`);
   await page.click('#in-result button[data-r="none"]');
   const back = [await tierOf(page), await page.$eval('#in-test', (e) => e.value + (e.disabled ? ' disabled' : ''))];
   check(`${L}: "Not tested yet" puts the customer's own test date back`, back[0] === 'Overdue' && back[1] === '38', back.join(' | '));
@@ -411,8 +423,9 @@ async function prototype(browser, vp) {
     after.oldFrame.title === 'New lenses in your current frame' && after.youngFrame.title === after.oldFrame.title && /₹199 fitting fee/.test(after.oldFrame.text)
       && /over two years old/.test(after.oldFrame.text) && /a new frame is your choice/.test(after.oldFrame.text) && !/over two years old/.test(after.youngFrame.text),
     `${after.oldFrame.title} | ${after.youngFrame.title}`);
-  check(`${L}: a child gets the lenses the optometrist recommends; near blur after 40 gets progressives`,
-    /^New lenses in Kabir's current frame/.test(after.child.title) && /If the optometrist recommends them, these can be myopia-control lenses/.test(after.child.text) && /^Progressive lenses/.test(after.near.title), `${after.child.title} | ${after.near.title}`);
+  check(`${L}: a child on myopia control gets the lens the optometrist confirms, with no ₹199 claim; near blur after 40 gets progressives at the published price`,
+    /^New myopia-control lenses in Kabir's current frame/.test(after.child.title) && /optometrist confirms the lens/.test(after.child.text) && !/₹199/.test(after.child.text)
+      && /^Progressive lenses/.test(after.near.title) && /From ₹649/.test(after.near.text) && !/Gold/.test(after.near.text), `${after.child.title} | ${after.near.title}`);
 
   // An open ticket stops every offer, every message and every priced answer.
   await who(page, 0);
@@ -475,15 +488,20 @@ async function prototype(browser, vp) {
   await page.click('#t-customer');
   for (const [k, d] of [['d1', 1], ['d25', 25], ['d40', 40]]) { await setRange(page, '#in-days', d); ravi[k] = await checkinText(page); }
   ravi.end = await tierOf(page);
-  check(`${L}: first-test follow-up sends two messages in 30 days, then stops`,
+  await setRange(page, '#in-days', 12);
+  await page.click('#in-sym button[data-s="1"]');
+  ravi.sym = [await tierOf(page), await checkinText(page)];
+  await page.click('#in-sym button[data-s="0"]');
+  check(`${L}: first-test follow-up sends two messages in 30 days, then stops; trouble seeing turns it into a re-check`,
     ravi.title === 'Lenskart Follow-up' && /message 1 of 2/.test(ravi.d12) && /^No message is sent/.test(ravi.d1) && /message 2 of 2/.test(ravi.d25)
-      && /^No message is sent/.test(ravi.d40) && ravi.end === 'Follow-up ended' && !SALES.test(ravi.d12) && !SALES.test(ravi.d25), `${ravi.title} | ${ravi.d12.slice(0, 60)} | ${ravi.end}`);
+      && /^No message is sent/.test(ravi.d40) && ravi.end === 'Follow-up ended' && !SALES.test(ravi.d12) && !SALES.test(ravi.d25)
+      && ravi.sym[0] === 'Re-check' && /^No message is sent/.test(ravi.sym[1]), `${ravi.title} | ${ravi.d12.slice(0, 60)} | ${ravi.end}`);
 
   await page.click('#t-console');
   const total = norm(await page.textContent('#m-total'));
-  check(`${L}: impact total ₹41.1 cr · $4.36M`, total === '₹41.1 cr · $4.36M', total);
+  check(`${L}: impact total ₹15.7 cr · $1.67M`, total === '₹15.7 cr · $1.67M', total);
   const netTxt = norm(await page.textContent('#m-net'));
-  check(`${L}: contribution after running costs ₹18.2 cr · $1.93M`, netTxt === '₹18.2 cr · $1.93M', netTxt);
+  check(`${L}: contribution after running costs ₹4.9 cr · $0.51M`, netTxt === '₹4.9 cr · $0.51M', netTxt);
   const head = norm(await page.textContent('#segtbl th:last-child'));
   check(`${L}: value column is labelled as incremental revenue`, /^Incremental revenue/.test(head), head);
   // The table and the calculator share their assumptions: with no extra
@@ -492,11 +510,11 @@ async function prototype(browser, vp) {
   const table = () => page.$$eval('#segtbl tbody tr', (rs) => rs.map((r) => [r.cells[0].innerText.trim(), r.cells[3].innerText.trim()]));
   const t1 = await table();
   const kpi = money(norm(await page.$eval('#kpis .kpi:last-child b', (b) => b.textContent)));
-  await setNum(page, '#m-take', 0);
+  await setNum(page, '#m-take', 0); await setNum(page, '#m-calllift', 0); await setNum(page, '#m-cann', 0);
   const t0 = await table();
-  await setNum(page, '#m-take', 6);
+  await setNum(page, '#m-take', 2); await setNum(page, '#m-calllift', 8); await setNum(page, '#m-cann', 3);
   const recall0 = t0.filter(([n]) => /due or overdue/.test(n)).map(([, v]) => v);
-  const follow = t0.find(([n]) => /^First-ever/.test(n));
+  const follow = t0.find(([n]) => /^First test/.test(n));
   check(`${L}: the console table uses the calculator's assumptions`,
     Math.abs(t1.reduce((a, [, v]) => a + money(v), 0) - kpi) <= 3 && recall0.length === 3 && recall0.every((v) => v === '0') && money(follow[1]) > 0, `kpi=${kpi} recall at 0pp=${recall0.join()}`);
   const zero = t1.filter(([n]) => /Open service ticket|Not due/.test(n)).map(([, v]) => v);
@@ -521,8 +539,9 @@ async function prototype(browser, vp) {
   // Nonsense inputs must not produce nonsense output.
   await setNum(page, '#m-acc', -5000000); await setNum(page, '#m-fx', 0); await setNum(page, '#m-pm', 250);
   const junk = norm(await page.textContent('#m-total')) + ' ' + norm(await page.textContent('#m-net')) + ' ' + norm(await page.textContent('#costs'));
+  const noFx = !/\$/.test(norm(await page.textContent('#m-total')));
   await setNum(page, '#m-acc', 9900000); await setNum(page, '#m-fx', 94.24); await setNum(page, '#m-pm', 64);
-  check(`${L}: the calculator never shows NaN, Infinity or negative revenue`, !/NaN|Infinity/.test(junk) && !/^−/.test(junk) && norm(await page.textContent('#m-net')) === '₹18.2 cr · $1.93M', junk.slice(0, 90));
+  check(`${L}: the calculator never shows NaN, Infinity, negative revenue or a dollar figure without a rate`, !/NaN|Infinity/.test(junk) && !/^−/.test(junk) && noFx && norm(await page.textContent('#m-net')) === '₹4.9 cr · $0.51M', junk.slice(0, 90));
 
   let worst = 0;
   for (const tab of ['#t-customer', '#t-checkin', '#t-console', '#t-brand']) {
@@ -607,11 +626,11 @@ async function consistency(browser) {
   await a.ctx.close();
   const b = await open(browser, vp, '/lenskart-study/prototype');
   await b.page.click('#t-console');
-  const num = async (id) => (norm(await b.page.textContent(id)).match(/₹(-?[\d.]+) cr/) || [])[1] || '';
+  const num = async (id) => { const m = norm(await b.page.textContent(id)).match(/(−?)₹([\d.]+) cr/); return m ? m[1] + m[2] : ''; };
   const set = (o) => b.page.evaluate((o) => { for (const k in o) { const e = document.getElementById(k); e.value = o[k]; e.dispatchEvent(new Event('input', { bubbles: true })); } }, o);
-  const BASE_IN = { 'm-take': 6, 'm-conv': 3, 'm-order': 3650, 'm-incr': 75, 'm-reach': 80, 'm-due': 40 };
+  const BASE_IN = { 'm-take': 2, 'm-calllift': 8, 'm-conv': 3, 'm-order': 3650, 'm-fval': 1950, 'm-incr': 75, 'm-reach': 80, 'm-cann': 3 };
   const read = async (o) => { await set({ ...BASE_IN, ...o }); return { net: await num('#m-net'), rev: await num('#m-total'), cost: await num('#m-cost') }; };
-  const cases = [await read({ 'm-take': 2, 'm-conv': 1.5 }), await read({}), await read({ 'm-take': 10, 'm-conv': 4.5 })];
+  const cases = [await read({ 'm-take': 1, 'm-calllift': 4, 'm-conv': 1.5 }), await read({}), await read({ 'm-take': 3, 'm-calllift': 12, 'm-conv': 4.5 })];
   const okCases = cases.every((c, i) => c.net === study.net[i] && c.rev === study.rev[i] && c.cost === study.cost[i]);
   check('case study low, base and high match the prototype calculator', study.net.length === 3 && okCases,
     `case study ${JSON.stringify([study.rev, study.cost, study.net])} vs calculator ${JSON.stringify(cases)}`);
@@ -620,7 +639,7 @@ async function consistency(browser) {
     const lo = (await read({ [r.k]: r.lo })).net; const hi = (await read({ [r.k]: r.hi })).net;
     if (lo !== r.cells[0] || hi !== r.cells[1]) bad.push(`${r.k}: page ${r.cells.join('/')} vs calculator ${lo}/${hi}`);
   }
-  check('every sensitivity figure on the case study matches the prototype calculator', study.sens.length === 6 && bad.length === 0, bad.join(' | ') || study.sens.length + ' rows');
+  check('every sensitivity figure on the case study matches the prototype calculator', study.sens.length === 8 && bad.length === 0, bad.join(' | ') || study.sens.length + ' rows');
   await b.ctx.close();
 }
 
