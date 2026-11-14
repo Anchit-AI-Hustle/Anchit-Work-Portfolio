@@ -550,6 +550,8 @@ function releaseShot(p) {
     // the shot is up: bigs crash the glass, the others get back
     for (const q of courtPlayers()) q.ai.crash = q.side === p.side ? (q.info.pos === 'C' || q.info.pos === 'PF' || q.info.pos === 'F') : true;
   }
+  // a missed dunk is decided at the rim and never reaches resolveShot: run the miss now, so a shooting foul on it gets its free throws
+  if (kind === 'dunk' && !make) missedShot(B.shot, false);
 }
 function resolveShot(d, dx, dz, s) {
   const sh = B.shot; sh.done = true;
