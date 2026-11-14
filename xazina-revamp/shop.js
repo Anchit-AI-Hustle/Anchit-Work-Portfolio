@@ -185,7 +185,7 @@ if(search){
  async function show(q){
   const token=++version;
   results.replaceChildren();
-  if(!q){$$('.shop-more').forEach(b=>b.remove());status.textContent='Enter a term to explore the catalog.';return}
+  if(!q){$$('.shop-more').forEach(b=>b.remove());status.textContent='Enter a term to explore the catalog.';return;}
   status.textContent='Searching Xazina…';
   try{
    const data=await searchData();if(token!==version)return;
