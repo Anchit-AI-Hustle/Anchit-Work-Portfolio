@@ -1769,7 +1769,8 @@ function c3Update(dt) {
   if (C.phase === 'done') { for (const q of M.court[0]) integrate(q, dt); stepBall(dt); if (C.endT > 0) { const air = B.shot && !B.shot.done && (C.holdT = (C.holdT || 0) + dt) < 3; if (!air) { C.endT -= dt; if (C.endT <= 0) c3Finish(); } } return; }
   if (C.phase !== 'intro') C.t -= dt;
   if (C.t <= 0 && C.phase !== 'done') { C.t = 0; c3End(); }
-  const r = rackPos(C.rack), hz = CT.HOOP;
+  // after the 25th ball the rack index is 5, one past the last rack: keep the last rack's spot
+  const r = rackPos(Math.min(C.rack, RACKS.length - 1)), hz = CT.HOOP;
   const sx = r.x, sz = r.z; // the shooting spot, just behind the line beside the rack
   const shotSpotX = r.x + (0 - r.x) * 0.0, shotSpotZ = r.z;
   void shotSpotX; void shotSpotZ;
