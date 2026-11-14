@@ -18,7 +18,7 @@
 .shop-tools summary{cursor:pointer;list-style:none}
 .shop-tools summary::-webkit-details-marker{display:none}
 .shop-tools details[open] summary span{transform:rotate(45deg)}
-.shop-mega{position:absolute;top:100%;left:0;right:0;max-height:min(70svh,730px);overflow:auto;overscroll-behavior:contain;background:#170f22f9;border-bottom:1px solid #d5b6ed6b;box-shadow:0 30px 75px #08050bd0}
+.shop-mega{position:absolute;top:100%;left:0;right:0;max-height:min(70svh,730px);overflow:auto;overscroll-behavior:contain;background:#170f22;border-bottom:1px solid #d5b6ed6b;box-shadow:0 30px 75px #08050bd0}
 .shop-mega-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px;padding-block:36px}
 .shop-mega section{min-width:0;border-top:1px solid #ccafd849;padding-top:13px}
 .shop-mega h2,.shop-mega h2 a{font:500 31px/1 var(--serif)!important;letter-spacing:-.025em!important;text-transform:none!important;margin:0 0 7px}
@@ -179,6 +179,20 @@ a:is(:hover,:focus-visible) .src-swap>:nth-child(2),a.src-swap:is(:hover,:focus-
 .src-chips>a{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border:1px solid var(--house-hair);color:var(--house-ink);text-decoration:none;font-size:13px;font-weight:600;letter-spacing:.02em}
 .src-chips>a:hover{background:#eadeed}
 .src-chips>a p{margin:0}
+/* Carousel columns step aside so their cards share the outer grid. */
+.src-flat{display:contents}
+/* Cards are narrow by design: a card that is also an image/copy pair stays stacked. */
+.src-card.src-split{grid-template-columns:minmax(0,1fr)!important;gap:14px;align-items:start}
+.src-card.src-split .src-split-media :is(img,video){aspect-ratio:4/3}
+/* Testimonials: one opening mark, the words in the serif, then who said it. */
+.src-grid:has(.src-quote){--min:clamp(220px,23cqi,320px)}
+.src-quote{display:flex;flex-direction:column}
+.src-quote>.src-qmark{font:400 64px/1 var(--serif);color:#9b72ae;height:34px;overflow:visible;margin:4px 0 0}
+.src-quote>.src-qmark~.src-qmark{display:none}
+.src-quote>p{max-width:none}
+.src-quote>.src-qmark~p{font:italic 400 clamp(16px,1.35vw,19px)/1.5 var(--serif);color:var(--house-ink);margin:0 0 14px}
+.src-quote>.src-qmark~.src-qmark~p{font:600 13px/1.4 var(--sans);font-style:normal;margin:0;padding-top:12px;border-top:1px solid var(--house-hair)}
+.src-quote>.src-qmark~.src-qmark~p~p{font-weight:600;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--house-muted);margin-top:3px;padding:0;border:0}
 @media(prefers-reduced-motion:reduce){.src-swap>:nth-child(2),.source-content summary::after{transition:none}}
 .source-block{border-top:1px solid #d4c2da;padding:22px 0 clamp(26px,4vw,64px);display:grid;grid-template-columns:115px minmax(0,1fr);gap:16px}
 .source-number{display:flex;align-items:center;gap:6px;height:max-content;font-size:9px;color:#764e83;letter-spacing:.12em;font-weight:700}
@@ -246,5 +260,13 @@ a:is(:hover,:focus-visible) .src-swap>:nth-child(2),a.src-swap:is(:hover,:focus-
 @keyframes maison-glow{from{opacity:.25;transform:translateY(-3%)}to{opacity:.78;transform:translateY(3%)}}
 @media(prefers-reduced-motion:reduce){.shop-product::before,.shop-cover>img{animation:none!important}}
 @media(max-width:360px){.shop-mark{font-size:27px}.shop-tools{gap:8px}}
+/* Phones: Search and Bag were 17px wide icons 28px apart; the breadcrumb,
+   size-guide and footer links were 18-29px tall. All reach 44px now. */
+@media(max-width:620px){
+ .shop-tools>a{min-width:44px;justify-content:center}
+ .shop-crumb a,.shop-product-guide a{display:inline-flex;align-items:center;min-height:44px}
+ .shop-foot-grid a,.shop-mega section>a{padding-block:11px}
+ .shop-remove{min-height:44px;padding-inline:4px}
+}
 .shop-social{display:flex;flex-wrap:wrap;gap:10px 21px;align-items:center;padding-bottom:20px}
 .shop-social a{font-size:12px;color:#e7d7ec}

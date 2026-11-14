@@ -15,6 +15,9 @@
 //   src-span    copy sitting among cards; it takes a full row
 //   src-aside   a short heading block beside a long body (FAQs)
 //   src-chips   three or more short links in a row
+//   src-flat    a carousel column wrapping a pair of cards; it steps aside so
+//               every card joins the outer grid (4 + 4, not 3 + 3 + an orphan)
+//   src-quote   a testimonial: src-qmark marks its loose “ ” glyphs
 //
 // It also removes three things the capture turned into visible text: inline
 // style values that leaked out of an attribute, Shopify's screen-reader price
@@ -115,8 +118,8 @@ function shape(n, inLink) {
       } else if (k.length >= 3 && !hasMedia(n) && k.every(c => hasHeading(c) && textLen(c) < 400)) {
         grid(n, k);                                // text-only tiles: an edit list
         add(n, 'src-grid-text');
-      } else if (k.length >= 3 && !hasMedia(n) && k.every(c => c.tag === 'a' && textLen(c) <= 40)) {
-        add(n, 'src-chips');                       // a run of short links
+      } else if (k.length >= 2 && !hasMedia(n) && k.every(c => c.tag === 'a' && textLen(c) <= 40)) {
+        add(n, 'src-chips');                       // a run of short links ("Directions" "Message us" read as one word)
       }
     }
   } else if (n.tag === 'a' && k.length >= 2 && k.every(mediaOnly)) add(n, 'src-swap');
@@ -132,12 +135,57 @@ export function clean(html) {
     // and an empty "Unit price /per". Kept: the one price a shopper needs.
     .replace(/<div>\s*<div>\s*Regular price\s*([^<]*?)\s*<\/div>\s*<div>\s*Sale price[\s\S]*?<\/div>\s*<div>\s*Unit price\s*<div>\s*\/per\s*<\/div>\s*<\/div>\s*<\/div>/g,
       (_, price) => `<p class="source-price">${price.replace(/Rs\.\s*/g, '₹')}</p>`)
-    .replace(/<p>\s*Type:\s*<\/p>/g, '');
+    .replace(/<p>\s*Type:\s*<\/p>/g, '')
+    // Captured prices came as "₹293,617.00", "₹ 148,756" and "₹2,93,617":
+    // all now read the way the product pages print them.
+    .replace(/₹\s?(\d[\d,]*)(\.\d{1,2})?(?![\d,])/g, (_, n, dec) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(+(n.replace(/,/g, '') + (dec || ''))))
+    // Leftover tab labels of a widget whose tabs did not survive capture.
+    .replace(/<div>\s*<p class="source-label">Stores<\/p>\s*<p class="source-label">Contact<\/p>\s*<\/div>/g, '');
+}
+
+// The contact page's appointment booker is a scripted three-step widget.
+// Captured, it was a dead form: "What / When / About you" as a list, a
+// permanent "This field is required", a stray "BACK" and two identical
+// buttons. It becomes the one action that works, in Xazina's own words from
+// its "Book an Appointment" card.
+const APPOINTMENT = '<div><div><p>Talk To Us First</p><h2>Book an Appointment</h2><p>One-on-one guidance on your ring, your budget, your story - in person or on a call.</p><p><a class="source-action" href="https://xazina.com/pages/contact-xazina#appt-contact-form">Book an appointment on Xazina ↗</a></p></div></div>';
+function replaceWidgets(html) {
+  if (!/id="stepNav"/.test(html)) return html;
+  const open = (html.match(/^\s*<div id="shopify-section-[^"]*">/) || [''])[0];
+  return open ? open + APPOINTMENT + '</div>' : APPOINTMENT;
+}
+
+const QMARK = /^\s*["“”„«»❝❞]\s*$/;
+function finish(n) {
+  if (!n.tag) return;
+  const k = kids(n);
+  // A card whose whole content is a pair or trio of cards is a carousel
+  // column, not a card: it steps aside so those cards join the outer grid.
+  // Bigger inner grids (a 12-piece "For Her" tab panel) stay panels.
+  if (n.cls?.includes('src-grid')) {
+    // All or nothing: a carousel's columns are alike, while a set of tab
+    // panels mixes sizes (Designer's Choice: All 9, Rings 4, Earrings 2). If
+    // only the small panels stepped aside, single pieces would take a whole
+    // column beside panels squeezing four into the same width.
+    const cards = k.filter(c => c.cls?.includes('src-card'));
+    const inner = cards.map(c => { const ck = kids(c); return ck.length === 1 && ck[0].cls?.includes('src-grid') ? [ck[0], kids(ck[0]).filter(x => x.cls?.includes('src-card')).length] : null; });
+    const flat = cards.length >= 2 && inner.every(x => x && x[1] <= 3) ? cards.length : 0;
+    let total = 0;
+    if (flat) cards.forEach((c, i) => { add(c, 'src-flat'); add(inner[i][0], 'src-flat'); total += inner[i][1]; });
+    if (flat) {
+      n.cls = n.cls.filter(x => x !== 'src-few' && !/^src-n\d$/.test(x));
+      if (total <= 3) add(n, 'src-few', 'src-n' + total);
+    }
+  }
+  if (k.length === 0 && n.tag !== '#root' && QMARK.test(n.children.map(c => c.text || '').join(''))) add(n, 'src-qmark');
+  if (k.some(c => !kids(c).length && QMARK.test(c.children.map(x => x.text || '').join('')))) add(n, 'src-quote');
+  n.children.forEach(finish);
 }
 
 export function tidy(html) {
   if (!html) return html;
-  const tree = parse(clean(html));
+  const tree = parse(clean(replaceWidgets(html)));
   shape(tree, false);
+  finish(tree);
   return serialize(tree);
 }

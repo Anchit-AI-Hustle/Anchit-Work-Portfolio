@@ -81,8 +81,10 @@ async function xazina(browser, path, w, h) {
   const r = await page.evaluate((w) => {
     const de = document.documentElement;
     const out = { overflow: de.scrollWidth - de.clientWidth, grids: [], lone: [], text: '' };
-    for (const g of document.querySelectorAll('.source-content .src-grid')) {
-      const cards = [...g.children].filter(c => c.classList.contains('src-card') && c.offsetParent);
+    for (const g of document.querySelectorAll('.source-content .src-grid:not(.src-flat)')) {
+      // Cards inside a flattened carousel column belong to the grid that lays them out.
+      const cards = [...g.querySelectorAll('.src-card:not(.src-flat)')]
+        .filter(c => c.offsetParent && c.parentElement.closest('.src-grid:not(.src-flat)') === g);
       if (cards.length < 2) continue;
       // Measured against the grid's own box: a grid nested in half of a split
       // is meant to fill that half, not the whole column.
@@ -98,12 +100,15 @@ async function xazina(browser, path, w, h) {
       const box = img.getBoundingClientRect();
       if (box.width > 40) out.lone.push(box.width / host.width);
     }
+    // A closing quote mark on its own line was the giveaway of an unstyled testimonial.
+    out.strayMarks = [...document.querySelectorAll('.source-content .src-qmark')].filter(m => m.offsetParent && getComputedStyle(m).fontSize === getComputedStyle(m.parentElement).fontSize).length;
     out.text = document.body.innerText;
     return out;
   }, w);
 
   if (r.overflow > 1) fail(where, `page scrolls sideways by ${r.overflow}px`);
   for (const e of errors) fail(where, e);
+  if (r.strayMarks) fail(where, `${r.strayMarks} testimonial quote marks shown as loose lines`);
   for (const k of ['Regular price', 'Unit price', 'Sale price', 'transform:translate', '\nType:\n', '0 pieces in this edit', 'This edit has no listed items']) {
     if (r.text.includes(k)) fail(where, `visible capture artefact "${k.trim()}"`);
   }
