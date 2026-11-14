@@ -350,8 +350,8 @@ html.embed body{padding-bottom:0!important}
     <a class="brandmark" href="/lenskart-study" style="text-decoration:none" target="_top"><div class="dot" aria-hidden="true">VR</div><div><strong>Vision Recall Engine</strong><small>Back to the Lenskart case study</small></div></a>
     <div class="tabs" role="tablist" aria-label="Prototype views">
       <button class="tab" role="tab" id="t-customer" aria-controls="p-customer" aria-selected="true">Customer app</button>
-      <button class="tab" role="tab" id="t-checkin" aria-controls="p-checkin" aria-selected="false" tabindex="-1">Sight Check-in</button>
-      <button class="tab" role="tab" id="t-console" aria-controls="p-console" aria-selected="false" tabindex="-1">Growth Console</button>
+      <button class="tab" role="tab" id="t-checkin" aria-controls="p-checkin" aria-selected="false" tabindex="-1">Recall Reminder</button>
+      <button class="tab" role="tab" id="t-console" aria-controls="p-console" aria-selected="false" tabindex="-1">Recall Dashboard</button>
       <button class="tab" role="tab" id="t-brand" aria-controls="p-brand" aria-selected="false" tabindex="-1">Brand schema</button>
     </div>
   </div>
@@ -367,7 +367,7 @@ html.embed body{padding-bottom:0!important}
       <li><span><b>Change something.</b> Move the months since their last test, record a re-test result, or report trouble seeing.</span></li>
       <li><span><b>Watch what happens.</b> The phone, the due date and the WhatsApp message all update, and each says why.</span></li>
     </ol>
-    <nav class="feats" aria-label="The six features"><span class="label">Or jump to a feature:</span><a href="#due"><b>1</b>Due Date</a><a href="#plan"><b>2</b>Re-test Plan</a><a href="#checkin"><b>3</b>Sight Check-in</a><a href="#next"><b>4</b>Next Pair Step</a><a href="#followup"><b>5</b>First-Test Follow-up</a><a href="#console"><b>6</b>Growth Console</a></nav>
+    <nav class="feats" aria-label="The six features"><span class="label">Or jump to a feature:</span><a href="#due"><b>1</b>Recall Date</a><a href="#checkin"><b>2</b>Recall Reminder</a><a href="#plan"><b>3</b>Recall Booking</a><a href="#next"><b>4</b>Recall Outcome</a><a href="#followup"><b>5</b>First Prescription Follow-up</a><a href="#console"><b>6</b>Recall Dashboard</a></nav>
   </div>
 </section>
 
@@ -378,7 +378,7 @@ html.embed body{padding-bottom:0!important}
 <!-- CUSTOMER -->
 <section class="panel on" id="p-customer" role="tabpanel" aria-labelledby="t-customer">
   <h2 id="customer" class="ptitle">Customer app</h2>
-  <p class="onscreen">What a customer would see in the Lenskart app, and why. The simulator changes this customer's situation, the phone shows what they would see, and the Due Date card explains the reasoning. Here: <b>Due Date</b>, <b>Re-test Plan</b>, <b>Next Pair Step</b> and, for Ravi, the <b>First-Test Follow-up</b>.</p>
+  <p class="onscreen">What a customer would see in the Lenskart app, and why. The simulator changes this customer's situation, the phone shows what they would see, and the Recall Date card explains the reasoning. Here: the <b>Recall Date</b>, <b>Recall Booking</b> (the plan in the phone), the <b>Recall Outcome</b> (bottom of the phone) and, for Ravi, the <b>First Prescription Follow-up</b>.</p>
   <div class="persona-row" role="group" aria-label="Choose a customer">
     <button class="chip" data-p="0" aria-pressed="true">Neha, 29 · Bengaluru</button>
     <button class="chip" data-p="1" aria-pressed="false">Arjun, 34 · Pune</button>
@@ -409,13 +409,13 @@ html.embed body{padding-bottom:0!important}
           <div class="stat"><b id="st-test"></b><span>Last eye test</span></div>
           <div class="stat"><b id="st-pair"></b><span>Current pair</span></div>
         </div>
-        <div class="nudge" id="s-nudge"><span id="plan" class="anchor"></span><p class="label" id="s-nudge-label">Re-test Plan</p><p id="s-nudge-title" style="font-weight:600;color:var(--heading)"></p><ul class="plan small" id="s-plan"></ul></div>
+        <div class="nudge" id="s-nudge"><span id="plan" class="anchor"></span><p class="label" id="s-nudge-label">Your next eye test</p><p id="s-nudge-title" style="font-weight:600;color:var(--heading)"></p><ul class="plan small" id="s-plan"></ul></div>
         <div class="card" style="padding:14px">
           <p class="label" style="margin-bottom:8px">Ask the eye-care assistant <span class="tag pri" style="margin-left:4px">Simulated</span></p>
           <div class="chat" id="chat" role="log" aria-live="polite" aria-label="Assistant conversation" tabindex="0"></div>
           <div class="quick" style="margin-top:10px" id="quick"></div>
         </div>
-        <p class="label" style="margin-top:4px" id="next">Your next pair step</p>
+        <p class="label" style="margin-top:4px" id="next">After your eye test</p>
         <div class="offer" id="s-next"></div>
       </div>
     </div>
@@ -448,33 +448,33 @@ html.embed body{padding-bottom:0!important}
       </div>
       <div class="card" id="due">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
-          <h3>Due Date: engine output</h3><span id="e-tier" class="tag"></span>
+          <h3>Recall Date: engine output</h3><span id="e-tier" class="tag"></span>
         </div>
         <div class="engine-out" style="margin-top:12px">
           <p><span class="label">Next eye test</span><br><b id="e-when" style="font-size:24px;line-height:32px;color:var(--heading)"></b></p>
           <ul class="plan small" id="e-reasons" style="margin-top:0"></ul>
           <div id="e-prio"></div>
           <div class="flow" id="e-actions"></div>
-          <details class="fold note"><summary>How this would work in production</summary><p class="small muted" style="padding:10px 0 12px">The due date is a rule on two facts Lenskart already holds, the date of the last eye test and the wearer's age. The intervals here follow published guidance from the American Optometric Association, the UK College of Optometrists and the International Myopia Institute (every 12 months under 18, every 6 months for a child on myopia-control lenses, every 24 months from 18 to 64 and every 12 months from 65); Lenskart's optometry team would set the final ones. A separate priority score only orders the store call list. Symptoms are not held today; they would come from the assistant or a check-in reply. Lenskart's current lens-replacement offer is single use per customer, so repeat use is a policy change this product would need. In production, a model trained on past cohorts predicts who will act, and every action is checked against a holdout group.</p></details>
+          <details class="fold note"><summary>How this would work in production</summary><p class="small muted" style="padding:10px 0 12px">The due date is a rule on two facts Lenskart already holds, the date of the last eye test and the wearer's age. The intervals here follow published guidance from the American Optometric Association, the UK College of Optometrists and the International Myopia Institute (every 12 months under 18, every 6 months for a child on myopia-control lenses, every 24 months from 18 to 64 and every 12 months from 65); Lenskart's optometry team would set the final ones. A separate priority score only orders the store call list. Symptoms are not held today; they would come from the assistant or a reply to a reminder. Lenskart's current lens-replacement offer is single use per customer, so repeat use is a policy change this product would need. In production, a model trained on past cohorts predicts who will act, and every action is checked against a holdout group.</p></details>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- CHECK-IN -->
+<!-- RECALL REMINDER -->
 <section class="panel" id="p-checkin" role="tabpanel" aria-labelledby="t-checkin" hidden>
   <div class="grid two">
     <div class="grid" style="align-content:start">
       <div class="card">
-        <h2 id="checkin">Sight Check-in on WhatsApp</h2>
-        <p style="margin-top:8px">Lenskart holds the date and result of every eye test it runs, but the customer has to remember when the next one is due. Sight Check-in sends one short, plain-language message when a test falls due, with a slot to book. <b>Who receives it depends on the wearer's age.</b></p>
-        <div class="scroll-x" style="margin-top:12px"><table class="aud" id="aud-tbl" aria-label="Who receives the check-in, by age">
-          <thead><tr><th scope="col">Wearer</th><th scope="col">Re-test rhythm</th><th scope="col">Check-in goes to</th></tr></thead>
+        <h2 id="checkin">Recall Reminder on WhatsApp</h2>
+        <p style="margin-top:8px">Lenskart holds the date and result of every eye test it runs, but the customer has to remember when the next one is due. The Recall Reminder sends one short, plain-language message when a test falls due, with a slot to book. <b>Who receives it depends on the wearer's age.</b></p>
+        <div class="scroll-x" style="margin-top:12px"><table class="aud" id="aud-tbl" aria-label="Who receives the reminder, by age">
+          <thead><tr><th scope="col">Wearer</th><th scope="col">Re-test rhythm</th><th scope="col">Reminder goes to</th></tr></thead>
           <tbody>
-            <tr data-a="minor"><th scope="row">Under 18</th><td>Every 12 months; every 6 months on myopia-control lenses</td><td><b>Parent Check-in</b>: the parent who holds the account, with consent taken at the eye test (DPDP Act 2023 needs it for under-18s)</td></tr>
-            <tr data-a="adult"><th scope="row">18 to 64</th><td>Every 24 months, sooner if they report trouble seeing</td><td><b>Self Check-in</b>: the wearer. A family member gets a copy only if the wearer opts in</td></tr>
-            <tr data-a="senior"><th scope="row">65 and above</th><td>Every 12 months</td><td><b>Self Check-in</b>: the wearer. A family member gets a copy only if the wearer opts in</td></tr>
+            <tr data-a="minor"><th scope="row">Under 18</th><td>Every 12 months; every 6 months on myopia-control lenses</td><td><b>To the parent</b>: the parent who holds the account, with consent taken at the eye test (DPDP Act 2023 needs it for under-18s)</td></tr>
+            <tr data-a="adult"><th scope="row">18 to 64</th><td>Every 24 months, sooner if they report trouble seeing</td><td><b>To the wearer</b>. A family member gets a copy only if the wearer opts in</td></tr>
+            <tr data-a="senior"><th scope="row">65 and above</th><td>Every 12 months</td><td><b>To the wearer</b>. A family member gets a copy only if the wearer opts in</td></tr>
           </tbody></table></div>
         <div class="ctl">
           <span class="label" id="l-person">Customer</span>
@@ -495,15 +495,15 @@ html.embed body{padding-bottom:0!important}
         <ul class="plan">
           <li><b>Book</b> opens the slot picker with the saved profile attached.</li>
           <li><b>I'm having trouble seeing</b> moves the test up; within three months of a test it becomes a free re-check at the store.</li>
-          <li><b>Not now</b> snoozes the check-in for 90 days and cancels the store call.</li>
-          <li><b>STOP</b> ends check-ins for good.</li>
+          <li><b>Not now</b> snoozes the reminder for 90 days and cancels the store call.</li>
+          <li><b>STOP</b> ends reminders for good.</li>
         </ul>
       </div>
       <div class="card soft">
         <h3>Guardrails built in</h3>
         <ul class="plan">
-          <li>No price or discount in any message. A check-in is about the eye test only.</li>
-          <li>One check-in when a test falls due and one reminder a week later. If the test is still not done at one and a half times the interval, one more goes out and the store may call. Then it stops until the next due date.</li>
+          <li>No price or discount in any message. A reminder is about the eye test only.</li>
+          <li>One reminder when a test falls due and a second a week later. If the test is still not done at one and a half times the interval, one more goes out and the store may call. Then it stops until the next due date.</li>
           <li>The store calls only customers who agreed to a call at their eye test.</li>
           <li>Nothing is sent while a service ticket is open; the ticket gets fixed first.</li>
           <li>No fear language and no diagnosis. Sudden loss of vision, pain or flashes are sent to an eye doctor, not to a store.</li>
@@ -513,7 +513,7 @@ html.embed body{padding-bottom:0!important}
     <div class="grid" style="align-content:start">
       <div class="channel" id="pp-channel" role="status"></div>
       <div class="wa" role="group" aria-label="WhatsApp preview">
-        <div class="wa-head"><div class="av" aria-hidden="true">LK</div><div><b id="wa-title">Lenskart Sight Check-in</b><br><small>Business account (concept)</small></div></div>
+        <div class="wa-head"><div class="av" aria-hidden="true">LK</div><div><b id="wa-title">Lenskart</b><br><small>Business account (concept)</small></div></div>
         <div class="wa-body" id="wa-body" role="status"></div>
       </div>
     </div>
@@ -523,7 +523,7 @@ html.embed body{padding-bottom:0!important}
 <!-- CONSOLE -->
 <section class="panel" id="p-console" role="tabpanel" aria-labelledby="t-console" hidden>
   <div style="display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:12px">
-    <div><h2 id="console">Growth Console</h2><p class="small" style="max-width:720px">The screen Lenskart's CRM team would open every Monday: whose eye test is due, what each group gets, and what that is worth if the uplift holds. Uses a made-up group of 5,000 past customers so it runs without Lenskart data.</p></div>
+    <div><h2 id="console">Recall Dashboard</h2><p class="small" style="max-width:720px">The screen Lenskart's CRM team would open every Monday: whose eye test is due, what each group gets, and what that is worth if the uplift holds. Uses a made-up group of 5,000 past customers so it runs without Lenskart data.</p></div>
     <button class="btn btn-outline sm" id="reseed" type="button">Generate a new cohort</button>
   </div>
   <div class="howto">
@@ -576,7 +576,7 @@ html.embed body{padding-bottom:0!important}
       <div class="row"><label for="m-incr">Truly extra, not just earlier (%)<small>Assumption: the rest would have come anyway, later</small></label><input id="m-incr" type="number" min="0" max="100" step="5" value="75"></div>
       <div class="row"><label for="m-base">Due customers who would return anyway (%)<small>Assumption; not disclosed</small></label><input id="m-base" type="number" min="0" max="100" step="5" value="20"></div>
       <div class="row"><label for="m-cann">Of those, now swap lenses instead of buying a pair (%)<small>Assumption: the cost of offering the swap first</small></label><input id="m-cann" type="number" min="0" max="100" step="1" value="3"></div>
-      <p class="label" style="margin-top:14px">Lever 2 · First-test follow-up</p>
+      <p class="label" style="margin-top:14px">Lever 2 · First Prescription Follow-up</p>
       <div class="row"><label for="m-first">First-ever eye tests a year<small>FY26 disclosed: "over 1 Cr"</small></label><input id="m-first" type="number" min="0" step="100000" value="10000000"></div>
       <div class="row"><label for="m-found">Where a power is found (%)<small>Assumption; Lenskart reports about 70% for children</small></label><input id="m-found" type="number" min="0" max="100" step="5" value="70"></div>
       <div class="row"><label for="m-noord">Of those, no order 30 days later (%)<small>Assumption; management says a significant majority buy</small></label><input id="m-noord" type="number" min="0" max="100" step="5" value="30"></div>
@@ -672,7 +672,7 @@ function status(s,p){
   if(s.test>=iv || s.sym===1) return 'due';
   return 'notdue';
 }
-var LABEL = {refer:'Refer to an eye doctor', doctor:'See an eye doctor', followup:'First-test follow-up', stopped:'Follow-up ended', tested:'Tested today', recheck:'Re-check', overdue:'Overdue', due:'Due now', notdue:'Not due'};
+var LABEL = {refer:'Refer to an eye doctor', doctor:'See an eye doctor', followup:'First Prescription Follow-up', stopped:'Follow-up ended', tested:'Tested today', recheck:'Re-check', overdue:'Overdue', due:'Due now', notdue:'Not due'};
 var TAGCLS = {refer:'warn', doctor:'bad', followup:'pri', stopped:'ok', tested:'ok', recheck:'warn', overdue:'bad', due:'warn', notdue:'ok'};
 // Only overdue customers can get a store call. This score orders that list.
 function priority(s,p){
@@ -687,8 +687,8 @@ function priority(s,p){
 }
 function actions(s,st,p){
   var a=[], g=band(p.age);
-  var who = g==='minor' ? {t:'Parent Check-in on WhatsApp',d:'To '+p.parent+', the consented parent: when the test is due and a slot to book. No price or discount in the message.'}
-          : {t:'Self Check-in on WhatsApp',d:'To '+p.name+': when the test is due and a slot to book. No price or discount in the message.'};
+  var who = g==='minor' ? {t:'Recall Reminder to the parent',d:'To '+p.parent+', the consented parent: when the test is due and a slot to book. No price or discount in the message.'}
+          : {t:'Recall Reminder on WhatsApp',d:'To '+p.name+': when the test is due and a slot to book. No price or discount in the message.'};
   if(st==='doctor'){
     a.push({t:'Point to an eye doctor today',d:'Sudden loss of vision, pain or flashes are not a job for an eye test. The app and the store say so plainly.'});
     a.push({t:'Hold every message and offer',d:'Nothing is sent and nothing is suggested until the customer tells us they have been seen.'});
@@ -701,15 +701,15 @@ function actions(s,st,p){
   }
   if(st==='refer'){
     a.push({t:'Refer to an eye doctor',d:'The power has not changed, so glasses do not explain the trouble seeing. The optometrist writes a referral and the store logs it.'});
-    a.push({t:'No offer and no reminder',d:'The next check-in waits for the usual interval.'});
+    a.push({t:'No offer and no reminder',d:'The next reminder waits for the usual interval.'});
   } else if(st==='followup'){
     a.push({t:'Follow-up 1 on day 3',d:'The saved power and two ways to try frames. No price or discount.'});
     a.push({t:'Follow-up 2 on day 21, then stop',d:'Sent only if there is still no order. After day 30 nothing more is sent.'});
   } else if(st==='stopped'){
     a.push({t:'Nothing more is sent',d:'Two follow-ups have gone and 30 days have passed. The power stays saved for whenever '+p.name+' returns.'});
   } else if(st==='tested'){
-    a.push({t:'Clock reset',d:'The test is on record today. The next check-in is in '+interval(p)+' months.'});
-    a.push({t:'Next Pair Step',d:s.result==='same'?'Power unchanged: nothing is offered.':'Power changed: the step in the phone, chosen from the test result.'});
+    a.push({t:'Clock reset',d:'The test is on record today. The next reminder is in '+interval(p)+' months.'});
+    a.push({t:'Recall Outcome',d:s.result==='same'?'Power unchanged: nothing is offered.':'Power changed: the step in the phone, chosen from the test result.'});
   } else if(st==='recheck'){
     a.push({t:'Free re-check at the store',d:'The last test was '+recent(p,s)+'. The store that tested '+p.name+' is told today.'});
     a.push({t:'No reminder and no offer',d:p.first?'If the power was wrong, the saved power is corrected before any order.':(s.pair<=12?'If the power was wrong, the lenses are remade under the one-year warranty.':'The store checks the power again for free.')});
@@ -726,7 +726,7 @@ function actions(s,st,p){
   }
   return a;
 }
-/* Next Pair Step: nothing is suggested before an eye test says it is needed. */
+/* Recall Outcome: nothing is suggested before an eye test says it is needed. */
 function nextStep(s,st,p){
   var g = band(p.age), iv = interval(p);
   if(st==='doctor') return {hold:true,tag:'On hold',cat:'Health first',title:'See an eye doctor first',sub:'Nothing is suggested until you have been seen.',price:'',note:''};
@@ -853,7 +853,7 @@ function renderCustomer(){
   else if(st==='overdue'){ title='Book a free re-test this week'; plan=['Nearest store: free eye test, slots today.'].concat(canHome(p)?[s.gold?'Or a home eye test in '+p.city+': free with your Gold membership.':'Or a home eye test in '+p.city+': ₹99, free for Gold members.']:[]).concat([(g==='minor'?p.name+'\'s':'Your')+' saved power and face scan are already attached.', s.callOk?'If nothing is booked in 7 days, your store calls once.':'We will remind you once more in 7 days.']); }
   else if(st==='due'){ title = s.test<iv ? 'Let us check '+whose(p)+' eyes sooner' : g==='minor' ? p.name+'\'s regular eye check is due' : 'Time for your regular eye check'; plan=(s.test<iv && s.pair<=12 ? ['If the power in '+whose(p)+' glasses turns out to be wrong, the lenses are remade under the one-year warranty.'] : []).concat([g==='minor'?'Children\'s power can change fast; a free check at the store.':'A free check at the store'+(canHome(p)?(s.gold?', or at home, free with your Gold membership.':', or ₹99 at home (free for Gold members).'):'.'),'One reminder, no follow-up calls.']); }
   else { title='Nothing to do right now'; plan=[own+' prescription is recent.','Any store will adjust the fit for free, any time.']; }
-  el('s-nudge-label').textContent = p.first ? 'First-Test Follow-up' : 'Re-test Plan';
+  el('s-nudge-label').textContent = p.first ? 'Your first pair' : 'Your next eye test';
   el('s-nudge-title').textContent = title;
   el('s-plan').innerHTML = plan.map(function(x){return '<li>'+x+'</li>';}).join('');
   var n = nextStep(s,st,p);
@@ -940,22 +940,23 @@ el('in-result').addEventListener('click',function(e){
   simState.result = r; rerender();
 });
 
-/* ---------- Sight Check-in ---------- */
+/* ---------- Recall Reminder ---------- */
 var lang = 'en', share = false;
 function renderCheckin(){
   var p = P[cur], s = simState, st = status(s,p), g = band(p.age), iv = interval(p);
   all('#aud-tbl tbody tr').forEach(function(r){r.classList.toggle('on',r.getAttribute('data-a')===g);});
   el('pp-share-wrap').style.display = g==='minor' ? 'none' : '';
   var toParent = g==='minor', ch = el('pp-channel');
-  el('wa-title').textContent = p.first ? 'Lenskart Follow-up' : toParent ? 'Lenskart Parent Check-in' : 'Lenskart Sight Check-in';
+  el('wa-title').textContent = 'Lenskart';
   ch.className = 'channel ' + (toParent?'parent':'self');
-  ch.innerHTML = toParent ? '<b>Goes to '+p.parent+', '+p.name+'\'s parent.</b> '+p.name+' is '+p.age+', so the parent who holds the account receives it, with consent taken at the eye test.'
-    : '<b>Goes to '+p.name+'.</b> '+(share?'A copy also goes to the family member '+p.name+' chose.':'No one else sees it unless '+p.name+' opts in to a family copy.');
+  var feat = p.first ? 'First Prescription Follow-up' : 'Recall Reminder';
+  ch.innerHTML = toParent ? '<b>'+feat+' to '+p.parent+', '+p.name+'\'s parent.</b> '+p.name+' is '+p.age+', so the parent who holds the account receives it, with consent taken at the eye test.'
+    : '<b>'+feat+' to '+p.name+'.</b> '+(share?'A copy also goes to the family member '+p.name+' chose.':'No one else sees it unless '+p.name+' opts in to a family copy.');
   var en = lang==='en', msg, btns = [], none = en ? 'No message is sent.\n\n' : 'कोई संदेश नहीं भेजा जाता।\n\n';
-  var stop = en ? '\n\nReply STOP to opt out of check-ins.' : '\n\nचेक-इन बंद करने के लिए STOP लिखें।';
+  var stop = en ? '\n\nReply STOP to stop these reminders.' : '\n\nये रिमाइंडर बंद करने के लिए STOP लिखें।';
   if(st==='doctor'){
-    msg = none + (en ? p.name+' reported sudden loss of vision, pain or flashes. The app and the store point to an eye doctor today; no check-in goes out.'
-                     : p.name+' ने अचानक नज़र कम होने, दर्द या चमक दिखने की बात बताई है। ऐप और स्टोर आज ही आंखों के डॉक्टर को दिखाने को कहते हैं; कोई चेक-इन नहीं जाता।');
+    msg = none + (en ? p.name+' reported sudden loss of vision, pain or flashes. The app and the store point to an eye doctor today; no reminder goes out.'
+                     : p.name+' ने अचानक नज़र कम होने, दर्द या चमक दिखने की बात बताई है। ऐप और स्टोर आज ही आंखों के डॉक्टर को दिखाने को कहते हैं; कोई रिमाइंडर नहीं जाता।');
   } else if(s.ticket){
     msg = none + (en ? p.name+' has an open service ticket, so messages are on hold until the ticket is closed.'
                      : p.name+' की एक सर्विस टिकट खुली है, इसलिए टिकट बंद होने तक संदेश रुके रहेंगे।');
@@ -971,13 +972,13 @@ function renderCheckin(){
   } else if(st==='stopped'){
     msg = none + (en ? 'Two follow-ups have gone and 30 days have passed. '+p.name+'\'s power stays saved.' : 'दो फ़ॉलो-अप जा चुके हैं और 30 दिन बीत गए हैं। '+p.name+' का नंबर सुरक्षित रहेगा।');
   } else if(st==='tested' || st==='refer'){
-    msg = none + (en ? p.name+' was tested today'+(st==='refer'?' and referred to an eye doctor':'')+'. The next check-in goes out in '+iv+' months.' : p.name+' की जांच आज हुई है'+(st==='refer'?' और उन्हें आंखों के डॉक्टर के पास भेजा गया है':'')+'। अगला चेक-इन '+iv+' महीने बाद जाएगा।');
+    msg = none + (en ? p.name+' was tested today'+(st==='refer'?' and referred to an eye doctor':'')+'. The next reminder goes out in '+iv+' months.' : p.name+' की जांच आज हुई है'+(st==='refer'?' और उन्हें आंखों के डॉक्टर के पास भेजा गया है':'')+'। अगला रिमाइंडर '+iv+' महीने बाद जाएगा।');
   } else if(st==='recheck'){
     msg = none + (en ? p.name+' reported trouble seeing; the last test was '+recent(p,s)+'. The store is told and offers a free re-check; no reminder goes out.'
                      : p.name+' ने देखने में दिक्कत बताई है; पिछली जांच '+(p.first?(s.days===0?'आज':s.days+' दिन पहले'):(s.test===0?'इसी महीने':s.test+' महीने पहले'))+' हुई थी। स्टोर को बताया गया है और वह मुफ़्त दोबारा जांच करेगा; कोई रिमाइंडर नहीं जाता।');
   } else if(st==='notdue'){
-    msg = none + (en ? p.name+'\'s last eye test was '+since(s.test)+'. The next check-in goes out in about '+mo(Math.max(1,iv-s.test))+'.'
-                     : p.name+' की पिछली आंखों की जांच '+(s.test===0?'इसी महीने':s.test+' महीने पहले')+' हुई थी। अगला चेक-इन लगभग '+Math.max(1,iv-s.test)+' महीने बाद जाएगा।');
+    msg = none + (en ? p.name+'\'s last eye test was '+since(s.test)+'. The next reminder goes out in about '+mo(Math.max(1,iv-s.test))+'.'
+                     : p.name+' की पिछली आंखों की जांच '+(s.test===0?'इसी महीने':s.test+' महीने पहले')+' हुई थी। अगला रिमाइंडर लगभग '+Math.max(1,iv-s.test)+' महीने बाद जाएगा।');
   } else if(toParent){
     var callP = st==='overdue' ? (s.callOk ? (en?'\n\nIf nothing is booked in a week, your store will call once, as you agreed at the last eye test.':'\n\nअगर एक हफ्ते में बुकिंग नहीं हुई, तो आपका स्टोर एक बार फ़ोन करेगा, जैसा आपने पिछली जांच पर कहा था।') : (en?'\n\nWe will remind you once more in a week.':'\n\nहम एक हफ्ते बाद एक बार और याद दिलाएंगे।')) : '';
     msg = en ? 'Hello '+p.parent+',\n\n'+p.name+'\'s last eye test with us was '+s.test+' months ago. Children\'s power can change quickly, so a regular check helps.\n\nThe test is free at your Lenskart store in '+p.city+'.'+callP+'\n\nIf '+p.name+'\'s power is the same, nothing needs to change.'+stop
@@ -1016,9 +1017,9 @@ function perRetest(I){ return I.swap*I.swapv + I.buy*I.order; }
 function rng(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0; var t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
 var seed = 20261113, cohort = [], sortK = 'value', sortDir = -1, selSeg = null;
 var GROUPS = {
-  adult:{seg:'Adults 18 to 64, due or overdue',action:'Check-in and re-test; a store call if overdue and agreed',recall:true,why:'The longest interval, and the largest group.'},
-  senior:{seg:'65 and above, due or overdue',action:'Check-in and re-test; a store call if overdue and agreed',recall:true,why:'Checked every year from 65.'},
-  child:{seg:'Children 8 to 17, due or overdue',action:'Parent Check-in and re-test at a store',recall:true,why:'The message goes to the parent; the test is at a store.'},
+  adult:{seg:'Adults 18 to 64, due or overdue',action:'Recall Reminder and booking; a store call if overdue and agreed',recall:true,why:'The longest interval, and the largest group.'},
+  senior:{seg:'65 and above, due or overdue',action:'Recall Reminder and booking; a store call if overdue and agreed',recall:true,why:'Checked every year from 65.'},
+  child:{seg:'Children 8 to 17, due or overdue',action:'Recall Reminder to the parent; test at a store',recall:true,why:'The message goes to the parent; the test is at a store.'},
   first:{seg:'First test in the last 30 days, power found, no order',action:'Two follow-ups with the saved power, then stop',recall:false,why:'They learned they need glasses and have not ordered yet.'},
   ticket:{seg:'Open service ticket',action:'Hold every message',recall:false,zero:true,why:'Nothing is sent until the ticket is closed.'},
   ok:{seg:'Not due',action:'Nothing is sent',recall:false,zero:true,why:'A recent prescription is not a sales lead.'}
@@ -1096,17 +1097,17 @@ function calc(){
   var total = A+B-C, contrib = total*Math.max(0,I.pm-I.sell), fxOk = I.fx>0;
   el('levers').innerHTML = [
     ['Recall: re-tests that would not have happened', A, Math.round(retests).toLocaleString('en-IN')+' extra re-tests × '+INR(perRetest(I))+' × '+(I.incr*100).toFixed(0)+'%'],
-    ['First-test follow-up', B, Math.round(followN*I.conv).toLocaleString('en-IN')+' extra orders × '+INR(I.fval)+' × '+(I.incr*100).toFixed(0)+'%'],
+    ['First Prescription Follow-up', B, Math.round(followN*I.conv).toLocaleString('en-IN')+' extra orders × '+INR(I.fval)+' × '+(I.incr*100).toFixed(0)+'%'],
     ['Returners who now swap lenses instead of buying', -C, Math.round(dueN*I.base*I.cann).toLocaleString('en-IN')+' customers × '+INR(Math.max(0,I.order-I.swapv))+' less each']
   ].map(function(l){return '<div class="lever"><div class="lever-head"><b>'+l[0]+'</b><span>'+CR(l[1])+'</span></div><div class="formula">'+l[2]+' = '+CR(l[1])+'</div></div>';}).join('');
   var c1=dueN*2*I.msg, c2=followN*2*I.msg, c3=retests*((1-I.hshare)*I.test+I.hshare*I.home), c4=calls*I.call, c5=I.tot*I.ai, cost=c1+c2+c3+c4+c5;
   el('costs').innerHTML = [
-    ['Recall check-ins (2 per due customer)', c1],['First-test follow-ups (2 each)', c2],['Extra re-tests, store and home', c3],['Store calls on day 8', c4],['AI ranking and message drafting', c5]
+    ['Recall Reminders (2 per due customer)', c1],['Prescription follow-ups (2 each)', c2],['Extra re-tests, store and home', c3],['Store calls on day 8', c4],['AI ranking and message drafting', c5]
   ].map(function(l){return '<div class="lever" style="padding:8px 0"><div class="lever-head"><span>'+l[0]+'</span><span>'+CR2(l[1])+'</span></div></div>';}).join('')
    + '<div class="lever" style="padding:8px 0"><div class="lever-head"><b>Total running cost</b><b id="m-cost">'+CR2(cost)+'</b></div></div>';
   // Which lever earns the money, after its own costs.
   var mar = Math.max(0,I.pm-I.sell), perT = (1-I.hshare)*I.test+I.hshare*I.home, rMsg = dueN*I.take, rCall = calls*I.calllift;
-  var LV = [['First-test follow-up', B*mar - c2], ['Store call on day 8', rCall*perRetest(I)*I.incr*mar - c4 - rCall*perT], ['Recall message', (rMsg*perRetest(I)*I.incr - C)*mar - c1 - rMsg*perT], ['AI ranking and drafting', -c5]];
+  var LV = [['First Prescription Follow-up', B*mar - c2], ['Store call in Recall Booking', rCall*perRetest(I)*I.incr*mar - c4 - rCall*perT], ['Recall Reminder', (rMsg*perRetest(I)*I.incr - C)*mar - c1 - rMsg*perT], ['AI ranking and drafting', -c5]];
   el('bylever').innerHTML = '<p class="label" style="margin-top:14px">Net by lever</p>' + LV.map(function(l){return '<div class="lever" style="padding:8px 0"><div class="lever-head"><span>'+l[0]+'</span><span>'+CR(l[1])+'</span></div></div>';}).join('');
   all('.calc input').forEach(function(i){ i.setAttribute('aria-invalid', String(!i.checkValidity())); });
   el('m-total').textContent = CR(total)+(fxOk?' · '+USDM(total,I.fx):'');
