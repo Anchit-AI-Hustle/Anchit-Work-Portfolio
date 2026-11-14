@@ -130,7 +130,18 @@ async function open(browser, vp, path, slowFonts) {
   page.on('pageerror', (e) => bag.errors.push('pageerror: ' + e.message));
   page.on('requestfailed', (r) => bag.failed.push(r.url() + ' ' + (r.failure() || {}).errorText));
   page.on('response', (r) => { if (r.status() >= 400) bag.failed.push(r.url() + ' HTTP ' + r.status()); });
-  const res = await page.goto(BASE + path, { waitUntil: 'networkidle' });
+  // Against the live site the host's edge now and then answers a burst of
+  // headless loads with a 403 challenge page instead of ours (measured: 1 in
+  // 36). That is the host, not the page, so retry it, and say so, rather than
+  // let one challenge crash every check after it. Anything else still fails.
+  let res = await page.goto(BASE + path, { waitUntil: 'networkidle' });
+  for (let i = 1; res.status() === 403 && i <= 3; i++) {
+    console.log(`  note  ${path}: host answered 403, retry ${i} of 3`);
+    await page.waitForTimeout(3000 * i);
+    // reload, not goto: the same URL again is a same-document hash change.
+    res = (await page.reload({ waitUntil: 'networkidle' })) || res;
+  }
+  if (res.status() !== 403) bag.failed = bag.failed.filter((f) => f !== (BASE + path).split('#')[0] + ' HTTP 403');
   return { ctx, page, bag, status: res.status() };
 }
 
@@ -166,9 +177,13 @@ async function landed(page, href) {
   return page.evaluate(([tab, h]) => {
     const t = document.getElementById(tab);
     const target = document.getElementById(h);
+    const barEl = document.getElementById('dl-bar');
+    // A missing element fails this one check with what the page was, rather
+    // than crashing every check after it.
+    if (!t || !target || !barEl) return `missing ${[!t && '#' + tab, !target && '#' + h, !barEl && '#dl-bar'].filter(Boolean).join(' ')} on "${document.title}" (${document.readyState}, ${document.body ? document.body.innerText.length : 0} chars)`;
     const r = target.getBoundingClientRect();
     // A whole-tab link must also keep the concept notice bar on screen.
-    const bar = document.getElementById('dl-bar').getBoundingClientRect();
+    const bar = barEl.getBoundingClientRect();
     const whole = t.getAttribute('aria-controls') === 'p-' + h;
     // The follow-up link also has to select Ravi, the first-test customer.
     if (h === 'followup' && target.getAttribute('aria-pressed') !== 'true') return false;
@@ -208,14 +223,15 @@ async function walkthrough(browser, vp) {
   for (const href of ['/lenskart-study#me', '/lenskart-study#impact']) {
     const o = await open(browser, vp, href, 1500);
     await o.page.waitForTimeout(900);
-    check(`${L}: ${href} lands on its section even when the web font is late`, (await landed(o.page, href)) === true, o.page.url());
+    const ok = await landed(o.page, href);
+    check(`${L}: ${href} lands on its section even when the web font is late`, ok === true, typeof ok === 'string' ? ok : o.page.url());
     await o.ctx.close();
   }
   for (const href of [...steps.map((s) => s[0]), ...tries, '/lenskart-study/prototype#brand']) {
     const o = await open(browser, vp, href);
     await o.page.waitForTimeout(500);
     const ok = await landed(o.page, href);
-    check(`${L}: ${href} opens on the right screen`, ok === true, o.page.url());
+    check(`${L}: ${href} opens on the right screen`, ok === true, typeof ok === 'string' ? `${ok} HTTP ${o.status}` : o.page.url());
     await o.ctx.close();
   }
 }
