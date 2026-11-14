@@ -29,7 +29,7 @@
     --font: "Bricolage Grotesque", ui-rounded, "Segoe UI", system-ui, sans-serif;
   }
   *, *::before, *::after { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; scroll-padding-top: 76px; }
   body {
     margin: 0;
     font-family: var(--font);
@@ -174,7 +174,7 @@
     background: rgba(205, 184, 247, 0.88);
     -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
-    border-b: 1px solid rgba(43, 22, 80, 0.15);
+    border-bottom: 1px solid rgba(43, 22, 80, 0.15);
   }
   /* ── THE COUNTER ───────────────────────────────────────────────────────
      The drawn bar in the hero. Everything animates on transform or opacity,
@@ -367,13 +367,32 @@
      The inline nav measures 700px. On a 320px phone it simply ran off the
      side of the screen, and the wordmark wrapped onto three lines, which made
      the fixed header 105px tall · taller than the hero's 90px top padding, so
-     the headline was buried behind it. Below 900px the links become a sheet
+     the headline was buried behind it. Below 1200px the links become a sheet
      behind a toggle, the wordmark stays on one line, and the header goes back
      to a single row. */
   .nav-links { display: contents; }
   .nav-toggle { display: none; }
 
-  @media (max-width: 900px) {
+  /* The inline row needs ~1250px. Between 900 and 1280 it did not fit, so
+     every label wrapped onto two or three lines and the wordmark stacked into
+     a 105px header. The sheet now takes over below 1200, and the band above it
+     gets a tighter row that holds one line. */
+  .nav a, .wordmark span, #audioBtn, #headerBagBtn { white-space: nowrap; }
+  .gs-toast { position: fixed; left: 50%; bottom: 18px; z-index: 75; display: flex; align-items: center; gap: 12px; max-width: calc(100vw - 24px); padding: 10px 10px 10px 16px; border-radius: 999px; background: #2B1650; color: #F1E9FF; font-size: 13px; font-weight: 800; box-shadow: 0 16px 36px rgba(0,0,0,.28); transform: translate(-50%, 140%); opacity: 0; transition: transform .3s ease, opacity .3s ease; }
+  .gs-toast.is-on { transform: translate(-50%, 0); opacity: 1; }
+  .gs-toast button { min-height: 40px; padding: 0 14px; border-radius: 999px; background: #7C3AED; color: #fff; font-size: 11px; text-transform: uppercase; letter-spacing: .12em; white-space: nowrap; }
+  @media (prefers-reduced-motion: reduce) { .gs-toast { transition: none; } }
+  /* Phones: controls a thumb has to hit are at least 44px tall. */
+  @media (max-width: 767px) {
+    #cartModal button, #cartModal input, #cartModal textarea, #headerBagBtn, #audioBtn, [onclick*="addBarItemToCart"], [onclick*="setSubMode"], [onclick*="addToCart"] { min-height: 44px; }
+    #cartModal input, #cartModal textarea, input[type="email"] { font-size: 16px; }
+  }
+  @media (min-width: 1200px) and (max-width: 1399px) {
+    .nav a { padding: 0 8px; font-size: 0.86rem; }
+    .nav { gap: 2px; }
+  }
+
+  @media (max-width: 1199px) {
     .site-head { padding: 6px var(--pad); gap: 6px; }
     .wordmark { font-size: 1rem; gap: 8px; min-width: 0; }
     .wordmark span { white-space: nowrap; }
@@ -980,9 +999,11 @@
   #orbit .dot { fill: var(--grape); }
   #orbit .dot-far { fill: var(--lilac-soft); stroke: var(--grape); stroke-width: 3; }
   #orbit .hub { fill: var(--grape); }
-  #orbit .pulse { fill: none; stroke: var(--berry); stroke-width: 2; opacity: 0; vector-effect: non-scaling-stroke; transform-box: fill-box; transform-origin: center; animation: pulse 3.6s ease-out infinite; animation-delay: calc(var(--k) * 1.2s); }
+  #orbit .pulse { fill: none; stroke: var(--berry); stroke-width: 2; opacity: 0; vector-effect: non-scaling-stroke; transform-box: fill-box; transform-origin: center; animation: orbitPulse 3.6s ease-out infinite; animation-delay: calc(var(--k) * 1.2s); }
   #orbit:not(.is-live) .pulse { animation-play-state: paused; }
-  @keyframes pulse { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(22); opacity: 0; } }
+  /* Was named "pulse", which replaced Tailwind's animate-pulse keyframes: the
+     green "open" dot in the announcement bar grew to 176px over the hours. */
+  @keyframes orbitPulse { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(22); opacity: 0; } }
   #orbit text { font-family: var(--font); font-weight: 800; font-size: 28px; fill: var(--grape); letter-spacing: -0.02em; paint-order: stroke; stroke: var(--lilac); stroke-width: 9px; stroke-linejoin: round; }
   #orbit text.hubtxt { font-size: 30px; }
   #orbit.armed .ring-1 { stroke-dasharray: 754; stroke-dashoffset: 754; transition: stroke-dashoffset 1.6s ease; }
@@ -1252,12 +1273,34 @@
     <span id="audioLabel" class="hidden sm:inline">65°C Audio</span>
   </button>
   <!-- Roastery Bag Trigger -->
-  <button id="headerBagBtn" onclick="toggleCart(true)" class="ml-2 px-4 py-1.5 rounded-full bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-wider hover:bg-[#4C1D95] transition-all flex items-center gap-1.5 shadow">
+  <button id="headerBagBtn" onclick="toggleCart(true, this)" aria-haspopup="dialog" class="ml-2 px-4 py-1.5 rounded-full bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-wider hover:bg-[#4C1D95] transition-all flex items-center gap-1.5 shadow">
     <span>Bag</span>
     <span class="px-1.5 py-0.2 bg-white/30 rounded-full text-[10px]" id="cartCount">0</span>
   </button>
 </nav>
 </header>
+<script>
+/* The disclaimer bar sits in normal flow above a position:fixed header, so at
+   the top of the page it painted straight over the logo and the nav. Push the
+   header down by however much of the bar is still on screen; once the bar has
+   scrolled away the offset is 0 and the header pins to the top as before.
+   `translate` (not top/transform) so nothing else that styles it is touched. */
+(function () {
+  var bar = document.querySelector('.concept-bar'), head = document.querySelector('header.site-head');
+  if (!bar || !head) return;
+  var queued = 0;
+  function place() {
+    queued = 0;
+    var y = Math.max(0, Math.round(bar.getBoundingClientRect().bottom));
+    head.style.translate = y ? '0 ' + y + 'px' : '';
+  }
+  function ask() { if (!queued) queued = requestAnimationFrame(place); }
+  addEventListener('scroll', ask, { passive: true });
+  addEventListener('resize', ask);
+  place();
+})();
+</script>
+
 
 <!-- Ultra-Thin Live Bar Hours & Sell-Out Info Strip -->
 <div id="gsAnnounceBar" class="relative z-30 text-[11px] sm:text-xs font-semibold tracking-wider py-2 px-4">
@@ -1993,7 +2036,7 @@
 
   <!-- ================= SPECIALTY ROASTERY & EXTRACTION CRAFT ================= -->
 <section class="py-24 px-6 md:px-12 max-w-7xl mx-auto" id="roasteryCraft">
-  <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+  <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-12 gap-6">
     <div>
       <span class="text-xs font-black uppercase tracking-[0.25em] text-[#7C3AED]">The Sensory Extraction & Roastery Bar</span>
       <h2 class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight mt-2 text-[#2B1650]">
@@ -2004,14 +2047,14 @@
         </p>
     </div>
     <!-- Mode Switcher Tabs -->
-    <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-[#2B1650]/20 shadow-sm text-xs font-black uppercase tracking-wider overflow-x-auto">
-      <button onclick="switchCraftTab('extraction')" id="craftTab-extraction" class="py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow whitespace-nowrap">
+    <div class="grid grid-cols-3 lg:flex items-stretch lg:items-center gap-1.5 lg:gap-2 w-full lg:w-auto shrink-0 p-1.5 rounded-2xl bg-white border border-[#2B1650]/20 shadow-sm text-[11px] sm:text-xs font-black uppercase tracking-wide sm:tracking-wider">
+      <button onclick="switchCraftTab('extraction')" id="craftTab-extraction" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all bg-[#2B1650] text-[#F1E9FF] shadow lg:whitespace-nowrap">
         1. 9-Bar Extraction
         </button>
-      <button onclick="switchCraftTab('microfoam')" id="craftTab-microfoam" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650] whitespace-nowrap">
+      <button onclick="switchCraftTab('microfoam')" id="craftTab-microfoam" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap">
         2. Microfoam Pour
         </button>
-      <button onclick="switchCraftTab('roast')" id="craftTab-roast" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650] whitespace-nowrap">
+      <button onclick="switchCraftTab('roast')" id="craftTab-roast" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap">
         3. Roast Spectrum
         </button>
     </div>
@@ -2360,7 +2403,7 @@
   </div>
 
   <!-- 3 Core D2C Products Grid -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="productGridContainer"></div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8" id="productGridContainer"></div>
 </section>
 
 <!-- CHEF SECTION: SCROLL-DRAWN TIMELINE -->
@@ -2503,7 +2546,7 @@
 
     <!-- Right Column: 3 Upcoming Events Horizontal Cards -->
     <div class="lg:col-span-7 space-y-5">
-      <div class="d2c-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div data-cupping class="d2c-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div class="flex items-center gap-5">
           <div class="w-20 h-20 rounded-2xl bg-[#2B1650] text-[#F1E9FF] flex flex-col items-center justify-center shrink-0 border border-[#CDB8F7]/40">
             <span class="font-serif-editorial font-bold text-2xl leading-none">26</span>
@@ -2520,7 +2563,7 @@
         </button>
       </div>
 
-      <div class="d2c-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div data-cupping class="d2c-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div class="flex items-center gap-5">
           <div class="w-20 h-20 rounded-2xl bg-[#2B1650] text-[#F1E9FF] flex flex-col items-center justify-center shrink-0 border border-[#CDB8F7]/40">
             <span class="font-serif-editorial font-bold text-2xl leading-none">02</span>
@@ -2537,7 +2580,7 @@
         </button>
       </div>
 
-      <div class="d2c-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div data-cupping class="d2c-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div class="flex items-center gap-5">
           <div class="w-20 h-20 rounded-2xl bg-[#2B1650] text-[#F1E9FF] flex flex-col items-center justify-center shrink-0 border border-[#CDB8F7]/40">
             <span class="font-serif-editorial font-bold text-2xl leading-none">09</span>
@@ -2560,7 +2603,7 @@
 <!-- ALL 3 LOCATIONS & CELEBRATED STEAMED WINDOW (SCRATCH TO REVEAL) -->
 <section class="visit" id="destinations" aria-labelledby="visit-title">
   <div class="max-w-7xl mx-auto space-y-10 scroll-reveal">
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
       <div>
         <span class="eyebrow-label">Interactive Destination Explorer</span>
         <h2 id="visit-title" class="text-4xl md:text-5xl font-display font-black uppercase tracking-tight text-[#2B1650] mt-2">
@@ -2568,14 +2611,14 @@
           </h2>
       </div>
       <!-- 3 Location Buttons -->
-      <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-[#2B1650]/20 shadow-sm text-xs font-black uppercase tracking-wider overflow-x-auto">
-        <button id="locTab-phase1" onclick="switchLocation('phase1')" class="py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow">
+      <div class="grid grid-cols-3 lg:flex items-stretch lg:items-center gap-1.5 lg:gap-2 w-full lg:w-auto shrink-0 p-1.5 rounded-2xl bg-white border border-[#2B1650]/20 shadow-sm text-[11px] sm:text-xs font-black uppercase tracking-wide sm:tracking-wider">
+        <button id="locTab-phase1" onclick="switchLocation('phase1')" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all bg-[#2B1650] text-[#F1E9FF] shadow lg:whitespace-nowrap">
           1. DLF Phase 1 Flagship
           </button>
-        <button id="locTab-gcr" onclick="switchLocation('gcr')" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650]">
+        <button id="locTab-gcr" onclick="switchLocation('gcr')" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap">
           2. Golf Course Road
           </button>
-        <button id="locTab-sec56" onclick="switchLocation('sec56')" class="py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650]">
+        <button id="locTab-sec56" onclick="switchLocation('sec56')" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap">
           3. Sector 56 Hub
           </button>
       </div>
@@ -2707,13 +2750,13 @@
 </main>
 
 <!-- SLIDE-OVER ROASTERY BAG DRAWER -->
-<div id="cartModal" class="fixed inset-0 z-50 hidden">
+<div id="cartModal" class="fixed inset-0 z-50 hidden" style="z-index:70" role="dialog" aria-modal="true" aria-labelledby="bagTitle">
 <div onclick="toggleCart(false)" class="absolute inset-0 bg-black/75 backdrop-blur-sm"></div>
 <div id="bagPanel" data-consent-pad class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-[#2B1650]/35 p-8 flex flex-col justify-between overflow-y-auto shadow-2xl text-[#2B1650]">
   <div>
     <div class="flex items-center justify-between border-b border-[#2B1650]/20 pb-5">
-      <h3 class="text-xl font-display font-black uppercase tracking-tight text-[#2B1650]">Your Roastery Bag</h3>
-      <button onclick="toggleCart(false)" class="text-xs uppercase tracking-widest text-[#7C3AED] font-black hover:underline">Close ✕</button>
+      <h3 id="bagTitle" class="text-xl font-display font-black uppercase tracking-tight text-[#2B1650]">Your Bag</h3>
+      <button type="button" id="bagClose" onclick="toggleCart(false)" class="min-w-[44px] min-h-[44px] px-3 rounded-full border border-[#7C3AED]/30 text-xs uppercase tracking-widest text-[#7C3AED] font-black hover:bg-[#F5EFFF]">Close ✕</button>
     </div>
     <div id="bagBody"><div id="cartItemsList" class="mt-6 space-y-4 max-h-[60vh] overflow-y-auto pr-1"></div></div>
   </div>
@@ -2731,15 +2774,15 @@
       <span class="font-bold uppercase tracking-wider text-[#534168]">Subtotal</span>
       <span id="cartTotalPrice" class="text-2xl font-display font-black text-[#7C3AED]">₹0</span>
     </div>
-    <button onclick="startCheckout()" class="w-full py-4 rounded-full bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-[0.2em] hover:bg-[#3D2272] transition-all shadow-lg">
-      Proceed to Roast &amp; Dispatch (₹) →
+    <button type="button" id="bagProceed" onclick="startCheckout()" class="w-full py-4 rounded-full bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-[0.2em] hover:bg-[#3D2272] transition-all shadow-lg disabled:opacity-40 disabled:cursor-not-allowed">
+      Continue to your details →
       </button>
   </div>
 
   <!-- Step 2: who the roast is for. An order needs a name, a number to call
        and somewhere to take it; asking for less would not be an order. -->
   <form id="bagCheckout" class="hidden border-t border-[#2B1650]/20 pt-6 space-y-3" novalidate>
-    <p class="text-[11px] font-black uppercase tracking-[0.18em] text-[#7C3AED]">Roast &amp; dispatch · your details</p>
+    <p class="text-[11px] font-black uppercase tracking-[0.18em] text-[#7C3AED]">Your details</p>
     <label class="block">
       <span class="block text-[11px] font-bold uppercase tracking-wider text-[#534168] mb-1">Name</span>
       <input id="ordName" name="name" autocomplete="name" class="w-full px-4 py-2.5 rounded-xl border border-[#2B1650]/25 text-sm bg-[#F5EFFF] focus:outline-none focus:ring-2 focus:ring-[#7C3AED]">
@@ -2806,7 +2849,9 @@
 <script>
 (function () {
   "use strict";
-  var reduce = false;
+  // 9994900 replaced this check with `false`, which quietly switched off
+  // every reduced-motion branch on the page.
+  var reduce = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 
   // 1. D2C Products Catalog
   const PRODUCTS = [
@@ -2863,7 +2908,7 @@
       address: 'Block F, 16 Arjun Marg, DLF Phase 1, Sector 26A, Gurugram 122002',
       phone: '+91 81300 56889',
       directions: 'https://www.google.com/maps/search/?api=1&query=Gram+Street+Coffee+DLF+Phase+1+Gurugram',
-      zomato: 'https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon',
+      order: 'https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon',
       image: '/assets/brand/u-1554118811-1e0d58224f24-1200.webp',
       caption: '16 Arjun Marg Flagship Bar'
     },
@@ -2877,7 +2922,9 @@
       address: 'DLF Summit Plaza, Sector 53, Golf Course Road, Gurugram 122002',
       phone: '+91 81300 56889',
       directions: 'https://www.google.com/maps/search/?api=1&query=Gram+Street+Coffee+DLF+Summit+Plaza+Golf+Course+Road+Gurgaon',
-      zomato: 'https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon',
+      // This reused the DLF Phase 1 Zomato page: a different outlet. No
+      // listing for this bar is known, so its order button steps aside.
+      order: '',
       image: '/assets/brand/u-1501339847302-ac426a4a7cbb-1200.webp',
       caption: 'DLF Summit Plaza (Sector 53)'
     },
@@ -2891,7 +2938,7 @@
       address: 'Jalvayu Towers, Sector 56, Gurugram 122011',
       phone: '+91 81300 56889',
       directions: 'https://www.google.com/maps/search/?api=1&query=Gram+Street+Coffee+Jalvayu+Towers+Sector+56+Gurugram',
-      zomato: 'https://www.swiggy.com/city/gurgaon/gram-street-coffee-arjun-marg-jalvayu-towers-rest1462852',
+      order: 'https://www.swiggy.com/city/gurgaon/gram-street-coffee-arjun-marg-jalvayu-towers-rest1462852',
       image: '/assets/brand/u-1442512595331-e89e73853f31-1200.webp',
       caption: 'Jalvayu Towers Express Hub'
     }
@@ -2911,9 +2958,9 @@
     ['phase1', 'gcr', 'sec56'].forEach(k => {
       const btn = document.getElementById(LOCATIONS[k].tabId);
       if (k === key) {
-        btn.className = 'py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow';
+        btn.className = 'py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all bg-[#2B1650] text-[#F1E9FF] shadow lg:whitespace-nowrap';
       } else {
-        btn.className = 'py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650]';
+        btn.className = 'py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap';
       }
     });
 
@@ -2926,7 +2973,12 @@
     document.getElementById('locPhone').textContent = loc.phone;
     document.getElementById('locPhone').href = `tel:${loc.phone.replace(/\s+/g, '')}`;
     document.getElementById('locDirectionsBtn').href = loc.directions;
-    document.getElementById('locZomatoBtn').href = loc.zomato;
+    const orderBtn = document.getElementById('locZomatoBtn');
+    orderBtn.hidden = !loc.order;
+    if (loc.order) {
+      orderBtn.href = loc.order;
+      orderBtn.textContent = `Order on ${/swiggy\./.test(loc.order) ? 'Swiggy' : 'Zomato'} ↗`;
+    }
     document.getElementById('scratchCaption').textContent = loc.caption;
 
     const bgImg = document.getElementById('scratchBgImage');
@@ -3595,15 +3647,16 @@
 
   if (scratchCanvas) {
     scratchCanvas.addEventListener('mousemove', (e) => wipeScratchAt(e.clientX, e.clientY));
+    // The glass is 56% of a phone screen, and preventDefault on every
+    // touchmove meant no swipe that started on it ever scrolled. pan-y gives
+    // vertical swipes back to the page; side-to-side strokes still wipe.
+    scratchCanvas.style.touchAction = 'pan-y';
     scratchCanvas.addEventListener('touchmove', (e) => {
-      if (e.touches && e.touches[0]) {
-        wipeScratchAt(e.touches[0].clientX, e.touches[0].clientY);
-        e.preventDefault();
-      }
-    }, { passive: false });
+      if (e.touches && e.touches[0]) wipeScratchAt(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
     scratchCanvas.addEventListener('touchstart', (e) => {
       if (e.touches && e.touches[0]) wipeScratchAt(e.touches[0].clientX, e.touches[0].clientY);
-    });
+    }, { passive: true });
     window.addEventListener('resize', window.initScratchWindow);
     window.initScratchWindow();
   }
@@ -3767,21 +3820,43 @@
     updateCartUI();
     step('bag');
     const sourceEl = triggerBtn || (window.event && window.event.currentTarget) || null;
-    window.launchBezierFlyToBag(sourceEl, product.image, 'GS').then(() => {
-      window.toggleCart(true);
-    });
+    afterAdd(sourceEl, product.image, 'GS', product.name);
   };
+
+  // On a phone the bag is the whole screen: throwing it up on every add made
+  // a three-drink order three trips in and out. There a toast confirms and
+  // offers the bag; larger screens keep the drawer. Reduced motion skips the
+  // fly-to-bag pill.
+  function afterAdd(sourceEl, image, tag, name) {
+    const small = window.matchMedia('(max-width: 767px)').matches;
+    const fly = reduce ? Promise.resolve() : window.launchBezierFlyToBag(sourceEl, image, tag);
+    if (small) { gsToast(`${name} added`); return; }
+    Promise.resolve(fly).then(() => window.toggleCart(true, sourceEl));
+  }
+  let gsToastTimer = 0;
+  function gsToast(msg) {
+    let t = document.getElementById('gsToast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'gsToast'; t.className = 'gs-toast'; t.setAttribute('role', 'status');
+      t.innerHTML = '<span></span><button type="button">View bag</button>';
+      t.querySelector('button').addEventListener('click', () => { t.classList.remove('is-on'); window.toggleCart(true, document.getElementById('headerBagBtn')); });
+      document.body.appendChild(t);
+    }
+    t.querySelector('span').textContent = msg;
+    t.classList.add('is-on');
+    clearTimeout(gsToastTimer);
+    gsToastTimer = setTimeout(() => t.classList.remove('is-on'), 3600);
+  }
 
   window.addBarItemToCart = function(id, name, price) {
     const exist = cart.find(i => i.id === id);
     if (exist) exist.qty += 1;
-    else cart.push({ id, name, price, qty: 1, isSub: false });
+    else cart.push({ id, name, price, qty: 1, isSub: false, bar: true });
     updateCartUI();
     step('bag');
     const sourceEl = (window.event && window.event.currentTarget) || null;
-    window.launchBezierFlyToBag(sourceEl, '/assets/brand/u-1646954256973-f7fd9ce626b1-800.webp', 'BAR').then(() => {
-      window.toggleCart(true);
-    });
+    afterAdd(sourceEl, '/assets/brand/u-1646954256973-f7fd9ce626b1-800.webp', 'BAR', name);
   };
 
   function updateCartUI() {
@@ -3791,32 +3866,97 @@
     if (countEl) countEl.textContent = count;
     const priceEl = document.getElementById('cartTotalPrice');
     if (priceEl) priceEl.textContent = `₹${total}`;
+    const proceed = document.getElementById('bagProceed');
+    if (proceed) proceed.disabled = cart.length === 0;
     const list = document.getElementById('cartItemsList');
-    if (list) {
+    if (list && !cart.length) {
+      list.innerHTML = `<div class="py-12 text-center">
+        <p class="font-display font-black uppercase text-lg text-[#2B1650]">Your bag is empty</p>
+        <p class="text-xs mt-2 text-[#534168]">Pick a drink from <a href="#barMenu" onclick="toggleCart(false)" class="underline font-bold">today's menu</a> or a roast from <a href="#d2cShop" onclick="toggleCart(false)" class="underline font-bold">the beans</a>.</p>
+      </div>`;
+    } else if (list) {
       list.innerHTML = cart.map((item, idx) => `
-        <div class="flex items-center justify-between p-4 rounded-2xl bg-[#F5EFFF] border border-[#7C3AED]/25">
-        <div>
+        <div class="flex items-center justify-between gap-3 p-4 rounded-2xl bg-[#F5EFFF] border border-[#7C3AED]/25">
+        <div class="min-w-0">
           <div class="font-bold uppercase text-sm text-[#2B1650]">${item.name}</div>
-          <div class="text-[11px] text-[#7C3AED] uppercase tracking-wider font-black">${item.isSub ? 'Monthly Roast Subscription (-15%)' : 'Fresh Single Bag'} • Qty: ${item.qty}</div>
+          <div class="text-[11px] text-[#7C3AED] uppercase tracking-wider font-black">${item.isSub ? 'Monthly roast subscription (−15%)' : item.bar ? 'From the bar' : 'Fresh roast, single bag'} • ₹${item.price} each</div>
+          <div class="font-black text-[#2B1650] mt-1">₹${item.price * item.qty}</div>
         </div>
-        <div class="flex items-center gap-3">
-          <span class="font-black text-[#7C3AED]">₹${item.price * item.qty}</span>
-          <button onclick="window.removeCartItem(${idx})" class="text-xs text-rose-600 font-bold hover:scale-110">✕</button>
+        <div class="flex items-center gap-1 shrink-0">
+          <div class="flex items-center border border-[#7C3AED]/30 rounded-xl overflow-hidden bg-white font-black text-sm">
+            <button type="button" onclick="window.changeCartQty(${idx}, -1)" aria-label="One fewer ${item.name}" class="w-10 h-10 hover:bg-[#F5EFFF]">−</button>
+            <span class="w-7 text-center text-[#7C3AED]" aria-label="Quantity">${item.qty}</span>
+            <button type="button" onclick="window.changeCartQty(${idx}, 1)" aria-label="One more ${item.name}" class="w-10 h-10 hover:bg-[#F5EFFF]">+</button>
+          </div>
+          <button type="button" onclick="window.removeCartItem(${idx})" aria-label="Remove ${item.name}" class="w-10 h-10 rounded-xl text-rose-600 font-bold hover:bg-rose-50">✕</button>
         </div>
       </div>
     `).join('');
     }
   }
 
+  window.changeCartQty = function(idx, d) {
+    if (!cart[idx]) return;
+    cart[idx].qty += d;
+    if (cart[idx].qty <= 0) cart.splice(idx, 1);
+    updateCartUI();
+  };
+
   window.removeCartItem = function(idx) {
     cart.splice(idx, 1);
     updateCartUI();
   };
 
-  window.toggleCart = function(open) {
+  // A dialog: focus moves in and stays, Esc closes, the page behind stops
+  // scrolling, and focus returns to whatever opened it.
+  let bagOpener = null;
+  window.toggleCart = function(open, opener) {
     const modal = document.getElementById('cartModal');
-    if (modal) modal.classList.toggle('hidden', !open);
+    if (!modal) return;
+    const wasOpen = !modal.classList.contains('hidden');
+    modal.classList.toggle('hidden', !open);
+    document.documentElement.style.overflow = open ? 'hidden' : '';
+    document.getElementById('headerBagBtn')?.setAttribute('aria-expanded', String(!!open));
+    if (open && !wasOpen) {
+      bagOpener = opener || document.activeElement;
+      requestAnimationFrame(() => document.getElementById('bagClose')?.focus());
+    } else if (!open && wasOpen) {
+      const back = bagOpener && document.contains(bagOpener) ? bagOpener : document.getElementById('headerBagBtn');
+      back?.focus?.();
+      bagOpener = null;
+    }
   };
+  document.addEventListener('keydown', (e) => {
+    const modal = document.getElementById('cartModal');
+    if (!modal || modal.classList.contains('hidden')) return;
+    if (e.key === 'Escape') { e.preventDefault(); window.toggleCart(false); return; }
+    if (e.key !== 'Tab') return;
+    const f = [...modal.querySelectorAll('button, a[href], input, textarea, select')].filter(el => !el.disabled && el.offsetParent !== null);
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && (document.activeElement === last || !modal.contains(document.activeElement))) { e.preventDefault(); first.focus(); }
+  });
+
+  // Cuppings: the next three Sundays from today in India, so the list never
+  // shows dates already gone (it read 26 Oct, 02 Nov, 09 Nov: all past, and
+  // all Mondays in 2026).
+  (function () {
+    const cards = document.querySelectorAll('[data-cupping]');
+    if (!cards.length) return;
+    const now = new Date(Date.now() + 330 * 60000);                  // IST
+    const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    d.setUTCDate(d.getUTCDate() + ((7 - d.getUTCDay()) % 7 || 7));     // next Sunday, never today
+    const MON = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    cards.forEach((card, i) => {
+      const day = new Date(d.getTime() + i * 7 * 86400000);
+      const box = card.querySelector('.w-20.h-20');
+      if (!box) return;
+      const [num, mon] = box.querySelectorAll('span');
+      if (num) num.textContent = String(day.getUTCDate()).padStart(2, '0');
+      if (mon) mon.textContent = MON[day.getUTCMonth()];
+    });
+  })();
 
   /* ---- placing the order -------------------------------------------------
      What used to be here was an alert() that said "Order Confirmed!" and
@@ -3882,7 +4022,7 @@
     });
     lines.push('', 'Total: Rs ' + o.total, '', o.name + ' - ' + o.phone, o.address);
     if (o.note) lines.push('Note: ' + o.note);
-    lines.push('', 'Please confirm the roast and send a payment link.');
+    lines.push('', 'Please confirm the order and send a payment link.');
     return lines.join('\n');
   }
 
@@ -4018,9 +4158,9 @@
       }
       if (btn) {
         if (t === tab) {
-          btn.className = "py-2.5 px-4 rounded-xl transition-all bg-[#2B1650] text-[#F1E9FF] shadow whitespace-nowrap";
+          btn.className = "py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all bg-[#2B1650] text-[#F1E9FF] shadow lg:whitespace-nowrap";
         } else {
-          btn.className = "py-2.5 px-4 rounded-xl transition-all text-[#534168] hover:text-[#2B1650] whitespace-nowrap";
+          btn.className = "py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap";
         }
       }
     });
@@ -4932,7 +5072,7 @@
     });
     // Leaving the mobile range with the sheet open would strand it on desktop.
     if (window.matchMedia) {
-      window.matchMedia('(min-width: 901px)').addEventListener('change', function (m) {
+      window.matchMedia('(min-width: 1200px)').addEventListener('change', function (m) {
         if (m.matches) setOpen(false);
       });
     }

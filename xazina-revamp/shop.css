@@ -18,7 +18,7 @@
 .shop-tools summary{cursor:pointer;list-style:none}
 .shop-tools summary::-webkit-details-marker{display:none}
 .shop-tools details[open] summary span{transform:rotate(45deg)}
-.shop-mega{position:absolute;top:100%;left:0;right:0;max-height:min(70svh,730px);overflow:auto;overscroll-behavior:contain;background:#170f22f9;border-bottom:1px solid #d5b6ed6b;box-shadow:0 30px 75px #08050bd0}
+.shop-mega{position:absolute;top:100%;left:0;right:0;max-height:min(70svh,730px);overflow:auto;overscroll-behavior:contain;background:#170f22;border-bottom:1px solid #d5b6ed6b;box-shadow:0 30px 75px #08050bd0}
 .shop-mega-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px;padding-block:36px}
 .shop-mega section{min-width:0;border-top:1px solid #ccafd849;padding-top:13px}
 .shop-mega h2,.shop-mega h2 a{font:500 31px/1 var(--serif)!important;letter-spacing:-.025em!important;text-transform:none!important;margin:0 0 7px}
@@ -109,22 +109,96 @@
 .shop-article aside{border-top:1px solid var(--house-hair);padding-top:18px}
 .shop-article aside p+p{margin-top:12px}
 .shop-article aside .shop-button{margin-top:12px}
-.source-content{color:var(--house-ink);overflow-wrap:anywhere;font-size:16px;line-height:1.7}
+/* CAPTURED CONTENT. Everything inside .source-content is HTML lifted from the
+   original store: ~100 Shopify section types, all anonymous <div>s. The build
+   (scripts/xazina-tidy.mjs) reads each one's shape and tags it src-split /
+   src-grid / src-card / src-swap; the rules below lay those shapes out so they
+   fill the column at every width instead of stacking one 760px photo per row.
+   Widths come from container units, so a card grid measures the space it is
+   actually given, whether that is a full home band or a product sidebar. */
+.source-content{color:var(--house-ink);overflow-wrap:break-word;font-size:16px;line-height:1.7;container-type:inline-size;min-width:0}
 .source-content p{max-width:76ch;margin:0 0 14px}
+/* 76ch is for reading. A paragraph that only wraps a photo (journal articles do) must not cap the photo at 742px. */
+.source-content p:has(img,video){max-width:none}
 .source-content a{color:#633970;text-decoration:underline;text-underline-offset:3px}
-.source-content h2,.source-content h3,.source-content h4,.source-content h5{font:500 clamp(31px,4.8vw,68px)/1 var(--serif);letter-spacing:-.042em;margin:18px 0 14px}
+.source-content h2,.source-content h3,.source-content h4,.source-content h5{font:500 clamp(31px,4.8vw,68px)/1 var(--serif);letter-spacing:-.042em;margin:18px 0 14px;text-wrap:balance}
 .source-content h3{font-size:clamp(28px,3.5vw,53px)}.source-content h4,.source-content h5{font-size:clamp(22px,2.5vw,35px)}
-.source-content img,.source-content video{width:min(100%,830px);max-height:620px;object-fit:contain;background:#ede4ef;margin:16px 0}
+.source-content :is(img,video){display:block;width:100%;height:auto;margin-block:14px;background:#ede4ef}
+.source-content video{background:#140d1c;object-fit:contain}
+.source-content picture{display:block}.source-content picture img{margin:0}
+/* A photo on its own spans the column; cover, not contain, so there is no lilac letterbox. */
+.source-content img:not(.src-card *,.src-split-media *,.src-swap *){max-height:min(76vh,720px);object-fit:cover}
+.source-content video:not(.src-card *,.src-split-media *){max-height:min(76vh,720px)}
 .source-content table{display:block;overflow:auto;max-width:100%;border-collapse:collapse;margin-block:18px}
 .source-content td,.source-content th{border:1px solid #c7accd;padding:8px}
-.source-content summary{cursor:pointer;font-weight:700;padding:11px 0}
-.source-content details{border-bottom:1px solid #d4c1da}
 .source-content .source-action{display:inline-flex;background:#2c1639;color:#fff;padding:10px 13px;margin-block:8px;font-size:12px}
+.source-content .source-price{font-size:13px;color:#51415a;margin:2px 0 0}
+/* Accordions: the question is a line of type with a plus, not a 68px headline with a stray triangle. */
+.source-content details{border-bottom:1px solid #d4c1da}
+.source-content details:first-of-type{border-top:1px solid #d4c1da}
+.source-content summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:17px 0;cursor:pointer;font:500 clamp(19px,2.1vw,27px)/1.22 var(--serif);letter-spacing:-.015em}
+.source-content summary::-webkit-details-marker{display:none}
+.source-content summary::after{content:"+";flex:none;font:300 26px/1 var(--sans);color:#6c4678;transition:transform .25s ease}
+.source-content details[open]>summary::after{transform:rotate(45deg)}
+.source-content summary :is(h1,h2,h3,h4,h5,h6,div,p,span){font:inherit;letter-spacing:inherit;margin:0;max-width:none}
+.source-content details>:not(summary){padding-bottom:16px}
+/* Card grids: 2 up on a phone, 3 on a tablet, 4 on a desktop; long-copy cards (testimonials, guides) one step wider. */
+.src-grid{--min:clamp(150px,23cqi,320px);--gx:clamp(10px,1.8cqi,22px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,var(--min)),1fr));gap:clamp(18px,2.6cqi,32px) var(--gx);align-items:start;margin-block:18px}
+.src-grid.src-grid-wide{--min:clamp(250px,31cqi,440px)}
+.src-grid.src-grid-text{--min:clamp(220px,27cqi,380px);gap:0 var(--gx)}
+.src-grid-text>.src-card{border-top:1px solid #d4c1da;padding-top:6px}
+.src-n2{--n:2}.src-n3{--n:3}
+.src-grid.src-few{grid-template-columns:repeat(auto-fit,minmax(min(100%,max(var(--min),(100% - (var(--n) - 1) * var(--gx)) / var(--n))),1fr))}
+.src-card{min-width:0;container-type:inline-size}
+.src-card :is(img,video){aspect-ratio:1;object-fit:cover;margin:0 0 12px}
+.src-n2>.src-card :is(img,video){aspect-ratio:4/3}
+.src-card :is(h2,h3,h4,h5){font-size:clamp(21px,10cqi,32px);margin:8px 0 8px}
+.src-card p{font-size:14px;line-height:1.55;margin-bottom:8px}
+.src-card a:has(img){display:block;text-decoration:none}
+/* Shopify's hover photo: two images stacked in one frame, the second fades in. */
+.src-swap{display:grid;overflow:hidden}
+.src-swap>*{grid-area:1/1;min-width:0}
+.src-swap>:nth-child(2){opacity:0;transition:opacity .45s ease}
+.src-swap>:nth-child(n+3){display:none}
+a:is(:hover,:focus-visible) .src-swap>:nth-child(2),a.src-swap:is(:hover,:focus-visible)>:nth-child(2){opacity:1}
+/* Image beside copy once there is room for both; stacked below that. */
+.src-split{display:grid;gap:clamp(14px,4cqi,56px);align-items:center;margin-block:10px}
+.src-split-media :is(img,video){margin:0}
+@container (min-width:560px){
+ .src-split{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+ .src-split-media :is(img,video){aspect-ratio:4/5;max-height:min(80vh,760px);object-fit:cover}
+ .src-split>:not(.src-split-media)>:first-child{margin-top:0}
+}
+.src-grid>.src-span{grid-column:1/-1}
+.src-grid>.src-span>:first-child{margin-top:0}
+/* FAQ: title beside its answers when the column is wide; the questions read as questions. */
+.src-aside{display:grid;gap:8px clamp(24px,5cqi,80px);align-items:start}
+@container (min-width:860px){.src-aside{grid-template-columns:minmax(0,.4fr) minmax(0,1fr)}.src-aside>:first-child{position:sticky;top:24px;grid-row:span 2}.src-aside>:not(:first-child){grid-column:2}}
+.source-content .source-label{font:500 clamp(19px,2vw,25px)/1.25 var(--serif);letter-spacing:-.015em;color:var(--house-ink);margin:26px 0 8px;max-width:none}
+.src-chips{display:flex;flex-wrap:wrap;gap:10px;margin-block:14px}
+.src-chips>a{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border:1px solid var(--house-hair);color:var(--house-ink);text-decoration:none;font-size:13px;font-weight:600;letter-spacing:.02em}
+.src-chips>a:hover{background:#eadeed}
+.src-chips>a p{margin:0}
+/* Carousel columns step aside so their cards share the outer grid. */
+.src-flat{display:contents}
+/* Cards are narrow by design: a card that is also an image/copy pair stays stacked. */
+.src-card.src-split{grid-template-columns:minmax(0,1fr)!important;gap:14px;align-items:start}
+.src-card.src-split .src-split-media :is(img,video){aspect-ratio:4/3}
+/* Testimonials: one opening mark, the words in the serif, then who said it. */
+.src-grid:has(.src-quote){--min:clamp(220px,23cqi,320px)}
+.src-quote{display:flex;flex-direction:column}
+.src-quote>.src-qmark{font:400 64px/1 var(--serif);color:#9b72ae;height:34px;overflow:visible;margin:4px 0 0}
+.src-quote>.src-qmark~.src-qmark{display:none}
+.src-quote>p{max-width:none}
+.src-quote>.src-qmark~p{font:italic 400 clamp(16px,1.35vw,19px)/1.5 var(--serif);color:var(--house-ink);margin:0 0 14px}
+.src-quote>.src-qmark~.src-qmark~p{font:600 13px/1.4 var(--sans);font-style:normal;margin:0;padding-top:12px;border-top:1px solid var(--house-hair)}
+.src-quote>.src-qmark~.src-qmark~p~p{font-weight:600;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--house-muted);margin-top:3px;padding:0;border:0}
+@media(prefers-reduced-motion:reduce){.src-swap>:nth-child(2),.source-content summary::after{transition:none}}
 .source-block{border-top:1px solid #d4c2da;padding:22px 0 clamp(26px,4vw,64px);display:grid;grid-template-columns:115px minmax(0,1fr);gap:16px}
 .source-number{display:flex;align-items:center;gap:6px;height:max-content;font-size:9px;color:#764e83;letter-spacing:.12em;font-weight:700}
 .source-number svg{width:11px;height:11px}
-.source-block:has(.source-content img) .source-content img{width:min(100%,760px)}
-.shop-home-blocks .source-block:nth-child(2) .source-content>div>div:has(>div>img),.shop-home-blocks .source-block:nth-child(2) .source-content>div>div:has(>a>img){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+/* Below a laptop the 115px label column is a fifth of the screen: the label goes on top. */
+@media(max-width:1023px){.source-block{grid-template-columns:minmax(0,1fr);gap:10px}}
 .shop-inline-links{display:flex;flex-wrap:wrap;gap:15px}
 .shop-inline-links a{text-decoration:underline}
 .shop-search{max-width:760px}
@@ -172,7 +246,6 @@
  .shop-filters{gap:8px}.shop-filters input,.shop-filters select{max-width:100%;min-width:0}
  .shop-product-layout,.shop-details,.shop-article,.shop-bag{grid-template-columns:minmax(0,1fr)}
  .shop-product-copy h1{font-size:clamp(44px,12vw,76px)}
- .source-block{grid-template-columns:1fr;gap:11px}
  .shop-foot-lead{grid-template-columns:1fr}.shop-foot-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
  .shop-bag-row{grid-template-columns:54px minmax(60px,1fr) 44px auto;gap:7px}
  .shop-bag-row input{padding-inline:5px}
@@ -187,5 +260,13 @@
 @keyframes maison-glow{from{opacity:.25;transform:translateY(-3%)}to{opacity:.78;transform:translateY(3%)}}
 @media(prefers-reduced-motion:reduce){.shop-product::before,.shop-cover>img{animation:none!important}}
 @media(max-width:360px){.shop-mark{font-size:27px}.shop-tools{gap:8px}}
+/* Phones: Search and Bag were 17px wide icons 28px apart; the breadcrumb,
+   size-guide and footer links were 18-29px tall. All reach 44px now. */
+@media(max-width:620px){
+ .shop-tools>a{min-width:44px;justify-content:center}
+ .shop-crumb a,.shop-product-guide a{display:inline-flex;align-items:center;min-height:44px}
+ .shop-foot-grid a,.shop-mega section>a{padding-block:11px}
+ .shop-remove{min-height:44px;padding-inline:4px}
+}
 .shop-social{display:flex;flex-wrap:wrap;gap:10px 21px;align-items:center;padding-bottom:20px}
 .shop-social a{font-size:12px;color:#e7d7ec}

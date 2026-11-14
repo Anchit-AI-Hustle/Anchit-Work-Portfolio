@@ -359,6 +359,16 @@
       justify-content: center;
       backdrop-filter: blur(8px);
     }
+    /* Three flex:1 pills kept their min-content width (wide-tracked caps), so
+       on a phone the row ran 80px off screen and "03. Shahi Marinades" was
+       cut in half. Below 640 they shrink, tighten and wrap inside the pill. */
+    @media (max-width: 639px) {
+      .deli-stage-nav { gap: 6px; }
+      .deli-stage-btn {
+        min-width: 0; padding: 6px 6px; font-size: 0.62rem;
+        letter-spacing: 0.06em; line-height: 1.15; text-align: center;
+      }
+    }
     .deli-stage-btn:hover {
       background: rgba(255, 255, 255, 0.22);
       color: #FFFFFF;
@@ -389,6 +399,9 @@
       -webkit-backdrop-filter: blur(20px) !important;
       border-bottom: 2px solid rgba(205, 38, 83, 0.22) !important;
       box-shadow: 0 6px 25px rgba(74, 14, 23, 0.08) !important;
+      /* transition-all would animate the disclaimer offset and make the
+         header trail the page while scrolling. */
+      transition-property: color, background-color, border-color, box-shadow !important;
     }
     .deli-nav-link {
       color: #4A0E17 !important;
@@ -406,10 +419,40 @@
        nav its own breathing room and tighten the tracking a little so the
        whole row still fits comfortably at 1280. */
     header.deli-site-header nav { margin-right: 2.25rem !important; }
-    @media (max-width: 1400px) {
+    /* The nav is min-w-0 and its links are nowrap, so a row that is too wide
+       never wraps: the nav quietly shrinks and its links slide UNDER the audio
+       and WhatsApp pills. Measured, it was too wide at every desktop width
+       (needs ~763px, got ~559px at 1440). So the row gets the screen it is on
+       (1680px cap instead of 1280) and sheds low-priority items in steps:
+       each item hidden here is still one tap away elsewhere on the page. */
+    header.deli-site-header > div { max-width: 1680px !important; }
+    @media (max-width: 1599px) {
       .deli-nav-link { letter-spacing: 0.12em !important; font-size: 0.74rem !important; }
       header.deli-site-header nav { gap: 1.35rem !important; margin-right: 1.75rem !important; }
     }
+    @media (max-width: 1799px) { .deli-tagline { display: none !important; } }
+    /* Phone and tablet menu sheet, hung from the header so it rides with it. */
+    .deli-burger { display: inline-block; width: 14px; }
+    .deli-burger i { display: block; height: 2px; margin: 3px 0; border-radius: 2px; background: currentColor; transition: transform .2s ease, opacity .2s ease; }
+    #deliMenuBtn[aria-expanded="true"] .deli-burger i:nth-child(1) { transform: translateY(5px) rotate(45deg); }
+    #deliMenuBtn[aria-expanded="true"] .deli-burger i:nth-child(2) { opacity: 0; }
+    #deliMenuBtn[aria-expanded="true"] .deli-burger i:nth-child(3) { transform: translateY(-5px) rotate(-45deg); }
+    .deli-mobile-nav { position: absolute; top: 100%; left: 8px; right: 8px; display: grid; gap: 2px; padding: 8px; background: #FFFDF9; border: 1px solid rgba(205, 38, 83, .22); border-radius: 18px; box-shadow: 0 22px 44px rgba(74, 14, 23, .18); max-height: calc(100svh - 90px); overflow-y: auto; }
+    .deli-mobile-nav[hidden] { display: none; }
+    .deli-mobile-nav a { display: flex; align-items: center; min-height: 48px; padding: 0 14px; border-radius: 12px; color: #4A0E17; font-weight: 800; font-size: .8rem; letter-spacing: .14em; text-transform: uppercase; }
+    .deli-mobile-nav a:hover, .deli-mobile-nav a:focus-visible { background: #FFF0F3; color: #CD2653; }
+    /* A jump lands below the 58px fixed header, not under it. */
+    [id] { scroll-margin-top: 76px; }
+    /* Phones: every control a thumb has to hit is at least 44px tall. */
+    @media (max-width: 767px) {
+      #basketModal button, #basketModal input, #basketModal a, .cat-pill, [id^="loupeTab-"], .deli-stage-btn, .deli-add-btn { min-height: 44px; }
+    }
+    .deli-toast { position: fixed; left: 50%; bottom: 18px; z-index: 75; display: flex; align-items: center; gap: 12px; max-width: calc(100vw - 24px); padding: 10px 10px 10px 16px; border-radius: 999px; background: #4A0E17; color: #FFF9F4; font-size: 13px; font-weight: 700; box-shadow: 0 16px 36px rgba(0,0,0,.28); transform: translate(-50%, 140%); opacity: 0; transition: transform .3s ease, opacity .3s ease; }
+    .deli-toast.is-on { transform: translate(-50%, 0); opacity: 1; }
+    .deli-toast button { min-height: 40px; padding: 0 14px; border-radius: 999px; background: #CD2653; color: #fff; font-size: 11px; text-transform: uppercase; letter-spacing: .12em; white-space: nowrap; }
+    @media (prefers-reduced-motion: reduce) { .deli-toast { transition: none; } }
+    @media (max-width: 1439px) { .deli-wa-pill { display: none !important; } }
+    @media (max-width: 1279px) { .deli-nav-loupe { display: none !important; } }
 
     /* Editorial Cards */
     .deli-card {
@@ -696,6 +739,8 @@
   .bwalk-cap b { display: block; font-family: var(--font-serif-chic, Georgia, serif); font-size: clamp(1.55rem, 3.6vw, 2.5rem); letter-spacing: -0.02em; line-height: 1.06; }
   .bwalk-cap span { display: block; margin-top: 6px; font-size: clamp(.85rem, 1.8vw, 1rem); font-weight: 500; opacity: .86; max-width: 44ch; margin-inline: auto; }
   .bwalk-step {
+    /* below the 58px fixed header, which it used to slide under */
+    margin-top: 58px;
     position: absolute; top: clamp(32px, 5.5vh, 64px); left: 0; right: 0; z-index: 26;
     text-align: center; color: #C59A45; font-size: .72rem;
     letter-spacing: .32em; text-transform: uppercase; font-weight: 800;
@@ -883,6 +928,7 @@
 <!-- seo:auto:end -->
 </head>
 <body class="linen-texture selection:bg-[#CD2653] selection:text-white">
+<a href="#larder" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[90] focus:px-4 focus:py-3 focus:rounded-full focus:bg-[#4A0E17] focus:text-white focus:font-bold">Skip to the larder</a>
 <div class="concept-bar" role="note" style="position:relative;z-index:60;padding:8px 16px;text-align:center;font:600 12px/1.45 system-ui,-apple-system,sans-serif;letter-spacing:.02em;background:#111;color:#f5f0e8">Concept storefront by <a href="/" style="color:inherit;text-decoration:underline;text-underline-offset:2px">Anchit Tandon</a>, not affiliated with Deli Chic. Nothing here places a real order.</div>
 
 <!-- Luxury Film Grain Cinematic Overlay -->
@@ -917,7 +963,7 @@
         DC
         </div>
       <span class="text-xl font-serif-chic font-black tracking-tight text-[#4A0E17] leading-none">Deli Chic</span>
-      <span class="hidden 2xl:inline text-[9px] tracking-[0.26em] uppercase font-bold text-[#CD2653] font-luxury border-l border-[#C59A45]/40 pl-2.5 ml-0.5">Food For Thought</span>
+      <span class="deli-tagline hidden 2xl:inline text-[9px] tracking-[0.26em] uppercase font-bold text-[#CD2653] font-luxury border-l border-[#C59A45]/40 pl-2.5 ml-0.5">Food For Thought</span>
     </a>
 
     <!-- Navigation Links -->
@@ -929,7 +975,7 @@
          was hiding. -->
     <nav class="hidden lg:flex items-center gap-4 xl:gap-5 text-xs font-bold uppercase tracking-[0.14em] xl:tracking-[0.18em] min-w-0">
       <a href="#larder" class="deli-nav-link whitespace-nowrap">The Larder</a>
-      <a href="#masterCarver" class="deli-nav-link whitespace-nowrap">Master Carver Loupe</a>
+      <a href="#masterCarver" class="deli-nav-link deli-nav-loupe whitespace-nowrap">Master Carver Loupe</a>
       <a href="#boucherieExperience" class="deli-nav-link whitespace-nowrap">Haute Standards</a>
       <a href="#hubs" class="deli-nav-link whitespace-nowrap">NCR Hubs (4)</a>
       <a href="#heritage" class="deli-nav-link whitespace-nowrap">Our Story</a>
@@ -944,19 +990,74 @@
       </button>
 
       <!-- WhatsApp Direct Concierge -->
-      <a href="https://wa.link/bk4b8e" target="_blank" rel="noreferrer noopener" class="hidden xl:inline-flex items-center gap-2 px-3.5 py-2 rounded-full border border-emerald-600/30 text-emerald-800 text-xs font-bold uppercase tracking-wider hover:bg-emerald-50 transition-all bg-emerald-50/50">
+      <a href="https://wa.link/bk4b8e" target="_blank" rel="noreferrer noopener" class="deli-wa-pill hidden xl:inline-flex items-center gap-2 px-3.5 py-2 rounded-full border border-emerald-600/30 text-emerald-800 text-xs font-bold uppercase tracking-wider hover:bg-emerald-50 transition-all bg-emerald-50/50">
         <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
         <span>WhatsApp Concierge</span>
       </a>
 
+      <!-- Menu below lg: the nav above is hidden there, and phones and tablets
+           had no way to reach the hubs or the story but 14 screens of scroll. -->
+      <button type="button" id="deliMenuBtn" class="lg:hidden inline-flex items-center justify-center gap-2 min-h-[44px] px-3.5 rounded-full border border-[#CD2653]/30 text-[#4A0E17] text-xs font-bold uppercase tracking-wider" aria-expanded="false" aria-controls="deliMobileNav">
+        <span aria-hidden="true" class="deli-burger"><i></i><i></i><i></i></span><span>Menu</span>
+      </button>
+
       <!-- Basket Trigger -->
-      <button id="deliBasketBtn" onclick="toggleBasket(true)" class="px-4 py-2 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#8C1434] transition-all shadow-md shadow-[#CD2653]/30 flex items-center gap-2 shrink-0 whitespace-nowrap">
+      <button id="deliBasketBtn" onclick="toggleBasket(true, this)" aria-haspopup="dialog" class="min-h-[44px] px-4 py-2 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#8C1434] transition-all shadow-md shadow-[#CD2653]/30 flex items-center gap-2 shrink-0 whitespace-nowrap">
         <span>Basket</span>
-        <span class="px-2 py-0.5 bg-white/25 rounded-full text-[10px] font-black" id="basketCount">0</span>
+        <span class="px-2 py-0.5 bg-white/25 rounded-full text-[10px] font-black" id="basketCount" aria-live="polite">0</span>
       </button>
     </div>
   </div>
+  <nav id="deliMobileNav" class="deli-mobile-nav lg:hidden" aria-label="Sections" hidden>
+    <a href="#larder">The Larder</a>
+    <a href="#masterCarver">Master Carver Loupe</a>
+    <a href="#boucherieExperience">Haute Standards</a>
+    <a href="#hubs">NCR Hubs (4)</a>
+    <a href="#heritage">Our Story</a>
+    <a href="https://wa.link/bk4b8e" target="_blank" rel="noreferrer noopener">WhatsApp Concierge ↗</a>
+  </nav>
 </header>
+<script>
+/* The disclaimer bar sits in normal flow above a position:fixed header, so at
+   the top of the page it painted straight over the logo and the nav. Push the
+   header down by however much of the bar is still on screen; once the bar has
+   scrolled away the offset is 0 and the header pins to the top as before.
+   `translate` (not top/transform) so nothing else that styles it is touched. */
+(function () {
+  var bar = document.querySelector('.concept-bar'), head = document.querySelector('header.deli-site-header');
+  if (!bar || !head) return;
+  var queued = 0;
+  function place() {
+    queued = 0;
+    var y = Math.max(0, Math.round(bar.getBoundingClientRect().bottom));
+    head.style.translate = y ? '0 ' + y + 'px' : '';
+  }
+  function ask() { if (!queued) queued = requestAnimationFrame(place); }
+  addEventListener('scroll', ask, { passive: true });
+  addEventListener('resize', ask);
+  place();
+})();
+</script>
+<script>
+/* The phone and tablet menu. Below lg the nav above is display:none, and
+   nothing replaced it: the hubs sat 14 screens down with no way to them. */
+(function () {
+  var btn = document.getElementById('deliMenuBtn'), nav = document.getElementById('deliMobileNav');
+  if (!btn || !nav) return;
+  function set(open, refocus) {
+    nav.hidden = !open;
+    btn.setAttribute('aria-expanded', String(open));
+    if (open) { var a = nav.querySelector('a'); if (a) a.focus(); }
+    else if (refocus) btn.focus();
+  }
+  btn.addEventListener('click', function () { set(nav.hidden); });
+  nav.addEventListener('click', function (e) { if (e.target.closest('a')) set(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !nav.hidden) set(false, true); });
+  document.addEventListener('click', function (e) { if (!nav.hidden && !nav.contains(e.target) && !btn.contains(e.target)) set(false); });
+  matchMedia('(min-width: 1024px)').addEventListener('change', function (m) { if (m.matches) set(false); });
+})();
+</script>
+
 
 <!-- ================= HERO SECTION: CULINARY SHOWCASE WITH LIVE ATMOSPHERIC CANVAS ================= -->
 <section class="relative pt-10 pb-20 md:pt-14 md:pb-28 px-6 md:px-10 max-w-7xl mx-auto overflow-hidden">
@@ -1013,17 +1114,17 @@
     <!-- Right Master Carver's Interactive Loupe Feature -->
     <div class="lg:col-span-5 relative" id="masterCarver">
       <!-- Interactive Cut Tabs for Loupe -->
-      <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-white/80 border border-[#CD2653]/20 mb-3 text-[10px] font-bold uppercase tracking-wider overflow-x-auto">
-        <button onclick="setLoupeCut('charcuterie')" id="loupeTab-charcuterie" class="py-1.5 px-3 rounded-xl bg-[#CD2653] text-white transition-all whitespace-nowrap">
+      <div class="grid grid-cols-4 sm:flex items-stretch sm:items-center gap-1 sm:gap-1.5 p-1 rounded-2xl bg-white/80 border border-[#CD2653]/20 mb-3 text-[10px] font-bold uppercase tracking-wide sm:tracking-wider">
+        <button onclick="setLoupeCut('charcuterie')" id="loupeTab-charcuterie" class="py-1.5 rounded-xl leading-tight text-center px-1 sm:px-3 bg-[#CD2653] text-white transition-all sm:whitespace-nowrap">
           Charcuterie
           </button>
-        <button onclick="setLoupeCut('poultry')" id="loupeTab-poultry" class="py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap">
+        <button onclick="setLoupeCut('poultry')" id="loupeTab-poultry" class="py-1.5 rounded-xl leading-tight text-center px-1 sm:px-3 text-[#524842] hover:text-[#CD2653] transition-all sm:whitespace-nowrap">
           Fresh Breast
           </button>
-        <button onclick="setLoupeCut('marinade')" id="loupeTab-marinade" class="py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap">
+        <button onclick="setLoupeCut('marinade')" id="loupeTab-marinade" class="py-1.5 rounded-xl leading-tight text-center px-1 sm:px-3 text-[#524842] hover:text-[#CD2653] transition-all sm:whitespace-nowrap">
           Lucknowi Cut
           </button>
-        <button onclick="setLoupeCut('momos')" id="loupeTab-momos" class="py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap">
+        <button onclick="setLoupeCut('momos')" id="loupeTab-momos" class="py-1.5 rounded-xl leading-tight text-center px-1 sm:px-3 text-[#524842] hover:text-[#CD2653] transition-all sm:whitespace-nowrap">
           Prawn Dim Sum
           </button>
       </div>
@@ -1173,7 +1274,7 @@
           </div>
         </div>
         <div class="lg:col-span-5 hidden lg:block">
-          <img src="/assets/brand/u-1599488615731-7e5c2823ff28-800.webp" loading="lazy" decoding="async" alt="Royal Awadhi Shahi Saffron Marinade" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#D4AF37]/70" />
+          <img src="/assets/brand/dc-lucknowi-marinade-800.webp" loading="lazy" decoding="async" alt="Royal Awadhi Shahi Saffron Marinade" class="w-full max-h-[44vh] aspect-square object-cover rounded-3xl shadow-2xl border-2 border-[#D4AF37]/70" />
         </div>
       </div>
     </div>
@@ -1257,7 +1358,7 @@
               <svg width="36" height="42" viewBox="0 0 36 42" fill="none"><path d="M18 0v18c0 6 8 6 8 12s-6 10-12 10" stroke="#D1D5DB" stroke-width="4" stroke-linecap="round"/><circle cx="18" cy="6" r="4" fill="#9CA3AF"/></svg>
             </div>
             <div class="relative h-44 overflow-hidden">
-              <img src="/assets/brand/u-1599488615731-7e5c2823ff28-800.webp" alt="" loading="lazy" decoding="async" class="w-full h-full object-cover" />
+              <img src="/assets/brand/dc-chicken-breast-450.webp" alt="" loading="lazy" decoding="async" class="w-full h-full object-cover" />
               <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/75 border border-emerald-400/50 text-emerald-300 text-[9px] font-luxury font-bold uppercase tracking-widest">Station 04 • Vacuum Locked</span>
             </div>
             <div class="p-5 space-y-1.5">
@@ -1303,7 +1404,7 @@
   </div>
 
   <!-- Category Filter Tabs -->
-  <div class="flex items-center gap-2.5 overflow-x-auto pb-4 mb-10 text-xs font-bold uppercase tracking-wider scrollbar-none" id="categoryTabs">
+  <div class="flex items-center gap-2.5 overflow-x-auto sm:flex-wrap sm:overflow-visible pb-4 mb-10 text-xs font-bold uppercase tracking-wider scrollbar-none" id="categoryTabs">
     <button onclick="filterCategory('all')" id="tab-all" class="cat-pill px-5 py-2.5 rounded-full bg-[#CD2653] text-white shadow-sm transition-all whitespace-nowrap">
       All Larder (12)
       </button>
@@ -1537,7 +1638,7 @@
 </footer>
 
 <!-- ================= SLIDE-OVER BASKET DRAWER ================= -->
-<div id="basketModal" class="fixed inset-0 z-50 hidden">
+<div id="basketModal" class="fixed inset-0 z-50 hidden" style="z-index:70" role="dialog" aria-modal="true" aria-labelledby="dcBasketTitle">
   <div onclick="toggleBasket(false)" class="absolute inset-0 bg-black/75 backdrop-blur-sm"></div>
   <div id="dcPanel" data-consent-pad class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-[#CD2653]/25 p-8 flex flex-col justify-between overflow-y-auto shadow-2xl text-[#1C1917]">
     <div>
@@ -1545,9 +1646,9 @@
       <div class="flex items-center justify-between border-b border-[#CD2653]/15 pb-4">
         <div>
           <span class="text-[10px] font-luxury font-bold uppercase tracking-widest text-[#CD2653]">Haute Boucherie</span>
-          <h3 class="text-xl font-serif-chic font-bold text-[#4A0E17]">Your Artisanal Basket</h3>
+          <h3 id="dcBasketTitle" class="text-xl font-serif-chic font-bold text-[#4A0E17]">Your Artisanal Basket</h3>
         </div>
-        <button onclick="toggleBasket(false)" class="text-xs uppercase tracking-widest text-[#CD2653] font-bold hover:underline">Close ✕</button>
+        <button type="button" id="dcClose" onclick="toggleBasket(false)" class="min-w-[44px] min-h-[44px] px-3 rounded-full border border-[#CD2653]/30 text-xs uppercase tracking-widest text-[#CD2653] font-bold hover:bg-[#FFF0F3]">Close ✕</button>
       </div>
 
       <!-- Free Delivery Threshold Meter -->
@@ -1578,10 +1679,10 @@
       <div>
         <label class="block text-[11px] font-bold uppercase tracking-wider text-[#6B625B] mb-1.5">Select NCR Delivery Slot:</label>
         <div class="grid grid-cols-2 gap-2 text-xs">
-          <button onclick="setSlot('Morning (10 AM–1 PM)')" id="slot-morning" class="slot-btn py-2 px-3 rounded-xl border border-[#CD2653] bg-[#CD2653] text-white font-bold transition-all">
+          <button type="button" aria-pressed="true" onclick="setSlot('Morning (10 AM–1 PM)')" id="slot-morning" class="slot-btn py-2 px-3 rounded-xl border border-[#CD2653] bg-[#CD2653] text-white font-bold transition-all">
             10 AM – 1 PM
             </button>
-          <button onclick="setSlot('Evening (5 PM–8 PM)')" id="slot-evening" class="slot-btn py-2 px-3 rounded-xl border border-[#CD2653]/30 bg-white text-[#524842] font-bold transition-all">
+          <button type="button" aria-pressed="false" onclick="setSlot('Evening (5 PM–8 PM)')" id="slot-evening" class="slot-btn py-2 px-3 rounded-xl border border-[#CD2653]/30 bg-white text-[#524842] font-bold transition-all">
             5 PM – 8 PM
             </button>
         </div>
@@ -1589,14 +1690,15 @@
 
       <!-- Promo Code Input -->
       <div class="flex gap-2">
-        <input type="text" id="promoInput" placeholder="Enter Code (e.g. WoW20)" class="w-full px-4 py-2 rounded-xl border border-[#CD2653]/30 text-xs uppercase font-luxury font-bold focus:outline-none focus:border-[#CD2653]" />
-        <button onclick="applyPromo()" class="px-5 py-2 rounded-xl bg-[#4A0E17] text-white font-bold text-xs uppercase hover:bg-[#2F090F] transition-all">
+        <input type="text" id="promoInput" aria-label="Promo code" aria-describedby="promoNotice promoError" placeholder="Code WoW20 · 20% off ₹999+" class="w-full px-4 py-2 rounded-xl border border-[#CD2653]/30 text-xs uppercase font-luxury font-bold focus:outline-none focus:border-[#CD2653]" />
+        <button type="button" onclick="applyPromo()" class="px-5 py-2 rounded-xl bg-[#4A0E17] text-white font-bold text-xs uppercase hover:bg-[#2F090F] transition-all">
           Apply
           </button>
       </div>
-      <div id="promoNotice" class="text-[11px] text-emerald-700 font-bold hidden">
+      <div id="promoNotice" class="text-[11px] text-emerald-700 font-bold hidden" role="status">
         ✓ Code WoW20 Applied! 20% Discount Activated.
         </div>
+      <div id="promoError" class="text-[11px] text-[#B4232F] font-bold hidden" role="alert"></div>
 
       <!-- Calculations -->
       <div class="space-y-1.5 text-xs text-[#524842]">
@@ -1614,8 +1716,8 @@
         </div>
       </div>
 
-      <button onclick="startDeliCheckout()" class="knife-glint w-full py-4 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#8C1434] transition-all shadow-lg shadow-[#CD2653]/30 flex items-center justify-center gap-2">
-        <span>Dispatch via WhatsApp Concierge ↗</span>
+      <button type="button" id="dcStart" onclick="startDeliCheckout()" class="knife-glint disabled:opacity-40 disabled:cursor-not-allowed w-full py-4 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-[#8C1434] transition-all shadow-lg shadow-[#CD2653]/30 flex items-center justify-center gap-2">
+        <span>Continue to delivery details →</span>
       </button>
     </div>
 
@@ -1805,7 +1907,7 @@
         title: 'Lucknowi Shahi Saffron Marinade',
         desc: 'Infused with Awadhi mace, roasted gram flour, hung curd and royal saffron threads.',
         badge: 'Chef Master Marinade Inspection',
-        image: '/assets/brand/u-1599488615731-7e5c2823ff28-1200.webp'
+        image: '/assets/brand/dc-lucknowi-marinade-1200.webp'
       },
       momos: {
         title: 'Handcrafted Coastal Prawn Dim Sum',
@@ -1850,7 +1952,7 @@
           </div>
 
           <div class="p-6 pt-0">
-            <button onclick="addToBasket('${p.id}', this)" class="w-full py-3 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#8C1434] transition-all shadow-md shadow-[#CD2653]/25 flex items-center justify-center gap-2">
+            <button type="button" onclick="addToBasket('${p.id}', this)" class="deli-add-btn w-full py-3 rounded-full bg-[#CD2653] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#8C1434] transition-all shadow-md shadow-[#CD2653]/25 flex items-center justify-center gap-2">
               <span>+ Add to Basket</span>
             </button>
           </div>
@@ -2085,8 +2187,10 @@
         btn.classList.remove('bg-[#CD2653]', 'text-white', 'shadow-sm');
         btn.classList.add('bg-white', 'text-[#524842]');
       });
+      document.querySelectorAll('.cat-pill').forEach(btn => btn.setAttribute('aria-pressed', 'false'));
       const active = document.getElementById(`tab-${cat}`);
       if (active) {
+        active.setAttribute('aria-pressed', 'true');
         active.classList.add('bg-[#CD2653]', 'text-white', 'shadow-sm');
         active.classList.remove('bg-white', 'text-[#524842]');
       }
@@ -2292,7 +2396,7 @@
       window.jumpDeliChapter = function(index) {
         const totalHeight = total();
         const targetY = wrap.getBoundingClientRect().top + window.scrollY + totalHeight * ((index + 0.5) / 3);
-        window.scrollTo({ top: targetY, behavior: 'smooth' });
+        window.scrollTo({ top: targetY, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
       };
 
       function update() {
@@ -2317,6 +2421,7 @@
             } else {
               btn.classList.remove('active');
             }
+            btn.setAttribute('aria-pressed', String(w > 0.5));
           }
 
           r += colors[i][0] * w;
@@ -2479,9 +2584,9 @@
       ['charcuterie', 'poultry', 'marinade', 'momos'].forEach(k => {
         const btn = document.getElementById(`loupeTab-${k}`);
         if (k === key) {
-          btn.className = 'py-1.5 px-3 rounded-xl bg-[#CD2653] text-white transition-all whitespace-nowrap';
+          btn.className = 'py-1.5 rounded-xl leading-tight text-center px-1 sm:px-3 bg-[#CD2653] text-white transition-all sm:whitespace-nowrap';
         } else {
-          btn.className = 'py-1.5 px-3 rounded-xl text-[#524842] hover:text-[#CD2653] transition-all whitespace-nowrap';
+          btn.className = 'py-1.5 rounded-xl leading-tight text-center px-1 sm:px-3 text-[#524842] hover:text-[#CD2653] transition-all sm:whitespace-nowrap';
         }
       });
 
@@ -2603,14 +2708,28 @@
       }
 
       container.addEventListener('mousemove', (e) => updateLoupe(e.clientX, e.clientY), { passive: true });
-      container.addEventListener('touchmove', (e) => {
+      // Touch: a vertical swipe over the photo must scroll the page (it covers
+      // half a phone screen, and swallowed every scroll that started on it).
+      // touch-action: pan-y hands vertical drags to the browser; the lens
+      // follows horizontal drags and taps, and goes away when the finger lifts.
+      container.style.touchAction = 'pan-y';
+      container.addEventListener('touchstart', (e) => {
         if (e.touches && e.touches[0]) {
           glass.style.display = 'block';
           syncGlassBackground();
           updateLoupe(e.touches[0].clientX, e.touches[0].clientY);
-          e.preventDefault();
         }
-      }, { passive: false });
+      }, { passive: true });
+      container.addEventListener('touchmove', (e) => {
+        if (e.touches && e.touches[0]) updateLoupe(e.touches[0].clientX, e.touches[0].clientY);
+      }, { passive: true });
+      const loupeOff = () => {
+        glass.style.display = 'none';
+        if (callout) callout.classList.remove('is-visible');
+        hotspots.forEach(h => h.classList.remove('is-snapped'));
+      };
+      container.addEventListener('touchend', loupeOff, { passive: true });
+      container.addEventListener('touchcancel', loupeOff, { passive: true });
     })();
 
     // 6. Basket Management + Fly-to-Basket Quadratic Bezier Arc
@@ -2625,12 +2744,37 @@
       updateBasketUI();
       dcStep('bag');
 
+      // On a phone the drawer is the whole screen: opening it on every add
+      // turned a three-item order into three trips in and out. There, a toast
+      // confirms the add and offers the basket; larger screens keep the drawer.
+      const small = window.matchMedia('(max-width: 767px)').matches;
       if (btnEl && typeof window.launchDeliBezierFly === 'function' && !prefersReducedMotion) {
         window.launchDeliBezierFly(btnEl, p ? p.image : '');
-        setTimeout(() => toggleBasket(true), 540);
-      } else {
-        toggleBasket(true);
       }
+      if (small) deliToast(`${p.name} added`);
+      else if (btnEl && !prefersReducedMotion) setTimeout(() => toggleBasket(true, btnEl), 540);
+      else toggleBasket(true, btnEl);
+    }
+
+    let deliToastTimer = 0;
+    function deliToast(msg) {
+      let t = document.getElementById('deliToast');
+      if (!t) {
+        t = document.createElement('div');
+        t.id = 'deliToast'; t.className = 'deli-toast'; t.setAttribute('role', 'status');
+        t.innerHTML = '<span></span><button type="button">View basket</button>';
+        t.querySelector('button').addEventListener('click', () => { t.classList.remove('is-on'); toggleBasket(true, document.getElementById('deliBasketBtn')); });
+        document.body.appendChild(t);
+      }
+      t.querySelector('span').textContent = msg;
+      t.classList.add('is-on');
+      clearTimeout(deliToastTimer);
+      deliToastTimer = setTimeout(() => t.classList.remove('is-on'), 3600);
+    }
+
+    function removeItem(idx) {
+      basket.splice(idx, 1);
+      updateBasketUI();
     }
 
     function changeQty(idx, delta) {
@@ -2645,7 +2789,10 @@
       selectedSlot = slotName;
       const mBtn = document.getElementById('slot-morning');
       const eBtn = document.getElementById('slot-evening');
-      if (slotName.includes('Morning') || slotName.includes('10 AM')) {
+      const morning = slotName.includes('Morning') || slotName.includes('10 AM');
+      mBtn.setAttribute('aria-pressed', String(morning));
+      eBtn.setAttribute('aria-pressed', String(!morning));
+      if (morning) {
         mBtn.className = 'slot-btn py-2 px-3 rounded-xl border border-[#CD2653] bg-[#CD2653] text-white font-bold transition-all';
         eBtn.className = 'slot-btn py-2 px-3 rounded-xl border border-[#CD2653]/30 bg-white text-[#524842] font-bold transition-all';
       } else {
@@ -2654,18 +2801,29 @@
       }
     }
 
+    // Errors used to be blocking alert() pop-ups; they now sit under the field.
+    function promoError(msg) {
+      const box = document.getElementById('promoError');
+      if (!box) return;
+      box.textContent = msg || '';
+      box.classList.toggle('hidden', !msg);
+    }
     function applyPromo() {
       const code = document.getElementById('promoInput').value.trim().toUpperCase();
       if (code === 'WOW20') {
         const subtotal = basket.reduce((s, i) => s + i.price * i.qty, 0);
         if (subtotal >= 999) {
           isPromoApplied = true;
-          document.getElementById('promoNotice').classList.remove('hidden');
+          promoError('');
         } else {
-          alert('Promo WoW20 requires minimum order value of ₹999. Add more cuts to qualify!');
+          promoError(`WoW20 needs a ₹999 basket. Add ₹${999 - subtotal} more to use it.`);
         }
       } else {
-        alert('Invalid promo code. Use verified code WoW20.');
+        // A different code replaces the old one rather than sitting beside it.
+        isPromoApplied = false;
+        updateBasketUI();
+        promoError(code ? 'That code is not valid. Try WoW20.' : 'Enter a promo code first.');
+        return;
       }
       updateBasketUI();
     }
@@ -2704,6 +2862,12 @@
       } else {
         document.getElementById('discountRow').style.display = 'none';
       }
+      // The "Applied" line follows the discount, instead of outliving it.
+      document.getElementById('promoNotice').classList.toggle('hidden', !discount);
+      if (isPromoApplied && !discount && subtotal > 0) promoError(`WoW20 is paused: the basket is under ₹999. Add ₹${999 - subtotal} to bring it back.`);
+      else if (discount) promoError('');
+      const start = document.getElementById('dcStart');
+      if (start) start.disabled = basket.length === 0;
 
       const finalTotal = subtotal - discount;
       document.getElementById('finalTotalPrice').textContent = `₹${finalTotal}`;
@@ -2726,21 +2890,52 @@
           <h4 class="font-bold text-sm text-[#4A0E17]">${item.name}</h4>
           <span class="text-[11px] text-[#CD2653] font-bold block">${item.weight} • ₹${item.price} each</span>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
           <div class="flex items-center border border-[#CD2653]/30 rounded-lg overflow-hidden bg-white text-xs font-bold">
-            <button onclick="changeQty(${idx}, -1)" class="px-2 py-1 hover:bg-[#FFF0F3] text-[#4A0E17]">-</button>
-            <span class="px-2.5 py-1 text-[#CD2653]">${item.qty}</span>
-            <button onclick="changeQty(${idx}, 1)" class="px-2 py-1 hover:bg-[#FFF0F3] text-[#4A0E17]">+</button>
+            <button type="button" onclick="changeQty(${idx}, -1)" aria-label="One fewer ${item.name}" class="w-10 h-10 hover:bg-[#FFF0F3] text-[#4A0E17]">−</button>
+            <span class="px-2 text-[#CD2653]" aria-label="Quantity">${item.qty}</span>
+            <button type="button" onclick="changeQty(${idx}, 1)" aria-label="One more ${item.name}" class="w-10 h-10 hover:bg-[#FFF0F3] text-[#4A0E17]">+</button>
           </div>
+          <button type="button" onclick="removeItem(${idx})" aria-label="Remove ${item.name}" class="w-10 h-10 rounded-lg text-[#6B625B] hover:text-[#CD2653] hover:bg-[#FFF0F3] text-base">×</button>
           <span class="font-serif-chic font-bold text-[#4A0E17] text-sm min-w-[50px] text-right">₹${item.price * item.qty}</span>
         </div>
       </div>
     `).join('');
     }
 
-    function toggleBasket(open) {
-      document.getElementById('basketModal').classList.toggle('hidden', !open);
+    // A dialog, not just a div that appears: focus moves in and stays in,
+    // Esc closes it, the page behind stops scrolling, and focus goes back to
+    // whatever opened it.
+    let dcOpener = null;
+    function dcFocusables() {
+      return [...document.querySelectorAll('#dcPanel button, #dcPanel a[href], #dcPanel input, #dcPanel textarea, #dcPanel select')]
+        .filter(el => !el.disabled && el.offsetParent !== null);
     }
+    function toggleBasket(open, opener) {
+      const modal = document.getElementById('basketModal');
+      const wasOpen = !modal.classList.contains('hidden');
+      modal.classList.toggle('hidden', !open);
+      document.documentElement.style.overflow = open ? 'hidden' : '';
+      document.getElementById('deliBasketBtn')?.setAttribute('aria-expanded', String(!!open));
+      if (open && !wasOpen) {
+        dcOpener = opener || document.activeElement;
+        requestAnimationFrame(() => document.getElementById('dcClose')?.focus());
+      } else if (!open && wasOpen) {
+        const back = dcOpener && document.contains(dcOpener) ? dcOpener : document.getElementById('deliBasketBtn');
+        back?.focus?.();
+        dcOpener = null;
+      }
+    }
+    document.addEventListener('keydown', (e) => {
+      const modal = document.getElementById('basketModal');
+      if (!modal || modal.classList.contains('hidden')) return;
+      if (e.key === 'Escape') { e.preventDefault(); toggleBasket(false); return; }
+      if (e.key !== 'Tab') return;
+      const f = dcFocusables(); if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && (document.activeElement === last || !modal.contains(document.activeElement))) { e.preventDefault(); first.focus(); }
+    });
 
     /* ---- placing the order ----------------------------------------------
        The message this used to build was a good one, but it was addressed
@@ -2873,6 +3068,9 @@
       if (wa) wa.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(dcOrderText(order))}`;
 
       basket.length = 0;
+      isPromoApplied = false;
+      const pi = document.getElementById('promoInput'); if (pi) pi.value = '';
+      promoError('');
       updateBasketUI();
       dcStep('done');
       return false;
