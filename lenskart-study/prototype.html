@@ -1143,11 +1143,12 @@ function calc(){
   var mar = Math.max(0,I.pm-I.sell), perT = (1-I.hshare)*I.test+I.hshare*I.home, rMsg = dueN*I.take, rCall = calls*I.calllift;
   var LV = [['First Prescription Follow-up', B*mar - c2], ['Call in Recall Booking', rCall*perRetest(I)*I.incr*mar - c4 - rCall*perT], ['Recall Reminder', (rMsg*perRetest(I)*I.incr - C)*mar - c1 - rMsg*perT], ['AI ranking and drafting', -c5]];
   el('bylever').innerHTML = '<p class="label" style="margin-top:14px">Net by lever</p>' + LV.map(function(l){return '<div class="lever" style="padding:8px 0"><div class="lever-head"><span>'+l[0]+'</span><span>'+CR(l[1])+'</span></div></div>';}).join('');
-  // Break-even: the smallest lift that pays for each action's own running cost.
-  // Uses only the price, margin and cost inputs, no assumed uplift.
-  var perO = I.fval*mar, perR = perRetest(I)*mar - perT;
-  var BE = [['First Prescription Follow-up', 2*I.msg, perO, 'extra order for every {n} people sent 2 messages; one first order of '+INR(I.fval)+' at '+((I.pm-I.sell)*100).toFixed(0)+'% contribution'],
-            ['Recall Reminder', 2*I.msg, perR, 'extra re-test for every {n} people sent 2 messages; a re-test worth '+INR(perRetest(I))+', less its '+INR(perT)+' cost'],
+  // Break-even: the smallest lift at which each action pays for itself.
+  // Each threshold solves the same per-person equation as its line in "Net by
+  // lever" for the lift that makes it zero, so the panel and the levers agree.
+  var perO = I.fval*I.incr*mar, perR = perRetest(I)*I.incr*mar - perT, swapLoss = I.base*I.cann*Math.max(0,I.order-I.swapv)*mar;
+  var BE = [['First Prescription Follow-up', 2*I.msg, perO, 'extra order for every {n} people sent 2 messages; a first order of '+INR(I.fval)+', '+(I.incr*100).toFixed(0)+'% truly extra, at '+((I.pm-I.sell)*100).toFixed(0)+'% contribution'],
+            ['Recall Reminder', 2*I.msg + swapLoss, perR, 'extra re-test for every {n} people sent 2 messages; covers the messages and the lens-swap loss'],
             ['Call in Recall Booking', I.call, perR, 'extra re-test for every {n} calls of '+INR(I.call)+' each']];
   el('breakeven').innerHTML = BE.map(function(b){ var pp = b[2]>0 ? b[1]/b[2]*100 : NaN, one = b[1]>0 && b[2]>0 ? Math.round(b[2]/b[1]) : 0;
     return '<div class="be" data-be="'+b[0]+'"><span>'+b[0]+'</span><b>'+(isFinite(pp)?'+'+pp.toFixed(2)+'pp':'n/a')+'</b><small>'+(one?'1 '+b[3].replace('{n}',one.toLocaleString('en-IN')):'Does not pay at these inputs')+'</small></div>'; }).join('');

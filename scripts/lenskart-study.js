@@ -641,7 +641,16 @@ async function prototype(browser, vp) {
   check(`${L}: a loss in the model keeps its minus sign`, /Recall Reminder\s*−₹/.test(lossLine), lossLine.slice(0, 120));
   const be = await page.$$eval('#breakeven .be', (bs) => bs.map((b) => [b.dataset.be, b.querySelector('b').textContent, b.querySelector('small').textContent]));
   check(`${L}: break-even lifts for each action, in plain words`,
-    be.length === 3 && be[0][1] === '+0.16pp' && /^1 extra order for every 633 people/.test(be[0][2]), JSON.stringify(be).slice(0, 160));
+    be.length === 3 && be.map((x) => x[1]).join() === '+0.21pp,+2.56pp,+3.12pp' && /^1 extra order for every 474 people/.test(be[0][2]), JSON.stringify(be).slice(0, 160));
+  // Review finding: break-even must solve the lever's own equation. Set the
+  // follow-up lift to its break-even and its line in "Net by lever" reads zero.
+  await setNum(page, '#m-conv', 0.2108);
+  const atBE = norm(await page.textContent('#bylever'));
+  await setNum(page, '#m-incr', 0);
+  const noIncr = await page.$$eval('#breakeven .be b', (bs) => bs.map((x) => x.textContent));
+  await setNum(page, '#m-conv', 3); await setNum(page, '#m-incr', 75);
+  check(`${L}: break-even agrees with the lever lines, and says n/a when nothing is truly extra`,
+    /First Prescription Follow-up\s*₹0\.0 cr/.test(atBE) && noIncr.every((x) => x === 'n/a'), atBE.slice(0, 80) + ' | ' + noIncr.join());
   // Nonsense inputs must not produce nonsense output.
   await setNum(page, '#m-acc', -5000000); await setNum(page, '#m-fx', 0); await setNum(page, '#m-pm', 250);
   const junk = norm(await page.textContent('#m-total')) + ' ' + norm(await page.textContent('#m-net')) + ' ' + norm(await page.textContent('#costs'));
