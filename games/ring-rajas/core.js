@@ -411,15 +411,23 @@ function startSolo(G, w, name, o) {
   w.solo = Object.assign({ name, d: S0, t: 0, dur: (S0.dur || 1) * ((o && o.speed) || 1), hit: false, x0: w.x, z0: w.z, fprev: 0, target: null, mv: null }, o || {});
   setSt(w, 'solo'); w.anim = name; w.ak = 0; w.adur = w.solo.dur;
 }
+// a wrestler leaving a lock-up for any reason lets the partner go too, so nobody is left holding a lock alone
+function dropLock(G, w) {
+  const L = w.lock; if (!L) return;
+  w.lock = null;
+  const o = L.a === w ? L.d : L.a;
+  if (o && o.lock === L) { o.lock = null; if (o.st === 'lock') stand(G, o); }
+}
 function down(G, w, face, gt) {
   setSt(w, 'down'); w.anim = face === 'front' ? 'downFront' : 'down'; w.face = face === 'front' ? 'front' : 'up';
   w.pitch = w.face === 'front' ? HALF : -HALF; w.h = LIE; w.roll = 0; w.yawOff = 0;
   w.getT = (gt || 1.4) * (0.75 + w.dmg / 160) * (1.25 - w.def.stats.tough * 0.35);
   if (w.bot) w.getT *= rnd(0.9, 1.15);
-  w.move = null; w.solo = null; w.lock = null; w.perch = null; w.fly = null; w.threat = null;
+  dropLock(G, w);
+  w.move = null; w.solo = null; w.perch = null; w.fly = null; w.threat = null;
   clampIn(w);
 }
-function stand(G, w) { setSt(w, 'idle'); w.anim = 'idle'; w.h = 1; w.pitch = 0; w.roll = 0; w.yawOff = 0; w.move = null; w.solo = null; w.lock = null; }
+function stand(G, w) { dropLock(G, w); setSt(w, 'idle'); w.anim = 'idle'; w.h = 1; w.pitch = 0; w.roll = 0; w.yawOff = 0; w.move = null; w.solo = null; }
 function hurt(G, w, by, amt, o) {
   amt *= 0.5 * (by && by.bot ? G.D.dmgIn : G.D.dmgOut) * (1.25 - w.def.stats.tough * 0.35);
   if (by) amt *= 0.85 + by.def.stats.pow * 0.3;
@@ -459,6 +467,8 @@ function doReverse(G, d, th) {
   ev(G, 'reverse', { a: d, d: a });
   say(G, 'reversal', { a, d });
   sfx(330, 0.08, { type: 'square', vol: 0.06 });
+  // reversing a third wrestler's attack lets go of the lock-up with anyone else, so that opponent is not left holding it
+  if (d.lock && d.lock.a !== a && d.lock.d !== a) breakLock(G, d.lock, true);
   if (th.kind === 'strike' || th.kind === 'counter') {
     // catch it and fire back
     a.solo = null; setSt(a, 'hit'); a.stun = 0.55; a.anim = 'stagger';
@@ -486,6 +496,7 @@ function startDuo(G, a, d, tplName, o) {
   const tpl = DUO[tplName]; if (!tpl) return;
   o = o || {};
   if (a.lock) breakLock(G, a.lock, true);
+  if (d.lock) breakLock(G, d.lock, true);
   const dur = tpl.dur * (o.speed || 1);
   const mv = { tpl, id: tplName, a, d, t: 0, dur, hit: false, name: o.name || tpl.name, dmg: o.dmg || tpl.dmg, fin: !!o.fin, sig: !!o.sig, autoPin: !!o.autoPin, hold: o.hold || null, ax: a.x, az: a.z };
   a.move = mv; d.move = mv; a.role = 'a'; d.role = 'd';
@@ -1068,7 +1079,7 @@ function tossOver(G, w, T) {
   const ox = sx ? Math.sign(T.x) : 0, oz = sx ? 0 : Math.sign(T.z);
   w.yaw = faceTo(w, T.x, T.z);
   startSolo(G, w, 'shove', { target: null, noRev: true });
-  T.lock = null; T.move = null;
+  dropLock(G, T); T.move = null;
   startSolo(G, T, 'overTop', { ox, oz, x0: T.x, z0: T.z });
   T.yaw = Math.atan2(-ox, -oz);
   hurt(G, T, w, 6);
@@ -1285,7 +1296,7 @@ function soloImpact(G, w, s) {
     if (big) { pop(G, s.special ? (s.name === 'roundkick' ? w.def.sig.name : (s.special === 'fin' ? w.def.fin.name : w.def.sig.name)) : d.name, w.def.col, big >= 3 ? 2 : 1.2); if (s.special === 'fin' || s.special === 'sig') G.crowd = Math.min(1, G.crowd + 0.3); }
     if (d.ground) { o.t = Math.max(0, o.t - 0.5); o.stagT = 0.35; thud(0.6); continue; }
     if (d.react === 'fall' || o.stam < 8) {
-      o.yaw = faceTo(o, w.x, w.z); o.solo = null; o.lock = null;
+      o.yaw = faceTo(o, w.x, w.z); o.solo = null; dropLock(G, o);
       // a hard hit near the ropes sends them over the top
       if (d.run && ropeDist(o) < 0.6 && inRing(o) && R() < 0.5 && G.cfg.match !== 'elim') { const sx = Math.abs(o.x) >= Math.abs(o.z); startSolo(G, o, 'overTop', { ox: sx ? Math.sign(o.x) : 0, oz: sx ? 0 : Math.sign(o.z), x0: o.x, z0: o.z }); }
       else { startSolo(G, o, 'fallBack', { gt: 1.2 + dmg * 0.05 + (s.special === 'fin' ? 1.4 : 0) }); }
