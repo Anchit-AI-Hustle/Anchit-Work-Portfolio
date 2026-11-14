@@ -888,8 +888,11 @@ function ftUpdate(dt) {
     startShot(p, 'ft', user);
     if (F.i === F.n - 1) F.last = true;
   }
-  if (p.act === 'ft' && p.ad && !p.ad.user && p.actT > 0.95 && !p.ad.rel) { releaseShot(p); if (F.last) { M.phase = 'live'; M.phaseT = 0; } }
+  if (p.act === 'ft' && p.ad && !p.ad.user && p.actT > 0.95 && !p.ad.rel) { releaseShot(p); if (F.last) ftGoLive(p); }
 }
+// after the last free throw leaves the hand the lane comes alive for the rebound, but the game clock
+// stays stopped until a player touches the ball (a make is a dead ball and never starts it)
+function ftGoLive(p) { M.phase = 'live'; M.phaseT = 0; M.ftHold = p; }
 function ftNext(made) {
   const F = M.ft; if (!F) return;
   F.i++; if (made) F.made++;
@@ -1005,7 +1008,8 @@ function gameUpdate(dt) {
   }
   // clocks
   const live = M.phase === 'live';
-  if ((live && B.state !== 'dead') || (M.clockRun && (M.phase === 'dead' || M.phase === 'inbound'))) {
+  if (M.ftHold && (!live || B.holder || B.last !== M.ftHold)) M.ftHold = null;
+  if ((live && B.state !== 'dead' && !M.ftHold) || (M.clockRun && (M.phase === 'dead' || M.phase === 'inbound'))) {
     M.clock -= dt;
     if (live && (B.state === 'held' || B.state === 'pass') && M.poss >= 0) M.shot -= dt;
   }
@@ -1580,13 +1584,13 @@ function switchPlayer(p) {
 function userFT(p, dt, sw) {
   if (p.act !== 'ft' || !p.ad || p.ad.rel) return;
   const ad = p.ad;
-  if (sw && sw.dir === 'up') { const tm = swipeTiming(sw); ad.timing = tm.t; U.lastRel = tm; U.relT = 0; U.msg = tm.t >= 0.999 ? 'Perfect release' : tm.t > 0.6 ? 'Good' : 'Off'; U.msgT = 1; releaseShot(p); if (M.ft && M.ft.last) { M.phase = 'live'; M.phaseT = 0; } return; }
+  if (sw && sw.dir === 'up') { const tm = swipeTiming(sw); ad.timing = tm.t; U.lastRel = tm; U.relT = 0; U.msg = tm.t >= 0.999 ? 'Perfect release' : tm.t > 0.6 ? 'Good' : 'Off'; U.msgT = 1; releaseShot(p); if (M.ft && M.ft.last) ftGoLive(p); return; }
   if (!ad.charging && shootHeld()) { ad.charging = true; ad.c0 = p.actT; }
   if (ad.charging) {
     const m = (p.actT - ad.c0) / 0.7;
     ad.m = m;
-    if (!shootHeld() || m > 2) { const tm = timingOf(m, M.diff.win * 1.2); ad.timing = tm.t; U.lastRel = tm; U.relT = 0; U.msg = tm.t >= 0.999 ? 'Perfect release' : tm.early ? 'Early' : 'Late'; U.msgT = 1; releaseShot(p); if (M.ft && M.ft.last) { M.phase = 'live'; M.phaseT = 0; } }
-  } else if (p.actT > 7) { ad.timing = 0.55; releaseShot(p); if (M.ft && M.ft.last) { M.phase = 'live'; M.phaseT = 0; } }
+    if (!shootHeld() || m > 2) { const tm = timingOf(m, M.diff.win * 1.2); ad.timing = tm.t; U.lastRel = tm; U.relT = 0; U.msg = tm.t >= 0.999 ? 'Perfect release' : tm.early ? 'Early' : 'Late'; U.msgT = 1; releaseShot(p); if (M.ft && M.ft.last) ftGoLive(p); }
+  } else if (p.actT > 7) { ad.timing = 0.55; releaseShot(p); if (M.ft && M.ft.last) ftGoLive(p); }
 }
 
 /* ---------------------------------------------------------------------- replays */
