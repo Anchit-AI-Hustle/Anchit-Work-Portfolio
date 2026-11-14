@@ -775,6 +775,19 @@ tr[hidden]{display:none!important}
 if(document.readyState!=='loading')mark();else document.addEventListener('DOMContentLoaded',mark);window.addEventListener('resize',mark,{passive:true});})();
 </script>
 <script>
+// A shared link opens on its section. On a slow connection the web font lands
+// after the browser has jumped to the fragment, the text above re-wraps, and
+// the reader ends up somewhere else. Land again once fonts and the page have
+// settled, unless the reader has already started scrolling.
+(function(){
+  var moved=false;
+  ['wheel','touchmove','keydown','mousedown'].forEach(function(ev){window.addEventListener(ev,function(){moved=true;},{passive:true,once:true});});
+  function land(){ if(moved||!location.hash) return; var t=document.getElementById(location.hash.slice(1)); if(t) t.scrollIntoView(); }
+  window.addEventListener('load',function(){ land(); setTimeout(land,400); });
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(function(){ land(); setTimeout(land,100); });
+})();
+</script>
+<script>
 // Phone tables stack into cards: each cell carries its column name.
 (function(){document.querySelectorAll('table.stack').forEach(function(t){
   var heads=[].map.call(t.querySelectorAll('thead th'),function(h){return h.textContent.trim();});

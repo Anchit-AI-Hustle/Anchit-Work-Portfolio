@@ -102,13 +102,14 @@ const results = [];
 const check = (name, ok, detail) => results.push([ok ? 'PASS' : 'FAIL', name, detail == null ? '' : String(detail)]);
 const norm = (s) => (s || '').replace(/\s+/g, ' ').trim();
 
-async function open(browser, vp, path) {
+async function open(browser, vp, path, slowFonts) {
   const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
   const bag = { errors: [], failed: [] };
   let closed = false;
   ctx.on('close', () => { closed = true; });
   await ctx.route('**/*', async (route) => {
     try {
+      if (slowFonts && /fonts\.g(oogleapis|static)\.com/.test(route.request().url())) await new Promise((r) => setTimeout(r, slowFonts));
       const res = await route.fetch();
       const headers = { ...res.headers() };
       if (!(headers['content-type'] || '').includes('text/html')) return await route.fulfill({ response: res });
@@ -199,6 +200,16 @@ async function walkthrough(browser, vp) {
     lines.length === 8 && urls.join() === steps.slice(0, 7).map((s) => s[1]).join(), clip.replace(/\n/g, ' | ').slice(0, 160));
   await ctx.close();
 
+  // A shared link must still land when the web font arrives late and the text
+  // above the target re-wraps. This is a guard, not a proof: `/lenskart-study#me`
+  // missed once on CI at 390 and could not be reproduced in 36 local loads, with
+  // or without the page's re-land script, so no planted defect backs this check.
+  for (const href of ['/lenskart-study#me', '/lenskart-study#impact']) {
+    const o = await open(browser, vp, href, 1500);
+    await o.page.waitForTimeout(900);
+    check(`${L}: ${href} lands on its section even when the web font is late`, (await landed(o.page, href)) === true, o.page.url());
+    await o.ctx.close();
+  }
   for (const href of [...steps.map((s) => s[0]), ...tries, '/lenskart-study/prototype#brand']) {
     const o = await open(browser, vp, href);
     await o.page.waitForTimeout(500);
