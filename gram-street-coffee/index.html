@@ -382,10 +382,14 @@
   .gs-toast.is-on { transform: translate(-50%, 0); opacity: 1; }
   .gs-toast button { min-height: 40px; padding: 0 14px; border-radius: 999px; background: #7C3AED; color: #fff; font-size: 11px; text-transform: uppercase; letter-spacing: .12em; white-space: nowrap; }
   @media (prefers-reduced-motion: reduce) { .gs-toast { transition: none; } }
+  #cartModal input:focus-visible, #cartModal textarea:focus-visible, input[type="email"]:focus-visible { outline: 2px solid #7C3AED; outline-offset: 2px; }
+  /* Tabs: the arrow keys move between them, as in any tab row. */
   /* Phones: controls a thumb has to hit are at least 44px tall. */
   @media (max-width: 767px) {
     #cartModal button, #cartModal input, #cartModal textarea, #headerBagBtn, #audioBtn, [onclick*="addBarItemToCart"], [onclick*="setSubMode"], [onclick*="addToCart"] { min-height: 44px; }
     #cartModal input, #cartModal textarea, input[type="email"] { font-size: 16px; }
+    [data-cupping] button, #locDirectionsBtn, #locZomatoBtn:not([hidden]), footer a, [role="tab"], form button { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+    #locPhone { display: inline-flex; align-items: center; min-height: 44px; }
   }
   @media (min-width: 1200px) and (max-width: 1399px) {
     .nav a { padding: 0 8px; font-size: 0.86rem; }
@@ -1055,7 +1059,9 @@
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 0.2em;
-    color: var(--accent);
+    /* --accent on the lilac page measured 3.2:1; this violet clears 5:1 on
+       lilac and 9:1 on white, the only two grounds these labels sit on. */
+    color: #5B21B6;
   }
   .eyebrow-label::before {
     content: "";
@@ -1265,7 +1271,7 @@
     <a href="#destinations">Find Us (3)</a>
   </div>
   <!-- Spatial Audio Toggle Button (15% Gain 65°C Steam Wand Acoustics) -->
-  <button id="audioBtn" onclick="toggleAudio()" aria-label="Toggle ambient audio" title="Toggle 65°C Steam Wand &amp; Bar Acoustics (15% Gain)" class="ml-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-[#2B1650]/40 text-[#2B1650] flex items-center gap-1.5 bg-white/70 hover:bg-white transition-all">
+  <button id="audioBtn" onclick="toggleAudio()" aria-pressed="false" aria-label="Ambient bar audio" title="Toggle 65°C Steam Wand &amp; Bar Acoustics (15% Gain)" class="ml-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-[#2B1650]/40 text-[#2B1650] flex items-center gap-1.5 bg-white/70 hover:bg-white transition-all">
     <span id="audioDot" class="w-2 h-2 rounded-full bg-slate-400"></span>
     <svg class="w-3.5 h-3.5 text-[#2B1650]" viewBox="0 0 16 16" fill="none" aria-hidden="true">
       <path d="M2 6.5v3M5 4.5v7M8 2.5v11M11 5v6M14 6.5v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
@@ -1511,9 +1517,9 @@
       Specialty in-house roasts, ceremonial Japanese Uji matcha and traditional small-batch gelato, from a lilac glass-fronted counter in Gurugram.
       </p>
     <div class="cta-row">
-      <a class="btn btn-primary" href="#chapters">Explore the Counter</a>
+      <a class="btn btn-primary" href="#chapters">Explore the Flavours</a>
       <a class="btn btn-chrome" href="#d2cShop">Shop Fresh Roasts (₹)</a>
-      <a class="btn btn-primary" href="#destinations">Visit Bar &amp; Wipe Glass ↗</a>
+      <a class="btn btn-primary" href="#destinations">Find the Counter</a>
     </div>
   </div>
 </section>
@@ -2047,21 +2053,21 @@
         </p>
     </div>
     <!-- Mode Switcher Tabs -->
-    <div class="grid grid-cols-3 lg:flex items-stretch lg:items-center gap-1.5 lg:gap-2 w-full lg:w-auto shrink-0 p-1.5 rounded-2xl bg-white border border-[#2B1650]/20 shadow-sm text-[11px] sm:text-xs font-black uppercase tracking-wide sm:tracking-wider">
-      <button onclick="switchCraftTab('extraction')" id="craftTab-extraction" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all bg-[#2B1650] text-[#F1E9FF] shadow lg:whitespace-nowrap">
+    <div role="tablist" class="grid grid-cols-3 lg:flex items-stretch lg:items-center gap-1.5 lg:gap-2 w-full lg:w-auto shrink-0 p-1.5 rounded-2xl bg-white border border-[#2B1650]/20 shadow-sm text-[11px] sm:text-xs font-black uppercase tracking-wide sm:tracking-wider">
+      <button type="button" role="tab" aria-selected="true" aria-controls="craftPanel-extraction" onclick="switchCraftTab('extraction')" id="craftTab-extraction" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all bg-[#2B1650] text-[#F1E9FF] shadow lg:whitespace-nowrap">
         1. 9-Bar Extraction
         </button>
-      <button onclick="switchCraftTab('microfoam')" id="craftTab-microfoam" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap">
+      <button type="button" role="tab" aria-selected="false" aria-controls="craftPanel-microfoam" onclick="switchCraftTab('microfoam')" id="craftTab-microfoam" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap">
         2. Microfoam Pour
         </button>
-      <button onclick="switchCraftTab('roast')" id="craftTab-roast" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap">
+      <button type="button" role="tab" aria-selected="false" aria-controls="craftPanel-roast" onclick="switchCraftTab('roast')" id="craftTab-roast" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap">
         3. Roast Spectrum
         </button>
     </div>
   </div>
 
   <!-- Panel 1: 9-Bar Bottomless Naked Portafilter Extraction Telemetry (60-Frame Scrub) -->
-  <div id="craftPanel-extraction" class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
+  <div id="craftPanel-extraction" role="tabpanel" aria-labelledby="craftTab-extraction" class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
     <!-- Left Controls & Telemetry -->
     <div class="lg:col-span-6 space-y-5">
       <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-[#7C3AED] text-xs font-black uppercase tracking-wider">
@@ -2158,7 +2164,7 @@
   </div>
 
   <!-- Panel 2: Microfoam Pour Studio (Interactive Fluid Path + 100% Gloss Tilt Shader) -->
-  <div id="craftPanel-microfoam" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
+  <div id="craftPanel-microfoam" role="tabpanel" aria-labelledby="craftTab-microfoam" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
     <!-- Left Controls -->
     <div class="lg:col-span-6 space-y-6">
       <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black uppercase tracking-wider">
@@ -2279,7 +2285,7 @@
   </div>
 
   <!-- Panel 3: Origin Roast Profile & Continuous Thermal Slider (196°C → 218°C → 235°C) -->
-  <div id="craftPanel-roast" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
+  <div id="craftPanel-roast" role="tabpanel" aria-labelledby="craftTab-roast" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#2B1650]/15 shadow-xl relative overflow-hidden">
     <!-- Left Origin Profile Details -->
     <div class="lg:col-span-6 space-y-6">
       <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-black uppercase tracking-wider">
@@ -2538,7 +2544,7 @@
             Join List →
           </button>
         </form>
-        <p id="eventSubMsg" class="hidden text-xs font-bold text-emerald-700">
+        <p id="eventSubMsg" role="status" class="hidden text-xs font-bold text-emerald-700">
           ✓ You're on the sensory guestlist! Watch your inbox this Friday at 9 AM.
         </p>
       </div>
@@ -2611,14 +2617,14 @@
           </h2>
       </div>
       <!-- 3 Location Buttons -->
-      <div class="grid grid-cols-3 lg:flex items-stretch lg:items-center gap-1.5 lg:gap-2 w-full lg:w-auto shrink-0 p-1.5 rounded-2xl bg-white border border-[#2B1650]/20 shadow-sm text-[11px] sm:text-xs font-black uppercase tracking-wide sm:tracking-wider">
-        <button id="locTab-phase1" onclick="switchLocation('phase1')" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all bg-[#2B1650] text-[#F1E9FF] shadow lg:whitespace-nowrap">
+      <div role="tablist" class="grid grid-cols-3 lg:flex items-stretch lg:items-center gap-1.5 lg:gap-2 w-full lg:w-auto shrink-0 p-1.5 rounded-2xl bg-white border border-[#2B1650]/20 shadow-sm text-[11px] sm:text-xs font-black uppercase tracking-wide sm:tracking-wider">
+        <button type="button" role="tab" aria-selected="true" aria-controls="locPanel" id="locTab-phase1" onclick="switchLocation('phase1')" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all bg-[#2B1650] text-[#F1E9FF] shadow lg:whitespace-nowrap">
           1. DLF Phase 1 Flagship
           </button>
-        <button id="locTab-gcr" onclick="switchLocation('gcr')" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap">
+        <button type="button" role="tab" aria-selected="false" aria-controls="locPanel" id="locTab-gcr" onclick="switchLocation('gcr')" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap">
           2. Golf Course Road
           </button>
-        <button id="locTab-sec56" onclick="switchLocation('sec56')" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap">
+        <button type="button" role="tab" aria-selected="false" aria-controls="locPanel" id="locTab-sec56" onclick="switchLocation('sec56')" class="py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all text-[#534168] hover:text-[#2B1650] lg:whitespace-nowrap">
           3. Sector 56 Hub
           </button>
       </div>
@@ -2626,7 +2632,7 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
       <!-- Store Info -->
-      <div class="lg:col-span-5 space-y-6 text-left">
+      <div id="locPanel" role="tabpanel" aria-label="Selected location" class="lg:col-span-5 space-y-6 text-left">
         <div id="locBadge" class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold uppercase">
           <span>● Flagship Roastery &amp; Café • Open 8:30 AM – 10:30 PM</span>
         </div>
@@ -2707,7 +2713,7 @@
         Subscribe →
       </button>
     </form>
-    <p id="newsSuccess" class="hidden mt-4 text-xs font-bold text-emerald-700">
+    <p id="newsSuccess" role="status" class="hidden mt-4 text-xs font-bold text-emerald-700">
       ✓ Welcome to Gram Street Roastery Dispatches · your 15% first-bag code (GRAM15) is on its way.
     </p>
   </div>
@@ -2783,6 +2789,7 @@
        and somewhere to take it; asking for less would not be an order. -->
   <form id="bagCheckout" class="hidden border-t border-[#2B1650]/20 pt-6 space-y-3" novalidate>
     <p class="text-[11px] font-black uppercase tracking-[0.18em] text-[#7C3AED]">Your details</p>
+    <p id="bagRecap" class="text-xs font-bold text-[#2B1650] bg-[#F5EFFF] rounded-xl px-3 py-2"></p>
     <label class="block">
       <span class="block text-[11px] font-bold uppercase tracking-wider text-[#534168] mb-1">Name</span>
       <input id="ordName" name="name" autocomplete="name" class="w-full px-4 py-2.5 rounded-xl border border-[#2B1650]/25 text-sm bg-[#F5EFFF] focus:outline-none focus:ring-2 focus:ring-[#7C3AED]">
@@ -2810,7 +2817,7 @@
   <!-- Step 3: placed, with a reference the roastery can be held to -->
   <div id="bagDone" class="hidden border-t border-[#2B1650]/20 pt-6 space-y-3">
     <p class="text-[11px] font-black uppercase tracking-[0.18em] text-[#7C3AED]">Demo order previewed</p>
-    <p class="text-3xl font-display font-black tracking-tight text-[#2B1650]" id="ordRef">GS-0000</p>
+    <p class="text-3xl font-display font-black tracking-tight text-[#2B1650]" id="ordRef" tabindex="-1">GS-0000</p>
     <p class="text-xs font-semibold text-[#534168] leading-relaxed" id="ordSummary"></p>
     <div class="flex items-center gap-2 pt-1">
       <a id="ordWa" href="#" target="_blank" rel="noopener" class="flex-1 text-center py-3.5 rounded-full bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-[0.16em] hover:bg-[#3D2272] transition-all">Send it on WhatsApp ↗</a>
@@ -2957,6 +2964,7 @@
 
     ['phase1', 'gcr', 'sec56'].forEach(k => {
       const btn = document.getElementById(LOCATIONS[k].tabId);
+      btn.setAttribute('aria-selected', String(k === key));
       if (k === key) {
         btn.className = 'py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all bg-[#2B1650] text-[#F1E9FF] shadow lg:whitespace-nowrap';
       } else {
@@ -3698,12 +3706,14 @@
       whiteNoise.start(0);
 
       isPlayingAudio = true;
+      document.getElementById('audioBtn').setAttribute('aria-pressed', 'true');
       document.getElementById('audioDot').className = 'w-2 h-2 rounded-full bg-emerald-400 animate-ping';
       document.getElementById('audioLabel').textContent = '65°C Steam: On';
     } else {
       if (audioCtx) audioCtx.close();
       audioCtx = null;
       isPlayingAudio = false;
+      document.getElementById('audioBtn').setAttribute('aria-pressed', 'false');
       document.getElementById('audioDot').className = 'w-2 h-2 rounded-full bg-slate-400';
       document.getElementById('audioLabel').textContent = '65°C Audio';
     }
@@ -3784,10 +3794,10 @@
           <p class="text-xs font-semibold text-[#534168] mb-5 leading-relaxed">${p.notes}</p>
 
           <div class="grid grid-cols-2 gap-2 p-1.5 rounded-xl bg-[#F5EFFF] border border-[#7C3AED]/25 text-[11px] font-black uppercase tracking-wider mb-2">
-            <button onclick="window.setSubMode('${p.id}', false)" class="py-2.5 rounded-lg transition-all ${!isSub ? 'bg-[#7C3AED] text-white shadow-sm' : 'text-[#534168]'}">
+            <button type="button" aria-pressed="${!isSub}" data-sub="${p.id}:0" onclick="window.setSubMode('${p.id}', false)" class="py-2.5 rounded-lg transition-all ${!isSub ? 'bg-[#7C3AED] text-white shadow-sm' : 'text-[#534168]'}">
               One-Time (₹${p.price})
               </button>
-            <button onclick="window.setSubMode('${p.id}', true)" class="py-2.5 rounded-lg transition-all ${isSub ? 'bg-[#7C3AED] text-white shadow-sm' : 'text-[#534168]'}">
+            <button type="button" aria-pressed="${isSub}" data-sub="${p.id}:1" onclick="window.setSubMode('${p.id}', true)" class="py-2.5 rounded-lg transition-all ${isSub ? 'bg-[#7C3AED] text-white shadow-sm' : 'text-[#534168]'}">
               Subscribe (-15%)
               </button>
           </div>
@@ -3804,9 +3814,12 @@
     if (typeof window.bindKineticCards === 'function') window.bindKineticCards();
   }
 
+  // The grid re-renders on every toggle, which dropped keyboard focus to
+  // <body>; focus goes back to the toggle that was pressed.
   window.setSubMode = function(id, isSub) {
     subMode[id] = isSub;
     renderProducts();
+    document.querySelector(`[data-sub="${id}:${isSub ? 1 : 0}"]`)?.focus();
   };
 
   window.addToCart = function(pId, triggerBtn) {
@@ -3938,6 +3951,15 @@
     else if (!e.shiftKey && (document.activeElement === last || !modal.contains(document.activeElement))) { e.preventDefault(); first.focus(); }
   });
 
+  document.addEventListener('keydown', (e) => {
+    const tab = e.target.closest && e.target.closest('[role="tab"]');
+    if (!tab || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+    const tabs = [...tab.parentElement.querySelectorAll('[role="tab"]')];
+    let i = tabs.indexOf(tab);
+    i = e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : (i + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+    e.preventDefault(); tabs[i].focus(); tabs[i].click();
+  });
+
   // Cuppings: the next three Sundays from today in India, so the list never
   // shows dates already gone (it read 26 Oct, 02 Nov, 09 Nov: all past, and
   // all Mondays in 2026).
@@ -3980,6 +4002,13 @@
     });
     var body = document.getElementById('bagBody');
     if (body) body.classList.toggle('hidden', which !== 'bag');
+    // The details step hid the items and the total; a one-line recap stays.
+    if (which === 'checkout') {
+      var recap = document.getElementById('bagRecap');
+      var n = cart.reduce(function (t, i) { return t + i.qty; }, 0);
+      if (recap) recap.textContent = n + (n === 1 ? ' item' : ' items') + ' · ₹' + cart.reduce(function (t, i) { return t + i.price * i.qty; }, 0) + ' · ' + cart.map(function (i) { return i.qty + '× ' + i.name; }).join(', ');
+    }
+    if (which === 'done') requestAnimationFrame(function () { var r = document.getElementById('ordRef'); if (r) r.focus(); });
     // With the bag hidden, justify-between leaves a column of white above the
     // step and the drawer reads as broken. The later steps sit under the
     // header instead.
@@ -4096,6 +4125,10 @@
 
     cart.length = 0;
     updateCartUI();
+    // The "Your last order" chip only appeared after a reload; it shows now.
+    var chipRef = document.getElementById('ordLastRef'), chip = document.getElementById('ordLast');
+    if (chipRef) chipRef.textContent = order.ref;
+    if (chip) chip.classList.remove('hidden');
     step('done');
     return false;
   }
@@ -4156,6 +4189,7 @@
           p.classList.remove('grid');
         }
       }
+      if (btn) btn.setAttribute('aria-selected', String(t === tab));
       if (btn) {
         if (t === tab) {
           btn.className = "py-2.5 px-2 lg:px-4 rounded-xl leading-tight text-center transition-all bg-[#2B1650] text-[#F1E9FF] shadow lg:whitespace-nowrap";

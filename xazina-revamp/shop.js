@@ -51,6 +51,16 @@ for(const panel of $$('[data-filters]')){
   stock.closest('label').hidden=true;
   for(const option of $$('option',sort))if(option.value.startsWith('price-'))option.remove();
  }
+ // Every product in the catalog is in stock, so the toggle could never
+ // change a result; it only appears where it can.
+ if(cards.every(card=>card.dataset.available==='yes'))stock.closest('label').hidden=true;
+ // /collections/all was one 75,000px page of 436 cards, the journal 162
+ // stories. Grids over 60 show 48 at a time, filters still search them all.
+ const PAGE=48, paged=cards.length>60;
+ let limit=PAGE;
+ const more=el('button','','shop-button glass shop-more');more.type='button';
+ more.addEventListener('click',()=>{const from=limit;limit+=PAGE;filter();const next=$$('[data-card]:not([hidden])',grid)[from];if(next)$('a',next)?.focus();});
+ $('[data-filter-clear]',section)?.addEventListener('click',()=>{query.value='';stock.checked=false;sort.value='original';updateFilters();query.focus();});
  const filter=()=>{
   const terms=query.value.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
   const ordered=[...cards];
@@ -61,10 +71,12 @@ for(const panel of $$('[data-filters]')){
   }
   let shown=0;
   for(const card of ordered){
-   card.hidden=(terms.length&&!terms.every(t=>wordStart(card.dataset.title,t)))||(stock.checked&&card.dataset.available!=='yes');
-   if(!card.hidden)shown++;
+   const match=!((terms.length&&!terms.every(t=>wordStart(card.dataset.title,t)))||(stock.checked&&card.dataset.available!=='yes'));
+   if(match)shown++;
+   card.hidden=!match||(paged&&shown>limit);
    grid.append(card);
   }
+  if(paged&&shown>limit){more.textContent=`Show more (${shown-limit} left)`;grid.after(more);}else more.remove();
   $('[data-result-count]',section).textContent=plural(shown,'result','results');
   $('[data-filter-empty]',section).hidden=shown!==0;
  };
@@ -84,11 +96,12 @@ for(const panel of $$('[data-filters]')){
    if(value)url.searchParams.set(key,value);else url.searchParams.delete(key);
   }
   history.replaceState(history.state,'',url);
+  limit=PAGE;
   filter();
  }
  query.addEventListener('input',updateFilters);sort.addEventListener('change',updateFilters);stock.addEventListener('change',updateFilters);
  addEventListener('popstate',readFilters);
- if(new URL(location.href).search)readFilters();
+ if(new URL(location.href).search)readFilters();else filter();
 }
 
 const data=$('#product-data');
@@ -144,19 +157,22 @@ if(data){
 function renderBag(){
  const target=$('[data-bag]');if(!target)return;
  const items=bag();
- if(!items.length){target.replaceChildren(el('p','Your bag is empty.'),anchor(href('/collections/all'),'Explore jewellery','shop-button dark'));return;}
+ if(!items.length){const go=anchor(href('/collections/all'),'Explore jewellery','shop-button dark');go.dataset.focus='next';target.replaceChildren(el('p','Your bag is empty.'),go);return;}
  const list=el('div','','shop-bag-list');
  const panel=el('aside','','shop-bag-summary');
- const update=next=>{if(write(next)){counts(next);renderBag()}};
+ // Re-rendering replaced every control, dropping keyboard focus to <body>.
+ // Focus goes back to the same control on the same row, or the next row.
+ const update=(next,focusKey)=>{if(write(next)){counts(next);renderBag();if(focusKey){const t=$(`[data-focus="${focusKey}"]`)||$('[data-focus^="qty-"]')||$('.shop-bag-summary a');t?.focus();}}};
  for(const item of items){
   const row=el('article','','shop-bag-row');
   const photo=anchor(href(item.path),'','shop-bag-image'),img=el('img');img.src=imgUrl(item.image,240);img.alt='';photo.append(img);
   const details=el('div');details.append(anchor(href(item.path)+'?variant='+item.id,item.title,'shop-bag-title'));
   if(item.variant&&item.variant!=='Default Title')details.append(el('p',item.variant));
-  const qty=el('input');qty.type='number';qty.min='1';qty.max='20';qty.value=asQuantity(item.qty);qty.setAttribute('aria-label','Quantity for '+item.title);
-  qty.addEventListener('change',()=>{item.qty=asQuantity(qty.value);update(items)});
+  const qty=el('input');qty.type='number';qty.min='0';qty.max='20';qty.value=asQuantity(item.qty);qty.setAttribute('aria-label','Quantity for '+item.title);qty.dataset.focus='qty-'+item.id;
+  // 0 used to silently snap back to 1; it now takes the piece out of the bag.
+  qty.addEventListener('change',()=>{if(Number(qty.value)===0){update(items.filter(i=>i.id!==item.id),'next');return;}item.qty=asQuantity(qty.value);update(items,'qty-'+item.id)});
   const remove=el('button','Remove','shop-remove');remove.type='button';remove.setAttribute('aria-label','Remove '+item.title);
-  remove.addEventListener('click',()=>update(items.filter(i=>i.id!==item.id)));
+  remove.addEventListener('click',()=>update(items.filter(i=>i.id!==item.id),'next'));
   details.append(remove);row.append(photo,details,qty,el('b',money(item.price*asQuantity(item.qty))));list.append(row);
  }
  const checkout=STORE+'/cart/'+items.map(i=>i.id+':'+asQuantity(i.qty)).join(',');
@@ -165,6 +181,17 @@ function renderBag(){
  target.replaceChildren(list,panel);
 }
 renderBag();
+
+// /checkout handed off to an empty xazina.com cart even with pieces in the
+// bag (only /cart built the prefilled link). It now carries the bag too.
+if(document.body.dataset.shopPath==='/checkout'){
+ const items=bag(), go=$('.shop-cover-copy .shop-button');
+ if(items.length&&go){
+  go.href=STORE+'/cart/'+items.map(i=>i.id+':'+asQuantity(i.qty)).join(',');
+  const n=items.reduce((t,i)=>t+asQuantity(i.qty),0), total=items.reduce((t,i)=>t+i.price*asQuantity(i.qty),0);
+  go.before(el('p',`${n} ${n===1?'piece':'pieces'} in your bag · ${money(total)}`,'shop-lede'));
+ }
+}
 
 const search=$('[data-search]');
 if(search){

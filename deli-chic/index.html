@@ -1059,6 +1059,7 @@
 </script>
 
 
+<main id="main">
 <!-- ================= HERO SECTION: CULINARY SHOWCASE WITH LIVE ATMOSPHERIC CANVAS ================= -->
 <section class="relative pt-10 pb-20 md:pt-14 md:pb-28 px-6 md:px-10 max-w-7xl mx-auto overflow-hidden">
   <!-- Atmospheric Culinary Steam & Golden Particle Canvas -->
@@ -1623,6 +1624,7 @@
 </section>
 
 <!-- ================= FOOTER ================= -->
+</main>
 <footer class="border-t border-[#CD2653]/15 py-12 px-6 md:px-10 text-center sm:text-left bg-white">
   <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-xs text-[#6B625B]">
     <div>
@@ -1999,9 +2001,15 @@
       function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
 
       function place(p) {
-        var trackWidth = track.scrollWidth || 1600;
+        // The end point was trackWidth - 0.78vw, a guess that suited a wide
+        // screen: on a phone the rail stopped with the last card's left edge
+        // 63px off screen. It now stops with the last card fully in view and a
+        // gutter on its right, measured from the card itself (offsetLeft is
+        // untouched by the transform this sets).
         var vw = window.innerWidth || 1280;
-        var maxShift = Math.max(0, trackWidth - vw * 0.78);
+        var last = cards[cards.length - 1];
+        var gutter = Math.max(16, vw * 0.06);
+        var maxShift = Math.max(0, track.offsetLeft + last.offsetLeft + last.offsetWidth - (vw - gutter));
         var shiftX = -p * maxShift;
         track.style.setProperty('--rail-x', shiftX.toFixed(1) + 'px');
 

@@ -30,8 +30,20 @@ function sized(url,w=900) {
 const image=(src, alt='',w=900,eager=false)=>`<img src="${escape(sized(src,w))}" alt="${escape(alt)}" ${eager?'fetchpriority="high"':'loading="lazy"'} decoding="async">`;
 const button=(href,label,style='gold',external=false)=>`<a class="shop-button ${style}" href="${escape(href)}">${escape(label)} ${icon(external?'shop-external':'shop-arrow')}</a>`;
 function list(items){return items.map(([text,href])=>`<a href="${escape(href)}">${escape(text)}</a>`).join('');}
+// The captured menu is flat: "Rings" and its "Solitaire" sit beside
+// "Earrings" and its own "Solitaire", so For Her listed Solitaire twice with
+// nothing to tell them apart. Category parents become sub-headings, their
+// pieces sit under them, and "Explore ..." promos are set apart.
+const MENU_PARENTS=new Set(['Rings','Earrings','Wrists','Neck']);
+function menuLinks(links){
+ let inGroup=false;
+ return links.map(([text,href])=>{
+  const cls=MENU_PARENTS.has(text)?(inGroup=true,'shop-mega-parent'):/^Explore /.test(text)?(inGroup=false,'shop-mega-explore'):inGroup?'shop-mega-child':'';
+  return `<a href="${escape(href)}"${cls?` class="${cls}"`:''}>${escape(text)}</a>`;
+ }).join('');
+}
 function header(snapshot, home=false){
- const groups=snapshot.menu.map(group=>`<section><h2><a href="${escape(group.href)}">${escape(group.title)}</a></h2>${list(group.links)}</section>`).join('');
+ const groups=snapshot.menu.map(group=>`<section><h2><a href="${escape(group.href)}">${escape(group.title)}</a></h2>${menuLinks(group.links)}</section>`).join('');
  return `<header class="shop-header${home?' home-shop-header':''}"${home?' id="shop-navigation"':''} aria-label="Xazina storefront">
  <div class="shop-top shop-wrap"><a class="shop-mark" href="${B}" aria-label="Xazina home">XAZINA<span>✧</span></a>
  <nav class="shop-nav" aria-label="Shop and discover"><a href="${local(COLLECTION)}">Jewellery</a><a href="${local('/collections/fragrances')}">Fragrance</a><a href="${local('/pages/customise-jewellery')}">Atelier</a><a href="${local(JOURNAL)}">Journal</a></nav>
@@ -63,6 +75,20 @@ function metaDescription(text){
  if([...d].length>160)d=[...d].slice(0,157).join('').replace(/[\s,;:.-]+\S*$/,'')+'…';
  return d;
 }
+// The captured "related" list held "Previous Post ..." and "Next Post ..."
+// as raw text, plus a "Learn more" after every story that repeated the link
+// just before it. Each story now appears once, under a plain label.
+function relatedStories(links){
+ const seen=new Set(), out=[];
+ for(const [text,href] of links||[]){
+  if(seen.has(href)||/^learn more$/i.test(text.trim()))continue;
+  seen.add(href);
+  const m=text.match(/^(Previous|Next) Post\s+(.*)$/i);
+  out.push(m?[(m[1].toLowerCase()==='previous'?'← Previous: ':'Next: ')+m[2],href]:[text,href]);
+ }
+ if(!out.length)return '';
+ return `<div class="shop-paper"><nav class="shop-wrap shop-section shop-related" aria-label="Related stories"><p class="shop-kicker">More from the journal</p>${list(out)}</nav></div>`;
+}
 function shell(snapshot,item,content) {
  const title=`${item.title} | Xazina`;
  const desc=metaDescription(item.description||item.excerpt||'Explore Xazina’s lab-grown diamond jewellery, fine fragrance and craft.');
@@ -91,10 +117,11 @@ function productCard(p) {
  <a href="${local(p.path)}"><div class="shop-card-image">${image(p.image,p.images?.[0]?.alt||p.title,680)}<span>${icon('shop-arrow')}</span></div>
  <div class="shop-card-text"><p class="shop-kicker">${escape(p.type||'Xazina jewellery')}</p><h2>${escape(p.title)}</h2>${p.price!==null?`<p>From ${money(p.price)}</p>`:''}</div></a></article>`;
 }
+const storyDate=d=>{const t=new Date(d);return isNaN(t)?'':t.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});};
 function routeCard(p) {
  return `<article class="shop-card shop-editor-card" data-card data-title="${escape(p.title.toLowerCase())}" data-price="0" data-available="yes"><a href="${local(p.path)}">
  <div class="shop-card-image">${image(p.image||ART[p.kind==='article'?'journal':'jewellery'],'',720)}<span>${icon('shop-arrow')}</span></div>
- <div class="shop-card-text"><p class="shop-kicker">${escape(p.kind==='article'?'The Xazina journal':p.kind==='collection'?'Curated collection':'The house')}</p><h2>${escape(p.title)}</h2></div></a></article>`;
+ <div class="shop-card-text"><p class="shop-kicker">${escape(p.kind==='article'?(p.date?'Journal · '+storyDate(p.date):'The Xazina journal'):p.kind==='collection'?'Curated collection':'The house')}</p><h2>${escape(p.title)}</h2></div></a></article>`;
 }
 function grid(cards,kicker='The edit',count=cards.length,filters=true){
  return `<section class="shop-paper"><div class="shop-wrap shop-section">
@@ -102,7 +129,7 @@ function grid(cards,kicker='The edit',count=cards.length,filters=true){
  ${filters?`<div class="shop-filters" data-filters><label>Find within this edit <input type="search" placeholder="Filter by name" data-filter-query></label>
  <label>Sort by <select data-filter-sort><option value="original">Featured</option><option value="az">Name A to Z</option><option value="price-up">Price: low to high</option><option value="price-down">Price: high to low</option></select></label><label class="shop-check"><input type="checkbox" data-filter-stock> In stock</label></div>`:''}</div>
  <div class="shop-grid" data-grid>${cards.join('')}</div>
- <p class="shop-empty" data-filter-empty ${count?'hidden':''}>${count?'No results match those filters.':'This edit has no listed items.'}</p>
+ <p class="shop-empty" data-filter-empty ${count?'hidden':''}>${count?'No results match those filters. <button type="button" class="shop-link-button" data-filter-clear>Clear filters</button>':'This edit has no listed items.'}</p>
  </div></section>`;
 }
 // "08 / XAZINA" said nothing. A block that shows no heading of its own is
@@ -178,8 +205,8 @@ function display(snapshot,item) {
  }
  if(item.kind==='article'){
   return hero(item,'The journal',{photo:ART.journal,desc:item.description,cover:true})
-    +(item.content?`<section class="shop-paper"><div class="shop-wrap shop-section shop-article"><aside><p class="shop-kicker">The Xazina journal</p>${item.date?`<p>${escape(item.date.slice(0,10))}</p>`:''}${button(local(JOURNAL),'All stories','dark')}</aside><article class="source-content">${tidy(item.content)}</article></div></section>`:unavailable(item,'Read the full story on Xazina.'))
-    +(item.related?.length?`<div class="shop-paper"><nav class="shop-wrap shop-section shop-inline-links" aria-label="Related stories">${list(item.related)}</nav></div>`:'');
+    +(item.content?`<section class="shop-paper"><div class="shop-wrap shop-section shop-article"><aside><p class="shop-kicker">The Xazina journal</p>${item.date?`<p><time datetime="${escape(item.date.slice(0,10))}">${escape(storyDate(item.date))}</time></p>`:''}${button(local(JOURNAL),'All stories','dark')}</aside><article class="source-content">${tidy(item.content)}</article></div></section>`:unavailable(item,'Read the full story on Xazina.'))
+    +relatedStories(item.related);
  }
  if(item.kind==='search')return hero(item,'Find something brilliant',{photo:ART.journal,desc:'Search products, collections, guides and journal stories.'})+
   `<section class="shop-paper"><div class="shop-wrap shop-section"><form class="shop-search" data-search><label for="q">Search Xazina</label><div><input id="q" name="q" type="search" placeholder="Try emerald, fragrance or size guide" required><button class="shop-button dark">Search ${icon('shop-search')}</button></div></form><p class="shop-search-status" role="status" data-search-status>Enter a term to explore the catalog.</p><div class="shop-grid" data-search-results></div></div></section>`;
@@ -238,7 +265,7 @@ export async function buildXazina(www,source){
   .replace(/<footer class="wrap footer">[\s\S]*?<\/footer>/,footer(snapshot))
   .replace(/href="https:\/\/(?:www\.)?xazina\.com([^"#?]*)"/g,(m,path)=>known.has(path)?`href="${local(path)}"`:m)
   .replace('</nav>\n          <a class="film-visit"','<a href="/xazina-revamp/collections">Shop all</a><a href="/xazina-revamp/blogs/lab-grown-diamond-journal-by-xazina">Journal</a></nav>\n          <a class="film-visit"')
-  .replace('<a class="film-visit" href="https://www.xazina.com/">Visit Xazina','<a class="film-visit" href="#shop-navigation">Shop &amp; menu');
+  .replace('<a class="film-visit" href="https://www.xazina.com/">Visit Xazina <svg aria-hidden="true"><use href="#external"/></svg>','<a class="film-visit" href="#shop-navigation">Shop &amp; menu <svg aria-hidden="true"><use href="#down"/></svg>');
  await writeFile(home,html);
  const search=all.filter(x=>!['directory','handoff','cart','search','policy','retired'].includes(x.kind)).map(x=>({title:x.title,path:x.path,kind:x.kind,image:x.image||'',price:x.price,tags:x.tags||[],type:x.type||''}));
  await writeFile(join(output,'catalog','search.json'),JSON.stringify(search));
