@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Gram Street Coffee | D2C Roastery, Japanese Matcha &amp; Gelato · Gurugram</title>
+<title>Gram Street Coffee storefront concept | design by Anchit Tandon</title>
 <meta name="theme-color" content="#CDB8F7">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23CDB8F7'/%3E%3Ccircle cx='32' cy='32' r='14' fill='%232B1650'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,6 +26,9 @@
     --accent: #7C3AED;
     --chrome: linear-gradient(135deg, #FBFAFF 0%, #C4BFD6 28%, #FFFFFF 46%, #9A94B3 68%, #E9E6F3 100%);
     --pad: clamp(18px, 5vw, 64px);
+    --dn-bg: #F1E9FF; --dn-ink: #2B1650; --dn-muted: #534168; --dn-accent: #5B21B6; --dn-card: #FFFFFF;
+    --dn-rule: rgba(43, 22, 80, 0.14); --dn-tag-bg: #2B1650; --dn-tag-ink: #F1E9FF; --dn-pad: var(--pad);
+    --dn-display: var(--font);
     --font: "Bricolage Grotesque", ui-rounded, "Segoe UI", system-ui, sans-serif;
   }
   *, *::before, *::after { box-sizing: border-box; }
@@ -463,6 +466,11 @@
   .hero.no-gl { background: linear-gradient(135deg, #e7dcff, #cdb8f7 50%, #b79af0); }
   #fx { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
   .hero-inner { position: relative; z-index: 2; max-width: 900px; }
+  @media (min-width: 601px) and (max-width: 1099px) and (orientation: portrait) {
+    /* The hero already starts below the header and the hours strip, so it
+       needs only a breath of padding, not the phone-sized clearance. */
+    .hero { min-height: min(calc(100svh - 150px), 900px); justify-content: flex-start; padding-top: clamp(48px, 6vh, 80px); }
+  }
   .hero h1 { font-size: clamp(2.2rem, 5.2vw, 4.4rem); max-width: 16ch; letter-spacing: -0.04em; line-height: 1.05; }
   .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.08em; margin-bottom: -0.08em; }
   .w > span { display: inline-block; animation: rise 0.95s cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: calc(var(--i) * 75ms + 250ms); }
@@ -476,6 +484,9 @@
   .btn-primary { background: var(--grape); color: var(--lilac-soft); }
   .btn-primary:hover { background: #3d2272; box-shadow: 0 10px 25px rgba(43, 22, 80, 0.25); }
   .btn-chrome { background: var(--chrome); color: var(--grape); border-color: rgba(43, 22, 80, 0.4); }
+  /* Secondary hero links: same height and target, no fill, so the shop is the one obvious next step. */
+  .btn-quiet { background: transparent; color: var(--grape); border-color: rgba(43, 22, 80, 0.45); }
+  .btn-quiet:hover { background: rgba(255, 255, 255, 0.45); }
   .btn-chrome:hover { filter: brightness(1.08); box-shadow: 0 10px 25px rgba(255, 255, 255, 0.4); }
 
   /* marquee */
@@ -781,13 +792,21 @@
   }
   .walk-cap b { display: block; font-size: clamp(1.85rem, 4.8vw, 3.2rem); letter-spacing: -0.03em; line-height: 1.04; text-shadow: 0 8px 28px rgba(18, 8, 38, 0.85); }
   .walk-cap span { display: block; margin-top: 10px; font-size: clamp(.95rem, 2vw, 1.1rem); font-weight: 600; opacity: .9; max-width: 40ch; margin-inline: auto; text-shadow: 0 4px 18px rgba(18, 8, 38, 0.9); }
+  /* The step label sat on top of the fascia sign at every size (a 247px
+     overlap at 1440). The sign's bottom edge is y=130 of a 1440x900 slice,
+     so it lands at max(130/1440 vw, 130/900 vh); the label starts below it. */
   .walk-step {
-    position: absolute; top: clamp(72px, 10vh, 110px); left: 0; right: 0;
+    position: absolute; top: calc(max(9.03vw, 14.45vh) + 18px); left: 0; right: 0;
     display: flex; align-items: center; justify-content: center; gap: 14px;
     text-align: center; color: #CDB8F7; font-size: .72rem;
     letter-spacing: .28em; text-transform: uppercase; font-weight: 800;
     pointer-events: none; z-index: 35;
   }
+  /* A pill behind the step label, so it reads wherever it lands on the scene
+     (on a portrait tablet it sat on the doorframe's chrome edge). */
+  #walkStepLabel { padding: 5px 12px; border-radius: 999px; background: rgba(27, 14, 54, 0.78); border: 1px solid rgba(205, 184, 247, 0.35); color: #F1E9FF; }
+  .walk-sign-short { display: none; }
+  @media (max-aspect-ratio: 21/20) { .walk-sign-long { display: none; } .walk-sign-short { display: inline; } }
   .walk-frame-hud {
     font-family: "JetBrains Mono", ui-monospace, monospace;
     padding: 4px 10px;
@@ -1178,71 +1197,55 @@
     .buoyant-pill { animation: none !important; }
   }
 </style>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "CafeOrCoffeeShop",
-  "name": "Gram Street Coffee",
-  "description": "Third-wave specialty coffee roastery, ceremonial Japanese Uji matcha bar, and artisanal small-batch gelato counter in Gurugram, founded by Chef Vanshika Bhatia.",
-  "url": "https://anchit-tandon.com/gram-street-coffee",
-  "telephone": "+91-81300-56889",
-  "email": "hello@gramstreetcoffee.com",
-  "foundingDate": "2023",
-  "founder": {
-    "@type": "Person",
-    "name": "Chef Vanshika Bhatia"
-  },
-  "servesCuisine": ["Specialty Coffee", "Ceremonial Japanese Matcha", "Artisanal Gelato", "Japanese Sandos", "Craft Viennoiserie"],
-  "priceRange": "₹₹",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "Block F, 16 Arjun Marg, DLF Phase 1, Sector 26A",
-    "addressLocality": "Gurugram",
-    "addressRegion": "Haryana",
-    "postalCode": "122002",
-    "addressCountry": "IN"
-  },
-  "openingHoursSpecification": [
-    {
-      "@type": "OpeningHoursSpecification",
-      "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-      "opens": "08:30",
-      "closes": "22:30"
-    },
-    {
-      "@type": "OpeningHoursSpecification",
-      "dayOfWeek": ["Saturday", "Sunday"],
-      "opens": "08:00",
-      "closes": "23:00"
-    }
-  ],
-  "sameAs": [
-    "https://www.instagram.com/gramstreetcoffee/",
-    "https://www.zomato.com/ncr/gram-street-coffee-dlf-phase-1-gurgaon"
-  ]
-}
-</script>
+<!-- No LocalBusiness JSON-LD: this is a design concept, not the cafe's own site,
+     and structured data would present it to search engines as the real business. -->
 <!-- seo:auto:start -->
-<!-- Managed by scripts/seo-inject.mjs · edit seo.config.json, not here. -->
-<meta name="description" content="In-house specialty roasts, ceremonial Uji matcha, and small-batch gelato. DLF Phase 1, Golf Course Road &amp; Sector 56, Gurugram." />
+<!-- Managed by scripts/seo-inject.mjs, edit seo.config.json, not here. -->
+<meta name="description" content="Independent storefront redesign concept for a Gurugram café, by Anchit Tandon: menu, bag, checkout and outlet finder. Illustrative photos, sample statuses." />
 <link rel="canonical" href="https://anchit-tandon.com/gram-street-coffee" />
-<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+<meta name="robots" content="noindex,follow" />
 <meta name="author" content="Anchit Tandon" />
-<meta property="og:title" content="Gram Street Coffee | D2C Roastery, Japanese Matcha &amp; Gelato · Gurugram" />
-<meta property="og:description" content="In-house specialty roasts, ceremonial Uji matcha, and small-batch gelato. DLF Phase 1, Golf Course Road &amp; Sector 56, Gurugram." />
+<meta property="og:title" content="Gram Street Coffee storefront concept | design by Anchit Tandon" />
+<meta property="og:description" content="Independent storefront redesign concept for a Gurugram café, by Anchit Tandon: menu, bag, checkout and outlet finder. Illustrative photos, sample statuses." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://anchit-tandon.com/gram-street-coffee" />
 <meta property="og:image" content="https://anchit-tandon.com/assets/brand/u-1501339847302-ac426a4a7cbb-1200.jpg" />
 <meta property="og:site_name" content="Anchit Tandon" />
 <meta property="og:locale" content="en_US" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Gram Street Coffee | D2C Roastery, Japanese Matcha &amp; Gelato · Gurugram" />
-<meta name="twitter:description" content="In-house specialty roasts, ceremonial Uji matcha, and small-batch gelato. DLF Phase 1, Golf Course Road &amp; Sector 56, Gurugram." />
+<meta name="twitter:title" content="Gram Street Coffee storefront concept | design by Anchit Tandon" />
+<meta name="twitter:description" content="Independent storefront redesign concept for a Gurugram café, by Anchit Tandon: menu, bag, checkout and outlet finder. Illustrative photos, sample statuses." />
 <meta name="twitter:image" content="https://anchit-tandon.com/assets/brand/u-1501339847302-ac426a4a7cbb-1200.jpg" />
 <!-- seo:auto:end -->
 </head>
 <body>
-<div class="concept-bar" role="note" style="position:relative;z-index:60;padding:8px 16px;text-align:center;font:600 12px/1.45 system-ui,-apple-system,sans-serif;letter-spacing:.02em;background:#111;color:#f5f0e8">Concept storefront by <a href="/" style="color:inherit;text-decoration:underline;text-underline-offset:2px">Anchit Tandon</a>, not affiliated with Gram Street Coffee. Nothing here places a real order.</div>
+<style>
+  /* Concept bar: neutral chrome, deliberately not either brand's palette, so
+     it reads as the frame around the work rather than part of the shop. */
+  .concept-bar{position:relative;z-index:60;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 18px;padding:8px 16px;font:600 12px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.02em;background:#111;color:#f5f0e8;text-align:center}
+  .concept-bar p{margin:0}
+  .concept-bar a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+  .concept-bar nav{display:flex;flex-wrap:wrap;justify-content:center;gap:0 14px}
+  .concept-bar nav a{display:inline-flex;align-items:center;min-height:24px}
+  .concept-bar a:focus-visible{outline:2px solid #f5f0e8;outline-offset:2px}
+  /* Design notes: the reasoning behind the concept, in the page's own type. */
+  .design-notes{padding:clamp(56px,9vw,112px) var(--dn-pad,24px);background:var(--dn-bg);color:var(--dn-ink);scroll-margin-top:72px}
+  .design-notes .dn-wrap{max-width:1120px;margin:0 auto}
+  .design-notes .dn-kicker{margin:0 0 12px;font:800 12px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--dn-accent)}
+  .design-notes h2{margin:0;font-family:var(--dn-display);font-size:clamp(1.9rem,4vw,3rem);line-height:1.08;letter-spacing:-.02em;max-width:22ch}
+  .design-notes .dn-lede{margin:16px 0 0;max-width:62ch;font-size:clamp(1rem,1.6vw,1.125rem);line-height:1.6;color:var(--dn-muted)}
+  .design-notes .dn-grid{display:grid;gap:16px;margin-top:clamp(28px,4vw,44px);grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+  .design-notes .dn-card{padding:22px 22px 24px;border-radius:18px;background:var(--dn-card);border:1px solid var(--dn-rule)}
+  .design-notes .dn-card h3{margin:0 0 10px;font:800 13px/1.35 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--dn-accent)}
+  .design-notes .dn-card p,.design-notes .dn-card li{margin:0;font-size:15px;line-height:1.6;color:var(--dn-ink)}
+  .design-notes .dn-card ul{margin:0;padding-left:18px;display:grid;gap:6px;list-style:disc}
+  .design-notes .dn-card li::marker{color:var(--dn-accent)}
+  .design-notes .dn-tag{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;font:700 11px/1.5 system-ui,-apple-system,sans-serif;letter-spacing:.06em;text-transform:uppercase;background:var(--dn-tag-bg);color:var(--dn-tag-ink);vertical-align:middle}
+  .design-notes .dn-foot{margin:28px 0 0;font-size:14px;line-height:1.6;color:var(--dn-muted)}
+  .design-notes .dn-foot a{color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:2px}
+  .concept-label{display:inline-block;margin:0 0 12px;padding:3px 10px;border-radius:999px;font:700 11px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.08em;text-transform:uppercase;background:#111;color:#f5f0e8}
+</style>
+<div class="concept-bar" role="note"><p>Concept storefront by <a href="/">Anchit Tandon</a>, not affiliated with Gram Street Coffee. No real orders · illustrative photos · sample statuses.</p><nav aria-label="About this concept"><a href="/">Portfolio</a><a href="#design-notes">Design notes</a><a href="/assets/resume.pdf">Resume</a><a href="mailto:anchit.tandon@gmail.com?subject=Your%20Gram%20Street%20concept">Email Anchit</a></nav></div>
 
 <!-- Luxury Film Grain Cinematic Overlay -->
 <div class="film-grain" aria-hidden="true"></div>
@@ -1270,13 +1273,13 @@
     <a href="#events">Cuppings</a>
     <a href="#destinations">Find Us (3)</a>
   </div>
-  <!-- Spatial Audio Toggle Button (15% Gain 65°C Steam Wand Acoustics) -->
-  <button id="audioBtn" onclick="toggleAudio()" aria-pressed="false" aria-label="Ambient bar audio" title="Toggle 65°C Steam Wand &amp; Bar Acoustics (15% Gain)" class="ml-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-[#2B1650]/40 text-[#2B1650] flex items-center gap-1.5 bg-white/70 hover:bg-white transition-all">
+  <!-- Ambient audio toggle -->
+  <button id="audioBtn" onclick="toggleAudio()" aria-pressed="false" aria-label="Ambient bar audio" title="Play ambient bar sounds" class="ml-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-[#2B1650]/40 text-[#2B1650] flex items-center gap-1.5 bg-white/70 hover:bg-white transition-all">
     <span id="audioDot" class="w-2 h-2 rounded-full bg-slate-400"></span>
     <svg class="w-3.5 h-3.5 text-[#2B1650]" viewBox="0 0 16 16" fill="none" aria-hidden="true">
       <path d="M2 6.5v3M5 4.5v7M8 2.5v11M11 5v6M14 6.5v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
     </svg>
-    <span id="audioLabel" class="hidden sm:inline">65°C Audio</span>
+    <span id="audioLabel" class="hidden sm:inline">Ambient audio</span>
   </button>
   <!-- Roastery Bag Trigger -->
   <button id="headerBagBtn" onclick="toggleCart(true, this)" aria-haspopup="dialog" class="ml-2 px-4 py-1.5 rounded-full bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-wider hover:bg-[#4C1D95] transition-all flex items-center gap-1.5 shadow">
@@ -1313,7 +1316,7 @@
   <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
     <div class="flex items-center gap-2 min-w-0 whitespace-nowrap">
       <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
-      <span class="font-mono-code font-bold text-[#CDB8F7] shrink-0">OPEN TODAY: 8:30 AM – 10:30 PM IST</span>
+      <span class="font-mono-code font-bold text-[#CDB8F7] shrink-0">Hours: 8:30 AM – 10:30 PM IST</span>
       <span class="text-white/85 truncate hidden md:inline">• 3 Gurugram Bars (DLF Phase 1, Golf Course Rd &amp; Sector 56) • Small-batch croissants &amp; micro-lots often sell out by 2 PM</span>
     </div>
     <div class="hidden lg:flex items-center gap-4 text-[11px] text-[#F1E9FF] whitespace-nowrap shrink-0 font-mono-code">
@@ -1517,9 +1520,9 @@
       Specialty in-house roasts, ceremonial Japanese Uji matcha and traditional small-batch gelato, from a lilac glass-fronted counter in Gurugram.
       </p>
     <div class="cta-row">
-      <a class="btn btn-primary" href="#chapters">Explore the Flavours</a>
-      <a class="btn btn-chrome" href="#d2cShop">Shop Fresh Roasts (₹)</a>
-      <a class="btn btn-primary" href="#destinations">Find the Counter</a>
+      <a class="btn btn-primary" href="#d2cShop">Shop Fresh Roasts (₹)</a>
+      <a class="btn btn-quiet" href="#chapters">Explore the Flavours</a>
+      <a class="btn btn-quiet" href="#destinations">Find the Counter</a>
     </div>
   </div>
 </section>
@@ -1573,7 +1576,8 @@
           <rect width="1440" height="900" fill="url(#lilacFacadeGrad)" mask="url(#facadeDoorCutout)"/>
           <!-- Arjun Marg Fascia Header Signage -->
           <rect x="110" y="68" width="1220" height="62" rx="10" fill="#1C0D38" stroke="#CDB8F7" stroke-opacity="0.4" stroke-width="2"/>
-          <text x="720" y="108" text-anchor="middle" fill="#F1E9FF" font-family="Bricolage Grotesque, sans-serif" font-size="26" font-weight="800" letter-spacing="9">16 ARJUN MARG • GRAM STREET COFFEE</text>
+          <text class="walk-sign-long" x="720" y="108" text-anchor="middle" fill="#F1E9FF" font-family="Bricolage Grotesque, sans-serif" font-size="26" font-weight="800" letter-spacing="9">16 ARJUN MARG • GRAM STREET COFFEE</text>
+          <text class="walk-sign-short" x="720" y="108" text-anchor="middle" fill="#F1E9FF" font-family="Bricolage Grotesque, sans-serif" font-size="26" font-weight="800" letter-spacing="9">GRAM STREET</text>
           <!-- Brushed Chrome Doorframe & Window Mullions -->
           <rect x="486" y="146" width="468" height="688" rx="24" stroke="url(#brushedChromeEdge)" stroke-width="9" fill="none"/>
           <rect x="130" y="210" width="290" height="440" rx="14" stroke="url(#brushedChromeEdge)" stroke-width="5" fill="none"/>
@@ -1742,11 +1746,10 @@
 
       <div class="walk-step" id="walkStep">
         <span id="walkStepLabel">01 / The Lilac Streetfront</span>
-        <span class="walk-frame-hud" id="walkFrameHud">FRAME 01 / 90</span>
       </div>
       <div class="walk-cap" id="walkCap">
         <b>A lilac front on Arjun Marg.</b>
-        <span>Move your cursor across the lilac architectural glass or scroll to cross the threshold into our 10-seater brushed-chrome bar.</span>
+        <span>Lilac glass. Chrome accents. A tiny room by design. Scroll to step inside.</span>
       </div>
       <div class="walk-hint" id="walkHint">Scroll<i></i></div>
     </div>
@@ -1827,7 +1830,7 @@
           </div>
           <div class="z-10">
             <div class="text-2xl font-display font-black text-white">Croissant Gelato Latte</div>
-            <div class="text-xs text-white/90 font-medium mt-1">Warm Brioche Amber (#C88A4B) &bull; Smoked Cacao (#1C1412) &amp; -12°C pozzetti churn</div>
+            <div class="text-xs text-white/90 font-medium mt-1">Warm brioche and smoked cacao, churned in-house</div>
           </div>
         </div>
       </div>
@@ -1858,7 +1861,7 @@
       </p>
     </div>
     <div class="font-mono-code text-xs uppercase tracking-wider text-[#2B1650] font-bold bg-[#F8F5FF] px-4 py-2.5 rounded-full border border-[#2B1650]/20 shadow-sm">
-      ● Live Bar Status: Pulling Nagaland Kiphire Lot (93.5°C)
+      Sample status · On the bar: Nagaland Kiphire lot
     </div>
   </div>
 
@@ -1989,7 +1992,7 @@
           <div>
             <div class="flex items-center gap-2">
               <h4 class="font-serif-editorial font-bold text-lg text-[#2B1650]">Eggplant Parm Milk-Bread Sando</h4>
-              <span class="px-2 py-0.5 rounded-full bg-purple-100 text-[#7C3AED] text-[9px] font-black uppercase tracking-wider">Chef Vanshika Special</span>
+              <span class="px-2 py-0.5 rounded-full bg-purple-100 text-[#7C3AED] text-[9px] font-black uppercase tracking-wider">House special</span>
             </div>
             <p class="text-xs font-medium text-[#534168] mt-1">Crispy panko aubergine, slow-simmered San Marzano marinara, basil oil &amp; aged provolone on Japanese shokupan.</p>
           </div>
@@ -2049,7 +2052,7 @@
         The Roastery &amp; Craft.
         </h2>
       <p class="mt-3 text-base text-[#534168] max-w-2xl font-semibold leading-relaxed">
-        Step behind our lilac glass counter in DLF Phase 1, Gurugram. Explore our precision 9-bar bottomless espresso extraction telemetry, velvety microfoam emulsion chemistry, and single-origin roast spectrums.
+        Step behind our lilac glass counter in DLF Phase 1, Gurugram. See how we pull a 9-bar espresso, steam velvety microfoam and roast our single origins.
         </p>
     </div>
     <!-- Mode Switcher Tabs -->
@@ -2077,7 +2080,7 @@
         Syrupy Golden Extraction.
       </h3>
       <p class="text-sm sm:text-base text-[#534168] font-medium leading-relaxed">
-        Scrub the 60-frame extraction timeline or hold directly on the portafilter stage to pull a live shot from <strong class="text-[#2B1650]">0.0s pre-infusion</strong> to <strong class="text-[#2B1650]">27.4s tiger-striped crema</strong>.
+        Drag the timeline or hold on the portafilter to pull a live shot from <strong class="text-[#2B1650]">0.0s pre-infusion</strong> to <strong class="text-[#2B1650]">27.4s tiger-striped crema</strong>.
       </p>
 
       <!-- Real Telemetry Grid (Driven Live by Frame Scrubber) -->
@@ -2099,7 +2102,7 @@
       <!-- Interactive 60-Frame Extraction Scrubber (0.0s to 27.4s) -->
       <div class="p-4 rounded-2xl bg-[#F8F5FF] border border-[#2B1650]/15 space-y-2.5">
         <div class="flex items-center justify-between text-[11px] font-mono-code font-bold">
-          <span class="text-[#2B1650] uppercase">60-Frame Shot Scrubber</span>
+          <span class="text-[#2B1650] uppercase">Shot timeline</span>
           <span id="extractionPhaseBadge" class="px-2.5 py-0.5 rounded-full bg-[#2B1650] text-[#F1E9FF]">18.1s–27.4s • Tiger-Striped Crema</span>
         </div>
         <input
@@ -2150,7 +2153,7 @@
       <canvas id="coffeeSteamCanvas" class="absolute inset-0 pointer-events-none z-10"></canvas>
       <div class="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none z-20">
         <span id="extractionFrameHud" class="px-3 py-1 rounded-full bg-black/75 backdrop-blur-md border border-white/20 text-[11px] font-mono-code font-bold text-[#CDB8F7]">
-          FRAME 60 / 60 • 27.4s
+          Shot time 27.4s
         </span>
         <span class="px-3 py-1 rounded-full bg-[#7C3AED]/85 backdrop-blur-md text-[10px] font-mono-code font-bold text-white uppercase tracking-wider">
           Hold or Drag to Scrub Shot
@@ -2417,6 +2420,7 @@
 <section class="chef" id="chef" aria-labelledby="chef-title">
   <div class="chef-grid scroll-reveal" data-slot="chef">
     <div>
+      <p class="concept-label">Illustrative copy, not confirmed by the café</p>
       <h2 id="chef-title">From pie shop to purple latte.</h2>
       <p class="lead">Chef Vanshika Bhatia built Gram Street as a compact, beverage-first counter, and she keeps building focused culinary destinations.</p>
 
@@ -2489,6 +2493,7 @@
 <section class="cities" id="cities" aria-labelledby="cities-title">
   <div class="cities-grid scroll-reveal">
     <div>
+      <p class="concept-label">Illustrative plan, not the café's announced roadmap</p>
       <h2 id="cities-title">A movement, city by city.</h2>
       <p>Gram Street began in Gurugram across DLF Phase 1, Golf Course Road and Sector 56. Mumbai, Bengaluru, Hyderabad and Jaipur are the planned next destinations, with Dubai, Singapore and London thereafter.</p>
       <div class="legend"><span>Inner ring: next across India.</span><span>Outer ring: international expansion.</span></div>
@@ -2545,7 +2550,7 @@
           </button>
         </form>
         <p id="eventSubMsg" role="status" class="hidden text-xs font-bold text-emerald-700">
-          ✓ You're on the sensory guestlist! Watch your inbox this Friday at 9 AM.
+          ✓ Demo only: this concept stores no emails, so nothing was sent.
         </p>
       </div>
     </div>
@@ -2564,7 +2569,7 @@
             <p class="text-xs font-medium text-[#534168] mt-1">Side-by-sideSCA protocol tasting of 5 washed and anaerobic Indian micro-lots roasted on our Giesen W6A.</p>
           </div>
         </div>
-        <button onclick="this.textContent='✓ Spot Reserved'; this.className='px-4 py-2.5 rounded-xl bg-emerald-700 text-white font-mono-code text-xs font-bold shrink-0';" class="px-4 py-2.5 rounded-xl bg-[#F5EFFF] hover:bg-[#7C3AED] text-[#7C3AED] hover:text-white border border-[#7C3AED]/30 font-mono-code text-xs font-bold transition-all shrink-0">
+        <button onclick="this.textContent='✓ Reserved (demo)'; this.className='px-4 py-2.5 rounded-xl bg-emerald-700 text-white font-mono-code text-xs font-bold shrink-0';" class="px-4 py-2.5 rounded-xl bg-[#F5EFFF] hover:bg-[#7C3AED] text-[#7C3AED] hover:text-white border border-[#7C3AED]/30 font-mono-code text-xs font-bold transition-all shrink-0">
           RSVP →
         </button>
       </div>
@@ -2581,7 +2586,7 @@
             <p class="text-xs font-medium text-[#534168] mt-1">Learn 78°C water tempering, 100-prong bamboo whisking geometry, and oat/coconut milk layering.</p>
           </div>
         </div>
-        <button onclick="this.textContent='✓ Spot Reserved'; this.className='px-4 py-2.5 rounded-xl bg-emerald-700 text-white font-mono-code text-xs font-bold shrink-0';" class="px-4 py-2.5 rounded-xl bg-[#F5EFFF] hover:bg-[#7C3AED] text-[#7C3AED] hover:text-white border border-[#7C3AED]/30 font-mono-code text-xs font-bold transition-all shrink-0">
+        <button onclick="this.textContent='✓ Reserved (demo)'; this.className='px-4 py-2.5 rounded-xl bg-emerald-700 text-white font-mono-code text-xs font-bold shrink-0';" class="px-4 py-2.5 rounded-xl bg-[#F5EFFF] hover:bg-[#7C3AED] text-[#7C3AED] hover:text-white border border-[#7C3AED]/30 font-mono-code text-xs font-bold transition-all shrink-0">
           RSVP →
         </button>
       </div>
@@ -2598,7 +2603,7 @@
             <p class="text-xs font-medium text-[#534168] mt-1">Hands-on 1:2 extraction ratio calibration, WDT distribution, and 65°C mirror-gloss rosetta pouring.</p>
           </div>
         </div>
-        <button onclick="this.textContent='✓ Spot Reserved'; this.className='px-4 py-2.5 rounded-xl bg-emerald-700 text-white font-mono-code text-xs font-bold shrink-0';" class="px-4 py-2.5 rounded-xl bg-[#F5EFFF] hover:bg-[#7C3AED] text-[#7C3AED] hover:text-white border border-[#7C3AED]/30 font-mono-code text-xs font-bold transition-all shrink-0">
+        <button onclick="this.textContent='✓ Reserved (demo)'; this.className='px-4 py-2.5 rounded-xl bg-emerald-700 text-white font-mono-code text-xs font-bold shrink-0';" class="px-4 py-2.5 rounded-xl bg-[#F5EFFF] hover:bg-[#7C3AED] text-[#7C3AED] hover:text-white border border-[#7C3AED]/30 font-mono-code text-xs font-bold transition-all shrink-0">
           RSVP →
         </button>
       </div>
@@ -2830,6 +2835,7 @@
 </div>
 
 <!-- ================= DEEP-GRAPE EDITORIAL FOOTER ================= -->
+<section class="design-notes" id="design-notes" aria-labelledby="design-notes-title"><div class="dn-wrap"><p class="dn-kicker">Design notes · concept by Anchit Tandon</p><h2 id="design-notes-title">Why this storefront looks the way it does.</h2><p class="dn-lede">Gram Street Coffee is a real Gurugram café. This page is my independent redesign of its storefront, built to show how I would take a first-time visitor from curiosity to an order. It is not the café's site.</p><div class="dn-grid"><article class="dn-card"><h3>The problem</h3><p>A café site has two jobs for a first-time visitor: show what the place is in one screen, then get them to an order or to the counter. I had no access to Gram Street's analytics, so everything below is a <strong>design hypothesis</strong>, not a finding.</p></article><article class="dn-card"><h3>What I kept</h3><ul><li>The brand's own material language: lilac glass, chrome, a tiny room by design.</li><li>Its three pillars, in its order: coffee, matcha, gelato.</li><li>The three Gurugram counters, and the real Zomato, Swiggy and Instagram links.</li></ul></article><article class="dn-card"><h3>What I changed</h3><ul><li>A walk-in scroll from the street to the counter, as the one signature moment.</li><li>A menu with a bag and a two-step checkout that keeps a recap of the order.</li><li>An outlet finder with a tab per counter, which hides an order link that would have pointed to the wrong outlet.</li><li>One primary call to action in the hero: the shop.</li></ul></article><article class="dn-card"><h3>Hypothesis</h3><p>If the menu and the nearest counter are each one tap from the first screen, more first-time visitors reach an order or directions than on a page that leads with the story.</p></article><article class="dn-card"><h3>How I would measure it <span class="dn-tag">Intended, not measured</span></h3><ul><li>Hero to menu click rate.</li><li>Add-to-bag rate, and bag to checkout completion.</li><li>Directions taps per outlet.</li></ul><p style="margin-top:10px">This concept has no live traffic, so none of these has been measured.</p></article><article class="dn-card"><h3>What is real and what is a demo</h3><ul><li><strong>Real:</strong> the outbound Instagram, Zomato and Swiggy links.</li><li><strong>Demo:</strong> the bag and checkout (no card is taken; WhatsApp only drafts a message marked DEMO), the guestlist and RSVPs (nothing is stored) and the bar status line.</li><li><strong>Illustrative:</strong> the photography, the founder story and the city plans.</li></ul></article><article class="dn-card"><h3>How checkout works here</h3><p>The order is simulated end to end: you get a reference and a WhatsApp draft you can read, and nothing leaves the page. In my Xazina concept the bag hands off to Xazina's real cart instead, because that catalogue is a real snapshot of the live store.</p></article><article class="dn-card"><h3>Motion decisions</h3><ul><li>One pinned scroll-through, never a second one competing with it.</li><li>No cursor trail, confetti or particle bursts: the brand's claim is precision.</li><li>Everything decorative pauses off screen and under reduced motion.</li></ul></article></div><p class="dn-foot">Questions about the concept? <a href="mailto:anchit.tandon@gmail.com?subject=Your%20Gram%20Street%20concept">Email Anchit</a>, or see the rest of my work on the <a href="/">portfolio</a>.</p></div></section>
 <footer>
   <div class="max-w-7xl mx-auto text-center space-y-6">
     <div class="inline-flex items-center gap-3">
@@ -2847,7 +2853,7 @@
     </div>
     <div class="pt-6 border-t border-white/15 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[#CDB8F7]/85 font-mono-code">
       <div>16 Arjun Marg (DLF Phase 1) • DLF Summit Plaza (Sector 53) • Jalvayu Towers (Sector 56)</div>
-      <div>Open Daily 08:30 AM – 10:30 PM IST • Made in Gurugram • © 2026 Gram Street Coffee</div>
+      <div>Concept storefront by <a href="/" class="underline">Anchit Tandon</a> · not affiliated with Gram Street Coffee · <a href="mailto:anchit.tandon@gmail.com?subject=Your%20Gram%20Street%20concept" class="underline">Email Anchit</a></div>
     </div>
   </div>
 </footer>
@@ -3286,9 +3292,9 @@
     }, { passive: true });
 
     var STEPS = [
-      [0.00, '01 / The Lilac Streetfront', 'Outside on 16 Arjun Marg.', 'Frames 01–30: Lilac architectural glass facade with live specular pane reflection. Scroll to push through the doorway.'],
-      [0.33, '02 / Crossing the Glass Threshold', 'Chrome specular flare across pastel.', 'Frames 31–60: Scaling through the brushed-steel doorframe as street acoustics give way to the espresso bar.'],
-      [0.67, '03 / The 10-Seater Chrome Bar', 'Docked at the brushed-steel counter.', 'Frames 61–90: E61 9.2-bar groupheads, 78°C Uji matcha chasen station and -12°C pozzetti gelato bar.']
+      [0.00, '01 / The Lilac Streetfront', 'Outside on 16 Arjun Marg.', 'Lilac glass. Chrome accents. A tiny room by design. Scroll to step inside.'],
+      [0.33, '02 / Through the Door', 'Chrome cutting through the pastel.', 'The street goes quiet and the espresso bar comes into view.'],
+      [0.67, '03 / The 10-Seater Chrome Bar', 'At the counter.', 'Espresso, the matcha whisking station and the gelato counter, side by side.']
     ];
     var at = -1;
     var capT = 0;
@@ -3708,14 +3714,14 @@
       isPlayingAudio = true;
       document.getElementById('audioBtn').setAttribute('aria-pressed', 'true');
       document.getElementById('audioDot').className = 'w-2 h-2 rounded-full bg-emerald-400 animate-ping';
-      document.getElementById('audioLabel').textContent = '65°C Steam: On';
+      document.getElementById('audioLabel').textContent = 'Ambient audio: on';
     } else {
       if (audioCtx) audioCtx.close();
       audioCtx = null;
       isPlayingAudio = false;
       document.getElementById('audioBtn').setAttribute('aria-pressed', 'false');
       document.getElementById('audioDot').className = 'w-2 h-2 rounded-full bg-slate-400';
-      document.getElementById('audioLabel').textContent = '65°C Audio';
+      document.getElementById('audioLabel').textContent = 'Ambient audio';
     }
   };
 
@@ -4424,7 +4430,7 @@
     if (phaseBadge) phaseBadge.textContent = st.phase;
     if (frameHud) {
       const fStr = st.frameIdx < 10 ? '0' + st.frameIdx : String(st.frameIdx);
-      frameHud.textContent = `FRAME ${fStr} / 60 • ${st.t.toFixed(1)}s`;
+      frameHud.textContent = `Shot time ${st.t.toFixed(1)}s`;
     }
     if (statusText) {
       statusText.textContent = `${st.pressure.toFixed(1)} BAR • ${st.yieldG.toFixed(1)}g Yield`;

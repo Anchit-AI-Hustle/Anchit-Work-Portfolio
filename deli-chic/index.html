@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Deli Chic · Food For Thought | Haute Boucherie &amp; Artisanal Larder</title>
+<title>Deli Chic storefront concept | design by Anchit Tandon</title>
 <!-- Tailwind CSS -->
 <!-- Tailwind, compiled and self-hosted (scripts/build-tailwind.mjs).
      The CDN build shipped a ~300KB JIT compiler, scanned the DOM at
@@ -43,6 +43,9 @@
       --chic-muted: #6B625B;
       --chic-gold: #C59A45;
       --chic-gold-bright: #FFA517;
+      --dn-bg: var(--chic-linen-warm); --dn-ink: var(--chic-charcoal); --dn-muted: #524842; --dn-accent: var(--chic-crimson-dark);
+      --dn-card: var(--chic-linen); --dn-rule: rgba(74, 14, 23, 0.14); --dn-tag-bg: var(--chic-burgundy); --dn-tag-ink: var(--chic-linen);
+      --dn-pad: clamp(18px, 5vw, 40px); --dn-display: var(--font-serif);
       --font-serif: "Playfair Display", Georgia, serif;
       --font-luxury: "Cinzel", serif;
       --font-sans: "Plus Jakarta Sans", sans-serif;
@@ -908,28 +911,54 @@
   .bag-bounce { animation: basketElasticBounce 0.48s cubic-bezier(0.34, 1.56, 0.64, 1); }
   </style>
 <!-- seo:auto:start -->
-<!-- Managed by scripts/seo-inject.mjs · edit seo.config.json, not here. -->
-<meta name="description" content="Artisanal cuts, 100% antibiotic residue-free poultry, handcrafted charcuterie and gourmet dim sum. Chilled 0°C–4°C delivery across Delhi NCR." />
+<!-- Managed by scripts/seo-inject.mjs, edit seo.config.json, not here. -->
+<meta name="description" content="Independent storefront redesign concept for a Delhi NCR gourmet butcher, by Anchit Tandon: larder, basket and delivery hubs. Illustrative photos." />
 <link rel="canonical" href="https://anchit-tandon.com/deli-chic" />
-<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+<meta name="robots" content="noindex,follow" />
 <meta name="author" content="Anchit Tandon" />
 <link rel="icon" href="/icons/favicon.svg" type="image/svg+xml" />
-<meta property="og:title" content="Deli Chic · Food For Thought | Haute Boucherie &amp; Artisanal Larder" />
-<meta property="og:description" content="Artisanal cuts, 100% antibiotic residue-free poultry, handcrafted charcuterie and gourmet dim sum. Chilled 0°C–4°C delivery across Delhi NCR." />
+<meta property="og:title" content="Deli Chic storefront concept | design by Anchit Tandon" />
+<meta property="og:description" content="Independent storefront redesign concept for a Delhi NCR gourmet butcher, by Anchit Tandon: larder, basket and delivery hubs. Illustrative photos." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://anchit-tandon.com/deli-chic" />
 <meta property="og:image" content="https://i1.wp.com/mh.delichic.co.in/wp-content/uploads/2020/09/Chicken-Breast-Antibiotic-Free-scaled.jpg" />
 <meta property="og:site_name" content="Anchit Tandon" />
 <meta property="og:locale" content="en_US" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Deli Chic · Food For Thought | Haute Boucherie &amp; Artisanal Larder" />
-<meta name="twitter:description" content="Artisanal cuts, 100% antibiotic residue-free poultry, handcrafted charcuterie and gourmet dim sum. Chilled 0°C–4°C delivery across Delhi NCR." />
+<meta name="twitter:title" content="Deli Chic storefront concept | design by Anchit Tandon" />
+<meta name="twitter:description" content="Independent storefront redesign concept for a Delhi NCR gourmet butcher, by Anchit Tandon: larder, basket and delivery hubs. Illustrative photos." />
 <meta name="twitter:image" content="https://i1.wp.com/mh.delichic.co.in/wp-content/uploads/2020/09/Chicken-Breast-Antibiotic-Free-scaled.jpg" />
 <!-- seo:auto:end -->
 </head>
 <body class="linen-texture selection:bg-[#CD2653] selection:text-white">
 <a href="#larder" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[90] focus:px-4 focus:py-3 focus:rounded-full focus:bg-[#4A0E17] focus:text-white focus:font-bold">Skip to the larder</a>
-<div class="concept-bar" role="note" style="position:relative;z-index:60;padding:8px 16px;text-align:center;font:600 12px/1.45 system-ui,-apple-system,sans-serif;letter-spacing:.02em;background:#111;color:#f5f0e8">Concept storefront by <a href="/" style="color:inherit;text-decoration:underline;text-underline-offset:2px">Anchit Tandon</a>, not affiliated with Deli Chic. Nothing here places a real order.</div>
+<style>
+  /* Concept bar: neutral chrome, deliberately not either brand's palette, so
+     it reads as the frame around the work rather than part of the shop. */
+  .concept-bar{position:relative;z-index:60;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 18px;padding:8px 16px;font:600 12px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.02em;background:#111;color:#f5f0e8;text-align:center}
+  .concept-bar p{margin:0}
+  .concept-bar a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+  .concept-bar nav{display:flex;flex-wrap:wrap;justify-content:center;gap:0 14px}
+  .concept-bar nav a{display:inline-flex;align-items:center;min-height:24px}
+  .concept-bar a:focus-visible{outline:2px solid #f5f0e8;outline-offset:2px}
+  /* Design notes: the reasoning behind the concept, in the page's own type. */
+  .design-notes{padding:clamp(56px,9vw,112px) var(--dn-pad,24px);background:var(--dn-bg);color:var(--dn-ink);scroll-margin-top:72px}
+  .design-notes .dn-wrap{max-width:1120px;margin:0 auto}
+  .design-notes .dn-kicker{margin:0 0 12px;font:800 12px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--dn-accent)}
+  .design-notes h2{margin:0;font-family:var(--dn-display);font-size:clamp(1.9rem,4vw,3rem);line-height:1.08;letter-spacing:-.02em;max-width:22ch}
+  .design-notes .dn-lede{margin:16px 0 0;max-width:62ch;font-size:clamp(1rem,1.6vw,1.125rem);line-height:1.6;color:var(--dn-muted)}
+  .design-notes .dn-grid{display:grid;gap:16px;margin-top:clamp(28px,4vw,44px);grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+  .design-notes .dn-card{padding:22px 22px 24px;border-radius:18px;background:var(--dn-card);border:1px solid var(--dn-rule)}
+  .design-notes .dn-card h3{margin:0 0 10px;font:800 13px/1.35 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--dn-accent)}
+  .design-notes .dn-card p,.design-notes .dn-card li{margin:0;font-size:15px;line-height:1.6;color:var(--dn-ink)}
+  .design-notes .dn-card ul{margin:0;padding-left:18px;display:grid;gap:6px;list-style:disc}
+  .design-notes .dn-card li::marker{color:var(--dn-accent)}
+  .design-notes .dn-tag{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;font:700 11px/1.5 system-ui,-apple-system,sans-serif;letter-spacing:.06em;text-transform:uppercase;background:var(--dn-tag-bg);color:var(--dn-tag-ink);vertical-align:middle}
+  .design-notes .dn-foot{margin:28px 0 0;font-size:14px;line-height:1.6;color:var(--dn-muted)}
+  .design-notes .dn-foot a{color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:2px}
+  .concept-label{display:inline-block;margin:0 0 12px;padding:3px 10px;border-radius:999px;font:700 11px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.08em;text-transform:uppercase;background:#111;color:#f5f0e8}
+</style>
+<div class="concept-bar" role="note"><p>Concept storefront by <a href="/">Anchit Tandon</a>, not affiliated with Deli Chic. No real orders · illustrative photos · sample statuses.</p><nav aria-label="About this concept"><a href="/">Portfolio</a><a href="#design-notes">Design notes</a><a href="/assets/resume.pdf">Resume</a><a href="mailto:anchit.tandon@gmail.com?subject=Your%20Deli%20Chic%20concept">Email Anchit</a></nav></div>
 
 <!-- Luxury Film Grain Cinematic Overlay -->
 <div class="film-grain" aria-hidden="true"></div>
@@ -940,14 +969,11 @@
 <div id="deliAnnounceBar" class="relative z-40 bg-[#4A0E17] text-[#FFF9F4] text-[11px] sm:text-xs font-medium tracking-wider py-1.5 px-4 border-b border-[#C59A45]/30">
   <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
     <div class="flex items-center gap-x-2 min-w-0 whitespace-nowrap">
-      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
-      <span class="font-bold shrink-0">All 4 NCR hubs open</span>
+      <span class="font-bold shrink-0">Sample status · 4 NCR delivery hubs</span>
       <span class="text-white/80 truncate hidden sm:inline">Slot 1 (10 AM–1 PM) &amp; Slot 2 (5 PM–8 PM) • Free express cold-chain on ₹999+</span>
     </div>
     <div class="hidden md:flex items-center gap-5 text-[11px] text-[#F7EFE6] whitespace-nowrap shrink-0">
-      <span>✦ Use Code <strong class="text-[#FFA517] underline tracking-widest font-black">WoW20</strong> (20% OFF)</span>
-      <span>•</span>
-      <span>Sodexo Accepted</span>
+      <span>✦ Sample code <strong class="text-[#FFA517] underline tracking-widest font-black">WoW20</strong> (20% off in this demo)</span>
       <span>•</span>
       <a href="tel:+919810002023" class="hover:text-white transition-colors">+91 98100 02023</a>
     </div>
@@ -975,7 +1001,6 @@
          was hiding. -->
     <nav class="hidden lg:flex items-center gap-4 xl:gap-5 text-xs font-bold uppercase tracking-[0.14em] xl:tracking-[0.18em] min-w-0">
       <a href="#larder" class="deli-nav-link whitespace-nowrap">The Larder</a>
-      <a href="#masterCarver" class="deli-nav-link deli-nav-loupe whitespace-nowrap">Master Carver Loupe</a>
       <a href="#boucherieExperience" class="deli-nav-link whitespace-nowrap">Haute Standards</a>
       <a href="#hubs" class="deli-nav-link whitespace-nowrap">NCR Hubs (4)</a>
       <a href="#heritage" class="deli-nav-link whitespace-nowrap">Our Story</a>
@@ -983,10 +1008,10 @@
 
     <!-- Action Controls -->
     <div class="flex items-center gap-2.5 shrink-0">
-      <!-- Cold-Room Spatial Audio Toggle (15% Gain) -->
-      <button type="button" id="deliAudioBtn" onclick="toggleDeliAudio()" aria-pressed="false" title="Toggle 2.4°C Cold-Room &amp; Vacuum-Seal Acoustics (15% Gain)" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#C59A45]/40 text-[#4A0E17] text-[10px] font-bold uppercase tracking-wider hover:bg-[#F7EFE6] transition-all">
+      <!-- Ambient audio toggle -->
+      <button type="button" id="deliAudioBtn" onclick="toggleDeliAudio()" aria-pressed="false" title="Play ambient cold-room sounds" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#C59A45]/40 text-[#4A0E17] text-[10px] font-bold uppercase tracking-wider hover:bg-[#F7EFE6] transition-all">
         <svg class="w-3.5 h-3.5 text-[#CD2653]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 10v4M6 7v10M10 4v16M14 8v8M18 6v12M22 10v4"/></svg>
-        <span id="deliAudioLabel">2.4°C Audio</span>
+        <span id="deliAudioLabel">Ambient audio</span>
       </button>
 
       <!-- WhatsApp Direct Concierge -->
@@ -1010,7 +1035,6 @@
   </div>
   <nav id="deliMobileNav" class="deli-mobile-nav lg:hidden" aria-label="Sections" hidden>
     <a href="#larder">The Larder</a>
-    <a href="#masterCarver">Master Carver Loupe</a>
     <a href="#boucherieExperience">Haute Standards</a>
     <a href="#hubs">NCR Hubs (4)</a>
     <a href="#heritage">Our Story</a>
@@ -1170,7 +1194,7 @@
               <span id="loupeBadgeText" class="text-[11px] font-bold uppercase tracking-wider text-emerald-800">Master Carver 2.5x Loupe Active</span>
             </div>
             <h4 id="loupeTitleText" class="text-base font-serif-chic font-bold text-[#4A0E17] mt-0.5">Prime Wood-Smoked Charcuterie</h4>
-            <p id="loupeDescText" class="text-[11px] text-[#6B625B]">Move cursor or drag finger across cut to inspect curing grain &amp; cellular density.</p>
+            <p id="loupeDescText" class="text-[11px] text-[#6B625B]">Move your cursor, or drag a finger, across the cut to look closer at the grain.</p>
           </div>
           <div class="text-right">
             <span class="text-xs font-luxury font-bold text-[#C59A45]" id="liveTempSensor">2.4°C</span>
@@ -1540,7 +1564,7 @@
           <p><strong>Direct Hotline:</strong> <a href="tel:+919810002023" class="text-[#CD2653] underline font-bold">+91 98100 02023</a></p>
           <p><strong>WhatsApp Concierge:</strong> <a href="https://wa.link/bk4b8e" target="_blank" rel="noopener" class="text-emerald-700 underline font-bold">wa.link/bk4b8e</a></p>
           <p><strong>Delivery Slots:</strong> 10:00 AM – 1:00 PM &amp; 5:00 PM – 8:00 PM</p>
-          <p><strong>Payment Modes:</strong> Sodexo, UPI, Debit/Credit Cards &amp; Net Banking</p>
+          <p><strong>Payment modes (sample):</strong> UPI, Debit/Credit Cards &amp; Net Banking</p>
         </div>
       </div>
     </div>
@@ -1625,11 +1649,12 @@
 
 <!-- ================= FOOTER ================= -->
 </main>
+<section class="design-notes" id="design-notes" aria-labelledby="design-notes-title"><div class="dn-wrap"><p class="dn-kicker">Design notes · concept by Anchit Tandon</p><h2 id="design-notes-title">Why this storefront looks the way it does.</h2><p class="dn-lede">Deli Chic is a real Delhi NCR gourmet butcher. This page is my independent redesign of its storefront, built to show how I would carry a shopper from a first look to a confident order. It is not Deli Chic's site.</p><div class="dn-grid"><article class="dn-card"><h3>The problem</h3><p>A premium butcher sells on trust and freshness, and a shopper wants to know three things fast: is it good, is it cold all the way to my door, and does it deliver to me. I had no access to Deli Chic's analytics, so everything below is a <strong>design hypothesis</strong>, not a finding.</p></article><article class="dn-card"><h3>What I kept</h3><ul><li>The brand's own catalogue: product names, prices and photographs from its public shop.</li><li>Its temperature claim, Chilled, Never Frozen, and the 0°C–4°C cold chain it describes.</li><li>Its four Delhi NCR hubs and two culinary lineages, European charcuterie and Awadhi marinades.</li></ul></article><article class="dn-card"><h3>What I changed</h3><ul><li>A larder with filters and a basket drawer, so a shopper never leaves the page to build an order.</li><li>A cold-room walk-through that shows the process, cut to sealed, as the one signature moment.</li><li>The four hubs, the areas each covers and the two delivery slots, shown before the basket rather than after it.</li><li>Slower, heavier motion than my Gram Street concept, to match a cold-chain brand.</li></ul></article><article class="dn-card"><h3>Hypothesis</h3><p>If the cold chain and the delivery hubs are visible before the basket, fewer shoppers abandon at checkout over the two questions that matter for raw protein: freshness and whether it reaches them.</p></article><article class="dn-card"><h3>How I would measure it <span class="dn-tag">Intended, not measured</span></h3><ul><li>Add-to-basket rate from the larder.</li><li>Basket to order-preview completion.</li><li>WhatsApp order-draft starts.</li></ul><p style="margin-top:10px">This concept has no live traffic, so none of these has been measured.</p></article><article class="dn-card"><h3>What is real and what is a demo</h3><ul><li><strong>From Deli Chic's public catalogue:</strong> product names, prices, product photos, and product claims such as antibiotic residue-free. I have not verified those claims.</li><li><strong>Demo:</strong> the basket and checkout (no card is taken; WhatsApp only drafts a message marked DEMO), the promo code and the hub status line.</li><li><strong>Illustrative:</strong> the atmosphere photography. Phone and WhatsApp links go to the brand, not to me.</li></ul></article><article class="dn-card"><h3>How checkout works here</h3><p>The order is simulated end to end: you get a preview and a WhatsApp draft you can read, and nothing is sent. In my Xazina concept the bag hands off to Xazina's real cart instead, because that catalogue is a real snapshot of the live store.</p></article><article class="dn-card"><h3>Motion decisions</h3><ul><li>No motion on raw-protein imagery: a pulse or a warm colour cycle on a cut reads as spoilage.</li><li>No springy or bouncy easing anywhere; it contradicts the cold-chain claim.</li><li>One pinned scroll-through, and everything decorative pauses off screen.</li></ul></article></div><p class="dn-foot">Questions about the concept? <a href="mailto:anchit.tandon@gmail.com?subject=Your%20Deli%20Chic%20concept">Email Anchit</a>, or see the rest of my work on the <a href="/">portfolio</a>.</p></div></section>
 <footer class="border-t border-[#CD2653]/15 py-12 px-6 md:px-10 text-center sm:text-left bg-white">
   <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-xs text-[#6B625B]">
     <div>
       <strong class="font-serif-chic font-bold text-base block text-[#4A0E17]">Deli Chic, Food For Thought</strong>
-      <span>Concept site by Anchit Tandon. Deli Chic and its marks belong to their owner.</span>
+      <span>Concept storefront by <a href="/" class="underline">Anchit Tandon</a>. Deli Chic and its marks belong to their owner. <a href="mailto:anchit.tandon@gmail.com?subject=Your%20Deli%20Chic%20concept" class="underline font-bold">Email Anchit</a></span>
     </div>
     <div class="flex gap-6 uppercase tracking-widest font-luxury font-bold text-[11px]">
       <a href="https://delichic.co.in/" target="_blank" rel="noopener" class="hover:text-[#CD2653] transition-colors">The real Deli Chic &#8599;</a>
@@ -3305,7 +3330,7 @@
           deliAmbientGain.gain.setTargetAtTime(deliAudioActive ? 0.15 : 0.0, deliAudioCtx.currentTime, 0.08);
         }
         if (btn) btn.setAttribute('aria-pressed', deliAudioActive ? 'true' : 'false');
-        if (lbl) lbl.textContent = deliAudioActive ? '2.4°C Live' : '2.4°C Audio';
+        if (lbl) lbl.textContent = deliAudioActive ? 'Ambient audio: on' : 'Ambient audio';
         if (deliAudioActive) playSubZeroSealClick();
       } catch (e) {}
     };
