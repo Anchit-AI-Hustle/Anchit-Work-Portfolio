@@ -69,6 +69,7 @@
 // MUT=negmsg     a negative input is reported as "not a number"
 // MUT=a11y       the phone preview loses its region role
 // MUT=swatch     the Muted swatch drifts from the --muted token
+// MUT=tutobase   AI Tuto reads as part of the base plan while the costs leave it out
 // MUT=nosixq / nostack / breakeven / nogates / navcut / overclaim   case study blocks
 const { chromium } = require('./_playwright.js');
 const vercel = require('../vercel.json');
@@ -120,7 +121,8 @@ function mutate(src) {
   if (MUT === 'noalias') return src.replace("h = ALIAS[h] || h;", '');
   if (MUT === 'vp') return src.replace('if(p.offline && p.vp && !p.final) a.push', 'if(p.offline && !p.final) a.push').replace(' && !p.final && p.vp, held', ' && !p.final, held').replace('!p.final && p.offline && p.vp && res.tier', '!p.final && p.offline && res.tier');
   if (MUT === 'finalmsg') return src.replace('var resultsEn = p.final ?', 'var resultsEn = false ?');
-  if (MUT === 'parentend') return src.replace("One thing you can do: ask '", "Also: ask '");
+  // Anchored on the medium-risk line: the high-risk report has its own "One thing you can do: ask" earlier in the file.
+  if (MUT === 'parentend') return src.replace("One thing you can do: ask '+p.name+' which session comes first tonight.", "Also: ask '+p.name+' which session comes first tonight.");
   if (MUT === 'pace') return src.replace('return lec>=75 ? 0 : Math.max(1, Math.ceil((75-lec)/100*LECTURES_SO_FAR));', 'return Math.max(0, Math.round((75-lec)/6));');
   if (MUT === 'zerowhy') return src.replace('(top.v>0 ? ', '(true ? ');
   if (MUT === 'finsplit') return src.replace('finT:lo.filter(function(x){return !x.nextBatch&&strong(x);})', 'finT:[]');
@@ -132,6 +134,7 @@ function mutate(src) {
   if (MUT === 'breakeven') return src.replace('a lift of <b>0.62pp</b>', 'a lift of <b>2pp</b>');
   if (MUT === 'nogates') return src.replace(/<div class="card" id="gates"[\s\S]*?<\/table><\/div>/, '<div>');
   if (MUT === 'navcut') return src.replace('<a href="#risks">Risks</a>', '');
+  if (MUT === 'tutobase') return src.replace('<td>A pilot arm, not in the base cost: one hour', '<td>One hour');
   if (MUT === 'overclaim') return src.replace('found where PW cannot yet see paying students drift away', 'found where paying students quietly drop off');
   return src;
 }
@@ -383,6 +386,12 @@ async function caseStudy(browser, vp) {
   const stackSrc = await page.$$eval('#stack a[href^="https://"]', (as) => as.length).catch(() => 0);
   check(`${L}: the engine is mapped onto PW's own AI products, with sources`,
     ['AI Guru', 'Guided AI tutor in practice sets', 'PW Pi Daily Challenges', 'AI Tuto', 'AI support'].every((n) => stack.includes(n)) && stackSrc >= 2, JSON.stringify(stack));
+  // AI Tuto is not in the ₹6.15 cr running cost, so nothing may present it as part of the base plan.
+  const tutoRow = norm(await page.$eval('#stack', (t) => [...t.querySelectorAll('tbody tr')].find((r) => r.cells[0].innerText.trim() === 'AI Tuto').innerText).catch(() => ''));
+  const sysTxt = norm(await page.textContent('#system'));
+  const tutoDown = norm(await page.textContent('#downside').catch(() => ''));
+  check(`${L}: AI Tuto is a pilot arm outside the base cost, everywhere it appears`,
+    /not in the base cost/.test(tutoRow) && /pilot arm/.test(sysTxt) && /outside the base cost/.test(tutoDown), tutoRow.slice(0, 120));
   // Break-even and the zero-renewal downside follow from the sizing table's own numbers.
   const down = norm(await page.textContent('#downside').catch(() => ''));
   const per1pp = 4.87e6 * 0.5 * 4104 / 1e9, be = (6.15 / per1pp).toFixed(2), zero = (4.87e6 * 0.5 * 0.35 * 0.01 * (36625 - 4104) / 1e7 + (4.87e6 - 0.96e6) * 0.015 * 3000 / 1e7 - 6.15).toFixed(1);

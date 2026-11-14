@@ -532,7 +532,7 @@ function actions(s,res,p){
             : g==='young' ? {t:'Weekly Progress Report alert, to the learner',d:'Sent to '+p.name+'. Parent gets a copy only if '+p.name+' opted in.'}
             : {t:'Weekly Progress Report + study-circle check-in',d:'Adult learner: no parent channel. Peers keep the streak going; a mentor steps in only at high risk.'};
   if(res.tier==='High'){
-    a.push({t:'7-day AI catch-up plan',d:'Backlog cut to the highest-weight chapters, scheduled by the AI Mentor, with guided practice and an hour of AI Tuto.'});
+    a.push({t:'7-day AI catch-up plan',d:'Backlog cut to the highest-weight chapters, scheduled by the AI Mentor, with guided practice and AI Guru for doubts.'});
     a.push({t:'Mentor call on day 8 if still high risk',d:'If the plan has not worked in a week, a real mentor rebuilds it with the learner. Calls are capped to what PW\'s mentors can take.'});
     a.push(pulse);
   } else if(res.tier==='Medium'){
@@ -629,7 +629,7 @@ function renderStudent(){
   el('st-lec').textContent = s.lec+'%'; el('st-test').textContent = s.test+'%'; el('st-streak').textContent = s.streak;
   var n = el('s-nudge'); n.className = 'nudge ' + (res.tier==='High'?'high':res.tier==='Medium'?'med':'low');
   var plan;
-  if(res.tier==='High'){ el('s-nudge-title').textContent='Your 7-day catch-up plan'; plan=['Day 1-2: 2 backlog lectures (highest weightage first)','Day 3: 20-min guided practice, one step at a time','Day 4-6: 2 more lectures + 1 hour with AI Tuto on your weakest chapter','Day 7: mini-test to reset your score','Day 8: a mentor calls if you are still behind']; }
+  if(res.tier==='High'){ el('s-nudge-title').textContent='Your 7-day catch-up plan'; plan=['Day 1-2: 2 backlog lectures (highest weightage first)','Day 3: 20-min guided practice, one step at a time','Day 4-6: 2 more lectures + doubts cleared with AI Guru','Day 7: mini-test to reset your score','Day 8: a mentor calls if you are still behind']; }
   else if(res.tier==='Medium'){ el('s-nudge-title').textContent='Catch up in 3 sessions'; plan=[behind>0?('Session 1: '+behind+' backlog lecture'+(behind>1?'s':'')):(s.test<40?'Session 1: re-watch your weakest chapter, then its DPP':'Session 1: 1 backlog lecture'),'Session 2: today\'s Daily Challenge, then a 15-question DPP on your weakest chapter','Session 3: ask at least 2 doubts on AI Guru']; }
   else { el('s-nudge-title').textContent='Great week. Keep the streak alive'; plan=['Next: Sunday full-length test','Bonus: 1 advanced problem set unlocked']; }
   el('s-plan').innerHTML = plan.map(function(x){return '<li>'+x+'</li>';}).join('');
