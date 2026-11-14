@@ -76,6 +76,9 @@
 // MUT=highpromo (discount shown at high risk)  plural ("1 lectures")  danda (Hindi ends with ".")
 // MUT=limits (150pp uplift, high risk above at risk)  finalchat (final-year chat sells a next batch)
 // MUT=noaiq / nosens / noleak / nested   case study AI-quality plan, sensitivity, problem size, nested iframe scroll
+// Third review (8.2 / 8.0), each with a mutation that must fail it:
+// MUT=pacecap nobacklog finalqueue doubtcouple sharecopy hindidefault plausible noskip (prototype)
+// MUT=leak3 nostack noembedscroll (case study)
 // MUT=nosixq / nostack / breakeven / nogates / navcut / overclaim   case study blocks
 const { chromium } = require('./_playwright.js');
 const vercel = require('../vercel.json');
@@ -98,7 +101,7 @@ const CSP = (() => {
 
 function mutate(src) {
   if (MUT === 'race') return src.replace('if(P[cur]===p) addMsg', 'addMsg');
-  if (MUT === 'label') return src.replace("k:'Lectures not done'", "k:'Behind batch pace'");
+  if (MUT === 'label') return src.replace("k:'Lectures short of pace'", "k:'Behind batch pace'");
   // Escaped so the site-wide no-dash sweep cannot "fix" the mutation itself, as it once did.
   if (MUT === 'dash') return src.replace('</body>', '<p>one \u2014 two</p></body>');
   if (MUT === 'auditnav') return src.replace(/<div class="hero-ctas" style="margin-top:6px"><a class="btn btn-outline sm" href="#top">.*?<\/div>/, '');
@@ -142,7 +145,7 @@ function mutate(src) {
   if (MUT === 'navcut') return src.replace('<a href="#risks">Risks</a>', '');
   if (MUT === 'floor') return src.replace("r = Math.max(r, s.idle>=14 ? 60 : s.idle>=7 ? 35 : 0);", '');
   if (MUT === 'couple') return src.replace("if(k==='streak' && simState.streak>0 && simState.idle>0)", 'if(false)').replace("if(k==='idle' && simState.idle>0 && simState.streak>0)", 'if(false)');
-  if (MUT === 'planfit') return src.replace("return Math.min(behind, tier==='High'?6:tier==='Medium'?3:0);", 'return behind;');
+  if (MUT === 'planfit') return src.replace("return Math.min(behind, tier==='High'?6:3);", 'return behind;');
   if (MUT === 'highpromo') return src.replace("(high?'':'<s>'+INR(nx.mrp)+'</s>", "(false?'':'<s>'+INR(nx.mrp)+'</s>");
   if (MUT === 'plural') return src.replace("return n+' '+w+(n===1?'':'s');", "return n+' '+w+'s';");
   if (MUT === 'danda') return src.replace("return t.replace(/\\.(?=\\s|$)/g,'।');", 'return t;');
@@ -152,6 +155,17 @@ function mutate(src) {
   if (MUT === 'nosens') return src.replace(/<table class="t-fit" id="sens">[\s\S]*?<\/table>/, '');
   if (MUT === 'noleak') return src.replace('about <b>₹600 cr a year</b> of online fees', 'some online fees');
   if (MUT === 'nested') return src.replace("fr.addEventListener('load', function(){ fit();", "fr.addEventListener('load', function(){ return;");
+  if (MUT === 'pacecap') return src.replace("v:Math.min(Math.max(0,75-s.lec)*1.3,60), max:60}", "v:(100-s.lec)*0.40, max:40}");
+  if (MUT === 'nobacklog') return src.replace("(behind>0?'Aaj sirf 2 cheezein: 1 backlog lecture", "(true?'Aaj sirf 2 cheezein: 1 backlog lecture");
+  if (MUT === 'finalqueue') return src.replace("    else if(p.final) a.push({t:'Results-day help queued'", "    else if(false) a.push({t:'Results-day help queued'");
+  if (MUT === 'doubtcouple') return src.replace("if(k==='doubt' && simState.doubt>0 && simState.idle>=7)", 'if(false)');
+  if (MUT === 'sharecopy') return src.replace("  var toParent = g==='minor';", "  var toParent = g==='minor' || (g==='young' && ppShare);");
+  if (MUT === 'hindidefault') return src.replace("  ppL = P[cur].lang==='HINDI' ? 'hi' : 'en';", '');
+  if (MUT === 'plausible') return src.replace("(t>3900e7*0.25?", '(false?');
+  if (MUT === 'noskip') return src.replace('<a class="skip" href="#main">Skip to the prototype</a>', '');
+  if (MUT === 'leak3') return src.replace("PW Pi's Daily Challenges lift week-three engagement, but no disclosed AI is aimed at renewal.", 'No disclosed AI aimed at retention or renewal.');
+  if (MUT === 'nostack') return src.replace('<table class="t-mid stack" id="six-q">', '<table class="t-mid" id="six-q">');
+  if (MUT === 'noembedscroll') return src.replace("e.data.type !== 'pw-scroll') return;", "e.data.type !== 'pw-scroll' || true) return;");
   if (MUT === 'tutogate') return src.replace('it scales only if recovery rises 11.3 points', 'it scales only if recovery rises 10 points');
   if (MUT === 'tutobase') return src.replace('<td>A pilot arm, not in the base cost: one hour', '<td>One hour');
   if (MUT === 'overclaim') return src.replace('found where PW cannot yet see paying students drift away', 'found where paying students quietly drop off');
@@ -390,7 +404,7 @@ async function caseStudy(browser, vp) {
   // The pilot must use grades with a next batch, gate on a backtest and be sized to detect the lift.
   const plan = norm(await page.textContent('#plan'));
   check(`${L}: pilot uses grades with a next batch, a backtest gate and a sized holdout`,
-    /Class 10 and Class 11/.test(plan) && !/Class 11 JEE and NEET dropper/.test(plan) && /AUC of 0\.70/.test(plan) && /13,300 learners/.test(plan), plan.slice(0, 160));
+    /Class 10 and Class 11/.test(plan) && !/Class 11 JEE and NEET dropper/.test(plan) && /AUC of 0\.70/.test(plan) && /14,500 learners/.test(plan), plan.slice(0, 160));
   const risks = norm(await page.textContent('#risks'));
   check(`${L}: risks cover DPDP s.9(3) and the holdout's fairness`, /s\.9\(3\)/.test(risks) && /never the child/.test(risks) && /holdout is fair/i.test(risks), risks.slice(0, 120));
   // The design choices rest on published evidence: each row names its source and links to it.
@@ -425,7 +439,7 @@ async function caseStudy(browser, vp) {
   check(`${L}: the leak is sized before the fix`, /₹600 cr a year/.test(sysTxt2) && /about 7%/.test(sysTxt2), sysTxt2.slice(0, 80));
   const sens = await page.$$eval('#sens tbody tr', (rs) => rs.map((r) => r.cells[1].innerText.trim())).catch(() => []);
   check(`${L}: sensitivity flexes renewal base, eligibility, incidence and margin`,
-    sens.join(' | ') === '69.1 / 79.1 / 89.1 | 65.6 / 79.1 / 92.7 | 79.1 / 74.2 | 57.3', sens.join(' | '));
+    sens.join(' | ') === '69.1 / 79.1 / 89.1 | 65.6 / 79.1 / 92.6 | 79.1 / 71.0 | 79.1 / 74.2 | 57.3', sens.join(' | '));
   const aiq = await page.$$eval('#aiq li', (l) => l.length).catch(() => 0);
   check(`${L}: an AI quality plan backs the generated plans and reports`, aiq === 4, aiq);
   const risks2 = norm(await page.textContent('#risks'));
@@ -440,6 +454,27 @@ async function caseStudy(browser, vp) {
     await page.waitForTimeout(600);
     const nest = await page.$eval('.proto-frame', (i) => { const d = i.contentDocument; return Math.ceil(d.body.getBoundingClientRect().height) - i.clientHeight; });
     check(`${L}: embedded prototype is sized to its content, no scroll inside a scroll`, nest <= 4, nest + 'px');
+  }
+  const gapsTxt = norm(await page.textContent('#gaps'));
+  const sixTxt = norm(await page.textContent('#six-q'));
+  check(`${L}: the leak list credits PW's retention AI; delivery economics are priced`, /Daily Challenges lift week-three engagement/.test(gapsTxt) && /₹9\.5 cr/.test(sixTxt) && /₹4\.5 cr/.test(sixTxt), '');
+  const order = await page.$$eval('main > section[id]', (ss) => ss.map((x) => x.id).slice(0, 4).join(','));
+  check(`${L}: "Why me" comes right after the short version`, order === 'system,questions,me,business', order);
+  if (vp.width <= 600) {
+    const wide = await page.$$eval('#six-q, #rk-main', (ts) => ts.map((t) => t.closest('.tbl').scrollWidth - t.closest('.tbl').clientWidth));
+    check(`${L}: the six questions and the main risks stack on a phone, no sideways scroll`, wide.length === 2 && wide.every((w) => w <= 2), JSON.stringify(wide));
+  }
+  const labels = await page.$$eval('.tbl[role="region"]', (ts) => ts.map((t) => t.getAttribute('aria-label')));
+  check(`${L}: every scrolling table has its own name`, new Set(labels).size === labels.length && labels.every((x) => !/^table, scrolls/i.test(x)), JSON.stringify(labels.slice(0, 4)));
+  if (vp.width >= 1080) {
+    const fr2 = await page.$('.proto-frame');
+    await fr2.scrollIntoViewIfNeeded();
+    const f2 = await fr2.contentFrame();
+    await f2.waitForSelector('#s-next button[data-act="parent"]');
+    await f2.click('#s-next button[data-act="parent"]');
+    await page.waitForTimeout(800);
+    const seen = await page.$eval('.proto-frame', (i) => { const r = i.getBoundingClientRect(); const t = i.contentDocument.getElementById('report').getBoundingClientRect(); const y = r.top + t.top; return { y: Math.round(y), ok: y >= 0 && y < innerHeight }; });
+    check(`${L}: a link inside the embedded prototype brings its target into view`, seen.ok, JSON.stringify(seen));
   }
   const hero = norm(await page.textContent('.hero .lede'));
   check(`${L}: hero does not overclaim`, !/quietly drop off/.test(hero) && /cannot yet see/.test(hero), hero.slice(0, 120));
@@ -605,7 +640,7 @@ async function nineFixes(page, L) {
   // 10. Second review: signals that contradict each other, plans that do not fit, words that do not agree.
   await page.click('#t-student');
   await page.click('.persona-row .chip[data-p="0"]');
-  await slide(page, { 'in-lec': 100, 'in-test': 100, 'in-idle': 21, 'in-doubt': 15 });
+  await slide(page, { 'in-lec': 100, 'in-test': 100, 'in-doubt': 0, 'in-idle': 21 });
   const away = [norm(await page.textContent('#e-tier')), norm(await page.textContent('#s-nudge-title'))];
   check(`${L}: three weeks away is high risk, whatever the averages`, away[0] === 'High risk' && !/Great week/.test(away[1]), away.join(' | '));
   await slide(page, { 'in-idle': 5, 'in-streak': 3 });
@@ -613,12 +648,12 @@ async function nineFixes(page, L) {
   await slide(page, { 'in-idle': 2 });
   const streakAfter = await page.$eval('#in-streak', (e) => +e.value);
   check(`${L}: a current streak and days away cannot both be above zero`, idleAfter === 0 && streakAfter === 0, `idle=${idleAfter} streak=${streakAfter}`);
-  await slide(page, { 'in-lec': 30, 'in-test': 90, 'in-idle': 5, 'in-doubt': 2, 'in-streak': 0 });
+  await slide(page, { 'in-lec': 45, 'in-test': 90, 'in-idle': 0, 'in-doubt': 2, 'in-streak': 0 });
   const fit = norm(await page.textContent('#s-plan'));
   await page.click('#quick button[data-q="backlog"]'); await page.waitForTimeout(400);
   const backlogReply = norm(await page.$$eval('#chat .bubble.ai', (b) => b[b.length - 1].textContent));
   check(`${L}: a 3-session plan holds 3 lectures and moves the rest to next week, and the chat agrees`,
-    /Session 1: 3 backlog lectures \(the other 15 next week\)/.test(fit) && /18 lecture peeche/.test(backlogReply) && /plan mein 3/.test(backlogReply), fit.slice(0, 90) + ' || ' + backlogReply);
+    /Session 1: 3 backlog lectures \(the other 9 next week\)/.test(fit) && /12 lecture peeche/.test(backlogReply) && /plan mein 3/.test(backlogReply), fit.slice(0, 90) + ' || ' + backlogReply);
   const live = norm(await page.textContent('#chat-live'));
   check(`${L}: the screen reader hears the AI's reply, not the learner's own question`, live === backlogReply, live.slice(0, 60));
   await page.click('.persona-row .chip[data-p="1"]');
@@ -634,7 +669,7 @@ async function nineFixes(page, L) {
   check(`${L}: no discount or struck price is shown while an adult is high risk`, !/% OFF/.test(kHigh) && /₹/.test(kHigh) && /Continue/.test(kHigh), kHigh.slice(-140));
   // Plurals, zero states and the Hindi danda in the weekly report.
   await page.click('.persona-row .chip[data-p="2"]');
-  await slide(page, { 'in-lec': 73 });
+  await slide(page, { 'in-lec': 73, 'in-test': 40, 'in-idle': 6 });
   await page.click('#t-parent');
   await page.click('#pp-lang button[data-l="en"]');
   const meenaRep = norm(await page.textContent('#wa-body'));
@@ -680,6 +715,59 @@ async function nineFixes(page, L) {
   await page.fill('#m-u', '4870000');
   check(`${L}: a ₹0 net price and zero users read as what they are`,
     /Net price is ₹0 at these inputs/.test(zeroNet) && !/No next batch/.test(zeroNet) && /₹0\s*Expected extra fees/.test(kpiZero), zeroNet.slice(0, 80) + ' || ' + kpiZero.slice(-40));
+
+  // 11. Third review: the score counts lectures against pace; screens never contradict each other.
+  await page.click('#t-student');
+  await page.click('.persona-row .chip[data-p="0"]');
+  await slide(page, { 'in-lec': 0, 'in-test': 100, 'in-idle': 0, 'in-doubt': 0, 'in-streak': 0 });
+  const zeroLec = norm(await page.textContent('#e-tier'));
+  await page.click('#quick button[data-q="today"]'); await page.waitForTimeout(350);
+  await slide(page, { 'in-lec': 75, 'in-test': 70, 'in-doubt': 1, 'in-streak': 5 });
+  const atPace = await page.$$eval('#e-factors .factor', (fs) => fs.map((f) => f.innerText.replace(/\s+/g, ' ').trim()).find((t) => /short of pace/.test(t)) || '');
+  check(`${L}: no lectures done is high risk; a learner at pace carries no lecture risk`, zeroLec === 'High risk' && /\+0\.0$/.test(atPace), `${zeroLec} | ${atPace}`);
+  await slide(page, { 'in-lec': 100, 'in-test': 100, 'in-doubt': 0, 'in-streak': 0, 'in-idle': 14 });
+  await page.click('#quick button[data-q="today"]'); await page.waitForTimeout(350);
+  const today = norm(await page.$$eval('#chat .bubble.ai', (b) => b[b.length - 1].textContent));
+  const noBack = [norm(await page.textContent('#e-actions')), norm(await page.textContent('#s-plan'))].join(' ');
+  check(`${L}: high risk with no backlog gets practice, not backlog lectures`, !/backlog/i.test(today + noBack) && /still high risk/.test(noBack), today.slice(0, 80));
+  await page.click('.persona-row .chip[data-p="1"]');
+  await slide(page, { 'in-lec': 60, 'in-test': 60, 'in-idle': 2, 'in-doubt': 1, 'in-streak': 0 });
+  const amanLow = norm(await page.textContent('#e-actions'));
+  check(`${L}: a final-year learner never has a next batch queued`, /Results-day help queued/.test(amanLow) && !/next batch shown/.test(amanLow), amanLow.slice(0, 120));
+  await slide(page, { 'in-idle': 21 });
+  await slide(page, { 'in-doubt': 5 });
+  const idleNow = await page.$eval('#in-idle', (e) => +e.value);
+  check(`${L}: asking doubts this week means the learner was active this week`, idleNow <= 6, idleNow);
+  await page.click('.persona-row .chip[data-p="2"]');
+  const meenaPlan = norm(await page.textContent('#s-plan'));
+  const meenaLang = await page.getAttribute('#pp-lang button[data-l="hi"]', 'aria-pressed');
+  check(`${L}: plan grammar reads naturally, and a Hindi-medium report opens in Hindi`, /\(one more next week\)/.test(meenaPlan) && meenaLang === 'true', meenaPlan.slice(0, 80) + ' | hi=' + meenaLang);
+  await page.click('.persona-row .chip[data-p="3"]');
+  const kTag = norm(await page.textContent('#s-next .banner'));
+  await slide(page, { 'in-lec': 10, 'in-test': 15, 'in-idle': 12, 'in-doubt': 0, 'in-streak': 0 });
+  const kBanner = norm(await page.textContent('#s-next .banner'));
+  check(`${L}: no results-day claim for a February start; a held offer stops saying "Recommended"`, /Next-step offer/.test(kTag) && !/Results-day offer/.test(kTag) && /when you are ready/.test(kBanner) && !/Recommended for/.test(kBanner), kTag + ' | ' + kBanner);
+  await page.click('#t-parent');
+  await page.click('#pp-learner button[data-p="1"]');
+  await page.check('#pp-share');
+  const shared = [norm(await page.textContent('#wa-to')), norm(await page.textContent('#wa-body'))];
+  await page.uncheck('#pp-share');
+  check(`${L}: sharing sends the parent a copy; the learner still sees their own report`, shared[0] === 'To Aman, copy to a parent' && /^Hi Aman/.test(shared[1]), shared[0] + ' | ' + shared[1].slice(0, 30));
+  await page.click('#t-console');
+  await page.fill('#m-fx', '');
+  const fxNote = norm(await page.textContent('#m-note'));
+  await page.fill('#m-fx', '95.1');
+  await page.fill('#m-off', '100');
+  const plaus = norm(await page.textContent('#m-total-sub'));
+  await page.fill('#m-off', '1');
+  check(`${L}: one honest message per calculator problem, and a plausibility warning`, !/US\$/.test(fxNote) && /more than a quarter of FY26 revenue/.test(plaus), fxNote + ' | ' + plaus.slice(-70));
+  const a11y3 = await page.evaluate(() => ({
+    skip: !!document.querySelector('a.skip[href="#main"]') && !!document.querySelector('main#main .hero'),
+    names: ['lec', 'test', 'idle', 'doubt', 'streak'].every((k) => document.getElementById('v-' + k).getAttribute('aria-hidden') === 'true'),
+    arrow: [...document.querySelectorAll('#segtbl th button')].every((b) => !/[▼▲]/.test([...b.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join(''))),
+    live: !document.getElementById('seg-detail').hasAttribute('aria-live') && !!document.getElementById('risk-live'),
+  }));
+  check(`${L}: skip link, stable slider names, silent sort arrows, quiet detail panel`, Object.values(a11y3).every(Boolean), JSON.stringify(a11y3));
 
   // 9. The brand schema swatch matches the token the page uses.
   await page.click('#t-brand');
@@ -752,7 +840,7 @@ async function prototype(browser, vp) {
   await page.check('#pp-share');
   const amanAfter = norm(await page.textContent('#wa-to'));
   check(`${L}: weekly report keeps one name, recipient by age and opt-in`,
-    title === 'PW Weekly Progress Report' && kabir === 'To Kabir' && amanBefore === 'To Aman' && amanAfter === "To Aman's parent",
+    title === 'PW Weekly Progress Report' && kabir === 'To Kabir' && amanBefore === 'To Aman' && amanAfter === 'To Aman, copy to a parent',
     `${title}: Kabir=${kabir} Aman=${amanBefore} -> ${amanAfter}`);
 
   // Riya's high-risk report, in both languages, states the escalation and never

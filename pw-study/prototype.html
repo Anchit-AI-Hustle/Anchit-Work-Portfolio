@@ -55,7 +55,7 @@ header.top{background:var(--surface);border-bottom:1px solid var(--border)}
 .eyebrow{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--primary)}
 .hero p.lede{max-width:780px;color:var(--body)}
 .hero .accent{color:var(--primary)}
-main .wrap{padding-top:24px;padding-bottom:48px}
+main>.wrap{padding-top:24px;padding-bottom:48px}
 .panel{display:none}.panel.on{display:block}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);padding:20px}
 .card.soft{background:var(--primary-50);border-color:transparent}
@@ -79,6 +79,8 @@ main .wrap{padding-top:24px;padding-bottom:48px}
 @media (max-width:759px){#p-parent>.grid.two>.grid:first-child{display:contents}#p-parent>.grid.two>.grid:first-child>.card:first-child{order:1}#p-parent>.grid.two>.grid:last-child{order:2}#p-parent .guard{order:3}}
 .swipe{display:none;font-size:13px;color:var(--muted);margin-top:8px}
 @media (max-width:759px){.swipe{display:block}}
+.skip{position:absolute;left:-9999px;top:8px;z-index:50;background:var(--ink);color:#fff;padding:8px 12px;border-radius:8px}.skip:focus{left:8px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .rowpick{all:unset;cursor:pointer;display:block;text-align:left;border-radius:6px}
 .rowpick:focus-visible{outline:2px solid var(--primary);outline-offset:3px}
 @media (max-width:600px){.hero p.small.muted{display:none}.hero .feats{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.hero .feats .label{display:none}.hero .feats a{flex:none}.tabs{-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}.tabs.at-end{-webkit-mask-image:none;mask-image:none}}
@@ -239,6 +241,8 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
     </nav>
   </div>
 </header>
+<a class="skip" href="#main">Skip to the prototype</a>
+<main id="main">
 <section class="hero">
   <div class="wrap">
     <span class="eyebrow">Working prototype · Anchit Tandon's application to PW</span>
@@ -250,7 +254,6 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
   </div>
 </section>
 
-<main>
 <div class="wrap">
 <div class="dl-bar" id="dl-bar"><span>Concept prototype by Anchit Tandon · synthetic data · not affiliated with PhysicsWallah</span></div>
 
@@ -299,15 +302,15 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
 
     <div class="grid" style="align-content:start">
       <div class="card sim">
-        <div class="mini" id="mini" aria-hidden="true"></div>
+        <div class="mini" id="mini" aria-hidden="true"></div><div class="sr" id="risk-live" aria-live="polite"></div>
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px">
           <h3>2 · Drag the signals</h3><span class="tag pri">The phone and the score react</span>
         </div>
-        <div class="field"><label for="in-lec">Lectures done (batch pace today: 75% of 40) <span id="v-lec"></span></label><input type="range" id="in-lec" min="0" max="100"></div>
-        <div class="field"><label for="in-test">Test average <span id="v-test"></span></label><input type="range" id="in-test" min="0" max="100"></div>
-        <div class="field"><label for="in-idle">Days since last study session <span id="v-idle"></span></label><input type="range" id="in-idle" min="0" max="21"></div>
-        <div class="field"><label for="in-doubt">Doubts asked this week <span id="v-doubt"></span></label><input type="range" id="in-doubt" min="0" max="15"></div>
-        <div class="field"><label for="in-streak">Study streak (days) <span id="v-streak"></span></label><input type="range" id="in-streak" min="0" max="30"></div>
+        <div class="field"><label for="in-lec">Lectures done (batch pace today: 75% of 40) <span id="v-lec" aria-hidden="true"></span></label><input type="range" id="in-lec" min="0" max="100"></div>
+        <div class="field"><label for="in-test">Test average <span id="v-test" aria-hidden="true"></span></label><input type="range" id="in-test" min="0" max="100"></div>
+        <div class="field"><label for="in-idle">Days since last study session <span id="v-idle" aria-hidden="true"></span></label><input type="range" id="in-idle" min="0" max="21"></div>
+        <div class="field"><label for="in-doubt">Doubts asked this week <span id="v-doubt" aria-hidden="true"></span></label><input type="range" id="in-doubt" min="0" max="15"></div>
+        <div class="field"><label for="in-streak">Study streak (days) <span id="v-streak" aria-hidden="true"></span></label><input type="range" id="in-streak" min="0" max="30"></div>
       </div>
       <div class="card" id="risk">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
@@ -393,7 +396,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
       </div>
       <div class="card">
         <h3>2 · What we do about it</h3>
-        <p class="small muted" style="margin-top:4px">Sorted by expected extra fees, highest first. Click a column header to re-sort, or a row for detail.</p>
+        <p class="small muted" style="margin-top:4px">The calculator's total, allocated to groups by each lever's rule; sorted by expected extra fees. Click a column header to re-sort, or a row for detail.</p>
         <p class="swipe" aria-hidden="true">Swipe sideways for every column →</p>
         <div class="tbl-wrap" style="margin-top:10px"><table id="segtbl"><thead><tr>
           <th><button data-k="seg">Group</button></th>
@@ -402,7 +405,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
           <th class="num"><button data-k="avgRisk">Avg risk</button></th>
           <th class="num"><button data-k="value">Extra fees (₹)</button></th>
         </tr></thead><tbody></tbody></table></div>
-        <div class="detail" id="seg-detail" aria-live="polite"></div>
+        <div class="detail" id="seg-detail"></div>
         <div class="formula" id="seg-scale" style="margin-top:10px"></div>
       </div>
       <div class="card">
@@ -518,7 +521,7 @@ var clamp = function(v,a,b){return Math.max(a,Math.min(b,v));};
 /* ---------- Engine: transparent rules (illustrative weights) ---------- */
 function score(s){
   var f = [
-    {k:'Lectures not done', v:(100-s.lec)*0.40, max:40},
+    {k:'Lectures short of pace', v:Math.min(Math.max(0,75-s.lec)*1.3,60), max:60},
     {k:'Low test scores',   v:(100-s.test)*0.25, max:25},
     // Watching without learning is drift too: a test average under 40% adds up to 40 points.
     {k:'Learning gap', v:s.test<40?Math.min((40-s.test)*2.5,40):0, max:40},
@@ -537,7 +540,7 @@ function aud(p){ return p.age<18?'minor':(p.age<=21?'young':'adult'); }
 // Batch pace: 75% of the 40 lectures released so far. Any shortfall is at least one lecture.
 var LECTURES_SO_FAR = 40;
 // A week's plan holds what fits in it: 6 lectures at high risk, 3 at medium. The rest roll into next week.
-function weekLectures(tier, behind){ return Math.min(behind, tier==='High'?6:tier==='Medium'?3:0); }
+function weekLectures(tier, behind){ return Math.min(behind, tier==='High'?6:3); }
 function lecturesBehind(lec){ return lec>=75 ? 0 : Math.max(1, Math.ceil((75-lec)/100*LECTURES_SO_FAR)); }
 function actions(s,res,p){
   var a=[], g=aud(p), minor=g==='minor';
@@ -545,7 +548,7 @@ function actions(s,res,p){
             : g==='young' ? {t:'Weekly Progress Report alert, to the learner',d:'Sent to '+p.name+'. Parent gets a copy only if '+p.name+' opted in.'}
             : {t:'Weekly Progress Report + study-circle check-in',d:'Adult learner: no parent channel. Peers keep the streak going; a mentor steps in only at high risk.'};
   if(res.tier==='High'){
-    a.push({t:'7-day AI catch-up plan',d:'Backlog cut to the highest-weight chapters, scheduled by the AI Mentor, with guided practice and AI Guru for doubts.'});
+    a.push({t:'7-day AI catch-up plan',d:(lecturesBehind(s.lec)>0?'Backlog cut to the highest-weight chapters, s':'Weakest chapters first, s')+'cheduled by the AI Mentor, with guided practice and AI Guru for doubts.'});
     a.push({t:'Mentor call on day 8 if still high risk',d:'If the plan has not worked in a week, a real mentor rebuilds it with the learner. Calls are capped to what PW\'s mentors can take.'});
     a.push(pulse);
   } else if(res.tier==='Medium'){
@@ -557,6 +560,7 @@ function actions(s,res,p){
       if(p.offline && p.vp && !p.final) a.push({t:minor?'Suggest a free Vidyapeeth trial class to the parent':'Offer a free Vidyapeeth trial class',d:'Strong, engaged learner in '+p.city+', a centre city.'+(minor?' Under 18, so the offer goes to the parent, never the child.':'')});
       else a.push({t:(minor?'Suggest to the parent: ':'Offer: ')+p.next.title,d:p.final?'Final year: an in-year upgrade only, no next-batch offer.':'High engagement and scores: ready for the next step on results day.'});
     }
+    else if(p.final) a.push({t:'Results-day help queued',d:'Final year: a year report and counselling after the exam; no next-batch offer.'});
     else a.push({t:'Next-step recommendation queued for results day',d:minor?'Shown to '+p.name+' as an academic next step; the parent gets the fees and offer.':'Personalised next batch shown on results day.'});
   }
   return a;
@@ -575,7 +579,7 @@ var P = [
    next:{cat:'Class 11',title:'Arjuna NEET 2029 (Hindi medium)',aud:'For NEET Aspirants',date:'Starts on 10 Apr, 2027',price:3499,mrp:7000,plan:'Infinity, Pro',why:'Your Science scores are your strongest. Early Class 11 start keeps your board-to-NEET momentum.'}},
   {name:'Kabir',full:'Kabir Singh',age:24,batch:'UPSC Prelims + Mains 2027',city:'Delhi',offline:true,vp:false,lang:'HINGLISH',
    s:{lec:55,test:60,idle:5,doubt:1,streak:0},
-   next:{cat:'UPSC',title:'Prelims Test Series 2027 + Mains Answer Writing',aud:'For UPSC Aspirants',date:'Starts on 1 Feb, 2027',price:2999,mrp:6000,plan:'Infinity',why:'Polity is your strongest area; the series targets Economy and Environment, your weakest. Mains answers graded by AI Grader.'}}
+   next:{cat:'UPSC',title:'Prelims Test Series 2027 + Mains Answer Writing',aud:'For UPSC Aspirants',date:'Starts on 1 Feb, 2027',price:2999,mrp:6000,plan:'Infinity',why:'Polity is your strongest area; the series targets Economy and Environment, your weakest. Includes weekly Mains answer-writing practice.'}}
 ];
 var cur = 0, simState = JSON.parse(JSON.stringify(P[0].s));
 
@@ -597,6 +601,8 @@ function selectTab(t, write){
 }
 // A whole-tab link lands on the bar above the panels, so the visitor still
 // sees the concept notice and the other tabs; a feature link lands on it.
+// Embedded in the case study, the frame has no scroll of its own: ask the page to bring the element into view.
+function embedScroll(node){ try { window.parent.postMessage({type:'pw-scroll', y: Math.max(0, node.getBoundingClientRect().top + window.pageYOffset - 12)}, location.origin); } catch(e){} }
 function fromHash(scroll, focus){
   var h = location.hash.slice(1).toLowerCase(); h = ALIAS[h] || h; var id = HASH[h];
   if(!id) return;
@@ -604,12 +610,14 @@ function fromHash(scroll, focus){
   var target = document.getElementById(h);
   if(scroll){
     var at = NAME[id]===h ? document.getElementById('dl-bar') : target;
-    window.scrollTo(0, Math.max(0, at.getBoundingClientRect().top + window.pageYOffset - 12));
+    if(EMBED && window.parent!==window && at.getClientRects().length===0) at = target;
+    if(EMBED && window.parent!==window) embedScroll(at);
+    else window.scrollTo(0, Math.max(0, at.getBoundingClientRect().top + window.pageYOffset - 12));
   }
   if(focus){ if(!target.hasAttribute('tabindex')) target.setAttribute('tabindex','-1'); target.focus({preventScroll:true}); }
 }
 tabs.forEach(function(t,i){
-  t.addEventListener('click',function(){selectTab(t,true);});
+  t.addEventListener('click',function(){selectTab(t,true); if(EMBED && window.parent!==window) embedScroll(document.querySelector('.tabs'));});
   t.addEventListener('keydown',function(e){
     var n=null;
     if(e.key==='ArrowRight'||e.key==='ArrowLeft') n=tabs[(i+(e.key==='ArrowRight'?1:tabs.length-1))%tabs.length];
@@ -641,15 +649,15 @@ function renderStudent(){
   var plan;
   var wk = weekLectures(res.tier, behind), later = behind - wk;
   if(res.tier==='High'){ var d1=Math.ceil(wk/2), d2=wk-d1; el('s-nudge-title').textContent='Your 7-day catch-up plan';
-    plan=[wk>0?'Day 1-2: '+pl(d1,'backlog lecture')+' (highest weightage first)':'Day 1-2: one short session a day on your weakest chapter','Day 3: 20-min guided practice, one step at a time',(d2>0?'Day 4-6: '+pl(d2,'more lecture'):'Day 4-6: weakest-chapter practice')+' + doubts cleared with AI Guru','Day 7: mini-test to reset your score','Day 8: a mentor calls if you are still behind'];
+    plan=[wk>0?'Day 1-2: '+pl(d1,'backlog lecture')+' (highest weightage first)':'Day 1-2: one short session a day on your weakest chapter','Day 3: 20-min guided practice, one step at a time',(d2>0?'Day 4-6: '+pl(d2,'more lecture'):'Day 4-6: weakest-chapter practice')+' + doubts cleared with AI Guru','Day 7: mini-test to reset your score','Day 8: a mentor calls if you are still high risk'];
     if(later>0) plan.push('The other '+pl(later,'lecture')+' move into next week\'s plan'); }
   else if(res.tier==='Medium'){ el('s-nudge-title').textContent='Catch up in 3 sessions';
-    plan=[wk>0?'Session 1: '+pl(wk,'backlog lecture')+(later>0?' (the other '+later+' next week)':''):'Session 1: re-watch your weakest chapter, then its DPP','Session 2: today\'s Daily Challenge, then a 15-question DPP on your weakest chapter','Session 3: ask at least 2 doubts on AI Guru']; }
-  else { el('s-nudge-title').textContent = s.streak>0 ? 'Great week. Keep the streak alive' : 'Good week. Start a streak today'; plan=['Next: Sunday full-length test','Bonus: 1 advanced problem set unlocked']; }
+    plan=[wk>0?'Session 1: '+pl(wk,'backlog lecture')+(later>0?(later===1?' (one more next week)':' (the other '+later+' next week)'):''):'Session 1: re-watch your weakest chapter, then its DPP','Session 2: today\'s Daily Challenge, then a 15-question DPP on your weakest chapter','Session 3: ask at least 2 doubts on AI Guru']; }
+  else { el('s-nudge-title').textContent = s.streak>0 ? 'Great week. Keep the streak alive' : 'Good week. Start a streak today'; plan=(wk>0?['This week: catch up '+pl(wk,'lecture')]:[]).concat(['Next: Sunday full-length test','Bonus: 1 advanced problem set unlocked']); }
   el('s-plan').innerHTML = plan.map(function(x){return '<li>'+x+'</li>';}).join('');
   var nx = p.next, off = Math.round((1-nx.price/nx.mrp)*100);
   var trialOk = !p.final && p.offline && p.vp && res.tier==='Low' && s.test>=70 && s.lec>=75;
-  var tag = high ? 'Not promoted while you catch up' : (minor ? 'Next-step recommendation' : (p.final ? 'In-year upgrade' : 'Results-day offer'));
+  var tag = high ? 'Not promoted while you catch up' : (minor ? 'Next-step recommendation' : (p.final ? 'In-year upgrade' : 'Next-step offer'));
   var foot;
   if(minor){
     // DPDP Act 2023 s.9(3): no advertising targeted at children. The child sees the academic step; the parent gets fees and offers.
@@ -664,7 +672,7 @@ function renderStudent(){
       '<p class="small muted">Illustrative price, not a PW quote.</p>';
   }
   el('s-next').innerHTML =
-    '<div class="banner"><div><small>Multiple plans inside: <b>'+nx.plan+'</b></small><div style="font-weight:700;font-size:16px;margin-top:2px">Recommended for '+p.name+'</div></div><span class="tag" style="background:#1B2124;color:#fff">'+tag+'</span></div>'+
+    '<div class="banner"><div><small>Multiple plans inside: <b>'+nx.plan+'</b></small><div style="font-weight:700;font-size:16px;margin-top:2px">'+(high?'Your next step, when you are ready':'Recommended for '+p.name)+'</div></div><span class="tag" style="background:#1B2124;color:#fff">'+tag+'</span></div>'+
     '<div class="inner"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="cat">'+nx.cat+'</span><span class="tag lang">'+p.lang+'</span></div>'+
     '<h3 style="font-size:20px;line-height:26px">'+nx.title+'</h3>'+
     '<p class="small">'+nx.aud+' · '+nx.date+'</p>'+
@@ -672,18 +680,19 @@ function renderStudent(){
     foot + '<p class="small next-msg" id="s-next-msg" role="status" aria-live="polite"></p></div>';
   // engine card
   el('e-risk').textContent = res.risk;
+  clearTimeout(window.__rl); window.__rl = setTimeout(function(){ el('risk-live').textContent = 'Risk '+res.risk+', '+res.tier.toLowerCase()+' risk.'; }, 700);
   var mini = el('mini'), dot = document.createElement('span');
   dot.className = 'dot ' + (res.tier==='High'?'h':res.tier==='Medium'?'m':'l');
   mini.textContent = '';
   mini.appendChild(dot);
-  mini.appendChild(document.createTextNode('Risk '+res.risk+' · '+res.tier+' · '+el('s-status').textContent));
+  mini.appendChild(document.createTextNode('Risk '+res.risk+' · '+res.tier+' · '+el('s-status').textContent+(plan.length?' · '+plan[0]:'')));
   var tg = el('e-tier'); tg.textContent = res.tier+' risk'; tg.className='tag '+(res.tier==='High'?'bad':res.tier==='Medium'?'warn':'ok');
   el('e-factors').innerHTML = res.factors.map(function(f){
     var w = Math.round(Math.abs(f.v)/f.max*100);
     return '<div class="factor"><span>'+f.k+'</span><span class="bar" aria-hidden="true"><i style="width:'+w+'%;background:'+(f.v<0?'#1B7938':'#5A4BDA')+'"></i></span><span style="text-align:right;font-variant-numeric:tabular-nums">'+(f.v<0?'':'+')+f.v.toFixed(1)+'</span></div>';
   }).join('');
   var top = res.factors.slice().sort(function(a,b){return b.v-a.v;})[0];
-  el('e-why').innerHTML = '<b>Why:</b> '+(top.v>0 ? 'biggest driver is "'+top.k.toLowerCase()+'" (+'+top.v.toFixed(1)+' pts).' : 'nothing is pulling the risk up this week.')+' Risk = sum of factors, capped 0-100; a test average under 40% adds a learning gap of up to 40 points, and 7+ days away is at least Medium, 14+ High. Tiers: High 60+, Medium 35-59, Low under 35.';
+  el('e-why').innerHTML = '<b>Why:</b> '+(top.v>0 ? 'biggest driver is "'+top.k.toLowerCase()+'" (+'+top.v.toFixed(1)+' pts).' : 'nothing is pulling the risk up this week.')+' Risk = sum of factors, capped 0-100; lectures count only below the 75% batch pace; a test average under 40% adds a learning gap of up to 40 points, and 7+ days away is at least Medium, 14+ High. Tiers: High 60+, Medium 35-59, Low under 35.';
   el('e-actions').innerHTML = actions(s,res,p).map(function(a,i){return '<div class="step"><span class="n">'+(i+1)+'</span><div><b>'+a.t+'</b><p class="small">'+a.d+'</p></div></div>';}).join('');
   renderChatChips();
 }
@@ -698,12 +707,17 @@ ids.forEach(function(k){ el('in-'+k).addEventListener('input',function(e){
   // A current streak means the learner studied today, so it and "days since last session" cannot both be above 0.
   if(k==='streak' && simState.streak>0 && simState.idle>0){ simState.idle=0; el('in-idle').value=0; }
   if(k==='idle' && simState.idle>0 && simState.streak>0){ simState.streak=0; el('in-streak').value=0; }
+  // Doubts asked this week mean the learner studied this week.
+  if(k==='idle' && simState.idle>=7 && simState.doubt>0){ simState.doubt=0; el('in-doubt').value=0; }
+  if(k==='doubt' && simState.doubt>0 && simState.idle>=7){ simState.idle=6; el('in-idle').value=6; }
   renderStudent(); renderParent(); }); });
 // One learner for the whole prototype: the Student app chips and the Weekly Progress Report learner buttons both choose it.
 function selectPersona(i){
   cur=i; simState=JSON.parse(JSON.stringify(P[cur].s)); ppShare=false;
   Array.prototype.forEach.call(document.querySelectorAll('.persona-row .chip'),function(x){x.setAttribute('aria-pressed',String(+x.dataset.p===cur));});
   Array.prototype.forEach.call(document.querySelectorAll('#pp-learner button'),function(x){x.setAttribute('aria-pressed',String(+x.dataset.p===cur));});
+  ppL = P[cur].lang==='HINDI' ? 'hi' : 'en';
+  Array.prototype.forEach.call(document.querySelectorAll('#pp-lang button'),function(x){x.setAttribute('aria-pressed',String(x.dataset.l===ppL));});
   setSliders(); el('chat').innerHTML=''; greet(); renderStudent(); renderParent();
 }
 Array.prototype.forEach.call(document.querySelectorAll('.persona-row .chip'),function(b){
@@ -723,7 +737,7 @@ function answer(k,label){
   addMsg('me',label);
   var wk=weekLectures(res.tier,behind);
   if(k==='backlog') txt = behind>0 ? 'Tum batch se '+behind+' lecture peeche ho. Tension mat lo: high-weightage wale pehle. '+(wk>0?'Is hafte ke plan mein '+wk+', '+(behind>wk?'baaki agle hafte.':'aur backlog khatam.'):'Is hafte practice pe focus, lectures agle hafte.') : 'Koi backlog nahi! Tum batch pace pe ho. Ab practice pe focus karte hain.';
-  else if(k==='today') txt = res.tier==='High' ? 'Aaj sirf 2 cheezein: 1 backlog lecture (45 min) aur 10-question DPP. Chhota target, pakka result.' : res.tier==='Medium' ? 'Aaj 1 lecture + apne weakest chapter ka DPP. Doubts ho to Ask AI pe daal do.' : 'Aaj ka lecture + Sunday test ki prep. '+(s.streak>0?'Streak '+s.streak+' din ka hai, todna mat!':'Aaj se nayi streak shuru karo!');
+  else if(k==='today') txt = res.tier==='High' ? (behind>0?'Aaj sirf 2 cheezein: 1 backlog lecture (45 min) aur 10-question DPP. Chhota target, pakka result.':'Aaj sirf 2 cheezein: apne weakest chapter ka 20-min guided practice aur 10-question DPP.') : res.tier==='Medium' ? 'Aaj 1 lecture + apne weakest chapter ka DPP. Doubts ho to Ask AI pe daal do.' : 'Aaj ka lecture + Sunday test ki prep. '+(s.streak>0?'Streak '+s.streak+' din ka hai, todna mat!':'Aaj se nayi streak shuru karo!');
   else if(p.final) txt = 'Tumhara batch exam ke saath khatam hota hai, isliye koi next batch nahi. Results ke baad counselling aur aage ka plan bataunga. Abhi poora focus exam pe.';
   else txt = 'Results ke din main tumhara personal report banaunga. Abhi ke data se best next step: '+p.next.title+(res.tier==='High'?', catch-up plan ke baad':'')+'.'+(aud(p)==='minor'?' Fees aur offers sirf tumhare parent ko jayenge.':'')+' Pehle is saal ka plan strong karte hain.';
   setTimeout(function(){ if(P[cur]===p) addMsg('ai',txt); },250);
@@ -733,7 +747,7 @@ function answer(k,label){
 var ppL='en', ppShare=false;
 function renderParent(){
   var p=P[cur], s=simState, res=score(s), behind=lecturesBehind(s.lec), g=aud(p);
-  var toParent = g==='minor' || (g==='young' && ppShare);
+  var toParent = g==='minor';
   Array.prototype.forEach.call(document.querySelectorAll('#aud-tbl tbody tr'),function(tr){tr.classList.toggle('on',tr.dataset.a===g);});
   var ch=el('pp-channel');
   ch.className='channel '+(toParent?'parent':'self');
@@ -742,17 +756,17 @@ function renderParent(){
     '<label class="toggle"><input type="checkbox" id="pp-share"'+(ppShare?' checked':'')+'> '+p.name+' chose to share with a parent</label>';
   else ch.innerHTML='<b>To the learner.</b> '+p.name+' is '+p.age+' and preparing for an adult exam, so there is no parent channel. The report goes to '+p.name+', with a study-circle check-in.';
   var sh=el('pp-share'); if(sh) sh.addEventListener('change',function(){ppShare=sh.checked;renderParent();var n=el('pp-share');if(n)n.focus();});
-  el('wa-to').textContent = toParent ? 'To '+p.name+'\'s parent' : 'To '+p.name;
+  el('wa-to').textContent = toParent ? 'To '+p.name+'\'s parent' : 'To '+p.name+(g==='young' && ppShare ? ', copy to a parent' : '');
   var hiMode = ppL==='hi', en, hi, mentor=toParent?(hiMode?'PW Parent App में देखें':'Open in PW Parent App'):(hiMode?'AI मेंटर से बात करें':'Talk to the AI Mentor');
   if(toParent){
     if(res.tier==='High'){
-      en = 'Namaste! Weekly update for '+p.full+' ('+p.batch+')\n\nThis week: '+s.lec+'% of lectures done vs batch pace, test average '+s.test+'%.'+(s.idle>0?' '+p.name+' has not studied on the app for '+pl(s.idle,'day')+'.':'')+'\n\nWhat we are doing: a 7-day catch-up plan is ready in the app. If '+p.name+' is still behind after a week, a PW mentor will call.\n\nOne thing you can do: ask '+p.name+' to show you the plan tonight. 10 minutes of your interest helps more than any reminder.';
+      en = 'Namaste! Weekly update for '+p.full+', '+p.batch+'\n\nThis week: '+s.lec+'% of lectures done vs batch pace, test average '+s.test+'%.'+(s.idle>0?' '+p.name+' has not studied on the app for '+pl(s.idle,'day')+'.':'')+'\n\nWhat we are doing: a 7-day catch-up plan is ready in the app. If '+p.name+' is still behind after a week, a PW mentor will call.\n\nOne thing you can do: ask '+p.name+' to show you the plan tonight. 10 minutes of your interest helps more than any reminder.';
       hi = 'नमस्ते! '+p.full+' की साप्ताहिक रिपोर्ट\n\nइस हफ्ते: बैच की गति के मुकाबले '+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%.'+(s.idle>0?' '+p.name+' ने '+s.idle+' दिन से ऐप पर पढ़ाई नहीं की है.':'')+'\n\nहम क्या कर रहे हैं: ऐप में 7 दिन का कैच-अप प्लान तैयार है. अगर एक हफ्ते बाद भी '+p.name+' पीछे रहे, तो PW मेंटर कॉल करेंगे.\n\nआप क्या कर सकते हैं: आज रात '+p.name+' से प्लान दिखाने को कहें. आपकी 10 मिनट की रुचि किसी भी रिमाइंडर से ज़्यादा असर करती है.';
     } else if(res.tier==='Medium'){
-      en = 'Namaste! Weekly update for '+p.full+' ('+p.batch+')\n\nThis week: '+s.lec+'% of lectures done, test average '+s.test+'%'+(s.streak>0?', '+s.streak+'-day study streak':'')+'. '+(behind>0?p.name+' is '+pl(behind,'lecture')+' behind pace.':'')+'\n\nPlan: 3 short catch-up sessions are scheduled this week by the AI Mentor.\n\nOne thing you can do: ask '+p.name+' which session comes first tonight.\n\nYou will get the next update on Sunday.';
+      en = 'Namaste! Weekly update for '+p.full+', '+p.batch+'\n\nThis week: '+s.lec+'% of lectures done, test average '+s.test+'%'+(s.streak>0?', '+s.streak+'-day study streak':'')+'. '+(behind>0?p.name+' is '+pl(behind,'lecture')+' behind pace.':'')+'\n\nPlan: 3 short catch-up sessions are scheduled this week by the AI Mentor.\n\nOne thing you can do: ask '+p.name+' which session comes first tonight.\n\nYou will get the next update on Sunday.';
       hi = 'नमस्ते! '+p.full+' की साप्ताहिक रिपोर्ट\n\nइस हफ्ते: '+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%'+(s.streak>0?', लगातार '+s.streak+' दिन पढ़ाई':'')+'. '+(behind>0?p.name+' बैच से '+behind+' लेक्चर पीछे है.':'')+'\n\nप्लान: AI मेंटर ने इस हफ्ते 3 छोटे कैच-अप सेशन तय किए हैं.\n\nआप क्या कर सकते हैं: '+p.name+' से पूछें कि आज रात कौन-सा सेशन पहले होगा.\n\nअगली रिपोर्ट रविवार को आएगी.';
     } else {
-      en = 'Namaste! Weekly update for '+p.full+' ('+p.batch+')\n\nGreat week: '+s.lec+'% of lectures done, test average '+s.test+'%'+(s.streak>0?', '+s.streak+'-day study streak':'')+'.\n\nOne thing you can do: tell '+p.name+' you noticed the '+(s.streak>0?'streak':'steady work')+'; praise for effort keeps it going.\n\nNext: Sunday full-length test. We will share the result with you.';
+      en = 'Namaste! Weekly update for '+p.full+', '+p.batch+'\n\nGreat week: '+s.lec+'% of lectures done, test average '+s.test+'%'+(s.streak>0?', '+s.streak+'-day study streak':'')+'.\n\nOne thing you can do: tell '+p.name+' you noticed the '+(s.streak>0?'streak':'steady work')+'; praise for effort keeps it going.\n\nNext: Sunday full-length test. We will share the result with you.';
       hi = 'नमस्ते! '+p.full+' की साप्ताहिक रिपोर्ट\n\nशानदार हफ्ता: '+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%'+(s.streak>0?', लगातार '+s.streak+' दिन पढ़ाई':'')+'.\n\nआप क्या कर सकते हैं: '+p.name+' को बताइए कि आपने '+(s.streak>0?'यह लगातार पढ़ाई':'यह मेहनत')+' देखी है; मेहनत की तारीफ़ से यह जारी रहती है.\n\nआगे: रविवार को फुल-लेंथ टेस्ट. नतीजा हम आपको भेजेंगे.';
     }
   } else {
@@ -774,9 +788,9 @@ function renderParent(){
   var resultsHi = p.final ? 'रिज़ल्ट के दिन का मैसेज (परीक्षा के बाद)\n\n'+whoHi+' पूरे साल का रिपोर्ट कार्ड तैयार है, सबसे ज़्यादा सुधरे चैप्टर के साथ. कोई अगला बैच नहीं सुझाया गया: यह बैच परीक्षा के साथ खत्म होता है. रिज़ल्ट के बाद क्या करना है, काउंसलिंग समेत, हम बताएंगे.' : 'रिज़ल्ट के दिन का मैसेज (बैच खत्म होने पर)\n\n'+whoHi+' पूरे साल का रिपोर्ट कार्ड तैयार है: '+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%. सबसे कठिन और सबसे मज़बूत चैप्टर के आधार पर अगला सुझाया गया कदम: '+p.next.title+(held?', कैच-अप प्लान पूरा होने के बाद':'')+'.'+(strong?' '+p.city+' के PW विद्यापीठ सेंटर में फ्री ट्रायल क्लास भी उपलब्ध है.':'');
   el('pp-status').textContent = 'Showing '+p.name+'\'s '+(toParent?'Weekly Progress Report to the parent':'Weekly Progress Report to the learner')+' in '+(hiMode?'Hindi':'English')+', from this week\'s signals ('+res.tier.toLowerCase()+' risk).';
   el('wa-body').innerHTML =
-    '<div class="wa-msg" lang="'+(hiMode?'hi':'en')+'">'+esc(hiMode?deva(hi):en)+'<span class="wa-time">Sun 7:00 pm</span></div>'+
+    '<div class="wa-msg" lang="'+(hiMode?'hi':'en')+'">'+esc(hiMode?deva(hi):en)+'<span class="wa-time">'+(hiMode?'रवि, शाम 7:00':'Sun 7:00 pm')+'</span></div>'+
     '<div class="wa-btns"><span>'+(hiMode?'प्लान देखें':'See the plan')+'</span><span>'+mentor+'</span></div>'+
-    '<div class="wa-msg" style="border:1px dashed #9AA0A6" lang="'+(hiMode?'hi':'en')+'">'+esc(hiMode?deva(resultsHi):resultsEn)+'<span class="wa-time">Results day</span></div>';
+    '<div class="wa-msg" style="border:1px dashed #9AA0A6" lang="'+(hiMode?'hi':'en')+'">'+esc(hiMode?deva(resultsHi):resultsEn)+'<span class="wa-time">'+(hiMode?'रिज़ल्ट का दिन':'Results day')+'</span></div>';
 }
 // Hindi sentences end with a danda, not a full stop.
 function deva(t){ return t.replace(/\.(?=\s|$)/g,'।'); }
@@ -830,7 +844,7 @@ function renderConsole(){
     mk('On track, top scorer, no centre','Infinity Pro upgrade on results day (to the parent if under 18)',g.topN,upShare('topN'),v.delta,'Strong learners far from a centre: offer the premium plan instead.','Rate: the calculator\'s +'+v.upg+'pp upgrade uplift on learners not yet on premium, shared between this group and final-year top scorers by size.',P_UP),
     mk('On track, others','Next batch card on results day (to the parent if under 18)',g.oth,W.oth*sre*g.oth.length,A,'Doing fine. Just make the next batch easy to choose when results land.',reWhy,P_ON),
     mk('Final year, top scorer','In-year Infinity Pro upgrade; no next-batch offer (to the parent if under 18)',g.finT,upShare('finT'),v.delta,'Strong final-year learners: the upgrade helps before the exam. Nothing is offered after it.','Rate: the same +'+v.upg+'pp upgrade uplift, shared with the no-centre top scorers by size.',P_UP),
-    mk('Final year, others','Help with results; no next-batch offer',g.fin,0,0,'No next batch to sell. Rescue still runs, because results drive word of mouth.','')
+    mk('Final year, others','Rescue if at risk, help with results; no next-batch offer',g.fin,0,0,'No next batch to sell. Rescue still runs, because results drive word of mouth.','')
   ];
   var stake=rows.reduce(function(t,r){return t+r.value;},0);
   el('kpis').innerHTML=[
@@ -856,7 +870,7 @@ function renderTable(){
     tr.addEventListener('click',go);
     tr.querySelector('.rowpick').addEventListener('click',function(e){e.stopPropagation();go();var n=el('segtbl').querySelector('tr.sel .rowpick');if(n)n.focus();});
   });
-  Array.prototype.forEach.call(document.querySelectorAll('#segtbl th'),function(th){var b=th.querySelector('button');var on=b.dataset.k===sortKey;th.setAttribute('aria-sort',on?(sortDir<0?'descending':'ascending'):'none');b.textContent=b.textContent.replace(/ [▼▲]$/,'')+(on?(sortDir<0?' ▼':' ▲'):'');});
+  Array.prototype.forEach.call(document.querySelectorAll('#segtbl th'),function(th){var b=th.querySelector('button');var on=b.dataset.k===sortKey;th.setAttribute('aria-sort',on?(sortDir<0?'descending':'ascending'):'none');if(!b.dataset.label) b.dataset.label=b.textContent.replace(/ [▼▲]$/,''); b.textContent=b.dataset.label; if(on){ var ar=document.createElement('span'); ar.setAttribute('aria-hidden','true'); ar.textContent=sortDir<0?' ▼':' ▲'; b.appendChild(ar); }});
   renderDetail();
 }
 function renderDetail(){
@@ -864,7 +878,7 @@ function renderDetail(){
   var sample=x.list.slice().sort(function(a,b){return b.risk-a.risk;}).slice(0,5);
   var rate=x.n?x.won/x.n*100:0;
   var finalRow = x.seg.indexOf('Final year, others')===0;
-  var calc = x.price>0 ? x.n.toLocaleString('en-IN')+' learners × '+rate.toFixed(1)+'% we expect the action to bring in × '+INR(x.price)+' each = <b>'+INR(x.value)+'</b>' : finalRow ? 'No next batch, so nothing to sell: ₹0. The action protects results and reputation.' : 'Net price is ₹0 at these inputs: the offline fee does not exceed the online fee already paid, so this group adds nothing. Check the ACPU and offline ARPU in the calculator.';
+  var calc = !(model().u>0) ? 'No online paying users in the calculator, so nothing to scale: ₹0.' : x.price>0 ? x.n.toLocaleString('en-IN')+' learners × '+rate.toFixed(1)+'% we expect the action to bring in × '+INR(x.price)+' each = <b>'+INR(x.value)+'</b>' : finalRow ? 'No next batch, so nothing to sell: ₹0. The action protects results and reputation.' : 'Net price is ₹0 at these inputs: the offline fee does not exceed the online fee already paid, so this group adds nothing. Check the ACPU and offline ARPU in the calculator.';
   var priceNote = x.pnote;
   el('seg-detail').innerHTML='<div class="card soft" style="padding:14px"><p class="label">Selected group</p><h3 style="margin-top:2px">'+x.seg+'</h3><p class="small" style="margin-top:4px">'+x.why+'</p>'+
     '<div class="formula" style="margin-top:8px">'+calc+'</div><p class="small muted" style="margin-top:6px">'+priceNote+(x.basis?' '+x.basis+' To be measured against a holdout.':'')+(rate>100?' <b>This assumption expects more learners than the group holds; lower it in the calculator.</b>':'')+'</p>'+
@@ -884,7 +898,7 @@ function model(){
   mids.forEach(function(k){
     var inp=el('m-'+k), raw=String(inp.value).trim(), x=parseFloat(raw), ok=raw!==''&&isFinite(x)&&x>=0;
     inp.setAttribute('aria-invalid', ok?'false':'true');
-    if(!ok){ (raw!==''&&isFinite(x)&&x<0?neg:empty).push(inp.labels&&inp.labels[0]?inp.labels[0].firstChild.textContent.trim():k); x=0; }
+    if(!ok && k!=='fx'){ (raw!==''&&isFinite(x)&&x<0?neg:empty).push(inp.labels&&inp.labels[0]?inp.labels[0].firstChild.textContent.trim():k); x=0; }
     if(PCT[k] && x>100){ capped.push(inp.labels[0].firstChild.textContent.trim()); x=100; }
     v[k]=x;
   });
@@ -908,7 +922,7 @@ function renderModel(){
   ].sort(function(a,b){return b[1]-a[1];});
   el('levers').innerHTML=L.map(function(x){return '<div class="lever"><div class="lever-head"><b>'+x[0]+'</b><span><b>'+CR(x[1])+'</b> <span class="muted">('+USDM(x[1],fx)+')</span></span></div><div class="formula">'+x[2]+'</div></div>';}).join('');
   el('m-total').textContent=CR(t)+'  ·  '+USDM(t,fx);
-  el('m-total-sub').textContent='≈ '+(t/3900e7*100).toFixed(1)+'% of FY26 revenue (₹3,900 cr). These are collections, recognised over the batch.'+(v.badfx?' FX below 1 ignored; using ₹95.1.':'');
+  el('m-total-sub').textContent='≈ '+(t/3900e7*100).toFixed(1)+'% of FY26 revenue (₹3,900 cr). These are collections, recognised over the batch.'+(v.badfx?' FX below 1 ignored; using ₹95.1.':'')+(t>3900e7*0.25?' This is more than a quarter of FY26 revenue: check the inputs.':'');
   // Running costs: the report goes every week to everyone who opted in.
   var msgs=v.u*(v.opt/100)*52, cwa=msgs*v.wa, offers=v.u*(v.elig/100), cmk=offers*v.mk;
   var calls=v.u*(v.hi/100)*(v.esc/100), ccall=calls*v.call, plans=v.u*(v.risk/100)*4, cai=plans*v.ai, cost=cwa+cmk+ccall+cai, netv=t-cost;
@@ -921,7 +935,7 @@ function renderModel(){
   el('costs').innerHTML=C.map(function(x){return '<div class="lever"><div class="lever-head"><b>'+x[0]+'</b><span><b>'+CR2(x[1])+'</b></span></div><div class="formula">'+x[2]+'</div></div>';}).join('');
   el('m-net').textContent=(netv<0?'−':'')+CR(Math.abs(netv))+'  ·  '+(netv<0?'−':'')+USDM(Math.abs(netv),fx);
   var hrs=calls*0.25/52;
-  el('m-net-sub').textContent='Running costs '+CR2(cost)+' a year'+(cost>0?'; return of '+(t/cost).toFixed(1)+'x on them':'')+'. Mentor calls need about '+Math.round(hrs).toLocaleString('en-IN')+' hours a week: about '+Math.round(hrs/24)+' full-time mentors at 60% of their week on calls. Build cost and the cost of serving the extra learners are not included.';
+  el('m-net-sub').textContent='Running costs '+CR2(cost)+' a year'+(cost>0?'; return of '+(t/cost).toFixed(1)+'x on them':'')+'. Mentor calls need about '+Math.round(hrs).toLocaleString('en-IN')+' hours a week: about '+Math.round(hrs/24).toLocaleString('en-IN')+' full-time mentors at 60% of their week on calls. Build cost and the cost of serving the extra learners are not included.';
   el('m-total-f').textContent='Total = '+CR(l1)+' + '+CR(l3)+' + '+CR(l2);
 }
 mids.forEach(function(k){el('m-'+k).addEventListener('input',function(){ renderModel(); if(COH.length) renderConsole(); });});
