@@ -28,7 +28,9 @@ export function mountOptics(canvas) {
     ({ width: w, height: h } = canvas.getBoundingClientRect());
     if (!w || !h) return;
     phone = w <= 680;
-    const ratio = Math.min(devicePixelRatio || 1, phone ? 1.4 : 1.75);
+    // A soft glow with no hard edges: it upscales invisibly, and its cost is
+    // per pixel, drawn every frame. 1x on a phone, 1.25x on a large screen.
+    const ratio = Math.min(devicePixelRatio || 1, phone ? 1 : 1.25);
     canvas.width = Math.round(w * ratio);
     canvas.height = Math.round(h * ratio);
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);

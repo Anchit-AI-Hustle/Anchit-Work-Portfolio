@@ -387,6 +387,11 @@
   @media (prefers-reduced-motion: reduce) { .gs-toast { transition: none; } }
   #cartModal input:focus-visible, #cartModal textarea:focus-visible, input[type="email"]:focus-visible { outline: 2px solid #7C3AED; outline-offset: 2px; }
   /* Tabs: the arrow keys move between them, as in any tab row. */
+  @media (max-width: 1024px), (pointer: coarse) {
+    .counter-scene *, .counter-scene *::before, .counter-scene *::after { animation: none !important; }
+    *, *::before, *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+    .site-head { background: rgba(241, 233, 255, 0.97) !important; }
+  }
   /* Phones: controls a thumb has to hit are at least 44px tall. */
   @media (max-width: 767px) {
     #cartModal button, #cartModal input, #cartModal textarea, #headerBagBtn, #audioBtn, [onclick*="addBarItemToCart"], [onclick*="setSubMode"], [onclick*="addToCart"] { min-height: 44px; }
@@ -742,8 +747,8 @@
   .walk-facade-glass-pane {
     position: absolute;
     inset: 0;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    /* No backdrop blur: a full-screen blur over a moving scene was redrawn
+       every frame. The tint below carries the glass on its own. */
     background: linear-gradient(
       115deg,
       rgba(205, 184, 247, 0.24) 0%,
@@ -1279,7 +1284,7 @@
     <svg class="w-3.5 h-3.5 text-[#2B1650]" viewBox="0 0 16 16" fill="none" aria-hidden="true">
       <path d="M2 6.5v3M5 4.5v7M8 2.5v11M11 5v6M14 6.5v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
     </svg>
-    <span id="audioLabel" class="hidden sm:inline">Ambient audio</span>
+    <span id="audioLabel" class="hidden xl:inline">Ambient audio</span>
   </button>
   <!-- Roastery Bag Trigger -->
   <button id="headerBagBtn" onclick="toggleCart(true, this)" aria-haspopup="dialog" class="ml-2 px-4 py-1.5 rounded-full bg-[#2B1650] text-[#F1E9FF] font-black text-xs uppercase tracking-wider hover:bg-[#4C1D95] transition-all flex items-center gap-1.5 shadow">
@@ -3104,12 +3109,21 @@
     // 30fps ceiling is indistinguishable here and halves the fragment work.
     // rAF still drives it, so the browser keeps control of when we paint.
     var MIN_DT = 1000 / 30, lastDraw = 0;
+    // It used to draw for as long as the hero was on screen, which kept the
+    // page busy at idle (about 345ms of work a second on a throttled phone,
+    // 450 on a laptop). It now moves while the visitor does: on load, on
+    // scroll, on pointer or touch, and holds its last frame 2.5s after.
+    var IDLE_MS = 2500, lastActive = performance.now();
     function loop(now) {
       if (!running) return;
+      if (now - lastActive > IDLE_MS) { running = false; return; }
       if (now - lastDraw >= MIN_DT) { lastDraw = now; draw(now); }
       requestAnimationFrame(loop);
     }
     function start() { if (running || !visible || document.hidden) return; running = true; requestAnimationFrame(loop); }
+    function poke() { lastActive = performance.now(); start(); }
+    window.addEventListener("scroll", poke, { passive: true });
+    window.addEventListener("touchstart", poke, { passive: true });
     function stop() { running = false; }
 
     resize(); draw(performance.now());
@@ -3118,7 +3132,8 @@
       hero.addEventListener("pointermove", function (e) {
         var r = hero.getBoundingClientRect();
         tx = (e.clientX - r.left) / r.width; ty = 1 - (e.clientY - r.top) / r.height;
-      });
+        poke();
+      }, { passive: true });
       if (typeof IntersectionObserver !== "undefined") {
         new IntersectionObserver(function (en) { visible = en[0].isIntersecting; visible ? start() : stop(); }).observe(hero);
       }
