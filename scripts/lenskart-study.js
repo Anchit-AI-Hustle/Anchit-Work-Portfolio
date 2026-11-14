@@ -39,6 +39,7 @@
 //   nocall      the store calls a customer who never agreed to calls
 //   consolemath the console table uses different maths from the calculator
 //   embedbar    the embedded prototype shows a second consent bar
+//   ambush      the case study opens on a claim with no explanation of what it is
 //   deeplink    the prototype ignores its hash on load
 //   walkurl     a walkthrough link points somewhere other than the URL it shows
 const { chromium } = require('./_playwright.js');
@@ -78,6 +79,7 @@ function mutate(src) {
     refer: ["(s.result==='same' && s.sym===1) ? 'refer' : 'tested'", "'tested'"],
     doctorchat: ["var reply = st==='doctor' ?", 'var reply = false ?'],
     embedbar: ['html.embed #consentBar{display:none!important}', ''],
+    ambush: ["<p class=\"lede\">I'm Anchit Tandon, a product manager. I studied Lenskart", '<p class="lede">Lenskart'],
     deeplink: ['function fromHash(scroll, focus){', 'function fromHash(scroll, focus){ if(!focus) return;'],
     walkurl: ['<a href="/lenskart-study/prototype#checkin">https://', '<a href="/lenskart-study/prototype#console">https://'],
   };
@@ -213,6 +215,17 @@ async function caseStudy(browser, vp) {
   }));
   check(`${L}: summary first, then the proposed system with six named features`,
     sys.order.join() === 'summary,system' && /Vision Recall Engine/.test(sys.h2) && sys.feats.join() === FEATURES.join(), JSON.stringify(sys));
+  // A first-time visitor must be told what this is before being told a claim:
+  // who wrote it, that it is not Lenskart's, the finding, and how to read it.
+  const intro = await page.evaluate(() => ({
+    h1: document.querySelector('.hero h1').innerText, lede: document.querySelector('.hero .lede').innerText,
+    finding: (document.querySelector('.finding') || {}).innerText || '', read: [...document.querySelectorAll('.howread li a')].map((a) => a.getAttribute('href')),
+    units: (document.querySelector('.howread .units') || {}).innerText || '',
+    order: [...document.querySelectorAll('.hero h1, .hero .lede, .hero .finding')].map((e) => e.className || e.tagName),
+  }));
+  check(`${L}: the page opens by saying what it is, who wrote it and how to read it`,
+    /case study/i.test(intro.h1) && /I'm Anchit Tandon/.test(intro.lede) && /not Lenskart's/.test(intro.lede) && /20\.7 million/.test(intro.finding)
+      && intro.read.join() === '#summary,#walkthrough,#business' && /crore/.test(intro.units) && intro.order.join() === 'H1,lede,finding', JSON.stringify(intro.order) + ' ' + intro.read.join());
   check(`${L}: a skip link to the content`, sys.skip === '#main' && !!(await page.$('main#main')), sys.skip);
 
   const counts = {}; const said = {};
@@ -329,6 +342,9 @@ async function prototype(browser, vp) {
   check(`${L}: HTTP 200`, status === 200, status);
   await names(page, L);
 
+  const pIntro = await page.evaluate(() => ({ h1: document.querySelector('.hero h1').innerText, lede: document.querySelector('.hero .lede').innerText, steps: document.querySelectorAll('.hero .start li').length }));
+  check(`${L}: the demo opens by saying what it is and how to use it`,
+    /demo/i.test(pIntro.h1) && /I'm Anchit Tandon/.test(pIntro.lede) && /made up/.test(pIntro.lede) && pIntro.steps === 3, JSON.stringify(pIntro).slice(0, 120));
   await page.click('.feats a[href="#console"]');
   const viaFeat = await page.getAttribute('#t-console', 'aria-selected');
   await page.click('#t-checkin');

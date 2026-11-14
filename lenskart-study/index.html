@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Lenskart Case Study: the Vision Recall Engine | Anchit Tandon</title>
-<meta name="description" content="Product case study by Anchit Tandon: a Lenskart platform audit and the Vision Recall Engine, an AI re-test and repeat-purchase system with a working prototype.">
+<meta name="description" content="An independent product case study of Lenskart by Anchit Tandon: what happens after the eye test, a live audit, and a working prototype of one idea.">
 <meta name="robots" content="noindex, nofollow">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#000042">
@@ -214,8 +214,19 @@ tr[hidden]{display:none!important}
 .foot-h{color:#fff;font-size:18px;line-height:26px;font-weight:600}
 .proto-frame{height:1400px}
 :root{--cb-bg:#000042;--cb-line:#333368;--cb-ink:#FFFFFF;--cb-muted:#D9D9E8;--cb-accent:#8CF2DB;--cb-accent-2:#8CF2DB;--cb-link:#8CF2DB;--cb-on-accent:#000042;--cb-font:var(--font)}
-@media (max-width:420px){.kpi b{font-size:22px;line-height:28px}.hero h1{font-size:27px;line-height:34px}.hero .wrap{padding-top:24px;gap:14px}.hero-ctas .btn{min-height:44px;padding:10px 16px}}
-@media (max-width:600px){
+@media (max-width:420px){.kpi b{font-size:22px;line-height:28px}.hero h1{font-size:25px;line-height:32px}.hero .wrap{padding-top:20px;gap:12px}.hero .lede{font-size:16px;line-height:25px}.hero-ctas .btn{min-height:44px;padding:10px 14px;font-size:14px}}
+.hero h1{max-width:980px}
+.intro{display:grid;gap:16px;margin-top:8px}
+.intro .lbl{display:block;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:2px}
+.finding{background:#fff;border:1px solid var(--border);border-left:5px solid var(--accent);border-radius:var(--r-panel);padding:16px 20px;display:grid;gap:12px;color:var(--heading);font-size:17px;line-height:27px}
+.howread{background:#fff;border:1px solid var(--border);border-radius:var(--r-panel);padding:16px 20px}
+.howread ul{list-style:none;padding:0;margin:6px 0 0;display:grid;gap:4px;font-size:15px;line-height:23px}
+.howread li a{display:inline-block;padding:4px 0;font-weight:600;text-decoration:none}
+.howread li a b{display:inline-block;min-width:92px;color:var(--heading)}
+.howread li a:hover{text-decoration:underline}
+.howread .units{font-size:13px;line-height:19px;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px solid var(--border-soft)}
+@media (min-width:900px){.intro{grid-template-columns:1.25fr 1fr;align-items:start}}
+@media (max-width:760px){
   .stack{min-width:0!important;table-layout:auto}
   .stack thead{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
   .stack tr{display:block;padding:12px 14px;border-bottom:1px solid var(--border-soft)}
@@ -241,11 +252,26 @@ tr[hidden]{display:none!important}
   body{background:#fff}
   section.block{padding:20px 0}
 }
+
+/* Second review pass. */
+:root{--bar:#008863;--cb-line:#8C8CB0}
+.chip,.btn-outline{border-color:#737397}
+.links a{min-height:44px;display:inline-flex;align-items:center}
+.feat .try{display:inline-flex;align-items:center;min-height:44px}
+.walk .wu a{display:inline-flex;align-items:center;min-height:44px}
+.howread li a{min-height:44px;display:inline-flex;align-items:center;flex-wrap:wrap;column-gap:6px}
+.howread li{display:flex;flex-wrap:wrap;align-items:center;column-gap:4px}
+.proto-frame:focus-visible{outline:3px solid var(--accent-ink);outline-offset:2px}
+.shots figure img{max-width:420px;margin:0 auto}
+@media (min-width:700px) and (max-width:899px){.shots{grid-template-columns:1fr}}
+@media (min-width:900px){.shots{grid-template-columns:minmax(0,1.2fr) 1fr 1fr}}
+@media (min-width:601px) and (max-width:760px){.tbl.is-wide::before{content:'Swipe sideways for every column \2192';display:block;position:sticky;left:0;padding:8px 12px;font-size:12px;font-weight:600;color:#5b6170;border-bottom:1px solid var(--border)}}
+@media print{body{padding-bottom:0!important}}
 </style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<div class="notice" role="note"><b>Independent case study</b> by Anchit Tandon. Not affiliated with or endorsed by Lenskart. Figures come from Lenskart's public filings, lenskart.com and its app listings; the prototype uses synthetic data.</div>
+<div class="notice" role="note"><b>Independent case study</b> by Anchit Tandon. Not affiliated with or endorsed by Lenskart.</div>
 
 <nav class="nav" aria-label="Sections">
   <div class="wrap">
@@ -259,15 +285,29 @@ tr[hidden]{display:none!important}
 
 <header class="hero" id="top">
   <div class="wrap">
-    <span class="eyebrow">Product case study · Lenskart · November 2026</span>
-    <h1>Lenskart ran 2.07 crore eye tests in India last year. <span class="accent">I found nothing telling those customers when the next is due.</span></h1>
+    <span class="eyebrow">Independent product case study · November 2026</span>
+    <h1>What happens after a Lenskart eye test? <span class="accent">A product case study, with a working prototype.</span></h1>
+    <p class="lede">I'm Anchit Tandon, a product manager. I studied Lenskart, the Indian eyewear retailer, from the outside, using only its public filings, its website and apps, and 3,500 customer reviews. This page shows what I found and the one thing I would build. It is my own work, not Lenskart's.</p>
     <div class="hero-ctas">
-      <a class="btn btn-primary" href="/lenskart-study/prototype">Open the working prototype</a>
-      <a class="btn btn-outline" href="#audit">See the live platform audit</a>
-      <a class="btn btn-soft" href="#walkthrough">7-step walkthrough</a>
+      <a class="btn btn-primary" href="#summary">Read the 1-minute summary</a>
+      <a class="btn btn-outline" href="/lenskart-study/prototype">Try the prototype</a>
+      <a class="btn btn-soft" href="#audit">See the evidence</a>
     </div>
-    <p class="lede">A product case study of Lenskart, shown as work: how it makes money, what is live on its platforms, where repeat revenue may be leaking, and the system I would build, the <b>Vision Recall Engine</b>, with a working prototype in Lenskart's design system. The due date is a rule; AI drafts each message in the customer's language, ranks the store call list and answers questions.</p>
-    <p class="meta">Sources: Lenskart Q4 FY26, Q1 FY27 and Q2 FY27 shareholders' letters, Annual Report FY2025-26, Q1 FY27 and Q3 FY26 earnings calls, the IPO prospectus, lenskart.com and Lenskart's app-store listings, checked 13 and 14 Nov 2026. ₹94.24 per US$ (ECB reference rate, 13 Nov 2026).</p>
+    <div class="intro">
+      <div class="finding">
+        <p><span class="lbl">The finding</span>Lenskart ran 2.07 crore (20.7 million) eye tests in India last year. I found nothing that tells those customers when the next one is due.</p>
+        <p><span class="lbl">The idea</span>The <b>Vision Recall Engine</b>: tell each customer when their next eye test is due, book it, and suggest lenses or a new pair only after the test says one is needed. The due date is a simple rule; AI drafts the messages and ranks the store call list.</p>
+      </div>
+      <div class="howread" aria-label="How to read this page">
+        <p class="lbl">How to read this page</p>
+        <ul>
+          <li><a href="#summary"><b>1 minute</b> The short version</a>: four cards, just below.</li>
+          <li><a href="#walkthrough"><b>8 minutes</b> The 7-step walkthrough</a>: the idea, the prototype, the evidence, the numbers.</li>
+          <li><a href="#business"><b>20 minutes</b> The full study</a>: twelve sections, top to bottom.</li>
+        </ul>
+        <p class="units">₹1 crore (cr) = ₹10 million. 1 lakh = 100,000. FY26 = April 2025 to March 2026.</p>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -334,7 +374,7 @@ tr[hidden]{display:none!important}
       <div class="card">
         <h3>FY26 revenue mix (₹9,002 cr)</h3>
         <div class="bar-row"><div class="lbl"><b>India</b><span>₹5,265 cr · 58.5% · +33.7%</span></div><div class="bar"><i style="width:58.5%;background:var(--primary)"></i></div></div>
-        <div class="bar-row"><div class="lbl"><b>International</b><span>₹3,790 cr · 42.1% · +30.2%</span></div><div class="bar"><i style="width:42.1%;background:var(--accent)"></i></div></div>
+        <div class="bar-row"><div class="lbl"><b>International</b><span>₹3,790 cr · 42.1% · +30.2%</span></div><div class="bar"><i style="width:42.1%;background:var(--bar)"></i></div></div>
         <p class="small muted">Shares are of consolidated revenue; the two segments add up to slightly more than it. Prescription eyeglasses were more than 80% of revenue in each of FY23 to FY25 (prospectus).</p>
       </div>
       <div class="card">
@@ -372,7 +412,7 @@ tr[hidden]{display:none!important}
       <div class="card">
         <h3>India, FY26 growth year on year</h3>
         <div class="cols" role="img" aria-label="India FY26 growth: eye tests up 54.3%, revenue up 33.7%, transacting customer accounts up 24.2%">
-          <div class="col"><b style="color:var(--accent-ink)">+54.3%</b><div style="height:150px;background:var(--accent)"></div><span>Eye tests</span></div>
+          <div class="col"><b style="color:var(--accent-ink)">+54.3%</b><div style="height:150px;background:var(--bar)"></div><span>Eye tests</span></div>
           <div class="col"><b>+33.7%</b><div style="height:93px;background:var(--primary)"></div><span>Revenue</span></div>
           <div class="col"><b>+24.2%</b><div style="height:67px;background:#737397"></div><span>Customers</span></div>
         </div>
@@ -380,7 +420,7 @@ tr[hidden]{display:none!important}
       </div>
       <div>
         <h3 style="margin-bottom:10px">Q2 FY27, year on year (drivers sorted by growth)</h3>
-        <div class="tbl"><table>
+        <div class="tbl" role="region" aria-label="Q2 FY27 growth by driver"><table>
           <thead><tr><th scope="col">Driver</th><th scope="col">Metric</th><th scope="col" class="num">Growth</th></tr></thead>
           <tbody>
             <tr><td>Remote optometry</td><td>Stores, 303 → 934</td><td class="num">3.1x</td></tr>
@@ -531,7 +571,7 @@ tr[hidden]{display:none!important}
     <div class="shots mob-only">
       <figure><a href="/lenskart-study/prototype#customer"><img src="/lenskart-study/img/customer.png" alt="Prototype customer app: months since the last eye test, a re-test plan, an eye-care assistant chat and the next pair step" loading="lazy" width="840" height="2284"></a><figcaption>Customer app: an eye test, not an offer</figcaption></figure>
       <figure><a href="/lenskart-study/prototype#checkin"><img src="/lenskart-study/img/checkin.png" alt="Sight Check-in WhatsApp preview sent to the parent of a 9-year-old" loading="lazy" width="880" height="1104"></a><figcaption>Sight Check-in to the right person</figcaption></figure>
-      <figure><a href="/lenskart-study/prototype#console"><img src="/lenskart-study/img/console.png" alt="Growth console table grouping customers by the action they get, with the incremental revenue of each group" loading="lazy" width="896" height="1840"></a><figcaption>Growth console: the Monday screen</figcaption></figure>
+      <figure><a href="/lenskart-study/prototype#console"><img src="/lenskart-study/img/console.png" alt="Growth console table grouping customers by the action they get, with the incremental revenue of each group" loading="lazy" width="896" height="2296"></a><figcaption>Growth console: the Monday screen</figcaption></figure>
     </div>
   </div>
 </section>
@@ -687,6 +727,8 @@ tr[hidden]{display:none!important}
     var shown=Array.prototype.filter.call(rows,function(r){return !r.hidden;}).length, cnt=document.getElementById('audit-count');
     if(cnt) cnt.textContent = f==='all' ? 'Showing all '+shown+' capabilities' : 'Showing '+shown+' of '+rows.length+': '+c.textContent.toLowerCase();
   });});
+  // On a phone the audit opens on what was not found; the rest is one tap away.
+  if(window.matchMedia && window.matchMedia('(max-width:600px)').matches){ var nf=document.querySelector('.filters .chip[data-f="none"]'); if(nf) nf.click(); }
   // Active section in nav
   var links=document.querySelectorAll('#links a'), map={};
   Array.prototype.forEach.call(links,function(a){map[a.getAttribute('href').slice(1)]=a;});
@@ -733,8 +775,8 @@ if(document.readyState!=='loading')mark();else document.addEventListener('DOMCon
 // The embedded prototype is the same origin: size the frame to its content so
 // the page scrolls, not the frame.
 (function(){var f=document.getElementById('proto-frame'); if(!f) return;
-  function fit(){ try{ var d=f.contentDocument; if(d&&d.documentElement){ var h=Math.ceil(d.documentElement.scrollHeight); if(h>200) f.style.height=h+'px'; } }catch(e){} }
-  f.addEventListener('load',function(){ fit(); try{ if('ResizeObserver' in window) new ResizeObserver(fit).observe(f.contentDocument.documentElement); f.contentDocument.addEventListener('click',function(){setTimeout(fit,60);}); f.contentDocument.addEventListener('input',function(){setTimeout(fit,60);}); }catch(e){} });
+  function fit(){ try{ var d=f.contentDocument; if(d&&d.body){ var h=Math.ceil(d.body.getBoundingClientRect().height); if(h>200) f.style.height=h+'px'; } }catch(e){} }
+  f.addEventListener('load',function(){ fit(); try{ if('ResizeObserver' in window) new ResizeObserver(fit).observe(f.contentDocument.body); f.contentDocument.addEventListener('click',function(){setTimeout(fit,60);}); f.contentDocument.addEventListener('input',function(){setTimeout(fit,60);}); }catch(e){} });
   window.addEventListener('resize',fit,{passive:true});
 })();
 </script>
