@@ -138,10 +138,12 @@ async function open(browser, vp, path, slowFonts) {
   for (let i = 1; res.status() === 403 && i <= 3; i++) {
     console.log(`  note  ${path}: host answered 403, retry ${i} of 3`);
     await page.waitForTimeout(3000 * i);
+    // Everything logged so far belongs to the challenge page, not ours: start
+    // the bag again, so the retried page is judged only on its own errors.
+    bag.errors.length = 0; bag.failed.length = 0;
     // reload, not goto: the same URL again is a same-document hash change.
     res = (await page.reload({ waitUntil: 'networkidle' })) || res;
   }
-  if (res.status() !== 403) bag.failed = bag.failed.filter((f) => f !== (BASE + path).split('#')[0] + ' HTTP 403');
   return { ctx, page, bag, status: res.status() };
 }
 
