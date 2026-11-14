@@ -1292,6 +1292,9 @@ function soloImpact(G, w, s) {
   }
   if (!hits.length) { s.missed = true; whiff(); if (s.special) say(G, 'miss', { a: w }); return; }
   for (const o of hits) {
+    // only a blow that lands on the wrestler applying it breaks up a cover or a hold
+    if (G.pin && o === G.pin.a) G.pin.broken = true;
+    if (G.sub && o === G.sub.a) endSub(G, 'break');
     if (o.st === 'perch') { knockOffTop(G, o, w); continue; }
     const dmg = s.dmg || d.dmg;
     hurt(G, o, w, dmg, { momK: s.special === 'fin' ? 0 : 1 });
@@ -1612,8 +1615,6 @@ function simulate(G, dt, a) {
     updateW(G, w, dt);
     // a partner who ran in to save the pin breaks it up on contact
     if (w.saving > 0 && G.pin && G.pin.d.team === w.team && dist(w, G.pin.a) < 1.4) { G.pin.broken = true; ev(G, 'save', { a: w }); }
-    if (w.st === 'solo' && w.solo && w.solo.target && G.pin && w.solo.target === G.pin.a && w.solo.hit) { G.pin.broken = true; }
-    if (w.st === 'solo' && w.solo && w.solo.target && G.sub && w.solo.target === G.sub.a && w.solo.hit) { endSub(G, 'break'); }
   }
   separate(G);
   updatePin(G, dt);
