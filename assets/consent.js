@@ -41,7 +41,9 @@
     document.head.appendChild(s);
   }
 
-  function banner() {
+  // quiet: shown while the visitor is mid-interaction (a deferred ask), so it
+  // must not take their focus; a stray Space would otherwise answer it.
+  function banner(quiet) {
     if (document.getElementById('consentBar')) return;
 
     var bar = document.createElement('div');
@@ -180,15 +182,32 @@
     });
 
     var first = bar.querySelector('.cb-primary');
-    if (first) first.focus({ preventScroll: true });
+    if (first && !quiet) first.focus({ preventScroll: true });
   }
 
   function init() {
     var choice = read();
     if (choice === 'granted') { loadAnalytics(); return; }
     if (choice === 'denied') return;
+    // The concept storefronts ask after the first scroll, so the hero stays the
+    // shop's. Shown mid-interaction, the question is quiet: it must not take the
+    // visitor's focus, or a Space pressed to scroll would answer it.
     if (STOREFRONT && (window.scrollY || 0) < 1) {
-      addEventListener('scroll', function once() { removeEventListener('scroll', once); banner(); }, { passive: true });
+      addEventListener('scroll', function once() { removeEventListener('scroll', once); banner(true); }, { passive: true });
+      return;
+    }
+    // A page can ask the question to wait until the visitor has started
+    // reading (data-consent-defer on <html>), so its first screen stays theirs.
+    // Nothing is loaded in the meantime, so waiting costs no privacy.
+    if (document.documentElement.hasAttribute('data-consent-defer')) {
+      var asked = false, timer;
+      var ask = function () {
+        if (asked) return; asked = true;
+        window.removeEventListener('scroll', onScroll); clearTimeout(timer); banner(true);
+      };
+      var onScroll = function () { if (window.scrollY > window.innerHeight * 0.6) ask(); };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      timer = setTimeout(ask, 20000);
       return;
     }
     banner();

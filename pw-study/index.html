@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-consent-defer>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -68,6 +68,17 @@ a{color:var(--primary);text-underline-offset:3px}
 .hero h1 .accent{color:var(--primary)}
 .lede{font-size:18px;line-height:28px;max-width:820px}
 .hero-ctas{display:flex;gap:10px;flex-wrap:wrap}
+/* Start here: who this is for and where to begin, before any jargon */
+.start{display:grid;gap:8px}
+.go{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-panel);padding:10px 14px;min-height:56px;text-decoration:none;color:var(--heading)}
+.go:hover{border-color:var(--primary)}
+.go::after{content:'\2192';margin-left:auto;color:var(--primary);font-weight:700}
+.go b{display:block;font-size:16px;line-height:22px}
+.go small{display:block;color:var(--muted);font-size:13px;line-height:18px}
+.gn{flex:none;width:28px;height:28px;border-radius:50%;background:var(--primary-50);color:var(--primary);display:grid;place-items:center;font-weight:700;font-size:14px}
+.go.pri{background:var(--primary);border-color:var(--primary);color:#fff}
+.go.pri small{color:#E9E7FF}.go.pri .gn{background:rgba(255,255,255,.2);color:#fff}.go.pri::after{color:#fff}
+@media (min-width:700px){.start{grid-template-columns:repeat(3,1fr)}}
 .meta{font-size:13px;color:var(--muted)}
 /* sections */
 section.block{padding:48px 0;border-bottom:1px solid var(--border-soft)}
@@ -190,7 +201,7 @@ footer h3{color:#fff}
 </style>
 </head>
 <body>
-<div class="notice" role="note"><b>Independent case study</b> by Anchit Tandon. Not affiliated with or endorsed by PhysicsWallah. Figures come from PW's public filings and pw.live; the prototype uses synthetic data.</div>
+<div class="notice" role="note"><b>Independent case study</b> by Anchit Tandon · not affiliated with PhysicsWallah</div>
 
 <nav class="nav" aria-label="Sections">
   <div class="wrap">
@@ -204,15 +215,15 @@ footer h3{color:#fff}
 
 <header class="hero" id="top">
   <div class="wrap">
-    <span class="eyebrow">Product Manager application · PhysicsWallah · Updated November 2026</span>
-    <h1>AI already wins PW's first sale. <span class="accent">Let it win the second.</span></h1>
-    <p class="lede">My application for a Product Manager role at PW, shown as work instead of a cover letter: how PW makes money, what is live on its platforms, where revenue leaks, and the system I would build, the <b>Learner Retention Engine</b>, with a working prototype in PW's design system.</p>
-    <div class="hero-ctas">
-      <a class="btn btn-primary" href="/pw-study/prototype">Open the working prototype</a>
-      <a class="btn btn-outline" href="#audit">See the live platform audit</a>
-      <a class="btn btn-soft" href="#walkthrough">Recruiter walkthrough</a>
-    </div>
-    <p class="meta">Sources: PW Q4 FY26 shareholder letter, Q1 FY27 earnings call (NSE filing), Q2 FY27 results as reported in Nov 2026, pw.live and PW's app-store listings, checked 25 Oct 2026. Updated 14 Nov 2026. ₹95.1 per US$ (mid-market, 25 Oct 2026).</p>
+    <span class="eyebrow">A job application, shown as work · Updated November 2026</span>
+    <h1>PW is brilliant at winning new students. <span class="accent">Here is how it keeps them.</span></h1>
+    <p class="lede">Hi, I'm Anchit Tandon, and this is my application for a Product Manager role at PhysicsWallah (PW). Instead of a cover letter, I studied PW's business, found where paying students quietly drop off, and built a working prototype of the fix.</p>
+    <nav class="start" aria-label="Start here">
+      <a class="go" href="#audit"><span class="gn" aria-hidden="true">1</span><span><b>What I found</b><small>Where students drop off, from PW's own platforms · 2 min</small></span></a>
+      <a class="go" href="#system"><span class="gn" aria-hidden="true">2</span><span><b>What I would build</b><small>Five features and what they are worth · 2 min</small></span></a>
+      <a class="go pri" href="/pw-study/prototype"><span class="gn" aria-hidden="true">3</span><span><b>Try the prototype</b><small>Pick a student and watch it work · 3 min</small></span></a>
+    </nav>
+    <p class="meta">Short on time? <a href="#walkthrough">The 8-minute recruiter walkthrough</a>. Figures come from PW's public filings and pw.live (Q4 FY26 letter, Q1 FY27 call, Q2 FY27 results); the prototype uses made-up students. ₹95.1 per US$.</p>
   </div>
 </header>
 
@@ -220,7 +231,7 @@ footer h3{color:#fff}
 <!-- PROPOSED SYSTEM -->
 <section class="block" id="system" aria-labelledby="sys-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">The proposed system</span><h2 id="sys-h">Learner Retention Engine: five features on top of what PW already runs</h2><p>It reads the study signals PW already collects, spots silent drop-off early, rescues it, and turns results day into the next enrolment. No new content, faculty or capex. Every feature below works in the prototype, and each link opens the part of the screen where it runs.</p></div>
+    <div class="sec-head"><span class="num">What I would build</span><h2 id="sys-h">The Learner Retention Engine: five features on top of what PW already runs</h2><p><b>The problem in one line:</b> a student who falls behind in month three has already paid for the year, so nobody notices until they do not come back. PW's AI already wins the first sale; this is built to win the second. It reads the study signals PW already collects, spots drift early, rescues it, and turns results day into the next enrolment. No new content, faculty or capex. Every feature works in the prototype; each link opens it.</p></div>
     <div class="feat">
       <div class="step"><span class="n">Feature 1</span><b>Drift Score</b><p>A weekly drop-off risk score for every paid learner, from lecture pace, tests, inactivity and doubts. Every score shows its reasons.</p><span class="for">For: the team that owns renewals</span><a class="try" href="/pw-study/prototype#drift">See the Drift Score</a></div>
       <div class="step"><span class="n">Feature 2</span><b>Comeback Plan</b><p>High risk: a 7-day AI Mentor plan first, and a human mentor call on day 8 only if the learner is still high risk. Medium risk: an AI catch-up plan.</p><span class="for">For: the learner</span><a class="try" href="/pw-study/prototype#plan">See Riya's plan</a></div>
