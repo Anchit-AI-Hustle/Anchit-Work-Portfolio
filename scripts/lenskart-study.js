@@ -142,7 +142,8 @@ const dashes = (frame) => frame.evaluate(() => {
 });
 const hScroll = (page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 
-const FEATURES = ['Due Date', 'Re\u2011test Plan', 'Sight Check-in', 'Next Pair Step', 'First-Test Follow-up', 'Growth Console'];
+// One family, in the order a customer meets them.
+const FEATURES = ['Recall Date', 'Recall Reminder', 'Recall Booking', 'Recall Outcome', 'First Prescription Follow-up', 'Recall Dashboard'];
 
 async function names(page, L) {
   const title = await page.title();
@@ -382,7 +383,7 @@ async function prototype(browser, vp) {
 
   // Status per customer, the phone agreeing with the engine, and nothing for
   // sale before an eye test.
-  const tiers = { 0: 'Overdue', 1: 'Not due', 2: 'Due now', 3: 'Due now', 4: 'First-test follow-up', 5: 'Due now' };
+  const tiers = { 0: 'Overdue', 1: 'Not due', 2: 'Due now', 3: 'Due now', 4: 'First Prescription Follow-up', 5: 'Due now' };
   const got = {}; const disagree = []; const presale = [];
   for (const i of [1, 2, 3, 4, 5, 0]) {
     await who(page, i);
@@ -494,16 +495,16 @@ async function prototype(browser, vp) {
 
   await page.click('#t-checkin');
   await page.click('#pp-person button[data-p="2"]');
-  const kabir = norm(await page.textContent('#wa-title'));
+  const kabir = norm(await page.textContent('#pp-channel'));
   const kabirBtns = await page.$$eval('#wa-body .wa-btns span', (b) => b.map((x) => x.textContent));
   await page.click('#pp-person button[data-p="3"]');
-  const meera = norm(await page.textContent('#wa-title'));
+  const meera = norm(await page.textContent('#pp-channel'));
   const before = norm(await page.textContent('#pp-channel'));
   await page.check('#pp-share');
   const afterShare = norm(await page.textContent('#pp-channel'));
   check(`${L}: check-in goes to the parent under 18, to the wearer otherwise, family copy only on opt-in`,
-    kabir === 'Lenskart Parent Check-in' && meera === 'Lenskart Sight Check-in' && /No one else sees it/.test(before) && /A copy also goes/.test(afterShare),
-    `Kabir=${kabir} Meera=${meera}`);
+    /^Recall Reminder to Sana, Kabir's parent/.test(kabir) && /^Recall Reminder to Meera\./.test(meera) && /No one else sees it/.test(before) && /A copy also goes/.test(afterShare),
+    `Kabir=${kabir.slice(0, 50)} Meera=${meera.slice(0, 40)}`);
   // Lenskart's home eye test is for ages 14 to 75; a 9-year-old is sent to the
   // store, in the message, the plan and the actions, even when overdue.
   await page.click('#t-customer');
@@ -521,14 +522,14 @@ async function prototype(browser, vp) {
   await page.click('#pp-lang button[data-l="en"]');
   check(`${L}: check-in escalates to one store call, in English and Hindi, each marked with its language`,
     /your store will call once/.test(msg.en) && /आपका स्टोर एक बार फ़ोन करेगा/.test(msg.hi) && langs.en === 'en' && langs.hi === 'hi', msg.en.slice(0, 100));
-  check(`${L}: check-in carries no price, offer or discount, and says how to opt out`, !SALES.test(msg.en) && !SALES.test(msg.hi) && /Reply STOP/.test(msg.en), (msg.en.match(/.{0,30}(₹|%|off|offer|discount|gold).{0,20}/i) || [''])[0]);
+  check(`${L}: check-in carries no price, offer or discount, and says how to opt out`, !SALES.test(msg.en) && !SALES.test(msg.hi) && /Reply STOP to stop these reminders/.test(msg.en), (msg.en.match(/.{0,30}(₹|%|off|offer|discount|gold).{0,20}/i) || [''])[0]);
   await page.click('#pp-person button[data-p="1"]');
   const arjun = norm(await page.textContent('#wa-body'));
   check(`${L}: a customer who is not due gets no message`, /^No message is sent/.test(arjun), arjun.slice(0, 60));
 
   // Ravi's first-test follow-up: two messages inside 30 days, then silence.
   await page.click('#pp-person button[data-p="4"]');
-  const ravi = { title: norm(await page.textContent('#wa-title')), d12: norm(await page.textContent('#wa-body')) };
+  const ravi = { title: norm(await page.textContent('#pp-channel')), d12: norm(await page.textContent('#wa-body')) };
   await page.click('#t-customer');
   for (const [k, d] of [['d1', 1], ['d25', 25], ['d40', 40]]) { await setRange(page, '#in-days', d); ravi[k] = await checkinText(page); }
   ravi.end = await tierOf(page);
@@ -537,7 +538,7 @@ async function prototype(browser, vp) {
   ravi.sym = [await tierOf(page), await checkinText(page)];
   await page.click('#in-sym button[data-s="0"]');
   check(`${L}: first-test follow-up sends two messages in 30 days, then stops; trouble seeing turns it into a re-check`,
-    ravi.title === 'Lenskart Follow-up' && /message 1 of 2/.test(ravi.d12) && /^No message is sent/.test(ravi.d1) && /message 2 of 2/.test(ravi.d25)
+    /^First Prescription Follow-up to Ravi/.test(ravi.title) && /message 1 of 2/.test(ravi.d12) && /^No message is sent/.test(ravi.d1) && /message 2 of 2/.test(ravi.d25)
       && /^No message is sent/.test(ravi.d40) && ravi.end === 'Follow-up ended' && !SALES.test(ravi.d12) && !SALES.test(ravi.d25)
       && ravi.sym[0] === 'Re-check' && /^No message is sent/.test(ravi.sym[1]), `${ravi.title} | ${ravi.d12.slice(0, 60)} | ${ravi.end}`);
 
