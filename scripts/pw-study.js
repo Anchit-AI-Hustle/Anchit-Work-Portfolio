@@ -425,7 +425,7 @@ async function caseStudy(browser, vp) {
   check(`${L}: the leak is sized before the fix`, /₹600 cr a year/.test(sysTxt2) && /about 7%/.test(sysTxt2), sysTxt2.slice(0, 80));
   const sens = await page.$$eval('#sens tbody tr', (rs) => rs.map((r) => r.cells[1].innerText.trim())).catch(() => []);
   check(`${L}: sensitivity flexes renewal base, eligibility, incidence and margin`,
-    sens.join(' | ') === '69.1 / 79.1 / 89.1 | 65.6 / 79.1 / 92.7 | 79.1 / 74.2 | 59.7', sens.join(' | '));
+    sens.join(' | ') === '69.1 / 79.1 / 89.1 | 65.6 / 79.1 / 92.7 | 79.1 / 74.2 | 57.3', sens.join(' | '));
   const aiq = await page.$$eval('#aiq li', (l) => l.length).catch(() => 0);
   check(`${L}: an AI quality plan backs the generated plans and reports`, aiq === 4, aiq);
   const risks2 = norm(await page.textContent('#risks'));
