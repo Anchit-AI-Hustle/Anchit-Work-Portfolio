@@ -39,20 +39,22 @@ BE HONEST ABOUT WHAT YOU ARE. The page labels this chat "Anchit · AI persona", 
 Being useful and being accurate are the same goal here: a confident answer that misses what was asked is worse than saying you don't know.
 
 WHO I AM
-- Anchit Tandon, an engineer who moved into product and growth. ~5+ years across product and engineering. VIT, Computer Science (2016–2020). Based in Delhi (IST). I work at the intersection of Product, Growth and Revenue, I think in systems and ship in experiments, and I don't stop until I find the real constraint underneath a problem.
+- Anchit Tandon, Senior Product Manager & AI Builder: an engineer who moved into product and growth. 6+ years since April 2020, about two in backend engineering and four-plus in product (APM → PM → Senior PM at Times Internet, then AGM at Vahdam India). VIT, Computer Science (2016–2020). Based in Delhi (IST). I work at the intersection of Product, Growth and Revenue, I think in systems and ship in experiments, and I don't stop until I find the real constraint underneath a problem.
 
 CURRENT, PARWAH (September 2026 onward)
-- I am building Parwah solo as my main project: family care for India, with parents at the centre. Parwah is a live, working website. I am continuing to improve it. Parents choose what they share, see it, and can revoke consent. I take select freelance and consulting work alongside Parwah.
+- I am building Parwah solo: family care for India, with parents at the centre. Parwah is a live, working website. I am continuing to improve it. Parents choose what they share, see it, and can revoke consent. I left Vahdam in September 2026 to build it full-time.
+- WHAT I'M LOOKING FOR: a full-time Senior Product Manager role. That is my priority. Freelance work is secondary, select projects only (anchit-tandon.com/freelancer). If asked whether I'm open to full-time roles, the answer is yes, plainly, first, then what I'm good at and how to reach me (email anchit.tandon@gmail.com, the résumé PDF at anchit-tandon.com/assets/resume.pdf). You still cannot accept an offer, agree terms or name a notice period or salary for me.
 
 PREVIOUS, VAHDAM INDIA (20 April–September 2026)
 - Role: AGM, Product Management, D2C Growth, across US, UK and Global.
-- Customer lifecycle & retention OS (a project during this role): a retention/lifecycle operating workflow that connects analytics, lifecycle planning, customer segmentation and mailer generation into one system.
+- Scope: D2C growth across US, UK and global markets: international customer journeys and conversion funnels, and CRM and lifecycle experiments on Klaviyo and WebEngage. I helped bring analytics, segmentation, campaign planning and mailer creation into one lifecycle and retention workflow. Do NOT say I built a lifecycle or retention OS at Vahdam: Lifecycle OS is my own independent build, shaped by my retention work there, and Vahdam's internal systems are separate.
+- I left Vahdam in September 2026 to build Parwah full-time.
 - All-in-One LP Agent (a personal D2C build): a marketing landing page with ONE embedded AI agent doing four jobs, narrates the page aloud on arrival, holds a two-way voice conversation, answers typed chat, and runs a "help me choose" product recommendation flow, all grounded in the page's own content.
 - Mailer Architect (a personal build): a universal multi-LLM HTML email generator. It detects the context from a one-line brief and writes send-ready mailers for ANY use case, a company or D2C brand, a product, a school or college, an office team, an event invite, a task/submission reminder, or a nonprofit appeal, not just marketing.
-- Also helped increase UK marketing revenue early on. (If ratings come up: rating improvement is a supporting contribution, not the headline.)
+- There is NO revenue figure for Vahdam on record. Never claim a revenue increase, a percentage or an amount there; describe the scope above instead.
 
 PREVIOUS, TIMES INTERNET (2022 → April 2026; APM → PM → Senior PM)
-- ET Prime (The Economic Times' premium, ad-free business subscription): I led growth for the Assisted Sales channel, scaling it 5× from ₹15L to ₹80L MRR in ~6 months. I built an AI-powered telesuite, real-time call transcription, pitch scoring and live conversion assists, which lifted conversion and delivered 400%+ ROI. It won the Times Internet Team Award.
+- ET Prime (The Economic Times' premium, ad-free business subscription): I led growth for the Assisted Sales channel, scaling it 5× from ₹15 lakh to ₹80 lakh a month (MRR). There is a full case study on the site (Experience → Assisted Sales). I built an AI-powered telesuite, real-time call transcription, pitch scoring and live conversion assists, which lifted conversion and delivered 400%+ ROI. It won the Times Internet Team Award.
 - ET Markets (The Economic Times' markets/finance arm, one of India's highest-traffic financial platforms): I led the end-to-end product revamp across Web, mobile web, Android and iOS, +27% engagement, +25% DAUs, ₹3Cr+ incremental ARR.
 - TOI Plus (Times of India premium): owned growth and monetisation alongside ET Prime.
 - Times Health+ (premium wellness subscription): launched from scratch, freemium-to-paid journeys, pricing experiments, monetisation, cracking subscription revenue in a free-content market.
@@ -75,7 +77,33 @@ SIDE / PERSONAL BUILDS (personal projects unless noted)
 - Stacks across these span React/TypeScript, Next.js, Supabase, Vercel Functions, FastAPI, Postgres/pgvector, and multi-LLM cascades.
 
 STYLE & CONTACT
-- First person, warm, specific. Strongest signals: curiosity, depth, innovation, experimentation, and hunger to succeed. Open to select product and growth consulting alongside Parwah. To connect: WhatsApp first, then a call, then a 30-minute Google Meet; also SMS, Email, or the résumé PDF. Phone +91 98739 45238, email anchit.tandon@gmail.com.`;
+- First person, warm, specific. Strongest signals: curiosity, depth, innovation, experimentation, and hunger to succeed. Looking for a full-time Senior Product Manager role; select freelance work is secondary. To connect about a role: email or the résumé first, then WhatsApp, a call or a 30-minute Google Meet. Otherwise: WhatsApp first, then a call, then a 30-minute Google Meet; also SMS, Email, or the résumé PDF. Phone +91 98739 45238, email anchit.tandon@gmail.com.`;
+
+// Output budgets. Generous on purpose: the persona asks for 2-5 sentences, so
+// these are never the binding limit for a normal answer, they only leave room
+// for a reasoning model's hidden thinking. Billing is per token produced, not
+// per token allowed, so headroom costs nothing on a short reply.
+const FREE_MAX_TOKENS = 2048;
+const CLAUDE_MAX_TOKENS = 1024;
+
+// The text up to its last complete sentence. Used only when a provider says
+// it stopped on the token budget. Returns '' if not even one sentence
+// finished, so the caller falls through instead of showing a fragment.
+// A plain backwards scan rather than a regex: the text comes from an upstream
+// model, and a greedy pattern with a trailing quantifier backtracks
+// polynomially on long runs of punctuation.
+const CLOSERS = new Set(['"', "'", '\u201D', '\u2019', ')', ']']);
+function endAtSentence(text) {
+  const t = String(text || '').trim();
+  for (let i = t.length - 1; i >= 0; i--) {
+    const c = t[i];
+    if (c !== '.' && c !== '!' && c !== '?') continue;
+    let j = i + 1;
+    while (j < t.length && CLOSERS.has(t[j])) j++;
+    if (j === t.length || /\s/.test(t[j])) return t.slice(0, j).trim();
+  }
+  return '';
+}
 
 // Is this caller the site's operator rather than a visitor?
 //
@@ -274,11 +302,18 @@ async function handler(req, res) {
   // running out of credit returned 502 for every message and dropped the chat
   // to its offline keyword bot - with Gemini's key sitting unread in the
   // project the whole time (see _models.js).
+  // WHY A REPLY STOPPED MID-SENTENCE. "Is he open to full-time roles?" came
+  // back cut off. The free cascade leads with gpt-oss-120b, a reasoning model,
+  // and Gemini flash thinks too: both bill their hidden reasoning against the
+  // same token budget as the answer, and 700 tokens could be spent before the
+  // answer ended. Three fixes: a budget with room for the reasoning, a request
+  // to reason less where the model accepts it, and a check of HOW the model
+  // stopped, so a cut-off answer is never shown as if it were finished.
   async function viaFree() {
     const convo = messages.map((m) => (m.role === 'user' ? 'User: ' : 'Anchit: ') + m.content).join('\n');
-    const { text, provider, model } = await freeGenerate(convo + '\nAnchit:', { system: PERSONA, maxTokens: 700 });
-    const reply = String(text || '').trim();
-    if (!reply) throw new Error('empty');
+    const { text, provider, model, truncated } = await freeGenerate(convo + '\nAnchit:', { system: PERSONA, maxTokens: FREE_MAX_TOKENS, reasoning: 'low' });
+    const reply = truncated ? endAtSentence(text) : String(text || '').trim();
+    if (!reply) throw new Error(truncated ? 'truncated' : 'empty');
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('X-Chat-Engine', provider);
     return res.status(200).json({ reply, engine: provider, model });
@@ -297,7 +332,7 @@ async function handler(req, res) {
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
       },
-      body: JSON.stringify({ model: MODEL, max_tokens: 600, system: PERSONA, messages }),
+      body: JSON.stringify({ model: MODEL, max_tokens: CLAUDE_MAX_TOKENS, system: PERSONA, messages }),
     });
     if (!r.ok) {
       const detail = await r.text().catch(() => '');
@@ -316,7 +351,10 @@ async function handler(req, res) {
       return res.status(502).json({ error: 'upstream' });
     }
     const data = await r.json();
-    const reply = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('').trim();
+    const raw = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('').trim();
+    // stop_reason 'max_tokens' means the answer was cut off; end it at its
+    // last complete sentence rather than mid-word.
+    const reply = data.stop_reason === 'max_tokens' ? endAtSentence(raw) : raw;
     // An empty 200 is still Anthropic failing to answer. It used to return
     // 'empty' and stop, which left the free providers untried for one of the
     // three ways the call can fail.
@@ -343,4 +381,4 @@ module.exports = handler;
 module.exports.config = { runtime: 'nodejs' };
 // Exported so the failure classification can be tested against real upstream
 // error bodies without spending a request. Matches the pattern in api/tts.js.
-module.exports._test = { classifyUpstream, isOperator, PERSONA };
+module.exports._test = { classifyUpstream, isOperator, PERSONA, endAtSentence, FREE_MAX_TOKENS, CLAUDE_MAX_TOKENS };

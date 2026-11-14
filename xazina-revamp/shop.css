@@ -12,10 +12,10 @@
 .shop-mark{width:max-content;font:500 clamp(31px,3.5vw,53px)/1 var(--serif);letter-spacing:.19em;white-space:nowrap;display:inline-flex;align-items:center}
 .shop-mark span{margin-left:9px;font-size:.45em;letter-spacing:0;color:#ecd2f7}
 .shop-nav,.shop-tools{display:flex;align-items:center;gap:clamp(14px,2.1vw,34px)}
-.shop-nav a,.shop-tools a,.shop-tools summary{font-size:10px;text-transform:uppercase;letter-spacing:.14em;font-weight:700;display:inline-flex;align-items:center;gap:5px;min-height:44px;white-space:nowrap}
+.shop-nav a,.shop-tools a,.shop-tools summary{font-size:11px;text-transform:uppercase;letter-spacing:.14em;font-weight:700;display:inline-flex;align-items:center;gap:5px;min-height:44px;white-space:nowrap}
 .shop-tools{justify-content:end;gap:clamp(11px,1.5vw,24px)}
 .shop-tools a{position:relative}
-.shop-tools a [data-bag-count]{min-width:15px;height:15px;padding-inline:3px;border-radius:10px;background:#eacbfd;color:#1e1227;font:700 9px/15px var(--sans);text-align:center}
+.shop-tools a [data-bag-count]{min-width:17px;height:17px;padding-inline:4px;border-radius:10px;background:#eacbfd;color:#1e1227;font:700 11px/17px var(--sans);text-align:center}
 .shop-tools summary{cursor:pointer;list-style:none}
 .shop-tools summary::-webkit-details-marker{display:none}
 .shop-tools details[open] summary span{transform:rotate(45deg)}
@@ -35,10 +35,10 @@
 .shop-cover[data-cover] h1{font-size:clamp(50px,7.5vw,113px);max-width:16ch}
 .shop-cover-copy{max-width:1000px}
 .shop-cover-copy>.shop-button{margin-top:23px}
-.shop-kicker{display:flex;align-items:center;gap:8px;color:var(--house-lilac);font:700 10px/1.45 var(--sans);letter-spacing:.19em;text-transform:uppercase}
+.shop-kicker{display:flex;flex-wrap:wrap;align-items:center;gap:8px;color:var(--house-lilac);font:700 11px/1.45 var(--sans);letter-spacing:.16em;text-transform:uppercase}
 .shop-kicker svg{width:12px;height:12px}
 .shop-lede{max-width:60ch;color:#f5eaf7;font-size:clamp(14px,1.65vw,19px);line-height:1.5}
-.shop-cover-note{font-size:9px;color:#f3deff;letter-spacing:.21em;font-weight:700;justify-self:end}
+.shop-cover-note{font-size:11px;color:#f3deff;letter-spacing:.21em;font-weight:700;justify-self:end}
 .shop-cover-action{display:inline-flex;align-items:center;gap:10px;min-height:44px;margin-top:19px;border-bottom:1px solid #d8b4e8;font-size:11px;text-transform:uppercase;letter-spacing:.11em;font-weight:700}
 .shop-cover-action:hover{color:#efc8ff}
 .shop-paper{background:var(--house-paper);color:var(--house-ink);color-scheme:light}
@@ -98,7 +98,7 @@
 /* On a laptop the 751px photo pushed the other photos below the screen. */
 @media(min-width:621px){.shop-main-image{max-height:min(66vh,720px)}}
 .shop-main-image img{height:100%;object-fit:contain;mix-blend-mode:multiply}
-.shop-main-image span{position:absolute;bottom:12px;right:12px;color:#3d2448;background:#fbf5f9e4;padding:7px 9px;font-size:10px}
+.shop-main-image span{position:absolute;bottom:12px;right:12px;color:#3d2448;background:#fbf5f9e4;padding:7px 9px;font-size:11px}
 .shop-thumbs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:8px}
 .shop-thumbs button{padding:0;border:1px solid transparent;background:#f3e8f3;cursor:pointer;aspect-ratio:1;min-width:0}
 .shop-thumbs button[aria-pressed=true]{border-color:#e3b3ff;outline:1px solid #9b72ae}
@@ -127,7 +127,7 @@
 .source-content h2,.source-content h3,.source-content h4,.source-content h5{font:500 clamp(31px,4.8vw,68px)/1 var(--serif);letter-spacing:-.042em;margin:18px 0 14px;text-wrap:balance}
 .source-content h3{font-size:clamp(28px,3.5vw,53px)}.source-content h4,.source-content h5{font-size:clamp(22px,2.5vw,35px)}
 .source-content :is(img,video){display:block;width:100%;height:auto;margin-block:14px;background:#ede4ef}
-.source-content video{background:#140d1c;object-fit:contain}
+.source-content video{background:#140d1c;object-fit:cover}
 .source-content picture{display:block}.source-content picture img{margin:0}
 /* A photo on its own spans the column; cover, not contain, so there is no lilac letterbox. */
 .source-content img:not(.src-card *,.src-split-media *,.src-swap *){max-height:min(76vh,720px);object-fit:cover}
@@ -211,10 +211,10 @@ body:is([data-shop-kind=collection],[data-shop-kind=journal],[data-shop-kind=tag
 .src-quote>p{max-width:none}
 .src-quote>.src-qmark~p{font:italic 400 clamp(16px,1.35vw,19px)/1.5 var(--serif);color:var(--house-ink);margin:0 0 14px}
 .src-quote>.src-qmark~.src-qmark~p{font:600 13px/1.4 var(--sans);font-style:normal;margin:0;padding-top:12px;border-top:1px solid var(--house-hair)}
-.src-quote>.src-qmark~.src-qmark~p~p{font-weight:600;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--house-muted);margin-top:3px;padding:0;border:0}
+.src-quote>.src-qmark~.src-qmark~p~p{font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--house-muted);margin-top:3px;padding:0;border:0}
 @media(prefers-reduced-motion:reduce){.src-swap>:nth-child(2),.source-content summary::after{transition:none}}
 .source-block{border-top:1px solid #d4c2da;padding:22px 0 clamp(26px,4vw,64px);display:grid;grid-template-columns:115px minmax(0,1fr);gap:16px}
-.source-number{display:flex;align-items:center;gap:6px;height:max-content;font-size:9px;color:#764e83;letter-spacing:.12em;font-weight:700}
+.source-number{display:flex;align-items:center;gap:6px;height:max-content;font-size:11px;line-height:1.35;color:#764e83;letter-spacing:.1em;font-weight:700;overflow-wrap:anywhere}
 .source-number svg{width:11px;height:11px}
 /* Below a laptop the 115px label column is a fifth of the screen: the label goes on top. */
 @media(max-width:1023px){.source-block{grid-template-columns:minmax(0,1fr);gap:10px}}
@@ -253,7 +253,7 @@ body:is([data-shop-kind=collection],[data-shop-kind=journal],[data-shop-kind=tag
  .shop-foot-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media(max-width:620px){
- .shop-top{min-height:64px;gap:5px}.shop-tools{gap:11px}.shop-tools a,.shop-tools summary{font-size:9px}
+ .shop-top{min-height:64px;gap:5px}.shop-tools{gap:11px}.shop-tools a,.shop-tools summary{font-size:11px}
  .shop-mega-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:19px}
  .shop-mega h2,.shop-mega h2 a{font-size:26px!important}
  .shop-cover{min-height:450px}
@@ -272,7 +272,7 @@ body:is([data-shop-kind=collection],[data-shop-kind=journal],[data-shop-kind=tag
  .shop-bag-row input{padding-inline:5px}
 }
 @media(prefers-reduced-motion:reduce){.shop-card img{transition:none}}
-.shop-product-guide{display:flex;flex-wrap:wrap;gap:8px 17px;margin-top:18px;padding-top:13px;border-top:1px solid #cfacde4d;font-size:11px;color:#eadcf1}
+.shop-product-guide{display:flex;flex-wrap:wrap;gap:8px 17px;margin-top:18px;padding-top:13px;border-top:1px solid #cfacde4d;font-size:12px;color:#eadcf1}
 .shop-product-guide a{text-decoration:underline;text-underline-offset:4px}
 .shop-product{position:relative;isolation:isolate}
 .shop-product::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 88% 29%,#72448f5c,transparent 51%);animation:maison-glow 6s ease-in-out infinite alternate}
@@ -291,3 +291,29 @@ body:is([data-shop-kind=collection],[data-shop-kind=journal],[data-shop-kind=tag
 }
 .shop-social{display:flex;flex-wrap:wrap;gap:10px 21px;align-items:center;padding-bottom:20px}
 .shop-social a{font-size:12px;color:#e7d7ec}
+
+/* Concept bar: the same note on every page of all three storefront concepts.
+   Neutral chrome, deliberately not the house palette. It scrolls away and the
+   sticky header then pins at top:0. */
+.concept-bar{position:relative;z-index:60;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 18px;padding:8px 16px;font:600 12px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.02em;background:#111;color:#f5f0e8;text-align:center}
+.concept-bar p{margin:0}
+.concept-bar a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+.concept-bar nav{display:flex;flex-wrap:wrap;justify-content:center;gap:0 14px}
+.concept-bar nav a{display:inline-flex;align-items:center;min-height:24px}
+.concept-bar a:focus-visible{outline:2px solid #f5f0e8;outline-offset:2px}
+.concept-bar p{max-width:none}
+.shop-kicker .concept-tag{color:#f3e6ff;border-color:#f3e6ff80;letter-spacing:.12em}
+/* Captured videos: the shape of their own poster, cropped to fill (never
+   letterboxed), one play button until they play. */
+.src-video{position:relative;min-width:0}
+.source-content .src-video video{width:100%;height:auto;max-height:min(76vh,720px);margin:0;object-fit:cover;background:#140d1c}
+.src-play{position:absolute;inset:0;margin:auto;width:64px;height:64px;border-radius:50%;border:1px solid #fff9;background:#140d1ccc;color:#fff;cursor:pointer;display:grid;place-items:center}
+.src-play::before{content:"";width:0;height:0;margin-left:5px;border-style:solid;border-width:11px 0 11px 18px;border-color:transparent transparent transparent currentColor}
+.src-play:hover{background:#2c1639}
+.src-play:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.src-play[hidden]{display:none}
+/* One film, two cuts: the landscape cut on wide screens, the portrait cut on
+   a phone, across the full column either way. */
+.src-grid:has(>.src-video-pair){grid-template-columns:minmax(0,1fr)}
+@media(min-width:621px){.src-video-pair.src-video-tall{display:none}}
+@media(max-width:620px){.src-video-pair.src-video-wide{display:none}}

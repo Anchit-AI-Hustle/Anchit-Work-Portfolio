@@ -1,5 +1,5 @@
 import { mountModel } from './model.js?v=prism-3';
-import { mountStory } from './story.js?v=prism-3';
+import { mountStory } from './story.js?v=prism-4';
 
 const media = matchMedia('(prefers-reduced-motion: reduce)');
 const motion = window.Motion;
@@ -38,7 +38,44 @@ const shine = new IntersectionObserver(entries => {
   }
 }, { threshold: .28 });
 document.querySelectorAll('.piece,.scent-layout figure,.atelier-art').forEach(el => shine.observe(el));
+// The concept bar sits above the film. The film is one screen tall minus the
+// bar, so the first screen still ends on its chapter controls; the height is
+// written on the story, not on :root, and only when the bar resizes.
+const conceptBar = document.querySelector('.concept-bar');
+const lightStory = document.getElementById('light-story');
+if (conceptBar && lightStory) {
+  const fit = () => lightStory.style.setProperty('--concept-h', conceptBar.offsetHeight + 'px');
+  fit();
+  new ResizeObserver(fit).observe(conceptBar);
+}
 mountStory({ motion, media, onEffects:updateEffects });
+
+// "Design notes" in the concept bar lands here from every Xazina page. The
+// film grows once it is ready and the photos above load as they are passed,
+// so a smooth jump measured at the start ended 500-800px short on a phone.
+// Until the reader takes over, the target is held in place while the page
+// above it settles.
+function holdTarget() {
+  // A malformed escape (#%E0) throws, and an uncaught throw here stopped the
+  // whole module, Light Lab included.
+  let id = '';
+  try { id = decodeURIComponent(location.hash.slice(1)); } catch (e) { return; }
+  const target = id && id !== 'top' && document.getElementById(id);
+  if (!target || target.closest('#light-story')) return;
+  let reader = false;
+  const off = () => { reader = true; };
+  for (const type of ['wheel', 'touchstart', 'keydown', 'pointerdown']) addEventListener(type, off, { once: true, passive: true });
+  const margin = () => parseFloat(getComputedStyle(target).scrollMarginTop) || 0;
+  const snap = () => {
+    if (!reader && Math.abs(target.getBoundingClientRect().top - margin()) > 2) target.scrollIntoView({ behavior: 'instant' });
+  };
+  const watch = new ResizeObserver(() => requestAnimationFrame(snap));
+  watch.observe(document.body);
+  addEventListener('scrollend', snap, { once: true });
+  setTimeout(() => { watch.disconnect(); for (const type of ['wheel', 'touchstart', 'keydown', 'pointerdown']) removeEventListener(type, off); }, 4000);
+}
+holdTarget();
+addEventListener('hashchange', holdTarget);
 
 const stage = document.getElementById('stage');
 const canvas = document.getElementById('model');
@@ -51,13 +88,13 @@ if (lab) {
   const modes = {
     3: { name: 'FIG 01 / BRILLIANT CUT', label: 'Rotation', max: 360, start: 0, unit: '°',
       hint: 'Turn a brilliant-cut model to see how its facets catch the light.',
-      alt: 'Interactive 3D projection of a faceted gemstone', verb: 'rotation' },
-    4: { name: 'FIG 02 / TESSERACT', label: 'Time phase', max: 100, start: 0, unit: '%',
-      hint: 'Scrub through one cycle of a rotating 4D cube projected into three dimensions.',
-      alt: 'Interactive projection of a four-dimensional tesseract', verb: 'time' },
-    5: { name: 'FIG 03 / PENTERACT', label: 'Light dispersion', max: 100, start: 62, unit: '%',
-      hint: 'Split the light across the edges of a projected 5D cube.',
-      alt: 'Interactive projection of a five-dimensional penteract with colour dispersion', verb: 'motion' }
+      alt: 'Interactive model of a faceted brilliant-cut gemstone', verb: 'rotation' },
+    4: { name: 'FIG 02 / TIME', label: 'Moment', max: 100, start: 0, unit: '%',
+      hint: 'Move through one turn of a cube that folds through time, a moment at a time.',
+      alt: 'Interactive drawing of a cube folding through time', verb: 'time' },
+    5: { name: 'FIG 03 / LIGHT', label: 'Colour split', max: 100, start: 62, unit: '%',
+      hint: 'Split white light into colour across the edges of a turning form.',
+      alt: 'Interactive drawing of a turning form with light split into colour', verb: 'motion' }
   };
   let mode = 3, playing = effects, visible = false, frame = 0, last = 0;
   let value = 0, time = 0, yaw = 0, pitch = 0, drag = null;
