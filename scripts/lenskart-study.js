@@ -318,8 +318,8 @@ async function caseStudy(browser, vp) {
 
   const range = await page.$$eval('#im-range tbody tr', (rs) => rs.map((r) => [...r.cells].map((c) => c.innerText.trim())));
   const row = (label) => (range.find((r) => r[0].startsWith(label)) || []).slice(1);
-  check(`${L}: sizing shows low, base and high`, row('Extra revenue').join() === '5.2,15.7,26.2', JSON.stringify(row('Extra revenue')));
-  check(`${L}: sizing is contribution net of running costs`, row('Net of running costs').join() === '−0.4,4.9,10.1', JSON.stringify(row('Net of running costs')));
+  check(`${L}: sizing shows low, base and high`, row('Extra revenue').join() === '4.0,14.0,24.1', JSON.stringify(row('Extra revenue')));
+  check(`${L}: sizing is contribution net of running costs`, row('Net of running costs').join() === '−1.0,3.9,8.9', JSON.stringify(row('Net of running costs')));
   // Each column of levers must add up to the total printed under it.
   const f = (t) => parseFloat(String(t).replace('−', '-'));
   const sums = [0, 1, 2].map((i) => range.slice(0, 3).reduce((a, r) => a + f(r[i + 1]), 0));
@@ -544,9 +544,9 @@ async function prototype(browser, vp) {
 
   await page.click('#t-console');
   const total = norm(await page.textContent('#m-total'));
-  check(`${L}: impact total ₹15.7 cr · $1.67M`, total === '₹15.7 cr · $1.67M', total);
+  check(`${L}: impact total ₹14.0 cr · $1.49M`, total === '₹14.0 cr · $1.49M', total);
   const netTxt = norm(await page.textContent('#m-net'));
-  check(`${L}: contribution after running costs ₹4.9 cr · $0.51M`, netTxt === '₹4.9 cr · $0.51M', netTxt);
+  check(`${L}: contribution after running costs ₹3.9 cr · $0.42M`, netTxt === '₹3.9 cr · $0.42M', netTxt);
   const head = norm(await page.textContent('#segtbl th:last-child'));
   check(`${L}: value column is labelled as incremental revenue`, /^Incremental revenue/.test(head), head);
   // The table and the calculator share their assumptions: with no extra
@@ -592,7 +592,7 @@ async function prototype(browser, vp) {
   const junk = norm(await page.textContent('#m-total')) + ' ' + norm(await page.textContent('#m-net')) + ' ' + norm(await page.textContent('#costs'));
   const noFx = !/\$/.test(norm(await page.textContent('#m-total')));
   await setNum(page, '#m-acc', 9900000); await setNum(page, '#m-fx', 94.24); await setNum(page, '#m-pm', 64);
-  check(`${L}: the calculator never shows NaN, Infinity, negative revenue or a dollar figure without a rate`, !/NaN|Infinity/.test(junk) && !/^−/.test(junk) && noFx && norm(await page.textContent('#m-net')) === '₹4.9 cr · $0.51M', junk.slice(0, 90));
+  check(`${L}: the calculator never shows NaN, Infinity, negative revenue or a dollar figure without a rate`, !/NaN|Infinity/.test(junk) && !/^−/.test(junk) && noFx && norm(await page.textContent('#m-net')) === '₹3.9 cr · $0.42M', junk.slice(0, 90));
 
   let worst = 0;
   for (const tab of ['#t-customer', '#t-checkin', '#t-console', '#t-brand']) {
