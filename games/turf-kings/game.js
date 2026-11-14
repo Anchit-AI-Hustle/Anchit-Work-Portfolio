@@ -54,7 +54,7 @@
       alt: { c1: '#f6f1e7', c2: '#12b5c6', shorts: '#f6f1e7', sock: '#f6f1e7' }, names: ['G. Pillai', 'W. Varkey', 'Z. Nambiar', 'U. Cheriyan', 'X. Kurup'] },
     { name: 'Hauz Khas Hawks', short: 'Hawks', abbr: 'HKH', c1: '#e23a43', c2: '#1b1b1f', shorts: '#1b1b1f', sock: '#e23a43',
       alt: { c1: '#f6f1e7', c2: '#e23a43', shorts: '#f6f1e7', sock: '#f6f1e7' }, names: ['B. Khanna', 'L. Anand', 'H. Bakshi', 'P. Suri', 'Q. Dhillon'] },
-    { name: 'Park Street Pumas', short: 'Pumas', abbr: 'PSP', c1: '#f4c21d', c2: '#2b2b2b', shorts: '#2b2b2b', sock: '#f4c21d',
+    { name: 'Park Street Pilots', short: 'Pilots', abbr: 'PSP', c1: '#f4c21d', c2: '#2b2b2b', shorts: '#2b2b2b', sock: '#f4c21d',
       alt: { c1: '#2b2b2b', c2: '#f4c21d', shorts: '#2b2b2b', sock: '#2b2b2b' }, names: ['O. Ghosh', 'R. Dutta', 'E. Sen', 'M. Biswas', 'C. Roy'] },
     { name: 'Charminar Chargers', short: 'Chargers', abbr: 'CHM', c1: '#9c2347', c2: '#ffd8e2', shorts: '#4d1022', sock: '#9c2347',
       alt: { c1: '#f6f1e7', c2: '#9c2347', shorts: '#f6f1e7', sock: '#f6f1e7' }, names: ['D. Reddy', 'V. Naidu', 'K. Goud', 'S. Rao', 'A. Yadav'] },
@@ -215,7 +215,7 @@
     // banner on the parapet edge
     g.save(); g.font = '700 11px ' + F_MONO; g.textAlign = 'center'; g.fillStyle = 'rgba(255,207,90,.55)';
     if (g.letterSpacing !== undefined) g.letterSpacing = '4px';
-    g.fillText('ROOFTOP LEAGUE  -  FIVE A SIDE  -  KINGS CUP', 0, 352); g.restore();
+    g.fillText('ROOFTOP LEAGUE  -  FIVE A SIDE  -  BANYAN CUP', 0, 352); g.restore();
 
     // 5. rooftop clutter on the short sides: water tanks, AC units, aerials
     [[-562, -205], [562, 205], [-562, 190], [562, -190]].forEach((t) => {
@@ -272,8 +272,8 @@
       for (let i = 0; i < n; i++) { g.fillStyle = i % 2 ? '#ffb736' : '#ff6940'; if (horiz) g.fillRect(x + i * 80 + 38, y + 2, 3, h - 4); else g.fillRect(x + 2, y + i * 80 + 38, w - 4, 3); }
       if (label && horiz) { g.save(); g.fillStyle = '#ffd36b'; g.font = '800 8px ' + F_UI; g.textAlign = 'center'; for (let i = 0; i < n; i++) g.fillText(label[i % label.length], x + i * 80 + 20, y + 8.4); g.restore(); }
     };
-    board(-457, -HW - 15, 914, 12, true, ['TURF KINGS', 'ROOFTOP LEAGUE', 'FIVE A SIDE', 'KINGS CUP']);
-    board(-457, HW + 3, 914, 12, true, ['CITY CAGE', 'TURF KINGS', 'KINGS CUP', 'ROOFTOP LEAGUE']);
+    board(-457, -HW - 15, 914, 12, true, ['TURF KINGS', 'ROOFTOP LEAGUE', 'FIVE A SIDE', 'BANYAN CUP']);
+    board(-457, HW + 3, 914, 12, true, ['CITY CAGE', 'TURF KINGS', 'BANYAN CUP', 'ROOFTOP LEAGUE']);
     [-1, 1].forEach((sx) => {
       const x0 = sx > 0 ? HL + 3 : -HL - 15;
       board(x0, -237, 12, 237 - GH - 4, false); board(x0, GH + 4, 12, 237 - GH - 4, false);
@@ -1466,7 +1466,7 @@
       arc.over({ score: CUP.total, scoreLabel: 'Cup points', eyebrow: 'Knocked out in the ' + STAGES[CUP.idx].toLowerCase(), title: 'Cup run over', html: html + detail + resHtml, again: 'New cup run' });
     } else if (CUP.idx >= 2) {
       CUP.total += 500;
-      arc.over({ score: CUP.total, scoreLabel: 'Cup points', eyebrow: 'Kings Cup', title: 'Champions of the <em>rooftop</em>', html: html + detail + resHtml + '<p>Trophy bonus +500</p>', again: 'New cup run' });
+      arc.over({ score: CUP.total, scoreLabel: 'Cup points', eyebrow: 'Banyan Cup', title: 'Champions of the <em>rooftop</em>', html: html + detail + resHtml + '<p>Trophy bonus +500</p>', again: 'New cup run' });
     } else {
       CUP.pending = true;
       arc.over({ eyebrow: STAGES[CUP.idx] + ' won', title: 'Through to the ' + STAGES[CUP.idx + 1].toLowerCase(), html: html + detail + resHtml + '<p>Next: <b style="color:var(--ink)">' + arc.esc(TEAMS[CUP.opps[CUP.idx + 1]].name) + '</b>, and they are tougher.</p>', again: 'Next match' });

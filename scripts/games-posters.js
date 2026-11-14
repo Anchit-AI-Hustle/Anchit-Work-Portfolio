@@ -18,7 +18,7 @@ const { chromium } = require('./_playwright.js');
 
 const BASE = (process.env.BASE || 'http://127.0.0.1:8099').replace(/\/$/, '');
 const ROOT = path.join(__dirname, '..');
-const GAMES = ['saffron-city', 'midnight-apex', 'ghat-riders', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'sky-thread', 'tiffin-dash', 'board-strike', 'yard-catch', 'rally-cage', 'fare-run', 'chhat-hopper', 'kart-mela', 'paint-ops', 'nitro-goal', 'mela-pinball', 'laddoo-dash', 'rangoli-drop', 'akash-raiders', 'diya-breaker'];
+const GAMES = ['saffron-city', 'midnight-apex', 'ghat-riders', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'ring-rajas', 'sky-thread', 'tiffin-dash', 'board-strike', 'yard-catch', 'rally-cage', 'fare-run', 'chhat-hopper', 'kart-mela', 'paint-ops', 'nitro-goal', 'mela-pinball', 'laddoo-dash', 'rangoli-drop', 'akash-raiders', 'diya-breaker'];
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // How long to play before the photo, and what to hold. Tuned per game so the
@@ -28,11 +28,12 @@ const PLAY = {
   // one still, so each is pinned to full detail: a query flag where the game reads one, or its own test hook.
   'saffron-city': { ms: 5000, keys: ['ArrowUp'], taps: ['KeyF'], tapAt: 400, query: '?q=2&lod=1' },
   'midnight-apex': { ms: 9000, keys: ['ArrowUp'], taps: [], hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
-  'ghat-riders': { ms: 9000, keys: ['ArrowUp'], taps: [], hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
-  'turf-kings': { ms: 4500, keys: ['ArrowUp', 'ArrowRight'], taps: [], query: '?quality=0' },
+  'ghat-riders': { ms: 6000, keys: ['ArrowUp'], taps: [], setup: () => window.__arcade.dev && window.__arcade.dev.skipIntro(), hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
+  'turf-kings': { ms: 4500, keys: ['ArrowUp', 'ArrowRight'], taps: [], query: '?quality=0', setup: () => window.__arcade.dev && window.__arcade.dev.skip() },
   'super-over': { ms: 3600, keys: [], taps: [], query: '?q=3' },
   'gully-champs': { ms: 3200, keys: [], taps: [], query: '?q=3&fixq=1' },
-  'court-lights': { ms: 2800, keys: [], taps: ['Space'], tapAt: 700, query: '?q=3' },
+  'court-lights': { ms: 3000, keys: [], taps: [], query: '?q=3', setup: () => { const d = window.__arcade.dev; d.live(); setTimeout(() => d.dunk(), 2400); }, hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
+  'ring-rajas': { ms: 2500, keys: [], taps: [], setup: () => { const d = window.__arcade.dev; d.skip(); d.duo('press', 0.6, false, true); if (d.pyro) d.pyro(12); if (d.hud) d.hud(false); if (d.shot) d.shot('close'); }, hiq: () => window.__arcade.dev && window.__arcade.dev.quality(3) },
   'sky-thread': { ms: 3500, keys: ['ArrowUp', 'ArrowRight'], taps: ['Space'], tapAt: 500, query: '?q=3' },
   'tiffin-dash': { ms: 2800, keys: ['ArrowUp'], taps: ['Space'], tapAt: 400, hiq: () => window.__arcade.dev && window.__arcade.dev.setQuality(3) },
   'board-strike': { ms: 2600, keys: ['ArrowRight'], taps: ['Space'], tapAt: 500, query: '?q=3' },
