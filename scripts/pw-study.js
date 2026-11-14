@@ -54,6 +54,7 @@
 // MUT=mentors       the case study's mentor head-count drifts from the calculator's
 // MUT=ambush        the consent question covers the first screen again
 // MUT=nostart       the case study opens with no 'start here' steps
+// MUT=focussteal    the deferred consent question takes the visitor's focus
 const { chromium } = require('./_playwright.js');
 const vercel = require('../vercel.json');
 const BASE = process.env.BASE || 'http://127.0.0.1:8099';
@@ -96,6 +97,7 @@ function mutate(src) {
   if (MUT === 'pilot') return src.replace('<li>Class 10 and Class 11 (JEE, NEET): both have a next batch</li>', '<li>Class 11 JEE and NEET dropper</li>');
   if (MUT === 'mentors') return src.replace('about 51 full-time mentors at 60% of their week on calls, and more', 'roughly 30 full-time mentors, and more');
   if (MUT === 'ambush') return src.replace(' data-consent-defer', '');
+  if (MUT === 'focussteal') return src.replace('</body>', '<script>document.addEventListener("click",function(){},true);(function w(){var b=document.querySelector("#consentBar .cb-primary");if(b&&!w.d){w.d=1;b.focus();}else if(!b)setTimeout(w,50);})();</script></body>');
   if (MUT === 'nostart') return src.replace(/<nav class="start"[\s\S]*?<\/nav>/, '');
   if (MUT === 'walkurl') return src.replace('<a href="/pw-study/prototype#pulse">https://', '<a href="/pw-study/prototype#console">https://');
   return src;
@@ -232,10 +234,15 @@ async function firstScreen(page, L, kind) {
   }
   check(`${L}: no consent question covers the first screen`, !f.consent, 'consent bar up=' + f.consent);
   // It is deferred, not dropped: reading on brings the question.
+  // A focused control is the visitor's place on the page; the late question must not take it,
+  // or a Space meant for scrolling answers it.
+  await page.focus('.hero a, .hero button').catch(() => {});
+  const before = await page.evaluate(() => document.activeElement && (document.activeElement.textContent || '').trim().slice(0, 30));
   await page.evaluate(() => window.scrollTo(0, innerHeight * 1.5));
   await page.waitForTimeout(700);
-  const later = await page.evaluate(() => !!document.getElementById('consentBar'));
-  check(`${L}: the consent question still comes once the visitor reads on`, later, 'consent bar present=' + later);
+  const later = await page.evaluate(() => ({ bar: !!document.getElementById('consentBar'), inBar: !!(document.activeElement && document.activeElement.closest('#consentBar')) }));
+  check(`${L}: the consent question still comes once the visitor reads on`, later.bar, 'consent bar present=' + later.bar);
+  check(`${L}: the late consent question leaves the visitor's focus where it was`, later.bar && !later.inBar, `focus was on "${before}", now in bar=${later.inBar}`);
   await page.evaluate(() => window.scrollTo(0, 0));
 }
 

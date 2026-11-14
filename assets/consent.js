@@ -35,7 +35,9 @@
     document.head.appendChild(s);
   }
 
-  function banner() {
+  // quiet: shown while the visitor is mid-interaction (a deferred ask), so it
+  // must not take their focus; a stray Space would otherwise answer it.
+  function banner(quiet) {
     if (document.getElementById('consentBar')) return;
 
     var bar = document.createElement('div');
@@ -167,7 +169,7 @@
     });
 
     var first = bar.querySelector('.cb-primary');
-    if (first) first.focus({ preventScroll: true });
+    if (first && !quiet) first.focus({ preventScroll: true });
   }
 
   function init() {
@@ -181,7 +183,7 @@
       var asked = false, timer;
       var ask = function () {
         if (asked) return; asked = true;
-        window.removeEventListener('scroll', onScroll); clearTimeout(timer); banner();
+        window.removeEventListener('scroll', onScroll); clearTimeout(timer); banner(true);
       };
       var onScroll = function () { if (window.scrollY > window.innerHeight * 0.6) ask(); };
       window.addEventListener('scroll', onScroll, { passive: true });
