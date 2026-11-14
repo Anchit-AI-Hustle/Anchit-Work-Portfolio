@@ -55,9 +55,18 @@ const MUTANT_CSS = {
 const failures = [];
 const fail = (where, msg) => failures.push(`${where}: ${msg}`);
 
+// A stray quote inside class="..." ends the attribute early, and every utility
+// after it becomes an attribute NAME: the Deli Basket button shipped that way,
+// unstyled at every width, while every behaviour check still passed.
+const JUNK_PROBE = () => {
+  window.junkAttributes = () => [...document.querySelectorAll('*')].flatMap(el =>
+    [...el.attributes].filter(a => /[\[\]#:\/(]/.test(a.name)).map(a => `<${el.tagName.toLowerCase()}${el.id ? '#' + el.id : ''}> "${a.name}"`)).slice(0, 5);
+};
+
 async function open(browser, path, w, h) {
   const ctx = await browser.newContext({ viewport: { width: w, height: h } });
   await ctx.addInitScript(() => { try { localStorage.setItem('cookie-consent', 'denied'); } catch (e) { /* private mode */ } });
+  await ctx.addInitScript(JUNK_PROBE);
   const page = await ctx.newPage();
   const errors = [];
   page.on('pageerror', e => errors.push('pageerror ' + e.message));
@@ -102,12 +111,14 @@ async function xazina(browser, path, w, h) {
     }
     // A closing quote mark on its own line was the giveaway of an unstyled testimonial.
     out.strayMarks = [...document.querySelectorAll('.source-content .src-qmark')].filter(m => m.offsetParent && getComputedStyle(m).fontSize === getComputedStyle(m.parentElement).fontSize).length;
+    out.junk = junkAttributes();
     out.text = document.body.innerText;
     return out;
   }, w);
 
   if (r.overflow > 1) fail(where, `page scrolls sideways by ${r.overflow}px`);
   for (const e of errors) fail(where, e);
+  for (const j of r.junk) fail(where, `class attribute closed early: ${j}`);
   if (r.strayMarks) fail(where, `${r.strayMarks} testimonial quote marks shown as loose lines`);
   for (const k of ['Regular price', 'Unit price', 'Sale price', 'transform:translate', '\nType:\n', '0 pieces in this edit', 'This edit has no listed items']) {
     if (r.text.includes(k)) fail(where, `visible capture artefact "${k.trim()}"`);
@@ -142,13 +153,14 @@ async function cafe(browser, { path, header }, w, h) {
       const r = b.getBoundingClientRect(), p = row.getBoundingClientRect();
       return r.right > Math.min(p.right, de.clientWidth) + 1 || r.left < Math.max(p.left, 0) - 1 || b.scrollWidth > b.clientWidth + 1;
     }).map(b => b.textContent.trim()));
-    return { overflow: de.scrollWidth - de.clientWidth, headTop: head.top, barBottom: bar.bottom, headH: head.height, broken, clipped };
+    return { overflow: de.scrollWidth - de.clientWidth, headTop: head.top, barBottom: bar.bottom, headH: head.height, broken, clipped, junk: junkAttributes() };
   }, header);
   if (r.overflow > 1) fail(where, `page scrolls sideways by ${r.overflow}px`);
   if (r.headTop < r.barBottom - 1) fail(where, `disclaimer covers the header by ${Math.round(r.barBottom - r.headTop)}px`);
   if (w >= 1024 && r.headH > 70) fail(where, `header wraps to ${Math.round(r.headH)}px`);
   for (const b of r.broken) fail(where, `broken image ${b}`);
   for (const t of r.clipped) fail(where, `tab cut off: "${t}"`);
+  for (const j of r.junk) fail(where, `class attribute closed early: ${j}`);
   for (const e of errors) fail(where, e);
   await ctx.close();
 }
