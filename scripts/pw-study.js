@@ -78,7 +78,7 @@
 // MUT=noaiq / nosens / noleak / nested   case study AI-quality plan, sensitivity, problem size, nested iframe scroll
 // Third review (8.2 / 8.0), each with a mutation that must fail it:
 // MUT=pacecap nobacklog finalqueue doubtcouple sharecopy hindidefault plausible noskip (prototype)
-// MUT=leak3 nostack noembedscroll (case study)
+// MUT=leak3 nostacked noembedscroll (case study)
 // MUT=nosixq / nostack / breakeven / nogates / navcut / overclaim   case study blocks
 const { chromium } = require('./_playwright.js');
 const vercel = require('../vercel.json');
@@ -164,7 +164,7 @@ function mutate(src) {
   if (MUT === 'plausible') return src.replace("(t>3900e7*0.25?", '(false?');
   if (MUT === 'noskip') return src.replace('<a class="skip" href="#main">Skip to the prototype</a>', '');
   if (MUT === 'leak3') return src.replace("PW Pi's Daily Challenges lift week-three engagement, but no disclosed AI is aimed at renewal.", 'No disclosed AI aimed at retention or renewal.');
-  if (MUT === 'nostack') return src.replace('<table class="t-mid stack" id="six-q">', '<table class="t-mid" id="six-q">');
+  if (MUT === 'nostacked') return src.replace('<table class="t-mid stack" id="six-q">', '<table class="t-mid" id="six-q">');
   if (MUT === 'noembedscroll') return src.replace("e.data.type !== 'pw-scroll') return;", "e.data.type !== 'pw-scroll' || true) return;");
   if (MUT === 'tutogate') return src.replace('it scales only if recovery rises 11.3 points', 'it scales only if recovery rises 10 points');
   if (MUT === 'tutobase') return src.replace('<td>A pilot arm, not in the base cost: one hour', '<td>One hour');
