@@ -157,7 +157,10 @@ async function oaiChat(url, key, model, system, prompt, maxTokens, extraHeaders,
                       : [{ role: 'user', content: prompt }];
   const body = { model, messages: msgs, temperature: 0.6, max_tokens: maxTokens };
   if (meta && meta.reasoning && /gpt-oss/.test(model)) {
-    if (/openrouter\.ai/.test(url)) body.reasoning = { effort: meta.reasoning };
+    // Exact hostname, not a substring test: OpenRouter takes a nested object.
+    let host = '';
+    try { host = new URL(url).hostname; } catch (e) { /* not a URL: treat as OpenAI-style */ }
+    if (host === 'openrouter.ai') body.reasoning = { effort: meta.reasoning };
     else body.reasoning_effort = meta.reasoning;
   }
   const r = await fetchTO(url, {

@@ -56,7 +56,10 @@ mountStory({ motion, media, onEffects:updateEffects });
 // Until the reader takes over, the target is held in place while the page
 // above it settles.
 function holdTarget() {
-  const id = decodeURIComponent(location.hash.slice(1));
+  // A malformed escape (#%E0) throws, and an uncaught throw here stopped the
+  // whole module, Light Lab included.
+  let id = '';
+  try { id = decodeURIComponent(location.hash.slice(1)); } catch (e) { return; }
   const target = id && id !== 'top' && document.getElementById(id);
   if (!target || target.closest('#light-story')) return;
   let reader = false;

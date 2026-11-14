@@ -89,10 +89,20 @@ const CLAUDE_MAX_TOKENS = 1024;
 // The text up to its last complete sentence. Used only when a provider says
 // it stopped on the token budget. Returns '' if not even one sentence
 // finished, so the caller falls through instead of showing a fragment.
+// A plain backwards scan rather than a regex: the text comes from an upstream
+// model, and a greedy pattern with a trailing quantifier backtracks
+// polynomially on long runs of punctuation.
+const CLOSERS = new Set(['"', "'", '\u201D', '\u2019', ')', ']']);
 function endAtSentence(text) {
   const t = String(text || '').trim();
-  const m = t.match(/^[\s\S]*[.!?](?:["'”’)\]]*)(?=\s|$)/);
-  return m ? m[0].trim() : '';
+  for (let i = t.length - 1; i >= 0; i--) {
+    const c = t[i];
+    if (c !== '.' && c !== '!' && c !== '?') continue;
+    let j = i + 1;
+    while (j < t.length && CLOSERS.has(t[j])) j++;
+    if (j === t.length || /\s/.test(t[j])) return t.slice(0, j).trim();
+  }
+  return '';
 }
 
 // Is this caller the site's operator rather than a visitor?
