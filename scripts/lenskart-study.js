@@ -293,6 +293,11 @@ async function caseStudy(browser, vp) {
   }));
   check(`${L}: slide summaries match the full tables in the appendix`,
     nf.slide.length === 6 && nf.slide.join('|') === nf.table.join('|') && nf.risks === 3 && nf.riskRows === 10, JSON.stringify(nf).slice(0, 200));
+  // Review finding: "See all 22" must show all 22, including on a phone.
+  await page.click('#audit-sum a[href="#audit-full"]');
+  await page.waitForTimeout(300);
+  const allShown = await page.$$eval('#audit-tbl tbody tr', (rs) => rs.filter((r) => r.offsetParent !== null).length);
+  check(`${L}: "See all 22" opens the audit with all 22 rows showing`, allShown === 22, allShown + ' rows');
   check(`${L}: a skip link to the content`, sys.skip === '#main' && !!(await page.$('main#main')), sys.skip);
 
   const counts = {}; const said = {};

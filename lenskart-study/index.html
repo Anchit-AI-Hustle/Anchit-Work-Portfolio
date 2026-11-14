@@ -820,6 +820,15 @@ tr[hidden]{display:none!important}
   document.getElementById('audit-count').textContent='Showing '+n+' of '+rows.length+': not found';
 })();
 </script>
+<script>
+/* The slide's "See all 22" link must show all 22, even on a phone, where
+   the table otherwise opens on the 6 not found. */
+(function(){
+  function showAll(){ var c=document.querySelector('.filters .chip[data-f="all"]'); if(c) c.click(); }
+  document.addEventListener('click',function(e){ if(e.target.closest && e.target.closest('a[href="#audit-full"]')) showAll(); });
+  if(location.hash==='#audit-full') window.addEventListener('load',showAll);
+})();
+</script>
     <p class="small muted" style="margin-top:10px">Sorted Live → Partial → Not found. "Not found" means not publicly documented; logged-in experiences, push notifications and internal tools could differ.</p>
   </div>
 </section>
