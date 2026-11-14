@@ -446,7 +446,7 @@ async function caseStudy(browser, vp) {
   const risks2 = norm(await page.textContent('#risks'));
   check(`${L}: risks cover fairness, false alarms and AI safety; legal check comes first`,
     /The score is fair/.test(risks2) && /A false alarm does no harm/.test(risks2) && /The AI stays safe/.test(risks2) && /week 0/.test(risks2) && /Week 0/.test(plan), '');
-  check(`${L}: scale rule uses the confidence bound, not the point estimate`, /lower 90% confidence bound/.test(plan) && /April 2027/.test(plan) && /randomised by household/.test(plan), '');
+  check(`${L}: scale rule uses the confidence bound, not the point estimate`, /about 87,000 learners, six times the pilot/.test(plan) && !/4x the sample/.test(plan) && /lower 90% confidence bound/.test(plan) && /April 2027/.test(plan) && /randomised by household/.test(plan), '');
   if (vp.width >= 1080) {
     const fr = await page.$('.proto-frame');
     await fr.scrollIntoViewIfNeeded();
