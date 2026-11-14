@@ -70,6 +70,7 @@
 // MUT=a11y       the phone preview loses its region role
 // MUT=swatch     the Muted swatch drifts from the --muted token
 // MUT=tutobase   AI Tuto reads as part of the base plan while the costs leave it out
+// MUT=tutogate   AI Tuto's rollout gate sits below its cost break-even
 // MUT=nosixq / nostack / breakeven / nogates / navcut / overclaim   case study blocks
 const { chromium } = require('./_playwright.js');
 const vercel = require('../vercel.json');
@@ -134,6 +135,7 @@ function mutate(src) {
   if (MUT === 'breakeven') return src.replace('a lift of <b>0.62pp</b>', 'a lift of <b>2pp</b>');
   if (MUT === 'nogates') return src.replace(/<div class="card" id="gates"[\s\S]*?<\/table><\/div>/, '<div>');
   if (MUT === 'navcut') return src.replace('<a href="#risks">Risks</a>', '');
+  if (MUT === 'tutogate') return src.replace('it scales only if recovery rises 11.3 points', 'it scales only if recovery rises 10 points');
   if (MUT === 'tutobase') return src.replace('<td>A pilot arm, not in the base cost: one hour', '<td>One hour');
   if (MUT === 'overclaim') return src.replace('found where PW cannot yet see paying students drift away', 'found where paying students quietly drop off');
   return src;
@@ -392,6 +394,10 @@ async function caseStudy(browser, vp) {
   const tutoDown = norm(await page.textContent('#downside').catch(() => ''));
   check(`${L}: AI Tuto is a pilot arm outside the base cost, everywhere it appears`,
     /not in the base cost/.test(tutoRow) && /pilot arm/.test(sysTxt) && /outside the base cost/.test(tutoDown), tutoRow.slice(0, 120));
+  // Its rollout gate is its true cost break-even: ₹17 an hour against ₹150 per avoided call.
+  const gate = (17 / 150 * 100).toFixed(1);
+  check(`${L}: AI Tuto scales only past its cost break-even of ${gate} points`,
+    tutoDown.includes(`${gate} points`) && plan.includes(`${gate} points`) && !/rises 10 points/.test(plan), gate);
   // Break-even and the zero-renewal downside follow from the sizing table's own numbers.
   const down = norm(await page.textContent('#downside').catch(() => ''));
   const per1pp = 4.87e6 * 0.5 * 4104 / 1e9, be = (6.15 / per1pp).toFixed(2), zero = (4.87e6 * 0.5 * 0.35 * 0.01 * (36625 - 4104) / 1e7 + (4.87e6 - 0.96e6) * 0.015 * 3000 / 1e7 - 6.15).toFixed(1);
