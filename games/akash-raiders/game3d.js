@@ -358,7 +358,7 @@ function init(a) {
   R.sky.frustumCulled = false; R.sky.renderOrder = -10; scene.add(R.sky);
   a.canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); R.lost = true; }, false);
   a.canvas.addEventListener('webglcontextrestored', () => { R.lost = false; }, false);
-  POST = createPost(renderer, { arc: a, intro: false, results: { dist: 40, yaw: 0.18, rise: 0.05, speed: 0.2 }, target: (v) => { v.set(0, 14, 0); return true; }, look: { bloom: 0.75, bloomWide: 0.45, threshold: 0.62, knee: 0.25, vignette: 0.36, grain: 0.03, sat: 1.1, contrast: 1.06, lift: [0.01, 0.006, 0.03], gain: [1.02, 0.99, 1.0] } });
+  POST = createPost(renderer, { arc: a, intro: false, results: { dist: 40, yaw: 0.18, rise: 0.05, speed: 0.2 }, target: (v) => { v.set(0, 14, 0); return true; }, look: { bloom: 0.66, bloomWide: 0.42, threshold: 0.64, knee: 0.25, vignette: 0.36, grain: 0.034, sat: 0.97, contrast: 1.05, lift: [0.012, 0.013, 0.028], gain: [1.04, 1.0, 0.96] } });
   const q = /[?&]q=(\d)/.exec(location.search);
   if (q) R.lock = true;
   setQuality(q ? +q[1] : R.soft ? 0 : a.device === 'desktop' ? 3 : 2);
@@ -376,6 +376,7 @@ function setQuality(q) {
   R.q = q;
   const t = TIERS[q];
   if (POST) POST.setQuality(t.post, R.lock);
+  if (VFX) VFX.setQuality(q);
   if (FX) FX.density = t.fx;
   if (R.stars) R.stars.geometry.setDrawRange(0, Math.floor(R.starN * t.stars));
   if (R.city) R.city.count = Math.floor(R.cityN * t.city);
@@ -477,7 +478,7 @@ function pump() {
   }
   if (!R.built) {
     R.built = true;
-    const done = () => { R.ready = true; view.ready = true; };
+    const done = () => { R.ready = true; view.ready = true; loadVFX(); };
     try {
       // Every material has already been drawn once by now, so this only catches stragglers.
       if (renderer.extensions.has('KHR_parallel_shader_compile')) renderer.compileAsync(scene, camera).then(done).catch(done);
@@ -606,7 +607,9 @@ function buildRocket() {
   R.rocketMat = stdMat({ vertexColors: true, metalness: 0.35, roughness: 0.3, envMapIntensity: env });
   R.captiveMat = stdMat({ vertexColors: true, metalness: 0.35, roughness: 0.3, color: '#c68bff', emissive: '#3a1060', envMapIntensity: env });
   // the window and the nozzle ring glow
-  const glowGeo = merge([sph(0.13, '#7ff2ff', [0, 0.38, 0.27], [1, 1, 0.55]), cyl(0.21, 0.21, 0.04, 14, '#ffd9a0', [0, -0.92, 0])]);
+  // the pilot: a helmeted head and shoulders seen against the lit window
+  const glowGeo = merge([sph(0.13, '#7ff2ff', [0, 0.38, 0.27], [1, 1, 0.55]), cyl(0.21, 0.21, 0.04, 14, '#ffd9a0', [0, -0.92, 0]),
+    sph(0.055, '#10161e', [0, 0.405, 0.318], [1, 1.08, 0.5]), sph(0.075, '#141a22', [0, 0.315, 0.318], [1.3, 0.55, 0.45]), sph(0.016, '#ffe9c0', [0.018, 0.42, 0.347], [1, 0.6, 0.4])]);
   R.glowMat = new THREE.MeshBasicMaterial({ vertexColors: true, color: new THREE.Color(2.2, 2.2, 2.2) });
   R.rockets = [];
   for (let i = 0; i < 4; i++) {
@@ -882,6 +885,22 @@ function firework(x, y, z, big) {
   const h = Math.random(), c1 = [CONF[(h * 5) | 0][0] * 2, CONF[(h * 5) | 0][1] * 2, CONF[(h * 5) | 0][2] * 2];
   sparks(x, y, z, big ? 110 : 60, big ? 16 : 11, [c1, [2, 1.8, 1.4], c1], big ? 1.6 : 1.2, big ? 1.4 : 0.9, true);
 }
+/* ------------------------------------------------------------ spectacle (shared VFX, loaded once the sky is built) */
+// Moths and lantern pods go up in real fireballs with smoke and falling debris, the rocket's loss is a big
+// blast and shockwave, a shield crackles with lightning, and the lantern queen dies in a chain of
+// explosions in slow motion. Loaded only after the build; it adds no lights (the blast light is ours).
+let VFX = null;
+const _xv = new THREE.Vector3(), _xw = new THREE.Vector3(), _xn = new THREE.Vector3(0, 0, 1);
+function loadVFX() {
+  if (VFX !== null) return; VFX = false;
+  import('/games/shared/vfx.js').then((m) => {
+    try { const v = m.createVFX(renderer, scene, camera, { quality: Math.max(0, R.q), unit: 1, groundY: -14, lights: 0, reduced: ARC ? ARC.reducedMotion : false }); v.warm(); VFX = v; window.__vfxState = 'ok'; } catch (e) { VFX = false; window.__vfxState = 'create: ' + (e && e.message); }
+  }).catch((e) => { VFX = false; window.__vfxState = 'import: ' + (e && e.message); });
+}
+function crackle(x, y, n, r) {
+  if (!VFX) return;
+  for (let i = 0; i < n; i++) { const a = Math.random() * TAU; VFX.lightning(_xv.set(x, y, 0.4), _xw.set(x + Math.cos(a) * r, y + Math.sin(a) * r, 0.4), { color: '#9fdcff', size: 0.35, duration: 0.3, branches: 1 }); }
+}
 function effect(type, x, y, p1, p2) {
   if (!FX || !R.ready) return;
   const rm = ARC && ARC.reducedMotion;
@@ -893,6 +912,7 @@ function effect(type, x, y, p1, p2) {
       smoke(x, y, -0.2, 2, 1.0);
       ringAt(x, y, 0.3, 1.6, 1.2, 0.8, p1 === MOTH ? 3.2 : 2.2, 0.45);
       blast(x, y, 0, p1 === MOTH ? 1 : 0.6);
+      if (VFX && p1 === MOTH) VFX.explosion(_xv.set(x, y, 0.2), { size: 0.38, color: '#c58bff' });
       if (p2) { sparks(x, y, 0.2, 30, 10, [[2, 1.6, 0.5]], 1.1, 0.4, true); }
       break;
     }
@@ -903,22 +923,24 @@ function effect(type, x, y, p1, p2) {
       sparks(x, y, 0.3, 90, 13, [[2, 2, 2], [0.6, 1.8, 2], [2, 1.2, 0.4]], 1.3, 0.5, true);
       confetti(x, y, 0.3, 30, 7); smoke(x, y, 0, 10, 2.2, 0.4, 0.35, 0.5);
       ringAt(x, y, 0.3, 2, 2, 2, 6, 0.7); blast(x, y, 0, 2.2);
+      if (VFX) { VFX.explosion(_xv.set(x, y, 0.3), { size: 0.75 }); VFX.ring(_xv.set(x, y, 0.4), '#9fdcff', { size: 3, normal: _xn, kind: 'shock' }); }
       if (POST && !rm) { POST.flash(0.35); POST.kick(5); }
       break;
     case 'cell': sparks(x, y, 0.2, p1 ? 4 : 9, 4, [[2, 1.3, 0.6]], 0.5, 0.24); if (!p1) smoke(x, y, 0, 1, 0.7, 0.6, 0.45, 0.35); break;
     case 'fizz': sparks(x, y, 0.3, 4, 3, [[2, 0.6, 1.4]], 0.3, 0.22); break;
-    case 'shield': sparks(x, y, 0.5, 5, 4, [[0.6, 1.8, 2.2]], 0.3, 0.24); break;
-    case 'shieldpop': sparks(x, y, 0.3, 40, 9, [[0.5, 1.8, 2.2]], 0.7, 0.34); ringAt(x, y, 0.3, 0.4, 1.6, 2, 3.2, 0.5); break;
-    case 'pod': sparks(x, y, 0.5, 70, 12, PAL.kite, 1.1, 0.45, true); confetti(x, y, 0.5, 20, 6); ringAt(x, y, 0.5, 2, 1.4, 0.6, 4.5, 0.6); blast(x, y, 0, 2); if (POST && !rm) POST.kick(3); break;
-    case 'bosscrack': ringAt(x, y, 0.8, 2, 1.6, 1, 8, 0.8); if (POST && !rm) { POST.flash(0.5, '#ffe0b0'); POST.kick(6); } blast(x, y, 0, 3); break;
+    case 'shield': sparks(x, y, 0.5, 5, 4, [[0.6, 1.8, 2.2]], 0.3, 0.24); crackle(x, y, 1, 1.3); break;
+    case 'shieldpop': sparks(x, y, 0.3, 40, 9, [[0.5, 1.8, 2.2]], 0.7, 0.34); ringAt(x, y, 0.3, 0.4, 1.6, 2, 3.2, 0.5); crackle(x, y, 4, 2.2); break;
+    case 'pod': if (VFX) VFX.explosion(_xv.set(x, y, 0.5), { size: 0.6 }); sparks(x, y, 0.5, 70, 12, PAL.kite, 1.1, 0.45, true); confetti(x, y, 0.5, 20, 6); ringAt(x, y, 0.5, 2, 1.4, 0.6, 4.5, 0.6); blast(x, y, 0, 2); if (POST && !rm) POST.kick(3); break;
+    case 'bosscrack': if (VFX) VFX.explosion(_xv.set(x, y, 0.8), { size: 0.8 }); ringAt(x, y, 0.8, 2, 1.6, 1, 8, 0.8); if (POST && !rm) { POST.flash(0.5, '#ffe0b0'); POST.kick(6); } blast(x, y, 0, 3); break;
     case 'bossdie':
-      for (let i = 0; i < 6; i++) R.queue.push({ t: i * 0.16, x: x + rand(7), y: y + rand(5), big: i === 0 });
+      for (let i = 0; i < 6; i++) R.queue.push({ t: i * 0.16, x: x + rand(7), y: y + rand(5), big: i === 0, boom: true });
+      if (VFX) { VFX.explosion(_xv.set(x, y, 0.8), { size: 1.4 }); VFX.timeWarp(0.35, 1.8); VFX.ring(_xv.set(x, y, 0.8), '#ffd27a', { size: 6, normal: _xn, kind: 'shock' }); }
       confetti(x, y, 0.8, 120, 12); ringAt(x, y, 0.8, 2, 2, 2, 14, 1.1); blast(x, y, 0, 4);
       if (POST && !rm) { POST.flash(0.7, '#fff2d0'); POST.kick(8); POST.letterbox(1, 1.6); }
       break;
     case 'bossin': if (POST && !rm) POST.letterbox(1, 3.0); break;
     case 'ring': ringAt(x, y, 0.6, 2, 0.5, 1.2, 3.5, 0.5); break;
-    case 'nova': ringAt(x, y, 0.4, 2, 0.6, 1.6, 15, 0.65); ringAt(x, y, 0.4, 1, 1.6, 2, 11, 0.55); sparks(x, y, 0.3, 50, 18, [[2, 0.7, 1.7], [1.8, 1.8, 2]], 0.8, 0.45); if (POST && !rm) { POST.flash(0.25, '#ffb0f0'); POST.kick(-3); } break;
+    case 'nova': if (VFX) VFX.ring(_xv.set(x, y, 0.4), '#ff9af0', { size: 6, normal: _xn, kind: 'shock' }); ringAt(x, y, 0.4, 2, 0.6, 1.6, 15, 0.65); ringAt(x, y, 0.4, 1, 1.6, 2, 11, 0.55); sparks(x, y, 0.3, 50, 18, [[2, 0.7, 1.7], [1.8, 1.8, 2]], 0.8, 0.45); if (POST && !rm) { POST.flash(0.25, '#ffb0f0'); POST.kick(-3); } break;
     case 'pickup': ringAt(x, y, 0.4, 1, 1.8, 2, 3, 0.45); sparks(x, y, 0.3, 26, 7, [[2, 1.8, 1]], 0.6, 0.3, true); break;
     case 'dock': ringAt(x, y, 0.4, 0.6, 1.8, 2, 3.4, 0.6); sparks(x, y, 0.3, 30, 7, [[0.6, 1.8, 2], [2, 2, 2]], 0.7, 0.32, true); break;
     case 'capture': sparks(x, y, 0.3, 20, 5, [[1.2, 0.8, 2]], 0.8, 0.3); break;
@@ -982,8 +1004,12 @@ function sync(a, G, dt) {
   let kN = 0, bN = 0, mN = 0, wN = 0, lN = 0;
   for (let i = 0; i < G.E.length; i++) {
     const e = G.E[i]; if (!e.on || e.st === S_WAIT) continue;
-    const x = lerp(e.px, e.x, al), y = lerp(e.py, e.y, al) + (e.dive ? 0 : Math.sin(t * 2.2 + e.seed) * 0.07);
+    let x = lerp(e.px, e.x, al), y = lerp(e.py, e.y, al) + (e.dive ? 0 : Math.sin(t * (2.0 + (e.seed % 1) * 0.5) + e.seed) * 0.07);
     let ang = lerp(e.pang, e.ang, al);
+    // a raider winds up before it peels off (a little rise and a shiver), and when the rocket goes down the
+    // whole formation bobs with glee; each keeps its own timing
+    if (e.dive && e.t < 0.32 && !a.reducedMotion) { const w = Math.sin(e.t / 0.32 * Math.PI); y += w * 0.28; ang += Math.sin(e.t * 60 + e.seed) * 0.12 * w; }
+    if (!e.dive && P.state === 'dead' && !a.reducedMotion) y += Math.abs(Math.sin(t * (7 + (e.seed % 3)) + e.seed)) * 0.22;
     const fl = e.flash;
     if (e.type === KITE) {
       ang += Math.sin(t * 3 + e.seed) * 0.13;
@@ -1185,7 +1211,7 @@ function render(a, G, ctx) {
   if (R.ready) {
     sync(a, G, sdt);
     // effects queued by the core: staggered fireworks
-    for (let i = R.queue.length - 1; i >= 0; i--) { const q = R.queue[i]; q.t -= sdt; if (q.t <= 0) { firework(q.x, q.y, 0.4, q.big); blast(q.x, q.y, 0, 1.5); R.queue.splice(i, 1); } }
+    for (let i = R.queue.length - 1; i >= 0; i--) { const q = R.queue[i]; q.t -= sdt; if (q.t <= 0) { firework(q.x, q.y, 0.4, q.big); blast(q.x, q.y, 0, 1.5); if (q.boom && VFX) VFX.explosion(_xv.set(q.x, q.y, 0.6), { size: 0.9 }); R.queue.splice(i, 1); } }
     // background shells over the city, now and then, and for every clear
     if (!paused && Math.random() < sdt * (a.state === 'menu' ? 0.35 : 0.08)) launchShell(rand(120), -60 - Math.random() * 120);
     for (let i = 0; i < R.shells.length; i++) {
@@ -1204,7 +1230,9 @@ function render(a, G, ctx) {
     }
     R.blast *= Math.exp(-sdt * 9); R.blastL.intensity = R.blast * 60;
   }
-  try { if (POST) POST.render(scene, camera); else renderer.render(scene, camera); } catch (e) { return false; }
+  if (VFX) { VFX.setReduced(a.reducedMotion); VFX.update(paused ? 0 : dt); VFX.applyShake(camera); }
+  try { if (POST) POST.render(scene, camera); else renderer.render(scene, camera); } catch (e) { if (VFX) VFX.removeShake(camera); return false; }
+  if (VFX) VFX.removeShake(camera);
   return true;
 }
 const _pv = new THREE.Vector3();

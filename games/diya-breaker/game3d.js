@@ -416,7 +416,15 @@ function buildRimLamps() {
   R.flames = new THREE.InstancedMesh(fl, R.flameMat, spots.length);
   spots.forEach((p, i) => { _m.makeTranslation(p[0], 0.62, p[1]); R.lamps.setMatrixAt(i, _m); R.flames.setMatrixAt(i, _zero); });
   R.lamps.castShadow = true; R.lamps.layers.enable(1); R.flames.layers.enable(1);
-  S.add(R.lamps, R.flames);
+  // each lit diya throws a warm pool of light on the stones round it, breathing with its flame
+  R.lampPools = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: TX.glow, color: '#ffffff', transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }), spots.length);
+  R.lampPools.instanceMatrix.setUsage(THREE.DynamicDrawUsage); R.lampPools.frustumCulled = false; R.lampPools.renderOrder = 2;
+  spots.forEach((p, i) => { R.lampPools.setMatrixAt(i, _zero); R.lampPools.setColorAt(i, _c.set('#000000')); });
+  R.lampPh = new Float32Array(spots.length * 2); for (let i = 0; i < spots.length; i++) { R.lampPh[i * 2] = Math.random() * 50; R.lampPh[i * 2 + 1] = 0.8 + Math.random() * 0.5; }
+  R.gust = 0; R.gustAt = 3; R.gustDir = 1;
+  // a software renderer pays for every additive pixel: no pools there
+  R.lampPools.visible = !R.soft;
+  S.add(R.lamps, R.flames, R.lampPools);
   R.lampLit = new Float32Array(spots.length);
 }
 
@@ -653,6 +661,19 @@ function buildEffects() {
   R.shards.castShadow = true;
   const sh = (n) => ({ n, head: 0, p: new Float32Array(n * 3), v: new Float32Array(n * 3), r: new Float32Array(n * 3), w: new Float32Array(n * 3), life: new Float32Array(n), max: new Float32Array(n), s: new Float32Array(n), dirty: false });
   R.sh = sh(NS); R.gsh = sh(220);
+  // scorch marks a cracker leaves on the stones, fading over a few seconds
+  const scT = canvasTex(128, 128, (g, w, h) => {
+    const r = rng(19);
+    const gr = g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2); gr.addColorStop(0, 'rgba(14,8,4,0.85)'); gr.addColorStop(0.45, 'rgba(24,14,8,0.5)'); gr.addColorStop(1, 'rgba(24,14,8,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 26; i++) { const a = r() * TAU, l = w * (0.25 + r() * 0.25); g.strokeStyle = 'rgba(10,6,3,' + (0.15 + r() * 0.25) + ')'; g.lineWidth = 1 + r() * 3; g.beginPath(); g.moveTo(w / 2 + Math.cos(a) * w * 0.12, h / 2 + Math.sin(a) * h * 0.12); g.lineTo(w / 2 + Math.cos(a) * l, h / 2 + Math.sin(a) * l); g.stroke(); }
+    for (let i = 0; i < 200; i++) { g.fillStyle = 'rgba(0,0,0,' + r() * 0.3 + ')'; const a = r() * TAU, d = r() * w * 0.4; g.fillRect(w / 2 + Math.cos(a) * d, h / 2 + Math.sin(a) * d, 2, 2); }
+  }, { clamp: true });
+  R.scorch = [];
+  for (let i = 0; i < 6; i++) {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: scT, color: '#ffffff', transparent: true, depthWrite: false, opacity: 0 }));
+    m.rotation.x = -Math.PI / 2; m.visible = false; m.renderOrder = 1; S.add(m); R.scorch.push({ m, t: 99 });
+  }
   // shockwave rings on the floor
   R.rings = [];
   for (let i = 0; i < 8; i++) {
@@ -679,6 +700,8 @@ function stepShards(P, im, dt) {
     P.v[i3 + 1] -= 16 * dt;
     P.p[i3] += P.v[i3] * dt; P.p[i3 + 1] += P.v[i3 + 1] * dt; P.p[i3 + 2] += P.v[i3 + 2] * dt;
     if (P.p[i3 + 1] < 0.05) { P.p[i3 + 1] = 0.05; P.v[i3 + 1] = Math.abs(P.v[i3 + 1]) * 0.35; P.v[i3] *= 0.6; P.v[i3 + 2] *= 0.6; P.w[i3] *= 0.6; P.w[i3 + 2] *= 0.6; }
+    // once a chip has stopped bouncing it slides to a halt and its spin dies away, so it lies on the stones
+    if (P.p[i3 + 1] <= 0.0501 && Math.abs(P.v[i3 + 1]) < 0.6) { const fr = Math.exp(-7 * dt), sp2 = Math.exp(-11 * dt); P.v[i3] *= fr; P.v[i3 + 2] *= fr; P.v[i3 + 1] = 0; P.w[i3] *= sp2; P.w[i3 + 1] *= fr; P.w[i3 + 2] *= sp2; }
     P.r[i3] += P.w[i3] * dt; P.r[i3 + 1] += P.w[i3 + 1] * dt; P.r[i3 + 2] += P.w[i3 + 2] * dt;
     const f = P.life[i] / P.max[i], sc = P.s[i] * (f < 0.25 ? f / 0.25 : 1);
     _e.set(P.r[i3], P.r[i3 + 1], P.r[i3 + 2]); _q.setFromEuler(_e); _s.set(sc * 1.3, sc * 0.7, sc); _v1.set(P.p[i3], P.p[i3 + 1], P.p[i3 + 2]);
@@ -686,6 +709,15 @@ function stepShards(P, im, dt) {
   }
   im.instanceMatrix.needsUpdate = true;
   if (!any) P.dirty = false;
+}
+function scorchAt(x, z, size) {
+  if (!R.scorch) return;
+  let o = R.scorch[0]; for (let i = 1; i < R.scorch.length; i++) if (R.scorch[i].t > o.t) o = R.scorch[i];
+  o.t = 0; o.m.visible = true; o.m.position.set(x, 0.014, z); o.m.rotation.z = Math.random() * TAU; o.m.scale.set(size, size, size);
+}
+function stepScorch(dt) {
+  if (!R.scorch) return;
+  for (let i = 0; i < R.scorch.length; i++) { const o = R.scorch[i]; if (!o.m.visible) continue; o.t += dt; const k = o.t < 0.15 ? o.t / 0.15 : Math.max(0, 1 - (o.t - 2.5) / 3); o.m.material.opacity = 0.75 * k; if (k <= 0 && o.t > 1) o.m.visible = false; }
 }
 function ring(x, y, z, hex, max, dur, vertical) {
   let s = R.rings[0];
@@ -770,7 +802,7 @@ function queueBuild(a) {
     () => { buildBosses(); },
     () => { if (!R.soft) buildEnv(); },
     () => {
-      R.fx = createFX(R.renderer, { arc: a, intro: false, results: { dist: 14, yaw: 0.3, rise: 0.12, speed: 0.2 }, target: (v) => { v.set(0, 0.5, zOf(9)); return true; }, look: { bloom: 0.6, bloomWide: 0.4, threshold: 0.62, knee: 0.25, vignette: 0.34, grain: 0.03, sat: 1.08, contrast: 1.06, lift: [0.015, 0.01, 0.025], gain: [1.03, 1.0, 0.97] } });
+      R.fx = createFX(R.renderer, { arc: a, intro: false, results: { dist: 14, yaw: 0.3, rise: 0.12, speed: 0.2 }, target: (v) => { v.set(0, 0.5, zOf(9)); return true; }, look: { bloom: 0.56, bloomWide: 0.38, threshold: 0.64, knee: 0.25, vignette: 0.34, grain: 0.032, sat: 0.96, contrast: 1.05, lift: [0.014, 0.012, 0.026], gain: [1.04, 1.0, 0.955] } });
     },
     () => { setQuality(R.qWant != null ? R.qWant : R.soft ? 0 : a.device === 'desktop' ? 3 : 2); },
     () => { setLook(0, true); resize3D(a); },
@@ -838,7 +870,7 @@ function warm(a) {
     try { R.renderer.shadowMap.needsUpdate = true; R.fx.render(S, R.camera); } catch (e) { /* lost context */ }
     shown.forEach((s) => { s[0].visible = s[1]; if (s[2] >= 0) s[0].count = s[2]; });
     R.balls[1].material = R.ballMat;
-    R.ready = true; R.building = false;
+    R.ready = true; R.building = false; loadVFX();
     R.readyAt = now(); R.ff = [];
     if (R.G) newLevel(R.G);
   });
@@ -859,6 +891,7 @@ function setQuality(q) {
   FX.density = t.fx;
   if (R.decor) { R.decor.visible = t.decor; R.garland.visible = t.decor; }
   R.fx.setQuality(t.post ? q : 0, R.lockQ);
+  if (VFX) VFX.setQuality(q);
   R.fx.setEnabled(t.post);
   resize3D(ARC);
 }
@@ -1182,6 +1215,8 @@ function syncBoss(G, dt, rm) {
   if (B.dead && dying < 1 && Math.random() < dt * 30) { const x = bx + (Math.random() - 0.5) * 2.4, z = zOf(by) + (Math.random() - 0.5) * 2; burst(x, 0.8, z, 10, 4, 1, 0.7, 0.3); }
 }
 function syncLamps(G, dt) {
+  R.gustAt -= dt; if (R.gustAt <= 0) { R.gust = 1; R.gustAt = 4 + Math.random() * 7; R.gustDir = Math.random() < 0.5 ? -1 : 1; }
+  R.gust *= Math.exp(-dt * 1.5);
   const lit = G.total > 0 ? 1 - G.breakable / G.total : 1;
   const n = R.lampSpots.length, want = G.phase === 'clear' || G.phase === 'win' || G.cfg.attract ? n : Math.floor(lit * n + 1e-6);
   const order = (i) => (i * 7) % n; // light them around the rim, not one side first
@@ -1189,13 +1224,22 @@ function syncLamps(G, dt) {
     const i = order(k), on = k < want;
     const prev = R.lampLit[i];
     R.lampLit[i] += ((on ? 1 : 0) - prev) * Math.min(1, dt * 6);
-    if (on && prev < 0.05 && R.lampLit[i] >= 0.05) { const p = R.lampSpots[i]; burst(p[0], 0.85, p[1], 6, 2, 1, 0.75, 0.3); }
+    if (on && prev < 0.05 && R.lampLit[i] >= 0.05) { const p = R.lampSpots[i]; burst(p[0], 0.85, p[1], 6, 2, 1, 0.75, 0.3); if (VFX && !G.cfg.attract && (G.phase === 'play' || G.phase === 'serve')) VFX.burst(_xv.set(p[0], 0.85, p[1]), { color: '#ffa63a', size: 0.32 }); }
     const s = R.lampLit[i];
-    if (s < 0.02) { R.flames.setMatrixAt(i, _zero); continue; }
-    const p = R.lampSpots[i], fl = 1 + Math.sin(R.time * 13 + i * 2.1) * 0.12 + Math.sin(R.time * 7.3 + i) * 0.08;
-    _v1.set(p[0], 0.7, p[1]); _q.identity(); _s.set(s, s * fl, s); _m.compose(_v1, _q, _s); R.flames.setMatrixAt(i, _m);
+    if (s < 0.02) { R.flames.setMatrixAt(i, _zero); R.lampPools.setMatrixAt(i, _zero); continue; }
+    // a real flame: three unrelated rhythms, never in step with its neighbours, and a gust now and then
+    // that runs along the rim, leans every flame the same way and makes them gutter
+    const p = R.lampSpots[i], ph = R.lampPh[i * 2], sp = R.lampPh[i * 2 + 1], T = R.time;
+    const n = Math.sin(T * 9.3 * sp + ph) * 0.5 + Math.sin(T * 14.1 * sp + ph * 1.7) * 0.3 + Math.sin(T * 23.7 + ph * 2.9) * 0.2;
+    const wave = R.gust * Math.max(0, Math.sin(T * 2.4 - p[0] * R.gustDir * 0.4 - p[1] * 0.15));
+    const rmF = ARC && ARC.reducedMotion;
+    const fl = rmF ? 1 : clamp(1 + n * 0.14 - wave * 0.4, 0.4, 1.3);
+    _v1.set(p[0], 0.7, p[1]); _e.set(0, 0, rmF ? 0 : (wave * 0.55 + n * 0.05) * R.gustDir); _q.setFromEuler(_e); _s.set(s * (0.92 + n * 0.05), s * fl, s); _m.compose(_v1, _q, _s); R.flames.setMatrixAt(i, _m);
+    const pr = s * (2.2 + fl * 0.35);
+    _v1.set(p[0], 0.035, p[1]); _q.identity(); _s.set(pr, 1, pr); _m.compose(_v1, _q, _s); R.lampPools.setMatrixAt(i, _m);
+    _c.setRGB(1.0, 0.5, 0.16).multiplyScalar(0.22 * s * fl); R.lampPools.setColorAt(i, _c);
   }
-  R.flames.instanceMatrix.needsUpdate = true;
+  R.flames.instanceMatrix.needsUpdate = true; R.lampPools.instanceMatrix.needsUpdate = true; R.lampPools.instanceColor.needsUpdate = true;
 }
 function burst(x, y, z, n, sp, r, g, b) {
   for (let i = 0; i < n; i++) {
@@ -1216,6 +1260,18 @@ function firework(x, y, z, big) {
   R.flashSky = Math.max(R.flashSky, big ? 0.4 : 0.2);
 }
 
+/* ------------------------------------------------------------ spectacle (shared VFX, loaded once the court is built) */
+// Glass bricks shatter into glinting shards, firecracker bricks go off as real little explosions, every
+// diya that lights flares with a burst of flame, a cleared court fires fireworks, and a boss goes down in
+// a chain of blasts in slow motion. Loaded only after the build, with no lights of its own.
+let VFX = null;
+const _xv = new THREE.Vector3(), _xn = new THREE.Vector3(0, 1, 0);
+function loadVFX() {
+  if (VFX !== null) return; VFX = false;
+  import('/games/shared/vfx.js').then((m) => {
+    try { const v = m.createVFX(R.renderer, R.scene, R.camera, { quality: Math.max(0, R.quality), unit: 0.9, groundY: 0, lights: 0, reduced: ARC ? ARC.reducedMotion : false }); v.warm(); VFX = v; window.__vfxState = 'ok'; } catch (e) { VFX = false; window.__vfxState = 'create: ' + (e && e.message); }
+  }).catch((e) => { VFX = false; window.__vfxState = 'import: ' + (e && e.message); });
+}
 /* ------------------------------------------------------------ what the core's events look like */
 function onEvent(e) {
   const G = R.G, a = ARC, rm = a.reducedMotion, x = e.x, z = zOf(e.y);
@@ -1224,12 +1280,13 @@ function onEvent(e) {
       const kind = e.a, col = e.s;
       _c.set(col);
       const cr = _c.r, cg = _c.g, cb = _c.b;
+      if (VFX) { if (kind === K_GLASS) VFX.impact(_xv.set(x, 0.35, z), _xn, { kind: 'glass', color: col, size: 0.8 }); else if (kind === K_METAL) VFX.impact(_xv.set(x, 0.35, z), _xn, { kind: 'spark', size: 0.6 }); }
       if (kind === K_GLASS) {
         for (let i = 0; i < 14; i++) shard(R.gsh, x + (Math.random() - 0.5) * 0.8, 0.25 + Math.random() * 0.15, z + (Math.random() - 0.5) * 0.35, (Math.random() - 0.5) * 6, 3 + Math.random() * 4, (Math.random() - 0.5) * 6, 0.9 + Math.random() * 0.6, 0.9 + Math.random() * 0.5, col, R.gshards);
         for (let i = 0; i < 16; i++) emitC(FX.add, x + (Math.random() - 0.5) * 0.8, 0.3, z, (Math.random() - 0.5) * 4, Math.random() * 3, (Math.random() - 0.5) * 4, 0.5, 0.3, 0.8 + cr * 0.2, 0.9 + cg * 0.1, 1, 1, 4, 1, 0);
       } else {
         const n = kind === K_METAL ? 10 : 8;
-        for (let i = 0; i < n; i++) shard(R.sh, x + (Math.random() - 0.5) * 0.8, 0.2 + Math.random() * 0.2, z + (Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 5, 2.5 + Math.random() * 3.5, (Math.random() - 0.5) * 5, 0.9 + Math.random() * 0.6, 1.1 + Math.random() * 0.6, col, R.shards);
+        for (let i = 0; i < n; i++) shard(R.sh, x + (Math.random() - 0.5) * 0.8, 0.2 + Math.random() * 0.2, z + (Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 5, 2.5 + Math.random() * 3.5, (Math.random() - 0.5) * 5, 0.9 + Math.random() * 0.6, 1.8 + Math.random() * 1.0, col, R.shards);
         for (let i = 0; i < 6; i++) emit(FX.soft, x + (Math.random() - 0.5) * 0.8, 0.2, z + (Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 1.2, 0.4 + Math.random() * 0.6, (Math.random() - 0.5) * 1.2, 0.9 + Math.random() * 0.5, 0.9, '#b8a090', 0.4, -0.2, 2, 2.2);
         burst(x, 0.3, z, 10, 3.2, Math.min(1, cr * 1.4 + 0.3), Math.min(1, cg * 1.2 + 0.2), cb * 0.8 + 0.1);
       }
@@ -1248,6 +1305,8 @@ function onEvent(e) {
       for (let i = 0; i < 14; i++) emitC(FX.add, x, 0.5, z, (Math.random() - 0.5) * 9, 3 + Math.random() * 6, (Math.random() - 0.5) * 9, 0.7 + Math.random() * 0.5, 0.18, 1, 0.8, 0.3, 1, 12, 0.5, 0);
       ring(x, 0.04, z, '#ffb040', 3.2, 0.55);
       R.flashL.position.set(x, 1.2, z); R.flashL.intensity = 30;
+      if (VFX) VFX.explosion(_xv.set(x, 0.3, z), { size: 0.42 });
+      scorchAt(x, z, 1.9 + Math.random() * 0.6);
       if (!rm) { a.shake = Math.min(14, (a.shake || 0) + 3.5); R.cam.punch = Math.min(1, R.cam.punch + 0.3); }
       break;
     }
@@ -1289,17 +1348,20 @@ function onEvent(e) {
     }
     case 'clear': {
       R.fwT = 0; R.fwN = G.cfg.attract ? 2 : 7;
+      if (VFX && !G.cfg.attract) VFX.fireworks(_xv.set(0, 7, zOf(TOPY) - 2), { count: 4, size: 0.5, launch: true });
       if (R.fx && !rm) { R.fx.letterbox(1, 2.6); R.fx.flash(0.2, '#fff0c8'); }
       break;
     }
     case 'bossHit': {
       burst(x, 0.8, z, 22, 5, 1, 0.6, 0.2);
+      if (VFX) VFX.impact(_xv.set(x, 0.8, z), _xn, { kind: 'spark', size: 1 });
       ring(x, 0.05, z, '#ffb040', 2.4, 0.4);
       if (!rm) { a.shake = Math.min(14, (a.shake || 0) + 3); if (R.fx) R.fx.kick(2); }
       break;
     }
     case 'bossDown': {
       for (let i = 0; i < 5; i++) firework(x + (Math.random() - 0.5) * 4, 3 + Math.random() * 3, z + (Math.random() - 0.5) * 3, true);
+      if (VFX) { VFX.explosion(_xv.set(x, 0.6, z), { size: 1.1 }); VFX.explosion(_xv.set(x + 1.6, 0.5, z - 0.8), { size: 0.7 }); VFX.explosion(_xv.set(x - 1.4, 0.5, z + 0.6), { size: 0.6 }); VFX.timeWarp(0.3, 1.6); }
       for (let i = 0; i < 40; i++) shard(R.sh, x + (Math.random() - 0.5) * 2, 0.5 + Math.random(), z + (Math.random() - 0.5) * 2, (Math.random() - 0.5) * 9, 4 + Math.random() * 6, (Math.random() - 0.5) * 9, 1.6, 1.5, '#e0a54a', R.shards);
       if (!rm) { a.shake = 20; R.cam.punch = 1; if (R.fx) { R.fx.kick(7); R.fx.flash(0.45, '#ffe0b0'); R.fx.letterbox(1, 2.4); } }
       break;
@@ -1360,7 +1422,8 @@ function frame(a, G, dt) {
   R.flashSky *= Math.exp(-dt * 3); R.skyU.uFlash.value = rm ? 0 : R.flashSky;
   R.dangerMat.opacity = 0.22 + 0.12 * Math.sin(R.time * 3) + (G.phase === 'lost' ? 0.4 * Math.max(0, 1 - G.pt) : 0);
   stepPool(FX.add, dt); stepPool(FX.soft, dt);
-  stepShards(R.sh, R.shards, dt); stepShards(R.gsh, R.gshards, dt);
+  stepShards(R.sh, R.shards, dt); stepShards(R.gsh, R.gshards, dt); stepScorch(dt);
+  if (VFX) { VFX.setReduced(rm); VFX.update(dt); }
 }
 function render(a, G) {
   const r = R.renderer, cam = R.camera;
@@ -1370,7 +1433,8 @@ function render(a, G) {
   r.shadowMap.needsUpdate = false;
   if (REFL.on) { const st = R.skyU.uStars.value; R.skyU.uStars.value = 0; renderRefl(cam); R.skyU.uStars.value = st; }
   r.shadowMap.needsUpdate = r.shadowMap.enabled;
-  R.fx.render(R.scene, cam);
+  if (VFX) VFX.applyShake(cam);
+  try { R.fx.render(R.scene, cam); } finally { if (VFX) VFX.removeShake(cam); }
 }
 
 /* ------------------------------------------------------------ the view the core talks to */

@@ -599,15 +599,19 @@ function stepBoss(G, dt) {
     G.version++;
     ev(G, 'spawnRow', B.x, B.y, r);
   }
+  // the boss watches the paddle the way a person would: what it saw a beat ago (0.15 to 0.3 s), and its
+  // aim wanders a little, so a paddle on the move is hard to hit but one standing still is not safe
+  if (B.seenX == null) { B.seenX = G.paddle.x; B.seenT = 0; }
+  B.seenT -= dt; if (B.seenT <= 0) { B.seenX = G.paddle.x; B.seenT = 0.15 + Math.random() * 0.15; }
   // embers fall toward the paddle
   B.fireT -= dt;
   if (B.fireT <= 0 && (G.phase === 'play' || G.phase === 'serve')) {
     B.fireT = D.fireEvery / rage * (0.85 + Math.random() * 0.3);
-    const n = D.shots;
+    const n = D.shots, aimErr = (Math.random() - 0.5) * 0.7;
     for (let k = 0; k < n; k++) {
       const e = G.embers.find((q) => !q.alive); if (!e) break;
       const spread = n > 1 ? (k - (n - 1) / 2) * 0.32 : 0;
-      const dx = G.paddle.x - B.x, dy = PAD_Y - B.y, l = Math.hypot(dx, dy) || 1, sp = 4.2 + (rage - 1) * 2;
+      const dx = B.seenX + aimErr - B.x, dy = PAD_Y - B.y, l = Math.hypot(dx, dy) || 1, sp = 4.2 + (rage - 1) * 2;
       const ang = Math.atan2(dx / l, -dy / l) + spread;
       e.alive = true; e.x = e.px = B.x; e.y = e.py = B.y - B.r * 0.8; e.vx = Math.sin(ang) * sp; e.vy = -Math.cos(ang) * sp;
     }

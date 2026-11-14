@@ -1,5 +1,16 @@
 import * as THREE from '/games/vendor/three/three.module.min.js';
 import { createFX as createPost } from '/games/shared/fx3d.js';
+import * as HUMAN from '/games/shared/human.js';
+import { createVFX } from '/games/shared/vfx.js';
+/*
+ * The big moments (shared spectacle layer): every good catch throws up a cloud of its own spice or grain powder
+ * from the crate, every fifth in a row bursts marigold confetti and a ring of light off the crate, a spoiled
+ * sack goes up in a sickly green puff, a sack that hits the setts kicks real dust, and a finished shift ends in
+ * the full yard celebration. Tiered by quality (thin on a software renderer), gentle under reduced motion.
+ */
+let VFX = null, VFXK = 1;
+const VP = new THREE.Vector3(), VN = new THREE.Vector3(0, 1, 0);
+const VCONF = ['#ff8a1c', '#ffb31a', '#ff6a10', '#ffd040', '#e8442a', '#fff3c4'];
 /*
  * Yard Catch 3D: spice sacks tumble from a warehouse loft into a market yard
  * at dusk, and a porter wheels his crate under them. Same rules, modes,
@@ -9,7 +20,7 @@ import { createFX as createPost } from '/games/shared/fx3d.js';
  */
 
 const PI = Math.PI, TAU = Math.PI * 2;
-const abs = Math.abs, sin = Math.sin, cos = Math.cos, min = Math.min, max = Math.max;
+const abs = Math.abs, sin = Math.sin, cos = Math.cos, min = Math.min, max = Math.max, floor = Math.floor;
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 const lerp = (a, b, t) => a + (b - a) * t;
 const damp = (a, b, k, dt) => lerp(a, b, 1 - Math.exp(-k * dt));
@@ -81,6 +92,7 @@ function scorePop(X, Y, text, col, big) { G.pops.push({ X, Y, text, col: col || 
 function finish(why, html) {
   if (G.phase === 'over' || G.attract || !arc || arc.state !== 'play') return;
   G.phase = 'over';
+  if (VFX && why === 'Shift over') { try { VFX.winBurst(VP.set(0, 0, -2), { colors: VCONF, size: 0.7 }); } catch (e) { /* ignore */ } }
   arc.haptic(why === 'Shift over' ? 'success' : 'fail');
   arc.over({
     eyebrow: why, title: why === 'Shift over' ? 'Shift <em>done</em>' : 'Yard <em>closed</em>',
@@ -93,6 +105,7 @@ function finish(why, html) {
 function miss(o) {
   if (G.phase === 'over' || G.inv > 0) return;
   G.lives--; G.combo = 0; G.inv = 1.15; G.hurt = 1;
+  yardReact(G.lives <= 0 ? 'over' : 'miss');
   arc.shake = 6; arc.sfx.tone(140, 0.14, { type: 'sawtooth', slide: 70, vol: 0.12 });
   arc.haptic('heavy', 0.6);
   if (G.lives <= 0) finish('Dropped the load', '<p>' + G.caught + ' sacks caught before the pile went over.</p>');
@@ -105,6 +118,7 @@ function catchItem(o) {
   if (o.spoil) {
     if (G.phase === 'over' || G.inv > 0) { o.dead = true; releaseVis(o, 'gone'); return; }
     G.lives--; G.combo = 0; G.inv = 1.15; G.hurt = 1;
+    yardReact(G.lives <= 0 ? 'over' : 'miss');
     spoilFx(X, Y);
     arc.toast('Spoiled', 'Skip those', 800);
     arc.sfx.tone(180, 0.12, { type: 'square', vol: 0.1 });
@@ -123,7 +137,7 @@ function catchItem(o) {
     arc.sfx.noise(0.08, { freq: 900, vol: 0.06 });
     if (!G.attract) arc.haptic('tap', min(1, 0.35 + G.combo * 0.06));
     if (G.combo >= 5) arc.toast('Combo x' + G.combo, '+' + add, 700);
-    if (G.combo % 5 === 0) { marigolds(X, Y + 0.4); CAM.kick = 1; if (!G.attract) { arc.haptic('success', 0.7); if (POST) POST.flash(0.14, '#ffe2a0'); } arc.sfx.tone(880, 0.12, { type: 'triangle', vol: 0.08, delay: 0.05 }); }
+    if (G.combo % 5 === 0) { yardReact('combo'); marigolds(X, Y + 0.4); CAM.kick = 1; if (!G.attract) { arc.haptic('success', 0.7); if (POST) POST.flash(0.14, '#ffe2a0'); } arc.sfx.tone(880, 0.12, { type: 'triangle', vol: 0.08, delay: 0.05 }); }
   }
   o.dead = true;
   releaseVis(o, 'gone');
@@ -225,6 +239,8 @@ function colorTex(canvas, srgb, repeat) {
   return t;
 }
 function std(o) { return new THREE.MeshStandardMaterial(o); }
+// a hex colour scaled in brightness (k > 1 lighter), for tinting a light texture
+function shadeHex(hex, k) { const c = new THREE.Color(hex); c.r = min(1, c.r * k); c.g = min(1, c.g * k); c.b = min(1, c.b * k); return c; }
 
 function woodGrain(g, w, h, base, dark, light, seed, streaks) {
   const r = window.Arcade.rng(seed);
@@ -287,6 +303,10 @@ function skyMaterial() {
       ' vec3 c = mix(vec3(0.85, 0.45, 0.24), vec3(0.62, 0.22, 0.16), smoothstep(0.0, 0.12, h));' +
       ' c = mix(c, vec3(0.24, 0.12, 0.2), smoothstep(0.1, 0.35, h)); c = mix(c, vec3(0.08, 0.06, 0.12), smoothstep(0.35, 0.8, h));' +
       ' float s = max(dot(vD, uSun), 0.0); c += vec3(1.0, 0.6, 0.3) * pow(s, 18.0) * 0.6 + vec3(1.0, 0.85, 0.6) * smoothstep(0.9985, 0.9992, s) * 2.0;' +
+      // a few long dusk clouds, lit warm on the sun side and going violet away from it
+      ' vec2 cp = vD.xz / max(vD.y + 0.14, 0.06); float n = sin(cp.x * 1.6 + sin(cp.y * 2.1) * 1.3) * sin(cp.y * 1.2 + cp.x * 0.35) + 0.45 * sin(cp.x * 3.7 + cp.y * 2.9);' +
+      ' float cl = smoothstep(0.3, 1.0, n) * smoothstep(0.03, 0.16, h) * (1.0 - smoothstep(0.42, 0.75, h));' +
+      ' c = mix(c, mix(vec3(0.3, 0.14, 0.2), vec3(1.0, 0.56, 0.32), pow(s, 3.0) * 0.85 + 0.15), cl * 0.5);' +
       ' gl_FragColor = vec4(c, 1.0);\n #include <tonemapping_fragment>\n #include <colorspace_fragment>\n }',
   });
 }
@@ -304,11 +324,74 @@ function stoneCanvas() {
       for (let k = 0; k < 40; k++) { g.fillStyle = r() < 0.5 ? 'rgba(0,0,0,0.12)' : 'rgba(255,230,200,0.06)'; g.fillRect(x + off + 3 + r() * (tw - 8), row * th + 3 + r() * (th - 8), 2 + r() * 4, 2 + r() * 3); }
     }
   }
+  // grime settles in the joints and toward the walls
+  for (let i = 0; i < 160; i++) { const x = r() * N, y = r() * N, rad = 8 + r() * 26; const rg = g.createRadialGradient(x, y, 0, x, y, rad); rg.addColorStop(0, 'rgba(20,12,6,0.18)'); rg.addColorStop(1, 'rgba(20,12,6,0)'); g.fillStyle = rg; g.fillRect(x - rad, y - rad, rad * 2, rad * 2); }
   // spilled spice and straw
   for (let i = 0; i < 260; i++) { g.fillStyle = ['rgba(196,85,46,0.35)', 'rgba(210,176,114,0.35)', 'rgba(255,200,90,0.25)'][i % 3]; g.fillRect(r() * N, r() * N, 1 + r() * 3, 1 + r() * 3); }
   g.strokeStyle = 'rgba(220,190,110,0.4)'; g.lineWidth = 1;
   for (let i = 0; i < 60; i++) { const x = r() * N, y = r() * N, a = r() * TAU; g.beginPath(); g.moveTo(x, y); g.lineTo(x + cos(a) * 10, y + sin(a) * 10); g.stroke(); }
   return c;
+}
+// The same setts as roughness: worn, polished tops a little glossier than the
+// gritty joints between them, so the lamps catch the stone unevenly.
+function stoneRough() {
+  const N = 256, c = makeCanvas(N, N), g = c.getContext('2d'), r = window.Arcade.rng(77);
+  g.fillStyle = '#f0f0f0'; g.fillRect(0, 0, N, N);
+  const tw = 64, th = 32;
+  for (let row = 0; row < N / th; row++) {
+    const off = (row % 2) * tw / 2;
+    for (let x = -tw; x < N + tw; x += tw) {
+      const v = 150 + r() * 70 | 0; g.fillStyle = 'rgb(' + v + ',' + v + ',' + v + ')';
+      g.fillRect(x + off + 2, row * th + 2, tw - 4, th - 4);
+      const cx = x + off + tw / 2, cy = row * th + th / 2, rg = g.createRadialGradient(cx, cy, 0, cx, cy, tw * 0.4);
+      rg.addColorStop(0, 'rgba(90,90,90,0.5)'); rg.addColorStop(1, 'rgba(90,90,90,0)'); g.fillStyle = rg; g.fillRect(cx - tw / 2, cy - th / 2, tw, th);
+    }
+  }
+  return c;
+}
+// A wet patch: an irregular soft-edged blot for the alpha of a puddle decal.
+function wetCanvas(seed) {
+  const N = 128, c = makeCanvas(N, N), g = c.getContext('2d'), r = window.Arcade.rng(seed);
+  g.fillStyle = '#000'; g.fillRect(0, 0, N, N);
+  for (let i = 0; i < 9; i++) {
+    const x = N / 2 + (r() - 0.5) * N * 0.45, y = N / 2 + (r() - 0.5) * N * 0.3, rad = N * (0.12 + r() * 0.18);
+    const rg = g.createRadialGradient(x, y, rad * 0.3, x, y, rad); rg.addColorStop(0, 'rgba(255,255,255,0.95)'); rg.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = rg; g.fillRect(x - rad, y - rad, rad * 2, rad * 2);
+  }
+  return c;
+}
+function plasterCanvas() {
+  const N = 256, c = makeCanvas(N, N), g = c.getContext('2d'), r = window.Arcade.rng(23);
+  g.fillStyle = '#d8ccbc'; g.fillRect(0, 0, N, N);
+  for (let i = 0; i < 2600; i++) { g.fillStyle = r() < 0.5 ? 'rgba(0,0,0,0.07)' : 'rgba(255,250,240,0.06)'; g.fillRect(r() * N, r() * N, 2 + r() * 3, 2 + r() * 3); }
+  ageWall(g, N, N, r, 0.28);
+  return c;
+}
+
+// Years of monsoon on a painted wall: streaks running down from every ledge,
+// flaked paint showing the brick under it, and a damp dark band of grime and
+// splash where the wall meets the yard.
+function ageWall(g, w, h, r, band) {
+  g.save();
+  for (let i = 0; i < 26; i++) {
+    const x = r() * w, y0 = r() * h * 0.6, len = 30 + r() * h * 0.35, sw = 2 + r() * 7;
+    const gr = g.createLinearGradient(0, y0, 0, y0 + len);
+    gr.addColorStop(0, 'rgba(20,12,8,0.22)'); gr.addColorStop(1, 'rgba(20,12,8,0)');
+    g.fillStyle = gr; g.fillRect(x, y0, sw, len);
+  }
+  for (let i = 0; i < 34; i++) {
+    const x = r() * w, y = r() * h, rx = 3 + r() * 16, ry = 2 + r() * 9;
+    g.fillStyle = r() < 0.5 ? 'rgba(150,84,58,0.5)' : 'rgba(225,200,170,0.22)';
+    g.beginPath();
+    for (let k = 0; k < 7; k++) { const a = k / 7 * TAU, q = 0.6 + r() * 0.6; g.lineTo(x + cos(a) * rx * q, y + sin(a) * ry * q); }
+    g.closePath(); g.fill();
+  }
+  const b0 = h * (1 - band);
+  const gb = g.createLinearGradient(0, b0, 0, h);
+  gb.addColorStop(0, 'rgba(18,10,6,0)'); gb.addColorStop(0.55, 'rgba(18,10,6,0.32)'); gb.addColorStop(1, 'rgba(14,8,4,0.6)');
+  g.fillStyle = gb; g.fillRect(0, b0, w, h - b0);
+  for (let i = 0; i < 500; i++) { const y = h - Math.pow(r(), 2.2) * h * band; g.fillStyle = r() < 0.7 ? 'rgba(40,26,14,0.25)' : 'rgba(120,96,70,0.18)'; g.fillRect(r() * w, y, 1 + r() * 3, 1 + r() * 2); }
+  g.restore();
 }
 
 function warehouseCanvas(sign, seed, tint) {
@@ -332,6 +415,7 @@ function warehouseCanvas(sign, seed, tint) {
   g.fillStyle = '#e8d2a8'; g.fillRect(60, 30, Wc - 120, 60);
   g.fillStyle = '#7a2420'; g.fillRect(66, 36, Wc - 132, 48);
   g.fillStyle = '#ffdca0'; g.font = '700 30px Fraunces, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(sign, Wc / 2, 61);
+  ageWall(g, Wc, H, r, 0.22);
   return c;
 }
 
@@ -395,7 +479,50 @@ class FxPool {
   }
   clear() { this.life.fill(0); this.alpha.fill(0); this.aAlpha.needsUpdate = true; }
 }
-const FX = { add: null, norm: null, rings: [] };
+// Marks a landing leaves on the stone: a scuff of spilt spice or grain that
+// fades over a few seconds. One instanced draw for all of them.
+const STAIN_VS = 'attribute float aA; attribute float aSeed; varying float vA; varying float vS; varying vec2 vUv; varying vec3 vC;' +
+  'void main(){ vUv = uv; vA = aA; vS = aSeed; vC = instanceColor; gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(position, 1.0); }';
+const STAIN_FS = 'varying float vA; varying float vS; varying vec2 vUv; varying vec3 vC;' +
+  'float h(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7)) + vS * 91.3) * 43758.5453); }' +
+  'void main(){ vec2 d = vUv - 0.5; float ang = atan(d.y, d.x); float r = length(d) * 2.0;' +
+  ' float edge = 0.62 + 0.18 * sin(ang * 3.0 + vS * 20.0) + 0.1 * sin(ang * 7.0 + vS * 7.0);' +
+  ' float speck = step(0.82, h(floor(vUv * 26.0))) * smoothstep(1.25, 0.6, r);' +
+  ' float a = (smoothstep(edge, edge * 0.45, r) * 0.75 + speck * 0.5) * vA; if (a < 0.01) discard;' +
+  ' gl_FragColor = vec4(vC, a);\n #include <colorspace_fragment>\n }';
+class Stains {
+  constructor(n) {
+    this.n = n; this.head = 0; this.life = new Float32Array(n); this.max = new Float32Array(n); this.a0 = new Float32Array(n);
+    const g = new THREE.PlaneGeometry(1, 1); g.rotateX(-PI / 2);
+    const seeds = new Float32Array(n); for (let i = 0; i < n; i++) seeds[i] = rnd();
+    this.aA = new THREE.InstancedBufferAttribute(new Float32Array(n), 1).setUsage(THREE.DynamicDrawUsage);
+    g.setAttribute('aA', this.aA); g.setAttribute('aSeed', new THREE.InstancedBufferAttribute(seeds, 1));
+    this.mesh = new THREE.InstancedMesh(g, new THREE.ShaderMaterial({ vertexShader: STAIN_VS, fragmentShader: STAIN_FS, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 }), n);
+    const d = new THREE.Object3D(); d.scale.set(0, 0, 0); d.updateMatrix();
+    for (let i = 0; i < n; i++) { this.mesh.setMatrixAt(i, d.matrix); this.mesh.setColorAt(i, C.dust); }
+    this.mesh.renderOrder = 2; this.mesh.frustumCulled = false; this.d = d; this.live = 0;
+  }
+  add(x, z, size, col, alpha, life) {
+    const i = this.head; this.head = (this.head + 1) % this.n;
+    this.d.position.set(x, 0.008, z); this.d.rotation.set(0, rnd() * TAU, 0); this.d.scale.set(size, 1, size * (0.6 + rnd() * 0.4)); this.d.updateMatrix();
+    this.mesh.setMatrixAt(i, this.d.matrix); this.mesh.setColorAt(i, col);
+    this.life[i] = life; this.max[i] = life; this.a0[i] = alpha;
+    this.mesh.instanceMatrix.needsUpdate = true; this.mesh.instanceColor.needsUpdate = true; this.live = 1;
+  }
+  step(dt) {
+    if (!this.live) return;
+    let any = 0;
+    for (let i = 0; i < this.n; i++) {
+      if (this.life[i] <= 0) continue;
+      any = 1; this.life[i] -= dt;
+      const k = clamp(this.life[i] / this.max[i], 0, 1);
+      this.aA.array[i] = this.a0[i] * min(1, k * 2.5);
+    }
+    this.aA.needsUpdate = true; if (!any) this.live = 0;
+  }
+  clear() { this.life.fill(0); this.aA.array.fill(0); this.aA.needsUpdate = true; }
+}
+const FX = { add: null, norm: null, rings: [], stains: null };
 const C = {
   gold: new THREE.Color('#ffc65c'), warm: new THREE.Color('#ffb736'), ink: new THREE.Color('#fbf5ec'), dust: new THREE.Color('#c8a87a'),
   green: new THREE.Color('#8ab040'), mote: new THREE.Color('#ffcf8a'), red: new THREE.Color('#ff5a3a'),
@@ -414,20 +541,36 @@ function ring(X, Y, Z, col, size, life) {
 function catchFx(X, Y, kind, combo) {
   if (!R3.ok) return;
   const col = C.kind[kind] || C.dust;
+  if (VFX && !G.attract) {
+    try {
+      VP.set(X, Y, 0.1); VFX.impact(VP, VN, { kind: 'powder', color: SACK[kind] ? SACK[kind].dust : '#c9a96e', size: 0.55 + min(0.5, combo * 0.05) });
+      if (combo % 5 === 0) { VFX.confetti(VP.set(X, Y + 0.6, 0.2), { count: 70 + min(60, combo * 4), size: 0.8, colors: VCONF }); VFX.ring(VP.set(X, W.catchY + 0.03, 0), '#ffb736', { size: 1.4 }); VFX.burst(VP.set(X, Y + 0.3, 0.2), { color: '#ffb736', size: 0.8 }); }
+    } catch (e) { /* ignore */ }
+  }
   for (let i = 0; i < 26; i++) { const a = rnd() * TAU, s = 0.4 + rnd() * 1.4; FX.norm.add(X + cos(a) * 0.2, Y, sin(a) * 0.15, cos(a) * s, 0.8 + rnd() * 1.6, sin(a) * s * 0.5, 0.6 + rnd() * 0.6, 0.06 + rnd() * 0.08, col, 0.7, 1.4, 2.2, 0.25, 0.02); }
   for (let i = 0; i < 10 + min(20, combo * 2); i++) { const a = rnd() * TAU, s = 0.6 + rnd() * 2; FX.add.add(X, Y + 0.1, 0, cos(a) * s, 1 + rnd() * 2.5, sin(a) * s * 0.4, 0.4 + rnd() * 0.4, 0.04 + rnd() * 0.04, rnd() < 0.5 ? C.gold : C.warm, 0.9, 3.5, 1.5); }
   ring(X, W.catchY + 0.02, 0, combo >= 5 ? C.warm : C.gold, 1.1 + min(1, combo * 0.1), 0.45);
 }
 function spoilFx(X, Y) {
   if (!R3.ok) return;
+  if (VFX) { try { VFX.impact(VP.set(X, Y, 0.1), VN, { kind: 'powder', color: '#8ab040', size: 0.8 }); VFX.shake(0.25); } catch (e) { /* ignore */ } }
   for (let i = 0; i < 30; i++) { const a = rnd() * TAU, s = 0.2 + rnd() * 0.8; FX.norm.add(X, Y, 0, cos(a) * s, 0.4 + rnd() * 1.0, sin(a) * s * 0.4, 1 + rnd() * 0.7, 0.12 + rnd() * 0.12, C.green, 0.55, -0.2, 1.6, 0.35); }
   ring(X, W.catchY + 0.02, 0, C.green, 1.2, 0.5);
 }
-function thudFx(X, Z, spoil) {
+function thudFx(X, Z, spoil, kind) {
   if (!R3.ok) return;
+  const kc = C.kind[kind] || C.dust;
+  // spilt grains and husk: little bits with weight that bounce once on the setts and come to rest
+  for (let i = 0; i < 16; i++) { const a = rnd() * TAU, s = 0.6 + rnd() * 1.6; FX.norm.add(X + cos(a) * 0.1, 0.12, Z + sin(a) * 0.1, cos(a) * s, 1.2 + rnd() * 1.6, sin(a) * s, 1.4 + rnd() * 0.8, 0.025 + rnd() * 0.02, kc, 0.95, 9.8, 0.6, 0, 0.012); }
+  FX.stains.add(X + (rnd() - 0.5) * 0.15, Z + (rnd() - 0.5) * 0.15, 0.7 + rnd() * 0.35, spoil ? C.green : kc, spoil ? 0.45 : 0.55, 7);
   for (let i = 0; i < 22; i++) { const a = rnd() * TAU, s = 0.5 + rnd() * 1.4; FX.norm.add(X + cos(a) * 0.15, 0.08, Z + sin(a) * 0.15, cos(a) * s, 0.3 + rnd() * 0.8, sin(a) * s, 0.7 + rnd() * 0.6, 0.12 + rnd() * 0.14, spoil ? C.green : C.dust, 0.5, 0.6, 2.4, 0.4, 0.02); }
   ring(X, 0.02, Z, spoil ? C.green : C.dust, 0.9, 0.5);
   arc.sfx.noise(0.12, { freq: 380, vol: 0.12 });
+  if (VFX && !G.attract) { try { VFX.dust(VP.set(X, 0.05, Z), { size: 0.7, color: spoil ? '#8a9a60' : '#c8a87a' }); } catch (e) { /* ignore */ } }
+}
+// Dust that rises a little, spreads, slows in the air and settles: drag on every axis, a gentle negative gravity, growth.
+function dustPuff(X, Z, n, k) {
+  for (let i = 0; i < n; i++) { const a = rnd() * TAU, s = (0.25 + rnd() * 0.45) * k; FX.norm.add(X + cos(a) * 0.05, 0.05, Z + sin(a) * 0.05, cos(a) * s, 0.15 + rnd() * 0.35 * k, sin(a) * s, 0.9 + rnd() * 0.7, 0.07 + rnd() * 0.06, C.dust, 0.22 + 0.12 * k, -0.08, 2.6, 0.32); }
 }
 function marigolds(X, Y) {
   if (!R3.ok) return;
@@ -470,7 +613,7 @@ function buildWorld() {
     R3.env = pm.fromScene(env, 0.04).texture; pm.dispose();
     scene.environment = R3.env; scene.environmentIntensity = 0.6;
   }
-  const hemi = new THREE.HemisphereLight('#e08a60', '#2a1a12', 0.75); scene.add(hemi); R3.hemi = hemi;
+  const hemi = new THREE.HemisphereLight('#9a8cb4', '#5a3222', 0.8); scene.add(hemi); R3.hemi = hemi;
   // the yard floodlight, nearly overhead, so a sack's shadow marks where it will land
   const key = new THREE.DirectionalLight('#ffe0b8', 1.6);
   key.position.set(1.5, 16, 5); key.target.position.set(0, 0, 0);
@@ -482,8 +625,24 @@ function buildWorld() {
 
   /* ground */
   const stone = colorTex(stoneCanvas(), true, true); stone.repeat.set(26, 17);
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(60, 40), std({ map: stone, roughness: 0.82, color: '#e8d0b8' }));
+  const sRough = colorTex(stoneRough(), false, true); sRough.repeat.set(26, 17);
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(60, 40), std({ map: stone, roughnessMap: sRough, roughness: 0.95, color: '#e2cab2' }));
   ground.rotation.x = -PI / 2; ground.position.z = -8; ground.receiveShadow = true; scene.add(ground);
+  // puddles left by the evening wash: dark, glossy, catching the lamps and the dusk sky
+  {
+    const wet = colorTex(wetCanvas(5), false);
+    const pg = new THREE.PlaneGeometry(1, 1); pg.rotateX(-PI / 2);
+    const pud = new THREE.InstancedMesh(pg, std({ color: '#1e1610', roughness: 0.08, metalness: 0.0, alphaMap: wet, transparent: true, opacity: 0.62, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }), 7);
+    const at = [[-3.8, 1.6, 2.4, 1.3, 0.3], [4.6, 0.8, 1.8, 1.1, -0.5], [-6.5, -2.4, 3.2, 1.6, 0.1], [7.2, -3.4, 2.2, 1.4, 0.8], [1.2, -5.6, 3.6, 1.2, -0.2], [-1.6, 3.6, 1.5, 0.9, 1.2], [5.4, 3.0, 1.2, 0.8, 0.4]];
+    const d0 = new THREE.Object3D();
+    at.forEach((p, i) => { d0.position.set(p[0], 0.006, p[1]); d0.rotation.set(0, p[4], 0); d0.scale.set(p[2], 1, p[3]); d0.updateMatrix(); pud.setMatrixAt(i, d0.matrix); });
+    pud.renderOrder = 1; pud.receiveShadow = true; scene.add(pud);
+    // grime and shade where the walls meet the yard, so no building floats on the stone
+    const aoC = makeCanvas(8, 64); { const g = aoC.getContext('2d'); const gr = g.createLinearGradient(0, 0, 0, 64); gr.addColorStop(0, 'rgba(0,0,0,0.7)'); gr.addColorStop(0.35, 'rgba(0,0,0,0.3)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(0, 0, 8, 64); }
+    const ag = new THREE.PlaneGeometry(1, 1); ag.rotateX(-PI / 2); ag.translate(0, 0, 0.5);
+    M.ao = new THREE.InstancedMesh(ag, new THREE.MeshBasicMaterial({ map: colorTex(aoC, false), transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 }), 8);
+    M.ao.renderOrder = 1; M.ao.count = 0; scene.add(M.ao);
+  }
 
   /* warehouses and skyline */
   const wh = [
@@ -496,12 +655,14 @@ function buildWorld() {
   const roofMat = std({ color: '#2a1a14', roughness: 0.6, metalness: 0.3 });
   const roofShape = new THREE.Shape(); roofShape.moveTo(-0.5, 0); roofShape.lineTo(0.5, 0); roofShape.lineTo(0, 0.22); roofShape.closePath();
   const roofGeo = new THREE.ExtrudeGeometry(roofShape, { depth: 1, bevelEnabled: false }); roofGeo.translate(0, 0, -0.5);
+  const aoD = new THREE.Object3D();
   wh.forEach((b, i) => {
     const tex = colorTex(warehouseCanvas(b.sign, 50 + i, b.tint)); tex.repeat.set(1, 1);
     const front = std({ map: tex, emissiveMap: tex, emissive: '#ffffff', emissiveIntensity: 0.32, roughness: 0.9 });
-    const side = std({ color: b.tint, roughness: 0.95 });
+    const side = std({ color: shadeHex(b.tint, 1.9), map: M.plaster || (M.plaster = colorTex(plasterCanvas(), true, true)), roughness: 0.95 });
     const m = new THREE.Mesh(new THREE.BoxGeometry(b.w, b.h, b.d), [side, side, side, side, front, side]);
     m.position.set(b.x, b.h / 2, b.z); m.receiveShadow = true; scene.add(m);
+    if (M.ao.count < 8) { const n0 = M.ao.count++; aoD.position.set(b.x, 0.004, b.z + b.d / 2); aoD.scale.set(b.w + 0.4, 1, 1.3); aoD.updateMatrix(); M.ao.setMatrixAt(n0, aoD.matrix); }
     const roof = new THREE.Mesh(roofGeo, roofMat); roof.scale.set(b.w + 0.6, b.w * 0.9, b.d + 0.4); roof.position.set(b.x, b.h, b.z); scene.add(roof);
   });
   const sk = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), std({ color: '#1e1218', roughness: 1 }), 18);
@@ -541,7 +702,7 @@ function buildWorld() {
   // a soft blob on the cobbles under every falling sack: where it will land
   const bc = makeCanvas(128, 128); { const g = bc.getContext('2d'); const rg2 = g.createRadialGradient(64, 64, 4, 64, 64, 62); rg2.addColorStop(0, 'rgba(0,0,0,0.75)'); rg2.addColorStop(0.6, 'rgba(0,0,0,0.35)'); rg2.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = rg2; g.fillRect(0, 0, 128, 128); }
   const blobG = new THREE.PlaneGeometry(1, 1); blobG.rotateX(-PI / 2);
-  M.blobs = new THREE.InstancedMesh(blobG, new THREE.MeshBasicMaterial({ map: colorTex(bc), transparent: true, depthWrite: false, opacity: 0.8 }), 14);
+  M.blobs = new THREE.InstancedMesh(blobG, new THREE.MeshBasicMaterial({ map: colorTex(bc), transparent: true, depthWrite: false, opacity: 0.8 }), 20);
   M.blobs.renderOrder = 2; M.blobs.frustumCulled = false; scene.add(M.blobs);
   const piles = new THREE.InstancedMesh(sg, M.sackMats.grain, 36);
   const pileAt = [[-4.6, -3.2, 7], [-2.8, -4.4, 5], [3.4, -3.6, 8], [5.6, -4.8, 6], [-7.5, -5.5, 6], [8.4, -6, 4]];
@@ -565,7 +726,7 @@ function buildWorld() {
   const crate = new THREE.Group(); cart.add(crate); M.crate = crate;
   const plankC = makeCanvas(256, 256); { const g = plankC.getContext('2d'); woodGrain(g, 256, 256, '#7a5232', '#2a160a', '#a87444', 15, 70); g.fillStyle = 'rgba(20,10,4,0.7)'; for (let y = 0; y < 256; y += 64) g.fillRect(0, y, 256, 4); }
   const plankTex = colorTex(plankC, true, true); plankTex.repeat.set(1.6, 1.6);
-  const plank = std({ map: plankTex, roughness: 0.7, color: '#ffffff' });
+  const plank = std({ map: plankTex, roughness: 0.7, color: '#ffffff' }); M.crateMat = plank;
   const hw = 0.58, hd = 0.4, wall = 0.06, ch = 0.62;
   const ringS = new THREE.Shape(); ringS.moveTo(-hw, -hd); ringS.lineTo(hw, -hd); ringS.lineTo(hw, hd); ringS.lineTo(-hw, hd); ringS.closePath();
   const hole = new THREE.Path(); hole.moveTo(-hw + wall, -hd + wall); hole.lineTo(-hw + wall, hd - wall); hole.lineTo(hw - wall, hd - wall); hole.lineTo(hw - wall, -hd + wall); hole.closePath(); ringS.holes.push(hole);
@@ -648,6 +809,7 @@ function buildWorld() {
   /* effects */
   FX.add = new FxPool(600, true, 0.05); FX.norm = new FxPool(900, false, 0.25);
   scene.add(FX.add.mesh); scene.add(FX.norm.mesh);
+  FX.stains = new Stains(12); scene.add(FX.stains.mesh);
   const rg = new THREE.RingGeometry(0.8, 1, 40); rg.rotateX(-PI / 2);
   for (let i = 0; i < 6; i++) {
     const m = new THREE.Mesh(rg, new THREE.MeshBasicMaterial({ color: '#ffb736', transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
@@ -727,9 +889,12 @@ function cameraRig(dt) {
   CAM.x = damp(CAM.x, tx, 2.5, dt);
   CAM.kick = max(0, CAM.kick - dt * 1.6);
   const push = rm ? 0 : sin(min(1, CAM.kick) * PI) * 0.6;
-  const sway = rm || menu ? 0 : sin(R3.time * 0.4) * 0.03;
-  cam.position.set(CAM.x + sway, CAM.Y, CAM.D - push);
-  cam.lookAt(CAM.x * 0.6, CAM.Y - CAM.D * Math.tan(CAM.tilt), 0);
+  // a camera operator's hands on the menu: slow, uneven drift made of unrelated sines (the shared pass adds a
+  // matching sway of the lens); the game itself stays locked off
+  const hh = rm || arc.state !== 'menu' ? 0 : 0.6, t = R3.time;
+  const hx = hh * (sin(t * 0.31) * 0.05 + sin(t * 0.73 + 1.3) * 0.025), hy = hh * (sin(t * 0.43 + 0.7) * 0.035 + sin(t * 1.1) * 0.012);
+  cam.position.set(CAM.x + hx, CAM.Y + hy, CAM.D - push);
+  cam.lookAt(CAM.x * 0.6 + hx * 0.4 + hh * sin(t * 0.27 + 2) * 0.03, CAM.Y - CAM.D * Math.tan(CAM.tilt) + hy * 0.3, 0);
   if (arc.shakeX || arc.shakeY) { cam.translateX(arc.shakeX * 0.004); cam.translateY(arc.shakeY * 0.004); }
   cam.updateMatrixWorld(true);
 }
@@ -765,7 +930,7 @@ function updateSacks(dt) {
       const rest = 0.22;
       m.position.set(v.x, max(rest, v.y), 0.15);
       m.rotation.z = damp(m.rotation.z, 1.35, 6, dt);
-      if (v.y <= rest) { v.state = 'lie'; v.t = 0; thudFx(v.x, 0.15, v.spoil); }
+      if (v.y <= rest) { v.state = 'lie'; v.t = 0; thudFx(v.x, 0.15, v.spoil, v.kind); }
     } else if (v.state === 'lie') {
       v.t += dt;
       const k = clamp((v.t - 1.4) / 0.5, 0, 1);
@@ -774,6 +939,11 @@ function updateSacks(dt) {
       if (k >= 1) { v.state = 'free'; m.visible = false; m.scale.setScalar(1); }
     }
   }
+  // contact shade under the cart, its wheels and the porter's feet: nothing in the yard floats
+  const cx = M.cart.position.x;
+  dm.position.set(cx, 0.011, 0); dm.scale.set(1.55, 1, 1.05); dm.updateMatrix(); M.blobs.setMatrixAt(nb++, dm.matrix);
+  for (const sx of [-1, 1]) { dm.position.set(cx + sx * 0.63, 0.012, 0); dm.scale.set(0.22, 1, 0.42); dm.updateMatrix(); M.blobs.setMatrixAt(nb++, dm.matrix); }
+  dm.position.set(cx, 0.011, -1.02); dm.scale.set(0.62, 1, 0.5); dm.updateMatrix(); M.blobs.setMatrixAt(nb++, dm.matrix);
   M.blobs.count = nb; M.blobs.instanceMatrix.needsUpdate = true;
 }
 
@@ -805,8 +975,14 @@ function updateCart(dt) {
   }
   // the porter walks with the cart and looks up at the nearest sack
   const P = M.P, v = abs(M.cartV), walk = clamp(v / 3, 0, 1);
-  M.walkT = (M.walkT || 0) + dt * (4 + v * 2.2) * (walk > 0.05 ? 1 : 0);
+  const ph0 = M.walkT || 0;
+  M.walkT = ph0 + dt * (4 + v * 2.2) * (walk > 0.05 ? 1 : 0);
   const ph = M.walkT;
+  // a heel strike each half cycle kicks a small puff off the setts; the wheels drag a low cloud when the cart is pushed hard
+  if (!arc.reducedMotion && R3.q >= 1) {
+    if (walk > 0.25 && floor(ph / PI) !== floor(ph0 / PI)) { const side = (floor(ph / PI) & 1) ? 1 : -1; dustPuff(cart.position.x + side * 0.1, -1.0, 3, 0.5 + walk * 0.4); }
+    if (v > 2 && rnd() < dt * v * 1.2) { const sx = rnd() < 0.5 ? -1 : 1; dustPuff(cart.position.x + sx * 0.63 - Math.sign(M.cartV) * 0.12, 0, 1, min(0.8, v / 6)); }
+  }
   for (let i = 0; i < 2; i++) {
     const L = P.legs[i], s2 = i ? 1 : -1;
     L.hip.rotation.x = sin(ph + (i ? PI : 0)) * 0.6 * walk;
@@ -824,9 +1000,113 @@ function updateCart(dt) {
   P.head.rotation.x = damp(P.head.rotation.x, -0.25 - (ny ? (1 - ny) * 0.4 : 0), 4, dt);
 }
 
+/* --------------------------------------------------------------- real people
+ * The porter and the yard folk are the shared people library's bodies: real proportions and skin, faces that blink
+ * and follow the sacks, a gait from how fast the cart really moves. The porter's hands are held on the handles by
+ * IK; he turns into the push, and reacts to a run of catches or a dropped load like a person would. A few yard
+ * hands loaf about between the sack piles and watch, each reacting on their own beat. Any failure leaves the old
+ * porter. */
+const HY = { on: false, porter: null, folk: [], yaw: 0, uo: { speed: 0, look: null }, uf: { look: null }, t: new THREE.Vector3(), look: new THREE.Vector3(),
+  q: new THREE.Quaternion(), qp: new THREE.Quaternion(), m: new THREE.Matrix4(), S: new THREE.Vector3(), M: new THREE.Vector3(), E: new THREE.Vector3(),
+  u: new THREE.Vector3(), f: new THREE.Vector3(), x: new THREE.Vector3(), y: new THREE.Vector3(), z: new THREE.Vector3(), a: new THREE.Vector3(), b: new THREE.Vector3(), pole: new THREE.Vector3(), reacting: 0 };
+function buildYardHumans(scene) {
+  if (typeof HUMAN.createHuman !== 'function') return;
+  try {
+    const q = R3.q;
+    const p = HUMAN.createHuman({ seed: 41, sex: 'm', build: 'athletic', height: 1.68, skin: '#9a5a38', quality: q, lod: q >= 1 ? 'full' : 'mid',
+      outfit: { top: '#efe6d2', top2: '#2a4a5a', sleeves: 'short', bottom: '#c8b48a', legs: 'long-shorts', shoes: '#3a2214', soles: '#2a1a10', cap: '#c42a1e' } });
+    p.group.position.set(0, 0, -1.05); M.cart.add(p.group); HY.porter = p;
+    M.P.root.visible = false;
+    if (q >= 1) {
+      // yard hands between the piles: one sitting on the sacks with his chai, three standing about
+      const spots = [[-1.9, -3.4, 0.35, 'sit'], [2.1, -3.9, -0.3, ''], [-3.2, -5.2, 0.6, ''], [3.9, -2.6, -0.8, '']];
+      spots.forEach((sp, i) => {
+        // the last one is a kid from the lanes who hangs about the yard after school
+        const kid = i === 3;
+        const h = HUMAN.createHuman({ seed: 600 + i * 31, quality: q, lod: 'mid', age: i === 0 ? 'older' : undefined, height: kid ? 1.32 : undefined, build: kid ? 'slim' : undefined,
+          outfit: kid ? { top: '#2f80c9', sleeves: 'short', bottom: '#3c3c46', legs: 'shorts', shoes: '#e9e6df' } : undefined });
+        h.group.position.set(sp[0], sp[3] === 'sit' ? 0.04 : 0, sp[1]); h.group.rotation.y = sp[2];
+        if (sp[3] === 'sit') {
+          // an upturned crate to sit on, and a glass of chai beside him
+          const stool = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.44, 0.42), M.crateMat || std({ color: '#6a4628', roughness: 0.85 }));
+          stool.position.set(sp[0] - Math.sin(sp[2]) * 0.12, 0.22, sp[1] - Math.cos(sp[2]) * 0.12); stool.rotation.y = sp[2]; stool.castShadow = true; stool.receiveShadow = true; scene.add(stool);
+          const chai = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.028, 0.09, 10), std({ color: '#c88a4a', roughness: 0.2, transparent: true, opacity: 0.85 }));
+          chai.position.set(sp[0] + 0.32, 0.045, sp[1] + 0.05); scene.add(chai);
+        }
+        scene.add(h.group); if (sp[3]) h.play(sp[3], { hold: true });
+        HY.folk.push({ h, sit: !!sp[3] });
+      });
+    }
+    HY.on = true;
+  } catch (e) {
+    HY.on = false; if (M.P) M.P.root.visible = true;
+    try { console.warn('yard-catch: people library unavailable', e && e.message); } catch (er) { /* ignore */ }
+  }
+}
+function yAim(bone, dir, bend) {
+  const H = HY;
+  H.y.copy(dir).multiplyScalar(-1).normalize();
+  H.x.copy(bend).addScaledVector(H.y, -bend.dot(H.y));
+  if (H.x.lengthSq() < 1e-8) H.x.set(1, 0, 0).addScaledVector(H.y, -H.y.x);
+  H.x.normalize(); H.z.crossVectors(H.x, H.y);
+  H.m.makeBasis(H.x, H.y, H.z); H.q.setFromRotationMatrix(H.m);
+  bone.parent.getWorldQuaternion(H.qp);
+  bone.quaternion.copy(H.qp.invert().multiply(H.q));
+  bone.updateMatrixWorld(true);
+}
+function yArm(h, right, T, pole) {
+  const b = h.bones, sc = h.height / 1.75, sh = right ? b.shoulderR : b.shoulderL, el = right ? b.elbowR : b.elbowL, H = HY;
+  sh.getWorldPosition(H.S);
+  H.a.subVectors(T, H.S); let d = H.a.length(); if (d < 1e-5) { H.a.set(0, -1, 0); d = 1e-5; } else H.a.multiplyScalar(1 / d);
+  const l1 = 0.29 * sc, l2 = 0.255 * sc, dm = min(d, l1 + l2 - 0.002), al = (l1 * l1 - l2 * l2 + dm * dm) / (2 * dm), hh = Math.sqrt(max(0, l1 * l1 - al * al));
+  H.b.copy(pole).addScaledVector(H.a, -pole.dot(H.a)); if (H.b.lengthSq() < 1e-6) H.b.set(0, 0, 1); H.b.normalize();
+  H.M.copy(H.S).addScaledVector(H.a, al).addScaledVector(H.b, hh); H.E.copy(H.S).addScaledVector(H.a, dm);
+  H.u.subVectors(H.M, H.S); H.f.subVectors(H.E, H.M); H.pole.crossVectors(H.f, H.u); if (H.pole.lengthSq() < 1e-8) H.pole.set(1, 0, 0);
+  yAim(sh, H.u, H.pole); yAim(el, H.f, H.pole);
+}
+// what the yard makes of a run of catches or a dropped load: everyone on their own beat
+function yardReact(kind) {
+  if (!HY.on || G.attract) return;
+  const later = (fn, d) => setTimeout(() => { if (HY.on) { try { fn(); } catch (e) { /* ignore */ } } }, d * 1000);
+  if (kind === 'combo') {
+    HY.reacting = 1.3; later(() => HY.porter.play('fistPump', { speed: 1.2 }), 0.05);
+    HY.folk.forEach((f) => { if (rnd() < 0.8) later(() => f.h.play(f.sit ? 'clap' : rnd() < 0.5 ? 'cheer' : 'clap'), 0.2 + rnd() * 0.6); });
+  } else if (kind === 'miss') {
+    HY.reacting = 1.1; later(() => HY.porter.play(rnd() < 0.5 ? 'handsOnHead' : 'slump', { speed: 1.5 }), 0.12);
+    HY.folk.forEach((f) => { if (rnd() < 0.5) later(() => f.h.play(f.sit ? 'shrug' : rnd() < 0.5 ? 'point' : 'shrug', { target: M.cart.position }), 0.3 + rnd() * 0.5); });
+  } else if (kind === 'over') {
+    later(() => HY.porter.play('slump', { hold: true }), 0.3);
+  }
+}
+function syncYardHumans(dt) {
+  const p = HY.porter, cart = M.cart;
+  let ny = null;
+  for (const o of G.items) if (!o.spoil && o.y < GY && (!ny || o.y > ny.y)) ny = o;
+  if (ny) HY.look.set(laneX(ny.x), yToY(ny.y), 0); else HY.look.set(cart.position.x, 1.2, 2);
+  // he turns into the push, back square to the crate when it stops
+  const want = clamp(M.cartV * 0.16, -1.0, 1.0);
+  HY.yaw = damp(HY.yaw, want, 5, dt); p.group.rotation.y = HY.yaw;
+  HY.uo.speed = abs(M.cartV); HY.uo.look = HY.look; p.update(dt, HY.uo);
+  HY.reacting = max(0, HY.reacting - dt);
+  if (!(HY.reacting > 0 && p.playing()) && G.phase !== 'over') {
+    // hands on the handle ends, elbows soft
+    p.bones.spine.rotation.x += 0.12;
+    p.group.updateMatrixWorld(true); cart.updateMatrixWorld(true);
+    HY.pole.set(0, -0.6, -1).applyQuaternion(p.group.getWorldQuaternion(HY.q));
+    HY.t.set(-0.38, 0.6, -1.0); cart.localToWorld(HY.t); yArm(p, false, HY.t, HY.pole);
+    HY.t.set(0.38, 0.6, -1.0); cart.localToWorld(HY.t); yArm(p, true, HY.t, HY.pole);
+  }
+  HY.uf.look = HY.look;
+  for (const f of HY.folk) f.h.update(dt, HY.uf);
+}
+
 function frame3D(dt) {
   R3.time += dt;
   updateCart(dt);
+  if (HY.on) {
+    try { syncYardHumans(dt); }
+    catch (e) { HY.on = false; if (HY.porter) HY.porter.group.visible = false; HY.folk.forEach((f) => { f.h.group.visible = false; }); M.P.root.visible = true; try { console.warn('yard-catch: people off', e && e.message); } catch (er) { /* ignore */ } }
+  }
   updateSacks(dt);
   // festoon lights: a sagging string across under the loft, twinkling
   const half = W.half || 3, n = 28, pos = M.wireGeo.attributes.position.array;
@@ -853,7 +1133,7 @@ function frame3D(dt) {
   }
   // dust motes drifting through the lamplight
   if (!arc.reducedMotion && rnd() < dt * 6) FX.add.add((rnd() - 0.5) * 2 * half, 0.5 + rnd() * (W.loftY - 1), -0.5 - rnd() * 2, 0.15 + rnd() * 0.2, 0.05, 0, 4, 0.03 + rnd() * 0.02, C.mote, 0.45, 0, 0);
-  FX.add.step(dt, R3.time); FX.norm.step(dt, R3.time);
+  FX.add.step(dt, R3.time); FX.norm.step(dt, R3.time); FX.stains.step(dt);
   cameraRig(dt);
   const sc = R3.renderer.domElement.height / (2 * Math.tan(R3.camera.fov * PI / 360));
   FX.add.mat.uniforms.uScale.value = sc; FX.norm.mat.uniforms.uScale.value = sc;
@@ -907,10 +1187,13 @@ function initRenderer() {
     const q = /[?&]q=(\d)/.exec(location.search); if (q) { R3.q = clamp(+q[1], 0, 3); R3.lock = true; }
     R3.camera = new THREE.PerspectiveCamera(40, arc.w / arc.h, 0.1, 200);
     buildWorld();
+    buildYardHumans(R3.scene);
     R3.scene.add(R3.camera);
+    try { VFX = createVFX(r, R3.scene, R3.camera, { quality: R3.q, unit: 1, groundY: 0, soft: R3.soft, reduced: arc.reducedMotion }); VFX.warm(); }
+    catch (e) { VFX = null; try { console.warn('yard-catch: spectacle layer off', e && e.message); } catch (er) { /* ignore */ } }
     R3.ok = true;
     // Shared post pass: bloom on the lamps and catches, grade, grain; a swing onto the yard at the start.
-    POST = createPost(R3.renderer, { arc, soft: R3.soft, intro: { yaw: 0.7, up: 0.4, back: 0.45 }, results: { yaw: 0.3 }, target: (v) => v.set(CAM.x * 0.6, CAM.Y - CAM.D * Math.tan(CAM.tilt), 0), look: { bloom: 0.5, threshold: 0.72 } });
+    POST = createPost(R3.renderer, { arc, soft: R3.soft, intro: { yaw: 0.7, up: 0.4, back: 0.45 }, results: { yaw: 0.3 }, target: (v) => v.set(CAM.x * 0.6, CAM.Y - CAM.D * Math.tan(CAM.tilt), 0), preset: 'natural', handheld: true, dof: { results: 0.7, radius: 0.22 }, look: { bloom: 0.42, threshold: 0.74, gain: [1.03, 1.0, 0.95] } });
     applyQuality();
   } catch (err) {
     R3.ok = false; R3.fail = String(err && err.message || err);
@@ -1012,7 +1295,9 @@ function render(c, a) {
   if (!R3.ok) drawFail(c);
   else if (!R3.lost) {
     frame3D(dt);
+    if (VFX) { try { VFX.setReduced(arc.reducedMotion); VFX.setQuality(R3.q); const k = VFX.update(R3.realDt > 0.1 ? 0.1 : R3.realDt); VFXK = arc.state === 'play' ? k : 1; VFX.applyShake(R3.camera); } catch (e) { VFX = null; VFXK = 1; } }
     if (POST) { POST.setQuality(R3.q, R3.lock); POST.render(R3.scene, R3.camera); } else R3.renderer.render(R3.scene, R3.camera);
+    if (VFX) VFX.removeShake(R3.camera);
   }
   // a red edge when a life goes (a soft vignette, never a flash under reduced motion)
   G.hurt = max(0, G.hurt - dt * 1.8);
@@ -1072,7 +1357,8 @@ function boot() {
     init(a) { arc = a; a.debug = dbg; G.D = DIFF.normal; initRenderer(); if (R3.ok) layoutYard(); reset(true); a.menu(); },
     start(a, ch) {
       arc = a; reset(false, ch);
-      if (R3.ok) { FX.add.clear(); FX.norm.clear(); }
+      if (R3.ok) { FX.add.clear(); FX.norm.clear(); FX.stains.clear(); }
+      if (HY.on) { HY.porter.stop(); HY.reacting = 0; HY.folk.forEach((f) => { if (!f.sit) f.h.stop(); }); }
       R3.accT = 0; R3.accN = 0; R3.settle = 1;
       const label = G.mode === 'shift' ? '75 seconds' : G.mode === 'clean' ? 'One life, skip the green' : 'Three lives';
       arc.toast(label, 'Yard Catch', 1400);
@@ -1081,7 +1367,7 @@ function boot() {
   });
   // for test scripts: the screen x of the lowest good sack, if any
   const target = () => { let best = null; for (const o of G.items) if (!o.spoil && (!best || o.y > best.y)) best = o; if (!best || !R3.ok) return null; toPx(laneX(best.x), 1, 0, PX); return PX.x; };
-  window.__yardcatch = { G, R3, W, CAM, M, target };
+  window.__yardcatch = { fxtest: () => { catchFx(0, W.catchY + 0.2, 'spice', 5); spoilFx(1, W.catchY + 0.2); thudFx(-1, 0.15, false, 'tea'); }, vfx: () => VFX, G, R3, W, CAM, M, target, HY, finish: () => finish('Shift over', '<p>' + G.caught + ' sacks in the shift.</p>') };
 }
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();

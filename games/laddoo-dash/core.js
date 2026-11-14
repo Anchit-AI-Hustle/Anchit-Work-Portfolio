@@ -96,9 +96,9 @@ const CUTS = [
   { title: 'Jalebi rain', sub: 'Four spirits, one hero, one giant jalebi' }
 ];
 const DIFF = {
-  easy: { pl: 1.0, sp: 0.86, fr: 1.4, lives: 5, rel: 1.4 },
-  normal: { pl: 1.0, sp: 0.96, fr: 1.0, lives: 3, rel: 1 },
-  hard: { pl: 1.03, sp: 1.07, fr: 0.65, lives: 3, rel: 0.6 }
+  easy: { pl: 1.0, sp: 0.86, fr: 1.4, lives: 5, rel: 1.4, slip: 0.09 },
+  normal: { pl: 1.0, sp: 0.96, fr: 1.0, lives: 3, rel: 1, slip: 0.05 },
+  hard: { pl: 1.03, sp: 1.07, fr: 0.65, lives: 3, rel: 0.6, slip: 0.025 }
 };
 const BASE = 8.0;
 const SCHED = [7, 20, 7, 20, 5, 20, 5, 1e9];
@@ -252,14 +252,17 @@ function reverse(G, s) {
 }
 function spiritOpen(M, x, y) { const c = cellAt(M, x, y); return c === PATH || c === TUN; }
 const TGT = { x: 0, y: 0 };
+// A spirit chases where it last SAW the hero: what it sees is refreshed every 0.13 to 0.3 s (a human's
+// reaction time), a little quicker on its good days, so a sharp turn at a junction buys a moment.
 function target(G, s) {
-  const h = G.hero, M = G.M, hx = Math.round(h.x), hy = Math.round(h.y), hd = h.dir < 0 ? 1 : h.dir;
+  const h = G.hero, M = G.M, sx = s.hx != null ? s.hx : h.x, sy = s.hy != null ? s.hy : h.y;
+  const hx = Math.round(sx), hy = Math.round(sy), hd0 = s.hd != null ? s.hd : h.dir, hd = hd0 < 0 ? 1 : hd0;
   if (s.st === 'eyes') { TGT.x = M.door.x; TGT.y = M.door.y - 1; return; }
   if (!G.chase && !(s.i === 0 && G.left < 22)) { TGT.x = M.corners[s.i][0]; TGT.y = M.corners[s.i][1]; return; }
   if (s.i === 0) { TGT.x = hx; TGT.y = hy; }
   else if (s.i === 1) { TGT.x = hx + DX[hd] * 4; TGT.y = hy + DY[hd] * 4; }
   else if (s.i === 2) { const ax = hx + DX[hd] * 2, ay = hy + DY[hd] * 2, t = G.sp[0]; TGT.x = ax + (ax - Math.round(t.x)); TGT.y = ay + (ay - Math.round(t.y)); }
-  else { const dx = wrapDX(M, s.x - h.x), dy = s.y - h.y; if (dx * dx + dy * dy > 64) { TGT.x = hx; TGT.y = hy; } else { TGT.x = M.corners[3][0]; TGT.y = M.corners[3][1]; } }
+  else { const dx = wrapDX(M, s.x - sx), dy = s.y - sy; if (dx * dx + dy * dy > 64) { TGT.x = hx; TGT.y = hy; } else { TGT.x = M.corners[3][0]; TGT.y = M.corners[3][1]; } }
 }
 function decide(G, s) {
   const M = G.M, cx = ((s.tx % M.W) + M.W) % M.W, cy = s.ty;
@@ -270,11 +273,18 @@ function decide(G, s) {
     for (let k = 0; k < 4; k++) { const d = (start + k) & 3; if (d === REV[s.dir]) continue; if (spiritOpen(M, cx + DX[d], cy + DY[d])) { best = d; break; } }
   } else {
     target(G, s);
+    let b2 = -1, bd2 = 1e9;
     for (let d = 0; d < 4; d++) {
       if (d === REV[s.dir]) continue;
       if (!spiritOpen(M, cx + DX[d], cy + DY[d])) continue;
       const ex = wrapDX(M, cx + DX[d] - TGT.x), ey = cy + DY[d] - TGT.y, dd = ex * ex + ey * ey;
-      if (dd < bd) { bd = dd; best = d; }
+      if (dd < bd) { b2 = best; bd2 = bd; bd = dd; best = d; } else if (dd < bd2) { bd2 = dd; b2 = d; }
+    }
+    // Now and then a spirit misjudges a junction and takes the other way, more often on an off day and
+    // never with the hero right in front of it, so a chase stays fair rather than machine perfect.
+    if (b2 >= 0 && s.st === 'active' && bd > 9) {
+      const d0 = DIFF[G.cfg.diff] || DIFF.normal;
+      if (G.rng() < d0.slip / (s.mood || 1)) { best = b2; s.slip = (s.slip || 0) + 1; }
     }
   }
   if (best < 0) best = REV[s.dir];
@@ -344,6 +354,9 @@ function spiritsStep(G, dt) {
   for (let i = 0; i < 4; i++) {
     const s = G.sp[i];
     s.t += dt;
+    if (s.mood == null) { s.mood = 0.78 + G.rng() * 0.44; s.react = 0; }
+    s.react -= dt;
+    if (s.react <= 0) { const h = G.hero; s.hx = h.x; s.hy = h.y; s.hd = h.dir; s.react = (0.13 + G.rng() * 0.17) / s.mood; }
     const v = spiritSpeed(G, s, sp);
     if (s.st === 'active' || s.st === 'eyes') moveNav(G, s, v * dt);
     else houseStep(G, s, dt, v);

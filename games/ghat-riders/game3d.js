@@ -1606,7 +1606,9 @@ const TUT = [
 ];
 function stepTutorial(W, dt) {
   const tu = W.tut, P = W.P, st = P.stats, L = TUT[tu.step];
-  if (!L || W.phase !== 'racing') return;
+  if (W.phase !== 'racing') return;
+  // after the last lesson there is no lesson to wait for, only the short run to the results
+  if (!L) { if (tu.doneT >= 0) { tu.doneT += dt; if (tu.doneT > 2.5) { W.phase = 'finished'; W.finWait = 3; P.finT = W.t; } } return; }
   tu.t += dt;
   const coach = W.riders[1];
   // each lesson counts from the moment it starts

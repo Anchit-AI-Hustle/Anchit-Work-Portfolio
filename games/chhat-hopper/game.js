@@ -1701,6 +1701,7 @@ function run(R) {
         power: (k) => { if (G && G.P) { if (k === 'diya') G.P.star = 10; else { setBig(G.P, true); if (k === 'chilli') G.P.power = 'chilli'; } } },
         unlock: (n) => { SAVE.unlocked = clamp(n | 0, 1, 9); saveGame(); },
         finishLevel: () => { if (G && G.map && G.map.flag) { G.P.x = G.map.flag.x - 0.4; G.P.y = G.map.flag.y0 + 4; } },
+        moment: (k) => { if (R.moment) R.moment(k); },
         boss: () => { if (G) { loadLevel(G, 8, false); startPlay(G); G.P.kite = false; G.P.x = G.map.arena.x0 + 1; G.P.y = G.map.arena.floor; G.cam.init = false; } }
       };
       a.menu();
@@ -1721,7 +1722,7 @@ function run(R) {
       if (!G || R.failed) return;
       auFrame();
       const inp = botOn ? botInput(G) : readInput(a, dt);
-      const slow = G.slow > 0 && !a.reducedMotion ? 0.4 : 1;
+      const slow = (G.slow > 0 && !a.reducedMotion ? 0.4 : 1) * (R.timeScale ? R.timeScale() : 1);
       let left = dt * slow;
       while (left > 1e-6) { const s = Math.min(FIXED, left); stepGame(G, s, inp); inp.jumpPressed = false; inp.dashPressed = false; inp.any = false; left -= s; if (G.over) break; }
       const P = G.P;
