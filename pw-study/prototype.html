@@ -81,6 +81,8 @@ main>.wrap{padding-top:24px;padding-bottom:48px}
 @media (max-width:759px){.swipe{display:block}}
 .skip{position:absolute;left:-9999px;top:8px;z-index:50;background:var(--ink);color:#fff;padding:8px 12px;border-radius:8px}.skip:focus{left:8px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.pair{display:inline-flex;gap:10px;align-items:center;flex-wrap:nowrap}
+.wa-btns button{all:unset;cursor:pointer;display:block}
 .rowpick{all:unset;cursor:pointer;display:block;text-align:left;border-radius:6px}
 .rowpick:focus-visible{outline:2px solid var(--primary);outline-offset:3px}
 @media (max-width:600px){.hero p.small.muted{display:none}.hero .feats{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.hero .feats .label{display:none}.hero .feats a{flex:none}.tabs{-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}.tabs.at-end{-webkit-mask-image:none;mask-image:none}}
@@ -229,6 +231,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
 <script>if(/[?&]embed=1/.test(location.search))document.documentElement.classList.add("embed");</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to the prototype</a>
 <div class="concept" role="note"><b>Concept prototype</b> by Anchit Tandon, with made-up students · not an official PW product</div>
 <header class="top">
   <div class="wrap">
@@ -241,7 +244,6 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
     </nav>
   </div>
 </header>
-<a class="skip" href="#main">Skip to the prototype</a>
 <main id="main">
 <section class="hero">
   <div class="wrap">
@@ -343,14 +345,14 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
             <tr data-a="adult"><td><b>Adult aspirant</b></td><td>UPSC, govt exams, CA, NEET PG, skills</td><td><b>To the learner</b>, plus a study-circle check-in. No parent channel</td></tr>
           </tbody></table></div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center">
-          <span class="label">Learner</span>
+          <span class="pair"><span class="label">Learner</span>
           <div class="seg" role="group" aria-label="Learner" id="pp-learner">
             <button data-p="0" aria-pressed="true">Riya, 16</button><button data-p="1" aria-pressed="false">Aman, 19</button><button data-p="2" aria-pressed="false">Meena, 15</button><button data-p="3" aria-pressed="false">Kabir, 24</button>
           </div>
-          <span class="label">Language</span>
+          </span><span class="pair"><span class="label">Language</span>
           <div class="seg" role="group" aria-label="Language" id="pp-lang">
-            <button data-l="en" aria-pressed="true">English</button><button data-l="hi" aria-pressed="false">हिंदी</button>
-          </div>
+            <button data-l="en" aria-pressed="true">English</button><button data-l="hi" lang="hi" aria-pressed="false">हिंदी</button>
+          </div></span>
         </div>
       </div>
       <div class="card soft guard">
@@ -412,8 +414,8 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
         <h3>How to prove it (first 90 days)</h3>
         <div class="flow" style="margin-top:10px">
           <div class="step"><span class="n">1</span><div><b>Backtest, then pick 2 grades</b><p class="small">Go only if week-6 risk predicts non-renewal (AUC 0.70+). Pilot Class 10 and Class 11: both have a next batch.</p></div></div>
-          <div class="step"><span class="n">2</span><div><b>90/10 holdout</b><p class="small">10% keep today's experience. About 13,300 learners detect +4pp on a 40% base at 80% power.</p></div></div>
-          <div class="step"><span class="n">3</span><div><b>Primary metric</b><p class="small">Next-cycle enrolment within 30 days of batch end or results day.</p></div></div>
+          <div class="step"><span class="n">2</span><div><b>90/10 holdout</b><p class="small">10% keep today's experience. About 14,500 learners give 80% power that the lift's lower bound clears the 0.62pp break-even if the true lift is +4pp.</p></div></div>
+          <div class="step"><span class="n">3</span><div><b>Primary metric</b><p class="small">Next-cycle enrolment by the start of the next batch, so renewals in the Vishwas Diwas window count.</p></div></div>
           <div class="step"><span class="n">4</span><div><b>Guardrails</b><p class="small">Notification opt-outs, refund rate, app rating, parent complaints.</p></div></div>
         </div>
       </div>
@@ -450,7 +452,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
         <p class="small" id="m-total-sub"></p>
         <div class="formula" id="m-total-f" style="margin-top:8px"></div>
         <p class="label" style="margin-top:14px">Net of running costs</p>
-        <p class="bigtotal" id="m-net"></p>
+        <p class="bigtotal" id="m-net" aria-live="polite"></p>
         <p class="small" id="m-net-sub"></p>
       </div>
     </div>
@@ -552,7 +554,7 @@ function actions(s,res,p){
     a.push({t:'Mentor call on day 8 if still high risk',d:'If the plan has not worked in a week, a real mentor rebuilds it with the learner. Calls are capped to what PW\'s mentors can take.'});
     a.push(pulse);
   } else if(res.tier==='Medium'){
-    a.push({t:'AI Mentor catch-up plan',d:'Backlog lectures, a Daily Challenge and one short DPP, scheduled around '+(g==='adult'?'work or coaching hours':'school hours')+'.'});
+    a.push({t:'AI Mentor catch-up plan',d:'Backlog lectures, a Daily Challenge and one short DPP, scheduled around '+(g==='adult'?'work or coaching hours':g==='young'?'coaching hours':'school hours')+'.'});
     a.push({t:g==='minor'?'Weekly Progress Report, to the parent':'Weekly Progress Report, to the learner',d:'Progress and the plan, no alarm.'});
   } else {
     a.push({t:'Protect the streak',d:'Light-touch praise, no extra pings.'});
@@ -560,8 +562,8 @@ function actions(s,res,p){
       if(p.offline && p.vp && !p.final) a.push({t:minor?'Suggest a free Vidyapeeth trial class to the parent':'Offer a free Vidyapeeth trial class',d:'Strong, engaged learner in '+p.city+', a centre city.'+(minor?' Under 18, so the offer goes to the parent, never the child.':'')});
       else a.push({t:(minor?'Suggest to the parent: ':'Offer: ')+p.next.title,d:p.final?'Final year: an in-year upgrade only, no next-batch offer.':'High engagement and scores: ready for the next step on results day.'});
     }
-    else if(p.final) a.push({t:'Results-day help queued',d:'Final year: a year report and counselling after the exam; no next-batch offer.'});
-    else a.push({t:'Next-step recommendation queued for results day',d:minor?'Shown to '+p.name+' as an academic next step; the parent gets the fees and offer.':'Personalised next batch shown on results day.'});
+    else if(p.final) a.push({t:'In-year upgrade in the app; results-day help queued',d:'Final year: the in-year upgrade stays available; after the exam, a year report and counselling. No next-batch offer.'});
+    else a.push({t:'Next-step recommendation in the app',d:minor?'Shown to '+p.name+' as an academic next step; the parent gets the fees and offer.':'Shown in the app now and personalised again on results day.'});
   }
   return a;
 }
@@ -570,13 +572,13 @@ function actions(s,res,p){
 var P = [
   {name:'Riya',full:'Riya Sharma',age:16,batch:'Arjuna JEE 2028 (Class 11)',city:'Jaipur',offline:true,vp:true,lang:'HINGLISH',
    s:{lec:38,test:45,idle:9,doubt:0,streak:0},
-   next:{cat:'Class 12',title:'Lakshya JEE 2028',aud:'For JEE Aspirants',date:'Starts on 5 Apr, 2027',price:4199,mrp:8000,plan:'Infinity, Pro',why:'Continues Arjuna with the same faculty. Your weak chapters (Rotational Motion, Chemical Bonding) are scheduled first.'}},
+   next:{cat:'Class 12',title:'Lakshya JEE 2028',acad:'Class 12 JEE preparation, same faculty',aud:'For JEE Aspirants',date:'Starts on 5 Apr, 2027',price:4199,mrp:8000,plan:'Infinity, Pro',why:'Continues Arjuna with the same faculty. Your weak chapters (Rotational Motion, Chemical Bonding) are scheduled first.'}},
   {name:'Aman',full:'Aman Verma',age:19,batch:'Yakeen NEET 2027 (Dropper)',city:'Patna',offline:true,vp:true,final:true,lang:'HINGLISH',
    s:{lec:82,test:74,idle:0,doubt:6,streak:12},
    next:{cat:'Dropper',title:'Yakeen NEET 2027 - Infinity Pro',aud:'For NEET Aspirants',date:'Upgrade applies to your current batch',price:3999,mrp:9000,plan:'Infinity Pro',why:'{testline} Infinity Pro adds mentor sessions and the full test series for the final 6 months.'}},
   {name:'Meena',full:'Meena Kumari',age:15,batch:'Udaan UP Board 2027 (Class 10, Hindi medium)',city:'Lucknow',offline:true,vp:true,lang:'HINDI',
    s:{lec:66,test:58,idle:3,doubt:0,streak:0},
-   next:{cat:'Class 11',title:'Arjuna NEET 2029 (Hindi medium)',aud:'For NEET Aspirants',date:'Starts on 10 Apr, 2027',price:3499,mrp:7000,plan:'Infinity, Pro',why:'Your Science scores are your strongest. Early Class 11 start keeps your board-to-NEET momentum.'}},
+   next:{cat:'Class 11',title:'Arjuna NEET 2029 (Hindi medium)',acad:'Class 11 NEET preparation, in Hindi',aud:'For NEET Aspirants',date:'Starts on 10 Apr, 2027',price:3499,mrp:7000,plan:'Infinity, Pro',why:'Your Science scores are your strongest. Early Class 11 start keeps your board-to-NEET momentum.'}},
   {name:'Kabir',full:'Kabir Singh',age:24,batch:'UPSC Prelims + Mains 2027',city:'Delhi',offline:true,vp:false,lang:'HINGLISH',
    s:{lec:55,test:60,idle:5,doubt:1,streak:0},
    next:{cat:'UPSC',title:'Prelims Test Series 2027 + Mains Answer Writing',aud:'For UPSC Aspirants',date:'Starts on 1 Feb, 2027',price:2999,mrp:6000,plan:'Infinity',why:'Polity is your strongest area; the series targets Economy and Environment, your weakest. Includes weekly Mains answer-writing practice.'}}
@@ -642,7 +644,7 @@ function renderStudent(){
   el('ringArc').setAttribute('stroke-dashoffset', (188.5*(1-onTrack/100)).toFixed(1));
   el('ringArc').setAttribute('stroke', res.tier==='High'?'#E31B4D':res.tier==='Medium'?'#FB6514':'#1B7938');
   var behind = lecturesBehind(s.lec);
-  el('s-status').textContent = res.tier==='High'?'Needs a push this week':res.tier==='Medium'?'Slightly off pace':'On track, keep going';
+  el('s-status').textContent = res.tier==='High'?'Needs a push this week':res.tier==='Medium'?'Slightly off pace':(behind>0?'On track overall, a little to catch up':'On track, keep going');
   el('s-sub').textContent = behind>0 ? behind+' lecture'+(behind>1?'s':'')+' behind batch pace' : 'On or ahead of batch pace';
   el('st-lec').textContent = s.lec+'%'; el('st-test').textContent = s.test+'%'; el('st-streak').textContent = s.streak;
   var n = el('s-nudge'); n.className = 'nudge ' + (res.tier==='High'?'high':res.tier==='Medium'?'med':'low');
@@ -650,12 +652,12 @@ function renderStudent(){
   var wk = weekLectures(res.tier, behind), later = behind - wk;
   if(res.tier==='High'){ var d1=Math.ceil(wk/2), d2=wk-d1; el('s-nudge-title').textContent='Your 7-day catch-up plan';
     plan=[wk>0?'Day 1-2: '+pl(d1,'backlog lecture')+' (highest weightage first)':'Day 1-2: one short session a day on your weakest chapter','Day 3: 20-min guided practice, one step at a time',(d2>0?'Day 4-6: '+pl(d2,'more lecture'):'Day 4-6: weakest-chapter practice')+' + doubts cleared with AI Guru','Day 7: mini-test to reset your score','Day 8: a mentor calls if you are still high risk'];
-    if(later>0) plan.push('The other '+pl(later,'lecture')+' move into next week\'s plan'); }
+    if(later>0) plan.push('The other '+pl(later,'lecture')+' '+(later<=6?'move into next week\'s plan':'spread over the next '+Math.ceil(later/6)+' weeks')); }
   else if(res.tier==='Medium'){ el('s-nudge-title').textContent='Catch up in 3 sessions';
-    plan=[wk>0?'Session 1: '+pl(wk,'backlog lecture')+(later>0?(later===1?' (one more next week)':' (the other '+later+' next week)'):''):'Session 1: re-watch your weakest chapter, then its DPP','Session 2: today\'s Daily Challenge, then a 15-question DPP on your weakest chapter','Session 3: ask at least 2 doubts on AI Guru']; }
+    plan=[wk>0?'Session 1: '+pl(wk,'backlog lecture')+(later>0?(later===1?' (one more next week)':later<=3?' (the other '+later+' next week)':' (the other '+later+' over the next '+Math.ceil(later/3)+' weeks)'):''):'Session 1: re-watch your weakest chapter, then its DPP','Session 2: today\'s Daily Challenge, then a 15-question DPP on your weakest chapter','Session 3: ask at least 2 doubts on AI Guru']; }
   else { el('s-nudge-title').textContent = s.streak>0 ? 'Great week. Keep the streak alive' : 'Good week. Start a streak today'; plan=(wk>0?['This week: catch up '+pl(wk,'lecture')]:[]).concat(['Next: Sunday full-length test','Bonus: 1 advanced problem set unlocked']); }
   el('s-plan').innerHTML = plan.map(function(x){return '<li>'+x+'</li>';}).join('');
-  var nx = p.next, off = Math.round((1-nx.price/nx.mrp)*100);
+  var nx = p.next, off = Math.round((1-nx.price/nx.mrp)*100), title = minor ? nx.acad : nx.title;
   var trialOk = !p.final && p.offline && p.vp && res.tier==='Low' && s.test>=70 && s.lec>=75;
   var tag = high ? 'Not promoted while you catch up' : (minor ? 'Next-step recommendation' : (p.final ? 'In-year upgrade' : 'Next-step offer'));
   var foot;
@@ -672,9 +674,9 @@ function renderStudent(){
       '<p class="small muted">Illustrative price, not a PW quote.</p>';
   }
   el('s-next').innerHTML =
-    '<div class="banner"><div><small>Multiple plans inside: <b>'+nx.plan+'</b></small><div style="font-weight:700;font-size:16px;margin-top:2px">'+(high?'Your next step, when you are ready':'Recommended for '+p.name)+'</div></div><span class="tag" style="background:#1B2124;color:#fff">'+tag+'</span></div>'+
+    '<div class="banner"><div><small>'+(minor?'Your next academic step':'Multiple plans inside: <b>'+nx.plan+'</b>')+'</small><div style="font-weight:700;font-size:16px;margin-top:2px">'+(high?'Your next step, when you are ready':minor?'Planned with your teachers':'Recommended for '+p.name)+'</div></div><span class="tag" style="background:#1B2124;color:#fff">'+tag+'</span></div>'+
     '<div class="inner"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="cat">'+nx.cat+'</span><span class="tag lang">'+p.lang+'</span></div>'+
-    '<h3 style="font-size:20px;line-height:26px">'+nx.title+'</h3>'+
+    '<h3 style="font-size:20px;line-height:26px">'+title+'</h3>'+
     '<p class="small">'+nx.aud+' · '+nx.date+'</p>'+
     '<p class="small" style="background:var(--primary-50);padding:8px 10px;border-radius:8px;color:var(--ink)"><b>Why this:</b> '+nx.why.replace('{testline}', s.test>=70 ? 'Your test average is '+s.test+'%, among the strongest in your batch.' : 'Your test average is '+s.test+'%, so the extra practice targets the chapters pulling it down.')+'</p>'+
     foot + '<p class="small next-msg" id="s-next-msg" role="status" aria-live="polite"></p></div>';
@@ -736,10 +738,10 @@ function answer(k,label){
   var s=simState,res=score(s),p=P[cur],behind=lecturesBehind(s.lec),txt;
   addMsg('me',label);
   var wk=weekLectures(res.tier,behind);
-  if(k==='backlog') txt = behind>0 ? 'Tum batch se '+behind+' lecture peeche ho. Tension mat lo: high-weightage wale pehle. '+(wk>0?'Is hafte ke plan mein '+wk+', '+(behind>wk?'baaki agle hafte.':'aur backlog khatam.'):'Is hafte practice pe focus, lectures agle hafte.') : 'Koi backlog nahi! Tum batch pace pe ho. Ab practice pe focus karte hain.';
+  if(k==='backlog') txt = behind>0 ? 'Tum batch se '+behind+' lecture peeche ho. Tension mat lo: high-weightage wale pehle. '+(wk>0?'Is hafte ke plan mein '+wk+', '+(behind>wk?(behind-wk<=(res.tier==='High'?6:3)?'baaki agle hafte.':'baaki agle '+Math.ceil((behind-wk)/(res.tier==='High'?6:3))+' hafton mein.'):'aur backlog khatam.'):'Is hafte practice pe focus, lectures agle hafte.') : 'Koi backlog nahi! Tum batch pace pe ho. Ab practice pe focus karte hain.';
   else if(k==='today') txt = res.tier==='High' ? (behind>0?'Aaj sirf 2 cheezein: 1 backlog lecture (45 min) aur 10-question DPP. Chhota target, pakka result.':'Aaj sirf 2 cheezein: apne weakest chapter ka 20-min guided practice aur 10-question DPP.') : res.tier==='Medium' ? 'Aaj 1 lecture + apne weakest chapter ka DPP. Doubts ho to Ask AI pe daal do.' : 'Aaj ka lecture + Sunday test ki prep. '+(s.streak>0?'Streak '+s.streak+' din ka hai, todna mat!':'Aaj se nayi streak shuru karo!');
   else if(p.final) txt = 'Tumhara batch exam ke saath khatam hota hai, isliye koi next batch nahi. Results ke baad counselling aur aage ka plan bataunga. Abhi poora focus exam pe.';
-  else txt = 'Results ke din main tumhara personal report banaunga. Abhi ke data se best next step: '+p.next.title+(res.tier==='High'?', catch-up plan ke baad':'')+'.'+(aud(p)==='minor'?' Fees aur offers sirf tumhare parent ko jayenge.':'')+' Pehle is saal ka plan strong karte hain.';
+  else txt = 'Results ke din main tumhara personal report banaunga. Abhi ke data se best next step: '+(aud(p)==='minor'?p.next.acad:p.next.title)+(res.tier==='High'?', catch-up plan ke baad':'')+'.'+(aud(p)==='minor'?' Fees aur offers sirf tumhare parent ko jayenge.':'')+' Pehle is saal ka plan strong karte hain.';
   setTimeout(function(){ if(P[cur]===p) addMsg('ai',txt); },250);
 }
 
@@ -756,23 +758,24 @@ function renderParent(){
     '<label class="toggle"><input type="checkbox" id="pp-share"'+(ppShare?' checked':'')+'> '+p.name+' chose to share with a parent</label>';
   else ch.innerHTML='<b>To the learner.</b> '+p.name+' is '+p.age+' and preparing for an adult exam, so there is no parent channel. The report goes to '+p.name+', with a study-circle check-in.';
   var sh=el('pp-share'); if(sh) sh.addEventListener('change',function(){ppShare=sh.checked;renderParent();var n=el('pp-share');if(n)n.focus();});
-  el('wa-to').textContent = toParent ? 'To '+p.name+'\'s parent' : 'To '+p.name+(g==='young' && ppShare ? ', copy to a parent' : '');
+  el('wa-to').textContent = ppL==='hi' ? (toParent ? p.name+' के अभिभावक को' : p.name+' को'+(g==='young' && ppShare ? ', अभिभावक को कॉपी' : '')) : (toParent ? 'To '+p.name+'\'s parent' : 'To '+p.name+(g==='young' && ppShare ? ', copy to a parent' : ''));
+  el('wa-title').textContent = ppL==='hi' ? 'PW साप्ताहिक प्रगति रिपोर्ट' : 'PW Weekly Progress Report';
   var hiMode = ppL==='hi', en, hi, mentor=toParent?(hiMode?'PW Parent App में देखें':'Open in PW Parent App'):(hiMode?'AI मेंटर से बात करें':'Talk to the AI Mentor');
   if(toParent){
     if(res.tier==='High'){
-      en = 'Namaste! Weekly update for '+p.full+', '+p.batch+'\n\nThis week: '+s.lec+'% of lectures done vs batch pace, test average '+s.test+'%.'+(s.idle>0?' '+p.name+' has not studied on the app for '+pl(s.idle,'day')+'.':'')+'\n\nWhat we are doing: a 7-day catch-up plan is ready in the app. If '+p.name+' is still behind after a week, a PW mentor will call.\n\nOne thing you can do: ask '+p.name+' to show you the plan tonight. 10 minutes of your interest helps more than any reminder.';
+      en = 'Namaste! Weekly update for '+p.full+', '+p.batch+'\n\nThis week: '+s.lec+'% of lectures done vs batch pace, test average '+s.test+'%.'+(s.idle>0?' '+p.name+' has not studied on the app for '+pl(s.idle,'day')+'.':'')+'\n\nWhat we are doing: a 7-day catch-up plan is ready in the app. If '+p.name+' is still '+(behind>0?'behind':'not back on track')+' after a week, a PW mentor will call.\n\nOne thing you can do: ask '+p.name+' to show you the plan tonight. 10 minutes of your interest helps more than any reminder.';
       hi = 'नमस्ते! '+p.full+' की साप्ताहिक रिपोर्ट\n\nइस हफ्ते: बैच की गति के मुकाबले '+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%.'+(s.idle>0?' '+p.name+' ने '+s.idle+' दिन से ऐप पर पढ़ाई नहीं की है.':'')+'\n\nहम क्या कर रहे हैं: ऐप में 7 दिन का कैच-अप प्लान तैयार है. अगर एक हफ्ते बाद भी '+p.name+' पीछे रहे, तो PW मेंटर कॉल करेंगे.\n\nआप क्या कर सकते हैं: आज रात '+p.name+' से प्लान दिखाने को कहें. आपकी 10 मिनट की रुचि किसी भी रिमाइंडर से ज़्यादा असर करती है.';
     } else if(res.tier==='Medium'){
       en = 'Namaste! Weekly update for '+p.full+', '+p.batch+'\n\nThis week: '+s.lec+'% of lectures done, test average '+s.test+'%'+(s.streak>0?', '+s.streak+'-day study streak':'')+'. '+(behind>0?p.name+' is '+pl(behind,'lecture')+' behind pace.':'')+'\n\nPlan: 3 short catch-up sessions are scheduled this week by the AI Mentor.\n\nOne thing you can do: ask '+p.name+' which session comes first tonight.\n\nYou will get the next update on Sunday.';
       hi = 'नमस्ते! '+p.full+' की साप्ताहिक रिपोर्ट\n\nइस हफ्ते: '+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%'+(s.streak>0?', लगातार '+s.streak+' दिन पढ़ाई':'')+'. '+(behind>0?p.name+' बैच से '+behind+' लेक्चर पीछे है.':'')+'\n\nप्लान: AI मेंटर ने इस हफ्ते 3 छोटे कैच-अप सेशन तय किए हैं.\n\nआप क्या कर सकते हैं: '+p.name+' से पूछें कि आज रात कौन-सा सेशन पहले होगा.\n\nअगली रिपोर्ट रविवार को आएगी.';
     } else {
-      en = 'Namaste! Weekly update for '+p.full+', '+p.batch+'\n\nGreat week: '+s.lec+'% of lectures done, test average '+s.test+'%'+(s.streak>0?', '+s.streak+'-day study streak':'')+'.\n\nOne thing you can do: tell '+p.name+' you noticed the '+(s.streak>0?'streak':'steady work')+'; praise for effort keeps it going.\n\nNext: Sunday full-length test. We will share the result with you.';
+      en = 'Namaste! Weekly update for '+p.full+', '+p.batch+'\n\nGreat week: '+s.lec+'% of lectures done, test average '+s.test+'%'+(s.streak>0?', '+s.streak+'-day study streak':'')+'.'+(behind>0?' '+p.name+' has '+pl(behind,'lecture')+' to catch up this week.':'')+'\n\nOne thing you can do: tell '+p.name+' you noticed the '+(s.streak>0?'streak':'steady work')+'; praise for effort keeps it going.\n\nNext: Sunday full-length test. We will share the result with you.';
       hi = 'नमस्ते! '+p.full+' की साप्ताहिक रिपोर्ट\n\nशानदार हफ्ता: '+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%'+(s.streak>0?', लगातार '+s.streak+' दिन पढ़ाई':'')+'.\n\nआप क्या कर सकते हैं: '+p.name+' को बताइए कि आपने '+(s.streak>0?'यह लगातार पढ़ाई':'यह मेहनत')+' देखी है; मेहनत की तारीफ़ से यह जारी रहती है.\n\nआगे: रविवार को फुल-लेंथ टेस्ट. नतीजा हम आपको भेजेंगे.';
     }
   } else {
     var circle = g==='adult';
     if(res.tier==='High'){
-      en = 'Hi '+p.name+', your week at a glance\n\n'+s.lec+'% of lectures done vs batch pace, test average '+s.test+'%'+(s.idle>0?', '+pl(s.idle,'day')+' since your last session':'')+'.\n\nA 7-day catch-up plan is ready in the app: start with just one lecture today. If you are still behind after a week, a mentor will call.'+(circle?' Your study circle checks in on Thursday.':'');
+      en = 'Hi '+p.name+', your week at a glance\n\n'+s.lec+'% of lectures done vs batch pace, test average '+s.test+'%'+(s.idle>0?', '+pl(s.idle,'day')+' since your last session':'')+'.\n\nA 7-day catch-up plan is ready in the app: start with '+(behind>0?'just one lecture':'one short session on your weakest chapter')+' today. If you are still behind after a week, a mentor will call.'+(circle?' Your study circle checks in on Thursday.':'');
       hi = 'Hi '+p.name+', आपका हफ्ता एक नज़र में\n\nबैच की गति के मुकाबले '+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%'+(s.idle>0?', आखिरी सेशन '+s.idle+' दिन पहले':'')+'.\n\nऐप में 7 दिन का कैच-अप प्लान तैयार है: आज सिर्फ एक लेक्चर से शुरू करें. अगर एक हफ्ते बाद भी आप पीछे रहे, तो आपके मेंटर कॉल करेंगे.'+(circle?' गुरुवार को आपका स्टडी सर्कल चेक-इन करेगा.':'');
     } else if(res.tier==='Medium'){
       en = 'Hi '+p.name+', your week at a glance\n\n'+s.lec+'% of lectures done, test average '+s.test+'%'+(s.streak>0?', '+s.streak+'-day streak':'')+'.'+(behind>0?' You are '+pl(behind,'lecture')+' behind pace.':'')+'\n\nYour AI Mentor has planned 3 short catch-up sessions this week.'+(circle?' Your study circle checks in on Thursday.':'');
@@ -784,16 +787,20 @@ function renderParent(){
   }
   var who = toParent?p.name+'\'s':'Your', whoHi = toParent?p.name+' का':'आपका';
   var strong = p.offline && res.tier==='Low' && s.test>=70 && s.lec>=75 && !p.final && p.vp, held = res.tier==='High';
-  var resultsEn = p.final ? 'Results-day message (sent after the exam)\n\n'+who+' year in numbers is ready, with the chapters that improved most. No next batch is recommended: this batch ends with the exam. We will share what to do after results, including counselling.' : 'Next-step recommendation (sent on results day or at batch end)\n\n'+who+' year in numbers is ready: '+s.lec+'% of lectures done, test average '+s.test+'%. Based on the hardest and strongest chapters, the recommended next step is '+p.next.title+(held?', shown once the catch-up plan is done':'')+'.'+(strong?' A free trial class is also available at the PW Vidyapeeth centre in '+p.city+'.':'');
+  var resultsEn = p.final ? 'Results-day message (sent after the exam)\n\n'+who+' year in numbers is ready, with the chapters that improved most. No next batch is recommended: this batch ends with the exam. We will share what to do after results, including counselling.' : 'Next-step recommendation (sent on results day or at batch end)\n\n'+who+' year in numbers is ready: '+s.lec+'% of lectures done, test average '+s.test+'%. Based on the hardest and strongest chapters, the recommended next step is '+p.next.title+(held?', shown once the catch-up plan is done':'')+'.'+(toParent&&!held?' Fee: '+INR(p.next.price)+' (MRP '+INR(p.next.mrp)+').':'')+(strong?' A free trial class is also available at the PW Vidyapeeth centre in '+p.city+'.':'');
   var resultsHi = p.final ? 'रिज़ल्ट के दिन का मैसेज (परीक्षा के बाद)\n\n'+whoHi+' पूरे साल का रिपोर्ट कार्ड तैयार है, सबसे ज़्यादा सुधरे चैप्टर के साथ. कोई अगला बैच नहीं सुझाया गया: यह बैच परीक्षा के साथ खत्म होता है. रिज़ल्ट के बाद क्या करना है, काउंसलिंग समेत, हम बताएंगे.' : 'रिज़ल्ट के दिन का मैसेज (बैच खत्म होने पर)\n\n'+whoHi+' पूरे साल का रिपोर्ट कार्ड तैयार है: '+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%. सबसे कठिन और सबसे मज़बूत चैप्टर के आधार पर अगला सुझाया गया कदम: '+p.next.title+(held?', कैच-अप प्लान पूरा होने के बाद':'')+'.'+(strong?' '+p.city+' के PW विद्यापीठ सेंटर में फ्री ट्रायल क्लास भी उपलब्ध है.':'');
   el('pp-status').textContent = 'Showing '+p.name+'\'s '+(toParent?'Weekly Progress Report to the parent':'Weekly Progress Report to the learner')+' in '+(hiMode?'Hindi':'English')+', from this week\'s signals ('+res.tier.toLowerCase()+' risk).';
   el('wa-body').innerHTML =
     '<div class="wa-msg" lang="'+(hiMode?'hi':'en')+'">'+esc(hiMode?deva(hi):en)+'<span class="wa-time">'+(hiMode?'रवि, शाम 7:00':'Sun 7:00 pm')+'</span></div>'+
-    '<div class="wa-btns"><span>'+(hiMode?'प्लान देखें':'See the plan')+'</span><span>'+mentor+'</span></div>'+
+    '<div class="wa-btns"><span><button type="button" data-wa="plan">'+(hiMode?'प्लान देखें':'See the plan')+'</button></span><span><button type="button" data-wa="app">'+mentor+'</button></span></div>'+
     '<div class="wa-msg" style="border:1px dashed #9AA0A6" lang="'+(hiMode?'hi':'en')+'">'+esc(hiMode?deva(resultsHi):resultsEn)+'<span class="wa-time">'+(hiMode?'रिज़ल्ट का दिन':'Results day')+'</span></div>';
 }
 // Hindi sentences end with a danda, not a full stop.
 function deva(t){ return t.replace(/\.(?=\s|$)/g,'।'); }
+document.addEventListener('click',function(e){ var b=e.target.closest&&e.target.closest('button[data-wa]'); if(!b) return;
+  if(b.dataset.wa==='plan'){ if(history.replaceState) history.replaceState(null,'','#catchup'); fromHash(true,true); }
+  else el('pp-status').textContent='Prototype only: this would open the '+(b.textContent.indexOf('AI')>=0||b.textContent.indexOf('मेंटर')>=0?'AI Mentor':'PW Parent App')+'.';
+});
 function esc(t){var d=document.createElement('div');d.textContent=t;return d.innerHTML;}
 function bindSeg(id,fn){ var g=el(id); Array.prototype.forEach.call(g.querySelectorAll('button'),function(b){ b.addEventListener('click',function(){ Array.prototype.forEach.call(g.querySelectorAll('button'),function(x){x.setAttribute('aria-pressed',x===b);}); fn(b); renderParent(); }); }); }
 Array.prototype.forEach.call(el('pp-learner').querySelectorAll('button'),function(b){ b.addEventListener('click',function(){ selectPersona(+b.dataset.p); }); });
@@ -803,12 +810,14 @@ bindSeg('pp-lang',function(b){ppL=b.dataset.l;});
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
 var seed=2026, sortKey='value', sortDir=-1, rows=[], selSeg=null, COH=[];
 function gen(){
-  var rnd=mulberry32(seed), N=5000, L=[];
+  var rnd=mulberry32(seed), N=5000, L=[], elig=model().elig/100, young=0.33, pOld=clamp((elig-young)/(1-young),0,1);
   for(var i=0;i<N;i++){
-    var eng=Math.pow(rnd(),0.55); // latent engagement, skewed towards engaged payers
-    var s={lec:Math.round(clamp(eng*100+(rnd()-0.5)*30,0,100)), test:Math.round(clamp(30+eng*55+(rnd()-0.5)*30,0,100)), idle:Math.round(clamp((1-eng)*16*rnd()*1.6,0,21)), doubt:rnd()<0.3+eng*0.5?Math.round(1+rnd()*8*eng):0, streak:Math.round(clamp(eng*20*rnd()*1.5,0,30))};
+    var eng=Math.pow(rnd(),0.7); // latent engagement, tuned so the cohort sits near the costed 13% high / 35% at risk
+    var s={lec:Math.round(clamp(40+eng*60+(rnd()-0.5)*10,0,100)), test:Math.round(clamp(30+eng*55+(rnd()-0.5)*30,0,100)), idle:Math.round(clamp((1-eng)*16*rnd()*1.6,0,21)), doubt:rnd()<0.3+eng*0.5?Math.round(1+rnd()*8*eng):0, streak:Math.round(clamp(eng*20*rnd()*1.5,0,30))};
+    if(s.streak>0&&s.idle>0){ if(rnd()<0.5) s.idle=0; else s.streak=0; } if(s.idle>=7) s.doubt=0;
     var r=score(s); r.s=s; r.id='L'+String(10001+i); var a=rnd(); r.age=a<0.55?Math.floor(13+rnd()*5):(a<0.8?Math.floor(18+rnd()*4):Math.floor(22+rnd()*8));
-    r.centre=rnd()<0.35; r.nextBatch=rnd()<0.5; L.push(r);
+    // Under-16s always have a next class; older learners have one at the rate that brings the cohort to the calculator's share.
+    r.centre=rnd()<0.35; r.nextBatch = r.age<16 ? true : rnd()<pOld; L.push(r);
   }
   return L;
 }
@@ -885,7 +894,7 @@ function renderDetail(){
     (sample.length?'<p class="label" style="margin-top:12px">Highest-risk learners in this group (synthetic)</p><div class="tbl-wrap" style="margin-top:6px"><table><thead><tr><th>Learner</th><th class="num">Age</th><th class="num">Lectures</th><th class="num">Test avg</th><th class="num">Days idle</th><th class="num">Risk</th></tr></thead><tbody>'+
     sample.map(function(l){return '<tr><td>'+l.id+'</td><td class="num">'+l.age+'</td><td class="num">'+l.s.lec+'%</td><td class="num">'+l.s.test+'%</td><td class="num">'+l.s.idle+'</td><td class="num">'+l.risk+'</td></tr>';}).join('')+'</tbody></table></div>':'')+'</div>';
 }
-Array.prototype.forEach.call(document.querySelectorAll('#segtbl th button'),function(b){b.addEventListener('click',function(){var k=b.dataset.k;if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=-1;}renderTable();});});
+Array.prototype.forEach.call(document.querySelectorAll('#segtbl th button'),function(b){b.addEventListener('click',function(){var k=b.dataset.k;if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=(k==='seg'||k==='action')?1:-1;}renderTable();});});
 el('reseed').addEventListener('click',function(){seed=Math.floor(Math.random()*1e9);buildConsole();});
 
 /* ---------- Impact model (live formulas) ---------- */
@@ -936,10 +945,10 @@ function renderModel(){
   el('costs').innerHTML=C.map(function(x){return '<div class="lever"><div class="lever-head"><b>'+x[0]+'</b><span><b>'+CR2(x[1])+'</b></span></div><div class="formula">'+x[2]+'</div></div>';}).join('');
   el('m-net').textContent=(netv<0?'−':'')+CR(Math.abs(netv))+'  ·  '+(netv<0?'−':'')+USDM(Math.abs(netv),fx);
   var hrs=calls*0.25/52;
-  el('m-net-sub').textContent='Running costs '+CR2(cost)+' a year'+(cost>0?'; return of '+(t/cost).toFixed(1)+'x on them':'')+'. Mentor calls need about '+Math.round(hrs).toLocaleString('en-IN')+' hours a week: about '+Math.round(hrs/24).toLocaleString('en-IN')+' full-time mentors at 60% of their week on calls. Build cost and the cost of serving the extra learners are not included.';
+  el('m-net-sub').textContent='Running costs '+CR2(cost)+' a year'+(cost>0?'; return of '+(t/cost).toFixed(1)+'x on them':'')+'. Mentor calls need about '+Math.round(hrs).toLocaleString('en-IN')+' hours a week: '+(hrs/24<0.5?'under 1 full-time mentor':'about '+Math.round(hrs/24).toLocaleString('en-IN')+' full-time mentor'+(Math.round(hrs/24)===1?'':'s'))+' at 60% of their week on calls. Build cost and the cost of serving the extra learners are not included.';
   el('m-total-f').textContent='Total = '+CR(l1)+' + '+CR(l3)+' + '+CR(l2);
 }
-mids.forEach(function(k){el('m-'+k).addEventListener('input',function(){ renderModel(); if(COH.length) renderConsole(); });});
+mids.forEach(function(k){el('m-'+k).addEventListener('input',function(){ renderModel(); if(k==='elig') buildConsole(); else if(COH.length) renderConsole(); });});
 
 /* ---------- Brand swatches ---------- */
 var SW=[['--primary','#5A4BDA','Buttons, accents, active tabs','High'],['--primary-50','#F1EFFF','Soft buttons, section tints','High'],['Ink / dark CTA','#1B2124','Buy Now, Login','High'],['Heading','#27272A','h2/h4','High'],['Body','#3D3D3D','Card meta','High'],['Muted','#6B6B6B','Struck MRP, secondary','High'],['Page tint','#F8F8F8','Section backgrounds','High'],['Border','#D9DCE1','Cards, pills','High'],['Success','#1B7938','% OFF, Recommended','High'],['Success bg','#DFF1E4','Discount chip','High'],['Orange','#FB6514','Category label','High'],['Premium tint','#FFF6E5','Infinity Pro plan','Med'],['--secondary-color','#E31B4D','Declared, not rendered','Med']];

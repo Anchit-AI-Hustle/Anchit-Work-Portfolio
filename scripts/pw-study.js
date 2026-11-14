@@ -79,6 +79,7 @@
 // Third review (8.2 / 8.0), each with a mutation that must fail it:
 // MUT=pacecap nobacklog finalqueue doubtcouple sharecopy hindidefault plausible noskip (prototype)
 // MUT=leak3 nostacked noembedscroll (case study)
+// Fourth review (8.1 / 8.1): MUT=childproduct lowbehind cohort
 // MUT=nosixq / nostack / breakeven / nogates / navcut / overclaim   case study blocks
 const { chromium } = require('./_playwright.js');
 const vercel = require('../vercel.json');
@@ -126,7 +127,7 @@ function mutate(src) {
   if (MUT === 'nostart') return src.replace(/<nav class="start"[\s\S]*?<\/nav>/, '');
   if (MUT === 'walkurl') return src.replace('<a href="/pw-study/prototype#report">https://', '<a href="/pw-study/prototype#dashboard">https://');
   if (MUT === 'oldfeature') return src.replace('tabindex="-1">Weekly Progress Report</button>', 'tabindex="-1">Weekly Pulse</button>');
-  if (MUT === 'noevidence') return src.replace(/<details class="card" id="evidence"[\s\S]*?<\/details>/, '');
+  if (MUT === 'noevidence') return src.replace(/<div class="card" id="evidence"[\s\S]*?<\/details><\/div>/, '');
   if (MUT === 'noalias') return src.replace("h = ALIAS[h] || h;", '');
   if (MUT === 'vp') return src.replace('if(p.offline && p.vp && !p.final) a.push', 'if(p.offline && !p.final) a.push').replace(' && !p.final && p.vp, held', ' && !p.final, held').replace('!p.final && p.offline && p.vp && res.tier', '!p.final && p.offline && res.tier');
   if (MUT === 'finalmsg') return src.replace('var resultsEn = p.final ?', 'var resultsEn = false ?');
@@ -157,7 +158,7 @@ function mutate(src) {
   if (MUT === 'nested') return src.replace("fr.addEventListener('load', function(){ fit();", "fr.addEventListener('load', function(){ return;");
   if (MUT === 'pacecap') return src.replace("v:Math.min(Math.max(0,75-s.lec)*1.3,60), max:60}", "v:(100-s.lec)*0.40, max:40}");
   if (MUT === 'nobacklog') return src.replace("(behind>0?'Aaj sirf 2 cheezein: 1 backlog lecture", "(true?'Aaj sirf 2 cheezein: 1 backlog lecture");
-  if (MUT === 'finalqueue') return src.replace("    else if(p.final) a.push({t:'Results-day help queued'", "    else if(false) a.push({t:'Results-day help queued'");
+  if (MUT === 'finalqueue') return src.replace("    else if(p.final) a.push({t:'In-year upgrade in the app; results-day help queued'", "    else if(false) a.push({t:'In-year upgrade in the app; results-day help queued'");
   if (MUT === 'doubtcouple') return src.replace("if(k==='doubt' && simState.doubt>0 && simState.idle>=7)", 'if(false)');
   if (MUT === 'sharecopy') return src.replace("  var toParent = g==='minor';", "  var toParent = g==='minor' || (g==='young' && ppShare);");
   if (MUT === 'hindidefault') return src.replace("  ppL = P[cur].lang==='HINDI' ? 'hi' : 'en';", '');
@@ -167,9 +168,12 @@ function mutate(src) {
   if (MUT === 'leak3') return src.replace("PW Pi's Daily Challenges lift week-three engagement, but no disclosed AI is aimed at renewal.", 'No disclosed AI aimed at retention or renewal.');
   if (MUT === 'nostacked') return src.replace('<table class="t-mid stack" id="six-q">', '<table class="t-mid" id="six-q">');
   if (MUT === 'noembedscroll') return src.replace("e.data.type !== 'pw-scroll') return;", "e.data.type !== 'pw-scroll' || true) return;");
+  if (MUT === 'childproduct') return src.replace("title = minor ? nx.acad : nx.title;", "title = nx.title;");
+  if (MUT === 'lowbehind') return src.replace("(behind>0?'On track overall, a little to catch up':'On track, keep going')", "'On track, keep going'");
+  if (MUT === 'cohort') return src.replace('var eng=Math.pow(rnd(),0.7);', 'var eng=Math.pow(rnd(),0.55);').replace('Math.round(clamp(40+eng*60+(rnd()-0.5)*10,0,100))', 'Math.round(clamp(eng*100+(rnd()-0.5)*30,0,100))');
   if (MUT === 'tutogate') return src.replace('it scales only if recovery rises 11.3 points', 'it scales only if recovery rises 10 points');
   if (MUT === 'tutobase') return src.replace('<td>A pilot arm, not in the base cost: one hour', '<td>One hour');
-  if (MUT === 'overclaim') return src.replace('found where PW cannot yet see paying students drift away', 'found where paying students quietly drop off');
+  if (MUT === 'overclaim') return src.replace('found where PW does not yet act when paying students drift', 'found where paying students quietly drop off');
   return src;
 }
 
@@ -478,7 +482,7 @@ async function caseStudy(browser, vp) {
     check(`${L}: a link inside the embedded prototype brings its target into view`, seen.ok, JSON.stringify(seen));
   }
   const hero = norm(await page.textContent('.hero .lede'));
-  check(`${L}: hero does not overclaim`, !/quietly drop off/.test(hero) && /cannot yet see/.test(hero), hero.slice(0, 120));
+  check(`${L}: hero does not overclaim`, !/quietly drop off/.test(hero) && /does not yet act when paying students drift/.test(hero), hero.slice(0, 120));
   if (vp.width >= 1440) {
     const nav = await page.$$eval('.nav .links a', (as) => { const box = as[0].parentElement.getBoundingClientRect(); return as.map((a) => [a.getAttribute('href'), a.getBoundingClientRect().right <= box.right + 1]); });
     check(`${L}: every nav link, Risks to Walkthrough, fits on screen`,
@@ -654,7 +658,7 @@ async function nineFixes(page, L) {
   await page.click('#quick button[data-q="backlog"]'); await page.waitForTimeout(400);
   const backlogReply = norm(await page.$$eval('#chat .bubble.ai', (b) => b[b.length - 1].textContent));
   check(`${L}: a 3-session plan holds 3 lectures and moves the rest to next week, and the chat agrees`,
-    /Session 1: 3 backlog lectures \(the other 9 next week\)/.test(fit) && /12 lecture peeche/.test(backlogReply) && /plan mein 3/.test(backlogReply), fit.slice(0, 90) + ' || ' + backlogReply);
+    /Session 1: 3 backlog lectures \(the other 9 over the next 3 weeks\)/.test(fit) && /12 lecture peeche/.test(backlogReply) && /plan mein 3/.test(backlogReply), fit.slice(0, 90) + ' || ' + backlogReply);
   const live = norm(await page.textContent('#chat-live'));
   check(`${L}: the screen reader hears the AI's reply, not the learner's own question`, live === backlogReply, live.slice(0, 60));
   await page.click('.persona-row .chip[data-p="1"]');
@@ -734,7 +738,7 @@ async function nineFixes(page, L) {
   await page.click('.persona-row .chip[data-p="1"]');
   await slide(page, { 'in-lec': 60, 'in-test': 60, 'in-idle': 2, 'in-doubt': 1, 'in-streak': 0 });
   const amanLow = norm(await page.textContent('#e-actions'));
-  check(`${L}: a final-year learner never has a next batch queued`, /Results-day help queued/.test(amanLow) && !/next batch shown/.test(amanLow), amanLow.slice(0, 120));
+  check(`${L}: a final-year learner never has a next batch queued`, /results-day help queued/.test(amanLow) && !/next batch shown/.test(amanLow), amanLow.slice(0, 120));
   await slide(page, { 'in-idle': 21 });
   await slide(page, { 'in-doubt': 5 });
   const idleNow = await page.$eval('#in-idle', (e) => +e.value);
@@ -770,6 +774,21 @@ async function nineFixes(page, L) {
     live: !document.getElementById('seg-detail').hasAttribute('aria-live') && !!document.getElementById('risk-live'),
   }));
   check(`${L}: skip link, stable slider names, silent sort arrows, quiet detail panel`, Object.values(a11y3).every(Boolean), JSON.stringify(a11y3));
+
+  // 12. Fourth review: a child sees an academic step, never a product; numbers in view agree.
+  await page.click('#t-student');
+  await page.click('.persona-row .chip[data-p="0"]');
+  await slide(page, { 'in-lec': 90, 'in-test': 85, 'in-idle': 0, 'in-doubt': 4, 'in-streak': 14 });
+  const childCard = norm(await page.textContent('#s-next'));
+  check(`${L}: an under-18 sees an academic next step, not a product, plan tier or price`,
+    /Class 12 JEE preparation, same faculty/.test(childCard) && !/Lakshya|Multiple plans inside|Recommended for|₹/.test(childCard), childCard.slice(0, 120));
+  await slide(page, { 'in-lec': 50, 'in-test': 100, 'in-idle': 0, 'in-doubt': 3, 'in-streak': 14 });
+  const lowBehind = norm(await page.textContent('#s-status'));
+  check(`${L}: low risk with a backlog says there is a little to catch up`, /a little to catch up/.test(lowBehind), lowBehind);
+  await page.click('#t-console');
+  const kpi = norm(await page.textContent('#kpis'));
+  const hiShare = +((kpi.match(/(\d+)%\s*Drifting/) || [])[1] || 0);
+  check(`${L}: the demo cohort sits near the costed high-risk share`, hiShare >= 10 && hiShare <= 18, hiShare + '%');
 
   // 9. The brand schema swatch matches the token the page uses.
   await page.click('#t-brand');
