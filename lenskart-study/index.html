@@ -70,6 +70,7 @@ a{color:var(--accent-ink);text-underline-offset:3px}
 .meta{font-size:13px;color:var(--muted)}
 /* sections */
 section.block{padding:48px 0;border-bottom:1px solid var(--border-soft)}
+.callout.takeaway{margin:0 0 16px;max-width:860px}
 ul.tight{margin:8px 0 0;padding-left:18px;display:grid;gap:6px}
 .lbl2{margin-top:10px;font-weight:700;color:var(--heading);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
 .appendix-head{padding:56px 0 8px;border-top:4px solid var(--border)}
@@ -388,6 +389,7 @@ tr[hidden]{display:none!important}
       <p>Checked on 13 and 14 Nov 2026, logged out: Lenskart's India store locator and a store page, the Lenskart at Home page, Lenskart's India FAQ and terms page, the public catalogue data its web app loads, aqualens.in and six Lenskart apps on Google Play and the App Store, plus Lenskart's own filings. Nothing was purchased and no forms were submitted.</p>
       <p class="small"><b>One limit, stated plainly:</b> from the network this audit ran on, Lenskart's rendered India home, product and Gold pages redirected to its US storefront. I read their content from Lenskart's India FAQ page and public catalogue data instead, and I have not seen the logged-in app.</p>
       <div class="hero-ctas" style="margin-top:6px"><a class="btn btn-outline sm" href="#top">Case study overview</a><a class="btn btn-primary sm" href="/lenskart-study/prototype">Open the working prototype</a></div></div>
+    <p class="callout takeaway"><b>Takeaway.</b> The pieces exist: free and home eye tests, saved prescriptions, free replacement lenses, Gold and calls. I found nothing public that connects a test date to a next step.</p>
     <div class="filters" role="group" aria-label="Filter capabilities">
       <button class="chip" type="button" data-f="all" aria-pressed="true">All</button>
       <button class="chip" type="button" data-f="live" aria-pressed="false">Live</button>
@@ -442,6 +444,7 @@ tr[hidden]{display:none!important}
 <section class="block" id="gaps" aria-labelledby="gap-h">
   <div class="wrap">
     <div class="sec-head"><span class="num">Slide 05 · Possible gaps</span><h2 id="gap-h">Five possible gaps, as far as public evidence shows</h2></div>
+    <p class="callout takeaway"><b>Takeaway.</b> Customers rate the app well, the power reading is the fragile part, and none of 3,500 reviews mentions being told a test was due.</p>
     <div class="grid g2 top" id="ratings" style="margin-bottom:20px">
       <div class="card"><h3>App ratings, read on 14 Nov 2026</h3>
         <div class="tbl" style="margin-top:10px"><table class="t-fit" id="rt-tbl"><thead><tr><th scope="col">Store</th><th scope="col" class="num">Rating</th><th scope="col" class="num">Ratings</th><th scope="col" class="num">1 or 2 stars</th></tr></thead><tbody>
@@ -452,7 +455,11 @@ tr[hidden]{display:none!important}
       <div class="card soft"><h3>What that suggests</h3><ul class="small tight"><li>About 9 in 10 people who rate the app give it 3 stars or more, so a reminder would mostly reach satisfied customers.</li><li>Under 2% of Google Play installs leave a rating at all. Most people open the app only when they need glasses, so the app cannot carry a reminder on its own.</li><li>The low ratings are mostly about delivery, support and refunds, but the one that matters here is a wrong power: a reminder that leads to a bad re-test does harm.</li></ul></div>
     </div>
     <div class="voices-head"><h3>In customers' own words</h3>
-      <p class="small muted">I read 3,500 public reviews of the Lenskart app: the 3,000 most recent on Google Play (28 Aug to 12 Nov 2026) and the 500 most recent on the App Store (29 Apr to 11 Nov 2026), collected 13 Nov 2026. On Google Play 1,946 are 4-5★, mostly short praise. Of the 1,458 rated 1-3★ across both stores, by keyword match 243 mention delivery, 235 customer support, 220 refunds, returns or exchanges and 148 power, lens or product quality (33 of them a wrong or different power); a review can match more than one. Keyword counts are a blunt tool, and written reviews skew negative against a 4.5 rating. Quoted verbatim; names left out.</p></div>
+      <ul class="small muted tight">
+        <li><b>Read:</b> 3,500 public reviews, the latest 3,000 on Google Play (28 Aug to 12 Nov 2026) and 500 on the App Store (29 Apr to 11 Nov 2026), collected 13 Nov 2026.</li>
+        <li><b>Low ratings (1,458 at 1 to 3★), by keyword:</b> delivery 243, customer support 235, refunds, returns or exchanges 220, power, lens or product quality 148 (33 a wrong or different power). A review can match more than one.</li>
+        <li><b>Caveat:</b> keyword counts are blunt, and written reviews skew negative against a 4.5 rating. Quotes are verbatim; names left out.</li>
+      </ul></div>
     <div class="grid voices" id="voices">
       <figure class="card voice"><blockquote>"I have tried to get power checked three times in 2 weeks and every time they have given me a different power."</blockquote><figcaption>Lenskart app, Google Play · 1★ · <span class="nw">7 Sep 2026</span></figcaption></figure>
       <figure class="card voice"><blockquote>"The service was very professional, they identified that my eye glasses number is increased."</blockquote><figcaption>Lenskart app, App Store · 5★ · <span class="nw">22 Aug 2026</span></figcaption></figure>
@@ -502,6 +509,7 @@ tr[hidden]{display:none!important}
 <section class="block" id="ideas" aria-labelledby="id-h">
   <div class="wrap">
     <div class="sec-head"><span class="num">Slide 07 · Options</span><h2 id="id-h">How might we turn every eye test into the next one?</h2><p>Constraint: no extra discounting and no new store formats. Seven options across acquisition, conversion, retention and upgrade, sorted by impact (my estimates).</p></div>
+    <p class="callout takeaway"><b>Takeaway.</b> Three of the seven options run on the same data, the eye-test record and its date, so they combine into one product.</p>
     <div class="tbl" aria-labelledby="id-h"><table class="t-wide stack">
       <thead><tr><th scope="col">AI bet</th><th scope="col">What it does</th><th scope="col">Revenue lever</th><th scope="col">Builds on</th><th scope="col">Impact</th><th scope="col">Effort</th></tr></thead>
       <tbody>
@@ -513,7 +521,6 @@ tr[hidden]{display:none!important}
         <tr><th scope="row">Contact lens run-out reorder</th><td data-label="What it does">Reorder prompt timed to the pack</td><td data-label="Revenue lever">Repeat frequency</td><td data-label="Builds on">Aqualens</td><td data-label="Impact">Med</td><td data-label="Effort">Low</td></tr>
         <tr><th scope="row">Old-pair trade-in at re-test</th><td data-label="What it does">Credit for an old frame</td><td data-label="Revenue lever">Order value</td><td data-label="Builds on">Free Lens Replacement</td><td data-label="Impact">Low</td><td data-label="Effort">Med</td></tr>
       </tbody></table></div>
-    <p class="callout amber" style="margin-top:16px">The three highlighted rows share the same data, the eye-test record and its date, so they combine into one product. It feeds Lenskart's own test-led growth plan instead of competing with it.</p>
     <div class="grid g3" style="margin-top:16px">
       <div class="card"><h3>Recall is standard practice elsewhere</h3><p class="small" style="margin-top:6px">The UK College of Optometrists tells its members not to recall adults more often than every two years without a clinical reason. I found no such norm in India.</p></div>
       <div class="card"><h3>Reminders work, by very different amounts</h3><p class="small" style="margin-top:6px">In US eye clinics, an automated call with a letter lifted follow-up from 28% to 30% and a personal call with a letter to 38% (Callinan et al., 2017); a brochure, a personal letter and a call lifted completed exams from 30% to 48% (Zangalli et al., 2016). In China, two informational text messages before a booked diabetic eye visit lifted attendance from 14.0% to 42.9% (Chen et al., 2018). All are clinics, not shops.</p></div>
@@ -525,7 +532,7 @@ tr[hidden]{display:none!important}
 <!-- BET -->
 <section class="block" id="bet" aria-labelledby="sys-h">
   <div class="wrap">
-    <div class="sec-head" id="system"><span class="num">Slide 08 · The idea to test</span><h2 id="sys-h">The Vision Recall Engine: six features to test, on top of what Lenskart already runs</h2><p>Narrowed by slide 06. It reads the eye-test record Lenskart already holds, follows up people whose first test found a power, reminds parents of children and adults who ask, and suggests lenses or a pair only after a test says one is needed. Each link opens that feature in the prototype.</p></div>
+    <div class="sec-head" id="system"><span class="num">Slide 08 · The idea to test</span><h2 id="sys-h">The Vision Recall Engine, led by the First Prescription Follow-up: six features to test on what Lenskart already runs</h2><p>Narrowed by slide 06. It reads the eye-test record Lenskart already holds, follows up people whose first test found a power, reminds parents of children and adults who ask, and suggests lenses or a pair only after a test says one is needed. Each link opens that feature in the prototype.</p></div>
     <div class="feat">
       <div class="step"><span class="n">Feature 1</span><b>Recall Date</b><p>When each customer's next eye test is due, from the date of their last test and their age band. Shown to everyone in the app; a message goes only to parents of children and to adults who asked.</p><span class="for">For: the CRM team</span><a class="try" href="/lenskart-study/prototype#due">See the Recall Date</a></div>
       <div class="step"><span class="n">Feature 2</span><b>Recall Reminder</b><p>One short WhatsApp message when a test falls due: to the parent for under-18s, and to adults only if they asked at their test. A slot to book, no price or discount.</p><span class="for">For: the wearer or the parent</span><a class="try" href="/lenskart-study/prototype#checkin">Open the Recall Reminder</a></div>
@@ -674,6 +681,7 @@ tr[hidden]{display:none!important}
 <section class="block" id="risks" aria-labelledby="rk-h">
   <div class="wrap">
     <div class="sec-head"><span class="num">Slide 12 · What could break it</span><h2 id="rk-h">Riskiest assumptions, and the cheapest test for each</h2></div>
+    <p class="callout takeaway"><b>Takeaway.</b> The riskiest assumption is that a due date brings anyone back at all. Past data can test that before anything is built.</p>
     <div class="tbl" aria-labelledby="rk-h"><table class="t-mid stack">
       <thead><tr><th scope="col">Assumption</th><th scope="col">Why it could be wrong</th><th scope="col">Cheapest test</th></tr></thead>
       <tbody>
