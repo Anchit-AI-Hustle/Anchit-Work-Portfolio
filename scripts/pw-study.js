@@ -3,7 +3,7 @@
 //
 // WHAT THIS GUARDS
 //   Both pages are self-contained HTML with a lot of inline logic: a risk
-//   engine, age-based Weekly Pulse routing, a seeded 5,000-learner console and
+//   engine, age-based Weekly Progress Report routing, a seeded 5,000-learner console and
 //   an impact calculator whose total is quoted on the case study itself. None
 //   of that was covered by any suite, so a change to the engine weights, the
 //   calculator defaults or a label could ship a page that contradicts its own
@@ -55,6 +55,8 @@
 // MUT=ambush        the consent question covers the first screen again
 // MUT=nostart       the case study opens with no 'start here' steps
 // MUT=focussteal    the deferred consent question takes the visitor's focus
+// MUT=oldfeature    a retired feature name comes back on a tab
+// MUT=noalias       links shared before the rename stop landing
 const { chromium } = require('./_playwright.js');
 const vercel = require('../vercel.json');
 const BASE = process.env.BASE || 'http://127.0.0.1:8099';
@@ -82,7 +84,7 @@ function mutate(src) {
   if (MUT === 'auditnav') return src.replace(/<div class="hero-ctas" style="margin-top:6px"><a class="btn btn-outline sm" href="#top">.*?<\/div>/, '');
   if (MUT === 'protonav') return src.replace(/<div class="xlinks">.*?<\/div>/, '');
   if (MUT === 'costdrift') return src.replace('id="m-wa" type="number" step="0.001" min="0" value="0.115"', 'id="m-wa" type="number" step="0.001" min="0" value="1.15"');
-  if (MUT === 'bigcall') return src.replace("t:'7-day AI comeback plan'", "t:'Human mentor call within 24 hours'")
+  if (MUT === 'bigcall') return src.replace("t:'7-day AI catch-up plan'", "t:'Human mentor call within 24 hours'")
     .replace("What we are doing: a 7-day catch-up plan is ready in the app.", "What we are doing: a PW mentor will call tomorrow at 6:30 pm.");
   if (MUT === 'oldname') return src.replace('<strong>Learner Retention Engine</strong>', '<strong>Agla Kadam</strong>');
   if (MUT === 'deeplink') return src.replace('function fromHash(scroll, focus){', 'function fromHash(scroll, focus){ if(!focus) return;');
@@ -99,7 +101,9 @@ function mutate(src) {
   if (MUT === 'ambush') return src.replace(' data-consent-defer', '');
   if (MUT === 'focussteal') return src.replace('</body>', '<script>document.addEventListener("click",function(){},true);(function w(){var b=document.querySelector("#consentBar .cb-primary");if(b&&!w.d){w.d=1;b.focus();}else if(!b)setTimeout(w,50);})();</script></body>');
   if (MUT === 'nostart') return src.replace(/<nav class="start"[\s\S]*?<\/nav>/, '');
-  if (MUT === 'walkurl') return src.replace('<a href="/pw-study/prototype#pulse">https://', '<a href="/pw-study/prototype#console">https://');
+  if (MUT === 'walkurl') return src.replace('<a href="/pw-study/prototype#report">https://', '<a href="/pw-study/prototype#dashboard">https://');
+  if (MUT === 'oldfeature') return src.replace('tabindex="-1">Weekly Report</button>', 'tabindex="-1">Weekly Pulse</button>');
+  if (MUT === 'noalias') return src.replace("h = ALIAS[h] || h;", '');
   return src;
 }
 
@@ -146,7 +150,11 @@ const dashes = (frame) => frame.evaluate(() => {
 });
 const hScroll = (page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 
-const FEATURES = ['Drift Score', 'Comeback Plan', 'Weekly Pulse', 'Results-Day Next Step', 'Growth Console'];
+const FEATURES = ['Drop-off Risk Score', 'Catch-up Plan', 'Weekly Progress Report', 'Next-Step Recommendation', 'Renewals Dashboard'];
+// Names retired in Nov 2026: each said something the feature did not do, or the UI called it something else.
+const RETIRED = /Drift Score|Comeback Plan|Weekly Pulse|Results-Day Next Step|Growth Console|Parent Pulse|Self Pulse|Study Pulse/i;
+// Old deep links, shared before the rename, and where each must land now.
+const ALIASES = { drift: 'risk', plan: 'catchup', next: 'recommendation', pulse: 'report', console: 'dashboard' };
 
 // One clear English name everywhere: page source, title and description.
 async function names(page, L) {
@@ -154,11 +162,19 @@ async function names(page, L) {
   const old = html.match(/.{0,30}(agla|kadam).{0,30}/gi) || [];
   const title = await page.title();
   check(`${L}: feature named "Learner Retention Engine", no Hindi working name`, old.length === 0 && /Learner Retention Engine/.test(title), old.join(' | ') || title);
+  // Visible text on every tab, hidden ones included, plus titles and alt text.
+  const text = await page.evaluate(() => {
+    const c = document.body.cloneNode(true); c.querySelectorAll('script,style').forEach((n) => n.remove());
+    return document.title + ' ' + c.textContent + ' ' + [...document.querySelectorAll('[alt],[aria-label],[title]')].map((e) => [e.getAttribute('alt'), e.getAttribute('aria-label'), e.getAttribute('title')].join(' ')).join(' ');
+  });
+  const hit = text.match(new RegExp('.{0,25}(' + RETIRED.source + ').{0,25}', 'gi')) || [];
+  check(`${L}: no retired feature name anywhere on the page`, hit.length === 0, hit.slice(0, 3).join(' | '));
 }
 
 // Where each shared link must land: a case study section heading on screen,
 // or the prototype tab it names, selected and on screen.
-const PROTO_TAB = { student: 't-student', drift: 't-student', plan: 't-student', next: 't-student', pulse: 't-parent', console: 't-console', brand: 't-brand' };
+const PROTO_TAB = { student: 't-student', risk: 't-student', catchup: 't-student', recommendation: 't-student', report: 't-parent', dashboard: 't-console', brand: 't-brand',
+  drift: 't-student', plan: 't-student', next: 't-student', pulse: 't-parent', console: 't-console' };
 async function landed(page, href) {
   const u = new URL(href, BASE);
   const h = u.hash.slice(1);
@@ -169,15 +185,16 @@ async function landed(page, href) {
     }, h);
   }
   if (u.pathname !== '/pw-study/prototype' || !PROTO_TAB[h]) return false;
-  return page.evaluate(([tab, h]) => {
+  return page.evaluate(([tab, h, aliases]) => {
+    h = aliases[h] || h;
     const t = document.getElementById(tab);
     const target = document.getElementById(h);
     const r = target.getBoundingClientRect();
     // A whole-tab link must also keep the concept notice bar on screen.
     const bar = document.getElementById('dl-bar').getBoundingClientRect();
-    const whole = t.getAttribute('aria-controls') === 'p-' + ({ pulse: 'parent' }[h] || h);
+    const whole = t.getAttribute('aria-controls') === 'p-' + ({ report: 'parent', dashboard: 'console' }[h] || h);
     return t.getAttribute('aria-selected') === 'true' && r.top >= 0 && r.top < innerHeight && (!whole || (bar.top >= 0 && bar.top < innerHeight));
-  }, [PROTO_TAB[h], h]);
+  }, [PROTO_TAB[h], h, ALIASES]);
 }
 
 // The recruiter walkthrough: every step shows a complete URL, links to exactly
@@ -205,7 +222,8 @@ async function walkthrough(browser, vp) {
     lines.length === 8 && urls.join() === steps.slice(0, 7).map((s) => s[1]).join(), clip.replace(/\n/g, ' | ').slice(0, 160));
   await ctx.close();
 
-  for (const href of [...steps.map((s) => s[0]), ...tries, '/pw-study/prototype#brand']) {
+  const old = Object.keys(ALIASES).map((k) => '/pw-study/prototype#' + k);
+  for (const href of [...steps.map((s) => s[0]), ...tries, '/pw-study/prototype#brand', ...old]) {
     const o = await open(browser, vp, href);
     await o.page.waitForTimeout(500);
     const ok = await landed(o.page, href);
@@ -349,14 +367,14 @@ const contrast = (page, sel, bgSel) => page.evaluate(([sel, bgSel]) => {
 }, [sel, bgSel]);
 
 async function reviewFixes(page, L) {
-  // 1. The Pulse is built from the simulator, not from the persona's defaults.
+  // 1. The weekly report is built from the simulator, not from the persona's defaults.
   await page.click('#t-student');
   await page.click('.persona-row .chip[data-p="0"]');
   await slide(page, { 'in-lec': 90, 'in-test': 85, 'in-idle': 0, 'in-doubt': 4, 'in-streak': 14 });
   await page.click('#t-parent');
   const pulse = norm(await page.textContent('#wa-body'));
   const status = norm(await page.textContent('#pp-status'));
-  check(`${L}: Weekly Pulse follows the simulator`, /90% of lectures done/.test(pulse) && !/has not studied/.test(pulse) && /low risk/.test(status), status);
+  check(`${L}: Weekly Progress Report follows the simulator`, /90% of lectures done/.test(pulse) && !/has not studied/.test(pulse) && /low risk/.test(status), status);
   // A minor who turns strong: the trial goes to the parent, never into the child's app.
   check(`${L}: a strong under-18's trial offer goes to the parent`, /trial class is also available/.test(pulse), pulse.slice(-160));
 
@@ -415,13 +433,15 @@ async function prototype(browser, vp) {
   await names(page, L);
   await firstScreen(page, L, 'proto');
 
+  const feats = await page.$$eval('.feats a', (as) => as.map((a) => a.textContent.replace(/^\d/, '').trim()));
+  check(`${L}: the five features carry the same names as the case study`, feats.join() === FEATURES.join(), JSON.stringify(feats));
   // The hero's feature links switch tabs; a tab click writes its own link.
-  await page.click('.feats a[href="#console"]');
+  await page.click('.feats a[href="#dashboard"]');
   const viaFeat = await page.getAttribute('#t-console', 'aria-selected');
   await page.click('#t-parent');
   const hashNow = await page.evaluate(() => location.hash);
   await page.click('#t-student');
-  check(`${L}: feature links switch tabs and each tab has its own link`, viaFeat === 'true' && hashNow === '#pulse', `console=${viaFeat} hash=${hashNow}`);
+  check(`${L}: feature links switch tabs and each tab has its own link`, viaFeat === 'true' && hashNow === '#report', `dashboard=${viaFeat} hash=${hashNow}`);
 
   const tiers = { 0: 'High risk', 1: 'Low risk', 2: 'Medium risk', 3: 'Medium risk' };
   const got = {};
@@ -437,7 +457,7 @@ async function prototype(browser, vp) {
   await page.click('.persona-row .chip[data-p="0"]');
   const steps = await page.$$eval('#e-actions .step b', (b) => b.map((x) => x.textContent.trim()));
   check(`${L}: high risk escalates to a mentor, never calls everyone`,
-    steps[0] === '7-day AI comeback plan' && steps.some((t) => /^Mentor call on day 8/.test(t)) && !steps.some((t) => /24 hours/.test(t)), JSON.stringify(steps));
+    steps[0] === '7-day AI catch-up plan' && steps.some((t) => /^Mentor call on day 8/.test(t)) && !steps.some((t) => /24 hours/.test(t)), JSON.stringify(steps));
 
   // The card and the engine must not disagree about pace. A learner the card
   // calls ahead must not have an engine factor that says they are behind.
@@ -467,11 +487,11 @@ async function prototype(browser, vp) {
   const amanBefore = norm(await page.textContent('#wa-title'));
   await page.check('#pp-share');
   const amanAfter = norm(await page.textContent('#wa-title'));
-  check(`${L}: Pulse title by age and opt-in`,
-    kabir === 'PW Study Pulse' && amanBefore === 'PW Study Pulse' && amanAfter === 'PW Parent Pulse',
+  check(`${L}: weekly report sender by age and opt-in`,
+    kabir === 'PW Progress Report' && amanBefore === 'PW Progress Report' && amanAfter === 'PW Parent Report',
     `Kabir=${kabir} Aman=${amanBefore} -> ${amanAfter}`);
 
-  // Riya's high-risk Pulse, in both languages, states the escalation and never
+  // Riya's high-risk report, in both languages, states the escalation and never
   // promises a call tomorrow: that is a promise PW's mentors cannot keep at scale.
   await page.click('#pp-learner button[data-p="0"]');
   const pulse = {};
@@ -479,9 +499,9 @@ async function prototype(browser, vp) {
   await page.click('#pp-lang button[data-l="en"]');
   // Riya is high risk: results day holds the next batch back and offers no
   // Vidyapeeth trial, which only strong learners in centre cities get.
-  check(`${L}: results-day Pulse holds offers back at high risk`,
+  check(`${L}: next-step recommendation holds offers back at high risk`,
     /shown once the catch-up plan is done/.test(pulse.en) && !/trial class/.test(pulse.en) && !/ट्रायल/.test(pulse.hi), pulse.en.slice(-200));
-  check(`${L}: Pulse escalates to a mentor after a week, in English and Hindi`,
+  check(`${L}: weekly report escalates to a mentor after a week, in English and Hindi`,
     /still behind after a week, a PW mentor will call/.test(pulse.en) && /एक हफ्ते बाद भी/.test(pulse.hi)
       && !/tomorrow|6:30/.test(pulse.en) && !/कल शाम|6:30/.test(pulse.hi), pulse.en.slice(0, 120));
 
