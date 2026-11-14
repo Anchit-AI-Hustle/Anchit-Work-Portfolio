@@ -920,7 +920,7 @@ function revPops(W, step) {
   VFX.impact(_vq, _vn, { kind: 'spark', size: 0.35 });
   VFX.dust(_vq, { size: 0.7 });
 }
-const addNitro = (W, n) => { W.P.nitro = Math.min(100, W.P.nitro + n); };
+const addNitro = (W, n) => { W.P.nitro = Math.min(W.P.nmax || 100, W.P.nitro + n); };
 
 function readSteer() {
   const inp = ARC.input;
@@ -4479,7 +4479,7 @@ function drawHUD(ctx, arc, W) {
   else { cx = w - m - r - 6; cy = h - m - r - 6; }
   drawDial(ctx, cx, cy, r, P);
   if (mode === 'drag') drawDragBar(ctx, arc, W, S, F, touch ? Math.min(cy - r - S(40), h - hp.bottom - S(66) - S(70) - S(40)) : h - m - S(70));
-  const nit = clamp(P.nitro / 100, 0, 1), flick = P.nitroOn ? 0.75 + 0.25 * Math.sin(performance.now() * 0.04) : 1;
+  const nit = clamp(P.nitro / (P.nmax || 100), 0, 1), flick = P.nitroOn ? 0.75 + 0.25 * Math.sin(performance.now() * 0.04) : 1;
   let nx, ny, nw2, nh2;
   if (touch) {
     nw2 = S(14); nh2 = S(112); nx = w - 14 - nw2 - 6; ny = h - (pads ? 168 : 30) - 14 - nh2;

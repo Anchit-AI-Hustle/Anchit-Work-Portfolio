@@ -1755,7 +1755,7 @@ export function startC3(team, o) {
 function c3Update(dt) {
   const C = M.c3, p = C.me;
   M.t += dt; M.phaseT += dt; M.banT = max(0, M.banT - dt);
-  if (C.phase === 'done') { for (const q of M.court[0]) integrate(q, dt); stepBall(dt); return; }
+  if (C.phase === 'done') { for (const q of M.court[0]) integrate(q, dt); stepBall(dt); if (C.endT > 0) { C.endT -= dt; if (C.endT <= 0) c3Finish(); } return; }
   if (C.phase !== 'intro') C.t -= dt;
   if (C.t <= 0 && C.phase !== 'done') { C.t = 0; c3End(); }
   const r = rackPos(C.rack), hz = CT.HOOP;
@@ -1808,7 +1808,12 @@ function c3End() {
   const field = [{ me: true, info: C.me.info, score: C.pts }].concat(C.rivals).sort((a, b) => b.score - a.score);
   C.field = field;
   evt('final', 0);
-  setTimeout(() => {
+  // run the results beat on the game clock, so a pause during it holds it rather than losing it
+  C.endT = 1.8;
+}
+function c3Finish() {
+  const C = M.c3, field = C.field;
+  {
     if (arc.state !== 'play' || M.kind !== 'c3') return;
     const place = field.findIndex((f) => f.me) + 1;
     if (C.round === 1 && place <= 2) {
@@ -1828,7 +1833,7 @@ function c3End() {
       score: C.pts, scoreLabel: 'Points', again: 'Shoot again',
       html: STYLE + '<p>' + (C.round === 2 ? 'Final round' : 'Round one') + ': ' + C.made.filter((x) => x).length + ' makes from 25 balls.</p>' + (note ? '<p class="cl-note">' + note + '</p>' : '') + '<table class="cl-tbl"><thead><tr><th>#</th><th>Shooter</th><th>Pts</th></tr></thead><tbody>' + rows + '</tbody></table>',
     });
-  }, 1800);
+  }
 }
 
 /* ====================================================================== the dunk contest */
