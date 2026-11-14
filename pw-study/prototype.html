@@ -898,7 +898,8 @@ function model(){
   mids.forEach(function(k){
     var inp=el('m-'+k), raw=String(inp.value).trim(), x=parseFloat(raw), ok=raw!==''&&isFinite(x)&&x>=0;
     inp.setAttribute('aria-invalid', ok?'false':'true');
-    if(!ok && k!=='fx'){ (raw!==''&&isFinite(x)&&x<0?neg:empty).push(inp.labels&&inp.labels[0]?inp.labels[0].firstChild.textContent.trim():k); x=0; }
+    // An unusable FX rate is reported once, by the fallback note below, but it must still become 0 so that fallback runs.
+    if(!ok){ if(k!=='fx') (raw!==''&&isFinite(x)&&x<0?neg:empty).push(inp.labels&&inp.labels[0]?inp.labels[0].firstChild.textContent.trim():k); x=0; }
     if(PCT[k] && x>100){ capped.push(inp.labels[0].firstChild.textContent.trim()); x=100; }
     v[k]=x;
   });

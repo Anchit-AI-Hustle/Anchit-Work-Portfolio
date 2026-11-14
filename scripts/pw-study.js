@@ -161,6 +161,7 @@ function mutate(src) {
   if (MUT === 'doubtcouple') return src.replace("if(k==='doubt' && simState.doubt>0 && simState.idle>=7)", 'if(false)');
   if (MUT === 'sharecopy') return src.replace("  var toParent = g==='minor';", "  var toParent = g==='minor' || (g==='young' && ppShare);");
   if (MUT === 'hindidefault') return src.replace("  ppL = P[cur].lang==='HINDI' ? 'hi' : 'en';", '');
+  if (MUT === 'fxnan') return src.replace("if(!ok){ if(k!=='fx') (raw!==''", "if(!ok && k!=='fx'){ if(k!=='fx') (raw!==''");
   if (MUT === 'plausible') return src.replace("(t>3900e7*0.25?", '(false?');
   if (MUT === 'noskip') return src.replace('<a class="skip" href="#main">Skip to the prototype</a>', '');
   if (MUT === 'leak3') return src.replace("PW Pi's Daily Challenges lift week-three engagement, but no disclosed AI is aimed at renewal.", 'No disclosed AI aimed at retention or renewal.');
@@ -756,11 +757,12 @@ async function nineFixes(page, L) {
   await page.click('#t-console');
   await page.fill('#m-fx', '');
   const fxNote = norm(await page.textContent('#m-note'));
+  const fxFigures = norm(await page.textContent('#p-console'));
   await page.fill('#m-fx', '95.1');
   await page.fill('#m-off', '100');
   const plaus = norm(await page.textContent('#m-total-sub'));
   await page.fill('#m-off', '1');
-  check(`${L}: one honest message per calculator problem, and a plausibility warning`, !/US\$/.test(fxNote) && /more than a quarter of FY26 revenue/.test(plaus), fxNote + ' | ' + plaus.slice(-70));
+  check(`${L}: one honest message per calculator problem, and a plausibility warning`, !/US\$/.test(fxNote) && !/NaN/.test(fxFigures) && /\$8\.97M/.test(fxFigures) && /more than a quarter of FY26 revenue/.test(plaus), fxNote + ' | ' + plaus.slice(-70));
   const a11y3 = await page.evaluate(() => ({
     skip: !!document.querySelector('a.skip[href="#main"]') && !!document.querySelector('main#main .hero'),
     names: ['lec', 'test', 'idle', 'doubt', 'streak'].every((k) => document.getElementById('v-' + k).getAttribute('aria-hidden') === 'true'),
