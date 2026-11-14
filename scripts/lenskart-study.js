@@ -87,7 +87,7 @@ function mutate(src) {
     referchat: ["    : st==='refer' ? (band(p.age)==='minor'?p.name+'\\'s':'Your')+' power has not changed, so new glasses will not help with this. Please see an eye doctor; the optometrist will write a referral. I will not suggest anything else until then.'\n", ''],
     leverdrift: ["['Store call on day 8', rCall*perRetest(I)*I.incr*mar - c4 - rCall*perT]", "['Store call on day 8', rCall*perRetest(I)*I.incr*mar]"],
     embedbar: ['html.embed #consentBar{display:none!important}', ''],
-    ambush: ["<p class=\"lede\">I'm Anchit Tandon, a product manager. I studied Lenskart", '<p class="lede">Lenskart'],
+    ambush: ['<p class="lede">An outside-in look at Lenskart, the Indian eyewear retailer, built only from public data', '<p class="lede">Lenskart'],
     deeplink: ['function fromHash(scroll, focus){', 'function fromHash(scroll, focus){ if(!focus) return;'],
     walkurl: ['<a href="/lenskart-study/prototype#checkin">https://', '<a href="/lenskart-study/prototype#console">https://'],
   };
@@ -130,7 +130,18 @@ async function open(browser, vp, path, slowFonts) {
   page.on('pageerror', (e) => bag.errors.push('pageerror: ' + e.message));
   page.on('requestfailed', (r) => bag.failed.push(r.url() + ' ' + (r.failure() || {}).errorText));
   page.on('response', (r) => { if (r.status() >= 400) bag.failed.push(r.url() + ' HTTP ' + r.status()); });
-  const res = await page.goto(BASE + path, { waitUntil: 'networkidle' });
+  // Against the live site the host's edge now and then answers a burst of
+  // headless loads with a 403 challenge page instead of ours (measured: 1 in
+  // 36). That is the host, not the page, so retry it, and say so, rather than
+  // let one challenge crash every check after it. Anything else still fails.
+  let res = await page.goto(BASE + path, { waitUntil: 'networkidle' });
+  for (let i = 1; res.status() === 403 && i <= 3; i++) {
+    console.log(`  note  ${path}: host answered 403, retry ${i} of 3`);
+    await page.waitForTimeout(3000 * i);
+    // reload, not goto: the same URL again is a same-document hash change.
+    res = (await page.reload({ waitUntil: 'networkidle' })) || res;
+  }
+  if (res.status() !== 403) bag.failed = bag.failed.filter((f) => f !== (BASE + path).split('#')[0] + ' HTTP 403');
   return { ctx, page, bag, status: res.status() };
 }
 
@@ -166,9 +177,13 @@ async function landed(page, href) {
   return page.evaluate(([tab, h]) => {
     const t = document.getElementById(tab);
     const target = document.getElementById(h);
+    const barEl = document.getElementById('dl-bar');
+    // A missing element fails this one check with what the page was, rather
+    // than crashing every check after it.
+    if (!t || !target || !barEl) return `missing ${[!t && '#' + tab, !target && '#' + h, !barEl && '#dl-bar'].filter(Boolean).join(' ')} on "${document.title}" (${document.readyState}, ${document.body ? document.body.innerText.length : 0} chars)`;
     const r = target.getBoundingClientRect();
     // A whole-tab link must also keep the concept notice bar on screen.
-    const bar = document.getElementById('dl-bar').getBoundingClientRect();
+    const bar = barEl.getBoundingClientRect();
     const whole = t.getAttribute('aria-controls') === 'p-' + h;
     // The follow-up link also has to select Ravi, the first-test customer.
     if (h === 'followup' && target.getAttribute('aria-pressed') !== 'true') return false;
@@ -208,14 +223,15 @@ async function walkthrough(browser, vp) {
   for (const href of ['/lenskart-study#me', '/lenskart-study#impact']) {
     const o = await open(browser, vp, href, 1500);
     await o.page.waitForTimeout(900);
-    check(`${L}: ${href} lands on its section even when the web font is late`, (await landed(o.page, href)) === true, o.page.url());
+    const ok = await landed(o.page, href);
+    check(`${L}: ${href} lands on its section even when the web font is late`, ok === true, typeof ok === 'string' ? ok : o.page.url());
     await o.ctx.close();
   }
   for (const href of [...steps.map((s) => s[0]), ...tries, '/lenskart-study/prototype#brand']) {
     const o = await open(browser, vp, href);
     await o.page.waitForTimeout(500);
     const ok = await landed(o.page, href);
-    check(`${L}: ${href} opens on the right screen`, ok === true, o.page.url());
+    check(`${L}: ${href} opens on the right screen`, ok === true, typeof ok === 'string' ? `${ok} HTTP ${o.status}` : o.page.url());
     await o.ctx.close();
   }
 }
@@ -226,17 +242,19 @@ async function caseStudy(browser, vp) {
   check(`${L}: HTTP 200`, status === 200, status);
   await names(page, L);
 
-  // The 60-second summary comes first, then the proposed system by feature name.
+  // The 60-second summary comes first, then the problem; the proposed system by feature name.
   const sys = await page.evaluate(() => ({
     order: [...document.querySelectorAll('main > section')].slice(0, 2).map((s) => s.id),
     h2: (document.querySelector('#sys-h') || {}).textContent || '',
     feats: [...document.querySelectorAll('#bet .feat .step b')].map((b) => b.textContent.trim()),
     skip: (document.querySelector('a.skip') || { getAttribute() {} }).getAttribute('href'),
   }));
-  check(`${L}: summary first, then the evidence; the proposal is stated once, with six named features`,
-    sys.order.join() === 'summary,business' && /Vision Recall Engine/.test(sys.h2) && sys.feats.join() === FEATURES.join(), JSON.stringify(sys));
+  check(`${L}: summary first, then the problem; the proposal is stated once, with six named features`,
+    sys.order.join() === 'summary,problem' && /Vision Recall Engine/.test(sys.h2) && sys.feats.join() === FEATURES.join(), JSON.stringify(sys));
   // A first-time visitor must be told what this is before being told a claim:
-  // who wrote it, that it is not Lenskart's, the finding, and how to read it.
+  // that it is outside-in, from public data, not Lenskart's, the finding, and
+  // how to read it. Reviewer feedback: no self-introduction in the opening, and
+  // a tone that allows Lenskart may already have tried it.
   const intro = await page.evaluate(() => ({
     h1: document.querySelector('.hero h1').innerText, lede: document.querySelector('.hero .lede').innerText,
     finding: (document.querySelector('.finding') || {}).innerText || '', read: [...document.querySelectorAll('.howread li a')].map((a) => a.getAttribute('href')),
@@ -244,8 +262,8 @@ async function caseStudy(browser, vp) {
     order: [...document.querySelectorAll('.hero h1, .hero .lede, .hero .finding')].map((e) => e.className || e.tagName),
   }));
   check(`${L}: the page opens by saying what it is, who wrote it and how to read it`,
-    /case study/i.test(intro.h1) && /I'm Anchit Tandon/.test(intro.lede) && /not Lenskart's/.test(intro.lede) && /20\.7 million/.test(intro.finding)
-      && intro.read.join() === '#summary,#walkthrough,#business' && /crore/.test(intro.units) && intro.order.join() === 'H1,lede,finding', JSON.stringify(intro.order) + ' ' + intro.read.join());
+    /case study/i.test(intro.h1) && !/Anchit|product manager/.test(intro.lede) && /public data/.test(intro.lede) && /may well have tested/.test(intro.lede) && /not Lenskart's/.test(intro.lede) && /20\.7 million/.test(intro.finding)
+      && intro.read.join() === '#summary,#walkthrough,#problem' && /crore/.test(intro.units) && intro.order.join() === 'H1,lede,finding', JSON.stringify(intro.order) + ' ' + intro.read.join());
   check(`${L}: a skip link to the content`, sys.skip === '#main' && !!(await page.$('main#main')), sys.skip);
 
   const counts = {}; const said = {};
@@ -318,8 +336,8 @@ async function caseStudy(browser, vp) {
 
   const range = await page.$$eval('#im-range tbody tr', (rs) => rs.map((r) => [...r.cells].map((c) => c.innerText.trim())));
   const row = (label) => (range.find((r) => r[0].startsWith(label)) || []).slice(1);
-  check(`${L}: sizing shows low, base and high`, row('Extra revenue').join() === '5.2,15.7,26.2', JSON.stringify(row('Extra revenue')));
-  check(`${L}: sizing is contribution net of running costs`, row('Net of running costs').join() === '−0.4,4.9,10.1', JSON.stringify(row('Net of running costs')));
+  check(`${L}: sizing shows low, base and high`, row('Extra revenue').join() === '4.0,14.0,24.1', JSON.stringify(row('Extra revenue')));
+  check(`${L}: sizing is contribution net of running costs`, row('Net of running costs').join() === '−1.0,3.9,8.9', JSON.stringify(row('Net of running costs')));
   // Each column of levers must add up to the total printed under it.
   const f = (t) => parseFloat(String(t).replace('−', '-'));
   const sums = [0, 1, 2].map((i) => range.slice(0, 3).reduce((a, r) => a + f(r[i + 1]), 0));
@@ -368,7 +386,7 @@ async function prototype(browser, vp) {
 
   const pIntro = await page.evaluate(() => ({ h1: document.querySelector('.hero h1').innerText, lede: document.querySelector('.hero .lede').innerText, steps: document.querySelectorAll('.hero .start li').length }));
   check(`${L}: the demo opens by saying what it is and how to use it`,
-    /demo/i.test(pIntro.h1) && /I'm Anchit Tandon/.test(pIntro.lede) && /made up/.test(pIntro.lede) && pIntro.steps === 3, JSON.stringify(pIntro).slice(0, 120));
+    /demo/i.test(pIntro.h1) && !/Anchit/.test(pIntro.lede) && /public data/.test(pIntro.lede) && /made up/.test(pIntro.lede) && pIntro.steps === 3, JSON.stringify(pIntro).slice(0, 120));
   await page.click('.feats a[href="#console"]');
   const viaFeat = await page.getAttribute('#t-console', 'aria-selected');
   await page.click('#t-checkin');
@@ -544,9 +562,9 @@ async function prototype(browser, vp) {
 
   await page.click('#t-console');
   const total = norm(await page.textContent('#m-total'));
-  check(`${L}: impact total ₹15.7 cr · $1.67M`, total === '₹15.7 cr · $1.67M', total);
+  check(`${L}: impact total ₹14.0 cr · $1.49M`, total === '₹14.0 cr · $1.49M', total);
   const netTxt = norm(await page.textContent('#m-net'));
-  check(`${L}: contribution after running costs ₹4.9 cr · $0.51M`, netTxt === '₹4.9 cr · $0.51M', netTxt);
+  check(`${L}: contribution after running costs ₹3.9 cr · $0.42M`, netTxt === '₹3.9 cr · $0.42M', netTxt);
   const head = norm(await page.textContent('#segtbl th:last-child'));
   check(`${L}: value column is labelled as incremental revenue`, /^Incremental revenue/.test(head), head);
   // The table and the calculator share their assumptions: with no extra
@@ -592,7 +610,7 @@ async function prototype(browser, vp) {
   const junk = norm(await page.textContent('#m-total')) + ' ' + norm(await page.textContent('#m-net')) + ' ' + norm(await page.textContent('#costs'));
   const noFx = !/\$/.test(norm(await page.textContent('#m-total')));
   await setNum(page, '#m-acc', 9900000); await setNum(page, '#m-fx', 94.24); await setNum(page, '#m-pm', 64);
-  check(`${L}: the calculator never shows NaN, Infinity, negative revenue or a dollar figure without a rate`, !/NaN|Infinity/.test(junk) && !/^−/.test(junk) && noFx && norm(await page.textContent('#m-net')) === '₹4.9 cr · $0.51M', junk.slice(0, 90));
+  check(`${L}: the calculator never shows NaN, Infinity, negative revenue or a dollar figure without a rate`, !/NaN|Infinity/.test(junk) && !/^−/.test(junk) && noFx && norm(await page.textContent('#m-net')) === '₹3.9 cr · $0.42M', junk.slice(0, 90));
 
   let worst = 0;
   for (const tab of ['#t-customer', '#t-checkin', '#t-console', '#t-brand']) {
