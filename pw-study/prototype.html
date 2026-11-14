@@ -72,6 +72,9 @@ main .wrap{padding-top:24px;padding-bottom:48px}
 .feats a{display:inline-flex;align-items:center;min-height:36px;padding:6px 12px;border-radius:var(--r-pill);background:#fff;border:1px solid var(--border);color:var(--ink);font-size:13px;font-weight:600;text-decoration:none}
 .feats a:hover{border-color:var(--primary);color:var(--primary)}
 .feats a b{color:var(--primary);margin-right:6px}
+.rowpick{all:unset;cursor:pointer;display:block;text-align:left;border-radius:6px}
+.rowpick:focus-visible{outline:2px solid var(--primary);outline-offset:3px}
+@media (max-width:600px){.hero p.small.muted{display:none}.hero .feats{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.hero .feats .label{display:none}.hero .feats a{flex:none}.tabs{-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}.tabs.at-end{-webkit-mask-image:none;mask-image:none}}
 .dl-bar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;font-size:13px;line-height:18px;color:var(--muted);padding:12px 0;margin-bottom:12px;border-bottom:1px solid var(--border)}
 .dl-tabs{display:flex;flex-wrap:wrap;gap:6px}
 .dl-tabs a{display:inline-flex;align-items:center;min-height:32px;padding:4px 10px;border-radius:var(--r-pill);color:var(--body);font-weight:600;text-decoration:none;border:1px solid var(--border);background:#fff}
@@ -137,7 +140,7 @@ main .wrap{padding-top:24px;padding-bottom:48px}
 .wa-msg.me{background:#DCF8C6;justify-self:end}
 .wa-time{display:block;text-align:right;font-size:11px;color:#4A5960;margin-top:4px}
 .wa-btns{display:grid;gap:6px}
-.wa-btns span{background:#fff;color:#027EB5;text-align:center;border-radius:8px;padding:9px;font-size:14px;font-weight:600}
+.wa-btns span{background:#fff;color:#01699A;text-align:center;border-radius:8px;padding:9px;font-size:14px;font-weight:600}
 .seg{display:inline-flex;border:1px solid var(--border);border-radius:var(--r-pill);padding:3px;background:#fff}
 .seg button{border:0;background:transparent;padding:6px 14px;border-radius:var(--r-pill);font-weight:600;font-size:14px;color:var(--body);min-height:36px}
 .seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
@@ -226,7 +229,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
     <a class="brandmark" href="/pw-study" style="text-decoration:none" target="_top"><div class="dot" aria-hidden="true">RE</div><div><strong>Learner Retention Engine</strong><small>Back to the PW case study</small></div></a>
     <nav class="tabs" role="tablist" aria-label="Prototype views">
       <button class="tab" role="tab" id="t-student" aria-controls="p-student" aria-selected="true">Student app</button>
-      <button class="tab" role="tab" id="t-parent" aria-controls="p-parent" aria-selected="false" tabindex="-1">Weekly Report</button>
+      <button class="tab" role="tab" id="t-parent" aria-controls="p-parent" aria-selected="false" tabindex="-1">Weekly Progress Report</button>
       <button class="tab" role="tab" id="t-console" aria-controls="p-console" aria-selected="false" tabindex="-1">Renewals Dashboard</button>
       <button class="tab" role="tab" id="t-brand" aria-controls="p-brand" aria-selected="false" tabindex="-1">Brand schema</button>
     </nav>
@@ -245,7 +248,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
 
 <main>
 <div class="wrap">
-<div class="dl-bar" id="dl-bar"><span>Concept prototype by Anchit Tandon · synthetic data · not affiliated with PhysicsWallah</span><nav class="dl-tabs" aria-label="Prototype screens"><a href="#student">Student app</a><a href="#report">Weekly Report</a><a href="#dashboard">Renewals Dashboard</a><a href="#brand">Brand schema</a></nav></div>
+<div class="dl-bar" id="dl-bar"><span>Concept prototype by Anchit Tandon · synthetic data · not affiliated with PhysicsWallah</span><nav class="dl-tabs" aria-label="Prototype screens"><a href="#student">Student app</a><a href="#report">Weekly Progress Report</a><a href="#dashboard">Renewals Dashboard</a><a href="#brand">Brand schema</a></nav></div>
 
 <!-- STUDENT -->
 <section class="panel on" id="p-student" role="tabpanel" aria-labelledby="t-student">
@@ -258,7 +261,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
     <button class="chip" data-p="3" aria-pressed="false">Kabir - UPSC, 24</button>
   </div>
   <div class="student-layout">
-    <div class="phone" aria-label="Student app preview">
+    <div class="phone" role="region" aria-label="Student app preview">
       <div class="phone-top">
         <small id="s-batch">Arjuna JEE 2028</small>
         <h2 style="color:#fff;margin-top:2px" id="s-hello">Namaste Riya</h2>
@@ -295,7 +298,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px">
           <h3>2 · Drag the signals</h3><span class="tag pri">The phone and the score react</span>
         </div>
-        <div class="field"><label for="in-lec">Lectures done (batch pace today: 75%) <span id="v-lec"></span></label><input type="range" id="in-lec" min="0" max="100"></div>
+        <div class="field"><label for="in-lec">Lectures done (batch pace today: 75% of 40) <span id="v-lec"></span></label><input type="range" id="in-lec" min="0" max="100"></div>
         <div class="field"><label for="in-test">Test average <span id="v-test"></span></label><input type="range" id="in-test" min="0" max="100"></div>
         <div class="field"><label for="in-idle">Days since last study session <span id="v-idle"></span></label><input type="range" id="in-idle" min="0" max="21"></div>
         <div class="field"><label for="in-doubt">Doubts asked this week <span id="v-doubt"></span></label><input type="range" id="in-doubt" min="0" max="15"></div>
@@ -327,9 +330,9 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
         <div style="overflow-x:auto;margin-top:12px"><table class="aud" id="aud-tbl">
           <thead><tr><th>Learner</th><th>Examples</th><th>Weekly report goes to</th></tr></thead>
           <tbody>
-            <tr data-a="minor"><td><b>Under 18</b></td><td>K-12, Class 11-12, boards</td><td><b>Parent report</b>: parent, with consent taken at purchase (DPDP Act 2023 needs it for under-18s)</td></tr>
-            <tr data-a="young"><td><b>18-21</b></td><td>JEE/NEET droppers, early college</td><td><b>Learner report</b>: learner. Parent gets a copy only if the learner opts in</td></tr>
-            <tr data-a="adult"><td><b>Adult aspirant</b></td><td>UPSC, govt exams, CA, NEET PG, skills</td><td><b>Learner report</b> + study-circle check-in. No parent channel</td></tr>
+            <tr data-a="minor"><td><b>Under 18</b></td><td>K-12, Class 11-12, boards</td><td><b>To the parent</b>, , with consent taken at purchase (DPDP Act 2023 needs it for under-18s)</td></tr>
+            <tr data-a="young"><td><b>18-21</b></td><td>JEE/NEET droppers, early college</td><td><b>To the learner</b>. . Parent gets a copy only if the learner opts in</td></tr>
+            <tr data-a="adult"><td><b>Adult aspirant</b></td><td>UPSC, govt exams, CA, NEET PG, skills</td><td><b>To the learner</b>, plus a study-circle check-in. No parent channel</td></tr>
           </tbody></table></div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center">
           <span class="label">Learner</span>
@@ -356,8 +359,8 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
     <div class="grid" style="align-content:start">
       <div class="channel" id="pp-channel"></div>
       <p class="small muted" id="pp-status" role="status" aria-live="polite"></p>
-      <div class="wa" aria-label="WhatsApp preview">
-        <div class="wa-head"><div class="av" aria-hidden="true">PW</div><div><b id="wa-title">PW Parent Report</b><br><small style="opacity:.85">Verified business account (concept)</small></div></div>
+      <div class="wa" role="region" aria-label="WhatsApp preview">
+        <div class="wa-head"><div class="av" aria-hidden="true">PW</div><div><b id="wa-title">PW Weekly Progress Report</b><br><small style="opacity:.85"><span id="wa-to">To Riya's parent</span> · business account (concept)</small></div></div>
         <div class="wa-body" id="wa-body"></div>
       </div>
     </div>
@@ -385,13 +388,13 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
       </div>
       <div class="card">
         <h3>2 · What we do about it</h3>
-        <p class="small muted" style="margin-top:4px">Sorted by expected fees won back, highest first. Click a column header to re-sort, or a row for detail.</p>
+        <p class="small muted" style="margin-top:4px">Sorted by expected extra fees, highest first. Click a column header to re-sort, or a row for detail.</p>
         <div class="tbl-wrap" style="margin-top:10px"><table id="segtbl"><thead><tr>
           <th><button data-k="seg">Group</button></th>
           <th><button data-k="action">Action this week</button></th>
           <th class="num"><button data-k="n">Learners</button></th>
           <th class="num"><button data-k="avgRisk">Avg risk</button></th>
-          <th class="num"><button data-k="value">Fees won back (₹)</button></th>
+          <th class="num"><button data-k="value">Extra fees (₹)</button></th>
         </tr></thead><tbody></tbody></table></div>
         <div class="detail" id="seg-detail" aria-live="polite"></div>
         <div class="formula" id="seg-scale" style="margin-top:10px"></div>
@@ -520,22 +523,25 @@ function score(s){
   return {risk:r,tier:tier,factors:f};
 }
 function aud(p){ return p.age<18?'minor':(p.age<=21?'young':'adult'); }
+// Batch pace: 75% of the 40 lectures released so far. Any shortfall is at least one lecture.
+var LECTURES_SO_FAR = 40;
+function lecturesBehind(lec){ return lec>=75 ? 0 : Math.max(1, Math.ceil((75-lec)/100*LECTURES_SO_FAR)); }
 function actions(s,res,p){
   var a=[], g=aud(p), minor=g==='minor';
-  var pulse = g==='minor' ? {t:'Parent report alert',d:'To the consented parent: calm, specific, one thing they can do.'}
-            : g==='young' ? {t:'Learner report alert',d:'Sent to '+p.name+'. Parent gets a copy only if '+p.name+' opted in.'}
-            : {t:'Learner report + study-circle check-in',d:'Adult learner: no parent channel. Peers keep the streak going; a mentor steps in only at high risk.'};
+  var pulse = g==='minor' ? {t:'Weekly Progress Report alert, to the parent',d:'To the consented parent: calm, specific, one thing they can do.'}
+            : g==='young' ? {t:'Weekly Progress Report alert, to the learner',d:'Sent to '+p.name+'. Parent gets a copy only if '+p.name+' opted in.'}
+            : {t:'Weekly Progress Report + study-circle check-in',d:'Adult learner: no parent channel. Peers keep the streak going; a mentor steps in only at high risk.'};
   if(res.tier==='High'){
-    a.push({t:'7-day AI catch-up plan',d:'Backlog cut to the highest-weight chapters, scheduled by the AI Mentor.'});
+    a.push({t:'7-day AI catch-up plan',d:'Backlog cut to the highest-weight chapters, scheduled by the AI Mentor, with guided practice and an hour of AI Tuto.'});
     a.push({t:'Mentor call on day 8 if still high risk',d:'If the plan has not worked in a week, a real mentor rebuilds it with the learner. Calls are capped to what PW\'s mentors can take.'});
     a.push(pulse);
   } else if(res.tier==='Medium'){
-    a.push({t:'AI Mentor catch-up plan',d:'Three backlog lectures plus one short DPP, scheduled around '+(g==='adult'?'work or coaching hours':'school hours')+'.'});
-    a.push({t:g==='minor'?'Weekly parent report':'Weekly learner report',d:'Progress and the plan, no alarm.'});
+    a.push({t:'AI Mentor catch-up plan',d:'Backlog lectures, a Daily Challenge and one short DPP, scheduled around '+(g==='adult'?'work or coaching hours':'school hours')+'.'});
+    a.push({t:g==='minor'?'Weekly Progress Report, to the parent':'Weekly Progress Report, to the learner',d:'Progress and the plan, no alarm.'});
   } else {
     a.push({t:'Protect the streak',d:'Light-touch praise, no extra pings.'});
     if(s.test>=70 && s.lec>=75){
-      if(p.offline && !p.final) a.push({t:minor?'Suggest a free Vidyapeeth trial class to the parent':'Offer a free Vidyapeeth trial class',d:'Strong, engaged learner in '+p.city+', a centre city.'+(minor?' Under 18, so the offer goes to the parent, never the child.':'')});
+      if(p.offline && p.vp && !p.final) a.push({t:minor?'Suggest a free Vidyapeeth trial class to the parent':'Offer a free Vidyapeeth trial class',d:'Strong, engaged learner in '+p.city+', a centre city.'+(minor?' Under 18, so the offer goes to the parent, never the child.':'')});
       else a.push({t:minor?'Suggest the Infinity Pro upgrade to the parent':'Offer Infinity Pro upgrade',d:p.final?'Final year: an in-year upgrade only, no next-batch offer.':'High engagement and scores: ready for the premium plan.'});
     }
     else a.push({t:'Next-step recommendation queued for results day',d:minor?'Shown to '+p.name+' as an academic next step; the parent gets the fees and offer.':'Personalised next batch shown on results day.'});
@@ -545,16 +551,16 @@ function actions(s,res,p){
 
 /* ---------- Personas (synthetic) ---------- */
 var P = [
-  {name:'Riya',full:'Riya Sharma',age:16,batch:'Arjuna JEE 2028 (Class 11)',city:'Jaipur',offline:true,lang:'HINGLISH',
+  {name:'Riya',full:'Riya Sharma',age:16,batch:'Arjuna JEE 2028 (Class 11)',city:'Jaipur',offline:true,vp:true,lang:'HINGLISH',
    s:{lec:38,test:45,idle:9,doubt:0,streak:0},
    next:{cat:'Class 12',title:'Lakshya JEE 2028',aud:'For JEE Aspirants',date:'Starts on 5 Apr, 2027',price:4199,mrp:8000,plan:'Infinity, Pro',why:'Continues Arjuna with the same faculty. Your weak chapters (Rotational Motion, Chemical Bonding) are scheduled first.'}},
-  {name:'Aman',full:'Aman Verma',age:19,batch:'Yakeen NEET 2027 (Dropper)',city:'Patna',offline:true,final:true,lang:'HINGLISH',
+  {name:'Aman',full:'Aman Verma',age:19,batch:'Yakeen NEET 2027 (Dropper)',city:'Patna',offline:true,vp:true,final:true,lang:'HINGLISH',
    s:{lec:82,test:74,idle:0,doubt:6,streak:12},
-   next:{cat:'Dropper',title:'Yakeen NEET 2027 - Infinity Pro',aud:'For NEET Aspirants',date:'Upgrade applies to your current batch',price:3999,mrp:9000,plan:'Infinity Pro',why:'Top 15% of your batch on tests. Infinity Pro adds mentor sessions and the full test series for the final 6 months.'}},
-  {name:'Meena',full:'Meena Kumari',age:15,batch:'Udaan UP Board 2027 (Class 10, Hindi medium)',city:'Lucknow',offline:true,lang:'HINDI',
+   next:{cat:'Dropper',title:'Yakeen NEET 2027 - Infinity Pro',aud:'For NEET Aspirants',date:'Upgrade applies to your current batch',price:3999,mrp:9000,plan:'Infinity Pro',why:'Your test average is {test}%, among the strongest in your batch. Infinity Pro adds mentor sessions and the full test series for the final 6 months.'}},
+  {name:'Meena',full:'Meena Kumari',age:15,batch:'Udaan UP Board 2027 (Class 10, Hindi medium)',city:'Lucknow',offline:true,vp:true,lang:'HINDI',
    s:{lec:66,test:58,idle:3,doubt:0,streak:2},
    next:{cat:'Class 11',title:'Arjuna NEET 2029 (Hindi medium)',aud:'For NEET Aspirants',date:'Starts on 10 Apr, 2027',price:3499,mrp:7000,plan:'Infinity, Pro',why:'Your Science scores are your strongest. Early Class 11 start keeps your board-to-NEET momentum.'}},
-  {name:'Kabir',full:'Kabir Singh',age:24,batch:'UPSC Prelims + Mains 2027',city:'Delhi',offline:true,lang:'HINGLISH',
+  {name:'Kabir',full:'Kabir Singh',age:24,batch:'UPSC Prelims + Mains 2027',city:'Delhi',offline:true,vp:false,lang:'HINGLISH',
    s:{lec:55,test:60,idle:5,doubt:1,streak:1},
    next:{cat:'UPSC',title:'Prelims Test Series 2027 + Mains Answer Writing',aud:'For UPSC Aspirants',date:'Starts on 1 Feb, 2027',price:2999,mrp:6000,plan:'Infinity',why:'Polity is your strongest area; the series targets Economy and Environment, your weakest. Mains answers graded by AI Grader.'}}
 ];
@@ -608,7 +614,8 @@ function el(id){return document.getElementById(id);}
 function setSliders(){ ids.forEach(function(k){ el('in-'+k).value = simState[k]; }); }
 function renderStudent(){
   var p = P[cur], s = simState, res = score(s), minor = aud(p)==='minor', high = res.tier==='High';
-  ids.forEach(function(k){ el('v-'+k).textContent = k==='lec'||k==='test' ? s[k]+'%' : s[k]; });
+  var UNIT={lec:'% of lectures done',test:'% test average',idle:' days since last session',doubt:' doubts this week',streak:' day streak'};
+  ids.forEach(function(k){ el('v-'+k).textContent = k==='lec'||k==='test' ? s[k]+'%' : s[k]; el('in-'+k).setAttribute('aria-valuetext', s[k]+UNIT[k]); });
   el('s-batch').textContent = p.batch;
   el('s-hello').textContent = 'Namaste ' + p.name;
   var onTrack = 100 - res.risk;
@@ -616,18 +623,18 @@ function renderStudent(){
   el('ringT').textContent = 'On-track score: ' + onTrack + ' out of 100';
   el('ringArc').setAttribute('stroke-dashoffset', (188.5*(1-onTrack/100)).toFixed(1));
   el('ringArc').setAttribute('stroke', res.tier==='High'?'#E31B4D':res.tier==='Medium'?'#FB6514':'#1B7938');
-  var behind = Math.max(0, Math.round((75 - s.lec)/6));
+  var behind = lecturesBehind(s.lec);
   el('s-status').textContent = res.tier==='High'?'Needs a push this week':res.tier==='Medium'?'Slightly off pace':'On track, keep going';
-  el('s-sub').textContent = behind>0 ? behind+' lectures behind batch pace' : 'Ahead of batch pace';
+  el('s-sub').textContent = behind>0 ? behind+' lecture'+(behind>1?'s':'')+' behind batch pace' : 'On or ahead of batch pace';
   el('st-lec').textContent = s.lec+'%'; el('st-test').textContent = s.test+'%'; el('st-streak').textContent = s.streak;
   var n = el('s-nudge'); n.className = 'nudge ' + (res.tier==='High'?'high':res.tier==='Medium'?'med':'low');
   var plan;
-  if(res.tier==='High'){ el('s-nudge-title').textContent='Your 7-day catch-up plan'; plan=['Day 1-2: 2 backlog lectures (highest weightage first)','Day 3: 20-min DPP, solutions unlocked instantly','Day 4-6: 2 more lectures + doubt session','Day 7: mini-test to reset your score','Day 8: a mentor calls if you are still behind']; }
-  else if(res.tier==='Medium'){ el('s-nudge-title').textContent='Catch up in 3 sessions'; plan=[behind>0?('Session 1: '+behind+' backlog lecture'+(behind>1?'s':'')):(s.test<40?'Session 1: re-watch your weakest chapter, then its DPP':'Session 1: 1 backlog lecture'),'Session 2: 15-question DPP on your weakest chapter','Session 3: ask at least 2 doubts on Ask AI']; }
+  if(res.tier==='High'){ el('s-nudge-title').textContent='Your 7-day catch-up plan'; plan=['Day 1-2: 2 backlog lectures (highest weightage first)','Day 3: 20-min guided practice, one step at a time','Day 4-6: 2 more lectures + 1 hour with AI Tuto on your weakest chapter','Day 7: mini-test to reset your score','Day 8: a mentor calls if you are still behind']; }
+  else if(res.tier==='Medium'){ el('s-nudge-title').textContent='Catch up in 3 sessions'; plan=[behind>0?('Session 1: '+behind+' backlog lecture'+(behind>1?'s':'')):(s.test<40?'Session 1: re-watch your weakest chapter, then its DPP':'Session 1: 1 backlog lecture'),'Session 2: today\'s Daily Challenge, then a 15-question DPP on your weakest chapter','Session 3: ask at least 2 doubts on AI Guru']; }
   else { el('s-nudge-title').textContent='Great week. Keep the streak alive'; plan=['Next: Sunday full-length test','Bonus: 1 advanced problem set unlocked']; }
   el('s-plan').innerHTML = plan.map(function(x){return '<li>'+x+'</li>';}).join('');
   var nx = p.next, off = Math.round((1-nx.price/nx.mrp)*100);
-  var trialOk = !p.final && p.offline && res.tier==='Low' && s.test>=70 && s.lec>=75;
+  var trialOk = !p.final && p.offline && p.vp && res.tier==='Low' && s.test>=70 && s.lec>=75;
   var tag = high ? 'Not promoted while you catch up' : (minor ? 'Next-step recommendation' : (p.final ? 'In-year upgrade' : 'Results-day offer'));
   var foot;
   if(minor){
@@ -647,7 +654,7 @@ function renderStudent(){
     '<div class="inner"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="cat">'+nx.cat+'</span><span class="tag lang">'+p.lang+'</span></div>'+
     '<h3 style="font-size:20px;line-height:26px">'+nx.title+'</h3>'+
     '<p class="small">'+nx.aud+' · '+nx.date+'</p>'+
-    '<p class="small" style="background:var(--primary-50);padding:8px 10px;border-radius:8px;color:var(--ink)"><b>Why this:</b> '+nx.why+'</p>'+
+    '<p class="small" style="background:var(--primary-50);padding:8px 10px;border-radius:8px;color:var(--ink)"><b>Why this:</b> '+nx.why.replace('{test}',s.test)+'</p>'+
     foot + '<p class="small next-msg" id="s-next-msg" role="status" aria-live="polite"></p></div>';
   // engine card
   el('e-risk').textContent = res.risk;
@@ -657,7 +664,7 @@ function renderStudent(){
     return '<div class="factor"><span>'+f.k+'</span><span class="bar" aria-hidden="true"><i style="width:'+w+'%;background:'+(f.v<0?'#1B7938':'#5A4BDA')+'"></i></span><span style="text-align:right;font-variant-numeric:tabular-nums">'+(f.v<0?'':'+')+f.v.toFixed(1)+'</span></div>';
   }).join('');
   var top = res.factors.slice().sort(function(a,b){return b.v-a.v;})[0];
-  el('e-why').innerHTML = '<b>Why:</b> biggest driver is "'+top.k.toLowerCase()+'" ('+(top.v>0?'+':'')+top.v.toFixed(1)+' pts). Risk = sum of factors, capped 0-100; a test average under 40% adds a learning gap of up to 40 points. Tiers: High 60+, Medium 35-59, Low under 35.';
+  el('e-why').innerHTML = '<b>Why:</b> '+(top.v>0 ? 'biggest driver is "'+top.k.toLowerCase()+'" (+'+top.v.toFixed(1)+' pts).' : 'nothing is pulling the risk up this week.')+' Risk = sum of factors, capped 0-100; a test average under 40% adds a learning gap of up to 40 points. Tiers: High 60+, Medium 35-59, Low under 35.';
   el('e-actions').innerHTML = actions(s,res,p).map(function(a,i){return '<div class="step"><span class="n">'+(i+1)+'</span><div><b>'+a.t+'</b><p class="small">'+a.d+'</p></div></div>';}).join('');
   renderChatChips();
 }
@@ -668,7 +675,7 @@ el('s-next').addEventListener('click',function(e){
   el('s-next-msg').textContent = act==='buy' ? 'Prototype only: this would open checkout for '+p.next.title+'.' : 'Prototype only: this would book a free trial class at the PW Vidyapeeth centre in '+p.city+'.';
 });
 ids.forEach(function(k){ el('in-'+k).addEventListener('input',function(e){ simState[k]=+e.target.value; renderStudent(); renderParent(); }); });
-// One learner for the whole prototype: the Student app chips and the Weekly Report learner buttons both choose it.
+// One learner for the whole prototype: the Student app chips and the Weekly Progress Report learner buttons both choose it.
 function selectPersona(i){
   cur=i; simState=JSON.parse(JSON.stringify(P[cur].s)); ppShare=false;
   Array.prototype.forEach.call(document.querySelectorAll('.persona-row .chip'),function(x){x.setAttribute('aria-pressed',String(+x.dataset.p===cur));});
@@ -688,7 +695,7 @@ function renderChatChips(){
   Array.prototype.forEach.call(el('quick').querySelectorAll('button'),function(b){ b.addEventListener('click',function(){ answer(b.dataset.q,b.textContent); }); });
 }
 function answer(k,label){
-  var s=simState,res=score(s),p=P[cur],behind=Math.max(0,Math.round((75-s.lec)/6)),txt;
+  var s=simState,res=score(s),p=P[cur],behind=lecturesBehind(s.lec),txt;
   addMsg('me',label);
   if(k==='backlog') txt = behind>0 ? 'Tum batch se '+behind+' lectures peeche ho. Tension mat lo: sirf high-weightage wale pehle karenge, '+Math.ceil(behind/2)+' din mein cover ho jayega.' : 'Koi backlog nahi! Tum batch pace se aage ho. Ab practice pe focus karte hain.';
   else if(k==='today') txt = res.tier==='High' ? 'Aaj sirf 2 cheezein: 1 backlog lecture (45 min) aur 10-question DPP. Chhota target, pakka result.' : res.tier==='Medium' ? 'Aaj 1 lecture + apne weakest chapter ka DPP. Doubts ho to Ask AI pe daal do.' : 'Aaj ka lecture + Sunday test ki prep. Streak '+s.streak+' din ka hai, todna mat!';
@@ -699,28 +706,28 @@ function answer(k,label){
 /* ---------- Weekly Progress Report (parent or learner) ---------- */
 var ppL='en', ppShare=false;
 function renderParent(){
-  var p=P[cur], s=simState, res=score(s), behind=Math.max(0,Math.round((75-s.lec)/6)), g=aud(p);
+  var p=P[cur], s=simState, res=score(s), behind=lecturesBehind(s.lec), g=aud(p);
   var toParent = g==='minor' || (g==='young' && ppShare);
   Array.prototype.forEach.call(document.querySelectorAll('#aud-tbl tbody tr'),function(tr){tr.classList.toggle('on',tr.dataset.a===g);});
   var ch=el('pp-channel');
   ch.className='channel '+(toParent?'parent':'self');
-  if(g==='minor') ch.innerHTML='<b>Parent report.</b> '+p.name+' is '+p.age+', so the report goes to the parent who gave consent at purchase. '+p.name+' can see every report too.';
-  else if(g==='young') ch.innerHTML='<b>'+(ppShare?'Learner report + parent copy.':'Learner report.')+'</b> '+p.name+' is '+p.age+', so the report goes to '+p.name+'. A parent copy is sent only if '+p.name+' opts in.'+
+  if(g==='minor') ch.innerHTML='<b>To the parent.</b> '+p.name+' is '+p.age+', so the report goes to the parent who gave consent at purchase. '+p.name+' can see every report too.';
+  else if(g==='young') ch.innerHTML='<b>'+(ppShare?'To the learner, with a parent copy.':'To the learner.')+'</b> '+p.name+' is '+p.age+', so the report goes to '+p.name+'. A parent copy is sent only if '+p.name+' opts in.'+
     '<label class="toggle"><input type="checkbox" id="pp-share"'+(ppShare?' checked':'')+'> '+p.name+' chose to share with a parent</label>';
-  else ch.innerHTML='<b>Learner report.</b> '+p.name+' is '+p.age+' and preparing for an adult exam, so there is no parent channel. The report goes to '+p.name+', with a study-circle check-in.';
+  else ch.innerHTML='<b>To the learner.</b> '+p.name+' is '+p.age+' and preparing for an adult exam, so there is no parent channel. The report goes to '+p.name+', with a study-circle check-in.';
   var sh=el('pp-share'); if(sh) sh.addEventListener('change',function(){ppShare=sh.checked;renderParent();});
-  el('wa-title').textContent = toParent?'PW Parent Report':'PW Progress Report';
+  el('wa-to').textContent = toParent ? 'To '+p.name+'\'s parent' : 'To '+p.name;
   var hiMode = ppL==='hi', en, hi, mentor=toParent?(hiMode?'PW Parent App में देखें':'Open in PW Parent App'):(hiMode?'AI मेंटर से बात करें':'Talk to the AI Mentor');
   if(toParent){
     if(res.tier==='High'){
       en = 'Namaste! Weekly update for '+p.full+' ('+p.batch+')\n\nThis week: '+s.lec+'% of lectures done vs batch pace, test average '+s.test+'%. '+p.name+' has not studied on the app for '+s.idle+' days.\n\nWhat we are doing: a 7-day catch-up plan is ready in the app. If '+p.name+' is still behind after a week, a PW mentor will call.\n\nOne thing you can do: ask '+p.name+' to show you the plan tonight. 10 minutes of your interest helps more than any reminder.';
       hi = 'नमस्ते! '+p.full+' की साप्ताहिक रिपोर्ट\n\nइस हफ्ते: बैच की गति के मुकाबले '+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%. '+p.name+' ने '+s.idle+' दिन से ऐप पर पढ़ाई नहीं की है.\n\nहम क्या कर रहे हैं: ऐप में 7 दिन का कैच-अप प्लान तैयार है. अगर एक हफ्ते बाद भी '+p.name+' पीछे रहे, तो PW मेंटर कॉल करेंगे.\n\nआप क्या कर सकते हैं: आज रात '+p.name+' से प्लान दिखाने को कहें. आपकी 10 मिनट की रुचि किसी भी रिमाइंडर से ज़्यादा असर करती है.';
     } else if(res.tier==='Medium'){
-      en = 'Namaste! Weekly update for '+p.full+' ('+p.batch+')\n\nThis week: '+s.lec+'% of lectures done, test average '+s.test+'%, '+s.streak+'-day study streak. '+(behind>0?p.name+' is '+behind+' lectures behind pace.':'')+'\n\nPlan: 3 short catch-up sessions are scheduled this week by the AI Mentor.\n\nYou will get the next update on Sunday.';
-      hi = 'नमस्ते! '+p.full+' की साप्ताहिक रिपोर्ट\n\nइस हफ्ते: '+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%, लगातार '+s.streak+' दिन पढ़ाई. '+(behind>0?p.name+' बैच से '+behind+' लेक्चर पीछे है.':'')+'\n\nप्लान: AI मेंटर ने इस हफ्ते 3 छोटे कैच-अप सेशन तय किए हैं.\n\nअगली रिपोर्ट रविवार को आएगी.';
+      en = 'Namaste! Weekly update for '+p.full+' ('+p.batch+')\n\nThis week: '+s.lec+'% of lectures done, test average '+s.test+'%, '+s.streak+'-day study streak. '+(behind>0?p.name+' is '+behind+' lectures behind pace.':'')+'\n\nPlan: 3 short catch-up sessions are scheduled this week by the AI Mentor.\n\nOne thing you can do: ask '+p.name+' which session comes first tonight.\n\nYou will get the next update on Sunday.';
+      hi = 'नमस्ते! '+p.full+' की साप्ताहिक रिपोर्ट\n\nइस हफ्ते: '+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%, लगातार '+s.streak+' दिन पढ़ाई. '+(behind>0?p.name+' बैच से '+behind+' लेक्चर पीछे है.':'')+'\n\nप्लान: AI मेंटर ने इस हफ्ते 3 छोटे कैच-अप सेशन तय किए हैं.\n\nआप क्या कर सकते हैं: '+p.name+' से पूछें कि आज रात कौन-सा सेशन पहले होगा.\n\nअगली रिपोर्ट रविवार को आएगी.';
     } else {
-      en = 'Namaste! Weekly update for '+p.full+' ('+p.batch+')\n\nGreat week: '+s.lec+'% of lectures done, test average '+s.test+'%, '+s.streak+'-day study streak. \n\nNext: Sunday full-length test. We will share the result with you.';
-      hi = 'नमस्ते! '+p.full+' की साप्ताहिक रिपोर्ट\n\nशानदार हफ्ता: '+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%, लगातार '+s.streak+' दिन पढ़ाई. \n\nआगे: रविवार को फुल-लेंथ टेस्ट. नतीजा हम आपको भेजेंगे.';
+      en = 'Namaste! Weekly update for '+p.full+' ('+p.batch+')\n\nGreat week: '+s.lec+'% of lectures done, test average '+s.test+'%, '+s.streak+'-day study streak.\n\nOne thing you can do: tell '+p.name+' you noticed the streak; praise for effort keeps it going.\n\nNext: Sunday full-length test. We will share the result with you.';
+      hi = 'नमस्ते! '+p.full+' की साप्ताहिक रिपोर्ट\n\nशानदार हफ्ता: '+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%, लगातार '+s.streak+' दिन पढ़ाई.\n\nआप क्या कर सकते हैं: '+p.name+' को बताइए कि आपने यह लगातार पढ़ाई देखी है; मेहनत की तारीफ़ से यह जारी रहती है.\n\nआगे: रविवार को फुल-लेंथ टेस्ट. नतीजा हम आपको भेजेंगे.';
     }
   } else {
     var circle = g==='adult';
@@ -736,10 +743,10 @@ function renderParent(){
     }
   }
   var who = toParent?p.name+'\'s':'Your', whoHi = toParent?p.name+' का':'आपका';
-  var strong = p.offline && res.tier==='Low' && s.test>=70 && s.lec>=75 && !p.final, held = res.tier==='High';
-  var resultsEn = 'Next-step recommendation (sent on results day or at batch end)\n\n'+who+' year in numbers is ready. Based on the hardest and strongest chapters, the recommended next step is '+p.next.title+(held?', shown once the catch-up plan is done':'')+'.'+(strong?' A free trial class is also available at the PW Vidyapeeth centre in '+p.city+'.':'');
-  var resultsHi = 'रिज़ल्ट के दिन का मैसेज (बैच खत्म होने पर)\n\n'+whoHi+' पूरे साल का रिपोर्ट कार्ड तैयार है. सबसे कठिन और सबसे मज़बूत चैप्टर के आधार पर अगला सुझाया गया कदम: '+p.next.title+(held?', कैच-अप प्लान पूरा होने के बाद':'')+'.'+(strong?' '+p.city+' के PW विद्यापीठ सेंटर में फ्री ट्रायल क्लास भी उपलब्ध है.':'');
-  el('pp-status').textContent = 'Showing '+p.name+'\'s '+(toParent?'parent report':'learner report')+' in '+(hiMode?'Hindi':'English')+', from this week\'s signals ('+res.tier.toLowerCase()+' risk).';
+  var strong = p.offline && res.tier==='Low' && s.test>=70 && s.lec>=75 && !p.final && p.vp, held = res.tier==='High';
+  var resultsEn = p.final ? 'Results-day message (sent after the exam)\n\n'+who+' year in numbers is ready, with the chapters that improved most. No next batch is recommended: this batch ends with the exam. We will share what to do after results, including counselling.' : 'Next-step recommendation (sent on results day or at batch end)\n\n'+who+' year in numbers is ready. Based on the hardest and strongest chapters, the recommended next step is '+p.next.title+(held?', shown once the catch-up plan is done':'')+'.'+(strong?' A free trial class is also available at the PW Vidyapeeth centre in '+p.city+'.':'');
+  var resultsHi = p.final ? 'रिज़ल्ट के दिन का मैसेज (परीक्षा के बाद)\n\n'+whoHi+' पूरे साल का रिपोर्ट कार्ड तैयार है, सबसे ज़्यादा सुधरे चैप्टर के साथ. कोई अगला बैच नहीं सुझाया गया: यह बैच परीक्षा के साथ खत्म होता है. रिज़ल्ट के बाद क्या करना है, काउंसलिंग समेत, हम बताएंगे.' : 'रिज़ल्ट के दिन का मैसेज (बैच खत्म होने पर)\n\n'+whoHi+' पूरे साल का रिपोर्ट कार्ड तैयार है. सबसे कठिन और सबसे मज़बूत चैप्टर के आधार पर अगला सुझाया गया कदम: '+p.next.title+(held?', कैच-अप प्लान पूरा होने के बाद':'')+'.'+(strong?' '+p.city+' के PW विद्यापीठ सेंटर में फ्री ट्रायल क्लास भी उपलब्ध है.':'');
+  el('pp-status').textContent = 'Showing '+p.name+'\'s '+(toParent?'Weekly Progress Report to the parent':'Weekly Progress Report to the learner')+' in '+(hiMode?'Hindi':'English')+', from this week\'s signals ('+res.tier.toLowerCase()+' risk).';
   el('wa-body').innerHTML =
     '<div class="wa-msg" lang="'+(hiMode?'hi':'en')+'">'+esc(hiMode?hi:en)+'<span class="wa-time">Sun 7:00 pm</span></div>'+
     '<div class="wa-btns"><span>'+(hiMode?'प्लान देखें':'See the plan')+'</span><span>'+mentor+'</span></div>'+
@@ -776,28 +783,33 @@ function renderConsole(){
   var g={
     hiU:hi.filter(function(x){return x.nextBatch&&x.age<18;}), hiA:hi.filter(function(x){return x.nextBatch&&x.age>=18;}), med:me.filter(nb),
     topC:lo.filter(function(x){return nb(x)&&strong(x)&&x.centre;}), topN:lo.filter(function(x){return nb(x)&&strong(x)&&!x.centre;}),
-    oth:lo.filter(function(x){return nb(x)&&!strong(x);}), fin:L.filter(function(x){return !x.nextBatch;})
+    oth:lo.filter(function(x){return nb(x)&&!strong(x);}),
+    finT:lo.filter(function(x){return !x.nextBatch&&strong(x);}), fin:L.filter(function(x){return !x.nextBatch&&!(x.tier==='Low'&&strong(x));})
   };
   var reL=N*(v.elig/100)*(v.ren/100), den=['hiU','hiA','med','oth'].reduce(function(t,k){return t+W[k]*g[k].length;},0), sre=den?reL/den:0;
   var movers=N*(v.elig/100)*(v.city/100)*(v.off/100), ups=Math.max(N-N*(v.u?v.prem/v.u:0),0)*(v.upg/100);
+  // Upgrades go to the strongest learners without a centre offer: top scorers far from a centre, and final-year top scorers (in-year only).
+  var upN=g.topN.length+g.finT.length, upShare=function(k){return upN?ups*g[k].length/upN:0;};
   var reWhy='Rate: the calculator\'s +'+v.ren+'pp re-enrolment uplift, weighted towards the groups most at risk (high 3x, medium 1.5x, on track 0.5x).';
   var avg=function(a){return a.length?Math.round(a.reduce(function(t,x){return t+x.risk;},0)/a.length):0;};
-  var mk=function(seg,action,list,won,price,why,basis){return {seg:seg,action:action,list:list,n:list.length,avgRisk:avg(list),won:won,price:price,value:Math.round(won*price),why:why,basis:basis};};
+  var P_ON=INR(A)+' = PW online fee per learner (FY26).', P_UP=INR(v.delta)+' = assumed price gap to Infinity Pro.', P_OFF=INR(net)+' = offline ARPU '+INR(v.arpu)+' minus the '+INR(A)+' online fee already paid (FY26).';
+  var mk=function(seg,action,list,won,price,why,basis,pnote){return {seg:seg,action:action,list:list,n:list.length,avgRisk:avg(list),won:won,price:price,value:Math.round(won*price),why:why,basis:basis,pnote:price>0?pnote:''};};
   rows=[
-    mk('High risk, under 18','7-day AI plan, mentor call if not back on track + parent report alert',g.hiU,W.hiU*sre*g.hiU.length,A,'Drifting school students who have a next batch. Their parent pays, so the parent is told.',reWhy),
-    mk('High risk, 18+','7-day AI plan, mentor call if not back on track + learner report',g.hiA,W.hiA*sre*g.hiA.length,A,'Drifting adult learners with a next batch. The report goes to them, not a parent.',reWhy),
-    mk('Medium risk','AI Mentor catch-up + Weekly Progress Report (parent if under 18)',g.med,W.med*sre*g.med.length,A,'Slightly off pace. The AI Mentor can usually fix this without a human.',reWhy),
-    mk('On track, top scorer, centre city','Free Vidyapeeth trial class (to the parent if under 18)',g.topC,movers,net,'Strong, engaged online learners near a PW centre: the best offline leads PW has.','Rate: the calculator\'s '+v.off+'% of learners with a next batch in centre cities moving to Vidyapeeth, all expected from this strongest group.'),
-    mk('On track, top scorer, no centre','Infinity Pro upgrade on results day (to the parent if under 18)',g.topN,ups,v.delta,'Strong learners far from a centre: offer the premium plan instead.','Rate: the calculator\'s +'+v.upg+'pp upgrade uplift on learners not yet on premium, all expected from this strongest group.'),
-    mk('On track, others','Next batch card on results day (to the parent if under 18)',g.oth,W.oth*sre*g.oth.length,A,'Doing fine. Just make the next batch easy to choose when results land.',reWhy),
-    mk('Final year, any risk','Help with results; no next-batch offer',g.fin,0,0,'No next batch to sell. Rescue still runs, because results drive word of mouth.','')
+    mk('High risk, under 18','7-day AI plan, mentor call if not back on track + Weekly Progress Report alert to the parent',g.hiU,W.hiU*sre*g.hiU.length,A,'Drifting school students who have a next batch. Their parent pays, so the parent is told.',reWhy,P_ON),
+    mk('High risk, 18+','7-day AI plan, mentor call if not back on track + Weekly Progress Report to the learner',g.hiA,W.hiA*sre*g.hiA.length,A,'Drifting adult learners with a next batch. The report goes to them, not a parent.',reWhy,P_ON),
+    mk('Medium risk','AI Mentor catch-up + Weekly Progress Report (parent if under 18)',g.med,W.med*sre*g.med.length,A,'Slightly off pace. The AI Mentor can usually fix this without a human.',reWhy,P_ON),
+    mk('On track, top scorer, centre city','Free Vidyapeeth trial class (to the parent if under 18)',g.topC,movers,net,'Strong, engaged online learners near a PW centre: the best offline leads PW has.','Rate: the calculator\'s '+v.off+'% of learners with a next batch in centre cities moving to Vidyapeeth, all expected from this strongest group.',P_OFF),
+    mk('On track, top scorer, no centre','Infinity Pro upgrade on results day (to the parent if under 18)',g.topN,upShare('topN'),v.delta,'Strong learners far from a centre: offer the premium plan instead.','Rate: the calculator\'s +'+v.upg+'pp upgrade uplift on learners not yet on premium, shared between this group and final-year top scorers by size.',P_UP),
+    mk('On track, others','Next batch card on results day (to the parent if under 18)',g.oth,W.oth*sre*g.oth.length,A,'Doing fine. Just make the next batch easy to choose when results land.',reWhy,P_ON),
+    mk('Final year, top scorer','In-year Infinity Pro upgrade; no next-batch offer (to the parent if under 18)',g.finT,upShare('finT'),v.delta,'Strong final-year learners: the upgrade helps before the exam. Nothing is offered after it.','Rate: the same +'+v.upg+'pp upgrade uplift, shared with the no-centre top scorers by size.',P_UP),
+    mk('Final year, others','Help with results; no next-batch offer',g.fin,0,0,'No next batch to sell. Rescue still runs, because results drive word of mouth.','')
   ];
   var stake=rows.reduce(function(t,r){return t+r.value;},0);
   el('kpis').innerHTML=[
     [N.toLocaleString('en-IN'),'Paid learners in this demo cohort'],
     [Math.round(hi.length/N*100)+'%','Drifting this week (high risk)'],
     [(hi.length+me.length).toLocaleString('en-IN'),'Get a rescue action this week'],
-    [INR(stake),'Expected fees won back in this cohort']
+    [INR(stake),'Expected extra fees in this cohort']
   ].map(function(k){return '<div class="kpi"><b>'+k[0]+'</b><span>'+k[1]+'</span></div>';}).join('');
   var mix=[['High',hi.length,'h'],['Medium',me.length,'m'],['Low',lo.length,'l']].sort(function(a,b){return b[1]-a[1];});
   el('riskbars').innerHTML=mix.map(function(m){var p=m[1]/N*100;return '<div class="chartbar"><span>'+m[0]+' risk</span><span class="bar"><i class="'+m[2]+'" style="width:'+p.toFixed(1)+'%"></i></span><span style="text-align:right;font-variant-numeric:tabular-nums">'+p.toFixed(1)+'%</span></div>';}).join('');
@@ -810,11 +822,11 @@ function renderConsole(){
 function renderTable(){
   var r=rows.slice().sort(function(a,b){var x=a[sortKey],y=b[sortKey];return (typeof x==='string'?x.localeCompare(y):x-y)*sortDir;});
   var tb=el('segtbl').querySelector('tbody');
-  tb.innerHTML=r.map(function(x){return '<tr class="pick'+(x.seg===selSeg?' sel':'')+'" tabindex="0" data-seg="'+x.seg+'"'+(x.seg===selSeg?' aria-current="true"':'')+'><td><b>'+x.seg+'</b></td><td>'+x.action+'</td><td class="num">'+x.n.toLocaleString('en-IN')+'</td><td class="num">'+x.avgRisk+'</td><td class="num">'+INR(x.value)+'</td></tr>';}).join('');
+  tb.innerHTML=r.map(function(x){return '<tr class="pick'+(x.seg===selSeg?' sel':'')+'" data-seg="'+x.seg+'"><td><button type="button" class="rowpick" aria-pressed="'+(x.seg===selSeg)+'"><b>'+x.seg+'</b></button></td><td>'+x.action+'</td><td class="num">'+x.n.toLocaleString('en-IN')+'</td><td class="num">'+x.avgRisk+'</td><td class="num">'+INR(x.value)+'</td></tr>';}).join('');
   Array.prototype.forEach.call(tb.querySelectorAll('tr'),function(tr){
     var go=function(){selSeg=tr.dataset.seg;renderTable();};
     tr.addEventListener('click',go);
-    tr.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go();var n=el('segtbl').querySelector('tr.sel');if(n)n.focus();}});
+    tr.querySelector('.rowpick').addEventListener('click',function(e){e.stopPropagation();go();var n=el('segtbl').querySelector('tr.sel .rowpick');if(n)n.focus();});
   });
   Array.prototype.forEach.call(document.querySelectorAll('#segtbl th'),function(th){var b=th.querySelector('button');var on=b.dataset.k===sortKey;th.setAttribute('aria-sort',on?(sortDir<0?'descending':'ascending'):'none');b.textContent=b.textContent.replace(/ [▼▲]$/,'')+(on?(sortDir<0?' ▼':' ▲'):'');});
   renderDetail();
@@ -823,8 +835,8 @@ function renderDetail(){
   var x=rows.filter(function(r){return r.seg===selSeg;})[0]; if(!x){el('seg-detail').innerHTML='';return;}
   var sample=x.list.slice().sort(function(a,b){return b.risk-a.risk;}).slice(0,5);
   var rate=x.n?x.won/x.n*100:0;
-  var calc = x.price>0 ? x.n.toLocaleString('en-IN')+' learners × '+rate.toFixed(1)+'% we expect the action to win back × '+INR(x.price)+' each = <b>'+INR(x.value)+'</b>' : 'No next batch, so nothing to sell: ₹0. The action protects results and reputation.';
-  var v=model(), priceNote = x.price===v.acpu?INR(v.acpu)+' = PW online fee per learner (FY26).':x.price===v.delta?INR(v.delta)+' = assumed price gap to Infinity Pro.':x.price>0?INR(x.price)+' = offline ARPU '+INR(v.arpu)+' minus the '+INR(v.acpu)+' online fee already paid (FY26).':'';
+  var calc = x.price>0 ? x.n.toLocaleString('en-IN')+' learners × '+rate.toFixed(1)+'% we expect the action to bring in × '+INR(x.price)+' each = <b>'+INR(x.value)+'</b>' : 'No next batch, so nothing to sell: ₹0. The action protects results and reputation.';
+  var priceNote = x.pnote;
   el('seg-detail').innerHTML='<div class="card soft" style="padding:14px"><p class="label">Selected group</p><h3 style="margin-top:2px">'+x.seg+'</h3><p class="small" style="margin-top:4px">'+x.why+'</p>'+
     '<div class="formula" style="margin-top:8px">'+calc+'</div><p class="small muted" style="margin-top:6px">'+priceNote+(x.basis?' '+x.basis+' To be measured against a holdout.':'')+(rate>100?' <b>This assumption expects more learners than the group holds; lower it in the calculator.</b>':'')+'</p>'+
     (sample.length?'<p class="label" style="margin-top:12px">Highest-risk learners in this group (synthetic)</p><div class="tbl-wrap" style="margin-top:6px"><table><thead><tr><th>Learner</th><th class="num">Age</th><th class="num">Lectures</th><th class="num">Test avg</th><th class="num">Days idle</th><th class="num">Risk</th></tr></thead><tbody>'+
@@ -839,16 +851,16 @@ var PCT={elig:1,ren:1,upg:1,city:1,off:1,opt:1,risk:1,hi:1,esc:1};
 var NOTE='';
 // Every input is read here. Empty or non-numeric fields count as 0 and are flagged; percentages are capped at 100.
 function model(){
-  var v={}, empty=[], capped=[];
+  var v={}, empty=[], neg=[], capped=[];
   mids.forEach(function(k){
     var inp=el('m-'+k), raw=String(inp.value).trim(), x=parseFloat(raw), ok=raw!==''&&isFinite(x)&&x>=0;
     inp.setAttribute('aria-invalid', ok?'false':'true');
-    if(!ok){ empty.push(inp.labels&&inp.labels[0]?inp.labels[0].firstChild.textContent.trim():k); x=0; }
+    if(!ok){ (raw!==''&&isFinite(x)&&x<0?neg:empty).push(inp.labels&&inp.labels[0]?inp.labels[0].firstChild.textContent.trim():k); x=0; }
     if(PCT[k] && x>100){ capped.push(inp.labels[0].firstChild.textContent.trim()); x=100; }
     v[k]=x;
   });
   v.badfx=v.fx<1; if(v.badfx) v.fx=95.1;
-  NOTE=(empty.length?'Not a number, so counted as 0: '+empty.join(', ')+'. ':'')+(capped.length?'Capped at 100%: '+capped.join(', ')+'.':'');
+  NOTE=(empty.length?'Not a number, so counted as 0: '+empty.join(', ')+'. ':'')+(neg.length?'Below zero, so counted as 0: '+neg.join(', ')+'. ':'')+(capped.length?'Capped at 100%: '+capped.join(', ')+'.':'');
   return v;
 }
 function renderModel(){
@@ -881,7 +893,7 @@ function renderModel(){
 mids.forEach(function(k){el('m-'+k).addEventListener('input',function(){ renderModel(); if(COH.length) renderConsole(); });});
 
 /* ---------- Brand swatches ---------- */
-var SW=[['--primary','#5A4BDA','Buttons, accents, active tabs','High'],['--primary-50','#F1EFFF','Soft buttons, section tints','High'],['Ink / dark CTA','#1B2124','Buy Now, Login','High'],['Heading','#27272A','h2/h4','High'],['Body','#3D3D3D','Card meta','High'],['Muted','#757575','Struck MRP, secondary','High'],['Page tint','#F8F8F8','Section backgrounds','High'],['Border','#D9DCE1','Cards, pills','High'],['Success','#1B7938','% OFF, Recommended','High'],['Success bg','#DFF1E4','Discount chip','High'],['Orange','#FB6514','Category label','High'],['Premium tint','#FFF6E5','Infinity Pro plan','Med'],['--secondary-color','#E31B4D','Declared, not rendered','Med']];
+var SW=[['--primary','#5A4BDA','Buttons, accents, active tabs','High'],['--primary-50','#F1EFFF','Soft buttons, section tints','High'],['Ink / dark CTA','#1B2124','Buy Now, Login','High'],['Heading','#27272A','h2/h4','High'],['Body','#3D3D3D','Card meta','High'],['Muted','#6B6B6B','Struck MRP, secondary','High'],['Page tint','#F8F8F8','Section backgrounds','High'],['Border','#D9DCE1','Cards, pills','High'],['Success','#1B7938','% OFF, Recommended','High'],['Success bg','#DFF1E4','Discount chip','High'],['Orange','#FB6514','Category label','High'],['Premium tint','#FFF6E5','Infinity Pro plan','Med'],['--secondary-color','#E31B4D','Declared, not rendered','Med']];
 el('swatches').innerHTML=SW.map(function(s){return '<div class="sw"><i style="background:'+s[1]+'"></i><div><b>'+s[0]+'</b>'+s[1]+'<br><span class="muted">'+s[2]+' · '+s[3]+'</span></div></div>';}).join('');
 
 /* ---------- Init ---------- */
@@ -891,6 +903,7 @@ fromHash(true);
 // The browser's own jump to the fragment runs after this script; land again once it has.
 window.addEventListener('load',function(){setTimeout(function(){fromHash(true);},0);});
 window.addEventListener('hashchange',function(){fromHash(true,true);});
+(function(){var tb=document.querySelector('.tabs');if(!tb)return;var f=function(){tb.classList.toggle('at-end',tb.scrollLeft+tb.clientWidth>=tb.scrollWidth-2);};tb.addEventListener('scroll',f,{passive:true});addEventListener('resize',f);f();})();
 Array.prototype.forEach.call(document.querySelectorAll('.feats a'),function(a){
   a.addEventListener('click',function(e){e.preventDefault(); if(history.replaceState) history.replaceState(null,'',a.getAttribute('href')); fromHash(true,true);});
 });
