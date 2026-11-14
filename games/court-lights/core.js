@@ -942,7 +942,8 @@ export function subIn(side, i, b) {
   if (B.holder === out) giveBall(b, 'sub');
   // free throws owed to a player who leaves are taken by the one who comes in
   if (M.next && M.next.type === 'ft' && M.next.shooter === out) M.next.shooter = b;
-  if (M.ft && M.ft.by === out) M.ft.by = b;
+  // mid-set, the replacement steps into the shooter's place at the stripe
+  if (M.ft && M.ft.by === out) { const s = M.dir[side]; M.ft.by = b; b.x = 0; b.z = s * CT.FT; b.yaw = faceTo(b, 0, s * CT.HOOP); b.vx = b.vz = 0; }
   if (M.ctrl === out) M.ctrl = b;
   evt('sub', b, out);
   if (side === M.user || rnd() < 0.5) say('sub', b);
