@@ -41,11 +41,18 @@ export function mountStory({ motion, media, onEffects }) {
     }
   }
 
+  // Per frame, these values used to be custom properties on #film. A custom
+  // property invalidates the computed style of every element under the one it
+  // is set on, so the whole film restyled 60 times a second while idle (228ms
+  // of style work per second on a throttled phone). They now go only to the
+  // elements that use them: the three shots and the current chapter button.
+  let lastShot = '', lastChapter = '';
   function decorate() {
-    film.style.setProperty('--chapter-progress', chapterProgress.toFixed(3));
-    film.style.setProperty('--zoom', (1.045 + sceneProgress * .20 + Math.sin(time * .63) * .026).toFixed(4));
-    film.style.setProperty('--lens-x', `${x * -27}px`);
-    film.style.setProperty('--lens-y', `${y * -17}px`);
+    // With motion paused the stylesheet holds the shots still; no inline value.
+    const shotTransform = !effects ? '' : `translate3d(${(x * -27).toFixed(2)}px,${(y * -17).toFixed(2)}px,0) scale(${(1.045 + sceneProgress * .20 + Math.sin(time * .63) * .026).toFixed(4)})`;
+    if (shotTransform !== lastShot) { lastShot = shotTransform; for (const shot of shots) shot.style.transform = shotTransform; }
+    const chapter = chapterProgress.toFixed(3);
+    if (chapter !== lastChapter) { lastChapter = chapter; buttons[act]?.style.setProperty('--chapter-progress', chapter); }
     optics?.draw({ act, time, scroll: sceneProgress, x, y, focused, structure: isStructure });
     if (!isStructure) return;
     const state = { mode: act + 3, time, yaw: x * .72, pitch: y * .39,
@@ -117,10 +124,21 @@ export function mountStory({ motion, media, onEffects }) {
     if (!frame && visible && !document.hidden) frame = requestAnimationFrame(tick);
   }
 
+  // The film plays on its own, so it cannot simply stop when nobody touches
+  // the page. It does not need 60 frames for a slow drift either: 30 on a
+  // phone, and 12 once the visitor has been still for 2.5s (cuts still land
+  // on time; any scroll, pointer, touch or key brings the full rate back).
+  const coarse = matchMedia('(max-width: 680px), (pointer: coarse)');
+  let lastPaint = 0, lastActive = performance.now();
+  const wake = () => { lastActive = performance.now(); };
+  for (const type of ['scroll', 'pointermove', 'touchstart', 'keydown']) addEventListener(type, wake, { passive: true });
   function tick(now) {
     frame = 0;
     if (!visible || document.hidden) { start = 0; return; }
-    if (effects && start) time += Math.min((now - start) / 1000, .05);
+    const gap = now - lastActive > 2500 ? 83 : coarse.matches ? 32 : 0;
+    if (gap && now - lastPaint < gap) { if (effects) schedule(); return; }
+    lastPaint = now;
+    if (effects && start) time += Math.min((now - start) / 1000, .12);
     start = effects ? now : 0;
     x += (toX - x) * .12; y += (toY - y) * .12;
     if (effects && !userDirected && !isStructure) {

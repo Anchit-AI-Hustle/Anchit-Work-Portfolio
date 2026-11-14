@@ -391,6 +391,9 @@
     #deliAnnounceBar { margin-top: 58px; }
 
     /* Fixed Header Solid Contrast */
+    @media (max-width: 1024px), (pointer: coarse) {
+      *, *::before, *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+    }
     header.deli-site-header {
       position: fixed !important;
       top: 0 !important;   /* one pinned line: the announce strip scrolls away */
@@ -398,8 +401,10 @@
       right: 0 !important;
       z-index: 50 !important;
       background: #FFFDF9 !important;
-      backdrop-filter: blur(20px) !important;
-      -webkit-backdrop-filter: blur(20px) !important;
+      /* No backdrop blur: the background above is opaque, so the blur was
+         invisible, and it was redone every frame the page moved under it. */
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
       border-bottom: 2px solid rgba(205, 38, 83, 0.22) !important;
       box-shadow: 0 6px 25px rgba(74, 14, 23, 0.08) !important;
       /* transition-all would animate the disclaimer offset and make the
@@ -1190,7 +1195,7 @@
         <div class="absolute bottom-5 left-5 right-5 p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-[#CD2653]/20 shadow-lg text-left flex items-center justify-between">
           <div>
             <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
               <span id="loupeBadgeText" class="text-[11px] font-bold uppercase tracking-wider text-emerald-800">Master Carver 2.5x Loupe Active</span>
             </div>
             <h4 id="loupeTitleText" class="text-base font-serif-chic font-bold text-[#4A0E17] mt-0.5">Prime Wood-Smoked Charcuterie</h4>
@@ -1460,7 +1465,7 @@
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
       <div>
         <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#CD2653]/30 border border-[#C59A45]/40 text-[#FFA517] text-xs font-bold uppercase tracking-wider mb-3">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
           <span>Temperature-Controlled Cold-Chain</span>
         </div>
         <h2 class="text-4xl md:text-5xl font-serif-chic font-bold tracking-tight text-white">
@@ -2354,6 +2359,7 @@
         if (canvas.width !== w || canvas.height !== h) {
           canvas.width = w; canvas.height = h; gl.viewport(0, 0, w, h);
         }
+        canvas.style.height = Math.round(ch) + 'px';
       }
       function draw(now) {
         mx += (tx - mx) * 0.06; my += (ty - my) * 0.06;
@@ -2362,8 +2368,14 @@
         gl.uniform2f(uM, mx, my);
         gl.drawArrays(gl.TRIANGLES, 0, 3);
       }
+      // It used to draw for as long as the hero was on screen: about 260ms of
+      // work a second on a throttled phone, 430 on a laptop, with nobody
+      // touching the page. It now moves on load, scroll, pointer and touch,
+      // and holds its last frame 2.5s after the visitor stops.
+      var IDLE_MS = 2500, lastActive = performance.now();
       function loop(now) {
         if (!running) return;
+        if (now - lastActive > IDLE_MS) { running = false; return; }
         if (now - lastDraw >= MIN_DT) { lastDraw = now; draw(now); }
         raf = requestAnimationFrame(loop);
       }
@@ -2371,9 +2383,14 @@
         if (running || document.hidden || !onScreen) return;
         running = true; raf = requestAnimationFrame(loop);
       }
+      function poke() { lastActive = performance.now(); start(); }
+      window.addEventListener('scroll', poke, { passive: true });
+      window.addEventListener('touchstart', poke, { passive: true });
       function stop() { running = false; cancelAnimationFrame(raf); }
 
-      canvas.style.width = '100%'; canvas.style.height = '100%';
+      canvas.style.width = '100%';
+      canvas.style.bottom = 'auto';
+      canvas.style.webkitMaskImage = canvas.style.maskImage = 'linear-gradient(#000 72%, transparent)';
       resize(); draw(performance.now());
       // Observe the PARENT. Observing the canvas while resize() touches the
       // canvas is a feedback loop, and it cost this page 2.3fps.
@@ -2386,6 +2403,7 @@
       window.addEventListener('pointermove', function (e) {
         tx = e.clientX / window.innerWidth;
         ty = 1 - (e.clientY / window.innerHeight);
+        poke();
       }, { passive: true });
 
       if (typeof IntersectionObserver !== 'undefined') {
