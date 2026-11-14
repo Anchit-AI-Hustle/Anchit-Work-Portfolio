@@ -40,7 +40,7 @@ const ROOT = path.join(__dirname, '..');
 // WWW=<dir> measures another built tree, e.g. a copy of the previous build.
 const WWW = process.env.WWW ? path.resolve(process.env.WWW) : path.join(ROOT, 'www');
 const BUDGET = { hub: +(process.env.HUB_LCP || 2500), home: +(process.env.HOME_LCP || 3500), menu: +(process.env.MENU || 6500), ready: +(process.env.READY || 10000) };
-const ALL_GAMES = ['saffron-city', 'midnight-apex', 'ghat-riders', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'sky-thread', 'tiffin-dash', 'board-strike', 'yard-catch', 'rally-cage', 'fare-run', 'chhat-hopper', 'kart-mela', 'paint-ops', 'nitro-goal'];
+const ALL_GAMES = ['saffron-city', 'midnight-apex', 'ghat-riders', 'turf-kings', 'super-over', 'gully-champs', 'court-lights', 'ring-rajas', 'sky-thread', 'tiffin-dash', 'board-strike', 'yard-catch', 'rally-cage', 'fare-run', 'chhat-hopper', 'kart-mela', 'paint-ops', 'nitro-goal'];
 const GAMES = (process.env.GAMES || ALL_GAMES.join(',')).split(',').map((s) => s.trim()).filter(Boolean);
 const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true };
 

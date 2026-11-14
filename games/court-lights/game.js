@@ -1,509 +1,152 @@
 /*
- * Court Lights: rooftop street basketball. An original game. No licensed
- * names, no sprite sheets. Everything is drawn in code on the Arcade shell.
+ * Court Lights, the 2D edition, for a device without WebGL2. The same game: core.js holds the league,
+ * the rules, the AI, the season, the contests, the rooftop shootout and the HUD. This draws it flat:
+ * the arena modes from above (the court fills the screen, long way up on a phone held upright), and
+ * the rooftop shootout in the original perspective drawing. Everything is drawn in code.
  */
 (function () {
   'use strict';
-  const A = window.Arcade;
-  const clamp = A.clamp, lerp = A.lerp;
-  const PI = Math.PI, TAU = Math.PI * 2;
-  const abs = Math.abs, sin = Math.sin, cos = Math.cos, min = Math.min, max = Math.max, hypot = Math.hypot;
-  const rnd = Math.random;
-  const F_DISP = 'Fraunces, Times New Roman, serif';
-  const F_UI = 'Inter, sans-serif';
-  const F_MONO = 'JetBrains Mono, ui-monospace, monospace';
-  const INK = '#FBF5EC', GOLD = '#c9a96e', WARM = '#FFB736', PRIM = '#FF6940';
-
-  const RIM = { x: 0, y: 3.05, z: 6.95, r: 0.23 };
-  const GRAV = 18.4;
-  const SWEET = [0.58, 0.78];
-
-  let arc;
-  const G = {
-    mode: 'sixty', phase: 'aim', time: 60, score: 0, combo: 0, makes: 0, attempts: 0, streak: 0,
-    aimX: 0, charge: 0, holding: false, go: 0, t: 0, hintT: 0, tAim: null,
-    ball: null, parts: [], net: [], buildings: [], attract: true,
-  };
-
-  function mkNet() {
-    const n = [];
-    for (let i = 0; i < 12; i++) {
-      const a = (i / 12) * TAU;
-      const strand = [];
-      for (let k = 0; k < 6; k++) {
-        const u = k / 5;
-        strand.push({
-          x: RIM.x + cos(a) * RIM.r * (1 - u * 0.72),
-          y: RIM.y - u * 0.42,
-          z: RIM.z + sin(a) * RIM.r * (1 - u * 0.72),
-        });
-      }
-      n.push(strand);
+  const PI = Math.PI, TAU = PI * 2;
+  const abs = Math.abs, sin = Math.sin, cos = Math.cos, min = Math.min, max = Math.max;
+  const INK = '#FBF5EC', WARM = '#FFB736', PRIM = '#FF6940';
+  import('/games/court-lights/core.js').then(function (C) {
+    const M = C.MATCH, B = C.BALL, CT = C.CT, TEAMS = C.TEAMS, SH = C.SH, SR = C.SR;
+    let arc = null;
+    const V = { portrait: true, s: 10, ox: 0, oy: 0 };
+    function layout() {
+      const w = arc.w, h = arc.h, pad = arc.hudPad ? arc.hudPad() : { top: 12, bottom: 52 };
+      V.portrait = h > w;
+      const top = pad.top + 64, bot = pad.bottom + (arc.touchMode ? 40 : 10);
+      const aw = w - 20, ah = h - top - bot;
+      const L = CT.HL * 2 + 2, Wd = CT.HW * 2 + 2;
+      V.s = V.portrait ? min(aw / Wd, ah / L) : min(aw / L, ah / Wd);
+      V.ox = w / 2; V.oy = top + ah / 2;
     }
-    return n;
-  }
-  function mkCity() {
-    const rng = A.rng(42);
-    const out = [];
-    for (let i = 0; i < 18; i++) {
-      out.push({
-        x: -14 + i * 1.65 + rng() * 0.4,
-        w: 0.9 + rng() * 1.2,
-        h: 3.4 + rng() * 7.5,
-        win: (rng() * 5) | 0,
-      });
-    }
-    return out;
-  }
-  G.net = mkNet();
-  G.buildings = mkCity();
-
-  function proj(x, y, z) {
-    const f = min(arc.w, arc.h) * 1.35;
-    const camY = 1.7, camZ = -9.2;
-    const dz = max(1.2, z - camZ);
-    const u = f / dz;
-    return { x: arc.w * 0.5 + x * u, y: arc.h * 0.62 - (y - camY) * u, s: u };
-  }
-
-  function resetBall() {
-    G.ball = { x: 0, y: 1.55, z: 0.35, vx: 0, vy: 0, vz: 0, spin: 0, air: false, scored: false, dead: 0 };
-    G.phase = 'aim'; G.charge = 0; G.holding = false;
-  }
-
-  function shoot() {
-    if (G.go > 0 && !G.attract) return;
-    const c = clamp(G.charge, 0.12, 1);
-    const b = G.ball;
-    b.air = true; b.scored = false; b.flightT = 0;
-    b.shotCharge = c;
-    b.vx = G.aimX * 3.6;
-    b.vz = 4.05 + c * 5.35;
-    b.vy = 6.15 + c * 6.4;
-    b.spin = 10 + c * 8;
-    G.phase = 'flight'; G.attempts++; G.holding = false; G.charge = 0;
-    arc.sfx.tone(220 + c * 80, 0.09, { type: 'triangle', vol: 0.12 });
-    arc.sfx.noise(0.05, { freq: 900, vol: 0.06 });
-  }
-
-  function splash(x, y, z, col, n) {
-    for (let i = 0; i < n; i++) {
-      const a = rnd() * TAU, sp = 0.6 + rnd() * 2.2;
-      G.parts.push({ x, y, z, vx: cos(a) * sp, vy: 1.2 + rnd() * 2.4, vz: sin(a) * sp, life: 0.45 + rnd() * 0.4, col });
-    }
-  }
-
-  function scoreShot(kind) {
-    if (G.attract || !arc || arc.state !== 'play') return;
-    const pts = 3 + G.combo;
-    G.score += pts; G.makes++; G.combo++; G.streak = max(G.streak, G.combo);
-    G.ball.scored = true; G.phase = 'net';
-    const label = G.combo >= 3 ? 'On fire x' + G.combo : (kind === 'swish' ? 'Swish' : 'Bucket');
-    arc.toast(label, '+' + pts, 1100);
-    arc.sfx.tone(kind === 'swish' ? 880 : 520, 0.16, { type: 'sine', vol: 0.16 });
-    if (kind === 'swish') arc.sfx.tone(1320, 0.22, { type: 'sine', vol: 0.1, delay: 0.05 });
-    splash(RIM.x, RIM.y - 0.1, RIM.z, kind === 'swish' ? WARM : INK, kind === 'swish' ? 18 : 10);
-    if (G.mode === 'twentyone' && G.score >= 21) finish('Twenty one');
-  }
-
-  function miss() {
-    G.combo = 0; G.phase = 'miss';
-    if (!G.attract && arc && arc.state === 'play') {
-      arc.sfx.tone(140, 0.18, { type: 'sawtooth', slide: 70, vol: 0.1 });
-    }
-    if (G.mode === 'sudden' && G.makes > 0) finish('Missed');
-  }
-
-  function finish(why) {
-    if (G.phase === 'over' || G.attract || !arc || arc.state !== 'play') return;
-    G.phase = 'over';
-    arc.over({
-      eyebrow: why || 'Buzzer', title: G.score >= 21 ? 'Lights <em>out</em>' : 'Buzzer',
-      score: G.score, scoreLabel: 'Points',
-      html: '<p>' + G.makes + ' makes from ' + G.attempts + ' shots. Best streak ' + G.streak + '.</p>',
-      again: 'Shoot again',
-    });
-  }
-
-  function stepBall(dt) {
-    const b = G.ball; if (!b) return;
-    if (!b.air) {
-      // A ball that has come to rest after a make or a miss is cleared here.
-      // Without this a miss that landed left the game stuck in 'miss'.
-      if (G.phase === 'net' || G.phase === 'miss') { b.dead += dt; if (b.dead > 0.55) resetBall(); }
-      return;
-    }
-    b.flightT = (b.flightT || 0) + dt;
-    b.vy -= GRAV * dt; b.x += b.vx * dt; b.y += b.vy * dt; b.z += b.vz * dt; b.spin += dt * 14;
-    b.vx *= 0.999; b.vz *= 0.999;
-    // backboard
-    if (b.z > 7.22 && b.y > 2.7 && b.y < 4.05 && abs(b.x) < 0.95 && b.vz > 0) {
-      b.z = 7.22; b.vz *= -0.38; b.vx *= 0.85; arc.sfx.tone(310, 0.05, { type: 'square', vol: 0.06 });
-    }
-    // rim: gold charge band is required for a clean make (matches the HUD).
-    const dx = b.x - RIM.x, dz = b.z - RIM.z, d = hypot(dx, dz);
-    if (!b.scored && b.y < RIM.y + 0.12 && b.y > RIM.y - 0.16) {
-      if (d < RIM.r - 0.05 && b.vy < 0) {
-        const ch = b.shotCharge == null ? 0.66 : b.shotCharge;
-        const sweet = ch >= SWEET[0] && ch <= SWEET[1];
-        if (sweet) {
-          scoreShot(d < 0.11 ? 'swish' : 'bank');
-          b.vx *= 0.2; b.vz *= 0.2; b.vy = min(b.vy, -0.4);
-        } else {
-          // Outside the gold band the rim rejects the ball.
-          const nx = dx / (d || 1), nz = dz / (d || 1);
-          b.vx += nx * 1.4; b.vz += nz * 1.4; b.vy = abs(b.vy) * 0.45;
-          b.x = RIM.x + nx * (RIM.r + 0.08); b.z = RIM.z + nz * (RIM.r + 0.08);
-          if (!G.attract) arc.sfx.tone(360, 0.05, { type: 'square', vol: 0.06 });
-        }
-      } else if (d < RIM.r + 0.07 && d > RIM.r - 0.05) {
-        const nx = dx / (d || 1), nz = dz / (d || 1);
-        const vn = b.vx * nx + b.vz * nz;
-        if (vn < 0) { b.vx -= 1.7 * vn * nx; b.vz -= 1.7 * vn * nz; b.vy *= 0.55; }
-        b.x = RIM.x + nx * (RIM.r + 0.06); b.z = RIM.z + nz * (RIM.r + 0.06);
-        arc.sfx.tone(420, 0.04, { type: 'square', vol: 0.05 });
-      }
-    }
-    if (b.y < 0.12) {
-      b.y = 0.12; b.vy *= -0.38; b.vx *= 0.72; b.vz *= 0.72;
-      if (abs(b.vy) < 1.2) { b.air = false; b.dead += dt; if (!b.scored && G.phase === 'flight') miss(); }
-    }
-    if (!b.air && !b.scored && G.phase !== 'aim') b.dead += dt;
-    if ((G.phase === 'net' || G.phase === 'miss') && b.dead > 0.55) resetBall();
-    if (G.phase === 'net' && b.y < RIM.y - 0.05) b.dead += dt;
-    if (G.phase === 'flight' && b.flightT > 4.2) { miss(); resetBall(); }
-  }
-
-  function stepNet(dt) {
-    const b = G.ball;
-    for (let i = 0; i < G.net.length; i++) {
-      const s = G.net[i], a = (i / G.net.length) * TAU;
-      for (let k = 0; k < s.length; k++) {
-        const u = k / (s.length - 1);
-        const tx = RIM.x + cos(a) * RIM.r * (1 - u * 0.72);
-        const ty = RIM.y - u * 0.42;
-        const tz = RIM.z + sin(a) * RIM.r * (1 - u * 0.72);
-        let ox = 0, oy = 0;
-        if (b && b.scored && b.y < RIM.y && b.y > RIM.y - 0.5) {
-          ox = (b.x - tx) * 0.35 * (1 - u); oy = -0.12 * (1 - u);
-        }
-        s[k].x = lerp(s[k].x, tx + ox, 1 - Math.exp(-dt * 10));
-        s[k].y = lerp(s[k].y, ty + oy, 1 - Math.exp(-dt * 10));
-        s[k].z = lerp(s[k].z, tz, 1 - Math.exp(-dt * 10));
-      }
-    }
-  }
-
-  function stepParts(dt) {
-    for (let i = G.parts.length - 1; i >= 0; i--) {
-      const p = G.parts[i];
-      p.life -= dt; p.vy -= 8 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt;
-      if (p.life <= 0) G.parts.splice(i, 1);
-    }
-  }
-
-  // Tap & swipe on a phone: touch anywhere and hold to charge, slide the same
-  // finger sideways to aim (relative, so the shot never jumps under the thumb),
-  // lift in the gold band to shoot. A tap too short to charge shoots nothing.
-  function gestTouch() {
-    const p = arc.input.pointer;
-    return !!arc.touchMode && arc.touchStyle === 'gesture' && !!p && p.type !== 'mouse';
-  }
-
-  function readAim(dt) {
-    const inp = arc.input, ax = inp.axis(), p = inp.pointer, gz = inp.gesture;
-    const gt = gestTouch();
-    if (abs(ax.x) > 0.08) {
-      G.aimX = clamp(G.aimX + ax.x * dt * 1.7, -0.72, 0.72);
-    } else if (gt) {
-      if (gz.active && gz.type !== 'mouse') {
-        if (!G.tAim) G.tAim = { x: gz.x, aim: G.aimX };
-        G.aimX = clamp(G.tAim.aim + ((gz.x - G.tAim.x) / max(160, arc.w * 0.45)) * 0.72, -0.72, 0.72);
-      } else {
-        G.tAim = null;
-        G.aimX *= Math.exp(-dt * 1.4);
-      }
-    } else if (p && p.seen) {
-      G.aimX = lerp(G.aimX, (p.nx - 0.5) * 1.44, 1 - Math.exp(-dt * 10));
-    } else if (abs(ax.x) < 0.08) {
-      G.aimX *= Math.exp(-dt * 1.4);
-    }
-    const down = inp.action();
-    if (G.phase === 'aim') {
-      if (down) {
-        G.holding = true; G.charge = min(1, G.charge + dt * 0.95);
-        // Full charge fires even if the player keeps holding, so a long press
-        // cannot lock the shot. Overcharging leaves the gold band on purpose.
-        if (G.charge >= 1) shoot();
-      } else if (G.holding) {
-        if (gt && G.charge < 0.1) { G.holding = false; G.charge = 0; } else shoot();
-      }
-    }
-  }
-
-  function newMatch(ch) {
-    G.mode = (ch && ch.mode) || 'sixty';
-    G.score = 0; G.combo = 0; G.makes = 0; G.attempts = 0; G.streak = 0; G.aimX = 0; G.t = 0; G.go = 0.8;
-    G.hintT = 0; G.tAim = null;
-    G.time = G.mode === 'sixty' ? 60 : G.mode === 'sudden' ? 90 : 99;
-    G.parts.length = 0; G.attract = false;
-    resetBall();
-    arc.toast(G.mode === 'twentyone' ? 'First to 21' : G.mode === 'sudden' ? 'Make or miss' : 'Sixty seconds', 'Court Lights', 1400);
-  }
-
-  function update(dt) {
-    G.t += dt; G.go = max(0, G.go - dt); G.hintT += dt;
-    if (G.phase === 'over') return;
-    if (G.mode === 'sixty' || G.mode === 'sudden') {
-      G.time -= dt;
-      if (G.time <= 0 && G.phase !== 'flight') { G.time = 0; finish('Buzzer'); return; }
-    }
-    readAim(dt);
-    stepBall(dt); stepNet(dt); stepParts(dt);
-  }
-
-  function attractReset() {
-    G.attract = true; G.score = 0; G.combo = 0; G.makes = 0; G.attempts = 0; G.streak = 0;
-    G.aimX = 0; G.charge = 0; G.holding = false; G.go = 0; G.phase = 'aim';
-    G.parts.length = 0; resetBall();
-  }
-
-  function idle(dt) {
-    G.t += dt; G.attract = true;
-    if (!G.ball || G.phase === 'over') attractReset();
-    if (G.phase === 'aim') {
-      G.aimX = sin(G.t * 0.7) * 0.35;
-      // Stay inside the gold band so attract demos look like real makes.
-      G.charge = 0.62 + 0.08 * sin(G.t * 1.3);
-      if ((G.t % 2.6) > 2.35) shoot();
-    }
-    stepBall(dt); stepNet(dt); stepParts(dt);
-    if (G.phase === 'net' || G.phase === 'miss' || (G.ball && G.ball.dead > 0.4)) resetBall();
-  }
-
-  function rr(c, x, y, w, h, r) {
-    r = min(r, w / 2, h / 2);
-    c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
-  }
-  function plate(c, x, y, w, h, r, a) {
-    c.fillStyle = 'rgba(15,13,10,' + (a == null ? 0.72 : a) + ')'; rr(c, x, y, w, h, r); c.fill();
-    c.strokeStyle = 'rgba(251,245,236,.12)'; c.lineWidth = 1; c.stroke();
-  }
-  function txt(c, s, x, y, size, col, wgt, align, font) {
-    c.font = (wgt || 500) + ' ' + size + 'px ' + (font || F_UI);
-    c.fillStyle = col; c.textAlign = align || 'left'; c.textBaseline = 'middle'; c.fillText(s, x, y);
-  }
-
-  function drawSky(c, w, h) {
-    const g = c.createLinearGradient(0, 0, 0, h);
-    g.addColorStop(0, '#1a1630'); g.addColorStop(0.45, '#3a2450'); g.addColorStop(0.72, '#c46a3a'); g.addColorStop(1, '#1a120c');
-    c.fillStyle = g; c.fillRect(0, 0, w, h);
-    c.fillStyle = WARM; c.beginPath(); c.arc(w * 0.78, h * 0.22, 18, 0, TAU); c.fill();
-    c.fillStyle = 'rgba(255,183,54,.12)'; c.beginPath(); c.arc(w * 0.78, h * 0.22, 70, 0, TAU); c.fill();
-    G.buildings.forEach((b) => {
-      const p0 = proj(b.x, 0, 22), p1 = proj(b.x + b.w, min(b.h, 6.2), 22);
-      const x = p0.x, ww = p1.x - p0.x, hh = p0.y - p1.y;
-      if (ww < 2 || hh < 2) return;
-      c.fillStyle = '#120e14'; c.fillRect(x, p1.y, ww, hh);
-      c.fillStyle = 'rgba(255,183,54,.28)';
-      for (let i = 0; i < b.win; i++) c.fillRect(x + 3 + (i % 3) * 6, p1.y + 6 + ((i / 3) | 0) * 8, 3, 4);
-    });
-  }
-
-  function drawCourt(c) {
-    const fl = [proj(-4.2, 0, -0.4), proj(4.2, 0, -0.4), proj(3.1, 0, 7.6), proj(-3.1, 0, 7.6)];
-    c.beginPath(); c.moveTo(fl[0].x, fl[0].y); for (let i = 1; i < 4; i++) c.lineTo(fl[i].x, fl[i].y); c.closePath();
-    c.fillStyle = '#3a2a22'; c.fill();
-    c.strokeStyle = 'rgba(251,245,236,.35)'; c.lineWidth = 2; c.stroke();
-    const key = [proj(-1.1, 0, 4.4), proj(1.1, 0, 4.4), proj(1.1, 0, 7.4), proj(-1.1, 0, 7.4)];
-    c.beginPath(); c.moveTo(key[0].x, key[0].y); for (let i = 1; i < 4; i++) c.lineTo(key[i].x, key[i].y); c.closePath();
-    c.strokeStyle = 'rgba(251,245,236,.5)'; c.lineWidth = 1.5; c.stroke();
-    c.strokeStyle = PRIM; c.globalAlpha = 0.7; c.lineWidth = 2; c.beginPath();
-    for (let i = 0; i <= 16; i++) {
-      const a = PI + (PI * i) / 16;
-      const p = proj(cos(a) * 3.4, 0, 3.4 + sin(a) * 1.15);
-      i ? c.lineTo(p.x, p.y) : c.moveTo(p.x, p.y);
-    }
-    c.stroke(); c.globalAlpha = 1;
-    // cage mesh, far end
-    c.strokeStyle = 'rgba(251,245,236,.12)'; c.lineWidth = 1;
-    for (let i = 0; i < 8; i++) {
-      const a = proj(-3.1 + i * 0.9, 0, 7.55), b = proj(-3.1 + i * 0.9, 3.6, 7.55);
-      c.beginPath(); c.moveTo(a.x, a.y); c.lineTo(b.x, b.y); c.stroke();
-    }
-  }
-
-  function drawHoop(c) {
-    const board = [proj(-0.9, 4.05, 7.2), proj(0.9, 4.05, 7.2), proj(0.9, 2.72, 7.2), proj(-0.9, 2.72, 7.2)];
-    c.beginPath(); c.moveTo(board[0].x, board[0].y); for (let i = 1; i < 4; i++) c.lineTo(board[i].x, board[i].y); c.closePath();
-    c.fillStyle = 'rgba(251,245,236,.88)'; c.fill();
-    c.strokeStyle = '#c23'; c.lineWidth = 3;
-    const sq = [proj(-0.28, 3.45, 7.18), proj(0.28, 3.45, 7.18), proj(0.28, 3.05, 7.18), proj(-0.28, 3.05, 7.18)];
-    c.beginPath(); c.moveTo(sq[0].x, sq[0].y); for (let i = 1; i < 4; i++) c.lineTo(sq[i].x, sq[i].y); c.closePath(); c.stroke();
-    const pole = proj(0, 0, 7.35), top = proj(0, 3.05, 7.35);
-    c.strokeStyle = '#2a261f'; c.lineWidth = 6; c.beginPath(); c.moveTo(pole.x, pole.y); c.lineTo(top.x, top.y); c.stroke();
-    const r = proj(RIM.x, RIM.y, RIM.z);
-    const rx = RIM.r * r.s, ry = RIM.r * r.s * 0.32;
-    c.strokeStyle = PRIM; c.lineWidth = 4; c.beginPath(); c.ellipse(r.x, r.y, rx, ry, 0, 0, TAU); c.stroke();
-    c.strokeStyle = 'rgba(201,169,110,.75)'; c.lineWidth = 1;
-    G.net.forEach((s) => {
+    // world (x, z) to the screen; y lifts a thing toward the top of the screen like a shadow offset
+    function sx(x, z) { return V.portrait ? V.ox + x * V.s : V.ox + z * V.s; }
+    function sy(x, z, y) { return (V.portrait ? V.oy - z * V.s : V.oy + x * V.s) - (y || 0) * V.s * 0.45; }
+    function toScreen(x, y, z) { return { x: sx(x, z), y: sy(x, z, y), z: 0 }; }
+    function stick(ax, ay) { return V.portrait ? { x: ax, z: -ay } : { x: ay, z: ax }; }
+    function line(c, x0, z0, x1, z1) { c.beginPath(); c.moveTo(sx(x0, z0), sy(x0, z0)); c.lineTo(sx(x1, z1), sy(x1, z1)); c.stroke(); }
+    function circ(c, x, z, r, a0, a1, fill) {
       c.beginPath();
-      s.forEach((p, i) => { const q = proj(p.x, p.y, p.z); i ? c.lineTo(q.x, q.y) : c.moveTo(q.x, q.y); });
-      c.stroke();
-    });
-  }
-
-  function drawPlayer(c) {
-    const lean = G.aimX * 0.18;
-    const p = proj(lean, 0, 0.2);
-    const head = proj(lean, 1.8, 0.2);
-    const s = max(0.7, (p.y - head.y) / 62);
-    c.save(); c.translate(p.x, p.y); c.scale(s, s);
-    c.fillStyle = '#1a1814'; c.fillRect(-10, -52, 20, 36);
-    c.fillStyle = PRIM; c.fillRect(-10, -28, 20, 8);
-    c.fillStyle = '#3a2a22'; c.beginPath(); c.arc(0, -60, 8, 0, TAU); c.fill();
-    c.fillStyle = '#1a1814'; c.fillRect(-12, -16, 8, 16); c.fillRect(4, -16, 8, 16);
-    if (G.phase === 'aim') {
-      c.save(); c.translate(14, -40); c.rotate(-0.6 - G.charge * 0.5);
-      c.fillStyle = '#c45a20'; c.beginPath(); c.arc(0, 0, 7, 0, TAU); c.fill();
-      c.restore();
+      const n = 36;
+      for (let i = 0; i <= n; i++) { const a = (a0 == null ? 0 : a0) + ((a1 == null ? TAU : a1) - (a0 == null ? 0 : a0)) * i / n; const px = sx(x + cos(a) * r, z + sin(a) * r), py = sy(x + cos(a) * r, z + sin(a) * r); i ? c.lineTo(px, py) : c.moveTo(px, py); }
+      if (fill) c.fill(); else c.stroke();
     }
-    c.restore();
-  }
-
-  function drawBall(c) {
-    const b = G.ball; if (!b) return;
-    if (!b.air && G.phase === 'aim') return;
-    const p = proj(b.x, b.y, b.z);
-    const r = max(5, 0.12 * p.s);
-    c.save(); c.translate(p.x, p.y); c.rotate(b.spin);
-    const g = c.createRadialGradient(-r * 0.3, -r * 0.3, 1, 0, 0, r);
-    g.addColorStop(0, '#ffb080'); g.addColorStop(1, '#c45a20');
-    c.fillStyle = g; c.beginPath(); c.arc(0, 0, r, 0, TAU); c.fill();
-    c.strokeStyle = '#2a1810'; c.lineWidth = 1; c.beginPath(); c.arc(0, 0, r, 0, TAU); c.moveTo(-r, 0); c.lineTo(r, 0); c.moveTo(0, -r); c.lineTo(0, r); c.stroke();
-    c.restore();
-  }
-
-  function drawHUD(c) {
-    const w = arc.w, h = arc.h, pad = arc.hudPad ? arc.hudPad() : { top: 12, left: 12, bottom: 52 };
-    // Side plates shrink on a narrow phone so they never sit under the clock.
-    const sw = (full) => min(full, max(96, w / 2 - 66 - 12));
-    plate(c, pad.left, pad.top, sw(150), 70, 12);
-    txt(c, 'POINTS', pad.left + 14, pad.top + 16, 10, GOLD, 600, 'left', F_MONO);
-    txt(c, String(G.score), pad.left + 14, pad.top + 42, 28, INK, 500, 'left', F_DISP);
-    const clock = G.mode === 'twentyone' ? 'TO 21' : (Math.max(0, G.time) | 0) + 's';
-    plate(c, w / 2 - 54, pad.top, 108, 44, 12);
-    txt(c, clock, w / 2, pad.top + 22, 22, G.time < 10 && G.mode !== 'twentyone' ? PRIM : INK, 500, 'center', F_DISP);
-    if (G.combo > 1) {
-      plate(c, w - pad.right - sw(120), pad.top, sw(120), 44, 12);
-      txt(c, 'STREAK x' + G.combo, w - pad.right - sw(120) / 2, pad.top + 22, 12, WARM, 600, 'center', F_MONO);
-    }
-    if (G.phase === 'aim') {
-      const bw = min(220, w - 40), bx = w / 2 - bw / 2, by = h - pad.bottom - 28;
-      plate(c, bx - 8, by - 10, bw + 16, 28, 10, 0.7);
-      c.fillStyle = 'rgba(251,245,236,.12)'; rr(c, bx, by, bw, 8, 4); c.fill();
-      const sweet0 = SWEET[0] * bw, sweet1 = (SWEET[1] - SWEET[0]) * bw;
-      c.fillStyle = 'rgba(255,183,54,.35)'; rr(c, bx + sweet0, by, sweet1, 8, 4); c.fill();
-      c.fillStyle = G.charge >= SWEET[0] && G.charge <= SWEET[1] ? WARM : PRIM;
-      rr(c, bx, by, max(4, bw * G.charge), 8, 4); c.fill();
-    }
-  }
-
-  // Where the ball will cross the rim height at the current aim, so a thumb
-  // that covers the court still sees the line it is about to shoot.
-  function drawTouchAim(c) {
-    if (!gestTouch() || G.phase !== 'aim' || !(G.holding || arc.input.gesture.active)) return;
-    const ch = G.charge >= 0.3 ? G.charge : 0.68;
-    const tt = (RIM.z - 0.35) / (4.05 + ch * 5.35);
-    const x = G.aimX * 3.6 * tt;
-    const r = proj(RIM.x, RIM.y, RIM.z), q = proj(x, RIM.y - 0.02, RIM.z);
-    const on = abs(x) < RIM.r * 0.6;
-    c.save();
-    c.strokeStyle = on ? WARM : 'rgba(255,105,64,.85)'; c.lineWidth = 2; c.globalAlpha = 0.9;
-    c.beginPath(); c.ellipse(q.x, q.y, 9, 4, 0, 0, TAU); c.stroke();
-    c.setLineDash([3, 5]); c.globalAlpha = 0.55;
-    c.beginPath(); c.moveTo(q.x, q.y + 6); c.lineTo(q.x, r.y + 46); c.stroke();
-    c.restore();
-  }
-
-  // The shell hides its own hint on touch, so the gesture reminder is drawn
-  // here for the first seconds of play.
-  function drawTouchHint(c) {
-    if (!arc.touchMode || arc.touchStyle === 'pads' || G.attract || G.hintT > 6) return;
-    const a = arc.reducedMotion ? 1 : clamp(6 - G.hintT, 0, 1);
-    const w = arc.w, pad = arc.hudPad ? arc.hudPad() : { bottom: 64 };
-    const msg = 'Hold to charge, slide to aim, lift in the gold';
-    c.save(); c.globalAlpha = a;
-    c.font = '600 13px ' + F_UI;
-    const mw = min(w - 24, c.measureText(msg).width + 32), y = arc.h - pad.bottom - 76;
-    plate(c, (w - mw) / 2, y - 16, mw, 32, 12, 0.66);
-    txt(c, msg, w / 2, y, 13, INK, 600, 'center');
-    c.restore();
-  }
-
-  function render(c) {
-    const w = arc.w, h = arc.h;
-    c.clearRect(0, 0, w, h);
-    drawSky(c, w, h);
-    drawCourt(c);
-    drawHoop(c);
-    drawPlayer(c);
-    G.parts.forEach((p) => {
-      const q = proj(p.x, p.y, p.z);
-      c.globalAlpha = clamp(p.life * 2, 0, 1);
-      c.fillStyle = p.col; c.beginPath(); c.arc(q.x, q.y, 2.2 * q.s, 0, TAU); c.fill();
+    function drawCourt(c) {
+      const T = TEAMS[M.teams[0] || 1];
+      c.fillStyle = '#121016'; c.fillRect(0, 0, arc.w, arc.h);
+      c.fillStyle = '#2a1d16';
+      const x0 = sx(-CT.HW - 1.2, -CT.HL - 1.2), y0 = sy(-CT.HW - 1.2, -CT.HL - 1.2), x1 = sx(CT.HW + 1.2, CT.HL + 1.2), y1 = sy(CT.HW + 1.2, CT.HL + 1.2);
+      c.fillRect(min(x0, x1), min(y0, y1), abs(x1 - x0), abs(y1 - y0));
+      const a0 = sx(-CT.HW, -CT.HL), b0 = sy(-CT.HW, -CT.HL), a1 = sx(CT.HW, CT.HL), b1 = sy(CT.HW, CT.HL);
+      const g = c.createLinearGradient(min(a0, a1), 0, max(a0, a1), 0); g.addColorStop(0, '#b98250'); g.addColorStop(0.5, '#cf9a62'); g.addColorStop(1, '#b98250');
+      c.fillStyle = g; c.fillRect(min(a0, a1), min(b0, b1), abs(a1 - a0), abs(b1 - b0));
+      c.fillStyle = T.c1; c.globalAlpha = 0.8;
+      for (const s of [-1, 1]) { const p0x = sx(-CT.KEYW, s * CT.HL), p0y = sy(-CT.KEYW, s * CT.HL), p1x = sx(CT.KEYW, s * CT.FT), p1y = sy(CT.KEYW, s * CT.FT); c.fillRect(min(p0x, p1x), min(p0y, p1y), abs(p1x - p0x), abs(p1y - p0y)); }
       c.globalAlpha = 1;
+      c.strokeStyle = 'rgba(251,245,236,.85)'; c.lineWidth = max(1, V.s * 0.06);
+      c.strokeRect(min(a0, a1), min(b0, b1), abs(a1 - a0), abs(b1 - b0));
+      line(c, -CT.HW, 0, CT.HW, 0); circ(c, 0, 0, CT.CIRC);
+      for (const s of [-1, 1]) {
+        const hz = s * CT.HOOP;
+        line(c, -CT.CORNER, s * CT.HL, -CT.CORNER, hz - s * 1.414); line(c, CT.CORNER, s * CT.HL, CT.CORNER, hz - s * 1.414);
+        const a0 = Math.asin(CT.CORNER / CT.ARC);
+        c.beginPath();
+        for (let i = 0; i <= 40; i++) { const a = -a0 + 2 * a0 * i / 40, x = CT.ARC * sin(a), z = hz - s * CT.ARC * cos(a); i ? c.lineTo(sx(x, z), sy(x, z)) : c.moveTo(sx(x, z), sy(x, z)); }
+        c.stroke();
+        line(c, -CT.KEYW, s * CT.HL, -CT.KEYW, s * CT.FT); line(c, CT.KEYW, s * CT.HL, CT.KEYW, s * CT.FT); line(c, -CT.KEYW, s * CT.FT, CT.KEYW, s * CT.FT);
+        circ(c, 0, s * CT.FT, CT.CIRC);
+        c.strokeStyle = PRIM; c.lineWidth = max(1.5, V.s * 0.05); circ(c, 0, hz, CT.RIM_R + 0.05);
+        c.strokeStyle = '#fbf5ec'; c.lineWidth = max(2, V.s * 0.08); line(c, -CT.BW, s * CT.BOARD, CT.BW, s * CT.BOARD);
+        c.strokeStyle = 'rgba(251,245,236,.85)'; c.lineWidth = max(1, V.s * 0.06);
+      }
+    }
+    function drawPlayer(c, p) {
+      const T = TEAMS[p.side === 0 ? M.teams[0] : p.side === 1 ? M.teams[1] : p.info.team];
+      const home = p.side === 0, r = max(5, V.s * 0.36);
+      const light = /^#[0-9a-f]{6}$/i.test(T.c2) && (parseInt(T.c2.slice(1, 3), 16) * 0.3 + parseInt(T.c2.slice(3, 5), 16) * 0.59 + parseInt(T.c2.slice(5, 7), 16) * 0.11) > 128 ? T.c2 : '#f1ece2';
+      const x = sx(p.x, p.z), y = sy(p.x, p.z);
+      c.fillStyle = 'rgba(0,0,0,.35)'; c.beginPath(); c.ellipse(x, y + r * 0.3, r, r * 0.6, 0, 0, TAU); c.fill();
+      const yy = sy(p.x, p.z, p.y);
+      c.fillStyle = home ? light : T.c1; c.beginPath(); c.arc(x, yy, r, 0, TAU); c.fill();
+      c.lineWidth = 2; c.strokeStyle = home ? T.c1 : light; c.stroke();
+      // the way he faces
+      c.strokeStyle = home ? T.c1 : light; c.beginPath(); c.moveTo(x, yy); c.lineTo(sx(p.x + sin(p.yaw) * 0.5, p.z + cos(p.yaw) * 0.5), sy(p.x + sin(p.yaw) * 0.5, p.z + cos(p.yaw) * 0.5, p.y)); c.stroke();
+      c.fillStyle = home ? T.c1 : light; c.font = '700 ' + Math.round(r * 0.95) + 'px Inter, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.fillText(String(p.info.num), x, yy + 1);
+      if (p === M.ctrl && M.user >= 0) { c.strokeStyle = M.poss === p.side ? WARM : '#7fd1ff'; c.lineWidth = 2.5; c.beginPath(); c.arc(x, y, r + 5, 0, TAU); c.stroke(); }
+    }
+    function drawBall(c) {
+      if (M.phase === 'intro') return;
+      const x = sx(B.x, B.z), y = sy(B.x, B.z), r = max(3, V.s * 0.16);
+      c.fillStyle = 'rgba(0,0,0,.35)'; c.beginPath(); c.arc(x, y, r * 0.9, 0, TAU); c.fill();
+      const yy = sy(B.x, B.z, B.y);
+      c.fillStyle = '#d06a2e'; c.beginPath(); c.arc(x, yy, r, 0, TAU); c.fill();
+      c.strokeStyle = '#2a1408'; c.lineWidth = 1; c.beginPath(); c.moveTo(x - r, yy); c.lineTo(x + r, yy); c.stroke();
+    }
+    function drawArena(c) {
+      layout();
+      drawCourt(c);
+      if (M.kind === 'c3' && M.c3) for (let i = 0; i < 5; i++) { const r = C.rackPos(i); c.fillStyle = 'rgba(208,106,46,.8)'; for (let j = 0; j < M.c3.left[i]; j++) { c.beginPath(); c.arc(sx(r.x, r.z) + j * 5 - 10, sy(r.x, r.z) + 14, 2.5, 0, TAU); c.fill(); } }
+      const list = [];
+      for (let s = 0; s < 2; s++) for (const p of M.court[s] || []) list.push(p);
+      if (M.kind === 'dunk' && M.dk) { const p = M.dk.list[M.dk.turn]; if (list.indexOf(p) < 0) list.push(p); }
+      list.sort((a, b) => sy(a.x, a.z) - sy(b.x, b.z));
+      for (const p of list) drawPlayer(c, p);
+      drawBall(c);
+    }
+    /* ---- the rooftop, in the original perspective drawing */
+    function proj(x, y, z) { const f = min(arc.w, arc.h) * 1.35, camY = 1.7, camZ = -9.2, dz = max(1.2, z - camZ), u = f / dz; return { x: arc.w * 0.5 + x * u, y: arc.h * 0.62 - (y - camY) * u, s: u }; }
+    let city = null;
+    function drawRoof(c) {
+      const w = arc.w, h = arc.h;
+      const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#1a1630'); g.addColorStop(0.45, '#3a2450'); g.addColorStop(0.72, '#c46a3a'); g.addColorStop(1, '#1a120c');
+      c.fillStyle = g; c.fillRect(0, 0, w, h);
+      c.fillStyle = WARM; c.beginPath(); c.arc(w * 0.78, h * 0.22, 18, 0, TAU); c.fill();
+      c.fillStyle = 'rgba(255,183,54,.12)'; c.beginPath(); c.arc(w * 0.78, h * 0.22, 70, 0, TAU); c.fill();
+      if (!city) { const r = window.Arcade.rng(42); city = []; for (let i = 0; i < 18; i++) city.push({ x: -14 + i * 1.65 + r() * 0.4, w: 0.9 + r() * 1.2, h: 3.4 + r() * 7.5, win: (r() * 5) | 0 }); }
+      city.forEach((b) => {
+        const p0 = proj(b.x, 0, 22), p1 = proj(b.x + b.w, min(b.h, 6.2), 22), x = p0.x, ww = p1.x - p0.x, hh = p0.y - p1.y;
+        if (ww < 2 || hh < 2) return;
+        c.fillStyle = '#120e14'; c.fillRect(x, p1.y, ww, hh);
+        c.fillStyle = 'rgba(255,183,54,.28)'; for (let i = 0; i < b.win; i++) c.fillRect(x + 3 + (i % 3) * 6, p1.y + 6 + ((i / 3) | 0) * 8, 3, 4);
+      });
+      const poly = (pts, fill, stroke, lw) => { c.beginPath(); c.moveTo(pts[0].x, pts[0].y); for (let i = 1; i < pts.length; i++) c.lineTo(pts[i].x, pts[i].y); c.closePath(); if (fill) { c.fillStyle = fill; c.fill(); } if (stroke) { c.strokeStyle = stroke; c.lineWidth = lw || 1; c.stroke(); } };
+      poly([proj(-4.2, 0, -0.4), proj(4.2, 0, -0.4), proj(3.1, 0, 7.6), proj(-3.1, 0, 7.6)], '#3a2a22', 'rgba(251,245,236,.35)', 2);
+      poly([proj(-1.1, 0, 4.4), proj(1.1, 0, 4.4), proj(1.1, 0, 7.4), proj(-1.1, 0, 7.4)], null, 'rgba(251,245,236,.5)', 1.5);
+      c.strokeStyle = PRIM; c.globalAlpha = 0.7; c.lineWidth = 2; c.beginPath();
+      for (let i = 0; i <= 16; i++) { const a = PI + (PI * i) / 16, q = proj(cos(a) * 3.4, 0, 3.4 + sin(a) * 1.15); i ? c.lineTo(q.x, q.y) : c.moveTo(q.x, q.y); }
+      c.stroke(); c.globalAlpha = 1;
+      c.strokeStyle = 'rgba(251,245,236,.12)'; c.lineWidth = 1;
+      for (let i = 0; i < 8; i++) { const a = proj(-3.1 + i * 0.9, 0, 7.55), b2 = proj(-3.1 + i * 0.9, 3.6, 7.55); c.beginPath(); c.moveTo(a.x, a.y); c.lineTo(b2.x, b2.y); c.stroke(); }
+      poly([proj(-0.9, 4.05, 7.2), proj(0.9, 4.05, 7.2), proj(0.9, 2.72, 7.2), proj(-0.9, 2.72, 7.2)], 'rgba(251,245,236,.88)');
+      poly([proj(-0.28, 3.45, 7.18), proj(0.28, 3.45, 7.18), proj(0.28, 3.05, 7.18), proj(-0.28, 3.05, 7.18)], null, '#c23', 3);
+      const pole = proj(0, 0, 7.35), top = proj(0, 3.05, 7.35); c.strokeStyle = '#2a261f'; c.lineWidth = 6; c.beginPath(); c.moveTo(pole.x, pole.y); c.lineTo(top.x, top.y); c.stroke();
+      const r = proj(SR.x, SR.y, SR.z); c.strokeStyle = PRIM; c.lineWidth = 4; c.beginPath(); c.ellipse(r.x, r.y, SR.r * r.s, SR.r * r.s * 0.32, 0, 0, TAU); c.stroke();
+      c.strokeStyle = 'rgba(201,169,110,.75)'; c.lineWidth = 1;
+      for (let i = 0; i < 12; i++) { const a = (i / 12) * TAU; c.beginPath(); for (let k = 0; k < 6; k++) { const u = k / 5, q = proj(SR.x + cos(a) * SR.r * (1 - u * 0.72), SR.y - u * 0.42, SR.z + sin(a) * SR.r * (1 - u * 0.72)); k ? c.lineTo(q.x, q.y) : c.moveTo(q.x, q.y); } c.stroke(); }
+      const p = proj(SH.aimX * 0.18, 0, 0.2), hd = proj(SH.aimX * 0.18, 1.8, 0.2), s = max(0.7, (p.y - hd.y) / 62);
+      c.save(); c.translate(p.x, p.y); c.scale(s, s); c.fillStyle = '#1a1814'; c.fillRect(-10, -52, 20, 36); c.fillStyle = PRIM; c.fillRect(-10, -28, 20, 8); c.fillStyle = '#3a2a22'; c.beginPath(); c.arc(0, -60, 8, 0, TAU); c.fill(); c.fillStyle = '#1a1814'; c.fillRect(-12, -16, 8, 16); c.fillRect(4, -16, 8, 16); c.restore();
+      const b = SH.ball;
+      if (b && (b.air || SH.phase !== 'aim')) { const q = proj(b.x, b.y, b.z), br = max(5, 0.12 * q.s); c.fillStyle = '#c45a20'; c.beginPath(); c.arc(q.x, q.y, br, 0, TAU); c.fill(); }
+      if (arc.state === 'play') {
+        C.plate(c, 12, 12, 140, 66, 12); C.txt(c, 'POINTS', 26, 28, 10, '#c9a96e', 600, 'left', C.F_MONO); C.txt(c, String(SH.score), 26, 54, 28, INK, 500, 'left', C.F_DISP);
+        C.plate(c, w / 2 - 54, 12, 108, 44, 12); C.txt(c, SH.mode === 'twentyone' ? 'TO 21' : (max(0, SH.time) | 0) + 's', w / 2, 34, 22, INK, 500, 'center', C.F_DISP);
+        if (SH.phase === 'aim') { const bw = min(220, w - 40), bx = w / 2 - bw / 2, by = h - 90; C.plate(c, bx - 8, by - 10, bw + 16, 28, 10, 0.7); c.fillStyle = 'rgba(255,183,54,.35)'; c.fillRect(bx + C.SWEET[0] * bw, by, (C.SWEET[1] - C.SWEET[0]) * bw, 8); c.fillStyle = SH.charge >= C.SWEET[0] && SH.charge <= C.SWEET[1] ? WARM : PRIM; c.fillRect(bx, by, max(4, bw * SH.charge), 8); }
+      }
+    }
+    let venueName = 'arena';
+    C.boot({
+      three: false,
+      init(a) { arc = a; },
+      venue(n) { venueName = n; },
+      toScreen, stick,
+      ev() {},
+      render(c) { if (venueName === 'roof') drawRoof(c); else drawArena(c); },
+      dbg: () => ({ webgl: false, quality: 0 }),
+      dev: { quality() {}, skip() { if (M.phase === 'intro') { M.phase = 'tip'; M.tip = { t: 0.6, done: false }; } } },
     });
-    drawBall(c);
-    const vig = c.createRadialGradient(w * 0.5, h * 0.45, min(w, h) * 0.28, w * 0.5, h * 0.5, min(w, h) * 0.78);
-    vig.addColorStop(0, 'rgba(0,0,0,0)'); vig.addColorStop(1, 'rgba(8,6,4,.5)');
-    c.fillStyle = vig; c.fillRect(0, 0, w, h);
-    if (arc.state === 'play' && !G.attract) { drawTouchAim(c); drawHUD(c); drawTouchHint(c); }
-  }
-
-  function dbg() {
-    const b = G.ball || {};
-    return {
-      phase: G.phase, mode: G.mode, score: G.score, time: +G.time.toFixed(2), aimX: +G.aimX.toFixed(3),
-      charge: +G.charge.toFixed(3), combo: G.combo, makes: G.makes, attempts: G.attempts,
-      ball: [+((b.x || 0).toFixed(2)), +((b.y || 0).toFixed(2)), +((b.z || 0).toFixed(2))],
-      air: !!(b.air), attract: !!G.attract,
-    };
-  }
-
-  A.create({
-    slug: 'court-lights', title: 'Court Lights', genre: 'Street basketball',
-    hint: 'Mouse or arrows aim   hold click or Space to shoot',
-    touchHint: 'Stick aims, hold Shoot, release to fire',
-    keys: [
-      ['Left / Right / A D', 'Aim the shot'],
-      ['Space / J (hold)', 'Charge, then release to shoot'],
-    ],
-    mouse: { cursor: 'crosshair', keys: [['Move mouse', 'Aim'], ['Click / hold', 'Charge, then release']] },
-    touch: { stick: true, pads: [{ label: 'Shoot', key: 'Space', big: true, hot: true }] },
-    touchKeys: [['On-screen stick', 'Aim'], ['Shoot (hold)', 'Charge, then release']],
-    gestures: {
-      drag: false,
-      hint: 'Hold to charge, slide to aim, lift in the gold',
-      keys: [
-        ['Touch and hold', 'Charge the shot'],
-        ['Slide left / right', 'Aim'],
-        ['Lift in the gold band', 'Shoot'],
-      ],
-    },
-    formatScore: (v) => Math.round(v) + ' pts',
-    menu: {
-      eyebrow: 'Street basketball',
-      title: 'Court <em>Lights</em>',
-      html: '<p>A rooftop cage after dark. Hold shoot to charge, release in the gold band for a make, and keep a streak going for extra points.</p>',
-      options: [
-        { id: 'mode', label: 'Mode', value: 'sixty', choices: [{ v: 'sixty', label: 'Sixty seconds' }, { v: 'twentyone', label: 'First to 21' }, { v: 'sudden', label: 'Make or miss' }] },
-      ],
-    },
-    pauseHtml() { return '<div class="stat"><div>Score<b>' + G.score + '</b></div><div>Makes<b>' + G.makes + '/' + G.attempts + '</b></div></div>'; },
-    onMenu(a) { arc = a; attractReset(); },
-    init(a) { arc = a; a.debug = dbg; attractReset(); a.menu(); },
-    start(a, ch) { arc = a; newMatch(ch); },
-    update, idle, render,
-  });
+  }).catch(function (e) { try { console.warn(e); } catch (er) { /* ignore */ } });
 })();

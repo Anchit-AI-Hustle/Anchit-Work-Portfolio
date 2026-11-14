@@ -928,7 +928,9 @@
     P.nitro = 35; P.nitroOn = false; P.steerIn = 0; P.rpm = 0.2; P.gear = 1; P.xCam = 0; P.drift = 0; P.cleanT = 0; P.draft = 0; P.hitCd = 0; P.lean = 0; P.thr = 0; P.bestNm = 0;
     P.lapT0 = 0; P.started = false; P.crashLog = { car: 0, obj: 0, wall: 0, edge: 0 }; P.flameT = 0; P.wasOff = false; P.crashes = 0; P.nearMisses = 0;
     W.P = P; W.racers.push(P);
-    var attract = W.attract, withRivals = attract || W.mode === 'race';
+    W.versus = W.mode === 'race' || W.mode === 'sprint';
+    W.raceLen = W.mode === 'sprint' ? Math.round(T.L * 0.86 / SEG) * SEG : LAPS * T.L;
+    var attract = W.attract, withRivals = attract || W.versus;
     if (withRivals) {
       var pool = RIVAL_HEX.filter(function (h) { return h !== hex; }), slot = 0, pslot = W.diff.slot;
       RIVALS.forEach(function (rv, idx) {
@@ -1029,7 +1031,7 @@
         if (P.ghost) c.rb = 1;
       }
       updateRival(W, c, dt); placeCar(T, c);
-      if (!c.finished && !W.attract && c.dist >= LAPS * T.L) { c.finished = true; c.finT = W.t - (c.dist - LAPS * T.L) / Math.max(c.speed, 500); }
+      if (!c.finished && !W.attract && c.dist >= W.raceLen) { c.finished = true; c.finT = W.t - (c.dist - W.raceLen) / Math.max(c.speed, 500); }
     }
     if (W.rbT <= 0) W.rbT = 0.3;
   }
@@ -1260,6 +1262,11 @@
   function updateLaps(W, dt, before) {
     var P = W.P, L = W.T.L;
     if (W.attract || P.finished) return;
+    if (W.mode === 'sprint') {
+      if (!P.started && P.dist >= 0) { P.started = true; P.lapT0 = W.t; P.lapIdx = 0; }
+      if (P.dist >= W.raceLen) finishPlayer(W, W.t - (P.dist - W.raceLen) / Math.max(P.speed, 500));
+      return;
+    }
     var lap = Math.floor(P.dist / L);
     if (lap > P.lapIdx) {
       var over = (P.dist - lap * L) / Math.max(P.speed, 500), tNow = W.t - over;
@@ -1283,8 +1290,8 @@
     P.finished = true; P.finT = tNow; W.phase = 'finished'; W.endT = 0; P.nitroOn = false;
     sortOrder(W);
     var pos = positionOf(W, P);
-    W.banner = W.mode === 'race' ? ordinal(pos) : 'FINISH'; W.bannerT = 3.2;
-    ARC.toast(W.mode === 'race' ? 'You finished ' + ordinal(pos) : 'Time ' + fmtTime(tNow), 'Chequered flag', 2600);
+    W.banner = W.versus ? ordinal(pos) : 'FINISH'; W.bannerT = 3.2;
+    ARC.toast(W.versus ? 'You finished ' + ordinal(pos) : 'Time ' + fmtTime(tNow), 'Chequered flag', 2600);
     [523, 659, 784, 1046].forEach(function (f, i) { ARC.sfx.tone(f, 0.22, { type: 'triangle', vol: 0.2, delay: i * 0.11 }); });
   }
 
@@ -1332,19 +1339,19 @@
     var P = W.P, T = W.T, track = W.cfg.track, i;
     engineStop();
     var rows = [];
-    if (W.mode === 'race') {
+    if (W.versus) {
       simulateRest(W);
       W.racers.forEach(function (c) { rows.push(c); });
       rows.sort(function (a, b) { return (a.finT || 1e9) - (b.finT || 1e9); });
     }
-    var pos = W.mode === 'race' ? rows.indexOf(P) + 1 : 1, total = P.finT, st = bestOf(track);
+    var pos = W.versus ? rows.indexOf(P) + 1 : 1, total = P.finT, st = bestOf(track);
     var newTotal = st.total == null || total < st.total, newLap = P.bestLap < Infinity && (st.lap == null || P.bestLap < st.lap);
     var prevTotal = st.total;
     if (newTotal) st.total = total;
     if (newLap) st.lap = P.bestLap;
     ARC.store.set('midnight-apex.bests', BESTS);
     var html = '', h = '<table class="mx-res"><tbody>';
-    if (W.mode === 'race') {
+    if (W.versus) {
       for (i = 0; i < rows.length; i++) {
         var c = rows[i], gap = c.finT - rows[0].finT;
         h += '<tr' + (c.isPlayer ? ' class="me"' : '') + '><td>' + (i + 1) + '</td><td>' + ARC.esc(c.isPlayer ? 'You' : c.name) + '<small>' + ARC.esc(c.k.name) + '</small></td><td>' + (i === 0 ? fmtTime(c.finT) : '+' + gap.toFixed(2)) + '</td></tr>';
@@ -1353,10 +1360,10 @@
       html += h;
     }
     html += '<div class="mx-laps">' + P.lapTimes.map(function (t, k) { return '<span>Lap ' + (k + 1) + '<b>' + fmtTime(t) + '</b></span>'; }).join('') + '</div>';
-    var title = W.mode === 'race' ? ordinal(pos) + ' <em>place</em>' : 'Time <em>attack</em>';
+    var title = W.versus ? ordinal(pos) + ' <em>place</em>' : 'Time <em>attack</em>';
     ARC.over({
-      score: total, lowerIsBetter: true, scoreLabel: 'Total time', eyebrow: W.mode === 'race' ? 'Race result - ' + T.name : 'Time attack - ' + T.name,
-      title: title, html: html, again: W.mode === 'race' ? 'Race again' : 'Go again'
+      score: total, lowerIsBetter: true, scoreLabel: 'Total time', eyebrow: W.versus ? (W.mode === 'sprint' ? 'Sprint result - ' : 'Race result - ') + T.name : 'Time attack - ' + T.name,
+      title: title, html: html, again: W.versus ? 'Race again' : 'Go again'
     });
     var stat = document.querySelector('.arc-card .stat');
     if (stat) {
@@ -1745,7 +1752,7 @@
   }
 
   function drawHUD(ctx, arc, W) {
-    var w = arc.w, h = arc.h, P = W.P, touch = arc.touchMode, race = W.mode === 'race', i;
+    var w = arc.w, h = arc.h, P = W.P, touch = arc.touchMode, race = W.versus, i;
     var u = clamp(Math.min(w / 700, h / 600), 0.78, 1.15), portrait = w / h < 0.9;
     function S(v) { return Math.round(v * u); }
     function F(v) { return Math.max(12, Math.round(v * u)); }
@@ -1762,7 +1769,7 @@
       var nw = ctx.measureText(String(pos)).width;
       txt(ctx, ordinal(pos).replace(/\d+/, ''), m + S(14) + nw, m + S(24), F(13), DIM, 'left', '600');
       txt(ctx, '/ ' + (W.rivals.length + 1), m + S(14) + nw + S(26), m + S(40), F(14), DIM, 'left', '600');
-      txt(ctx, 'LAP ' + lapNo + '/' + LAPS, m + S(12), m + S(59), F(13), INK, 'left', '700');
+      txt(ctx, W.mode === 'sprint' ? Math.max(0, Math.round((W.raceLen - P.dist) * 0.004)) + ' M TO GO' : 'LAP ' + lapNo + '/' + LAPS, m + S(12), m + S(59), F(W.mode === 'sprint' ? 11 : 13), INK, 'left', '700');
     } else {
       txt(ctx, 'LAP ' + lapNo + '/' + LAPS, m + S(12), m + S(34), F(20), INK, 'left', '700');
       txt(ctx, 'TIME ATTACK', m + S(12), m + S(55), F(11), GOLD, 'left', '600');
@@ -1895,7 +1902,7 @@
         '<div class="mx-laps">' + bests + '</div>',
       options: [
         { id: 'track', label: 'Track', value: 'harbour', choices: TRACK_ORDER.map(function (id) { return { v: id, label: PAL[id].name }; }) },
-        { id: 'mode', label: 'Mode', value: 'race', choices: [{ v: 'race', label: 'Race' }, { v: 'time', label: 'Time attack' }] },
+        { id: 'mode', label: 'Mode', value: 'race', choices: [{ v: 'race', label: 'Circuit' }, { v: 'sprint', label: 'Sprint' }, { v: 'time', label: 'Time attack' }] },
         { id: 'car', label: 'Car', value: 'kestrel', choices: PLAYER_KINDS.map(function (id) { return { v: id, label: KINDS[id].name }; }) },
         { id: 'color', label: 'Colour', value: 'ember', choices: COLORS.map(function (c) { return { v: c.id, label: c.name }; }) },
         { id: 'diff', label: 'Difficulty', value: 'pro', choices: [{ v: 'rookie', label: 'Rookie' }, { v: 'pro', label: 'Pro' }, { v: 'legend', label: 'Legend' }] },
