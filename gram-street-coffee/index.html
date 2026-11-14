@@ -3121,7 +3121,8 @@
       requestAnimationFrame(loop);
     }
     function start() { if (running || !visible || document.hidden) return; running = true; requestAnimationFrame(loop); }
-    function poke() { lastActive = performance.now(); start(); }
+    // Reduced motion keeps the single still frame drawn below: nothing wakes it.
+    function poke() { if (reduce) return; lastActive = performance.now(); start(); }
     window.addEventListener("scroll", poke, { passive: true });
     window.addEventListener("touchstart", poke, { passive: true });
     function stop() { running = false; }
