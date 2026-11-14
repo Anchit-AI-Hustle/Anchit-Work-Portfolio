@@ -1730,7 +1730,7 @@ function lessonEvent(G, type, d) {
   const P = G.P;
   if (L.k === 'strike' && type === 'hit' && d.a === P) L.hit(1);
   if (L.k === 'grapple' && type === 'impact' && d.a === P && /Snapmare|Arm drag|Hip toss|Knee/.test(d.m || '')) L.hit(1);
-  if (L.k === 'heavy' && type === 'impact' && d.a === P && P.move == null && /slam|suplex|DDT|bomb|breaker|Belly|takedown/i.test(d.m || '')) L.hit(1);
+  if (L.k === 'heavy' && type === 'impact' && d.a === P && /slam|suplex|DDT|bomb|breaker|Belly|takedown/i.test(d.m || '')) L.hit(1);
   if (L.k === 'whip' && type === 'impact' && d.a === P && /clothes|boot|drop|Back body/i.test(d.m || '')) L.hit(1);
   if (L.k === 'reverse' && type === 'reverse' && d.a === P) L.hit(1);
   if (L.k === 'top' && type === 'impact' && d.a === P && /splash|Crossbody|Dive|Plunge/i.test(d.m || '')) L.hit(1);
