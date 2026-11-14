@@ -94,7 +94,7 @@ function mutate(src) {
   if (MUT === 'auditnav') return src.replace(/<div class="hero-ctas" style="margin-top:6px"><a class="btn btn-outline sm" href="#top">.*?<\/div>/, '');
   if (MUT === 'protonav') return src.replace(/<div class="xlinks">.*?<\/div>/, '');
   if (MUT && !R[MUT]) throw new Error('unknown MUT ' + MUT);
-  if (R[MUT] && src.includes('Vision Recall Engine') && !src.includes(R[MUT][0]) && /prototype|study/.test(src) && MUT !== 'dash') return src;
+  if (R[MUT] && src.includes('Eye Test Follow-up Engine') && !src.includes(R[MUT][0]) && /prototype|study/.test(src) && MUT !== 'dash') return src;
   return R[MUT] ? src.replace(R[MUT][0], R[MUT][1]) : src;
 }
 
@@ -156,11 +156,11 @@ const dashes = (frame) => frame.evaluate(() => {
 const hScroll = (page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 
 // One family, in the order a customer meets them.
-const FEATURES = ['Recall Date', 'Recall Reminder', 'Recall Booking', 'Recall Outcome', 'First Prescription Follow-up', 'Recall Dashboard'];
+const FEATURES = ['First Prescription Follow-up', 'Recall Date', 'Recall Reminder', 'Recall Booking', 'Recall Outcome', 'Recall Dashboard'];
 
 async function names(page, L) {
   const title = await page.title();
-  check(`${L}: titled for the Vision Recall Engine or the Lenskart case study`, /Vision Recall Engine/.test(title) && /Anchit Tandon/.test(title), title);
+  check(`${L}: titled for the Eye Test Follow-up Engine or the Lenskart case study`, /Eye Test Follow-up Engine/.test(title) && /Anchit Tandon/.test(title), title);
 }
 
 // Where each shared link must land: a case study section heading on screen,
@@ -252,7 +252,7 @@ async function caseStudy(browser, vp) {
     skip: (document.querySelector('a.skip') || { getAttribute() {} }).getAttribute('href'),
   }));
   check(`${L}: summary first, then the problem; the proposal is stated once, with six named features`,
-    sys.order.join() === 'summary,problem' && /Vision Recall Engine/.test(sys.h2) && sys.feats.join() === FEATURES.join(), JSON.stringify(sys));
+    sys.order.join() === 'summary,problem' && /Eye Test Follow-up Engine/.test(sys.h2) && sys.feats.join() === FEATURES.join(), JSON.stringify(sys));
   // A first-time visitor must be told what this is before being told a claim:
   // that it is outside-in, from public data, not Lenskart's, the finding, and
   // how to read it. Reviewer feedback: no self-introduction in the opening, and
@@ -278,13 +278,21 @@ async function caseStudy(browser, vp) {
     rate: [...document.querySelectorAll('#rt-tbl tbody tr')].map((r) => [...r.cells].map((c) => c.innerText.trim()).join(' ')),
     research: document.querySelectorAll('#rs-tbl tbody tr').length,
   }));
-  const deckIds = 'summary,problem,research,audit,gaps,whynot,ideas,bet,prototype,impact,plan,risks,walkthrough,me,business,engine,growth,ledger';
+  const deckIds = 'summary,problem,research,audit,gaps,whynot,ideas,bet,prototype,impact,plan,risks,walkthrough,me,business,engine,growth,ledger,audit-full,risks-full';
   const slideNo = deck.nums.slice(0, 14).map((n) => (n.match(/^SLIDE (\d\d)/i) || [])[1]).join();
   check(`${L}: fourteen numbered slides in order, then the appendix`,
     deck.ids.join() === deckIds && slideNo === Array.from({ length: 14 }, (_, i) => String(i + 1).padStart(2, '0')).join() && deck.nums.slice(14).every((n) => /^APPENDIX/i.test(n)), deck.ids.join() + ' | ' + slideNo);
   check(`${L}: no "how Lenskart makes money" pitch, and the growth chart is labelled Lenskart's`, !deck.biz && /^Lenskart India/.test(deck.growth), deck.growth);
   check(`${L}: counter-evidence, research and app ratings are on the page`,
     deck.why === 7 && deck.research === 4 && deck.rate.join(' | ') === 'Google Play 4.5 7,92,550 7.6% | App Store, India 4.5 1,07,856 9.0%', `${deck.why} reasons, ${deck.research} age rows, ${deck.rate.join(' | ')}`);
+  // The audit slide's six "not found" must be exactly the table's not-found rows.
+  const nf = await page.evaluate(() => ({
+    slide: [...document.querySelectorAll('#audit-sum .soft li')].map((x) => x.innerText.trim()),
+    table: [...document.querySelectorAll('#audit-tbl tbody tr[data-s="none"] th')].map((x) => x.innerText.trim()),
+    risks: document.querySelectorAll('#risks-sum .card').length, riskRows: document.querySelectorAll('#risks-full tbody tr').length,
+  }));
+  check(`${L}: slide summaries match the full tables in the appendix`,
+    nf.slide.length === 6 && nf.slide.join('|') === nf.table.join('|') && nf.risks === 3 && nf.riskRows === 10, JSON.stringify(nf).slice(0, 200));
   check(`${L}: a skip link to the content`, sys.skip === '#main' && !!(await page.$('main#main')), sys.skip);
 
   const counts = {}; const said = {};

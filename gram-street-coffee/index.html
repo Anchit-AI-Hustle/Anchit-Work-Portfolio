@@ -810,6 +810,12 @@
   /* A pill behind the step label, so it reads wherever it lands on the scene
      (on a portrait tablet it sat on the doorframe's chrome edge). */
   #walkStepLabel { padding: 5px 12px; border-radius: 999px; background: rgba(27, 14, 54, 0.78); border: 1px solid rgba(205, 184, 247, 0.35); color: #F1E9FF; }
+  .walk.is-stepped .walk-layer,
+  .walk.is-stepped .walk-facade-mask,
+  .walk.is-stepped .walk-chrome-flare {
+    transition: transform .8s cubic-bezier(.16, 1, .3, 1), opacity .55s ease;
+  }
+  .walk.is-stepped .walk-hint { transition: opacity .4s ease; }
   .walk-sign-short { display: none; }
   @media (max-aspect-ratio: 21/20) { .walk-sign-long { display: none; } .walk-sign-short { display: inline; } }
   .walk-frame-hud {
@@ -3378,28 +3384,50 @@
     }
     if (cap) cap.style.transition = 'opacity .34s ease, transform .34s cubic-bezier(.16,1,.3,1)';
 
-    var ticking = false;
+    // Stepped, not scrubbed. The walk used to interpolate every layer on every
+    // scroll frame, so most scroll positions showed a half-dissolved mix of two
+    // scenes with the caption faded out between them: it read as broken, and
+    // the per-frame work (layout read, five layer transforms, a custom property
+    // on the section that restyled everything inside it) made scrolling lag.
+    // Now scroll only picks which of the three scenes is showing; each scene is
+    // a fully composed pose, and the browser glides between them in one
+    // compositor transition. Nothing runs while the walk is off screen.
+    // The last pose is the end of the run: the counter layer has faded and
+    // the docked 10-seater bar has come forward, the view the caption names.
+    // Under 760px the walk's perspective tightens to 760px, which left the
+    // bar at about 0.62x (200px on a phone). 1.05 brings it to about 0.96x.
+    var narrow = window.matchMedia('(max-width: 760px)');
+    var POSES = [0.02, 0.45, narrow.matches ? 1.05 : 1];
+    var shown = -1, inView = false, ticking = false;
+    sec.classList.add('is-stepped');
     function onScroll() {
-      if (ticking) return;
+      if (ticking || !inView) return;
       ticking = true;
       requestAnimationFrame(function () {
         ticking = false;
         var r = rail.getBoundingClientRect();
         var span = r.height - frame.offsetHeight;
         var p = span > 0 ? clamp01(-r.top / span) : 0;
-        sec.style.setProperty('--p', p.toFixed(4));
-        place(p);
+        var k = p < 0.33 ? 0 : p < 0.67 ? 1 : 2;
+        if (k === shown) return;
+        shown = k;
+        place(POSES[k]);
       });
     }
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
+    window.addEventListener('resize', function () { POSES[2] = narrow.matches ? 1.05 : 1; shown = -1; onScroll(); });
 
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (en) {
-        sec.classList.toggle('is-past', !en[0].isIntersecting);
+        inView = en[0].isIntersecting;
+        sec.classList.toggle('is-past', !inView);
+        if (inView) onScroll();
       }, { threshold: 0 }).observe(sec);
-    }
-    onScroll();
+    } else { inView = true; onScroll(); }
+    // Composed first scene straight away. The observer's first callback then
+    // picks the right scene, including after a reload restores a mid-walk
+    // scroll position.
+    shown = 0; place(POSES[0]);
   })();
 
   /* 4. Timeline Line Drawing & Orbit Reveal */
