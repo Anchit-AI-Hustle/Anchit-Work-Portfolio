@@ -79,6 +79,8 @@ a{color:var(--primary);text-underline-offset:3px}
 .go.pri{background:var(--primary);border-color:var(--primary);color:#fff}
 .go.pri small{color:#E9E7FF}.go.pri .gn{background:rgba(255,255,255,.2);color:#fff}.go.pri::after{color:#fff}
 @media (min-width:700px){.start{grid-template-columns:repeat(3,1fr)}}
+/* Phones: the three start steps must sit on the first screen with room to spare, even before the web font arrives. */
+@media (max-width:420px){.hero .wrap{padding-top:24px;padding-bottom:28px;gap:14px}.hero .lede{font-size:16px;line-height:25px}.go{min-height:52px;padding:8px 12px}}
 .meta{font-size:13px;color:var(--muted)}
 /* sections */
 section.block{padding:48px 0;border-bottom:1px solid var(--border-soft)}
@@ -103,6 +105,8 @@ section.block:nth-of-type(even){background:#fff}
 .kpi span{display:block;font-weight:600;color:var(--heading);font-size:15px}
 .kpi small{display:block;color:var(--muted);font-size:13px;line-height:18px;margin-top:2px}
 .tag{display:inline-block;font-size:12px;line-height:16px;font-weight:600;padding:4px 8px;border-radius:var(--r-tag);white-space:nowrap}
+/* A tag inside a card may wrap: with a wider fallback font a no-wrap tag stuck out of its card and scrolled the page sideways at 820px. */
+.card .tag{white-space:normal;max-width:100%}
 .tag.live{background:var(--success-bg);color:var(--success)}
 .tag.part{background:var(--warn-bg);color:var(--orange-ink)}
 .tag.none{background:var(--danger-bg);color:var(--danger-ink)}

@@ -113,13 +113,17 @@ const results = [];
 const check = (name, ok, detail) => results.push([ok ? 'PASS' : 'FAIL', name, detail == null ? '' : String(detail)]);
 const norm = (s) => (s || '').replace(/\s+/g, ' ').trim();
 
-async function open(browser, vp, path) {
+async function open(browser, vp, path, noFonts) {
   const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
+  // noFonts: the web fonts never arrive, as on a slow network or when the CI
+  // runner cannot reach the font host. The layout must still hold.
+
   const bag = { errors: [], failed: [] };
   let closed = false;
   ctx.on('close', () => { closed = true; });
   await ctx.route('**/*', async (route) => {
     try {
+      if (noFonts && /fonts\.g(oogleapis|static)\.com/.test(route.request().url())) return await route.fulfill({ status: 200, contentType: 'text/css', body: '' });
       const res = await route.fetch();
       const headers = { ...res.headers() };
       if (!(headers['content-type'] || '').includes('text/html')) return await route.fulfill({ response: res });
@@ -616,10 +620,31 @@ async function consistency(browser) {
   check('case study mentor head-count matches the prototype calculator', !!mStudy && mStudy === mCalc, `case study ${mStudy} vs calculator ${mCalc}`);
 }
 
+// CI failed on main (14 Nov 2026) with "steps=2" at 390 and a 45px sideways
+// scroll at 820, on code that had passed minutes earlier. Cause: when the web
+// font does not load, the fallback font is wider, the hero grows until the
+// third "start here" step drops below the fold, and a no-wrap tag in a card
+// sticks out past the page. Block the fonts and the first screen must hold.
+async function fallbackFonts(browser, vp) {
+  const L = `[${vp.name}] /pw-study, web font blocked`;
+  const { ctx, page } = await open(browser, vp, '/pw-study', true);
+  const f = await page.evaluate(() => {
+    // 40px of room: fallback fonts differ between machines, so a step that
+    // only just fits here can fall below the fold on the CI runner.
+    const vis = (el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.top >= 0 && r.bottom <= innerHeight - 40; };
+    const last = [...document.querySelectorAll('.start a')].pop();
+    return { steps: [...document.querySelectorAll('.start a')].filter(vis).length, bottom: last ? Math.round(last.getBoundingClientRect().bottom) : -1, vh: innerHeight, over: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+  });
+  check(`${L}: all three "start here" steps on the first screen, with room to spare`, f.steps === 3, `steps=${f.steps} last bottom ${f.bottom}/${f.vh}`);
+  check(`${L}: no horizontal page scroll`, f.over <= 0, f.over + 'px');
+  await ctx.close();
+}
+
 (async () => {
   const browser = await chromium.launch();
   await consistency(browser);
   for (const vp of VIEWPORTS) {
+    await fallbackFonts(browser, vp);
     await caseStudy(browser, vp);
     await prototype(browser, vp);
     await crossNav(browser, vp);
