@@ -226,8 +226,8 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
     <a class="brandmark" href="/pw-study" style="text-decoration:none" target="_top"><div class="dot" aria-hidden="true">RE</div><div><strong>Learner Retention Engine</strong><small>Back to the PW case study</small></div></a>
     <nav class="tabs" role="tablist" aria-label="Prototype views">
       <button class="tab" role="tab" id="t-student" aria-controls="p-student" aria-selected="true">Student app</button>
-      <button class="tab" role="tab" id="t-parent" aria-controls="p-parent" aria-selected="false" tabindex="-1">Weekly Pulse</button>
-      <button class="tab" role="tab" id="t-console" aria-controls="p-console" aria-selected="false" tabindex="-1">Growth Console</button>
+      <button class="tab" role="tab" id="t-parent" aria-controls="p-parent" aria-selected="false" tabindex="-1">Weekly Report</button>
+      <button class="tab" role="tab" id="t-console" aria-controls="p-console" aria-selected="false" tabindex="-1">Renewals Dashboard</button>
       <button class="tab" role="tab" id="t-brand" aria-controls="p-brand" aria-selected="false" tabindex="-1">Brand schema</button>
     </nav>
   </div>
@@ -238,18 +238,18 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
     <h1>See what happens when a student <span class="accent">starts to drift</span>.</h1>
     <p class="lede">A clickable mock-up with four made-up students. Pick one, drag their study signals, and watch the system respond in three places: the student's app, the weekly WhatsApp message, and the dashboard PW's renewals team would use. AI replies follow simple, visible rules.</p>
     <div class="xlinks"><a class="btn btn-outline sm" href="/pw-study" target="_top">Back to the case study</a><a class="btn btn-soft sm" href="/pw-study#audit" target="_top">See the live platform audit</a></div>
-    <nav class="feats" aria-label="The five features"><span class="label">Or jump to a feature:</span><a href="#drift"><b>1</b>Drift Score</a><a href="#plan"><b>2</b>Comeback Plan</a><a href="#pulse"><b>3</b>Weekly Pulse</a><a href="#next"><b>4</b>Results-Day Next Step</a><a href="#console"><b>5</b>Growth Console</a></nav>
+    <nav class="feats" aria-label="The five features"><span class="label">Or jump to a feature:</span><a href="#risk"><b>1</b>Drop-off Risk Score</a><a href="#catchup"><b>2</b>Catch-up Plan</a><a href="#report"><b>3</b>Weekly Progress Report</a><a href="#recommendation"><b>4</b>Next-Step Recommendation</a><a href="#dashboard"><b>5</b>Renewals Dashboard</a></nav>
     <p class="small muted">Part of Anchit Tandon's Product Manager application to PW. Step-by-step review: <a href="/pw-study#walkthrough" target="_top">anchit-tandon.com/pw-study#walkthrough</a></p>
   </div>
 </section>
 
 <main>
 <div class="wrap">
-<div class="dl-bar" id="dl-bar"><span>Concept prototype by Anchit Tandon · synthetic data · not affiliated with PhysicsWallah</span><nav class="dl-tabs" aria-label="Prototype screens"><a href="#student">Student app</a><a href="#pulse">Weekly Pulse</a><a href="#console">Growth Console</a><a href="#brand">Brand schema</a></nav></div>
+<div class="dl-bar" id="dl-bar"><span>Concept prototype by Anchit Tandon · synthetic data · not affiliated with PhysicsWallah</span><nav class="dl-tabs" aria-label="Prototype screens"><a href="#student">Student app</a><a href="#report">Weekly Report</a><a href="#dashboard">Renewals Dashboard</a><a href="#brand">Brand schema</a></nav></div>
 
 <!-- STUDENT -->
 <section class="panel on" id="p-student" role="tabpanel" aria-labelledby="t-student">
-  <p class="onscreen" id="student">On this screen: <b>Drift Score</b> (engine output), <b>Comeback Plan</b> (the plan in the phone) and <b>Results-Day Next Step</b> (bottom of the phone).</p>
+  <p class="onscreen" id="student">On this screen: <b>Drop-off Risk Score</b> (engine output; the phone shows it as an on-track score), <b>Catch-up Plan</b> (the plan in the phone) and <b>Next-Step Recommendation</b> (bottom of the phone).</p>
   <p class="label" style="margin-bottom:8px">1 · Pick a student</p>
   <div class="persona-row" role="group" aria-label="Choose a learner">
     <button class="chip" data-p="0" aria-pressed="true">Riya - Class 11, JEE</button>
@@ -279,13 +279,13 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
           <div class="stat"><b id="st-test">45%</b><span>Test avg</span></div>
           <div class="stat"><b id="st-streak">0</b><span>Day streak</span></div>
         </div>
-        <div class="nudge" id="s-nudge"><span id="plan" class="anchor"></span><p class="label" id="s-nudge-label">AI Mentor plan</p><p id="s-nudge-title" style="font-weight:600;color:var(--heading)"></p><ul class="plan small" id="s-plan"></ul></div>
+        <div class="nudge" id="s-nudge"><span id="catchup" class="anchor"></span><p class="label" id="s-nudge-label">AI Mentor plan</p><p id="s-nudge-title" style="font-weight:600;color:var(--heading)"></p><ul class="plan small" id="s-plan"></ul></div>
         <div class="card" style="padding:14px">
           <p class="label" style="margin-bottom:8px">Ask your AI Mentor <span class="tag pri" style="margin-left:4px">Simulated</span></p>
           <div class="chat" id="chat" aria-live="polite"></div>
           <div class="quick" style="margin-top:10px" id="quick"></div>
         </div>
-        <p class="label" style="margin-top:4px" id="next">Your next step</p>
+        <p class="label" style="margin-top:4px" id="recommendation">Your next step</p>
         <div class="batch" id="s-next"></div>
       </div>
     </div>
@@ -301,9 +301,9 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
         <div class="field"><label for="in-doubt">Doubts asked this week <span id="v-doubt"></span></label><input type="range" id="in-doubt" min="0" max="15"></div>
         <div class="field"><label for="in-streak">Study streak (days) <span id="v-streak"></span></label><input type="range" id="in-streak" min="0" max="30"></div>
       </div>
-      <div class="card" id="drift">
+      <div class="card" id="risk">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
-          <h3>Drift Score: engine output</h3><span id="e-tier" class="tag"></span>
+          <h3>Drop-off Risk Score: engine output</h3><span id="e-tier" class="tag"></span>
         </div>
         <div class="engine-out" style="margin-top:12px">
           <p><span class="label">Drop-off risk</span><br><b id="e-risk" style="font-size:28px;line-height:34px;color:var(--heading)"></b><span class="muted"> / 100</span></p>
@@ -322,14 +322,14 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
   <div class="grid two">
     <div class="grid" style="align-content:start">
       <div class="card">
-        <h2 id="pulse">Weekly Pulse on WhatsApp</h2>
-        <p style="margin-top:8px">The PW Parent App already shows attendance, lecture, DPP and test stats, but a parent has to open it. Weekly Pulse pushes a plain-language summary on WhatsApp and links into the app. <b>Who receives it depends on the learner's age.</b> It is built from the same learner and signals as the Student app tab: drag the signals there and this message changes.</p>
+        <h2 id="report">Weekly Progress Report on WhatsApp</h2>
+        <p style="margin-top:8px">The PW Parent App already shows attendance, lecture, DPP and test stats, but a parent has to open it. The Weekly Progress Report pushes a plain-language summary on WhatsApp and links into the app. <b>Who receives it depends on the learner's age.</b> It is built from the same learner and signals as the Student app tab: drag the signals there and this message changes.</p>
         <div style="overflow-x:auto;margin-top:12px"><table class="aud" id="aud-tbl">
           <thead><tr><th>Learner</th><th>Examples</th><th>Weekly report goes to</th></tr></thead>
           <tbody>
-            <tr data-a="minor"><td><b>Under 18</b></td><td>K-12, Class 11-12, boards</td><td><b>Parent Pulse</b>: parent, with consent taken at purchase (DPDP Act 2023 needs it for under-18s)</td></tr>
-            <tr data-a="young"><td><b>18-21</b></td><td>JEE/NEET droppers, early college</td><td><b>Self Pulse</b>: learner. Parent gets a copy only if the learner opts in</td></tr>
-            <tr data-a="adult"><td><b>Adult aspirant</b></td><td>UPSC, govt exams, CA, NEET PG, skills</td><td><b>Self Pulse</b> + study-circle check-in. No parent channel</td></tr>
+            <tr data-a="minor"><td><b>Under 18</b></td><td>K-12, Class 11-12, boards</td><td><b>Parent report</b>: parent, with consent taken at purchase (DPDP Act 2023 needs it for under-18s)</td></tr>
+            <tr data-a="young"><td><b>18-21</b></td><td>JEE/NEET droppers, early college</td><td><b>Learner report</b>: learner. Parent gets a copy only if the learner opts in</td></tr>
+            <tr data-a="adult"><td><b>Adult aspirant</b></td><td>UPSC, govt exams, CA, NEET PG, skills</td><td><b>Learner report</b> + study-circle check-in. No parent channel</td></tr>
           </tbody></table></div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center">
           <span class="label">Learner</span>
@@ -357,7 +357,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
       <div class="channel" id="pp-channel"></div>
       <p class="small muted" id="pp-status" role="status" aria-live="polite"></p>
       <div class="wa" aria-label="WhatsApp preview">
-        <div class="wa-head"><div class="av" aria-hidden="true">PW</div><div><b id="wa-title">PW Parent Pulse</b><br><small style="opacity:.85">Verified business account (concept)</small></div></div>
+        <div class="wa-head"><div class="av" aria-hidden="true">PW</div><div><b id="wa-title">PW Parent Report</b><br><small style="opacity:.85">Verified business account (concept)</small></div></div>
         <div class="wa-body" id="wa-body"></div>
       </div>
     </div>
@@ -367,7 +367,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
 <!-- CONSOLE -->
 <section class="panel" id="p-console" role="tabpanel" aria-labelledby="t-console" hidden>
   <div style="display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:12px">
-    <div><h2 id="console">Growth Console</h2><p class="small" style="max-width:720px">The screen PW's retention team would open every Monday: who is drifting, what action each group gets, and what that is worth. Uses a made-up cohort of 5,000 paid learners so it runs without PW data.</p></div>
+    <div><h2 id="dashboard">Renewals Dashboard</h2><p class="small" style="max-width:720px">The screen PW's retention team would open every Monday: who is drifting, what action each group gets, and what that is worth. Uses a made-up cohort of 5,000 paid learners so it runs without PW data.</p></div>
     <button class="btn btn-outline sm" id="reseed">Generate a new cohort</button>
   </div>
   <div class="howto" aria-label="How to read this screen">
@@ -423,7 +423,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
       <p class="small" id="m-note" role="status" aria-live="polite"></p>
       <div id="levers" style="margin-top:8px"></div>
       <p class="label" style="margin-top:14px">Running costs a year</p>
-      <div class="row"><label for="m-opt">Opted in to the Weekly Pulse (%)<small>Assumption</small></label><input id="m-opt" type="number" step="5" min="0" max="100" value="50"></div>
+      <div class="row"><label for="m-opt">Opted in to the Weekly Progress Report (%)<small>Assumption</small></label><input id="m-opt" type="number" step="5" min="0" max="100" value="50"></div>
       <div class="row"><label for="m-risk">At risk in a given week (%)<small id="h-risk">Assumption; sets AI Mentor plans</small></label><input id="m-risk" type="number" step="1" min="0" max="100" value="35"></div>
       <div class="row"><label for="m-wa">WhatsApp utility message (₹)<small>Meta India rate, from 1 Oct 2026</small></label><input id="m-wa" type="number" step="0.001" min="0" value="0.115"></div>
       <div class="row"><label for="m-mk">WhatsApp marketing message (₹)<small>Meta India rate, from 1 Oct 2026</small></label><input id="m-mk" type="number" step="0.0001" min="0" value="0.8631"></div>
@@ -522,23 +522,23 @@ function score(s){
 function aud(p){ return p.age<18?'minor':(p.age<=21?'young':'adult'); }
 function actions(s,res,p){
   var a=[], g=aud(p), minor=g==='minor';
-  var pulse = g==='minor' ? {t:'Parent Pulse alert',d:'To the consented parent: calm, specific, one thing they can do.'}
-            : g==='young' ? {t:'Self Pulse alert',d:'Sent to '+p.name+'. Parent gets a copy only if '+p.name+' opted in.'}
-            : {t:'Self Pulse + study-circle check-in',d:'Adult learner: no parent channel. Peers keep the streak going; a mentor steps in only at high risk.'};
+  var pulse = g==='minor' ? {t:'Parent report alert',d:'To the consented parent: calm, specific, one thing they can do.'}
+            : g==='young' ? {t:'Learner report alert',d:'Sent to '+p.name+'. Parent gets a copy only if '+p.name+' opted in.'}
+            : {t:'Learner report + study-circle check-in',d:'Adult learner: no parent channel. Peers keep the streak going; a mentor steps in only at high risk.'};
   if(res.tier==='High'){
-    a.push({t:'7-day AI comeback plan',d:'Backlog cut to the highest-weight chapters, scheduled by the AI Mentor.'});
+    a.push({t:'7-day AI catch-up plan',d:'Backlog cut to the highest-weight chapters, scheduled by the AI Mentor.'});
     a.push({t:'Mentor call on day 8 if still high risk',d:'If the plan has not worked in a week, a real mentor rebuilds it with the learner. Calls are capped to what PW\'s mentors can take.'});
     a.push(pulse);
   } else if(res.tier==='Medium'){
     a.push({t:'AI Mentor catch-up plan',d:'Three backlog lectures plus one short DPP, scheduled around '+(g==='adult'?'work or coaching hours':'school hours')+'.'});
-    a.push({t:g==='minor'?'Weekly Parent Pulse report':'Weekly Self Pulse report',d:'Progress and the plan, no alarm.'});
+    a.push({t:g==='minor'?'Weekly parent report':'Weekly learner report',d:'Progress and the plan, no alarm.'});
   } else {
     a.push({t:'Protect the streak',d:'Light-touch praise, no extra pings.'});
     if(s.test>=70 && s.lec>=75){
       if(p.offline && !p.final) a.push({t:minor?'Suggest a free Vidyapeeth trial class to the parent':'Offer a free Vidyapeeth trial class',d:'Strong, engaged learner in '+p.city+', a centre city.'+(minor?' Under 18, so the offer goes to the parent, never the child.':'')});
       else a.push({t:minor?'Suggest the Infinity Pro upgrade to the parent':'Offer Infinity Pro upgrade',d:p.final?'Final year: an in-year upgrade only, no next-batch offer.':'High engagement and scores: ready for the premium plan.'});
     }
-    else a.push({t:'Results-day next step queued',d:minor?'Shown to '+p.name+' as an academic next step; the parent gets the fees and offer.':'Personalised next batch shown on results day.'});
+    else a.push({t:'Next-step recommendation queued for results day',d:minor?'Shown to '+p.name+' as an academic next step; the parent gets the fees and offer.':'Personalised next batch shown on results day.'});
   }
   return a;
 }
@@ -562,9 +562,11 @@ var cur = 0, simState = JSON.parse(JSON.stringify(P[0].s));
 
 /* ---------- Tabs ---------- */
 var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
-/* Deep links: /pw-study/prototype#student, #drift, #plan, #next, #pulse, #console, #brand */
-var HASH = {student:'t-student', drift:'t-student', plan:'t-student', next:'t-student', pulse:'t-parent', console:'t-console', brand:'t-brand'};
-var NAME = {'t-student':'student','t-parent':'pulse','t-console':'console','t-brand':'brand'};
+/* Deep links: /pw-study/prototype#student, #risk, #catchup, #recommendation, #report, #dashboard, #brand.
+   Links shared before the features were renamed keep working through ALIAS. */
+var HASH = {student:'t-student', risk:'t-student', catchup:'t-student', recommendation:'t-student', report:'t-parent', dashboard:'t-console', brand:'t-brand'};
+var ALIAS = {drift:'risk', plan:'catchup', next:'recommendation', pulse:'report', console:'dashboard'};
+var NAME = {'t-student':'student','t-parent':'report','t-console':'dashboard','t-brand':'brand'};
 var EMBED = document.documentElement.classList.contains('embed');
 function selectTab(t, write){
   tabs.forEach(function(x){
@@ -580,7 +582,7 @@ function selectTab(t, write){
 // A whole-tab link lands on the bar above the panels, so the visitor still
 // sees the concept notice and the other tabs; a feature link lands on it.
 function fromHash(scroll, focus){
-  var h = location.hash.slice(1).toLowerCase(), id = HASH[h];
+  var h = location.hash.slice(1).toLowerCase(); h = ALIAS[h] || h; var id = HASH[h];
   if(!id) return;
   selectTab(document.getElementById(id));
   var target = document.getElementById(h);
@@ -620,13 +622,13 @@ function renderStudent(){
   el('st-lec').textContent = s.lec+'%'; el('st-test').textContent = s.test+'%'; el('st-streak').textContent = s.streak;
   var n = el('s-nudge'); n.className = 'nudge ' + (res.tier==='High'?'high':res.tier==='Medium'?'med':'low');
   var plan;
-  if(res.tier==='High'){ el('s-nudge-title').textContent='Your 7-day comeback plan'; plan=['Day 1-2: 2 backlog lectures (highest weightage first)','Day 3: 20-min DPP, solutions unlocked instantly','Day 4-6: 2 more lectures + doubt session','Day 7: mini-test to reset your score','Day 8: a mentor calls if you are still behind']; }
+  if(res.tier==='High'){ el('s-nudge-title').textContent='Your 7-day catch-up plan'; plan=['Day 1-2: 2 backlog lectures (highest weightage first)','Day 3: 20-min DPP, solutions unlocked instantly','Day 4-6: 2 more lectures + doubt session','Day 7: mini-test to reset your score','Day 8: a mentor calls if you are still behind']; }
   else if(res.tier==='Medium'){ el('s-nudge-title').textContent='Catch up in 3 sessions'; plan=[behind>0?('Session 1: '+behind+' backlog lecture'+(behind>1?'s':'')):(s.test<40?'Session 1: re-watch your weakest chapter, then its DPP':'Session 1: 1 backlog lecture'),'Session 2: 15-question DPP on your weakest chapter','Session 3: ask at least 2 doubts on Ask AI']; }
   else { el('s-nudge-title').textContent='Great week. Keep the streak alive'; plan=['Next: Sunday full-length test','Bonus: 1 advanced problem set unlocked']; }
   el('s-plan').innerHTML = plan.map(function(x){return '<li>'+x+'</li>';}).join('');
   var nx = p.next, off = Math.round((1-nx.price/nx.mrp)*100);
   var trialOk = !p.final && p.offline && res.tier==='Low' && s.test>=70 && s.lec>=75;
-  var tag = high ? 'Not promoted while you catch up' : (minor ? 'Results-day next step' : 'Results-day offer');
+  var tag = high ? 'Not promoted while you catch up' : (minor ? 'Next-step recommendation' : (p.final ? 'In-year upgrade' : 'Results-day offer'));
   var foot;
   if(minor){
     // DPDP Act 2023 s.9(3): no advertising targeted at children. The child sees the academic step; the parent gets fees and offers.
@@ -662,11 +664,11 @@ function renderStudent(){
 el('s-next').addEventListener('click',function(e){
   var b = e.target.closest('button[data-act]'); if(!b) return;
   var p = P[cur], act = b.getAttribute('data-act');
-  if(act==='parent'){ if(history.replaceState) history.replaceState(null,'','#pulse'); fromHash(true,true); return; }
+  if(act==='parent'){ if(history.replaceState) history.replaceState(null,'','#report'); fromHash(true,true); return; }
   el('s-next-msg').textContent = act==='buy' ? 'Prototype only: this would open checkout for '+p.next.title+'.' : 'Prototype only: this would book a free trial class at the PW Vidyapeeth centre in '+p.city+'.';
 });
 ids.forEach(function(k){ el('in-'+k).addEventListener('input',function(e){ simState[k]=+e.target.value; renderStudent(); renderParent(); }); });
-// One learner for the whole prototype: the Student app chips and the Pulse learner buttons both choose it.
+// One learner for the whole prototype: the Student app chips and the Weekly Report learner buttons both choose it.
 function selectPersona(i){
   cur=i; simState=JSON.parse(JSON.stringify(P[cur].s)); ppShare=false;
   Array.prototype.forEach.call(document.querySelectorAll('.persona-row .chip'),function(x){x.setAttribute('aria-pressed',String(+x.dataset.p===cur));});
@@ -694,7 +696,7 @@ function answer(k,label){
   setTimeout(function(){ if(P[cur]===p) addMsg('ai',txt); },250);
 }
 
-/* ---------- Weekly Pulse (Parent or Self) ---------- */
+/* ---------- Weekly Progress Report (parent or learner) ---------- */
 var ppL='en', ppShare=false;
 function renderParent(){
   var p=P[cur], s=simState, res=score(s), behind=Math.max(0,Math.round((75-s.lec)/6)), g=aud(p);
@@ -702,12 +704,12 @@ function renderParent(){
   Array.prototype.forEach.call(document.querySelectorAll('#aud-tbl tbody tr'),function(tr){tr.classList.toggle('on',tr.dataset.a===g);});
   var ch=el('pp-channel');
   ch.className='channel '+(toParent?'parent':'self');
-  if(g==='minor') ch.innerHTML='<b>Parent Pulse.</b> '+p.name+' is '+p.age+', so the report goes to the parent who gave consent at purchase. '+p.name+' can see every report too.';
-  else if(g==='young') ch.innerHTML='<b>'+(ppShare?'Self Pulse + parent copy.':'Self Pulse.')+'</b> '+p.name+' is '+p.age+', so the report goes to '+p.name+'. A parent copy is sent only if '+p.name+' opts in.'+
+  if(g==='minor') ch.innerHTML='<b>Parent report.</b> '+p.name+' is '+p.age+', so the report goes to the parent who gave consent at purchase. '+p.name+' can see every report too.';
+  else if(g==='young') ch.innerHTML='<b>'+(ppShare?'Learner report + parent copy.':'Learner report.')+'</b> '+p.name+' is '+p.age+', so the report goes to '+p.name+'. A parent copy is sent only if '+p.name+' opts in.'+
     '<label class="toggle"><input type="checkbox" id="pp-share"'+(ppShare?' checked':'')+'> '+p.name+' chose to share with a parent</label>';
-  else ch.innerHTML='<b>Self Pulse.</b> '+p.name+' is '+p.age+' and preparing for an adult exam, so there is no parent channel. The report goes to '+p.name+', with a study-circle check-in.';
+  else ch.innerHTML='<b>Learner report.</b> '+p.name+' is '+p.age+' and preparing for an adult exam, so there is no parent channel. The report goes to '+p.name+', with a study-circle check-in.';
   var sh=el('pp-share'); if(sh) sh.addEventListener('change',function(){ppShare=sh.checked;renderParent();});
-  el('wa-title').textContent = toParent?'PW Parent Pulse':'PW Study Pulse';
+  el('wa-title').textContent = toParent?'PW Parent Report':'PW Progress Report';
   var hiMode = ppL==='hi', en, hi, mentor=toParent?(hiMode?'PW Parent App में देखें':'Open in PW Parent App'):(hiMode?'AI मेंटर से बात करें':'Talk to the AI Mentor');
   if(toParent){
     if(res.tier==='High'){
@@ -723,8 +725,8 @@ function renderParent(){
   } else {
     var circle = g==='adult';
     if(res.tier==='High'){
-      en = 'Hi '+p.name+', your week at a glance\n\n'+s.lec+'% of lectures done vs batch pace, test average '+s.test+'%, '+s.idle+' days since your last session.\n\nA 7-day comeback plan is ready in the app: start with just one lecture today. If you are still behind after a week, a mentor will call.';
-      hi = 'Hi '+p.name+', आपका हफ्ता एक नज़र में\n\nबैच की गति के मुकाबले '+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%, आखिरी सेशन '+s.idle+' दिन पहले.\n\nऐप में 7 दिन का कमबैक प्लान तैयार है: आज सिर्फ एक लेक्चर से शुरू करें. अगर एक हफ्ते बाद भी आप पीछे रहे, तो आपके मेंटर कॉल करेंगे.';
+      en = 'Hi '+p.name+', your week at a glance\n\n'+s.lec+'% of lectures done vs batch pace, test average '+s.test+'%, '+s.idle+' days since your last session.\n\nA 7-day catch-up plan is ready in the app: start with just one lecture today. If you are still behind after a week, a mentor will call.';
+      hi = 'Hi '+p.name+', आपका हफ्ता एक नज़र में\n\nबैच की गति के मुकाबले '+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%, आखिरी सेशन '+s.idle+' दिन पहले.\n\nऐप में 7 दिन का कैच-अप प्लान तैयार है: आज सिर्फ एक लेक्चर से शुरू करें. अगर एक हफ्ते बाद भी आप पीछे रहे, तो आपके मेंटर कॉल करेंगे.';
     } else if(res.tier==='Medium'){
       en = 'Hi '+p.name+', your week at a glance\n\n'+s.lec+'% of lectures done, test average '+s.test+'%, '+s.streak+'-day streak.'+(behind>0?' You are '+behind+' lectures behind pace.':'')+'\n\nYour AI Mentor has planned 3 short catch-up sessions this week.'+(circle?' Your study circle checks in on Thursday.':'');
       hi = 'Hi '+p.name+', आपका हफ्ता एक नज़र में\n\n'+s.lec+'% लेक्चर पूरे, टेस्ट औसत '+s.test+'%, लगातार '+s.streak+' दिन.'+(behind>0?' आप बैच से '+behind+' लेक्चर पीछे हैं.':'')+'\n\nAI मेंटर ने इस हफ्ते 3 छोटे कैच-अप सेशन तय किए हैं.'+(circle?' गुरुवार को आपका स्टडी सर्कल चेक-इन करेगा.':'');
@@ -735,9 +737,9 @@ function renderParent(){
   }
   var who = toParent?p.name+'\'s':'Your', whoHi = toParent?p.name+' का':'आपका';
   var strong = p.offline && res.tier==='Low' && s.test>=70 && s.lec>=75 && !p.final, held = res.tier==='High';
-  var resultsEn = 'Results-day message (sent at batch end)\n\n'+who+' year in numbers is ready. Based on the hardest and strongest chapters, the recommended next step is '+p.next.title+(held?', shown once the catch-up plan is done':'')+'.'+(strong?' A free trial class is also available at the PW Vidyapeeth centre in '+p.city+'.':'');
+  var resultsEn = 'Next-step recommendation (sent on results day or at batch end)\n\n'+who+' year in numbers is ready. Based on the hardest and strongest chapters, the recommended next step is '+p.next.title+(held?', shown once the catch-up plan is done':'')+'.'+(strong?' A free trial class is also available at the PW Vidyapeeth centre in '+p.city+'.':'');
   var resultsHi = 'रिज़ल्ट के दिन का मैसेज (बैच खत्म होने पर)\n\n'+whoHi+' पूरे साल का रिपोर्ट कार्ड तैयार है. सबसे कठिन और सबसे मज़बूत चैप्टर के आधार पर अगला सुझाया गया कदम: '+p.next.title+(held?', कैच-अप प्लान पूरा होने के बाद':'')+'.'+(strong?' '+p.city+' के PW विद्यापीठ सेंटर में फ्री ट्रायल क्लास भी उपलब्ध है.':'');
-  el('pp-status').textContent = 'Showing '+p.name+'\'s '+(toParent?'Parent Pulse':'Study Pulse')+' in '+(hiMode?'Hindi':'English')+', from this week\'s signals ('+res.tier.toLowerCase()+' risk).';
+  el('pp-status').textContent = 'Showing '+p.name+'\'s '+(toParent?'parent report':'learner report')+' in '+(hiMode?'Hindi':'English')+', from this week\'s signals ('+res.tier.toLowerCase()+' risk).';
   el('wa-body').innerHTML =
     '<div class="wa-msg" lang="'+(hiMode?'hi':'en')+'">'+esc(hiMode?hi:en)+'<span class="wa-time">Sun 7:00 pm</span></div>'+
     '<div class="wa-btns"><span>'+(hiMode?'प्लान देखें':'See the plan')+'</span><span>'+mentor+'</span></div>'+
@@ -782,9 +784,9 @@ function renderConsole(){
   var avg=function(a){return a.length?Math.round(a.reduce(function(t,x){return t+x.risk;},0)/a.length):0;};
   var mk=function(seg,action,list,won,price,why,basis){return {seg:seg,action:action,list:list,n:list.length,avgRisk:avg(list),won:won,price:price,value:Math.round(won*price),why:why,basis:basis};};
   rows=[
-    mk('High risk, under 18','7-day AI plan, mentor call if not back on track + Parent Pulse alert',g.hiU,W.hiU*sre*g.hiU.length,A,'Drifting school students who have a next batch. Their parent pays, so the parent is told.',reWhy),
-    mk('High risk, 18+','7-day AI plan, mentor call if not back on track + Self Pulse',g.hiA,W.hiA*sre*g.hiA.length,A,'Drifting adult learners with a next batch. The report goes to them, not a parent.',reWhy),
-    mk('Medium risk','AI Mentor catch-up + weekly Pulse (parent if under 18)',g.med,W.med*sre*g.med.length,A,'Slightly off pace. The AI Mentor can usually fix this without a human.',reWhy),
+    mk('High risk, under 18','7-day AI plan, mentor call if not back on track + parent report alert',g.hiU,W.hiU*sre*g.hiU.length,A,'Drifting school students who have a next batch. Their parent pays, so the parent is told.',reWhy),
+    mk('High risk, 18+','7-day AI plan, mentor call if not back on track + learner report',g.hiA,W.hiA*sre*g.hiA.length,A,'Drifting adult learners with a next batch. The report goes to them, not a parent.',reWhy),
+    mk('Medium risk','AI Mentor catch-up + Weekly Progress Report (parent if under 18)',g.med,W.med*sre*g.med.length,A,'Slightly off pace. The AI Mentor can usually fix this without a human.',reWhy),
     mk('On track, top scorer, centre city','Free Vidyapeeth trial class (to the parent if under 18)',g.topC,movers,net,'Strong, engaged online learners near a PW centre: the best offline leads PW has.','Rate: the calculator\'s '+v.off+'% of learners with a next batch in centre cities moving to Vidyapeeth, all expected from this strongest group.'),
     mk('On track, top scorer, no centre','Infinity Pro upgrade on results day (to the parent if under 18)',g.topN,ups,v.delta,'Strong learners far from a centre: offer the premium plan instead.','Rate: the calculator\'s +'+v.upg+'pp upgrade uplift on learners not yet on premium, all expected from this strongest group.'),
     mk('On track, others','Next batch card on results day (to the parent if under 18)',g.oth,W.oth*sre*g.oth.length,A,'Doing fine. Just make the next batch easy to choose when results land.',reWhy),
@@ -861,11 +863,11 @@ function renderModel(){
   el('levers').innerHTML=L.map(function(x){return '<div class="lever"><div class="lever-head"><b>'+x[0]+'</b><span><b>'+CR(x[1])+'</b> <span class="muted">('+USDM(x[1],fx)+')</span></span></div><div class="formula">'+x[2]+'</div></div>';}).join('');
   el('m-total').textContent=CR(t)+'  ·  '+USDM(t,fx);
   el('m-total-sub').textContent='≈ '+(t/3900e7*100).toFixed(1)+'% of FY26 revenue (₹3,900 cr). These are collections, recognised over the batch.'+(v.badfx?' FX below 1 ignored; using ₹95.1.':'');
-  // Running costs: the Pulse goes every week to everyone who opted in.
+  // Running costs: the report goes every week to everyone who opted in.
   var msgs=v.u*(v.opt/100)*52, cwa=msgs*v.wa, offers=v.u*(v.elig/100), cmk=offers*v.mk;
   var calls=v.u*(v.hi/100)*(v.esc/100), ccall=calls*v.call, plans=v.u*(v.risk/100)*4, cai=plans*v.ai, cost=cwa+cmk+ccall+cai, netv=t-cost;
   var C=[
-    ['Weekly Pulse on WhatsApp',cwa,'U × opted-in% × 52 weeks × utility rate = '+Math.round(msgs).toLocaleString('en-IN')+' messages × ₹'+v.wa],
+    ['Weekly Progress Report on WhatsApp',cwa,'U × opted-in% × 52 weeks × utility rate = '+Math.round(msgs).toLocaleString('en-IN')+' messages × ₹'+v.wa],
     ['Next-step offers',cmk,'U × eligible% × marketing rate = '+Math.round(offers).toLocaleString('en-IN')+' messages × ₹'+v.mk],
     ['Mentor calls (escalations only)',ccall,'U × high-risk% × not recovered% × call cost = '+Math.round(calls).toLocaleString('en-IN')+' calls × '+INR(v.call)],
     ['AI Mentor plans',cai,'U × at-risk% × 4 a year × plan cost = '+Math.round(plans).toLocaleString('en-IN')+' plans × ₹'+v.ai]
