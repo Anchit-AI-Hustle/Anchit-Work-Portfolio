@@ -143,20 +143,36 @@ async function fetchTO(url, opts) {
 }
 
 // Groq, Cerebras and OpenRouter all speak the OpenAI chat shape.
-async function oaiChat(url, key, model, system, prompt, maxTokens, extraHeaders) {
+//
+// `meta` (optional) is filled in with how the generation ended, so a caller
+// can tell a finished answer from one the token budget cut off. That matters
+// because gpt-oss-120b, which leads three of these chains, is a REASONING
+// model: its hidden reasoning is billed against max_tokens too, so a budget
+// sized for a short reply could be spent before the reply finished, and the
+// chat showed a sentence that stopped mid-word with finish_reason "length".
+// `meta.reasoning` ('low') asks a gpt-oss model to think less; it is only sent
+// to gpt-oss ids, the one family documented to accept it on these hosts.
+async function oaiChat(url, key, model, system, prompt, maxTokens, extraHeaders, meta) {
   const msgs = system ? [{ role: 'system', content: system }, { role: 'user', content: prompt }]
                       : [{ role: 'user', content: prompt }];
+  const body = { model, messages: msgs, temperature: 0.6, max_tokens: maxTokens };
+  if (meta && meta.reasoning && /gpt-oss/.test(model)) {
+    if (/openrouter\.ai/.test(url)) body.reasoning = { effort: meta.reasoning };
+    else body.reasoning_effort = meta.reasoning;
+  }
   const r = await fetchTO(url, {
     method: 'POST',
     headers: Object.assign({ 'content-type': 'application/json', Authorization: 'Bearer ' + key }, extraHeaders || {}),
-    body: JSON.stringify({ model, messages: msgs, temperature: 0.6, max_tokens: maxTokens }),
+    body: JSON.stringify(body),
   });
   if (!r.ok) throw await httpError(r);
   const d = await r.json();
-  return (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
+  const c = d.choices && d.choices[0];
+  if (meta) meta.finish = String((c && c.finish_reason) || '');
+  return (c && c.message && c.message.content) || '';
 }
 
-async function geminiGen(key, model, system, prompt, maxTokens) {
+async function geminiGen(key, model, system, prompt, maxTokens, meta) {
   const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model
     + ':generateContent?key=' + encodeURIComponent(key);
   const body = {
@@ -171,8 +187,12 @@ async function geminiGen(key, model, system, prompt, maxTokens) {
   if (r.status === 429) { await new Promise((s) => setTimeout(s, 2500)); r = await fetchTO(url, opts); }
   if (!r.ok) throw await httpError(r);
   const d = await r.json();
-  const parts = (d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts) || [];
-  return parts.filter((x) => typeof x.text === 'string').map((x) => x.text).join('').trim();
+  const cand = d.candidates && d.candidates[0];
+  // Gemini's thinking tokens also count against maxOutputTokens; MAX_TOKENS
+  // here is the same cut-off answer as an OpenAI-shape "length".
+  if (meta) meta.finish = String((cand && cand.finishReason) || '');
+  const parts = (cand && cand.content && cand.content.parts) || [];
+  return parts.filter((x) => typeof x.text === 'string' && !x.thought).map((x) => x.text).join('').trim();
 }
 
 /**
@@ -187,17 +207,20 @@ async function freeGenerate(prompt, opts) {
   const o = opts || {};
   const system = o.system || '';
   const maxTokens = o.maxTokens || 4096;
+  // Filled by whichever attempt answers; runs are sequential, so one object
+  // is enough. `reasoning` is opt-in (the chat asks for 'low').
+  const meta = { finish: '', reasoning: o.reasoning || '' };
   const runs = [];
   const gq = KEYS.groq();
-  if (gq) runs.push(['groq', (m) => oaiChat('https://api.groq.com/openai/v1/chat/completions', gq, m, system, prompt, maxTokens)]);
+  if (gq) runs.push(['groq', (m) => oaiChat('https://api.groq.com/openai/v1/chat/completions', gq, m, system, prompt, maxTokens, null, meta)]);
   const cb = KEYS.cerebras();
-  if (cb) runs.push(['cerebras', (m) => oaiChat('https://api.cerebras.ai/v1/chat/completions', cb, m, system, prompt, maxTokens)]);
+  if (cb) runs.push(['cerebras', (m) => oaiChat('https://api.cerebras.ai/v1/chat/completions', cb, m, system, prompt, maxTokens, null, meta)]);
   const gk = KEYS.gemini();
-  if (gk) runs.push(['gemini', (m) => geminiGen(gk, m, system, prompt, maxTokens)]);
+  if (gk) runs.push(['gemini', (m) => geminiGen(gk, m, system, prompt, maxTokens, meta)]);
   const or = KEYS.openrouter();
   if (or) runs.push(['openrouter', (m) => oaiChat('https://openrouter.ai/api/v1/chat/completions', or, m, system, prompt, maxTokens, {
     'HTTP-Referer': 'https://anchit-tandon.com', 'X-Title': 'anchit-tandon.com',
-  })]);
+  }, meta)]);
 
   if (!runs.length) throw Object.assign(new Error('no free provider key configured'), { attempts: [] });
 
@@ -205,7 +228,10 @@ async function freeGenerate(prompt, opts) {
   for (const [name, attempt] of runs) {
     try {
       const { out, model } = await tryModels(name, attempt);
-      if (out && out.trim()) return { text: out, provider: name, model };
+      // `truncated` is true when the provider stopped on the token budget
+      // rather than at the end of its answer. Callers that show text to a
+      // person should not show that text as if it were finished.
+      if (out && out.trim()) return { text: out, provider: name, model, finish: meta.finish, truncated: /^(length|max_tokens)$/i.test(meta.finish) };
       attempts.push(name + ':empty');
     } catch (e) {
       attempts.push(name + ':' + String((e && e.message) || e).slice(0, 120));

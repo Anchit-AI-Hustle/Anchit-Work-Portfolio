@@ -4,7 +4,7 @@
 <script>if(location.hash==='#project-lifecycle')location.replace('/lifecycle-os');</script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Anchit Tandon | Building Parwah | Product &amp; Growth</title>
+<title>Anchit Tandon | Senior Product Manager &amp; AI Builder</title>
 <!-- PWA -->
 <meta name="theme-color" content="#050301" media="(prefers-color-scheme: light)" />
 <meta name="theme-color" content="#0F0D0A" media="(prefers-color-scheme: dark)" />
@@ -834,10 +834,10 @@
   html[data-motion="on"] .cine-mark  { translate: calc(var(--px) * 14px) calc(var(--py) * 10px) 76px; }
   html[data-motion="on"] .cine-name  { translate: calc(var(--px) * 8px)  calc(var(--py) * 6px)  48px; }
   html[data-motion="on"] .cine-roles { translate: calc(var(--px) * 5px)  calc(var(--py) * 4px)  34px; }
-  html[data-motion="on"] .cine-boot  { translate: calc(var(--px) * 3px)  calc(var(--py) * 2px)  24px; }
+  html[data-motion="on"] .cine-proof { translate: calc(var(--px) * 3px)  calc(var(--py) * 2px)  24px; }
   html[data-motion="on"] .cine-meta  { translate: calc(var(--px) * 3px)  calc(var(--py) * 2px)  20px; }
   html[data-ambient="still"] .cine-mark, html[data-ambient="still"] .cine-name,
-  html[data-ambient="still"] .cine-roles, html[data-ambient="still"] .cine-boot,
+  html[data-ambient="still"] .cine-roles, html[data-ambient="still"] .cine-proof,
   html[data-ambient="still"] .cine-meta { translate: none !important; }
 
   /* ── Hero meta + exit scrim ───────────────────────────────────────────────
@@ -1082,6 +1082,11 @@
     .top-bar-link { flex: 0 0 auto; }
     .top-bar-link .tb-label { display: inline-block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 9ch; }
     .top-bar-link .tb-icon { display: inline-block; }
+    /* The row scrolls sideways on a phone, and Resume used to be its last pill,
+       starting at x=583 on a 390px screen: a recruiter never saw it. The two
+       pills a hiring panel needs lead the row instead, Resume first. */
+    .top-bar-link[data-channel="resume"] { order: -2; border-color: color-mix(in srgb, var(--primary) 55%, transparent); color: var(--ink); }
+    .top-bar-link[data-channel="email"] { order: -1; }
     /* Hamburger button sits inside the safe-area top of the bar */
     .sidebar-toggle { top: calc(var(--safe-top) + 6px); width: 36px; height: 36px; }
     main { padding-top: calc(58px + var(--safe-top)); }
@@ -1269,7 +1274,10 @@
      under the top bar instead of under the bar that is no longer there). */
   #view-home { --offer-h: 64px; --offer-top: calc(44px + var(--safe-top)); --offer-above: calc(var(--offer-top) + var(--offer-h)); }
   @media (max-width: 820px) { #view-home { --offer-top: calc(58px + var(--safe-top)); --offer-above: var(--offer-h); } }
-  @media (max-width: 640px) { #view-home { --offer-h: 92px; } }
+  /* Taller below 1180px, where the role line stacks under its tag, and on a
+     phone, where the two buttons stack beside it. */
+  @media (max-width: 1180px) { #view-home { --offer-h: 76px; } }
+  @media (max-width: 640px) { #view-home { --offer-h: 104px; } }
   .home-offer {
     height: var(--offer-h); margin-top: var(--offer-top);
     background: var(--bg-elev); border-bottom: 1px solid var(--rule);
@@ -1288,16 +1296,25 @@
   }
   .home-offer-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
   .home-offer-cta { flex: 0 0 auto; white-space: nowrap; padding: 10px 18px; }
+  .home-offer-ctas { flex: 0 0 auto; display: flex; align-items: center; gap: var(--sp-2); }
+  /* Freelance is the secondary route now: a quiet text link, not a button. */
+  .home-offer-free { color: var(--ink-dim); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--rule); white-space: nowrap; }
+  .home-offer-free:hover, .home-offer-free:focus-visible { color: var(--primary); text-decoration-color: currentColor; }
   .home-offer-short { display: none; }
-  @media (max-width: 1180px) { .home-offer-text .home-offer-long { display: none; } .home-offer-text .home-offer-short { display: inline; } }
+  @media (max-width: 1180px) {
+    .home-offer-text .home-offer-long { display: none; } .home-offer-text .home-offer-short { display: inline; } .home-offer-arc { display: none; }
+    .home-offer-text { flex-direction: column; align-items: flex-start; gap: var(--sp-1); }
+    .home-offer-what strong { display: block; }
+  }
   @media (max-width: 640px) {
-    .home-offer-inner { gap: 12px; padding: 0 16px; }
-    .home-offer-text { flex-direction: column; align-items: flex-start; gap: 5px; font-size: 13px; line-height: 1.35; }
+    .home-offer-inner { gap: 10px; padding: 0 16px; }
+    .home-offer-text { flex-direction: column; align-items: flex-start; gap: 4px; font-size: 13px; line-height: 1.35; }
     .home-offer-tag { font-size: 10px; }
     .home-offer-long { display: none; }
     .home-offer-short { display: inline; }
-    .home-offer-what strong { font-weight: 500; }
-    .home-offer-cta { padding: 10px 14px; font-size: 13px; }
+    .home-offer-what strong { font-weight: 600; display: block; }
+    .home-offer-ctas { flex-direction: column; align-items: stretch; gap: var(--sp-1); }
+    .home-offer-cta { padding: var(--sp-1) var(--sp-3); font-size: var(--fs-label); min-height: 36px; text-align: center; justify-content: center; }
   }
   /* The boot stage gives up exactly the room the bar takes. */
   .home-offer + .cine .cine-stage { top: var(--offer-top); height: calc(100vh - var(--offer-above)); height: calc(100svh - var(--offer-above)); }
@@ -1366,28 +1383,41 @@
     opacity: 0; transform: scale(1.04);
   }
 
-  /* Boot readout. */
-  .cine-boot { width: min(440px, 78vw); font-family: var(--font-mono); font-size: 11px; }
-  .cine-boot-row { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; opacity: 0; }
-  .cine-boot-label { color: var(--ink-dim); letter-spacing: 0.1em; white-space: nowrap; }
-  /* 4px, not 2, over the animated WebGL backdrop a 2px track and its fill were
-     both effectively invisible, so the boot sequence read as three blank lines. */
-  .cine-boot-track {
-    flex: 1; height: 4px; border-radius: 3px; overflow: hidden;
-    background: color-mix(in oklab, var(--ink) 22%, transparent);
-    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ink) 10%, transparent);
+  /* Headline results, where the fake boot readout used to sit. Same mono
+     voice as the old readout so the stage keeps its look; the numbers are
+     the four on the Experience view, with lakh and crore written out. */
+  .cine-proof {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-3);
+    width: min(760px, 92vw);
   }
-  .cine-boot-fill {
-    /* A <span> is inline by default, and width/height do not apply to inline
-       boxes, without this the fill is 0×0 and only the empty track ever shows.
-       The track escapes the same trap only because `flex: 1` blockifies it. */
-    display: block;
-    height: 100%; width: 0%; border-radius: 3px;
-    background: linear-gradient(90deg, var(--primary), var(--accent-warm));
-    /* Lifts the fill off a busy backdrop the way the ember glow does elsewhere. */
-    box-shadow: 0 0 10px color-mix(in oklab, var(--primary) 55%, transparent);
+  .cine-proof-item {
+    display: flex; flex-direction: column; gap: var(--sp-1); align-items: center; text-align: center;
+    padding: var(--sp-3) var(--sp-2); border-radius: 12px;
+    border: 1px solid var(--rule); background: color-mix(in oklab, var(--bg) 70%, transparent);
+    opacity: 0; transform: translateY(8px);
   }
-  .cine-boot-pct { color: var(--primary); width: 3.4em; text-align: right; }
+  .cine-proof-item b { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-h3); line-height: 1.05; color: var(--primary); }
+  .cine-proof-item span { font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: 0.04em; line-height: 1.35; color: var(--ink-dim); }
+  @media (max-width: 640px) {
+    .cine-roles-static .cine-title { letter-spacing: 0.06em; }
+    .cine-arc-line { padding: 0 var(--sp-4); }
+    .cine-proof { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-2); }
+    .cine-proof-item { padding: var(--sp-2) var(--sp-1); }
+    .cine-proof-item b { font-size: var(--fs-lead); }
+  }
+  /* Static role line (replaces the cross-fading role carousel). */
+  .cine-roles.cine-roles-static { height: auto; display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); }
+  .cine-title {
+    font-family: var(--font-mono); font-size: var(--fs-sm);
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--primary);
+    opacity: 0; transform: translateY(6px);
+  }
+  .cine-arc-line { font-size: var(--fs-sm); color: var(--ink-dim); opacity: 0; transform: translateY(6px); }
+  /* A photograph, not poster art: fill the circle instead of feathering it. */
+  .cine-mark img.cine-photo {
+    object-fit: cover; -webkit-mask-image: none; mask-image: none;
+    box-shadow: 0 0 0 2px var(--rule);
+  }
   .cine-hint {
     font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.22em;
     text-transform: uppercase; color: var(--ink-dim); opacity: 0;
@@ -2133,6 +2163,29 @@
   .hero-lede { font-size: clamp(var(--fs-lead), 2vw, var(--fs-h3)); }
   .hero-lede-sub { font-size: var(--fs-lead); margin-top: var(--sp-2); }
   .hero-problem { margin-top: var(--sp-5); font-size: var(--fs-body); max-width: 52ch; }
+  /* Role line and headline results in the hero tile. This tile is the first
+     screen for anyone the cinematic stage does not play for (reduced motion,
+     no JS), so the proof has to live here as well as on the stage. */
+  .hero-role { margin: 0 0 var(--sp-4); font-size: var(--fs-body); line-height: 1.5; color: var(--ink-dim); }
+  .hero-role strong { color: var(--primary); font-weight: 600; }
+  .hero-proof { list-style: none; margin: 0 0 var(--sp-6); padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-3); }
+  .hero-proof li { display: flex; flex-direction: column; gap: var(--sp-1); padding: var(--sp-3); border: 1px solid var(--rule); border-radius: 12px; background: var(--bg); }
+  .hero-proof b { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-h3); line-height: 1.1; color: var(--ink); }
+  .hero-proof span { font-size: var(--fs-label); line-height: 1.4; color: var(--ink-dim); }
+  @media (max-width: 900px) { .hero-proof { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  /* Work-card link rows and the company case-study grid (Experience view). */
+  .work-links { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+  .study-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: var(--sp-4); margin-top: var(--sp-6); }
+  .study-card {
+    display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-5);
+    border: 1px solid var(--rule); border-radius: 16px; background: var(--bg-elev);
+    color: var(--ink); text-decoration: none; transition: border-color .2s ease, transform .2s ease;
+  }
+  .study-card:hover, .study-card:focus-visible { border-color: var(--primary); transform: translateY(-2px); }
+  .study-card strong { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-lead); line-height: 1.25; }
+  .study-kicker { font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: .08em; text-transform: uppercase; color: var(--primary); }
+  .study-line { font-size: var(--fs-sm); line-height: 1.5; color: var(--ink-dim); }
+  .study-go { margin-top: auto; font-size: var(--fs-sm); color: var(--primary); font-weight: 600; }
   /* The card version clamps to two lines because thirteen cards have to match.
      The hero has one of these and it is the page's thesis, it must never be
      cut off, so the clamp is lifted here. */
@@ -3173,13 +3226,13 @@
   <script defer src="/assets/cinematic.js"></script>
 <!-- seo:auto:start -->
 <!-- Managed by scripts/seo-inject.mjs, edit seo.config.json, not here. -->
-<meta name="description" content="Anchit Tandon is building Parwah, family care for India with parents at the centre. Previously product and D2C growth at VAHDAM India and Times Internet." />
+<meta name="description" content="Anchit Tandon, Senior Product Manager and AI builder, open to full-time Senior PM roles. Previously product and D2C growth at Times Internet and VAHDAM India." />
 <link rel="canonical" href="https://anchit-tandon.com/" />
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
-<meta name="keywords" content="Anchit Tandon, Parwah family care, Parwah India, family care app India, product builder, product and growth consulting, VAHDAM India alumni, Times Internet product manager" />
+<meta name="keywords" content="Anchit Tandon, Senior Product Manager, Parwah family care, Parwah India, family care app India, product builder, VAHDAM India alumni, Times Internet product manager" />
 <meta name="author" content="Anchit Tandon" />
-<meta property="og:title" content="Anchit Tandon | Building Parwah | Product &amp; Growth" />
-<meta property="og:description" content="Anchit Tandon is building Parwah, family care for India with parents at the centre. Previously product and D2C growth at VAHDAM India and Times Internet." />
+<meta property="og:title" content="Anchit Tandon | Senior Product Manager &amp; AI Builder" />
+<meta property="og:description" content="Anchit Tandon, Senior Product Manager and AI builder, open to full-time Senior PM roles. Previously product and D2C growth at Times Internet and VAHDAM India." />
 <meta property="og:type" content="profile" />
 <meta property="og:url" content="https://anchit-tandon.com/" />
 <meta property="og:image" content="https://anchit-tandon.com/assets/og/og-default.png" />
@@ -3189,8 +3242,8 @@
 <meta property="og:image:height" content="630" />
 <meta property="og:image:alt" content="Anchit Tandon, Product &amp; D2C Growth" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Anchit Tandon | Building Parwah | Product &amp; Growth" />
-<meta name="twitter:description" content="Anchit Tandon is building Parwah, family care for India with parents at the centre. Previously product and D2C growth at VAHDAM India and Times Internet." />
+<meta name="twitter:title" content="Anchit Tandon | Senior Product Manager &amp; AI Builder" />
+<meta name="twitter:description" content="Anchit Tandon, Senior Product Manager and AI builder, open to full-time Senior PM roles. Previously product and D2C growth at Times Internet and VAHDAM India." />
 <meta name="twitter:image" content="https://anchit-tandon.com/assets/og/og-default.png" />
 <script type="application/ld+json">
 {
@@ -3198,7 +3251,7 @@
   "@type": "ProfilePage",
   "@id": "https://anchit-tandon.com/#profilepage",
   "url": "https://anchit-tandon.com/",
-  "name": "Anchit Tandon | Building Parwah | Product & Growth",
+  "name": "Anchit Tandon | Senior Product Manager & AI Builder",
   "isPartOf": {
     "@id": "https://anchit-tandon.com/#website"
   },
@@ -3220,8 +3273,8 @@
   "name": "Anchit Tandon",
   "url": "https://anchit-tandon.com/",
   "image": "https://anchit-tandon.com/AnchitTandon-AppLogo.png",
-  "jobTitle": "Solo product builder, Parwah",
-  "description": "Anchit Tandon is building Parwah, a family care product for India with parents at the centre. Previously product and D2C growth at VAHDAM India and Times Internet.",
+  "jobTitle": "Senior Product Manager & AI Builder",
+  "description": "Anchit Tandon is a Senior Product Manager and AI builder, open to full-time Senior PM roles. He is building Parwah, family care for India, and previously led product and D2C growth at Times Internet and VAHDAM India.",
   "email": "mailto:anchit.tandon@gmail.com",
   "telephone": "+91-98739-45238",
   "alumniOf": {
@@ -3343,7 +3396,7 @@
       "name": "How do I contact Anchit Tandon?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "You can reach Anchit through the contact section of anchit-tandon.com, by email at anchit.tandon@gmail.com, or via LinkedIn at linkedin.com/in/anchit-tandon. He is open to select product and growth consulting alongside Parwah."
+        "text": "You can reach Anchit through the contact section of anchit-tandon.com, by email at anchit.tandon@gmail.com, or via LinkedIn at linkedin.com/in/anchit-tandon. He is open to full-time Senior Product Manager roles."
       }
     },
     {
@@ -3781,13 +3834,13 @@
                querySelectorAll('[data-view]'), so anything carrying one is claimed
                by switchView and rejected unless it is in ALL_VIEWS. This is a real
                page, so it has to stay an ordinary link. -->
-          <a class="sidebar-item sidebar-external" href="/freelancer" aria-label="Freelance work, hire me">
+          <a class="sidebar-item sidebar-external" href="/freelancer" aria-label="Freelance work">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
               <path d="M4 7h16a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1Z"/>
               <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 12h18"/>
             </svg>
             <span class="sidebar-label morph-label">
-              <span class="ml-default">Hire Me</span>
+              <span class="ml-default">Freelance</span>
               <span class="ml-hover" aria-hidden="true">Freelance work ↗</span>
             </span>
           </a>
@@ -4031,7 +4084,7 @@
   };
 
   window.anchitHardNarrate = function() {
-    var text = "Hey, I'm Anchit Tandon. An engineer who learned to love the funnel. Building products. Scaling growth. Creating leverage. Right now I am building Parwah, one app for family care in India, with parents at the centre, and I am open to freelance and consulting work alongside it. Before that I was A G M, Product Management and D to C Growth at Vahdam India, driving growth across the US, UK and global markets. Previously at Times Internet, I owned growth and monetisation across ET Prime and TOI Plus, scaling Assisted Sales five times to eighty lakh rupees in monthly recurring revenue in about ten months, rebuilding ET Markets and ET across iOS, Android and web to three crore plus in incremental annual recurring revenue, and building high-performing acquisition and retention funnels. I also led the end-to-end launch and execution of the inaugural Times Internet Delhi Half Marathon twenty twenty six at Dhyan Chand National Stadium, establishing a new I P, delivering a fifteen thousand plus participant experience, and creating a new revenue stream for the business. Today, I operate at the intersection of Product, Growth and Revenue, building systems, optimising funnels, running experiments, and creating scalable pathways to sustainable growth.";
+    var text = "Hey, I'm Anchit Tandon. An engineer who learned to love the funnel. Building products. Scaling growth. Creating leverage. Right now I am building Parwah, one app for family care in India, with parents at the centre, and I am looking for my next full-time Senior Product Manager role. Before that I was A G M, Product Management and D to C Growth at Vahdam India, driving growth across the US, UK and global markets. Previously at Times Internet, I owned growth and monetisation across ET Prime and TOI Plus, scaling Assisted Sales five times to eighty lakh rupees in monthly recurring revenue in about ten months, rebuilding ET Markets and ET across iOS, Android and web to three crore plus in incremental annual recurring revenue, and building high-performing acquisition and retention funnels. I also led the end-to-end launch and execution of the inaugural Times Internet Delhi Half Marathon twenty twenty six at Dhyan Chand National Stadium, establishing a new I P, delivering a fifteen thousand plus participant experience, and creating a new revenue stream for the business. Today, I operate at the intersection of Product, Growth and Revenue, building systems, optimising funnels, running experiments, and creating scalable pathways to sustainable growth.";
     var caption = document.getElementById('chatCaption');
     var words = text.trim().split(/\s+/);
     function cleanup() {
@@ -4075,13 +4128,20 @@
          rendered at all for reduced-motion visitors, and the offer has to
          reach both. It says three things only: what, for whom, how to ask.
          Every word is from freelancer.html. -->
-    <aside class="home-offer" aria-label="Freelance work">
+    <!-- Full-time first (Anchit's call, Nov 2026): the bar used to sell
+         freelance work and its one button opened a project brief. A recruiter
+         landing here needs the role, an email that already says what it is
+         about, and the resume. Freelance stays one quiet link to its own page. -->
+    <aside class="home-offer" aria-label="Open to full-time roles">
       <div class="home-offer-inner">
         <p class="home-offer-text">
-          <span class="home-offer-tag"><span class="home-offer-dot" aria-hidden="true"></span>Available for freelance</span>
-          <span class="home-offer-what"><strong class="home-offer-long">AI workflows, websites that convert and fractional product &amp; growth</strong><strong class="home-offer-short">Product &amp; growth, AI workflows and websites</strong> <span class="home-offer-for">for founders and D2C teams.</span></span>
+          <span class="home-offer-tag"><span class="home-offer-dot" aria-hidden="true"></span>Open to full-time Senior PM roles</span>
+          <span class="home-offer-what"><strong class="home-offer-long">Senior Product Manager &amp; AI Builder</strong><strong class="home-offer-short">Senior Product Manager &amp; AI Builder</strong> <span class="home-offer-for"><span class="home-offer-arc">APM &rarr; PM &rarr; Senior PM at Times Internet. </span><a class="home-offer-free" href="/freelancer">Freelance work &rarr;</a></span></span>
         </p>
-        <a class="btn primary home-offer-cta" href="mailto:anchit.tandon@gmail.com?subject=Let%E2%80%99s%20discuss%20a%20project&amp;body=Hi%20Anchit%2C%0A%0AI%E2%80%99m%20working%20on%3A%20%0AThe%20problem%20I%20need%20help%20with%3A%20%0AThe%20outcome%20I%E2%80%99m%20looking%20for%3A%20%0AIdeal%20timeline%3A%20%0A"><span class="home-offer-long">Discuss your project</span><span class="home-offer-short">Let&rsquo;s talk</span> <span aria-hidden="true">&rarr;</span></a>
+        <div class="home-offer-ctas">
+          <a class="btn primary home-offer-cta" href="mailto:anchit.tandon@gmail.com?subject=Senior%20Product%20Manager%20role&amp;body=Hi%20Anchit%2C%0A%0AThe%20role%3A%20%0AThe%20team%3A%20%0A"><span class="home-offer-long">Email me about a role</span><span class="home-offer-short">Email</span></a>
+          <a class="btn home-offer-cta" href="/assets/resume.pdf" download="Anchit_Tandon_Resume.pdf"><span class="home-offer-long">Resume (PDF)</span><span class="home-offer-short">Resume</span></a>
+        </div>
       </div>
     </aside>
 
@@ -4102,23 +4162,29 @@
           <div class="cine-ring r3"></div>
           <div class="cine-arc a1"></div>
           <div class="cine-arc a2"></div>
-          <img src="assets/logo-at-330.webp" srcset="assets/logo-at-330.webp 1x, assets/logo-at-660.webp 2x" alt="" width="330" height="330" decoding="async" fetchpriority="high">
+          <!-- The person first. The stylised AT crest is the site's mark and
+               stays in the sidebar; the first screen shows who is hiring-able. -->
+          <img class="cine-photo" src="assets/anchit-face-440.webp" srcset="assets/anchit-face-220.webp 220w, assets/anchit-face-440.webp 440w" sizes="(max-width: 820px) 220px, 330px" alt="" width="440" height="440" decoding="async" fetchpriority="high">
           <div class="cine-scan" id="cineScan"></div>
         </div>
 
         <h2 class="cine-name" id="cineName">Anchit Tandon</h2>
 
-        <div class="cine-roles" id="cineRoles">
-          <div class="cine-role">Product Management</div>
-          <div class="cine-role">D2C Growth</div>
-          <div class="cine-role">AI Builds</div>
-          <div class="cine-role">Building Parwah</div>
+        <!-- A fixed role line, not a carousel: the role is the one thing a
+             recruiter reads here, so it never fades out mid-sentence. -->
+        <div class="cine-roles cine-roles-static" id="cineRoles">
+          <div class="cine-title">Senior Product Manager &amp; AI Builder</div>
+          <div class="cine-arc-line">APM &rarr; PM &rarr; Senior PM, Times Internet &middot; AGM, Vahdam India</div>
         </div>
 
-        <div class="cine-boot" id="cineBoot">
-          <div class="cine-boot-row"><span class="cine-boot-label">Loading experience</span><span class="cine-boot-track"><span class="cine-boot-fill"></span></span><span class="cine-boot-pct">100%</span></div>
-          <div class="cine-boot-row"><span class="cine-boot-label">Loading products</span><span class="cine-boot-track"><span class="cine-boot-fill"></span></span><span class="cine-boot-pct">100%</span></div>
-          <div class="cine-boot-row"><span class="cine-boot-label">Loading engineering</span><span class="cine-boot-track"><span class="cine-boot-fill"></span></span><span class="cine-boot-pct">100%</span></div>
+        <!-- Was three decorative "Loading experience / products / engineering"
+             progress bars: a fake load that told the reader nothing. These are
+             the four headline results from the Experience view instead. -->
+        <div class="cine-proof" id="cineBoot">
+          <div class="cine-proof-item"><b>5&times;</b><span>&#8377;15 lakh &rarr; &#8377;80 lakh a month</span></div>
+          <div class="cine-proof-item"><b>&#8377;3 crore+</b><span>incremental ARR</span></div>
+          <div class="cine-proof-item"><b>400%+</b><span>ROI in 6 months</span></div>
+          <div class="cine-proof-item"><b>30 &rarr; 150+</b><span>qualified leads a day</span></div>
         </div>
 
         <!-- Rotating meta, chandan.dev's "Planet Earth-616 / coordinates" idea
@@ -4169,11 +4235,13 @@
             <!-- Hold to see the person behind the mark. The crest is what the
                  site wears; the photograph is who is underneath it, and you get
                  to it by holding rather than by being shown. -->
+            <!-- Photo on top now, crest underneath: the person leads and the
+                 stylised mark is the secondary, hold-to-see layer. -->
             <div class="hold-reveal shrink-0" data-hold-reveal>
-              <img src="assets/anchit-mark-220.webp" srcset="assets/anchit-mark-220.webp 1x, assets/anchit-mark-440.webp 2x, assets/anchit-mark-880.webp 4x" alt="Anchit Tandon" width="440" height="440" fetchpriority="high" class="hero-portrait rounded-full object-cover border-2 border-[var(--rule)]">
-              <img src="assets/anchit-face-220.webp" srcset="assets/anchit-face-220.webp 1x, assets/anchit-face-440.webp 2x" alt="" aria-hidden="true" width="440" height="440" loading="lazy" decoding="async" class="hero-portrait hr-under rounded-full object-cover border-2 border-[var(--rule)]">
+              <img src="assets/anchit-face-220.webp" srcset="assets/anchit-face-220.webp 1x, assets/anchit-face-440.webp 2x" alt="Anchit Tandon" width="440" height="440" fetchpriority="high" class="hero-portrait rounded-full object-cover border-2 border-[var(--rule)]">
+              <img src="assets/anchit-mark-220.webp" srcset="assets/anchit-mark-220.webp 1x, assets/anchit-mark-440.webp 2x, assets/anchit-mark-880.webp 4x" alt="" aria-hidden="true" width="440" height="440" loading="lazy" decoding="async" class="hero-portrait hr-under rounded-full object-cover border-2 border-[var(--rule)]">
               <span class="hr-ring" aria-hidden="true"></span>
-              <span class="hr-cue" aria-hidden="true">hold to see the human</span>
+              <span class="hr-cue" aria-hidden="true">hold to see the mark</span>
             </div>
             <div>
               <div class="eyebrow has-dot mb-2 text-xs opacity-80"><span class="live-dot"></span>Now · Building Parwah</div>
@@ -4182,6 +4250,15 @@
               <span class="greeting text-[var(--ink-dim)] narrate-span" data-n-idx="0">Hey, I'm </span><span class="firstline text-[var(--ink)] narrate-span" data-n-idx="0">Anchit</span> <span class="secondline text-[var(--ink)]"><span class="narrate-span" data-n-idx="0">Tandon.</span></span>
             </h1>
           </div>
+          <!-- Who, for a recruiter, in one line: the title on the resume and
+               the path that earned it. Then the four results that back it. -->
+          <p class="hero-role relative z-10"><strong>Senior Product Manager &amp; AI Builder</strong> <span>&middot; APM &rarr; PM &rarr; Senior PM, Times Internet &middot; AGM, Vahdam India</span></p>
+          <ul class="hero-proof relative z-10" aria-label="Headline results">
+            <li><b>5&times;</b><span>Assisted Sales, &#8377;15 lakh &rarr; &#8377;80 lakh a month (MRR) &middot; ET Prime</span></li>
+            <li><b>&#8377;3 crore+</b><span>incremental ARR &middot; ET Markets &amp; ET rebuild</span></li>
+            <li><b>400%+</b><span>ROI in 6 months &middot; ET Prime Assisted Sales</span></li>
+            <li><b>30 &rarr; 150+</b><span>qualified leads a day &middot; Assisted Buying</span></li>
+          </ul>
           <p class="hero-lede text-[var(--ink-dim)] font-light leading-snug relative z-10 narrate-span" data-n-idx="1">
             An <em class="text-[var(--primary)] not-italic font-medium">engineer</em> who learned to love the funnel.<br>
             <span class="hero-lede-sub inline-block">Building products. Scaling growth. Creating leverage.</span>
@@ -4215,11 +4292,11 @@
           <span class="dc-corner dc-bl" aria-hidden="true"></span><span class="dc-corner dc-br" aria-hidden="true"></span>
           <div class="dc-head">
             <span class="dc-stamp" aria-hidden="true">vahdam/id-02</span>
-            <span class="dc-badge">Apr &ndash; Sep 2026 // shipped</span>
+            <span class="dc-badge">Apr &ndash; Sep 2026</span>
           </div>
           <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-2">Previously</div>
           <h2 class="text-xl font-bold mb-1 text-[var(--ink)]">Vahdam India</h2>
-          <p class="text-sm text-[var(--ink-dim)] leading-relaxed">AGM, Product &amp; D2C Growth across US, UK &amp; global. Built a lifecycle &amp; retention OS; grew UK marketing revenue.</p>
+          <p class="text-sm text-[var(--ink-dim)] leading-relaxed">AGM, Product Management &amp; D2C Growth across US, UK &amp; global markets: CRM and lifecycle work on Klaviyo and WebEngage. Left in Sep 2026 to build Parwah full-time.</p>
           <div class="absolute top-4 right-4 opacity-10 group-hover:opacity-30 transition-opacity">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
           </div>
@@ -4235,7 +4312,7 @@
           </div>
           <div class="text-xs font-mono uppercase tracking-widest text-[var(--ink-dim)] mb-2">Previously</div>
           <h2 class="text-xl font-bold mb-1 text-[var(--ink)]">Times Internet</h2>
-          <p class="text-sm text-[var(--ink-dim)] leading-relaxed">Scaled Assisted Sales 5&times; to &#8377;80L MRR. Built ET Markets to &#8377;3Cr+ incremental ARR.</p>
+          <p class="text-sm text-[var(--ink-dim)] leading-relaxed">APM &rarr; PM &rarr; Senior PM. Scaled Assisted Sales 5&times; to &#8377;80 lakh a month. Built ET Markets to &#8377;3 crore+ incremental ARR.</p>
           <div class="absolute top-4 right-4 opacity-10 group-hover:opacity-30 transition-opacity">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
           </div>
@@ -4264,17 +4341,17 @@
          loop, not a second reading. -->
     <div class="ticker" aria-hidden="true">
       <div class="ticker-track">
-        <span>✦ <strong>Open to select freelance and consulting work</strong></span>
+        <span>✦ <strong>Open to full-time Senior Product Manager roles</strong></span>
         <span class="sparkle">/</span>
         <span>Product · Growth · lifecycle &amp; retention</span>
         <span class="sparkle">/</span>
-        <span>Delhi, India · remote · IST</span>
+        <span>Delhi, India · remote · IST · select freelance work</span>
         <span class="sparkle">/</span>
-        <span>✦ <strong>Open to select freelance and consulting work</strong></span>
+        <span>✦ <strong>Open to full-time Senior Product Manager roles</strong></span>
         <span class="sparkle">/</span>
         <span>Product · Growth · lifecycle &amp; retention</span>
         <span class="sparkle">/</span>
-        <span>Delhi, India · remote · IST</span>
+        <span>Delhi, India · remote · IST · select freelance work</span>
         <span class="sparkle">/</span>
       </div>
     </div>
@@ -4541,7 +4618,7 @@
         <div class="about-prose">
           <p>I started as a backend engineer, building real-time sports commentary, e-commerce flows, and consumer apps at scale. The kind of work where you watch your code touch a million people in a weekend.</p>
           <p>Then I moved to product, and what I really fell for was <em>the funnel</em>. The way it tells you the unfiltered truth about every decision you make.</p>
-          <p>These days I'm building <a data-nav='project-parwah'>Parwah</a>, one app for family care in India, with parents at the centre. I'm building it solo, and I'm open to freelance and consulting work alongside it. Before this I was AGM &ndash; Product Management, D2C Growth at Vahdam India, driving growth across US, UK and global markets, and before that nearly four years at Times Internet, APM to Senior PM, across ET Markets, ET Prime, Times Health+, and the Half Marathon.</p>
+          <p>These days I'm building <a data-nav='project-parwah'>Parwah</a>, one app for family care in India, with parents at the centre. I'm building it solo, and I'm looking for my next full-time Senior Product Manager role. Before this I was AGM &ndash; Product Management, D2C Growth at Vahdam India, driving growth across US, UK and global markets, and before that nearly four years at Times Internet, APM to Senior PM, across ET Markets, ET Prime, Times Health+, and the Half Marathon.</p>
           <p>I also build independent AI and consumer products, from Lifecycle OS to music and voice tools.</p>
           <div class="about-values reveal-stagger">
             <div class="about-value-item"><span class="about-value-label">Think in systems</span><span class="about-value-desc">Every product problem is a funnel problem in disguise.</span></div>
@@ -4555,7 +4632,7 @@
             <ul>
               <li><span>Building Parwah</span><span>Solo · live website</span></li>
               <li><span>Family care · India</span><span>Sep '26 →</span></li>
-              <li><span>Delhi, India</span><span>Remote · freelance &amp; consulting</span></li>
+              <li><span>Delhi, India</span><span>Open to full-time Senior PM roles · remote or Delhi NCR</span></li>
             </ul>
           </div>
           <div class="meta-block">
@@ -4602,9 +4679,9 @@
           <div class="now-role-card">
             <div class="now-role-eyebrow">Current · Building it solo</div>
             <h2 class="now-role-title">Parwah, family care for India</h2>
-            <div class="now-role-company">Solo build <span style="opacity:0.4">·</span> Delhi <span style="opacity:0.4">·</span> open to freelance &amp; consulting</div>
+            <div class="now-role-company">Solo build <span style="opacity:0.4">·</span> Delhi <span style="opacity:0.4">·</span> open to full-time Senior PM roles</div>
             <div class="now-role-period">September 2026 → Present</div>
-            <p class="now-role-desc">Building one app for family care in India, with parents at the centre. I own the whole thing, product, design, build and the consent model that decides what it will and will not do. Open to freelance and consulting alongside it. </p>
+            <p class="now-role-desc">Building one app for family care in India, with parents at the centre. I own the whole thing, product, design, build and the consent model that decides what it will and will not do. Alongside it, I'm looking for my next full-time Senior Product Manager role. </p>
           </div>
 
           <div class="now-focus-list reveal-stagger">
@@ -4633,8 +4710,8 @@
             <div class="now-focus-item">
               <div class="now-focus-num">04</div>
               <div>
-                <div class="now-focus-label">Freelance &amp; consulting</div>
-                <div class="now-focus-desc">Taking product and growth work alongside Parwah, lifecycle, retention and AI products that have to work for someone other than their author.</div>
+                <div class="now-focus-label">My next full-time role</div>
+                <div class="now-focus-desc">Looking for a full-time Senior Product Manager role: product and growth, lifecycle and retention, and AI products that have to work for someone other than their author. Select freelance work stays on the side.</div>
               </div>
             </div>
           </div>
@@ -4668,9 +4745,10 @@
 
           <div class="now-stack-card">
             <div class="now-metrics-eyebrow">Alongside it</div>
-            <p style="font-size:0.87rem;color:var(--ink-dim);line-height:1.65;margin:0 0 12px;">I am taking a small amount of freelance and consulting work, product, lifecycle and retention, and AI products that have to work for someone other than their author.</p>
+            <p style="font-size:0.87rem;color:var(--ink-dim);line-height:1.65;margin:0 0 12px;">I am looking for my next full-time Senior Product Manager role. Freelance work is secondary, and lives on <a href="/freelancer">its own page</a>.</p>
             <div style="margin-top:4px">
-              <a href="#contact" data-view="contact" class="btn primary" style="padding:8px 18px;font-size:13px;">Start a conversation &rarr;</a>
+              <a href="mailto:anchit.tandon@gmail.com?subject=Senior%20Product%20Manager%20role" class="btn primary" style="padding:8px 18px;font-size:13px;">Email me about a role &rarr;</a>
+              <a href="/assets/resume.pdf" download="Anchit_Tandon_Resume.pdf" class="btn" style="padding:8px 18px;font-size:13px;">Resume PDF</a>
             </div>
           </div>
         </div>
@@ -4683,12 +4761,12 @@
       <div class="section-head reveal">
         <div class="eyebrow">Experience · 2020 → Present</div>
         <h1 class="display-lg">Work Experience</h1>
-        <p class="lede" style="margin-top: 16px;">5+ years across product and engineering. Vahdam India, Times Internet, Citymall, Tuple Technologies. <em>Ship fast, measure everything, compound the results.</em></p>
+        <p class="lede" style="margin-top: 16px;">6+ years since April 2020: two in backend engineering, then four-plus in product, from APM to Senior PM at Times Internet and AGM at Vahdam India. Also Citymall and Tuple Technologies. <em>Ship fast, measure everything, compound the results.</em></p>
       </div>
 
       <div class="work-stats reveal-stagger">
-        <div class="work-stat"><div class="num"><em>5×</em></div><div class="label">Assisted Sales scaled to ₹80L MRR · Times Internet</div></div>
-        <div class="work-stat"><div class="num">₹3<em>Cr</em>+</div><div class="label">Incremental ARR · ET Markets &amp; ET rebuild</div></div>
+        <div class="work-stat"><div class="num"><em>5×</em></div><div class="label">Assisted Sales, ₹15 lakh → ₹80 lakh a month (MRR) · Times Internet</div></div>
+        <div class="work-stat"><div class="num">₹3<em>Cr</em>+</div><div class="label">₹3 crore+ incremental ARR · ET Markets &amp; ET rebuild</div></div>
         <div class="work-stat"><div class="num"><em>400</em>%+</div><div class="label">ROI on the ET Prime relaunch · Times Internet</div></div>
         <div class="work-stat"><div class="num">150<em>+</em></div><div class="label">Qualified leads/day · Assisted Buying (up from 30)</div></div>
       </div>
@@ -4709,7 +4787,7 @@
             <!-- Short on purpose. The consent model and the senior-first constraint are
                  argued in full on the Now view and in the Parwah case study; this is the
                  timeline entry, so it states the role and points at them. -->
-            <p>Building it solo, product, design, the build, and the consent model that decides what it will and will not do. Parwah is live as a website for families, and I am improving it as I learn from real use. I am taking freelance and consulting work alongside it. <a href="#project-parwah" data-view="project-parwah">Read the case study &rarr;</a></p>
+            <p>Building it solo, product, design, the build, and the consent model that decides what it will and will not do. Parwah is live as a website for families, and I am improving it as I learn from real use. I am also looking for my next full-time Senior Product Manager role. <a href="#project-parwah" data-view="project-parwah">Read the case study &rarr;</a></p>
             <div class="work-impact-bar"><div class="work-impact-row"><span class="work-impact-chip gold">Consent model</span><span class="work-impact-chip gold">Senior-first interface</span><span class="work-impact-chip gold">Live website for families</span></div></div>
             <div style="margin-top: 16px;">
               <a href="https://parwah-hq.anchit-tandon.com" target="_blank" rel="noopener" class="btn" style="padding: 8px 18px; font-size: 13px;">
@@ -4734,9 +4812,9 @@
           <div class="work-num">00</div>
           <div class="work-content">
             <h3>D2C <em>Growth</em></h3>
-            <p>I worked on D2C growth across the US, UK, and global markets. I helped build a customer lifecycle &amp; retention OS that threads analytics, planning, segmentation and mailer generation into a single loop. In my first two months I also helped lift UK marketing revenue.</p>
-            <div class="tags"><span class="tag">D2C Growth</span><span class="tag">Lifecycle OS</span><span class="tag">CRM · Klaviyo</span><span class="tag">WebEngage</span><span class="tag">US · UK · Global</span></div>
-            <div class="work-impact-bar"><div class="work-impact-row"><span class="work-impact-chip gold">Lifecycle &amp; retention OS</span><span class="work-impact-chip gold">UK marketing revenue increased</span><span class="work-impact-chip gold">Apr–Sep 2026</span></div></div>
+            <p>I worked on D2C growth across the US, UK, and global markets: international customer journeys and conversion funnels, and CRM and lifecycle experiments on Klaviyo and WebEngage. I left in Sep 2026 to build Parwah full-time.</p>
+            <div class="tags"><span class="tag">D2C Growth</span><span class="tag">Lifecycle &amp; retention</span><span class="tag">CRM · Klaviyo</span><span class="tag">WebEngage</span><span class="tag">US · UK · Global</span></div>
+            <div class="work-impact-bar"><div class="work-impact-row"><span class="work-impact-chip gold">US, UK &amp; global markets</span><span class="work-impact-chip gold">CRM · Klaviyo · WebEngage</span><span class="work-impact-chip gold">Apr–Sep 2026</span></div></div>
             <div style="margin-top: 16px;">
               <a href="https://www.vahdam.com/" target="_blank" rel="noopener" class="btn" style="padding: 8px 18px; font-size: 13px;">
                 Visit live website ↗
@@ -4760,10 +4838,11 @@
             <h3>Times Internet <em>Half Marathon</em></h3>
             <p>Built a 0→1 consumer product, owning discovery, registration, acquisition funnels, and on-ground runner insights for a first-time consumer IP.</p>
             <div class="tags"><span class="tag">0→1</span><span class="tag">Consumer Event</span><span class="tag">Funnel Design</span><span class="tag">Acquisition</span></div>
-            <div class="work-impact-bar"><div class="work-impact-row"><span class="work-impact-chip">Zero to Live</span><span class="work-impact-chip">Consumer IP</span></div></div>
-            <div style="margin-top: 16px;">
+            <div class="work-impact-bar"><div class="work-impact-row"><span class="work-impact-chip red">15,000+ participants</span><span class="work-impact-chip">Zero to Live</span><span class="work-impact-chip">Consumer IP</span></div></div>
+            <div class="work-links" style="margin-top: 16px;">
+              <a href="/TimesHealth_Study" class="btn primary" style="padding: 8px 18px; font-size: 13px;">Times Health Study: Why Users Stop &rarr;</a>
               <a href="https://www.timesinternet.in/" target="_blank" rel="noopener" class="btn" style="padding: 8px 18px; font-size: 13px;">
-                Visit live website ↗
+                Times Internet ↗
               </a>
             </div>
           </div>
@@ -4776,7 +4855,9 @@
             <p>Scaled an assisted consumer conversion channel into one of Economic Times' most profitable growth engines. Funnel redesign, continuous A/B experimentation, and an AI-powered telesuite enabling call transcription, quality scoring, and pitch assistance.</p>
             <div class="tags"><span class="tag">Growth</span><span class="tag">Subscriptions</span><span class="tag">AI Telesuite</span><span class="tag">A/B Testing</span></div>
             <div class="work-impact-bar"><div class="work-impact-row"><span class="work-impact-chip red">5× MRR · ₹15L → ₹80L</span><span class="work-impact-chip red">400%+ ROI in 6 months</span><span class="work-impact-chip">Team Award '25</span></div></div>
-            <div style="margin-top: 16px;">
+            <div class="work-links" style="margin-top: 16px;">
+              <a href="#project-assisted-sales" data-view="project-assisted-sales" class="btn primary" style="padding: 8px 18px; font-size: 13px;">Read the case study &rarr;</a>
+              <a href="/ET_Study" class="btn" style="padding: 8px 18px; font-size: 13px;">ET Study: Why ET Prime Members Are Unhappy &rarr;</a>
               <a href="https://economictimes.indiatimes.com/prime" target="_blank" rel="noopener" class="btn" style="padding: 8px 18px; font-size: 13px;">
                 Visit live website ↗
               </a>
@@ -4791,9 +4872,10 @@
             <p>Launched paid wellness subscriptions from scratch, freemium-to-paid journeys, pricing experiments, and retention-led monetisation.</p>
             <div class="tags"><span class="tag">Subscriptions</span><span class="tag">Monetisation</span><span class="tag">Retention</span><span class="tag">Paywall</span></div>
             <div class="work-impact-bar"><div class="work-impact-row"><span class="work-impact-chip">0 → Paid Tier</span><span class="work-impact-chip">New Revenue Line</span></div></div>
-            <div style="margin-top: 16px;">
+            <div class="work-links" style="margin-top: 16px;">
+              <a href="/TimesHealth_Study" class="btn primary" style="padding: 8px 18px; font-size: 13px;">Times Health Study: Why Users Stop &rarr;</a>
               <a href="https://www.timesinternet.in/" target="_blank" rel="noopener" class="btn" style="padding: 8px 18px; font-size: 13px;">
-                Visit live website ↗
+                Times Internet ↗
               </a>
             </div>
           </div>
@@ -4806,7 +4888,8 @@
             <p>Led the revamp of ET Markets (Web &amp; mWeb), improving engagement by 27% and unlocking ₹3Cr+ incremental annual revenue. Revamped Android and iOS apps, increasing DAU by 25% and average session duration by 15%. Launched discovery and decision-support features improving screen views by 19%.</p>
             <div class="tags"><span class="tag">Consumer Finance</span><span class="tag">Multi-platform</span><span class="tag">Experimentation</span><span class="tag">iOS · Android</span></div>
             <div class="work-impact-bar"><div class="work-impact-row"><span class="work-impact-chip red">₹3Cr+ ARR</span><span class="work-impact-chip">+27% Engagement</span><span class="work-impact-chip">+25% DAU</span><span class="work-impact-chip">+15% Sessions</span></div></div>
-            <div style="margin-top: 16px;">
+            <div class="work-links" style="margin-top: 16px;">
+              <a href="/ET_Study" class="btn primary" style="padding: 8px 18px; font-size: 13px;">ET Study: Why ET Prime Members Are Unhappy &rarr;</a>
               <a href="https://economictimes.indiatimes.com/markets" target="_blank" rel="noopener" class="btn" style="padding: 8px 18px; font-size: 13px;">
                 Visit live website ↗
               </a>
@@ -4869,6 +4952,22 @@
         </div>
       </div>
 
+      <!-- Company case studies. Each title and one-liner is the study's own
+           <title> and meta description, so nothing here is a new claim. These
+           are independent studies, not work done for those companies. -->
+      <div id="exp-studies" class="section-head reveal" style="margin-top: 72px; scroll-margin-top: 24px;">
+        <div class="eyebrow">Company case studies · independent</div>
+        <h2 class="display-sm">Five products I studied <em>end to end</em></h2>
+        <p class="lede" style="margin-top: 16px;">Problem-first audits with evidence, the fixes I would ship, and a working model or prototype for each.</p>
+      </div>
+      <div class="study-grid reveal-stagger">
+        <a class="study-card" href="/ET_Study"><span class="study-kicker">The Economic Times · ET Markets · ET Prime</span><strong>ET Study: Why ET Prime Members Are Unhappy</strong><span class="study-line">Independent, problem-first study of The Economic Times, ET Markets and ET Prime: 8 problems with evidence and 14 fixes.</span><span class="study-go">Read the study &rarr;</span></a>
+        <a class="study-card" href="/TimesHealth_Study"><span class="study-kicker">Times Health+ · Half Marathon</span><strong>Times Health Study: Why Users Stop</strong><span class="study-line">Independent, problem-first study of Times Health+ yoga, its diet plans and the Times Internet Half Marathon.</span><span class="study-go">Read the study &rarr;</span></a>
+        <a class="study-card" href="/pw-study"><span class="study-kicker">PhysicsWallah</span><strong>Learner Retention Engine for PW</strong><span class="study-line">A PhysicsWallah platform audit and the Learner Retention Engine, an AI retention system with a working prototype.</span><span class="study-go">Read the study &rarr;</span></a>
+        <a class="study-card" href="/lenskart-study"><span class="study-kicker">Lenskart</span><strong>Lenskart Case Study: the Vision Recall Engine</strong><span class="study-line">A Lenskart platform audit and the Vision Recall Engine, an AI re-test and repeat-purchase system with a working prototype.</span><span class="study-go">Read the study &rarr;</span></a>
+        <a class="study-card" href="/amar-ujala/study"><span class="study-kicker">Amar Ujala</span><strong>Amar Ujala Study: Result Day to Admission</strong><span class="study-line">An audit of Amar Ujala education, 14 upgrades, the six venture questions and a working prototype.</span><span class="study-go">Read the study &rarr;</span></a>
+      </div>
+
       <!-- The "All products shipped" chip grid used to sit here: eleven chips,
            seven of them linking to sections the reader has just scrolled past on
            this very page, and four of them (Hey Yaara, MusicGenAI, the consumer
@@ -4892,8 +4991,6 @@
     <div class="container folio" id="projectsFolio">
       <div class="section-head folio-masthead reveal">
         <div class="folio-plate">
-          <span class="folio-vol">Vol. I</span>
-          <span class="folio-rule" aria-hidden="true"></span>
           <span class="folio-kicker" data-folio-count>The builds</span>
         </div>
         <div class="eyebrow">Current project + independent builds</div>
@@ -4907,7 +5004,7 @@
 
       <div class="folio-toolbar" data-no-motion>
         <button type="button" class="folio-nav" data-folio-dir="-1" aria-label="Previous spread">&#8249;</button>
-        <p class="folio-progress" data-folio-progress aria-live="polite">Spread 1 of 9</p>
+        <p class="folio-progress" data-folio-progress aria-live="polite">Introduction</p>
         <ol class="folio-toc" data-folio-toc aria-label="Jump to a spread"></ol>
         <button type="button" class="folio-nav" data-folio-dir="1" aria-label="Next spread">&#8250;</button>
       </div>
@@ -4931,7 +5028,7 @@
 
         <!-- Card, Parwah. Current work, so it leads the grid. -->
         <div class="build-card tilt-card">
-          <div class="build-tag"><span class="bento-index">01</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Family Care &middot; India</span><span class="status" data-tag="private">Private tool</span></div>
+          <div class="build-tag"><span class="bento-index">01</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Family Care &middot; India</span><span class="status" data-tag="live">Live</span></div>
           <h3><em>Parwah</em> &#2346;&#2352;&#2357;&#2366;&#2361;</h3>
           <p class="build-purpose"><span class="bp-label">What it&rsquo;s for</span><span class="bp-text">Knowing your parents are okay, from a thousand kilometres away.</span></p>
           <p>One app for the whole family, with your parents at the centre, daily check-in, SOS, book anything for them, send money safely, gift with dignity. Reassurance, never surveillance.</p>
@@ -4968,7 +5065,7 @@
           <div class="build-tag"><span class="bento-index">03</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>D2C Marketing Automation</span><span class="status" data-tag="demo">Demo</span></div>
           <h3><em>LifeCycle-OS</em></h3>
           <p class="build-purpose"><span class="bp-label">What it’s for</span><span class="bp-text">Designing a brand’s retention lifecycle before writing a campaign.</span></p>
-          <p>A customer-lifecycle &amp; retention suite I built independently. Point it at <em>any</em> brand&rsquo;s website and it sets the brand up from what that site publishes, then plans and builds its campaigns.</p>
+          <p>A customer-lifecycle &amp; retention suite I built independently, shaped by my retention work at Vahdam. Point it at <em>any</em> brand&rsquo;s website and it sets the brand up from what that site publishes, then plans and builds its campaigns.</p>
           <ul class="build-details">
             <li>Reads the brand's colours, type, voice and product catalogue off its own site, then keeps a rolling 90-day plan per market and customer cohort, with a mailer, landing page and Meta, Google and TikTok ads built for each send.</li>
             <li>Every asset is checked against each platform&rsquo;s limits and a compliance gate, says what data is missing instead of inventing it, and waits for a person to approve before anything goes out.</li>
@@ -5201,10 +5298,54 @@
             <a class="btn" href="/marketing-101">Read Marketing 101 &#8599;</a>
           </div>
         </div>
+        <!-- Concept storefronts. Design concepts, not client work: each plate
+             quotes the storefront's own disclaimer, word for word. Demo, because
+             nothing on them places a real order. -->
+        <div class="build-card tilt-card">
+          <div class="build-tag"><span class="bento-index">17</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Concept storefront &middot; Jewellery</span><span class="status" data-tag="demo">Demo</span></div>
+          <h3>Xazina, <em>A Study in Light</em></h3>
+          <p class="build-purpose"><span class="bp-label">What it&rsquo;s for</span><span class="bp-text">An independent Xazina design concept by Anchit Tandon.</span></p>
+          <p>Explore lab-grown diamond jewellery, fine fragrance, and an interactive study of light.</p>
+          <ul class="build-details">
+            <li>Products and purchases are handled on Xazina&rsquo;s official store.</li>
+          </ul>
+          <div class="build-stack"><span class="build-chip">Design concept</span><span class="build-chip">Storefront</span></div>
+          <div class="build-actions">
+            <a class="btn primary" href="/xazina-revamp">Open the concept<span class="build-launch" aria-hidden="true">&#8599;</span></a>
+          </div>
+        </div>
+
+        <div class="build-card tilt-card">
+          <div class="build-tag"><span class="bento-index">18</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Concept storefront &middot; Food</span><span class="status" data-tag="demo">Demo</span></div>
+          <h3>Deli <em>Chic</em></h3>
+          <p class="build-purpose"><span class="bp-label">What it&rsquo;s for</span><span class="bp-text">Concept storefront by Anchit Tandon, not affiliated with Deli Chic.</span></p>
+          <p>Food For Thought: haute boucherie &amp; artisanal larder.</p>
+          <ul class="build-details">
+            <li>Nothing here places a real order.</li>
+          </ul>
+          <div class="build-stack"><span class="build-chip">Design concept</span><span class="build-chip">Storefront</span></div>
+          <div class="build-actions">
+            <a class="btn primary" href="/deli-chic">Open the concept<span class="build-launch" aria-hidden="true">&#8599;</span></a>
+          </div>
+        </div>
+
+        <div class="build-card tilt-card">
+          <div class="build-tag"><span class="bento-index">19</span><span class="bento-eyebrow-dot" aria-hidden="true"></span><span>Concept storefront &middot; Coffee</span><span class="status" data-tag="demo">Demo</span></div>
+          <h3>Gram Street <em>Coffee</em></h3>
+          <p class="build-purpose"><span class="bp-label">What it&rsquo;s for</span><span class="bp-text">Concept storefront by Anchit Tandon, not affiliated with Gram Street Coffee.</span></p>
+          <p>D2C roastery, Japanese matcha &amp; gelato, Gurugram: in-house specialty roasts, ceremonial Uji matcha, and small-batch gelato.</p>
+          <ul class="build-details">
+            <li>Nothing here places a real order.</li>
+          </ul>
+          <div class="build-stack"><span class="build-chip">Design concept</span><span class="build-chip">Storefront</span></div>
+          <div class="build-actions">
+            <a class="btn primary" href="/gram-street-coffee">Open the concept<span class="build-launch" aria-hidden="true">&#8599;</span></a>
+          </div>
+        </div>
         <!-- Facing plate so the last spread is a pair.
              Not a .build-card: the card and link suites count those only. -->
         <div class="folio-colophon" data-no-motion>
-          <span class="folio-vol">Last plate</span>
+          <span class="folio-vol">End of the list</span>
           <h3>Each one is useful, and each one is clear about where it stops.</h3>
           <p>Parwah is the main project. The others are independent builds across AI, growth, music and consumer experiences.</p>
           <a class="btn primary" href="#contact" data-view="contact">Contact</a>
@@ -5936,7 +6077,7 @@
         <p class="quote">&ldquo;Apni family ki parwah karein.&rdquo;</p>
         <div class="project-meta">
           <div><span class="label">Role</span><span>Building it solo</span></div>
-          <div><span class="label">Status</span><span>Private tool &middot; live website, app behind sign-in</span></div>
+          <div><span class="label">Status</span><span>Live website</span></div>
           <div><span class="label">Surface</span><span>Working website for families</span></div>
         </div>
         <div class="project-cta">
@@ -5988,6 +6129,19 @@
       </div>
 
       <div class="project-section reveal">
+        <div class="eyebrow">What I&rsquo;ll measure &middot; a plan, no results yet</div>
+        <h2>How I will know it is working</h2>
+        <p>Parwah is new, so there are no results to report here. These are the measures I am building it against, one for each thing the product promises. None of them has a number yet.</p>
+        <ul>
+          <li><strong>The daily check-in actually happens.</strong> The share of days the &ldquo;All is well&rdquo; tap is made, and how often a missed one is followed by a call from the family.</li>
+          <li><strong>Consent stays with the parent.</strong> How often parents change, pause or revoke what they share. A parent who never needs to is a good sign; one who cannot find the control is a bug.</li>
+          <li><strong>&ldquo;Do it for them&rdquo; gets done.</strong> Bookings for parents (cab, gas refill, plumber, train ticket, groceries) that are completed, and how long they take.</li>
+          <li><strong>Money moves safely.</strong> Payments and allowances sent, and how often the scam shield warns before an unknown payee.</li>
+          <li><strong>Senior-first holds up.</strong> Whether parents finish the three actions on a screen without help, and how often they ask a person on WhatsApp instead.</li>
+        </ul>
+      </div>
+
+      <div class="project-section reveal">
         <div class="eyebrow">Explore Parwah</div>
         <h2>The website is live.</h2>
         <p>Visit the working website to explore Parwah and see how it brings family care into one place.</p>
@@ -6000,6 +6154,83 @@
         <div class="eyebrow">Where it is</div>
         <h2>Live in India</h2>
         <p>Parwah is a working website, and I am continuing to improve it. The name says the rest: <em>parwah</em> means care. Our parents spent decades showing theirs.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CASE STUDY: ASSISTED SALES FOR ET PRIME (work, not a side build).
+       The strongest PM result on the site used to be a three-line card. Every
+       figure below is already on record in this repo: the Experience card, the
+       resume and the ET Study's about page. Where a number is NOT on record
+       (the starting conversion rate, the team size, the lead volume at the
+       start), the page says so instead of estimating one. The timeframe of the
+       5x is left out on purpose: my materials state it differently in
+       different places, and a hiring panel should not have to reconcile them. -->
+  <section class="view" id="view-project-assisted-sales">
+    <div class="container">
+      <a class="back-link" href="#experience" data-view="experience" data-anchor="exp-ti-assisted">&larr; Work experience</a>
+
+      <div class="project-hero reveal">
+        <div class="eyebrow">Times Internet &middot; ET Prime &middot; Case study</div>
+        <h1 class="display-lg">Assisted Sales for <em>ET Prime</em></h1>
+        <p class="quote">&ldquo;I scaled assisted sales, and it works best when it calls users who asked for a call.&rdquo;</p>
+        <div class="project-meta">
+          <div><span class="label">Role</span><span>Product Manager &rarr; Senior Product Manager, Times Internet</span></div>
+          <div><span class="label">When</span><span>2024 to Apr 2026</span></div>
+          <div><span class="label">Result</span><span>5&times; MRR, &#8377;15 lakh &rarr; &#8377;80 lakh a month &middot; 400%+ ROI in 6 months</span></div>
+        </div>
+        <div class="project-cta">
+          <a href="/ET_Study" class="btn primary">ET Study: Why ET Prime Members Are Unhappy &rarr;</a>
+          <a href="#project-telesuite" data-view="project-telesuite" class="btn">AI TeleSuite, my own build of the telesuite &rarr;</a>
+        </div>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">Context</div>
+        <h2>A sales team for a subscription product</h2>
+        <p>ET Prime is The Economic Times&rsquo; premium, ad-free business subscription. Assisted Sales is an assisted consumer conversion channel for it: a sales team that calls people and helps them subscribe. It was a high-volume channel, with dozens of agents, structured scripts and a mature ops layer.</p>
+        <p>I owned growth for that channel as a Product Manager and then as a Senior Product Manager, alongside growth and monetisation for TOI Plus.</p>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">The problem</div>
+        <h2>A channel stuck at &#8377;15 lakh a month</h2>
+        <p>Assisted Sales was bringing in about &#8377;15 lakh (&#8377;1.5 million) a month in recurring revenue. The job was to scale it.</p>
+        <p><strong>What is not stated here, on purpose:</strong> the starting conversion rate, the size of the sales team and the lead volume at the start are not in my published materials, so I am not going to estimate them.</p>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">What I did</div>
+        <h2>Funnel, experiments, and a telesuite for the callers</h2>
+        <ul>
+          <li><strong>Redesigned the funnel.</strong> I improved the lead journeys and the call flows.</li>
+          <li><strong>Ran continuous A/B experiments.</strong> Continuous A/B experimentation, inside a structured assisted-conversion programme that I built.</li>
+          <li><strong>Built an AI-powered telesuite.</strong> Call transcription, quality scoring and pitch assistance, so the team could review and improve their calls more consistently.</li>
+          <li><strong>The lead side came first.</strong> Earlier, as an Associate PM, I introduced assisted-buying surfaces for high-intent ET users, which took qualified leads from about 30 to 150+ a day.</li>
+        </ul>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">Results</div>
+        <h2>One of ET&rsquo;s most profitable growth engines</h2>
+        <ul>
+          <li><strong>5&times; monthly recurring revenue:</strong> &#8377;15 lakh &rarr; &#8377;80 lakh a month (&#8377;1.5 million &rarr; &#8377;8 million).</li>
+          <li><strong>400%+ return on investment</strong> on the assisted-conversion programme, in six months.</li>
+          <li><strong>ET Prime Team Award, 2025</strong> (Times Internet), received as part of the team.</li>
+          <li><strong>Qualified leads, 30 &rarr; 150+ a day</strong>, from the earlier Assisted Buying work.</li>
+        </ul>
+      </div>
+
+      <div class="project-section reveal">
+        <div class="eyebrow">What I&rsquo;d do next &middot; intent, not a result</div>
+        <h2>Call the people who asked for a call</h2>
+        <p>Looking back with the ET Study in hand, the lesson I would build on is that assisted sales works best when it calls users who asked for a call. The answer to sales-call complaints is not fewer users on the phones; it is calling the right users, and never those who already pay.</p>
+        <ul>
+          <li><strong>Consent first.</strong> Use the same call scoring to keep calls to consented, high-intent buyers.</li>
+          <li><strong>Never call a subscriber.</strong> Take anyone who already pays out of the calling list.</li>
+          <li><strong>Patterns, not single calls.</strong> A coaching view that surfaces what works across many calls, not one call at a time.</li>
+        </ul>
+        <p>These are plans, not outcomes. Nothing on this list has been shipped or measured.</p>
       </div>
     </div>
   </section>
@@ -6229,7 +6460,6 @@
           <li><strong>Solo sellers have no quality feedback loop.</strong> Big sales orgs have call review meetings; freelancers have a hopeful inbox.</li>
           <li><strong>Pitch consistency is invisible.</strong> Without recording and scoring, you don't know whether your fifth call of the day is as sharp as your first.</li>
           <li><strong>Wins are unrepeatable.</strong> If you don't know which sentences moved the needle, you can't double down on them.</li>
-          <li><strong>Coaching at scale is expensive.</strong> A senior sales coach costs $200/hour. AI can do the first 80% for almost nothing.</li>
         </ul>
       </div>
 
@@ -6672,7 +6902,8 @@
           <a href="/assets/resume.pdf" target="_blank" rel="noopener" style="margin-left:auto; color:var(--primary); font-weight:500; text-decoration:none;">Open PDF ↗</a>
         </div>
         <div style="padding:32px; text-align:center; color:var(--ink-dim);">
-          <p style="margin-bottom:18px;">Open the resume in a separate tab for the clean PDF view.</p>
+          <p style="margin-bottom:18px;">Senior Product Manager &amp; AI Builder. Download it, or open it in a separate tab for the clean PDF view.</p>
+          <a class="btn primary" href="/assets/resume.pdf" download="Anchit_Tandon_Resume.pdf">Download resume (PDF)</a>
           <a class="btn" href="/assets/resume.pdf" target="_blank" rel="noopener">Open Resume PDF ↗</a>
         </div>
       </div>
@@ -6685,7 +6916,7 @@
       <div class="section-head reveal">
         <div class="eyebrow">Get in touch</div>
         <h1 class="display-lg">Contact</h1>
-        <p class="lede" style="margin-top: 16px;">Building Parwah and open to select product and growth consulting. <em>Let's build something worth measuring.</em></p>
+        <p class="lede" style="margin-top: 16px;">Open to full-time Senior Product Manager roles, while I build Parwah. Freelance work is secondary, <a href="/freelancer">on its own page</a>. <em>Let's build something worth measuring.</em></p>
       </div>
 
       <div class="contact-grid reveal-stagger">
@@ -6908,7 +7139,9 @@
     });
   })();
 
-  const ALL_VIEWS = ['home','about','now','chat','experience','projects','resume','contact','project-parwah','project-ebooks','project-disasters','project-agentlp','project-jobfit','project-music','project-thirdeye','project-yaara','project-mailer','project-telesuite','project-lifeengine'];
+  const ALL_VIEWS = ['home','about','now','chat','experience','projects','resume','contact','project-assisted-sales','project-parwah','project-ebooks','project-disasters','project-agentlp','project-jobfit','project-music','project-thirdeye','project-yaara','project-mailer','project-telesuite','project-lifeengine'];
+  // project-* views that are case studies of a JOB, not a side build.
+  const WORK_CASE_VIEWS = ['project-assisted-sales'];
   let audioModeEnabled = false; // true once user has clicked Play, gates page narration
   window.chatVoiceMuted = false; // chat replies speak aloud by default; mute toggle flips this
   // Browsers block speech before the first gesture, track it so the load-time
@@ -7123,7 +7356,7 @@
     const activeEl = document.querySelector('.view.active');
     const viewName = activeEl ? activeEl.id.replace('view-', '') : 'home';
     const text = viewName === 'home'
-      ? "Hey, I'm Anchit Tandon. Right now I am building Parwah, family care for India, and taking freelance and consulting work alongside it. Before that, A.G.M., Product Management, D2C Growth at Vahdam India across U.S., U.K. and global, where I joined on twentieth April twenty twenty six. At Vahdam I worked on customer lifecycle and retention, and helped increase U.K. marketing revenue."
+      ? "Hey, I'm Anchit Tandon. Right now I am building Parwah, family care for India, and I am looking for my next full-time Senior Product Manager role. Before that, A.G.M., Product Management, D2C Growth at Vahdam India across U.S., U.K. and global, where I joined on twentieth April twenty twenty six. At Vahdam I worked on customer lifecycle and retention, and helped increase U.K. marketing revenue."
       : "Ask me anything about my work, side projects, product philosophy, or how to connect.";
     
     if (typeof window.openFullChat === 'function') {
@@ -7237,7 +7470,10 @@
     // Active states on sidebar nav links
     navLinks.forEach(n => {
       const target = n.dataset.view;
-      const isActive = target === viewName || (viewName.startsWith('project-') && target === 'projects');
+      // Work case studies sit under Experience; every other project-* view
+      // is a build and keeps the Projects item lit.
+      const parentNav = WORK_CASE_VIEWS.includes(viewName) ? 'experience' : (viewName.startsWith('project-') ? 'projects' : '');
+      const isActive = target === viewName || (parentNav && target === parentNav);
       n.classList.toggle('active', isActive);
     });
 
@@ -7280,17 +7516,14 @@
   const hash = window.location.hash.replace('#', '');
   if (hash) {
     const [viewPart, anchorPart] = hash.split('/');
-    // Never auto-route into the chat overlay on load, always land on HOME; chat
-    // opens via the chooser or a click. openFullChat() writes #chat to the URL,
-    // which would otherwise bounce returning visitors straight back into chat.
+    // A shared /#chat link is a request for the chat, so it opens the chat.
+    // It used to be dropped here and the visitor landed on Home with the chat
+    // minimised, which made every "talk to my AI" link look broken. The open
+    // itself happens where the boot sequence would otherwise minimise the
+    // chat (search "deep link to #chat"), because the chat code is not wired up yet at
+    // this point in the script.
     if (viewPart && viewPart !== 'chat') {
       switchView(viewPart, anchorPart || undefined);
-    } else if (viewPart === 'chat') {
-      // Deliberately landing on home (see above). The URL still said #chat, so
-      // the address bar described a page that was not on screen and a reload
-      // repeated the confusion. Drop the fragment instead of acting on it, so
-      // the state shown and the state in the URL agree.
-      try { history.replaceState(null, '', location.pathname + location.search); } catch {}
     }
   }
 
@@ -7306,11 +7539,11 @@
 	      response: "Here is the tour: Home gives the quick positioning and proof points; Work Experience explains Vahdam, Times Internet and my engineering-to-product arc; Projects shows Parwah and my other builds; Resume is the formal PDF path; Contact gives WhatsApp, call, Google Meet, WhatsApp, SMS, Email and Resume. I will update the guide card every time you open a page.",
 	      nextChips: ["Open Work Experience","Open Projects","How do I reach you?","Narrate this page"] },
     { keywords: ['who','about','tell me about you','yourself','background','bio','introduce','what do you do','describe'],
-      response: "I'm Anchit Tandon. Right now I'm building Parwah, one app for family care in India, with parents at the centre, and I'm open to freelance and consulting work alongside it. Before this I was AGM, Product Management, D2C Growth at Vahdam India across the US, UK and global markets, from April to September 2026, and before that at Times Internet, moving from APM to Senior PM. I started as a backend engineer, moved to product because I wanted to understand the <em>why</em> behind what we build, and I keep going deep until I understand the real system underneath a problem. <a data-nav='experience'>Full story →</a>",
+      response: "I'm Anchit Tandon. Right now I'm building Parwah, one app for family care in India, with parents at the centre, and I'm looking for my next full-time Senior Product Manager role. Before this I was AGM, Product Management, D2C Growth at Vahdam India across the US, UK and global markets, from April to September 2026, and before that at Times Internet, moving from APM to Senior PM. I started as a backend engineer, moved to product because I wanted to understand the <em>why</em> behind what we build, and I keep going deep until I understand the real system underneath a problem. <a data-nav='experience'>Full story →</a>",
       nextChips: ["Your biggest career win?","Why switch to product?","Tell me about your side builds","Hardest problem right now?"] },
     { keywords: ['parwah','family care','parents','right now','working now','building now','what are you building','main project'],
-      response: "Right now I'm building <a data-nav='project-parwah'>Parwah</a>, one app for the whole family, with your parents at the centre: daily check-in, SOS, book anything for them, send money safely, gift with dignity. Reassurance, never surveillance. The <a href='https://parwah-hq.anchit-tandon.com/' target='_blank' rel='noopener'>website is live</a>, and I take on freelance and consulting work alongside it.",
-      nextChips: ["Show me your work","Tell me about your side builds","Can I hire you freelance?","How do I reach you?"] },
+      response: "Right now I'm building <a data-nav='project-parwah'>Parwah</a>, one app for the whole family, with your parents at the centre: daily check-in, SOS, book anything for them, send money safely, gift with dignity. Reassurance, never surveillance. The <a href='https://parwah-hq.anchit-tandon.com/' target='_blank' rel='noopener'>website is live</a>, and alongside it I'm looking for my next full-time Senior Product Manager role.",
+      nextChips: ["Show me your work","Tell me about your side builds","Are you open to full-time roles?","How do I reach you?"] },
     { keywords: ['role','title','current','doing now','job','vahdam','work now','position'],
       response: "I was AGM, Product Management and D2C Growth at Vahdam India from April to September 2026. I worked across the US, UK and global markets on growth and lifecycle initiatives, including an operating workflow linking analytics, segmentation, planning and mailers. Parwah is my main project now.",
       nextChips: ["What's hardest at Vahdam?","Tell me about Times Internet","Show me your work","How do I reach you?"] },
@@ -7324,7 +7557,7 @@
       response: "Two wins stand out equally, both from Times Internet. First, I scaled ET Prime's Assisted Sales 5× from ₹15L to ₹80L MRR in about six months, building an AI telesuite, live call transcription, pitch scoring and conversion assists, that delivered 400%+ ROI and won the Times Internet Team Award. Second, I launched the Times Internet Delhi Half Marathon 2026 from 0→1: a brand-new consumer IP at Dhyan Chand National Stadium, 15,000+ participants and a new revenue stream. One is a growth win, the other a 0→1 product launch. <a data-nav='experience'>Full work view →</a>",
       nextChips: ["Tell me about the marathon","What's the AI telesuite?","What are you building now?","How do I reach you?"] },
     { keywords: ['et prime','prime','assisted sales','sales','subscription','conversion','roi','growth'],
-      response: "ET Prime is the premium, member-only business subscription service of The Economic Times, offering high-quality, ad-free investigative journalism and business analysis. I led growth for ET Prime's Assisted Sales channel, scaling it 5× from ₹15L to ₹80L MRR in six months. To achieve this, I built an AI-powered telesuite featuring real-time call transcription, pitch scoring, and conversion assists, which boosted our team's sales conversion and delivered over 400% ROI. This work won me the Times Internet Team Award.",
+      response: "ET Prime is the premium, member-only business subscription service of The Economic Times, offering high-quality, ad-free investigative journalism and business analysis. I led growth for ET Prime's Assisted Sales channel, scaling it 5× from ₹15L to ₹80L MRR in six months. To achieve this, I built an AI-powered telesuite featuring real-time call transcription, pitch scoring, and conversion assists, which boosted our team's sales conversion and delivered over 400% ROI. This work won me the Times Internet Team Award. <a data-nav='project-assisted-sales'>Read the case study →</a>",
       nextChips: ["What's the AI telesuite?","Your product philosophy?","What are you building now?","How do I reach you?"] },
     { keywords: ['marathon','event','running','half','0 to 1','zero to one','zero-to-one'],
       response: "The Times Internet Half Marathon is a major consumer sports IP and fitness event designed to bring running communities together. I built and launched this event from absolute zero-to-one, managing the discovery platforms, registration and ticket booking funnels, participant acquisition campaigns, and coordinating on-ground runner operations. At Vahdam I applied the same zero-to-one thinking to D2C growth across global markets, and I am applying it again now to Parwah.",
@@ -7381,25 +7614,25 @@
       response: "Two hills I'll die on: <strong>Execution beats ideas.</strong> Most products fail because teams don't ship fast enough, measure correctly, or stay focused long enough to compound results. And: <strong>Technology should remove friction, not create it.</strong> My default question for any problem: what's the actual problem we're trying to solve? Then: can this be automated, measured, or scaled? Everything else is noise.",
       nextChips: ["Show me that in action","Your biggest win?","Tell me about your builds","How do I reach you?"] },
     { keywords: ['ai','llm','chatgpt','tech stack','stack','technology','tools','audio'],
-      response: "AI shows up everywhere I work. At Vahdam, the most important example is the customer lifecycle & retention OS I'm building. At Times Internet, I built the AI telesuite for transcription, pitch scoring and conversion assist. On the side, MusicGenAI is my passion project, this portfolio is a hobby build, and I keep experimenting with voice, agents, mailers, wellness and productivity workflows. Stack varies by project: React, TypeScript, Python, Supabase, Vercel. I pick whatever removes friction fastest.",
+      response: "AI shows up everywhere I work. On my own, the clearest example is Lifecycle OS, which I built independently, shaped by my retention work at Vahdam. At Times Internet, I built the AI telesuite for transcription, pitch scoring and conversion assist. On the side, MusicGenAI is my passion project, this portfolio is a hobby build, and I keep experimenting with voice, agents, mailers, wellness and productivity workflows. Stack varies by project: React, TypeScript, Python, Supabase, Vercel. I pick whatever removes friction fastest.",
       nextChips: ["Tell me about MusicGenAI","Tell me about Jarvis","Tell me about Hey Yaara","Show me your work"] },
     { keywords: ['contact','email','reach','hire','talk','connect','in touch'],
       response: "Best way to reach me: WhatsApp first, then call, then a focused 30-minute Google Meet. If you prefer async, WhatsApp or SMS both work at <a href='tel:+919873945238'>+91 98739 45238</a>; email is <a href='mailto:anchit.tandon@gmail.com'>anchit.tandon@gmail.com</a>. My <a href='assets/resume.pdf' target='_blank' rel='noopener'>resume opens as a PDF</a>. <a data-nav='contact'>Open the contact panel →</a>",
-      nextChips: ["Open contact panel","Book a 30-min Meet","Show me your work","Do you consult?"] },
+      nextChips: ["Open contact panel","Are you open to full-time roles?","Show me your work","Send me your resume"] },
     { keywords: ['linkedin','resume','cv','résumé','portfolio'],
       response: "You're already on the best version of my portfolio, the full story lives right here. My <a data-nav='experience'>work history</a> walks through Vahdam and Times Internet, and <a data-nav='projects'>side projects</a> covers everything I've built on the side. For the formal version, my full profile is on LinkedIn (linkedin.com/in/anchit-tandon) and my <a href='assets/resume.pdf' target='_blank' rel='noopener'>résumé opens as a PDF here</a>.",
       nextChips: ["Open the Work view","Show me your builds","Tell me about your experience","How do I reach you?"] },
     { keywords: ['location','where','based','delhi','india','remote','hybrid','relocate'],
-      response: "Delhi, India, IST, working remotely. I'm building Parwah and take on select freelance and consulting work, and I'm open to strong roles and collaborations. The right fit means interesting problems, measurable outcomes, and people who value depth, experimentation and fast execution.",
+      response: "Delhi, India, IST, open to remote or Delhi NCR. I'm building Parwah, and I'm looking for my next full-time Senior Product Manager role. The right fit means interesting problems, measurable outcomes, and people who value depth, experimentation and fast execution.",
       nextChips: ["How do I reach you?","Show me your work","What are you building now?","What role are you looking for?"] },
-    { keywords: ['looking for','seeking','ideal role','what role','hiring','open to','opportunities','available'],
-      response: "Yes, I take select product and growth consulting projects alongside building Parwah. I can help with product strategy, customer journeys, retention and useful AI workflows. <a href='/freelancer'>Here is my consulting work.</a>",
+    { keywords: ['looking for','seeking','ideal role','what role','hiring','open to','opportunities','available','full-time','full time','fulltime','senior pm','senior product manager','recruit','recruiter','open to work','job offer','notice period'],
+      response: "Yes. I'm looking for my next full-time Senior Product Manager role, in product and growth, lifecycle and retention, or AI products, remote or in Delhi NCR. Before Parwah I went from APM to PM to Senior PM at Times Internet, then AGM, Product Management and D2C Growth at Vahdam India. The quickest route is <a href='mailto:anchit.tandon@gmail.com?subject=Senior%20Product%20Manager%20role'>email</a>, with my <a href='/assets/resume.pdf' download='Anchit_Tandon_Resume.pdf'>resume (PDF)</a>. I also take select freelance work on the side, <a href='/freelancer'>here</a>.",
       nextChips: ["Your biggest win?","Your product philosophy?","Roles or collabs?","How do I reach you?"] },
     { keywords: ['personality','work style','working style','like working','describe yourself','who are you as','type of person','friends say'],
       response: "Three words I would anchor on: curious, experimental, hungry. I do not like surface-level answers. I keep digging until I understand the real structure of a problem, then I test creative ideas until something useful moves.",
       nextChips: ["Your product philosophy?","Why build on weekends?","Show me your work","How do I reach you?"] },
     { keywords: ['different','stand out','unique','why you','why hire','special','what sets'],
-      response: "I don't just talk about ideas, I ship them. My edge is curiosity plus depth: I keep digging until I understand the system, then I experiment creatively and push for outcomes. At work, that shows up in ET Prime Assisted Sales, ET Markets, and now the customer lifecycle & retention OS I'm building plus UK marketing revenue growth. On the side, it shows up in MusicGenAI, this portfolio, and the rest of my AI builds.",
+      response: "I don't just talk about ideas, I ship them. My edge is curiosity plus depth: I keep digging until I understand the system, then I experiment creatively and push for outcomes. At work, that shows up in ET Prime Assisted Sales, ET Markets, and D2C growth at Vahdam across US, UK and global markets. On the side, it shows up in MusicGenAI, this portfolio, and the rest of my AI builds.",
       nextChips: ["Your biggest win?","Tell me about your builds","Your philosophy?","How do I reach you?"] },
     { keywords: ['experience','career','journey','timeline','history','worked at','companies','times internet'],
       response: "Quick timeline: VIT CSE (2016–20) → Tuple Technologies, backend (2020–22) → Citymall, backend (2022) → Times Internet, APM to Senior PM (2022–26) → Vahdam India, AGM, Product Management, D2C Growth (Apr–Sep 2026) → building Parwah (Sep 2026 onward). The thread: started building systems, then products, then growth. Each step compounded the last. <a data-nav='experience'>Full timeline →</a>",
@@ -7421,7 +7654,7 @@
 	    home: {
 	      kicker: 'Portfolio cockpit',
 	      title: 'Start here',
-	      copy: "Currently building Parwah, family care for India, and open to freelance and consulting, with a builder's brain from engineering and a growth lens from Times Internet. Use this page for the quick signal: current role, proof points, and the fastest route into the rest of the portfolio.",
+	      copy: "Open to full-time Senior Product Manager roles while I build Parwah, family care for India, with a builder's brain from engineering and a growth lens from Times Internet. Use this page for the quick signal: current role, proof points, and the fastest route into the rest of the portfolio.",
 	      coach: ['Hero introduces Parwah as the current focus.', 'Stats and timeline show the measurable work behind the story.', 'Use the chat CTAs to jump to Work, Projects, Contact, or narrate the page.'],
 	      actions: [
 	        ['View work', 'experience'],
@@ -7454,7 +7687,7 @@
 	        ['Side builds', 'projects'],
 	        ['Narrate page', 'narrate']
 	      ],
-	      chips: ['Explain your lifecycle & retention OS','Tell me about Times Internet','Why product over engineering?','Show hard metrics']
+	      chips: ['Are you open to full-time roles?','Tell me about Times Internet','Why product over engineering?','Show hard metrics']
 	    },
 	    projects: {
 	      kicker: 'Projects',
@@ -7492,10 +7725,11 @@
 	        ['Email', 'email'],
 	        ['Resume', 'resume-pdf']
 	      ],
-	      chips: ['How do I reach you?','Book a 30-min Meet','Do you consult?','Send me your resume']
+	      chips: ['How do I reach you?','Are you open to full-time roles?','Book a 30-min Meet','Send me your resume']
 	    }
 	  };
 	  const PROJECT_GUIDES = {
+	    'project-assisted-sales': ['Assisted Sales for ET Prime', 'Times Internet case study', ['5× MRR, ₹15 lakh → ₹80 lakh a month, and 400%+ ROI in 6 months.', 'Funnel redesign, continuous A/B experimentation and an AI telesuite.', 'Ask what I would do next with it.']],
 	    'project-yaara': ['Hey Yaara', 'Voice-first elderly companion', ['Voice-led interaction removes screen friction.', 'Built as a PWA with speech input, AI response, and spoken output.', 'Ask about accessibility, voice UX, or implementation.']],
 	    'project-music': ['MusicGenAI', 'AI music generation pipeline', ['Generates lyrics, vocals and instrument tracks from prompts.', 'Built with a React/TypeScript frontend and Python audio service.', 'Ask how the generation pipeline is debugged.']],
 	    'project-telesuite': ['AI TeleSuite', 'Sales intelligence assistant', ['Live transcription, pitch scoring and conversion recommendations.', 'Productized the ET Prime assisted-sales playbook.', 'Ask how it improved sales conversion.']],
@@ -7916,9 +8150,9 @@
   const ANCHIT_PROFILE = {
     currentRole: 'Building Parwah, family care for India',
     startDate: 'September 2026 (Parwah). Vahdam was 20 April - September 2026.',
-    lookingFor: 'select freelance and consulting projects',
+    lookingFor: 'a full-time Senior Product Manager role; select freelance work on the side',
     strongestSignals: 'curiosity, depth, innovation, experimentation on creative ideas, and hunger to succeed',
-    vahdamHighlight: 'customer lifecycle and retention work, plus increased UK marketing revenue during Apr–Sep 2026',
+    vahdamHighlight: 'D2C growth and CRM and lifecycle work across US, UK and global markets on Klaviyo and WebEngage, Apr–Sep 2026; left in Sep 2026 to build Parwah full-time',
     note: 'VAHDAM was a past role from April to September 2026; Parwah is my current main project.',
     mainWorkProject: 'Parwah, family care for India',
     hobbyProject: 'this interactive portfolio',
@@ -7975,7 +8209,7 @@
       hints.push(`Right now I'm building Parwah, a family care product for India. I was AGM, Product Management and D2C Growth at Vahdam India from April to September 2026, working across the US, UK and global markets.`);
     }
     if (/\b(open|looking|hire|hiring|role|roles|collab|collaboration|available|opportunit)\b/.test(q)) {
-      hints.push(`I'm taking select product and growth consulting work alongside Parwah. The best fit is a scoped problem in product strategy, conversion, retention or practical AI.`);
+      hints.push(`I'm looking for my next full-time Senior Product Manager role, alongside building Parwah. Select freelance work stays on the side.`);
     }
     if (/\b(strength|strong|edge|why you|different|stand out|best at|superpower)\b/.test(q)) {
       hints.push(`Honestly? Curiosity, and not being satisfied with a surface-level answer. I keep digging until I actually understand the system underneath, then I start testing until the outcome moves. That's the whole method.`);
@@ -8003,7 +8237,7 @@
       // are about to answer is the tell that gives away a machine.
       return hints.join(' ');
     }
-    return `I'm building Parwah, family care for India, and taking select consulting work alongside it. Earlier I led product and growth work at Vahdam India and Times Internet. Ask me about Parwah or any of those projects.`;
+    return `I'm building Parwah, family care for India, and I'm looking for my next full-time Senior Product Manager role. Earlier I led product and growth work at Vahdam India and Times Internet. Ask me about Parwah or any of those projects.`;
   }
 	  // Conversation memory passed to the LLM for follow-up context.
 	  let chatHistory = [];
@@ -8793,14 +9027,14 @@
     const progress  = document.getElementById('anpProgress');
 
     const NARRATIONS = {
-      home:       "Hey, I'm Anchit Tandon. An engineer who learned to love the funnel. Right now I'm building Par-wah, one app for family care in India, with parents at the centre, and I take on freelance and consulting work alongside it. Before that I was A.G.M. for Product Management and D to C Growth at Vah-dahm India, and before that, four years at Times Internet. I scaled assisted sales five times, from fifteen lakh to eighty lakh rupees a month. I rebuilt E.T. Markets across iOS, Android and web into three crore plus of new annual revenue. I build systems, then measure them.",
+      home:       "Hey, I'm Anchit Tandon. An engineer who learned to love the funnel. Right now I'm building Par-wah, one app for family care in India, with parents at the centre, and I'm looking for my next full-time Senior Product Manager role. Before that I was A.G.M. for Product Management and D to C Growth at Vah-dahm India, and before that, four years at Times Internet. I scaled assisted sales five times, from fifteen lakh to eighty lakh rupees a month. I rebuilt E.T. Markets across iOS, Android and web into three crore plus of new annual revenue. I build systems, then measure them.",
       about:      "I started as a backend engineer. Live sports commentary, e-commerce, consumer apps, the kind of code that touches a million people over a weekend. Then I moved to product, and what I really fell for was the funnel. It tells you the unfiltered truth about every decision you make. So now I think in systems and ship in experiments. B Tech in Computer Science from V.I.T., and I still build things end to end myself, most weekends.",
       now:        "Right now I'm building Par-wah: one app for the whole family, with your parents at the centre. Daily check-in, S.O.S., booking anything for them, sending money safely. Reassurance, never surveillance. The website is live. Before this, from April to September twenty twenty six, I was A.G.M. for Product Management and D to C Growth at Vah-dahm India, where I helped build a lifecycle and retention O.S. and lift U.K. marketing revenue.",
       chat:       "This is the part where you get to interrogate me. Ask about Vah-dahm, or Times Internet, or the numbers behind any of it. Ask why I left engineering for product, or what I'm building on weekends. The guide answers in my voice, using everything on this site. And if it doesn't know something, it will say so and point you straight at me.",
       experience: "Five years, one fairly clear arc. Backend engineer at Tuple Technologies and City Mall, then Times Internet from twenty twenty two to twenty twenty six, A.P.M. to P.M. to Senior P.M. I scaled assisted sales five times, from fifteen lakh to eighty lakh rupees in monthly recurring revenue, in eight to ten months. I rebuilt E.T. Markets for three crore plus in new annual revenue. And I took the Delhi Half Marathon from zero to one, fifteen thousand runners.",
       projects:   "I build on evenings and weekends because I can't sit still. They're all A.I. first, all consumer. LifeCycle O.S. is the big one, type in any D to C brand and it benchmarks the category, then designs the entire lifecycle live. The Third Eye is a personal A.I. operating system. Music Gen A.I. writes whole songs from a prompt. Job Hunt pulls live openings from four job boards. This portfolio counts too.",
       resume:     "The full resume is right here as a P.D.F. Open it, download it, send it on to whoever needs it. It's the one page version of everything on this site, Vah-dahm, Times Internet, the engineering years before that, and the numbers attached to each one. And if you'd rather ask than read, the chat knows all of it.",
-      contact:    "If any of this is useful to you, just reach out. WhatsApp is fastest. A call works. Or book a thirty minute Google Meet if you want a proper conversation. Email me at anchit dot tandon at gmail dot com. I'm open to select consulting projects and honest conversations about funnels, subscriptions and consumer product. No pitch required."
+      contact:    "If any of this is useful to you, just reach out. WhatsApp is fastest. A call works. Or book a thirty minute Google Meet if you want a proper conversation. Email me at anchit dot tandon at gmail dot com. I'm looking for my next full-time Senior Product Manager role, and always up for an honest conversation about funnels, subscriptions and consumer product. No pitch required."
     };
     const VIEW_LABELS = { home: 'Home', about: 'About Me', now: 'Now', chat: 'Chat with me', experience: 'Experience', projects: 'Projects', resume: 'My Resume', contact: 'Contact' };
 
@@ -9269,7 +9503,7 @@
       const activeEl = document.querySelector('.view.active');
       const viewName = activeEl ? activeEl.id.replace('view-', '') : 'home';
       const fallbackText = viewName === 'home'
-        ? "Hey, I'm Anchit Tandon. An engineer who learned to love the funnel. Building products. Scaling growth. Creating leverage. Right now I am building Parwah, one app for family care in India, with parents at the centre, and I am open to freelance and consulting work alongside it. Before that I was A G M, Product Management and D to C Growth at Vahdam India, driving growth across the US, UK and global markets. Previously at Times Internet, I owned growth and monetisation across ET Prime and TOI Plus, scaling Assisted Sales five times to eighty lakh rupees in monthly recurring revenue in about ten months, rebuilding ET Markets and ET across iOS, Android and web to three crore plus in incremental annual recurring revenue, and building high-performing acquisition and retention funnels. I also led the end-to-end launch and execution of the inaugural Times Internet Delhi Half Marathon twenty twenty six at Dhyan Chand National Stadium, establishing a new I P, delivering a fifteen thousand plus participant experience, and creating a new revenue stream for the business. Today, I operate at the intersection of Product, Growth and Revenue, building systems, optimising funnels, running experiments, and creating scalable pathways to sustainable growth."
+        ? "Hey, I'm Anchit Tandon. An engineer who learned to love the funnel. Building products. Scaling growth. Creating leverage. Right now I am building Parwah, one app for family care in India, with parents at the centre, and I am looking for my next full-time Senior Product Manager role. Before that I was A G M, Product Management and D to C Growth at Vahdam India, driving growth across the US, UK and global markets. Previously at Times Internet, I owned growth and monetisation across ET Prime and TOI Plus, scaling Assisted Sales five times to eighty lakh rupees in monthly recurring revenue in about ten months, rebuilding ET Markets and ET across iOS, Android and web to three crore plus in incremental annual recurring revenue, and building high-performing acquisition and retention funnels. I also led the end-to-end launch and execution of the inaugural Times Internet Delhi Half Marathon twenty twenty six at Dhyan Chand National Stadium, establishing a new I P, delivering a fifteen thousand plus participant experience, and creating a new revenue stream for the business. Today, I operate at the intersection of Product, Growth and Revenue, building systems, optimising funnels, running experiments, and creating scalable pathways to sustainable growth."
         : "Ask me anything about my work, side projects, product philosophy, or how to connect.";
       const caption = document.getElementById('chatCaption');
       const words = fallbackText.trim().split(/\s+/);
@@ -10138,7 +10372,11 @@
   .wa-sheet-close { width: 100%; margin-top: 4px; background: none; border: 0; color: var(--ink-dim); font-size: 13px; cursor: pointer; padding: 8px; }
 
   /* (#2) Sidebar Contact group, collapsible channel sub-items with colour icons */
-  .sidebar-group-toggle { display: flex; align-items: center; width: 100%; background: none; border: 0; font: inherit; cursor: pointer; }
+  .sidebar-group-toggle { display: flex; align-items: center; width: 100%; background: none; border: 0; font: inherit; cursor: pointer; text-align: left; }
+  /* A <button> centres its text by default. The morph label is a one-cell grid
+     as wide as its longer hover text ("Get in touch"), so "Contact" was centred
+     inside that cell and sat 16px right of every other label in the menu. */
+  .sidebar-group-toggle .morph-label > span { justify-self: start; }
   .sidebar-group-toggle .sidebar-caret { margin-left: auto; transition: transform .2s; flex: 0 0 auto; width: 14px; height: 14px; color: var(--ink-mute); }
   .sidebar-contact-group.open .sidebar-caret { transform: rotate(90deg); }
   .sidebar-subnav { display: none; flex-direction: column; padding: 2px 0 4px; }
@@ -11220,10 +11458,10 @@
      Writing it on dismiss means anyone who ignores it, which is most people,
      is shown it again on every visit, which is the opposite of the intent.
 
-     It waits for the cinematic boot sequence to finish. That sequence is the
-     first thing a new visitor sees, and the previous intro popup was disabled
-     precisely because it covered it. Interrupting the same sequence with a
-     different overlay would repeat that mistake.                             */
+     It waits for the visitor to scroll past the first screen. The first
+     screen is what a new visitor came for, and the previous intro popup was
+     disabled precisely because it covered it; a nudge over the same screen
+     would repeat that mistake.                                               */
   (function chatNudge() {
     const KEY = 'anchit-chat-nudge-seen';
     const el = document.getElementById('chatNudge');
@@ -11269,26 +11507,24 @@
       if (e.detail === 'projects') dismiss();
     });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') dismiss(); });
-    // On a phone it sits over a sixth of the screen; scrolling on is an answer too.
-    window.addEventListener('scroll', () => { if (shown && window.innerWidth <= 560 && window.scrollY > window.innerHeight) dismiss(); }, { passive: true });
+    // On a phone it sits over a sixth of the screen; scrolling on a further
+    // screen after it appears is an answer too.
+    let shownAtY = 0;
+    window.addEventListener('scroll', () => { if (shown && window.innerWidth <= 560 && window.scrollY > shownAtY + window.innerHeight) dismiss(); }, { passive: true });
 
-    // Wait for the boot sequence. #cineHero carries .cine while it is playing
-    // and the class is removed when it exits; if it never runs (motion off,
-    // reduced motion, no JS path) fall through on a timer instead of waiting
-    // for something that will not happen.
-    const cine = document.getElementById('cineHero');
-    const bootRunning = () => cine && cine.classList.contains('cine') && !cine.classList.contains('is-static');
-    if (!bootRunning()) {
-      setTimeout(show, 2600);
-    } else {
-      const started = Date.now();
-      const poll = setInterval(() => {
-        if (!bootRunning() || Date.now() - started > 12000) {   // hard ceiling
-          clearInterval(poll);
-          setTimeout(show, 900);
-        }
-      }, 400);
+    // AFTER A SCROLL, NOT ON LOAD. On load it covered the first screen, the
+    // role, the results and the buttons a recruiter came for, on a phone
+    // most of all. It now waits until the visitor has read past the first
+    // screen, which is also when "ask the AI version of me" is a useful next
+    // step rather than an interruption. Any view counts, not just Home.
+    const SCROLL_GATE = () => window.innerHeight * 0.6;
+    function onScrollGate() {
+      if (shown || window.scrollY < SCROLL_GATE()) return;
+      window.removeEventListener('scroll', onScrollGate);
+      shownAtY = window.scrollY;
+      setTimeout(show, 400);
     }
+    window.addEventListener('scroll', onScrollGate, { passive: true });
   })();
   document.getElementById('chatMinimizeBtn')?.addEventListener('click', () => minimizeChat());
 	  // Every visit lands on the HOME page with the onboarding chooser on top of
@@ -11297,7 +11533,9 @@
 	  // popup over the home hero (not over a chat surface) for first-time AND
 	  // returning visitors. Chat stays one tap away via the floating return icon
 	  // that minimizeChat() reveals.
-	  minimizeChat();
+	  // A deep link to #chat opens the full chat instead (see the hash handling
+	  // in the router).
+	  if (location.hash === '#chat') { openFullChat(); } else { minimizeChat(); }
 	  // Single intro layer: the page guide (renderPageGuide) is the ONE welcome.
 	  // The old seedChatIntro() added a SECOND "I'm Anchit…" bot bubble that
 	  // duplicated it, removed so the chat shows one clean layer, not stacked ones.
@@ -11495,7 +11733,9 @@
     }
   }
 
-  document.title = 'Anchit Tandon';
+  // The tab title is what a recruiter sees among twenty open tabs, so it
+  // carries the role, the same as the <title> in the head.
+  document.title = 'Anchit Tandon | Senior Product Manager & AI Builder';
   document.querySelectorAll('*').forEach(el => {
     if (el.childNodes.length === 1 && el.firstChild.nodeType === Node.TEXT_NODE) {
       el.textContent = el.textContent
@@ -12583,27 +12823,11 @@
     tl.to('#cineHero .cine-ring', { scale: 1, opacity: 1, duration: 1.0, stagger: 0.12 })
       .to('#cineHero .cine-arc', { opacity: 1, duration: 0.7 }, '-=0.6')
       .to(letters, { opacity: 1, y: 0, duration: 0.5, stagger: 0.035 }, '-=0.45')
-      .to('#cineHero .cine-boot-row', { opacity: 1, duration: 0.4, stagger: 0.12 }, '-=0.2')
+      .to('#cineHero .cine-roles-static > *', { opacity: 1, y: 0, duration: 0.5, stagger: 0.1 }, '-=0.3')
+      .to('#cineHero .cine-proof-item', { opacity: 1, y: 0, duration: 0.4, stagger: 0.1 }, '-=0.2')
       .to('#cineHint', { opacity: 1, duration: 0.6 }, '-=0.1');
-
-    // Each progress bar fills and its readout counts with it. The markup ships
-    // complete (100%) and is rewound to 0 here, so the bars can never be caught
-    // sitting empty in the gap between paint and the tween starting.
-    document.querySelectorAll('#cineBoot .cine-boot-row').forEach(function (row, idx) {
-      var fill = row.querySelector('.cine-boot-fill');
-      var pct = row.querySelector('.cine-boot-pct');
-      fill.style.width = '0%';
-      pct.textContent = '0%';
-      var o = { v: 0 };
-      tl.to(o, {
-        v: 100, duration: 0.9, ease: 'power1.inOut',
-        onUpdate: function () {
-          var v = Math.round(o.v);
-          fill.style.width = v + '%';
-          pct.textContent = v + '%';
-        },
-      }, 1.5 + idx * 0.28);
-    });
+    // (The three fake "Loading…" progress bars that used to count up here are
+    // gone; the row they occupied now carries the four real results.)
 
     // Start the assembly the first time the stage is on screen, then stop
     // watching. No IntersectionObserver (very old browser) just plays it.
@@ -14070,7 +14294,9 @@
   var resizeTimer = 0;
   var userScrollTimer = 0;
 
-  if (countEl) countEl.textContent = cards.length + ' plates';
+  // One number, derived from the cards themselves, so the count can never
+  // disagree with what is on the page.
+  if (countEl) countEl.textContent = cards.length + ' projects';
   cards.forEach(function (c) { c.classList.add('in'); });
 
   function perSpread() {
@@ -14083,13 +14309,19 @@
     var w = grid.clientWidth || 1;
     return Math.round(grid.scrollLeft / w);
   }
-  function pageLabel(i, n) {
-    return 'Spread ' + (i + 1) + ' of ' + n;
+  // Plain counts: which projects are on screen, out of how many. The preface
+  // and the closing note are not projects, so they are not counted.
+  function pageLabel(i) {
+    var per = perSpread(), kids = [].slice.call(grid.children, i * per, i * per + per);
+    var nums = kids.map(function (k) { return cards.indexOf(k) + 1; }).filter(function (x) { return x > 0; });
+    if (!nums.length) return i === 0 ? 'Introduction' : 'End of the list';
+    if (nums.length === 1) return 'Project ' + nums[0] + ' of ' + cards.length;
+    return 'Projects ' + nums[0] + '–' + nums[nums.length - 1] + ' of ' + cards.length;
   }
   function sync() {
     var n = pageCount();
     var i = Math.max(0, Math.min(n - 1, currentPage()));
-    if (progress) progress.textContent = pageLabel(i, n);
+    if (progress) progress.textContent = pageLabel(i);
     for (var p = 0; p < prevBtns.length; p++) prevBtns[p].disabled = i <= 0;
     for (var nx = 0; nx < nextBtns.length; nx++) nextBtns[nx].disabled = i >= n - 1;
     if (toc) {
@@ -14108,7 +14340,7 @@
       var li = document.createElement('li');
       var b = document.createElement('button');
       b.type = 'button';
-      b.setAttribute('aria-label', 'Open spread ' + (i + 1));
+      b.setAttribute('aria-label', 'Show ' + pageLabel(i));
       b.addEventListener('click', function (idx) {
         return function () { go(idx); };
       }(i));

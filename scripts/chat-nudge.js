@@ -4,17 +4,19 @@
 //   - it never appears, and new visitors never learn the AI chat exists
 //   - it appears every time, and becomes the thing returning visitors close
 //
-// It also must not interrupt the cinematic boot sequence. The intro popup that
-// used to live here was disabled for exactly that reason, it opened a blurred
-// scrim over the title sequence on every load, so "waits for the boot" is a
-// requirement, not a nicety.
+// It also must not cover the first screen. The intro popup that used to live
+// here was disabled for exactly that reason, and a hiring-panel review found
+// this nudge doing the same on a phone: over the role, the results and the
+// buttons a recruiter came for. So it now waits for the visitor to scroll
+// past the first screen, and "hidden until a scroll" is a requirement.
 //
 // Run against a served build:  node scripts/chat-nudge.js
 // MUT=1 removes the seen-flag guard; the returning-visitor check must fail.
 const { chromium } = require('./_playwright.js');
 
 const MUT = process.env.MUT === '1';
-const URL = 'http://127.0.0.1:8099/index.html';
+const URL = (process.env.BASE || 'http://127.0.0.1:8099') + '/index.html';
+const scrollOn = async (p) => { await p.evaluate(() => window.scrollTo(0, innerHeight)); await p.waitForTimeout(1500); };
 const KEY = 'anchit-chat-nudge-seen';
 const AFTER_BOOT = 13500;   // boot sequence, plus the settle delay
 
@@ -42,8 +44,11 @@ const isShown = (p) => p.evaluate(() => {
     !(await isShown(p)), 'hidden at 2s');
 
   await p.waitForTimeout(AFTER_BOOT - 2000);
+  check('it does not cover the first screen before a scroll',
+    !(await isShown(p)), 'hidden after the boot, no scroll yet');
+  await scrollOn(p);
   const shown = await isShown(p);
-  check('a new visitor is shown it', shown, shown ? 'visible after the boot' : 'never appeared');
+  check('a new visitor is shown it', shown, shown ? 'visible after a scroll' : 'never appeared');
 
   // The flag must be written on SHOW. Writing it on dismiss means anyone who
   // ignores the nudge, most people, is shown it again on every visit.
@@ -54,6 +59,7 @@ const isShown = (p) => p.evaluate(() => {
   // ── the same visitor, coming back ────────────────────────────────────────
   await p.goto(URL, { waitUntil: 'load', timeout: 25000 });
   await p.waitForTimeout(AFTER_BOOT);
+  await scrollOn(p);
   const again = await isShown(p);
   check('a returning visitor is not shown it again', !again, again ? 'shown a second time' : 'stayed hidden');
   await ctx.close();
@@ -63,7 +69,8 @@ const isShown = (p) => p.evaluate(() => {
   const p2 = await ctx2.newPage();
   await p2.goto(URL, { waitUntil: 'load', timeout: 25000 });
   await p2.waitForTimeout(AFTER_BOOT);
-  check('a different new visitor still gets it', (await isShown(p2)), 'fresh profile, shown');
+  await scrollOn(p2);
+  check('a different new visitor still gets it', (await isShown(p2)), 'fresh profile, shown after a scroll');
 
   // Dismissible, and it must not trap focus or block the page.
   await p2.click('#chatNudgeClose');
@@ -81,6 +88,7 @@ const isShown = (p) => p.evaluate(() => {
   });
   await p3.goto(URL, { waitUntil: 'load', timeout: 25000 });
   await p3.waitForTimeout(AFTER_BOOT);
+  await scrollOn(p3);
   const alive = await p3.evaluate(() => !!document.querySelector('.sidebar'));
   check('with storage refused it fails closed and the page still works',
     alive && !(await isShown(p3)), alive ? 'page renders, no nudge' : 'page broke');
