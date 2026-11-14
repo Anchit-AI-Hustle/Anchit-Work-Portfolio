@@ -672,7 +672,11 @@ function renderStudent(){
     foot + '<p class="small next-msg" id="s-next-msg" role="status" aria-live="polite"></p></div>';
   // engine card
   el('e-risk').textContent = res.risk;
-  el('mini').innerHTML = '<span class="dot '+(res.tier==='High'?'h':res.tier==='Medium'?'m':'l')+'"></span>Risk '+res.risk+' · '+res.tier+' · '+el('s-status').textContent;
+  var mini = el('mini'), dot = document.createElement('span');
+  dot.className = 'dot ' + (res.tier==='High'?'h':res.tier==='Medium'?'m':'l');
+  mini.textContent = '';
+  mini.appendChild(dot);
+  mini.appendChild(document.createTextNode('Risk '+res.risk+' · '+res.tier+' · '+el('s-status').textContent));
   var tg = el('e-tier'); tg.textContent = res.tier+' risk'; tg.className='tag '+(res.tier==='High'?'bad':res.tier==='Medium'?'warn':'ok');
   el('e-factors').innerHTML = res.factors.map(function(f){
     var w = Math.round(Math.abs(f.v)/f.max*100);
