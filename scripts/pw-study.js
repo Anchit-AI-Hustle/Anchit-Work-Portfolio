@@ -154,7 +154,7 @@ function mutate(src) {
   if (MUT === 'finalchat') return src.replace("else if(p.final) txt = ", "else if(false) txt = ");
   if (MUT === 'noaiq') return src.replace(/<div class="card" id="aiq"[\s\S]*?<\/ul><\/div>/, '');
   if (MUT === 'nosens') return src.replace(/<table class="t-fit" id="sens">[\s\S]*?<\/table>/, '');
-  if (MUT === 'noleak') return src.replace('about <b>₹600 cr a year</b> of online fees', 'some online fees');
+  if (MUT === 'noleak') return src.replace('about <b>₹600 cr a year</b> in illustrative fees', 'some illustrative fees');
   if (MUT === 'nested') return src.replace("fr.addEventListener('load', function(){ fit();", "fr.addEventListener('load', function(){ return;");
   if (MUT === 'pacecap') return src.replace("v:Math.min(Math.max(0,75-s.lec)*1.3,60), max:60}", "v:(100-s.lec)*0.40, max:40}");
   if (MUT === 'nobacklog') return src.replace("(behind>0?'Aaj sirf 2 cheezein: 1 backlog lecture", "(true?'Aaj sirf 2 cheezein: 1 backlog lecture");
@@ -165,7 +165,7 @@ function mutate(src) {
   if (MUT === 'fxnan') return src.replace("if(!ok){ if(k!=='fx') (raw!==''", "if(!ok && k!=='fx'){ if(k!=='fx') (raw!==''");
   if (MUT === 'plausible') return src.replace("(t>3900e7*0.25?", '(false?');
   if (MUT === 'noskip') return src.replace('<a class="skip" href="#main">Skip to the prototype</a>', '');
-  if (MUT === 'leak3') return src.replace("PW Pi's Daily Challenges lift week-three engagement, but no disclosed AI is aimed at renewal.", 'No disclosed AI aimed at retention or renewal.');
+  if (MUT === 'leak3') return src.replace("PW reports higher week-three retention alongside Pi Lens daily challenges.", 'No disclosed AI aimed at retention or renewal.');
   if (MUT === 'nostacked') return src.replace('<table class="t-mid stack" id="six-q">', '<table class="t-mid" id="six-q">');
   if (MUT === 'noembedscroll') return src.replace("e.data.type !== 'pw-scroll') return;", "e.data.type !== 'pw-scroll' || true) return;");
   if (MUT === 'childproduct') return src.replace("title = minor ? nx.acad : nx.title;", "title = nx.title;");
@@ -173,7 +173,7 @@ function mutate(src) {
   if (MUT === 'cohort') return src.replace('var eng=Math.pow(rnd(),0.7);', 'var eng=Math.pow(rnd(),0.55);').replace('Math.round(clamp(40+eng*60+(rnd()-0.5)*10,0,100))', 'Math.round(clamp(eng*100+(rnd()-0.5)*30,0,100))');
   if (MUT === 'tutogate') return src.replace('it scales only if recovery rises 11.3 points', 'it scales only if recovery rises 10 points');
   if (MUT === 'tutobase') return src.replace('<td>A pilot arm, not in the base cost: one hour', '<td>One hour');
-  if (MUT === 'overclaim') return src.replace('found where PW does not yet act when paying students drift', 'found where paying students quietly drop off');
+  if (MUT === 'overclaim') return src.replace('My proposal for PhysicsWallah starts with one test', 'I found where paying students quietly drop off');
   return src;
 }
 
@@ -320,7 +320,7 @@ async function firstScreen(page, L, kind) {
   });
   if (kind === 'study') {
     check(`${L}: first screen says who and what, with three visible "start here" steps`,
-      /application for a Product Manager role/.test(f.lede) && f.steps === 3, `steps=${f.steps} lede=${f.lede.slice(0, 60)}`);
+      /Anchit Tandon.*proposal for PhysicsWallah/.test(f.lede) && f.steps === 3, `steps=${f.steps} lede=${f.lede.slice(0, 60)}`);
   } else {
     check(`${L}: first screen says what the prototype is and how to use it`, /made-up students/.test(f.lede) && /Pick one/.test(f.lede), f.lede.slice(0, 80));
   }
@@ -417,13 +417,14 @@ async function caseStudy(browser, vp) {
   check(`${L}: research table backs the design, every row linked to its source`, ev.length >= 7 && ev.every((n) => n >= 1), JSON.stringify(ev));
   check(`${L}: DPDP row states when the children's rules apply and the fallback`, /May 2027/.test(risks) && /18\+ learners/.test(risks), risks.slice(0, 80));
   const q2 = norm(await page.textContent('#q2').catch(() => ''));
-  check(`${L}: latest quarter (Q2 FY27) is reported with its source`, /₹1,242 cr/.test(q2) && /Inc42/.test(q2), q2.slice(0, 120));
+  const q2Source = await page.locator('#q2 a').getAttribute('href');
+  check(`${L}: latest quarter (Q2 FY27) links to the primary filing`, /₹1,242 cr/.test(q2) && q2Source?.startsWith('https://nsearchives.nseindia.com/corporate/'), q2.slice(0, 120));
   const six = await page.$$eval('#six-q tbody tr', (rs) => rs.map((r) => !!r.querySelector('a[href^="#"]'))).catch(() => []);
   check(`${L}: six reviewer questions, each answered and linked`, six.length === 6 && six.every(Boolean), JSON.stringify(six));
   const stack = await page.$$eval('#stack tbody tr', (rs) => rs.map((r) => r.cells[0].innerText.trim())).catch(() => []);
   const stackSrc = await page.$$eval('#stack a[href^="https://"]', (as) => as.length).catch(() => 0);
   check(`${L}: the engine is mapped onto PW's own AI products, with sources`,
-    ['AI Guru', 'Guided AI tutor in practice sets', 'PW Pi Daily Challenges', 'AI Tuto', 'AI support'].every((n) => stack.includes(n)) && stackSrc >= 2, JSON.stringify(stack));
+    ['AI Guru', 'Guided AI tutor in practice sets', 'PW Pi and Pi Lens', 'AI Tuto', 'AI support'].every((n) => stack.includes(n)) && stackSrc >= 2, JSON.stringify(stack));
   // AI Tuto is not in the ₹6.15 cr running cost, so nothing may present it as part of the base plan.
   const tutoRow = norm(await page.$eval('#stack', (t) => [...t.querySelectorAll('tbody tr')].find((r) => r.cells[0].innerText.trim() === 'AI Tuto').innerText).catch(() => ''));
   const sysTxt = norm(await page.textContent('#system'));
@@ -462,7 +463,7 @@ async function caseStudy(browser, vp) {
   }
   const gapsTxt = norm(await page.textContent('#gaps'));
   const sixTxt = norm(await page.textContent('#six-q'));
-  check(`${L}: the leak list credits PW's retention AI; delivery economics are priced`, /Daily Challenges lift week-three engagement/.test(gapsTxt) && /₹9\.5 cr/.test(sixTxt) && /₹4\.5 cr/.test(sixTxt), '');
+  check(`${L}: the leak list credits PW's retention AI; delivery economics are priced`, /higher week-three retention alongside Pi Lens daily challenges/.test(gapsTxt) && /₹9\.5 cr/.test(sixTxt) && /₹4\.5 cr/.test(sixTxt), '');
   const order = await page.$$eval('main > section[id]', (ss) => ss.map((x) => x.id).slice(0, 4).join(','));
   check(`${L}: "Why me" comes right after the short version`, order === 'system,questions,me,business', order);
   if (vp.width <= 600) {
@@ -482,7 +483,7 @@ async function caseStudy(browser, vp) {
     check(`${L}: a link inside the embedded prototype brings its target into view`, seen.ok, JSON.stringify(seen));
   }
   const hero = norm(await page.textContent('.hero .lede'));
-  check(`${L}: hero does not overclaim`, !/quietly drop off/.test(hero) && /does not yet act when paying students drift/.test(hero), hero.slice(0, 120));
+  check(`${L}: hero does not overclaim`, !/quietly drop off/.test(hero) && /proposal for PhysicsWallah starts with one test/.test(hero), hero.slice(0, 120));
   if (vp.width >= 1440) {
     const nav = await page.$$eval('.nav .links a', (as) => { const box = as[0].parentElement.getBoundingClientRect(); return as.map((a) => [a.getAttribute('href'), a.getBoundingClientRect().right <= box.right + 1]); });
     check(`${L}: every nav link, Risks to Walkthrough, fits on screen`,
