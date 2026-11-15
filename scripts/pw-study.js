@@ -246,13 +246,14 @@ async function firstScreen(page, L, kind) {
     const bar = document.getElementById('consentBar');
     return {
       lede: (document.querySelector('.hero .lede') || {}).textContent || '',
+      role: (document.querySelector('.hero .eyebrow') || {}).textContent || '',
       steps: [...document.querySelectorAll('.start a')].filter(vis).length,
       consent: !!(bar && bar.getBoundingClientRect().height > 0 && bar.getAttribute('data-in') === '1'),
     };
   });
   if (kind === 'study') {
     check(`${L}: first screen says who and what, with three visible "start here" steps`,
-      /application for a Product Manager role/.test(f.lede) && f.steps === 3, `steps=${f.steps} lede=${f.lede.slice(0, 60)}`);
+      /Senior Product Manager, Growth/.test(f.role) && /Anchit Tandon.*catch-up plan/.test(f.lede) && f.steps === 3, `steps=${f.steps} lede=${f.lede.slice(0, 60)}`);
   } else {
     check(`${L}: first screen says what the prototype is and how to use it`, /made-up students/.test(f.lede) && /Pick one/.test(f.lede), f.lede.slice(0, 80));
   }
@@ -338,10 +339,10 @@ async function caseStudy(browser, vp) {
   const body = await page.evaluate(() => document.body.textContent);
   const unverified = ['30 of 330', 'mainly for new enrollments', 'monthly mentor sessions'].filter((q) => body.includes(q));
   check(`${L}: no quote that could not be verified`, unverified.length === 0, unverified.join(' | '));
-  // The pilot must use grades with a next batch, gate on a backtest and be sized to detect the lift.
+  // Verify the test has a defined cohort, comparison and outcome.
   const plan = norm(await page.textContent('#plan'));
-  check(`${L}: pilot uses grades with a next batch, a backtest gate and a sized holdout`,
-    /Class 10 and Class 11/.test(plan) && !/Class 11 JEE and NEET dropper/.test(plan) && /AUC of 0\.70/.test(plan) && /13,300 learners/.test(plan), plan.slice(0, 160));
+  check(`${L}: pilot specifies its cohort, primary measure and sample-size assumptions`,
+    /Class 11 JEE/.test(plan) && /50\/50/.test(plan) && /syllabus-aligned practice set in seven days/.test(plan) && /4,800 learners/.test(plan), plan.slice(0, 160));
   const risks = norm(await page.textContent('#risks'));
   check(`${L}: risks cover DPDP s.9(3) and the holdout's fairness`, /s\.9\(3\)/.test(risks) && /never the child/.test(risks) && /holdout is fair/i.test(risks), risks.slice(0, 120));
   // The design choices rest on published evidence: each row names its source and links to it.
@@ -349,7 +350,9 @@ async function caseStudy(browser, vp) {
   check(`${L}: research table backs the design, every row linked to its source`, ev.length >= 7 && ev.every((n) => n >= 1), JSON.stringify(ev));
   check(`${L}: DPDP row states when the children's rules apply and the fallback`, /May 2027/.test(risks) && /18\+ learners/.test(risks), risks.slice(0, 80));
   const q2 = norm(await page.textContent('#q2').catch(() => ''));
-  check(`${L}: latest quarter (Q2 FY27) is reported with its source`, /₹1,242 cr/.test(q2) && /Inc42/.test(q2), q2.slice(0, 120));
+  const filing = await page.locator('#q2 a').getAttribute('href');
+  check(`${L}: latest quarter (Q2 FY27) links to the primary filing`,
+    /₹1,242 cr/.test(q2) && filing?.startsWith('https://nsearchives.nseindia.com/corporate/'), q2.slice(0, 120));
   const d = await dashes(page);
   check(`${L}: no em/en dash`, d.length === 0, d.join(' | '));
   await page.waitForTimeout(300);
