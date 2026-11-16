@@ -462,18 +462,18 @@
     transition: all 0.2s ease; flex-shrink: 0;
     cursor: pointer; border: none; outline: none;
   }
-  .sidebar-item:hover { background: rgba(255,255,255,0.09); color: rgba(251,245,236,0.85); }
+  .sidebar-item:hover { background: rgba(255,255,255,0.06); color: rgba(251,245,236,0.9); }
   .sidebar-item.active {
-    background: color-mix(in srgb, var(--primary) 16%, transparent);
+    background: rgba(251, 245, 236, 0.05);
     color: var(--ink);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 30%, transparent);
+    box-shadow: inset 0 0 0 1px var(--rule-strong);
   }
-  .sidebar-item.active .sidebar-label { color: var(--primary); font-weight: 600; }
-  /* Glowing accent bar marks the current page, clearly visible on every view */
+  .sidebar-item.active .sidebar-label { color: var(--ink); font-weight: 600; }
+  /* Clean architectural indicator marks the current view */
   .sidebar-item.active::before {
     content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
-    width: 3px; height: 22px; border-radius: 0 3px 3px 0;
-    background: var(--primary); box-shadow: 0 0 10px var(--primary);
+    width: 2px; height: 18px; border-radius: 0 2px 2px 0;
+    background: var(--primary);
   }
   .sidebar-item svg { width: 18px; height: 18px; flex-shrink: 0; }
   .sidebar-label {
@@ -3545,16 +3545,17 @@
      widened slightly to reproduce the blurred edge for free. */
   .float-aura{ inset:-22%;
     background:
-      /* Pointer-following light. --fx/--fy are viewport percentages; this layer
-         spans -22%…122% of the viewport, so they are remapped into its own box
-         rather than being written onto :root where they would invalidate the
-         style of every element in the document on every pointer frame. */
-      radial-gradient(42% 30% at calc(var(--fx, 74%) / 1.44 + 15.28%) calc(var(--fy, 18%) / 1.44 + 15.28%), rgba(232,177,78,.16), transparent 58%),
-      radial-gradient(40% 36% at 18% 22%, rgba(255,95,21,.11), transparent 64%),
-      radial-gradient(44% 40% at 84% 74%, rgba(216,184,120,.085), transparent 66%),
-      radial-gradient(48% 42% at 62% 12%, rgba(120,80,255,.05), transparent 64%);
-    animation:floatAura 22s ease-in-out infinite alternate; }
-  @keyframes floatAura{ from{transform:translate3d(-2%,-1%,0)} to{transform:translate3d(3%,2%,0)} }
+      /* Subtle pointer-following atmospheric light + faint architectural grid */
+      radial-gradient(38% 28% at calc(var(--fx, 74%) / 1.44 + 15.28%) calc(var(--fy, 18%) / 1.44 + 15.28%), rgba(201,169,110,.075), transparent 60%),
+      radial-gradient(40% 36% at 18% 22%, rgba(255,105,64,.045), transparent 64%),
+      radial-gradient(44% 40% at 84% 74%, rgba(201,169,110,.04), transparent 66%),
+      linear-gradient(to right, rgba(251,245,236,.022) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(251,245,236,.022) 1px, transparent 1px);
+    background-size: auto, auto, auto, 72px 72px, 72px 72px;
+    animation:floatAura 26s ease-in-out infinite alternate; }
+  @keyframes floatAura{ from{transform:translate3d(-1%,-0.5%,0)} to{transform:translate3d(1.5%,1%,0)} }
+  /* Retire dated spinning orb and neon perimeter border in favour of calm editorial depth */
+  .energy-orb, .energy-border { display: none !important; }
   /* ── Energy orb wallpaper: glowing core + revolving orbital rings (faint) ── */
   .energy-orb{ position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:min(82vmin,900px); aspect-ratio:1; z-index:0; pointer-events:none; opacity:.22; display:flex; align-items:center; justify-content:center; perspective:1200px; }
   .eo-ring{ position:absolute; inset:0; border-radius:50%; border:1px solid rgba(216,184,120,.28); transform-style:preserve-3d; }
@@ -3627,7 +3628,7 @@
   var x=c.getContext('2d');
   var W,H,ps=[];
   function size(){ W=c.width=innerWidth; H=c.height=innerHeight; }
-  function seed(){ ps=[]; var n=Math.min(130,Math.floor(W/11)); for(var k=0;k<n;k++)ps.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.9+.5,v:Math.random()*.42+.14,a:Math.random()*.5+.28}); }
+  function seed(){ ps=[]; var n=Math.min(44,Math.floor(W/32)); for(var k=0;k<n;k++)ps.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.2+.4,v:Math.random()*.24+.08,a:Math.random()*.18+.08}); }
   size(); seed(); addEventListener('resize',function(){size();seed();});
   // Defer to the ambient tier resolved before the first paint, rather than
   // reading the preference again and risking a different answer. At the `still`
@@ -3774,7 +3775,7 @@
     </a>
     <a class="sidebar-item" href="#now" data-view="now" aria-label="Now, current role">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <span class="sidebar-label morph-label"><span class="ml-default">Now</span><span class="ml-hover" aria-hidden="true">What I am building</span></span>
+      <span class="sidebar-label morph-label"><span class="ml-default">Now</span><span class="ml-hover" aria-hidden="true">Right now</span></span>
     </a>
     <a class="sidebar-item" href="#experience" data-view="experience" aria-label="Work Experience">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
@@ -3782,7 +3783,7 @@
     </a>
     <a class="sidebar-item" href="#projects" data-view="projects" aria-label="Projects">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-      <span class="sidebar-label morph-label"><span class="ml-default">Projects</span><span class="ml-hover" aria-hidden="true">What I am building</span></span>
+      <span class="sidebar-label morph-label"><span class="ml-default">Projects</span><span class="ml-hover" aria-hidden="true">19 builds</span></span>
     </a>
     <a class="sidebar-item" href="#chat" data-view="chat" aria-label="Chat with Anchit">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -12224,29 +12225,23 @@
     var camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 0.1, 260);
     camera.position.z = 30;
 
-    var COUNT = isMobile ? 1400 : 3200, SPREAD = 90;
+    var COUNT = isMobile ? 90 : 220, SPREAD = 90;
     var geo = new THREE.BufferGeometry();
     var pos = new Float32Array(COUNT * 3), col = new Float32Array(COUNT * 3);
     for (var i = 0; i < COUNT; i++) {
       pos[i*3] = (Math.random()-0.5)*SPREAD; pos[i*3+1] = (Math.random()-0.5)*SPREAD; pos[i*3+2] = (Math.random()-0.5)*SPREAD;
-      var rr = Math.random(); var cc = rr<0.55 ? primary : (rr<0.82 ? gold : accent);
+      var rr = Math.random(); var cc = rr<0.55 ? gold : (rr<0.85 ? accent : primary);
       col[i*3]=cc.r; col[i*3+1]=cc.g; col[i*3+2]=cc.b;
     }
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
-    var mat = new THREE.PointsMaterial({ size: isMobile ? 0.55 : 0.5, map: softSprite(THREE), vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.95, sizeAttenuation: true });
+    var mat = new THREE.PointsMaterial({ size: isMobile ? 0.24 : 0.22, map: softSprite(THREE), vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.34, sizeAttenuation: true });
     var points = new THREE.Points(geo, mat);
     scene.add(points);
 
-    // Glowing core: two counter-rotating wireframe icosahedra (an "AI core").
-    function shell(radius, detail, color, opacity) {
-      var m = new THREE.Mesh(new THREE.IcosahedronGeometry(radius, detail),
-        new THREE.MeshBasicMaterial({ color: color, wireframe: true, transparent: true, opacity: opacity, blending: THREE.AdditiveBlending, depthWrite: false }));
-      scene.add(m); return m;
-    }
-    var coreOuter = shell(9, 1, primary, 0.16);
-    var coreInner = shell(5.2, 0, accent, 0.14);
-    var coreGlow  = shell(3.0, 0, gold, 0.22);
+    // Restrained futuristic backdrop: no spinning wireframe icosahedra behind copy.
+    var noopShell = { rotation: { x: 0, y: 0, z: 0 } };
+    var coreOuter = noopShell, coreInner = noopShell, coreGlow = noopShell;
 
     var mxT = 0, myT = 0, mx = 0, my = 0, scrollY = 0;
     window.addEventListener('pointermove', function (e) { mxT = (e.clientX/window.innerWidth)-0.5; myT = (e.clientY/window.innerHeight)-0.5; }, { passive: true });
@@ -12282,7 +12277,7 @@
     // backdrops while the WebGL canvas was still empty, and anyone whose first
     // render was slow got a bare background in the gap.
     function reveal() {
-      canvas.style.opacity = '0.85';
+      canvas.style.opacity = '0.36';
       // Announce it, so the CSS can retire the other backdrops. The quality
       // guard clears it again if this machine cannot keep up, and the 2D field
       // comes straight back.
