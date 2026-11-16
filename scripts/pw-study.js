@@ -371,7 +371,14 @@ async function caseStudy(browser, vp) {
     JSON.stringify({ ranks: story.priorityItems, features: story.features }));
   check(`${L}: GTM includes a three-stage launch process`,
     story.gtmPhases === 3, story.gtmPhases);
-    await page.click('.filters .chip[data-f="none"]');
+    // The full audit is intentionally collapsed to keep the interviewer view concise.
+  const auditDetails = page.locator('#audit details.evidence-details');
+  check(`${L}: detailed capability audit is available on demand`,
+    !(await auditDetails.evaluate((e) => e.open)), 'collapsed at first visit');
+  await auditDetails.locator('summary').click();
+  check(`${L}: expanding audit reveals all capability filters`,
+    await page.locator('.filters .chip[data-f="none"]').isVisible(), '');
+  await page.click('.filters .chip[data-f="none"]');
   const rows = await page.$$eval('#audit-tbl tbody tr', (rs) => rs.filter((r) => r.offsetParent !== null).length);
   check(`${L}: audit "Not found" filter shows 5 rows`, rows === 5, rows);
 
