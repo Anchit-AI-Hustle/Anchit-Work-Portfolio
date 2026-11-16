@@ -1264,7 +1264,7 @@
      The stage centres its content, so without this the "Scroll to continue"
      hint sits underneath the pill. Padding shifts the whole stack up rather
      than moving one line, so nothing else in the hero can collide either. */
-  @media (max-width: 820px) { .cine-stage { padding-bottom: 104px; } }
+  @media (max-width: 820px) { .cine-stage { justify-content: flex-start; padding-top: 20px; padding-bottom: 104px; } } @media (max-width: 640px) { .cine-stage { padding-top: 16px; gap: 10px; } .cine-mark { width: clamp(140px, 24vh, 210px); } }
 
   /* Freelance offer bar, sits between the fixed top bar and the boot stage.
      Its height is fixed per breakpoint rather than left to the content, because
@@ -1273,7 +1273,7 @@
      --offer-top is where the stage pins once the bar has scrolled away (just
      under the top bar instead of under the bar that is no longer there). */
   #view-home { --offer-h: 64px; --offer-top: calc(44px + var(--safe-top)); --offer-above: calc(var(--offer-top) + var(--offer-h)); }
-  @media (max-width: 820px) { #view-home { --offer-top: calc(58px + var(--safe-top)); --offer-above: var(--offer-h); } }
+  @media (max-width: 820px) { #view-home { --offer-top: calc(58px + var(--safe-top)); --offer-above: calc(var(--offer-top) + var(--offer-h)); } }
   /* Taller below 1180px, where the role line stacks under its tag, and on a
      phone, where the two buttons stack beside it. */
   @media (max-width: 1180px) { #view-home { --offer-h: 76px; } }
