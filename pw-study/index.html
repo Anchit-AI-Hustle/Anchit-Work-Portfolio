@@ -316,7 +316,7 @@ footer h3{color:#fff}
   <div class="wrap">
     <a class="mark" href="#top"><i aria-hidden="true">AT</i><span><b>PW Study</b><small>by Anchit Tandon</small></span></a>
     <div class="links" id="links">
-      <a href="#overview">Start here</a><a href="#audit">Research</a><a href="#gaps">Findings</a><a href="#system">Proposal</a><a href="#bet">AI design</a><a href="#prototype">What I built</a><a href="#first-test">First test</a><a href="#impact">Economics</a><a href="#me">Why me</a><a href="#walkthrough">Share</a>
+      <a href="#overview">Overview</a><a href="#journey-demo">Live demo</a><a href="#audit">Research</a><a href="#gaps">Findings</a><a href="#system">Proposal</a><a href="#bet">AI design</a><a href="#first-test">First test</a><a href="#impact">Economics</a><a href="#me">Why me</a><a href="#walkthrough">Share</a>
     </div>
     <a class="btn btn-primary sm cta" href="/pw-study/prototype">Open prototype</a>
   </div>
@@ -354,41 +354,89 @@ footer h3{color:#fff}
 <!-- INTERVIEWER BRIEF -->
 <section class="block interviewer-brief" id="overview" aria-labelledby="overview-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">Start here · 90-second interviewer brief</span>
-      <h2 id="overview-h">My question, my work, my findings, and my proposed next step</h2>
-      <p>I wanted to understand whether PW could help a paid learner recover from missed practice by using products PW already has—and whether better educational continuity could eventually improve eligible next-stage enrolment. I treated this as a <b>hypothesis to validate</b>, not a claim that PW has an internal retention problem.</p>
+    <div class="sec-head">
+      <span class="num">Start here · 90-second interviewer briefing</span>
+      <h2 id="overview-h">What I did, what I learned, and what I would test</h2>
+      <p><b>The question:</b> Could PW's existing learning tools help a paid learner return to meaningful practice after falling behind? I investigated the opportunity with public information, built a demonstrable product concept, and defined how I would test it—without claiming PW lacks an internal retention system.</p>
     </div>
-    <div class="grid g2">
-      <article class="card done">
-        <span class="tag live">Completed · public research</span>
-        <h3>1. What I investigated</h3>
-        <p>I reviewed <b>45+ public PW pages, nine app listings, 1,425 public app reviews</b>, and company-reported financial and AI disclosures. I mapped existing learning, planning, parent-support and growth capabilities, then identified where public evidence ends.</p>
-        <p class="note-tight" style="margin-top:8px"><a href="#audit">Read the audit and method</a> · <a href="#gaps">See the findings</a></p>
+    <div class="case-route" role="list" aria-label="The case study from completed research to proposed experiment">
+      <div class="route-card completed" role="listitem"><span class="route-num">01 · COMPLETED</span><b>Investigated PW</b><small>Website, app listings, reviews and filings</small></div>
+      <div class="route-card completed" role="listitem"><span class="route-num">02 · COMPLETED</span><b>Built a prototype</b><small>Student, progress report and business dashboard</small></div>
+      <div class="route-card future" role="listitem"><span class="route-num">03 · HYPOTHESIS</span><b>Connected the dots</b><small>A recovery action using existing PW tools</small></div>
+      <div class="route-card future" role="listitem"><span class="route-num">04 · TO VALIDATE</span><b>Designed the test</b><small>Learning recovery, mastery and incremental value</small></div>
+    </div>
+    <div class="proof-grid">
+      <article class="evidence-panel">
+        <div class="panel-head"><span class="tag live">Research completed</span><span class="note-tight">Public sources only</span></div>
+        <h3>What I examined</h3>
+        <div class="evidence-metrics">
+          <div class="metric"><strong>45+</strong><span>PW web pages audited</span></div>
+          <div class="metric"><strong>9</strong><span>App listings reviewed</span></div>
+          <div class="metric"><strong>1,425</strong><span>Public reviews examined</span></div>
+        </div>
+        <p>I cross-referenced product surfaces, parent and learner feedback, and PW's reported AI and financial results to identify <b>testable questions</b>, not invent internal churn statistics.</p>
+        <div class="panel-foot" style="margin-top:16px"><span class="maker"><img src="/assets/anchit-profile-720.webp" width="40" height="40" loading="lazy" alt="Anchit Tandon"><span>Personally researched &amp; synthesised</span></span><a href="#audit">Inspect evidence →</a></div>
       </article>
-      <article class="card done">
-        <span class="tag live">Completed · interactive demonstration</span>
-        <h3>2. What I actually built</h3>
-        <p>A responsive, clickable <b>student experience, progress-report view and renewals dashboard</b>, with four fictional learners, adjustable study signals, explainable rule-based decisions and editable ₹ scenarios.</p>
-        <p class="note-tight" style="margin-top:8px">These are working demo interactions, <b>not trained ML, integrated PW APIs or a real user experiment</b>. <a href="/pw-study/prototype">Try the prototype</a>.</p>
-      </article>
-      <article class="card proposed">
-        <span class="tag part">Proposed · product judgment</span>
-        <h3>3. What I learned</h3>
-        <p>PW already has substantial AI tutoring, practice and planning capability. A promising incremental opportunity may be to make a missed-practice moment actionable: one manageable, syllabus-aligned catch-up task, with existing tools reused rather than duplicated.</p>
-        <p class="note-tight" style="margin-top:8px">The existence and magnitude of the gap are still unverified; internal event data and first-party interviews decide whether this is worth building.</p>
-      </article>
-      <article class="card proposed">
-        <span class="tag part">Proposed · first PW experiment</span>
-        <h3>4. What I would test</h3>
-        <p>Randomise eligible learners who missed practice to <b>existing experience vs. one short, guided catch-up plan</b>. Compare meaningful practice recovery after seven days, sustained practice the next week, unassisted mastery, safety and cost. Evaluate next-stage enrolment later—only when the buying window matures.</p>
-        <p class="note-tight" style="margin-top:8px"><a href="#first-test">Experiment design and decision gates</a></p>
+      <article class="built-panel">
+        <div class="panel-head"><span class="tag live">Prototype completed</span><span class="note-tight">Rule-based demonstration</span></div>
+        <h3>What I made clickable</h3>
+        <div class="built-preview" aria-label="Three screenshots from the prototype">
+          <a href="/pw-study/prototype#student" aria-label="Explore learner experience"><img src="/pw-study/img/student.png" alt="Learner concept screenshot" width="2168" height="2566" loading="lazy"></a>
+          <a href="/pw-study/prototype#report" aria-label="Explore report experience"><img src="/pw-study/img/pulse.png" alt="Proposed progress report screenshot" width="660" height="1125" loading="lazy"></a>
+          <a href="/pw-study/prototype#dashboard" aria-label="Explore dashboard experience"><img src="/pw-study/img/console.png" alt="Synthetic dashboard screenshot" width="1061" height="1488" loading="lazy"></a>
+        </div>
+        <p><b>4 fictional learners</b> · Adjustable study signals · Explainable demo actions · An editable synthetic 5,000-learner scenario calculator. No live PW integrations.</p>
+        <div class="panel-foot" style="margin-top:16px"><span class="note-tight">Real in-browser interactions.</span><a href="/pw-study/prototype">Try my prototype →</a></div>
       </article>
     </div>
-    <div class="proof">
-      <b>Evidence boundary.</b> I have <b>not</b> accessed PW’s internal retention or learner data, interviewed PW customers, deployed a real AI model, sent WhatsApp messages or demonstrated revenue lift. I have completed the public investigation, synthesis, concept, interactive prototype and scenario model.
+    <div class="conclusion-grid">
+      <article class="conclusion-panel">
+        <span class="tag part">My product hypothesis · Not validated</span>
+        <b>PW has the ingredients. Could the recovery moment be simpler?</b>
+        <p>PW already offers AI Guru, guided practice, planning tools and mentorship. Instead of inventing another planner, I would test one manageable, syllabus-aligned catch-up action after missed practice. Internal data must establish if this adds value.</p>
+        <a href="#gaps">See what led me here →</a>
+      </article>
+      <article class="conclusion-panel next">
+        <span class="tag part">My proposed experiment at PW</span>
+        <b>Improve learning first. Monetisation comes later.</b>
+        <p>Compare existing support to a guided catch-up task among legally eligible learners. Measure seven-day recovery, repeat practice, unassisted mastery, fairness and cost—then next-stage enrolment when the buying window arrives.</p>
+        <a href="#first-test">Inspect the experiment →</a>
+      </article>
     </div>
-    <p class="callout" style="margin-top:18px"><b>My recommendation:</b> test whether a focused learning intervention works <em>before</em> investing in a churn-prediction stack, parent messaging or commercial cross-sell. An unsuccessful learning test should change the roadmap—not be explained away by a large revenue scenario.</p>
-    <nav class="path" aria-label="Read the case study in order"><a href="#audit">01 Research</a><a href="#gaps">02 Findings</a><a href="#system">03 Proposal</a><a href="#bet">04 AI design</a><a href="#prototype">05 Built demo</a><a href="#first-test">06 Experiment</a><a href="#impact">09 Economics</a><a href="#me">10 Why me</a></nav>
+    <p class="proof"><b>What I have not done:</b> accessed PW internal data, interviewed PW customers, trained a predictive model, sent real WhatsApp reports or proven revenue uplift. The interactions are real; learner cases and business uplifts are illustrative.</p>
+    <p class="callout" style="margin-top:16px"><b>Product recommendation:</b> validate one useful learner-recovery intervention before investing in prediction infrastructure or commercial targeting. If learning does not improve, do not scale this bet.</p>
+  </div>
+</section>
+
+<!-- DEMO SHOWCASE -->
+<section class="block demo-showcase" id="journey-demo" aria-labelledby="jd-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="num">See the work, not just the description</span>
+      <h2 id="jd-h">Three working screens that communicate the product idea</h2>
+      <p>Each preview is a screenshot from the <b>actual interactive prototype I built</b>. Open a screen to inspect its corresponding demo view. All learners, scores and financial results are fictional.</p>
+    </div>
+    <div class="demo-gallery">
+      <article class="demo-tile">
+        <a class="demo-cover" href="/pw-study/prototype#student"><img src="/pw-study/img/student.png" alt="Concept learner app showing on-track status and a catch-up plan" width="2168" height="2566" loading="lazy"><span class="live-label">01 / Student experience</span></a>
+        <div class="demo-info"><h3>From missed tasks to a comeback plan</h3><p>Select a learner and change study signals to see how the illustrative plan and on-track score respond.</p><a href="/pw-study/prototype#student">Explore learner app →</a></div>
+      </article>
+      <article class="demo-tile">
+        <a class="demo-cover" href="/pw-study/prototype#report"><img src="/pw-study/img/pulse.png" alt="Proposed weekly WhatsApp progress report showing illustrative learning data" width="660" height="1125" loading="lazy"><span class="live-label">02 / Progress report</span></a>
+        <div class="demo-info"><h3>Communicate progress, not pressure</h3><p>Preview factual updates and compare adult and parent-facing designs. Real sending requires legal review and consent.</p><a href="/pw-study/prototype#report">Explore report preview →</a></div>
+      </article>
+      <article class="demo-tile">
+        <a class="demo-cover" href="/pw-study/prototype#dashboard"><img src="/pw-study/img/console.png" alt="Synthetic renewal dashboard showing learner segments, actions and cost scenarios" width="1061" height="1488" loading="lazy"><span class="live-label">03 / Business dashboard</span></a>
+        <div class="demo-info"><h3>See how a PM would judge the bet</h3><p>Inspect fictional cohorts and change model inputs. Collections are sensitivity scenarios, not forecasts or profit.</p><a href="/pw-study/prototype#dashboard">Explore the dashboard →</a></div>
+      </article>
+    </div>
+    <div class="demo-walk" aria-label="Four steps for interviewers">
+      <div><b>STEP 1</b>Choose Riya or Kabir in the student view.</div>
+      <div><b>STEP 2</b>Change practice, test and inactivity signals.</div>
+      <div><b>STEP 3</b>See the illustrative plan and progress report.</div>
+      <div><b>STEP 4</b>Challenge economics in the dashboard.</div>
+    </div>
+    <div class="hero-ctas" style="margin-top:20px"><a class="btn btn-primary" href="/pw-study/prototype">Launch interactive prototype</a><a class="btn btn-outline" href="#first-test">How I would test it</a></div>
   </div>
 </section>
 
@@ -466,6 +514,13 @@ footer h3{color:#fff}
 <section class="block" id="system" aria-labelledby="sys-h">
   <div class="wrap">
     <div class="sec-head"><span class="num">03 · Proposed solution, not deployed</span><h2 id="sys-h">A learning-recovery layer on PW’s existing tools</h2><p><b>The problem to validate.</b> When a paid learner falls behind, knowing the backlog is only useful if they have a manageable way to resume. PW already has Tracker 360, guided practice and daily challenges. The first test uses those tools to see whether a specific catch-up task gets the learner studying again. As a sensitivity check, a scenario with 50% next-batch eligibility and 40% repeat enrolment implies about <b>₹600 cr a year</b> in illustrative fees associated with eligible non-returners. A +4-point lift would capture about 7% of that scenario. Actual eligibility, prices and repeat enrolment need validation.</p></div>
+    <div class="visual-path" role="list" aria-label="How the proposed learner-recovery flow would work">
+      <div class="node" role="listitem"><strong aria-hidden="true">📚</strong><b>Study signal</b><span>Missed meaningful practice</span></div>
+      <div class="node" role="listitem"><strong aria-hidden="true">🔎</strong><b>Validate</b><span>Check event quality &amp; eligibility</span></div>
+      <div class="node" role="listitem"><strong aria-hidden="true">🧭</strong><b>Guide</b><span>One syllabus-aligned task</span></div>
+      <div class="node" role="listitem"><strong aria-hidden="true">✅</strong><b>Learn</b><span>Recover practice &amp; mastery</span></div>
+      <div class="node" role="listitem"><strong aria-hidden="true">📈</strong><b>Measure</b><span>Incremental effect vs. control</span></div>
+    </div>
     <div class="feat">
       <div class="step"><span class="n">Feature 1</span><b>Drop-off Risk Score</b><p>A proposed 0–100 drop-off score for legally eligible learners, using validated progress and practice signals. Start with interpretable rules; use trained prediction only if it outperforms that baseline, is calibrated and clears privacy review.</p><span class="for">For: the team that owns renewals</span><a class="try" href="/pw-study/prototype#risk">See the risk score</a></div>
       <div class="step"><span class="n">Feature 2</span><b>Catch-up Plan</b><p>Made by the AI Mentor from PW's own AI: guided practice, AI Guru for doubts and Daily Challenges. A human mentor calls on day 8 only if the learner is still high risk. An hour of AI Tuto is tested as a pilot arm.</p><span class="for">For: the learner</span><a class="try" href="/pw-study/prototype#catchup">See Riya's plan</a></div>
@@ -530,14 +585,16 @@ footer h3{color:#fff}
 <!-- PROTOTYPE -->
 <section class="block" id="prototype" aria-labelledby="pr-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">05 · What I actually built</span><h2 id="pr-h">A clickable concept I implemented—not a production AI integration</h2><p>I built a browser-based interactive prototype with four fictional learners (Riya 16, Aman 19, Meena 15, Kabir 24), adjustable study signals, simulated support flows, parent-report variants, and an editable 5,000-learner scenario calculator. <b>What is real:</b> the interaction and formulas. <b>What is not:</b> model training, PW data, WhatsApp sends, verified consent, live AI calls, or measured growth.</p>
-      <div class="hero-ctas" style="margin-top:6px"><a class="btn btn-primary" href="/pw-study/prototype">Open full screen</a></div></div>
-    <iframe class="proto-frame" src="/pw-study/prototype?embed=1" title="Learner Retention Engine working prototype" loading="lazy"></iframe>
-    <div class="shots mob-only">
-      <figure><img src="/pw-study/img/student.png" alt="Prototype student app: on-track score, 7-day catch-up plan, AI Mentor chat, a next-step recommendation with no price for an under-18, and the drop-off risk score with its reasons" loading="lazy" width="2168" height="2566"><figcaption>Student app: a plan, not a warning</figcaption></figure>
-      <figure><img src="/pw-study/img/pulse.png" alt="Weekly Progress Report on WhatsApp, sent to a parent of a 16-year-old" loading="lazy" width="660" height="1125"><figcaption>Weekly Progress Report, to the right person</figcaption></figure>
-      <figure><img src="/pw-study/img/console.png" alt="Renewals Dashboard action table grouping learners by risk, age and final year, with the extra fees each group is expected to bring in and the maths for the selected group" loading="lazy" width="1061" height="1488"><figcaption>Renewals Dashboard: the Monday screen</figcaption></figure>
+    <div class="sec-head">
+      <span class="num">05 · What I actually built</span>
+      <h2 id="pr-h">A working interactive concept—not a deployed AI product</h2>
+      <p>The screenshot gallery appears <a href="#journey-demo">near the top of this study</a> so a hiring manager can inspect it before reading the appendices. Four fictional learner profiles, adjustable inputs, report previews and an editable cohort calculator work in-browser; no PW APIs, real learners, trained ML or measured growth are involved.</p>
+      <div class="hero-ctas" style="margin-top:6px"><a class="btn btn-primary" href="/pw-study/prototype">Open full demo</a><a class="btn btn-outline" href="#journey-demo">View screenshot gallery</a></div>
     </div>
+    <details class="inline-demo">
+      <summary>Or expand the interactive prototype within this page (desktop)</summary>
+      <iframe class="proto-frame" src="/pw-study/prototype?embed=1" title="Interactive fictional learner-recovery prototype" loading="lazy"></iframe>
+    </details>
   </div>
 </section>
 
@@ -835,7 +892,7 @@ footer h3{color:#fff}
       <li><span class="wn" aria-hidden="true">1</span><span class="wt">Start with the 90-second case summary <small>· 1 min</small></span><span class="small">My question, what I completed, what remains hypothetical, and the recommendation.</span><span class="wu"><a href="/pw-study#overview">https://anchit-tandon.com/pw-study#overview</a></span></li>
       <li><span class="wn" aria-hidden="true">2</span><span class="wt">Review my public research and findings <small>· 2 min</small></span><span class="small">PW capabilities, app reviews, evidence boundaries and hypotheses to validate.</span><span class="wu"><a href="/pw-study#audit">https://anchit-tandon.com/pw-study#audit</a></span></li>
       <li><span class="wn" aria-hidden="true">3</span><span class="wt">Understand the proposed product and AI logic <small>· 2 min</small></span><span class="small">What the concept would add, how it reuses PW AI and why a predictive model is optional.</span><span class="wu"><a href="/pw-study#architecture">https://anchit-tandon.com/pw-study#architecture</a></span></li>
-      <li><span class="wn" aria-hidden="true">4</span><span class="wt">Try the interactive demonstration <small>· 3 min</small></span><span class="small">Adjust fictional learners, see proposed recovery flows, inspect the financial scenario calculator.</span><span class="wu"><a href="/pw-study/prototype">https://anchit-tandon.com/pw-study/prototype</a></span></li>
+      <li><span class="wn" aria-hidden="true">4</span><span class="wt">See screenshots and try the prototype <small>· 3 min</small></span><span class="small">Preview three screens and manipulate fictional learner signals.</span><span class="wu"><a href="/pw-study#journey-demo">https://anchit-tandon.com/pw-study#journey-demo</a></span></li>
       <li><span class="wn" aria-hidden="true">5</span><span class="wt">Judge the first experiment <small>· 2 min</small></span><span class="small">Existing experience versus guided catch-up, learning outcomes and go/no-go criteria.</span><span class="wu"><a href="/pw-study#first-test">https://anchit-tandon.com/pw-study#first-test</a></span></li>
       <li><span class="wn" aria-hidden="true">6</span><span class="wt">Stress-test economics and risks <small>· 2 min</small></span><span class="small">The assumptions behind incremental collections, downside, privacy and model fairness.</span><span class="wu"><a href="/pw-study#impact">https://anchit-tandon.com/pw-study#impact</a></span></li>
       <li><span class="wn" aria-hidden="true">7</span><span class="wt">Connect this work to my experience <small>· 1 min</small></span><span class="small">Relevant subscription-growth delivery, AI experimentation and cross-functional execution.</span><span class="wu"><a href="/pw-study#me">https://anchit-tandon.com/pw-study#me</a></span></li>
