@@ -962,11 +962,39 @@ async function prototype(browser, vp) {
     check(`${L}: on a phone or tablet the score stays in view while dragging`, mini.on && mini.t.includes(tier.replace(' risk', '')), JSON.stringify(mini));
   }
   let worst = 0;
+  let overflowDiag = [];
   for (const tab of ['#t-student', '#t-parent', '#t-console', '#t-brand']) {
     await page.click(tab);
-    worst = Math.max(worst, await hScroll(page));
+    const over = await hScroll(page);
+    if (over > worst) {
+      worst = over;
+      // A failing viewport must identify the offending DOM box. This aids repair
+      // without weakening the no-horizontal-scroll assertion or hiding content.
+      overflowDiag = await page.evaluate((tabId) => {
+        const viewport = document.documentElement.clientWidth;
+        return [...document.body.querySelectorAll('*')]
+          .filter((el) => {
+            const r = el.getBoundingClientRect();
+            const css = getComputedStyle(el);
+            return css.display !== 'none' && css.visibility !== 'hidden' &&
+              r.height > 0 && (r.right - viewport > 1 || r.left < -1);
+          })
+          .map((el) => {
+            const r = el.getBoundingClientRect();
+            return {
+              tab: tabId, tag: el.tagName.toLowerCase(), id: el.id || '',
+              className: typeof el.className === 'string' ? el.className.slice(0, 60) : '',
+              left: Math.round(r.left), right: Math.round(r.right),
+              width: Math.round(r.width),
+              overflow: getComputedStyle(el).overflowX,
+            };
+          })
+          .sort((a, b) => b.right - a.right).slice(0, 12);
+      }, tab);
+    }
   }
-  check(`${L}: no horizontal page scroll on any tab`, worst <= 0, worst + 'px');
+  check(`${L}: no horizontal page scroll on any tab`,
+    worst <= 0, worst + 'px ' + JSON.stringify(overflowDiag));
   const d = await dashes(page);
   check(`${L}: no em/en dash`, d.length === 0, d.join(' | '));
   await page.waitForTimeout(300);
