@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Learner Retention Engine Prototype | Anchit Tandon, PM Application</title>
-<meta name="description" content="Working prototype of the Learner Retention Engine, an AI retention system proposed for PhysicsWallah in a PM application by Anchit Tandon. Synthetic data.">
+<title>PW Learning Recovery Concept | Anchit Tandon · Senior Product Manager – Growth</title>
+<meta name="description" content="Interactive PhysicsWallah learning-recovery concept by Anchit Tandon, Senior Product Manager – Growth applicant. Four fictional learners, rule-based interactions and scenario economics; not a trained AI system.">
 <meta name="robots" content="noindex, nofollow">
 <meta name="color-scheme" content="light">
 <link rel="canonical" href="https://anchit-tandon.com/pw-study/prototype">
@@ -247,12 +247,12 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
 <main id="main">
 <section class="hero">
   <div class="wrap">
-    <span class="eyebrow">Working prototype · Anchit Tandon's application to PW</span>
+    <span class="eyebrow">Interactive concept I built · Senior Product Manager – Growth</span>
     <h1>See what happens when a student <span class="accent">starts to drift</span>.</h1>
-    <p class="lede">A clickable mock-up with four made-up students. Pick one, drag their study signals, and watch the system respond in three places: the student's app, the weekly WhatsApp message, and the dashboard PW's renewals team would use. AI replies follow simple, visible rules.</p>
+    <p class="lede"><b>What I built:</b> four fictional learner journeys, adjustable risk signals, a simulated catch-up experience, report previews and an editable financial model. Pick a learner and change the signals to see the concept respond. <b>What this does not do:</b> run trained AI, call PW APIs, use real learner data, contact parents or prove growth uplift. The rules and responses are illustrative.</p>
     <div class="xlinks"><a class="btn btn-outline sm" href="/pw-study" target="_top">Back to the case study</a><a class="btn btn-soft sm" href="/pw-study#audit" target="_top">See the live platform audit</a></div>
     <nav class="feats" aria-label="The five features"><span class="label">Or jump to a feature:</span><a href="#risk"><b>1</b>Drop-off Risk Score</a><a href="#catchup"><b>2</b>Catch-up Plan</a><a href="#report"><b>3</b>Weekly Progress Report</a><a href="#recommendation"><b>4</b>Next-Step Recommendation</a><a href="#dashboard"><b>5</b>Renewals Dashboard</a></nav>
-    <p class="small muted">Part of Anchit Tandon's Product Manager application to PW. Step-by-step review: <a href="/pw-study#walkthrough" target="_top">anchit-tandon.com/pw-study#walkthrough</a></p>
+    <p class="small muted">Part of Anchit Tandon's Senior Product Manager – Growth interview case study for PW. Step-by-step review: <a href="/pw-study#walkthrough" target="_top">anchit-tandon.com/pw-study#walkthrough</a></p>
   </div>
 </section>
 
@@ -323,7 +323,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
           <div id="e-factors"></div>
           <p class="why" id="e-why"></p>
           <div class="flow" id="e-actions"></div>
-          <p class="small muted">Rule weights are illustrative. In production the signals come from data PW already collects (Tracker 360 and Prep Meter progress, lecture watch, DPP and test data, Ask AI doubts), scored by a model trained on PW batch history and checked against a holdout group.</p>
+          <p class="small muted">This is a transparent rule-based illustration, not a trained ML model. A production system would first validate internal data access and quality, legal eligibility, and the performance of simple rules. Predictive ML would be added only if temporal calibration, precision and intervention experiments justify it.</p>
         </div>
       </div>
     </div>
@@ -384,7 +384,7 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
     <button class="btn btn-outline sm" id="reseed">Generate a new cohort</button>
   </div>
   <div class="howto" aria-label="How to read this screen">
-    <div class="card soft"><p><b class="n">1</b><b>Who is drifting</b></p><p class="small" style="margin-top:6px">Every paid learner gets a weekly risk score from their study signals (lecture pace, tests, inactivity, doubts, streak).</p></div>
+    <div class="card soft"><p><b class="n">1</b><b>Who is drifting</b></p><p class="small" style="margin-top:6px">For this demo, synthetic learners receive an illustrative risk score. Production scoring would be limited to legally eligible learners, validated events and permitted educational purposes.</p></div>
     <div class="card soft"><p><b class="n">2</b><b>What we do about it</b></p><p class="small" style="margin-top:6px">Learners are grouped by the action they get. Click any row to see who is in it and how the ₹ is worked out.</p></div>
     <div class="card soft"><p><b class="n">3</b><b>What it is worth for PW</b></p><p class="small" style="margin-top:6px">A what-if calculator on PW's real FY26 numbers. Change any assumption and the total updates.</p></div>
   </div>
@@ -411,12 +411,12 @@ footer .wrap{padding-top:16px;padding-bottom:24px;font-size:13px;line-height:19p
         <div class="formula" id="seg-scale" style="margin-top:10px"></div>
       </div>
       <div class="card">
-        <h3>How to prove it (first 90 days)</h3>
+        <h3>How I would validate this—after joining PW</h3>
         <div class="flow" style="margin-top:10px">
-          <div class="step"><span class="n">1</span><div><b>Backtest, then pick 2 grades</b><p class="small">Go only if week-6 risk predicts non-renewal (AUC 0.70+). Pilot Class 10 and Class 11: both have a next batch.</p></div></div>
-          <div class="step"><span class="n">2</span><div><b>90/10 holdout</b><p class="small">10% keep today's experience. About 14,500 learners give 80% power that the lift's lower bound clears the 0.62pp break-even if the true lift is +4pp.</p></div></div>
-          <div class="step"><span class="n">3</span><div><b>Primary metric</b><p class="small">Next-cycle enrolment by the start of the next batch, so renewals in the Vishwas Diwas window count.</p></div></div>
-          <div class="step"><span class="n">4</span><div><b>Guardrails</b><p class="small">Notification opt-outs, refund rate, app rating, parent complaints.</p></div></div>
+          <div class="step"><span class="n">1</span><div><b>Backtest, then pick 2 grades</b><p class="small">First test a simple, auditable missed-practice rule. Backtest any future ML model for calibration, precision at capacity and subgroup errors; child data use requires legal approval.</p></div></div>
+          <div class="step"><span class="n">2</span><div><b>Start with 50/50 experiment</b><p class="small">Randomise a legally eligible cohort into current support versus a guided catch-up plan; preserve existing help for both groups. Recalculate sample size from the real baseline.</p></div></div>
+          <div class="step"><span class="n">3</span><div><b>Primary learning metric</b><p class="small">Verified practice recovery in seven days; check repeat practice and unassisted mastery. Read incremental next-cycle enrolment later when the cohort matures.</p></div></div>
+          <div class="step"><span class="n">4</span><div><b>Guardrails</b><p class="small">Mastery must not decline. Check unsafe advice, data accuracy, consent, opt-outs, complaints, cost and subgroup fairness.</p></div></div>
         </div>
       </div>
     </div>
