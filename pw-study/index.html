@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PhysicsWallah Growth Case Study: Learner Retention Engine | Anchit Tandon</title>
-<meta name="description" content="Product Manager application by Anchit Tandon: a PhysicsWallah platform audit and the Learner Retention Engine, an AI retention system with a working prototype.">
+<meta name="description" content="Senior Product Manager – Growth interview case study for PhysicsWallah: what Anchit Tandon researched, learned and built, plus a testable learner-recovery product proposal.">
 <meta name="robots" content="noindex, nofollow">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#5A4BDA">
-<meta property="og:title" content="Product Manager Application: a Learner Retention Engine for PW">
-<meta property="og:description" content="Product Manager application by Anchit Tandon: a PhysicsWallah platform audit and the Learner Retention Engine, with a working prototype and a walkthrough.">
+<meta property="og:title" content="PhysicsWallah Growth Case Study | Research, Prototype & Experiments by Anchit Tandon">
+<meta property="og:description" content="What I investigated, what I actually built, what the evidence shows, and how I would validate learning recovery and growth at PhysicsWallah.">
 <meta property="og:type" content="article">
 <link rel="canonical" href="https://anchit-tandon.com/pw-study">
 <link rel="icon" href="/icons/favicon.svg">
@@ -204,6 +204,21 @@ footer h3{color:#fff}
 }
 @media (max-width:699px){.nav .cta{display:none}}
 @media (prefers-reduced-motion:no-preference){.bar i{transition:width .5s ease}}
+.interviewer-brief{background:#fff;border-top:1px solid var(--border-soft)}
+.interviewer-brief .card{border-top:4px solid var(--primary)}
+.interviewer-brief .card.done{border-top-color:var(--success)}
+.interviewer-brief .card.proposed{border-top-color:var(--orange)}
+.interviewer-brief .card h3{margin:8px 0}
+.interviewer-brief .card p{font-size:15px;line-height:23px}
+.interviewer-brief .proof{margin-top:16px;padding:14px 18px;border-radius:var(--r-panel);background:var(--primary-50);font-size:14px;line-height:23px}
+.interviewer-brief .path{display:flex;gap:10px 16px;flex-wrap:wrap;margin-top:14px;font-size:14px;font-weight:600}
+.evidence-details{margin-top:16px;padding:16px;background:#fff;border:1px solid var(--border);border-radius:var(--r-panel)}
+.evidence-details summary{list-style:disclosure-closed}
+.evidence-details[open] summary{margin-bottom:14px}
+.ai-system .card{border-top:4px solid var(--primary)}
+.ai-system h4{font-size:15px;margin:6px 0}
+.note-tight{font-size:14px;line-height:22px;color:var(--muted)}
+@media(max-width:699px){.interviewer-brief .card{padding:16px}}
 </style>
 </head>
 <body>
@@ -213,7 +228,7 @@ footer h3{color:#fff}
   <div class="wrap">
     <a class="mark" href="#top"><i aria-hidden="true">AT</i><span><b>PW Study</b><small>by Anchit Tandon</small></span></a>
     <div class="links" id="links">
-      <a href="#system">System</a><a href="#me">Why me</a><a href="#business">Business</a><a href="#audit">Audit</a><a href="#gaps">Gaps</a><a href="#bet">The bet</a><a href="#prototype">Prototype</a><a href="#impact">Impact</a><a href="#plan">Plan</a><a href="#risks">Risks</a><a href="#walkthrough">Walkthrough</a>
+      <a href="#overview">Start here</a><a href="#audit">Research</a><a href="#gaps">Findings</a><a href="#system">Proposal</a><a href="#bet">AI design</a><a href="#prototype">What I built</a><a href="#first-test">First test</a><a href="#impact">Economics</a><a href="#me">Why me</a><a href="#walkthrough">Share</a>
     </div>
     <a class="btn btn-primary sm cta" href="/pw-study/prototype">Open prototype</a>
   </div>
@@ -222,65 +237,369 @@ footer h3{color:#fff}
 <header class="hero" id="top">
   <div class="wrap">
     <span class="eyebrow">Senior Product Manager, Growth · November 2026</span>
-    <h1>Help paid learners <span class="accent">get back on track.</span></h1>
-    <p class="lede">I’m Anchit Tandon. My proposal for PhysicsWallah starts with one test: can a short catch-up plan bring a paid learner back to practice and keep them studying the following week?</p>
+    <h1>From missed practice to <span class="accent">learning recovery.</span></h1>
+    <p class="lede">I studied how PhysicsWallah supports paid learners, identified an opportunity to test, and built an interactive concept. Here is <b>what I researched, what I built, what remains a hypothesis, and how I would test it</b> as a Senior Product Manager – Growth.</p>
     <nav class="start" aria-label="Start here">
-      <a class="go" href="#audit"><span class="gn" aria-hidden="true">1</span><span><b>What I found</b><small>Public evidence on paid learning at PW · 2 min</small></span></a>
-      <a class="go" href="#system"><span class="gn" aria-hidden="true">2</span><span><b>What I would build</b><small>The five features and the first test · 2 min</small></span></a>
-      <a class="go pri" href="/pw-study/prototype"><span class="gn" aria-hidden="true">3</span><span><b>Try the prototype</b><small>Pick a student and watch it work · 3 min</small></span></a>
+      <a class="go" href="#overview"><span class="gn" aria-hidden="true">1</span><span><b>Start with the case</b><small>My question, work and conclusion · 90 sec</small></span></a>
+      <a class="go" href="#first-test"><span class="gn" aria-hidden="true">2</span><span><b>Understand my product bet</b><small>The proposed first experiment · 2 min</small></span></a>
+      <a class="go pri" href="/pw-study/prototype"><span class="gn" aria-hidden="true">3</span><span><b>Try what I built</b><small>Four synthetic learners · 3 min</small></span></a>
     </nav>
-    <p class="meta"><a href="#first-test">Read the first experiment</a> · <a href="#stack">PW’s AI products</a> · <a href="#walkthrough">Full walkthrough</a>. The prototype uses synthetic learners.</p>
+    <p class="meta">Independent, public-data case study · <a href="#audit">Research evidence</a> · <a href="#stack">PW’s existing AI</a> · <a href="#walkthrough">Shareable walkthrough</a>. The prototype does not connect to PW systems or run a trained AI model.</p>
   </div>
 </header>
 
 <main>
+
+<!-- INTERVIEWER BRIEF -->
+<section class="block interviewer-brief" id="overview" aria-labelledby="overview-h">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">Start here · 90-second interviewer brief</span>
+      <h2 id="overview-h">My question, my work, my findings, and my proposed next step</h2>
+      <p>I wanted to understand whether PW could help a paid learner recover from missed practice by using products PW already has—and whether better educational continuity could eventually improve eligible next-stage enrolment. I treated this as a <b>hypothesis to validate</b>, not a claim that PW has an internal retention problem.</p>
+    </div>
+    <div class="grid g2">
+      <article class="card done">
+        <span class="tag live">Completed · public research</span>
+        <h3>1. What I investigated</h3>
+        <p>I reviewed <b>45+ public PW pages, nine app listings, 1,425 public app reviews</b>, and company-reported financial and AI disclosures. I mapped existing learning, planning, parent-support and growth capabilities, then identified where public evidence ends.</p>
+        <p class="note-tight" style="margin-top:8px"><a href="#audit">Read the audit and method</a> · <a href="#gaps">See the findings</a></p>
+      </article>
+      <article class="card done">
+        <span class="tag live">Completed · interactive demonstration</span>
+        <h3>2. What I actually built</h3>
+        <p>A responsive, clickable <b>student experience, progress-report view and renewals dashboard</b>, with four fictional learners, adjustable study signals, explainable rule-based decisions and editable ₹ scenarios.</p>
+        <p class="note-tight" style="margin-top:8px">These are working demo interactions, <b>not trained ML, integrated PW APIs or a real user experiment</b>. <a href="/pw-study/prototype">Try the prototype</a>.</p>
+      </article>
+      <article class="card proposed">
+        <span class="tag part">Proposed · product judgment</span>
+        <h3>3. What I learned</h3>
+        <p>PW already has substantial AI tutoring, practice and planning capability. A promising incremental opportunity may be to make a missed-practice moment actionable: one manageable, syllabus-aligned catch-up task, with existing tools reused rather than duplicated.</p>
+        <p class="note-tight" style="margin-top:8px">The existence and magnitude of the gap are still unverified; internal event data and first-party interviews decide whether this is worth building.</p>
+      </article>
+      <article class="card proposed">
+        <span class="tag part">Proposed · first PW experiment</span>
+        <h3>4. What I would test</h3>
+        <p>Randomise eligible learners who missed practice to <b>existing experience vs. one short, guided catch-up plan</b>. Compare meaningful practice recovery after seven days, sustained practice the next week, unassisted mastery, safety and cost. Evaluate next-stage enrolment later—only when the buying window matures.</p>
+        <p class="note-tight" style="margin-top:8px"><a href="#first-test">Experiment design and decision gates</a></p>
+      </article>
+    </div>
+    <div class="proof">
+      <b>Evidence boundary.</b> I have <b>not</b> accessed PW’s internal retention or learner data, interviewed PW customers, deployed a real AI model, sent WhatsApp messages or demonstrated revenue lift. I have completed the public investigation, synthesis, concept, interactive prototype and scenario model.
+    </div>
+    <p class="callout" style="margin-top:18px"><b>My recommendation:</b> test whether a focused learning intervention works <em>before</em> investing in a churn-prediction stack, parent messaging or commercial cross-sell. An unsuccessful learning test should change the roadmap—not be explained away by a large revenue scenario.</p>
+    <nav class="path" aria-label="Read the case study in order"><a href="#audit">01 Research</a><a href="#gaps">02 Findings</a><a href="#system">03 Proposal</a><a href="#bet">04 AI design</a><a href="#prototype">05 Built demo</a><a href="#first-test">06 Experiment</a><a href="#impact">09 Economics</a><a href="#me">10 Why me</a></nav>
+  </div>
+</section>
+
+<!-- AUDIT -->
+<section class="block" id="audit" aria-labelledby="au-h">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">01 · Research I completed</span><h2 id="au-h">I audited what was publicly visible—without assuming access to PW’s internals</h2>
+      <p>Tested on 25 Oct 2026, logged out: 45+ pw.live pages (home, batch listings, batch detail pages across JEE, NEET, UPSC and Class 10, Vidyapeeth, Test Series, Power Batch, Prerna, Tracker 360) and 9 PW apps on Google Play and the App Store, plus PW's own filings. Nothing was purchased and no forms were submitted.</p>
+      <div class="hero-ctas" style="margin-top:6px"><a class="btn btn-outline sm" href="#top">Case study overview</a><a class="btn btn-primary sm" href="/pw-study/prototype">Open the working prototype</a></div></div>
+    <div class="grid g3">
+      <div class="card"><span class="tag live">Observed</span><h3 style="margin-top:8px">Existing PW learning AI</h3><p class="small">AI Guru, guided practice, Pi Lens, Tracker 360 and Prep Meter already support parts of this journey.</p></div>
+      <div class="card"><span class="tag part">Opportunity to test</span><h3 style="margin-top:8px">A smaller recovery moment</h3><p class="small">Could a missed-practice trigger guide a learner back to one useful task without introducing another planner?</p></div>
+      <div class="card"><span class="tag none">Unknown internally</span><h3 style="margin-top:8px">Actual churn and coverage</h3><p class="small">Public sources cannot establish internal renewal rates, CRM journeys, eligibility or which tools are available in every batch.</p></div>
+    </div>
+    <details class="method more evidence-details">
+      <summary>Inspect the complete capability-by-capability audit and filters</summary>
+    <div class="filters" role="group" aria-label="Filter capabilities">
+      <button class="chip" data-f="all" aria-pressed="true">All</button>
+      <button class="chip" data-f="live" aria-pressed="false">Live</button>
+      <button class="chip" data-f="part" aria-pressed="false">Partial</button>
+      <button class="chip" data-f="none" aria-pressed="false">Not found</button>
+    </div>
+    <div class="tbl"><table class="t-wide" id="audit-tbl">
+      <thead><tr><th style="width:24%">Capability</th><th style="width:12%">Status</th><th style="width:40%">What I saw (verbatim where quoted)</th><th style="width:24%">Where</th></tr></thead>
+      <tbody>
+        <tr data-s="live"><td><b>AI doubt solving</b></td><td><span class="tag live">Live</span></td><td>"24*7 Doubt Resolution powered by Ask AI Feature"; Ask AI 3.05M+ doubts at 91% satisfaction; AI Guru 99.45M+ queries (Q4 FY26), 108.8M from 6.09M students (Q2 FY27).</td><td>Batch pages; Q4 FY26 and Q2 FY27 letters</td></tr>
+        <tr data-s="live"><td><b>AI counselling and lead AI</b></td><td><span class="tag live">Live</span></td><td>Voice bots handle 6,000+ calls a day at ~75% lower cost; smart lead routing gives "~10% higher revenue per lead"; a lead model processed 2+ crore leads.</td><td>Q4 FY26 letter</td></tr>
+        <tr data-s="live"><td><b>Study planner with on-track status</b></td><td><span class="tag live">Live</span></td><td>Tracker 360, "a PW study planner": shows tasks done against the plan, an end date and how many days the learner is "behind schedule"; streaks; "Miss a day and the plan rebalances around what is left".</td><td>tracker360.pw.live; included in plans such as NEET 360</td></tr>
+        <tr data-s="live"><td><b>Chapter preparation tracker</b></td><td><span class="tag live">Live</span></td><td>Prep Meter (Backlog Killer): "Track your chapter-wise preparation level and get personalized roadmap".</td><td>Infinity plan inclusions</td></tr>
+        <tr data-s="live"><td><b>Parent visibility</b></td><td><span class="tag live">Live</span></td><td>PW Parent App: "View their attendance, lecture, DPP, and test stats on the student dashboard"; 10L+ downloads, 4.0 rating; parent login at spd.pw.live.</td><td>Google Play com.pw.parent; App Store</td></tr>
+        <tr data-s="live"><td><b>Human mentorship</b></td><td><span class="tag live">Live</span></td><td>Infinity Pro "1:1 Mentorship": "Two 30-minute monthly sessions with PW alumni for career and strategy guidance"; Infinity "Topper Mentorship Program"; Prerna wellbeing teleconsultation.</td><td>Batch pages; Prerna page</td></tr>
+        <tr data-s="live"><td><b>AI Mentor</b></td><td><span class="tag live">Live</span></td><td>0.52M+ users served (also available to non-PW students). Not visible on public web pages.</td><td>Q4 FY26 letter</td></tr>
+        <tr data-s="part"><td><b>Continuation into next year</b></td><td><span class="tag part">Partial</span></td><td>Combo batches (e.g. Arjuna NEET 2026 + Lakshya NEET 2027); "Free Upcoming Versions"; Vishwas Diwas early buyers "automatically upgraded". CuriousJr only: "preview next year's course offerings and unlock early-enrollment benefits".</td><td>Batch pages; PW news; CuriousJr Play listing</td></tr>
+        <tr data-s="part"><td><b>Online to offline</b></td><td><span class="tag part">Partial</span></td><td>Online batches mention "Exam guidance at our PW Offline centers"; Vidyapeeth counselling bookable through the app. No Vidyapeeth trial or demo class found.</td><td>Batch pages; Vidyapeeth Utsav page</td></tr>
+        <tr data-s="none"><td><b>Weekly progress report to the learner</b></td><td><span class="tag none">Not found</span></td><td>Only test-performance reports and dashboards; no weekly summary pushed to the learner.</td><td>Searched site, store listings, filings</td></tr>
+        <tr data-s="none"><td><b>WhatsApp updates to parents</b></td><td><span class="tag none">Not found</span></td><td>Parent data lives in the app; a parent has to open it. No push digest found.</td><td>Searched site, store listings</td></tr>
+        <tr data-s="none"><td><b>Personalised next-batch recommendation on results day (main app)</b></td><td><span class="tag none">Not found</span></td><td>Next-year preview exists in CuriousJr only.</td><td>Searched site, store listings, filings</td></tr>
+        <tr data-s="none"><td><b>Renewal offer for existing online students</b></td><td><span class="tag none">Not found</span></td><td>No renewal or loyalty price for existing online learners on batch pages, offer pages or store listings; the offers found were for new bookings, such as Vidyapeeth Utsav 2026 scholarships.</td><td>Batch and offer pages; Vidyapeeth Utsav page</td></tr>
+        <tr data-s="none"><td><b>One layer connecting risk signals to actions</b></td><td><span class="tag none">Not found</span></td><td>Each tool sits in its own plan or app; no public evidence of a cross-plan risk signal that triggers mentor, parent or next-step actions.</td><td>Internal systems not visible publicly</td></tr>
+      </tbody></table></div>
+    <p class="small muted" style="margin-top:10px">Sorted Live → Partial → Not found. "Not found" means not publicly documented; logged-in experiences, push notifications and internal tools could differ.</p>
+    </details>
+  </div>
+</section>
+
+<!-- GAPS -->
+<section class="block" id="gaps" aria-labelledby="gap-h">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">02 · What I learned</span><h2 id="gap-h">Five hypotheses emerging from the evidence</h2><p>Public reviews and product surfaces reveal possible learner pain points, not PW’s internal churn rates or existing operational workflows. These are questions for a PW data review and direct interviews—not established internal failures.</p></div>
+    <div class="voices-head"><h3>In learners' and parents' own words</h3>
+      <p class="small muted">I read 1,425 public reviews of the PW app and the PW Parent App, collected 26 Oct 2026. Quoted verbatim; names left out.</p>
+      <details class="small muted method"><summary>How the reviews were read</summary><p>680 and 677 on Google Play, 68 on the App Store; the PW app ones are from 2026, the Parent App ones from Feb 2024 on. About half the PW app reviews are 5★ praise for the teaching; of the 270 rated 1-3★, 214 are about bugs or support. In the Parent App, 105 of 677 Google Play reviews (15.5%) mention reports, progress, attendance or results, and 61 of those (58%) rate it 1-3★, mostly because the data is missing, wrong or too thin; most of those are from 2024. No interviews yet: ten learner and ten parent calls are in the first three weeks of the plan.</p></details></div>
+    <div class="grid voices" id="voices">
+      <figure class="card voice"><blockquote>"It should have overall insights as well, like monthly and overall, and also option to check previous weeks or custom range data."</blockquote><figcaption>Parent App, App Store · 1★ · 3 Aug 2026</figcaption></figure>
+      <figure class="card voice"><blockquote>"the test records and my ward’s attendance are not showing on the portal yet."</blockquote><figcaption>Parent App, Google Play · 1★ · 17 Sep 2026</figcaption></figure>
+      <figure class="card voice"><blockquote>"my child is improving day by day. But your guidance and counseling can play a significant role to make the future of young ones."</blockquote><figcaption>Parent App, Google Play · 5★ · 16 Jul 2026</figcaption></figure>
+      <figure class="card voice"><blockquote>"I paid a hefty amount for the Shreshth 2.0 Infinity batch, yet it expired and I lost access to the content I purchased."</blockquote><figcaption>PW app, Google Play · 1★ · 9 Jul 2026</figcaption></figure>
+      <figure class="card voice"><blockquote>"Please add an option to hide expired batches from seeing while navigating through the 'my batches' section."</blockquote><figcaption>PW app, Google Play · 4★ · 22 Jul 2026</figcaption></figure>
+      <figure class="card voice"><blockquote>"there is mentioned that 1 to 1 mentorship but when we purchase the batch,then there is only paid no mentorship."</blockquote><figcaption>PW app, Google Play · 2★ · 5 Aug 2026</figcaption></figure>
+    </div>
+    <p class="small muted" style="margin:10px 0 20px"><b>My interpretation, not a population estimate:</b> some reviewers want clearer progress summaries, some describe confusion around batch expiry, and some question mentorship delivery. Self-selected reviews do not establish prevalence or causality. I would validate each with enrolled learners, parents and support tickets before prioritising a fix.</p>
+    <div class="tbl"><table class="t-wide">
+      <thead><tr><th style="width:22%">Shortcoming</th><th style="width:48%">Evidence</th><th style="width:30%">So what</th></tr></thead>
+      <tbody>
+        <tr><td><b>1. Repeat business is not visible</b></td><td>The filings reviewed give no next-batch re-enrolment baseline. Upfront payment separates the point of purchase from sustained learning.</td><td>Measure study drop-off and eligible repeat purchase separately.</td></tr>
+        <tr><td><b>2. Retention tools are scattered and pull-based</b></td><td>Tracker 360 in some plans, Prep Meter in Infinity, 1:1 mentorship in Infinity Pro, parent data in a separate app that has to be opened.</td><td>Check which plan tiers already have a reliable recovery path; access gaps are a hypothesis.</td></tr>
+        <tr><td><b>3. Can guided practice help learners recover?</b></td><td>PW reports higher week-three retention alongside Pi Lens daily challenges.</td><td>Test whether guided practice helps paid learners return after missing planned work.</td></tr>
+        <tr><td><b>4. Revenue is calendar-bound</b></td><td>79% of FY26 collections came March to September; Vishwas Diwas took ₹205 cr in 3 weeks; a NEET shift moved 1-1.5 lakh enrolments out of Q1.</td><td>Peaks are mass events; next steps are not yet personal.</td></tr>
+        <tr><td><b>5. Offline growth must come from existing centres</b></td><td>Offline ARPU −9% on mix; expansion now "opportunistic"; margin rests on ARPU and seat utilisation, PW's own measure, which it reports rising from 1.77 to 1.99.</td><td>PW's best offline leads are its own online learners.</td></tr>
+      </tbody></table></div>
+  </div>
+</section>
+
 <!-- PROPOSED SYSTEM -->
 <section class="block" id="system" aria-labelledby="sys-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">What I would build</span><h2 id="sys-h">The Learner Retention Engine: five features on top of what PW already runs</h2><p><b>The problem to validate.</b> When a paid learner falls behind, knowing the backlog is only useful if they have a manageable way to resume. PW already has Tracker 360, guided practice and daily challenges. The first test uses those tools to see whether a specific catch-up task gets the learner studying again. As a sensitivity check, a scenario with 50% next-batch eligibility and 40% repeat enrolment implies about <b>₹600 cr a year</b> in illustrative fees associated with eligible non-returners. A +4-point lift would capture about 7% of that scenario. Actual eligibility, prices and repeat enrolment need validation.</p></div>
+    <div class="sec-head"><span class="num">03 · Proposed solution, not deployed</span><h2 id="sys-h">A learning-recovery layer on PW’s existing tools</h2><p><b>The problem to validate.</b> When a paid learner falls behind, knowing the backlog is only useful if they have a manageable way to resume. PW already has Tracker 360, guided practice and daily challenges. The first test uses those tools to see whether a specific catch-up task gets the learner studying again. As a sensitivity check, a scenario with 50% next-batch eligibility and 40% repeat enrolment implies about <b>₹600 cr a year</b> in illustrative fees associated with eligible non-returners. A +4-point lift would capture about 7% of that scenario. Actual eligibility, prices and repeat enrolment need validation.</p></div>
     <div class="feat">
-      <div class="step"><span class="n">Feature 1</span><b>Drop-off Risk Score</b><p>A weekly 0-100 risk score for every paid learner, from lecture pace, tests, inactivity and doubts. Every score shows its reasons; learners see it as an on-track score.</p><span class="for">For: the team that owns renewals</span><a class="try" href="/pw-study/prototype#risk">See the risk score</a></div>
+      <div class="step"><span class="n">Feature 1</span><b>Drop-off Risk Score</b><p>A proposed 0–100 drop-off score for legally eligible learners, using validated progress and practice signals. Start with interpretable rules; use trained prediction only if it outperforms that baseline, is calibrated and clears privacy review.</p><span class="for">For: the team that owns renewals</span><a class="try" href="/pw-study/prototype#risk">See the risk score</a></div>
       <div class="step"><span class="n">Feature 2</span><b>Catch-up Plan</b><p>Made by the AI Mentor from PW's own AI: guided practice, AI Guru for doubts and Daily Challenges. A human mentor calls on day 8 only if the learner is still high risk. An hour of AI Tuto is tested as a pilot arm.</p><span class="for">For: the learner</span><a class="try" href="/pw-study/prototype#catchup">See Riya's plan</a></div>
-      <div class="step"><span class="n">Feature 3</span><b>Weekly Progress Report</b><p>A plain-language WhatsApp summary each week, sent to the parent for under-18s and to the learner for adults. Parents get a link into the Parent App; learners get one to the AI Mentor.</p><span class="for">For: the parent or the learner</span><a class="try" href="/pw-study/prototype#report">Open the weekly report</a></div>
-      <div class="step"><span class="n">Feature 4</span><b>Next-Step Recommendation</b><p>A personal year report and the right next batch, plan upgrade or Vidyapeeth trial class. Not promoted while a learner is high risk; for under-18s every offer goes to the parent, never the child.</p><span class="for">For: the learner and parent</span><a class="try" href="/pw-study/prototype#recommendation">See the recommendation</a></div>
+      <div class="step"><span class="n">Feature 3</span><b>Weekly Progress Report</b><p>A factual, opt-in weekly summary from verified progress events, sent to consenting adults. Any report involving a child needs specific parental consent, purpose limitation and legal approval; it is not a sales channel.</p><span class="for">For: the parent or the learner</span><a class="try" href="/pw-study/prototype#report">Open the weekly report</a></div>
+      <div class="step"><span class="n">Feature 4</span><b>Next-Step Recommendation</b><p>A next-stage learning pathway after the learner has recovered, with batch or centre options where appropriate. Commercial recommendations are evaluated separately from child behavioural monitoring and require legal approval.</p><span class="for">For: the learner and parent</span><a class="try" href="/pw-study/prototype#recommendation">See the recommendation</a></div>
       <div class="step dark"><span class="n">Feature 5</span><b>Renewals Dashboard</b><p>The Monday screen for the team that owns renewals: learners grouped by action, what each group is expected to win back, and the running cost.</p><span class="for" style="color:#B9B1FF">For: the team that owns renewals</span><a class="try" href="/pw-study/prototype#dashboard" style="color:#D9D3FF">Open the dashboard</a></div>
     </div>
     <p class="callout" style="margin-top:20px"><b>First decision:</b> does a catch-up plan get more paid learners back to meaningful practice than the current experience? <a href="#first-test">Read the experiment</a> · <a href="#impact">Inspect the expansion economics</a></p>
   </div>
 </section>
 
-<!-- SIX QUESTIONS -->
-<section class="block" id="questions" aria-labelledby="q-h">
+<!-- BET -->
+<section class="block" id="bet" aria-labelledby="bet-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">In 60 seconds</span><h2 id="q-h">The short version, as six questions</h2></div>
-    <div class="tbl"><table class="t-mid stack" id="six-q"><thead><tr><th style="width:30%">Question</th><th>Short answer</th><th style="width:14%">Detail</th></tr></thead><tbody>
-      <tr><td><b>Can AI improve paid learners' outcomes and retention?</b></td><td>Test whether one guided practice task gets learners who missed a planned set studying again. Read seven-day recovery and week-two repeat practice by assignment. An AI Tuto arm can follow.</td><td><a href="#bet">The bet</a></td></tr>
-      <tr><td><b>Does it change delivery economics?</b></td><td>AI handles the first week of every rescue; a person calls only if that fails. Calling every high-risk learner first would cost about ₹9.5 cr a year; AI first costs ₹4.5 cr (₹3.80 cr of calls for the 253,000 who still need one, plus ₹0.68 cr of AI plans).</td><td><a href="#impact">Costs</a></td></tr>
-      <tr><td><b>Is there a new product here?</b></td><td>Results day as a product: a personal year report and next step, and an online-to-Vidyapeeth trial that fills seats in centres PW already runs.</td><td><a href="#bet">The bet</a></td></tr>
-      <tr><td><b>How would we know it works?</b></td><td>A 50/50 experiment for practice recovery, followed by a next-cycle enrolment read when a new batch opens.</td><td><a href="#first-test">Experiment</a></td></tr>
-      <tr><td><b>What is it worth?</b></td><td>A +4-point re-enrolment lift would mean 400 extra purchases per 10,000 eligible learners. At ₹4,104 each, that is ₹16.4 lakh in illustrative collections before costs and refunds.</td><td><a href="#impact">Sizing</a></td></tr>
-      <tr><td><b>Which workflow does automation improve?</b></td><td>The renewals team's week: the Renewals Dashboard routes every learner to the cheapest action that works, the same AI-first, person-on-exception pattern as PW's support, where AI resolves 80% of queries.</td><td><a href="#prototype">Prototype</a></td></tr>
-    </tbody></table></div>
+    <div class="sec-head"><span class="num">04 · Why this product, and why PW AI</span><h2 id="bet-h">The Learner Retention Engine: one layer on top of what PW already runs</h2><p>No new learning content, faculty or capex. It connects the signals PW already collects to actions PW already knows how to take, for every learner on every plan: spot, rescue, inform, renew, run. The five features are described at the top of the page; this section is what they reuse, what they add and the evidence behind them.</p></div>
+    <div class="card" id="stack"><h3>Built on PW's own AI, not next to it</h3>
+      <p class="small muted" style="margin-top:4px">PW-reported results from the <a href="https://nsearchives.nseindia.com/corporate/NEAPSPW_04112026173007_shareholder_letter_intimationSD.pdf">Q2 FY27 shareholders’ letter, section F</a> and the <a href="https://nsearchives.nseindia.com/corporate/NEAPSPW_09112026123848_IntimationEarningsCallTranscript_signed.pdf">4 November earnings call, page 11</a>.</p>
+      <div class="tbl" style="margin-top:10px"><table class="t-wide"><thead><tr><th style="width:22%">PW product</th><th style="width:38%">What PW reports</th><th>Its job in the engine</th></tr></thead><tbody>
+        <tr><td><b>AI Guru</b></td><td>108.8M queries from 6.09M students, cumulative through 30 September 2026</td><td>Answers doubts inside the Catch-up Plan; doubts asked is one of the risk signals</td></tr>
+        <tr><td><b>Guided AI tutor in practice sets</b></td><td>20%+ adoption and 70% session completion in the first guided-practice release in PW Books</td><td>The practice steps of the Catch-up Plan: work through a question, not read an answer</td></tr>
+        <tr><td><b>PW Pi and Pi Lens</b></td><td>Pi Lens daily challenges reached 60% adoption, with 30%+ higher week-three retention reported alongside the feature. PW Pi had 54,000+ paid subscribers. The comparison design is undisclosed.</td><td>The medium-risk nudge: a daily challenge on the weak chapter before any message is sent</td></tr>
+        <tr><td><b>AI Tuto</b></td><td>Management reported delivery cost below ₹20 per tutoring hour and said it was still exploring pricing</td><td>A pilot arm, not in the base cost: one hour of one-to-one AI teaching in the high-risk 7-day plan, before any human call</td></tr>
+        <tr><td><b>AI support</b></td><td>80% of support queries resolved without a person; satisfaction up from 2.8 to 3.7</td><td>The same AI-first, person-on-exception pattern, applied to renewals</td></tr>
+      </tbody></table></div>
+    </div>
+    <details class="method more" style="margin-top:20px"><summary>What it reuses from PW, and what it adds</summary>
+    <div class="grid g2" style="margin-top:20px">
+      <div class="card"><h3>Reuses (already live)</h3><ul class="reuse small" style="margin-top:6px"><li>Tracker 360 and Prep Meter progress signals</li><li>AI Guru, guided practice, AI Mentor and 1:1 mentors as the rescue channels; AI Tuto as a pilot arm</li><li>PW Parent App as the place a parent lands</li><li>Infinity and Infinity Pro plans; 370 centres (Q2 FY27)</li><li>Lead AI and voice bots for follow-up calls</li></ul></div>
+      <div class="card soft"><h3>Adds (not found today)</h3><ul class="reuse small" style="margin-top:6px"><li>One cross-plan drop-off risk score with reasons</li><li>Risk- and age-based routing of actions</li><li>Weekly Progress Report pushed on WhatsApp</li><li>A personal next-step recommendation in the main app</li><li>Online-to-Vidyapeeth trial class for strong learners in centre cities</li><li>Study-circle check-ins: an opt-in peer group for adult learners</li><li>A holdout to prove incremental lift</li></ul></div>
+    </div>
+    </details>
+
+    <div class="card ai-system" id="architecture" style="margin-top:20px">
+      <span class="tag pri">Design proposal · not built or trained</span>
+      <h3 style="margin-top:10px">What actually needs engineering—and what does not need a new LLM</h3>
+      <p class="small muted" style="margin:6px 0 16px">Separate deterministic student records, predictive ML, content-grounded generation and causal measurement. The clickable demo uses hand-written rules only.</p>
+      <div class="grid g3">
+        <article class="card"><span class="tag pri">1 · Data quality</span><h4>Trusted learner events</h4><p class="small">Reconcile attendance, DPP, tests and Tracker 360 events with server logs; handle delayed sync, offline study and exam breaks. Unknown means unknown—not “high risk.”</p></article>
+        <article class="card"><span class="tag pri">2 · Decision policy</span><h4>Start deterministic</h4><p class="small">A transparent missed-practice rule can launch the first A/B test. Route only eligible users; child data requires a separate legal basis and approved purpose.</p></article>
+        <article class="card"><span class="tag pri">3 · Predictive ML</span><h4>Add only if valuable</h4><p class="small">Compare calibrated logistic / tree baselines with simple rules using temporal holdouts, top-k precision, cohort calibration and false-positive rates by segment.</p></article>
+        <article class="card"><span class="tag pri">4 · AI intervention</span><h4>Use PW’s learning stack</h4><p class="small">Retrieve only authorised batch content; generate a short plan using approved learning assets. Validate syllabus coverage, factual accuracy, safe tone and cost; fall back to reviewed templates.</p></article>
+        <article class="card"><span class="tag pri">5 · Experimentation</span><h4>Prove incremental benefit</h4><p class="small">Randomise at learner or household level; estimate practice recovery and mastery against existing support. Test intervention uplift and cost per incremental recovery—not AUC alone.</p></article>
+        <article class="card"><span class="tag pri">6 · Safe scaling</span><h4>Observe and abstain</h4><p class="small">Instrument opt-outs, learning harm, hallucinations, delivery failure and subgroup drift. Pause unsafe flows; keep education separate from behavioural commercial targeting.</p></article>
+      </div>
+      <p class="callout" style="margin-top:16px"><b>Key AI product judgment:</b> a model that predicts dropping out does not prove that any particular message will prevent it. The product earns its place only when the intervention improves learning, fairly and economically.</p>
+    </div>
+    <div class="card" id="evidence" style="margin-top:20px"><h3>What the research says, and what it changed in the design</h3><details class="method more"><summary>Show the nine studies</summary>
+      <p class="small muted" style="margin-top:4px">Field experiments, a review and a meta-analysis, checked 14 Nov 2026. Most come from the US and Botswana: I found no Indian trial of WhatsApp progress reports, which is exactly what the pilot is for.</p>
+      <div class="tbl" style="margin-top:10px"><table class="t-wide"><thead><tr><th style="width:40%">Finding</th><th style="width:27%">Source</th><th style="width:33%">What it changed here</th></tr></thead><tbody>
+        <tr><td>Weekly automated texts to parents about missed work, grades and absences cut course failures by 27% and raised attendance by 12%; fewer than 2% of parents opted out</td><td><a href="https://econpapers.repec.org/RePEc:uwp:jhriss:v:56:y:2021:i:1:p:125-158" rel="noopener">Bergman and Chan, Journal of Human Resources, 2021</a></td><td>The Weekly Progress Report is weekly, automated and factual</td></tr>
+        <tr><td>Weekly teacher-to-parent messages cut failure to earn course credit from 15.8% to 9.3%, a 41% reduction, mostly by preventing dropouts; messages about what to improve worked best</td><td><a href="https://annenberg.brown.edu/publications/underutilized-potential-teacher-parent-communication-evidence-field-experiment" rel="noopener">Kraft and Rogers, Economics of Education Review, 2015</a></td><td>Every report ends with one thing the parent can do</td></tr>
+        <tr><td>Text messages plus phone calls raised learning by 0.121 standard deviations; text messages alone had no effect</td><td><a href="https://www.nber.org/papers/w28205" rel="noopener">Angrist, Bergman and Matsheng, Nature Human Behaviour, 2022</a></td><td>High risk escalates to a human mentor call on day 8: a message alone is not the rescue</td></tr>
+        <tr><td>Five texts a week instead of three raised parent opt-outs by 2.9 points, 58% over a 5% base, and worked no better</td><td><a href="https://docs.iza.org/dp11669.pdf" rel="noopener">Cortes, Fricke, Loeb and Song, Education Finance and Policy, 2021</a></td><td>One report a week, and at most one alert in between</td></tr>
+        <tr><td>A dropout model trained on one week of activity reached an AUC of about 0.8 on a later run of the course; testing on the same course overstates accuracy</td><td><a href="https://arxiv.org/abs/1711.06349" rel="noopener">Gardner and Brooks, User Modeling and User-Adapted Interaction, 2018</a></td><td>The go/no-go backtest asks for 0.70, tested on a later cohort than it was built on</td></tr>
+        <tr><td>Across 11 studies, dropout models catch most dropouts (sensitivity 0.94) but raise many false alarms (specificity 0.77)</td><td><a href="https://www.sciopen.com/local/article_pdf/10.26599/TST.2025.9010039.pdf" rel="noopener">Tenorio-Berrio, P&eacute;rez-Mart&iacute;n and Let&oacute;n, Tsinghua Science and Technology, 2026</a></td><td>The first action is a cheap AI plan; a person calls only if a week of it fails</td></tr>
+        <tr><td>Re-enrolment reminders alone are often too weak: no effect across 800,000 students; texts alone had a small, insignificant effect that rose to 1.5 points (21%) with a one-course fee waiver; aid-renewal texts kept 14 points more community-college students enrolled</td><td><a href="https://econpapers.repec.org/RePEc:eee:jeborg:v:183:y:2021:i:c:p:105-128" rel="noopener">Bird et al., 2021</a>; <a href="https://www.nber.org/papers/w26649" rel="noopener">Ortagus, Tanner and McFarlin, 2020</a>; <a href="https://econpapers.repec.org/RePEc:uwp:jhriss:v:51:y:2016:i:2:p:389-415" rel="noopener">Castleman and Page, 2016</a></td><td>The Next-Step Recommendation names a specific batch and the reason, not a generic reminder, and every lever keeps a holdout</td></tr>
+      </tbody></table></div>
+    </details></div>
   </div>
 </section>
+
+<!-- PROTOTYPE -->
+<section class="block" id="prototype" aria-labelledby="pr-h">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">05 · What I actually built</span><h2 id="pr-h">A clickable concept I implemented—not a production AI integration</h2><p>I built a browser-based interactive prototype with four fictional learners (Riya 16, Aman 19, Meena 15, Kabir 24), adjustable study signals, simulated support flows, parent-report variants, and an editable 5,000-learner scenario calculator. <b>What is real:</b> the interaction and formulas. <b>What is not:</b> model training, PW data, WhatsApp sends, verified consent, live AI calls, or measured growth.</p>
+      <div class="hero-ctas" style="margin-top:6px"><a class="btn btn-primary" href="/pw-study/prototype">Open full screen</a></div></div>
+    <iframe class="proto-frame" src="/pw-study/prototype?embed=1" title="Learner Retention Engine working prototype" loading="lazy"></iframe>
+    <div class="shots mob-only">
+      <figure><img src="/pw-study/img/student.png" alt="Prototype student app: on-track score, 7-day catch-up plan, AI Mentor chat, a next-step recommendation with no price for an under-18, and the drop-off risk score with its reasons" loading="lazy" width="2168" height="2566"><figcaption>Student app: a plan, not a warning</figcaption></figure>
+      <figure><img src="/pw-study/img/pulse.png" alt="Weekly Progress Report on WhatsApp, sent to a parent of a 16-year-old" loading="lazy" width="660" height="1125"><figcaption>Weekly Progress Report, to the right person</figcaption></figure>
+      <figure><img src="/pw-study/img/console.png" alt="Renewals Dashboard action table grouping learners by risk, age and final year, with the extra fees each group is expected to bring in and the maths for the selected group" loading="lazy" width="1061" height="1488"><figcaption>Renewals Dashboard: the Monday screen</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- FIRST EXPERIMENT -->
+<section class="block" id="first-test" aria-labelledby="first-test-h">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">06 · The first experiment I would run</span><h2 id="first-test-h">Before prediction or renewals: test whether a catch-up plan helps learning</h2><p>Start with one paid online Class 11 JEE batch, subject to age and consent review. Check how the existing experience handles overdue practice before choosing the intervention. If permissions are unavailable, start in an eligible 18+ batch.</p></div>
+    <div class="grid g3">
+      <article class="card"><h3>Trigger</h3><p class="small" style="margin-top:8px">A learner misses a planned practice set and completes no other set for seven days. Validate the underlying events and suppress the trigger during planned breaks.</p></article>
+      <article class="card"><h3>Intervention</h3><p class="small" style="margin-top:8px">Randomise 50/50 at the first trigger. Both arms keep existing support and the same messaging cadence. The treatment sees a short in-app plan with a guided question and a link to approved batch material.</p></article>
+      <article class="card"><h3>Decision</h3><p class="small" style="margin-top:8px">Read the share of assigned learners who complete a syllabus-aligned practice set in seven days. Check repeat practice in days 8–14, unassisted mastery on matched questions, complaints, subgroup effects and cost per incremental meaningful recovery. Read eligible next-cycle enrolment only when that window matures.</p></article>
+    </div>
+    <p class="small muted" style="margin-top:12px">At a 40% baseline and a 4 percentage-point minimum detectable lift, a two-sided 5% test with 80% power needs about 4,800 learners across two equal arms. Recalculate on actual cohort volume and account for any household clustering.</p>
+    <p style="margin-top:12px"><a href="/pw-study/prototype#catchup">See the catch-up prototype</a> · <a href="#plan">Review the wider rollout design</a></p>
+  </div>
+</section>
+
+<!-- PLAN -->
+<section class="block" id="plan" aria-labelledby="pl-h">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">07 · Conditional rollout</span><h2 id="pl-h">Validate data and learning lift before adding AI complexity</h2><p>If the first experiment shows durable practice recovery, this design tests the wider programme in grades with a next batch.</p></div>
+    <div class="grid g3">
+      <div class="card"><span class="tag pri">Weeks 1-3 · Baseline and go/no-go</span><ul class="small" style="margin-top:10px"><li>Week 0: PW legal reviews permissible child-data purposes, verifiable parental consent and marketing separation; without approval, pilot only an 18+ cohort</li><li>Pull two past cohorts; define drop-off and renewal per category</li><li>Compare simple rules to a temporally held-out calibrated predictor; evaluate ROC-AUC, precision at mentor capacity, calibration and subgroup errors. Only add ML if it beats simpler rules</li><li>Ten learner and ten parent interviews</li></ul></div>
+      <div class="card"><span class="tag pri">Weeks 4-8 · Pilot the rescue</span><ul class="small" style="margin-top:10px"><li>Eligible adult cohort first unless a legally approved education-only design permits Class 10 / 11 involvement</li><li>90/10 holdout, randomised by household so siblings share an arm: about 14,500 learners give 80% power that the lift's lower 90% bound clears the 0.62pp break-even if the true lift is +4pp on a 40% base</li><li>One treatment arm decides scale; if it passes, phase 2 splits report, plan and offer in a factorial to read each part</li><li>Weekly Progress Report for opted-in parents and learners; read 7-day reactivation weekly</li><li>AI Tuto arm: half the high-risk group also gets one AI Tuto hour; it scales only if recovery rises 11.3 points, its cost break-even, or renewal rises enough to cover the gap</li></ul></div>
+      <div class="card"><span class="tag pri">Weeks 9-13 · Next-step recommendation</span><ul class="small" style="margin-top:10px"><li>Results-day recommendations go live for the March batch end; the renewal read follows in April</li><li>Vidyapeeth trial in 5 centre cities, using empty seats in classes already running, so each trial costs little beyond the counsellor's follow-up, offered to parents of under-18s</li><li>Read-out of leading signals; the scale decision waits for the renewal read</li></ul></div>
+    </div>
+    <div class="grid g3" style="margin-top:16px">
+      <div class="card soft"><b style="color:var(--primary)">North star</b><p class="small" style="margin-top:4px">First experiment: incremental meaningful practice recovery with verified mastery. Later business outcome: eligible next-cycle enrolment versus holdout, assessed after the next-batch buying window.</p></div>
+      <div class="card"><b>Leading</b><p class="small" style="margin-top:4px">Meaningful practice completion, day 8–14 repeat practice, unassisted topic mastery; later upgrade and trial-to-seat rates.</p></div>
+      <div class="card" style="background:var(--premium-bg);border-color:transparent"><b style="color:var(--premium-ink)">Guardrails</b><p class="small" style="margin-top:4px">Learning harm or pressure, opt-outs, refunds, complaints, error rates and unequal false positives. Final-year learners can get educational help without a next-batch sales offer.</p></div>
+    </div>
+    <div class="card" id="gates" style="margin-top:16px"><h3>What has to be true to scale</h3>
+      <div class="tbl" style="margin-top:10px"><table class="t-mid"><thead><tr><th style="width:18%">When</th><th>Pass</th><th style="width:34%">If it fails</th></tr></thead><tbody>
+        <tr><td><b>Week 3</b></td><td>Temporal backtest beats a rules-only baseline; adequate calibration, top-k precision for mentor capacity and subgroup error rates, with an approved lawful data basis</td><td>Ship the results-day tool only</td></tr>
+        <tr><td><b>Week 8</b></td><td>Material increase in meaningful seven-day practice recovery against randomised control, sustained day 8–14 practice, no deterioration in unassisted mastery, and acceptable opt-out / complaint / cost thresholds</td><td>Change the plan or the message, rerun for 4 weeks</td></tr>
+        <tr><td><b>Next batch start</b></td><td>The lower 90% confidence bound on next-cycle enrolment lift sits above 0.62pp, the break-even</td><td>Point estimate above 0.62pp but the bound below it: widen to more grades: showing that a 2pp lift clears the 0.62pp break-even needs about 87,000 learners, six times the pilot. Point estimate below 0.62pp: stop, keep the results-day tool</td></tr>
+      </tbody></table></div>
+      <p class="small muted" style="margin-top:8px">Renewal can only be read when a batch ends. For a pilot starting in December 2026, Class 10 and 11 batches end around March 2027, so the first renewal read is around April 2027; weeks 4-8 read leading signals in the meantime.</p>
+    </div>
+    <div class="card" id="aiq" style="margin-top:16px"><h3>Keeping the AI honest</h3><ul class="small" style="margin-top:6px">
+      <li><b>Numbers are never generated:</b> every figure in a report is filled from Tracker 360 and test data, and the wording comes from a library of reviewed templates per risk tier and language, so the 127M weekly reports carry no per-message AI cost. A report whose numbers fail a check against the source is not sent. The AI writes only the AI Mentor plans, which are costed.</li>
+      <li><b>Plans stay inside the syllabus:</b> the AI Mentor builds plans only from the learner's own batch lectures, DPPs and practice sets; plan acceptance (the learner starts day 1) is tracked weekly.</li>
+      <li><b>People read a sample:</b> 200 reports a week in each language are reviewed by a native speaker for accuracy and tone; any error pauses that template.</li>
+      <li><b>Learning, not just renewal:</b> the first pilot is judged on meaningful completed practice and sustained study, with unassisted concept mastery as a critical guardrail. Increased sales cannot compensate for worse learning.</li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- RISKS -->
+<section class="block" id="risks" aria-labelledby="rk-h">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">08 · Risks and stop conditions</span><h2 id="rk-h">Riskiest assumptions, and the cheapest test for each</h2></div>
+    <div class="tbl"><table class="t-mid stack" id="rk-main">
+      <thead><tr><th>Assumption</th><th>Why it could be wrong</th><th>Cheapest test</th></tr></thead>
+      <tbody>
+        <tr class="hl"><td><b>Drop-off is predictable early</b></td><td>Learners may drop off suddenly, close to exams</td><td>Backtest last year's data before building anything</td></tr>
+        <tr class="hl"><td><b>The signals are accurate</b></td><td>Parent App reviews report watch time and DPPs not updating: "It shows, 6 minutes of lectures progress when actually I did 2+ hours" (Google Play, 23 Sep 2024)</td><td>Reconcile one week of Tracker 360 and Parent App data with server logs; send no report on a signal that fails</td></tr>
+        <tr><td><b>People act on nudges</b></td><td>WhatsApp fatigue; reports get ignored</td><td>2-week report pilot with opted-in parents and learners</td></tr>
+        <tr class="hl"><td><b>Children's data is used lawfully</b></td><td>DPDP Act 2023 s.9(3) bars "tracking or behavioural monitoring of children or targeted advertising directed at children". The Rules (13 Nov 2025) exempt an "educational institution" only for tracking that serves its educational activities or children's safety, never for advertising, and the children's rules apply from about May 2027. Published commentary leans against counting a consumer edtech platform as an educational institution</td><td>Sending an offer to a parent does not itself legalise using a child’s behaviour to select it. Keep educational support separate from commercial targeting. Require PW legal approval for each data use; without a lawful basis, do not score children or trigger behaviour-based offers, and limit factual reports to expressly authorised purposes</td></tr>
+        <tr><td><b>The score is fair</b></td><td>Hindi-medium or low-bandwidth learners may watch fewer lectures in-app and be over-flagged</td><td>Measure calibration, precision/recall and false positives by language, low-bandwidth/device access and city tier. Abstain or use universal educational support when signals are insufficient.</td></tr>
+        <tr><td><b>A false alarm does no harm</b></td><td>A wrong "high risk" can add pressure on a minor at home</td><td>Parents never see a risk label, only progress and one supportive action; signs of distress go to a trained counsellor, not a sales queue</td></tr>
+        <tr><td><b>The AI stays safe</b></td><td>Generated plans or replies could be wrong, or stray into advice they should not give</td><td>Template-filled numbers, syllabus-only plans, a weekly human sample, and no health or personal advice from the AI Mentor</td></tr>
+      </tbody></table></div>
+    <details class="method more" style="margin-top:8px"><summary>Five more assumptions, and their tests</summary><div class="tbl" style="margin-top:8px"><table class="t-mid stack"><thead><tr><th>Assumption</th><th>Why it could be wrong</th><th>Cheapest test</th></tr></thead><tbody>
+        <tr><td><b>Offers do not feel pushy</b></td><td>An education brand loses trust fast</td><td>Copy test with complaint and opt-out guardrails</td></tr>
+        <tr><td><b>Lift is incremental</b></td><td>Renewal may happen anyway via Vishwas Diwas, combo batches and marketing</td><td>Keep a 10% holdout for every action</td></tr>
+        <tr><td><b>The holdout is fair</b></td><td>Withholding help from learners, many of them minors</td><td>The holdout keeps everything PW offers today; only the new layer is held back, for one cycle</td></tr>
+        <tr><td><b>It does not duplicate Tracker 360</b></td><td>Learners may see two planners</td><td>The plan is written into Tracker 360's schedule and the report reads from it; the prototype draws it in its own panel only because Tracker 360 is not public</td></tr>
+        <tr><td><b>Consent is in place</b></td><td>Minors need verifiable parental consent; adults decide for themselves</td><td>Age-gated consent at purchase (DPDP Act 2023). For under-18s, the parent proves identity and age with details PW already holds or a DigiLocker token, as DPDP Rule 10 allows</td></tr>
+      </tbody></table></div></details>
+    <p class="small muted" style="margin-top:8px">Sorted by how much each assumption would change the plan. If drop-off is not predictable by week six, the product becomes a results-day tool only. The pilot's grades are all under 18, so the legal check comes first, in week 0: if the children's exemption does not apply, the pilot moves to adult categories with a next attempt (NEET PG, CA, UPSC). The legal reading here is mine, not legal advice.</p>
+  </div>
+</section>
+
+<!-- IMPACT -->
+<section class="block" id="impact" aria-labelledby="im-h">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">09 · Scenario economics</span><h2 id="im-h">From one cohort to a wider rollout</h2>
+      <p><b>This is a scenario calculator, not a forecast.</b> For every 10,000 eligible learners, an unproven four-point re-enrolment lift would imply 400 extra purchases and ₹16.4 lakh in collections at an illustrative ₹4,104 each, before costs, refunds and cannibalisation. The first experiment tests learning recovery; economic estimates must be replaced with PW cohort and pricing data.</p></div>
+    <p class="callout amber" style="margin-bottom:20px"><b>Decision rule:</b> do not green-light this initiative because the model shows ₹85.3 crore. Approve only if an actual holdout demonstrates better learning and incremental contribution after learner-delivery, operational and acquisition/substitution costs.</p>
+    <div class="grid split">
+      <div class="tbl"><table class="t-fit" id="im-range">
+        <thead><tr><th>Lever (FY26 base)</th><th class="num">Low</th><th class="num">Base</th><th class="num">High</th></tr></thead>
+        <tbody>
+          <tr><td>Re-enrolment into next batch<br><span class="small muted">4.87M × 50% eligible × +2 / 4 / 6pp × ₹4,104</span></td><td class="num">20.0</td><td class="num">40.0</td><td class="num">60.0</td></tr>
+          <tr><td>Online to Vidyapeeth<br><span class="small muted">4.87M × 50% with a next batch × 35% in centre cities × 0.5 / 1 / 1.5% × ₹32,521 net of online fee</span></td><td class="num">13.9</td><td class="num">27.7</td><td class="num">41.6</td></tr>
+          <tr><td>Plan upgrade (Infinity, Infinity Pro)<br><span class="small muted">(4.87M − 0.96M on premium) × +0.75 / 1.5 / 2.25pp × ₹3,000 gap</span></td><td class="num">8.8</td><td class="num">17.6</td><td class="num">26.4</td></tr>
+          <tr class="hl"><td><b>Extra collections</b> <span class="small muted">(₹ cr a year)</span></td><td class="num"><b>42.6</b></td><td class="num"><b>85.3</b></td><td class="num"><b>127.9</b></td></tr>
+          <tr><td>Less running costs<br><span class="small muted">WhatsApp reports and offers, mentor calls, AI Mentor plans; held at base</span></td><td class="num">−6.15</td><td class="num">−6.15</td><td class="num">−6.15</td></tr>
+          <tr class="hl"><td><b>Collections less modelled running costs</b> <span class="small muted">(₹ cr a year)</span></td><td class="num"><b>36.5</b></td><td class="num"><b>79.1</b></td><td class="num"><b>121.8</b></td></tr>
+          <tr><td>Net in US$ at ₹95.1</td><td class="num">3.84M</td><td class="num">8.32M</td><td class="num">12.81M</td></tr>
+        </tbody></table></div>
+      <div class="card soft">
+        <h3>Read this honestly</h3>
+        <ul class="small" style="margin-top:6px">
+          <li><b>PW-disclosed:</b> 4.87M online payers, ₹4,104 ACPU, ₹36,625 offline ARPU, 960k premium enrolments. Every uplift is my assumption until a holdout proves it.</li>
+          <li><b>Double-counting risk:</b> the calculation subtracts an assumed online fee from offline migration but does not prove the learner would otherwise have purchased online. Cross-lever overlap, conversion attribution, additional teaching capacity and refunds require PW data. Final-year learners get no next-batch offer.</li>
+          <li><b>The number to watch:</b> the re-enrolment uplift is +4pp on an assumed 40% renewal base. At a 30% or 50% base the same lift is +3pp or +5pp, so this lever is ₹30 cr or ₹50 cr. The weeks 1-3 backtest replaces the base with PW's real rate.</li>
+          <li>The table shows additional collections minus assumed programme running costs—not net revenue, EBITDA, profit or contribution. It excludes incremental faculty/service delivery, refunds, acquisition substitution, build cost and potentially overlapping levers. No margin uplift is assumed without PW cost data.</li>
+        </ul>
+        <details class="small method"><summary>Where each assumption comes from</summary><ul>
+          <li>Re-enrolment +4pp: ET subscriber retention experiments inform my intuition but do not predict a PW uplift. A four-point PW effect is an illustrative sensitivity, not an evidence-based estimate. ET is a news subscription, not a course, which is why the holdout comes first. For range, published re-enrolment nudges run from no effect to +1.5 points with a fee waiver and +14 points at community colleges (see the research table in section 07); my 2-6pp range sits inside that, and the holdout decides.</li>
+          <li>Upgrades are the weakest lever: it rests on an assumed price gap. +1.5pp is about 58,700 learners, 6% on top of PW's 960k premium enrolments; for scale, Vishwas Diwas 2026 sold 35k Infinity Pro plans in three weeks, so treat this as a stretch, not a floor. The ₹3,000 gap is an assumed price difference between a base batch and Infinity Pro, to be replaced with PW's price book; the prototype's illustrative Infinity Pro add-on shows ₹3,999, so ₹3,000 is the cautious choice.</li>
+          <li>Vidyapeeth 1% of learners with a next batch in centre cities is about 8,500 students, 1.8% of FY26 offline enrolments. ₹36,625 is offline revenue per student and ₹4,104 online collections per user; I treat both as a year's fee, an approximation until PW's fee data replaces it.</li>
+          <li>50% have a next batch (it leaves out final-year school learners and one-shot exams once cleared), 35% live in centre cities, and the 960k premium enrolments (Curious Jr Power Batch, Infinity, Infinity Pro) are treated as learners already on premium. Figures are rounded; totals use unrounded values. Every input is editable in the prototype's Renewals Dashboard.</li>
+        </ul></details>
+      </div>
+    </div>
+    <h3 style="margin-top:24px">What it costs to run, and who makes the calls</h3>
+    <div class="tbl" style="margin-top:10px"><table class="t-fit" id="im-cost">
+      <thead><tr><th style="width:26%">Cost</th><th style="width:52%">Volume and rate</th><th class="num" style="width:22%">₹ cr a year</th></tr></thead>
+      <tbody>
+        <tr><td><b>Weekly Progress Report on WhatsApp</b></td><td>4.87M × 50% opted in × 52 weeks = 126.6M messages × ₹0.115 utility rate</td><td class="num">1.46</td></tr>
+        <tr><td><b>Next-step offers</b></td><td>One per learner with a next batch: 2.4M messages × ₹0.8631 marketing rate</td><td class="num">0.21</td></tr>
+        <tr><td><b>Human mentor calls</b></td><td>Only learners still high risk after the 7-day AI plan, final-year learners included: 4.87M × 13% high risk × 40% not recovered = 253,000 calls × ₹150 for a 15-minute call. One call per drift episode, one episode per learner a year</td><td class="num">3.80</td></tr>
+        <tr><td><b>AI Mentor plans</b></td><td>4.87M × 35% at risk in a typical week × 4 plans a year × ₹1 per plan; a plan covers one drift episode, and four episodes a year is my assumption</td><td class="num">0.68</td></tr>
+        <tr class="hl"><td><b>Total running cost</b></td><td>Return on running cost: about 14x at base, 7x at low</td><td class="num"><b>6.15</b></td></tr>
+      </tbody></table></div>
+    <details class="small method" style="margin-top:8px"><summary>How the running costs are priced, and who makes the calls</summary><p class="small muted" style="margin-top:6px">WhatsApp rates are Meta's INR list rates for India, effective 1 Oct 2026, before GST. I price the weekly report as a utility message and offers as marketing. Meta checks each template's category and bills one that mixes an update with a promotion as marketing, one more reason the report never carries an offer; and if it bills the report as marketing (₹0.8631) the report costs ₹10.9 cr and the base net falls to ₹69.7 cr. Mentor cost, AI cost, opt-in, risk shares and recovery rate are my estimates. 253,000 calls of 15 minutes is about 1,220 mentor-hours a week of talk time: about 51 full-time mentors at 60% of their week on calls, and more at exam peaks, drawn from PW's existing alumni mentor pool, or hired new: the ₹3.80 cr of calls covers about ₹7.4 lakh a mentor a year; if capacity runs short, mentor calls are prioritised by educational need, safety and consent—not by potential fees and everyone else stays with the AI Mentor.</p></details>
+    <div class="grid g2" style="margin-top:20px" id="downside">
+      <div class="card"><h3>Break-even and the downside</h3><ul class="small" style="margin-top:6px">
+        <li><b>Collections-only threshold, not financial break-even:</b> one assumed point of re-enrolment yields about ₹10.0 cr in gross collections (4.87M × 50% × ₹4,104). An assumed <b>0.62pp</b> would match ₹6.15 cr of running cost before incremental servicing, refunds, build costs or foregone alternatives. True contribution break-even requires PW finance inputs.</li>
+        <li><b>Downside:</b> if all three uplift assumptions fail, the programme creates <b>no incremental collections</b> while incurring up to ₹6.15 cr assumed annual run-rate and ₹3.5 cr estimated build-team cost, before other expenses. Gains from upgrades or migration cannot be assumed to offset a failed renewal hypothesis.</li>
+        <li><b>If under-18s cannot be scored</b> (see Risks): every lever runs on adults only. PW does not publish an age mix; at an assumed 50% adult share, collections halve to ₹42.6 cr, costs fall to about ₹3.8 cr because parents still get the factual report, and net is <b>about ₹39 cr</b>.</li>
+        <li><b>Seats:</b> 1% of eligible learners in centre cities moving offline is about 8,500 students: about 61 for each of the 139 Vidyapeeth centres open at the end of FY26, filling seats in centres PW already runs, which PW now says is where offline growth comes from.</li>
+      </ul></div>
+      <div class="card"><h3>What else could move the number</h3>
+        <div class="tbl" style="margin-top:8px"><table class="t-fit" id="sens"><thead><tr><th>Input (base in bold)</th><th class="num">Net, ₹ cr</th></tr></thead><tbody>
+          <tr><td>Renewal base 30% / <b>40%</b> / 50% (uplift 3 / 4 / 5pp)</td><td class="num">69.1 / 79.1 / 89.1</td></tr>
+          <tr><td>Learners with a next batch 40% / <b>50%</b> / 60%</td><td class="num">65.6 / 79.1 / 92.6</td></tr>
+          <tr><td>AI Mentor plans: <b>4 a year</b> / one every at-risk week (₹8.86 cr)</td><td class="num">79.1 / 71.0</td></tr>
+          <tr><td>Ever high risk in a year <b>13%</b> / 30%: 584,000 calls, ₹8.77 cr, about 117 mentors</td><td class="num">79.1 / 74.2</td></tr>
+          <tr><td>Contribution view: an extra Vidyapeeth seat at an assumed 30% margin, less the online fee the mover stops paying (₹36,625 × 30% − ₹4,104 = ₹6,884 a mover); online renewals and upgrades are deliberately kept as near-pure margin, since content and faculty are already paid for</td><td class="num">57.3</td></tr>
+        </tbody></table></div>
+        <p class="small muted" style="margin-top:6px">The low and high cases above flex only the uplifts; this table flexes the other inputs one at a time, with running costs moving as they do in the calculator. 13% is my weekly high-risk share used as the yearly one; if more learners drift at some point in the year, calls are the line that grows; cap volume and prioritise educational need, not potential fees.</p>
+      </div>
+      <div class="card"><h3>The team, and a cheaper rescue</h3><ul class="small" style="margin-top:6px">
+        <li><b>Build team, illustrative:</b> one PM, one data scientist, four engineers, a designer, an analyst and part-time language review, estimated at ₹3.5 cr fully loaded annually. This is an additional assumed cost; the model does not establish profitability or positive contribution for the programme.</li>
+        <li><b>Who owns what:</b> I own the product and the holdout; the renewals team owns the dashboard; the mentor team owns calls; PW legal signs off consent before launch.</li>
+        <li><b>AI Tuto, a pilot arm outside the base cost:</b> one hour each for the 633,000 high-risk learners would cost about ₹1.08 cr at an assumed ₹17 an hour. Each hour costs ₹17 and each avoided call saves ₹150, so it pays for itself only if recovery rises by 11.3 points (17 ÷ 150), from 60% to about 71%: calls then fall from 253,000 to about 182,000, saving the same ₹1.08 cr and about 14 mentors. So the pilot splits high-risk learners between the plan with and without it, and AI Tuto rolls out only if its arm clears that bar, or lifts renewal by enough to cover the gap.</li>
+      </ul></div>
+    </div>
+  </div>
+</section>
+
 <!-- WHY ME -->
 <section class="block" id="me" aria-labelledby="me-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">Why me</span><h2 id="me-h">I have run this playbook on a paid subscription product</h2><p>Times Internet, June 2022 to April 2026: Associate PM → PM → Senior PM.</p></div>
+    <div class="sec-head"><span class="num">10 · Relevant experience</span><h2 id="me-h">I have run this playbook on a paid subscription product</h2><p>Times Internet, June 2022 to April 2026: Associate PM → PM → Senior PM.</p></div>
     <div class="grid g3">
       <div class="card kpi"><span class="tag pri">Revenue · Assisted Sales</span><b style="margin-top:8px">₹15L → ₹80L</b><small style="font-size:14px;line-height:21px">Monthly ET assisted-sales revenue through funnel redesign; 400%+ ROI in six months on ET Prime's assisted-conversion funnel.</small></div>
       <div class="card kpi"><span class="tag pri">AI Automation</span><b style="margin-top:8px">AI TeleSuite</b><small style="font-size:14px;line-height:21px">Built call transcription, quality scoring and pitch assist for the assisted-sales team: the automation behind scaling Assisted Sales 5×.</small></div>
       <div class="card kpi"><span class="tag pri">Retention · Engagement</span><b style="margin-top:8px">+10% · +27%</b><small style="font-size:14px;line-height:21px">Subscriber retention through onboarding experiments; ET Markets engagement, ₹3 cr+ incremental yearly revenue.</small></div>
     </div>
     <p class="callout" style="margin-top:20px">Engineer turned PM (B.Tech CSE, VIT). I prototype with AI myself, as with this case study and its working prototype, so ideas reach users and data faster.</p>
-    <div class="hero-ctas" style="margin-top:16px"><a class="btn btn-primary" href="mailto:anchit.tandon@gmail.com?subject=PW%20Product%20Manager%20application">Email Anchit</a><a class="btn btn-outline" href="https://www.linkedin.com/in/anchit-tandon" rel="noopener">LinkedIn</a><a class="btn btn-outline" href="/freelancer">Profile</a></div>
+    <div class="hero-ctas" style="margin-top:16px"><a class="btn btn-primary" href="mailto:anchit.tandon@gmail.com?subject=PW%20Senior%20Product%20Manager%20Growth%20application">Email Anchit</a><a class="btn btn-outline" href="https://www.linkedin.com/in/anchit-tandon" rel="noopener">LinkedIn</a><a class="btn btn-outline" href="/freelancer">Profile</a></div>
   </div>
 </section>
 
 <!-- BUSINESS -->
 <section class="block" id="business" aria-labelledby="biz-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">01 · How PW makes money</span><h2 id="biz-h">A profitable-at-EBITDA, half-online learning company</h2><p>FY26 (year to 31 March 2026), from PW's Q4 FY26 shareholder letter.</p></div>
+    <div class="sec-head"><span class="num">Appendix A · Business context</span><h2 id="biz-h">A profitable-at-EBITDA, half-online learning company</h2><p>FY26 (year to 31 March 2026), from PW's Q4 FY26 shareholder letter.</p></div>
     <div class="grid g2m g3">
       <div class="card kpi"><b class="pri">₹3,900 cr</b><span>Revenue, +35% YoY</span><small>≈ $410M</small></div>
       <div class="card kpi"><b>₹549 cr</b><span>EBITDA, 14.1% margin</span><small>Up from 6.7% in FY25 · PAT −₹24 cr after ₹63 cr one-offs</small></div>
@@ -322,7 +641,7 @@ footer h3{color:#fff}
 <!-- ENGINE -->
 <section class="block" id="engine" aria-labelledby="eng-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">02 · The revenue engine</span><h2 id="eng-h">Free teaching builds trust; affordable batches monetise it</h2></div>
+    <div class="sec-head"><span class="num">Appendix B · Revenue engine</span><h2 id="eng-h">Free teaching builds trust; affordable batches monetise it</h2></div>
     <details class="method more"><summary>Show the detail</summary>
     <div class="flow">
       <div class="step"><span class="n">1 · Reach</span><b>142M+</b><p class="small">Free YouTube and social teaching led by faculty</p></div>
@@ -331,7 +650,7 @@ footer h3{color:#fff}
       <div class="step dark"><span class="n">4 · Upgrade</span><b>0.47M</b><p class="small">Offline students (Vidyapeeth, Pathshala and other centres)</p></div>
       <div class="step"><span class="n">5 · Results</span><b>16+</b><p class="small">Exam categories, each over ₹10 cr in collections</p></div>
     </div>
-    <p class="callout" style="margin-top:20px">The step PW does not report, and where the next rupee is cheapest, is <b>5 back to 3</b>: the same learner paying again next year.</p>
+    <p class="callout" style="margin-top:20px">One loop whose public baseline I could not verify is <b>5 back to 3</b>: an eligible learner progressing into another course. Its economics relative to other growth bets need PW cohort data.</p>
     </details>
   </div>
 </section>
@@ -339,7 +658,7 @@ footer h3{color:#fff}
 <!-- GROWTH -->
 <section class="block" id="growth" aria-labelledby="gr-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">03 · Where growth comes from</span><h2 id="gr-h">Growth has spread from JEE and NEET to many smaller categories</h2></div>
+    <div class="sec-head"><span class="num">Appendix C · Category trends</span><h2 id="gr-h">Growth has spread from JEE and NEET to many smaller categories</h2></div>
     <details class="method more"><summary>Show the detail</summary>
     <div class="grid g2">
       <div class="card">
@@ -371,72 +690,10 @@ footer h3{color:#fff}
   </div>
 </section>
 
-<!-- AUDIT -->
-<section class="block" id="audit" aria-labelledby="au-h">
-  <div class="wrap">
-    <div class="sec-head"><span class="num">04 · Live platform audit</span><h2 id="au-h">What PW already runs, and what I could not find</h2>
-      <p>Tested on 25 Oct 2026, logged out: 45+ pw.live pages (home, batch listings, batch detail pages across JEE, NEET, UPSC and Class 10, Vidyapeeth, Test Series, Power Batch, Prerna, Tracker 360) and 9 PW apps on Google Play and the App Store, plus PW's own filings. Nothing was purchased and no forms were submitted.</p>
-      <div class="hero-ctas" style="margin-top:6px"><a class="btn btn-outline sm" href="#top">Case study overview</a><a class="btn btn-primary sm" href="/pw-study/prototype">Open the working prototype</a></div></div>
-    <div class="filters" role="group" aria-label="Filter capabilities">
-      <button class="chip" data-f="all" aria-pressed="true">All</button>
-      <button class="chip" data-f="live" aria-pressed="false">Live</button>
-      <button class="chip" data-f="part" aria-pressed="false">Partial</button>
-      <button class="chip" data-f="none" aria-pressed="false">Not found</button>
-    </div>
-    <div class="tbl"><table class="t-wide" id="audit-tbl">
-      <thead><tr><th style="width:24%">Capability</th><th style="width:12%">Status</th><th style="width:40%">What I saw (verbatim where quoted)</th><th style="width:24%">Where</th></tr></thead>
-      <tbody>
-        <tr data-s="live"><td><b>AI doubt solving</b></td><td><span class="tag live">Live</span></td><td>"24*7 Doubt Resolution powered by Ask AI Feature"; Ask AI 3.05M+ doubts at 91% satisfaction; AI Guru 99.45M+ queries (Q4 FY26), 108.8M from 6.09M students (Q2 FY27).</td><td>Batch pages; Q4 FY26 and Q2 FY27 letters</td></tr>
-        <tr data-s="live"><td><b>AI counselling and lead AI</b></td><td><span class="tag live">Live</span></td><td>Voice bots handle 6,000+ calls a day at ~75% lower cost; smart lead routing gives "~10% higher revenue per lead"; a lead model processed 2+ crore leads.</td><td>Q4 FY26 letter</td></tr>
-        <tr data-s="live"><td><b>Study planner with on-track status</b></td><td><span class="tag live">Live</span></td><td>Tracker 360, "a PW study planner": shows tasks done against the plan, an end date and how many days the learner is "behind schedule"; streaks; "Miss a day and the plan rebalances around what is left".</td><td>tracker360.pw.live; included in plans such as NEET 360</td></tr>
-        <tr data-s="live"><td><b>Chapter preparation tracker</b></td><td><span class="tag live">Live</span></td><td>Prep Meter (Backlog Killer): "Track your chapter-wise preparation level and get personalized roadmap".</td><td>Infinity plan inclusions</td></tr>
-        <tr data-s="live"><td><b>Parent visibility</b></td><td><span class="tag live">Live</span></td><td>PW Parent App: "View their attendance, lecture, DPP, and test stats on the student dashboard"; 10L+ downloads, 4.0 rating; parent login at spd.pw.live.</td><td>Google Play com.pw.parent; App Store</td></tr>
-        <tr data-s="live"><td><b>Human mentorship</b></td><td><span class="tag live">Live</span></td><td>Infinity Pro "1:1 Mentorship": "Two 30-minute monthly sessions with PW alumni for career and strategy guidance"; Infinity "Topper Mentorship Program"; Prerna wellbeing teleconsultation.</td><td>Batch pages; Prerna page</td></tr>
-        <tr data-s="live"><td><b>AI Mentor</b></td><td><span class="tag live">Live</span></td><td>0.52M+ users served (also available to non-PW students). Not visible on public web pages.</td><td>Q4 FY26 letter</td></tr>
-        <tr data-s="part"><td><b>Continuation into next year</b></td><td><span class="tag part">Partial</span></td><td>Combo batches (e.g. Arjuna NEET 2026 + Lakshya NEET 2027); "Free Upcoming Versions"; Vishwas Diwas early buyers "automatically upgraded". CuriousJr only: "preview next year's course offerings and unlock early-enrollment benefits".</td><td>Batch pages; PW news; CuriousJr Play listing</td></tr>
-        <tr data-s="part"><td><b>Online to offline</b></td><td><span class="tag part">Partial</span></td><td>Online batches mention "Exam guidance at our PW Offline centers"; Vidyapeeth counselling bookable through the app. No Vidyapeeth trial or demo class found.</td><td>Batch pages; Vidyapeeth Utsav page</td></tr>
-        <tr data-s="none"><td><b>Weekly progress report to the learner</b></td><td><span class="tag none">Not found</span></td><td>Only test-performance reports and dashboards; no weekly summary pushed to the learner.</td><td>Searched site, store listings, filings</td></tr>
-        <tr data-s="none"><td><b>WhatsApp updates to parents</b></td><td><span class="tag none">Not found</span></td><td>Parent data lives in the app; a parent has to open it. No push digest found.</td><td>Searched site, store listings</td></tr>
-        <tr data-s="none"><td><b>Personalised next-batch recommendation on results day (main app)</b></td><td><span class="tag none">Not found</span></td><td>Next-year preview exists in CuriousJr only.</td><td>Searched site, store listings, filings</td></tr>
-        <tr data-s="none"><td><b>Renewal offer for existing online students</b></td><td><span class="tag none">Not found</span></td><td>No renewal or loyalty price for existing online learners on batch pages, offer pages or store listings; the offers found were for new bookings, such as Vidyapeeth Utsav 2026 scholarships.</td><td>Batch and offer pages; Vidyapeeth Utsav page</td></tr>
-        <tr data-s="none"><td><b>One layer connecting risk signals to actions</b></td><td><span class="tag none">Not found</span></td><td>Each tool sits in its own plan or app; no public evidence of a cross-plan risk signal that triggers mentor, parent or next-step actions.</td><td>Internal systems not visible publicly</td></tr>
-      </tbody></table></div>
-    <p class="small muted" style="margin-top:10px">Sorted Live → Partial → Not found. "Not found" means not publicly documented; logged-in experiences, push notifications and internal tools could differ.</p>
-  </div>
-</section>
-
-<!-- GAPS -->
-<section class="block" id="gaps" aria-labelledby="gap-h">
-  <div class="wrap">
-    <div class="sec-head"><span class="num">05 · Shortcomings</span><h2 id="gap-h">Five growth questions to validate</h2></div>
-    <div class="voices-head"><h3>In learners' and parents' own words</h3>
-      <p class="small muted">I read 1,425 public reviews of the PW app and the PW Parent App, collected 26 Oct 2026. Quoted verbatim; names left out.</p>
-      <details class="small muted method"><summary>How the reviews were read</summary><p>680 and 677 on Google Play, 68 on the App Store; the PW app ones are from 2026, the Parent App ones from Feb 2024 on. About half the PW app reviews are 5★ praise for the teaching; of the 270 rated 1-3★, 214 are about bugs or support. In the Parent App, 105 of 677 Google Play reviews (15.5%) mention reports, progress, attendance or results, and 61 of those (58%) rate it 1-3★, mostly because the data is missing, wrong or too thin; most of those are from 2024. No interviews yet: ten learner and ten parent calls are in the first three weeks of the plan.</p></details></div>
-    <div class="grid voices" id="voices">
-      <figure class="card voice"><blockquote>"It should have overall insights as well, like monthly and overall, and also option to check previous weeks or custom range data."</blockquote><figcaption>Parent App, App Store · 1★ · 3 Aug 2026</figcaption></figure>
-      <figure class="card voice"><blockquote>"the test records and my ward’s attendance are not showing on the portal yet."</blockquote><figcaption>Parent App, Google Play · 1★ · 17 Sep 2026</figcaption></figure>
-      <figure class="card voice"><blockquote>"my child is improving day by day. But your guidance and counseling can play a significant role to make the future of young ones."</blockquote><figcaption>Parent App, Google Play · 5★ · 16 Jul 2026</figcaption></figure>
-      <figure class="card voice"><blockquote>"I paid a hefty amount for the Shreshth 2.0 Infinity batch, yet it expired and I lost access to the content I purchased."</blockquote><figcaption>PW app, Google Play · 1★ · 9 Jul 2026</figcaption></figure>
-      <figure class="card voice"><blockquote>"Please add an option to hide expired batches from seeing while navigating through the 'my batches' section."</blockquote><figcaption>PW app, Google Play · 4★ · 22 Jul 2026</figcaption></figure>
-      <figure class="card voice"><blockquote>"there is mentioned that 1 to 1 mentorship but when we purchase the batch,then there is only paid no mentorship."</blockquote><figcaption>PW app, Google Play · 2★ · 5 Aug 2026</figcaption></figure>
-    </div>
-    <p class="small muted" style="margin:10px 0 20px">What this says: many parents want a pushed, periodic summary and do not trust the one they have to go and find; the end of a batch currently feels like a loss, not a next step; and mentorship promises have to be ones PW can keep, which is why human calls here are capped.</p>
-    <div class="tbl"><table class="t-wide">
-      <thead><tr><th style="width:22%">Shortcoming</th><th style="width:48%">Evidence</th><th style="width:30%">So what</th></tr></thead>
-      <tbody>
-        <tr><td><b>1. Repeat business is not visible</b></td><td>The filings reviewed give no next-batch re-enrolment baseline. Upfront payment separates the point of purchase from sustained learning.</td><td>Measure study drop-off and eligible repeat purchase separately.</td></tr>
-        <tr><td><b>2. Retention tools are scattered and pull-based</b></td><td>Tracker 360 in some plans, Prep Meter in Infinity, 1:1 mentorship in Infinity Pro, parent data in a separate app that has to be opened.</td><td>The base-plan learners who drift most get the least help.</td></tr>
-        <tr><td><b>3. Can guided practice help learners recover?</b></td><td>PW reports higher week-three retention alongside Pi Lens daily challenges.</td><td>Test whether guided practice helps paid learners return after missing planned work.</td></tr>
-        <tr><td><b>4. Revenue is calendar-bound</b></td><td>79% of FY26 collections came March to September; Vishwas Diwas took ₹205 cr in 3 weeks; a NEET shift moved 1-1.5 lakh enrolments out of Q1.</td><td>Peaks are mass events; next steps are not yet personal.</td></tr>
-        <tr><td><b>5. Offline growth must come from existing centres</b></td><td>Offline ARPU −9% on mix; expansion now "opportunistic"; margin rests on ARPU and seat utilisation, PW's own measure, which it reports rising from 1.77 to 1.99.</td><td>PW's best offline leads are its own online learners.</td></tr>
-      </tbody></table></div>
-  </div>
-</section>
-
 <!-- IDEATION -->
 <section class="block" id="ideas" aria-labelledby="id-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">06 · Ideation</span><h2 id="id-h">How might we turn daily learners into next year's enrolments?</h2><p>Constraint: no extra counsellors and no deeper discounts. Seven options across acquisition, conversion, retention, upgrade and e-commerce, sorted by impact (my estimates).</p></div>
+    <div class="sec-head"><span class="num">Appendix D · Alternative bets</span><h2 id="id-h">What else could I prioritise—and why start with learning recovery?</h2><p>Constraint: no extra counsellors and no deeper discounts. Seven options across acquisition, conversion, retention, upgrade and e-commerce, sorted by impact (my estimates).</p></div>
     <details class="method more"><summary>Show the detail</summary>
     <div class="tbl"><table class="t-wide">
       <thead><tr><th>AI bet</th><th>What it does</th><th>Revenue lever</th><th>Builds on</th><th>Impact</th><th>Effort</th></tr></thead>
@@ -449,217 +706,43 @@ footer h3{color:#fff}
         <tr><td>AI batch finder for YouTube viewers</td><td>Diagnostic → right batch and plan</td><td>New payers</td><td>Free content funnel</td><td>Med</td><td>Med</td></tr>
         <tr><td>Practice-gap bundles on PW Store</td><td>Weak chapters → books, test series</td><td>Store order value</td><td>Prep Meter data</td><td>Low</td><td>Low</td></tr>
       </tbody></table></div>
-    <p class="callout amber" style="margin-top:16px">The three highlighted rows share the same data and the same moment, so they combine into one product. It complements PW's AI tutor rather than competing with it.</p>
+    <p class="callout amber" style="margin-top:16px">I would prioritise recovery first because it reuses existing learning tools, has a short-cycle educational outcome and can be experimentally tested without discounts. <b>This is a hypothesis, not an internal PW priority ranking.</b> If PW data shows activation or paid conversion has much higher incremental headroom, I would change the roadmap.</p>
     </details>
   </div>
 </section>
 
-<!-- BET -->
-<section class="block" id="bet" aria-labelledby="bet-h">
+<!-- SIX QUESTIONS -->
+<section class="block" id="questions" aria-labelledby="q-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">07 · The bet</span><h2 id="bet-h">The Learner Retention Engine: one layer on top of what PW already runs</h2><p>No new learning content, faculty or capex. It connects the signals PW already collects to actions PW already knows how to take, for every learner on every plan: spot, rescue, inform, renew, run. The five features are described at the top of the page; this section is what they reuse, what they add and the evidence behind them.</p></div>
-    <div class="card" id="stack"><h3>Built on PW's own AI, not next to it</h3>
-      <p class="small muted" style="margin-top:4px">PW-reported results from the <a href="https://nsearchives.nseindia.com/corporate/NEAPSPW_04112026173007_shareholder_letter_intimationSD.pdf">Q2 FY27 shareholders’ letter, section F</a> and the <a href="https://nsearchives.nseindia.com/corporate/NEAPSPW_09112026123848_IntimationEarningsCallTranscript_signed.pdf">4 November earnings call, page 11</a>.</p>
-      <div class="tbl" style="margin-top:10px"><table class="t-wide"><thead><tr><th style="width:22%">PW product</th><th style="width:38%">What PW reports</th><th>Its job in the engine</th></tr></thead><tbody>
-        <tr><td><b>AI Guru</b></td><td>108.8M queries from 6.09M students, cumulative through 30 September 2026</td><td>Answers doubts inside the Catch-up Plan; doubts asked is one of the risk signals</td></tr>
-        <tr><td><b>Guided AI tutor in practice sets</b></td><td>20%+ adoption and 70% session completion in the first guided-practice release in PW Books</td><td>The practice steps of the Catch-up Plan: work through a question, not read an answer</td></tr>
-        <tr><td><b>PW Pi and Pi Lens</b></td><td>Pi Lens daily challenges reached 60% adoption, with 30%+ higher week-three retention reported alongside the feature. PW Pi had 54,000+ paid subscribers. The comparison design is undisclosed.</td><td>The medium-risk nudge: a daily challenge on the weak chapter before any message is sent</td></tr>
-        <tr><td><b>AI Tuto</b></td><td>Management reported delivery cost below ₹20 per tutoring hour and said it was still exploring pricing</td><td>A pilot arm, not in the base cost: one hour of one-to-one AI teaching in the high-risk 7-day plan, before any human call</td></tr>
-        <tr><td><b>AI support</b></td><td>80% of support queries resolved without a person; satisfaction up from 2.8 to 3.7</td><td>The same AI-first, person-on-exception pattern, applied to renewals</td></tr>
-      </tbody></table></div>
-    </div>
-    <details class="method more" style="margin-top:20px"><summary>What it reuses from PW, and what it adds</summary>
-    <div class="grid g2" style="margin-top:20px">
-      <div class="card"><h3>Reuses (already live)</h3><ul class="reuse small" style="margin-top:6px"><li>Tracker 360 and Prep Meter progress signals</li><li>AI Guru, guided practice, AI Mentor and 1:1 mentors as the rescue channels; AI Tuto as a pilot arm</li><li>PW Parent App as the place a parent lands</li><li>Infinity and Infinity Pro plans; 370 centres (Q2 FY27)</li><li>Lead AI and voice bots for follow-up calls</li></ul></div>
-      <div class="card soft"><h3>Adds (not found today)</h3><ul class="reuse small" style="margin-top:6px"><li>One cross-plan drop-off risk score with reasons</li><li>Risk- and age-based routing of actions</li><li>Weekly Progress Report pushed on WhatsApp</li><li>A personal next-step recommendation in the main app</li><li>Online-to-Vidyapeeth trial class for strong learners in centre cities</li><li>Study-circle check-ins: an opt-in peer group for adult learners</li><li>A holdout to prove incremental lift</li></ul></div>
-    </div>
-    </details>
-    <div class="card" id="evidence" style="margin-top:20px"><h3>What the research says, and what it changed in the design</h3><details class="method more"><summary>Show the nine studies</summary>
-      <p class="small muted" style="margin-top:4px">Field experiments, a review and a meta-analysis, checked 14 Nov 2026. Most come from the US and Botswana: I found no Indian trial of WhatsApp progress reports, which is exactly what the pilot is for.</p>
-      <div class="tbl" style="margin-top:10px"><table class="t-wide"><thead><tr><th style="width:40%">Finding</th><th style="width:27%">Source</th><th style="width:33%">What it changed here</th></tr></thead><tbody>
-        <tr><td>Weekly automated texts to parents about missed work, grades and absences cut course failures by 27% and raised attendance by 12%; fewer than 2% of parents opted out</td><td><a href="https://econpapers.repec.org/RePEc:uwp:jhriss:v:56:y:2021:i:1:p:125-158" rel="noopener">Bergman and Chan, Journal of Human Resources, 2021</a></td><td>The Weekly Progress Report is weekly, automated and factual</td></tr>
-        <tr><td>Weekly teacher-to-parent messages cut failure to earn course credit from 15.8% to 9.3%, a 41% reduction, mostly by preventing dropouts; messages about what to improve worked best</td><td><a href="https://annenberg.brown.edu/publications/underutilized-potential-teacher-parent-communication-evidence-field-experiment" rel="noopener">Kraft and Rogers, Economics of Education Review, 2015</a></td><td>Every report ends with one thing the parent can do</td></tr>
-        <tr><td>Text messages plus phone calls raised learning by 0.121 standard deviations; text messages alone had no effect</td><td><a href="https://www.nber.org/papers/w28205" rel="noopener">Angrist, Bergman and Matsheng, Nature Human Behaviour, 2022</a></td><td>High risk escalates to a human mentor call on day 8: a message alone is not the rescue</td></tr>
-        <tr><td>Five texts a week instead of three raised parent opt-outs by 2.9 points, 58% over a 5% base, and worked no better</td><td><a href="https://docs.iza.org/dp11669.pdf" rel="noopener">Cortes, Fricke, Loeb and Song, Education Finance and Policy, 2021</a></td><td>One report a week, and at most one alert in between</td></tr>
-        <tr><td>A dropout model trained on one week of activity reached an AUC of about 0.8 on a later run of the course; testing on the same course overstates accuracy</td><td><a href="https://arxiv.org/abs/1711.06349" rel="noopener">Gardner and Brooks, User Modeling and User-Adapted Interaction, 2018</a></td><td>The go/no-go backtest asks for 0.70, tested on a later cohort than it was built on</td></tr>
-        <tr><td>Across 11 studies, dropout models catch most dropouts (sensitivity 0.94) but raise many false alarms (specificity 0.77)</td><td><a href="https://www.sciopen.com/local/article_pdf/10.26599/TST.2025.9010039.pdf" rel="noopener">Tenorio-Berrio, P&eacute;rez-Mart&iacute;n and Let&oacute;n, Tsinghua Science and Technology, 2026</a></td><td>The first action is a cheap AI plan; a person calls only if a week of it fails</td></tr>
-        <tr><td>Re-enrolment reminders alone are often too weak: no effect across 800,000 students; texts alone had a small, insignificant effect that rose to 1.5 points (21%) with a one-course fee waiver; aid-renewal texts kept 14 points more community-college students enrolled</td><td><a href="https://econpapers.repec.org/RePEc:eee:jeborg:v:183:y:2021:i:c:p:105-128" rel="noopener">Bird et al., 2021</a>; <a href="https://www.nber.org/papers/w26649" rel="noopener">Ortagus, Tanner and McFarlin, 2020</a>; <a href="https://econpapers.repec.org/RePEc:uwp:jhriss:v:51:y:2016:i:2:p:389-415" rel="noopener">Castleman and Page, 2016</a></td><td>The Next-Step Recommendation names a specific batch and the reason, not a generic reminder, and every lever keeps a holdout</td></tr>
-      </tbody></table></div>
-    </details></div>
-  </div>
-</section>
-
-<!-- PROTOTYPE -->
-<section class="block" id="prototype" aria-labelledby="pr-h">
-  <div class="wrap">
-    <div class="sec-head"><span class="num">08 · Working prototype</span><h2 id="pr-h">Try it: all five features, working</h2><p>Four sample learners (Riya 16, Aman 19, Meena 15, Kabir 24), drag the study signals and watch the risk, plan, channel and next step change. The Renewals Dashboard groups a 5,000-learner synthetic cohort by action and shows the ₹ maths behind each group.</p>
-      <div class="hero-ctas" style="margin-top:6px"><a class="btn btn-primary" href="/pw-study/prototype">Open full screen</a></div></div>
-    <iframe class="proto-frame" src="/pw-study/prototype?embed=1" title="Learner Retention Engine working prototype" loading="lazy"></iframe>
-    <div class="shots mob-only">
-      <figure><img src="/pw-study/img/student.png" alt="Prototype student app: on-track score, 7-day catch-up plan, AI Mentor chat, a next-step recommendation with no price for an under-18, and the drop-off risk score with its reasons" loading="lazy" width="2168" height="2566"><figcaption>Student app: a plan, not a warning</figcaption></figure>
-      <figure><img src="/pw-study/img/pulse.png" alt="Weekly Progress Report on WhatsApp, sent to a parent of a 16-year-old" loading="lazy" width="660" height="1125"><figcaption>Weekly Progress Report, to the right person</figcaption></figure>
-      <figure><img src="/pw-study/img/console.png" alt="Renewals Dashboard action table grouping learners by risk, age and final year, with the extra fees each group is expected to bring in and the maths for the selected group" loading="lazy" width="1061" height="1488"><figcaption>Renewals Dashboard: the Monday screen</figcaption></figure>
-    </div>
-  </div>
-</section>
-
-<!-- IMPACT -->
-<section class="block" id="impact" aria-labelledby="im-h">
-  <div class="wrap">
-    <div class="sec-head"><span class="num">09 · Sizing the prize</span><h2 id="im-h">From one cohort to a wider rollout</h2>
-      <p>For every 10,000 eligible learners, 4 points of additional re-enrolment would mean 400 extra purchases. At ₹4,104 per enrolment, that is ₹16.4 lakh in illustrative collections before costs and refunds. The table below models a wider rollout under three sets of assumptions.</p></div>
-    <div class="grid split">
-      <div class="tbl"><table class="t-fit" id="im-range">
-        <thead><tr><th>Lever (FY26 base)</th><th class="num">Low</th><th class="num">Base</th><th class="num">High</th></tr></thead>
-        <tbody>
-          <tr><td>Re-enrolment into next batch<br><span class="small muted">4.87M × 50% eligible × +2 / 4 / 6pp × ₹4,104</span></td><td class="num">20.0</td><td class="num">40.0</td><td class="num">60.0</td></tr>
-          <tr><td>Online to Vidyapeeth<br><span class="small muted">4.87M × 50% with a next batch × 35% in centre cities × 0.5 / 1 / 1.5% × ₹32,521 net of online fee</span></td><td class="num">13.9</td><td class="num">27.7</td><td class="num">41.6</td></tr>
-          <tr><td>Plan upgrade (Infinity, Infinity Pro)<br><span class="small muted">(4.87M − 0.96M on premium) × +0.75 / 1.5 / 2.25pp × ₹3,000 gap</span></td><td class="num">8.8</td><td class="num">17.6</td><td class="num">26.4</td></tr>
-          <tr class="hl"><td><b>Extra collections</b> <span class="small muted">(₹ cr a year)</span></td><td class="num"><b>42.6</b></td><td class="num"><b>85.3</b></td><td class="num"><b>127.9</b></td></tr>
-          <tr><td>Less running costs<br><span class="small muted">WhatsApp reports and offers, mentor calls, AI Mentor plans; held at base</span></td><td class="num">−6.15</td><td class="num">−6.15</td><td class="num">−6.15</td></tr>
-          <tr class="hl"><td><b>Net of running costs</b> <span class="small muted">(₹ cr a year)</span></td><td class="num"><b>36.5</b></td><td class="num"><b>79.1</b></td><td class="num"><b>121.8</b></td></tr>
-          <tr><td>Net in US$ at ₹95.1</td><td class="num">3.84M</td><td class="num">8.32M</td><td class="num">12.81M</td></tr>
-        </tbody></table></div>
-      <div class="card soft">
-        <h3>Read this honestly</h3>
-        <ul class="small" style="margin-top:6px">
-          <li><b>PW-disclosed:</b> 4.87M online payers, ₹4,104 ACPU, ₹36,625 offline ARPU, 960k premium enrolments. Every uplift is my assumption until a holdout proves it.</li>
-          <li><b>No double counting:</b> a learner who moves to Vidyapeeth counts only for the fee above the online fee they would have paid, and an upgrade is a separate in-year payment. Final-year learners get no next-batch offer.</li>
-          <li><b>The number to watch:</b> the re-enrolment uplift is +4pp on an assumed 40% renewal base. At a 30% or 50% base the same lift is +3pp or +5pp, so this lever is ₹30 cr or ₹50 cr. The weeks 1-3 backtest replaces the base with PW's real rate.</li>
-          <li>Collections, recognised over the batch, net only of the programme's running costs; the team that builds it is costed below, and serving the extra learners is not included. Renewals need no lead or counselling spend, so their margin should sit above PW's 14.1% EBITDA average.</li>
-        </ul>
-        <details class="small method"><summary>Where each assumption comes from</summary><ul>
-          <li>Re-enrolment +4pp: my onboarding experiments at ET lifted subscriber retention 10%; on an assumed 40% renewal base that is 4pp. ET is a news subscription, not a course, which is why the backtest comes first. For range, published re-enrolment nudges run from no effect to +1.5 points with a fee waiver and +14 points at community colleges (see the research table in section 07); my 2-6pp range sits inside that, and the holdout decides.</li>
-          <li>Upgrades are the weakest lever: it rests on an assumed price gap. +1.5pp is about 58,700 learners, 6% on top of PW's 960k premium enrolments; for scale, Vishwas Diwas 2026 sold 35k Infinity Pro plans in three weeks, so treat this as a stretch, not a floor. The ₹3,000 gap is an assumed price difference between a base batch and Infinity Pro, to be replaced with PW's price book; the prototype's illustrative Infinity Pro add-on shows ₹3,999, so ₹3,000 is the cautious choice.</li>
-          <li>Vidyapeeth 1% of learners with a next batch in centre cities is about 8,500 students, 1.8% of FY26 offline enrolments. ₹36,625 is offline revenue per student and ₹4,104 online collections per user; I treat both as a year's fee, an approximation until PW's fee data replaces it.</li>
-          <li>50% have a next batch (it leaves out final-year school learners and one-shot exams once cleared), 35% live in centre cities, and the 960k premium enrolments (Curious Jr Power Batch, Infinity, Infinity Pro) are treated as learners already on premium. Figures are rounded; totals use unrounded values. Every input is editable in the prototype's Renewals Dashboard.</li>
-        </ul></details>
-      </div>
-    </div>
-    <h3 style="margin-top:24px">What it costs to run, and who makes the calls</h3>
-    <div class="tbl" style="margin-top:10px"><table class="t-fit" id="im-cost">
-      <thead><tr><th style="width:26%">Cost</th><th style="width:52%">Volume and rate</th><th class="num" style="width:22%">₹ cr a year</th></tr></thead>
-      <tbody>
-        <tr><td><b>Weekly Progress Report on WhatsApp</b></td><td>4.87M × 50% opted in × 52 weeks = 126.6M messages × ₹0.115 utility rate</td><td class="num">1.46</td></tr>
-        <tr><td><b>Next-step offers</b></td><td>One per learner with a next batch: 2.4M messages × ₹0.8631 marketing rate</td><td class="num">0.21</td></tr>
-        <tr><td><b>Human mentor calls</b></td><td>Only learners still high risk after the 7-day AI plan, final-year learners included: 4.87M × 13% high risk × 40% not recovered = 253,000 calls × ₹150 for a 15-minute call. One call per drift episode, one episode per learner a year</td><td class="num">3.80</td></tr>
-        <tr><td><b>AI Mentor plans</b></td><td>4.87M × 35% at risk in a typical week × 4 plans a year × ₹1 per plan; a plan covers one drift episode, and four episodes a year is my assumption</td><td class="num">0.68</td></tr>
-        <tr class="hl"><td><b>Total running cost</b></td><td>Return on running cost: about 14x at base, 7x at low</td><td class="num"><b>6.15</b></td></tr>
-      </tbody></table></div>
-    <details class="small method" style="margin-top:8px"><summary>How the running costs are priced, and who makes the calls</summary><p class="small muted" style="margin-top:6px">WhatsApp rates are Meta's INR list rates for India, effective 1 Oct 2026, before GST. I price the weekly report as a utility message and offers as marketing. Meta checks each template's category and bills one that mixes an update with a promotion as marketing, one more reason the report never carries an offer; and if it bills the report as marketing (₹0.8631) the report costs ₹10.9 cr and the base net falls to ₹69.7 cr. Mentor cost, AI cost, opt-in, risk shares and recovery rate are my estimates. 253,000 calls of 15 minutes is about 1,220 mentor-hours a week of talk time: about 51 full-time mentors at 60% of their week on calls, and more at exam peaks, drawn from PW's existing alumni mentor pool, or hired new: the ₹3.80 cr of calls covers about ₹7.4 lakh a mentor a year; if capacity runs short, calls go first to the learners with the most fees at stake and everyone else stays with the AI Mentor.</p></details>
-    <div class="grid g2" style="margin-top:20px" id="downside">
-      <div class="card"><h3>Break-even and the downside</h3><ul class="small" style="margin-top:6px">
-        <li><b>Break-even:</b> each 1pp of re-enrolment is worth ₹10.0 cr (4.87M × 50% × ₹4,104), so a lift of <b>0.62pp</b> pays the ₹6.15 cr running cost on its own.</li>
-        <li><b>If re-enrolment does not move at all:</b> the Vidyapeeth and upgrade levers still net about <b>₹39.2 cr</b> (₹27.7 + ₹17.6 − ₹6.15 cr).</li>
-        <li><b>If under-18s cannot be scored</b> (see Risks): every lever runs on adults only. PW does not publish an age mix; at an assumed 50% adult share, collections halve to ₹42.6 cr, costs fall to about ₹3.8 cr because parents still get the factual report, and net is <b>about ₹39 cr</b>.</li>
-        <li><b>Seats:</b> 1% of eligible learners in centre cities moving offline is about 8,500 students: about 61 for each of the 139 Vidyapeeth centres open at the end of FY26, filling seats in centres PW already runs, which PW now says is where offline growth comes from.</li>
-      </ul></div>
-      <div class="card"><h3>What else could move the number</h3>
-        <div class="tbl" style="margin-top:8px"><table class="t-fit" id="sens"><thead><tr><th>Input (base in bold)</th><th class="num">Net, ₹ cr</th></tr></thead><tbody>
-          <tr><td>Renewal base 30% / <b>40%</b> / 50% (uplift 3 / 4 / 5pp)</td><td class="num">69.1 / 79.1 / 89.1</td></tr>
-          <tr><td>Learners with a next batch 40% / <b>50%</b> / 60%</td><td class="num">65.6 / 79.1 / 92.6</td></tr>
-          <tr><td>AI Mentor plans: <b>4 a year</b> / one every at-risk week (₹8.86 cr)</td><td class="num">79.1 / 71.0</td></tr>
-          <tr><td>Ever high risk in a year <b>13%</b> / 30%: 584,000 calls, ₹8.77 cr, about 117 mentors</td><td class="num">79.1 / 74.2</td></tr>
-          <tr><td>Contribution view: an extra Vidyapeeth seat at an assumed 30% margin, less the online fee the mover stops paying (₹36,625 × 30% − ₹4,104 = ₹6,884 a mover); online renewals and upgrades are deliberately kept as near-pure margin, since content and faculty are already paid for</td><td class="num">57.3</td></tr>
-        </tbody></table></div>
-        <p class="small muted" style="margin-top:6px">The low and high cases above flex only the uplifts; this table flexes the other inputs one at a time, with running costs moving as they do in the calculator. 13% is my weekly high-risk share used as the yearly one; if more learners drift at some point in the year, calls are the line that grows, and they are capped and sent first to the learners with the most fees at stake.</p>
-      </div>
-      <div class="card"><h3>The team, and a cheaper rescue</h3><ul class="small" style="margin-top:6px">
-        <li><b>Build team, my estimate:</b> one PM, one data scientist, four engineers, a designer, an analyst and a part-time language reviewer for the weekly sample, about <b>₹3.5 cr a year</b> fully loaded at Indian market pay. It reuses PW's data and AI platforms, so year-one net after the team is still about <b>₹76 cr</b> at base.</li>
-        <li><b>Who owns what:</b> I own the product and the holdout; the renewals team owns the dashboard; the mentor team owns calls; PW legal signs off consent before launch.</li>
-        <li><b>AI Tuto, a pilot arm outside the base cost:</b> one hour each for the 633,000 high-risk learners would cost about ₹1.08 cr at an assumed ₹17 an hour. Each hour costs ₹17 and each avoided call saves ₹150, so it pays for itself only if recovery rises by 11.3 points (17 ÷ 150), from 60% to about 71%: calls then fall from 253,000 to about 182,000, saving the same ₹1.08 cr and about 14 mentors. So the pilot splits high-risk learners between the plan with and without it, and AI Tuto rolls out only if its arm clears that bar, or lifts renewal by enough to cover the gap.</li>
-      </ul></div>
-    </div>
-  </div>
-</section>
-
-<!-- FIRST EXPERIMENT -->
-<section class="block" id="first-test" aria-labelledby="first-test-h">
-  <div class="wrap">
-    <div class="sec-head"><span class="num">First experiment</span><h2 id="first-test-h">Can one catch-up plan restart a study habit?</h2><p>Start with one paid online Class 11 JEE batch, subject to age and consent review. Check how the existing experience handles overdue practice before choosing the intervention. If permissions are unavailable, start in an eligible 18+ batch.</p></div>
-    <div class="grid g3">
-      <article class="card"><h3>Trigger</h3><p class="small" style="margin-top:8px">A learner misses a planned practice set and completes no other set for seven days. Validate the underlying events and suppress the trigger during planned breaks.</p></article>
-      <article class="card"><h3>Intervention</h3><p class="small" style="margin-top:8px">Randomise 50/50 at the first trigger. Both arms keep existing support and the same messaging cadence. The treatment sees a short in-app plan with a guided question and a link to approved batch material.</p></article>
-      <article class="card"><h3>Decision</h3><p class="small" style="margin-top:8px">Read the share of assigned learners who complete a syllabus-aligned practice set in seven days. Check repeat practice in days 8-14, an unassisted follow-up question, complaints and cost per extra recovery. Read paid re-enrolment when the window matures.</p></article>
-    </div>
-    <p class="small muted" style="margin-top:12px">At a 40% baseline and a 4 percentage-point minimum detectable lift, a two-sided 5% test with 80% power needs about 4,800 learners across two equal arms. Recalculate on actual cohort volume and account for any household clustering.</p>
-    <p style="margin-top:12px"><a href="/pw-study/prototype#catchup">See the catch-up prototype</a> · <a href="#plan">Review the wider rollout design</a></p>
-  </div>
-</section>
-
-<!-- PLAN -->
-<section class="block" id="plan" aria-labelledby="pl-h">
-  <div class="wrap">
-    <div class="sec-head"><span class="num">10 · Wider rollout and renewal read</span><h2 id="pl-h">Prove it can predict, then prove lift, before scaling</h2><p>If the first experiment shows durable practice recovery, this design tests the wider programme in grades with a next batch.</p></div>
-    <div class="grid g3">
-      <div class="card"><span class="tag pri">Weeks 1-3 · Baseline and go/no-go</span><ul class="small" style="margin-top:10px"><li>Week 0: PW legal confirms the children's exemption covers the score; if not, the pilot runs on 18+ categories instead</li><li>Pull two past cohorts; define drop-off and renewal per category</li><li>Backtest: week-6 risk must rank next-year non-renewal at an AUC of 0.70 or better. If not, ship a results-day tool only</li><li>Ten learner and ten parent interviews</li></ul></div>
-      <div class="card"><span class="tag pri">Weeks 4-8 · Pilot the rescue</span><ul class="small" style="margin-top:10px"><li>Class 10 and Class 11 (JEE, NEET): both have a next batch</li><li>90/10 holdout, randomised by household so siblings share an arm: about 14,500 learners give 80% power that the lift's lower 90% bound clears the 0.62pp break-even if the true lift is +4pp on a 40% base</li><li>One treatment arm decides scale; if it passes, phase 2 splits report, plan and offer in a factorial to read each part</li><li>Weekly Progress Report for opted-in parents and learners; read 7-day reactivation weekly</li><li>AI Tuto arm: half the high-risk group also gets one AI Tuto hour; it scales only if recovery rises 11.3 points, its cost break-even, or renewal rises enough to cover the gap</li></ul></div>
-      <div class="card"><span class="tag pri">Weeks 9-13 · Next-step recommendation</span><ul class="small" style="margin-top:10px"><li>Results-day recommendations go live for the March batch end; the renewal read follows in April</li><li>Vidyapeeth trial in 5 centre cities, using empty seats in classes already running, so each trial costs little beyond the counsellor's follow-up, offered to parents of under-18s</li><li>Read-out of leading signals; the scale decision waits for the renewal read</li></ul></div>
-    </div>
-    <div class="grid g3" style="margin-top:16px">
-      <div class="card soft"><b style="color:var(--primary)">North star</b><p class="small" style="margin-top:4px">Next-cycle enrolment by the start of the next batch, so renewals in the Vishwas Diwas window count, read against the holdout.</p></div>
-      <div class="card"><b>Leading</b><p class="small" style="margin-top:4px">7-day reactivation, lecture pace, upgrade rate, trial-to-seat rate.</p></div>
-      <div class="card" style="background:var(--premium-bg);border-color:transparent"><b style="color:var(--premium-ink)">Guardrails</b><p class="small" style="margin-top:4px">Opt-outs, refund rate, app rating, parent complaints. Droppers join later as a rescue-only group: they have no next batch.</p></div>
-    </div>
-    <div class="card" id="gates" style="margin-top:16px"><h3>What has to be true to scale</h3>
-      <div class="tbl" style="margin-top:10px"><table class="t-mid"><thead><tr><th style="width:18%">When</th><th>Pass</th><th style="width:34%">If it fails</th></tr></thead><tbody>
-        <tr><td><b>Week 3</b></td><td>Backtest AUC of 0.70 or better on a later cohort than the one it was built on</td><td>Ship the results-day tool only</td></tr>
-        <tr><td><b>Week 8</b></td><td>High-risk learners back on pace within 7 days at least 10 points above the holdout; opt-outs under 2%; no rise in refunds or complaints; test scores no lower than the holdout's</td><td>Change the plan or the message, rerun for 4 weeks</td></tr>
-        <tr><td><b>Next batch start</b></td><td>The lower 90% confidence bound on next-cycle enrolment lift sits above 0.62pp, the break-even</td><td>Point estimate above 0.62pp but the bound below it: widen to more grades: showing that a 2pp lift clears the 0.62pp break-even needs about 87,000 learners, six times the pilot. Point estimate below 0.62pp: stop, keep the results-day tool</td></tr>
-      </tbody></table></div>
-      <p class="small muted" style="margin-top:8px">Renewal can only be read when a batch ends. For a pilot starting in December 2026, Class 10 and 11 batches end around March 2027, so the first renewal read is around April 2027; weeks 4-8 read leading signals in the meantime.</p>
-    </div>
-    <div class="card" id="aiq" style="margin-top:16px"><h3>Keeping the AI honest</h3><ul class="small" style="margin-top:6px">
-      <li><b>Numbers are never generated:</b> every figure in a report is filled from Tracker 360 and test data, and the wording comes from a library of reviewed templates per risk tier and language, so the 127M weekly reports carry no per-message AI cost. A report whose numbers fail a check against the source is not sent. The AI writes only the AI Mentor plans, which are costed.</li>
-      <li><b>Plans stay inside the syllabus:</b> the AI Mentor builds plans only from the learner's own batch lectures, DPPs and practice sets; plan acceptance (the learner starts day 1) is tracked weekly.</li>
-      <li><b>People read a sample:</b> 200 reports a week in each language are reviewed by a native speaker for accuracy and tone; any error pauses that template.</li>
-      <li><b>Learning, not just renewal:</b> test-score change against the holdout is a secondary metric, so the engine cannot win renewals while learning gets worse.</li>
-    </ul></div>
-  </div>
-</section>
-
-<!-- RISKS -->
-<section class="block" id="risks" aria-labelledby="rk-h">
-  <div class="wrap">
-    <div class="sec-head"><span class="num">11 · What could break it</span><h2 id="rk-h">Riskiest assumptions, and the cheapest test for each</h2></div>
-    <div class="tbl"><table class="t-mid stack" id="rk-main">
-      <thead><tr><th>Assumption</th><th>Why it could be wrong</th><th>Cheapest test</th></tr></thead>
-      <tbody>
-        <tr class="hl"><td><b>Drop-off is predictable early</b></td><td>Learners may drop off suddenly, close to exams</td><td>Backtest last year's data before building anything</td></tr>
-        <tr class="hl"><td><b>The signals are accurate</b></td><td>Parent App reviews report watch time and DPPs not updating: "It shows, 6 minutes of lectures progress when actually I did 2+ hours" (Google Play, 23 Sep 2024)</td><td>Reconcile one week of Tracker 360 and Parent App data with server logs; send no report on a signal that fails</td></tr>
-        <tr><td><b>People act on nudges</b></td><td>WhatsApp fatigue; reports get ignored</td><td>2-week report pilot with opted-in parents and learners</td></tr>
-        <tr class="hl"><td><b>Children's data is used lawfully</b></td><td>DPDP Act 2023 s.9(3) bars "tracking or behavioural monitoring of children or targeted advertising directed at children". The Rules (13 Nov 2025) exempt an "educational institution" only for tracking that serves its educational activities or children's safety, never for advertising, and the children's rules apply from about May 2027. Published commentary leans against counting a consumer edtech platform as an educational institution</td><td>Every offer goes to the consenting parent, never the child. PW legal rules on the exemption before launch. If PW does not qualify, the score and catch-up plan run only for 18+ learners, and under-18s get a factual weekly report of what the Parent App already shows</td></tr>
-        <tr><td><b>The score is fair</b></td><td>Hindi-medium or low-bandwidth learners may watch fewer lectures in-app and be over-flagged</td><td>Check the score's calibration by language, device and city tier in the backtest; adjust before launch</td></tr>
-        <tr><td><b>A false alarm does no harm</b></td><td>A wrong "high risk" can add pressure on a minor at home</td><td>Parents never see a risk label, only progress and one supportive action; signs of distress go to a trained counsellor, not a sales queue</td></tr>
-        <tr><td><b>The AI stays safe</b></td><td>Generated plans or replies could be wrong, or stray into advice they should not give</td><td>Template-filled numbers, syllabus-only plans, a weekly human sample, and no health or personal advice from the AI Mentor</td></tr>
-      </tbody></table></div>
-    <details class="method more" style="margin-top:8px"><summary>Five more assumptions, and their tests</summary><div class="tbl" style="margin-top:8px"><table class="t-mid stack"><thead><tr><th>Assumption</th><th>Why it could be wrong</th><th>Cheapest test</th></tr></thead><tbody>
-        <tr><td><b>Offers do not feel pushy</b></td><td>An education brand loses trust fast</td><td>Copy test with complaint and opt-out guardrails</td></tr>
-        <tr><td><b>Lift is incremental</b></td><td>Renewal may happen anyway via Vishwas Diwas, combo batches and marketing</td><td>Keep a 10% holdout for every action</td></tr>
-        <tr><td><b>The holdout is fair</b></td><td>Withholding help from learners, many of them minors</td><td>The holdout keeps everything PW offers today; only the new layer is held back, for one cycle</td></tr>
-        <tr><td><b>It does not duplicate Tracker 360</b></td><td>Learners may see two planners</td><td>The plan is written into Tracker 360's schedule and the report reads from it; the prototype draws it in its own panel only because Tracker 360 is not public</td></tr>
-        <tr><td><b>Consent is in place</b></td><td>Minors need verifiable parental consent; adults decide for themselves</td><td>Age-gated consent at purchase (DPDP Act 2023). For under-18s, the parent proves identity and age with details PW already holds or a DigiLocker token, as DPDP Rule 10 allows</td></tr>
-      </tbody></table></div></details>
-    <p class="small muted" style="margin-top:8px">Sorted by how much each assumption would change the plan. If drop-off is not predictable by week six, the product becomes a results-day tool only. The pilot's grades are all under 18, so the legal check comes first, in week 0: if the children's exemption does not apply, the pilot moves to adult categories with a next attempt (NEET PG, CA, UPSC). The legal reading here is mine, not legal advice.</p>
+    <div class="sec-head"><span class="num">Appendix · Quick questions</span><h2 id="q-h">The short version, as six questions</h2></div>
+    <div class="tbl"><table class="t-mid stack" id="six-q"><thead><tr><th style="width:30%">Question</th><th>Short answer</th><th style="width:14%">Detail</th></tr></thead><tbody>
+      <tr><td><b>Can AI improve paid learners' outcomes and retention?</b></td><td>Test whether one guided practice task gets learners who missed a planned set studying again. Read seven-day recovery and week-two repeat practice by assignment. An AI Tuto arm can follow.</td><td><a href="#bet">The bet</a></td></tr>
+      <tr><td><b>Does it change delivery economics?</b></td><td>AI handles the first week of every rescue; a person calls only if that fails. Calling every high-risk learner first would cost about ₹9.5 cr a year; AI first costs ₹4.5 cr (₹3.80 cr of calls for the 253,000 who still need one, plus ₹0.68 cr of AI plans).</td><td><a href="#impact">Costs</a></td></tr>
+      <tr><td><b>Is there a new product here?</b></td><td>Results day as a product: a personal year report and next step, and an online-to-Vidyapeeth trial that fills seats in centres PW already runs.</td><td><a href="#bet">The bet</a></td></tr>
+      <tr><td><b>How would we know it works?</b></td><td>A 50/50 experiment for practice recovery, followed by a next-cycle enrolment read when a new batch opens.</td><td><a href="#first-test">Experiment</a></td></tr>
+      <tr><td><b>What is it worth?</b></td><td>A +4-point re-enrolment lift would mean 400 extra purchases per 10,000 eligible learners. At ₹4,104 each, that is ₹16.4 lakh in illustrative collections before costs and refunds.</td><td><a href="#impact">Sizing</a></td></tr>
+      <tr><td><b>Which workflow does automation improve?</b></td><td>The renewals team's week: the Renewals Dashboard routes every learner to the cheapest action that works, the same AI-first, person-on-exception pattern as PW's support, where AI resolves 80% of queries.</td><td><a href="#prototype">Prototype</a></td></tr>
+    </tbody></table></div>
   </div>
 </section>
 
 <!-- RECRUITER WALKTHROUGH -->
 <section class="block" id="walkthrough" aria-labelledby="walk-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">For recruiters and hiring managers</span><h2 id="walk-h">Review this application in 7 steps, about 8 minutes</h2><p>Each step is a complete link that opens the right screen, so any step can be shared on its own.</p></div>
+    <div class="sec-head"><span class="num">Interviewer guide</span><h2 id="walk-h">A seven-step interview walkthrough: summary first, evidence available on demand</h2><p>Each step is a complete link that opens the right screen, so any step can be shared on its own.</p></div>
     <ol class="walk" id="walk">
-      <li><span class="wn" aria-hidden="true">1</span><span class="wt">The proposed system <small>· 1 min</small></span><span class="small">The five features and what they are worth.</span><span class="wu"><a href="/pw-study#system">https://anchit-tandon.com/pw-study#system</a></span></li>
-      <li><span class="wn" aria-hidden="true">2</span><span class="wt">Student app: Drop-off Risk Score, Catch-up Plan, Next-Step Recommendation <small>· 2 min</small></span><span class="small">Pick a learner and drag the study signals; the risk score, the plan and the recommendation change with them.</span><span class="wu"><a href="/pw-study/prototype#student">https://anchit-tandon.com/pw-study/prototype#student</a></span></li>
-      <li><span class="wn" aria-hidden="true">3</span><span class="wt">Weekly Progress Report <small>· 1 min</small></span><span class="small">Switch between Riya (16) and Kabir (24) to see who receives it, in English or Hindi.</span><span class="wu"><a href="/pw-study/prototype#report">https://anchit-tandon.com/pw-study/prototype#report</a></span></li>
-      <li><span class="wn" aria-hidden="true">4</span><span class="wt">Renewals Dashboard <small>· 1 min</small></span><span class="small">Learners grouped by action, with the fees each group wins back and a live calculator.</span><span class="wu"><a href="/pw-study/prototype#dashboard">https://anchit-tandon.com/pw-study/prototype#dashboard</a></span></li>
-      <li><span class="wn" aria-hidden="true">5</span><span class="wt">The evidence: live platform audit <small>· 1 min</small></span><span class="small">What is live on pw.live and PW's apps today, and what is missing.</span><span class="wu"><a href="/pw-study#audit">https://anchit-tandon.com/pw-study#audit</a></span></li>
-      <li><span class="wn" aria-hidden="true">6</span><span class="wt">Sizing and running costs <small>· 1 min</small></span><span class="small">Low, base and high cases, net of WhatsApp, mentor and AI costs.</span><span class="wu"><a href="/pw-study#impact">https://anchit-tandon.com/pw-study#impact</a></span></li>
-      <li><span class="wn" aria-hidden="true">7</span><span class="wt">Why me <small>· 1 min</small></span><span class="small">Where I have run this playbook before, and how to reach me.</span><span class="wu"><a href="/pw-study#me">https://anchit-tandon.com/pw-study#me</a></span></li>
+      <li><span class="wn" aria-hidden="true">1</span><span class="wt">Start with the 90-second case summary <small>· 1 min</small></span><span class="small">My question, what I completed, what remains hypothetical, and the recommendation.</span><span class="wu"><a href="/pw-study#overview">https://anchit-tandon.com/pw-study#overview</a></span></li>
+      <li><span class="wn" aria-hidden="true">2</span><span class="wt">Review my public research and findings <small>· 2 min</small></span><span class="small">PW capabilities, app reviews, evidence boundaries and hypotheses to validate.</span><span class="wu"><a href="/pw-study#audit">https://anchit-tandon.com/pw-study#audit</a></span></li>
+      <li><span class="wn" aria-hidden="true">3</span><span class="wt">Understand the proposed product and AI logic <small>· 2 min</small></span><span class="small">What the concept would add, how it reuses PW AI and why a predictive model is optional.</span><span class="wu"><a href="/pw-study#architecture">https://anchit-tandon.com/pw-study#architecture</a></span></li>
+      <li><span class="wn" aria-hidden="true">4</span><span class="wt">Try the interactive demonstration <small>· 3 min</small></span><span class="small">Adjust fictional learners, see proposed recovery flows, inspect the financial scenario calculator.</span><span class="wu"><a href="/pw-study/prototype">https://anchit-tandon.com/pw-study/prototype</a></span></li>
+      <li><span class="wn" aria-hidden="true">5</span><span class="wt">Judge the first experiment <small>· 2 min</small></span><span class="small">Existing experience versus guided catch-up, learning outcomes and go/no-go criteria.</span><span class="wu"><a href="/pw-study#first-test">https://anchit-tandon.com/pw-study#first-test</a></span></li>
+      <li><span class="wn" aria-hidden="true">6</span><span class="wt">Stress-test economics and risks <small>· 2 min</small></span><span class="small">The assumptions behind incremental collections, downside, privacy and model fairness.</span><span class="wu"><a href="/pw-study#impact">https://anchit-tandon.com/pw-study#impact</a></span></li>
+      <li><span class="wn" aria-hidden="true">7</span><span class="wt">Connect this work to my experience <small>· 1 min</small></span><span class="small">Relevant subscription-growth delivery, AI experimentation and cross-functional execution.</span><span class="wu"><a href="/pw-study#me">https://anchit-tandon.com/pw-study#me</a></span></li>
     </ol>
     <div class="share"><button class="btn btn-primary sm" type="button" id="copy-walk">Copy all 7 links</button><span class="small">Or share one link for the whole review: <a href="/pw-study#walkthrough">https://anchit-tandon.com/pw-study#walkthrough</a></span><span class="small muted" id="copy-msg" role="status" aria-live="polite"></span></div>
   </div>
 </section>
+
 </main>
 
 <footer>
@@ -669,7 +752,7 @@ footer h3{color:#fff}
       <li>PhysicsWallah Q4 FY26 shareholder letter (May 2026): FY26 revenue, segments, users, ACPU, ARPU, centres, AI metrics, Vishwas Diwas, premium enrolments.</li>
       <li>PhysicsWallah Q1 FY27 earnings call transcript, NSE filing (Aug 2026): Q1 revenue, category growth, seat utilisation, AI tutor beta.</li>
       <li><a href="https://nsearchives.nseindia.com/corporate/NEAPSPW_04112026173007_shareholder_letter_intimationSD.pdf">PhysicsWallah Q2 FY27 shareholders’ letter</a> and <a href="https://nsearchives.nseindia.com/corporate/NEAPSPW_09112026123848_IntimationEarningsCallTranscript_signed.pdf">earnings call transcript</a> (November 2026): revenue, enrolments, guided practice, PW Pi and AI Tuto.</li>
-      <li>PhysicsWallah Q2 FY27 shareholder letter (5 Nov 2026) and earnings call (9 Nov 2026), as summarised by Multibagg: AI Guru, guided practice, PW Pi, AI Tuto, AI support and NEET figures. Company-reported.</li>
+      <li>PhysicsWallah Q2 FY27 shareholder letter, filed 4 November 2026, and the 4 November 2026 earnings call transcript, filed 9 November 2026: AI Guru, guided practice, PW Pi, AI Tuto, AI support and category performance. Company-reported; original NSE documents linked above.</li>
       <li>Digital Personal Data Protection Act 2023, section 9, and the DPDP Rules 2025 (G.S.R. 846(E), 13 Nov 2025: Rule 1 phase-in, Rules 10 and 12, Fourth Schedule), from the official text; the reading of "educational institution" is from published commentary.</li>
       <li>Meta's WhatsApp Business Platform INR rate card, effective 1 Oct 2026, and its template category rules.</li>
       <li>Nine studies and reviews on parent messaging, dropout prediction and re-enrolment nudges (field experiments, a review and a meta-analysis), linked in the research table in section 07.</li>
@@ -707,7 +790,7 @@ footer h3{color:#fff}
   // Recruiter walkthrough: copy every step as full links
   var cb=document.getElementById('copy-walk'), msg=document.getElementById('copy-msg');
   if(cb){cb.addEventListener('click',function(){
-    var lines=['Anchit Tandon, Product Manager application to PW: review in 7 steps (about 8 minutes)'];
+    var lines=['Anchit Tandon, Senior Product Manager – Growth application to PhysicsWallah: interview study in 7 steps'];
     Array.prototype.forEach.call(document.querySelectorAll('#walk li'),function(li,i){
       lines.push((i+1)+'. '+li.querySelector('.wt').firstChild.textContent.trim()+': '+li.querySelector('.wu a').textContent.trim());
     });
