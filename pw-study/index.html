@@ -362,6 +362,21 @@ footer h3{color:#fff}
 @media(max-width:850px){.story-goal,.outcome-layout{grid-template-columns:1fr}.story-stage,.change-phases,.gtm-phases{grid-template-columns:1fr 1fr}.story-end-nav{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:620px){.story-stage,.examined-groups,.change-phases,.gtm-phases,.found-grid,.outcome-layout{grid-template-columns:1fr}.research-numbers{grid-template-columns:repeat(2,1fr)}.rank-card{grid-template-columns:42px minmax(0,1fr);gap:10px}.rank-card .priority{grid-column:2;text-align:left}.story-goal>div,.story-goal>aside{padding:18px}.story-end-nav{grid-template-columns:repeat(2,1fr)}}
 
+.nav .wrap{gap:10px}
+.nav .links{gap:2px}
+.nav .links a{font-size:12px;padding:8px 6px}
+.search-audit{padding:20px;border:1px solid #e0d9fa;background:linear-gradient(135deg,#f9f7ff,#fff);border-radius:18px;margin-top:25px}
+.search-audit .search-observations{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0}
+.search-audit .search-observations article{background:#fff;border:1px solid var(--border);border-radius:13px;padding:17px}
+.search-audit .search-observations h4{font-size:16px;margin:6px 0}
+.search-audit .search-observations p,.search-audit .search-observations li{font-size:13px;line-height:21px}
+.search-audit .search-observations ul{margin-top:9px}
+.search-audit .search-method{margin-top:13px;font-size:13px;line-height:21px;color:var(--muted)}
+.search-action{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}
+.search-action>div{padding:14px;border-radius:12px;background:#f3f0ff;border:1px solid #e1dafa}
+.search-action b{display:block;font-size:14px;margin-bottom:6px}
+.search-action p{font-size:13px;line-height:20px}
+@media(max-width:700px){.search-audit .search-observations,.search-action{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -369,7 +384,7 @@ footer h3{color:#fff}
 
 <nav class="nav" aria-label="Interview case study chapters">
   <div class="wrap"><a class="mark" href="#top"><i aria-hidden="true">AT</i><span><b>PW Growth Study</b><small>by Anchit Tandon</small></span></a>
-  <div class="links" id="links"><a href="#overview">1 · Goal</a><a href="#audit">2 · Examined</a><a href="#gaps">3 · Found</a><a href="#priorities">4 · Ranked</a><a href="#system">5 · Changes</a><a href="#journey-demo">6 · Demos</a><a href="#gtm">7 · GTM / output</a></div>
+  <div class="links" id="links"><a href="#overview">1 · Objective</a><a href="#audit">2 · Research Audit</a><a href="#gaps">3 · Key Findings</a><a href="#priorities">4 · Growth Priorities</a><a href="#system">5 · Proposed Solutions</a><a href="#journey-demo">6 · Interactive Demos</a><a href="#gtm">7 · GTM &amp; Expected Impact</a></div>
   <a class="btn btn-primary sm cta" href="/pw-study/prototype">Try the demo</a></div>
 </nav>
 
@@ -417,15 +432,33 @@ footer h3{color:#fff}
 <section class="block" id="audit" aria-labelledby="au-h">
   <div class="wrap">
     <div class="sec-head"><div class="chapter-head"><b>02</b> What I examined</div><h2 id="au-h">PW’s business, learner journeys, AI stack and public feedback</h2>
-      <p>Tested on 25 Oct 2026, logged out: 45+ pw.live pages (home, batch listings, batch detail pages across JEE, NEET, UPSC and Class 10, Vidyapeeth, Test Series, Power Batch, Prerna, Tracker 360) and 9 PW apps on Google Play and the App Store, plus PW's own filings. Nothing was purchased and no forms were submitted.</p>
+      <p>Initial product-page audit completed 25 Oct 2026, logged out; official filing review updated through 4 Nov 2026: 45+ pw.live pages (home, batch listings, batch detail pages across JEE, NEET, UPSC and Class 10, Vidyapeeth, Test Series, Power Batch, Prerna, Tracker 360) and 9 PW apps on Google Play and the App Store, plus PW's own filings. Nothing was purchased and no forms were submitted.</p>
       <div class="hero-ctas" style="margin-top:6px"><a class="btn btn-outline sm" href="#top">Case study overview</a><a class="btn btn-primary sm" href="/pw-study/prototype">Open the working prototype</a></div></div>
     <div class="research-numbers"><div><strong>45+</strong><small>Public PW pages</small></div><div><strong>9</strong><small>App listings</small></div><div><strong>1,425</strong><small>Public reviews</small></div><div><strong>FY26-27</strong><small>Financial and AI disclosures</small></div></div>
     <div class="examined-groups"><div><b>Business model</b><p>Online/offline monetisation, course categories, centres and seasonality.</p></div><div><b>Learning products</b><p>Batch discovery, Tracker 360, Prep Meter, guided practice and parent app.</p></div><div><b>Customer evidence</b><p>App feedback, education studies, public AI-product adoption and retention disclosures.</p></div></div>
     <p class="small muted" style="margin-bottom:15px">All review counts are from the documented sample, not representative user-survey results; no internal PW data was available.</p>
+    <div class="card" id="current-initiatives" style="margin:20px 0 18px;padding:24px">
+      <div class="chapter-head"><b aria-hidden="true">PW</b> Current initiatives · 4 November 2026</div>
+      <h3>What PhysicsWallah is already building and scaling</h3>
+      <p class="small" style="margin:8px 0 14px">I reviewed PW's <a href="https://nsearchives.nseindia.com/corporate/NEAPSPW_04112026173007_shareholder_letter_intimationSD.pdf" target="_blank" rel="noopener noreferrer">official Q2 FY27 shareholder letter</a>. The labels below distinguish products already live, limited pilots, and stated expansion plans; the numbers are <b>company-reported</b>, not my independently measured product metrics.</p>
+      <div class="grid g3">
+        <article class="card"><span class="tag live">Live · Scale</span><h4 style="margin:9px 0">AI Guru + guided practice</h4><p class="small">108.8M queries across 6.09M students. Guided step-by-step solving was newly added to practice sets in Q2 FY27.</p><p class="note-tight"><b>Build on:</b> existing question content and pedagogy for a recovery MVP.</p></article>
+        <article class="card"><span class="tag live">Live · Scale</span><h4 style="margin:9px 0">Pi Lens + PW Pi</h4><p class="small">Pi Lens added 1v1 Battles, Concept Labs and Daily Challenges; PW reports 54K+ paid PW Pi subscribers.</p><p class="note-tight"><b>Build on:</b> low-friction practice habit loops, not an additional generic tutor.</p></article>
+        <article class="card"><span class="tag part">Pilot · Expanding</span><h4 style="margin:9px 0">AI Tuto, conversational tutor</h4><p class="small">Class 8 pilot with ~1,500 voluntary learners; PW reports a 4.8/5 user rating and ~₹17/hour voice-tutoring cost. Extension to other grades is planned.</p><p class="note-tight"><b>Build on:</b> supervised, syllabus-grounded recovery support; do not duplicate Tuto.</p></article>
+        <article class="card"><span class="tag live">Live · Monetising</span><h4 style="margin:9px 0">PW Books + premium learning</h4><p class="small">PW reports 49K paying learners for AI-first PW Books and Infinity/Pro collection growth of 32% in H1.</p><p class="note-tight"><b>Build on:</b> proof of willingness to pay, with learning value and tier entitlements made clear.</p></article>
+        <article class="card"><span class="tag live">Scaling · Growth</span><h4 style="margin:9px 0">Foundation, Boards/CUET, Curious Junior</h4><p class="small">Non-JEE/NEET categories reached 73.8% of H1 online enrolments; Boards/CUET enrolments rose 130%. Curious Junior collections more than doubled.</p><p class="note-tight"><b>Build on:</b> stage-appropriate academic journeys; do not use one JEE/NEET playbook for every learner.</p></article>
+        <article class="card"><span class="tag live">Scaling · Regional</span><h4 style="margin:9px 0">Vernacular + South India</h4><p class="small">1.23 lakh vernacular enrolments across 10 languages (+77% YoY). South India is an online-first growth focus, with 63 centres reported.</p><p class="note-tight"><b>Build on:</b> language and region-specific course discovery, onboarding and support.</p></article>
+        <article class="card"><span class="tag part">Announced · Next cycles</span><h4 style="margin:9px 0">NEET recovery + crash courses</h4><p class="small">PW disclosed NEET enrolment timing effects and outlined short-duration crash-course expansion through Q3/Q4.</p><p class="note-tight"><b>Build on:</b> exam-calendar-aware acquisition and continuation journeys.</p></article>
+        <article class="card"><span class="tag live">Live · Operations</span><h4 style="margin:9px 0">AI support + capital discipline</h4><p class="small">PW reports AI resolves 80% of student-support queries; offline expansion has shifted toward improving existing-centre utilisation.</p><p class="note-tight"><b>Build on:</b> reliable escalation and seat-aware centre referrals, not new unvalidated call workloads.</p></article>
+        <article class="card"><span class="tag part">In development</span><h4 style="margin:9px 0">Tuto study lamp</h4><p class="small">PW outlines an early-stage camera-enabled tutoring lamp with on-device processing, a physical shutter and parental controls.</p><p class="note-tight"><b>Build on:</b> privacy-by-design patterns; treat this as R&amp;D, not an already-shipped consumer product.</p></article>
+      </div>
+      <p class="callout" style="margin-top:16px"><b>Strategic takeaway:</b> PW has already invested in tutoring AI, practice, premium products, K-12 expansion and regional discovery. My proposal is not another AI feature; it tests <b>incremental learning recovery at a specific moment</b> and complementary search-to-course journeys on top of that stack.</p>
+    </div>
+
     <div class="grid g3">
       <div class="card"><span class="tag live">Observed</span><h3 style="margin-top:8px">Existing PW learning AI</h3><p class="small">AI Guru, guided practice, Pi Lens, Tracker 360 and Prep Meter already support parts of this journey.</p></div>
       <div class="card"><span class="tag part">Opportunity to test</span><h3 style="margin-top:8px">A smaller recovery moment</h3><p class="small">Could a missed-practice trigger guide a learner back to one useful task without introducing another planner?</p></div>
-      <div class="card"><span class="tag none">Unknown internally</span><h3 style="margin-top:8px">Actual churn and coverage</h3><p class="small">Public sources cannot establish internal renewal rates, CRM journeys, eligibility or which tools are available in every batch.</p></div>
+      <div class="card"><span class="tag part">Strategic implication</span><h3 style="margin-top:8px">Link learning to continuation</h3><p class="small">Evaluate one targeted academic recovery intervention first, and measure next-stage enrolment only after cohort maturity.</p></div>
     </div>
     <details class="method more evidence-details">
       <summary>Inspect the complete capability-by-capability audit and filters</summary>
@@ -456,20 +489,38 @@ footer h3{color:#fff}
     <p class="small muted" style="margin-top:10px">Sorted Live → Partial → Not found. "Not found" means not publicly documented; logged-in experiences, push notifications and internal tools could differ.</p>
     </details>
   </div>
+    <div class="search-audit" id="search-opportunity" aria-labelledby="search-h">
+      <div class="chapter-head"><b aria-hidden="true">↗</b> Acquisition audit · SEO + AEO</div>
+      <h3 id="search-h">How learners discover the right PW course through Search and AI answers</h3>
+      <p class="small" style="margin-top:8px">I reviewed a small public sample of PW batch landing pages, the published crawler rules, and <a href="https://developers.google.com/search/docs/appearance/ai-features" target="_blank" rel="noopener noreferrer">Google Search Central's AI search guidance</a>. This is an <b>opportunity audit</b>, not an assertion about PW's rankings, technical defects or conversions.</p>
+      <div class="search-observations">
+        <article><span class="tag live">Observed · Content</span><h4>Current-year intent is sometimes diluted</h4><p>The 2027-focused <a href="https://www.pw.live/neet/class-12/batches" target="_blank" rel="noopener noreferrer">NEET Class 12</a> and <a href="https://www.pw.live/iit-jee/batches" target="_blank" rel="noopener noreferrer">JEE batches</a> pages include 2026 exam/counselling context near the opening.</p><p><b>Improve:</b> lead with the target-year decision, clarify current batch eligibility and update dates, then separate archived exam-cycle news.</p></article>
+        <article><span class="tag live">Observed · Discovery foundation</span><h4>Course information and crawl controls exist</h4><p>PW publishes course tables, target years, schedules and FAQs; its <a href="https://www.pw.live/robots.txt" target="_blank" rel="noopener noreferrer">robots.txt</a> links to a sitemap and restricts study/practice paths, which may intentionally protect app experiences.</p><p><b>Improve:</b> audit indexable public landing pages, internal links and canonical/structured-data alignment. Do not remove restrictions without knowing their purpose.</p></article>
+        <article><span class="tag part">Proposed · SEO</span><h4>Make the next action obvious by search intent</h4><ul><li>Group pages by target exam year, class, language and online/offline mode.</li><li>Put reviewed batch comparisons and current entry dates above unrelated updates.</li><li>Link to the right cohort and explain what's included before login or payment.</li></ul></article>
+        <article><span class="tag part">Proposed · AEO / AI discovery</span><h4>Publish precise, source-backed answers</h4><ul><li>Use visible, verified Q&amp;A for real questions: suitability, duration, language, fee and support.</li><li>Align structured data with visible, current content; cite official exam sources.</li><li>Keep pages crawlable and useful; Google does <b>not</b> require AEO-only schema or llms.txt.</li></ul></article>
+      </div>
+      <div class="search-action">
+        <div><b>P0 · Validate</b><p>Sample GSC landing pages, queries, impressions, CTR, indexation and qualified enrolment starts.</p></div>
+        <div><b>P1 · Test</b><p>Update a matched set of 2027 batch landing pages and compare with unaffected pages.</p></div>
+        <div><b>P2 · Measure</b><p>Track non-branded discovery, course-match clicks, enrolment conversion and sourced AI citations where observable.</p></div>
+      </div>
+      <p class="search-method"><b>Limits:</b> I did not have access to PW Search Console, analytics, crawl logs, site-wide schema diagnostics, AI referral reports or paid enrolment attribution. Google doesn't guarantee indexing or inclusion in AI answers. Any ranking or revenue impact remains unmeasured.</p>
+    </div>
 </section>
 
 
 <!-- GAPS -->
 <section class="block" id="gaps" aria-labelledby="gap-h">
   <div class="wrap">
-    <div class="sec-head"><div class="chapter-head"><b>03</b> What I found</div><h2 id="gap-h">Five insights and what each could mean for the product</h2><p>Public reviews and product surfaces reveal possible learner pain points, not PW’s internal churn rates or existing operational workflows. These are questions for a PW data review and direct interviews-not established internal failures.</p></div>
+    <div class="sec-head"><div class="chapter-head"><b>03</b> Evidence-backed findings</div><h2 id="gap-h">Six public observations, each connected to a product decision</h2><p>These findings come from sampled PW pages, app reviews and published company reports. A review is a customer signal, not evidence of how often a problem occurs. I separate <b>what I observed</b> from <b>what I would test</b>.</p></div>
     <div class="found-grid">
-  <article><strong>Finding 1 · Existing AI</strong><h3>PW is not starting from zero</h3><p>AI Guru, guided practice, Pi Lens, planning and mentorship already cover important learning needs.</p><p class="implication"><b>So what:</b> build on existing tools, not a duplicate tutor.</p></article>
-  <article><strong>Finding 2 · Progress reporting</strong><h3>Some parents question data visibility and accuracy</h3><p>Selected public reviews mention missing attendance or inaccurate study activity.</p><p class="implication"><b>So what:</b> reconcile data before any automated progress update.</p></article>
-  <article><strong>Finding 3 · Batch transition</strong><h3>Next-stage decisions can be confusing</h3><p>Public feedback mentions batch expiry; PW also has combo and next-year options.</p><p class="implication"><b>So what:</b> evaluate a clearer educational progression journey.</p></article>
-  <article><strong>Finding 4 · Cohort economics</strong><h3>Revenue follows exam calendars and course category</h3><p>Company filings reveal seasonal collections and diverse K-12, test-prep and offline growth.</p><p class="implication"><b>So what:</b> segment renewal and progression rather than using a blended churn rate.</p></article>
-  <article><strong>Finding 5 · Evidence gap</strong><h3>Internal retention performance is unknown</h3><p>Public data does not establish existing CRM flows, learner recovery or true repeat-enrolment baselines.</p><p class="implication"><b>So what:</b> validate with PW data and interviews before committing capital.</p></article>
- </div>
+      <article><strong>Finding 1 · Existing AI products</strong><h3>PW already has a learning-AI foundation</h3><p>AI Guru, guided practice, Pi Lens, planning and mentorship are publicly described PW capabilities.</p><p class="implication"><b>Product implication:</b> connect existing tools around a specific missed-practice moment; avoid another generic AI tutor.</p></article>
+      <article><strong>Finding 2 · Parent experience</strong><h3>Some parents report missing or inaccurate progress data</h3><p>Selected Parent App reviews mention attendance, lesson activity and assessment records that do not appear as expected.</p><p class="implication"><b>Product implication:</b> validate event reliability before launching automated progress reports. <a href="#voices">See sample reviews</a>.</p></article>
+      <article><strong>Finding 3 · Batch expiry</strong><h3>Course transitions can create navigation friction</h3><p>Sampled learner reviews describe expired-batch access concerns and ask for clearer batch navigation.</p><p class="implication"><b>Product implication:</b> clarify expiry, remaining access and the educational next step. <a href="#voices">See the evidence</a>.</p></article>
+      <article><strong>Finding 4 · Category mix</strong><h3>Growth is broader than JEE and NEET</h3><p>Categories beyond JEE-NEET contributed <b>73.8% of H1 FY27 enrolments, up from 64.8%</b> a year earlier, according to PW's <a href="https://nsearchives.nseindia.com/corporate/NEAPSPW_04112026173007_shareholder_letter_intimationSD.pdf" target="_blank" rel="noopener noreferrer">4 November 2026 shareholder letter</a>.</p><p class="implication"><b>Product implication:</b> do not apply a single renewal or growth playbook to Foundation, Board/CUET, JEE/NEET and professional exams. Prioritise and measure by category and learner stage.</p></article>
+      <article><strong>Finding 5 · Mentorship expectations</strong><h3>Some paid learners question what support is included</h3><p>A sampled app review says 1:1 mentorship was expected but an additional paid offer appeared after enrolment. One review is <b>not</b> proof of a systemic fulfilment problem.</p><p class="implication"><b>Product implication:</b> audit plan-level entitlements, show mentor access and response expectations clearly, and test support handoffs before promising new interventions. <a href="#voices">See review</a>.</p></article>
+      <article><strong>Finding 6 · Search discovery</strong><h3>Some exam-year pages mix current course intent with past-cycle updates</h3><p>PW's <a href="https://www.pw.live/neet/class-12/batches" target="_blank" rel="noopener noreferrer">Class 12 NEET batches page</a> lists 2027 preparation but opens with August 2026 counselling; the <a href="https://www.pw.live/iit-jee/batches" target="_blank" rel="noopener noreferrer">JEE batches page</a> similarly mixes 2027-28 intent and 2026 exam context.</p><p class="implication"><b>Product implication:</b> align titles, opening answers, course comparisons and update dates to the learner's target exam year. <a href="#search-opportunity">See the SEO/AEO review</a>.</p></article>
+    </div>
     <div class="voices-head"><h3>In learners' and parents' own words</h3>
       <p class="small muted">I read 1,425 public reviews of the PW app and the PW Parent App, collected 26 Oct 2026. Quoted verbatim; names left out.</p>
       <details class="small muted method"><summary>How the reviews were read</summary><p>680 and 677 on Google Play, 68 on the App Store; the PW app ones are from 2026, the Parent App ones from Feb 2024 on. About half the PW app reviews are 5★ praise for the teaching; of the 270 rated 1-3★, 214 are about bugs or support. In the Parent App, 105 of 677 Google Play reviews (15.5%) mention reports, progress, attendance or results, and 61 of those (58%) rate it 1-3★, mostly because the data is missing, wrong or too thin; most of those are from 2024. No interviews yet: ten learner and ten parent calls are in the first three weeks of the plan.</p></details></div>
@@ -482,15 +533,16 @@ footer h3{color:#fff}
       <figure class="card voice"><blockquote>"there is mentioned that 1 to 1 mentorship but when we purchase the batch,then there is only paid no mentorship."</blockquote><figcaption>PW app, Google Play · 2★ · 5 Aug 2026</figcaption></figure>
     </div>
     <p class="small muted" style="margin:10px 0 20px"><b>My interpretation, not a population estimate:</b> some reviewers want clearer progress summaries, some describe confusion around batch expiry, and some question mentorship delivery. Self-selected reviews do not establish prevalence or causality. I would validate each with enrolled learners, parents and support tickets before prioritising a fix.</p>
-    <div class="tbl"><table class="t-wide">
-      <thead><tr><th style="width:22%">Shortcoming</th><th style="width:48%">Evidence</th><th style="width:30%">So what</th></tr></thead>
-      <tbody>
-        <tr><td><b>1. Repeat business is not visible</b></td><td>The filings reviewed give no next-batch re-enrolment baseline. Upfront payment separates the point of purchase from sustained learning.</td><td>Measure study drop-off and eligible repeat purchase separately.</td></tr>
-        <tr><td><b>2. Retention tools are scattered and pull-based</b></td><td>Tracker 360 in some plans, Prep Meter in Infinity, 1:1 mentorship in Infinity Pro, parent data in a separate app that has to be opened.</td><td>Check which plan tiers already have a reliable recovery path; access gaps are a hypothesis.</td></tr>
-        <tr><td><b>3. Can guided practice help learners recover?</b></td><td>PW reports higher week-three retention alongside Pi Lens daily challenges.</td><td>Test whether guided practice helps paid learners return after missing planned work.</td></tr>
-        <tr><td><b>4. Revenue is calendar-bound</b></td><td>79% of FY26 collections came March to September; Vishwas Diwas took ₹205 cr in 3 weeks; a NEET shift moved 1-1.5 lakh enrolments out of Q1.</td><td>Peaks are mass events; next steps are not yet personal.</td></tr>
-        <tr><td><b>5. Offline growth must come from existing centres</b></td><td>Offline ARPU −9% on mix; expansion now "opportunistic"; margin rests on ARPU and seat utilisation, PW's own measure, which it reports rising from 1.77 to 1.99.</td><td>PW's best offline leads are its own online learners.</td></tr>
+    <details class="method" style="margin-top:16px"><summary><b>See evidence → potential product action → validation requirement</b></summary>
+      <div class="tbl" style="margin-top:12px"><table class="t-wide"><thead><tr><th>Observed public signal</th><th>Possible improvement</th><th>What I would verify internally</th></tr></thead><tbody>
+        <tr><td>Existing AI-guided practice and learner-planning tools</td><td>Integrate one targeted catch-up task into the current learning flow</td><td>Current recovery interventions, adoption, learning uplift</td></tr>
+        <tr><td>Sample Parent App complaints about reporting reliability</td><td>Reconcile progress and attendance events; show freshness and confidence</td><td>Event completeness, actual incident rate, parent consent</td></tr>
+        <tr><td>Public batch-expiry and navigation complaints</td><td>Make expiry and academically relevant next steps explicit</td><td>Support ticket incidence, access policy, eligible transition paths</td></tr>
+        <tr><td>Non-JEE/NEET categories now represent 73.8% of H1 enrolments</td><td>Segment growth experiments by academic stage and category</td><td>Cohort size, retention/activation, gross margin by segment</td></tr>
+        <tr><td>Sample mentorship entitlement complaint</td><td>Show verified inclusions and service expectations at purchase and in-app</td><td>Entitlement definitions, capacity, response times, complaint incidence</td></tr>
+        <tr><td>Mixed exam-year context on selected public batch pages</td><td>Refresh current-intent answers and course selection pathways</td><td>GSC queries/CTR, crawl diagnostics, conversion tracking, AI citations</td></tr>
       </tbody></table></div>
+    </details>
   </div>
 </section>
 
@@ -504,7 +556,7 @@ footer h3{color:#fff}
   <article class="rank-card"><span class="rank-no">2</span><div><h3>Progress data quality and trustworthy updates</h3><p>Some Parent App reviews surface reporting friction; reliable records are essential before sending summaries.</p><small>Dependency: data reconciliation, consent and age-appropriate legal design.</small></div><span class="priority">P0 · Foundation</span></article>
   <article class="rank-card"><span class="rank-no">3</span><div><h3>Results-day pathway to the appropriate next batch</h3><p>Potential continuation lever aligned to natural course transitions, after learning value is established.</p><small>Dependency: eligible repeat enrolment baseline, timing and commercial holdout.</small></div><span class="priority">P1 · Growth test</span></article>
   <article class="rank-card"><span class="rank-no">4</span><div><h3>Online-to-Vidyapeeth class trial</h3><p>Could put suitable online learners in existing-centre seats, but execution depends on local capacity and counselling.</p><small>Dependency: academic fit, seat utilisation, geography and incrementality.</small></div><span class="priority">P1 · Local pilot</span></article>
-  <article class="rank-card"><span class="rank-no">5</span><div><h3>AI batch finder for free-content viewers</h3><p>Could match learners to courses, but requires free-to-paid funnel data to demonstrate unmet demand.</p><small>Dependency: activation and lead-quality benchmarks.</small></div><span class="priority">P2 · Explore</span></article>
+  <article class="rank-card"><span class="rank-no">5</span><div><h3>SEO + AI-answer discovery for the right batch</h3><p>Selected JEE/NEET landing pages mix target-year course choices with prior-cycle updates. Test refreshed, answer-first comparisons and clear academic-stage routing.</p><small>Dependency: <a href="#search-opportunity">public SEO/AEO review</a>, Search Console, search-intent cohorts and paid-enrolment attribution.</small></div><span class="priority">P2 · Organic growth</span></article>
   <article class="rank-card"><span class="rank-no">6</span><div><h3>AI tutor premium packaging</h3><p>Potential monetisation, though PW already reports AI Tuto development-avoid duplicating its roadmap.</p><small>Dependency: usage, price elasticity and educational quality.</small></div><span class="priority">P2 · Align first</span></article>
   <article class="rank-card"><span class="rank-no">7</span><div><h3>Study-gap books and test-series bundles</h3><p>Cross-sell has less direct evidence of an underserved learning need than recovery and progress transparency.</p><small>Dependency: purchase intent, contextual relevance and incremental value.</small></div><span class="priority">P3 · Later</span></article>
  </div>
@@ -594,6 +646,12 @@ footer h3{color:#fff}
    </tbody></table></div><p class="small muted" style="margin-top:12px">Not profit, EBITDA or a forecast; excludes refunds, substitution, incremental service delivery and programme expenses. The <a href="#impact">full sensitivity model</a> is in the appendix.</p></div>
   <div class="card soft"><h3>Scale / stop decision</h3><ul class="small" style="margin-top:10px"><li><b>Scale:</b> reliable data, meaningful incremental recovery, sustained practice and no mastery harm.</li><li><b>Economics:</b> incremental intervention value exceeds delivery and support costs.</li><li><b>Wait:</b> next-stage conversion cannot be claimed before cohort maturity.</li><li><b>Stop:</b> no educational benefit, privacy issues, disproportionate harms or unviable unit economics.</li></ul><p style="margin-top:13px"><a href="#first-test">Experiment design</a> · <a href="#plan">Rollout gates</a> · <a href="#impact">Business model</a></p></div>
  </div>
+ <div class="card" style="margin:18px 0">
+    <span class="tag pri">Parallel acquisition workstream · Organic search</span><h3 style="margin:10px 0">SEO + AI-answer pilot: match learner intent to the right batch</h3>
+    <p class="small">Start with the sampled 2027 JEE/NEET pages, confirm their non-branded query demand in Search Console, improve exam-year clarity, course comparison and dated source answers, then measure matched-page performance. Keep this separate from the in-app recovery experiment to avoid attributing organic acquisition to retention nudges.</p>
+    <div class="grid g3" style="margin-top:14px"><div><b>Audience</b><p class="small">Organic visitors comparing target year, class, language and batch format.</p></div><div><b>Channel</b><p class="small">Existing search-indexable PW landing pages and helpful source-grounded answers.</p></div><div><b>Expected outputs</b><p class="small">Validated query clusters, updated landing-page template and measured qualified enrolment starts; no guaranteed ranking or AI citations.</p></div></div>
+    <p class="small muted" style="margin-top:10px">Decision: scale by cohort only if the test shows incremental qualified discovery/conversion with no informational or compliance harm.</p>
+  </div>
  <p class="callout"><b>GTM sequence:</b> learning rescue → repeat practice and mastery → trusted, consented support → relevant next course → measured incremental contribution. A large modelled opportunity does not justify scaling an unsuccessful pilot.</p>
  <nav class="story-end-nav" aria-label="Seven chapters"><a href="#overview"><span>01</span>Goal</a><a href="#audit"><span>02</span>Examined</a><a href="#gaps"><span>03</span>Found</a><a href="#priorities"><span>04</span>Ranked</a><a href="#system"><span>05</span>Changes</a><a href="#journey-demo"><span>06</span>Demos</a><a href="#gtm"><span>07</span>GTM</a></nav>
 </div></section>
