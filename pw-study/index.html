@@ -219,6 +219,94 @@ footer h3{color:#fff}
 .ai-system h4{font-size:15px;margin:6px 0}
 .note-tight{font-size:14px;line-height:22px;color:var(--muted)}
 @media(max-width:699px){.interviewer-brief .card{padding:16px}}
+
+/* Visual case-study presentation using genuine screenshots of the synthetic concept. */
+.hero-stage{display:grid;grid-template-columns:minmax(0,1.04fr) minmax(360px,.96fr);gap:34px;align-items:center}
+.hero-copy{display:grid;gap:17px;align-content:center}
+.hero-copy h1{font-size:clamp(34px,3.65vw,54px);line-height:1.1;letter-spacing:-.035em}
+.hero-copy .lede{font-size:18px;line-height:1.6}
+.hero-highlight{font-weight:700;color:var(--heading)}
+.hero-chips,.hero-actions{display:flex;flex-wrap:wrap;gap:8px}
+.hero-chips span{font-size:12px;font-weight:700;border:1px solid #d9d3ff;background:#fff;padding:5px 10px;border-radius:999px;color:var(--primary-700)}
+.hero-actions{gap:10px}
+.hero-owner{display:flex;align-items:center;gap:12px;border-top:1px solid #d9d3ff;padding-top:14px}
+.hero-owner img{width:48px;height:48px;border-radius:50%;object-fit:cover;object-position:center 20%;border:2px solid #fff;box-shadow:0 3px 12px #2c268328}
+.hero-owner b{display:block;font-size:14px;color:var(--heading)}
+.hero-owner span{display:block;font-size:12px;color:var(--muted);line-height:19px}
+.hero-visual{height:445px;min-width:0;border-radius:26px;position:relative;isolation:isolate;overflow:hidden;background:radial-gradient(circle at 20% 20%,#d3ccff 0,transparent 53%),radial-gradient(circle at 76% 66%,#e7dcff 0,transparent 55%),#f5f2ff;border:1px solid #e6dfff}
+.hero-visual:before{content:"";position:absolute;width:360px;height:360px;border:1px dashed #b1a7f0;border-radius:50%;left:22%;top:10%;opacity:.65}
+.hero-shot{position:absolute;display:block;overflow:hidden;background:#fff;border:5px solid #fff;box-shadow:0 20px 44px rgba(44,35,103,.20);border-radius:14px;text-decoration:none;transition:transform .2s ease,box-shadow .2s ease}
+.hero-shot:hover,.hero-shot:focus-visible{transform:translateY(-6px) rotate(0deg)!important;box-shadow:0 26px 54px rgba(44,35,103,.28);z-index:5}
+.hero-shot img{display:block;width:100%;height:100%;object-fit:cover;object-position:top center}
+.hero-shot.student{left:7%;top:8%;width:44%;height:77%;transform:rotate(-5deg);z-index:2}
+.hero-shot.parent{right:10%;top:5%;width:35%;height:56%;transform:rotate(6deg);z-index:3}
+.hero-shot.console{right:3%;bottom:8%;width:56%;height:38%;transform:rotate(-2deg);z-index:4}
+.shot-chip{position:absolute;bottom:6px;left:6px;right:6px;font-size:11px;font-weight:700;line-height:17px;padding:5px 7px;border-radius:7px;background:rgba(27,33,36,.91);color:#fff;text-align:center}
+.visual-note{position:absolute;left:4%;bottom:5%;max-width:38%;font-size:11px;line-height:17px;color:#3b3275;font-weight:700;z-index:4}
+.start.visual-start{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.start.visual-start .go{background:rgba(255,255,255,.82);border-color:#ded8f7}
+.start.visual-start .go.pri{background:var(--primary);border-color:var(--primary)}
+.case-route{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:24px}
+.route-card{position:relative;display:grid;gap:5px;padding:17px;background:#fff;border:1px solid #e0dff0;border-radius:14px;min-width:0}
+.route-card .route-num{font-size:12px;font-weight:800;color:var(--primary)}
+.route-card b{font-size:16px;color:var(--heading)}
+.route-card small{font-size:12px;line-height:18px;color:var(--muted)}
+.route-card:after{content:"→";position:absolute;right:-10px;top:50%;z-index:2;transform:translateY(-50%);width:20px;height:20px;border-radius:50%;background:var(--primary);color:#fff;font-size:14px;display:grid;place-items:center}
+.route-card:last-child:after{display:none}
+.route-card.completed{border-top:4px solid #218456}
+.route-card.future{border-top:4px solid var(--orange)}
+.route-card.future .route-num{color:#B94A0B}
+.proof-grid,.conclusion-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.evidence-panel,.built-panel{background:#fff;border:1px solid var(--border);border-radius:20px;padding:23px;overflow:hidden}
+.panel-head,.panel-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.evidence-panel h3,.built-panel h3{font-size:23px;line-height:30px;margin-top:12px}
+.evidence-panel p,.built-panel p{margin-top:10px;font-size:14px;line-height:23px}
+.evidence-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:18px 0}
+.evidence-metrics .metric{padding:14px 9px;background:#f3f0ff;border-radius:12px;min-width:0}
+.evidence-metrics strong{display:block;font-size:clamp(23px,2.8vw,34px);line-height:1.2;color:var(--primary);letter-spacing:-.03em}
+.evidence-metrics span{font-size:12px;line-height:17px;color:#433d5b;display:block;margin-top:5px}
+.panel-foot a{font-size:14px;font-weight:700}
+.maker{display:flex;gap:9px;align-items:center;font-size:12px;color:var(--muted)}
+.maker img{width:40px;height:40px;object-fit:cover;border-radius:50%}
+.built-preview{display:grid;grid-template-columns:1.2fr 1fr 1.1fr;gap:8px;height:165px;margin:16px 0;background:#f3f0ff;border-radius:12px;padding:9px}
+.built-preview a{border-radius:8px;overflow:hidden;border:1px solid #e6ddff;box-shadow:0 3px 8px #3f377a1a;background:#fff}
+.built-preview img{display:block;width:100%;height:100%;object-fit:cover;object-position:top}
+.conclusion-grid{margin-top:16px}
+.conclusion-panel{border:1px solid #eadff9;background:#f7f3ff;border-radius:16px;padding:20px;display:grid;gap:9px}
+.conclusion-panel.next{border-color:#f3dacb;background:#fff7f1}
+.conclusion-panel b{font-size:20px;line-height:26px;color:var(--heading)}
+.conclusion-panel p{font-size:14px;line-height:22px}
+.conclusion-panel a{font-size:14px;font-weight:700}
+.interviewer-brief .proof{font-size:13px;line-height:21px;margin-top:16px}
+.demo-showcase{border-top:1px solid var(--border-soft);background:linear-gradient(180deg,#faf8ff,#fff 88%)}
+.demo-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.demo-tile{overflow:hidden;background:#fff;border:1px solid #e0dff0;border-radius:18px;box-shadow:0 9px 28px rgba(44,35,103,.07)}
+.demo-cover{display:block;text-decoration:none;position:relative;background:#f2eeff;border-bottom:1px solid #e5e0f8;height:310px;padding:12px}
+.demo-cover img{display:block;width:100%;height:100%;object-fit:contain;object-position:top center;transition:transform .2s ease}
+.demo-cover:hover img,.demo-cover:focus-visible img{transform:scale(1.025)}
+.demo-cover .live-label{position:absolute;top:14px;left:14px;font-size:11px;font-weight:700;line-height:16px;background:#fff;padding:6px 9px;color:var(--primary-700);border:1px solid #ddd4fc;border-radius:100px;box-shadow:0 2px 8px #3226841a}
+.demo-info{padding:17px}
+.demo-info h3{font-size:17px}
+.demo-info p{font-size:13px;line-height:21px;min-height:63px;margin:6px 0 12px}
+.demo-info a{font-size:14px;font-weight:700}
+.demo-walk{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:18px}
+.demo-walk div{border-radius:12px;border:1px solid #e2dced;padding:12px 14px;background:#fff;font-size:13px;line-height:20px}
+.demo-walk b{display:block;color:var(--primary);font-size:12px;margin-bottom:4px}
+.inline-demo{border:1px solid #ddd7f6;border-radius:15px;background:#f8f6ff;padding:16px;margin-top:20px}
+.inline-demo summary{font-size:15px;font-weight:700;color:var(--primary);cursor:pointer}
+.inline-demo .proto-frame{display:block;margin-top:16px}
+.visual-path{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:18px 0}
+.visual-path .node{padding:15px 10px;border:1px solid #dbd5fa;background:#fff;border-radius:12px;text-align:center;position:relative}
+.visual-path .node:after{content:"→";position:absolute;right:-11px;top:50%;transform:translateY(-50%);color:var(--primary);font-size:19px;z-index:1;font-weight:800}
+.visual-path .node:last-child:after{display:none}
+.visual-path .node strong{display:block;font-size:22px;line-height:28px;margin-bottom:6px}
+.visual-path .node b{display:block;font-size:14px;line-height:20px;color:var(--heading)}
+.visual-path .node span{display:block;font-size:11px;line-height:16px;color:var(--muted);margin-top:5px}
+@media(max-width:1000px){.hero-stage{grid-template-columns:1fr 350px;gap:18px}.hero-visual{height:360px}.hero-copy h1{font-size:38px}.hero-copy .lede{font-size:16px}.demo-cover{height:270px}}
+@media(max-width:760px){.hero-stage{grid-template-columns:1fr}.hero-visual{height:320px;max-width:560px;width:100%;margin:auto}.hero .wrap{padding-top:24px}.start.visual-start,.case-route,.visual-path{grid-template-columns:repeat(2,minmax(0,1fr))}.route-card:after,.visual-path .node:after{display:none}.proof-grid,.conclusion-grid{grid-template-columns:1fr}.demo-gallery{grid-template-columns:1fr 1fr}.demo-walk{grid-template-columns:1fr 1fr}.demo-cover{height:280px}.hero-copy h1{font-size:clamp(31px,7vw,44px)}}
+@media(max-width:520px){.hero-visual{height:290px}.hero-shot.student{left:4%;width:47%}.hero-shot.parent{right:7%;width:39%}.hero-shot.console{right:3%;width:55%}.hero-actions .btn{flex:1;min-width:0;font-size:13px;padding:10px 11px}.start.visual-start{grid-template-columns:1fr}.start.visual-start .go{min-height:51px}.case-route{grid-template-columns:repeat(2,minmax(0,1fr))}.route-card{padding:13px}.evidence-panel,.built-panel{padding:16px}.evidence-metrics strong{font-size:25px}.demo-gallery{grid-template-columns:1fr}.demo-cover{height:330px}.demo-info p{min-height:0}.demo-walk{grid-template-columns:1fr 1fr}.visual-path{grid-template-columns:1fr 1fr}.visual-path .node:last-child{grid-column:1/-1}.inline-demo{display:none}}
+@media(prefers-reduced-motion:reduce){.hero-shot,.demo-cover img{transition:none}}
+
 </style>
 </head>
 <body>
@@ -228,7 +316,7 @@ footer h3{color:#fff}
   <div class="wrap">
     <a class="mark" href="#top"><i aria-hidden="true">AT</i><span><b>PW Study</b><small>by Anchit Tandon</small></span></a>
     <div class="links" id="links">
-      <a href="#overview">Start here</a><a href="#audit">Research</a><a href="#gaps">Findings</a><a href="#system">Proposal</a><a href="#bet">AI design</a><a href="#prototype">What I built</a><a href="#first-test">First test</a><a href="#impact">Economics</a><a href="#me">Why me</a><a href="#walkthrough">Share</a>
+      <a href="#overview">Overview</a><a href="#journey-demo">Live demo</a><a href="#audit">Research</a><a href="#gaps">Findings</a><a href="#system">Proposal</a><a href="#bet">AI design</a><a href="#first-test">First test</a><a href="#impact">Economics</a><a href="#me">Why me</a><a href="#walkthrough">Share</a>
     </div>
     <a class="btn btn-primary sm cta" href="/pw-study/prototype">Open prototype</a>
   </div>
@@ -236,15 +324,28 @@ footer h3{color:#fff}
 
 <header class="hero" id="top">
   <div class="wrap">
-    <span class="eyebrow">Senior Product Manager, Growth · November 2026</span>
-    <h1>From missed practice to <span class="accent">learning recovery.</span></h1>
-    <p class="lede">I studied how PhysicsWallah supports paid learners, identified an opportunity to test, and built an interactive concept. Here is <b>what I researched, what I built, what remains a hypothesis, and how I would test it</b> as a Senior Product Manager – Growth.</p>
-    <nav class="start" aria-label="Start here">
-      <a class="go" href="#overview"><span class="gn" aria-hidden="true">1</span><span><b>Start with the case</b><small>My question, work and conclusion · 90 sec</small></span></a>
-      <a class="go" href="#first-test"><span class="gn" aria-hidden="true">2</span><span><b>Understand my product bet</b><small>The proposed first experiment · 2 min</small></span></a>
-      <a class="go pri" href="/pw-study/prototype"><span class="gn" aria-hidden="true">3</span><span><b>Try what I built</b><small>Four synthetic learners · 3 min</small></span></a>
+    <div class="hero-stage">
+      <div class="hero-copy">
+        <span class="eyebrow">PhysicsWallah · Senior Product Manager – Growth · November 2026</span>
+        <div class="hero-chips"><span>Public research completed</span><span>Interactive concept built</span><span>Experiments proposed</span></div>
+        <h1>When a learner falls behind, <span class="accent">what brings them back?</span></h1>
+        <p class="lede">I mapped PW's existing learning tools, investigated learner pain points, and built a clickable experience around <span class="hero-highlight">one focused idea: turn missed practice into a manageable recovery action.</span> Here's the evidence, what I built, and what I'd test.</p>
+        <div class="hero-actions"><a class="btn btn-primary" href="#overview">See my work · 90 sec</a><a class="btn btn-outline" href="/pw-study/prototype">Explore interactive demo ↗</a></div>
+        <div class="hero-owner"><img src="/assets/anchit-profile-720.webp" width="48" height="48" alt="Photo of Anchit Tandon" fetchpriority="high"><div><b>Research, product concept &amp; prototype by Anchit Tandon</b><span>Independent case study · Not affiliated with PhysicsWallah</span></div></div>
+      </div>
+      <div class="hero-visual" aria-label="Previews of the three interactive prototype experiences">
+        <a class="hero-shot student" href="/pw-study/prototype#student" aria-label="Open simulated learner app"><img src="/pw-study/img/student.png" alt="Screenshot of concept student experience with on-track score and catch-up plan" width="2168" height="2566" fetchpriority="high"><span class="shot-chip">01 · Learner app</span></a>
+        <a class="hero-shot parent" href="/pw-study/prototype#report" aria-label="Open simulated weekly progress report"><img src="/pw-study/img/pulse.png" alt="Screenshot of proposed weekly progress report message" width="660" height="1125"><span class="shot-chip">02 · Progress report</span></a>
+        <a class="hero-shot console" href="/pw-study/prototype#dashboard" aria-label="Open synthetic renewals dashboard"><img src="/pw-study/img/console.png" alt="Screenshot of synthetic renewals dashboard" width="1061" height="1488"><span class="shot-chip">03 · Dashboard</span></a>
+        <span class="visual-note">Real demo screenshots · Fictional learners</span>
+      </div>
+    </div>
+    <nav class="start visual-start" aria-label="Start here">
+      <a class="go" href="#overview"><span class="gn" aria-hidden="true">1</span><span><b>What I did</b><small>Research, synthesis &amp; build</small></span></a>
+      <a class="go" href="#journey-demo"><span class="gn" aria-hidden="true">2</span><span><b>See the screens</b><small>Three interactive experiences</small></span></a>
+      <a class="go pri" href="#first-test"><span class="gn" aria-hidden="true">3</span><span><b>Judge the product bet</b><small>First test &amp; decision criteria</small></span></a>
     </nav>
-    <p class="meta">Independent, public-data case study · <a href="#audit">Research evidence</a> · <a href="#stack">PW’s existing AI</a> · <a href="#walkthrough">Shareable walkthrough</a>. The prototype does not connect to PW systems or run a trained AI model.</p>
+    <p class="meta">Screens use fictional learners and illustrative rules—not a trained or deployed AI system. <a href="#audit">Research evidence</a> · <a href="#architecture">AI design</a> · <a href="#walkthrough">Interview walkthrough</a>.</p>
   </div>
 </header>
 
@@ -253,41 +354,89 @@ footer h3{color:#fff}
 <!-- INTERVIEWER BRIEF -->
 <section class="block interviewer-brief" id="overview" aria-labelledby="overview-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">Start here · 90-second interviewer brief</span>
-      <h2 id="overview-h">My question, my work, my findings, and my proposed next step</h2>
-      <p>I wanted to understand whether PW could help a paid learner recover from missed practice by using products PW already has—and whether better educational continuity could eventually improve eligible next-stage enrolment. I treated this as a <b>hypothesis to validate</b>, not a claim that PW has an internal retention problem.</p>
+    <div class="sec-head">
+      <span class="num">Start here · 90-second interviewer briefing</span>
+      <h2 id="overview-h">What I did, what I learned, and what I would test</h2>
+      <p><b>The question:</b> Could PW's existing learning tools help a paid learner return to meaningful practice after falling behind? I investigated the opportunity with public information, built a demonstrable product concept, and defined how I would test it—without claiming PW lacks an internal retention system.</p>
     </div>
-    <div class="grid g2">
-      <article class="card done">
-        <span class="tag live">Completed · public research</span>
-        <h3>1. What I investigated</h3>
-        <p>I reviewed <b>45+ public PW pages, nine app listings, 1,425 public app reviews</b>, and company-reported financial and AI disclosures. I mapped existing learning, planning, parent-support and growth capabilities, then identified where public evidence ends.</p>
-        <p class="note-tight" style="margin-top:8px"><a href="#audit">Read the audit and method</a> · <a href="#gaps">See the findings</a></p>
+    <div class="case-route" role="list" aria-label="The case study from completed research to proposed experiment">
+      <div class="route-card completed" role="listitem"><span class="route-num">01 · COMPLETED</span><b>Investigated PW</b><small>Website, app listings, reviews and filings</small></div>
+      <div class="route-card completed" role="listitem"><span class="route-num">02 · COMPLETED</span><b>Built a prototype</b><small>Student, progress report and business dashboard</small></div>
+      <div class="route-card future" role="listitem"><span class="route-num">03 · HYPOTHESIS</span><b>Connected the dots</b><small>A recovery action using existing PW tools</small></div>
+      <div class="route-card future" role="listitem"><span class="route-num">04 · TO VALIDATE</span><b>Designed the test</b><small>Learning recovery, mastery and incremental value</small></div>
+    </div>
+    <div class="proof-grid">
+      <article class="evidence-panel">
+        <div class="panel-head"><span class="tag live">Research completed</span><span class="note-tight">Public sources only</span></div>
+        <h3>What I examined</h3>
+        <div class="evidence-metrics">
+          <div class="metric"><strong>45+</strong><span>PW web pages audited</span></div>
+          <div class="metric"><strong>9</strong><span>App listings reviewed</span></div>
+          <div class="metric"><strong>1,425</strong><span>Public reviews examined</span></div>
+        </div>
+        <p>I cross-referenced product surfaces, parent and learner feedback, and PW's reported AI and financial results to identify <b>testable questions</b>, not invent internal churn statistics.</p>
+        <div class="panel-foot" style="margin-top:16px"><span class="maker"><img src="/assets/anchit-profile-720.webp" width="40" height="40" loading="lazy" alt="Anchit Tandon"><span>Personally researched &amp; synthesised</span></span><a href="#audit">Inspect evidence →</a></div>
       </article>
-      <article class="card done">
-        <span class="tag live">Completed · interactive demonstration</span>
-        <h3>2. What I actually built</h3>
-        <p>A responsive, clickable <b>student experience, progress-report view and renewals dashboard</b>, with four fictional learners, adjustable study signals, explainable rule-based decisions and editable ₹ scenarios.</p>
-        <p class="note-tight" style="margin-top:8px">These are working demo interactions, <b>not trained ML, integrated PW APIs or a real user experiment</b>. <a href="/pw-study/prototype">Try the prototype</a>.</p>
-      </article>
-      <article class="card proposed">
-        <span class="tag part">Proposed · product judgment</span>
-        <h3>3. What I learned</h3>
-        <p>PW already has substantial AI tutoring, practice and planning capability. A promising incremental opportunity may be to make a missed-practice moment actionable: one manageable, syllabus-aligned catch-up task, with existing tools reused rather than duplicated.</p>
-        <p class="note-tight" style="margin-top:8px">The existence and magnitude of the gap are still unverified; internal event data and first-party interviews decide whether this is worth building.</p>
-      </article>
-      <article class="card proposed">
-        <span class="tag part">Proposed · first PW experiment</span>
-        <h3>4. What I would test</h3>
-        <p>Randomise eligible learners who missed practice to <b>existing experience vs. one short, guided catch-up plan</b>. Compare meaningful practice recovery after seven days, sustained practice the next week, unassisted mastery, safety and cost. Evaluate next-stage enrolment later—only when the buying window matures.</p>
-        <p class="note-tight" style="margin-top:8px"><a href="#first-test">Experiment design and decision gates</a></p>
+      <article class="built-panel">
+        <div class="panel-head"><span class="tag live">Prototype completed</span><span class="note-tight">Rule-based demonstration</span></div>
+        <h3>What I made clickable</h3>
+        <div class="built-preview" aria-label="Three screenshots from the prototype">
+          <a href="/pw-study/prototype#student" aria-label="Explore learner experience"><img src="/pw-study/img/student.png" alt="Learner concept screenshot" width="2168" height="2566" loading="lazy"></a>
+          <a href="/pw-study/prototype#report" aria-label="Explore report experience"><img src="/pw-study/img/pulse.png" alt="Proposed progress report screenshot" width="660" height="1125" loading="lazy"></a>
+          <a href="/pw-study/prototype#dashboard" aria-label="Explore dashboard experience"><img src="/pw-study/img/console.png" alt="Synthetic dashboard screenshot" width="1061" height="1488" loading="lazy"></a>
+        </div>
+        <p><b>4 fictional learners</b> · Adjustable study signals · Explainable demo actions · An editable synthetic 5,000-learner scenario calculator. No live PW integrations.</p>
+        <div class="panel-foot" style="margin-top:16px"><span class="note-tight">Real in-browser interactions.</span><a href="/pw-study/prototype">Try my prototype →</a></div>
       </article>
     </div>
-    <div class="proof">
-      <b>Evidence boundary.</b> I have <b>not</b> accessed PW’s internal retention or learner data, interviewed PW customers, deployed a real AI model, sent WhatsApp messages or demonstrated revenue lift. I have completed the public investigation, synthesis, concept, interactive prototype and scenario model.
+    <div class="conclusion-grid">
+      <article class="conclusion-panel">
+        <span class="tag part">My product hypothesis · Not validated</span>
+        <b>PW has the ingredients. Could the recovery moment be simpler?</b>
+        <p>PW already offers AI Guru, guided practice, planning tools and mentorship. Instead of inventing another planner, I would test one manageable, syllabus-aligned catch-up action after missed practice. Internal data must establish if this adds value.</p>
+        <a href="#gaps">See what led me here →</a>
+      </article>
+      <article class="conclusion-panel next">
+        <span class="tag part">My proposed experiment at PW</span>
+        <b>Improve learning first. Monetisation comes later.</b>
+        <p>Compare existing support to a guided catch-up task among legally eligible learners. Measure seven-day recovery, repeat practice, unassisted mastery, fairness and cost—then next-stage enrolment when the buying window arrives.</p>
+        <a href="#first-test">Inspect the experiment →</a>
+      </article>
     </div>
-    <p class="callout" style="margin-top:18px"><b>My recommendation:</b> test whether a focused learning intervention works <em>before</em> investing in a churn-prediction stack, parent messaging or commercial cross-sell. An unsuccessful learning test should change the roadmap—not be explained away by a large revenue scenario.</p>
-    <nav class="path" aria-label="Read the case study in order"><a href="#audit">01 Research</a><a href="#gaps">02 Findings</a><a href="#system">03 Proposal</a><a href="#bet">04 AI design</a><a href="#prototype">05 Built demo</a><a href="#first-test">06 Experiment</a><a href="#impact">09 Economics</a><a href="#me">10 Why me</a></nav>
+    <p class="proof"><b>What I have not done:</b> accessed PW internal data, interviewed PW customers, trained a predictive model, sent real WhatsApp reports or proven revenue uplift. The interactions are real; learner cases and business uplifts are illustrative.</p>
+    <p class="callout" style="margin-top:16px"><b>Product recommendation:</b> validate one useful learner-recovery intervention before investing in prediction infrastructure or commercial targeting. If learning does not improve, do not scale this bet.</p>
+  </div>
+</section>
+
+<!-- DEMO SHOWCASE -->
+<section class="block demo-showcase" id="journey-demo" aria-labelledby="jd-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="num">See the work, not just the description</span>
+      <h2 id="jd-h">Three working screens that communicate the product idea</h2>
+      <p>Each preview is a screenshot from the <b>actual interactive prototype I built</b>. Open a screen to inspect its corresponding demo view. All learners, scores and financial results are fictional.</p>
+    </div>
+    <div class="demo-gallery">
+      <article class="demo-tile">
+        <a class="demo-cover" href="/pw-study/prototype#student"><img src="/pw-study/img/student.png" alt="Concept learner app showing on-track status and a catch-up plan" width="2168" height="2566" loading="lazy"><span class="live-label">01 / Student experience</span></a>
+        <div class="demo-info"><h3>From missed tasks to a comeback plan</h3><p>Select a learner and change study signals to see how the illustrative plan and on-track score respond.</p><a href="/pw-study/prototype#student">Explore learner app →</a></div>
+      </article>
+      <article class="demo-tile">
+        <a class="demo-cover" href="/pw-study/prototype#report"><img src="/pw-study/img/pulse.png" alt="Proposed weekly WhatsApp progress report showing illustrative learning data" width="660" height="1125" loading="lazy"><span class="live-label">02 / Progress report</span></a>
+        <div class="demo-info"><h3>Communicate progress, not pressure</h3><p>Preview factual updates and compare adult and parent-facing designs. Real sending requires legal review and consent.</p><a href="/pw-study/prototype#report">Explore report preview →</a></div>
+      </article>
+      <article class="demo-tile">
+        <a class="demo-cover" href="/pw-study/prototype#dashboard"><img src="/pw-study/img/console.png" alt="Synthetic renewal dashboard showing learner segments, actions and cost scenarios" width="1061" height="1488" loading="lazy"><span class="live-label">03 / Business dashboard</span></a>
+        <div class="demo-info"><h3>See how a PM would judge the bet</h3><p>Inspect fictional cohorts and change model inputs. Collections are sensitivity scenarios, not forecasts or profit.</p><a href="/pw-study/prototype#dashboard">Explore the dashboard →</a></div>
+      </article>
+    </div>
+    <div class="demo-walk" aria-label="Four steps for interviewers">
+      <div><b>STEP 1</b>Choose Riya or Kabir in the student view.</div>
+      <div><b>STEP 2</b>Change practice, test and inactivity signals.</div>
+      <div><b>STEP 3</b>See the illustrative plan and progress report.</div>
+      <div><b>STEP 4</b>Challenge economics in the dashboard.</div>
+    </div>
+    <div class="hero-ctas" style="margin-top:20px"><a class="btn btn-primary" href="/pw-study/prototype">Launch interactive prototype</a><a class="btn btn-outline" href="#first-test">How I would test it</a></div>
   </div>
 </section>
 
@@ -365,6 +514,13 @@ footer h3{color:#fff}
 <section class="block" id="system" aria-labelledby="sys-h">
   <div class="wrap">
     <div class="sec-head"><span class="num">03 · Proposed solution, not deployed</span><h2 id="sys-h">A learning-recovery layer on PW’s existing tools</h2><p><b>The problem to validate.</b> When a paid learner falls behind, knowing the backlog is only useful if they have a manageable way to resume. PW already has Tracker 360, guided practice and daily challenges. The first test uses those tools to see whether a specific catch-up task gets the learner studying again. As a sensitivity check, a scenario with 50% next-batch eligibility and 40% repeat enrolment implies about <b>₹600 cr a year</b> in illustrative fees associated with eligible non-returners. A +4-point lift would capture about 7% of that scenario. Actual eligibility, prices and repeat enrolment need validation.</p></div>
+    <div class="visual-path" role="list" aria-label="How the proposed learner-recovery flow would work">
+      <div class="node" role="listitem"><strong aria-hidden="true">📚</strong><b>Study signal</b><span>Missed meaningful practice</span></div>
+      <div class="node" role="listitem"><strong aria-hidden="true">🔎</strong><b>Validate</b><span>Check event quality &amp; eligibility</span></div>
+      <div class="node" role="listitem"><strong aria-hidden="true">🧭</strong><b>Guide</b><span>One syllabus-aligned task</span></div>
+      <div class="node" role="listitem"><strong aria-hidden="true">✅</strong><b>Learn</b><span>Recover practice &amp; mastery</span></div>
+      <div class="node" role="listitem"><strong aria-hidden="true">📈</strong><b>Measure</b><span>Incremental effect vs. control</span></div>
+    </div>
     <div class="feat">
       <div class="step"><span class="n">Feature 1</span><b>Drop-off Risk Score</b><p>A proposed 0–100 drop-off score for legally eligible learners, using validated progress and practice signals. Start with interpretable rules; use trained prediction only if it outperforms that baseline, is calibrated and clears privacy review.</p><span class="for">For: the team that owns renewals</span><a class="try" href="/pw-study/prototype#risk">See the risk score</a></div>
       <div class="step"><span class="n">Feature 2</span><b>Catch-up Plan</b><p>Made by the AI Mentor from PW's own AI: guided practice, AI Guru for doubts and Daily Challenges. A human mentor calls on day 8 only if the learner is still high risk. An hour of AI Tuto is tested as a pilot arm.</p><span class="for">For: the learner</span><a class="try" href="/pw-study/prototype#catchup">See Riya's plan</a></div>
@@ -429,14 +585,16 @@ footer h3{color:#fff}
 <!-- PROTOTYPE -->
 <section class="block" id="prototype" aria-labelledby="pr-h">
   <div class="wrap">
-    <div class="sec-head"><span class="num">05 · What I actually built</span><h2 id="pr-h">A clickable concept I implemented—not a production AI integration</h2><p>I built a browser-based interactive prototype with four fictional learners (Riya 16, Aman 19, Meena 15, Kabir 24), adjustable study signals, simulated support flows, parent-report variants, and an editable 5,000-learner scenario calculator. <b>What is real:</b> the interaction and formulas. <b>What is not:</b> model training, PW data, WhatsApp sends, verified consent, live AI calls, or measured growth.</p>
-      <div class="hero-ctas" style="margin-top:6px"><a class="btn btn-primary" href="/pw-study/prototype">Open full screen</a></div></div>
-    <iframe class="proto-frame" src="/pw-study/prototype?embed=1" title="Learner Retention Engine working prototype" loading="lazy"></iframe>
-    <div class="shots mob-only">
-      <figure><img src="/pw-study/img/student.png" alt="Prototype student app: on-track score, 7-day catch-up plan, AI Mentor chat, a next-step recommendation with no price for an under-18, and the drop-off risk score with its reasons" loading="lazy" width="2168" height="2566"><figcaption>Student app: a plan, not a warning</figcaption></figure>
-      <figure><img src="/pw-study/img/pulse.png" alt="Weekly Progress Report on WhatsApp, sent to a parent of a 16-year-old" loading="lazy" width="660" height="1125"><figcaption>Weekly Progress Report, to the right person</figcaption></figure>
-      <figure><img src="/pw-study/img/console.png" alt="Renewals Dashboard action table grouping learners by risk, age and final year, with the extra fees each group is expected to bring in and the maths for the selected group" loading="lazy" width="1061" height="1488"><figcaption>Renewals Dashboard: the Monday screen</figcaption></figure>
+    <div class="sec-head">
+      <span class="num">05 · What I actually built</span>
+      <h2 id="pr-h">A working interactive concept—not a deployed AI product</h2>
+      <p>The screenshot gallery appears <a href="#journey-demo">near the top of this study</a> so a hiring manager can inspect it before reading the appendices. Four fictional learner profiles, adjustable inputs, report previews and an editable cohort calculator work in-browser; no PW APIs, real learners, trained ML or measured growth are involved.</p>
+      <div class="hero-ctas" style="margin-top:6px"><a class="btn btn-primary" href="/pw-study/prototype">Open full demo</a><a class="btn btn-outline" href="#journey-demo">View screenshot gallery</a></div>
     </div>
+    <details class="inline-demo">
+      <summary>Or expand the interactive prototype within this page (desktop)</summary>
+      <iframe class="proto-frame" src="/pw-study/prototype?embed=1" title="Interactive fictional learner-recovery prototype" loading="lazy"></iframe>
+    </details>
   </div>
 </section>
 
@@ -734,7 +892,7 @@ footer h3{color:#fff}
       <li><span class="wn" aria-hidden="true">1</span><span class="wt">Start with the 90-second case summary <small>· 1 min</small></span><span class="small">My question, what I completed, what remains hypothetical, and the recommendation.</span><span class="wu"><a href="/pw-study#overview">https://anchit-tandon.com/pw-study#overview</a></span></li>
       <li><span class="wn" aria-hidden="true">2</span><span class="wt">Review my public research and findings <small>· 2 min</small></span><span class="small">PW capabilities, app reviews, evidence boundaries and hypotheses to validate.</span><span class="wu"><a href="/pw-study#audit">https://anchit-tandon.com/pw-study#audit</a></span></li>
       <li><span class="wn" aria-hidden="true">3</span><span class="wt">Understand the proposed product and AI logic <small>· 2 min</small></span><span class="small">What the concept would add, how it reuses PW AI and why a predictive model is optional.</span><span class="wu"><a href="/pw-study#architecture">https://anchit-tandon.com/pw-study#architecture</a></span></li>
-      <li><span class="wn" aria-hidden="true">4</span><span class="wt">Try the interactive demonstration <small>· 3 min</small></span><span class="small">Adjust fictional learners, see proposed recovery flows, inspect the financial scenario calculator.</span><span class="wu"><a href="/pw-study/prototype">https://anchit-tandon.com/pw-study/prototype</a></span></li>
+      <li><span class="wn" aria-hidden="true">4</span><span class="wt">See screenshots and try the prototype <small>· 3 min</small></span><span class="small">Preview three screens and manipulate fictional learner signals.</span><span class="wu"><a href="/pw-study#journey-demo">https://anchit-tandon.com/pw-study#journey-demo</a></span></li>
       <li><span class="wn" aria-hidden="true">5</span><span class="wt">Judge the first experiment <small>· 2 min</small></span><span class="small">Existing experience versus guided catch-up, learning outcomes and go/no-go criteria.</span><span class="wu"><a href="/pw-study#first-test">https://anchit-tandon.com/pw-study#first-test</a></span></li>
       <li><span class="wn" aria-hidden="true">6</span><span class="wt">Stress-test economics and risks <small>· 2 min</small></span><span class="small">The assumptions behind incremental collections, downside, privacy and model fairness.</span><span class="wu"><a href="/pw-study#impact">https://anchit-tandon.com/pw-study#impact</a></span></li>
       <li><span class="wn" aria-hidden="true">7</span><span class="wt">Connect this work to my experience <small>· 1 min</small></span><span class="small">Relevant subscription-growth delivery, AI experimentation and cross-functional execution.</span><span class="wu"><a href="/pw-study#me">https://anchit-tandon.com/pw-study#me</a></span></li>
