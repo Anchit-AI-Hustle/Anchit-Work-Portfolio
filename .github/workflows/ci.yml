@@ -76,19 +76,20 @@ jobs:
           done
           curl -sf -o /dev/null http://localhost:8099/ || { echo "static server never came up"; cat /tmp/serve.log; exit 1; }
 
+      # Fail fast on content and the PW study's actual new UI invariants.
+      # The exhaustive 85k-link scan remains last, after all other checks.
       - name: Structural suites
         run: |
-          npm run test:nogithub
-          npm run test:redirects
-          npm run test:links
           npm run test:seo
           npm run test:nodash
+          npm run test:pwstudy
+          npm run test:nogithub
+          npm run test:links
           npm run test:routes
           npm run test:sw
           npm run test:chatblank
           npm run test:sidebar
           npm run test:course
-          npm run test:pwstudy
           npm run test:lenskartstudy
           npm run test:amarujala
           npm run test:timesstudies
@@ -118,3 +119,6 @@ jobs:
           test -f www/task-tracker.html
           node -e "const v=require('./vercel.json');const r=v.rewrites.find(x=>x.source==='/how-to');if(!r||r.destination!=='/how-to/index.html')process.exit(1);console.log('How-To Engine route OK: /how-to')"
           echo 'How-To Engine route OK: /how-to'
+
+      - name: Exhaustive internal links and redirects
+        run: npm run test:redirects
