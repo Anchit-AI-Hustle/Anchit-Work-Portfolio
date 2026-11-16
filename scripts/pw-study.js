@@ -406,7 +406,7 @@ async function caseStudy(browser, vp) {
   if (vp.width >= 1080) {
     check(`${L}: optional embedded prototype starts collapsed`,
       !(await frameEl.isVisible()) && !(await inline.evaluate((e) => e.open)), '');
-    await inline.locator('summary').click();
+    await page.locator('.inline-demo summary').click();
     await frameEl.scrollIntoViewIfNeeded();
     check(`${L}: opening optional demo displays the iframe`, await frameEl.isVisible(), '');
     const fr = await frameEl.contentFrame();
