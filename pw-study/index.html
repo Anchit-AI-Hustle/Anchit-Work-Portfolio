@@ -219,6 +219,94 @@ footer h3{color:#fff}
 .ai-system h4{font-size:15px;margin:6px 0}
 .note-tight{font-size:14px;line-height:22px;color:var(--muted)}
 @media(max-width:699px){.interviewer-brief .card{padding:16px}}
+
+/* Visual case-study presentation using genuine screenshots of the synthetic concept. */
+.hero-stage{display:grid;grid-template-columns:minmax(0,1.04fr) minmax(360px,.96fr);gap:34px;align-items:center}
+.hero-copy{display:grid;gap:17px;align-content:center}
+.hero-copy h1{font-size:clamp(34px,3.65vw,54px);line-height:1.1;letter-spacing:-.035em}
+.hero-copy .lede{font-size:18px;line-height:1.6}
+.hero-highlight{font-weight:700;color:var(--heading)}
+.hero-chips,.hero-actions{display:flex;flex-wrap:wrap;gap:8px}
+.hero-chips span{font-size:12px;font-weight:700;border:1px solid #d9d3ff;background:#fff;padding:5px 10px;border-radius:999px;color:var(--primary-700)}
+.hero-actions{gap:10px}
+.hero-owner{display:flex;align-items:center;gap:12px;border-top:1px solid #d9d3ff;padding-top:14px}
+.hero-owner img{width:48px;height:48px;border-radius:50%;object-fit:cover;object-position:center 20%;border:2px solid #fff;box-shadow:0 3px 12px #2c268328}
+.hero-owner b{display:block;font-size:14px;color:var(--heading)}
+.hero-owner span{display:block;font-size:12px;color:var(--muted);line-height:19px}
+.hero-visual{height:445px;min-width:0;border-radius:26px;position:relative;isolation:isolate;overflow:hidden;background:radial-gradient(circle at 20% 20%,#d3ccff 0,transparent 53%),radial-gradient(circle at 76% 66%,#e7dcff 0,transparent 55%),#f5f2ff;border:1px solid #e6dfff}
+.hero-visual:before{content:"";position:absolute;width:360px;height:360px;border:1px dashed #b1a7f0;border-radius:50%;left:22%;top:10%;opacity:.65}
+.hero-shot{position:absolute;display:block;overflow:hidden;background:#fff;border:5px solid #fff;box-shadow:0 20px 44px rgba(44,35,103,.20);border-radius:14px;text-decoration:none;transition:transform .2s ease,box-shadow .2s ease}
+.hero-shot:hover,.hero-shot:focus-visible{transform:translateY(-6px) rotate(0deg)!important;box-shadow:0 26px 54px rgba(44,35,103,.28);z-index:5}
+.hero-shot img{display:block;width:100%;height:100%;object-fit:cover;object-position:top center}
+.hero-shot.student{left:7%;top:8%;width:44%;height:77%;transform:rotate(-5deg);z-index:2}
+.hero-shot.parent{right:10%;top:5%;width:35%;height:56%;transform:rotate(6deg);z-index:3}
+.hero-shot.console{right:3%;bottom:8%;width:56%;height:38%;transform:rotate(-2deg);z-index:4}
+.shot-chip{position:absolute;bottom:6px;left:6px;right:6px;font-size:11px;font-weight:700;line-height:17px;padding:5px 7px;border-radius:7px;background:rgba(27,33,36,.91);color:#fff;text-align:center}
+.visual-note{position:absolute;left:4%;bottom:5%;max-width:38%;font-size:11px;line-height:17px;color:#3b3275;font-weight:700;z-index:4}
+.start.visual-start{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.start.visual-start .go{background:rgba(255,255,255,.82);border-color:#ded8f7}
+.start.visual-start .go.pri{background:var(--primary);border-color:var(--primary)}
+.case-route{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:24px}
+.route-card{position:relative;display:grid;gap:5px;padding:17px;background:#fff;border:1px solid #e0dff0;border-radius:14px;min-width:0}
+.route-card .route-num{font-size:12px;font-weight:800;color:var(--primary)}
+.route-card b{font-size:16px;color:var(--heading)}
+.route-card small{font-size:12px;line-height:18px;color:var(--muted)}
+.route-card:after{content:"→";position:absolute;right:-10px;top:50%;z-index:2;transform:translateY(-50%);width:20px;height:20px;border-radius:50%;background:var(--primary);color:#fff;font-size:14px;display:grid;place-items:center}
+.route-card:last-child:after{display:none}
+.route-card.completed{border-top:4px solid #218456}
+.route-card.future{border-top:4px solid var(--orange)}
+.route-card.future .route-num{color:#B94A0B}
+.proof-grid,.conclusion-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.evidence-panel,.built-panel{background:#fff;border:1px solid var(--border);border-radius:20px;padding:23px;overflow:hidden}
+.panel-head,.panel-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.evidence-panel h3,.built-panel h3{font-size:23px;line-height:30px;margin-top:12px}
+.evidence-panel p,.built-panel p{margin-top:10px;font-size:14px;line-height:23px}
+.evidence-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:18px 0}
+.evidence-metrics .metric{padding:14px 9px;background:#f3f0ff;border-radius:12px;min-width:0}
+.evidence-metrics strong{display:block;font-size:clamp(23px,2.8vw,34px);line-height:1.2;color:var(--primary);letter-spacing:-.03em}
+.evidence-metrics span{font-size:12px;line-height:17px;color:#433d5b;display:block;margin-top:5px}
+.panel-foot a{font-size:14px;font-weight:700}
+.maker{display:flex;gap:9px;align-items:center;font-size:12px;color:var(--muted)}
+.maker img{width:40px;height:40px;object-fit:cover;border-radius:50%}
+.built-preview{display:grid;grid-template-columns:1.2fr 1fr 1.1fr;gap:8px;height:165px;margin:16px 0;background:#f3f0ff;border-radius:12px;padding:9px}
+.built-preview a{border-radius:8px;overflow:hidden;border:1px solid #e6ddff;box-shadow:0 3px 8px #3f377a1a;background:#fff}
+.built-preview img{display:block;width:100%;height:100%;object-fit:cover;object-position:top}
+.conclusion-grid{margin-top:16px}
+.conclusion-panel{border:1px solid #eadff9;background:#f7f3ff;border-radius:16px;padding:20px;display:grid;gap:9px}
+.conclusion-panel.next{border-color:#f3dacb;background:#fff7f1}
+.conclusion-panel b{font-size:20px;line-height:26px;color:var(--heading)}
+.conclusion-panel p{font-size:14px;line-height:22px}
+.conclusion-panel a{font-size:14px;font-weight:700}
+.interviewer-brief .proof{font-size:13px;line-height:21px;margin-top:16px}
+.demo-showcase{border-top:1px solid var(--border-soft);background:linear-gradient(180deg,#faf8ff,#fff 88%)}
+.demo-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.demo-tile{overflow:hidden;background:#fff;border:1px solid #e0dff0;border-radius:18px;box-shadow:0 9px 28px rgba(44,35,103,.07)}
+.demo-cover{display:block;text-decoration:none;position:relative;background:#f2eeff;border-bottom:1px solid #e5e0f8;height:310px;padding:12px}
+.demo-cover img{display:block;width:100%;height:100%;object-fit:contain;object-position:top center;transition:transform .2s ease}
+.demo-cover:hover img,.demo-cover:focus-visible img{transform:scale(1.025)}
+.demo-cover .live-label{position:absolute;top:14px;left:14px;font-size:11px;font-weight:700;line-height:16px;background:#fff;padding:6px 9px;color:var(--primary-700);border:1px solid #ddd4fc;border-radius:100px;box-shadow:0 2px 8px #3226841a}
+.demo-info{padding:17px}
+.demo-info h3{font-size:17px}
+.demo-info p{font-size:13px;line-height:21px;min-height:63px;margin:6px 0 12px}
+.demo-info a{font-size:14px;font-weight:700}
+.demo-walk{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:18px}
+.demo-walk div{border-radius:12px;border:1px solid #e2dced;padding:12px 14px;background:#fff;font-size:13px;line-height:20px}
+.demo-walk b{display:block;color:var(--primary);font-size:12px;margin-bottom:4px}
+.inline-demo{border:1px solid #ddd7f6;border-radius:15px;background:#f8f6ff;padding:16px;margin-top:20px}
+.inline-demo summary{font-size:15px;font-weight:700;color:var(--primary);cursor:pointer}
+.inline-demo .proto-frame{display:block;margin-top:16px}
+.visual-path{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:18px 0}
+.visual-path .node{padding:15px 10px;border:1px solid #dbd5fa;background:#fff;border-radius:12px;text-align:center;position:relative}
+.visual-path .node:after{content:"→";position:absolute;right:-11px;top:50%;transform:translateY(-50%);color:var(--primary);font-size:19px;z-index:1;font-weight:800}
+.visual-path .node:last-child:after{display:none}
+.visual-path .node strong{display:block;font-size:22px;line-height:28px;margin-bottom:6px}
+.visual-path .node b{display:block;font-size:14px;line-height:20px;color:var(--heading)}
+.visual-path .node span{display:block;font-size:11px;line-height:16px;color:var(--muted);margin-top:5px}
+@media(max-width:1000px){.hero-stage{grid-template-columns:1fr 350px;gap:18px}.hero-visual{height:360px}.hero-copy h1{font-size:38px}.hero-copy .lede{font-size:16px}.demo-cover{height:270px}}
+@media(max-width:760px){.hero-stage{grid-template-columns:1fr}.hero-visual{height:320px;max-width:560px;width:100%;margin:auto}.hero .wrap{padding-top:24px}.start.visual-start,.case-route,.visual-path{grid-template-columns:repeat(2,minmax(0,1fr))}.route-card:after,.visual-path .node:after{display:none}.proof-grid,.conclusion-grid{grid-template-columns:1fr}.demo-gallery{grid-template-columns:1fr 1fr}.demo-walk{grid-template-columns:1fr 1fr}.demo-cover{height:280px}.hero-copy h1{font-size:clamp(31px,7vw,44px)}}
+@media(max-width:520px){.hero-visual{height:290px}.hero-shot.student{left:4%;width:47%}.hero-shot.parent{right:7%;width:39%}.hero-shot.console{right:3%;width:55%}.hero-actions .btn{flex:1;min-width:0;font-size:13px;padding:10px 11px}.start.visual-start{grid-template-columns:1fr}.start.visual-start .go{min-height:51px}.case-route{grid-template-columns:repeat(2,minmax(0,1fr))}.route-card{padding:13px}.evidence-panel,.built-panel{padding:16px}.evidence-metrics strong{font-size:25px}.demo-gallery{grid-template-columns:1fr}.demo-cover{height:330px}.demo-info p{min-height:0}.demo-walk{grid-template-columns:1fr 1fr}.visual-path{grid-template-columns:1fr 1fr}.visual-path .node:last-child{grid-column:1/-1}.inline-demo{display:none}}
+@media(prefers-reduced-motion:reduce){.hero-shot,.demo-cover img{transition:none}}
+
 </style>
 </head>
 <body>
@@ -236,15 +324,28 @@ footer h3{color:#fff}
 
 <header class="hero" id="top">
   <div class="wrap">
-    <span class="eyebrow">Senior Product Manager, Growth · November 2026</span>
-    <h1>From missed practice to <span class="accent">learning recovery.</span></h1>
-    <p class="lede">I studied how PhysicsWallah supports paid learners, identified an opportunity to test, and built an interactive concept. Here is <b>what I researched, what I built, what remains a hypothesis, and how I would test it</b> as a Senior Product Manager – Growth.</p>
-    <nav class="start" aria-label="Start here">
-      <a class="go" href="#overview"><span class="gn" aria-hidden="true">1</span><span><b>Start with the case</b><small>My question, work and conclusion · 90 sec</small></span></a>
-      <a class="go" href="#first-test"><span class="gn" aria-hidden="true">2</span><span><b>Understand my product bet</b><small>The proposed first experiment · 2 min</small></span></a>
-      <a class="go pri" href="/pw-study/prototype"><span class="gn" aria-hidden="true">3</span><span><b>Try what I built</b><small>Four synthetic learners · 3 min</small></span></a>
+    <div class="hero-stage">
+      <div class="hero-copy">
+        <span class="eyebrow">PhysicsWallah · Senior Product Manager – Growth · November 2026</span>
+        <div class="hero-chips"><span>Public research completed</span><span>Interactive concept built</span><span>Experiments proposed</span></div>
+        <h1>When a learner falls behind, <span class="accent">what brings them back?</span></h1>
+        <p class="lede">I mapped PW's existing learning tools, investigated learner pain points, and built a clickable experience around <span class="hero-highlight">one focused idea: turn missed practice into a manageable recovery action.</span> Here's the evidence, what I built, and what I'd test.</p>
+        <div class="hero-actions"><a class="btn btn-primary" href="#overview">See my work · 90 sec</a><a class="btn btn-outline" href="/pw-study/prototype">Explore interactive demo ↗</a></div>
+        <div class="hero-owner"><img src="/assets/anchit-profile-720.webp" width="48" height="48" alt="Photo of Anchit Tandon" fetchpriority="high"><div><b>Research, product concept &amp; prototype by Anchit Tandon</b><span>Independent case study · Not affiliated with PhysicsWallah</span></div></div>
+      </div>
+      <div class="hero-visual" aria-label="Previews of the three interactive prototype experiences">
+        <a class="hero-shot student" href="/pw-study/prototype#student" aria-label="Open simulated learner app"><img src="/pw-study/img/student.png" alt="Screenshot of concept student experience with on-track score and catch-up plan" width="2168" height="2566" fetchpriority="high"><span class="shot-chip">01 · Learner app</span></a>
+        <a class="hero-shot parent" href="/pw-study/prototype#report" aria-label="Open simulated weekly progress report"><img src="/pw-study/img/pulse.png" alt="Screenshot of proposed weekly progress report message" width="660" height="1125"><span class="shot-chip">02 · Progress report</span></a>
+        <a class="hero-shot console" href="/pw-study/prototype#dashboard" aria-label="Open synthetic renewals dashboard"><img src="/pw-study/img/console.png" alt="Screenshot of synthetic renewals dashboard" width="1061" height="1488"><span class="shot-chip">03 · Dashboard</span></a>
+        <span class="visual-note">Real demo screenshots · Fictional learners</span>
+      </div>
+    </div>
+    <nav class="start visual-start" aria-label="Start here">
+      <a class="go" href="#overview"><span class="gn" aria-hidden="true">1</span><span><b>What I did</b><small>Research, synthesis &amp; build</small></span></a>
+      <a class="go" href="#journey-demo"><span class="gn" aria-hidden="true">2</span><span><b>See the screens</b><small>Three interactive experiences</small></span></a>
+      <a class="go pri" href="#first-test"><span class="gn" aria-hidden="true">3</span><span><b>Judge the product bet</b><small>First test &amp; decision criteria</small></span></a>
     </nav>
-    <p class="meta">Independent, public-data case study · <a href="#audit">Research evidence</a> · <a href="#stack">PW’s existing AI</a> · <a href="#walkthrough">Shareable walkthrough</a>. The prototype does not connect to PW systems or run a trained AI model.</p>
+    <p class="meta">Screens use fictional learners and illustrative rules—not a trained or deployed AI system. <a href="#audit">Research evidence</a> · <a href="#architecture">AI design</a> · <a href="#walkthrough">Interview walkthrough</a>.</p>
   </div>
 </header>
 
