@@ -111,6 +111,9 @@ async function shaderRestsAndWakes(browser, path, id, w, h) {
   // 2.5s rest deadline during inline init, so on a slow runner they can finish
   // before 'load' fires. Init and the first resize draw a frame or two; a
   // moving shader draws about 75 in its 2.5s window at 30fps, so 10 is the bar.
+  // Read 0.8s after load: the loop starts when its visibility observer fires,
+  // just after load, and by then it has drawn ~24 if still going, ~55 if done.
+  await page.waitForTimeout(800);
   const d1 = await draws(page, id);
   if (d1 < 10) fail(`${path}@${w}`, `#${id} does not move on load (${d1} draw${d1 === 1 ? '' : 's'})`);
   await page.waitForTimeout(3500); const r0 = await draws(page, id); await page.waitForTimeout(900); const r1 = await draws(page, id);
