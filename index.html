@@ -292,25 +292,20 @@
      one-shot on reveal or bound to a pointer that has to be over the element.
      ======================================== */
 
-  /* ── view transition: edge, chromatic fringe, scanline band ── */
-  .view-wipe > span { position: absolute; inset: 0; display: block; pointer-events: none; }
+  /* ── view transition: one light edge crossing the frame ──
+     A band a fifth of the viewport wide, not a stack of full-screen layers:
+     the eye only ever tracked the leading line, and four viewport-sized
+     surfaces were being blended into every frame of the jump to draw it. */
+  .view-wipe {
+    position: fixed; top: 0; bottom: 0; left: 0; width: 22vw; z-index: 60;
+    pointer-events: none; visibility: hidden; opacity: 0;
+    background: linear-gradient(90deg, transparent,
+      color-mix(in srgb, var(--primary) 10%, transparent) 70%,
+      color-mix(in srgb, var(--accent-warm) 22%, transparent));
+  }
   .vw-edge {
-    background: linear-gradient(100deg, transparent 47.6%,
-      color-mix(in srgb, var(--accent-warm) 92%, white) 49.4%,
-      color-mix(in srgb, var(--accent-warm) 92%, white) 50.6%, transparent 52.4%);
-  }
-  /* The fringe is the brand's own two hues pulled apart, not a red/cyan cliché,
-     a split in colours the site already owns still reads as a split. */
-  .vw-split {
-    background:
-      linear-gradient(100deg, transparent 46%, color-mix(in srgb, var(--primary) 55%, transparent) 49%, transparent 52%),
-      linear-gradient(100deg, transparent 50%, color-mix(in srgb, var(--accent) 45%, transparent) 53%, transparent 56%);
-  }
-  .vw-scan {
-    background: repeating-linear-gradient(0deg,
-      color-mix(in srgb, var(--accent-warm) 12%, transparent) 0 1px, transparent 1px 4px);
-    -webkit-mask-image: linear-gradient(100deg, transparent 38%, #000 50%, transparent 62%);
-    mask-image: linear-gradient(100deg, transparent 38%, #000 50%, transparent 62%);
+    position: absolute; top: 0; bottom: 0; right: 0; width: 2px; display: block;
+    background: color-mix(in srgb, var(--accent-warm) 92%, white);
   }
 
   /* ── holographic sheen: one pass across a card as it arrives ──
@@ -361,9 +356,7 @@
   .hud-tilt:hover > .hud-spec { opacity: 1; }
   html[data-motion="off"] .hud-tilt > .hud-spec { display: none; }
 
-  html[data-motion="off"] .vw-edge,
-  html[data-motion="off"] .vw-split,
-  html[data-motion="off"] .vw-scan { display: none; }
+  html[data-motion="off"] .view-wipe { display: none; }
 
   /* ============ SIDEBAR ============ */
   .sidebar {
@@ -1128,11 +1121,25 @@
   /* ============ LAYOUT ============ */
   main { position: relative; z-index: 2; }
   .view { display: none; padding: clamp(24px, 4vw, 48px) 0 clamp(80px, 10vw, 160px); }
-  .view.active { display: block; animation: viewIn 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+  /* THE TURN. A route change is one motion: the incoming view rises 14px and
+     fades in over 420ms, and nothing else on the page moves while it does.
+     There used to be three entrances stacked on this element (viewIn here,
+     viewFadeUp on .v-enter, a perspective tilt on .d3-enter) plus a brightness
+     filter and a four-layer screen wipe, all starting on the same frame. Each
+     was reasonable alone; together a jump drew ~21 render passes a frame and
+     ran at half the frame rate of a scroll. One composited transform, one
+     easing, and the ambient layers stand down until it lands (see __quiet). */
+  /* No fill mode. A filling animation keeps applying its last keyframe, and
+     Chrome reports `to { transform: none }` held that way as an identity
+     MATRIX, not `none`: the view would stay a compositor layer and a
+     containing block for every fixed descendant, forever. */
+  .view.active { display: block; animation: viewIn 0.42s cubic-bezier(0.22, 1, 0.36, 1); }
+  html[data-motion="off"] .view.active { animation: none; }
+  @media (prefers-reduced-motion: reduce) { .view.active { animation: none; } }
   #view-home { padding-top: 0; }
   @keyframes viewIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translate3d(0, 14px, 0); }
+    to { opacity: 1; transform: none; }
   }
   .container { max-width: var(--max-w); margin: 0 auto; padding: 0 var(--gutter); }
 
@@ -2595,7 +2602,9 @@
     pointer-events: none; opacity: 0; transition: opacity 260ms ease;
     background: radial-gradient(420px circle at var(--px, 50%) var(--py, 50%),
       color-mix(in oklab, var(--primary) 20%, transparent), transparent 62%);
-    mix-blend-mode: screen;
+    /* No mix-blend-mode. A blend mode isolates the element into its own
+       offscreen surface, one per card, composited every frame. Over a
+       near-black panel `screen` and plain alpha are the same picture. */
   }
   .d3.is-lit::after { opacity: 1; }
   .d3.is-lit { z-index: 2; }
@@ -2634,11 +2643,9 @@
   .d3-mag:hover, .d3-mag:focus-visible { will-change: transform; }
 
   /* Incoming view arrives with depth on every route change. */
-  .view.d3-enter { animation: d3Enter 620ms cubic-bezier(0.16,1,0.3,1) both; }
-  @keyframes d3Enter {
-    from { opacity: 0; transform: perspective(1400px) rotateX(4deg) translateY(22px) scale(0.985); }
-    to   { opacity: 1; transform: none; }
-  }
+  /* (The view-level tilt lived here. A perspective transform on a layer the
+     height of the whole page is the single most expensive thing a route change
+     can ask for; the depth now comes from the blocks inside, which are small.) */
 
   /* Touch devices get the reveals and the sheen but no pointer tilt or cursor
      light, there is no hover, and the tilt would only ever fire on tap. */
@@ -2653,12 +2660,10 @@
   html.no-depth .d3-sheen::before,
   html.no-depth .d3-rise,
   html.no-depth .d3-words > .d3-w { opacity: 1 !important; transform: none !important; }
-  html.no-depth .view.d3-enter { animation: none !important; }
   
   html[data-motion="off"] .d3, html[data-motion="off"] .d3-mag { transform: none !important; transition: none !important; }
   html[data-motion="off"] .d3::after, html[data-motion="off"] .d3-sheen::before { display: none !important; }
   html[data-motion="off"] .d3-rise, html[data-motion="off"] .d3-words > .d3-w { opacity: 1 !important; transform: none !important; }
-  html[data-motion="off"] .view.d3-enter { animation: none !important; }
 
   /* ============ SEMANTIC MOTION ============ */
   /* Every animation here is chosen to echo what the element MEANS,
@@ -3048,16 +3053,9 @@
   }
 
   /* ============ VIEW TRANSITIONS ============ */
-  @keyframes viewFadeUp {
-    from { opacity: 0; transform: translateY(28px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes viewFadeOut {
-    from { opacity: 1; transform: translateY(0); }
-    to   { opacity: 0; transform: translateY(-16px); }
-  }
-  .view.v-enter { animation: viewFadeUp 0.42s cubic-bezier(0.16, 1, 0.3, 1) both; }
-  .view.v-leave { animation: viewFadeOut 0.22s ease forwards; pointer-events: none; }
+  /* .v-enter / .v-leave are still toggled by the router as state hooks, but
+     the entrance itself is the single viewIn turn on .view.active. */
+  .view.v-leave { pointer-events: none; }
 
   /* ============ HERO DOT GRID ============ */
   .hero-dot-grid {
@@ -7463,6 +7461,9 @@
       setTimeout(() => prev.classList.remove('v-leave'), 250);
     }
 
+    // Ambient layers stand down for the turn (420ms) and light back up after.
+    if (prev && prev.id !== 'view-' + viewName && window.__quiet) window.__quiet(440);
+
     views.forEach(v => {
       const isActive = v.id === 'view-' + viewName;
       const needsEnter = isActive && !v.classList.contains('active');
@@ -8972,7 +8973,7 @@
 
         if (!document.getElementById('view-experience')?.classList.contains('active')) {
           switchView('about');
-          // 280ms matches the viewFadeUp animation (0.42s), enough for DOM to be active
+          // 280ms sits inside the viewIn turn (0.42s), enough for DOM to be active
           setTimeout(() => openNode(target), 280);
         } else {
           openNode(target);
@@ -11057,9 +11058,6 @@
     from { opacity: .38; }
     to { opacity: .72; }
   }
-  .view.active {
-    animation: viewIn .5s cubic-bezier(.16, 1, .3, 1);
-  }
   }
   .view.active .display-xl,
   .view.active .display-lg,
@@ -11128,7 +11126,8 @@
       radial-gradient(420px circle at var(--mx, 50%) var(--my, 0%), rgba(255, 122, 31, .13), transparent 42%);
     transform: translateX(-38%);
     animation: futureSurfaceScan 6.4s ease-in-out infinite;
-    mix-blend-mode: screen;
+    /* Plain alpha, not `screen`: see .d3::after. Nine of these on one screen
+       were nine extra render passes on every frame, at rest. */
   }
   @keyframes futureSurfaceScan {
     0%, 100% { transform: translateX(-42%); opacity: .22; }
@@ -12240,7 +12239,7 @@
     scene.add(points);
 
     // Restrained futuristic backdrop: no spinning wireframe icosahedra behind copy.
-    var noopShell = { rotation: { x: 0, y: 0, z: 0 } };
+    var noopShell = { rotation: { x: 0, y: 0, z: 0 }, scale: { setScalar: function () {} } };
     var coreOuter = noopShell, coreInner = noopShell, coreGlow = noopShell;
 
     var mxT = 0, myT = 0, mx = 0, my = 0, scrollY = 0;
@@ -12488,37 +12487,17 @@
     var wipe = document.createElement('div');
     wipe.id = 'view-wipe';
     wipe.setAttribute('aria-hidden', 'true');
-    wipe.style.cssText = 'position:fixed;inset:0;z-index:60;pointer-events:none;opacity:0;' +
-      // Ember → gold, matching the brand mark. The second stop was still the
-      // retired teal accent, which flashed a non-brand colour on every jump.
-      'background:linear-gradient(115deg, transparent 0%, rgba(255,105,64,0.30) 42%, ' +
-      'rgba(255,183,54,0.24) 58%, transparent 100%);transform:translateX(-100%);';
-    // Three passes instead of one, so a jump reads as a machine cutting to a new
-    // frame rather than a colour wash going by:
-    //   edge   a hard leading line, the thing the eye actually tracks
-    //   split  a chromatic fringe trailing it, offset a few pixels
-    //   scan   a band of scanlines crossing behind
-    // Each is its own element moving on transform and fading on opacity, so all
-    // three are compositor work and none of them costs a repaint.
+    // One band, one leading edge (styled by .view-wipe / .vw-edge). It is
+    // hidden, not merely transparent, between jumps, so it holds no layer.
     wipe.className = 'view-wipe';
-    wipe.innerHTML = '<span class="vw-edge"></span><span class="vw-split"></span><span class="vw-scan"></span>';
+    wipe.innerHTML = '<span class="vw-edge"></span>';
     document.body.appendChild(wipe);
 
     document.addEventListener('viewChanged', function () {
       if (reduceMotion) return;
-      gsap.fromTo(wipe, { xPercent: -100, opacity: 0.9 },
-        { xPercent: 100, opacity: 0, duration: 0.7, ease: 'power2.inOut' });
-      // The fringe runs a beat behind the edge and the scan a beat behind that,
-      // which is what makes it read as depth rather than as one flat object.
-      var edge  = wipe.querySelector('.vw-edge');
-      var split = wipe.querySelector('.vw-split');
-      var scan  = wipe.querySelector('.vw-scan');
-      if (edge)  gsap.fromTo(edge,  { xPercent: -6, opacity: 1 },
-        { xPercent: 6, opacity: 0, duration: 0.7, ease: 'power2.inOut' });
-      if (split) gsap.fromTo(split, { xPercent: -14, opacity: 0.85 },
-        { xPercent: 10, opacity: 0, duration: 0.78, ease: 'power2.inOut' });
-      if (scan)  gsap.fromTo(scan,  { xPercent: -30, opacity: 0.55 },
-        { xPercent: 30, opacity: 0, duration: 0.86, ease: 'power1.inOut' });
+      gsap.killTweensOf(wipe);
+      gsap.fromTo(wipe, { x: -wipe.offsetWidth, autoAlpha: 0.9 },
+        { x: window.innerWidth, autoAlpha: 0, duration: 0.52, ease: 'power2.inOut' });
       var w = window.__webglBg;
       if (w) {
         // Spike the energy field and kick the core into a spin on every jump.
@@ -12526,11 +12505,8 @@
         if (w.mat) gsap.fromTo(w.mat, { opacity: 1.35 }, { opacity: 0.95, duration: 1.0, ease: 'power2.out' });
         if (w.coreOuter) gsap.fromTo(w.coreOuter.rotation, { z: '-=0.5' }, { z: '+=0.5', duration: 1.2, ease: 'power3.out' });
       }
-      // A brief incoming-view "materialize", subtle scale/blur clear.
-      var enterView = document.querySelector('.view.active');
-      if (enterView) {
-        gsap.fromTo(enterView, { filter: 'brightness(1.35)' }, { filter: 'brightness(1)', duration: 0.6, ease: 'power2.out', clearProps: 'filter' });
-      }
+      // (A brightness "materialize" tween ran here on the whole view. filter
+      // is not composited: it re-rasterised a page-tall layer on every frame.)
       // Pop in any stat figures the newly active view just revealed.
       var active = document.querySelector('.view.active');
       if (active) animateStats(active);
@@ -13434,8 +13410,11 @@
   // it (CSS via body.is-scrolling, canvases via window.__scrolling) and stands
   // down for the duration of the gesture, so the frame budget during a scroll
   // belongs to the scroll.
-  var idle = 0;
-  function stop(){ idle = 0; window.__scrolling = false; window.__lastScroll = performance.now();
+  var idle = 0, holdUntil = 0;
+  function stop(){
+    var left = holdUntil - performance.now();
+    if (left > 0) { idle = setTimeout(stop, left); return; }
+    idle = 0; window.__scrolling = false; window.__lastScroll = performance.now();
     document.body.classList.remove('is-scrolling'); }
   function start(){
     window.__lastScroll = performance.now();
@@ -13443,6 +13422,13 @@
     if (idle) clearTimeout(idle);
     idle = setTimeout(stop, 180);
   }
+  // A route change is the page moving too. The router asks for quiet for the
+  // length of the turn, so the incoming view is the only thing on screen that
+  // animates; a scroll event arriving meanwhile cannot cut the hold short.
+  window.__quiet = function (ms) {
+    holdUntil = Math.max(holdUntil, performance.now() + (ms || 0));
+    start();
+  };
   addEventListener('scroll', start, { passive: true });
   addEventListener('wheel', start, { passive: true });
   addEventListener('touchmove', start, { passive: true });
@@ -13538,9 +13524,12 @@
      on small screens and sits above these on z-index. Both pills were inside
      its band and therefore untappable. */
   @media (max-width:820px){ #jarvisPill, body.sidebar-collapsed #jarvisPill{ left:16px; bottom:88px; } }
-  /* Keeps the 88px lift, a narrower phone does not move the chat bar, so
-     dropping back to bottom:12px here put the pill straight back underneath it. */
-  @media (max-width:560px){ #jarvisPill, body.sidebar-collapsed #jarvisPill{ left:12px; bottom:88px; font-size:10px; padding:8px 12px; } }
+  /* On a phone the chat launcher is a circle in the bottom-LEFT corner, not the
+     full-width bar it once was. Stacked 88px above it, this pill sat squarely
+     on the hero's proof tiles ("400%+ ROI in 6 months" was unreadable behind
+     it on the first screen). The bottom-right corner is free at this width, so
+     the pill takes it and lines up with the launcher instead of the content. */
+  @media (max-width:560px){ #jarvisPill, body.sidebar-collapsed #jarvisPill{ left:auto; right:12px; bottom:20px; font-size:10px; padding:8px 12px; } }
 
   #agentsModal{ position:fixed; inset:0; z-index:10000; display:none; align-items:center; justify-content:center;
     background:rgba(6,4,3,.72); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); padding:20px; }

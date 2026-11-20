@@ -36,3 +36,16 @@ for (const file of pages) {
   if (after !== before) { await writeFile(file, after); deferred++; }
 }
 console.log(`[copy-ayushi] fonts no longer block first paint on ${deferred} page(s)`);
+
+// Same reason, different pass: build-www.mjs opts every page into the
+// cross-document page turn, and these arrive after it. Most of this sub-site
+// already declares the opt-in in its own head; any page that does not gets the
+// same bare declaration the others use, so no link here is a hard cut.
+let turned = 0;
+for (const file of pages) {
+  const html = await readFile(file, 'utf8');
+  if (html.includes('@view-transition') || !/<\/head>/i.test(html)) continue;
+  await writeFile(file, html.replace(/<\/head>/i, '<style>@view-transition{navigation:auto}</style>\n</head>'));
+  turned++;
+}
+console.log(`[copy-ayushi] page turn: opted in ${turned} page(s)`);

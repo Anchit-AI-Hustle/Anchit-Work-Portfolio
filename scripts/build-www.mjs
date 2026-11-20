@@ -428,6 +428,50 @@ async function injectConsent() {
   console.log(`[build-www] consent: injected into ${injected} page(s)${skipped ? `; skipped ${skipped}` : ''}`);
 }
 
+// ── The page turn ───────────────────────────────────────────────────────────
+// index.html turns between its views with one 420ms rise-and-fade. Moving
+// between PAGES used to be a hard cut: the document unloaded, the screen went
+// to the background colour, and the next page built itself from nothing. This
+// opts every page into a cross-document view transition with the same timing
+// and easing, so a link to another page reads as the same turn.
+//
+// It has to be in the parsed <head> of BOTH documents (the outgoing page when
+// the navigation starts, the incoming one before its first frame), which is
+// why it is a build-time <style> and not something a deferred script adds.
+// Browsers without cross-document transitions ignore the at-rule and cut, as
+// before. Reduced motion and the Motion toggle both turn it off.
+const PAGE_TURN_MARKER = 'id="page-turn"';
+const PAGE_TURN_TAG = `<style ${PAGE_TURN_MARKER}>
+@view-transition { navigation: auto; }
+@keyframes ptOut { to { opacity: 0; transform: translate3d(0, -8px, 0); } }
+@keyframes ptIn { from { opacity: 0; transform: translate3d(0, 14px, 0); } }
+::view-transition-old(root) { animation: ptOut 200ms cubic-bezier(.4, 0, 1, 1) both; }
+::view-transition-new(root) { animation: ptIn 420ms cubic-bezier(.22, 1, .36, 1) both; }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
+html[data-motion="off"]::view-transition-group(*),
+html[data-motion="off"]::view-transition-old(*),
+html[data-motion="off"]::view-transition-new(*) { animation: none !important; }
+</style>`;
+
+async function injectPageTurn() {
+  const htmlFiles = await collectHtmlFiles(WWW);
+  let injected = 0;
+  let skipped = 0;
+  for (const file of htmlFiles) {
+    const before = await readFile(file, 'utf8');
+    // A page that already declares its own cross-document transition keeps it.
+    if (before.includes(PAGE_TURN_MARKER) || before.includes('@view-transition') || !/<\/head>/i.test(before)) {
+      skipped++;
+      continue;
+    }
+    await writeFile(file, before.replace(/<\/head>/i, `${PAGE_TURN_TAG}\n</head>`), 'utf8');
+    injected++;
+  }
+  console.log(`[build-www] page turn: injected into ${injected} page(s)${skipped ? `; skipped ${skipped}` : ''}`);
+}
+
 async function injectSharedExperience() {
   const htmlFiles = await collectHtmlFiles(WWW);
   let skillMapInjected = 0;
@@ -487,6 +531,7 @@ async function main() {
   await deferGoogleFonts();
   await stampServiceWorker();
   await injectConsent();
+  await injectPageTurn();
   // Gamified App Skill Map / Project Playbooks widgets removed from the site,
   // they read as unfinished progress shells on a portfolio. The runtimes still
   // exist under assets/ but are no longer injected into any page.
