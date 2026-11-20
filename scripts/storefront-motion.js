@@ -107,8 +107,12 @@ async function shaderRestsAndWakes(browser, path, id, w, h) {
   const { ctx, page } = await open(browser, path, w, h);
   const shown = await page.evaluate((id) => { const c = document.getElementById(id); return !!c && getComputedStyle(c).display !== 'none'; }, id);
   if (!shown) { await ctx.close(); return; }
-  const d0 = await draws(page, id); await page.waitForTimeout(700); const d1 = await draws(page, id);
-  if (d1 <= d0) fail(`${path}@${w}`, `#${id} does not move on load`);
+  // Counted from navigation, not from the load event: the shaders start their
+  // 2.5s rest deadline during inline init, so on a slow runner they can finish
+  // before 'load' fires. Init and the first resize draw a frame or two; a
+  // moving shader draws about 75 in its 2.5s window at 30fps, so 10 is the bar.
+  const d1 = await draws(page, id);
+  if (d1 < 10) fail(`${path}@${w}`, `#${id} does not move on load (${d1} draw${d1 === 1 ? '' : 's'})`);
   await page.waitForTimeout(3500); const r0 = await draws(page, id); await page.waitForTimeout(900); const r1 = await draws(page, id);
   if (r1 !== r0) fail(`${path}@${w}`, `#${id} keeps drawing at idle (${r1 - r0} draws in 0.9s)`);
   await page.mouse.wheel(0, 60); await page.waitForTimeout(500);
