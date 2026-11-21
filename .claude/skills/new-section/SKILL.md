@@ -21,6 +21,9 @@ Follow these steps in order whenever adding or rebuilding a page section:
    - Include descriptive `alt` text on all images, lazy-load below-the-fold images (`loading="lazy"`), and use appropriately sized WebP assets (`<= 300 KB` hero, `<= 150 KB` other images).
    - Keep animations subtle (`< 500ms`, `transform` and `opacity` only, trigger once, nothing important waits on them) and respect `prefers-reduced-motion: reduce` as well as `html[data-motion="off"]`.
    - Ensure every button, link, and interactive control has a clear hover state and `:focus-visible` outline.
+   - Keep the page idle when nobody is using it (DESIGN.md, Motion, Runtime budget): no loop that runs for as long as the section is on screen, no backdrop blur over moving content (none at all on phones and tablets), no infinite SVG animation, no forever-pulsing status dot, and scroll handlers gated by `IntersectionObserver`.
+   - If the section is a pinned scroll story, step between whole scenes instead of scrubbing every layer.
+   - If the page is a concept on a real brand, follow `.claude/skills/concept-storefront/SKILL.md`: label sample statuses and demo confirmations, and put no unsourced claims or build jargon (frame counters, hex codes, telemetry) on screen.
 
 4. **Check at 390px, 768px, and 1440px**
    - Verify the section at `390px` (phone), `768px` (tablet), and `1440px` (desktop):
@@ -28,6 +31,7 @@ Follow these steps in order whenever adding or rebuilding a page section:
      - No horizontal overflow (`scrollWidth <= innerWidth`) and nothing touching the screen edge.
      - Touch targets / buttons are thumb-friendly (`>= 44px` tap area on mobile).
      - Images are not stretched or awkwardly cropped at any width.
+     - If you changed header or nav copy, the header still fits at every width from the nav breakpoint to 1440px (a longer label once overflowed at 1200-1279px only).
    - Fix any layout issues found.
 
 5. **Match surrounding spacing and hierarchy**
