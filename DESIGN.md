@@ -175,6 +175,29 @@ thing a route change can ask for.
 element into an offscreen surface that is composited every frame, at rest.
 Over a near-black panel `screen` and plain alpha are the same picture.
 
+### The book (Projects)
+
+The Projects folio turns a real page. Forward, the right-hand page lifts off
+the spine and comes over; its back is the next left-hand page. The leaf and
+the cover that hides the seam are clones of the actual pages, made for one
+turn and removed after it. 780ms two-up, 520ms one-up, transform and opacity
+only, under `perspective: 2400px` on the stage.
+
+The surface is holographic, not paper: scanlines and the two brand hues on
+the leaf in flight, a hot leading edge, a scan band across the spread, a line
+of light down the spine when the page lands, HUD corner brackets, and a lean
+of at most 3 degrees toward the pointer (variables on the stage element).
+Measure pages with layout offsets, never `getBoundingClientRect`: the lean
+rotates the stage, and a rotated box reports a rect that is not its size.
+
+### Entrances are never switched off on a timer
+
+`assets/cinematic.js` once ran `setTimeout(bail, 4000)`. `bail()` forces every
+`.cin` on the page to its final state, so four seconds after load every
+entrance below the fold was dead before anyone scrolled to it, on every page.
+The deadline now rescues only what is unrevealed AND on screen. `bail()` is
+for a thrown error or a missing IntersectionObserver.
+
 ### Arrival choreography
 
 Blocks arrive **one at a time**, and their children arrive one at a time inside

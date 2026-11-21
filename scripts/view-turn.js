@@ -116,6 +116,76 @@ const check = (ok, label, detail) => {
     const got = await nav.evaluate(() => sessionStorage.getItem('vt:' + location.pathname));
     check(got === 'yes', `page turn runs on navigation to ${href}`, String(got));
   }
+  // Entrances outlive the first four seconds. The shared runtime used to bail
+  // on a timer, which switched off every entrance below the fold before anyone
+  // scrolled to it: the first screen performed and the rest of the page sat.
+  for (const href of ['/', '/lifecycle-os']) {
+    const pg = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await pg.goto(BASE + href, { waitUntil: 'load' });
+    await pg.waitForTimeout(6000);
+    const before = await pg.evaluate(() => ({
+      bail: document.documentElement.classList.contains('cin-bail'),
+      played: document.querySelectorAll('.cin-in').length,
+      waiting: document.querySelectorAll('.cin:not(.cin-in),.cin-stagger:not(.cin-in)').length }));
+    check(!before.bail, `${href}: entrances are not switched off after six seconds`);
+    check(before.waiting > 0, `${href}: blocks below the fold are still waiting for their entrance`, String(before.waiting));
+    for (let i = 0; i < 4; i++) { await pg.mouse.wheel(0, 700); await pg.waitForTimeout(500); }
+    await pg.waitForTimeout(1500);
+    const after = await pg.evaluate(() => ({
+      played: document.querySelectorAll('.cin-in').length,
+      stuck: [...document.querySelectorAll('.cin:not(.cin-in),.cin-stagger:not(.cin-in)')].filter(e => {
+        const r = e.getBoundingClientRect(); return r.height > 0 && r.top < innerHeight && r.bottom > 0; }).length }));
+    check(after.played > before.played, `${href}: scrolling plays new entrances`, `${before.played} -> ${after.played}`);
+    check(after.stuck === 0, `${href}: nothing on screen is left unrevealed`, String(after.stuck));
+    await pg.close();
+  }
+
+  // The Projects book turns a real, two-sided page. What it replaced was a
+  // blank flap rotating with no perspective while the pages slid sideways.
+  {
+    const pg = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const errors = [];
+    pg.on('pageerror', e => errors.push(e.message));
+    await pg.goto(BASE + '/#projects', { waitUntil: 'load' });
+    await pg.waitForTimeout(3200);
+    await pg.mouse.move(1100, 500);
+    await pg.keyboard.press('ArrowRight');
+    await pg.waitForTimeout(1300);
+    await pg.keyboard.press('ArrowRight');
+    await pg.waitForTimeout(220);
+    const mid = await pg.evaluate(() => {
+      const st = document.querySelector('.folio-stage'), l = document.querySelector('.folio-leaf'), c = document.querySelector('.folio-cover');
+      const g = document.querySelector('.builds-grid[data-folio]');
+      // Any page will do for size: every page in a spread is half the grid.
+      const right = g.children[2];
+      return l && c && right ? {
+        persp: getComputedStyle(st).perspective, faces: l.querySelectorAll('.folio-face').length,
+        is3d: getComputedStyle(l).transform.startsWith('matrix3d'),
+        aligned: Math.abs(l.offsetWidth - right.offsetWidth) < 2 && Math.abs(l.offsetHeight - right.offsetHeight) < 2 && Math.abs(c.offsetTop - l.offsetTop) < 2,
+        bothFilled: [...l.querySelectorAll('.folio-face')].every(f => f.querySelector('.build-card, .folio-preface, .folio-colophon')),
+      } : null;
+    });
+    check(!!mid, 'book: a leaf and a cover exist mid-turn');
+    if (mid) {
+      check(mid.persp !== 'none', 'book: the stage has a camera', mid.persp);
+      check(mid.faces === 2 && mid.bothFilled, 'book: the leaf has two faces and both carry a real page', JSON.stringify(mid));
+      check(mid.is3d, 'book: the leaf is rotating in 3D');
+      check(mid.aligned, 'book: leaf and cover match the pages they stand in for');
+    }
+    await pg.waitForTimeout(1400);
+    const end = await pg.evaluate(() => {
+      const g = document.querySelector('.builds-grid[data-folio]');
+      const on = [...g.children].filter(k => { const x = k.offsetLeft - g.scrollLeft; return x > -3 && x < g.clientWidth - 3; });
+      return { leftover: document.querySelectorAll('.folio-leaf,.folio-cover,.folio-cast').length,
+        label: document.querySelector('[data-folio-progress]').textContent,
+        level: on.length === 2 && Math.abs(on[0].getBoundingClientRect().top - on[1].getBoundingClientRect().top) < 2 };
+    });
+    check(end.leftover === 0, 'book: nothing is left on the stage after the turn', String(end.leftover));
+    check(/4.5 of/.test(end.label), 'book: two turns land on the third spread', end.label);
+    check(errors.length === 0, 'book: no script errors', errors.slice(0, 2).join(' | '));
+    await pg.close();
+  }
+
   // Motion off, saved on the origin, must hold on the incoming page before its
   // first frame, including a page that never loads the shared motion runtime.
   for (const href of ['/growth-school', '/pw-study/', '/ayushi-rawat/']) {
