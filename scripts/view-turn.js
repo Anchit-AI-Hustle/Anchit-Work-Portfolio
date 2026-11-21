@@ -355,6 +355,57 @@ const check = (ok, label, detail) => {
       'sidebar: the submenu is collapsed and its icons sized before its markup is parsed');
   }
 
+  // The room moves, everywhere, and stands down when it should. The backdrop
+  // was static dust on black; "continuous" is a property to measure, so each
+  // piece is sampled twice and has to have moved.
+  {
+    const pg = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await pg.goto(BASE + '/', { waitUntil: 'load' });
+    await pg.waitForTimeout(6000);
+    const snap = () => pg.evaluate(() => ({
+      node: document.querySelector('.fd-node').getBoundingClientRect().left,
+      glow: document.querySelector('.lux-a').getBoundingClientRect().left,
+      dust: document.querySelector('.lux-d1').getBoundingClientRect().top,
+      ring: getComputedStyle(document.querySelector('.lux-r1')).transform }));
+    const a = await snap();
+    await pg.waitForTimeout(3000);
+    const z = await snap();
+    check(Math.abs(z.glow - a.glow) > 1 && Math.abs(z.dust - a.dust) > 5 && z.ring !== a.ring, 'home: light, dust and rings are all moving with nobody touching the page', JSON.stringify({ glow: Math.round(z.glow - a.glow), dust: Math.round(z.dust - a.dust) }));
+    check(Math.abs(z.node - a.node) > 5, 'home: the orbit turns on its own', String(Math.round(z.node - a.node)));
+    // Keep the page moving and wait for the state, rather than sampling at a
+    // guessed moment between the scroll starting and the governor releasing.
+    const stoodDown = pg.waitForFunction(() => getComputedStyle(document.querySelector('.lux')).visibility === 'hidden', null, { timeout: 3000, polling: 30 }).then(() => true, () => false);
+    for (let i = 0; i < 12; i++) { await pg.mouse.wheel(0, 120); await pg.waitForTimeout(40); }
+    check(await stoodDown, 'home: the room stands down while the page scrolls');
+    await pg.waitForTimeout(1200);
+    check(await pg.evaluate(() => getComputedStyle(document.querySelector('.lux')).visibility === 'visible'), 'home: the room comes back when the scroll stops');
+    await pg.close();
+
+    const off = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const po = await off.newPage();
+    await po.addInitScript(() => { try { localStorage.setItem('anchit-motion', 'off'); } catch (e) {} });
+    await po.goto(BASE + '/', { waitUntil: 'load' });
+    await po.waitForTimeout(2500);
+    check(await po.evaluate(() => document.querySelector('.lux').getAnimations({ subtree: true }).length === 0), 'home: with Motion off nothing in the room animates');
+    await po.goto(BASE + '/lifecycle-os', { waitUntil: 'load' });
+    await po.waitForTimeout(2500);
+    check(!(await po.evaluate(() => !!document.querySelector('.cin-room'))), 'linked pages: with Motion off the room is not built');
+    await off.close();
+
+    for (const [href, want] of [['/freelancer', true], ['/lifecycle-os', true], ['/growth-school', true], ['/deli-chic/', false], ['/task-tracker', false]]) {
+      const p2 = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+      await p2.goto(BASE + href, { waitUntil: 'load' });
+      await p2.waitForTimeout(3000);
+      const r = await p2.evaluate(() => { const room = document.querySelector('.cin-room');
+        return { room: !!room, running: room ? room.getAnimations({ subtree: true }).filter(x => x.playState === 'running').length : 0,
+          behind: room ? getComputedStyle(room).zIndex === '-1' && getComputedStyle(room).pointerEvents === 'none' : true,
+          overflow: document.documentElement.scrollWidth - innerWidth }; });
+      if (want) check(r.room && r.running >= 4 && r.behind && r.overflow <= 1, `${href}: has a moving room, behind the page, no overflow`, JSON.stringify(r));
+      else check(!r.room, `${href}: is left without a room (a storefront or a full-screen app)`);
+      await p2.close();
+    }
+  }
+
   // Motion off, saved on the origin, must hold on the incoming page before its
   // first frame, including a page that never loads the shared motion runtime.
   for (const href of ['/growth-school', '/pw-study/', '/ayushi-rawat/']) {

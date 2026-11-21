@@ -3521,6 +3521,15 @@
 <!-- ═══ FLOATING BACKGROUND LAYER (drifting particles + soft aura) ═══ -->
 <canvas id="floatBg" aria-hidden="true"></canvas>
 <div class="float-aura" aria-hidden="true"></div>
+<!-- LUX: the room itself moves. Slow light, dust in depth, a foil sheen, two
+     orbit lines. Every piece is a static paint moved by a compositor-only
+     transform or faded by opacity, so it costs no script and no repaint. -->
+<div class="lux" aria-hidden="true">
+  <i class="lux-glow lux-a"></i><i class="lux-glow lux-b"></i><i class="lux-glow lux-c"></i>
+  <i class="lux-ring lux-r1"></i><i class="lux-ring lux-r2"></i>
+  <i class="lux-dust lux-d1"></i><i class="lux-dust lux-d2"></i>
+  <i class="lux-sheen"></i>
+</div>
 <!-- Energy orb wallpaper: glowing core + revolving orbital rings, faint, behind
      everything (no solid nodes over content) -->
 <div class="energy-orb" aria-hidden="true">
@@ -14880,6 +14889,89 @@
      nothing loops at rest (the orbit coasts to a stop, the warp is one shot,
      the rail writes on scroll); every label is read from copy already on this
      page, so nothing here states a fact the site did not already state. -->
+<style id="lux-css">
+  /* ── LUX: continuous, slow, expensive-looking ────────────────────────────
+     The backdrop was static dust on black: correct, and dead. Luxury motion is
+     slow and never stops, like light across lacquer, so these loops run 16 to
+     180 seconds each and none of them shares a period with another; the room
+     never repeats on a scale anyone can see.
+
+     The site's own rule is that nothing decorative runs forever. This is the
+     owner's explicit exception for the backdrop, and it is held to the part of
+     that rule that matters: transform and opacity only, no script, no layout,
+     no paint. It leaves the compositor during a scroll like every other
+     ambient layer, stops when Motion is off, and thins out on phones. */
+  .lux { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; contain: strict; transition: opacity .4s ease; }
+  .lux > i { position: absolute; display: block; will-change: transform; }
+
+  /* Light: three pools of champagne, ember and gold, drifting across each other. */
+  .lux-glow { width: 78vmax; height: 78vmax; border-radius: 50%; }
+  .lux-a { left: -18vmax; top: -30vmax;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--accent-warm) 26%, transparent), transparent 72%);
+    animation: luxA 47s ease-in-out infinite alternate; }
+  .lux-b { right: -26vmax; top: 8vmax;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--primary) 22%, transparent), transparent 70%);
+    animation: luxB 61s ease-in-out infinite alternate; }
+  .lux-c { left: 18vmax; bottom: -46vmax;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 24%, transparent), transparent 72%);
+    animation: luxC 73s ease-in-out infinite alternate; }
+  @keyframes luxA { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(22vmax, 16vmax, 0) scale(1.18); } }
+  @keyframes luxB { from { transform: translate3d(0, 0, 0) scale(1.1); } to { transform: translate3d(-26vmax, 14vmax, 0) scale(.9); } }
+  @keyframes luxC { from { transform: translate3d(-10vmax, 0, 0) scale(.92); } to { transform: translate3d(18vmax, -20vmax, 0) scale(1.14); } }
+
+  /* Orbit lines: two hairline rings, one carrying a point of light. */
+  .lux-ring { left: 58%; top: 44%; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--accent-warm) 20%, transparent); }
+  .lux-r1 { width: 96vmin; height: 96vmin; margin: -48vmin 0 0 -48vmin; animation: luxSpin 120s linear infinite; }
+  .lux-r1::after { content: ''; position: absolute; top: -3px; left: 50%; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%;
+    background: var(--accent-warm); box-shadow: 0 0 14px 2px color-mix(in srgb, var(--accent-warm) 70%, transparent); }
+  .lux-r2 { width: 132vmin; height: 132vmin; margin: -66vmin 0 0 -66vmin; border-style: dashed;
+    border-color: color-mix(in srgb, var(--primary) 16%, transparent); animation: luxSpin 180s linear infinite reverse; }
+  @keyframes luxSpin { to { transform: rotate(360deg); } }
+
+  /* Dust in depth: far dust is small and slow, near dust larger and quicker.
+     Each sheet is exactly one tile taller than the screen and rises by exactly
+     one tile, so the loop has no seam. */
+  .lux-dust { left: 0; right: 0; top: 0; }
+  .lux-d1 { height: calc(100% + 720px); opacity: .7;
+    background-image:
+      radial-gradient(circle, color-mix(in srgb, var(--accent-warm) 80%, transparent) 0 1px, transparent 1.6px),
+      radial-gradient(circle, color-mix(in srgb, var(--ink) 60%, transparent) 0 .8px, transparent 1.4px);
+    background-size: 220px 240px, 340px 360px; background-position: 30px 60px, 170px 20px;
+    animation: luxRise1 96s linear infinite; }
+  .lux-d2 { height: calc(100% + 480px);
+    background-image:
+      radial-gradient(circle, color-mix(in srgb, var(--accent-warm) 95%, transparent) 0 1.6px, transparent 2.6px),
+      radial-gradient(circle, color-mix(in srgb, var(--primary) 80%, transparent) 0 1.2px, transparent 2.2px);
+    background-size: 420px 480px, 560px 240px; background-position: 90px 130px, 310px 40px;
+    animation: luxRise2 52s linear infinite, luxTwinkle 7s ease-in-out infinite alternate; }
+  @keyframes luxRise1 { to { transform: translate3d(0, -720px, 0); } }
+  @keyframes luxRise2 { to { transform: translate3d(0, -480px, 0); } }
+  @keyframes luxTwinkle { from { opacity: .35; } to { opacity: .9; } }
+
+  /* Foil: a band of light crosses the room, then the room rests. */
+  .lux-sheen { top: -30vh; left: 0; width: 34vw; height: 160vh; opacity: 0;
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent-warm) 11%, transparent) 46%,
+      color-mix(in srgb, var(--ink) 9%, transparent) 50%, color-mix(in srgb, var(--accent-warm) 11%, transparent) 54%, transparent);
+    animation: luxSheen 17s cubic-bezier(.45, 0, .2, 1) infinite; }
+  @keyframes luxSheen {
+    0% { transform: translate3d(-60vw, 0, 0) rotate(16deg); opacity: 0; }
+    8% { opacity: 1; }
+    46% { opacity: 1; }
+    54%, 100% { transform: translate3d(150vw, 0, 0) rotate(16deg); opacity: 0; }
+  }
+
+  /* The page is moving: leave the compositor, like every other ambient layer. */
+  body.is-scrolling .lux { opacity: 0; visibility: hidden; transition: opacity .12s ease, visibility 0s .12s; }
+  body.is-scrolling .lux > i, body.is-scrolling .lux-r1::after { animation-play-state: paused !important; }
+  /* Phones: the light, the far dust and the foil. Fewer sheets to blend. */
+  html[data-ambient="lite"] .lux-c, html[data-ambient="lite"] .lux-d2, html[data-ambient="lite"] .lux-r2 { display: none; }
+  /* Calm or off: the room holds still, lit. */
+  html[data-ambient="still"] .lux > i, html[data-motion="off"] .lux > i { animation: none !important; will-change: auto; }
+  html[data-ambient="still"] .lux-sheen, html[data-motion="off"] .lux-sheen,
+  html[data-ambient="still"] .lux-dust, html[data-motion="off"] .lux-dust { display: none; }
+  html[data-motion="off"] .lux { visibility: visible !important; opacity: 1; transition: none; }
+  body.view-chat .lux-sheen, body.chat-guide-open .lux-sheen { display: none; }
+</style>
 <style id="flight-deck-css">
   /* ── orbit ── */
   .cine-mark { isolation: isolate; }
@@ -15118,13 +15210,30 @@
         n.classList.toggle('is-far', depth < -0.15);
       }
     }
+    // It turns on its own, slowly, for as long as it is on screen and the
+    // visitor has not asked for calm; a drag or a flick adds to that and then
+    // settles back to it. Off screen, in a hidden tab, during a scroll or with
+    // Motion off, the loop is not running at all.
+    var DRIFT = 0.0026, visible = true;
+    function alive() {
+      return visible && !document.hidden && !motionOff() && !window.__scrolling &&
+        root.getAttribute('data-ambient') !== 'still' && mark.offsetParent !== null;
+    }
     function tick() {
       raf = 0;
+      var live = alive(), rest = live ? DRIFT : 0;
       rot += vel;
-      vel *= dragging ? 0.6 : 0.94;
+      vel = dragging ? vel * 0.6 : rest + (vel - rest) * 0.94;
       place();
-      if (Math.abs(vel) > 0.0006 || dragging) raf = requestAnimationFrame(tick);
+      if (live || dragging || Math.abs(vel) > 0.0006) raf = requestAnimationFrame(tick);
     }
+    function wake() { if (!raf && alive()) raf = requestAnimationFrame(tick); }
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (es) { visible = es[0].isIntersecting; wake(); }).observe(mark);
+    }
+    document.addEventListener('visibilitychange', wake);
+    addEventListener('scroll', function () { setTimeout(wake, 260); }, { passive: true });
+    document.addEventListener('viewChanged', function () { setTimeout(wake, 500); });
     function kick(v) {
       if (motionOff()) return;
       vel = Math.max(-0.16, Math.min(0.16, vel + v));
@@ -15143,7 +15252,7 @@
     addEventListener('resize', place, { passive: true });
     // One spin on arrival, so it is seen to be a thing that turns.
     var spun = false;
-    function arrive() { if (spun) return; spun = true; wrap.classList.add('is-on'); kick(0.11); }
+    function arrive() { if (spun) return; spun = true; wrap.classList.add('is-on'); kick(0.11); wake(); }
     if (root.classList.contains('cine-settled')) arrive(); else setTimeout(arrive, 2600);
     document.addEventListener('viewChanged', function (e) { if (e.detail === 'home') { place(); kick(0.07); } });
   })();
