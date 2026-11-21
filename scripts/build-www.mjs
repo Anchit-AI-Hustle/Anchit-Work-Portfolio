@@ -91,6 +91,7 @@ const assets = [
   'xazina-revamp',
   'pw-study',
   'radio-mirchi',
+  'radio-mirchi-interview-prep.html',
   'lenskart-study',
   'amar-ujala',
   'ET_Study',
