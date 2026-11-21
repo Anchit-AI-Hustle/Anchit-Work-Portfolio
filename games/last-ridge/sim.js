@@ -594,7 +594,7 @@ export const LESSONS = [
   { id: 'reload', text: 'Reload', hint: 'R, X on a controller or the Reload button', check: (W, P) => W.lesson.reloads >= 1 },
   { id: 'crouch', text: 'Crouch, then go prone', hint: 'C to crouch, Z to go prone (B: tap crouch, hold prone)', check: (W) => W.lesson.prone },
   { id: 'slide', text: 'Sprint and slide', hint: 'Hold Shift to sprint, press C while sprinting. On a stick: click it in, then B', check: (W) => W.lesson.slide },
-  { id: 'lean', text: 'Lean out from the post', hint: 'Q and E lean left and right (on touch, the Lean button)', check: (W) => W.lesson.lean > 0.6 },
+  { id: 'lean', text: 'Lean out from the post', hint: 'Q and E lean left and right (a controller\'s d-pad left and right; on touch, the Lean button)', check: (W) => W.lesson.lean > 0.6 },
   { id: 'vault', text: 'Vault the sandbags', hint: 'Run at the low wall and press Space (A, or the Jump button)', check: (W) => W.lesson.vault },
   { id: 'nade', text: 'Throw a frag into the pit', hint: 'G (LB, or the Frag button). Hold to cook, let go to throw', check: (W) => W.lesson.nade, at: [6, 11] },
   { id: 'course', text: 'Run the kill house', hint: 'Hit every board in the house as fast as you can', course: true, check: (W) => W.course && W.course.done },

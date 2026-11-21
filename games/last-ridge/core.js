@@ -40,12 +40,12 @@ function chosenClass() {
 /* ------------------------------------------------------------ input */
 const MOUSE = { left: false, right: false, leftHit: false, dx: 0, dy: 0, lx: null, ly: null, wheel: 0, lockLostAt: -1e9 };
 const TOUCH = { move: null, look: null, mx: 0, mz: 0, ldx: 0, ldy: 0, tap: false, hold: false, aim: false, crouch: false, lean: 0 };
-const PADS = { sprint: false, l3: false, r3: false, lb: false, rb: false, y: 0, yUsed: false };
+const PADS = { sprint: false, l3: false, r3: false, lb: false, rb: false, y: 0, yUsed: false, lean: 0 };
 const HOLD = { c: 0, cProne: false };
 const locked = () => !!ARC && document.pointerLockElement === ARC.canvas;
 function requestLock() { if (!ARC || ARC.touchMode || locked() || (VIEW && VIEW.flat)) return; try { const p = ARC.canvas.requestPointerLock(); if (p && p.catch) p.catch(() => {}); } catch (e) { /* not here */ } }
 function releaseLock() { try { if (document.pointerLockElement) document.exitPointerLock(); } catch (e) { /* fine */ } }
-function clearInput() { MOUSE.left = MOUSE.right = MOUSE.leftHit = false; MOUSE.dx = MOUSE.dy = MOUSE.wheel = 0; TOUCH.move = TOUCH.look = null; TOUCH.mx = TOUCH.mz = TOUCH.ldx = TOUCH.ldy = 0; TOUCH.tap = TOUCH.hold = false; TOUCH.aim = false; TOUCH.crouch = false; TOUCH.lean = 0; HOLD.c = 0; }
+function clearInput() { MOUSE.left = MOUSE.right = MOUSE.leftHit = false; MOUSE.dx = MOUSE.dy = MOUSE.wheel = 0; TOUCH.move = TOUCH.look = null; TOUCH.mx = TOUCH.mz = TOUCH.ldx = TOUCH.ldy = 0; TOUCH.tap = TOUCH.hold = false; TOUCH.aim = false; TOUCH.crouch = false; TOUCH.lean = 0; PADS.lean = 0; HOLD.c = 0; }
 function wireInput(a) {
   const cv = a.canvas;
   cv.addEventListener('mousedown', (e) => {
@@ -140,6 +140,9 @@ function gatherInput(a, dt) {
     if (y) { PADS.y += dt; if (PADS.y > 0.5 && !PADS.yUsed) { PADS.yUsed = true; const st = D.STREAKS.slice().reverse().find((x) => S.streakReady(W, P, x)); if (st) I['streak_' + st.id] = true; } }
     else { if (PADS.y > 0 && PADS.y <= 0.5) I.nextWeapon = true; PADS.y = 0; PADS.yUsed = false; }
     PADS.l3 = l3; PADS.r3 = r3; PADS.lb = lb; PADS.rb = rb;
+    // the d-pad's left and right lean (the shell also reads them as a strafe, so take that back out)
+    const dl = b(14), dr = b(15);
+    if (dl || dr) { PADS.lean = (dr ? 1 : 0) - (dl ? 1 : 0); if (inp.pad.active) I.mx += dz(gp.axes[0] || 0) - inp.pad.x; } else PADS.lean = 0;
     if (ml < 0.3) PADS.sprint = false;
   }
   const useAvail = S.useAvailable(W, P);
@@ -158,6 +161,7 @@ function gatherInput(a, dt) {
   if (inp.hit('KeyZ')) I.proneHit = true;
   I.sprint = inp.down('ShiftLeft', 'ShiftRight') || PADS.sprint || (TOUCH.move && TOUCH.mz < -0.92);
   I.lean = (inp.down('KeyE') ? 1 : 0) - (inp.down('KeyQ') ? 1 : 0);
+  if (gp && PADS.lean) I.lean = PADS.lean;
   if (a.touchMode) { if (inp.hit('KeyL')) TOUCH.lean = TOUCH.lean === 0 ? 1 : TOUCH.lean === 1 ? -1 : 0; if (TOUCH.lean) I.lean = TOUCH.lean; if (Math.hypot(I.mx, I.mz) > 0.6) TOUCH.lean = 0; }
   if (inp.hit('Digit1')) I.weaponTo = 0; if (inp.hit('Digit2')) I.weaponTo = 1;
   if (inp.hit('KeyY') || inp.hit('Tab') && false) I.nextWeapon = true;
@@ -398,7 +402,7 @@ function howTo() {
     html: '<p class="lr-rules">Knock rivals down with hits to the body (the head counts for more). Your health comes back if you stay out of fire for a few seconds. Aim down the sights for accuracy; crouch and go prone for steadier fire and less of a target; sprint to move, slide into cover, lean round corners and vault low walls. Cook a frag by holding it, smoke blocks sight lines, a flash leaves anyone facing it helpless. Scorestreaks: earn points in one life for a Recon Drone (400), a Supply Drop (600) and a Mortar Strike (900).</p>' +
       '<div class="lr-h">Keyboard and mouse</div>' + k([['WASD', 'Move'], ['Mouse', 'Look (click the game to lock the pointer)'], ['Left click / J', 'Fire'], ['Right click / K', 'Aim down sights'], ['R', 'Reload'], ['Shift', 'Sprint; while aiming a scope, hold breath'], ['C', 'Crouch, slide from a sprint, hold for prone'], ['Z', 'Prone'], ['Space', 'Jump, vault a low wall'], ['Q / E', 'Lean left / right'], ['G', 'Frag: hold to cook, let go to throw'], ['X', 'Smoke or flash'], ['F', 'Use: hold to plant, disarm, tag; press to resupply'], ['V', 'Melee; from behind, a quiet takedown'], ['1 2 / wheel', 'Switch weapon'], ['4 5 6 / T', 'Scorestreaks'], ['Tab', 'Scoreboard'], ['Esc', 'Pause']]) +
       '<div class="lr-h">Touch</div>' + k([['Left of the screen', 'A move stick under your thumb; push it all the way up to sprint'], ['Right of the screen', 'Drag to look; tap or hold to fire'], ['Auto fire', 'Fires when the sight rests on a rival (menu option)'], ['Aim', 'Aim down sights (toggle)'], ['Reload, Frag, Crouch, Jump', 'Buttons; Use and Streak appear when you can'], ['Stick & buttons', 'Settings: the classic stick plus every action on a button']]) +
-      '<div class="lr-h">Controller</div>' + k([['Left stick', 'Move; click to sprint'], ['Right stick', 'Look, with a little aim assist'], ['RT / LT', 'Fire / aim down sights'], ['A', 'Jump, vault'], ['B', 'Crouch, slide; hold for prone'], ['X', 'Reload; hold beside an objective to use it'], ['Y', 'Switch weapon; hold for a scorestreak'], ['LB / RB', 'Frag (hold to cook) / smoke or flash'], ['R3', 'Melee, quiet takedown'], ['Start', 'Pause']]) +
+      '<div class="lr-h">Controller</div>' + k([['Left stick', 'Move; click to sprint'], ['Right stick', 'Look, with a little aim assist'], ['RT / LT', 'Fire / aim down sights'], ['A', 'Jump, vault'], ['B', 'Crouch, slide; hold for prone'], ['X', 'Reload; hold beside an objective to use it'], ['Y', 'Switch weapon; hold for a scorestreak'], ['LB / RB', 'Frag (hold to cook) / smoke or flash'], ['R3', 'Melee, quiet takedown'], ['D-pad left / right', 'Lean'], ['Start', 'Pause']]) +
       '<div class="lr-h">Modes</div><p class="lr-rules">' + Object.values(D.MP_MODES).map((m) => '<b>' + m.name + ':</b> ' + m.rules).join(' ') + ' <b>Campaign:</b> six linked missions: an assault, a defence, a stealth infiltration, a convoy on the mounted gun, a sabotage and an extraction. Each scores up to three stars. If you go down, you get back up at the last checkpoint. <b>Ranks:</b> every match and mission earns XP; ranks unlock weapons, optics, mods, perks and classes.</p>',
     actions: [{ label: 'Back', primary: true, on: () => ARC.menu() }],
   });
