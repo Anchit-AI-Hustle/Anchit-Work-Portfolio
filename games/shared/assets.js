@@ -416,8 +416,9 @@ export async function person(name, opts) {
       a.enabled = true;
       a.setEffectiveTimeScale(o2.timeScale != null ? o2.timeScale : 1);
       a.setEffectiveWeight(1);
-      if (o2.once) { a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = true; } else { a.setLoop(THREE.LoopRepeat, Infinity); loopName = clip; }
-      if (current === a && !o2.once && !o2.restart) return a;
+      const once = !!o2.once || o2.loop === false;
+      if (once) { a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = true; } else { a.setLoop(THREE.LoopRepeat, Infinity); loopName = clip; }
+      if (current === a && !once && !o2.restart) return a;
       a.reset();
       if (current && current !== a && fade > 0) { a.play(); current.crossFadeTo(a, fade, false); } else { if (current && current !== a) current.stop(); a.play(); }
       current = a;
