@@ -3320,8 +3320,19 @@ function cheapOf(m) {
   }
   return c;
 }
-function applyTier() {
+// A quality change that would rebuild shaders (material swaps, shadows on or off, the environment map) waits for
+// a moment with no racing on screen (menu, pause, results), where the short compile goes unnoticed; during a race
+// only the changes that never touch a shader apply: resolution, shadow map size and update rate, effect density.
+function applyTier(force) {
   const r = R3, t = TIERS[r.quality];
+  const racing = !force && ARC && ARC.state === 'play' && r.progSet;
+  r.shadowEvery = t.shadow || !r.shadowCap ? 1 : 3;
+  if (r.sun.shadow.mapSize.x !== (t.shadow ? t.map : 512)) { const m = t.shadow ? t.map : 512; r.sun.shadow.mapSize.set(m, m); if (r.sun.shadow.map) { r.sun.shadow.map.dispose(); r.sun.shadow.map = null; } }
+  if (FX) FX.density = t.fx;
+  if (MARKS) MARKS.setCap([0, 90, 170, 260][r.quality]);
+  if (VFX) VFX.setQuality(r.quality);
+  if (racing) { r.progPending = true; lightLevels(); return; }
+  r.progSet = true; r.progPending = false; r.shadowCap = t.shadow; r.shadowEvery = 1;
   r.scene.traverse((o) => {
     if (o.isMesh && o.material && !Array.isArray(o.material) && !o.userData.keepMat && !o.material.userData.keepMat) {
       const full = fullOf(o.material), want = t.cheap ? cheapOf(full) : full;
@@ -3332,10 +3343,6 @@ function applyTier() {
   ALL_TEX.forEach((tx) => { if (tx.anisotropy !== an) { tx.anisotropy = an; tx.needsUpdate = true; } });
   QUAL.forEach((m) => { m.castShadow = t.shadow && r.quality >= 3; });
   r.renderer.shadowMap.enabled = t.shadow; r.sun.castShadow = t.shadow;
-  if (r.sun.shadow.mapSize.x !== t.map) { r.sun.shadow.mapSize.set(t.map, t.map); if (r.sun.shadow.map) { r.sun.shadow.map.dispose(); r.sun.shadow.map = null; } }
-  if (FX) FX.density = t.fx;
-  if (MARKS) MARKS.setCap([0, 90, 170, 260][r.quality]);
-  if (VFX) VFX.setQuality(r.quality);
   r.scene.environment = t.cheap ? null : (r.cur ? r.envs[r.cur.T.id] : null);
   lightLevels();
 }
@@ -3447,7 +3454,7 @@ function activateWorld(W) {
   r.stageQ = []; r.stageWait = 4;
   if (!W.attract && !S.bridged) { S.bridged = true; r.stageQ.push(...bridgeJobs(T, S)); }
   if (r.podium) r.podium.visible = false;
-  applyTier();
+  applyTier(true); // a course is being built: a loading moment, so every tier change applies now
   applyWeather(W);
   r.peopleQ = r.bikes.concat(r.patrolBikes); r.peopleWait = 3;
   r.camInit = false; r.worldRef = W;
@@ -3849,6 +3856,8 @@ function renderScene(W, dt, a) {
     if (W.podShow && W.phase === 'podium' && !W.podFx && W.podT > 0.6 && r.podium) { W.podFx = true; r.podium.updateMatrixWorld(true); _vq.set(0, 2.2, 0).applyMatrix4(r.podium.matrixWorld); VFX.winBurst(_vq, { size: 0.8 }); }
     VFX.update(dt);
   }
+  if (r.progPending && ARC && ARC.state !== 'play') applyTier();
+  if (r.shadowCap) { const sm = r.renderer.shadowMap; if (r.shadowEvery > 1) { sm.autoUpdate = false; if (((r.shF = (r.shF || 0) + 1) % r.shadowEvery) === 0) sm.needsUpdate = true; } else sm.autoUpdate = true; }
   if (POST) { POST.setQuality(r.quality, r.lockQ); POST.render(r.scene, r.camera); } else r.renderer.render(r.scene, r.camera);
 }
 
