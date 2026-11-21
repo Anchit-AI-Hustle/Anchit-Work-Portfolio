@@ -339,3 +339,21 @@ source files; `#00B584` across 5. Twelve files carry one or the other,
    palette utilities (`gray-500`, `blue-600`, …) for brand surfaces.
 4. Match the surrounding file's conventions, this repo is intentionally
    single-file per app, with styles in the existing `<style>` block.
+### The arrival word
+
+On every view turn the destination's name is written in gold dust across the
+page, holds for a breath and blows away (1.35 s in all). It is the one loud
+move the home page makes; nothing else is allowed to compete with it.
+
+- One WebGL draw call. Each point carries where it starts, where it belongs and
+  when it leaves; the flight is computed in the vertex shader from the time, so
+  script does no per-point work.
+- The canvas and its dimmer are `display: none` except while it plays. Idle
+  cost is zero and no layer is left behind.
+- The page is dimmed behind the word (opacity only) so dust is read against
+  dark, and both layers ignore the pointer: the page takes clicks throughout.
+- Off with Motion off, on the `still` tier and once the frame governor has
+  stepped the page down to lean. If WebGL is unavailable it does nothing.
+- `window.__formAt(view, p)` holds one frame at progress `p` for suites and
+  screenshots.
+
