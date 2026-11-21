@@ -97,6 +97,7 @@ Add a new section called "[name]", directly after "[section before it]". It is a
 How it should behave:
 - When the section reaches the top of the screen, it holds still while the visitor keeps scrolling.
 - Each step replaces the one before it, in step with the scroll. A step is a large number, a short heading and one sentence of real copy.
+- Step between whole steps, never scrub: scroll picks the step and it glides in whole, so no scroll position ever shows two half-faded steps or a missing caption. Work only while the section is on screen.
 - After the third step, the section lets go and the page scrolls on as normal.
 
 How to build it:
@@ -123,6 +124,11 @@ Keep the page fast and safe:
 - If 3D fails for any reason, show the same still image and keep the rest of the page working.
 
 In your plan, tell me how you will make the still image. Ask me before installing any package.
+```
+
+### A concept storefront on a real brand
+```text
+Build a concept storefront for [brand], a real [kind of business] in [city], as my portfolio work. Follow .claude/skills/concept-storefront/SKILL.md: concept bar at the top with my credit and links, noindex and out of the sitemap, no business JSON-LD, a design-notes section (problem, kept, changed, hypothesis, intended metrics, real vs demo, checkout), sample and demo labels on anything that is not real, and no claim I cannot source. Plan first and show me which facts come from the brand's public site.
 ```
 
 ### A working contact form
@@ -237,6 +243,11 @@ Do a polish pass on the whole page: consistent spacing between sections, consist
 ### The speed check
 ```text
 Check the page's loading speed and tell me the three changes that would improve it most.
+```
+
+### The idle check (lag that headless tests miss)
+```text
+With nobody touching the page, measure how much main-thread work it does per second (Chrome Performance.getMetrics TaskDuration over 4 seconds) at 390px with 4x CPU throttling and at 1440px. Anything over about 40 ms per second is lag a visitor will feel. Switch each moving thing off one at a time (shaders, canvases, CSS and SVG animations, backdrop blurs, scroll handlers) and show me what each costs in a table. Then fix the biggest ones at the source, following DESIGN.md, Motion, Runtime budget.
 ```
 
 ### Cost of cinematic moves
