@@ -10,7 +10,7 @@ import * as S from './sim.js';
 import * as SND from './audio.js';
 import { drawHUD, drawBoard, txt } from './hud.js';
 
-const { clamp, lerp, angDiff, TAU } = S;
+const { clamp, lerp, angDiff } = S;
 let ARC = null, VIEW = null, W = null, SAVE = null, NOVIEW = false;
 const SKEY = 'arcade.last-ridge.save';
 
