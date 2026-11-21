@@ -31,8 +31,9 @@ const BASE = process.env.BASE || 'http://localhost:8099';
 const WWW = path.join(__dirname, '..', 'www');
 const MUT = process.env.MUT || '';
 let failed = 0;
+const failures = [];
 const check = (ok, label, detail) => {
-  if (!ok) failed++;
+  if (!ok) { failed++; failures.push(label + (detail ? '  ' + detail : '')); }
   console.log(`${ok ? 'PASS' : 'FAIL'}  ${label}${detail ? '  ' + detail : ''}`);
 };
 
@@ -207,8 +208,14 @@ const check = (ok, label, detail) => {
     await pg.goto(BASE + '/', { waitUntil: 'load' });
     await pg.waitForTimeout(6500);
     const orbit = await pg.evaluate(() => {
-      const ns = [...document.querySelectorAll('.fd-node')].map(n => { const r = n.getBoundingClientRect(); return { t: n.textContent, l: r.left, r: r.right, x: Math.round(r.left + r.width / 2) }; });
-      return { n: ns.length, spread: new Set(ns.map(n => n.x)).size, inside: ns.every(n => n.l >= 0 && n.r <= innerWidth),
+      const ns = [...document.querySelectorAll('.fd-node')].map(n => { const r = n.getBoundingClientRect(); return { t: n.textContent, l: r.left, r: r.right, x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) }; });
+      // "Different places" means different points, not different columns. The
+      // orbit turns on its own now, and at some moments the label passing in
+      // front and the one passing behind share an x. Comparing x alone made
+      // this check fail on a correct page, whenever it happened to sample then.
+      const apart = (a, b) => Math.abs(a.x - b.x) > 6 || Math.abs(a.y - b.y) > 6;
+      const distinct = ns.filter((a, i) => ns.every((b, j) => i === j || apart(a, b))).length;
+      return { n: ns.length, spread: distinct, inside: ns.every(n => n.l >= 0 && n.r <= innerWidth),
         clean: ns.every(n => n.t.length < 14), overflow: document.documentElement.scrollWidth - innerWidth };
     });
     check(orbit.n === 4 && orbit.spread === 4, `${name}: four orbit nodes at four different places`, JSON.stringify(orbit));
@@ -444,6 +451,53 @@ const check = (ok, label, detail) => {
     await pt.close();
   }
 
+  // Live edges: a point of light laps the border of each card on screen. They
+  // must actually be moving, only on cards in view, never on the book (it has
+  // its own frame), a storefront or with Motion off, and never widen the page.
+  for (const [name, width, height] of [['phone', 390, 844], ['desktop', 1440, 900]]) {
+    const pg = await browser.newPage({ viewport: { width, height } });
+    await pg.goto(BASE + '/', { waitUntil: 'load' });
+    await pg.waitForTimeout(3200);
+    await pg.evaluate(() => window.switchView('contact'));
+    await pg.waitForFunction(() => [...document.querySelectorAll('.contact-card.is-live > .lv-beam > i')].some(i => i.getAnimations().some(a => a.playState === 'running')), null, { timeout: 9000 }).catch(() => {});
+    const live = await pg.evaluate(() => {
+      const on = [...document.querySelectorAll('.contact-card.is-live > .lv-beam > i')];
+      const off = [...document.querySelectorAll('.is-lv:not(.is-live) > .lv-beam > i')];
+      return { moving: on.filter(i => i.getAnimations().some(a => a.playState === 'running')).length,
+        phases: new Set(on.map(i => getComputedStyle(i).animationDelay)).size,
+        offscreenRunning: off.filter(i => i.getAnimations().some(a => a.playState === 'running')).length,
+        overflow: document.documentElement.scrollWidth - innerWidth };
+    });
+    check(live.moving >= 2, `${name}: light is lapping the edges of the cards on screen`, JSON.stringify(live));
+    check(live.phases >= 2, `${name}: the cards are not all in step`, String(live.phases));
+    check(live.offscreenRunning === 0, `${name}: no card animates while it is off screen`, String(live.offscreenRunning));
+    check(live.overflow <= 1, `${name}: live edges cause no horizontal overflow`, String(live.overflow));
+    await pg.evaluate(() => window.switchView('projects'));
+    await pg.waitForTimeout(3200);
+    check(await pg.evaluate(() => document.querySelectorAll('.folio .lv-beam').length === 0), `${name}: the book carries no live edges of its own`);
+    await pg.close();
+  }
+  {
+    const off = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const po = await off.newPage();
+    await po.addInitScript(() => { try { localStorage.setItem('anchit-motion', 'off'); } catch (e) {} });
+    await po.goto(BASE + '/', { waitUntil: 'load' });
+    await po.waitForTimeout(2500);
+    await po.evaluate(() => window.switchView('contact'));
+    await po.waitForTimeout(3500);
+    check(await po.evaluate(() => [...document.querySelectorAll('.lv-beam > i')].every(i => i.getAnimations().length === 0)), 'live edges: nothing animates with Motion off');
+    await off.close();
+    for (const [href, want] of [['/freelancer', true], ['/growth-school', true], ['/deli-chic/', false]]) {
+      const p2 = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+      await p2.goto(BASE + href, { waitUntil: 'load' });
+      await p2.waitForTimeout(4200);
+      const n = await p2.evaluate(() => [...document.querySelectorAll('.is-live > .lv-beam > i')].filter(i => i.getAnimations().some(a => a.playState === 'running')).length);
+      if (want) check(n >= 1, `${href}: cards on screen have live edges`, String(n));
+      else check(n === 0 && !(await p2.evaluate(() => !!document.querySelector('.lv-beam'))), `${href}: a storefront gets no live edges`);
+      await p2.close();
+    }
+  }
+
   // Motion off, saved on the origin, must hold on the incoming page before its
   // first frame, including a page that never loads the shared motion runtime.
   for (const href of ['/growth-school', '/pw-study/', '/ayushi-rawat/']) {
@@ -457,6 +511,10 @@ const check = (ok, label, detail) => {
   }
   await browser.close();
 
+  // Name the failures again at the end. This suite prints well over a hundred
+  // lines, and a CI log tail showed "1 check(s) failed" with the failing line
+  // long since scrolled out of it.
+  if (failed) failures.forEach(f => console.log('FAILED  ' + f));
   console.log(failed ? `\n${failed} check(s) failed` : '\nall checks passed');
   process.exit(failed ? 1 : 0);
 })();
